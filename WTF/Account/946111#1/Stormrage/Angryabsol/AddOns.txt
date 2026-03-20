@@ -10,7 +10,7 @@ Blizzard_EncounterJournal: enabled
 Blizzard_Transmog: enabled
 OPie_Classic: disabled
 Blizzard_CombatText: enabled
-ArcUI: disabled
+ArcUI: enabled
 Auctionator: enabled
 AutoFlood: enabled
 Baganator: enabled
@@ -67,5 +67,5 @@ RaiderIO_DB_EU_F: disabled
 RaiderIO_DB_CN_R: disabled
 RaiderIO_DB_CN_M: disabled
 RaiderIO_DB_CN_F: disabled
-EllesmereUICooldownManager: enabled
-EllesmereUIResourceBars: enabled
+EllesmereUICooldownManager: disabled
+EllesmereUIResourceBars: disabled

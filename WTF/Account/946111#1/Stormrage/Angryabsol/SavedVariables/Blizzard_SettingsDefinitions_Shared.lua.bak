@@ -2,9 +2,9 @@
 NewSettingsSeen = {
 ["CAA_COMBAT_AUDIO_ALERTS_LABEL"] = true,
 ["raidFramesDispelIndicatorType"] = true,
-["raidFramesDispelIndicatorOverlay"] = true,
+["enableConnectToPhotoSharing"] = true,
 ["raidFramesDisplayClassColor"] = true,
 ["raidFramesCenterBigDefensive"] = true,
 ["raidFramesDisplayLargerRoleSpecificDebuffs"] = true,
-["enableConnectToPhotoSharing"] = true,
+["raidFramesDispelIndicatorOverlay"] = true,
 }

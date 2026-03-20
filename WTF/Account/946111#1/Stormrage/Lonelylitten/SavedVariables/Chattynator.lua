@@ -1,7 +1,6 @@
 
 CHATTYNATOR_CURRENT_PROFILE = "DEFAULT"
 CHATTYNATOR_COMMAND_HISTORY = {
-"/cw Doofmcgoofin-Stormrage :D",
 "/cw Doofmcgoofin-Stormrage done!",
 "/cw Doofmcgoofin-Stormrage got me a resource out of that too!",
 "/cw Doofmcgoofin-Stormrage it was just the green gem thing",
@@ -203,4 +202,5 @@ CHATTYNATOR_COMMAND_HISTORY = {
 "/s /eui",
 "/s /RELOAD",
 "/s /eui",
+"/cw Rollingursus-Stormrage Done!",
 }

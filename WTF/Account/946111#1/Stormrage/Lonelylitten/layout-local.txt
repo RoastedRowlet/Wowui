@@ -1,6 +1,6 @@
 Version: 1
 Frame: CraftScanScannerMenuButton
-FrameLevel: 125
+FrameLevel: 127
 Anchor: LEFT
 X: 37
 Y: -225
@@ -20,10 +20,3 @@ X: 98
 Y: -48
 W: 1105
 H: 658
-Frame: EllesmereUIFrame
-FrameLevel: 100
-Anchor: TOP
-X: 137
-Y: -35
-W: 1500
-H: 1154

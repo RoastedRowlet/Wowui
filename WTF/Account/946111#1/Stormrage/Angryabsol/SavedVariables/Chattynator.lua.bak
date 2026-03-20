@@ -1,9 +1,6 @@
 
 CHATTYNATOR_CURRENT_PROFILE = "DEFAULT"
 CHATTYNATOR_COMMAND_HISTORY = {
-"/s /console floatingCombatTextCombatDamage 1",
-"/s /console floatingCombatTextCombatHealing 1",
-"/s /console floatingCombatTextPetMeleeDamage 1",
 "/s /console floatingCombatTextPetSpellDamage 1",
 "/s /console floatingCombatTextCombatLogPeriodicSpells 1",
 "/s /AIO",
@@ -202,4 +199,15 @@ CHATTYNATOR_COMMAND_HISTORY = {
 "/s /reload",
 "/s /EUI",
 "/s /eui",
+"/s /EUI",
+"/s /eui",
+"/s /EUI",
+"/s /ARCUI",
+"/s /EUI",
+"/s /ARCUI",
+"/s /simc",
+"/s /way #2393 55.6 69.8 Soridormi",
+"/s /run print(C_QuestLog.IsQuestFlaggedCompleted(93942))",
+"/s /QQ",
+"/s /way 31.62 26.20",
 }
