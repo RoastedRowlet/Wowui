@@ -1,4 +1,5 @@
 @echo off
+cd /d D:\World of Warcraft\_retail_
 :: Stage all changes (new, modified, and deleted files)
 git add -A
 
