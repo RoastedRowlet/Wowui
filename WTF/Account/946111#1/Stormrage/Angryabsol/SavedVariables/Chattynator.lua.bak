@@ -1,8 +1,6 @@
 
 CHATTYNATOR_CURRENT_PROFILE = "DEFAULT"
 CHATTYNATOR_COMMAND_HISTORY = {
-"/s /reload",
-"/s /aio",
 "/s /console floatingCombatTextCombatDamage 1",
 "/s /console floatingCombatTextCombatHealing 1",
 "/s /console floatingCombatTextPetMeleeDamage 1",

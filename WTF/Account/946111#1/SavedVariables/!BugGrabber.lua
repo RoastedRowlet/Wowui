@@ -1,7 +1,7 @@
 
 BugGrabberDB = {
-["session"] = 510,
 ["lastSanitation"] = 3,
+["session"] = 511,
 ["errors"] = {
 {
 ["message"] = "...erface/AddOns/TargetedSpells/TargetedSpellsMixin.lua:350: attempt to call method 'SetFrameStrata' (a nil value)",
