@@ -1,0 +1,16 @@
+VER 3 0100000000000003 "Ele Blast NS" "134400"
+#showtooltip Elemental Blast
+/use Nature's Swiftness
+/use Elemental Blast
+END
+VER 3 0100000000000002 "FOCUS KICK" "134400"
+#122
+#showtooltip wind shear
+/cast [@focus,exists][@target] wind shear
+END
+VER 3 0100000000000001 "HPPOT" "5931169"
+#121
+--&0b
+#showtooltip
+/use item:211879--&
+END

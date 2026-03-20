@@ -1,0 +1,15 @@
+Version: 1
+Frame: CraftScanScannerMenuButton
+FrameLevel: 55
+Anchor: LEFT
+X: 44
+Y: -235
+W: 53
+H: 53
+Frame: CraftScanConfigPage
+FrameLevel: 1
+Anchor: CENTER
+X: 0
+Y: 0
+W: 1105
+H: 658

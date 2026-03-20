@@ -1,0 +1,2404 @@
+
+Bartender4DB = {
+["namespaces"] = {
+["StatusTrackingBar"] = {
+["profiles"] = {
+["Taurostotem - Area 52"] = {
+["version"] = 3,
+["position"] = {
+["y"] = -29.7913818359375,
+["x"] = 29.28666305541992,
+["point"] = "TOPLEFT",
+},
+},
+["Zappyxatu - Stormrage"] = {
+["version"] = 3,
+["position"] = {
+["y"] = -29.7913818359375,
+["x"] = 29.28666305541992,
+["point"] = "TOPLEFT",
+},
+},
+["Angryabsol - Stormrage"] = {
+["enabled"] = true,
+["version"] = 3,
+["position"] = {
+["y"] = 4,
+["x"] = -4.000015258789063,
+["point"] = "TOPLEFT",
+},
+},
+["Evileevee - Area 52"] = {
+["enabled"] = true,
+["version"] = 3,
+["position"] = {
+["y"] = 29,
+["x"] = -289.5,
+["point"] = "BOTTOM",
+},
+},
+["Dankmankeys - Stormrage"] = {
+["enabled"] = true,
+["version"] = 3,
+["position"] = {
+["y"] = 29,
+["x"] = -289.5,
+["point"] = "BOTTOM",
+},
+},
+["Madmareep - Stormrage"] = {
+["version"] = 3,
+["position"] = {
+["y"] = -29.7913818359375,
+["x"] = 29.28666305541992,
+["point"] = "TOPLEFT",
+},
+},
+["Barelynoer - Area 52"] = {
+["version"] = 3,
+["position"] = {
+["y"] = -29.7913818359375,
+["x"] = 29.28666305541992,
+["point"] = "TOPLEFT",
+},
+},
+["Lonelylitten - Stormrage"] = {
+["position"] = {
+["y"] = -29.7913818359375,
+["x"] = 29.28666305541992,
+["point"] = "TOPLEFT",
+},
+["version"] = 3,
+},
+["EVOKER"] = {
+["version"] = 3,
+["position"] = {
+["y"] = -29.7913818359375,
+["x"] = 29.28666305541992,
+["point"] = "TOPLEFT",
+},
+},
+["Minimeditite - Area 52"] = {
+["enabled"] = true,
+["version"] = 3,
+["position"] = {
+["y"] = 29,
+["x"] = -289.5,
+["point"] = "BOTTOM",
+},
+},
+},
+},
+["QueueStatus"] = {
+["profiles"] = {
+["Taurostotem - Area 52"] = {
+["version"] = 3,
+["position"] = {
+["y"] = -224.7457275390625,
+["x"] = -78.240234375,
+["point"] = "TOPRIGHT",
+},
+},
+["Zappyxatu - Stormrage"] = {
+["version"] = 3,
+["position"] = {
+["y"] = -224.7457275390625,
+["x"] = -78.240234375,
+["point"] = "TOPRIGHT",
+},
+},
+["Angryabsol - Stormrage"] = {
+["version"] = 3,
+["position"] = {
+["y"] = -227.9463500976563,
+["x"] = -40,
+["point"] = "TOPRIGHT",
+},
+},
+["Evileevee - Area 52"] = {
+["version"] = 3,
+["position"] = {
+["y"] = 40.5,
+["x"] = -324,
+},
+},
+["Dankmankeys - Stormrage"] = {
+["version"] = 3,
+["position"] = {
+["y"] = 40.5,
+["x"] = -324,
+},
+},
+["Madmareep - Stormrage"] = {
+["version"] = 3,
+["position"] = {
+["y"] = -224.7457275390625,
+["x"] = -78.240234375,
+["point"] = "TOPRIGHT",
+},
+},
+["Barelynoer - Area 52"] = {
+["version"] = 3,
+["position"] = {
+["y"] = -216.5064697265625,
+["x"] = -40,
+["point"] = "TOPRIGHT",
+},
+},
+["Lonelylitten - Stormrage"] = {
+["position"] = {
+["y"] = -224.7457275390625,
+["x"] = -78.240234375,
+["point"] = "TOPRIGHT",
+},
+["version"] = 3,
+},
+["EVOKER"] = {
+["version"] = 3,
+["position"] = {
+["y"] = -233.237060546875,
+["x"] = -40,
+["point"] = "TOPRIGHT",
+},
+},
+["Minimeditite - Area 52"] = {
+["version"] = 3,
+["position"] = {
+["y"] = 40.5,
+["x"] = -324,
+},
+},
+},
+},
+["ActionBars"] = {
+["profiles"] = {
+["Taurostotem - Area 52"] = {
+["actionbars"] = {
+{
+["showgrid"] = true,
+["fadeoutdelay"] = 0,
+["WoW10Layout"] = true,
+["fadeout"] = true,
+["position"] = {
+["y"] = 49.00000762939453,
+["x"] = 498.5098876953125,
+["point"] = "BOTTOMLEFT",
+},
+["fadeoutalpha"] = 0,
+["version"] = 3,
+["visibility"] = {
+["combat"] = true,
+},
+["states"] = {
+["stance"] = {
+["DRUID"] = {
+["prowl"] = 7,
+},
+},
+},
+},
+{
+["enabled"] = false,
+["WoW10Layout"] = true,
+["version"] = 3,
+["position"] = {
+["y"] = -120.6412506103516,
+["x"] = 206.6414184570313,
+["point"] = "LEFT",
+},
+},
+{
+["fadeoutalpha"] = 0,
+["WoW10Layout"] = true,
+["fadeout"] = true,
+["showgrid"] = true,
+["position"] = {
+["y"] = 143.0000152587891,
+["x"] = 498.5098876953125,
+["point"] = "BOTTOMLEFT",
+},
+["version"] = 3,
+["visibility"] = {
+["combat"] = true,
+},
+["fadeoutdelay"] = 0,
+},
+{
+["fadeoutalpha"] = 0,
+["WoW10Layout"] = true,
+["fadeout"] = true,
+["showgrid"] = true,
+["position"] = {
+["y"] = 96.0000228881836,
+["x"] = -3.65673828125,
+["point"] = "BOTTOM",
+},
+["version"] = 3,
+["visibility"] = {
+["combat"] = true,
+},
+["fadeoutdelay"] = 0,
+},
+{
+["fadeoutalpha"] = 0,
+["WoW10Layout"] = true,
+["fadeout"] = true,
+["showgrid"] = true,
+["position"] = {
+["y"] = 96.0000228881836,
+["x"] = 498.5099792480469,
+["point"] = "BOTTOMLEFT",
+},
+["version"] = 3,
+["visibility"] = {
+["combat"] = true,
+},
+["fadeoutdelay"] = 0,
+},
+{
+["fadeoutalpha"] = 0,
+["WoW10Layout"] = true,
+["fadeout"] = true,
+["showgrid"] = true,
+["position"] = {
+["y"] = 49.00000762939453,
+["x"] = -4.419921875,
+["point"] = "BOTTOM",
+},
+["version"] = 3,
+["visibility"] = {
+["combat"] = true,
+},
+["fadeoutdelay"] = 0,
+},
+{
+["WoW10Layout"] = true,
+["version"] = 3,
+["position"] = {
+["y"] = 190.0000457763672,
+["x"] = 498.5098876953125,
+["point"] = "BOTTOMLEFT",
+},
+},
+{
+["enabled"] = true,
+["showgrid"] = true,
+["fadeout"] = true,
+["fadeoutdelay"] = 0,
+["position"] = {
+["y"] = 190.0000457763672,
+["x"] = 498.5098876953125,
+["point"] = "BOTTOMLEFT",
+},
+["WoW10Layout"] = true,
+["fadeoutalpha"] = 0,
+["visibility"] = {
+["combat"] = true,
+},
+["version"] = 3,
+},
+{
+["WoW10Layout"] = true,
+},
+{
+["WoW10Layout"] = true,
+},
+[14] = {
+["enabled"] = true,
+["flyoutDirection"] = "LEFT",
+["position"] = {
+["y"] = 213.3749542236328,
+["x"] = -36.7498779296875,
+["point"] = "RIGHT",
+["scale"] = 0.75,
+},
+["rows"] = 12,
+["WoW10Layout"] = true,
+["version"] = 3,
+},
+[13] = {
+["enabled"] = true,
+["showgrid"] = true,
+["fadeout"] = true,
+["fadeoutdelay"] = 0,
+["position"] = {
+["y"] = 143.3695373535156,
+["x"] = -3.65673828125,
+["point"] = "BOTTOM",
+},
+["WoW10Layout"] = true,
+["fadeoutalpha"] = 0,
+["visibility"] = {
+["combat"] = true,
+},
+["version"] = 3,
+},
+[15] = {
+["enabled"] = true,
+["flyoutDirection"] = "LEFT",
+["position"] = {
+["y"] = 213.3749542236328,
+["x"] = -70.90472412109375,
+["point"] = "RIGHT",
+["scale"] = 0.75,
+},
+["rows"] = 12,
+["WoW10Layout"] = true,
+["version"] = 3,
+},
+},
+},
+["Zappyxatu - Stormrage"] = {
+["actionbars"] = {
+{
+["showgrid"] = true,
+["fadeout"] = true,
+["WoW10Layout"] = true,
+["fadeoutdelay"] = 0,
+["position"] = {
+["y"] = 49.00000762939453,
+["x"] = 498.5098876953125,
+["point"] = "BOTTOMLEFT",
+},
+["fadeoutalpha"] = 0,
+["version"] = 3,
+["visibility"] = {
+["combat"] = true,
+},
+["states"] = {
+["stance"] = {
+["DRUID"] = {
+["prowl"] = 7,
+},
+},
+},
+},
+{
+["enabled"] = false,
+["WoW10Layout"] = true,
+["version"] = 3,
+["position"] = {
+["y"] = -120.6412506103516,
+["x"] = 206.6414184570313,
+["point"] = "LEFT",
+},
+},
+{
+["version"] = 3,
+["WoW10Layout"] = true,
+["fadeoutdelay"] = 0,
+["showgrid"] = true,
+["position"] = {
+["y"] = 143.0000152587891,
+["x"] = 498.5098876953125,
+["point"] = "BOTTOMLEFT",
+},
+["fadeoutalpha"] = 0,
+["visibility"] = {
+["combat"] = true,
+},
+["fadeout"] = true,
+},
+{
+["version"] = 3,
+["WoW10Layout"] = true,
+["fadeoutdelay"] = 0,
+["showgrid"] = true,
+["position"] = {
+["y"] = 96.0000228881836,
+["x"] = -3.65673828125,
+["point"] = "BOTTOM",
+},
+["fadeoutalpha"] = 0,
+["visibility"] = {
+["combat"] = true,
+},
+["fadeout"] = true,
+},
+{
+["version"] = 3,
+["WoW10Layout"] = true,
+["fadeoutdelay"] = 0,
+["showgrid"] = true,
+["position"] = {
+["y"] = 96.0000228881836,
+["x"] = 498.5099792480469,
+["point"] = "BOTTOMLEFT",
+},
+["fadeoutalpha"] = 0,
+["visibility"] = {
+["combat"] = true,
+},
+["fadeout"] = true,
+},
+{
+["version"] = 3,
+["WoW10Layout"] = true,
+["fadeoutdelay"] = 0,
+["showgrid"] = true,
+["position"] = {
+["y"] = 49.00000762939453,
+["x"] = -4.419921875,
+["point"] = "BOTTOM",
+},
+["fadeoutalpha"] = 0,
+["visibility"] = {
+["combat"] = true,
+},
+["fadeout"] = true,
+},
+{
+["WoW10Layout"] = true,
+["version"] = 3,
+["position"] = {
+["y"] = 190.0000457763672,
+["x"] = 498.5098876953125,
+["point"] = "BOTTOMLEFT",
+},
+},
+{
+["enabled"] = true,
+["showgrid"] = true,
+["fadeoutdelay"] = 0,
+["fadeout"] = true,
+["position"] = {
+["y"] = 190.0000457763672,
+["x"] = 498.5098876953125,
+["point"] = "BOTTOMLEFT",
+},
+["WoW10Layout"] = true,
+["version"] = 3,
+["visibility"] = {
+["combat"] = true,
+},
+["fadeoutalpha"] = 0,
+},
+{
+["WoW10Layout"] = true,
+},
+{
+["WoW10Layout"] = true,
+},
+[14] = {
+["enabled"] = true,
+["flyoutDirection"] = "LEFT",
+["position"] = {
+["y"] = 213.3749542236328,
+["x"] = -36.7498779296875,
+["point"] = "RIGHT",
+["scale"] = 0.75,
+},
+["rows"] = 12,
+["WoW10Layout"] = true,
+["version"] = 3,
+},
+[13] = {
+["enabled"] = true,
+["showgrid"] = true,
+["fadeoutdelay"] = 0,
+["fadeout"] = true,
+["position"] = {
+["y"] = 143.3695373535156,
+["x"] = -3.65673828125,
+["point"] = "BOTTOM",
+},
+["WoW10Layout"] = true,
+["version"] = 3,
+["visibility"] = {
+["combat"] = true,
+},
+["fadeoutalpha"] = 0,
+},
+[15] = {
+["enabled"] = true,
+["flyoutDirection"] = "LEFT",
+["position"] = {
+["y"] = 213.3749542236328,
+["x"] = -70.90472412109375,
+["point"] = "RIGHT",
+["scale"] = 0.75,
+},
+["rows"] = 12,
+["WoW10Layout"] = true,
+["version"] = 3,
+},
+},
+},
+["Angryabsol - Stormrage"] = {
+["actionbars"] = {
+{
+["showgrid"] = true,
+["fadeoutdelay"] = 0,
+["WoW10Layout"] = true,
+["fadeout"] = true,
+["position"] = {
+["y"] = 49.00000762939453,
+["x"] = 498.5098876953125,
+["point"] = "BOTTOMLEFT",
+},
+["fadeoutalpha"] = 0,
+["version"] = 3,
+["visibility"] = {
+["combat"] = true,
+},
+["states"] = {
+["stance"] = {
+["DRUID"] = {
+["prowl"] = 7,
+},
+},
+},
+},
+{
+["enabled"] = false,
+["WoW10Layout"] = true,
+["version"] = 3,
+["position"] = {
+["y"] = -120.6412506103516,
+["x"] = 206.6414184570313,
+["point"] = "LEFT",
+},
+},
+{
+["fadeoutdelay"] = 0,
+["WoW10Layout"] = true,
+["fadeout"] = true,
+["showgrid"] = true,
+["position"] = {
+["y"] = 143.0000152587891,
+["x"] = 498.5098876953125,
+["point"] = "BOTTOMLEFT",
+},
+["version"] = 3,
+["visibility"] = {
+["combat"] = true,
+},
+["fadeoutalpha"] = 0,
+},
+{
+["fadeoutdelay"] = 0,
+["WoW10Layout"] = true,
+["fadeout"] = true,
+["showgrid"] = true,
+["position"] = {
+["y"] = 96.0000228881836,
+["x"] = -3.65673828125,
+["point"] = "BOTTOM",
+},
+["version"] = 3,
+["visibility"] = {
+["combat"] = true,
+},
+["fadeoutalpha"] = 0,
+},
+{
+["fadeoutdelay"] = 0,
+["WoW10Layout"] = true,
+["fadeout"] = true,
+["showgrid"] = true,
+["position"] = {
+["y"] = 96.0000228881836,
+["x"] = 498.5099792480469,
+["point"] = "BOTTOMLEFT",
+},
+["version"] = 3,
+["visibility"] = {
+["combat"] = true,
+},
+["fadeoutalpha"] = 0,
+},
+{
+["fadeoutdelay"] = 0,
+["WoW10Layout"] = true,
+["fadeout"] = true,
+["showgrid"] = true,
+["position"] = {
+["y"] = 49.00000762939453,
+["x"] = -4.419921875,
+["point"] = "BOTTOM",
+},
+["version"] = 3,
+["visibility"] = {
+["combat"] = true,
+},
+["fadeoutalpha"] = 0,
+},
+{
+["WoW10Layout"] = true,
+["version"] = 3,
+["position"] = {
+["y"] = 190.0000457763672,
+["x"] = 498.5098876953125,
+["point"] = "BOTTOMLEFT",
+},
+},
+{
+["enabled"] = true,
+["showgrid"] = true,
+["fadeoutalpha"] = 0,
+["fadeout"] = true,
+["position"] = {
+["y"] = 190.0000457763672,
+["x"] = 498.5098876953125,
+["point"] = "BOTTOMLEFT",
+},
+["WoW10Layout"] = true,
+["version"] = 3,
+["visibility"] = {
+["combat"] = true,
+},
+["fadeoutdelay"] = 0,
+},
+{
+["WoW10Layout"] = true,
+},
+{
+["WoW10Layout"] = true,
+},
+[14] = {
+["enabled"] = true,
+["flyoutDirection"] = "LEFT",
+["position"] = {
+["y"] = 213.3749542236328,
+["x"] = -36.7498779296875,
+["point"] = "RIGHT",
+["scale"] = 0.75,
+},
+["rows"] = 12,
+["WoW10Layout"] = true,
+["version"] = 3,
+},
+[13] = {
+["enabled"] = true,
+["showgrid"] = true,
+["fadeoutalpha"] = 0,
+["fadeout"] = true,
+["position"] = {
+["y"] = 143.3695373535156,
+["x"] = -3.65673828125,
+["point"] = "BOTTOM",
+},
+["WoW10Layout"] = true,
+["version"] = 3,
+["visibility"] = {
+["combat"] = true,
+},
+["fadeoutdelay"] = 0,
+},
+[15] = {
+["enabled"] = true,
+["flyoutDirection"] = "LEFT",
+["position"] = {
+["y"] = 213.3749542236328,
+["x"] = -70.90472412109375,
+["point"] = "RIGHT",
+["scale"] = 0.75,
+},
+["rows"] = 12,
+["WoW10Layout"] = true,
+["version"] = 3,
+},
+},
+},
+["Evileevee - Area 52"] = {
+["actionbars"] = {
+{
+["showgrid"] = true,
+["version"] = 3,
+["WoW10Layout"] = true,
+["position"] = {
+["y"] = 82,
+["x"] = -285,
+["point"] = "BOTTOM",
+},
+},
+{
+["enabled"] = false,
+["version"] = 3,
+["WoW10Layout"] = true,
+["position"] = {
+["y"] = -224,
+["x"] = -284.5000305175781,
+["point"] = "CENTER",
+},
+},
+{
+["flyoutDirection"] = "LEFT",
+["position"] = {
+["y"] = 193,
+["x"] = -54,
+["point"] = "RIGHT",
+},
+["rows"] = 12,
+["WoW10Layout"] = true,
+["version"] = 3,
+},
+{
+["flyoutDirection"] = "LEFT",
+["position"] = {
+["y"] = 193,
+["x"] = -104,
+["point"] = "RIGHT",
+},
+["rows"] = 12,
+["WoW10Layout"] = true,
+["version"] = 3,
+},
+{
+["enabled"] = false,
+["version"] = 3,
+["WoW10Layout"] = true,
+["position"] = {
+["y"] = 184,
+["x"] = -285,
+["point"] = "BOTTOM",
+},
+},
+{
+["version"] = 3,
+["WoW10Layout"] = true,
+["position"] = {
+["y"] = 133,
+["x"] = -285,
+["point"] = "BOTTOM",
+},
+},
+{
+["WoW10Layout"] = true,
+},
+{
+["WoW10Layout"] = true,
+},
+{
+["WoW10Layout"] = true,
+},
+{
+["WoW10Layout"] = true,
+},
+[14] = {
+["WoW10Layout"] = true,
+},
+[13] = {
+["WoW10Layout"] = true,
+},
+[15] = {
+["WoW10Layout"] = true,
+},
+},
+},
+["Dankmankeys - Stormrage"] = {
+["actionbars"] = {
+{
+["showgrid"] = true,
+["WoW10Layout"] = true,
+["version"] = 3,
+["position"] = {
+["y"] = 82,
+["x"] = -285,
+["point"] = "BOTTOM",
+},
+},
+{
+["enabled"] = false,
+["WoW10Layout"] = true,
+["version"] = 3,
+["position"] = {
+["y"] = -224,
+["x"] = -284.5000305175781,
+["point"] = "CENTER",
+},
+},
+{
+["flyoutDirection"] = "LEFT",
+["position"] = {
+["y"] = 193,
+["x"] = -54,
+["point"] = "RIGHT",
+},
+["rows"] = 12,
+["WoW10Layout"] = true,
+["version"] = 3,
+},
+{
+["flyoutDirection"] = "LEFT",
+["position"] = {
+["y"] = 193,
+["x"] = -104,
+["point"] = "RIGHT",
+},
+["rows"] = 12,
+["WoW10Layout"] = true,
+["version"] = 3,
+},
+{
+["enabled"] = false,
+["WoW10Layout"] = true,
+["version"] = 3,
+["position"] = {
+["y"] = 184,
+["x"] = -285,
+["point"] = "BOTTOM",
+},
+},
+{
+["WoW10Layout"] = true,
+["version"] = 3,
+["position"] = {
+["y"] = 133,
+["x"] = -285,
+["point"] = "BOTTOM",
+},
+},
+{
+["WoW10Layout"] = true,
+},
+{
+["WoW10Layout"] = true,
+},
+{
+["WoW10Layout"] = true,
+},
+{
+["WoW10Layout"] = true,
+},
+[14] = {
+["WoW10Layout"] = true,
+},
+[13] = {
+["WoW10Layout"] = true,
+},
+[15] = {
+["WoW10Layout"] = true,
+},
+},
+},
+["Madmareep - Stormrage"] = {
+["actionbars"] = {
+{
+["showgrid"] = true,
+["fadeoutdelay"] = 0,
+["visibility"] = {
+["combat"] = true,
+},
+["fadeout"] = true,
+["position"] = {
+["y"] = 49.00000762939453,
+["x"] = 498.5098876953125,
+["point"] = "BOTTOMLEFT",
+},
+["version"] = 3,
+["fadeoutalpha"] = 0,
+["WoW10Layout"] = true,
+["states"] = {
+["stance"] = {
+["DRUID"] = {
+["prowl"] = 7,
+},
+},
+},
+},
+{
+["enabled"] = false,
+["version"] = 3,
+["WoW10Layout"] = true,
+["position"] = {
+["y"] = -120.6412506103516,
+["x"] = 206.6414184570313,
+["point"] = "LEFT",
+},
+},
+{
+["fadeout"] = true,
+["visibility"] = {
+["combat"] = true,
+},
+["version"] = 3,
+["showgrid"] = true,
+["fadeoutalpha"] = 0,
+["position"] = {
+["y"] = 143.0000152587891,
+["x"] = 498.5098876953125,
+["point"] = "BOTTOMLEFT",
+},
+["WoW10Layout"] = true,
+["fadeoutdelay"] = 0,
+},
+{
+["fadeout"] = true,
+["visibility"] = {
+["combat"] = true,
+},
+["version"] = 3,
+["showgrid"] = true,
+["fadeoutalpha"] = 0,
+["position"] = {
+["y"] = 96.0000228881836,
+["x"] = -3.65673828125,
+["point"] = "BOTTOM",
+},
+["WoW10Layout"] = true,
+["fadeoutdelay"] = 0,
+},
+{
+["fadeout"] = true,
+["visibility"] = {
+["combat"] = true,
+},
+["version"] = 3,
+["showgrid"] = true,
+["fadeoutalpha"] = 0,
+["position"] = {
+["y"] = 96.0000228881836,
+["x"] = 498.5099792480469,
+["point"] = "BOTTOMLEFT",
+},
+["WoW10Layout"] = true,
+["fadeoutdelay"] = 0,
+},
+{
+["fadeout"] = true,
+["visibility"] = {
+["combat"] = true,
+},
+["version"] = 3,
+["showgrid"] = true,
+["fadeoutalpha"] = 0,
+["position"] = {
+["y"] = 49.00000762939453,
+["x"] = -4.419921875,
+["point"] = "BOTTOM",
+},
+["WoW10Layout"] = true,
+["fadeoutdelay"] = 0,
+},
+{
+["version"] = 3,
+["WoW10Layout"] = true,
+["position"] = {
+["y"] = 190.0000457763672,
+["x"] = 498.5098876953125,
+["point"] = "BOTTOMLEFT",
+},
+},
+{
+["enabled"] = true,
+["showgrid"] = true,
+["version"] = 3,
+["fadeoutdelay"] = 0,
+["position"] = {
+["y"] = 190.0000457763672,
+["x"] = 498.5098876953125,
+["point"] = "BOTTOMLEFT",
+},
+["visibility"] = {
+["combat"] = true,
+},
+["fadeoutalpha"] = 0,
+["WoW10Layout"] = true,
+["fadeout"] = true,
+},
+{
+["WoW10Layout"] = true,
+},
+{
+["WoW10Layout"] = true,
+},
+[14] = {
+["enabled"] = true,
+["flyoutDirection"] = "LEFT",
+["position"] = {
+["y"] = 213.3749542236328,
+["x"] = -36.7498779296875,
+["point"] = "RIGHT",
+["scale"] = 0.75,
+},
+["rows"] = 12,
+["WoW10Layout"] = true,
+["version"] = 3,
+},
+[13] = {
+["enabled"] = true,
+["showgrid"] = true,
+["version"] = 3,
+["fadeoutdelay"] = 0,
+["position"] = {
+["y"] = 143.3695373535156,
+["x"] = -3.65673828125,
+["point"] = "BOTTOM",
+},
+["visibility"] = {
+["combat"] = true,
+},
+["fadeoutalpha"] = 0,
+["WoW10Layout"] = true,
+["fadeout"] = true,
+},
+[15] = {
+["enabled"] = true,
+["flyoutDirection"] = "LEFT",
+["position"] = {
+["y"] = 213.3749542236328,
+["x"] = -70.90472412109375,
+["point"] = "RIGHT",
+["scale"] = 0.75,
+},
+["rows"] = 12,
+["WoW10Layout"] = true,
+["version"] = 3,
+},
+},
+},
+["Barelynoer - Area 52"] = {
+["actionbars"] = {
+{
+["showgrid"] = true,
+["fadeout"] = true,
+["WoW10Layout"] = true,
+["fadeoutdelay"] = 0,
+["position"] = {
+["y"] = 49.00000762939453,
+["x"] = 498.5098876953125,
+["point"] = "BOTTOMLEFT",
+},
+["fadeoutalpha"] = 0,
+["version"] = 3,
+["visibility"] = {
+["combat"] = true,
+},
+["states"] = {
+["stance"] = {
+["DRUID"] = {
+["prowl"] = 7,
+},
+},
+},
+},
+{
+["enabled"] = false,
+["WoW10Layout"] = true,
+["version"] = 3,
+["position"] = {
+["y"] = -120.6412506103516,
+["x"] = 206.6414184570313,
+["point"] = "LEFT",
+},
+},
+{
+["fadeoutdelay"] = 0,
+["WoW10Layout"] = true,
+["fadeout"] = true,
+["showgrid"] = true,
+["position"] = {
+["y"] = 143.0000152587891,
+["x"] = 498.5098876953125,
+["point"] = "BOTTOMLEFT",
+},
+["fadeoutalpha"] = 0,
+["visibility"] = {
+["combat"] = true,
+},
+["version"] = 3,
+},
+{
+["fadeoutdelay"] = 0,
+["WoW10Layout"] = true,
+["fadeout"] = true,
+["showgrid"] = true,
+["position"] = {
+["y"] = 96.0000228881836,
+["x"] = -3.65673828125,
+["point"] = "BOTTOM",
+},
+["fadeoutalpha"] = 0,
+["visibility"] = {
+["combat"] = true,
+},
+["version"] = 3,
+},
+{
+["fadeoutdelay"] = 0,
+["WoW10Layout"] = true,
+["fadeout"] = true,
+["showgrid"] = true,
+["position"] = {
+["y"] = 96.0000228881836,
+["x"] = 498.5099792480469,
+["point"] = "BOTTOMLEFT",
+},
+["fadeoutalpha"] = 0,
+["visibility"] = {
+["combat"] = true,
+},
+["version"] = 3,
+},
+{
+["fadeoutdelay"] = 0,
+["WoW10Layout"] = true,
+["fadeout"] = true,
+["showgrid"] = true,
+["position"] = {
+["y"] = 49.00000762939453,
+["x"] = -4.419921875,
+["point"] = "BOTTOM",
+},
+["fadeoutalpha"] = 0,
+["visibility"] = {
+["combat"] = true,
+},
+["version"] = 3,
+},
+{
+["WoW10Layout"] = true,
+["version"] = 3,
+["position"] = {
+["y"] = 190.0000457763672,
+["x"] = 498.5098876953125,
+["point"] = "BOTTOMLEFT",
+},
+},
+{
+["enabled"] = true,
+["showgrid"] = true,
+["version"] = 3,
+["fadeout"] = true,
+["position"] = {
+["y"] = 190.0000457763672,
+["x"] = 498.5098876953125,
+["point"] = "BOTTOMLEFT",
+},
+["WoW10Layout"] = true,
+["fadeoutalpha"] = 0,
+["visibility"] = {
+["combat"] = true,
+},
+["fadeoutdelay"] = 0,
+},
+{
+["WoW10Layout"] = true,
+},
+{
+["WoW10Layout"] = true,
+},
+[14] = {
+["enabled"] = true,
+["flyoutDirection"] = "LEFT",
+["position"] = {
+["y"] = 213.3749542236328,
+["x"] = -36.7498779296875,
+["point"] = "RIGHT",
+["scale"] = 0.75,
+},
+["rows"] = 12,
+["WoW10Layout"] = true,
+["version"] = 3,
+},
+[13] = {
+["enabled"] = true,
+["showgrid"] = true,
+["version"] = 3,
+["fadeout"] = true,
+["position"] = {
+["y"] = 143.3695373535156,
+["x"] = -3.65673828125,
+["point"] = "BOTTOM",
+},
+["WoW10Layout"] = true,
+["fadeoutalpha"] = 0,
+["visibility"] = {
+["combat"] = true,
+},
+["fadeoutdelay"] = 0,
+},
+[15] = {
+["enabled"] = true,
+["flyoutDirection"] = "LEFT",
+["position"] = {
+["y"] = 213.3749542236328,
+["x"] = -70.90472412109375,
+["point"] = "RIGHT",
+["scale"] = 0.75,
+},
+["rows"] = 12,
+["WoW10Layout"] = true,
+["version"] = 3,
+},
+},
+},
+["Lonelylitten - Stormrage"] = {
+["actionbars"] = {
+{
+["showgrid"] = true,
+["fadeout"] = true,
+["fadeoutdelay"] = 0,
+["fadeoutalpha"] = 0,
+["version"] = 3,
+["position"] = {
+["y"] = 49.00000762939453,
+["x"] = 498.5098876953125,
+["point"] = "BOTTOMLEFT",
+},
+["visibility"] = {
+["combat"] = true,
+["always"] = false,
+},
+["WoW10Layout"] = true,
+["states"] = {
+["stance"] = {
+["DRUID"] = {
+["prowl"] = 7,
+},
+},
+},
+},
+{
+["enabled"] = false,
+["version"] = 3,
+["position"] = {
+["y"] = -120.6412506103516,
+["x"] = 206.6414184570313,
+["point"] = "LEFT",
+},
+["WoW10Layout"] = true,
+},
+{
+["showgrid"] = true,
+["fadeoutdelay"] = 0,
+["visibility"] = {
+["combat"] = true,
+["always"] = false,
+},
+["fadeout"] = true,
+["version"] = 3,
+["position"] = {
+["y"] = 143.0000152587891,
+["x"] = 498.5098876953125,
+["point"] = "BOTTOMLEFT",
+},
+["fadeoutalpha"] = 0,
+["WoW10Layout"] = true,
+},
+{
+["showgrid"] = true,
+["fadeoutdelay"] = 0,
+["visibility"] = {
+["combat"] = true,
+["always"] = false,
+},
+["fadeout"] = true,
+["version"] = 3,
+["position"] = {
+["y"] = 96.0000228881836,
+["x"] = -3.65673828125,
+["point"] = "BOTTOM",
+},
+["fadeoutalpha"] = 0,
+["WoW10Layout"] = true,
+},
+{
+["showgrid"] = true,
+["fadeoutdelay"] = 0,
+["visibility"] = {
+["combat"] = true,
+["always"] = false,
+},
+["fadeout"] = true,
+["version"] = 3,
+["position"] = {
+["y"] = 96.0000228881836,
+["x"] = 498.5099792480469,
+["point"] = "BOTTOMLEFT",
+},
+["fadeoutalpha"] = 0,
+["WoW10Layout"] = true,
+},
+{
+["showgrid"] = true,
+["fadeoutdelay"] = 0,
+["visibility"] = {
+["combat"] = true,
+["always"] = false,
+},
+["fadeout"] = true,
+["version"] = 3,
+["position"] = {
+["y"] = 49.00000762939453,
+["x"] = -4.419921875,
+["point"] = "BOTTOM",
+},
+["fadeoutalpha"] = 0,
+["WoW10Layout"] = true,
+},
+{
+["version"] = 3,
+["position"] = {
+["y"] = 190.0000457763672,
+["x"] = 498.5098876953125,
+["point"] = "BOTTOMLEFT",
+},
+["WoW10Layout"] = true,
+},
+{
+["showgrid"] = true,
+["fadeoutdelay"] = 0,
+["enabled"] = true,
+["visibility"] = {
+["combat"] = true,
+["always"] = false,
+},
+["version"] = 3,
+["fadeoutalpha"] = 0,
+["position"] = {
+["y"] = 190.0000457763672,
+["x"] = 498.5098876953125,
+["point"] = "BOTTOMLEFT",
+},
+["fadeout"] = true,
+["WoW10Layout"] = true,
+},
+{
+["WoW10Layout"] = true,
+},
+{
+["WoW10Layout"] = true,
+},
+[14] = {
+["flyoutDirection"] = "LEFT",
+["rows"] = 12,
+["enabled"] = true,
+["WoW10Layout"] = true,
+["version"] = 3,
+["position"] = {
+["y"] = 213.3749542236328,
+["x"] = -36.7498779296875,
+["point"] = "RIGHT",
+["scale"] = 0.75,
+},
+["visibility"] = {
+["always"] = false,
+},
+},
+[13] = {
+["showgrid"] = true,
+["fadeoutdelay"] = 0,
+["enabled"] = true,
+["visibility"] = {
+["combat"] = true,
+["always"] = false,
+},
+["version"] = 3,
+["fadeoutalpha"] = 0,
+["position"] = {
+["y"] = 143.3695373535156,
+["x"] = -3.65673828125,
+["point"] = "BOTTOM",
+},
+["fadeout"] = true,
+["WoW10Layout"] = true,
+},
+[15] = {
+["flyoutDirection"] = "LEFT",
+["rows"] = 12,
+["enabled"] = true,
+["WoW10Layout"] = true,
+["version"] = 3,
+["position"] = {
+["y"] = 213.3749542236328,
+["x"] = -70.90472412109375,
+["point"] = "RIGHT",
+["scale"] = 0.75,
+},
+["visibility"] = {
+["always"] = false,
+},
+},
+},
+},
+["EVOKER"] = {
+["actionbars"] = {
+{
+["showgrid"] = true,
+["fadeoutdelay"] = 0,
+["visibility"] = {
+["combat"] = true,
+},
+["fadeout"] = true,
+["position"] = {
+["y"] = 49.00000762939453,
+["x"] = 498.5098876953125,
+["point"] = "BOTTOMLEFT",
+},
+["version"] = 3,
+["fadeoutalpha"] = 0,
+["WoW10Layout"] = true,
+["states"] = {
+["stance"] = {
+["DRUID"] = {
+["prowl"] = 7,
+},
+},
+},
+},
+{
+["enabled"] = false,
+["version"] = 3,
+["WoW10Layout"] = true,
+["position"] = {
+["y"] = -120.6412506103516,
+["x"] = 206.6414184570313,
+["point"] = "LEFT",
+},
+},
+{
+["fadeout"] = true,
+["visibility"] = {
+["combat"] = true,
+},
+["fadeoutdelay"] = 0,
+["showgrid"] = true,
+["fadeoutalpha"] = 0,
+["position"] = {
+["y"] = 143.0000152587891,
+["x"] = 498.5098876953125,
+["point"] = "BOTTOMLEFT",
+},
+["WoW10Layout"] = true,
+["version"] = 3,
+},
+{
+["fadeout"] = true,
+["visibility"] = {
+["combat"] = true,
+},
+["fadeoutdelay"] = 0,
+["showgrid"] = true,
+["fadeoutalpha"] = 0,
+["position"] = {
+["y"] = 96.0000228881836,
+["x"] = -3.65673828125,
+["point"] = "BOTTOM",
+},
+["WoW10Layout"] = true,
+["version"] = 3,
+},
+{
+["fadeout"] = true,
+["visibility"] = {
+["combat"] = true,
+},
+["fadeoutdelay"] = 0,
+["showgrid"] = true,
+["fadeoutalpha"] = 0,
+["position"] = {
+["y"] = 96.0000228881836,
+["x"] = 498.5099792480469,
+["point"] = "BOTTOMLEFT",
+},
+["WoW10Layout"] = true,
+["version"] = 3,
+},
+{
+["fadeout"] = true,
+["visibility"] = {
+["combat"] = true,
+},
+["fadeoutdelay"] = 0,
+["showgrid"] = true,
+["fadeoutalpha"] = 0,
+["position"] = {
+["y"] = 49.00000762939453,
+["x"] = -4.419921875,
+["point"] = "BOTTOM",
+},
+["WoW10Layout"] = true,
+["version"] = 3,
+},
+{
+["version"] = 3,
+["WoW10Layout"] = true,
+["position"] = {
+["y"] = 190.0000457763672,
+["x"] = 498.5098876953125,
+["point"] = "BOTTOMLEFT",
+},
+},
+{
+["enabled"] = true,
+["showgrid"] = true,
+["fadeoutdelay"] = 0,
+["version"] = 3,
+["position"] = {
+["y"] = 190.0000457763672,
+["x"] = 498.5098876953125,
+["point"] = "BOTTOMLEFT",
+},
+["visibility"] = {
+["combat"] = true,
+},
+["fadeoutalpha"] = 0,
+["WoW10Layout"] = true,
+["fadeout"] = true,
+},
+{
+["WoW10Layout"] = true,
+},
+{
+["WoW10Layout"] = true,
+},
+[14] = {
+["enabled"] = true,
+["flyoutDirection"] = "LEFT",
+["position"] = {
+["y"] = 213.3749542236328,
+["x"] = -36.7498779296875,
+["point"] = "RIGHT",
+["scale"] = 0.75,
+},
+["rows"] = 12,
+["WoW10Layout"] = true,
+["version"] = 3,
+},
+[13] = {
+["enabled"] = true,
+["showgrid"] = true,
+["fadeoutdelay"] = 0,
+["version"] = 3,
+["position"] = {
+["y"] = 143.3695373535156,
+["x"] = -3.65673828125,
+["point"] = "BOTTOM",
+},
+["visibility"] = {
+["combat"] = true,
+},
+["fadeoutalpha"] = 0,
+["WoW10Layout"] = true,
+["fadeout"] = true,
+},
+[15] = {
+["enabled"] = true,
+["flyoutDirection"] = "LEFT",
+["position"] = {
+["y"] = 213.3749542236328,
+["x"] = -70.90472412109375,
+["point"] = "RIGHT",
+["scale"] = 0.75,
+},
+["rows"] = 12,
+["WoW10Layout"] = true,
+["version"] = 3,
+},
+},
+},
+["Minimeditite - Area 52"] = {
+["actionbars"] = {
+{
+["position"] = {
+["y"] = 82,
+["x"] = -285,
+["point"] = "BOTTOM",
+},
+["WoW10Layout"] = true,
+["version"] = 3,
+["showgrid"] = true,
+},
+{
+["enabled"] = false,
+["WoW10Layout"] = true,
+["version"] = 3,
+["position"] = {
+["y"] = -224,
+["x"] = -284.5000305175781,
+["point"] = "CENTER",
+},
+},
+{
+["flyoutDirection"] = "LEFT",
+["position"] = {
+["y"] = 193,
+["x"] = -54,
+["point"] = "RIGHT",
+},
+["rows"] = 12,
+["WoW10Layout"] = true,
+["version"] = 3,
+},
+{
+["flyoutDirection"] = "LEFT",
+["position"] = {
+["y"] = 193,
+["x"] = -104,
+["point"] = "RIGHT",
+},
+["rows"] = 12,
+["WoW10Layout"] = true,
+["version"] = 3,
+},
+{
+["enabled"] = false,
+["WoW10Layout"] = true,
+["version"] = 3,
+["position"] = {
+["y"] = 184,
+["x"] = -285,
+["point"] = "BOTTOM",
+},
+},
+{
+["WoW10Layout"] = true,
+["version"] = 3,
+["position"] = {
+["y"] = 133,
+["x"] = -285,
+["point"] = "BOTTOM",
+},
+},
+{
+["WoW10Layout"] = true,
+},
+{
+["WoW10Layout"] = true,
+},
+{
+["WoW10Layout"] = true,
+},
+{
+["WoW10Layout"] = true,
+},
+[14] = {
+["WoW10Layout"] = true,
+},
+[13] = {
+["WoW10Layout"] = true,
+},
+[15] = {
+["WoW10Layout"] = true,
+},
+},
+},
+},
+},
+["ExtraActionBar"] = {
+["profiles"] = {
+["Taurostotem - Area 52"] = {
+["version"] = 3,
+["position"] = {
+["y"] = -224.5161895751953,
+["x"] = -347.6332397460938,
+["point"] = "CENTER",
+},
+},
+["Zappyxatu - Stormrage"] = {
+["version"] = 3,
+["position"] = {
+["y"] = -224.5161895751953,
+["x"] = -347.6332397460938,
+["point"] = "CENTER",
+},
+},
+["Angryabsol - Stormrage"] = {
+["version"] = 3,
+["position"] = {
+["y"] = -224.5161895751953,
+["x"] = -347.6332397460938,
+["point"] = "CENTER",
+},
+},
+["Evileevee - Area 52"] = {
+["version"] = 3,
+["position"] = {
+["y"] = 287.0000305175781,
+["x"] = -63.4998779296875,
+["point"] = "BOTTOM",
+},
+},
+["Dankmankeys - Stormrage"] = {
+["version"] = 3,
+["position"] = {
+["y"] = 287.0000305175781,
+["x"] = -63.4998779296875,
+["point"] = "BOTTOM",
+},
+},
+["Madmareep - Stormrage"] = {
+["version"] = 3,
+["position"] = {
+["y"] = -224.5161895751953,
+["x"] = -347.6332397460938,
+["point"] = "CENTER",
+},
+},
+["Barelynoer - Area 52"] = {
+["version"] = 3,
+["position"] = {
+["y"] = 255.5266876220703,
+["x"] = -63.4998779296875,
+["point"] = "BOTTOM",
+},
+},
+["Lonelylitten - Stormrage"] = {
+["position"] = {
+["y"] = -224.5161895751953,
+["x"] = -347.6332397460938,
+["point"] = "CENTER",
+},
+["version"] = 3,
+},
+["EVOKER"] = {
+["version"] = 3,
+["position"] = {
+["y"] = -224.5161895751953,
+["x"] = -347.6332397460938,
+["point"] = "CENTER",
+},
+},
+["Minimeditite - Area 52"] = {
+["version"] = 3,
+["position"] = {
+["y"] = 287.0000305175781,
+["x"] = -63.4998779296875,
+["point"] = "BOTTOM",
+},
+},
+},
+},
+["MicroMenu"] = {
+["profiles"] = {
+["Taurostotem - Area 52"] = {
+["padding"] = 0,
+["version"] = 3,
+["position"] = {
+["y"] = 43.00000381469727,
+["x"] = 193.2560272216797,
+["point"] = "BOTTOMLEFT",
+},
+},
+["Zappyxatu - Stormrage"] = {
+["padding"] = 0,
+["version"] = 3,
+["position"] = {
+["y"] = 43.00000381469727,
+["x"] = 193.2560272216797,
+["point"] = "BOTTOMLEFT",
+},
+},
+["Angryabsol - Stormrage"] = {
+["padding"] = 0,
+["version"] = 3,
+["position"] = {
+["y"] = 43.00000381469727,
+["x"] = -3.999996900558472,
+["point"] = "BOTTOMLEFT",
+},
+},
+["Evileevee - Area 52"] = {
+["version"] = 3,
+["position"] = {
+["y"] = 42,
+["x"] = -284,
+["point"] = "BOTTOMRIGHT",
+},
+},
+["Dankmankeys - Stormrage"] = {
+["version"] = 3,
+["position"] = {
+["y"] = 42,
+["x"] = -284,
+["point"] = "BOTTOMRIGHT",
+},
+},
+["Madmareep - Stormrage"] = {
+["padding"] = 0,
+["version"] = 3,
+["position"] = {
+["y"] = 43.00000381469727,
+["x"] = -3.999996900558472,
+["point"] = "BOTTOMLEFT",
+},
+},
+["Barelynoer - Area 52"] = {
+["version"] = 3,
+["position"] = {
+["y"] = 42,
+["x"] = -284,
+["point"] = "BOTTOMRIGHT",
+},
+},
+["Lonelylitten - Stormrage"] = {
+["position"] = {
+["y"] = 43.00000381469727,
+["x"] = -3.999996900558472,
+["point"] = "BOTTOMLEFT",
+},
+["version"] = 3,
+["padding"] = 0,
+},
+["EVOKER"] = {
+["padding"] = 0,
+["version"] = 3,
+["position"] = {
+["y"] = 43.00000381469727,
+["x"] = 193.2560272216797,
+["point"] = "BOTTOMLEFT",
+},
+},
+["Minimeditite - Area 52"] = {
+["version"] = 3,
+["position"] = {
+["y"] = 42,
+["x"] = -284,
+["point"] = "BOTTOMRIGHT",
+},
+},
+},
+},
+["BagBar"] = {
+["profiles"] = {
+["Taurostotem - Area 52"] = {
+["enabled"] = false,
+["version"] = 3,
+["position"] = {
+["y"] = 80,
+["x"] = -212,
+["point"] = "BOTTOMRIGHT",
+},
+},
+["Zappyxatu - Stormrage"] = {
+["enabled"] = false,
+["version"] = 3,
+["position"] = {
+["y"] = 80,
+["x"] = -212,
+["point"] = "BOTTOMRIGHT",
+},
+},
+["Angryabsol - Stormrage"] = {
+["enabled"] = false,
+["version"] = 3,
+["position"] = {
+["y"] = 80,
+["x"] = -212,
+["point"] = "BOTTOMRIGHT",
+},
+},
+["Evileevee - Area 52"] = {
+["version"] = 3,
+["position"] = {
+["y"] = 80,
+["x"] = -212,
+["point"] = "BOTTOMRIGHT",
+},
+},
+["Dankmankeys - Stormrage"] = {
+["version"] = 3,
+["position"] = {
+["y"] = 80,
+["x"] = -212,
+["point"] = "BOTTOMRIGHT",
+},
+},
+["Madmareep - Stormrage"] = {
+["enabled"] = false,
+["version"] = 3,
+["position"] = {
+["y"] = 80,
+["x"] = -212,
+["point"] = "BOTTOMRIGHT",
+},
+},
+["Barelynoer - Area 52"] = {
+["enabled"] = false,
+["version"] = 3,
+["position"] = {
+["y"] = 80,
+["x"] = -212,
+["point"] = "BOTTOMRIGHT",
+},
+},
+["Lonelylitten - Stormrage"] = {
+["enabled"] = false,
+["version"] = 3,
+["position"] = {
+["y"] = 80,
+["x"] = -212,
+["point"] = "BOTTOMRIGHT",
+},
+},
+["EVOKER"] = {
+["enabled"] = false,
+["version"] = 3,
+["position"] = {
+["y"] = 80,
+["x"] = -212,
+["point"] = "BOTTOMRIGHT",
+},
+},
+["Minimeditite - Area 52"] = {
+["version"] = 3,
+["position"] = {
+["y"] = 80,
+["x"] = -212,
+["point"] = "BOTTOMRIGHT",
+},
+},
+},
+},
+["BlizzardArt"] = {
+["profiles"] = {
+["Taurostotem - Area 52"] = {
+["position"] = {
+["y"] = -174.7080078125,
+["x"] = 111.433967590332,
+["point"] = "LEFT",
+},
+["version"] = 3,
+["artLayout"] = "MODERN",
+},
+["Zappyxatu - Stormrage"] = {
+["position"] = {
+["y"] = -174.7080078125,
+["x"] = 111.433967590332,
+["point"] = "LEFT",
+},
+["version"] = 3,
+["artLayout"] = "MODERN",
+},
+["Angryabsol - Stormrage"] = {
+["position"] = {
+["y"] = -174.7080078125,
+["x"] = 111.433967590332,
+["point"] = "LEFT",
+},
+["version"] = 3,
+["artLayout"] = "MODERN",
+},
+["Evileevee - Area 52"] = {
+["enabled"] = true,
+["artLayout"] = "MODERN",
+["version"] = 3,
+["position"] = {
+["y"] = 87,
+["x"] = -288.5,
+["point"] = "BOTTOM",
+},
+},
+["Dankmankeys - Stormrage"] = {
+["enabled"] = true,
+["artLayout"] = "MODERN",
+["version"] = 3,
+["position"] = {
+["y"] = 87,
+["x"] = -288.5,
+["point"] = "BOTTOM",
+},
+},
+["Madmareep - Stormrage"] = {
+["artLayout"] = "MODERN",
+["version"] = 3,
+["position"] = {
+["y"] = -174.7080078125,
+["x"] = 111.433967590332,
+["point"] = "LEFT",
+},
+},
+["Barelynoer - Area 52"] = {
+["position"] = {
+["y"] = -174.7080078125,
+["x"] = 111.433967590332,
+["point"] = "LEFT",
+},
+["version"] = 3,
+["artLayout"] = "MODERN",
+},
+["Lonelylitten - Stormrage"] = {
+["artLayout"] = "MODERN",
+["position"] = {
+["y"] = -174.7080078125,
+["x"] = 111.433967590332,
+["point"] = "LEFT",
+},
+["version"] = 3,
+},
+["EVOKER"] = {
+["artLayout"] = "MODERN",
+["version"] = 3,
+["position"] = {
+["y"] = -174.7080078125,
+["x"] = 111.433967590332,
+["point"] = "LEFT",
+},
+},
+["Minimeditite - Area 52"] = {
+["enabled"] = true,
+["position"] = {
+["y"] = 87,
+["x"] = -288.5,
+["point"] = "BOTTOM",
+},
+["version"] = 3,
+["artLayout"] = "MODERN",
+},
+},
+},
+["StanceBar"] = {
+["profiles"] = {
+["Taurostotem - Area 52"] = {
+["fadeoutdelay"] = 0,
+["position"] = {
+["y"] = 222.0000457763672,
+["x"] = 500.0453186035156,
+["point"] = "BOTTOMLEFT",
+["scale"] = 1,
+},
+["version"] = 3,
+["fadeout"] = true,
+["fadeoutalpha"] = 0,
+},
+["Zappyxatu - Stormrage"] = {
+["version"] = 3,
+["position"] = {
+["y"] = 222.0000457763672,
+["x"] = 500.0453186035156,
+["point"] = "BOTTOMLEFT",
+["scale"] = 1,
+},
+["fadeout"] = true,
+["fadeoutdelay"] = 0,
+["fadeoutalpha"] = 0,
+},
+["Angryabsol - Stormrage"] = {
+["version"] = 3,
+["position"] = {
+["y"] = 222.0000457763672,
+["x"] = 500.0453186035156,
+["point"] = "BOTTOMLEFT",
+["scale"] = 1,
+},
+["fadeoutalpha"] = 0,
+["fadeout"] = true,
+["fadeoutdelay"] = 0,
+},
+["Evileevee - Area 52"] = {
+["version"] = 3,
+["position"] = {
+["y"] = -14.99997711181641,
+["x"] = -82.50003051757812,
+["point"] = "CENTER",
+},
+},
+["Dankmankeys - Stormrage"] = {
+["version"] = 3,
+["position"] = {
+["y"] = -14.99997711181641,
+["x"] = -82.50003051757812,
+["point"] = "CENTER",
+},
+},
+["Madmareep - Stormrage"] = {
+["fadeoutalpha"] = 0,
+["position"] = {
+["y"] = 222.0000457763672,
+["x"] = 500.0453186035156,
+["point"] = "BOTTOMLEFT",
+["scale"] = 1,
+},
+["version"] = 3,
+["fadeout"] = true,
+["fadeoutdelay"] = 0,
+},
+["Barelynoer - Area 52"] = {
+["version"] = 3,
+["position"] = {
+["y"] = 34.00000762939453,
+["x"] = 336.9666442871094,
+["point"] = "BOTTOMLEFT",
+["scale"] = 1,
+},
+},
+["Lonelylitten - Stormrage"] = {
+["fadeout"] = true,
+["fadeoutdelay"] = 0,
+["position"] = {
+["y"] = 222.0000457763672,
+["x"] = 500.0453186035156,
+["point"] = "BOTTOMLEFT",
+["scale"] = 1,
+},
+["fadeoutalpha"] = 0,
+["version"] = 3,
+},
+["EVOKER"] = {
+["fadeout"] = true,
+["position"] = {
+["y"] = 222.0000457763672,
+["x"] = 500.0453186035156,
+["point"] = "BOTTOMLEFT",
+["scale"] = 1,
+},
+["fadeoutdelay"] = 0,
+["fadeoutalpha"] = 0,
+["version"] = 3,
+},
+["Minimeditite - Area 52"] = {
+["version"] = 3,
+["position"] = {
+["y"] = -14.99997711181641,
+["x"] = -82.50003051757812,
+["point"] = "CENTER",
+},
+},
+},
+},
+["PetBar"] = {
+["profiles"] = {
+["Taurostotem - Area 52"] = {
+["version"] = 3,
+["position"] = {
+["y"] = 222.0000457763672,
+["x"] = -407.6272583007813,
+["point"] = "BOTTOM",
+},
+},
+["Zappyxatu - Stormrage"] = {
+["version"] = 3,
+["position"] = {
+["y"] = 222.0000457763672,
+["x"] = -407.6272583007813,
+["point"] = "BOTTOM",
+},
+},
+["Angryabsol - Stormrage"] = {
+["version"] = 3,
+["position"] = {
+["y"] = 222.0000457763672,
+["x"] = -407.6272583007813,
+["point"] = "BOTTOM",
+},
+},
+["Evileevee - Area 52"] = {
+["version"] = 3,
+["position"] = {
+["y"] = 168,
+["x"] = -285,
+["point"] = "BOTTOM",
+},
+},
+["Dankmankeys - Stormrage"] = {
+["version"] = 3,
+["position"] = {
+["y"] = 168,
+["x"] = -285,
+["point"] = "BOTTOM",
+},
+},
+["Madmareep - Stormrage"] = {
+["version"] = 3,
+["position"] = {
+["y"] = 222.0000457763672,
+["x"] = -407.6272583007813,
+["point"] = "BOTTOM",
+},
+},
+["Barelynoer - Area 52"] = {
+["version"] = 3,
+["position"] = {
+["y"] = 34.00000762939453,
+["x"] = 17.36631011962891,
+["point"] = "BOTTOMLEFT",
+},
+},
+["Lonelylitten - Stormrage"] = {
+["version"] = 3,
+["position"] = {
+["y"] = 222.0000457763672,
+["x"] = -407.6272583007813,
+["point"] = "BOTTOM",
+},
+},
+["EVOKER"] = {
+["version"] = 3,
+["position"] = {
+["y"] = 222.0000457763672,
+["x"] = -407.6272583007813,
+["point"] = "BOTTOM",
+},
+},
+["Minimeditite - Area 52"] = {
+["version"] = 3,
+["position"] = {
+["y"] = 168,
+["x"] = -285,
+["point"] = "BOTTOM",
+},
+},
+},
+},
+["Vehicle"] = {
+["profiles"] = {
+["Taurostotem - Area 52"] = {
+["version"] = 3,
+["position"] = {
+["y"] = -109.4124450683594,
+["x"] = 396.5444946289063,
+["point"] = "CENTER",
+},
+},
+["Zappyxatu - Stormrage"] = {
+["version"] = 3,
+["position"] = {
+["y"] = -109.4124450683594,
+["x"] = 396.5444946289063,
+["point"] = "CENTER",
+},
+},
+["Angryabsol - Stormrage"] = {
+["version"] = 3,
+["position"] = {
+["y"] = -109.4124450683594,
+["x"] = 396.5444946289063,
+["point"] = "CENTER",
+},
+},
+["Evileevee - Area 52"] = {
+["version"] = 3,
+["position"] = {
+["y"] = 153,
+["x"] = -337,
+["point"] = "BOTTOM",
+},
+},
+["Dankmankeys - Stormrage"] = {
+["version"] = 3,
+["position"] = {
+["y"] = 153,
+["x"] = -337,
+["point"] = "BOTTOM",
+},
+},
+["Madmareep - Stormrage"] = {
+["version"] = 3,
+["position"] = {
+["y"] = -109.4124450683594,
+["x"] = 396.5444946289063,
+["point"] = "CENTER",
+},
+},
+["Barelynoer - Area 52"] = {
+["version"] = 3,
+["position"] = {
+["y"] = -109.4124450683594,
+["x"] = 396.5444946289063,
+["point"] = "CENTER",
+},
+},
+["Lonelylitten - Stormrage"] = {
+["position"] = {
+["y"] = -109.4124450683594,
+["x"] = 396.5444946289063,
+["point"] = "CENTER",
+},
+["version"] = 3,
+},
+["EVOKER"] = {
+["version"] = 3,
+["position"] = {
+["y"] = -109.4124450683594,
+["x"] = 396.5444946289063,
+["point"] = "CENTER",
+},
+},
+["Minimeditite - Area 52"] = {
+["version"] = 3,
+["position"] = {
+["y"] = 153,
+["x"] = -337,
+["point"] = "BOTTOM",
+},
+},
+},
+},
+},
+["profileKeys"] = {
+["Taurostotem - Area 52"] = "Taurostotem - Area 52",
+["Lonelylitten - Stormrage"] = "Lonelylitten - Stormrage",
+["Angryabsol - Stormrage"] = "Angryabsol - Stormrage",
+["Evileevee - Area 52"] = "Evileevee - Area 52",
+["Dankmankeys - Stormrage"] = "Dankmankeys - Stormrage",
+["Madmareep - Stormrage"] = "Madmareep - Stormrage",
+["Barelynoer - Area 52"] = "EVOKER",
+["Zappyxatu - Stormrage"] = "Zappyxatu - Stormrage",
+["Minimeditite - Area 52"] = "Minimeditite - Area 52",
+},
+["profiles"] = {
+["Taurostotem - Area 52"] = {
+["focuscastmodifier"] = false,
+["blizzardVehicle"] = true,
+["minimapIcon"] = {
+["minimapPos"] = 177.570701061882,
+},
+["outofrange"] = "hotkey",
+},
+["Zappyxatu - Stormrage"] = {
+["focuscastmodifier"] = false,
+["blizzardVehicle"] = true,
+["minimapIcon"] = {
+["minimapPos"] = 177.570701061882,
+},
+["outofrange"] = "hotkey",
+},
+["Angryabsol - Stormrage"] = {
+["focuscastmodifier"] = false,
+["blizzardVehicle"] = true,
+["minimapIcon"] = {
+["minimapPos"] = 320.7530080577687,
+},
+["outofrange"] = "hotkey",
+},
+["Evileevee - Area 52"] = {
+["focuscastmodifier"] = false,
+["blizzardVehicle"] = true,
+["outofrange"] = "hotkey",
+},
+["Dankmankeys - Stormrage"] = {
+["focuscastmodifier"] = false,
+["blizzardVehicle"] = true,
+["outofrange"] = "hotkey",
+},
+["Madmareep - Stormrage"] = {
+["focuscastmodifier"] = false,
+["blizzardVehicle"] = true,
+["minimapIcon"] = {
+["minimapPos"] = 320.7530080577687,
+},
+["outofrange"] = "hotkey",
+},
+["Barelynoer - Area 52"] = {
+["focuscastmodifier"] = false,
+["blizzardVehicle"] = true,
+["minimapIcon"] = {
+["minimapPos"] = 197.6676561487116,
+},
+["outofrange"] = "hotkey",
+},
+["Lonelylitten - Stormrage"] = {
+["blizzardVehicle"] = true,
+["focuscastmodifier"] = false,
+["minimapIcon"] = {
+["minimapPos"] = 320.7530080577687,
+},
+["outofrange"] = "hotkey",
+},
+["EVOKER"] = {
+["focuscastmodifier"] = false,
+["blizzardVehicle"] = true,
+["minimapIcon"] = {
+["minimapPos"] = 31.72356755507164,
+},
+["outofrange"] = "hotkey",
+},
+["Minimeditite - Area 52"] = {
+["focuscastmodifier"] = false,
+["blizzardVehicle"] = true,
+["outofrange"] = "hotkey",
+},
+},
+}

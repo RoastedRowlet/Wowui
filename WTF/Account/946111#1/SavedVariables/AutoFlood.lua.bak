@@ -1,0 +1,2 @@
+
+AF_config = nil

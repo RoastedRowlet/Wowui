@@ -1,0 +1,145 @@
+--[[ PrivateAuras indicator ]]--
+
+local Grid2 = Grid2
+local wipe = wipe
+local strmatch = strmatch
+local AddPrivateAuraAnchor = C_UnitAuras.AddPrivateAuraAnchor
+local RemovePrivateAuraAnchor = C_UnitAuras.RemovePrivateAuraAnchor
+
+local function ClearFrameAuraAnchors(f)
+	local auraHandles = f.auraHandles
+	for i=1,#auraHandles do
+		RemovePrivateAuraAnchor(auraHandles[i])
+	end
+	return wipe(auraHandles)
+end
+
+local function Icon_Create(self, parent)
+	local f = self:Acquire("Frame", parent)
+	f.auraHandles = {}
+	f.auraFrames = {}
+end
+
+local function Icon_Update(self, parent, unit)
+	local f = parent[self.name]
+	if f and unit ~= f.auraUnit then
+		local auraHandles = ClearFrameAuraAnchors(f)
+		local displayDurFrame = self.displayDurFrame
+		local auraAnchor = self.auraAnchor
+		local iconAnchor = auraAnchor.iconInfo.iconAnchor
+		local durationAnchor = auraAnchor.durationAnchor
+		auraAnchor.unitToken = unit
+		auraAnchor.auraIndex = self.auraIndex
+		local auraFrames = f.auraFrames
+		for i=1,self.maxIcons do
+			local auraFrame = auraFrames[i]
+			auraAnchor.parent = auraFrame
+			iconAnchor.relativeTo = auraFrame
+			if durationAnchor then
+				durationAnchor.relativeTo = displayDurFrame and auraFrame.durFrame or auraFrame
+			end
+			auraHandles[i] = AddPrivateAuraAnchor(auraAnchor)
+			auraAnchor.auraIndex = auraAnchor.auraIndex + 1
+		end
+		if durationAnchor then -- we dont want to store relativeTo field in savedvariables
+			durationAnchor.relativeTo = nil
+		end
+		f.auraUnit = unit
+	end
+end
+
+local function Icon_Layout(self, parent)
+	local dbx = self.dbx
+	local l = dbx.location
+	local f = parent[self.name]
+	local iconSize = self.iconSize>1 and self.iconSize or self.iconSize * parent:GetHeight()
+	f:SetScale(self.borderScale and 1 or iconSize/32)
+	iconSize = self.borderScale and iconSize or 32
+	local sizeFull = iconSize + (dbx.iconSpacing or 1)
+	f:SetParent(parent)
+	f:ClearAllPoints()
+	f:SetPoint( l.point, parent.container, l.relPoint, l.x, l.y )
+	f:SetFrameLevel( parent:GetFrameLevel() + (dbx.level or 1) )
+	f:SetSize( sizeFull*self.colCount, sizeFull*self.rowCount )
+	f.auraUnit = nil
+	local auraAnchor = self.auraAnchor
+	auraAnchor.iconInfo.iconWidth = iconSize
+	auraAnchor.iconInfo.iconHeight = iconSize
+	local frameSize = self.disableTip and 0.001 or iconSize
+	local adjustX = self.disableTip and iconSize*self.horMult/2 or 0
+	local adjustY = self.disableTip and iconSize*self.verMult/2 or 0
+	local offsetX = adjustX
+	local offsetY = adjustY
+	local sumX = sizeFull * self.horMult
+	local sumY = sizeFull * self.verMult
+	local auraFrames = f.auraFrames
+	for i=1, self.maxIcons do
+		local frame = auraFrames[i] or CreateFrame('frame', nil, f)
+		frame:ClearAllPoints()
+		frame:SetPoint(self.point, f, self.point, offsetX, offsetY)
+		frame:SetSize(frameSize, frameSize)
+		frame:Show()
+		if self.displayDurFrame then
+			frame.durFrame = frame.durFrame or CreateFrame('frame', nil, frame)
+			frame.durFrame:SetPoint(self.point, f, self.point, offsetX-adjustX, offsetY-adjustY)
+			frame.durFrame:SetSize(iconSize, iconSize)
+			frame.durFrame:Show()
+		end
+		offsetX = offsetX + sumX
+		offsetY = offsetY + sumY
+		auraFrames[i] = frame
+	end
+	for i=self.maxIcons+1, #auraFrames do
+		auraFrames[i]:Hide()
+	end
+	f:Show()
+end
+
+local function Icon_Disable(self, parent)
+	local f = parent[self.name]
+	ClearFrameAuraAnchors(f)
+	f.auraUnit = nil
+	f:Hide()
+	f:SetParent(nil)
+	f:ClearAllPoints()
+end
+
+local function Icon_UpdateDB(self)
+	local dbx = self.dbx
+	self.maxIcons = dbx.maxIcons or 4
+	self.auraIndex= dbx.auraIndex or 1
+	self.disableTip = dbx.disableTooltip
+	self.displayDurFrame = dbx.disableTooltip and dbx.durationAnchor
+	self.iconSize = dbx.iconSize or Grid2Frame.db.profile.iconSize or 14
+	self.borderScale = dbx.borderScale
+	self.auraAnchor.iconInfo.borderScale = self.borderScale
+	self.auraAnchor.showCountdownFrame = not dbx.disableCooldown
+	self.auraAnchor.showCountdownNumbers = not dbx.disableCooldownNumbers
+	self.auraAnchor.durationAnchor = dbx.durationAnchor
+	if dbx.orientation=='VERTICAL' then
+		self.point = strmatch(dbx.location.point,'BOTTOM') or 'TOP'
+		self.horMult = 0
+		self.verMult = self.point=='TOP' and -1 or 1
+		self.colCount = 1
+		self.rowCount = self.maxIcons
+	else
+		self.point = strmatch(dbx.location.point,'RIGHT') or 'LEFT'
+		self.horMult = self.point=='LEFT' and 1 or -1
+		self.verMult = 0
+		self.colCount = self.maxIcons
+		self.rowCount = 1
+	end
+end
+
+Grid2.setupFunc["privateauras"] = function(indicatorKey, dbx)
+	local indicator = Grid2.indicatorPrototype:new(indicatorKey)
+	indicator.auraAnchor = { iconInfo={ iconAnchor={ offsetX=0, offsetY=0, point='CENTER', relativePoint='CENTER' } } }
+	indicator.dbx       = dbx
+	indicator.Create    = Icon_Create
+	indicator.Layout    = Icon_Layout
+	indicator.Disable   = Icon_Disable
+	indicator.UpdateDB  = Icon_UpdateDB
+	indicator.UpdateO   = Icon_Update
+	Grid2:RegisterIndicator(indicator, { "privateauras" })
+	return indicator
+end

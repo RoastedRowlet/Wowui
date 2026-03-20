@@ -1,0 +1,21 @@
+## Interface: 120001
+## Author: p3lim
+## Version: 120000.95-Release
+## Title: QuickQuest
+## Notes: Quest automation wizardry
+## IconTexture: Interface\Icons\spell_nature_timestop
+## SavedVariables: QuickQuestDB2, QuickQuestDB3, QuickQuestBlocklistDB, QuickQuestMoviesDB
+
+## X-Curse-Project-ID: 36494
+## X-WoWI-ID: 20838
+## X-Wago-ID: Qb6meD6P
+
+libs\Dashi\embed.xml
+
+locale\[TextLocale].lua [AllowLoadTextLocale deDE, esES, esMX, frFR, itIT, koKR, ptBR, ruRU, zhCN, zhTW]
+
+utils.lua
+quests.lua
+gossip.lua
+movies.lua
+settings.lua

@@ -1,0 +1,38 @@
+VER 3 0100000000000007 "90 Tier" "INV_MISC_QUESTIONMARK"
+#showtooltip
+/cast [talent:6/1] Summon Jade Serpent Statue
+/cast [talent:6/2] Refreshing Jade Wind
+/cast [talent:6/3] Invoke Chi-Ji, the Red Crane
+END
+VER 3 0100000000000006 "Defensive" "INV_MISC_QUESTIONMARK"
+#showtooltip
+/cast [talent:5/2] Diffuse Magic
+/cast [talent:5/3] Dampen Harm
+END
+VER 3 0100000000000005 "Life Cocoon" "INV_MISC_QUESTIONMARK"
+#showtooltip Life Cocoon
+/use [@mouseover,help,nodead][help,nodead][@player] Life Cocoon
+END
+VER 3 0100000000000004 "Renewing Mist" "INV_MISC_QUESTIONMARK"
+#showtooltip Renewing Mist
+/use [@mouseover,help,nodead][help,nodead][@player] Renewing Mist
+END
+VER 3 0100000000000008 "RSK" "INV_MISC_QUESTIONMARK"
+#showtooltip Rising Sun Kick
+/use Thunder Focus Tea
+/use Rising Sun Kick
+END
+VER 3 0100000000000009 "Tiger's Lust" "INV_MISC_QUESTIONMARK"
+#showtooltip Tiger's Lust
+/use [@mouseover,help,nodead][help,nodead][@player] Tiger's Lust
+END
+VER 3 0100000000000003 "vivify" "INV_MISC_QUESTIONMARK"
+#showtooltip Vivify
+/use [@mouseover,help,nodead][help,nodead][@player] Vivify
+END
+VER 3 0100000000000001 "VuhDoDCShieldData" "Ability_Repair"
+R1NM1MR1HR1OM1PM2IH2WM[x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x]2OH[x][x]0__[x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x]
+END
+VER 3 0100000000000002 "VuhDoDCShieldNames" "Ability_Repair"
+NStdAriSerZinGysSilZen[x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x]Min[x][x]Skö[x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x][x]
+END

@@ -1,0 +1,7 @@
+=========================== Class Icons Attribution ===========================
+JiberishUI Icons Attribution
+This addon contains icon artwork licensed from JiberishUI, LLC.
+All icons are © JiberishUI, LLC.
+Artwork created by Handclaw and commissioned exclusively for JiberishUI.
+No redistribution or reuse of these assets is permitted outside of this addon.
+==============================================================================

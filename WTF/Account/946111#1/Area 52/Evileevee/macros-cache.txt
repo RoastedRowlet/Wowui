@@ -1,0 +1,38 @@
+VER 3 0100000000000005 "adfasdfasdf" "135886"
+/console showplayer
+/run local cvar="WeakaurasCrosshairsToggle" SetCVar(cvar,1-GetCVar(cvar),cvar)
+END
+VER 3 0100000000000004 "Dispersion" "INV_MISC_QUESTIONMARK"
+END
+VER 3 0100000000000001 "life grip" "INV_MISC_QUESTIONMARK"
+#showtooltip 
+/use [@mouseover,help,nodead][help,nodead][@player] leap of faith
+END
+VER 3 0100000000000007 "MO Penanace" "134400"
+#showtooltip Penance
+/cast [@mouseover] Penance
+END
+VER 3 010000000000000A "mouseover dispel" "134400"
+#showtooltip 
+/cast [@mouseover] PURIFY
+END
+VER 3 0100000000000003 "pain sup" "INV_MISC_QUESTIONMARK"
+#showtooltip 
+/use [@mouseover,help,nodead][help,nodead][@player] Pain suppression
+END
+VER 3 0100000000000009 "PI MO" "134400"
+#showtooltip Power Infusion
+/cast [@mouseover] Power Infusion
+END
+VER 3 0100000000000002 "PW: Radiance" "INV_MISC_QUESTIONMARK"
+#showtooltip 
+/use [@mouseover,help,nodead][help,nodead][@player] Power Word: Radiance
+END
+VER 3 0100000000000008 "Rapture MO" "134400"
+#showtooltip Rapture
+/cast [@mouseover] Rapture
+END
+VER 3 0100000000000006 "Shining" "INV_MISC_QUESTIONMARK"
+#showtooltip 
+/use [@mouseover,help,nodead][help,nodead][@player] Shining Force
+END

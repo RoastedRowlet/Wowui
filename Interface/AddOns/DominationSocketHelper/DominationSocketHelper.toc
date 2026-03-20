@@ -1,0 +1,26 @@
+## Interface: 120000, 120001
+## Title: Socket Helper
+## Author: Metriss - Stormrage
+## Version: v2.2.20
+## SavedVariables: DSHDB
+## Notes: Helps with changing Gems and Domination Socket Shards
+
+## X-Curse-Project-ID: 507074
+
+#@no-lib-strip@
+libs\libs.xml
+#@end-no-lib-strip@
+
+#locales
+locales\enUS.lua
+locales\ruRU.lua
+locales\deDE.lua
+locales\esES.lua
+locales\frFR.lua
+locales\zhCN.lua
+locales\zhTW.lua
+
+main.lua
+#remix.lua
+#ldb.lua
+options.lua

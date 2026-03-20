@@ -1,0 +1,49 @@
+
+WMC_Saved = {
+["placeKey"] = "G",
+["clearModifier"] = "CTRL-",
+["clearKey"] = "B",
+["orderList"] = {
+6,
+4,
+3,
+7,
+1,
+2,
+5,
+8,
+},
+["placeModifier"] = "SHIFT-",
+}
+WMC_TargetSaved = {
+["placeKey"] = "",
+["clearModifier"] = "",
+["clearKey"] = "",
+["orderList"] = {
+8,
+7,
+6,
+5,
+4,
+3,
+2,
+1,
+},
+["placeModifier"] = "",
+}
+WMC_MouseoverSaved = {
+["placeKey"] = "",
+["clearModifier"] = "",
+["clearKey"] = "",
+["orderList"] = {
+8,
+7,
+6,
+5,
+4,
+3,
+2,
+1,
+},
+["placeModifier"] = "",
+}

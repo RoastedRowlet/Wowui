@@ -1,0 +1,32 @@
+VER 3 0100000000000007 "Bind/grab" "INV_MISC_QUESTIONMARK"
+/cast Earthgrab Totem
+/cast Earthbind Totem
+END
+VER 3 0100000000000002 "ChainHeal" "INV_MISC_QUESTIONMARK"
+#showtooltip 
+/use [@mouseover,help,nodead][help,nodead][@player] Chain HEal
+END
+VER 3 0100000000000001 "EarthShield" "INV_MISC_QUESTIONMARK"
+#showtooltip 
+/use [@mouseover,help,nodead][help,nodead][@player] Earth shield
+END
+VER 3 0100000000000008 "M+" "INV_MISC_QUESTIONMARK"
+/2 WTS M+ 15 Carries. 2500 io Friend group. Gold only. Whisper for details
+END
+VER 3 0100000000000005 "Prim wave" "INV_MISC_QUESTIONMARK"
+#showtooltip 
+/use [@mouseover,help,nodead][help,nodead][@player] Primordial Wave
+END
+VER 3 0100000000000004 "Riptide" "INV_MISC_QUESTIONMARK"
+#showtooltip 
+/use [@mouseover,help,nodead][help,nodead][@player] riptide
+END
+VER 3 0100000000000006 "t50" "INV_MISC_QUESTIONMARK"
+#showtooltip
+/cast [talent:7/2] Wellspring
+/cast [talent:7/3] Ascendance
+END
+VER 3 0100000000000003 "UnleashLife" "INV_MISC_QUESTIONMARK"
+#showtooltip 
+/use [@mouseover,help,nodead][help,nodead][@player] Unleash Life
+END

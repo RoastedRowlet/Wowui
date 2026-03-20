@@ -1,0 +1,504 @@
+VER 3 0000000000000052 " " "1387609"
+#169
+END
+VER 3 0000000000000027 " moons or Foe" "134400"
+#001
+#showtooltip
+/use [known:New Moon]New Moon;[known:Fury of Elune]Fury of Elune
+END
+VER 3 000000000000000C "aap" "134400"
+#002
+#showtooltip
+/click ExtraActionButton1
+END
+VER 3 0000000000000011 "AAP_MACRO" "134400"
+#003
+#showtooltip
+/script print('no button yet')
+END
+VER 3 000000000000005B "adaptiveSwarm" "134400"
+#004
+#showtooltip Adaptive Swarm
+/cast [@mouseover,help,nodead][exists,nodead] Adaptive Swarm
+END
+VER 3 0000000000000005 "Affinity Spells" "134400"
+#005
+#showtooltip
+/use [spec:1,talent:3/1][spec:3/4,talent:3/2]Maim;[spec:1/2,talent:3/2][spec:4,talent:3/3]Incapacitating Roar;[spec:1/2/3,talent:3/3]Ursol's Vortex;[spec:2/3/4,talent:3/1]Typhoon;
+END
+VER 3 0000000000000022 "APR_MACRO" "134400"
+#006
+#showtooltip
+/script print('no button yet')
+END
+VER 3 0000000000000053 "atotemEWT" "134400"
+#091
+#showtooltip
+/use Earthen Wall Totem
+/use Ancestral Protection Totem
+END
+VER 3 0000000000000018 "AutoMP" "134400"
+#007
+#showtooltip
+/cast Conjured Mana Bun
+/cast item:173859
+END
+VER 3 0000000000000043 "AutoPotion" "134400"
+#008
+#showtooltip 
+/castsequence reset=combat/90 Renewal
+END
+VER 3 000000000000000D "bal tier 7" "134400"
+#009
+#showtooltip
+/cast [talent:7/2] fury of elune
+/cast [talent:7/3] New Moon
+END
+VER 3 000000000000000A "bark" "134400"
+#010
+#showtooltip
+/cast [@mouseover] Ironbark
+END
+VER 3 0000000000000037 "bot trink mo" "136160"
+#011
+#showtooltip 14
+/use [@mouseover,help,nodead][exists,nodead] 14
+END
+VER 3 0000000000000015 "BotTrink" "136160"
+#012
+#showtooltip
+/use [@mouseover] 14
+END
+VER 3 000000000000000B "brez" "134400"
+#013
+#showtooltip rebirth
+/cancelform [form:1]
+/cast Nature's Swiftness
+/cast [@mouseover][] Rebirth
+END
+VER 3 0000000000000068 "BS macro" "134400"
+END
+VER 3 000000000000002B "Cancel Starlord" "134400"
+#014
+#showtooltip starlord
+/cancelaura starlord
+END
+VER 3 000000000000001E "Cat form kick" "134400"
+#015
+#showtooltip Skull Bash
+/cast [nostance:2] cat form
+/cast Skull Bash
+END
+VER 3 000000000000003E "Chain heal MO" "134400"
+#016
+#showtooltip
+/cast [@mouseover,help,nodead] [] Chain Heal
+END
+VER 3 000000000000005C "Convoke NS" "134400"
+#061
+#showtooltip Convoke the Spirits
+/cast [nochanneling] Nature's Swiftness
+/use [nochanneling] Potion of Recklessness
+/cast Incarnation: Tree of Life
+/cast Convoke the Spirits
+/cqs
+END
+VER 3 0000000000000021 "Convoke or tree" "134400"
+#017
+#showtooltip
+/cast incarnation: tree of life
+/cast Convoke the spirits
+END
+VER 3 0000000000000010 "CW" "134400"
+#018
+#showtooltip cenarion ward
+/cast [@mouseover] Cenarion ward
+END
+VER 3 000000000000005F "DrinkBot" "1387609"
+#019
+#showtooltip item:226811
+/use [btn:1] item:226811
+/cast [btn:2] Conjure Refreshment
+END
+VER 3 0000000000000058 "DrinkBot" "134400"
+#169
+#showtooltip item:0
+/use [btn:1] item:0
+/cast [btn:2] Conjure Refreshment
+END
+VER 3 000000000000005A "DrinkBot" "INV_MISC_QUESTIONMARK"
+#showtooltip item:222744
+/use [btn:1] item:222744
+/cast [btn:2] Conjure Refreshment
+END
+VER 3 0000000000000050 "Earth Shield" "134400"
+#020
+#showtooltip
+/cast [@mouseover] Earth Shield
+END
+VER 3 000000000000005D "Ejection" "458230"
+#170
+#showtooltip
+/run EjectPassengerFromSeat(1)
+/run EjectPassengerFromSeat(2)
+END
+VER 3 0000000000000031 "EngiRez" "134400"
+#021
+#showtooltip
+/use [@mouseover,help,dead][help,dead][] Complicated Cuffs
+END
+VER 3 000000000000000F "Flourish Vigil" "538743"
+#022
+#showtooltip
+/use 13
+/use Fleeting Tempered Potion
+/use Flourish
+/use Nature's Vigil
+END
+VER 3 000000000000001D "focus skullbash" "134400"
+#024
+#showtooltip Skull Bash
+/cast [nostance:2] cat form
+/cast [@focus, exists, harm] Skull Bash
+END
+VER 3 000000000000003C "Focus Target" "132177"
+#023
+#showtooltip
+/focus target
+END
+VER 3 0000000000000033 "GGs" "134400"
+#025
+#showtooltip
+/cast [@mouseover] Grove Guardians
+END
+VER 3 000000000000001C "halondrus" "134400"
+#026
+#showtooltip
+/wm [@cursor] 1
+/click ExtraActionButton1
+END
+VER 3 000000000000000E "HAMHealthPot" "134400"
+#027
+#showtooltip 
+/castsequence reset=combat Potion of Withering Dreams, healthstone
+END
+VER 3 000000000000003B "hotw pot" "134400"
+#028
+#showtooltip
+/use Heart of the Wild
+/use Elemental Potion of Ultimate Power
+END
+VER 3 0000000000000009 "innervate" "134400"
+#029
+#showtooltip
+/cast [@player] Innervate
+END
+VER 3 000000000000002C "Innervate Boomy" "134400"
+#030
+#showtooltip
+/cast [@mouseover] Innervate
+END
+VER 3 0000000000000026 "Innervate me" "134400"
+#031
+#showtooltip
+/w Azalune-Area52 Innervate
+END
+VER 3 000000000000002F "Key Sales" "134400"
+#032
+#showtooltip
+/4 [WTS} M+ 11-20 Keys. Rank 1 Title group PST for details
+END
+VER 3 0000000000000048 "Leap of Faith" "463835"
+#033
+#showtooltip
+/cast [@mouseover] Leap of faith
+END
+VER 3 0000000000000049 "levitate" "135928"
+#034
+#showtooltip
+/cast [@mouseover,help,nodead] [] Levitate
+END
+VER 3 0000000000000002 "lifebloom" "134400"
+#035
+#showtooltip
+/cast [@mouseover] Lifebloom
+END
+VER 3 0000000000000036 "LIQUID MACRO" "134400"
+#036
+#showtooltip
+/run WeakAuras.ScanEvents("LIQUID_PRIVATE_AURA_MACRO", true)
+/pat Patymac
+END
+VER 3 0000000000000017 "mana food" "134400"
+#037
+#showtooltip
+/use Conjured Mana Bun
+/use Ethereal Pomegranate
+/use Bone Apple Tea
+END
+VER 3 0000000000000028 "MARKERS" "1052602"
+#038
+#showtooltip
+/click ActionButton8 Button5
+END
+VER 3 000000000000001A "meld drink" "132089"
+#039
+#showtooltip
+#Showtooltip Conjured Mana Bun
+/cast Shadowmeld
+/use Conjured Mana Bun
+END
+VER 3 000000000000004C "Mo pennance" "237545"
+#040
+#showtooltip
+/cast [@mouseover,exists,nochanneling] Penance
+END
+VER 3 0000000000000029 "Moonfire HOTW" "134400"
+#041
+#showtooltip
+/use moonfire
+/use Heart of the Wild
+END
+VER 3 0000000000000030 "Mount/DR" "4922469"
+#042
+#showtooltip
+/cast Winding Slitherdrake
+/cast [flyable] G.M.O.D.; G.M.O.D
+END
+VER 3 000000000000002E "Mouseover Dispel" "134400"
+#043
+#showtooltip
+/use [@mouseover,help,nodead] Nature's Cure
+/use [@mouseover,help,nodead] Remove Corruption
+END
+VER 3 000000000000001B "mouseover focus" "134400"
+#044
+#showtooltip
+/focus [@mouseover,exists,nodead] []
+END
+VER 3 000000000000001F "Nourish" "134400"
+#045
+#showtooltip
+/cast [@mouseover] Nourish
+END
+VER 3 0000000000000061 "NS Ext Macro" "135966"
+/run NSAPI:ExternalRequest();
+END
+VER 3 0000000000000062 "NS Innervate" "136048"
+/run NSAPI:InnervateRequest();
+END
+VER 3 0000000000000060 "NS PA Macro" "132288"
+/run NSAPI:PrivateAura();
+END
+VER 3 0000000000000067 "NS RG" "134400"
+#showtooltip regrowth
+/cast Nature's Swiftness
+/cast Regrowth
+END
+VER 3 000000000000004B "pain sup" "135936"
+#046
+#showtooltip
+/cast [@mouseover] Pain Suppression
+END
+VER 3 0000000000000035 "ping" "134400"
+#047
+#showtooltip
+/ping
+END
+VER 3 0000000000000038 "Ping Hibernate" "134400"
+#048
+#showtooltip Hibernate
+/ping [@target] On My Way
+/use Hibernate
+END
+VER 3 0000000000000063 "PING PARTY LUST" "134400"
+/ping [@mouseover] 
+/p LUST!
+END
+VER 3 0000000000000032 "potion" "134400"
+#049
+#showtooltip Elemental Potion of Ultimate Power
+/use Elemental Potion of Ultimate Power
+END
+VER 3 000000000000004A "Power Infusion" "135939"
+#050
+#showtooltip
+/cast [@mouseover] Power Infusion
+END
+VER 3 000000000000004F "primwave" "134400"
+#051
+#showtooltip
+/cast [@mouseover] Primordial Wave
+/cast Wellspring
+END
+VER 3 0000000000000064 "pull 3" "132120"
+/pull 3
+END
+VER 3 0000000000000039 "Pull 3" "409599"
+#052
+#showtooltip
+/pull 3
+END
+VER 3 000000000000003A "Pull3" "132103"
+#053
+#showtooltip
+/pull 3
+END
+VER 3 0000000000000047 "PW Radiance" "1386546"
+#054
+#showtooltip Power Word: Radiance
+/cast [@mouseover,help,nodead] [] Power Word: Radiance
+END
+VER 3 0000000000000041 "PW Shield" "135940"
+#055
+#showtooltip
+/cast [@mouseover,nochanneling] Power Word: Shield
+END
+VER 3 0000000000000019 "Racial" "132089"
+#056
+#showtooltip
+#Showtooltip
+/cast Shadowmeld
+/cast War Stomp
+END
+VER 3 000000000000004E "Rapture" "237548"
+#057
+#showtooltip
+/cast [@mouseover] Rapture
+END
+VER 3 0000000000000012 "readycheck" "135769"
+#058
+#showtooltip
+/readycheck
+END
+VER 3 0000000000000034 "Remove trees" "132089"
+#059
+#showtooltip
+/click t1
+/click t2
+/click t3
+/click t4
+/cast shadowmeld
+END
+VER 3 0000000000000040 "Renewing MO" "134400"
+#060
+#showtooltip
+/cast [@mouseover] Renewing Mist
+END
+VER 3 0000000000000008 "resto row 7" "134400"
+#151
+#showtooltip
+/cast [talent:7/1] Tiger dash
+/cast [talent:7/2] Renewal
+/cast [talent:7/3] Flourish
+END
+VER 3 0000000000000044 "Reversion" "134400"
+#152
+#showtooltip
+/cast [@mouseover] Reversion
+END
+VER 3 000000000000003D "Riptide mo" "134400"
+#153
+#showtooltip
+/cast [@mouseover] Riptide
+END
+VER 3 0000000000000065 "secrets" "134400"
+/way #2472 36.7 58.0 1PD
+/way #2371 42.2 20.9 2PD
+/way #2472 38.2 45.6 3PD
+/way #2472 37.3 25.7 4
+/way #2472 41.6 39.8 5
+/way #2371 49.6 26.7 6PD
+/way #2371 72.1 29.4 7PD
+/way #2472 46.3 18.6 8
+/way #2472 58.4 91.5 9
+/way #2371 48.9 57.1 10
+END
+VER 3 0000000000000045 "spiritbloom" "134400"
+#154
+#showtooltip
+/cast [@mouseover] Spiritbloom(Green)
+END
+VER 3 000000000000002D "SS Vigil" "134400"
+#155
+#showtooltip
+/cast [nochanneling] Starsurge
+END
+VER 3 0000000000000016 "starfall no bear" "236168"
+#showtooltip starfall
+/cancelform [form:1]
+/cast starfall
+END
+VER 3 0000000000000003 "swiftmend" "134400"
+#181
+#showtooltip Swiftmend
+/cast Nature's Vigil
+/cast [@mouseover,help,nodead] Swiftmend
+END
+VER 3 0000000000000007 "talent row 4" "134400"
+#158
+#showtooltip
+/cast [talent:4/1] mighty bash
+/cast [talent:4/2] mass entanglement
+/cast [talent:4/3] Heart of the wild
+END
+VER 3 000000000000005E "Target Focus" "4640477"
+#171
+#showtooltip
+/target focus
+END
+VER 3 0000000000000014 "Thorns" "134400"
+#159
+#showtooltip
+/cast [@mouseover] Thorns
+END
+VER 3 0000000000000046 "Time dilation" "134400"
+#160
+#showtooltip
+/cast [@mouseover] Time Dilation
+END
+VER 3 0000000000000024 "Top Trink mouseo" "5948041"
+#161
+#showtooltip 13
+/use [@mouseover,help,nodead][exists,nodead] 13
+END
+VER 3 0000000000000013 "topTrink" "5948041"
+#162
+#showtooltip 13
+/use 13
+/use [combat] 16
+END
+VER 3 0000000000000051 "Unleash Life" "134400"
+#163
+#showtooltip
+/cast [@mouseover] Unleash Life
+END
+VER 3 0000000000000066 "Upgrade wraps" "134400"
+/run GenericTraitUI_LoadUI()GenericTraitFrame:SetSystemID(29)GenericTraitFrame:SetTreeID(1115)ToggleFrame(GenericTraitFrame)
+END
+VER 3 000000000000003F "Vivify MO" "134400"
+#164
+#showtooltip
+/cast [@mouseover] Vivify
+END
+VER 3 0000000000000023 "Vrotex mass" "134400"
+#165
+#showtooltip
+/use [known:ursol's vortex]ursol's vortex;[known:mass entanglement]mass entanglement
+END
+VER 3 0000000000000006 "Wild Charge" "134400"
+#166
+#showtooltip Wild Charge
+/cast  [@mouseover,exists,nodead] [] Wild Charge
+END
+VER 3 0000000000000004 "wild growth" "134400"
+#167
+#showtooltip wild growth
+/use Ethereal Augment Rune
+/cast [@mouseover,help,nodead] [] Wild growth
+END
+VER 3 0000000000000025 "WM Blue" "135989"
+#168
+#showtooltip
+/wm [@cursor] 1
+END

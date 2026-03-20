@@ -1,0 +1,1210 @@
+-- ===================================================================
+-- ArcUI_DB.lua
+-- Database structure with support for multiple bar slots, resource bars,
+-- and cooldown bars (charge-based ability tracking)
+-- v2.8.0: Added ColorCurve threshold support for duration bars
+-- ===================================================================
+
+local ADDON, ns = ...
+ns.API = ns.API or {}  -- Initialize API table
+
+-- ===================================================================
+-- DEFAULT THRESHOLD PRESETS
+-- ===================================================================
+local DEFAULT_THRESHOLDS = {
+  simple = {
+    { enabled = true, minValue = 0, maxValue = 100, color = {r=0, g=0.8, b=1, a=1} }
+  },
+  threshold = {
+    { enabled = true, minValue = 0,  maxValue = 100, color = {r=1, g=0, b=0, a=1} },
+    { enabled = true, minValue = 50, maxValue = 100, color = {r=1, g=1, b=0, a=1} },
+    { enabled = true, minValue = 80, maxValue = 100, color = {r=0, g=1, b=0, a=1} },
+    { enabled = false, minValue = 50, color = {r=1, g=0.5, b=0, a=1} },
+    { enabled = false, minValue = 70, color = {r=0.5, g=0, b=1, a=1} },
+    { enabled = false, minValue = 90, color = {r=1, g=0, b=1, a=1} }
+  }
+}
+
+ns.DB_DEFAULTS = {
+  global = {
+    profileSnapshots = {},
+    migrationWarningSeen = false,
+    minimap = {
+      hide = false,
+      minimapPos = 220,
+      radius = 80
+    },
+    menuBackgroundAlpha = 1.0,
+    -- Options panel saved position/size
+    optionsPanelPos = nil,   -- { point, x, y }
+    optionsPanelSize = nil,  -- { width, height }
+    -- CDM Master Kill Switch - stored in global so it's checked before CDM modules init
+    cdmStylingEnabled = true,
+    -- Pending CDM profiles from master import (for classes not yet logged)
+    masterCDMPending = nil,
+    -- Skin preset library (shared across all characters)
+    skinLibrary = {},
+  },
+  
+  -- Profile storage (shared across characters using same profile)
+  profile = {
+    -- CDM Enhancement settings (per-profile for cross-character use)
+    cdmEnhance = {
+      enabled = true,
+      enableAuraCustomization = true,
+      enableCooldownCustomization = true,
+      unlocked = false,
+      textDragMode = false,
+      iconSettings = {},        -- [cooldownID] = { per-icon settings }
+      globalAuraSettings = {},  -- Default settings for all aura icons
+      globalCooldownSettings = {}, -- Default settings for all cooldown icons
+      globalApplyScale = false,
+      globalApplyHideShadow = false,
+      groupSettings = {         -- Group-level settings per viewer type
+        aura = { padding = nil, scale = nil },
+        cooldown = { padding = nil, scale = nil },
+        utility = { padding = nil, scale = nil },
+      },
+    },
+    -- CDM Groups settings (per-profile for cross-character use)
+    cdmGroups = {
+      specData = {},        -- [specIndex] = { groups = {}, savedPositions = {}, freeIcons = {} }
+      specInheritedFrom = {},
+      lastActiveSpec = nil,
+    },
+  },
+  
+  char = {
+    -- NOTE: cdmGroups is NOT in defaults anymore!
+    -- We manage cdmGroups storage directly in ArcUIDB.char[charKey].cdmGroups
+    -- to bypass AceDB's removeDefaults which strips our nested specData.
+    -- See ArcUI_CDM_Shared.lua GetCDMGroupsDB() for the storage implementation.
+    
+    selectedBar = 1,
+    selectedResourceBar = 1,
+    selectedCooldownBar = 1,
+    
+    -- Array of buff/debuff bar configurations (up to 30 bars)
+    bars = {
+      [1] = {
+        tracking = {
+          enabled = false,
+          trackType = "buff",
+          spellID = 0,
+          buffName = "",
+          iconTextureID = 0,
+          cooldownID = 0,
+          alternateCooldownIDs = {},  -- Additional cooldownIDs for cross-spec support
+          excludedCooldownIDs = {},   -- CooldownIDs manually removed; never auto-discovered
+          slotNumber = 0,
+          maxStacks = 10,
+          auraInstanceID = 0,
+          useBaseSpell = false,  -- Ignore CDM override spell, use base spell for icon
+
+          sourceType = "icon",
+          useDurationBar = false,
+          dynamicMaxDuration = false,
+          maxDuration = 30,
+        },
+        display = {
+          enabled = true,
+          displayMode = "single",
+          width = 200,
+          height = 20,
+          barScale = 1.0,
+          opacity = 1.0,
+          
+          displayType = "bar",
+          iconSize = 48,
+          iconShowTexture = true,
+          iconShowStacks = true,
+          iconStackAnchor = "TOPRIGHT",
+          iconStackPosition = nil,
+          iconStackFont = "2002 Bold",
+          iconStackFontSize = 16,
+          iconStackColor = {r=1, g=1, b=1, a=1},
+          iconStackOutline = "THICKOUTLINE",
+          iconStackShadow = false,
+          iconShowDuration = true,
+          iconDurationFont = "2002 Bold",
+          iconDurationFontSize = 14,
+          iconDurationColor = {r=1, g=1, b=1, a=1},
+          iconDurationOutline = "THICKOUTLINE",
+          iconDurationShadow = false,
+          iconShowBorder = true,
+          iconBorderColor = {r=0, g=0, b=0, a=1},
+          iconMultiMode = false,
+          iconMultiFreeMode = false,
+          iconMultiLockPositions = false,
+          iconMultiShowDesatBg = true,
+          iconMultiSpacing = 4,
+          iconMultiDirection = "RIGHT",
+          iconMultiPositions = {},
+          iconMultiShowDurationOn = 1,
+          iconMultiDurationAnchor = "BOTTOM",
+          
+          -- ═══════════════════════════════════════════════════════════════
+          -- COOLDOWN DISPLAY OPTIONS
+          -- ═══════════════════════════════════════════════════════════════
+          -- Cooldown Swipe (COOLDOWNS ONLY)
+          iconShowCooldownSwipe = true,
+          iconCooldownReverse = false,
+          iconCooldownDrawEdge = true,
+          iconCooldownDrawBling = true,
+          
+          -- Desaturation options
+          iconDesaturateOnCooldown = true,
+          iconDesaturateWhenInactive = false,
+          
+          -- Icon Zoom (crop edges)
+          iconZoom = 0,
+          
+          texture = "Blizzard",
+          rotateTexture = false,
+          fillTextureScale = 1.0,
+          barOrientation = "horizontal",  -- "horizontal" or "vertical"
+          barReverseFill = false,         -- Reverse fill direction (right-to-left / top-to-bottom)
+          useGradient = false,
+          gradientSecondColor = {r=0, g=0, b=0, a=0.5},  -- Second color for gradient (darker by default)
+          gradientDirection = "VERTICAL",  -- "VERTICAL" or "HORIZONTAL"
+          gradientIntensity = 0.5,  -- How much the second color affects the gradient (0-1)
+          barColor = {r=0, g=0.5, b=1, a=1},
+          thresholdMode = "simple",
+          fragmentedSpacing = 2,
+          fragmentedColors = {},
+          fragmentedChargingColor = {r=0.4, g=0.4, b=0.4, a=1},
+          fragmentedShowSegmentText = false,
+          fragmentedTextSize = 10,
+          -- Icons mode settings (for secondary resources like Runes/Essence)
+          iconsMode = "row",  -- "row" or "freeform"
+          iconsSize = 32,
+          iconsSpacing = 4,
+          iconsShape = "square",  -- "square" or "circle"
+          iconsPositions = {},  -- saved positions for freeform mode
+          iconsShowCooldownText = true,
+          iconsCooldownTextSize = 12,
+          enableMaxColor = false,
+          maxColor = {r=0, g=1, b=0, a=1},
+          foldedColor1 = {r=0, g=0.5, b=1, a=1},
+          foldedColor2 = {r=0, g=1, b=0, a=1},
+          enableSmoothing = false,
+          showBackground = true,
+          backgroundColor = {r=0.2, g=0.2, b=0.2, a=0.8},
+          showBorder = true,
+          borderStyle = "Drawn",
+          drawnBorderThickness = 2,
+          borderColor = {r=0, g=0, b=0, a=1},
+          showTickMarks = true,
+          tickMode = "all",
+          tickThickness = 1,
+          tickHeightPercent = 100,
+          tickHeightAnchor = "center",
+          tickThicknessAnchor = "center",
+          tickColor = {r=0, g=0, b=0, a=1},
+          showText = true,
+          font = "2002 Bold",
+          fontSize = 24,
+          textColor = {r=1, g=1, b=1, a=1},
+          textOutline = "THICKOUTLINE",
+          textShadow = false,
+          textAnchor = "OUTERTOP",
+          textAnchorOffsetX = 0,
+          textAnchorOffsetY = 0,
+          showDuration = false,
+          durationFont = "2002 Bold",
+          durationFontSize = 18,
+          durationColor = {r=1, g=1, b=1, a=1},
+          durationOutline = "THICKOUTLINE",
+          durationShadow = false,
+          durationAnchor = "CENTER",
+          durationAnchorOffsetX = 0,
+          durationAnchorOffsetY = 0,
+          durationDecimals = 1,
+          durationShowWhenReady = false,
+          
+          -- ═══════════════════════════════════════════════════════════════
+          -- DURATION BAR COLORCURVE THRESHOLD SETTINGS (v2.8.0)
+          -- Uses WoW 12.0 ColorCurve API for secret-safe color transitions
+          -- ═══════════════════════════════════════════════════════════════
+          durationColorCurveEnabled = false,       -- Enable ColorCurve thresholds
+          durationColorCurveMode = "step",         -- "step" (threshold) or "gradient"
+          durationColorCurveThreshold = 0.30,      -- Percentage (0-1) for threshold
+          durationColorCurveLowColor = {r=1, g=0, b=0, a=1},   -- Color below threshold (red)
+          durationColorCurveHighColor = {r=0, g=1, b=0, a=1},  -- Color at/above threshold (green)
+          durationColorCurveMidColor = {r=1, g=1, b=0, a=1},   -- Mid color for gradient mode (yellow)
+          durationBarFillMode = "drain",   -- "drain" (shrinks as time passes) or "fill" (grows as time passes)
+          
+          -- Multi-threshold duration bar settings (v2 migration adds these)
+          -- Must be in defaults so compaction can strip them when unchanged
+          durationThreshold2Enabled = false,
+          durationThreshold2Value = 75,
+          durationThreshold2Color = {r=0.8, g=0.8, b=0, a=1},
+          durationThreshold3Enabled = false,
+          durationThreshold3Value = 50,
+          durationThreshold3Color = {r=1, g=0.5, b=0, a=1},
+          durationThreshold4Enabled = false,
+          durationThreshold4Value = 25,
+          durationThreshold4Color = {r=1, g=0.3, b=0, a=1},
+          durationThreshold5Enabled = false,
+          durationThreshold5Value = 10,
+          durationThreshold5Color = {r=1, g=0, b=0, a=1},
+          durationThresholdAsSeconds = false,
+          durationThresholdMaxDuration = 30,
+          
+          showName = false,
+          nameFont = "2002 Bold",
+          nameFontSize = 14,
+          nameColor = {r=1, g=1, b=1, a=1},
+          nameOutline = "THICKOUTLINE",
+          nameShadow = false,
+          nameAnchor = "CENTER",
+          nameAnchorOffsetX = 0,
+          nameAnchorOffsetY = 0,
+          showBarIcon = false,
+          barIconSize = 32,
+          iconOverride = nil,    -- Spell ID or texture ID to override the bar icon
+          barIconAnchor = "LEFT",
+          barIconAnchorOffsetX = 0,
+          barIconAnchorOffsetY = 0,
+          barIconShowBorder = true,
+          barIconBorderColor = {r=0, g=0, b=0, a=1},
+          barMovable = true,
+          textMovable = true,
+          textLocked = true,
+          barPosition = {
+            point = "CENTER",
+            relPoint = "CENTER",
+            x = 0,
+            y = 200
+          },
+          textPosition = {
+            point = "CENTER",
+            relPoint = "CENTER",
+            x = 0,
+            y = 230
+          },
+          -- Frame strata settings
+          barFrameStrata = "MEDIUM",
+          barFrameLevel = 10,
+        },
+        behavior = {
+          hideBuffIcon = false,
+          hideWhenZeroStacks = false,
+          hideWhenInactive = false,
+          hideOutOfCombat = false,
+          showOnSpec = 0,
+          showOnSpecs = {}
+        },
+        thresholds = {
+          [1] = { enabled = true, minValue = 0, maxValue = 10, color = {r=0, g=0.5, b=1, a=1} },
+          [2] = { enabled = false, minValue = 5, maxValue = 10, color = {r=1, g=1, b=0, a=1} },
+          [3] = { enabled = false, minValue = 8, maxValue = 10, color = {r=0, g=1, b=0, a=1} }
+        },
+        stackColors = {},
+        colorRanges = {
+          [1] = { from = 1, to = 4, color = {r=0, g=0.5, b=1, a=1} },
+          [2] = { enabled = false, from = 5, to = 8, color = {r=1, g=1, b=0, a=1} },
+          [3] = { enabled = false, from = 9, to = 12, color = {r=0, g=1, b=0, a=1} }
+        },
+        
+        -- ═══════════════════════════════════════════════════════════════
+        -- CONDITIONAL EVENTS
+        -- ═══════════════════════════════════════════════════════════════
+        events = {},
+      },
+    },
+    
+    -- ===============================================================
+    -- RESOURCE BARS (Primary AND Secondary resources with threshold color layers)
+    -- v2.6.0: Added resourceCategory, secondaryType for secondary resource support
+    -- ===============================================================
+    resourceBars = {
+      [1] = {
+        tracking = {
+          enabled = false,
+          resourceCategory = "primary",  -- "primary" or "secondary"
+          powerType = 0,                 -- For primary resources (Enum.PowerType)
+          secondaryType = nil,           -- "comboPoints", "holyPower", "chi", "runes", "soulShards", "essence", "arcaneCharges", "stagger", "soulFragments", "soulFragmentsDevourer", "maelstromWeapon", "mana"
+          powerName = "",
+          maxValue = 100,
+          overrideMax = false,
+          -- Rune-specific settings
+          showRuneTimer = false,         -- Show time until next rune ready
+        },
+        thresholds = {
+          { enabled = true, minValue = 0, maxValue = 100, color = {r=0, g=0.8, b=1, a=1} },
+          { enabled = false, minValue = 50, maxValue = 100, color = {r=1, g=1, b=0, a=1} },
+          { enabled = false, minValue = 80, maxValue = 100, color = {r=0, g=1, b=0, a=1} }
+        },
+        abilityThresholds = {},
+        display = {
+          enabled = true,
+          thresholdMode = "simple",
+          enableMaxColor = false,
+          maxColor = {r=0, g=1, b=0, a=1},
+          foldedColor1 = {r=0, g=0.5, b=1, a=1},
+          foldedColor2 = {r=0, g=1, b=0, a=1},
+          enableSmoothing = false,
+          width = 250,
+          height = 25,
+          barScale = 1.0,
+          opacity = 1.0,
+          
+          texture = "Blizzard",
+          rotateTexture = false,
+          fillTextureScale = 1.0,
+          barOrientation = "horizontal",  -- "horizontal" or "vertical"
+          barReverseFill = false,         -- Reverse fill direction
+          showBackground = true,
+          backgroundColor = {r=0.1, g=0.1, b=0.1, a=0.9},
+          showBorder = true,
+          drawnBorderThickness = 2,
+          borderColor = {r=0, g=0, b=0, a=1},
+          showTickMarks = false,
+          tickMode = "all",
+          tickThickness = 2,
+          tickHeightPercent = 100,
+          tickHeightAnchor = "center",
+          tickThicknessAnchor = "center",
+          tickColor = {r=1, g=1, b=1, a=0.8},
+          showText = true,
+          textFormat = "value",  -- "value" or "percent"
+          font = "Friz Quadrata TT",
+          fontSize = 20,
+          textColor = {r=1, g=1, b=1, a=1},
+          textAnchor = "OUTERTOP",
+          textAnchorOffsetX = 0,
+          textAnchorOffsetY = 0,
+          barMovable = true,
+          textMovable = true,
+          textLocked = true,
+          barPosition = {
+            point = "CENTER",
+            relPoint = "CENTER",
+            x = 0,
+            y = -100
+          },
+          textPosition = {
+            point = "CENTER",
+            relPoint = "CENTER",
+            x = 0,
+            y = -70
+          },
+          -- Frame strata settings
+          barFrameStrata = "MEDIUM",
+          barFrameLevel = 10,
+        },
+        behavior = {
+          hideOutOfCombat = false,
+          hideWhenFull = false,
+          hideWhenEmpty = false,
+          hideBlizzardFrame = false,  -- Hide corresponding Blizzard resource frame
+          showOnSpec = 0,
+          showOnSpecs = {},
+          talentConditions = nil,
+          talentMatchMode = nil,
+        },
+        prediction = {
+          spells = {},
+        },
+      }
+    },
+    
+    -- ===============================================================
+    -- COOLDOWN BARS (Charge-based ability tracking)
+    -- Structure mirrors buff bars for Appearance panel compatibility
+    -- ===============================================================
+    cooldownBars = {
+      [1] = {
+        tracking = {
+          enabled = false,
+          cooldownID = 0,
+          spellID = 0,
+          spellName = "",
+          buffName = "",  -- Alias for spellName (display compatibility)
+          iconTextureID = 0,
+          maxStacks = 3,  -- Max charges
+          trackType = "charge",
+        },
+        display = {
+          enabled = true,
+          displayType = "bar",  -- "bar" or "icon"
+          
+          -- Size
+          width = 200,
+          height = 20,
+          barScale = 1.0,
+          opacity = 1.0,
+          
+          
+          -- Icon Mode Settings
+          iconSize = 48,
+          iconShowTexture = true,
+          iconShowStacks = true,
+          iconStackAnchor = "TOPRIGHT",
+          iconStackPosition = nil,
+          iconStackFont = "2002 Bold",
+          iconStackFontSize = 16,
+          iconStackColor = {r=1, g=1, b=1, a=1},
+          iconStackOutline = "THICKOUTLINE",
+          iconStackShadow = false,
+          iconShowBorder = true,
+          iconBorderColor = {r=0, g=0, b=0, a=1},
+          
+          -- Texture and fill
+          texture = "Blizzard",
+          rotateTexture = false,
+          fillTextureScale = 1.0,
+          barOrientation = "horizontal",  -- "horizontal" or "vertical"
+          barReverseFill = false,         -- Reverse fill direction
+          
+          -- Colors
+          useGradient = false,
+          barColor = {r=0.2, g=0.8, b=1, a=1},
+          thresholdMode = "simple",
+          enableMaxColor = false,
+          maxColor = {r=0, g=1, b=0, a=1},
+          
+          -- Background
+          showBackground = true,
+          backgroundColor = {r=0.2, g=0.2, b=0.2, a=0.8},
+          
+          -- Border
+          showBorder = true,
+          borderStyle = "Drawn",
+          drawnBorderThickness = 2,
+          borderColor = {r=0, g=0, b=0, a=1},
+          
+          -- Tick marks
+          showTickMarks = true,
+          tickMode = "all",
+          tickThickness = 1,
+          tickHeightPercent = 100,
+          tickHeightAnchor = "center",
+          tickThicknessAnchor = "center",
+          tickColor = {r=0, g=0, b=0, a=1},
+          
+          -- Stack/Charge Text
+          showText = true,
+          font = "2002 Bold",
+          fontSize = 18,
+          textColor = {r=1, g=1, b=1, a=1},
+          textOutline = "THICKOUTLINE",
+          textShadow = false,
+          textAnchor = "CENTER",
+          textAnchorOffsetX = 0,
+          textAnchorOffsetY = 0,
+          
+          -- Bar Icon
+          showBarIcon = true,
+          barIconSize = 20,
+          barIconAnchor = "LEFT",
+          barIconAnchorOffsetX = 0,
+          barIconAnchorOffsetY = 0,
+          barIconShowBorder = true,
+          barIconBorderColor = {r=0, g=0, b=0, a=1},
+          
+          -- Position
+          barMovable = true,
+          textMovable = true,
+          textLocked = true,
+          barPosition = {
+            point = "CENTER",
+            relPoint = "CENTER",
+            x = 0,
+            y = -200
+          },
+          textPosition = {
+            point = "CENTER",
+            relPoint = "CENTER",
+            x = 0,
+            y = -170
+          },
+          iconPosition = {
+            point = "CENTER",
+            relPoint = "CENTER",
+            x = 0,
+            y = -200
+          },
+          -- Frame strata settings
+          barFrameStrata = "MEDIUM",
+          barFrameLevel = 10,
+        },
+        behavior = {
+          hideOutOfCombat = false,
+          hideWhenFull = false,
+          hideWhenZero = false,
+          showOnSpec = 0,
+          showOnSpecs = {},
+          talentConditions = nil,
+          talentMatchMode = nil,
+        },
+        thresholds = {
+          [1] = { enabled = true, minValue = 0, maxValue = 3, color = {r=0.2, g=0.8, b=1, a=1} },
+          [2] = { enabled = false, minValue = 2, maxValue = 3, color = {r=1, g=1, b=0, a=1} },
+          [3] = { enabled = false, minValue = 3, maxValue = 3, color = {r=0, g=1, b=0, a=1} }
+        },
+        stackColors = {},
+        colorRanges = {
+          [1] = { from = 1, to = 1, color = {r=0.2, g=0.8, b=1, a=1} },
+          [2] = { enabled = false, from = 2, to = 2, color = {r=1, g=1, b=0, a=1} },
+          [3] = { enabled = false, from = 3, to = 3, color = {r=0, g=1, b=0, a=1} }
+        }
+      }
+    },
+    
+    -- LEGACY: CDM Enhancement settings were moved to profile storage
+    -- This stub exists only for migration purposes (CDMEnhance.lua migrates to profile)
+    -- DO NOT add new fields here - use profile.cdmEnhance instead
+    cdmEnhance = nil,
+    
+    
+    -- ═══════════════════════════════════════════════════════════════════════════
+    -- COOLDOWN BAR SETUP (ArcUI_CooldownBars.lua active bar tracking)
+    -- Stores which spells have bars created (spellID lists/maps)
+    -- ═══════════════════════════════════════════════════════════════════════════
+    cooldownBarSetup = {
+      activeCooldowns = {},  -- {spellID, spellID, ...} - Duration bars
+      activeCharges = {},    -- {spellID, spellID, ...} - Charge bars  
+      activeResources = {},  -- {[spellID] = true, ...} - Resource bars
+      manualSpells = {},     -- {spellID, ...} - Manually added spells
+      hiddenSpells = {},     -- {[spellID] = true, ...} - Hidden from catalog
+    },
+    
+    configVersion = 1
+  }
+}
+
+-- Store presets for easy access
+ns.ThresholdPresets = DEFAULT_THRESHOLDS
+
+-- ===================================================================
+-- HELPER: Get Bar Config (Buff/Debuff bars)
+-- ===================================================================
+function ns.API.GetBarConfig(barNumber)
+  local db = ns.db and ns.db.char  -- Inline GetDB() to avoid function call overhead
+  if not db or not db.bars then return nil end
+  
+  barNumber = barNumber or db.selectedBar or 1
+  
+  if not db.bars[barNumber] then
+    db.bars[barNumber] = CopyTable(ns.DB_DEFAULTS.char.bars[1])
+    local yOffset = 200 - ((barNumber - 1) * 30)
+    db.bars[barNumber].display.barPosition.y = yOffset
+    db.bars[barNumber].display.textPosition.y = yOffset + 30
+  end
+  
+  local barConfig = db.bars[barNumber]
+  
+  -- FAST PATH: Already migrated = most common case during combat (400+ calls/sec)
+  local CURRENT_MIGRATION_VERSION = 2
+  local migrated = barConfig._migrated
+  if migrated == CURRENT_MIGRATION_VERSION or (type(migrated) == "number" and migrated >= CURRENT_MIGRATION_VERSION) then
+    return barConfig
+  end
+  
+  -- Migration versioning: _migrated was originally a boolean (true).
+  -- Now uses a version number to allow incremental migrations.
+  -- Old _migrated = true is treated as version 1.
+  local currentVersion = 0
+  if migrated == true then
+    currentVersion = 1  -- Old boolean flag = version 1
+  elseif type(migrated) == "number" then
+    currentVersion = migrated
+  end
+  
+  -- ═══════════════════════════════════════════════════════════════════
+  -- VERSION 1 MIGRATIONS (original)
+  -- All use == nil checks so they're idempotent / safe to re-run
+  -- ═══════════════════════════════════════════════════════════════════
+  
+  -- Migration: ensure events table exists
+  if not barConfig.events then
+    barConfig.events = {}
+  end
+  
+  -- Migration: ensure new display options exist
+  local display = barConfig.display
+  if display.iconShowCooldownSwipe == nil then display.iconShowCooldownSwipe = true end
+  if display.iconCooldownReverse == nil then display.iconCooldownReverse = false end
+  if display.iconCooldownDrawEdge == nil then display.iconCooldownDrawEdge = true end
+  if display.iconCooldownDrawBling == nil then display.iconCooldownDrawBling = true end
+  if display.iconDesaturateOnCooldown == nil then display.iconDesaturateOnCooldown = true end
+  if display.iconDesaturateWhenInactive == nil then display.iconDesaturateWhenInactive = false end
+  if display.iconZoom == nil then display.iconZoom = 0 end
+  if display.durationShowWhenReady == nil then display.durationShowWhenReady = false end
+  -- v2.8.0: Migration for ColorCurve duration bar settings (legacy keys)
+  if display.durationColorCurveEnabled == nil then display.durationColorCurveEnabled = false end
+  if display.durationColorCurveMode == nil then display.durationColorCurveMode = "step" end
+  if display.durationColorCurveThreshold == nil then display.durationColorCurveThreshold = 0.30 end
+  if display.durationColorCurveLowColor == nil then display.durationColorCurveLowColor = {r=1, g=0, b=0, a=1} end
+  if display.durationColorCurveHighColor == nil then display.durationColorCurveHighColor = {r=0, g=1, b=0, a=1} end
+  if display.durationColorCurveMidColor == nil then display.durationColorCurveMidColor = {r=1, g=1, b=0, a=1} end
+  if display.durationBarFillMode == nil then display.durationBarFillMode = "drain" end
+  -- Migration: fillDirection -> barOrientation
+  if display.fillDirection and not display.barOrientation then
+    -- Convert old 4-way direction to new orientation system
+    if display.fillDirection == "BOTTOM_TO_TOP" or display.fillDirection == "TOP_TO_BOTTOM" then
+      display.barOrientation = "vertical"
+    else
+      display.barOrientation = "horizontal"
+    end
+    display.fillDirection = nil  -- Remove old setting
+  end
+  if display.barOrientation == nil then display.barOrientation = "horizontal" end
+  if display.barReverseFill == nil then display.barReverseFill = false end
+  if display.rotateTexture == nil then display.rotateTexture = false end
+  if display.showBackground == nil then display.showBackground = true end
+  -- Migration: ensure text anchor defaults exist (prevents free-drag mode for old bars)
+  if display.textAnchor == nil then display.textAnchor = "OUTERTOP" end
+  if display.durationAnchor == nil then display.durationAnchor = "CENTER" end
+  if display.nameAnchor == nil then display.nameAnchor = "CENTER" end
+  if display.barIconAnchor == nil then display.barIconAnchor = "LEFT" end
+  -- Migration: ensure frame strata defaults exist
+  if display.barFrameStrata == nil then display.barFrameStrata = "MEDIUM" end
+  if display.barFrameLevel == nil then display.barFrameLevel = 10 end
+  
+  -- Migration: ensure behavior table exists
+  if not barConfig.behavior then
+    barConfig.behavior = {
+      hideBuffIcon = false,
+      hideWhenZeroStacks = false,
+      hideWhenInactive = false,
+      hideOutOfCombat = false,
+      showOnSpec = 0,
+      showOnSpecs = {}
+    }
+  end
+  
+  -- ═══════════════════════════════════════════════════════════════════
+  -- VERSION 2 MIGRATIONS (conditional color thresholds + spec fix)
+  -- Fixes old bars created before multi-threshold system existed
+  -- ═══════════════════════════════════════════════════════════════════
+  
+  -- Migration: ensure new multi-threshold keys exist
+  -- Old system used: durationColorCurveLowColor/HighColor/MidColor + single threshold
+  -- New system uses: durationThreshold2-5 Enabled/Value/Color
+  if display.durationThreshold2Enabled == nil then
+    -- Check if old-style settings had actual customization we should convert
+    local hadOldSettings = display.durationColorCurveEnabled and display.durationColorCurveThreshold
+    
+    if hadOldSettings then
+      -- Convert old single-threshold to new multi-threshold format
+      -- Old: one threshold at durationColorCurveThreshold % with lowColor below it
+      local oldPct = (display.durationColorCurveThreshold or 0.30) * 100  -- Convert 0-1 to 0-100
+      local oldLowColor = display.durationColorCurveLowColor or {r=1, g=0, b=0, a=1}
+      
+      -- Enable threshold 2 with the old settings
+      display.durationThreshold2Enabled = true
+      display.durationThreshold2Value = oldPct
+      display.durationThreshold2Color = {
+        r = oldLowColor.r, g = oldLowColor.g, b = oldLowColor.b, a = oldLowColor.a or 1
+      }
+    else
+      -- No old settings - just set defaults (disabled)
+      display.durationThreshold2Enabled = false
+      display.durationThreshold2Value = 75
+      display.durationThreshold2Color = {r=0.8, g=0.8, b=0, a=1}
+    end
+  end
+  
+  -- Ensure thresholds 3-5 have defaults
+  if display.durationThreshold3Enabled == nil then display.durationThreshold3Enabled = false end
+  if display.durationThreshold3Value == nil then display.durationThreshold3Value = 50 end
+  if display.durationThreshold3Color == nil then display.durationThreshold3Color = {r=1, g=0.5, b=0, a=1} end
+  if display.durationThreshold4Enabled == nil then display.durationThreshold4Enabled = false end
+  if display.durationThreshold4Value == nil then display.durationThreshold4Value = 25 end
+  if display.durationThreshold4Color == nil then display.durationThreshold4Color = {r=1, g=0.3, b=0, a=1} end
+  if display.durationThreshold5Enabled == nil then display.durationThreshold5Enabled = false end
+  if display.durationThreshold5Value == nil then display.durationThreshold5Value = 10 end
+  if display.durationThreshold5Color == nil then display.durationThreshold5Color = {r=1, g=0, b=0, a=1} end
+  -- Ensure threshold mode settings exist
+  if display.durationThresholdAsSeconds == nil then display.durationThresholdAsSeconds = false end
+  if display.durationThresholdMaxDuration == nil then display.durationThresholdMaxDuration = 30 end
+  
+  -- Migration: convert old showOnSpec (single number) to showOnSpecs (table)
+  -- Old system: showOnSpec = 2 means "only show on spec 2"
+  -- New system: showOnSpecs = {2} means "only show on spec 2"
+  if barConfig.behavior then
+    -- Ensure showOnSpecs table exists
+    if not barConfig.behavior.showOnSpecs then
+      barConfig.behavior.showOnSpecs = {}
+    end
+    -- Convert old single-spec to new multi-spec format
+    local oldSpec = barConfig.behavior.showOnSpec
+    if oldSpec and oldSpec > 0 and #barConfig.behavior.showOnSpecs == 0 then
+      barConfig.behavior.showOnSpecs = { oldSpec }
+    end
+  end
+  
+  -- Migration: convert old showInForms (positive) or hideInForms (negative) → hideWhen keys
+  -- Old positive: showInForms = {cat=true, bear=true} → "show ONLY in cat and bear"
+  -- Old negative: hideInForms = {cat=true} → "hide in cat"
+  -- New unified: hideWhen = {hideInCatForm=true, ...}
+  local FORM_KEY_TO_HIDEWHEN = {
+    caster  = "hideInCasterForm",
+    cat     = "hideInCatForm",
+    bear    = "hideInBearForm",
+    moonkin = "hideInMoonkinForm",
+    travel  = "hideInTravelForm",
+    tree    = "hideInTreeForm",
+    none            = "hideInNoStance",
+    battleStance    = "hideInBattleStance",
+    defensiveStance = "hideInDefensiveStance",
+    shadowform      = "hideInShadowform",
+    stealth         = "hideInStealth",
+  }
+  if barConfig.behavior then
+    -- First: convert old positive showInForms → negative hideInForms
+    if barConfig.behavior.showInForms and type(barConfig.behavior.showInForms) == "table" then
+      local showForms = barConfig.behavior.showInForms
+      local anySelected = false
+      for _, v in pairs(showForms) do
+        if v then anySelected = true; break end
+      end
+      if anySelected then
+        -- Druid form set (the only class that had the old positive system)
+        local allDruidForms = { "caster", "cat", "bear", "moonkin", "travel", "tree" }
+        if not barConfig.behavior.hideInForms then barConfig.behavior.hideInForms = {} end
+        for _, form in ipairs(allDruidForms) do
+          if not showForms[form] then
+            barConfig.behavior.hideInForms[form] = true
+          end
+        end
+        barConfig.behavior.hideInFormsAlpha = barConfig.behavior.hideInFormsAlpha or 0
+      end
+      barConfig.behavior.showInForms = nil
+    end
+    -- Second: convert hideInForms → hideWhen keys
+    if barConfig.behavior.hideInForms and type(barConfig.behavior.hideInForms) == "table" then
+      if not barConfig.behavior.hideWhen or type(barConfig.behavior.hideWhen) ~= "table" then
+        barConfig.behavior.hideWhen = {}
+      end
+      for formKey, enabled in pairs(barConfig.behavior.hideInForms) do
+        if enabled then
+          local hwKey = FORM_KEY_TO_HIDEWHEN[formKey]
+          if hwKey then
+            barConfig.behavior.hideWhen[hwKey] = true
+          end
+        end
+      end
+      -- Migrate alpha
+      if barConfig.behavior.hideInFormsAlpha and barConfig.behavior.hideInFormsAlpha > 0 then
+        barConfig.behavior.hideWhenAlpha = barConfig.behavior.hideInFormsAlpha
+      end
+      barConfig.behavior.hideInForms = nil
+      barConfig.behavior.hideInFormsAlpha = nil
+    end
+  end
+  
+  -- Mark as migrated with version number
+  barConfig._migrated = CURRENT_MIGRATION_VERSION
+  
+  return barConfig
+end
+
+-- ===================================================================
+-- HELPER: Get Resource Bar Config
+-- ===================================================================
+function ns.API.GetResourceBarConfig(barNumber)
+  local db = ns.API.GetDB()
+  if not db then return nil end
+  
+  if not db.resourceBars then
+    db.resourceBars = {}
+  end
+  
+  barNumber = barNumber or db.selectedResourceBar or 1
+  
+  if not db.resourceBars[barNumber] then
+    db.resourceBars[barNumber] = CopyTable(ns.DB_DEFAULTS.char.resourceBars[1])
+    local yOffset = -100 - ((barNumber - 1) * 35)
+    db.resourceBars[barNumber].display.barPosition.y = yOffset
+    db.resourceBars[barNumber].display.textPosition.y = yOffset + 30
+  end
+  
+  -- Migration: ensure new fields exist
+  local tracking = db.resourceBars[barNumber].tracking
+  if not tracking.resourceCategory then
+    tracking.resourceCategory = "primary"
+  end
+  
+  return db.resourceBars[barNumber]
+end
+
+-- ===================================================================
+-- HELPER: Get Cooldown Bar Config
+-- ===================================================================
+function ns.API.GetCooldownBarConfig(barNumber)
+  local db = ns.API.GetDB()
+  if not db then return nil end
+  
+  if not db.cooldownBars then
+    db.cooldownBars = {}
+  end
+  
+  barNumber = barNumber or db.selectedCooldownBar or 1
+  
+  if not db.cooldownBars[barNumber] then
+    db.cooldownBars[barNumber] = CopyTable(ns.DB_DEFAULTS.char.cooldownBars[1])
+    local yOffset = -200 - ((barNumber - 1) * 30)
+    db.cooldownBars[barNumber].display.barPosition.y = yOffset
+    db.cooldownBars[barNumber].display.textPosition.y = yOffset + 30
+    db.cooldownBars[barNumber].display.iconPosition.y = yOffset
+  end
+  
+  return db.cooldownBars[barNumber]
+end
+
+-- ===================================================================
+-- HELPER: Get Selected Bar Number
+-- ===================================================================
+function ns.API.GetSelectedBar()
+  local db = ns.API.GetDB()
+  return db and db.selectedBar or 1
+end
+
+-- ===================================================================
+-- HELPER: Set Selected Bar
+-- ===================================================================
+function ns.API.SetSelectedBar(barNumber)
+  local db = ns.API.GetDB()
+  if db then
+    db.selectedBar = barNumber
+  end
+end
+
+-- ===================================================================
+-- HELPER: Get Selected Resource Bar Number
+-- ===================================================================
+function ns.API.GetSelectedResourceBar()
+  local db = ns.API.GetDB()
+  return db and db.selectedResourceBar or 1
+end
+
+-- ===================================================================
+-- HELPER: Set Selected Resource Bar
+-- ===================================================================
+function ns.API.SetSelectedResourceBar(barNumber)
+  local db = ns.API.GetDB()
+  if db then
+    db.selectedResourceBar = barNumber
+  end
+end
+
+-- ===================================================================
+-- HELPER: Get Selected Cooldown Bar Number
+-- ===================================================================
+function ns.API.GetSelectedCooldownBar()
+  local db = ns.API.GetDB()
+  return db and db.selectedCooldownBar or 1
+end
+
+-- ===================================================================
+-- HELPER: Set Selected Cooldown Bar
+-- ===================================================================
+function ns.API.SetSelectedCooldownBar(barNumber)
+  local db = ns.API.GetDB()
+  if db then
+    db.selectedCooldownBar = barNumber
+  end
+end
+
+-- ===================================================================
+-- HELPER: Get All Active Bars (Buff/Debuff)
+-- ===================================================================
+function ns.API.GetActiveBars()
+  local db = ns.API.GetDB()
+  if not db or not db.bars then return {} end
+  
+  local activeBars = {}
+  for i = 1, 500 do
+    if db.bars[i] and db.bars[i].tracking.enabled then
+      table.insert(activeBars, i)
+    end
+  end
+  
+  return activeBars
+end
+
+-- ===================================================================
+-- HELPER: Get All Active Resource Bars
+-- ===================================================================
+function ns.API.GetActiveResourceBars()
+  local db = ns.API.GetDB()
+  if not db or not db.resourceBars then return {} end
+  
+  local activeBars = {}
+  for i = 1, 500 do
+    if db.resourceBars[i] and db.resourceBars[i].tracking.enabled then
+      table.insert(activeBars, i)
+    end
+  end
+  
+  return activeBars
+end
+
+-- ===================================================================
+-- HELPER: Get All Active Cooldown Bars
+-- ===================================================================
+function ns.API.GetActiveCooldownBars()
+  local db = ns.API.GetDB()
+  if not db or not db.cooldownBars then return {} end
+  
+  local activeBars = {}
+  for i = 1, 500 do
+    if db.cooldownBars[i] and db.cooldownBars[i].tracking and db.cooldownBars[i].tracking.enabled then
+      table.insert(activeBars, i)
+    end
+  end
+  
+  return activeBars
+end
+
+-- ===================================================================
+-- HELPER: Apply Threshold Preset
+-- ===================================================================
+function ns.API.ApplyThresholdPreset(barNumber, presetName, maxValue)
+  local cfg = ns.API.GetResourceBarConfig(barNumber)
+  if not cfg then return false end
+  
+  local preset = ns.ThresholdPresets[presetName]
+  if not preset then return false end
+  
+  cfg.thresholds = {}
+  for i, threshold in ipairs(preset) do
+    local scaled = CopyTable(threshold)
+    scaled.minValue = math.floor((threshold.minValue / 100) * maxValue)
+    scaled.maxValue = math.floor((threshold.maxValue / 100) * maxValue)
+    cfg.thresholds[i] = scaled
+  end
+  
+  return true
+end
+
+-- Initialize a new empty bar slot (makes it appear in UI)
+function ns.API.InitializeNewBar()
+  local db = ns.API.GetDB()
+  if not db or not db.bars then return nil end
+  
+  for i = 1, 500 do
+    if db.bars[i] and not db.bars[i].tracking.enabled then
+      db.bars[i].tracking.enabled = true
+      db.bars[i].tracking.buffName = "(Not configured yet)"
+      db.bars[i].tracking.spellID = 0
+      db.bars[i].tracking.maxStacks = 10
+      
+      if ns.Display and ns.Display.ShowBar then
+        ns.Display.ShowBar(i)
+      end
+      
+      return i
+    end
+  end
+  
+  return nil
+end
+
+-- ===================================================================
+-- HELPER: Initialize New Resource Bar
+-- ===================================================================
+function ns.API.InitializeNewResourceBar(powerType, powerName, resourceCategory, secondaryType)
+  local db = ns.API.GetDB()
+  if not db then return nil end
+  
+  if not db.resourceBars then
+    db.resourceBars = {}
+  end
+  
+  resourceCategory = resourceCategory or "primary"
+  
+  for i = 1, 500 do
+    local cfg = db.resourceBars[i]
+    
+    local isEmpty = not cfg or 
+                    not cfg.tracking or 
+                    not cfg.tracking.enabled or 
+                    (not cfg.tracking.powerType and (not cfg.tracking.powerName or cfg.tracking.powerName == ""))
+    
+    if isEmpty then
+      cfg = ns.API.GetResourceBarConfig(i)
+      
+      cfg.tracking.enabled = true
+      cfg.tracking.resourceCategory = resourceCategory
+      cfg.tracking.powerType = powerType
+      cfg.tracking.secondaryType = secondaryType
+      cfg.tracking.powerName = powerName
+      
+      -- ═══════════════════════════════════════════════════════════
+      -- CRITICAL: Reset display mode when reusing a slot.
+      -- A previously deleted bar (e.g. Runes in "fragmented" mode)
+      -- would contaminate the new bar if we don't reset this.
+      -- ═══════════════════════════════════════════════════════════
+      cfg.display.thresholdMode = "simple"
+      cfg.display.showTickMarks = false
+      cfg.display.enableActiveCountColors = nil
+      cfg.display.activeCountColors = nil
+      cfg.display.fragmentedColors = nil
+      cfg.display.fragmentedChargingColor = nil
+      cfg.display.fragmentedSpecColors = nil
+      cfg.display.smartChargingColor = nil
+      cfg.display.colorCurveEnabled = false
+      cfg.display.chargedComboColor = nil
+      cfg.display.showInForms = nil
+      cfg.display.iconsLayout = nil
+      cfg.display.iconShape = nil
+      cfg.display.iconsBorderStyle = nil
+      cfg.stackColors = nil
+      cfg.colorRanges = nil
+      
+      -- Get max value based on resource type
+      if resourceCategory == "secondary" and secondaryType then
+        cfg.tracking.maxValue = ns.Resources and ns.Resources.GetSecondaryMaxValue(secondaryType) or 5
+      elseif resourceCategory == "autoPrimary" then
+        -- Auto-switching: resolve current power type dynamically
+        local autoPower = UnitPowerType("player")
+        local max = UnitPowerMax("player", autoPower)
+        cfg.tracking.maxValue = (max and max > 0) and max or 100
+      else
+        local max = UnitPowerMax("player", powerType)
+        -- Use queried value if valid, otherwise default to 100 (will be updated at runtime)
+        cfg.tracking.maxValue = (max and max > 0) and max or 100
+      end
+      
+      if cfg.behavior then
+        cfg.behavior.talentConditions = nil
+        cfg.behavior.talentMatchMode = nil
+        if resourceCategory == "autoPrimary" then
+          -- Auto-switching bar: show on ALL specs (it resolves powerType dynamically)
+          cfg.behavior.showOnSpecs = {}
+        else
+          -- Manual bar: lock to current spec
+          cfg.behavior.showOnSpecs = { GetSpecialization() or 1 }
+        end
+      end
+      
+      cfg.display.enabled = true
+      
+      -- Enable tick marks for discrete secondary resources
+      if resourceCategory == "secondary" then
+        local discreteTypes = {
+          comboPoints = true, holyPower = true, chi = true,
+          runes = true, soulShards = true, essence = true, arcaneCharges = true,
+          soulFragments = true, maelstromWeapon = true,
+        }
+        if discreteTypes[secondaryType] then
+          cfg.display.showTickMarks = true
+          cfg.display.tickMode = "all"
+        end
+        
+        -- Auto-enable fragmented mode for runes and essence
+        local fragmentedTypes = {
+          runes = true, essence = true
+        }
+        if fragmentedTypes[secondaryType] then
+          cfg.display.thresholdMode = "fragmented"
+          cfg.display.showTickMarks = false  -- No ticks needed for fragmented
+          
+          -- Set up per-segment colors for fragmented resources
+          if not cfg.display.fragmentedColors then cfg.display.fragmentedColors = {} end
+          
+          if secondaryType == "runes" then
+            -- DK Rune colors: handled dynamically by GetFragmentedReadyColor via DK_SPEC_DEFAULT_COLORS
+            -- Don't set fragmentedColors here — per-segment overrides would block the spec color system
+            cfg.display.fragmentedChargingColor = {r=0.4, g=0.4, b=0.4, a=1}
+          elseif secondaryType == "essence" then
+            -- Evoker Essence colors - bright teal
+            local essenceColor = {r=0, g=0.8, b=0.8, a=1}
+            for j = 1, 5 do
+              cfg.display.fragmentedColors[j] = {r=essenceColor.r, g=essenceColor.g, b=essenceColor.b, a=essenceColor.a}
+            end
+            cfg.display.fragmentedChargingColor = {r=0, g=0.4, b=0.4, a=1}
+          end
+          
+          -- Skip the standard preset
+          if ns.Resources and ns.Resources.ApplyAppearance then
+            ns.Resources.ApplyAppearance(i)
+          end
+          
+          return i
+        end
+      end
+      
+      -- Set bar color to match resource type color
+      if secondaryType and ns.Resources and ns.Resources.SecondaryTypesLookup then
+        local typeInfo = ns.Resources.SecondaryTypesLookup[secondaryType]
+        if typeInfo and typeInfo.color then
+          cfg.display.barColor = {r=typeInfo.color.r, g=typeInfo.color.g, b=typeInfo.color.b, a=1}
+          -- Also update threshold[1] color for simple mode
+          if cfg.thresholds and cfg.thresholds[1] then
+            cfg.thresholds[1].color = {r=typeInfo.color.r, g=typeInfo.color.g, b=typeInfo.color.b, a=1}
+          end
+        end
+      end
+      
+      -- Auto-enable hideBlizzardFrame for secondary resources
+      if cfg.behavior then
+        cfg.behavior.hideBlizzardFrame = true
+      end
+      
+      ns.API.ApplyThresholdPreset(i, "threeTone", cfg.tracking.maxValue)
+      
+      if ns.Resources and ns.Resources.ApplyAppearance then
+        ns.Resources.ApplyAppearance(i)
+      end
+      
+      return i
+    end
+  end
+  
+  return nil
+end
+
+-- ===================================================================
+-- HELPER: Initialize New Cooldown Bar
+-- ===================================================================
+function ns.API.InitializeNewCooldownBar(cooldownID, spellID, spellName, maxCharges, iconTexture)
+  local db = ns.API.GetDB()
+  if not db then return nil end
+  
+  if not db.bars then
+    db.bars = {}
+  end
+  
+  -- Find an empty bar slot (cooldown bars share slots with regular bars)
+  for i = 1, 500 do
+    local cfg = db.bars[i]
+    
+    local isEmpty = not cfg or 
+                    not cfg.tracking or 
+                    not cfg.tracking.enabled
+    
+    if isEmpty then
+      cfg = ns.API.GetBarConfig(i)
+      
+      cfg.tracking.enabled = true
+      cfg.tracking.cooldownID = cooldownID
+      cfg.tracking.spellID = spellID
+      cfg.tracking.spellName = spellName
+      cfg.tracking.buffName = spellName  -- For display compatibility
+      cfg.tracking.iconTextureID = iconTexture or (spellID and C_Spell.GetSpellTexture(spellID)) or 134400
+      cfg.tracking.maxStacks = maxCharges or 3
+      cfg.tracking.trackType = "cooldownCharge"  -- CRITICAL: Use correct trackType
+      
+      cfg.display.enabled = true
+      cfg.behavior.showOnSpecs = { GetSpecialization() or 1 }
+      
+      if ns.Display and ns.Display.ApplyAppearance then
+        ns.Display.ApplyAppearance(i)
+      end
+      
+      return i
+    end
+  end
+  
+  return nil
+end
+
+-- ===================================================================
+-- END OF ArcUI_DB.lua
+-- ===================================================================

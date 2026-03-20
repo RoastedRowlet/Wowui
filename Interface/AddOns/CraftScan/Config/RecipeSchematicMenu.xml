@@ -1,0 +1,33 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+  <Script file="RecipeSchematicMenu.lua" />
+
+  <Button name="CraftScan_ScannerConfigButtonTemplate" inherits="UIPanelButtonTemplate"
+    mixin="CraftScan_ScannerConfigButtonMixin" virtual="true" frameLevel="501">
+    <Size x="140" y="22" />
+    <Scripts>
+      <OnClick method="OnClick" />
+    </Scripts>
+    <Frames>
+      <Frame parentKey="Spinner" inherits="SpinnerTemplate" frameLevel="2200" hidden="true">
+        <Size x="22" y="22" />
+        <Anchors>
+          <Anchor point="CENTER" />
+        </Anchors>
+      </Frame>
+    </Frames>
+    <Layers>
+      <Layer level="ARTWORK">
+        <FontString parentKey="ScanningLabel" inherits="GameFontHighlightSmall2"
+          justifyV="CENTER" justifyH="LEFT">
+          <Size x="200" y="20" />
+          <Anchors>
+            <Anchor point="LEFT" relativeKey="$parent" relativePoint="RIGHT" x="2" y="0" />
+          </Anchors>
+        </FontString>
+      </Layer>
+    </Layers>
+  </Button>
+
+</Ui>

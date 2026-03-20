@@ -1,0 +1,260 @@
+-- bar indicator options
+
+local Grid2Options = Grid2Options
+local L = Grid2Options.L
+
+Grid2Options:RegisterIndicatorOptions("bar", true, function(self, indicator)
+	local colors, options, statuses, filter  = {}, {}, {}, {}
+	self:MakeIndicatorTypeLevelOptions(indicator,options)
+	self:MakeIndicatorLocationOptions(indicator,options)
+	self:MakeIndicatorBarAppearanceOptions(indicator, options)
+	self:MakeIndicatorBarMiscOptions(indicator, options)
+	self:MakeIndicatorStatusOptions(indicator, statuses)
+	self:MakeIndicatorStatusOptions(indicator.sideKick, colors)
+	self:MakeIndicatorLoadOptions(indicator, filter)
+	self:AddIndicatorOptions(indicator, statuses, options, colors, filter)
+end)
+
+-- Grid2Options:MakeIndicatorBarDisplayOptions()
+function Grid2Options:MakeIndicatorBarAppearanceOptions(indicator,options)
+	self:MakeHeaderOptions( options, "Appearance" )
+	options.orientation = {
+		type = "select",
+		order = 15,
+		name = L["Orientation of the Bar"],
+		desc = L["Set status bar orientation."],
+		get = function ()
+			return indicator.dbx.orientation or "DEFAULT"
+		end,
+		set = function (_, v)
+			if v=="DEFAULT" then v= nil	end
+			indicator:SetOrientation(v)
+			self:RefreshIndicator(indicator, "Layout")
+			if indicator.childName then
+				self:RefreshIndicator( Grid2.indicators[indicator.childName], "Layout" )
+			end
+		end,
+		values={ ["DEFAULT"]= L["DEFAULT"], ["VERTICAL"] = L["VERTICAL"], ["HORIZONTAL"] = L["HORIZONTAL"]}
+	}
+	options.barWidth= {
+		type = "range",
+		order = 30,
+		name = L["Bar Width"],
+		desc = L["Choose zero to set the bar to the same width as parent frame"],
+		min = 0,
+		softMax = 75,
+		step = 1,
+		get = function ()
+			return indicator.dbx.width
+		end,
+		set = function (_, v)
+			if v==0 then v= nil end
+			indicator.dbx.width = v
+			self:RefreshIndicator(indicator, "Layout")
+		end,
+	}
+	options.barHeight= {
+		type = "range",
+		order = 40,
+		name = L["Bar Height"],
+		desc = L["Choose zero to set the bar to the same height as parent frame"],
+		min = 0,
+		softMax = 75,
+		step = 1,
+		get = function ()
+			return indicator.dbx.height
+		end,
+		set = function (_, v)
+			if v==0 then v= nil end
+			indicator.dbx.height = v
+			self:RefreshIndicator(indicator, "Layout")
+		end,
+	}
+	options.reverseFill= {
+		type = "toggle",
+		name = L["Reverse Fill"],
+		desc = L["Fill the bar in reverse."],
+		order = 44,
+		tristate = false,
+		get = function () return indicator.dbx.reverseFill end,
+		set = function (_, v)
+			indicator.dbx.reverseFill = v or nil
+			self:RefreshIndicator(indicator, "Layout")
+			if indicator.childName then
+				self:RefreshIndicator( Grid2.indicators[indicator.childName], "Layout" )
+			end
+		end,
+	}
+	self:MakeHeaderOptions( options, "Background" )
+	options.enableBack = {
+		type = "toggle",
+		name = L["Enable Background"],
+		desc = L["Enable Background"],
+		order = 61,
+		get = function () return indicator.dbx.backColor~=nil end,
+		set = function (_, v)
+			if v then
+				indicator.dbx.backColor = { r=0,g=0,b=0,a=1 }
+			else
+				indicator.dbx.backColor, indicator.dbx.backTexture = nil, nil
+			end
+			self:RefreshIndicator(indicator, "Create")
+		end,
+	}
+	options.backAlwaysVisible = {
+		type = "toggle",
+		name = L["Always Visible"],
+		desc = L["Display the background even when the indicator is not active."],
+		order = 62,
+		get = function () return not indicator.dbx.hideWhenInactive end,
+		set = function (_, v)
+			indicator.dbx.hideWhenInactive = (not v) or nil
+			self:RefreshIndicator(indicator, "Layout")
+		end,
+		hidden = function() return not indicator.dbx.backColor end,
+	}
+	options.backColor = {
+		type = "color",
+		order = 63,
+		name = L["Background Color"],
+		desc = L["Background Color"],
+		hasAlpha = true,
+		get = function() return self:UnpackColor( indicator.dbx.backColor, "BLACK" ) end,
+		set = function(info,r,g,b,a)
+			self:PackColor( r,g,b,a, indicator.dbx, "backColor" )
+			self:RefreshIndicator(indicator, "Layout")
+		end,
+		hidden = function() return not indicator.dbx.backColor end,
+	}
+	options.backTexture = {
+		type = "select", dialogControl = "LSM30_Statusbar",
+		order = 64,
+		name = L["Background Texture"],
+		desc = L["Adjust the background texture."],
+		get = function (info) return indicator.dbx.backTexture or self.MEDIA_VALUE_DEFAULT end,
+		set = function (info, v)
+			indicator.dbx.backTexture = v~=self.MEDIA_VALUE_DEFAULT and v or nil
+			self:RefreshIndicator(indicator, "Layout")
+		end,
+		values = self.GetStatusBarValues,
+		hidden = function() return not indicator.dbx.backColor end,
+	}
+end
+
+-- Grid2Options:MakeIndicatorBarMiscOptions()
+function Grid2Options:MakeIndicatorBarMiscOptions(indicator, options)
+	options.texture = {
+		type = "select", dialogControl = "LSM30_Statusbar",
+		order = 20,
+		name = L["Frame Texture"],
+		desc = L["Adjust the frame texture."],
+		get = function (info) return indicator.dbx.texture or self.MEDIA_VALUE_DEFAULT end,
+		set = function (info, v)
+			indicator.dbx.texture = v~=self.MEDIA_VALUE_DEFAULT and v or nil
+			self:RefreshIndicator(indicator, "Layout")
+		end,
+		values = self.GetStatusBarValues,
+	}
+	options.barOpacity = {
+		type = "range",
+		order = 43,
+		name = L["Opacity"],
+		desc = L["Set the opacity, select zero to use the status color opacity."],
+		min = 0,
+		max = 1,
+		step = 0.01,
+		bigStep = 0.05,
+		get = function () return indicator.dbx.opacity or 1 end,
+		set = function (_, v)
+			indicator.dbx.opacity = v
+			indicator.sideKick:UpdateDB()
+			Grid2Frame:UpdateIndicators()
+		end,
+	}
+	self:MakeHeaderOptions( options, "Special" )
+	options.inverColor= {
+		type = "toggle",
+		name = L["Invert Bar Color"],
+		desc = L["Swap foreground/background colors on bars."],
+		order = 71,
+		tristate = false,
+		get = function () return indicator.dbx.invertColor	end,
+		set = function (_, v)
+			indicator.dbx.invertColor = v or nil
+			indicator.sideKick:UpdateDB()
+			self:RefreshIndicator(indicator, "Create")
+		end,
+	}
+	options.interpol= {
+		type = "toggle",
+		name = L["Smooth animation"],
+		desc = L["Animate bar changes."],
+		order = 72,
+		tristate = false,
+		get = function () return indicator.dbx.interpolation~=nil end,
+		set = function (_, v)
+			indicator.dbx.interpolation = v and 1 or nil
+			self:RefreshIndicator(indicator, "Create")
+		end,
+	}
+	self:MakeHeaderOptions( options, "Display" )
+	if Grid2.isMidnight then
+		options.remaining = {
+			type = "toggle",
+			name = L["Remaining time"],
+			desc = L["Show the remaining time."],
+			order = 81,
+			tristate = false,
+			get = function () return indicator.dbx.duration==true end,
+			set = function (_, v)
+				if v then
+					indicator.dbx.duration = true
+				else
+					indicator.dbx.duration = nil
+				end
+				self:RefreshIndicator(indicator, "Layout")
+			end,
+		}
+		options.elapsed = {
+			type = "toggle",
+			name = L["Elapsed time"],
+			desc = L["Show the elapsed time."],
+			order = 82,
+			tristate = false,
+			get = function () return indicator.dbx.duration==false end,
+			set = function (_, v)
+				if v then
+					indicator.dbx.duration = false
+				else
+					indicator.dbx.duration = nil
+				end
+				self:RefreshIndicator(indicator, "Layout")
+			end,
+		}
+	else
+		options.duration = {
+			type = "toggle",
+			name = L["Show Duration"],
+			desc = L["Show the remaining time."],
+			order = 81,
+			tristate = false,
+			get = function () return indicator.dbx.duration end,
+			set = function (_, v)
+				indicator.dbx.duration = v or nil
+				self:RefreshIndicator(indicator, "Update")
+			end,
+		}
+		options.stack = {
+			type = "toggle",
+			name = L["Show stack"],
+			desc = L["Show the number of stacks."],
+			order = 85,
+			tristate = false,
+			get = function () return indicator.dbx.stack end,
+			set = function (_, v)
+				indicator.dbx.stack = v or nil
+				self:RefreshIndicator(indicator, "Update")
+			end,
+		}
+	end
+end

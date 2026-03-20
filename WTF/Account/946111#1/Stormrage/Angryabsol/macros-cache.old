@@ -1,0 +1,23 @@
+VER 3 0100000000000004 "Consume no chann" "134400"
+#showtooltip
+/stopmacro [channeling:Void Ray]
+/cast Consume
+END
+VER 3 0100000000000003 "Cursor Shift" "134400"
+#showtooltip shift
+/cast [@cursor] Shift
+END
+VER 3 0100000000000005 "Dismount" "134400"
+/dismount
+END
+VER 3 0100000000000002 "Focus Kick" "INV_MISC_QUESTIONMARK"
+/cast [target=focus] Disrupt
+END
+VER 3 0100000000000006 "Meta Trinket" "134400"
+#showtooltip Void Metamorphosis
+/use 13
+/cast Void Metamorphosis
+END
+VER 3 0100000000000001 "sit" "INV_MISC_QUESTIONMARK"
+/sit
+END

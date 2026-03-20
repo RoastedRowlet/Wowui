@@ -1,0 +1,2 @@
+
+EllesmereUIResourceBarsDB = nil

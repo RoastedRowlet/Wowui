@@ -1,0 +1,69 @@
+## Interface: 120000
+## Title: CraftScan
+## Version: 1.6.3
+## Notes: Scans chat for potential work orders
+## Author: Stevin
+## Category: Professions
+## X-Curse-Project-ID: 1028358
+## X-Wago-ID: rN4V3jKD
+## X-WoWI-ID: 26847
+## SavedVariables: CraftScan_DB
+## IconTexture: Interface\Icons\Trade_blacksmithing
+
+embeds.xml
+
+Libs/classic.lua
+Libs/LibSerialize.lua
+Libs/LibDeflate.lua
+
+Consts.lua
+
+Locales/enUS.lua
+Locales/deDE.lua
+Locales/itIT.lua
+Locales/ruRU.lua
+Locales/ptBR.lua
+Locales/frFR.lua
+Locales/esES.lua
+Locales/esMX.lua
+Locales/koKR.lua
+Locales/zhTW.lua
+Locales/zhCN.lua
+Locales/Localization.lua
+
+Utils/Debug.lua
+Utils/EventBus.lua
+Utils/DoOnce.lua
+Utils/Utils.xml
+Utils/ReleaseNotes.xml
+Utils/Dialog.xml
+Utils/TimeSlice.lua
+Utils/Tooltip.lua
+Utils/TooltipPlot.lua
+Utils/WaitGroup.lua
+Utils/Comm.lua
+Utils/FStrings.lua
+
+Config/RecipeSchematicMenu.xml
+
+Customer/AlertIcon.xml
+
+Customer/ChatScanner.lua
+
+Customer/OrderTableTemplate.xml
+
+Customer/AnalyticsTableTemplate.xml
+
+Customer/OrderPage.xml
+
+Settings/Settings.xml
+
+Customer/CustomerPage.xml
+
+Config/Concentration.lua
+Config/ConfigPage.xml
+Config/BasicTemplates.xml
+Config/RecipeConfigPanel.xml
+Config/ProfessionConfigPanel.xml
+Config/GeneralConfigPanel.xml
+Config/SubstitutionTagPanel.xml
