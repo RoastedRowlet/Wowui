@@ -1,6 +1,7 @@
 
 Blizzard_Console_SavedVars = {
 ["version"] = 3,
+["height"] = 300,
 ["messageHistory"] = {
 {
 "CVar 'maxLightCount' failed validation for its initial value.",
@@ -4278,10 +4279,21 @@ Blizzard_Console_SavedVars = {
 "ChromaEffects disabled",
 0,
 },
+{
+"NetClient::HandleConnect()\n",
+0,
 },
-["height"] = 300,
-["fontHeight"] = 14,
+{
+"Got new connection 2",
+0,
+},
+{
+"[WowEntitlements] [BNetAccount-0-0000000E6FBF] [WowAccount-0-00000401C2D6] Initialized with 70 entitlements.",
+0,
+},
+},
 ["isShown"] = false,
+["fontHeight"] = 14,
 ["commandHistory"] = {
 },
 }
