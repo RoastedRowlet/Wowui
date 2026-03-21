@@ -630,7 +630,7 @@ CraftScan_DB = {
 [402134] = {
 ["scan_state"] = 4,
 },
-[16726] = {
+[3508] = {
 ["scan_state"] = 4,
 },
 [416688] = {
@@ -642,7 +642,7 @@ CraftScan_DB = {
 [402133] = {
 ["scan_state"] = 4,
 },
-[3508] = {
+[413758] = {
 ["scan_state"] = 4,
 },
 [3491] = {
@@ -765,7 +765,7 @@ CraftScan_DB = {
 [3507] = {
 ["scan_state"] = 4,
 },
-[413758] = {
+[16726] = {
 ["scan_state"] = 4,
 },
 [24399] = {
@@ -913,8 +913,8 @@ CraftScan_DB = {
 },
 ["concentration"] = {
 ["maxQuantity"] = 1000,
-["lastUpdated"] = 1773927746,
-["amount"] = 109,
+["lastUpdated"] = 1774062711,
+["amount"] = 151,
 ["rechargeTimePerPoint"] = 345600,
 ["currencyID"] = 3161,
 },
@@ -1268,19 +1268,19 @@ CraftScan_DB = {
 [449575] = {
 ["scan_state"] = 4,
 },
-[432963] = {
+[449938] = {
 ["scan_state"] = 4,
 },
 [433087] = {
 ["scan_state"] = 4,
 },
-[449574] = {
+[432963] = {
 ["scan_state"] = 4,
 },
 [432962] = {
 ["scan_state"] = 4,
 },
-[449938] = {
+[449574] = {
 ["scan_state"] = 4,
 },
 },
@@ -1349,8 +1349,8 @@ CraftScan_DB = {
 },
 ["concentration"] = {
 ["maxQuantity"] = 1000,
-["lastUpdated"] = 1773927487,
-["amount"] = 113,
+["lastUpdated"] = 1774062356,
+["amount"] = 153,
 ["rechargeTimePerPoint"] = 345600,
 ["currencyID"] = 3161,
 },
@@ -1754,10 +1754,10 @@ CraftScan_DB = {
 [25490] = {
 ["scan_state"] = 4,
 },
-[25612] = {
+[32807] = {
 ["scan_state"] = 4,
 },
-[32807] = {
+[26882] = {
 ["scan_state"] = 4,
 },
 [26872] = {
@@ -1775,7 +1775,7 @@ CraftScan_DB = {
 [25610] = {
 ["scan_state"] = 4,
 },
-[26882] = {
+[25612] = {
 ["scan_state"] = 4,
 },
 [25614] = {
@@ -2010,8 +2010,8 @@ CraftScan_DB = {
 },
 ["concentration"] = {
 ["maxQuantity"] = 1000,
-["lastUpdated"] = 1773927436,
-["amount"] = 112,
+["lastUpdated"] = 1774062456,
+["amount"] = 152,
 ["rechargeTimePerPoint"] = 345600,
 ["currencyID"] = 3161,
 },
@@ -2031,19 +2031,19 @@ CraftScan_DB = {
 ["analytics"] = {
 },
 ["customers"] = {
-["Phantumdeath-Stormrage"] = {
-["responses"] = {
-[2906] = {
-},
-},
-["guid"] = "Player-60-0EDECD91",
-},
 ["Bluesbro-Stormrage"] = {
 ["responses"] = {
 [2909] = {
 },
 },
 ["guid"] = "Player-60-0E30EA71",
+},
+["Phantumdeath-Stormrage"] = {
+["responses"] = {
+[2906] = {
+},
+},
+["guid"] = "Player-60-0EDECD91",
 },
 },
 },
@@ -2934,8 +2934,8 @@ CraftScan_DB = {
 },
 ["concentration"] = {
 ["maxQuantity"] = 1000,
-["lastUpdated"] = 1773927569,
-["amount"] = 199,
+["lastUpdated"] = 1774062614,
+["amount"] = 245,
 ["rechargeTimePerPoint"] = 345600,
 ["currencyID"] = 3161,
 },

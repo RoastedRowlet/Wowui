@@ -15,19 +15,19 @@ _detalhes_database = {
 ["totalabsorbed"] = 0.002166,
 ["pets"] = {
 },
-["aID"] = "3676-0DF7D3EF",
+["classe"] = "EVOKER",
 ["total_without_pet"] = 0.002166,
 ["last_dps_realtime"] = 0,
 ["dps_started"] = false,
 ["total"] = 6109,
 ["spec"] = 1473,
-["on_hold"] = false,
+["friendlyfire"] = {
+},
 ["total_extra"] = 0,
 ["serial"] = "Player-3676-0DF7D3EF",
 ["avoidable_damage"] = {
 },
-["damage_from"] = {
-},
+["specIcon"] = 5198700,
 ["targets"] = {
 },
 ["friendlyfire_total"] = 0,
@@ -35,9 +35,9 @@ _detalhes_database = {
 },
 ["damage_taken_ps"] = 3383.777777777778,
 ["end_time"] = 1773430948,
-["friendlyfire"] = {
+["on_hold"] = false,
+["damage_from"] = {
 },
-["specIcon"] = 5198700,
 ["nome"] = "Barelynoer",
 ["spells"] = {
 ["_ActorTable"] = {
@@ -45,7 +45,7 @@ _detalhes_database = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -64,7 +64,7 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["r_amt"] = 0,
 },
 },
@@ -72,7 +72,7 @@ _detalhes_database = {
 },
 ["grupo"] = true,
 ["tipo"] = 1,
-["classe"] = "EVOKER",
+["aID"] = "3676-0DF7D3EF",
 ["custom"] = 0,
 ["last_event"] = 0,
 ["damage_taken"] = 121816,
@@ -88,12 +88,12 @@ _detalhes_database = {
 ["_ActorTable"] = {
 {
 ["flag_original"] = 1298,
-["healing_from"] = {
+["targets_overheal"] = {
 },
 ["pets"] = {
 },
 ["iniciar_hps"] = false,
-["aID"] = "3676-0DF7D3EF",
+["classe"] = "EVOKER",
 ["totalover"] = 0.003198,
 ["total_without_pet"] = 0.003198,
 ["total"] = 20013,
@@ -113,7 +113,7 @@ _detalhes_database = {
 ["healing_taken"] = 0.003198,
 ["end_time"] = 1773430948,
 ["start_time"] = 1773430948,
-["targets_overheal"] = {
+["healing_from"] = {
 },
 ["nome"] = "Barelynoer",
 ["spells"] = {
@@ -145,13 +145,13 @@ _detalhes_database = {
 ["tipo"] = 3,
 },
 ["grupo"] = true,
-["heal_enemy_amt"] = 0,
+["aID"] = "3676-0DF7D3EF",
 ["last_event"] = 0,
 ["custom"] = 0,
 ["tipo"] = 2,
 ["totaldenied"] = 0.003198,
 ["delay"] = 0,
-["classe"] = "EVOKER",
+["heal_enemy_amt"] = 0,
 },
 },
 },
@@ -175,7 +175,7 @@ _detalhes_database = {
 },
 ["boss_hp"] = 1,
 ["CombatStartedAt"] = 40265.114,
-["overall_added"] = true,
+["tempo_start"] = 1773430948,
 ["last_events_tables"] = {
 },
 ["alternate_power"] = {
@@ -291,7 +291,7 @@ _detalhes_database = {
 ["start_time"] = 40242.77,
 ["TimeData"] = {
 },
-["tempo_start"] = 1773430948,
+["overall_added"] = true,
 },
 {
 {
@@ -303,19 +303,19 @@ _detalhes_database = {
 ["totalabsorbed"] = 0.002334,
 ["pets"] = {
 },
-["aID"] = "3676-0DF7D3EF",
+["classe"] = "EVOKER",
 ["total_without_pet"] = 0.002334,
 ["last_dps_realtime"] = 0,
 ["dps_started"] = false,
 ["total"] = 51372,
 ["spec"] = 1473,
-["on_hold"] = false,
+["friendlyfire"] = {
+},
 ["total_extra"] = 0,
 ["serial"] = "Player-3676-0DF7D3EF",
 ["avoidable_damage"] = {
 },
-["damage_from"] = {
-},
+["specIcon"] = 5198700,
 ["targets"] = {
 },
 ["friendlyfire_total"] = 0,
@@ -323,9 +323,9 @@ _detalhes_database = {
 },
 ["damage_taken_ps"] = 721.7692307692307,
 ["end_time"] = 1773429454,
-["friendlyfire"] = {
+["on_hold"] = false,
+["damage_from"] = {
 },
-["specIcon"] = 5198700,
 ["nome"] = "Barelynoer",
 ["spells"] = {
 ["_ActorTable"] = {
@@ -333,7 +333,7 @@ _detalhes_database = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -352,14 +352,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["r_amt"] = 0,
 },
 [1252389] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -378,14 +378,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["r_amt"] = 0,
 },
 [1263101] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -404,14 +404,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["r_amt"] = 0,
 },
 [396286] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -430,7 +430,7 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["r_amt"] = 0,
 },
 },
@@ -438,7 +438,7 @@ _detalhes_database = {
 },
 ["grupo"] = true,
 ["tipo"] = 1,
-["classe"] = "EVOKER",
+["aID"] = "3676-0DF7D3EF",
 ["custom"] = 0,
 ["last_event"] = 0,
 ["damage_taken"] = 9383,
@@ -454,12 +454,12 @@ _detalhes_database = {
 ["_ActorTable"] = {
 {
 ["flag_original"] = 1298,
-["healing_from"] = {
+["targets_overheal"] = {
 },
 ["pets"] = {
 },
 ["iniciar_hps"] = false,
-["aID"] = "3676-0DF7D3EF",
+["classe"] = "EVOKER",
 ["totalover"] = 0.005481,
 ["total_without_pet"] = 0.005481,
 ["total"] = 283,
@@ -479,7 +479,7 @@ _detalhes_database = {
 ["healing_taken"] = 0.005481,
 ["end_time"] = 1773429454,
 ["start_time"] = 1773429454,
-["targets_overheal"] = {
+["healing_from"] = {
 },
 ["nome"] = "Barelynoer",
 ["spells"] = {
@@ -511,13 +511,13 @@ _detalhes_database = {
 ["tipo"] = 3,
 },
 ["grupo"] = true,
-["heal_enemy_amt"] = 0,
+["aID"] = "3676-0DF7D3EF",
 ["last_event"] = 0,
 ["custom"] = 0,
 ["tipo"] = 2,
 ["totaldenied"] = 0.005481,
 ["delay"] = 0,
-["classe"] = "EVOKER",
+["heal_enemy_amt"] = 0,
 },
 },
 },
@@ -541,7 +541,7 @@ _detalhes_database = {
 },
 ["boss_hp"] = 1,
 ["CombatStartedAt"] = 40227.221,
-["overall_added"] = true,
+["tempo_start"] = 1773429454,
 ["last_events_tables"] = {
 },
 ["alternate_power"] = {
@@ -657,7 +657,7 @@ _detalhes_database = {
 ["start_time"] = 38766.27,
 ["TimeData"] = {
 },
-["tempo_start"] = 1773429454,
+["overall_added"] = true,
 },
 {
 {
@@ -669,28 +669,28 @@ _detalhes_database = {
 ["totalabsorbed"] = 0.00282,
 ["pets"] = {
 },
-["classe"] = "EVOKER",
+["aID"] = "3676-0DF7D3EF",
 ["total_without_pet"] = 0.00282,
 ["last_dps_realtime"] = 0,
 ["dps_started"] = false,
 ["total"] = 208919,
 ["spec"] = 1473,
-["friendlyfire"] = {
-},
+["on_hold"] = false,
 ["total_extra"] = 0,
 ["serial"] = "Player-3676-0DF7D3EF",
 ["avoidable_damage"] = {
 },
-["damage_from"] = {
-},
+["specIcon"] = 5198700,
 ["targets"] = {
 },
 ["friendlyfire_total"] = 0,
 ["raid_targets"] = {
 },
 ["end_time"] = 1773380249,
-["on_hold"] = false,
-["specIcon"] = 5198700,
+["friendlyfire"] = {
+},
+["damage_from"] = {
+},
 ["nome"] = "Barelynoer",
 ["spells"] = {
 ["_ActorTable"] = {
@@ -698,7 +698,7 @@ _detalhes_database = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -717,14 +717,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [434481] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -743,14 +743,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [409311] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -769,14 +769,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [396286] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -795,14 +795,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [362969] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -821,14 +821,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [1252389] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -847,14 +847,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [357208] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -873,14 +873,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 },
 ["tipo"] = 2,
 },
 ["grupo"] = true,
-["aID"] = "3676-0DF7D3EF",
+["classe"] = "EVOKER",
 ["tipo"] = 1,
 ["custom"] = 0,
 ["last_event"] = 0,
@@ -917,7 +917,7 @@ _detalhes_database = {
 },
 ["boss_hp"] = 1,
 ["CombatStartedAt"] = 38756.145,
-["overall_added"] = true,
+["tempo_start"] = 1773380249,
 ["last_events_tables"] = {
 },
 ["alternate_power"] = {
@@ -1032,7 +1032,7 @@ _detalhes_database = {
 ["start_time"] = 143326.635,
 ["TimeData"] = {
 },
-["tempo_start"] = 1773380249,
+["overall_added"] = true,
 },
 {
 {
@@ -1044,19 +1044,19 @@ _detalhes_database = {
 ["totalabsorbed"] = 0.002445,
 ["pets"] = {
 },
-["classe"] = "EVOKER",
+["aID"] = "3676-0DF7D3EF",
 ["total_without_pet"] = 0.002445,
 ["last_dps_realtime"] = 0,
 ["dps_started"] = false,
 ["total"] = 1259929,
 ["spec"] = 1473,
-["friendlyfire"] = {
-},
+["on_hold"] = false,
 ["total_extra"] = 0,
 ["serial"] = "Player-3676-0DF7D3EF",
 ["avoidable_damage"] = {
 },
-["specIcon"] = 5198700,
+["damage_from"] = {
+},
 ["targets"] = {
 },
 ["friendlyfire_total"] = 0,
@@ -1064,9 +1064,9 @@ _detalhes_database = {
 },
 ["damage_taken_ps"] = 4594.153846153846,
 ["end_time"] = 1773379909,
-["on_hold"] = false,
-["damage_from"] = {
+["friendlyfire"] = {
 },
+["specIcon"] = 5198700,
 ["nome"] = "Barelynoer",
 ["spells"] = {
 ["_ActorTable"] = {
@@ -1074,7 +1074,7 @@ _detalhes_database = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -1093,14 +1093,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [1236970] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -1119,14 +1119,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [1263101] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -1145,14 +1145,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [1259172] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -1171,14 +1171,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [395160] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -1197,14 +1197,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [442204] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -1223,14 +1223,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [1263121] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -1249,14 +1249,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [396286] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -1275,14 +1275,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [361469] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -1301,14 +1301,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [1283719] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -1327,14 +1327,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [357208] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -1353,14 +1353,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [409311] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -1379,14 +1379,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [434481] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -1405,14 +1405,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [396288] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -1431,7 +1431,7 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 },
@@ -1439,7 +1439,7 @@ _detalhes_database = {
 },
 ["grupo"] = true,
 ["tipo"] = 1,
-["aID"] = "3676-0DF7D3EF",
+["classe"] = "EVOKER",
 ["custom"] = 0,
 ["last_event"] = 0,
 ["damage_taken"] = 119448,
@@ -1455,12 +1455,12 @@ _detalhes_database = {
 ["_ActorTable"] = {
 {
 ["flag_original"] = 1298,
-["targets_overheal"] = {
+["healing_from"] = {
 },
 ["pets"] = {
 },
 ["iniciar_hps"] = false,
-["classe"] = "EVOKER",
+["heal_enemy_amt"] = 0,
 ["totalover"] = 0.006841,
 ["total_without_pet"] = 0.006841,
 ["total"] = 25175,
@@ -1480,7 +1480,7 @@ _detalhes_database = {
 ["healing_taken"] = 0.006841,
 ["end_time"] = 1773379909,
 ["start_time"] = 1773379909,
-["healing_from"] = {
+["targets_overheal"] = {
 },
 ["nome"] = "Barelynoer",
 ["spells"] = {
@@ -1558,13 +1558,13 @@ _detalhes_database = {
 ["tipo"] = 3,
 },
 ["grupo"] = true,
-["aID"] = "3676-0DF7D3EF",
+["classe"] = "EVOKER",
 ["last_event"] = 0,
 ["custom"] = 0,
 ["tipo"] = 2,
 ["totaldenied"] = 0.006841,
 ["delay"] = 0,
-["heal_enemy_amt"] = 0,
+["aID"] = "3676-0DF7D3EF",
 },
 },
 },
@@ -1588,7 +1588,7 @@ _detalhes_database = {
 },
 ["boss_hp"] = 1,
 ["CombatStartedAt"] = 143326.635,
-["tempo_start"] = 1773379909,
+["overall_added"] = true,
 ["last_events_tables"] = {
 },
 ["alternate_power"] = {
@@ -1704,7 +1704,7 @@ _detalhes_database = {
 ["start_time"] = 142974.564,
 ["TimeData"] = {
 },
-["overall_added"] = true,
+["tempo_start"] = 1773379909,
 },
 {
 {
@@ -1716,19 +1716,19 @@ _detalhes_database = {
 ["totalabsorbed"] = 0.006437,
 ["pets"] = {
 },
-["classe"] = "EVOKER",
+["aID"] = "3676-0DF7D3EF",
 ["total_without_pet"] = 0.006437,
 ["last_dps_realtime"] = 0,
 ["dps_started"] = false,
 ["total"] = 902562,
 ["spec"] = 1473,
-["friendlyfire"] = {
-},
+["on_hold"] = false,
 ["total_extra"] = 0,
 ["serial"] = "Player-3676-0DF7D3EF",
 ["avoidable_damage"] = {
 },
-["specIcon"] = 5198700,
+["damage_from"] = {
+},
 ["targets"] = {
 },
 ["friendlyfire_total"] = 0,
@@ -1736,9 +1736,9 @@ _detalhes_database = {
 },
 ["damage_taken_ps"] = 6281.448717948718,
 ["end_time"] = 1773379812,
-["on_hold"] = false,
-["damage_from"] = {
+["friendlyfire"] = {
 },
+["specIcon"] = 5198700,
 ["nome"] = "Barelynoer",
 ["spells"] = {
 ["_ActorTable"] = {
@@ -1746,7 +1746,7 @@ _detalhes_database = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -1765,14 +1765,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [1263101] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -1791,14 +1791,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [395160] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -1817,14 +1817,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [1263121] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -1843,14 +1843,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [396286] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -1869,14 +1869,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [1252389] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -1895,14 +1895,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [357208] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -1921,14 +1921,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [409311] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -1947,14 +1947,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [434481] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -1973,14 +1973,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [362969] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -1999,7 +1999,7 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 },
@@ -2007,7 +2007,7 @@ _detalhes_database = {
 },
 ["grupo"] = true,
 ["tipo"] = 1,
-["aID"] = "3676-0DF7D3EF",
+["classe"] = "EVOKER",
 ["custom"] = 0,
 ["last_event"] = 0,
 ["damage_taken"] = 489953,
@@ -2023,12 +2023,12 @@ _detalhes_database = {
 ["_ActorTable"] = {
 {
 ["flag_original"] = 1298,
-["targets_overheal"] = {
+["healing_from"] = {
 },
 ["pets"] = {
 },
 ["iniciar_hps"] = false,
-["classe"] = "EVOKER",
+["heal_enemy_amt"] = 0,
 ["totalover"] = 0.007463,
 ["total_without_pet"] = 0.007463,
 ["total"] = 303943,
@@ -2048,7 +2048,7 @@ _detalhes_database = {
 ["healing_taken"] = 0.007463,
 ["end_time"] = 1773379812,
 ["start_time"] = 1773379812,
-["healing_from"] = {
+["targets_overheal"] = {
 },
 ["nome"] = "Barelynoer",
 ["spells"] = {
@@ -2195,13 +2195,13 @@ _detalhes_database = {
 ["tipo"] = 3,
 },
 ["grupo"] = true,
-["aID"] = "3676-0DF7D3EF",
+["classe"] = "EVOKER",
 ["last_event"] = 0,
 ["custom"] = 0,
 ["tipo"] = 2,
 ["totaldenied"] = 0.007463,
 ["delay"] = 0,
-["heal_enemy_amt"] = 0,
+["aID"] = "3676-0DF7D3EF",
 },
 },
 },
@@ -2221,7 +2221,7 @@ _detalhes_database = {
 ["dispell"] = 2.004137,
 ["pets"] = {
 },
-["classe"] = "EVOKER",
+["aID"] = "3676-0DF7D3EF",
 ["interrupt_spells"] = {
 ["_ActorTable"] = {
 [1257774] = {
@@ -2240,8 +2240,7 @@ _detalhes_database = {
 },
 ["interrompeu_oque"] = {
 },
-["interrupt_targets"] = {
-},
+["spec"] = 1473,
 ["serial"] = "Player-3676-0DF7D3EF",
 ["specIcon"] = 5198700,
 ["dispell_oque"] = {
@@ -2253,11 +2252,12 @@ _detalhes_database = {
 },
 ["nome"] = "Barelynoer",
 ["grupo"] = true,
-["last_event"] = 0,
-["aID"] = "3676-0DF7D3EF",
-["tipo"] = 4,
 ["interrupt"] = 2.002605,
-["spec"] = 1473,
+["classe"] = "EVOKER",
+["tipo"] = 4,
+["interrupt_targets"] = {
+},
+["last_event"] = 0,
 },
 },
 },
@@ -2269,7 +2269,7 @@ _detalhes_database = {
 },
 ["boss_hp"] = 1,
 ["CombatStartedAt"] = 142974.564,
-["tempo_start"] = 1773379812,
+["overall_added"] = true,
 ["last_events_tables"] = {
 },
 ["alternate_power"] = {
@@ -2385,7 +2385,7 @@ _detalhes_database = {
 ["start_time"] = 142825.377,
 ["TimeData"] = {
 },
-["overall_added"] = true,
+["tempo_start"] = 1773379812,
 },
 {
 {
@@ -2397,19 +2397,19 @@ _detalhes_database = {
 ["totalabsorbed"] = 0.007863,
 ["pets"] = {
 },
-["classe"] = "EVOKER",
+["aID"] = "3676-0DF7D3EF",
 ["total_without_pet"] = 0.007863,
 ["last_dps_realtime"] = 0,
 ["dps_started"] = false,
 ["total"] = 1514931,
 ["spec"] = 1473,
-["friendlyfire"] = {
-},
+["on_hold"] = false,
 ["total_extra"] = 0,
 ["serial"] = "Player-3676-0DF7D3EF",
 ["avoidable_damage"] = {
 },
-["specIcon"] = 5198700,
+["damage_from"] = {
+},
 ["targets"] = {
 },
 ["friendlyfire_total"] = 0,
@@ -2417,9 +2417,9 @@ _detalhes_database = {
 },
 ["damage_taken_ps"] = 13256.45238095238,
 ["end_time"] = 1773379721,
-["on_hold"] = false,
-["damage_from"] = {
+["friendlyfire"] = {
 },
+["specIcon"] = 5198700,
 ["nome"] = "Barelynoer",
 ["spells"] = {
 ["_ActorTable"] = {
@@ -2427,7 +2427,7 @@ _detalhes_database = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -2446,14 +2446,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [1236970] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -2472,14 +2472,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [1263101] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -2498,14 +2498,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [1259172] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -2524,14 +2524,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [395160] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -2550,14 +2550,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [442204] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -2576,14 +2576,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [1263121] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -2602,14 +2602,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [396286] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -2628,14 +2628,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [1252389] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -2654,14 +2654,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [1283719] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -2680,14 +2680,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [357208] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -2706,14 +2706,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [362969] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -2732,14 +2732,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [434481] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -2758,14 +2758,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [396288] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -2784,7 +2784,7 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 },
@@ -2792,7 +2792,7 @@ _detalhes_database = {
 },
 ["grupo"] = true,
 ["tipo"] = 1,
-["aID"] = "3676-0DF7D3EF",
+["classe"] = "EVOKER",
 ["custom"] = 0,
 ["last_event"] = 0,
 ["damage_taken"] = 556771,
@@ -2808,17 +2808,16 @@ _detalhes_database = {
 ["_ActorTable"] = {
 {
 ["flag_original"] = 1298,
-["targets_overheal"] = {
+["healing_from"] = {
 },
 ["pets"] = {
 },
 ["iniciar_hps"] = false,
-["classe"] = "EVOKER",
+["aID"] = "3676-0DF7D3EF",
 ["totalover"] = 0.005437,
 ["total_without_pet"] = 0.005437,
 ["total"] = 501065,
-["targets_absorbs"] = {
-},
+["spec"] = 1473,
 ["heal_enemy"] = {
 },
 ["totalabsorb_ps"] = 1017.976190476191,
@@ -2830,11 +2829,11 @@ _detalhes_database = {
 ["targets"] = {
 },
 ["totalover_without_pet"] = 0.005437,
-["heal_enemy_amt"] = 0,
+["classe"] = "EVOKER",
 ["healing_taken"] = 0.005437,
 ["end_time"] = 1773379721,
 ["last_event"] = 0,
-["aID"] = "3676-0DF7D3EF",
+["heal_enemy_amt"] = 0,
 ["nome"] = "Barelynoer",
 ["spells"] = {
 ["_ActorTable"] = {
@@ -3003,14 +3002,15 @@ _detalhes_database = {
 ["tipo"] = 3,
 },
 ["grupo"] = true,
-["healing_from"] = {
+["targets_overheal"] = {
 },
 ["start_time"] = 1773379721,
 ["custom"] = 0,
 ["tipo"] = 2,
 ["totaldenied"] = 0.005437,
 ["delay"] = 0,
-["spec"] = 1473,
+["targets_absorbs"] = {
+},
 },
 },
 },
@@ -3030,7 +3030,7 @@ _detalhes_database = {
 ["dispell"] = 2.00465,
 ["pets"] = {
 },
-["classe"] = "EVOKER",
+["aID"] = "3676-0DF7D3EF",
 ["interrupt_spells"] = {
 ["_ActorTable"] = {
 [1257774] = {
@@ -3058,8 +3058,7 @@ _detalhes_database = {
 },
 ["interrompeu_oque"] = {
 },
-["interrupt_targets"] = {
-},
+["spec"] = 1473,
 ["serial"] = "Player-3676-0DF7D3EF",
 ["specIcon"] = 5198700,
 ["dispell_oque"] = {
@@ -3071,11 +3070,12 @@ _detalhes_database = {
 },
 ["nome"] = "Barelynoer",
 ["grupo"] = true,
-["last_event"] = 0,
-["aID"] = "3676-0DF7D3EF",
-["tipo"] = 4,
 ["interrupt"] = 2.007699,
-["spec"] = 1473,
+["classe"] = "EVOKER",
+["tipo"] = 4,
+["interrupt_targets"] = {
+},
+["last_event"] = 0,
 },
 },
 },
@@ -3087,7 +3087,7 @@ _detalhes_database = {
 },
 ["boss_hp"] = 1,
 ["CombatStartedAt"] = 142825.377,
-["tempo_start"] = 1773379721,
+["overall_added"] = true,
 ["last_events_tables"] = {
 },
 ["alternate_power"] = {
@@ -3203,7 +3203,7 @@ _detalhes_database = {
 ["start_time"] = 142770.159,
 ["TimeData"] = {
 },
-["overall_added"] = true,
+["tempo_start"] = 1773379721,
 },
 {
 {
@@ -3215,19 +3215,19 @@ _detalhes_database = {
 ["totalabsorbed"] = 0.007479,
 ["pets"] = {
 },
-["classe"] = "EVOKER",
+["aID"] = "3676-0DF7D3EF",
 ["total_without_pet"] = 0.007479,
 ["last_dps_realtime"] = 0,
 ["dps_started"] = false,
 ["total"] = 445453,
 ["spec"] = 1473,
-["friendlyfire"] = {
-},
+["on_hold"] = false,
 ["total_extra"] = 0,
 ["serial"] = "Player-3676-0DF7D3EF",
 ["avoidable_damage"] = {
 },
-["specIcon"] = 5198700,
+["damage_from"] = {
+},
 ["targets"] = {
 },
 ["friendlyfire_total"] = 0,
@@ -3235,9 +3235,9 @@ _detalhes_database = {
 },
 ["damage_taken_ps"] = 7634.918367346939,
 ["end_time"] = 1773379666,
-["on_hold"] = false,
-["damage_from"] = {
+["friendlyfire"] = {
 },
+["specIcon"] = 5198700,
 ["nome"] = "Barelynoer",
 ["spells"] = {
 ["_ActorTable"] = {
@@ -3245,7 +3245,7 @@ _detalhes_database = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -3264,144 +3264,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
-["r_amt"] = 0,
-},
-[357208] = {
-["c_amt"] = 0,
-["b_amt"] = 0,
-["g_amt"] = 0,
 ["b_dmg"] = 0,
-["targets"] = {
-},
-["n_total"] = 0,
-["n_min"] = 0,
-["g_dmg"] = 0,
-["counter"] = 1,
-["total"] = 106561,
-["c_max"] = 0,
-["id"] = 357208,
-["r_dmg"] = 0,
-["extra"] = {
-},
-["a_dmg"] = 0,
-["a_amt"] = 0,
-["c_min"] = 0,
-["successful_casted"] = 0,
-["c_total"] = 0,
-["n_amt"] = 0,
-["n_max"] = 0,
-["r_amt"] = 0,
-},
-[396286] = {
-["c_amt"] = 0,
-["b_amt"] = 0,
-["g_amt"] = 0,
-["b_dmg"] = 0,
-["targets"] = {
-},
-["n_total"] = 0,
-["n_min"] = 0,
-["g_dmg"] = 0,
-["counter"] = 1,
-["total"] = 35230,
-["c_max"] = 0,
-["id"] = 396286,
-["r_dmg"] = 0,
-["extra"] = {
-},
-["a_dmg"] = 0,
-["a_amt"] = 0,
-["c_min"] = 0,
-["successful_casted"] = 0,
-["c_total"] = 0,
-["n_amt"] = 0,
-["n_max"] = 0,
-["r_amt"] = 0,
-},
-[1263101] = {
-["c_amt"] = 0,
-["b_amt"] = 0,
-["g_amt"] = 0,
-["b_dmg"] = 0,
-["targets"] = {
-},
-["n_total"] = 0,
-["n_min"] = 0,
-["g_dmg"] = 0,
-["counter"] = 1,
-["total"] = 6205,
-["c_max"] = 0,
-["id"] = 1263101,
-["r_dmg"] = 0,
-["extra"] = {
-},
-["a_dmg"] = 0,
-["a_amt"] = 0,
-["c_min"] = 0,
-["successful_casted"] = 0,
-["c_total"] = 0,
-["n_amt"] = 0,
-["n_max"] = 0,
-["r_amt"] = 0,
-},
-[434481] = {
-["c_amt"] = 0,
-["b_amt"] = 0,
-["g_amt"] = 0,
-["b_dmg"] = 0,
-["targets"] = {
-},
-["n_total"] = 0,
-["n_min"] = 0,
-["g_dmg"] = 0,
-["counter"] = 1,
-["total"] = 15889,
-["c_max"] = 0,
-["id"] = 434481,
-["r_dmg"] = 0,
-["extra"] = {
-},
-["a_dmg"] = 0,
-["a_amt"] = 0,
-["c_min"] = 0,
-["successful_casted"] = 0,
-["c_total"] = 0,
-["n_amt"] = 0,
-["n_max"] = 0,
-["r_amt"] = 0,
-},
-[362969] = {
-["c_amt"] = 0,
-["b_amt"] = 0,
-["g_amt"] = 0,
-["b_dmg"] = 0,
-["targets"] = {
-},
-["n_total"] = 0,
-["n_min"] = 0,
-["g_dmg"] = 0,
-["counter"] = 1,
-["total"] = 25146,
-["c_max"] = 0,
-["id"] = 362969,
-["r_dmg"] = 0,
-["extra"] = {
-},
-["a_dmg"] = 0,
-["a_amt"] = 0,
-["c_min"] = 0,
-["successful_casted"] = 0,
-["c_total"] = 0,
-["n_amt"] = 0,
-["n_max"] = 0,
 ["r_amt"] = 0,
 },
 [1252389] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -3420,7 +3290,137 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
+["b_dmg"] = 0,
+["r_amt"] = 0,
+},
+[396286] = {
+["c_amt"] = 0,
+["b_amt"] = 0,
+["g_amt"] = 0,
 ["n_max"] = 0,
+["targets"] = {
+},
+["n_total"] = 0,
+["n_min"] = 0,
+["g_dmg"] = 0,
+["counter"] = 1,
+["total"] = 35230,
+["c_max"] = 0,
+["id"] = 396286,
+["r_dmg"] = 0,
+["extra"] = {
+},
+["a_dmg"] = 0,
+["a_amt"] = 0,
+["c_min"] = 0,
+["successful_casted"] = 0,
+["c_total"] = 0,
+["n_amt"] = 0,
+["b_dmg"] = 0,
+["r_amt"] = 0,
+},
+[1263101] = {
+["c_amt"] = 0,
+["b_amt"] = 0,
+["g_amt"] = 0,
+["n_max"] = 0,
+["targets"] = {
+},
+["n_total"] = 0,
+["n_min"] = 0,
+["g_dmg"] = 0,
+["counter"] = 1,
+["total"] = 6205,
+["c_max"] = 0,
+["id"] = 1263101,
+["r_dmg"] = 0,
+["extra"] = {
+},
+["a_dmg"] = 0,
+["a_amt"] = 0,
+["c_min"] = 0,
+["successful_casted"] = 0,
+["c_total"] = 0,
+["n_amt"] = 0,
+["b_dmg"] = 0,
+["r_amt"] = 0,
+},
+[434481] = {
+["c_amt"] = 0,
+["b_amt"] = 0,
+["g_amt"] = 0,
+["n_max"] = 0,
+["targets"] = {
+},
+["n_total"] = 0,
+["n_min"] = 0,
+["g_dmg"] = 0,
+["counter"] = 1,
+["total"] = 15889,
+["c_max"] = 0,
+["id"] = 434481,
+["r_dmg"] = 0,
+["extra"] = {
+},
+["a_dmg"] = 0,
+["a_amt"] = 0,
+["c_min"] = 0,
+["successful_casted"] = 0,
+["c_total"] = 0,
+["n_amt"] = 0,
+["b_dmg"] = 0,
+["r_amt"] = 0,
+},
+[362969] = {
+["c_amt"] = 0,
+["b_amt"] = 0,
+["g_amt"] = 0,
+["n_max"] = 0,
+["targets"] = {
+},
+["n_total"] = 0,
+["n_min"] = 0,
+["g_dmg"] = 0,
+["counter"] = 1,
+["total"] = 25146,
+["c_max"] = 0,
+["id"] = 362969,
+["r_dmg"] = 0,
+["extra"] = {
+},
+["a_dmg"] = 0,
+["a_amt"] = 0,
+["c_min"] = 0,
+["successful_casted"] = 0,
+["c_total"] = 0,
+["n_amt"] = 0,
+["b_dmg"] = 0,
+["r_amt"] = 0,
+},
+[357208] = {
+["c_amt"] = 0,
+["b_amt"] = 0,
+["g_amt"] = 0,
+["n_max"] = 0,
+["targets"] = {
+},
+["n_total"] = 0,
+["n_min"] = 0,
+["g_dmg"] = 0,
+["counter"] = 1,
+["total"] = 106561,
+["c_max"] = 0,
+["id"] = 357208,
+["r_dmg"] = 0,
+["extra"] = {
+},
+["a_dmg"] = 0,
+["a_amt"] = 0,
+["c_min"] = 0,
+["successful_casted"] = 0,
+["c_total"] = 0,
+["n_amt"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 },
@@ -3428,7 +3428,7 @@ _detalhes_database = {
 },
 ["grupo"] = true,
 ["tipo"] = 1,
-["aID"] = "3676-0DF7D3EF",
+["classe"] = "EVOKER",
 ["custom"] = 0,
 ["last_event"] = 0,
 ["damage_taken"] = 374111,
@@ -3444,12 +3444,12 @@ _detalhes_database = {
 ["_ActorTable"] = {
 {
 ["flag_original"] = 1298,
-["targets_overheal"] = {
+["healing_from"] = {
 },
 ["pets"] = {
 },
 ["iniciar_hps"] = false,
-["classe"] = "EVOKER",
+["heal_enemy_amt"] = 0,
 ["totalover"] = 0.005526,
 ["total_without_pet"] = 0.005526,
 ["total"] = 365023,
@@ -3469,7 +3469,7 @@ _detalhes_database = {
 ["healing_taken"] = 0.005526,
 ["end_time"] = 1773379666,
 ["start_time"] = 1773379666,
-["healing_from"] = {
+["targets_overheal"] = {
 },
 ["nome"] = "Barelynoer",
 ["spells"] = {
@@ -3593,13 +3593,13 @@ _detalhes_database = {
 ["tipo"] = 3,
 },
 ["grupo"] = true,
-["aID"] = "3676-0DF7D3EF",
+["classe"] = "EVOKER",
 ["last_event"] = 0,
 ["custom"] = 0,
 ["tipo"] = 2,
 ["totaldenied"] = 0.005526,
 ["delay"] = 0,
-["heal_enemy_amt"] = 0,
+["aID"] = "3676-0DF7D3EF",
 },
 },
 },
@@ -3619,7 +3619,7 @@ _detalhes_database = {
 ["dispell"] = 2.008739,
 ["pets"] = {
 },
-["classe"] = "EVOKER",
+["aID"] = "3676-0DF7D3EF",
 ["interrupt_spells"] = {
 ["_ActorTable"] = {
 [1257774] = {
@@ -3647,8 +3647,7 @@ _detalhes_database = {
 },
 ["interrompeu_oque"] = {
 },
-["interrupt_targets"] = {
-},
+["spec"] = 1473,
 ["serial"] = "Player-3676-0DF7D3EF",
 ["specIcon"] = 5198700,
 ["dispell_oque"] = {
@@ -3660,11 +3659,12 @@ _detalhes_database = {
 },
 ["nome"] = "Barelynoer",
 ["grupo"] = true,
-["last_event"] = 0,
-["aID"] = "3676-0DF7D3EF",
-["tipo"] = 4,
 ["interrupt"] = 2.008602,
-["spec"] = 1473,
+["classe"] = "EVOKER",
+["tipo"] = 4,
+["interrupt_targets"] = {
+},
+["last_event"] = 0,
 },
 },
 },
@@ -3676,7 +3676,7 @@ _detalhes_database = {
 },
 ["boss_hp"] = 1,
 ["CombatStartedAt"] = 142770.159,
-["tempo_start"] = 1773379666,
+["overall_added"] = true,
 ["last_events_tables"] = {
 },
 ["alternate_power"] = {
@@ -3792,7 +3792,7 @@ _detalhes_database = {
 ["start_time"] = 142707.562,
 ["TimeData"] = {
 },
-["overall_added"] = true,
+["tempo_start"] = 1773379666,
 },
 {
 {
@@ -3804,19 +3804,19 @@ _detalhes_database = {
 ["totalabsorbed"] = 0.007033,
 ["pets"] = {
 },
-["classe"] = "EVOKER",
+["aID"] = "3676-0DF7D3EF",
 ["total_without_pet"] = 0.007033,
 ["last_dps_realtime"] = 0,
 ["dps_started"] = false,
 ["total"] = 815238,
 ["spec"] = 1473,
-["friendlyfire"] = {
-},
+["on_hold"] = false,
 ["total_extra"] = 0,
 ["serial"] = "Player-3676-0DF7D3EF",
 ["avoidable_damage"] = {
 },
-["specIcon"] = 5198700,
+["damage_from"] = {
+},
 ["targets"] = {
 },
 ["friendlyfire_total"] = 0,
@@ -3824,9 +3824,9 @@ _detalhes_database = {
 },
 ["damage_taken_ps"] = 6595.21875,
 ["end_time"] = 1773379560,
-["on_hold"] = false,
-["damage_from"] = {
+["friendlyfire"] = {
 },
+["specIcon"] = 5198700,
 ["nome"] = "Barelynoer",
 ["spells"] = {
 ["_ActorTable"] = {
@@ -3834,7 +3834,7 @@ _detalhes_database = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -3853,14 +3853,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [1236970] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -3879,14 +3879,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [1263101] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -3905,14 +3905,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [1259172] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -3931,14 +3931,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [395160] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -3957,14 +3957,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [442204] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -3983,14 +3983,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [1263121] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -4009,14 +4009,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [396286] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -4035,14 +4035,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [362969] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -4061,14 +4061,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [357208] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -4087,14 +4087,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [409311] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -4113,14 +4113,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [434481] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -4139,14 +4139,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [1252389] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -4165,7 +4165,7 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 },
@@ -4173,7 +4173,7 @@ _detalhes_database = {
 },
 ["grupo"] = true,
 ["tipo"] = 1,
-["aID"] = "3676-0DF7D3EF",
+["classe"] = "EVOKER",
 ["custom"] = 0,
 ["last_event"] = 0,
 ["damage_taken"] = 211047,
@@ -4189,12 +4189,12 @@ _detalhes_database = {
 ["_ActorTable"] = {
 {
 ["flag_original"] = 1298,
-["targets_overheal"] = {
+["healing_from"] = {
 },
 ["pets"] = {
 },
 ["iniciar_hps"] = false,
-["classe"] = "EVOKER",
+["heal_enemy_amt"] = 0,
 ["totalover"] = 0.005165,
 ["total_without_pet"] = 0.005165,
 ["total"] = 107696,
@@ -4214,34 +4214,11 @@ _detalhes_database = {
 ["healing_taken"] = 0.005165,
 ["end_time"] = 1773379560,
 ["start_time"] = 1773379560,
-["healing_from"] = {
+["targets_overheal"] = {
 },
 ["nome"] = "Barelynoer",
 ["spells"] = {
 ["_ActorTable"] = {
-[361469] = {
-["c_amt"] = 0,
-["totalabsorb"] = 0,
-["targets_overheal"] = {
-},
-["n_max"] = 0,
-["targets"] = {
-},
-["n_total"] = 0,
-["n_min"] = 0,
-["counter"] = 1,
-["overheal"] = 0,
-["total"] = 22650,
-["c_max"] = 0,
-["id"] = 361469,
-["targets_absorbs"] = {
-},
-["c_min"] = 0,
-["c_total"] = 0,
-["totaldenied"] = 0,
-["n_amt"] = 0,
-["absorbed"] = 0,
-},
 [374348] = {
 ["c_amt"] = 0,
 ["totalabsorb"] = 0,
@@ -4257,6 +4234,29 @@ _detalhes_database = {
 ["total"] = 7062,
 ["c_max"] = 0,
 ["id"] = 374348,
+["targets_absorbs"] = {
+},
+["c_min"] = 0,
+["c_total"] = 0,
+["totaldenied"] = 0,
+["n_amt"] = 0,
+["absorbed"] = 0,
+},
+[361469] = {
+["c_amt"] = 0,
+["totalabsorb"] = 0,
+["targets_overheal"] = {
+},
+["n_max"] = 0,
+["targets"] = {
+},
+["n_total"] = 0,
+["n_min"] = 0,
+["counter"] = 1,
+["overheal"] = 0,
+["total"] = 22650,
+["c_max"] = 0,
+["id"] = 361469,
 ["targets_absorbs"] = {
 },
 ["c_min"] = 0,
@@ -4315,13 +4315,13 @@ _detalhes_database = {
 ["tipo"] = 3,
 },
 ["grupo"] = true,
-["aID"] = "3676-0DF7D3EF",
+["classe"] = "EVOKER",
 ["last_event"] = 0,
 ["custom"] = 0,
 ["tipo"] = 2,
 ["totaldenied"] = 0.005165,
 ["delay"] = 0,
-["heal_enemy_amt"] = 0,
+["aID"] = "3676-0DF7D3EF",
 },
 },
 },
@@ -4345,7 +4345,7 @@ _detalhes_database = {
 },
 ["boss_hp"] = 1,
 ["CombatStartedAt"] = 142707.562,
-["tempo_start"] = 1773379560,
+["overall_added"] = true,
 ["last_events_tables"] = {
 },
 ["alternate_power"] = {
@@ -4461,7 +4461,7 @@ _detalhes_database = {
 ["start_time"] = 142618.365,
 ["TimeData"] = {
 },
-["overall_added"] = true,
+["tempo_start"] = 1773379560,
 },
 {
 {
@@ -4473,19 +4473,19 @@ _detalhes_database = {
 ["totalabsorbed"] = 0.004868,
 ["pets"] = {
 },
-["classe"] = "EVOKER",
+["aID"] = "3676-0DF7D3EF",
 ["total_without_pet"] = 0.004868,
 ["last_dps_realtime"] = 0,
 ["dps_started"] = false,
 ["total"] = 496274,
 ["spec"] = 1473,
-["friendlyfire"] = {
-},
+["on_hold"] = false,
 ["total_extra"] = 0,
 ["serial"] = "Player-3676-0DF7D3EF",
 ["avoidable_damage"] = {
 },
-["specIcon"] = 5198700,
+["damage_from"] = {
+},
 ["targets"] = {
 },
 ["friendlyfire_total"] = 0,
@@ -4493,9 +4493,9 @@ _detalhes_database = {
 },
 ["damage_taken_ps"] = 8302.944444444445,
 ["end_time"] = 1773379522,
-["on_hold"] = false,
-["damage_from"] = {
+["friendlyfire"] = {
 },
+["specIcon"] = 5198700,
 ["nome"] = "Barelynoer",
 ["spells"] = {
 ["_ActorTable"] = {
@@ -4503,7 +4503,7 @@ _detalhes_database = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -4522,14 +4522,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [357208] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -4548,14 +4548,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [396286] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -4574,14 +4574,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [434481] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -4600,14 +4600,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [362969] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -4626,14 +4626,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [361469] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -4652,7 +4652,7 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 },
@@ -4660,7 +4660,7 @@ _detalhes_database = {
 },
 ["grupo"] = true,
 ["tipo"] = 1,
-["aID"] = "3676-0DF7D3EF",
+["classe"] = "EVOKER",
 ["custom"] = 0,
 ["last_event"] = 0,
 ["damage_taken"] = 149453,
@@ -4676,12 +4676,12 @@ _detalhes_database = {
 ["_ActorTable"] = {
 {
 ["flag_original"] = 1298,
-["targets_overheal"] = {
+["healing_from"] = {
 },
 ["pets"] = {
 },
 ["iniciar_hps"] = false,
-["classe"] = "EVOKER",
+["heal_enemy_amt"] = 0,
 ["totalover"] = 0.002688,
 ["total_without_pet"] = 0.002688,
 ["total"] = 23861,
@@ -4701,7 +4701,7 @@ _detalhes_database = {
 ["healing_taken"] = 0.002688,
 ["end_time"] = 1773379522,
 ["start_time"] = 1773379522,
-["healing_from"] = {
+["targets_overheal"] = {
 },
 ["nome"] = "Barelynoer",
 ["spells"] = {
@@ -4756,13 +4756,13 @@ _detalhes_database = {
 ["tipo"] = 3,
 },
 ["grupo"] = true,
-["aID"] = "3676-0DF7D3EF",
+["classe"] = "EVOKER",
 ["last_event"] = 0,
 ["custom"] = 0,
 ["tipo"] = 2,
 ["totaldenied"] = 0.002688,
 ["delay"] = 0,
-["heal_enemy_amt"] = 0,
+["aID"] = "3676-0DF7D3EF",
 },
 },
 },
@@ -4786,7 +4786,7 @@ _detalhes_database = {
 },
 ["boss_hp"] = 1,
 ["CombatStartedAt"] = 142618.365,
-["tempo_start"] = 1773379522,
+["overall_added"] = true,
 ["last_events_tables"] = {
 },
 ["alternate_power"] = {
@@ -4902,7 +4902,7 @@ _detalhes_database = {
 ["start_time"] = 142595.75,
 ["TimeData"] = {
 },
-["overall_added"] = true,
+["tempo_start"] = 1773379522,
 },
 {
 {
@@ -4914,19 +4914,19 @@ _detalhes_database = {
 ["totalabsorbed"] = 0.008011,
 ["pets"] = {
 },
-["classe"] = "EVOKER",
+["aID"] = "3676-0DF7D3EF",
 ["total_without_pet"] = 0.008011,
 ["last_dps_realtime"] = 0,
 ["dps_started"] = false,
 ["total"] = 503797,
 ["spec"] = 1473,
-["friendlyfire"] = {
-},
+["on_hold"] = false,
 ["total_extra"] = 0,
 ["serial"] = "Player-3676-0DF7D3EF",
 ["avoidable_damage"] = {
 },
-["specIcon"] = 5198700,
+["damage_from"] = {
+},
 ["targets"] = {
 },
 ["friendlyfire_total"] = 0,
@@ -4934,9 +4934,9 @@ _detalhes_database = {
 },
 ["damage_taken_ps"] = 5355,
 ["end_time"] = 1773379494,
-["on_hold"] = false,
-["damage_from"] = {
+["friendlyfire"] = {
 },
+["specIcon"] = 5198700,
 ["nome"] = "Barelynoer",
 ["spells"] = {
 ["_ActorTable"] = {
@@ -4944,7 +4944,7 @@ _detalhes_database = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -4963,14 +4963,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [357208] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -4989,14 +4989,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [409311] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -5015,14 +5015,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [396286] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -5041,14 +5041,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [361469] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -5067,14 +5067,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [1252389] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -5093,14 +5093,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [434481] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -5119,14 +5119,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [362969] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -5145,7 +5145,7 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 },
@@ -5153,7 +5153,7 @@ _detalhes_database = {
 },
 ["grupo"] = true,
 ["tipo"] = 1,
-["aID"] = "3676-0DF7D3EF",
+["classe"] = "EVOKER",
 ["custom"] = 0,
 ["last_event"] = 0,
 ["damage_taken"] = 80325,
@@ -5169,12 +5169,12 @@ _detalhes_database = {
 ["_ActorTable"] = {
 {
 ["flag_original"] = 1298,
-["targets_overheal"] = {
+["healing_from"] = {
 },
 ["pets"] = {
 },
 ["iniciar_hps"] = false,
-["classe"] = "EVOKER",
+["heal_enemy_amt"] = 0,
 ["totalover"] = 0.001261,
 ["total_without_pet"] = 0.001261,
 ["total"] = 2580,
@@ -5194,7 +5194,7 @@ _detalhes_database = {
 ["healing_taken"] = 0.001261,
 ["end_time"] = 1773379494,
 ["start_time"] = 1773379494,
-["healing_from"] = {
+["targets_overheal"] = {
 },
 ["nome"] = "Barelynoer",
 ["spells"] = {
@@ -5226,13 +5226,13 @@ _detalhes_database = {
 ["tipo"] = 3,
 },
 ["grupo"] = true,
-["aID"] = "3676-0DF7D3EF",
+["classe"] = "EVOKER",
 ["last_event"] = 0,
 ["custom"] = 0,
 ["tipo"] = 2,
 ["totaldenied"] = 0.001261,
 ["delay"] = 0,
-["heal_enemy_amt"] = 0,
+["aID"] = "3676-0DF7D3EF",
 },
 },
 },
@@ -5256,7 +5256,7 @@ _detalhes_database = {
 },
 ["boss_hp"] = 1,
 ["CombatStartedAt"] = 142595.392,
-["tempo_start"] = 1773379494,
+["overall_added"] = true,
 ["last_events_tables"] = {
 },
 ["alternate_power"] = {
@@ -5372,7 +5372,7 @@ _detalhes_database = {
 ["start_time"] = 142570.715,
 ["TimeData"] = {
 },
-["overall_added"] = true,
+["tempo_start"] = 1773379494,
 },
 {
 {
@@ -5384,19 +5384,19 @@ _detalhes_database = {
 ["totalabsorbed"] = 0.007667,
 ["pets"] = {
 },
-["classe"] = "EVOKER",
+["aID"] = "3676-0DF7D3EF",
 ["total_without_pet"] = 0.007667,
 ["last_dps_realtime"] = 0,
 ["dps_started"] = false,
 ["total"] = 748824,
 ["spec"] = 1473,
-["friendlyfire"] = {
-},
+["on_hold"] = false,
 ["total_extra"] = 0,
 ["serial"] = "Player-3676-0DF7D3EF",
 ["avoidable_damage"] = {
 },
-["specIcon"] = 5198700,
+["damage_from"] = {
+},
 ["targets"] = {
 },
 ["friendlyfire_total"] = 0,
@@ -5404,9 +5404,9 @@ _detalhes_database = {
 },
 ["damage_taken_ps"] = 6688.9,
 ["end_time"] = 1773379463,
-["on_hold"] = false,
-["damage_from"] = {
+["friendlyfire"] = {
 },
+["specIcon"] = 5198700,
 ["nome"] = "Barelynoer",
 ["spells"] = {
 ["_ActorTable"] = {
@@ -5414,7 +5414,7 @@ _detalhes_database = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -5433,14 +5433,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [6603] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -5459,14 +5459,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [1263101] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -5485,14 +5485,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [395160] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -5511,14 +5511,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [1263121] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -5537,14 +5537,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [396286] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -5563,14 +5563,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [362969] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -5589,14 +5589,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [357208] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -5615,14 +5615,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [409311] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -5641,14 +5641,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [434481] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -5667,14 +5667,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [1252389] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -5693,7 +5693,7 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 },
@@ -5701,7 +5701,7 @@ _detalhes_database = {
 },
 ["grupo"] = true,
 ["tipo"] = 1,
-["aID"] = "3676-0DF7D3EF",
+["classe"] = "EVOKER",
 ["custom"] = 0,
 ["last_event"] = 0,
 ["damage_taken"] = 267556,
@@ -5717,12 +5717,12 @@ _detalhes_database = {
 ["_ActorTable"] = {
 {
 ["flag_original"] = 1298,
-["targets_overheal"] = {
+["healing_from"] = {
 },
 ["pets"] = {
 },
 ["iniciar_hps"] = false,
-["classe"] = "EVOKER",
+["heal_enemy_amt"] = 0,
 ["totalover"] = 0.005432,
 ["total_without_pet"] = 0.005432,
 ["total"] = 177658,
@@ -5742,7 +5742,7 @@ _detalhes_database = {
 ["healing_taken"] = 0.005432,
 ["end_time"] = 1773379463,
 ["start_time"] = 1773379463,
-["healing_from"] = {
+["targets_overheal"] = {
 },
 ["nome"] = "Barelynoer",
 ["spells"] = {
@@ -5820,13 +5820,13 @@ _detalhes_database = {
 ["tipo"] = 3,
 },
 ["grupo"] = true,
-["aID"] = "3676-0DF7D3EF",
+["classe"] = "EVOKER",
 ["last_event"] = 0,
 ["custom"] = 0,
 ["tipo"] = 2,
 ["totaldenied"] = 0.005432,
 ["delay"] = 0,
-["heal_enemy_amt"] = 0,
+["aID"] = "3676-0DF7D3EF",
 },
 },
 },
@@ -5846,7 +5846,7 @@ _detalhes_database = {
 ["dispell"] = 1.003683,
 ["pets"] = {
 },
-["classe"] = "EVOKER",
+["aID"] = "3676-0DF7D3EF",
 ["interrupt_spells"] = {
 ["_ActorTable"] = {
 [217742] = {
@@ -5865,8 +5865,7 @@ _detalhes_database = {
 },
 ["interrompeu_oque"] = {
 },
-["interrupt_targets"] = {
-},
+["spec"] = 1473,
 ["serial"] = "Player-3676-0DF7D3EF",
 ["specIcon"] = 5198700,
 ["dispell_oque"] = {
@@ -5878,11 +5877,12 @@ _detalhes_database = {
 },
 ["nome"] = "Barelynoer",
 ["grupo"] = true,
-["last_event"] = 0,
-["aID"] = "3676-0DF7D3EF",
-["tipo"] = 4,
 ["interrupt"] = 1.003035,
-["spec"] = 1473,
+["classe"] = "EVOKER",
+["tipo"] = 4,
+["interrupt_targets"] = {
+},
+["last_event"] = 0,
 },
 },
 },
@@ -5894,7 +5894,7 @@ _detalhes_database = {
 },
 ["boss_hp"] = 1,
 ["CombatStartedAt"] = 142570.715,
-["tempo_start"] = 1773379463,
+["overall_added"] = true,
 ["last_events_tables"] = {
 },
 ["alternate_power"] = {
@@ -6010,7 +6010,7 @@ _detalhes_database = {
 ["start_time"] = 142515.266,
 ["TimeData"] = {
 },
-["overall_added"] = true,
+["tempo_start"] = 1773379463,
 },
 {
 {
@@ -6022,19 +6022,19 @@ _detalhes_database = {
 ["totalabsorbed"] = 0.005101,
 ["pets"] = {
 },
-["classe"] = "EVOKER",
+["aID"] = "3676-0DF7D3EF",
 ["total_without_pet"] = 0.005101,
 ["last_dps_realtime"] = 0,
 ["dps_started"] = false,
 ["total"] = 455165,
 ["spec"] = 1473,
-["friendlyfire"] = {
-},
+["on_hold"] = false,
 ["total_extra"] = 0,
 ["serial"] = "Player-3676-0DF7D3EF",
 ["avoidable_damage"] = {
 },
-["specIcon"] = 5198700,
+["damage_from"] = {
+},
 ["targets"] = {
 },
 ["friendlyfire_total"] = 0,
@@ -6042,9 +6042,9 @@ _detalhes_database = {
 },
 ["damage_taken_ps"] = 7251.333333333333,
 ["end_time"] = 1773379342,
-["on_hold"] = false,
-["damage_from"] = {
+["friendlyfire"] = {
 },
+["specIcon"] = 5198700,
 ["nome"] = "Barelynoer",
 ["spells"] = {
 ["_ActorTable"] = {
@@ -6052,7 +6052,7 @@ _detalhes_database = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -6071,14 +6071,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [1259172] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -6097,14 +6097,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [442204] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -6123,14 +6123,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [1236970] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -6149,14 +6149,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [1252389] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -6175,14 +6175,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [434481] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -6201,14 +6201,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [357208] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -6227,14 +6227,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [396286] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -6253,7 +6253,7 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 },
@@ -6261,7 +6261,7 @@ _detalhes_database = {
 },
 ["grupo"] = true,
 ["tipo"] = 1,
-["aID"] = "3676-0DF7D3EF",
+["classe"] = "EVOKER",
 ["custom"] = 0,
 ["last_event"] = 0,
 ["damage_taken"] = 174032,
@@ -6277,17 +6277,16 @@ _detalhes_database = {
 ["_ActorTable"] = {
 {
 ["flag_original"] = 1298,
-["targets_overheal"] = {
+["healing_from"] = {
 },
 ["pets"] = {
 },
 ["iniciar_hps"] = false,
-["classe"] = "EVOKER",
+["aID"] = "3676-0DF7D3EF",
 ["totalover"] = 0.001842,
 ["total_without_pet"] = 0.001842,
 ["total"] = 54196,
-["targets_absorbs"] = {
-},
+["spec"] = 1473,
 ["heal_enemy"] = {
 },
 ["totalabsorb_ps"] = 1405.875,
@@ -6299,11 +6298,11 @@ _detalhes_database = {
 ["targets"] = {
 },
 ["totalover_without_pet"] = 0.001842,
-["heal_enemy_amt"] = 0,
+["classe"] = "EVOKER",
 ["healing_taken"] = 0.001842,
 ["end_time"] = 1773379342,
 ["last_event"] = 0,
-["aID"] = "3676-0DF7D3EF",
+["heal_enemy_amt"] = 0,
 ["nome"] = "Barelynoer",
 ["spells"] = {
 ["_ActorTable"] = {
@@ -6380,14 +6379,15 @@ _detalhes_database = {
 ["tipo"] = 3,
 },
 ["grupo"] = true,
-["healing_from"] = {
+["targets_overheal"] = {
 },
 ["start_time"] = 1773379342,
 ["custom"] = 0,
 ["tipo"] = 2,
 ["totaldenied"] = 0.001842,
 ["delay"] = 0,
-["spec"] = 1473,
+["targets_absorbs"] = {
+},
 },
 },
 },
@@ -6411,7 +6411,7 @@ _detalhes_database = {
 },
 ["boss_hp"] = 1,
 ["CombatStartedAt"] = 142515.046,
-["tempo_start"] = 1773379342,
+["overall_added"] = true,
 ["last_events_tables"] = {
 },
 ["alternate_power"] = {
@@ -6527,7 +6527,7 @@ _detalhes_database = {
 ["start_time"] = 142415.383,
 ["TimeData"] = {
 },
-["overall_added"] = true,
+["tempo_start"] = 1773379342,
 },
 {
 {
@@ -6539,19 +6539,19 @@ _detalhes_database = {
 ["totalabsorbed"] = 0.007181,
 ["pets"] = {
 },
-["classe"] = "EVOKER",
+["aID"] = "3676-0DF7D3EF",
 ["total_without_pet"] = 0.007181,
 ["last_dps_realtime"] = 0,
 ["dps_started"] = false,
 ["total"] = 173692,
 ["spec"] = 1473,
-["friendlyfire"] = {
-},
+["on_hold"] = false,
 ["total_extra"] = 0,
 ["serial"] = "Player-3676-0DF7D3EF",
 ["avoidable_damage"] = {
 },
-["specIcon"] = 5198700,
+["damage_from"] = {
+},
 ["targets"] = {
 },
 ["friendlyfire_total"] = 0,
@@ -6559,9 +6559,9 @@ _detalhes_database = {
 },
 ["damage_taken_ps"] = 5900.866666666667,
 ["end_time"] = 1773379288,
-["on_hold"] = false,
-["damage_from"] = {
+["friendlyfire"] = {
 },
+["specIcon"] = 5198700,
 ["nome"] = "Barelynoer",
 ["spells"] = {
 ["_ActorTable"] = {
@@ -6569,7 +6569,7 @@ _detalhes_database = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -6588,14 +6588,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [434481] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -6614,14 +6614,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [396286] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -6640,14 +6640,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [362969] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -6666,14 +6666,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [361469] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -6692,14 +6692,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [357208] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -6718,7 +6718,7 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 },
@@ -6726,7 +6726,7 @@ _detalhes_database = {
 },
 ["grupo"] = true,
 ["tipo"] = 1,
-["aID"] = "3676-0DF7D3EF",
+["classe"] = "EVOKER",
 ["custom"] = 0,
 ["last_event"] = 0,
 ["damage_taken"] = 88513,
@@ -6742,12 +6742,12 @@ _detalhes_database = {
 ["_ActorTable"] = {
 {
 ["flag_original"] = 1298,
-["targets_overheal"] = {
+["healing_from"] = {
 },
 ["pets"] = {
 },
 ["iniciar_hps"] = false,
-["classe"] = "EVOKER",
+["heal_enemy_amt"] = 0,
 ["totalover"] = 0.008996,
 ["total_without_pet"] = 0.008996,
 ["total"] = 951,
@@ -6767,7 +6767,7 @@ _detalhes_database = {
 ["healing_taken"] = 0.008996,
 ["end_time"] = 1773379288,
 ["start_time"] = 1773379288,
-["healing_from"] = {
+["targets_overheal"] = {
 },
 ["nome"] = "Barelynoer",
 ["spells"] = {
@@ -6799,13 +6799,13 @@ _detalhes_database = {
 ["tipo"] = 3,
 },
 ["grupo"] = true,
-["aID"] = "3676-0DF7D3EF",
+["classe"] = "EVOKER",
 ["last_event"] = 0,
 ["custom"] = 0,
 ["tipo"] = 2,
 ["totaldenied"] = 0.008996,
 ["delay"] = 0,
-["heal_enemy_amt"] = 0,
+["aID"] = "3676-0DF7D3EF",
 },
 },
 },
@@ -6829,7 +6829,7 @@ _detalhes_database = {
 },
 ["boss_hp"] = 1,
 ["CombatStartedAt"] = 142409.553,
-["tempo_start"] = 1773379288,
+["overall_added"] = true,
 ["last_events_tables"] = {
 },
 ["alternate_power"] = {
@@ -6945,7 +6945,7 @@ _detalhes_database = {
 ["start_time"] = 142364.025,
 ["TimeData"] = {
 },
-["overall_added"] = true,
+["tempo_start"] = 1773379288,
 },
 {
 {
@@ -6957,19 +6957,19 @@ _detalhes_database = {
 ["totalabsorbed"] = 0.003568,
 ["pets"] = {
 },
-["classe"] = "EVOKER",
+["aID"] = "3676-0DF7D3EF",
 ["total_without_pet"] = 0.003568,
 ["last_dps_realtime"] = 0,
 ["dps_started"] = false,
 ["total"] = 159491,
 ["spec"] = 1473,
-["friendlyfire"] = {
-},
+["on_hold"] = false,
 ["total_extra"] = 0,
 ["serial"] = "Player-3676-0DF7D3EF",
 ["avoidable_damage"] = {
 },
-["specIcon"] = 5198700,
+["damage_from"] = {
+},
 ["targets"] = {
 },
 ["friendlyfire_total"] = 0,
@@ -6977,9 +6977,9 @@ _detalhes_database = {
 },
 ["damage_taken_ps"] = 4704.4,
 ["end_time"] = 1773379240,
-["on_hold"] = false,
-["damage_from"] = {
+["friendlyfire"] = {
 },
+["specIcon"] = 5198700,
 ["nome"] = "Barelynoer",
 ["spells"] = {
 ["_ActorTable"] = {
@@ -6987,7 +6987,7 @@ _detalhes_database = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -7006,14 +7006,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [434481] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -7032,14 +7032,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [396286] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -7058,14 +7058,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [1263101] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -7084,14 +7084,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [357208] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -7110,7 +7110,7 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 },
@@ -7118,7 +7118,7 @@ _detalhes_database = {
 },
 ["grupo"] = true,
 ["tipo"] = 1,
-["aID"] = "3676-0DF7D3EF",
+["classe"] = "EVOKER",
 ["custom"] = 0,
 ["last_event"] = 0,
 ["damage_taken"] = 47044,
@@ -7134,12 +7134,12 @@ _detalhes_database = {
 ["_ActorTable"] = {
 {
 ["flag_original"] = 1298,
-["targets_overheal"] = {
+["healing_from"] = {
 },
 ["pets"] = {
 },
 ["iniciar_hps"] = false,
-["classe"] = "EVOKER",
+["heal_enemy_amt"] = 0,
 ["totalover"] = 0.005111,
 ["total_without_pet"] = 0.005111,
 ["total"] = 794,
@@ -7159,7 +7159,7 @@ _detalhes_database = {
 ["healing_taken"] = 0.005111,
 ["end_time"] = 1773379240,
 ["start_time"] = 1773379240,
-["healing_from"] = {
+["targets_overheal"] = {
 },
 ["nome"] = "Barelynoer",
 ["spells"] = {
@@ -7191,13 +7191,13 @@ _detalhes_database = {
 ["tipo"] = 3,
 },
 ["grupo"] = true,
-["aID"] = "3676-0DF7D3EF",
+["classe"] = "EVOKER",
 ["last_event"] = 0,
 ["custom"] = 0,
 ["tipo"] = 2,
 ["totaldenied"] = 0.005111,
 ["delay"] = 0,
-["heal_enemy_amt"] = 0,
+["aID"] = "3676-0DF7D3EF",
 },
 },
 },
@@ -7221,7 +7221,7 @@ _detalhes_database = {
 },
 ["boss_hp"] = 1,
 ["CombatStartedAt"] = 142364.025,
-["tempo_start"] = 1773379240,
+["overall_added"] = true,
 ["last_events_tables"] = {
 },
 ["alternate_power"] = {
@@ -7337,7 +7337,7 @@ _detalhes_database = {
 ["start_time"] = 142325.54,
 ["TimeData"] = {
 },
-["overall_added"] = true,
+["tempo_start"] = 1773379240,
 },
 {
 {
@@ -7349,19 +7349,19 @@ _detalhes_database = {
 ["totalabsorbed"] = 0.008969,
 ["pets"] = {
 },
-["classe"] = "EVOKER",
+["aID"] = "3676-0DF7D3EF",
 ["total_without_pet"] = 0.008969,
 ["last_dps_realtime"] = 0,
 ["dps_started"] = false,
 ["total"] = 1203417,
 ["spec"] = 1473,
-["friendlyfire"] = {
-},
+["on_hold"] = false,
 ["total_extra"] = 0,
 ["serial"] = "Player-3676-0DF7D3EF",
 ["avoidable_damage"] = {
 },
-["specIcon"] = 5198700,
+["damage_from"] = {
+},
 ["targets"] = {
 },
 ["friendlyfire_total"] = 0,
@@ -7369,9 +7369,9 @@ _detalhes_database = {
 },
 ["damage_taken_ps"] = 4441.734693877551,
 ["end_time"] = 1773379036,
-["on_hold"] = false,
-["damage_from"] = {
+["friendlyfire"] = {
 },
+["specIcon"] = 5198700,
 ["nome"] = "Barelynoer",
 ["spells"] = {
 ["_ActorTable"] = {
@@ -7379,7 +7379,7 @@ _detalhes_database = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -7398,14 +7398,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [396288] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -7424,14 +7424,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [1263101] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -7450,14 +7450,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [1259172] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -7476,14 +7476,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [395160] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -7502,14 +7502,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [442204] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -7528,14 +7528,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [362969] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -7554,14 +7554,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [396286] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -7580,14 +7580,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [409311] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -7606,14 +7606,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [1283719] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -7632,14 +7632,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [357208] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -7658,14 +7658,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [1236970] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -7684,14 +7684,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [434481] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -7710,14 +7710,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [361469] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -7736,7 +7736,7 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 },
@@ -7744,7 +7744,7 @@ _detalhes_database = {
 },
 ["grupo"] = true,
 ["tipo"] = 1,
-["aID"] = "3676-0DF7D3EF",
+["classe"] = "EVOKER",
 ["custom"] = 0,
 ["last_event"] = 0,
 ["damage_taken"] = 217645,
@@ -7760,17 +7760,16 @@ _detalhes_database = {
 ["_ActorTable"] = {
 {
 ["flag_original"] = 1298,
-["targets_overheal"] = {
+["healing_from"] = {
 },
 ["pets"] = {
 },
 ["iniciar_hps"] = false,
-["classe"] = "EVOKER",
+["aID"] = "3676-0DF7D3EF",
 ["totalover"] = 0.00539,
 ["total_without_pet"] = 0.00539,
 ["total"] = 146313,
-["targets_absorbs"] = {
-},
+["spec"] = 1473,
 ["heal_enemy"] = {
 },
 ["totalabsorb_ps"] = 664.4285714285714,
@@ -7782,11 +7781,11 @@ _detalhes_database = {
 ["targets"] = {
 },
 ["totalover_without_pet"] = 0.00539,
-["heal_enemy_amt"] = 0,
+["classe"] = "EVOKER",
 ["healing_taken"] = 0.00539,
 ["end_time"] = 1773379036,
 ["last_event"] = 0,
-["aID"] = "3676-0DF7D3EF",
+["heal_enemy_amt"] = 0,
 ["nome"] = "Barelynoer",
 ["spells"] = {
 ["_ActorTable"] = {
@@ -7978,14 +7977,15 @@ _detalhes_database = {
 ["tipo"] = 3,
 },
 ["grupo"] = true,
-["healing_from"] = {
+["targets_overheal"] = {
 },
 ["start_time"] = 1773379036,
 ["custom"] = 0,
 ["tipo"] = 2,
 ["totaldenied"] = 0.00539,
 ["delay"] = 0,
-["spec"] = 1473,
+["targets_absorbs"] = {
+},
 },
 },
 },
@@ -8005,7 +8005,7 @@ _detalhes_database = {
 ["dispell"] = 1.002198,
 ["pets"] = {
 },
-["classe"] = "EVOKER",
+["aID"] = "3676-0DF7D3EF",
 ["interrupt_spells"] = {
 ["_ActorTable"] = {
 [1256194] = {
@@ -8024,8 +8024,7 @@ _detalhes_database = {
 },
 ["interrompeu_oque"] = {
 },
-["interrupt_targets"] = {
-},
+["spec"] = 1473,
 ["serial"] = "Player-3676-0DF7D3EF",
 ["specIcon"] = 5198700,
 ["dispell_oque"] = {
@@ -8037,11 +8036,12 @@ _detalhes_database = {
 },
 ["nome"] = "Barelynoer",
 ["grupo"] = true,
-["last_event"] = 0,
-["aID"] = "3676-0DF7D3EF",
-["tipo"] = 4,
 ["interrupt"] = 1.003142,
-["spec"] = 1473,
+["classe"] = "EVOKER",
+["tipo"] = 4,
+["interrupt_targets"] = {
+},
+["last_event"] = 0,
 },
 },
 },
@@ -8053,7 +8053,7 @@ _detalhes_database = {
 },
 ["boss_hp"] = 1,
 ["CombatStartedAt"] = 142320.416,
-["tempo_start"] = 1773379036,
+["overall_added"] = true,
 ["last_events_tables"] = {
 },
 ["alternate_power"] = {
@@ -8169,17 +8169,17 @@ _detalhes_database = {
 ["start_time"] = 142078.256,
 ["TimeData"] = {
 },
-["overall_added"] = true,
+["tempo_start"] = 1773379036,
 },
 },
 },
 ["ocd_tracker"] = {
-["show_title"] = true,
+["enabled"] = false,
 ["current_cooldowns"] = {
 },
 ["lines_per_column"] = 12,
 ["group_frames"] = true,
-["show_options"] = false,
+["width"] = 120,
 ["frames"] = {
 ["defensive-raid"] = {
 },
@@ -8194,12 +8194,12 @@ _detalhes_database = {
 ["defensive-personal"] = {
 },
 },
-["width"] = 120,
+["show_options"] = false,
 ["ignored_cooldowns"] = {
 },
+["framme_locked"] = false,
 ["cooldowns"] = {
 },
-["height"] = 18,
 ["own_frame"] = {
 ["defensive-raid"] = false,
 ["ofensive"] = false,
@@ -8207,12 +8207,12 @@ _detalhes_database = {
 ["utility"] = false,
 ["defensive-personal"] = false,
 },
-["framme_locked"] = false,
+["height"] = 18,
 ["show_conditions"] = {
 ["only_inside_instance"] = true,
 ["only_in_group"] = true,
 },
-["enabled"] = false,
+["show_title"] = true,
 ["filters"] = {
 ["itemutil"] = false,
 ["itempower"] = false,
@@ -8305,82 +8305,7 @@ _detalhes_database = {
 },
 },
 },
-["plugin_database"] = {
-["DETAILS_PLUGIN_COMPARETWO_WINDOW"] = {
-["enabled"] = true,
-["author"] = "Terciob",
-["max_compares"] = 4,
-["compare_type"] = 1,
-},
-["DETAILS_PLUGIN_STREAM_OVERLAY"] = {
-["use_square_mode"] = false,
-["is_first_run"] = false,
-["arrow_color"] = {
-1,
-1,
-1,
-0.5,
-},
-["scale"] = 1,
-["main_frame_size"] = {
-299.9999389648438,
-500.0000610351563,
-},
-["minimap"] = {
-["minimapPos"] = 107.6053533137717,
-["radius"] = 160,
-["hide"] = false,
-},
-["row_height"] = 20,
-["arrow_anchor_x"] = 0,
-["font_color"] = {
-1,
-1,
-1,
-1,
-},
-["row_texture"] = "Details Serenity",
-["square_grow_direction"] = "right",
-["point"] = "CENTER",
-["main_frame_strata"] = "LOW",
-["square_amount"] = 5,
-["enabled"] = false,
-["arrow_size"] = 10,
-["use_spark"] = true,
-["row_spacement"] = 21,
-["main_frame_color"] = {
-0,
-0,
-0,
-0.2,
-},
-["author"] = "Terciob",
-["arrow_texture"] = "Interface\\CHATFRAME\\ChatFrameExpandArrow",
-["font_size"] = 10,
-["y"] = -0.0001220703125,
-["x"] = 0,
-["font_face"] = "Friz Quadrata TT",
-["square_size"] = 32,
-["per_second"] = {
-["enabled"] = false,
-["point"] = "CENTER",
-["scale"] = 1,
-["font_shadow"] = true,
-["y"] = 6.103515625e-05,
-["x"] = -0.000244140625,
-["size"] = 32,
-["update_speed"] = 0.05,
-["attribute_type"] = 1,
-},
-["row_color"] = {
-0.1,
-0.1,
-0.1,
-0.4,
-},
-["main_frame_locked"] = false,
-["arrow_anchor_y"] = 0,
-},
+["cached_talents"] = {
 },
 ["nick_tag_cache"] = {
 ["nextreset"] = 1775077974,
@@ -8390,10 +8315,10 @@ _detalhes_database = {
 ["data_harvest_for_charsts"] = {
 ["players"] = {
 {
-["playerKey"] = "total",
-["combatObjectContainer"] = 1,
 ["name"] = "Damage of Each Individual Player",
 ["playerOnly"] = true,
+["playerKey"] = "total",
+["combatObjectContainer"] = 1,
 },
 },
 ["totals"] = {
@@ -8431,15 +8356,15 @@ _detalhes_database = {
 ["last_realversion"] = 170,
 ["data_harvested_for_charts"] = {
 },
-["cached_roles"] = {
+["damage_meter_session_info"] = {
 },
 ["SoloTablesSaved"] = {
 ["Mode"] = 1,
 },
 ["combat_log"] = {
 ["inverse_deathlog_overalldata"] = false,
-["merge_gemstones_1007"] = false,
 ["track_hunter_frenzy"] = false,
+["merge_gemstones_1007"] = false,
 ["merge_critical_heals"] = false,
 ["inverse_deathlog_raid"] = false,
 ["calc_evoker_damage"] = true,
@@ -8447,32 +8372,108 @@ _detalhes_database = {
 ["inverse_deathlog_mplus"] = false,
 },
 ["on_death_menu"] = false,
-["mythic_plus_log"] = {
+["plugin_database"] = {
+["DETAILS_PLUGIN_COMPARETWO_WINDOW"] = {
+["enabled"] = true,
+["author"] = "Terciob",
+["max_compares"] = 4,
+["compare_type"] = 1,
+},
+["DETAILS_PLUGIN_STREAM_OVERLAY"] = {
+["use_square_mode"] = false,
+["is_first_run"] = false,
+["arrow_color"] = {
+1,
+1,
+1,
+0.5,
+},
+["arrow_anchor_y"] = 0,
+["main_frame_size"] = {
+299.9999389648438,
+500.0000610351563,
+},
+["minimap"] = {
+["minimapPos"] = 107.6053533137717,
+["radius"] = 160,
+["hide"] = false,
+},
+["main_frame_locked"] = false,
+["arrow_anchor_x"] = 0,
+["row_color"] = {
+0.1,
+0.1,
+0.1,
+0.4,
+},
+["row_texture"] = "Details Serenity",
+["square_grow_direction"] = "right",
+["per_second"] = {
+["enabled"] = false,
+["point"] = "CENTER",
+["scale"] = 1,
+["font_shadow"] = true,
+["y"] = 6.103515625e-05,
+["x"] = -0.000244140625,
+["attribute_type"] = 1,
+["update_speed"] = 0.05,
+["size"] = 32,
+},
+["author"] = "Terciob",
+["square_amount"] = 5,
+["enabled"] = false,
+["arrow_size"] = 10,
+["font_size"] = 10,
+["row_spacement"] = 21,
+["main_frame_color"] = {
+0,
+0,
+0,
+0.2,
+},
+["main_frame_strata"] = "LOW",
+["arrow_texture"] = "Interface\\CHATFRAME\\ChatFrameExpandArrow",
+["y"] = -0.0001220703125,
+["use_spark"] = true,
+["x"] = 0,
+["font_face"] = "Friz Quadrata TT",
+["square_size"] = 32,
+["point"] = "CENTER",
+["font_color"] = {
+1,
+1,
+1,
+1,
+},
+["row_height"] = 20,
+["scale"] = 1,
+},
+},
+["coach"] = {
+["enabled"] = false,
+["welcome_panel_pos"] = {
+},
+["last_coach_name"] = false,
 },
 ["character_data"] = {
-["logons"] = 106,
+["logons"] = 107,
 },
-["announce_damagerecord"] = {
-["enabled"] = true,
-["channel"] = "SELF",
-},
+["ignore_nicktag"] = false,
 ["announce_firsthit"] = {
 ["enabled"] = true,
 ["channel"] = "SELF",
 },
 ["last_instance_time"] = 1773374426,
-["benchmark_db"] = {
-["frame"] = {
-},
-},
-["player_stats"] = {
-},
+["last_day"] = "20",
 ["last_version"] = "12.0.1 14718",
 ["combat_id"] = 886,
 ["savedStyles"] = {
 },
-["last_day"] = "19",
-["cached_talents"] = {
+["player_stats"] = {
+},
+["benchmark_db"] = {
+["frame"] = {
+},
 },
 ["announce_deaths"] = {
 ["enabled"] = false,
@@ -8624,7 +8625,7 @@ _detalhes_database = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -8643,14 +8644,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [6603] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -8669,7 +8670,7 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [1263121] = {
@@ -9006,7 +9007,7 @@ _detalhes_database = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -9025,7 +9026,7 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [452333] = {
@@ -9084,7 +9085,7 @@ _detalhes_database = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -9103,7 +9104,7 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [196733] = {
@@ -9184,32 +9185,6 @@ _detalhes_database = {
 ["total"] = 829554,
 ["id"] = 1262159,
 },
-[450508] = {
-["c_amt"] = 0,
-["b_amt"] = 0,
-["a_dmg"] = 0,
-["b_dmg"] = 0,
-["targets"] = {
-},
-["n_total"] = 0,
-["n_min"] = 0,
-["a_amt"] = 0,
-["counter"] = 15,
-["r_amt"] = 0,
-["c_max"] = 0,
-["extra"] = {
-},
-["r_dmg"] = 0,
-["g_amt"] = 0,
-["n_max"] = 0,
-["g_dmg"] = 0,
-["c_min"] = 0,
-["successful_casted"] = 0,
-["c_total"] = 0,
-["n_amt"] = 0,
-["total"] = 4166651,
-["id"] = 450508,
-},
 [434481] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
@@ -9235,6 +9210,32 @@ _detalhes_database = {
 ["n_amt"] = 0,
 ["total"] = 848911,
 ["id"] = 434481,
+},
+[450508] = {
+["c_amt"] = 0,
+["b_amt"] = 0,
+["a_dmg"] = 0,
+["b_dmg"] = 0,
+["targets"] = {
+},
+["n_total"] = 0,
+["n_min"] = 0,
+["a_amt"] = 0,
+["counter"] = 15,
+["r_amt"] = 0,
+["c_max"] = 0,
+["extra"] = {
+},
+["r_dmg"] = 0,
+["g_amt"] = 0,
+["n_max"] = 0,
+["g_dmg"] = 0,
+["c_min"] = 0,
+["successful_casted"] = 0,
+["c_total"] = 0,
+["n_amt"] = 0,
+["total"] = 4166651,
+["id"] = 450508,
 },
 [107270] = {
 ["c_amt"] = 0,
@@ -9370,7 +9371,7 @@ _detalhes_database = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -9389,14 +9390,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [322109] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -9415,7 +9416,7 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [360828] = {
@@ -9645,7 +9646,7 @@ _detalhes_database = {
 ["total"] = 179968,
 ["id"] = 6603,
 },
-[390844] = {
+[8092] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["a_dmg"] = 0,
@@ -9655,7 +9656,7 @@ _detalhes_database = {
 ["n_total"] = 0,
 ["n_min"] = 0,
 ["a_amt"] = 0,
-["counter"] = 15,
+["counter"] = 14,
 ["r_amt"] = 0,
 ["c_max"] = 0,
 ["extra"] = {
@@ -9668,8 +9669,8 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["total"] = 2657474,
-["id"] = 390844,
+["total"] = 744113,
+["id"] = 8092,
 },
 [32379] = {
 ["c_amt"] = 0,
@@ -9697,37 +9698,37 @@ _detalhes_database = {
 ["total"] = 1236594,
 ["id"] = 32379,
 },
-[47540] = {
+[421453] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
-["a_dmg"] = 0,
-["b_dmg"] = 0,
+["g_amt"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
 ["n_min"] = 0,
-["a_amt"] = 0,
-["counter"] = 15,
-["r_amt"] = 0,
+["g_dmg"] = 0,
+["counter"] = 3,
+["total"] = 761505,
 ["c_max"] = 0,
+["id"] = 421453,
+["r_dmg"] = 0,
 ["extra"] = {
 },
-["r_dmg"] = 0,
-["g_amt"] = 0,
-["n_max"] = 0,
-["g_dmg"] = 0,
+["a_dmg"] = 0,
+["a_amt"] = 0,
 ["c_min"] = 0,
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["total"] = 2607771,
-["id"] = 47540,
+["b_dmg"] = 0,
+["r_amt"] = 0,
 },
 [409311] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -9746,7 +9747,7 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [373442] = {
@@ -9801,31 +9802,31 @@ _detalhes_database = {
 ["total"] = 1221328,
 ["id"] = 585,
 },
-[421453] = {
+[47540] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
-["g_amt"] = 0,
+["a_dmg"] = 0,
 ["b_dmg"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
 ["n_min"] = 0,
-["g_dmg"] = 0,
-["counter"] = 3,
-["total"] = 761505,
+["a_amt"] = 0,
+["counter"] = 15,
+["r_amt"] = 0,
 ["c_max"] = 0,
-["id"] = 421453,
-["r_dmg"] = 0,
 ["extra"] = {
 },
-["a_dmg"] = 0,
-["a_amt"] = 0,
+["r_dmg"] = 0,
+["g_amt"] = 0,
+["n_max"] = 0,
+["g_dmg"] = 0,
 ["c_min"] = 0,
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
-["r_amt"] = 0,
+["total"] = 2607771,
+["id"] = 47540,
 },
 [589] = {
 ["c_amt"] = 0,
@@ -9857,7 +9858,7 @@ _detalhes_database = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -9876,10 +9877,10 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
-[8092] = {
+[390844] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["a_dmg"] = 0,
@@ -9889,7 +9890,7 @@ _detalhes_database = {
 ["n_total"] = 0,
 ["n_min"] = 0,
 ["a_amt"] = 0,
-["counter"] = 14,
+["counter"] = 15,
 ["r_amt"] = 0,
 ["c_max"] = 0,
 ["extra"] = {
@@ -9902,8 +9903,8 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["total"] = 744113,
-["id"] = 8092,
+["total"] = 2657474,
+["id"] = 390844,
 },
 },
 ["tipo"] = 2,
@@ -9954,7 +9955,7 @@ _detalhes_database = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -9973,14 +9974,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [1262769] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -9999,7 +10000,7 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [1262863] = {
@@ -10110,7 +10111,7 @@ _detalhes_database = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -10129,7 +10130,7 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [1280757] = {
@@ -10214,7 +10215,7 @@ _detalhes_database = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -10233,14 +10234,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [410265] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -10259,14 +10260,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [235314] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -10285,7 +10286,7 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [44614] = {
@@ -10392,31 +10393,31 @@ _detalhes_database = {
 ["total"] = 3522400,
 ["id"] = 84714,
 },
-[418735] = {
+[409311] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
-["g_amt"] = 0,
+["a_dmg"] = 0,
 ["b_dmg"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
 ["n_min"] = 0,
-["g_dmg"] = 0,
-["counter"] = 8,
-["total"] = 1307732,
+["a_amt"] = 0,
+["counter"] = 14,
+["r_amt"] = 0,
 ["c_max"] = 0,
-["id"] = 418735,
-["r_dmg"] = 0,
 ["extra"] = {
 },
-["a_dmg"] = 0,
-["a_amt"] = 0,
+["r_dmg"] = 0,
+["g_amt"] = 0,
+["n_max"] = 0,
+["g_dmg"] = 0,
 ["c_min"] = 0,
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
-["r_amt"] = 0,
+["total"] = 149631,
+["id"] = 409311,
 },
 [190357] = {
 ["c_amt"] = 0,
@@ -10444,31 +10445,31 @@ _detalhes_database = {
 ["total"] = 2433643,
 ["id"] = 190357,
 },
-[409311] = {
+[418735] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
-["a_dmg"] = 0,
-["b_dmg"] = 0,
+["g_amt"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
 ["n_min"] = 0,
-["a_amt"] = 0,
-["counter"] = 14,
-["r_amt"] = 0,
+["g_dmg"] = 0,
+["counter"] = 8,
+["total"] = 1307732,
 ["c_max"] = 0,
+["id"] = 418735,
+["r_dmg"] = 0,
 ["extra"] = {
 },
-["r_dmg"] = 0,
-["g_amt"] = 0,
-["n_max"] = 0,
-["g_dmg"] = 0,
+["a_dmg"] = 0,
+["a_amt"] = 0,
 ["c_min"] = 0,
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["total"] = 149631,
-["id"] = 409311,
+["b_dmg"] = 0,
+["r_amt"] = 0,
 },
 [1278079] = {
 ["c_amt"] = 0,
@@ -10649,7 +10650,7 @@ _detalhes_database = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -10668,10 +10669,10 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
-[1217610] = {
+[6603] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["a_dmg"] = 0,
@@ -10681,7 +10682,7 @@ _detalhes_database = {
 ["n_total"] = 0,
 ["n_min"] = 0,
 ["a_amt"] = 0,
-["counter"] = 11,
+["counter"] = 12,
 ["r_amt"] = 0,
 ["c_max"] = 0,
 ["extra"] = {
@@ -10694,8 +10695,8 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["total"] = 4270848,
-["id"] = 1217610,
+["total"] = 9729,
+["id"] = 6603,
 },
 [1225827] = {
 ["c_amt"] = 0,
@@ -10805,7 +10806,7 @@ _detalhes_database = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -10824,7 +10825,7 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [1256619] = {
@@ -10857,7 +10858,7 @@ _detalhes_database = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -10876,14 +10877,14 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [198793] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -10902,7 +10903,7 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [1213649] = {
@@ -10935,7 +10936,7 @@ _detalhes_database = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -10954,7 +10955,7 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
 [409311] = {
@@ -10983,7 +10984,7 @@ _detalhes_database = {
 ["total"] = 682892,
 ["id"] = 409311,
 },
-[6603] = {
+[1256305] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["a_dmg"] = 0,
@@ -10993,7 +10994,7 @@ _detalhes_database = {
 ["n_total"] = 0,
 ["n_min"] = 0,
 ["a_amt"] = 0,
-["counter"] = 12,
+["counter"] = 15,
 ["r_amt"] = 0,
 ["c_max"] = 0,
 ["extra"] = {
@@ -11006,8 +11007,8 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["total"] = 9729,
-["id"] = 6603,
+["total"] = 5696150,
+["id"] = 1256305,
 },
 [1221162] = {
 ["c_amt"] = 0,
@@ -11039,7 +11040,7 @@ _detalhes_database = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["g_amt"] = 0,
-["b_dmg"] = 0,
+["n_max"] = 0,
 ["targets"] = {
 },
 ["n_total"] = 0,
@@ -11058,10 +11059,10 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["n_max"] = 0,
+["b_dmg"] = 0,
 ["r_amt"] = 0,
 },
-[1256305] = {
+[1217610] = {
 ["c_amt"] = 0,
 ["b_amt"] = 0,
 ["a_dmg"] = 0,
@@ -11071,7 +11072,7 @@ _detalhes_database = {
 ["n_total"] = 0,
 ["n_min"] = 0,
 ["a_amt"] = 0,
-["counter"] = 15,
+["counter"] = 11,
 ["r_amt"] = 0,
 ["c_max"] = 0,
 ["extra"] = {
@@ -11084,8 +11085,8 @@ _detalhes_database = {
 ["successful_casted"] = 0,
 ["c_total"] = 0,
 ["n_amt"] = 0,
-["total"] = 5696150,
-["id"] = 1256305,
+["total"] = 4270848,
+["id"] = 1217610,
 },
 },
 ["tipo"] = 2,
@@ -11108,12 +11109,12 @@ _detalhes_database = {
 ["_ActorTable"] = {
 {
 ["flag_original"] = 1298,
-["healing_from"] = {
+["targets_overheal"] = {
 },
 ["pets"] = {
 },
 ["iniciar_hps"] = false,
-["heal_enemy_amt"] = 0,
+["aID"] = "3675-0AFBCB0B",
 ["totalover"] = 0.09654700000000001,
 ["total_without_pet"] = 0.09654700000000001,
 ["total"] = 32635792.008408,
@@ -11129,15 +11130,15 @@ _detalhes_database = {
 ["nome"] = "Erebii-MoonGuard",
 ["totalover_without_pet"] = 0.09654700000000001,
 ["healing_taken"] = 0.09654700000000001,
-["aID"] = "3675-0AFBCB0B",
+["classe"] = "PRIEST",
 ["end_time"] = 1773374474,
-["targets_overheal"] = {
+["healing_from"] = {
 },
 ["start_time"] = 1773374471,
 ["boss_fight_component"] = true,
 ["spells"] = {
 ["_ActorTable"] = {
-[194509] = {
+[1249829] = {
 ["c_amt"] = 0,
 ["totalabsorb"] = 0,
 ["targets_overheal"] = {
@@ -11147,11 +11148,11 @@ _detalhes_database = {
 },
 ["n_total"] = 0,
 ["n_min"] = 0,
-["counter"] = 13,
+["counter"] = 2,
 ["overheal"] = 0,
-["total"] = 1632368,
+["total"] = 33166,
 ["c_max"] = 0,
-["id"] = 194509,
+["id"] = 1249829,
 ["targets_absorbs"] = {
 },
 ["c_min"] = 0,
@@ -11183,7 +11184,7 @@ _detalhes_database = {
 ["totaldenied"] = 0,
 ["absorbed"] = 0,
 },
-[81751] = {
+[443126] = {
 ["c_amt"] = 0,
 ["totalabsorb"] = 0,
 ["targets_overheal"] = {
@@ -11195,9 +11196,9 @@ _detalhes_database = {
 ["n_min"] = 0,
 ["counter"] = 15,
 ["overheal"] = 0,
-["total"] = 11397734,
+["total"] = 1866900,
 ["c_max"] = 0,
-["id"] = 81751,
+["id"] = 443126,
 ["targets_absorbs"] = {
 },
 ["c_min"] = 0,
@@ -11229,7 +11230,7 @@ _detalhes_database = {
 ["totaldenied"] = 0,
 ["absorbed"] = 0,
 },
-[1249829] = {
+[194509] = {
 ["c_amt"] = 0,
 ["totalabsorb"] = 0,
 ["targets_overheal"] = {
@@ -11239,40 +11240,17 @@ _detalhes_database = {
 },
 ["n_total"] = 0,
 ["n_min"] = 0,
-["counter"] = 2,
+["counter"] = 13,
 ["overheal"] = 0,
-["total"] = 33166,
+["total"] = 1632368,
 ["c_max"] = 0,
-["id"] = 1249829,
+["id"] = 194509,
 ["targets_absorbs"] = {
 },
 ["c_min"] = 0,
 ["c_total"] = 0,
 ["totaldenied"] = 0,
 ["n_amt"] = 0,
-["absorbed"] = 0,
-},
-[443126] = {
-["c_amt"] = 0,
-["totalabsorb"] = 0,
-["targets_overheal"] = {
-},
-["n_max"] = 0,
-["targets"] = {
-},
-["n_total"] = 0,
-["n_min"] = 0,
-["counter"] = 15,
-["overheal"] = 0,
-["total"] = 1866900,
-["c_max"] = 0,
-["id"] = 443126,
-["targets_absorbs"] = {
-},
-["c_min"] = 0,
-["c_total"] = 0,
-["n_amt"] = 0,
-["totaldenied"] = 0,
 ["absorbed"] = 0,
 },
 [17] = {
@@ -11298,7 +11276,7 @@ _detalhes_database = {
 ["n_amt"] = 0,
 ["absorbed"] = 0,
 },
-[421453] = {
+[186263] = {
 ["c_amt"] = 0,
 ["totalabsorb"] = 0,
 ["targets_overheal"] = {
@@ -11308,17 +11286,40 @@ _detalhes_database = {
 },
 ["n_total"] = 0,
 ["n_min"] = 0,
-["counter"] = 3,
+["counter"] = 5,
 ["overheal"] = 0,
-["total"] = 146637,
+["total"] = 604264,
 ["c_max"] = 0,
-["id"] = 421453,
+["id"] = 186263,
 ["targets_absorbs"] = {
 },
 ["c_min"] = 0,
 ["c_total"] = 0,
 ["totaldenied"] = 0,
 ["n_amt"] = 0,
+["absorbed"] = 0,
+},
+[47540] = {
+["c_amt"] = 0,
+["totalabsorb"] = 0,
+["targets_overheal"] = {
+},
+["n_max"] = 0,
+["targets"] = {
+},
+["n_total"] = 0,
+["n_min"] = 0,
+["counter"] = 15,
+["overheal"] = 0,
+["total"] = 4612225,
+["c_max"] = 0,
+["id"] = 47540,
+["targets_absorbs"] = {
+},
+["c_min"] = 0,
+["c_total"] = 0,
+["n_amt"] = 0,
+["totaldenied"] = 0,
 ["absorbed"] = 0,
 },
 [2061] = {
@@ -11367,29 +11368,6 @@ _detalhes_database = {
 ["totaldenied"] = 0,
 ["absorbed"] = 0,
 },
-[47540] = {
-["c_amt"] = 0,
-["totalabsorb"] = 0,
-["targets_overheal"] = {
-},
-["n_max"] = 0,
-["targets"] = {
-},
-["n_total"] = 0,
-["n_min"] = 0,
-["counter"] = 15,
-["overheal"] = 0,
-["total"] = 4612225,
-["c_max"] = 0,
-["id"] = 47540,
-["targets_absorbs"] = {
-},
-["c_min"] = 0,
-["c_total"] = 0,
-["n_amt"] = 0,
-["totaldenied"] = 0,
-["absorbed"] = 0,
-},
 [33110] = {
 ["c_amt"] = 0,
 ["totalabsorb"] = 0,
@@ -11411,6 +11389,29 @@ _detalhes_database = {
 ["c_total"] = 0,
 ["n_amt"] = 0,
 ["totaldenied"] = 0,
+["absorbed"] = 0,
+},
+[421453] = {
+["c_amt"] = 0,
+["totalabsorb"] = 0,
+["targets_overheal"] = {
+},
+["n_max"] = 0,
+["targets"] = {
+},
+["n_total"] = 0,
+["n_min"] = 0,
+["counter"] = 3,
+["overheal"] = 0,
+["total"] = 146637,
+["c_max"] = 0,
+["id"] = 421453,
+["targets_absorbs"] = {
+},
+["c_min"] = 0,
+["c_total"] = 0,
+["totaldenied"] = 0,
+["n_amt"] = 0,
 ["absorbed"] = 0,
 },
 [409311] = {
@@ -11436,7 +11437,7 @@ _detalhes_database = {
 ["n_amt"] = 0,
 ["absorbed"] = 0,
 },
-[186263] = {
+[81751] = {
 ["c_amt"] = 0,
 ["totalabsorb"] = 0,
 ["targets_overheal"] = {
@@ -11446,24 +11447,24 @@ _detalhes_database = {
 },
 ["n_total"] = 0,
 ["n_min"] = 0,
-["counter"] = 5,
+["counter"] = 15,
 ["overheal"] = 0,
-["total"] = 604264,
+["total"] = 11397734,
 ["c_max"] = 0,
-["id"] = 186263,
+["id"] = 81751,
 ["targets_absorbs"] = {
 },
 ["c_min"] = 0,
 ["c_total"] = 0,
-["totaldenied"] = 0,
 ["n_amt"] = 0,
+["totaldenied"] = 0,
 ["absorbed"] = 0,
 },
 },
 ["tipo"] = 3,
 },
 ["grupo"] = true,
-["classe"] = "PRIEST",
+["heal_enemy_amt"] = 0,
 ["tipo"] = 2,
 ["custom"] = 0,
 ["last_event"] = 0,
@@ -11474,12 +11475,12 @@ _detalhes_database = {
 },
 {
 ["flag_original"] = 1298,
-["healing_from"] = {
+["targets_overheal"] = {
 },
 ["pets"] = {
 },
 ["iniciar_hps"] = false,
-["heal_enemy_amt"] = 0,
+["aID"] = "3675-0ACDA14C",
 ["totalover"] = 0.09542999999999999,
 ["total_without_pet"] = 0.09542999999999999,
 ["total"] = 19200655.004987,
@@ -11495,9 +11496,9 @@ _detalhes_database = {
 ["nome"] = "Shaeul-MoonGuard",
 ["totalover_without_pet"] = 0.09542999999999999,
 ["healing_taken"] = 0.09542999999999999,
-["aID"] = "3675-0ACDA14C",
+["classe"] = "MONK",
 ["end_time"] = 1773374474,
-["targets_overheal"] = {
+["healing_from"] = {
 },
 ["start_time"] = 1773374471,
 ["boss_fight_component"] = true,
@@ -11572,29 +11573,6 @@ _detalhes_database = {
 ["n_amt"] = 0,
 ["absorbed"] = 0,
 },
-[414143] = {
-["c_amt"] = 0,
-["totalabsorb"] = 0,
-["targets_overheal"] = {
-},
-["n_max"] = 0,
-["targets"] = {
-},
-["n_total"] = 0,
-["n_min"] = 0,
-["counter"] = 15,
-["overheal"] = 0,
-["total"] = 1598262,
-["c_max"] = 0,
-["id"] = 414143,
-["targets_absorbs"] = {
-},
-["c_min"] = 0,
-["c_total"] = 0,
-["n_amt"] = 0,
-["totaldenied"] = 0,
-["absorbed"] = 0,
-},
 [1265145] = {
 ["c_amt"] = 0,
 ["totalabsorb"] = 0,
@@ -11610,6 +11588,29 @@ _detalhes_database = {
 ["total"] = 3951162,
 ["c_max"] = 0,
 ["id"] = 1265145,
+["targets_absorbs"] = {
+},
+["c_min"] = 0,
+["c_total"] = 0,
+["totaldenied"] = 0,
+["n_amt"] = 0,
+["absorbed"] = 0,
+},
+[1266720] = {
+["c_amt"] = 0,
+["totalabsorb"] = 0,
+["targets_overheal"] = {
+},
+["n_max"] = 0,
+["targets"] = {
+},
+["n_total"] = 0,
+["n_min"] = 0,
+["counter"] = 6,
+["overheal"] = 0,
+["total"] = 32410,
+["c_max"] = 0,
+["id"] = 1266720,
 ["targets_absorbs"] = {
 },
 ["c_min"] = 0,
@@ -11641,29 +11642,6 @@ _detalhes_database = {
 ["n_amt"] = 0,
 ["absorbed"] = 0,
 },
-[1242197] = {
-["c_amt"] = 0,
-["totalabsorb"] = 0,
-["targets_overheal"] = {
-},
-["n_max"] = 0,
-["targets"] = {
-},
-["n_total"] = 0,
-["n_min"] = 0,
-["counter"] = 4,
-["overheal"] = 0,
-["total"] = 211219,
-["c_max"] = 0,
-["id"] = 1242197,
-["targets_absorbs"] = {
-},
-["c_min"] = 0,
-["c_total"] = 0,
-["totaldenied"] = 0,
-["n_amt"] = 0,
-["absorbed"] = 0,
-},
 [1255367] = {
 ["c_amt"] = 0,
 ["totalabsorb"] = 0,
@@ -11679,6 +11657,29 @@ _detalhes_database = {
 ["total"] = 401016,
 ["c_max"] = 0,
 ["id"] = 1255367,
+["targets_absorbs"] = {
+},
+["c_min"] = 0,
+["c_total"] = 0,
+["totaldenied"] = 0,
+["n_amt"] = 0,
+["absorbed"] = 0,
+},
+[1242197] = {
+["c_amt"] = 0,
+["totalabsorb"] = 0,
+["targets_overheal"] = {
+},
+["n_max"] = 0,
+["targets"] = {
+},
+["n_total"] = 0,
+["n_min"] = 0,
+["counter"] = 4,
+["overheal"] = 0,
+["total"] = 211219,
+["c_max"] = 0,
+["id"] = 1242197,
 ["targets_absorbs"] = {
 },
 ["c_min"] = 0,
@@ -11802,7 +11803,7 @@ _detalhes_database = {
 ["n_amt"] = 0,
 ["absorbed"] = 0,
 },
-[1266720] = {
+[414143] = {
 ["c_amt"] = 0,
 ["totalabsorb"] = 0,
 ["targets_overheal"] = {
@@ -11812,24 +11813,24 @@ _detalhes_database = {
 },
 ["n_total"] = 0,
 ["n_min"] = 0,
-["counter"] = 6,
+["counter"] = 15,
 ["overheal"] = 0,
-["total"] = 32410,
+["total"] = 1598262,
 ["c_max"] = 0,
-["id"] = 1266720,
+["id"] = 414143,
 ["targets_absorbs"] = {
 },
 ["c_min"] = 0,
 ["c_total"] = 0,
-["totaldenied"] = 0,
 ["n_amt"] = 0,
+["totaldenied"] = 0,
 ["absorbed"] = 0,
 },
 },
 ["tipo"] = 3,
 },
 ["grupo"] = true,
-["classe"] = "MONK",
+["heal_enemy_amt"] = 0,
 ["tipo"] = 2,
 ["custom"] = 0,
 ["last_event"] = 0,
@@ -11840,12 +11841,12 @@ _detalhes_database = {
 },
 {
 ["flag_original"] = 1298,
-["healing_from"] = {
+["targets_overheal"] = {
 },
 ["pets"] = {
 },
 ["iniciar_hps"] = false,
-["heal_enemy_amt"] = 0,
+["aID"] = "1426-0ED47CB2",
 ["totalover"] = 0.07091,
 ["total_without_pet"] = 0.07091,
 ["total"] = 3157909.005928,
@@ -11861,9 +11862,9 @@ _detalhes_database = {
 ["nome"] = "Zaræs-AeriePeak",
 ["totalover_without_pet"] = 0.07091,
 ["healing_taken"] = 0.07091,
-["aID"] = "1426-0ED47CB2",
+["classe"] = "DEMONHUNTER",
 ["end_time"] = 1773374474,
-["targets_overheal"] = {
+["healing_from"] = {
 },
 ["start_time"] = 1773374471,
 ["boss_fight_component"] = true,
@@ -11988,7 +11989,7 @@ _detalhes_database = {
 ["tipo"] = 3,
 },
 ["grupo"] = true,
-["classe"] = "DEMONHUNTER",
+["heal_enemy_amt"] = 0,
 ["tipo"] = 2,
 ["custom"] = 0,
 ["last_event"] = 0,
@@ -11999,12 +12000,12 @@ _detalhes_database = {
 },
 {
 ["flag_original"] = 1298,
-["healing_from"] = {
+["targets_overheal"] = {
 },
 ["pets"] = {
 },
 ["iniciar_hps"] = false,
-["aID"] = "3676-0DF7D3EF",
+["heal_enemy_amt"] = 0,
 ["totalover"] = 0.273722,
 ["total_without_pet"] = 0.273722,
 ["total"] = 5255163.005969,
@@ -12020,9 +12021,9 @@ _detalhes_database = {
 ["nome"] = "Barelynoer",
 ["totalover_without_pet"] = 0.273722,
 ["healing_taken"] = 0.273722,
-["heal_enemy_amt"] = 0,
+["classe"] = "EVOKER",
 ["end_time"] = 1773374537,
-["targets_overheal"] = {
+["healing_from"] = {
 },
 ["start_time"] = 1773374534,
 ["boss_fight_component"] = true,
@@ -12308,7 +12309,7 @@ _detalhes_database = {
 ["tipo"] = 3,
 },
 ["grupo"] = true,
-["classe"] = "EVOKER",
+["aID"] = "3676-0DF7D3EF",
 ["tipo"] = 2,
 ["custom"] = 0,
 ["last_event"] = 0,
@@ -12319,12 +12320,12 @@ _detalhes_database = {
 },
 {
 ["flag_original"] = 1298,
-["targets_overheal"] = {
+["healing_from"] = {
 },
 ["pets"] = {
 },
 ["iniciar_hps"] = false,
-["aID"] = "60-0FD145DB",
+["heal_enemy_amt"] = 0,
 ["totalover"] = 0.061851,
 ["total_without_pet"] = 0.061851,
 ["total"] = 1680848.001431,
@@ -12340,9 +12341,9 @@ _detalhes_database = {
 ["boss_fight_component"] = true,
 ["totalover_without_pet"] = 0.061851,
 ["healing_taken"] = 0.061851,
-["heal_enemy_amt"] = 0,
+["classe"] = "MAGE",
 ["end_time"] = 1773374623,
-["healing_from"] = {
+["targets_overheal"] = {
 },
 ["start_time"] = 1773374620,
 ["nome"] = "Saralenaa-Stormrage",
@@ -12421,7 +12422,7 @@ _detalhes_database = {
 ["tipo"] = 3,
 },
 ["grupo"] = true,
-["classe"] = "MAGE",
+["aID"] = "60-0FD145DB",
 ["last_event"] = 0,
 ["custom"] = 0,
 ["tipo"] = 2,
@@ -12446,7 +12447,7 @@ _detalhes_database = {
 ["dispell"] = 33.10636399999999,
 ["pets"] = {
 },
-["aID"] = "3676-0DF7D3EF",
+["classe"] = "EVOKER",
 ["interrupt_spells"] = {
 ["_ActorTable"] = {
 [1257774] = {
@@ -12467,18 +12468,18 @@ _detalhes_database = {
 },
 ["counter"] = 1,
 },
-[1282722] = {
+[443111] = {
 ["total"] = 1,
-["id"] = 1282722,
+["id"] = 443111,
 ["interrompeu_oque"] = {
 },
 ["targets"] = {
 },
 ["counter"] = 1,
 },
-[443111] = {
+[1282722] = {
 ["total"] = 1,
-["id"] = 443111,
+["id"] = 1282722,
 ["interrompeu_oque"] = {
 },
 ["targets"] = {
@@ -12602,12 +12603,12 @@ _detalhes_database = {
 },
 ["boss_fight_component"] = true,
 ["grupo"] = true,
-["classe"] = "EVOKER",
+["aID"] = "3676-0DF7D3EF",
 ["interrupt_targets"] = {
 },
 ["last_event"] = 0,
-["nome"] = "Barelynoer",
 ["interrupt"] = 33.11586,
+["nome"] = "Barelynoer",
 ["tipo"] = 4,
 },
 {
@@ -12616,7 +12617,7 @@ _detalhes_database = {
 ["dispell"] = 9.026774999999999,
 ["pets"] = {
 },
-["aID"] = "1426-0ED47CB2",
+["classe"] = "DEMONHUNTER",
 ["interrupt_spells"] = {
 ["_ActorTable"] = {
 [1271094] = {
@@ -12664,12 +12665,12 @@ _detalhes_database = {
 },
 ["boss_fight_component"] = true,
 ["grupo"] = true,
-["classe"] = "DEMONHUNTER",
+["aID"] = "1426-0ED47CB2",
 ["interrupt_targets"] = {
 },
 ["last_event"] = 0,
-["nome"] = "Zaræs-AeriePeak",
 ["interrupt"] = 9.035802000000002,
+["nome"] = "Zaræs-AeriePeak",
 ["tipo"] = 4,
 },
 {
@@ -12678,7 +12679,7 @@ _detalhes_database = {
 ["dispell"] = 11.026495,
 ["pets"] = {
 },
-["aID"] = "3675-0ACDA14C",
+["classe"] = "MONK",
 ["interrupt_spells"] = {
 ["_ActorTable"] = {
 [1285445] = {
@@ -12733,14 +12734,14 @@ _detalhes_database = {
 },
 ["tipo"] = 9,
 },
-["nome"] = "Shaeul-MoonGuard",
-["tipo"] = 4,
-["classe"] = "MONK",
-["last_event"] = 0,
 ["interrupt"] = 11.029526,
+["nome"] = "Shaeul-MoonGuard",
+["aID"] = "3675-0ACDA14C",
+["last_event"] = 0,
 ["interrupt_targets"] = {
 },
 ["grupo"] = true,
+["tipo"] = 4,
 },
 },
 },
@@ -12757,7 +12758,9 @@ _detalhes_database = {
 },
 ["bossTimers"] = {
 },
-["combat_counter"] = 910,
+["cleu_events"] = {
+["n"] = 1,
+},
 ["playerTalents"] = {
 },
 ["totals"] = {
@@ -12824,7 +12827,7 @@ _detalhes_database = {
 ["mapId"] = 2915,
 ["raid_roster"] = {
 },
-["frags"] = {
+["player_last_events"] = {
 },
 ["is_challenge"] = false,
 ["segments_added"] = {
@@ -13069,12 +13072,8 @@ _detalhes_database = {
 ["clock"] = "00:53:28",
 },
 },
-["cleu_events"] = {
-["n"] = 1,
-},
+["combat_counter"] = 910,
 ["overall_enemy_name"] = "-- x -- x --",
-["player_last_events"] = {
-},
 ["PhaseData"] = {
 {
 1,
@@ -13089,25 +13088,26 @@ _detalhes_database = {
 ["damage"] = {
 },
 },
+["frags"] = {
+},
 ["start_time"] = 38044.06500000002,
 ["TimeData"] = {
 },
 ["spells_cast_timeline"] = {
 },
 },
-["ignore_nicktag"] = false,
+["announce_damagerecord"] = {
+["enabled"] = true,
+["channel"] = "SELF",
+},
 ["arena_data_headers"] = {
 },
-["coach"] = {
-["enabled"] = false,
-["welcome_panel_pos"] = {
-},
-["last_coach_name"] = false,
+["mythic_plus_log"] = {
 },
 ["announce_cooldowns"] = {
+["enabled"] = false,
 ["ignored_cooldowns"] = {
 },
-["enabled"] = false,
 ["custom"] = "",
 ["channel"] = "RAID",
 },
@@ -13115,7 +13115,7 @@ _detalhes_database = {
 ["last_difficulty"] = 15,
 ["last_raid"] = "",
 },
-["damage_meter_session_info"] = {
+["cached_roles"] = {
 },
 ["cached_specs"] = {
 ["Player-3676-0DF7D3EF"] = 1473,

@@ -63,18 +63,16 @@ TalentLoadoutEx = {
 {
 {
 ["pvp3"] = 3058,
-["pvp2"] = 180,
 ["name"] = "Raid",
-["isInGroup"] = false,
+["pvp2"] = 180,
 ["pvp1"] = 182,
 ["icon"] = 134400,
 ["text"] = "CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMDMmlZmZmBYYWmZbYmZGbsMzyMjhZBDAGgltxGmmZWGBAAAYzMzMzgNjhxMAmZAgB",
 },
 {
 ["icon"] = 134400,
-["name"] = "M+",
 ["pvp2"] = 180,
-["isInGroup"] = false,
+["name"] = "M+",
 ["text"] = "CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNMmZgxsMzMzMLMgxMLzsYmZmlxyMLjZGshBAjltZGMmtRgJAAAALMzMzgNjZMGAAmZgB",
 ["pvp3"] = 3058,
 ["pvp1"] = 182,

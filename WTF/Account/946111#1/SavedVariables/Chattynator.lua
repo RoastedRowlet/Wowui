@@ -539,10 +539,10 @@ CHATTYNATOR_CONFIG = {
 ["isTemporary"] = false,
 ["backgroundColor"] = "1a1a1a",
 ["groups"] = {
-["COMBAT_MISC_INFO"] = false,
 ["OPENING"] = false,
-["VOICE_TEXT"] = false,
 ["PET_BATTLE_COMBAT_LOG"] = false,
+["VOICE_TEXT"] = false,
+["COMBAT_MISC_INFO"] = false,
 ["COMBAT_XP_GAIN"] = false,
 ["PET_INFO"] = false,
 ["TRADESKILLS"] = false,
@@ -606,6 +606,57 @@ CHATTYNATOR_CONFIG = {
 ["filters"] = {
 },
 },
+{
+["tabColor"] = "FF80FF",
+["channels"] = {
+},
+["whispersTemp"] = {
+["Alconaft-Stormrage"] = true,
+},
+["name"] = "Alconaft-Stormrage",
+["isTemporary"] = true,
+["groups"] = {
+},
+["addons"] = {
+},
+["backgroundColor"] = "1a1a1a",
+["filters"] = {
+},
+},
+{
+["tabColor"] = "FF80FF",
+["channels"] = {
+},
+["whispersTemp"] = {
+["Kayodru-Stormrage"] = true,
+},
+["name"] = "Kayodru-Stormrage",
+["isTemporary"] = true,
+["groups"] = {
+},
+["addons"] = {
+},
+["backgroundColor"] = "1a1a1a",
+["filters"] = {
+},
+},
+{
+["tabColor"] = "FF80FF",
+["channels"] = {
+},
+["whispersTemp"] = {
+["Fobemonk-Stormrage"] = true,
+},
+["name"] = "Fobemonk-Stormrage",
+["isTemporary"] = true,
+["groups"] = {
+},
+["addons"] = {
+},
+["backgroundColor"] = "1a1a1a",
+["filters"] = {
+},
+},
 },
 ["position"] = {
 "TOPLEFT",
@@ -632,7 +683,7 @@ CHATTYNATOR_CONFIG = {
 },
 }
 CHATTYNATOR_MESSAGE_LOG = {
-["cleanIndex"] = 3878,
+["cleanIndex"] = 3886,
 ["current"] = {
 {
 ["recordedBy"] = "Lonelylitten-Stormrage",
@@ -77532,6 +77583,1689 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["text"] = "|Hplayer:Torqaan-Zul'jin|h[|cffaad372Torqaan-Zul'jin|r]|h has earned the achievement |cffffff00|Hachievement:62180:Player-61-0F823AE2:1:3:20:26:4294967295:4294967295:4294967295:4294967295|h[Prey: Dominating the Void (Nightmare)]|h|r!",
 ["timestamp"] = 1774059823,
 ["id"] = "s6_3878",
+},
+{
+["recordedBy"] = "Zappyxatu-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["name"] = "Camberon",
+},
+["event"] = "CHAT_MSG_MONSTER_SAY",
+["type"] = "MONSTER_SAY",
+},
+["color"] = {
+["r"] = 1,
+["g"] = 1,
+["b"] = 0.6235294342041016,
+},
+["text"] = "Camberon says: I'm far too busy to keep up with your training, but you're welcome to use my cauldron over there.",
+["timestamp"] = 1774062300,
+["id"] = "s6_3879",
+},
+{
+["recordedBy"] = "Zappyxatu-Stormrage",
+["typeInfo"] = {
+["event"] = "CHAT_MSG_SKILL",
+["type"] = "SKILL",
+},
+["color"] = {
+["r"] = 0.3333333432674408,
+["g"] = 0.3333333432674408,
+["b"] = 1,
+},
+["text"] = "Your skill in Midnight Alchemy has increased to 7.",
+["timestamp"] = 1774062357,
+["id"] = "s6_3880",
+},
+{
+["recordedBy"] = "Zappyxatu-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["class"] = "SHAMAN",
+["race"] = "Dwarf",
+["name"] = "Zappyxatu-Stormrage",
+["sex"] = 2,
+},
+["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
+},
+["color"] = {
+["r"] = 0,
+["g"] = 0.6666666865348816,
+["b"] = 0,
+},
+["text"] = "You create: |cnIQ1:|Hitem:241304::::::::80:264::::2:38:14:40:3252:::::|h[Silvermoon Health Potion |A:Professions-ChatIcon-Quality-12-Tier2:17:15::1|a]|h|rx5.",
+["timestamp"] = 1774062357,
+["id"] = "s6_3881",
+},
+{
+["recordedBy"] = "Madmareep-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["name"] = "Camberon",
+},
+["event"] = "CHAT_MSG_MONSTER_SAY",
+["type"] = "MONSTER_SAY",
+},
+["color"] = {
+["b"] = 0.6235294342041016,
+["g"] = 1,
+["r"] = 1,
+},
+["text"] = "Camberon says: I'm far too busy to keep up with your training, but you're welcome to use my cauldron over there.",
+["id"] = "s6_3882",
+["timestamp"] = 1774062431,
+},
+{
+["recordedBy"] = "Madmareep-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["race"] = "NightElf",
+["class"] = "PRIEST",
+["name"] = "Madmareep-Stormrage",
+["sex"] = 2,
+},
+["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
+},
+["color"] = {
+["b"] = 0,
+["g"] = 0.6666666865348816,
+["r"] = 0,
+},
+["text"] = "You create: |cnIQ1:|Hitem:241304::::::::80:258::::2:38:14:40:3252:::::|h[Silvermoon Health Potion |A:Professions-ChatIcon-Quality-12-Tier2:17:15::1|a]|h|rx5.",
+["id"] = "s6_3883",
+["timestamp"] = 1774062458,
+},
+{
+["recordedBy"] = "Madmareep-Stormrage",
+["typeInfo"] = {
+["event"] = "CHAT_MSG_SKILL",
+["type"] = "SKILL",
+},
+["color"] = {
+["b"] = 1,
+["g"] = 0.3333333432674408,
+["r"] = 0.3333333432674408,
+},
+["text"] = "Your skill in Midnight Alchemy has increased to 8.",
+["id"] = "s6_3884",
+["timestamp"] = 1774062459,
+},
+{
+["recordedBy"] = "Barelynoer-Area52",
+["typeInfo"] = {
+["player"] = {
+["name"] = "Camberon",
+},
+["event"] = "CHAT_MSG_MONSTER_SAY",
+["type"] = "MONSTER_SAY",
+},
+["color"] = {
+["r"] = 1,
+["g"] = 1,
+["b"] = 0.6235294342041016,
+},
+["text"] = "Camberon says: I'm far too busy to keep up with your training, but you're welcome to use my cauldron over there.",
+["timestamp"] = 1774062605,
+["id"] = "s6_3885",
+},
+{
+["recordedBy"] = "Barelynoer-Area52",
+["typeInfo"] = {
+["player"] = {
+["class"] = "EVOKER",
+["race"] = "Dracthyr",
+["name"] = "Barelynoer-Area52",
+["sex"] = 2,
+},
+["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
+},
+["color"] = {
+["r"] = 0,
+["g"] = 0.6666666865348816,
+["b"] = 0,
+},
+["text"] = "You create: |cnIQ1:|Hitem:241304::::::::90:1473::::2:38:14:40:3252:::::|h[Silvermoon Health Potion |A:Professions-ChatIcon-Quality-12-Tier2:17:15::1|a]|h|rx5.",
+["timestamp"] = 1774062618,
+["id"] = "s6_3886",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["name"] = "Camberon",
+},
+["type"] = "MONSTER_SAY",
+["event"] = "CHAT_MSG_MONSTER_SAY",
+},
+["color"] = {
+["b"] = 0.6235294342041016,
+["g"] = 1,
+["r"] = 1,
+},
+["text"] = "Camberon says: I'm far too busy to keep up with your training, but you're welcome to use my cauldron over there.",
+["id"] = "s6_3887",
+["timestamp"] = 1774062703,
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["race"] = "NightElf",
+["class"] = "DRUID",
+["name"] = "Lonelylitten-Stormrage",
+["sex"] = 2,
+},
+["type"] = "LOOT",
+["event"] = "CHAT_MSG_LOOT",
+},
+["color"] = {
+["b"] = 0,
+["g"] = 0.6666666865348816,
+["r"] = 0,
+},
+["text"] = "You create: |cnIQ1:|Hitem:241304::::::::90:102::::2:38:14:40:3252:::::|h[Silvermoon Health Potion |A:Professions-ChatIcon-Quality-12-Tier2:17:15::1|a]|h|rx5.",
+["id"] = "s6_3888",
+["timestamp"] = 1774062715,
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["type"] = "SKILL",
+["event"] = "CHAT_MSG_SKILL",
+},
+["color"] = {
+["b"] = 1,
+["g"] = 0.3333333432674408,
+["r"] = 0.3333333432674408,
+},
+["text"] = "Your skill in Midnight Alchemy has increased to 3.",
+["id"] = "s6_3889",
+["timestamp"] = 1774062715,
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["race"] = "NightElf",
+["class"] = "DRUID",
+["name"] = "Lonelylitten-Stormrage",
+["sex"] = 2,
+},
+["type"] = "LOOT",
+["event"] = "CHAT_MSG_LOOT",
+},
+["color"] = {
+["b"] = 0,
+["g"] = 0.6666666865348816,
+["r"] = 0,
+},
+["text"] = "You receive item: |cnIQ3:|Hitem:251285::::::::90:102:::::::::|h[Petrified Root]|h|rx2",
+["id"] = "s6_3890",
+["timestamp"] = 1774062809,
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["race"] = "NightElf",
+["class"] = "DRUID",
+["name"] = "Lonelylitten-Stormrage",
+["sex"] = 2,
+},
+["type"] = "LOOT",
+["event"] = "CHAT_MSG_LOOT",
+},
+["color"] = {
+["b"] = 0,
+["g"] = 0.6666666865348816,
+["r"] = 0,
+},
+["text"] = "You receive item: |cnIQ2:|Hitem:238197::::::::90:102:::::::::|h[Refulgent Copper Ingot |A:Professions-ChatIcon-Quality-12-Tier1:17:15::1|a]|h|rx10",
+["id"] = "s6_3891",
+["timestamp"] = 1774062809,
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["race"] = "NightElf",
+["class"] = "DRUID",
+["name"] = "Lonelylitten-Stormrage",
+["sex"] = 2,
+},
+["type"] = "LOOT",
+["event"] = "CHAT_MSG_LOOT",
+},
+["color"] = {
+["b"] = 0,
+["g"] = 0.6666666865348816,
+["r"] = 0,
+},
+["text"] = "You receive item: |cnIQ1:|Hitem:242788::::::::90:102:::::::::|h[Duskshrouded Stone |A:Professions-ChatIcon-Quality-12-Tier1:17:15::1|a]|h|rx4",
+["id"] = "s6_3892",
+["timestamp"] = 1774062810,
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["race"] = "NightElf",
+["class"] = "DRUID",
+["name"] = "Lonelylitten-Stormrage",
+["sex"] = 2,
+},
+["type"] = "LOOT",
+["event"] = "CHAT_MSG_LOOT",
+},
+["color"] = {
+["b"] = 0,
+["g"] = 0.6666666865348816,
+["r"] = 0,
+},
+["text"] = "You receive item: |cnIQ2:|Hitem:238204::::::::90:102:::::::::|h[Sterling Alloy |A:Professions-ChatIcon-Quality-12-Tier1:17:15::1|a]|h|rx6",
+["id"] = "s6_3893",
+["timestamp"] = 1774062810,
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["type"] = "CURRENCY",
+["event"] = "CHAT_MSG_CURRENCY",
+},
+["color"] = {
+["b"] = 0,
+["g"] = 0.6666666865348816,
+["r"] = 0,
+},
+["text"] = "You receive currency: |cnIQ3:|Hcurrency:3257:0|h[Artisan Blacksmith's Moxie]|h|rx30",
+["id"] = "s6_3894",
+["timestamp"] = 1774062844,
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["race"] = "NightElf",
+["class"] = "DRUID",
+["name"] = "Lonelylitten-Stormrage",
+["sex"] = 2,
+},
+["type"] = "LOOT",
+["event"] = "CHAT_MSG_LOOT",
+},
+["color"] = {
+["b"] = 0,
+["g"] = 0.6666666865348816,
+["r"] = 0,
+},
+["text"] = "You receive item: |cnIQ1:|Hitem:243060::::::::90:102:::::::::|h[Luminant Flux]|h|r",
+["id"] = "s6_3895",
+["timestamp"] = 1774062848,
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["type"] = "CURRENCY",
+["event"] = "CHAT_MSG_CURRENCY",
+},
+["color"] = {
+["b"] = 0,
+["g"] = 0.6666666865348816,
+["r"] = 0,
+},
+["text"] = "You receive currency: |cnIQ3:|Hcurrency:3257:0|h[Artisan Blacksmith's Moxie]|h|rx30",
+["id"] = "s6_3896",
+["timestamp"] = 1774062861,
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["type"] = "CURRENCY",
+["event"] = "CHAT_MSG_CURRENCY",
+},
+["color"] = {
+["b"] = 0,
+["g"] = 0.6666666865348816,
+["r"] = 0,
+},
+["text"] = "You receive currency: |cnIQ3:|Hcurrency:3257:0|h[Artisan Blacksmith's Moxie]|h|rx30",
+["id"] = "s6_3897",
+["timestamp"] = 1774062870,
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["race"] = "NightElf",
+["class"] = "DRUID",
+["name"] = "Lonelylitten-Stormrage",
+["sex"] = 2,
+},
+["type"] = "LOOT",
+["event"] = "CHAT_MSG_LOOT",
+},
+["color"] = {
+["b"] = 0,
+["g"] = 0.6666666865348816,
+["r"] = 0,
+},
+["text"] = "You receive item: |cnIQ1:|Hitem:243060::::::::90:102:::::::::|h[Luminant Flux]|h|rx2",
+["id"] = "s6_3898",
+["timestamp"] = 1774062875,
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["type"] = "CURRENCY",
+["event"] = "CHAT_MSG_CURRENCY",
+},
+["color"] = {
+["b"] = 0,
+["g"] = 0.6666666865348816,
+["r"] = 0,
+},
+["text"] = "You receive currency: |cnIQ3:|Hcurrency:3257:0|h[Artisan Blacksmith's Moxie]|h|rx30",
+["id"] = "s6_3899",
+["timestamp"] = 1774062877,
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["race"] = "NightElf",
+["class"] = "DRUID",
+["name"] = "Lonelylitten-Stormrage",
+["sex"] = 2,
+},
+["type"] = "LOOT",
+["event"] = "CHAT_MSG_LOOT",
+},
+["color"] = {
+["b"] = 0,
+["g"] = 0.6666666865348816,
+["r"] = 0,
+},
+["text"] = "You receive item: |cnIQ3:|Hitem:246323::::::::90:102:::::::::|h[Glimmer of Midnight Blacksmithing Knowledge]|h|r",
+["id"] = "s6_3900",
+["timestamp"] = 1774062896,
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["race"] = "NightElf",
+["class"] = "DRUID",
+["name"] = "Lonelylitten-Stormrage",
+["sex"] = 2,
+},
+["type"] = "LOOT",
+["event"] = "CHAT_MSG_LOOT",
+},
+["color"] = {
+["b"] = 0,
+["g"] = 0.6666666865348816,
+["r"] = 0,
+},
+["text"] = "You receive item: |cnIQ1:|Hitem:246585::::::::90:102::11:::::::|h[Artisan's Consortium Payout]|h|r",
+["id"] = "s6_3901",
+["timestamp"] = 1774062896,
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["race"] = "NightElf",
+["class"] = "DRUID",
+["name"] = "Lonelylitten-Stormrage",
+["sex"] = 2,
+},
+["type"] = "LOOT",
+["event"] = "CHAT_MSG_LOOT",
+},
+["color"] = {
+["b"] = 0,
+["g"] = 0.6666666865348816,
+["r"] = 0,
+},
+["text"] = "You receive item: |cnIQ1:|Hitem:246585::::::::90:102::11:::::::|h[Artisan's Consortium Payout]|h|r",
+["id"] = "s6_3902",
+["timestamp"] = 1774062897,
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["race"] = "NightElf",
+["class"] = "DRUID",
+["name"] = "Lonelylitten-Stormrage",
+["sex"] = 2,
+},
+["type"] = "LOOT",
+["event"] = "CHAT_MSG_LOOT",
+},
+["color"] = {
+["b"] = 0,
+["g"] = 0.6666666865348816,
+["r"] = 0,
+},
+["text"] = "You receive item: |cnIQ1:|Hitem:246585::::::::90:102::11:::::::|h[Artisan's Consortium Payout]|h|r",
+["id"] = "s6_3903",
+["timestamp"] = 1774062897,
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["race"] = "NightElf",
+["class"] = "DRUID",
+["name"] = "Lonelylitten-Stormrage",
+["sex"] = 2,
+},
+["type"] = "LOOT",
+["event"] = "CHAT_MSG_LOOT",
+},
+["color"] = {
+["b"] = 0,
+["g"] = 0.6666666865348816,
+["r"] = 0,
+},
+["text"] = "You receive item: |cnIQ1:|Hitem:246585::::::::90:102::11:::::::|h[Artisan's Consortium Payout]|h|r",
+["id"] = "s6_3904",
+["timestamp"] = 1774062897,
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["race"] = "NightElf",
+["class"] = "DRUID",
+["name"] = "Lonelylitten-Stormrage",
+["sex"] = 2,
+},
+["type"] = "LOOT",
+["event"] = "CHAT_MSG_LOOT",
+},
+["color"] = {
+["b"] = 0,
+["g"] = 0.6666666865348816,
+["r"] = 0,
+},
+["text"] = "You receive item: |cnIQ3:|Hitem:246323::::::::90:102:::::::::|h[Glimmer of Midnight Blacksmithing Knowledge]|h|r",
+["id"] = "s6_3905",
+["timestamp"] = 1774062898,
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["race"] = "NightElf",
+["class"] = "DRUID",
+["name"] = "Lonelylitten-Stormrage",
+["sex"] = 2,
+},
+["type"] = "LOOT",
+["event"] = "CHAT_MSG_LOOT",
+},
+["color"] = {
+["b"] = 0,
+["g"] = 0.6666666865348816,
+["r"] = 0,
+},
+["text"] = "You receive item: |cnIQ1:|Hitem:246585::::::::90:102::11:::::::|h[Artisan's Consortium Payout]|h|r",
+["id"] = "s6_3906",
+["timestamp"] = 1774062898,
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["race"] = "NightElf",
+["class"] = "DRUID",
+["name"] = "Lonelylitten-Stormrage",
+["sex"] = 2,
+},
+["type"] = "LOOT",
+["event"] = "CHAT_MSG_LOOT",
+},
+["color"] = {
+["b"] = 0,
+["g"] = 0.6666666865348816,
+["r"] = 0,
+},
+["text"] = "You receive item: |cnIQ2:|Hitem:246448::::::::90:102:::::::::|h[Artisan's Ledger]|h|r",
+["id"] = "s6_3907",
+["timestamp"] = 1774062898,
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["race"] = "NightElf",
+["class"] = "DRUID",
+["name"] = "Lonelylitten-Stormrage",
+["sex"] = 2,
+},
+["type"] = "LOOT",
+["event"] = "CHAT_MSG_LOOT",
+},
+["color"] = {
+["b"] = 0,
+["g"] = 0.6666666865348816,
+["r"] = 0,
+},
+["text"] = "You receive item: |cnIQ3:|Hitem:246322::::::::90:102:::::::::|h[Flicker of Midnight Blacksmithing Knowledge]|h|r",
+["id"] = "s6_3908",
+["timestamp"] = 1774062899,
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["race"] = "NightElf",
+["class"] = "DRUID",
+["name"] = "Lonelylitten-Stormrage",
+["sex"] = 2,
+},
+["type"] = "LOOT",
+["event"] = "CHAT_MSG_LOOT",
+},
+["color"] = {
+["b"] = 0,
+["g"] = 0.6666666865348816,
+["r"] = 0,
+},
+["text"] = "You receive item: |cnIQ3:|Hitem:246323::::::::90:102:::::::::|h[Glimmer of Midnight Blacksmithing Knowledge]|h|r",
+["id"] = "s6_3909",
+["timestamp"] = 1774062899,
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["race"] = "NightElf",
+["class"] = "DRUID",
+["name"] = "Lonelylitten-Stormrage",
+["sex"] = 2,
+},
+["type"] = "LOOT",
+["event"] = "CHAT_MSG_LOOT",
+},
+["color"] = {
+["b"] = 0,
+["g"] = 0.6666666865348816,
+["r"] = 0,
+},
+["text"] = "You receive item: |cnIQ1:|Hitem:246447::::::::90:102:::::::::|h[Apprentice's Scribbles]|h|r",
+["id"] = "s6_3910",
+["timestamp"] = 1774062899,
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["race"] = "NightElf",
+["class"] = "DRUID",
+["name"] = "Lonelylitten-Stormrage",
+["sex"] = 2,
+},
+["type"] = "LOOT",
+["event"] = "CHAT_MSG_LOOT",
+},
+["color"] = {
+["b"] = 0,
+["g"] = 0.6666666865348816,
+["r"] = 0,
+},
+["text"] = "You receive item: |cnIQ1:|Hitem:260630::::::::90:102:::::::::|h[Ingenious Identifier]|h|r",
+["id"] = "s6_3911",
+["timestamp"] = 1774062916,
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["race"] = "NightElf",
+["class"] = "DRUID",
+["name"] = "Lonelylitten-Stormrage",
+["sex"] = 2,
+},
+["type"] = "LOOT",
+["event"] = "CHAT_MSG_LOOT",
+},
+["color"] = {
+["b"] = 0,
+["g"] = 0.6666666865348816,
+["r"] = 0,
+},
+["text"] = "You receive item: |cnIQ2:|Hitem:236777::::::::90:102::::1:38:14:::::|h[Argentleaf |A:Professions-ChatIcon-Quality-12-Tier2:17:15::1|a]|h|rx3",
+["id"] = "s6_3912",
+["timestamp"] = 1774062916,
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["race"] = "NightElf",
+["class"] = "DRUID",
+["name"] = "Lonelylitten-Stormrage",
+["sex"] = 2,
+},
+["type"] = "LOOT",
+["event"] = "CHAT_MSG_LOOT",
+},
+["color"] = {
+["b"] = 0,
+["g"] = 0.6666666865348816,
+["r"] = 0,
+},
+["text"] = "You receive item: |cnIQ1:|Hitem:260630::::::::90:102:::::::::|h[Ingenious Identifier]|h|r",
+["id"] = "s6_3913",
+["timestamp"] = 1774062918,
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["race"] = "NightElf",
+["class"] = "DRUID",
+["name"] = "Lonelylitten-Stormrage",
+["sex"] = 2,
+},
+["type"] = "LOOT",
+["event"] = "CHAT_MSG_LOOT",
+},
+["color"] = {
+["b"] = 0,
+["g"] = 0.6666666865348816,
+["r"] = 0,
+},
+["text"] = "You receive item: |cnIQ1:|Hitem:238511::::::::90:102::::1:38:13:::::|h[Void-Tempered Leather |A:Professions-ChatIcon-Quality-12-Tier1:17:15::1|a]|h|rx6",
+["id"] = "s6_3914",
+["timestamp"] = 1774062918,
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["type"] = "CURRENCY",
+["event"] = "CHAT_MSG_CURRENCY",
+},
+["color"] = {
+["b"] = 0,
+["g"] = 0.6666666865348816,
+["r"] = 0,
+},
+["text"] = "You receive currency: |cnIQ3:|Hcurrency:3151:0|h[Midnight Blacksmithing Knowledge]|h|rx2",
+["id"] = "s6_3915",
+["timestamp"] = 1774062919,
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["type"] = "CURRENCY",
+["event"] = "CHAT_MSG_CURRENCY",
+},
+["color"] = {
+["b"] = 0,
+["g"] = 0.6666666865348816,
+["r"] = 0,
+},
+["text"] = "You receive currency: |cnIQ3:|Hcurrency:3257:0|h[Artisan Blacksmith's Moxie]|h|rx10",
+["id"] = "s6_3916",
+["timestamp"] = 1774062919,
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["race"] = "NightElf",
+["class"] = "DRUID",
+["name"] = "Lonelylitten-Stormrage",
+["sex"] = 2,
+},
+["type"] = "LOOT",
+["event"] = "CHAT_MSG_LOOT",
+},
+["color"] = {
+["b"] = 0,
+["g"] = 0.6666666865348816,
+["r"] = 0,
+},
+["text"] = "You receive item: |cnIQ3:|Hitem:251285::::::::90:102:::::::::|h[Petrified Root]|h|rx3",
+["id"] = "s6_3917",
+["timestamp"] = 1774062919,
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["race"] = "NightElf",
+["class"] = "DRUID",
+["name"] = "Lonelylitten-Stormrage",
+["sex"] = 2,
+},
+["type"] = "LOOT",
+["event"] = "CHAT_MSG_LOOT",
+},
+["color"] = {
+["b"] = 0,
+["g"] = 0.6666666865348816,
+["r"] = 0,
+},
+["text"] = "You receive item: |cnIQ2:|Hitem:247719::::::::90:102:::::::::|h[Multicraft Matrix]|h|r",
+["id"] = "s6_3918",
+["timestamp"] = 1774062919,
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["race"] = "NightElf",
+["class"] = "DRUID",
+["name"] = "Lonelylitten-Stormrage",
+["sex"] = 2,
+},
+["type"] = "LOOT",
+["event"] = "CHAT_MSG_LOOT",
+},
+["color"] = {
+["b"] = 0,
+["g"] = 0.6666666865348816,
+["r"] = 0,
+},
+["text"] = "You receive item: |cnIQ2:|Hitem:237362::::::::90:102::::1:38:13:::::|h[Umbral Tin Ore |A:Professions-ChatIcon-Quality-12-Tier1:17:15::1|a]|h|rx3",
+["id"] = "s6_3919",
+["timestamp"] = 1774062919,
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["race"] = "NightElf",
+["class"] = "DRUID",
+["name"] = "Lonelylitten-Stormrage",
+["sex"] = 2,
+},
+["type"] = "LOOT",
+["event"] = "CHAT_MSG_LOOT",
+},
+["color"] = {
+["b"] = 0,
+["g"] = 0.6666666865348816,
+["r"] = 0,
+},
+["text"] = "You receive item: |cnIQ2:|Hitem:247725::::::::90:102:::::::::|h[Resourceful Rebar]|h|r",
+["id"] = "s6_3920",
+["timestamp"] = 1774062922,
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["race"] = "NightElf",
+["class"] = "DRUID",
+["name"] = "Lonelylitten-Stormrage",
+["sex"] = 2,
+},
+["type"] = "LOOT",
+["event"] = "CHAT_MSG_LOOT",
+},
+["color"] = {
+["b"] = 0,
+["g"] = 0.6666666865348816,
+["r"] = 0,
+},
+["text"] = "You receive item: |cnIQ1:|Hitem:236767::::::::90:102::::1:38:14:::::|h[Tranquility Bloom |A:Professions-ChatIcon-Quality-12-Tier2:17:15::1|a]|h|rx5",
+["id"] = "s6_3921",
+["timestamp"] = 1774062922,
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["race"] = "NightElf",
+["class"] = "DRUID",
+["name"] = "Lonelylitten-Stormrage",
+["sex"] = 2,
+},
+["type"] = "LOOT",
+["event"] = "CHAT_MSG_LOOT",
+},
+["color"] = {
+["b"] = 0,
+["g"] = 0.6666666865348816,
+["r"] = 0,
+},
+["text"] = "You receive item: |cnIQ2:|Hitem:236774::::::::90:102::::1:38:13:::::|h[Azeroot |A:Professions-ChatIcon-Quality-12-Tier1:17:15::1|a]|h|rx3",
+["id"] = "s6_3922",
+["timestamp"] = 1774062922,
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["type"] = "CURRENCY",
+["event"] = "CHAT_MSG_CURRENCY",
+},
+["color"] = {
+["b"] = 0,
+["g"] = 0.6666666865348816,
+["r"] = 0,
+},
+["text"] = "You receive currency: |cnIQ3:|Hcurrency:3257:0|h[Artisan Blacksmith's Moxie]|h|rx10",
+["id"] = "s6_3923",
+["timestamp"] = 1774062923,
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["type"] = "CURRENCY",
+["event"] = "CHAT_MSG_CURRENCY",
+},
+["color"] = {
+["b"] = 0,
+["g"] = 0.6666666865348816,
+["r"] = 0,
+},
+["text"] = "You receive currency: |cnIQ3:|Hcurrency:3151:0|h[Midnight Blacksmithing Knowledge]|h|rx2",
+["id"] = "s6_3924",
+["timestamp"] = 1774062923,
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["race"] = "NightElf",
+["class"] = "DRUID",
+["name"] = "Lonelylitten-Stormrage",
+["sex"] = 2,
+},
+["type"] = "LOOT",
+["event"] = "CHAT_MSG_LOOT",
+},
+["color"] = {
+["b"] = 0,
+["g"] = 0.6666666865348816,
+["r"] = 0,
+},
+["text"] = "You receive item: |cnIQ1:|Hitem:260630::::::::90:102:::::::::|h[Ingenious Identifier]|h|r",
+["id"] = "s6_3925",
+["timestamp"] = 1774062923,
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["race"] = "NightElf",
+["class"] = "DRUID",
+["name"] = "Lonelylitten-Stormrage",
+["sex"] = 2,
+},
+["type"] = "LOOT",
+["event"] = "CHAT_MSG_LOOT",
+},
+["color"] = {
+["b"] = 0,
+["g"] = 0.6666666865348816,
+["r"] = 0,
+},
+["text"] = "You receive item: |cnIQ3:|Hitem:251285::::::::90:102:::::::::|h[Petrified Root]|h|rx2",
+["id"] = "s6_3926",
+["timestamp"] = 1774062923,
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["race"] = "NightElf",
+["class"] = "DRUID",
+["name"] = "Lonelylitten-Stormrage",
+["sex"] = 2,
+},
+["type"] = "LOOT",
+["event"] = "CHAT_MSG_LOOT",
+},
+["color"] = {
+["b"] = 0,
+["g"] = 0.6666666865348816,
+["r"] = 0,
+},
+["text"] = "You receive item: |cnIQ1:|Hitem:237359::::::::90:102::::1:38:13:::::|h[Refulgent Copper Ore |A:Professions-ChatIcon-Quality-12-Tier1:17:15::1|a]|h|rx6",
+["id"] = "s6_3927",
+["timestamp"] = 1774062923,
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["race"] = "NightElf",
+["class"] = "DRUID",
+["name"] = "Lonelylitten-Stormrage",
+["sex"] = 2,
+},
+["type"] = "LOOT",
+["event"] = "CHAT_MSG_LOOT",
+},
+["color"] = {
+["b"] = 0,
+["g"] = 0.6666666865348816,
+["r"] = 0,
+},
+["text"] = "You receive item: |cnIQ2:|Hitem:238522::::::::90:102:::::::::|h[Peerless Plumage]|h|rx2",
+["id"] = "s6_3928",
+["timestamp"] = 1774062923,
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["type"] = "CURRENCY",
+["event"] = "CHAT_MSG_CURRENCY",
+},
+["color"] = {
+["b"] = 0,
+["g"] = 0.6666666865348816,
+["r"] = 0,
+},
+["text"] = "You receive currency: |cnIQ3:|Hcurrency:3151:0|h[Midnight Blacksmithing Knowledge]|h|rx1",
+["id"] = "s6_3929",
+["timestamp"] = 1774062928,
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["type"] = "CURRENCY",
+["event"] = "CHAT_MSG_CURRENCY",
+},
+["color"] = {
+["b"] = 0,
+["g"] = 0.6666666865348816,
+["r"] = 0,
+},
+["text"] = "You receive currency: |cnIQ3:|Hcurrency:3257:0|h[Artisan Blacksmith's Moxie]|h|rx5",
+["id"] = "s6_3930",
+["timestamp"] = 1774062928,
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["type"] = "CURRENCY",
+["event"] = "CHAT_MSG_CURRENCY",
+},
+["color"] = {
+["b"] = 0,
+["g"] = 0.6666666865348816,
+["r"] = 0,
+},
+["text"] = "You receive currency: |cnIQ3:|Hcurrency:3151:0|h[Midnight Blacksmithing Knowledge]|h|rx2",
+["id"] = "s6_3931",
+["timestamp"] = 1774062930,
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["type"] = "CURRENCY",
+["event"] = "CHAT_MSG_CURRENCY",
+},
+["color"] = {
+["b"] = 0,
+["g"] = 0.6666666865348816,
+["r"] = 0,
+},
+["text"] = "You receive currency: |cnIQ3:|Hcurrency:3257:0|h[Artisan Blacksmith's Moxie]|h|rx10",
+["id"] = "s6_3932",
+["timestamp"] = 1774062930,
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["race"] = "NightElf",
+["class"] = "WARLOCK",
+["name"] = "Masati-Dalaran",
+["sex"] = 3,
+},
+["type"] = "GUILD_ACHIEVEMENT",
+["event"] = "CHAT_MSG_GUILD_ACHIEVEMENT",
+},
+["color"] = {
+["b"] = 0.250980406999588,
+["g"] = 1,
+["r"] = 0.250980406999588,
+},
+["text"] = "|Hplayer:Masati-Dalaran|h[|cff8788eeMasati-Dalaran|r]|h has earned the achievement |cffffff00|Hachievement:61801:Player-3683-0DBE6DA8:1:3:20:26:4294967295:4294967295:4294967295:4294967295|h[Midnight Delves: Tier 5 (Season 1)]|h|r!",
+["id"] = "s6_3933",
+["timestamp"] = 1774062955,
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["race"] = "Orc",
+["class"] = "DEATHKNIGHT",
+["name"] = "Kahuneh-Mal'Ganis",
+["sex"] = 3,
+},
+["type"] = "GUILD",
+["event"] = "CHAT_MSG_GUILD",
+},
+["color"] = {
+["b"] = 0.250980406999588,
+["g"] = 1,
+["r"] = 0.250980406999588,
+},
+["text"] = "|Hchannel:GUILD|h[Guild]|h |Hplayer:Kahuneh-Mal'Ganis:419:GUILD:|h[|cffc41e3aKahuneh|r]|h: look at this guy",
+["id"] = "s6_3934",
+["timestamp"] = 1774062970,
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["race"] = "Orc",
+["class"] = "DEATHKNIGHT",
+["name"] = "Kahuneh-Mal'Ganis",
+["sex"] = 3,
+},
+["type"] = "GUILD",
+["event"] = "CHAT_MSG_GUILD",
+},
+["color"] = {
+["b"] = 0.250980406999588,
+["g"] = 1,
+["r"] = 0.250980406999588,
+},
+["text"] = "|Hchannel:GUILD|h[Guild]|h |Hplayer:Kahuneh-Mal'Ganis:421:GUILD:|h[|cffc41e3aKahuneh|r]|h: not a hof delver",
+["id"] = "s6_3935",
+["timestamp"] = 1774062973,
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["race"] = "VoidElf",
+["class"] = "MAGE",
+["name"] = "Scadrial-Tichondrius",
+["sex"] = 3,
+},
+["type"] = "GUILD_ACHIEVEMENT",
+["event"] = "CHAT_MSG_GUILD_ACHIEVEMENT",
+},
+["color"] = {
+["b"] = 0.250980406999588,
+["g"] = 1,
+["r"] = 0.250980406999588,
+},
+["text"] = "|Hplayer:Scadrial-Tichondrius|h[|cff3fc7ebScadrial-Tichondrius|r]|h has earned the achievement |cffffff00|Hachievement:61797:Player-11-0E694AFA:1:3:20:26:4294967295:4294967295:4294967295:4294967295|h[My Shady Nemesis]|h|r!",
+["id"] = "s6_3936",
+["timestamp"] = 1774063218,
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["race"] = "Dwarf",
+["class"] = "SHAMAN",
+["name"] = "Alconaft-Stormrage",
+["sex"] = 2,
+},
+["type"] = "WHISPER",
+["event"] = "CHAT_MSG_WHISPER_INFORM",
+},
+["color"] = {
+["b"] = 1,
+["g"] = 0.501960813999176,
+["r"] = 1,
+},
+["text"] = "To |Hplayer:Alconaft-Stormrage:663:WHISPER:ALCONAFT-STORMRAGE|h[|cff0070ddAlconaft|r]|h: I can! R5 guaranteed. This Character!",
+["id"] = "s6_3937",
+["timestamp"] = 1774063374,
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["race"] = "Dwarf",
+["class"] = "SHAMAN",
+["name"] = "Alconaft-Stormrage",
+["sex"] = 2,
+},
+["type"] = "WHISPER",
+["event"] = "CHAT_MSG_WHISPER",
+},
+["color"] = {
+["b"] = 1,
+["g"] = 0.501960813999176,
+["r"] = 1,
+},
+["text"] = "|Hplayer:Alconaft-Stormrage:682:WHISPER:ALCONAFT-STORMRAGE|h[|cff0070ddAlconaft|r]|h whispers: how much? tip?",
+["id"] = "s6_3938",
+["timestamp"] = 1774063398,
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["race"] = "Dwarf",
+["class"] = "SHAMAN",
+["name"] = "Alconaft-Stormrage",
+["sex"] = 2,
+},
+["type"] = "WHISPER",
+["event"] = "CHAT_MSG_WHISPER_INFORM",
+},
+["color"] = {
+["b"] = 1,
+["g"] = 0.501960813999176,
+["r"] = 1,
+},
+["text"] = "To |Hplayer:Alconaft-Stormrage:696:WHISPER:ALCONAFT-STORMRAGE|h[|cff0070ddAlconaft|r]|h: whatever you feel is fair",
+["id"] = "s6_3939",
+["timestamp"] = 1774063408,
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["race"] = "Dwarf",
+["class"] = "SHAMAN",
+["name"] = "Alconaft-Stormrage",
+["sex"] = 2,
+},
+["type"] = "WHISPER",
+["event"] = "CHAT_MSG_WHISPER",
+},
+["color"] = {
+["b"] = 1,
+["g"] = 0.501960813999176,
+["r"] = 1,
+},
+["text"] = "|Hplayer:Alconaft-Stormrage:724:WHISPER:ALCONAFT-STORMRAGE|h[|cff0070ddAlconaft|r]|h whispers: sent",
+["id"] = "s6_3940",
+["timestamp"] = 1774063426,
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["race"] = "Dwarf",
+["class"] = "SHAMAN",
+["name"] = "Alconaft-Stormrage",
+["sex"] = 2,
+},
+["type"] = "WHISPER",
+["event"] = "CHAT_MSG_WHISPER_INFORM",
+},
+["color"] = {
+["b"] = 1,
+["g"] = 0.501960813999176,
+["r"] = 1,
+},
+["text"] = "To |Hplayer:Alconaft-Stormrage:743:WHISPER:ALCONAFT-STORMRAGE|h[|cff0070ddAlconaft|r]|h: done!",
+["id"] = "s6_3941",
+["timestamp"] = 1774063441,
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["race"] = "Dwarf",
+["class"] = "SHAMAN",
+["name"] = "Alconaft-Stormrage",
+["sex"] = 2,
+},
+["type"] = "WHISPER",
+["event"] = "CHAT_MSG_WHISPER",
+},
+["color"] = {
+["b"] = 1,
+["g"] = 0.501960813999176,
+["r"] = 1,
+},
+["text"] = "|Hplayer:Alconaft-Stormrage:752:WHISPER:ALCONAFT-STORMRAGE|h[|cff0070ddAlconaft|r]|h whispers: ty",
+["id"] = "s6_3942",
+["timestamp"] = 1774063446,
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["race"] = "Dwarf",
+["class"] = "SHAMAN",
+["name"] = "Alconaft-Stormrage",
+["sex"] = 2,
+},
+["type"] = "WHISPER",
+["event"] = "CHAT_MSG_WHISPER_INFORM",
+},
+["color"] = {
+["b"] = 1,
+["g"] = 0.501960813999176,
+["r"] = 1,
+},
+["text"] = "To |Hplayer:Alconaft-Stormrage:771:WHISPER:ALCONAFT-STORMRAGE|h[|cff0070ddAlconaft|r]|h: npnp!",
+["id"] = "s6_3943",
+["timestamp"] = 1774063459,
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["race"] = "NightElf",
+["class"] = "WARLOCK",
+["name"] = "Masati-Dalaran",
+["sex"] = 3,
+},
+["type"] = "GUILD_ACHIEVEMENT",
+["event"] = "CHAT_MSG_GUILD_ACHIEVEMENT",
+},
+["color"] = {
+["b"] = 0.250980406999588,
+["g"] = 1,
+["r"] = 0.250980406999588,
+},
+["text"] = "|Hplayer:Masati-Dalaran|h[|cff8788eeMasati-Dalaran|r]|h has earned the achievement |cffffff00|Hachievement:61802:Player-3683-0DBE6DA8:1:3:20:26:4294967295:4294967295:4294967295:4294967295|h[Midnight Delves: Tier 6 (Season 1)]|h|r!",
+["id"] = "s6_3944",
+["timestamp"] = 1774063719,
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["race"] = "NightElf",
+["class"] = "DRUID",
+["name"] = "Kayodru-Stormrage",
+["sex"] = 3,
+},
+["type"] = "WHISPER",
+["event"] = "CHAT_MSG_WHISPER_INFORM",
+},
+["color"] = {
+["b"] = 1,
+["g"] = 0.501960813999176,
+["r"] = 1,
+},
+["text"] = "To |Hplayer:Kayodru-Stormrage:1136:WHISPER:KAYODRU-STORMRAGE|h[|cffff7c0aKayodru|r]|h: I can! R5 guaranteed. This Character!",
+["id"] = "s6_3945",
+["timestamp"] = 1774063989,
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["race"] = "NightElf",
+["class"] = "DRUID",
+["name"] = "Kayodru-Stormrage",
+["sex"] = 3,
+},
+["type"] = "WHISPER",
+["event"] = "CHAT_MSG_WHISPER",
+},
+["color"] = {
+["b"] = 1,
+["g"] = 0.501960813999176,
+["r"] = 1,
+},
+["text"] = "|Hplayer:Kayodru-Stormrage:1158:WHISPER:KAYODRU-STORMRAGE|h[|cffff7c0aKayodru|r]|h whispers: sent",
+["id"] = "s6_3946",
+["timestamp"] = 1774064036,
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["race"] = "NightElf",
+["class"] = "DRUID",
+["name"] = "Lonelylitten-Stormrage",
+["sex"] = 2,
+},
+["type"] = "LOOT",
+["event"] = "CHAT_MSG_LOOT",
+},
+["color"] = {
+["b"] = 0,
+["g"] = 0.6666666865348816,
+["r"] = 0,
+},
+["text"] = "You receive item: |cnIQ2:|Hitem:238205::::::::90:102:::::::::|h[Sterling Alloy |A:Professions-ChatIcon-Quality-12-Tier2:17:15::1|a]|h|rx2",
+["id"] = "s6_3947",
+["timestamp"] = 1774064049,
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["race"] = "NightElf",
+["class"] = "DRUID",
+["name"] = "Lonelylitten-Stormrage",
+["sex"] = 2,
+},
+["type"] = "LOOT",
+["event"] = "CHAT_MSG_LOOT",
+},
+["color"] = {
+["b"] = 0,
+["g"] = 0.6666666865348816,
+["r"] = 0,
+},
+["text"] = "You receive item: |cnIQ2:|Hitem:238203::::::::90:102:::::::::|h[Gloaming Alloy |A:Professions-ChatIcon-Quality-12-Tier2:17:15::1|a]|h|rx3",
+["id"] = "s6_3948",
+["timestamp"] = 1774064049,
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["race"] = "NightElf",
+["class"] = "DRUID",
+["name"] = "Kayodru-Stormrage",
+["sex"] = 3,
+},
+["type"] = "WHISPER",
+["event"] = "CHAT_MSG_WHISPER_INFORM",
+},
+["color"] = {
+["b"] = 1,
+["g"] = 0.501960813999176,
+["r"] = 1,
+},
+["text"] = "To |Hplayer:Kayodru-Stormrage:1171:WHISPER:KAYODRU-STORMRAGE|h[|cffff7c0aKayodru|r]|h: done!",
+["id"] = "s6_3949",
+["timestamp"] = 1774064066,
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["race"] = "NightElf",
+["class"] = "WARLOCK",
+["name"] = "Masati-Dalaran",
+["sex"] = 3,
+},
+["type"] = "GUILD_ACHIEVEMENT",
+["event"] = "CHAT_MSG_GUILD_ACHIEVEMENT",
+},
+["color"] = {
+["b"] = 0.250980406999588,
+["g"] = 1,
+["r"] = 0.250980406999588,
+},
+["text"] = "|Hplayer:Masati-Dalaran|h[|cff8788eeMasati-Dalaran|r]|h has earned the achievement |cffffff00|Hachievement:61803:Player-3683-0DBE6DA8:1:3:20:26:4294967295:4294967295:4294967295:4294967295|h[Midnight Delves: Tier 7 (Season 1)]|h|r!",
+["id"] = "s6_3950",
+["timestamp"] = 1774064344,
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["race"] = "VoidElf",
+["class"] = "MAGE",
+["name"] = "Scadrial-Tichondrius",
+["sex"] = 3,
+},
+["type"] = "GUILD_ACHIEVEMENT",
+["event"] = "CHAT_MSG_GUILD_ACHIEVEMENT",
+},
+["color"] = {
+["b"] = 0.250980406999588,
+["g"] = 1,
+["r"] = 0.250980406999588,
+},
+["text"] = "|Hplayer:Scadrial-Tichondrius|h[|cff3fc7ebScadrial-Tichondrius|r]|h has earned the achievement |cffffff00|Hachievement:61805:Player-11-0E694AFA:1:3:20:26:4294967295:4294967295:4294967295:4294967295|h[Midnight Delves: Tier 9 (Season 1)]|h|r!",
+["id"] = "s6_3951",
+["timestamp"] = 1774064497,
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["race"] = "Dracthyr",
+["class"] = "EVOKER",
+["name"] = "Dazuren-Zul'jin",
+["sex"] = 2,
+},
+["type"] = "GUILD_ACHIEVEMENT",
+["event"] = "CHAT_MSG_GUILD_ACHIEVEMENT",
+},
+["color"] = {
+["b"] = 0.250980406999588,
+["g"] = 1,
+["r"] = 0.250980406999588,
+},
+["text"] = "|Hplayer:Dazuren-Zul'jin|h[|cff33937fDazuren-Zul'jin|r]|h has earned the achievement |cffffff00|Hachievement:41287:Player-61-0EFF184F:1:3:20:26:4294967295:4294967295:4294967295:4294967295|h[Windrunner Spire]|h|r!",
+["id"] = "s6_3952",
+["timestamp"] = 1774064524,
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["race"] = "VoidElf",
+["class"] = "MAGE",
+["name"] = "Scadrial-Tichondrius",
+["sex"] = 3,
+},
+["type"] = "GUILD_ACHIEVEMENT",
+["event"] = "CHAT_MSG_GUILD_ACHIEVEMENT",
+},
+["color"] = {
+["b"] = 0.250980406999588,
+["g"] = 1,
+["r"] = 0.250980406999588,
+},
+["text"] = "|Hplayer:Scadrial-Tichondrius|h[|cff3fc7ebScadrial-Tichondrius|r]|h has earned the achievement |cffffff00|Hachievement:60891:Player-11-0E694AFA:1:3:20:26:4294967295:4294967295:4294967295:4294967295|h[The Crimson Rogue]|h|r!",
+["id"] = "s6_3953",
+["timestamp"] = 1774064621,
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["race"] = "Orc",
+["class"] = "DEATHKNIGHT",
+["name"] = "Kahuneh-Mal'Ganis",
+["sex"] = 3,
+},
+["type"] = "GUILD_ACHIEVEMENT",
+["event"] = "CHAT_MSG_GUILD_ACHIEVEMENT",
+},
+["color"] = {
+["b"] = 0.250980406999588,
+["g"] = 1,
+["r"] = 0.250980406999588,
+},
+["text"] = "|Hplayer:Kahuneh-Mal'Ganis|h[|cffc41e3aKahuneh-Mal'Ganis|r]|h has earned the achievement |cffffff00|Hachievement:61685:Player-3684-07137432:1:3:20:26:4294967295:4294967295:4294967295:4294967295|h[Proficient in Battle]|h|r!",
+["id"] = "s6_3954",
+["timestamp"] = 1774064651,
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["race"] = "Dwarf",
+["class"] = "MONK",
+["name"] = "Fobemonk-Stormrage",
+["sex"] = 2,
+},
+["type"] = "WHISPER",
+["event"] = "CHAT_MSG_WHISPER_INFORM",
+},
+["color"] = {
+["b"] = 1,
+["g"] = 0.501960813999176,
+["r"] = 1,
+},
+["text"] = "To |Hplayer:Fobemonk-Stormrage:2503:WHISPER:FOBEMONK-STORMRAGE|h[|cff00ff98Fobemonk|r]|h: which weapon?",
+["id"] = "s6_3955",
+["timestamp"] = 1774065598,
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["race"] = "Dracthyr",
+["class"] = "EVOKER",
+["name"] = "Dazuren-Zul'jin",
+["sex"] = 2,
+},
+["type"] = "GUILD_ACHIEVEMENT",
+["event"] = "CHAT_MSG_GUILD_ACHIEVEMENT",
+},
+["color"] = {
+["b"] = 0.250980406999588,
+["g"] = 1,
+["r"] = 0.250980406999588,
+},
+["text"] = "|Hplayer:Dazuren-Zul'jin|h[|cff33937fDazuren-Zul'jin|r]|h has earned the achievement |cffffff00|Hachievement:42329:Player-61-0EFF184F:1:3:20:26:4294967295:4294967295:4294967295:4294967295|h[Two Warband Mentors: Midnight]|h|r!",
+["id"] = "s6_3956",
+["timestamp"] = 1774065710,
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["race"] = "NightElf",
+["class"] = "WARLOCK",
+["name"] = "Hesperr-Stormrage",
+["sex"] = 3,
+},
+["type"] = "GUILD_ACHIEVEMENT",
+["event"] = "CHAT_MSG_GUILD_ACHIEVEMENT",
+},
+["color"] = {
+["b"] = 0.250980406999588,
+["g"] = 1,
+["r"] = 0.250980406999588,
+},
+["text"] = "|Hplayer:Hesperr-Stormrage|h[|cff8788eeHesperr|r]|h has earned the achievement |cffffff00|Hachievement:61806:Player-60-0FE1266E:1:3:20:26:4294967295:4294967295:4294967295:4294967295|h[Midnight Delves: Tier 10 (Season 1)]|h|r!",
+["id"] = "s6_3957",
+["timestamp"] = 1774065985,
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["race"] = "VoidElf",
+["class"] = "MAGE",
+["name"] = "Scadrial-Tichondrius",
+["sex"] = 3,
+},
+["type"] = "GUILD_ACHIEVEMENT",
+["event"] = "CHAT_MSG_GUILD_ACHIEVEMENT",
+},
+["color"] = {
+["b"] = 0.250980406999588,
+["g"] = 1,
+["r"] = 0.250980406999588,
+},
+["text"] = "|Hplayer:Scadrial-Tichondrius|h[|cff3fc7ebScadrial-Tichondrius|r]|h has earned the achievement |cffffff00|Hachievement:61806:Player-11-0E694AFA:1:3:20:26:4294967295:4294967295:4294967295:4294967295|h[Midnight Delves: Tier 10 (Season 1)]|h|r!",
+["id"] = "s6_3958",
+["timestamp"] = 1774066036,
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["race"] = "BloodElf",
+["class"] = "DEMONHUNTER",
+["name"] = "Manasor-Zul'jin",
+["sex"] = 2,
+},
+["type"] = "GUILD_ACHIEVEMENT",
+["event"] = "CHAT_MSG_GUILD_ACHIEVEMENT",
+},
+["color"] = {
+["b"] = 0.250980406999588,
+["g"] = 1,
+["r"] = 0.250980406999588,
+},
+["text"] = "|Hplayer:Manasor-Zul'jin|h[|cffa330c9Manasor-Zul'jin|r]|h has earned the achievement |cffffff00|Hachievement:16271:Player-61-0B36C7E9:1:3:20:26:4294967295:4294967295:4294967295:4294967295|h[Mythic: Algeth'ar Academy]|h|r!",
+["id"] = "s6_3959",
+["timestamp"] = 1774066617,
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["race"] = "Dwarf",
+["class"] = "MAGE",
+["name"] = "Combustizar-Zul'jin",
+["sex"] = 2,
+},
+["type"] = "GUILD_ACHIEVEMENT",
+["event"] = "CHAT_MSG_GUILD_ACHIEVEMENT",
+},
+["color"] = {
+["b"] = 0.250980406999588,
+["g"] = 1,
+["r"] = 0.250980406999588,
+},
+["text"] = "|Hplayer:Combustizar-Zul'jin|h[|cff3fc7ebCombustizar-Zul'jin|r]|h has earned the achievement |cffffff00|Hachievement:62175:Player-61-0F1441B7:1:3:20:26:4294967295:4294967295:4294967295:4294967295|h[Prey: Sadistic Shamans (Nightmare)]|h|r!",
+["id"] = "s6_3960",
+["timestamp"] = 1774066948,
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["race"] = "BloodElf",
+["class"] = "DEMONHUNTER",
+["name"] = "Manasor-Zul'jin",
+["sex"] = 2,
+},
+["type"] = "GUILD_ACHIEVEMENT",
+["event"] = "CHAT_MSG_GUILD_ACHIEVEMENT",
+},
+["color"] = {
+["b"] = 0.250980406999588,
+["g"] = 1,
+["r"] = 0.250980406999588,
+},
+["text"] = "|Hplayer:Manasor-Zul'jin|h[|cffa330c9Manasor-Zul'jin|r]|h has earned the achievement |cffffff00|Hachievement:9036:Player-61-0B36C7E9:1:3:20:26:4294967295:4294967295:4294967295:4294967295|h[Monomania]|h|r!",
+["id"] = "s6_3961",
+["timestamp"] = 1774067846,
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["race"] = "BloodElf",
+["class"] = "DEMONHUNTER",
+["name"] = "Manasor-Zul'jin",
+["sex"] = 2,
+},
+["type"] = "GUILD_ACHIEVEMENT",
+["event"] = "CHAT_MSG_GUILD_ACHIEVEMENT",
+},
+["color"] = {
+["b"] = 0.250980406999588,
+["g"] = 1,
+["r"] = 0.250980406999588,
+},
+["text"] = "|Hplayer:Manasor-Zul'jin|h[|cffa330c9Manasor-Zul'jin|r]|h has earned the achievement |cffffff00|Hachievement:10081:Player-61-0B36C7E9:1:3:20:26:4294967295:4294967295:4294967295:4294967295|h[Mythic: Skyreach]|h|r!",
+["id"] = "s6_3962",
+["timestamp"] = 1774067846,
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["race"] = "NightElf",
+["class"] = "DEMONHUNTER",
+["name"] = "Ekitten-Zul'jin",
+["sex"] = 3,
+},
+["type"] = "GUILD_ACHIEVEMENT",
+["event"] = "CHAT_MSG_GUILD_ACHIEVEMENT",
+},
+["color"] = {
+["b"] = 0.250980406999588,
+["g"] = 1,
+["r"] = 0.250980406999588,
+},
+["text"] = "|Hplayer:Ekitten-Zul'jin|h[|cffa330c9Ekitten-Zul'jin|r]|h has earned the achievement |cffffff00|Hachievement:61638:Player-61-0FC6C0FE:1:3:20:26:4294967295:4294967295:4294967295:4294967295|h[Den of Nalorakk]|h|r!",
+["id"] = "s6_3963",
+["timestamp"] = 1774067998,
 },
 },
 ["version"] = 1,

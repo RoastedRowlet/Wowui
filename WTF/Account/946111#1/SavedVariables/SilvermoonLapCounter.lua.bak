@@ -23,13 +23,13 @@ SilvermoonLapCounterDB = {
 },
 ["Lonelylitten-Stormrage"] = {
 ["bestLapTime"] = 4.885000000002037,
-["lastLapDate"] = "2026-03-20 22:26",
+["lastLapDate"] = "2026-03-20 22:29",
 ["realm"] = "Stormrage",
-["lastLapTime"] = 12.09800000000178,
+["lastLapTime"] = 8.578000000001339,
 ["firstLapDate"] = "2026-03-03 01:21",
 ["class"] = "DRUID",
 ["bestLapDate"] = "2026-03-12 00:52",
-["lapCount"] = 323,
+["lapCount"] = 325,
 },
 ["Zappyxatu-Stormrage"] = {
 ["class"] = "SHAMAN",

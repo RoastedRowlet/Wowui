@@ -202,4 +202,9 @@ CHATTYNATOR_COMMAND_HISTORY = {
 "/s /eui",
 "/cw Possum-Stormrage /eui",
 "/cw Possum-Stormrage /reload",
+"/cw Alconaft-Stormrage whatever you feel is fair",
+"/cw Alconaft-Stormrage done!",
+"/cw Alconaft-Stormrage npnp!",
+"/cw Kayodru-Stormrage done!",
+"/cw Fobemonk-Stormrage which weapon?",
 }

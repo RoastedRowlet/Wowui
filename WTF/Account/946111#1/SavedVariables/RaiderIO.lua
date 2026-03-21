@@ -14,8 +14,14 @@ RaiderIO_Config = {
 }
 RaiderIO_LastCharacter = "us-Lonelylitten-stormrage"
 RaiderIO_MissingCharacters = {
-["us-Jenner-stormrage"] = true,
-["us-Pyrâmid-stormrage"] = true,
+["us-Talyora-stormrage"] = true,
+["us-Sodina-stormrage"] = true,
+["us-Madagol-stormrage"] = true,
+["us-Senjdk-stormrage"] = true,
+["us-Konsecration-bleeding-hollow"] = true,
+["us-Blssed-stormrage"] = true,
+["us-Ipinkmage-stormrage"] = true,
+["us-Accuria-stormrage"] = true,
 }
 RaiderIO_MissingServers = {
 }

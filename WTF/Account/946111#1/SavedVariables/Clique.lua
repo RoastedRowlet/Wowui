@@ -11,18 +11,18 @@ CliqueDB3 = {
 },
 ["Barelynoer - Area 52"] = {
 ["spec1_profileKey"] = "Barelynoer - Area 52",
+["spec3_profileKey"] = "Barelynoer - Area 52",
 ["spec2_profileKey"] = "Barelynoer - Area 52",
 ["specswap"] = false,
-["spec3_profileKey"] = "Barelynoer - Area 52",
 },
 ["Lonelylitten - Stormrage"] = {
 ["spec1_profileKey"] = "Lonelylitten - Stormrage",
 ["fastooc"] = false,
-["specswap"] = false,
+["spec2_profileKey"] = "Lonelylitten - Stormrage",
 ["downclick"] = false,
 ["spec4_profileKey"] = "Lonelylitten - Stormrage",
+["specswap"] = false,
 ["spec3_profileKey"] = "Lonelylitten - Stormrage",
-["spec2_profileKey"] = "Lonelylitten - Stormrage",
 },
 },
 ["profileKeys"] = {
@@ -67,15 +67,6 @@ CliqueDB3 = {
 ["unit"] = "mouseover",
 },
 {
-["spell"] = "Regrowth",
-["key"] = "BUTTON2",
-["sets"] = {
-["default"] = true,
-},
-["icon"] = 136085,
-["type"] = "spell",
-},
-{
 ["type"] = "menu",
 ["key"] = "CTRL-BUTTON2",
 ["sets"] = {
@@ -92,17 +83,17 @@ CliqueDB3 = {
 ["type"] = "spell",
 },
 {
-["type"] = "macro",
-["key"] = "SHIFT-BUTTON2",
-["macrotext"] = "/cast Nature's Swiftness\n/cast [@mouseover] Regrowth\n",
+["spell"] = "Regrowth",
+["key"] = "BUTTON2",
 ["sets"] = {
 ["default"] = true,
 },
-["icon"] = 134332,
+["icon"] = 136085,
+["type"] = "spell",
 },
 {
 ["type"] = "macro",
-["key"] = "ALT-BUTTON2",
+["key"] = "SHIFT-BUTTON2",
 ["macrotext"] = "/cast Nature's Swiftness\n/cast [@mouseover] Regrowth\n",
 ["sets"] = {
 ["default"] = true,
@@ -126,6 +117,15 @@ CliqueDB3 = {
 },
 ["icon"] = 236288,
 ["type"] = "spell",
+},
+{
+["type"] = "macro",
+["key"] = "ALT-BUTTON2",
+["macrotext"] = "/cast Nature's Swiftness\n/cast [@mouseover] Regrowth\n",
+["sets"] = {
+["default"] = true,
+},
+["icon"] = 134332,
 },
 {
 ["spell"] = "Revive",

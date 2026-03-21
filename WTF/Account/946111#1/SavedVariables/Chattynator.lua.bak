@@ -543,10 +543,10 @@ CHATTYNATOR_CONFIG = {
 ["invert"] = true,
 ["name"] = "GENERAL",
 ["groups"] = {
-["PET_BATTLE_COMBAT_LOG"] = false,
 ["COMBAT_MISC_INFO"] = false,
-["COMBAT_XP_GAIN"] = false,
 ["OPENING"] = false,
+["COMBAT_XP_GAIN"] = false,
+["PET_BATTLE_COMBAT_LOG"] = false,
 ["VOICE_TEXT"] = false,
 ["PET_INFO"] = false,
 ["TRADESKILLS"] = false,
@@ -632,7 +632,7 @@ CHATTYNATOR_CONFIG = {
 },
 }
 CHATTYNATOR_MESSAGE_LOG = {
-["cleanIndex"] = 3876,
+["cleanIndex"] = 3884,
 ["current"] = {
 {
 ["recordedBy"] = "Lonelylitten-Stormrage",
@@ -77500,8 +77500,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Costcomuffin-Zul'jin",
 ["sex"] = 3,
 },
-["type"] = "GUILD_ACHIEVEMENT",
 ["event"] = "CHAT_MSG_GUILD_ACHIEVEMENT",
+["type"] = "GUILD_ACHIEVEMENT",
 },
 ["color"] = {
 ["b"] = 0.250980406999588,
@@ -77521,8 +77521,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Torqaan-Zul'jin",
 ["sex"] = 3,
 },
-["type"] = "GUILD_ACHIEVEMENT",
 ["event"] = "CHAT_MSG_GUILD_ACHIEVEMENT",
+["type"] = "GUILD_ACHIEVEMENT",
 },
 ["color"] = {
 ["b"] = 0.250980406999588,
@@ -77532,6 +77532,153 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["text"] = "|Hplayer:Torqaan-Zul'jin|h[|cffaad372Torqaan-Zul'jin|r]|h has earned the achievement |cffffff00|Hachievement:62180:Player-61-0F823AE2:1:3:20:26:4294967295:4294967295:4294967295:4294967295|h[Prey: Dominating the Void (Nightmare)]|h|r!",
 ["id"] = "s6_3878",
 ["timestamp"] = 1774059823,
+},
+{
+["recordedBy"] = "Zappyxatu-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["name"] = "Camberon",
+},
+["event"] = "CHAT_MSG_MONSTER_SAY",
+["type"] = "MONSTER_SAY",
+},
+["color"] = {
+["b"] = 0.6235294342041016,
+["g"] = 1,
+["r"] = 1,
+},
+["text"] = "Camberon says: I'm far too busy to keep up with your training, but you're welcome to use my cauldron over there.",
+["id"] = "s6_3879",
+["timestamp"] = 1774062300,
+},
+{
+["recordedBy"] = "Zappyxatu-Stormrage",
+["typeInfo"] = {
+["event"] = "CHAT_MSG_SKILL",
+["type"] = "SKILL",
+},
+["color"] = {
+["b"] = 1,
+["g"] = 0.3333333432674408,
+["r"] = 0.3333333432674408,
+},
+["text"] = "Your skill in Midnight Alchemy has increased to 7.",
+["id"] = "s6_3880",
+["timestamp"] = 1774062357,
+},
+{
+["recordedBy"] = "Zappyxatu-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["race"] = "Dwarf",
+["class"] = "SHAMAN",
+["name"] = "Zappyxatu-Stormrage",
+["sex"] = 2,
+},
+["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
+},
+["color"] = {
+["b"] = 0,
+["g"] = 0.6666666865348816,
+["r"] = 0,
+},
+["text"] = "You create: |cnIQ1:|Hitem:241304::::::::80:264::::2:38:14:40:3252:::::|h[Silvermoon Health Potion |A:Professions-ChatIcon-Quality-12-Tier2:17:15::1|a]|h|rx5.",
+["id"] = "s6_3881",
+["timestamp"] = 1774062357,
+},
+{
+["recordedBy"] = "Madmareep-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["name"] = "Camberon",
+},
+["event"] = "CHAT_MSG_MONSTER_SAY",
+["type"] = "MONSTER_SAY",
+},
+["color"] = {
+["r"] = 1,
+["g"] = 1,
+["b"] = 0.6235294342041016,
+},
+["text"] = "Camberon says: I'm far too busy to keep up with your training, but you're welcome to use my cauldron over there.",
+["timestamp"] = 1774062431,
+["id"] = "s6_3882",
+},
+{
+["recordedBy"] = "Madmareep-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["class"] = "PRIEST",
+["race"] = "NightElf",
+["name"] = "Madmareep-Stormrage",
+["sex"] = 2,
+},
+["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
+},
+["color"] = {
+["r"] = 0,
+["g"] = 0.6666666865348816,
+["b"] = 0,
+},
+["text"] = "You create: |cnIQ1:|Hitem:241304::::::::80:258::::2:38:14:40:3252:::::|h[Silvermoon Health Potion |A:Professions-ChatIcon-Quality-12-Tier2:17:15::1|a]|h|rx5.",
+["timestamp"] = 1774062458,
+["id"] = "s6_3883",
+},
+{
+["recordedBy"] = "Madmareep-Stormrage",
+["typeInfo"] = {
+["event"] = "CHAT_MSG_SKILL",
+["type"] = "SKILL",
+},
+["color"] = {
+["r"] = 0.3333333432674408,
+["g"] = 0.3333333432674408,
+["b"] = 1,
+},
+["text"] = "Your skill in Midnight Alchemy has increased to 8.",
+["timestamp"] = 1774062459,
+["id"] = "s6_3884",
+},
+{
+["recordedBy"] = "Barelynoer-Area52",
+["typeInfo"] = {
+["player"] = {
+["name"] = "Camberon",
+},
+["type"] = "MONSTER_SAY",
+["event"] = "CHAT_MSG_MONSTER_SAY",
+},
+["color"] = {
+["b"] = 0.6235294342041016,
+["g"] = 1,
+["r"] = 1,
+},
+["text"] = "Camberon says: I'm far too busy to keep up with your training, but you're welcome to use my cauldron over there.",
+["id"] = "s6_3885",
+["timestamp"] = 1774062605,
+},
+{
+["recordedBy"] = "Barelynoer-Area52",
+["typeInfo"] = {
+["player"] = {
+["race"] = "Dracthyr",
+["class"] = "EVOKER",
+["name"] = "Barelynoer-Area52",
+["sex"] = 2,
+},
+["type"] = "LOOT",
+["event"] = "CHAT_MSG_LOOT",
+},
+["color"] = {
+["b"] = 0,
+["g"] = 0.6666666865348816,
+["r"] = 0,
+},
+["text"] = "You create: |cnIQ1:|Hitem:241304::::::::90:1473::::2:38:14:40:3252:::::|h[Silvermoon Health Potion |A:Professions-ChatIcon-Quality-12-Tier2:17:15::1|a]|h|rx5.",
+["id"] = "s6_3886",
+["timestamp"] = 1774062618,
 },
 },
 ["version"] = 1,

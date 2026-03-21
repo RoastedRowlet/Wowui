@@ -861,6 +861,24 @@ CraftSimDB = {
 ["provisionAll"] = 1,
 ["realm"] = "Stormrage",
 },
+["Fobemonk-Stormrage"] = {
+["chatHistory"] = {
+{
+["fromPlayer"] = true,
+["content"] = "which weapon?",
+["timestamp"] = 1774051140,
+},
+},
+["totalOrders"] = 0,
+["customer"] = "Fobemonk",
+["craftHistory"] = {
+},
+["provisionSome"] = 0,
+["provisionNone"] = 0,
+["provisionAll"] = 0,
+["totalTip"] = 0,
+["realm"] = "Stormrage",
+},
 ["Sundkay-Stormrage"] = {
 ["chatHistory"] = {
 {
@@ -962,6 +980,140 @@ CraftSimDB = {
 ["provisionNone"] = 0,
 ["provisionAll"] = 1,
 ["totalTip"] = 15000000,
+["realm"] = "Stormrage",
+},
+["Kayodru-Stormrage"] = {
+["chatHistory"] = {
+{
+["fromPlayer"] = true,
+["content"] = "I can! R5 guaranteed. This Character!",
+["timestamp"] = 1774049520,
+},
+{
+["fromPlayer"] = false,
+["content"] = "sent",
+["timestamp"] = 1774049580,
+},
+{
+["fromPlayer"] = true,
+["content"] = "done!",
+["timestamp"] = 1774049580,
+},
+},
+["totalOrders"] = 1,
+["customer"] = "Kayodru",
+["npc"] = false,
+["craftHistory"] = {
+{
+["reagentState"] = 0,
+["tip"] = 26000000,
+["customerNotes"] = "",
+["timestamp"] = 1774049580,
+["itemLink"] = "|cnIQ4:|Hitem:237849::::::::90:102::13:6:12214:12497:12066:12693:8960:8793:8:28:3615:29:32:30:40:38:8:40:2736:46:232875:47:245876:48:245784:::::|h[Magister's Valediction |A:Professions-ChatIcon-Quality-Tier5:17:15::1|a]|h|r",
+["reagents"] = {
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 251283,
+},
+["dataSlotIndex"] = 1,
+["quantity"] = 1,
+},
+["isBasicReagent"] = true,
+["source"] = 0,
+["slotIndex"] = 1,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 237366,
+},
+["dataSlotIndex"] = 2,
+["quantity"] = 2,
+},
+["isBasicReagent"] = true,
+["source"] = 0,
+["slotIndex"] = 2,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 238203,
+},
+["dataSlotIndex"] = 1,
+["quantity"] = 10,
+},
+["isBasicReagent"] = true,
+["source"] = 0,
+["slotIndex"] = 3,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 238205,
+},
+["dataSlotIndex"] = 2,
+["quantity"] = 6,
+},
+["isBasicReagent"] = true,
+["source"] = 0,
+["slotIndex"] = 4,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 244638,
+},
+["dataSlotIndex"] = 3,
+["quantity"] = 1,
+},
+["isBasicReagent"] = true,
+["source"] = 0,
+["slotIndex"] = 5,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 232875,
+},
+["dataSlotIndex"] = 4,
+["quantity"] = 4,
+},
+["isBasicReagent"] = false,
+["source"] = 1,
+["slotIndex"] = 6,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 245876,
+},
+["dataSlotIndex"] = 5,
+["quantity"] = 1,
+},
+["isBasicReagent"] = false,
+["source"] = 1,
+["slotIndex"] = 7,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 245784,
+},
+["dataSlotIndex"] = 6,
+["quantity"] = 1,
+},
+["isBasicReagent"] = false,
+["source"] = 0,
+["slotIndex"] = 8,
+},
+},
+},
+},
+["provisionSome"] = 0,
+["provisionNone"] = 0,
+["provisionAll"] = 1,
+["totalTip"] = 26000000,
 ["realm"] = "Stormrage",
 },
 ["Aldvelothi-Stormrage"] = {
@@ -1704,6 +1856,160 @@ CraftSimDB = {
 ["provisionNone"] = 0,
 ["totalTip"] = 20000000,
 ["provisionAll"] = 1,
+["realm"] = "Stormrage",
+},
+["Alconaft-Stormrage"] = {
+["chatHistory"] = {
+{
+["fromPlayer"] = true,
+["content"] = "I can! R5 guaranteed. This Character!",
+["timestamp"] = 1774048920,
+},
+{
+["fromPlayer"] = false,
+["content"] = "how much? tip?",
+["timestamp"] = 1774048920,
+},
+{
+["fromPlayer"] = true,
+["content"] = "whatever you feel is fair",
+["timestamp"] = 1774048920,
+},
+{
+["fromPlayer"] = false,
+["content"] = "sent",
+["timestamp"] = 1774048980,
+},
+{
+["fromPlayer"] = true,
+["content"] = "done!",
+["timestamp"] = 1774048980,
+},
+{
+["fromPlayer"] = false,
+["content"] = "ty",
+["timestamp"] = 1774048980,
+},
+{
+["fromPlayer"] = true,
+["content"] = "npnp!",
+["timestamp"] = 1774048980,
+},
+},
+["totalOrders"] = 1,
+["customer"] = "Alconaft",
+["npc"] = false,
+["craftHistory"] = {
+{
+["reagentState"] = 0,
+["tip"] = 50000000,
+["customerNotes"] = "",
+["timestamp"] = 1774048980,
+["itemLink"] = "|cnIQ4:|Hitem:237849::::::::90:102::13:6:12214:12497:12066:12693:8960:8791:8:28:3615:29:49:30:36:38:8:40:2736:46:232875:47:245876:48:245790:::::|h[Magister's Valediction |A:Professions-ChatIcon-Quality-Tier5:17:15::1|a]|h|r",
+["reagents"] = {
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 251283,
+},
+["dataSlotIndex"] = 1,
+["quantity"] = 1,
+},
+["isBasicReagent"] = true,
+["source"] = 0,
+["slotIndex"] = 1,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 237366,
+},
+["dataSlotIndex"] = 2,
+["quantity"] = 2,
+},
+["isBasicReagent"] = true,
+["source"] = 0,
+["slotIndex"] = 2,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 238203,
+},
+["dataSlotIndex"] = 1,
+["quantity"] = 10,
+},
+["isBasicReagent"] = true,
+["source"] = 0,
+["slotIndex"] = 3,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 238205,
+},
+["dataSlotIndex"] = 2,
+["quantity"] = 6,
+},
+["isBasicReagent"] = true,
+["source"] = 0,
+["slotIndex"] = 4,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 244638,
+},
+["dataSlotIndex"] = 3,
+["quantity"] = 1,
+},
+["isBasicReagent"] = true,
+["source"] = 0,
+["slotIndex"] = 5,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 232875,
+},
+["dataSlotIndex"] = 4,
+["quantity"] = 4,
+},
+["isBasicReagent"] = false,
+["source"] = 1,
+["slotIndex"] = 6,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 245876,
+},
+["dataSlotIndex"] = 5,
+["quantity"] = 1,
+},
+["isBasicReagent"] = false,
+["source"] = 1,
+["slotIndex"] = 7,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 245790,
+},
+["dataSlotIndex"] = 6,
+["quantity"] = 1,
+},
+["isBasicReagent"] = false,
+["source"] = 0,
+["slotIndex"] = 8,
+},
+},
+},
+},
+["provisionSome"] = 0,
+["provisionNone"] = 0,
+["provisionAll"] = 1,
+["totalTip"] = 50000000,
 ["realm"] = "Stormrage",
 },
 ["Bexiaria-Stormrage"] = {
@@ -5998,12 +6304,12 @@ CraftSimDB = {
 [246448] = 0,
 [246450] = 0,
 [240990] = 0,
-[240991] = 90,
-[246449] = 0,
 [247726] = 0,
+[246449] = 0,
+[236761] = 6,
 [246447] = 0,
 [247724] = 0,
-[236761] = 6,
+[240991] = 90,
 [247788] = 0,
 [260630] = 0,
 [247725] = 0,
@@ -6014,12 +6320,12 @@ CraftSimDB = {
 [246448] = 0,
 [246450] = 0,
 [240990] = 0,
-[240991] = 0,
-[246449] = 0,
 [247726] = 0,
+[246449] = 0,
+[236761] = 0,
 [246447] = 0,
 [247724] = 0,
-[236761] = 0,
+[240991] = 0,
 [247788] = 0,
 [260630] = 0,
 [247725] = 0,
@@ -6202,19 +6508,19 @@ CraftSimDB = {
 [197747] = 0,
 [245783] = 0,
 [245815] = 0,
-[238197] = 1,
+[238197] = 0,
 [244604] = 0,
 [244636] = 0,
 [197748] = 0,
 [245784] = 0,
 [245816] = 0,
 [238198] = 0,
-[232875] = 2,
+[232875] = 4,
 [244637] = 0,
 [245785] = 0,
 [245817] = 0,
 [242789] = 0,
-[244638] = 1,
+[244638] = 0,
 [245786] = 0,
 [245818] = 0,
 [244607] = 0,
@@ -6226,7 +6532,7 @@ CraftSimDB = {
 [236767] = 0,
 [245788] = 0,
 [245820] = 0,
-[238202] = 3,
+[238202] = 0,
 [238521] = 0,
 [193928] = 0,
 [245789] = 0,
@@ -6235,7 +6541,7 @@ CraftSimDB = {
 [193929] = 0,
 [245790] = 0,
 [245822] = 0,
-[238204] = 0,
+[238204] = 2,
 [236770] = 0,
 [245791] = 0,
 [245823] = 0,
@@ -6261,7 +6567,7 @@ CraftSimDB = {
 [241306] = 0,
 [251283] = 0,
 [236780] = 0,
-[243060] = 155,
+[243060] = 153,
 [241307] = 0,
 [251285] = 1,
 [242647] = 3,
@@ -6281,7 +6587,7 @@ CraftSimDB = {
 [244603] = 0,
 [237361] = 0,
 [236761] = 18,
-[260630] = 7,
+[260630] = 8,
 [245872] = 0,
 [244675] = 0,
 [197741] = 0,
@@ -6294,7 +6600,7 @@ CraftSimDB = {
 [237366] = 0,
 [246447] = 0,
 [194969] = 0,
-[242788] = 0,
+[242788] = 1,
 [237363] = 0,
 [245874] = 0,
 [247725] = 8,
@@ -6660,12 +6966,12 @@ CraftSimDB = {
 [246448] = 0,
 [246450] = 0,
 [247725] = 0,
-[236761] = 0,
-[247724] = 0,
 [240991] = 90,
+[247724] = 0,
+[247726] = 0,
 [246447] = 0,
 [246449] = 0,
-[247726] = 0,
+[236761] = 0,
 [247788] = 0,
 [260630] = 0,
 [240990] = 0,
@@ -6676,12 +6982,12 @@ CraftSimDB = {
 [246448] = 0,
 [246450] = 0,
 [247725] = 0,
-[236761] = 0,
-[247724] = 0,
 [240991] = 0,
+[247724] = 0,
+[247726] = 0,
 [246447] = 0,
 [246449] = 0,
-[247726] = 0,
+[236761] = 0,
 [247788] = 0,
 [260630] = 0,
 [240990] = 0,
@@ -7052,7 +7358,7 @@ CraftSimDB = {
 ["CRAFTQUEUE_FLASH_TASKBAR_ON_CRAFT_FINISHED"] = true,
 ["CRAFT_LOG_DISABLE_ADV_DATA"] = true,
 ["MODULE_COST_OVERVIEW"] = false,
-["MODULE_CRAFT_QUEUE"] = false,
+["MODULE_CRAFT_QUEUE"] = true,
 ["COOLDOWNS_FILTERED_EXPANSIONS"] = {
 [10] = true,
 [11] = true,
@@ -7082,13 +7388,13 @@ CraftSimDB = {
 ["offsetY"] = 148.6666259765625,
 },
 ["savedPos_CRAFT_QUEUE"] = {
-["offsetX"] = 979.16796875,
-["offsetY"] = -34.99884033203125,
+["offsetX"] = 979.1672973632812,
+["offsetY"] = -36.66552734375,
 },
 },
 ["CRAFTQUEUE_QUEUE_PATRON_ORDERS_MAX_COST"] = 0,
 ["CRAFTQUEUE_AUTO_SHOW"] = true,
-["CUSTOMER_HISTORY_AUTO_PURGE_LAST_PURGE"] = 1774044660,
+["CUSTOMER_HISTORY_AUTO_PURGE_LAST_PURGE"] = 1774047900,
 ["TOP_GEAR_AUTO_UPDATE"] = true,
 ["CRAFT_LOG_AUTO_SHOW"] = true,
 ["CUSTOMER_HISTORY_RECORD_PATRON_ORDERS"] = false,
@@ -7101,6 +7407,8 @@ CraftSimDB = {
 ["multicraftPreloadDB"] = {
 ["version"] = 1,
 ["data"] = {
+true,
+[3] = true,
 },
 },
 ["crafterDB"] = {
@@ -7112,7 +7420,7 @@ CraftSimDB = {
 ["baseDifficulty"] = 0,
 ["upperSkillTreshold"] = 0,
 ["lowerSkillThreshold"] = 0,
-["baseSkill"] = 5,
+["baseSkill"] = 6,
 ["recipeID"] = 1233130,
 ["bonusDifficulty"] = 1,
 ["ingenuityRefund"] = 0,
@@ -7132,12 +7440,12 @@ CraftSimDB = {
 ["baseDifficulty"] = 530,
 ["upperSkillTreshold"] = 530,
 ["lowerSkillThreshold"] = 0,
-["baseSkill"] = 6,
+["baseSkill"] = 7,
 ["recipeID"] = 1230866,
 ["bonusDifficulty"] = 0,
 ["ingenuityRefund"] = 176,
 ["bonusSkill"] = 0,
-["quality"] = 1.01132071018219,
+["quality"] = 1.0132075548172,
 ["guaranteedCraftingQualityID"] = 13,
 ["concentrationCost"] = 352,
 ["craftingQuality"] = 1,
@@ -7181,8 +7489,8 @@ CraftSimDB = {
 [11] = {
 [3] = {
 ["maxQuantity"] = 1000,
-["lastUpdated"] = 1773927488,
-["amount"] = 113,
+["lastUpdated"] = 1774062357,
+["amount"] = 153,
 ["rechargeTimePerPoint"] = 345600,
 ["currencyID"] = 3161,
 },
@@ -9741,28 +10049,28 @@ CraftSimDB = {
 },
 ["professionInfos"] = {
 [1233130] = {
-["skillLevel"] = 5,
+["skillLevel"] = 6,
 ["professionID"] = 2906,
-["sourceCounter"] = 2,
+["sourceCounter"] = 1,
 ["isPrimaryProfession"] = true,
+["parentProfessionID"] = 171,
 ["expansionName"] = "Midnight",
-["professionName"] = "Midnight Alchemy",
 ["profession"] = 3,
 ["skillModifier"] = 0,
-["parentProfessionID"] = 171,
+["professionName"] = "Midnight Alchemy",
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Alchemy",
 },
 [1230866] = {
-["skillLevel"] = 6,
+["skillLevel"] = 7,
 ["professionID"] = 2906,
-["sourceCounter"] = 2,
+["sourceCounter"] = 1,
 ["isPrimaryProfession"] = true,
+["parentProfessionID"] = 171,
 ["expansionName"] = "Midnight",
-["professionName"] = "Midnight Alchemy",
 ["profession"] = 3,
 ["skillModifier"] = 0,
-["parentProfessionID"] = 171,
+["professionName"] = "Midnight Alchemy",
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Alchemy",
 },
@@ -76937,11 +77245,11 @@ CraftSimDB = {
 ["professionID"] = 2914,
 ["sourceCounter"] = 13,
 ["parentProfessionName"] = "Jewelcrafting",
-["parentProfessionID"] = 755,
 ["expansionName"] = "Midnight",
+["professionName"] = "Midnight Jewelcrafting",
 ["profession"] = 12,
 ["skillModifier"] = 18,
-["professionName"] = "Midnight Jewelcrafting",
+["parentProfessionID"] = 755,
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = true,
 },
@@ -76950,11 +77258,11 @@ CraftSimDB = {
 ["professionID"] = 2914,
 ["sourceCounter"] = 25,
 ["isPrimaryProfession"] = true,
-["professionName"] = "Midnight Jewelcrafting",
 ["parentProfessionID"] = 755,
+["expansionName"] = "Midnight",
 ["profession"] = 12,
 ["skillModifier"] = 18,
-["expansionName"] = "Midnight",
+["professionName"] = "Midnight Jewelcrafting",
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Jewelcrafting",
 },
@@ -76963,11 +77271,11 @@ CraftSimDB = {
 ["professionID"] = 2914,
 ["sourceCounter"] = 9,
 ["parentProfessionName"] = "Jewelcrafting",
-["expansionName"] = "Midnight",
 ["professionName"] = "Midnight Jewelcrafting",
+["parentProfessionID"] = 755,
 ["profession"] = 12,
 ["skillModifier"] = 18,
-["parentProfessionID"] = 755,
+["expansionName"] = "Midnight",
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = true,
 },
@@ -76976,11 +77284,11 @@ CraftSimDB = {
 ["professionID"] = 2914,
 ["sourceCounter"] = 3,
 ["isPrimaryProfession"] = true,
-["professionName"] = "Midnight Jewelcrafting",
 ["parentProfessionID"] = 755,
+["expansionName"] = "Midnight",
 ["profession"] = 12,
 ["skillModifier"] = 18,
-["expansionName"] = "Midnight",
+["professionName"] = "Midnight Jewelcrafting",
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Jewelcrafting",
 },
@@ -76989,11 +77297,11 @@ CraftSimDB = {
 ["professionID"] = 2914,
 ["sourceCounter"] = 3,
 ["isPrimaryProfession"] = true,
-["professionName"] = "Midnight Jewelcrafting",
 ["parentProfessionID"] = 755,
+["expansionName"] = "Midnight",
 ["profession"] = 12,
 ["skillModifier"] = 18,
-["expansionName"] = "Midnight",
+["professionName"] = "Midnight Jewelcrafting",
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Jewelcrafting",
 },
@@ -77002,11 +77310,11 @@ CraftSimDB = {
 ["professionID"] = 2914,
 ["sourceCounter"] = 64,
 ["parentProfessionName"] = "Jewelcrafting",
-["professionName"] = "Midnight Jewelcrafting",
 ["parentProfessionID"] = 755,
+["expansionName"] = "Midnight",
 ["profession"] = 12,
 ["skillModifier"] = 18,
-["expansionName"] = "Midnight",
+["professionName"] = "Midnight Jewelcrafting",
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = true,
 },
@@ -77015,11 +77323,11 @@ CraftSimDB = {
 ["professionID"] = 2914,
 ["sourceCounter"] = 4,
 ["isPrimaryProfession"] = true,
-["professionName"] = "Midnight Jewelcrafting",
 ["parentProfessionID"] = 755,
+["expansionName"] = "Midnight",
 ["profession"] = 12,
 ["skillModifier"] = 18,
-["expansionName"] = "Midnight",
+["professionName"] = "Midnight Jewelcrafting",
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Jewelcrafting",
 },
@@ -77028,11 +77336,11 @@ CraftSimDB = {
 ["professionID"] = 2914,
 ["sourceCounter"] = 7,
 ["parentProfessionName"] = "Jewelcrafting",
-["expansionName"] = "Midnight",
 ["professionName"] = "Midnight Jewelcrafting",
+["parentProfessionID"] = 755,
 ["profession"] = 12,
 ["skillModifier"] = 18,
-["parentProfessionID"] = 755,
+["expansionName"] = "Midnight",
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = true,
 },
@@ -77041,11 +77349,11 @@ CraftSimDB = {
 ["professionID"] = 2914,
 ["sourceCounter"] = 20,
 ["isPrimaryProfession"] = true,
-["professionName"] = "Midnight Jewelcrafting",
 ["parentProfessionID"] = 755,
+["expansionName"] = "Midnight",
 ["profession"] = 12,
 ["skillModifier"] = 18,
-["expansionName"] = "Midnight",
+["professionName"] = "Midnight Jewelcrafting",
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Jewelcrafting",
 },
@@ -77054,11 +77362,11 @@ CraftSimDB = {
 ["professionID"] = 2914,
 ["sourceCounter"] = 12,
 ["parentProfessionName"] = "Jewelcrafting",
-["parentProfessionID"] = 755,
 ["expansionName"] = "Midnight",
+["professionName"] = "Midnight Jewelcrafting",
 ["profession"] = 12,
 ["skillModifier"] = 18,
-["professionName"] = "Midnight Jewelcrafting",
+["parentProfessionID"] = 755,
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = true,
 },
@@ -77067,11 +77375,11 @@ CraftSimDB = {
 ["professionID"] = 2914,
 ["sourceCounter"] = 9,
 ["parentProfessionName"] = "Jewelcrafting",
-["expansionName"] = "Midnight",
 ["professionName"] = "Midnight Jewelcrafting",
+["parentProfessionID"] = 755,
 ["profession"] = 12,
 ["skillModifier"] = 18,
-["parentProfessionID"] = 755,
+["expansionName"] = "Midnight",
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = true,
 },
@@ -77080,11 +77388,11 @@ CraftSimDB = {
 ["professionID"] = 2914,
 ["sourceCounter"] = 61,
 ["parentProfessionName"] = "Jewelcrafting",
-["professionName"] = "Midnight Jewelcrafting",
 ["parentProfessionID"] = 755,
+["expansionName"] = "Midnight",
 ["profession"] = 12,
 ["skillModifier"] = 18,
-["expansionName"] = "Midnight",
+["professionName"] = "Midnight Jewelcrafting",
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = true,
 },
@@ -77093,11 +77401,11 @@ CraftSimDB = {
 ["professionID"] = 2914,
 ["sourceCounter"] = 12,
 ["parentProfessionName"] = "Jewelcrafting",
-["parentProfessionID"] = 755,
 ["expansionName"] = "Midnight",
+["professionName"] = "Midnight Jewelcrafting",
 ["profession"] = 12,
 ["skillModifier"] = 18,
-["professionName"] = "Midnight Jewelcrafting",
+["parentProfessionID"] = 755,
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = true,
 },
@@ -77106,11 +77414,11 @@ CraftSimDB = {
 ["professionID"] = 2914,
 ["sourceCounter"] = 12,
 ["isPrimaryProfession"] = true,
-["professionName"] = "Midnight Jewelcrafting",
 ["parentProfessionID"] = 755,
+["expansionName"] = "Midnight",
 ["profession"] = 12,
 ["skillModifier"] = 0,
-["expansionName"] = "Midnight",
+["professionName"] = "Midnight Jewelcrafting",
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Jewelcrafting",
 },
@@ -77119,11 +77427,11 @@ CraftSimDB = {
 ["professionID"] = 2914,
 ["sourceCounter"] = 3,
 ["isPrimaryProfession"] = true,
-["professionName"] = "Midnight Jewelcrafting",
 ["parentProfessionID"] = 755,
+["expansionName"] = "Midnight",
 ["profession"] = 12,
 ["skillModifier"] = 18,
-["expansionName"] = "Midnight",
+["professionName"] = "Midnight Jewelcrafting",
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Jewelcrafting",
 },
@@ -77132,11 +77440,11 @@ CraftSimDB = {
 ["professionID"] = 2914,
 ["sourceCounter"] = 15,
 ["isPrimaryProfession"] = true,
-["professionName"] = "Midnight Jewelcrafting",
 ["parentProfessionID"] = 755,
+["expansionName"] = "Midnight",
 ["profession"] = 12,
 ["skillModifier"] = 0,
-["expansionName"] = "Midnight",
+["professionName"] = "Midnight Jewelcrafting",
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Jewelcrafting",
 },
@@ -77145,11 +77453,11 @@ CraftSimDB = {
 ["professionID"] = 2914,
 ["sourceCounter"] = 60,
 ["parentProfessionName"] = "Jewelcrafting",
-["professionName"] = "Midnight Jewelcrafting",
 ["parentProfessionID"] = 755,
+["expansionName"] = "Midnight",
 ["profession"] = 12,
 ["skillModifier"] = 18,
-["expansionName"] = "Midnight",
+["professionName"] = "Midnight Jewelcrafting",
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = true,
 },
@@ -77158,11 +77466,11 @@ CraftSimDB = {
 ["professionID"] = 2914,
 ["sourceCounter"] = 6,
 ["parentProfessionName"] = "Jewelcrafting",
-["expansionName"] = "Midnight",
 ["professionName"] = "Midnight Jewelcrafting",
+["parentProfessionID"] = 755,
 ["profession"] = 12,
 ["skillModifier"] = 18,
-["parentProfessionID"] = 755,
+["expansionName"] = "Midnight",
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = true,
 },
@@ -77171,11 +77479,11 @@ CraftSimDB = {
 ["professionID"] = 2914,
 ["sourceCounter"] = 12,
 ["parentProfessionName"] = "Jewelcrafting",
-["parentProfessionID"] = 755,
 ["expansionName"] = "Midnight",
+["professionName"] = "Midnight Jewelcrafting",
 ["profession"] = 12,
 ["skillModifier"] = 18,
-["professionName"] = "Midnight Jewelcrafting",
+["parentProfessionID"] = 755,
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = true,
 },
@@ -77184,11 +77492,11 @@ CraftSimDB = {
 ["professionID"] = 2914,
 ["sourceCounter"] = 4,
 ["isPrimaryProfession"] = true,
-["professionName"] = "Midnight Jewelcrafting",
 ["parentProfessionID"] = 755,
+["expansionName"] = "Midnight",
 ["profession"] = 12,
 ["skillModifier"] = 18,
-["expansionName"] = "Midnight",
+["professionName"] = "Midnight Jewelcrafting",
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Jewelcrafting",
 },
@@ -77197,11 +77505,11 @@ CraftSimDB = {
 ["professionID"] = 2914,
 ["sourceCounter"] = 27,
 ["isPrimaryProfession"] = true,
-["parentProfessionID"] = 755,
 ["expansionName"] = "Midnight",
+["professionName"] = "Midnight Jewelcrafting",
 ["profession"] = 12,
 ["skillModifier"] = 18,
-["professionName"] = "Midnight Jewelcrafting",
+["parentProfessionID"] = 755,
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Jewelcrafting",
 },
@@ -77210,11 +77518,11 @@ CraftSimDB = {
 ["professionID"] = 2914,
 ["sourceCounter"] = 1,
 ["isPrimaryProfession"] = true,
-["professionName"] = "Midnight Jewelcrafting",
 ["parentProfessionID"] = 755,
+["expansionName"] = "Midnight",
 ["profession"] = 12,
 ["skillModifier"] = 18,
-["expansionName"] = "Midnight",
+["professionName"] = "Midnight Jewelcrafting",
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Jewelcrafting",
 },
@@ -77223,11 +77531,11 @@ CraftSimDB = {
 ["professionID"] = 2914,
 ["sourceCounter"] = 29,
 ["isPrimaryProfession"] = true,
-["parentProfessionID"] = 755,
 ["expansionName"] = "Midnight",
+["professionName"] = "Midnight Jewelcrafting",
 ["profession"] = 12,
 ["skillModifier"] = 18,
-["professionName"] = "Midnight Jewelcrafting",
+["parentProfessionID"] = 755,
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Jewelcrafting",
 },
@@ -77236,11 +77544,11 @@ CraftSimDB = {
 ["professionID"] = 2914,
 ["sourceCounter"] = 4,
 ["isPrimaryProfession"] = true,
-["professionName"] = "Midnight Jewelcrafting",
 ["parentProfessionID"] = 755,
+["expansionName"] = "Midnight",
 ["profession"] = 12,
 ["skillModifier"] = 18,
-["expansionName"] = "Midnight",
+["professionName"] = "Midnight Jewelcrafting",
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Jewelcrafting",
 },
@@ -77249,11 +77557,11 @@ CraftSimDB = {
 ["professionID"] = 2914,
 ["sourceCounter"] = 61,
 ["parentProfessionName"] = "Jewelcrafting",
-["professionName"] = "Midnight Jewelcrafting",
 ["parentProfessionID"] = 755,
+["expansionName"] = "Midnight",
 ["profession"] = 12,
 ["skillModifier"] = 18,
-["expansionName"] = "Midnight",
+["professionName"] = "Midnight Jewelcrafting",
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = true,
 },
@@ -77262,11 +77570,11 @@ CraftSimDB = {
 ["professionID"] = 2914,
 ["sourceCounter"] = 12,
 ["parentProfessionName"] = "Jewelcrafting",
-["parentProfessionID"] = 755,
 ["expansionName"] = "Midnight",
+["professionName"] = "Midnight Jewelcrafting",
 ["profession"] = 12,
 ["skillModifier"] = 18,
-["professionName"] = "Midnight Jewelcrafting",
+["parentProfessionID"] = 755,
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = true,
 },
@@ -77275,11 +77583,11 @@ CraftSimDB = {
 ["professionID"] = 2906,
 ["sourceCounter"] = 5,
 ["parentProfessionName"] = "Alchemy",
-["expansionName"] = "Midnight",
 ["professionName"] = "Midnight Alchemy",
+["parentProfessionID"] = 171,
 ["profession"] = 3,
 ["skillModifier"] = 0,
-["parentProfessionID"] = 171,
+["expansionName"] = "Midnight",
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = true,
 },
@@ -77288,11 +77596,11 @@ CraftSimDB = {
 ["professionID"] = 2906,
 ["sourceCounter"] = 5,
 ["parentProfessionName"] = "Alchemy",
-["expansionName"] = "Midnight",
 ["professionName"] = "Midnight Alchemy",
+["parentProfessionID"] = 171,
 ["profession"] = 3,
 ["skillModifier"] = 0,
-["parentProfessionID"] = 171,
+["expansionName"] = "Midnight",
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = true,
 },
@@ -77935,35 +78243,42 @@ CraftSimDB = {
 },
 [1229609] = {
 ["baseDifficulty"] = 200,
-["upperSkillTreshold"] = 100,
-["lowerSkillThreshold"] = 40,
-["baseSkill"] = 62,
+["upperSkillTreshold"] = 160,
+["lowerSkillThreshold"] = 100,
+["baseSkill"] = 100,
 ["recipeID"] = 1229609,
 ["bonusDifficulty"] = 0,
-["ingenuityRefund"] = 109,
-["bonusSkill"] = 0,
-["quality"] = 2.366666793823242,
-["guaranteedCraftingQualityID"] = 5,
-["concentrationCost"] = 218,
-["craftingQuality"] = 2,
-["craftingQualityID"] = 5,
+["ingenuityRefund"] = 131,
+["bonusSkill"] = 40,
+["quality"] = 3.666666746139526,
+["guaranteedCraftingQualityID"] = 6,
+["concentrationCost"] = 261,
+["craftingQuality"] = 3,
+["craftingQualityID"] = 6,
 ["craftingDataID"] = 2698,
 ["isQualityCraft"] = true,
 ["concentrationCurrencyID"] = 3162,
 ["bonusStats"] = {
 {
-["bonusStatValue"] = 0,
+["bonusStatValue"] = 187,
 ["bonusStatName"] = "Resourcefulness",
-["ratingDescription"] = "You have a 0.0% chance to use fewer tradeable reagents.",
-["bonusRatingPct"] = 0,
-["ratingPct"] = 0,
+["ratingDescription"] = "You have a 20.8% chance to use fewer tradeable reagents.",
+["bonusRatingPct"] = 20.77777862548828,
+["ratingPct"] = 20.77777862548828,
 },
 {
-["bonusStatValue"] = 0,
+["bonusStatValue"] = 34,
+["bonusStatName"] = "Crafting Speed",
+["ratingDescription"] = "Increases your crafting speed.",
+["bonusRatingPct"] = 6.800000190734863,
+["ratingPct"] = 6.800000190734863,
+},
+{
+["bonusStatValue"] = 53,
 ["bonusStatName"] = "Ingenuity",
-["ratingDescription"] = "You have a 0.0% chance to have an ingenious breakthrough when you Concentrate on a craft, refunding 50.0% of Concentration spent.",
-["bonusRatingPct"] = 0,
-["ratingPct"] = 0,
+["ratingDescription"] = "You have a 5.3% chance to have an ingenious breakthrough when you Concentrate on a craft, refunding 50.0% of Concentration spent.",
+["bonusRatingPct"] = 5.300000190734863,
+["ratingPct"] = 5.300000190734863,
 },
 },
 },
@@ -78754,22 +79069,22 @@ CraftSimDB = {
 ["bonusStatValue"] = 187,
 ["bonusStatName"] = "Resourcefulness",
 ["ratingDescription"] = "You have a 20.8% chance to use fewer tradeable reagents.",
-["ratingPct"] = 20.77777862548828,
 ["bonusRatingPct"] = 20.77777862548828,
+["ratingPct"] = 20.77777862548828,
 },
 {
 ["bonusStatValue"] = 34,
 ["bonusStatName"] = "Crafting Speed",
 ["ratingDescription"] = "Increases your crafting speed.",
-["ratingPct"] = 6.800000190734863,
 ["bonusRatingPct"] = 6.800000190734863,
+["ratingPct"] = 6.800000190734863,
 },
 {
 ["bonusStatValue"] = 53,
 ["bonusStatName"] = "Ingenuity",
 ["ratingDescription"] = "You have a 5.3% chance to have an ingenious breakthrough when you Concentrate on a craft, refunding 50.0% of Concentration spent.",
-["ratingPct"] = 5.300000190734863,
 ["bonusRatingPct"] = 5.300000190734863,
+["ratingPct"] = 5.300000190734863,
 },
 },
 },
@@ -79444,22 +79759,22 @@ CraftSimDB = {
 ["bonusStatValue"] = 187,
 ["bonusStatName"] = "Resourcefulness",
 ["ratingDescription"] = "You have a 20.8% chance to use fewer tradeable reagents.",
-["ratingPct"] = 20.77777862548828,
 ["bonusRatingPct"] = 20.77777862548828,
+["ratingPct"] = 20.77777862548828,
 },
 {
 ["bonusStatValue"] = 34,
 ["bonusStatName"] = "Crafting Speed",
 ["ratingDescription"] = "Increases your crafting speed.",
-["ratingPct"] = 6.800000190734863,
 ["bonusRatingPct"] = 6.800000190734863,
+["ratingPct"] = 6.800000190734863,
 },
 {
 ["bonusStatValue"] = 53,
 ["bonusStatName"] = "Ingenuity",
 ["ratingDescription"] = "You have a 5.3% chance to have an ingenious breakthrough when you Concentrate on a craft, refunding 50.0% of Concentration spent.",
-["ratingPct"] = 5.300000190734863,
 ["bonusRatingPct"] = 5.300000190734863,
+["ratingPct"] = 5.300000190734863,
 },
 },
 },
@@ -80620,7 +80935,7 @@ CraftSimDB = {
 ["baseDifficulty"] = 0,
 ["upperSkillTreshold"] = 0,
 ["lowerSkillThreshold"] = 0,
-["baseSkill"] = 1,
+["baseSkill"] = 2,
 ["recipeID"] = 1233130,
 ["bonusDifficulty"] = 1,
 ["ingenuityRefund"] = 0,
@@ -80815,22 +81130,22 @@ CraftSimDB = {
 ["bonusStatValue"] = 187,
 ["bonusStatName"] = "Resourcefulness",
 ["ratingDescription"] = "You have a 20.8% chance to use fewer tradeable reagents.",
-["ratingPct"] = 20.77777862548828,
 ["bonusRatingPct"] = 20.77777862548828,
+["ratingPct"] = 20.77777862548828,
 },
 {
 ["bonusStatValue"] = 34,
 ["bonusStatName"] = "Crafting Speed",
 ["ratingDescription"] = "Increases your crafting speed.",
-["ratingPct"] = 6.800000190734863,
 ["bonusRatingPct"] = 6.800000190734863,
+["ratingPct"] = 6.800000190734863,
 },
 {
 ["bonusStatValue"] = 53,
 ["bonusStatName"] = "Ingenuity",
 ["ratingDescription"] = "You have a 5.3% chance to have an ingenious breakthrough when you Concentrate on a craft, refunding 50.0% of Concentration spent.",
-["ratingPct"] = 5.300000190734863,
 ["bonusRatingPct"] = 5.300000190734863,
+["ratingPct"] = 5.300000190734863,
 },
 },
 },
@@ -80948,11 +81263,11 @@ CraftSimDB = {
 ["concentrationCurrencyID"] = 3162,
 ["bonusStats"] = {
 {
-["bonusStatValue"] = 186,
+["bonusStatValue"] = 187,
 ["bonusStatName"] = "Resourcefulness",
-["ratingDescription"] = "You have a 20.7% chance to use fewer tradeable reagents.",
-["bonusRatingPct"] = 20.66666603088379,
-["ratingPct"] = 20.66666603088379,
+["ratingDescription"] = "You have a 20.8% chance to use fewer tradeable reagents.",
+["bonusRatingPct"] = 20.77777862548828,
+["ratingPct"] = 20.77777862548828,
 },
 {
 ["bonusStatValue"] = 34,
@@ -80999,22 +81314,22 @@ CraftSimDB = {
 ["bonusStatValue"] = 187,
 ["bonusStatName"] = "Resourcefulness",
 ["ratingDescription"] = "You have a 20.8% chance to use fewer tradeable reagents.",
-["ratingPct"] = 20.77777862548828,
 ["bonusRatingPct"] = 20.77777862548828,
+["ratingPct"] = 20.77777862548828,
 },
 {
 ["bonusStatValue"] = 34,
 ["bonusStatName"] = "Crafting Speed",
 ["ratingDescription"] = "Increases your crafting speed.",
-["ratingPct"] = 6.800000190734863,
 ["bonusRatingPct"] = 6.800000190734863,
+["ratingPct"] = 6.800000190734863,
 },
 {
 ["bonusStatValue"] = 53,
 ["bonusStatName"] = "Ingenuity",
 ["ratingDescription"] = "You have a 5.3% chance to have an ingenious breakthrough when you Concentrate on a craft, refunding 50.0% of Concentration spent.",
-["ratingPct"] = 5.300000190734863,
 ["bonusRatingPct"] = 5.300000190734863,
+["ratingPct"] = 5.300000190734863,
 },
 },
 },
@@ -81452,12 +81767,12 @@ CraftSimDB = {
 ["baseDifficulty"] = 530,
 ["upperSkillTreshold"] = 530,
 ["lowerSkillThreshold"] = 0,
-["baseSkill"] = 2,
+["baseSkill"] = 3,
 ["recipeID"] = 1230866,
 ["bonusDifficulty"] = 0,
 ["ingenuityRefund"] = 175,
 ["bonusSkill"] = 45,
-["quality"] = 1.088679194450378,
+["quality"] = 1.090566039085388,
 ["guaranteedCraftingQualityID"] = 13,
 ["concentrationCost"] = 349,
 ["craftingQuality"] = 1,
@@ -81470,22 +81785,22 @@ CraftSimDB = {
 ["bonusStatValue"] = 135,
 ["bonusStatName"] = "Resourcefulness",
 ["ratingDescription"] = "You have a 15.0% chance to use fewer tradeable reagents.",
-["ratingPct"] = 15,
 ["bonusRatingPct"] = 15,
+["ratingPct"] = 15,
 },
 {
 ["bonusStatValue"] = 0,
 ["bonusStatName"] = "Multicraft",
 ["ratingDescription"] = "You have a 0.0% chance to craft additional items.",
-["ratingPct"] = 0,
 ["bonusRatingPct"] = 0,
+["ratingPct"] = 0,
 },
 {
 ["bonusStatValue"] = 0,
 ["bonusStatName"] = "Ingenuity",
 ["ratingDescription"] = "You have a 0.0% chance to have an ingenious breakthrough when you Concentrate on a craft, refunding 50.0% of Concentration spent.",
-["ratingPct"] = 0,
 ["bonusRatingPct"] = 0,
+["ratingPct"] = 0,
 },
 },
 },
@@ -81812,15 +82127,15 @@ CraftSimDB = {
 [11] = {
 {
 ["maxQuantity"] = 1000,
-["lastUpdated"] = 1774046668,
-["amount"] = 37,
+["lastUpdated"] = 1774064050,
+["amount"] = 87,
 ["rechargeTimePerPoint"] = 345600,
 ["currencyID"] = 3162,
 },
 [3] = {
 ["maxQuantity"] = 1000,
-["lastUpdated"] = 1773927747,
-["amount"] = 109,
+["lastUpdated"] = 1774062733,
+["amount"] = 151,
 ["rechargeTimePerPoint"] = 345600,
 ["currencyID"] = 3161,
 },
@@ -82186,25 +82501,21 @@ CraftSimDB = {
 ["disabled"] = false,
 ["maxQuality"] = 5,
 ["relativeDifficulty"] = 3,
-["recipeID"] = 1229609,
-["isEnchantingRecipe"] = false,
 ["supportsCraftingStats"] = true,
 ["firstCraft"] = false,
-["numSkillUps"] = 1,
-["isGatheringRecipe"] = false,
 ["learned"] = true,
 ["skillLineAbilityID"] = 52344,
 ["icon"] = 7427775,
-["qualityIlvlBonuses"] = {
-0,
-6,
-12,
-19,
-26,
-},
-["isRecraft"] = false,
 ["isSalvageRecipe"] = false,
 ["itemLevel"] = 180,
+["craftable"] = true,
+["name"] = "Thalassian Pickaxe",
+["isEnchantingRecipe"] = false,
+["recipeID"] = 1229609,
+["canCreateMultiple"] = true,
+["categoryID"] = 2227,
+["isGatheringRecipe"] = false,
+["isRecraft"] = false,
 ["qualityIDs"] = {
 4,
 5,
@@ -82212,18 +82523,22 @@ CraftSimDB = {
 7,
 8,
 },
-["craftable"] = true,
 ["isDummyRecipe"] = false,
-["name"] = "Thalassian Pickaxe",
-["alwaysUsesLowestQuality"] = false,
 ["supportsQualities"] = true,
-["canCreateMultiple"] = true,
-["maxTrivialLevel"] = 30,
+["qualityIlvlBonuses"] = {
+0,
+6,
+12,
+19,
+26,
+},
 ["hasSingleItemOutput"] = true,
-["hyperlink"] = "|cnIQ2:|Hitem:238010::::::::88:102::13:1:3524::::::|h[Thalassian Pickaxe]|h|r",
-["canSkillUp"] = true,
+["alwaysUsesLowestQuality"] = false,
+["hyperlink"] = "|cnIQ2:|Hitem:238010::::::::90:102::13:1:3524::::::|h[Thalassian Pickaxe]|h|r",
+["maxTrivialLevel"] = 30,
+["canSkillUp"] = false,
 ["favorite"] = false,
-["categoryID"] = 2227,
+["numSkillUps"] = 1,
 },
 [1229610] = {
 ["sourceType"] = 0,
@@ -82494,38 +82809,38 @@ CraftSimDB = {
 ["disabled"] = false,
 ["maxQuality"] = 2,
 ["relativeDifficulty"] = 3,
-["recipeID"] = 1230759,
-["isEnchantingRecipe"] = false,
 ["supportsCraftingStats"] = true,
 ["firstCraft"] = false,
-["numSkillUps"] = 1,
-["isGatheringRecipe"] = false,
 ["learned"] = true,
 ["skillLineAbilityID"] = 52667,
 ["icon"] = 7548938,
-["canCreateMultiple"] = true,
-["isRecraft"] = false,
 ["isSalvageRecipe"] = false,
-["itemLevel"] = 885,
+["itemLevel"] = 278,
+["craftable"] = true,
+["name"] = "Refulgent Weightstone",
+["isEnchantingRecipe"] = false,
+["recipeID"] = 1230759,
+["canCreateMultiple"] = true,
+["categoryID"] = 2231,
+["isGatheringRecipe"] = false,
+["isRecraft"] = false,
 ["qualityIDs"] = {
 13,
 14,
 },
-["craftable"] = true,
 ["isDummyRecipe"] = false,
-["name"] = "Refulgent Weightstone",
-["alwaysUsesLowestQuality"] = false,
 ["supportsQualities"] = true,
 ["qualityItemIDs"] = {
 237367,
 237369,
 },
-["maxTrivialLevel"] = 35,
 ["hasSingleItemOutput"] = true,
+["alwaysUsesLowestQuality"] = false,
 ["hyperlink"] = "|cnIQ2:|Hitem:237367::::::::90:102::13:1:3524::::::|h[Refulgent Weightstone |A:Professions-ChatIcon-Quality-12-Tier1:17:15::1|a]|h|r",
+["maxTrivialLevel"] = 60,
 ["canSkillUp"] = false,
 ["favorite"] = false,
-["categoryID"] = 2231,
+["numSkillUps"] = 1,
 },
 [1230760] = {
 ["sourceType"] = 0,
@@ -83012,28 +83327,21 @@ CraftSimDB = {
 ["disabled"] = false,
 ["maxQuality"] = 5,
 ["relativeDifficulty"] = 3,
-["recipeID"] = 1229629,
-["categoryID"] = 2225,
 ["supportsCraftingStats"] = true,
 ["firstCraft"] = false,
-["numSkillUps"] = 1,
-["isGatheringRecipe"] = false,
 ["learned"] = true,
 ["skillLineAbilityID"] = 52364,
 ["icon"] = 7195180,
-["favorite"] = false,
-["canSkillUp"] = false,
 ["isSalvageRecipe"] = false,
 ["itemLevel"] = 165,
-["hyperlink"] = "|cnIQ3:|Hitem:237917::::::::90:105::13:1:3524::::::|h[Blood-Tempered Greaves]|h|r",
 ["craftable"] = true,
-["hasSingleItemOutput"] = true,
-["maxTrivialLevel"] = 55,
-["alwaysUsesLowestQuality"] = false,
-["canCreateMultiple"] = true,
-["supportsQualities"] = true,
 ["name"] = "Blood-Tempered Greaves",
-["isDummyRecipe"] = false,
+["isEnchantingRecipe"] = false,
+["recipeID"] = 1229629,
+["canCreateMultiple"] = true,
+["categoryID"] = 2225,
+["isGatheringRecipe"] = false,
+["isRecraft"] = false,
 ["qualityIDs"] = {
 4,
 5,
@@ -83041,7 +83349,8 @@ CraftSimDB = {
 7,
 8,
 },
-["isRecraft"] = false,
+["isDummyRecipe"] = false,
+["supportsQualities"] = true,
 ["qualityIlvlBonuses"] = {
 0,
 3,
@@ -83049,7 +83358,13 @@ CraftSimDB = {
 9,
 13,
 },
-["isEnchantingRecipe"] = false,
+["hasSingleItemOutput"] = true,
+["alwaysUsesLowestQuality"] = false,
+["hyperlink"] = "|cnIQ3:|Hitem:237917::::::::90:102::13:1:3524::::::|h[Blood-Tempered Greaves]|h|r",
+["maxTrivialLevel"] = 55,
+["canSkillUp"] = false,
+["favorite"] = false,
+["numSkillUps"] = 1,
 },
 [1276112] = {
 ["sourceType"] = 0,
@@ -83177,9 +83492,9 @@ CraftSimDB = {
 ["alwaysUsesLowestQuality"] = true,
 ["isDummyRecipe"] = false,
 ["hyperlink"] = "|cnIQ4:|Hitem:206648::::::::90:105:::1:3524::::::|h[Undeath Metal]|h|r",
-["name"] = "Undeath Metal",
 ["hasSingleItemOutput"] = false,
 ["maxTrivialLevel"] = 310,
+["name"] = "Undeath Metal",
 ["canSkillUp"] = true,
 ["favorite"] = false,
 ["numSkillUps"] = 1,
@@ -83321,25 +83636,21 @@ CraftSimDB = {
 ["disabled"] = false,
 ["maxQuality"] = 5,
 ["relativeDifficulty"] = 3,
-["recipeID"] = 1229647,
-["isEnchantingRecipe"] = false,
 ["supportsCraftingStats"] = true,
 ["firstCraft"] = false,
-["categoryID"] = 2226,
-["isGatheringRecipe"] = false,
 ["learned"] = true,
 ["skillLineAbilityID"] = 52382,
 ["icon"] = 517163,
-["qualityIlvlBonuses"] = {
-0,
-3,
-6,
-9,
-13,
-},
-["isRecraft"] = false,
 ["isSalvageRecipe"] = false,
 ["itemLevel"] = 246,
+["craftable"] = true,
+["name"] = "Magister's Valediction",
+["isEnchantingRecipe"] = false,
+["recipeID"] = 1229647,
+["canCreateMultiple"] = true,
+["categoryID"] = 2226,
+["isGatheringRecipe"] = false,
+["isRecraft"] = false,
 ["qualityIDs"] = {
 4,
 5,
@@ -83347,15 +83658,19 @@ CraftSimDB = {
 7,
 8,
 },
-["craftable"] = true,
 ["isDummyRecipe"] = false,
-["name"] = "Magister's Valediction",
-["alwaysUsesLowestQuality"] = false,
 ["supportsQualities"] = true,
-["canCreateMultiple"] = true,
+["qualityIlvlBonuses"] = {
+0,
+3,
+6,
+9,
+13,
+},
 ["hasSingleItemOutput"] = true,
-["maxTrivialLevel"] = 100,
+["alwaysUsesLowestQuality"] = false,
 ["hyperlink"] = "|cnIQ4:|Hitem:237849::::::::90:102::13:1:3524::::::|h[Magister's Valediction]|h|r",
+["maxTrivialLevel"] = 100,
 ["canSkillUp"] = false,
 ["favorite"] = true,
 ["numSkillUps"] = 1,
@@ -83365,25 +83680,21 @@ CraftSimDB = {
 ["disabled"] = false,
 ["maxQuality"] = 5,
 ["relativeDifficulty"] = 3,
-["recipeID"] = 1229648,
-["isEnchantingRecipe"] = false,
 ["supportsCraftingStats"] = true,
 ["firstCraft"] = false,
-["categoryID"] = 2226,
-["isGatheringRecipe"] = false,
 ["learned"] = true,
 ["skillLineAbilityID"] = 52383,
 ["icon"] = 7118838,
-["qualityIlvlBonuses"] = {
-0,
-3,
-6,
-9,
-13,
-},
-["isRecraft"] = false,
 ["isSalvageRecipe"] = false,
-["itemLevel"] = 885,
+["itemLevel"] = 246,
+["craftable"] = true,
+["name"] = "Blood Knight's Warblade",
+["isEnchantingRecipe"] = false,
+["recipeID"] = 1229648,
+["canCreateMultiple"] = true,
+["categoryID"] = 2226,
+["isGatheringRecipe"] = false,
+["isRecraft"] = false,
 ["qualityIDs"] = {
 4,
 5,
@@ -83391,15 +83702,19 @@ CraftSimDB = {
 7,
 8,
 },
-["craftable"] = true,
 ["isDummyRecipe"] = false,
-["name"] = "Blood Knight's Warblade",
-["alwaysUsesLowestQuality"] = false,
 ["supportsQualities"] = true,
-["canCreateMultiple"] = true,
+["qualityIlvlBonuses"] = {
+0,
+3,
+6,
+9,
+13,
+},
 ["hasSingleItemOutput"] = true,
-["maxTrivialLevel"] = 100,
+["alwaysUsesLowestQuality"] = false,
 ["hyperlink"] = "|cnIQ4:|Hitem:237846::::::::90:102::13:1:3524::::::|h[Blood Knight's Warblade]|h|r",
+["maxTrivialLevel"] = 100,
 ["canSkillUp"] = false,
 ["favorite"] = true,
 ["numSkillUps"] = 1,
@@ -83541,25 +83856,21 @@ CraftSimDB = {
 ["disabled"] = false,
 ["maxQuality"] = 5,
 ["relativeDifficulty"] = 3,
-["recipeID"] = 1229652,
-["isEnchantingRecipe"] = false,
 ["supportsCraftingStats"] = true,
 ["firstCraft"] = false,
-["categoryID"] = 2226,
-["isGatheringRecipe"] = false,
 ["learned"] = true,
 ["skillLineAbilityID"] = 52387,
 ["icon"] = 517163,
-["qualityIlvlBonuses"] = {
-0,
-3,
-6,
-9,
-13,
-},
-["isRecraft"] = false,
 ["isSalvageRecipe"] = false,
 ["itemLevel"] = 246,
+["craftable"] = true,
+["name"] = "Blood Knight's Mercy",
+["isEnchantingRecipe"] = false,
+["recipeID"] = 1229652,
+["canCreateMultiple"] = true,
+["categoryID"] = 2226,
+["isGatheringRecipe"] = false,
+["isRecraft"] = false,
 ["qualityIDs"] = {
 4,
 5,
@@ -83567,15 +83878,19 @@ CraftSimDB = {
 7,
 8,
 },
-["craftable"] = true,
 ["isDummyRecipe"] = false,
-["name"] = "Blood Knight's Mercy",
-["alwaysUsesLowestQuality"] = false,
 ["supportsQualities"] = true,
-["canCreateMultiple"] = true,
+["qualityIlvlBonuses"] = {
+0,
+3,
+6,
+9,
+13,
+},
 ["hasSingleItemOutput"] = true,
-["maxTrivialLevel"] = 100,
+["alwaysUsesLowestQuality"] = false,
 ["hyperlink"] = "|cnIQ4:|Hitem:237848::::::::90:102::13:1:3524::::::|h[Blood Knight's Mercy]|h|r",
+["maxTrivialLevel"] = 100,
 ["canSkillUp"] = false,
 ["favorite"] = true,
 ["numSkillUps"] = 1,
@@ -83805,28 +84120,21 @@ CraftSimDB = {
 ["disabled"] = false,
 ["maxQuality"] = 5,
 ["relativeDifficulty"] = 3,
-["recipeID"] = 1229658,
-["categoryID"] = 2226,
 ["supportsCraftingStats"] = true,
 ["firstCraft"] = false,
-["numSkillUps"] = 1,
-["isGatheringRecipe"] = false,
 ["learned"] = true,
 ["skillLineAbilityID"] = 52393,
 ["icon"] = 7139837,
-["favorite"] = true,
-["canSkillUp"] = false,
 ["isSalvageRecipe"] = false,
-["itemLevel"] = 885,
-["hyperlink"] = "|cnIQ4:|Hitem:237839::::::::90:105::13:1:3524::::::|h[Spellbreaker's Blade]|h|r",
+["itemLevel"] = 246,
 ["craftable"] = true,
-["hasSingleItemOutput"] = true,
-["maxTrivialLevel"] = 100,
-["alwaysUsesLowestQuality"] = false,
-["canCreateMultiple"] = true,
-["supportsQualities"] = true,
 ["name"] = "Spellbreaker's Blade",
-["isDummyRecipe"] = false,
+["isEnchantingRecipe"] = false,
+["recipeID"] = 1229658,
+["canCreateMultiple"] = true,
+["categoryID"] = 2226,
+["isGatheringRecipe"] = false,
+["isRecraft"] = false,
 ["qualityIDs"] = {
 4,
 5,
@@ -83834,7 +84142,8 @@ CraftSimDB = {
 7,
 8,
 },
-["isRecraft"] = false,
+["isDummyRecipe"] = false,
+["supportsQualities"] = true,
 ["qualityIlvlBonuses"] = {
 0,
 3,
@@ -83842,7 +84151,13 @@ CraftSimDB = {
 9,
 13,
 },
-["isEnchantingRecipe"] = false,
+["hasSingleItemOutput"] = true,
+["alwaysUsesLowestQuality"] = false,
+["hyperlink"] = "|cnIQ4:|Hitem:237839::::::::90:102::13:1:3524::::::|h[Spellbreaker's Blade]|h|r",
+["maxTrivialLevel"] = 100,
+["canSkillUp"] = false,
+["favorite"] = true,
+["numSkillUps"] = 1,
 },
 [1229659] = {
 ["sourceType"] = 0,
@@ -84215,9 +84530,9 @@ CraftSimDB = {
 ["canCreateMultiple"] = true,
 ["canSkillUp"] = true,
 ["alwaysUsesLowestQuality"] = true,
+["name"] = "Roasted Boar Meat",
 ["maxTrivialLevel"] = 85,
 ["hasSingleItemOutput"] = false,
-["name"] = "Roasted Boar Meat",
 ["hyperlink"] = "|cnIQ1:|Hitem:2681::::::::90:105:::1:3524::::::|h[Roasted Boar Meat]|h|r",
 ["isDummyRecipe"] = false,
 ["isRecraft"] = false,
@@ -84391,35 +84706,35 @@ CraftSimDB = {
 ["disabled"] = false,
 ["maxQuality"] = 2,
 ["relativeDifficulty"] = 3,
-["recipeID"] = 1230758,
-["isEnchantingRecipe"] = false,
 ["supportsCraftingStats"] = true,
 ["firstCraft"] = false,
-["categoryID"] = 2231,
-["isGatheringRecipe"] = false,
 ["learned"] = true,
 ["skillLineAbilityID"] = 52666,
 ["icon"] = 7548941,
-["canCreateMultiple"] = true,
-["isRecraft"] = false,
 ["isSalvageRecipe"] = false,
 ["itemLevel"] = 278,
+["craftable"] = true,
+["name"] = "Refulgent Whetstone",
+["isEnchantingRecipe"] = false,
+["recipeID"] = 1230758,
+["canCreateMultiple"] = true,
+["categoryID"] = 2231,
+["isGatheringRecipe"] = false,
+["isRecraft"] = false,
 ["qualityIDs"] = {
 13,
 14,
 },
-["craftable"] = true,
 ["isDummyRecipe"] = false,
-["name"] = "Refulgent Whetstone",
-["alwaysUsesLowestQuality"] = false,
 ["supportsQualities"] = true,
 ["qualityItemIDs"] = {
 237370,
 237371,
 },
 ["hasSingleItemOutput"] = true,
-["maxTrivialLevel"] = 15,
-["hyperlink"] = "|cnIQ2:|Hitem:237370::::::::90:105::13:1:3524::::::|h[Refulgent Whetstone |A:Professions-ChatIcon-Quality-12-Tier1:17:15::1|a]|h|r",
+["alwaysUsesLowestQuality"] = false,
+["hyperlink"] = "|cnIQ2:|Hitem:237370::::::::90:102::13:1:3524::::::|h[Refulgent Whetstone |A:Professions-ChatIcon-Quality-12-Tier1:17:15::1|a]|h|r",
+["maxTrivialLevel"] = 45,
 ["canSkillUp"] = false,
 ["favorite"] = false,
 ["numSkillUps"] = 1,
@@ -84983,28 +85298,21 @@ CraftSimDB = {
 ["disabled"] = false,
 ["maxQuality"] = 5,
 ["relativeDifficulty"] = 3,
-["recipeID"] = 1229626,
-["categoryID"] = 2225,
 ["supportsCraftingStats"] = true,
 ["firstCraft"] = false,
-["numSkillUps"] = 1,
-["isGatheringRecipe"] = false,
 ["learned"] = true,
 ["skillLineAbilityID"] = 52361,
 ["icon"] = 7369044,
-["favorite"] = false,
-["canSkillUp"] = false,
 ["isSalvageRecipe"] = false,
 ["itemLevel"] = 201,
-["hyperlink"] = "|cnIQ3:|Hitem:237920::::::::90:105::13:1:3524::::::|h[Blood-Tempered Bulwark]|h|r",
 ["craftable"] = true,
-["hasSingleItemOutput"] = true,
-["maxTrivialLevel"] = 45,
-["alwaysUsesLowestQuality"] = false,
-["canCreateMultiple"] = true,
-["supportsQualities"] = true,
 ["name"] = "Blood-Tempered Bulwark",
-["isDummyRecipe"] = false,
+["isEnchantingRecipe"] = false,
+["recipeID"] = 1229626,
+["canCreateMultiple"] = true,
+["categoryID"] = 2225,
+["isGatheringRecipe"] = false,
+["isRecraft"] = false,
 ["qualityIDs"] = {
 4,
 5,
@@ -85012,7 +85320,8 @@ CraftSimDB = {
 7,
 8,
 },
-["isRecraft"] = false,
+["isDummyRecipe"] = false,
+["supportsQualities"] = true,
 ["qualityIlvlBonuses"] = {
 0,
 3,
@@ -85020,7 +85329,13 @@ CraftSimDB = {
 9,
 13,
 },
-["isEnchantingRecipe"] = false,
+["hasSingleItemOutput"] = true,
+["alwaysUsesLowestQuality"] = false,
+["hyperlink"] = "|cnIQ3:|Hitem:237920::::::::90:102::13:1:3524::::::|h[Blood-Tempered Bulwark]|h|r",
+["maxTrivialLevel"] = 45,
+["canSkillUp"] = false,
+["favorite"] = false,
+["numSkillUps"] = 1,
 },
 [445093] = {
 ["sourceType"] = 0,
@@ -85089,58 +85404,51 @@ CraftSimDB = {
 ["disabled"] = false,
 ["maxQuality"] = 0,
 ["relativeDifficulty"] = 0,
-["recipeID"] = 1233130,
 ["supportsCraftingStats"] = true,
 ["firstCraft"] = false,
-["categoryID"] = 2172,
-["isGatheringRecipe"] = false,
 ["learned"] = true,
 ["skillLineAbilityID"] = 52782,
 ["icon"] = 7548894,
-["numSkillUps"] = 2,
 ["isSalvageRecipe"] = true,
 ["itemLevel"] = 885,
-["canCreateMultiple"] = true,
 ["craftable"] = true,
-["canSkillUp"] = true,
-["hyperlink"] = "|cnIQ1:|Hitem:242638::::::::90:105:::1:3524::::::|h[Recycle Flasks]|h|r",
-["alwaysUsesLowestQuality"] = true,
-["maxTrivialLevel"] = 25,
-["hasSingleItemOutput"] = false,
 ["name"] = "Recycle Flasks",
-["supportsQualities"] = false,
-["isDummyRecipe"] = false,
-["isRecraft"] = false,
-["favorite"] = false,
 ["isEnchantingRecipe"] = false,
+["recipeID"] = 1233130,
+["canCreateMultiple"] = true,
+["categoryID"] = 2172,
+["isGatheringRecipe"] = false,
+["isRecraft"] = false,
+["isDummyRecipe"] = false,
+["supportsQualities"] = false,
+["hasSingleItemOutput"] = false,
+["alwaysUsesLowestQuality"] = true,
+["hyperlink"] = "|cnIQ1:|Hitem:242638::::::::90:102:::1:3524::::::|h[Recycle Flasks]|h|r",
+["maxTrivialLevel"] = 25,
+["canSkillUp"] = true,
+["favorite"] = false,
+["numSkillUps"] = 2,
 },
 [1229625] = {
 ["sourceType"] = 0,
 ["disabled"] = false,
 ["maxQuality"] = 5,
 ["relativeDifficulty"] = 3,
-["recipeID"] = 1229625,
-["categoryID"] = 2225,
 ["supportsCraftingStats"] = true,
 ["firstCraft"] = false,
-["numSkillUps"] = 1,
-["isGatheringRecipe"] = false,
 ["learned"] = true,
 ["skillLineAbilityID"] = 52360,
 ["icon"] = 7195217,
-["favorite"] = false,
-["canSkillUp"] = false,
 ["isSalvageRecipe"] = false,
 ["itemLevel"] = 201,
-["hyperlink"] = "|cnIQ3:|Hitem:237921::::::::90:105::13:1:3524::::::|h[Blood-Tempered Basinet]|h|r",
 ["craftable"] = true,
-["hasSingleItemOutput"] = true,
-["maxTrivialLevel"] = 50,
-["alwaysUsesLowestQuality"] = false,
-["canCreateMultiple"] = true,
-["supportsQualities"] = true,
 ["name"] = "Blood-Tempered Basinet",
-["isDummyRecipe"] = false,
+["isEnchantingRecipe"] = false,
+["recipeID"] = 1229625,
+["canCreateMultiple"] = true,
+["categoryID"] = 2225,
+["isGatheringRecipe"] = false,
+["isRecraft"] = false,
 ["qualityIDs"] = {
 4,
 5,
@@ -85148,7 +85456,8 @@ CraftSimDB = {
 7,
 8,
 },
-["isRecraft"] = false,
+["isDummyRecipe"] = false,
+["supportsQualities"] = true,
 ["qualityIlvlBonuses"] = {
 0,
 3,
@@ -85156,7 +85465,13 @@ CraftSimDB = {
 9,
 13,
 },
-["isEnchantingRecipe"] = false,
+["hasSingleItemOutput"] = true,
+["alwaysUsesLowestQuality"] = false,
+["hyperlink"] = "|cnIQ3:|Hitem:237921::::::::90:102::13:1:3524::::::|h[Blood-Tempered Basinet]|h|r",
+["maxTrivialLevel"] = 50,
+["canSkillUp"] = false,
+["favorite"] = false,
+["numSkillUps"] = 1,
 },
 [1229628] = {
 ["sourceType"] = 0,
@@ -85844,25 +86159,21 @@ CraftSimDB = {
 ["disabled"] = false,
 ["maxQuality"] = 5,
 ["relativeDifficulty"] = 3,
-["recipeID"] = 1264646,
-["isEnchantingRecipe"] = false,
 ["supportsCraftingStats"] = true,
 ["firstCraft"] = true,
-["numSkillUps"] = 1,
-["isGatheringRecipe"] = false,
 ["learned"] = false,
 ["skillLineAbilityID"] = 56441,
 ["icon"] = 7548935,
-["qualityIlvlBonuses"] = {
-0,
-6,
-12,
-19,
-26,
-},
-["isRecraft"] = false,
 ["isSalvageRecipe"] = false,
-["itemLevel"] = 885,
+["itemLevel"] = 232,
+["craftable"] = true,
+["name"] = "Sunforged Needle Set",
+["isEnchantingRecipe"] = false,
+["recipeID"] = 1264646,
+["canCreateMultiple"] = true,
+["categoryID"] = 2227,
+["isGatheringRecipe"] = false,
+["isRecraft"] = false,
 ["qualityIDs"] = {
 4,
 5,
@@ -85870,18 +86181,22 @@ CraftSimDB = {
 7,
 8,
 },
-["craftable"] = true,
 ["isDummyRecipe"] = false,
-["name"] = "Sunforged Needle Set",
-["alwaysUsesLowestQuality"] = false,
 ["supportsQualities"] = true,
-["canCreateMultiple"] = true,
-["maxTrivialLevel"] = 100,
+["qualityIlvlBonuses"] = {
+0,
+6,
+12,
+19,
+26,
+},
 ["hasSingleItemOutput"] = true,
-["hyperlink"] = "|cnIQ4:|Hitem:259234::::::::90:105::13:1:3524::::::|h[Sunforged Needle Set]|h|r",
+["alwaysUsesLowestQuality"] = false,
+["hyperlink"] = "|cnIQ4:|Hitem:259234::::::::90:102::13:1:3524::::::|h[Sunforged Needle Set]|h|r",
+["maxTrivialLevel"] = 100,
 ["canSkillUp"] = false,
 ["favorite"] = false,
-["categoryID"] = 2227,
+["numSkillUps"] = 1,
 },
 [1230764] = {
 ["sourceType"] = 0,
@@ -85918,38 +86233,38 @@ CraftSimDB = {
 ["disabled"] = false,
 ["maxQuality"] = 2,
 ["relativeDifficulty"] = 0,
-["recipeID"] = 1230866,
-["numSkillUps"] = 1,
 ["supportsCraftingStats"] = true,
 ["firstCraft"] = false,
-["categoryID"] = 2252,
-["isGatheringRecipe"] = false,
 ["learned"] = true,
 ["skillLineAbilityID"] = 52693,
 ["icon"] = 7548909,
-["canCreateMultiple"] = true,
-["canSkillUp"] = true,
 ["isSalvageRecipe"] = false,
 ["itemLevel"] = 278,
-["hyperlink"] = "|cnIQ1:|Hitem:241305::::::::90:105::13:1:3524::::::|h[Silvermoon Health Potion |A:Professions-ChatIcon-Quality-12-Tier1:17:15::1|a]|h|r",
 ["craftable"] = true,
-["maxTrivialLevel"] = 60,
-["hasSingleItemOutput"] = true,
-["alwaysUsesLowestQuality"] = false,
-["qualityItemIDs"] = {
-241305,
-241304,
-},
-["supportsQualities"] = true,
 ["name"] = "Silvermoon Health Potion",
-["isDummyRecipe"] = false,
+["isEnchantingRecipe"] = false,
+["recipeID"] = 1230866,
+["canCreateMultiple"] = true,
+["categoryID"] = 2252,
+["isGatheringRecipe"] = false,
+["isRecraft"] = false,
 ["qualityIDs"] = {
 13,
 14,
 },
-["isRecraft"] = false,
+["isDummyRecipe"] = false,
+["supportsQualities"] = true,
+["qualityItemIDs"] = {
+241305,
+241304,
+},
+["hasSingleItemOutput"] = true,
+["alwaysUsesLowestQuality"] = false,
+["hyperlink"] = "|cnIQ1:|Hitem:241305::::::::90:102::13:1:3524::::::|h[Silvermoon Health Potion |A:Professions-ChatIcon-Quality-12-Tier1:17:15::1|a]|h|r",
+["maxTrivialLevel"] = 60,
+["canSkillUp"] = true,
 ["favorite"] = false,
-["isEnchantingRecipe"] = false,
+["numSkillUps"] = 1,
 },
 [308419] = {
 ["sourceType"] = 0,
@@ -103207,6 +103522,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 0,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 10,
@@ -103252,10 +103568,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104268,
-["active"] = false,
 },
 {
 ["threshold"] = 5,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 10,
@@ -103301,10 +103617,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104267,
-["active"] = false,
 },
 {
 ["threshold"] = 10,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 10,
@@ -103350,10 +103666,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104266,
-["active"] = false,
 },
 {
 ["threshold"] = 15,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 10,
@@ -103399,10 +103715,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104265,
-["active"] = false,
 },
 {
 ["threshold"] = 20,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 10,
@@ -103448,7 +103764,6 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104264,
-["active"] = false,
 },
 },
 ["active"] = false,
@@ -103554,6 +103869,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 5,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -103599,10 +103915,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104253,
-["active"] = false,
 },
 {
 ["threshold"] = 15,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -103648,10 +103964,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104251,
-["active"] = false,
 },
 {
 ["threshold"] = 25,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -103697,10 +104013,9 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104249,
-["active"] = false,
 },
 },
-["active"] = false,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -103797,12 +104112,13 @@ CraftSimDB = {
 ["nodeID"] = 104258,
 ["maxRank"] = 30,
 ["icon"] = 4624394,
-["rank"] = -1,
+["rank"] = 0,
 },
 {
 ["perkData"] = {
 {
 ["threshold"] = 0,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -103848,10 +104164,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104273,
-["active"] = false,
 },
 {
 ["threshold"] = 5,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -103897,10 +104213,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104272,
-["active"] = false,
 },
 {
 ["threshold"] = 10,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -103946,10 +104262,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104271,
-["active"] = false,
 },
 {
 ["threshold"] = 15,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -103995,10 +104311,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104270,
-["active"] = false,
 },
 {
 ["threshold"] = 20,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -104044,10 +104360,9 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104269,
-["active"] = false,
 },
 },
-["active"] = false,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -104071,7 +104386,7 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 2650,
 },
 ["resourcefulness"] = {
-["value"] = 0,
+["value"] = 43,
 ["extraValues"] = {
 0,
 },
@@ -104144,12 +104459,13 @@ CraftSimDB = {
 ["nodeID"] = 104290,
 ["maxRank"] = 20,
 ["icon"] = 961617,
-["rank"] = -1,
+["rank"] = 13,
 },
 {
 ["perkData"] = {
 {
 ["threshold"] = 0,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -104195,10 +104511,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104278,
-["active"] = false,
 },
 {
 ["threshold"] = 5,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -104244,10 +104560,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104277,
-["active"] = false,
 },
 {
 ["threshold"] = 10,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -104293,10 +104609,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104276,
-["active"] = false,
 },
 {
 ["threshold"] = 15,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -104342,10 +104658,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104275,
-["active"] = false,
 },
 {
 ["threshold"] = 20,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -104391,7 +104707,6 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104274,
-["active"] = false,
 },
 },
 ["active"] = false,
@@ -104497,6 +104812,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 0,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -104542,10 +104858,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104247,
-["active"] = false,
 },
 {
 ["threshold"] = 5,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -104591,10 +104907,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104246,
-["active"] = false,
 },
 {
 ["threshold"] = 10,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -104640,10 +104956,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104245,
-["active"] = false,
 },
 {
 ["threshold"] = 15,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -104689,10 +105005,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104244,
-["active"] = false,
 },
 {
 ["threshold"] = 20,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -104738,10 +105054,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104243,
-["active"] = false,
 },
 {
 ["threshold"] = 25,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -104788,7 +105104,6 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104242,
-["active"] = false,
 },
 },
 ["active"] = false,
@@ -104895,6 +105210,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 5,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 3,
@@ -104940,10 +105256,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104286,
-["active"] = false,
 },
 {
 ["threshold"] = 15,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 3,
@@ -104989,10 +105305,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104284,
-["active"] = false,
 },
 {
 ["threshold"] = 25,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 3,
@@ -105038,10 +105354,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104282,
-["active"] = false,
 },
 {
 ["threshold"] = 35,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 3,
@@ -105087,10 +105403,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104280,
-["active"] = false,
 },
 {
 ["threshold"] = 40,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 10,
@@ -105136,10 +105452,9 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104279,
-["active"] = false,
 },
 },
-["active"] = false,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -105236,7 +105551,7 @@ CraftSimDB = {
 ["nodeID"] = 104292,
 ["maxRank"] = 40,
 ["icon"] = 1020356,
-["rank"] = -1,
+["rank"] = 0,
 },
 },
 ["professionStats"] = {
@@ -105262,8 +105577,9 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 2650,
 },
 ["resourcefulness"] = {
-["value"] = 0,
+["value"] = 43,
 ["extraValues"] = {
+0,
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
@@ -105278,6 +105594,7 @@ CraftSimDB = {
 ["ingenuity"] = {
 ["value"] = 0,
 ["extraValues"] = {
+0,
 },
 ["name"] = "ingenuity",
 ["percentDivisionFactor"] = 1000,
@@ -140756,7 +141073,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 0,
-["perkID"] = 104268,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 10,
@@ -140779,19 +141096,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -140801,11 +141118,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104268,
 },
 {
 ["threshold"] = 5,
-["perkID"] = 104267,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 10,
@@ -140828,19 +141145,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -140850,11 +141167,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104267,
 },
 {
 ["threshold"] = 10,
-["perkID"] = 104266,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 10,
@@ -140877,19 +141194,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -140899,11 +141216,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104266,
 },
 {
 ["threshold"] = 15,
-["perkID"] = 104265,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 10,
@@ -140926,19 +141243,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -140948,11 +141265,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104265,
 },
 {
 ["threshold"] = 20,
-["perkID"] = 104264,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 10,
@@ -140975,19 +141292,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -140997,7 +141314,7 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104264,
 },
 },
 ["active"] = false,
@@ -141022,13 +141339,6 @@ CraftSimDB = {
 },
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
-},
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
 },
 ["resourcefulness"] = {
 ["value"] = 0,
@@ -141037,6 +141347,13 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -141070,13 +141387,6 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -141084,6 +141394,13 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -141103,7 +141420,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 0,
-["perkID"] = 104273,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -141126,19 +141443,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 10,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -141148,11 +141465,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = true,
+["perkID"] = 104273,
 },
 {
 ["threshold"] = 5,
-["perkID"] = 104272,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -141175,19 +141492,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 10,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -141197,11 +141514,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = true,
+["perkID"] = 104272,
 },
 {
 ["threshold"] = 10,
-["perkID"] = 104271,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -141224,19 +141541,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 10,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -141246,11 +141563,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = true,
+["perkID"] = 104271,
 },
 {
 ["threshold"] = 15,
-["perkID"] = 104270,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -141273,19 +141590,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 10,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -141295,11 +141612,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104270,
 },
 {
 ["threshold"] = 20,
-["perkID"] = 104269,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -141322,19 +141639,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 10,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -141344,7 +141661,7 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104269,
 },
 },
 ["active"] = true,
@@ -141369,13 +141686,6 @@ CraftSimDB = {
 },
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
-},
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
 },
 ["resourcefulness"] = {
 ["value"] = 43,
@@ -141384,6 +141694,13 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -141417,13 +141734,6 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 70,
 ["extraValues"] = {
@@ -141431,6 +141741,13 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -141450,7 +141767,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 0,
-["perkID"] = 104563,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -141473,19 +141790,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -141495,11 +141812,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = true,
+["perkID"] = 104563,
 },
 {
 ["threshold"] = 5,
-["perkID"] = 104562,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -141521,6 +141838,13 @@ CraftSimDB = {
 },
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
+},
+["resourcefulness"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
 },
 ["skill"] = {
 ["value"] = 5,
@@ -141529,13 +141853,6 @@ CraftSimDB = {
 ["name"] = "skill",
 ["percentDivisionFactor"] = 1,
 },
-["resourcefulness"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "resourcefulness",
-["percentDivisionFactor"] = 900,
-},
 ["ingenuity"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -141544,11 +141861,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104562,
 },
 {
 ["threshold"] = 10,
-["perkID"] = 104561,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -141570,6 +141887,13 @@ CraftSimDB = {
 },
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
+},
+["resourcefulness"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
 },
 ["skill"] = {
 ["value"] = 10,
@@ -141578,13 +141902,6 @@ CraftSimDB = {
 ["name"] = "skill",
 ["percentDivisionFactor"] = 1,
 },
-["resourcefulness"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "resourcefulness",
-["percentDivisionFactor"] = 900,
-},
 ["ingenuity"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -141593,11 +141910,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104561,
 },
 {
 ["threshold"] = 20,
-["perkID"] = 104559,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -141620,19 +141937,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 15,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 15,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -141642,11 +141959,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104559,
 },
 {
 ["threshold"] = 25,
-["perkID"] = 104558,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -141669,19 +141986,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 15,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 15,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -141691,7 +142008,7 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104558,
 },
 },
 ["active"] = true,
@@ -141717,13 +142034,6 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -141731,6 +142041,13 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -141764,13 +142081,6 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 75,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -141778,6 +142088,13 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 75,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -141797,7 +142114,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 0,
-["perkID"] = 104278,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -141820,19 +142137,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 10,
@@ -141842,11 +142159,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104278,
 },
 {
 ["threshold"] = 5,
-["perkID"] = 104277,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -141869,19 +142186,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 10,
@@ -141891,11 +142208,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104277,
 },
 {
 ["threshold"] = 10,
-["perkID"] = 104276,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -141918,19 +142235,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 10,
@@ -141940,11 +142257,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104276,
 },
 {
 ["threshold"] = 15,
-["perkID"] = 104275,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -141967,19 +142284,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 10,
@@ -141989,11 +142306,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104275,
 },
 {
 ["threshold"] = 20,
-["perkID"] = 104274,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -142016,19 +142333,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 10,
@@ -142038,7 +142355,7 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104274,
 },
 },
 ["active"] = false,
@@ -142063,13 +142380,6 @@ CraftSimDB = {
 },
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
-},
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
 },
 ["resourcefulness"] = {
 ["value"] = 0,
@@ -142078,6 +142388,13 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -142111,13 +142428,6 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -142125,6 +142435,13 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 70,
@@ -142144,7 +142461,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 0,
-["perkID"] = 104531,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -142167,19 +142484,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -142189,11 +142506,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = true,
+["perkID"] = 104531,
 },
 {
 ["threshold"] = 5,
-["perkID"] = 104530,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -142216,19 +142533,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 5,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 5,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -142238,11 +142555,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104530,
 },
 {
 ["threshold"] = 15,
-["perkID"] = 104528,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -142265,19 +142582,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 5,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 5,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -142287,11 +142604,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104528,
 },
 {
 ["threshold"] = 25,
-["perkID"] = 104526,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -142313,6 +142630,13 @@ CraftSimDB = {
 },
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
+},
+["resourcefulness"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
 },
 ["skill"] = {
 ["value"] = 10,
@@ -142321,13 +142645,6 @@ CraftSimDB = {
 ["name"] = "skill",
 ["percentDivisionFactor"] = 1,
 },
-["resourcefulness"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "resourcefulness",
-["percentDivisionFactor"] = 900,
-},
 ["ingenuity"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -142336,11 +142653,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104526,
 },
 {
 ["threshold"] = 30,
-["perkID"] = 104525,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -142363,19 +142680,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -142385,7 +142702,7 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104525,
 },
 },
 ["active"] = true,
@@ -142411,13 +142728,6 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -142425,6 +142735,13 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -142458,13 +142775,6 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 50,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -142472,6 +142782,13 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 50,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -142491,7 +142808,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 5,
-["perkID"] = 104286,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 3,
@@ -142514,19 +142831,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 1,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 3,
@@ -142536,11 +142853,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104286,
 },
 {
 ["threshold"] = 15,
-["perkID"] = 104284,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 3,
@@ -142563,19 +142880,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 1,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 3,
@@ -142585,11 +142902,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104284,
 },
 {
 ["threshold"] = 25,
-["perkID"] = 104282,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 3,
@@ -142612,19 +142929,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 1,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 3,
@@ -142634,11 +142951,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104282,
 },
 {
 ["threshold"] = 35,
-["perkID"] = 104280,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 3,
@@ -142660,13 +142977,6 @@ CraftSimDB = {
 },
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
-},
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
 },
 ["resourcefulness"] = {
 ["value"] = 1,
@@ -142675,6 +142985,13 @@ CraftSimDB = {
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
 },
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
+},
 ["ingenuity"] = {
 ["value"] = 3,
 ["extraValues"] = {
@@ -142683,11 +143000,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104280,
 },
 {
 ["threshold"] = 40,
-["perkID"] = 104279,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 10,
@@ -142710,19 +143027,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 10,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 10,
@@ -142732,7 +143049,7 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104279,
 },
 },
 ["active"] = true,
@@ -142758,13 +143075,6 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -142772,6 +143082,13 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -142805,13 +143122,6 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 54,
 ["extraValues"] = {
@@ -142819,6 +143129,13 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 62,
@@ -142838,7 +143155,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 5,
-["perkID"] = 104523,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -142861,19 +143178,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 5,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 5,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -142883,11 +143200,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104523,
 },
 {
 ["threshold"] = 10,
-["perkID"] = 104522,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -142910,19 +143227,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 5,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 5,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -142932,11 +143249,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104522,
 },
 {
 ["threshold"] = 15,
-["perkID"] = 104521,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -142958,6 +143275,13 @@ CraftSimDB = {
 },
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
+},
+["resourcefulness"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
 },
 ["skill"] = {
 ["value"] = 10,
@@ -142966,13 +143290,6 @@ CraftSimDB = {
 ["name"] = "skill",
 ["percentDivisionFactor"] = 1,
 },
-["resourcefulness"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "resourcefulness",
-["percentDivisionFactor"] = 900,
-},
 ["ingenuity"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -142981,11 +143298,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104521,
 },
 {
 ["threshold"] = 20,
-["perkID"] = 104520,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -143008,19 +143325,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 15,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 15,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -143030,7 +143347,7 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104520,
 },
 },
 ["active"] = true,
@@ -143056,13 +143373,6 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -143070,6 +143380,13 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -143103,13 +143420,6 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 60,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -143117,6 +143427,13 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 60,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -143155,13 +143472,6 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 43,
 ["extraValues"] = {
@@ -143169,6 +143479,13 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -143201,13 +143518,6 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 185,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 124,
 ["extraValues"] = {
@@ -143215,6 +143525,13 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 185,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 132,
@@ -147684,7 +148001,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 0,
-["perkID"] = 104268,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 10,
@@ -147707,19 +148024,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -147729,11 +148046,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104268,
 },
 {
 ["threshold"] = 5,
-["perkID"] = 104267,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 10,
@@ -147756,19 +148073,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -147778,11 +148095,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104267,
 },
 {
 ["threshold"] = 10,
-["perkID"] = 104266,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 10,
@@ -147805,19 +148122,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -147827,11 +148144,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104266,
 },
 {
 ["threshold"] = 15,
-["perkID"] = 104265,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 10,
@@ -147854,19 +148171,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -147876,11 +148193,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104265,
 },
 {
 ["threshold"] = 20,
-["perkID"] = 104264,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 10,
@@ -147903,19 +148220,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -147925,7 +148242,7 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104264,
 },
 },
 ["active"] = false,
@@ -147950,13 +148267,6 @@ CraftSimDB = {
 },
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
-},
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
 },
 ["resourcefulness"] = {
 ["value"] = 0,
@@ -147965,6 +148275,13 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -147998,13 +148315,6 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -148012,6 +148322,13 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -148031,7 +148348,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 0,
-["perkID"] = 104273,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -148054,19 +148371,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 10,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -148076,11 +148393,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = true,
+["perkID"] = 104273,
 },
 {
 ["threshold"] = 5,
-["perkID"] = 104272,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -148103,19 +148420,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 10,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -148125,11 +148442,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = true,
+["perkID"] = 104272,
 },
 {
 ["threshold"] = 10,
-["perkID"] = 104271,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -148152,19 +148469,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 10,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -148174,11 +148491,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = true,
+["perkID"] = 104271,
 },
 {
 ["threshold"] = 15,
-["perkID"] = 104270,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -148201,19 +148518,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 10,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -148223,11 +148540,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104270,
 },
 {
 ["threshold"] = 20,
-["perkID"] = 104269,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -148250,19 +148567,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 10,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -148272,7 +148589,7 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104269,
 },
 },
 ["active"] = true,
@@ -148297,13 +148614,6 @@ CraftSimDB = {
 },
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
-},
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
 },
 ["resourcefulness"] = {
 ["value"] = 43,
@@ -148312,6 +148622,13 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -148345,13 +148662,6 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 70,
 ["extraValues"] = {
@@ -148359,6 +148669,13 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -148378,7 +148695,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 0,
-["perkID"] = 104563,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -148401,19 +148718,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -148423,11 +148740,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = true,
+["perkID"] = 104563,
 },
 {
 ["threshold"] = 5,
-["perkID"] = 104562,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -148449,6 +148766,13 @@ CraftSimDB = {
 },
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
+},
+["resourcefulness"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
 },
 ["skill"] = {
 ["value"] = 5,
@@ -148457,13 +148781,6 @@ CraftSimDB = {
 ["name"] = "skill",
 ["percentDivisionFactor"] = 1,
 },
-["resourcefulness"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "resourcefulness",
-["percentDivisionFactor"] = 900,
-},
 ["ingenuity"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -148472,11 +148789,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104562,
 },
 {
 ["threshold"] = 10,
-["perkID"] = 104561,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -148498,6 +148815,13 @@ CraftSimDB = {
 },
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
+},
+["resourcefulness"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
 },
 ["skill"] = {
 ["value"] = 10,
@@ -148506,13 +148830,6 @@ CraftSimDB = {
 ["name"] = "skill",
 ["percentDivisionFactor"] = 1,
 },
-["resourcefulness"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "resourcefulness",
-["percentDivisionFactor"] = 900,
-},
 ["ingenuity"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -148521,11 +148838,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104561,
 },
 {
 ["threshold"] = 20,
-["perkID"] = 104559,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -148548,19 +148865,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 15,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 15,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -148570,11 +148887,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104559,
 },
 {
 ["threshold"] = 25,
-["perkID"] = 104558,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -148597,19 +148914,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 15,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 15,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -148619,7 +148936,7 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104558,
 },
 },
 ["active"] = true,
@@ -148645,13 +148962,6 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -148659,6 +148969,13 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -148692,13 +149009,6 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 75,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -148706,6 +149016,13 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 75,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -148725,7 +149042,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 0,
-["perkID"] = 104278,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -148748,19 +149065,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 10,
@@ -148770,11 +149087,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104278,
 },
 {
 ["threshold"] = 5,
-["perkID"] = 104277,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -148797,19 +149114,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 10,
@@ -148819,11 +149136,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104277,
 },
 {
 ["threshold"] = 10,
-["perkID"] = 104276,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -148846,19 +149163,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 10,
@@ -148868,11 +149185,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104276,
 },
 {
 ["threshold"] = 15,
-["perkID"] = 104275,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -148895,19 +149212,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 10,
@@ -148917,11 +149234,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104275,
 },
 {
 ["threshold"] = 20,
-["perkID"] = 104274,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -148944,19 +149261,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 10,
@@ -148966,7 +149283,7 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104274,
 },
 },
 ["active"] = false,
@@ -148991,13 +149308,6 @@ CraftSimDB = {
 },
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
-},
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
 },
 ["resourcefulness"] = {
 ["value"] = 0,
@@ -149006,6 +149316,13 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -149039,13 +149356,6 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -149053,6 +149363,13 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 70,
@@ -149072,7 +149389,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 5,
-["perkID"] = 104511,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -149095,19 +149412,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 5,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 5,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -149117,11 +149434,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104511,
 },
 {
 ["threshold"] = 10,
-["perkID"] = 104510,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -149144,19 +149461,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 5,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 5,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -149166,11 +149483,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104510,
 },
 {
 ["threshold"] = 15,
-["perkID"] = 104509,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -149192,6 +149509,13 @@ CraftSimDB = {
 },
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
+},
+["resourcefulness"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
 },
 ["skill"] = {
 ["value"] = 10,
@@ -149200,13 +149524,6 @@ CraftSimDB = {
 ["name"] = "skill",
 ["percentDivisionFactor"] = 1,
 },
-["resourcefulness"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "resourcefulness",
-["percentDivisionFactor"] = 900,
-},
 ["ingenuity"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -149215,11 +149532,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104509,
 },
 {
 ["threshold"] = 20,
-["perkID"] = 104508,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -149241,6 +149558,13 @@ CraftSimDB = {
 },
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
+},
+["resourcefulness"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
 },
 ["skill"] = {
 ["value"] = 15,
@@ -149249,13 +149573,6 @@ CraftSimDB = {
 ["name"] = "skill",
 ["percentDivisionFactor"] = 1,
 },
-["resourcefulness"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "resourcefulness",
-["percentDivisionFactor"] = 900,
-},
 ["ingenuity"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -149264,7 +149581,7 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104508,
 },
 },
 ["active"] = false,
@@ -149290,13 +149607,6 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -149304,6 +149614,13 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -149337,13 +149654,6 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 60,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -149351,6 +149661,13 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 60,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -149370,7 +149687,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 5,
-["perkID"] = 104286,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 3,
@@ -149393,19 +149710,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 1,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 3,
@@ -149415,11 +149732,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104286,
 },
 {
 ["threshold"] = 15,
-["perkID"] = 104284,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 3,
@@ -149442,19 +149759,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 1,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 3,
@@ -149464,11 +149781,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104284,
 },
 {
 ["threshold"] = 25,
-["perkID"] = 104282,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 3,
@@ -149491,19 +149808,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 1,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 3,
@@ -149513,11 +149830,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104282,
 },
 {
 ["threshold"] = 35,
-["perkID"] = 104280,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 3,
@@ -149539,13 +149856,6 @@ CraftSimDB = {
 },
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
-},
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
 },
 ["resourcefulness"] = {
 ["value"] = 1,
@@ -149554,6 +149864,13 @@ CraftSimDB = {
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
 },
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
+},
 ["ingenuity"] = {
 ["value"] = 3,
 ["extraValues"] = {
@@ -149562,11 +149879,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104280,
 },
 {
 ["threshold"] = 40,
-["perkID"] = 104279,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 10,
@@ -149589,19 +149906,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 10,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 10,
@@ -149611,7 +149928,7 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104279,
 },
 },
 ["active"] = true,
@@ -149637,13 +149954,6 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -149651,6 +149961,13 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -149684,13 +150001,6 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 54,
 ["extraValues"] = {
@@ -149698,6 +150008,13 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 62,
@@ -149717,7 +150034,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 0,
-["perkID"] = 104531,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -149740,19 +150057,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -149762,11 +150079,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = true,
+["perkID"] = 104531,
 },
 {
 ["threshold"] = 5,
-["perkID"] = 104530,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -149789,19 +150106,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 5,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 5,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -149811,11 +150128,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104530,
 },
 {
 ["threshold"] = 15,
-["perkID"] = 104528,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -149838,19 +150155,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 5,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 5,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -149860,11 +150177,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104528,
 },
 {
 ["threshold"] = 25,
-["perkID"] = 104526,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -149886,6 +150203,13 @@ CraftSimDB = {
 },
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
+},
+["resourcefulness"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
 },
 ["skill"] = {
 ["value"] = 10,
@@ -149894,13 +150218,6 @@ CraftSimDB = {
 ["name"] = "skill",
 ["percentDivisionFactor"] = 1,
 },
-["resourcefulness"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "resourcefulness",
-["percentDivisionFactor"] = 900,
-},
 ["ingenuity"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -149909,11 +150226,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104526,
 },
 {
 ["threshold"] = 30,
-["perkID"] = 104525,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -149936,19 +150253,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -149958,7 +150275,7 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104525,
 },
 },
 ["active"] = true,
@@ -149984,13 +150301,6 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -149998,6 +150308,13 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -150031,13 +150348,6 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 50,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -150045,6 +150355,13 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 50,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -150083,13 +150400,6 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 43,
 ["extraValues"] = {
@@ -150097,6 +150407,13 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -150129,13 +150446,6 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 185,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 124,
 ["extraValues"] = {
@@ -150143,6 +150453,13 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 185,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 132,
@@ -160811,6 +161128,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 0,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 10,
@@ -160856,10 +161174,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104268,
-["active"] = false,
 },
 {
 ["threshold"] = 5,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 10,
@@ -160905,10 +161223,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104267,
-["active"] = false,
 },
 {
 ["threshold"] = 10,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 10,
@@ -160954,10 +161272,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104266,
-["active"] = false,
 },
 {
 ["threshold"] = 15,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 10,
@@ -161003,10 +161321,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104265,
-["active"] = false,
 },
 {
 ["threshold"] = 20,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 10,
@@ -161052,7 +161370,6 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104264,
-["active"] = false,
 },
 },
 ["active"] = false,
@@ -161158,6 +161475,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 0,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -161203,10 +161521,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104600,
-["active"] = true,
 },
 {
 ["threshold"] = 5,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -161252,10 +161570,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104599,
-["active"] = true,
 },
 {
 ["threshold"] = 20,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -161301,10 +161619,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104596,
-["active"] = true,
 },
 {
 ["threshold"] = 25,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -161350,7 +161668,6 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104595,
-["active"] = true,
 },
 },
 ["active"] = true,
@@ -161456,6 +161773,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 0,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -161501,10 +161819,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104273,
-["active"] = true,
 },
 {
 ["threshold"] = 5,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -161550,10 +161868,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104272,
-["active"] = true,
 },
 {
 ["threshold"] = 10,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -161599,10 +161917,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104271,
-["active"] = true,
 },
 {
 ["threshold"] = 15,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -161648,10 +161966,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104270,
-["active"] = false,
 },
 {
 ["threshold"] = 20,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -161697,7 +162015,6 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104269,
-["active"] = false,
 },
 },
 ["active"] = true,
@@ -161803,6 +162120,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 0,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -161848,10 +162166,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104278,
-["active"] = false,
 },
 {
 ["threshold"] = 5,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -161897,10 +162215,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104277,
-["active"] = false,
 },
 {
 ["threshold"] = 10,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -161946,10 +162264,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104276,
-["active"] = false,
 },
 {
 ["threshold"] = 15,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -161995,10 +162313,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104275,
-["active"] = false,
 },
 {
 ["threshold"] = 20,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -162044,7 +162362,6 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104274,
-["active"] = false,
 },
 },
 ["active"] = false,
@@ -162150,6 +162467,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 0,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -162195,10 +162513,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104625,
-["active"] = true,
 },
 {
 ["threshold"] = 5,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -162244,10 +162562,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104624,
-["active"] = true,
 },
 {
 ["threshold"] = 10,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -162293,10 +162611,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104623,
-["active"] = true,
 },
 {
 ["threshold"] = 20,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -162342,10 +162660,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104621,
-["active"] = true,
 },
 {
 ["threshold"] = 25,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -162391,7 +162709,6 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104620,
-["active"] = true,
 },
 },
 ["active"] = true,
@@ -162497,6 +162814,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 5,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 3,
@@ -162542,10 +162860,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104286,
-["active"] = false,
 },
 {
 ["threshold"] = 15,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 3,
@@ -162591,10 +162909,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104284,
-["active"] = false,
 },
 {
 ["threshold"] = 25,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 3,
@@ -162640,10 +162958,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104282,
-["active"] = false,
 },
 {
 ["threshold"] = 35,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 3,
@@ -162689,10 +163007,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104280,
-["active"] = false,
 },
 {
 ["threshold"] = 40,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 10,
@@ -162738,7 +163056,6 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104279,
-["active"] = false,
 },
 },
 ["active"] = true,
@@ -162844,6 +163161,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 5,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -162889,10 +163207,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104593,
-["active"] = true,
 },
 {
 ["threshold"] = 10,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -162938,10 +163256,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104592,
-["active"] = true,
 },
 {
 ["threshold"] = 15,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -162987,10 +163305,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104591,
-["active"] = true,
 },
 {
 ["threshold"] = 20,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -163036,7 +163354,6 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104590,
-["active"] = true,
 },
 },
 ["active"] = true,
@@ -163238,6 +163555,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 0,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 10,
@@ -163283,10 +163601,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104268,
-["active"] = false,
 },
 {
 ["threshold"] = 5,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 10,
@@ -163332,10 +163650,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104267,
-["active"] = false,
 },
 {
 ["threshold"] = 10,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 10,
@@ -163381,10 +163699,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104266,
-["active"] = false,
 },
 {
 ["threshold"] = 15,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 10,
@@ -163430,10 +163748,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104265,
-["active"] = false,
 },
 {
 ["threshold"] = 20,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 10,
@@ -163479,7 +163797,6 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104264,
-["active"] = false,
 },
 },
 ["active"] = false,
@@ -163585,6 +163902,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 0,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -163630,10 +163948,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104273,
-["active"] = true,
 },
 {
 ["threshold"] = 5,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -163679,10 +163997,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104272,
-["active"] = true,
 },
 {
 ["threshold"] = 10,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -163728,10 +164046,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104271,
-["active"] = true,
 },
 {
 ["threshold"] = 15,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -163777,10 +164095,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104270,
-["active"] = false,
 },
 {
 ["threshold"] = 20,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -163826,7 +164144,6 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104269,
-["active"] = false,
 },
 },
 ["active"] = true,
@@ -163932,6 +164249,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 5,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -163977,10 +164295,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104605,
-["active"] = true,
 },
 {
 ["threshold"] = 10,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -164026,10 +164344,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104604,
-["active"] = false,
 },
 {
 ["threshold"] = 15,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -164075,10 +164393,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104603,
-["active"] = false,
 },
 {
 ["threshold"] = 20,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -164124,7 +164442,6 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104602,
-["active"] = false,
 },
 },
 ["active"] = true,
@@ -164230,6 +164547,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 0,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -164275,10 +164593,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104278,
-["active"] = false,
 },
 {
 ["threshold"] = 5,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -164324,10 +164642,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104277,
-["active"] = false,
 },
 {
 ["threshold"] = 10,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -164373,10 +164691,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104276,
-["active"] = false,
 },
 {
 ["threshold"] = 15,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -164422,10 +164740,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104275,
-["active"] = false,
 },
 {
 ["threshold"] = 20,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -164471,7 +164789,6 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104274,
-["active"] = false,
 },
 },
 ["active"] = false,
@@ -164577,6 +164894,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 0,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -164622,10 +164940,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104625,
-["active"] = true,
 },
 {
 ["threshold"] = 5,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -164671,10 +164989,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104624,
-["active"] = true,
 },
 {
 ["threshold"] = 10,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -164720,10 +165038,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104623,
-["active"] = true,
 },
 {
 ["threshold"] = 20,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -164769,10 +165087,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104621,
-["active"] = true,
 },
 {
 ["threshold"] = 25,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -164818,7 +165136,6 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104620,
-["active"] = true,
 },
 },
 ["active"] = true,
@@ -164924,6 +165241,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 5,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 3,
@@ -164969,10 +165287,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104286,
-["active"] = false,
 },
 {
 ["threshold"] = 15,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 3,
@@ -165018,10 +165336,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104284,
-["active"] = false,
 },
 {
 ["threshold"] = 25,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 3,
@@ -165067,10 +165385,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104282,
-["active"] = false,
 },
 {
 ["threshold"] = 35,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 3,
@@ -165116,10 +165434,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104280,
-["active"] = false,
 },
 {
 ["threshold"] = 40,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 10,
@@ -165165,7 +165483,6 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104279,
-["active"] = false,
 },
 },
 ["active"] = true,
@@ -165271,6 +165588,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 0,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -165316,10 +165634,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104618,
-["active"] = true,
 },
 {
 ["threshold"] = 5,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -165365,10 +165683,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104617,
-["active"] = true,
 },
 {
 ["threshold"] = 20,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -165414,10 +165732,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104614,
-["active"] = true,
 },
 {
 ["threshold"] = 25,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -165463,7 +165781,6 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104613,
-["active"] = true,
 },
 },
 ["active"] = true,
@@ -172946,6 +173263,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 0,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 10,
@@ -172991,10 +173309,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104268,
-["active"] = false,
 },
 {
 ["threshold"] = 5,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 10,
@@ -173040,10 +173358,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104267,
-["active"] = false,
 },
 {
 ["threshold"] = 10,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 10,
@@ -173089,10 +173407,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104266,
-["active"] = false,
 },
 {
 ["threshold"] = 15,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 10,
@@ -173138,10 +173456,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104265,
-["active"] = false,
 },
 {
 ["threshold"] = 20,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 10,
@@ -173187,7 +173505,6 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104264,
-["active"] = false,
 },
 },
 ["active"] = false,
@@ -173293,6 +173610,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 0,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -173338,10 +173656,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104600,
-["active"] = true,
 },
 {
 ["threshold"] = 5,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -173387,10 +173705,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104599,
-["active"] = true,
 },
 {
 ["threshold"] = 20,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -173436,10 +173754,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104596,
-["active"] = true,
 },
 {
 ["threshold"] = 25,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -173485,7 +173803,6 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104595,
-["active"] = true,
 },
 },
 ["active"] = true,
@@ -173591,6 +173908,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 0,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -173636,10 +173954,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104273,
-["active"] = true,
 },
 {
 ["threshold"] = 5,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -173685,10 +174003,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104272,
-["active"] = true,
 },
 {
 ["threshold"] = 10,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -173734,10 +174052,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104271,
-["active"] = true,
 },
 {
 ["threshold"] = 15,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -173783,10 +174101,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104270,
-["active"] = false,
 },
 {
 ["threshold"] = 20,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -173832,7 +174150,6 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104269,
-["active"] = false,
 },
 },
 ["active"] = true,
@@ -173938,6 +174255,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 0,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -173983,10 +174301,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104278,
-["active"] = false,
 },
 {
 ["threshold"] = 5,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -174032,10 +174350,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104277,
-["active"] = false,
 },
 {
 ["threshold"] = 10,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -174081,10 +174399,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104276,
-["active"] = false,
 },
 {
 ["threshold"] = 15,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -174130,10 +174448,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104275,
-["active"] = false,
 },
 {
 ["threshold"] = 20,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -174179,7 +174497,6 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104274,
-["active"] = false,
 },
 },
 ["active"] = false,
@@ -174285,6 +174602,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 0,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -174330,10 +174648,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104625,
-["active"] = true,
 },
 {
 ["threshold"] = 5,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -174379,10 +174697,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104624,
-["active"] = true,
 },
 {
 ["threshold"] = 10,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -174428,10 +174746,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104623,
-["active"] = true,
 },
 {
 ["threshold"] = 20,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -174477,10 +174795,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104621,
-["active"] = true,
 },
 {
 ["threshold"] = 25,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -174526,7 +174844,6 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104620,
-["active"] = true,
 },
 },
 ["active"] = true,
@@ -174632,6 +174949,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 5,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 3,
@@ -174677,10 +174995,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104286,
-["active"] = false,
 },
 {
 ["threshold"] = 15,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 3,
@@ -174726,10 +175044,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104284,
-["active"] = false,
 },
 {
 ["threshold"] = 25,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 3,
@@ -174775,10 +175093,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104282,
-["active"] = false,
 },
 {
 ["threshold"] = 35,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 3,
@@ -174824,10 +175142,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104280,
-["active"] = false,
 },
 {
 ["threshold"] = 40,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 10,
@@ -174873,7 +175191,6 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104279,
-["active"] = false,
 },
 },
 ["active"] = true,
@@ -174979,6 +175296,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 5,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -175024,10 +175342,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104593,
-["active"] = true,
 },
 {
 ["threshold"] = 10,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -175073,10 +175391,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104592,
-["active"] = true,
 },
 {
 ["threshold"] = 15,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -175122,10 +175440,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104591,
-["active"] = true,
 },
 {
 ["threshold"] = 20,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -175171,7 +175489,6 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104590,
-["active"] = true,
 },
 },
 ["active"] = true,
@@ -187508,7 +187825,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 0,
-["perkID"] = 104268,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 10,
@@ -187531,19 +187848,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -187553,11 +187870,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104268,
 },
 {
 ["threshold"] = 5,
-["perkID"] = 104267,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 10,
@@ -187580,19 +187897,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -187602,11 +187919,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104267,
 },
 {
 ["threshold"] = 10,
-["perkID"] = 104266,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 10,
@@ -187629,19 +187946,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -187651,11 +187968,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104266,
 },
 {
 ["threshold"] = 15,
-["perkID"] = 104265,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 10,
@@ -187678,19 +187995,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -187700,11 +188017,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104265,
 },
 {
 ["threshold"] = 20,
-["perkID"] = 104264,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 10,
@@ -187727,19 +188044,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -187749,7 +188066,7 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104264,
 },
 },
 ["active"] = false,
@@ -187774,13 +188091,6 @@ CraftSimDB = {
 },
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
-},
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
 },
 ["resourcefulness"] = {
 ["value"] = 0,
@@ -187789,6 +188099,13 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -187822,13 +188139,6 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -187836,6 +188146,13 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -187855,7 +188172,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 0,
-["perkID"] = 104273,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -187878,19 +188195,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 10,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -187900,11 +188217,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = true,
+["perkID"] = 104273,
 },
 {
 ["threshold"] = 5,
-["perkID"] = 104272,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -187927,19 +188244,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 10,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -187949,11 +188266,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = true,
+["perkID"] = 104272,
 },
 {
 ["threshold"] = 10,
-["perkID"] = 104271,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -187976,19 +188293,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 10,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -187998,11 +188315,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = true,
+["perkID"] = 104271,
 },
 {
 ["threshold"] = 15,
-["perkID"] = 104270,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -188025,19 +188342,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 10,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -188047,11 +188364,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104270,
 },
 {
 ["threshold"] = 20,
-["perkID"] = 104269,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -188074,19 +188391,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 10,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -188096,7 +188413,7 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104269,
 },
 },
 ["active"] = true,
@@ -188121,13 +188438,6 @@ CraftSimDB = {
 },
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
-},
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
 },
 ["resourcefulness"] = {
 ["value"] = 43,
@@ -188136,6 +188446,13 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -188169,13 +188486,6 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 70,
 ["extraValues"] = {
@@ -188183,6 +188493,13 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -188202,7 +188519,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 5,
-["perkID"] = 104605,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -188225,19 +188542,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 5,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 5,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -188247,11 +188564,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = true,
+["perkID"] = 104605,
 },
 {
 ["threshold"] = 10,
-["perkID"] = 104604,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -188274,19 +188591,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 5,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 5,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -188296,11 +188613,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104604,
 },
 {
 ["threshold"] = 15,
-["perkID"] = 104603,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -188322,6 +188639,13 @@ CraftSimDB = {
 },
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
+},
+["resourcefulness"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
 },
 ["skill"] = {
 ["value"] = 10,
@@ -188330,13 +188654,6 @@ CraftSimDB = {
 ["name"] = "skill",
 ["percentDivisionFactor"] = 1,
 },
-["resourcefulness"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "resourcefulness",
-["percentDivisionFactor"] = 900,
-},
 ["ingenuity"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -188345,11 +188662,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104603,
 },
 {
 ["threshold"] = 20,
-["perkID"] = 104602,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -188372,19 +188689,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 15,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 15,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -188394,7 +188711,7 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104602,
 },
 },
 ["active"] = true,
@@ -188420,13 +188737,6 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 12,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -188434,6 +188744,13 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 12,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -188467,13 +188784,6 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 60,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -188481,6 +188791,13 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 60,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -188500,7 +188817,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 0,
-["perkID"] = 104278,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -188523,19 +188840,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 10,
@@ -188545,11 +188862,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104278,
 },
 {
 ["threshold"] = 5,
-["perkID"] = 104277,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -188572,19 +188889,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 10,
@@ -188594,11 +188911,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104277,
 },
 {
 ["threshold"] = 10,
-["perkID"] = 104276,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -188621,19 +188938,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 10,
@@ -188643,11 +188960,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104276,
 },
 {
 ["threshold"] = 15,
-["perkID"] = 104275,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -188670,19 +188987,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 10,
@@ -188692,11 +189009,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104275,
 },
 {
 ["threshold"] = 20,
-["perkID"] = 104274,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -188719,19 +189036,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 10,
@@ -188741,7 +189058,7 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104274,
 },
 },
 ["active"] = false,
@@ -188766,13 +189083,6 @@ CraftSimDB = {
 },
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
-},
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
 },
 ["resourcefulness"] = {
 ["value"] = 0,
@@ -188781,6 +189091,13 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -188814,13 +189131,6 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -188828,6 +189138,13 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 70,
@@ -188847,7 +189164,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 0,
-["perkID"] = 104625,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -188870,19 +189187,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -188892,11 +189209,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = true,
+["perkID"] = 104625,
 },
 {
 ["threshold"] = 5,
-["perkID"] = 104624,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -188919,19 +189236,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 5,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 5,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -188941,11 +189258,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = true,
+["perkID"] = 104624,
 },
 {
 ["threshold"] = 10,
-["perkID"] = 104623,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -188968,19 +189285,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 5,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 5,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -188990,11 +189307,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = true,
+["perkID"] = 104623,
 },
 {
 ["threshold"] = 20,
-["perkID"] = 104621,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -189017,19 +189334,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 5,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 5,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -189039,11 +189356,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = true,
+["perkID"] = 104621,
 },
 {
 ["threshold"] = 25,
-["perkID"] = 104620,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -189066,19 +189383,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 5,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 5,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -189088,7 +189405,7 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = true,
+["perkID"] = 104620,
 },
 },
 ["active"] = true,
@@ -189113,13 +189430,6 @@ CraftSimDB = {
 },
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
-},
-["skill"] = {
-["value"] = 50,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
 },
 ["resourcefulness"] = {
 ["value"] = 0,
@@ -189128,6 +189438,13 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 50,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -189161,13 +189478,6 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 50,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -189175,6 +189485,13 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 50,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -189194,7 +189511,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 5,
-["perkID"] = 104286,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 3,
@@ -189217,19 +189534,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 1,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 3,
@@ -189239,11 +189556,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104286,
 },
 {
 ["threshold"] = 15,
-["perkID"] = 104284,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 3,
@@ -189266,19 +189583,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 1,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 3,
@@ -189288,11 +189605,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104284,
 },
 {
 ["threshold"] = 25,
-["perkID"] = 104282,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 3,
@@ -189315,19 +189632,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 1,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 3,
@@ -189337,11 +189654,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104282,
 },
 {
 ["threshold"] = 35,
-["perkID"] = 104280,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 3,
@@ -189363,13 +189680,6 @@ CraftSimDB = {
 },
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
-},
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
 },
 ["resourcefulness"] = {
 ["value"] = 1,
@@ -189378,6 +189688,13 @@ CraftSimDB = {
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
 },
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
+},
 ["ingenuity"] = {
 ["value"] = 3,
 ["extraValues"] = {
@@ -189386,11 +189703,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104280,
 },
 {
 ["threshold"] = 40,
-["perkID"] = 104279,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 10,
@@ -189413,19 +189730,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 10,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 10,
@@ -189435,7 +189752,7 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104279,
 },
 },
 ["active"] = true,
@@ -189461,13 +189778,6 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -189475,6 +189785,13 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -189508,13 +189825,6 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 54,
 ["extraValues"] = {
@@ -189522,6 +189832,13 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 62,
@@ -189541,7 +189858,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 0,
-["perkID"] = 104618,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -189564,19 +189881,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -189586,11 +189903,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = true,
+["perkID"] = 104618,
 },
 {
 ["threshold"] = 5,
-["perkID"] = 104617,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -189613,19 +189930,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 10,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 10,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -189635,11 +189952,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = true,
+["perkID"] = 104617,
 },
 {
 ["threshold"] = 20,
-["perkID"] = 104614,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -189661,6 +189978,13 @@ CraftSimDB = {
 },
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
+},
+["resourcefulness"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
 },
 ["skill"] = {
 ["value"] = 10,
@@ -189669,13 +189993,6 @@ CraftSimDB = {
 ["name"] = "skill",
 ["percentDivisionFactor"] = 1,
 },
-["resourcefulness"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "resourcefulness",
-["percentDivisionFactor"] = 900,
-},
 ["ingenuity"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -189684,11 +190001,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = true,
+["perkID"] = 104614,
 },
 {
 ["threshold"] = 25,
-["perkID"] = 104613,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -189711,19 +190028,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -189733,7 +190050,7 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = true,
+["perkID"] = 104613,
 },
 },
 ["active"] = true,
@@ -189758,13 +190075,6 @@ CraftSimDB = {
 },
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
-},
-["skill"] = {
-["value"] = 45,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
 },
 ["resourcefulness"] = {
 ["value"] = 0,
@@ -189773,6 +190083,13 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 45,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -189806,13 +190123,6 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 45,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -189820,6 +190130,13 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 45,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -189858,13 +190175,6 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 107,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 43,
 ["extraValues"] = {
@@ -189872,6 +190182,13 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 107,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -189904,13 +190221,6 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 155,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 124,
 ["extraValues"] = {
@@ -189918,6 +190228,13 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 155,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 132,
@@ -209694,7 +210011,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 0,
-["perkID"] = 107280,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -209717,19 +210034,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 5,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 5,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -209739,11 +210056,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = true,
+["perkID"] = 107280,
 },
 {
 ["threshold"] = 5,
-["perkID"] = 107279,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -209766,19 +210083,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 5,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 5,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -209788,11 +210105,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = true,
+["perkID"] = 107279,
 },
 {
 ["threshold"] = 15,
-["perkID"] = 107277,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -209815,19 +210132,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 5,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 5,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -209837,11 +210154,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = true,
+["perkID"] = 107277,
 },
 {
 ["threshold"] = 25,
-["perkID"] = 107275,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -209864,19 +210181,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 5,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 5,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -209886,7 +210203,7 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 107275,
 },
 },
 ["active"] = true,
@@ -209911,13 +210228,6 @@ CraftSimDB = {
 },
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
-},
-["skill"] = {
-["value"] = 35,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
 },
 ["resourcefulness"] = {
 ["value"] = 0,
@@ -209926,6 +210236,13 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 35,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -209959,13 +210276,6 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 50,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -209973,6 +210283,13 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 50,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -210011,13 +210328,6 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 35,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -210025,6 +210335,13 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 35,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -210057,13 +210374,6 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 50,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -210071,6 +210381,13 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 50,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -211572,6 +211889,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 0,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 10,
@@ -211617,10 +211935,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104268,
-["active"] = false,
 },
 {
 ["threshold"] = 5,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 10,
@@ -211666,10 +211984,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104267,
-["active"] = false,
 },
 {
 ["threshold"] = 10,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 10,
@@ -211715,10 +212033,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104266,
-["active"] = false,
 },
 {
 ["threshold"] = 15,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 10,
@@ -211764,10 +212082,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104265,
-["active"] = false,
 },
 {
 ["threshold"] = 20,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 10,
@@ -211813,7 +212131,6 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104264,
-["active"] = false,
 },
 },
 ["active"] = false,
@@ -211919,6 +212236,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 0,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -211964,10 +212282,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104273,
-["active"] = true,
 },
 {
 ["threshold"] = 5,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -212013,10 +212331,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104272,
-["active"] = true,
 },
 {
 ["threshold"] = 10,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -212062,10 +212380,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104271,
-["active"] = true,
 },
 {
 ["threshold"] = 15,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -212111,10 +212429,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104270,
-["active"] = false,
 },
 {
 ["threshold"] = 20,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -212160,7 +212478,6 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104269,
-["active"] = false,
 },
 },
 ["active"] = true,
@@ -212266,6 +212583,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 0,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -212311,10 +212629,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104278,
-["active"] = false,
 },
 {
 ["threshold"] = 5,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -212360,10 +212678,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104277,
-["active"] = false,
 },
 {
 ["threshold"] = 10,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -212409,10 +212727,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104276,
-["active"] = false,
 },
 {
 ["threshold"] = 15,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -212458,10 +212776,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104275,
-["active"] = false,
 },
 {
 ["threshold"] = 20,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -212507,7 +212825,6 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104274,
-["active"] = false,
 },
 },
 ["active"] = false,
@@ -212613,6 +212930,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 0,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -212658,10 +212976,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104625,
-["active"] = true,
 },
 {
 ["threshold"] = 5,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -212707,10 +213025,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104624,
-["active"] = true,
 },
 {
 ["threshold"] = 10,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -212756,10 +213074,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104623,
-["active"] = true,
 },
 {
 ["threshold"] = 20,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -212805,10 +213123,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104621,
-["active"] = true,
 },
 {
 ["threshold"] = 25,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -212854,7 +213172,6 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104620,
-["active"] = true,
 },
 },
 ["active"] = true,
@@ -212960,6 +213277,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 5,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 3,
@@ -213005,10 +213323,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104286,
-["active"] = false,
 },
 {
 ["threshold"] = 15,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 3,
@@ -213054,10 +213372,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104284,
-["active"] = false,
 },
 {
 ["threshold"] = 25,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 3,
@@ -213103,10 +213421,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104282,
-["active"] = false,
 },
 {
 ["threshold"] = 35,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 3,
@@ -213152,10 +213470,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104280,
-["active"] = false,
 },
 {
 ["threshold"] = 40,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 10,
@@ -213201,7 +213519,6 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104279,
-["active"] = false,
 },
 },
 ["active"] = true,
@@ -213307,6 +213624,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 5,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -213352,10 +213670,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104581,
-["active"] = false,
 },
 {
 ["threshold"] = 10,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -213401,10 +213719,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104580,
-["active"] = false,
 },
 {
 ["threshold"] = 15,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -213450,10 +213768,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104579,
-["active"] = false,
 },
 {
 ["threshold"] = 20,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -213499,10 +213817,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104578,
-["active"] = false,
 },
 {
 ["threshold"] = 25,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -213548,7 +213866,6 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104577,
-["active"] = false,
 },
 },
 ["active"] = true,
@@ -222616,7 +222933,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 0,
-["perkID"] = 104268,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 10,
@@ -222639,19 +222956,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -222661,11 +222978,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104268,
 },
 {
 ["threshold"] = 5,
-["perkID"] = 104267,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 10,
@@ -222688,19 +223005,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -222710,11 +223027,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104267,
 },
 {
 ["threshold"] = 10,
-["perkID"] = 104266,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 10,
@@ -222737,19 +223054,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -222759,11 +223076,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104266,
 },
 {
 ["threshold"] = 15,
-["perkID"] = 104265,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 10,
@@ -222786,19 +223103,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -222808,11 +223125,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104265,
 },
 {
 ["threshold"] = 20,
-["perkID"] = 104264,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 10,
@@ -222835,19 +223152,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -222857,7 +223174,7 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104264,
 },
 },
 ["active"] = false,
@@ -222882,13 +223199,6 @@ CraftSimDB = {
 },
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
-},
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
 },
 ["resourcefulness"] = {
 ["value"] = 0,
@@ -222897,6 +223207,13 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -222930,13 +223247,6 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -222944,6 +223254,13 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -222963,7 +223280,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 0,
-["perkID"] = 104273,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -222986,19 +223303,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 10,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -223008,11 +223325,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = true,
+["perkID"] = 104273,
 },
 {
 ["threshold"] = 5,
-["perkID"] = 104272,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -223035,19 +223352,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 10,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -223057,11 +223374,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = true,
+["perkID"] = 104272,
 },
 {
 ["threshold"] = 10,
-["perkID"] = 104271,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -223084,19 +223401,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 10,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -223106,11 +223423,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = true,
+["perkID"] = 104271,
 },
 {
 ["threshold"] = 15,
-["perkID"] = 104270,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -223133,19 +223450,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 10,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -223155,11 +223472,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104270,
 },
 {
 ["threshold"] = 20,
-["perkID"] = 104269,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -223182,19 +223499,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 10,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -223204,7 +223521,7 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104269,
 },
 },
 ["active"] = true,
@@ -223229,13 +223546,6 @@ CraftSimDB = {
 },
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
-},
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
 },
 ["resourcefulness"] = {
 ["value"] = 43,
@@ -223244,6 +223554,13 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -223277,13 +223594,6 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 70,
 ["extraValues"] = {
@@ -223291,6 +223601,13 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -223310,7 +223627,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 0,
-["perkID"] = 104563,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -223333,19 +223650,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -223355,11 +223672,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = true,
+["perkID"] = 104563,
 },
 {
 ["threshold"] = 5,
-["perkID"] = 104562,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -223381,6 +223698,13 @@ CraftSimDB = {
 },
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
+},
+["resourcefulness"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
 },
 ["skill"] = {
 ["value"] = 5,
@@ -223389,13 +223713,6 @@ CraftSimDB = {
 ["name"] = "skill",
 ["percentDivisionFactor"] = 1,
 },
-["resourcefulness"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "resourcefulness",
-["percentDivisionFactor"] = 900,
-},
 ["ingenuity"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -223404,11 +223721,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104562,
 },
 {
 ["threshold"] = 10,
-["perkID"] = 104561,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -223430,6 +223747,13 @@ CraftSimDB = {
 },
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
+},
+["resourcefulness"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
 },
 ["skill"] = {
 ["value"] = 10,
@@ -223438,13 +223762,6 @@ CraftSimDB = {
 ["name"] = "skill",
 ["percentDivisionFactor"] = 1,
 },
-["resourcefulness"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "resourcefulness",
-["percentDivisionFactor"] = 900,
-},
 ["ingenuity"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -223453,11 +223770,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104561,
 },
 {
 ["threshold"] = 20,
-["perkID"] = 104559,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -223480,19 +223797,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 15,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 15,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -223502,11 +223819,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104559,
 },
 {
 ["threshold"] = 25,
-["perkID"] = 104558,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -223529,19 +223846,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 15,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 15,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -223551,7 +223868,7 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104558,
 },
 },
 ["active"] = true,
@@ -223577,13 +223894,6 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -223591,6 +223901,13 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -223624,13 +223941,6 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 75,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -223638,6 +223948,13 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 75,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -223657,7 +223974,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 0,
-["perkID"] = 104278,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -223680,19 +223997,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 10,
@@ -223702,11 +224019,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104278,
 },
 {
 ["threshold"] = 5,
-["perkID"] = 104277,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -223729,19 +224046,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 10,
@@ -223751,11 +224068,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104277,
 },
 {
 ["threshold"] = 10,
-["perkID"] = 104276,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -223778,19 +224095,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 10,
@@ -223800,11 +224117,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104276,
 },
 {
 ["threshold"] = 15,
-["perkID"] = 104275,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -223827,19 +224144,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 10,
@@ -223849,11 +224166,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104275,
 },
 {
 ["threshold"] = 20,
-["perkID"] = 104274,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -223876,19 +224193,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 10,
@@ -223898,7 +224215,7 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104274,
 },
 },
 ["active"] = false,
@@ -223923,13 +224240,6 @@ CraftSimDB = {
 },
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
-},
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
 },
 ["resourcefulness"] = {
 ["value"] = 0,
@@ -223938,6 +224248,13 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -223971,13 +224288,6 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -223985,6 +224295,13 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 70,
@@ -224004,7 +224321,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 0,
-["perkID"] = 104556,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -224027,19 +224344,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -224049,11 +224366,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104556,
 },
 {
 ["threshold"] = 5,
-["perkID"] = 104555,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -224076,19 +224393,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 5,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 5,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -224098,11 +224415,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104555,
 },
 {
 ["threshold"] = 15,
-["perkID"] = 104553,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -224125,19 +224442,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 5,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 5,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -224147,11 +224464,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104553,
 },
 {
 ["threshold"] = 25,
-["perkID"] = 104551,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -224173,6 +224490,13 @@ CraftSimDB = {
 },
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
+},
+["resourcefulness"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
 },
 ["skill"] = {
 ["value"] = 10,
@@ -224181,13 +224505,6 @@ CraftSimDB = {
 ["name"] = "skill",
 ["percentDivisionFactor"] = 1,
 },
-["resourcefulness"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "resourcefulness",
-["percentDivisionFactor"] = 900,
-},
 ["ingenuity"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -224196,11 +224513,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104551,
 },
 {
 ["threshold"] = 30,
-["perkID"] = 104550,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -224223,19 +224540,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -224245,7 +224562,7 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104550,
 },
 },
 ["active"] = false,
@@ -224270,13 +224587,6 @@ CraftSimDB = {
 },
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
-},
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
 },
 ["resourcefulness"] = {
 ["value"] = 0,
@@ -224285,6 +224595,13 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -224318,13 +224635,6 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 50,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -224332,6 +224642,13 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 50,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -224351,7 +224668,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 5,
-["perkID"] = 104286,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 3,
@@ -224374,19 +224691,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 1,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 3,
@@ -224396,11 +224713,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104286,
 },
 {
 ["threshold"] = 15,
-["perkID"] = 104284,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 3,
@@ -224423,19 +224740,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 1,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 3,
@@ -224445,11 +224762,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104284,
 },
 {
 ["threshold"] = 25,
-["perkID"] = 104282,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 3,
@@ -224472,19 +224789,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 1,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 3,
@@ -224494,11 +224811,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104282,
 },
 {
 ["threshold"] = 35,
-["perkID"] = 104280,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 3,
@@ -224520,13 +224837,6 @@ CraftSimDB = {
 },
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
-},
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
 },
 ["resourcefulness"] = {
 ["value"] = 1,
@@ -224535,6 +224845,13 @@ CraftSimDB = {
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
 },
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
+},
 ["ingenuity"] = {
 ["value"] = 3,
 ["extraValues"] = {
@@ -224543,11 +224860,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104280,
 },
 {
 ["threshold"] = 40,
-["perkID"] = 104279,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 10,
@@ -224570,19 +224887,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 10,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 10,
@@ -224592,7 +224909,7 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104279,
 },
 },
 ["active"] = true,
@@ -224618,13 +224935,6 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -224632,6 +224942,13 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -224665,13 +224982,6 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 54,
 ["extraValues"] = {
@@ -224679,6 +224989,13 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 62,
@@ -224698,7 +225015,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 5,
-["perkID"] = 104536,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -224721,19 +225038,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 5,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 5,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -224743,11 +225060,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104536,
 },
 {
 ["threshold"] = 10,
-["perkID"] = 104535,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -224770,19 +225087,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 5,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 5,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -224792,11 +225109,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104535,
 },
 {
 ["threshold"] = 15,
-["perkID"] = 104534,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -224818,6 +225135,13 @@ CraftSimDB = {
 },
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
+},
+["resourcefulness"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
 },
 ["skill"] = {
 ["value"] = 10,
@@ -224826,13 +225150,6 @@ CraftSimDB = {
 ["name"] = "skill",
 ["percentDivisionFactor"] = 1,
 },
-["resourcefulness"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "resourcefulness",
-["percentDivisionFactor"] = 900,
-},
 ["ingenuity"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -224841,11 +225158,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104534,
 },
 {
 ["threshold"] = 20,
-["perkID"] = 104533,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -224867,6 +225184,13 @@ CraftSimDB = {
 },
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
+},
+["resourcefulness"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
 },
 ["skill"] = {
 ["value"] = 15,
@@ -224875,13 +225199,6 @@ CraftSimDB = {
 ["name"] = "skill",
 ["percentDivisionFactor"] = 1,
 },
-["resourcefulness"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "resourcefulness",
-["percentDivisionFactor"] = 900,
-},
 ["ingenuity"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -224890,7 +225207,7 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 104533,
 },
 },
 ["active"] = false,
@@ -224916,13 +225233,6 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -224930,6 +225240,13 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -224963,13 +225280,6 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 60,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -224977,6 +225287,13 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 60,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -225015,13 +225332,6 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 43,
 ["extraValues"] = {
@@ -225029,6 +225339,13 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -225061,13 +225378,6 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 185,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 124,
 ["extraValues"] = {
@@ -225075,6 +225385,13 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 185,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 132,
@@ -225092,6 +225409,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 0,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 10,
@@ -225137,10 +225455,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104268,
-["active"] = false,
 },
 {
 ["threshold"] = 5,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 10,
@@ -225186,10 +225504,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104267,
-["active"] = false,
 },
 {
 ["threshold"] = 10,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 10,
@@ -225235,10 +225553,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104266,
-["active"] = false,
 },
 {
 ["threshold"] = 15,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 10,
@@ -225284,10 +225602,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104265,
-["active"] = false,
 },
 {
 ["threshold"] = 20,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 10,
@@ -225333,7 +225651,6 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104264,
-["active"] = false,
 },
 },
 ["active"] = false,
@@ -225439,6 +225756,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 0,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -225484,10 +225802,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104273,
-["active"] = true,
 },
 {
 ["threshold"] = 5,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -225533,10 +225851,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104272,
-["active"] = true,
 },
 {
 ["threshold"] = 10,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -225582,10 +225900,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104271,
-["active"] = true,
 },
 {
 ["threshold"] = 15,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -225631,10 +225949,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104270,
-["active"] = false,
 },
 {
 ["threshold"] = 20,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -225680,7 +225998,6 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104269,
-["active"] = false,
 },
 },
 ["active"] = true,
@@ -225707,7 +226024,7 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 2650,
 },
 ["resourcefulness"] = {
-["value"] = 42,
+["value"] = 43,
 ["extraValues"] = {
 0,
 },
@@ -225780,12 +226097,13 @@ CraftSimDB = {
 ["nodeID"] = 104290,
 ["maxRank"] = 20,
 ["icon"] = 961617,
-["rank"] = 12,
+["rank"] = 13,
 },
 {
 ["perkData"] = {
 {
 ["threshold"] = 0,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -225831,10 +226149,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104278,
-["active"] = false,
 },
 {
 ["threshold"] = 5,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -225880,10 +226198,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104277,
-["active"] = false,
 },
 {
 ["threshold"] = 10,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -225929,10 +226247,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104276,
-["active"] = false,
 },
 {
 ["threshold"] = 15,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -225978,10 +226296,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104275,
-["active"] = false,
 },
 {
 ["threshold"] = 20,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -226027,7 +226345,6 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104274,
-["active"] = false,
 },
 },
 ["active"] = false,
@@ -226133,6 +226450,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 0,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -226178,10 +226496,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104625,
-["active"] = true,
 },
 {
 ["threshold"] = 5,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -226227,10 +226545,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104624,
-["active"] = true,
 },
 {
 ["threshold"] = 10,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -226276,10 +226594,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104623,
-["active"] = true,
 },
 {
 ["threshold"] = 20,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -226325,10 +226643,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104621,
-["active"] = true,
 },
 {
 ["threshold"] = 25,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -226374,7 +226692,6 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104620,
-["active"] = true,
 },
 },
 ["active"] = true,
@@ -226480,6 +226797,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 5,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 3,
@@ -226525,10 +226843,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104286,
-["active"] = false,
 },
 {
 ["threshold"] = 15,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 3,
@@ -226574,10 +226892,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104284,
-["active"] = false,
 },
 {
 ["threshold"] = 25,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 3,
@@ -226623,10 +226941,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104282,
-["active"] = false,
 },
 {
 ["threshold"] = 35,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 3,
@@ -226672,10 +226990,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104280,
-["active"] = false,
 },
 {
 ["threshold"] = 40,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 10,
@@ -226721,7 +227039,6 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104279,
-["active"] = false,
 },
 },
 ["active"] = true,
@@ -226827,6 +227144,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 5,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -226872,10 +227190,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104581,
-["active"] = false,
 },
 {
 ["threshold"] = 10,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -226921,10 +227239,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104580,
-["active"] = false,
 },
 {
 ["threshold"] = 15,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -226970,10 +227288,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104579,
-["active"] = false,
 },
 {
 ["threshold"] = 20,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -227019,10 +227337,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104578,
-["active"] = false,
 },
 {
 ["threshold"] = 25,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -227068,7 +227386,6 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104577,
-["active"] = false,
 },
 },
 ["active"] = true,
@@ -227194,7 +227511,7 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 2650,
 },
 ["resourcefulness"] = {
-["value"] = 42,
+["value"] = 43,
 ["extraValues"] = {
 0,
 },
@@ -244016,6 +244333,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 0,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 10,
@@ -244061,10 +244379,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104268,
-["active"] = false,
 },
 {
 ["threshold"] = 5,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 10,
@@ -244110,10 +244428,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104267,
-["active"] = false,
 },
 {
 ["threshold"] = 10,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 10,
@@ -244159,10 +244477,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104266,
-["active"] = false,
 },
 {
 ["threshold"] = 15,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 10,
@@ -244208,10 +244526,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104265,
-["active"] = false,
 },
 {
 ["threshold"] = 20,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 10,
@@ -244257,7 +244575,6 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104264,
-["active"] = false,
 },
 },
 ["active"] = false,
@@ -244363,6 +244680,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 5,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -244408,10 +244726,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104253,
-["active"] = false,
 },
 {
 ["threshold"] = 15,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -244457,10 +244775,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104251,
-["active"] = false,
 },
 {
 ["threshold"] = 25,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -244506,7 +244824,6 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104249,
-["active"] = false,
 },
 },
 ["active"] = true,
@@ -244612,6 +244929,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 0,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -244657,10 +244975,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104273,
-["active"] = true,
 },
 {
 ["threshold"] = 5,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -244706,10 +245024,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104272,
-["active"] = true,
 },
 {
 ["threshold"] = 10,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -244755,10 +245073,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104271,
-["active"] = true,
 },
 {
 ["threshold"] = 15,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -244804,10 +245122,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104270,
-["active"] = false,
 },
 {
 ["threshold"] = 20,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -244853,7 +245171,6 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104269,
-["active"] = false,
 },
 },
 ["active"] = true,
@@ -244959,6 +245276,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 0,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -245004,10 +245322,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104241,
-["active"] = false,
 },
 {
 ["threshold"] = 5,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -245053,10 +245371,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104240,
-["active"] = false,
 },
 {
 ["threshold"] = 10,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -245102,10 +245420,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104239,
-["active"] = false,
 },
 {
 ["threshold"] = 15,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -245151,10 +245469,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104238,
-["active"] = false,
 },
 {
 ["threshold"] = 20,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -245200,10 +245518,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104237,
-["active"] = false,
 },
 {
 ["threshold"] = 25,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -245250,7 +245568,6 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104236,
-["active"] = false,
 },
 },
 ["active"] = false,
@@ -245357,6 +245674,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 5,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 3,
@@ -245402,10 +245720,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104286,
-["active"] = false,
 },
 {
 ["threshold"] = 15,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 3,
@@ -245451,10 +245769,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104284,
-["active"] = false,
 },
 {
 ["threshold"] = 25,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 3,
@@ -245500,10 +245818,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104282,
-["active"] = false,
 },
 {
 ["threshold"] = 35,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 3,
@@ -245549,10 +245867,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104280,
-["active"] = false,
 },
 {
 ["threshold"] = 40,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 10,
@@ -245598,7 +245916,6 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104279,
-["active"] = false,
 },
 },
 ["active"] = true,
@@ -245704,6 +246021,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 0,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -245749,10 +246067,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104278,
-["active"] = false,
 },
 {
 ["threshold"] = 5,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -245798,10 +246116,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104277,
-["active"] = false,
 },
 {
 ["threshold"] = 10,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -245847,10 +246165,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104276,
-["active"] = false,
 },
 {
 ["threshold"] = 15,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -245896,10 +246214,10 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104275,
-["active"] = false,
 },
 {
 ["threshold"] = 20,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -245945,7 +246263,6 @@ CraftSimDB = {
 },
 },
 ["perkID"] = 104274,
-["active"] = false,
 },
 },
 ["active"] = false,
@@ -248280,7 +248597,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 0,
-["perkID"] = 107100,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -248303,19 +248620,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 5,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 5,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -248325,11 +248642,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 107100,
 },
 {
 ["threshold"] = 5,
-["perkID"] = 107099,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -248352,19 +248669,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 5,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 5,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -248374,11 +248691,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 107099,
 },
 {
 ["threshold"] = 15,
-["perkID"] = 107097,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -248401,19 +248718,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 5,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 5,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -248423,11 +248740,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 107097,
 },
 {
 ["threshold"] = 25,
-["perkID"] = 107095,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -248450,19 +248767,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 5,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 5,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -248472,7 +248789,7 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 107095,
 },
 },
 ["active"] = false,
@@ -248497,13 +248814,6 @@ CraftSimDB = {
 },
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
-},
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
 },
 ["resourcefulness"] = {
 ["value"] = 0,
@@ -248512,6 +248822,13 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -248545,13 +248862,6 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 50,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -248559,6 +248869,13 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 50,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -248578,7 +248895,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 0,
-["perkID"] = 107081,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -248601,19 +248918,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -248623,11 +248940,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 107081,
 },
 {
 ["threshold"] = 5,
-["perkID"] = 107080,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 30,
@@ -248650,19 +248967,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -248672,11 +248989,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 107080,
 },
 {
 ["threshold"] = 10,
-["perkID"] = 107079,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -248699,19 +249016,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -248721,11 +249038,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 107079,
 },
 {
 ["threshold"] = 15,
-["perkID"] = 107078,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 30,
@@ -248748,19 +249065,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -248770,11 +249087,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 107078,
 },
 {
 ["threshold"] = 20,
-["perkID"] = 107077,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -248798,19 +249115,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -248820,7 +249137,7 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 107077,
 },
 },
 ["active"] = false,
@@ -248846,13 +249163,6 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -248860,6 +249170,13 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -248894,13 +249211,6 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -248908,6 +249218,13 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -248927,7 +249244,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 0,
-["perkID"] = 107086,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -248950,19 +249267,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -248973,11 +249290,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 107086,
 },
 {
 ["threshold"] = 5,
-["perkID"] = 107085,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -249000,19 +249317,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 15,
@@ -249022,11 +249339,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 107085,
 },
 {
 ["threshold"] = 10,
-["perkID"] = 107084,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -249049,19 +249366,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 15,
@@ -249071,11 +249388,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 107084,
 },
 {
 ["threshold"] = 15,
-["perkID"] = 107083,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -249098,19 +249415,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 15,
@@ -249120,11 +249437,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 107083,
 },
 {
 ["threshold"] = 20,
-["perkID"] = 107082,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -249147,19 +249464,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -249170,7 +249487,7 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 107082,
 },
 },
 ["active"] = false,
@@ -249195,13 +249512,6 @@ CraftSimDB = {
 },
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
-},
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
 },
 ["resourcefulness"] = {
 ["value"] = 0,
@@ -249210,6 +249520,13 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -249243,13 +249560,6 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -249257,6 +249567,13 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 105,
@@ -249277,7 +249594,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 0,
-["perkID"] = 107280,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -249300,19 +249617,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 5,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 5,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -249322,11 +249639,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = true,
+["perkID"] = 107280,
 },
 {
 ["threshold"] = 5,
-["perkID"] = 107279,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -249349,19 +249666,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 5,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 5,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -249371,11 +249688,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = true,
+["perkID"] = 107279,
 },
 {
 ["threshold"] = 15,
-["perkID"] = 107277,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -249398,19 +249715,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 5,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 5,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -249420,11 +249737,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = true,
+["perkID"] = 107277,
 },
 {
 ["threshold"] = 25,
-["perkID"] = 107275,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -249447,19 +249764,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 5,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 5,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -249469,7 +249786,7 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 107275,
 },
 },
 ["active"] = true,
@@ -249494,13 +249811,6 @@ CraftSimDB = {
 },
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
-},
-["skill"] = {
-["value"] = 35,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
 },
 ["resourcefulness"] = {
 ["value"] = 0,
@@ -249509,6 +249819,13 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 35,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -249542,13 +249859,6 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 50,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -249556,6 +249866,13 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 50,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -249575,7 +249892,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 0,
-["perkID"] = 107093,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -249598,19 +249915,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -249620,11 +249937,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 107093,
 },
 {
 ["threshold"] = 5,
-["perkID"] = 107092,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -249647,19 +249964,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 5,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 5,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -249669,11 +249986,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 107092,
 },
 {
 ["threshold"] = 15,
-["perkID"] = 107090,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -249696,19 +250013,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 5,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 5,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -249718,11 +250035,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 107090,
 },
 {
 ["threshold"] = 20,
-["perkID"] = 107089,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -249745,19 +250062,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 5,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 5,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -249767,11 +250084,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 107089,
 },
 {
 ["threshold"] = 30,
-["perkID"] = 107087,
+["active"] = false,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -249793,6 +250110,13 @@ CraftSimDB = {
 },
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
+},
+["resourcefulness"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
 },
 ["skill"] = {
 ["value"] = 25,
@@ -249801,13 +250125,6 @@ CraftSimDB = {
 ["name"] = "skill",
 ["percentDivisionFactor"] = 1,
 },
-["resourcefulness"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "resourcefulness",
-["percentDivisionFactor"] = 900,
-},
 ["ingenuity"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -249816,7 +250133,7 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = false,
+["perkID"] = 107087,
 },
 },
 ["active"] = false,
@@ -249842,13 +250159,6 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -249856,6 +250166,13 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -249889,13 +250206,6 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 70,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -249903,6 +250213,13 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 70,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -249922,7 +250239,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 0,
-["perkID"] = 107268,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -249945,19 +250262,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 25,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -249967,11 +250284,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = true,
+["perkID"] = 107268,
 },
 {
 ["threshold"] = 5,
-["perkID"] = 107267,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -249994,19 +250311,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 5,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 5,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -250016,11 +250333,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = true,
+["perkID"] = 107267,
 },
 {
 ["threshold"] = 10,
-["perkID"] = 107266,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -250043,19 +250360,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 25,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -250065,11 +250382,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = true,
+["perkID"] = 107266,
 },
 {
 ["threshold"] = 15,
-["perkID"] = 107265,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -250091,6 +250408,13 @@ CraftSimDB = {
 },
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
+},
+["resourcefulness"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
 },
 ["skill"] = {
 ["value"] = 5,
@@ -250099,13 +250423,6 @@ CraftSimDB = {
 ["name"] = "skill",
 ["percentDivisionFactor"] = 1,
 },
-["resourcefulness"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "resourcefulness",
-["percentDivisionFactor"] = 900,
-},
 ["ingenuity"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -250114,11 +250431,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = true,
+["perkID"] = 107265,
 },
 {
 ["threshold"] = 20,
-["perkID"] = 107264,
+["active"] = true,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -250140,13 +250457,6 @@ CraftSimDB = {
 },
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
-},
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
 },
 ["resourcefulness"] = {
 ["value"] = 25,
@@ -250155,6 +250465,13 @@ CraftSimDB = {
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
 },
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
+},
 ["ingenuity"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -250163,7 +250480,7 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["active"] = true,
+["perkID"] = 107264,
 },
 },
 ["active"] = true,
@@ -250188,13 +250505,6 @@ CraftSimDB = {
 },
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
-},
-["skill"] = {
-["value"] = 10,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
 },
 ["resourcefulness"] = {
 ["value"] = 135,
@@ -250203,6 +250513,13 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 10,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -250236,13 +250553,6 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 10,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 135,
 ["extraValues"] = {
@@ -250250,6 +250560,13 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 10,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -250288,13 +250605,6 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 45,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 135,
 ["extraValues"] = {
@@ -250302,6 +250612,13 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 45,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -250335,13 +250652,6 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 180,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 135,
 ["extraValues"] = {
@@ -250349,6 +250659,13 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 180,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 105,
@@ -261071,11 +261388,11 @@ CraftSimDB = {
 ["professionID"] = 2907,
 ["sourceCounter"] = 43,
 ["isPrimaryProfession"] = true,
-["expansionName"] = "Midnight",
 ["professionName"] = "Midnight Blacksmithing",
+["parentProfessionID"] = 164,
 ["profession"] = 1,
 ["skillModifier"] = 18,
-["parentProfessionID"] = 164,
+["expansionName"] = "Midnight",
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Blacksmithing",
 },
@@ -261084,11 +261401,11 @@ CraftSimDB = {
 ["professionID"] = 2907,
 ["sourceCounter"] = 43,
 ["isPrimaryProfession"] = true,
-["expansionName"] = "Midnight",
 ["professionName"] = "Midnight Blacksmithing",
+["parentProfessionID"] = 164,
 ["profession"] = 1,
 ["skillModifier"] = 18,
-["parentProfessionID"] = 164,
+["expansionName"] = "Midnight",
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Blacksmithing",
 },
@@ -261097,11 +261414,11 @@ CraftSimDB = {
 ["professionID"] = 2907,
 ["sourceCounter"] = 5,
 ["parentProfessionName"] = "Blacksmithing",
-["professionName"] = "Midnight Blacksmithing",
 ["parentProfessionID"] = 164,
+["expansionName"] = "Midnight",
 ["profession"] = 1,
 ["skillModifier"] = 40,
-["expansionName"] = "Midnight",
+["professionName"] = "Midnight Blacksmithing",
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = true,
 },
@@ -261110,11 +261427,11 @@ CraftSimDB = {
 ["professionID"] = 2907,
 ["sourceCounter"] = 6,
 ["isPrimaryProfession"] = true,
-["parentProfessionID"] = 164,
 ["expansionName"] = "Midnight",
+["professionName"] = "Midnight Blacksmithing",
 ["profession"] = 1,
 ["skillModifier"] = 24,
-["professionName"] = "Midnight Blacksmithing",
+["parentProfessionID"] = 164,
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Blacksmithing",
 },
@@ -261123,11 +261440,11 @@ CraftSimDB = {
 ["professionID"] = 2907,
 ["sourceCounter"] = 16,
 ["isPrimaryProfession"] = true,
-["parentProfessionID"] = 164,
 ["expansionName"] = "Midnight",
+["professionName"] = "Midnight Blacksmithing",
 ["profession"] = 1,
 ["skillModifier"] = 40,
-["professionName"] = "Midnight Blacksmithing",
+["parentProfessionID"] = 164,
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Blacksmithing",
 },
@@ -261136,11 +261453,11 @@ CraftSimDB = {
 ["professionID"] = 2907,
 ["sourceCounter"] = 1,
 ["parentProfessionName"] = "Blacksmithing",
-["parentProfessionID"] = 164,
 ["expansionName"] = "Midnight",
+["professionName"] = "Midnight Blacksmithing",
 ["profession"] = 1,
 ["skillModifier"] = 30,
-["professionName"] = "Midnight Blacksmithing",
+["parentProfessionID"] = 164,
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = true,
 },
@@ -261149,11 +261466,11 @@ CraftSimDB = {
 ["professionID"] = 2907,
 ["sourceCounter"] = 4,
 ["parentProfessionName"] = "Blacksmithing",
-["expansionName"] = "Midnight",
 ["professionName"] = "Midnight Blacksmithing",
+["parentProfessionID"] = 164,
 ["profession"] = 1,
 ["skillModifier"] = 18,
-["parentProfessionID"] = 164,
+["expansionName"] = "Midnight",
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = true,
 },
@@ -261162,37 +261479,37 @@ CraftSimDB = {
 ["professionID"] = 2907,
 ["sourceCounter"] = 12,
 ["isPrimaryProfession"] = true,
-["expansionName"] = "Midnight",
 ["professionName"] = "Midnight Blacksmithing",
+["parentProfessionID"] = 164,
 ["profession"] = 1,
 ["skillModifier"] = 40,
-["parentProfessionID"] = 164,
+["expansionName"] = "Midnight",
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Blacksmithing",
 },
 [1229609] = {
-["skillLevel"] = 62,
+["skillLevel"] = 100,
 ["professionID"] = 2907,
-["sourceCounter"] = 17,
+["sourceCounter"] = 6,
 ["parentProfessionName"] = "Blacksmithing",
-["expansionName"] = "Midnight",
-["professionName"] = "Midnight Blacksmithing",
-["profession"] = 1,
-["skillModifier"] = 0,
 ["parentProfessionID"] = 164,
-["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = true,
+["profession"] = 1,
+["skillModifier"] = 40,
+["professionName"] = "Midnight Blacksmithing",
+["maxSkillLevel"] = 100,
+["expansionName"] = "Midnight",
 },
 [1229610] = {
 ["skillLevel"] = 62,
 ["professionID"] = 2907,
 ["sourceCounter"] = 17,
 ["parentProfessionName"] = "Blacksmithing",
-["expansionName"] = "Midnight",
 ["professionName"] = "Midnight Blacksmithing",
+["parentProfessionID"] = 164,
 ["profession"] = 1,
 ["skillModifier"] = 0,
-["parentProfessionID"] = 164,
+["expansionName"] = "Midnight",
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = true,
 },
@@ -261201,11 +261518,11 @@ CraftSimDB = {
 ["professionID"] = 2907,
 ["sourceCounter"] = 5,
 ["parentProfessionName"] = "Blacksmithing",
-["professionName"] = "Midnight Blacksmithing",
 ["parentProfessionID"] = 164,
+["expansionName"] = "Midnight",
 ["profession"] = 1,
 ["skillModifier"] = 40,
-["expansionName"] = "Midnight",
+["professionName"] = "Midnight Blacksmithing",
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = true,
 },
@@ -261214,11 +261531,11 @@ CraftSimDB = {
 ["professionID"] = 2907,
 ["sourceCounter"] = 5,
 ["parentProfessionName"] = "Blacksmithing",
-["professionName"] = "Midnight Blacksmithing",
 ["parentProfessionID"] = 164,
+["expansionName"] = "Midnight",
 ["profession"] = 1,
 ["skillModifier"] = 40,
-["expansionName"] = "Midnight",
+["professionName"] = "Midnight Blacksmithing",
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = true,
 },
@@ -261227,11 +261544,11 @@ CraftSimDB = {
 ["professionID"] = 2907,
 ["sourceCounter"] = 5,
 ["parentProfessionName"] = "Blacksmithing",
-["expansionName"] = "Midnight",
 ["professionName"] = "Midnight Blacksmithing",
+["parentProfessionID"] = 164,
 ["profession"] = 1,
 ["skillModifier"] = 30,
-["parentProfessionID"] = 164,
+["expansionName"] = "Midnight",
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = true,
 },
@@ -261240,11 +261557,11 @@ CraftSimDB = {
 ["professionID"] = 2907,
 ["sourceCounter"] = 21,
 ["isPrimaryProfession"] = true,
-["expansionName"] = "Midnight",
 ["professionName"] = "Midnight Blacksmithing",
+["parentProfessionID"] = 164,
 ["profession"] = 1,
 ["skillModifier"] = 40,
-["parentProfessionID"] = 164,
+["expansionName"] = "Midnight",
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Blacksmithing",
 },
@@ -261253,37 +261570,37 @@ CraftSimDB = {
 ["professionID"] = 2907,
 ["sourceCounter"] = 20,
 ["isPrimaryProfession"] = true,
-["expansionName"] = "Midnight",
 ["professionName"] = "Midnight Blacksmithing",
+["parentProfessionID"] = 164,
 ["profession"] = 1,
 ["skillModifier"] = 40,
-["parentProfessionID"] = 164,
+["expansionName"] = "Midnight",
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Blacksmithing",
 },
 [1230759] = {
 ["skillLevel"] = 100,
 ["professionID"] = 2907,
-["sourceCounter"] = 1,
+["sourceCounter"] = 6,
 ["parentProfessionName"] = "Blacksmithing",
-["expansionName"] = "Midnight",
-["professionName"] = "Midnight Blacksmithing",
+["parentProfessionID"] = 164,
+["isPrimaryProfession"] = true,
 ["profession"] = 1,
 ["skillModifier"] = 40,
-["parentProfessionID"] = 164,
+["professionName"] = "Midnight Blacksmithing",
 ["maxSkillLevel"] = 100,
-["isPrimaryProfession"] = true,
+["expansionName"] = "Midnight",
 },
 [1230760] = {
 ["skillLevel"] = 74,
 ["professionID"] = 2907,
 ["sourceCounter"] = 2,
 ["isPrimaryProfession"] = true,
-["professionName"] = "Midnight Blacksmithing",
 ["parentProfessionID"] = 164,
+["expansionName"] = "Midnight",
 ["profession"] = 1,
 ["skillModifier"] = 24,
-["expansionName"] = "Midnight",
+["professionName"] = "Midnight Blacksmithing",
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Blacksmithing",
 },
@@ -261292,11 +261609,11 @@ CraftSimDB = {
 ["professionID"] = 2907,
 ["sourceCounter"] = 3,
 ["parentProfessionName"] = "Blacksmithing",
-["expansionName"] = "Midnight",
 ["professionName"] = "Midnight Blacksmithing",
+["parentProfessionID"] = 164,
 ["profession"] = 1,
 ["skillModifier"] = 40,
-["parentProfessionID"] = 164,
+["expansionName"] = "Midnight",
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = true,
 },
@@ -261305,11 +261622,11 @@ CraftSimDB = {
 ["professionID"] = 2907,
 ["sourceCounter"] = 20,
 ["isPrimaryProfession"] = true,
-["expansionName"] = "Midnight",
 ["professionName"] = "Midnight Blacksmithing",
+["parentProfessionID"] = 164,
 ["profession"] = 1,
 ["skillModifier"] = 40,
-["parentProfessionID"] = 164,
+["expansionName"] = "Midnight",
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Blacksmithing",
 },
@@ -261318,11 +261635,11 @@ CraftSimDB = {
 ["professionID"] = 2907,
 ["sourceCounter"] = 20,
 ["isPrimaryProfession"] = true,
-["expansionName"] = "Midnight",
 ["professionName"] = "Midnight Blacksmithing",
+["parentProfessionID"] = 164,
 ["profession"] = 1,
 ["skillModifier"] = 40,
-["parentProfessionID"] = 164,
+["expansionName"] = "Midnight",
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Blacksmithing",
 },
@@ -261331,11 +261648,11 @@ CraftSimDB = {
 ["professionID"] = 2907,
 ["sourceCounter"] = 20,
 ["isPrimaryProfession"] = true,
-["expansionName"] = "Midnight",
 ["professionName"] = "Midnight Blacksmithing",
+["parentProfessionID"] = 164,
 ["profession"] = 1,
 ["skillModifier"] = 40,
-["parentProfessionID"] = 164,
+["expansionName"] = "Midnight",
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Blacksmithing",
 },
@@ -261344,11 +261661,11 @@ CraftSimDB = {
 ["professionID"] = 2907,
 ["sourceCounter"] = 3,
 ["parentProfessionName"] = "Blacksmithing",
-["expansionName"] = "Midnight",
 ["professionName"] = "Midnight Blacksmithing",
+["parentProfessionID"] = 164,
 ["profession"] = 1,
 ["skillModifier"] = 40,
-["parentProfessionID"] = 164,
+["expansionName"] = "Midnight",
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = true,
 },
@@ -261357,11 +261674,11 @@ CraftSimDB = {
 ["professionID"] = 2907,
 ["sourceCounter"] = 20,
 ["isPrimaryProfession"] = true,
-["expansionName"] = "Midnight",
 ["professionName"] = "Midnight Blacksmithing",
+["parentProfessionID"] = 164,
 ["profession"] = 1,
 ["skillModifier"] = 40,
-["parentProfessionID"] = 164,
+["expansionName"] = "Midnight",
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Blacksmithing",
 },
@@ -261370,11 +261687,11 @@ CraftSimDB = {
 ["professionID"] = 2907,
 ["sourceCounter"] = 4,
 ["parentProfessionName"] = "Blacksmithing",
-["professionName"] = "Midnight Blacksmithing",
 ["parentProfessionID"] = 164,
+["expansionName"] = "Midnight",
 ["profession"] = 1,
 ["skillModifier"] = 40,
-["expansionName"] = "Midnight",
+["professionName"] = "Midnight Blacksmithing",
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = true,
 },
@@ -261383,11 +261700,11 @@ CraftSimDB = {
 ["professionID"] = 2907,
 ["sourceCounter"] = 14,
 ["parentProfessionName"] = "Blacksmithing",
-["professionName"] = "Midnight Blacksmithing",
 ["parentProfessionID"] = 164,
+["expansionName"] = "Midnight",
 ["profession"] = 1,
 ["skillModifier"] = 30,
-["expansionName"] = "Midnight",
+["professionName"] = "Midnight Blacksmithing",
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = true,
 },
@@ -261396,11 +261713,11 @@ CraftSimDB = {
 ["professionID"] = 2907,
 ["sourceCounter"] = 6,
 ["isPrimaryProfession"] = true,
-["parentProfessionID"] = 164,
 ["expansionName"] = "Midnight",
+["professionName"] = "Midnight Blacksmithing",
 ["profession"] = 1,
 ["skillModifier"] = 24,
-["professionName"] = "Midnight Blacksmithing",
+["parentProfessionID"] = 164,
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Blacksmithing",
 },
@@ -261409,11 +261726,11 @@ CraftSimDB = {
 ["professionID"] = 2907,
 ["sourceCounter"] = 6,
 ["isPrimaryProfession"] = true,
-["parentProfessionID"] = 164,
 ["expansionName"] = "Midnight",
+["professionName"] = "Midnight Blacksmithing",
 ["profession"] = 1,
 ["skillModifier"] = 24,
-["professionName"] = "Midnight Blacksmithing",
+["parentProfessionID"] = 164,
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Blacksmithing",
 },
@@ -261422,37 +261739,37 @@ CraftSimDB = {
 ["professionID"] = 2907,
 ["sourceCounter"] = 6,
 ["isPrimaryProfession"] = true,
-["parentProfessionID"] = 164,
 ["expansionName"] = "Midnight",
+["professionName"] = "Midnight Blacksmithing",
 ["profession"] = 1,
 ["skillModifier"] = 24,
-["professionName"] = "Midnight Blacksmithing",
+["parentProfessionID"] = 164,
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Blacksmithing",
 },
 [1229629] = {
 ["skillLevel"] = 100,
 ["professionID"] = 2907,
-["sourceCounter"] = 20,
+["sourceCounter"] = 6,
+["parentProfessionName"] = "Blacksmithing",
+["parentProfessionID"] = 164,
 ["isPrimaryProfession"] = true,
-["expansionName"] = "Midnight",
-["professionName"] = "Midnight Blacksmithing",
 ["profession"] = 1,
 ["skillModifier"] = 40,
-["parentProfessionID"] = 164,
+["professionName"] = "Midnight Blacksmithing",
 ["maxSkillLevel"] = 100,
-["parentProfessionName"] = "Blacksmithing",
+["expansionName"] = "Midnight",
 },
 [1276112] = {
 ["skillLevel"] = 74,
 ["professionID"] = 2907,
 ["sourceCounter"] = 7,
 ["isPrimaryProfession"] = true,
-["professionName"] = "Midnight Blacksmithing",
 ["parentProfessionID"] = 164,
+["expansionName"] = "Midnight",
 ["profession"] = 1,
 ["skillModifier"] = 24,
-["expansionName"] = "Midnight",
+["professionName"] = "Midnight Blacksmithing",
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Blacksmithing",
 },
@@ -261461,11 +261778,11 @@ CraftSimDB = {
 ["professionID"] = 2907,
 ["sourceCounter"] = 3,
 ["parentProfessionName"] = "Blacksmithing",
-["professionName"] = "Midnight Blacksmithing",
 ["parentProfessionID"] = 164,
+["expansionName"] = "Midnight",
 ["profession"] = 1,
 ["skillModifier"] = 18,
-["expansionName"] = "Midnight",
+["professionName"] = "Midnight Blacksmithing",
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = true,
 },
@@ -261474,11 +261791,11 @@ CraftSimDB = {
 ["professionID"] = 2873,
 ["sourceCounter"] = 75,
 ["isPrimaryProfession"] = false,
-["expansionName"] = "Khaz Algar",
 ["professionName"] = "Khaz Algar Cooking",
+["parentProfessionID"] = 185,
 ["profession"] = 5,
 ["skillModifier"] = 13,
-["parentProfessionID"] = 185,
+["expansionName"] = "Khaz Algar",
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Cooking",
 },
@@ -261487,11 +261804,11 @@ CraftSimDB = {
 ["professionID"] = 2477,
 ["sourceCounter"] = 2,
 ["parentProfessionName"] = "Blacksmithing",
-["parentProfessionID"] = 164,
 ["expansionName"] = "Classic",
+["professionName"] = "Classic Blacksmithing",
 ["profession"] = 1,
 ["skillModifier"] = 0,
-["professionName"] = "Classic Blacksmithing",
+["parentProfessionID"] = 164,
 ["maxSkillLevel"] = 300,
 ["isPrimaryProfession"] = true,
 },
@@ -261500,11 +261817,11 @@ CraftSimDB = {
 ["professionID"] = 2907,
 ["sourceCounter"] = 2,
 ["parentProfessionName"] = "Blacksmithing",
-["expansionName"] = "Midnight",
 ["professionName"] = "Midnight Blacksmithing",
+["parentProfessionID"] = 164,
 ["profession"] = 1,
 ["skillModifier"] = 40,
-["parentProfessionID"] = 164,
+["expansionName"] = "Midnight",
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = true,
 },
@@ -261513,11 +261830,11 @@ CraftSimDB = {
 ["professionID"] = 2907,
 ["sourceCounter"] = 3,
 ["parentProfessionName"] = "Blacksmithing",
-["professionName"] = "Midnight Blacksmithing",
 ["parentProfessionID"] = 164,
+["expansionName"] = "Midnight",
 ["profession"] = 1,
 ["skillModifier"] = 18,
-["expansionName"] = "Midnight",
+["professionName"] = "Midnight Blacksmithing",
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = true,
 },
@@ -261526,50 +261843,50 @@ CraftSimDB = {
 ["professionID"] = 2907,
 ["sourceCounter"] = 5,
 ["parentProfessionName"] = "Blacksmithing",
-["professionName"] = "Midnight Blacksmithing",
 ["parentProfessionID"] = 164,
+["expansionName"] = "Midnight",
 ["profession"] = 1,
 ["skillModifier"] = 40,
-["expansionName"] = "Midnight",
+["professionName"] = "Midnight Blacksmithing",
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = true,
 },
 [1229647] = {
 ["skillLevel"] = 100,
 ["professionID"] = 2907,
-["sourceCounter"] = 3,
+["sourceCounter"] = 9,
 ["parentProfessionName"] = "Blacksmithing",
-["expansionName"] = "Midnight",
-["professionName"] = "Midnight Blacksmithing",
+["parentProfessionID"] = 164,
+["isPrimaryProfession"] = true,
 ["profession"] = 1,
 ["skillModifier"] = 40,
-["parentProfessionID"] = 164,
+["professionName"] = "Midnight Blacksmithing",
 ["maxSkillLevel"] = 100,
-["isPrimaryProfession"] = true,
+["expansionName"] = "Midnight",
 },
 [1229648] = {
 ["skillLevel"] = 100,
 ["professionID"] = 2907,
-["sourceCounter"] = 2,
+["sourceCounter"] = 6,
 ["parentProfessionName"] = "Blacksmithing",
-["expansionName"] = "Midnight",
-["professionName"] = "Midnight Blacksmithing",
+["parentProfessionID"] = 164,
+["isPrimaryProfession"] = true,
 ["profession"] = 1,
 ["skillModifier"] = 40,
-["parentProfessionID"] = 164,
+["professionName"] = "Midnight Blacksmithing",
 ["maxSkillLevel"] = 100,
-["isPrimaryProfession"] = true,
+["expansionName"] = "Midnight",
 },
 [1229649] = {
 ["skillLevel"] = 100,
 ["professionID"] = 2907,
 ["sourceCounter"] = 5,
 ["parentProfessionName"] = "Blacksmithing",
-["professionName"] = "Midnight Blacksmithing",
 ["parentProfessionID"] = 164,
+["expansionName"] = "Midnight",
 ["profession"] = 1,
 ["skillModifier"] = 40,
-["expansionName"] = "Midnight",
+["professionName"] = "Midnight Blacksmithing",
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = true,
 },
@@ -261578,11 +261895,11 @@ CraftSimDB = {
 ["professionID"] = 2907,
 ["sourceCounter"] = 5,
 ["parentProfessionName"] = "Blacksmithing",
-["professionName"] = "Midnight Blacksmithing",
 ["parentProfessionID"] = 164,
+["expansionName"] = "Midnight",
 ["profession"] = 1,
 ["skillModifier"] = 40,
-["expansionName"] = "Midnight",
+["professionName"] = "Midnight Blacksmithing",
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = true,
 },
@@ -261591,37 +261908,37 @@ CraftSimDB = {
 ["professionID"] = 2907,
 ["sourceCounter"] = 5,
 ["parentProfessionName"] = "Blacksmithing",
-["professionName"] = "Midnight Blacksmithing",
 ["parentProfessionID"] = 164,
+["expansionName"] = "Midnight",
 ["profession"] = 1,
 ["skillModifier"] = 40,
-["expansionName"] = "Midnight",
+["professionName"] = "Midnight Blacksmithing",
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = true,
 },
 [1229652] = {
 ["skillLevel"] = 100,
 ["professionID"] = 2907,
-["sourceCounter"] = 5,
+["sourceCounter"] = 6,
 ["parentProfessionName"] = "Blacksmithing",
 ["parentProfessionID"] = 164,
-["expansionName"] = "Midnight",
+["isPrimaryProfession"] = true,
 ["profession"] = 1,
 ["skillModifier"] = 40,
 ["professionName"] = "Midnight Blacksmithing",
 ["maxSkillLevel"] = 100,
-["isPrimaryProfession"] = true,
+["expansionName"] = "Midnight",
 },
 [1229653] = {
 ["skillLevel"] = 100,
 ["professionID"] = 2907,
 ["sourceCounter"] = 5,
 ["parentProfessionName"] = "Blacksmithing",
-["professionName"] = "Midnight Blacksmithing",
 ["parentProfessionID"] = 164,
+["expansionName"] = "Midnight",
 ["profession"] = 1,
 ["skillModifier"] = 40,
-["expansionName"] = "Midnight",
+["professionName"] = "Midnight Blacksmithing",
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = true,
 },
@@ -261630,11 +261947,11 @@ CraftSimDB = {
 ["professionID"] = 2907,
 ["sourceCounter"] = 5,
 ["parentProfessionName"] = "Blacksmithing",
-["professionName"] = "Midnight Blacksmithing",
 ["parentProfessionID"] = 164,
+["expansionName"] = "Midnight",
 ["profession"] = 1,
 ["skillModifier"] = 40,
-["expansionName"] = "Midnight",
+["professionName"] = "Midnight Blacksmithing",
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = true,
 },
@@ -261643,11 +261960,11 @@ CraftSimDB = {
 ["professionID"] = 2907,
 ["sourceCounter"] = 5,
 ["parentProfessionName"] = "Blacksmithing",
-["professionName"] = "Midnight Blacksmithing",
 ["parentProfessionID"] = 164,
+["expansionName"] = "Midnight",
 ["profession"] = 1,
 ["skillModifier"] = 40,
-["expansionName"] = "Midnight",
+["professionName"] = "Midnight Blacksmithing",
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = true,
 },
@@ -261656,11 +261973,11 @@ CraftSimDB = {
 ["professionID"] = 2907,
 ["sourceCounter"] = 20,
 ["isPrimaryProfession"] = true,
-["expansionName"] = "Midnight",
 ["professionName"] = "Midnight Blacksmithing",
+["parentProfessionID"] = 164,
 ["profession"] = 1,
 ["skillModifier"] = 40,
-["parentProfessionID"] = 164,
+["expansionName"] = "Midnight",
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Blacksmithing",
 },
@@ -261669,37 +261986,37 @@ CraftSimDB = {
 ["professionID"] = 2907,
 ["sourceCounter"] = 2,
 ["parentProfessionName"] = "Blacksmithing",
-["expansionName"] = "Midnight",
 ["professionName"] = "Midnight Blacksmithing",
+["parentProfessionID"] = 164,
 ["profession"] = 1,
 ["skillModifier"] = 40,
-["parentProfessionID"] = 164,
+["expansionName"] = "Midnight",
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = true,
 },
 [1229658] = {
 ["skillLevel"] = 100,
 ["professionID"] = 2907,
-["sourceCounter"] = 1,
-["isPrimaryProfession"] = true,
-["professionName"] = "Midnight Blacksmithing",
+["sourceCounter"] = 6,
+["parentProfessionName"] = "Blacksmithing",
 ["parentProfessionID"] = 164,
+["isPrimaryProfession"] = true,
 ["profession"] = 1,
 ["skillModifier"] = 40,
-["expansionName"] = "Midnight",
+["professionName"] = "Midnight Blacksmithing",
 ["maxSkillLevel"] = 100,
-["parentProfessionName"] = "Blacksmithing",
+["expansionName"] = "Midnight",
 },
 [1229659] = {
 ["skillLevel"] = 100,
 ["professionID"] = 2907,
 ["sourceCounter"] = 5,
 ["parentProfessionName"] = "Blacksmithing",
-["professionName"] = "Midnight Blacksmithing",
 ["parentProfessionID"] = 164,
+["expansionName"] = "Midnight",
 ["profession"] = 1,
 ["skillModifier"] = 40,
-["expansionName"] = "Midnight",
+["professionName"] = "Midnight Blacksmithing",
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = true,
 },
@@ -261708,11 +262025,11 @@ CraftSimDB = {
 ["professionID"] = 2907,
 ["sourceCounter"] = 9,
 ["parentProfessionName"] = "Blacksmithing",
-["expansionName"] = "Midnight",
 ["professionName"] = "Midnight Blacksmithing",
+["parentProfessionID"] = 164,
 ["profession"] = 1,
 ["skillModifier"] = 30,
-["parentProfessionID"] = 164,
+["expansionName"] = "Midnight",
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = true,
 },
@@ -261721,11 +262038,11 @@ CraftSimDB = {
 ["professionID"] = 2907,
 ["sourceCounter"] = 9,
 ["parentProfessionName"] = "Blacksmithing",
-["expansionName"] = "Midnight",
 ["professionName"] = "Midnight Blacksmithing",
+["parentProfessionID"] = 164,
 ["profession"] = 1,
 ["skillModifier"] = 30,
-["parentProfessionID"] = 164,
+["expansionName"] = "Midnight",
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = true,
 },
@@ -261734,11 +262051,11 @@ CraftSimDB = {
 ["professionID"] = 2907,
 ["sourceCounter"] = 20,
 ["isPrimaryProfession"] = true,
-["expansionName"] = "Midnight",
 ["professionName"] = "Midnight Blacksmithing",
+["parentProfessionID"] = 164,
 ["profession"] = 1,
 ["skillModifier"] = 40,
-["parentProfessionID"] = 164,
+["expansionName"] = "Midnight",
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Blacksmithing",
 },
@@ -261747,11 +262064,11 @@ CraftSimDB = {
 ["professionID"] = 2907,
 ["sourceCounter"] = 15,
 ["parentProfessionName"] = "Blacksmithing",
-["professionName"] = "Midnight Blacksmithing",
 ["parentProfessionID"] = 164,
+["expansionName"] = "Midnight",
 ["profession"] = 1,
 ["skillModifier"] = 40,
-["expansionName"] = "Midnight",
+["professionName"] = "Midnight Blacksmithing",
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = true,
 },
@@ -261760,11 +262077,11 @@ CraftSimDB = {
 ["professionID"] = 2907,
 ["sourceCounter"] = 9,
 ["parentProfessionName"] = "Blacksmithing",
-["expansionName"] = "Midnight",
 ["professionName"] = "Midnight Blacksmithing",
+["parentProfessionID"] = 164,
 ["profession"] = 1,
 ["skillModifier"] = 30,
-["parentProfessionID"] = 164,
+["expansionName"] = "Midnight",
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = true,
 },
@@ -261773,11 +262090,11 @@ CraftSimDB = {
 ["professionID"] = 2907,
 ["sourceCounter"] = 21,
 ["isPrimaryProfession"] = true,
-["parentProfessionID"] = 164,
 ["expansionName"] = "Midnight",
+["professionName"] = "Midnight Blacksmithing",
 ["profession"] = 1,
 ["skillModifier"] = 40,
-["professionName"] = "Midnight Blacksmithing",
+["parentProfessionID"] = 164,
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Blacksmithing",
 },
@@ -261786,11 +262103,11 @@ CraftSimDB = {
 ["professionID"] = 2907,
 ["sourceCounter"] = 9,
 ["parentProfessionName"] = "Blacksmithing",
-["expansionName"] = "Midnight",
 ["professionName"] = "Midnight Blacksmithing",
+["parentProfessionID"] = 164,
 ["profession"] = 1,
 ["skillModifier"] = 30,
-["parentProfessionID"] = 164,
+["expansionName"] = "Midnight",
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = true,
 },
@@ -261799,11 +262116,11 @@ CraftSimDB = {
 ["professionID"] = 2548,
 ["sourceCounter"] = 68,
 ["isPrimaryProfession"] = false,
-["expansionName"] = "Classic",
 ["professionName"] = "Classic Cooking",
+["parentProfessionID"] = 185,
 ["profession"] = 5,
 ["skillModifier"] = 0,
-["parentProfessionID"] = 185,
+["expansionName"] = "Classic",
 ["maxSkillLevel"] = 300,
 ["parentProfessionName"] = "Cooking",
 },
@@ -261812,11 +262129,11 @@ CraftSimDB = {
 ["professionID"] = 2824,
 ["sourceCounter"] = 62,
 ["isPrimaryProfession"] = false,
-["expansionName"] = "Dragon Isles",
 ["professionName"] = "Dragon Isles Cooking",
+["parentProfessionID"] = 185,
 ["profession"] = 5,
 ["skillModifier"] = 0,
-["parentProfessionID"] = 185,
+["expansionName"] = "Dragon Isles",
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Cooking",
 },
@@ -261825,11 +262142,11 @@ CraftSimDB = {
 ["professionID"] = 2907,
 ["sourceCounter"] = 7,
 ["parentProfessionName"] = "Blacksmithing",
-["professionName"] = "Midnight Blacksmithing",
 ["parentProfessionID"] = 164,
+["expansionName"] = "Midnight",
 ["profession"] = 1,
 ["skillModifier"] = 18,
-["expansionName"] = "Midnight",
+["professionName"] = "Midnight Blacksmithing",
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = true,
 },
@@ -261838,11 +262155,11 @@ CraftSimDB = {
 ["professionID"] = 2907,
 ["sourceCounter"] = 6,
 ["isPrimaryProfession"] = true,
-["parentProfessionID"] = 164,
 ["expansionName"] = "Midnight",
+["professionName"] = "Midnight Blacksmithing",
 ["profession"] = 1,
 ["skillModifier"] = 24,
-["professionName"] = "Midnight Blacksmithing",
+["parentProfessionID"] = 164,
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Blacksmithing",
 },
@@ -261851,37 +262168,37 @@ CraftSimDB = {
 ["professionID"] = 2907,
 ["sourceCounter"] = 20,
 ["isPrimaryProfession"] = true,
-["expansionName"] = "Midnight",
 ["professionName"] = "Midnight Blacksmithing",
+["parentProfessionID"] = 164,
 ["profession"] = 1,
 ["skillModifier"] = 40,
-["parentProfessionID"] = 164,
+["expansionName"] = "Midnight",
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Blacksmithing",
 },
 [1230758] = {
 ["skillLevel"] = 100,
 ["professionID"] = 2907,
-["sourceCounter"] = 3,
+["sourceCounter"] = 6,
 ["parentProfessionName"] = "Blacksmithing",
-["expansionName"] = "Midnight",
-["professionName"] = "Midnight Blacksmithing",
+["parentProfessionID"] = 164,
+["isPrimaryProfession"] = true,
 ["profession"] = 1,
 ["skillModifier"] = 40,
-["parentProfessionID"] = 164,
+["professionName"] = "Midnight Blacksmithing",
 ["maxSkillLevel"] = 100,
-["isPrimaryProfession"] = true,
+["expansionName"] = "Midnight",
 },
 [445120] = {
 ["skillLevel"] = 100,
 ["professionID"] = 2873,
 ["sourceCounter"] = 70,
 ["isPrimaryProfession"] = false,
-["expansionName"] = "Khaz Algar",
 ["professionName"] = "Khaz Algar Cooking",
+["parentProfessionID"] = 185,
 ["profession"] = 5,
 ["skillModifier"] = 13,
-["parentProfessionID"] = 185,
+["expansionName"] = "Khaz Algar",
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Cooking",
 },
@@ -261890,11 +262207,11 @@ CraftSimDB = {
 ["professionID"] = 2908,
 ["sourceCounter"] = 79,
 ["isPrimaryProfession"] = false,
-["expansionName"] = "Midnight",
 ["professionName"] = "Midnight Cooking",
+["parentProfessionID"] = 185,
 ["profession"] = 5,
 ["skillModifier"] = 0,
-["parentProfessionID"] = 185,
+["expansionName"] = "Midnight",
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Cooking",
 },
@@ -261903,11 +262220,11 @@ CraftSimDB = {
 ["professionID"] = 2908,
 ["sourceCounter"] = 72,
 ["isPrimaryProfession"] = false,
-["expansionName"] = "Midnight",
 ["professionName"] = "Midnight Cooking",
+["parentProfessionID"] = 185,
 ["profession"] = 5,
 ["skillModifier"] = 0,
-["parentProfessionID"] = 185,
+["expansionName"] = "Midnight",
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Cooking",
 },
@@ -261916,11 +262233,11 @@ CraftSimDB = {
 ["professionID"] = 2908,
 ["sourceCounter"] = 19,
 ["parentProfessionName"] = "Cooking",
-["expansionName"] = "Midnight",
 ["professionName"] = "Midnight Cooking",
+["parentProfessionID"] = 185,
 ["profession"] = 5,
 ["skillModifier"] = 0,
-["parentProfessionID"] = 185,
+["expansionName"] = "Midnight",
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = false,
 },
@@ -261929,11 +262246,11 @@ CraftSimDB = {
 ["professionID"] = 2908,
 ["sourceCounter"] = 19,
 ["parentProfessionName"] = "Cooking",
-["expansionName"] = "Midnight",
 ["professionName"] = "Midnight Cooking",
+["parentProfessionID"] = 185,
 ["profession"] = 5,
 ["skillModifier"] = 0,
-["parentProfessionID"] = 185,
+["expansionName"] = "Midnight",
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = false,
 },
@@ -261942,11 +262259,11 @@ CraftSimDB = {
 ["professionID"] = 2908,
 ["sourceCounter"] = 62,
 ["isPrimaryProfession"] = false,
-["expansionName"] = "Midnight",
 ["professionName"] = "Midnight Cooking",
+["parentProfessionID"] = 185,
 ["profession"] = 5,
 ["skillModifier"] = 0,
-["parentProfessionID"] = 185,
+["expansionName"] = "Midnight",
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Cooking",
 },
@@ -261955,11 +262272,11 @@ CraftSimDB = {
 ["professionID"] = 2873,
 ["sourceCounter"] = 18,
 ["parentProfessionName"] = "Cooking",
-["expansionName"] = "Khaz Algar",
 ["professionName"] = "Khaz Algar Cooking",
+["parentProfessionID"] = 185,
 ["profession"] = 5,
 ["skillModifier"] = 13,
-["parentProfessionID"] = 185,
+["expansionName"] = "Khaz Algar",
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = false,
 },
@@ -261968,11 +262285,11 @@ CraftSimDB = {
 ["professionID"] = 2873,
 ["sourceCounter"] = 18,
 ["parentProfessionName"] = "Cooking",
-["expansionName"] = "Khaz Algar",
 ["professionName"] = "Khaz Algar Cooking",
+["parentProfessionID"] = 185,
 ["profession"] = 5,
 ["skillModifier"] = 13,
-["parentProfessionID"] = 185,
+["expansionName"] = "Khaz Algar",
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = false,
 },
@@ -261981,11 +262298,11 @@ CraftSimDB = {
 ["professionID"] = 2908,
 ["sourceCounter"] = 65,
 ["isPrimaryProfession"] = false,
-["expansionName"] = "Midnight",
 ["professionName"] = "Midnight Cooking",
+["parentProfessionID"] = 185,
 ["profession"] = 5,
 ["skillModifier"] = 0,
-["parentProfessionID"] = 185,
+["expansionName"] = "Midnight",
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Cooking",
 },
@@ -261994,11 +262311,11 @@ CraftSimDB = {
 ["professionID"] = 2752,
 ["sourceCounter"] = 18,
 ["parentProfessionName"] = "Cooking",
-["expansionName"] = "Shadowlands",
 ["professionName"] = "Shadowlands Cooking",
+["parentProfessionID"] = 185,
 ["profession"] = 5,
 ["skillModifier"] = 0,
-["parentProfessionID"] = 185,
+["expansionName"] = "Shadowlands",
 ["maxSkillLevel"] = 75,
 ["isPrimaryProfession"] = false,
 },
@@ -262007,11 +262324,11 @@ CraftSimDB = {
 ["professionID"] = 2752,
 ["sourceCounter"] = 18,
 ["parentProfessionName"] = "Cooking",
-["expansionName"] = "Shadowlands",
 ["professionName"] = "Shadowlands Cooking",
+["parentProfessionID"] = 185,
 ["profession"] = 5,
 ["skillModifier"] = 0,
-["parentProfessionID"] = 185,
+["expansionName"] = "Shadowlands",
 ["maxSkillLevel"] = 75,
 ["isPrimaryProfession"] = false,
 },
@@ -262020,11 +262337,11 @@ CraftSimDB = {
 ["professionID"] = 2873,
 ["sourceCounter"] = 18,
 ["parentProfessionName"] = "Cooking",
-["expansionName"] = "Khaz Algar",
 ["professionName"] = "Khaz Algar Cooking",
+["parentProfessionID"] = 185,
 ["profession"] = 5,
 ["skillModifier"] = 13,
-["parentProfessionID"] = 185,
+["expansionName"] = "Khaz Algar",
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = false,
 },
@@ -262033,11 +262350,11 @@ CraftSimDB = {
 ["professionID"] = 2908,
 ["sourceCounter"] = 19,
 ["parentProfessionName"] = "Cooking",
-["expansionName"] = "Midnight",
 ["professionName"] = "Midnight Cooking",
+["parentProfessionID"] = 185,
 ["profession"] = 5,
 ["skillModifier"] = 0,
-["parentProfessionID"] = 185,
+["expansionName"] = "Midnight",
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = false,
 },
@@ -262046,11 +262363,11 @@ CraftSimDB = {
 ["professionID"] = 2908,
 ["sourceCounter"] = 18,
 ["parentProfessionName"] = "Cooking",
-["expansionName"] = "Midnight",
 ["professionName"] = "Midnight Cooking",
+["parentProfessionID"] = 185,
 ["profession"] = 5,
 ["skillModifier"] = 0,
-["parentProfessionID"] = 185,
+["expansionName"] = "Midnight",
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = false,
 },
@@ -262059,11 +262376,11 @@ CraftSimDB = {
 ["professionID"] = 2908,
 ["sourceCounter"] = 19,
 ["parentProfessionName"] = "Cooking",
-["expansionName"] = "Midnight",
 ["professionName"] = "Midnight Cooking",
+["parentProfessionID"] = 185,
 ["profession"] = 5,
 ["skillModifier"] = 0,
-["parentProfessionID"] = 185,
+["expansionName"] = "Midnight",
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = false,
 },
@@ -262072,11 +262389,11 @@ CraftSimDB = {
 ["professionID"] = 2873,
 ["sourceCounter"] = 18,
 ["parentProfessionName"] = "Cooking",
-["expansionName"] = "Khaz Algar",
 ["professionName"] = "Khaz Algar Cooking",
+["parentProfessionID"] = 185,
 ["profession"] = 5,
 ["skillModifier"] = 13,
-["parentProfessionID"] = 185,
+["expansionName"] = "Khaz Algar",
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = false,
 },
@@ -262085,11 +262402,11 @@ CraftSimDB = {
 ["professionID"] = 2873,
 ["sourceCounter"] = 62,
 ["isPrimaryProfession"] = false,
-["expansionName"] = "Khaz Algar",
 ["professionName"] = "Khaz Algar Cooking",
+["parentProfessionID"] = 185,
 ["profession"] = 5,
 ["skillModifier"] = 13,
-["parentProfessionID"] = 185,
+["expansionName"] = "Khaz Algar",
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Cooking",
 },
@@ -262098,37 +262415,37 @@ CraftSimDB = {
 ["professionID"] = 2908,
 ["sourceCounter"] = 62,
 ["isPrimaryProfession"] = false,
-["expansionName"] = "Midnight",
 ["professionName"] = "Midnight Cooking",
+["parentProfessionID"] = 185,
 ["profession"] = 5,
 ["skillModifier"] = 0,
-["parentProfessionID"] = 185,
+["expansionName"] = "Midnight",
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Cooking",
 },
 [1229626] = {
 ["skillLevel"] = 100,
 ["professionID"] = 2907,
-["sourceCounter"] = 20,
+["sourceCounter"] = 6,
+["parentProfessionName"] = "Blacksmithing",
+["parentProfessionID"] = 164,
 ["isPrimaryProfession"] = true,
-["expansionName"] = "Midnight",
-["professionName"] = "Midnight Blacksmithing",
 ["profession"] = 1,
 ["skillModifier"] = 40,
-["parentProfessionID"] = 164,
+["professionName"] = "Midnight Blacksmithing",
 ["maxSkillLevel"] = 100,
-["parentProfessionName"] = "Blacksmithing",
+["expansionName"] = "Midnight",
 },
 [445093] = {
 ["skillLevel"] = 100,
 ["professionID"] = 2873,
 ["sourceCounter"] = 18,
 ["parentProfessionName"] = "Cooking",
-["expansionName"] = "Khaz Algar",
 ["professionName"] = "Khaz Algar Cooking",
+["parentProfessionID"] = 185,
 ["profession"] = 5,
 ["skillModifier"] = 13,
-["parentProfessionID"] = 185,
+["expansionName"] = "Khaz Algar",
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = false,
 },
@@ -262137,50 +262454,50 @@ CraftSimDB = {
 ["professionID"] = 2873,
 ["sourceCounter"] = 62,
 ["isPrimaryProfession"] = false,
-["expansionName"] = "Khaz Algar",
 ["professionName"] = "Khaz Algar Cooking",
+["parentProfessionID"] = 185,
 ["profession"] = 5,
 ["skillModifier"] = 13,
-["parentProfessionID"] = 185,
+["expansionName"] = "Khaz Algar",
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Cooking",
 },
 [1233130] = {
-["skillLevel"] = 1,
+["skillLevel"] = 2,
 ["professionID"] = 2906,
 ["sourceCounter"] = 4,
-["isPrimaryProfession"] = true,
-["professionName"] = "Midnight Alchemy",
+["parentProfessionName"] = "Alchemy",
 ["parentProfessionID"] = 171,
+["isPrimaryProfession"] = true,
 ["profession"] = 3,
 ["skillModifier"] = 0,
-["expansionName"] = "Midnight",
+["professionName"] = "Midnight Alchemy",
 ["maxSkillLevel"] = 100,
-["parentProfessionName"] = "Alchemy",
+["expansionName"] = "Midnight",
 },
 [1229625] = {
 ["skillLevel"] = 100,
 ["professionID"] = 2907,
-["sourceCounter"] = 20,
+["sourceCounter"] = 6,
+["parentProfessionName"] = "Blacksmithing",
+["parentProfessionID"] = 164,
 ["isPrimaryProfession"] = true,
-["expansionName"] = "Midnight",
-["professionName"] = "Midnight Blacksmithing",
 ["profession"] = 1,
 ["skillModifier"] = 40,
-["parentProfessionID"] = 164,
+["professionName"] = "Midnight Blacksmithing",
 ["maxSkillLevel"] = 100,
-["parentProfessionName"] = "Blacksmithing",
+["expansionName"] = "Midnight",
 },
 [1229628] = {
 ["skillLevel"] = 100,
 ["professionID"] = 2907,
 ["sourceCounter"] = 20,
 ["isPrimaryProfession"] = true,
-["expansionName"] = "Midnight",
 ["professionName"] = "Midnight Blacksmithing",
+["parentProfessionID"] = 164,
 ["profession"] = 1,
 ["skillModifier"] = 40,
-["parentProfessionID"] = 164,
+["expansionName"] = "Midnight",
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Blacksmithing",
 },
@@ -262189,11 +262506,11 @@ CraftSimDB = {
 ["professionID"] = 2907,
 ["sourceCounter"] = 15,
 ["isPrimaryProfession"] = true,
-["parentProfessionID"] = 164,
 ["expansionName"] = "Midnight",
+["professionName"] = "Midnight Blacksmithing",
 ["profession"] = 1,
 ["skillModifier"] = 18,
-["professionName"] = "Midnight Blacksmithing",
+["parentProfessionID"] = 164,
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Blacksmithing",
 },
@@ -262202,11 +262519,11 @@ CraftSimDB = {
 ["professionID"] = 2908,
 ["sourceCounter"] = 64,
 ["isPrimaryProfession"] = false,
-["expansionName"] = "Midnight",
 ["professionName"] = "Midnight Cooking",
+["parentProfessionID"] = 185,
 ["profession"] = 5,
 ["skillModifier"] = 0,
-["parentProfessionID"] = 185,
+["expansionName"] = "Midnight",
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Cooking",
 },
@@ -262215,11 +262532,11 @@ CraftSimDB = {
 ["professionID"] = 2907,
 ["sourceCounter"] = 14,
 ["parentProfessionName"] = "Blacksmithing",
-["professionName"] = "Midnight Blacksmithing",
 ["parentProfessionID"] = 164,
+["expansionName"] = "Midnight",
 ["profession"] = 1,
 ["skillModifier"] = 30,
-["expansionName"] = "Midnight",
+["professionName"] = "Midnight Blacksmithing",
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = true,
 },
@@ -262228,11 +262545,11 @@ CraftSimDB = {
 ["professionID"] = 2908,
 ["sourceCounter"] = 71,
 ["isPrimaryProfession"] = false,
-["expansionName"] = "Midnight",
 ["professionName"] = "Midnight Cooking",
+["parentProfessionID"] = 185,
 ["profession"] = 5,
 ["skillModifier"] = 0,
-["parentProfessionID"] = 185,
+["expansionName"] = "Midnight",
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Cooking",
 },
@@ -262241,11 +262558,11 @@ CraftSimDB = {
 ["professionID"] = 2908,
 ["sourceCounter"] = 62,
 ["isPrimaryProfession"] = false,
-["expansionName"] = "Midnight",
 ["professionName"] = "Midnight Cooking",
+["parentProfessionID"] = 185,
 ["profession"] = 5,
 ["skillModifier"] = 0,
-["parentProfessionID"] = 185,
+["expansionName"] = "Midnight",
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Cooking",
 },
@@ -262254,11 +262571,11 @@ CraftSimDB = {
 ["professionID"] = 2907,
 ["sourceCounter"] = 6,
 ["isPrimaryProfession"] = true,
-["parentProfessionID"] = 164,
 ["expansionName"] = "Midnight",
+["professionName"] = "Midnight Blacksmithing",
 ["profession"] = 1,
 ["skillModifier"] = 24,
-["professionName"] = "Midnight Blacksmithing",
+["parentProfessionID"] = 164,
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Blacksmithing",
 },
@@ -262267,11 +262584,11 @@ CraftSimDB = {
 ["professionID"] = 2907,
 ["sourceCounter"] = 3,
 ["isPrimaryProfession"] = true,
-["parentProfessionID"] = 164,
 ["expansionName"] = "Midnight",
+["professionName"] = "Midnight Blacksmithing",
 ["profession"] = 1,
 ["skillModifier"] = 24,
-["professionName"] = "Midnight Blacksmithing",
+["parentProfessionID"] = 164,
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Blacksmithing",
 },
@@ -262280,11 +262597,11 @@ CraftSimDB = {
 ["professionID"] = 2908,
 ["sourceCounter"] = 19,
 ["parentProfessionName"] = "Cooking",
-["expansionName"] = "Midnight",
 ["professionName"] = "Midnight Cooking",
+["parentProfessionID"] = 185,
 ["profession"] = 5,
 ["skillModifier"] = 0,
-["parentProfessionID"] = 185,
+["expansionName"] = "Midnight",
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = false,
 },
@@ -262293,11 +262610,11 @@ CraftSimDB = {
 ["professionID"] = 2907,
 ["sourceCounter"] = 8,
 ["isPrimaryProfession"] = true,
-["parentProfessionID"] = 164,
 ["expansionName"] = "Midnight",
+["professionName"] = "Midnight Blacksmithing",
 ["profession"] = 1,
 ["skillModifier"] = 24,
-["professionName"] = "Midnight Blacksmithing",
+["parentProfessionID"] = 164,
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Blacksmithing",
 },
@@ -262306,11 +262623,11 @@ CraftSimDB = {
 ["professionID"] = 2907,
 ["sourceCounter"] = 20,
 ["isPrimaryProfession"] = true,
-["expansionName"] = "Midnight",
 ["professionName"] = "Midnight Blacksmithing",
+["parentProfessionID"] = 164,
 ["profession"] = 1,
 ["skillModifier"] = 40,
-["parentProfessionID"] = 164,
+["expansionName"] = "Midnight",
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Blacksmithing",
 },
@@ -262319,11 +262636,11 @@ CraftSimDB = {
 ["professionID"] = 2907,
 ["sourceCounter"] = 2,
 ["parentProfessionName"] = "Blacksmithing",
-["professionName"] = "Midnight Blacksmithing",
 ["parentProfessionID"] = 164,
+["expansionName"] = "Midnight",
 ["profession"] = 1,
 ["skillModifier"] = 40,
-["expansionName"] = "Midnight",
+["professionName"] = "Midnight Blacksmithing",
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = true,
 },
@@ -262332,11 +262649,11 @@ CraftSimDB = {
 ["professionID"] = 2907,
 ["sourceCounter"] = 5,
 ["parentProfessionName"] = "Blacksmithing",
-["professionName"] = "Midnight Blacksmithing",
 ["parentProfessionID"] = 164,
+["expansionName"] = "Midnight",
 ["profession"] = 1,
 ["skillModifier"] = 40,
-["expansionName"] = "Midnight",
+["professionName"] = "Midnight Blacksmithing",
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = true,
 },
@@ -262345,11 +262662,11 @@ CraftSimDB = {
 ["professionID"] = 2907,
 ["sourceCounter"] = 2,
 ["isPrimaryProfession"] = true,
-["professionName"] = "Midnight Blacksmithing",
 ["parentProfessionID"] = 164,
+["expansionName"] = "Midnight",
 ["profession"] = 1,
 ["skillModifier"] = 24,
-["expansionName"] = "Midnight",
+["professionName"] = "Midnight Blacksmithing",
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Blacksmithing",
 },
@@ -262358,11 +262675,11 @@ CraftSimDB = {
 ["professionID"] = 2908,
 ["sourceCounter"] = 19,
 ["parentProfessionName"] = "Cooking",
-["expansionName"] = "Midnight",
 ["professionName"] = "Midnight Cooking",
+["parentProfessionID"] = 185,
 ["profession"] = 5,
 ["skillModifier"] = 0,
-["parentProfessionID"] = 185,
+["expansionName"] = "Midnight",
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = false,
 },
@@ -262371,11 +262688,11 @@ CraftSimDB = {
 ["professionID"] = 2907,
 ["sourceCounter"] = 5,
 ["parentProfessionName"] = "Blacksmithing",
-["professionName"] = "Midnight Blacksmithing",
 ["parentProfessionID"] = 164,
+["expansionName"] = "Midnight",
 ["profession"] = 1,
 ["skillModifier"] = 40,
-["expansionName"] = "Midnight",
+["professionName"] = "Midnight Blacksmithing",
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = true,
 },
@@ -262384,11 +262701,11 @@ CraftSimDB = {
 ["professionID"] = 2907,
 ["sourceCounter"] = 14,
 ["parentProfessionName"] = "Blacksmithing",
-["professionName"] = "Midnight Blacksmithing",
 ["parentProfessionID"] = 164,
+["expansionName"] = "Midnight",
 ["profession"] = 1,
 ["skillModifier"] = 30,
-["expansionName"] = "Midnight",
+["professionName"] = "Midnight Blacksmithing",
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = true,
 },
@@ -262397,63 +262714,63 @@ CraftSimDB = {
 ["professionID"] = 2907,
 ["sourceCounter"] = 3,
 ["parentProfessionName"] = "Blacksmithing",
-["professionName"] = "Midnight Blacksmithing",
 ["parentProfessionID"] = 164,
+["expansionName"] = "Midnight",
 ["profession"] = 1,
 ["skillModifier"] = 18,
-["expansionName"] = "Midnight",
+["professionName"] = "Midnight Blacksmithing",
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = true,
 },
 [1264646] = {
 ["skillLevel"] = 100,
 ["professionID"] = 2907,
-["sourceCounter"] = 1,
+["sourceCounter"] = 8,
 ["parentProfessionName"] = "Blacksmithing",
-["professionName"] = "Midnight Blacksmithing",
 ["parentProfessionID"] = 164,
+["isPrimaryProfession"] = true,
 ["profession"] = 1,
 ["skillModifier"] = 40,
-["expansionName"] = "Midnight",
+["professionName"] = "Midnight Blacksmithing",
 ["maxSkillLevel"] = 100,
-["isPrimaryProfession"] = true,
+["expansionName"] = "Midnight",
 },
 [1230764] = {
 ["skillLevel"] = 100,
 ["professionID"] = 2907,
 ["sourceCounter"] = 5,
 ["parentProfessionName"] = "Blacksmithing",
-["professionName"] = "Midnight Blacksmithing",
 ["parentProfessionID"] = 164,
+["expansionName"] = "Midnight",
 ["profession"] = 1,
 ["skillModifier"] = 40,
-["expansionName"] = "Midnight",
+["professionName"] = "Midnight Blacksmithing",
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = true,
 },
 [1230866] = {
-["skillLevel"] = 2,
+["skillLevel"] = 3,
 ["professionID"] = 2906,
 ["sourceCounter"] = 4,
-["isPrimaryProfession"] = true,
-["professionName"] = "Midnight Alchemy",
+["parentProfessionName"] = "Alchemy",
 ["parentProfessionID"] = 171,
+["isPrimaryProfession"] = true,
 ["profession"] = 3,
 ["skillModifier"] = 0,
-["expansionName"] = "Midnight",
+["professionName"] = "Midnight Alchemy",
 ["maxSkillLevel"] = 100,
-["parentProfessionName"] = "Alchemy",
+["expansionName"] = "Midnight",
 },
 [308419] = {
 ["skillLevel"] = 75,
 ["professionID"] = 2752,
 ["sourceCounter"] = 18,
 ["parentProfessionName"] = "Cooking",
-["expansionName"] = "Shadowlands",
 ["professionName"] = "Shadowlands Cooking",
+["parentProfessionID"] = 185,
 ["profession"] = 5,
 ["skillModifier"] = 0,
-["parentProfessionID"] = 185,
+["expansionName"] = "Shadowlands",
 ["maxSkillLevel"] = 75,
 ["isPrimaryProfession"] = false,
 },
@@ -262462,11 +262779,11 @@ CraftSimDB = {
 ["professionID"] = 2907,
 ["sourceCounter"] = 6,
 ["isPrimaryProfession"] = true,
-["parentProfessionID"] = 164,
 ["expansionName"] = "Midnight",
+["professionName"] = "Midnight Blacksmithing",
 ["profession"] = 1,
 ["skillModifier"] = 24,
-["professionName"] = "Midnight Blacksmithing",
+["parentProfessionID"] = 164,
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Blacksmithing",
 },
@@ -262475,11 +262792,11 @@ CraftSimDB = {
 ["professionID"] = 2907,
 ["sourceCounter"] = 3,
 ["parentProfessionName"] = "Blacksmithing",
-["professionName"] = "Midnight Blacksmithing",
 ["parentProfessionID"] = 164,
+["expansionName"] = "Midnight",
 ["profession"] = 1,
 ["skillModifier"] = 18,
-["expansionName"] = "Midnight",
+["professionName"] = "Midnight Blacksmithing",
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = true,
 },
@@ -262488,11 +262805,11 @@ CraftSimDB = {
 ["professionID"] = 2908,
 ["sourceCounter"] = 79,
 ["isPrimaryProfession"] = false,
-["expansionName"] = "Midnight",
 ["professionName"] = "Midnight Cooking",
+["parentProfessionID"] = 185,
 ["profession"] = 5,
 ["skillModifier"] = 0,
-["parentProfessionID"] = 185,
+["expansionName"] = "Midnight",
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Cooking",
 },
@@ -262501,11 +262818,11 @@ CraftSimDB = {
 ["professionID"] = 2907,
 ["sourceCounter"] = 20,
 ["isPrimaryProfession"] = true,
-["expansionName"] = "Midnight",
 ["professionName"] = "Midnight Blacksmithing",
+["parentProfessionID"] = 164,
 ["profession"] = 1,
 ["skillModifier"] = 40,
-["parentProfessionID"] = 164,
+["expansionName"] = "Midnight",
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Blacksmithing",
 },
@@ -262790,52 +263107,6 @@ CraftSimDB = {
 ["equippedGear"] = {
 ["profession"] = 3,
 ["isCooking"] = false,
-["gear1"] = {
-["professionStats"] = {
-["multicraft"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "multicraft",
-["percentDivisionFactor"] = 1100,
-},
-["recipeDifficulty"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "recipedifficulty",
-["percentDivisionFactor"] = 1,
-},
-["craftingspeed"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "craftingspeed",
-["percentDivisionFactor"] = 2650,
-},
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
-["resourcefulness"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "resourcefulness",
-["percentDivisionFactor"] = 900,
-},
-["ingenuity"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "ingenuity",
-["percentDivisionFactor"] = 1000,
-},
-},
-},
 ["tool"] = {
 ["professionStats"] = {
 ["multicraft"] = {
@@ -262859,6 +263130,13 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
+["resourcefulness"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
+},
 ["skill"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -262866,12 +263144,51 @@ CraftSimDB = {
 ["name"] = "skill",
 ["percentDivisionFactor"] = 1,
 },
+["ingenuity"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "ingenuity",
+["percentDivisionFactor"] = 1000,
+},
+},
+},
+["gear1"] = {
+["professionStats"] = {
+["multicraft"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "multicraft",
+["percentDivisionFactor"] = 1100,
+},
+["recipeDifficulty"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "recipedifficulty",
+["percentDivisionFactor"] = 1,
+},
+["craftingspeed"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "craftingspeed",
+["percentDivisionFactor"] = 2650,
+},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -262905,19 +263222,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -262932,7 +263249,7 @@ CraftSimDB = {
 ["cached"] = true,
 ["availableProfessionGear"] = {
 {
-["itemLink"] = "|cnIQ3:|Hitem:245778::::::::90:105::13:3:12253:12251:12499:4:28:3615:29:76:38:5:40:2871::::Player-60-0BBC4C88:|h[Sin'dorei Alchemist's Mixing Rod |A:Professions-ChatIcon-Quality-Tier2:17:15::1|a]|h|r",
+["itemLink"] = "|cnIQ3:|Hitem:245778::::::::90:102::13:3:12253:12251:12499:4:28:3615:29:76:38:5:40:2871::::Player-60-0BBC4C88:|h[Sin'dorei Alchemist's Mixing Rod |A:Professions-ChatIcon-Quality-Tier2:17:15::1|a]|h|r",
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -262955,19 +263272,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 18,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 86,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 18,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -262979,7 +263296,7 @@ CraftSimDB = {
 },
 },
 {
-["itemLink"] = "|cnIQ3:|Hitem:244626::::::::90:105::13:3:12253:12251:12500:3:28:3615:38:6:40:4041::::Player-60-0EC4E0A3:|h[Sin'dorei Alchemist's Hat |A:Professions-ChatIcon-Quality-Tier3:17:15::1|a]|h|r",
+["itemLink"] = "|cnIQ3:|Hitem:244626::::::::90:102::13:3:12253:12251:12500:3:28:3615:38:6:40:4041::::Player-60-0EC4E0A3:|h[Sin'dorei Alchemist's Hat |A:Professions-ChatIcon-Quality-Tier3:17:15::1|a]|h|r",
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 30,
@@ -263002,19 +263319,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 11,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 11,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 44,
@@ -263026,7 +263343,7 @@ CraftSimDB = {
 },
 },
 {
-["itemLink"] = "|cnIQ2:|Hitem:239641::::::::90:105::13:3:12252:12251:12499:3:28:3615:38:5:40:2582::::Player-60-0B85C2B6:|h[Bright Linen Alchemy Apron |A:Professions-ChatIcon-Quality-Tier2:17:15::1|a]|h|r",
+["itemLink"] = "|cnIQ2:|Hitem:239641::::::::90:102::13:3:12252:12251:12499:3:28:3615:38:5:40:2582::::Player-60-0B85C2B6:|h[Bright Linen Alchemy Apron |A:Professions-ChatIcon-Quality-Tier2:17:15::1|a]|h|r",
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 20,
@@ -263049,19 +263366,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["skill"] = {
-["value"] = 5,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
+},
+["skill"] = {
+["value"] = 5,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 30,
@@ -264096,22 +264413,22 @@ CraftSimDB = {
 ["bonusStatValue"] = 0,
 ["bonusStatName"] = "Resourcefulness",
 ["ratingDescription"] = "You have a 0.0% chance to use fewer tradeable reagents.",
-["bonusRatingPct"] = 0,
 ["ratingPct"] = 0,
+["bonusRatingPct"] = 0,
 },
 {
 ["bonusStatValue"] = 0,
 ["bonusStatName"] = "Multicraft",
 ["ratingDescription"] = "You have a 0.0% chance to craft additional items.",
-["bonusRatingPct"] = 0,
 ["ratingPct"] = 0,
+["bonusRatingPct"] = 0,
 },
 {
 ["bonusStatValue"] = 0,
 ["bonusStatName"] = "Ingenuity",
 ["ratingDescription"] = "You have a 0.0% chance to have an ingenious breakthrough when you Concentrate on a craft, refunding 50.0% of Concentration spent.",
-["bonusRatingPct"] = 0,
 ["ratingPct"] = 0,
+["bonusRatingPct"] = 0,
 },
 },
 },
@@ -264519,22 +264836,22 @@ CraftSimDB = {
 ["bonusStatValue"] = 98,
 ["bonusStatName"] = "Resourcefulness",
 ["ratingDescription"] = "You have a 10.9% chance to use fewer tradeable reagents.",
-["bonusRatingPct"] = 10.88888931274414,
 ["ratingPct"] = 10.88888931274414,
+["bonusRatingPct"] = 10.88888931274414,
 },
 {
 ["bonusStatValue"] = 0,
 ["bonusStatName"] = "Multicraft",
 ["ratingDescription"] = "You have a 0.0% chance to craft additional items.",
-["bonusRatingPct"] = 0,
 ["ratingPct"] = 0,
+["bonusRatingPct"] = 0,
 },
 {
 ["bonusStatValue"] = 0,
 ["bonusStatName"] = "Ingenuity",
 ["ratingDescription"] = "You have a 0.0% chance to have an ingenious breakthrough when you Concentrate on a craft, refunding 50.0% of Concentration spent.",
-["bonusRatingPct"] = 0,
 ["ratingPct"] = 0,
+["bonusRatingPct"] = 0,
 },
 },
 },
@@ -264873,8 +265190,8 @@ CraftSimDB = {
 },
 [3] = {
 ["maxQuantity"] = 1000,
-["lastUpdated"] = 1773927570,
-["amount"] = 199,
+["lastUpdated"] = 1774062615,
+["amount"] = 245,
 ["rechargeTimePerPoint"] = 345600,
 ["currencyID"] = 3161,
 },
@@ -266471,37 +266788,37 @@ CraftSimDB = {
 ["maxQuality"] = 2,
 ["relativeDifficulty"] = 2,
 ["recipeID"] = 1230866,
-["isEnchantingRecipe"] = false,
+["numSkillUps"] = 1,
 ["supportsCraftingStats"] = true,
 ["firstCraft"] = false,
-["numSkillUps"] = 1,
+["categoryID"] = 2252,
 ["isGatheringRecipe"] = false,
 ["learned"] = true,
 ["skillLineAbilityID"] = 52693,
 ["icon"] = 7548909,
 ["canCreateMultiple"] = true,
-["isRecraft"] = false,
+["canSkillUp"] = true,
 ["isSalvageRecipe"] = false,
 ["itemLevel"] = 278,
-["qualityIDs"] = {
-13,
-14,
-},
+["maxTrivialLevel"] = 60,
 ["craftable"] = true,
-["isDummyRecipe"] = false,
-["name"] = "Silvermoon Health Potion",
+["hyperlink"] = "|cnIQ1:|Hitem:241305::::::::90:1473::13:1:3524::::::|h[Silvermoon Health Potion |A:Professions-ChatIcon-Quality-12-Tier1:17:15::1|a]|h|r",
+["hasSingleItemOutput"] = true,
 ["alwaysUsesLowestQuality"] = false,
-["supportsQualities"] = true,
 ["qualityItemIDs"] = {
 241305,
 241304,
 },
-["maxTrivialLevel"] = 60,
-["hasSingleItemOutput"] = true,
-["hyperlink"] = "|cnIQ1:|Hitem:241305::::::::90:1473::13:1:3524::::::|h[Silvermoon Health Potion |A:Professions-ChatIcon-Quality-12-Tier1:17:15::1|a]|h|r",
-["canSkillUp"] = true,
+["supportsQualities"] = true,
+["name"] = "Silvermoon Health Potion",
+["isDummyRecipe"] = false,
+["qualityIDs"] = {
+13,
+14,
+},
+["isRecraft"] = false,
 ["favorite"] = true,
-["categoryID"] = 2252,
+["isEnchantingRecipe"] = false,
 },
 [1230867] = {
 ["sourceType"] = 0,
@@ -266883,37 +267200,37 @@ CraftSimDB = {
 ["maxQuality"] = 2,
 ["relativeDifficulty"] = 0,
 ["recipeID"] = 1230877,
-["isEnchantingRecipe"] = false,
+["numSkillUps"] = 2,
 ["supportsCraftingStats"] = true,
 ["firstCraft"] = false,
-["numSkillUps"] = 2,
+["categoryID"] = 2253,
 ["isGatheringRecipe"] = false,
 ["learned"] = true,
 ["skillLineAbilityID"] = 52704,
 ["icon"] = 7548904,
 ["canCreateMultiple"] = true,
-["isRecraft"] = false,
+["canSkillUp"] = true,
 ["isSalvageRecipe"] = false,
 ["itemLevel"] = 885,
-["qualityIDs"] = {
-13,
-14,
-},
+["maxTrivialLevel"] = 100,
 ["craftable"] = true,
-["isDummyRecipe"] = false,
-["name"] = "Flask of the Blood Knights",
+["hyperlink"] = "|cnIQ1:|Hitem:241325::::::::90:1473::13:1:3524::::::|h[Flask of the Blood Knights |A:Professions-ChatIcon-Quality-12-Tier1:17:15::1|a]|h|r",
+["hasSingleItemOutput"] = true,
 ["alwaysUsesLowestQuality"] = false,
-["supportsQualities"] = true,
 ["qualityItemIDs"] = {
 241325,
 241324,
 },
-["maxTrivialLevel"] = 100,
-["hasSingleItemOutput"] = true,
-["hyperlink"] = "|cnIQ1:|Hitem:241325::::::::90:1473::13:1:3524::::::|h[Flask of the Blood Knights |A:Professions-ChatIcon-Quality-12-Tier1:17:15::1|a]|h|r",
-["canSkillUp"] = true,
+["supportsQualities"] = true,
+["name"] = "Flask of the Blood Knights",
+["isDummyRecipe"] = false,
+["qualityIDs"] = {
+13,
+14,
+},
+["isRecraft"] = false,
 ["favorite"] = true,
-["categoryID"] = 2253,
+["isEnchantingRecipe"] = false,
 },
 [1230869] = {
 ["sourceType"] = 0,
@@ -360486,6 +360803,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 0,
+["perkID"] = 107100,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -360508,19 +360826,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["resourcefulness"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "resourcefulness",
-["percentDivisionFactor"] = 900,
-},
 ["skill"] = {
 ["value"] = 5,
 ["extraValues"] = {
 },
 ["name"] = "skill",
 ["percentDivisionFactor"] = 1,
+},
+["resourcefulness"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -360530,11 +360848,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["perkID"] = 107100,
 ["active"] = false,
 },
 {
 ["threshold"] = 5,
+["perkID"] = 107099,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -360557,19 +360875,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["resourcefulness"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "resourcefulness",
-["percentDivisionFactor"] = 900,
-},
 ["skill"] = {
 ["value"] = 5,
 ["extraValues"] = {
 },
 ["name"] = "skill",
 ["percentDivisionFactor"] = 1,
+},
+["resourcefulness"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -360579,11 +360897,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["perkID"] = 107099,
 ["active"] = false,
 },
 {
 ["threshold"] = 15,
+["perkID"] = 107097,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -360606,19 +360924,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["resourcefulness"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "resourcefulness",
-["percentDivisionFactor"] = 900,
-},
 ["skill"] = {
 ["value"] = 5,
 ["extraValues"] = {
 },
 ["name"] = "skill",
 ["percentDivisionFactor"] = 1,
+},
+["resourcefulness"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -360628,11 +360946,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["perkID"] = 107097,
 ["active"] = false,
 },
 {
 ["threshold"] = 25,
+["perkID"] = 107095,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -360655,19 +360973,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["resourcefulness"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "resourcefulness",
-["percentDivisionFactor"] = 900,
-},
 ["skill"] = {
 ["value"] = 5,
 ["extraValues"] = {
 },
 ["name"] = "skill",
 ["percentDivisionFactor"] = 1,
+},
+["resourcefulness"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -360677,7 +360995,6 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["perkID"] = 107095,
 ["active"] = false,
 },
 },
@@ -360703,6 +361020,13 @@ CraftSimDB = {
 },
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["resourcefulness"] = {
 ["value"] = 0,
@@ -360711,13 +361035,6 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
-},
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -360751,6 +361068,13 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
+["skill"] = {
+["value"] = 50,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
+},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -360758,13 +361082,6 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
-},
-["skill"] = {
-["value"] = 50,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -360784,6 +361101,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 0,
+["perkID"] = 107081,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -360806,19 +361124,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["resourcefulness"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "resourcefulness",
-["percentDivisionFactor"] = 900,
-},
 ["skill"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "skill",
 ["percentDivisionFactor"] = 1,
+},
+["resourcefulness"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -360828,11 +361146,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["perkID"] = 107081,
 ["active"] = false,
 },
 {
 ["threshold"] = 5,
+["perkID"] = 107080,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 30,
@@ -360855,19 +361173,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["resourcefulness"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "resourcefulness",
-["percentDivisionFactor"] = 900,
-},
 ["skill"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "skill",
 ["percentDivisionFactor"] = 1,
+},
+["resourcefulness"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -360877,11 +361195,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["perkID"] = 107080,
 ["active"] = false,
 },
 {
 ["threshold"] = 10,
+["perkID"] = 107079,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -360904,19 +361222,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["resourcefulness"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "resourcefulness",
-["percentDivisionFactor"] = 900,
-},
 ["skill"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "skill",
 ["percentDivisionFactor"] = 1,
+},
+["resourcefulness"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -360926,11 +361244,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["perkID"] = 107079,
 ["active"] = false,
 },
 {
 ["threshold"] = 15,
+["perkID"] = 107078,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 30,
@@ -360953,19 +361271,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["resourcefulness"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "resourcefulness",
-["percentDivisionFactor"] = 900,
-},
 ["skill"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "skill",
 ["percentDivisionFactor"] = 1,
+},
+["resourcefulness"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -360975,11 +361293,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["perkID"] = 107078,
 ["active"] = false,
 },
 {
 ["threshold"] = 20,
+["perkID"] = 107077,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -361003,19 +361321,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["resourcefulness"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "resourcefulness",
-["percentDivisionFactor"] = 900,
-},
 ["skill"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "skill",
 ["percentDivisionFactor"] = 1,
+},
+["resourcefulness"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -361025,7 +361343,6 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["perkID"] = 107077,
 ["active"] = false,
 },
 },
@@ -361052,6 +361369,13 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
+},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -361059,13 +361383,6 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
-},
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -361100,6 +361417,13 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
+},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -361107,13 +361431,6 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
-},
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -361133,6 +361450,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 0,
+["perkID"] = 107086,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -361155,19 +361473,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["resourcefulness"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "resourcefulness",
-["percentDivisionFactor"] = 900,
-},
 ["skill"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "skill",
 ["percentDivisionFactor"] = 1,
+},
+["resourcefulness"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -361178,11 +361496,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["perkID"] = 107086,
 ["active"] = false,
 },
 {
 ["threshold"] = 5,
+["perkID"] = 107085,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -361205,19 +361523,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["resourcefulness"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "resourcefulness",
-["percentDivisionFactor"] = 900,
-},
 ["skill"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "skill",
 ["percentDivisionFactor"] = 1,
+},
+["resourcefulness"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
 },
 ["ingenuity"] = {
 ["value"] = 15,
@@ -361227,11 +361545,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["perkID"] = 107085,
 ["active"] = false,
 },
 {
 ["threshold"] = 10,
+["perkID"] = 107084,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -361254,19 +361572,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["resourcefulness"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "resourcefulness",
-["percentDivisionFactor"] = 900,
-},
 ["skill"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "skill",
 ["percentDivisionFactor"] = 1,
+},
+["resourcefulness"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
 },
 ["ingenuity"] = {
 ["value"] = 15,
@@ -361276,11 +361594,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["perkID"] = 107084,
 ["active"] = false,
 },
 {
 ["threshold"] = 15,
+["perkID"] = 107083,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -361303,19 +361621,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["resourcefulness"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "resourcefulness",
-["percentDivisionFactor"] = 900,
-},
 ["skill"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "skill",
 ["percentDivisionFactor"] = 1,
+},
+["resourcefulness"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
 },
 ["ingenuity"] = {
 ["value"] = 15,
@@ -361325,11 +361643,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["perkID"] = 107083,
 ["active"] = false,
 },
 {
 ["threshold"] = 20,
+["perkID"] = 107082,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -361352,19 +361670,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["resourcefulness"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "resourcefulness",
-["percentDivisionFactor"] = 900,
-},
 ["skill"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "skill",
 ["percentDivisionFactor"] = 1,
+},
+["resourcefulness"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -361375,7 +361693,6 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["perkID"] = 107082,
 ["active"] = false,
 },
 },
@@ -361401,6 +361718,13 @@ CraftSimDB = {
 },
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["resourcefulness"] = {
 ["value"] = 0,
@@ -361409,13 +361733,6 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
-},
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -361449,6 +361766,13 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
+},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -361456,13 +361780,6 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
-},
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 105,
@@ -361483,6 +361800,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 0,
+["perkID"] = 107280,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -361505,19 +361823,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["resourcefulness"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "resourcefulness",
-["percentDivisionFactor"] = 900,
-},
 ["skill"] = {
 ["value"] = 5,
 ["extraValues"] = {
 },
 ["name"] = "skill",
 ["percentDivisionFactor"] = 1,
+},
+["resourcefulness"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -361527,11 +361845,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["perkID"] = 107280,
 ["active"] = true,
 },
 {
 ["threshold"] = 5,
+["perkID"] = 107279,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -361554,19 +361872,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["resourcefulness"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "resourcefulness",
-["percentDivisionFactor"] = 900,
-},
 ["skill"] = {
 ["value"] = 5,
 ["extraValues"] = {
 },
 ["name"] = "skill",
 ["percentDivisionFactor"] = 1,
+},
+["resourcefulness"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -361576,11 +361894,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["perkID"] = 107279,
 ["active"] = true,
 },
 {
 ["threshold"] = 15,
+["perkID"] = 107277,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -361603,19 +361921,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["resourcefulness"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "resourcefulness",
-["percentDivisionFactor"] = 900,
-},
 ["skill"] = {
 ["value"] = 5,
 ["extraValues"] = {
 },
 ["name"] = "skill",
 ["percentDivisionFactor"] = 1,
+},
+["resourcefulness"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -361625,11 +361943,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["perkID"] = 107277,
 ["active"] = false,
 },
 {
 ["threshold"] = 25,
+["perkID"] = 107275,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -361652,19 +361970,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["resourcefulness"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "resourcefulness",
-["percentDivisionFactor"] = 900,
-},
 ["skill"] = {
 ["value"] = 5,
 ["extraValues"] = {
 },
 ["name"] = "skill",
 ["percentDivisionFactor"] = 1,
+},
+["resourcefulness"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -361674,7 +361992,6 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["perkID"] = 107275,
 ["active"] = false,
 },
 },
@@ -361700,6 +362017,13 @@ CraftSimDB = {
 },
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
+},
+["skill"] = {
+["value"] = 20,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["resourcefulness"] = {
 ["value"] = 0,
@@ -361708,13 +362032,6 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
-},
-["skill"] = {
-["value"] = 20,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -361748,6 +362065,13 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
+["skill"] = {
+["value"] = 50,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
+},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -361755,13 +362079,6 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
-},
-["skill"] = {
-["value"] = 50,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -361781,6 +362098,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 0,
+["perkID"] = 107093,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -361803,19 +362121,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["resourcefulness"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "resourcefulness",
-["percentDivisionFactor"] = 900,
-},
 ["skill"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "skill",
 ["percentDivisionFactor"] = 1,
+},
+["resourcefulness"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -361825,11 +362143,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["perkID"] = 107093,
 ["active"] = false,
 },
 {
 ["threshold"] = 5,
+["perkID"] = 107092,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -361852,19 +362170,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["resourcefulness"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "resourcefulness",
-["percentDivisionFactor"] = 900,
-},
 ["skill"] = {
 ["value"] = 5,
 ["extraValues"] = {
 },
 ["name"] = "skill",
 ["percentDivisionFactor"] = 1,
+},
+["resourcefulness"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -361874,11 +362192,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["perkID"] = 107092,
 ["active"] = false,
 },
 {
 ["threshold"] = 15,
+["perkID"] = 107090,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -361901,19 +362219,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["resourcefulness"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "resourcefulness",
-["percentDivisionFactor"] = 900,
-},
 ["skill"] = {
 ["value"] = 5,
 ["extraValues"] = {
 },
 ["name"] = "skill",
 ["percentDivisionFactor"] = 1,
+},
+["resourcefulness"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -361923,11 +362241,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["perkID"] = 107090,
 ["active"] = false,
 },
 {
 ["threshold"] = 20,
+["perkID"] = 107089,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -361950,19 +362268,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["resourcefulness"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "resourcefulness",
-["percentDivisionFactor"] = 900,
-},
 ["skill"] = {
 ["value"] = 5,
 ["extraValues"] = {
 },
 ["name"] = "skill",
 ["percentDivisionFactor"] = 1,
+},
+["resourcefulness"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -361972,11 +362290,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["perkID"] = 107089,
 ["active"] = false,
 },
 {
 ["threshold"] = 30,
+["perkID"] = 107087,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -361998,13 +362316,6 @@ CraftSimDB = {
 },
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
-},
-["resourcefulness"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "resourcefulness",
-["percentDivisionFactor"] = 900,
 },
 ["skill"] = {
 ["value"] = 25,
@@ -362013,6 +362324,13 @@ CraftSimDB = {
 ["name"] = "skill",
 ["percentDivisionFactor"] = 1,
 },
+["resourcefulness"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
+},
 ["ingenuity"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -362021,7 +362339,6 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["perkID"] = 107087,
 ["active"] = false,
 },
 },
@@ -362048,6 +362365,13 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
+},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -362055,13 +362379,6 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
-},
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -362095,6 +362412,13 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
+["skill"] = {
+["value"] = 70,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
+},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -362102,13 +362426,6 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
-},
-["skill"] = {
-["value"] = 70,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -362128,6 +362445,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 0,
+["perkID"] = 107268,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -362150,19 +362468,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["resourcefulness"] = {
-["value"] = 25,
-["extraValues"] = {
-},
-["name"] = "resourcefulness",
-["percentDivisionFactor"] = 900,
-},
 ["skill"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "skill",
 ["percentDivisionFactor"] = 1,
+},
+["resourcefulness"] = {
+["value"] = 25,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -362172,11 +362490,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["perkID"] = 107268,
 ["active"] = false,
 },
 {
 ["threshold"] = 5,
+["perkID"] = 107267,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -362199,19 +362517,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["resourcefulness"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "resourcefulness",
-["percentDivisionFactor"] = 900,
-},
 ["skill"] = {
 ["value"] = 5,
 ["extraValues"] = {
 },
 ["name"] = "skill",
 ["percentDivisionFactor"] = 1,
+},
+["resourcefulness"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -362221,11 +362539,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["perkID"] = 107267,
 ["active"] = false,
 },
 {
 ["threshold"] = 10,
+["perkID"] = 107266,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -362248,19 +362566,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["resourcefulness"] = {
-["value"] = 25,
-["extraValues"] = {
-},
-["name"] = "resourcefulness",
-["percentDivisionFactor"] = 900,
-},
 ["skill"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "skill",
 ["percentDivisionFactor"] = 1,
+},
+["resourcefulness"] = {
+["value"] = 25,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -362270,11 +362588,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["perkID"] = 107266,
 ["active"] = false,
 },
 {
 ["threshold"] = 15,
+["perkID"] = 107265,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -362296,13 +362614,6 @@ CraftSimDB = {
 },
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
-},
-["resourcefulness"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "resourcefulness",
-["percentDivisionFactor"] = 900,
 },
 ["skill"] = {
 ["value"] = 5,
@@ -362311,6 +362622,13 @@ CraftSimDB = {
 ["name"] = "skill",
 ["percentDivisionFactor"] = 1,
 },
+["resourcefulness"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
+},
 ["ingenuity"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -362319,11 +362637,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["perkID"] = 107265,
 ["active"] = false,
 },
 {
 ["threshold"] = 20,
+["perkID"] = 107264,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -362345,13 +362663,6 @@ CraftSimDB = {
 },
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
-},
-["resourcefulness"] = {
-["value"] = 25,
-["extraValues"] = {
-},
-["name"] = "resourcefulness",
-["percentDivisionFactor"] = 900,
 },
 ["skill"] = {
 ["value"] = 0,
@@ -362360,6 +362671,13 @@ CraftSimDB = {
 ["name"] = "skill",
 ["percentDivisionFactor"] = 1,
 },
+["resourcefulness"] = {
+["value"] = 25,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
+},
 ["ingenuity"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -362368,7 +362686,6 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["perkID"] = 107264,
 ["active"] = false,
 },
 },
@@ -362394,6 +362711,13 @@ CraftSimDB = {
 },
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["resourcefulness"] = {
 ["value"] = 0,
@@ -362402,13 +362726,6 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
-},
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -362442,6 +362759,13 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
+["skill"] = {
+["value"] = 10,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
+},
 ["resourcefulness"] = {
 ["value"] = 135,
 ["extraValues"] = {
@@ -362449,13 +362773,6 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
-},
-["skill"] = {
-["value"] = 10,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -362494,6 +362811,13 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
+["skill"] = {
+["value"] = 20,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
+},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -362501,13 +362825,6 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
-},
-["skill"] = {
-["value"] = 20,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -362541,6 +362858,13 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
+["skill"] = {
+["value"] = 180,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
+},
 ["resourcefulness"] = {
 ["value"] = 135,
 ["extraValues"] = {
@@ -362548,13 +362872,6 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
-},
-["skill"] = {
-["value"] = 180,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 105,
@@ -382919,6 +383236,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 0,
+["perkID"] = 107193,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -382941,19 +383259,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["resourcefulness"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "resourcefulness",
-["percentDivisionFactor"] = 900,
-},
 ["skill"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "skill",
 ["percentDivisionFactor"] = 1,
+},
+["resourcefulness"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -382964,11 +383282,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["perkID"] = 107193,
 ["active"] = false,
 },
 {
 ["threshold"] = 5,
+["perkID"] = 107192,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -382991,19 +383309,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["resourcefulness"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "resourcefulness",
-["percentDivisionFactor"] = 900,
-},
 ["skill"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "skill",
 ["percentDivisionFactor"] = 1,
+},
+["resourcefulness"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
 },
 ["ingenuity"] = {
 ["value"] = 15,
@@ -383013,11 +383331,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["perkID"] = 107192,
 ["active"] = false,
 },
 {
 ["threshold"] = 10,
+["perkID"] = 107191,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -383040,19 +383358,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["resourcefulness"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "resourcefulness",
-["percentDivisionFactor"] = 900,
-},
 ["skill"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "skill",
 ["percentDivisionFactor"] = 1,
+},
+["resourcefulness"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
 },
 ["ingenuity"] = {
 ["value"] = 15,
@@ -383062,11 +383380,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["perkID"] = 107191,
 ["active"] = false,
 },
 {
 ["threshold"] = 15,
+["perkID"] = 107190,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -383089,19 +383407,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["resourcefulness"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "resourcefulness",
-["percentDivisionFactor"] = 900,
-},
 ["skill"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "skill",
 ["percentDivisionFactor"] = 1,
+},
+["resourcefulness"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
 },
 ["ingenuity"] = {
 ["value"] = 15,
@@ -383111,11 +383429,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["perkID"] = 107190,
 ["active"] = false,
 },
 {
 ["threshold"] = 20,
+["perkID"] = 107189,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -383138,19 +383456,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["resourcefulness"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "resourcefulness",
-["percentDivisionFactor"] = 900,
-},
 ["skill"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "skill",
 ["percentDivisionFactor"] = 1,
+},
+["resourcefulness"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -383161,7 +383479,6 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["perkID"] = 107189,
 ["active"] = false,
 },
 },
@@ -383187,6 +383504,13 @@ CraftSimDB = {
 },
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["resourcefulness"] = {
 ["value"] = 0,
@@ -383195,13 +383519,6 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
-},
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -383235,6 +383552,13 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
+},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -383242,13 +383566,6 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
-},
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 105,
@@ -383269,6 +383586,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 0,
+["perkID"] = 107200,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -383291,19 +383609,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["resourcefulness"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "resourcefulness",
-["percentDivisionFactor"] = 900,
-},
 ["skill"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "skill",
 ["percentDivisionFactor"] = 1,
+},
+["resourcefulness"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -383313,11 +383631,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["perkID"] = 107200,
 ["active"] = false,
 },
 {
 ["threshold"] = 5,
+["perkID"] = 107199,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -383340,19 +383658,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["resourcefulness"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "resourcefulness",
-["percentDivisionFactor"] = 900,
-},
 ["skill"] = {
 ["value"] = 5,
 ["extraValues"] = {
 },
 ["name"] = "skill",
 ["percentDivisionFactor"] = 1,
+},
+["resourcefulness"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -383362,11 +383680,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["perkID"] = 107199,
 ["active"] = false,
 },
 {
 ["threshold"] = 15,
+["perkID"] = 107197,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -383389,19 +383707,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["resourcefulness"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "resourcefulness",
-["percentDivisionFactor"] = 900,
-},
 ["skill"] = {
 ["value"] = 5,
 ["extraValues"] = {
 },
 ["name"] = "skill",
 ["percentDivisionFactor"] = 1,
+},
+["resourcefulness"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -383411,11 +383729,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["perkID"] = 107197,
 ["active"] = false,
 },
 {
 ["threshold"] = 20,
+["perkID"] = 107196,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -383438,19 +383756,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["resourcefulness"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "resourcefulness",
-["percentDivisionFactor"] = 900,
-},
 ["skill"] = {
 ["value"] = 5,
 ["extraValues"] = {
 },
 ["name"] = "skill",
 ["percentDivisionFactor"] = 1,
+},
+["resourcefulness"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -383460,11 +383778,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["perkID"] = 107196,
 ["active"] = false,
 },
 {
 ["threshold"] = 30,
+["perkID"] = 107194,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -383486,13 +383804,6 @@ CraftSimDB = {
 },
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
-},
-["resourcefulness"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "resourcefulness",
-["percentDivisionFactor"] = 900,
 },
 ["skill"] = {
 ["value"] = 10,
@@ -383501,6 +383812,13 @@ CraftSimDB = {
 ["name"] = "skill",
 ["percentDivisionFactor"] = 1,
 },
+["resourcefulness"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
+},
 ["ingenuity"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -383509,7 +383827,6 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["perkID"] = 107194,
 ["active"] = false,
 },
 },
@@ -383536,6 +383853,13 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
+},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -383543,13 +383867,6 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
-},
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -383583,6 +383900,13 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
+["skill"] = {
+["value"] = 55,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
+},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -383590,13 +383914,6 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
-},
-["skill"] = {
-["value"] = 55,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -383616,6 +383933,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 0,
+["perkID"] = 107280,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -383638,19 +383956,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["resourcefulness"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "resourcefulness",
-["percentDivisionFactor"] = 900,
-},
 ["skill"] = {
 ["value"] = 5,
 ["extraValues"] = {
 },
 ["name"] = "skill",
 ["percentDivisionFactor"] = 1,
+},
+["resourcefulness"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -383660,11 +383978,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["perkID"] = 107280,
 ["active"] = true,
 },
 {
 ["threshold"] = 5,
+["perkID"] = 107279,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -383687,19 +384005,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["resourcefulness"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "resourcefulness",
-["percentDivisionFactor"] = 900,
-},
 ["skill"] = {
 ["value"] = 5,
 ["extraValues"] = {
 },
 ["name"] = "skill",
 ["percentDivisionFactor"] = 1,
+},
+["resourcefulness"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -383709,11 +384027,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["perkID"] = 107279,
 ["active"] = true,
 },
 {
 ["threshold"] = 15,
+["perkID"] = 107277,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -383736,19 +384054,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["resourcefulness"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "resourcefulness",
-["percentDivisionFactor"] = 900,
-},
 ["skill"] = {
 ["value"] = 5,
 ["extraValues"] = {
 },
 ["name"] = "skill",
 ["percentDivisionFactor"] = 1,
+},
+["resourcefulness"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -383758,11 +384076,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["perkID"] = 107277,
 ["active"] = false,
 },
 {
 ["threshold"] = 25,
+["perkID"] = 107275,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -383785,19 +384103,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["resourcefulness"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "resourcefulness",
-["percentDivisionFactor"] = 900,
-},
 ["skill"] = {
 ["value"] = 5,
 ["extraValues"] = {
 },
 ["name"] = "skill",
 ["percentDivisionFactor"] = 1,
+},
+["resourcefulness"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -383807,7 +384125,6 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["perkID"] = 107275,
 ["active"] = false,
 },
 },
@@ -383833,6 +384150,13 @@ CraftSimDB = {
 },
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
+},
+["skill"] = {
+["value"] = 20,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
 },
 ["resourcefulness"] = {
 ["value"] = 0,
@@ -383841,13 +384165,6 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
-},
-["skill"] = {
-["value"] = 20,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -383881,6 +384198,13 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
+["skill"] = {
+["value"] = 50,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
+},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -383888,13 +384212,6 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
-},
-["skill"] = {
-["value"] = 50,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -383914,6 +384231,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 0,
+["perkID"] = 107207,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -383936,19 +384254,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["resourcefulness"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "resourcefulness",
-["percentDivisionFactor"] = 900,
-},
 ["skill"] = {
 ["value"] = 5,
 ["extraValues"] = {
 },
 ["name"] = "skill",
 ["percentDivisionFactor"] = 1,
+},
+["resourcefulness"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -383958,11 +384276,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["perkID"] = 107207,
 ["active"] = true,
 },
 {
 ["threshold"] = 5,
+["perkID"] = 107206,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -383985,19 +384303,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["resourcefulness"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "resourcefulness",
-["percentDivisionFactor"] = 900,
-},
 ["skill"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "skill",
 ["percentDivisionFactor"] = 1,
+},
+["resourcefulness"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -384007,11 +384325,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["perkID"] = 107206,
 ["active"] = true,
 },
 {
 ["threshold"] = 15,
+["perkID"] = 107204,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -384034,19 +384352,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["resourcefulness"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "resourcefulness",
-["percentDivisionFactor"] = 900,
-},
 ["skill"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "skill",
 ["percentDivisionFactor"] = 1,
+},
+["resourcefulness"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -384056,11 +384374,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["perkID"] = 107204,
 ["active"] = true,
 },
 {
 ["threshold"] = 25,
+["perkID"] = 107202,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -384082,13 +384400,6 @@ CraftSimDB = {
 },
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
-},
-["resourcefulness"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "resourcefulness",
-["percentDivisionFactor"] = 900,
 },
 ["skill"] = {
 ["value"] = 5,
@@ -384097,6 +384408,13 @@ CraftSimDB = {
 ["name"] = "skill",
 ["percentDivisionFactor"] = 1,
 },
+["resourcefulness"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
+},
 ["ingenuity"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -384105,7 +384423,6 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["perkID"] = 107202,
 ["active"] = false,
 },
 },
@@ -384132,6 +384449,13 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
+["skill"] = {
+["value"] = 20,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
+},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -384139,13 +384463,6 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
-},
-["skill"] = {
-["value"] = 20,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -384179,6 +384496,13 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
+["skill"] = {
+["value"] = 40,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
+},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -384186,13 +384510,6 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
-},
-["skill"] = {
-["value"] = 40,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -384212,6 +384529,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 0,
+["perkID"] = 107188,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -384234,19 +384552,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["resourcefulness"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "resourcefulness",
-["percentDivisionFactor"] = 900,
-},
 ["skill"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "skill",
 ["percentDivisionFactor"] = 1,
+},
+["resourcefulness"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -384256,11 +384574,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["perkID"] = 107188,
 ["active"] = false,
 },
 {
 ["threshold"] = 5,
+["perkID"] = 107187,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 30,
@@ -384283,19 +384601,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["resourcefulness"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "resourcefulness",
-["percentDivisionFactor"] = 900,
-},
 ["skill"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "skill",
 ["percentDivisionFactor"] = 1,
+},
+["resourcefulness"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -384305,11 +384623,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["perkID"] = 107187,
 ["active"] = false,
 },
 {
 ["threshold"] = 10,
+["perkID"] = 107186,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -384332,19 +384650,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["resourcefulness"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "resourcefulness",
-["percentDivisionFactor"] = 900,
-},
 ["skill"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "skill",
 ["percentDivisionFactor"] = 1,
+},
+["resourcefulness"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -384354,11 +384672,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["perkID"] = 107186,
 ["active"] = false,
 },
 {
 ["threshold"] = 15,
+["perkID"] = 107185,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 30,
@@ -384381,19 +384699,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["resourcefulness"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "resourcefulness",
-["percentDivisionFactor"] = 900,
-},
 ["skill"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "skill",
 ["percentDivisionFactor"] = 1,
+},
+["resourcefulness"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -384403,11 +384721,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["perkID"] = 107185,
 ["active"] = false,
 },
 {
 ["threshold"] = 20,
+["perkID"] = 107184,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -384431,19 +384749,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["resourcefulness"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "resourcefulness",
-["percentDivisionFactor"] = 900,
-},
 ["skill"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "skill",
 ["percentDivisionFactor"] = 1,
+},
+["resourcefulness"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -384453,7 +384771,6 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["perkID"] = 107184,
 ["active"] = false,
 },
 },
@@ -384480,6 +384797,13 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
+},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -384487,13 +384811,6 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
-},
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -384528,6 +384845,13 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
+},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -384535,13 +384859,6 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
-},
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -384561,6 +384878,7 @@ CraftSimDB = {
 ["perkData"] = {
 {
 ["threshold"] = 0,
+["perkID"] = 107263,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -384583,19 +384901,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["resourcefulness"] = {
-["value"] = 25,
-["extraValues"] = {
-},
-["name"] = "resourcefulness",
-["percentDivisionFactor"] = 900,
-},
 ["skill"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "skill",
 ["percentDivisionFactor"] = 1,
+},
+["resourcefulness"] = {
+["value"] = 25,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -384605,11 +384923,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["perkID"] = 107263,
 ["active"] = true,
 },
 {
 ["threshold"] = 5,
+["perkID"] = 107262,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -384632,19 +384950,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["resourcefulness"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "resourcefulness",
-["percentDivisionFactor"] = 900,
-},
 ["skill"] = {
 ["value"] = 5,
 ["extraValues"] = {
 },
 ["name"] = "skill",
 ["percentDivisionFactor"] = 1,
+},
+["resourcefulness"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -384654,11 +384972,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["perkID"] = 107262,
 ["active"] = true,
 },
 {
 ["threshold"] = 10,
+["perkID"] = 107261,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -384681,19 +384999,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["resourcefulness"] = {
-["value"] = 25,
-["extraValues"] = {
-},
-["name"] = "resourcefulness",
-["percentDivisionFactor"] = 900,
-},
 ["skill"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "skill",
 ["percentDivisionFactor"] = 1,
+},
+["resourcefulness"] = {
+["value"] = 25,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -384703,11 +385021,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["perkID"] = 107261,
 ["active"] = true,
 },
 {
 ["threshold"] = 15,
+["perkID"] = 107260,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -384729,13 +385047,6 @@ CraftSimDB = {
 },
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
-},
-["resourcefulness"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "resourcefulness",
-["percentDivisionFactor"] = 900,
 },
 ["skill"] = {
 ["value"] = 5,
@@ -384744,6 +385055,13 @@ CraftSimDB = {
 ["name"] = "skill",
 ["percentDivisionFactor"] = 1,
 },
+["resourcefulness"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
+},
 ["ingenuity"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -384752,11 +385070,11 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["perkID"] = 107260,
 ["active"] = true,
 },
 {
 ["threshold"] = 20,
+["perkID"] = 107259,
 ["professionStats"] = {
 ["multicraft"] = {
 ["value"] = 0,
@@ -384779,19 +385097,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["resourcefulness"] = {
-["value"] = 25,
-["extraValues"] = {
-},
-["name"] = "resourcefulness",
-["percentDivisionFactor"] = 900,
-},
 ["skill"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "skill",
 ["percentDivisionFactor"] = 1,
+},
+["resourcefulness"] = {
+["value"] = 25,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -384801,7 +385119,6 @@ CraftSimDB = {
 ["percentDivisionFactor"] = 1000,
 },
 },
-["perkID"] = 107259,
 ["active"] = false,
 },
 },
@@ -384828,6 +385145,13 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
+["skill"] = {
+["value"] = 10,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
+},
 ["resourcefulness"] = {
 ["value"] = 98,
 ["extraValues"] = {
@@ -384835,13 +385159,6 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
-},
-["skill"] = {
-["value"] = 10,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -384875,6 +385192,13 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
+["skill"] = {
+["value"] = 10,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
+},
 ["resourcefulness"] = {
 ["value"] = 135,
 ["extraValues"] = {
@@ -384882,13 +385206,6 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
-},
-["skill"] = {
-["value"] = 10,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -384927,6 +385244,13 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
+["skill"] = {
+["value"] = 50,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
+},
 ["resourcefulness"] = {
 ["value"] = 98,
 ["extraValues"] = {
@@ -384934,13 +385258,6 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
-},
-["skill"] = {
-["value"] = 50,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -384974,6 +385291,13 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
+["skill"] = {
+["value"] = 155,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
+},
 ["resourcefulness"] = {
 ["value"] = 135,
 ["extraValues"] = {
@@ -384981,13 +385305,6 @@ CraftSimDB = {
 },
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
-},
-["skill"] = {
-["value"] = 155,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
 },
 ["ingenuity"] = {
 ["value"] = 105,
@@ -402940,11 +403257,11 @@ CraftSimDB = {
 ["professionID"] = 2915,
 ["sourceCounter"] = 7,
 ["parentProfessionName"] = "Leatherworking",
-["parentProfessionID"] = 165,
 ["expansionName"] = "Midnight",
+["professionName"] = "Midnight Leatherworking",
 ["profession"] = 2,
 ["skillModifier"] = 40,
-["professionName"] = "Midnight Leatherworking",
+["parentProfessionID"] = 165,
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = true,
 },
@@ -402953,11 +403270,11 @@ CraftSimDB = {
 ["professionID"] = 2915,
 ["sourceCounter"] = 5,
 ["isPrimaryProfession"] = true,
-["professionName"] = "Midnight Leatherworking",
 ["parentProfessionID"] = 165,
+["expansionName"] = "Midnight",
 ["profession"] = 2,
 ["skillModifier"] = 0,
-["expansionName"] = "Midnight",
+["professionName"] = "Midnight Leatherworking",
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Leatherworking",
 },
@@ -402966,11 +403283,11 @@ CraftSimDB = {
 ["professionID"] = 2915,
 ["sourceCounter"] = 7,
 ["isPrimaryProfession"] = true,
-["professionName"] = "Midnight Leatherworking",
 ["parentProfessionID"] = 165,
+["expansionName"] = "Midnight",
 ["profession"] = 2,
 ["skillModifier"] = 0,
-["expansionName"] = "Midnight",
+["professionName"] = "Midnight Leatherworking",
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Leatherworking",
 },
@@ -402979,11 +403296,11 @@ CraftSimDB = {
 ["professionID"] = 2915,
 ["sourceCounter"] = 7,
 ["parentProfessionName"] = "Leatherworking",
-["parentProfessionID"] = 165,
 ["expansionName"] = "Midnight",
+["professionName"] = "Midnight Leatherworking",
 ["profession"] = 2,
 ["skillModifier"] = 40,
-["professionName"] = "Midnight Leatherworking",
+["parentProfessionID"] = 165,
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = true,
 },
@@ -402992,11 +403309,11 @@ CraftSimDB = {
 ["professionID"] = 2915,
 ["sourceCounter"] = 12,
 ["parentProfessionName"] = "Leatherworking",
-["expansionName"] = "Midnight",
 ["professionName"] = "Midnight Leatherworking",
+["parentProfessionID"] = 165,
 ["profession"] = 2,
 ["skillModifier"] = 0,
-["parentProfessionID"] = 165,
+["expansionName"] = "Midnight",
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = true,
 },
@@ -403005,11 +403322,11 @@ CraftSimDB = {
 ["professionID"] = 2915,
 ["sourceCounter"] = 7,
 ["isPrimaryProfession"] = true,
-["professionName"] = "Midnight Leatherworking",
 ["parentProfessionID"] = 165,
+["expansionName"] = "Midnight",
 ["profession"] = 2,
 ["skillModifier"] = 0,
-["expansionName"] = "Midnight",
+["professionName"] = "Midnight Leatherworking",
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Leatherworking",
 },
@@ -403018,11 +403335,11 @@ CraftSimDB = {
 ["professionID"] = 2915,
 ["sourceCounter"] = 6,
 ["isPrimaryProfession"] = true,
-["professionName"] = "Midnight Leatherworking",
 ["parentProfessionID"] = 165,
+["expansionName"] = "Midnight",
 ["profession"] = 2,
 ["skillModifier"] = 0,
-["expansionName"] = "Midnight",
+["professionName"] = "Midnight Leatherworking",
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Leatherworking",
 },
@@ -403031,11 +403348,11 @@ CraftSimDB = {
 ["professionID"] = 2915,
 ["sourceCounter"] = 7,
 ["isPrimaryProfession"] = true,
-["expansionName"] = "Midnight",
 ["professionName"] = "Midnight Leatherworking",
+["parentProfessionID"] = 165,
 ["profession"] = 2,
 ["skillModifier"] = 40,
-["parentProfessionID"] = 165,
+["expansionName"] = "Midnight",
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Leatherworking",
 },
@@ -403044,11 +403361,11 @@ CraftSimDB = {
 ["professionID"] = 2915,
 ["sourceCounter"] = 27,
 ["parentProfessionName"] = "Leatherworking",
-["expansionName"] = "Midnight",
 ["professionName"] = "Midnight Leatherworking",
+["parentProfessionID"] = 165,
 ["profession"] = 2,
 ["skillModifier"] = 0,
-["parentProfessionID"] = 165,
+["expansionName"] = "Midnight",
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = true,
 },
@@ -403057,11 +403374,11 @@ CraftSimDB = {
 ["professionID"] = 2915,
 ["sourceCounter"] = 10,
 ["isPrimaryProfession"] = true,
-["professionName"] = "Midnight Leatherworking",
 ["parentProfessionID"] = 165,
+["expansionName"] = "Midnight",
 ["profession"] = 2,
 ["skillModifier"] = 0,
-["expansionName"] = "Midnight",
+["professionName"] = "Midnight Leatherworking",
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Leatherworking",
 },
@@ -403070,11 +403387,11 @@ CraftSimDB = {
 ["professionID"] = 2915,
 ["sourceCounter"] = 29,
 ["parentProfessionName"] = "Leatherworking",
-["expansionName"] = "Midnight",
 ["professionName"] = "Midnight Leatherworking",
+["parentProfessionID"] = 165,
 ["profession"] = 2,
 ["skillModifier"] = 40,
-["parentProfessionID"] = 165,
+["expansionName"] = "Midnight",
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = true,
 },
@@ -403083,11 +403400,11 @@ CraftSimDB = {
 ["professionID"] = 2915,
 ["sourceCounter"] = 10,
 ["isPrimaryProfession"] = true,
-["professionName"] = "Midnight Leatherworking",
 ["parentProfessionID"] = 165,
+["expansionName"] = "Midnight",
 ["profession"] = 2,
 ["skillModifier"] = 0,
-["expansionName"] = "Midnight",
+["professionName"] = "Midnight Leatherworking",
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Leatherworking",
 },
@@ -403096,11 +403413,11 @@ CraftSimDB = {
 ["professionID"] = 2915,
 ["sourceCounter"] = 10,
 ["isPrimaryProfession"] = true,
-["professionName"] = "Midnight Leatherworking",
 ["parentProfessionID"] = 165,
+["expansionName"] = "Midnight",
 ["profession"] = 2,
 ["skillModifier"] = 0,
-["expansionName"] = "Midnight",
+["professionName"] = "Midnight Leatherworking",
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Leatherworking",
 },
@@ -403109,11 +403426,11 @@ CraftSimDB = {
 ["professionID"] = 2915,
 ["sourceCounter"] = 8,
 ["parentProfessionName"] = "Leatherworking",
-["parentProfessionID"] = 165,
 ["expansionName"] = "Midnight",
+["professionName"] = "Midnight Leatherworking",
 ["profession"] = 2,
 ["skillModifier"] = 40,
-["professionName"] = "Midnight Leatherworking",
+["parentProfessionID"] = 165,
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = true,
 },
@@ -403122,11 +403439,11 @@ CraftSimDB = {
 ["professionID"] = 2915,
 ["sourceCounter"] = 30,
 ["parentProfessionName"] = "Leatherworking",
-["expansionName"] = "Midnight",
 ["professionName"] = "Midnight Leatherworking",
+["parentProfessionID"] = 165,
 ["profession"] = 2,
 ["skillModifier"] = 40,
-["parentProfessionID"] = 165,
+["expansionName"] = "Midnight",
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = true,
 },
@@ -403135,11 +403452,11 @@ CraftSimDB = {
 ["professionID"] = 2915,
 ["sourceCounter"] = 10,
 ["isPrimaryProfession"] = true,
-["professionName"] = "Midnight Leatherworking",
 ["parentProfessionID"] = 165,
+["expansionName"] = "Midnight",
 ["profession"] = 2,
 ["skillModifier"] = 0,
-["expansionName"] = "Midnight",
+["professionName"] = "Midnight Leatherworking",
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Leatherworking",
 },
@@ -403148,11 +403465,11 @@ CraftSimDB = {
 ["professionID"] = 2915,
 ["sourceCounter"] = 10,
 ["isPrimaryProfession"] = true,
-["professionName"] = "Midnight Leatherworking",
 ["parentProfessionID"] = 165,
+["expansionName"] = "Midnight",
 ["profession"] = 2,
 ["skillModifier"] = 0,
-["expansionName"] = "Midnight",
+["professionName"] = "Midnight Leatherworking",
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Leatherworking",
 },
@@ -403161,11 +403478,11 @@ CraftSimDB = {
 ["professionID"] = 2915,
 ["sourceCounter"] = 2,
 ["parentProfessionName"] = "Leatherworking",
-["expansionName"] = "Midnight",
 ["professionName"] = "Midnight Leatherworking",
+["parentProfessionID"] = 165,
 ["profession"] = 2,
 ["skillModifier"] = 40,
-["parentProfessionID"] = 165,
+["expansionName"] = "Midnight",
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = true,
 },
@@ -403174,11 +403491,11 @@ CraftSimDB = {
 ["professionID"] = 2906,
 ["sourceCounter"] = 10,
 ["parentProfessionName"] = "Alchemy",
-["professionName"] = "Midnight Alchemy",
 ["parentProfessionID"] = 171,
+["expansionName"] = "Midnight",
 ["profession"] = 3,
 ["skillModifier"] = 0,
-["expansionName"] = "Midnight",
+["professionName"] = "Midnight Alchemy",
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = true,
 },
@@ -403187,11 +403504,11 @@ CraftSimDB = {
 ["professionID"] = 2915,
 ["sourceCounter"] = 3,
 ["parentProfessionName"] = "Leatherworking",
-["parentProfessionID"] = 165,
 ["expansionName"] = "Midnight",
+["professionName"] = "Midnight Leatherworking",
 ["profession"] = 2,
 ["skillModifier"] = 40,
-["professionName"] = "Midnight Leatherworking",
+["parentProfessionID"] = 165,
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = true,
 },
@@ -403200,11 +403517,11 @@ CraftSimDB = {
 ["professionID"] = 2915,
 ["sourceCounter"] = 8,
 ["isPrimaryProfession"] = true,
-["expansionName"] = "Midnight",
 ["professionName"] = "Midnight Leatherworking",
+["parentProfessionID"] = 165,
 ["profession"] = 2,
 ["skillModifier"] = 40,
-["parentProfessionID"] = 165,
+["expansionName"] = "Midnight",
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Leatherworking",
 },
@@ -403213,11 +403530,11 @@ CraftSimDB = {
 ["professionID"] = 2915,
 ["sourceCounter"] = 7,
 ["parentProfessionName"] = "Leatherworking",
-["parentProfessionID"] = 165,
 ["expansionName"] = "Midnight",
+["professionName"] = "Midnight Leatherworking",
 ["profession"] = 2,
 ["skillModifier"] = 40,
-["professionName"] = "Midnight Leatherworking",
+["parentProfessionID"] = 165,
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = true,
 },
@@ -403226,11 +403543,11 @@ CraftSimDB = {
 ["professionID"] = 2915,
 ["sourceCounter"] = 7,
 ["isPrimaryProfession"] = true,
-["expansionName"] = "Midnight",
 ["professionName"] = "Midnight Leatherworking",
+["parentProfessionID"] = 165,
 ["profession"] = 2,
 ["skillModifier"] = 40,
-["parentProfessionID"] = 165,
+["expansionName"] = "Midnight",
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Leatherworking",
 },
@@ -403239,11 +403556,11 @@ CraftSimDB = {
 ["professionID"] = 2915,
 ["sourceCounter"] = 2,
 ["parentProfessionName"] = "Leatherworking",
-["expansionName"] = "Midnight",
 ["professionName"] = "Midnight Leatherworking",
+["parentProfessionID"] = 165,
 ["profession"] = 2,
 ["skillModifier"] = 40,
-["parentProfessionID"] = 165,
+["expansionName"] = "Midnight",
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = true,
 },
@@ -403252,11 +403569,11 @@ CraftSimDB = {
 ["professionID"] = 2915,
 ["sourceCounter"] = 2,
 ["isPrimaryProfession"] = true,
-["parentProfessionID"] = 165,
 ["expansionName"] = "Midnight",
+["professionName"] = "Midnight Leatherworking",
 ["profession"] = 2,
 ["skillModifier"] = 40,
-["professionName"] = "Midnight Leatherworking",
+["parentProfessionID"] = 165,
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Leatherworking",
 },
@@ -403265,11 +403582,11 @@ CraftSimDB = {
 ["professionID"] = 2915,
 ["sourceCounter"] = 2,
 ["parentProfessionName"] = "Leatherworking",
-["expansionName"] = "Midnight",
 ["professionName"] = "Midnight Leatherworking",
+["parentProfessionID"] = 165,
 ["profession"] = 2,
 ["skillModifier"] = 40,
-["parentProfessionID"] = 165,
+["expansionName"] = "Midnight",
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = true,
 },
@@ -403278,11 +403595,11 @@ CraftSimDB = {
 ["professionID"] = 2915,
 ["sourceCounter"] = 2,
 ["parentProfessionName"] = "Leatherworking",
-["expansionName"] = "Midnight",
 ["professionName"] = "Midnight Leatherworking",
+["parentProfessionID"] = 165,
 ["profession"] = 2,
 ["skillModifier"] = 40,
-["parentProfessionID"] = 165,
+["expansionName"] = "Midnight",
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = true,
 },
@@ -403291,11 +403608,11 @@ CraftSimDB = {
 ["professionID"] = 2906,
 ["sourceCounter"] = 10,
 ["parentProfessionName"] = "Alchemy",
-["professionName"] = "Midnight Alchemy",
 ["parentProfessionID"] = 171,
+["expansionName"] = "Midnight",
 ["profession"] = 3,
 ["skillModifier"] = 0,
-["expansionName"] = "Midnight",
+["professionName"] = "Midnight Alchemy",
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = true,
 },
@@ -403304,11 +403621,11 @@ CraftSimDB = {
 ["professionID"] = 2915,
 ["sourceCounter"] = 2,
 ["parentProfessionName"] = "Leatherworking",
-["expansionName"] = "Midnight",
 ["professionName"] = "Midnight Leatherworking",
+["parentProfessionID"] = 165,
 ["profession"] = 2,
 ["skillModifier"] = 40,
-["parentProfessionID"] = 165,
+["expansionName"] = "Midnight",
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = true,
 },
@@ -403317,11 +403634,11 @@ CraftSimDB = {
 ["professionID"] = 2915,
 ["sourceCounter"] = 3,
 ["parentProfessionName"] = "Leatherworking",
-["expansionName"] = "Midnight",
 ["professionName"] = "Midnight Leatherworking",
+["parentProfessionID"] = 165,
 ["profession"] = 2,
 ["skillModifier"] = 40,
-["parentProfessionID"] = 165,
+["expansionName"] = "Midnight",
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = true,
 },
@@ -403330,11 +403647,11 @@ CraftSimDB = {
 ["professionID"] = 2915,
 ["sourceCounter"] = 3,
 ["parentProfessionName"] = "Leatherworking",
-["parentProfessionID"] = 165,
 ["expansionName"] = "Midnight",
+["professionName"] = "Midnight Leatherworking",
 ["profession"] = 2,
 ["skillModifier"] = 40,
-["professionName"] = "Midnight Leatherworking",
+["parentProfessionID"] = 165,
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = true,
 },
@@ -403343,11 +403660,11 @@ CraftSimDB = {
 ["professionID"] = 2915,
 ["sourceCounter"] = 34,
 ["isPrimaryProfession"] = true,
-["parentProfessionID"] = 165,
 ["expansionName"] = "Midnight",
+["professionName"] = "Midnight Leatherworking",
 ["profession"] = 2,
 ["skillModifier"] = 40,
-["professionName"] = "Midnight Leatherworking",
+["parentProfessionID"] = 165,
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Leatherworking",
 },
@@ -403356,11 +403673,11 @@ CraftSimDB = {
 ["professionID"] = 2906,
 ["sourceCounter"] = 4,
 ["isPrimaryProfession"] = true,
-["expansionName"] = "Midnight",
 ["professionName"] = "Midnight Alchemy",
+["parentProfessionID"] = 171,
 ["profession"] = 3,
 ["skillModifier"] = 0,
-["parentProfessionID"] = 171,
+["expansionName"] = "Midnight",
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Alchemy",
 },
@@ -403369,11 +403686,11 @@ CraftSimDB = {
 ["professionID"] = 2906,
 ["sourceCounter"] = 31,
 ["isPrimaryProfession"] = true,
-["parentProfessionID"] = 171,
 ["expansionName"] = "Midnight",
+["professionName"] = "Midnight Alchemy",
 ["profession"] = 3,
 ["skillModifier"] = 0,
-["professionName"] = "Midnight Alchemy",
+["parentProfessionID"] = 171,
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Alchemy",
 },
@@ -403382,11 +403699,11 @@ CraftSimDB = {
 ["professionID"] = 2906,
 ["sourceCounter"] = 9,
 ["isPrimaryProfession"] = true,
-["professionName"] = "Midnight Alchemy",
 ["parentProfessionID"] = 171,
+["expansionName"] = "Midnight",
 ["profession"] = 3,
 ["skillModifier"] = 0,
-["expansionName"] = "Midnight",
+["professionName"] = "Midnight Alchemy",
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Alchemy",
 },
@@ -403395,11 +403712,11 @@ CraftSimDB = {
 ["professionID"] = 2906,
 ["sourceCounter"] = 25,
 ["isPrimaryProfession"] = true,
-["parentProfessionID"] = 171,
 ["expansionName"] = "Midnight",
+["professionName"] = "Midnight Alchemy",
 ["profession"] = 3,
 ["skillModifier"] = 0,
-["professionName"] = "Midnight Alchemy",
+["parentProfessionID"] = 171,
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Alchemy",
 },
@@ -403408,11 +403725,11 @@ CraftSimDB = {
 ["professionID"] = 2906,
 ["sourceCounter"] = 12,
 ["parentProfessionName"] = "Alchemy",
-["parentProfessionID"] = 171,
 ["expansionName"] = "Midnight",
+["professionName"] = "Midnight Alchemy",
 ["profession"] = 3,
 ["skillModifier"] = 0,
-["professionName"] = "Midnight Alchemy",
+["parentProfessionID"] = 171,
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = true,
 },
@@ -403421,11 +403738,11 @@ CraftSimDB = {
 ["professionID"] = 2915,
 ["sourceCounter"] = 1,
 ["isPrimaryProfession"] = true,
-["parentProfessionID"] = 165,
 ["expansionName"] = "Midnight",
+["professionName"] = "Midnight Leatherworking",
 ["profession"] = 2,
 ["skillModifier"] = 40,
-["professionName"] = "Midnight Leatherworking",
+["parentProfessionID"] = 165,
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Leatherworking",
 },
@@ -403433,25 +403750,25 @@ CraftSimDB = {
 ["skillLevel"] = 59,
 ["professionID"] = 2906,
 ["sourceCounter"] = 3,
-["parentProfessionName"] = "Alchemy",
-["parentProfessionID"] = 171,
 ["expansionName"] = "Midnight",
+["isPrimaryProfession"] = true,
+["professionName"] = "Midnight Alchemy",
 ["profession"] = 3,
 ["skillModifier"] = 0,
-["professionName"] = "Midnight Alchemy",
+["parentProfessionID"] = 171,
 ["maxSkillLevel"] = 100,
-["isPrimaryProfession"] = true,
+["parentProfessionName"] = "Alchemy",
 },
 [1230867] = {
 ["skillLevel"] = 53,
 ["professionID"] = 2906,
 ["sourceCounter"] = 4,
 ["parentProfessionName"] = "Alchemy",
-["parentProfessionID"] = 171,
 ["expansionName"] = "Midnight",
+["professionName"] = "Midnight Alchemy",
 ["profession"] = 3,
 ["skillModifier"] = 0,
-["professionName"] = "Midnight Alchemy",
+["parentProfessionID"] = 171,
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = true,
 },
@@ -403460,11 +403777,11 @@ CraftSimDB = {
 ["professionID"] = 2915,
 ["sourceCounter"] = 12,
 ["parentProfessionName"] = "Leatherworking",
-["expansionName"] = "Midnight",
 ["professionName"] = "Midnight Leatherworking",
+["parentProfessionID"] = 165,
 ["profession"] = 2,
 ["skillModifier"] = 0,
-["parentProfessionID"] = 165,
+["expansionName"] = "Midnight",
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = true,
 },
@@ -403473,11 +403790,11 @@ CraftSimDB = {
 ["professionID"] = 2915,
 ["sourceCounter"] = 10,
 ["isPrimaryProfession"] = true,
-["professionName"] = "Midnight Leatherworking",
 ["parentProfessionID"] = 165,
+["expansionName"] = "Midnight",
 ["profession"] = 2,
 ["skillModifier"] = 0,
-["expansionName"] = "Midnight",
+["professionName"] = "Midnight Leatherworking",
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Leatherworking",
 },
@@ -403486,11 +403803,11 @@ CraftSimDB = {
 ["professionID"] = 2915,
 ["sourceCounter"] = 7,
 ["isPrimaryProfession"] = true,
-["expansionName"] = "Midnight",
 ["professionName"] = "Midnight Leatherworking",
+["parentProfessionID"] = 165,
 ["profession"] = 2,
 ["skillModifier"] = 40,
-["parentProfessionID"] = 165,
+["expansionName"] = "Midnight",
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Leatherworking",
 },
@@ -403499,11 +403816,11 @@ CraftSimDB = {
 ["professionID"] = 2906,
 ["sourceCounter"] = 46,
 ["parentProfessionName"] = "Alchemy",
-["professionName"] = "Midnight Alchemy",
 ["parentProfessionID"] = 171,
+["expansionName"] = "Midnight",
 ["profession"] = 3,
 ["skillModifier"] = 0,
-["expansionName"] = "Midnight",
+["professionName"] = "Midnight Alchemy",
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = true,
 },
@@ -403512,11 +403829,11 @@ CraftSimDB = {
 ["professionID"] = 2906,
 ["sourceCounter"] = 16,
 ["parentProfessionName"] = "Alchemy",
-["parentProfessionID"] = 171,
 ["expansionName"] = "Midnight",
+["professionName"] = "Midnight Alchemy",
 ["profession"] = 3,
 ["skillModifier"] = 0,
-["professionName"] = "Midnight Alchemy",
+["parentProfessionID"] = 171,
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = true,
 },
@@ -403525,11 +403842,11 @@ CraftSimDB = {
 ["professionID"] = 2915,
 ["sourceCounter"] = 10,
 ["isPrimaryProfession"] = true,
-["professionName"] = "Midnight Leatherworking",
 ["parentProfessionID"] = 165,
+["expansionName"] = "Midnight",
 ["profession"] = 2,
 ["skillModifier"] = 0,
-["expansionName"] = "Midnight",
+["professionName"] = "Midnight Leatherworking",
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Leatherworking",
 },
@@ -403538,11 +403855,11 @@ CraftSimDB = {
 ["professionID"] = 2906,
 ["sourceCounter"] = 4,
 ["parentProfessionName"] = "Alchemy",
-["parentProfessionID"] = 171,
 ["expansionName"] = "Midnight",
+["professionName"] = "Midnight Alchemy",
 ["profession"] = 3,
 ["skillModifier"] = 0,
-["professionName"] = "Midnight Alchemy",
+["parentProfessionID"] = 171,
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = true,
 },
@@ -403551,11 +403868,11 @@ CraftSimDB = {
 ["professionID"] = 2906,
 ["sourceCounter"] = 10,
 ["parentProfessionName"] = "Alchemy",
-["professionName"] = "Midnight Alchemy",
 ["parentProfessionID"] = 171,
+["expansionName"] = "Midnight",
 ["profession"] = 3,
 ["skillModifier"] = 0,
-["expansionName"] = "Midnight",
+["professionName"] = "Midnight Alchemy",
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = true,
 },
@@ -403564,11 +403881,11 @@ CraftSimDB = {
 ["professionID"] = 2915,
 ["sourceCounter"] = 13,
 ["parentProfessionName"] = "Leatherworking",
-["expansionName"] = "Midnight",
 ["professionName"] = "Midnight Leatherworking",
+["parentProfessionID"] = 165,
 ["profession"] = 2,
 ["skillModifier"] = 0,
-["parentProfessionID"] = 165,
+["expansionName"] = "Midnight",
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = true,
 },
@@ -403576,25 +403893,25 @@ CraftSimDB = {
 ["skillLevel"] = 59,
 ["professionID"] = 2906,
 ["sourceCounter"] = 3,
-["parentProfessionName"] = "Alchemy",
-["parentProfessionID"] = 171,
 ["expansionName"] = "Midnight",
+["isPrimaryProfession"] = true,
+["professionName"] = "Midnight Alchemy",
 ["profession"] = 3,
 ["skillModifier"] = 0,
-["professionName"] = "Midnight Alchemy",
+["parentProfessionID"] = 171,
 ["maxSkillLevel"] = 100,
-["isPrimaryProfession"] = true,
+["parentProfessionName"] = "Alchemy",
 },
 [1230869] = {
 ["skillLevel"] = 55,
 ["professionID"] = 2906,
 ["sourceCounter"] = 20,
 ["parentProfessionName"] = "Alchemy",
-["parentProfessionID"] = 171,
 ["expansionName"] = "Midnight",
+["professionName"] = "Midnight Alchemy",
 ["profession"] = 3,
 ["skillModifier"] = 0,
-["professionName"] = "Midnight Alchemy",
+["parentProfessionID"] = 171,
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = true,
 },
@@ -403603,11 +403920,11 @@ CraftSimDB = {
 ["professionID"] = 2915,
 ["sourceCounter"] = 10,
 ["isPrimaryProfession"] = true,
-["professionName"] = "Midnight Leatherworking",
 ["parentProfessionID"] = 165,
+["expansionName"] = "Midnight",
 ["profession"] = 2,
 ["skillModifier"] = 0,
-["expansionName"] = "Midnight",
+["professionName"] = "Midnight Leatherworking",
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Leatherworking",
 },
@@ -403616,11 +403933,11 @@ CraftSimDB = {
 ["professionID"] = 2915,
 ["sourceCounter"] = 8,
 ["parentProfessionName"] = "Leatherworking",
-["parentProfessionID"] = 165,
 ["expansionName"] = "Midnight",
+["professionName"] = "Midnight Leatherworking",
 ["profession"] = 2,
 ["skillModifier"] = 40,
-["professionName"] = "Midnight Leatherworking",
+["parentProfessionID"] = 165,
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = true,
 },
@@ -403629,11 +403946,11 @@ CraftSimDB = {
 ["professionID"] = 2915,
 ["sourceCounter"] = 21,
 ["parentProfessionName"] = "Leatherworking",
-["expansionName"] = "Midnight",
 ["professionName"] = "Midnight Leatherworking",
+["parentProfessionID"] = 165,
 ["profession"] = 2,
 ["skillModifier"] = 0,
-["parentProfessionID"] = 165,
+["expansionName"] = "Midnight",
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = true,
 },
@@ -403642,11 +403959,11 @@ CraftSimDB = {
 ["professionID"] = 2915,
 ["sourceCounter"] = 7,
 ["isPrimaryProfession"] = true,
-["professionName"] = "Midnight Leatherworking",
 ["parentProfessionID"] = 165,
+["expansionName"] = "Midnight",
 ["profession"] = 2,
 ["skillModifier"] = 0,
-["expansionName"] = "Midnight",
+["professionName"] = "Midnight Leatherworking",
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Leatherworking",
 },
@@ -403655,11 +403972,11 @@ CraftSimDB = {
 ["professionID"] = 2906,
 ["sourceCounter"] = 4,
 ["isPrimaryProfession"] = true,
-["expansionName"] = "Midnight",
 ["professionName"] = "Midnight Alchemy",
+["parentProfessionID"] = 171,
 ["profession"] = 3,
 ["skillModifier"] = 0,
-["parentProfessionID"] = 171,
+["expansionName"] = "Midnight",
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Alchemy",
 },
@@ -403668,11 +403985,11 @@ CraftSimDB = {
 ["professionID"] = 2915,
 ["sourceCounter"] = 10,
 ["isPrimaryProfession"] = true,
-["professionName"] = "Midnight Leatherworking",
 ["parentProfessionID"] = 165,
+["expansionName"] = "Midnight",
 ["profession"] = 2,
 ["skillModifier"] = 0,
-["expansionName"] = "Midnight",
+["professionName"] = "Midnight Leatherworking",
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Leatherworking",
 },
@@ -403702,52 +404019,6 @@ CraftSimDB = {
 ["equippedGear"] = {
 ["profession"] = 3,
 ["isCooking"] = false,
-["tool"] = {
-["professionStats"] = {
-["multicraft"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "multicraft",
-["percentDivisionFactor"] = 1100,
-},
-["recipeDifficulty"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "recipedifficulty",
-["percentDivisionFactor"] = 1,
-},
-["craftingspeed"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "craftingspeed",
-["percentDivisionFactor"] = 2650,
-},
-["resourcefulness"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "resourcefulness",
-["percentDivisionFactor"] = 900,
-},
-["skill"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "skill",
-["percentDivisionFactor"] = 1,
-},
-["ingenuity"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "ingenuity",
-["percentDivisionFactor"] = 1000,
-},
-},
-},
 ["gear1"] = {
 ["professionStats"] = {
 ["multicraft"] = {
@@ -403771,6 +404042,13 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
+},
 ["resourcefulness"] = {
 ["value"] = 0,
 ["extraValues"] = {
@@ -403778,12 +404056,51 @@ CraftSimDB = {
 ["name"] = "resourcefulness",
 ["percentDivisionFactor"] = 900,
 },
+["ingenuity"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "ingenuity",
+["percentDivisionFactor"] = 1000,
+},
+},
+},
+["tool"] = {
+["professionStats"] = {
+["multicraft"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "multicraft",
+["percentDivisionFactor"] = 1100,
+},
+["recipeDifficulty"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "recipedifficulty",
+["percentDivisionFactor"] = 1,
+},
+["craftingspeed"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "craftingspeed",
+["percentDivisionFactor"] = 2650,
+},
 ["skill"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "skill",
 ["percentDivisionFactor"] = 1,
+},
+["resourcefulness"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -403817,19 +404134,19 @@ CraftSimDB = {
 ["name"] = "craftingspeed",
 ["percentDivisionFactor"] = 2650,
 },
-["resourcefulness"] = {
-["value"] = 0,
-["extraValues"] = {
-},
-["name"] = "resourcefulness",
-["percentDivisionFactor"] = 900,
-},
 ["skill"] = {
 ["value"] = 0,
 ["extraValues"] = {
 },
 ["name"] = "skill",
 ["percentDivisionFactor"] = 1,
+},
+["resourcefulness"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
 },
 ["ingenuity"] = {
 ["value"] = 0,
@@ -404044,12 +404361,12 @@ CraftSimDB = {
 ["baseDifficulty"] = 530,
 ["upperSkillTreshold"] = 530,
 ["lowerSkillThreshold"] = 0,
-["baseSkill"] = 7,
+["baseSkill"] = 8,
 ["recipeID"] = 1230866,
 ["bonusDifficulty"] = 0,
 ["ingenuityRefund"] = 176,
 ["bonusSkill"] = 0,
-["quality"] = 1.0132075548172,
+["quality"] = 1.01509428024292,
 ["guaranteedCraftingQualityID"] = 13,
 ["concentrationCost"] = 352,
 ["craftingQuality"] = 1,
@@ -404112,7 +404429,7 @@ CraftSimDB = {
 ["baseDifficulty"] = 0,
 ["upperSkillTreshold"] = 0,
 ["lowerSkillThreshold"] = 0,
-["baseSkill"] = 6,
+["baseSkill"] = 7,
 ["recipeID"] = 1233130,
 ["bonusDifficulty"] = 1,
 ["ingenuityRefund"] = 0,
@@ -404173,8 +404490,8 @@ CraftSimDB = {
 [11] = {
 [3] = {
 ["maxQuantity"] = 1000,
-["lastUpdated"] = 1773927437,
-["amount"] = 112,
+["lastUpdated"] = 1774062457,
+["amount"] = 152,
 ["rechargeTimePerPoint"] = 345600,
 ["currencyID"] = 3161,
 },
@@ -404230,7 +404547,7 @@ CraftSimDB = {
 ["isEnchantingRecipe"] = false,
 ["supportsCraftingStats"] = true,
 ["firstCraft"] = false,
-["categoryID"] = 2252,
+["numSkillUps"] = 1,
 ["isGatheringRecipe"] = false,
 ["learned"] = true,
 ["skillLineAbilityID"] = 52693,
@@ -404252,12 +404569,12 @@ CraftSimDB = {
 241305,
 241304,
 },
-["hasSingleItemOutput"] = true,
 ["maxTrivialLevel"] = 60,
+["hasSingleItemOutput"] = true,
 ["hyperlink"] = "|cnIQ1:|Hitem:241305::::::::80:258::13:1:3524::::::|h[Silvermoon Health Potion |A:Professions-ChatIcon-Quality-12-Tier1:17:15::1|a]|h|r",
 ["canSkillUp"] = true,
 ["favorite"] = false,
-["numSkillUps"] = 1,
+["categoryID"] = 2252,
 },
 [427214] = {
 ["sourceType"] = 0,
@@ -404350,8 +404667,8 @@ CraftSimDB = {
 ["alwaysUsesLowestQuality"] = true,
 ["supportsQualities"] = false,
 ["name"] = "Recycle Flasks",
-["hasSingleItemOutput"] = false,
 ["maxTrivialLevel"] = 25,
+["hasSingleItemOutput"] = false,
 ["hyperlink"] = "|cnIQ1:|Hitem:242638::::::::80:258:::1:3524::::::|h[Recycle Flasks]|h|r",
 ["canSkillUp"] = true,
 ["favorite"] = false,
@@ -410134,18 +410451,18 @@ CraftSimDB = {
 ["professionID"] = 2906,
 ["sourceCounter"] = 6,
 ["parentProfessionName"] = "Alchemy",
-["expansionName"] = "Midnight",
 ["professionName"] = "Midnight Alchemy",
+["parentProfessionID"] = 171,
 ["profession"] = 3,
 ["skillModifier"] = 0,
-["parentProfessionID"] = 171,
+["expansionName"] = "Midnight",
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = true,
 },
 [1230866] = {
-["skillLevel"] = 7,
+["skillLevel"] = 8,
 ["professionID"] = 2906,
-["sourceCounter"] = 1,
+["sourceCounter"] = 2,
 ["parentProfessionName"] = "Alchemy",
 ["professionName"] = "Midnight Alchemy",
 ["parentProfessionID"] = 171,
@@ -410160,11 +410477,11 @@ CraftSimDB = {
 ["professionID"] = 2871,
 ["sourceCounter"] = 6,
 ["parentProfessionName"] = "Alchemy",
-["expansionName"] = "Khaz Algar",
 ["professionName"] = "Khaz Algar Alchemy",
+["parentProfessionID"] = 171,
 ["profession"] = 3,
 ["skillModifier"] = 0,
-["parentProfessionID"] = 171,
+["expansionName"] = "Khaz Algar",
 ["maxSkillLevel"] = 100,
 ["isPrimaryProfession"] = true,
 },
@@ -410173,18 +410490,18 @@ CraftSimDB = {
 ["professionID"] = 2871,
 ["sourceCounter"] = 8,
 ["isPrimaryProfession"] = true,
-["professionName"] = "Khaz Algar Alchemy",
 ["parentProfessionID"] = 171,
+["expansionName"] = "Khaz Algar",
 ["profession"] = 3,
 ["skillModifier"] = 0,
-["expansionName"] = "Khaz Algar",
+["professionName"] = "Khaz Algar Alchemy",
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Alchemy",
 },
 [1233130] = {
-["skillLevel"] = 6,
+["skillLevel"] = 7,
 ["professionID"] = 2906,
-["sourceCounter"] = 1,
+["sourceCounter"] = 2,
 ["parentProfessionName"] = "Alchemy",
 ["professionName"] = "Midnight Alchemy",
 ["parentProfessionID"] = 171,
@@ -410199,11 +410516,11 @@ CraftSimDB = {
 ["professionID"] = 2906,
 ["sourceCounter"] = 11,
 ["isPrimaryProfession"] = true,
-["professionName"] = "Midnight Alchemy",
 ["parentProfessionID"] = 171,
+["expansionName"] = "Midnight",
 ["profession"] = 3,
 ["skillModifier"] = 0,
-["expansionName"] = "Midnight",
+["professionName"] = "Midnight Alchemy",
 ["maxSkillLevel"] = 100,
 ["parentProfessionName"] = "Alchemy",
 },
