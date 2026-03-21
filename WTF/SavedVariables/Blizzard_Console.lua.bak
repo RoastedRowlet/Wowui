@@ -1,28 +1,7 @@
 
 Blizzard_Console_SavedVars = {
 ["version"] = 3,
-["height"] = 300,
 ["messageHistory"] = {
-{
-"Reflection mode changed to 0",
-0,
-},
-{
-"Reflection downscale changed to 0",
-0,
-},
-{
-"Sunshafts quality changed to 0",
-0,
-},
-{
-"Refraction mode changed to 0",
-0,
-},
-{
-"Volume fog disabled.",
-0,
-},
 {
 "Particulate volumes disabled.",
 0,
@@ -4023,9 +4002,134 @@ Blizzard_Console_SavedVars = {
 "NetClient::HandleConnect()\n",
 0,
 },
+{
+"-------------------------------------------------- Previous Session --------------------------------------------------",
+0,
 },
-["isShown"] = false,
+{
+"Attempted to register existing command: SetDifficulty",
+0,
+},
+{
+"Got new connection 3",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x0000000040",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x0000008040",
+0,
+},
+{
+"Proficiency in item class 4 set to 0x0000000021",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x000000c040",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x000000c440",
+0,
+},
+{
+"Proficiency in item class 4 set to 0x0000000025",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x000000c460",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x000000e460",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x000010e460",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x000010e470",
+0,
+},
+{
+"Proficiency in item class 4 set to 0x0000000027",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x000010e470",
+0,
+},
+{
+"Proficiency in item class 4 set to 0x0000000027",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Time set to 3/20/2026 (Fri) 20:10",
+0,
+},
+{
+"Gamespeed set from 0.017 to 0.017",
+0,
+},
+{
+"Got new connection 3",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Skill 171 increased from 2 to 3",
+0,
+},
+{
+"Skill 2906 increased from 2 to 3",
+0,
+},
+{
+"Time set to 3/20/2026 (Fri) 20:26",
+0,
+},
+{
+"Time set to 3/20/2026 (Fri) 20:26",
+0,
+},
+{
+"Time set to 3/20/2026 (Fri) 20:29",
+0,
+},
+{
+"Time set to 3/20/2026 (Fri) 20:29",
+0,
+},
+{
+"Time set to 3/20/2026 (Fri) 20:38",
+0,
+},
+{
+"Time set to 3/20/2026 (Fri) 20:38",
+0,
+},
+{
+"Time set to 3/20/2026 (Fri) 21:27",
+0,
+},
+{
+"Time set to 3/20/2026 (Fri) 21:27",
+0,
+},
+},
+["height"] = 300,
 ["fontHeight"] = 14,
+["isShown"] = false,
 ["commandHistory"] = {
 },
 }
