@@ -19,4 +19,3 @@ git commit -m "%msg%"
 
 :: Push to the current remote branch
 git push
-pause
