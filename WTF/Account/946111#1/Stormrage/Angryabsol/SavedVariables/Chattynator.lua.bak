@@ -1,14 +1,6 @@
 
 CHATTYNATOR_CURRENT_PROFILE = "DEFAULT"
 CHATTYNATOR_COMMAND_HISTORY = {
-"/s /console floatingCombatTextPetSpellDamage 1",
-"/s /console floatingCombatTextCombatLogPeriodicSpells 1",
-"/s /AIO",
-"/s /aio",
-"/g nerd",
-"/g /aio",
-"/p didnt see the healer left",
-"/p that was weird",
 "/g honk",
 "/g /played",
 "/i my b there lol",
@@ -210,4 +202,6 @@ CHATTYNATOR_COMMAND_HISTORY = {
 "/s /run print(C_QuestLog.IsQuestFlaggedCompleted(93942))",
 "/s /QQ",
 "/s /way 31.62 26.20",
+"/s /simc",
+"/s /SIMC",
 }

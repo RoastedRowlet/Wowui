@@ -1,10 +1,6 @@
 
 CHATTYNATOR_CURRENT_PROFILE = "DEFAULT"
 CHATTYNATOR_COMMAND_HISTORY = {
-"/cw Doofmcgoofin-Stormrage done!",
-"/cw Doofmcgoofin-Stormrage got me a resource out of that too!",
-"/cw Doofmcgoofin-Stormrage it was just the green gem thing",
-"/cw Doofmcgoofin-Stormrage dazzling thorium",
 "/cw Aldvelothi-Stormrage whatever you want to tip!",
 "/cw Aldvelothi-Stormrage done!",
 "/cw Mimicked-Stormrage cand can do dagger",
@@ -203,4 +199,7 @@ CHATTYNATOR_COMMAND_HISTORY = {
 "/s /RELOAD",
 "/s /eui",
 "/cw Rollingursus-Stormrage Done!",
+"/s /eui",
+"/cw Possum-Stormrage /eui",
+"/cw Possum-Stormrage /reload",
 }

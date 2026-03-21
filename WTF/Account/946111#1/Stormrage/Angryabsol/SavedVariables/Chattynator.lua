@@ -1,8 +1,6 @@
 
 CHATTYNATOR_CURRENT_PROFILE = "DEFAULT"
 CHATTYNATOR_COMMAND_HISTORY = {
-"/g honk",
-"/g /played",
 "/i my b there lol",
 "/i didnt see you were stuck lmao",
 "/s /clique",
