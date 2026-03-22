@@ -1,16 +1,6 @@
 
 CHATTYNATOR_CURRENT_PROFILE = "DEFAULT"
 CHATTYNATOR_COMMAND_HISTORY = {
-" its simple",
-" but im a sucker to the like void form thing",
-" yeah i could definitely see myself gettng bored of it",
-" /simc",
-" /arcui",
-" /SIMC",
-" /simc",
-" i mean i knew it was op as fuck when donny was doing okay looking damage lmao",
-" I like how they kinda low key buffed arcane",
-" more ",
 " more ST more funnel less aoe",
 " but the other good specs took a 20%er",
 " I wish i woulda seen a good demo at some point this week",
@@ -210,4 +200,7 @@ CHATTYNATOR_COMMAND_HISTORY = {
 "/p /dt",
 "/p /details",
 "/p /reload",
+"/raid I say we try to 3 heal it and see what happens",
+"/raid oh no your 10 gold",
+"/s /RELOAD",
 }

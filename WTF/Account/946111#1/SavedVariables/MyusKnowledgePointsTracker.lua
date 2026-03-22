@@ -1,5 +1,20 @@
 
 MKPT_Config = {
+["global"] = {
+["state"] = {
+["firstTimeLoaded"] = false,
+},
+["position"] = {
+["y"] = -156.66650390625,
+["x"] = 0,
+},
+["ui"] = {
+["autohide"] = true,
+},
+["minimap"] = {
+["minimapPos"] = 61.80283058612044,
+},
+},
 ["profileKeys"] = {
 ["Taurostotem - Area 52"] = "Taurostotem - Area 52",
 ["Lonelylitten - Stormrage"] = "Lonelylitten - Stormrage",
@@ -10,17 +25,5 @@ MKPT_Config = {
 ["Barelynoer - Area 52"] = "Barelynoer - Area 52",
 ["Zappyxatu - Stormrage"] = "Zappyxatu - Stormrage",
 ["Minimeditite - Area 52"] = "Minimeditite - Area 52",
-},
-["global"] = {
-["position"] = {
-["y"] = -157.4998779296875,
-["x"] = 5.833213806152344,
-},
-["state"] = {
-["firstTimeLoaded"] = false,
-},
-["minimap"] = {
-["minimapPos"] = 61.80283058612044,
-},
 },
 }

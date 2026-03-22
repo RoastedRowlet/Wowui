@@ -66,7 +66,12 @@ end
 local function SetFontSafe(fs, path, size, flags)
     if not fs then return end
     local safePath = SafeFont(path)
-    fs:SetFont(safePath, size or 11, flags or "NONE")
+    size = size or 11
+    flags = flags or "NONE"
+    -- Skip if font hasn't changed
+    local curPath, curSize, curFlags = fs:GetFont()
+    if curPath == safePath and curSize == size and (curFlags or "NONE") == flags then return end
+    fs:SetFont(safePath, size, flags)
     -- Verify font was set; if not try forward-slash fallback, then Blizzard default
     if not fs:GetFont() then
         fs:SetFont("Fonts/FRIZQT__.TTF", size or 11, flags or "NONE")
@@ -122,73 +127,81 @@ local function ShowContextMenu(anchor, items)
 
         -- Close when clicking anywhere outside the menu
         local clickOff = CreateFrame("Frame")
-        clickOff:RegisterEvent("GLOBAL_MOUSE_DOWN")
         clickOff:SetScript("OnEvent", function()
             if ctxMenu:IsShown() and not ctxMenu:IsMouseOver() then
                 ctxMenu:Hide()
             end
         end)
+        ctxMenu:HookScript("OnShow", function()
+            clickOff:RegisterEvent("GLOBAL_MOUSE_DOWN")
+        end)
+        ctxMenu:HookScript("OnHide", function()
+            clickOff:UnregisterEvent("GLOBAL_MOUSE_DOWN")
+        end)
     end
 
-    -- Clear old item frames
+    -- Hide excess pooled buttons
     for _, btn in ipairs(ctxMenu._items) do
         btn:Hide()
     end
-    wipe(ctxMenu._items)
 
     local ITEM_H = 26
     local MENU_PAD = 4
     local maxTextW = 0
 
-    -- Measure text widths first
-    for _, item in ipairs(items) do
-        local tmp = ctxMenu:CreateFontString(nil, "OVERLAY")
-        SetFontSafe(tmp, GlobalFont(), 12, OutlineFlag())
-        tmp:SetText(item.text)
-        local w = tmp:GetStringWidth()
-        if w > maxTextW then maxTextW = w end
-        tmp:Hide()
+    -- Reusable measurement font string
+    if not ctxMenu._measureFS then
+        ctxMenu._measureFS = ctxMenu:CreateFontString(nil, "OVERLAY")
     end
+    local mfs = ctxMenu._measureFS
+    SetFontSafe(mfs, GlobalFont(), 12, OutlineFlag())
+    for _, item in ipairs(items) do
+        mfs:SetText(item.text)
+        local w = mfs:GetStringWidth()
+        if w > maxTextW then maxTextW = w end
+    end
+    mfs:SetText("")
+    mfs:Hide()
 
     local MENU_W = math.max(140, maxTextW + 40)
 
-    -- Create item buttons
+    -- Acquire or create item buttons from pool
+    local acR, acG, acB = C.accent.r, C.accent.g, C.accent.b
     for i, item in ipairs(items) do
-        local btn = CreateFrame("Button", nil, ctxMenu)
+        local btn = ctxMenu._items[i]
+        if not btn then
+            btn = CreateFrame("Button", nil, ctxMenu)
+            local hl = btn:CreateTexture(nil, "BACKGROUND", nil, 1)
+            hl:SetAllPoints()
+            btn._hl = hl
+            local lbl = btn:CreateFontString(nil, "OVERLAY")
+            lbl:SetPoint("LEFT", btn, "LEFT", 10, 0)
+            lbl:SetPoint("RIGHT", btn, "RIGHT", -10, 0)
+            lbl:SetJustifyH("LEFT")
+            btn._lbl = lbl
+            btn:SetScript("OnEnter", function()
+                btn._hl:SetColorTexture(1, 1, 1, E.DD_ITEM_HL_A)
+                btn._lbl:SetTextColor(acR, acG, acB, 1)
+            end)
+            btn:SetScript("OnLeave", function()
+                btn._hl:SetColorTexture(1, 1, 1, 0)
+                btn._lbl:SetTextColor(1, 1, 1, 1)
+            end)
+            ctxMenu._items[i] = btn
+        end
         btn:SetSize(MENU_W - MENU_PAD * 2, ITEM_H)
+        btn:ClearAllPoints()
         btn:SetPoint("TOPLEFT", ctxMenu, "TOPLEFT", MENU_PAD, -(MENU_PAD + (i - 1) * ITEM_H))
-
-        -- Highlight
-        local hl = btn:CreateTexture(nil, "BACKGROUND", nil, 1)
-        hl:SetAllPoints()
-        hl:SetColorTexture(1, 1, 1, 0)
-        btn._hl = hl
-
-        -- Label
-        local lbl = btn:CreateFontString(nil, "OVERLAY")
-        SetFontSafe(lbl, GlobalFont(), 12, OutlineFlag())
-        lbl:SetPoint("LEFT", btn, "LEFT", 10, 0)
-        lbl:SetPoint("RIGHT", btn, "RIGHT", -10, 0)
-        lbl:SetJustifyH("LEFT")
-        lbl:SetTextColor(1, 1, 1, 1)
-        lbl:SetText(item.text)
-        btn._lbl = lbl
-
-        local acR, acG, acB = C.accent.r, C.accent.g, C.accent.b
-        btn:SetScript("OnEnter", function()
-            hl:SetColorTexture(1, 1, 1, E.DD_ITEM_HL_A)
-            lbl:SetTextColor(acR, acG, acB, 1)
-        end)
-        btn:SetScript("OnLeave", function()
-            hl:SetColorTexture(1, 1, 1, 0)
-            lbl:SetTextColor(1, 1, 1, 1)
-        end)
+        btn._hl:SetColorTexture(1, 1, 1, 0)
+        SetFontSafe(btn._lbl, GlobalFont(), 12, OutlineFlag())
+        btn._lbl:SetTextColor(1, 1, 1, 1)
+        btn._lbl:SetText(item.text)
+        btn._onClick = item.onClick
         btn:SetScript("OnClick", function()
             ctxMenu:Hide()
-            if item.onClick then item.onClick() end
+            if btn._onClick then btn._onClick() end
         end)
-
-        table.insert(ctxMenu._items, btn)
+        btn:Show()
     end
 
     ctxMenu:SetSize(MENU_W, MENU_PAD * 2 + #items * ITEM_H)
@@ -287,7 +300,6 @@ local function AcquireRow(parent)
         r.text:SetWordWrap(true)
         r.text:SetNonSpaceWrap(false)
         r.frame:SetScript("OnEnter", function(self)
-            if EQT._onHoverIn then EQT._onHoverIn() end
             if EQT._qtMouseoverIn then EQT._qtMouseoverIn() end
             if self._questID and r._baseR then
                 local br, bg, bb = r._baseR, r._baseG, r._baseB
@@ -295,7 +307,6 @@ local function AcquireRow(parent)
             end
         end)
         r.frame:SetScript("OnLeave", function()
-            if EQT._onHoverOut then EQT._onHoverOut() end
             if EQT._qtMouseoverOut then EQT._qtMouseoverOut() end
             if r._baseR then r.text:SetTextColor(r._baseR, r._baseG, r._baseB) end
         end)
@@ -321,7 +332,7 @@ local function ReleaseRow(r)
     table.insert(rowPool, r)
 end
 local function ReleaseAll()
-    EQT.timerRows = {}
+    wipe(EQT.timerRows)
     for i = #EQT.rows, 1, -1 do ReleaseRow(EQT.rows[i]); EQT.rows[i] = nil end
 end
 
@@ -376,7 +387,6 @@ local function AcquireItemBtn()
     local cd = CreateFrame("Cooldown", nil, b, "CooldownFrameTemplate")
     cd:SetAllPoints(); b._cd = cd
     b:SetScript("OnEnter", function(self)
-        if EQT._onHoverIn then EQT._onHoverIn() end
         if EQT._qtMouseoverIn then EQT._qtMouseoverIn() end
         if self._itemID then
             GameTooltip:SetOwner(self, "ANCHOR_LEFT")
@@ -384,7 +394,6 @@ local function AcquireItemBtn()
         end
     end)
     b:SetScript("OnLeave", function()
-        if EQT._onHoverOut then EQT._onHoverOut() end
         if EQT._qtMouseoverOut then EQT._qtMouseoverOut() end
         GameTooltip:Hide()
     end)
@@ -465,6 +474,49 @@ local WIDGET_TYPE_DELVE_HEADER   = (Enum and Enum.UIWidgetVisualizationType and 
 local WIDGET_TYPE_SCENARIO_TIMER = 20
 local WIDGET_TYPE_STATUSBAR      = (Enum and Enum.UIWidgetVisualizationType and Enum.UIWidgetVisualizationType.StatusBar) or 2
 
+local function GetDelveLivesFromHeaderInfo(hi)
+    if not hi or not hi.currencies then
+        return nil, nil, nil
+    end
+
+    for _, c in ipairs(hi.currencies) do
+        local tooltip = tostring(c.tooltip or "")
+        if tooltip:find("Total deaths") then
+            local remaining = tonumber(c.text)
+            if remaining then
+                local deaths = tonumber(tooltip:match("[Tt]otal deaths:%s*(%d+)")) or 0
+                local maxLives = remaining + deaths
+                return remaining, maxLives, deaths
+            end
+        end
+    end
+
+    return nil, nil, nil
+end
+
+local function AddDelveLivesObjective(objectives, seenText, remaining, maxLives, deaths)
+    if not remaining then return end
+
+    local text
+    if maxLives and maxLives > 0 then
+        text = string.format("Lives Remaining: %d/%d", remaining, maxLives)
+    else
+        text = string.format("Lives Remaining: %d", remaining)
+    end
+
+    if deaths and deaths > 0 then
+        text = text .. string.format(" (Deaths: %d)", deaths)
+    end
+
+    if seenText[text] then return end
+    seenText[text] = true
+
+    table.insert(objectives, 1, {
+        text     = text,
+        finished = false,
+    })
+end
+
 local function GetScenarioSection()
     if not C_Scenario or not C_Scenario.IsInScenario then return nil end
     if not C_Scenario.IsInScenario() then return nil end
@@ -489,6 +541,7 @@ local function GetScenarioSection()
     -- Scan widget sets for Delve header (type 29) to get banner info
     local bannerTitle, bannerIcon, bannerTier = nil, nil, nil
     local isDelve = C_PartyInfo and C_PartyInfo.IsDelveInProgress and C_PartyInfo.IsDelveInProgress()
+    local delveLivesCur, delveLivesMax, delveDeathsUsed = nil, nil, nil
 
     local setsToScan = {}
     if widgetSetID and widgetSetID ~= 0 then setsToScan[#setsToScan+1] = widgetSetID end
@@ -512,6 +565,13 @@ local function GetScenarioSection()
                             bannerTitle = (wi.headerText and wi.headerText ~= "") and wi.headerText or bannerTitle
                             bannerTier  = (wi.tierText   and wi.tierText   ~= "") and wi.tierText  or bannerTier
                             bannerIcon  = wi.atlasIcon or wi.icon or bannerIcon
+
+                            local livesCur, livesMax, deathsUsed = GetDelveLivesFromHeaderInfo(wi)
+                            if livesCur ~= nil then
+                                delveLivesCur = livesCur
+                                delveLivesMax = livesMax
+                                delveDeathsUsed = deathsUsed
+                            end
                             isDelve = true
                         end
                     end
@@ -671,6 +731,11 @@ local function GetScenarioSection()
         end
     end
 
+    if isDelve and delveLivesCur ~= nil then
+        AddDelveLivesObjective(objectives, seenText, delveLivesCur, delveLivesMax, delveDeathsUsed)
+    end
+
+
     if #objectives == 0 and title == "Scenario" then return nil end
 
     return {
@@ -743,12 +808,13 @@ function EQT:ClearSectionCache()
     wipe(questSectionCache)
 end
 
+local _ql_watched, _ql_zone, _ql_world, _ql_prey, _ql_seen = {}, {}, {}, {}, {}
 local function GetQuestLists()
-    local watched = {}
-    local zone    = {}
-    local world   = {}
-    local prey    = {}
-    local seen    = {}
+    local watched = wipe(_ql_watched)
+    local zone    = wipe(_ql_zone)
+    local world   = wipe(_ql_world)
+    local prey    = wipe(_ql_prey)
+    local seen    = wipe(_ql_seen)
 
     if not C_QuestLog then return watched, zone, world, prey end
     local n = C_QuestLog.GetNumQuestLogEntries and C_QuestLog.GetNumQuestLogEntries() or 0
@@ -822,6 +888,56 @@ local function GetQuestLists()
 end
 
 -------------------------------------------------------------------------------
+-- Tracked Recipes
+-------------------------------------------------------------------------------
+local _recipes = {}
+local function GetTrackedRecipes()
+    local list = wipe(_recipes)
+    if not C_TradeSkillUI or not C_TradeSkillUI.GetRecipesTracked then return list end
+
+    local tracked = C_TradeSkillUI.GetRecipesTracked(false)
+    local recraft = C_TradeSkillUI.GetRecipesTracked(true)
+    if recraft then for _, v in ipairs(recraft) do table.insert(tracked, v) end end
+    if not tracked or #tracked == 0 then return list end
+
+    for _, tracked_entry in ipairs(tracked) do
+        local recipeID = type(tracked_entry) == "table" and (tracked_entry.recipeID or tracked_entry.recipeSchematicID) or tracked_entry
+        if recipeID then
+            local ok, schematic = pcall(C_TradeSkillUI.GetRecipeSchematic, recipeID, false)
+            if ok and schematic then
+                local entry = {
+                    recipeID = recipeID,
+                    name = schematic.name or ("Recipe #"..recipeID),
+                    reagents = {},
+                }
+                if schematic.reagentSlotSchematics then
+                    for _, slot in ipairs(schematic.reagentSlotSchematics) do
+                        if slot.reagentType == 1 and slot.reagents then
+                            for _, reagent in ipairs(slot.reagents) do
+                                local itemID = reagent.itemID
+                                if itemID then
+                                    local name = C_Item.GetItemNameByID(itemID) or ("Item "..itemID)
+                                    local owned = C_Item.GetItemCount(itemID, true) or 0
+                                    local needed = slot.quantityRequired or 1
+                                    table.insert(entry.reagents, {
+                                        name = name,
+                                        owned = owned,
+                                        needed = needed,
+                                        finished = owned >= needed,
+                                    })
+                                end
+                            end
+                        end
+                    end
+                end
+                table.insert(list, entry)
+            end
+        end
+    end
+    return list
+end
+
+-------------------------------------------------------------------------------
 -- Refresh
 -------------------------------------------------------------------------------
 local PAD_H    = 8
@@ -836,22 +952,28 @@ local BAR_PAD  = 2   -- gap between text and bar
 -- Forward declaration; defined after BuildFrame
 local UpdateInnerAlignment
 
-function EQT:Refresh()
+function EQT:Refresh(skipAlphaFlash)
     local f = self.frame
     if not f then return end
     local content = f.content
-    local width   = Cfg("width") or 220
+    local width   = Cfg("width") or 325
     local tc      = Cfg("titleColor")
     local oc      = Cfg("objColor")
+    local cc      = Cfg("completedColor") or C.complete
     local iqSize  = Cfg("questItemSize") or 22
 
-    -- Hide content during teardown+rebuild to prevent single-frame flicker
-    if f.inner then f.inner:SetAlpha(0) end
+    -- Hide content during teardown+rebuild to prevent single-frame flicker.
+    -- Skip when triggered by resize (content is already visible at ~correct size).
+    if f.inner and not skipAlphaFlash then f.inner:SetAlpha(0) end
 
     ReleaseAll(); ReleaseAllItems()
     for i = #self.sections, 1, -1 do ReleaseSection(self.sections[i]); self.sections[i] = nil end
 
     if f.bg then f.bg:SetColorTexture(Cfg("bgR") or 0, Cfg("bgG") or 0, Cfg("bgB") or 0, Cfg("bgAlpha") or 0.35) end
+    if f.topLine then
+        local tlc = Cfg("secColor") or C.section
+        f.topLine:SetColorTexture(tlc.r, tlc.g, tlc.b, 0.7)
+    end
     f:SetWidth(width)
     local contentW = math.max(10, width - PAD_H * 2 - 10)
     content:SetWidth(contentW)
@@ -882,12 +1004,10 @@ function EQT:Refresh()
         s.line:SetColorTexture(sc.r, sc.g, sc.b, 0.4)
         local br, bg, bb = sc.r, sc.g, sc.b
         s.frame:SetScript("OnEnter", function()
-            if EQT._onHoverIn then EQT._onHoverIn() end
             if EQT._qtMouseoverIn then EQT._qtMouseoverIn() end
             s.label:SetTextColor(br + (1 - br) * 0.5, bg + (1 - bg) * 0.5, bb + (1 - bb) * 0.5)
         end)
         s.frame:SetScript("OnLeave", function()
-            if EQT._onHoverOut then EQT._onHoverOut() end
             if EQT._qtMouseoverOut then EQT._qtMouseoverOut() end
             s.label:SetTextColor(br, bg, bb)
         end)
@@ -914,12 +1034,10 @@ function EQT:Refresh()
         s.line:SetColorTexture(sc2.r, sc2.g, sc2.b, 0.4)
         local br, bg, bb = sc2.r, sc2.g, sc2.b
         s.frame:SetScript("OnEnter", function()
-            if EQT._onHoverIn then EQT._onHoverIn() end
             if EQT._qtMouseoverIn then EQT._qtMouseoverIn() end
             s.label:SetTextColor(br + (1 - br) * 0.5, bg + (1 - bg) * 0.5, bb + (1 - bb) * 0.5)
         end)
         s.frame:SetScript("OnLeave", function()
-            if EQT._onHoverOut then EQT._onHoverOut() end
             if EQT._qtMouseoverOut then EQT._qtMouseoverOut() end
             s.label:SetTextColor(br, bg, bb)
         end)
@@ -961,19 +1079,23 @@ function EQT:Refresh()
         r.text:SetHeight(TEXT_H + 2)
         r.text:Show()
 
-        -- Timer bar background
-        if r.barBg then r.barBg:Hide(); r.barBg = nil end
-        r.barBg = r.frame:CreateTexture(nil, "BACKGROUND")
+        -- Timer bar background (reuse existing texture)
+        if not r.barBg then
+            r.barBg = r.frame:CreateTexture(nil, "BACKGROUND")
+        end
         r.barBg:SetColorTexture(C.barBg.r, C.barBg.g, C.barBg.b, 0.8)
+        r.barBg:ClearAllPoints()
         r.barBg:SetPoint("TOPLEFT",  r.frame, "TOPLEFT",  14, -(TEXT_H + 4))
         r.barBg:SetPoint("TOPRIGHT", r.frame, "TOPRIGHT", -4, -(TEXT_H + 4))
         r.barBg:SetHeight(TIMER_BAR_H)
         r.barBg:Show()
 
-        -- Timer bar fill
-        if r.barFill then r.barFill:Hide(); r.barFill = nil end
-        r.barFill = r.frame:CreateTexture(nil, "ARTWORK")
+        -- Timer bar fill (reuse existing texture)
+        if not r.barFill then
+            r.barFill = r.frame:CreateTexture(nil, "ARTWORK")
+        end
         r.barFill:SetColorTexture(C.timer.r, C.timer.g, C.timer.b, 0.85)
+        r.barFill:ClearAllPoints()
         r.barFill:SetPoint("TOPLEFT",    r.barBg, "TOPLEFT",    0, 0)
         r.barFill:SetPoint("BOTTOMLEFT", r.barBg, "BOTTOMLEFT", 0, 0)
         r.barFill:Show()
@@ -1039,9 +1161,10 @@ function EQT:Refresh()
         r.barFill:SetWidth(math.max(1, barW * pct))
         r.barFill:Show()
 
-        -- Percentage text (always recreate - reparenting loses font state)
-        if r.pctFS then r.pctFS:Hide(); r.pctFS = nil end
-        r.pctFS = r.frame:CreateFontString(nil, "OVERLAY")
+        -- Percentage text (reuse existing font string)
+        if not r.pctFS then
+            r.pctFS = r.frame:CreateFontString(nil, "OVERLAY")
+        end
         SetFontSafe(r.pctFS, GlobalFont(), BAR_H + 2, OutlineFlag())
         r.pctFS:SetJustifyH("RIGHT")
         r.pctFS:SetJustifyV("MIDDLE")
@@ -1064,7 +1187,8 @@ function EQT:Refresh()
 
     local function AddTitleRow(text, cr, cg, cb, qID, isAutoComplete, isComplete)
         local r = AcquireRow(content)
-        SetFontSafe(r.text, tfp, tfs, tff)
+        local fontSize = isComplete and (Cfg("completedFontSize") or tfs) or tfs
+        SetFontSafe(r.text, tfp, fontSize, tff)
         r.text:SetTextColor(cr, cg, cb)
         r._baseR, r._baseG, r._baseB = cr, cg, cb
         ApplyFontShadow(r.text)
@@ -1113,6 +1237,11 @@ function EQT:Refresh()
             r.frame:SetScript("OnClick", function(self, btn)
                 if btn == "RightButton" then
                     ShowContextMenu(self, {
+                        { text = "Focus", onClick = function()
+                            if C_SuperTrack and C_SuperTrack.SetSuperTrackedQuestID then
+                                C_SuperTrack.SetSuperTrackedQuestID(qID)
+                            end
+                        end },
                         { text = "Untrack Quest", onClick = function()
                             RemoveWatch(qID); EQT.dirty = true
                         end },
@@ -1122,6 +1251,8 @@ function EQT:Refresh()
                             StaticPopup_Show("ABANDON_QUEST", C_QuestLog.GetTitleForQuestID(qID))
                         end },
                     })
+                elseif IsShiftKeyDown() then
+                    RemoveWatch(qID); EQT.dirty = true
                 else
                     -- Suppress refresh so QUEST_LOG_UPDATE from SetSelectedQuest
                     -- doesn't rebuild the list and cause quests to jump
@@ -1189,7 +1320,7 @@ function EQT:Refresh()
         for i, q in ipairs(list) do
             local tr, tg, tb
             if q.isFailed then tr, tg, tb = C.failed.r, C.failed.g, C.failed.b
-            elseif q.isComplete then tr, tg, tb = C.complete.r, C.complete.g, C.complete.b
+            elseif q.isComplete then tr, tg, tb = cc.r, cc.g, cc.b
             else tr, tg, tb = tc.r, tc.g, tc.b end
             AddTitleRow(((startIdx or 0)+i).."  "..q.title, tr, tg, tb, q.questID, q.isAutoComplete, q.isComplete)
 
@@ -1204,9 +1335,9 @@ function EQT:Refresh()
                     -- Show progress bar instead of text
                     AddProgressRow(obj.numFulfilled or 0, obj.numRequired)
                 else
-                    local cr = obj.finished and C.complete.r or oc.r
-                    local cg = obj.finished and C.complete.g or oc.g
-                    local cb = obj.finished and C.complete.b or oc.b
+                    local cr = obj.finished and cc.r or oc.r
+                    local cg = obj.finished and cc.g or oc.g
+                    local cb = obj.finished and cc.b or oc.b
                     if obj.text and obj.text ~= "" then
                         AddObjRow(obj.text, cr, cg, cb)
                     end
@@ -1218,10 +1349,32 @@ function EQT:Refresh()
 
     local watched, zone, world, prey = GetQuestLists()
     local scenario = GetScenarioSection()
+    local recipes = GetTrackedRecipes()
+
+    -- Recipe Tracking section (top of tracker)
+    if #recipes > 0 then
+        local rc = Cfg("recipesCollapsed") or false
+        AddCollapsibleSection("RECIPE TRACKING", rc, function()
+            DB().recipesCollapsed = not Cfg("recipesCollapsed"); EQT:Refresh()
+        end)
+        if not rc then
+            for _, recipe in ipairs(recipes) do
+                AddTitleRow(recipe.name, tc.r, tc.g, tc.b)
+                for _, reagent in ipairs(recipe.reagents) do
+                    local cr = reagent.finished and cc.r or oc.r
+                    local cg = reagent.finished and cc.g or oc.g
+                    local cb = reagent.finished and cc.b or oc.b
+                    AddObjRow(reagent.owned.."/"..reagent.needed.." "..reagent.name, cr, cg, cb)
+                end
+                yOff = yOff + 3
+            end
+        end
+    end
 
     -- Scenario / Delve section
+    local anyAboveScenario = #recipes > 0
     if scenario then
-        if #watched > 0 or #zone > 0 or #world > 0 then yOff = yOff + 4 end
+        if anyAboveScenario or #watched > 0 or #zone > 0 or #world > 0 then yOff = yOff + 4 end
 
         -- Collapsible "DELVES" section header (only for delves, plain for other scenarios)
         local dc = false
@@ -1314,9 +1467,9 @@ function EQT:Refresh()
 
         -- Objectives
         for _, obj in ipairs(scenario.objectives) do
-            local cr = obj.finished and C.complete.r or oc.r
-            local cg = obj.finished and C.complete.g or oc.g
-            local cb = obj.finished and C.complete.b or oc.b
+            local cr = obj.finished and cc.r or oc.r
+            local cg = obj.finished and cc.g or oc.g
+            local cb = obj.finished and cc.b or oc.b
             if obj.objType == "progressbar" and obj.numRequired and obj.numRequired > 0 then
                 AddProgressRow(obj.numFulfilled or 0, obj.numRequired)
                 if obj.text and obj.text ~= "" then
@@ -1331,8 +1484,8 @@ function EQT:Refresh()
         end -- if not dc
     end
 
-    -- Order: Delves (above), Zone Quests, World Quests, Quests (bottom)
-    local anyAbove = scenario ~= nil
+    -- Order: Recipes (top), Delves, Zone Quests, World Quests, Quests (bottom)
+    local anyAbove = #recipes > 0 or scenario ~= nil
 
     if Cfg("showPreyQuests") and #prey > 0 then
         if anyAbove then yOff = yOff + 4 end; anyAbove = true
@@ -1366,13 +1519,13 @@ function EQT:Refresh()
         end)
         if not qc then RenderList(watched, 0) end
     end
-    if not scenario and #watched == 0 and #zone == 0 and #world == 0 and #prey == 0 then
+    if not scenario and #watched == 0 and #zone == 0 and #world == 0 and #prey == 0 and #recipes == 0 then
         AddObjRow("No tracked quests.", oc.r, oc.g, oc.b)
     end
 
     content:SetHeight(math.max(yOff, 1))
     local totalH = PAD_V + 2 + yOff + PAD_V + 5
-    local maxH = Cfg("height") or 600
+    local maxH = Cfg("height") or 500
     -- Outer frame stays at max height (consistent with unlock mode)
     f:SetHeight(maxH)
     -- Inner frame auto-collapses to content
@@ -1391,7 +1544,7 @@ function EQT:Refresh()
     end
 
     -- Restore visibility after rebuild is complete (prevents teardown flicker)
-    if f.inner then f.inner:SetAlpha(1) end
+    if f.inner and not skipAlphaFlash then f.inner:SetAlpha(1) end
 end
 
 -------------------------------------------------------------------------------
@@ -1413,6 +1566,8 @@ UpdateInnerAlignment = function(f)
         inner:SetPoint("TOPRIGHT", f, "TOPRIGHT", 0, 0)
     end
 end
+EQT.UpdateInnerAlignment = UpdateInnerAlignment
+EQT.PAD_V = PAD_V
 
 local function BuildFrame()
     local f = CreateFrame("Frame", "EUI_QuestTrackerFrame", UIParent)
@@ -1420,7 +1575,7 @@ local function BuildFrame()
 
     -- Inner frame holds all visual content; aligns within f based on setting
     local inner = CreateFrame("Frame", nil, f)
-    inner:EnableMouse(true)
+    inner:EnableMouse(false)
     f.inner = inner
 
     local bg = inner:CreateTexture(nil, "BACKGROUND")
@@ -1430,7 +1585,8 @@ local function BuildFrame()
     topLine:SetHeight(1)
     topLine:SetPoint("TOPLEFT",  inner, "TOPLEFT",  0, 0)
     topLine:SetPoint("TOPRIGHT", inner, "TOPRIGHT", 0, 0)
-    topLine:SetColorTexture(C.accent.r, C.accent.g, C.accent.b, 0.7)
+    local sc = Cfg("secColor") or C.section
+    topLine:SetColorTexture(sc.r, sc.g, sc.b, 0.7)
     if not Cfg("showTopLine") then topLine:Hide() end
     f.topLine = topLine
 
@@ -1438,11 +1594,12 @@ local function BuildFrame()
     sf:SetPoint("TOPLEFT",     inner, "TOPLEFT",     PAD_H, -(PAD_V + 2))
     sf:SetPoint("BOTTOMRIGHT", inner, "BOTTOMRIGHT", -(PAD_H + 10), PAD_V + 5)
     sf:EnableMouseWheel(true)
+    sf:EnableMouse(false)
     sf:SetClipsChildren(true)
     f.sf = sf
 
     local content = CreateFrame("Frame", nil, sf)
-    content:SetWidth(math.max(10, (Cfg("width") or 220) - PAD_H*2 - 10))
+    content:SetWidth(math.max(10, (Cfg("width") or 325) - PAD_H*2 - 10))
     content:SetHeight(1)
     sf:SetScrollChild(content); f.content = content
 
@@ -1452,7 +1609,6 @@ local function BuildFrame()
     scrollTrack:SetPoint("TOPRIGHT", inner, "TOPRIGHT", -4, -(PAD_V + 2 + 4))
     scrollTrack:SetPoint("BOTTOMRIGHT", inner, "BOTTOMRIGHT", -4, PAD_V + 5 + 4)
     scrollTrack:SetFrameLevel(sf:GetFrameLevel() + 3)
-    scrollTrack:Hide()
 
     local trackBg = scrollTrack:CreateTexture(nil, "BACKGROUND")
     trackBg:SetAllPoints()
@@ -1478,11 +1634,9 @@ local function BuildFrame()
     scrollHitArea:SetScript("OnDragStart", function() end)
     scrollHitArea:SetScript("OnDragStop", function() end)
     scrollHitArea:SetScript("OnEnter", function()
-        if EQT._onHoverIn then EQT._onHoverIn() end
         if EQT._qtMouseoverIn then EQT._qtMouseoverIn() end
     end)
     scrollHitArea:SetScript("OnLeave", function()
-        if EQT._onHoverOut then EQT._onHoverOut() end
         if EQT._qtMouseoverOut then EQT._qtMouseoverOut() end
     end)
 
@@ -1503,15 +1657,12 @@ local function BuildFrame()
         scrollThumb:SetScript("OnUpdate", nil)
     end
 
-    local scrollbarHovered = false
-    local FADE_DUR = 0.2
-    local hoverFade = 0   -- 0 = fully out, 1 = fully in
-    scrollTrack:SetAlpha(0)
-    scrollTrack:Show()
+    local SCROLLBAR_ALPHA = 0.35
 
     local function UpdateScrollThumb()
         local maxScroll = EllesmereUI.SafeScrollRange(sf)
-        if maxScroll <= 0 then scrollTrack:SetAlpha(0); hoverFade = 0; return end
+        if maxScroll <= 0 then scrollTrack:SetAlpha(0); return end
+        scrollTrack:SetAlpha(SCROLLBAR_ALPHA)
         local trackH = scrollTrack:GetHeight()
         local visH   = sf:GetHeight()
         local visibleRatio = visH / (visH + maxScroll)
@@ -1642,72 +1793,13 @@ local function BuildFrame()
         UpdateScrollThumb()
     end)
 
-    -- Event-driven hover fade (0.2s transition for scrollbar + bg opacity)
-    local frameHovered = false
-    local fadeFrame = CreateFrame("Frame")
-    fadeFrame:Hide()
-    fadeFrame:SetScript("OnUpdate", function(_, dt)
-        local target = frameHovered and 1 or 0
-        if hoverFade == target then fadeFrame:Hide(); return end
-        local speed = dt / FADE_DUR
-        if target > hoverFade then
-            hoverFade = math.min(1, hoverFade + speed)
-        else
-            hoverFade = math.max(0, hoverFade - speed)
-        end
-        -- Scrollbar alpha
-        local maxScroll = EllesmereUI.SafeScrollRange(sf)
-        if maxScroll > 0 then
-            scrollTrack:SetAlpha(hoverFade)
-        else
-            scrollTrack:SetAlpha(0)
-        end
-        -- Background opacity boost (0 to +0.15)
-        local baseA = Cfg("bgAlpha") or 0.6
-        local curA = baseA + 0.15 * hoverFade
-        f.bg:SetColorTexture(Cfg("bgR") or 0, Cfg("bgG") or 0, Cfg("bgB") or 0, math.min(1, curA))
-        -- Snap when close enough
-        if math.abs(hoverFade - target) < 0.01 then
-            hoverFade = target
-        end
-    end)
-
-    local function OnHoverIn()
-        if frameHovered then return end
-        frameHovered = true
-        scrollbarHovered = true
-        UpdateScrollThumb()
-        fadeFrame:Show()
-    end
-    local function OnHoverOut()
-        -- Defer one frame: OnLeave fires when entering a child frame too
-        C_Timer.After(0, function()
-            if f:IsMouseOver() then return end
-            frameHovered = false
-            scrollbarHovered = false
-            fadeFrame:Show()
-        end)
-    end
-    -- Use the outer frame for hover detection so child buttons don't break it.
-    -- f is always full-size; inner/sf/content children all live inside it.
-    f:SetScript("OnEnter", OnHoverIn)
-    f:SetScript("OnLeave", OnHoverOut)
-    inner:SetScript("OnEnter", OnHoverIn)
-    inner:SetScript("OnLeave", OnHoverOut)
-    sf:HookScript("OnEnter", OnHoverIn)
-    sf:HookScript("OnLeave", OnHoverOut)
-    -- Propagate hover from child buttons (quest rows, sections, items)
-    EQT._onHoverIn = OnHoverIn
-    EQT._onHoverOut = OnHoverOut
+    -- f is the full-height wrapper used by unlock mode and must NOT
+    -- intercept mouse events in the empty space below content.
+    f:EnableMouse(false)
 
     -- Stop all standalone frames when hidden (M+, raids, disabled, etc.)
     f:HookScript("OnHide", function()
-        fadeFrame:Hide()
         smoothFrame:Hide()
-        frameHovered = false
-        scrollbarHovered = false
-        hoverFade = 0
-        scrollTrack:SetAlpha(0)
         isSmoothing = false
     end)
 
@@ -1783,16 +1875,9 @@ local function CaptureBlizzardTracker()
         point = "CENTER", relPoint = "CENTER",
         x = cx - (uiW / 2), y = cy - (uiH / 2),
     }
-    -- Capture width if available
-    local w = ot:GetWidth()
-    if w and w > 50 then
-        db.width = math.floor(w * bScale / uiScale + 0.5)
-    end
-    -- Capture height as fixed height
-    local h = ot:GetHeight()
-    if h and h > 50 then
-        db.height = math.floor(h * bScale / uiScale + 0.5)
-    end
+    -- Width and height not captured -- Blizzard's tracker is anchored on both
+    -- axes so GetWidth()/GetHeight() return the full stretch, not content size.
+    -- Defaults of 325 width and 500 height are used instead.
     -- Capture text size from Blizzard's edit mode setting (index 2)
     if ot.GetSettingValue then
         local ok, val = pcall(ot.GetSettingValue, ot, 2)
@@ -1825,24 +1910,33 @@ function EQT:Init()
     if not Cfg("enabled") then return end
     self._needsCapture = not DB()._capturedOnce
     self.frame = BuildFrame()
-    self.frame:SetWidth(Cfg("width") or 220)
-    self.frame:SetHeight(Cfg("height") or 600)
+    self.frame:SetWidth(Cfg("width") or 325)
+    self.frame:SetHeight(Cfg("height") or 500)
     self:ApplyPosition()
 
     -- Hide/show Blizzard ObjectiveTrackerFrame based on setting
+    -- We move it far off-screen so its children can't intercept clicks.
+    if not EQT._hiddenFrame then
+        EQT._hiddenFrame = CreateFrame("Frame")
+        EQT._hiddenFrame:Hide()
+    end
     local function ApplyBlizzardTrackerVisibility()
         local ot = _G.ObjectiveTrackerFrame
         if not ot then return end
         if Cfg("hideBlizzardTracker") and Cfg("enabled") ~= false then
-            ot:SetAlpha(0)
-            ot:EnableMouse(false)
+            if not ot._eqtOrigParent then
+                ot._eqtOrigParent = ot:GetParent()
+            end
+            ot:SetParent(EQT._hiddenFrame)
         else
+            if ot._eqtOrigParent then
+                ot:SetParent(ot._eqtOrigParent)
+            end
             ot:SetAlpha(1)
-            ot:EnableMouse(true)
         end
     end
     EQT.ApplyBlizzardTrackerVisibility = ApplyBlizzardTrackerVisibility
-    -- Hook Show and SetAlpha so Blizzard/unlock mode can't restore it
+    -- Hook Show so Blizzard/unlock mode can't restore it
     local ot = _G.ObjectiveTrackerFrame
     if ot then
         local suppressing = false
@@ -1850,13 +1944,14 @@ function EQT:Init()
             if suppressing then return end
             if Cfg("hideBlizzardTracker") and Cfg("enabled") ~= false then
                 suppressing = true
-                ot:SetAlpha(0)
-                ot:EnableMouse(false)
+                if not ot._eqtOrigParent then
+                    ot._eqtOrigParent = ot:GetParent()
+                end
+                ot:SetParent(EQT._hiddenFrame)
                 suppressing = false
             end
         end
         hooksecurefunc(ot, "Show", SuppressBlizzTracker)
-        hooksecurefunc(ot, "SetAlpha", SuppressBlizzTracker)
     end
     C_Timer.After(1, ApplyBlizzardTrackerVisibility)
 
@@ -1875,21 +1970,11 @@ function EQT:Init()
             end
         end)
     end
-    -- Hook onto outer frame + inner + sf for mouseover visibility.
-    -- Child buttons propagate via EQT._onHoverIn/_onHoverOut which
-    -- already call OnHoverIn/OnHoverOut (handles scrollbar/bg fade).
-    -- For mouseover visibility mode, we also need QTMouseoverIn/Out.
+    -- Mouseover visibility propagates from interactive children only.
+    -- Do NOT hook OnEnter/OnLeave on inner/sf -- that re-enables mouse
+    -- and blocks clicks through to the game world.
     EQT._qtMouseoverIn = QTMouseoverIn
     EQT._qtMouseoverOut = QTMouseoverOut
-    self.frame:HookScript("OnEnter", QTMouseoverIn)
-    self.frame:HookScript("OnLeave", QTMouseoverOut)
-    local innerFrame = self.frame.inner or self.frame
-    innerFrame:HookScript("OnEnter", QTMouseoverIn)
-    innerFrame:HookScript("OnLeave", QTMouseoverOut)
-    if self.frame.sf then
-        self.frame.sf:HookScript("OnEnter", QTMouseoverIn)
-        self.frame.sf:HookScript("OnLeave", QTMouseoverOut)
-    end
 
     local function UpdateQTVisibility()
         if not EQT.frame then return end
@@ -1937,6 +2022,8 @@ function EQT:Init()
         "UI_WIDGET_UNIT_CHANGED",
         "QUEST_DATA_LOAD_RESULT","QUEST_POI_UPDATE","AREA_POIS_UPDATED",
         "SUPER_TRACKING_CHANGED",
+        "TRACKED_RECIPE_UPDATE",
+        "TRADE_SKILL_LIST_UPDATE",
     }
     local ZONE_EVENTS = {"ZONE_CHANGED_NEW_AREA","ZONE_CHANGED"}
 
@@ -1962,9 +2049,7 @@ function EQT:Init()
         -- Zone changed: clear section cache so quests re-categorize
         EQT:ClearSectionCache()
         C_Timer.After(0.5,  function() EQT.dirty = true end)
-        C_Timer.After(1.5,  function() EQT.dirty = true end)
-        C_Timer.After(3.0,  function() EQT.dirty = true end)
-        C_Timer.After(5.0,  function() EQT.dirty = true end)
+        C_Timer.After(2.0,  function() EQT.dirty = true end)
     end)
 
     -- Structural events always trigger a rebuild (quest actually added/removed)
@@ -1992,7 +2077,7 @@ function EQT:Init()
                 EQT._needsCapture = false
                 CaptureBlizzardTracker()
                 if EQT.frame then
-                    EQT.frame:SetWidth(Cfg("width") or 220)
+                    EQT.frame:SetWidth(Cfg("width") or 325)
                 end
             end
             EQT:ApplyPosition()
@@ -2099,37 +2184,61 @@ function EQT:Init()
 
     -- Set the WoW binding so GetBindingKey('EUI_QUESTITEM') works
     -- This uses SaveBindings which is the standard API
+    local _applyingQuestItemHotkey = false
+
     local function ApplyQuestItemHotkey()
         if InCombatLockdown() then return end
-        local key = Cfg("questItemHotkey")
-        local old1, old2 = GetBindingKey("EUI_QUESTITEM")
-        local hasOld = old1 or old2
-        local hasNew = key and key ~= ""
+        if _applyingQuestItemHotkey then return end
 
-        -- Nothing to do if no old binding and no new binding
-        if not hasOld and not hasNew then return end
+        _applyingQuestItemHotkey = true
 
-        -- Only modify bindings if something actually changes
-        if hasOld then
-            -- Only clear the old key if it differs from the new one
-            if old1 and old1 ~= key then SetBinding(old1) end
-            if old2 and old2 ~= key then SetBinding(old2) end
-        end
-        if hasNew then
-            SetBinding(key, "EUI_QUESTITEM")
-        end
+        local ok, err = pcall(function()
+            local key = Cfg("questItemHotkey")
+            local old1, old2 = GetBindingKey("EUI_QUESTITEM")
+            local hasOld = old1 or old2
+            local hasNew = key and key ~= ""
 
-        -- Only persist if the binding set is valid (1 = account, 2 = character)
-        local bindingSet = GetCurrentBindingSet()
-        if bindingSet and bindingSet >= 1 and bindingSet <= 2 then
-            SaveBindings(bindingSet)
-        end
+            if not hasOld and not hasNew then
+                return
+            end
 
-        -- Trigger attribute handler to re-register click binding
-        if not InCombatLockdown() then
+            local changed = false
+
+            if hasOld then
+                if old1 and old1 ~= key then
+                    SetBinding(old1)
+                    changed = true
+                end
+                if old2 and old2 ~= key then
+                    SetBinding(old2)
+                    changed = true
+                end
+            end
+
+            if hasNew then
+                local alreadyBound = (old1 == key or old2 == key)
+                if not alreadyBound then
+                    SetBinding(key, "EUI_QUESTITEM")
+                    changed = true
+                end
+            end
+
+            if changed then
+                local bindingSet = GetCurrentBindingSet()
+                if bindingSet and bindingSet >= 1 and bindingSet <= 2 then
+                    SaveBindings(bindingSet)
+                end
+            end
+
             local cur = qItemBtn:GetAttribute("item")
             qItemBtn:SetAttribute("item", nil)
             qItemBtn:SetAttribute("item", cur)
+        end)
+
+        _applyingQuestItemHotkey = false
+
+        if not ok and err then
+            geterrorhandler()(err)
         end
     end
     EQT.ApplyQuestItemHotkey = ApplyQuestItemHotkey
@@ -2171,9 +2280,20 @@ function EQT:Init()
     qItemFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
     qItemFrame:SetScript("OnEvent", function(_, event)
         if InCombatLockdown() then return end
-        if event == "PLAYER_REGEN_ENABLED" or event == "UPDATE_BINDINGS" then
+
+        if event == "PLAYER_REGEN_ENABLED" then
             ApplyQuestItemHotkey()
+            UpdateQuestItemAttribute()
+            return
         end
+
+        if event == "UPDATE_BINDINGS" then
+            local cur = qItemBtn:GetAttribute("item")
+            qItemBtn:SetAttribute("item", nil)
+            qItemBtn:SetAttribute("item", cur)
+            return
+        end
+
         UpdateQuestItemAttribute()
     end)
 
@@ -2196,47 +2316,26 @@ function EQT:Init()
                 group = "Basics",
                 order = 510,
                 noResize = false,
+                noAnchorTo = true,
                 getFrame = function() return f end,
                 getSize  = function()
                     return f:GetWidth(), f:GetHeight()
                 end,
                 setWidth = function(_, w)
-                    local minW = 120
-                    w = math.max(minW, math.floor(w + 0.5))
+                    w = math.max(120, math.floor(w + 0.5))
                     DB().width = w
-                    f:SetWidth(w)
-                    -- Suppress OnSizeChanged + disable word wrap during drag
-                    if not EQT._widthDragging then
-                        EQT._widthDragging = true
-                        for _, r in ipairs(EQT.rows) do
-                            if r.text then r.text:SetWordWrap(false) end
-                        end
-                    end
-                    -- Debounce the expensive full refresh
-                    if EQT._resizeTimer then EQT._resizeTimer:Cancel() end
-                    EQT._resizeTimer = C_Timer.NewTimer(0.15, function()
-                        EQT._resizeTimer = nil
-                        EQT._widthDragging = false
-                        EQT:Refresh()
-                    end)
-                    EllesmereUI.RepositionBarToMover("EQT_Tracker")
+                    EQT:Refresh(true)
                 end,
                 setHeight = function(_, h)
                     h = math.max(60, math.floor(h + 0.5))
                     DB().height = h
                     f:SetHeight(h)
-                    -- Lightweight inner resize (no full rebuild)
                     if f.inner then
-                        local totalH = (f.content and f.content:GetHeight() or 0) + PAD_V*2 + 7
+                        local totalH = (f.content and f.content:GetHeight() or 0) + PAD_V * 2 + 7
                         f.inner:SetHeight(math.min(totalH, h))
+                        UpdateInnerAlignment(f)
                     end
-                    -- Debounce the expensive full refresh
-                    if EQT._resizeTimer then EQT._resizeTimer:Cancel() end
-                    EQT._resizeTimer = C_Timer.NewTimer(0.15, function()
-                        EQT._resizeTimer = nil
-                        EQT:Refresh()
-                    end)
-                    EllesmereUI.RepositionBarToMover("EQT_Tracker")
+                    if f._updateScrollThumb then f._updateScrollThumb() end
                 end,
                 savePos = function(_, point, relPoint, x, y)
                     DB().pos = { point = point, relPoint = relPoint, x = x, y = y }
@@ -2267,7 +2366,7 @@ do
         if not EQT.frame then return end
         C_Timer.After(0, function()
             EQT:ApplyPosition()
-            EQT:Refresh()
+            EQT:Refresh(true)
         end)
     end)
 end
@@ -2284,7 +2383,7 @@ loader:SetScript("OnEvent", function(self, _, loaded)
             EQT._needsCapture = false
             CaptureBlizzardTracker()
             if EQT.frame then
-                EQT.frame:SetWidth(Cfg("width") or 220)
+                EQT.frame:SetWidth(Cfg("width") or 325)
                 EQT:ApplyPosition()
             end
         end

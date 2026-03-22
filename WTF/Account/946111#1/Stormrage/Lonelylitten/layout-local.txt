@@ -1,6 +1,6 @@
 Version: 1
 Frame: CraftScanScannerMenuButton
-FrameLevel: 146
+FrameLevel: 164
 Anchor: LEFT
 X: 47
 Y: -257
@@ -9,7 +9,7 @@ H: 53
 Frame: Grid2LayoutFrame
 FrameLevel: 1
 Anchor: CENTER
-X: -265
+X: -258
 Y: -200
 W: 180
 H: 100
@@ -20,17 +20,3 @@ X: 98
 Y: -48
 W: 1105
 H: 658
-Frame: EllesmereUIFrame
-FrameLevel: 100
-Anchor: TOP
-X: -127
-Y: 46
-W: 1500
-H: 1154
-Frame: PlayerSpellsFrame
-FrameLevel: 1
-Anchor: TOPLEFT
-X: 86
-Y: -23
-W: 1618
-H: 883

@@ -1,9 +1,6 @@
 
 CHATTYNATOR_CURRENT_PROFILE = "DEFAULT"
 CHATTYNATOR_COMMAND_HISTORY = {
-" I like how they kinda low key buffed arcane",
-" more ",
-" more ST more funnel less aoe",
 " but the other good specs took a 20%er",
 " I wish i woulda seen a good demo at some point this week",
 " every time i look at logs its doing 40% more damage than anyone else on beta",
@@ -204,4 +201,5 @@ CHATTYNATOR_COMMAND_HISTORY = {
 "/p /reload",
 "/raid I say we try to 3 heal it and see what happens",
 "/raid oh no your 10 gold",
+"/s /RELOAD",
 }

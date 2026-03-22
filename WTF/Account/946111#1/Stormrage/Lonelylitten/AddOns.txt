@@ -3,7 +3,7 @@ Grid2LDB: enabled
 Grid2Options: enabled
 Blizzard_ObjectiveTracker: enabled
 Blizzard_CompactRaidFrames: enabled
-ArcUI: disabled
+ArcUI: enabled
 UnhaltedUnitFrames: disabled
 MyCharacterPanel: disabled
 Blizzard_CharacterFrame: enabled
@@ -20,10 +20,10 @@ CraftScan: enabled
 Bartender4: disabled
 idTip: enabled
 EllesmereUINameplates: enabled
-EllesmereUIResourceBars: enabled
+EllesmereUIResourceBars: disabled
 EllesmereUIUnitFrames: enabled
 EllesmereUIActionBars: enabled
-EllesmereUICooldownManager: enabled
+EllesmereUICooldownManager: disabled
 EllesmereUICursor: disabled
 Auctionator: enabled
 AutoFlood: enabled
