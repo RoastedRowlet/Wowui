@@ -51,7 +51,7 @@ local loadedConfigNames = {};
 local function UpdateLoadedConfigNames()
 	if not Addon.loadedDataList then
 		PlayerSpellsFrame.TalentsFrame:UpdateTreeInfo();
-		Addon:UpdateScrollBox();
+		Addon:UpdateScrollBox(true);
 	end
 
 	table.wipe(loadedConfigNames);

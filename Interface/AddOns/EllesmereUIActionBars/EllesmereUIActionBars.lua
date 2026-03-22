@@ -209,7 +209,6 @@ local defaults = {
         procGlowScale = 1.0,
         procGlowEnabled = false,
         hideCastingAnimations = true,
-        disableTooltips = false,
         barPositions = {},
         bars = {},
     },
@@ -249,6 +248,8 @@ for _, info in ipairs(BAR_CONFIG) do
         overrideNumRows  = nil,
         growDirection    = "up",
         alwaysShowButtons = true,
+        showPagingArrows = false,
+        pagingArrowsRight = false,
         bgEnabled = false,
         bgColor = { r = 0, g = 0, b = 0, a = 0.5 },
         outOfRangeColoring = false,
@@ -267,6 +268,7 @@ for _, info in ipairs(BAR_CONFIG) do
         cooldownTextXOffset = 0,
         cooldownTextYOffset = 0,
         cooldownTextColor = { r = 1, g = 1, b = 1 },
+        disableTooltips = false,
         orientation = "horizontal",
         numIcons = 12,
         numRows = 1,
@@ -1108,6 +1110,40 @@ local function HideBlizzardBars()
     end
     if MainMenuBarPageNumber then MainMenuBarPageNumber:Hide() end
 
+    -- Replace ActionBar_PageUp / ActionBar_PageDown with versions that
+    -- read the current page from our state driver. The stock versions
+    -- call ChangeActionBarPage (a C function) which uses
+    -- GetActionBarPage() internally. Something in the stock pipeline
+    -- resets the page back to 1 after each change because we disabled
+    -- MainMenuBar. Our replacements read state-page from the MainBar
+    -- frame and call SetActionBarPage directly.
+    ActionBar_PageUp = function()
+        local mainFrame = barFrames and barFrames["MainBar"]
+        local curPage
+        if mainFrame then
+            curPage = tonumber(mainFrame:GetAttribute("state-page")) or 1
+        else
+            curPage = GetActionBarPage and GetActionBarPage() or 1
+        end
+        local maxPages = NUM_ACTIONBAR_PAGES or 6
+        local newPage = curPage + 1
+        if newPage > maxPages then newPage = 1 end
+        ChangeActionBarPage(newPage)
+    end
+    ActionBar_PageDown = function()
+        local mainFrame = barFrames and barFrames["MainBar"]
+        local curPage
+        if mainFrame then
+            curPage = tonumber(mainFrame:GetAttribute("state-page")) or 1
+        else
+            curPage = GetActionBarPage and GetActionBarPage() or 1
+        end
+        local maxPages = NUM_ACTIONBAR_PAGES or 6
+        local newPage = curPage - 1
+        if newPage < 1 then newPage = maxPages end
+        ChangeActionBarPage(newPage)
+    end
+
     -- Hide status tracking bar manager (unless user wants Blizzard data bars)
     if not (EAB.db and EAB.db.profile.useBlizzardDataBars) then
         if StatusTrackingBarManager then
@@ -1346,6 +1382,8 @@ local function GetOrCreateButton(slot, parent, info, index, skipProtected)
     return btn
 end
 
+local NUM_AB_PAGES = NUM_ACTIONBAR_PAGES or 6
+
 -------------------------------------------------------------------------------
 --  Paging State Conditions (class-specific)
 --  Format: "[condition] pageNumber; ..."
@@ -1375,12 +1413,190 @@ local function GetClassPagingConditions()
     -- Dragonriding (all classes)
     conditions = conditions .. "[bonusbar:5] 11; "
 
+    -- Manual page switching (pages 2-6)
+    -- [bar:N] responds to WoW's internal page set by ChangeActionBarPage().
+    -- The built-in keybinds and our paging arrows trigger this securely.
+    for i = 2, NUM_AB_PAGES do
+        conditions = conditions .. "[bar:" .. i .. "] " .. i .. "; "
+    end
 
     -- Default: page 1
     conditions = conditions .. "1"
 
     return conditions
 end
+
+-------------------------------------------------------------------------------
+--  Action Bar 1 Paging Arrows + Page Number
+-------------------------------------------------------------------------------
+local _pagingFrame    -- forward ref
+local LayoutPagingFrame  -- forward ref (used inside SetupPagingFrame closure)
+
+-- Sync the paging frame alpha with the MainBar frame.
+-- Called from mouseover, drag, combat, and refresh code paths.
+local function SyncPagingAlpha(alpha)
+    if _pagingFrame then _pagingFrame:SetAlpha(alpha) end
+end
+
+-- Paging arrows and keybind buttons use SecureActionButtonTemplate with
+-- type "macro". The macro uses [bar:N] conditionals to cycle through
+-- pages statically, so no dynamic attribute changes are needed.
+-- This runs in the protected execution path on hardware click.
+local _macroNext = "/changeactionbar [bar:6] 1"
+local _macroPrev = "/changeactionbar [bar:1] 6"
+for i = 1, NUM_AB_PAGES - 1 do
+    _macroNext = _macroNext .. "; [bar:" .. i .. "] " .. (i + 1)
+    _macroPrev = _macroPrev .. "; [bar:" .. (i + 1) .. "] " .. i
+end
+
+local function WireSecurePagingButton(btn, delta)
+    btn:SetAttribute("type", "macro")
+    btn:SetAttribute("macrotext", delta > 0 and _macroNext or _macroPrev)
+end
+
+local function SetupPagingFrame()
+    if _pagingFrame then return _pagingFrame end
+
+    local f = CreateFrame("Frame", "EABPagingFrame", UIParent)
+    f:SetSize(20, 52)
+    f:SetFrameStrata("MEDIUM")
+    f:SetFrameLevel(10)
+
+    -- Page number text
+    local pageText = f:CreateFontString(nil, "OVERLAY")
+    pageText:SetFont(STANDARD_TEXT_FONT, 12, "OUTLINE")
+    pageText:SetTextColor(1, 1, 1, 0.9)
+    pageText:SetText("1")
+    f._pageText = pageText
+
+    -- Up arrow (clicks Blizzard's ActionBarUpButton securely)
+    local upBtn = CreateFrame("Button", "EABPagingUp", f, "SecureActionButtonTemplate")
+    upBtn:SetSize(18, 18)
+    upBtn:RegisterForClicks("AnyUp", "AnyDown")
+    upBtn:SetNormalAtlas("UI-HUD-ActionBar-PageUpArrow-Up")
+    upBtn:SetPushedAtlas("UI-HUD-ActionBar-PageUpArrow-Down")
+    upBtn:SetDisabledAtlas("UI-HUD-ActionBar-PageUpArrow-Disabled")
+    upBtn:SetHighlightAtlas("UI-HUD-ActionBar-PageUpArrow-Mouseover")
+    f._upBtn = upBtn
+
+    -- Down arrow (clicks Blizzard's ActionBarDownButton securely)
+    local downBtn = CreateFrame("Button", "EABPagingDown", f, "SecureActionButtonTemplate")
+    downBtn:SetSize(18, 18)
+    downBtn:RegisterForClicks("AnyUp", "AnyDown")
+    downBtn:SetNormalAtlas("UI-HUD-ActionBar-PageDownArrow-Up")
+    downBtn:SetPushedAtlas("UI-HUD-ActionBar-PageDownArrow-Down")
+    downBtn:SetDisabledAtlas("UI-HUD-ActionBar-PageDownArrow-Disabled")
+    downBtn:SetHighlightAtlas("UI-HUD-ActionBar-PageDownArrow-Mouseover")
+    f._downBtn = downBtn
+
+    -- Update page text and handle combat visibility / vehicle state
+    f:RegisterEvent("ACTIONBAR_PAGE_CHANGED")
+    f:RegisterEvent("UPDATE_BONUS_ACTIONBAR")
+    f:RegisterEvent("UPDATE_OVERRIDE_ACTIONBAR")
+    f:RegisterEvent("UPDATE_VEHICLE_ACTIONBAR")
+    f:RegisterEvent("PLAYER_REGEN_DISABLED")
+    f:RegisterEvent("PLAYER_REGEN_ENABLED")
+    f:SetScript("OnEvent", function(_, event)
+        if event == "UPDATE_OVERRIDE_ACTIONBAR" or event == "UPDATE_VEHICLE_ACTIONBAR" then
+            LayoutPagingFrame()
+            return
+        end
+        if event == "PLAYER_REGEN_DISABLED" or event == "PLAYER_REGEN_ENABLED" then
+            local s = EAB and EAB.db and EAB.db.profile and EAB.db.profile.bars and EAB.db.profile.bars["MainBar"]
+            if s and not InCombatLockdown() then
+                local inCombat = (event == "PLAYER_REGEN_DISABLED")
+                if s.combatShowEnabled then
+                    if inCombat then f:Show() else f:Hide() end
+                elseif s.combatHideEnabled then
+                    if inCombat then f:Hide() else f:Show() end
+                end
+            end
+            return
+        end
+        local page = GetActionBarPage and GetActionBarPage() or 1
+        pageText:SetText(tostring(page))
+    end)
+
+    -- Initial text
+    local initPage = GetActionBarPage and GetActionBarPage() or 1
+    pageText:SetText(tostring(initPage))
+
+    -- Wire arrow buttons to cycle pages via secure macro
+    WireSecurePagingButton(upBtn, 1)
+    WireSecurePagingButton(downBtn, -1)
+
+    _pagingFrame = f
+    return f
+end
+
+LayoutPagingFrame = function()
+    local f = _pagingFrame
+    if not f then return end
+    if InCombatLockdown() then return end
+    local mainFrame = barFrames and barFrames["MainBar"]
+    if not mainFrame then f:Hide(); return end
+
+    local s = EAB and EAB.db and EAB.db.profile and EAB.db.profile.bars and EAB.db.profile.bars["MainBar"]
+    if not s then f:Hide(); return end
+
+    if s.alwaysHidden or s.enabled == false or not s.showPagingArrows then
+        f:Hide()
+        return
+    end
+
+    -- Hide during vehicle/override (paging doesn't apply)
+    local overridePage = mainFrame:GetAttribute("state-overridepage") or 0
+    if overridePage > 0 then
+        f:Hide()
+        return
+    end
+
+    local isVertical = (s.orientation == "vertical")
+    local base = barBaseSize and barBaseSize["MainBar"]
+    local btnH = (s.buttonHeight and s.buttonHeight > 0) and s.buttonHeight or (base and base.h or 45)
+    local arrowSize = math.max(14, math.floor(btnH * 0.4))
+    local textSize = math.max(10, math.floor(arrowSize * 0.7))
+    local gap = 2
+
+    f._upBtn:SetSize(arrowSize, arrowSize)
+    f._downBtn:SetSize(arrowSize, arrowSize)
+    f._pageText:SetFont(STANDARD_TEXT_FONT, textSize, "OUTLINE")
+
+    f._upBtn:ClearAllPoints()
+    f._downBtn:ClearAllPoints()
+    f._pageText:ClearAllPoints()
+
+    local onRight = s.pagingArrowsRight
+
+    if isVertical then
+        local totalW = arrowSize + gap + textSize * 2 + gap + arrowSize
+        f:SetSize(totalW, arrowSize)
+        f:ClearAllPoints()
+        if onRight then
+            f:SetPoint("TOP", mainFrame, "BOTTOM", 0, -4)
+        else
+            f:SetPoint("BOTTOM", mainFrame, "TOP", 0, 4)
+        end
+        f._downBtn:SetPoint("LEFT", f, "LEFT", 0, 0)
+        f._pageText:SetPoint("CENTER", f, "CENTER", 0, 0)
+        f._upBtn:SetPoint("RIGHT", f, "RIGHT", 0, 0)
+    else
+        local totalH = arrowSize + gap + textSize + gap + arrowSize
+        f:SetSize(arrowSize, totalH)
+        f:ClearAllPoints()
+        if onRight then
+            f:SetPoint("LEFT", mainFrame, "RIGHT", 4, 0)
+        else
+            f:SetPoint("RIGHT", mainFrame, "LEFT", -4, 0)
+        end
+        f._upBtn:SetPoint("TOP", f, "TOP", 0, 0)
+        f._pageText:SetPoint("CENTER", f, "CENTER", 0, 0)
+        f._downBtn:SetPoint("BOTTOM", f, "BOTTOM", 0, 0)
+    end
+
+    f:Show()
+end
+ns.LayoutPagingFrame = LayoutPagingFrame
 
 -------------------------------------------------------------------------------
 --  Secure Bar Frame Creation
@@ -1906,6 +2122,7 @@ local function ComputeBarLayout(key)
             if isVertical then
                 col = floor((i - 1) / stride)
                 row = (i - 1) % stride
+                if growDir == "UP" then row = stride - 1 - row end
             else
                 col = (i - 1) % stride
                 row = floor((i - 1) / stride)
@@ -2020,6 +2237,7 @@ local function LayoutBar(key)
             if isVertical then
                 col = floor((i - 1) / stride)
                 row = (i - 1) % stride
+                if growDir == "UP" then row = stride - 1 - row end
             else
                 col = (i - 1) % stride
                 row = floor((i - 1) / stride)
@@ -2043,7 +2261,7 @@ local function LayoutBar(key)
                 yOff = -(row * stepH)
                 anchor = "TOPLEFT"
             elseif growDir == "UP" then
-                -- Icon 1 at bottom, grows upward
+                -- Icon 1 at top, grows upward (row flipped so highest row index = bottom)
                 xOff = col * stepW
                 yOff = row * stepH
                 anchor = "BOTTOMLEFT"
@@ -2069,12 +2287,12 @@ local function LayoutBar(key)
                 btn.AutoCastOverlay:SetAllPoints(btn)
             end
 
-            -- Resize the spell activation alert (proc glow / assisted highlight)
-            -- to match the button size; Blizzard sizes it for default 45px buttons.
-            -- Only resize when using custom proc glows; the default Blizzard
-            -- glow intentionally extends past the button edges.
+            -- Pin SpellActivationAlert to button bounds when using custom proc
+            -- glows. When custom glows are off, leave Blizzard's alert
+            -- completely untouched so the native glow sizes itself correctly.
             if btn.SpellActivationAlert and p and p.procGlowEnabled ~= false then
                 btn.SpellActivationAlert:SetAllPoints(btn)
+                btn.SpellActivationAlert:SetScale(1)
             end
 
             -- Hide profession quality diamond overlays (added in Dragonflight)
@@ -2211,6 +2429,55 @@ local function LayoutBar(key)
     -- Propagate anchor chain so anything anchored to this bar follows the resize
     if EllesmereUI and EllesmereUI.PropagateAnchorChain then
         EllesmereUI.PropagateAnchorChain(key)
+    end
+
+    -- Position paging arrows after MainBar layout
+    if key == "MainBar" then
+        if not _pagingFrame then SetupPagingFrame() end
+        LayoutPagingFrame()
+        -- Set up secure paging keybind overrides (once, out of combat).
+        -- Redirects NEXTACTIONPAGE / PREVIOUSACTIONPAGE to hidden secure
+        -- buttons so page cycling works in combat without taint.
+        if _pagingFrame and not _pagingFrame._pageBindsSet and not InCombatLockdown() then
+            _pagingFrame._pageBindsSet = true
+            local nextBtn = CreateFrame("Button", "EABPageNext", UIParent, "SecureActionButtonTemplate")
+            nextBtn:SetSize(1, 1)
+            nextBtn:SetPoint("TOPLEFT", UIParent, "TOPLEFT", -200, 200)
+            nextBtn:SetAlpha(0)
+            nextBtn:RegisterForClicks("AnyUp", "AnyDown")
+            WireSecurePagingButton(nextBtn, 1)
+
+            local prevBtn = CreateFrame("Button", "EABPagePrev", UIParent, "SecureActionButtonTemplate")
+            prevBtn:SetSize(1, 1)
+            prevBtn:SetPoint("TOPLEFT", UIParent, "TOPLEFT", -200, 200)
+            prevBtn:SetAlpha(0)
+            prevBtn:RegisterForClicks("AnyUp", "AnyDown")
+            WireSecurePagingButton(prevBtn, -1)
+
+            local function ApplyPageBindings()
+                if InCombatLockdown() then return end
+                ClearOverrideBindings(_pagingFrame)
+                local nextKeys = { GetBindingKey("NEXTACTIONPAGE") }
+                local prevKeys = { GetBindingKey("PREVIOUSACTIONPAGE") }
+                for _, k in ipairs(nextKeys) do
+                    SetOverrideBindingClick(_pagingFrame, true, k, "EABPageNext")
+                end
+                for _, k in ipairs(prevKeys) do
+                    SetOverrideBindingClick(_pagingFrame, true, k, "EABPagePrev")
+                end
+            end
+            ApplyPageBindings()
+            -- Re-apply if user changes keybinds
+            _pagingFrame:RegisterEvent("UPDATE_BINDINGS")
+            local origOnEvent = _pagingFrame:GetScript("OnEvent")
+            _pagingFrame:SetScript("OnEvent", function(self, event, ...)
+                if event == "UPDATE_BINDINGS" then
+                    if not InCombatLockdown() then ApplyPageBindings() end
+                    return
+                end
+                if origOnEvent then origOnEvent(self, event, ...) end
+            end)
+        end
     end
 end
 
@@ -2384,7 +2651,7 @@ local function EnsureBorders(btn)
     if btn._eabBorders then return btn._eabBorders end
     local PP = EllesmereUI and EllesmereUI.PP
     if PP then
-        PP.CreateBorder(btn, 0, 0, 0, 1, 1, "OVERLAY", -1)
+        PP.CreateBorder(btn, 0, 0, 0, 1, 1, "OVERLAY", 2)
         btn._eabBorders = btn._ppBorders
     end
     return btn._eabBorders
@@ -2545,9 +2812,11 @@ local function ApplyShapeToButton(btn, shape, brdOn, brdR, brdG, brdB, brdA, brd
                 end
             end
         end
-        -- Show square borders
-        if btn._eabBorders then
+        -- Show square borders only if border is enabled
+        if btn._eabBorders and brdOn then
             PP.ShowBorder(btn)
+        elseif btn._eabBorders then
+            PP.HideBorder(btn)
         end
         -- Re-enable Blizzard's Border texture (was hidden for custom shapes)
         if btn.Border then
@@ -2863,6 +3132,7 @@ function EAB:ApplyBarOpacity(barKey)
     if not frame then return end
     if not s.mouseoverEnabled then
         frame:SetAlpha(s.mouseoverAlpha or 1)
+        if barKey == "MainBar" then SyncPagingAlpha(s.mouseoverAlpha or 1) end
     end
 end
 
@@ -3259,9 +3529,10 @@ function EAB:ApplyRangeColoring()
                 end
                 -- Only update visuals when state actually changes
                 if (wasOut ~= nil) == (isOut) then return end
+                local bars = EAB.db.profile.bars
                 for _, info in ipairs(BAR_CONFIG) do
                     local btns = barButtons[info.key]
-                    local s = EAB.db.profile.bars[info.key]
+                    local s = bars[info.key]
                     if btns and s and s.outOfRangeColoring then
                         for _, btn in ipairs(btns) do
                             if GetButtonActionSlot(btn) == slot then
@@ -3340,6 +3611,24 @@ function EAB:ApplyRangeColoring()
         local s = self.db.profile.bars[key]
         if s and s.outOfRangeColoring then
             EnableRangeCheckForBar(key)
+            -- Immediate sweep: apply tint for slots already out of range
+            -- since EnableActionRangeCheck does not fire an initial event.
+            local btns = barButtons[key]
+            if btns then
+                for _, btn in ipairs(btns) do
+                    local slot = GetButtonActionSlot(btn)
+                    if slot and HasAction(slot) then
+                        local inRange = IsActionInRange(slot)
+                        if inRange == false then
+                            _range.outOfRange[slot] = true
+                            ApplyRangeTint(btn, true, s)
+                        else
+                            _range.outOfRange[slot] = nil
+                            ApplyRangeTint(btn, false, s)
+                        end
+                    end
+                end
+            end
         else
             DisableRangeCheckForBar(key)
         end
@@ -3436,6 +3725,7 @@ local function AttachHoverHooks(barKey)
             state.fadeDir = "in"
             StopFade(frame)
             FadeTo(frame, 1, s.mouseoverSpeed or 0.15)
+            if barKey == "MainBar" then SyncPagingAlpha(1) end
         end
     end
 
@@ -3449,6 +3739,7 @@ local function AttachHoverHooks(barKey)
             if s and s.mouseoverEnabled and state.fadeDir ~= "out" then
                 state.fadeDir = "out"
                 FadeTo(frame, 0, s.mouseoverSpeed or 0.15)
+                if barKey == "MainBar" then SyncPagingAlpha(0) end
             end
         end)
     end
@@ -3463,6 +3754,7 @@ local function AttachHoverHooks(barKey)
                 if s and s.mouseoverEnabled and state.fadeDir ~= "out" then
                     state.fadeDir = "out"
                     FadeTo(frame, 0, s.mouseoverSpeed or 0.15)
+                    if barKey == "MainBar" then SyncPagingAlpha(0) end
                 end
             end)
         end
@@ -3502,11 +3794,13 @@ function EAB:RefreshMouseover()
                 frame:SetAlpha(0)
                 local state = hoverStates[key]
                 if state then state.fadeDir = "out" end
+                if key == "MainBar" then SyncPagingAlpha(0) end
             else
                 StopFade(frame)
                 frame:SetAlpha(s.mouseoverAlpha or 1)
                 local state = hoverStates[key]
                 if state then state.fadeDir = nil end
+                if key == "MainBar" then SyncPagingAlpha(s.mouseoverAlpha or 1) end
             end
         end
     end
@@ -4772,7 +5066,8 @@ function EAB.AnchorVehicleButton()
                 and EAB.db.profile.barPositions["VehicleExit"]
     btn:ClearAllPoints()
     if pos then
-        btn:SetPoint(pos.point, UIParent, pos.relPoint or pos.point,
+        local pt = pos.point
+        btn:SetPoint(pt, UIParent, pos.relPoint or pt,
                      pos.x, pos.y)
     else
         local bar1 = barFrames["MainBar"]
@@ -5006,8 +5301,9 @@ local function RestoreBarPositions()
             -- Skip for unlock-anchored bars (anchor system is authority)
             local anchored = EllesmereUI and EllesmereUI.IsUnlockAnchored and EllesmereUI.IsUnlockAnchored(key)
             if not anchored or not frame:GetLeft() then
+                local pt = pos.point
                 frame:ClearAllPoints()
-                frame:SetPoint(pos.point, UIParent, pos.relPoint, pos.x, pos.y)
+                frame:SetPoint(pt, UIParent, pos.relPoint or pt, pos.x, pos.y)
             end
         end
     end
@@ -5105,7 +5401,8 @@ local function RegisterWithUnlockMode()
             loadPos = function()
                 local pos = EAB.db.profile.barPositions[info.key]
                 if not pos then return nil end
-                return { point = pos.point, relPoint = pos.relPoint or pos.point, x = pos.x, y = pos.y }
+                local pt = pos.point
+                return { point = pt, relPoint = pos.relPoint or pt, x = pos.x, y = pos.y }
             end,
             clearPos = function()
                 EAB.db.profile.barPositions[info.key] = nil
@@ -5114,8 +5411,9 @@ local function RegisterWithUnlockMode()
                 local pos = EAB.db.profile.barPositions[info.key]
                 local frame = barFrames[info.key]
                 if pos and frame then
+                    local pt = pos.point
                     frame:ClearAllPoints()
-                    frame:SetPoint(pos.point, UIParent, pos.relPoint, pos.x, pos.y)
+                    frame:SetPoint(pt, UIParent, pos.relPoint or pt, pos.x, pos.y)
                 end
             end,
         })
@@ -5145,16 +5443,19 @@ local function RegisterWithUnlockMode()
                             point = point, relPoint = relPoint or point, x = x, y = y,
                         }
                     end
-                    local holder = blizzMovableHolders[bk]
-                    if holder and point and x and y and not InCombatLockdown() then
-                        holder:ClearAllPoints()
-                        holder:SetPoint(point, UIParent, relPoint or point, x, y)
+                    if not EllesmereUI._unlockActive then
+                        local holder = blizzMovableHolders[bk]
+                        if holder and point and x and y and not InCombatLockdown() then
+                            holder:ClearAllPoints()
+                            holder:SetPoint(point, UIParent, relPoint or point, x, y)
+                        end
                     end
                 end,
                 loadPos = function()
                     local pos = EAB.db.profile.barPositions[bk]
                     if not pos then return nil end
-                    return { point = pos.point, relPoint = pos.relPoint or pos.point, x = pos.x, y = pos.y }
+                    local pt = pos.point
+                    return { point = pt, relPoint = pos.relPoint or pt, x = pos.x, y = pos.y }
                 end,
                 clearPos = function()
                     EAB.db.profile.barPositions[bk] = nil
@@ -5165,7 +5466,8 @@ local function RegisterWithUnlockMode()
                     if not holder or InCombatLockdown() then return end
                     holder:ClearAllPoints()
                     if pos then
-                        holder:SetPoint(pos.point, UIParent, pos.relPoint or pos.point, pos.x, pos.y)
+                        local pt = pos.point
+                        holder:SetPoint(pt, UIParent, pos.relPoint or pt, pos.x, pos.y)
                     else
                         holder:SetPoint("CENTER", UIParent, "CENTER", 0, -200)
                     end
@@ -5193,7 +5495,7 @@ local function RegisterWithUnlockMode()
                             point = point, relPoint = relPoint or point, x = x, y = y,
                         }
                     end
-                    if not InCombatLockdown() then
+                    if not EllesmereUI._unlockActive and not InCombatLockdown() then
                         vBtn:ClearAllPoints()
                         vBtn:SetPoint(point, UIParent, relPoint or point, x, y)
                     end
@@ -5201,7 +5503,8 @@ local function RegisterWithUnlockMode()
                 loadPos = function()
                     local pos = EAB.db.profile.barPositions["VehicleExit"]
                     if not pos then return nil end
-                    return { point = pos.point, relPoint = pos.relPoint or pos.point, x = pos.x, y = pos.y }
+                    local pt = pos.point
+                    return { point = pt, relPoint = pos.relPoint or pt, x = pos.x, y = pos.y }
                 end,
                 clearPos = function()
                     EAB.db.profile.barPositions["VehicleExit"] = nil
@@ -5612,18 +5915,23 @@ function EAB:FinishSetup()
         ActionButton1:SetAttribute("showgrid", 0)
     end
 
-    -- Suppress action bar tooltips when the global setting is enabled.
+    -- Suppress action bar tooltips per-bar when the setting is enabled.
     -- Hooks GameTooltip:SetAction/SetPetAction which Blizzard action
     -- buttons call on hover. Zero per-frame cost.
     if GameTooltip then
-        local function ShouldHideTooltip()
-            return EAB.db and EAB.db.profile.disableTooltips
+        local function ShouldHideTooltip(tip)
+            local owner = tip:GetOwner()
+            if not owner then return false end
+            local info = buttonToBar[owner]
+            if not info then return false end
+            local s = EAB.db and EAB.db.profile.bars[info.barKey]
+            return s and s.disableTooltips
         end
         hooksecurefunc(GameTooltip, "SetAction", function(self)
-            if ShouldHideTooltip() then self:Hide() end
+            if ShouldHideTooltip(self) then self:Hide() end
         end)
         hooksecurefunc(GameTooltip, "SetPetAction", function(self)
-            if ShouldHideTooltip() then self:Hide() end
+            if ShouldHideTooltip(self) then self:Hide() end
         end)
     end
 
@@ -5643,6 +5951,7 @@ function EAB:FinishSetup()
                         if s and s.mouseoverEnabled and state.fadeDir ~= "out" then
                             state.fadeDir = "out"
                             FadeTo(state.frame, 0, s.mouseoverSpeed or 0.15)
+                            if key == "MainBar" then SyncPagingAlpha(0) end
                         end
                     end
                 end
@@ -5759,6 +6068,7 @@ function EAB:FinishSetup()
                         StopFade(frame)
                         frame:SetAlpha(s.mouseoverAlpha or 1)
                         if state then state.fadeDir = "in" end
+                        if key == "MainBar" then SyncPagingAlpha(s.mouseoverAlpha or 1) end
                     end
                 else
                     -- Restore original strata (only if we changed it)
@@ -5775,6 +6085,7 @@ function EAB:FinishSetup()
                             StopFade(frame)
                             FadeTo(frame, 0, s.mouseoverSpeed or 0.15)
                             if state then state.fadeDir = "out" end
+                            if key == "MainBar" then SyncPagingAlpha(0) end
                         end
                     end
                 end
@@ -6454,14 +6765,12 @@ local function RegisterDataBarsWithUnlockMode()
                 setWidth = function(_, w)
                     local s = EAB.db.profile.bars[bk]
                     if s then s.width = math.floor(w + 0.5) end
-                    local frame = dataBarFrames[bk]
-                    if frame then frame:SetWidth(w) end
+                    ApplyDataBarLayout(bk)
                 end,
                 setHeight = function(_, h)
                     local s = EAB.db.profile.bars[bk]
                     if s then s.height = math.floor(h + 0.5) end
-                    local frame = dataBarFrames[bk]
-                    if frame then frame:SetHeight(h) end
+                    ApplyDataBarLayout(bk)
                 end,
                 savePos = function(_, point, relPoint, x, y)
                     if point and x and y then
@@ -6469,16 +6778,19 @@ local function RegisterDataBarsWithUnlockMode()
                             point = point, relPoint = relPoint or point, x = x, y = y,
                         }
                     end
-                    local frame = dataBarFrames[bk]
-                    if frame and point and x and y then
-                        frame:ClearAllPoints()
-                        frame:SetPoint(point, UIParent, relPoint or point, x, y)
+                    if not EllesmereUI._unlockActive then
+                        local frame = dataBarFrames[bk]
+                        if frame and point and x and y then
+                            frame:ClearAllPoints()
+                            frame:SetPoint(point, UIParent, relPoint or point, x, y)
+                        end
                     end
                 end,
                 loadPos = function()
                     local pos = EAB.db.profile.barPositions[bk]
                     if not pos then return nil end
-                    return { point = pos.point, relPoint = pos.relPoint or pos.point, x = pos.x, y = pos.y }
+                    local pt = pos.point
+                    return { point = pt, relPoint = pos.relPoint or pt, x = pos.x, y = pos.y }
                 end,
                 clearPos = function()
                     EAB.db.profile.barPositions[bk] = nil
@@ -7219,10 +7531,12 @@ local function RegisterExtraBarsWithUnlockMode()
                             point = point, relPoint = relPoint or point, x = x, y = y,
                         }
                     end
-                    local holder = extraBarHolders[bk]
-                    if holder and point and x and y then
-                        holder:ClearAllPoints()
-                        holder:SetPoint(point, UIParent, relPoint or point, x, y)
+                    if not EllesmereUI._unlockActive then
+                        local holder = extraBarHolders[bk]
+                        if holder and point and x and y then
+                            holder:ClearAllPoints()
+                            holder:SetPoint(point, UIParent, relPoint or point, x, y)
+                        end
                     end
                 end,
                 loadPos = function()

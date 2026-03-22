@@ -1,8 +1,9 @@
 # TomTom
 
-## [v4.2.23-release](https://github.com/jnwhiteh/TomTom/tree/v4.2.23-release) (2026-03-12)
-[Full Changelog](https://github.com/jnwhiteh/TomTom/commits/v4.2.23-release) [Previous Releases](https://github.com/jnwhiteh/TomTom/releases)
+## [v4.2.24-release](https://github.com/jnwhiteh/TomTom/tree/v4.2.24-release) (2026-03-14)
+[Full Changelog](https://github.com/jnwhiteh/TomTom/commits/v4.2.24-release) [Previous Releases](https://github.com/jnwhiteh/TomTom/releases)
 
+- Update frFR locale (thanks Tolsow!)  
 - Guard set waypoint from objectives  
 - Fix some issues with the minimap button and compartment  
     This should more reliably respect the users settings  
@@ -687,4 +688,3 @@
 - * Updated localization  
 - * Updated enUS localization file  
 - * Added deDE localization, courtesy of Elto  
-- * Fixed a bug that caused the crazy arrow to appear on zoning/death/etc  

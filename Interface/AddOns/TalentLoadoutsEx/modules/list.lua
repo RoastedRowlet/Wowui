@@ -10,7 +10,7 @@ local function OnClickToggleButton(toggleButton)
 		local parent = toggleButton:GetParent();
 		parent.data.isExpanded = not parent.data.isExpanded;
 		Addon.selectedIndex = parent.index;
-		Addon:RequestUpdate();
+		Addon:UpdateScrollBox(true);
 	end
 end
 
@@ -152,7 +152,7 @@ function Addon:InitScrollBox()
 	ScrollUtil.InitScrollBoxListWithScrollBar(Addon.frame.ScrollBox, Addon.frame.ScrollBar, view);
 end
 
-local function InitDataProvider()
+local function InitDataProvider(currentText)
 	local dataProvider = CreateDataProvider();
 
 	if Addon.loadedDataList then
@@ -166,7 +166,7 @@ local function InitDataProvider()
 	for index, data in ipairs(Addon:MergeTables(Addon:GetSpecTable(), Addon:GetPresetData())) do
 		if data.text then
 			-- Config
-			local isDataLoaded = Addon:IsDataLoaded(data);
+			local isDataLoaded = Addon:IsDataLoaded(data, currentText);
 			if isDataLoaded then
 				table.insert(Addon.loadedDataList, data);
 			end
@@ -192,10 +192,10 @@ local function InitDataProvider()
 end
 
 local specIndex = nil;
-local function UpdateDataProvider()
+local function UpdateDataProvider(currentText)
 	local scrollBox = Addon.frame.ScrollBox;
 
-	local newDataProvider = InitDataProvider();
+	local newDataProvider = InitDataProvider(currentText);
 
 	local oldDataProvider = scrollBox:GetDataProvider();
 	if not oldDataProvider then
@@ -222,10 +222,17 @@ local function UpdateDataProvider()
 	end
 end
 
-function Addon:UpdateScrollBox()
-	UpdateDataProvider();
+local currentTextCache = nil;
+function Addon:UpdateScrollBox(forceUpdate)
+	local currentText = Addon:GetExportText();
+	if not forceUpdate and currentText and currentText == currentTextCache then
+		return; -- Skip
+	end
+
+	UpdateDataProvider(currentText);
 	Addon:UpdatePanelButton();
 	Addon:SendUpdateMessage();
+	currentTextCache = currentText;
 end
 
 local updateDelay = 0.1;

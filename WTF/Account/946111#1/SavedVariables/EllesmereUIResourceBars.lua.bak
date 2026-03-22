@@ -1,2 +1,3 @@
 
-EllesmereUIResourceBarsDB = nil
+EllesmereUIResourceBarsDB = {
+}

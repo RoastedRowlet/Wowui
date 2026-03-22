@@ -1,21 +1,6 @@
 
 CHATTYNATOR_CURRENT_PROFILE = "DEFAULT"
 CHATTYNATOR_COMMAND_HISTORY = {
-"/cw Appledrink-Stormrage and one in the middle of the whole profession area",
-"/cw Nostridamus-Stormrage done!",
-"/cw Appledrink-Stormrage done!",
-"/cw Appledrink-Stormrage /RELOAD",
-"/s /floodmsg |cffffd000|Htrade:Player-60-0F85ABEF:2018:164|h[Blacksmithing]|h|r At the table now, R5 Maces INSTA craft. /w me",
-"/s /flood on",
-"/s /flood off",
-"/s /flood on",
-"/cw Highwaym are you 249 or is chonky just bad?",
-"/cw Highwaym SHEEEESH",
-"/cw Highwaym yeah drum opop",
-"/cw Highwaym yeye checks out",
-"/cw Highwaym /GRID2",
-"/cw Highwaym potato sounds like snack to me",
-"/cw Highwaym-Stormrage lmao",
 "/cw Highwaym-Stormrage /grid2",
 "/cw Highwaym-Stormrage /GRID2",
 "/cw Highwaym-Stormrage /m",
@@ -213,4 +198,8 @@ CHATTYNATOR_COMMAND_HISTORY = {
 "/cw Stormvine-Stormrage chat got spammed and didnt see the order or your whisper lmao",
 "/cw Stormvine-Stormrage sorry about that",
 "/cw Stormvine-Stormrage /run for i=1,C_QuestLog.GetNumQuestLogEntries() do C_QuestLog.SetSelectedQuest(C_QuestLog.GetInfo(i).questID); C_QuestLog.SetAbandonQuest(); C_QuestLog.AbandonQuest() end;",
+"/s /EUI",
+"/s /GRID2",
+"/s /EUI",
+"/s /eui",
 }
