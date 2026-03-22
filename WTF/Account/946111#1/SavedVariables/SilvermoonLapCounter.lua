@@ -8,9 +8,9 @@ SilvermoonLapCounterDB = {
 },
 ["Angryabsol-Stormrage"] = {
 ["bestLapTime"] = 6.887999999977183,
-["lastLapDate"] = "2026-03-21 23:27",
-["lapCount"] = 18,
-["lastLapTime"] = 20.9719999999943,
+["lastLapDate"] = "2026-03-22 01:28",
+["lapCount"] = 19,
+["lastLapTime"] = 25.43700000000536,
 ["firstLapDate"] = "2026-03-15 13:39",
 ["class"] = "DEMONHUNTER",
 ["bestLapDate"] = "2026-03-16 22:27",

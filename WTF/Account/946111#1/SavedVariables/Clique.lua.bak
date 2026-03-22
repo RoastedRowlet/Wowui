@@ -4,10 +4,10 @@ CliqueDB3 = {
 ["char"] = {
 ["Angryabsol - Stormrage"] = {
 ["spec1_profileKey"] = "Angryabsol - Stormrage",
+["specswap"] = false,
 ["spec3_profileKey"] = "Angryabsol - Stormrage",
 ["spec2_profileKey"] = "Angryabsol - Stormrage",
 ["stopcastingfix"] = true,
-["specswap"] = false,
 },
 ["Barelynoer - Area 52"] = {
 ["spec1_profileKey"] = "Barelynoer - Area 52",
@@ -18,11 +18,11 @@ CliqueDB3 = {
 ["Lonelylitten - Stormrage"] = {
 ["spec1_profileKey"] = "Lonelylitten - Stormrage",
 ["fastooc"] = false,
-["specswap"] = false,
+["spec3_profileKey"] = "Lonelylitten - Stormrage",
 ["downclick"] = false,
 ["spec4_profileKey"] = "Lonelylitten - Stormrage",
-["spec3_profileKey"] = "Lonelylitten - Stormrage",
 ["spec2_profileKey"] = "Lonelylitten - Stormrage",
+["specswap"] = false,
 },
 },
 ["profileKeys"] = {

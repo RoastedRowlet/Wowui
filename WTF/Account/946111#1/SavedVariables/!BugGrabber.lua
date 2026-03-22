@@ -1,6 +1,6 @@
 
 BugGrabberDB = {
-["session"] = 540,
+["session"] = 548,
 ["lastSanitation"] = 3,
 ["errors"] = {
 {
@@ -562,6 +562,14 @@ BugGrabberDB = {
 ["stack"] = "[Interface/AddOns/GroupfinderFlags/main.lua]:593: in function <Interface/AddOns/GroupfinderFlags/main.lua:485>\n[C]: in function 'LFGListSearchEntry_Update'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2709: in function 'initializer'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:374: in function 'InvokeInitializer'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:392: in function <...izzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua:391>\n[C]: in function 'secureexecuterange'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:395: in function 'InvokeInitializers'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:786: in function 'Update'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:305: in function 'SetScrollPercentageInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:169: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:754: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:124: in function 'FullUpdate'\n...[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:705: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2753: in function 'LFGListSearchPanel_UpdateResults'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2683: in function 'LFGListSearchPanel_UpdateResultList'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2569: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:2568>\n[C]: in function 'Show'\n[Interface/AddOns/Blizzard_UIParentPanelManager/Shared/UIParentPanelManager.lua]:842: in function <...UIParentPanelManager/Shared/UIParentPanelManager.lua:828>\n[C]: in function 'ShowUIPanel'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/PVEFrame.lua]:104: in function 'PVEFrame_ShowFrame'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/PVEFrame.lua]:55: in function 'PVEFrame_ToggleFrame'\n[TOGGLEGROUPFINDER]:1: in function <[string \"TOGGLEGROUPFINDER\"]:1>\n",
 ["session"] = 531,
 ["counter"] = 36,
+},
+{
+["message"] = ".../Blizzard_PrivateAurasUI/Blizzard_PrivateAurasUI.lua:224: attempt to index field 'auras' (a nil value)",
+["time"] = 1774159508,
+["locals"] = "self = <table> {\n isDirty = true\n anchors = <table> {\n }\n unit = \"raid20\"\n debuffFramePool = <table> {\n }\n}\nupdateInfo = <table> {\n removedAuraInstanceIDs = <table> {\n }\n isFullUpdate = false\n}\naurasChanged = false\n(for state) = <table> {\n 1 = 5\n}\n(for control) = 1\n_ = 1\nauraInstanceID = 5\n(*temporary) = nil\n(*temporary) = 1\n(*temporary) = 5\n(*temporary) = nil\n(*temporary) = nil\n(*temporary) = nil\n(*temporary) = nil\n(*temporary) = nil\n(*temporary) = nil\n(*temporary) = \"attempt to index field 'auras' (a nil value)\"\n",
+["stack"] = "[Interface/AddOns/Blizzard_PrivateAurasUI/Blizzard_PrivateAurasUI.lua]:224: in function 'HandleUpdateInfo'\n[Interface/AddOns/Blizzard_PrivateAurasUI/Blizzard_PrivateAurasUI.lua]:154: in function <.../Blizzard_PrivateAurasUI/Blizzard_PrivateAurasUI.lua:153>\n",
+["session"] = 543,
+["counter"] = 1,
 },
 },
 }

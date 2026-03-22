@@ -71,18 +71,18 @@ TalentLoadoutEx = {
 ["DRUID"] = {
 {
 {
-["pvp3"] = 3058,
 ["name"] = "Raid",
 ["pvp2"] = 180,
+["pvp3"] = 3058,
 ["isInGroup"] = false,
 ["text"] = "CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMDMmlZmZmBYYWmZbYmZGbsMzyMjhZBDAGgltxGmmZWGBAAAYzMzMzgNjhxMAmZAgB",
 ["icon"] = 134400,
 ["pvp1"] = 182,
 },
 {
-["icon"] = 134400,
 ["pvp2"] = 180,
 ["name"] = "M+",
+["icon"] = 134400,
 ["isInGroup"] = false,
 ["pvp1"] = 182,
 ["pvp3"] = 3058,

@@ -1,15 +1,6 @@
 
 CHATTYNATOR_CURRENT_PROFILE = "DEFAULT"
 CHATTYNATOR_COMMAND_HISTORY = {
-"/cw Highwaym-Stormrage lmao",
-"/cw Highwaym-Stormrage /grid2",
-"/cw Highwaym-Stormrage /GRID2",
-"/cw Highwaym-Stormrage /m",
-"/cw Highwaym-Stormrage /arcui",
-"/cw Highwaym-Stormrage /BARTENDER",
-"/cw Highwaym-Stormrage /ARCUI",
-"/cw Highwaym-Stormrage /BARTENDER",
-"/cw Highwaym-Stormrage lmao!",
 "/cw Highwaym-Stormrage you're currently taking everyone to gapplebees",
 "/cw Highwaym-Stormrage get ready for alex to ask you how you're slamming so hard lmao",
 "/cw Cinderelly EVERY TIME",
@@ -203,4 +194,14 @@ CHATTYNATOR_COMMAND_HISTORY = {
 "/s /GRID2",
 "/s /EUI",
 "/s /eui",
+"/s /RELOAD",
+"/s /EUI",
+"/s /RELOAD",
+"/s /EUI",
+"/s /eui",
+"/s /EUI",
+"/s /eui",
+"/s /reload",
+"/s /eui",
+"/s /reload",
 }

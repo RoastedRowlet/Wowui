@@ -716,46 +716,47 @@ SYNDICATOR_DATA = {
 ["itemCount"] = 1,
 ["itemID"] = 184479,
 ["isBound"] = true,
-["quality"] = 3,
-["itemLink"] = "|cnIQ3:|Hitem:184479::::::::90:1480:::::::::|h[Shrouded Cloth Bag]|h|r",
 ["iconTexture"] = 3528454,
+["itemLink"] = "|cnIQ3:|Hitem:184479::::::::90:1480:::::::::|h[Shrouded Cloth Bag]|h|r",
+["quality"] = 3,
 },
 {
 ["itemCount"] = 1,
 ["itemID"] = 184479,
 ["isBound"] = true,
-["quality"] = 3,
-["itemLink"] = "|cnIQ3:|Hitem:184479::::::::90:1480:::::::::|h[Shrouded Cloth Bag]|h|r",
 ["iconTexture"] = 3528454,
+["itemLink"] = "|cnIQ3:|Hitem:184479::::::::90:1480:::::::::|h[Shrouded Cloth Bag]|h|r",
+["quality"] = 3,
 },
 {
 ["itemCount"] = 1,
 ["itemID"] = 184479,
 ["isBound"] = true,
-["quality"] = 3,
-["itemLink"] = "|cnIQ3:|Hitem:184479::::::::90:1480:::::::::|h[Shrouded Cloth Bag]|h|r",
 ["iconTexture"] = 3528454,
+["itemLink"] = "|cnIQ3:|Hitem:184479::::::::90:1480:::::::::|h[Shrouded Cloth Bag]|h|r",
+["quality"] = 3,
 },
 {
 ["itemCount"] = 1,
 ["itemID"] = 184479,
 ["isBound"] = true,
-["quality"] = 3,
-["itemLink"] = "|cnIQ3:|Hitem:184479::::::::90:1480:::::::::|h[Shrouded Cloth Bag]|h|r",
 ["iconTexture"] = 3528454,
+["itemLink"] = "|cnIQ3:|Hitem:184479::::::::90:1480:::::::::|h[Shrouded Cloth Bag]|h|r",
+["quality"] = 3,
 },
 {
 ["itemCount"] = 1,
 ["itemID"] = 194019,
 ["isBound"] = true,
-["quality"] = 2,
-["itemLink"] = "|cnIQ2:|Hitem:194019::::::::90:1480:::::::::|h[Simply Stitched Reagent Bag]|h|r",
 ["iconTexture"] = 4549254,
+["itemLink"] = "|cnIQ2:|Hitem:194019::::::::90:1480:::::::::|h[Simply Stitched Reagent Bag]|h|r",
+["quality"] = 2,
 },
 },
 },
 ["bankTabs"] = {
 {
+["depositFlags"] = 0,
 ["name"] = "Tab 1",
 ["slots"] = {
 {
@@ -969,7 +970,6 @@ SYNDICATOR_DATA = {
 {
 },
 },
-["depositFlags"] = 0,
 ["iconTexture"] = 134400,
 },
 },
@@ -995,148 +995,162 @@ SYNDICATOR_DATA = {
 ["itemID"] = 6948,
 ["isBound"] = true,
 ["hasLoot"] = false,
-["quality"] = 1,
-["itemLink"] = "|cnIQ1:|Hitem:6948::::::::90:1480::62:::::::|h[Hearthstone]|h|r",
 ["iconTexture"] = 134414,
+["itemLink"] = "|cnIQ1:|Hitem:6948::::::::90:1480::62:::::::|h[Hearthstone]|h|r",
+["quality"] = 1,
 },
 {
-["itemCount"] = 200,
+["itemCount"] = 199,
 ["itemID"] = 241289,
 ["isBound"] = false,
 ["hasLoot"] = false,
-["quality"] = 1,
-["itemLink"] = "|cnIQ1:|Hitem:241289::::::::90:1480:::::::::|h[Potion of Recklessness |A:Professions-ChatIcon-Quality-12-Tier1:17:15::1|a]|h|r",
 ["iconTexture"] = 7548916,
+["itemLink"] = "|cnIQ1:|Hitem:241289::::::::90:1480:::::::::|h[Potion of Recklessness |A:Professions-ChatIcon-Quality-12-Tier1:17:15::1|a]|h|r",
+["quality"] = 1,
 },
 {
-["itemCount"] = 4,
+["itemCount"] = 2,
 ["itemID"] = 241289,
 ["isBound"] = false,
 ["hasLoot"] = false,
-["quality"] = 1,
-["itemLink"] = "|cnIQ1:|Hitem:241289::::::::90:1480:::::::::|h[Potion of Recklessness |A:Professions-ChatIcon-Quality-12-Tier1:17:15::1|a]|h|r",
 ["iconTexture"] = 7548916,
+["itemLink"] = "|cnIQ1:|Hitem:241289::::::::90:1480:::::::::|h[Potion of Recklessness |A:Professions-ChatIcon-Quality-12-Tier1:17:15::1|a]|h|r",
+["quality"] = 1,
 },
 {
 ["itemCount"] = 100,
 ["itemID"] = 241305,
 ["isBound"] = false,
 ["hasLoot"] = false,
-["quality"] = 1,
-["itemLink"] = "|cnIQ1:|Hitem:241305::::::::90:1480:::::::::|h[Silvermoon Health Potion |A:Professions-ChatIcon-Quality-12-Tier1:17:15::1|a]|h|r",
 ["iconTexture"] = 7548909,
+["itemLink"] = "|cnIQ1:|Hitem:241305::::::::90:1480:::::::::|h[Silvermoon Health Potion |A:Professions-ChatIcon-Quality-12-Tier1:17:15::1|a]|h|r",
+["quality"] = 1,
 },
 {
 ["itemCount"] = 2,
 ["itemID"] = 258138,
 ["isBound"] = true,
 ["hasLoot"] = false,
-["quality"] = 1,
-["itemLink"] = "|cnIQ1:|Hitem:258138::::::::90:1480:::::::::|h[Potent Healing Potion]|h|r",
 ["iconTexture"] = 2057574,
+["itemLink"] = "|cnIQ1:|Hitem:258138::::::::90:1480:::::::::|h[Potent Healing Potion]|h|r",
+["quality"] = 1,
 },
 {
-["itemCount"] = 9,
+["itemCount"] = 8,
 ["itemID"] = 241325,
 ["isBound"] = false,
 ["hasLoot"] = false,
-["quality"] = 1,
-["itemLink"] = "|cnIQ1:|Hitem:241325::::::::90:1480:::::::::|h[Flask of the Blood Knights |A:Professions-ChatIcon-Quality-12-Tier1:17:15::1|a]|h|r",
 ["iconTexture"] = 7548904,
+["itemLink"] = "|cnIQ1:|Hitem:241325::::::::90:1480:::::::::|h[Flask of the Blood Knights |A:Professions-ChatIcon-Quality-12-Tier1:17:15::1|a]|h|r",
+["quality"] = 1,
 },
 {
-["itemCount"] = 17,
+["itemCount"] = 72,
 ["itemID"] = 242275,
 ["isBound"] = false,
 ["hasLoot"] = false,
-["quality"] = 3,
-["itemLink"] = "|cnIQ3:|Hitem:242275::::::::90:1480:::::::::|h[Royal Roast]|h|r",
 ["iconTexture"] = 4672193,
+["itemLink"] = "|cnIQ3:|Hitem:242275::::::::90:1480:::::::::|h[Royal Roast]|h|r",
+["quality"] = 3,
 },
 {
 ["itemCount"] = 18,
 ["itemID"] = 243734,
 ["isBound"] = false,
 ["hasLoot"] = false,
-["quality"] = 2,
-["itemLink"] = "|cnIQ2:|Hitem:243734::::::::90:1480:::::::::|h[Thalassian Phoenix Oil |A:Professions-ChatIcon-Quality-12-Tier2:17:15::1|a]|h|r",
 ["iconTexture"] = 7548987,
+["itemLink"] = "|cnIQ2:|Hitem:243734::::::::90:1480:::::::::|h[Thalassian Phoenix Oil |A:Professions-ChatIcon-Quality-12-Tier2:17:15::1|a]|h|r",
+["quality"] = 2,
 },
 {
 ["itemCount"] = 1,
 ["itemID"] = 5512,
 ["isBound"] = false,
 ["hasLoot"] = false,
-["quality"] = 1,
-["itemLink"] = "|cnIQ1:|Hitem:5512::::::::90:1480::3::::::Player-60-0E4A3397:|h[Healthstone]|h|r",
 ["iconTexture"] = 538745,
+["itemLink"] = "|cnIQ1:|Hitem:5512::::::::90:1480::3::::::Player-60-063BFDC9:|h[Healthstone]|h|r",
+["quality"] = 1,
 },
 {
 ["itemCount"] = 3,
 ["itemID"] = 251039,
 ["isBound"] = true,
 ["hasLoot"] = false,
-["quality"] = 1,
-["itemLink"] = "|cnIQ1:|Hitem:251039::::::::90:1480:::::::::|h[Toasting Brew]|h|r",
 ["iconTexture"] = 135999,
+["itemLink"] = "|cnIQ1:|Hitem:251039::::::::90:1480:::::::::|h[Toasting Brew]|h|r",
+["quality"] = 1,
 },
 {
 ["itemCount"] = 1,
 ["itemID"] = 124640,
 ["isBound"] = false,
 ["hasLoot"] = false,
-["quality"] = 1,
-["itemLink"] = "|cnIQ1:|Hitem:124640::::::::90:1480:::::::::|h[Inky Black Potion]|h|r",
 ["iconTexture"] = 134757,
+["itemLink"] = "|cnIQ1:|Hitem:124640::::::::90:1480:::::::::|h[Inky Black Potion]|h|r",
+["quality"] = 1,
 },
 {
 ["itemCount"] = 162,
 ["itemID"] = 38682,
 ["isBound"] = false,
 ["hasLoot"] = false,
-["quality"] = 1,
-["itemLink"] = "|cnIQ1:|Hitem:38682::::::::90:1480:::::::::|h[Enchanting Vellum]|h|r",
 ["iconTexture"] = 237050,
+["itemLink"] = "|cnIQ1:|Hitem:38682::::::::90:1480:::::::::|h[Enchanting Vellum]|h|r",
+["quality"] = 1,
 },
 {
 ["itemCount"] = 1,
 ["itemID"] = 244174,
 ["isBound"] = true,
 ["hasLoot"] = false,
-["quality"] = 1,
-["itemLink"] = "|cnIQ1:|Hitem:244174::::::::90:1480::14::1:28:3615:::::|h[Refulgent Copper Rod]|h|r",
 ["iconTexture"] = 7457449,
+["itemLink"] = "|cnIQ1:|Hitem:244174::::::::90:1480::14::1:28:3615:::::|h[Refulgent Copper Rod]|h|r",
+["quality"] = 1,
 },
 {
 ["itemCount"] = 1,
 ["itemID"] = 140192,
 ["isBound"] = true,
 ["hasLoot"] = false,
-["quality"] = 1,
-["itemLink"] = "|cnIQ1:|Hitem:140192::::::::90:1480::11:::::::|h[Dalaran Hearthstone]|h|r",
 ["iconTexture"] = 1444943,
+["itemLink"] = "|cnIQ1:|Hitem:140192::::::::90:1480::11:::::::|h[Dalaran Hearthstone]|h|r",
+["quality"] = 1,
 },
 {
 ["itemCount"] = 4,
 ["itemID"] = 238987,
 ["isBound"] = true,
 ["hasLoot"] = false,
-["quality"] = 3,
-["itemLink"] = "|cnIQ3:|Hitem:238987::::::::90:1480:::::::::|h[Saltheril's Favor]|h|r",
 ["iconTexture"] = 237281,
+["itemLink"] = "|cnIQ3:|Hitem:238987::::::::90:1480:::::::::|h[Saltheril's Favor]|h|r",
+["quality"] = 3,
 },
 {
 ["itemCount"] = 1,
 ["itemID"] = 242241,
 ["isBound"] = true,
 ["hasLoot"] = false,
-["quality"] = 2,
-["itemLink"] = "|cnIQ2:|Hitem:242241::::::::90:1480:::::::::|h[Latent Arcana]|h|r",
 ["iconTexture"] = 132841,
+["itemLink"] = "|cnIQ2:|Hitem:242241::::::::90:1480:::::::::|h[Latent Arcana]|h|r",
+["quality"] = 2,
 },
 {
+["itemCount"] = 1,
+["itemID"] = 264498,
+["isBound"] = true,
+["hasLoot"] = false,
+["iconTexture"] = 7514962,
+["itemLink"] = "|cnIQ3:|Hitem:264498::::::::90:1480::3::1:28:3607:::::|h[Voltaic Trigore Egg]|h|r",
+["quality"] = 3,
 },
 {
+["itemCount"] = 1,
+["itemID"] = 242275,
+["isBound"] = false,
+["hasLoot"] = false,
+["iconTexture"] = 4672193,
+["itemLink"] = "|cnIQ3:|Hitem:242275::::::::90:1480:::::::::|h[Royal Roast]|h|r",
+["quality"] = 3,
 },
 {
 },
@@ -1397,65 +1411,72 @@ SYNDICATOR_DATA = {
 ["itemID"] = 151567,
 ["isBound"] = false,
 ["hasLoot"] = false,
-["quality"] = 1,
-["itemLink"] = "|cnIQ1:|Hitem:151567::::::::90:1480:::::::::|h[Lightweave Cloth]|h|r",
 ["iconTexture"] = 1686583,
+["itemLink"] = "|cnIQ1:|Hitem:151567::::::::90:1480:::::::::|h[Lightweave Cloth]|h|r",
+["quality"] = 1,
 },
 {
 ["itemCount"] = 1,
 ["itemID"] = 242640,
 ["isBound"] = false,
 ["hasLoot"] = false,
-["quality"] = 1,
-["itemLink"] = "|cnIQ1:|Hitem:242640::::::::90:1480:::::::::|h[Plant Protein]|h|r",
 ["iconTexture"] = 7548955,
+["itemLink"] = "|cnIQ1:|Hitem:242640::::::::90:1480:::::::::|h[Plant Protein]|h|r",
+["quality"] = 1,
+},
+{
+["itemCount"] = 2,
+["itemID"] = 242639,
+["isBound"] = false,
+["hasLoot"] = false,
+["iconTexture"] = 237354,
+["itemLink"] = "|cnIQ1:|Hitem:242639::::::::90:1480:::::::::|h[Practically Pork]|h|r",
+["quality"] = 1,
 },
 {
 ["itemCount"] = 2,
 ["itemID"] = 232875,
 ["isBound"] = true,
 ["hasLoot"] = false,
-["quality"] = 4,
-["itemLink"] = "|cnIQ4:|Hitem:232875::::::::90:1480:::::::::|h[Spark of Radiance]|h|r",
 ["iconTexture"] = 7551418,
+["itemLink"] = "|cnIQ4:|Hitem:232875::::::::90:1480:::::::::|h[Spark of Radiance]|h|r",
+["quality"] = 4,
 },
 {
 ["itemCount"] = 47,
 ["itemID"] = 240991,
 ["isBound"] = false,
 ["hasLoot"] = false,
-["quality"] = 1,
-["itemLink"] = "|cnIQ1:|Hitem:240991::::::::90:1480::::1:38:13:::::|h[Sunglass Vial |A:Professions-ChatIcon-Quality-12-Tier1:17:15::1|a]|h|r",
 ["iconTexture"] = 7548906,
+["itemLink"] = "|cnIQ1:|Hitem:240991::::::::90:1480::::1:38:13:::::|h[Sunglass Vial |A:Professions-ChatIcon-Quality-12-Tier1:17:15::1|a]|h|r",
+["quality"] = 1,
 },
 {
 ["itemCount"] = 2,
 ["itemID"] = 247719,
 ["isBound"] = true,
 ["hasLoot"] = false,
-["quality"] = 2,
-["itemLink"] = "|cnIQ2:|Hitem:247719::::::::90:1480:::::::::|h[Multicraft Matrix]|h|r",
 ["iconTexture"] = 4548881,
+["itemLink"] = "|cnIQ2:|Hitem:247719::::::::90:1480:::::::::|h[Multicraft Matrix]|h|r",
+["quality"] = 2,
 },
 {
 ["itemCount"] = 5,
 ["itemID"] = 247725,
 ["isBound"] = true,
 ["hasLoot"] = false,
-["quality"] = 2,
-["itemLink"] = "|cnIQ2:|Hitem:247725::::::::90:1480:::::::::|h[Resourceful Rebar]|h|r",
 ["iconTexture"] = 133006,
+["itemLink"] = "|cnIQ2:|Hitem:247725::::::::90:1480:::::::::|h[Resourceful Rebar]|h|r",
+["quality"] = 2,
 },
 {
 ["itemCount"] = 3,
 ["itemID"] = 260630,
 ["isBound"] = true,
 ["hasLoot"] = false,
-["quality"] = 1,
-["itemLink"] = "|cnIQ1:|Hitem:260630::::::::90:1480:::::::::|h[Ingenious Identifier]|h|r",
 ["iconTexture"] = 3610513,
-},
-{
+["itemLink"] = "|cnIQ1:|Hitem:260630::::::::90:1480:::::::::|h[Ingenious Identifier]|h|r",
+["quality"] = 1,
 },
 {
 },
@@ -1575,36 +1596,44 @@ SYNDICATOR_DATA = {
 },
 },
 },
-["money"] = 864339486,
+["money"] = 941177943,
 ["mail"] = {
+{
+["itemCount"] = 100,
+["itemID"] = 242747,
+["expirationTime"] = 1776753426,
+["quality"] = 3,
+["itemLink"] = "|cnIQ3:|Hitem:242747::::::::90:102:::::::::|h[Hearty Royal Roast]|h|r",
+["iconTexture"] = 4672193,
+},
 },
 ["void"] = {
 },
 ["currencies"] = {
-[3363] = 129,
+[3363] = 138,
 [3212] = 3,
 [2815] = 5000,
 [1580] = 0,
 [3377] = 900,
 [3379] = 151,
-[3383] = 51,
+[3383] = 60,
 [1803] = 429,
-[1560] = 725,
 [3341] = 10,
-[3316] = 2217,
-[3056] = 5000,
-[1755] = 4675,
-[2032] = 17295,
+[3343] = 40,
+[3378] = 1,
+[1560] = 725,
+[1166] = 200,
+[3256] = 85,
 [3310] = 439,
 [1719] = 371,
 [3376] = 4,
-[3378] = 1,
-[3256] = 85,
+[3316] = 2217,
+[2032] = 17295,
 [3258] = 290,
-[1166] = 200,
+[1755] = 4675,
 [3262] = 355,
-[3343] = 40,
 [1718] = 0,
+[3056] = 5000,
 },
 ["equipped"] = {
 {
@@ -1613,25 +1642,25 @@ SYNDICATOR_DATA = {
 ["itemCount"] = 1,
 ["itemID"] = 151336,
 ["isBound"] = true,
-["quality"] = 4,
-["itemLink"] = "|cnIQ4:|Hitem:151336::::::::90:1480::23:6:12785:13439:6652:12667:13577:12699:1:28:3025:::::|h[Voidlashed Hood]|h|r",
 ["iconTexture"] = 1544137,
+["itemLink"] = "|cnIQ4:|Hitem:151336::::::::90:1480::23:6:12785:13439:6652:12667:13577:12699:1:28:3025:::::|h[Voidlashed Hood]|h|r",
+["quality"] = 4,
 },
 {
 ["itemCount"] = 1,
 ["itemID"] = 251142,
 ["isBound"] = true,
-["quality"] = 4,
-["itemLink"] = "|cnIQ4:|Hitem:251142::240860::::::90:1480::23:5:12779:13439:6652:13668:12699:1:28:3025:::::|h[Pendant of Malefic Fury]|h|r",
 ["iconTexture"] = 7636611,
+["itemLink"] = "|cnIQ4:|Hitem:251142::240860::::::90:1480::23:5:12779:13439:6652:13668:12699:1:28:3025:::::|h[Pendant of Malefic Fury]|h|r",
+["quality"] = 4,
 },
 {
 ["itemCount"] = 1,
 ["itemID"] = 251092,
 ["isBound"] = true,
-["quality"] = 4,
-["itemLink"] = "|cnIQ4:|Hitem:251092::::::::90:1480::23:5:12779:13439:6652:12699:13577:1:28:3025:::::|h[Fallen Grunt's Mantle]|h|r",
 ["iconTexture"] = 7232475,
+["itemLink"] = "|cnIQ4:|Hitem:251092::::::::90:1480::23:5:12779:13439:6652:12699:13577:1:28:3025:::::|h[Fallen Grunt's Mantle]|h|r",
+["quality"] = 4,
 },
 {
 },
@@ -1639,105 +1668,105 @@ SYNDICATOR_DATA = {
 ["itemCount"] = 1,
 ["itemID"] = 251099,
 ["isBound"] = true,
-["quality"] = 4,
-["itemLink"] = "|cnIQ4:|Hitem:251099::::::::90:1480::23:5:12785:13439:6652:13577:12699:1:28:3025:::::|h[Vest of the Howling Gale]|h|r",
 ["iconTexture"] = 7232471,
+["itemLink"] = "|cnIQ4:|Hitem:251099::::::::90:1480::23:5:12785:13439:6652:13577:12699:1:28:3025:::::|h[Vest of the Howling Gale]|h|r",
+["quality"] = 4,
 },
 {
 ["itemCount"] = 1,
 ["itemID"] = 251082,
 ["isBound"] = true,
-["quality"] = 4,
-["itemLink"] = "|cnIQ4:|Hitem:251082::::::::90:1480::23:6:12785:13439:6652:12667:13577:12699:1:28:3022:::::|h[Snapvine Cinch]|h|r",
 ["iconTexture"] = 7278019,
+["itemLink"] = "|cnIQ4:|Hitem:251082::::::::90:1480::23:6:12785:13439:6652:12667:13577:12699:1:28:3022:::::|h[Snapvine Cinch]|h|r",
+["quality"] = 4,
 },
 {
 ["itemCount"] = 1,
 ["itemID"] = 251087,
 ["isBound"] = true,
-["quality"] = 4,
-["itemLink"] = "|cnIQ4:|Hitem:251087::::::::90:1480::23:5:12779:13439:6652:12699:13577:1:28:3025:::::|h[Legwraps of Lingering Legacies]|h|r",
 ["iconTexture"] = 7232474,
+["itemLink"] = "|cnIQ4:|Hitem:251087::::::::90:1480::23:5:12779:13439:6652:12699:13577:1:28:3025:::::|h[Legwraps of Lingering Legacies]|h|r",
+["quality"] = 4,
 },
 {
 ["itemCount"] = 1,
 ["itemID"] = 151317,
 ["isBound"] = true,
-["quality"] = 4,
-["itemLink"] = "|cnIQ4:|Hitem:151317::::::::90:1480::23:5:12785:13439:6652:13577:12699:1:28:3025:::::|h[Footpads of Seeping Dread]|h|r",
 ["iconTexture"] = 1544133,
+["itemLink"] = "|cnIQ4:|Hitem:151317::::::::90:1480::23:5:12785:13439:6652:13577:12699:1:28:3025:::::|h[Footpads of Seeping Dread]|h|r",
+["quality"] = 4,
 },
 {
 ["itemCount"] = 1,
 ["itemID"] = 251103,
 ["isBound"] = true,
-["quality"] = 4,
-["itemLink"] = "|cnIQ4:|Hitem:251103::::::::90:1480::23:6:12779:13439:6652:12667:12699:13577:1:28:3025:::::|h[Custodial Cuffs]|h|r",
 ["iconTexture"] = 7232469,
+["itemLink"] = "|cnIQ4:|Hitem:251103::::::::90:1480::23:6:12779:13439:6652:12667:12699:13577:1:28:3025:::::|h[Custodial Cuffs]|h|r",
+["quality"] = 4,
 },
 {
 ["itemCount"] = 1,
 ["itemID"] = 151318,
 ["isBound"] = true,
-["quality"] = 4,
-["itemLink"] = "|cnIQ4:|Hitem:151318::::::::90:1480::23:5:12785:13439:40:13577:12699:1:28:3025:::::|h[Gloves of the Dark Shroud]|h|r",
 ["iconTexture"] = 1544136,
+["itemLink"] = "|cnIQ4:|Hitem:151318::::::::90:1480::23:5:12785:13439:40:13577:12699:1:28:3025:::::|h[Gloves of the Dark Shroud]|h|r",
+["quality"] = 4,
 },
 {
 ["itemCount"] = 1,
 ["itemID"] = 151311,
 ["isBound"] = true,
-["quality"] = 4,
-["itemLink"] = "|cnIQ4:|Hitem:151311:8021:240860::::::90:1480::23:5:12785:13439:6652:13668:12699:1:28:1171:::::|h[Band of the Triumvirate]|h|r",
 ["iconTexture"] = 1408436,
+["itemLink"] = "|cnIQ4:|Hitem:151311:8021:240860::::::90:1480::23:5:12785:13439:6652:13668:12699:1:28:1171:::::|h[Band of the Triumvirate]|h|r",
+["quality"] = 4,
 },
 {
 ["itemCount"] = 1,
 ["itemID"] = 251093,
 ["isBound"] = true,
-["quality"] = 4,
-["itemLink"] = "|cnIQ4:|Hitem:251093:8021:240860::::::90:1480::23:5:12779:13439:6652:13668:12699:1:28:3025:::::|h[Omission of Light]|h|r",
 ["iconTexture"] = 7636676,
+["itemLink"] = "|cnIQ4:|Hitem:251093:8021:240860::::::90:1480::23:5:12779:13439:6652:13668:12699:1:28:3025:::::|h[Omission of Light]|h|r",
+["quality"] = 4,
 },
 {
 ["itemCount"] = 1,
 ["itemID"] = 250215,
 ["isBound"] = true,
-["quality"] = 4,
-["itemLink"] = "|cnIQ4:|Hitem:250215::::::::90:1480::23:4:12779:13439:6652:12699:1:28:3025:::::|h[Freightrunner's Flask]|h|r",
 ["iconTexture"] = 3566841,
+["itemLink"] = "|cnIQ4:|Hitem:250215::::::::90:1480::23:4:12779:13439:6652:12699:1:28:3025:::::|h[Freightrunner's Flask]|h|r",
+["quality"] = 4,
 },
 {
 ["itemCount"] = 1,
 ["itemID"] = 250256,
 ["isBound"] = true,
-["quality"] = 4,
-["itemLink"] = "|cnIQ4:|Hitem:250256::::::::90:1480::173:4:6652:12699:11215:12781:1:28:3025:::::|h[Heart of Wind]|h|r",
 ["iconTexture"] = 4644003,
+["itemLink"] = "|cnIQ4:|Hitem:250256::::::::90:1480::173:4:6652:12699:11215:12781:1:28:3025:::::|h[Heart of Wind]|h|r",
+["quality"] = 4,
 },
 {
 ["itemCount"] = 1,
 ["itemID"] = 193712,
 ["isBound"] = true,
-["quality"] = 4,
-["itemLink"] = "|cnIQ4:|Hitem:193712::::::::90:1480::23:5:12785:13439:6652:13577:12699:1:28:3025:::::|h[Potion-Stained Cloak]|h|r",
 ["iconTexture"] = 4095087,
+["itemLink"] = "|cnIQ4:|Hitem:193712::::::::90:1480::23:5:12785:13439:6652:13577:12699:1:28:3025:::::|h[Potion-Stained Cloak]|h|r",
+["quality"] = 4,
 },
 {
 ["itemCount"] = 1,
 ["itemID"] = 237840,
 ["isBound"] = true,
-["quality"] = 4,
-["itemLink"] = "|cnIQ4:|Hitem:237840:8041:::::::90:1480::13:6:12214:12497:12066:12693:8960:8793:8:28:3615:29:36:30:49:38:8:40:2746:46:232875:47:245876:48:245784::::Player-60-0F85ABEF:|h[Spellbreaker's Warglaive |A:Professions-ChatIcon-Quality-Tier5:17:15::1|a]|h|r",
 ["iconTexture"] = 7151971,
+["itemLink"] = "|cnIQ4:|Hitem:237840:8041:::::::90:1480::13:6:12214:12497:12066:12693:8960:8793:8:28:3615:29:36:30:49:38:8:40:2746:46:232875:47:245876:48:245784::::Player-60-0F85ABEF:|h[Spellbreaker's Warglaive |A:Professions-ChatIcon-Quality-Tier5:17:15::1|a]|h|r",
+["quality"] = 4,
 },
 {
 ["itemCount"] = 1,
 ["itemID"] = 258050,
 ["isBound"] = true,
-["quality"] = 4,
-["itemLink"] = "|cnIQ4:|Hitem:258050::::::::90:1480::23:4:13439:6652:12701:12788:1:28:3025:::::|h[Arcanic of the High Sage]|h|r",
 ["iconTexture"] = 939346,
+["itemLink"] = "|cnIQ4:|Hitem:258050::::::::90:1480::23:4:13439:6652:12701:12790:1:28:3025:::::|h[Arcanic of the High Sage]|h|r",
+["quality"] = 4,
 },
 {
 },
@@ -1747,25 +1776,25 @@ SYNDICATOR_DATA = {
 ["itemCount"] = 1,
 ["itemID"] = 244713,
 ["isBound"] = true,
-["quality"] = 2,
-["itemLink"] = "|cnIQ2:|Hitem:244713::::::::90:1480::13:3:12252:12251:12498:4:28:3615:29:81:38:4:40:2786::::Player-60-0DF32C58:|h[Farstrider Clampers |A:Professions-ChatIcon-Quality-Tier1:17:15::1|a]|h|r",
 ["iconTexture"] = 7427771,
+["itemLink"] = "|cnIQ2:|Hitem:244713::::::::90:1480::13:3:12252:12251:12498:4:28:3615:29:81:38:4:40:2786::::Player-60-0DF32C58:|h[Farstrider Clampers |A:Professions-ChatIcon-Quality-Tier1:17:15::1|a]|h|r",
+["quality"] = 2,
 },
 {
 ["itemCount"] = 1,
 ["itemID"] = 244629,
 ["isBound"] = true,
-["quality"] = 2,
-["itemLink"] = "|cnIQ2:|Hitem:244629::::::::90:1480::13:3:12252:12251:12498:3:28:3615:38:4:40:4052::::Player-60-0FE8E65E:|h[Apprentice Jeweler's Apron |A:Professions-ChatIcon-Quality-Tier1:17:15::1|a]|h|r",
 ["iconTexture"] = 4381974,
+["itemLink"] = "|cnIQ2:|Hitem:244629::::::::90:1480::13:3:12252:12251:12498:3:28:3615:38:4:40:4052::::Player-60-0FE8E65E:|h[Apprentice Jeweler's Apron |A:Professions-ChatIcon-Quality-Tier1:17:15::1|a]|h|r",
+["quality"] = 2,
 },
 {
 ["itemCount"] = 1,
 ["itemID"] = 240955,
 ["isBound"] = true,
-["quality"] = 2,
-["itemLink"] = "|cnIQ2:|Hitem:240955::::::::90:1480::13:3:12252:12251:12493:3:28:3615:38:4:40:3129::::Player-60-0F81BD09:|h[Silvermoon Loupes |A:Professions-ChatIcon-Quality-Tier1:17:15::1|a]|h|r",
 ["iconTexture"] = 4381975,
+["itemLink"] = "|cnIQ2:|Hitem:240955::::::::90:1480::13:3:12252:12251:12493:3:28:3615:38:4:40:3129::::Player-60-0F81BD09:|h[Silvermoon Loupes |A:Professions-ChatIcon-Quality-Tier1:17:15::1|a]|h|r",
+["quality"] = 2,
 },
 {
 },
@@ -2416,7 +2445,7 @@ SYNDICATOR_DATA = {
 ["itemID"] = 183634,
 ["isBound"] = true,
 ["quality"] = 4,
-["itemLink"] = "|cnIQ4:|Hitem:183634::::::::90:105::::1:28:1401:::::|h[Papa's Mint Condition Bag]|h|r",
+["itemLink"] = "|cnIQ4:|Hitem:183634::::::::90:102::::1:28:1401:::::|h[Papa's Mint Condition Bag]|h|r",
 ["iconTexture"] = 133659,
 },
 {
@@ -2424,7 +2453,7 @@ SYNDICATOR_DATA = {
 ["itemID"] = 138300,
 ["isBound"] = true,
 ["quality"] = 4,
-["itemLink"] = "|cnIQ4:|Hitem:138300::::::::90:105::::1:28:347:::::|h[Madman's Luggage]|h|r",
+["itemLink"] = "|cnIQ4:|Hitem:138300::::::::90:102::::1:28:347:::::|h[Madman's Luggage]|h|r",
 ["iconTexture"] = 647735,
 },
 {
@@ -2432,7 +2461,7 @@ SYNDICATOR_DATA = {
 ["itemID"] = 202194,
 ["isBound"] = true,
 ["quality"] = 3,
-["itemLink"] = "|cnIQ3:|Hitem:202194::::::::90:105:::::::::|h[Misty Satchel]|h|r",
+["itemLink"] = "|cnIQ3:|Hitem:202194::::::::90:102:::::::::|h[Misty Satchel]|h|r",
 ["iconTexture"] = 133660,
 },
 {
@@ -2440,7 +2469,7 @@ SYNDICATOR_DATA = {
 ["itemID"] = 194018,
 ["isBound"] = true,
 ["quality"] = 3,
-["itemLink"] = "|cnIQ3:|Hitem:194018::::::::90:105::::1:40:460::::Player-60-0E7FC18A:|h[Azureweave Expedition Pack]|h|r",
+["itemLink"] = "|cnIQ3:|Hitem:194018::::::::90:102::::1:40:460::::Player-60-0E7FC18A:|h[Azureweave Expedition Pack]|h|r",
 ["iconTexture"] = 4549238,
 },
 {
@@ -2448,7 +2477,7 @@ SYNDICATOR_DATA = {
 ["itemID"] = 222854,
 ["isBound"] = true,
 ["quality"] = 3,
-["itemLink"] = "|cnIQ3:|Hitem:222854::::::::90:105::::1:40:2389::::Player-60-07050C59:|h[Dawnweave Reagent Bag]|h|r",
+["itemLink"] = "|cnIQ3:|Hitem:222854::::::::90:102::::1:40:2389::::Player-60-07050C59:|h[Dawnweave Reagent Bag]|h|r",
 ["iconTexture"] = 5931423,
 },
 },
@@ -2478,7 +2507,7 @@ SYNDICATOR_DATA = {
 ["isBound"] = true,
 ["hasLoot"] = false,
 ["quality"] = 1,
-["itemLink"] = "|cnIQ1:|Hitem:6948::::::::90:105:::::::::|h[Hearthstone]|h|r",
+["itemLink"] = "|cnIQ1:|Hitem:6948::::::::90:102:::::::::|h[Hearthstone]|h|r",
 ["iconTexture"] = 134414,
 },
 {
@@ -2487,7 +2516,7 @@ SYNDICATOR_DATA = {
 ["isBound"] = false,
 ["hasLoot"] = false,
 ["quality"] = 2,
-["itemLink"] = "|cnIQ2:|Hitem:269586::::::::90:105:::::::::|h[Emergency Soul Link |A:Professions-ChatIcon-Quality-12-Tier2:17:15::1|a]|h|r",
+["itemLink"] = "|cnIQ2:|Hitem:269586::::::::90:102:::::::::|h[Emergency Soul Link |A:Professions-ChatIcon-Quality-12-Tier2:17:15::1|a]|h|r",
 ["iconTexture"] = 607854,
 },
 {
@@ -2496,7 +2525,7 @@ SYNDICATOR_DATA = {
 ["isBound"] = false,
 ["hasLoot"] = false,
 ["quality"] = 1,
-["itemLink"] = "|cnIQ1:|Hitem:268954::::::::90:105::::2:38:13:40:3239:::::|h[Entropic Extract |A:Professions-ChatIcon-Quality-12-Tier1:17:15::1|a]|h|r",
+["itemLink"] = "|cnIQ1:|Hitem:268954::::::::90:102::::2:38:13:40:3239:::::|h[Entropic Extract |A:Professions-ChatIcon-Quality-12-Tier1:17:15::1|a]|h|r",
 ["iconTexture"] = 1416156,
 },
 {
@@ -2505,7 +2534,7 @@ SYNDICATOR_DATA = {
 ["isBound"] = false,
 ["hasLoot"] = false,
 ["quality"] = 1,
-["itemLink"] = "|cnIQ1:|Hitem:241289::::::::90:105:::::::::|h[Potion of Recklessness |A:Professions-ChatIcon-Quality-12-Tier1:17:15::1|a]|h|r",
+["itemLink"] = "|cnIQ1:|Hitem:241289::::::::90:102:::::::::|h[Potion of Recklessness |A:Professions-ChatIcon-Quality-12-Tier1:17:15::1|a]|h|r",
 ["iconTexture"] = 7548916,
 },
 {
@@ -2514,7 +2543,7 @@ SYNDICATOR_DATA = {
 ["isBound"] = false,
 ["hasLoot"] = false,
 ["quality"] = 1,
-["itemLink"] = "|cnIQ1:|Hitem:241305::::::::90:105::::2:38:13:40:3252:::::|h[Silvermoon Health Potion |A:Professions-ChatIcon-Quality-12-Tier1:17:15::1|a]|h|r",
+["itemLink"] = "|cnIQ1:|Hitem:241305::::::::90:102::::2:38:13:40:3252:::::|h[Silvermoon Health Potion |A:Professions-ChatIcon-Quality-12-Tier1:17:15::1|a]|h|r",
 ["iconTexture"] = 7548909,
 },
 {
@@ -2523,7 +2552,7 @@ SYNDICATOR_DATA = {
 ["isBound"] = false,
 ["hasLoot"] = false,
 ["quality"] = 1,
-["itemLink"] = "|cnIQ1:|Hitem:191395::::::::90:105:::::::::|h[Potion of the Hushed Zephyr |A:Professions-ChatIcon-Quality-Tier3:17:15::1|a]|h|r",
+["itemLink"] = "|cnIQ1:|Hitem:191395::::::::90:102:::::::::|h[Potion of the Hushed Zephyr |A:Professions-ChatIcon-Quality-Tier3:17:15::1|a]|h|r",
 ["iconTexture"] = 4497570,
 },
 {
@@ -2532,7 +2561,7 @@ SYNDICATOR_DATA = {
 ["isBound"] = true,
 ["hasLoot"] = false,
 ["quality"] = 1,
-["itemLink"] = "|cnIQ1:|Hitem:258138::::::::90:105:::::::::|h[Potent Healing Potion]|h|r",
+["itemLink"] = "|cnIQ1:|Hitem:258138::::::::90:102:::::::::|h[Potent Healing Potion]|h|r",
 ["iconTexture"] = 2057574,
 },
 {
@@ -2541,7 +2570,7 @@ SYNDICATOR_DATA = {
 ["isBound"] = false,
 ["hasLoot"] = false,
 ["quality"] = 1,
-["itemLink"] = "|cnIQ1:|Hitem:204370::::::::90:105:::::::::|h[Stinky Bright Potion]|h|r",
+["itemLink"] = "|cnIQ1:|Hitem:204370::::::::90:102:::::::::|h[Stinky Bright Potion]|h|r",
 ["iconTexture"] = 968261,
 },
 {
@@ -2550,7 +2579,7 @@ SYNDICATOR_DATA = {
 ["isBound"] = false,
 ["hasLoot"] = false,
 ["quality"] = 1,
-["itemLink"] = "|cnIQ1:|Hitem:241325::::::::90:105:::::::::|h[Flask of the Blood Knights |A:Professions-ChatIcon-Quality-12-Tier1:17:15::1|a]|h|r",
+["itemLink"] = "|cnIQ1:|Hitem:241325::::::::90:102:::::::::|h[Flask of the Blood Knights |A:Professions-ChatIcon-Quality-12-Tier1:17:15::1|a]|h|r",
 ["iconTexture"] = 7548904,
 },
 {
@@ -2559,17 +2588,19 @@ SYNDICATOR_DATA = {
 ["isBound"] = false,
 ["hasLoot"] = false,
 ["quality"] = 1,
-["itemLink"] = "|cnIQ1:|Hitem:241317::::::::90:105:::::::::|h[Haranir Phial of Perception |A:Professions-ChatIcon-Quality-12-Tier1:17:15::1|a]|h|r",
+["itemLink"] = "|cnIQ1:|Hitem:241317::::::::90:102:::::::::|h[Haranir Phial of Perception |A:Professions-ChatIcon-Quality-12-Tier1:17:15::1|a]|h|r",
 ["iconTexture"] = 7548901,
 },
 {
-["itemCount"] = 100,
-["itemID"] = 242747,
+["itemCount"] = 400,
+["itemID"] = 268679,
 ["isBound"] = false,
 ["hasLoot"] = false,
 ["quality"] = 3,
-["itemLink"] = "|cnIQ3:|Hitem:242747::::::::90:105:::::::::|h[Hearty Royal Roast]|h|r",
+["itemLink"] = "|cnIQ3:|Hitem:268679::::::::90:102:::::::::|h[Hearty Impossibly Royal Roast]|h|r",
 ["iconTexture"] = 4672193,
+},
+{
 },
 {
 ["itemCount"] = 1000,
@@ -2577,7 +2608,7 @@ SYNDICATOR_DATA = {
 ["isBound"] = false,
 ["hasLoot"] = false,
 ["quality"] = 2,
-["itemLink"] = "|cnIQ2:|Hitem:242299::::::::90:105:::::::::|h[Sanguithorn Tea]|h|r",
+["itemLink"] = "|cnIQ2:|Hitem:242299::::::::90:102:::::::::|h[Sanguithorn Tea]|h|r",
 ["iconTexture"] = 7548960,
 },
 {
@@ -2586,7 +2617,7 @@ SYNDICATOR_DATA = {
 ["isBound"] = false,
 ["hasLoot"] = false,
 ["quality"] = 2,
-["itemLink"] = "|cnIQ2:|Hitem:242299::::::::90:105:::::::::|h[Sanguithorn Tea]|h|r",
+["itemLink"] = "|cnIQ2:|Hitem:242299::::::::90:102:::::::::|h[Sanguithorn Tea]|h|r",
 ["iconTexture"] = 7548960,
 },
 {
@@ -2595,7 +2626,7 @@ SYNDICATOR_DATA = {
 ["isBound"] = false,
 ["hasLoot"] = false,
 ["quality"] = 2,
-["itemLink"] = "|cnIQ2:|Hitem:243734::::::::90:105:::::::::|h[Thalassian Phoenix Oil |A:Professions-ChatIcon-Quality-12-Tier2:17:15::1|a]|h|r",
+["itemLink"] = "|cnIQ2:|Hitem:243734::::::::90:102:::::::::|h[Thalassian Phoenix Oil |A:Professions-ChatIcon-Quality-12-Tier2:17:15::1|a]|h|r",
 ["iconTexture"] = 7548987,
 },
 {
@@ -2604,7 +2635,7 @@ SYNDICATOR_DATA = {
 ["isBound"] = true,
 ["hasLoot"] = false,
 ["quality"] = 3,
-["itemLink"] = "|cnIQ3:|Hitem:243191::::::::90:105::14::1:28:3008:::::|h[Ethereal Augment Rune]|h|r",
+["itemLink"] = "|cnIQ3:|Hitem:243191::::::::90:102::14::1:28:3008:::::|h[Ethereal Augment Rune]|h|r",
 ["iconTexture"] = 3566863,
 },
 {
@@ -2613,7 +2644,7 @@ SYNDICATOR_DATA = {
 ["isBound"] = true,
 ["hasLoot"] = false,
 ["quality"] = 7,
-["itemLink"] = "|cnIQ7:|Hitem:264882::::::::90:105:::::::::|h[Finery Funds]|h|r",
+["itemLink"] = "|cnIQ7:|Hitem:264882::::::::90:102:::::::::|h[Finery Funds]|h|r",
 ["iconTexture"] = 6255014,
 },
 {
@@ -2622,7 +2653,7 @@ SYNDICATOR_DATA = {
 ["isBound"] = false,
 ["hasLoot"] = false,
 ["quality"] = 2,
-["itemLink"] = "|cnIQ2:|Hitem:112384::::::::90:105::13::::::Player-60-0AE49389:|h[Reflecting Prism]|h|r",
+["itemLink"] = "|cnIQ2:|Hitem:112384::::::::90:102::13::::::Player-60-0AE49389:|h[Reflecting Prism]|h|r",
 ["iconTexture"] = 1033182,
 },
 {
@@ -2631,7 +2662,7 @@ SYNDICATOR_DATA = {
 ["isBound"] = true,
 ["hasLoot"] = false,
 ["quality"] = 2,
-["itemLink"] = "|cnIQ2:|Hitem:71083::::::::90:105:::::::::|h[Darkmoon Game Token]|h|r",
+["itemLink"] = "|cnIQ2:|Hitem:71083::::::::90:102:::::::::|h[Darkmoon Game Token]|h|r",
 ["iconTexture"] = 531974,
 },
 {
@@ -2640,16 +2671,7 @@ SYNDICATOR_DATA = {
 ["isBound"] = false,
 ["hasLoot"] = false,
 ["quality"] = 1,
-["itemLink"] = "|cnIQ1:|Hitem:124640::::::::90:105:::::::::|h[Inky Black Potion]|h|r",
-["iconTexture"] = 134757,
-},
-{
-["itemCount"] = 200,
-["itemID"] = 124640,
-["isBound"] = false,
-["hasLoot"] = false,
-["quality"] = 1,
-["itemLink"] = "|cnIQ1:|Hitem:124640::::::::90:105:::::::::|h[Inky Black Potion]|h|r",
+["itemLink"] = "|cnIQ1:|Hitem:124640::::::::90:102:::::::::|h[Inky Black Potion]|h|r",
 ["iconTexture"] = 134757,
 },
 },
@@ -2660,7 +2682,16 @@ SYNDICATOR_DATA = {
 ["isBound"] = false,
 ["hasLoot"] = false,
 ["quality"] = 1,
-["itemLink"] = "|cnIQ1:|Hitem:124640::::::::90:105:::::::::|h[Inky Black Potion]|h|r",
+["itemLink"] = "|cnIQ1:|Hitem:124640::::::::90:102:::::::::|h[Inky Black Potion]|h|r",
+["iconTexture"] = 134757,
+},
+{
+["itemCount"] = 200,
+["itemID"] = 124640,
+["isBound"] = false,
+["hasLoot"] = false,
+["quality"] = 1,
+["itemLink"] = "|cnIQ1:|Hitem:124640::::::::90:102:::::::::|h[Inky Black Potion]|h|r",
 ["iconTexture"] = 134757,
 },
 {
@@ -2669,7 +2700,7 @@ SYNDICATOR_DATA = {
 ["isBound"] = false,
 ["hasLoot"] = false,
 ["quality"] = 1,
-["itemLink"] = "|cnIQ1:|Hitem:124640::::::::90:105:::::::::|h[Inky Black Potion]|h|r",
+["itemLink"] = "|cnIQ1:|Hitem:124640::::::::90:102:::::::::|h[Inky Black Potion]|h|r",
 ["iconTexture"] = 134757,
 },
 {
@@ -2678,7 +2709,7 @@ SYNDICATOR_DATA = {
 ["isBound"] = true,
 ["hasLoot"] = false,
 ["quality"] = 4,
-["itemLink"] = "|cnIQ4:|Hitem:249808::::::::90:105::3:3:6652:13333:12787:1:28:3607:::::|h[Litany of Lightblind Wrath]|h|r",
+["itemLink"] = "|cnIQ4:|Hitem:249808::::::::90:102::3:3:6652:13333:12787:1:28:3607:::::|h[Litany of Lightblind Wrath]|h|r",
 ["iconTexture"] = 7636705,
 },
 {
@@ -2687,7 +2718,7 @@ SYNDICATOR_DATA = {
 ["isBound"] = false,
 ["hasLoot"] = false,
 ["quality"] = 1,
-["itemLink"] = "|cnIQ1:|Hitem:38682::::::::90:105:::::::::|h[Enchanting Vellum]|h|r",
+["itemLink"] = "|cnIQ1:|Hitem:38682::::::::90:102:::::::::|h[Enchanting Vellum]|h|r",
 ["iconTexture"] = 237050,
 },
 {
@@ -2696,7 +2727,7 @@ SYNDICATOR_DATA = {
 ["isBound"] = false,
 ["hasLoot"] = false,
 ["quality"] = 1,
-["itemLink"] = "|cnIQ1:|Hitem:5956::::::::90:105::14::1:28:3321:::::|h[Blacksmith Hammer]|h|r",
+["itemLink"] = "|cnIQ1:|Hitem:5956::::::::90:102::14::1:28:3321:::::|h[Blacksmith Hammer]|h|r",
 ["iconTexture"] = 133057,
 },
 {
@@ -2705,7 +2736,7 @@ SYNDICATOR_DATA = {
 ["isBound"] = true,
 ["hasLoot"] = false,
 ["quality"] = 3,
-["itemLink"] = "|cnIQ3:|Hitem:245778::::::::90:105::13:3:12253:12251:12499:4:28:3615:29:76:38:5:40:2871::::Player-60-0BBC4C88:|h[Sin'dorei Alchemist's Mixing Rod |A:Professions-ChatIcon-Quality-Tier2:17:15::1|a]|h|r",
+["itemLink"] = "|cnIQ3:|Hitem:245778::::::::90:102::13:3:12253:12251:12499:4:28:3615:29:76:38:5:40:2871::::Player-60-0BBC4C88:|h[Sin'dorei Alchemist's Mixing Rod |A:Professions-ChatIcon-Quality-Tier2:17:15::1|a]|h|r",
 ["iconTexture"] = 7457494,
 },
 {
@@ -2714,7 +2745,7 @@ SYNDICATOR_DATA = {
 ["isBound"] = false,
 ["hasLoot"] = false,
 ["quality"] = 1,
-["itemLink"] = "|cnIQ1:|Hitem:227208::::::::90:105::14::1:28:2797:::::|h[Bismuth Rod]|h|r",
+["itemLink"] = "|cnIQ1:|Hitem:227208::::::::90:102::14::1:28:2797:::::|h[Bismuth Rod]|h|r",
 ["iconTexture"] = 4524423,
 },
 {
@@ -2723,7 +2754,7 @@ SYNDICATOR_DATA = {
 ["isBound"] = true,
 ["hasLoot"] = false,
 ["quality"] = 3,
-["itemLink"] = "|cnIQ3:|Hitem:244626::::::::90:105::13:3:12253:12251:12500:3:28:3615:38:6:40:4041::::Player-60-0EC4E0A3:|h[Sin'dorei Alchemist's Hat |A:Professions-ChatIcon-Quality-Tier3:17:15::1|a]|h|r",
+["itemLink"] = "|cnIQ3:|Hitem:244626::::::::90:102::13:3:12253:12251:12500:3:28:3615:38:6:40:4041::::Player-60-0EC4E0A3:|h[Sin'dorei Alchemist's Hat |A:Professions-ChatIcon-Quality-Tier3:17:15::1|a]|h|r",
 ["iconTexture"] = 4517354,
 },
 {
@@ -2732,7 +2763,7 @@ SYNDICATOR_DATA = {
 ["isBound"] = true,
 ["hasLoot"] = false,
 ["quality"] = 2,
-["itemLink"] = "|cnIQ2:|Hitem:239641::::::::90:105::13:3:12252:12251:12499:3:28:3615:38:5:40:2582::::Player-60-0B85C2B6:|h[Bright Linen Alchemy Apron |A:Professions-ChatIcon-Quality-Tier2:17:15::1|a]|h|r",
+["itemLink"] = "|cnIQ2:|Hitem:239641::::::::90:102::13:3:12252:12251:12499:3:28:3615:38:5:40:2582::::Player-60-0B85C2B6:|h[Bright Linen Alchemy Apron |A:Professions-ChatIcon-Quality-Tier2:17:15::1|a]|h|r",
 ["iconTexture"] = 4517355,
 },
 {
@@ -2741,7 +2772,7 @@ SYNDICATOR_DATA = {
 ["isBound"] = true,
 ["hasLoot"] = false,
 ["quality"] = 3,
-["itemLink"] = "|cnIQ3:|Hitem:115281::::::::90:105:::::::::|h[Enchanted Highmaul Bracer]|h|r",
+["itemLink"] = "|cnIQ3:|Hitem:115281::::::::90:102:::::::::|h[Enchanted Highmaul Bracer]|h|r",
 ["iconTexture"] = 323412,
 },
 {
@@ -2750,7 +2781,7 @@ SYNDICATOR_DATA = {
 ["isBound"] = true,
 ["hasLoot"] = false,
 ["quality"] = 2,
-["itemLink"] = "|cnIQ2:|Hitem:201470::::::::90:105:::::::::|h[Story of a Memorable Victory]|h|r",
+["itemLink"] = "|cnIQ2:|Hitem:201470::::::::90:102:::::::::|h[Story of a Memorable Victory]|h|r",
 ["iconTexture"] = 4549163,
 },
 {
@@ -2759,7 +2790,7 @@ SYNDICATOR_DATA = {
 ["isBound"] = true,
 ["hasLoot"] = false,
 ["quality"] = 1,
-["itemLink"] = "|cnIQ1:|Hitem:110560::::::::90:105:::::::::|h[Garrison Hearthstone]|h|r",
+["itemLink"] = "|cnIQ1:|Hitem:110560::::::::90:102:::::::::|h[Garrison Hearthstone]|h|r",
 ["iconTexture"] = 1041860,
 },
 {
@@ -2768,10 +2799,8 @@ SYNDICATOR_DATA = {
 ["isBound"] = true,
 ["hasLoot"] = false,
 ["quality"] = 4,
-["itemLink"] = "|cnIQ4:|Hitem:250741::::::::90:105:::::::::|h[Puzzling Cartel Chip]|h|r",
+["itemLink"] = "|cnIQ4:|Hitem:250741::::::::90:102:::::::::|h[Puzzling Cartel Chip]|h|r",
 ["iconTexture"] = 1604168,
-},
-{
 },
 {
 ["itemCount"] = 84,
@@ -2779,7 +2808,7 @@ SYNDICATOR_DATA = {
 ["isBound"] = true,
 ["hasLoot"] = false,
 ["quality"] = 3,
-["itemLink"] = "|cnIQ3:|Hitem:137642::::::::90:105:::::::::|h[Mark of Honor]|h|r",
+["itemLink"] = "|cnIQ3:|Hitem:137642::::::::90:102:::::::::|h[Mark of Honor]|h|r",
 ["iconTexture"] = 1322720,
 },
 {
@@ -2788,7 +2817,7 @@ SYNDICATOR_DATA = {
 ["isBound"] = true,
 ["hasLoot"] = false,
 ["quality"] = 3,
-["itemLink"] = "|cnIQ3:|Hitem:246951::::::::90:105:::::::::|h[Stormarion Core]|h|r",
+["itemLink"] = "|cnIQ3:|Hitem:246951::::::::90:102:::::::::|h[Stormarion Core]|h|r",
 ["iconTexture"] = 7431083,
 },
 {
@@ -2797,7 +2826,7 @@ SYNDICATOR_DATA = {
 ["isBound"] = true,
 ["hasLoot"] = false,
 ["quality"] = 1,
-["itemLink"] = "|cnIQ1:|Hitem:245937::::::::90:105:::::::::|h[Void-Tainted Remains]|h|r",
+["itemLink"] = "|cnIQ1:|Hitem:245937::::::::90:102:::::::::|h[Void-Tainted Remains]|h|r",
 ["iconTexture"] = 133720,
 },
 {
@@ -2806,7 +2835,7 @@ SYNDICATOR_DATA = {
 ["isBound"] = false,
 ["hasLoot"] = false,
 ["quality"] = 3,
-["itemLink"] = "|cnIQ3:|Hitem:188152::::::::90:105::14::1:28:783:::::|h[Gateway Control Shard]|h|r",
+["itemLink"] = "|cnIQ3:|Hitem:188152::::::::90:102::14::1:28:783:::::|h[Gateway Control Shard]|h|r",
 ["iconTexture"] = 607513,
 },
 {
@@ -3059,7 +3088,7 @@ SYNDICATOR_DATA = {
 ["isBound"] = false,
 ["hasLoot"] = false,
 ["quality"] = 1,
-["itemLink"] = "|cnIQ1:|Hitem:243060::::::::90:105:::::::::|h[Luminant Flux]|h|r",
+["itemLink"] = "|cnIQ1:|Hitem:243060::::::::90:102:::::::::|h[Luminant Flux]|h|r",
 ["iconTexture"] = 4622294,
 },
 {
@@ -3068,7 +3097,7 @@ SYNDICATOR_DATA = {
 ["isBound"] = false,
 ["hasLoot"] = false,
 ["quality"] = 2,
-["itemLink"] = "|cnIQ2:|Hitem:34055::::::::90:105:::::::::|h[Greater Cosmic Essence]|h|r",
+["itemLink"] = "|cnIQ2:|Hitem:34055::::::::90:102:::::::::|h[Greater Cosmic Essence]|h|r",
 ["iconTexture"] = 237016,
 },
 {
@@ -3077,7 +3106,7 @@ SYNDICATOR_DATA = {
 ["isBound"] = true,
 ["hasLoot"] = false,
 ["quality"] = 4,
-["itemLink"] = "|cnIQ4:|Hitem:232875::::::::90:105:::::::::|h[Spark of Radiance]|h|r",
+["itemLink"] = "|cnIQ4:|Hitem:232875::::::::90:102:::::::::|h[Spark of Radiance]|h|r",
 ["iconTexture"] = 7551418,
 },
 {
@@ -3086,7 +3115,7 @@ SYNDICATOR_DATA = {
 ["isBound"] = true,
 ["hasLoot"] = false,
 ["quality"] = 1,
-["itemLink"] = "|cnIQ1:|Hitem:247811::::::::90:105:::::::::|h[Oil of Heartwood]|h|r",
+["itemLink"] = "|cnIQ1:|Hitem:247811::::::::90:102:::::::::|h[Oil of Heartwood]|h|r",
 ["iconTexture"] = 2032169,
 },
 {
@@ -3095,7 +3124,7 @@ SYNDICATOR_DATA = {
 ["isBound"] = true,
 ["hasLoot"] = false,
 ["quality"] = 3,
-["itemLink"] = "|cnIQ3:|Hitem:242651::::::::90:105:::::::::|h[Stabilized Derivate]|h|r",
+["itemLink"] = "|cnIQ3:|Hitem:242651::::::::90:102:::::::::|h[Stabilized Derivate]|h|r",
 ["iconTexture"] = 348534,
 },
 {
@@ -3104,7 +3133,7 @@ SYNDICATOR_DATA = {
 ["isBound"] = false,
 ["hasLoot"] = false,
 ["quality"] = 1,
-["itemLink"] = "|cnIQ1:|Hitem:240991::::::::90:105::::1:38:13:::::|h[Sunglass Vial |A:Professions-ChatIcon-Quality-12-Tier1:17:15::1|a]|h|r",
+["itemLink"] = "|cnIQ1:|Hitem:240991::::::::90:102::::1:38:13:::::|h[Sunglass Vial |A:Professions-ChatIcon-Quality-12-Tier1:17:15::1|a]|h|r",
 ["iconTexture"] = 7548906,
 },
 {
@@ -3113,7 +3142,7 @@ SYNDICATOR_DATA = {
 ["isBound"] = true,
 ["hasLoot"] = false,
 ["quality"] = 3,
-["itemLink"] = "|cnIQ3:|Hitem:247724::::::::90:105:::::::::|h[Multicraft Manifold]|h|r",
+["itemLink"] = "|cnIQ3:|Hitem:247724::::::::90:102:::::::::|h[Multicraft Manifold]|h|r",
 ["iconTexture"] = 4548879,
 },
 {
@@ -3122,7 +3151,7 @@ SYNDICATOR_DATA = {
 ["isBound"] = true,
 ["hasLoot"] = false,
 ["quality"] = 3,
-["itemLink"] = "|cnIQ3:|Hitem:247726::::::::90:105:::::::::|h[Resourceful Routing]|h|r",
+["itemLink"] = "|cnIQ3:|Hitem:247726::::::::90:102:::::::::|h[Resourceful Routing]|h|r",
 ["iconTexture"] = 133004,
 },
 {
@@ -3131,7 +3160,7 @@ SYNDICATOR_DATA = {
 ["isBound"] = true,
 ["hasLoot"] = false,
 ["quality"] = 2,
-["itemLink"] = "|cnIQ2:|Hitem:247788::::::::90:105:::::::::|h[Ingenious Identity]|h|r",
+["itemLink"] = "|cnIQ2:|Hitem:247788::::::::90:102:::::::::|h[Ingenious Identity]|h|r",
 ["iconTexture"] = 3610512,
 },
 {
@@ -3140,7 +3169,7 @@ SYNDICATOR_DATA = {
 ["isBound"] = true,
 ["hasLoot"] = false,
 ["quality"] = 2,
-["itemLink"] = "|cnIQ2:|Hitem:247719::::::::90:105:::::::::|h[Multicraft Matrix]|h|r",
+["itemLink"] = "|cnIQ2:|Hitem:247719::::::::90:102:::::::::|h[Multicraft Matrix]|h|r",
 ["iconTexture"] = 4548881,
 },
 {
@@ -3149,7 +3178,7 @@ SYNDICATOR_DATA = {
 ["isBound"] = true,
 ["hasLoot"] = false,
 ["quality"] = 2,
-["itemLink"] = "|cnIQ2:|Hitem:247725::::::::90:105:::::::::|h[Resourceful Rebar]|h|r",
+["itemLink"] = "|cnIQ2:|Hitem:247725::::::::90:102:::::::::|h[Resourceful Rebar]|h|r",
 ["iconTexture"] = 133006,
 },
 {
@@ -3158,10 +3187,17 @@ SYNDICATOR_DATA = {
 ["isBound"] = true,
 ["hasLoot"] = false,
 ["quality"] = 1,
-["itemLink"] = "|cnIQ1:|Hitem:260630::::::::90:105:::::::::|h[Ingenious Identifier]|h|r",
+["itemLink"] = "|cnIQ1:|Hitem:260630::::::::90:102:::::::::|h[Ingenious Identifier]|h|r",
 ["iconTexture"] = 3610513,
 },
 {
+["itemCount"] = 3,
+["itemID"] = 238203,
+["isBound"] = false,
+["hasLoot"] = false,
+["quality"] = 2,
+["itemLink"] = "|cnIQ2:|Hitem:238203::::::::90:102:::::::::|h[Gloaming Alloy |A:Professions-ChatIcon-Quality-12-Tier2:17:15::1|a]|h|r",
+["iconTexture"] = 7548920,
 },
 {
 },
@@ -3217,74 +3253,54 @@ SYNDICATOR_DATA = {
 },
 ["auctions"] = {
 {
-["iconTexture"] = 4638442,
+["auctionID"] = 839066911,
 ["itemCount"] = 2,
 ["itemID"] = 260665,
 ["isBound"] = false,
 ["expirationTime"] = 1774215191,
 ["quality"] = 0,
 ["itemLink"] = "|cnIQ0:|Hitem:260665::::::::90:102:::::::::|h[Sizable Tusk]|h|r",
-["auctionID"] = 839066911,
+["iconTexture"] = 4638442,
 },
 {
-["iconTexture"] = 7549048,
+["auctionID"] = 839516593,
 ["itemCount"] = 1,
 ["itemID"] = 245851,
 ["isBound"] = false,
 ["expirationTime"] = 1774219699,
 ["quality"] = 3,
 ["itemLink"] = "|cnIQ3:|Hitem:245851::::::::90:102:::::::::|h[Five of Rot]|h|r",
-["auctionID"] = 839516593,
+["iconTexture"] = 7549048,
 },
 {
-["iconTexture"] = 7548922,
+["auctionID"] = 840388708,
+["itemCount"] = 1,
+["itemID"] = 245834,
+["isBound"] = false,
+["expirationTime"] = 1774228225,
+["quality"] = 3,
+["itemLink"] = "|cnIQ3:|Hitem:245834::::::::90:102:::::::::|h[Five of Hunt]|h|r",
+["iconTexture"] = 7549028,
+},
+{
+["auctionID"] = 839096035,
 ["itemCount"] = 1,
 ["itemID"] = 238198,
 ["isBound"] = false,
 ["expirationTime"] = 1774215485,
 ["quality"] = 2,
 ["itemLink"] = "|cnIQ2:|Hitem:238198::::::::90:102:::::::::|h[Refulgent Copper Ingot |A:Professions-ChatIcon-Quality-12-Tier2:17:15::1|a]|h|r",
-["auctionID"] = 839096035,
+["iconTexture"] = 7548922,
 },
 {
-["iconTexture"] = 7548920,
+["auctionID"] = 839074229,
 ["itemCount"] = 3,
 ["itemID"] = 238203,
 ["isBound"] = false,
 ["expirationTime"] = 1774215264,
 ["quality"] = 2,
 ["itemLink"] = "|cnIQ2:|Hitem:238203::::::::90:102:::::::::|h[Gloaming Alloy |A:Professions-ChatIcon-Quality-12-Tier2:17:15::1|a]|h|r",
-["auctionID"] = 839074229,
-},
-{
-["iconTexture"] = 7300485,
-["itemCount"] = 2,
-["itemID"] = 237359,
-["isBound"] = false,
-["expirationTime"] = 1774228219,
-["quality"] = 1,
-["itemLink"] = "|cnIQ1:|Hitem:237359::::::::90:102:::::::::|h[Refulgent Copper Ore |A:Professions-ChatIcon-Quality-12-Tier1:17:15::1|a]|h|r",
-["auctionID"] = 840388089,
-},
-{
-["iconTexture"] = 7549048,
-["itemCount"] = 1,
-["itemID"] = 245851,
-["isBound"] = false,
-["expirationTime"] = 1774228224,
-["quality"] = 3,
-["itemLink"] = "|cnIQ3:|Hitem:245851::::::::90:102:::::::::|h[Five of Rot]|h|r",
-["auctionID"] = 840388564,
-},
-{
-["iconTexture"] = 7549028,
-["itemCount"] = 1,
-["itemID"] = 245834,
-["isBound"] = false,
-["expirationTime"] = 1774228226,
-["quality"] = 3,
-["itemLink"] = "|cnIQ3:|Hitem:245834::::::::90:102:::::::::|h[Five of Hunt]|h|r",
-["auctionID"] = 840388708,
+["iconTexture"] = 7548920,
 },
 },
 ["currencyByHeader"] = {
@@ -3445,7 +3461,7 @@ SYNDICATOR_DATA = {
 },
 },
 },
-["money"] = 6964325545,
+["money"] = 6861525515,
 ["mail"] = {
 },
 ["void"] = {
@@ -3541,7 +3557,7 @@ SYNDICATOR_DATA = {
 ["itemID"] = 251140,
 ["isBound"] = true,
 ["quality"] = 4,
-["itemLink"] = "|cnIQ4:|Hitem:251140:7959:::::::90:105::23:6:13439:6652:12667:12699:13577:12782:1:28:3025:::::|h[Vilefiend's Guise]|h|r",
+["itemLink"] = "|cnIQ4:|Hitem:251140:7959:::::::90:102::23:6:13439:6652:12667:12699:13577:12782:1:28:3025:::::|h[Vilefiend's Guise]|h|r",
 ["iconTexture"] = 7232473,
 },
 {
@@ -3549,7 +3565,7 @@ SYNDICATOR_DATA = {
 ["itemID"] = 251096,
 ["isBound"] = true,
 ["quality"] = 4,
-["itemLink"] = "|cnIQ4:|Hitem:251096::240861::::::90:105::23:5:12785:13439:6652:13668:12699:1:28:3025:::::|h[Pendant of Aching Grief]|h|r",
+["itemLink"] = "|cnIQ4:|Hitem:251096::240861::::::90:102::23:5:12785:13439:6652:13668:12699:1:28:3025:::::|h[Pendant of Aching Grief]|h|r",
 ["iconTexture"] = 7636615,
 },
 {
@@ -3557,7 +3573,7 @@ SYNDICATOR_DATA = {
 ["itemID"] = 249642,
 ["isBound"] = true,
 ["quality"] = 4,
-["itemLink"] = "|cnIQ4:|Hitem:249642::::::::90:105::109:3:12786:6652:13577:1:28:6011:::::|h[Osseoclad Razorspaulders]|h|r",
+["itemLink"] = "|cnIQ4:|Hitem:249642::::::::90:102::109:3:12786:6652:13577:1:28:6011:::::|h[Osseoclad Razorspaulders]|h|r",
 ["iconTexture"] = 7232475,
 },
 {
@@ -3567,7 +3583,7 @@ SYNDICATOR_DATA = {
 ["itemID"] = 249637,
 ["isBound"] = true,
 ["quality"] = 4,
-["itemLink"] = "|cnIQ4:|Hitem:249637::::::::90:105::110:3:12793:6652:13577:1:28:6011:::::|h[Osseoclad Marrowvest]|h|r",
+["itemLink"] = "|cnIQ4:|Hitem:249637::::::::90:102::110:3:12793:6652:13577:1:28:6011:::::|h[Osseoclad Marrowvest]|h|r",
 ["iconTexture"] = 7232471,
 },
 {
@@ -3575,7 +3591,7 @@ SYNDICATOR_DATA = {
 ["itemID"] = 251166,
 ["isBound"] = true,
 ["quality"] = 4,
-["itemLink"] = "|cnIQ4:|Hitem:251166::::::::90:105::23:6:12785:13439:6652:12667:13577:12699:1:28:3025:::::|h[Falconer's Cinch]|h|r",
+["itemLink"] = "|cnIQ4:|Hitem:251166::::::::90:102::23:6:12785:13439:6652:12667:13577:12699:1:28:3025:::::|h[Falconer's Cinch]|h|r",
 ["iconTexture"] = 7278019,
 },
 {
@@ -3583,7 +3599,7 @@ SYNDICATOR_DATA = {
 ["itemID"] = 49817,
 ["isBound"] = true,
 ["quality"] = 4,
-["itemLink"] = "|cnIQ4:|Hitem:49817::::::::90:105::23:5:13439:6652:13577:12699:12790:1:28:3025:::::|h[Shaggy Wyrmleather Leggings]|h|r",
+["itemLink"] = "|cnIQ4:|Hitem:49817::::::::90:102::23:5:13439:6652:13577:12699:12790:1:28:3025:::::|h[Shaggy Wyrmleather Leggings]|h|r",
 ["iconTexture"] = 312652,
 },
 {
@@ -3591,7 +3607,7 @@ SYNDICATOR_DATA = {
 ["itemID"] = 251121,
 ["isBound"] = true,
 ["quality"] = 4,
-["itemLink"] = "|cnIQ4:|Hitem:251121::::::::90:105::23:5:12785:13439:40:13577:12699:1:28:3025:::::|h[Domanaar's Dire Treads]|h|r",
+["itemLink"] = "|cnIQ4:|Hitem:251121::::::::90:102::23:5:12785:13439:40:13577:12699:1:28:3025:::::|h[Domanaar's Dire Treads]|h|r",
 ["iconTexture"] = 7232468,
 },
 {
@@ -3599,7 +3615,7 @@ SYNDICATOR_DATA = {
 ["itemID"] = 50264,
 ["isBound"] = true,
 ["quality"] = 4,
-["itemLink"] = "|cnIQ4:|Hitem:50264::::::::90:105::23:6:12785:13439:42:12667:13577:12699:1:28:3025:::::|h[Chewed Leather Wristguards]|h|r",
+["itemLink"] = "|cnIQ4:|Hitem:50264::::::::90:102::23:6:12785:13439:42:12667:13577:12699:1:28:3025:::::|h[Chewed Leather Wristguards]|h|r",
 ["iconTexture"] = 236962,
 },
 {
@@ -3607,7 +3623,7 @@ SYNDICATOR_DATA = {
 ["itemID"] = 193721,
 ["isBound"] = true,
 ["quality"] = 4,
-["itemLink"] = "|cnIQ4:|Hitem:193721::::::::90:105::23:5:13439:6652:13577:12699:12789:1:28:3025:::::|h[Ruby Contestant's Gloves]|h|r",
+["itemLink"] = "|cnIQ4:|Hitem:193721::::::::90:102::23:5:13439:6652:13577:12699:12789:1:28:3025:::::|h[Ruby Contestant's Gloves]|h|r",
 ["iconTexture"] = 4095089,
 },
 {
@@ -3615,7 +3631,7 @@ SYNDICATOR_DATA = {
 ["itemID"] = 151311,
 ["isBound"] = true,
 ["quality"] = 4,
-["itemLink"] = "|cnIQ4:|Hitem:151311:8021:240861::::::90:105::23:5:12785:13439:6652:13668:12699:1:28:1171:::::|h[Band of the Triumvirate]|h|r",
+["itemLink"] = "|cnIQ4:|Hitem:151311:8021:240861::::::90:102::23:5:12785:13439:6652:13668:12699:1:28:1171:::::|h[Band of the Triumvirate]|h|r",
 ["iconTexture"] = 1408436,
 },
 {
@@ -3623,7 +3639,7 @@ SYNDICATOR_DATA = {
 ["itemID"] = 49812,
 ["isBound"] = true,
 ["quality"] = 4,
-["itemLink"] = "|cnIQ4:|Hitem:49812::::::::90:105::23:5:12785:13439:6652:13668:12699:1:28:3025:::::|h[Purloined Wedding Ring]|h|r",
+["itemLink"] = "|cnIQ4:|Hitem:49812::::::::90:102::23:5:12785:13439:6652:13668:12699:1:28:3025:::::|h[Purloined Wedding Ring]|h|r",
 ["iconTexture"] = 133384,
 },
 {
@@ -3631,7 +3647,7 @@ SYNDICATOR_DATA = {
 ["itemID"] = 249809,
 ["isBound"] = true,
 ["quality"] = 4,
-["itemLink"] = "|cnIQ4:|Hitem:249809::::::::90:105::3:3:6652:13333:12788:1:28:3608:::::|h[Locus-Walker's Ribbon]|h|r",
+["itemLink"] = "|cnIQ4:|Hitem:249809::::::::90:102::3:3:6652:13333:12788:1:28:3608:::::|h[Locus-Walker's Ribbon]|h|r",
 ["iconTexture"] = 7636707,
 },
 {
@@ -3639,7 +3655,7 @@ SYNDICATOR_DATA = {
 ["itemID"] = 250256,
 ["isBound"] = true,
 ["quality"] = 4,
-["itemLink"] = "|cnIQ4:|Hitem:250256::::::::90:105::23:4:13439:6652:12699:12790:1:28:3025:::::|h[Heart of Wind]|h|r",
+["itemLink"] = "|cnIQ4:|Hitem:250256::::::::90:102::23:4:13439:6652:12699:12790:1:28:3025:::::|h[Heart of Wind]|h|r",
 ["iconTexture"] = 4644003,
 },
 {
@@ -3647,7 +3663,7 @@ SYNDICATOR_DATA = {
 ["itemID"] = 193712,
 ["isBound"] = true,
 ["quality"] = 4,
-["itemLink"] = "|cnIQ4:|Hitem:193712::::::::90:105::23:5:13439:6652:13577:12699:12786:1:28:3025:::::|h[Potion-Stained Cloak]|h|r",
+["itemLink"] = "|cnIQ4:|Hitem:193712::::::::90:102::23:5:13439:6652:13577:12699:12786:1:28:3025:::::|h[Potion-Stained Cloak]|h|r",
 ["iconTexture"] = 4095087,
 },
 {
@@ -3655,7 +3671,7 @@ SYNDICATOR_DATA = {
 ["itemID"] = 258050,
 ["isBound"] = true,
 ["quality"] = 4,
-["itemLink"] = "|cnIQ4:|Hitem:258050::::::::90:105::23:4:13439:6652:12701:12790:1:28:3025:::::|h[Arcanic of the High Sage]|h|r",
+["itemLink"] = "|cnIQ4:|Hitem:258050::::::::90:102::23:4:13439:6652:12701:12790:1:28:3025:::::|h[Arcanic of the High Sage]|h|r",
 ["iconTexture"] = 939346,
 },
 {
@@ -3663,7 +3679,7 @@ SYNDICATOR_DATA = {
 ["itemID"] = 193709,
 ["isBound"] = true,
 ["quality"] = 4,
-["itemLink"] = "|cnIQ4:|Hitem:193709::::::::90:105::23:4:13439:6652:12699:12789:1:28:2587:::::|h[Vexamus' Expulsion Rod]|h|r",
+["itemLink"] = "|cnIQ4:|Hitem:193709::::::::90:102::23:4:13439:6652:12699:12789:1:28:2587:::::|h[Vexamus' Expulsion Rod]|h|r",
 ["iconTexture"] = 4526077,
 },
 {
@@ -3681,7 +3697,7 @@ SYNDICATOR_DATA = {
 ["itemID"] = 238018,
 ["isBound"] = true,
 ["quality"] = 3,
-["itemLink"] = "|cnIQ3:|Hitem:238018::::::::90:105::13:4:12253:12251:12502:8952:5:28:3615:29:82:38:8:40:2687:44:245816::::Player-60-0EFF479D:|h[Sun-Blessed Blacksmith's Hammer |A:Professions-ChatIcon-Quality-Tier5:17:15::1|a]|h|r",
+["itemLink"] = "|cnIQ3:|Hitem:238018::::::::90:102::13:4:12253:12251:12502:8952:5:28:3615:29:82:38:8:40:2687:44:245816::::Player-60-0EFF479D:|h[Sun-Blessed Blacksmith's Hammer |A:Professions-ChatIcon-Quality-Tier5:17:15::1|a]|h|r",
 ["iconTexture"] = 7427767,
 },
 {
@@ -3689,7 +3705,7 @@ SYNDICATOR_DATA = {
 ["itemID"] = 244628,
 ["isBound"] = true,
 ["quality"] = 3,
-["itemLink"] = "|cnIQ3:|Hitem:244628::::::::90:105::13:3:12253:12251:12502:3:28:3615:38:8:40:4044::::Player-60-0EFF479D:|h[Sin'dorei Forgemaster's Cover |A:Professions-ChatIcon-Quality-Tier5:17:15::1|a]|h|r",
+["itemLink"] = "|cnIQ3:|Hitem:244628::::::::90:102::13:3:12253:12251:12502:3:28:3615:38:8:40:4044::::Player-60-0EFF479D:|h[Sin'dorei Forgemaster's Cover |A:Professions-ChatIcon-Quality-Tier5:17:15::1|a]|h|r",
 ["iconTexture"] = 4374732,
 },
 {
@@ -3697,7 +3713,7 @@ SYNDICATOR_DATA = {
 ["itemID"] = 237952,
 ["isBound"] = true,
 ["quality"] = 3,
-["itemLink"] = "|cnIQ3:|Hitem:237952::::::::90:105::13:3:12253:12251:12499:3:28:3615:38:5:40:2692::::Player-60-0FDF4195:|h[Sun-Blessed Blacksmith's Toolbox |A:Professions-ChatIcon-Quality-Tier2:17:15::1|a]|h|r",
+["itemLink"] = "|cnIQ3:|Hitem:237952::::::::90:102::13:3:12253:12251:12499:3:28:3615:38:5:40:2692::::Player-60-0FDF4195:|h[Sun-Blessed Blacksmith's Toolbox |A:Professions-ChatIcon-Quality-Tier2:17:15::1|a]|h|r",
 ["iconTexture"] = 7548923,
 },
 {
@@ -3705,7 +3721,7 @@ SYNDICATOR_DATA = {
 ["itemID"] = 222577,
 ["isBound"] = true,
 ["quality"] = 2,
-["itemLink"] = "|cnIQ2:|Hitem:222577::::::::90:105::13:3:10827:10830:9632:3:28:2734:38:8:40:2260::::Player-60-0E8AB7BB:|h[Burnt Rolling Pin |A:Professions-ChatIcon-Quality-Tier5:17:15::1|a]|h|r",
+["itemLink"] = "|cnIQ2:|Hitem:222577::::::::90:102::13:3:10827:10830:9632:3:28:2734:38:8:40:2260::::Player-60-0E8AB7BB:|h[Burnt Rolling Pin |A:Professions-ChatIcon-Quality-Tier5:17:15::1|a]|h|r",
 ["iconTexture"] = 4485499,
 },
 {
@@ -3713,7 +3729,7 @@ SYNDICATOR_DATA = {
 ["itemID"] = 222846,
 ["isBound"] = true,
 ["quality"] = 2,
-["itemLink"] = "|cnIQ2:|Hitem:222846::::::::90:105::13:3:10827:10830:13628:3:28:2734:38:8:40:2381::::Player-60-0E8AB7BB:|h[Weavercloth Chef's Hat |A:Professions-ChatIcon-Quality-Tier5:17:15::1|a]|h|r",
+["itemLink"] = "|cnIQ2:|Hitem:222846::::::::90:102::13:3:10827:10830:13628:3:28:2734:38:8:40:2381::::Player-60-0E8AB7BB:|h[Weavercloth Chef's Hat |A:Professions-ChatIcon-Quality-Tier5:17:15::1|a]|h|r",
 ["iconTexture"] = 4485408,
 },
 {
@@ -3721,7 +3737,7 @@ SYNDICATOR_DATA = {
 ["itemID"] = 198225,
 ["isBound"] = true,
 ["quality"] = 2,
-["itemLink"] = "|cnIQ2:|Hitem:198225::::::::90:105::13:3:8841:8842:8807:3:28:2164:38:8:40:622::::Player-60-0AA7D215:|h[Draconium Fisherfriend |A:Professions-ChatIcon-Quality-Tier5:17:15::1|a]|h|r",
+["itemLink"] = "|cnIQ2:|Hitem:198225::::::::90:102::13:3:8841:8842:8807:3:28:2164:38:8:40:622::::Player-60-0AA7D215:|h[Draconium Fisherfriend |A:Professions-ChatIcon-Quality-Tier5:17:15::1|a]|h|r",
 ["iconTexture"] = 4611537,
 },
 {
@@ -3773,8 +3789,6 @@ SYNDICATOR_DATA = {
 },
 ["bankTabs"] = {
 {
-["depositFlags"] = 0,
-["name"] = "Tab 1",
 ["slots"] = {
 {
 ["itemCount"] = 1,
@@ -3980,11 +3994,214 @@ SYNDICATOR_DATA = {
 {
 },
 },
+["depositFlags"] = 0,
+["name"] = "Tab 1",
 ["iconTexture"] = 134400,
 },
 {
+["slots"] = {
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+},
 ["depositFlags"] = 0,
 ["name"] = "Tab 2",
+["iconTexture"] = 134400,
+},
+{
 ["slots"] = {
 {
 },
@@ -4183,11 +4400,11 @@ SYNDICATOR_DATA = {
 {
 },
 },
-["iconTexture"] = 134400,
-},
-{
 ["depositFlags"] = 0,
 ["name"] = "Tab 3",
+["iconTexture"] = 134400,
+},
+{
 ["slots"] = {
 {
 },
@@ -4386,11 +4603,11 @@ SYNDICATOR_DATA = {
 {
 },
 },
-["iconTexture"] = 134400,
-},
-{
 ["depositFlags"] = 128,
 ["name"] = "Reagents",
+["iconTexture"] = 134400,
+},
+{
 ["slots"] = {
 {
 },
@@ -4589,214 +4806,11 @@ SYNDICATOR_DATA = {
 {
 },
 },
-["iconTexture"] = 134400,
-},
-{
 ["depositFlags"] = 0,
 ["name"] = "Void Storage 1",
-["slots"] = {
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-},
 ["iconTexture"] = 134400,
 },
 {
-["depositFlags"] = 0,
-["name"] = "Void Storage 2",
 ["slots"] = {
 {
 },
@@ -4995,6 +5009,8 @@ SYNDICATOR_DATA = {
 {
 },
 },
+["depositFlags"] = 0,
+["name"] = "Void Storage 2",
 ["iconTexture"] = 134400,
 },
 },
@@ -7398,886 +7414,6 @@ SYNDICATOR_DATA = {
 ["bank"] = {
 },
 },
-["Minimeditite-Area52"] = {
-["containerInfo"] = {
-["bags"] = {
-{
-["itemCount"] = 1,
-["itemID"] = 114821,
-["isBound"] = true,
-["quality"] = 4,
-["itemLink"] = "|cnIQ4:|Hitem:114821::::::::70:270::::::::Player-3676-0879EC27:|h[Hexweave Bag]|h|r",
-["iconTexture"] = 1029751,
-},
-{
-["itemCount"] = 1,
-["itemID"] = 114821,
-["isBound"] = true,
-["quality"] = 4,
-["itemLink"] = "|cnIQ4:|Hitem:114821::::::::70:270::::::::Player-3676-0879EC27:|h[Hexweave Bag]|h|r",
-["iconTexture"] = 1029751,
-},
-{
-["itemCount"] = 1,
-["itemID"] = 114821,
-["isBound"] = true,
-["quality"] = 4,
-["itemLink"] = "|cnIQ4:|Hitem:114821::::::::70:270::::::::Player-3676-0879EC27:|h[Hexweave Bag]|h|r",
-["iconTexture"] = 1029751,
-},
-{
-["itemCount"] = 1,
-["itemID"] = 114821,
-["isBound"] = true,
-["quality"] = 4,
-["itemLink"] = "|cnIQ4:|Hitem:114821::::::::70:270::::::::Player-3676-0879EC27:|h[Hexweave Bag]|h|r",
-["iconTexture"] = 1029751,
-},
-{
-},
-},
-},
-["bankTabs"] = {
-},
-["details"] = {
-["class"] = 10,
-["realmNormalized"] = "Area52",
-["show"] = {
-["inventory"] = true,
-["gold"] = true,
-},
-["race"] = "BloodElf",
-["faction"] = "Horde",
-["sex"] = 2,
-["className"] = "MONK",
-["character"] = "Minimeditite",
-["realm"] = "Area 52",
-},
-["bags"] = {
-{
-{
-["itemCount"] = 1,
-["itemID"] = 6948,
-["isBound"] = true,
-["hasLoot"] = false,
-["quality"] = 1,
-["itemLink"] = "|cnIQ1:|Hitem:6948::::::::70:270:::::::::|h[Hearthstone]|h|r",
-["iconTexture"] = 134414,
-},
-{
-["itemCount"] = 2,
-["itemID"] = 116268,
-["isBound"] = false,
-["hasLoot"] = false,
-["quality"] = 1,
-["itemLink"] = "|cnIQ1:|Hitem:116268::::::::70:270:::::::::|h[Draenic Invisibility Potion]|h|r",
-["iconTexture"] = 967518,
-},
-{
-["itemCount"] = 19,
-["itemID"] = 2459,
-["isBound"] = false,
-["hasLoot"] = false,
-["quality"] = 1,
-["itemLink"] = "|cnIQ1:|Hitem:2459::::::::70:270:::::::::|h[Swiftness Potion]|h|r",
-["iconTexture"] = 134875,
-},
-{
-["itemCount"] = 1,
-["itemID"] = 168842,
-["isBound"] = true,
-["hasLoot"] = false,
-["quality"] = 6,
-["itemLink"] = "|cnIQ6:|Hitem:168842::::::::70:270::16:::::::|h[Engine of Mecha-Perfection]|h|r",
-["iconTexture"] = 133871,
-},
-{
-["itemCount"] = 1,
-["itemID"] = 168558,
-["isBound"] = true,
-["hasLoot"] = false,
-["quality"] = 6,
-["itemLink"] = "|cnIQ6:|Hitem:168558::::::::70:270::16:::::::|h[Fetish of the Deep Dungeons]|h|r",
-["iconTexture"] = 973905,
-},
-{
-["itemCount"] = 1,
-["itemID"] = 168621,
-["isBound"] = true,
-["hasLoot"] = false,
-["quality"] = 6,
-["itemLink"] = "|cnIQ6:|Hitem:168621::::::::70:270::16:::::::|h[Magnifying Lens of the Focusing Iris]|h|r",
-["iconTexture"] = 460953,
-},
-{
-["itemCount"] = 1,
-["itemID"] = 173289,
-["isBound"] = true,
-["hasLoot"] = false,
-["quality"] = 6,
-["itemLink"] = "|cnIQ6:|Hitem:173289::::::::70:270::9:::::::|h[Pulsing Azerite Geode]|h|r",
-["iconTexture"] = 2967103,
-},
-{
-["itemCount"] = 1,
-["itemID"] = 168937,
-["isBound"] = true,
-["hasLoot"] = false,
-["quality"] = 6,
-["itemLink"] = "|cnIQ6:|Hitem:168937::::::::70:270::9:::::::|h[Ward of Reciprocation]|h|r",
-["iconTexture"] = 135876,
-},
-{
-["itemCount"] = 1,
-["itemID"] = 173309,
-["isBound"] = true,
-["hasLoot"] = false,
-["quality"] = 6,
-["itemLink"] = "|cnIQ6:|Hitem:173309::::::::70:270::9:::::::|h[Water Dancer's Technique]|h|r",
-["iconTexture"] = 1505960,
-},
-{
-["itemCount"] = 7,
-["itemID"] = 169694,
-["isBound"] = true,
-["hasLoot"] = false,
-["quality"] = 4,
-["itemLink"] = "|cnIQ4:|Hitem:169694::::::::70:270:::::::::|h[Aqueous Reliquary]|h|r",
-["iconTexture"] = 948864,
-},
-{
-["itemCount"] = 60,
-["itemID"] = 174279,
-["isBound"] = true,
-["hasLoot"] = false,
-["quality"] = 4,
-["itemLink"] = "|cnIQ4:|Hitem:174279::::::::70:270:::::::::|h[Encrypted Ny'alothan Text]|h|r",
-["iconTexture"] = 441148,
-},
-{
-["itemCount"] = 4,
-["itemID"] = 174288,
-["isBound"] = true,
-["hasLoot"] = false,
-["quality"] = 4,
-["itemLink"] = "|cnIQ4:|Hitem:174288::::::::70:270:::::::::|h[Breath of Everlasting Spirit]|h|r",
-["iconTexture"] = 463539,
-},
-{
-["itemCount"] = 29,
-["itemID"] = 169491,
-["isBound"] = true,
-["hasLoot"] = false,
-["quality"] = 4,
-["itemLink"] = "|cnIQ4:|Hitem:169491::::::::70:270:::::::::|h[Focused Life Anima]|h|r",
-["iconTexture"] = 463568,
-},
-{
-["itemCount"] = 22,
-["itemID"] = 174287,
-["isBound"] = true,
-["hasLoot"] = false,
-["quality"] = 4,
-["itemLink"] = "|cnIQ4:|Hitem:174287::::::::70:270:::::::::|h[Sparks of Unwavering Strength]|h|r",
-["iconTexture"] = 348560,
-},
-{
-["itemCount"] = 1,
-["itemID"] = 128938,
-["isBound"] = true,
-["hasLoot"] = false,
-["quality"] = 6,
-["itemLink"] = "|cnIQ6:|Hitem:128938::137339:137270:133763::::70:270::9:2:732:1522:2:8:337:24:1:3:3411:1472:3528:3:3413:1472:3337:3:3418:1472:3337::|h[Fu Zan, the Wanderer's Companion]|h|r",
-["iconTexture"] = 1264909,
-},
-{
-["itemCount"] = 1,
-["itemID"] = 128937,
-["isBound"] = true,
-["hasLoot"] = false,
-["quality"] = 6,
-["itemLink"] = "|cnIQ6:|Hitem:128937::152040:152051:146932::::70:270::9:2:733:1522::3:3611:1472:3337:3:3611:1472:3337:::|h[Sheilun, Staff of the Mists]|h|r",
-["iconTexture"] = 1242282,
-},
-{
-["itemCount"] = 1,
-["itemID"] = 128940,
-["isBound"] = true,
-["hasLoot"] = false,
-["quality"] = 6,
-["itemLink"] = "|cnIQ6:|Hitem:128940::137493:137326:141278::::70:270::9:2:734:1522:1:8:290:3:3411:1472:3336:3:3417:1472:3336:3:1824:1472:3528::|h[Fists of the Heavens]|h|r",
-["iconTexture"] = 1282595,
-},
-{
-["itemCount"] = 1,
-["itemID"] = 167555,
-["isBound"] = true,
-["hasLoot"] = false,
-["quality"] = 4,
-["itemLink"] = "|cnIQ4:|Hitem:167555::167556:168752:::::70:270::11:1:1474::::::|h[Pocket-Sized Computation Device]|h|r",
-["iconTexture"] = 2115322,
-},
-{
-["itemCount"] = 17,
-["itemID"] = 152877,
-["isBound"] = false,
-["hasLoot"] = false,
-["quality"] = 4,
-["itemLink"] = "|cnIQ4:|Hitem:152877::::::::70:270:::::::::|h[Veiled Crystal]|h|r",
-["iconTexture"] = 2060147,
-},
-{
-["itemCount"] = 18,
-["itemID"] = 152876,
-["isBound"] = false,
-["hasLoot"] = false,
-["quality"] = 3,
-["itemLink"] = "|cnIQ3:|Hitem:152876::::::::70:270:::::::::|h[Umbra Shard]|h|r",
-["iconTexture"] = 2060146,
-},
-},
-{
-{
-["itemCount"] = 11,
-["itemID"] = 152875,
-["isBound"] = false,
-["hasLoot"] = false,
-["quality"] = 1,
-["itemLink"] = "|cnIQ1:|Hitem:152875::::::::70:270:::::::::|h[Gloom Dust]|h|r",
-["iconTexture"] = 2060145,
-},
-{
-["itemCount"] = 39,
-["itemID"] = 124442,
-["isBound"] = false,
-["hasLoot"] = false,
-["quality"] = 4,
-["itemLink"] = "|cnIQ4:|Hitem:124442::::::::70:270:::::::::|h[Chaos Crystal]|h|r",
-["iconTexture"] = 1379176,
-},
-{
-["itemCount"] = 25,
-["itemID"] = 124440,
-["isBound"] = false,
-["hasLoot"] = false,
-["quality"] = 1,
-["itemLink"] = "|cnIQ1:|Hitem:124440::::::::70:270:::::::::|h[Arkhana]|h|r",
-["iconTexture"] = 1379175,
-},
-{
-["itemCount"] = 1,
-["itemID"] = 22449,
-["isBound"] = false,
-["hasLoot"] = false,
-["quality"] = 3,
-["itemLink"] = "|cnIQ3:|Hitem:22449::::::::70:270:::::::::|h[Large Prismatic Shard]|h|r",
-["iconTexture"] = 132881,
-},
-{
-["itemCount"] = 5,
-["itemID"] = 22445,
-["isBound"] = false,
-["hasLoot"] = false,
-["quality"] = 1,
-["itemLink"] = "|cnIQ1:|Hitem:22445::::::::70:270:::::::::|h[Arcane Dust]|h|r",
-["iconTexture"] = 132854,
-},
-{
-["itemCount"] = 1,
-["itemID"] = 163475,
-["isBound"] = true,
-["hasLoot"] = false,
-["quality"] = 1,
-["itemLink"] = "|cnIQ1:|Hitem:163475::::::::70:270:::::::::|h[Magical Spyglass]|h|r",
-["iconTexture"] = 134441,
-},
-{
-["itemCount"] = 1,
-["itemID"] = 152900,
-["isBound"] = true,
-["hasLoot"] = false,
-["quality"] = 4,
-["itemLink"] = "|cnIQ4:|Hitem:152900::::::::70:270:::::::::|h[Blood of the Unmaker]|h|r",
-["iconTexture"] = 463517,
-},
-{
-["itemCount"] = 1,
-["itemID"] = 129119,
-["isBound"] = true,
-["hasLoot"] = false,
-["quality"] = 1,
-["itemLink"] = "|cnIQ1:|Hitem:129119::::::::70:270:::::::::|h[Foxflower Sample]|h|r",
-["iconTexture"] = 1387616,
-},
-{
-["itemCount"] = 1,
-["itemID"] = 29740,
-["isBound"] = false,
-["hasLoot"] = false,
-["quality"] = 2,
-["itemLink"] = "|cnIQ2:|Hitem:29740::::::::70:270:::::::::|h[Fel Armament]|h|r",
-["iconTexture"] = 133832,
-},
-{
-["itemCount"] = 1,
-["itemID"] = 198538,
-["isBound"] = true,
-["hasLoot"] = false,
-["quality"] = 3,
-["itemLink"] = "|cnIQ3:|Hitem:198538::::::::70:270:::::::::|h[Magically Bound Message]|h|r",
-["iconTexture"] = 237249,
-},
-{
-["itemCount"] = 1,
-["itemID"] = 138441,
-["isBound"] = true,
-["hasLoot"] = false,
-["quality"] = 1,
-["itemLink"] = "|cnIQ1:|Hitem:138441::::::::70:270:::::::::|h[Grotesque Remains]|h|r",
-["iconTexture"] = 646670,
-},
-{
-["itemCount"] = 1,
-["itemID"] = 140192,
-["isBound"] = true,
-["hasLoot"] = false,
-["quality"] = 1,
-["itemLink"] = "|cnIQ1:|Hitem:140192::::::::70:270::11:::::::|h[Dalaran Hearthstone]|h|r",
-["iconTexture"] = 1444943,
-},
-{
-},
-{
-["itemCount"] = 1,
-["itemID"] = 174756,
-["isBound"] = true,
-["hasLoot"] = false,
-["quality"] = 2,
-["itemLink"] = "|cnIQ2:|Hitem:174756::::::::70:270:::::::::|h[Aqir Relic Fragment]|h|r",
-["iconTexture"] = 441140,
-},
-{
-},
-{
-["itemCount"] = 4,
-["itemID"] = 141028,
-["isBound"] = true,
-["hasLoot"] = false,
-["quality"] = 3,
-["itemLink"] = "|cnIQ3:|Hitem:141028::::::::70:270:::::::::|h[Grimoire of Knowledge]|h|r",
-["iconTexture"] = 355498,
-},
-{
-["itemCount"] = 2,
-["itemID"] = 174759,
-["isBound"] = true,
-["hasLoot"] = false,
-["quality"] = 2,
-["itemLink"] = "|cnIQ2:|Hitem:174759::::::::70:270:::::::::|h[Mogu Relic Fragment]|h|r",
-["iconTexture"] = 646672,
-},
-{
-["itemCount"] = 4,
-["itemID"] = 174758,
-["isBound"] = true,
-["hasLoot"] = false,
-["quality"] = 2,
-["itemLink"] = "|cnIQ2:|Hitem:174758::::::::70:270:::::::::|h[Voidwarped Relic Fragment]|h|r",
-["iconTexture"] = 3072269,
-},
-{
-["itemCount"] = 1,
-["itemID"] = 141605,
-["isBound"] = true,
-["hasLoot"] = false,
-["quality"] = 3,
-["itemLink"] = "|cnIQ3:|Hitem:141605::::::::70:270::11:::::::|h[Flight Master's Whistle]|h|r",
-["iconTexture"] = 132161,
-},
-{
-["itemCount"] = 5,
-["itemID"] = 139419,
-["isBound"] = true,
-["hasLoot"] = false,
-["quality"] = 2,
-["itemLink"] = "|cnIQ2:|Hitem:139419::::::::70:270:::::::::|h[Golden Banana]|h|r",
-["iconTexture"] = 133980,
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-},
-{
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-},
-{
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-["itemCount"] = 1,
-["itemID"] = 110560,
-["isBound"] = true,
-["hasLoot"] = false,
-["quality"] = 1,
-["itemLink"] = "|cnIQ1:|Hitem:110560::::::::70:270:::::::::|h[Garrison Hearthstone]|h|r",
-["iconTexture"] = 1041860,
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-},
-{
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-["itemCount"] = 1,
-["itemID"] = 8383,
-["isBound"] = false,
-["hasLoot"] = false,
-["quality"] = 1,
-["itemLink"] = "|cnIQ1:|Hitem:8383::::::::70:270:::::::::|h[Plain Letter]|h|r",
-["iconTexture"] = 134327,
-},
-{
-},
-{
-},
-{
-},
-{
-},
-},
-{
-},
-},
-["auctions"] = {
-},
-["currencyByHeader"] = {
-{
-["name"] = "Unknown",
-["currencies"] = {
-},
-},
-{
-["header"] = "Midnight",
-["currencies"] = {
-},
-},
-{
-["header"] = "Season 1",
-["currencies"] = {
-3378,
-},
-},
-{
-["header"] = "Dungeon and Raid",
-["currencies"] = {
-1166,
-},
-},
-{
-["header"] = "Miscellaneous",
-["currencies"] = {
-2032,
-},
-},
-{
-["header"] = "Legacy",
-["currencies"] = {
-},
-},
-{
-["header"] = "Battle for Azeroth",
-["currencies"] = {
-1755,
-1719,
-1803,
-1721,
-1710,
-1580,
-1718,
-1560,
-},
-},
-{
-["header"] = "Legion",
-["currencies"] = {
-1155,
-1275,
-1342,
-1226,
-1220,
-1273,
-1533,
-},
-},
-{
-["header"] = "Warlords of Draenor",
-["currencies"] = {
-824,
-},
-},
-},
-["money"] = 14099,
-["mail"] = {
-},
-["void"] = {
-},
-["currencies"] = {
-[1580] = 4,
-[1273] = 2,
-[1275] = 11,
-[1710] = 1,
-[1155] = 147,
-[1342] = 54,
-[1560] = 7625,
-[1220] = 3126,
-[824] = 300,
-[1718] = 0,
-[1719] = 2109,
-[1533] = 2002,
-[3378] = 0,
-[2032] = 17295,
-[1226] = 1588,
-[1755] = 7702,
-[1166] = 630,
-[1721] = 38,
-[1803] = 710,
-},
-["equipped"] = {
-{
-},
-{
-["itemCount"] = 1,
-["itemID"] = 159302,
-["isBound"] = true,
-["quality"] = 4,
-["itemLink"] = "|cnIQ4:|Hitem:159302::::::::70:270::35:5:5442:1513:4786:6505:4775::::::|h[Cowl of Fluid Machinations]|h|r",
-["iconTexture"] = 1941312,
-},
-{
-["itemCount"] = 1,
-["itemID"] = 158075,
-["isBound"] = true,
-["quality"] = 6,
-["itemLink"] = "|cnIQ6:|Hitem:158075::::::::70:270::11:4:4932:4933:6316:1546::::::|h[Heart of Azeroth]|h|r",
-["iconTexture"] = 1869493,
-},
-{
-["itemCount"] = 1,
-["itemID"] = 174135,
-["isBound"] = true,
-["quality"] = 4,
-["itemLink"] = "|cnIQ4:|Hitem:174135::::::::70:270::5:5:4823:1502:4786:6509:4775::::::|h[Spaulders of Aberrant Allure]|h|r",
-["iconTexture"] = 2978248,
-},
-{
-},
-{
-["itemCount"] = 1,
-["itemID"] = 159298,
-["isBound"] = true,
-["quality"] = 4,
-["itemLink"] = "|cnIQ4:|Hitem:159298::::::::70:270::35:4:5448:1543:4786:6510::::::|h[Venture Co. Plenipotentiary Vest]|h|r",
-["iconTexture"] = 1892756,
-},
-{
-["itemCount"] = 1,
-["itemID"] = 174142,
-["isBound"] = true,
-["quality"] = 4,
-["itemLink"] = "|cnIQ4:|Hitem:174142::::::::70:270::5:5:4823:6516:6513:1502:4786::::::|h[Belt of Braided Vessels]|h|r",
-["iconTexture"] = 2978241,
-},
-{
-["itemCount"] = 1,
-["itemID"] = 159306,
-["isBound"] = true,
-["quality"] = 4,
-["itemLink"] = "|cnIQ4:|Hitem:159306::::::::70:270::35:6:6536:6578:6515:1543:4786:6516::::::|h[Singe-Blotched Britches]|h|r",
-["iconTexture"] = 1941313,
-},
-{
-["itemCount"] = 1,
-["itemID"] = 175007,
-["isBound"] = true,
-["quality"] = 4,
-["itemLink"] = "|cnIQ4:|Hitem:175007::::::::70:270::5:8:4823:43:6578:6579:6548:6515:1502:4786::::::|h[Footpads of Terrible Delusions]|h|r",
-["iconTexture"] = 2978242,
-},
-{
-["itemCount"] = 1,
-["itemID"] = 173445,
-["isBound"] = true,
-["quality"] = 4,
-["itemLink"] = "|cnIQ4:|Hitem:173445::::::::70:270::36:9:6412:4803:6513:6578:6579:6474:6455:1479:4786::::::|h[Wristwraps of the Insatiable Maw]|h|r",
-["iconTexture"] = 2978243,
-},
-{
-["itemCount"] = 1,
-["itemID"] = 159344,
-["isBound"] = true,
-["quality"] = 4,
-["itemLink"] = "|cnIQ4:|Hitem:159344::168641::::::70:270::23:6:4779:4802:6516:6513:1498:4786::::::|h[Underrot Grotto Tenders]|h|r",
-["iconTexture"] = 1892757,
-},
-{
-["itemCount"] = 1,
-["itemID"] = 158314,
-["isBound"] = true,
-["quality"] = 4,
-["itemLink"] = "|cnIQ4:|Hitem:158314::::::::70:270::35:8:6536:6578:6579:6477:6455:6515:1543:4786::::::|h[Seal of Questionable Loyalties]|h|r",
-["iconTexture"] = 2000826,
-},
-{
-["itemCount"] = 1,
-["itemID"] = 169160,
-["isBound"] = true,
-["quality"] = 4,
-["itemLink"] = "|cnIQ4:|Hitem:169160:6109:::::::70:270::16:8:6536:6578:6579:6478:6462:6515:1514:4786::::::|h[Shorting Bit Band]|h|r",
-["iconTexture"] = 2958712,
-},
-{
-["itemCount"] = 1,
-["itemID"] = 174044,
-["isBound"] = true,
-["quality"] = 4,
-["itemLink"] = "|cnIQ4:|Hitem:174044::::::::70:270::5:4:4823:6513:1502:4786::::::|h[Humming Black Dragonscale]|h|r",
-["iconTexture"] = 1526633,
-},
-{
-["itemCount"] = 1,
-["itemID"] = 174500,
-["isBound"] = true,
-["quality"] = 4,
-["itemLink"] = "|cnIQ4:|Hitem:174500::::::::70:270::5:4:4823:6515:1502:4786::::::|h[Vita-Charged Titanshard]|h|r",
-["iconTexture"] = 136050,
-},
-{
-["itemCount"] = 1,
-["itemID"] = 169223,
-["isBound"] = true,
-["quality"] = 5,
-["itemLink"] = "|cnIQ5:|Hitem:169223::::::::70:270::11:2:6280:1472::::::|h[Ashjra'kamas, Shroud of Resolve]|h|r",
-["iconTexture"] = 530999,
-},
-{
-["itemCount"] = 1,
-["itemID"] = 158371,
-["isBound"] = true,
-["quality"] = 4,
-["itemLink"] = "|cnIQ4:|Hitem:158371:5963:::::::70:270::16:5:6530:6516:6515:1528:4786::::::|h[Seabreeze]|h|r",
-["iconTexture"] = 1821503,
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-{
-},
-},
-["bank"] = {
-},
-},
 ["Madmareep-Stormrage"] = {
 ["containerInfo"] = {
 ["bags"] = {
@@ -10643,13 +9779,13 @@ SYNDICATOR_DATA = {
 [3378] = 0,
 [2245] = 0,
 [2003] = 937,
-[1721] = 4,
+[1166] = 1245,
 [1710] = 39,
 [1533] = 30,
 [2032] = 17295,
-[1166] = 1245,
-[1155] = 250,
 [2594] = 1759,
+[1155] = 250,
+[1721] = 4,
 [1718] = 0,
 [1560] = 3,
 },
@@ -10810,6 +9946,886 @@ SYNDICATOR_DATA = {
 ["bank"] = {
 },
 },
+["Minimeditite-Area52"] = {
+["containerInfo"] = {
+["bags"] = {
+{
+["itemCount"] = 1,
+["itemID"] = 114821,
+["isBound"] = true,
+["quality"] = 4,
+["itemLink"] = "|cnIQ4:|Hitem:114821::::::::70:270::::::::Player-3676-0879EC27:|h[Hexweave Bag]|h|r",
+["iconTexture"] = 1029751,
+},
+{
+["itemCount"] = 1,
+["itemID"] = 114821,
+["isBound"] = true,
+["quality"] = 4,
+["itemLink"] = "|cnIQ4:|Hitem:114821::::::::70:270::::::::Player-3676-0879EC27:|h[Hexweave Bag]|h|r",
+["iconTexture"] = 1029751,
+},
+{
+["itemCount"] = 1,
+["itemID"] = 114821,
+["isBound"] = true,
+["quality"] = 4,
+["itemLink"] = "|cnIQ4:|Hitem:114821::::::::70:270::::::::Player-3676-0879EC27:|h[Hexweave Bag]|h|r",
+["iconTexture"] = 1029751,
+},
+{
+["itemCount"] = 1,
+["itemID"] = 114821,
+["isBound"] = true,
+["quality"] = 4,
+["itemLink"] = "|cnIQ4:|Hitem:114821::::::::70:270::::::::Player-3676-0879EC27:|h[Hexweave Bag]|h|r",
+["iconTexture"] = 1029751,
+},
+{
+},
+},
+},
+["bankTabs"] = {
+},
+["details"] = {
+["class"] = 10,
+["realmNormalized"] = "Area52",
+["show"] = {
+["inventory"] = true,
+["gold"] = true,
+},
+["race"] = "BloodElf",
+["faction"] = "Horde",
+["sex"] = 2,
+["className"] = "MONK",
+["character"] = "Minimeditite",
+["realm"] = "Area 52",
+},
+["bags"] = {
+{
+{
+["itemCount"] = 1,
+["itemID"] = 6948,
+["isBound"] = true,
+["hasLoot"] = false,
+["quality"] = 1,
+["itemLink"] = "|cnIQ1:|Hitem:6948::::::::70:270:::::::::|h[Hearthstone]|h|r",
+["iconTexture"] = 134414,
+},
+{
+["itemCount"] = 2,
+["itemID"] = 116268,
+["isBound"] = false,
+["hasLoot"] = false,
+["quality"] = 1,
+["itemLink"] = "|cnIQ1:|Hitem:116268::::::::70:270:::::::::|h[Draenic Invisibility Potion]|h|r",
+["iconTexture"] = 967518,
+},
+{
+["itemCount"] = 19,
+["itemID"] = 2459,
+["isBound"] = false,
+["hasLoot"] = false,
+["quality"] = 1,
+["itemLink"] = "|cnIQ1:|Hitem:2459::::::::70:270:::::::::|h[Swiftness Potion]|h|r",
+["iconTexture"] = 134875,
+},
+{
+["itemCount"] = 1,
+["itemID"] = 168842,
+["isBound"] = true,
+["hasLoot"] = false,
+["quality"] = 6,
+["itemLink"] = "|cnIQ6:|Hitem:168842::::::::70:270::16:::::::|h[Engine of Mecha-Perfection]|h|r",
+["iconTexture"] = 133871,
+},
+{
+["itemCount"] = 1,
+["itemID"] = 168558,
+["isBound"] = true,
+["hasLoot"] = false,
+["quality"] = 6,
+["itemLink"] = "|cnIQ6:|Hitem:168558::::::::70:270::16:::::::|h[Fetish of the Deep Dungeons]|h|r",
+["iconTexture"] = 973905,
+},
+{
+["itemCount"] = 1,
+["itemID"] = 168621,
+["isBound"] = true,
+["hasLoot"] = false,
+["quality"] = 6,
+["itemLink"] = "|cnIQ6:|Hitem:168621::::::::70:270::16:::::::|h[Magnifying Lens of the Focusing Iris]|h|r",
+["iconTexture"] = 460953,
+},
+{
+["itemCount"] = 1,
+["itemID"] = 173289,
+["isBound"] = true,
+["hasLoot"] = false,
+["quality"] = 6,
+["itemLink"] = "|cnIQ6:|Hitem:173289::::::::70:270::9:::::::|h[Pulsing Azerite Geode]|h|r",
+["iconTexture"] = 2967103,
+},
+{
+["itemCount"] = 1,
+["itemID"] = 168937,
+["isBound"] = true,
+["hasLoot"] = false,
+["quality"] = 6,
+["itemLink"] = "|cnIQ6:|Hitem:168937::::::::70:270::9:::::::|h[Ward of Reciprocation]|h|r",
+["iconTexture"] = 135876,
+},
+{
+["itemCount"] = 1,
+["itemID"] = 173309,
+["isBound"] = true,
+["hasLoot"] = false,
+["quality"] = 6,
+["itemLink"] = "|cnIQ6:|Hitem:173309::::::::70:270::9:::::::|h[Water Dancer's Technique]|h|r",
+["iconTexture"] = 1505960,
+},
+{
+["itemCount"] = 7,
+["itemID"] = 169694,
+["isBound"] = true,
+["hasLoot"] = false,
+["quality"] = 4,
+["itemLink"] = "|cnIQ4:|Hitem:169694::::::::70:270:::::::::|h[Aqueous Reliquary]|h|r",
+["iconTexture"] = 948864,
+},
+{
+["itemCount"] = 60,
+["itemID"] = 174279,
+["isBound"] = true,
+["hasLoot"] = false,
+["quality"] = 4,
+["itemLink"] = "|cnIQ4:|Hitem:174279::::::::70:270:::::::::|h[Encrypted Ny'alothan Text]|h|r",
+["iconTexture"] = 441148,
+},
+{
+["itemCount"] = 4,
+["itemID"] = 174288,
+["isBound"] = true,
+["hasLoot"] = false,
+["quality"] = 4,
+["itemLink"] = "|cnIQ4:|Hitem:174288::::::::70:270:::::::::|h[Breath of Everlasting Spirit]|h|r",
+["iconTexture"] = 463539,
+},
+{
+["itemCount"] = 29,
+["itemID"] = 169491,
+["isBound"] = true,
+["hasLoot"] = false,
+["quality"] = 4,
+["itemLink"] = "|cnIQ4:|Hitem:169491::::::::70:270:::::::::|h[Focused Life Anima]|h|r",
+["iconTexture"] = 463568,
+},
+{
+["itemCount"] = 22,
+["itemID"] = 174287,
+["isBound"] = true,
+["hasLoot"] = false,
+["quality"] = 4,
+["itemLink"] = "|cnIQ4:|Hitem:174287::::::::70:270:::::::::|h[Sparks of Unwavering Strength]|h|r",
+["iconTexture"] = 348560,
+},
+{
+["itemCount"] = 1,
+["itemID"] = 128938,
+["isBound"] = true,
+["hasLoot"] = false,
+["quality"] = 6,
+["itemLink"] = "|cnIQ6:|Hitem:128938::137339:137270:133763::::70:270::9:2:732:1522:2:8:337:24:1:3:3411:1472:3528:3:3413:1472:3337:3:3418:1472:3337::|h[Fu Zan, the Wanderer's Companion]|h|r",
+["iconTexture"] = 1264909,
+},
+{
+["itemCount"] = 1,
+["itemID"] = 128937,
+["isBound"] = true,
+["hasLoot"] = false,
+["quality"] = 6,
+["itemLink"] = "|cnIQ6:|Hitem:128937::152040:152051:146932::::70:270::9:2:733:1522::3:3611:1472:3337:3:3611:1472:3337:::|h[Sheilun, Staff of the Mists]|h|r",
+["iconTexture"] = 1242282,
+},
+{
+["itemCount"] = 1,
+["itemID"] = 128940,
+["isBound"] = true,
+["hasLoot"] = false,
+["quality"] = 6,
+["itemLink"] = "|cnIQ6:|Hitem:128940::137493:137326:141278::::70:270::9:2:734:1522:1:8:290:3:3411:1472:3336:3:3417:1472:3336:3:1824:1472:3528::|h[Fists of the Heavens]|h|r",
+["iconTexture"] = 1282595,
+},
+{
+["itemCount"] = 1,
+["itemID"] = 167555,
+["isBound"] = true,
+["hasLoot"] = false,
+["quality"] = 4,
+["itemLink"] = "|cnIQ4:|Hitem:167555::167556:168752:::::70:270::11:1:1474::::::|h[Pocket-Sized Computation Device]|h|r",
+["iconTexture"] = 2115322,
+},
+{
+["itemCount"] = 17,
+["itemID"] = 152877,
+["isBound"] = false,
+["hasLoot"] = false,
+["quality"] = 4,
+["itemLink"] = "|cnIQ4:|Hitem:152877::::::::70:270:::::::::|h[Veiled Crystal]|h|r",
+["iconTexture"] = 2060147,
+},
+{
+["itemCount"] = 18,
+["itemID"] = 152876,
+["isBound"] = false,
+["hasLoot"] = false,
+["quality"] = 3,
+["itemLink"] = "|cnIQ3:|Hitem:152876::::::::70:270:::::::::|h[Umbra Shard]|h|r",
+["iconTexture"] = 2060146,
+},
+},
+{
+{
+["itemCount"] = 11,
+["itemID"] = 152875,
+["isBound"] = false,
+["hasLoot"] = false,
+["quality"] = 1,
+["itemLink"] = "|cnIQ1:|Hitem:152875::::::::70:270:::::::::|h[Gloom Dust]|h|r",
+["iconTexture"] = 2060145,
+},
+{
+["itemCount"] = 39,
+["itemID"] = 124442,
+["isBound"] = false,
+["hasLoot"] = false,
+["quality"] = 4,
+["itemLink"] = "|cnIQ4:|Hitem:124442::::::::70:270:::::::::|h[Chaos Crystal]|h|r",
+["iconTexture"] = 1379176,
+},
+{
+["itemCount"] = 25,
+["itemID"] = 124440,
+["isBound"] = false,
+["hasLoot"] = false,
+["quality"] = 1,
+["itemLink"] = "|cnIQ1:|Hitem:124440::::::::70:270:::::::::|h[Arkhana]|h|r",
+["iconTexture"] = 1379175,
+},
+{
+["itemCount"] = 1,
+["itemID"] = 22449,
+["isBound"] = false,
+["hasLoot"] = false,
+["quality"] = 3,
+["itemLink"] = "|cnIQ3:|Hitem:22449::::::::70:270:::::::::|h[Large Prismatic Shard]|h|r",
+["iconTexture"] = 132881,
+},
+{
+["itemCount"] = 5,
+["itemID"] = 22445,
+["isBound"] = false,
+["hasLoot"] = false,
+["quality"] = 1,
+["itemLink"] = "|cnIQ1:|Hitem:22445::::::::70:270:::::::::|h[Arcane Dust]|h|r",
+["iconTexture"] = 132854,
+},
+{
+["itemCount"] = 1,
+["itemID"] = 163475,
+["isBound"] = true,
+["hasLoot"] = false,
+["quality"] = 1,
+["itemLink"] = "|cnIQ1:|Hitem:163475::::::::70:270:::::::::|h[Magical Spyglass]|h|r",
+["iconTexture"] = 134441,
+},
+{
+["itemCount"] = 1,
+["itemID"] = 152900,
+["isBound"] = true,
+["hasLoot"] = false,
+["quality"] = 4,
+["itemLink"] = "|cnIQ4:|Hitem:152900::::::::70:270:::::::::|h[Blood of the Unmaker]|h|r",
+["iconTexture"] = 463517,
+},
+{
+["itemCount"] = 1,
+["itemID"] = 129119,
+["isBound"] = true,
+["hasLoot"] = false,
+["quality"] = 1,
+["itemLink"] = "|cnIQ1:|Hitem:129119::::::::70:270:::::::::|h[Foxflower Sample]|h|r",
+["iconTexture"] = 1387616,
+},
+{
+["itemCount"] = 1,
+["itemID"] = 29740,
+["isBound"] = false,
+["hasLoot"] = false,
+["quality"] = 2,
+["itemLink"] = "|cnIQ2:|Hitem:29740::::::::70:270:::::::::|h[Fel Armament]|h|r",
+["iconTexture"] = 133832,
+},
+{
+["itemCount"] = 1,
+["itemID"] = 198538,
+["isBound"] = true,
+["hasLoot"] = false,
+["quality"] = 3,
+["itemLink"] = "|cnIQ3:|Hitem:198538::::::::70:270:::::::::|h[Magically Bound Message]|h|r",
+["iconTexture"] = 237249,
+},
+{
+["itemCount"] = 1,
+["itemID"] = 138441,
+["isBound"] = true,
+["hasLoot"] = false,
+["quality"] = 1,
+["itemLink"] = "|cnIQ1:|Hitem:138441::::::::70:270:::::::::|h[Grotesque Remains]|h|r",
+["iconTexture"] = 646670,
+},
+{
+["itemCount"] = 1,
+["itemID"] = 140192,
+["isBound"] = true,
+["hasLoot"] = false,
+["quality"] = 1,
+["itemLink"] = "|cnIQ1:|Hitem:140192::::::::70:270::11:::::::|h[Dalaran Hearthstone]|h|r",
+["iconTexture"] = 1444943,
+},
+{
+},
+{
+["itemCount"] = 1,
+["itemID"] = 174756,
+["isBound"] = true,
+["hasLoot"] = false,
+["quality"] = 2,
+["itemLink"] = "|cnIQ2:|Hitem:174756::::::::70:270:::::::::|h[Aqir Relic Fragment]|h|r",
+["iconTexture"] = 441140,
+},
+{
+},
+{
+["itemCount"] = 4,
+["itemID"] = 141028,
+["isBound"] = true,
+["hasLoot"] = false,
+["quality"] = 3,
+["itemLink"] = "|cnIQ3:|Hitem:141028::::::::70:270:::::::::|h[Grimoire of Knowledge]|h|r",
+["iconTexture"] = 355498,
+},
+{
+["itemCount"] = 2,
+["itemID"] = 174759,
+["isBound"] = true,
+["hasLoot"] = false,
+["quality"] = 2,
+["itemLink"] = "|cnIQ2:|Hitem:174759::::::::70:270:::::::::|h[Mogu Relic Fragment]|h|r",
+["iconTexture"] = 646672,
+},
+{
+["itemCount"] = 4,
+["itemID"] = 174758,
+["isBound"] = true,
+["hasLoot"] = false,
+["quality"] = 2,
+["itemLink"] = "|cnIQ2:|Hitem:174758::::::::70:270:::::::::|h[Voidwarped Relic Fragment]|h|r",
+["iconTexture"] = 3072269,
+},
+{
+["itemCount"] = 1,
+["itemID"] = 141605,
+["isBound"] = true,
+["hasLoot"] = false,
+["quality"] = 3,
+["itemLink"] = "|cnIQ3:|Hitem:141605::::::::70:270::11:::::::|h[Flight Master's Whistle]|h|r",
+["iconTexture"] = 132161,
+},
+{
+["itemCount"] = 5,
+["itemID"] = 139419,
+["isBound"] = true,
+["hasLoot"] = false,
+["quality"] = 2,
+["itemLink"] = "|cnIQ2:|Hitem:139419::::::::70:270:::::::::|h[Golden Banana]|h|r",
+["iconTexture"] = 133980,
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+},
+{
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+},
+{
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+["itemCount"] = 1,
+["itemID"] = 110560,
+["isBound"] = true,
+["hasLoot"] = false,
+["quality"] = 1,
+["itemLink"] = "|cnIQ1:|Hitem:110560::::::::70:270:::::::::|h[Garrison Hearthstone]|h|r",
+["iconTexture"] = 1041860,
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+},
+{
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+["itemCount"] = 1,
+["itemID"] = 8383,
+["isBound"] = false,
+["hasLoot"] = false,
+["quality"] = 1,
+["itemLink"] = "|cnIQ1:|Hitem:8383::::::::70:270:::::::::|h[Plain Letter]|h|r",
+["iconTexture"] = 134327,
+},
+{
+},
+{
+},
+{
+},
+{
+},
+},
+{
+},
+},
+["auctions"] = {
+},
+["currencyByHeader"] = {
+{
+["name"] = "Unknown",
+["currencies"] = {
+},
+},
+{
+["header"] = "Midnight",
+["currencies"] = {
+},
+},
+{
+["header"] = "Season 1",
+["currencies"] = {
+3378,
+},
+},
+{
+["header"] = "Dungeon and Raid",
+["currencies"] = {
+1166,
+},
+},
+{
+["header"] = "Miscellaneous",
+["currencies"] = {
+2032,
+},
+},
+{
+["header"] = "Legacy",
+["currencies"] = {
+},
+},
+{
+["header"] = "Battle for Azeroth",
+["currencies"] = {
+1755,
+1719,
+1803,
+1721,
+1710,
+1580,
+1718,
+1560,
+},
+},
+{
+["header"] = "Legion",
+["currencies"] = {
+1155,
+1275,
+1342,
+1226,
+1220,
+1273,
+1533,
+},
+},
+{
+["header"] = "Warlords of Draenor",
+["currencies"] = {
+824,
+},
+},
+},
+["money"] = 14099,
+["mail"] = {
+},
+["void"] = {
+},
+["currencies"] = {
+[1580] = 4,
+[1273] = 2,
+[1275] = 11,
+[1710] = 1,
+[1155] = 147,
+[1342] = 54,
+[1560] = 7625,
+[1220] = 3126,
+[824] = 300,
+[1718] = 0,
+[1719] = 2109,
+[1533] = 2002,
+[3378] = 0,
+[2032] = 17295,
+[1226] = 1588,
+[1755] = 7702,
+[1166] = 630,
+[1721] = 38,
+[1803] = 710,
+},
+["equipped"] = {
+{
+},
+{
+["itemCount"] = 1,
+["itemID"] = 159302,
+["isBound"] = true,
+["quality"] = 4,
+["itemLink"] = "|cnIQ4:|Hitem:159302::::::::70:270::35:5:5442:1513:4786:6505:4775::::::|h[Cowl of Fluid Machinations]|h|r",
+["iconTexture"] = 1941312,
+},
+{
+["itemCount"] = 1,
+["itemID"] = 158075,
+["isBound"] = true,
+["quality"] = 6,
+["itemLink"] = "|cnIQ6:|Hitem:158075::::::::70:270::11:4:4932:4933:6316:1546::::::|h[Heart of Azeroth]|h|r",
+["iconTexture"] = 1869493,
+},
+{
+["itemCount"] = 1,
+["itemID"] = 174135,
+["isBound"] = true,
+["quality"] = 4,
+["itemLink"] = "|cnIQ4:|Hitem:174135::::::::70:270::5:5:4823:1502:4786:6509:4775::::::|h[Spaulders of Aberrant Allure]|h|r",
+["iconTexture"] = 2978248,
+},
+{
+},
+{
+["itemCount"] = 1,
+["itemID"] = 159298,
+["isBound"] = true,
+["quality"] = 4,
+["itemLink"] = "|cnIQ4:|Hitem:159298::::::::70:270::35:4:5448:1543:4786:6510::::::|h[Venture Co. Plenipotentiary Vest]|h|r",
+["iconTexture"] = 1892756,
+},
+{
+["itemCount"] = 1,
+["itemID"] = 174142,
+["isBound"] = true,
+["quality"] = 4,
+["itemLink"] = "|cnIQ4:|Hitem:174142::::::::70:270::5:5:4823:6516:6513:1502:4786::::::|h[Belt of Braided Vessels]|h|r",
+["iconTexture"] = 2978241,
+},
+{
+["itemCount"] = 1,
+["itemID"] = 159306,
+["isBound"] = true,
+["quality"] = 4,
+["itemLink"] = "|cnIQ4:|Hitem:159306::::::::70:270::35:6:6536:6578:6515:1543:4786:6516::::::|h[Singe-Blotched Britches]|h|r",
+["iconTexture"] = 1941313,
+},
+{
+["itemCount"] = 1,
+["itemID"] = 175007,
+["isBound"] = true,
+["quality"] = 4,
+["itemLink"] = "|cnIQ4:|Hitem:175007::::::::70:270::5:8:4823:43:6578:6579:6548:6515:1502:4786::::::|h[Footpads of Terrible Delusions]|h|r",
+["iconTexture"] = 2978242,
+},
+{
+["itemCount"] = 1,
+["itemID"] = 173445,
+["isBound"] = true,
+["quality"] = 4,
+["itemLink"] = "|cnIQ4:|Hitem:173445::::::::70:270::36:9:6412:4803:6513:6578:6579:6474:6455:1479:4786::::::|h[Wristwraps of the Insatiable Maw]|h|r",
+["iconTexture"] = 2978243,
+},
+{
+["itemCount"] = 1,
+["itemID"] = 159344,
+["isBound"] = true,
+["quality"] = 4,
+["itemLink"] = "|cnIQ4:|Hitem:159344::168641::::::70:270::23:6:4779:4802:6516:6513:1498:4786::::::|h[Underrot Grotto Tenders]|h|r",
+["iconTexture"] = 1892757,
+},
+{
+["itemCount"] = 1,
+["itemID"] = 158314,
+["isBound"] = true,
+["quality"] = 4,
+["itemLink"] = "|cnIQ4:|Hitem:158314::::::::70:270::35:8:6536:6578:6579:6477:6455:6515:1543:4786::::::|h[Seal of Questionable Loyalties]|h|r",
+["iconTexture"] = 2000826,
+},
+{
+["itemCount"] = 1,
+["itemID"] = 169160,
+["isBound"] = true,
+["quality"] = 4,
+["itemLink"] = "|cnIQ4:|Hitem:169160:6109:::::::70:270::16:8:6536:6578:6579:6478:6462:6515:1514:4786::::::|h[Shorting Bit Band]|h|r",
+["iconTexture"] = 2958712,
+},
+{
+["itemCount"] = 1,
+["itemID"] = 174044,
+["isBound"] = true,
+["quality"] = 4,
+["itemLink"] = "|cnIQ4:|Hitem:174044::::::::70:270::5:4:4823:6513:1502:4786::::::|h[Humming Black Dragonscale]|h|r",
+["iconTexture"] = 1526633,
+},
+{
+["itemCount"] = 1,
+["itemID"] = 174500,
+["isBound"] = true,
+["quality"] = 4,
+["itemLink"] = "|cnIQ4:|Hitem:174500::::::::70:270::5:4:4823:6515:1502:4786::::::|h[Vita-Charged Titanshard]|h|r",
+["iconTexture"] = 136050,
+},
+{
+["itemCount"] = 1,
+["itemID"] = 169223,
+["isBound"] = true,
+["quality"] = 5,
+["itemLink"] = "|cnIQ5:|Hitem:169223::::::::70:270::11:2:6280:1472::::::|h[Ashjra'kamas, Shroud of Resolve]|h|r",
+["iconTexture"] = 530999,
+},
+{
+["itemCount"] = 1,
+["itemID"] = 158371,
+["isBound"] = true,
+["quality"] = 4,
+["itemLink"] = "|cnIQ4:|Hitem:158371:5963:::::::70:270::16:5:6530:6516:6515:1528:4786::::::|h[Seabreeze]|h|r",
+["iconTexture"] = 1821503,
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+{
+},
+},
+["bank"] = {
+},
+},
 },
 ["Guilds"] = {
 ["Red Raid-Stormrage"] = {
@@ -10820,6 +10836,21 @@ SYNDICATOR_DATA = {
 ["gold"] = false,
 },
 ["guild"] = "Red Raid",
+["faction"] = "Alliance",
+["visited"] = false,
+["realm"] = "Stormrage",
+},
+["bank"] = {
+},
+},
+["Beam-Stormrage"] = {
+["money"] = 0,
+["details"] = {
+["show"] = {
+["inventory"] = true,
+["gold"] = false,
+},
+["guild"] = "Beam",
 ["faction"] = "Alliance",
 ["visited"] = false,
 ["realm"] = "Stormrage",
@@ -10898,8 +10929,6 @@ SYNDICATOR_DATA = {
 },
 ["bank"] = {
 {
-["depositFlags"] = 0,
-["name"] = "Tab 1",
 ["slots"] = {
 {
 },
@@ -11098,11 +11127,11 @@ SYNDICATOR_DATA = {
 {
 },
 },
+["depositFlags"] = 0,
+["name"] = "Tab 1",
 ["iconTexture"] = 134400,
 },
 {
-["depositFlags"] = 0,
-["name"] = "Tab 2",
 ["slots"] = {
 {
 },
@@ -11301,6 +11330,8 @@ SYNDICATOR_DATA = {
 {
 },
 },
+["depositFlags"] = 0,
+["name"] = "Tab 2",
 ["iconTexture"] = 134400,
 },
 },
@@ -11600,9 +11631,9 @@ SYNDICATOR_SUMMARIES = {
 ["equipped"] = 1,
 ["bank"] = 0,
 },
-["item:241305"] = {
+["item:246450"] = {
 ["mail"] = 0,
-["bags"] = 11,
+["bags"] = 2,
 ["void"] = 0,
 ["auctions"] = 0,
 ["equipped"] = 0,
@@ -11616,20 +11647,20 @@ SYNDICATOR_SUMMARIES = {
 ["equipped"] = 0,
 ["bank"] = 0,
 },
-["item:246450"] = {
-["mail"] = 0,
-["bags"] = 2,
-["void"] = 0,
-["auctions"] = 0,
-["equipped"] = 0,
-["bank"] = 0,
-},
 ["item:256978"] = {
 ["mail"] = 0,
 ["bags"] = 0,
 ["void"] = 0,
 ["auctions"] = 0,
 ["equipped"] = 1,
+["bank"] = 0,
+},
+["item:241305"] = {
+["mail"] = 0,
+["bags"] = 11,
+["void"] = 0,
+["auctions"] = 0,
+["equipped"] = 0,
 ["bank"] = 0,
 },
 ["item:194018"] = {
@@ -11914,12 +11945,12 @@ SYNDICATOR_SUMMARIES = {
 ["equipped"] = 0,
 ["bank"] = 0,
 },
-["item:180123"] = {
+["item:186731"] = {
 ["void"] = 0,
 ["auctions"] = 0,
 ["mail"] = 0,
-["bags"] = 0,
-["equipped"] = 1,
+["bags"] = 1,
+["equipped"] = 0,
 ["bank"] = 0,
 },
 ["item:172325"] = {
@@ -11946,19 +11977,19 @@ SYNDICATOR_SUMMARIES = {
 ["equipped"] = 1,
 ["bank"] = 0,
 },
+["item:180123"] = {
+["void"] = 0,
+["auctions"] = 0,
+["mail"] = 0,
+["bags"] = 0,
+["equipped"] = 1,
+["bank"] = 0,
+},
 ["item:137642"] = {
 ["void"] = 0,
 ["auctions"] = 0,
 ["mail"] = 0,
 ["bags"] = 14,
-["equipped"] = 0,
-["bank"] = 0,
-},
-["item:186731"] = {
-["void"] = 0,
-["auctions"] = 0,
-["mail"] = 0,
-["bags"] = 1,
 ["equipped"] = 0,
 ["bank"] = 0,
 },
@@ -12324,7 +12355,7 @@ SYNDICATOR_SUMMARIES = {
 ["equipped"] = 4,
 ["bank"] = 0,
 },
-["item:29740"] = {
+["item:152900"] = {
 ["void"] = 0,
 ["auctions"] = 0,
 ["mail"] = 0,
@@ -12364,7 +12395,7 @@ SYNDICATOR_SUMMARIES = {
 ["equipped"] = 0,
 ["bank"] = 0,
 },
-["item:198538"] = {
+["item:29740"] = {
 ["void"] = 0,
 ["auctions"] = 0,
 ["mail"] = 0,
@@ -12388,7 +12419,7 @@ SYNDICATOR_SUMMARIES = {
 ["equipped"] = 0,
 ["bank"] = 0,
 },
-["item:152900"] = {
+["item:198538"] = {
 ["void"] = 0,
 ["auctions"] = 0,
 ["mail"] = 0,
@@ -13282,11 +13313,11 @@ SYNDICATOR_SUMMARIES = {
 ["equipped"] = 0,
 ["bank"] = 1,
 },
-["item:241325"] = {
+["item:264498"] = {
 ["void"] = 0,
 ["auctions"] = 0,
 ["mail"] = 0,
-["bags"] = 9,
+["bags"] = 1,
 ["equipped"] = 0,
 ["bank"] = 0,
 },
@@ -13294,7 +13325,7 @@ SYNDICATOR_SUMMARIES = {
 ["void"] = 0,
 ["auctions"] = 0,
 ["mail"] = 0,
-["bags"] = 204,
+["bags"] = 201,
 ["equipped"] = 0,
 ["bank"] = 0,
 },
@@ -13370,12 +13401,12 @@ SYNDICATOR_SUMMARIES = {
 ["equipped"] = 1,
 ["bank"] = 0,
 },
-["item:264246"] = {
+["item:151311"] = {
 ["void"] = 0,
 ["auctions"] = 0,
 ["mail"] = 0,
 ["bags"] = 0,
-["equipped"] = 0,
+["equipped"] = 1,
 ["bank"] = 0,
 },
 ["item:260630"] = {
@@ -13418,26 +13449,10 @@ SYNDICATOR_SUMMARIES = {
 ["equipped"] = 1,
 ["bank"] = 0,
 },
-["item:260662"] = {
+["item:242747"] = {
 ["void"] = 0,
 ["auctions"] = 0,
-["mail"] = 0,
-["bags"] = 0,
-["equipped"] = 0,
-["bank"] = 0,
-},
-["item:260665"] = {
-["void"] = 0,
-["auctions"] = 0,
-["mail"] = 0,
-["bags"] = 0,
-["equipped"] = 0,
-["bank"] = 0,
-},
-["item:260646"] = {
-["void"] = 0,
-["auctions"] = 0,
-["mail"] = 0,
+["mail"] = 100,
 ["bags"] = 0,
 ["equipped"] = 0,
 ["bank"] = 0,
@@ -13446,11 +13461,35 @@ SYNDICATOR_SUMMARIES = {
 ["void"] = 0,
 ["auctions"] = 0,
 ["mail"] = 0,
-["bags"] = 17,
+["bags"] = 73,
 ["equipped"] = 0,
 ["bank"] = 0,
 },
-["item:151311"] = {
+["item:38682"] = {
+["void"] = 0,
+["auctions"] = 0,
+["mail"] = 0,
+["bags"] = 162,
+["equipped"] = 0,
+["bank"] = 0,
+},
+["item:242639"] = {
+["void"] = 0,
+["auctions"] = 0,
+["mail"] = 0,
+["bags"] = 2,
+["equipped"] = 0,
+["bank"] = 0,
+},
+["item:251039"] = {
+["void"] = 0,
+["auctions"] = 0,
+["mail"] = 0,
+["bags"] = 3,
+["equipped"] = 0,
+["bank"] = 0,
+},
+["item:250215"] = {
 ["void"] = 0,
 ["auctions"] = 0,
 ["mail"] = 0,
@@ -13466,30 +13505,6 @@ SYNDICATOR_SUMMARIES = {
 ["equipped"] = 4,
 ["bank"] = 0,
 },
-["item:38682"] = {
-["void"] = 0,
-["auctions"] = 0,
-["mail"] = 0,
-["bags"] = 162,
-["equipped"] = 0,
-["bank"] = 0,
-},
-["item:242640"] = {
-["void"] = 0,
-["auctions"] = 0,
-["mail"] = 0,
-["bags"] = 1,
-["equipped"] = 0,
-["bank"] = 0,
-},
-["item:250215"] = {
-["void"] = 0,
-["auctions"] = 0,
-["mail"] = 0,
-["bags"] = 0,
-["equipped"] = 1,
-["bank"] = 0,
-},
 ["item:258050"] = {
 ["void"] = 0,
 ["auctions"] = 0,
@@ -13498,12 +13513,20 @@ SYNDICATOR_SUMMARIES = {
 ["equipped"] = 1,
 ["bank"] = 0,
 },
-["item:260664"] = {
+["item:244174"] = {
+["void"] = 0,
+["auctions"] = 0,
+["mail"] = 0,
+["bags"] = 1,
+["equipped"] = 0,
+["bank"] = 0,
+},
+["item:251142"] = {
 ["void"] = 0,
 ["auctions"] = 0,
 ["mail"] = 0,
 ["bags"] = 0,
-["equipped"] = 0,
+["equipped"] = 1,
 ["bank"] = 0,
 },
 ["item:151318"] = {
@@ -13515,14 +13538,6 @@ SYNDICATOR_SUMMARIES = {
 ["bank"] = 0,
 },
 ["item:151317"] = {
-["void"] = 0,
-["auctions"] = 0,
-["mail"] = 0,
-["bags"] = 0,
-["equipped"] = 1,
-["bank"] = 0,
-},
-["item:251092"] = {
 ["void"] = 0,
 ["auctions"] = 0,
 ["mail"] = 0,
@@ -13570,12 +13585,12 @@ SYNDICATOR_SUMMARIES = {
 ["equipped"] = 0,
 ["bank"] = 0,
 },
-["item:251142"] = {
+["item:241325"] = {
 ["void"] = 0,
 ["auctions"] = 0,
 ["mail"] = 0,
-["bags"] = 0,
-["equipped"] = 1,
+["bags"] = 8,
+["equipped"] = 0,
 ["bank"] = 0,
 },
 ["item:232875"] = {
@@ -13602,12 +13617,12 @@ SYNDICATOR_SUMMARIES = {
 ["equipped"] = 0,
 ["bank"] = 0,
 },
-["item:251039"] = {
+["item:251092"] = {
 ["void"] = 0,
 ["auctions"] = 0,
 ["mail"] = 0,
-["bags"] = 3,
-["equipped"] = 0,
+["bags"] = 0,
+["equipped"] = 1,
 ["bank"] = 0,
 },
 ["item:237840"] = {
@@ -13626,7 +13641,7 @@ SYNDICATOR_SUMMARIES = {
 ["equipped"] = 0,
 ["bank"] = 0,
 },
-["item:244174"] = {
+["item:242640"] = {
 ["void"] = 0,
 ["auctions"] = 0,
 ["mail"] = 0,
@@ -14542,11 +14557,11 @@ SYNDICATOR_SUMMARIES = {
 ["equipped"] = 1,
 ["bank"] = 0,
 },
-["item:222744"] = {
+["item:198538"] = {
 ["void"] = 0,
 ["auctions"] = 0,
 ["mail"] = 0,
-["bags"] = 557,
+["bags"] = 1,
 ["equipped"] = 0,
 ["bank"] = 0,
 },
@@ -14558,11 +14573,11 @@ SYNDICATOR_SUMMARIES = {
 ["equipped"] = 0,
 ["bank"] = 0,
 },
-["item:237741"] = {
+["item:222744"] = {
 ["void"] = 0,
 ["auctions"] = 0,
 ["mail"] = 0,
-["bags"] = 1,
+["bags"] = 557,
 ["equipped"] = 0,
 ["bank"] = 0,
 },
@@ -14814,7 +14829,7 @@ SYNDICATOR_SUMMARIES = {
 ["equipped"] = 0,
 ["bank"] = 0,
 },
-["item:198538"] = {
+["item:237741"] = {
 ["void"] = 0,
 ["auctions"] = 0,
 ["mail"] = 0,
@@ -14960,11 +14975,11 @@ SYNDICATOR_SUMMARIES = {
 ["equipped"] = 0,
 ["bank"] = 0,
 },
-["item:112384"] = {
+["item:268679"] = {
 ["auctions"] = 0,
 ["void"] = 0,
 ["mail"] = 0,
-["bags"] = 1,
+["bags"] = 400,
 ["equipped"] = 0,
 ["bank"] = 0,
 },
@@ -14973,14 +14988,6 @@ SYNDICATOR_SUMMARIES = {
 ["void"] = 0,
 ["mail"] = 0,
 ["bags"] = 1,
-["equipped"] = 0,
-["bank"] = 0,
-},
-["item:237359"] = {
-["auctions"] = 2,
-["void"] = 0,
-["mail"] = 0,
-["bags"] = 0,
 ["equipped"] = 0,
 ["bank"] = 0,
 },
@@ -15104,11 +15111,11 @@ SYNDICATOR_SUMMARIES = {
 ["equipped"] = 0,
 ["bank"] = 0,
 },
-["item:137642"] = {
+["item:243191"] = {
 ["auctions"] = 0,
 ["void"] = 0,
 ["mail"] = 0,
-["bags"] = 84,
+["bags"] = 1,
 ["equipped"] = 0,
 ["bank"] = 0,
 },
@@ -15184,11 +15191,11 @@ SYNDICATOR_SUMMARIES = {
 ["equipped"] = 0,
 ["bank"] = 0,
 },
-["item:240991"] = {
+["item:246951"] = {
 ["auctions"] = 0,
 ["void"] = 0,
 ["mail"] = 0,
-["bags"] = 54,
+["bags"] = 20,
 ["equipped"] = 0,
 ["bank"] = 0,
 },
@@ -15224,15 +15231,15 @@ SYNDICATOR_SUMMARIES = {
 ["equipped"] = 0,
 ["bank"] = 0,
 },
-["item:260630"] = {
+["item:249808"] = {
 ["auctions"] = 0,
 ["void"] = 0,
 ["mail"] = 0,
-["bags"] = 11,
+["bags"] = 1,
 ["equipped"] = 0,
 ["bank"] = 0,
 },
-["item:38682"] = {
+["item:243734"] = {
 ["auctions"] = 0,
 ["void"] = 0,
 ["mail"] = 0,
@@ -15260,7 +15267,7 @@ SYNDICATOR_SUMMARIES = {
 ["auctions"] = 3,
 ["void"] = 0,
 ["mail"] = 0,
-["bags"] = 0,
+["bags"] = 3,
 ["equipped"] = 0,
 ["bank"] = 0,
 },
@@ -15273,18 +15280,10 @@ SYNDICATOR_SUMMARIES = {
 ["bank"] = 0,
 },
 ["item:245851"] = {
-["auctions"] = 2,
+["auctions"] = 1,
 ["void"] = 0,
 ["mail"] = 0,
 ["bags"] = 0,
-["equipped"] = 0,
-["bank"] = 0,
-},
-["item:242747"] = {
-["auctions"] = 0,
-["void"] = 0,
-["mail"] = 0,
-["bags"] = 100,
 ["equipped"] = 0,
 ["bank"] = 0,
 },
@@ -15328,15 +15327,7 @@ SYNDICATOR_SUMMARIES = {
 ["equipped"] = 1,
 ["bank"] = 0,
 },
-["item:241289"] = {
-["auctions"] = 0,
-["void"] = 0,
-["mail"] = 0,
-["bags"] = 56,
-["equipped"] = 0,
-["bank"] = 0,
-},
-["item:188152"] = {
+["item:227208"] = {
 ["auctions"] = 0,
 ["void"] = 0,
 ["mail"] = 0,
@@ -15352,6 +15343,22 @@ SYNDICATOR_SUMMARIES = {
 ["equipped"] = 0,
 ["bank"] = 0,
 },
+["item:188152"] = {
+["auctions"] = 0,
+["void"] = 0,
+["mail"] = 0,
+["bags"] = 1,
+["equipped"] = 0,
+["bank"] = 0,
+},
+["item:193712"] = {
+["auctions"] = 0,
+["void"] = 0,
+["mail"] = 0,
+["bags"] = 0,
+["equipped"] = 1,
+["bank"] = 0,
+},
 ["item:193721"] = {
 ["auctions"] = 0,
 ["void"] = 0,
@@ -15360,7 +15367,7 @@ SYNDICATOR_SUMMARIES = {
 ["equipped"] = 1,
 ["bank"] = 0,
 },
-["item:193712"] = {
+["item:250256"] = {
 ["auctions"] = 0,
 ["void"] = 0,
 ["mail"] = 0,
@@ -15376,19 +15383,19 @@ SYNDICATOR_SUMMARIES = {
 ["equipped"] = 0,
 ["bank"] = 0,
 },
-["item:250256"] = {
-["auctions"] = 0,
-["void"] = 0,
-["mail"] = 0,
-["bags"] = 0,
-["equipped"] = 1,
-["bank"] = 0,
-},
 ["item:201470"] = {
 ["auctions"] = 0,
 ["void"] = 0,
 ["mail"] = 0,
 ["bags"] = 1,
+["equipped"] = 0,
+["bank"] = 0,
+},
+["item:241289"] = {
+["auctions"] = 0,
+["void"] = 0,
+["mail"] = 0,
+["bags"] = 56,
 ["equipped"] = 0,
 ["bank"] = 0,
 },
@@ -15400,19 +15407,11 @@ SYNDICATOR_SUMMARIES = {
 ["equipped"] = 1,
 ["bank"] = 0,
 },
-["item:227208"] = {
+["item:38682"] = {
 ["auctions"] = 0,
 ["void"] = 0,
 ["mail"] = 0,
-["bags"] = 1,
-["equipped"] = 0,
-["bank"] = 0,
-},
-["item:242299"] = {
-["auctions"] = 0,
-["void"] = 0,
-["mail"] = 0,
-["bags"] = 1491,
+["bags"] = 5,
 ["equipped"] = 0,
 ["bank"] = 0,
 },
@@ -15422,6 +15421,14 @@ SYNDICATOR_SUMMARIES = {
 ["mail"] = 0,
 ["bags"] = 0,
 ["equipped"] = 1,
+["bank"] = 0,
+},
+["item:112384"] = {
+["auctions"] = 0,
+["void"] = 0,
+["mail"] = 0,
+["bags"] = 1,
+["equipped"] = 0,
 ["bank"] = 0,
 },
 ["item:138300"] = {
@@ -15440,19 +15447,11 @@ SYNDICATOR_SUMMARIES = {
 ["equipped"] = 0,
 ["bank"] = 0,
 },
-["item:249808"] = {
+["item:242299"] = {
 ["auctions"] = 0,
 ["void"] = 0,
 ["mail"] = 0,
-["bags"] = 1,
-["equipped"] = 0,
-["bank"] = 0,
-},
-["item:243734"] = {
-["auctions"] = 0,
-["void"] = 0,
-["mail"] = 0,
-["bags"] = 5,
+["bags"] = 1491,
 ["equipped"] = 0,
 ["bank"] = 0,
 },
@@ -15462,6 +15461,14 @@ SYNDICATOR_SUMMARIES = {
 ["mail"] = 0,
 ["bags"] = 1,
 ["equipped"] = 0,
+["bank"] = 0,
+},
+["item:251166"] = {
+["auctions"] = 0,
+["void"] = 0,
+["mail"] = 0,
+["bags"] = 0,
+["equipped"] = 1,
 ["bank"] = 0,
 },
 ["item:124640"] = {
@@ -15480,14 +15487,6 @@ SYNDICATOR_SUMMARIES = {
 ["equipped"] = 1,
 ["bank"] = 0,
 },
-["item:251166"] = {
-["auctions"] = 0,
-["void"] = 0,
-["mail"] = 0,
-["bags"] = 0,
-["equipped"] = 1,
-["bank"] = 0,
-},
 ["item:249637"] = {
 ["auctions"] = 0,
 ["void"] = 0,
@@ -15496,11 +15495,11 @@ SYNDICATOR_SUMMARIES = {
 ["equipped"] = 1,
 ["bank"] = 0,
 },
-["item:246951"] = {
+["item:137642"] = {
 ["auctions"] = 0,
 ["void"] = 0,
 ["mail"] = 0,
-["bags"] = 20,
+["bags"] = 84,
 ["equipped"] = 0,
 ["bank"] = 0,
 },
@@ -15512,11 +15511,19 @@ SYNDICATOR_SUMMARIES = {
 ["equipped"] = 1,
 ["bank"] = 0,
 },
-["item:243191"] = {
+["item:260630"] = {
 ["auctions"] = 0,
 ["void"] = 0,
 ["mail"] = 0,
-["bags"] = 1,
+["bags"] = 11,
+["equipped"] = 0,
+["bank"] = 0,
+},
+["item:240991"] = {
+["auctions"] = 0,
+["void"] = 0,
+["mail"] = 0,
+["bags"] = 54,
 ["equipped"] = 0,
 ["bank"] = 0,
 },
@@ -16034,19 +16041,19 @@ SYNDICATOR_SUMMARIES = {
 ["equipped"] = 0,
 ["bank"] = 0,
 },
+["item:241304"] = {
+["void"] = 0,
+["auctions"] = 5,
+["mail"] = 0,
+["bags"] = 0,
+["equipped"] = 0,
+["bank"] = 0,
+},
 ["item:224107"] = {
 ["void"] = 0,
 ["auctions"] = 0,
 ["mail"] = 0,
 ["bags"] = 19,
-["equipped"] = 0,
-["bank"] = 0,
-},
-["item:230905"] = {
-["void"] = 0,
-["auctions"] = 0,
-["mail"] = 0,
-["bags"] = 3,
 ["equipped"] = 0,
 ["bank"] = 0,
 },
@@ -16082,7 +16089,7 @@ SYNDICATOR_SUMMARIES = {
 ["equipped"] = 0,
 ["bank"] = 0,
 },
-["item:211872"] = {
+["item:242464"] = {
 ["void"] = 0,
 ["auctions"] = 0,
 ["mail"] = 0,
@@ -16122,11 +16129,11 @@ SYNDICATOR_SUMMARIES = {
 ["equipped"] = 1,
 ["bank"] = 0,
 },
-["item:242464"] = {
+["item:226811"] = {
 ["void"] = 0,
 ["auctions"] = 0,
 ["mail"] = 0,
-["bags"] = 1,
+["bags"] = 20,
 ["equipped"] = 0,
 ["bank"] = 0,
 },
@@ -16186,11 +16193,11 @@ SYNDICATOR_SUMMARIES = {
 ["equipped"] = 0,
 ["bank"] = 0,
 },
-["item:226811"] = {
+["item:211872"] = {
 ["void"] = 0,
 ["auctions"] = 0,
 ["mail"] = 0,
-["bags"] = 20,
+["bags"] = 1,
 ["equipped"] = 0,
 ["bank"] = 0,
 },
@@ -16218,11 +16225,11 @@ SYNDICATOR_SUMMARIES = {
 ["equipped"] = 0,
 ["bank"] = 0,
 },
-["item:241304"] = {
+["item:230905"] = {
 ["void"] = 0,
-["auctions"] = 5,
+["auctions"] = 0,
 ["mail"] = 0,
-["bags"] = 0,
+["bags"] = 3,
 ["equipped"] = 0,
 ["bank"] = 0,
 },

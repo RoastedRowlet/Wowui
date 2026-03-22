@@ -13,8 +13,8 @@ MKPT_Config = {
 },
 ["global"] = {
 ["position"] = {
-["y"] = -160,
-["x"] = 10,
+["y"] = -157.4998779296875,
+["x"] = 5.833213806152344,
 },
 ["state"] = {
 ["firstTimeLoaded"] = false,

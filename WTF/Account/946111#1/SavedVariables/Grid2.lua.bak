@@ -5,55 +5,55 @@ Grid2DB = {
 ["profiles"] = {
 ["Taurostotem - Area 52"] = {
 ["iconSize"] = 18,
-["displayZoomedIcons"] = true,
 ["frameWidth"] = 62,
 ["frameHeight"] = 62,
+["displayZoomedIcons"] = true,
 },
 ["Zappyxatu - Stormrage"] = {
 ["iconSize"] = 18,
-["displayZoomedIcons"] = true,
 ["frameWidth"] = 62,
 ["frameHeight"] = 62,
+["displayZoomedIcons"] = true,
 },
 ["Midnight"] = {
-["frameWidth"] = 150,
-["frameHeight"] = 75,
-["frameTexture"] = "Grid2 Flat",
-["frameBorder"] = 1,
-["frameBorderTexture"] = "None",
 ["extraThemes"] = {
 },
+["frameHeight"] = 75,
+["frameWidth"] = 150,
+["frameBorder"] = 1,
+["frameBorderTexture"] = "None",
+["frameTexture"] = "Grid2 Flat",
 ["frameBorderDistance"] = -2,
 },
 ["Evileevee - Area 52"] = {
 ["iconSize"] = 18,
-["displayZoomedIcons"] = true,
 ["frameWidth"] = 62,
 ["frameHeight"] = 62,
+["displayZoomedIcons"] = true,
 },
 ["Dankmankeys - Stormrage"] = {
 ["iconSize"] = 18,
-["frameHeight"] = 62,
 ["displayZoomedIcons"] = true,
 ["frameWidth"] = 62,
+["frameHeight"] = 62,
 },
 ["Madmareep - Stormrage"] = {
 ["iconSize"] = 18,
-["frameHeight"] = 62,
 ["displayZoomedIcons"] = true,
 ["frameWidth"] = 62,
+["frameHeight"] = 62,
 },
 ["Angryabsol - Stormrage"] = {
 ["iconSize"] = 18,
-["frameHeight"] = 62,
 ["displayZoomedIcons"] = true,
 ["frameWidth"] = 62,
+["frameHeight"] = 62,
 },
 ["Barelynoer - Area 52"] = {
 ["iconSize"] = 18,
-["displayZoomedIcons"] = true,
 ["frameWidth"] = 62,
 ["frameHeight"] = 62,
+["displayZoomedIcons"] = true,
 },
 ["Midnight2"] = {
 ["frameBorder"] = 1,
@@ -68,7 +68,7 @@ Grid2DB = {
 ["iconSize"] = 18,
 ["mouseoverTexture"] = "Blizzard Quest Title Highlight",
 ["frameBorderDistance"] = -1,
-["displayZoomedIcons"] = true,
+["frameBorderTexture"] = "Grid2 Flat",
 ["frameHeight"] = 57,
 ["frameHeaderLocks"] = {
 },
@@ -79,7 +79,12 @@ Grid2DB = {
 ["b"] = 0,
 },
 ["barTexture"] = "Gradient",
-["frameBorderTexture"] = "Grid2 Flat",
+["frameBorderColor"] = {
+["a"] = 1,
+["r"] = 0,
+["g"] = 0,
+["b"] = 0,
+},
 ["frameWidths"] = {
 },
 ["mouseoverHighlight"] = false,
@@ -100,12 +105,7 @@ Grid2DB = {
 ["frameHeights"] = {
 },
 ["frameWidth"] = 87,
-["frameBorderColor"] = {
-["a"] = 1,
-["r"] = 0,
-["g"] = 0,
-["b"] = 0,
-},
+["displayZoomedIcons"] = true,
 },
 {
 ["frameHeaderWidths"] = {
@@ -117,13 +117,18 @@ Grid2DB = {
 ["iconSize"] = 18,
 ["mouseoverTexture"] = "Blizzard Quest Title Highlight",
 ["frameBorderDistance"] = -1,
-["frameBorderTexture"] = "Grid2 Flat",
+["displayZoomedIcons"] = true,
 ["frameHeight"] = 57,
 ["frameWidth"] = 87,
 ["frameHeights"] = {
 },
 ["barTexture"] = "Gradient",
-["displayZoomedIcons"] = true,
+["frameBorderColor"] = {
+["a"] = 1,
+["b"] = 0,
+["g"] = 0,
+["r"] = 0,
+},
 ["frameWidths"] = {
 },
 ["orientation"] = "HORIZONTAL",
@@ -149,12 +154,7 @@ Grid2DB = {
 ["mouseoverHighlight"] = false,
 ["frameHeaderLocks"] = {
 },
-["frameBorderColor"] = {
-["a"] = 1,
-["b"] = 0,
-["g"] = 0,
-["r"] = 0,
-},
+["frameBorderTexture"] = "Grid2 Flat",
 },
 {
 ["frameColor"] = {
@@ -170,18 +170,18 @@ Grid2DB = {
 ["iconSize"] = 18,
 ["mouseoverTexture"] = "Blizzard Quest Title Highlight",
 ["frameBorderDistance"] = -1,
-["frameBorderTexture"] = "Grid2 Flat",
-["frameHeight"] = 57,
-["frameHeaderLocks"] = {
-},
-["mouseoverHighlight"] = false,
-["barTexture"] = "Gradient",
 ["frameBorderColor"] = {
 ["a"] = 1,
 ["r"] = 0,
 ["g"] = 0,
 ["b"] = 0,
 },
+["frameHeight"] = 57,
+["frameHeaderLocks"] = {
+},
+["mouseoverHighlight"] = false,
+["barTexture"] = "Gradient",
+["displayZoomedIcons"] = true,
 ["frameWidths"] = {
 },
 ["frameContentColor"] = {
@@ -203,7 +203,7 @@ Grid2DB = {
 },
 ["orientation"] = "HORIZONTAL",
 ["frameWidth"] = 87,
-["displayZoomedIcons"] = true,
+["frameBorderTexture"] = "Grid2 Flat",
 },
 },
 ["iconSize"] = 18,
@@ -232,9 +232,9 @@ Grid2DB = {
 },
 ["Minimeditite - Area 52"] = {
 ["iconSize"] = 18,
-["frameWidth"] = 62,
 ["frameHeight"] = 62,
 ["displayZoomedIcons"] = true,
+["frameWidth"] = 62,
 },
 },
 },
@@ -251,10 +251,10 @@ Grid2DB = {
 ["unitsPerColumn"] = 5,
 },
 ["meta"] = {
-["party"] = true,
 ["arena"] = true,
-["solo"] = true,
 ["raid"] = true,
+["solo"] = true,
+["party"] = true,
 },
 },
 },
@@ -271,10 +271,10 @@ Grid2DB = {
 ["Midnight2"] = {
 ["BackgroundTexture"] = "None",
 ["layouts"] = {
-["party"] = "Dungeons",
 ["raid"] = "Dungeons",
-["solo"] = "Dungeons",
 ["arena"] = "Dungeons",
+["solo"] = "Dungeons",
+["party"] = "Dungeons",
 },
 ["extraThemes"] = {
 {
@@ -1236,8 +1236,8 @@ Grid2DB = {
 },
 },
 ["statusMap"] = {
-["alpha"] = {
-["range"] = 99,
+["border"] = {
+["target"] = 50,
 },
 ["text-down"] = {
 ["name"] = 99,
@@ -1248,11 +1248,11 @@ Grid2DB = {
 ["text-down-color"] = {
 ["classcolor"] = 99,
 },
-["border"] = {
-["target"] = 50,
-},
 ["health-bar-color"] = {
 ["health-current"] = 51,
+},
+["alpha"] = {
+["range"] = 99,
 },
 },
 ["versions"] = {
@@ -3445,9 +3445,9 @@ Grid2DB = {
 ["type"] = "privateauras",
 ["durationAnchor"] = {
 ["offsetX"] = 0,
+["relativePoint"] = "CENTER",
 ["offsetY"] = 0,
 ["point"] = "CENTER",
-["relativePoint"] = "CENTER",
 },
 ["maxIcons"] = 4,
 ["iconSize"] = 0.36,
@@ -3520,10 +3520,10 @@ Grid2DB = {
 ["buff-Rejuvenation(Germination)-mine"] = 51,
 },
 ["health-bar"] = {
-["shields"] = 4,
-["heal-absorbs"] = 2,
 ["health-current"] = 1,
+["heal-absorbs"] = 2,
 ["heals-incoming"] = 3,
+["shields"] = 4,
 },
 ["debuffs-icons"] = {
 ["debuffs-Relevant"] = 50,
@@ -3570,15 +3570,17 @@ Grid2DB = {
 },
 },
 ["statuses"] = {
-["buff-Regrowth-mine"] = {
-["spellName"] = 8936,
-["type"] = "buff",
-["mine"] = 1,
+["buffs-Relevant"] = {
+["type"] = "mbuffs",
 ["color1"] = {
 ["a"] = 1,
-["r"] = 1,
+["b"] = 0,
 ["g"] = 1,
-["b"] = 1,
+["r"] = 0,
+},
+["aura_filter"] = {
+["sortRule"] = 5,
+["filter"] = "HELPFUL|RAID",
 },
 },
 ["master-looter"] = {
@@ -3595,17 +3597,35 @@ Grid2DB = {
 ["g"] = 0.5,
 },
 },
-["buffs-Relevant"] = {
-["type"] = "mbuffs",
+["debuffs-Dispellable"] = {
 ["color1"] = {
 ["a"] = 1,
 ["b"] = 0,
-["g"] = 1,
-["r"] = 0,
+["g"] = 0,
+["r"] = 1,
+},
+["type"] = "mdebuffs",
+["colors"] = {
+["Poison"] = {
+["a"] = 1,
+["b"] = 0,
+["g"] = 0.2784313857555389,
+["r"] = 0.1764705926179886,
+},
 },
 ["aura_filter"] = {
-["sortRule"] = 5,
-["filter"] = "HELPFUL|RAID",
+["typed"] = true,
+},
+},
+["buff-Regrowth-mine"] = {
+["spellName"] = 8936,
+["type"] = "buff",
+["mine"] = 1,
+["color1"] = {
+["a"] = 1,
+["r"] = 1,
+["g"] = 1,
+["b"] = 1,
 },
 },
 ["buff-Rejuvenation-mine"] = {
@@ -3668,16 +3688,10 @@ Grid2DB = {
 ["filter"] = "HELPFUL|EXTERNAL_DEFENSIVE",
 },
 },
-["buff-ShiftingSands-mine"] = {
+["health-current"] = {
 ["color1"] = {
-["a"] = 1,
-["b"] = 1,
-["g"] = 1,
-["r"] = 1,
+["r"] = 0.3058823645114899,
 },
-["type"] = "buff",
-["mine"] = 1,
-["spellName"] = 413984,
 },
 ["buff-BlisteringScales-mine"] = {
 ["color1"] = {
@@ -3716,25 +3730,16 @@ Grid2DB = {
 ["blizFilter"] = "HARMFUL",
 },
 },
-["debuffs-Dispellable"] = {
+["buff-ShiftingSands-mine"] = {
 ["color1"] = {
 ["a"] = 1,
-["b"] = 0,
-["g"] = 0,
+["b"] = 1,
+["g"] = 1,
 ["r"] = 1,
 },
-["type"] = "mdebuffs",
-["colors"] = {
-["Poison"] = {
-["a"] = 1,
-["b"] = 0,
-["g"] = 0.2784313857555389,
-["r"] = 0.1764705926179886,
-},
-},
-["aura_filter"] = {
-["typed"] = true,
-},
+["type"] = "buff",
+["mine"] = 1,
+["spellName"] = 413984,
 },
 ["buffs-Defensives"] = {
 ["type"] = "mbuffs",
@@ -3746,11 +3751,6 @@ Grid2DB = {
 },
 ["aura_filter"] = {
 ["blizFilter"] = "HELPFUL|EXTERNAL_DEFENSIVE",
-},
-},
-["health-current"] = {
-["color1"] = {
-["r"] = 0.3058823645114899,
 },
 },
 ["buff-WildGrowth-mine"] = {
