@@ -1,27 +1,31 @@
 
 RaiderIO_Config = {
+["minimapIcon"] = {
+["minimapPos"] = 180,
+["showInCompartment"] = true,
+["hide"] = false,
+["lock"] = false,
+},
 ["profilePoint"] = {
 ["y"] = 0,
 ["x"] = -16,
 ["point"] = "TOPLEFT",
 },
-["minimapIcon"] = {
-["minimapPos"] = 180,
-["showInCompartment"] = true,
-["lock"] = false,
-["hide"] = false,
-},
 }
-RaiderIO_LastCharacter = "us-Lonelylitten-stormrage"
+RaiderIO_LastCharacter = "us-Angryabsol-stormrage"
 RaiderIO_MissingCharacters = {
-["us-Talyora-stormrage"] = true,
-["us-Sodina-stormrage"] = true,
-["us-Madagol-stormrage"] = true,
-["us-Senjdk-stormrage"] = true,
-["us-Konsecration-bleeding-hollow"] = true,
-["us-Blssed-stormrage"] = true,
-["us-Ipinkmage-stormrage"] = true,
-["us-Accuria-stormrage"] = true,
+["us-Rahmiex-kiljaeden"] = true,
+["us-Azcadum-ragnaros"] = true,
+["us-Hugefeet-magtheridon"] = true,
+["us-Darksigns-magtheridon"] = true,
+["us-Angryabsol-stormrage"] = true,
+["us-Apathy-ysondre"] = true,
+["us-Apalofdan-area-52"] = true,
+["us-Afkdots-magtheridon"] = true,
+["us-Que-magtheridon"] = true,
+["us-Asumi-ysondre"] = true,
+["us-Dipski-anetheron"] = true,
+["us-Labombah-magtheridon"] = true,
 }
 RaiderIO_MissingServers = {
 }

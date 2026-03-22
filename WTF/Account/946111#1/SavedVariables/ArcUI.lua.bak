@@ -14,9 +14,9 @@ ArcUIDB = {
 ["globalSettings"] = {
 },
 ["onlyOnUseTrinkets"] = false,
-["trackedItems"] = {
-},
 ["positions"] = {
+},
+["trackedItems"] = {
 },
 ["enabled"] = true,
 },
@@ -28,8 +28,8 @@ ArcUIDB = {
 ["achAlwaysAnimate"] = false,
 ["achScale"] = 1,
 ["_migrated"] = true,
-["achStyle"] = "ants",
 ["achLevel"] = 5,
+["achStyle"] = "ants",
 ["achShowBurst"] = true,
 ["achColor"] = {
 ["a"] = 1,
@@ -84,7 +84,6 @@ ArcUIDB = {
 ["groupLayouts"] = {
 ["Buffs"] = {
 ["enabled"] = true,
-["containerPadding"] = -4,
 ["layout"] = {
 ["perRow"] = 4,
 ["direction"] = "HORIZONTAL",
@@ -95,6 +94,7 @@ ArcUIDB = {
 ["gridCols"] = 4,
 ["iconHeight"] = 36,
 },
+["containerPadding"] = -4,
 ["members"] = {
 },
 ["grid"] = {
@@ -107,23 +107,22 @@ ArcUIDB = {
 },
 ["visibility"] = "always",
 ["showBackground"] = false,
+["position"] = {
+["y"] = 200,
+["x"] = 0,
+},
+["showBorder"] = false,
+["autoReflow"] = true,
+["lockGridSize"] = false,
 ["borderColor"] = {
 ["a"] = 1,
 ["b"] = 0.3,
 ["g"] = 0.8,
 ["r"] = 0.3,
 },
-["showBorder"] = false,
-["autoReflow"] = true,
-["lockGridSize"] = false,
-["position"] = {
-["y"] = 200,
-["x"] = 0,
-},
 },
 ["Essential"] = {
 ["enabled"] = true,
-["containerPadding"] = -4,
 ["layout"] = {
 ["perRow"] = 4,
 ["direction"] = "HORIZONTAL",
@@ -134,6 +133,7 @@ ArcUIDB = {
 ["gridCols"] = 4,
 ["iconHeight"] = 36,
 },
+["containerPadding"] = -4,
 ["members"] = {
 },
 ["grid"] = {
@@ -146,23 +146,22 @@ ArcUIDB = {
 },
 ["visibility"] = "always",
 ["showBackground"] = false,
+["position"] = {
+["y"] = 100,
+["x"] = 0,
+},
+["showBorder"] = false,
+["autoReflow"] = true,
+["lockGridSize"] = false,
 ["borderColor"] = {
 ["a"] = 1,
 ["b"] = 0.2,
 ["g"] = 0.6,
 ["r"] = 0.8,
 },
-["showBorder"] = false,
-["autoReflow"] = true,
-["lockGridSize"] = false,
-["position"] = {
-["y"] = 100,
-["x"] = 0,
-},
 },
 ["Utility"] = {
 ["enabled"] = true,
-["containerPadding"] = -4,
 ["layout"] = {
 ["perRow"] = 4,
 ["direction"] = "HORIZONTAL",
@@ -173,6 +172,7 @@ ArcUIDB = {
 ["gridCols"] = 4,
 ["iconHeight"] = 36,
 },
+["containerPadding"] = -4,
 ["members"] = {
 },
 ["grid"] = {
@@ -185,18 +185,18 @@ ArcUIDB = {
 },
 ["visibility"] = "always",
 ["showBackground"] = false,
+["position"] = {
+["y"] = 0,
+["x"] = 0,
+},
+["showBorder"] = false,
+["autoReflow"] = true,
+["lockGridSize"] = false,
 ["borderColor"] = {
 ["a"] = 1,
 ["b"] = 0.9,
 ["g"] = 0.6,
 ["r"] = 0.3,
-},
-["showBorder"] = false,
-["autoReflow"] = true,
-["lockGridSize"] = false,
-["position"] = {
-["y"] = 0,
-["x"] = 0,
 },
 },
 },
@@ -253,8 +253,8 @@ ArcUIDB = {
 ["textAnchorOffsetX"] = -35,
 ["width"] = 333,
 ["textAnchor"] = "CENTERRIGHT",
-["textAnchorOffsetY"] = -1,
 ["height"] = 20,
+["textAnchorOffsetY"] = -1,
 ["fontSize"] = 16,
 ["texture"] = "Grid2 Flat",
 },
@@ -322,35 +322,35 @@ ArcUIDB = {
 ["colorCurveThreshold3Value"] = 100,
 ["textMovable"] = false,
 ["backgroundTexture"] = "Dragonflight",
-["colorCurveThreshold2Color"] = {
-["a"] = 1,
-["r"] = 0.7098039388656616,
-["g"] = 0.4274510145187378,
-["b"] = 0,
-},
+["thresholdMode"] = "colorCurve",
 ["textPosition"] = {
 ["y"] = -105,
 ["relPoint"] = "CENTER",
 ["point"] = "CENTER",
 ["x"] = 0,
 },
-["thresholdMode"] = "colorCurve",
+["colorCurveThreshold2Color"] = {
+["a"] = 1,
+["r"] = 0.7098039388656616,
+["g"] = 0.4274510145187378,
+["b"] = 0,
+},
 ["colorCurveThreshold4Enabled"] = true,
 ["colorCurveDirection"] = "fill",
 ["texture"] = "Grid2 Flat",
 ["enabled"] = true,
 ["textAnchor"] = "RIGHT",
 ["textAnchorOffsetX"] = -35,
-["colorCurveThreshold4Value"] = 0,
+["barMovable"] = false,
 ["colorCurveThreshold4Color"] = {
 ["a"] = 1,
 ["b"] = 0.8666667342185974,
 ["g"] = 1,
 ["r"] = 0.9686275124549866,
 },
-["colorCurveEnabled"] = true,
-["thresholdAsPercent"] = false,
 ["width"] = 333,
+["thresholdAsPercent"] = false,
+["colorCurveEnabled"] = true,
 ["barPosition"] = {
 ["y"] = -253,
 ["relPoint"] = "CENTER",
@@ -359,7 +359,7 @@ ArcUIDB = {
 },
 ["colorCurveThreshold3Enabled"] = true,
 ["colorCurveThreshold2Enabled"] = true,
-["barMovable"] = false,
+["colorCurveThreshold4Value"] = 0,
 ["height"] = 15,
 ["colorCurveThreshold5Enabled"] = false,
 ["fontSize"] = 16,
@@ -459,14 +459,19 @@ ArcUIDB = {
 ["point"] = "CENTER",
 ["x"] = 0,
 },
-["colorCurveEnabled"] = false,
-["barMovable"] = false,
 ["tickColor"] = {
 ["a"] = 0.800000011920929,
 ["r"] = 0,
 ["g"] = 0,
 ["b"] = 0,
 },
+["barColor"] = {
+["a"] = 1,
+["r"] = 1,
+["g"] = 0.615686297416687,
+["b"] = 0.09019608050584793,
+},
+["colorCurveEnabled"] = false,
 ["width"] = 333,
 ["enableMaxColor"] = true,
 ["showText"] = false,
@@ -483,12 +488,7 @@ ArcUIDB = {
 ["point"] = "CENTER",
 ["x"] = 0,
 },
-["barColor"] = {
-["a"] = 1,
-["r"] = 1,
-["g"] = 0.615686297416687,
-["b"] = 0.09019608050584793,
-},
+["barMovable"] = false,
 ["texture"] = "Grid2 Flat",
 },
 ["behavior"] = {
@@ -557,6 +557,8 @@ ArcUIDB = {
 ["globalSettings"] = {
 },
 ["onlyOnUseTrinkets"] = true,
+["positions"] = {
+},
 ["trackedItems"] = {
 ["arc_trinket_14"] = {
 ["enabled"] = true,
@@ -575,8 +577,6 @@ ArcUIDB = {
 ["isPassive"] = false,
 },
 },
-["positions"] = {
-},
 ["enabled"] = true,
 },
 ["achSettings"] = {
@@ -593,9 +593,9 @@ ArcUIDB = {
 ["g"] = 1,
 ["r"] = 1,
 },
-["achStyle"] = "ants",
-["achShowBurst"] = true,
 ["achLevel"] = 5,
+["achShowBurst"] = true,
+["achStyle"] = "ants",
 },
 ["bphSettings"] = {
 ["enabled"] = false,
@@ -652,7 +652,10 @@ ArcUIDB = {
 ["enabled"] = false,
 ["customTicksAsPercent"] = true,
 ["durationFontSize"] = 16,
-["durationAnchor"] = "CENTERRIGHT",
+["barPosition"] = {
+["y"] = -541.4997634887695,
+["x"] = -897.666748046875,
+},
 ["durationColorCurveEnabled"] = true,
 ["barMovable"] = false,
 ["width"] = 338,
@@ -669,10 +672,7 @@ ArcUIDB = {
 ["g"] = 1,
 ["b"] = 0.01960784383118153,
 },
-["barPosition"] = {
-["y"] = -541.4997634887695,
-["x"] = -897.666748046875,
-},
+["durationAnchor"] = "CENTERRIGHT",
 ["durationShadow"] = true,
 },
 ["abilityThresholds"] = {
@@ -803,14 +803,14 @@ ArcUIDB = {
 ["customStacksPerCast"] = 1,
 ["customMaxStacks"] = 10,
 ["dynamicMaxDuration"] = true,
-["customDuration"] = 10,
+["maxDuration"] = 0,
 ["buffName"] = "Efflorescence",
 ["trackType"] = "buff",
 ["customSpellID"] = 0,
 ["auraInstanceID"] = 0,
 ["alternateCooldownIDs"] = {
 },
-["maxDuration"] = 0,
+["customDuration"] = 10,
 ["spellID"] = 145205,
 },
 ["thresholds"] = {
@@ -910,13 +910,13 @@ ArcUIDB = {
 ["point"] = "CENTER",
 ["x"] = -59,
 },
-["durationAnchorOffsetY"] = -1,
 ["textPosition"] = {
 ["y"] = 170,
 ["relPoint"] = "CENTER",
 ["point"] = "CENTER",
 ["x"] = 0,
 },
+["durationAnchorOffsetY"] = -1,
 ["durationFont"] = "Friz Quadrata TT",
 ["texture"] = "Grid2 Flat",
 },
@@ -969,14 +969,14 @@ ArcUIDB = {
 ["customStacksPerCast"] = 1,
 ["customMaxStacks"] = 10,
 ["dynamicMaxDuration"] = true,
-["customDuration"] = 10,
+["maxDuration"] = 0,
 ["buffName"] = "Eclipse (Lunar)",
 ["trackType"] = "buff",
 ["customSpellID"] = 0,
 ["auraInstanceID"] = 0,
 ["alternateCooldownIDs"] = {
 },
-["maxDuration"] = 0,
+["customDuration"] = 10,
 ["spellID"] = 1239669,
 },
 ["behavior"] = {
@@ -1046,13 +1046,13 @@ ArcUIDB = {
 ["point"] = "CENTER",
 ["x"] = 59,
 },
-["durationAnchorOffsetY"] = -1,
 ["textPosition"] = {
 ["y"] = 140,
 ["relPoint"] = "CENTER",
 ["point"] = "CENTER",
 ["x"] = 0,
 },
+["durationAnchorOffsetY"] = -1,
 ["durationFont"] = "Friz Quadrata TT",
 ["texture"] = "Grid2 Flat",
 },
@@ -1105,7 +1105,7 @@ ArcUIDB = {
 ["customStacksPerCast"] = 1,
 ["customMaxStacks"] = 10,
 ["dynamicMaxDuration"] = true,
-["customDuration"] = 10,
+["maxDuration"] = 0,
 ["buffName"] = "Eclipse (Solar)",
 ["trackType"] = "buff",
 ["customSpellID"] = 0,
@@ -1113,7 +1113,7 @@ ArcUIDB = {
 ["alternateCooldownIDs"] = {
 76,
 },
-["maxDuration"] = 0,
+["customDuration"] = 10,
 ["spellID"] = 1239669,
 },
 ["behavior"] = {
@@ -1296,18 +1296,18 @@ ArcUIDB = {
 },
 ["groupLayouts"] = {
 ["Buffs"] = {
-["gridCols"] = 4,
-["lockGridSize"] = false,
-["autoReflow"] = false,
-["iconWidth"] = 36,
-["iconSize"] = 36,
-["containerPadding"] = -4,
 ["borderColor"] = {
 ["a"] = 1,
 ["b"] = 0.3,
 ["g"] = 0.8,
 ["r"] = 0.3,
 },
+["lockGridSize"] = false,
+["autoReflow"] = false,
+["iconWidth"] = 36,
+["iconSize"] = 36,
+["containerPadding"] = -4,
+["gridCols"] = 4,
 ["spacing"] = 2,
 ["bgColor"] = {
 ["a"] = 0.6,
@@ -1317,28 +1317,28 @@ ArcUIDB = {
 },
 ["showBorder"] = false,
 ["gridRows"] = 1,
+["iconHeight"] = 36,
+["dynamicLayout"] = false,
+["showBackground"] = false,
+["visibility"] = "always",
 ["position"] = {
 ["y"] = 219,
 ["x"] = 0,
 },
-["dynamicLayout"] = false,
-["showBackground"] = false,
-["visibility"] = "always",
-["iconHeight"] = 36,
 },
 ["Essential"] = {
-["gridCols"] = 5,
-["lockGridSize"] = false,
-["autoReflow"] = false,
-["iconWidth"] = 36,
-["iconSize"] = 36,
-["containerPadding"] = -4,
 ["borderColor"] = {
 ["a"] = 1,
 ["b"] = 0.2,
 ["g"] = 0.6,
 ["r"] = 0.8,
 },
+["lockGridSize"] = false,
+["autoReflow"] = false,
+["iconWidth"] = 36,
+["iconSize"] = 36,
+["containerPadding"] = -4,
+["gridCols"] = 5,
 ["spacing"] = 2,
 ["bgColor"] = {
 ["a"] = 0.6,
@@ -1348,28 +1348,28 @@ ArcUIDB = {
 },
 ["showBorder"] = false,
 ["gridRows"] = 1,
+["iconHeight"] = 36,
+["dynamicLayout"] = false,
+["showBackground"] = false,
+["visibility"] = "always",
 ["position"] = {
 ["y"] = 108.9998168945313,
 ["x"] = -22.500732421875,
 },
-["dynamicLayout"] = false,
-["showBackground"] = false,
-["visibility"] = "always",
-["iconHeight"] = 36,
 },
 ["Utility"] = {
-["gridCols"] = 6,
-["lockGridSize"] = false,
-["autoReflow"] = false,
-["iconWidth"] = 36,
-["iconSize"] = 36,
-["containerPadding"] = -4,
 ["borderColor"] = {
 ["a"] = 1,
 ["b"] = 0.9,
 ["g"] = 0.6,
 ["r"] = 0.3,
 },
+["lockGridSize"] = false,
+["autoReflow"] = false,
+["iconWidth"] = 36,
+["iconSize"] = 36,
+["containerPadding"] = -4,
+["gridCols"] = 6,
 ["spacing"] = 2,
 ["bgColor"] = {
 ["a"] = 0.6,
@@ -1379,14 +1379,14 @@ ArcUIDB = {
 },
 ["showBorder"] = false,
 ["gridRows"] = 1,
+["iconHeight"] = 36,
+["dynamicLayout"] = false,
+["showBackground"] = false,
+["visibility"] = "always",
 ["position"] = {
 ["y"] = 339.8331909179688,
 ["x"] = 553.4993896484375,
 },
-["dynamicLayout"] = false,
-["showBackground"] = false,
-["visibility"] = "always",
-["iconHeight"] = 36,
 },
 },
 ["matchMode"] = "all",
@@ -1619,6 +1619,8 @@ ArcUIDB = {
 },
 ["onlyOnUseTrinkets"] = true,
 ["autoTrackEquippedTrinkets"] = true,
+["positions"] = {
+},
 ["trackedItems"] = {
 ["arc_trinket_13"] = {
 ["enabled"] = true,
@@ -1628,8 +1630,6 @@ ArcUIDB = {
 ["slotID"] = 13,
 ["isPassive"] = false,
 },
-},
-["positions"] = {
 },
 },
 ["groupLayouts"] = {
@@ -1778,19 +1778,19 @@ ArcUIDB = {
 ["hideShadow"] = false,
 ["rangeIndicator"] = {
 },
-["debuffBorder"] = {
-["enabled"] = false,
-},
-["chargeText"] = {
+["procGlow"] = {
 },
 ["pandemicBorder"] = {
 ["enabled"] = false,
 },
 ["position"] = {
 },
+["debuffBorder"] = {
+["enabled"] = false,
+},
 ["height"] = 36,
 ["padding"] = 0,
-["procGlow"] = {
+["chargeText"] = {
 },
 ["auraActiveState"] = {
 },
@@ -2147,12 +2147,13 @@ ArcUIDB = {
 ["row"] = 0,
 ["viewerType"] = "utility",
 },
-[65518] = {
+[8729] = {
 ["type"] = "group",
-["col"] = 9,
-["target"] = "Utility",
+["col"] = 4,
+["target"] = "Essential",
+["viewerType"] = "cooldown",
 ["row"] = 0,
-["sortIndex"] = 9,
+["sortIndex"] = 4,
 },
 [150529] = {
 ["type"] = "group",
@@ -2184,13 +2185,12 @@ ArcUIDB = {
 ["row"] = 0,
 ["viewerType"] = "utility",
 },
-[8729] = {
+[65518] = {
 ["type"] = "group",
-["col"] = 4,
-["target"] = "Essential",
-["viewerType"] = "cooldown",
+["col"] = 9,
+["target"] = "Utility",
 ["row"] = 0,
-["sortIndex"] = 4,
+["sortIndex"] = 9,
 },
 [8509] = {
 ["type"] = "group",
@@ -2546,16 +2546,16 @@ ArcUIDB = {
 },
 ["groupLayouts"] = {
 ["Buffs"] = {
-["position"] = {
-["y"] = 200,
-["x"] = 0,
-},
+["iconHeight"] = 36,
 ["visibility"] = "always",
 ["iconWidth"] = 36,
 ["showBackground"] = false,
 ["containerPadding"] = -4,
 ["showBorder"] = false,
-["iconHeight"] = 36,
+["position"] = {
+["y"] = 200,
+["x"] = 0,
+},
 ["bgColor"] = {
 ["a"] = 0.6,
 ["r"] = 0,
@@ -2564,28 +2564,28 @@ ArcUIDB = {
 },
 ["spacing"] = 2,
 ["gridRows"] = 2,
+["gridCols"] = 4,
+["iconSize"] = 36,
+["autoReflow"] = false,
+["lockGridSize"] = false,
 ["borderColor"] = {
 ["a"] = 1,
 ["r"] = 0.3,
 ["g"] = 0.8,
 ["b"] = 0.3,
 },
-["iconSize"] = 36,
-["autoReflow"] = false,
-["lockGridSize"] = false,
-["gridCols"] = 4,
 },
 ["Essential"] = {
-["position"] = {
-["y"] = 100,
-["x"] = 0,
-},
+["iconHeight"] = 36,
 ["visibility"] = "always",
 ["iconWidth"] = 36,
 ["showBackground"] = false,
 ["containerPadding"] = -4,
 ["showBorder"] = false,
-["iconHeight"] = 36,
+["position"] = {
+["y"] = 100,
+["x"] = 0,
+},
 ["bgColor"] = {
 ["a"] = 0.6,
 ["r"] = 0,
@@ -2594,28 +2594,28 @@ ArcUIDB = {
 },
 ["spacing"] = 2,
 ["gridRows"] = 2,
+["gridCols"] = 4,
+["iconSize"] = 36,
+["autoReflow"] = false,
+["lockGridSize"] = false,
 ["borderColor"] = {
 ["a"] = 1,
 ["r"] = 0.8,
 ["g"] = 0.6,
 ["b"] = 0.2,
 },
-["iconSize"] = 36,
-["autoReflow"] = false,
-["lockGridSize"] = false,
-["gridCols"] = 4,
 },
 ["Utility"] = {
-["position"] = {
-["y"] = 0,
-["x"] = 0,
-},
+["iconHeight"] = 36,
 ["visibility"] = "always",
 ["iconWidth"] = 36,
 ["showBackground"] = false,
 ["containerPadding"] = -4,
 ["showBorder"] = false,
-["iconHeight"] = 36,
+["position"] = {
+["y"] = 0,
+["x"] = 0,
+},
 ["bgColor"] = {
 ["a"] = 0.6,
 ["r"] = 0,
@@ -2624,16 +2624,16 @@ ArcUIDB = {
 },
 ["spacing"] = 2,
 ["gridRows"] = 2,
+["gridCols"] = 4,
+["iconSize"] = 36,
+["autoReflow"] = false,
+["lockGridSize"] = false,
 ["borderColor"] = {
 ["a"] = 1,
 ["r"] = 0.3,
 ["g"] = 0.6,
 ["b"] = 0.9,
 },
-["iconSize"] = 36,
-["autoReflow"] = false,
-["lockGridSize"] = false,
-["gridCols"] = 4,
 },
 },
 ["matchMode"] = "all",
@@ -2733,12 +2733,12 @@ ArcUIDB = {
 ["row"] = 1,
 ["viewerType"] = "utility",
 },
-[1494] = {
+[121706] = {
 ["type"] = "group",
 ["col"] = 2,
-["target"] = "Buffs",
-["row"] = 0,
-["viewerType"] = "aura",
+["target"] = "Utility",
+["row"] = 1,
+["viewerType"] = "utility",
 },
 [1185] = {
 ["type"] = "group",
@@ -2761,12 +2761,12 @@ ArcUIDB = {
 ["row"] = 0,
 ["viewerType"] = "utility",
 },
-[1159] = {
+[152137] = {
 ["type"] = "group",
-["col"] = 4,
-["target"] = "Utility",
-["row"] = 1,
-["viewerType"] = "utility",
+["col"] = 3,
+["target"] = "Buffs",
+["row"] = 0,
+["viewerType"] = "aura",
 },
 [123704] = {
 ["type"] = "group",
@@ -2776,12 +2776,12 @@ ArcUIDB = {
 ["row"] = 1,
 ["viewerType"] = "cooldown",
 },
-[152137] = {
+[1159] = {
 ["type"] = "group",
-["col"] = 3,
-["target"] = "Buffs",
-["row"] = 0,
-["viewerType"] = "aura",
+["col"] = 4,
+["target"] = "Utility",
+["row"] = 1,
+["viewerType"] = "utility",
 },
 [71314] = {
 ["type"] = "group",
@@ -2847,12 +2847,12 @@ ArcUIDB = {
 ["row"] = 1,
 ["viewerType"] = "cooldown",
 },
-[121706] = {
+[1494] = {
 ["type"] = "group",
 ["col"] = 2,
-["target"] = "Utility",
-["row"] = 1,
-["viewerType"] = "utility",
+["target"] = "Buffs",
+["row"] = 0,
+["viewerType"] = "aura",
 },
 },
 ["freeIcons"] = {
@@ -3005,22 +3005,35 @@ ArcUIDB = {
 ["resourceBars"] = {
 {
 ["display"] = {
-["textAnchor"] = "CENTER",
-["barPosition"] = {
-["y"] = -223,
-},
+["textAnchorOffsetY"] = -1.5,
 ["barColor"] = {
 ["a"] = 1,
 ["b"] = 0.8,
 ["g"] = 0.13,
 ["r"] = 0.28,
 },
-["colorCurveEnabled"] = false,
-["width"] = 262,
-["textAnchorOffsetY"] = -1.5,
 ["height"] = 20,
-["barMovable"] = false,
+["width"] = 262,
 ["texture"] = "Grid2 Flat",
+["textAnchor"] = "CENTER",
+["barPosition"] = {
+["y"] = -223,
+},
+["barMovable"] = false,
+["colorCurveEnabled"] = false,
+},
+["behavior"] = {
+["hideBlizzardFrame"] = true,
+["showOnSpecs"] = {
+3,
+},
+},
+["tracking"] = {
+["enabled"] = true,
+["resourceCategory"] = "secondary",
+["secondaryType"] = "soulFragmentsDevourer",
+["powerName"] = "Soul Fragments (Devourer)",
+["maxValue"] = 50,
 },
 ["thresholds"] = {
 {
@@ -3031,39 +3044,9 @@ ArcUIDB = {
 },
 },
 },
-["tracking"] = {
-["enabled"] = true,
-["resourceCategory"] = "secondary",
-["secondaryType"] = "soulFragmentsDevourer",
-["powerName"] = "Soul Fragments (Devourer)",
-["maxValue"] = 50,
-},
-["behavior"] = {
-["hideBlizzardFrame"] = true,
-["showOnSpecs"] = {
-3,
-},
-},
 },
 {
 ["display"] = {
-["enabled"] = true,
-["textAnchor"] = "CENTER",
-["barPosition"] = {
-["y"] = -244.1666259765625,
-["relPoint"] = "CENTER",
-["point"] = "CENTER",
-["x"] = 0,
-},
-["barColor"] = {
-["a"] = 1,
-["b"] = 0.4901961088180542,
-["g"] = 0,
-["r"] = 1,
-},
-["colorCurveEnabled"] = false,
-["width"] = 262,
-["height"] = 20,
 ["textAnchorOffsetY"] = -1.5,
 ["textPosition"] = {
 ["y"] = -105,
@@ -3071,8 +3054,41 @@ ArcUIDB = {
 ["point"] = "CENTER",
 ["x"] = 0,
 },
-["barMovable"] = false,
+["enabled"] = true,
+["barColor"] = {
+["a"] = 1,
+["b"] = 0.4901961088180542,
+["g"] = 0,
+["r"] = 1,
+},
+["height"] = 20,
+["width"] = 262,
 ["texture"] = "Grid2 Flat",
+["textAnchor"] = "CENTER",
+["barPosition"] = {
+["y"] = -244.1666259765625,
+["relPoint"] = "CENTER",
+["point"] = "CENTER",
+["x"] = 0,
+},
+["barMovable"] = false,
+["colorCurveEnabled"] = false,
+},
+["behavior"] = {
+["hideBlizzardFrame"] = true,
+["showOnSpec"] = 0,
+["showOnSpecs"] = {
+3,
+},
+},
+["tracking"] = {
+["enabled"] = true,
+["powerType"] = 17,
+["resourceCategory"] = "primary",
+["overrideMax"] = false,
+["powerName"] = "Fury",
+["maxValue"] = 120,
+["showRuneTimer"] = false,
 },
 ["thresholds"] = {
 {
@@ -3109,23 +3125,21 @@ ArcUIDB = {
 ["maxValue"] = 100,
 },
 },
-["tracking"] = {
-["enabled"] = true,
-["powerType"] = 17,
-["resourceCategory"] = "primary",
-["overrideMax"] = false,
-["powerName"] = "Fury",
-["maxValue"] = 120,
-["showRuneTimer"] = false,
-},
-["behavior"] = {
-["showOnSpec"] = 0,
-["hideBlizzardFrame"] = true,
-["showOnSpecs"] = {
-3,
 },
 },
+["cooldownBarSetup"] = {
+["hiddenSpells"] = {
 },
+["manualSpells"] = {
+},
+["activeCooldowns"] = {
+},
+["activeResources"] = {
+},
+["activeCharges"] = {
+},
+},
+["timerBarConfigs"] = {
 },
 ["arcAuras"] = {
 ["autoTrackEquippedTrinkets"] = true,
@@ -3140,8 +3154,6 @@ ArcUIDB = {
 },
 ["onlyOnUseTrinkets"] = true,
 ["enabled"] = true,
-["positions"] = {
-},
 ["trackedItems"] = {
 ["arc_item_241289"] = {
 ["enabled"] = true,
@@ -3168,6 +3180,8 @@ ArcUIDB = {
 ["isPassive"] = true,
 },
 },
+["positions"] = {
+},
 },
 ["achSettings"] = {
 ["achOnArcAuras"] = false,
@@ -3183,9 +3197,9 @@ ArcUIDB = {
 ["g"] = 1,
 ["r"] = 1,
 },
-["achStyle"] = "ants",
-["achShowBurst"] = true,
 ["achLevel"] = 5,
+["achShowBurst"] = true,
+["achStyle"] = "ants",
 },
 ["bphSettings"] = {
 ["enabled"] = false,
@@ -3212,6 +3226,8 @@ ArcUIDB = {
 ["mode"] = "flash",
 ["txLeft"] = 0,
 ["useCustomColor"] = false,
+},
+["bars"] = {
 },
 ["cdmGroups"] = {
 ["enabled"] = true,
@@ -3453,7 +3469,6 @@ ArcUIDB = {
 ["class_12_spec_3"] = {
 ["characterName"] = "Angryabsol",
 ["createdAt"] = 1773464595,
-["activeProfile"] = "Devourer (Angryabsol)",
 ["layoutProfiles"] = {
 ["Devourer (Angryabsol)"] = {
 ["iconSettings"] = {
@@ -3625,9 +3640,9 @@ ArcUIDB = {
 },
 [101982] = {
 ["y"] = -72.166748046875,
-["x"] = -584.9989013671875,
-["iconSize"] = 36,
 ["type"] = "free",
+["iconSize"] = 36,
+["x"] = -584.9989013671875,
 },
 ["arc_trinket_14"] = {
 ["type"] = "group",
@@ -3918,6 +3933,7 @@ ArcUIDB = {
 ["matchMode"] = "all",
 },
 },
+["activeProfile"] = "Devourer (Angryabsol)",
 },
 },
 ["masqueSettings"] = {
@@ -3931,16 +3947,8 @@ ArcUIDB = {
 },
 ["disableTooltips"] = false,
 },
-["cooldownBarSetup"] = {
-["hiddenSpells"] = {
-},
-["manualSpells"] = {
-},
-["activeCooldowns"] = {
-},
-["activeResources"] = {
-},
-["activeCharges"] = {
+["timerBars"] = {
+["activeTimers"] = {
 },
 },
 },
@@ -3958,9 +3966,9 @@ ArcUIDB = {
 },
 ["onlyOnUseTrinkets"] = false,
 ["enabled"] = true,
-["trackedItems"] = {
-},
 ["positions"] = {
+},
+["trackedItems"] = {
 },
 },
 ["achSettings"] = {
@@ -3977,9 +3985,9 @@ ArcUIDB = {
 ["g"] = 1,
 ["r"] = 1,
 },
-["achLevel"] = 5,
-["achShowBurst"] = true,
 ["achStyle"] = "ants",
+["achShowBurst"] = true,
+["achLevel"] = 5,
 },
 ["bphSettings"] = {
 ["enabled"] = false,
@@ -4078,9 +4086,9 @@ ArcUIDB = {
 },
 ["onlyOnUseTrinkets"] = false,
 ["enabled"] = true,
-["positions"] = {
-},
 ["trackedItems"] = {
+},
+["positions"] = {
 },
 },
 ["cooldownBarSetup"] = {
@@ -4168,30 +4176,12 @@ ArcUIDB = {
 ["g"] = 1,
 ["r"] = 1,
 },
-["achStyle"] = "ants",
-["achShowBurst"] = true,
 ["achLevel"] = 5,
+["achShowBurst"] = true,
+["achStyle"] = "ants",
 },
 },
 ["Madmareep - Stormrage"] = {
-["achSettings"] = {
-["achOnArcAuras"] = false,
-["achStrata"] = "INHERIT",
-["achCombatOnly"] = false,
-["assistedCombatHighlight"] = false,
-["achAlwaysAnimate"] = false,
-["achScale"] = 1,
-["_migrated"] = true,
-["achStyle"] = "ants",
-["achLevel"] = 5,
-["achShowBurst"] = true,
-["achColor"] = {
-["a"] = 1,
-["r"] = 1,
-["g"] = 1,
-["b"] = 1,
-},
-},
 ["arcAuras"] = {
 ["autoTrackEquippedTrinkets"] = false,
 ["autoTrackSlots"] = {
@@ -4204,9 +4194,9 @@ ArcUIDB = {
 ["globalSettings"] = {
 },
 ["onlyOnUseTrinkets"] = false,
-["positions"] = {
-},
 ["trackedItems"] = {
+},
+["positions"] = {
 },
 ["enabled"] = true,
 },
@@ -4255,7 +4245,6 @@ ArcUIDB = {
 ["class_5_spec_3"] = {
 ["characterName"] = "Madmareep",
 ["createdAt"] = 1770324565,
-["activeProfile"] = "Shadow",
 ["layoutProfiles"] = {
 ["Shadow"] = {
 ["iconSettings"] = {
@@ -4366,32 +4355,12 @@ ArcUIDB = {
 ["groupLayouts"] = {
 ["Buffs"] = {
 ["enabled"] = true,
-["position"] = {
-["y"] = 200,
-["x"] = 0,
-},
-["containerPadding"] = -4,
-["members"] = {
-},
-["grid"] = {
-},
-["bgColor"] = {
-["a"] = 0.6,
-["r"] = 0,
-["g"] = 0,
-["b"] = 0,
-},
-["lockGridSize"] = false,
-["autoReflow"] = true,
 ["borderColor"] = {
 ["a"] = 1,
 ["r"] = 0.3,
 ["g"] = 0.8,
 ["b"] = 0.3,
 },
-["showBorder"] = false,
-["showBackground"] = false,
-["visibility"] = "always",
 ["layout"] = {
 ["perRow"] = 4,
 ["direction"] = "HORIZONTAL",
@@ -4402,14 +4371,6 @@ ArcUIDB = {
 ["gridCols"] = 4,
 ["spacing"] = 2,
 },
-},
-["Essential"] = {
-["enabled"] = true,
-["position"] = {
-["y"] = 100,
-["x"] = 0,
-},
-["containerPadding"] = -4,
 ["members"] = {
 },
 ["grid"] = {
@@ -4422,15 +4383,23 @@ ArcUIDB = {
 },
 ["lockGridSize"] = false,
 ["autoReflow"] = true,
+["position"] = {
+["y"] = 200,
+["x"] = 0,
+},
+["showBorder"] = false,
+["showBackground"] = false,
+["visibility"] = "always",
+["containerPadding"] = -4,
+},
+["Essential"] = {
+["enabled"] = true,
 ["borderColor"] = {
 ["a"] = 1,
 ["r"] = 0.8,
 ["g"] = 0.6,
 ["b"] = 0.2,
 },
-["showBorder"] = false,
-["showBackground"] = false,
-["visibility"] = "always",
 ["layout"] = {
 ["perRow"] = 4,
 ["direction"] = "HORIZONTAL",
@@ -4441,14 +4410,6 @@ ArcUIDB = {
 ["gridCols"] = 4,
 ["spacing"] = 2,
 },
-},
-["Utility"] = {
-["enabled"] = true,
-["position"] = {
-["y"] = 0,
-["x"] = 0,
-},
-["containerPadding"] = -4,
 ["members"] = {
 },
 ["grid"] = {
@@ -4461,15 +4422,23 @@ ArcUIDB = {
 },
 ["lockGridSize"] = false,
 ["autoReflow"] = true,
+["position"] = {
+["y"] = 100,
+["x"] = 0,
+},
+["showBorder"] = false,
+["showBackground"] = false,
+["visibility"] = "always",
+["containerPadding"] = -4,
+},
+["Utility"] = {
+["enabled"] = true,
 ["borderColor"] = {
 ["a"] = 1,
 ["r"] = 0.3,
 ["g"] = 0.6,
 ["b"] = 0.9,
 },
-["showBorder"] = false,
-["showBackground"] = false,
-["visibility"] = "always",
 ["layout"] = {
 ["perRow"] = 4,
 ["direction"] = "HORIZONTAL",
@@ -4480,11 +4449,32 @@ ArcUIDB = {
 ["gridCols"] = 4,
 ["spacing"] = 2,
 },
+["members"] = {
+},
+["grid"] = {
+},
+["bgColor"] = {
+["a"] = 0.6,
+["r"] = 0,
+["g"] = 0,
+["b"] = 0,
+},
+["lockGridSize"] = false,
+["autoReflow"] = true,
+["position"] = {
+["y"] = 0,
+["x"] = 0,
+},
+["showBorder"] = false,
+["showBackground"] = false,
+["visibility"] = "always",
+["containerPadding"] = -4,
 },
 },
 ["matchMode"] = "all",
 },
 },
+["activeProfile"] = "Shadow",
 },
 },
 ["masqueSettings"] = {
@@ -4498,22 +4488,28 @@ ArcUIDB = {
 },
 ["disableTooltips"] = false,
 },
+["achSettings"] = {
+["achOnArcAuras"] = false,
+["achStrata"] = "INHERIT",
+["achCombatOnly"] = false,
+["assistedCombatHighlight"] = false,
+["achAlwaysAnimate"] = false,
+["achScale"] = 1,
+["_migrated"] = true,
+["achLevel"] = 5,
+["achStyle"] = "ants",
+["achShowBurst"] = true,
+["achColor"] = {
+["a"] = 1,
+["r"] = 1,
+["g"] = 1,
+["b"] = 1,
+},
+},
 },
 ["Barelynoer - Area 52"] = {
 ["resourceBars"] = {
 {
-["behavior"] = {
-["showOnSpecs"] = {
-3,
-},
-},
-["tracking"] = {
-["enabled"] = true,
-["resourceCategory"] = "secondary",
-["secondaryType"] = "essence",
-["powerName"] = "Essence",
-["maxValue"] = 6,
-},
 ["display"] = {
 ["activeCountColors"] = {
 {
@@ -4609,9 +4605,21 @@ ArcUIDB = {
 ["showText"] = false,
 ["height"] = 16,
 ["thresholdMode"] = "fragmented",
-["barMovable"] = false,
 ["texture"] = "Grid2 Flat",
+["barMovable"] = false,
 ["smartChargingColor"] = false,
+},
+["tracking"] = {
+["enabled"] = true,
+["resourceCategory"] = "secondary",
+["secondaryType"] = "essence",
+["powerName"] = "Essence",
+["maxValue"] = 6,
+},
+["behavior"] = {
+["showOnSpecs"] = {
+3,
+},
 },
 },
 },
@@ -4629,6 +4637,8 @@ ArcUIDB = {
 },
 ["onlyOnUseTrinkets"] = false,
 ["autoTrackEquippedTrinkets"] = true,
+["positions"] = {
+},
 ["trackedItems"] = {
 ["arc_trinket_13"] = {
 ["enabled"] = true,
@@ -4647,20 +4657,24 @@ ArcUIDB = {
 ["isPassive"] = true,
 },
 },
-["positions"] = {
 },
+["achSettings"] = {
+["achOnArcAuras"] = false,
+["achStrata"] = "INHERIT",
+["achCombatOnly"] = false,
+["assistedCombatHighlight"] = false,
+["achAlwaysAnimate"] = false,
+["achScale"] = 1,
+["_migrated"] = true,
+["achColor"] = {
+["a"] = 1,
+["b"] = 1,
+["g"] = 1,
+["r"] = 1,
 },
-["cooldownBarSetup"] = {
-["hiddenSpells"] = {
-},
-["manualSpells"] = {
-},
-["activeCooldowns"] = {
-},
-["activeResources"] = {
-},
-["activeCharges"] = {
-},
+["achStyle"] = "ants",
+["achShowBurst"] = true,
+["achLevel"] = 5,
 },
 ["bphSettings"] = {
 ["enabled"] = false,
@@ -4695,6 +4709,7 @@ ArcUIDB = {
 ["class_13_spec_3"] = {
 ["characterName"] = "Barelynoer",
 ["createdAt"] = 1769733909,
+["activeProfile"] = "Augmentation",
 ["layoutProfiles"] = {
 ["Augmentation"] = {
 ["iconSettings"] = {
@@ -5287,7 +5302,6 @@ ArcUIDB = {
 ["matchMode"] = "all",
 },
 },
-["activeProfile"] = "Augmentation",
 },
 },
 ["masqueSettings"] = {
@@ -5302,23 +5316,17 @@ ArcUIDB = {
 },
 ["disableTooltips"] = false,
 },
-["achSettings"] = {
-["achOnArcAuras"] = false,
-["achStrata"] = "INHERIT",
-["achCombatOnly"] = false,
-["assistedCombatHighlight"] = false,
-["achAlwaysAnimate"] = false,
-["achScale"] = 1,
-["_migrated"] = true,
-["achColor"] = {
-["a"] = 1,
-["b"] = 1,
-["g"] = 1,
-["r"] = 1,
+["cooldownBarSetup"] = {
+["hiddenSpells"] = {
 },
-["achLevel"] = 5,
-["achShowBurst"] = true,
-["achStyle"] = "ants",
+["manualSpells"] = {
+},
+["activeCooldowns"] = {
+},
+["activeResources"] = {
+},
+["activeCharges"] = {
+},
 },
 },
 ["Zappyxatu - Stormrage"] = {
@@ -5336,8 +5344,6 @@ ArcUIDB = {
 },
 ["onlyOnUseTrinkets"] = false,
 ["autoTrackEquippedTrinkets"] = true,
-["positions"] = {
-},
 ["trackedItems"] = {
 ["arc_trinket_13"] = {
 ["enabled"] = true,
@@ -5356,24 +5362,20 @@ ArcUIDB = {
 ["isPassive"] = true,
 },
 },
+["positions"] = {
 },
-["achSettings"] = {
-["achOnArcAuras"] = false,
-["achStrata"] = "INHERIT",
-["achCombatOnly"] = false,
-["assistedCombatHighlight"] = false,
-["achAlwaysAnimate"] = false,
-["achScale"] = 1,
-["_migrated"] = true,
-["achColor"] = {
-["a"] = 1,
-["b"] = 1,
-["g"] = 1,
-["r"] = 1,
 },
-["achLevel"] = 5,
-["achShowBurst"] = true,
-["achStyle"] = "ants",
+["cooldownBarSetup"] = {
+["hiddenSpells"] = {
+},
+["manualSpells"] = {
+},
+["activeCooldowns"] = {
+},
+["activeResources"] = {
+},
+["activeCharges"] = {
+},
 },
 ["bphSettings"] = {
 ["enabled"] = false,
@@ -5408,7 +5410,6 @@ ArcUIDB = {
 ["class_7_spec_3"] = {
 ["characterName"] = "Zappyxatu",
 ["createdAt"] = 1769933120,
-["activeProfile"] = "Restoration",
 ["layoutProfiles"] = {
 ["Restoration"] = {
 ["iconSettings"] = {
@@ -5656,6 +5657,7 @@ ArcUIDB = {
 ["matchMode"] = "all",
 },
 },
+["activeProfile"] = "Restoration",
 },
 },
 ["masqueSettings"] = {
@@ -5668,38 +5670,6 @@ ArcUIDB = {
 ["specInheritedFrom"] = {
 },
 ["disableTooltips"] = false,
-},
-["cooldownBarSetup"] = {
-["hiddenSpells"] = {
-},
-["manualSpells"] = {
-},
-["activeCooldowns"] = {
-},
-["activeResources"] = {
-},
-["activeCharges"] = {
-},
-},
-},
-["Minimeditite - Area 52"] = {
-["arcAuras"] = {
-["autoTrackEquippedTrinkets"] = false,
-["autoTrackSlots"] = {
-[13] = true,
-[14] = true,
-},
-["trackedSpells"] = {
-},
-["updateRate"] = 0.1,
-["globalSettings"] = {
-},
-["onlyOnUseTrinkets"] = false,
-["enabled"] = true,
-["trackedItems"] = {
-},
-["positions"] = {
-},
 },
 ["achSettings"] = {
 ["achOnArcAuras"] = false,
@@ -5718,6 +5688,44 @@ ArcUIDB = {
 ["achStyle"] = "ants",
 ["achShowBurst"] = true,
 ["achLevel"] = 5,
+},
+},
+["Minimeditite - Area 52"] = {
+["arcAuras"] = {
+["autoTrackEquippedTrinkets"] = false,
+["autoTrackSlots"] = {
+[13] = true,
+[14] = true,
+},
+["trackedSpells"] = {
+},
+["updateRate"] = 0.1,
+["globalSettings"] = {
+},
+["onlyOnUseTrinkets"] = false,
+["enabled"] = true,
+["positions"] = {
+},
+["trackedItems"] = {
+},
+},
+["achSettings"] = {
+["achOnArcAuras"] = false,
+["achStrata"] = "INHERIT",
+["achCombatOnly"] = false,
+["assistedCombatHighlight"] = false,
+["achAlwaysAnimate"] = false,
+["achScale"] = 1,
+["_migrated"] = true,
+["achColor"] = {
+["a"] = 1,
+["b"] = 1,
+["g"] = 1,
+["r"] = 1,
+},
+["achLevel"] = 5,
+["achShowBurst"] = true,
+["achStyle"] = "ants",
 },
 ["bphSettings"] = {
 ["enabled"] = false,
@@ -5764,16 +5772,16 @@ ArcUIDB = {
 },
 ["groupLayouts"] = {
 ["Buffs"] = {
-["iconHeight"] = 36,
+["position"] = {
+["y"] = 200,
+["x"] = 0,
+},
 ["visibility"] = "always",
 ["showBackground"] = false,
 ["iconWidth"] = 36,
 ["dynamicLayout"] = false,
 ["containerPadding"] = -4,
-["position"] = {
-["y"] = 200,
-["x"] = 0,
-},
+["iconHeight"] = 36,
 ["spacing"] = 2,
 ["bgColor"] = {
 ["a"] = 0.6,
@@ -5783,28 +5791,28 @@ ArcUIDB = {
 },
 ["showBorder"] = false,
 ["gridRows"] = 2,
-["gridCols"] = 4,
-["iconSize"] = 36,
-["autoReflow"] = true,
-["lockGridSize"] = false,
 ["borderColor"] = {
 ["a"] = 1,
 ["b"] = 0.3,
 ["g"] = 0.8,
 ["r"] = 0.3,
 },
+["iconSize"] = 36,
+["autoReflow"] = true,
+["lockGridSize"] = false,
+["gridCols"] = 4,
 },
 ["Essential"] = {
-["iconHeight"] = 36,
+["position"] = {
+["y"] = 100,
+["x"] = 0,
+},
 ["visibility"] = "always",
 ["showBackground"] = false,
 ["iconWidth"] = 36,
 ["dynamicLayout"] = false,
 ["containerPadding"] = -4,
-["position"] = {
-["y"] = 100,
-["x"] = 0,
-},
+["iconHeight"] = 36,
 ["spacing"] = 2,
 ["bgColor"] = {
 ["a"] = 0.6,
@@ -5814,28 +5822,28 @@ ArcUIDB = {
 },
 ["showBorder"] = false,
 ["gridRows"] = 2,
-["gridCols"] = 4,
-["iconSize"] = 36,
-["autoReflow"] = true,
-["lockGridSize"] = false,
 ["borderColor"] = {
 ["a"] = 1,
 ["b"] = 0.2,
 ["g"] = 0.6,
 ["r"] = 0.8,
 },
+["iconSize"] = 36,
+["autoReflow"] = true,
+["lockGridSize"] = false,
+["gridCols"] = 4,
 },
 ["Utility"] = {
-["iconHeight"] = 36,
+["position"] = {
+["y"] = 0,
+["x"] = 0,
+},
 ["visibility"] = "always",
 ["showBackground"] = false,
 ["iconWidth"] = 36,
 ["dynamicLayout"] = false,
 ["containerPadding"] = -4,
-["position"] = {
-["y"] = 0,
-["x"] = 0,
-},
+["iconHeight"] = 36,
 ["spacing"] = 2,
 ["bgColor"] = {
 ["a"] = 0.6,
@@ -5845,16 +5853,16 @@ ArcUIDB = {
 },
 ["showBorder"] = false,
 ["gridRows"] = 2,
-["gridCols"] = 4,
-["iconSize"] = 36,
-["autoReflow"] = true,
-["lockGridSize"] = false,
 ["borderColor"] = {
 ["a"] = 1,
 ["b"] = 0.9,
 ["g"] = 0.6,
 ["r"] = 0.3,
 },
+["iconSize"] = 36,
+["autoReflow"] = true,
+["lockGridSize"] = false,
+["gridCols"] = 4,
 },
 },
 ["matchMode"] = "all",
@@ -5974,18 +5982,18 @@ ArcUIDB = {
 ["createdBy"] = "System",
 ["groups"] = {
 ["Buffs"] = {
-["spacing"] = 2,
-["visibility"] = "always",
-["iconWidth"] = 36,
-["autoReflow"] = false,
-["containerPadding"] = 0,
-["showBorder"] = false,
 ["borderColor"] = {
 ["a"] = 1,
 ["b"] = 0.3,
 ["g"] = 0.8,
 ["r"] = 0.3,
 },
+["visibility"] = "always",
+["iconWidth"] = 36,
+["autoReflow"] = false,
+["containerPadding"] = 0,
+["showBorder"] = false,
+["spacing"] = 2,
 ["bgColor"] = {
 ["a"] = 0.6,
 ["b"] = 0,
@@ -5994,28 +6002,28 @@ ArcUIDB = {
 },
 ["iconHeight"] = 36,
 ["gridRows"] = 2,
+["gridCols"] = 4,
+["iconSize"] = 36,
+["showBackground"] = false,
+["lockGridSize"] = false,
 ["position"] = {
 ["y"] = 200,
 ["x"] = 0,
 },
-["iconSize"] = 36,
-["showBackground"] = false,
-["lockGridSize"] = false,
-["gridCols"] = 4,
 },
 ["Essential"] = {
-["spacing"] = 2,
-["visibility"] = "always",
-["iconWidth"] = 36,
-["autoReflow"] = false,
-["containerPadding"] = 0,
-["showBorder"] = false,
 ["borderColor"] = {
 ["a"] = 1,
 ["b"] = 0.2,
 ["g"] = 0.6,
 ["r"] = 0.8,
 },
+["visibility"] = "always",
+["iconWidth"] = 36,
+["autoReflow"] = false,
+["containerPadding"] = 0,
+["showBorder"] = false,
+["spacing"] = 2,
 ["bgColor"] = {
 ["a"] = 0.6,
 ["b"] = 0,
@@ -6024,28 +6032,28 @@ ArcUIDB = {
 },
 ["iconHeight"] = 36,
 ["gridRows"] = 2,
+["gridCols"] = 4,
+["iconSize"] = 36,
+["showBackground"] = false,
+["lockGridSize"] = false,
 ["position"] = {
 ["y"] = 100,
 ["x"] = 0,
 },
-["iconSize"] = 36,
-["showBackground"] = false,
-["lockGridSize"] = false,
-["gridCols"] = 4,
 },
 ["Utility"] = {
-["spacing"] = 2,
-["visibility"] = "always",
-["iconWidth"] = 36,
-["autoReflow"] = false,
-["containerPadding"] = 0,
-["showBorder"] = false,
 ["borderColor"] = {
 ["a"] = 1,
 ["b"] = 0.9,
 ["g"] = 0.6,
 ["r"] = 0.3,
 },
+["visibility"] = "always",
+["iconWidth"] = 36,
+["autoReflow"] = false,
+["containerPadding"] = 0,
+["showBorder"] = false,
+["spacing"] = 2,
 ["bgColor"] = {
 ["a"] = 0.6,
 ["b"] = 0,
@@ -6054,14 +6062,14 @@ ArcUIDB = {
 },
 ["iconHeight"] = 36,
 ["gridRows"] = 2,
+["gridCols"] = 4,
+["iconSize"] = 36,
+["showBackground"] = false,
+["lockGridSize"] = false,
 ["position"] = {
 ["y"] = 0,
 ["x"] = 0,
 },
-["iconSize"] = 36,
-["showBackground"] = false,
-["lockGridSize"] = false,
-["gridCols"] = 4,
 },
 },
 ["displayName"] = "Default",

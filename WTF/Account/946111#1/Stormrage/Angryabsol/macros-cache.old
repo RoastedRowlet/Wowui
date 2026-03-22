@@ -18,6 +18,11 @@ VER 3 0100000000000006 "Meta Trinket" "134400"
 /use 13
 /cast Void Metamorphosis
 END
+VER 3 0100000000000007 "Reap no chann" "134400"
+#showtooltip reap
+/stopmacro [channeling:Void Ray]
+/cast reap
+END
 VER 3 0100000000000001 "sit" "INV_MISC_QUESTIONMARK"
 /sit
 END

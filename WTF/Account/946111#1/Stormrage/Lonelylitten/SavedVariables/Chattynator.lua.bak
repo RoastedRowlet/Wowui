@@ -1,13 +1,6 @@
 
 CHATTYNATOR_CURRENT_PROFILE = "DEFAULT"
 CHATTYNATOR_COMMAND_HISTORY = {
-"/cw Aldvelothi-Stormrage whatever you want to tip!",
-"/cw Aldvelothi-Stormrage done!",
-"/cw Mimicked-Stormrage cand can do dagger",
-"/cw Bukkjudge-Stormrage no :( no pvp recipes sorry",
-"/cw Appledrink-Stormrage however much you wanna tip",
-"/cw Appledrink-Stormrage there's 2",
-"/cw Appledrink-Stormrage 1 in the auction house on the left (looking from outside)",
 "/cw Appledrink-Stormrage and one in the middle of the whole profession area",
 "/cw Nostridamus-Stormrage done!",
 "/cw Appledrink-Stormrage done!",
@@ -202,4 +195,11 @@ CHATTYNATOR_COMMAND_HISTORY = {
 "/s /eui",
 "/cw Possum-Stormrage /eui",
 "/cw Possum-Stormrage /reload",
+"/cw Alconaft-Stormrage whatever you feel is fair",
+"/cw Alconaft-Stormrage done!",
+"/cw Alconaft-Stormrage npnp!",
+"/cw Kayodru-Stormrage done!",
+"/cw Fobemonk-Stormrage which weapon?",
+"/s /eui",
+"/s /reload",
 }

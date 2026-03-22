@@ -1,13 +1,6 @@
 
 CHATTYNATOR_CURRENT_PROFILE = "DEFAULT"
 CHATTYNATOR_COMMAND_HISTORY = {
-"/cw Aldvelothi-Stormrage whatever you want to tip!",
-"/cw Aldvelothi-Stormrage done!",
-"/cw Mimicked-Stormrage cand can do dagger",
-"/cw Bukkjudge-Stormrage no :( no pvp recipes sorry",
-"/cw Appledrink-Stormrage however much you wanna tip",
-"/cw Appledrink-Stormrage there's 2",
-"/cw Appledrink-Stormrage 1 in the auction house on the left (looking from outside)",
 "/cw Appledrink-Stormrage and one in the middle of the whole profession area",
 "/cw Nostridamus-Stormrage done!",
 "/cw Appledrink-Stormrage done!",
@@ -207,4 +200,17 @@ CHATTYNATOR_COMMAND_HISTORY = {
 "/cw Alconaft-Stormrage npnp!",
 "/cw Kayodru-Stormrage done!",
 "/cw Fobemonk-Stormrage which weapon?",
+"/s /eui",
+"/s /reload",
+"/s /GRID2",
+"/s /CLIQUE",
+"/s /EUI",
+"/g what level delve is max for keys?",
+"/g anyone know?",
+"/cw Stormvine-Stormrage oh sorry im blind af ",
+"/cw Stormvine-Stormrage i was disenchanting sit and just didnt see",
+"/cw Stormvine-Stormrage done!",
+"/cw Stormvine-Stormrage chat got spammed and didnt see the order or your whisper lmao",
+"/cw Stormvine-Stormrage sorry about that",
+"/cw Stormvine-Stormrage /run for i=1,C_QuestLog.GetNumQuestLogEntries() do C_QuestLog.SetSelectedQuest(C_QuestLog.GetInfo(i).questID); C_QuestLog.SetAbandonQuest(); C_QuestLog.AbandonQuest() end;",
 }
