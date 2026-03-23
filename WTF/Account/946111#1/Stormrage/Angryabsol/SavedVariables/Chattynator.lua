@@ -1,8 +1,6 @@
 
 CHATTYNATOR_CURRENT_PROFILE = "DEFAULT"
 CHATTYNATOR_COMMAND_HISTORY = {
-" but the other good specs took a 20%er",
-" I wish i woulda seen a good demo at some point this week",
 " every time i look at logs its doing 40% more damage than anyone else on beta",
 " https://www.warcraftlogs.com/reports/FC2Hzg9TmQjDMJn6?fight=7&type=damage-done",
 " lmao",
@@ -202,4 +200,6 @@ CHATTYNATOR_COMMAND_HISTORY = {
 "/raid I say we try to 3 heal it and see what happens",
 "/raid oh no your 10 gold",
 "/s /RELOAD",
+"/s /eui",
+"/s /reload",
 }

@@ -17,9 +17,9 @@ CliqueDB3 = {
 },
 ["Lonelylitten - Stormrage"] = {
 ["spec1_profileKey"] = "Lonelylitten - Stormrage",
-["fastooc"] = false,
 ["spec3_profileKey"] = "Lonelylitten - Stormrage",
 ["downclick"] = false,
+["fastooc"] = false,
 ["spec4_profileKey"] = "Lonelylitten - Stormrage",
 ["specswap"] = false,
 ["spec2_profileKey"] = "Lonelylitten - Stormrage",

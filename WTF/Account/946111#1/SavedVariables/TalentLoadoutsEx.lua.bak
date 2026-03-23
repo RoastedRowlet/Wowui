@@ -47,17 +47,17 @@ TalentLoadoutEx = {
 ["DRUID"] = {
 {
 {
-["text"] = "CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMDMmlZmZmBYYWmZbYmZGbsMzyMjhZBDAGgltxGmmZWGBAAAYzMzMzgNjhxMAmZAgB",
-["name"] = "Raid",
 ["icon"] = 134400,
+["name"] = "Raid",
+["text"] = "CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMDMmlZmZmBYYWmZbYmZGbsMzyMjhZBDAGgltxGmmZWGBAAAYzMzMzgNjhxMAmZAgB",
 ["pvp1"] = 182,
 ["pvp3"] = 3058,
 ["pvp2"] = 180,
 },
 {
-["pvp1"] = 182,
-["pvp2"] = 180,
 ["pvp3"] = 3058,
+["pvp2"] = 180,
+["pvp1"] = 182,
 ["text"] = "CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNMmZgxsMzMzMLMgxMLzsYmZmlxyMLjZGshBAjltZGMmtRgJAAAALMzMzgNjZMGAAmZgB",
 ["icon"] = 134400,
 ["name"] = "M+",

@@ -539,10 +539,10 @@ CHATTYNATOR_CONFIG = {
 ["isTemporary"] = false,
 ["backgroundColor"] = "1a1a1a",
 ["groups"] = {
-["OPENING"] = false,
 ["PET_BATTLE_COMBAT_LOG"] = false,
-["VOICE_TEXT"] = false,
 ["COMBAT_MISC_INFO"] = false,
+["VOICE_TEXT"] = false,
+["OPENING"] = false,
 ["COMBAT_XP_GAIN"] = false,
 ["PET_INFO"] = false,
 ["TRADESKILLS"] = false,
@@ -649,7 +649,7 @@ CHATTYNATOR_CONFIG = {
 },
 }
 CHATTYNATOR_MESSAGE_LOG = {
-["cleanIndex"] = 4622,
+["cleanIndex"] = 4712,
 ["current"] = {
 {
 ["recordedBy"] = "Angryabsol-Stormrage",
@@ -90471,8 +90471,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Lonelylitten-Stormrage",
 ["sex"] = 2,
 },
-["type"] = "LOOT",
 ["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
 },
 ["color"] = {
 ["b"] = 0,
@@ -90492,8 +90492,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Lonelylitten-Stormrage",
 ["sex"] = 2,
 },
-["type"] = "LOOT",
 ["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
 },
 ["color"] = {
 ["b"] = 0,
@@ -90513,8 +90513,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Chailatté-Zul'jin",
 ["sex"] = 3,
 },
-["type"] = "GUILD_ACHIEVEMENT",
 ["event"] = "CHAT_MSG_GUILD_ACHIEVEMENT",
+["type"] = "GUILD_ACHIEVEMENT",
 },
 ["color"] = {
 ["b"] = 0.250980406999588,
@@ -90534,8 +90534,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Seralock-Zul'jin",
 ["sex"] = 3,
 },
-["type"] = "GUILD_ACHIEVEMENT",
 ["event"] = "CHAT_MSG_GUILD_ACHIEVEMENT",
+["type"] = "GUILD_ACHIEVEMENT",
 },
 ["color"] = {
 ["b"] = 0.250980406999588,
@@ -90555,8 +90555,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Lonelylitten",
 ["sex"] = 2,
 },
-["type"] = "MONSTER_BOSS_WHISPER",
 ["event"] = "CHAT_MSG_RAID_BOSS_WHISPER",
+["type"] = "MONSTER_BOSS_WHISPER",
 },
 ["color"] = {
 ["b"] = 0,
@@ -90576,8 +90576,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Brewchief-BleedingHollow",
 ["sex"] = 2,
 },
-["type"] = "GUILD_ACHIEVEMENT",
 ["event"] = "CHAT_MSG_GUILD_ACHIEVEMENT",
+["type"] = "GUILD_ACHIEVEMENT",
 },
 ["color"] = {
 ["b"] = 0.250980406999588,
@@ -90597,8 +90597,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Brewchief-BleedingHollow",
 ["sex"] = 2,
 },
-["type"] = "GUILD_ACHIEVEMENT",
 ["event"] = "CHAT_MSG_GUILD_ACHIEVEMENT",
+["type"] = "GUILD_ACHIEVEMENT",
 },
 ["color"] = {
 ["b"] = 0.250980406999588,
@@ -90618,8 +90618,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Chailatté-Zul'jin",
 ["sex"] = 3,
 },
-["type"] = "GUILD_ACHIEVEMENT",
 ["event"] = "CHAT_MSG_GUILD_ACHIEVEMENT",
+["type"] = "GUILD_ACHIEVEMENT",
 },
 ["color"] = {
 ["b"] = 0.250980406999588,
@@ -90639,8 +90639,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Chailatté-Zul'jin",
 ["sex"] = 3,
 },
-["type"] = "GUILD_ACHIEVEMENT",
 ["event"] = "CHAT_MSG_GUILD_ACHIEVEMENT",
+["type"] = "GUILD_ACHIEVEMENT",
 },
 ["color"] = {
 ["b"] = 0.250980406999588,
@@ -90657,8 +90657,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["player"] = {
 ["name"] = "Alleria Windrunner",
 },
-["type"] = "MONSTER_YELL",
 ["event"] = "CHAT_MSG_MONSTER_YELL",
+["type"] = "MONSTER_YELL",
 },
 ["color"] = {
 ["b"] = 0.250980406999588,
@@ -90675,8 +90675,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["player"] = {
 ["name"] = "Arator",
 },
-["type"] = "MONSTER_YELL",
 ["event"] = "CHAT_MSG_MONSTER_YELL",
+["type"] = "MONSTER_YELL",
 },
 ["color"] = {
 ["b"] = 0.250980406999588,
@@ -90693,8 +90693,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["player"] = {
 ["name"] = "Arator",
 },
-["type"] = "MONSTER_SAY",
 ["event"] = "CHAT_MSG_MONSTER_SAY",
+["type"] = "MONSTER_SAY",
 },
 ["color"] = {
 ["b"] = 0.6235294342041016,
@@ -90714,8 +90714,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Jimps-Area52",
 ["sex"] = 3,
 },
-["type"] = "LOOT",
 ["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
 },
 ["color"] = {
 ["b"] = 0,
@@ -90735,8 +90735,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Jimps-Area52",
 ["sex"] = 3,
 },
-["type"] = "LOOT",
 ["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
 },
 ["color"] = {
 ["b"] = 0,
@@ -90753,8 +90753,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["player"] = {
 ["name"] = "Corewarden Nysarra",
 },
-["type"] = "MONSTER_YELL",
 ["event"] = "CHAT_MSG_MONSTER_YELL",
+["type"] = "MONSTER_YELL",
 },
 ["color"] = {
 ["b"] = 0.250980406999588,
@@ -90774,8 +90774,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Jimps-Area52",
 ["sex"] = 3,
 },
-["type"] = "LOOT",
 ["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
 },
 ["color"] = {
 ["b"] = 0,
@@ -90792,8 +90792,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["player"] = {
 ["name"] = "Corewarden Nysarra",
 },
-["type"] = "MONSTER_YELL",
 ["event"] = "CHAT_MSG_MONSTER_YELL",
+["type"] = "MONSTER_YELL",
 },
 ["color"] = {
 ["b"] = 0.250980406999588,
@@ -90810,8 +90810,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["player"] = {
 ["name"] = "Corewarden Nysarra",
 },
-["type"] = "MONSTER_YELL",
 ["event"] = "CHAT_MSG_MONSTER_YELL",
+["type"] = "MONSTER_YELL",
 },
 ["color"] = {
 ["b"] = 0.250980406999588,
@@ -90831,8 +90831,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Shadowdhh-Area52",
 ["sex"] = 2,
 },
-["type"] = "LOOT",
 ["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
 },
 ["color"] = {
 ["b"] = 0,
@@ -90849,8 +90849,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["player"] = {
 ["name"] = "Corewarden Nysarra",
 },
-["type"] = "MONSTER_YELL",
 ["event"] = "CHAT_MSG_MONSTER_YELL",
+["type"] = "MONSTER_YELL",
 },
 ["color"] = {
 ["b"] = 0.250980406999588,
@@ -90870,8 +90870,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Shadowdhh-Area52",
 ["sex"] = 2,
 },
-["type"] = "LOOT",
 ["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
 },
 ["color"] = {
 ["b"] = 0,
@@ -90891,8 +90891,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Jimps-Area52",
 ["sex"] = 3,
 },
-["type"] = "LOOT",
 ["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
 },
 ["color"] = {
 ["b"] = 0,
@@ -90912,8 +90912,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Jimps-Area52",
 ["sex"] = 3,
 },
-["type"] = "LOOT",
 ["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
 },
 ["color"] = {
 ["b"] = 0,
@@ -90930,8 +90930,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["player"] = {
 ["name"] = "Corewarden Nysarra",
 },
-["type"] = "MONSTER_YELL",
 ["event"] = "CHAT_MSG_MONSTER_YELL",
+["type"] = "MONSTER_YELL",
 },
 ["color"] = {
 ["b"] = 0.250980406999588,
@@ -90948,8 +90948,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["player"] = {
 ["name"] = "Corewarden Nysarra",
 },
-["type"] = "MONSTER_YELL",
 ["event"] = "CHAT_MSG_MONSTER_YELL",
+["type"] = "MONSTER_YELL",
 },
 ["color"] = {
 ["b"] = 0.250980406999588,
@@ -90969,8 +90969,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Lonelylitten-Stormrage",
 ["sex"] = 2,
 },
-["type"] = "LOOT",
 ["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
 },
 ["color"] = {
 ["b"] = 0,
@@ -90990,8 +90990,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Jimps-Area52",
 ["sex"] = 3,
 },
-["type"] = "LOOT",
 ["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
 },
 ["color"] = {
 ["b"] = 0,
@@ -91005,8 +91005,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 {
 ["recordedBy"] = "Lonelylitten-Stormrage",
 ["typeInfo"] = {
-["type"] = "MONEY",
 ["event"] = "CHAT_MSG_MONEY",
+["type"] = "MONEY",
 },
 ["color"] = {
 ["b"] = 0,
@@ -91026,8 +91026,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Extentz-Area52",
 ["sex"] = 3,
 },
-["type"] = "LOOT",
 ["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
 },
 ["color"] = {
 ["b"] = 0,
@@ -91047,8 +91047,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Extentz-Area52",
 ["sex"] = 3,
 },
-["type"] = "LOOT",
 ["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
 },
 ["color"] = {
 ["b"] = 0,
@@ -91068,8 +91068,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Linkken-Illidan",
 ["sex"] = 3,
 },
-["type"] = "LOOT",
 ["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
 },
 ["color"] = {
 ["b"] = 0,
@@ -91089,8 +91089,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Linkken-Illidan",
 ["sex"] = 3,
 },
-["type"] = "LOOT",
 ["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
 },
 ["color"] = {
 ["b"] = 0,
@@ -91107,8 +91107,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["player"] = {
 ["name"] = "Arator",
 },
-["type"] = "MONSTER_SAY",
 ["event"] = "CHAT_MSG_MONSTER_SAY",
+["type"] = "MONSTER_SAY",
 },
 ["color"] = {
 ["b"] = 0.6235294342041016,
@@ -91128,8 +91128,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Jufufu-Thrall",
 ["sex"] = 3,
 },
-["type"] = "GUILD_ACHIEVEMENT",
 ["event"] = "CHAT_MSG_GUILD_ACHIEVEMENT",
+["type"] = "GUILD_ACHIEVEMENT",
 },
 ["color"] = {
 ["b"] = 0.250980406999588,
@@ -91149,8 +91149,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Jufufu-Thrall",
 ["sex"] = 3,
 },
-["type"] = "GUILD_ACHIEVEMENT",
 ["event"] = "CHAT_MSG_GUILD_ACHIEVEMENT",
+["type"] = "GUILD_ACHIEVEMENT",
 },
 ["color"] = {
 ["b"] = 0.250980406999588,
@@ -91170,8 +91170,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Lonelylitten-Stormrage",
 ["sex"] = 2,
 },
-["type"] = "PARTY",
 ["event"] = "CHAT_MSG_PARTY",
+["type"] = "PARTY",
 },
 ["color"] = {
 ["b"] = 1,
@@ -91191,8 +91191,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Jimps-Area52",
 ["sex"] = 3,
 },
-["type"] = "PARTY",
 ["event"] = "CHAT_MSG_PARTY",
+["type"] = "PARTY",
 },
 ["color"] = {
 ["b"] = 1,
@@ -91209,8 +91209,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["player"] = {
 ["name"] = "Arator",
 },
-["type"] = "MONSTER_YELL",
 ["event"] = "CHAT_MSG_MONSTER_YELL",
+["type"] = "MONSTER_YELL",
 },
 ["color"] = {
 ["b"] = 0.250980406999588,
@@ -91227,8 +91227,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["player"] = {
 ["name"] = "Arator",
 },
-["type"] = "MONSTER_YELL",
 ["event"] = "CHAT_MSG_MONSTER_YELL",
+["type"] = "MONSTER_YELL",
 },
 ["color"] = {
 ["b"] = 0.250980406999588,
@@ -91245,8 +91245,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["player"] = {
 ["name"] = "Lothraxion",
 },
-["type"] = "MONSTER_YELL",
 ["event"] = "CHAT_MSG_MONSTER_YELL",
+["type"] = "MONSTER_YELL",
 },
 ["color"] = {
 ["b"] = 0.250980406999588,
@@ -91263,8 +91263,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["player"] = {
 ["name"] = "Lothraxion",
 },
-["type"] = "MONSTER_YELL",
 ["event"] = "CHAT_MSG_MONSTER_YELL",
+["type"] = "MONSTER_YELL",
 },
 ["color"] = {
 ["b"] = 0.250980406999588,
@@ -91281,8 +91281,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["player"] = {
 ["name"] = "Circuit Seer",
 },
-["type"] = "MONSTER_YELL",
 ["event"] = "CHAT_MSG_MONSTER_YELL",
+["type"] = "MONSTER_YELL",
 },
 ["color"] = {
 ["b"] = 0.250980406999588,
@@ -91299,8 +91299,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["player"] = {
 ["name"] = "Kasreth",
 },
-["type"] = "MONSTER_YELL",
 ["event"] = "CHAT_MSG_MONSTER_YELL",
+["type"] = "MONSTER_YELL",
 },
 ["color"] = {
 ["b"] = 0.250980406999588,
@@ -91317,8 +91317,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["player"] = {
 ["name"] = "Kasreth",
 },
-["type"] = "MONSTER_YELL",
 ["event"] = "CHAT_MSG_MONSTER_YELL",
+["type"] = "MONSTER_YELL",
 },
 ["color"] = {
 ["b"] = 0.250980406999588,
@@ -91335,8 +91335,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["player"] = {
 ["name"] = "Kasreth",
 },
-["type"] = "MONSTER_YELL",
 ["event"] = "CHAT_MSG_MONSTER_YELL",
+["type"] = "MONSTER_YELL",
 },
 ["color"] = {
 ["b"] = 0.250980406999588,
@@ -91356,8 +91356,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Shadowdhh-Area52",
 ["sex"] = 2,
 },
-["type"] = "LOOT",
 ["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
 },
 ["color"] = {
 ["b"] = 0,
@@ -91374,8 +91374,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["player"] = {
 ["name"] = "Arator",
 },
-["type"] = "MONSTER_SAY",
 ["event"] = "CHAT_MSG_MONSTER_SAY",
+["type"] = "MONSTER_SAY",
 },
 ["color"] = {
 ["b"] = 0.6235294342041016,
@@ -91389,8 +91389,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 {
 ["recordedBy"] = "Lonelylitten-Stormrage",
 ["typeInfo"] = {
-["type"] = "MONEY",
 ["event"] = "CHAT_MSG_MONEY",
+["type"] = "MONEY",
 },
 ["color"] = {
 ["b"] = 0,
@@ -91407,8 +91407,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["player"] = {
 ["name"] = "Lothraxion",
 },
-["type"] = "MONSTER_YELL",
 ["event"] = "CHAT_MSG_MONSTER_YELL",
+["type"] = "MONSTER_YELL",
 },
 ["color"] = {
 ["b"] = 0.250980406999588,
@@ -91425,8 +91425,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["player"] = {
 ["name"] = "Lothraxion",
 },
-["type"] = "MONSTER_YELL",
 ["event"] = "CHAT_MSG_MONSTER_YELL",
+["type"] = "MONSTER_YELL",
 },
 ["color"] = {
 ["b"] = 0.250980406999588,
@@ -91443,8 +91443,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["player"] = {
 ["name"] = "Alleria Windrunner",
 },
-["type"] = "MONSTER_YELL",
 ["event"] = "CHAT_MSG_MONSTER_YELL",
+["type"] = "MONSTER_YELL",
 },
 ["color"] = {
 ["b"] = 0.250980406999588,
@@ -91461,8 +91461,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["player"] = {
 ["name"] = "Arator",
 },
-["type"] = "MONSTER_YELL",
 ["event"] = "CHAT_MSG_MONSTER_YELL",
+["type"] = "MONSTER_YELL",
 },
 ["color"] = {
 ["b"] = 0.250980406999588,
@@ -91479,8 +91479,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["player"] = {
 ["name"] = "Lothraxion",
 },
-["type"] = "MONSTER_YELL",
 ["event"] = "CHAT_MSG_MONSTER_YELL",
+["type"] = "MONSTER_YELL",
 },
 ["color"] = {
 ["b"] = 0.250980406999588,
@@ -91500,8 +91500,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Shadowdhh-Area52",
 ["sex"] = 2,
 },
-["type"] = "ACHIEVEMENT",
 ["event"] = "CHAT_MSG_ACHIEVEMENT",
+["type"] = "ACHIEVEMENT",
 },
 ["color"] = {
 ["b"] = 0,
@@ -91521,8 +91521,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Shadowdhh-Area52",
 ["sex"] = 2,
 },
-["type"] = "ACHIEVEMENT",
 ["event"] = "CHAT_MSG_ACHIEVEMENT",
+["type"] = "ACHIEVEMENT",
 },
 ["color"] = {
 ["b"] = 0,
@@ -91542,8 +91542,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Shadowdhh-Area52",
 ["sex"] = 2,
 },
-["type"] = "ACHIEVEMENT",
 ["event"] = "CHAT_MSG_ACHIEVEMENT",
+["type"] = "ACHIEVEMENT",
 },
 ["color"] = {
 ["b"] = 0,
@@ -91563,8 +91563,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Jimps-Area52",
 ["sex"] = 3,
 },
-["type"] = "ACHIEVEMENT",
 ["event"] = "CHAT_MSG_ACHIEVEMENT",
+["type"] = "ACHIEVEMENT",
 },
 ["color"] = {
 ["b"] = 0,
@@ -91584,8 +91584,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Jimps-Area52",
 ["sex"] = 3,
 },
-["type"] = "ACHIEVEMENT",
 ["event"] = "CHAT_MSG_ACHIEVEMENT",
+["type"] = "ACHIEVEMENT",
 },
 ["color"] = {
 ["b"] = 0,
@@ -91605,8 +91605,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Jimps-Area52",
 ["sex"] = 3,
 },
-["type"] = "ACHIEVEMENT",
 ["event"] = "CHAT_MSG_ACHIEVEMENT",
+["type"] = "ACHIEVEMENT",
 },
 ["color"] = {
 ["b"] = 0,
@@ -91626,8 +91626,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Extentz-Area52",
 ["sex"] = 3,
 },
-["type"] = "ACHIEVEMENT",
 ["event"] = "CHAT_MSG_ACHIEVEMENT",
+["type"] = "ACHIEVEMENT",
 },
 ["color"] = {
 ["b"] = 0,
@@ -91647,8 +91647,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Extentz-Area52",
 ["sex"] = 3,
 },
-["type"] = "ACHIEVEMENT",
 ["event"] = "CHAT_MSG_ACHIEVEMENT",
+["type"] = "ACHIEVEMENT",
 },
 ["color"] = {
 ["b"] = 0,
@@ -91668,8 +91668,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Extentz-Area52",
 ["sex"] = 3,
 },
-["type"] = "ACHIEVEMENT",
 ["event"] = "CHAT_MSG_ACHIEVEMENT",
+["type"] = "ACHIEVEMENT",
 },
 ["color"] = {
 ["b"] = 0,
@@ -91683,8 +91683,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 {
 ["recordedBy"] = "Lonelylitten-Stormrage",
 ["typeInfo"] = {
-["type"] = "LOOT",
 ["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
 },
 ["color"] = {
 ["b"] = 0,
@@ -91704,8 +91704,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Shadowdhh-Area52",
 ["sex"] = 2,
 },
-["type"] = "LOOT",
 ["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
 },
 ["color"] = {
 ["b"] = 0,
@@ -91725,8 +91725,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Shadowdhh-Area52",
 ["sex"] = 2,
 },
-["type"] = "LOOT",
 ["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
 },
 ["color"] = {
 ["b"] = 0,
@@ -91746,8 +91746,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Lonelylitten-Stormrage",
 ["sex"] = 2,
 },
-["type"] = "LOOT",
 ["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
 },
 ["color"] = {
 ["b"] = 0,
@@ -91767,8 +91767,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Lonelylitten-Stormrage",
 ["sex"] = 2,
 },
-["type"] = "LOOT",
 ["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
 },
 ["color"] = {
 ["b"] = 0,
@@ -91788,8 +91788,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Lonelylitten-Stormrage",
 ["sex"] = 2,
 },
-["type"] = "LOOT",
 ["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
 },
 ["color"] = {
 ["b"] = 0,
@@ -91809,8 +91809,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Lonelylitten-Stormrage",
 ["sex"] = 2,
 },
-["type"] = "LOOT",
 ["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
 },
 ["color"] = {
 ["b"] = 0,
@@ -91824,8 +91824,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 {
 ["recordedBy"] = "Lonelylitten-Stormrage",
 ["typeInfo"] = {
-["type"] = "MONEY",
 ["event"] = "CHAT_MSG_MONEY",
+["type"] = "MONEY",
 },
 ["color"] = {
 ["b"] = 0,
@@ -91839,8 +91839,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 {
 ["recordedBy"] = "Lonelylitten-Stormrage",
 ["typeInfo"] = {
-["type"] = "CURRENCY",
 ["event"] = "CHAT_MSG_CURRENCY",
+["type"] = "CURRENCY",
 },
 ["color"] = {
 ["b"] = 0,
@@ -91860,8 +91860,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Linkken-Illidan",
 ["sex"] = 3,
 },
-["type"] = "LOOT",
 ["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
 },
 ["color"] = {
 ["b"] = 0,
@@ -91881,8 +91881,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Jimps-Area52",
 ["sex"] = 3,
 },
-["type"] = "LOOT",
 ["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
 },
 ["color"] = {
 ["b"] = 0,
@@ -91902,8 +91902,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Jimps-Area52",
 ["sex"] = 3,
 },
-["type"] = "LOOT",
 ["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
 },
 ["color"] = {
 ["b"] = 0,
@@ -91920,8 +91920,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["player"] = {
 ["name"] = "Alleria Windrunner",
 },
-["type"] = "MONSTER_SAY",
 ["event"] = "CHAT_MSG_MONSTER_SAY",
+["type"] = "MONSTER_SAY",
 },
 ["color"] = {
 ["b"] = 0.6235294342041016,
@@ -91941,8 +91941,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Extentz-Area52",
 ["sex"] = 3,
 },
-["type"] = "LOOT",
 ["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
 },
 ["color"] = {
 ["b"] = 0,
@@ -91962,8 +91962,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Extentz-Area52",
 ["sex"] = 3,
 },
-["type"] = "LOOT",
 ["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
 },
 ["color"] = {
 ["b"] = 0,
@@ -91983,8 +91983,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Extentz-Area52",
 ["sex"] = 3,
 },
-["type"] = "LOOT",
 ["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
 },
 ["color"] = {
 ["b"] = 0,
@@ -92004,8 +92004,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Lonelylitten-Stormrage",
 ["sex"] = 2,
 },
-["type"] = "PARTY",
 ["event"] = "CHAT_MSG_PARTY",
+["type"] = "PARTY",
 },
 ["color"] = {
 ["b"] = 1,
@@ -92025,8 +92025,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Lonelylitten-Stormrage",
 ["sex"] = 2,
 },
-["type"] = "PARTY",
 ["event"] = "CHAT_MSG_PARTY",
+["type"] = "PARTY",
 },
 ["color"] = {
 ["b"] = 1,
@@ -92046,8 +92046,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Extentz-Area52",
 ["sex"] = 3,
 },
-["type"] = "LOOT",
 ["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
 },
 ["color"] = {
 ["b"] = 0,
@@ -92061,8 +92061,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 {
 ["recordedBy"] = "Lonelylitten-Stormrage",
 ["typeInfo"] = {
-["type"] = "LOOT",
 ["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
 },
 ["color"] = {
 ["b"] = 0,
@@ -92076,8 +92076,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 {
 ["recordedBy"] = "Lonelylitten-Stormrage",
 ["typeInfo"] = {
-["type"] = "LOOT",
 ["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
 },
 ["color"] = {
 ["b"] = 0,
@@ -92094,8 +92094,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["player"] = {
 ["name"] = "Decimus",
 },
-["type"] = "MONSTER_SAY",
 ["event"] = "CHAT_MSG_MONSTER_SAY",
+["type"] = "MONSTER_SAY",
 },
 ["color"] = {
 ["b"] = 0.6235294342041016,
@@ -92112,8 +92112,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["player"] = {
 ["name"] = "Alleria Windrunner",
 },
-["type"] = "MONSTER_SAY",
 ["event"] = "CHAT_MSG_MONSTER_SAY",
+["type"] = "MONSTER_SAY",
 },
 ["color"] = {
 ["b"] = 0.6235294342041016,
@@ -92130,8 +92130,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["player"] = {
 ["name"] = "Alleria Windrunner",
 },
-["type"] = "MONSTER_SAY",
 ["event"] = "CHAT_MSG_MONSTER_SAY",
+["type"] = "MONSTER_SAY",
 },
 ["color"] = {
 ["b"] = 0.6235294342041016,
@@ -92151,8 +92151,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Shadowdhh-Area52",
 ["sex"] = 2,
 },
-["type"] = "LOOT",
 ["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
 },
 ["color"] = {
 ["b"] = 0,
@@ -92172,8 +92172,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Brewchief-BleedingHollow",
 ["sex"] = 2,
 },
-["type"] = "GUILD_ACHIEVEMENT",
 ["event"] = "CHAT_MSG_GUILD_ACHIEVEMENT",
+["type"] = "GUILD_ACHIEVEMENT",
 },
 ["color"] = {
 ["b"] = 0.250980406999588,
@@ -92193,8 +92193,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Brewchief-BleedingHollow",
 ["sex"] = 2,
 },
-["type"] = "GUILD_ACHIEVEMENT",
 ["event"] = "CHAT_MSG_GUILD_ACHIEVEMENT",
+["type"] = "GUILD_ACHIEVEMENT",
 },
 ["color"] = {
 ["b"] = 0.250980406999588,
@@ -92204,6 +92204,24 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["text"] = "|Hplayer:Brewchief-BleedingHollow|h[|cffc69b6dBrewchief-BleedingHollow|r]|h has earned the achievement |cffffff00|Hachievement:61645:Player-73-0EEDD513:1:3:22:26:4294967295:4294967295:4294967295:4294967295|h[Mythic: Maisara Caverns]|h|r!",
 ["id"] = "s7_4711",
 ["timestamp"] = 1774224349,
+},
+{
+["recordedBy"] = "Angryabsol-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["name"] = "Solwin Brightstitch",
+},
+["event"] = "CHAT_MSG_MONSTER_SAY",
+["type"] = "MONSTER_SAY",
+},
+["color"] = {
+["r"] = 1,
+["g"] = 1,
+["b"] = 0.6235294342041016,
+},
+["text"] = "Solwin Brightstitch says: Alas, if I had but one worthy customer...",
+["timestamp"] = 1774300400,
+["id"] = "s7_4712",
 },
 },
 ["version"] = 1,

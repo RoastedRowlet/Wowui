@@ -543,10 +543,10 @@ CHATTYNATOR_CONFIG = {
 ["invert"] = true,
 ["name"] = "GENERAL",
 ["groups"] = {
-["COMBAT_MISC_INFO"] = false,
 ["OPENING"] = false,
-["COMBAT_XP_GAIN"] = false,
 ["PET_BATTLE_COMBAT_LOG"] = false,
+["COMBAT_XP_GAIN"] = false,
+["COMBAT_MISC_INFO"] = false,
 ["VOICE_TEXT"] = false,
 ["PET_INFO"] = false,
 ["TRADESKILLS"] = false,
@@ -649,7 +649,7 @@ CHATTYNATOR_CONFIG = {
 },
 }
 CHATTYNATOR_MESSAGE_LOG = {
-["cleanIndex"] = 4622,
+["cleanIndex"] = 4712,
 ["current"] = {
 {
 ["recordedBy"] = "Angryabsol-Stormrage",
@@ -90461,6 +90461,1767 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["text"] = "|Hplayer:Gooeyguzzler-Zul'jin|h[|cffff7c0aGooeyguzzler-Zul'jin|r]|h has earned the achievement |cffffff00|Hachievement:10081:Player-61-0FE28734:1:3:22:26:4294967295:4294967295:4294967295:4294967295|h[Mythic: Skyreach]|h|r!",
 ["timestamp"] = 1774203705,
 ["id"] = "s7_4622",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["class"] = "DRUID",
+["race"] = "NightElf",
+["name"] = "Lonelylitten-Stormrage",
+["sex"] = 2,
+},
+["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
+},
+["color"] = {
+["r"] = 0,
+["g"] = 0.6666666865348816,
+["b"] = 0,
+},
+["text"] = "You receive item: |cnIQ2:|Hitem:238198::::::::90:105:::::::::|h[Refulgent Copper Ingot |A:Professions-ChatIcon-Quality-12-Tier2:17:15::1|a]|h|r",
+["timestamp"] = 1774222474,
+["id"] = "s7_4623",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["class"] = "DRUID",
+["race"] = "NightElf",
+["name"] = "Lonelylitten-Stormrage",
+["sex"] = 2,
+},
+["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
+},
+["color"] = {
+["r"] = 0,
+["g"] = 0.6666666865348816,
+["b"] = 0,
+},
+["text"] = "You receive item: |cnIQ2:|Hitem:238203::::::::90:105:::::::::|h[Gloaming Alloy |A:Professions-ChatIcon-Quality-12-Tier2:17:15::1|a]|h|rx3",
+["timestamp"] = 1774222475,
+["id"] = "s7_4624",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["class"] = "DRUID",
+["race"] = "ZandalariTroll",
+["name"] = "Chailatté-Zul'jin",
+["sex"] = 3,
+},
+["event"] = "CHAT_MSG_GUILD_ACHIEVEMENT",
+["type"] = "GUILD_ACHIEVEMENT",
+},
+["color"] = {
+["r"] = 0.250980406999588,
+["g"] = 1,
+["b"] = 0.250980406999588,
+},
+["text"] = "|Hplayer:Chailatté-Zul'jin|h[|cffff7c0aChailatté-Zul'jin|r]|h has earned the achievement |cffffff00|Hachievement:61387:Player-61-0F133928:1:3:22:26:4294967295:4294967295:4294967295:4294967295|h[Prey: Normal Mode I]|h|r!",
+["timestamp"] = 1774222535,
+["id"] = "s7_4625",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["class"] = "WARLOCK",
+["race"] = "Dracthyr",
+["name"] = "Seralock-Zul'jin",
+["sex"] = 3,
+},
+["event"] = "CHAT_MSG_GUILD_ACHIEVEMENT",
+["type"] = "GUILD_ACHIEVEMENT",
+},
+["color"] = {
+["r"] = 0.250980406999588,
+["g"] = 1,
+["b"] = 0.250980406999588,
+},
+["text"] = "|Hplayer:Seralock-Zul'jin|h[|cff8788eeSeralock-Zul'jin|r]|h has earned the achievement |cffffff00|Hachievement:61678:Player-61-0FC582E0:1:3:22:26:4294967295:4294967295:4294967295:4294967295|h[Midnight Superior]|h|r!",
+["timestamp"] = 1774222543,
+["id"] = "s7_4626",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["class"] = "DRUID",
+["race"] = "NightElf",
+["name"] = "Lonelylitten",
+["sex"] = 2,
+},
+["event"] = "CHAT_MSG_RAID_BOSS_WHISPER",
+["type"] = "MONSTER_BOSS_WHISPER",
+},
+["color"] = {
+["r"] = 1,
+["g"] = 0.8666667342185974,
+["b"] = 0,
+},
+["text"] = "The guards' eyes are on you. Return to neutral territory.",
+["timestamp"] = 1774222673,
+["id"] = "s7_4627",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["class"] = "WARRIOR",
+["race"] = "Nightborne",
+["name"] = "Brewchief-BleedingHollow",
+["sex"] = 2,
+},
+["event"] = "CHAT_MSG_GUILD_ACHIEVEMENT",
+["type"] = "GUILD_ACHIEVEMENT",
+},
+["color"] = {
+["r"] = 0.250980406999588,
+["g"] = 1,
+["b"] = 0.250980406999588,
+},
+["text"] = "|Hplayer:Brewchief-BleedingHollow|h[|cffc69b6dBrewchief-BleedingHollow|r]|h has earned the achievement |cffffff00|Hachievement:41288:Player-73-0EEDD513:1:3:22:26:4294967295:4294967295:4294967295:4294967295|h[Heroic: Windrunner Spire]|h|r!",
+["timestamp"] = 1774223061,
+["id"] = "s7_4628",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["class"] = "WARRIOR",
+["race"] = "Nightborne",
+["name"] = "Brewchief-BleedingHollow",
+["sex"] = 2,
+},
+["event"] = "CHAT_MSG_GUILD_ACHIEVEMENT",
+["type"] = "GUILD_ACHIEVEMENT",
+},
+["color"] = {
+["r"] = 0.250980406999588,
+["g"] = 1,
+["b"] = 0.250980406999588,
+},
+["text"] = "|Hplayer:Brewchief-BleedingHollow|h[|cffc69b6dBrewchief-BleedingHollow|r]|h has earned the achievement |cffffff00|Hachievement:41291:Player-73-0EEDD513:1:3:22:26:4294967295:4294967295:4294967295:4294967295|h[Mythic: Windrunner Spire]|h|r!",
+["timestamp"] = 1774223061,
+["id"] = "s7_4629",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["class"] = "DRUID",
+["race"] = "ZandalariTroll",
+["name"] = "Chailatté-Zul'jin",
+["sex"] = 3,
+},
+["event"] = "CHAT_MSG_GUILD_ACHIEVEMENT",
+["type"] = "GUILD_ACHIEVEMENT",
+},
+["color"] = {
+["r"] = 0.250980406999588,
+["g"] = 1,
+["b"] = 0.250980406999588,
+},
+["text"] = "|Hplayer:Chailatté-Zul'jin|h[|cffff7c0aChailatté-Zul'jin|r]|h has earned the achievement |cffffff00|Hachievement:61389:Player-61-0F133928:1:3:22:26:4294967295:4294967295:4294967295:4294967295|h[Prey: Hard Mode I]|h|r!",
+["timestamp"] = 1774223086,
+["id"] = "s7_4630",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["class"] = "DRUID",
+["race"] = "ZandalariTroll",
+["name"] = "Chailatté-Zul'jin",
+["sex"] = 3,
+},
+["event"] = "CHAT_MSG_GUILD_ACHIEVEMENT",
+["type"] = "GUILD_ACHIEVEMENT",
+},
+["color"] = {
+["r"] = 0.250980406999588,
+["g"] = 1,
+["b"] = 0.250980406999588,
+},
+["text"] = "|Hplayer:Chailatté-Zul'jin|h[|cffff7c0aChailatté-Zul'jin|r]|h has earned the achievement |cffffff00|Hachievement:62157:Player-61-0F133928:1:3:22:26:4294967295:4294967295:4294967295:4294967295|h[Prey: Sadistic Shamans (Hard)]|h|r!",
+["timestamp"] = 1774223086,
+["id"] = "s7_4631",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["name"] = "Alleria Windrunner",
+},
+["event"] = "CHAT_MSG_MONSTER_YELL",
+["type"] = "MONSTER_YELL",
+},
+["color"] = {
+["r"] = 1,
+["g"] = 0.250980406999588,
+["b"] = 0.250980406999588,
+},
+["text"] = "Alleria Windrunner yells: Lothraxion! Give up this foolishness. We have already won!",
+["timestamp"] = 1774223417,
+["id"] = "s7_4632",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["name"] = "Arator",
+},
+["event"] = "CHAT_MSG_MONSTER_YELL",
+["type"] = "MONSTER_YELL",
+},
+["color"] = {
+["r"] = 1,
+["g"] = 0.250980406999588,
+["b"] = 0.250980406999588,
+},
+["text"] = "Arator yells: You put all of Silvermoon in danger. This isn't worth the risk!",
+["timestamp"] = 1774223423,
+["id"] = "s7_4633",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["name"] = "Arator",
+},
+["event"] = "CHAT_MSG_MONSTER_SAY",
+["type"] = "MONSTER_SAY",
+},
+["color"] = {
+["r"] = 1,
+["g"] = 1,
+["b"] = 0.6235294342041016,
+},
+["text"] = "Arator says: There seems to be a few pieces missing. We have to find them if we're going to stop Lothraxion!",
+["timestamp"] = 1774223429,
+["id"] = "s7_4634",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["class"] = "WARLOCK",
+["race"] = "Nightborne",
+["name"] = "Jimps-Area52",
+["sex"] = 3,
+},
+["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
+},
+["color"] = {
+["r"] = 0,
+["g"] = 0.6666666865348816,
+["b"] = 0,
+},
+["text"] = "Jimps-Area52 receives loot: |cnIQ0:|Hitem:260638::::::::90:105:::::::::|h[Fine Void Residue]|h|r.",
+["timestamp"] = 1774223519,
+["id"] = "s7_4635",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["class"] = "WARLOCK",
+["race"] = "Nightborne",
+["name"] = "Jimps-Area52",
+["sex"] = 3,
+},
+["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
+},
+["color"] = {
+["r"] = 0,
+["g"] = 0.6666666865348816,
+["b"] = 0,
+},
+["text"] = "Jimps-Area52 receives loot: |cnIQ0:|Hitem:260659::::::::90:105:::::::::|h[Stellar Vortex Residue]|h|r.",
+["timestamp"] = 1774223519,
+["id"] = "s7_4636",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["name"] = "Corewarden Nysarra",
+},
+["event"] = "CHAT_MSG_MONSTER_YELL",
+["type"] = "MONSTER_YELL",
+},
+["color"] = {
+["r"] = 1,
+["g"] = 0.250980406999588,
+["b"] = 0.250980406999588,
+},
+["text"] = "Corewarden Nysarra yells: What a miserable display! You have all failed in your purpose!",
+["timestamp"] = 1774223524,
+["id"] = "s7_4637",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["class"] = "WARLOCK",
+["race"] = "Nightborne",
+["name"] = "Jimps-Area52",
+["sex"] = 3,
+},
+["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
+},
+["color"] = {
+["r"] = 0,
+["g"] = 0.6666666865348816,
+["b"] = 0,
+},
+["text"] = "Jimps-Area52 receives loot: |cnIQ0:|Hitem:260659::::::::90:105:::::::::|h[Stellar Vortex Residue]|h|rx2.",
+["timestamp"] = 1774223555,
+["id"] = "s7_4638",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["name"] = "Corewarden Nysarra",
+},
+["event"] = "CHAT_MSG_MONSTER_YELL",
+["type"] = "MONSTER_YELL",
+},
+["color"] = {
+["r"] = 1,
+["g"] = 0.250980406999588,
+["b"] = 0.250980406999588,
+},
+["text"] = "Corewarden Nysarra yells: Is there no end to you intruders? Do us all a favor and die before I have to kill you myself.",
+["timestamp"] = 1774223563,
+["id"] = "s7_4639",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["name"] = "Corewarden Nysarra",
+},
+["event"] = "CHAT_MSG_MONSTER_YELL",
+["type"] = "MONSTER_YELL",
+},
+["color"] = {
+["r"] = 1,
+["g"] = 0.250980406999588,
+["b"] = 0.250980406999588,
+},
+["text"] = "Corewarden Nysarra yells: Prove your worth, you pathetic lackeys.",
+["timestamp"] = 1774223590,
+["id"] = "s7_4640",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["class"] = "DEMONHUNTER",
+["race"] = "BloodElf",
+["name"] = "Shadowdhh-Area52",
+["sex"] = 2,
+},
+["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
+},
+["color"] = {
+["r"] = 0,
+["g"] = 0.6666666865348816,
+["b"] = 0,
+},
+["text"] = "Shadowdhh-Area52 receives loot: |cnIQ0:|Hitem:260659::::::::90:105:::::::::|h[Stellar Vortex Residue]|h|r.",
+["timestamp"] = 1774223594,
+["id"] = "s7_4641",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["name"] = "Corewarden Nysarra",
+},
+["event"] = "CHAT_MSG_MONSTER_YELL",
+["type"] = "MONSTER_YELL",
+},
+["color"] = {
+["r"] = 1,
+["g"] = 0.250980406999588,
+["b"] = 0.250980406999588,
+},
+["text"] = "Corewarden Nysarra yells: Minions, do not disappoint me again.",
+["timestamp"] = 1774223627,
+["id"] = "s7_4642",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["class"] = "DEMONHUNTER",
+["race"] = "BloodElf",
+["name"] = "Shadowdhh-Area52",
+["sex"] = 2,
+},
+["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
+},
+["color"] = {
+["r"] = 0,
+["g"] = 0.6666666865348816,
+["b"] = 0,
+},
+["text"] = "Shadowdhh-Area52 receives loot: |cnIQ0:|Hitem:260659::::::::90:105:::::::::|h[Stellar Vortex Residue]|h|r.",
+["timestamp"] = 1774223629,
+["id"] = "s7_4643",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["class"] = "WARLOCK",
+["race"] = "Nightborne",
+["name"] = "Jimps-Area52",
+["sex"] = 3,
+},
+["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
+},
+["color"] = {
+["r"] = 0,
+["g"] = 0.6666666865348816,
+["b"] = 0,
+},
+["text"] = "Jimps-Area52 receives loot: |cnIQ0:|Hitem:260659::::::::90:105:::::::::|h[Stellar Vortex Residue]|h|rx2.",
+["timestamp"] = 1774223629,
+["id"] = "s7_4644",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["class"] = "WARLOCK",
+["race"] = "Nightborne",
+["name"] = "Jimps-Area52",
+["sex"] = 3,
+},
+["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
+},
+["color"] = {
+["r"] = 0,
+["g"] = 0.6666666865348816,
+["b"] = 0,
+},
+["text"] = "Jimps-Area52 receives loot: |cnIQ0:|Hitem:260638::::::::90:105:::::::::|h[Fine Void Residue]|h|r.",
+["timestamp"] = 1774223629,
+["id"] = "s7_4645",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["name"] = "Corewarden Nysarra",
+},
+["event"] = "CHAT_MSG_MONSTER_YELL",
+["type"] = "MONSTER_YELL",
+},
+["color"] = {
+["r"] = 1,
+["g"] = 0.250980406999588,
+["b"] = 0.250980406999588,
+},
+["text"] = "Corewarden Nysarra yells: Must I do everything myself?",
+["timestamp"] = 1774223669,
+["id"] = "s7_4646",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["name"] = "Corewarden Nysarra",
+},
+["event"] = "CHAT_MSG_MONSTER_YELL",
+["type"] = "MONSTER_YELL",
+},
+["color"] = {
+["r"] = 1,
+["g"] = 0.250980406999588,
+["b"] = 0.250980406999588,
+},
+["text"] = "Corewarden Nysarra yells: All this... for that wretched Xal'atath...",
+["timestamp"] = 1774223738,
+["id"] = "s7_4647",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["class"] = "DRUID",
+["race"] = "NightElf",
+["name"] = "Lonelylitten-Stormrage",
+["sex"] = 2,
+},
+["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
+},
+["color"] = {
+["r"] = 0,
+["g"] = 0.6666666865348816,
+["b"] = 0,
+},
+["text"] = "You receive loot: |cnIQ0:|Hitem:260659::::::::90:105:::::::::|h[Stellar Vortex Residue]|h|r",
+["timestamp"] = 1774223739,
+["id"] = "s7_4648",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["class"] = "WARLOCK",
+["race"] = "Nightborne",
+["name"] = "Jimps-Area52",
+["sex"] = 3,
+},
+["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
+},
+["color"] = {
+["r"] = 0,
+["g"] = 0.6666666865348816,
+["b"] = 0,
+},
+["text"] = "Jimps-Area52 receives loot: |cnIQ4:|Hitem:251093::::::::90:105::23:5:12785:13439:6652:13668:12699:1:28:3025:::::|h[Omission of Light]|h|r.",
+["timestamp"] = 1774223740,
+["id"] = "s7_4649",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["event"] = "CHAT_MSG_MONEY",
+["type"] = "MONEY",
+},
+["color"] = {
+["r"] = 1,
+["g"] = 1,
+["b"] = 0,
+},
+["text"] = "You loot 14 Gold, 37 Silver, 58 Copper",
+["timestamp"] = 1774223740,
+["id"] = "s7_4650",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["class"] = "HUNTER",
+["race"] = "Harronir",
+["name"] = "Extentz-Area52",
+["sex"] = 3,
+},
+["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
+},
+["color"] = {
+["r"] = 0,
+["g"] = 0.6666666865348816,
+["b"] = 0,
+},
+["text"] = "Extentz-Area52 receives loot: |cnIQ0:|Hitem:260659::::::::90:105:::::::::|h[Stellar Vortex Residue]|h|rx2.",
+["timestamp"] = 1774223741,
+["id"] = "s7_4651",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["class"] = "HUNTER",
+["race"] = "Harronir",
+["name"] = "Extentz-Area52",
+["sex"] = 3,
+},
+["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
+},
+["color"] = {
+["r"] = 0,
+["g"] = 0.6666666865348816,
+["b"] = 0,
+},
+["text"] = "Extentz-Area52 receives loot: |cnIQ0:|Hitem:260677::::::::90:105:::::::::|h[Void Flakes]|h|r.",
+["timestamp"] = 1774223741,
+["id"] = "s7_4652",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["class"] = "SHAMAN",
+["race"] = "Harronir",
+["name"] = "Linkken-Illidan",
+["sex"] = 3,
+},
+["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
+},
+["color"] = {
+["r"] = 0,
+["g"] = 0.6666666865348816,
+["b"] = 0,
+},
+["text"] = "Linkken-Illidan receives loot: |cnIQ0:|Hitem:260659::::::::90:105:::::::::|h[Stellar Vortex Residue]|h|r.",
+["timestamp"] = 1774223741,
+["id"] = "s7_4653",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["class"] = "SHAMAN",
+["race"] = "Harronir",
+["name"] = "Linkken-Illidan",
+["sex"] = 3,
+},
+["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
+},
+["color"] = {
+["r"] = 0,
+["g"] = 0.6666666865348816,
+["b"] = 0,
+},
+["text"] = "Linkken-Illidan receives loot: |cnIQ0:|Hitem:260638::::::::90:105:::::::::|h[Fine Void Residue]|h|r.",
+["timestamp"] = 1774223741,
+["id"] = "s7_4654",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["name"] = "Arator",
+},
+["event"] = "CHAT_MSG_MONSTER_SAY",
+["type"] = "MONSTER_SAY",
+},
+["color"] = {
+["r"] = 1,
+["g"] = 1,
+["b"] = 0.6235294342041016,
+},
+["text"] = "Arator says: Don't forget to send the conduits.",
+["timestamp"] = 1774223742,
+["id"] = "s7_4655",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["class"] = "MONK",
+["race"] = "BloodElf",
+["name"] = "Jufufu-Thrall",
+["sex"] = 3,
+},
+["event"] = "CHAT_MSG_GUILD_ACHIEVEMENT",
+["type"] = "GUILD_ACHIEVEMENT",
+},
+["color"] = {
+["r"] = 0.250980406999588,
+["g"] = 1,
+["b"] = 0.250980406999588,
+},
+["text"] = "|Hplayer:Jufufu-Thrall|h[|cff00ff98Jufufu-Thrall|r]|h has earned the achievement |cffffff00|Hachievement:10460:Player-3678-0E1B2E36:1:3:22:26:4294967295:4294967295:4294967295:4294967295|h[Hidden Potential]|h|r!",
+["timestamp"] = 1774223747,
+["id"] = "s7_4656",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["class"] = "MONK",
+["race"] = "BloodElf",
+["name"] = "Jufufu-Thrall",
+["sex"] = 3,
+},
+["event"] = "CHAT_MSG_GUILD_ACHIEVEMENT",
+["type"] = "GUILD_ACHIEVEMENT",
+},
+["color"] = {
+["r"] = 0.250980406999588,
+["g"] = 1,
+["b"] = 0.250980406999588,
+},
+["text"] = "|Hplayer:Jufufu-Thrall|h[|cff00ff98Jufufu-Thrall|r]|h has earned the achievement |cffffff00|Hachievement:42292:Player-3678-0E1B2E36:1:3:22:26:4294967295:4294967295:4294967295:4294967295|h[Hidden Potential of the Grandmaster]|h|r!",
+["timestamp"] = 1774223747,
+["id"] = "s7_4657",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["class"] = "DRUID",
+["race"] = "NightElf",
+["name"] = "Lonelylitten-Stormrage",
+["sex"] = 2,
+},
+["event"] = "CHAT_MSG_PARTY",
+["type"] = "PARTY",
+},
+["color"] = {
+["r"] = 0.6666666865348816,
+["g"] = 0.6666666865348816,
+["b"] = 1,
+},
+["text"] = "|Hchannel:PARTY|h[Party]|h |Hplayer:Lonelylitten-Stormrage:1290:PARTY:|h[|cffff7c0aLonelylitten|r]|h: need that ring?",
+["timestamp"] = 1774223749,
+["id"] = "s7_4658",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["class"] = "WARLOCK",
+["race"] = "Nightborne",
+["name"] = "Jimps-Area52",
+["sex"] = 3,
+},
+["event"] = "CHAT_MSG_PARTY",
+["type"] = "PARTY",
+},
+["color"] = {
+["r"] = 0.6666666865348816,
+["g"] = 0.6666666865348816,
+["b"] = 1,
+},
+["text"] = "|Hchannel:PARTY|h[Party]|h |Hplayer:Jimps-Area52:1291:PARTY:|h[|cff8788eeJimps-Area52|r]|h: ye srry",
+["timestamp"] = 1774223754,
+["id"] = "s7_4659",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["name"] = "Arator",
+},
+["event"] = "CHAT_MSG_MONSTER_YELL",
+["type"] = "MONSTER_YELL",
+},
+["color"] = {
+["r"] = 1,
+["g"] = 0.250980406999588,
+["b"] = 0.250980406999588,
+},
+["text"] = "Arator yells: Lothraxion, this isn't what the Light demands of us.",
+["timestamp"] = 1774223765,
+["id"] = "s7_4660",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["name"] = "Arator",
+},
+["event"] = "CHAT_MSG_MONSTER_YELL",
+["type"] = "MONSTER_YELL",
+},
+["color"] = {
+["r"] = 1,
+["g"] = 0.250980406999588,
+["b"] = 0.250980406999588,
+},
+["text"] = "Arator yells: Think of the lives that will be lost--just trust us.",
+["timestamp"] = 1774223768,
+["id"] = "s7_4661",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["name"] = "Lothraxion",
+},
+["event"] = "CHAT_MSG_MONSTER_YELL",
+["type"] = "MONSTER_YELL",
+},
+["color"] = {
+["r"] = 1,
+["g"] = 0.250980406999588,
+["b"] = 0.250980406999588,
+},
+["text"] = "Lothraxion yells: You of them all, I thought would understand Arator. ",
+["timestamp"] = 1774223772,
+["id"] = "s7_4662",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["name"] = "Lothraxion",
+},
+["event"] = "CHAT_MSG_MONSTER_YELL",
+["type"] = "MONSTER_YELL",
+},
+["color"] = {
+["r"] = 1,
+["g"] = 0.250980406999588,
+["b"] = 0.250980406999588,
+},
+["text"] = "Lothraxion yells: A shame that the Void has corrupted you too.",
+["timestamp"] = 1774223777,
+["id"] = "s7_4663",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["name"] = "Circuit Seer",
+},
+["event"] = "CHAT_MSG_MONSTER_YELL",
+["type"] = "MONSTER_YELL",
+},
+["color"] = {
+["r"] = 1,
+["g"] = 0.250980406999588,
+["b"] = 0.250980406999588,
+},
+["text"] = "Circuit Seer yells: The pylon is showing near critical failure, Chief Corewright!",
+["timestamp"] = 1774223783,
+["id"] = "s7_4664",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["name"] = "Kasreth",
+},
+["event"] = "CHAT_MSG_MONSTER_YELL",
+["type"] = "MONSTER_YELL",
+},
+["color"] = {
+["r"] = 1,
+["g"] = 0.250980406999588,
+["b"] = 0.250980406999588,
+},
+["text"] = "Kasreth yells: Hurry up those repairs. If we aren't careful, that will be all of us!",
+["timestamp"] = 1774223787,
+["id"] = "s7_4665",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["name"] = "Kasreth",
+},
+["event"] = "CHAT_MSG_MONSTER_YELL",
+["type"] = "MONSTER_YELL",
+},
+["color"] = {
+["r"] = 1,
+["g"] = 0.250980406999588,
+["b"] = 0.250980406999588,
+},
+["text"] = "Kasreth yells: More of you mindless intruders!",
+["timestamp"] = 1774223997,
+["id"] = "s7_4666",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["name"] = "Kasreth",
+},
+["event"] = "CHAT_MSG_MONSTER_YELL",
+["type"] = "MONSTER_YELL",
+},
+["color"] = {
+["r"] = 1,
+["g"] = 0.250980406999588,
+["b"] = 0.250980406999588,
+},
+["text"] = "Kasreth yells: But my job isn't done... There's still...",
+["timestamp"] = 1774224056,
+["id"] = "s7_4667",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["class"] = "DEMONHUNTER",
+["race"] = "BloodElf",
+["name"] = "Shadowdhh-Area52",
+["sex"] = 2,
+},
+["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
+},
+["color"] = {
+["r"] = 0,
+["g"] = 0.6666666865348816,
+["b"] = 0,
+},
+["text"] = "Shadowdhh-Area52 receives loot: |cnIQ4:|Hitem:251206::::::::90:105::23:5:12785:13439:6652:13577:12699:1:28:3025:::::|h[Fluxweave Cloak]|h|r.",
+["timestamp"] = 1774224058,
+["id"] = "s7_4668",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["name"] = "Arator",
+},
+["event"] = "CHAT_MSG_MONSTER_SAY",
+["type"] = "MONSTER_SAY",
+},
+["color"] = {
+["r"] = 1,
+["g"] = 1,
+["b"] = 0.6235294342041016,
+},
+["text"] = "Arator says: You got the last conduit? Make sure to send them over.",
+["timestamp"] = 1774224061,
+["id"] = "s7_4669",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["event"] = "CHAT_MSG_MONEY",
+["type"] = "MONEY",
+},
+["color"] = {
+["r"] = 1,
+["g"] = 1,
+["b"] = 0,
+},
+["text"] = "You loot 17 Gold, 34 Silver, 23 Copper",
+["timestamp"] = 1774224062,
+["id"] = "s7_4670",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["name"] = "Lothraxion",
+},
+["event"] = "CHAT_MSG_MONSTER_YELL",
+["type"] = "MONSTER_YELL",
+},
+["color"] = {
+["r"] = 1,
+["g"] = 0.250980406999588,
+["b"] = 0.250980406999588,
+},
+["text"] = "Lothraxion yells: You will realize I was right, Alleria.",
+["timestamp"] = 1774224075,
+["id"] = "s7_4671",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["name"] = "Lothraxion",
+},
+["event"] = "CHAT_MSG_MONSTER_YELL",
+["type"] = "MONSTER_YELL",
+},
+["color"] = {
+["r"] = 1,
+["g"] = 0.250980406999588,
+["b"] = 0.250980406999588,
+},
+["text"] = "Lothraxion yells: Your judgment has been clouded by the Void. As it always does!",
+["timestamp"] = 1774224079,
+["id"] = "s7_4672",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["name"] = "Alleria Windrunner",
+},
+["event"] = "CHAT_MSG_MONSTER_YELL",
+["type"] = "MONSTER_YELL",
+},
+["color"] = {
+["r"] = 1,
+["g"] = 0.250980406999588,
+["b"] = 0.250980406999588,
+},
+["text"] = "Alleria Windrunner yells: My vision has never been clearer Lothraxion, but I don't want to believe it. ",
+["timestamp"] = 1774224084,
+["id"] = "s7_4673",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["name"] = "Arator",
+},
+["event"] = "CHAT_MSG_MONSTER_YELL",
+["type"] = "MONSTER_YELL",
+},
+["color"] = {
+["r"] = 1,
+["g"] = 0.250980406999588,
+["b"] = 0.250980406999588,
+},
+["text"] = "Arator yells: The console is working--starting the bridge now!",
+["timestamp"] = 1774224097,
+["id"] = "s7_4674",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["name"] = "Lothraxion",
+},
+["event"] = "CHAT_MSG_MONSTER_YELL",
+["type"] = "MONSTER_YELL",
+},
+["color"] = {
+["r"] = 1,
+["g"] = 0.250980406999588,
+["b"] = 0.250980406999588,
+},
+["text"] = "Lothraxion yells: You will see.",
+["timestamp"] = 1774224297,
+["id"] = "s7_4675",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["class"] = "DEMONHUNTER",
+["race"] = "BloodElf",
+["name"] = "Shadowdhh-Area52",
+["sex"] = 2,
+},
+["event"] = "CHAT_MSG_ACHIEVEMENT",
+["type"] = "ACHIEVEMENT",
+},
+["color"] = {
+["r"] = 1,
+["g"] = 1,
+["b"] = 0,
+},
+["text"] = "|Hplayer:Shadowdhh-Area52|h[|cffa330c9Shadowdhh-Area52|r]|h has earned the achievement |cffffff00|Hachievement:61640:Player-3676-0E0A0843:1:3:22:26:4294967295:4294967295:4294967295:4294967295|h[Nexus-Point Xenas]|h|r!",
+["timestamp"] = 1774224297,
+["id"] = "s7_4676",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["class"] = "DEMONHUNTER",
+["race"] = "BloodElf",
+["name"] = "Shadowdhh-Area52",
+["sex"] = 2,
+},
+["event"] = "CHAT_MSG_ACHIEVEMENT",
+["type"] = "ACHIEVEMENT",
+},
+["color"] = {
+["r"] = 1,
+["g"] = 1,
+["b"] = 0,
+},
+["text"] = "|Hplayer:Shadowdhh-Area52|h[|cffa330c9Shadowdhh-Area52|r]|h has earned the achievement |cffffff00|Hachievement:61647:Player-3676-0E0A0843:1:3:22:26:4294967295:4294967295:4294967295:4294967295|h[Mythic: Nexus-Point Xenas]|h|r!",
+["timestamp"] = 1774224297,
+["id"] = "s7_4677",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["class"] = "DEMONHUNTER",
+["race"] = "BloodElf",
+["name"] = "Shadowdhh-Area52",
+["sex"] = 2,
+},
+["event"] = "CHAT_MSG_ACHIEVEMENT",
+["type"] = "ACHIEVEMENT",
+},
+["color"] = {
+["r"] = 1,
+["g"] = 1,
+["b"] = 0,
+},
+["text"] = "|Hplayer:Shadowdhh-Area52|h[|cffa330c9Shadowdhh-Area52|r]|h has earned the achievement |cffffff00|Hachievement:61646:Player-3676-0E0A0843:1:3:22:26:4294967295:4294967295:4294967295:4294967295|h[Heroic: Nexus-Point Xenas]|h|r!",
+["timestamp"] = 1774224297,
+["id"] = "s7_4678",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["class"] = "WARLOCK",
+["race"] = "Nightborne",
+["name"] = "Jimps-Area52",
+["sex"] = 3,
+},
+["event"] = "CHAT_MSG_ACHIEVEMENT",
+["type"] = "ACHIEVEMENT",
+},
+["color"] = {
+["r"] = 1,
+["g"] = 1,
+["b"] = 0,
+},
+["text"] = "|Hplayer:Jimps-Area52|h[|cff8788eeJimps-Area52|r]|h has earned the achievement |cffffff00|Hachievement:61640:Player-3676-0CCF514A:1:3:22:26:4294967295:4294967295:4294967295:4294967295|h[Nexus-Point Xenas]|h|r!",
+["timestamp"] = 1774224297,
+["id"] = "s7_4679",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["class"] = "WARLOCK",
+["race"] = "Nightborne",
+["name"] = "Jimps-Area52",
+["sex"] = 3,
+},
+["event"] = "CHAT_MSG_ACHIEVEMENT",
+["type"] = "ACHIEVEMENT",
+},
+["color"] = {
+["r"] = 1,
+["g"] = 1,
+["b"] = 0,
+},
+["text"] = "|Hplayer:Jimps-Area52|h[|cff8788eeJimps-Area52|r]|h has earned the achievement |cffffff00|Hachievement:61647:Player-3676-0CCF514A:1:3:22:26:4294967295:4294967295:4294967295:4294967295|h[Mythic: Nexus-Point Xenas]|h|r!",
+["timestamp"] = 1774224297,
+["id"] = "s7_4680",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["class"] = "WARLOCK",
+["race"] = "Nightborne",
+["name"] = "Jimps-Area52",
+["sex"] = 3,
+},
+["event"] = "CHAT_MSG_ACHIEVEMENT",
+["type"] = "ACHIEVEMENT",
+},
+["color"] = {
+["r"] = 1,
+["g"] = 1,
+["b"] = 0,
+},
+["text"] = "|Hplayer:Jimps-Area52|h[|cff8788eeJimps-Area52|r]|h has earned the achievement |cffffff00|Hachievement:61646:Player-3676-0CCF514A:1:3:22:26:4294967295:4294967295:4294967295:4294967295|h[Heroic: Nexus-Point Xenas]|h|r!",
+["timestamp"] = 1774224297,
+["id"] = "s7_4681",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["class"] = "HUNTER",
+["race"] = "Harronir",
+["name"] = "Extentz-Area52",
+["sex"] = 3,
+},
+["event"] = "CHAT_MSG_ACHIEVEMENT",
+["type"] = "ACHIEVEMENT",
+},
+["color"] = {
+["r"] = 1,
+["g"] = 1,
+["b"] = 0,
+},
+["text"] = "|Hplayer:Extentz-Area52|h[|cffaad372Extentz-Area52|r]|h has earned the achievement |cffffff00|Hachievement:61640:Player-3676-0EDE39D7:1:3:22:26:4294967295:4294967295:4294967295:4294967295|h[Nexus-Point Xenas]|h|r!",
+["timestamp"] = 1774224297,
+["id"] = "s7_4682",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["class"] = "HUNTER",
+["race"] = "Harronir",
+["name"] = "Extentz-Area52",
+["sex"] = 3,
+},
+["event"] = "CHAT_MSG_ACHIEVEMENT",
+["type"] = "ACHIEVEMENT",
+},
+["color"] = {
+["r"] = 1,
+["g"] = 1,
+["b"] = 0,
+},
+["text"] = "|Hplayer:Extentz-Area52|h[|cffaad372Extentz-Area52|r]|h has earned the achievement |cffffff00|Hachievement:61647:Player-3676-0EDE39D7:1:3:22:26:4294967295:4294967295:4294967295:4294967295|h[Mythic: Nexus-Point Xenas]|h|r!",
+["timestamp"] = 1774224297,
+["id"] = "s7_4683",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["class"] = "HUNTER",
+["race"] = "Harronir",
+["name"] = "Extentz-Area52",
+["sex"] = 3,
+},
+["event"] = "CHAT_MSG_ACHIEVEMENT",
+["type"] = "ACHIEVEMENT",
+},
+["color"] = {
+["r"] = 1,
+["g"] = 1,
+["b"] = 0,
+},
+["text"] = "|Hplayer:Extentz-Area52|h[|cffaad372Extentz-Area52|r]|h has earned the achievement |cffffff00|Hachievement:61646:Player-3676-0EDE39D7:1:3:22:26:4294967295:4294967295:4294967295:4294967295|h[Heroic: Nexus-Point Xenas]|h|r!",
+["timestamp"] = 1774224297,
+["id"] = "s7_4684",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
+},
+["color"] = {
+["r"] = 0,
+["g"] = 0.6666666865348816,
+["b"] = 0,
+},
+["text"] = "|HlootHistory:3333|h[Loot]|h: |cnIQ2:|Hitem:264338::::::::90:105::23:::::::|h[Domanaar Control Console]|h|r",
+["timestamp"] = 1774224297,
+["id"] = "s7_4685",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["class"] = "DEMONHUNTER",
+["race"] = "BloodElf",
+["name"] = "Shadowdhh-Area52",
+["sex"] = 2,
+},
+["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
+},
+["color"] = {
+["r"] = 0,
+["g"] = 0.6666666865348816,
+["b"] = 0,
+},
+["text"] = "Shadowdhh-Area52 receives loot: |cnIQ3:|Hitem:251285::::::::90:105:::::::::|h[Petrified Root]|h|rx5.",
+["timestamp"] = 1774224298,
+["id"] = "s7_4686",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["class"] = "DEMONHUNTER",
+["race"] = "BloodElf",
+["name"] = "Shadowdhh-Area52",
+["sex"] = 2,
+},
+["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
+},
+["color"] = {
+["r"] = 0,
+["g"] = 0.6666666865348816,
+["b"] = 0,
+},
+["text"] = "Shadowdhh-Area52 receives loot: |cnIQ0:|Hitem:260604::::::::90:105:::::::::|h[Insect Shedding]|h|r.",
+["timestamp"] = 1774224298,
+["id"] = "s7_4687",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["class"] = "DRUID",
+["race"] = "NightElf",
+["name"] = "Lonelylitten-Stormrage",
+["sex"] = 2,
+},
+["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
+},
+["color"] = {
+["r"] = 0,
+["g"] = 0.6666666865348816,
+["b"] = 0,
+},
+["text"] = "You receive loot: |cnIQ0:|Hitem:260638::::::::90:105:::::::::|h[Fine Void Residue]|h|r",
+["timestamp"] = 1774224299,
+["id"] = "s7_4688",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["class"] = "DRUID",
+["race"] = "NightElf",
+["name"] = "Lonelylitten-Stormrage",
+["sex"] = 2,
+},
+["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
+},
+["color"] = {
+["r"] = 0,
+["g"] = 0.6666666865348816,
+["b"] = 0,
+},
+["text"] = "You receive loot: |cnIQ0:|Hitem:260662::::::::90:105:::::::::|h[Polished Purple Pebble]|h|r",
+["timestamp"] = 1774224299,
+["id"] = "s7_4689",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["class"] = "DRUID",
+["race"] = "NightElf",
+["name"] = "Lonelylitten-Stormrage",
+["sex"] = 2,
+},
+["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
+},
+["color"] = {
+["r"] = 0,
+["g"] = 0.6666666865348816,
+["b"] = 0,
+},
+["text"] = "You receive loot: |cnIQ0:|Hitem:260654::::::::90:105:::::::::|h[Abrasive Sand]|h|rx2",
+["timestamp"] = 1774224299,
+["id"] = "s7_4690",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["class"] = "DRUID",
+["race"] = "NightElf",
+["name"] = "Lonelylitten-Stormrage",
+["sex"] = 2,
+},
+["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
+},
+["color"] = {
+["r"] = 0,
+["g"] = 0.6666666865348816,
+["b"] = 0,
+},
+["text"] = "You receive loot: |cnIQ4:|Hitem:251216::::::::90:105::23:5:12785:13439:6652:13577:12699:1:28:3025:::::|h[Maledict Vest]|h|r",
+["timestamp"] = 1774224299,
+["id"] = "s7_4691",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["event"] = "CHAT_MSG_MONEY",
+["type"] = "MONEY",
+},
+["color"] = {
+["r"] = 1,
+["g"] = 1,
+["b"] = 0,
+},
+["text"] = "You loot 33 Gold, 79 Silver, 87 Copper",
+["timestamp"] = 1774224300,
+["id"] = "s7_4692",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["event"] = "CHAT_MSG_CURRENCY",
+["type"] = "CURRENCY",
+},
+["color"] = {
+["r"] = 0,
+["g"] = 0.6666666865348816,
+["b"] = 0,
+},
+["text"] = "You receive currency: |cnIQ4:|Hcurrency:3343:0|h[Champion Dawncrest]|h|rx10",
+["timestamp"] = 1774224300,
+["id"] = "s7_4693",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["class"] = "SHAMAN",
+["race"] = "Harronir",
+["name"] = "Linkken-Illidan",
+["sex"] = 3,
+},
+["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
+},
+["color"] = {
+["r"] = 0,
+["g"] = 0.6666666865348816,
+["b"] = 0,
+},
+["text"] = "Linkken-Illidan receives loot: |cnIQ1:|Hitem:242639::::::::90:105:::::::::|h[Practically Pork]|h|r.",
+["timestamp"] = 1774224300,
+["id"] = "s7_4694",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["class"] = "WARLOCK",
+["race"] = "Nightborne",
+["name"] = "Jimps-Area52",
+["sex"] = 3,
+},
+["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
+},
+["color"] = {
+["r"] = 0,
+["g"] = 0.6666666865348816,
+["b"] = 0,
+},
+["text"] = "Jimps-Area52 receives loot: |cnIQ1:|Hitem:242639::::::::90:105:::::::::|h[Practically Pork]|h|r.",
+["timestamp"] = 1774224304,
+["id"] = "s7_4695",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["class"] = "WARLOCK",
+["race"] = "Nightborne",
+["name"] = "Jimps-Area52",
+["sex"] = 3,
+},
+["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
+},
+["color"] = {
+["r"] = 0,
+["g"] = 0.6666666865348816,
+["b"] = 0,
+},
+["text"] = "Jimps-Area52 receives loot: |cnIQ0:|Hitem:260662::::::::90:105:::::::::|h[Polished Purple Pebble]|h|r.",
+["timestamp"] = 1774224304,
+["id"] = "s7_4696",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["name"] = "Alleria Windrunner",
+},
+["event"] = "CHAT_MSG_MONSTER_SAY",
+["type"] = "MONSTER_SAY",
+},
+["color"] = {
+["r"] = 1,
+["g"] = 1,
+["b"] = 0.6235294342041016,
+},
+["text"] = "Alleria Windrunner says: Farewell, old friend...",
+["timestamp"] = 1774224307,
+["id"] = "s7_4697",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["class"] = "HUNTER",
+["race"] = "Harronir",
+["name"] = "Extentz-Area52",
+["sex"] = 3,
+},
+["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
+},
+["color"] = {
+["r"] = 0,
+["g"] = 0.6666666865348816,
+["b"] = 0,
+},
+["text"] = "Extentz-Area52 receives loot: |cnIQ0:|Hitem:260662::::::::90:105:::::::::|h[Polished Purple Pebble]|h|r.",
+["timestamp"] = 1774224308,
+["id"] = "s7_4698",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["class"] = "HUNTER",
+["race"] = "Harronir",
+["name"] = "Extentz-Area52",
+["sex"] = 3,
+},
+["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
+},
+["color"] = {
+["r"] = 0,
+["g"] = 0.6666666865348816,
+["b"] = 0,
+},
+["text"] = "Extentz-Area52 receives loot: |cnIQ0:|Hitem:260654::::::::90:105:::::::::|h[Abrasive Sand]|h|r.",
+["timestamp"] = 1774224308,
+["id"] = "s7_4699",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["class"] = "HUNTER",
+["race"] = "Harronir",
+["name"] = "Extentz-Area52",
+["sex"] = 3,
+},
+["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
+},
+["color"] = {
+["r"] = 0,
+["g"] = 0.6666666865348816,
+["b"] = 0,
+},
+["text"] = "Extentz-Area52 receives loot: |cnIQ0:|Hitem:260638::::::::90:105:::::::::|h[Fine Void Residue]|h|r.",
+["timestamp"] = 1774224308,
+["id"] = "s7_4700",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["class"] = "DRUID",
+["race"] = "NightElf",
+["name"] = "Lonelylitten-Stormrage",
+["sex"] = 2,
+},
+["event"] = "CHAT_MSG_PARTY",
+["type"] = "PARTY",
+},
+["color"] = {
+["r"] = 0.6666666865348816,
+["g"] = 0.6666666865348816,
+["b"] = 1,
+},
+["text"] = "|Hchannel:PARTY|h[Party]|h |Hplayer:Lonelylitten-Stormrage:1383:PARTY:|h[|cffff7c0aLonelylitten|r]|h: anyone need the chest i go?",
+["timestamp"] = 1774224312,
+["id"] = "s7_4701",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["class"] = "DRUID",
+["race"] = "NightElf",
+["name"] = "Lonelylitten-Stormrage",
+["sex"] = 2,
+},
+["event"] = "CHAT_MSG_PARTY",
+["type"] = "PARTY",
+},
+["color"] = {
+["r"] = 0.6666666865348816,
+["g"] = 0.6666666865348816,
+["b"] = 1,
+},
+["text"] = "|Hchannel:PARTY|h[Party]|h |Hplayer:Lonelylitten-Stormrage:1384:PARTY:|h[|cffff7c0aLonelylitten|r]|h: got*",
+["timestamp"] = 1774224314,
+["id"] = "s7_4702",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["class"] = "HUNTER",
+["race"] = "Harronir",
+["name"] = "Extentz-Area52",
+["sex"] = 3,
+},
+["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
+},
+["color"] = {
+["r"] = 0,
+["g"] = 0.6666666865348816,
+["b"] = 0,
+},
+["text"] = "Extentz-Area52 receives loot: |cnIQ4:|Hitem:251217::::::::90:105::23:5:12785:13439:6652:13668:12699:1:28:3025:::::|h[Occlusion of Void]|h|r.",
+["timestamp"] = 1774224317,
+["id"] = "s7_4703",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
+},
+["color"] = {
+["r"] = 0,
+["g"] = 0.6666666865348816,
+["b"] = 0,
+},
+["text"] = "|HlootHistory:3333|h[Loot]|h: You passed on: |cnIQ2:|Hitem:264338::::::::90:105::23:::::::|h[Domanaar Control Console]|h|r |HlootHistory:3333|h|cnLOOT_LINK_COLOR:[View Loot Rolls]|r|h",
+["timestamp"] = 1774224317,
+["id"] = "s7_4704",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
+},
+["color"] = {
+["r"] = 0,
+["g"] = 0.6666666865348816,
+["b"] = 0,
+},
+["text"] = "|HlootHistory:3333|h[Loot]|h: Everyone passed on: |cnIQ2:|Hitem:264338::::::::90:105::23:::::::|h[Domanaar Control Console]|h|r",
+["timestamp"] = 1774224317,
+["id"] = "s7_4705",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["name"] = "Decimus",
+},
+["event"] = "CHAT_MSG_MONSTER_SAY",
+["type"] = "MONSTER_SAY",
+},
+["color"] = {
+["r"] = 1,
+["g"] = 1,
+["b"] = 0.6235294342041016,
+},
+["text"] = "Decimus says: I have all I need. Mourn your friend after we save your city.",
+["timestamp"] = 1774224318,
+["id"] = "s7_4706",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["name"] = "Alleria Windrunner",
+},
+["event"] = "CHAT_MSG_MONSTER_SAY",
+["type"] = "MONSTER_SAY",
+},
+["color"] = {
+["r"] = 1,
+["g"] = 1,
+["b"] = 0.6235294342041016,
+},
+["text"] = "Alleria Windrunner says: It's over...",
+["timestamp"] = 1774224325,
+["id"] = "s7_4707",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["name"] = "Alleria Windrunner",
+},
+["event"] = "CHAT_MSG_MONSTER_SAY",
+["type"] = "MONSTER_SAY",
+},
+["color"] = {
+["r"] = 1,
+["g"] = 1,
+["b"] = 0.6235294342041016,
+},
+["text"] = "Alleria Windrunner says: Come, through the portal.",
+["timestamp"] = 1774224328,
+["id"] = "s7_4708",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["class"] = "DEMONHUNTER",
+["race"] = "BloodElf",
+["name"] = "Shadowdhh-Area52",
+["sex"] = 2,
+},
+["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
+},
+["color"] = {
+["r"] = 0,
+["g"] = 0.6666666865348816,
+["b"] = 0,
+},
+["text"] = "Shadowdhh-Area52 receives loot: |cnIQ2:|Hitem:264338::::::::90:105::23:::::::|h[Domanaar Control Console]|h|r.",
+["timestamp"] = 1774224332,
+["id"] = "s7_4709",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["class"] = "WARRIOR",
+["race"] = "Nightborne",
+["name"] = "Brewchief-BleedingHollow",
+["sex"] = 2,
+},
+["event"] = "CHAT_MSG_GUILD_ACHIEVEMENT",
+["type"] = "GUILD_ACHIEVEMENT",
+},
+["color"] = {
+["r"] = 0.250980406999588,
+["g"] = 1,
+["b"] = 0.250980406999588,
+},
+["text"] = "|Hplayer:Brewchief-BleedingHollow|h[|cffc69b6dBrewchief-BleedingHollow|r]|h has earned the achievement |cffffff00|Hachievement:61644:Player-73-0EEDD513:1:3:22:26:4294967295:4294967295:4294967295:4294967295|h[Heroic: Maisara Caverns]|h|r!",
+["timestamp"] = 1774224349,
+["id"] = "s7_4710",
+},
+{
+["recordedBy"] = "Lonelylitten-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["class"] = "WARRIOR",
+["race"] = "Nightborne",
+["name"] = "Brewchief-BleedingHollow",
+["sex"] = 2,
+},
+["event"] = "CHAT_MSG_GUILD_ACHIEVEMENT",
+["type"] = "GUILD_ACHIEVEMENT",
+},
+["color"] = {
+["r"] = 0.250980406999588,
+["g"] = 1,
+["b"] = 0.250980406999588,
+},
+["text"] = "|Hplayer:Brewchief-BleedingHollow|h[|cffc69b6dBrewchief-BleedingHollow|r]|h has earned the achievement |cffffff00|Hachievement:61645:Player-73-0EEDD513:1:3:22:26:4294967295:4294967295:4294967295:4294967295|h[Mythic: Maisara Caverns]|h|r!",
+["timestamp"] = 1774224349,
+["id"] = "s7_4711",
+},
+{
+["recordedBy"] = "Angryabsol-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["name"] = "Solwin Brightstitch",
+},
+["event"] = "CHAT_MSG_MONSTER_SAY",
+["type"] = "MONSTER_SAY",
+},
+["color"] = {
+["b"] = 0.6235294342041016,
+["g"] = 1,
+["r"] = 1,
+},
+["text"] = "Solwin Brightstitch says: Alas, if I had but one worthy customer...",
+["id"] = "s7_4712",
+["timestamp"] = 1774300400,
 },
 },
 ["version"] = 1,
