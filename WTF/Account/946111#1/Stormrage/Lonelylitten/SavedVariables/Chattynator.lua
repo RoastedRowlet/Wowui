@@ -202,4 +202,10 @@ CHATTYNATOR_COMMAND_HISTORY = {
 "/s /eui",
 "/s /arcui",
 "/s /reload",
+"/s /simc",
+"/p need that ring?",
+"/p LMAO",
+"/p how did i not know that knocks",
+"/p anyone need the chest i go?",
+"/p got*",
 }

@@ -1,10 +1,6 @@
 
 CHATTYNATOR_CURRENT_PROFILE = "DEFAULT"
 CHATTYNATOR_COMMAND_HISTORY = {
-"/cw Dragomar-Stormrage no problem",
-"/cw Bloodfart-Stormrage what are you looking to craft?",
-"/cw Bloodfart-Stormrage /flood on",
-"/cw Bloodfart-Stormrage /flood off",
 "/cw Tinyshams-Stormrage :O",
 "/cw Tinyshams-Stormrage done!",
 "/s /simc",
