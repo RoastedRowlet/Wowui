@@ -12,8 +12,20 @@ RaiderIO_Config = {
 ["hide"] = false,
 },
 }
-RaiderIO_LastCharacter = "us-Angryabsol-stormrage"
+RaiderIO_LastCharacter = "us-Lonelylitten-stormrage"
 RaiderIO_MissingCharacters = {
+["us-Crystalynn-ragnaros"] = true,
+["us-Apostos-moon-guard"] = true,
+["us-Jokertinha-stormrage"] = true,
+["us-Rysol-kelthuzad"] = true,
+["us-Alceras-tichondrius"] = true,
+["us-Demonnyka-zuljin"] = true,
+["us-Lunaticj-zuljin"] = true,
+["us-Fireburning-stormrage"] = true,
+["us-Myrkyr-proudmoore"] = true,
+["us-Firr-zuljin"] = true,
+["us-Draksha-zuljin"] = true,
+["us-Voidhand-ragnaros"] = true,
 }
 RaiderIO_MissingServers = {
 }

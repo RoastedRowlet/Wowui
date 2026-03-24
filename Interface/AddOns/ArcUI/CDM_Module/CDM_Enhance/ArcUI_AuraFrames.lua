@@ -9,6 +9,9 @@
 --   - SetAuraInstanceInfo / ClearAuraInstanceInfo hook installation
 --   - Initial glow + alpha eval on frame enhancement
 --   - EnhanceAuraFrame: single entry point called by CDMEnhance.EnhanceFrame
+--   - Threshold glow ticker: GetGlowThresholdCurve / GetGlowThresholdCurveSeconds
+--     Start/StopThresholdGlowTracking + 0.5s EvaluateThresholdGlows ticker
+--     (CDMEnhance delegates to ns.AuraFrames — single authority)
 --
 -- NOT responsible for:
 --   - Cooldown frames with wasSetFromAura (still owned by CDMEnhance/CooldownState)
@@ -84,17 +87,163 @@ local function ApplyBorderDesaturation(frame, value)
   end
 end
 
-local function StartThresholdGlowTracking(cdID)
-  if ns.CDMEnhance and ns.CDMEnhance.StartThresholdGlowTracking then
-    ns.CDMEnhance.StartThresholdGlowTracking(cdID)
+-- ===================================================================
+-- THRESHOLD GLOW TICKER
+-- Owns curve builders + 0.5s ticker for % and seconds-based glow thresholds.
+-- AuraFrames is the single authority; CDMEnhance delegates via ns.AuraFrames.
+-- ===================================================================
+
+local glowThresholdCurveCache    = {}
+local glowThresholdCurveCacheSec = {}
+
+-- Returns 1 when remaining% <= threshold, 0 above — use with EvaluateRemainingPercent
+function AF.GetGlowThresholdCurve(threshold)
+  if not C_CurveUtil or not C_CurveUtil.CreateCurve then return nil end
+  local key = math.floor(threshold * 1000)
+  if glowThresholdCurveCache[key] then return glowThresholdCurveCache[key] end
+  local curve = C_CurveUtil.CreateCurve()
+  curve:AddPoint(0.0, 1)
+  curve:AddPoint(threshold, 1)
+  curve:AddPoint(threshold + 0.001, 0)
+  curve:AddPoint(1.0, 0)
+  glowThresholdCurveCache[key] = curve
+  return curve
+end
+
+-- Returns 1 when remaining seconds <= threshold — use with EvaluateRemainingDuration
+-- Immune to talent-extended duration bugs (Moonfire/Sunfire + Aetherial Kindling, etc.)
+function AF.GetGlowThresholdCurveSeconds(seconds)
+  if not C_CurveUtil or not C_CurveUtil.CreateCurve then return nil end
+  local key = math.floor(seconds * 100)
+  if glowThresholdCurveCacheSec[key] then return glowThresholdCurveCacheSec[key] end
+  local curve = C_CurveUtil.CreateCurve()
+  curve:AddPoint(0.0, 1)
+  curve:AddPoint(seconds, 1)
+  curve:AddPoint(seconds + 0.001, 0)
+  curve:AddPoint(99999, 0)
+  glowThresholdCurveCacheSec[key] = curve
+  return curve
+end
+
+local activeThresholdGlows = {}  -- cdID -> true
+local thresholdGlowTicker  = nil
+
+local function EvaluateThresholdGlows()
+  local hasActive = false
+
+  for cdID in pairs(activeThresholdGlows) do
+    local data = ns.CDMEnhance and ns.CDMEnhance.GetEnhancedFrameData and ns.CDMEnhance.GetEnhancedFrameData(cdID)
+    if data and data.frame then
+      local frame = data.frame
+      local cfg = GetEffectiveIconSettingsForFrame(frame)
+      if cfg then
+        local stateVisuals = GetEffectiveStateVisuals(cfg)
+        if stateVisuals and stateVisuals.readyGlow
+          and (stateVisuals.glowThresholdSeconds or (stateVisuals.glowThreshold and stateVisuals.glowThreshold < 1.0))
+          and not stateVisuals.glowFollowPandemic then
+          if ShouldShowReadyGlow(stateVisuals, frame) then
+            local auraID = frame.auraInstanceID
+            local isThresholdPreview = ns.CDMEnhanceOptions
+              and ns.CDMEnhanceOptions.IsGlowPreviewActive
+              and ns.CDMEnhanceOptions.IsGlowPreviewActive(cdID)
+            if isThresholdPreview then
+              hasActive = true
+              ShowReadyGlow(frame, stateVisuals)
+            elseif (frame._arcAuraActive ~= nil and frame._arcAuraActive)
+              or (frame._arcAuraActive == nil and HasAuraInstanceID(auraID)) then
+              hasActive = true
+
+              -- Determine tracked unit
+              local auraType   = stateVisuals.glowAuraType or "auto"
+              local trackedUnit = "player"
+              if auraType == "debuff" then
+                trackedUnit = "target"
+              elseif auraType == "auto" then
+                local Shared = ns.Shared or ns.CDMEnhance and ns.CDMEnhance.Shared
+                local cdInfo = Shared and Shared.SafeGetCDMInfo and Shared.SafeGetCDMInfo(cdID)
+                if cdInfo and cdInfo.category == 3 then trackedUnit = "target" end
+              end
+
+              local threshSec = stateVisuals.glowThresholdSeconds
+              local function evalDurObj(durObj)
+                if threshSec then
+                  local curve = AF.GetGlowThresholdCurveSeconds(threshSec)
+                  if curve then
+                    local ok, val = pcall(durObj.EvaluateRemainingDuration, durObj, curve)
+                    return ok and val or nil
+                  end
+                else
+                  local curve = AF.GetGlowThresholdCurve(stateVisuals.glowThreshold)
+                  if curve then return durObj:EvaluateRemainingPercent(curve) end
+                end
+              end
+
+              local durObj = C_UnitAuras and C_UnitAuras.GetAuraDuration
+                and C_UnitAuras.GetAuraDuration(trackedUnit, auraID)
+              if not durObj then
+                local fallback = trackedUnit == "player" and "target" or "player"
+                durObj = C_UnitAuras and C_UnitAuras.GetAuraDuration
+                  and C_UnitAuras.GetAuraDuration(fallback, auraID)
+              end
+
+              if durObj then
+                local glowAlpha = evalDurObj(durObj)
+                if glowAlpha ~= nil then
+                  if ns.CDMEnhance and ns.CDMEnhance.SetGlowAlpha then
+                    ns.CDMEnhance.SetGlowAlpha(frame, glowAlpha, stateVisuals)
+                  end
+                else
+                  ShowReadyGlow(frame, stateVisuals)
+                end
+              else
+                ShowReadyGlow(frame, stateVisuals)
+              end
+            else
+              activeThresholdGlows[cdID] = nil
+              HideReadyGlow(frame)
+            end
+          else
+            activeThresholdGlows[cdID] = nil
+            HideReadyGlow(frame)
+          end
+        else
+          activeThresholdGlows[cdID] = nil
+        end
+      else
+        activeThresholdGlows[cdID] = nil
+      end
+    else
+      activeThresholdGlows[cdID] = nil
+    end
+  end
+
+  if not hasActive and thresholdGlowTicker then
+    thresholdGlowTicker:Cancel()
+    thresholdGlowTicker = nil
   end
 end
 
-local function StopThresholdGlowTracking(cdID)
-  if ns.CDMEnhance and ns.CDMEnhance.StopThresholdGlowTracking then
-    ns.CDMEnhance.StopThresholdGlowTracking(cdID)
+function AF.StartThresholdGlowTracking(cdID)
+  if not cdID then return end
+  activeThresholdGlows[cdID] = true
+  EvaluateThresholdGlows()
+  if not thresholdGlowTicker then
+    thresholdGlowTicker = C_Timer.NewTicker(0.5, EvaluateThresholdGlows)
   end
 end
+
+function AF.StopThresholdGlowTracking(cdID)
+  if not cdID then return end
+  activeThresholdGlows[cdID] = nil
+  if not next(activeThresholdGlows) and thresholdGlowTicker then
+    thresholdGlowTicker:Cancel()
+    thresholdGlowTicker = nil
+  end
+end
+
+-- Local aliases for internal callers (UpdateAuraFrame references these)
+local function StartThresholdGlowTracking(cdID) AF.StartThresholdGlowTracking(cdID) end
+local function StopThresholdGlowTracking(cdID)  AF.StopThresholdGlowTracking(cdID)  end
 
 -- ===================================================================
 -- AURA ACTIVE GLOW
@@ -114,6 +263,9 @@ function AF.ShouldShowAuraActiveGlow(auraActiveCfg, frame, isReady)
   end
 
   if not auraActiveCfg then return false end
+
+  -- glowFollowPandemic: CDM pandemic hooks own show/hide — suppress normal aura-gain path
+  if auraActiveCfg.glowFollowPandemic then return false end
 
   local glowOnActive  = auraActiveCfg.glow == true
   local glowOnMissing = auraActiveCfg.glowWhenMissing == true
@@ -255,11 +407,13 @@ function AF.UpdateAuraFrame(frame)
     and ns.CDMEnhanceOptions.IsAuraGlowPreviewActive(frame.cooldownID)
 
   if not stateVisuals and not hasAuraActiveGlow and not isAuraGlowPreview then
-    if frame._arcAuraActiveGlowActive then AF.HideAuraActiveGlow(frame) end
-    if ns.CustomLabel and ns.CustomLabel.UpdateVisibility then
-      ns.CustomLabel.UpdateVisibility(frame)
+    if not optionsPanelOpen then
+      if frame._arcAuraActiveGlowActive then AF.HideAuraActiveGlow(frame) end
+      if ns.CustomLabel and ns.CustomLabel.UpdateVisibility then
+        ns.CustomLabel.UpdateVisibility(frame)
+      end
+      return
     end
-    return
   end
 
   -- Icon texture
@@ -278,7 +432,8 @@ function AF.UpdateAuraFrame(frame)
   end
 
   local hasAuraOrTotem = HasAuraInstanceID(frame.auraInstanceID) or (frame.totemData ~= nil)
-  local isAura         = cfg._isAura or hasAuraOrTotem
+  -- _arcAuraStateHooked: frame is a real aura type, buff just not currently active
+  local isAura         = cfg._isAura or hasAuraOrTotem or (frame._arcAuraStateHooked == true)
   local isReady        = false
 
   if isAura or hasAuraOrTotem then
@@ -299,7 +454,7 @@ function AF.UpdateAuraFrame(frame)
     return
   end
 
-  -- No state visuals configured: glow-only path
+  -- No state visuals configured: glow-only path (unless options panel open for preview)
   if not stateVisuals then
     local aaCfg = cfg.auraActiveState or (isAuraGlowPreview and {} or nil)
     if aaCfg and (aaCfg.glow or aaCfg.glowWhenMissing or isAuraGlowPreview) then
@@ -312,21 +467,29 @@ function AF.UpdateAuraFrame(frame)
     if ns.CustomLabel and ns.CustomLabel.UpdateVisibility then
       ns.CustomLabel.UpdateVisibility(frame)
     end
-    return
+    if not optionsPanelOpen then return end
+    -- options panel open: fall through to apply 0.35 preview opacity
   end
 
   -- Alpha + desat
   local targetAlpha, targetDesat
-  if isReady then
-    targetAlpha = GetEffectiveReadyAlpha(stateVisuals)
+  if not stateVisuals then
+    -- Only preview at 0.35 if the frame is actually hidden (alpha 0).
+    -- If the frame is already visible (e.g. missing-aura opacity set to 1),
+    -- leave it alone — don't force it down to 0.35.
+    local currentAlpha = frame._arcTargetAlpha or 0
+    targetAlpha = (currentAlpha <= 0) and 0.35 or currentAlpha
     targetDesat = 0
+  elseif isReady then
+    targetAlpha = GetEffectiveReadyAlpha(stateVisuals)
+    targetDesat = stateVisuals.readyDesaturate and 1 or 0
   else
     local cdAlpha = stateVisuals.cooldownAlpha
     targetAlpha = (cdAlpha <= 0) and (optionsPanelOpen and 0.35 or 0) or cdAlpha
     targetDesat = stateVisuals.cooldownDesaturate and 1 or 0
   end
 
-  local effectiveReadyAlpha = GetEffectiveReadyAlpha(stateVisuals)
+  local effectiveReadyAlpha = stateVisuals and GetEffectiveReadyAlpha(stateVisuals) or 1
   if isReady and effectiveReadyAlpha < 1.0 then
     frame._arcEnforceReadyAlpha  = true
     frame._arcReadyAlphaValue    = effectiveReadyAlpha
@@ -397,7 +560,7 @@ function AF.UpdateAuraFrame(frame)
 
   -- Tint
   local targetTintR, targetTintG, targetTintB = 1, 1, 1
-  if not isReady and stateVisuals.cooldownTint and stateVisuals.cooldownTintColor then
+  if not isReady and stateVisuals and stateVisuals.cooldownTint and stateVisuals.cooldownTintColor then
     local col = stateVisuals.cooldownTintColor
     targetTintR = col.r or 0.5
     targetTintG = col.g or 0.5
@@ -416,12 +579,26 @@ function AF.UpdateAuraFrame(frame)
   -- re-read the shadow. forceVisuals=true bypasses the idle-skip cache so the
   -- glow is correctly hidden out of combat after totem placement.
   local isCooldownFrame = not cfg._isAura and (frame.totemData == nil or frame._arcCooldownEventDriven)
-  if not isCooldownFrame then
+  if not isCooldownFrame and stateVisuals then
     local isReadyGlowPreview = ns.CDMEnhanceOptions and ns.CDMEnhanceOptions.IsGlowPreviewActive
       and ns.CDMEnhanceOptions.IsGlowPreviewActive(frame.cooldownID)
     local threshold = stateVisuals.glowThreshold or 1.0
     local isReadyOrPreview = isReady or isReadyGlowPreview
-    if threshold >= 1.0 then
+    if stateVisuals.glowFollowPandemic then
+      -- ShowPandemicStateFrame/CheckTriggerAuraAppliedAlert own show/hide for live play.
+      -- Preview: always show. Aura lost: always hide.
+      -- Aura active: check _arcPandemicGlowActive — if pandemic window is over, hide.
+      if isReadyGlowPreview then
+        ShowReadyGlow(frame, stateVisuals)
+      elseif not isReady then
+        HideReadyGlow(frame)
+      elseif not frame._arcPandemicGlowActive then
+        -- Aura active but pandemic window ended (flag cleared by CheckTriggerAuraAppliedAlert
+        -- or TriggerAlertEvent) — hide the glow now.
+        HideReadyGlow(frame)
+      end
+      frame._arcTargetGlow = true
+    elseif threshold >= 1.0 and not stateVisuals.glowThresholdSeconds then
       if ShouldShowReadyGlow(stateVisuals, frame) and isReadyOrPreview then
         ShowReadyGlow(frame, stateVisuals)
       else
@@ -486,6 +663,26 @@ function AF.InstallHooks(frame, cdID)
 
   if frame.OnAuraInstanceInfoSet then
     hooksecurefunc(frame, "OnAuraInstanceInfoSet", function(self)
+      -- glowFollowPandemic: detect genuine reapplication via _arcAuraActive false→true.
+      -- Covers both ID-change reapplications AND same-ID totem replacements.
+      -- Read previous state BEFORE updating _arcAuraActive below.
+      local wasActive = self._arcLastPandemicAuraActive
+      local nowActive = HasAuraInstanceID(self.auraInstanceID)
+      self._arcLastPandemicAuraActive = nowActive
+      if self._arcPandemicGlowActive and nowActive and wasActive == false then
+        self._arcPandemicGlowActive = nil
+        local cfgP = ns.CDMEnhance and ns.CDMEnhance.GetEffectiveIconSettingsForFrame
+          and ns.CDMEnhance.GetEffectiveIconSettingsForFrame(self)
+        local aasP = cfgP and cfgP.auraActiveState
+        local svP  = cfgP and ns.CDMEnhance.GetEffectiveStateVisuals
+          and ns.CDMEnhance.GetEffectiveStateVisuals(cfgP)
+        if aasP and aasP.glowFollowPandemic then
+          AF.HideAuraActiveGlow(self)
+        elseif svP and svP.glowFollowPandemic then
+          if ns.CDMEnhance.HideReadyGlow then ns.CDMEnhance.HideReadyGlow(self) end
+        end
+      end
+
       -- Confirm aura is actually present before caching true
       self._arcAuraActive = HasAuraInstanceID(self.auraInstanceID)
       if self._arcIgnoreAuraOverride then
@@ -526,6 +723,8 @@ function AF.InstallHooks(frame, cdID)
 
   if frame.OnAuraInstanceInfoCleared then
     hooksecurefunc(frame, "OnAuraInstanceInfoCleared", function(self)
+      -- Seed false so the next OnAuraInstanceInfoSet detects the false→true transition
+      self._arcLastPandemicAuraActive = false
       -- Confirm aura is actually gone before caching false
       self._arcAuraActive = HasAuraInstanceID(self.auraInstanceID)
       if self._arcIgnoreAuraOverride then
@@ -643,10 +842,11 @@ local function InstallCompatShims()
   -- OptimizedApplyIconVisuals → UpdateAuraFrame
   ns.CDMEnhance.OptimizedApplyIconVisuals  = AF.UpdateAuraFrame
 
-  -- Glow helpers
-  ns.CDMEnhance.ShowAuraActiveGlow         = AF.ShowAuraActiveGlow
-  ns.CDMEnhance.HideAuraActiveGlow         = AF.HideAuraActiveGlow
-  ns.CDMEnhance.ShouldShowAuraActiveGlow   = AF.ShouldShowAuraActiveGlow
+  -- Threshold glow ticker (AuraFrames is now the authority)
+  ns.CDMEnhance.StartThresholdGlowTracking   = AF.StartThresholdGlowTracking
+  ns.CDMEnhance.StopThresholdGlowTracking    = AF.StopThresholdGlowTracking
+  ns.CDMEnhance.GetGlowThresholdCurve        = AF.GetGlowThresholdCurve
+  ns.CDMEnhance.GetGlowThresholdCurveSeconds = AF.GetGlowThresholdCurveSeconds
 end
 
 -- Run after ADDON_LOADED so ns.CDMEnhance is guaranteed populated

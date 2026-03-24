@@ -65,7 +65,7 @@ do -- Pinpoint Arrow
                     Frame(name .. "Arrow1", {
                         Frame(name .. "Arrow1Texture")
                             :id("Arrow1Texture", id)
-                            :background(Waypoint_Preload.UIDef.UIPinpointArrow)
+                            :background(Waypoint_Preload.UIDEF.UIPinpointArrow)
                             :point(UIKit.Enum.Point.Center)
                             :size(ARROW_SIZE, ARROW_SIZE)
                             :backgroundBlendMode(UIKit.Enum.BlendMode.Add)
@@ -78,7 +78,7 @@ do -- Pinpoint Arrow
                     Frame(name .. "Arrow2", {
                         Frame(name .. "Arrow2Texture")
                             :id("Arrow2Texture", id)
-                            :background(Waypoint_Preload.UIDef.UIPinpointArrow)
+                            :background(Waypoint_Preload.UIDEF.UIPinpointArrow)
                             :point(UIKit.Enum.Point.Center)
                             :size(ARROW_SIZE, ARROW_SIZE)
                             :backgroundBlendMode(UIKit.Enum.BlendMode.Add)
@@ -91,7 +91,7 @@ do -- Pinpoint Arrow
                     Frame(name .. "Arrow3", {
                         Frame(name .. "Arrow3Texture")
                             :id("Arrow3Texture", id)
-                            :background(Waypoint_Preload.UIDef.UIPinpointArrow)
+                            :background(Waypoint_Preload.UIDEF.UIPinpointArrow)
                             :point(UIKit.Enum.Point.Center)
                             :size(ARROW_SIZE, ARROW_SIZE)
                             :backgroundBlendMode(UIKit.Enum.BlendMode.Add)
@@ -173,7 +173,7 @@ do -- Context Icon
                     :id("BackgroundTexture", id)
                     :point(UIKit.Enum.Point.Center)
                     :size(FOREGROUND_SIZE, FOREGROUND_SIZE)
-                    :background(Waypoint_Preload.UIDef.ContextIcon)
+                    :background(Waypoint_Preload.UIDEF.ContextIcon)
                     :frameLevel(2),
                 Frame(name .. "Image")
                     :id("Image", id)

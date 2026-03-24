@@ -197,39 +197,43 @@ local function SafeAnchorCenter(sourceFrame, sourcePoint, destFrame, destPoint, 
     if not dLeft or not dWidth or dWidth < 1 then return false end
     if issecretvalue(dLeft) or issecretvalue(dWidth) then return false end
 
-    -- Dest anchor point in dest's coordinate space (GetRect = screen pixels)
-    local dAnchorX, dAnchorY = GetAnchorOffset(dWidth, dHeight, destPoint)
-    local targetX = dLeft + dAnchorX
-    local targetY = dBottom + dAnchorY
+    -- GetRect() returns screen pixels. Convert to UIParent space.
+    local dScale = destFrame:GetEffectiveScale()
+    local uScale = UIParent:GetEffectiveScale()
+    local dRatio = dScale / uScale
+    local dLeftUI   = dLeft   * dRatio
+    local dBottomUI = dBottom * dRatio
+    local dWidthUI  = dWidth  * dRatio
+    local dHeightUI = dHeight * dRatio
 
-    -- Source anchor offset from BOTTOMLEFT (GetSize = local coords)
+    -- Dest anchor point in UIParent space
+    local dAnchorX, dAnchorY = GetAnchorOffset(dWidthUI, dHeightUI, destPoint)
+    local targetX = dLeftUI + dAnchorX
+    local targetY = dBottomUI + dAnchorY
+
+    -- Source dimensions: GetSize() returns local coords. Convert to UIParent space.
     local sWidth, sHeight = sourceFrame:GetSize()
     if not sWidth or sWidth < 1 then return false end
     if issecretvalue(sWidth) then return false end
-    local sAnchorX, sAnchorY = GetAnchorOffset(sWidth, sHeight, sourcePoint)
+    local sScale = sourceFrame:GetEffectiveScale()
+    local sRatio = sScale / uScale
+    local sWidthUI  = sWidth  * sRatio
+    local sHeightUI = sHeight * sRatio
 
-    -- BOTTOMLEFT position (same as SafeAnchor)
+    -- Source anchor offset in UIParent space
+    local sAnchorX, sAnchorY = GetAnchorOffset(sWidthUI, sHeightUI, sourcePoint)
+
+    -- BOTTOMLEFT position in UIParent space
     local blX = targetX - sAnchorX + (xOffset or 0)
     local blY = targetY - sAnchorY + (yOffset or 0)
 
-    -- Scale correction: dest's scale space -> UIParent's scale space
-    local dScale = destFrame:GetEffectiveScale()
-    local uScale = UIParent:GetEffectiveScale()
-    if dScale ~= uScale then
-        local ratio = dScale / uScale
-        blX = blX * ratio
-        blY = blY * ratio
-    end
-
     -- Convert BOTTOMLEFT to CENTER offset relative to UIParent CENTER.
-    -- blX/blY are now in UIParent's coordinate space (same as SafeAnchor).
-    -- UIParent:GetSize() is also in UIParent's coordinate space.
-    -- sWidth/sHeight are in source's local coords = same space when anchored to UIParent.
+    -- All values are now in UIParent space.
     local uWidth, uHeight = UIParent:GetSize()
-    local centerX = blX + (sWidth * 0.5) - (uWidth * 0.5)
-    local centerY = blY + (sHeight * 0.5) - (uHeight * 0.5)
+    local centerX = blX + sWidthUI * 0.5 - uWidth * 0.5
+    local centerY = blY + sHeightUI * 0.5 - uHeight * 0.5
 
-    -- Combat guard: ClearAllPoints/SetPoint blocked on protected frames in combat
+    -- Combat guard
     if InCombatLockdown() and sourceFrame.IsProtected and sourceFrame:IsProtected() then
         return false
     end
@@ -423,20 +427,16 @@ function Anchors.ApplyGroupAnchor(group)
     elseif mode == "toMouse" then
         EnsureMouseProxy()
         local sourcePoint = cfg.sourcePoint or "CENTER"
-        local ok, err = pcall(function()
-            group.container:ClearAllPoints()
-            group.container:SetPoint(sourcePoint, mouseProxyFrame, "BOTTOMLEFT", cfg.offsetX or 0, cfg.offsetY or 0)
+        group.container:ClearAllPoints()
+        group.container:SetPoint(sourcePoint, mouseProxyFrame, "BOTTOMLEFT", cfg.offsetX or 0, cfg.offsetY or 0)
+        applied = true
+        RegisterMouseConsumer()
+        C_Timer.After(0.02, function()
+            if ns.CDMGroups.SyncAnchorProxy then
+                ns.CDMGroups.SyncAnchorProxy(group)
+            end
         end)
-        if ok then
-            applied = true
-            RegisterMouseConsumer()
-            C_Timer.After(0.02, function()
-                if ns.CDMGroups.SyncAnchorProxy then
-                    ns.CDMGroups.SyncAnchorProxy(group)
-                end
-            end)
-            DebugPrint("CDMGroupsAnchors: " .. group.name .. " > mouse cursor")
-        end
+        DebugPrint("CDMGroupsAnchors: " .. group.name .. " > mouse cursor")
     end
     -- mode == "none": group stays where the user dragged it
 
@@ -693,7 +693,29 @@ function Anchors.HookContainerForDragTracking(group)
         if InCombatLockdown() then return end
         ReapplyDuringDrag()
     end)
-    
+
+    -- Hook OnSizeChanged: re-anchor dependents after dynamic layout resizes the container.
+    -- When dynamic layout compacts icons, it: (1) shrinks the container, (2) shifts its
+    -- CENTER by _contentCenterX/Y. SyncAnchorProxy fires between these two steps, so
+    -- SafeAnchorCenter reads the wrong rect (old size at new center).
+    -- C_Timer.After(0) defers the re-anchor until AFTER the center-sync SetPoint has
+    -- also completed in the same tick — GetRect() then returns the final size+position.
+    -- _arcSizeChangedPending debounces burst OnSizeChanged events (one deferred call max).
+    if container.HookScript then
+        container:HookScript("OnSizeChanged", function()
+            if container._arcIsDragging then return end  -- drag hook handles drags
+            if isAnchoring then return end
+            if InCombatLockdown() then return end
+            if container._arcSizeChangedPending then return end
+            container._arcSizeChangedPending = true
+            C_Timer.After(0, function()
+                container._arcSizeChangedPending = false
+                if InCombatLockdown() then return end
+                ReapplyDuringDrag()
+            end)
+        end)
+    end
+
     DebugPrint("CDMGroupsAnchors: Drag tracking hooked on " .. groupName .. " container")
 end
 
@@ -804,8 +826,8 @@ function Anchors.HookTargetFrame(frameName, group)
     for depth = 1, 4 do
         local numPoints = current.GetNumPoints and current:GetNumPoints() or 0
         if numPoints == 0 then break end
-        local ok, _, relFrame = pcall(current.GetPoint, current, 1)
-        if not ok or not relFrame then break end
+        local _, _, relFrame = current:GetPoint(1)
+        if not relFrame then break end
         if relFrame == UIParent or relFrame == WorldFrame then break end
         if seen[relFrame] then break end
         seen[relFrame] = true
@@ -1024,6 +1046,20 @@ function Anchors.DetachAllExternalFrames(group)
         hookedGroupContainers[group.name] = nil
     end
 
+    -- Clear hookedExternalFrames entries for this group so HookExternalFrame
+    -- re-runs on the next ReapplyAll after spec/profile switch.
+    -- Without this the guard `if hookedExternalFrames[hookKey] then return end`
+    -- permanently blocks re-writing _arcAnchorData, breaking snap-back forever
+    -- after the first spec switch even though DetachAllExternalFrames cleared it.
+    if group.name then
+        local suffix = "_" .. group.name
+        for key in pairs(hookedExternalFrames) do
+            if key:sub(-#suffix) == suffix then
+                hookedExternalFrames[key] = nil
+            end
+        end
+    end
+
     for _, entry in ipairs(frames) do
         if entry.frameName and entry.frameName ~= "" then
             local extFrame = SafeGetFrame(entry.frameName)
@@ -1057,11 +1093,32 @@ function Anchors.DetachAllExternalFrames(group)
                     DebugPrint("CDMGroupsAnchors: No _arcOriginalAnchors for", entry.frameName, "- nothing to restore")
                 end
 
-                -- Clean remaining tag
+                -- CRITICAL: Always clear _arcOriginalAnchors after detach.
+                -- If the frame now belongs to a DIFFERENT group in the new spec/profile,
+                -- the stale saved anchors would restore to the WRONG position.
+                -- Clearing here forces the new profile's first ApplyAnchoredFrames
+                -- to re-capture the frame's actual current anchors as the new baseline.
                 extFrame._arcOriginalAnchors = nil
             end
         end
     end
+end
+
+-- ═══════════════════════════════════════════════════════════════════════════
+-- RESET ALL HOOK STATE (spec/profile switch)
+-- Wipes ALL hook guard tables so every hook re-runs cleanly in the new spec.
+-- Called by CDMGroups.OnSpecChange AFTER DetachAllExternalFrames so frames
+-- are already restored before we drop the guards.
+-- hookedGroupContainers is intentionally kept — containers are reused from the
+-- pool and their hooksecurefunc hooks are permanent; re-hooked on new container.
+-- hookedTargetFrames is cleared so toFrame/trackTarget groups re-hook their
+-- target frame's SetPoint in the new spec (target may be a different frame).
+-- ═══════════════════════════════════════════════════════════════════════════
+function Anchors.ResetAllHookState()
+    wipe(hookedExternalFrames)
+    wipe(hookedTargetFrames)
+    -- hookedGroupContainers: cleared per-group in DetachAllExternalFrames, not here
+    DebugPrint("CDMGroupsAnchors: ResetAllHookState — hook guards cleared for spec/profile switch")
 end
 
 -- ═══════════════════════════════════════════════════════════════════════════
@@ -1190,30 +1247,32 @@ local function GetTopNamedFrame()
     local isSecret = issecretvalue
     for gName, obj in pairs(_G) do
         if type(gName) == "string" and type(obj) == "table" then
-            local ok, result = pcall(function()
-                if not (obj.GetObjectType and obj.IsVisible and obj.GetRect) then return nil end
+            if obj.GetObjectType and obj.IsVisible and obj.GetRect then
                 local vis = obj:IsVisible()
-                if isSecret and isSecret(vis) then return "secret" end
-                if not vis then return nil end
-                local l, b, w, h = obj:GetRect()
-                if not l or not b or not w or not h then return nil end
-                if isSecret and (isSecret(l) or isSecret(w)) then return "secret" end
-                if w <= 0 or h <= 0 then return nil end
-                if cursorX >= l and cursorX <= (l + w) and cursorY >= b and cursorY <= (b + h) then
-                    return { area = w * h }
-                end
-                return nil
-            end)
-            if ok and result then
-                if result == "secret" then
+                if isSecret and isSecret(vis) then
                     if not bestName then
                         bestName = gName .. " |cffff4444(secret)|r"
                         bestFrame = nil
                     end
-                elseif result.area and result.area < bestArea and gName ~= "WorldFrame" and gName ~= "UIParent" then
-                    bestName = gName
-                    bestFrame = obj
-                    bestArea = result.area
+                elseif vis then
+                    local l, b, w, h = obj:GetRect()
+                    if l and b and w and h then
+                        if isSecret and (isSecret(l) or isSecret(w)) then
+                            if not bestName then
+                                bestName = gName .. " |cffff4444(secret)|r"
+                                bestFrame = nil
+                            end
+                        elseif w > 0 and h > 0 then
+                            if cursorX >= l and cursorX <= (l + w) and cursorY >= b and cursorY <= (b + h) then
+                                local area = w * h
+                                if area < bestArea and gName ~= "WorldFrame" and gName ~= "UIParent" then
+                                    bestName = gName
+                                    bestFrame = obj
+                                    bestArea = area
+                                end
+                            end
+                        end
+                    end
                 end
             end
         end

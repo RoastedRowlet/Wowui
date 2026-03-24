@@ -55,7 +55,9 @@ function WaypointMixin:OnLoad()
     SavedVariables.OnChange("WaypointDB_Global", "WaypointBeamAlpha", function() self:UpdateBeam() end)
     SavedVariables.OnChange("WaypointDB_Global", "WaypointAlpha", function() self:UpdateOpacity() end)
     CallbackRegistry.Add("Preload.DatabaseReady", function()
-        self:UpdateFooter(); self:UpdateBeam(); self:UpdateOpacity()
+        self:UpdateFooter()
+        self:UpdateBeam()
+        self:UpdateOpacity()
     end)
 end
 
@@ -160,7 +162,7 @@ function WaypointMixin:UpdateBeam()
 end
 
 function WaypointMixin:UpdateOpacity()
-    self:SetAlpha(Config.DBGlobal:GetVariable("WaypointAlpha") or 1)
+    self.Container:SetAlpha(Config.DBGlobal:GetVariable("WaypointAlpha") or 1)
 end
 
 function WaypointMixin:SetIcon(UIContextIconTexture)
@@ -262,11 +264,11 @@ do
         :to(1)
 
     WaypointMixin.AnimGroup_Hover:State("ENABLED", function(frame)
-        Enabled:Play(frame.Container)
+        Enabled:Play(frame)
     end)
 
     WaypointMixin.AnimGroup_Hover:State("DISABLED", function(frame)
-        Disabled:Play(frame.Container)
+        Disabled:Play(frame)
     end)
 end
 
@@ -294,7 +296,10 @@ local PinpointMixin = {}
 function PinpointMixin:OnLoad()
     SavedVariables.OnChange("WaypointDB_Global", "PinpointScale", function() self:UpdateSize() end)
     SavedVariables.OnChange("WaypointDB_Global", "PinpointAlpha", function() self:UpdateOpacity() end)
-    CallbackRegistry.Add("Preload.DatabaseReady", function() self:UpdateSize(); self:UpdateOpacity() end)
+    CallbackRegistry.Add("Preload.DatabaseReady", function()
+        self:UpdateSize()
+        self:UpdateOpacity()
+    end)
 end
 
 function PinpointMixin:UpdateText()

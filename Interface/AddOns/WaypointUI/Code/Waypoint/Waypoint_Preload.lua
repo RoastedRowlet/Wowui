@@ -6,7 +6,7 @@ local Waypoint_Preload = env.modules:New("@\\Waypoint\\Preload")
 
 local ATLAS = UIKit.Define.Texture_Atlas{ path = Path.Root .. "\\Art\\Waypoint\\Waypoint" }
 Utils_Texture.Preload(Path.Root .. "\\Art\\Waypoint\\Waypoint")
-Waypoint_Preload.UIDef = {
+Waypoint_Preload.UIDEF = {
     ContextIcon          = ATLAS{ left = 0 / 1024, right = 128 / 1024, top = 128 / 1024, bottom = 256 / 1024 },
     UIWaypointBeam       = ATLAS{ left = 693/1024, right = 843/1024, top = 0/1024, bottom = 1024/1024 },
     UIWaypointBeamFX     = ATLAS{ left = 896 / 1024, right = 1024 / 1024, top = 0 / 1024, bottom = 1024 / 1024 },

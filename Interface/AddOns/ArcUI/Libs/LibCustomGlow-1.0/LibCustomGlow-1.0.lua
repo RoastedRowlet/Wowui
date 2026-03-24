@@ -131,7 +131,7 @@ lib.GlowFramePool = GlowFramePool
 
 local function addFrameAndTex(r,color,name,key,N,xOffset,yOffset,texture,texCoord,desaturated,frameLevel)
     key = key or ""
-	frameLevel = frameLevel or 8
+	frameLevel = frameLevel or 1
     if not r[name..key] then
         r[name..key] = GlowFramePool:Acquire()
         r[name..key]:SetParent(r)
@@ -685,7 +685,7 @@ function lib.ButtonGlow_Start(r,color,frequency,frameLevel,key,xOffset,yOffset)
     if not r then
         return
     end
-	frameLevel = frameLevel or 8;
+	frameLevel = frameLevel or 1;
     key = key or ""
     xOffset = xOffset or 0
     yOffset = yOffset or 0
@@ -964,7 +964,7 @@ https://github.com/Gethe/wow-ui-source/blob/d8e8ebf572c3b28237cf83e8fc5c0583b545
 end
 
 local ProcGlowDefaults = {
-    frameLevel = 8,
+    frameLevel = 1,
     color = nil,
     startAnim = true,
     xOffset = 0,

@@ -70,6 +70,22 @@ local function DeepCopy(t)
     return copy
 end
 
+-- Deep merge: source keys overwrite dest keys, tables recurse.
+-- Used to bake globals into per-icon settings during flatten import.
+local function DeepMergeImport(dest, source)
+    if not source then return dest end
+    if not dest then return DeepCopy(source) end
+    local result = DeepCopy(dest)
+    for k, v in pairs(source) do
+        if type(v) == "table" and type(result[k]) == "table" then
+            result[k] = DeepMergeImport(result[k], v)
+        elseif v ~= nil then
+            result[k] = v
+        end
+    end
+    return result
+end
+
 -- Canonical copy of a raw layoutData table (DB or imported).
 -- Single source of truth for all group layout fields — add new fields here only.
 -- This is intentionally a flat copy (not tied to a runtime group object) so it works
@@ -385,6 +401,39 @@ local function BuildExportData(options)
                     end
                 end
             end
+            
+            -- ─────────────────────────────────────────────────────────────────
+            -- GLOBAL GROUP LAYOUTS: embed referenced layouts into export string
+            -- If the exported profile links to a named global layout via
+            -- groupLayoutName, pull that layout's data from the global DB and
+            -- embed it. The importer can then recreate it in their own global DB
+            -- rather than ending up with an empty profile.
+            -- ─────────────────────────────────────────────────────────────────
+            if exportData.cdmGroups.layoutProfiles then
+                local _glDB = ns.CDMShared and ns.CDMShared.GetGroupLayoutsDB and ns.CDMShared.GetGroupLayoutsDB()
+                if _glDB then
+                    local globalGroupLayouts = {}
+                    for _, profileData in pairs(exportData.cdmGroups.layoutProfiles) do
+                        local linkedName = profileData.groupLayoutName
+                        if linkedName and _glDB[linkedName] and not globalGroupLayouts[linkedName] then
+                            -- Deep copy, strip runtime-only fields
+                            local layoutCopy = DeepCopy(_glDB[linkedName])
+                            for _, groupData in pairs(layoutCopy) do
+                                if type(groupData) == "table" then
+                                    groupData.members = nil
+                                    groupData.grid = nil
+                                    groupData.container = nil
+                                    groupData.dragBar = nil
+                                end
+                            end
+                            globalGroupLayouts[linkedName] = layoutCopy
+                        end
+                    end
+                    if next(globalGroupLayouts) then
+                        exportData.cdmGroups.globalGroupLayouts = globalGroupLayouts
+                    end
+                end
+            end
         end
     end
     
@@ -418,9 +467,12 @@ local function BuildExportData(options)
     if ns.db and ns.db.char and ns.db.char.arcAuras then
         local arcAuras = ns.db.char.arcAuras
         
-        if (options.includeArcAuras ~= false) and arcAuras.trackedItems and next(arcAuras.trackedItems) then
+        -- Always emit arcAuras block so importers know to wipe their existing icons
+        -- even when the exporter has deleted everything (empty tables are intentional)
+        if options.includeArcAuras ~= false then
             exportData.arcAuras = {
-                trackedItems = DeepCopy(arcAuras.trackedItems),
+                trackedItems = arcAuras.trackedItems and DeepCopy(arcAuras.trackedItems) or {},
+                trackedSpells = arcAuras.trackedSpells and DeepCopy(arcAuras.trackedSpells) or {},
                 positions = arcAuras.positions and DeepCopy(arcAuras.positions) or nil,
                 globalSettings = arcAuras.globalSettings and next(arcAuras.globalSettings) and DeepCopy(arcAuras.globalSettings) or nil,
                 enabled = arcAuras.enabled,
@@ -428,21 +480,6 @@ local function BuildExportData(options)
                 autoTrackSlots = arcAuras.autoTrackSlots and DeepCopy(arcAuras.autoTrackSlots) or nil,
                 onlyOnUseTrinkets = arcAuras.onlyOnUseTrinkets,
             }
-        end
-        
-        -- Also export tracked spell cooldowns (if any)
-        if (options.includeArcAuras ~= false) and arcAuras.trackedSpells and next(arcAuras.trackedSpells) then
-            if not exportData.arcAuras then
-                exportData.arcAuras = {
-                    positions = arcAuras.positions and DeepCopy(arcAuras.positions) or nil,
-                    globalSettings = arcAuras.globalSettings and next(arcAuras.globalSettings) and DeepCopy(arcAuras.globalSettings) or nil,
-                    enabled = arcAuras.enabled,
-                    autoTrackEquippedTrinkets = arcAuras.autoTrackEquippedTrinkets,
-                    autoTrackSlots = arcAuras.autoTrackSlots and DeepCopy(arcAuras.autoTrackSlots) or nil,
-                    onlyOnUseTrinkets = arcAuras.onlyOnUseTrinkets,
-                }
-            end
-            exportData.arcAuras.trackedSpells = DeepCopy(arcAuras.trackedSpells)
         end
     end
     
@@ -1038,6 +1075,51 @@ function IE.Import(importString, options)
         end
         
         -- ═══════════════════════════════════════════════════════════════════════════
+        -- GLOBAL GROUP LAYOUTS: write embedded layouts into importer's global DB
+        -- For each layout in data.cdmGroups.globalGroupLayouts:
+        --   No conflict  → write directly, profile groupLayoutName links automatically
+        --   Conflict     → apply the user's chosen resolution from layoutConflictResolutions:
+        --                  "overwrite" → replace only that one layout's data
+        --                  "copy"      → write under options.layoutConflictResolutions[name].copyName
+        --                               and patch imported profile's groupLayoutName to the new name
+        -- ═══════════════════════════════════════════════════════════════════════════
+        if data.cdmGroups.globalGroupLayouts and next(data.cdmGroups.globalGroupLayouts) then
+            local _glDB = ns.CDMShared and ns.CDMShared.GetGroupLayoutsDB and ns.CDMShared.GetGroupLayoutsDB()
+            if _glDB then
+                local conflicts = options.layoutConflictResolutions or {}
+                for layoutName, layoutData in pairs(data.cdmGroups.globalGroupLayouts) do
+                    local existing = _glDB[layoutName]
+                    if not existing then
+                        -- No conflict — write straight in
+                        _glDB[layoutName] = DeepCopy(layoutData)
+                    else
+                        local resolution = conflicts[layoutName]
+                        local mode = resolution and resolution.mode
+                        if mode == "overwrite" then
+                            -- Replace ONLY this layout's data, leave all other layouts untouched
+                            wipe(_glDB[layoutName])
+                            for k, v in pairs(layoutData) do
+                                _glDB[layoutName][k] = DeepCopy(v)
+                            end
+                        elseif mode == "copy" then
+                            local copyName = resolution.copyName
+                            if copyName and copyName ~= "" then
+                                -- Write under the new name
+                                _glDB[copyName] = DeepCopy(layoutData)
+                                -- Patch the imported profile's groupLayoutName to point at the copy
+                                local importedProfile = specData.layoutProfiles[importedProfileName]
+                                if importedProfile and importedProfile.groupLayoutName == layoutName then
+                                    importedProfile.groupLayoutName = copyName
+                                end
+                            end
+                        end
+                        -- If no resolution provided (shouldn't happen in normal flow) → skip silently
+                    end
+                end
+            end
+        end
+        
+        -- ═══════════════════════════════════════════════════════════════════════════
         -- SET ACTIVE PROFILE to the imported one
         -- ═══════════════════════════════════════════════════════════════════════════
         specData.activeProfile = importedProfileName
@@ -1087,14 +1169,91 @@ function IE.Import(importString, options)
         
         local cdmEnhance = ns.db.profile.cdmEnhance
         
-        -- Import global aura settings
-        if data.cdmEnhance.globalAuraSettings then
-            cdmEnhance.globalAuraSettings = DeepCopy(data.cdmEnhance.globalAuraSettings)
-        end
-        
-        -- Import global cooldown settings  
-        if data.cdmEnhance.globalCooldownSettings then
-            cdmEnhance.globalCooldownSettings = DeepCopy(data.cdmEnhance.globalCooldownSettings)
+        local flattenGlobals = options.importFlattenGlobals and options.importGlobalSettings
+
+        if flattenGlobals then
+            -- ── FLATTEN MODE ──────────────────────────────────────────────────
+            -- Bake imported globals into each icon's per-icon settings so the
+            -- profile looks exactly as intended, without touching the user's own
+            -- globalAuraSettings / globalCooldownSettings.
+            --
+            -- IMPORTANT: Only touches the single imported profile (importedProfileName).
+            -- All other profiles the user already had are completely untouched.
+            --
+            -- Iterates savedPositions (every icon in the profile) not just the
+            -- existing iconSettings entries, so icons that were using globals with
+            -- zero per-icon overrides also get a baked entry. Per-icon overrides
+            -- always win (globals applied first, per-icon merged on top).
+            -- ──────────────────────────────────────────────────────────────────
+            local importedAuraGlobals     = data.cdmEnhance.globalAuraSettings
+            local importedCooldownGlobals = data.cdmEnhance.globalCooldownSettings
+
+            if (importedAuraGlobals and next(importedAuraGlobals))
+            or (importedCooldownGlobals and next(importedCooldownGlobals)) then
+                local Shared = GetShared()
+                local specDataNow = ns.db.char.cdmGroups
+                    and ns.db.char.cdmGroups.specData
+                    and ns.db.char.cdmGroups.specData[currentSpec]
+
+                -- ONLY touch the profile we just imported — no other profiles
+                local importedProfile = specDataNow
+                    and specDataNow.layoutProfiles
+                    and specDataNow.layoutProfiles[importedProfileName]
+
+                if importedProfile then
+                    if not importedProfile.iconSettings then
+                        importedProfile.iconSettings = {}
+                    end
+
+                    -- Build the full set of cdIDs to bake:
+                    -- savedPositions covers every icon in the profile (group + free).
+                    -- This catches icons with NO existing per-icon entry, not just ones
+                    -- that already have overrides.
+                    local allCDIDs = {}
+                    if importedProfile.savedPositions then
+                        for cdID in pairs(importedProfile.savedPositions) do
+                            allCDIDs[tostring(cdID)] = true
+                        end
+                    end
+                    -- Also include any existing per-icon entries (may cover arc_ IDs
+                    -- stored as strings that aren't numeric savedPositions keys)
+                    for cdID in pairs(importedProfile.iconSettings) do
+                        allCDIDs[tostring(cdID)] = true
+                    end
+
+                    for cdIDStr in pairs(allCDIDs) do
+                        -- Determine aura vs cooldown for this icon
+                        local isAura = false
+                        if not cdIDStr:match("^arc_") then
+                            if Shared and Shared.SafeGetCDMInfo and Shared.IsAuraCategory then
+                                local cdInfo = Shared.SafeGetCDMInfo(tonumber(cdIDStr) or cdIDStr)
+                                if cdInfo then
+                                    isAura = Shared.IsAuraCategory(cdInfo.category)
+                                end
+                            end
+                        end
+
+                        local globalsToApply = isAura and importedAuraGlobals or importedCooldownGlobals
+                        if globalsToApply and next(globalsToApply) then
+                            local existingPerIcon = importedProfile.iconSettings[cdIDStr]
+                            -- Globals are base, per-icon overrides win on top
+                            local baked = DeepMergeImport(DeepCopy(globalsToApply), existingPerIcon)
+                            importedProfile.iconSettings[cdIDStr] = baked
+                        end
+                    end
+                end
+            end
+            -- Don't write globals to cdmEnhance — user's own globals stay intact
+        else
+            -- Import global aura settings
+            if data.cdmEnhance.globalAuraSettings then
+                cdmEnhance.globalAuraSettings = DeepCopy(data.cdmEnhance.globalAuraSettings)
+            end
+            
+            -- Import global cooldown settings  
+            if data.cdmEnhance.globalCooldownSettings then
+                cdmEnhance.globalCooldownSettings = DeepCopy(data.cdmEnhance.globalCooldownSettings)
+            end
         end
         
         -- Import other CDMEnhance flags
@@ -1122,7 +1281,7 @@ function IE.Import(importString, options)
     -- ═══════════════════════════════════════════════════════════════════════════
     -- IMPORT ARC AURAS (if present)
     -- ═══════════════════════════════════════════════════════════════════════════
-    if data.arcAuras and (data.arcAuras.trackedItems or data.arcAuras.trackedSpells) then
+    if data.arcAuras then
         if not ns.db.char then ns.db.char = {} end
         if not ns.db.char.arcAuras then
             ns.db.char.arcAuras = {
@@ -1806,13 +1965,18 @@ local uiState = {
     exportGlobalSettings = true,
     exportGroupSettings = true,
     exportProfiles = true,
+    exportArcAuras = true,
     -- Import options (what to import)
     importGroupLayouts = true,
     importPositions = true,
     importIconSettings = true,
     importGlobalSettings = true,
+    importFlattenGlobals = false,
     importGroupSettings = true,
     importProfiles = true,
+    -- Global Group Layout conflict resolution
+    -- { [layoutName] = "overwrite" | "copy", copyName = "..." }
+    layoutConflictResolutions = {},
     -- Quick Import selection (formerly Account Import)
     selectedAccountImport = nil,
     -- Group Templates state
@@ -3305,6 +3469,16 @@ local function GetOptionsTable()
                 get = function() return uiState.exportProfiles end,
                 set = function(_, v) uiState.exportProfiles = v end,
             },
+            exportArcAuras = {
+                type = "toggle",
+                name = "Arc Auras",
+                desc = "Include Arc Auras tracked spells and items. Uncheck this to exclude your trinkets/pots from the export.",
+                order = 47.5,
+                width = 0.7,
+                hidden = function() return collapsedSections.externalExport or collapsedSections.exportOptions end,
+                get = function() return uiState.exportArcAuras end,
+                set = function(_, v) uiState.exportArcAuras = v end,
+            },
             exportSpacer = {
                 type = "description",
                 name = "",
@@ -3325,6 +3499,7 @@ local function GetOptionsTable()
                         includeIconSettings = uiState.exportIconSettings,
                         includeGlobalSettings = uiState.exportGlobalSettings,
                         includeGroupSettings = uiState.exportGroupSettings,
+                        includeArcAuras = uiState.exportArcAuras,
                     })
                     if exportStr then
                         uiState.exportString = exportStr
@@ -3404,13 +3579,29 @@ local function GetOptionsTable()
                         if data then
                             uiState.importPreview = IE.GetImportStats(data)
                             uiState.importError = nil
+                            -- Reset conflict resolutions and detect which layouts conflict
+                            wipe(uiState.layoutConflictResolutions)
+                            if data.cdmGroups and data.cdmGroups.globalGroupLayouts then
+                                local _glDB = ns.CDMShared and ns.CDMShared.GetGroupLayoutsDB and ns.CDMShared.GetGroupLayoutsDB()
+                                for layoutName in pairs(data.cdmGroups.globalGroupLayouts) do
+                                    if _glDB and _glDB[layoutName] then
+                                        -- Conflict — default to overwrite, user can change
+                                        uiState.layoutConflictResolutions[layoutName] = {
+                                            mode = "overwrite",
+                                            copyName = layoutName .. " (imported)",
+                                        }
+                                    end
+                                end
+                            end
                         else
                             uiState.importPreview = nil
                             uiState.importError = err
+                            wipe(uiState.layoutConflictResolutions)
                         end
                     else
                         uiState.importPreview = nil
                         uiState.importError = nil
+                        wipe(uiState.layoutConflictResolutions)
                     end
                 end,
             },
@@ -3534,6 +3725,18 @@ local function GetOptionsTable()
                 get = function() return uiState.importGlobalSettings end,
                 set = function(_, v) uiState.importGlobalSettings = v end,
             },
+            importFlattenGlobals = {
+                type = "toggle",
+                name = "Bake Globals into Icons",
+                desc = "Instead of overwriting your Global Defaults, merge the imported globals into each icon's per-icon settings. " ..
+                       "You get the profile looking exactly as intended but your own Global Defaults are untouched.",
+                order = 68.5,
+                width = 1.4,
+                hidden = function() return collapsedSections.externalExport or collapsedSections.importOptions end,
+                disabled = function() return not uiState.importGlobalSettings end,
+                get = function() return uiState.importFlattenGlobals end,
+                set = function(_, v) uiState.importFlattenGlobals = v end,
+            },
             importGroupSettings = {
                 type = "toggle",
                 name = "Group Settings",
@@ -3560,6 +3763,147 @@ local function GetOptionsTable()
                 order = 71,
                 hidden = function() return collapsedSections.externalExport end,
             },
+            
+            -- ═══════════════════════════════════════════════════════════════
+            -- GLOBAL GROUP LAYOUT CONFLICT RESOLUTION
+            -- One block per conflicting layout name, shown between import
+            -- options and the Import button. Each gives the user a choice:
+            --   Overwrite  → replace only that layout's data
+            --   Create copy → write under a new name (user-typed)
+            -- Import button is blocked until all conflicts have a valid resolution.
+            -- ═══════════════════════════════════════════════════════════════
+            layoutConflictHeader = {
+                type = "description",
+                name = function()
+                    if not next(uiState.layoutConflictResolutions) then return "" end
+                    return "|cffffff00Global Group Layout Conflicts|r\n" ..
+                           "|cff888888The following layouts from this export already exist in your account. " ..
+                           "Choose how to handle each one:|r"
+                end,
+                order = 71.1,
+                fontSize = "medium",
+                hidden = function()
+                    return collapsedSections.externalExport or not next(uiState.layoutConflictResolutions)
+                end,
+            },
+            layoutConflictWidgets = {
+                type = "group",
+                name = "",
+                order = 71.2,
+                inline = true,
+                hidden = function()
+                    return collapsedSections.externalExport or not next(uiState.layoutConflictResolutions)
+                end,
+                args = (function()
+                    -- Build dynamically — one block per conflicting layout
+                    -- This closure runs once at options table build time.
+                    -- The widgets use closures over layoutConflictResolutions so they
+                    -- always reflect current state.
+                    local conflictArgs = {}
+                    -- We use a metatable trick: the args table is always the same table
+                    -- reference, so we can populate it dynamically when needed.
+                    -- AceConfig re-reads args on every NotifyChange.
+                    setmetatable(conflictArgs, {
+                        __index = function(t, k) return nil end,
+                        __newindex = rawset,
+                    })
+                    -- Return a proxy that rebuilds on each access
+                    return setmetatable({}, {
+                        __index = function(_, k)
+                            -- Rebuild on every widget access so new conflicts appear immediately
+                            local args = {}
+                            local order = 1
+                            for layoutName, res in pairs(uiState.layoutConflictResolutions) do
+                                local capName = layoutName  -- capture for closures
+                                args["conflict_" .. order .. "_label"] = {
+                                    type = "description",
+                                    name = "|cffffd100\"" .. layoutName .. "\"|r",
+                                    order = order,
+                                    width = "full",
+                                    fontSize = "medium",
+                                }
+                                args["conflict_" .. order .. "_mode"] = {
+                                    type = "select",
+                                    name = "Action",
+                                    order = order + 0.1,
+                                    width = 1.0,
+                                    values = {
+                                        overwrite = "Overwrite existing",
+                                        copy = "Create a copy",
+                                    },
+                                    get = function()
+                                        local r = uiState.layoutConflictResolutions[capName]
+                                        return r and r.mode or "overwrite"
+                                    end,
+                                    set = function(_, val)
+                                        if uiState.layoutConflictResolutions[capName] then
+                                            uiState.layoutConflictResolutions[capName].mode = val
+                                        end
+                                        LibStub("AceConfigRegistry-3.0"):NotifyChange("ArcUI")
+                                    end,
+                                }
+                                args["conflict_" .. order .. "_copyName"] = {
+                                    type = "input",
+                                    name = "New Name",
+                                    desc = "Name for the copy of this layout",
+                                    order = order + 0.2,
+                                    width = 1.2,
+                                    hidden = function()
+                                        local r = uiState.layoutConflictResolutions[capName]
+                                        return not r or r.mode ~= "copy"
+                                    end,
+                                    get = function()
+                                        local r = uiState.layoutConflictResolutions[capName]
+                                        return r and r.copyName or ""
+                                    end,
+                                    set = function(_, val)
+                                        if uiState.layoutConflictResolutions[capName] then
+                                            uiState.layoutConflictResolutions[capName].copyName = val
+                                        end
+                                    end,
+                                }
+                                args["conflict_" .. order .. "_copyWarn"] = {
+                                    type = "description",
+                                    name = function()
+                                        local r = uiState.layoutConflictResolutions[capName]
+                                        if not r or r.mode ~= "copy" then return "" end
+                                        local cn = r.copyName or ""
+                                        if cn == "" then
+                                            return "|cffff4444Please enter a name for the copy.|r"
+                                        end
+                                        local _glDB = ns.CDMShared and ns.CDMShared.GetGroupLayoutsDB and ns.CDMShared.GetGroupLayoutsDB()
+                                        if _glDB and _glDB[cn] then
+                                            return "|cffff4444A layout named \"" .. cn .. "\" already exists.|r"
+                                        end
+                                        return "|cff00ff00Name is available.|r"
+                                    end,
+                                    order = order + 0.3,
+                                    fontSize = "small",
+                                    hidden = function()
+                                        local r = uiState.layoutConflictResolutions[capName]
+                                        return not r or r.mode ~= "copy"
+                                    end,
+                                }
+                                order = order + 1
+                            end
+                            return args[k]
+                        end,
+                        __pairs = function(_)
+                            local args = {}
+                            local order = 1
+                            for layoutName, res in pairs(uiState.layoutConflictResolutions) do
+                                local capName = layoutName
+                                args["conflict_" .. order .. "_label"] = true
+                                args["conflict_" .. order .. "_mode"] = true
+                                args["conflict_" .. order .. "_copyName"] = true
+                                args["conflict_" .. order .. "_copyWarn"] = true
+                                order = order + 1
+                            end
+                            return next, args, nil
+                        end,
+                    })
+                end)(),
+            },
             -- Import button
             importButton = {
                 type = "execute",
@@ -3578,6 +3922,17 @@ local function GetOptionsTable()
                         currentSpec = "class_" .. (classID or 0) .. "_spec_" .. specIdx
                     end
                     if p.sourceSpec and p.sourceSpec ~= currentSpec then return true end
+                    -- Block if any layout conflict is in "copy" mode with empty or duplicate name
+                    if next(uiState.layoutConflictResolutions) then
+                        local _glDB = ns.CDMShared and ns.CDMShared.GetGroupLayoutsDB and ns.CDMShared.GetGroupLayoutsDB()
+                        for _, res in pairs(uiState.layoutConflictResolutions) do
+                            if res.mode == "copy" then
+                                local cn = res.copyName or ""
+                                if cn == "" then return true end
+                                if _glDB and _glDB[cn] then return true end
+                            end
+                        end
+                    end
                     return false
                 end,
                 confirm = function()
@@ -3601,8 +3956,10 @@ local function GetOptionsTable()
                             importPositions = uiState.importPositions,
                             importIconSettings = uiState.importIconSettings,
                             importGlobalSettings = uiState.importGlobalSettings,
+                            importFlattenGlobals = uiState.importFlattenGlobals,
                             importGroupSettings = uiState.importGroupSettings,
                             importProfiles = uiState.importProfiles,
+                            layoutConflictResolutions = uiState.layoutConflictResolutions,
                             cdmAction = cdmAction, -- "replace", "ignore", or nil (normal add)
                         })
                         if success then
@@ -3620,6 +3977,7 @@ local function GetOptionsTable()
                             uiState.importString = ""
                             uiState.importPreview = nil
                             uiState.importError = nil
+                            wipe(uiState.layoutConflictResolutions)
                             StaticPopup_Show("ARCUI_RELOAD_AFTER_IMPORT")
                         else
                             PrintMsg("|cffff0000Import failed:|r " .. (result or "Unknown error"))
@@ -3667,6 +4025,7 @@ local function GetOptionsTable()
                     uiState.importString = ""
                     uiState.importPreview = nil
                     uiState.importError = nil
+                    wipe(uiState.layoutConflictResolutions)
                 end,
             },
             

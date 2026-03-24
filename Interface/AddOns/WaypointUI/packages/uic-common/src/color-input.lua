@@ -9,7 +9,7 @@ local UICCommonColorInput = env.modules:New("packages\\uic-common\\color-input")
 local Mixin = Mixin
 local CreateFromMixins = CreateFromMixins
 
-local UIDef = {
+local UIDEF = {
     UIColorInput              = UICCommonPreload.ATLAS{ inset = 10, scale = 0.7, left = 7/512, right = 100/512, top = 242/512, bottom = 283/512 },
     UIColorInput_Disabled     = UICCommonPreload.ATLAS{ inset = 10, scale = 0.7, left = 106/512, right = 199/512, top = 242/512, bottom = 283/512 },
     UIColorInputFill          = UICCommonPreload.ATLAS{ left = 202/512, right = 292/512, top = 243/512, bottom = 282/512 },
@@ -40,16 +40,16 @@ do --Color Input
         local buttonState = self:GetButtonState()
         local isEnabled = self:IsEnabled()
 
-        self:background(isEnabled and UIDef.UIColorInput or UIDef.UIColorInput_Disabled)
+        self:background(isEnabled and UIDEF.UIColorInput or UIDEF.UIColorInput_Disabled)
         if not isEnabled then
-            self.Fill:background(UIDef.UIColorInputFill_Disabled)
+            self.Fill:background(UIDEF.UIColorInputFill_Disabled)
             return
         end
 
         if buttonState == "NORMAL" or buttonState == "HIGHLIGHTED" then
-            self.Fill:background(UIDef.UIColorInputFill)
+            self.Fill:background(UIDEF.UIColorInputFill)
         elseif buttonState == "PUSHED" then
-            self.Fill:background(UIDef.UIColorInputFill_Pushed)
+            self.Fill:background(UIDEF.UIColorInputFill_Pushed)
         end
     end
 
@@ -69,7 +69,7 @@ do --Color Input
                     :background(UIKit.UI.TEXTURE_NIL)
                     :_updateMode(UIKit.Enum.UpdateMode.ExcludeVisibilityChanged)
             })
-            :background(UIDef.UIColorInput)
+            :background(UIDEF.UIColorInput)
             :_updateMode(UIKit.Enum.UpdateMode.ExcludeVisibilityChanged)
 
         frame.Texture = frame:GetTextureFrame()

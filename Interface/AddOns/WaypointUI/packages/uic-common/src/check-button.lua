@@ -9,7 +9,7 @@ local UICCommonCheckButton = env.modules:New("packages\\uic-common\\check-button
 local Mixin = Mixin
 local CreateFromMixins = CreateFromMixins
 
-local UIDef = {
+local UIDEF = {
     UICheckButton                    = UICCommonPreload.ATLAS{ left = 4/512, right = 51/512, top = 192/512, bottom = 239/512 },
     UICheckButton_Disabled           = UICCommonPreload.ATLAS{ left = 98/512, right = 145/512, top = 192/512, bottom = 239/512 },
     UICheckButtonChecked             = UICCommonPreload.ATLAS{ left = 51/512, right = 98/512, top = 192/512, bottom = 239/512 },
@@ -39,15 +39,15 @@ do --Check Button
 
         if isChecked then
             if not isEnabled then
-                self:background(UIDef.UICheckButtonChecked_Disabled)
+                self:background(UIDEF.UICheckButtonChecked_Disabled)
             else
-                self:background(UIDef.UICheckButtonChecked)
+                self:background(UIDEF.UICheckButtonChecked)
             end
         else
             if not isEnabled then
-                self:background(UIDef.UICheckButton_Disabled)
+                self:background(UIDEF.UICheckButton_Disabled)
             else
-                self:background(UIDef.UICheckButton)
+                self:background(UIDEF.UICheckButton)
             end
         end
     end
@@ -68,7 +68,7 @@ do --Check Button
     UICCommonCheckButton.New = UIKit.Template(function(id, name, children, ...)
         local frame =
             Frame(name)
-            :background(UIDef.UICheckButton)
+            :background(UIDEF.UICheckButton)
             :_updateMode(UIKit.Enum.UpdateMode.ExcludeVisibilityChanged)
 
         Mixin(frame, CheckButtonMixin)

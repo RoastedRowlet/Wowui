@@ -121,33 +121,20 @@ end
 ns.CDMEnhance.CooldownCurves = CooldownCurves
 ns.CDMEnhance.InitCooldownCurves = InitCooldownCurves
 
--- Cache for glow threshold curves
-local glowThresholdCurveCache = {}
-
--- Forward declarations for threshold glow tracking (defined later)
-local StartThresholdGlowTracking
-local StopThresholdGlowTracking
-
--- Get or create a threshold curve for glow visibility
--- Returns 1 when remaining % <= threshold (show glow), 0 when above (hide glow)
+-- Threshold glow curve builders and ticker live in AuraFrames (owns all glow threshold logic).
+-- CDMEnhance delegates via ns.AuraFrames at call time so load order doesn't matter.
 local function GetGlowThresholdCurve(threshold)
-  if not C_CurveUtil or not C_CurveUtil.CreateCurve then return nil end
-  
-  local key = math.floor(threshold * 1000)
-  if glowThresholdCurveCache[key] then return glowThresholdCurveCache[key] end
-  
-  local curve = C_CurveUtil.CreateCurve()
-  curve:AddPoint(0.0, 1)                    -- 0% remaining = show glow
-  curve:AddPoint(threshold, 1)              -- at threshold = show glow  
-  curve:AddPoint(threshold + 0.001, 0)      -- just above threshold = hide
-  curve:AddPoint(1.0, 0)                    -- 100% remaining = hide glow
-  
-  glowThresholdCurveCache[key] = curve
-  return curve
+  return ns.AuraFrames and ns.AuraFrames.GetGlowThresholdCurve and ns.AuraFrames.GetGlowThresholdCurve(threshold)
 end
-
--- Export for CooldownState module
-ns.CDMEnhance.GetGlowThresholdCurve = GetGlowThresholdCurve
+local function GetGlowThresholdCurveSeconds(seconds)
+  return ns.AuraFrames and ns.AuraFrames.GetGlowThresholdCurveSeconds and ns.AuraFrames.GetGlowThresholdCurveSeconds(seconds)
+end
+local function StartThresholdGlowTracking(cdID)
+  if ns.AuraFrames and ns.AuraFrames.StartThresholdGlowTracking then ns.AuraFrames.StartThresholdGlowTracking(cdID) end
+end
+local function StopThresholdGlowTracking(cdID)
+  if ns.AuraFrames and ns.AuraFrames.StopThresholdGlowTracking then ns.AuraFrames.StopThresholdGlowTracking(cdID) end
+end
 
 -- Debug output - only outputs when debug mode is enabled
 local function DebugLog(msg)
@@ -335,22 +322,17 @@ local function GetSpellCooldownState(spellID)
   -- Check if this is a charge spell
   local chargeInfo = nil
   local isChargeSpell = false
-  pcall(function()
     chargeInfo = C_Spell.GetSpellCharges(spellID)
     isChargeSpell = chargeInfo ~= nil
-  end)
   
-  -- Get basic cooldown info - wrap in pcall in case cdInfo is secret
   -- ONLY set isOnGCD when it's explicitly true - treat false same as nil
   local isOnGCD = nil
-  pcall(function()
     local cdInfo = C_Spell.GetSpellCooldown(spellID)
     if cdInfo and cdInfo.isOnGCD == true then
       isOnGCD = true
     end
     -- If cdInfo.isOnGCD is false or nil, leave isOnGCD as nil
     -- This way we only react to "definitely on GCD", not "definitely not on GCD"
-  end)
   
   -- Get duration objects
   local durationObj = nil
@@ -358,18 +340,14 @@ local function GetSpellCooldownState(spellID)
   
   -- For charge spells, get charge duration (tracks recharge, ignores GCD)
   if isChargeSpell and C_Spell.GetSpellChargeDuration then
-    local ok, obj = pcall(C_Spell.GetSpellChargeDuration, spellID)
-    if ok and obj then
+    local obj = C_Spell.GetSpellChargeDuration(spellID)
       chargeDurObj = obj
-    end
   end
   
   -- Always get regular cooldown duration too
   if C_Spell.GetSpellCooldownDuration then
-    local ok, obj = pcall(C_Spell.GetSpellCooldownDuration, spellID)
-    if ok and obj then
+    local obj = C_Spell.GetSpellCooldownDuration(spellID)
       durationObj = obj
-    end
   end
   
   return isOnGCD, durationObj, isChargeSpell, chargeDurObj
@@ -993,6 +971,7 @@ local DEFAULT_ICON_SETTINGS = {
     showEdge = true,        -- The spinning bright line
     showBling = true,       -- Flash when cooldown finishes
     reverse = false,        -- Reverse swipe direction
+    reverseWhileAura = false, -- Reverse swipe while the aura is active on this icon
     swipeColor = nil,       -- nil = use CDM default, or {r, g, b, a} to override
     edgeScale = nil,        -- Scale of the spinning edge line (nil = use CDM default, typically ~1.8)
     edgeColor = nil,        -- nil = use default, or {r, g, b, a} to override
@@ -1008,6 +987,7 @@ local DEFAULT_ICON_SETTINGS = {
   auraActiveState = {
     ignoreAuraOverride = false,  -- Show spell cooldown instead of aura duration
     glow = false,                -- Show glow while aura is active (cooldown frames only)
+    glowFollowPandemic = false,  -- Only show glow when CDM enters pandemic window (uses CDM timing, ignores % threshold)
     glowWhenMissing = false,     -- Invert: show glow when aura is NOT active
     glowType = "button",         -- "button", "pixel", "autocast", "proc"
     glowColor = nil,             -- nil = default gold, or {r, g, b}
@@ -1505,10 +1485,10 @@ local function PlayAlertSound(soundFile, soundID)
   if soundFile and soundFile ~= "" then
     -- Play custom sound file
     local path = "Interface\\AddOns\\ArcUI\\Sounds\\" .. soundFile .. ".ogg"
-    pcall(PlaySoundFile, path, "Master")
+    PlaySoundFile(path, "Master")
   elseif soundID then
     -- Fall back to sound ID
-    pcall(PlaySound, soundID)
+    PlaySound(soundID)
   end
 end
 
@@ -1734,31 +1714,8 @@ local function UpdatePreviewText(frame, cdID, cfg)
   -- Skip for Arc Aura frames - they manage their own Count fontstring
   if cfg.chargeText and not frame._arcConfig and not frame._arcAuraID then
     local chargeCfg = cfg.chargeText
-    local chargeText = frame._arcChargeText
-    local hasRealText = false
-    
-    -- Check if real text is showing (IsShown and GetText can be secret during combat)
-    if chargeText then
-      -- Wrap entire check in pcall - both IsShown() and GetText() can be secret
-      local ok, result = pcall(function()
-        if chargeText:IsShown() then
-          local currentText = chargeText:GetText()
-          return currentText and currentText ~= ""
-        end
-        return false
-      end)
-      if ok then
-        hasRealText = result
-      else
-        -- If pcall failed due to secret values, assume there's text
-        hasRealText = true
-      end
-    end
-    
-    -- Also consider single stack mirror text as "real text" (use flag, never read GetText back)
-    if not hasRealText and frame._arcSingleStackShowing then
-      hasRealText = true
-    end
+    -- Use cached flag instead of IsShown()/GetText() which are secret in instances
+    local hasRealText = frame._arcCLHasText == true or frame._arcSingleStackShowing == true
 
     -- Only show preview on the selected icon AND when no real text
     if isSelectedIcon and not hasRealText then
@@ -1827,25 +1784,8 @@ local function UpdatePreviewText(frame, cdID, cfg)
   local cooldownFrame = frame.Cooldown or frame.cooldown
   if cooldownFrame and cfg.cooldownText and cfg.cooldownText.enabled ~= false then
     local cdTextCfg = cfg.cooldownText
-    local hasCooldownText = false
-    
-    -- Check if there's visible cooldown text (IsShown and GetText can be secret during combat)
-    if frame._arcCooldownText then
-      -- Wrap entire check in pcall - both IsShown() and GetText() can be secret
-      local ok, result = pcall(function()
-        if frame._arcCooldownText:IsShown() then
-          local text = frame._arcCooldownText:GetText()
-          return text and text ~= ""
-        end
-        return false
-      end)
-      if ok then
-        hasCooldownText = result
-      else
-        -- If pcall failed due to secret values, assume there's text
-        hasCooldownText = true
-      end
-    end
+    -- Use cached flag instead of IsShown()/GetText() which are secret in instances
+    local hasCooldownText = frame._arcPreserveDurationText == true
     
     -- Only show preview on the selected icon AND when no real text
     if isSelectedIcon and not hasCooldownText then
@@ -1932,13 +1872,7 @@ local function UpdatePreviewGlow(frame, cdID, cfg)
   local isPreviewTarget = glowPreviewActive and (cdID == previewCdID)
   
   -- Check if real glow is happening (don't show preview during actual proc)
-  local hasRealGlow = false
-  if frame.SpellActivationAlert then
-    local ok, result = pcall(function() return frame.SpellActivationAlert:IsShown() end)
-    if ok and result then
-      hasRealGlow = true
-    end
-  end
+  local hasRealGlow = frame._arcProcGlowActive == true
   
   -- Get glow config
   local glowCfg = cfg and cfg.procGlow
@@ -1955,11 +1889,11 @@ local function UpdatePreviewGlow(frame, cdID, cfg)
     if not glowOverlay or not settings then return end
     local strata = settings.readyGlowFrameStrata or settings.glowFrameStrata
     if strata and strata ~= "inherit" then
-      pcall(glowOverlay.SetFrameStrata, glowOverlay, strata)
+      glowOverlay.SetFrameStrata(glowOverlay, strata)
       glowOverlay._arcGlowStrataOverride = strata
     elseif glowOverlay._arcGlowStrataOverride then
       local parentStrata = glowOverlay._arcOwnerFrame and glowOverlay._arcOwnerFrame:GetFrameStrata() or "MEDIUM"
-      pcall(glowOverlay.SetFrameStrata, glowOverlay, parentStrata)
+      glowOverlay.SetFrameStrata(glowOverlay, parentStrata)
       glowOverlay._arcGlowStrataOverride = nil
     end
     local level = settings.readyGlowFrameLevel or settings.glowFrameLevel
@@ -2433,14 +2367,12 @@ local function ApplyBorderDesaturationFromDuration(frame, durationObj)
   -- Get or create color curves for this color
   local rCurve, gCurve, bCurve = GetBorderColorCurves(r, g, b)
   if not rCurve or not gCurve or not bCurve then return end
-  
-  -- Evaluate curves with duration object - results may be secret but SetVertexColor accepts them!
-  local okR, finalR = pcall(function() return durationObj:EvaluateRemainingPercent(rCurve) end)
-  local okG, finalG = pcall(function() return durationObj:EvaluateRemainingPercent(gCurve) end)
-  local okB, finalB = pcall(function() return durationObj:EvaluateRemainingPercent(bCurve) end)
-  
-  if okR and okG and okB and finalR and finalG and finalB then
-    -- SetVertexColor accepts secret values!
+
+  local finalR = durationObj:EvaluateRemainingPercent(rCurve)
+  local finalG = durationObj:EvaluateRemainingPercent(gCurve)
+  local finalB = durationObj:EvaluateRemainingPercent(bCurve)
+
+  if finalR and finalG and finalB then
     if edges.top then edges.top:SetVertexColor(finalR, finalG, finalB, a) end
     if edges.bottom then edges.bottom:SetVertexColor(finalR, finalG, finalB, a) end
     if edges.left then edges.left:SetVertexColor(finalR, finalG, finalB, a) end
@@ -2500,8 +2432,8 @@ ApplyIconStyle = function(frame, cdID)
   -- Must happen before any mask stripping so the reference is always available.
   -- Masque's Mask.lua reads Button.IconMask to initialize its mask system.
   if iconTex and not frame.IconMask then
-    local ok, mask = pcall(function() return iconTex:GetMaskTexture(1) end)
-    if ok and mask then
+    local mask = iconTex:GetMaskTexture(1)
+    if mask then
       frame.IconMask = mask
     end
   end
@@ -2552,7 +2484,7 @@ ApplyIconStyle = function(frame, cdID)
       -- Masque needs the original masks present so Skin_Mask can manage them.
       if iconTex._arcMasksRemoved and iconTex._arcOrigMasks then
         for _, mask in ipairs(iconTex._arcOrigMasks) do
-          pcall(function() iconTex:AddMaskTexture(mask) end)
+          iconTex:AddMaskTexture(mask)
         end
         iconTex._arcMasksRemoved = nil
       end
@@ -2563,12 +2495,12 @@ ApplyIconStyle = function(frame, cdID)
       if not iconTex._arcMasksRemoved and iconTex.GetMaskTexture and iconTex.RemoveMaskTexture then
         local masksToRemove = {}
         for i = 1, 5 do
-          local ok, mask = pcall(function() return iconTex:GetMaskTexture(i) end)
-          if ok and mask then table.insert(masksToRemove, mask) end
+          local mask = iconTex:GetMaskTexture(i)
+          if mask then table.insert(masksToRemove, mask) end
         end
         if #masksToRemove > 0 then iconTex._arcOrigMasks = masksToRemove end
         for _, mask in ipairs(masksToRemove) do
-          pcall(function() iconTex:RemoveMaskTexture(mask) end)
+          iconTex:RemoveMaskTexture(mask)
         end
         iconTex._arcMasksRemoved = true
       end
@@ -2584,21 +2516,21 @@ ApplyIconStyle = function(frame, cdID)
             -- Match CDM's native XML: mask is setAllPoints on the FRAME, not iconTex
             -- Using iconTex causes 1-2px misalignment at top corners
             maskTex:SetAllPoints(frame)
-            pcall(function() iconTex:AddMaskTexture(maskTex) end)
+            iconTex:AddMaskTexture(maskTex)
             iconTex._arcOwnMask = maskTex
           end
         else
           -- Remove our own mask if present
           if iconTex._arcOwnMask then
-            pcall(function() iconTex:RemoveMaskTexture(iconTex._arcOwnMask) end)
+            iconTex:RemoveMaskTexture(iconTex._arcOwnMask)
             iconTex._arcOwnMask = nil
           end
           -- CDM may have re-added its native mask since last refresh — strip any that remain
           if iconTex.GetMaskTexture and iconTex.RemoveMaskTexture then
             for i = 1, 5 do
-              local ok, mask = pcall(function() return iconTex:GetMaskTexture(i) end)
-              if ok and mask then
-                pcall(function() iconTex:RemoveMaskTexture(mask) end)
+              local mask = iconTex:GetMaskTexture(i)
+              if mask then
+                iconTex:RemoveMaskTexture(mask)
               end
             end
           end
@@ -2652,6 +2584,27 @@ ApplyIconStyle = function(frame, cdID)
   -- are static children already handled by SetAlpha hooks and ApplyIconStyle.
   if not frame._arcPandemicHooked and frame.ShowPandemicStateFrame then
     frame._arcPandemicHooked = true
+
+    -- ShowPandemicStateFrame and HidePandemicStateFrame are mutually exclusive each frame —
+    -- CDM calls exactly one of them from CheckPandemicTimeDisplay every OnUpdate tick.
+    -- ON:  ShowPandemicStateFrame fires → start glow, stamp _arcPandemicLastFire
+    -- OFF: HidePandemicStateFrame fires → if glow active and last fire was >0.1s ago, kill it
+    -- Zero timers, zero closures, zero allocations. Just a GetTime() stamp and a compare.
+    local PANDEMIC_LINGER = 0.1  -- allow ~6 frames of Hide before killing (handles hitches)
+
+    local function PandemicGlowKill(self)
+      self._arcPandemicGlowActive = nil
+      self._arcPandemicLastFire   = nil
+      local pfCfgW = GetEffectiveIconSettingsForFrame(self)
+      local aasFW  = pfCfgW and pfCfgW.auraActiveState
+      local svFW   = pfCfgW and GetEffectiveStateVisuals(pfCfgW)
+      if aasFW and aasFW.glow == true and aasFW.glowFollowPandemic == true then
+        HideAuraActiveGlow(self)
+      elseif svFW and svFW.readyGlow and svFW.glowFollowPandemic then
+        if ns.CDMEnhance.HideReadyGlow then ns.CDMEnhance.HideReadyGlow(self) end
+      end
+    end
+
     hooksecurefunc(frame, "ShowPandemicStateFrame", function(self)
       local pi = self.PandemicIcon
       if not pi then return end
@@ -2662,6 +2615,43 @@ ApplyIconStyle = function(frame, cdID)
       else
         ModuleDisableBorderFrame(pi, "pandemic")
       end
+
+      local pfCfg = GetEffectiveIconSettingsForFrame(self)
+      local aasF  = pfCfg and pfCfg.auraActiveState
+      local svF   = pfCfg and GetEffectiveStateVisuals(pfCfg)
+      local hasFollowPandemic = (aasF and aasF.glow == true and aasF.glowFollowPandemic == true)
+                             or (svF and svF.readyGlow and svF.glowFollowPandemic)
+      if not hasFollowPandemic then return end
+
+      -- Stamp every fire so HidePandemicStateFrame knows the window is still live
+      self._arcPandemicLastFire = GetTime()
+
+      if not self._arcPandemicGlowActive then
+        if aasF and aasF.glow == true and aasF.glowFollowPandemic == true then
+          local ok = not aasF.glowCombatOnly or InCombatLockdown() or UnitAffectingCombat("player")
+          if ok then
+            self._arcPandemicGlowActive = true
+            HideAuraActiveGlow(self)
+            ShowAuraActiveGlow(self, aasF)
+          end
+        elseif svF and svF.readyGlow and svF.glowFollowPandemic then
+          local ok = not svF.readyGlowCombatOnly or InCombatLockdown() or UnitAffectingCombat("player")
+          if ok then
+            self._arcPandemicGlowActive = true
+            if ns.CDMEnhance.HideReadyGlow then ns.CDMEnhance.HideReadyGlow(self) end
+            if ns.CDMEnhance.ShowReadyGlow then ns.CDMEnhance.ShowReadyGlow(self, svF) end
+          end
+        end
+      end
+    end)
+
+    -- HidePandemicStateFrame fires every frame when window is closed.
+    -- Kill glow once enough time has passed since last ShowPandemicStateFrame.
+    hooksecurefunc(frame, "HidePandemicStateFrame", function(self)
+      if not self._arcPandemicGlowActive then return end
+      local last = self._arcPandemicLastFire
+      if last and (GetTime() - last) < PANDEMIC_LINGER then return end
+      PandemicGlowKill(self)
     end)
   end
 
@@ -2886,26 +2876,21 @@ ApplyIconStyle = function(frame, cdID)
       local spellID = cooldownInfo and (cooldownInfo.overrideSpellID or cooldownInfo.spellID)
       if not spellID then return end
 
-      -- Live read: hook fires inside CDM's feed, not our dispatch cycle
-      local isOnGCD = nil
-      pcall(function()
-        local cdInfo = C_Spell.GetSpellCooldown(spellID)
-        if cdInfo and cdInfo.isOnGCD == true then isOnGCD = true end
-      end)
-      if not isOnGCD then return end
+      -- Read CDM's own isOnGCD field — set by CacheCooldownValues() which runs
+      -- synchronously BEFORE CooldownFrame_Set() within RefreshSpellCooldownInfo().
+      -- By the time this hook fires, pf.isOnGCD is already current. Zero API calls.
+      if not pf.isOnGCD then return end
 
       pf._arcBypassGCDIntercept = true
 
       if pf._arcIsChargeSpellCached then
         -- Charge spell: replace GCD feed with recharge timer (or clear if none)
         local chargeDurObj = nil
-        pcall(function()
           if C_Spell.GetSpellChargeDuration then
             chargeDurObj = C_Spell.GetSpellChargeDuration(spellID)
           end
-        end)
         if chargeDurObj then
-          pcall(function() cd:SetCooldownFromDurationObject(chargeDurObj, true) end)
+          cd:SetCooldownFromDurationObject(chargeDurObj, true)
         else
           cd:SetCooldown(0, 0)
         end
@@ -3153,8 +3138,9 @@ ApplyIconStyle = function(frame, cdID)
       frame.Cooldown._arcParentFrame = frame
       frame.Cooldown._arcCdID = cdID
       
-      -- Store user's reverse setting for the hook to use
-      frame._arcUserReverse = swipeCfg and swipeCfg.reverse == true
+      -- Store user's reverse settings for the SetCooldown hook to use
+      frame._arcUserReverse      = swipeCfg and swipeCfg.reverse == true
+      frame._arcReverseWhileAura = swipeCfg and swipeCfg.reverseWhileAura == true
       
       hooksecurefunc(frame.Cooldown, "SetCooldown", function(self)
         local parentFrame = self._arcParentFrame
@@ -3177,7 +3163,8 @@ ApplyIconStyle = function(frame, cdID)
         
         -- Apply user's reverse (animation direction) setting
         -- CDM template has reverse="true" by default, so we need to set it explicitly
-        self:SetReverse(parentFrame._arcUserReverse or false)
+        local auraActive = (parentFrame._arcAuraActive == true) or (parentFrame.totemData ~= nil)
+        self:SetReverse((parentFrame._arcUserReverse or false) or (auraActive and (parentFrame._arcReverseWhileAura or false)))
         
         -- ═══════════════════════════════════════════════════════════════════
         -- CHARGE SPELL GCD HIDING - Shadow binary controls swipe visibility
@@ -3349,15 +3336,20 @@ ApplyIconStyle = function(frame, cdID)
       -- Cache whether this is a charge spell (needed by CooldownState binary detection).
       -- Required for: noGCDSwipe GCD intercept, ignoreAuraOverride recharge detection,
       -- swipeWaitForNoCharges, and any path reading GetBinaryCooldownState.
+      -- Charge type is static per spellID — only re-check when spellID changes.
       do
         local cooldownInfo = frame.cooldownInfo
         local spellID = cooldownInfo and (cooldownInfo.overrideSpellID or cooldownInfo.spellID)
         if spellID then
-          local chargeInfo = nil
-          pcall(function() chargeInfo = C_Spell.GetSpellCharges(spellID) end)
-          frame._arcIsChargeSpellCached = (chargeInfo ~= nil)
+          if frame._arcChargeCheckSpellID ~= spellID then
+            frame._arcChargeCheckSpellID = spellID
+            local chargeInfo = C_Spell.GetSpellCharges(spellID)
+            local chargeDurObj = chargeInfo and C_Spell.GetSpellChargeDuration and C_Spell.GetSpellChargeDuration(spellID)
+            frame._arcIsChargeSpellCached = (chargeInfo ~= nil and chargeDurObj ~= nil)
+          end
         else
           frame._arcIsChargeSpellCached = false
+          frame._arcChargeCheckSpellID = nil
         end
       end
       
@@ -3835,43 +3827,9 @@ ApplyIconStyle = function(frame, cdID)
         end))
       end
       
-      -- Hook SetVertexColor to enforce CooldownState's desired tint
-      -- and prevent CDM from dimming the icon (keepBright)
-      hooksecurefunc(frame.Icon, "SetVertexColor", _T("CDMHook.SetVertexColor", function(self, r, g, b, a)
-        local pf = self._arcParentFrame
-        if not pf then return end
-        if pf._arcBypassVertexHook then return end
-        
-        -- FAST PATH: no CooldownState tint AND cfg says no keepBright intercept needed.
-        -- This skips GetEffectiveIconSettingsForFrame on the 71/s common case.
-        if not pf._arcDesiredVertexColor then
-          if pf._arcCfgCdID == pf.cooldownID and pf._arcCfgVersion == effectiveSettingsCacheVersion
-             and not pf._arcCachedNeedVertexIntercept then
-            return
-          end
-        end
-        
-        -- COOLDOWN STATE VERTEX COLOR ENFORCEMENT (same pattern as alpha)
-        -- CooldownState stores desired color; enforce it against CDM/SpellUsability overwrites
-        local dvc = pf._arcDesiredVertexColor
-        if dvc then
-          pf._arcBypassVertexHook = true
-          self:SetVertexColor(dvc.r, dvc.g, dvc.b, 1)
-          pf._arcBypassVertexHook = false
-          return
-        end
-        
-        -- KEEP BRIGHT ENFORCEMENT (no CooldownState tint active)
-        local kbCfg = GetEffectiveIconSettingsForFrame(pf)
-        if kbCfg and kbCfg.keepBright then
-          -- Only intercept if CDM is trying to dim (not already white)
-          if not (r == 1 and g == 1 and b == 1) then
-            pf._arcBypassVertexHook = true
-            self:SetVertexColor(1, 1, 1)
-            pf._arcBypassVertexHook = false
-          end
-        end
-      end))
+    -- (SetVertexColor hook removed — RefreshIconColor hook in CDMSpellUsability
+    --  now handles all color writes in a single pass after CDM runs.
+    --  No more hook fighting at 76/s.)
     end
     
     -- Hook SetCooldown to reapply our settings after CDM updates
@@ -3962,126 +3920,51 @@ ApplyIconStyle = function(frame, cdID)
         end
         
         local currentCfg = GetIconSettings(currentCdID)
-        if not currentCfg or not currentCfg.cooldownSwipe then return end
-        
-        local swipe = currentCfg.cooldownSwipe
-        
-        -- Check for ignoreAuraOverride in both old location (cooldownSwipe) and new location (auraActiveState)
-        local ignoreAuraOverride = parentFrame._arcIgnoreAuraOverride 
-          or swipe.ignoreAuraOverride 
+        if not currentCfg then return end
+
+        -- Resolve ignoreAuraOverride BEFORE the cooldownSwipe nil-guard so that
+        -- frames with ignoreAuraOverride in auraActiveState (and no cooldownSwipe
+        -- table at all) still reach the IAO durationObj push block.
+        local ignoreAuraOverride = parentFrame._arcIgnoreAuraOverride
+          or (currentCfg.cooldownSwipe and currentCfg.cooldownSwipe.ignoreAuraOverride)
           or (currentCfg.auraActiveState and currentCfg.auraActiveState.ignoreAuraOverride)
-        
+
+        -- For non-IAO paths, still need cooldownSwipe table
+        local swipe = currentCfg.cooldownSwipe
+        if not ignoreAuraOverride and not swipe then return end
+
         -- Handle Ignore Aura Override - we take FULL control of swipe/edge
         if ignoreAuraOverride then
           -- ═══════════════════════════════════════════════════════════════════
           -- IGNORE AURA OVERRIDE MODE
-          -- Purpose: Push SPELL cooldown durationObj instead of CDM's aura duration.
-          -- CooldownState PATH A owns all swipe/edge/alpha decisions.
-          -- This hook is a DUMB PIPE: push data, set texture, apply bling.
+          -- durationObj push now lives in CooldownState.HandleIgnoreAuraOverride,
+          -- fired via OnAuraInstanceInfoSet → CooldownState.Apply. API-agnostic,
+          -- works before and after the 12.0.1 hotfix.
+          -- This hook handles: texture override, bling, reverse, swipe color.
           -- ═══════════════════════════════════════════════════════════════════
-          
+
+          -- Set texture to spell icon (not aura icon)
           local cooldownInfo = parentFrame.cooldownInfo
           local spellID = cooldownInfo and (cooldownInfo.overrideSpellID or cooldownInfo.spellID)
-          local baseSpellID = cooldownInfo and cooldownInfo.spellID
-          
-          if spellID then
-            local isOnGCD, durationObj, isChargeSpell, chargeDurObj = GetSpellCooldownState(spellID)
-            
-            -- Fallback: if overrideSpellID returned no durationObj, try base spellID
-            if not durationObj and baseSpellID and baseSpellID ~= spellID then
-              local _, baseDurObj, baseIsCharge, baseChargeDur = GetSpellCooldownState(baseSpellID)
-              if baseDurObj then
-                durationObj = baseDurObj
-                if baseIsCharge then
-                  isChargeSpell = true
-                  chargeDurObj = baseChargeDur
-                end
-              end
-            end
-            
-            -- Push durationObj to override CDM's aura display with spell cooldown
-            if isChargeSpell and chargeDurObj then
-              -- Charge spell: push chargeDurObj for recharge timer display
-              parentFrame._arcBypassCDHook = true
-              pcall(function()
-                self:SetUseAuraDisplayTime(false)
-                self:SetCooldownFromDurationObject(chargeDurObj)
-              end)
-              parentFrame._arcBypassCDHook = false
-              
-              -- Text preservation (hideTextWithSwipe)
-              local hideTextWithSwipe = swipe.hideTextWithSwipe
-              local shouldPreserveText = not hideTextWithSwipe and parentFrame._arcPreserveDurationText and (parentFrame._lastAppliedAlpha or 1) > 0.01 and not parentFrame._arcGroupHidden and not (parentFrame:GetParent() and parentFrame:GetParent()._arcGroupHidden)
-              if shouldPreserveText then
-                for _, region in ipairs({self:GetRegions()}) do
-                  if region:IsObjectType("FontString") and region.SetIgnoreParentAlpha then
-                    region:SetIgnoreParentAlpha(true)
-                  end
-                end
-                if not parentFrame._arcHideCDTextForCharges then
-                  if parentFrame._arcCooldownText and parentFrame._arcCooldownText.SetIgnoreParentAlpha then
-                    parentFrame._arcCooldownText:SetIgnoreParentAlpha(true)
-                  end
-                end
-                if not parentFrame._arcHideChargeAtZero then
-                  if parentFrame._arcChargeText and parentFrame._arcChargeText.SetIgnoreParentAlpha then
-                    parentFrame._arcChargeText:SetIgnoreParentAlpha(true)
-                  end
-                end
-              end
-            elseif durationObj then
-              -- Normal spell: push spell cooldown durationObj
-              parentFrame._arcBypassCDHook = true
-              pcall(function()
-                self:SetUseAuraDisplayTime(false)
-                self:SetCooldownFromDurationObject(durationObj)
-              end)
-              parentFrame._arcBypassCDHook = false
-              
-              -- Text preservation
-              if parentFrame._arcPreserveDurationText and (parentFrame._lastAppliedAlpha or 1) > 0.01 and not parentFrame._arcGroupHidden and not (parentFrame:GetParent() and parentFrame:GetParent()._arcGroupHidden) then
-                for _, region in ipairs({self:GetRegions()}) do
-                  if region:IsObjectType("FontString") and region.SetIgnoreParentAlpha then
-                    region:SetIgnoreParentAlpha(true)
-                  end
-                end
-                if not parentFrame._arcHideCDTextForCharges then
-                  if parentFrame._arcCooldownText and parentFrame._arcCooldownText.SetIgnoreParentAlpha then
-                    parentFrame._arcCooldownText:SetIgnoreParentAlpha(true)
-                  end
-                end
-                if not parentFrame._arcHideChargeAtZero then
-                  if parentFrame._arcChargeText and parentFrame._arcChargeText.SetIgnoreParentAlpha then
-                    parentFrame._arcChargeText:SetIgnoreParentAlpha(true)
-                  end
-                end
-              end
-            end
-            -- If neither durationObj nor chargeDurObj, don't clear — let CDM's display stand
-            
-            -- Set texture to spell icon (not aura icon)
-            if parentFrame.Icon then
-              local texture = C_Spell.GetSpellTexture(spellID)
-              if texture then
-                parentFrame._arcBypassTextureHook = true
-                parentFrame.Icon:SetTexture(texture)
-                parentFrame._arcBypassTextureHook = false
-              end
+          if spellID and parentFrame.Icon then
+            local texture = C_Spell.GetSpellTexture(spellID)
+            if texture then
+              parentFrame._arcBypassTextureHook = true
+              parentFrame.Icon:SetTexture(texture)
+              parentFrame._arcBypassTextureHook = false
             end
           end
           
           -- Apply bling/reverse/color based on who controls cooldowns
           if not masqueControlsCooldowns then
             -- ArcUI controls: Apply all user settings
-            self:SetDrawBling(swipe.showBling ~= false)
-            self:SetReverse(swipe.reverse == true)
-            
-            -- Set swipe color: auraSwipeColor when aura is active, swipeColor otherwise, else black
-            -- auraSwipeColor lets users customize the swipe during aura display separately
-            -- from the cooldown swipe color (CDM's default aura yellow is always overridden here)
+            self:SetDrawBling(not swipe or swipe.showBling ~= false)
             local isAuraNowActive = (parentFrame._arcAuraActive == true) or (parentFrame.totemData ~= nil)
-            local colorToUse = swipe.swipeColor
-            if isAuraNowActive and swipe.auraSwipeColor then
+            self:SetReverse((swipe and swipe.reverse == true or false) or (isAuraNowActive and swipe and swipe.reverseWhileAura == true))
+
+            -- Set swipe color: auraSwipeColor when aura is active, swipeColor otherwise, else black
+            local colorToUse = swipe and swipe.swipeColor
+            if isAuraNowActive and swipe and swipe.auraSwipeColor then
               colorToUse = swipe.auraSwipeColor
             end
             if colorToUse then
@@ -4109,18 +3992,13 @@ ApplyIconStyle = function(frame, cdID)
             -- Check if aura is active - if so, CDM handles display
             local auraActive = parentFrame._arcAuraActive == true
             
-            -- Check if charge spell
-            local chargeInfo = nil
-            pcall(function() chargeInfo = C_Spell.GetSpellCharges(spellID) end)
-            
-            if chargeInfo and C_Spell.GetSpellChargeDuration and not auraActive then
+            -- Use cached charge type (set in ApplyIconStyle, static per spellID)
+            if parentFrame._arcIsChargeSpellCached and C_Spell.GetSpellChargeDuration and not auraActive then
               -- CHARGE SPELL (no aura): push chargeDurObj for timer display
-              local ok, chargeDurObj = pcall(C_Spell.GetSpellChargeDuration, spellID)
-              if ok and chargeDurObj then
+              local chargeDurObj = C_Spell.GetSpellChargeDuration(spellID)
+              if chargeDurObj then
                 parentFrame._arcBypassCDHook = true
-                pcall(function()
-                  self:SetCooldownFromDurationObject(chargeDurObj)
-                end)
+                self:SetCooldownFromDurationObject(chargeDurObj)
                 parentFrame._arcBypassCDHook = false
               end
             end
@@ -4140,10 +4018,10 @@ ApplyIconStyle = function(frame, cdID)
           -- Just apply bling/reverse/color.
           -- ═══════════════════════════════════════════════════════════════════
           self:SetDrawBling(swipe.showBling ~= false)
-          self:SetReverse(swipe.reverse == true)
+          local isAuraNowActive = (parentFrame._arcAuraActive == true) or (parentFrame.totemData ~= nil)
+          self:SetReverse((swipe.reverse == true) or (isAuraNowActive and swipe.reverseWhileAura == true))
 
           -- Apply swipe color: auraSwipeColor when aura is active, else swipeColor
-          local isAuraNowActive = (parentFrame._arcAuraActive == true) or (parentFrame.totemData ~= nil)
           if isAuraNowActive and swipe.auraSwipeColor then
             local sc = swipe.auraSwipeColor
             self:SetSwipeColor(sc.r or 0, sc.g or 0, sc.b or 0, sc.a or 0.7)
@@ -4207,8 +4085,8 @@ ApplyIconStyle = function(frame, cdID)
     -- Upgrade it to the CDM atlas so it looks identical.
     if not frame._arcIconOverlay and frame.IconOverlay then
       frame._arcIconOverlay = frame.IconOverlay
-      pcall(function() frame._arcIconOverlay:SetAtlas("UI-HUD-CoolDownManager-IconOverlay", false) end)
-      pcall(function() frame._arcIconOverlay:SetVertexColor(1, 1, 1, 1) end)
+      frame._arcIconOverlay:SetAtlas("UI-HUD-CoolDownManager-IconOverlay", false)
+      frame._arcIconOverlay:SetVertexColor(1, 1, 1, 1)
     end
   end
 
@@ -4335,7 +4213,7 @@ ApplyIconStyle = function(frame, cdID)
       spellID = frame.cooldownInfo.overrideSpellID or frame.cooldownInfo.spellID
     end
     if not spellID and frame.GetSpellID then
-      pcall(function() spellID = frame:GetSpellID() end)
+      spellID = frame:GetSpellID()
     end
     frame._arcSpellID = spellID
     
@@ -4353,9 +4231,7 @@ ApplyIconStyle = function(frame, cdID)
     -- ═══════════════════════════════════════════════════════════════
     if spellID and glowCfg.enabled ~= false then
       local isOverlayed = false
-      pcall(function()
         isOverlayed = C_SpellActivationOverlay and C_SpellActivationOverlay.IsSpellOverlayed(spellID)
-      end)
       
       if isOverlayed then
         -- Proc is active - apply our color to CDM's glow
@@ -4366,18 +4242,19 @@ ApplyIconStyle = function(frame, cdID)
   
   -- ═══════════════════════════════════════════════════════════════════
   -- TEXT OVERLAY FRAME (sits above cooldown swipe AND glow frames)
-  -- Level hierarchy: base(+0) → glowOverlay/Cooldown(+1, glows clamped here, duration text OVERLAY layer) → textOverlay(+20) → charges(+50) → drag(+100)
-  -- LCG glow children clamped to overlay level via ClampOverlayChildren hooks
+  -- Level hierarchy: base(+0) → glowOverlay/Cooldown(+1, glows sit here) → textOverlay(+2) → charges(+3) → drag(+4)
+  -- Glows land at iconLevel+1 (GLOW_LEVEL_OFFSET=1), text clears them with +2.
+  -- Cross-group same-strata minimum gap: set foreground group level ≥ background+3.
   -- ═══════════════════════════════════════════════════════════════════
   if not frame._arcTextOverlay then
     local overlay = CreateFrame("Frame", nil, frame)
     overlay:SetAllPoints(frame)
-    overlay:SetFrameLevel(frame:GetFrameLevel() + 20)
+    overlay:SetFrameLevel(frame:GetFrameLevel() + 2)
     overlay:EnableMouse(false)  -- CRITICAL: Never intercept mouse - just a container
     frame._arcTextOverlay = overlay
   else
     -- Ensure existing overlay stays above glow frames (frame level may have changed)
-    frame._arcTextOverlay:SetFrameLevel(frame:GetFrameLevel() + 20)
+    frame._arcTextOverlay:SetFrameLevel(frame:GetFrameLevel() + 2)
   end
   
   -- ═══════════════════════════════════════════════════════════════════
@@ -4436,6 +4313,17 @@ ApplyIconStyle = function(frame, cdID)
             ns.Glows.Start(self, "ArcUI_Alert", "pixel", {color = color, lines = 8, frequency = 0.25, thickness = 2, xOffset = glowOffset, yOffset = glowOffset})
           end
         end
+        -- glowFollowPandemic: aura reapplied = pandemic window is over, clear glow
+        local panCfg1 = GetEffectiveIconSettingsForFrame(self)
+        local aas1 = panCfg1 and panCfg1.auraActiveState
+        local sv1  = panCfg1 and GetEffectiveStateVisuals(panCfg1)
+        if aas1 and aas1.glow == true and aas1.glowFollowPandemic == true then
+          self._arcPandemicGlowActive = nil
+          HideAuraActiveGlow(self)
+        elseif sv1 and sv1.readyGlow and sv1.glowFollowPandemic then
+          self._arcPandemicGlowActive = nil
+          if ns.CDMEnhance.HideReadyGlow then ns.CDMEnhance.HideReadyGlow(self) end
+        end
         -- NOTE: Inactive state (desaturation/hide/dim) is handled by CDMGroups via ApplyIconVisuals
         -- Do NOT duplicate that logic here - it causes conflicts when settings change
         
@@ -4452,6 +4340,27 @@ ApplyIconStyle = function(frame, cdID)
             ns.Glows.Start(self, "ArcUI_Alert", "pixel", {color = color, lines = 8, frequency = 0.15, thickness = 2, xOffset = glowOffset, yOffset = glowOffset})
           end
         end
+        -- glowFollowPandemic: CDM fires eventType 2 at exact pandemic entry — use it directly
+        local panCfg = GetEffectiveIconSettingsForFrame(self)
+        local aas = panCfg and panCfg.auraActiveState
+        local sv  = panCfg and GetEffectiveStateVisuals(panCfg)
+        if aas and aas.glow == true and aas.glowFollowPandemic == true then
+          -- Respect glowCombatOnly: only show if not restricted to combat, or currently in combat
+          local passedCombat = not aas.glowCombatOnly or InCombatLockdown() or UnitAffectingCombat("player")
+          if passedCombat then
+            self._arcPandemicGlowActive = true
+            HideAuraActiveGlow(self)
+            ShowAuraActiveGlow(self, aas)
+          end
+        elseif sv and sv.readyGlow and sv.glowFollowPandemic then
+          -- Respect readyGlowCombatOnly: only show if not restricted to combat, or currently in combat
+          local passedCombat = not sv.readyGlowCombatOnly or InCombatLockdown() or UnitAffectingCombat("player")
+          if passedCombat then
+            self._arcPandemicGlowActive = true
+            if ns.CDMEnhance.HideReadyGlow then ns.CDMEnhance.HideReadyGlow(self) end
+            if ns.CDMEnhance.ShowReadyGlow then ns.CDMEnhance.ShowReadyGlow(self, sv) end
+          end
+        end
         
       elseif eventType == 3 then -- OnCooldown (Aura expired / Cooldown used)
         local ev = alertCfg and alertCfg.onUnavailable
@@ -4465,9 +4374,33 @@ ApplyIconStyle = function(frame, cdID)
             ns.Glows.Stop(self, "ArcUI_Alert")
           end
         end
+        -- glowFollowPandemic: aura expired, clear pandemic glow
+        local panCfg3 = GetEffectiveIconSettingsForFrame(self)
+        local aas3 = panCfg3 and panCfg3.auraActiveState
+        local sv3  = panCfg3 and GetEffectiveStateVisuals(panCfg3)
+        if aas3 and aas3.glow == true and aas3.glowFollowPandemic == true then
+          self._arcPandemicGlowActive = nil
+          HideAuraActiveGlow(self)
+        elseif sv3 and sv3.readyGlow and sv3.glowFollowPandemic then
+          self._arcPandemicGlowActive = nil
+          if ns.CDMEnhance.HideReadyGlow then ns.CDMEnhance.HideReadyGlow(self) end
+        end
         -- NOTE: Inactive state (desaturation/hide/dim) is handled by CDMGroups via ApplyIconVisuals
         -- Do NOT duplicate that logic here - it causes conflicts when settings change
         
+      elseif eventType == 5 then -- OnAuraApplied (aura reapplied — pandemic window reset)
+        -- glowFollowPandemic: reapplication means aura is full duration, CDM hides pandemic — we must too
+        local panCfg5 = GetEffectiveIconSettingsForFrame(self)
+        local aas5 = panCfg5 and panCfg5.auraActiveState
+        local sv5  = panCfg5 and GetEffectiveStateVisuals(panCfg5)
+        if aas5 and aas5.glow == true and aas5.glowFollowPandemic == true then
+          self._arcPandemicGlowActive = nil
+          HideAuraActiveGlow(self)
+        elseif sv5 and sv5.readyGlow and sv5.glowFollowPandemic then
+          self._arcPandemicGlowActive = nil
+          if ns.CDMEnhance.HideReadyGlow then ns.CDMEnhance.HideReadyGlow(self) end
+        end
+
       elseif eventType == 4 then -- ChargeGained
         local ev = alertCfg and alertCfg.onChargeGained
         if ev then
@@ -4512,9 +4445,7 @@ ApplyIconStyle = function(frame, cdID)
     if gCfg and spellID and gCfg.enabled ~= false then
       -- Check current proc state
       local isOverlayed = false
-      pcall(function()
         isOverlayed = C_SpellActivationOverlay and C_SpellActivationOverlay.IsSpellOverlayed(spellID)
-      end)
       
       if isOverlayed then
         ns.CDMEnhance.ShowProcGlow(frame, gCfg)
@@ -4565,7 +4496,7 @@ function SetupChargeText(frame, cdID, cfg)
         fs:SetDrawLayer("OVERLAY", 7)
         frame._arcSingleStackText = fs
       end
-      frame._arcSingleStackContainer:SetFrameLevel(frame:GetFrameLevel() + 50)
+      frame._arcSingleStackContainer:SetFrameLevel(frame:GetFrameLevel() + 3)
       local fs = frame._arcSingleStackText
       local fontPath = GetFontPath(chargeCfg.font)
       SafeSetFont(fs, fontPath, chargeCfg.size or 16, chargeCfg.outline or "OUTLINE")
@@ -4632,8 +4563,8 @@ function SetupChargeText(frame, cdID, cfg)
         frame._arcSingleStackText:SetText("")
         frame._arcSingleStackShowing = false
       end
-      appFrame:SetAlpha(1)
       if chargeCfg and chargeCfg.enabled ~= false then
+        appFrame:SetAlpha(1)
         local appText = appFrame.Applications
         if appText then
           local fontPath = GetFontPath(chargeCfg.font)
@@ -4653,6 +4584,24 @@ function SetupChargeText(frame, cdID, cfg)
             local anchor = chargeCfg.anchor or "BOTTOMRIGHT"
             appText:SetPoint(anchor, frame, anchor, chargeCfg.offsetX or -2, chargeCfg.offsetY or 2)
           end
+        end
+      else
+        -- chargeText disabled: hide Applications frame via alpha (zero CPU).
+        -- Hook SetAlpha once so CDM can't restore it.
+        appFrame:SetAlpha(0)
+        if not appFrame._arcStackHideHooked then
+          appFrame._arcStackHideHooked = true
+          hooksecurefunc(appFrame, "SetAlpha", function(self, a)
+            local pf = self._arcParentIconFrame
+            if not pf then return end
+            local cdID2 = pf.cooldownID
+            local cfg2 = cdID2 and ns.CDMEnhance and ns.CDMEnhance.GetIconSettings and ns.CDMEnhance.GetIconSettings(cdID2)
+            local cc2 = cfg2 and cfg2.chargeText
+            if not cc2 or cc2.enabled == false then
+              if a ~= 0 then self:SetAlpha(0) end
+            end
+          end)
+          appFrame._arcParentIconFrame = frame
         end
       end
     end
@@ -4905,7 +4854,7 @@ function SetupChargeText(frame, cdID, cfg)
     local chargeFrame = frame.ChargeCount or frame.Applications
     if chargeFrame and chargeFrame.SetFrameLevel then
       local baseLevel = frame:GetFrameLevel()
-      chargeFrame:SetFrameLevel(baseLevel + 50)
+      chargeFrame:SetFrameLevel(baseLevel + 3)
     end
     
     -- Color
@@ -5191,6 +5140,11 @@ function SetupCooldownText(frame, cdID, cfg)
         end
       else
         -- ENABLED: Style text
+        -- Preemptively mark duration color active to prevent StyleCooldownText
+        -- stomping with static white before the 0.1s ticker fires (flicker fix)
+        if currentCfg.cooldownText.durationColor then
+          parentFrame._arcDurationColorActive = true
+        end
         for _, region in ipairs({self:GetRegions()}) do
           if region:IsObjectType("FontString") and not region._arcIsChargeText then
             StyleCooldownText(region, currentCfg.cooldownText, parentFrame)
@@ -5233,7 +5187,7 @@ local function CreateTextDragOverlay(fontString, frame, cdID, textType)
   local overlay = CreateFrame("Frame", nil, frame._arcTextOverlay)
   overlay:SetSize(50, 24)
   overlay:SetPoint("CENTER", fontString, "CENTER", 0, 0)
-  -- Set frame level HIGHER than icon drag overlay (which is +50)
+  -- Set frame level HIGHER than icon drag overlay (which is +4)
   overlay:SetFrameLevel(frame:GetFrameLevel() + 100)
   overlay:SetFrameStrata("DIALOG")
   overlay:EnableMouse(false)
@@ -5348,14 +5302,11 @@ local function CreateTextDragOverlay(fontString, frame, cdID, textType)
   overlay:SetScript("OnUpdate", function(self)
     if not self._dragging then 
       -- Keep overlay positioned on fontstring when not dragging
-      -- Wrap in pcall to handle secret/tainted values during combat
       if self._fontString then
-        pcall(function()
           -- SetAlphaFromBoolean handles secret boolean from IsShown()
           self:SetAlphaFromBoolean(self._fontString:IsShown(), 1, 0)
           self:ClearAllPoints()
           self:SetPoint("CENTER", self._fontString, "CENTER", 0, 0)
-        end)
       end
       return 
     end
@@ -5369,12 +5320,10 @@ local function CreateTextDragOverlay(fontString, frame, cdID, textType)
     local targetX = cursorX + (self._dragOffsetX or 0)
     local targetY = cursorY + (self._dragOffsetY or 0)
     
-    pcall(function()
       self._fontString:ClearAllPoints()
       self._fontString:SetPoint("CENTER", UIParent, "BOTTOMLEFT", targetX, targetY)
       self:ClearAllPoints()
       self:SetPoint("CENTER", self._fontString, "CENTER", 0, 0)
-    end)
   end)
   
   overlay:SetScript("OnMouseDown", function(self, button)
@@ -5517,7 +5466,7 @@ local function CreateDragOverlay(frame, cdID)
   
   local overlay = CreateFrame("Button", nil, frame)
   overlay:SetAllPoints()
-  overlay:SetFrameLevel(frame:GetFrameLevel() + 50)
+  overlay:SetFrameLevel(frame:GetFrameLevel() + 4)
   overlay:RegisterForClicks("LeftButtonUp", "RightButtonUp")
   -- Default to only unlocked state - options check happens via UpdateOverlayState
   overlay:EnableMouse(isUnlocked)
@@ -5622,6 +5571,7 @@ end
 ns.CDMEnhance.DisableCDMSubframeMouse = function(frame) end
 
 local function UpdateOverlayState(frame)
+  if not frame then return end
   if frame._arcOverlay then
     -- Check if frame is in a CDMGroups container or is a free icon managed by CDMGroups
     local parent = frame:GetParent()
@@ -5717,7 +5667,7 @@ local function ApplyMasqueAntsShapeToGlow(parentFrame, glow)
   if not shape then return end
   local MasqueLib = LibStub and LibStub("Masque", true)
   if not MasqueLib or not MasqueLib.GetAssistedCombatHighlightStyle then return end
-  local ok, styleData = pcall(MasqueLib.GetAssistedCombatHighlightStyle, MasqueLib, shape)
+  local styleData = MasqueLib.GetAssistedCombatHighlightStyle(MasqueLib, shape)
   if not ok or not styleData then return end
   if styleData.Texture then
     glow.Flipbook:SetTexture(styleData.Texture)
@@ -5751,9 +5701,9 @@ local function ApplyMasqueProcShapeToACHGlow(parentFrame, glow)
   if not shape then return end
   local MasqueLib = LibStub and LibStub("Masque", true)
   if not MasqueLib or not MasqueLib.GetSpellAlertFlipBook then return end
-  local ok, flipData = pcall(MasqueLib.GetSpellAlertFlipBook, MasqueLib, "Modern", shape)
+  local flipData = MasqueLib.GetSpellAlertFlipBook(MasqueLib, "Modern", shape)
   if not ok or not flipData then
-    ok, flipData = pcall(MasqueLib.GetSpellAlertFlipBook, MasqueLib, "Classic", shape)
+    flipData = MasqueLib.GetSpellAlertFlipBook(MasqueLib, "Classic", shape)
   end
   if not ok or not flipData then return end
   if flipData.LoopTexture and glow.ProcLoopFlipbook then
@@ -6048,7 +5998,14 @@ local function ShouldShowReadyGlow(stateVisuals, frame)
   if not stateVisuals or stateVisuals.readyGlow ~= true then
     return false
   end
-  
+
+  -- glowFollowPandemic: only TriggerAlertEvent (eventType 2) owns this glow.
+  -- Normal ready/apply paths must not show or hide it via _arcPandemicGlowActive.
+  -- Preview already returned true above so this gate is never reached in preview.
+  if stateVisuals.glowFollowPandemic then
+    return frame and frame._arcPandemicGlowActive == true or false
+  end
+
   -- Check combat-only mode
   if stateVisuals.readyGlowCombatOnly then
     local inCombat = InCombatLockdown() or UnitAffectingCombat("player")
@@ -6164,6 +6121,8 @@ GetEffectiveStateVisuals = function(cfg)
         readyGlowFrameStrata = rs.glowFrameStrata,  -- nil = inherit parent strata
         readyGlowFrameLevel = rs.glowFrameLevel,    -- nil = auto (relative +15)
         glowThreshold = rs.glowThreshold or 1.0,
+        glowThresholdSeconds = rs.glowThresholdSeconds,  -- nil = use percent mode, number = time-based (immune to extension bugs)
+        glowFollowPandemic = rs.glowFollowPandemic == true,  -- Use CDM pandemic timing instead of threshold
         glowAuraType = rs.glowAuraType or "auto",
         glowWhileChargesAvailable = rs.glowWhileChargesAvailable == true,  -- STRICT boolean
         readyProcOverride = rs.procOverride == true,    -- STRICT boolean
@@ -6184,6 +6143,7 @@ end
 
 -- Helper to get effective ready alpha (handles options panel preview when alpha is 0)
 local function GetEffectiveReadyAlpha(stateVisuals)
+  if not stateVisuals then return 1 end
   local readyAlpha = stateVisuals.readyAlpha
   if readyAlpha <= 0 then
     if ns.CDMEnhance.IsOptionsPanelOpen and ns.CDMEnhance.IsOptionsPanelOpen() then
@@ -6223,35 +6183,32 @@ ns.CDMEnhance.ShouldShowReadyGlow = ShouldShowReadyGlow
 -- ═══════════════════════════════════════════════════════════════════════════
 
 -- ═══════════════════════════════════════════════════════════════════
--- AURA ACTIVE GLOW — owned by ArcUI_AuraFrames.lua
--- The local forward-declarations (ShowAuraActiveGlow, HideAuraActiveGlow,
--- ShouldShowAuraActiveGlow) are wired up by AuraFrames' compat shim at
--- load time. ns.CDMEnhance.Show/Hide/ShouldShow are also set there.
--- Cooldown frames with auraActiveState.glow call through ns.CDMEnhance.
+-- AURA ACTIVE GLOW — owned by ArcUI_CooldownState.lua for cooldown frames
+-- CDMEnhance forwards through ns.CooldownState (set when CooldownState loads).
+-- Stub here so any early callers before CooldownState loads don't crash.
 -- ═══════════════════════════════════════════════════════════════════
 
-local function _AuraGlowProxy(fn, ...)
-  local f = ns.AuraFrames and ns.AuraFrames[fn]
-  if f then return f(...) end
-end
-
 ShowAuraActiveGlow = function(frame, cfg)
-  _AuraGlowProxy("ShowAuraActiveGlow", frame, cfg)
+  if ns.CooldownState and ns.CooldownState.ShowAuraActiveGlow then
+    ns.CooldownState.ShowAuraActiveGlow(frame, cfg)
+  end
 end
 
 HideAuraActiveGlow = function(frame)
-  _AuraGlowProxy("HideAuraActiveGlow", frame)
+  if ns.CooldownState and ns.CooldownState.HideAuraActiveGlow then
+    ns.CooldownState.HideAuraActiveGlow(frame)
+  end
 end
 
 local function ShouldShowAuraActiveGlow(auraActiveCfg, frame, isReady)
-  if ns.AuraFrames and ns.AuraFrames.ShouldShowAuraActiveGlow then
-    return ns.AuraFrames.ShouldShowAuraActiveGlow(auraActiveCfg, frame, isReady)
+  if ns.CooldownState and ns.CooldownState.ShouldShowAuraActiveGlow then
+    return ns.CooldownState.ShouldShowAuraActiveGlow(auraActiveCfg, frame, isReady)
   end
   return false
 end
 
--- Exports set by AuraFrames compat shim after it loads.
--- Stub here so any early callers don't crash.
+-- Exports: point at CooldownState (set when it loads).
+-- Stub closures above ensure early callers are safe before CooldownState loads.
 ns.CDMEnhance.ShowAuraActiveGlow       = ShowAuraActiveGlow
 ns.CDMEnhance.HideAuraActiveGlow       = HideAuraActiveGlow
 ns.CDMEnhance.ShouldShowAuraActiveGlow = ShouldShowAuraActiveGlow
@@ -6335,17 +6292,6 @@ function ns.CDMEnhance.OnCooldownEvent(frame, fromTicker, skipIdle, forceVisuals
         -- Feed immediately so the new spell's state is applied now, not on next event
         ns.CooldownState.FeedShadow(frame, cfg)
         ApplyCooldownStateVisuals(frame, cfg)
-      end
-
-      -- Update shadow state cache for GlobalCooldownSweep auto-stop decision.
-      -- Per-frame event listener and shadow hooks own feeding and dispatch —
-      -- we just need the cache to reflect current state so the ticker knows
-      -- when all frames are idle and can stop.
-      if fromTicker then
-        local shadowCD    = frame._arcCDMShadowCooldown
-        local chargeShadow = frame._arcCDMChargeShadow
-        frame._arcLastShadowShown = shadowCD    and shadowCD:IsShown() or false
-        frame._arcLastChargeShown = chargeShadow and chargeShadow:IsShown() or false
       end
     end
   end
@@ -6847,12 +6793,19 @@ EnhanceFrame = function(frame, cdID, viewerType, viewerName)
     end
     
     -- ═══════════════════════════════════════════════════════════════════
-    -- AURA STATE HOOKS + INITIAL EVAL — delegated to ArcUI_AuraFrames
-    -- Installs SetAuraInstanceInfo/ClearAuraInstanceInfo hooks,
-    -- runs initial glow eval and initial alpha/desat on this frame.
+    -- AURA STATE HOOKS + INITIAL EVAL
+    -- True aura (buff/debuff) frames: delegated to ArcUI_AuraFrames.
+    -- Cooldown/utility frames: hooks owned by CooldownState so that all
+    -- cooldown-frame logic stays in CooldownState, not AuraFrames.
     -- ═══════════════════════════════════════════════════════════════════
-    if ns.AuraFrames and ns.AuraFrames.EnhanceAuraFrame then
-      ns.AuraFrames.EnhanceAuraFrame(frame, cdID)
+    if viewerType == "aura" then
+      if ns.AuraFrames and ns.AuraFrames.EnhanceAuraFrame then
+        ns.AuraFrames.EnhanceAuraFrame(frame, cdID)
+      end
+    else
+      if ns.CooldownState and ns.CooldownState.InstallCooldownAuraHooks then
+        ns.CooldownState.InstallCooldownAuraHooks(frame)
+      end
     end
 
   end
@@ -6888,16 +6841,12 @@ EnhanceFrame = function(frame, cdID, viewerType, viewerName)
         frame._arcCachedSpellID = spellID
         -- Also cache initial duration objects
         if C_Spell.GetSpellCooldownDuration then
-          local okDur, durObj = pcall(C_Spell.GetSpellCooldownDuration, spellID)
-          if okDur and durObj then
+          local durObj = C_Spell.GetSpellCooldownDuration(spellID)
             frame._arcCachedCooldownDuration = durObj
-          end
         end
         if C_Spell.GetSpellChargeDuration then
-          local okCharge, chargeObj = pcall(C_Spell.GetSpellChargeDuration, spellID)
-          if okCharge and chargeObj then
+          local chargeObj = C_Spell.GetSpellChargeDuration(spellID)
             frame._arcCachedChargeDuration = chargeObj
-          end
         end
       end
     end
@@ -6988,12 +6937,8 @@ ns.CDMEnhance.EnhanceFrame = EnhanceFrame
 -- Check if a frame reference is still valid (not destroyed/recycled)
 local function IsFrameValid(frame)
   if not frame then return false end
-  -- Try to access frame properties - if frame was destroyed this will fail
-  local ok = pcall(function()
-    local _ = frame:GetParent()
-    local _ = frame:IsShown()
-  end)
-  return ok
+  local parent = frame:GetParent()
+  return parent ~= nil
 end
 
 -- Get all detached frames (for central scanner to include)
@@ -7713,16 +7658,19 @@ local function ApplyCooldownPreview(frame, cdID, enable)
     else
       -- CDM cooldown frame: re-push real cooldown directly so active timers
       -- don't flash empty after preview cleared. One-shot, no polling.
+      -- 12.0.1: startTime/duration are secret — use DurationObject instead.
       local spellID = frame.cooldownInfo
         and (frame.cooldownInfo.overrideSpellID or frame.cooldownInfo.spellID)
       if spellID and frame.Cooldown then
-        local cdOK, cdInfo = pcall(C_Spell.GetSpellCooldown, spellID)
-        if cdOK and cdInfo and cdInfo.startTime and cdInfo.startTime > 0 then
-          frame._arcBypassCDHook = true
-          pcall(function()
-            frame.Cooldown:SetCooldown(cdInfo.startTime, cdInfo.duration, cdInfo.modRate or 1)
-          end)
-          frame._arcBypassCDHook = false
+        local cdInfo = C_Spell.GetSpellCooldown(spellID)
+        if cdInfo and cdInfo.startTime and cdInfo.startTime > 0 then
+          local durObj = C_Spell.GetSpellCooldownDuration(spellID)
+          if durObj then
+            frame._arcBypassCDHook = true
+            frame.Cooldown:SetCooldown(0, 0)
+            frame.Cooldown:SetCooldownFromDurationObject(durObj)
+            frame._arcBypassCDHook = false
+          end
         end
       end
     end
@@ -8807,23 +8755,35 @@ end
 -- Refresh overlay mouse states (called when options panel opens/closes)
 function ns.CDMEnhance.RefreshOverlayMouseState()
   for cdID, data in pairs(enhancedFrames) do
-    UpdateOverlayState(data.frame)
-    -- Also update preview text and glow since they depend on options panel state
-    local cfg = GetIconSettings(cdID)
-    if cfg then
-      UpdatePreviewText(data.frame, cdID, cfg)
-      UpdatePreviewGlow(data.frame, cdID, cfg)
-      -- Only refresh cooldown state visuals for frames that have custom settings.
-      -- Frames without stateVisuals are managed by CDM natively — touching them
-      -- would destructively override CDM's own desaturation/alpha.
-      local sv = GetEffectiveStateVisuals(cfg)
-      local ignAura = (cfg.auraActiveState and cfg.auraActiveState.ignoreAuraOverride)
-                   or (cfg.cooldownSwipe and cfg.cooldownSwipe.ignoreAuraOverride)
-      if sv or ignAura then
-        -- Clear cached alpha so it gets recalculated
-        data.frame._arcTargetAlpha = nil
-        data.frame._arcEnforceReadyAlpha = nil
-        ApplyCooldownStateVisuals(data.frame, cfg, cfg.alpha or 1.0)
+    local frame = data.frame
+    if frame then
+      UpdateOverlayState(frame)
+      local cfg = GetIconSettings(cdID)
+      if cfg then
+        UpdatePreviewText(frame, cdID, cfg)
+        UpdatePreviewGlow(frame, cdID, cfg)
+        local sv = GetEffectiveStateVisuals(cfg)
+        local ignAura = (cfg.auraActiveState and cfg.auraActiveState.ignoreAuraOverride)
+                     or (cfg.cooldownSwipe and cfg.cooldownSwipe.ignoreAuraOverride)
+        if sv or ignAura then
+          frame._arcTargetAlpha = nil
+          frame._arcEnforceReadyAlpha = nil
+          ApplyCooldownStateVisuals(frame, cfg, cfg.alpha or 1.0)
+        end
+      end
+      local effectiveCfg = GetEffectiveIconSettings(cdID)
+      if (effectiveCfg and effectiveCfg._isAura)
+          or (data.viewerType == "aura")
+          or (frame._arcAuraStateHooked == true)
+          or (frame.totemData ~= nil)
+          or (frame.wasSetFromAura == true) then
+        frame._arcTargetAlpha       = nil
+        frame._arcEnforceReadyAlpha = nil
+        frame._arcLastOptimizedCall = nil
+        frame._arcLastAuraActive    = nil
+        if ns.AuraFrames and ns.AuraFrames.UpdateAuraFrame then
+          ns.AuraFrames.UpdateAuraFrame(frame)
+        end
       end
     end
   end
@@ -8961,11 +8921,13 @@ function ns.CDMEnhance.ForceRefreshAllVisualStates()
       -- Reapply state visuals from fresh config
       local cfg = GetEffectiveIconSettingsForFrame(frame)
       if cfg then
-        ApplyCooldownStateVisuals(frame, cfg, cfg.alpha or 1.0)
-        -- Aura frames with no stateVisuals are not touched by ApplyCooldownStateVisuals.
-        -- Re-apply icon style so cfg.alpha (real value, not preview 0.35) is restored on close.
-        if cfg._isAura then
-          ApplyIconStyle(frame, cdID)
+        if cfg._isAura or (frame.totemData ~= nil) or (frame.wasSetFromAura == true) then
+          -- Aura/totem/wasSetFromAura: UpdateAuraFrame owns alpha including preview opacity.
+          if ns.AuraFrames and ns.AuraFrames.UpdateAuraFrame then
+            ns.AuraFrames.UpdateAuraFrame(frame)
+          end
+        else
+          ApplyCooldownStateVisuals(frame, cfg, cfg.alpha or 1.0)
         end
       end
     end
@@ -9079,145 +9041,6 @@ eventFrame:RegisterEvent("SPELL_ACTIVATION_OVERLAY_GLOW_HIDE")
 eventFrame:RegisterEvent("COOLDOWN_VIEWER_SPELL_OVERRIDE_UPDATED")
 
 
--- Track active threshold glow icons and manage ticker
-local activeThresholdGlows = {}  -- cdID -> true
-local thresholdGlowTicker = nil
-
-local function EvaluateThresholdGlows()
-  local hasActive = false
-  
-  for cdID in pairs(activeThresholdGlows) do
-    local data = enhancedFrames[cdID]
-    if data and data.frame then
-      local frame = data.frame
-      -- Use frame-level cached config
-      local cfg = GetEffectiveIconSettingsForFrame(frame)
-      if cfg then
-        local stateVisuals = GetEffectiveStateVisuals(cfg)
-        if stateVisuals and stateVisuals.readyGlow and stateVisuals.glowThreshold and stateVisuals.glowThreshold < 1.0 then
-          -- Check if glow should show at all (combat-only, etc)
-          if ShouldShowReadyGlow(stateVisuals, frame) then
-            local auraID = frame.auraInstanceID
-            local isThresholdPreview = ns.CDMEnhanceOptions and ns.CDMEnhanceOptions.IsGlowPreviewActive
-              and ns.CDMEnhanceOptions.IsGlowPreviewActive(cdID)
-            if isThresholdPreview then
-              -- Preview: show glow even if buff is inactive, stay in tracking
-              hasActive = true
-              ShowReadyGlow(frame, stateVisuals)
-            elseif (frame._arcAuraActive ~= nil and frame._arcAuraActive) or (frame._arcAuraActive == nil and HasAuraInstanceID(auraID)) then
-              hasActive = true
-              
-              -- Determine which unit this aura tracks
-              local auraType = stateVisuals.glowAuraType or "auto"
-              local trackedUnit = "player"
-              if auraType == "debuff" then
-                trackedUnit = "target"
-              elseif auraType == "auto" then
-                local cdInfo = Shared.SafeGetCDMInfo and Shared.SafeGetCDMInfo(cdID)
-                if cdInfo and cdInfo.category == 3 then trackedUnit = "target" end
-              end
-              
-              -- Evaluate threshold glow curve
-              local durationObj = C_UnitAuras and C_UnitAuras.GetAuraDuration and C_UnitAuras.GetAuraDuration(trackedUnit, auraID)
-              if durationObj then
-                local thresholdCurve = GetGlowThresholdCurve(stateVisuals.glowThreshold)
-                if thresholdCurve then
-                  local okG, glowAlpha = pcall(function()
-                    return durationObj:EvaluateRemainingPercent(thresholdCurve)
-                  end)
-                  if okG and glowAlpha ~= nil then
-                    SetGlowAlpha(frame, glowAlpha, stateVisuals)
-                  else
-                    -- pcall failed or glowAlpha nil - show glow as fallback
-                    ShowReadyGlow(frame, stateVisuals)
-                  end
-                else
-                  -- No threshold curve - show glow
-                  ShowReadyGlow(frame, stateVisuals)
-                end
-              else
-                -- GetAuraDuration returned nil - try other unit as fallback
-                -- The auraInstanceID might be valid for the OTHER unit
-                local fallbackUnit = trackedUnit == "player" and "target" or "player"
-                local fallbackDurationObj = C_UnitAuras and C_UnitAuras.GetAuraDuration and C_UnitAuras.GetAuraDuration(fallbackUnit, auraID)
-                if fallbackDurationObj then
-                  local thresholdCurve = GetGlowThresholdCurve(stateVisuals.glowThreshold)
-                  if thresholdCurve then
-                    local okG, glowAlpha = pcall(function()
-                      return fallbackDurationObj:EvaluateRemainingPercent(thresholdCurve)
-                    end)
-                    if okG and glowAlpha ~= nil then
-                      SetGlowAlpha(frame, glowAlpha, stateVisuals)
-                    else
-                      ShowReadyGlow(frame, stateVisuals)
-                    end
-                  else
-                    ShowReadyGlow(frame, stateVisuals)
-                  end
-                else
-                  -- Neither unit worked - show glow anyway since aura is active
-                  ShowReadyGlow(frame, stateVisuals)
-                end
-              end
-            else
-              -- Aura gone, remove from tracking and hide glow
-              activeThresholdGlows[cdID] = nil
-              HideReadyGlow(frame)
-            end
-          else
-            -- Glow conditions not met, remove from tracking
-            activeThresholdGlows[cdID] = nil
-            HideReadyGlow(frame)
-          end
-        else
-          -- Settings changed, no longer threshold glow
-          activeThresholdGlows[cdID] = nil
-        end
-      else
-        -- No config, remove from tracking
-        activeThresholdGlows[cdID] = nil
-      end
-    else
-      -- Frame gone, remove from tracking
-      activeThresholdGlows[cdID] = nil
-    end
-  end
-  
-  -- Stop ticker if no active threshold glows
-  if not hasActive and thresholdGlowTicker then
-    thresholdGlowTicker:Cancel()
-    thresholdGlowTicker = nil
-  end
-end
-
--- Start threshold glow ticker for an icon
-StartThresholdGlowTracking = function(cdID)
-  if not cdID then return end  -- Guard against nil
-  activeThresholdGlows[cdID] = true
-  
-  -- Evaluate immediately so target-switch / aura-gain doesn't wait up to 500ms
-  EvaluateThresholdGlows()
-  
-  -- Start ticker if not running (may already be running for other icons)
-  if not thresholdGlowTicker then
-    thresholdGlowTicker = C_Timer.NewTicker(0.5, EvaluateThresholdGlows)
-  end
-end
-ns.CDMEnhance.StartThresholdGlowTracking = StartThresholdGlowTracking
-
--- Stop threshold glow ticker for an icon
-StopThresholdGlowTracking = function(cdID)
-  if not cdID then return end  -- Guard against nil
-  activeThresholdGlows[cdID] = nil
-  
-  -- Check if any still active
-  if not next(activeThresholdGlows) and thresholdGlowTicker then
-    thresholdGlowTicker:Cancel()
-    thresholdGlowTicker = nil
-  end
-end
-ns.CDMEnhance.StopThresholdGlowTracking = StopThresholdGlowTracking
-
 -- ═══════════════════════════════════════════════════════════════════════════
 -- PROC GLOW FUNCTIONS (Event-driven like ArcAuras)
 -- ═══════════════════════════════════════════════════════════════════════════
@@ -9263,7 +9086,7 @@ TriggerMasqueSpellAlertUpdate = function(frame, region)
   if not MasqueLib then return end
   -- Masque exposes UpdateSpellAlert on its API object
   if MasqueLib.UpdateSpellAlert then
-    pcall(MasqueLib.UpdateSpellAlert, MasqueLib, frame, region)
+    MasqueLib.UpdateSpellAlert(MasqueLib, frame, region)
   end
 end
 
@@ -9288,9 +9111,9 @@ ApplyMasqueProcShapeToAlert = function(frame)
   local MasqueLib = LibStub and LibStub("Masque", true)
   if not MasqueLib or not MasqueLib.GetSpellAlertFlipBook then return end
 
-  local ok, flipData = pcall(MasqueLib.GetSpellAlertFlipBook, MasqueLib, "Modern", shape)
+  local flipData = MasqueLib.GetSpellAlertFlipBook(MasqueLib, "Modern", shape)
   if not ok or not flipData then
-    ok, flipData = pcall(MasqueLib.GetSpellAlertFlipBook, MasqueLib, "Classic", shape)
+    flipData = MasqueLib.GetSpellAlertFlipBook(MasqueLib, "Classic", shape)
   end
   if not ok or not flipData then return end
 
@@ -9340,7 +9163,7 @@ ApplyMasqueProcShapeToAlert = function(frame)
 
   -- AltGlow shape (Masque provides per-shape alt glow textures)
   if alert.ProcAltGlow then
-    local ok2, altData = pcall(MasqueLib.GetSpellAlert, MasqueLib, shape)
+    local altData = MasqueLib.GetSpellAlert(MasqueLib, shape)
     -- GetSpellAlert returns Glow, Ants (not useful for alt glow specifically)
     -- The alt glow texture path follows Masque's naming: Shape\SpellAlert-AltGlow
     local altPath = [[Interface\AddOns\Masque\Textures\]] .. shape .. [[\SpellAlert-AltGlow]]
@@ -9362,9 +9185,9 @@ ApplyMasqueProcShapeToLCG = function(frame, glowFrame)
   local MasqueLib = LibStub and LibStub("Masque", true)
   if not MasqueLib or not MasqueLib.GetSpellAlertFlipBook then return end
 
-  local ok, flipData = pcall(MasqueLib.GetSpellAlertFlipBook, MasqueLib, "Modern", shape)
+  local flipData = MasqueLib.GetSpellAlertFlipBook(MasqueLib, "Modern", shape)
   if not ok or not flipData then
-    ok, flipData = pcall(MasqueLib.GetSpellAlertFlipBook, MasqueLib, "Classic", shape)
+    flipData = MasqueLib.GetSpellAlertFlipBook(MasqueLib, "Classic", shape)
   end
   if not ok or not flipData then return end
 
@@ -9847,7 +9670,7 @@ function ns.CDMEnhance.CleanupStaleProcGlows()
         currentSpellID = frame.cooldownInfo.overrideSpellID or frame.cooldownInfo.spellID
       end
       if not currentSpellID and frame.GetSpellID then
-        pcall(function() currentSpellID = frame:GetSpellID() end)
+        currentSpellID = frame:GetSpellID()
       end
       if not currentSpellID then
         currentSpellID = frame._arcSpellID
@@ -10260,11 +10083,7 @@ eventFrame:SetScript("OnEvent", function(self, event, arg1)
     end)
     
   elseif event == "SPELL_UPDATE_COOLDOWN" then
-    -- Per-frame event listeners handle all CD feeding — no global sweep needed.
-    -- Just kick the out-of-combat ticker for expiry edge cases on non-CD frames.
-    if not InCombatLockdown() and ns.CDMEnhance.EnsureTickerState then
-      ns.CDMEnhance.EnsureTickerState()
-    end
+    -- Per-frame event listeners in CooldownState handle all CD feeding.
 
   elseif event == "SPELL_ACTIVATION_OVERLAY_GLOW_SHOW" then
     -- arg1 = spellID (non-secret event data)
@@ -10285,7 +10104,7 @@ eventFrame:SetScript("OnEvent", function(self, event, arg1)
           frameSpellID = data.frame.cooldownInfo.overrideSpellID or data.frame.cooldownInfo.spellID
         end
         if not frameSpellID and data.frame.GetSpellID then
-          pcall(function() frameSpellID = data.frame:GetSpellID() end)
+          frameSpellID = data.frame:GetSpellID()
         end
         if not frameSpellID then
           frameSpellID = data.frame._arcSpellID
@@ -10538,11 +10357,6 @@ end
 Shared.OnOptionsPanelStateChanged = function(isOpen)
   -- Panel state changed - refresh all icon visuals
   ns.CDMEnhance.RefreshOverlayMouseState()
-  
-  -- Also ensure cooldown state ticker is running if needed
-  if ns.CDMEnhance.EnsureTickerState then
-    ns.CDMEnhance.EnsureTickerState()
-  end
 
   -- Force item/trinket frames to re-evaluate immediately on panel open/close.
   -- They are event-driven (BAG_UPDATE_COOLDOWN) so they won't self-correct
@@ -10572,138 +10386,6 @@ end
 --
 -- The sweep function below is called by the 0.5s out-of-combat ticker
 -- for safety: handles edge cases like options panel preview, cooldowns
--- expiring while AFK, and initial state after spec changes.
--- ═══════════════════════════════════════════════════════════════════════════
-
--- Lightweight sweep: iterate enhanced frames and dispatch per-frame
--- Used by the 0.5s out-of-combat ticker, NOT the hot combat path.
-local cooldownStateTicker = nil  -- Forward declaration for auto-stop in sweep
-local function GlobalCooldownSweep()
-  -- Skip during protection/spec change
-  if ns.CDMGroups then
-    if ns.CDMGroups.specChangeInProgress or ns.CDMGroups._pendingSpecChange then return end
-    if ns.CDMGroups._restorationProtectionEnd and GetTime() < ns.CDMGroups._restorationProtectionEnd then return end
-  end
-
-  local hasActiveCooldown = false
-  for cdID, data in pairs(enhancedFrames) do
-    local frame = data.frame
-    if frame and (data.viewerType == "cooldown" or data.viewerType == "utility") then
-      ns.CDMEnhance.OnCooldownEvent(frame, true) -- true = fromTicker (enables idle skip)
-      -- Track if any frame has an active cooldown (cache was updated by OnCooldownEvent)
-      if not hasActiveCooldown then
-        if frame._arcLastShadowShown == true or frame._arcLastChargeShown == true then
-          hasActiveCooldown = true
-        end
-      end
-    end
-  end
-
-  -- AUTO-STOP: All frames idle — stop ticker to save CPU.
-  -- Restarts when: SPELL_UPDATE_COOLDOWN fires, options panel opens, combat changes.
-  if not hasActiveCooldown and not Shared.IsOptionsPanelOpen() then
-    if cooldownStateTicker then
-      cooldownStateTicker:Cancel()
-      cooldownStateTicker = nil
-      if ns.devMode then
-        print("|cff00FF00[ArcUI]|r Ticker auto-stopped (all frames idle)")
-      end
-    end
-  end
-end
-
-
--- ═══════════════════════════════════════════════════════════════════════════
--- COOLDOWN STATE TICKER
--- Now demand-driven: only runs when there are active cooldowns to monitor
--- or when the options panel is open for preview.
--- Auto-stops when all frames report idle (see GlobalCooldownSweep).
--- Restarted by SPELL_UPDATE_COOLDOWN, combat changes, options panel.
--- ═══════════════════════════════════════════════════════════════════════════
--- cooldownStateTicker declared above GlobalCooldownSweep for shared scope
-local TICKER_INTERVAL = 0.5  -- Low frequency to minimize performance impact
-
--- Check if ticker should keep running
-local function ShouldTickerRun()
-  -- Always run if options panel is open (preview mode needs continuous updates)
-  if Shared.IsOptionsPanelOpen() then
-    return true
-  end
-  -- In combat, event-driven hooks handle everything — no ticker needed
-  if InCombatLockdown() then
-    return false
-  end
-  -- Out of combat: ticker is demand-driven. GlobalCooldownSweep auto-stops
-  -- when all frames are idle. We return true here to let it run until
-  -- auto-stop kicks in.
-  return true
-end
-
-local function StartCooldownStateTicker()
-  if cooldownStateTicker then return end  -- Already running
-  
-  cooldownStateTicker = C_Timer.NewTicker(TICKER_INTERVAL, function()
-    -- Check if we should still be running
-    if not ShouldTickerRun() then
-      if cooldownStateTicker then
-        cooldownStateTicker:Cancel()
-        cooldownStateTicker = nil
-      end
-      return
-    end
-    
-    -- Call per-frame dispatch on all enhanced cooldown frames
-    GlobalCooldownSweep()
-  end)
-  
-  if ns.devMode then
-    print("|cff00FF00[ArcUI]|r Started cooldown state ticker (0.5s)")
-  end
-end
-
-local function StopCooldownStateTicker()
-  if cooldownStateTicker then
-    cooldownStateTicker:Cancel()
-    cooldownStateTicker = nil
-    
-    if ns.devMode then
-      print("|cff00FF00[ArcUI]|r Stopped cooldown state ticker")
-    end
-  end
-end
-
--- Ensure ticker is running if it should be
-local function EnsureTickerState()
-  if ShouldTickerRun() then
-    StartCooldownStateTicker()
-  else
-    StopCooldownStateTicker()
-  end
-end
-
--- Export for callback use
-ns.CDMEnhance.EnsureTickerState = EnsureTickerState
-
--- Register for combat state changes
-local tickerEventFrame = CreateFrame("Frame")
-tickerEventFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
-tickerEventFrame:RegisterEvent("PLAYER_REGEN_DISABLED")
-tickerEventFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
-
-tickerEventFrame:SetScript("OnEvent", function(self, event)
-  if event == "PLAYER_REGEN_ENABLED" then
-    -- Left combat - start the ticker
-    C_Timer.After(0.1, EnsureTickerState)
-  elseif event == "PLAYER_REGEN_DISABLED" then
-    -- Entered combat - check if options panel keeps it alive
-    C_Timer.After(0.1, EnsureTickerState)
-  elseif event == "PLAYER_ENTERING_WORLD" then
-    -- On login/reload, start ticker if needed
-    C_Timer.After(1.5, EnsureTickerState)
-  end
-end)
-
-
 -- ===================================================================
 -- GROUP SCALE API
 -- Per-group scale override (separate from global defaults)

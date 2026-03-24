@@ -277,6 +277,7 @@ ns.CDMGroups.SafeShowContainer = SafeShowContainer
 
 -- Flush pending container sizes and sync proxies after combat ends
 local combatFlushFrame = CreateFrame("Frame")
+_G.ArcUICDMGroupsCombatFlush = combatFlushFrame  -- profiler
 combatFlushFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
 combatFlushFrame:SetScript("OnEvent", function()
     -- ═══ FLUSH PENDING VISIBILITY (ensure Show() for alpha-visible containers) ═══
@@ -640,6 +641,22 @@ ns.CDMGroups.druidForm = "caster"  -- Track current druid form for visibility
 ns.CDMGroups.currentStance = "none" -- Track current stance/form for all classes
 
 -- ═══════════════════════════════════════════════════════════════════════════
+-- SKYRIDING DETECTION HELPER
+-- UnitPowerBarID("player") == 631 was the old method; Blizzard changed it
+-- to return 0 in Skyriding as of patch 12.x.
+-- GetBonusBarIndex() == 11 and GetBonusBarOffset() == 5 is the current
+-- reliable way to detect that the Skyriding action bar is active.
+-- We keep checking UnitPowerBarID as a fallback for forward-compatibility.
+-- ═══════════════════════════════════════════════════════════════════════════
+local function IsSkyriding()
+    if GetBonusBarIndex() == 11 and GetBonusBarOffset() == 5 then
+        return true
+    end
+    -- Fallback: old power bar ID (may still work on some builds)
+    return UnitPowerBarID("player") == 631
+end
+
+-- ═══════════════════════════════════════════════════════════════════════════
 -- SHAPESHIFT / STANCE CATEGORY HELPER
 -- Returns a category string for the current form/stance.
 -- Works across all classes that use the stance bar.
@@ -728,7 +745,7 @@ local function RefreshAllVisibilityState()
     ns.CDMGroups.isDead = UnitIsDeadOrGhost("player") and true or false
     ns.CDMGroups.isPvP = (UnitIsPVP("player") or UnitIsPVPFreeForAll("player")) and true or false
     ns.CDMGroups.isResting = IsResting() and true or false
-    ns.CDMGroups.isDragonriding = (UnitPowerBarID("player") == 631)
+    ns.CDMGroups.isDragonriding = IsSkyriding()
     ns.CDMGroups.isStealthed = IsStealthed() and true or false
     ns.CDMGroups.druidForm = GetDruidFormCategory()
     ns.CDMGroups.currentStance = GetCurrentFormCategory()
@@ -1504,9 +1521,11 @@ function ns.CDMGroups.RegisterExternalFrame(frameID, frame, viewerType, defaultG
                 entry.manipulated = true
                 entry.group = group
                 
-                -- Show frame
-                frame:SetAlpha(1)
-                frame:Show()
+                -- Show frame only if the group container is currently visible
+                if not group.container or not group.container._arcGroupHidden then
+                    frame:SetAlpha(1)
+                    frame:Show()
+                end
                 
                 -- Setup drag if dragging is allowed
                 if ns.CDMGroups.ShouldAllowDrag() then
@@ -4331,6 +4350,13 @@ function ns.CDMGroups.LoadProfile(profileName, skipActivation)
     
     local destroyedCount = #groupsToDestroy
     if destroyedCount > 0 or createdCount > 0 then
+    end
+
+    -- Wipe hook guards after all DetachAllExternalFrames calls complete.
+    -- Groups that were destroyed or updated have new containers/anchors — all
+    -- hooks must re-run so toFrame targets and external frames re-bind correctly.
+    if ns.CDMGroupsAnchors and ns.CDMGroupsAnchors.ResetAllHookState then
+        ns.CDMGroupsAnchors.ResetAllHookState()
     end
     
     -- CRITICAL: Notify FrameController that layout changed (ensures hidden frames get fixed)
@@ -9774,13 +9800,21 @@ function ns.CDMGroups.CreateGroup(name)
             
             -- ANCHORED GROUPS: The anchor owns the container position.
             -- Shifting it with _appliedOffsetX/Y breaks the anchor.
-            -- In combat ApplyGroupAnchor is blocked so the break is permanent
-            -- until the next out-of-combat Layout. Keep offset = 0 always;
-            -- icons compute their pixel positions relative to the anchor center.
+            -- ANCHORED GROUPS: The anchor owns the container position — never call
+            -- ClearAllPoints/SetPoint here (would fight the anchor on every Layout).
+            -- BUT we still need _appliedOffsetX/Y = contentCenterX/Y so that icons
+            -- are positioned at (offset - contentCenter) from the container center,
+            -- which gives near-zero offsets and keeps icons correctly centered in the
+            -- compact container.  Without this, an empty row produces a non-zero
+            -- contentCenterY and icons appear shifted up/down inside the container.
             if _layoutIsAnchored then
-                if oldCenterX ~= 0 or oldCenterY ~= 0 then
-                    self._appliedOffsetX = 0
-                    self._appliedOffsetY = 0
+                -- Update applied offset to match current content center.
+                -- Container is NOT moved — ApplyGroupAnchor handles that at end of Layout.
+                local centerChanged = math.abs(newCenterX - oldCenterX) > 0.5
+                    or math.abs(newCenterY - oldCenterY) > 0.5
+                if centerChanged then
+                    self._appliedOffsetX = newCenterX
+                    self._appliedOffsetY = newCenterY
                 end
                 -- Container position is managed entirely by ApplyGroupAnchor (called
                 -- at end of Layout). No ClearAllPoints/SetPoint here.
@@ -9888,8 +9922,9 @@ function ns.CDMGroups.CreateGroup(name)
                     frame:SetSize(effectiveW, effectiveH)
                     frame._cdmgSettingSize = false
                     
-                    -- Only show if not hidden due to hideWhenUnequipped setting
-                    if not frame._arcHiddenUnequipped and not frame._arcSlotEmpty and not IsFrameHiddenByBar(frame) then
+                    -- Only show if not hidden due to hideWhenUnequipped setting or group visibility
+                    if not frame._arcHiddenUnequipped and not frame._arcSlotEmpty and not IsFrameHiddenByBar(frame)
+                       and not (self.container and self.container._arcGroupHidden) then
                         frame:SetAlpha(1)
                         frame:Show()
                     end
@@ -12874,7 +12909,7 @@ function ns.CDMGroups.PLAYER_ENTERING_WORLD(event, isInitialLogin, isReloadingUI
             ns.CDMGroups.inVehicle = (UnitInVehicle("player") or UnitOnTaxi("player")) and true or false
             ns.CDMGroups.inInstance = IsInInstance() or false
             ns.CDMGroups.isResting = IsResting()
-            ns.CDMGroups.isDragonriding = (UnitPowerBarID("player") == 631)
+            ns.CDMGroups.isDragonriding = IsSkyriding()
             ns.CDMGroups.hasTarget = UnitExists("target") or false
             ns.CDMGroups.isCasting = false
             ns.CDMGroups.isStealthed = IsStealthed() and true or false
@@ -12899,7 +12934,7 @@ function ns.CDMGroups.PLAYER_ENTERING_WORLD(event, isInitialLogin, isReloadingUI
         ns.CDMGroups.inInstance = IsInInstance() or false
         ns.CDMGroups.isResting = IsResting()
         ns.CDMGroups.isPvP = (UnitIsPVP("player") or UnitIsPVPFreeForAll("player")) and true or false
-        ns.CDMGroups.isDragonriding = (UnitPowerBarID("player") == 631)
+        ns.CDMGroups.isDragonriding = IsSkyriding()
         ns.CDMGroups.hasTarget = UnitExists("target") or false
         ns.CDMGroups.isCasting = false
         ns.CDMGroups.isStealthed = IsStealthed() and true or false
@@ -12924,7 +12959,7 @@ function ns.CDMGroups.PLAYER_ENTERING_WORLD(event, isInitialLogin, isReloadingUI
             ns.CDMGroups.inInstance = IsInInstance() or false
             ns.CDMGroups.isResting = IsResting()
             ns.CDMGroups.isPvP = (UnitIsPVP("player") or UnitIsPVPFreeForAll("player")) and true or false
-            ns.CDMGroups.isDragonriding = (UnitPowerBarID("player") == 631)
+            ns.CDMGroups.isDragonriding = IsSkyriding()
             ns.CDMGroups.hasTarget = UnitExists("target") or false
             ns.CDMGroups.isStealthed = IsStealthed() and true or false
             ns.CDMGroups.isFlying = IsFlying() and true or false
@@ -13307,7 +13342,7 @@ function ns.CDMGroups.PLAYER_ENTERING_WORLD(event, isInitialLogin, isReloadingUI
                 ns.CDMGroups.isResting = IsResting()
                 ns.CDMGroups.inEncounter = false  -- No active encounter on fresh init
                 ns.CDMGroups.isPvP = UnitIsPVP("player") or UnitIsPVPFreeForAll("player") or false
-                ns.CDMGroups.isDragonriding = (UnitPowerBarID("player") == 631)
+                ns.CDMGroups.isDragonriding = IsSkyriding()
                 ns.CDMGroups.hasTarget = UnitExists("target") or false
                 ns.CDMGroups.isCasting = false
                 ns.CDMGroups.isStealthed = IsStealthed() or false
@@ -13502,13 +13537,36 @@ function ns.CDMGroups.PLAYER_SPECIALIZATION_CHANGED()
     -- CRITICAL: Release ALL frames back to CDM IMMEDIATELY
     -- CDM cannot properly reassign/destroy frames that we've reparented
     -- We must give them back so CDM can do its lifecycle management
-    
+
+    -- Reset frame ownership to the NEW spec's active profile BEFORE DetachAll.
+    -- Without this, the old spec's _activeFrameOwnership persists into the new spec.
+    -- DetachAll clears frame tags but ownership is checked again in ApplyAnchoredFrames
+    -- during ReapplyAll, so stale ownership causes the wrong group to win the frame
+    -- and blocks new anchors from being applied in the new spec/profile.
+    do
+        local newSpecData = GetSpecData(newSpec)
+        if newSpecData and newSpecData.layoutProfiles then
+            local activeProfileName = newSpecData.activeProfile or "Default"
+            local newProfile = newSpecData.layoutProfiles[activeProfileName]
+            ns._activeFrameOwnership = (newProfile and newProfile.frameOwnership)
+                and DeepCopy(newProfile.frameOwnership) or {}
+        else
+            ns._activeFrameOwnership = {}
+        end
+    end
+
     -- Detach external frames (PlayerFrame etc.) anchored to groups FIRST
     -- before groups are modified or destroyed
     if ns.CDMGroupsAnchors and ns.CDMGroupsAnchors.DetachAllExternalFrames then
         for groupName, group in pairs(ns.CDMGroups.groups or {}) do
             ns.CDMGroupsAnchors.DetachAllExternalFrames(group)
         end
+    end
+
+    -- Wipe all hook guards so toFrame/toGroup/external-frame hooks re-run cleanly
+    -- in the new spec. Must come AFTER DetachAllExternalFrames (frames already restored).
+    if ns.CDMGroupsAnchors and ns.CDMGroupsAnchors.ResetAllHookState then
+        ns.CDMGroupsAnchors.ResetAllHookState()
     end
     
     local framesReleased = 0
@@ -13807,6 +13865,7 @@ end
 
 -- Create event frame for initialization
 local CDMGroupsInitFrame = CreateFrame("Frame")
+_G.ArcUICDMGroupsInitFrame = CDMGroupsInitFrame  -- profiler
 local cdmGroupsInitialized = false
 
 -- CRITICAL FIX: Try to initialize as EARLY as possible
@@ -13858,8 +13917,9 @@ CDMGroupsInitFrame:RegisterEvent("PLAYER_UPDATE_RESTING")         -- Resting sta
 CDMGroupsInitFrame:RegisterEvent("ENCOUNTER_START")               -- Boss encounter started
 CDMGroupsInitFrame:RegisterEvent("ENCOUNTER_END")                 -- Boss encounter ended
 CDMGroupsInitFrame:RegisterEvent("UNIT_FLAGS")                    -- PvP flag changes
-CDMGroupsInitFrame:RegisterEvent("UNIT_POWER_BAR_SHOW")           -- Skyriding detection
-CDMGroupsInitFrame:RegisterEvent("UNIT_POWER_BAR_HIDE")           -- Skyriding detection
+CDMGroupsInitFrame:RegisterEvent("UNIT_POWER_BAR_SHOW")           -- Skyriding detection (legacy)
+CDMGroupsInitFrame:RegisterEvent("UNIT_POWER_BAR_HIDE")           -- Skyriding detection (legacy)
+CDMGroupsInitFrame:RegisterEvent("UPDATE_BONUS_ACTIONBAR")        -- Skyriding detection (12.x+)
 CDMGroupsInitFrame:RegisterEvent("ZONE_CHANGED_NEW_AREA")         -- Instance detection
 CDMGroupsInitFrame:RegisterEvent("PLAYER_TARGET_CHANGED")         -- Target gained/lost
 CDMGroupsInitFrame:RegisterEvent("UPDATE_STEALTH")                -- Stealth state changed
@@ -13991,10 +14051,10 @@ CDMGroupsInitFrame:SetScript("OnEvent", function(self, event, ...)
             ns.CDMGroups.isPvP = UnitIsPVP("player") or UnitIsPVPFreeForAll("player") or false
             ns.CDMGroups.UpdateGroupVisibility()
         end
-    elseif event == "UNIT_POWER_BAR_SHOW" or event == "UNIT_POWER_BAR_HIDE" then
+    elseif event == "UNIT_POWER_BAR_SHOW" or event == "UNIT_POWER_BAR_HIDE" or event == "UPDATE_BONUS_ACTIONBAR" then
         local unit = ...
-        if unit == "player" then
-            ns.CDMGroups.isDragonriding = (UnitPowerBarID("player") == 631)
+        if event == "UPDATE_BONUS_ACTIONBAR" or unit == "player" then
+            ns.CDMGroups.isDragonriding = IsSkyriding()
             ns.CDMGroups.UpdateGroupVisibility()
         end
     elseif event == "ZONE_CHANGED_NEW_AREA" then
@@ -14618,6 +14678,10 @@ local function SaveGroupLayoutsToActiveProfile()
             }
         end
     end
+
+    -- Save frame ownership map so newly-added anchored frames are persisted
+    -- even if the session ends before a spec switch triggers SaveCurrentToProfile.
+    profile.frameOwnership = ns._activeFrameOwnership and next(ns._activeFrameOwnership) and ns._activeFrameOwnership or nil
 end
 
 -- Export for external access (e.g., Options toggle setters that need immediate save)
@@ -14750,3 +14814,11 @@ end
 -- ===================================================================
 -- END OF ArcUI_CDMGroups.lua  
 -- ===================================================================
+-- Register local functions for profiler visibility
+if _G.ArcUIProfiler_RegisterLocals then
+    _G.ArcUIProfiler_RegisterLocals("CDMGroups", {
+        UpdateGroupVisibility = ns.CDMGroups.UpdateGroupVisibility,
+        GetAllGroupedFrames   = ns.CDMGroups.GetAllGroupedFrames,
+        GetFreeIcons          = ns.CDMGroups.GetFreeIcons,
+    })
+end

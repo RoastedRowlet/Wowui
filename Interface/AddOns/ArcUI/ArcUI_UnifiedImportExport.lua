@@ -29,6 +29,7 @@ local state = {
     cdmImportPositions      = true,
     cdmImportIconSettings   = true,
     cdmImportGlobalSettings = true,
+    cdmImportFlattenGlobals = false,
     cdmImportGroupSettings  = true,
     cdmImportProfiles       = true,
 
@@ -226,6 +227,7 @@ local function DoImport()
             importPositions      = state.cdmImportPositions,
             importIconSettings   = state.cdmImportIconSettings,
             importGlobalSettings = state.cdmImportGlobalSettings,
+            importFlattenGlobals = state.cdmImportFlattenGlobals,
             importGroupSettings  = state.cdmImportGroupSettings,
             importProfiles       = state.cdmImportProfiles,
         })
@@ -436,6 +438,19 @@ function UIE.GetOptionsTable()
                 hidden = function() return state.detectedType ~= "cdm" end,
                 get    = function() return state.cdmImportGlobalSettings end,
                 set    = function(_, v) state.cdmImportGlobalSettings = v end,
+            },
+            cdmImportFlattenGlobals = {
+                type     = "toggle",
+                name     = "Bake Globals into Icons",
+                desc     = "Instead of overwriting your Global Defaults, merge the imported globals into each icon's per-icon settings. " ..
+                           "The profile will look exactly as intended while your own Global Defaults stay untouched — " ..
+                           "so your other profiles won't be affected.",
+                order    = 24.5,
+                width    = 1.4,
+                hidden   = function() return state.detectedType ~= "cdm" end,
+                disabled = function() return not state.cdmImportGlobalSettings end,
+                get      = function() return state.cdmImportFlattenGlobals end,
+                set      = function(_, v) state.cdmImportFlattenGlobals = v end,
             },
             cdmImportGroupSettings = {
                 type   = "toggle",

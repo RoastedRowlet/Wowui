@@ -1,7 +1,6 @@
 # Chattynator
 
-## [199](https://github.com/TheMouseNest/Chattynator/tree/199) (2026-03-20)
-[Full Changelog](https://github.com/TheMouseNest/Chattynator/compare/198...199) 
+## [200](https://github.com/TheMouseNest/Chattynator/tree/200) (2026-03-22)
+[Full Changelog](https://github.com/TheMouseNest/Chattynator/compare/199...200) 
 
-- Fixes for tabs dropdown when overflowing  
-- Fix overflow tab button showing when not absolutely necessary  
+- Fix error when dragging tabs  

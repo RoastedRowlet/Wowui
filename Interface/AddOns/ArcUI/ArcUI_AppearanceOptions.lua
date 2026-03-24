@@ -9099,9 +9099,10 @@ function ns.AppearanceOptions.GetOptionsTable()
       textFormat = {
         type = "select",
         name = "Display As",
-        desc = "Value shows the raw number (e.g. 45000). Percentage shows as percent (e.g. 72%).",
+        desc = "Value shows the raw number (e.g. 45000). Abbreviated shortens large numbers (e.g. 45K). Percentage shows as percent (e.g. 72%).",
         values = {
           ["value"] = "Value",
+          ["abbreviated"] = "Abbreviated",
           ["percent"] = "Percentage",
         },
         get = function()
@@ -10102,6 +10103,52 @@ function ns.AppearanceOptions.GetOptionsTable()
           if IsIconMode() or collapsedSections.durationText then return true end
           local cfg = GetSelectedConfig()
           return not IsChargeBar() or not (cfg and cfg.display.showDuration)
+        end
+      },
+      dynamicTextOffsetX = {
+        type = "input",
+        name = "Dynamic Text Offset X",
+        desc = "Fine-tune horizontal position of the dynamic timer text within its slot.",
+        get = function()
+          local cfg = GetSelectedConfig()
+          return tostring(cfg and cfg.display.dynamicTextOffsetX or 0)
+        end,
+        set = function(info, value)
+          local cfg = GetSelectedConfig()
+          if cfg then
+            cfg.display.dynamicTextOffsetX = tonumber(value) or 0
+            RefreshBar()
+          end
+        end,
+        order = 76.71,
+        width = 1.3,
+        hidden = function()
+          if IsIconMode() or collapsedSections.durationText then return true end
+          local cfg = GetSelectedConfig()
+          return not IsChargeBar() or not (cfg and cfg.display.showDuration) or not (cfg and cfg.display.dynamicTextOnSlot)
+        end
+      },
+      dynamicTextOffsetY = {
+        type = "input",
+        name = "Dynamic Text Offset Y",
+        desc = "Fine-tune vertical position of the dynamic timer text within its slot.",
+        get = function()
+          local cfg = GetSelectedConfig()
+          return tostring(cfg and cfg.display.dynamicTextOffsetY or 0)
+        end,
+        set = function(info, value)
+          local cfg = GetSelectedConfig()
+          if cfg then
+            cfg.display.dynamicTextOffsetY = tonumber(value) or 0
+            RefreshBar()
+          end
+        end,
+        order = 76.72,
+        width = 1.3,
+        hidden = function()
+          if IsIconMode() or collapsedSections.durationText then return true end
+          local cfg = GetSelectedConfig()
+          return not IsChargeBar() or not (cfg and cfg.display.showDuration) or not (cfg and cfg.display.dynamicTextOnSlot)
         end
       },
       -- Duration text strata
@@ -11263,6 +11310,28 @@ function ns.AppearanceOptions.GetOptionsTable()
         hidden = function()
           local cfg = GetSelectedConfig()
           return GetSelectedConfig() == nil or not SupportsCDMGroupAnchor() or collapsedSections.groupAnchor or not (cfg and cfg.display.anchorToGroup and cfg.display.matchGroupWidth)
+        end
+      },
+      matchIconEdges = {
+        type = "toggle",
+        name = "Match Icon Edges",
+        desc = "Align the bar flush with the icon edges rather than the container edges.\n\nWhen enabled the bar automatically offsets to sit pixel-perfect against the top or bottom icon edge, so no manual Y offset is needed.",
+        get = function()
+          local cfg = GetSelectedConfig()
+          return cfg and cfg.display.matchIconEdges
+        end,
+        set = function(info, value)
+          local cfg = GetSelectedConfig()
+          if cfg then
+            cfg.display.matchIconEdges = value
+            RefreshBar()
+          end
+        end,
+        order = 85.43,
+        width = 0.9,
+        hidden = function()
+          local cfg = GetSelectedConfig()
+          return not IsResourceBar() or GetSelectedConfig() == nil or not SupportsCDMGroupAnchor() or collapsedSections.groupAnchor or not (cfg and cfg.display.anchorToGroup and cfg.display.matchGroupWidth and cfg.display.matchSlotsOnly)
         end
       },
       matchWidthAdjust = {

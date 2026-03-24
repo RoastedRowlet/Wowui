@@ -33,14 +33,14 @@ do -- Waypoint
                         :id("Beam.Mask", id)
                         :point(UIKit.Enum.Point.Center, UIKit.Enum.Point.Bottom)
                         :size(100, 100)
-                        :maskBackground(Waypoint_Preload.UIDef.UIWaypointBeamMask)
+                        :maskBackground(Waypoint_Preload.UIDEF.UIWaypointBeamMask)
                         :frameLevel(2),
 
                     Frame(name .. ".Beam.Background")
                         :id("Beam.Background", id)
                         :size(UIKit.UI.FILL)
                         :frameLevel(1)
-                        :background(Waypoint_Preload.UIDef.UIWaypointBeam)
+                        :background(Waypoint_Preload.UIDEF.UIWaypointBeam)
                         :backgroundBlendMode(UIKit.Enum.BlendMode.Add)
                         :mask(UIKit.NewGroupCaptureString("Beam.Mask", id)),
 
@@ -48,7 +48,7 @@ do -- Waypoint
                         :id("Beam.FX.Mask", id)
                         :point(UIKit.Enum.Point.Bottom)
                         :size(UIKit.Define.Percentage{ value = 100 }, 250)
-                        :maskBackground(Waypoint_Preload.UIDef.UIWaypointBeamMask)
+                        :maskBackground(Waypoint_Preload.UIDEF.UIWaypointBeamMask)
                         :frameLevel(2),
 
                     Frame(name .. ".Beam.FX")
@@ -56,7 +56,7 @@ do -- Waypoint
                         :size(UIKit.UI.FILL)
                         :frameLevel(2)
                         :backgroundBlendMode(UIKit.Enum.BlendMode.Add)
-                        :background(Waypoint_Preload.UIDef.UIWaypointBeamFX)
+                        :background(Waypoint_Preload.UIDEF.UIWaypointBeamFX)
                         :mask(UIKit.NewGroupCaptureString("Beam.FX.Mask", id))
                 })
                     :id("Beam", id)
@@ -156,7 +156,7 @@ do -- Pinpoint
             Frame(name .. ".Foreground", {
                 Frame(name .. ".Foreground.Background")
                     :id("Foreground.Background", id)
-                    :background(Waypoint_Preload.UIDef.UIPinpoint)
+                    :background(Waypoint_Preload.UIDEF.UIPinpoint)
                     :size(UIKit.UI.FILL)
                     :frameLevel(6)
                     :_excludeFromCalculations(),
@@ -217,7 +217,7 @@ do -- Navigator
                 :point(UIKit.Enum.Point.Center)
                 :frameLevel(3)
                 :size(ARROW_SIZE, ARROW_SIZE)
-                :background(Waypoint_Preload.UIDef.UINavigatorArrow)
+                :background(Waypoint_Preload.UIDEF.UINavigatorArrow)
         })
             :id("Container", id)
             :point(UIKit.Enum.Point.Center)

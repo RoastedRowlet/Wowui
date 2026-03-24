@@ -5,6 +5,7 @@ local SavedVariables_Handler = env.modules:New("packages\\saved-variables\\handl
 
 local type = type
 local pairs = pairs
+local concat = table.concat
 
 local registeredDatabases = {}
 
@@ -26,31 +27,86 @@ local function ResolveNestedPath(rootTable, pathKeys)
     return current
 end
 
+local function ResolveNestedSlot(rootTable, pathKeys, createMissing)
+    local current = rootTable
+    local lastIndex = #pathKeys
+
+    if lastIndex == 0 then return nil end
+
+    for i = 1, lastIndex - 1 do
+        local pathKey = pathKeys[i]
+        local nextTable = current[pathKey]
+
+        if nextTable == nil then
+            if not createMissing then return nil end
+            nextTable = {}
+            current[pathKey] = nextTable
+        elseif type(nextTable) ~= "table" then
+            return nil
+        end
+
+        current = nextTable
+    end
+
+    return current, pathKeys[lastIndex]
+end
+
+local function GetValueAtKey(rootTable, key)
+    if type(key) ~= "table" then
+        return rootTable[key]
+    end
+
+    return ResolveNestedPath(rootTable, key)
+end
+
+local function SetValueAtKey(rootTable, key, value)
+    if type(key) ~= "table" then
+        local previousValue = rootTable[key]
+        if previousValue == value then return false end
+
+        rootTable[key] = value
+        return true
+    end
+
+    local parentTable, finalKey = ResolveNestedSlot(rootTable, key, value ~= nil)
+    if not parentTable or finalKey == nil then return false end
+
+    local previousValue = parentTable[finalKey]
+    if previousValue == value then return false end
+
+    parentTable[finalKey] = value
+    return true
+end
+
+local function GetCallbackKey(key)
+    if type(key) ~= "table" then
+        return key
+    end
+
+    return concat(key, ".")
+end
+
 local function SetVariable(self, key, value)
     local storedData = GetStoredData(self)
-    local previousValue = storedData[key]
 
-    if previousValue == value then return end
-    if type(value) == "table" and previousValue == value then return end
+    if not SetValueAtKey(storedData, key, value) then return end
 
-    storedData[key] = value
-    CallbackRegistry.Trigger(self.callbackPrefix .. key, value)
+    CallbackRegistry.Trigger(self.callbackPrefix .. GetCallbackKey(key), value)
 end
 
 local function GetVariable(self, key)
-    local storedValue = GetStoredData(self)[key]
+    local storedValue = GetValueAtKey(GetStoredData(self), key)
     if storedValue ~= nil then return storedValue end
-    return self.defaultValues[key]
+    return GetValueAtKey(self.defaultValues, key)
 end
 
 local function ResetVariable(self, key)
-    local defaultValue = self.defaultValues[key]
     local storedData = GetStoredData(self)
+    local defaultValue = GetValueAtKey(self.defaultValues, key)
 
-    if storedData[key] ~= defaultValue then
-        storedData[key] = defaultValue
-        CallbackRegistry.Trigger(self.callbackPrefix .. key, defaultValue)
-    end
+    if not SetValueAtKey(storedData, key, defaultValue) then return end
+
+    CallbackRegistry.Trigger(self.callbackPrefix .. GetCallbackKey(key), defaultValue)
 end
 
 local function WipeDatabase(self)
@@ -143,5 +199,5 @@ function SavedVariables_Handler.GetDatabase(databaseName)
 end
 
 function SavedVariables_Handler.OnChange(databaseName, variableName, callbackFunc)
-    CallbackRegistry.Add("SavedVariables." .. databaseName .. "." .. variableName, callbackFunc)
+    CallbackRegistry.Add("SavedVariables." .. databaseName .. "." .. GetCallbackKey(variableName), callbackFunc)
 end

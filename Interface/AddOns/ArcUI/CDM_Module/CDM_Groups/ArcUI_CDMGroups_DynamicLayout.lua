@@ -378,6 +378,7 @@ local function TriggerDynamicLayout(group, reason, triggerFrame)
     local totalTime = GetTime() - now
     Trace("TRIGGER_COMPLETE", cdID, string.format("total=%.1fms", totalTime * 1000), groupName)
 end
+TriggerDynamicLayout = (Track and Track("DL.TriggerDynamicLayout", TriggerDynamicLayout)) or TriggerDynamicLayout
 
 -- Hook a frame's aura events for center alignment immediate response
 -- NOTE: We do NOT capture 'group' in the closure because frames can move between groups.
@@ -1700,6 +1701,7 @@ local function CheckGroupForChanges(group)
     end
     return true  -- group is dirty because a hook fired — always reflow
 end
+CheckGroupForChanges = (Track and Track("DL.CheckGroupForChanges", CheckGroupForChanges)) or CheckGroupForChanges
 
 -- Process pending reflows
 local function ProcessPendingReflows()
@@ -1803,6 +1805,7 @@ function DL.OnReconcileComplete()
         state.pendingPostTalentRefresh = false
     end)
 end
+ProcessPendingReflows = (Track and Track("DL.ProcessPendingReflows", ProcessPendingReflows)) or ProcessPendingReflows
 
 -- ═══════════════════════════════════════════════════════════════════════════
 -- MAINTAINER
@@ -1846,6 +1849,7 @@ local function RunDirtyTick()
         ProcessPendingReflows()
     end
 end
+RunDirtyTick = (Track and Track("DL.RunDirtyTick", RunDirtyTick)) or RunDirtyTick
 
 -- Start dirty ticker only. Mismatch tick removed — OnAuraInstanceInfoSet/Cleared hooks
 -- own aura state truth. RunDirtyTick only runs when a hook has marked a group dirty.

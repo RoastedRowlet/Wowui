@@ -1,18 +1,6 @@
 
 CHATTYNATOR_CURRENT_PROFILE = "DEFAULT"
 CHATTYNATOR_COMMAND_HISTORY = {
-"/cw Tinyshams-Stormrage :O",
-"/cw Tinyshams-Stormrage done!",
-"/s /simc",
-"/s /ROLL",
-"/p ports are so laggy this xpack",
-"/p LOL",
-"/p tank talking bedge",
-"/p you can freedom that btw",
-"/p the chains",
-"/s /reload",
-"/s /EUI",
-"/cw Lamiralei-Stormrage sounds good",
 "/cw Lamiralei-Stormrage /eui",
 "/cw Lamiralei-Stormrage done!",
 "/cw Lamiralei-Stormrage /eui",
@@ -208,4 +196,10 @@ CHATTYNATOR_COMMAND_HISTORY = {
 "/p how did i not know that knocks",
 "/p anyone need the chest i go?",
 "/p got*",
+"/s /reload",
+" sure",
+" valid",
+" its aight",
+"/p either of you need this staff?",
+"/p can jump through those lol",
 }

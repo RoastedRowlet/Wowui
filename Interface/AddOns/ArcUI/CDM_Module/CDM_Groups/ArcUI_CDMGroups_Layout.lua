@@ -282,8 +282,8 @@ local function SetupFrameInContainer(frame, container, slotW, slotH, cooldownID)
     end
     for _, region in ipairs({frame:GetRegions()}) do
         if region:IsObjectType("Texture") then
-            local ok, atlas = pcall(function() return region:GetAtlas() end)
-            if ok and atlas and atlas:find("IconOverlay") then
+            local atlas = region:GetAtlas()
+            if atlas and atlas:find("IconOverlay") then
                 region:SetAlpha(0)
                 region:Hide()
             end

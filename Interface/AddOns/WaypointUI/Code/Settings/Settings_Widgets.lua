@@ -128,13 +128,13 @@ do -- Tab Button
 
         if self.isSelected then
             if buttonState == "PUSHED" then
-                self.Background:background(Settings_Preload.UIDef.UITabButtonSelected_Pushed)
+                self.Background:background(Settings_Preload.UIDEF.UITabButtonSelected_Pushed)
                 self.Text:SetPoint("CENTER", self, 0, TEXT_Y_PUSHED)
             elseif buttonState == "HIGHLIGHTED" then
-                self.Background:background(Settings_Preload.UIDef.UITabButtonSelected_Highlighted)
+                self.Background:background(Settings_Preload.UIDEF.UITabButtonSelected_Highlighted)
                 self.Text:SetPoint("CENTER", self, 0, TEXT_Y)
             else
-                self.Background:background(Settings_Preload.UIDef.UITabButtonSelected)
+                self.Background:background(Settings_Preload.UIDEF.UITabButtonSelected)
                 self.Text:SetPoint("CENTER", self, 0, TEXT_Y)
             end
 
@@ -142,17 +142,17 @@ do -- Tab Button
             self.Text:SetAlpha(TEXT_ALPHA_SELECTED)
         else
             if buttonState == "PUSHED" then
-                self.Background:background(Settings_Preload.UIDef.UITabButton_Pushed)
+                self.Background:background(Settings_Preload.UIDEF.UITabButton_Pushed)
                 self.Text:textColor(TEXT_COLOR)
                 self.Text:SetAlpha(TEXT_ALPHA_PUSHED)
                 self.Text:SetPoint("CENTER", self, 0, TEXT_Y_PUSHED)
             elseif buttonState == "HIGHLIGHTED" then
-                self.Background:background(Settings_Preload.UIDef.UITabButton_Highlighted)
+                self.Background:background(Settings_Preload.UIDEF.UITabButton_Highlighted)
                 self.Text:textColor(TEXT_COLOR)
                 self.Text:SetAlpha(TEXT_ALPHA_HIGHLIGHTED)
                 self.Text:SetPoint("CENTER", self, 0, TEXT_Y)
             else
-                self.Background:background(Settings_Preload.UIDef.UITabButton)
+                self.Background:background(Settings_Preload.UIDEF.UITabButton)
                 self.Text:textColor(TEXT_COLOR)
                 self.Text:SetAlpha(TEXT_ALPHA)
                 self.Text:SetPoint("CENTER", self, 0, TEXT_Y)
@@ -297,9 +297,9 @@ do -- Widgets
 
         function ContainerMixin:SetSubcontainer(isSubcontainer)
             if isSubcontainer then
-                self.Background:background(Settings_Preload.UIDef.UICSubcontainer)
+                self.Background:background(Settings_Preload.UIDEF.UICSubcontainer)
             else
-                self.Background:background(Settings_Preload.UIDef.UICContainer)
+                self.Background:background(Settings_Preload.UIDEF.UICContainer)
             end
         end
 
@@ -485,7 +485,7 @@ do -- Widgets
                     Frame(name .. ".Background")
                         :id("Background", id)
                         :size(BACKGROUND_SIZE)
-                        :background(Settings_Preload.UIDef.UIWidget)
+                        :background(Settings_Preload.UIDEF.UIWidget)
                         :_excludeFromCalculations(),
 
                     Frame(name .. ".Content", {

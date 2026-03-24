@@ -9,19 +9,62 @@ local ADDON, ns = ...
 -- Round to nearest integer for pixel-perfect SetSize calls.
 local function PixelSize(n) return math.floor(n + 0.5) end
 
--- Physical-pixel-aware snap: matches the rounding used by CDMGroups icon sizing
--- (GetSlotDimensions) so bar widths align exactly with icon grid widths.
--- Formula: floor(n / pmult + 0.5) * pmult  where pmult = (768/screenH) / UIScale
-local function PixelSnap(n, effectiveScale)
+-- SnapToGroupPx: identical formula to CDMGroups Layout() snapPx.
+-- Uses UIParent:GetScale() (not container:GetEffectiveScale()) to match CDMGroups exactly.
+-- CDMGroups builds _slotAreaW with this formula; re-snapping with a different formula
+-- (e.g. PixelSnapEven) moves the value off the pixel boundary CDMGroups set → 1px drift.
+-- Always use this when sizing a bar to match a group dimension.
+local function SnapToGroupPx(n)
   local _, h = GetPhysicalScreenSize()
-  local s = effectiveScale or UIParent:GetScale()
+  local s = UIParent:GetScale()
   if h and h > 0 and s and s > 0 then
-    local pmult = (768 / h) / s
-    return math.floor(n / pmult + 0.5) * pmult
+    local ppu = (h / 768) * s
+    return math.floor(n * ppu + 0.5) / ppu
   end
   return math.floor(n + 0.5)
 end
 
+-- PixelSnap: used for dimensions NOT derived from CDMGroups (e.g. bar height).
+-- Same 1-pixel formula as SnapToGroupPx but accepts explicit scale for callers
+-- that already have a local effective scale computed.
+local function PixelSnap(n, effectiveScale)
+  local _, h = GetPhysicalScreenSize()
+  local s = effectiveScale or UIParent:GetScale()
+  if h and h > 0 and s and s > 0 then
+    local ppu = (h / 768) * s
+    return math.floor(n * ppu + 0.5) / ppu
+  end
+  return math.floor(n + 0.5)
+end
+
+-- GetActualIconInset: returns the WoW-unit x inset from container BOTTOMLEFT to the
+-- leftmost visible icon's left edge. Because GetLeft() and SetPoint offsets share the
+-- same coordinate space, the difference is directly usable as a SetPoint x offset.
+-- This bypasses all sub-pixel derivation: odd slot widths, dynamic compaction shifts,
+-- overflow compensation etc. are all already baked into the live frame positions.
+-- Falls back to rawBase when no icons are positioned yet (initial load).
+local function GetActualIconInset(group)
+  local rawBase = group and group._slotInsetPx or 0
+  if not group or not group.members or not group.container then return rawBase end
+  local containerLeft = group.container:GetLeft()
+  if not containerLeft then return rawBase end
+
+  local minLeft = math.huge
+  for _, member in pairs(group.members) do
+    local frame = member.frame
+    if frame and frame:IsShown() then
+      local fL = frame:GetLeft()
+      if fL and fL < minLeft then minLeft = fL end
+    end
+  end
+
+  if minLeft < math.huge then
+    return minLeft - containerLeft  -- exact WoW-unit inset, no sub-pixel guesswork
+  end
+  return rawBase  -- fallback: icons not positioned yet
+end
+-- Rounds to nearest 2-physical-pixel boundary.
+-- DO NOT use for group-matched bar widths — use SnapToGroupPx instead.
 local function PixelSnapEven(n, effectiveScale)
   local _, h = GetPhysicalScreenSize()
   local s = effectiveScale or UIParent:GetScale()
@@ -30,6 +73,52 @@ local function PixelSnapEven(n, effectiveScale)
     return math.floor(n * ppu / 2 + 0.5) * 2 / ppu
   end
   return math.floor(n / 2 + 0.5) * 2
+end
+
+-- GetActualIconInsetY: same as GetActualIconInset but for the top edge (Y axis).
+-- Used when a vertical fragmented bar is anchored LEFT or RIGHT of the container.
+-- WoW's Y axis is inverted (top of screen = higher value), so containerTop - iconTop
+-- gives the downward inset from the container's top edge to the topmost icon.
+local function GetActualIconInsetY(group)
+  local rawBase = group and group._slotInsetPx or 0
+  if not group or not group.members or not group.container then return rawBase end
+  local containerTop = group.container:GetTop()
+  if not containerTop then return rawBase end
+  local maxTop = -math.huge
+  for _, member in pairs(group.members) do
+    local frame = member.frame
+    if frame and frame:IsShown() then
+      local fT = frame:GetTop()
+      if fT and fT > maxTop then maxTop = fT end
+    end
+  end
+  if maxTop > -math.huge then
+    return containerTop - maxTop  -- positive = inset downward from container top
+  end
+  return rawBase
+end
+
+-- GetActualIconInsetBottom: distance in WoW units from container bottom edge UP
+-- to the bottom edge of the lowest visible icon.
+-- Use as positive Y offset in BOTTOMLEFT anchors so the bar sits flush against
+-- the icon area's bottom rather than the container's outer bottom edge.
+local function GetActualIconInsetBottom(group)
+  local rawBase = group and group._slotInsetPx or 0
+  if not group or not group.members or not group.container then return rawBase end
+  local containerBottom = group.container:GetBottom()
+  if not containerBottom then return rawBase end
+  local minBottom = math.huge
+  for _, member in pairs(group.members) do
+    local frame = member.frame
+    if frame and frame:IsShown() then
+      local fB = frame:GetBottom()
+      if fB and fB < minBottom then minBottom = fB end
+    end
+  end
+  if minBottom < math.huge then
+    return minBottom - containerBottom  -- positive = icon bottom is above container bottom
+  end
+  return rawBase
 end
 ns.Resources = ns.Resources or {}
 
@@ -3055,6 +3144,9 @@ local function UpdateThresholdLayers(barNumber, secretValue, passedMaxValue, dis
       pixelBT = PixelUtil.GetNearestPixelSize(borderThickness, mainFrame:GetEffectiveScale(), 1)
     end
     
+    -- snapSpc hoisted so positioning loop uses same snapped spacing as sizing.
+    -- Without this, sizing uses snapSpc but xOffset uses raw spacing -> drift.
+    local snapSpc = SnapToGroupPx(spacing)
     local totalGaps = spacing * math.max(0, numSegments - 1)
     
     -- Layout direction
@@ -3069,16 +3161,24 @@ local function UpdateThresholdLayers(barNumber, secretValue, passedMaxValue, dis
     -- Segment size: configured dims = content area, gaps are extra
     local segmentWidth, segmentHeight
     local isMatchingGroup = cfg.display.anchorToGroup and cfg.display.matchGroupWidth
-    
+
+    -- For the matched-group path we use plain float division so all segments
+    -- are exactly equal width. The GPU handles the subpixel edge between segments
+    -- identically to WeakAuras/ElvUI. Physical-pixel rounding causes either unequal
+    -- segments or bar overhang — both more visible than a ~0.5px subpixel blend.
+
     if isMatchingGroup then
       local mfW = mainFrame:GetWidth()
       local mfH = mainFrame:GetHeight()
+      local totalGapSnapped = snapSpc * math.max(0, numSegments - 1)
+      totalGaps = totalGapSnapped
+
       if isLayoutVertical then
-        segmentWidth = mfW
-        segmentHeight = (mfH - totalGaps) / numSegments
+        segmentWidth  = mfW
+        segmentHeight = (mfH - totalGapSnapped) / numSegments
       else
-        segmentWidth = (mfW - totalGaps) / numSegments
         segmentHeight = mfH
+        segmentWidth  = (mfW - totalGapSnapped) / numSegments
       end
     else
       local scale = cfg.display.barScale or 1.0
@@ -3264,17 +3364,31 @@ local function UpdateThresholdLayers(barNumber, secretValue, passedMaxValue, dis
       -- is fractional and gaps alternate between floor and ceil (e.g. 3/4px).
       segFrame:ClearAllPoints()
       if isLayoutVertical then
-        local snapH    = PixelSnap(segmentHeight, mainFrame:GetEffectiveScale())
-        local snapStep = PixelSnap(segmentHeight + spacing, mainFrame:GetEffectiveScale())
-        local yOffset  = (i - 1) * snapStep
-        segFrame:SetPoint("BOTTOMLEFT", mainFrame, "BOTTOMLEFT", 0, yOffset)
-        segFrame:SetSize(segmentWidth, snapH)
+        if isMatchingGroup then
+          -- Float positioning: segmentHeight = mfH/N exactly. GPU handles subpixel edges.
+          local yOffset = (i - 1) * (segmentHeight + snapSpc)
+          segFrame:SetPoint("BOTTOMLEFT", mainFrame, "BOTTOMLEFT", 0, yOffset)
+          segFrame:SetSize(segmentWidth, segmentHeight)
+        else
+          local snapH    = PixelSnap(segmentHeight, mainFrame:GetEffectiveScale())
+          local snapStep = PixelSnap(segmentHeight + spacing, mainFrame:GetEffectiveScale())
+          local yOffset  = (i - 1) * snapStep
+          segFrame:SetPoint("BOTTOMLEFT", mainFrame, "BOTTOMLEFT", 0, yOffset)
+          segFrame:SetSize(segmentWidth, snapH)
+        end
       else
-        local snapW    = PixelSnap(segmentWidth, mainFrame:GetEffectiveScale())
-        local snapStep = PixelSnap(segmentWidth + spacing, mainFrame:GetEffectiveScale())
-        local xOffset  = (i - 1) * snapStep
-        segFrame:SetPoint("TOPLEFT", mainFrame, "TOPLEFT", xOffset, 0)
-        segFrame:SetSize(snapW, segmentHeight)
+        if isMatchingGroup then
+          -- Float positioning: segmentWidth = mfW/N exactly. GPU handles subpixel edges.
+          local xOffset = (i - 1) * (segmentWidth + snapSpc)
+          segFrame:SetPoint("TOPLEFT", mainFrame, "TOPLEFT", xOffset, 0)
+          segFrame:SetSize(segmentWidth, segmentHeight)
+        else
+          local snapW    = PixelSnap(segmentWidth, mainFrame:GetEffectiveScale())
+          local snapStep = PixelSnap(segmentWidth + spacing, mainFrame:GetEffectiveScale())
+          local xOffset  = (i - 1) * snapStep
+          segFrame:SetPoint("TOPLEFT", mainFrame, "TOPLEFT", xOffset, 0)
+          segFrame:SetSize(snapW, segmentHeight)
+        end
       end
       
       -- Update background
@@ -3651,6 +3765,12 @@ local function UpdateThresholdLayers(barNumber, secretValue, passedMaxValue, dis
       if barWidth > 0 and slotCount and slotCount > 0 then
         local derived = (barWidth - math.max(0, slotCount - 1) * iconSpacing) / slotCount
         if derived > 0 then iconSize = derived end
+      end
+      -- Update mainFrame height to iconSize NOW so icon "LEFT" anchors (which center
+      -- vertically on mainFrame) position correctly before fill heights are computed.
+      -- ApplyAppearance sets height from cfg.display.height which may differ from iconSize.
+      if iconSize > 0 then
+        mainFrame:SetHeight(iconSize)
       end
     end
     local showCDText = cfg.display.cdTextShow
@@ -4139,7 +4259,7 @@ local function UpdateThresholdLayers(barNumber, secretValue, passedMaxValue, dis
     end
     
     -- Resize mainFrame to encompass all icons in row mode (enables drag)
-    -- Skip when matchGroupWidth is active — ApplyAppearance already set the correct size
+    -- Skip when matchGroupWidth is active — height was already set above when iconSize was derived.
     if not isFreeform and numIcons > 0 and not isMatchingGroup then
       local totalIconsWidth = (numIcons * iconSize) + ((numIcons - 1) * iconSpacing)
       mainFrame:SetSize(totalIconsWidth, iconSize)
@@ -4174,6 +4294,13 @@ local function UpdateThresholdLayers(barNumber, secretValue, passedMaxValue, dis
           local precision = config.display.cdTextDecimalPrecision or 0
           local fmt = "%." .. precision .. "f"
           local iSize = config.display.iconsSize or 32
+          -- When matched to a group, iconSize was derived from barWidth/numIcons — re-derive here
+          -- so fill heights match the actual frame size, not the raw config value.
+          local isMatchedGroup = config.display.anchorToGroup and config.display.matchGroupWidth
+          if isMatchedGroup and self.iconFrames and #self.iconFrames > 0 then
+            local frameSize = self.iconFrames[1]:GetWidth()
+            if frameSize and frameSize > 0 then iSize = frameSize end
+          end
           local iShape = config.display.iconsShape or "square"
           local isTextureShape = TEXTURE_SHAPES[iShape]
           
@@ -5363,6 +5490,9 @@ function ns.Resources.UpdateBar(barNumber)
     elseif displayFormat == "decimal" then
       -- Format as decimal (e.g., Soul Shards for Destruction)
       textFrame.text:SetFormattedText("%.1f", displayValue)
+    elseif textFormat == "abbreviated" then
+      -- Abbreviated: AbbreviateNumbers accepts secret values (e.g. 45000 → "45K")
+      textFrame.text:SetText(AbbreviateNumbers(secretValue))
     else
       -- Default: raw value
       textFrame.text:SetText(secretValue)
@@ -5613,6 +5743,82 @@ function ns.Resources.UpdateBar(barNumber)
 end
 
 -- ===================================================================
+-- UPDATE BAR VALUE (cheap — event-driven, options panel closed)
+-- Skips all layout/spec/talent/hideWhen checks. Only updates the
+-- bar fill, color, and text. Called from UNIT_POWER_FREQUENT.
+-- Falls back to full UpdateBar when frames don't exist yet.
+-- ===================================================================
+local function UpdateBarValue(barNumber)
+  local frames = resourceFrames[barNumber]
+  -- If frames don't exist yet, fall back to full UpdateBar which creates them
+  if not frames or not frames.mainFrame or not frames.mainFrame:IsShown() then
+    ns.Resources.UpdateBar(barNumber)
+    return
+  end
+
+  local cfg = ns.API.GetResourceBarConfig(barNumber)
+  if not cfg or not cfg.tracking.enabled then return end
+
+  local mainFrame, textFrame = frames.mainFrame, frames.textFrame
+  local resourceCategory = cfg.tracking.resourceCategory or "primary"
+  local secretValue, maxValue, displayValue, displayFormat
+
+  if resourceCategory == "secondary" then
+    local secondaryType = cfg.tracking.secondaryType
+    if not secondaryType then return end
+    local max, current, display, format = ns.Resources.GetSecondaryResourceValue(secondaryType)
+    if not max or max <= 0 then
+      -- max=0 is transient (e.g. post-shapeshift UnitPowerMax not yet populated).
+      -- Fall through to full UpdateBar so visibility logic runs and bar re-shows correctly.
+      ns.Resources.UpdateBar(barNumber)
+      return
+    end
+    secretValue  = current
+    maxValue     = max
+    displayValue = display
+    displayFormat = format
+    if not cfg.tracking.overrideMax then
+      cfg.tracking.maxValue = maxValue
+    else
+      maxValue = cfg.tracking.maxValue or max
+    end
+  else
+    local powerType = ResolvePowerType(cfg)
+    if not powerType or powerType < 0 then return end
+    local unitMax = UnitPowerMax("player", powerType)
+    maxValue = (unitMax and unitMax > 0) and unitMax or (cfg.tracking.maxValue or 100)
+    secretValue  = UnitPower("player", powerType)
+    displayValue = secretValue
+    displayFormat = "number"
+  end
+
+  -- Update bar fill + color
+  UpdateThresholdLayers(barNumber, secretValue, maxValue, displayValue)
+
+  -- Update text
+  if cfg.display.showText then
+    local textFormat = cfg.display.textFormat or "value"
+    if textFormat == "percent" and resourceCategory ~= "secondary" then
+      local powerType = ResolvePowerType(cfg)
+      if powerType and powerType >= 0 then
+        local pct = UnitPowerPercent("player", powerType, false, CurveConstants.ScaleTo100)
+        local pctFmt = (cfg.display.textShowPercentSymbol ~= false) and "%.0f%%" or "%.0f"
+        textFrame.text:SetFormattedText(pctFmt, pct)
+      else
+        textFrame.text:SetText(secretValue)
+      end
+    elseif displayFormat == "decimal" then
+      textFrame.text:SetFormattedText("%.1f", displayValue)
+    elseif textFormat == "abbreviated" then
+      textFrame.text:SetText(AbbreviateNumbers(secretValue))
+    else
+      textFrame.text:SetText(secretValue)
+    end
+    textFrame:Show()
+  end
+end
+
+-- ===================================================================
 -- APPLY APPEARANCE
 -- ===================================================================
 function ns.Resources.ApplyAppearance(barNumber)
@@ -5769,16 +5975,32 @@ function ns.Resources.ApplyAppearance(barNumber)
         -- containerW includes padding which makes barWidth*ppu not divisible by numSegments.
         -- Non-fragmented bars: respect matchSlotsOnly setting as before.
         local isFragmented = (display.thresholdMode == "fragmented")
+        local isFragVertical = isFragmented and (display.fragmentedLayoutDirection == "vertical")
         if (isFragmented or display.matchSlotsOnly) and group._slotAreaW then
-          matchDimension = isSideAnchor and (group._slotAreaHRaw or group._slotAreaH) or (group._slotAreaWRaw or group._slotAreaW)
+          if isFragVertical then
+            -- Vertical fragmented: long dimension is always H regardless of anchor side.
+            -- needsSwap puts matchDimension into frame height via SetSize(barHeight, barWidth).
+            matchDimension = group._slotAreaHRaw or group._slotAreaH
+          else
+            -- Horizontal fragmented / non-fragmented: side anchors match H, others match W.
+            matchDimension = isSideAnchor and (group._slotAreaHRaw or group._slotAreaH) or (group._slotAreaWRaw or group._slotAreaW)
+          end
         else
           local cW, cH = container:GetWidth(), container:GetHeight()
           matchDimension = isSideAnchor and cH or cW
         end
         if matchDimension and matchDimension > 0 then
           local sizeAdjust = display.matchWidthAdjust or 0
-          barWidth  = PixelSnapEven(matchDimension + sizeAdjust, effScale)
+          -- SnapToGroupPx: same formula CDMGroups uses for _slotAreaW (1-pixel, UIParent scale).
+          barWidth  = SnapToGroupPx(matchDimension + sizeAdjust)
           barHeight = PixelSnap((display.height or 25) * scale, effScale)
+
+          -- For fragmented bars: do NOT round barWidth to a numSegments multiple.
+          -- Segment sizing uses raw float division (mfW / numSegments) so the GPU
+          -- handles subpixel edges identically to WeakAuras/ElvUI. Rounding to whole
+          -- pixels causes either unequal segments or bar overhang — both worse than
+          -- the imperceptible ~0.5px subpixel blend at segment boundaries.
+
           -- Swap for vertical orientation or fragmented vertical layout
           if needsSwap then
             mainFrame:SetSize(barHeight, barWidth)
@@ -5788,26 +6010,41 @@ function ns.Resources.ApplyAppearance(barNumber)
         end
       end
 
-      -- Anchor: matchSlotsOnly TOP/BOTTOM uses container TOP/BOTTOM (center x)
-      -- so bar+icons share the same rounding chain — no 1px drift from padding.
+      -- Anchor: matchSlotsOnly TOP/BOTTOM aligns bar LEFT EDGE to the first icon's left edge.
+      -- rawBase is the inset from container edge to icon area.
+      -- GetActualIconInset reads real icon frame positions — handles all sub-pixel cases
+      -- slot width is odd (CENTER-anchor floor division vs TOPLEFT anchor).
+      local rawBase    = (group and group._slotInsetPx) or 0
+      local alignInset       = GetActualIconInset(group)
+      local alignInsetY      = GetActualIconInsetY(group)
+      local alignInsetBottom = GetActualIconInsetBottom(group)
+      
       local matchSlots = display.matchGroupWidth and display.matchSlotsOnly and barWidth
       mainFrame:ClearAllPoints()
       if anchorPoint == "TOP" then
         if matchSlots then
-          mainFrame:SetPoint("BOTTOMLEFT", container, "TOP", -barWidth/2 + offsetX, offsetY)
+          mainFrame:SetPoint("BOTTOMLEFT", container, "TOPLEFT", alignInset + offsetX, (display.matchIconEdges and -alignInsetY or 0) + offsetY)
         else
           mainFrame:SetPoint("BOTTOMLEFT", container, "TOPLEFT", offsetX, offsetY)
         end
       elseif anchorPoint == "BOTTOM" then
         if matchSlots then
-          mainFrame:SetPoint("TOPLEFT", container, "BOTTOM", -barWidth/2 + offsetX, offsetY)
+          mainFrame:SetPoint("TOPLEFT", container, "BOTTOMLEFT", alignInset + offsetX, (display.matchIconEdges and alignInsetBottom or 0) + offsetY)
         else
           mainFrame:SetPoint("TOPLEFT", container, "BOTTOMLEFT", offsetX, offsetY)
         end
       elseif anchorPoint == "LEFT" then
-        mainFrame:SetPoint("RIGHT", container, "LEFT", offsetX, offsetY)
+        if matchSlots then
+          mainFrame:SetPoint("TOPRIGHT", container, "TOPLEFT", offsetX, -(alignInsetY + offsetY))
+        else
+          mainFrame:SetPoint("RIGHT", container, "LEFT", offsetX, offsetY)
+        end
       elseif anchorPoint == "RIGHT" then
-        mainFrame:SetPoint("LEFT", container, "RIGHT", offsetX, offsetY)
+        if matchSlots then
+          mainFrame:SetPoint("TOPLEFT", container, "TOPRIGHT", offsetX, -(alignInsetY + offsetY))
+        else
+          mainFrame:SetPoint("LEFT", container, "RIGHT", offsetX, offsetY)
+        end
       end
 
       if display.matchGroupWidth then
@@ -6182,7 +6419,6 @@ local powerTokenCache = {}      -- [powerToken] = { barNum1, barNum2, ... }
 local autoPrimaryBars = {}      -- { barNum1, barNum2, ... } for autoPrimary bars
 local hasAuraBasedBars = false  -- Quick early-out for UNIT_AURA handler
 local isInitialized = false     -- MUST be here: UpdateBarsForSecondaryType + RefreshSoulShardBars reference it
-
 local function RebuildResourceEventCache()
   wipe(secondaryTypeCache)
   wipe(powerTokenCache)
@@ -6546,18 +6782,16 @@ eventFrame:SetScript("OnEvent", function(self, event, arg1, arg2, ...)
     
   elseif event == "UNIT_POWER_FREQUENT" and arg1 == "player" then
     if not isInitialized then return end
-    
+
     local powerToken = arg2
-    
-    -- O(1) lookup: update bars that track this power token directly
+
     local tokenBars = powerTokenCache[powerToken]
     if tokenBars then
       for _, barNumber in ipairs(tokenBars) do
         ns.Resources.UpdateBar(barNumber)
       end
     end
-    
-    -- AutoPrimary bars always update regardless of token
+
     for _, barNumber in ipairs(autoPrimaryBars) do
       ns.Resources.UpdateBar(barNumber)
     end
@@ -6993,15 +7227,20 @@ function ns.Resources.OnGroupContainerSizeChanged(groupName, newWidth, newHeight
           -- Fragmented bars always use _slotAreaW for even segment division.
           -- Non-fragmented respect matchSlotsOnly.
           local isFragmented = (cfg.display.thresholdMode == "fragmented")
+          local isFragVertical = isFragmented and (cfg.display.fragmentedLayoutDirection == "vertical")
           local matchDimension
           if (isFragmented or cfg.display.matchSlotsOnly) and group and group._slotAreaW then
-            matchDimension = isSideAnchor and (group._slotAreaHRaw or group._slotAreaH) or (group._slotAreaWRaw or group._slotAreaW)
+            if isFragVertical then
+              matchDimension = group._slotAreaHRaw or group._slotAreaH
+            else
+              matchDimension = isSideAnchor and (group._slotAreaHRaw or group._slotAreaH) or (group._slotAreaWRaw or group._slotAreaW)
+            end
           else
             matchDimension = isSideAnchor and newHeight or newWidth
           end
 
           local sizeAdjust = cfg.display.matchWidthAdjust or 0
-          local barWidth = PixelSnapEven(matchDimension + sizeAdjust, effScale)
+          local barWidth = SnapToGroupPx(matchDimension + sizeAdjust)
           local barHeight = PixelSnap((cfg.display.height or 25) * scale, effScale)
           
           -- Use same needsSwap logic as ApplyAppearance:
@@ -7014,27 +7253,40 @@ function ns.Resources.OnGroupContainerSizeChanged(groupName, newWidth, newHeight
           else
             mainFrame:SetSize(barWidth, barHeight)
           end
-          -- Re-anchor so center-x offset stays correct with new barWidth.
-          local offsetX = cfg.display.anchorOffsetX or 0
-          local offsetY = cfg.display.anchorOffsetY or 0
+          -- Re-anchor: align bar edges to icon area edges.
+          local offsetX         = cfg.display.anchorOffsetX or 0
+          local offsetY         = cfg.display.anchorOffsetY or 0
+          local rawBase         = (group and group._slotInsetPx) or 0
+          local alignInset       = GetActualIconInset(group)
+          local alignInsetY      = GetActualIconInsetY(group)
+          local alignInsetBottom = GetActualIconInsetBottom(group)
+          
           local matchSlots = cfg.display.matchSlotsOnly and barWidth
           mainFrame:ClearAllPoints()
           if anchorPoint == "TOP" then
             if matchSlots then
-              mainFrame:SetPoint("BOTTOMLEFT", container, "TOP", -barWidth/2 + offsetX, offsetY)
+              mainFrame:SetPoint("BOTTOMLEFT", container, "TOPLEFT", alignInset + offsetX, (cfg.display.matchIconEdges and -alignInsetY or 0) + offsetY)
             else
               mainFrame:SetPoint("BOTTOMLEFT", container, "TOPLEFT", offsetX, offsetY)
             end
           elseif anchorPoint == "BOTTOM" then
             if matchSlots then
-              mainFrame:SetPoint("TOPLEFT", container, "BOTTOM", -barWidth/2 + offsetX, offsetY)
+              mainFrame:SetPoint("TOPLEFT", container, "BOTTOMLEFT", alignInset + offsetX, (cfg.display.matchIconEdges and alignInsetBottom or 0) + offsetY)
             else
               mainFrame:SetPoint("TOPLEFT", container, "BOTTOMLEFT", offsetX, offsetY)
             end
           elseif anchorPoint == "LEFT" then
-            mainFrame:SetPoint("RIGHT", container, "LEFT", offsetX, offsetY)
+            if matchSlots then
+              mainFrame:SetPoint("TOPRIGHT", container, "TOPLEFT", offsetX, -(alignInsetY + offsetY))
+            else
+              mainFrame:SetPoint("RIGHT", container, "LEFT", offsetX, offsetY)
+            end
           elseif anchorPoint == "RIGHT" then
-            mainFrame:SetPoint("LEFT", container, "RIGHT", offsetX, offsetY)
+            if matchSlots then
+              mainFrame:SetPoint("TOPLEFT", container, "TOPRIGHT", offsetX, -(alignInsetY + offsetY))
+            else
+              mainFrame:SetPoint("LEFT", container, "RIGHT", offsetX, offsetY)
+            end
           end
         end
       end
@@ -7082,17 +7334,21 @@ local function OnContainerSizeChanged(container, width, height)
 
           -- Use container effective scale for pixel snapping.
           local effScale = container:GetEffectiveScale()
-          -- Fragmented bars always use _slotAreaW for even segment division.
           local isFragmented = (cfg.display.thresholdMode == "fragmented")
+          local isFragVertical = isFragmented and (cfg.display.fragmentedLayoutDirection == "vertical")
           local matchDimension
           if (isFragmented or cfg.display.matchSlotsOnly) and group and group._slotAreaW then
-            matchDimension = isSideAnchor and (group._slotAreaHRaw or group._slotAreaH) or (group._slotAreaWRaw or group._slotAreaW)
+            if isFragVertical then
+              matchDimension = group._slotAreaHRaw or group._slotAreaH
+            else
+              matchDimension = isSideAnchor and (group._slotAreaHRaw or group._slotAreaH) or (group._slotAreaWRaw or group._slotAreaW)
+            end
           else
             matchDimension = isSideAnchor and height or width
           end
           
           local sizeAdjust = cfg.display.matchWidthAdjust or 0
-          local barWidth = PixelSnapEven(matchDimension + sizeAdjust, effScale)
+          local barWidth = SnapToGroupPx(matchDimension + sizeAdjust)
           local barHeight = PixelSnap((cfg.display.height or 25) * scale, effScale)
           
           -- Use same needsSwap logic as ApplyAppearance:
@@ -7105,27 +7361,40 @@ local function OnContainerSizeChanged(container, width, height)
           else
             mainFrame:SetSize(barWidth, barHeight)
           end
-          -- Re-anchor so center-x offset stays correct with new barWidth.
-          local offsetX = cfg.display.anchorOffsetX or 0
-          local offsetY = cfg.display.anchorOffsetY or 0
+          -- Re-anchor: align bar left edge to first icon left edge (BOTTOMLEFT + GetActualIconInset(group)).
+          local offsetX     = cfg.display.anchorOffsetX or 0
+          local offsetY     = cfg.display.anchorOffsetY or 0
+          local rawBase     = (group and group._slotInsetPx) or 0
+          local alignInset  = GetActualIconInset(group)
+          local alignInsetY      = GetActualIconInsetY(group)
+          local alignInsetBottom = GetActualIconInsetBottom(group)
+          
           local matchSlots = cfg.display.matchSlotsOnly and barWidth
           mainFrame:ClearAllPoints()
           if anchorPoint == "TOP" then
             if matchSlots then
-              mainFrame:SetPoint("BOTTOMLEFT", container, "TOP", -barWidth/2 + offsetX, offsetY)
+              mainFrame:SetPoint("BOTTOMLEFT", container, "TOPLEFT", alignInset + offsetX, (cfg.display.matchIconEdges and -alignInsetY or 0) + offsetY)
             else
               mainFrame:SetPoint("BOTTOMLEFT", container, "TOPLEFT", offsetX, offsetY)
             end
           elseif anchorPoint == "BOTTOM" then
             if matchSlots then
-              mainFrame:SetPoint("TOPLEFT", container, "BOTTOM", -barWidth/2 + offsetX, offsetY)
+              mainFrame:SetPoint("TOPLEFT", container, "BOTTOMLEFT", alignInset + offsetX, (cfg.display.matchIconEdges and alignInsetBottom or 0) + offsetY)
             else
               mainFrame:SetPoint("TOPLEFT", container, "BOTTOMLEFT", offsetX, offsetY)
             end
           elseif anchorPoint == "LEFT" then
-            mainFrame:SetPoint("RIGHT", container, "LEFT", offsetX, offsetY)
+            if matchSlots then
+              mainFrame:SetPoint("TOPRIGHT", container, "TOPLEFT", offsetX, -(alignInsetY + offsetY))
+            else
+              mainFrame:SetPoint("RIGHT", container, "LEFT", offsetX, offsetY)
+            end
           elseif anchorPoint == "RIGHT" then
-            mainFrame:SetPoint("LEFT", container, "RIGHT", offsetX, offsetY)
+            if matchSlots then
+              mainFrame:SetPoint("TOPLEFT", container, "TOPRIGHT", offsetX, -(alignInsetY + offsetY))
+            else
+              mainFrame:SetPoint("LEFT", container, "RIGHT", offsetX, offsetY)
+            end
           end
         end
       end
@@ -7134,6 +7403,36 @@ local function OnContainerSizeChanged(container, width, height)
 end
 
 -- Hook a container for size change events
+-- ===================================================================
+-- SHARED BAR ALIGNMENT API
+-- Used by CooldownBars, TimerBars, and any future bar type that needs
+-- pixel-perfect width matching and left-edge alignment to a CDM group.
+-- ===================================================================
+
+--- Returns the correct bar width in WoW units for matching a CDM group.
+--- Uses SnapToGroupPx (identical to CDMGroups's own snap formula).
+---@param groupName string
+---@param sizeAdjust number? optional extra pixels in WoW units (cfg.display.matchWidthAdjust)
+---@return number? barWidth, or nil if group not found
+function ns.Resources.GetMatchedBarWidth(groupName, sizeAdjust)
+  local group = ns.CDMGroups and ns.CDMGroups.groups and ns.CDMGroups.groups[groupName]
+  if not group then return nil end
+  local saw = group._slotAreaW
+  if not saw or saw <= 0 then return nil end
+  return SnapToGroupPx(saw + (sizeAdjust or 0))
+end
+
+--- Returns the WoW-unit x offset from container BOTTOMLEFT to the first icon's left edge.
+--- Pass this as the x offset when doing SetPoint("TOPLEFT", container, "BOTTOMLEFT", inset, y).
+--- Works at any UI scale, icon size, and dynamic layout state.
+--- Falls back to group._slotInsetPx if no icons are visible yet.
+---@param groupName string
+---@return number inset in WoW units
+function ns.Resources.GetGroupIconInset(groupName)
+  local group = ns.CDMGroups and ns.CDMGroups.groups and ns.CDMGroups.groups[groupName]
+  return GetActualIconInset(group)
+end
+
 function ns.Resources.HookContainerForAnchoredBars(groupName)
   if not ns.CDMGroups or not ns.CDMGroups.groups then return end
   

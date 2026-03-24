@@ -327,8 +327,8 @@ local function GetDurationForFrame(frame)
   local auraID = frame.auraInstanceID
   if auraID and type(auraID) == "number" then
     local unit = frame.auraDataUnit or frame.unitToken or "player"
-    local ok, dur = pcall(C_UnitAuras.GetAuraDuration, unit, auraID)
-    if ok and dur then return dur end
+    local dur = C_UnitAuras.GetAuraDuration(unit, auraID)
+    if dur then return dur end
   end
 
   -- SPELL: get cooldown duration (fallback)
@@ -336,8 +336,8 @@ local function GetDurationForFrame(frame)
   if cooldownInfo then
     local spellID = cooldownInfo.overrideSpellID or cooldownInfo.spellID
     if spellID and type(spellID) == "number" then
-      local ok, dur = pcall(C_Spell.GetSpellCooldownDuration, spellID)
-      if ok and dur then return dur end
+      local dur = C_Spell.GetSpellCooldownDuration(spellID)
+      if dur then return dur end
     end
   end
 
@@ -434,13 +434,13 @@ local function ProcessFrame(frame, cfg)
     -- EvaluateRemainingDuration: evaluates curve at remaining seconds
     -- EvaluateRemainingPercent: evaluates curve at remaining percent (0-100)
     local usePercent = cfg and cfg.cooldownText and cfg.cooldownText.durationColorUsePercent
-    local ok, color
+    local color
     if usePercent then
-      ok, color = pcall(dur.EvaluateRemainingPercent, dur, curve)
+      color = dur:EvaluateRemainingPercent(curve)
     else
-      ok, color = pcall(dur.EvaluateRemainingDuration, dur, curve)
+      color = dur:EvaluateRemainingDuration(curve)
     end
-    if ok and color then
+    if color then
       ApplyColor(frame, color)
       activeFrames[frame] = true
       return true

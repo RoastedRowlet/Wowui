@@ -1070,6 +1070,8 @@ local DEFAULTS = {
             enabled = true,
             hideBlizzard = true,
             useBlizzardBuffBars = false,
+            rotationHelperEnabled = true,
+            rotationHelperGlowStyle = 5,
             -- The 3 default bars (match Blizzard CDM)
             bars = {
                 {
@@ -3144,7 +3146,7 @@ end
 local function ComputeTopRowStride(barData, count)
     local numRows = barData.numRows or 1
     if numRows < 1 then numRows = 1 end
-    if numRows == 2 and barData.topRowCount and barData.topRowCount > 0 then
+    if numRows == 2 and barData.customTopRowEnabled and barData.topRowCount and barData.topRowCount > 0 then
         local topCount = math.min(barData.topRowCount, count)
         local bottomCount = count - topCount
         return math.max(topCount, bottomCount), numRows, topCount
@@ -3414,17 +3416,24 @@ LayoutCDMBar = function(barKey)
     -- How many icons on the top row
     local topRowCount = customTopCount
     if topRowCount < 0 then topRowCount = 0 end
-    local topRowHasLess = (topRowCount > 0 and topRowCount < stride)
+    local bottomRowCount = #visibleIcons - topRowCount
+    if bottomRowCount < 0 then bottomRowCount = 0 end
+
+    -- Compute per-row centering offset (icons fewer than stride get centered)
+    local function RowIconCount(row)
+        if row == 0 then return topRowCount end
+        return bottomRowCount
+    end
 
     -- Position each icon: fill bottom-up so bottom rows are full,
-    -- top row gets the remainder. Centering only on top row when partial.
+    -- top row gets the remainder. Center any row with fewer icons than stride.
     for i, icon in ipairs(visibleIcons) do
         icon:SetSize(iconW, iconH)
         icon:ClearAllPoints()
 
         -- Map sequential index to bottom-up grid position.
         -- Icon 1..topRowCount fill the top row (visual row 0).
-        -- Remaining icons fill rows 1..numRows-1 (bottom rows, full).
+        -- Remaining icons fill rows 1..numRows-1 (bottom rows).
         local col, row
         if i <= topRowCount then
             col = i - 1
@@ -3435,43 +3444,46 @@ LayoutCDMBar = function(barKey)
             row = 1 + math.floor(bottomIdx / stride)
         end
 
-        -- Only center the top row when it has fewer icons than stride
+        -- Center any row that has fewer icons than stride
+        local rowCount = RowIconCount(row)
+        local rowHasLess = (rowCount > 0 and rowCount < stride)
+
         if grow == "RIGHT" then
             local rowOffset = 0
-            if row == 0 and topRowHasLess then
-                rowOffset = SnapForScale((stride - topRowCount) * stepW / 2, 1)
+            if rowHasLess then
+                rowOffset = SnapForScale((stride - rowCount) * stepW / 2, 1)
             end
             icon:SetPoint("TOPLEFT", frame, "TOPLEFT",
                 col * stepW + rowOffset,
                 -(row * stepH))
         elseif grow == "LEFT" then
             local rowOffset = 0
-            if row == 0 and topRowHasLess then
-                rowOffset = SnapForScale((stride - topRowCount) * stepW / 2, 1)
+            if rowHasLess then
+                rowOffset = SnapForScale((stride - rowCount) * stepW / 2, 1)
             end
             icon:SetPoint("TOPRIGHT", frame, "TOPRIGHT",
                 -(col * stepW + rowOffset),
                 -(row * stepH))
         elseif grow == "DOWN" then
             local rowOffset = 0
-            if row == 0 and topRowHasLess then
-                rowOffset = SnapForScale((stride - topRowCount) * stepH / 2, 1)
+            if rowHasLess then
+                rowOffset = SnapForScale((stride - rowCount) * stepH / 2, 1)
             end
             icon:SetPoint("TOPLEFT", frame, "TOPLEFT",
                 row * stepW,
                 -(col * stepH + rowOffset))
         elseif grow == "UP" then
             local rowOffset = 0
-            if row == 0 and topRowHasLess then
-                rowOffset = SnapForScale((stride - topRowCount) * stepH / 2, 1)
+            if rowHasLess then
+                rowOffset = SnapForScale((stride - rowCount) * stepH / 2, 1)
             end
             icon:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT",
                 row * stepW,
                 col * stepH + rowOffset)
         elseif grow == "CENTER" then
             local rowOffset = 0
-            if row == 0 and topRowHasLess then
-                rowOffset = SnapForScale((stride - topRowCount) * stepW / 2, 1)
+            if rowHasLess then
+                rowOffset = SnapForScale((stride - rowCount) * stepW / 2, 1)
             end
             icon:SetPoint("TOPLEFT", frame, "CENTER",
                 col * stepW + rowOffset - totalW / 2,
@@ -8554,6 +8566,77 @@ function ECME:CDMFinishSetup()
 end
 
 -------------------------------------------------------------------------------
+--  Rotation Helper Integration (Blizzard C_AssistedCombat)
+--  Highlights the currently suggested spell from the rotation assistant
+--  with a glow on its CDM icon.
+-------------------------------------------------------------------------------
+ns._rotationGlowedIcons = {}
+ns._lastSuggestedSpell = nil
+ns._rotationHookInstalled = false
+
+local function UpdateRotationHighlights()
+    local p = ECME.db and ECME.db.profile
+    if not p or not p.cdmBars or not p.cdmBars.rotationHelperEnabled then
+        for icon in pairs(ns._rotationGlowedIcons) do
+            if icon._glowOverlay then
+                _G_Glows.StopAllGlows(icon._glowOverlay)
+                icon._glowOverlay:SetAlpha(0)
+            end
+            ns._rotationGlowedIcons[icon] = nil
+        end
+        ns._lastSuggestedSpell = nil
+        return
+    end
+
+    local suggestedSpell = C_AssistedCombat and C_AssistedCombat.GetNextCastSpell and C_AssistedCombat.GetNextCastSpell()
+
+    if suggestedSpell == ns._lastSuggestedSpell then return end
+    ns._lastSuggestedSpell = suggestedSpell
+
+    for icon in pairs(ns._rotationGlowedIcons) do
+        if icon._glowOverlay then
+            _G_Glows.StopAllGlows(icon._glowOverlay)
+            icon._glowOverlay:SetAlpha(0)
+        end
+    end
+    wipe(ns._rotationGlowedIcons)
+
+    if not suggestedSpell then return end
+
+    local glowStyle = p.cdmBars.rotationHelperGlowStyle or 5
+    for barKey, icons in pairs(cdmBarIcons) do
+        for _, icon in ipairs(icons) do
+            if icon._spellID and icon._spellID == suggestedSpell and icon:IsShown() then
+                if icon._glowOverlay then
+                    icon._glowOverlay:SetAlpha(1)
+                    StartNativeGlow(icon._glowOverlay, glowStyle, 1, 0.82, 0.1)
+                    ns._rotationGlowedIcons[icon] = true
+                end
+            end
+        end
+    end
+end
+ns.UpdateRotationHighlights = UpdateRotationHighlights
+
+local function InstallRotationHook()
+    if ns._rotationHookInstalled then return end
+    ns._rotationHookInstalled = true
+
+    if EventRegistry and EventRegistry.RegisterCallback then
+        EventRegistry:RegisterCallback("AssistedCombatManager.OnAssistedHighlightSpellChange", function()
+            UpdateRotationHighlights()
+        end, "ECME_CDM_RotationHelper")
+    end
+
+    -- Also hook the manager's update method as a fallback
+    if AssistedCombatManager and AssistedCombatManager.UpdateAllAssistedHighlightFramesForSpell then
+        hooksecurefunc(AssistedCombatManager, "UpdateAllAssistedHighlightFramesForSpell", function()
+            UpdateRotationHighlights()
+        end)
+    end
+end
+
+-------------------------------------------------------------------------------
 --  Event-Driven Runtime Maintenance
 --
 --  This frame owns the non-tick triggers: login/world transitions, spec swaps,
@@ -8802,6 +8885,10 @@ eventFrame:SetScript("OnEvent", function(_, event, unit, updateInfo, arg3)
         if ns.StartSpecValidation then
             ns.StartSpecValidation()
         end
+        -- Install rotation helper hook after CDM frames have been built
+        C_Timer.After(1, function()
+            InstallRotationHook()
+        end)
     end
     if event == "SPELLS_CHANGED" then
         -- SPELLS_CHANGED fires reliably after spec data is available.

@@ -9,6 +9,8 @@
 local ADDON_NAME = "LifebloomAlert"
 local LIFEBLOOM_SPELL_ID = 33763
 local LIFEBLOOM_NAME = C_Spell.GetSpellName(LIFEBLOOM_SPELL_ID) or "Lifebloom"
+local LIFEBLOOM_ICON = C_Spell.GetSpellTexture(LIFEBLOOM_SPELL_ID)
+local SOUND_CHANNEL_LIST = { "Master", "SFX", "Music", "Ambience", "Dialog" }
 
 local SOUND_LIST = {
     { label = "Text To Speech",         value = "tts" },
@@ -53,6 +55,7 @@ local DEFAULTS = {
 
     -- Volume
     ttsVolume         = 100,
+	soundChannel      = "SFX",
 
     -- Timer text alert
     timerTextEnabled  = false,
@@ -81,6 +84,16 @@ local DEFAULTS = {
     noLBTextFlash     = true,
     noLBTextFont      = "Fonts\\FRIZQT__.TTF",
     noLBTextOutline   = 2,
+
+    -- Cursor icon
+    cursorEnabled     = false,
+    cursorScale       = 1.0,
+    cursorOffsetX     = 20,
+    cursorOffsetY     = -20,
+    cursorTextR       = 1.0,
+    cursorTextG       = 1.0,
+    cursorTextB       = 1.0,
+    cursorTextSize    = 14,
 }
 
 -------------------------------------------------------------------------------
@@ -149,16 +162,18 @@ local function PlayAlert(soundIndex, ttsText, ttsVoice, ttsRate)
     local entry = GetSoundEntry(soundIndex)
     if not entry then return end
 
+    local channel = db.soundChannel or "SFX"
+
     if entry.value == "tts" then
         SpeakTTS(ttsText, ttsVoice, ttsRate)
     elseif type(entry.value) == "string" and entry.value:sub(1, 4) == "lsm:" then
         local LSM = LibStub and LibStub("LibSharedMedia-3.0", true)
         if LSM then
             local path = LSM:Fetch("sound", entry.value:sub(5))
-            if path then PlaySoundFile(path, "Master") end
+            if path then PlaySoundFile(path, db.soundChannel or "SFX") end
         end
     elseif type(entry.value) == "number" then
-        PlaySound(entry.value, "Master")
+        PlaySound(entry.value, db.soundChannel or "SFX")
     end
 end
 
@@ -340,7 +355,81 @@ local function SetTextFrameMovable(f, enabled)
 end
 
 -------------------------------------------------------------------------------
--- 6. CORE LOGIC
+-- 6. CURSOR ICON
+-------------------------------------------------------------------------------
+
+local cursorFrame
+local cursorTesting = false
+
+local function CreateCursorFrame()
+    local f = CreateFrame("Frame", "LBACursorFrame", UIParent)
+    f:SetSize(40, 40)
+    f:SetFrameStrata("TOOLTIP")
+    f:SetClampedToScreen(false)
+
+    local icon = f:CreateTexture(nil, "BACKGROUND")
+    icon:SetAllPoints()
+    icon:SetTexture(LIFEBLOOM_ICON)
+    icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
+    f.icon = icon
+
+    local timer = f:CreateFontString(nil, "OVERLAY")
+    timer:SetFont("Fonts\\FRIZQT__.TTF", 14, "OUTLINE")
+    timer:SetPoint("CENTER", f, "CENTER", 0, 0)
+    timer:SetJustifyH("CENTER")
+    timer:SetText("")
+    f.timer = timer
+
+    f:Hide()
+    return f
+end
+
+local function UpdateCursorFrame()
+    if not cursorFrame then return end
+
+    local scale    = db.cursorScale or 1.0
+    local size     = 40 * scale
+    local offsetX  = db.cursorOffsetX or 20
+    local offsetY  = db.cursorOffsetY or -20
+    local fontSize = db.cursorTextSize or 14
+
+    cursorFrame:SetSize(size, size)
+    cursorFrame.timer:SetFont("Fonts\\FRIZQT__.TTF", fontSize, "OUTLINE")
+    cursorFrame.timer:SetTextColor(
+        db.cursorTextR or 1,
+        db.cursorTextG or 1,
+        db.cursorTextB or 1,
+        1)
+
+    cursorFrame:SetScript("OnUpdate", function(self)
+        local x, y = GetCursorPosition()
+        local uiScale = UIParent:GetEffectiveScale()
+        self:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT",
+            x / uiScale + offsetX,
+            y / uiScale + offsetY)
+    end)
+end
+
+local function ShowCursorFrame(remaining)
+    if not db.cursorEnabled and not cursorTesting then return end
+    UpdateCursorFrame()
+    if remaining then
+        cursorFrame.timer:SetText(string.format("%.1f", remaining))
+    else
+        cursorFrame.timer:SetText("")
+    end
+    cursorFrame:Show()
+end
+
+local function HideCursorFrame()
+    if cursorFrame then
+        cursorFrame:Hide()
+        cursorFrame:SetScript("OnUpdate", nil)
+    end
+end
+
+-------------------------------------------------------------------------------
+-- 7. CORE LOGIC
 -------------------------------------------------------------------------------
 
 local coreFrame = CreateFrame("Frame")
@@ -381,25 +470,48 @@ local function CheckUnit(unit)
             end
         end
 
-        return true
+        return true, remaining
     end
-    return false
+    return false, nil
 end
 
 local function ScanForLifebloom()
-    local found = false
+    local found        = false
+    local minRemaining = nil
 
     if IsInRaid() then
         for i = 1, GetNumGroupMembers() do
-            if CheckUnit("raid" .. i) then found = true end
+            local unitFound, rem = CheckUnit("raid" .. i)
+            if unitFound then
+                found = true
+                if rem and (not minRemaining or rem < minRemaining) then
+                    minRemaining = rem
+                end
+            end
         end
     elseif IsInGroup() then
-        if CheckUnit("player") then found = true end
+        local unitFound, rem = CheckUnit("player")
+        if unitFound then
+            found = true
+            if rem and (not minRemaining or rem < minRemaining) then
+                minRemaining = rem
+            end
+        end
         for i = 1, GetNumGroupMembers() do
-            if CheckUnit("party" .. i) then found = true end
+            unitFound, rem = CheckUnit("party" .. i)
+            if unitFound then
+                found = true
+                if rem and (not minRemaining or rem < minRemaining) then
+                    minRemaining = rem
+                end
+            end
         end
     else
-        if CheckUnit("player") then found = true end
+        local unitFound, rem = CheckUnit("player")
+        if unitFound then
+            found = true
+            minRemaining = rem
+        end
     end
 
     if not found and timerTextShowing then
@@ -407,14 +519,23 @@ local function ScanForLifebloom()
         HideTimerTextAlert()
     end
 
-    if db.noLBEnabled and not found and UnitAffectingCombat("player") then
+    local inCombat = UnitAffectingCombat("player")
+
+    -- sound alert
+    if db.noLBEnabled and not found and inCombat then
         local now  = GetTime()
         local freq = db.noLBFrequency or 5
         if now - lastNoLBAlert >= freq then
             PlayAlert(db.noLBSoundChoice, db.noLBTTSText, db.noLBTTSVoice, db.noLBTTSRate)
             lastNoLBAlert = now
         end
-        if db.noLBTextEnabled and not noLBTextShowing then
+    elseif found then
+        lastNoLBAlert = 0
+    end
+
+    -- no-LB text alert
+    if db.noLBTextEnabled and not found and inCombat then
+        if not noLBTextShowing then
             noLBTextShowing = true
             ShowNoLBTextAlert()
         end
@@ -423,14 +544,22 @@ local function ScanForLifebloom()
             noLBTextShowing = false
             HideNoLBTextAlert()
         end
-        if found then
-            lastNoLBAlert = 0
-        end
     end
 
-    if not UnitAffectingCombat("player") and noLBTextShowing then
-        noLBTextShowing = false
-        HideNoLBTextAlert()
+    -- cursor icon logic
+    if cursorTesting then
+        -- test mode: scan loop does not touch cursor
+    elseif db.cursorEnabled then
+        local threshold = db.timerUsePandemic and 4.5 or (db.timerCustomSecs or 4.5)
+        if not found and inCombat then
+            ShowCursorFrame(nil)
+        elseif found and minRemaining and minRemaining <= threshold then
+            ShowCursorFrame(minRemaining)
+        else
+            HideCursorFrame()
+        end
+    else
+        HideCursorFrame()
     end
 end
 
@@ -444,7 +573,7 @@ coreFrame:SetScript("OnUpdate", function(self, elapsed)
 end)
 
 -------------------------------------------------------------------------------
--- 7. OPTIONS PANEL
+-- 8. OPTIONS PANEL
 -------------------------------------------------------------------------------
 
 local optionsPanel
@@ -586,7 +715,11 @@ end
 local function BuildSoundDropItems()
     local items = {}
     for _, entry in ipairs(SOUND_LIST) do
-        items[#items + 1] = entry.label
+        if entry.value == "tts" then
+            items[#items + 1] = entry.label
+        else
+            items[#items + 1] = "Blizzard: " .. entry.label
+        end
     end
     local LSM = LibStub and LibStub("LibSharedMedia-3.0", true)
     if LSM then
@@ -693,7 +826,7 @@ local function CreateColorPicker(parent, label, x, y, getR, getG, getB, getA, on
             g          = getG(),
             b          = getB(),
             opacity    = getA and getA() or 1,
-            hasOpacity = true,
+            hasOpacity = getA ~= nil,
             swatchFunc = swatchFunc,
             cancelFunc = cancelFunc,
         })
@@ -782,7 +915,6 @@ local function BuildTextAlertSection(content, yOff, prefix, titleText, defaultMs
         end)
     yOff = yOff - 52
 
-    -- Test button
     local testBtn = CreateFrame("Button", nil, content, "UIPanelButtonTemplate")
     testBtn:SetSize(100, 22)
     testBtn:SetPoint("TOPLEFT", 10, yOff)
@@ -805,7 +937,6 @@ local function BuildTextAlertSection(content, yOff, prefix, titleText, defaultMs
         end)
     end)
 
-    -- Unlock/move button
     local unlockBtn = CreateFrame("Button", nil, content, "UIPanelButtonTemplate")
     unlockBtn:SetSize(150, 22)
     unlockBtn:SetPoint("LEFT", testBtn, "RIGHT", 6, 0)
@@ -827,6 +958,84 @@ local function BuildTextAlertSection(content, yOff, prefix, titleText, defaultMs
             SetTextFrameMovable(f, false)
             f:Hide()
             self:SetText("Unlock & Move Text")
+        end
+    end)
+    yOff = yOff - 35
+
+    return yOff
+end
+
+local function BuildCursorSection(content, yOff)
+    local sec = content:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+    sec:SetPoint("TOPLEFT", 10, yOff)
+    sec:SetText("Cursor Reminder Icon")
+    yOff = yOff - 25
+
+    CreateCheckbox(content, "Enable cursor icon", 10, yOff,
+        function() return db.cursorEnabled end,
+        function(v)
+            db.cursorEnabled = v
+            if not v and not cursorTesting then HideCursorFrame() end
+        end)
+    yOff = yOff - 30
+
+    CreateSlider(content, "Icon Scale", 10, yOff, 0.5, 3.0, 0.1,
+        function() return db.cursorScale or 1.0 end,
+        function(v)
+            db.cursorScale = v
+            if cursorFrame and cursorFrame:IsShown() then UpdateCursorFrame() end
+        end)
+    yOff = yOff - 45
+
+    CreateSlider(content, "X Offset", 10, yOff, -100, 100, 1,
+        function() return db.cursorOffsetX or 20 end,
+        function(v)
+            db.cursorOffsetX = v
+            if cursorFrame and cursorFrame:IsShown() then UpdateCursorFrame() end
+        end)
+    yOff = yOff - 45
+
+    CreateSlider(content, "Y Offset", 10, yOff, -100, 100, 1,
+        function() return db.cursorOffsetY or -20 end,
+        function(v)
+            db.cursorOffsetY = v
+            if cursorFrame and cursorFrame:IsShown() then UpdateCursorFrame() end
+        end)
+    yOff = yOff - 45
+
+    CreateSlider(content, "Timer Text Size", 10, yOff, 8, 32, 1,
+        function() return db.cursorTextSize or 14 end,
+        function(v)
+            db.cursorTextSize = v
+            if cursorFrame and cursorFrame:IsShown() then UpdateCursorFrame() end
+        end)
+    yOff = yOff - 45
+
+    CreateColorPicker(content, "Timer Text Color", 10, yOff,
+        function() return db.cursorTextR or 1 end,
+        function() return db.cursorTextG or 1 end,
+        function() return db.cursorTextB or 1 end,
+        nil,
+        function(r, g, b)
+            db.cursorTextR = r
+            db.cursorTextG = g
+            db.cursorTextB = b
+            if cursorFrame and cursorFrame:IsShown() then UpdateCursorFrame() end
+        end)
+    yOff = yOff - 35
+
+    local testBtn = CreateFrame("Button", nil, content, "UIPanelButtonTemplate")
+    testBtn:SetSize(100, 22)
+    testBtn:SetPoint("TOPLEFT", 10, yOff)
+    testBtn:SetText("Test Icon")
+    testBtn:SetScript("OnClick", function(self)
+        cursorTesting = not cursorTesting
+        if cursorTesting then
+            ShowCursorFrame(3.7)
+            self:SetText("Hide Icon")
+        else
+            HideCursorFrame()
+            self:SetText("Test Icon")
         end
     end)
     yOff = yOff - 35
@@ -913,13 +1122,17 @@ local function BuildOptionsPanel()
                 local LSM = LibStub and LibStub("LibSharedMedia-3.0", true)
                 if LSM then
                     local path = LSM:Fetch("sound", entry.value:sub(5))
-                    if path then PlaySoundFile(path, "Master") end
+                    if path then PlaySoundFile(path, db.soundChannel or "SFX") end
                 end
             elseif type(entry.value) == "number" then
-                PlaySound(entry.value, "Master")
+                PlaySound(entry.value, db.soundChannel or "SFX")
             end
         end)
-    yOff = yOff - 52
+local channelNote4 = content:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    channelNote4:SetPoint("TOPLEFT", 10, yOff - 58)
+    channelNote4:SetTextColor(1, 0.2, 0.2, 1)
+    channelNote4:SetText("Volume adjustment only works for non Blizzard sounds and TTS.")
+    yOff = yOff - 78
 
     local timerTTSLabel
     _, timerTTSEditBox = CreateEditBox(content, "TTS Text (press Enter to save):", 10, yOff, 300,
@@ -952,7 +1165,7 @@ local function BuildOptionsPanel()
     secNoLB:SetText("No Lifebloom Alert  |cFFFF6060(in combat only)|r")
     yOff = yOff - 25
 
-    CreateCheckbox(content, "Alert when no Lifebloom is active on anyone in your group", 10, yOff,
+    CreateCheckbox(content, "Enable No-LB sound alert", 10, yOff,
         function() return db.noLBEnabled end,
         function(v) db.noLBEnabled = v end)
     yOff = yOff - 30
@@ -973,13 +1186,17 @@ local function BuildOptionsPanel()
                 local LSM = LibStub and LibStub("LibSharedMedia-3.0", true)
                 if LSM then
                     local path = LSM:Fetch("sound", entry.value:sub(5))
-                    if path then PlaySoundFile(path, "Master") end
+                    if path then PlaySoundFile(path, db.soundChannel or "SFX") end
                 end
             elseif type(entry.value) == "number" then
-                PlaySound(entry.value, "Master")
+                PlaySound(entry.value, db.soundChannel or "SFX")
             end
         end)
-    yOff = yOff - 52
+	local channelNote3 = content:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    channelNote3:SetPoint("TOPLEFT", 10, yOff - 58)
+    channelNote3:SetTextColor(1, 0.2, 0.2, 1)
+    channelNote3:SetText("Volume adjustment only works for non Blizzard sounds and TTS.")
+    yOff = yOff - 78
 
     local noLBTTSLabel
     _, noLBTTSEditBox = CreateEditBox(content, "TTS Text (press Enter to save):", 10, yOff, 300,
@@ -1000,6 +1217,15 @@ local function BuildOptionsPanel()
 
     yOff = BuildTextAlertSection(content, yOff, "noLB", "No Lifebloom Text Alert", "Lifebloom Missing")
 
+    -- cursor icon
+    local sep3 = content:CreateTexture(nil, "OVERLAY")
+    sep3:SetColorTexture(0.4, 0.4, 0.4, 0.6)
+    sep3:SetSize(530, 1)
+    sep3:SetPoint("TOPLEFT", 10, yOff)
+    yOff = yOff - 15
+
+    yOff = BuildCursorSection(content, yOff)
+
     -- volume and tts settings
     local sep2 = content:CreateTexture(nil, "OVERLAY")
     sep2:SetColorTexture(0.4, 0.4, 0.4, 0.6)
@@ -1011,6 +1237,27 @@ local function BuildOptionsPanel()
     secShared:SetPoint("TOPLEFT", 10, yOff)
     secShared:SetText("Volume & TTS Settings")
     yOff = yOff - 25
+	
+	CreateScrollDropdown(content, "Alert Sound Channel:", 10, yOff, SOUND_CHANNEL_LIST,
+        function()
+            local ch = db.soundChannel or "SFX"
+            for i, v in ipairs(SOUND_CHANNEL_LIST) do
+                if v == ch then return i end
+            end
+            return 2  -- default to SFX
+        end,
+        function(v)
+            db.soundChannel = SOUND_CHANNEL_LIST[v]
+        end)
+		local channelNote = content:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    channelNote:SetPoint("TOPLEFT", 10, yOff - 44)
+    channelNote:SetTextColor(0.7, 0.7, 0.7, 1)
+    channelNote:SetText("Applies to NON-TTS sounds only. Adjust volume slide that you chose in WoW Sound Settings.")
+		local channelNote2 = content:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    channelNote2:SetPoint("TOPLEFT", 10, yOff - 58)
+    channelNote2:SetTextColor(1, 0.2, 0.2, 1)
+    channelNote2:SetText("Volume adjustment only works for non Blizzard sounds.")
+    yOff = yOff - 78
 
     CreateSlider(content, "TTS Volume", 10, yOff, 0, 100, 5,
         function() return db.ttsVolume or 100 end,
@@ -1048,7 +1295,7 @@ local function BuildOptionsPanel()
 end
 
 -------------------------------------------------------------------------------
--- 8. INITIALISATION
+-- 9. INITIALISATION
 -------------------------------------------------------------------------------
 
 local category
@@ -1092,6 +1339,7 @@ initFrame:SetScript("OnEvent", function(self, event, arg1)
 
         timerTextFrame = CreateTextAlertFrame("LBATimerTextFrame")
         noLBTextFrame  = CreateTextAlertFrame("LBANoLBTextFrame")
+        cursorFrame    = CreateCursorFrame()
 
         local panel = BuildOptionsPanel()
 

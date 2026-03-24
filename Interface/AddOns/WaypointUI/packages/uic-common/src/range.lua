@@ -11,7 +11,7 @@ local UICCommonRange = env.modules:New("packages\\uic-common\\range")
 local Mixin = Mixin
 local CreateFromMixins = CreateFromMixins
 
-local UIDef = {
+local UIDEF = {
     UIStepperArrowLeft              = UICCommonPreload.ATLAS{ left = 92/512, right = 117/512, top = 415/512, bottom = 440/512 },
     UIStepperArrowLeft_Highlighted  = UICCommonPreload.ATLAS{ left = 115/512, right = 140/512, top = 415/512, bottom = 440/512 },
     UIStepperArrowLeft_Pushed       = UICCommonPreload.ATLAS{ left = 138/512, right = 163/512, top = 415/512, bottom = 440/512 },
@@ -37,27 +37,27 @@ do -- Stepper
 
         if not isEnabled then
             if self.isIncrease then
-                self:background(UIDef.UIStepperArrowRight_Disabled)
+                self:background(UIDEF.UIStepperArrowRight_Disabled)
             else
-                self:background(UIDef.UIStepperArrowLeft_Disabled)
+                self:background(UIDEF.UIStepperArrowLeft_Disabled)
             end
         elseif buttonState == "PUSHED" then
             if self.isIncrease then
-                self:background(UIDef.UIStepperArrowRight_Pushed)
+                self:background(UIDEF.UIStepperArrowRight_Pushed)
             else
-                self:background(UIDef.UIStepperArrowLeft_Pushed)
+                self:background(UIDEF.UIStepperArrowLeft_Pushed)
             end
         elseif buttonState == "HIGHLIGHTED" then
             if self.isIncrease then
-                self:background(UIDef.UIStepperArrowRight_Highlighted)
+                self:background(UIDEF.UIStepperArrowRight_Highlighted)
             else
-                self:background(UIDef.UIStepperArrowLeft_Highlighted)
+                self:background(UIDEF.UIStepperArrowLeft_Highlighted)
             end
         else
             if self.isIncrease then
-                self:background(UIDef.UIStepperArrowRight)
+                self:background(UIDEF.UIStepperArrowRight)
             else
-                self:background(UIDef.UIStepperArrowLeft)
+                self:background(UIDEF.UIStepperArrowLeft)
             end
         end
     end
@@ -136,13 +136,13 @@ do -- Range
         local isEnabled = self:IsEnabled()
 
         if not isEnabled then
-            self.parent.RangeThumb:background(UIDef.UIRangeThumb_Disabled)
+            self.parent.RangeThumb:background(UIDEF.UIRangeThumb_Disabled)
         elseif buttonState == "PUSHED" then
-            self.parent.RangeThumb:background(UIDef.UIRangeThumb_Pushed)
+            self.parent.RangeThumb:background(UIDEF.UIRangeThumb_Pushed)
         elseif buttonState == "HIGHLIGHTED" then
-            self.parent.RangeThumb:background(UIDef.UIRangeThumb_Highlighted)
+            self.parent.RangeThumb:background(UIDEF.UIRangeThumb_Highlighted)
         else
-            self.parent.RangeThumb:background(UIDef.UIRangeThumb)
+            self.parent.RangeThumb:background(UIDEF.UIRangeThumb)
         end
     end
 
@@ -165,7 +165,7 @@ do -- Range
                         :frameLevel(2)
                         :as("LINEAR_SLIDER_THUMB")
                         :size(UIKit.UI.FILL)
-                        :background(UIDef.UIRangeThumb)
+                        :background(UIDEF.UIRangeThumb)
                         :_updateMode(UIKit.Enum.UpdateMode.ExcludeVisibilityChanged),
 
                     Frame(name .. ".RangeTrack")
@@ -173,7 +173,7 @@ do -- Range
                         :frameLevel(1)
                         :as("LINEAR_SLIDER_TRACK")
                         :size(TRACK_SIZE)
-                        :background(UIDef.UIRangeTrack)
+                        :background(UIDEF.UIRangeTrack)
                         :_updateMode(UIKit.Enum.UpdateMode.ExcludeVisibilityChanged)
                 })
                     :id("Range", id)

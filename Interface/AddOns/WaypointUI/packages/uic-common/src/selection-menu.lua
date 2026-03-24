@@ -11,7 +11,7 @@ local UICCommonSelectionMenu = env.modules:New("packages\\uic-common\\selection-
 local Mixin = Mixin
 local CreateFromMixins = CreateFromMixins
 
-local UIDef = {
+local UIDEF = {
     UIRow               = UICCommonPreload.ATLAS{ inset = 4, scale = 1, left = 401 / 512, right = 433 / 512, top = 102 / 512, bottom = 118 / 512 },
     UIMenu              = UICCommonPreload.ATLAS{ inset = { 35, 35, 22, 51 }, scale = 0.9, left = 192 / 512, right = 319 / 512, top = 98 / 512, bottom = 192 / 512 },
     UIArrow             = UICCommonPreload.ATLAS{ left = 319 / 512, right = 345 / 512, top = 137 / 512, bottom = 163 / 512 },
@@ -122,7 +122,7 @@ do -- Row
                     :textColor(TEXT_COLOR)
                     :textAlignment("LEFT", "MIDDLE")
             })
-            :background(UIDef.UIRow)
+            :background(UIDEF.UIRow)
             :backgroundColor(BACKGROUND_COLOR)
             :size(WIDTH, HEIGHT)
 
@@ -155,10 +155,10 @@ do -- Content Arrow
         self:UpdateAnimation()
 
         if isTop then
-            self.parent:background(UIDef.UIEdgeFade_Top)
+            self.parent:background(UIDEF.UIEdgeFade_Top)
             self:point(UIKit.Enum.Point.Top)
         else
-            self.parent:background(UIDef.UIEdgeFade_Bottom)
+            self.parent:background(UIDEF.UIEdgeFade_Bottom)
             self:point(UIKit.Enum.Point.Bottom)
             self:backgroundRotation(math.pi)
         end
@@ -167,11 +167,11 @@ do -- Content Arrow
     function ContentArrowMixin:UpdateAnimation()
         local buttonState = self:GetButtonState()
         if buttonState == "PUSHED" then
-            self:background(UIDef.UIArrow_Pushed)
+            self:background(UIDEF.UIArrow_Pushed)
         elseif buttonState == "HIGHLIGHTED" then
-            self:background(UIDef.UIArrow_Highlighted)
+            self:background(UIDEF.UIArrow_Highlighted)
         else
-            self:background(UIDef.UIArrow)
+            self:background(UIDEF.UIArrow)
         end
     end
 
@@ -376,7 +376,7 @@ do -- Selection Menu
                         :id("Background", id)
                         :frameLevel(2)
                         :size(BACKGROUND_SIZE)
-                        :background(UIDef.UIMenu)
+                        :background(UIDEF.UIMenu)
                         :alpha(0.925)
                         :_excludeFromCalculations()
                         :_updateMode(UIKit.Enum.UpdateMode.ExcludeVisibilityChanged),

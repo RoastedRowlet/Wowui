@@ -2,7 +2,7 @@
 -- Copyright (c) 2026 by RaiderIO, Inc.
 -- All rights reserved.
 --
-local provider={name=...,data=1,region="tw",date="2026-03-22T06:44:06Z",currentSeasonId=0,numCharacters=7457,keystoneMilestoneLevels={15,12,10,7,4,2},db={}}
+local provider={name=...,data=1,region="tw",date="2026-03-23T06:44:01Z",currentSeasonId=0,numCharacters=7675,keystoneMilestoneLevels={15,12,10,7,4,2},db={}}
 local F
 
 F = function() provider.db["眾星之子"]={0,"夜嵐緋雪","龍蝦小魚卵"} end F()

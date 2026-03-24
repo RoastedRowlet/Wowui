@@ -8,7 +8,7 @@
         `NewUserNavigation(name, mapID, x, y, flags)`   -- Creates and tracks a new user waypoint at the specified coordinates
         `IsUserNavigationTracked()`                     -- Returns true if a user waypoint is currently being tracked
 
-    `WaypointUIAPI.OpenSettingUI()`
+    `WaypointUIAPI.OpenSettingsUI()`
 ]]
 
 local env = select(2, ...)
@@ -27,6 +27,6 @@ end
 
 do -- @\\Settings
     local Setting = env.modules:Await("@\\Settings")
-    WaypointUIAPI_OpenSettingUI = Setting.OpenSettingUI
-    WaypointUIAPI.OpenSettingUI = Setting.OpenSettingUI
+    WaypointUIAPI_OpenSettingsUI = Setting.OpenSettingsUI
+    WaypointUIAPI.OpenSettingsUI = Setting.OpenSettingsUI
 end

@@ -533,6 +533,7 @@ local function ShowDeleteConfirmation(barNum, barType, barName)
         cfg.tracking.useBaseSpell = false
         cfg.tracking.trackedSpellID = nil  -- Clear tracked spell selection
         cfg.tracking.maxStacks = 10
+        if ns.API and ns.API.InvalidateActiveBarCache then ns.API.InvalidateActiveBarCache() end
         cfg.tracking.maxDuration = 30
         cfg.tracking.iconTextureID = nil
         cfg.tracking.displaySpellID = nil
@@ -571,6 +572,7 @@ local function ShowDeleteConfirmation(barNum, barType, barName)
           cfg.tracking.powerName = nil
           cfg.display.enabled = false
           if ns.Resources and ns.Resources.HideBar then ns.Resources.HideBar(barNum) end
+          if ns.API and ns.API.InvalidateActiveBarCache then ns.API.InvalidateActiveBarCache() end
         end
       end
     end

@@ -13,23 +13,11 @@ local BPH = ns.ButtonPressHighlight
 -- ═══════════════════════════════════════════════════════════════════════════
 -- LOCALS
 -- ═══════════════════════════════════════════════════════════════════════════
-local buttonCache    = {}         -- all scanned action bar buttons
-local bindMap        = {}         -- [keybindString] = { spellID=, itemID=, buttons={} }
-local activeOverlays = {}         -- [key] = { texture=, buttons={}, id= }
-local modifierState  = {}         -- track shift/ctrl/alt
-local isActive       = false
-local enhancedFrames               -- lazy CDMEnhance reference
-local texPool                      -- CreateTexturePool (lazy init)
-local watcherFrame                 -- keyboard/mouse event watcher
-local updateFrame                  -- OnUpdate for hold-mode cleanup
-local bindsDirty     = true        -- flag to rebuild on next keypress
-
--- Mouse button name → keybind string
-local mouseButtonMap = {
-  ["MiddleButton"] = "BUTTON3",
-  ["Button4"]      = "BUTTON4",
-  ["Button5"]      = "BUTTON5",
-}
+local activeOverlays  = {}   -- [key] = { texture= }
+local isActive        = false
+local enhancedFrames             -- lazy CDMEnhance reference
+local texPool                    -- CreateTexturePool (lazy init)
+local useActionHooked = false    -- hooksecurefunc guard
 
 -- ═══════════════════════════════════════════════════════════════════════════
 -- MASQUE SHAPE INTEGRATION
@@ -318,167 +306,49 @@ local function BuildOverlayFunc()
 end
 
 -- ═══════════════════════════════════════════════════════════════════════════
--- SLOT → BINDING MAPPINGS (matches ArcUI_Keybinds.lua exactly)
--- ═══════════════════════════════════════════════════════════════════════════
-local SLOT_MAPPINGS = {
-  { startSlot = 1,   binding = "ACTIONBUTTON" },           -- Action Bar 1
-  { startSlot = 61,  binding = "MULTIACTIONBAR1BUTTON" },  -- MultiBarBottomLeft
-  { startSlot = 49,  binding = "MULTIACTIONBAR2BUTTON" },  -- MultiBarBottomRight
-  { startSlot = 25,  binding = "MULTIACTIONBAR3BUTTON" },  -- MultiBarRight
-  { startSlot = 37,  binding = "MULTIACTIONBAR4BUTTON" },  -- MultiBarLeft
-  { startSlot = 145, binding = "MULTIACTIONBAR5BUTTON" },  -- MultiBar5
-  { startSlot = 157, binding = "MULTIACTIONBAR6BUTTON" },  -- MultiBar6
-  { startSlot = 169, binding = "MULTIACTIONBAR7BUTTON" },  -- MultiBar7
-}
-
--- slot → list of button frames (used in hold mode to check PUSHED state)
-local slotToButtons = {}
-
--- ═══════════════════════════════════════════════════════════════════════════
--- BUTTON CACHE: scan ElvUI + Blizzard action bars, build slot→buttons map
--- ═══════════════════════════════════════════════════════════════════════════
-local function BuildButtonCache()
-  wipe(buttonCache)
-  wipe(slotToButtons)
-
-  -- ElvUI bars 1–15
-  for i = 1, 15 do
-    local bar = "ElvUI_Bar" .. i
-    for j = 1, 12 do
-      local btn = _G[bar .. "Button" .. j]
-      if btn then tinsert(buttonCache, btn) end
-    end
-  end
-
-  -- Blizzard bars
-  local blizzBars = {
-    "Action", "MultiBarBottomLeft", "MultiBarRight", "MultiBarBottomRight",
-    "MultiBarLeft", "MultiBar5", "MultiBar6", "MultiBar7", "Stance",
-  }
-  for _, barName in ipairs(blizzBars) do
-    for i = 1, 12 do
-      local btn = _G[barName .. "Button" .. i]
-      if btn then tinsert(buttonCache, btn) end
-    end
-  end
-
-  -- Build slot → buttons map for hold-mode PUSHED checks
-  for _, btn in ipairs(buttonCache) do
-    local ok, forbidden = pcall(function() return btn:IsForbidden() end)
-    if ok and not forbidden and btn.action then
-      local slot = btn._state_action or btn.action
-      if slot then
-        if not slotToButtons[slot] then slotToButtons[slot] = {} end
-        tinsert(slotToButtons[slot], btn)
-      end
-    end
-  end
-end
-
--- ═══════════════════════════════════════════════════════════════════════════
 -- ACTION HELPERS
 -- ═══════════════════════════════════════════════════════════════════════════
-local function GetActionSpellID(slot)
+local function GetSlotSpellAndItem(slot)
   local actionType, id = GetActionInfo(slot)
-  if actionType == "spell" then return id end
-  if actionType == "macro" then return GetMacroSpell(id) end
-  return nil
-end
-
-local function GetActionItemID(slot)
-  local actionType, id = GetActionInfo(slot)
-  if actionType == "item" then return id end
-  if actionType == "macro" then return GetMacroItem(id) end
-  return nil
-end
-
--- ═══════════════════════════════════════════════════════════════════════════
--- BIND MAP: keybind string → { spellID=, itemID=, buttons={} }
--- Uses correct slot→binding mapping (same as ArcUI_Keybinds.lua)
--- ═══════════════════════════════════════════════════════════════════════════
-local function RebuildBindMap()
-  wipe(bindMap)
-
-  local function RegisterBinding(bindingName, slot)
-    if not HasAction(slot) then return end
-    local spellID = GetActionSpellID(slot)
-    local itemID  = GetActionItemID(slot)
-    if not (spellID or itemID) then return end
-    local buttons = slotToButtons[slot] or {}
-    local binds = { GetBindingKey(bindingName) }
-    for _, key in ipairs(binds) do
-      if key and key ~= "" and not bindMap[key] then
-        bindMap[key] = { spellID = spellID, itemID = itemID, buttons = buttons }
-      end
-    end
+  if actionType == "spell" then return id, nil end
+  if actionType == "item"  then return nil, id end
+  if actionType == "macro" then
+    local spellID = GetMacroSpell(id)
+    if spellID then return spellID, nil end
+    -- Fallback: macro might use /use instead of /cast
+    local _, _, itemID = GetMacroItem(id)
+    return nil, itemID
   end
-
-  -- Pass 1: ElvUI buttons with keyBoundTarget (covers all ElvUI bars 1-15 with correct
-  -- binding names, including ELVUIBAR13/14/15BUTTON for bars 13-15)
-  local slotsCoveredByElvUI = {}
-  for _, btn in ipairs(buttonCache) do
-    local ok, forbidden = pcall(function() return btn:IsForbidden() end)
-    if ok and not forbidden and btn.keyBoundTarget and btn.keyBoundTarget ~= "" then
-      local slot = btn._state_action or btn.action
-      if slot then
-        slotsCoveredByElvUI[slot] = true
-        RegisterBinding(btn.keyBoundTarget, slot)
-      end
-    end
-  end
-
-  -- Pass 2: Standard Blizzard slot mappings for any slot not already handled by ElvUI
-  for _, mapping in ipairs(SLOT_MAPPINGS) do
-    for i = 1, 12 do
-      local slot = mapping.startSlot + i - 1
-      if not slotsCoveredByElvUI[slot] then
-        RegisterBinding(mapping.binding .. i, slot)
-      end
-    end
-  end
-
-  -- Bonus bars (stances/forms): slots 73-120 use ACTIONBUTTON bindings when active
-  local bonusOffset = C_ActionBar and C_ActionBar.GetBonusBarOffset
-    and C_ActionBar.GetBonusBarOffset()
-  if bonusOffset and not issecretvalue(bonusOffset) and bonusOffset > 0 then
-    local bonusStart = 72 + ((bonusOffset - 1) * 12) + 1
-    for i = 1, 12 do
-      local slot = bonusStart + i - 1
-      if slot <= 120 and not slotsCoveredByElvUI[slot] then
-        RegisterBinding("ACTIONBUTTON" .. i, slot)
-      end
-    end
-  end
-
-  bindsDirty = false
+  return nil, nil
 end
 
 -- ═══════════════════════════════════════════════════════════════════════════
--- CDM FRAME MATCHING (pcall-safe for secret values)
+-- CDM FRAME MATCHING
 -- ═══════════════════════════════════════════════════════════════════════════
 local function CDMFrameMatchesSpell(frame, targetSpellID)
   if not frame or not targetSpellID then return false end
   local info = frame.cooldownInfo
   if not info then return false end
 
-  local ok, matched = pcall(function()
-    if info.spellID and info.spellID == targetSpellID then return true end
-    if info.overrideSpellID and info.overrideSpellID == targetSpellID then return true end
-    if info.overrideTooltipSpellID and info.overrideTooltipSpellID == targetSpellID then return true end
-    if info.linkedSpellID and info.linkedSpellID == targetSpellID then return true end
-    if info.linkedSpellIDs then
-      for _, linkedID in ipairs(info.linkedSpellIDs) do
-        if linkedID == targetSpellID then return true end
+  local matched = false
+  if info.spellID and not issecretvalue(info.spellID) and info.spellID == targetSpellID then matched = true end
+  if not matched and info.overrideSpellID and not issecretvalue(info.overrideSpellID) and info.overrideSpellID == targetSpellID then matched = true end
+  if not matched and info.overrideTooltipSpellID and not issecretvalue(info.overrideTooltipSpellID) and info.overrideTooltipSpellID == targetSpellID then matched = true end
+  if not matched and info.linkedSpellID and not issecretvalue(info.linkedSpellID) and info.linkedSpellID == targetSpellID then matched = true end
+  if not matched and info.linkedSpellIDs then
+    for _, linkedID in ipairs(info.linkedSpellIDs) do
+      if linkedID and not issecretvalue(linkedID) and linkedID == targetSpellID then
+        matched = true
+        break
       end
     end
-    if frame.GetAuraSpellID then
-      local auraSpellID = frame:GetAuraSpellID()
-      if auraSpellID and auraSpellID == targetSpellID then return true end
-    end
-    return false
-  end)
+  end
+  if not matched and frame.GetAuraSpellID then
+    local auraSpellID = frame:GetAuraSpellID()
+    if auraSpellID and not issecretvalue(auraSpellID) and auraSpellID == targetSpellID then matched = true end
+  end
 
-  return ok and matched or false
+  return matched
 end
 
 -- ═══════════════════════════════════════════════════════════════════════════
@@ -515,7 +385,7 @@ local function ReleaseOverlay(key)
   activeOverlays[key] = nil
 end
 
-local function ShowOverlayOnFrame(frame, key, bindInfo)
+local function ShowOverlayOnFrame(frame, key)
   if not frame or not SetOverlayTexture then return end
   if activeOverlays[key] then return end  -- already showing
 
@@ -530,21 +400,14 @@ local function ShowOverlayOnFrame(frame, key, bindInfo)
   tex:SetPoint("TOPLEFT", frame, "TOPLEFT")
   tex:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT")
 
-  -- Apply Masque shape mask if enabled
   if UseMasqueShapes() then
     ApplyMasqueShapeToTexture(tex, frame)
   end
 
   tex:Show()
+  activeOverlays[key] = { texture = tex }
 
-  activeOverlays[key] = {
-    texture = tex,
-    buttons = bindInfo and bindInfo.buttons or {},
-    spellID = bindInfo and bindInfo.spellID,
-    itemID  = bindInfo and bindInfo.itemID,
-  }
-
-  -- Flash mode: auto-release after duration
+  -- Flash mode: auto-release after duration via timer — zero OnUpdate
   if GetMode() == "flash" then
     local dur = GetFlashDuration()
     C_Timer.After(dur, function()
@@ -558,7 +421,7 @@ end
 -- ═══════════════════════════════════════════════════════════════════════════
 -- FIND MATCHING CDM FRAMES FOR A SPELL/ITEM
 -- ═══════════════════════════════════════════════════════════════════════════
-local function FindAndHighlightCDMFrames(spellID, itemID, bindInfo)
+local function FindAndHighlightCDMFrames(spellID, itemID)
   if not enhancedFrames then
     if ns.CDMEnhance and ns.CDMEnhance.GetEnhancedFrames then
       enhancedFrames = ns.CDMEnhance.GetEnhancedFrames()
@@ -569,13 +432,12 @@ local function FindAndHighlightCDMFrames(spellID, itemID, bindInfo)
     for cdID, data in pairs(enhancedFrames) do
       if data and data.frame and data.frame:IsShown() then
         if CDMFrameMatchesSpell(data.frame, spellID) then
-          ShowOverlayOnFrame(data.frame, "cdm_" .. cdID, bindInfo)
+          ShowOverlayOnFrame(data.frame, "cdm_" .. cdID)
         end
       end
     end
   end
 
-  -- Arc Auras Cooldown frames
   if IsArcAurasEnabled() and spellID then
     local AACooldown = ns.ArcAurasCooldown
     if AACooldown and AACooldown.spellsByID then
@@ -583,7 +445,7 @@ local function FindAndHighlightCDMFrames(spellID, itemID, bindInfo)
       if arcID and AACooldown.spellData then
         local fd = AACooldown.spellData[arcID]
         if fd and fd.frame and fd.frame:IsShown() and not fd.frame._arcHiddenNotInSpec then
-          ShowOverlayOnFrame(fd.frame, "aa_" .. arcID, bindInfo)
+          ShowOverlayOnFrame(fd.frame, "aa_" .. arcID)
         end
       end
     end
@@ -591,151 +453,106 @@ local function FindAndHighlightCDMFrames(spellID, itemID, bindInfo)
 end
 
 -- ═══════════════════════════════════════════════════════════════════════════
--- HOLD MODE: OnUpdate checks if buttons are still pushed
+-- DETECTION
+-- hooksecurefunc("UseAction") fires for every action bar press (keyboard+click)
+-- Purely additive — original fires first, cast happens normally.
+-- Covers spells, items, and macros via GetActionInfo + GetMacroSpell.
+-- Hold mode releases via spell cast events on "player" (non-secret).
 -- ═══════════════════════════════════════════════════════════════════════════
+local holdFrame
 local holdElapsed = 0
+
+-- All button frames to check for PUSHED state in hold mode
+local allButtons = {}
+local buttonsCached = false
+
+local function CacheAllButtons()
+  if buttonsCached then return end
+  buttonsCached = true
+  local prefixes = {
+    "ActionButton", "MultiBarBottomLeftButton", "MultiBarBottomRightButton",
+    "MultiBarRightButton", "MultiBarLeftButton",
+    "MultiBar5Button", "MultiBar6Button", "MultiBar7Button",
+  }
+  for _, prefix in ipairs(prefixes) do
+    for i = 1, 12 do
+      local btn = _G[prefix .. i]
+      if btn then tinsert(allButtons, btn) end
+    end
+  end
+  for i = 1, 15 do
+    for j = 1, 12 do
+      local btn = _G["ElvUI_Bar" .. i .. "Button" .. j]
+      if btn then tinsert(allButtons, btn) end
+    end
+  end
+  for i = 1, 120 do
+    local btn = _G["BT4Button" .. i]
+    if btn then tinsert(allButtons, btn) end
+  end
+end
+
 local function OnUpdate_Hold(self, elapsed)
   holdElapsed = holdElapsed + elapsed
   if holdElapsed < 0.03 then return end
   holdElapsed = 0
-
-  if not IsShiftKeyDown()   then modifierState["LSHIFT"] = nil end
-  if not IsControlKeyDown() then modifierState["LCTRL"]  = nil end
-  if not IsAltKeyDown()     then modifierState["LALT"]   = nil end
-
-  for key, data in pairs(activeOverlays) do
-    local stillPushed = false
-    if data.buttons then
-      for _, btn in ipairs(data.buttons) do
-        if btn:GetButtonState() == "PUSHED" then
-          stillPushed = true
-          break
-        end
-      end
-    end
-    if not stillPushed then
-      ReleaseOverlay(key)
-    end
+  for _, btn in ipairs(allButtons) do
+    if btn:GetButtonState() == "PUSHED" then return end  -- still held
   end
+  ReleaseAllOverlays()
+  self:SetScript("OnUpdate", nil)
 end
 
--- ═══════════════════════════════════════════════════════════════════════════
--- FLASH MODE: OnUpdate just tracks modifiers (overlays self-release via timer)
--- ═══════════════════════════════════════════════════════════════════════════
-local function OnUpdate_Flash(self, elapsed)
-  holdElapsed = holdElapsed + elapsed
-  if holdElapsed < 0.03 then return end
+local function StartHoldPoll()
+  CacheAllButtons()
+  if not holdFrame then holdFrame = CreateFrame("Frame") end
   holdElapsed = 0
-
-  if not IsShiftKeyDown()   then modifierState["LSHIFT"] = nil end
-  if not IsControlKeyDown() then modifierState["LCTRL"]  = nil end
-  if not IsAltKeyDown()     then modifierState["LALT"]   = nil end
+  holdFrame:SetScript("OnUpdate", OnUpdate_Hold)
 end
 
--- ═══════════════════════════════════════════════════════════════════════════
--- KEY / MOUSE HANDLERS
--- ═══════════════════════════════════════════════════════════════════════════
-local function GetCurrentModifier()
-  for modKey in pairs(modifierState) do
-    return modKey:match("^.(.*)")  -- "LSHIFT" → "SHIFT"
-  end
-  return nil
-end
+local function InstallHooks()
+  if useActionHooked then return end
+  useActionHooked = true
 
-local function HandleKeyDown(self, key)
-  if not isActive then return end
-  if bindsDirty then RebuildBindMap() end
+  hooksecurefunc("UseAction", function(slot)
+    if not isActive then return end
+    local spellID, itemID = GetSlotSpellAndItem(slot)
+    if spellID or itemID then
+      FindAndHighlightCDMFrames(spellID, itemID)
+      if GetMode() == "hold" then StartHoldPoll() end
+    end
+  end)
 
-  local mod = GetCurrentModifier()
-  local fullKey = mod and (mod .. "-" .. key) or key
+  -- CastSpellByID: direct spell casts
+  hooksecurefunc("CastSpellByID", function(spellID)
+    if not isActive then return end
+    if not spellID or issecretvalue(spellID) then return end
+    FindAndHighlightCDMFrames(spellID, nil)
+    if GetMode() == "hold" then StartHoldPoll() end
+  end)
 
-  local bindInfo = bindMap[fullKey]
-  if bindInfo then
-    FindAndHighlightCDMFrames(bindInfo.spellID, bindInfo.itemID, bindInfo)
-  end
-end
-
-local function HandleMouseDown(self, button)
-  if not isActive then return end
-  local mapped = mouseButtonMap[button]
-  if mapped then
-    HandleKeyDown(nil, mapped)
-  end
-end
-
-local function HandleModifier(self, event, key, state)
-  if event == "MODIFIER_STATE_CHANGED" then
-    modifierState[key] = (state == 1) or nil
-  end
-end
-
--- ═══════════════════════════════════════════════════════════════════════════
--- BINDING REFRESH (throttled)
--- ═══════════════════════════════════════════════════════════════════════════
-local lastBindRefresh = 0
-local function ScheduleBindRefresh()
-  if not isActive then return end
-  local now = GetTime()
-  if now - lastBindRefresh < 0.2 then return end
-  lastBindRefresh = now
-
-  if InCombatLockdown() then
-    bindsDirty = true
-  else
-    C_Timer.After(1, function()
-      if isActive then
-        RebuildBindMap()
+  -- CastSpellByName: macro /cast lines route through here
+  if CastSpellByName then
+    hooksecurefunc("CastSpellByName", function(name)
+      if not isActive then return end
+      if not name then return end
+      local spellID = C_Spell and C_Spell.GetSpellIDForSpellIdentifier and C_Spell.GetSpellIDForSpellIdentifier(name)
+      if spellID and not issecretvalue(spellID) then
+        FindAndHighlightCDMFrames(spellID, nil)
+        if GetMode() == "hold" then StartHoldPoll() end
       end
     end)
   end
 end
 
 -- ═══════════════════════════════════════════════════════════════════════════
--- PUBLIC API: Enable / Disable / Refresh
+-- PUBLIC API
 -- ═══════════════════════════════════════════════════════════════════════════
 function BPH.Enable()
   if isActive then return end
   isActive = true
-
-  BuildButtonCache()
-  RebuildBindMap()
   BuildOverlayFunc()
-
-  if not watcherFrame then
-    watcherFrame = CreateFrame("Frame", nil, UIParent)
-  end
-  watcherFrame:SetScript("OnKeyDown", HandleKeyDown)
-  watcherFrame:SetScript("OnEvent", function(self, event, ...)
-    if event == "MODIFIER_STATE_CHANGED" then
-      HandleModifier(self, event, ...)
-    elseif event == "SPELLS_CHANGED" or event == "ACTIONBAR_SLOT_CHANGED"
-      or event == "PLAYER_TALENT_UPDATE" or event == "PLAYER_ENTERING_WORLD"
-      or event == "UPDATE_BINDINGS" then
-      ScheduleBindRefresh()
-    end
-  end)
-  watcherFrame:RegisterEvent("MODIFIER_STATE_CHANGED")
-  watcherFrame:RegisterEvent("SPELLS_CHANGED")
-  watcherFrame:RegisterEvent("ACTIONBAR_SLOT_CHANGED")
-  watcherFrame:RegisterEvent("PLAYER_TALENT_UPDATE")
-  watcherFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
-  watcherFrame:RegisterEvent("UPDATE_BINDINGS")
-  watcherFrame:SetPropagateKeyboardInput(true)
-
-  if not updateFrame then
-    updateFrame = CreateFrame("Frame")
-  end
-  if GetMode() == "hold" then
-    updateFrame:SetScript("OnUpdate", OnUpdate_Hold)
-  else
-    updateFrame:SetScript("OnUpdate", OnUpdate_Flash)
-  end
-
-  if EventRegistry then
-    EventRegistry:RegisterFrameEventAndCallback("GLOBAL_MOUSE_DOWN", function(_, button)
-      HandleMouseDown(nil, button)
-    end, BPH)
-  end
+  InstallHooks()
 
   if ns.devMode then
     print("|cff00FF00[ArcUI]|r Button Press Highlight enabled")
@@ -745,22 +562,7 @@ end
 function BPH.Disable()
   if not isActive then return end
   isActive = false
-
   ReleaseAllOverlays()
-
-  if watcherFrame then
-    watcherFrame:SetScript("OnKeyDown", nil)
-    watcherFrame:SetScript("OnEvent", nil)
-    watcherFrame:UnregisterAllEvents()
-  end
-
-  if updateFrame then
-    updateFrame:SetScript("OnUpdate", nil)
-  end
-
-  if EventRegistry then
-    EventRegistry:UnregisterFrameEventAndCallback("GLOBAL_MOUSE_DOWN", BPH)
-  end
 
   if ns.devMode then
     print("|cffFF6600[ArcUI]|r Button Press Highlight disabled")
@@ -770,19 +572,9 @@ end
 function BPH.Refresh()
   if not isActive then return end
   ReleaseAllOverlays()
-  enhancedFrames = nil
+  enhancedFrames  = nil
   cachedMasqueAPI = nil
-  BuildButtonCache()
-  RebuildBindMap()
   BuildOverlayFunc()
-
-  if updateFrame then
-    if GetMode() == "hold" then
-      updateFrame:SetScript("OnUpdate", OnUpdate_Hold)
-    else
-      updateFrame:SetScript("OnUpdate", OnUpdate_Flash)
-    end
-  end
 end
 
 function BPH.IsActive()
@@ -807,12 +599,10 @@ end
 -- ═══════════════════════════════════════════════════════════════════════════
 local initFrame = CreateFrame("Frame")
 initFrame:RegisterEvent("PLAYER_LOGIN")
-initFrame:SetScript("OnEvent", function(self, event)
+initFrame:SetScript("OnEvent", function(self)
   self:UnregisterAllEvents()
   C_Timer.After(2.5, function()
-    if IsEnabled() then
-      BPH.Enable()
-    end
+    if IsEnabled() then BPH.Enable() end
   end)
 end)
 
@@ -891,7 +681,7 @@ function ns.ButtonPressHighlightOptions.GetCooldownArgs()
   args.bphMode = {
     type = "select",
     name = "Mode",
-    desc = "Hold: overlay stays while button is pressed. Flash: brief pulse then auto-releases.",
+    desc = "Hold: overlay persists while the action is active (great for channels). Flash: brief pulse then auto-releases.",
     order = 100.03,
     width = 1.0,
     values = { hold = "Hold", flash = "Flash" },
@@ -1063,31 +853,13 @@ function ns.ButtonPressHighlightOptions.GetCooldownArgs()
     hidden = HideBPH,
   }
 
-  args.bphRefresh = {
-    type = "execute",
-    name = "Refresh Bindings",
-    desc = "Rebuild keybind → spell mapping from your action bars.",
-    order = 100.10,
-    width = 1.0,
-    func = function()
-      if isActive then
-        BPH.Refresh()
-        print("|cff00FF00[ArcUI]|r Button Press Highlight bindings refreshed.")
-      end
-    end,
-    disabled = function() return not IsEnabled() end,
-    hidden = HideBPH,
-  }
-
   args.bphStatus = {
     type = "description",
     name = function()
       if not isActive then
         return "|cffFF4444Inactive|r — Enable above to activate."
       end
-      local count = 0
-      for _ in pairs(bindMap) do count = count + 1 end
-      return "|cff00FF00Active|r — " .. count .. " keybinds mapped."
+      return "|cff00FF00Active|r — Listening for action bar state changes."
     end,
     order = 100.11,
     fontSize = "medium",

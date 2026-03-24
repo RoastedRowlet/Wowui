@@ -48,7 +48,7 @@ local SettingFrameAnchor = CreateFrame("Frame", nil, UIParent)
 local SettingFrameInset = 8
 local isInitialized = false
 
-function Setting.OpenSettingUI()
+function Setting.OpenSettingsUI()
     if not categoryId then return end
     Settings.OpenToCategory(categoryId)
 end

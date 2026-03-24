@@ -38,6 +38,8 @@ end
 
 local ArcAurasCooldown = {}
 ns.ArcAurasCooldown = ArcAurasCooldown
+local Track = _G.ArcUIProfiler_Track
+local Track = _G.ArcUIProfiler_Track
 
 -- ═══════════════════════════════════════════════════════════════════════════
 -- LIBRARIES
@@ -124,7 +126,7 @@ local UpdateProcGlow    -- Proc glow state
 --          color {r,g,b,a}, alphaOverride (number or nil), desat (boolean)
 -- ═══════════════════════════════════════════════════════════════════════════
 
-local function GetUsabilityState(fd, settings)
+local _GUS = function(fd, settings)
     if not fd or not fd.spellID then return "usable", USABLE_COLOR, nil, false end
 
     local su = settings and settings.spellUsability
@@ -161,6 +163,7 @@ local function GetUsabilityState(fd, settings)
         return "notUsable", color, alpha, desat
     end
 end
+local GetUsabilityState = Track and Track("ArcAurasCooldown.GetUsabilityState", _GUS) or _GUS
 
 -- Backward-compat wrapper (returns just the color)
 local function GetUsabilityColor(fd, settings)
@@ -176,7 +179,7 @@ end
 -- Called from DesatCooldown hooks and FeedCooldown.
 -- ═══════════════════════════════════════════════════════════════════════════
 
-function ArcAurasCooldown.ApplySpellStateVisuals(fd, isOnCD, passedSettings)
+local _ASV = function(fd, isOnCD, passedSettings)
     if not fd or not fd.frame or not fd.icon then return end
 
     local frame = fd.frame
@@ -602,6 +605,8 @@ function ArcAurasCooldown.ApplySpellStateVisuals(fd, isOnCD, passedSettings)
         end
     end
 end
+ArcAurasCooldown.ApplySpellStateVisuals = Track and Track("ArcAurasCooldown.ApplySpellStateVisuals", _ASV) or _ASV
+local ApplySpellStateVisuals = ArcAurasCooldown.ApplySpellStateVisuals
 
 -- ═══════════════════════════════════════════════════════════════════════════
 -- FEED COOLDOWN (EVENT-DRIVEN ONLY)
@@ -617,7 +622,8 @@ end
 --   4. Update charge text
 -- ═══════════════════════════════════════════════════════════════════════════
 
-FeedCooldown = function(fd)
+local _FeedCooldownFn
+_FeedCooldownFn = function(fd)
     if not fd or not fd.frame or not fd.frame:IsShown() then return end
     if fd.frame._arcHiddenNotInSpec then return end
 
@@ -647,11 +653,10 @@ FeedCooldown = function(fd)
         if isOnGCD then
             fd.desatCooldown:SetCooldown(0, 0)
         else
-            -- Direct pcall: avoids closure allocation per call
-            local ok, durObj = pcall(C_Spell.GetSpellCooldownDuration, spellID)
-            if ok and durObj then
+            local durObj = C_Spell.GetSpellCooldownDuration(spellID)
+            if durObj then
                 fd.desatCooldown:Clear()
-                pcall(fd.desatCooldown.SetCooldownFromDurationObject, fd.desatCooldown, durObj, true)
+                fd.desatCooldown:SetCooldownFromDurationObject(durObj, true)
             else
                 fd.desatCooldown:SetCooldown(0, 0)
             end
@@ -667,10 +672,10 @@ FeedCooldown = function(fd)
     local cooldown = fd.cooldown
 
     if isChargeSpell then
-        local ok, chargeDurObj = pcall(C_Spell.GetSpellChargeDuration, spellID)
-        if ok and chargeDurObj then
+        local chargeDurObj = C_Spell.GetSpellChargeDuration(spellID)
+        if chargeDurObj then
             cooldown:Clear()
-            pcall(cooldown.SetCooldownFromDurationObject, cooldown, chargeDurObj, true)
+            cooldown:SetCooldownFromDurationObject(chargeDurObj, true)
         else
             cooldown:Clear()
         end
@@ -699,9 +704,9 @@ FeedCooldown = function(fd)
         if noGCD and isOnGCD then
             cooldown:Clear()
         else
-            local ok, cooldownDurObj = pcall(C_Spell.GetSpellCooldownDuration, spellID)
-            if ok and cooldownDurObj then
-                pcall(cooldown.SetCooldownFromDurationObject, cooldown, cooldownDurObj, true)
+            local cooldownDurObj = C_Spell.GetSpellCooldownDuration(spellID)
+            if cooldownDurObj then
+                cooldown:SetCooldownFromDurationObject(cooldownDurObj, true)
             else
                 cooldown:Clear()
             end
@@ -730,9 +735,12 @@ FeedCooldown = function(fd)
     --    so calling this every FeedCooldown is effectively free.
     -- ───────────────────────────────────────────────────────────────────
     local isOnCD = fd.desatCooldown and fd.desatCooldown:IsShown() or false
-    ArcAurasCooldown.ApplySpellStateVisuals(fd, isOnCD, settings)
+    ApplySpellStateVisuals(fd, isOnCD, settings)
 end
 
+-- Wrap FeedCooldown for profiler visibility, then expose
+FeedCooldown = Track and Track("ArcAurasCooldown.FeedCooldown", _FeedCooldownFn) or _FeedCooldownFn
+FeedCooldown = Track and Track("ArcAurasCooldown.FeedCooldown", _FeedCooldownFn) or _FeedCooldownFn
 -- Expose FeedCooldown for ArcAuras hooks to call
 ArcAurasCooldown.FeedCooldown = FeedCooldown
 
@@ -756,8 +764,8 @@ UpdateChargeText = function(fd, settings)
         return
     end
 
-    local ok, chargeInfo = pcall(C_Spell.GetSpellCharges, fd.spellID)
-    if ok and chargeInfo then
+    local chargeInfo = C_Spell.GetSpellCharges(fd.spellID)
+    if chargeInfo then
         -- currentCharges is SECRET in combat — SetText accepts secrets, no comparisons!
         fd.chargeText:SetText(chargeInfo.currentCharges or "")
         fd.chargeText:Show()
@@ -897,8 +905,8 @@ function ArcAurasCooldown.InitializeSpellFrame(arcID, frame, config)
     end
 
     -- Detect charge spell (cached once, prevents flicker)
-    local cOk, chargeInfo = pcall(C_Spell.GetSpellCharges, spellID)
-    fd.isChargeSpell = (cOk and chargeInfo ~= nil)
+    local chargeInfo = C_Spell.GetSpellCharges(spellID)
+    fd.isChargeSpell = (chargeInfo ~= nil)
 
     -- Range check setup — EnableSpellRangeCheck opts in to SPELL_RANGE_CHECK_UPDATE
     if C_Spell.SpellHasRange and C_Spell.EnableSpellRangeCheck then
@@ -919,6 +927,43 @@ function ArcAurasCooldown.InitializeSpellFrame(arcID, frame, config)
 
     -- CDMEnhance registration (Masque registration already handled by ArcAuras.CreateFrame)
     ArcAuras.RegisterWithCDMEnhance(arcID, frame)
+
+    -- ═══════════════════════════════════════════════════════════════════
+    -- ALPHA ENFORCEMENT HOOK for arc_spell frames.
+    -- Arc Aura spell frames call ApplyIconStyle (not EnhanceFrame), so
+    -- CDMEnhance's _arcFrameAlphaHooked SetAlpha hook is never installed.
+    -- Without it, anything calling SetAlpha(1) after ApplySpellStateVisuals
+    -- applies readyAlpha=0 silently overrides it (FrameController, Show
+    -- hooks, group layouts). We install the same logic here directly.
+    -- ═══════════════════════════════════════════════════════════════════
+    if not frame._arcFrameAlphaHooked then
+        frame._arcFrameAlphaHooked = true
+        hooksecurefunc(frame, "SetAlpha", function(self, alpha)
+            if self._arcBypassFrameAlphaHook then return end
+            -- Enforce ready-state alpha (e.g. readyAlpha=0 when spell is ready)
+            if self._arcEnforceReadyAlpha and self._arcReadyAlphaValue then
+                self._arcBypassFrameAlphaHook = true
+                self:SetAlpha(self._arcReadyAlphaValue)
+                self._arcBypassFrameAlphaHook = false
+                self._lastAppliedAlpha = self._arcReadyAlphaValue
+                return
+            end
+            -- Enforce cooldown-state alpha
+            if self._arcTargetAlpha ~= nil then
+                self._arcBypassFrameAlphaHook = true
+                self:SetAlpha(self._arcTargetAlpha)
+                self._arcBypassFrameAlphaHook = false
+                self._lastAppliedAlpha = self._arcTargetAlpha
+                return
+            end
+            -- Fallback: preserve whatever we last applied
+            if self._arcEnhanced and self._lastAppliedAlpha then
+                self._arcBypassFrameAlphaHook = true
+                self:SetAlpha(self._lastAppliedAlpha)
+                self._arcBypassFrameAlphaHook = false
+            end
+        end)
+    end
 
     -- Apply structural settings from CDMEnhance (size, borders, swipe config)
     if ArcAuras.ApplySettingsToFrame then
@@ -1340,6 +1385,7 @@ end
 -- ═══════════════════════════════════════════════════════════════════════════
 
 local eventFrame = CreateFrame("Frame")
+_G.ArcUIArcAurasCooldownEventFrame = eventFrame  -- profiler
 eventFrame:RegisterEvent("SPELL_UPDATE_COOLDOWN")
 eventFrame:RegisterEvent("SPELL_UPDATE_CHARGES")
 eventFrame:RegisterEvent("SPELL_UPDATE_USES")
@@ -1358,13 +1404,13 @@ eventFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
 
 local specChangePending = false
 
-eventFrame:SetScript("OnEvent", function(self, event, arg1, arg2, arg3)
+local _onEventFn = function(self, event, arg1, arg2, arg3)
 
     if event == "SPELL_UPDATE_COOLDOWN" then
         for arcID, fd in pairs(ArcAurasCooldown.spellData) do
             if fd.frame and fd.frame:IsShown() and not fd.frame._arcHiddenNotInSpec then
-                local ok, cooldownInfo = pcall(C_Spell.GetSpellCooldown, fd.spellID)
-                if ok and cooldownInfo then
+                local cooldownInfo = C_Spell.GetSpellCooldown(fd.spellID)
+                if cooldownInfo then
                     fd.lastIsOnGCD = cooldownInfo.isOnGCD
                 end
                 FeedCooldown(fd)
@@ -1376,7 +1422,7 @@ eventFrame:SetScript("OnEvent", function(self, event, arg1, arg2, arg3)
         for arcID, fd in pairs(ArcAurasCooldown.spellData) do
             if fd.frame and fd.frame:IsShown() and not fd.frame._arcHiddenNotInSpec then
                 local isOnCD = fd.desatCooldown and fd.desatCooldown:IsShown() or false
-                ArcAurasCooldown.ApplySpellStateVisuals(fd, isOnCD)
+                ApplySpellStateVisuals(fd, isOnCD)
             end
         end
 
@@ -1389,7 +1435,7 @@ eventFrame:SetScript("OnEvent", function(self, event, arg1, arg2, arg3)
             fd.spellOutOfRange = (checksRange == true and inRange == false)
             if fd.frame and fd.frame:IsShown() and not fd.frame._arcHiddenNotInSpec then
                 local isOnCD = fd.desatCooldown and fd.desatCooldown:IsShown() or false
-                ArcAurasCooldown.ApplySpellStateVisuals(fd, isOnCD)
+                ApplySpellStateVisuals(fd, isOnCD)
             end
         end
 
@@ -1493,7 +1539,8 @@ eventFrame:SetScript("OnEvent", function(self, event, arg1, arg2, arg3)
             end)
         end
     end
-end)
+end
+eventFrame:SetScript("OnEvent", Track and Track("ArcAurasCooldown.OnEvent", _onEventFn) or _onEventFn)
 
 -- ═══════════════════════════════════════════════════════════════════════════
 -- OPTIONS PANEL STATE MONITOR
@@ -1510,7 +1557,7 @@ local function RefreshAllSpellVisuals()
             fd.frame._lastAppliedAlpha = nil
             fd.frame._arcLastSpellState = nil
             local isOnCD = fd.desatCooldown and fd.desatCooldown:IsShown() or false
-            ArcAurasCooldown.ApplySpellStateVisuals(fd, isOnCD)
+            ApplySpellStateVisuals(fd, isOnCD)
         end
     end
 end
@@ -1547,22 +1594,35 @@ function ArcAurasCooldown.Initialize()
     C_Timer.After(1.5, function()
         for arcID, fd in pairs(ArcAurasCooldown.spellData) do
             if fd.frame and fd.frame:IsShown() then
-                local cOk, chargeInfo = pcall(C_Spell.GetSpellCharges, fd.spellID)
-                fd.isChargeSpell = (cOk and chargeInfo ~= nil)
+                local chargeInfo = C_Spell.GetSpellCharges(fd.spellID)
+                fd.isChargeSpell = (chargeInfo ~= nil)
                 FeedCooldown(fd)
                 UpdateProcGlow(fd)
             end
         end
     end)
+
+    -- VISUAL FIX: Re-apply ready/cooldown state visuals after everything settles.
+    -- FrameController repositions free icons and calls SetAlpha(1) at ~1-2s, which
+    -- overrides any readyAlpha=0 that was set during frame creation. By 4.5s all
+    -- positioning is done. RefreshAllSpellVisuals clears the alpha guard flags and
+    -- re-applies the correct alpha from settings.
+    C_Timer.After(4.5, function()
+        if ArcAurasCooldown.initialized then
+            ArcAurasCooldown.RefreshAllSpellVisuals()
+        end
+    end)
 end
 
 local initFrame = CreateFrame("Frame")
+_G.ArcUIArcAurasCooldownInitFrame = initFrame  -- profiler
 initFrame:RegisterEvent("PLAYER_LOGIN")
-initFrame:SetScript("OnEvent", function()
+local _initOnEventFn = function()
     C_Timer.After(3, function()
         ArcAurasCooldown.Initialize()
     end)
-end)
+end
+initFrame:SetScript("OnEvent", Track and Track("ArcAurasCooldown.InitEvent", _initOnEventFn) or _initOnEventFn)
 
 -- ═══════════════════════════════════════════════════════════════════════════
 -- REFRESH ALL (called on settings change)
@@ -1602,7 +1662,7 @@ function ArcAurasCooldown.RefreshSpellVisuals(arcID)
         fd.readyGlowType = nil
     end
     local isOnCD = fd.desatCooldown and fd.desatCooldown:IsShown() or false
-    ArcAurasCooldown.ApplySpellStateVisuals(fd, isOnCD)
+    ApplySpellStateVisuals(fd, isOnCD)
 end
 
 -- Refresh ALL spell frame visuals without rebuilding frame size/appearance.
@@ -1618,8 +1678,13 @@ function ArcAurasCooldown.RefreshAllSpellVisuals()
                 fd.readyGlowType = nil
             end
             fd.frame._arcLastSpellState = nil  -- Force re-eval (bypass state-change early return)
+            -- CRITICAL: Clear _lastAppliedAlpha so the alpha guard in ApplySpellStateVisuals
+            -- doesn't skip SetAlpha on reload. Without this, if readyAlpha was already applied
+            -- during frame creation and hasn't changed, the guard short-circuits and the
+            -- enforcement hook never gets _arcEnforceReadyAlpha set correctly.
+            fd.frame._lastAppliedAlpha = nil
             local isOnCD = fd.desatCooldown and fd.desatCooldown:IsShown() or false
-            ArcAurasCooldown.ApplySpellStateVisuals(fd, isOnCD)
+            ApplySpellStateVisuals(fd, isOnCD)
         end
     end
 end
@@ -1720,3 +1785,27 @@ function ArcAurasCooldown.GetSpellInfoForArcID(arcID)
 end
 -- Debug bridge: expose spellData for standalone debugger addons
 _G.ArcUI_ArcAurasCooldown = ArcAurasCooldown
+-- Register local functions for profiler visibility
+if _G.ArcUIProfiler_RegisterLocals then
+    local _wrapped = _G.ArcUIProfiler_RegisterLocals("ArcAurasCooldown", {
+        FeedCooldown           = FeedCooldown,
+        UpdateChargeText       = UpdateChargeText,
+        UpdateProcGlow         = UpdateProcGlow,
+        GetUsabilityState      = GetUsabilityState,
+        GetUsabilityColor      = GetUsabilityColor,
+        RefreshAllSpellVisuals = RefreshAllSpellVisuals,
+        ApplySpellStateVisuals = ArcAurasCooldown.ApplySpellStateVisuals,
+    })
+    -- Swap local references so profiler wrapper is actually called
+    if _wrapped then
+        if _wrapped.FeedCooldown      then FeedCooldown      = _wrapped.FeedCooldown      end
+        if _wrapped.UpdateChargeText  then UpdateChargeText  = _wrapped.UpdateChargeText  end
+        if _wrapped.UpdateProcGlow    then UpdateProcGlow    = _wrapped.UpdateProcGlow    end
+        if _wrapped.GetUsabilityState then GetUsabilityState = _wrapped.GetUsabilityState end
+        if _wrapped.GetUsabilityColor then GetUsabilityColor = _wrapped.GetUsabilityColor end
+        if _wrapped.RefreshAllSpellVisuals then RefreshAllSpellVisuals = _wrapped.RefreshAllSpellVisuals end
+        if _wrapped.ApplySpellStateVisuals then
+            ArcAurasCooldown.ApplySpellStateVisuals = _wrapped.ApplySpellStateVisuals
+        end
+    end
+end

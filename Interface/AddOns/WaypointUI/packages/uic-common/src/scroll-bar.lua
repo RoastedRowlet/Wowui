@@ -9,7 +9,7 @@ local UICCommonScrollBar = env.modules:New("packages\\uic-common\\scroll-bar")
 local Mixin = Mixin
 local CreateFromMixins = CreateFromMixins
 
-local UIDef = {
+local UIDEF = {
     UIScrollBarTrack             = UICCommonPreload.ATLAS{ inset = 6, scale = 0.3, left = 78/512, right = 90/512, top = 378/512, bottom = 499/512 },
     UIScrollBarThumb             = UICCommonPreload.ATLAS{ inset = 12, left = 4 / 512, right = 28 / 512, top = 376 / 512, bottom = 501 / 512 },
     UIScrollBarThumb_Highlighted = UICCommonPreload.ATLAS{ inset = 12, left = 28 / 512, right = 52 / 512, top = 376 / 512, bottom = 501 / 512 },
@@ -37,11 +37,11 @@ do --Scroll Bar
         local buttonState = self:GetButtonState()
 
         if buttonState == "PUSHED" then
-            self.Thumb:background(UIDef.UIScrollBarThumb_Pushed)
+            self.Thumb:background(UIDEF.UIScrollBarThumb_Pushed)
         elseif buttonState == "HIGHLIGHTED" then
-            self.Thumb:background(UIDef.UIScrollBarThumb_Highlighted)
+            self.Thumb:background(UIDEF.UIScrollBarThumb_Highlighted)
         else
-            self.Thumb:background(UIDef.UIScrollBarThumb)
+            self.Thumb:background(UIDEF.UIScrollBarThumb)
         end
     end
 
@@ -63,7 +63,7 @@ do --Scroll Bar
                     :frameLevel(2)
                     :as("LINEAR_SLIDER_THUMB")
                     :size(UIKit.UI.FILL)
-                    :background(UIDef.UIScrollBarThumb)
+                    :background(UIDEF.UIScrollBarThumb)
                     :_updateMode(UIKit.Enum.UpdateMode.ExcludeVisibilityChanged),
 
                 Frame(name .. ".Track")
@@ -72,7 +72,7 @@ do --Scroll Bar
                     :as("LINEAR_SLIDER_TRACK")
                     :point(UIKit.Enum.Point.Center)
                     :size(6, UIKit.UI.P_FILL)
-                    :background(UIDef.UIScrollBarTrack)
+                    :background(UIDEF.UIScrollBarTrack)
                     :_updateMode(UIKit.Enum.UpdateMode.ExcludeVisibilityChanged)
             })
 

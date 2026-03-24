@@ -597,7 +597,7 @@ function ns.API.GetBarConfig(barNumber)
   local barConfig = db.bars[barNumber]
   
   -- FAST PATH: Already migrated = most common case during combat (400+ calls/sec)
-  local CURRENT_MIGRATION_VERSION = 2
+  local CURRENT_MIGRATION_VERSION = 3
   local migrated = barConfig._migrated
   if migrated == CURRENT_MIGRATION_VERSION or (type(migrated) == "number" and migrated >= CURRENT_MIGRATION_VERSION) then
     return barConfig
@@ -797,6 +797,37 @@ function ns.API.GetBarConfig(barNumber)
     end
   end
   
+  -- ═══════════════════════════════════════════════════════════════════
+  -- VERSION 3 MIGRATIONS (border thickness pixel-perfect fix)
+  -- The border rendering changed from GetNearestPixelSize (which rounded
+  -- 1 WoW unit to 2 physical pixels at sub-1 UI scales) to an exact
+  -- physical pixel formula (1 WoW unit = exactly 1 physical pixel).
+  -- Double any existing drawnBorderThickness so bars look identical after
+  -- the update. New bars created after migration are unaffected.
+  -- ═══════════════════════════════════════════════════════════════════
+  if currentVersion < 3 then
+    -- Rendering changed from GetNearestPixelSize (which could round 1 WoW unit to 2px
+    -- at sub-1 UI scales due to btRaw minimum) to exact physical pixel formula (1 = 1px).
+    -- Compute how many physical pixels the OLD code actually rendered and store that count
+    -- as the new value — so everyone gets identical visuals regardless of UI scale.
+    local _, _h = GetPhysicalScreenSize()
+    local _s = UIParent:GetScale()
+    local _ppu = (_h and _h > 0 and _s and _s > 0) and (_h / 768) * _s or 1
+    local d = barConfig.display
+    if d and d.showBorder then
+      local bt = d.drawnBorderThickness
+      if type(bt) == "number" and bt > 0 then
+        d.drawnBorderThickness = math.max(bt, math.floor(bt * _ppu + 0.5))
+      end
+    end
+    if d then
+      local tt = d.tickThickness
+      if type(tt) == "number" and tt > 0 then
+        d.tickThickness = math.max(tt, math.floor(tt * _ppu + 0.5))
+      end
+    end
+  end
+
   -- Mark as migrated with version number
   barConfig._migrated = CURRENT_MIGRATION_VERSION
   
@@ -913,52 +944,67 @@ end
 -- ===================================================================
 -- HELPER: Get All Active Bars (Buff/Debuff)
 -- ===================================================================
+-- ===================================================================
+-- ACTIVE BAR CACHE
+-- Avoids scanning 500 slots on every call. Invalidated whenever a bar
+-- is enabled/disabled or created/deleted via InvalidateActiveBarCache().
+-- ===================================================================
+local activeBarCache         = nil  -- [barNum, ...] or nil (dirty)
+local activeResourceBarCache = nil
+local activeCooldownBarCache = nil
+
+function ns.API.InvalidateActiveBarCache()
+  activeBarCache         = nil
+  activeResourceBarCache = nil
+  activeCooldownBarCache = nil
+end
+
 function ns.API.GetActiveBars()
+  if activeBarCache then return activeBarCache end
   local db = ns.API.GetDB()
-  if not db or not db.bars then return {} end
-  
+  if not db or not db.bars then activeBarCache = {}; return activeBarCache end
   local activeBars = {}
   for i = 1, 500 do
     if db.bars[i] and db.bars[i].tracking.enabled then
       table.insert(activeBars, i)
     end
   end
-  
-  return activeBars
+  activeBarCache = activeBars
+  return activeBarCache
 end
 
 -- ===================================================================
 -- HELPER: Get All Active Resource Bars
 -- ===================================================================
 function ns.API.GetActiveResourceBars()
+  if activeResourceBarCache then return activeResourceBarCache end
   local db = ns.API.GetDB()
-  if not db or not db.resourceBars then return {} end
-  
+  if not db or not db.resourceBars then activeResourceBarCache = {}; return activeResourceBarCache end
   local activeBars = {}
   for i = 1, 500 do
     if db.resourceBars[i] and db.resourceBars[i].tracking.enabled then
       table.insert(activeBars, i)
     end
   end
-  
-  return activeBars
+  activeResourceBarCache = activeBars
+  return activeResourceBarCache
 end
 
 -- ===================================================================
 -- HELPER: Get All Active Cooldown Bars
 -- ===================================================================
 function ns.API.GetActiveCooldownBars()
+  if activeCooldownBarCache then return activeCooldownBarCache end
   local db = ns.API.GetDB()
-  if not db or not db.cooldownBars then return {} end
-  
+  if not db or not db.cooldownBars then activeCooldownBarCache = {}; return activeCooldownBarCache end
   local activeBars = {}
   for i = 1, 500 do
     if db.cooldownBars[i] and db.cooldownBars[i].tracking and db.cooldownBars[i].tracking.enabled then
       table.insert(activeBars, i)
     end
   end
-  
-  return activeBars
+  activeCooldownBarCache = activeBars
+  return activeCooldownBarCache
 end
 
 -- ===================================================================
@@ -993,6 +1039,7 @@ function ns.API.InitializeNewBar()
       db.bars[i].tracking.buffName = "(Not configured yet)"
       db.bars[i].tracking.spellID = 0
       db.bars[i].tracking.maxStacks = 10
+      ns.API.InvalidateActiveBarCache()
       
       if ns.Display and ns.Display.ShowBar then
         ns.Display.ShowBar(i)
@@ -1034,6 +1081,7 @@ function ns.API.InitializeNewResourceBar(powerType, powerName, resourceCategory,
       cfg.tracking.powerType = powerType
       cfg.tracking.secondaryType = secondaryType
       cfg.tracking.powerName = powerName
+      ns.API.InvalidateActiveBarCache()
       
       -- ═══════════════════════════════════════════════════════════
       -- CRITICAL: Reset display mode when reusing a slot.

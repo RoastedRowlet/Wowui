@@ -161,6 +161,20 @@ local function BuildUsabilityEntries(orderBase, mode, hideSection)
     hidden = hideSection,
   }
 
+  entries["spellUsabilityResourceColorReset"] = {
+    type = "execute", name = "Reset",
+    desc = "Reset to CDM default blue (0.5, 0.5, 1.0)",
+    func = function()
+      ApplySetting(mode, function(c)
+        if not c.spellUsability then c.spellUsability = {} end
+        c.spellUsability.notEnoughResourceColor = nil
+      end)
+      Refresh()
+    end,
+    order = orderBase + 0.0115, width = 0.3,
+    hidden = hideSection,
+  }
+
   entries["spellUsabilityResourceAlpha"] = {
     type = "range", name = "Icon Opacity", min = 0, max = 1.0, step = 0.05,
     desc = "Icon opacity when you don't have enough resource to cast.\n\nSet to 0 to hide the icon until you have enough resource.",
@@ -243,6 +257,20 @@ local function BuildUsabilityEntries(orderBase, mode, hideSection)
       Refresh()
     end,
     order = orderBase + 0.021, width = 0.5,
+    hidden = hideSection,
+  }
+
+  entries["spellUsabilityNotUsableColorReset"] = {
+    type = "execute", name = "Reset",
+    desc = "Reset to CDM default gray (0.4, 0.4, 0.4)",
+    func = function()
+      ApplySetting(mode, function(c)
+        if not c.spellUsability then c.spellUsability = {} end
+        c.spellUsability.notUsableColor = nil
+      end)
+      Refresh()
+    end,
+    order = orderBase + 0.0215, width = 0.3,
     hidden = hideSection,
   }
 

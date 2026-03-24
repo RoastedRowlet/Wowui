@@ -1,11 +1,15 @@
 -- ═══════════════════════════════════════════════════════════════════════════
 -- ArcUI Arc Auras - Custom Tracking System
 -- Track items (trinkets, potions) and spells not covered by CDM
+-- v1.4 - Refactor: Removed continuity protection cache (_startTime/_lastDuration
+--        used as stale-value fallback). GCD suppression via IsLikelyGCD() is
+--        sufficient; continuity protection was the root cause of potions not
+--        resetting after ENCOUNTER_END. ENCOUNTER_END handler simplified.
 -- v1.3 - Fix: Ready glow stuck on during cooldown. _arcReadyGlowActive was
 --        cleared BEFORE calling HideReadyGlow(), causing its early-exit guard
 --        to skip the actual glow stop. Now call HideReadyGlow first, then clear flags.
 -- v1.2 - Fix: Potion ready-glow during active CD (C_Container returns nil when consumed)
---        Added C_Item.GetItemCooldown fallback, continuity protection, glow debounce
+--        Added C_Item.GetItemCooldown fallback, GCD suppression, glow debounce
 -- 
 -- NOTE: Item cooldowns are NON-SECRET in WoW 12.0!
 -- This means direct numeric comparisons work in combat.
@@ -15,6 +19,7 @@ local ADDON, ns = ...
 
 ns.ArcAuras = ns.ArcAuras or {}
 local ArcAuras = ns.ArcAuras
+local Track = _G.ArcUIProfiler_Track
 
 -- Dependencies
 local Shared = ns.CDMShared
@@ -568,15 +573,17 @@ local function ComputeStackDisplay(config)
             end
         end
         
-        -- Check for item-based charges (like Healthstone) via tooltip
-        local tooltipCharges = GetItemChargesFromTooltip(config.itemID)
-        if tooltipCharges then
-            return tooltipCharges, true
+        -- Check for item-based charges (like Healthstone) via GetItemCount includeCharges=true
+        -- This is what CooldownPanels uses — no tooltip parsing needed
+        local withCharges = GetItemCount(config.itemID, false, true)
+        local withoutCharges = GetItemCount(config.itemID, false, false)
+        if withCharges and withoutCharges and withCharges > withoutCharges then
+            return withCharges, true
         end
         
         -- No charges - fall back to inventory count for consumables
         if ShouldShowInventoryCount(config.itemID) then
-            return GetItemCount(config.itemID, false, false), false  -- Bags only
+            return withoutCharges, false
         end
         
     elseif config.type == "trinket" and config.slotID then
@@ -828,23 +835,11 @@ local function CreateArcAuraFrame(arcID, config)
         desatCooldown:SetAlpha(0) -- INVISIBLE! But IsShown() still reflects CD state.
         frame._arcDesatCooldown = desatCooldown
         
-        -- Hook: SetCooldown → drive desaturation from IsShown()
-        hooksecurefunc(desatCooldown, "SetCooldown", function(self)
-            local fd = self._arcFrameData
-            if not fd or not fd.icon then return end
-            local isOnCD = self:IsShown()
-            -- Apply state visuals through the spell engine's applier
-            if ns.ArcAurasCooldown and ns.ArcAurasCooldown.ApplySpellStateVisuals then
-                ns.ArcAurasCooldown.ApplySpellStateVisuals(fd, isOnCD)
-            elseif fd.desaturate then
-                fd.icon:SetDesaturated(isOnCD)
-            else
-                fd.icon:SetDesaturated(false)
-            end
-        end)
-        
-        -- Hook: SetCooldownFromDurationObject → same logic
-        hooksecurefunc(desatCooldown, "SetCooldownFromDurationObject", function(self)
+        -- Use OnShow/OnHide instead of hooksecurefunc on our own frame.
+        -- hooksecurefunc would attribute CPU to whichever frame called SetCooldown
+        -- (e.g. CDM's viewer during RefreshData), making it invisible to the profiler.
+        -- OnShow/OnHide fire on the desatCooldown frame itself → CPU attributed correctly.
+        local _desatApply = Track and Track("ArcAuras.DesatCD.Apply", function(self)
             local fd = self._arcFrameData
             if not fd or not fd.icon then return end
             local isOnCD = self:IsShown()
@@ -855,10 +850,24 @@ local function CreateArcAuraFrame(arcID, config)
             else
                 fd.icon:SetDesaturated(false)
             end
-        end)
+        end) or function(self)
+            local fd = self._arcFrameData
+            if not fd or not fd.icon then return end
+            local isOnCD = self:IsShown()
+            if ns.ArcAurasCooldown and ns.ArcAurasCooldown.ApplySpellStateVisuals then
+                ns.ArcAurasCooldown.ApplySpellStateVisuals(fd, isOnCD)
+            elseif fd.desaturate then
+                fd.icon:SetDesaturated(isOnCD)
+            else
+                fd.icon:SetDesaturated(false)
+            end
+        end
+        desatCooldown:SetScript("OnShow", _desatApply)
+        desatCooldown:SetScript("OnHide", _desatApply)
         
-        -- Hook: OnCooldownDone → CD expired, apply ready visuals
-        desatCooldown:HookScript("OnCooldownDone", function(self)
+        -- OnCooldownDone: CD expired → apply ready visuals
+        -- SetScript (not HookScript) since desatCooldown is our own frame
+        local _desatOnDone = Track and Track("ArcAuras.DesatCD.OnCooldownDone", function(self)
             local fd = self._arcFrameData
             if not fd or not fd.icon then return end
             if ns.ArcAurasCooldown and ns.ArcAurasCooldown.ApplySpellStateVisuals then
@@ -866,18 +875,32 @@ local function CreateArcAuraFrame(arcID, config)
             else
                 fd.icon:SetDesaturated(false)
             end
-        end)
+        end) or function(self)
+            local fd = self._arcFrameData
+            if not fd or not fd.icon then return end
+            if ns.ArcAurasCooldown and ns.ArcAurasCooldown.ApplySpellStateVisuals then
+                ns.ArcAurasCooldown.ApplySpellStateVisuals(fd, false)
+            else
+                fd.icon:SetDesaturated(false)
+            end
+        end
+        desatCooldown:SetScript("OnCooldownDone", _desatOnDone)
         
         -- Visible cooldown: OnCooldownDone → re-feed for instant visual update
-        -- NOTE: Do NOT set desat here — desat is driven by the shadow frame (desatCooldown).
-        -- Unconditionally clearing desat causes a visible flash when recasting instantly.
-        cooldown:HookScript("OnCooldownDone", function(self)
+        local _cooldownOnDone = Track and Track("ArcAuras.Cooldown.OnCooldownDone", function(self)
             local fd = self._arcFrameData
             if not fd then return end
             if ns.ArcAurasCooldown and ns.ArcAurasCooldown.FeedCooldown then
                 ns.ArcAurasCooldown.FeedCooldown(fd)
             end
-        end)
+        end) or function(self)
+            local fd = self._arcFrameData
+            if not fd then return end
+            if ns.ArcAurasCooldown and ns.ArcAurasCooldown.FeedCooldown then
+                ns.ArcAurasCooldown.FeedCooldown(fd)
+            end
+        end
+        cooldown:SetScript("OnCooldownDone", _cooldownOnDone)
         
         -- CooldownFlash (matches CDM structure for CDMEnhance bling control)
         local cooldownFlash = CreateFrame("Frame", nil, frame)
@@ -1416,7 +1439,6 @@ local function UpdateTrinketCooldown(frame, slotID)
         
         frame._isOnCooldown = false
         frame._remaining = 0
-        frame._startTime = 0
         frame._duration = 0
         
         return false, 0
@@ -1455,7 +1477,6 @@ local function UpdateTrinketCooldown(frame, slotID)
     
     frame._isOnCooldown = isOnCooldown
     frame._remaining = remaining
-    frame._startTime = startTime
     frame._duration = duration
     
     -- EXPIRY: Hook OnCooldownDone on the Cooldown frame so the ready-state transition
@@ -1531,18 +1552,6 @@ local function UpdateItemCooldown(frame, itemID)
         frame._lastUsableCheckTime = nil
     end
     
-    -- COOLDOWN CONTINUITY PROTECTION (potions, consumables):
-    -- Even after C_Item fallback, if ALL APIs return nil/0 but we had a valid cooldown with
-    -- significant remaining time, hold the previous data to prevent false "ready" flashes.
-    if (not duration or duration <= 0) and frame._lastDuration and frame._lastDuration > 2 
-       and frame._startTime and frame._startTime > 0 then
-        local expectedRemaining = (frame._startTime + frame._lastDuration) - GetTime()
-        if expectedRemaining > 1 then
-            startTime = frame._startTime
-            duration = frame._lastDuration
-        end
-    end
-    
     -- Detect cooldown ENDING (was on, now off) - item may be usable again
     local cooldownJustEnded = (frame._lastDuration and frame._lastDuration > 1) and (not duration or duration <= 0)
     if cooldownJustEnded then
@@ -1592,7 +1601,6 @@ local function UpdateItemCooldown(frame, itemID)
         
         frame._isOnCooldown = false
         frame._remaining = 0
-        frame._startTime = 0
         frame._duration = 0
         frame._arcLockedOut = true  -- Special flag for visual handling
         
@@ -1635,7 +1643,6 @@ local function UpdateItemCooldown(frame, itemID)
     
     frame._isOnCooldown = isOnCooldown
     frame._remaining = remaining
-    frame._startTime = startTime
     frame._duration = duration
     
     -- EXPIRY: Hook OnCooldownDone (see UpdateTrinketCooldown)
@@ -1729,6 +1736,221 @@ end
 -- OPTIMIZED: Uses cached settings, cached LCG reference, state-change detection
 -- Called when BAG_UPDATE_COOLDOWN fires or on initial state apply.
 -- Handles a single non-spell arc frame (trinket/item).
+
+-- ═══════════════════════════════════════════════════════════════════════════
+-- TARGETED VISUAL APPLIERS (item/trinket frames only)
+-- Each function handles ONE concern. Called only when that concern changes.
+-- Never called for spell frames (_arcIsSpellCooldown = true).
+-- ═══════════════════════════════════════════════════════════════════════════
+
+-- Updates stack/count text only. Called from BAG_UPDATE_COOLDOWN for count-based items.
+local function ApplyStackText(frame, arcID)
+    if not frame._arcStackText then return end
+    local config = frame._arcConfig
+    if not config then return end
+    -- Cache is invalidated by the event that triggered this call (BAG_UPDATE_COOLDOWN,
+    -- SPELL_UPDATE_CHARGES, etc.) via InvalidateStackCache before ApplyStackText is
+    -- reached. Pre-invalidating here caused ComputeStackDisplay to run on every call
+    -- defeating the cache entirely.
+    local displayValue, isCharges = GetStackDisplay(config, arcID)
+    local settings = ArcAuras.GetCachedSettings(arcID)
+    local chargeTextEnabled = not (settings and settings.chargeText and settings.chargeText.enabled == false)
+    if displayValue ~= nil and chargeTextEnabled then
+        frame._arcStackText:SetText(displayValue)
+        frame._arcStackText:Show()
+    else
+        frame._arcStackText:SetText("")
+        frame._arcStackText:Hide()
+    end
+end
+
+-- Returns cached stateVisuals, refreshing only when settings generation changed.
+local function GetCachedStateVisuals(frame, arcID)
+    if frame._settingsGeneration ~= settingsCacheGeneration or not frame._cachedStateVisuals_init then
+        local settings = ArcAuras.GetCachedSettings(arcID)
+        local sv = nil
+        if ns.CDMEnhance and ns.CDMEnhance.GetEffectiveStateVisuals then
+            sv = ns.CDMEnhance.GetEffectiveStateVisuals(settings)
+        end
+        frame._cachedStateVisuals = sv
+        frame._settingsGeneration = settingsCacheGeneration
+        frame._cachedStateVisuals_init = true
+        frame._cachedSettings = settings
+    end
+    return frame._cachedStateVisuals, frame._cachedSettings
+end
+
+-- Called only when isOnCooldown flips. Updates desat/alpha/tint/glow for cooldown state.
+local function ApplyCooldownStateVisuals(frame, arcID, isOnCooldown)
+    local sv, settings = GetCachedStateVisuals(frame, arcID)
+    local csv = settings and settings.cooldownStateVisuals or {}
+    local rs = csv.readyState or {}
+    local cs = csv.cooldownState or {}
+    local iconTex = frame.Icon
+
+    if isOnCooldown then
+        -- Alpha
+        local cooldownAlpha = cs.alpha ~= nil and cs.alpha or (sv and sv.cooldownAlpha) or 1.0
+        if cooldownAlpha <= 0 and ns.CDMEnhance and ns.CDMEnhance.IsOptionsPanelOpen and ns.CDMEnhance.IsOptionsPanelOpen() then
+            cooldownAlpha = 0.35
+        end
+        if frame._lastAppliedAlpha ~= cooldownAlpha then
+            frame._arcTargetAlpha = cooldownAlpha
+            frame._arcEnforceReadyAlpha = false
+            frame._arcReadyAlphaValue = nil
+            frame._arcBypassFrameAlphaHook = true
+            frame:SetAlpha(cooldownAlpha)
+            frame._arcBypassFrameAlphaHook = false
+            frame._lastAppliedAlpha = cooldownAlpha
+        end
+        -- Desaturation
+        local noDesaturate = (sv and sv.noDesaturate) or (cs.noDesaturate == true)
+        local shouldDesat = not noDesaturate
+        local desatKey = shouldDesat and "desat" or "normal"
+        if frame._lastDesatState ~= desatKey then
+            frame._lastDesatState = desatKey
+            if iconTex then
+                if shouldDesat then
+                    if iconTex.SetDesaturation then iconTex:SetDesaturation(1)
+                    elseif iconTex.SetDesaturated then iconTex:SetDesaturated(true) end
+                else
+                    if iconTex.SetDesaturation then iconTex:SetDesaturation(0)
+                    elseif iconTex.SetDesaturated then iconTex:SetDesaturated(false) end
+                end
+            end
+        end
+        -- Tint
+        local cooldownTint = (sv and sv.cooldownTint) or (cs.tint == true)
+        local tintColor = (sv and sv.cooldownTintColor) or cs.tintColor
+        local tintKey = cooldownTint and tintColor or false
+        if frame._lastTintRef ~= tintKey then
+            frame._lastTintRef = tintKey
+            if iconTex then
+                if cooldownTint and tintColor then
+                    local c = tintColor
+                    iconTex:SetVertexColor(c.r or 0.5, c.g or 0.5, c.b or 0.5, 1)
+                else
+                    iconTex:SetVertexColor(1, 1, 1, 1)
+                end
+            end
+        end
+        -- Stop ready glow on cooldown start
+        if frame._lastVisualState ~= "cooldown" then
+            frame._lastVisualState = "cooldown"
+            if ns.Glows and (frame._arcReadyGlowActive or ns.Glows.IsActive(frame, "ArcUI_ReadyGlow")) then
+                ns.Glows.Stop(frame, "ArcUI_ReadyGlow")
+            end
+            frame._arcReadyGlowActive = false
+            frame._arcPreviewGlowActive = false
+            frame._arcCurrentGlowSig = nil
+            if ns.CustomLabel and ns.CustomLabel.UpdateVisibility then
+                ns.CustomLabel.UpdateVisibility(frame)
+            end
+        end
+    else
+        -- READY STATE
+        local readyAlpha = rs.alpha ~= nil and rs.alpha or (sv and sv.readyAlpha) or 1.0
+        if readyAlpha <= 0 and ns.CDMEnhance and ns.CDMEnhance.IsOptionsPanelOpen and ns.CDMEnhance.IsOptionsPanelOpen() then
+            readyAlpha = 0.35
+        end
+        frame._arcTargetAlpha = nil
+        frame._arcEnforceReadyAlpha = true
+        frame._arcReadyAlphaValue = readyAlpha
+        if frame._lastAppliedAlpha ~= readyAlpha then
+            frame._arcBypassFrameAlphaHook = true
+            frame:SetAlpha(readyAlpha)
+            frame._arcBypassFrameAlphaHook = false
+            frame._lastAppliedAlpha = readyAlpha
+        end
+        -- Clear desat
+        local desatKey = "normal"
+        if frame._lastDesatState ~= desatKey then
+            frame._lastDesatState = desatKey
+            if iconTex then
+                if iconTex.SetDesaturation then iconTex:SetDesaturation(0)
+                elseif iconTex.SetDesaturated then iconTex:SetDesaturated(false) end
+                iconTex:SetVertexColor(1, 1, 1, 1)
+            end
+        end
+        -- Start ready glow on ready state
+        if frame._lastVisualState ~= "ready" then
+            frame._lastVisualState = "ready"
+            if ns.CustomLabel and ns.CustomLabel.UpdateVisibility then
+                ns.CustomLabel.UpdateVisibility(frame)
+            end
+            -- Glow evaluation only on state change
+            local shouldGlow = sv and sv.readyGlow
+            local combatOnly = sv and sv.readyGlowCombatOnly
+            if shouldGlow and (not combatOnly or InCombatLockdown()) then
+                if not frame._arcReadyGlowActive then
+                    frame._arcReadyGlowActive = true
+                    if ns.Glows then
+                        ns.Glows.Start(frame, "ArcUI_ReadyGlow",
+                            sv.readyGlowType or "button", {
+                                color = sv.readyGlowColor or {1,1,1,1},
+                                lines = sv.readyGlowLines or 8,
+                                frequency = sv.readyGlowSpeed or 0.25,
+                                thickness = sv.readyGlowThickness or 2,
+                            })
+                    end
+                end
+            else
+                if frame._arcReadyGlowActive then
+                    if ns.Glows then ns.Glows.Stop(frame, "ArcUI_ReadyGlow") end
+                    frame._arcReadyGlowActive = false
+                end
+            end
+        end
+    end
+end
+
+-- Called only when isUsable/notEnoughMana flips. Only touches alpha + desat.
+local function ApplyUsabilityVisuals(frame, arcID, isUsable)
+    if frame._isOnCooldown then return end  -- cooldown state takes priority
+    local sv, settings = GetCachedStateVisuals(frame, arcID)
+    local csv = settings and settings.cooldownStateVisuals or {}
+    local cs = csv.readyState or {}
+    local iconTex = frame.Icon
+
+    local isUnusable = not isUsable
+    local desatKey = isUnusable and "desat_unusable" or "normal"
+    if frame._lastDesatState ~= desatKey then
+        frame._lastDesatState = desatKey
+        if iconTex then
+            if isUnusable then
+                if iconTex.SetDesaturation then iconTex:SetDesaturation(1)
+                elseif iconTex.SetDesaturated then iconTex:SetDesaturated(true) end
+            else
+                if iconTex.SetDesaturation then iconTex:SetDesaturation(0)
+                elseif iconTex.SetDesaturated then iconTex:SetDesaturated(false) end
+                iconTex:SetVertexColor(1, 1, 1, 1)
+            end
+        end
+    end
+    local csvReady = csv.readyState or {}
+    local readyAlpha = csvReady.alpha ~= nil and csvReady.alpha or (sv and sv.readyAlpha) or 1.0
+    local cooldownAlpha = (csv.cooldownState or {}).alpha
+    local targetAlpha = isUnusable and (cooldownAlpha or 1.0) or readyAlpha
+    if targetAlpha <= 0 and ns.CDMEnhance and ns.CDMEnhance.IsOptionsPanelOpen and ns.CDMEnhance.IsOptionsPanelOpen() then
+        targetAlpha = 0.35
+    end
+    if isUnusable then
+        frame._arcTargetAlpha = targetAlpha
+        frame._arcEnforceReadyAlpha = false
+        frame._arcReadyAlphaValue = nil
+    else
+        frame._arcTargetAlpha = nil
+        frame._arcEnforceReadyAlpha = true
+        frame._arcReadyAlphaValue = targetAlpha
+    end
+    if frame._lastAppliedAlpha ~= targetAlpha then
+        frame._arcBypassFrameAlphaHook = true
+        frame:SetAlpha(targetAlpha)
+        frame._arcBypassFrameAlphaHook = false
+        frame._lastAppliedAlpha = targetAlpha
+    end
+end
+
 local function UpdateArcItemFrame(frame, arcID)
     if not (frame and frame:IsShown()) then return end
     if frame._arcIsSpellCooldown then return end
@@ -2294,14 +2516,35 @@ function ArcAuras.ApplySettingsToFrame(arcID, frame)
     -- If not in a group, use ArcAura's own size settings
     if not inGroup then
         local scale = cfg.scale or 1
-        local baseWidth = cfg.width or 40
-        local baseHeight = cfg.height or 40
+        -- Use freeIcons stored iconSize as the fallback base so this path and
+        -- RefreshAllGroupLayouts/RefreshIconLayout (which use data.iconSize as
+        -- their fallback) agree when cfg.width is nil. ArcAura frames use
+        -- _arcAuraID as their key into freeIcons — NOT _arcCooldownID.
+        local freeIconKey = frame._arcAuraID or frame._arcCooldownID
+        local storedBase = (frame._cdmgIsFreeIcon
+            and ns.CDMGroups and ns.CDMGroups.freeIcons
+            and freeIconKey
+            and ns.CDMGroups.freeIcons[freeIconKey]
+            and ns.CDMGroups.freeIcons[freeIconKey].iconSize) or 40
+        local baseWidth = cfg.width or storedBase
+        local baseHeight = cfg.height or storedBase
         width = baseWidth * scale
         height = baseHeight * scale
     end
     
     frame:SetSize(width, height)
-    
+
+    -- Sync freeIcons stored iconSize so TrackFreeIcon re-runs read the correct
+    -- base. Uses _arcAuraID (the correct key for ArcAura frames in freeIcons).
+    if frame._cdmgIsFreeIcon and ns.CDMGroups and ns.CDMGroups.freeIcons then
+        local syncKey = frame._arcAuraID or frame._arcCooldownID
+        if syncKey and ns.CDMGroups.freeIcons[syncKey] then
+            local syncBase = (not inGroup) and (cfg.width or ns.CDMGroups.freeIcons[syncKey].iconSize or 40) or width
+            ns.CDMGroups.freeIcons[syncKey].iconSize = syncBase
+            frame._cdmgFreeTargetSize = syncBase
+        end
+    end
+
     -- CRITICAL: Invalidate glow signature when size changes. LCG glow textures
     -- are sized at creation time — if the frame was resized after glow started
     -- (common during loading when CDMGroups enforces group sizes), the glow
@@ -3907,7 +4150,16 @@ function ArcAuras.RefreshVisibility()
                 end
             else
                 frame:Show()
-                ArcAuras.ApplyInitialStateVisuals(arcID, frame)
+                -- Item frames: use full UpdateArcItemFrame so 0-stack desaturation
+                -- is re-evaluated (ApplyInitialStateVisuals only checks _isOnCooldown
+                -- and would stamp "ready/saturated" onto a 0-stack item frame).
+                -- Trinket and spell frames still use ApplyInitialStateVisuals (which
+                -- skips spell frames entirely and hands them to FeedCooldown).
+                if config.type == "item" and not frame._arcIsSpellCooldown then
+                    UpdateArcItemFrame(frame, arcID)
+                else
+                    ArcAuras.ApplyInitialStateVisuals(arcID, frame)
+                end
             end
         end
     end
@@ -4418,22 +4670,17 @@ function ArcAuras.RefreshFrameSettings(arcID)
         frame._arcStackStyleApplied = true
     end
     
-    -- CRITICAL: Update cooldown state BEFORE applying visuals
-    -- After zone change, frame._isOnCooldown may be stale - query the real state first
-    -- so ApplyInitialStateVisuals uses the correct cooldown state for alpha
-    -- NOTE: Spell frames skip this - their engine handles cooldown state via events
-    local config = frame._arcConfig
-    if config then
-        if config.type == "trinket" and config.slotID then
-            UpdateTrinketCooldown(frame, config.slotID)
-        elseif config.type == "item" and config.itemID then
-            UpdateItemCooldown(frame, config.itemID)
-        end
-        -- Spell frames: ApplyInitialStateVisuals will trigger FeedCooldown
-    end
-    
-    -- Now apply state visuals with the CURRENT cooldown state
-    ArcAuras.ApplyInitialStateVisuals(arcID, frame)
+    -- Drive a full visual re-evaluation via UpdateArcItemFrame.
+    -- This is required so glow changes made in the options panel take effect
+    -- immediately: UpdateArcItemFrame sees settingsChanged=true (caches cleared
+    -- above), stops any stale glow, and restarts it with the new settings.
+    -- ApplyInitialStateVisuals only handled alpha/desat and never touched glows,
+    -- which is why glow changes were invisible until the panel was closed and a
+    -- BAG_UPDATE event fired. UpdateArcItemFrame contains a strict superset of
+    -- ApplyInitialStateVisuals so this is a safe drop-in replacement.
+    -- NOTE: Spell frames are guarded by the _arcIsSpellCooldown early-return
+    -- inside UpdateArcItemFrame, so they remain unaffected.
+    ArcAuras.UpdateArcItemFrame(frame, arcID)
 end
 
 -- Refresh settings for all Arc Aura frames
@@ -4603,11 +4850,47 @@ eventFrame:RegisterEvent("BAG_UPDATE_COOLDOWN")          -- Fires when item/trin
 eventFrame:RegisterEvent("SPELL_UPDATE_USABLE")          -- Fires when item usability changes (CC, fear, combat restrictions)
 eventFrame:RegisterEvent("SPELL_UPDATE_CHARGES")         -- Fires when charges change (Healthstone consumed/recharged)
 eventFrame:RegisterEvent("PLAYER_REGEN_ENABLED")         -- Fires when leaving combat (unlocks once-per-combat items)
+eventFrame:RegisterEvent("ENCOUNTER_END")                -- Fires on boss kill/wipe (resets potion combat-use lockout)
+
+-- ═══════════════════════════════════════════════════════════════════════════
+-- USABILITY CHECK (dedicated, deferred)
+-- Called after events that change item usability (e.g. Healthstone once-per-combat).
+-- Deferred by 0.1s because C_Item.IsUsableItem lags ~50ms behind the event firing.
+-- ═══════════════════════════════════════════════════════════════════════════
+local usabilityCheckPending = false
+
+local function CheckAllItemUsability()
+    usabilityCheckPending = false
+    for arcID, frame in pairs(ArcAuras.frames) do
+        if not frame._arcIsSpellCooldown and frame:IsShown() then
+            local config = frame._arcConfig
+            local itemID = config and (config.itemID or (config.type == "trinket" and GetInventoryItemID("player", config.slotID)))
+            if itemID then
+                local usable = C_Item.IsUsableItem(itemID)
+                -- State-change guard: only act if usability actually changed
+                if frame._lastUsableResult ~= usable then
+                    frame._lastUsableResult = usable
+                    frame._lastUsableCheckTime = GetTime()
+                    -- Only apply usability visuals — not a full rebuild
+                    ApplyUsabilityVisuals(frame, arcID, usable)
+                end
+            end
+        end
+    end
+end
+
+local function ScheduleUsabilityCheck()
+    if usabilityCheckPending then return end
+    usabilityCheckPending = true
+    C_Timer.After(0.1, CheckAllItemUsability)
+end
+
+eventFrame:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")     -- Catches once-per-combat lockouts (e.g. Healthstone)
 
 -- Debounce for PLAYER_EQUIPED_SPELLS_CHANGED (fires 12 times at once)
 local lastEquipedSpellsTime = 0
 
-eventFrame:SetScript("OnEvent", function(self, event, arg1)
+local _arcAurasOnEvent = function(self, event, arg1)
     if event == "PLAYER_LOGIN" then
         -- Enable DB caching now that SavedVariables are loaded
         C_Timer.After(0.1, function()
@@ -4701,22 +4984,93 @@ eventFrame:SetScript("OnEvent", function(self, event, arg1)
             end
         end
     elseif event == "BAG_UPDATE_DELAYED" then
-        -- Bag contents settled - invalidate stack caches for new/changed items
+        -- Bag contents settled - invalidate caches and update all item frames
         InvalidateStackCache()
-    elseif event == "BAG_UPDATE_COOLDOWN" then
-        -- Item/trinket cooldown changed - update all non-spell arc frames immediately
         for arcID, frame in pairs(ArcAuras.frames) do
-            UpdateArcItemFrame(frame, arcID)
+            if not frame._arcIsSpellCooldown and frame:IsShown() then
+                ArcAuras.UpdateArcItemFrame(frame, arcID)
+            end
+        end
+    elseif event == "BAG_UPDATE_COOLDOWN" then
+        -- Only update cooldown state — no full rebuild.
+        -- State-change guard: each frame exits immediately if startTime/duration unchanged.
+        for arcID, frame in pairs(ArcAuras.frames) do
+            if frame:IsShown() and not frame._arcIsSpellCooldown then
+                local config = frame._arcConfig
+                if config then
+                    local startTime, duration
+                    if config.type == "trinket" and config.slotID then
+                        local iid = GetInventoryItemID("player", config.slotID)
+                        if iid then startTime, duration = C_Container.GetItemCooldown(iid) end
+                    elseif config.type == "item" and config.itemID then
+                        startTime, duration = C_Container.GetItemCooldown(config.itemID)
+                    end
+                    if startTime then
+                        local itemID = config.itemID or (config.type == "trinket" and GetInventoryItemID("player", config.slotID))
+                        -- Skip GCD fires entirely
+                        if not (duration and duration > 0 and IsLikelyGCD(itemID, duration)) then
+                            local isOnCooldown = duration and duration > 0 and ((startTime + duration) - GetTime()) > 0
+                            -- Only act if something changed
+                            if isOnCooldown ~= frame._isOnCooldown
+                                or startTime ~= frame._lastStartTime
+                                or duration ~= frame._lastDuration then
+                                -- Feed cooldown animation
+                                if frame._durationObj and C_DurationUtil then
+                                    frame._durationObj:SetTimeFromStart(startTime or 0, duration or 0)
+                                    frame.Cooldown:SetCooldownFromDurationObject(frame._durationObj, true)
+                                else
+                                    frame.Cooldown:SetCooldown(startTime or 0, duration or 0)
+                                end
+                                frame._lastStartTime = startTime
+                                frame._lastDuration = duration
+                                local prevOnCooldown = frame._isOnCooldown
+                                frame._isOnCooldown = isOnCooldown
+                                if isOnCooldown and not prevOnCooldown then
+                                    -- Cooldown STARTED: apply cooldown visuals immediately
+                                    ApplyCooldownStateVisuals(frame, arcID, true)
+                                    -- Set OnCooldownDone to trigger full ready-state rebuild
+                                    local _arcID = arcID
+                                    frame.Cooldown:SetScript("OnCooldownDone", function()
+                                        frame.Cooldown:SetScript("OnCooldownDone", nil)
+                                        ArcAuras.UpdateArcItemFrame(frame, _arcID)
+                                    end)
+                                else
+                                    -- Not on cooldown (includes lockout items like Healthstone where
+                                    -- duration=0.001 expires instantly). Always run full UpdateArcItemFrame
+                                    -- so isLockedOut + IsUsableItem checks fire and apply correct visuals.
+                                    frame.Cooldown:SetScript("OnCooldownDone", nil)
+                                    ArcAuras.UpdateArcItemFrame(frame, arcID)
+                                end
+                            end
+                        end
+                        -- Always refresh stack/count text — catches Healthstone create/consume
+                        ApplyStackText(frame, arcID)
+                    end
+                end
+            end
         end
     elseif event == "SPELL_UPDATE_USABLE" or event == "SPELL_UPDATE_CHARGES" or event == "PLAYER_REGEN_ENABLED" then
-        -- Usability or charge counts changed (CC dropped, Healthstone consumed, combat ended)
-        -- Force usability recheck on all item frames
+        -- Defer to CheckAllItemUsability (0.1s debounced, state-change guarded).
+        -- No immediate full sweep — CheckAllItemUsability calls ApplyUsabilityVisuals
+        -- only on frames where usability actually changed.
+        InvalidateStackCache()
+        ScheduleUsabilityCheck()
+
+    elseif event == "ENCOUNTER_END" then
+        -- Boss ended - item CDs (potions, trinkets) may have been reset by Blizzard.
+        -- GCD suppression in IsLikelyGCD means no continuity cache to clear here.
+        InvalidateStackCache()
+        ScheduleUsabilityCheck()
         for arcID, frame in pairs(ArcAuras.frames) do
             if not frame._arcIsSpellCooldown then
-                frame._lastUsableCheckTime = nil  -- Expire cache so next update rechecks
-                InvalidateStackCache(arcID)
                 UpdateArcItemFrame(frame, arcID)
             end
+        end
+    elseif event == "UNIT_SPELLCAST_SUCCEEDED" then
+        -- arg1 = unit token (non-secret for player). Schedule deferred usability check
+        -- so C_Item.IsUsableItem has time to reflect the new state.
+        if arg1 == "player" then
+            ScheduleUsabilityCheck()
         end
     elseif event == "PLAYER_EQUIPED_SPELLS_CHANGED" then
         -- Fires 12 times at once - debounce to only process once
@@ -4865,7 +5219,8 @@ eventFrame:SetScript("OnEvent", function(self, event, arg1)
             end)
         end
     end
-end)
+end
+eventFrame:SetScript("OnEvent", Track and Track("ArcAuras.OnEvent", _arcAurasOnEvent) or _arcAurasOnEvent)
 
 -- ═══════════════════════════════════════════════════════════════════════════
 -- SLASH COMMANDS
@@ -4873,7 +5228,7 @@ end)
 
 SLASH_ARCAURAS1 = "/arcauras"
 SlashCmdList["ARCAURAS"] = function(msg)
-    local cmd = msg:lower():trim()
+    local cmd = strtrim(msg:lower())
     
     if cmd == "" then
         if ns.ArcAurasOptions and ns.ArcAurasOptions.OpenPanel then
@@ -5047,4 +5402,34 @@ function ArcAuras.GetItemInfoForArcID(cdID)
     end
     
     return itemID, name, icon
+end
+-- ═══════════════════════════════════════════════════════════════════════════
+-- PROFILER: Register local hot-path functions so ArcUIProfiler can wrap them.
+-- Must run AFTER all local function definitions above.
+-- RegisterLocals wraps immediately and returns wrapped versions — swap locals
+-- so calls through local upvalues (the actual hot path) hit the wrappers.
+-- ═══════════════════════════════════════════════════════════════════════════
+do
+    local _wrapped = _G.ArcUIProfiler_RegisterLocals and _G.ArcUIProfiler_RegisterLocals("ArcAuras", {
+        UpdateArcItemFrame        = UpdateArcItemFrame,
+        UpdateTrinketCooldown     = UpdateTrinketCooldown,
+        UpdateItemCooldown        = UpdateItemCooldown,
+        ApplyCooldownStateVisuals = ApplyCooldownStateVisuals,
+        ApplyUsabilityVisuals     = ApplyUsabilityVisuals,
+        GetCachedStateVisuals     = GetCachedStateVisuals,
+        ApplyStackText            = ApplyStackText,
+        GetStackDisplay           = GetStackDisplay,
+        ComputeStackDisplay       = ComputeStackDisplay,
+    })
+    if _wrapped then
+        if _wrapped.UpdateArcItemFrame        then UpdateArcItemFrame        = _wrapped.UpdateArcItemFrame        end
+        if _wrapped.UpdateTrinketCooldown     then UpdateTrinketCooldown     = _wrapped.UpdateTrinketCooldown     end
+        if _wrapped.UpdateItemCooldown        then UpdateItemCooldown        = _wrapped.UpdateItemCooldown        end
+        if _wrapped.ApplyCooldownStateVisuals then ApplyCooldownStateVisuals = _wrapped.ApplyCooldownStateVisuals end
+        if _wrapped.ApplyUsabilityVisuals     then ApplyUsabilityVisuals     = _wrapped.ApplyUsabilityVisuals     end
+        if _wrapped.GetCachedStateVisuals     then GetCachedStateVisuals     = _wrapped.GetCachedStateVisuals     end
+        if _wrapped.ApplyStackText            then ApplyStackText            = _wrapped.ApplyStackText            end
+        if _wrapped.GetStackDisplay           then GetStackDisplay           = _wrapped.GetStackDisplay           end
+        if _wrapped.ComputeStackDisplay       then ComputeStackDisplay       = _wrapped.ComputeStackDisplay       end
+    end
 end

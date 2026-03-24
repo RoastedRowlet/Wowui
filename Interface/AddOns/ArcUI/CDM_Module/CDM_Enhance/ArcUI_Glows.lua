@@ -110,7 +110,7 @@ end
 local BLIZZ_CONTAINER_RATIO = 66 / 45   -- ~1.467
 
 -- Default glow frame level offset above parent
-local GLOW_LEVEL_OFFSET = 8
+local GLOW_LEVEL_OFFSET = 1
 
 -- CDM Flash renders BEHIND the icon by default (looks better as a background pulse).
 -- Users can override via the Glow Frame Level option.

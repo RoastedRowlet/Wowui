@@ -11,7 +11,7 @@ local UICCommonPrompt = env.modules:New("packages\\uic-common\\prompt")
 
 local Mixin = Mixin
 
-local UIDef = {
+local UIDEF = {
     UIPrompt = UICCommonPreload.ATLAS{ inset = 11, scale = 1, left = 4/512, right = 46/512, top = 330/512, bottom = 372/512 }
 }
 
@@ -179,7 +179,7 @@ do --Prompt
                     :_updateMode(UIKit.Enum.UpdateMode.ExcludeVisibilityChanged)
             })
             :size(PROMPT_WIDTH, PROMPT_HEIGHT)
-            :background(UIDef.UIPrompt)
+            :background(UIDEF.UIPrompt)
             :backgroundColor(PROMPT_BACKGROUND_COLOR)
             :_updateMode(UIKit.Enum.UpdateMode.ExcludeVisibilityChanged)
 

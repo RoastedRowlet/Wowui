@@ -814,6 +814,36 @@ SlashCmdList["ARCUIREPAIR"] = function(msg)
     
     if cmd == "emergency" then
         DR.EmergencyRepair()
+    elseif cmd == "groupdump" then
+        -- Dump live group layout values for debugging
+        if ns.CDMGroups and ns.CDMGroups.groups then
+            for name, g in pairs(ns.CDMGroups.groups) do
+                PrintMsg(string.format("[%s] iconSize=%s iconWidth=%s spacing=%s containerPadding=%s cols=%s rows=%s",
+                    name,
+                    tostring(g.layout and g.layout.iconSize),
+                    tostring(g.layout and g.layout.iconWidth),
+                    tostring(g.layout and g.layout.spacing),
+                    tostring(g.containerPadding),
+                    tostring(g.layout and g.layout.gridCols),
+                    tostring(g.layout and g.layout.gridRows)
+                ))
+                -- Also check member frame sizes
+                local count = 0
+                for cdID, member in pairs(g.members or {}) do
+                    if member.frame and count < 2 then
+                        local fw, fh = member.frame:GetSize()
+                        PrintMsg(string.format("  frame[%s] size=%.1fx%.1f _cdmgSlotW=%s _cdmgTargetSize=%s",
+                            tostring(cdID), fw, fh,
+                            tostring(member.frame._cdmgSlotW),
+                            tostring(member.frame._cdmgTargetSize)
+                        ))
+                        count = count + 1
+                    end
+                end
+            end
+        else
+            PrintMsg("No CDMGroups groups found")
+        end
     elseif cmd == "cdmclean" then
         -- Manual CDMGroups cleanup (preview what logout will strip)
         local svTable = _G.ArcUIDB

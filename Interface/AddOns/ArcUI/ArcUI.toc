@@ -2,7 +2,7 @@
 ## Title: Arc UI
 ## Notes: Buff/Debuff stack tracking bars, icons, resource bars, cooldown bars, and timer bars with CD Manager integration
 ## Author: Arc
-## Version: 3.6.1.c
+## Version: 3.6.2.b
 ## X-Wago-ID:mNw7Q2No
 ## SavedVariables: ArcUIDB, ArcUI_CDMEnhance_Debug
 
@@ -37,6 +37,7 @@ Libs\LibEQOL\LibEQOL.xml
 
 # Core Files
 ArcUI_DB.lua
+ArcUI_BarGroupAlign.lua
 ArcUI_Core.lua
 ArcUI_Display.lua
 ArcUI_Resources.lua

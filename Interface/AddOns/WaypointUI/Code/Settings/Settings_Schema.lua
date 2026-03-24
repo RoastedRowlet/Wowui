@@ -61,14 +61,14 @@ local Settings_Preload = env.modules:Import("@\\Settings\\Preload")
 local Settings_Schema = env.modules:New("@\\Settings\\Schema")
 
 local IsAddOnLoaded = C_AddOns.IsAddOnLoaded
-local Settings_PROMPT = _G[Settings_Preload.FRAME_NAME].Prompt
+local SettingsPrompt = _G[Settings_Preload.FRAME_NAME].Prompt
 
 local function HandleAccept()
     Config.DBGlobal:Wipe()
     ReloadUI()
 end
 
-local RESET_Settings_PROMPT_INFO = {
+local RESET_PROMPT = {
     text         = L["CONFIG_GENERAL_OTHER_RESETPROMPT"],
     options      = {
         {
@@ -129,7 +129,7 @@ do -- Schema
                             widgetName        = nil,
                             widgetType        = Settings_Enum.WidgetType.Button,
                             widgetButton_text = L["CONFIG_GENERAL_OTHER_RESETBUTTON"],
-                            set               = function() Settings_PROMPT:Open(RESET_Settings_PROMPT_INFO) end
+                            set               = function() SettingsPrompt:Open(RESET_PROMPT) end
                         }
                     }
                 }

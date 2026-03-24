@@ -11,7 +11,7 @@ local UICCommonInput = env.modules:New("packages\\uic-common\\input")
 local Mixin = Mixin
 local CreateFromMixins = CreateFromMixins
 
-local UIDef = {
+local UIDEF = {
     UIInput          = UICCommonPreload.ATLAS{ inset = 10, scale = 0.7, left = 7 / 512, right = 100 / 512, top = 242 / 512, bottom = 283 / 512 },
     UIInput_Disabled = UICCommonPreload.ATLAS{ inset = 10, scale = 0.7, left = 106 / 512, right = 199 / 512, top = 242 / 512, bottom = 283 / 512 },
     UIInputCaret     = UIKit.Define.Texture{ path = Path.Root .. "\\Art\\Primitives\\Box" }
@@ -46,9 +46,9 @@ do --Input
         local isEnabled = self:IsEnabled()
 
         if not isEnabled then
-            self.Background:background(UIDef.UIInput_Disabled)
+            self.Background:background(UIDEF.UIInput_Disabled)
         elseif focused then
-            self.Background:background(UIDef.UIInput_Highlighted)
+            self.Background:background(UIDEF.UIInput_Highlighted)
 
             if not self.AnimGroup:IsPlaying(self.Caret, "NORMAL") then
                 self.AnimGroup:Play(self.Caret, "NORMAL")
@@ -56,9 +56,9 @@ do --Input
         else
             local buttonState = self:GetButtonState()
             if buttonState == "HIGHLIGHTED" then
-                self.Background:background(UIDef.UIInput_Highlighted)
+                self.Background:background(UIDEF.UIInput_Highlighted)
             else
-                self.Background:background(UIDef.UIInput)
+                self.Background:background(UIDEF.UIInput)
             end
         end
     end
@@ -93,7 +93,7 @@ do --Input
                     :id("Background", id)
                     :frameLevel(1)
                     :size(BACKGROUND_SIZE)
-                    :background(UIDef.UIInput)
+                    :background(UIDEF.UIInput)
                     :_excludeFromCalculations()
                     :_updateMode(UIKit.Enum.UpdateMode.ExcludeVisibilityChanged),
 
@@ -103,7 +103,7 @@ do --Input
                         :as("INPUT_CARET")
                         :frameLevel(3)
                         :size(UIKit.UI.FILL)
-                        :background(UIDef.UIInputCaret)
+                        :background(UIDEF.UIInputCaret)
                         :backgroundColor(CARET_COLOR)
                         :_updateMode(UIKit.Enum.UpdateMode.ExcludeVisibilityChanged)
                 })

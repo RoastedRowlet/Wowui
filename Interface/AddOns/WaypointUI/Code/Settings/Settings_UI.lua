@@ -16,7 +16,7 @@ do -- Setting
                 :id("Sidebar.Divider", id)
                 :point(UIKit.Enum.Point.Right)
                 :size(2, UIKit.Define.Percentage{ value = 100 })
-                :background(Settings_Preload.UIDef.Divider)
+                :background(Settings_Preload.UIDEF.Divider)
                 :backgroundColor(UIKit.Define.Color_RGBA{ r = 142.5, g = 142.5, b = 142.5, a = 0.2375 }),
 
             Frame(name .. ".Sidebar.Content", {

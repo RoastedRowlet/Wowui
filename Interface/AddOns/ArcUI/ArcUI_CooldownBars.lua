@@ -24,6 +24,36 @@ local function PixelSnap(n, effectiveScale)
   return math.floor(n + 0.5)
 end
 
+-- Same 1-pixel rounding grid CDMGroups uses for _slotAreaW.
+local function SnapToGroupPx(n)
+  if ns.BarGroupAlign and ns.BarGroupAlign.SnapToGroupPx then
+    return ns.BarGroupAlign.SnapToGroupPx(n)
+  end
+  local _, h = GetPhysicalScreenSize()
+  local s = UIParent:GetScale()
+  if h and h > 0 and s and s > 0 then
+    local pmult = (768 / h) / s
+    return math.floor(n / pmult + 0.5) * pmult
+  end
+  return math.floor(n + 0.5)
+end
+
+-- Live X inset from container BOTTOMLEFT to first icon left edge.
+local function GetActualIconInset(group)
+  if ns.BarGroupAlign and ns.BarGroupAlign.GetIconInsetX then
+    return ns.BarGroupAlign.GetIconInsetX(group)
+  end
+  return 0
+end
+
+-- Live Y inset from container TOP to first icon top edge.
+local function GetActualIconInsetY(group)
+  if ns.BarGroupAlign and ns.BarGroupAlign.GetIconInsetY then
+    return ns.BarGroupAlign.GetIconInsetY(group)
+  end
+  return 0
+end
+
 -- ===================================================================
 -- DEBUG LOGGING
 -- ===================================================================
@@ -1005,7 +1035,22 @@ end
 -- ===================================================================
 -- SAVE/RESTORE BAR CONFIGURATION
 -- ===================================================================
+-- Version counter: increments when bar settings change.
+-- UpdateCooldownBar/UpdateChargeBar cache cfg on barData and skip GetBarConfig
+-- when their cached version matches — avoids a DB lookup every 0.1s tick.
+local barConfigVersion = 1
+
+function ns.CooldownBars.BumpConfigVersion()
+  barConfigVersion = barConfigVersion + 1
+end
+
+function ns.CooldownBars.GetConfigVersion()
+  return barConfigVersion
+end
+
 function ns.CooldownBars.SaveBarConfig()
+  -- Bump version so per-bar caches are invalidated on next tick
+  barConfigVersion = barConfigVersion + 1
   -- Skip save if we're in the middle of restoring (prevents mid-restore overwrites)
   if isRestoring then
     return
@@ -1957,6 +2002,31 @@ local function CreateChargeBar(index)
   local slotsContainer = CreateFrame("Frame", nil, frame)
   slotsContainer:SetPoint("LEFT", icon, "RIGHT", 4, 0)
   slotsContainer:SetSize(180, 14)  -- Default slots area size
+
+  -- Invisible tracker bar — spans full slots width, SetValue(secretCurrentCharges).
+  -- Its fill right-edge lands at the boundary between the last full charge and the
+  -- actively recharging slot.
+  local chargeTrackerBar = CreateFrame("StatusBar", nil, slotsContainer)
+  chargeTrackerBar:SetPoint("TOPLEFT", slotsContainer, "TOPLEFT", 0, 0)
+  chargeTrackerBar:SetSize(180, 14)  -- Resized in CreateChargeSlots to totalSize + spacing
+  chargeTrackerBar:SetStatusBarTexture("Interface\\TargetingFrame\\UI-StatusBar")
+  chargeTrackerBar:SetStatusBarColor(1, 1, 1, 1)
+  chargeTrackerBar:SetAlpha(0)
+  local chargeTrackerTex = chargeTrackerBar:GetStatusBarTexture()
+  chargeTrackerTex:SetSnapToPixelGrid(false)
+  chargeTrackerTex:SetTexelSnappingBias(0)
+
+  -- refreshBar anchored LEFT to chargeTrackerTex RIGHT — auto-follows as tracker fills.
+  -- One slot wide (sized in CreateChargeSlots). Duration text lives inside it.
+  local refreshBar = CreateFrame("Frame", nil, slotsContainer)
+  refreshBar:SetPoint("LEFT", chargeTrackerTex, "RIGHT", 0, 0)
+  refreshBar:SetSize(40, 14)
+  local dynamicTimerText = refreshBar:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+  dynamicTimerText:SetPoint("CENTER", refreshBar, "CENTER", 0, 0)
+  dynamicTimerText:SetJustifyH("CENTER")
+  dynamicTimerText:SetTextColor(1, 1, 0.5, 1)
+  dynamicTimerText:SetShadowOffset(1, -1)
+  refreshBar:Hide()
   
   -- Name text container (allows independent frame level)
   local nameTextContainer = CreateFrame("Frame", nil, frame)
@@ -2023,6 +2093,10 @@ local function CreateChargeBar(index)
   local barData = {
     frame = frame,
     slotsContainer = slotsContainer,
+    chargeTrackerBar = chargeTrackerBar,
+    chargeTrackerTex = chargeTrackerTex,
+    refreshBar = refreshBar,
+    dynamicTimerText = dynamicTimerText,
     icon = icon,
     iconBorder = iconBorder,
     barBorderFrame = barBorderFrame,
@@ -2319,7 +2393,7 @@ local function CreateChargeSlots(barData, maxCharges, slotsTotalWidth, slotHeigh
     for i = 1, maxCharges do
       local yOffset = (i - 1) * (barLength + spacing)
       -- Each slot is narrow and tall, positioned from bottom
-      local slot = CreateChargeSlot(container, i, barThickness, barLength + 2, yOffset, true, displayCfg)
+      local slot = CreateChargeSlot(container, i, barThickness, barLength, yOffset, true, displayCfg)
       barData.chargeSlots[i] = slot
     end
   else
@@ -2336,6 +2410,36 @@ local function CreateChargeSlots(barData, maxCharges, slotsTotalWidth, slotHeigh
   
   -- Store orientation for later use
   barData.isVertical = isVertical
+
+  -- Tracker width = totalSize + spacing so each charge unit = barLength + spacing exactly.
+  -- This ensures the fill right-edge lands at the inter-slot boundary for every charge count,
+  -- regardless of spacing. refreshBar width = barLength (one slot) so its CENTER = slot center.
+  -- Math: tracker advances (barLength+spacing) per charge. refreshBar center offset = barLength/2.
+  -- → CENTER of refreshBar = currentCharges*(barLength+spacing) + barLength/2 = center of recharging slot ✓
+  if barData.chargeTrackerBar then
+    local trackerSize = totalSize + spacing  -- one extra spacing unit for correct per-slot alignment
+    barData.chargeTrackerBar:SetMinMaxValues(0, maxCharges)
+    barData.chargeTrackerBar:SetValue(0)
+    barData.chargeTrackerBar:SetOrientation(isVertical and "VERTICAL" or "HORIZONTAL")
+    if isVertical then
+      -- Vertical: tracker fills BOTTOM→TOP, anchor to BOTTOMLEFT so fill grows upward.
+      -- refreshBar sits ABOVE the fill top edge → anchor BOTTOM to TOP of tracker texture.
+      barData.chargeTrackerBar:SetSize(barThickness, trackerSize)
+      barData.chargeTrackerBar:ClearAllPoints()
+      barData.chargeTrackerBar:SetPoint("BOTTOMLEFT", barData.slotsContainer, "BOTTOMLEFT", 0, 0)
+      barData.refreshBar:SetSize(barThickness, barLength)
+      barData.refreshBar:ClearAllPoints()
+      barData.refreshBar:SetPoint("BOTTOM", barData.chargeTrackerTex, "TOP", 0, 0)
+    else
+      -- Horizontal: tracker fills LEFT→RIGHT, anchor TOPLEFT. refreshBar sits RIGHT of fill.
+      barData.chargeTrackerBar:SetSize(trackerSize, barThickness)
+      barData.chargeTrackerBar:ClearAllPoints()
+      barData.chargeTrackerBar:SetPoint("TOPLEFT", barData.slotsContainer, "TOPLEFT", 0, 0)
+      barData.refreshBar:SetSize(barLength, barThickness)
+      barData.refreshBar:ClearAllPoints()
+      barData.refreshBar:SetPoint("LEFT", barData.chargeTrackerTex, "RIGHT", 0, 0)
+    end
+  end
 end
 
 
@@ -2486,9 +2590,23 @@ UpdateCooldownBar = function(barData)
     return  -- Bar stays in activeCooldowns, will show again when spell becomes available
   end
   
-  -- Get config
+  -- Get config — cached on barData, only re-fetched when settings version changes
   local barTypeKey = GetBarTypeKey("cooldown", barData.instance or 1)
-  local cfg = ns.CooldownBars.GetBarConfig and ns.CooldownBars.GetBarConfig(spellID, barTypeKey)
+  if barData._cfgVersion ~= barConfigVersion then
+    barData._cfg = ns.CooldownBars.GetBarConfig and ns.CooldownBars.GetBarConfig(spellID, barTypeKey)
+    barData._cfgVersion = barConfigVersion
+  end
+  local cfg = barData._cfg
+
+  -- Hard disable: Show toggle off = hide when panel closed; still previews when panel is open
+  if cfg and cfg.tracking and cfg.tracking.enabled == false and not IsOptionsPanelOpen() then
+    barData.frame:Hide()
+    if barData.durationTextFrame then barData.durationTextFrame:Hide(); barData.durationTextFrame:EnableMouse(false) end
+    if barData.readyTextFrame then barData.readyTextFrame:Hide(); barData.readyTextFrame:EnableMouse(false) end
+    if barData.bar then barData.bar:SetScript("OnUpdate", nil) end
+    return
+  end
+
   local hideWhenReady = cfg and cfg.behavior and cfg.behavior.hideWhenReady
   local hideWhen = cfg and GetHideWhen(cfg)
   
@@ -2843,8 +2961,20 @@ UpdateChargeBar = function(barData)
   
   -- Get exact charge count
   
-  -- Check hide behavior config
-  local cfg = ns.CooldownBars.GetBarConfig and ns.CooldownBars.GetBarConfig(spellID, GetBarTypeKey("charge", barData.instance or 1))
+  -- Check hide behavior config — cached on barData, only re-fetched when settings version changes
+  if barData._chargeCfgVersion ~= barConfigVersion then
+    barData._chargeCfg = ns.CooldownBars.GetBarConfig and ns.CooldownBars.GetBarConfig(spellID, GetBarTypeKey("charge", barData.instance or 1))
+    barData._chargeCfgVersion = barConfigVersion
+  end
+  local cfg = barData._chargeCfg
+
+  -- Hard disable: Show toggle off = hide when panel closed; still previews when panel is open
+  if cfg and cfg.tracking and cfg.tracking.enabled == false and not IsOptionsPanelOpen() then
+    barData.frame:Hide()
+    if barData.chargeTrackerBar then barData.chargeTrackerBar:SetScript("OnUpdate", nil) end
+    return
+  end
+
   local hideWhen = cfg and GetHideWhen(cfg)
   
   -- Determine visibility
@@ -2941,6 +3071,11 @@ UpdateChargeBar = function(barData)
     end
   end
   
+  -- Feed tracker — must happen before text logic so refreshBar is positioned correctly
+  if barData.chargeTrackerBar then
+    barData.chargeTrackerBar:SetValue(secretCurrentCharges)
+  end
+
   -- Update display text (both normal and FREE mode if exists)
   barData.currentText:SetText(secretCurrentCharges)
   if barData.stackCurrentText then
@@ -2971,63 +3106,74 @@ UpdateChargeBar = function(barData)
       end)
       textVal = ok and result or remaining
 
-      -- Set text on all slots — cascade hides inactive slots so only the recharging one shows
-      if dynamicTextOnSlot and barData.chargeSlots then
-        for _, slot in ipairs(barData.chargeSlots) do
-          if slot.timerText then slot.timerText:SetText(textVal) end
-        end
+      if dynamicTextOnSlot and barData.refreshBar then
+        -- Dynamic mode: text lives in refreshBar which auto-follows chargeTrackerTex RIGHT edge
+        barData.dynamicTimerText:SetText(textVal)
+        barData.refreshBar:Show()
+        -- Suppress normal timer text
         barData.timerText:SetText("")
         if barData.freeTimerText then barData.freeTimerText:SetText("") end
+        if barData.timerTextContainer then barData.timerTextContainer:Hide() end
+        if barData.timerTextFrame then barData.timerTextFrame:Hide() end
       else
         barData.timerText:SetText(textVal)
         if barData.freeTimerText then barData.freeTimerText:SetText(textVal) end
+        if barData.timerText then barData.timerText:Show() end
+        if barData.timerTextContainer then barData.timerTextContainer:Show() end
+        if barData.timerTextFrame then barData.timerTextFrame:Show() end
       end
-      if barData.timerText then barData.timerText:Show() end
-      if barData.timerTextContainer then barData.timerTextContainer:Show() end
-      if barData.timerTextFrame then barData.timerTextFrame:Show() end
     else
-      -- Not recharging — clear per-slot timer texts
+      -- Not recharging — hide dynamic refreshBar
+      if barData.refreshBar then
+        barData.refreshBar:Hide()
+        if barData.dynamicTimerText then barData.dynamicTimerText:SetText("") end
+      end
+      -- Clear per-slot timer texts
       if barData.chargeSlots then
         for _, slot in ipairs(barData.chargeSlots) do
           if slot.timerText then slot.timerText:SetText("") end
         end
       end
       if barData.showZeroWhenReady then
-        -- Show "0" when ready
-        barData.timerText:SetText("0")
-        if barData.freeTimerText then
-          barData.freeTimerText:SetText("0")
+        if dynamicTextOnSlot and barData.refreshBar then
+          -- Dynamic mode: show "0" on last slot via refreshBar
+          -- Position tracker at max so refreshBar sits on last slot
+          barData.chargeTrackerBar:SetValue(maxCharges - 1)
+          barData.dynamicTimerText:SetText("0")
+          barData.refreshBar:Show()
+          barData.timerText:SetText("")
+          if barData.timerTextContainer then barData.timerTextContainer:Hide() end
+        else
+          barData.timerText:SetText("0")
+          if barData.freeTimerText then barData.freeTimerText:SetText("0") end
+          if barData.timerText then barData.timerText:Show() end
+          if barData.timerTextContainer then barData.timerTextContainer:Show() end
+          if barData.timerTextFrame and barData.useFreeTimerText then barData.timerTextFrame:Show() end
         end
-        if dynamicTextOnSlot and barData.chargeSlots and #barData.chargeSlots > 0 then
-          local lastSlot = barData.chargeSlots[#barData.chargeSlots]
-          if barData.timerText then
-            barData.timerText:ClearAllPoints()
-            barData.timerText:SetPoint("CENTER", lastSlot.rechargeBar, "CENTER", 0, 0)
-          end
-          if barData.freeTimerText then
-            barData.freeTimerText:ClearAllPoints()
-            barData.freeTimerText:SetPoint("CENTER", lastSlot.rechargeBar, "CENTER", 0, 0)
-          end
-        end
-        if barData.timerText then barData.timerText:Show() end
-        if barData.timerTextContainer then barData.timerTextContainer:Show() end
-        if barData.timerTextFrame and barData.useFreeTimerText then barData.timerTextFrame:Show() end
       else
-        -- Clear/hide timer
+        -- Not recharging, no zero — hide everything
         barData.timerText:SetText("")
         if barData.freeTimerText then barData.freeTimerText:SetText("") end
-        if dynamicTextOnSlot then
-          if barData.timerText then barData.timerText:Hide() end
-          if barData.timerTextContainer then barData.timerTextContainer:Hide() end
-          if barData.timerTextFrame then barData.timerTextFrame:Hide() end
+        if barData.timerText then barData.timerText:Hide() end
+        if barData.timerTextContainer then barData.timerTextContainer:Hide() end
+        if barData.timerTextFrame then barData.timerTextFrame:Hide() end
+        -- Preview: options panel open → show "0" on last slot as preview
+        if IsOptionsPanelOpen() and dynamicTextOnSlot and barData.refreshBar then
+          barData.chargeTrackerBar:SetValue(maxCharges - 1)
+          barData.dynamicTimerText:SetText("0")
+          barData.refreshBar:Show()
         end
       end
     end  -- end if cachedChargeDurObj and isRecharging
   else
-    -- showDuration disabled — hide all timer text including per-slot
+    -- showDuration disabled — hide all timer text including per-slot and refreshBar
     if barData.timerText then barData.timerText:SetText("") barData.timerText:Hide() end
     if barData.timerTextContainer then barData.timerTextContainer:Hide() end
     if barData.timerTextFrame then barData.timerTextFrame:Hide() end
+    if barData.refreshBar then
+      barData.refreshBar:Hide()
+      if barData.dynamicTimerText then barData.dynamicTimerText:SetText("") end
+    end
     if barData.chargeSlots then
       for _, slot in ipairs(barData.chargeSlots) do
         if slot.timerText then slot.timerText:SetText("") slot.timerText:SetAlpha(0) end
@@ -3254,6 +3400,13 @@ local function UpdateResourceBar(barData)
   
   -- Check hide conditions
   local cfg = ns.CooldownBars.GetBarConfig and ns.CooldownBars.GetBarConfig(barData.spellID, "resource")
+
+  -- Hard disable: Show toggle off = hide when panel closed; still previews when panel is open
+  if cfg and cfg.tracking and cfg.tracking.enabled == false and not IsOptionsPanelOpen() then
+    barData.frame:Hide()
+    return
+  end
+
   local hideWhen = cfg and GetHideWhen(cfg)
   local hideWhenFadeAlpha = 1.0
   if EvaluateHideConditions(hideWhen, cfg and cfg.behavior and cfg.behavior.hideLogic) then
@@ -3384,12 +3537,17 @@ function ns.CooldownBars.RemoveCooldownBar(spellID, instance)
   
   ns.CooldownBars.activeCooldowns[barID] = nil
   
-  -- Disable in cooldownBarConfigs so import/export no longer lists it
+  -- Wipe settings entirely so a new bar starts fresh with defaults
   local barTypeKey = GetBarTypeKey("cooldown", instance)
   if ns.db and ns.db.char and ns.db.char.cooldownBarConfigs
-     and ns.db.char.cooldownBarConfigs[spellID]
-     and ns.db.char.cooldownBarConfigs[spellID][barTypeKey] then
-    ns.db.char.cooldownBarConfigs[spellID][barTypeKey].tracking.enabled = false
+     and ns.db.char.cooldownBarConfigs[spellID] then
+    ns.db.char.cooldownBarConfigs[spellID][barTypeKey] = nil
+    -- Clean up the spell entry if it's now empty
+    local hasAny = false
+    for _ in pairs(ns.db.char.cooldownBarConfigs[spellID]) do hasAny = true; break end
+    if not hasAny then
+      ns.db.char.cooldownBarConfigs[spellID] = nil
+    end
   end
   
   -- Save immediately to persist removal across character switches
@@ -3517,12 +3675,17 @@ function ns.CooldownBars.RemoveChargeBar(spellID, instance)
   
   ns.CooldownBars.activeCharges[barID] = nil
   
-  -- Disable in cooldownBarConfigs so import/export no longer lists it
+  -- Wipe settings entirely so a new bar starts fresh with defaults
   local barTypeKey = GetBarTypeKey("charge", instance)
   if ns.db and ns.db.char and ns.db.char.cooldownBarConfigs
-     and ns.db.char.cooldownBarConfigs[spellID]
-     and ns.db.char.cooldownBarConfigs[spellID][barTypeKey] then
-    ns.db.char.cooldownBarConfigs[spellID][barTypeKey].tracking.enabled = false
+     and ns.db.char.cooldownBarConfigs[spellID] then
+    ns.db.char.cooldownBarConfigs[spellID][barTypeKey] = nil
+    -- Clean up the spell entry if it's now empty
+    local hasAny = false
+    for _ in pairs(ns.db.char.cooldownBarConfigs[spellID]) do hasAny = true; break end
+    if not hasAny then
+      ns.db.char.cooldownBarConfigs[spellID] = nil
+    end
   end
   
   -- Save immediately to persist removal across character switches
@@ -3702,6 +3865,8 @@ local DISPLAY_DEFAULTS = {
   
   -- Dynamic Text Positioning (Charge Bars Only)
   dynamicTextOnSlot = false,                                   -- Show text centered on recharging slot
+  dynamicTextOffsetX = 0,                                      -- Fine-tune X offset for dynamic timer text
+  dynamicTextOffsetY = 0,                                      -- Fine-tune Y offset for dynamic timer text
   
   -- Background
   showBackground = true,
@@ -4769,6 +4934,12 @@ function ns.CooldownBars.ApplyAppearance(spellID, barType)
     -- Get strata settings for duration text
     local durationStrata = display.durationTextStrata or display.barFrameStrata or "HIGH"
     local durationLevel = display.durationTextLevel or (display.barFrameLevel or 10) + 25
+
+    -- Apply strata/level to refreshBar so dynamicTimerText renders above bar content
+    if barData.refreshBar then
+      barData.refreshBar:SetFrameStrata(durationStrata)
+      barData.refreshBar:SetFrameLevel(durationLevel)
+    end
     
     if barData.timerText then
       -- Only position and show timer text if showDuration is enabled
@@ -4962,7 +5133,11 @@ function ns.CooldownBars.ApplyAppearance(spellID, barType)
       local barWidth, barHeight
       if display.matchGroupWidth then
         local matchDimension
-        if display.matchSlotsOnly and group._slotAreaW then
+        -- Charge bars: always use _slotArea dimensions so each slot aligns with an icon.
+        -- Using container dimensions (which include rawBase padding) makes the bar too tall/wide.
+        -- Non-charge bars: respect matchSlotsOnly toggle.
+        local forceSlots = (barType == "charge") and group._slotAreaW
+        if (display.matchSlotsOnly or forceSlots) and group._slotAreaW then
           matchDimension = isSideAnchor and (group._slotAreaHRaw or group._slotAreaH) or (group._slotAreaWRaw or group._slotAreaW)
         else
           local cW, cH = container:GetWidth(), container:GetHeight()
@@ -4970,7 +5145,7 @@ function ns.CooldownBars.ApplyAppearance(spellID, barType)
         end
         if matchDimension and matchDimension > 0 then
           local sizeAdjust = display.matchWidthAdjust or 0
-          barWidth = PixelSnap(matchDimension + sizeAdjust, effScale)
+          barWidth = SnapToGroupPx(matchDimension + sizeAdjust)
           if barType == "charge" then
             barHeight = (display.frameHeight or 38) * scale
           else
@@ -4984,29 +5159,39 @@ function ns.CooldownBars.ApplyAppearance(spellID, barType)
         end
       end
 
-      -- Anchor: matchSlotsOnly TOP/BOTTOM uses container TOP/BOTTOM (center x)
-      -- so slots center aligns with icon row center via single-step rounding.
-      -- TOPLEFT chain causes up to 342/1001 position mismatches at default padding.
-      -- Charge bars: slotsContainer sits at frame CENTER (0,0), so frame must be
-      -- centered over the slot area — same -barWidth/2 offset applies correctly.
-      local matchSlots = display.matchGroupWidth and display.matchSlotsOnly and barWidth
+      -- Anchor: when matchGroupWidth is on, align bar to the icon area using
+      -- GetActualIconInset (X) and GetActualIconInsetY (Y) so slots land exactly
+      -- over the icon row/column. slotsContainer is at frame CENTER, so anchoring
+      -- frame BOTTOMLEFT at alignInset correctly centers slots over the icon area.
+      -- Non-matched bars fall back to simple container edge anchors.
+      local useInsetAnchor = display.matchGroupWidth and barWidth
+      local alignInset  = useInsetAnchor and GetActualIconInset(group) or 0
+      local alignInsetY = useInsetAnchor and GetActualIconInsetY(group) or 0
       frame:ClearAllPoints()
       if anchorPoint == "TOP" then
-        if matchSlots then
-          frame:SetPoint("BOTTOMLEFT", container, "TOP", -barWidth/2 + offsetX, offsetY)
+        if useInsetAnchor then
+          frame:SetPoint("BOTTOMLEFT", container, "TOPLEFT", alignInset + offsetX, offsetY)
         else
           frame:SetPoint("BOTTOMLEFT", container, "TOPLEFT", offsetX, offsetY)
         end
       elseif anchorPoint == "BOTTOM" then
-        if matchSlots then
-          frame:SetPoint("TOPLEFT", container, "BOTTOM", -barWidth/2 + offsetX, offsetY)
+        if useInsetAnchor then
+          frame:SetPoint("TOPLEFT", container, "BOTTOMLEFT", alignInset + offsetX, offsetY)
         else
           frame:SetPoint("TOPLEFT", container, "BOTTOMLEFT", offsetX, offsetY)
         end
       elseif anchorPoint == "LEFT" then
-        frame:SetPoint("RIGHT", container, "LEFT", offsetX, offsetY)
+        if useInsetAnchor then
+          frame:SetPoint("TOPRIGHT", container, "TOPLEFT", offsetX, -(alignInsetY + offsetY))
+        else
+          frame:SetPoint("RIGHT", container, "LEFT", offsetX, offsetY)
+        end
       elseif anchorPoint == "RIGHT" then
-        frame:SetPoint("LEFT", container, "RIGHT", offsetX, offsetY)
+        if useInsetAnchor then
+          frame:SetPoint("TOPLEFT", container, "TOPRIGHT", offsetX, -(alignInsetY + offsetY))
+        else
+          frame:SetPoint("LEFT", container, "RIGHT", offsetX, offsetY)
+        end
       end
 
       if display.matchGroupWidth then
@@ -5714,6 +5899,20 @@ function ns.CooldownBars.ApplyAppearance(spellID, barType)
         end)
         barData.timerText:SetTextColor(durColor.r, durColor.g, durColor.b, durColor.a or 1)
         ApplyTextShadow(barData.timerText, display.durationShadow)
+
+        -- Style dynamic tracker text (dynamicTextOnSlot mode)
+        if barData.dynamicTimerText then
+          pcall(function()
+            barData.dynamicTimerText:SetFont(fontPath, display.durationFontSize or 14, outlineFlag)
+          end)
+          barData.dynamicTimerText:SetTextColor(durColor.r, durColor.g, durColor.b, durColor.a or 1)
+          ApplyTextShadow(barData.dynamicTimerText, display.durationShadow)
+          -- Apply offset inside refreshBar
+          local offsetX = display.dynamicTextOffsetX or 0
+          local offsetY = display.dynamicTextOffsetY or 0
+          barData.dynamicTimerText:ClearAllPoints()
+          barData.dynamicTimerText:SetPoint("CENTER", barData.refreshBar, "CENTER", offsetX, offsetY)
+        end
 
         -- Style per-slot timerText (dynamic text on slot mode)
         if barData.chargeSlots then
@@ -7245,8 +7444,8 @@ UpdateTimerBar = function(barData)
   local cfg = ns.CooldownBars.GetTimerConfig(timerID)
   if not cfg then return end
   
-  -- ZERO CPU when disabled: hide bar, kill scripts, bail out
-  if not cfg.tracking.enabled then
+  -- Hard disable: Show toggle off = hide when panel closed; still previews when panel is open
+  if not cfg.tracking.enabled and not IsOptionsPanelOpen() then
     barData.frame:Hide()
     barData.bar:SetScript("OnUpdate", nil)
     if barData.nameTextFrame then barData.nameTextFrame:Hide() end
@@ -8805,8 +9004,14 @@ end)
 -- state changes, all bars re-evaluate their hide conditions instantly.
 -- ===================================================================
 
-function ns.CooldownBars.RefreshAllBarVisibility()
-  -- Cooldown (duration) bars
+do
+  local _lastCBRefresh = 0
+  function ns.CooldownBars.RefreshAllBarVisibility()
+    -- Throttle: don't run on every spell cast, 4/s is enough for visibility changes
+    local now = GetTime()
+    if now - _lastCBRefresh < 0.25 then return end
+    _lastCBRefresh = now
+    -- Cooldown (duration) bars
   for barID, barIndex in pairs(ns.CooldownBars.activeCooldowns or {}) do
     local barData = ns.CooldownBars.bars and ns.CooldownBars.bars[barIndex]
     if barData then
@@ -8834,6 +9039,7 @@ function ns.CooldownBars.RefreshAllBarVisibility()
     if barData then
       UpdateTimerBar(barData)
     end
+  end
   end
 end
 
@@ -9098,9 +9304,10 @@ local function OnContainerSizeChangedForCooldownBars(container, width, height)
               local effScale = container:GetEffectiveScale()
 
               -- matchSlotsOnly: _slotAreaW is plain WoW units — no _pmult needed.
-              -- matchGroupWidth (full container): always use container dimensions.
+              -- Charge bars: always use _slotArea so slots align per icon (not container+padding).
               local matchDimension
-              if cfg.display.matchSlotsOnly and group and group._slotAreaW then
+              local forceSlots = (barInfo.type == "charge") and group and group._slotAreaW
+              if (cfg.display.matchSlotsOnly or forceSlots) and group and group._slotAreaW then
                 matchDimension = isSideAnchor and (group._slotAreaHRaw or group._slotAreaH) or (group._slotAreaWRaw or group._slotAreaW)
               else
                 local cW, cH = container:GetWidth(), container:GetHeight()
@@ -9108,7 +9315,7 @@ local function OnContainerSizeChangedForCooldownBars(container, width, height)
               end
 
               local sizeAdjust = cfg.display.matchWidthAdjust or 0
-              local barWidth = PixelSnap(matchDimension + sizeAdjust, effScale)
+              local barWidth = SnapToGroupPx(matchDimension + sizeAdjust)
               local barHeight
 
               if barInfo.type == "charge" then
@@ -9124,29 +9331,37 @@ local function OnContainerSizeChangedForCooldownBars(container, width, height)
                 frame:SetSize(barWidth, barHeight)
               end
 
-              -- Re-anchor frame so center-x stays correct with new barWidth.
-              -- SetSize alone is not enough: the anchor offset (-barWidth/2) was
-              -- baked at ApplyAppearance time and must be refreshed here.
+              -- Re-anchor frame using GetActualIconInset so slots align with icon area.
               local offsetX = cfg.display.anchorOffsetX or 0
               local offsetY = cfg.display.anchorOffsetY or 0
-              local matchSlots = cfg.display.matchSlotsOnly and barWidth and barInfo.type ~= "charge"
+              local useInsetAnchor = barWidth ~= nil
+              local alignInset  = useInsetAnchor and GetActualIconInset(group) or 0
+              local alignInsetY = useInsetAnchor and GetActualIconInsetY(group) or 0
               frame:ClearAllPoints()
               if anchorPoint == "TOP" then
-                if matchSlots then
-                  frame:SetPoint("BOTTOMLEFT", container, "TOP", -barWidth/2 + offsetX, offsetY)
+                if useInsetAnchor then
+                  frame:SetPoint("BOTTOMLEFT", container, "TOPLEFT", alignInset + offsetX, offsetY)
                 else
                   frame:SetPoint("BOTTOMLEFT", container, "TOPLEFT", offsetX, offsetY)
                 end
               elseif anchorPoint == "BOTTOM" then
-                if matchSlots then
-                  frame:SetPoint("TOPLEFT", container, "BOTTOM", -barWidth/2 + offsetX, offsetY)
+                if useInsetAnchor then
+                  frame:SetPoint("TOPLEFT", container, "BOTTOMLEFT", alignInset + offsetX, offsetY)
                 else
                   frame:SetPoint("TOPLEFT", container, "BOTTOMLEFT", offsetX, offsetY)
                 end
               elseif anchorPoint == "LEFT" then
-                frame:SetPoint("RIGHT", container, "LEFT", offsetX, offsetY)
+                if useInsetAnchor then
+                  frame:SetPoint("TOPRIGHT", container, "TOPLEFT", offsetX, -(alignInsetY + offsetY))
+                else
+                  frame:SetPoint("RIGHT", container, "LEFT", offsetX, offsetY)
+                end
               elseif anchorPoint == "RIGHT" then
-                frame:SetPoint("LEFT", container, "RIGHT", offsetX, offsetY)
+                if useInsetAnchor then
+                  frame:SetPoint("TOPLEFT", container, "TOPRIGHT", offsetX, -(alignInsetY + offsetY))
+                else
+                  frame:SetPoint("LEFT", container, "RIGHT", offsetX, offsetY)
+                end
               end
               
               -- For charge bars: also resize the slots container and recreate slots

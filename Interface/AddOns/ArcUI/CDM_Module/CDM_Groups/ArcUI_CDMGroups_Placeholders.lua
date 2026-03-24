@@ -2245,7 +2245,7 @@ PushFramesFromSlot = function(group, row, col, claimingCdID)
             -- CRITICAL: Return frame to CDM before clearing reference
             if memberAtSlot.frame then
                 if ns.CDMGroups.ReturnFrameToCDM then
-                    pcall(ns.CDMGroups.ReturnFrameToCDM, memberAtSlot.frame, memberAtSlot.entry)
+                    ns.CDMGroups.ReturnFrameToCDM(memberAtSlot.frame, memberAtSlot.entry)
                 end
             end
             
@@ -2430,8 +2430,8 @@ local function DisplaceForReturningIcon(group, row, col, returningCdID)
     end
     
     -- Check if occupant has a valid frame
-    local hasValidFrame = occupantMember.frame and 
-        pcall(function() return occupantMember.frame.cooldownID end) and
+    local hasValidFrame = occupantMember.frame and
+        occupantMember.frame.cooldownID ~= nil and
         occupantMember.frame.cooldownID == gridOccupant
     
     if not hasValidFrame then
@@ -2490,7 +2490,7 @@ local function DisplaceForReturningIcon(group, row, col, returningCdID)
                 -- Return frame to CDM before clearing reference
                 if occupantMember.frame then
                     if ns.CDMGroups.ReturnFrameToCDM then
-                        pcall(ns.CDMGroups.ReturnFrameToCDM, occupantMember.frame, occupantMember.entry)
+                        ns.CDMGroups.ReturnFrameToCDM(occupantMember.frame, occupantMember.entry)
                     end
                 end
                 

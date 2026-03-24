@@ -5,7 +5,7 @@ local Settings_Preload = env.modules:New("@\\Settings\\Preload")
 
 local ATLAS_TAB_BUTTON = UIKit.Define.Texture_Atlas{ path = Path.Root .. "\\Art\\Settings\\TabButton", inset = 16 }
 local ATLAS_CONTAINER = UIKit.Define.Texture_Atlas{ path = Path.Root .. "\\Art\\Settings\\Widget-Container", inset = 18, sliceMode = Enum.UITextureSliceMode.Stretched }
-Settings_Preload.UIDef = {
+Settings_Preload.UIDEF = {
     UITabButton                     = UIKit.UI.TEXTURE_NIL,
     UITabButton_Highlighted         = ATLAS_TAB_BUTTON{ left = 0 / 256, top = 0 / 128, right = 64 / 256, bottom = 64 / 128, scale = 0.6 },
     UITabButton_Pushed              = ATLAS_TAB_BUTTON{ left = 64 / 256, top = 0 / 128, right = 128 / 256, bottom = 64 / 128, scale = 0.6 },

@@ -503,6 +503,7 @@ local function ScanCDMViewers()
     Debug("ScanCDMViewers: Found", CountTable(cdmState), "cooldownIDs")
     return cdmState
 end
+ScanCDMViewers = (Track and Track("FC.ScanCDMViewers", ScanCDMViewers)) or ScanCDMViewers
 
 -- Helper to count table entries
 CountTable = function(t)
@@ -798,6 +799,7 @@ local function AssignFrameToGroup(cdID, frame, groupName, row, col, viewerType, 
     Debug("AssignFrameToGroup:", cdID, "->", groupName, "[" .. (row or 0) .. "," .. (col or 0) .. "]")
     return true
 end
+AssignFrameToGroup = (Track and Track("FC.AssignFrameToGroup", AssignFrameToGroup)) or AssignFrameToGroup
 
 local function AssignFrameToFree(cdID, frame, x, y, iconSize, viewerType, viewerName)
     ns.CDMGroups.freeIcons = ns.CDMGroups.freeIcons or {}
@@ -1095,6 +1097,7 @@ local function AssignFrameToOwner(cdID, cdmData)
     Debug("AssignFrameToOwner: No default group for cdID", cdID, "- creating as free icon at", freeX, freeY)
     return AssignFrameToFree(cdID, frame, freeX, freeY, iconSize, viewerType, viewerName)
 end
+AssignFrameToOwner = (Track and Track("FC.AssignFrameToOwner", AssignFrameToOwner)) or AssignFrameToOwner
 
 -- ═══════════════════════════════════════════════════════════════════════════
 -- CORE: RECONCILE
@@ -2385,6 +2388,14 @@ local function Reconcile()
                 TimelineAdd("ACTION", "FORCE_REFRESH_VISUALS", "Recalculating alpha/desat/glow after followup sweep")
                 ns.CDMEnhance.ForceRefreshAllVisualStates()
             end
+
+            -- Arc Aura spell frames have the same problem as CDM aura frames above:
+            -- ready-state alpha/desat doesn't apply after spec change until the options
+            -- panel is opened. RefreshAllSpellVisuals clears the state guards and re-applies.
+            if ns.ArcAurasCooldown and ns.ArcAurasCooldown.RefreshAllSpellVisuals then
+                TimelineAdd("ACTION", "ARC_SPELL_REFRESH_VISUALS", "Recalculating arc spell alpha/desat/glow after followup sweep")
+                ns.ArcAurasCooldown.RefreshAllSpellVisuals()
+            end
             
             -- ═══════════════════════════════════════════════════════════════════════════
             -- ORPHAN CLEANUP: Hide CDM viewer children that have no cooldownID.
@@ -2478,10 +2489,44 @@ local function Reconcile()
             if DL and DL.OnReconcileComplete then
                 DL.OnReconcileComplete()
             end
+
+            -- ═══════════════════════════════════════════════════════════════════════════
+            -- ANCHOR RE-APPLY: Sync all proxy rects then reapply group-to-group and
+            -- group-to-frame anchors. Must run AFTER bars are re-anchored and containers
+            -- have their final sizes — SafeAnchorCenter reads GetRect() which returns wrong
+            -- values if called before containers finish resizing.
+            -- Also covers external frames (e.g. ElvUI unit frames) attached to groups:
+            -- DetachAllExternalFrames ran during OnSpecChange but ReapplyAll is the only
+            -- path that re-attaches them to the correct new-spec group.
+            -- ═══════════════════════════════════════════════════════════════════════════
+            if ns.CDMGroupsAnchors then
+                if ns.CDMGroups.SyncAllAnchorProxies then
+                    ns.CDMGroups.SyncAllAnchorProxies()
+                    TimelineAdd("ACTION", "ANCHOR_PROXY_SYNC", "SyncAllAnchorProxies after spec settle")
+                end
+                if ns.CDMGroupsAnchors.ReapplyAll then
+                    ns.CDMGroupsAnchors.ReapplyAll()
+                    TimelineAdd("ACTION", "ANCHOR_REAPPLY", "CDMGroupsAnchors.ReapplyAll after spec settle")
+                end
+            end
             
             -- Refresh keybind overlays after spec/talent change repooling
             if ns.Keybinds and ns.Keybinds.IsEnabled and ns.Keybinds.IsEnabled() then
                 ns.Keybinds.RefreshAll()
+            end
+            
+            -- Aura bars: force full segment re-layout now that containers are fully settled.
+            -- RefreshAllBars at 0.8s runs before CDMGroups reflow completes, leaving bars
+            -- sized against the old container width. InvalidateSpecCache busts the early-exit
+            -- cache so the next UpdateBar recalculates against the final container size.
+            if ns.Display then
+                if ns.Display.InvalidateSpecCache then
+                    ns.Display.InvalidateSpecCache()
+                end
+                if ns.Display.RefreshAllBars then
+                    ns.Display.RefreshAllBars()
+                    TimelineAdd("ACTION", "BAR_REANCHOR_FINAL", "Display bars re-laid out against settled containers")
+                end
             end
         end)
     end
@@ -2490,6 +2535,8 @@ local function Reconcile()
     Debug("RECONCILE COMPLETE - assigned:", assigned, "skipped:", skipped, "time:", string.format("%.2fms", elapsed))
     Debug("═══════════════════════════════════════════════════")
 end
+
+Reconcile = (Track and Track("FC.Reconcile", Reconcile)) or Reconcile
 
 -- ═══════════════════════════════════════════════════════════════════════════
 -- DEBOUNCE SYSTEM
@@ -2548,6 +2595,7 @@ local function OnNotifyListeners()
         ScheduleReconcile(CONFIG.DEBOUNCE_NORMAL)
     end
 end
+OnNotifyListeners = (Track and Track("FC.OnNotifyListeners", OnNotifyListeners)) or OnNotifyListeners
 
 local function OnSpecializationChanged(unit)
     if unit and unit ~= "player" then return end
@@ -2596,6 +2644,25 @@ local function OnSpellsChanged()
     
     DebugEvent("SPELLS_CHANGED")
     ScheduleReconcile(CONFIG.DEBOUNCE_NORMAL)
+end
+
+local function OnPvPTalentUpdate()
+    if not _cdmGroupsEnabled then return end
+
+    -- Skip if already handling a bigger change
+    if state.specChangeDetected then return end
+
+    TimelineAdd("EVENT", "PVP_TALENT_UPDATE", "War Mode / PvP talent change detected")
+    DebugEvent("PLAYER_PVP_TALENT_UPDATE")
+    state.talentChangeDetected = true
+
+    -- Notify DynamicLayout to clear stale visibility state (same as talent change)
+    local DL = ns.CDMGroups.DynamicLayout
+    if DL and DL.OnTalentChangeStart then
+        DL.OnTalentChangeStart()
+    end
+
+    ScheduleReconcile(CONFIG.DEBOUNCE_TALENT)
 end
 
 -- Called when profile or layout is loaded/changed
@@ -2789,7 +2856,28 @@ local function OnArcUIPanelChanged(isOpen)
         if ns.Resources and ns.Resources.RefreshAllBars then
             ns.Resources.RefreshAllBars()
         end
+        -- On panel close: re-drive aura icons so preview opacity (0.35) is cleared.
+        -- Closing the panel clears _arcTargetAlpha cache but never calls OptimizedApplyIconVisuals
+        -- with optionsPanelOpen=false, leaving icons stuck at preview alpha.
+        if not isOpen and ns.CDMEnhance and ns.CDMEnhance.RefreshIconType then
+            ns.CDMEnhance.RefreshIconType("aura")
+        end
     end)
+    
+    -- Second pass after reflow settles — aura bar segments need to recalculate
+    -- their pixel widths against the compact container size, not the open-panel size.
+    if not isOpen then
+        C_Timer.After(0.5, function()
+            if ns.Display then
+                if ns.Display.InvalidateSpecCache then
+                    ns.Display.InvalidateSpecCache()
+                end
+                if ns.Display.RefreshAllBars then
+                    ns.Display.RefreshAllBars()
+                end
+            end
+        end)
+    end
 end
 ns.CDMGroups.OnArcUIPanelChanged = OnArcUIPanelChanged
 
@@ -2800,12 +2888,13 @@ ns.CDMGroups.OnArcUIPanelChanged = OnArcUIPanelChanged
 -- ═══════════════════════════════════════════════════════════════════════════
 
 local VisualMaintainer = CreateFrame("Frame")
+_G.ArcUIVisualMaintainer = VisualMaintainer  -- exposed for profiler frame discovery
 local visualMaintainerElapsed = 0
 local optionsPanelCheckElapsed = 0
 local editButtonUpdateElapsed = 0
 local lastOptionsOpenState = false
 
-VisualMaintainer:SetScript("OnUpdate", function(self, elapsed)
+local _vmOnUpdateFn = function(self, elapsed)
     if not _cdmGroupsEnabled then return end
     
     visualMaintainerElapsed = visualMaintainerElapsed + elapsed
@@ -3139,7 +3228,8 @@ VisualMaintainer:SetScript("OnUpdate", function(self, elapsed)
             end
         end
     end
-end)
+end
+VisualMaintainer:SetScript("OnUpdate", Track and Track("FC.VisualMaintainer.OnUpdate", _vmOnUpdateFn) or _vmOnUpdateFn)
 
 -- ═══════════════════════════════════════════════════════════════════════════
 -- INITIALIZATION
@@ -3317,7 +3407,8 @@ local function Initialize()
     eventFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
     eventFrame:RegisterEvent("COOLDOWN_VIEWER_DATA_LOADED")
     eventFrame:RegisterEvent("COOLDOWN_VIEWER_SPELL_OVERRIDE_UPDATED")
-    
+    eventFrame:RegisterEvent("PLAYER_PVP_TALENT_UPDATE")
+
     eventFrame:SetScript("OnEvent", function(self, event, ...)
         if event == "PLAYER_SPECIALIZATION_CHANGED" then
             OnSpecializationChanged(...)
@@ -3325,10 +3416,21 @@ local function Initialize()
             OnTalentUpdate(...)
         elseif event == "SPELLS_CHANGED" then
             OnSpellsChanged()
+        elseif event == "PLAYER_PVP_TALENT_UPDATE" then
+            OnPvPTalentUpdate()
         elseif event == "PLAYER_ENTERING_WORLD" then
             -- Install CDM hooks after entering world
             C_Timer.After(0.5, InstallCDMHooks)
             C_Timer.After(2.0, InstallCDMHooks)  -- Retry in case CDM loads late
+            -- Arc Auras spell frames: ready-state alpha does not apply on reload
+            -- until the options panel is opened. RefreshAllSpellVisuals clears the
+            -- stale _lastAppliedAlpha/_arcLastSpellState guards and re-applies visuals.
+            -- Deferred past ArcAuras.Initialize (2s) + CDMEnhance settings load.
+            C_Timer.After(3.0, function()
+                if ns.ArcAurasCooldown and ns.ArcAurasCooldown.RefreshAllSpellVisuals then
+                    ns.ArcAurasCooldown.RefreshAllSpellVisuals()
+                end
+            end)
         elseif event == "COOLDOWN_VIEWER_DATA_LOADED" then
             TimelineAdd("CDM", "DATA_LOADED", "CDM finished loading/reassigning cooldown data")
             -- Also schedule a reconcile to catch any changes

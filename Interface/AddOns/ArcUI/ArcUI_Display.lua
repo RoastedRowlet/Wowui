@@ -560,38 +560,6 @@ ns.Display._barFrames = barFrames  -- Expose for debugger
 -- ===================================================================
 local activeAuraPolling = {}  -- [barNumber] = { unit = string, auraID = number, barFrame = frame }
 
-local auraEventFrame = CreateFrame("Frame")
-auraEventFrame:RegisterEvent("UNIT_AURA")
-auraEventFrame:SetScript("OnEvent", function(self, event, unit, updateInfo)
-  -- Quick exit if no bars are polling
-  if not next(activeAuraPolling) then return end
-  
-  -- Check each polling bar to see if its aura is still valid
-  for barNumber, data in pairs(activeAuraPolling) do
-    if data.unit == unit then
-      -- This unit changed, check if our tracked aura still exists
-      local auraData = C_UnitAuras.GetAuraDataByAuraInstanceID(data.unit, data.auraID)
-      if not auraData then
-        -- Aura expired! Stop polling immediately
-        if data.barFrame and data.barFrame.bar then
-          data.barFrame.bar:SetScript("OnUpdate", nil)
-          data.barFrame.bar.colorCurveData = nil
-          data.barFrame.bar.manualMaxData = nil
-        end
-        if data.iconFrame then
-          data.iconFrame:SetScript("OnUpdate", nil)
-          data.iconFrame.durationActive = false
-        end
-        if data.durationFrame then
-          data.durationFrame:SetScript("OnUpdate", nil)
-          data.durationFrame.isActive = false
-        end
-        activeAuraPolling[barNumber] = nil
-      end
-    end
-  end
-end)
-
 -- Helper to register a bar for aura polling tracking
 local function RegisterAuraPolling(barNumber, unit, auraID, barFrame, iconFrame, durationFrame)
   if not unit or not auraID then return end
@@ -705,6 +673,19 @@ end
 -- Invalidate spec cache (call on PLAYER_SPECIALIZATION_CHANGED)
 function ns.Display.InvalidateSpecCache()
   cachedCurrentSpec = nil
+  -- Force full bar re-layout on next UpdateBar — container sizes change after spec reflow
+  for barNumber, frames in pairs(barFrames) do
+    if frames.barFrame then
+      frames.barFrame._lastConfigVersion = -1
+      frames.barFrame._lastActive = nil
+      frames.barFrame._lastOptionsOpen = nil
+    end
+  end
+end
+
+-- Export for Core.lua and other modules
+function ns.Display.GetCachedSpec()
+  return GetCachedSpec()
 end
 
 -- ═══════════════════════════════════════════════════════════════════════════
@@ -1085,7 +1066,7 @@ local function CreateTextFrame(barNumber)
   frame.text = frame:CreateFontString(nil, "OVERLAY")
   frame.text:SetPoint("CENTER")
   frame.text:SetFont("Fonts\\FRIZQT__.TTF", 24, "OUTLINE")
-  frame.text:SetText("0")
+  frame.text:SetText("")
   frame.text:SetTextColor(1, 1, 1, 1)
   frame.text:SetShadowOffset(2, -2)  -- Add shadow like old addon
   frame.text:SetShadowColor(0, 0, 0, 1)
@@ -1141,7 +1122,7 @@ local function CreateDurationFrame(barNumber)
   frame.text = frame:CreateFontString(nil, "OVERLAY")
   frame.text:SetPoint("CENTER")
   frame.text:SetFont("Fonts\\FRIZQT__.TTF", 18, "OUTLINE")
-  frame.text:SetText("0")  -- Default to "0"
+  frame.text:SetText("")  -- Start empty
   frame.text:SetTextColor(1, 1, 1, 1)
   frame.text:SetShadowOffset(2, -2)
   frame.text:SetShadowColor(0, 0, 0, 1)
@@ -1846,7 +1827,10 @@ local function UpdateTickMarks(barFrame, barConfig, maxValue, displayMode)
     local segInset = 0
     if barConfig.display.showBorder and (displayMode == "granular" or displayMode == "perStack") then
       local btRaw = barConfig.display.drawnBorderThickness or 2
-      segInset = PixelUtil.GetNearestPixelSize(btRaw, barFrame:GetEffectiveScale(), btRaw)
+      local _s1 = barFrame:GetEffectiveScale()
+      local _, _h1 = GetPhysicalScreenSize()
+      local _onePx1 = (_h1 and _h1 > 0 and _s1 and _s1 > 0) and (768 / _h1) / _s1 or 1
+      segInset = _onePx1 * btRaw
     end
     local tickTotalSize = isVertical and barFrame:GetHeight() or barFrame:GetWidth()
     local tickInsetSize = tickTotalSize - 2 * segInset
@@ -1858,7 +1842,12 @@ local function UpdateTickMarks(barFrame, barConfig, maxValue, displayMode)
     local barCrossSize   = isVertical and barFrame:GetWidth() or barFrame:GetHeight()
     local borderInset    = 0
     if barConfig.display.showBorder and (displayMode == "granular" or displayMode == "perStack") then
-      borderInset = barConfig.display.drawnBorderThickness or 0
+      local btRawCross = barConfig.display.drawnBorderThickness or 0
+      -- Use same exact-pixel formula as segInset so tick span matches fill area exactly
+      local _sc = barFrame:GetEffectiveScale()
+      local _, _hc = GetPhysicalScreenSize()
+      local _onePxC = (_hc and _hc > 0 and _sc and _sc > 0) and (768 / _hc) / _sc or 1
+      borderInset = _onePxC * btRawCross
     end
     local availCross     = math.max(1, barCrossSize - 2 * borderInset)
 
@@ -1867,7 +1856,9 @@ local function UpdateTickMarks(barFrame, barConfig, maxValue, displayMode)
     for _, tickValue in ipairs(tickPositions) do
       if barFrame.tickMarks and barFrame.tickMarks[tickIndex] then
         local tick = barFrame.tickMarks[tickIndex]
-        local pixelThickness = PixelUtil.GetNearestPixelSize(thickness, scale, thickness)
+        local _, _ht = GetPhysicalScreenSize()
+        local _onePxT = (_ht and _ht > 0 and scale and scale > 0) and (768 / _ht) / scale or 1
+        local pixelThickness = _onePxT * thickness
         local halfThick  = pixelThickness / 2
         local tickSpan   = availCross * (tickHeightPct / 100)
 
@@ -1889,7 +1880,13 @@ local function UpdateTickMarks(barFrame, barConfig, maxValue, displayMode)
         if granularBar then
           rawPos = (isVertical and granularBar:GetHeight() or granularBar:GetWidth())
         elseif displayMode == "perStack" then
-          rawPos = segInset + PixelSnap(tickValue / tickMaxValue * tickInsetSize, scale)
+          -- Match the exact formula used in the perStack segment loop:
+          -- integer pixel boundaries via math_floor (not nearest-round) so ticks
+          -- land on the same physical pixel as the segment edge they mark.
+          local _, _h = GetPhysicalScreenSize()
+          local _pmult = (_h and _h > 0 and scale and scale > 0) and (768 / _h) / scale or 1
+          local _totalPx = math_floor(tickInsetSize / _pmult + 0.5)
+          rawPos = segInset + math_floor(tickValue / tickMaxValue * _totalPx) * _pmult
         else
           rawPos = segInset + tickValue / tickMaxValue * tickInsetSize
         end
@@ -1949,12 +1946,12 @@ ns.Display._UpdateTickMarks = UpdateTickMarks
 -- ===================================================================
 -- UPDATE SPECIFIC BAR
 -- ===================================================================
-function ns.Display.UpdateBar(barNumber, stacks, maxStacks, active, durationFontString, iconTexture)
+function ns.Display.UpdateBar(barNumber, stacks, maxStacks, active, durationFontString, iconTexture, auraName, cachedConfig)
   -- PROFILER: Track where time is spent
   local PM = ns.ProfilerMark
   if PM then PM("GetBarConfig") end
-  
-  local barConfig = ns.API.GetBarConfig(barNumber)
+
+  local barConfig = cachedConfig or ns.API.GetBarConfig(barNumber)
   if not barConfig or not barConfig.tracking or not barConfig.tracking.enabled then
     -- Bar not configured - hide it (but don't create frames!)
     if barFrames[barNumber] then
@@ -2041,9 +2038,35 @@ function ns.Display.UpdateBar(barNumber, stacks, maxStacks, active, durationFont
   end
   if barFrames[barNumber] then barFrames[barNumber]._arcHideWhenAlpha = hideWhenFadeAlpha end
   
-  -- Inactive check
+  -- Inactive check — defer hide by 2 frames to prevent flicker on quick buff refresh
   if shouldShow and not optionsOpen and not active and barConfig.behavior and barConfig.behavior.hideWhenInactive then
+    local frames = barFrames[barNumber]
+    if frames then
+      if not frames._arcHideWhenInactivePending then
+        frames._arcHideWhenInactivePending = true
+        C_Timer.After(0.1, function()  -- ~6 frames at 60fps, covers quick buff refresh window
+          if frames._arcHideWhenInactivePending then
+            frames._arcHideWhenInactivePending = nil
+            -- Only hide if still inactive
+            local state = ns.API and ns.API.GetBarState and ns.API.GetBarState(barNumber)
+            if state and not state.active then
+              SafeHide(frames.barFrame)
+              SafeHide(frames.textFrame)
+              SafeHide(frames.durationFrame)
+              SafeHide(frames.iconFrame)
+              SafeHide(frames.nameFrame)
+              SafeHide(frames.barIconFrame)
+              HideMultiIconFrames(barNumber)
+            end
+          end
+        end)
+      end
+    end
     shouldShow = false
+  else
+    -- Cancel any pending hide if bar became active again
+    local frames = barFrames[barNumber]
+    if frames then frames._arcHideWhenInactivePending = nil end
   end
   
   -- Early exit if bar shouldn't show and options not open
@@ -2639,41 +2662,34 @@ function ns.Display.UpdateBar(barNumber, stacks, maxStacks, active, durationFont
           if not iconFrame.durationOnUpdate then
             iconFrame.durationOnUpdate = function(self, elapsed)
               self.durationElapsed = (self.durationElapsed or 0) + elapsed
-              if self.durationElapsed < 0.03 then return end  -- ~30fps
+              if self.durationElapsed < 0.05 then return end  -- 20fps
               self.durationElapsed = 0
-              
+
               if not self.durationActive or not self.durationSource then return end
-              
+
               -- Get current auraID from source (may have changed due to refresh)
               local currentAuraID, currentUnit = self.durationSource:GetAuraInfo()
               if not currentAuraID or not currentUnit then
                 self.duration:SetText("")
                 return
               end
-              
-              -- Get fresh DurationObject (handles aura refresh automatically)
-              local ok, durObj = pcall(C_UnitAuras.GetAuraDuration, currentUnit, currentAuraID)
-              if ok and durObj then
-                local okRemaining, remaining = pcall(durObj.GetRemainingDuration, durObj)
-                if okRemaining then
-                  self.duration:SetFormattedText(DURATION_FMT[self.storedDecimals] or "%.1f", remaining)
-                else
-                  self.duration:SetText("")
-                end
+
+              -- GetAuraDuration returns nil for gone auras, does not throw — no pcall needed
+              local durObj = C_UnitAuras.GetAuraDuration(currentUnit, currentAuraID)
+              if durObj then
+                -- GetRemainingDuration on valid durObj does not throw — no pcall needed
+                self.duration:SetFormattedText(DURATION_FMT[self.storedDecimals] or "%.1f", durObj:GetRemainingDuration())
               else
                 self.duration:SetText("")
               end
             end
           end
           iconFrame:SetScript("OnUpdate", iconFrame.durationOnUpdate)
-          
-          -- Initial text set
-          local ok, durObj = pcall(C_UnitAuras.GetAuraDuration, unit, auraID)
-          if ok and durObj then
-            local okRemaining, remaining = pcall(durObj.GetRemainingDuration, durObj)
-            if okRemaining then
-              iconFrame.duration:SetFormattedText(DURATION_FMT[decimals] or "%.1f", remaining)
-            end
+
+          -- Initial text set — no pcall, GetAuraDuration returns nil safely
+          local durObj = C_UnitAuras.GetAuraDuration(unit, auraID)
+          if durObj then
+            iconFrame.duration:SetFormattedText(DURATION_FMT[decimals] or "%.1f", durObj:GetRemainingDuration())
           end
         else
           iconFrame.duration:SetText("")
@@ -2783,35 +2799,42 @@ function ns.Display.UpdateBar(barNumber, stacks, maxStacks, active, durationFont
   
   -- Helper: cache thresholdAsPercent for file-level GetThresholdValue calls
   local thresholdAsPercent = barConfig.display.thresholdAsPercent
-  
-  -- Hide stacked bars if they exist
-  if barFrame.stackedBars then
-    for i = 1, #barFrame.stackedBars do
-      SafeHide(barFrame.stackedBars[i])
-    end
-  end
-  
-  -- Hide granular bars if they exist
-  if barFrame.granularBars then
-    for i = 1, #barFrame.granularBars do
-      local gb = barFrame.granularBars[i]
-      SafeHide(gb)
-      if gb then
-        if gb._arcTickBorderEnd then gb._arcTickBorderEnd:Hide() end
-        if gb._arcTickBorderStart then gb._arcTickBorderStart:Hide() end
-        if gb._arcTickBorder then gb._arcTickBorder:Hide() end
-      end
-    end
-  end
-  
-  if PM then PM("AppearanceSetup") end
-  
+
   -- ═══════════════════════════════════════════════════════════════════
   -- PERFORMANCE: Use _configVersion instead of building hash string every call
   -- _configVersion is bumped by BumpConfigVersion() when settings change
   -- ═══════════════════════════════════════════════════════════════════
   local currentConfigVersion = barConfig._configVersion or 0
   local needsSetup = barFrame._lastConfigVersion ~= currentConfigVersion
+  -- When anchored to a group, always force segment re-layout.
+  -- The bar frame may be resized by UpdateBarForGroup in ApplyAppearance,
+  -- and segment bars need to recompute their SetPoint positions every time.
+  if not needsSetup and barConfig.display and barConfig.display.anchorToGroup then
+    local dm = barConfig.display.thresholdMode or "simple"
+    if dm == "perStack" or dm == "granular" then
+      needsSetup = true
+    end
+  end
+  if needsSetup then
+    if barFrame.stackedBars then
+      for i = 1, #barFrame.stackedBars do
+        SafeHide(barFrame.stackedBars[i])
+      end
+    end
+    if barFrame.granularBars then
+      for i = 1, #barFrame.granularBars do
+        local gb = barFrame.granularBars[i]
+        SafeHide(gb)
+        if gb then
+          if gb._arcTickBorderEnd then gb._arcTickBorderEnd:Hide() end
+          if gb._arcTickBorderStart then gb._arcTickBorderStart:Hide() end
+          if gb._arcTickBorder then gb._arcTickBorder:Hide() end
+        end
+      end
+    end
+  end
+  
+  if PM then PM("AppearanceSetup") end
   
   -- Get orientation settings for bar (always needed for logic, cheap)
   local isBarVertical = (barConfig.display.barOrientation == "vertical")
@@ -2828,7 +2851,11 @@ function ns.Display.UpdateBar(barNumber, stacks, maxStacks, active, durationFont
       if fetchedTexture then texturePath = fetchedTexture end
     end
     barFrame._cachedTexturePath = texturePath
-    barFrame._lastConfigVersion = currentConfigVersion
+    -- Only lock in the config version when options are closed — while options are
+    -- open the user may change settings every call, so always re-evaluate needsSetup
+    if not optionsOpen then
+      barFrame._lastConfigVersion = currentConfigVersion
+    end
   end
   
   -- Get fill texture scale
@@ -2840,7 +2867,87 @@ function ns.Display.UpdateBar(barNumber, stacks, maxStacks, active, durationFont
   end
   
   if PM then PM("BarRendering") end
-  
+
+  -- ═══════════════════════════════════════════════════════════════════════════
+  -- RUNTIME EARLY EXIT: Bar already set up, active state unchanged, options closed.
+  -- Bust on options open/close transitions and for 1s after close so dynamic
+  -- layout reflow can complete before we lock in the bar state.
+  -- ═══════════════════════════════════════════════════════════════════════════
+  local optionsTransition = (barFrame._lastOptionsOpen ~= nil) and (barFrame._lastOptionsOpen ~= optionsOpen)
+  if not optionsTransition and not optionsOpen then
+    -- Check 1s grace period after close
+    if barFrame._optionsCloseTime then
+      if GetTime() - barFrame._optionsCloseTime < 1.0 then
+        optionsTransition = true
+      else
+        barFrame._optionsCloseTime = nil
+      end
+    end
+  end
+  if barFrame._lastOptionsOpen ~= optionsOpen then
+    barFrame._lastConfigVersion = -1  -- container width changed, force segment re-layout
+    optionsTransition = true
+  end
+  if barFrame._lastOptionsOpen and not optionsOpen and not barFrame._optionsCloseTime then
+    barFrame._optionsCloseTime = GetTime()
+    optionsTransition = true
+  end
+  barFrame._lastOptionsOpen = optionsOpen
+
+  if not optionsOpen and not needsSetup and not optionsTransition and barFrame._lastActive == active and barFrame._lastActive ~= nil then
+    if active then
+      -- Cancel any pending hideWhenInactive hide
+      if barFrames[barNumber] then barFrames[barNumber]._arcHideWhenInactivePending = nil end
+      if displayMode == "granular" or displayMode == "perStack" then
+        if barFrame.granularBars then
+          for _, bar in ipairs(barFrame.granularBars) do
+            bar:SetValue(effectiveStacks, interp)
+          end
+        end
+      elseif displayMode == "folded" then
+        if barFrame.stackedBars then
+          if barFrame.stackedBars[1] then barFrame.stackedBars[1]:SetValue(effectiveStacks, interp) end
+          if barFrame.stackedBars[2] then barFrame.stackedBars[2]:SetValue(effectiveStacks, interp) end
+        end
+        if barFrame.maxColorBar then barFrame.maxColorBar:SetValue(effectiveStacks, interp) end
+      else -- simple
+        if barFrame.stackedBars then
+          if barFrame.stackedBars[1] then barFrame.stackedBars[1]:SetValue(effectiveStacks, interp) end
+          if barFrame.stackedBars[2] then barFrame.stackedBars[2]:SetValue(effectiveStacks, interp) end
+        end
+      end
+      if barConfig.display.showText then
+        textFrame.text:SetText(stacks)
+        if not textFrame:IsShown() then textFrame:Show() end
+      end
+      -- Restore frames hidden externally (e.g. HideBar from Core trackingOK=false)
+      -- If barFrame was hidden, force full path so duration/name/etc get properly re-setup
+      if barConfig.display.enabled and not barFrame:IsShown() then
+        barFrame._lastActive = nil  -- bust early exit so full path runs next call
+        barFrame:Show()
+      end
+      if nameFrame and barConfig.display.showName and not nameFrame:IsShown() then
+        nameFrame:Show()
+      end
+      if barIconFrame and barConfig.display.showBarIcon and not barIconFrame:IsShown() then
+        barIconFrame:Show()
+      end
+    else
+      -- Inactive: ensure correct visibility based on hideWhenInactive setting
+      if barConfig.behavior and barConfig.behavior.hideWhenInactive then
+        if barFrame:IsShown() then
+          SafeHide(barFrame)
+          SafeHide(textFrame)
+        end
+      elseif barConfig.display.enabled and not barFrame:IsShown() then
+        barFrame:Show()
+        if barConfig.display.showText then textFrame:Show() end
+      end
+    end
+    return
+  end
+  barFrame._lastActive = active
+
   if displayMode == "granular" then
     -- ═══════════════════════════════════════════════════════════════
     -- GRANULAR MODE: 1 bar per stack
@@ -2921,6 +3028,8 @@ function ns.Display.UpdateBar(barNumber, stacks, maxStacks, active, durationFont
       bar:SetOrientation(barOrientation)
       bar:SetReverseFill(isBarReverseFill)
       bar:SetRotatesTexture(rotateBarTex)
+      local barTex = bar:GetStatusBarTexture()
+      if barTex then barTex:SetSnapToPixelGrid(false) barTex:SetTexelSnappingBias(0) end
       table.insert(barFrame.granularBars, bar)
     end
     
@@ -2930,6 +3039,9 @@ function ns.Display.UpdateBar(barNumber, stacks, maxStacks, active, durationFont
       local widthPercent = barValue / maxStacks
       local color = GetColorForValue(barValue, enableMaxColor, maxStacks, maxColor, colorRanges)
       
+      -- Skip interpolation at threshold boundary bars to prevent old color leaking through
+      local interp = thresholdBoundary[barValue] and nil or GetBarInterpolation(enableSmooth)
+
       -- PERFORMANCE: Only apply expensive setup when appearance changes
       if needsSetup or not bar._setupDone then
         bar:SetOrientation(barOrientation)
@@ -2938,45 +3050,36 @@ function ns.Display.UpdateBar(barNumber, stacks, maxStacks, active, durationFont
         bar:SetStatusBarTexture(texturePath)
         bar:SetFrameLevel(barFrame:GetFrameLevel() + i)
         ApplyBarSmoothing(bar, enableSmooth)
+        bar:ClearAllPoints()
+        local barScale = barFrame:GetEffectiveScale()
+        if isBarVertical then
+          local totalHeight = barFrame:GetHeight()
+          local barHeight = widthPercent * totalHeight
+          if isBarReverseFill then
+            bar:SetPoint("TOPLEFT", barFrame, "TOPLEFT", 0, 0)
+            bar:SetPoint("RIGHT", barFrame, "RIGHT", 0, 0)
+          else
+            bar:SetPoint("BOTTOMLEFT", barFrame, "BOTTOMLEFT", 0, 0)
+            bar:SetPoint("RIGHT", barFrame, "RIGHT", 0, 0)
+          end
+          bar:SetHeight(math_max(2, PixelSnap(barHeight, barScale)))
+        else
+          local totalWidth = barFrame:GetWidth()
+          local barWidth = widthPercent * totalWidth
+          if isBarReverseFill then
+            bar:SetPoint("TOPRIGHT", barFrame, "TOPRIGHT", 0, 0)
+            bar:SetPoint("BOTTOM", barFrame, "BOTTOM", 0, 0)
+          else
+            bar:SetPoint("TOPLEFT", barFrame, "TOPLEFT", 0, 0)
+            bar:SetPoint("BOTTOM", barFrame, "BOTTOM", 0, 0)
+          end
+          bar:SetWidth(math_max(2, PixelSnap(barWidth, barScale)))
+        end
+        bar:SetMinMaxValues(barValue - 1, barValue)
+        bar:SetStatusBarColor(color.r, color.g, color.b, color.a or 1)
+        ApplyBarGradient(bar, barConfig, color)
         bar._setupDone = true
       end
-      
-      -- Position based on fill direction (must update if size changes, but that's rare)
-      bar:ClearAllPoints()
-      local barScale = barFrame:GetEffectiveScale()
-      if isBarVertical then
-        local totalHeight = barFrame:GetHeight()
-        local barHeight = widthPercent * totalHeight
-        if isBarReverseFill then
-          -- Reverse: anchor to TOP (fills top-to-bottom)
-          bar:SetPoint("TOPLEFT", barFrame, "TOPLEFT", 0, 0)
-          bar:SetPoint("RIGHT", barFrame, "RIGHT", 0, 0)
-        else
-          -- Normal: anchor to BOTTOM (fills bottom-to-top)
-          bar:SetPoint("BOTTOMLEFT", barFrame, "BOTTOMLEFT", 0, 0)
-          bar:SetPoint("RIGHT", barFrame, "RIGHT", 0, 0)
-        end
-        bar:SetHeight(math_max(2, PixelSnap(barHeight, barScale)))
-      else
-        local totalWidth = barFrame:GetWidth()
-        local barWidth = widthPercent * totalWidth
-        if isBarReverseFill then
-          -- Reverse: anchor to RIGHT (fills right-to-left)
-          bar:SetPoint("TOPRIGHT", barFrame, "TOPRIGHT", 0, 0)
-          bar:SetPoint("BOTTOM", barFrame, "BOTTOM", 0, 0)
-        else
-          -- Normal: anchor to LEFT (fills left-to-right)
-          bar:SetPoint("TOPLEFT", barFrame, "TOPLEFT", 0, 0)
-          bar:SetPoint("BOTTOM", barFrame, "BOTTOM", 0, 0)
-        end
-        bar:SetWidth(math_max(2, PixelSnap(barWidth, barScale)))
-      end
-      
-      -- Skip interpolation at threshold boundary bars to prevent old color leaking through
-      local interp = thresholdBoundary[barValue] and nil or GetBarInterpolation(enableSmooth)
-      bar:SetMinMaxValues(barValue - 1, barValue)
-      bar:SetStatusBarColor(color.r, color.g, color.b, color.a or 1)
-      ApplyBarGradient(bar, barConfig, color)  -- Pass current color to avoid secrets
       bar:SetValue(effectiveStacks, interp)
       bar:Show()
 
@@ -3007,7 +3110,10 @@ function ns.Display.UpdateBar(barNumber, stacks, maxStacks, active, durationFont
     local segInset = 0
     if barConfig.display.showBorder then
       local btRaw = barConfig.display.drawnBorderThickness or 2
-      segInset = PixelUtil.GetNearestPixelSize(btRaw, barFrame:GetEffectiveScale(), btRaw)
+      local _s2 = barFrame:GetEffectiveScale()
+      local _, _h2 = GetPhysicalScreenSize()
+      local _onePx2 = (_h2 and _h2 > 0 and _s2 and _s2 > 0) and (768 / _h2) / _s2 or 1
+      segInset = _onePx2 * btRaw
     end
 
     -- Hide maxColorBar (we use segment color override instead)
@@ -3027,6 +3133,8 @@ function ns.Display.UpdateBar(barNumber, stacks, maxStacks, active, durationFont
       bar:SetOrientation(barOrientation)
       bar:SetReverseFill(isBarReverseFill)
       bar:SetRotatesTexture(rotateBarTex)
+      local barTex = bar:GetStatusBarTexture()
+      if barTex then barTex:SetSnapToPixelGrid(false) barTex:SetTexelSnappingBias(0) end
       table.insert(barFrame.granularBars, bar)
     end
     
@@ -3057,6 +3165,13 @@ function ns.Display.UpdateBar(barNumber, stacks, maxStacks, active, durationFont
         color = maxColor
       end
 
+      -- Per-segment pixel boundaries (always needed for positioning)
+      local startPixel = math_floor((i - 1) * totalPixels / numBars)
+      local endPixel   = math_floor(i       * totalPixels / numBars)
+      local sizePixels = math_max(2, endPixel - startPixel - segGapPx)
+      local offset  = segInset + startPixel * pmult
+      local barSize = sizePixels * pmult
+
       -- PERFORMANCE: Only apply expensive setup when appearance changes
       if needsSetup or not bar._setupDone then
         bar:SetOrientation(barOrientation)
@@ -3065,65 +3180,55 @@ function ns.Display.UpdateBar(barNumber, stacks, maxStacks, active, durationFont
         bar:SetStatusBarTexture(texturePath)
         bar:SetFrameLevel(barFrame:GetFrameLevel() + i)
         ApplyBarSmoothing(bar, enableSmooth)
+        bar:ClearAllPoints()
+        if isBarVertical then
+          if isBarReverseFill then
+            bar:SetPoint("TOPLEFT",  barFrame, "TOPLEFT",  0, -offset)
+            bar:SetPoint("TOPRIGHT", barFrame, "TOPRIGHT", 0, -offset)
+            if i == numBars then
+              bar:SetPoint("BOTTOMLEFT",  barFrame, "BOTTOMLEFT",  0,  segInset)
+              bar:SetPoint("BOTTOMRIGHT", barFrame, "BOTTOMRIGHT", 0,  segInset)
+            else
+              bar:SetHeight(barSize)
+            end
+          else
+            bar:SetPoint("BOTTOMLEFT",  barFrame, "BOTTOMLEFT",  0, offset)
+            bar:SetPoint("BOTTOMRIGHT", barFrame, "BOTTOMRIGHT", 0, offset)
+            if i == numBars then
+              bar:SetPoint("TOPLEFT",  barFrame, "TOPLEFT",  0, -segInset)
+              bar:SetPoint("TOPRIGHT", barFrame, "TOPRIGHT", 0, -segInset)
+            else
+              bar:SetHeight(barSize)
+            end
+          end
+        else
+          if isBarReverseFill then
+            bar:SetPoint("TOPRIGHT",    barFrame, "TOPRIGHT",    -offset, 0)
+            bar:SetPoint("BOTTOMRIGHT", barFrame, "BOTTOMRIGHT", -offset, 0)
+            if i == numBars then
+              bar:SetPoint("TOPLEFT",    barFrame, "TOPLEFT",     segInset, 0)
+              bar:SetPoint("BOTTOMLEFT", barFrame, "BOTTOMLEFT",  segInset, 0)
+            else
+              bar:SetWidth(barSize)
+            end
+          else
+            bar:SetPoint("TOPLEFT",    barFrame, "TOPLEFT",    offset, 0)
+            bar:SetPoint("BOTTOMLEFT", barFrame, "BOTTOMLEFT", offset, 0)
+            if i == numBars then
+              bar:SetPoint("TOPRIGHT",    barFrame, "TOPRIGHT",    -segInset, 0)
+              bar:SetPoint("BOTTOMRIGHT", barFrame, "BOTTOMRIGHT", -segInset, 0)
+            else
+              bar:SetWidth(barSize)
+            end
+          end
+        end
+        local interp = GetBarInterpolation(enableSmooth)
+        bar:SetMinMaxValues(i - 1, i, interp)
+        bar:SetStatusBarColor(color.r, color.g, color.b, color.a or 1)
+        ApplyBarGradient(bar, barConfig, color)
         bar._setupDone = true
       end
-
-      -- Integer pixel boundaries — divide total pixels, not rounded UI units.
-      -- floor() gives each boundary a whole-pixel position; remainder distributes
-      -- naturally across segments (last segment absorbs any leftover pixel).
-      local startPixel = math_floor((i - 1) * totalPixels / numBars)
-      local endPixel   = math_floor(i       * totalPixels / numBars)
-      local sizePixels = math_max(2, endPixel - startPixel - segGapPx)
-      -- Convert back to UI units for SetPoint/SetSize
-      local offset  = segInset + startPixel * pmult
-      local barSize = sizePixels * pmult
-
-      bar:ClearAllPoints()
-      if isBarVertical then
-        if isBarReverseFill then
-          bar:SetPoint("TOPLEFT",  barFrame, "TOPLEFT",  0, -offset)
-          bar:SetPoint("TOPRIGHT", barFrame, "TOPRIGHT", 0, -offset)
-          if i == numBars then
-            bar:SetPoint("BOTTOMLEFT",  barFrame, "BOTTOMLEFT",  0,  segInset)
-            bar:SetPoint("BOTTOMRIGHT", barFrame, "BOTTOMRIGHT", 0,  segInset)
-          else
-            bar:SetHeight(barSize)
-          end
-        else
-          bar:SetPoint("BOTTOMLEFT",  barFrame, "BOTTOMLEFT",  0, offset)
-          bar:SetPoint("BOTTOMRIGHT", barFrame, "BOTTOMRIGHT", 0, offset)
-          if i == numBars then
-            bar:SetPoint("TOPLEFT",  barFrame, "TOPLEFT",  0, -segInset)
-            bar:SetPoint("TOPRIGHT", barFrame, "TOPRIGHT", 0, -segInset)
-          else
-            bar:SetHeight(barSize)
-          end
-        end
-      else
-        if isBarReverseFill then
-          bar:SetPoint("TOPRIGHT",    barFrame, "TOPRIGHT",    -offset, 0)
-          bar:SetPoint("BOTTOMRIGHT", barFrame, "BOTTOMRIGHT", -offset, 0)
-          if i == numBars then
-            bar:SetPoint("TOPLEFT",    barFrame, "TOPLEFT",     segInset, 0)
-            bar:SetPoint("BOTTOMLEFT", barFrame, "BOTTOMLEFT",  segInset, 0)
-          else
-            bar:SetWidth(barSize)
-          end
-        else
-          bar:SetPoint("TOPLEFT",    barFrame, "TOPLEFT",    offset, 0)
-          bar:SetPoint("BOTTOMLEFT", barFrame, "BOTTOMLEFT", offset, 0)
-          if i == numBars then
-            bar:SetPoint("TOPRIGHT",    barFrame, "TOPRIGHT",    -segInset, 0)
-            bar:SetPoint("BOTTOMRIGHT", barFrame, "BOTTOMRIGHT", -segInset, 0)
-          else
-            bar:SetWidth(barSize)
-          end
-        end
-      end
       local interp = GetBarInterpolation(enableSmooth)
-      bar:SetMinMaxValues(i - 1, i, interp)
-      bar:SetStatusBarColor(color.r, color.g, color.b, color.a or 1)
-      ApplyBarGradient(bar, barConfig, color)  -- Pass current color to avoid secrets
       bar:SetValue(effectiveStacks, interp)
       SafeShow(bar)
 
@@ -3154,6 +3259,7 @@ function ns.Display.UpdateBar(barNumber, stacks, maxStacks, active, durationFont
     local midpoint = math_ceil(maxStacks / 2)
     local color1 = barConfig.display.foldedColor1 or {r=0, g=0.5, b=1, a=1}
     local color2 = barConfig.display.foldedColor2 or {r=0, g=1, b=0, a=1}
+    local maxColor = barConfig.display.maxColor or {r=0, g=1, b=0, a=1}
     
     -- Get smoothing setting
     local enableSmooth = barConfig.display.enableSmoothing
@@ -3189,19 +3295,15 @@ function ns.Display.UpdateBar(barNumber, stacks, maxStacks, active, durationFont
       bar1:SetStatusBarTexture(texturePath)
       bar1:SetFrameLevel(barFrame:GetFrameLevel() + 1)
       ApplyBarSmoothing(bar1, enableSmooth)
+      bar1:ClearAllPoints()
+      bar1:SetPoint("TOPLEFT", barFrame, "TOPLEFT", 0, 0)
+      bar1:SetPoint("BOTTOMRIGHT", barFrame, "BOTTOMRIGHT", 0, 0)
+      bar1:SetMinMaxValues(0, midpoint, interp)
+      bar1:SetStatusBarColor(color1.r, color1.g, color1.b, color1.a or 1)
+      ApplyBarGradient(bar1, barConfig, color1)
       bar1._setupDone = true
     end
-    
-    local interp = GetBarInterpolation(enableSmooth)
-    
-    bar1:ClearAllPoints()
-    bar1:ClearAllPoints()
-    bar1:SetPoint("TOPLEFT", barFrame, "TOPLEFT", 0, 0)
-    bar1:SetPoint("BOTTOMRIGHT", barFrame, "BOTTOMRIGHT", 0, 0)
-    bar1:SetMinMaxValues(0, midpoint, interp)
-    bar1:SetStatusBarColor(color1.r, color1.g, color1.b, color1.a or 1)
-    ApplyBarGradient(bar1, barConfig, color1)  -- Pass current color to avoid secrets
-    bar1:SetValue(effectiveStacks, interp)  -- Will cap at midpoint naturally
+    bar1:SetValue(effectiveStacks, interp)
     bar1:Show()
     
     -- Bar 2: Second half color (midpoint to max) - overlays bar1 directly
@@ -3216,17 +3318,15 @@ function ns.Display.UpdateBar(barNumber, stacks, maxStacks, active, durationFont
       bar2:SetStatusBarTexture(texturePath)
       bar2:SetFrameLevel(barFrame:GetFrameLevel() + 2)
       ApplyBarSmoothing(bar2, enableSmooth)
+      bar2:ClearAllPoints()
+      bar2:SetPoint("TOPLEFT", barFrame, "TOPLEFT", 0, 0)
+      bar2:SetPoint("BOTTOMRIGHT", barFrame, "BOTTOMRIGHT", 0, 0)
+      bar2:SetMinMaxValues(midpoint, maxStacks, interp)
+      bar2:SetStatusBarColor(color2.r, color2.g, color2.b, color2.a or 1)
+      ApplyBarGradient(bar2, barConfig, color2)
       bar2._setupDone = true
     end
-    
-    bar2:ClearAllPoints()
-    bar2:ClearAllPoints()
-    bar2:SetPoint("TOPLEFT", barFrame, "TOPLEFT", 0, 0)
-    bar2:SetPoint("BOTTOMRIGHT", barFrame, "BOTTOMRIGHT", 0, 0)
-    bar2:SetMinMaxValues(midpoint, maxStacks, interp)
-    bar2:SetStatusBarColor(color2.r, color2.g, color2.b, color2.a or 1)
-    ApplyBarGradient(bar2, barConfig, color2)  -- Pass current color to avoid secrets
-    bar2:SetValue(effectiveStacks, interp)  -- Only fills when stacks > midpoint
+    bar2:SetValue(effectiveStacks, interp)
     bar2:Show()
     
     -- MAX COLOR OVERLAY for folded mode
@@ -3246,18 +3346,14 @@ function ns.Display.UpdateBar(barNumber, stacks, maxStacks, active, durationFont
         maxBar:SetStatusBarTexture(texturePath)
         maxBar:SetFrameLevel(barFrame:GetFrameLevel() + 21)
         ApplyBarSmoothing(maxBar, enableSmooth)
+        maxBar:ClearAllPoints()
+        maxBar:SetPoint("TOPLEFT", barFrame, "TOPLEFT", 0, 0)
+        maxBar:SetPoint("BOTTOMRIGHT", barFrame, "BOTTOMRIGHT", 0, 0)
+        maxBar:SetMinMaxValues(maxStacks - 1, maxStacks, interp)
+        maxBar:SetStatusBarColor(maxColor.r, maxColor.g, maxColor.b, maxColor.a or 1)
+        ApplyBarGradient(maxBar, barConfig, maxColor)
         maxBar._setupDone = true
       end
-      
-      local maxColor = barConfig.display.maxColor or {r=0, g=1, b=0, a=1}
-      
-      maxBar:ClearAllPoints()
-      maxBar:ClearAllPoints()
-      maxBar:SetPoint("TOPLEFT", barFrame, "TOPLEFT", 0, 0)
-      maxBar:SetPoint("BOTTOMRIGHT", barFrame, "BOTTOMRIGHT", 0, 0)
-      maxBar:SetMinMaxValues(maxStacks - 1, maxStacks, interp)
-      maxBar:SetStatusBarColor(maxColor.r, maxColor.g, maxColor.b, maxColor.a or 1)
-      ApplyBarGradient(maxBar, barConfig, maxColor)  -- Pass current color to avoid secrets
       maxBar:SetValue(effectiveStacks, interp)
       maxBar:Show()
     elseif barFrame.maxColorBar then
@@ -3291,13 +3387,8 @@ function ns.Display.UpdateBar(barNumber, stacks, maxStacks, active, durationFont
     end
     
     if enableMaxColor and maxStacks > 1 then
-      -- TWO BARS: base (full width) + max color overlay (full width, on top)
       local interp = GetBarInterpolation(enableSmooth)
-      
-      -- Bar 1: Base color (0 to max) - full width
       local bar1 = barFrame.stackedBars[1]
-      
-      -- PERFORMANCE: Only apply expensive setup when appearance changes
       if needsSetup or not bar1._setupDone then
         bar1:SetOrientation(barOrientation)
         bar1:SetReverseFill(isBarReverseFill)
@@ -3305,24 +3396,18 @@ function ns.Display.UpdateBar(barNumber, stacks, maxStacks, active, durationFont
         bar1:SetStatusBarTexture(texturePath)
         bar1:SetFrameLevel(barFrame:GetFrameLevel() + 1)
         ApplyBarSmoothing(bar1, enableSmooth)
+        bar1:ClearAllPoints()
+        bar1:SetPoint("TOPLEFT", barFrame, "TOPLEFT", 0, 0)
+        bar1:SetPoint("BOTTOMRIGHT", barFrame, "BOTTOMRIGHT", 0, 0)
+        bar1:SetMinMaxValues(0, maxStacks, interp)
+        bar1:SetStatusBarColor(baseColor.r, baseColor.g, baseColor.b, baseColor.a or 1)
+        ApplyBarGradient(bar1, barConfig, baseColor)
         bar1._setupDone = true
       end
-      
-      bar1:ClearAllPoints()
-      bar1:ClearAllPoints()
-    bar1:SetPoint("TOPLEFT", barFrame, "TOPLEFT", 0, 0)
-    bar1:SetPoint("BOTTOMRIGHT", barFrame, "BOTTOMRIGHT", 0, 0)
-      bar1:SetMinMaxValues(0, maxStacks, interp)
-      bar1:SetStatusBarColor(baseColor.r, baseColor.g, baseColor.b, baseColor.a or 1)
-      ApplyBarGradient(bar1, barConfig, baseColor)  -- Pass current color to avoid secrets
       bar1:SetValue(effectiveStacks, interp)
       bar1:Show()
-      
-      -- Bar 2: Max color overlay (max-1 to max) - full width, on top
-      -- Only fills when at max stacks
+
       local bar2 = barFrame.stackedBars[2]
-      
-      -- PERFORMANCE: Only apply expensive setup when appearance changes
       if needsSetup or not bar2._setupDone then
         bar2:SetOrientation(barOrientation)
         bar2:SetReverseFill(isBarReverseFill)
@@ -3330,24 +3415,19 @@ function ns.Display.UpdateBar(barNumber, stacks, maxStacks, active, durationFont
         bar2:SetStatusBarTexture(texturePath)
         bar2:SetFrameLevel(barFrame:GetFrameLevel() + 2)
         ApplyBarSmoothing(bar2, enableSmooth)
+        bar2:ClearAllPoints()
+        bar2:SetPoint("TOPLEFT", barFrame, "TOPLEFT", 0, 0)
+        bar2:SetPoint("BOTTOMRIGHT", barFrame, "BOTTOMRIGHT", 0, 0)
+        bar2:SetMinMaxValues(maxStacks - 1, maxStacks, interp)
+        bar2:SetStatusBarColor(maxColor.r, maxColor.g, maxColor.b, maxColor.a or 1)
+        ApplyBarGradient(bar2, barConfig, maxColor)
         bar2._setupDone = true
       end
-      
-      bar2:ClearAllPoints()
-      bar2:ClearAllPoints()
-    bar2:SetPoint("TOPLEFT", barFrame, "TOPLEFT", 0, 0)
-    bar2:SetPoint("BOTTOMRIGHT", barFrame, "BOTTOMRIGHT", 0, 0)
-      bar2:SetMinMaxValues(maxStacks - 1, maxStacks, interp)
-      bar2:SetStatusBarColor(maxColor.r, maxColor.g, maxColor.b, maxColor.a or 1)
-      ApplyBarGradient(bar2, barConfig, maxColor)  -- Pass current color to avoid secrets
       bar2:SetValue(effectiveStacks, interp)
       bar2:Show()
     else
-      -- SINGLE BAR: just base color
       local bar1 = barFrame.stackedBars[1]
       local interp = GetBarInterpolation(enableSmooth)
-      
-      -- PERFORMANCE: Only apply expensive setup when appearance changes
       if needsSetup or not bar1._setupDone then
         bar1:SetOrientation(barOrientation)
         bar1:SetReverseFill(isBarReverseFill)
@@ -3355,19 +3435,16 @@ function ns.Display.UpdateBar(barNumber, stacks, maxStacks, active, durationFont
         bar1:SetStatusBarTexture(texturePath)
         bar1:SetFrameLevel(barFrame:GetFrameLevel() + 1)
         ApplyBarSmoothing(bar1, enableSmooth)
+        bar1:ClearAllPoints()
+        bar1:SetPoint("TOPLEFT", barFrame, "TOPLEFT", 0, 0)
+        bar1:SetPoint("BOTTOMRIGHT", barFrame, "BOTTOMRIGHT", 0, 0)
+        bar1:SetMinMaxValues(0, maxStacks, interp)
+        bar1:SetStatusBarColor(baseColor.r, baseColor.g, baseColor.b, baseColor.a or 1)
+        ApplyBarGradient(bar1, barConfig, baseColor)
         bar1._setupDone = true
       end
-      
-      bar1:ClearAllPoints()
-      bar1:ClearAllPoints()
-    bar1:SetPoint("TOPLEFT", barFrame, "TOPLEFT", 0, 0)
-    bar1:SetPoint("BOTTOMRIGHT", barFrame, "BOTTOMRIGHT", 0, 0)
-      bar1:SetMinMaxValues(0, maxStacks, interp)
-      bar1:SetStatusBarColor(baseColor.r, baseColor.g, baseColor.b, baseColor.a or 1)
-      ApplyBarGradient(bar1, barConfig, baseColor)  -- Pass current color to avoid secrets
       bar1:SetValue(effectiveStacks, interp)
       bar1:Show()
-      
       barFrame.stackedBars[2]:Hide()
     end
   end
@@ -3415,46 +3492,49 @@ function ns.Display.UpdateBar(barNumber, stacks, maxStacks, active, durationFont
         -- Store current aura info for OnUpdate
         durationFrame.sourceBar = durationFontString
         durationFrame.isActive = true
-        
+
         -- Set up OnUpdate to poll GetRemainingDuration() with fresh DurationObject
         if not durationFrame.durationOnUpdate then
           durationFrame.durationOnUpdate = function(self, elapsed)
             self.elapsed = (self.elapsed or 0) + elapsed
-            if self.elapsed < 0.03 then return end  -- ~30fps
+            if self.elapsed < 0.05 then return end  -- 20fps
             self.elapsed = 0
-            
-            if not self.isActive or not self.sourceBar then return end
-            
-            -- Get current auraID from sourceBar (may have changed due to refresh)
-            local currentAuraID, currentUnit = self.sourceBar:GetAuraInfo()
-            if not currentAuraID or not currentUnit then
+
+            if not self.isActive or not self.sourceBar then
+              self:SetScript("OnUpdate", nil)
               self.text:SetText("")
+              self:Hide()
               return
             end
-            
-            -- Get fresh DurationObject (handles aura refresh automatically)
-            local ok, durObj = pcall(C_UnitAuras.GetAuraDuration, currentUnit, currentAuraID)
-            if ok and durObj then
-              local okRemaining, remaining = pcall(durObj.GetRemainingDuration, durObj)
-              if okRemaining then
-                self.text:SetFormattedText(DURATION_FMT[self.storedDecimals] or "%.1f", remaining)
-              else
-                self.text:SetText("")
-              end
-            else
+
+            local currentAuraID, currentUnit = self.sourceBar:GetAuraInfo()
+            if not currentAuraID or not currentUnit then
+              self:SetScript("OnUpdate", nil)
+              self.isActive = false
+              self.sourceBar = nil
               self.text:SetText("")
+              self:Hide()
+              return
+            end
+
+            local durObj = C_UnitAuras.GetAuraDuration(currentUnit, currentAuraID)
+            if durObj then
+              self.text:SetFormattedText(DURATION_FMT[self.storedDecimals] or "%.1f", durObj:GetRemainingDuration())
+            else
+              self:SetScript("OnUpdate", nil)
+              self.isActive = false
+              self.sourceBar = nil
+              self.text:SetText("")
+              self:Hide()
             end
           end
         end
         durationFrame:SetScript("OnUpdate", durationFrame.durationOnUpdate)
-        
-        -- Initial text set
-        local ok, durObj = pcall(C_UnitAuras.GetAuraDuration, unit, auraID)
-        if ok and durObj then
-          local okRemaining, remaining = pcall(durObj.GetRemainingDuration, durObj)
-          if okRemaining then
-            durationFrame.text:SetFormattedText(DURATION_FMT[decimals] or "%.1f", remaining)
-          end
+
+        -- Initial text set — no pcall, GetAuraDuration returns nil safely
+        local durObj = C_UnitAuras.GetAuraDuration(unit, auraID)
+        if durObj then
+          durationFrame.text:SetFormattedText(DURATION_FMT[decimals] or "%.1f", durObj:GetRemainingDuration())
         end
         
         local dc = barConfig.display.durationColor or {r=1, g=1, b=1, a=1}
@@ -3567,14 +3647,13 @@ function ns.Display.UpdateBar(barNumber, stacks, maxStacks, active, durationFont
     end
   end
   
-  -- Check if vertical bar
-  local isVertical = (barConfig.display.barOrientation == "vertical")
-  
-  -- Update tick marks using shared function
-  UpdateTickMarks(barFrame, barConfig, maxStacks, displayMode)
-  
-  -- Bar icon - show tracking icon alongside bar (for all bar types)
-  if barConfig.display.showBarIcon and barIconFrame then
+  -- Update tick marks - only needed when config changes
+  if needsSetup then
+    UpdateTickMarks(barFrame, barConfig, maxStacks, displayMode)
+  end
+
+  -- Bar icon - only setup when config changes
+  if needsSetup and barConfig.display.showBarIcon and barIconFrame then
     -- Set icon texture
     if iconTexture then
       barIconFrame.icon:SetTexture(iconTexture)
@@ -3609,7 +3688,9 @@ function ns.Display.UpdateBar(barNumber, stacks, maxStacks, active, durationFont
     else
       textFrame:Hide()
     end
-    -- Duration visibility is handled earlier in the function based on IsShown() check
+    if barConfig.display.showName and nameFrame then
+      nameFrame:Show()
+    end
     if barConfig.display.showBarIcon and barIconFrame then
       barIconFrame:Show()
     end
@@ -3908,12 +3989,12 @@ end
 -- ===================================================================
 -- UPDATE CUSTOM BAR (Cast-based tracking with duration countdown)
 -- ===================================================================
-function ns.Display.UpdateDurationBar(barNumber, stacks, maxStacks, active, sourceBar, stacksFontString, iconTexture)
+function ns.Display.UpdateDurationBar(barNumber, stacks, maxStacks, active, sourceBar, stacksFontString, iconTexture, auraName, cachedConfig)
   -- PROFILER: Track where time is spent
   local PM = ns.ProfilerMark
   if PM then PM("GetBarConfig") end
-  
-  local barConfig = ns.API.GetBarConfig(barNumber)
+
+  local barConfig = cachedConfig or ns.API.GetBarConfig(barNumber)
   if not barConfig or not barConfig.tracking.enabled then
     if barFrames[barNumber] then
       barFrames[barNumber].barFrame:Hide()
@@ -4352,8 +4433,10 @@ function ns.Display.UpdateDurationBar(barNumber, stacks, maxStacks, active, sour
       barFrame.bg:SetShown(barConfig.display.showBackground)
     end
     
-    -- Cache the version
-    barFrame._lastConfigVersion = currentConfigVersion
+    -- Cache the version — only when options closed so live config changes keep triggering needsSetup
+    if not optionsOpen then
+      barFrame._lastConfigVersion = currentConfigVersion
+    end
   end
   
   -- NOTE: We don't set bar:SetAlpha(1) here - each code path sets alpha
@@ -4600,48 +4683,37 @@ function ns.Display.UpdateDurationBar(barNumber, stacks, maxStacks, active, sour
             
             -- NOW make bar visible (color already applied, no flicker)
             barFrame.bar:SetAlpha(1)
-            
-            -- Set up OnUpdate handler for continuous color updates (throttled)
+
+            -- Set up OnUpdate handler for continuous color updates (throttled to 20fps).
+            -- Expiry cleanup is handled event-driven by activeAuraPolling UNIT_AURA handler
+            -- which nils colorCurveData — the `if not data then return end` fast-exit covers it.
             barFrame.bar:SetScript("OnUpdate", function(self, elapsed)
               local data = self.colorCurveData
-              if not data then return end
-              
-              -- Check if aura still exists EVERY FRAME (no throttle for responsiveness)
-              local durObj = nil
-              pcall(function()
-                durObj = C_UnitAuras.GetAuraDuration(data.unit, data.auraID)
-              end)
-            
-              -- If durObj is nil (aura gone), hide bar immediately and stop
+              if not data then return end  -- event-driven cleanup already ran → free exit
+
+              -- Throttle gate FIRST — GetAuraDuration only called at 20fps, not every frame
+              data.elapsed = data.elapsed + elapsed
+              if data.elapsed < 0.05 then return end
+              data.elapsed = 0
+
+              -- GetAuraDuration returns nil for gone auras, does not throw — no pcall needed
+              local durObj = C_UnitAuras.GetAuraDuration(data.unit, data.auraID)
               if not durObj then
-                self:SetAlpha(0)  -- Hide entire StatusBar
+                self:SetAlpha(0)
                 self:SetScript("OnUpdate", nil)
                 self.colorCurveData = nil
                 return
               end
-            
-              -- Throttle color updates only (not aura checks)
-              data.elapsed = data.elapsed + elapsed
-              if data.elapsed < 0.05 then return end  -- 20fps for color updates
-              data.elapsed = 0
-            
-              -- Aura exists - evaluate color from curve
-              -- SetStatusBarColor accepts secrets AND handles alpha correctly
-              local colorApplied = false
-              pcall(function()
-                local colorResult = durObj:EvaluateRemainingPercent(data.colorCurve)
-                if colorResult then
-                  self:SetStatusBarColor(colorResult:GetRGBA())
-                  colorApplied = true
-                end
-              end)
-            
-              -- Fallback to baseColor if curve evaluation failed
-              if not colorApplied then
+
+              -- Evaluate color from curve — SetStatusBarColor accepts secrets
+              local colorResult = durObj:EvaluateRemainingPercent(data.colorCurve)
+              if colorResult then
+                self:SetStatusBarColor(colorResult:GetRGBA())
+              else
                 self:SetStatusBarColor(data.baseColor.r, data.baseColor.g, data.baseColor.b, data.baseColor.a or 1)
               end
             end)
-          
+
             -- Register for event-driven cleanup when aura expires
             RegisterAuraPolling(barNumber, unit, auraID, barFrame, nil, nil)
           end  -- end if not alreadyActive
@@ -4659,37 +4731,22 @@ function ns.Display.UpdateDurationBar(barNumber, stacks, maxStacks, active, sour
           
           -- Get bar texture reference for color
           local barTexture = barFrame.bar:GetStatusBarTexture()
-          
+
           -- Reset VertexColor to white (in case ColorCurve was previously active)
           if barTexture then
             barTexture:SetVertexColor(1, 1, 1, 1)
           end
-          
-          -- Monitor for aura expiry to prevent white bar flash
-          barFrame.bar:SetScript("OnUpdate", function(self, elapsed)
-            local data = self.auraMonitorData
-            if not data then return end
-            
-            -- Check if aura still exists EVERY FRAME (no throttle)
-            local durObj = nil
-            pcall(function()
-              durObj = C_UnitAuras.GetAuraDuration(data.unit, data.auraID)
-            end)
-            
-            -- If aura is gone, hide bar immediately and stop
-            if not durObj then
-              self:SetAlpha(0)  -- Hide entire StatusBar
-              self:SetScript("OnUpdate", nil)
-              self.auraMonitorData = nil
-            end
-          end)
-          
-          -- Apply base color via SetStatusBarColor (VertexColor is white, so this shows through)
+
+          -- No OnUpdate needed — activeAuraPolling UNIT_AURA handler handles expiry
+          -- event-driven by niling auraMonitorData and calling SetScript("OnUpdate", nil).
+          barFrame.bar:SetScript("OnUpdate", nil)
+
+          -- Apply base color via SetStatusBarColor
           barFrame.bar:SetStatusBarColor(baseColor.r, baseColor.g, baseColor.b, baseColor.a or 1)
-          
+
           -- NOW restore bar visibility (color is already applied, no flicker)
           barFrame.bar:SetAlpha(1)
-          
+
           -- Register for event-driven cleanup
           RegisterAuraPolling(barNumber, unit, auraID, barFrame, nil, nil)
         end
@@ -4707,48 +4764,40 @@ function ns.Display.UpdateDurationBar(barNumber, stacks, maxStacks, active, sour
           interp = durationInterp,
         }
         
-        -- OnUpdate polls GetRemainingDuration (secret) → SetValue (accepts secrets, auto-clamps)
+        -- OnUpdate polls GetRemainingDuration (secret) → SetValue (accepts secrets, auto-clamps).
+        -- Throttle gate first — expiry handled event-driven by activeAuraPolling.
         local barTexture = barFrame.bar:GetStatusBarTexture()
         barFrame.bar:SetScript("OnUpdate", function(self, elapsed)
           local data = self.manualMaxData
-          if not data then return end
-          
-          -- Check if aura still exists EVERY FRAME (no throttle for responsiveness)
-          local durObj = nil
-          pcall(function()
-            durObj = C_UnitAuras.GetAuraDuration(data.unit, data.auraID)
-          end)
-          
-          -- If durObj is nil (aura gone), hide bar immediately and stop
+          if not data then return end  -- event-driven cleanup already ran → free exit
+
+          -- Throttle gate FIRST — GetAuraDuration only called at 20fps, not every frame
+          data.elapsed = data.elapsed + elapsed
+          if data.elapsed < 0.05 then return end
+          data.elapsed = 0
+
+          -- GetAuraDuration returns nil for gone auras, does not throw — no pcall needed
+          local durObj = C_UnitAuras.GetAuraDuration(data.unit, data.auraID)
           if not durObj then
-            self:SetAlpha(0)  -- Hide entire StatusBar
+            self:SetAlpha(0)
             self:SetScript("OnUpdate", nil)
             self.manualMaxData = nil
             return
           end
-          
-          -- Throttle value updates only
-          data.elapsed = data.elapsed + elapsed
-          if data.elapsed < 0.05 then return end  -- 20 updates/sec
-          data.elapsed = 0
-          
-          -- Aura exists - update value
-          pcall(function()
-            local remaining = durObj:GetRemainingDuration()  -- Secret value
-            self:SetValue(remaining, data.interp)  -- Auto-clamps to maxValue
-          end)
+
+          -- GetRemainingDuration on a valid durObj does not throw — no pcall needed
+          local remaining = durObj:GetRemainingDuration()  -- secret value
+          self:SetValue(remaining, data.interp)            -- SetValue accepts secrets
         end)
         
         -- Register for event-driven cleanup when aura expires
         RegisterAuraPolling(barNumber, unit, auraID, barFrame, nil, nil)
-        
-        -- Apply initial value
-        pcall(function()
-          local durObj = C_UnitAuras.GetAuraDuration(unit, auraID)
-          if durObj then
-            barFrame.bar:SetValue(durObj:GetRemainingDuration(), durationInterp)
-          end
-        end)
+
+        -- Apply initial value — no pcall, GetAuraDuration returns nil safely
+        local durObj = C_UnitAuras.GetAuraDuration(unit, auraID)
+        if durObj then
+          barFrame.bar:SetValue(durObj:GetRemainingDuration(), durationInterp)
+        end
         
         -- Reset VertexColor and apply base color
         if barTexture then barTexture:SetVertexColor(1, 1, 1, 1) end
@@ -4921,46 +4970,49 @@ function ns.Display.UpdateDurationBar(barNumber, stacks, maxStacks, active, sour
         -- Store current aura info for OnUpdate
         durationFrame.sourceBar = sourceBar
         durationFrame.isActive = true
-        
+
         -- Set up OnUpdate to poll GetRemainingDuration() with fresh DurationObject
         if not durationFrame.durationOnUpdate then
           durationFrame.durationOnUpdate = function(self, elapsed)
             self.elapsed = (self.elapsed or 0) + elapsed
-            if self.elapsed < 0.03 then return end  -- ~30fps
+            if self.elapsed < 0.05 then return end  -- 20fps
             self.elapsed = 0
-            
-            if not self.isActive or not self.sourceBar then return end
-            
-            -- Get current auraID from sourceBar (may have changed due to refresh)
-            local currentAuraID, currentUnit = self.sourceBar:GetAuraInfo()
-            if not currentAuraID or not currentUnit then
+
+            if not self.isActive or not self.sourceBar then
+              self:SetScript("OnUpdate", nil)
               self.text:SetText("")
+              self:Hide()
               return
             end
-            
-            -- Get fresh DurationObject (handles aura refresh automatically)
-            local ok, durObj = pcall(C_UnitAuras.GetAuraDuration, currentUnit, currentAuraID)
-            if ok and durObj then
-              local okRemaining, remaining = pcall(durObj.GetRemainingDuration, durObj)
-              if okRemaining then
-                self.text:SetFormattedText(DURATION_FMT[self.storedDecimals] or "%.1f", remaining)
-              else
-                self.text:SetText("")
-              end
-            else
+
+            local currentAuraID, currentUnit = self.sourceBar:GetAuraInfo()
+            if not currentAuraID or not currentUnit then
+              self:SetScript("OnUpdate", nil)
+              self.isActive = false
+              self.sourceBar = nil
               self.text:SetText("")
+              self:Hide()
+              return
+            end
+
+            local durObj = C_UnitAuras.GetAuraDuration(currentUnit, currentAuraID)
+            if durObj then
+              self.text:SetFormattedText(DURATION_FMT[self.storedDecimals] or "%.1f", durObj:GetRemainingDuration())
+            else
+              self:SetScript("OnUpdate", nil)
+              self.isActive = false
+              self.sourceBar = nil
+              self.text:SetText("")
+              self:Hide()
             end
           end
         end
         durationFrame:SetScript("OnUpdate", durationFrame.durationOnUpdate)
-        
-        -- Initial text set
-        local ok, durObj = pcall(C_UnitAuras.GetAuraDuration, unit, auraID)
-        if ok and durObj then
-          local okRemaining, remaining = pcall(durObj.GetRemainingDuration, durObj)
-          if okRemaining then
-            durationFrame.text:SetFormattedText(DURATION_FMT[decimals] or "%.1f", remaining)
-          end
+
+        -- Initial text set — no pcall, GetAuraDuration returns nil safely
+        local durObj = C_UnitAuras.GetAuraDuration(unit, auraID)
+        if durObj then
+          durationFrame.text:SetFormattedText(DURATION_FMT[decimals] or "%.1f", durObj:GetRemainingDuration())
         end
       else
         durationFrame.text:SetFormattedText(DURATION_FMT[decimals] or "%.1f", sourceBar:GetValue())
@@ -5146,22 +5198,19 @@ local function UpdateBarForGroup(barNumber, cfg, barFrame, groupName)
     end
   end
 
-  -- Position
-  -- For matchSlotsOnly TOP/BOTTOM: anchor BOTTOMLEFT/TOPLEFT to container TOP/BOTTOM
-  -- with x offset = -barWidth/2. Container TOP/BOTTOM uses container.CENTER.x, which
-  -- is the same reference icons use → single-step rounding, no 1px drift from padding
-  -- or double-rounding. Side anchors are unaffected.
   barFrame:ClearAllPoints()
   local matchSlots = cfg.matchGroupWidth and cfg.matchSlotsOnly and barWidth
   if anchorPoint == "TOP" then
     if matchSlots then
-      barFrame:SetPoint("BOTTOMLEFT", container, "TOP", -barWidth/2 + offsetX, offsetY)
+      local halfWidth = PixelSnap(barWidth / 2, effScale)
+      barFrame:SetPoint("BOTTOMLEFT", container, "TOP", -halfWidth + offsetX, offsetY)
     else
       barFrame:SetPoint("BOTTOMLEFT", container, "TOPLEFT", offsetX, offsetY)
     end
   elseif anchorPoint == "BOTTOM" then
     if matchSlots then
-      barFrame:SetPoint("TOPLEFT", container, "BOTTOM", -barWidth/2 + offsetX, offsetY)
+      local halfWidth = PixelSnap(barWidth / 2, effScale)
+      barFrame:SetPoint("TOPLEFT", container, "BOTTOM", -halfWidth + offsetX, offsetY)
     else
       barFrame:SetPoint("TOPLEFT", container, "BOTTOMLEFT", offsetX, offsetY)
     end
@@ -5230,6 +5279,14 @@ function ns.Display.ApplyAppearance(barNumber)
   local barFrame, textFrame, durationFrame, iconFrame, nameFrame, barIconFrame = GetBarFrames(barNumber)
   local cfg = barConfig.display
   local displayType = cfg.displayType or "bar"
+
+  -- Always clear _setupDone on segment bars when ApplyAppearance runs.
+  -- The frame may be resized by UpdateBarForGroup called later in this function,
+  -- but UpdateBar runs immediately after so we can't rely on size-change detection
+  -- (WoW layout may not commit the new size before GetWidth() is called).
+  if barFrame.granularBars then
+    for _, _gb in ipairs(barFrame.granularBars) do _gb._setupDone = false end
+  end
   
   -- ═══════════════════════════════════════════════════════════════════
   -- ICON MODE APPEARANCE
@@ -5494,7 +5551,19 @@ function ns.Display.ApplyAppearance(barNumber)
       local offsetY = PixelSnap(cfg.anchorOffsetY or 0)
 
       -- Use shared helper for position + size (same as resize callbacks)
+      local _wBefore = barFrame._lastKnownW
+      local _hBefore = barFrame._lastKnownH
       UpdateBarForGroup(barNumber, cfg, barFrame, cfg.anchorGroupName)
+      local _wAfter, _hAfter = barFrame:GetWidth(), barFrame:GetHeight()
+      -- If frame was resized by UpdateBarForGroup, clear _setupDone on all segment bars
+      -- so they recompute their SetPoint positions against the new frame dimensions.
+      if _wBefore ~= _wAfter or _hBefore ~= _hAfter then
+        if barFrame.granularBars then
+          for _, _gb in ipairs(barFrame.granularBars) do _gb._setupDone = false end
+        end
+      end
+      barFrame._lastKnownW = _wAfter
+      barFrame._lastKnownH = _hAfter
 
       -- Hook the container's OnSizeChanged event
       barFrame._anchoredGroupName = cfg.anchorGroupName
@@ -5798,7 +5867,10 @@ function ns.Display.ApplyAppearance(barNumber)
     if cfg.showBorder then
       local btRaw = cfg.drawnBorderThickness or 2
       -- Snap to nearest physical pixel so every edge is uniform and crisp
-      local bt = PixelUtil.GetNearestPixelSize(btRaw, barFrame:GetEffectiveScale(), btRaw)
+      local _s3 = barFrame:GetEffectiveScale()
+      local _, _h3 = GetPhysicalScreenSize()
+      local _onePx3 = (_h3 and _h3 > 0 and _s3 and _s3 > 0) and (768 / _h3) / _s3 or 1
+      local bt = _onePx3 * btRaw
       local bc = cfg.borderColor or {r = 0, g = 0, b = 0, a = 1}
       
       -- Top border (spans full width at top)

@@ -11,7 +11,7 @@ local UICCommonButton = env.modules:New("packages\\uic-common\\button")
 local Mixin = Mixin
 local CreateFromMixins = CreateFromMixins
 
-local UIDef = {
+local UIDEF = {
     Close                           = UICCommonPreload.ATLAS{ left = 319 / 512, right = 345 / 512, top = 185 / 512, bottom = 211 / 512 },
     SelectionMenu                   = UICCommonPreload.ATLAS{ left = 344 / 512, right = 370 / 512, top = 186 / 512, bottom = 212 / 512 },
 
@@ -63,32 +63,32 @@ do --Button
 
         if not isEnabled then
             local texture =
-                self.isCompact and (self.isRed and UIDef.UIButtonRedCompact_Disabled or UIDef.UIButtonGrayCompact_Disabled) or
-                (self.isRed and UIDef.UIButtonRed_Disabled or UIDef.UIButtonGray_Disabled)
+                self.isCompact and (self.isRed and UIDEF.UIButtonRedCompact_Disabled or UIDEF.UIButtonGrayCompact_Disabled) or
+                (self.isRed and UIDEF.UIButtonRed_Disabled or UIDEF.UIButtonGray_Disabled)
 
             self.Texture:background(texture)
             self.Content:ClearAllPoints()
             self.Content:SetPoint("CENTER", self, "CENTER", 0, CONTENT_Y)
         elseif buttonState == "NORMAL" then
             local texture =
-                self.isCompact and (self.isRed and UIDef.UIButtonRedCompact or UIDef.UIButtonGrayCompact) or
-                (self.isRed and UIDef.UIButtonRed or UIDef.UIButtonGray)
+                self.isCompact and (self.isRed and UIDEF.UIButtonRedCompact or UIDEF.UIButtonGrayCompact) or
+                (self.isRed and UIDEF.UIButtonRed or UIDEF.UIButtonGray)
 
             self.Texture:background(texture)
             self.Content:ClearAllPoints()
             self.Content:SetPoint("CENTER", self, "CENTER", 0, CONTENT_Y)
         elseif buttonState == "HIGHLIGHTED" then
             local texture =
-                self.isCompact and (self.isRed and UIDef.UIButtonRedCompact_Highlighted or UIDef.UIButtonGrayCompact_Highlighted) or
-                (self.isRed and UIDef.UIButtonRed_Highlighted or UIDef.UIButtonGray_Highlighted)
+                self.isCompact and (self.isRed and UIDEF.UIButtonRedCompact_Highlighted or UIDEF.UIButtonGrayCompact_Highlighted) or
+                (self.isRed and UIDEF.UIButtonRed_Highlighted or UIDEF.UIButtonGray_Highlighted)
 
             self.Texture:background(texture)
             self.Content:ClearAllPoints()
             self.Content:SetPoint("CENTER", self, "CENTER", -CONTENT_Y_HIGHLIGHTED, CONTENT_Y_HIGHLIGHTED)
         elseif buttonState == "PUSHED" then
             local texture =
-                self.isCompact and (self.isRed and UIDef.UIButtonRedCompact_Pushed or UIDef.UIButtonGrayCompact_Pushed) or
-                (self.isRed and UIDef.UIButtonRed_Pushed or UIDef.UIButtonGray_Pushed)
+                self.isCompact and (self.isRed and UIDEF.UIButtonRedCompact_Pushed or UIDEF.UIButtonGrayCompact_Pushed) or
+                (self.isRed and UIDEF.UIButtonRed_Pushed or UIDEF.UIButtonGray_Pushed)
 
             self.Texture:background(texture)
             self.Content:ClearAllPoints()
@@ -283,7 +283,7 @@ do --Button (Close)
                 Frame(name .. ".Close")
                     :id("Close", id)
                     :point(UIKit.Enum.Point.Center)
-                    :background(UIDef.Close)
+                    :background(UIDEF.Close)
                     :size(SIZE, SIZE)
                     :_updateMode(UIKit.Enum.UpdateMode.ExcludeVisibilityChanged),
 
@@ -310,7 +310,7 @@ do --Button (Selection Menu)
                 Frame(name .. ".Arrow")
                     :id("Arrow", id)
                     :point(UIKit.Enum.Point.Right)
-                    :background(UIDef.SelectionMenu)
+                    :background(UIDEF.SelectionMenu)
                     :size(12, 12)
                     :_updateMode(UIKit.Enum.UpdateMode.ExcludeVisibilityChanged),
 
