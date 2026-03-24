@@ -1,7 +1,6 @@
 
 CHATTYNATOR_CURRENT_PROFILE = "DEFAULT"
 CHATTYNATOR_COMMAND_HISTORY = {
-"/cw Lamiralei-Stormrage /eui",
 "/cw Lamiralei-Stormrage done!",
 "/cw Lamiralei-Stormrage /eui",
 "/s /eui",
@@ -202,4 +201,5 @@ CHATTYNATOR_COMMAND_HISTORY = {
 " its aight",
 "/p either of you need this staff?",
 "/p can jump through those lol",
+"/s /reload",
 }

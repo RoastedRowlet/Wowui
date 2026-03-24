@@ -67,13 +67,13 @@ CliqueDB3 = {
 ["unit"] = "mouseover",
 },
 {
-["type"] = "macro",
-["key"] = "SHIFT-BUTTON2",
-["macrotext"] = "/cast Nature's Swiftness\n/cast [@mouseover] Regrowth\n",
+["spell"] = "Regrowth",
+["key"] = "BUTTON2",
 ["sets"] = {
 ["default"] = true,
 },
-["icon"] = 134332,
+["icon"] = 136085,
+["type"] = "spell",
 },
 {
 ["type"] = "menu",
@@ -92,22 +92,22 @@ CliqueDB3 = {
 ["type"] = "spell",
 },
 {
-["spell"] = "Regrowth",
-["key"] = "BUTTON2",
+["type"] = "macro",
+["key"] = "SHIFT-BUTTON2",
+["macrotext"] = "/cast Nature's Swiftness\n/cast [@mouseover] Regrowth\n",
 ["sets"] = {
 ["default"] = true,
 },
-["icon"] = 136085,
-["type"] = "spell",
+["icon"] = 134332,
 },
 {
-["spell"] = "Revive",
-["key"] = "CTRL-BUTTON1",
+["type"] = "macro",
+["key"] = "ALT-BUTTON2",
+["macrotext"] = "/cast Nature's Swiftness\n/cast [@mouseover] Regrowth\n",
 ["sets"] = {
 ["default"] = true,
 },
-["icon"] = 132132,
-["type"] = "spell",
+["icon"] = 134332,
 },
 {
 ["type"] = "target",
@@ -128,13 +128,13 @@ CliqueDB3 = {
 ["type"] = "spell",
 },
 {
-["type"] = "macro",
-["key"] = "ALT-BUTTON2",
-["macrotext"] = "/cast Nature's Swiftness\n/cast [@mouseover] Regrowth\n",
+["spell"] = "Revive",
+["key"] = "CTRL-BUTTON1",
 ["sets"] = {
 ["default"] = true,
 },
-["icon"] = 134332,
+["icon"] = 132132,
+["type"] = "spell",
 },
 {
 ["spell"] = "Remove Corruption",
