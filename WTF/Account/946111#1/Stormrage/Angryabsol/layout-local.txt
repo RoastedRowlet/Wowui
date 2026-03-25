@@ -1,6 +1,6 @@
 Version: 1
 Frame: CraftScanScannerMenuButton
-FrameLevel: 86
+FrameLevel: 87
 Anchor: LEFT
 X: 71
 Y: -234
@@ -20,10 +20,3 @@ X: -186
 Y: -120
 W: 1105
 H: 658
-Frame: RaidGroupButton5
-FrameLevel: 10
-Anchor: TOPLEFT
-X: 76
-Y: -171
-W: 156
-H: 14

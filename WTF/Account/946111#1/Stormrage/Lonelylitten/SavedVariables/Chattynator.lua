@@ -1,12 +1,6 @@
 
 CHATTYNATOR_CURRENT_PROFILE = "DEFAULT"
 CHATTYNATOR_COMMAND_HISTORY = {
-"/s /eui",
-"/s /arcui",
-"/s /reload",
-"/s /simc",
-"/p need that ring?",
-"/p LMAO",
 "/p how did i not know that knocks",
 "/p anyone need the chest i go?",
 "/p got*",
@@ -204,4 +198,8 @@ CHATTYNATOR_COMMAND_HISTORY = {
 "/p /reload",
 "/s /arcui",
 "/s /RC",
+"/s /RELOAD",
+"/cw Chiéfkiefn-Stormrage yeah",
+"/cw Chiéfkiefn-Stormrage sounds good",
+"/cw Chiéfkiefn-Stormrage /reload",
 }

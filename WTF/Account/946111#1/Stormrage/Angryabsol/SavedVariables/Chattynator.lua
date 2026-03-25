@@ -1,19 +1,6 @@
 
 CHATTYNATOR_CURRENT_PROFILE = "DEFAULT"
 CHATTYNATOR_COMMAND_HISTORY = {
-" /arcui",
-"/s /simc",
-"/s /M",
-"/s /simc",
-"/s /SIMC",
-"/g :O",
-"/s /m",
-"/s /SIMC",
-"/s /ARCUI",
-"/s /simc",
-"/s /SIMC",
-"/s /simc",
-"/s /m",
 "/g :D",
 "/s /reload",
 "/s /SIMC",

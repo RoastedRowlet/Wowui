@@ -1,5 +1,12 @@
 
 WarpDepleteDB = {
+["profileKeys"] = {
+["Lonelylitten - Stormrage"] = "Default",
+["Angryabsol - Stormrage"] = "Default",
+["Barelynoer - Area 52"] = "Default",
+["Madmareep - Stormrage"] = "Default",
+["Zappyxatu - Stormrage"] = "Default",
+},
 ["global"] = {
 ["splits"] = {
 [161] = {
@@ -233,49 +240,43 @@ WarpDepleteDB = {
 },
 },
 },
-[402] = {
-[11] = {
-["current"] = {
-1099,
-678,
-246,
-1523,
-["forces"] = 1318,
-["challenge"] = 1522993,
-},
-["best"] = {
-1099,
-678,
-246,
-1523,
-["forces"] = 1318,
-["challenge"] = 1522993,
-},
-["currentDiff"] = {
--159,
--134,
--168,
--572,
-["forces"] = -149,
-["challenge"] = -572163,
-},
-},
+[558] = {
 [10] = {
 ["current"] = {
-1133,
-712,
-287,
-1518,
-["forces"] = 1328,
-["challenge"] = 1518468,
+477,
+783,
+1152,
+1528,
+["forces"] = 1582,
+["challenge"] = 1582441,
 },
 ["best"] = {
-1133,
-712,
-287,
-1518,
-["forces"] = 1328,
-["challenge"] = 1518468,
+477,
+783,
+1152,
+1528,
+["forces"] = 1582,
+["challenge"] = 1582441,
+},
+["currentDiff"] = {
+},
+},
+[11] = {
+["current"] = {
+451,
+739,
+1105,
+1424,
+["forces"] = 1259,
+["challenge"] = 1424498,
+},
+["best"] = {
+451,
+739,
+1105,
+1424,
+["forces"] = 1259,
+["challenge"] = 1424498,
 },
 ["currentDiff"] = {
 },
@@ -355,53 +356,55 @@ WarpDepleteDB = {
 },
 },
 },
-[558] = {
-[10] = {
-["current"] = {
-477,
-783,
-1152,
-1528,
-["forces"] = 1582,
-["challenge"] = 1582441,
-},
-["best"] = {
-477,
-783,
-1152,
-1528,
-["forces"] = 1582,
-["challenge"] = 1582441,
-},
-["currentDiff"] = {
-},
-},
+[402] = {
 [11] = {
 ["current"] = {
-451,
-739,
-1105,
-1424,
-["forces"] = 1259,
-["challenge"] = 1424498,
+1099,
+678,
+246,
+1523,
+["forces"] = 1318,
+["challenge"] = 1522993,
 },
 ["best"] = {
-451,
-739,
-1105,
-1424,
-["forces"] = 1259,
-["challenge"] = 1424498,
+1099,
+678,
+246,
+1523,
+["forces"] = 1318,
+["challenge"] = 1522993,
+},
+["currentDiff"] = {
+-159,
+-134,
+-168,
+-572,
+["forces"] = -149,
+["challenge"] = -572163,
+},
+},
+[10] = {
+["current"] = {
+1133,
+712,
+287,
+1518,
+["forces"] = 1328,
+["challenge"] = 1518468,
+},
+["best"] = {
+1133,
+712,
+287,
+1518,
+["forces"] = 1328,
+["challenge"] = 1518468,
 },
 ["currentDiff"] = {
 },
 },
 },
 },
-},
-["profileKeys"] = {
-["Lonelylitten - Stormrage"] = "Default",
-["Angryabsol - Stormrage"] = "Default",
 },
 ["profiles"] = {
 ["Default"] = {
