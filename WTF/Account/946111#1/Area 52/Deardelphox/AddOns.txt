@@ -34,3 +34,4 @@ LittleWigs_WrathOfTheLichKing: enabled
 LittleWigs_WarlordsOfDraenor: enabled
 LittleWigs_Legion: enabled
 LittleWigs_Dragonflight: enabled
+BigWigs_TheDreamrift: enabled
