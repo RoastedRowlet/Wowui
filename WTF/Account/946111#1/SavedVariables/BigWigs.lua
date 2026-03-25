@@ -2,6 +2,7 @@
 BigWigs3DB = {
 ["profileKeys"] = {
 ["Lonelylitten - Stormrage"] = "Default",
+["Angryabsol - Stormrage"] = "Default",
 },
 ["namespaces"] = {
 ["BigWigs_Plugins_PrivateAuras"] = {
@@ -21,6 +22,16 @@ BigWigs3DB = {
 ["global"] = {
 ["showViewerTeleportTip"] = false,
 },
+["profiles"] = {
+["Default"] = {
+["viewerPosition"] = {
+nil,
+nil,
+67,
+-97,
+},
+},
+},
 },
 ["BigWigs_Plugins_BossBlock"] = {
 ["global"] = {
@@ -32,12 +43,20 @@ BigWigs3DB = {
 },
 },
 ["myKeystones"] = {
+["Player-60-0C9E885E"] = {
+["playerRating"] = 940,
+["specId"] = 1480,
+["keyMap"] = 559,
+["name"] = "Angryabsol",
+["keyLevel"] = 4,
+["realm"] = "Stormrage",
+},
 ["Player-60-0F85ABEF"] = {
-["playerRating"] = 2644,
+["playerRating"] = 2682,
 ["specId"] = 105,
-["keyMap"] = 402,
+["keyMap"] = 558,
 ["name"] = "Lonelylitten",
-["keyLevel"] = 13,
+["keyLevel"] = 11,
 ["realm"] = "Stormrage",
 },
 },
@@ -139,8 +158,8 @@ BigWigsStatsDB = {
 [2795] = {
 ["normal"] = {
 ["kills"] = 1,
-["bestDate"] = "2026/03/25",
 ["fkDate"] = "2026/03/25",
+["bestDate"] = "2026/03/25",
 ["best"] = 313.8260000000009,
 ["fkDuration"] = 313.8260000000009,
 },

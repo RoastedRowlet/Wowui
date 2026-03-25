@@ -28,7 +28,7 @@ BigWigs_Core: enabled
 BigWigs_Options: enabled
 BigWigs_Plugins: enabled
 LittleWigs: enabled
-EllesmereUICooldownManager: enabled
+EllesmereUICooldownManager: disabled
 BigWigs_TheVoidspire: enabled
 LittleWigs_WrathOfTheLichKing: enabled
 LittleWigs_WarlordsOfDraenor: enabled

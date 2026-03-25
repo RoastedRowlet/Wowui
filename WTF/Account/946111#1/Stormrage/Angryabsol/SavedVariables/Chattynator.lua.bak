@@ -202,4 +202,13 @@ CHATTYNATOR_COMMAND_HISTORY = {
 "/s /RELOAD",
 "/s /eui",
 "/s /reload",
+"/s /key",
+"/s /M",
+"/s /rc",
+"/s /PULL 10",
+"/p 8 seat?",
+"/p /RC",
+"/p /pull 10",
+"/cw Camdadk-Illidan pit",
+"/cw Camdadk-Illidan /RELOAD",
 }

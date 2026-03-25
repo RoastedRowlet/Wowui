@@ -1,6 +1,6 @@
 
 BugGrabberDB = {
-["session"] = 606,
+["session"] = 612,
 ["lastSanitation"] = 3,
 ["errors"] = {
 {
@@ -628,14 +628,6 @@ BugGrabberDB = {
 ["counter"] = 47667,
 },
 {
-["message"] = "Interface/AddOns/RaiderIO/core.lua:7186: table index is secret",
-["time"] = 1774391461,
-["locals"] = "s = \"TOOLTIP\"\no = 1\n(for state) = <table> {\n 1 = \"TOOLTIP\"\n 2 = <no value>\n}\n(for control) = 2\n_ = 2\nv = <no value>\n(*temporary) = <table> {\n 1 = \"TOOLTIP\"\n 2 = \"FULLSCREEN_DIALOG\"\n 3 = \"FULLSCREEN\"\n 4 = \"DIALOG\"\n 5 = \"HIGH\"\n 6 = \"MEDIUM\"\n 7 = \"LOW\"\n 8 = \"BACKGROUND\"\n TOOLTIP = 1\n BACKGROUND = 8\n FULLSCREEN = 3\n HIGH = 5\n DIALOG = 4\n LOW = 7\n FULLSCREEN_DIALOG = 2\n MEDIUM = 6\n}\n(*temporary) = <no value>\n(*temporary) = \"table index is secret\"\nSTRATA_MAP = <table> {\n 1 = \"TOOLTIP\"\n 2 = \"FULLSCREEN_DIALOG\"\n 3 = \"FULLSCREEN\"\n 4 = \"DIALOG\"\n 5 = \"HIGH\"\n 6 = \"MEDIUM\"\n 7 = \"LOW\"\n 8 = \"BACKGROUND\"\n TOOLTIP = 1\n BACKGROUND = 8\n FULLSCREEN = 3\n HIGH = 5\n DIALOG = 4\n LOW = 7\n FULLSCREEN_DIALOG = 2\n MEDIUM = 6\n}\n",
-["stack"] = "[Interface/AddOns/RaiderIO/core.lua]:7186: in function <Interface/AddOns/RaiderIO/core.lua:7182>\n[Interface/AddOns/RaiderIO/core.lua]:7268: in function <Interface/AddOns/RaiderIO/core.lua:7254>\n[Interface/AddOns/RaiderIO/core.lua]:7321: in function <Interface/AddOns/RaiderIO/core.lua:7311>\n[Interface/AddOns/RaiderIO/core.lua]:7465: in function 'ShowProfile'\n[Interface/AddOns/RaiderIO/core.lua]:7590: in function <Interface/AddOns/RaiderIO/core.lua:7569>\n[C]: in function 'LFGListUtil_SetSearchEntryTooltip'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:3320: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:3317>\n[C]: ?\n",
-["session"] = 600,
-["counter"] = 20,
-},
-{
 ["message"] = "...ddOns/Blizzard_FrameXML/FloatingPetBattleTooltip.lua:157: attempt to perform arithmetic on a secret number value (tainted by 'Auctionator')",
 ["time"] = 1774391735,
 ["locals"] = "self = BattlePetTooltip {\n linePool = <table> {\n }\n Owned = FontString {\n }\n layoutType = \"TooltipDefaultLayout\"\n SpeedTexture = Texture {\n }\n HealthTexture = Texture {\n }\n PowerTexture = Texture {\n }\n speciesID = 175\n PetType = FontString {\n }\n Power = FontString {\n }\n Speed = FontString {\n }\n textLineAnchor = FontString {\n }\n PetTypeTexture = Texture {\n }\n Name = FontString {\n }\n Health = FontString {\n }\n NineSlice = Frame {\n }\n Level = FontString {\n }\n BattlePet = FontString {\n }\n}\ntext = \" \"\nr = 1\ng = 0.823529\nb = 0\nwrap = nil\nanchor = Texture {\n}\nline = FontString {\n}\n(*temporary) = BattlePetTooltip {\n linePool = <table> {\n }\n Owned = FontString {\n }\n layoutType = \"TooltipDefaultLayout\"\n SpeedTexture = Texture {\n }\n HealthTexture = Texture {\n }\n PowerTexture = Texture {\n }\n speciesID = 175\n PetType = FontString {\n }\n Power = FontString {\n }\n Speed = FontString {\n }\n textLineAnchor = FontString {\n }\n PetTypeTexture = Texture {\n }\n Name = FontString {\n }\n Health = FontString {\n }\n NineSlice = Frame {\n }\n Level = FontString {\n }\n BattlePet = FontString {\n }\n}\n(*temporary) = <no value>\n(*temporary) = <no value>\n(*temporary) = FontString {\n}\n(*temporary) = <no value>\n(*temporary) = -2\n(*temporary) = \"attempt to perform arithmetic on a secret number value (tainted by 'Auctionator')\"\nLinePadding = 2\n",
@@ -682,6 +674,14 @@ BugGrabberDB = {
 ["stack"] = "[Interface/AddOns/Details/functions/util.lua]:167: in function 'MakeSettingsForAdapter'\n[Interface/AddOns/Details/functions/util.lua]:830: in function 'MakeDeathLogAdapter'\n[Interface/AddOns/Details/core/parser_nocleu_tp.lua]:495: in function <Interface/AddOns/Details/core/parser_nocleu_tp.lua:433>\n[C]: ?\n",
 ["session"] = 606,
 ["counter"] = 20,
+},
+{
+["message"] = "Interface/AddOns/RaiderIO/core.lua:7186: table index is secret",
+["time"] = 1774454904,
+["locals"] = "s = \"TOOLTIP\"\no = 1\n(for state) = <table> {\n 1 = \"TOOLTIP\"\n 2 = <no value>\n}\n(for control) = 2\n_ = 2\nv = <no value>\n(*temporary) = <table> {\n 1 = \"TOOLTIP\"\n 2 = \"FULLSCREEN_DIALOG\"\n 3 = \"FULLSCREEN\"\n 4 = \"DIALOG\"\n 5 = \"HIGH\"\n 6 = \"MEDIUM\"\n 7 = \"LOW\"\n 8 = \"BACKGROUND\"\n TOOLTIP = 1\n BACKGROUND = 8\n FULLSCREEN = 3\n HIGH = 5\n DIALOG = 4\n LOW = 7\n FULLSCREEN_DIALOG = 2\n MEDIUM = 6\n}\n(*temporary) = <no value>\n(*temporary) = \"table index is secret\"\nSTRATA_MAP = <table> {\n 1 = \"TOOLTIP\"\n 2 = \"FULLSCREEN_DIALOG\"\n 3 = \"FULLSCREEN\"\n 4 = \"DIALOG\"\n 5 = \"HIGH\"\n 6 = \"MEDIUM\"\n 7 = \"LOW\"\n 8 = \"BACKGROUND\"\n TOOLTIP = 1\n BACKGROUND = 8\n FULLSCREEN = 3\n HIGH = 5\n DIALOG = 4\n LOW = 7\n FULLSCREEN_DIALOG = 2\n MEDIUM = 6\n}\n",
+["stack"] = "[Interface/AddOns/RaiderIO/core.lua]:7186: in function <Interface/AddOns/RaiderIO/core.lua:7182>\n[Interface/AddOns/RaiderIO/core.lua]:7268: in function <Interface/AddOns/RaiderIO/core.lua:7254>\n[Interface/AddOns/RaiderIO/core.lua]:7321: in function <Interface/AddOns/RaiderIO/core.lua:7311>\n[Interface/AddOns/RaiderIO/core.lua]:7465: in function 'ShowProfile'\n[Interface/AddOns/RaiderIO/core.lua]:7667: in function <Interface/AddOns/RaiderIO/core.lua:7649>\n[C]: ?\n",
+["session"] = 609,
+["counter"] = 26,
 },
 },
 }

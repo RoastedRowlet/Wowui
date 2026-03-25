@@ -319,6 +319,150 @@ CraftSimDB = {
 ["provisionAll"] = 1,
 ["realm"] = "Stormrage",
 },
+["Quanxibomba-Stormrage"] = {
+["chatHistory"] = {
+{
+["fromPlayer"] = true,
+["content"] = "I can! R5 guaranteed. This Character!",
+["timestamp"] = 1773778380,
+},
+{
+["fromPlayer"] = false,
+["content"] = "sending it your way",
+["timestamp"] = 1773778380,
+},
+{
+["fromPlayer"] = false,
+["content"] = "sent",
+["timestamp"] = 1773778380,
+},
+{
+["fromPlayer"] = true,
+["content"] = "forgot to say done! but im sure you figured that out lol",
+["timestamp"] = 1773778500,
+},
+{
+["fromPlayer"] = false,
+["content"] = "yeah thanks beast",
+["timestamp"] = 1773778500,
+},
+},
+["totalOrders"] = 1,
+["customer"] = "Quanxibomba",
+["npc"] = false,
+["craftHistory"] = {
+{
+["reagentState"] = 0,
+["tip"] = 100000000,
+["itemLink"] = "|cnIQ4:|Hitem:237840::::::::90:102::13:6:12214:12497:12066:12693:8960:8791:8:28:3615:29:49:30:40:38:8:40:2746:46:232875:47:245876:48:245790:::::|h[Spellbreaker's Warglaive |A:Professions-ChatIcon-Quality-Tier5:17:15::1|a]|h|r",
+["timestamp"] = 1773778380,
+["customerNotes"] = "",
+["reagents"] = {
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 251283,
+},
+["dataSlotIndex"] = 1,
+["quantity"] = 1,
+},
+["slotIndex"] = 1,
+["source"] = 0,
+["isBasicReagent"] = true,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 237366,
+},
+["dataSlotIndex"] = 2,
+["quantity"] = 2,
+},
+["slotIndex"] = 2,
+["source"] = 0,
+["isBasicReagent"] = true,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 238203,
+},
+["dataSlotIndex"] = 1,
+["quantity"] = 8,
+},
+["slotIndex"] = 3,
+["source"] = 0,
+["isBasicReagent"] = true,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 238205,
+},
+["dataSlotIndex"] = 2,
+["quantity"] = 6,
+},
+["slotIndex"] = 4,
+["source"] = 0,
+["isBasicReagent"] = true,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 244638,
+},
+["dataSlotIndex"] = 3,
+["quantity"] = 1,
+},
+["slotIndex"] = 5,
+["source"] = 0,
+["isBasicReagent"] = true,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 232875,
+},
+["dataSlotIndex"] = 4,
+["quantity"] = 2,
+},
+["slotIndex"] = 6,
+["source"] = 1,
+["isBasicReagent"] = false,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 245876,
+},
+["dataSlotIndex"] = 5,
+["quantity"] = 1,
+},
+["slotIndex"] = 7,
+["source"] = 1,
+["isBasicReagent"] = false,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 245790,
+},
+["dataSlotIndex"] = 6,
+["quantity"] = 1,
+},
+["slotIndex"] = 8,
+["source"] = 0,
+["isBasicReagent"] = false,
+},
+},
+},
+},
+["provisionSome"] = 0,
+["provisionNone"] = 0,
+["totalTip"] = 100000000,
+["provisionAll"] = 1,
+["realm"] = "Stormrage",
+},
 ["Íhavehothots-Stormrage"] = {
 ["chatHistory"] = {
 {
@@ -470,6 +614,155 @@ CraftSimDB = {
 ["provisionSome"] = 0,
 ["provisionNone"] = 0,
 ["totalTip"] = 10000000,
+["provisionAll"] = 1,
+["realm"] = "Stormrage",
+},
+["Aldvelothi-Stormrage"] = {
+["chatHistory"] = {
+{
+["fromPlayer"] = true,
+["content"] = "I can! R5 guaranteed. This Character!",
+["timestamp"] = 1773780120,
+},
+{
+["fromPlayer"] = false,
+["content"] = "price?",
+["timestamp"] = 1773780120,
+},
+{
+["fromPlayer"] = true,
+["content"] = "whatever you want to tip!",
+["timestamp"] = 1773780120,
+},
+{
+["fromPlayer"] = false,
+["content"] = "snt, 5k",
+["timestamp"] = 1773780180,
+},
+{
+["fromPlayer"] = true,
+["content"] = "done!",
+["timestamp"] = 1773780180,
+},
+{
+["fromPlayer"] = false,
+["content"] = "ty!",
+["timestamp"] = 1773780240,
+},
+},
+["totalOrders"] = 1,
+["customer"] = "Aldvelothi",
+["npc"] = false,
+["craftHistory"] = {
+{
+["reagentState"] = 0,
+["tip"] = 50000000,
+["itemLink"] = "|cnIQ4:|Hitem:237849::::::::90:105::13:6:12214:12497:12066:12693:8960:8793:8:28:3615:29:32:30:49:38:8:40:2736:46:232875:47:245876:48:245784:::::|h[Magister's Valediction |A:Professions-ChatIcon-Quality-Tier5:17:15::1|a]|h|r",
+["timestamp"] = 1773780180,
+["customerNotes"] = "",
+["reagents"] = {
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 251283,
+},
+["dataSlotIndex"] = 1,
+["quantity"] = 1,
+},
+["slotIndex"] = 1,
+["source"] = 0,
+["isBasicReagent"] = true,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 237366,
+},
+["dataSlotIndex"] = 2,
+["quantity"] = 2,
+},
+["slotIndex"] = 2,
+["source"] = 0,
+["isBasicReagent"] = true,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 238203,
+},
+["dataSlotIndex"] = 1,
+["quantity"] = 10,
+},
+["slotIndex"] = 3,
+["source"] = 0,
+["isBasicReagent"] = true,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 238205,
+},
+["dataSlotIndex"] = 2,
+["quantity"] = 6,
+},
+["slotIndex"] = 4,
+["source"] = 0,
+["isBasicReagent"] = true,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 244638,
+},
+["dataSlotIndex"] = 3,
+["quantity"] = 1,
+},
+["slotIndex"] = 5,
+["source"] = 0,
+["isBasicReagent"] = true,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 232875,
+},
+["dataSlotIndex"] = 4,
+["quantity"] = 4,
+},
+["slotIndex"] = 6,
+["source"] = 1,
+["isBasicReagent"] = false,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 245876,
+},
+["dataSlotIndex"] = 5,
+["quantity"] = 1,
+},
+["slotIndex"] = 7,
+["source"] = 1,
+["isBasicReagent"] = false,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 245784,
+},
+["dataSlotIndex"] = 6,
+["quantity"] = 1,
+},
+["slotIndex"] = 8,
+["source"] = 0,
+["isBasicReagent"] = false,
+},
+},
+},
+},
+["provisionSome"] = 0,
+["provisionNone"] = 0,
+["totalTip"] = 50000000,
 ["provisionAll"] = 1,
 ["realm"] = "Stormrage",
 },
@@ -783,6 +1076,130 @@ CraftSimDB = {
 ["provisionSome"] = 0,
 ["provisionNone"] = 0,
 ["totalTip"] = 75000000,
+["provisionAll"] = 1,
+["realm"] = "Stormrage",
+},
+["Bubblgutz-Stormrage"] = {
+["chatHistory"] = {
+{
+["fromPlayer"] = true,
+["content"] = "I can! R5 guaranteed. This Character!",
+["timestamp"] = 1773759660,
+},
+},
+["totalOrders"] = 1,
+["customer"] = "Bubblgutz",
+["npc"] = false,
+["craftHistory"] = {
+{
+["reagentState"] = 0,
+["tip"] = 20000000,
+["itemLink"] = "|cnIQ4:|Hitem:237848::::::::90:105::13:6:12214:12497:12066:12693:8960:8791:8:28:3615:29:49:30:32:38:8:40:2741:46:232875:47:245876:48:245790:::::|h[Blood Knight's Mercy |A:Professions-ChatIcon-Quality-Tier5:17:15::1|a]|h|r",
+["timestamp"] = 1773759780,
+["customerNotes"] = "",
+["reagents"] = {
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 251283,
+},
+["dataSlotIndex"] = 1,
+["quantity"] = 1,
+},
+["slotIndex"] = 1,
+["source"] = 0,
+["isBasicReagent"] = true,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 237366,
+},
+["dataSlotIndex"] = 2,
+["quantity"] = 2,
+},
+["slotIndex"] = 2,
+["source"] = 0,
+["isBasicReagent"] = true,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 238203,
+},
+["dataSlotIndex"] = 1,
+["quantity"] = 10,
+},
+["slotIndex"] = 3,
+["source"] = 0,
+["isBasicReagent"] = true,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 238205,
+},
+["dataSlotIndex"] = 2,
+["quantity"] = 6,
+},
+["slotIndex"] = 4,
+["source"] = 0,
+["isBasicReagent"] = true,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 244638,
+},
+["dataSlotIndex"] = 3,
+["quantity"] = 1,
+},
+["slotIndex"] = 5,
+["source"] = 0,
+["isBasicReagent"] = true,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 232875,
+},
+["dataSlotIndex"] = 4,
+["quantity"] = 4,
+},
+["slotIndex"] = 6,
+["source"] = 1,
+["isBasicReagent"] = false,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 245876,
+},
+["dataSlotIndex"] = 5,
+["quantity"] = 1,
+},
+["slotIndex"] = 7,
+["source"] = 1,
+["isBasicReagent"] = false,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 245790,
+},
+["dataSlotIndex"] = 6,
+["quantity"] = 1,
+},
+["slotIndex"] = 8,
+["source"] = 0,
+["isBasicReagent"] = false,
+},
+},
+},
+},
+["provisionSome"] = 0,
+["provisionNone"] = 0,
+["totalTip"] = 20000000,
 ["provisionAll"] = 1,
 ["realm"] = "Stormrage",
 },
@@ -1788,6 +2205,160 @@ CraftSimDB = {
 ["totalTip"] = 50000000,
 ["realm"] = "Stormrage",
 },
+["Alconaft-Stormrage"] = {
+["chatHistory"] = {
+{
+["fromPlayer"] = true,
+["content"] = "I can! R5 guaranteed. This Character!",
+["timestamp"] = 1774048920,
+},
+{
+["fromPlayer"] = false,
+["content"] = "how much? tip?",
+["timestamp"] = 1774048920,
+},
+{
+["fromPlayer"] = true,
+["content"] = "whatever you feel is fair",
+["timestamp"] = 1774048920,
+},
+{
+["fromPlayer"] = false,
+["content"] = "sent",
+["timestamp"] = 1774048980,
+},
+{
+["fromPlayer"] = true,
+["content"] = "done!",
+["timestamp"] = 1774048980,
+},
+{
+["fromPlayer"] = false,
+["content"] = "ty",
+["timestamp"] = 1774048980,
+},
+{
+["fromPlayer"] = true,
+["content"] = "npnp!",
+["timestamp"] = 1774048980,
+},
+},
+["totalOrders"] = 1,
+["customer"] = "Alconaft",
+["npc"] = false,
+["craftHistory"] = {
+{
+["reagentState"] = 0,
+["tip"] = 50000000,
+["customerNotes"] = "",
+["timestamp"] = 1774048980,
+["itemLink"] = "|cnIQ4:|Hitem:237849::::::::90:102::13:6:12214:12497:12066:12693:8960:8791:8:28:3615:29:49:30:36:38:8:40:2736:46:232875:47:245876:48:245790:::::|h[Magister's Valediction |A:Professions-ChatIcon-Quality-Tier5:17:15::1|a]|h|r",
+["reagents"] = {
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 251283,
+},
+["dataSlotIndex"] = 1,
+["quantity"] = 1,
+},
+["isBasicReagent"] = true,
+["source"] = 0,
+["slotIndex"] = 1,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 237366,
+},
+["dataSlotIndex"] = 2,
+["quantity"] = 2,
+},
+["isBasicReagent"] = true,
+["source"] = 0,
+["slotIndex"] = 2,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 238203,
+},
+["dataSlotIndex"] = 1,
+["quantity"] = 10,
+},
+["isBasicReagent"] = true,
+["source"] = 0,
+["slotIndex"] = 3,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 238205,
+},
+["dataSlotIndex"] = 2,
+["quantity"] = 6,
+},
+["isBasicReagent"] = true,
+["source"] = 0,
+["slotIndex"] = 4,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 244638,
+},
+["dataSlotIndex"] = 3,
+["quantity"] = 1,
+},
+["isBasicReagent"] = true,
+["source"] = 0,
+["slotIndex"] = 5,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 232875,
+},
+["dataSlotIndex"] = 4,
+["quantity"] = 4,
+},
+["isBasicReagent"] = false,
+["source"] = 1,
+["slotIndex"] = 6,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 245876,
+},
+["dataSlotIndex"] = 5,
+["quantity"] = 1,
+},
+["isBasicReagent"] = false,
+["source"] = 1,
+["slotIndex"] = 7,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 245790,
+},
+["dataSlotIndex"] = 6,
+["quantity"] = 1,
+},
+["isBasicReagent"] = false,
+["source"] = 0,
+["slotIndex"] = 8,
+},
+},
+},
+},
+["provisionSome"] = 0,
+["provisionNone"] = 0,
+["provisionAll"] = 1,
+["totalTip"] = 50000000,
+["realm"] = "Stormrage",
+},
 ["Theossi-Stormrage"] = {
 ["chatHistory"] = {
 },
@@ -2214,6 +2785,251 @@ CraftSimDB = {
 ["totalTip"] = 100000000,
 ["realm"] = "Stormrage",
 },
+["Tekapo-Stormrage"] = {
+["chatHistory"] = {
+{
+["fromPlayer"] = true,
+["content"] = "I can! R5 guaranteed. This Character!",
+["timestamp"] = 1774389720,
+},
+{
+["fromPlayer"] = false,
+["content"] = "sent!",
+["timestamp"] = 1774389780,
+},
+{
+["fromPlayer"] = true,
+["content"] = "kk! omw",
+["timestamp"] = 1774389780,
+},
+{
+["fromPlayer"] = false,
+["content"] = "tyvm!",
+["timestamp"] = 1774389960,
+},
+{
+["fromPlayer"] = true,
+["content"] = ":D",
+["timestamp"] = 1774389960,
+},
+},
+["totalOrders"] = 1,
+["customer"] = "Tekapo",
+["npc"] = false,
+["craftHistory"] = {
+{
+["reagentState"] = 0,
+["tip"] = 50000000,
+["customerNotes"] = "TYVM!",
+["timestamp"] = 1774389840,
+["itemLink"] = "|cnIQ4:|Hitem:237849:8039:::::::90:105::13:8:12214:12497:12066:12693:8960:8793:13621:13667:9:28:3615:29:49:30:36:38:8:40:2736:46:232875:47:245876:48:245784:49:-2147480303:::::|h[Magister's Valediction |A:Professions-ChatIcon-Quality-Tier5:17:15::1|a]|h|r",
+["reagents"] = {
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 251283,
+},
+["dataSlotIndex"] = 1,
+["quantity"] = 1,
+},
+["isBasicReagent"] = true,
+["source"] = 0,
+["slotIndex"] = 1,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 238203,
+},
+["dataSlotIndex"] = 1,
+["quantity"] = 5,
+},
+["isBasicReagent"] = true,
+["source"] = 0,
+["slotIndex"] = 2,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 238205,
+},
+["dataSlotIndex"] = 2,
+["quantity"] = 3,
+},
+["isBasicReagent"] = true,
+["source"] = 0,
+["slotIndex"] = 3,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 244638,
+},
+["dataSlotIndex"] = 3,
+["quantity"] = 1,
+},
+["isBasicReagent"] = true,
+["source"] = 0,
+["slotIndex"] = 4,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["currencyID"] = 3345,
+},
+["dataSlotIndex"] = 7,
+["quantity"] = 80,
+},
+["isBasicReagent"] = false,
+["source"] = 1,
+["slotIndex"] = 8,
+},
+},
+},
+},
+["provisionSome"] = 0,
+["provisionNone"] = 0,
+["provisionAll"] = 1,
+["totalTip"] = 50000000,
+["realm"] = "Stormrage",
+},
+["Therodra-Stormrage"] = {
+["chatHistory"] = {
+{
+["fromPlayer"] = true,
+["content"] = "I can! R5 guaranteed. This Character!",
+["timestamp"] = 1774450320,
+},
+},
+["totalOrders"] = 0,
+["customer"] = "Therodra",
+["craftHistory"] = {
+},
+["provisionSome"] = 0,
+["provisionNone"] = 0,
+["provisionAll"] = 0,
+["totalTip"] = 0,
+["realm"] = "Stormrage",
+},
+["Angryabsol-Stormrage"] = {
+["chatHistory"] = {
+},
+["totalOrders"] = 1,
+["customer"] = "Angryabsol",
+["npc"] = false,
+["craftHistory"] = {
+{
+["reagentState"] = 0,
+["tip"] = 10000,
+["customerNotes"] = "",
+["timestamp"] = 1774032180,
+["itemLink"] = "|cnIQ4:|Hitem:237840::::::::90:102::13:6:12214:12497:12066:12693:8960:8793:8:28:3615:29:36:30:49:38:8:40:2746:46:232875:47:245876:48:245784:::::|h[Spellbreaker's Warglaive |A:Professions-ChatIcon-Quality-Tier5:17:15::1|a]|h|r",
+["reagents"] = {
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 251283,
+},
+["dataSlotIndex"] = 1,
+["quantity"] = 1,
+},
+["isBasicReagent"] = true,
+["source"] = 0,
+["slotIndex"] = 1,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 237366,
+},
+["dataSlotIndex"] = 2,
+["quantity"] = 2,
+},
+["isBasicReagent"] = true,
+["source"] = 0,
+["slotIndex"] = 2,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 238203,
+},
+["dataSlotIndex"] = 1,
+["quantity"] = 8,
+},
+["isBasicReagent"] = true,
+["source"] = 0,
+["slotIndex"] = 3,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 238205,
+},
+["dataSlotIndex"] = 2,
+["quantity"] = 6,
+},
+["isBasicReagent"] = true,
+["source"] = 0,
+["slotIndex"] = 4,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 244638,
+},
+["dataSlotIndex"] = 3,
+["quantity"] = 1,
+},
+["isBasicReagent"] = true,
+["source"] = 0,
+["slotIndex"] = 5,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 232875,
+},
+["dataSlotIndex"] = 4,
+["quantity"] = 2,
+},
+["isBasicReagent"] = false,
+["source"] = 1,
+["slotIndex"] = 6,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 245876,
+},
+["dataSlotIndex"] = 5,
+["quantity"] = 1,
+},
+["isBasicReagent"] = false,
+["source"] = 1,
+["slotIndex"] = 7,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 245784,
+},
+["dataSlotIndex"] = 6,
+["quantity"] = 1,
+},
+["isBasicReagent"] = false,
+["source"] = 0,
+["slotIndex"] = 8,
+},
+},
+},
+},
+["provisionSome"] = 0,
+["provisionNone"] = 0,
+["provisionAll"] = 1,
+["totalTip"] = 10000,
+["realm"] = "Stormrage",
+},
 ["Stormvine-Stormrage"] = {
 ["chatHistory"] = {
 {
@@ -2380,504 +3196,39 @@ CraftSimDB = {
 ["totalTip"] = 100000000,
 ["realm"] = "Stormrage",
 },
-["Potaties-Illidan"] = {
-["chatHistory"] = {
-{
-["fromPlayer"] = false,
-["content"] = "i was baiting ian",
-["timestamp"] = 1774398600,
-},
-{
-["fromPlayer"] = false,
-["content"] = "he didn't give in",
-["timestamp"] = 1774398600,
-},
-{
-["fromPlayer"] = true,
-["content"] = "LMAOOOO",
-["timestamp"] = 1774398600,
-},
-},
-["totalOrders"] = 0,
-["customer"] = "Potaties",
-["craftHistory"] = {
-},
-["provisionSome"] = 0,
-["provisionNone"] = 0,
-["provisionAll"] = 0,
-["totalTip"] = 0,
-["realm"] = "Illidan",
-},
-["Angryabsol-Stormrage"] = {
-["chatHistory"] = {
-},
-["totalOrders"] = 1,
-["customer"] = "Angryabsol",
-["npc"] = false,
-["craftHistory"] = {
-{
-["reagentState"] = 0,
-["tip"] = 10000,
-["customerNotes"] = "",
-["timestamp"] = 1774032180,
-["itemLink"] = "|cnIQ4:|Hitem:237840::::::::90:102::13:6:12214:12497:12066:12693:8960:8793:8:28:3615:29:36:30:49:38:8:40:2746:46:232875:47:245876:48:245784:::::|h[Spellbreaker's Warglaive |A:Professions-ChatIcon-Quality-Tier5:17:15::1|a]|h|r",
-["reagents"] = {
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 251283,
-},
-["dataSlotIndex"] = 1,
-["quantity"] = 1,
-},
-["isBasicReagent"] = true,
-["source"] = 0,
-["slotIndex"] = 1,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 237366,
-},
-["dataSlotIndex"] = 2,
-["quantity"] = 2,
-},
-["isBasicReagent"] = true,
-["source"] = 0,
-["slotIndex"] = 2,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 238203,
-},
-["dataSlotIndex"] = 1,
-["quantity"] = 8,
-},
-["isBasicReagent"] = true,
-["source"] = 0,
-["slotIndex"] = 3,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 238205,
-},
-["dataSlotIndex"] = 2,
-["quantity"] = 6,
-},
-["isBasicReagent"] = true,
-["source"] = 0,
-["slotIndex"] = 4,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 244638,
-},
-["dataSlotIndex"] = 3,
-["quantity"] = 1,
-},
-["isBasicReagent"] = true,
-["source"] = 0,
-["slotIndex"] = 5,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 232875,
-},
-["dataSlotIndex"] = 4,
-["quantity"] = 2,
-},
-["isBasicReagent"] = false,
-["source"] = 1,
-["slotIndex"] = 6,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 245876,
-},
-["dataSlotIndex"] = 5,
-["quantity"] = 1,
-},
-["isBasicReagent"] = false,
-["source"] = 1,
-["slotIndex"] = 7,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 245784,
-},
-["dataSlotIndex"] = 6,
-["quantity"] = 1,
-},
-["isBasicReagent"] = false,
-["source"] = 0,
-["slotIndex"] = 8,
-},
-},
-},
-},
-["provisionSome"] = 0,
-["provisionNone"] = 0,
-["provisionAll"] = 1,
-["totalTip"] = 10000,
-["realm"] = "Stormrage",
-},
-["Azidahakasan-Stormrage"] = {
-["chatHistory"] = {
-{
-["fromPlayer"] = false,
-["content"] = "how much for max |cnIQ4:|Hitem:237839::::::::90:72::13:1:3524:5:40:2747:38:8:46:232875:47:244675:48:245786:::::|h[Spellbreaker's Blade |A:Professions-ChatIcon-Quality-Tier5:17:15::1|a]|h|r",
-["timestamp"] = 1773225660,
-},
-{
-["fromPlayer"] = true,
-["content"] = "whatever you'd like to tip",
-["timestamp"] = 1773225660,
-},
-{
-["fromPlayer"] = false,
-["content"] = "give me a starting point, haven't seen how much people are tipping in new xpac",
-["timestamp"] = 1773225720,
-},
-{
-["fromPlayer"] = false,
-["content"] = "otherwise 5k is what i was giving last season lol",
-["timestamp"] = 1773225720,
-},
-{
-["fromPlayer"] = true,
-["content"] = "i've seen a lot of people sending all over the place. the median seems to be around 10k lately since its early",
-["timestamp"] = 1773225720,
-},
-{
-["fromPlayer"] = true,
-["content"] = "but i've seen 1k and 50k lmao",
-["timestamp"] = 1773225720,
-},
-{
-["fromPlayer"] = false,
-["content"] = "okay order sent tnx in advance",
-["timestamp"] = 1773225720,
-},
-{
-["fromPlayer"] = true,
-["content"] = "done!",
-["timestamp"] = 1773225780,
-},
-{
-["fromPlayer"] = false,
-["content"] = "ty vm, have a great one",
-["timestamp"] = 1773225720,
-},
-{
-["fromPlayer"] = true,
-["content"] = "you too!",
-["timestamp"] = 1773225720,
-},
-},
-["totalOrders"] = 1,
-["customer"] = "Azidahakasan",
-["npc"] = false,
-["craftHistory"] = {
-{
-["reagentState"] = 0,
-["tip"] = 125000000,
-["customerNotes"] = "",
-["timestamp"] = 1773225780,
-["itemLink"] = "|cnIQ4:|Hitem:237839::::::::90:105::13:6:12214:12497:12066:12685:8960:8790:8:28:3615:29:36:30:40:38:8:40:2747:46:232875:47:244675:48:245786:::::|h[Spellbreaker's Blade |A:Professions-ChatIcon-Quality-Tier5:17:15::1|a]|h|r",
-["reagents"] = {
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 251283,
-},
-["dataSlotIndex"] = 1,
-["quantity"] = 1,
-},
-["isBasicReagent"] = true,
-["source"] = 0,
-["slotIndex"] = 1,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 237366,
-},
-["dataSlotIndex"] = 2,
-["quantity"] = 2,
-},
-["isBasicReagent"] = true,
-["source"] = 0,
-["slotIndex"] = 2,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 238203,
-},
-["dataSlotIndex"] = 1,
-["quantity"] = 8,
-},
-["isBasicReagent"] = true,
-["source"] = 0,
-["slotIndex"] = 3,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 238205,
-},
-["dataSlotIndex"] = 2,
-["quantity"] = 6,
-},
-["isBasicReagent"] = true,
-["source"] = 0,
-["slotIndex"] = 4,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 244638,
-},
-["dataSlotIndex"] = 3,
-["quantity"] = 1,
-},
-["isBasicReagent"] = true,
-["source"] = 0,
-["slotIndex"] = 5,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 232875,
-},
-["dataSlotIndex"] = 4,
-["quantity"] = 2,
-},
-["isBasicReagent"] = false,
-["source"] = 1,
-["slotIndex"] = 6,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 244675,
-},
-["dataSlotIndex"] = 5,
-["quantity"] = 1,
-},
-["isBasicReagent"] = false,
-["source"] = 1,
-["slotIndex"] = 7,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 245786,
-},
-["dataSlotIndex"] = 6,
-["quantity"] = 1,
-},
-["isBasicReagent"] = false,
-["source"] = 0,
-["slotIndex"] = 8,
-},
-},
-},
-},
-["provisionSome"] = 0,
-["provisionNone"] = 0,
-["provisionAll"] = 1,
-["totalTip"] = 125000000,
-["realm"] = "Stormrage",
-},
-["Quanxibomba-Stormrage"] = {
+["Bexiaria-Stormrage"] = {
 ["chatHistory"] = {
 {
 ["fromPlayer"] = true,
 ["content"] = "I can! R5 guaranteed. This Character!",
-["timestamp"] = 1773778380,
-},
-{
-["fromPlayer"] = false,
-["content"] = "sending it your way",
-["timestamp"] = 1773778380,
+["timestamp"] = 1773841620,
 },
 {
 ["fromPlayer"] = false,
 ["content"] = "sent",
-["timestamp"] = 1773778380,
-},
-{
-["fromPlayer"] = true,
-["content"] = "forgot to say done! but im sure you figured that out lol",
-["timestamp"] = 1773778500,
-},
-{
-["fromPlayer"] = false,
-["content"] = "yeah thanks beast",
-["timestamp"] = 1773778500,
-},
-},
-["totalOrders"] = 1,
-["customer"] = "Quanxibomba",
-["npc"] = false,
-["craftHistory"] = {
-{
-["reagentState"] = 0,
-["tip"] = 100000000,
-["itemLink"] = "|cnIQ4:|Hitem:237840::::::::90:102::13:6:12214:12497:12066:12693:8960:8791:8:28:3615:29:49:30:40:38:8:40:2746:46:232875:47:245876:48:245790:::::|h[Spellbreaker's Warglaive |A:Professions-ChatIcon-Quality-Tier5:17:15::1|a]|h|r",
-["timestamp"] = 1773778380,
-["customerNotes"] = "",
-["reagents"] = {
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 251283,
-},
-["dataSlotIndex"] = 1,
-["quantity"] = 1,
-},
-["slotIndex"] = 1,
-["source"] = 0,
-["isBasicReagent"] = true,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 237366,
-},
-["dataSlotIndex"] = 2,
-["quantity"] = 2,
-},
-["slotIndex"] = 2,
-["source"] = 0,
-["isBasicReagent"] = true,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 238203,
-},
-["dataSlotIndex"] = 1,
-["quantity"] = 8,
-},
-["slotIndex"] = 3,
-["source"] = 0,
-["isBasicReagent"] = true,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 238205,
-},
-["dataSlotIndex"] = 2,
-["quantity"] = 6,
-},
-["slotIndex"] = 4,
-["source"] = 0,
-["isBasicReagent"] = true,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 244638,
-},
-["dataSlotIndex"] = 3,
-["quantity"] = 1,
-},
-["slotIndex"] = 5,
-["source"] = 0,
-["isBasicReagent"] = true,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 232875,
-},
-["dataSlotIndex"] = 4,
-["quantity"] = 2,
-},
-["slotIndex"] = 6,
-["source"] = 1,
-["isBasicReagent"] = false,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 245876,
-},
-["dataSlotIndex"] = 5,
-["quantity"] = 1,
-},
-["slotIndex"] = 7,
-["source"] = 1,
-["isBasicReagent"] = false,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 245790,
-},
-["dataSlotIndex"] = 6,
-["quantity"] = 1,
-},
-["slotIndex"] = 8,
-["source"] = 0,
-["isBasicReagent"] = false,
-},
-},
-},
-},
-["provisionSome"] = 0,
-["provisionNone"] = 0,
-["totalTip"] = 100000000,
-["provisionAll"] = 1,
-["realm"] = "Stormrage",
-},
-["Lamiralei-Stormrage"] = {
-["chatHistory"] = {
-{
-["fromPlayer"] = true,
-["content"] = "I can! R5 guaranteed. This Character!",
-["timestamp"] = 1773939060,
-},
-{
-["fromPlayer"] = false,
-["content"] = "inc",
-["timestamp"] = 1773939120,
-},
-{
-["fromPlayer"] = true,
-["content"] = "sounds good",
-["timestamp"] = 1773939180,
-},
-{
-["fromPlayer"] = false,
-["content"] = "sent!",
-["timestamp"] = 1773939180,
+["timestamp"] = 1773841740,
 },
 {
 ["fromPlayer"] = true,
 ["content"] = "done!",
-["timestamp"] = 1773939180,
+["timestamp"] = 1773841740,
+},
+{
+["fromPlayer"] = false,
+["content"] = "ty!",
+["timestamp"] = 1773841740,
 },
 },
 ["totalOrders"] = 1,
-["customer"] = "Lamiralei",
+["customer"] = "Bexiaria",
 ["npc"] = false,
 ["craftHistory"] = {
 {
 ["reagentState"] = 0,
 ["tip"] = 50000000,
-["customerNotes"] = "",
-["timestamp"] = 1773939180,
-["itemLink"] = "|cnIQ4:|Hitem:237840::::::::90:105::13:6:12214:12497:12066:12693:8960:8793:8:28:3615:29:36:30:49:38:8:40:2746:46:232875:47:245876:48:245784:::::|h[Spellbreaker's Warglaive |A:Professions-ChatIcon-Quality-Tier5:17:15::1|a]|h|r",
+["customerNotes"] = "Thank you!",
+["timestamp"] = 1773841740,
+["itemLink"] = "|cnIQ4:|Hitem:237849::::::::90:105::13:6:12214:12497:12066:12693:8960:8793:8:28:3615:29:32:30:49:38:8:40:2736:46:232875:47:245876:48:245784:::::|h[Magister's Valediction |A:Professions-ChatIcon-Quality-Tier5:17:15::1|a]|h|r",
 ["reagents"] = {
 {
 ["reagentInfo"] = {
@@ -2902,130 +3253,6 @@ CraftSimDB = {
 ["isBasicReagent"] = true,
 ["source"] = 0,
 ["slotIndex"] = 2,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 238203,
-},
-["dataSlotIndex"] = 1,
-["quantity"] = 8,
-},
-["isBasicReagent"] = true,
-["source"] = 0,
-["slotIndex"] = 3,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 238205,
-},
-["dataSlotIndex"] = 2,
-["quantity"] = 6,
-},
-["isBasicReagent"] = true,
-["source"] = 0,
-["slotIndex"] = 4,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 244638,
-},
-["dataSlotIndex"] = 3,
-["quantity"] = 1,
-},
-["isBasicReagent"] = true,
-["source"] = 0,
-["slotIndex"] = 5,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 232875,
-},
-["dataSlotIndex"] = 4,
-["quantity"] = 2,
-},
-["isBasicReagent"] = false,
-["source"] = 1,
-["slotIndex"] = 6,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 245876,
-},
-["dataSlotIndex"] = 5,
-["quantity"] = 1,
-},
-["isBasicReagent"] = false,
-["source"] = 1,
-["slotIndex"] = 7,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 245784,
-},
-["dataSlotIndex"] = 6,
-["quantity"] = 1,
-},
-["isBasicReagent"] = false,
-["source"] = 0,
-["slotIndex"] = 8,
-},
-},
-},
-},
-["provisionSome"] = 0,
-["provisionNone"] = 0,
-["totalTip"] = 50000000,
-["provisionAll"] = 1,
-["realm"] = "Stormrage",
-},
-["Bubblgutz-Stormrage"] = {
-["chatHistory"] = {
-{
-["fromPlayer"] = true,
-["content"] = "I can! R5 guaranteed. This Character!",
-["timestamp"] = 1773759660,
-},
-},
-["totalOrders"] = 1,
-["customer"] = "Bubblgutz",
-["npc"] = false,
-["craftHistory"] = {
-{
-["reagentState"] = 0,
-["tip"] = 20000000,
-["itemLink"] = "|cnIQ4:|Hitem:237848::::::::90:105::13:6:12214:12497:12066:12693:8960:8791:8:28:3615:29:49:30:32:38:8:40:2741:46:232875:47:245876:48:245790:::::|h[Blood Knight's Mercy |A:Professions-ChatIcon-Quality-Tier5:17:15::1|a]|h|r",
-["timestamp"] = 1773759780,
-["customerNotes"] = "",
-["reagents"] = {
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 251283,
-},
-["dataSlotIndex"] = 1,
-["quantity"] = 1,
-},
-["slotIndex"] = 1,
-["source"] = 0,
-["isBasicReagent"] = true,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 237366,
-},
-["dataSlotIndex"] = 2,
-["quantity"] = 2,
-},
-["slotIndex"] = 2,
-["source"] = 0,
-["isBasicReagent"] = true,
 },
 {
 ["reagentInfo"] = {
@@ -3035,9 +3262,9 @@ CraftSimDB = {
 ["dataSlotIndex"] = 1,
 ["quantity"] = 10,
 },
-["slotIndex"] = 3,
-["source"] = 0,
 ["isBasicReagent"] = true,
+["source"] = 0,
+["slotIndex"] = 3,
 },
 {
 ["reagentInfo"] = {
@@ -3047,9 +3274,9 @@ CraftSimDB = {
 ["dataSlotIndex"] = 2,
 ["quantity"] = 6,
 },
-["slotIndex"] = 4,
-["source"] = 0,
 ["isBasicReagent"] = true,
+["source"] = 0,
+["slotIndex"] = 4,
 },
 {
 ["reagentInfo"] = {
@@ -3059,9 +3286,9 @@ CraftSimDB = {
 ["dataSlotIndex"] = 3,
 ["quantity"] = 1,
 },
-["slotIndex"] = 5,
-["source"] = 0,
 ["isBasicReagent"] = true,
+["source"] = 0,
+["slotIndex"] = 5,
 },
 {
 ["reagentInfo"] = {
@@ -3071,9 +3298,9 @@ CraftSimDB = {
 ["dataSlotIndex"] = 4,
 ["quantity"] = 4,
 },
-["slotIndex"] = 6,
-["source"] = 1,
 ["isBasicReagent"] = false,
+["source"] = 1,
+["slotIndex"] = 6,
 },
 {
 ["reagentInfo"] = {
@@ -3083,29 +3310,236 @@ CraftSimDB = {
 ["dataSlotIndex"] = 5,
 ["quantity"] = 1,
 },
-["slotIndex"] = 7,
-["source"] = 1,
 ["isBasicReagent"] = false,
+["source"] = 1,
+["slotIndex"] = 7,
 },
 {
 ["reagentInfo"] = {
 ["reagent"] = {
-["itemID"] = 245790,
+["itemID"] = 245784,
 },
 ["dataSlotIndex"] = 6,
 ["quantity"] = 1,
 },
-["slotIndex"] = 8,
-["source"] = 0,
 ["isBasicReagent"] = false,
+["source"] = 0,
+["slotIndex"] = 8,
 },
 },
 },
 },
 ["provisionSome"] = 0,
 ["provisionNone"] = 0,
-["totalTip"] = 20000000,
 ["provisionAll"] = 1,
+["totalTip"] = 50000000,
+["realm"] = "Stormrage",
+},
+["Camdadk-Illidan"] = {
+["chatHistory"] = {
+{
+["fromPlayer"] = false,
+["content"] = "plz say you got aa",
+["timestamp"] = 1774442100,
+},
+{
+["fromPlayer"] = true,
+["content"] = "pit",
+["timestamp"] = 1774442100,
+},
+{
+["fromPlayer"] = false,
+["content"] = "ah pit then seat back to pit XD",
+["timestamp"] = 1774442160,
+},
+{
+["fromPlayer"] = true,
+["content"] = "Right? tragedy",
+["timestamp"] = 1774442160,
+},
+{
+["fromPlayer"] = false,
+["content"] = "if you want to kick the mage and que us up if the tank wants to",
+["timestamp"] = 1774442160,
+},
+{
+["fromPlayer"] = false,
+["content"] = "up to you",
+["timestamp"] = 1774442220,
+},
+{
+["fromPlayer"] = true,
+["content"] = "tank is fixing his UI because he updated it and ellismere reset the prfoles lmao",
+["timestamp"] = 1774442280,
+},
+{
+["fromPlayer"] = false,
+["content"] = "ight imma bio then",
+["timestamp"] = 1774442280,
+},
+{
+["fromPlayer"] = true,
+["content"] = "we got aa",
+["timestamp"] = 1774444260,
+},
+{
+["fromPlayer"] = false,
+["content"] = "ahhh !@#$ ",
+["timestamp"] = 1774444260,
+},
+{
+["fromPlayer"] = false,
+["content"] = "let me get my trinket",
+["timestamp"] = 1774444260,
+},
+{
+["fromPlayer"] = false,
+["content"] = "we doing it at the 12 or you droping it?",
+["timestamp"] = 1774444320,
+},
+},
+["totalOrders"] = 0,
+["customer"] = "Camdadk",
+["craftHistory"] = {
+},
+["provisionSome"] = 0,
+["provisionNone"] = 0,
+["provisionAll"] = 0,
+["totalTip"] = 0,
+["realm"] = "Illidan",
+},
+["Rollingursus-Stormrage"] = {
+["chatHistory"] = {
+{
+["fromPlayer"] = true,
+["content"] = "I can! R5 guaranteed. This Character!",
+["timestamp"] = 1774032180,
+},
+{
+["fromPlayer"] = true,
+["content"] = "Done!",
+["timestamp"] = 1774032240,
+},
+{
+["fromPlayer"] = false,
+["content"] = "thanks",
+["timestamp"] = 1774032240,
+},
+},
+["totalOrders"] = 1,
+["customer"] = "Rollingursus",
+["npc"] = false,
+["craftHistory"] = {
+{
+["reagentState"] = 0,
+["tip"] = 50000000,
+["customerNotes"] = "",
+["timestamp"] = 1774032240,
+["itemLink"] = "|cnIQ4:|Hitem:237849::::::::90:102::13:6:12214:12497:12066:12693:8960:8793:8:28:3615:29:49:30:40:38:8:40:2736:46:232875:47:245876:48:245784:::::|h[Magister's Valediction |A:Professions-ChatIcon-Quality-Tier5:17:15::1|a]|h|r",
+["reagents"] = {
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 251283,
+},
+["dataSlotIndex"] = 1,
+["quantity"] = 1,
+},
+["isBasicReagent"] = true,
+["source"] = 0,
+["slotIndex"] = 1,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 237366,
+},
+["dataSlotIndex"] = 2,
+["quantity"] = 2,
+},
+["isBasicReagent"] = true,
+["source"] = 0,
+["slotIndex"] = 2,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 238203,
+},
+["dataSlotIndex"] = 1,
+["quantity"] = 10,
+},
+["isBasicReagent"] = true,
+["source"] = 0,
+["slotIndex"] = 3,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 238205,
+},
+["dataSlotIndex"] = 2,
+["quantity"] = 6,
+},
+["isBasicReagent"] = true,
+["source"] = 0,
+["slotIndex"] = 4,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 244638,
+},
+["dataSlotIndex"] = 3,
+["quantity"] = 1,
+},
+["isBasicReagent"] = true,
+["source"] = 0,
+["slotIndex"] = 5,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 232875,
+},
+["dataSlotIndex"] = 4,
+["quantity"] = 4,
+},
+["isBasicReagent"] = false,
+["source"] = 1,
+["slotIndex"] = 6,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 245876,
+},
+["dataSlotIndex"] = 5,
+["quantity"] = 1,
+},
+["isBasicReagent"] = false,
+["source"] = 1,
+["slotIndex"] = 7,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 245784,
+},
+["dataSlotIndex"] = 6,
+["quantity"] = 1,
+},
+["isBasicReagent"] = false,
+["source"] = 0,
+["slotIndex"] = 8,
+},
+},
+},
+},
+["provisionSome"] = 0,
+["provisionNone"] = 0,
+["provisionAll"] = 1,
+["totalTip"] = 50000000,
 ["realm"] = "Stormrage",
 },
 ["Sundkay-Stormrage"] = {
@@ -3494,1554 +3928,6 @@ CraftSimDB = {
 ["provisionAll"] = 1,
 ["realm"] = "Stormrage",
 },
-["Fuglylight-Stormrage"] = {
-["chatHistory"] = {
-},
-["totalOrders"] = 1,
-["customer"] = "Fuglylight",
-["npc"] = false,
-["craftHistory"] = {
-{
-["reagentState"] = 0,
-["tip"] = 20000000,
-["itemLink"] = "|cnIQ4:|Hitem:237932::::::::90:105::13:5:12247:12246:12497:8793:13620:7:28:3615:29:40:30:36:38:8:40:2703:45:245784:46:-2147480307:::::|h[Primalforged Heavy Axe |A:Professions-ChatIcon-Quality-Tier5:17:15::1|a]|h|r",
-["timestamp"] = 1773310740,
-["customerNotes"] = "",
-["reagents"] = {
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 243060,
-},
-["dataSlotIndex"] = 1,
-["quantity"] = 2,
-},
-["slotIndex"] = 1,
-["source"] = 0,
-["isBasicReagent"] = true,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 238198,
-},
-["dataSlotIndex"] = 1,
-["quantity"] = 4,
-},
-["slotIndex"] = 2,
-["source"] = 0,
-["isBasicReagent"] = true,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 245784,
-},
-["dataSlotIndex"] = 3,
-["quantity"] = 1,
-},
-["slotIndex"] = 4,
-["source"] = 0,
-["isBasicReagent"] = false,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["currencyID"] = 3341,
-},
-["dataSlotIndex"] = 4,
-["quantity"] = 80,
-},
-["slotIndex"] = 5,
-["source"] = 1,
-["isBasicReagent"] = false,
-},
-},
-},
-},
-["provisionSome"] = 0,
-["provisionNone"] = 0,
-["totalTip"] = 20000000,
-["provisionAll"] = 1,
-["realm"] = "Stormrage",
-},
-["Rianon-Stormrage"] = {
-["chatHistory"] = {
-{
-["fromPlayer"] = false,
-["content"] = " how much for max rank  chopper",
-["timestamp"] = 1772662920,
-},
-{
-["fromPlayer"] = true,
-["content"] = "whatever you feel comfortable tipping",
-["timestamp"] = 1772662920,
-},
-{
-["fromPlayer"] = false,
-["content"] = " ok what name",
-["timestamp"] = 1772662920,
-},
-{
-["fromPlayer"] = true,
-["content"] = "this one!",
-["timestamp"] = 1772662920,
-},
-{
-["fromPlayer"] = true,
-["content"] = "I hate that other character !@#$ lol",
-["timestamp"] = 1772662980,
-},
-{
-["fromPlayer"] = false,
-["content"] = " sent    was trying to figure what the new standard might be",
-["timestamp"] = 1772663100,
-},
-{
-["fromPlayer"] = true,
-["content"] = "1 sec on the order",
-["timestamp"] = 1772663160,
-},
-{
-["fromPlayer"] = true,
-["content"] = "this early i need the weapon wrap 2* as well",
-["timestamp"] = 1772663280,
-},
-{
-["fromPlayer"] = false,
-["content"] = " #$%^ ok   i tried to get it made but got screwed so i can  repick one up from the ah brb with it to resend",
-["timestamp"] = 1772663400,
-},
-{
-["fromPlayer"] = true,
-["content"] = "sounds good",
-["timestamp"] = 1772663400,
-},
-{
-["fromPlayer"] = true,
-["content"] = "i was literally short 1 knowledge point lol",
-["timestamp"] = 1772663400,
-},
-{
-["fromPlayer"] = true,
-["content"] = "absolutely tragic",
-["timestamp"] = 1772663400,
-},
-{
-["fromPlayer"] = false,
-["content"] = " i feel that  was starting to think this recipe was at the  butt end of the circle for axes or something",
-["timestamp"] = 1772663460,
-},
-{
-["fromPlayer"] = true,
-["content"] = "done!",
-["timestamp"] = 1772663580,
-},
-{
-["fromPlayer"] = false,
-["content"] = " thank you , your  amzing keep up the good work",
-["timestamp"] = 1772663640,
-},
-{
-["fromPlayer"] = true,
-["content"] = "you too!",
-["timestamp"] = 1772663640,
-},
-{
-["fromPlayer"] = true,
-["content"] = "hmu if you need that thing upgraded when you get the gilded crests :D",
-["timestamp"] = 1772663700,
-},
-{
-["fromPlayer"] = false,
-["content"] = " will do in a week or two depending on gating lol",
-["timestamp"] = 1772663760,
-},
-{
-["fromPlayer"] = true,
-["content"] = "I think its 3 weeks when we get access to mythic crests?",
-["timestamp"] = 1772663760,
-},
-{
-["fromPlayer"] = true,
-["content"] = "2 for heroic",
-["timestamp"] = 1772663760,
-},
-{
-["fromPlayer"] = false,
-["content"] = " yeah trying to forget we are back to bc  timegates honsently lol",
-["timestamp"] = 1772663820,
-},
-},
-["totalOrders"] = 1,
-["customer"] = "Rianon",
-["npc"] = false,
-["craftHistory"] = {
-{
-["reagentState"] = 0,
-["tip"] = 50000000,
-["customerNotes"] = "",
-["timestamp"] = 1772663580,
-["itemLink"] = "|cnIQ4:|Hitem:237850::::::::90:102::13:6:12214:12497:12066:12693:8960:8793:8:28:3615:29:49:30:36:38:8:40:2735:46:232875:47:245876:48:245784:::::|h[Farstrider's Chopper |A:Professions-ChatIcon-Quality-Tier5:17:15::1|a]|h|r",
-["reagents"] = {
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 251283,
-},
-["dataSlotIndex"] = 1,
-["quantity"] = 1,
-},
-["isBasicReagent"] = true,
-["source"] = 0,
-["slotIndex"] = 1,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 237366,
-},
-["dataSlotIndex"] = 2,
-["quantity"] = 2,
-},
-["isBasicReagent"] = true,
-["source"] = 0,
-["slotIndex"] = 2,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 238203,
-},
-["dataSlotIndex"] = 1,
-["quantity"] = 8,
-},
-["isBasicReagent"] = true,
-["source"] = 0,
-["slotIndex"] = 3,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 238205,
-},
-["dataSlotIndex"] = 2,
-["quantity"] = 6,
-},
-["isBasicReagent"] = true,
-["source"] = 0,
-["slotIndex"] = 4,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 244638,
-},
-["dataSlotIndex"] = 3,
-["quantity"] = 1,
-},
-["isBasicReagent"] = true,
-["source"] = 0,
-["slotIndex"] = 5,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 232875,
-},
-["dataSlotIndex"] = 4,
-["quantity"] = 2,
-},
-["isBasicReagent"] = false,
-["source"] = 1,
-["slotIndex"] = 6,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 245876,
-},
-["dataSlotIndex"] = 5,
-["quantity"] = 1,
-},
-["isBasicReagent"] = false,
-["source"] = 1,
-["slotIndex"] = 7,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 245784,
-},
-["dataSlotIndex"] = 6,
-["quantity"] = 1,
-},
-["isBasicReagent"] = false,
-["source"] = 0,
-["slotIndex"] = 8,
-},
-},
-},
-},
-["provisionSome"] = 0,
-["provisionNone"] = 0,
-["provisionAll"] = 1,
-["totalTip"] = 50000000,
-["realm"] = "Stormrage",
-},
-["Rollingursus-Stormrage"] = {
-["chatHistory"] = {
-{
-["fromPlayer"] = true,
-["content"] = "I can! R5 guaranteed. This Character!",
-["timestamp"] = 1774032180,
-},
-{
-["fromPlayer"] = true,
-["content"] = "Done!",
-["timestamp"] = 1774032240,
-},
-{
-["fromPlayer"] = false,
-["content"] = "thanks",
-["timestamp"] = 1774032240,
-},
-},
-["totalOrders"] = 1,
-["customer"] = "Rollingursus",
-["npc"] = false,
-["craftHistory"] = {
-{
-["reagentState"] = 0,
-["tip"] = 50000000,
-["customerNotes"] = "",
-["timestamp"] = 1774032240,
-["itemLink"] = "|cnIQ4:|Hitem:237849::::::::90:102::13:6:12214:12497:12066:12693:8960:8793:8:28:3615:29:49:30:40:38:8:40:2736:46:232875:47:245876:48:245784:::::|h[Magister's Valediction |A:Professions-ChatIcon-Quality-Tier5:17:15::1|a]|h|r",
-["reagents"] = {
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 251283,
-},
-["dataSlotIndex"] = 1,
-["quantity"] = 1,
-},
-["isBasicReagent"] = true,
-["source"] = 0,
-["slotIndex"] = 1,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 237366,
-},
-["dataSlotIndex"] = 2,
-["quantity"] = 2,
-},
-["isBasicReagent"] = true,
-["source"] = 0,
-["slotIndex"] = 2,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 238203,
-},
-["dataSlotIndex"] = 1,
-["quantity"] = 10,
-},
-["isBasicReagent"] = true,
-["source"] = 0,
-["slotIndex"] = 3,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 238205,
-},
-["dataSlotIndex"] = 2,
-["quantity"] = 6,
-},
-["isBasicReagent"] = true,
-["source"] = 0,
-["slotIndex"] = 4,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 244638,
-},
-["dataSlotIndex"] = 3,
-["quantity"] = 1,
-},
-["isBasicReagent"] = true,
-["source"] = 0,
-["slotIndex"] = 5,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 232875,
-},
-["dataSlotIndex"] = 4,
-["quantity"] = 4,
-},
-["isBasicReagent"] = false,
-["source"] = 1,
-["slotIndex"] = 6,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 245876,
-},
-["dataSlotIndex"] = 5,
-["quantity"] = 1,
-},
-["isBasicReagent"] = false,
-["source"] = 1,
-["slotIndex"] = 7,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 245784,
-},
-["dataSlotIndex"] = 6,
-["quantity"] = 1,
-},
-["isBasicReagent"] = false,
-["source"] = 0,
-["slotIndex"] = 8,
-},
-},
-},
-},
-["provisionSome"] = 0,
-["provisionNone"] = 0,
-["provisionAll"] = 1,
-["totalTip"] = 50000000,
-["realm"] = "Stormrage",
-},
-["Ritomctwisto-Stormrage"] = {
-["chatHistory"] = {
-{
-["fromPlayer"] = true,
-["content"] = "I can! R5 guaranteed. This Character!",
-["timestamp"] = 1774148700,
-},
-{
-["fromPlayer"] = false,
-["content"] = "great, how much comm? not used to the norms yet",
-["timestamp"] = 1774148760,
-},
-{
-["fromPlayer"] = true,
-["content"] = "whatever you feel is fair",
-["timestamp"] = 1774148760,
-},
-{
-["fromPlayer"] = true,
-["content"] = "generally see around 10k ish",
-["timestamp"] = 1774148760,
-},
-{
-["fromPlayer"] = true,
-["content"] = "but whatever you wanna send",
-["timestamp"] = 1774148760,
-},
-{
-["fromPlayer"] = false,
-["content"] = "great, sending your way",
-["timestamp"] = 1774148760,
-},
-{
-["fromPlayer"] = true,
-["content"] = "done!",
-["timestamp"] = 1774148820,
-},
-{
-["fromPlayer"] = false,
-["content"] = "tyvm",
-["timestamp"] = 1774148880,
-},
-},
-["totalOrders"] = 1,
-["customer"] = "Ritomctwisto",
-["npc"] = false,
-["craftHistory"] = {
-{
-["reagentState"] = 0,
-["tip"] = 100000000,
-["itemLink"] = "|cnIQ4:|Hitem:237849::::::::90:102::13:6:12214:12497:12066:12693:8960:8793:8:28:3615:29:49:30:40:38:8:40:2736:46:232875:47:245876:48:245784:::::|h[Magister's Valediction |A:Professions-ChatIcon-Quality-Tier5:17:15::1|a]|h|r",
-["timestamp"] = 1774148820,
-["customerNotes"] = "",
-["reagents"] = {
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 251283,
-},
-["dataSlotIndex"] = 1,
-["quantity"] = 1,
-},
-["slotIndex"] = 1,
-["source"] = 0,
-["isBasicReagent"] = true,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 237366,
-},
-["dataSlotIndex"] = 2,
-["quantity"] = 2,
-},
-["slotIndex"] = 2,
-["source"] = 0,
-["isBasicReagent"] = true,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 238203,
-},
-["dataSlotIndex"] = 1,
-["quantity"] = 10,
-},
-["slotIndex"] = 3,
-["source"] = 0,
-["isBasicReagent"] = true,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 238205,
-},
-["dataSlotIndex"] = 2,
-["quantity"] = 6,
-},
-["slotIndex"] = 4,
-["source"] = 0,
-["isBasicReagent"] = true,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 244638,
-},
-["dataSlotIndex"] = 3,
-["quantity"] = 1,
-},
-["slotIndex"] = 5,
-["source"] = 0,
-["isBasicReagent"] = true,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 232875,
-},
-["dataSlotIndex"] = 4,
-["quantity"] = 4,
-},
-["slotIndex"] = 6,
-["source"] = 1,
-["isBasicReagent"] = false,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 245876,
-},
-["dataSlotIndex"] = 5,
-["quantity"] = 1,
-},
-["slotIndex"] = 7,
-["source"] = 1,
-["isBasicReagent"] = false,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 245784,
-},
-["dataSlotIndex"] = 6,
-["quantity"] = 1,
-},
-["slotIndex"] = 8,
-["source"] = 0,
-["isBasicReagent"] = false,
-},
-},
-},
-},
-["provisionSome"] = 0,
-["provisionNone"] = 0,
-["totalTip"] = 100000000,
-["provisionAll"] = 1,
-["realm"] = "Stormrage",
-},
-["Alconaft-Stormrage"] = {
-["chatHistory"] = {
-{
-["fromPlayer"] = true,
-["content"] = "I can! R5 guaranteed. This Character!",
-["timestamp"] = 1774048920,
-},
-{
-["fromPlayer"] = false,
-["content"] = "how much? tip?",
-["timestamp"] = 1774048920,
-},
-{
-["fromPlayer"] = true,
-["content"] = "whatever you feel is fair",
-["timestamp"] = 1774048920,
-},
-{
-["fromPlayer"] = false,
-["content"] = "sent",
-["timestamp"] = 1774048980,
-},
-{
-["fromPlayer"] = true,
-["content"] = "done!",
-["timestamp"] = 1774048980,
-},
-{
-["fromPlayer"] = false,
-["content"] = "ty",
-["timestamp"] = 1774048980,
-},
-{
-["fromPlayer"] = true,
-["content"] = "npnp!",
-["timestamp"] = 1774048980,
-},
-},
-["totalOrders"] = 1,
-["customer"] = "Alconaft",
-["npc"] = false,
-["craftHistory"] = {
-{
-["reagentState"] = 0,
-["tip"] = 50000000,
-["customerNotes"] = "",
-["timestamp"] = 1774048980,
-["itemLink"] = "|cnIQ4:|Hitem:237849::::::::90:102::13:6:12214:12497:12066:12693:8960:8791:8:28:3615:29:49:30:36:38:8:40:2736:46:232875:47:245876:48:245790:::::|h[Magister's Valediction |A:Professions-ChatIcon-Quality-Tier5:17:15::1|a]|h|r",
-["reagents"] = {
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 251283,
-},
-["dataSlotIndex"] = 1,
-["quantity"] = 1,
-},
-["isBasicReagent"] = true,
-["source"] = 0,
-["slotIndex"] = 1,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 237366,
-},
-["dataSlotIndex"] = 2,
-["quantity"] = 2,
-},
-["isBasicReagent"] = true,
-["source"] = 0,
-["slotIndex"] = 2,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 238203,
-},
-["dataSlotIndex"] = 1,
-["quantity"] = 10,
-},
-["isBasicReagent"] = true,
-["source"] = 0,
-["slotIndex"] = 3,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 238205,
-},
-["dataSlotIndex"] = 2,
-["quantity"] = 6,
-},
-["isBasicReagent"] = true,
-["source"] = 0,
-["slotIndex"] = 4,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 244638,
-},
-["dataSlotIndex"] = 3,
-["quantity"] = 1,
-},
-["isBasicReagent"] = true,
-["source"] = 0,
-["slotIndex"] = 5,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 232875,
-},
-["dataSlotIndex"] = 4,
-["quantity"] = 4,
-},
-["isBasicReagent"] = false,
-["source"] = 1,
-["slotIndex"] = 6,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 245876,
-},
-["dataSlotIndex"] = 5,
-["quantity"] = 1,
-},
-["isBasicReagent"] = false,
-["source"] = 1,
-["slotIndex"] = 7,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 245790,
-},
-["dataSlotIndex"] = 6,
-["quantity"] = 1,
-},
-["isBasicReagent"] = false,
-["source"] = 0,
-["slotIndex"] = 8,
-},
-},
-},
-},
-["provisionSome"] = 0,
-["provisionNone"] = 0,
-["provisionAll"] = 1,
-["totalTip"] = 50000000,
-["realm"] = "Stormrage",
-},
-["Sahïra-Stormrage"] = {
-["chatHistory"] = {
-{
-["fromPlayer"] = true,
-["content"] = "I can! R5 guaranteed. This Character!",
-["timestamp"] = 1773760020,
-},
-{
-["fromPlayer"] = false,
-["content"] = "price ?",
-["timestamp"] = 1773760080,
-},
-{
-["fromPlayer"] = true,
-["content"] = "whatever you want to tip",
-["timestamp"] = 1773760140,
-},
-{
-["fromPlayer"] = false,
-["content"] = "send to this char ?",
-["timestamp"] = 1773760140,
-},
-{
-["fromPlayer"] = true,
-["content"] = "yup!",
-["timestamp"] = 1773760140,
-},
-{
-["fromPlayer"] = true,
-["content"] = "i !@#$ing hate when i want something crafted",
-["timestamp"] = 1773760140,
-},
-{
-["fromPlayer"] = true,
-["content"] = "and someone is like \"lemee hop on my alt rq\"",
-["timestamp"] = 1773760140,
-},
-{
-["fromPlayer"] = false,
-["content"] = "yeah its true haha",
-["timestamp"] = 1773760200,
-},
-{
-["fromPlayer"] = false,
-["content"] = "send :3",
-["timestamp"] = 1773760200,
-},
-{
-["fromPlayer"] = true,
-["content"] = "done!",
-["timestamp"] = 1773760200,
-},
-{
-["fromPlayer"] = false,
-["content"] = "ty so much <3",
-["timestamp"] = 1773760260,
-},
-},
-["totalOrders"] = 1,
-["customer"] = "Sahïra",
-["npc"] = false,
-["craftHistory"] = {
-{
-["reagentState"] = 0,
-["tip"] = 50000000,
-["itemLink"] = "|cnIQ4:|Hitem:237849::::::::90:105::13:6:12214:12497:12066:12693:8960:8793:8:28:3615:29:32:30:40:38:8:40:2736:46:232875:47:245876:48:245784:::::|h[Magister's Valediction |A:Professions-ChatIcon-Quality-Tier5:17:15::1|a]|h|r",
-["timestamp"] = 1773760200,
-["customerNotes"] = "",
-["reagents"] = {
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 251283,
-},
-["dataSlotIndex"] = 1,
-["quantity"] = 1,
-},
-["slotIndex"] = 1,
-["source"] = 0,
-["isBasicReagent"] = true,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 237366,
-},
-["dataSlotIndex"] = 2,
-["quantity"] = 2,
-},
-["slotIndex"] = 2,
-["source"] = 0,
-["isBasicReagent"] = true,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 238203,
-},
-["dataSlotIndex"] = 1,
-["quantity"] = 10,
-},
-["slotIndex"] = 3,
-["source"] = 0,
-["isBasicReagent"] = true,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 238205,
-},
-["dataSlotIndex"] = 2,
-["quantity"] = 6,
-},
-["slotIndex"] = 4,
-["source"] = 0,
-["isBasicReagent"] = true,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 244638,
-},
-["dataSlotIndex"] = 3,
-["quantity"] = 1,
-},
-["slotIndex"] = 5,
-["source"] = 0,
-["isBasicReagent"] = true,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 232875,
-},
-["dataSlotIndex"] = 4,
-["quantity"] = 4,
-},
-["slotIndex"] = 6,
-["source"] = 1,
-["isBasicReagent"] = false,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 245876,
-},
-["dataSlotIndex"] = 5,
-["quantity"] = 1,
-},
-["slotIndex"] = 7,
-["source"] = 1,
-["isBasicReagent"] = false,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 245784,
-},
-["dataSlotIndex"] = 6,
-["quantity"] = 1,
-},
-["slotIndex"] = 8,
-["source"] = 0,
-["isBasicReagent"] = false,
-},
-},
-},
-},
-["provisionSome"] = 0,
-["provisionNone"] = 0,
-["totalTip"] = 50000000,
-["provisionAll"] = 1,
-["realm"] = "Stormrage",
-},
-["Vhsvvp-Area52"] = {
-["chatHistory"] = {
-{
-["fromPlayer"] = true,
-["content"] = "ahhhhh you went disc for that last one",
-["timestamp"] = 1774397220,
-},
-{
-["fromPlayer"] = true,
-["content"] = "i was like... why is literally no one taking damage lmao",
-["timestamp"] = 1774397220,
-},
-{
-["fromPlayer"] = false,
-["content"] = "ye havent tried disc in raid before",
-["timestamp"] = 1774397220,
-},
-{
-["fromPlayer"] = false,
-["content"] = "yeee",
-["timestamp"] = 1774397220,
-},
-{
-["fromPlayer"] = false,
-["content"] = "lmao",
-["timestamp"] = 1774397220,
-},
-{
-["fromPlayer"] = true,
-["content"] = "the void shield ",
-["timestamp"] = 1774397220,
-},
-{
-["fromPlayer"] = false,
-["content"] = "i was bored",
-["timestamp"] = 1774397220,
-},
-{
-["fromPlayer"] = true,
-["content"] = "theres nothing to do lmao",
-["timestamp"] = 1774397220,
-},
-{
-["fromPlayer"] = false,
-["content"] = "ye we could probably 1 heal these LOL",
-["timestamp"] = 1774397220,
-},
-{
-["fromPlayer"] = true,
-["content"] = "esp that one",
-["timestamp"] = 1774397220,
-},
-{
-["fromPlayer"] = false,
-["content"] = "what ilvl are you? ",
-["timestamp"] = 1774397280,
-},
-{
-["fromPlayer"] = true,
-["content"] = "260",
-["timestamp"] = 1774397280,
-},
-{
-["fromPlayer"] = false,
-["content"] = "niceee",
-["timestamp"] = 1774397280,
-},
-{
-["fromPlayer"] = false,
-["content"] = "i just need legs",
-["timestamp"] = 1774397280,
-},
-{
-["fromPlayer"] = false,
-["content"] = "still rocking adventure LOL",
-["timestamp"] = 1774397280,
-},
-{
-["fromPlayer"] = false,
-["content"] = "261",
-["timestamp"] = 1774397280,
-},
-{
-["fromPlayer"] = true,
-["content"] = "i didnt hit much today",
-["timestamp"] = 1774397280,
-},
-{
-["fromPlayer"] = false,
-["content"] = "i actually have no clue what i'm doing",
-["timestamp"] = 1774399140,
-},
-},
-["totalOrders"] = 0,
-["customer"] = "Vhsvvp",
-["craftHistory"] = {
-},
-["provisionSome"] = 0,
-["provisionNone"] = 0,
-["provisionAll"] = 0,
-["totalTip"] = 0,
-["realm"] = "Area52",
-},
-["Korogi-Stormrage"] = {
-["chatHistory"] = {
-{
-["fromPlayer"] = true,
-["content"] = "recraft what?",
-["timestamp"] = 1774185360,
-},
-{
-["fromPlayer"] = false,
-["content"] = "|cnIQ4:|Hitem:237849::::::::90:1473::13:1:3524:6:40:2736:38:4:46:232875:47:245876:48:245786:49:-2147480303:::::|h[Magister's Valediction |A:Professions-ChatIcon-Quality-Tier1:17:15::1|a]|h|r at r5 272",
-["timestamp"] = 1774185420,
-},
-{
-["fromPlayer"] = true,
-["content"] = "i can do that",
-["timestamp"] = 1774185420,
-},
-{
-["fromPlayer"] = false,
-["content"] = "how much tip u need?",
-["timestamp"] = 1774185420,
-},
-{
-["fromPlayer"] = true,
-["content"] = "whatever you feel is fair",
-["timestamp"] = 1774185420,
-},
-{
-["fromPlayer"] = false,
-["content"] = "3k okay? im poor",
-["timestamp"] = 1774185420,
-},
-{
-["fromPlayer"] = true,
-["content"] = "sure",
-["timestamp"] = 1774185420,
-},
-{
-["fromPlayer"] = false,
-["content"] = "sent",
-["timestamp"] = 1774185480,
-},
-{
-["fromPlayer"] = true,
-["content"] = "done",
-["timestamp"] = 1774185480,
-},
-{
-["fromPlayer"] = false,
-["content"] = "ty!",
-["timestamp"] = 1774185480,
-},
-},
-["totalOrders"] = 1,
-["customer"] = "Korogi",
-["npc"] = false,
-["craftHistory"] = {
-{
-["reagentState"] = 0,
-["tip"] = 30000000,
-["customerNotes"] = "",
-["timestamp"] = 1774185480,
-["itemLink"] = "|cnIQ4:|Hitem:237849:8039:::::::90:105::13:8:12214:12497:12066:12693:8960:8790:13621:13667:9:28:3615:29:49:30:36:38:8:40:2736:46:232875:47:245876:48:245786:49:-2147480303:::::|h[Magister's Valediction |A:Professions-ChatIcon-Quality-Tier5:17:15::1|a]|h|r",
-["reagents"] = {
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 251283,
-},
-["dataSlotIndex"] = 1,
-["quantity"] = 1,
-},
-["isBasicReagent"] = true,
-["source"] = 0,
-["slotIndex"] = 1,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 238203,
-},
-["dataSlotIndex"] = 1,
-["quantity"] = 5,
-},
-["isBasicReagent"] = true,
-["source"] = 0,
-["slotIndex"] = 2,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 238205,
-},
-["dataSlotIndex"] = 2,
-["quantity"] = 3,
-},
-["isBasicReagent"] = true,
-["source"] = 0,
-["slotIndex"] = 3,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 244638,
-},
-["dataSlotIndex"] = 3,
-["quantity"] = 1,
-},
-["isBasicReagent"] = true,
-["source"] = 0,
-["slotIndex"] = 4,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 245876,
-},
-["dataSlotIndex"] = 5,
-["quantity"] = 1,
-},
-["isBasicReagent"] = false,
-["source"] = 1,
-["slotIndex"] = 6,
-},
-},
-},
-},
-["provisionSome"] = 0,
-["provisionNone"] = 0,
-["provisionAll"] = 1,
-["totalTip"] = 30000000,
-["realm"] = "Stormrage",
-},
-["Tekapo-Stormrage"] = {
-["chatHistory"] = {
-{
-["fromPlayer"] = true,
-["content"] = "I can! R5 guaranteed. This Character!",
-["timestamp"] = 1774389720,
-},
-{
-["fromPlayer"] = false,
-["content"] = "sent!",
-["timestamp"] = 1774389780,
-},
-{
-["fromPlayer"] = true,
-["content"] = "kk! omw",
-["timestamp"] = 1774389780,
-},
-{
-["fromPlayer"] = false,
-["content"] = "tyvm!",
-["timestamp"] = 1774389960,
-},
-{
-["fromPlayer"] = true,
-["content"] = ":D",
-["timestamp"] = 1774389960,
-},
-},
-["totalOrders"] = 1,
-["customer"] = "Tekapo",
-["npc"] = false,
-["craftHistory"] = {
-{
-["reagentState"] = 0,
-["tip"] = 50000000,
-["customerNotes"] = "TYVM!",
-["timestamp"] = 1774389840,
-["itemLink"] = "|cnIQ4:|Hitem:237849:8039:::::::90:105::13:8:12214:12497:12066:12693:8960:8793:13621:13667:9:28:3615:29:49:30:36:38:8:40:2736:46:232875:47:245876:48:245784:49:-2147480303:::::|h[Magister's Valediction |A:Professions-ChatIcon-Quality-Tier5:17:15::1|a]|h|r",
-["reagents"] = {
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 251283,
-},
-["dataSlotIndex"] = 1,
-["quantity"] = 1,
-},
-["isBasicReagent"] = true,
-["source"] = 0,
-["slotIndex"] = 1,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 238203,
-},
-["dataSlotIndex"] = 1,
-["quantity"] = 5,
-},
-["isBasicReagent"] = true,
-["source"] = 0,
-["slotIndex"] = 2,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 238205,
-},
-["dataSlotIndex"] = 2,
-["quantity"] = 3,
-},
-["isBasicReagent"] = true,
-["source"] = 0,
-["slotIndex"] = 3,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 244638,
-},
-["dataSlotIndex"] = 3,
-["quantity"] = 1,
-},
-["isBasicReagent"] = true,
-["source"] = 0,
-["slotIndex"] = 4,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["currencyID"] = 3345,
-},
-["dataSlotIndex"] = 7,
-["quantity"] = 80,
-},
-["isBasicReagent"] = false,
-["source"] = 1,
-["slotIndex"] = 8,
-},
-},
-},
-},
-["provisionSome"] = 0,
-["provisionNone"] = 0,
-["provisionAll"] = 1,
-["totalTip"] = 50000000,
-["realm"] = "Stormrage",
-},
-["Aldvelothi-Stormrage"] = {
-["chatHistory"] = {
-{
-["fromPlayer"] = true,
-["content"] = "I can! R5 guaranteed. This Character!",
-["timestamp"] = 1773780120,
-},
-{
-["fromPlayer"] = false,
-["content"] = "price?",
-["timestamp"] = 1773780120,
-},
-{
-["fromPlayer"] = true,
-["content"] = "whatever you want to tip!",
-["timestamp"] = 1773780120,
-},
-{
-["fromPlayer"] = false,
-["content"] = "snt, 5k",
-["timestamp"] = 1773780180,
-},
-{
-["fromPlayer"] = true,
-["content"] = "done!",
-["timestamp"] = 1773780180,
-},
-{
-["fromPlayer"] = false,
-["content"] = "ty!",
-["timestamp"] = 1773780240,
-},
-},
-["totalOrders"] = 1,
-["customer"] = "Aldvelothi",
-["npc"] = false,
-["craftHistory"] = {
-{
-["reagentState"] = 0,
-["tip"] = 50000000,
-["itemLink"] = "|cnIQ4:|Hitem:237849::::::::90:105::13:6:12214:12497:12066:12693:8960:8793:8:28:3615:29:32:30:49:38:8:40:2736:46:232875:47:245876:48:245784:::::|h[Magister's Valediction |A:Professions-ChatIcon-Quality-Tier5:17:15::1|a]|h|r",
-["timestamp"] = 1773780180,
-["customerNotes"] = "",
-["reagents"] = {
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 251283,
-},
-["dataSlotIndex"] = 1,
-["quantity"] = 1,
-},
-["slotIndex"] = 1,
-["source"] = 0,
-["isBasicReagent"] = true,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 237366,
-},
-["dataSlotIndex"] = 2,
-["quantity"] = 2,
-},
-["slotIndex"] = 2,
-["source"] = 0,
-["isBasicReagent"] = true,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 238203,
-},
-["dataSlotIndex"] = 1,
-["quantity"] = 10,
-},
-["slotIndex"] = 3,
-["source"] = 0,
-["isBasicReagent"] = true,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 238205,
-},
-["dataSlotIndex"] = 2,
-["quantity"] = 6,
-},
-["slotIndex"] = 4,
-["source"] = 0,
-["isBasicReagent"] = true,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 244638,
-},
-["dataSlotIndex"] = 3,
-["quantity"] = 1,
-},
-["slotIndex"] = 5,
-["source"] = 0,
-["isBasicReagent"] = true,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 232875,
-},
-["dataSlotIndex"] = 4,
-["quantity"] = 4,
-},
-["slotIndex"] = 6,
-["source"] = 1,
-["isBasicReagent"] = false,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 245876,
-},
-["dataSlotIndex"] = 5,
-["quantity"] = 1,
-},
-["slotIndex"] = 7,
-["source"] = 1,
-["isBasicReagent"] = false,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 245784,
-},
-["dataSlotIndex"] = 6,
-["quantity"] = 1,
-},
-["slotIndex"] = 8,
-["source"] = 0,
-["isBasicReagent"] = false,
-},
-},
-},
-},
-["provisionSome"] = 0,
-["provisionNone"] = 0,
-["totalTip"] = 50000000,
-["provisionAll"] = 1,
-["realm"] = "Stormrage",
-},
-["Bexiaria-Stormrage"] = {
-["chatHistory"] = {
-{
-["fromPlayer"] = true,
-["content"] = "I can! R5 guaranteed. This Character!",
-["timestamp"] = 1773841620,
-},
-{
-["fromPlayer"] = false,
-["content"] = "sent",
-["timestamp"] = 1773841740,
-},
-{
-["fromPlayer"] = true,
-["content"] = "done!",
-["timestamp"] = 1773841740,
-},
-{
-["fromPlayer"] = false,
-["content"] = "ty!",
-["timestamp"] = 1773841740,
-},
-},
-["totalOrders"] = 1,
-["customer"] = "Bexiaria",
-["npc"] = false,
-["craftHistory"] = {
-{
-["reagentState"] = 0,
-["tip"] = 50000000,
-["customerNotes"] = "Thank you!",
-["timestamp"] = 1773841740,
-["itemLink"] = "|cnIQ4:|Hitem:237849::::::::90:105::13:6:12214:12497:12066:12693:8960:8793:8:28:3615:29:32:30:49:38:8:40:2736:46:232875:47:245876:48:245784:::::|h[Magister's Valediction |A:Professions-ChatIcon-Quality-Tier5:17:15::1|a]|h|r",
-["reagents"] = {
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 251283,
-},
-["dataSlotIndex"] = 1,
-["quantity"] = 1,
-},
-["isBasicReagent"] = true,
-["source"] = 0,
-["slotIndex"] = 1,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 237366,
-},
-["dataSlotIndex"] = 2,
-["quantity"] = 2,
-},
-["isBasicReagent"] = true,
-["source"] = 0,
-["slotIndex"] = 2,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 238203,
-},
-["dataSlotIndex"] = 1,
-["quantity"] = 10,
-},
-["isBasicReagent"] = true,
-["source"] = 0,
-["slotIndex"] = 3,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 238205,
-},
-["dataSlotIndex"] = 2,
-["quantity"] = 6,
-},
-["isBasicReagent"] = true,
-["source"] = 0,
-["slotIndex"] = 4,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 244638,
-},
-["dataSlotIndex"] = 3,
-["quantity"] = 1,
-},
-["isBasicReagent"] = true,
-["source"] = 0,
-["slotIndex"] = 5,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 232875,
-},
-["dataSlotIndex"] = 4,
-["quantity"] = 4,
-},
-["isBasicReagent"] = false,
-["source"] = 1,
-["slotIndex"] = 6,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 245876,
-},
-["dataSlotIndex"] = 5,
-["quantity"] = 1,
-},
-["isBasicReagent"] = false,
-["source"] = 1,
-["slotIndex"] = 7,
-},
-{
-["reagentInfo"] = {
-["reagent"] = {
-["itemID"] = 245784,
-},
-["dataSlotIndex"] = 6,
-["quantity"] = 1,
-},
-["isBasicReagent"] = false,
-["source"] = 0,
-["slotIndex"] = 8,
-},
-},
-},
-},
-["provisionSome"] = 0,
-["provisionNone"] = 0,
-["provisionAll"] = 1,
-["totalTip"] = 50000000,
-["realm"] = "Stormrage",
-},
 ["Kementtari-Stormrage"] = {
 ["chatHistory"] = {
 },
@@ -5281,132 +4167,1078 @@ CraftSimDB = {
 ["totalTip"] = 70000000,
 ["realm"] = "Stormrage",
 },
-["Highwaym-Stormrage"] = {
+["Rianon-Stormrage"] = {
 ["chatHistory"] = {
 {
 ["fromPlayer"] = false,
-["content"] = "PI has been secured for this boss",
-["timestamp"] = 1774396080,
+["content"] = " how much for max rank  chopper",
+["timestamp"] = 1772662920,
 },
 {
 ["fromPlayer"] = true,
-["content"] = "oh %^&*",
-["timestamp"] = 1774396080,
+["content"] = "whatever you feel comfortable tipping",
+["timestamp"] = 1772662920,
 },
 {
 ["fromPlayer"] = false,
-["content"] = "boutta send this boss to space",
-["timestamp"] = 1774396080,
+["content"] = " ok what name",
+["timestamp"] = 1772662920,
 },
 {
 ["fromPlayer"] = true,
-["content"] = "i was gonna crash out if he got it again",
-["timestamp"] = 1774397040,
+["content"] = "this one!",
+["timestamp"] = 1772662920,
 },
 {
 ["fromPlayer"] = true,
-["content"] = "when he already has 2 lol",
-["timestamp"] = 1774397040,
+["content"] = "I hate that other character !@#$ lol",
+["timestamp"] = 1772662980,
 },
 {
 ["fromPlayer"] = false,
-["content"] = "is that 4P for you now?",
-["timestamp"] = 1774397040,
+["content"] = " sent    was trying to figure what the new standard might be",
+["timestamp"] = 1772663100,
 },
 {
 ["fromPlayer"] = true,
-["content"] = "no",
-["timestamp"] = 1774397040,
-},
-{
-["fromPlayer"] = false,
-["content"] = "oh you didnt get the one off voracious?",
-["timestamp"] = 1774397040,
+["content"] = "1 sec on the order",
+["timestamp"] = 1772663160,
 },
 {
 ["fromPlayer"] = true,
-["content"] = "its my frist but obv with +1 more its 4 piece",
-["timestamp"] = 1774397100,
+["content"] = "this early i need the weapon wrap 2* as well",
+["timestamp"] = 1772663280,
+},
+{
+["fromPlayer"] = false,
+["content"] = " #$%^ ok   i tried to get it made but got screwed so i can  repick one up from the ah brb with it to resend",
+["timestamp"] = 1772663400,
 },
 {
 ["fromPlayer"] = true,
-["content"] = "no he snagged it with a 99",
-["timestamp"] = 1774397100,
-},
-{
-["fromPlayer"] = false,
-["content"] = "RIP",
-["timestamp"] = 1774397100,
-},
-{
-["fromPlayer"] = false,
-["content"] = "man I really wanna spoil the reason they go immune cause we will legit never figure it out if not",
-["timestamp"] = 1774398660,
-},
-{
-["fromPlayer"] = false,
-["content"] = "but Im being ethical",
-["timestamp"] = 1774398660,
+["content"] = "sounds good",
+["timestamp"] = 1772663400,
 },
 {
 ["fromPlayer"] = true,
-["content"] = "what is it?",
-["timestamp"] = 1774398660,
-},
-{
-["fromPlayer"] = false,
-["content"] = "if you lust on pull",
-["timestamp"] = 1774398660,
+["content"] = "i was literally short 1 knowledge point lol",
+["timestamp"] = 1772663400,
 },
 {
 ["fromPlayer"] = true,
-["content"] = "that's crazy though",
-["timestamp"] = 1774399020,
+["content"] = "absolutely tragic",
+["timestamp"] = 1772663400,
 },
 {
 ["fromPlayer"] = false,
-["content"] = "yeah you have to wait till each ults once",
-["timestamp"] = 1774399080,
+["content"] = " i feel that  was starting to think this recipe was at the  butt end of the circle for axes or something",
+["timestamp"] = 1772663460,
 },
 {
 ["fromPlayer"] = true,
-["content"] = "yeah because they all get forbearance?",
-["timestamp"] = 1774399080,
+["content"] = "done!",
+["timestamp"] = 1772663580,
 },
 {
 ["fromPlayer"] = false,
-["content"] = "yeah",
-["timestamp"] = 1774399080,
-},
-{
-["fromPlayer"] = false,
-["content"] = "what do I have to do on this boss",
-["timestamp"] = 1774399140,
-},
-{
-["fromPlayer"] = false,
-["content"] = "also is this aoe?",
-["timestamp"] = 1774399140,
+["content"] = " thank you , your  amzing keep up the good work",
+["timestamp"] = 1772663640,
 },
 {
 ["fromPlayer"] = true,
-["content"] = "you get some like line",
-["timestamp"] = 1774399140,
+["content"] = "you too!",
+["timestamp"] = 1772663640,
 },
 {
 ["fromPlayer"] = true,
-["content"] = "that you need to take to adds",
-["timestamp"] = 1774399200,
+["content"] = "hmu if you need that thing upgraded when you get the gilded crests :D",
+["timestamp"] = 1772663700,
+},
+{
+["fromPlayer"] = false,
+["content"] = " will do in a week or two depending on gating lol",
+["timestamp"] = 1772663760,
+},
+{
+["fromPlayer"] = true,
+["content"] = "I think its 3 weeks when we get access to mythic crests?",
+["timestamp"] = 1772663760,
+},
+{
+["fromPlayer"] = true,
+["content"] = "2 for heroic",
+["timestamp"] = 1772663760,
+},
+{
+["fromPlayer"] = false,
+["content"] = " yeah trying to forget we are back to bc  timegates honsently lol",
+["timestamp"] = 1772663820,
 },
 },
-["totalOrders"] = 0,
-["customer"] = "Highwaym",
+["totalOrders"] = 1,
+["customer"] = "Rianon",
+["npc"] = false,
 ["craftHistory"] = {
+{
+["reagentState"] = 0,
+["tip"] = 50000000,
+["customerNotes"] = "",
+["timestamp"] = 1772663580,
+["itemLink"] = "|cnIQ4:|Hitem:237850::::::::90:102::13:6:12214:12497:12066:12693:8960:8793:8:28:3615:29:49:30:36:38:8:40:2735:46:232875:47:245876:48:245784:::::|h[Farstrider's Chopper |A:Professions-ChatIcon-Quality-Tier5:17:15::1|a]|h|r",
+["reagents"] = {
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 251283,
+},
+["dataSlotIndex"] = 1,
+["quantity"] = 1,
+},
+["isBasicReagent"] = true,
+["source"] = 0,
+["slotIndex"] = 1,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 237366,
+},
+["dataSlotIndex"] = 2,
+["quantity"] = 2,
+},
+["isBasicReagent"] = true,
+["source"] = 0,
+["slotIndex"] = 2,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 238203,
+},
+["dataSlotIndex"] = 1,
+["quantity"] = 8,
+},
+["isBasicReagent"] = true,
+["source"] = 0,
+["slotIndex"] = 3,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 238205,
+},
+["dataSlotIndex"] = 2,
+["quantity"] = 6,
+},
+["isBasicReagent"] = true,
+["source"] = 0,
+["slotIndex"] = 4,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 244638,
+},
+["dataSlotIndex"] = 3,
+["quantity"] = 1,
+},
+["isBasicReagent"] = true,
+["source"] = 0,
+["slotIndex"] = 5,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 232875,
+},
+["dataSlotIndex"] = 4,
+["quantity"] = 2,
+},
+["isBasicReagent"] = false,
+["source"] = 1,
+["slotIndex"] = 6,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 245876,
+},
+["dataSlotIndex"] = 5,
+["quantity"] = 1,
+},
+["isBasicReagent"] = false,
+["source"] = 1,
+["slotIndex"] = 7,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 245784,
+},
+["dataSlotIndex"] = 6,
+["quantity"] = 1,
+},
+["isBasicReagent"] = false,
+["source"] = 0,
+["slotIndex"] = 8,
+},
+},
+},
 },
 ["provisionSome"] = 0,
 ["provisionNone"] = 0,
-["provisionAll"] = 0,
-["totalTip"] = 0,
+["provisionAll"] = 1,
+["totalTip"] = 50000000,
+["realm"] = "Stormrage",
+},
+["Azidahakasan-Stormrage"] = {
+["chatHistory"] = {
+{
+["fromPlayer"] = false,
+["content"] = "how much for max |cnIQ4:|Hitem:237839::::::::90:72::13:1:3524:5:40:2747:38:8:46:232875:47:244675:48:245786:::::|h[Spellbreaker's Blade |A:Professions-ChatIcon-Quality-Tier5:17:15::1|a]|h|r",
+["timestamp"] = 1773225660,
+},
+{
+["fromPlayer"] = true,
+["content"] = "whatever you'd like to tip",
+["timestamp"] = 1773225660,
+},
+{
+["fromPlayer"] = false,
+["content"] = "give me a starting point, haven't seen how much people are tipping in new xpac",
+["timestamp"] = 1773225720,
+},
+{
+["fromPlayer"] = false,
+["content"] = "otherwise 5k is what i was giving last season lol",
+["timestamp"] = 1773225720,
+},
+{
+["fromPlayer"] = true,
+["content"] = "i've seen a lot of people sending all over the place. the median seems to be around 10k lately since its early",
+["timestamp"] = 1773225720,
+},
+{
+["fromPlayer"] = true,
+["content"] = "but i've seen 1k and 50k lmao",
+["timestamp"] = 1773225720,
+},
+{
+["fromPlayer"] = false,
+["content"] = "okay order sent tnx in advance",
+["timestamp"] = 1773225720,
+},
+{
+["fromPlayer"] = true,
+["content"] = "done!",
+["timestamp"] = 1773225780,
+},
+{
+["fromPlayer"] = false,
+["content"] = "ty vm, have a great one",
+["timestamp"] = 1773225720,
+},
+{
+["fromPlayer"] = true,
+["content"] = "you too!",
+["timestamp"] = 1773225720,
+},
+},
+["totalOrders"] = 1,
+["customer"] = "Azidahakasan",
+["npc"] = false,
+["craftHistory"] = {
+{
+["reagentState"] = 0,
+["tip"] = 125000000,
+["customerNotes"] = "",
+["timestamp"] = 1773225780,
+["itemLink"] = "|cnIQ4:|Hitem:237839::::::::90:105::13:6:12214:12497:12066:12685:8960:8790:8:28:3615:29:36:30:40:38:8:40:2747:46:232875:47:244675:48:245786:::::|h[Spellbreaker's Blade |A:Professions-ChatIcon-Quality-Tier5:17:15::1|a]|h|r",
+["reagents"] = {
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 251283,
+},
+["dataSlotIndex"] = 1,
+["quantity"] = 1,
+},
+["isBasicReagent"] = true,
+["source"] = 0,
+["slotIndex"] = 1,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 237366,
+},
+["dataSlotIndex"] = 2,
+["quantity"] = 2,
+},
+["isBasicReagent"] = true,
+["source"] = 0,
+["slotIndex"] = 2,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 238203,
+},
+["dataSlotIndex"] = 1,
+["quantity"] = 8,
+},
+["isBasicReagent"] = true,
+["source"] = 0,
+["slotIndex"] = 3,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 238205,
+},
+["dataSlotIndex"] = 2,
+["quantity"] = 6,
+},
+["isBasicReagent"] = true,
+["source"] = 0,
+["slotIndex"] = 4,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 244638,
+},
+["dataSlotIndex"] = 3,
+["quantity"] = 1,
+},
+["isBasicReagent"] = true,
+["source"] = 0,
+["slotIndex"] = 5,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 232875,
+},
+["dataSlotIndex"] = 4,
+["quantity"] = 2,
+},
+["isBasicReagent"] = false,
+["source"] = 1,
+["slotIndex"] = 6,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 244675,
+},
+["dataSlotIndex"] = 5,
+["quantity"] = 1,
+},
+["isBasicReagent"] = false,
+["source"] = 1,
+["slotIndex"] = 7,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 245786,
+},
+["dataSlotIndex"] = 6,
+["quantity"] = 1,
+},
+["isBasicReagent"] = false,
+["source"] = 0,
+["slotIndex"] = 8,
+},
+},
+},
+},
+["provisionSome"] = 0,
+["provisionNone"] = 0,
+["provisionAll"] = 1,
+["totalTip"] = 125000000,
+["realm"] = "Stormrage",
+},
+["Fuglylight-Stormrage"] = {
+["chatHistory"] = {
+},
+["totalOrders"] = 1,
+["customer"] = "Fuglylight",
+["npc"] = false,
+["craftHistory"] = {
+{
+["reagentState"] = 0,
+["tip"] = 20000000,
+["itemLink"] = "|cnIQ4:|Hitem:237932::::::::90:105::13:5:12247:12246:12497:8793:13620:7:28:3615:29:40:30:36:38:8:40:2703:45:245784:46:-2147480307:::::|h[Primalforged Heavy Axe |A:Professions-ChatIcon-Quality-Tier5:17:15::1|a]|h|r",
+["timestamp"] = 1773310740,
+["customerNotes"] = "",
+["reagents"] = {
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 243060,
+},
+["dataSlotIndex"] = 1,
+["quantity"] = 2,
+},
+["slotIndex"] = 1,
+["source"] = 0,
+["isBasicReagent"] = true,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 238198,
+},
+["dataSlotIndex"] = 1,
+["quantity"] = 4,
+},
+["slotIndex"] = 2,
+["source"] = 0,
+["isBasicReagent"] = true,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 245784,
+},
+["dataSlotIndex"] = 3,
+["quantity"] = 1,
+},
+["slotIndex"] = 4,
+["source"] = 0,
+["isBasicReagent"] = false,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["currencyID"] = 3341,
+},
+["dataSlotIndex"] = 4,
+["quantity"] = 80,
+},
+["slotIndex"] = 5,
+["source"] = 1,
+["isBasicReagent"] = false,
+},
+},
+},
+},
+["provisionSome"] = 0,
+["provisionNone"] = 0,
+["totalTip"] = 20000000,
+["provisionAll"] = 1,
+["realm"] = "Stormrage",
+},
+["Korogi-Stormrage"] = {
+["chatHistory"] = {
+{
+["fromPlayer"] = true,
+["content"] = "recraft what?",
+["timestamp"] = 1774185360,
+},
+{
+["fromPlayer"] = false,
+["content"] = "|cnIQ4:|Hitem:237849::::::::90:1473::13:1:3524:6:40:2736:38:4:46:232875:47:245876:48:245786:49:-2147480303:::::|h[Magister's Valediction |A:Professions-ChatIcon-Quality-Tier1:17:15::1|a]|h|r at r5 272",
+["timestamp"] = 1774185420,
+},
+{
+["fromPlayer"] = true,
+["content"] = "i can do that",
+["timestamp"] = 1774185420,
+},
+{
+["fromPlayer"] = false,
+["content"] = "how much tip u need?",
+["timestamp"] = 1774185420,
+},
+{
+["fromPlayer"] = true,
+["content"] = "whatever you feel is fair",
+["timestamp"] = 1774185420,
+},
+{
+["fromPlayer"] = false,
+["content"] = "3k okay? im poor",
+["timestamp"] = 1774185420,
+},
+{
+["fromPlayer"] = true,
+["content"] = "sure",
+["timestamp"] = 1774185420,
+},
+{
+["fromPlayer"] = false,
+["content"] = "sent",
+["timestamp"] = 1774185480,
+},
+{
+["fromPlayer"] = true,
+["content"] = "done",
+["timestamp"] = 1774185480,
+},
+{
+["fromPlayer"] = false,
+["content"] = "ty!",
+["timestamp"] = 1774185480,
+},
+},
+["totalOrders"] = 1,
+["customer"] = "Korogi",
+["npc"] = false,
+["craftHistory"] = {
+{
+["reagentState"] = 0,
+["tip"] = 30000000,
+["customerNotes"] = "",
+["timestamp"] = 1774185480,
+["itemLink"] = "|cnIQ4:|Hitem:237849:8039:::::::90:105::13:8:12214:12497:12066:12693:8960:8790:13621:13667:9:28:3615:29:49:30:36:38:8:40:2736:46:232875:47:245876:48:245786:49:-2147480303:::::|h[Magister's Valediction |A:Professions-ChatIcon-Quality-Tier5:17:15::1|a]|h|r",
+["reagents"] = {
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 251283,
+},
+["dataSlotIndex"] = 1,
+["quantity"] = 1,
+},
+["isBasicReagent"] = true,
+["source"] = 0,
+["slotIndex"] = 1,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 238203,
+},
+["dataSlotIndex"] = 1,
+["quantity"] = 5,
+},
+["isBasicReagent"] = true,
+["source"] = 0,
+["slotIndex"] = 2,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 238205,
+},
+["dataSlotIndex"] = 2,
+["quantity"] = 3,
+},
+["isBasicReagent"] = true,
+["source"] = 0,
+["slotIndex"] = 3,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 244638,
+},
+["dataSlotIndex"] = 3,
+["quantity"] = 1,
+},
+["isBasicReagent"] = true,
+["source"] = 0,
+["slotIndex"] = 4,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 245876,
+},
+["dataSlotIndex"] = 5,
+["quantity"] = 1,
+},
+["isBasicReagent"] = false,
+["source"] = 1,
+["slotIndex"] = 6,
+},
+},
+},
+},
+["provisionSome"] = 0,
+["provisionNone"] = 0,
+["provisionAll"] = 1,
+["totalTip"] = 30000000,
+["realm"] = "Stormrage",
+},
+["Sahïra-Stormrage"] = {
+["chatHistory"] = {
+{
+["fromPlayer"] = true,
+["content"] = "I can! R5 guaranteed. This Character!",
+["timestamp"] = 1773760020,
+},
+{
+["fromPlayer"] = false,
+["content"] = "price ?",
+["timestamp"] = 1773760080,
+},
+{
+["fromPlayer"] = true,
+["content"] = "whatever you want to tip",
+["timestamp"] = 1773760140,
+},
+{
+["fromPlayer"] = false,
+["content"] = "send to this char ?",
+["timestamp"] = 1773760140,
+},
+{
+["fromPlayer"] = true,
+["content"] = "yup!",
+["timestamp"] = 1773760140,
+},
+{
+["fromPlayer"] = true,
+["content"] = "i !@#$ing hate when i want something crafted",
+["timestamp"] = 1773760140,
+},
+{
+["fromPlayer"] = true,
+["content"] = "and someone is like \"lemee hop on my alt rq\"",
+["timestamp"] = 1773760140,
+},
+{
+["fromPlayer"] = false,
+["content"] = "yeah its true haha",
+["timestamp"] = 1773760200,
+},
+{
+["fromPlayer"] = false,
+["content"] = "send :3",
+["timestamp"] = 1773760200,
+},
+{
+["fromPlayer"] = true,
+["content"] = "done!",
+["timestamp"] = 1773760200,
+},
+{
+["fromPlayer"] = false,
+["content"] = "ty so much <3",
+["timestamp"] = 1773760260,
+},
+},
+["totalOrders"] = 1,
+["customer"] = "Sahïra",
+["npc"] = false,
+["craftHistory"] = {
+{
+["reagentState"] = 0,
+["tip"] = 50000000,
+["itemLink"] = "|cnIQ4:|Hitem:237849::::::::90:105::13:6:12214:12497:12066:12693:8960:8793:8:28:3615:29:32:30:40:38:8:40:2736:46:232875:47:245876:48:245784:::::|h[Magister's Valediction |A:Professions-ChatIcon-Quality-Tier5:17:15::1|a]|h|r",
+["timestamp"] = 1773760200,
+["customerNotes"] = "",
+["reagents"] = {
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 251283,
+},
+["dataSlotIndex"] = 1,
+["quantity"] = 1,
+},
+["slotIndex"] = 1,
+["source"] = 0,
+["isBasicReagent"] = true,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 237366,
+},
+["dataSlotIndex"] = 2,
+["quantity"] = 2,
+},
+["slotIndex"] = 2,
+["source"] = 0,
+["isBasicReagent"] = true,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 238203,
+},
+["dataSlotIndex"] = 1,
+["quantity"] = 10,
+},
+["slotIndex"] = 3,
+["source"] = 0,
+["isBasicReagent"] = true,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 238205,
+},
+["dataSlotIndex"] = 2,
+["quantity"] = 6,
+},
+["slotIndex"] = 4,
+["source"] = 0,
+["isBasicReagent"] = true,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 244638,
+},
+["dataSlotIndex"] = 3,
+["quantity"] = 1,
+},
+["slotIndex"] = 5,
+["source"] = 0,
+["isBasicReagent"] = true,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 232875,
+},
+["dataSlotIndex"] = 4,
+["quantity"] = 4,
+},
+["slotIndex"] = 6,
+["source"] = 1,
+["isBasicReagent"] = false,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 245876,
+},
+["dataSlotIndex"] = 5,
+["quantity"] = 1,
+},
+["slotIndex"] = 7,
+["source"] = 1,
+["isBasicReagent"] = false,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 245784,
+},
+["dataSlotIndex"] = 6,
+["quantity"] = 1,
+},
+["slotIndex"] = 8,
+["source"] = 0,
+["isBasicReagent"] = false,
+},
+},
+},
+},
+["provisionSome"] = 0,
+["provisionNone"] = 0,
+["totalTip"] = 50000000,
+["provisionAll"] = 1,
+["realm"] = "Stormrage",
+},
+["Ritomctwisto-Stormrage"] = {
+["chatHistory"] = {
+{
+["fromPlayer"] = true,
+["content"] = "I can! R5 guaranteed. This Character!",
+["timestamp"] = 1774148700,
+},
+{
+["fromPlayer"] = false,
+["content"] = "great, how much comm? not used to the norms yet",
+["timestamp"] = 1774148760,
+},
+{
+["fromPlayer"] = true,
+["content"] = "whatever you feel is fair",
+["timestamp"] = 1774148760,
+},
+{
+["fromPlayer"] = true,
+["content"] = "generally see around 10k ish",
+["timestamp"] = 1774148760,
+},
+{
+["fromPlayer"] = true,
+["content"] = "but whatever you wanna send",
+["timestamp"] = 1774148760,
+},
+{
+["fromPlayer"] = false,
+["content"] = "great, sending your way",
+["timestamp"] = 1774148760,
+},
+{
+["fromPlayer"] = true,
+["content"] = "done!",
+["timestamp"] = 1774148820,
+},
+{
+["fromPlayer"] = false,
+["content"] = "tyvm",
+["timestamp"] = 1774148880,
+},
+},
+["totalOrders"] = 1,
+["customer"] = "Ritomctwisto",
+["npc"] = false,
+["craftHistory"] = {
+{
+["reagentState"] = 0,
+["tip"] = 100000000,
+["itemLink"] = "|cnIQ4:|Hitem:237849::::::::90:102::13:6:12214:12497:12066:12693:8960:8793:8:28:3615:29:49:30:40:38:8:40:2736:46:232875:47:245876:48:245784:::::|h[Magister's Valediction |A:Professions-ChatIcon-Quality-Tier5:17:15::1|a]|h|r",
+["timestamp"] = 1774148820,
+["customerNotes"] = "",
+["reagents"] = {
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 251283,
+},
+["dataSlotIndex"] = 1,
+["quantity"] = 1,
+},
+["slotIndex"] = 1,
+["source"] = 0,
+["isBasicReagent"] = true,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 237366,
+},
+["dataSlotIndex"] = 2,
+["quantity"] = 2,
+},
+["slotIndex"] = 2,
+["source"] = 0,
+["isBasicReagent"] = true,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 238203,
+},
+["dataSlotIndex"] = 1,
+["quantity"] = 10,
+},
+["slotIndex"] = 3,
+["source"] = 0,
+["isBasicReagent"] = true,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 238205,
+},
+["dataSlotIndex"] = 2,
+["quantity"] = 6,
+},
+["slotIndex"] = 4,
+["source"] = 0,
+["isBasicReagent"] = true,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 244638,
+},
+["dataSlotIndex"] = 3,
+["quantity"] = 1,
+},
+["slotIndex"] = 5,
+["source"] = 0,
+["isBasicReagent"] = true,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 232875,
+},
+["dataSlotIndex"] = 4,
+["quantity"] = 4,
+},
+["slotIndex"] = 6,
+["source"] = 1,
+["isBasicReagent"] = false,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 245876,
+},
+["dataSlotIndex"] = 5,
+["quantity"] = 1,
+},
+["slotIndex"] = 7,
+["source"] = 1,
+["isBasicReagent"] = false,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 245784,
+},
+["dataSlotIndex"] = 6,
+["quantity"] = 1,
+},
+["slotIndex"] = 8,
+["source"] = 0,
+["isBasicReagent"] = false,
+},
+},
+},
+},
+["provisionSome"] = 0,
+["provisionNone"] = 0,
+["totalTip"] = 100000000,
+["provisionAll"] = 1,
+["realm"] = "Stormrage",
+},
+["Lamiralei-Stormrage"] = {
+["chatHistory"] = {
+{
+["fromPlayer"] = true,
+["content"] = "I can! R5 guaranteed. This Character!",
+["timestamp"] = 1773939060,
+},
+{
+["fromPlayer"] = false,
+["content"] = "inc",
+["timestamp"] = 1773939120,
+},
+{
+["fromPlayer"] = true,
+["content"] = "sounds good",
+["timestamp"] = 1773939180,
+},
+{
+["fromPlayer"] = false,
+["content"] = "sent!",
+["timestamp"] = 1773939180,
+},
+{
+["fromPlayer"] = true,
+["content"] = "done!",
+["timestamp"] = 1773939180,
+},
+},
+["totalOrders"] = 1,
+["customer"] = "Lamiralei",
+["npc"] = false,
+["craftHistory"] = {
+{
+["reagentState"] = 0,
+["tip"] = 50000000,
+["customerNotes"] = "",
+["timestamp"] = 1773939180,
+["itemLink"] = "|cnIQ4:|Hitem:237840::::::::90:105::13:6:12214:12497:12066:12693:8960:8793:8:28:3615:29:36:30:49:38:8:40:2746:46:232875:47:245876:48:245784:::::|h[Spellbreaker's Warglaive |A:Professions-ChatIcon-Quality-Tier5:17:15::1|a]|h|r",
+["reagents"] = {
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 251283,
+},
+["dataSlotIndex"] = 1,
+["quantity"] = 1,
+},
+["isBasicReagent"] = true,
+["source"] = 0,
+["slotIndex"] = 1,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 237366,
+},
+["dataSlotIndex"] = 2,
+["quantity"] = 2,
+},
+["isBasicReagent"] = true,
+["source"] = 0,
+["slotIndex"] = 2,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 238203,
+},
+["dataSlotIndex"] = 1,
+["quantity"] = 8,
+},
+["isBasicReagent"] = true,
+["source"] = 0,
+["slotIndex"] = 3,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 238205,
+},
+["dataSlotIndex"] = 2,
+["quantity"] = 6,
+},
+["isBasicReagent"] = true,
+["source"] = 0,
+["slotIndex"] = 4,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 244638,
+},
+["dataSlotIndex"] = 3,
+["quantity"] = 1,
+},
+["isBasicReagent"] = true,
+["source"] = 0,
+["slotIndex"] = 5,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 232875,
+},
+["dataSlotIndex"] = 4,
+["quantity"] = 2,
+},
+["isBasicReagent"] = false,
+["source"] = 1,
+["slotIndex"] = 6,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 245876,
+},
+["dataSlotIndex"] = 5,
+["quantity"] = 1,
+},
+["isBasicReagent"] = false,
+["source"] = 1,
+["slotIndex"] = 7,
+},
+{
+["reagentInfo"] = {
+["reagent"] = {
+["itemID"] = 245784,
+},
+["dataSlotIndex"] = 6,
+["quantity"] = 1,
+},
+["isBasicReagent"] = false,
+["source"] = 0,
+["slotIndex"] = 8,
+},
+},
+},
+},
+["provisionSome"] = 0,
+["provisionNone"] = 0,
+["totalTip"] = 50000000,
+["provisionAll"] = 1,
 ["realm"] = "Stormrage",
 },
 },
@@ -7715,9 +7547,9 @@ CraftSimDB = {
 [245814] = 0,
 [248130] = 0,
 [245782] = 0,
-[242606] = 0,
-[243606] = 0,
 [245781] = 0,
+[243606] = 0,
+[242606] = 0,
 [236780] = 0,
 [246448] = 0,
 [245819] = 0,
@@ -7802,9 +7634,9 @@ CraftSimDB = {
 [245814] = 0,
 [248130] = 0,
 [245782] = 0,
-[242606] = 0,
-[243606] = 0,
 [245781] = 0,
+[243606] = 0,
+[242606] = 0,
 [236780] = 0,
 [246448] = 0,
 [245819] = 0,
@@ -7937,19 +7769,19 @@ CraftSimDB = {
 [236949] = 0,
 [245874] = 0,
 [251489] = 0,
-[197743] = 0,
+[246448] = 0,
 [194970] = 0,
 [237365] = 0,
 [237364] = 0,
 [237359] = 0,
 [238518] = 18,
-[236950] = 0,
+[245875] = 0,
 [246449] = 0,
 [247724] = 1,
-[245875] = 0,
+[236950] = 0,
 [247788] = 1,
 [191465] = 0,
-[246448] = 0,
+[197743] = 0,
 [191529] = 0,
 [245876] = 0,
 [236771] = 0,
@@ -8077,19 +7909,19 @@ CraftSimDB = {
 [236949] = 0,
 [245874] = 0,
 [251489] = 0,
-[197743] = 1,
+[246448] = 0,
 [194970] = 34,
 [237365] = 0,
 [237364] = 0,
 [237359] = 0,
 [238518] = 0,
-[236950] = 0,
+[245875] = 0,
 [246449] = 0,
 [247724] = 0,
-[245875] = 0,
+[236950] = 0,
 [247788] = 0,
 [191465] = 1,
-[246448] = 0,
+[197743] = 1,
 [191529] = 5,
 [245876] = 0,
 [236771] = 0,
@@ -8148,7 +7980,7 @@ CraftSimDB = {
 [236950] = 0,
 [244675] = 0,
 [245816] = 0,
-[243602] = 0,
+[238522] = 0,
 [238520] = 1,
 [236776] = 0,
 [236770] = 0,
@@ -8156,15 +7988,15 @@ CraftSimDB = {
 [236951] = 0,
 [244608] = 0,
 [244603] = 0,
-[243603] = 0,
+[238523] = 1,
 [236761] = 24,
 [236777] = 0,
 [38682] = 97,
 [247726] = 0,
 [236952] = 1,
-[247719] = 7,
-[244604] = 0,
 [245814] = 0,
+[244604] = 0,
+[247719] = 7,
 [245787] = 0,
 [245817] = 0,
 [245785] = 0,
@@ -8172,7 +8004,7 @@ CraftSimDB = {
 [251489] = 0,
 [245819] = 0,
 [251490] = 0,
-[243605] = 0,
+[238525] = 1,
 [245820] = 0,
 [245791] = 0,
 [246447] = 0,
@@ -8184,7 +8016,7 @@ CraftSimDB = {
 [245781] = 0,
 [236780] = 0,
 [246448] = 0,
-[238525] = 1,
+[243605] = 0,
 [246450] = 2,
 [245784] = 0,
 [238511] = 0,
@@ -8196,9 +8028,9 @@ CraftSimDB = {
 [244632] = 0,
 [244631] = 0,
 [238512] = 0,
-[238523] = 1,
+[243603] = 0,
 [245783] = 0,
-[238522] = 0,
+[243602] = 0,
 [238519] = 0,
 },
 ["bank"] = {
@@ -8241,7 +8073,7 @@ CraftSimDB = {
 [236950] = 0,
 [244675] = 0,
 [245816] = 0,
-[243602] = 0,
+[238522] = 0,
 [238520] = 0,
 [236776] = 0,
 [236770] = 0,
@@ -8249,15 +8081,15 @@ CraftSimDB = {
 [236951] = 0,
 [244608] = 0,
 [244603] = 0,
-[243603] = 0,
+[238523] = 0,
 [236761] = 0,
 [236777] = 0,
 [38682] = 0,
 [247726] = 0,
 [236952] = 0,
-[247719] = 0,
-[244604] = 0,
 [245814] = 0,
+[244604] = 0,
+[247719] = 0,
 [245787] = 0,
 [245817] = 0,
 [245785] = 0,
@@ -8265,7 +8097,7 @@ CraftSimDB = {
 [251489] = 0,
 [245819] = 0,
 [251490] = 0,
-[243605] = 0,
+[238525] = 0,
 [245820] = 0,
 [245791] = 0,
 [246447] = 0,
@@ -8277,7 +8109,7 @@ CraftSimDB = {
 [245781] = 0,
 [236780] = 0,
 [246448] = 0,
-[238525] = 0,
+[243605] = 0,
 [246450] = 0,
 [245784] = 0,
 [238511] = 0,
@@ -8289,9 +8121,9 @@ CraftSimDB = {
 [244632] = 0,
 [244631] = 0,
 [238512] = 0,
-[238523] = 0,
+[243603] = 0,
 [245783] = 0,
-[238522] = 0,
+[243602] = 0,
 [238519] = 0,
 },
 },
@@ -8686,19 +8518,19 @@ CraftSimDB = {
 ["COST_OPTIMIZATION_SUB_RECIPE_INCLUDE_CONCENTRATION"] = false,
 ["MODULE_CRAFT_LOG"] = true,
 ["CRAFTQUEUE_WORK_ORDERS_INCLUDE_PATRON_ORDERS"] = true,
-["CRAFT_LOG_AUTO_SHOW"] = true,
-["CRAFTQUEUE_WORK_ORDERS_FORCE_CONCENTRATION"] = false,
-["CONCENTRATION_TRACKER_PINNED"] = false,
+["NEWS_CHECKSUM"] = 81,
 ["CRAFTQUEUE_QUEUE_OPEN_RECIPE_OPTIMIZE_CONCENTRATION"] = true,
+["CONCENTRATION_TRACKER_PINNED"] = false,
+["CRAFTQUEUE_WORK_ORDERS_FORCE_CONCENTRATION"] = false,
 ["CRAFTING_GARBAGE_COLLECTION_ENABLED"] = true,
 ["MINIMAP_BUTTON_HIDE"] = false,
 ["PROFIT_CALCULATION_RESOURCEFULNESS_CONSTANT"] = 0.3,
-["TOP_GEAR_AUTO_UPDATE"] = true,
+["COST_OPTIMIZATION_SUB_RECIPE_MAX_DEPTH"] = 1,
 ["CRAFTQUEUE_WORK_ORDERS_INCLUDE_PERSONAL_ORDERS"] = true,
 ["CRAFTQUEUE_FLASH_TASKBAR_ON_CRAFT_FINISHED"] = true,
 ["CRAFT_LOG_DISABLE_ADV_DATA"] = true,
 ["MODULE_COST_OVERVIEW"] = false,
-["MODULE_CRAFT_QUEUE"] = true,
+["MODULE_CRAFT_QUEUE"] = false,
 ["COOLDOWNS_FILTERED_EXPANSIONS"] = {
 [10] = true,
 [11] = true,
@@ -8728,15 +8560,15 @@ CraftSimDB = {
 ["offsetY"] = 148.6666259765625,
 },
 ["savedPos_CRAFT_QUEUE"] = {
-["offsetX"] = 1013.333740234375,
-["offsetY"] = -59.99859619140625,
+["offsetX"] = 1034.166931152344,
+["offsetY"] = -21.665283203125,
 },
 },
 ["CRAFTQUEUE_QUEUE_PATRON_ORDERS_MAX_COST"] = 0,
 ["CRAFTQUEUE_AUTO_SHOW"] = true,
-["CUSTOMER_HISTORY_AUTO_PURGE_LAST_PURGE"] = 0,
-["COST_OPTIMIZATION_SUB_RECIPE_MAX_DEPTH"] = 1,
-["NEWS_CHECKSUM"] = 81,
+["CUSTOMER_HISTORY_AUTO_PURGE_LAST_PURGE"] = 1774439160,
+["TOP_GEAR_AUTO_UPDATE"] = true,
+["CRAFT_LOG_AUTO_SHOW"] = true,
 ["CUSTOMER_HISTORY_RECORD_PATRON_ORDERS"] = false,
 ["MODULE_AVERAGE_PROFIT"] = false,
 ["CRAFT_LOG_HIDE_BLIZZARD_CRAFTING_LOG"] = false,
@@ -8754,16 +8586,591 @@ CraftSimDB = {
 ["data"] = {
 ["Angryabsol-Stormrage"] = {
 ["operationInfos"] = {
+[1230866] = {
+["baseDifficulty"] = 530,
+["upperSkillTreshold"] = 530,
+["lowerSkillThreshold"] = 0,
+["baseSkill"] = 7,
+["recipeID"] = 1230866,
+["bonusDifficulty"] = 0,
+["ingenuityRefund"] = 176,
+["bonusSkill"] = 0,
+["quality"] = 1.0132075548172,
+["guaranteedCraftingQualityID"] = 13,
+["concentrationCost"] = 352,
+["craftingQuality"] = 1,
+["craftingQualityID"] = 13,
+["craftingDataID"] = 3252,
+["isQualityCraft"] = true,
+["concentrationCurrencyID"] = 3161,
+["bonusStats"] = {
+{
+["bonusStatValue"] = 0,
+["bonusStatName"] = "Resourcefulness",
+["ratingDescription"] = "You have a 0.0% chance to use fewer tradeable reagents.",
+["ratingPct"] = 0,
+["bonusRatingPct"] = 0,
+},
+{
+["bonusStatValue"] = 0,
+["bonusStatName"] = "Multicraft",
+["ratingDescription"] = "You have a 0.0% chance to craft additional items.",
+["ratingPct"] = 0,
+["bonusRatingPct"] = 0,
+},
+{
+["bonusStatValue"] = 0,
+["bonusStatName"] = "Ingenuity",
+["ratingDescription"] = "You have a 0.0% chance to have an ingenious breakthrough when you Concentrate on a craft, refunding 50.0% of Concentration spent.",
+["ratingPct"] = 0,
+["bonusRatingPct"] = 0,
+},
+},
+},
+[1230444] = {
+["baseDifficulty"] = 400,
+["upperSkillTreshold"] = 400,
+["lowerSkillThreshold"] = 0,
+["baseSkill"] = 67,
+["recipeID"] = 1230444,
+["bonusDifficulty"] = 0,
+["ingenuityRefund"] = 229,
+["bonusSkill"] = 28,
+["quality"] = 1.237499952316284,
+["guaranteedCraftingQualityID"] = 13,
+["concentrationCost"] = 458,
+["craftingQuality"] = 1,
+["craftingQualityID"] = 13,
+["craftingDataID"] = 3082,
+["isQualityCraft"] = true,
+["concentrationCurrencyID"] = 3166,
+["bonusStats"] = {
+{
+["bonusStatValue"] = 18,
+["bonusStatName"] = "Resourcefulness",
+["ratingDescription"] = "You have a 2.0% chance to use fewer tradeable reagents.",
+["ratingPct"] = 2,
+["bonusRatingPct"] = 2,
+},
+{
+["bonusStatValue"] = 28,
+["bonusStatName"] = "Crafting Speed",
+["ratingDescription"] = "Increases your crafting speed.",
+["ratingPct"] = 5.599999904632568,
+["bonusRatingPct"] = 5.599999904632568,
+},
+{
+["bonusStatValue"] = 86,
+["bonusStatName"] = "Multicraft",
+["ratingDescription"] = "You have a 7.8% chance to craft additional items.",
+["ratingPct"] = 7.818181991577148,
+["bonusRatingPct"] = 7.818181991577148,
+},
+{
+["bonusStatValue"] = 28,
+["bonusStatName"] = "Ingenuity",
+["ratingDescription"] = "You have a 2.8% chance to have an ingenious breakthrough when you Concentrate on a craft, refunding 50.0% of Concentration spent.",
+["ratingPct"] = 2.799999952316284,
+["bonusRatingPct"] = 2.799999952316284,
+},
+},
+},
+},
+["class"] = "DEMONHUNTER",
+["cachedRecipeIDs"] = {
+[3] = {
+1230866,
+},
+[12] = {
+1230444,
+471045,
+},
+},
+["concentrationData"] = {
+[11] = {
+[3] = {
+["maxQuantity"] = 1000,
+["lastUpdated"] = 1774456757,
+["amount"] = 233,
+["rechargeTimePerPoint"] = 345600,
+["currencyID"] = 3161,
+},
+[12] = {
+["maxQuantity"] = 1000,
+["lastUpdated"] = 1774460558,
+["amount"] = 132,
+["rechargeTimePerPoint"] = 345600,
+["currencyID"] = 3166,
+},
+},
 },
 ["cooldownData"] = {
 },
 ["recipeInfos"] = {
+[1230866] = {
+["sourceType"] = 0,
+["disabled"] = false,
+["maxQuality"] = 2,
+["relativeDifficulty"] = 0,
+["recipeID"] = 1230866,
+["numSkillUps"] = 1,
+["supportsCraftingStats"] = true,
+["firstCraft"] = false,
+["categoryID"] = 2252,
+["isGatheringRecipe"] = false,
+["learned"] = true,
+["skillLineAbilityID"] = 52693,
+["icon"] = 7548909,
+["canCreateMultiple"] = true,
+["canSkillUp"] = true,
+["isSalvageRecipe"] = false,
+["itemLevel"] = 278,
+["maxTrivialLevel"] = 60,
+["craftable"] = true,
+["hyperlink"] = "|cnIQ1:|Hitem:241305::::::::90:1480::13:1:3524::::::|h[Silvermoon Health Potion |A:Professions-ChatIcon-Quality-12-Tier1:17:15::1|a]|h|r",
+["hasSingleItemOutput"] = true,
+["alwaysUsesLowestQuality"] = false,
+["qualityItemIDs"] = {
+241305,
+241304,
+},
+["supportsQualities"] = true,
+["name"] = "Silvermoon Health Potion",
+["isDummyRecipe"] = false,
+["qualityIDs"] = {
+13,
+14,
+},
+["isRecraft"] = false,
+["favorite"] = true,
+["isEnchantingRecipe"] = false,
+},
+[1230444] = {
+["sourceType"] = 0,
+["disabled"] = false,
+["maxQuality"] = 2,
+["relativeDifficulty"] = 2,
+["recipeID"] = 1230444,
+["numSkillUps"] = 1,
+["supportsCraftingStats"] = true,
+["firstCraft"] = false,
+["categoryID"] = 2236,
+["isGatheringRecipe"] = false,
+["learned"] = true,
+["skillLineAbilityID"] = 52578,
+["icon"] = 7549142,
+["canCreateMultiple"] = true,
+["canSkillUp"] = true,
+["isSalvageRecipe"] = false,
+["itemLevel"] = 278,
+["maxTrivialLevel"] = 75,
+["craftable"] = true,
+["hyperlink"] = "|cnIQ3:|Hitem:240891::::::::90:1480::13:1:3524::::::|h[Flawless Masterful Peridot |A:Professions-ChatIcon-Quality-12-Tier1:17:15::1|a]|h|r",
+["hasSingleItemOutput"] = true,
+["alwaysUsesLowestQuality"] = false,
+["qualityItemIDs"] = {
+240891,
+240892,
+},
+["supportsQualities"] = true,
+["name"] = "Flawless Masterful Peridot",
+["isDummyRecipe"] = false,
+["qualityIDs"] = {
+13,
+14,
+},
+["isRecraft"] = false,
+["favorite"] = true,
+["isEnchantingRecipe"] = false,
+},
+[471045] = {
+["sourceType"] = 0,
+["disabled"] = false,
+["relativeDifficulty"] = 3,
+["recipeID"] = 471045,
+["supportsCraftingStats"] = false,
+["firstCraft"] = false,
+["abilityVerb"] = "Recraft",
+["isGatheringRecipe"] = false,
+["learned"] = true,
+["skillLineAbilityID"] = 51525,
+["icon"] = 134138,
+["numSkillUps"] = 0,
+["canCreateMultiple"] = false,
+["isSalvageRecipe"] = false,
+["itemLevel"] = 0,
+["categoryID"] = 2173,
+["craftable"] = true,
+["canSkillUp"] = true,
+["maxTrivialLevel"] = 0,
+["alwaysUsesLowestQuality"] = false,
+["hasSingleItemOutput"] = false,
+["supportsQualities"] = false,
+["name"] = "Recraft Equipment",
+["isDummyRecipe"] = false,
+["isRecraft"] = true,
+["alternateVerb"] = "Modify",
+["favorite"] = false,
+["isEnchantingRecipe"] = false,
+},
+},
+["specializationData"] = {
+[11] = {
+[3] = {
+[107107] = -1,
+[107104] = -1,
+[107105] = -1,
+[107284] = -1,
+[107106] = -1,
+[107282] = -1,
+},
+[12] = {
+[106900] = 10,
+[106901] = 0,
+[106898] = 0,
+[107014] = -1,
+[107012] = -1,
+[107015] = -1,
+[107013] = -1,
+},
+},
 },
 ["professionInfos"] = {
+[1230866] = {
+["skillLevel"] = 7,
+["professionID"] = 2906,
+["sourceCounter"] = 1,
+["expansionName"] = "Midnight",
+["isPrimaryProfession"] = true,
+["professionName"] = "Midnight Alchemy",
+["profession"] = 3,
+["skillModifier"] = 0,
+["parentProfessionID"] = 171,
+["maxSkillLevel"] = 100,
+["parentProfessionName"] = "Alchemy",
+},
+[1230444] = {
+["skillLevel"] = 67,
+["professionID"] = 2914,
+["sourceCounter"] = 4,
+["expansionName"] = "Midnight",
+["isPrimaryProfession"] = true,
+["professionName"] = "Midnight Jewelcrafting",
+["profession"] = 12,
+["skillModifier"] = 18,
+["parentProfessionID"] = 755,
+["maxSkillLevel"] = 100,
+["parentProfessionName"] = "Jewelcrafting",
+},
+[471045] = {
+["skillLevel"] = 66,
+["professionID"] = 2914,
+["sourceCounter"] = 4,
+["expansionName"] = "Midnight",
+["isPrimaryProfession"] = true,
+["professionName"] = "Midnight Jewelcrafting",
+["profession"] = 12,
+["skillModifier"] = 18,
+["parentProfessionID"] = 755,
+["maxSkillLevel"] = 100,
+["parentProfessionName"] = "Jewelcrafting",
+},
 },
 ["professionGear"] = {
 [12] = {
-["cached"] = false,
+["equippedGear"] = {
+["profession"] = 12,
+["isCooking"] = false,
+["gear1"] = {
+["itemLink"] = "|cnIQ2:|Hitem:244629::::::::90:1480::13:3:12252:12251:12498:3:28:3615:38:4:40:4052::::Player-60-0FE8E65E:|h[Apprentice Jeweler's Apron |A:Professions-ChatIcon-Quality-Tier1:17:15::1|a]|h|r",
+["professionStats"] = {
+["multicraft"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "multicraft",
+["percentDivisionFactor"] = 1100,
+},
+["recipeDifficulty"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "recipedifficulty",
+["percentDivisionFactor"] = 1,
+},
+["craftingspeed"] = {
+["value"] = 28,
+["extraValues"] = {
+},
+["name"] = "craftingspeed",
+["percentDivisionFactor"] = 2650,
+},
+["skill"] = {
+["value"] = 5,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
+},
+["resourcefulness"] = {
+["value"] = 18,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
+},
+["ingenuity"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "ingenuity",
+["percentDivisionFactor"] = 1000,
+},
+},
+},
+["tool"] = {
+["itemLink"] = "|cnIQ2:|Hitem:244713::::::::90:1480::13:3:12252:12251:12498:4:28:3615:29:81:38:4:40:2786::::Player-60-0DF32C58:|h[Farstrider Clampers |A:Professions-ChatIcon-Quality-Tier1:17:15::1|a]|h|r",
+["professionStats"] = {
+["multicraft"] = {
+["value"] = 58,
+["extraValues"] = {
+},
+["name"] = "multicraft",
+["percentDivisionFactor"] = 1100,
+},
+["recipeDifficulty"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "recipedifficulty",
+["percentDivisionFactor"] = 1,
+},
+["craftingspeed"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "craftingspeed",
+["percentDivisionFactor"] = 2650,
+},
+["skill"] = {
+["value"] = 8,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
+},
+["resourcefulness"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
+},
+["ingenuity"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "ingenuity",
+["percentDivisionFactor"] = 1000,
+},
+},
+},
+["gear2"] = {
+["itemLink"] = "|cnIQ2:|Hitem:240955::::::::90:1480::13:3:12252:12251:12493:3:28:3615:38:4:40:3129::::Player-60-0F81BD09:|h[Silvermoon Loupes |A:Professions-ChatIcon-Quality-Tier1:17:15::1|a]|h|r",
+["professionStats"] = {
+["multicraft"] = {
+["value"] = 18,
+["extraValues"] = {
+},
+["name"] = "multicraft",
+["percentDivisionFactor"] = 1100,
+},
+["recipeDifficulty"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "recipedifficulty",
+["percentDivisionFactor"] = 1,
+},
+["craftingspeed"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "craftingspeed",
+["percentDivisionFactor"] = 2650,
+},
+["skill"] = {
+["value"] = 5,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
+},
+["resourcefulness"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
+},
+["ingenuity"] = {
+["value"] = 28,
+["extraValues"] = {
+},
+["name"] = "ingenuity",
+["percentDivisionFactor"] = 1000,
+},
+},
+},
+},
+["cached"] = true,
+["availableProfessionGear"] = {
+},
+},
+[3] = {
+["equippedGear"] = {
+["profession"] = 3,
+["isCooking"] = false,
+["gear1"] = {
+["professionStats"] = {
+["multicraft"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "multicraft",
+["percentDivisionFactor"] = 1100,
+},
+["recipeDifficulty"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "recipedifficulty",
+["percentDivisionFactor"] = 1,
+},
+["craftingspeed"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "craftingspeed",
+["percentDivisionFactor"] = 2650,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
+},
+["resourcefulness"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
+},
+["ingenuity"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "ingenuity",
+["percentDivisionFactor"] = 1000,
+},
+},
+},
+["tool"] = {
+["professionStats"] = {
+["multicraft"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "multicraft",
+["percentDivisionFactor"] = 1100,
+},
+["recipeDifficulty"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "recipedifficulty",
+["percentDivisionFactor"] = 1,
+},
+["craftingspeed"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "craftingspeed",
+["percentDivisionFactor"] = 2650,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
+},
+["resourcefulness"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
+},
+["ingenuity"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "ingenuity",
+["percentDivisionFactor"] = 1000,
+},
+},
+},
+["gear2"] = {
+["professionStats"] = {
+["multicraft"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "multicraft",
+["percentDivisionFactor"] = 1100,
+},
+["recipeDifficulty"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "recipedifficulty",
+["percentDivisionFactor"] = 1,
+},
+["craftingspeed"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "craftingspeed",
+["percentDivisionFactor"] = 2650,
+},
+["skill"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
+},
+["resourcefulness"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
+},
+["ingenuity"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "ingenuity",
+["percentDivisionFactor"] = 1000,
+},
+},
+},
+},
+["cached"] = true,
 ["availableProfessionGear"] = {
 },
 },
@@ -9234,10 +9641,10 @@ CraftSimDB = {
 ["maxQuality"] = 2,
 ["relativeDifficulty"] = 3,
 ["recipeID"] = 1230759,
-["numSkillUps"] = 1,
+["categoryID"] = 2231,
 ["supportsCraftingStats"] = true,
 ["firstCraft"] = false,
-["categoryID"] = 2231,
+["numSkillUps"] = 1,
 ["isGatheringRecipe"] = false,
 ["learned"] = true,
 ["skillLineAbilityID"] = 52667,
@@ -9248,8 +9655,8 @@ CraftSimDB = {
 ["itemLevel"] = 885,
 ["hyperlink"] = "|cnIQ2:|Hitem:237367::::::::90:105::13:1:3524::::::|h[Refulgent Weightstone |A:Professions-ChatIcon-Quality-12-Tier1:17:15::1|a]|h|r",
 ["craftable"] = true,
-["maxTrivialLevel"] = 60,
 ["hasSingleItemOutput"] = true,
+["maxTrivialLevel"] = 60,
 ["alwaysUsesLowestQuality"] = false,
 ["qualityItemIDs"] = {
 237367,
@@ -9287,8 +9694,8 @@ CraftSimDB = {
 ["canSkillUp"] = true,
 ["hyperlink"] = "|cnIQ1:|Hitem:242638::::::::90:105:::1:3524::::::|h[Recycle Flasks]|h|r",
 ["alwaysUsesLowestQuality"] = true,
-["maxTrivialLevel"] = 25,
 ["hasSingleItemOutput"] = false,
+["maxTrivialLevel"] = 25,
 ["name"] = "Recycle Flasks",
 ["supportsQualities"] = false,
 ["isDummyRecipe"] = false,
@@ -9302,10 +9709,10 @@ CraftSimDB = {
 ["maxQuality"] = 5,
 ["relativeDifficulty"] = 3,
 ["recipeID"] = 1229621,
-["numSkillUps"] = 1,
+["categoryID"] = 2225,
 ["supportsCraftingStats"] = true,
 ["firstCraft"] = false,
-["categoryID"] = 2225,
+["numSkillUps"] = 1,
 ["isGatheringRecipe"] = false,
 ["learned"] = true,
 ["skillLineAbilityID"] = 52356,
@@ -9316,8 +9723,8 @@ CraftSimDB = {
 ["itemLevel"] = 201,
 ["hyperlink"] = "|cnIQ3:|Hitem:237925::::::::90:105::13:1:3524::::::|h[Blood-Tempered Gauntlets]|h|r",
 ["craftable"] = true,
-["maxTrivialLevel"] = 50,
 ["hasSingleItemOutput"] = true,
+["maxTrivialLevel"] = 50,
 ["alwaysUsesLowestQuality"] = false,
 ["canCreateMultiple"] = true,
 ["supportsQualities"] = true,
@@ -9349,7 +9756,7 @@ CraftSimDB = {
 ["isEnchantingRecipe"] = false,
 ["supportsCraftingStats"] = true,
 ["firstCraft"] = false,
-["categoryID"] = 2226,
+["numSkillUps"] = 1,
 ["isGatheringRecipe"] = false,
 ["learned"] = true,
 ["skillLineAbilityID"] = 52387,
@@ -9377,12 +9784,12 @@ CraftSimDB = {
 ["alwaysUsesLowestQuality"] = false,
 ["supportsQualities"] = true,
 ["canCreateMultiple"] = true,
-["hasSingleItemOutput"] = true,
 ["maxTrivialLevel"] = 100,
+["hasSingleItemOutput"] = true,
 ["hyperlink"] = "|cnIQ4:|Hitem:237848::::::::90:105::13:1:3524::::::|h[Blood Knight's Mercy]|h|r",
 ["canSkillUp"] = false,
 ["favorite"] = true,
-["numSkillUps"] = 1,
+["categoryID"] = 2226,
 },
 [1229609] = {
 ["sourceType"] = 0,
@@ -9390,10 +9797,10 @@ CraftSimDB = {
 ["maxQuality"] = 5,
 ["relativeDifficulty"] = 3,
 ["recipeID"] = 1229609,
-["numSkillUps"] = 1,
+["categoryID"] = 2227,
 ["supportsCraftingStats"] = true,
 ["firstCraft"] = false,
-["categoryID"] = 2227,
+["numSkillUps"] = 1,
 ["isGatheringRecipe"] = false,
 ["learned"] = true,
 ["skillLineAbilityID"] = 52344,
@@ -9404,8 +9811,8 @@ CraftSimDB = {
 ["itemLevel"] = 180,
 ["hyperlink"] = "|cnIQ2:|Hitem:238010::::::::90:105::13:1:3524::::::|h[Thalassian Pickaxe]|h|r",
 ["craftable"] = true,
-["maxTrivialLevel"] = 30,
 ["hasSingleItemOutput"] = true,
+["maxTrivialLevel"] = 30,
 ["alwaysUsesLowestQuality"] = false,
 ["canCreateMultiple"] = true,
 ["supportsQualities"] = true,
@@ -9434,10 +9841,10 @@ CraftSimDB = {
 ["maxQuality"] = 5,
 ["relativeDifficulty"] = 3,
 ["recipeID"] = 1229657,
-["numSkillUps"] = 1,
+["categoryID"] = 2226,
 ["supportsCraftingStats"] = true,
 ["firstCraft"] = false,
-["categoryID"] = 2226,
+["numSkillUps"] = 1,
 ["isGatheringRecipe"] = false,
 ["learned"] = true,
 ["skillLineAbilityID"] = 52392,
@@ -9448,8 +9855,8 @@ CraftSimDB = {
 ["itemLevel"] = 246,
 ["hyperlink"] = "|cnIQ4:|Hitem:237840::::::::90:105::13:1:3524::::::|h[Spellbreaker's Warglaive]|h|r",
 ["craftable"] = true,
-["maxTrivialLevel"] = 100,
 ["hasSingleItemOutput"] = true,
+["maxTrivialLevel"] = 100,
 ["alwaysUsesLowestQuality"] = false,
 ["canCreateMultiple"] = true,
 ["supportsQualities"] = true,
@@ -9478,10 +9885,10 @@ CraftSimDB = {
 ["maxQuality"] = 5,
 ["relativeDifficulty"] = 3,
 ["recipeID"] = 1229658,
-["numSkillUps"] = 1,
+["categoryID"] = 2226,
 ["supportsCraftingStats"] = true,
 ["firstCraft"] = false,
-["categoryID"] = 2226,
+["numSkillUps"] = 1,
 ["isGatheringRecipe"] = false,
 ["learned"] = true,
 ["skillLineAbilityID"] = 52393,
@@ -9492,8 +9899,8 @@ CraftSimDB = {
 ["itemLevel"] = 246,
 ["hyperlink"] = "|cnIQ1:|Hitem:237839::::::::90:105::13:1:3524::::::|h[]|h|r",
 ["craftable"] = true,
-["maxTrivialLevel"] = 100,
 ["hasSingleItemOutput"] = true,
+["maxTrivialLevel"] = 100,
 ["alwaysUsesLowestQuality"] = false,
 ["canCreateMultiple"] = true,
 ["supportsQualities"] = true,
@@ -9522,10 +9929,10 @@ CraftSimDB = {
 ["maxQuality"] = 5,
 ["relativeDifficulty"] = 3,
 ["recipeID"] = 1229614,
-["numSkillUps"] = 1,
+["categoryID"] = 2226,
 ["supportsCraftingStats"] = true,
 ["firstCraft"] = false,
-["categoryID"] = 2226,
+["numSkillUps"] = 1,
 ["isGatheringRecipe"] = false,
 ["learned"] = true,
 ["skillLineAbilityID"] = 52349,
@@ -9536,8 +9943,8 @@ CraftSimDB = {
 ["itemLevel"] = 201,
 ["hyperlink"] = "|cnIQ3:|Hitem:237932::::::::90:105::13:1:3524::::::|h[Primalforged Heavy Axe]|h|r",
 ["craftable"] = true,
-["maxTrivialLevel"] = 40,
 ["hasSingleItemOutput"] = true,
+["maxTrivialLevel"] = 40,
 ["alwaysUsesLowestQuality"] = false,
 ["canCreateMultiple"] = true,
 ["supportsQualities"] = true,
@@ -9566,10 +9973,10 @@ CraftSimDB = {
 ["maxQuality"] = 2,
 ["relativeDifficulty"] = 0,
 ["recipeID"] = 1230866,
-["numSkillUps"] = 1,
+["categoryID"] = 2252,
 ["supportsCraftingStats"] = true,
 ["firstCraft"] = false,
-["categoryID"] = 2252,
+["numSkillUps"] = 1,
 ["isGatheringRecipe"] = false,
 ["learned"] = true,
 ["skillLineAbilityID"] = 52693,
@@ -9580,8 +9987,8 @@ CraftSimDB = {
 ["itemLevel"] = 278,
 ["hyperlink"] = "|cnIQ1:|Hitem:241305::::::::90:105::13:1:3524::::::|h[Silvermoon Health Potion |A:Professions-ChatIcon-Quality-12-Tier1:17:15::1|a]|h|r",
 ["craftable"] = true,
-["maxTrivialLevel"] = 60,
 ["hasSingleItemOutput"] = true,
+["maxTrivialLevel"] = 60,
 ["alwaysUsesLowestQuality"] = false,
 ["qualityItemIDs"] = {
 241305,
@@ -9604,10 +10011,10 @@ CraftSimDB = {
 ["maxQuality"] = 5,
 ["relativeDifficulty"] = 3,
 ["recipeID"] = 1229650,
-["numSkillUps"] = 1,
+["categoryID"] = 2226,
 ["supportsCraftingStats"] = true,
 ["firstCraft"] = false,
-["categoryID"] = 2226,
+["numSkillUps"] = 1,
 ["isGatheringRecipe"] = false,
 ["learned"] = true,
 ["skillLineAbilityID"] = 52385,
@@ -9618,8 +10025,8 @@ CraftSimDB = {
 ["itemLevel"] = 246,
 ["hyperlink"] = "|cnIQ4:|Hitem:237838::::::::90:105::13:1:3524::::::|h[Magister's Ritual Knife]|h|r",
 ["craftable"] = true,
-["maxTrivialLevel"] = 100,
 ["hasSingleItemOutput"] = true,
+["maxTrivialLevel"] = 100,
 ["alwaysUsesLowestQuality"] = false,
 ["canCreateMultiple"] = true,
 ["supportsQualities"] = true,
@@ -9651,7 +10058,7 @@ CraftSimDB = {
 ["isEnchantingRecipe"] = false,
 ["supportsCraftingStats"] = true,
 ["firstCraft"] = false,
-["categoryID"] = 2226,
+["numSkillUps"] = 1,
 ["isGatheringRecipe"] = false,
 ["learned"] = true,
 ["skillLineAbilityID"] = 52382,
@@ -9679,12 +10086,12 @@ CraftSimDB = {
 ["alwaysUsesLowestQuality"] = false,
 ["supportsQualities"] = true,
 ["canCreateMultiple"] = true,
-["hasSingleItemOutput"] = true,
 ["maxTrivialLevel"] = 100,
+["hasSingleItemOutput"] = true,
 ["hyperlink"] = "|cnIQ4:|Hitem:237849::::::::90:105::13:1:3524::::::|h[Magister's Valediction]|h|r",
 ["canSkillUp"] = false,
 ["favorite"] = true,
-["numSkillUps"] = 1,
+["categoryID"] = 2226,
 },
 [1229659] = {
 ["sourceType"] = 0,
@@ -9692,10 +10099,10 @@ CraftSimDB = {
 ["maxQuality"] = 5,
 ["relativeDifficulty"] = 3,
 ["recipeID"] = 1229659,
-["numSkillUps"] = 1,
+["categoryID"] = 2226,
 ["supportsCraftingStats"] = true,
 ["firstCraft"] = false,
-["categoryID"] = 2226,
+["numSkillUps"] = 1,
 ["isGatheringRecipe"] = false,
 ["learned"] = true,
 ["skillLineAbilityID"] = 52394,
@@ -9706,8 +10113,8 @@ CraftSimDB = {
 ["itemLevel"] = 246,
 ["hyperlink"] = "|cnIQ4:|Hitem:237837::::::::90:105::13:1:3524::::::|h[Farstrider's Mercy]|h|r",
 ["craftable"] = true,
-["maxTrivialLevel"] = 100,
 ["hasSingleItemOutput"] = true,
+["maxTrivialLevel"] = 100,
 ["alwaysUsesLowestQuality"] = false,
 ["canCreateMultiple"] = true,
 ["supportsQualities"] = true,
@@ -10382,6 +10789,233 @@ CraftSimDB = {
 },
 },
 },
+["craftQueueDB"] = {
+["version"] = 1,
+["data"] = {
+{
+["concentrating"] = false,
+["requiredSelectableReagent"] = false,
+["crafterData"] = {
+["class"] = "DEMONHUNTER",
+["name"] = "Angryabsol",
+["realm"] = "Stormrage",
+},
+["subRecipeCostsEnabled"] = false,
+["recipeID"] = 1230444,
+["serializedSubRecipeData"] = {
+},
+["subRecipeDepth"] = 0,
+["amount"] = 1,
+["parentRecipeInfo"] = {
+},
+["requiredReagents"] = {
+{
+["items"] = {
+{
+["qualityID"] = 1,
+["quantity"] = 3,
+["itemID"] = 236950,
+},
+},
+["dataSlotIndex"] = 1,
+["requiredQuantity"] = 3,
+},
+{
+["items"] = {
+{
+["qualityID"] = 1,
+["quantity"] = 1,
+["itemID"] = 251285,
+},
+},
+["dataSlotIndex"] = 2,
+["requiredQuantity"] = 1,
+},
+{
+["hasQuality"] = true,
+["items"] = {
+{
+["qualityID"] = 1,
+["quantity"] = 1,
+["itemID"] = 242610,
+},
+{
+["qualityID"] = 2,
+["quantity"] = 0,
+["itemID"] = 242726,
+},
+},
+["dataSlotIndex"] = 1,
+["requiredQuantity"] = 1,
+},
+{
+["hasQuality"] = true,
+["items"] = {
+{
+["qualityID"] = 1,
+["quantity"] = 5,
+["itemID"] = 242620,
+},
+{
+["qualityID"] = 2,
+["quantity"] = 0,
+["itemID"] = 242621,
+},
+},
+["dataSlotIndex"] = 2,
+["requiredQuantity"] = 5,
+},
+},
+["professionGearSet"] = {
+["profession"] = 12,
+["isCooking"] = false,
+["gear1"] = {
+["itemLink"] = "|cnIQ2:|Hitem:244629::::::::90:1480::13:3:12252:12251:12498:3:28:3615:38:4:40:4052::::Player-60-0FE8E65E:|h[Apprentice Jeweler's Apron |A:Professions-ChatIcon-Quality-Tier1:17:15::1|a]|h|r",
+["professionStats"] = {
+["multicraft"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "multicraft",
+["percentDivisionFactor"] = 1100,
+},
+["recipeDifficulty"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "recipedifficulty",
+["percentDivisionFactor"] = 1,
+},
+["craftingspeed"] = {
+["value"] = 28,
+["extraValues"] = {
+},
+["name"] = "craftingspeed",
+["percentDivisionFactor"] = 2650,
+},
+["skill"] = {
+["value"] = 5,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
+},
+["resourcefulness"] = {
+["value"] = 18,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
+},
+["ingenuity"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "ingenuity",
+["percentDivisionFactor"] = 1000,
+},
+},
+},
+["tool"] = {
+["itemLink"] = "|cnIQ2:|Hitem:244713::::::::90:1480::13:3:12252:12251:12498:4:28:3615:29:81:38:4:40:2786::::Player-60-0DF32C58:|h[Farstrider Clampers |A:Professions-ChatIcon-Quality-Tier1:17:15::1|a]|h|r",
+["professionStats"] = {
+["multicraft"] = {
+["value"] = 58,
+["extraValues"] = {
+},
+["name"] = "multicraft",
+["percentDivisionFactor"] = 1100,
+},
+["recipeDifficulty"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "recipedifficulty",
+["percentDivisionFactor"] = 1,
+},
+["craftingspeed"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "craftingspeed",
+["percentDivisionFactor"] = 2650,
+},
+["skill"] = {
+["value"] = 8,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
+},
+["resourcefulness"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
+},
+["ingenuity"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "ingenuity",
+["percentDivisionFactor"] = 1000,
+},
+},
+},
+["gear2"] = {
+["itemLink"] = "|cnIQ2:|Hitem:240955::::::::90:1480::13:3:12252:12251:12493:3:28:3615:38:4:40:3129::::Player-60-0F81BD09:|h[Silvermoon Loupes |A:Professions-ChatIcon-Quality-Tier1:17:15::1|a]|h|r",
+["professionStats"] = {
+["multicraft"] = {
+["value"] = 18,
+["extraValues"] = {
+},
+["name"] = "multicraft",
+["percentDivisionFactor"] = 1100,
+},
+["recipeDifficulty"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "recipedifficulty",
+["percentDivisionFactor"] = 1,
+},
+["craftingspeed"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "craftingspeed",
+["percentDivisionFactor"] = 2650,
+},
+["skill"] = {
+["value"] = 5,
+["extraValues"] = {
+},
+["name"] = "skill",
+["percentDivisionFactor"] = 1,
+},
+["resourcefulness"] = {
+["value"] = 0,
+["extraValues"] = {
+},
+["name"] = "resourcefulness",
+["percentDivisionFactor"] = 900,
+},
+["ingenuity"] = {
+["value"] = 28,
+["extraValues"] = {
+},
+["name"] = "ingenuity",
+["percentDivisionFactor"] = 1000,
+},
+},
+},
+},
+["optionalReagents"] = {
+},
+},
+},
+},
 ["priceOverrideDB"] = {
 ["version"] = 1,
 ["data"] = {
@@ -10389,11 +11023,6 @@ CraftSimDB = {
 },
 ["globalOverrides"] = {
 },
-},
-},
-["craftQueueDB"] = {
-["version"] = 1,
-["data"] = {
 },
 },
 ["recipeSubCrafterDB"] = {
@@ -10476,28 +11105,28 @@ CraftSimDB = {
 [1236059] = "Barelynoer-Area52",
 [1230450] = "Angryabsol-Stormrage",
 [1236061] = "Barelynoer-Area52",
-[1230455] = "Angryabsol-Stormrage",
+[1236065] = "Barelynoer-Area52",
 [1230453] = "Angryabsol-Stormrage",
 [1236068] = "Barelynoer-Area52",
-[1236065] = "Barelynoer-Area52",
-[1236066] = "Barelynoer-Area52",
-[1236067] = "Barelynoer-Area52",
+[1230455] = "Angryabsol-Stormrage",
+[1230456] = "Angryabsol-Stormrage",
+[1230457] = "Angryabsol-Stormrage",
 [1230458] = "Angryabsol-Stormrage",
-[1230460] = "Angryabsol-Stormrage",
 [1236070] = "Barelynoer-Area52",
-[1236073] = "Barelynoer-Area52",
-[1232247] = "Lonelylitten-Stormrage",
+[1230460] = "Angryabsol-Stormrage",
 [1230463] = "Angryabsol-Stormrage",
+[1232247] = "Lonelylitten-Stormrage",
+[1236073] = "Barelynoer-Area52",
 [1236074] = "Barelynoer-Area52",
 [1236075] = "Barelynoer-Area52",
 [1236076] = "Barelynoer-Area52",
 [1276112] = "Lonelylitten-Stormrage",
 [445092] = "Lonelylitten-Stormrage",
 [1230874] = "Lonelylitten-Stormrage",
-[1230470] = "Angryabsol-Stormrage",
+[1236080] = "Barelynoer-Area52",
 [1230474] = "Angryabsol-Stormrage",
 [1236082] = "Barelynoer-Area52",
-[1236083] = "Barelynoer-Area52",
+[1230473] = "Angryabsol-Stormrage",
 [1236594] = "Barelynoer-Area52",
 [1230475] = "Angryabsol-Stormrage",
 [1236086] = "Barelynoer-Area52",
@@ -10545,13 +11174,13 @@ CraftSimDB = {
 [1230476] = "Angryabsol-Stormrage",
 [1226184] = "Lonelylitten-Stormrage",
 [1226185] = "Lonelylitten-Stormrage",
-[1230473] = "Angryabsol-Stormrage",
-[1236080] = "Barelynoer-Area52",
+[1236083] = "Barelynoer-Area52",
+[1230470] = "Angryabsol-Stormrage",
 [1236465] = "Barelynoer-Area52",
 [1230449] = "Angryabsol-Stormrage",
 [1226190] = "Lonelylitten-Stormrage",
-[1230457] = "Angryabsol-Stormrage",
-[1230456] = "Angryabsol-Stormrage",
+[1236067] = "Barelynoer-Area52",
+[1236066] = "Barelynoer-Area52",
 [1226193] = "Lonelylitten-Stormrage",
 [1226194] = "Lonelylitten-Stormrage",
 [1226195] = "Lonelylitten-Stormrage",
