@@ -67,5 +67,14 @@ RaiderIO_DB_EU_F: disabled
 RaiderIO_DB_CN_R: disabled
 RaiderIO_DB_CN_M: disabled
 RaiderIO_DB_CN_F: disabled
-EllesmereUICooldownManager: disabled
+EllesmereUICooldownManager: enabled
 EllesmereUIResourceBars: disabled
+BigWigs_Core: enabled
+BigWigs_Options: enabled
+BigWigs_Plugins: enabled
+LittleWigs: enabled
+BigWigs_TheVoidspire: enabled
+LittleWigs_WrathOfTheLichKing: enabled
+LittleWigs_WarlordsOfDraenor: enabled
+LittleWigs_Legion: enabled
+LittleWigs_Dragonflight: enabled

@@ -616,21 +616,12 @@ function ns.CooldownBars.ScanPlayerSpells()
       return
     end
     
-    -- Check for charges - chargeInfo being non-nil means it's a charge spell
-    -- NOTE: chargeInfo.maxCharges can be SECRET in WoW 12.0, use nil check for hasCharges
     local chargeInfo = C_Spell.GetSpellCharges(spellID)
-    local hasCharges = (chargeInfo ~= nil)  -- Table exists = charge spell
+    local hasCharges = (chargeInfo ~= nil)
     local maxCharges = 0
     
     if hasCharges and chargeInfo.maxCharges then
-      -- Only read actual value if NOT secret
-      if not issecretvalue or not issecretvalue(chargeInfo.maxCharges) then
-        maxCharges = chargeInfo.maxCharges
-      else
-        -- Secret value - still a charge spell, just can't get count yet
-        Log("  SECRET maxCharges (still charge spell): " .. spellName .. " (ID:" .. spellID .. ")")
-        maxCharges = 2  -- Default assumption for charge spells
-      end
+      maxCharges = chargeInfo.maxCharges
     end
     
     -- Check if it has cooldown API
@@ -645,9 +636,7 @@ function ns.CooldownBars.ScanPlayerSpells()
     
     -- Check if it's a talent spell
     local isTalent = false
-    pcall(function()
-      isTalent = C_Spell.IsClassTalentSpell(spellID) or C_Spell.IsPvPTalentSpell(spellID)
-    end)
+    isTalent = C_Spell.IsClassTalentSpell(spellID) or C_Spell.IsPvPTalentSpell(spellID)
     
     -- Check for resource cost
     local costInfo = C_Spell.GetSpellPowerCost(spellID)
@@ -834,12 +823,7 @@ function ns.CooldownBars.AddSpellByID(spellID)
   local maxCharges = 0
   
   if hasCharges and chargeInfo.maxCharges then
-    -- Only read actual value if NOT secret
-    if not issecretvalue or not issecretvalue(chargeInfo.maxCharges) then
-      maxCharges = chargeInfo.maxCharges
-    else
-      maxCharges = 2  -- Default assumption for charge spells
-    end
+    maxCharges = chargeInfo.maxCharges
   end
   
   -- Check for cooldown
@@ -865,9 +849,7 @@ function ns.CooldownBars.AddSpellByID(spellID)
   
   -- Check if talent
   local isTalent = false
-  pcall(function()
-    isTalent = C_Spell.IsClassTalentSpell(spellID) or C_Spell.IsPvPTalentSpell(spellID)
-  end)
+  isTalent = C_Spell.IsClassTalentSpell(spellID) or C_Spell.IsPvPTalentSpell(spellID)
   
   -- Get texture
   local texture = C_Spell.GetSpellTexture(spellID) or 134400
@@ -1377,36 +1359,14 @@ end
 -- Call this when spell info is available (out of combat, on events)
 local function CacheMaxCooldownDuration(spellID)
   if not spellID then return end
-  
-  local cdInfo = C_Spell.GetSpellCooldown(spellID)
-  if not cdInfo then return end
-  
-  -- Check if duration is secret before caching
-  if issecretvalue and issecretvalue(cdInfo.duration) then
-    return  -- Can't cache secret value
-  end
-  
-  -- Only cache if there's an actual duration (not 0, not GCD-only)
-  if cdInfo.duration and cdInfo.duration > 1.5 then
-    cachedMaxDurations[spellID] = cdInfo.duration
-  end
+  -- maxCharges is non-secret; use it as proxy to confirm spell has a real cooldown
+  -- We can't compare duration (SECRET), so we only cache via charge duration path below
 end
 
 -- Also cache from charge info for charge spells
 local function CacheMaxChargeDuration(spellID)
-  if not spellID then return end
-  
-  local chargeInfo = C_Spell.GetSpellCharges(spellID)
-  if not chargeInfo then return end
-  
-  -- Check if cooldownDuration is secret
-  if issecretvalue and issecretvalue(chargeInfo.cooldownDuration) then
-    return
-  end
-  
-  if chargeInfo.cooldownDuration and chargeInfo.cooldownDuration > 0 then
-    cachedMaxDurations[spellID] = chargeInfo.cooldownDuration
-  end
+  -- cooldownDuration from GetSpellCharges is SECRET — cannot compare or cache.
+  -- Color curve threshold "seconds mode" will use durationThresholdMaxDuration fallback.
 end
 
 -- Get cached max duration for a spell
@@ -1567,30 +1527,22 @@ local function RefreshAllChargeBarMaxCharges()
     if barData and barData.frame then
       local chargeInfo = C_Spell.GetSpellCharges(spellID)
       if chargeInfo and chargeInfo.maxCharges then
-        -- Outside combat, maxCharges should be non-secret
         local newMax = chargeInfo.maxCharges
-        if issecretvalue and issecretvalue(newMax) then
-          -- If somehow secret, skip this bar
-          Log("RefreshAllChargeBarMaxCharges: " .. spellID .. " maxCharges is secret, skipping")
-        else
-          local oldMax = barData.maxCharges
-          if oldMax ~= newMax then
-            Log("Max charges changed for " .. spellID .. ": " .. (oldMax or 0) .. " -> " .. newMax)
-            barData.maxCharges = newMax
-            
-            -- Update text display
-            if barData.maxText then
-              barData.maxText:SetText("/" .. barData.maxCharges)
-            end
-            if barData.stackMaxText then
-              barData.stackMaxText:SetText("/" .. barData.maxCharges)
-            end
-            
-            -- Recreate slots with new count
-            C_Timer.After(0.01, function()
-              ns.CooldownBars.ApplyAppearance(spellID, barTypeKey)
-            end)
+        local oldMax = barData.maxCharges
+        if oldMax ~= newMax then
+          Log("Max charges changed for " .. spellID .. ": " .. (oldMax or 0) .. " -> " .. newMax)
+          barData.maxCharges = newMax
+          -- Update text display
+          if barData.maxText then
+            barData.maxText:SetText("/" .. barData.maxCharges)
           end
+          if barData.stackMaxText then
+            barData.stackMaxText:SetText("/" .. barData.maxCharges)
+          end
+          -- Recreate slots with new count
+          C_Timer.After(0.01, function()
+            ns.CooldownBars.ApplyAppearance(spellID, barTypeKey)
+          end)
         end
       end
     end
@@ -1644,18 +1596,25 @@ end
 -- Feed shadow from live spell cooldown data (GCD filtered).
 -- Returns true=READY, false=on CD (matches old IsCooldownReadyForBar signature).
 -- For charge spells: also checks charge shadow — if a charge is recharging, not ready.
-local function IsCooldownReadyForBar(barData, spellID)
+local function IsCooldownReadyForBar(barData, spellID, isGCDTracker)
   local shadow = GetReadyShadowForBar(barData)
   barData._arcFeedingReadyShadow = (barData._arcFeedingReadyShadow or 0) + 1
   local info = spellID and C_Spell.GetSpellCooldown(spellID)
   if info then
-    if info.isOnGCD == true then
-      shadow:SetCooldown(0, 0)
+    local shouldFeed
+    if isGCDTracker then
+      shouldFeed = (info.isOnGCD == true)
     else
-      shadow:SetCooldown(info.startTime, info.duration)
+      shouldFeed = (info.isActive == true and info.isOnGCD ~= true)
+    end
+    if shouldFeed then
+      local durObj = C_Spell.GetSpellCooldownDuration(spellID)
+      if durObj then shadow:SetCooldownFromDurationObject(durObj, true) end
+    else
+      CooldownFrame_Clear(shadow)
     end
   else
-    shadow:SetCooldown(0, 0)
+    CooldownFrame_Clear(shadow)
   end
   barData._arcFeedingReadyShadow = barData._arcFeedingReadyShadow - 1
   if not shadow:IsShown() and barData.chargeShadow and barData.chargeShadow:IsShown() then
@@ -2136,11 +2095,9 @@ local function CreateChargeBar(index)
       -- Feed charge shadow (same guard pattern as UpdateCooldownBar)
       local chargeShadow = GetChargeShadowForBar(bd)
       bd._arcFeedingChargeShadow = (bd._arcFeedingChargeShadow or 0) + 1
-      chargeShadow:SetCooldown(0, 0)
-      pcall(function()
-        local durObj = C_Spell.GetSpellChargeDuration(spellID)
-        if durObj then chargeShadow:SetCooldownFromDurationObject(durObj, true) end
-      end)
+      CooldownFrame_Clear(chargeShadow)
+      local durObj = C_Spell.GetSpellChargeDuration(spellID)
+      if durObj then chargeShadow:SetCooldownFromDurationObject(durObj, true) end
       bd._arcFeedingChargeShadow = bd._arcFeedingChargeShadow - 1
       UpdateChargeBar(bd)
     elseif event == "SPELL_UPDATE_COOLDOWN" then
@@ -2155,11 +2112,9 @@ local function CreateChargeBar(index)
       bd.needsDurationRefresh = true
       local chargeShadow = GetChargeShadowForBar(bd)
       bd._arcFeedingChargeShadow = (bd._arcFeedingChargeShadow or 0) + 1
-      chargeShadow:SetCooldown(0, 0)
-      pcall(function()
-        local durObj = C_Spell.GetSpellChargeDuration(spellID)
-        if durObj then chargeShadow:SetCooldownFromDurationObject(durObj, true) end
-      end)
+      CooldownFrame_Clear(chargeShadow)
+      local durObj = C_Spell.GetSpellChargeDuration(spellID)
+      if durObj then chargeShadow:SetCooldownFromDurationObject(durObj, true) end
       bd._arcFeedingChargeShadow = bd._arcFeedingChargeShadow - 1
       UpdateChargeBar(bd)
     end
@@ -2643,16 +2598,14 @@ UpdateCooldownBar = function(barData)
   if chargeInfo then
     local chargeShadow = GetChargeShadowForBar(barData)
     barData._arcFeedingChargeShadow = (barData._arcFeedingChargeShadow or 0) + 1
-    chargeShadow:SetCooldown(0, 0)
-    pcall(function()
-      local durObj = C_Spell.GetSpellChargeDuration(spellID)
-      if durObj then chargeShadow:SetCooldownFromDurationObject(durObj, true) end
-    end)
+    CooldownFrame_Clear(chargeShadow)
+    local durObj = C_Spell.GetSpellChargeDuration(spellID)
+    if durObj then chargeShadow:SetCooldownFromDurationObject(durObj, true) end
     barData._arcFeedingChargeShadow = barData._arcFeedingChargeShadow - 1
   end
 
   -- Visibility check - shadow Cooldown frame IsShown() is non-secret
-  local isReady = IsCooldownReadyForBar(barData, spellID)
+  local isReady = IsCooldownReadyForBar(barData, spellID, isGCDTracker)
   local shouldShow = true
   local isPreviewMode = false
   local hideWhenFadeAlpha = 1.0
@@ -2726,11 +2679,7 @@ UpdateCooldownBar = function(barData)
       if showMaxText and barData.maxText then
         local maxCharges = chargeInfo.maxCharges
         if maxCharges then
-          if issecretvalue and issecretvalue(maxCharges) then
-            barData.maxText:SetText("/??")
-          else
-            barData.maxText:SetText("/" .. maxCharges)
-          end
+          barData.maxText:SetText("/" .. maxCharges)
           barData.maxText:Show()
         end
       elseif barData.maxText then
@@ -2802,26 +2751,20 @@ UpdateCooldownBar = function(barData)
         -- IMPORTANT: Check charge duration FIRST (charge spells need this for recharge tracking)
         local freshDurObj = C_Spell.GetSpellChargeDuration(data.spellID) or C_Spell.GetSpellCooldownDuration(data.spellID)
         if freshDurObj then
-          local colorOK = pcall(function()
-            local colorResult = freshDurObj:EvaluateRemainingPercent(data.colorCurve)
-            if colorResult then
-              barTexture:SetVertexColor(colorResult:GetRGB())
-            end
-          end)
-          if not colorOK then
+          local colorResult = freshDurObj:EvaluateRemainingPercent(data.colorCurve)
+          if colorResult then
+            barTexture:SetVertexColor(colorResult:GetRGB())
+          else
             barTexture:SetVertexColor(data.baseColor.r, data.baseColor.g, data.baseColor.b, data.baseColor.a or 1)
           end
         end
       end)
       
       -- Apply initial color
-      local colorOK = pcall(function()
-        local colorResult = durObj:EvaluateRemainingPercent(colorCurve)
-        if colorResult then
-          barTexture:SetVertexColor(colorResult:GetRGB())
-        end
-      end)
-      if not colorOK then
+      local colorResult = durObj:EvaluateRemainingPercent(colorCurve)
+      if colorResult then
+        barTexture:SetVertexColor(colorResult:GetRGB())
+      else
         barTexture:SetVertexColor(baseColor.r, baseColor.g, baseColor.b, baseColor.a or 1)
       end
     else
@@ -2831,35 +2774,13 @@ UpdateCooldownBar = function(barData)
       barTexture:SetVertexColor(baseColor.r, baseColor.g, baseColor.b, 1)
     end
     
-    -- Duration text with decimals formatting (same pattern as charge bars)
+    -- Duration text: SetFormattedText accepts secret values and applies format directly
     local durationDecimals = cfg and cfg.display and cfg.display.durationDecimals or 1
+    local DURATION_FMT = { [0] = "%.0f", [1] = "%.1f", [2] = "%.2f", [3] = "%.3f" }
+    local fmt = DURATION_FMT[durationDecimals] or "%.1f"
     local remaining = durObj:GetRemainingDuration()
-    local ok, result = pcall(function()
-      local num = tonumber(remaining)
-      if num then
-        if durationDecimals == 0 then
-          return string.format("%.0f", num)
-        elseif durationDecimals == 1 then
-          return string.format("%.1f", num)
-        else
-          return string.format("%.2f", num)
-        end
-      end
-      return remaining  -- Return as-is if can't convert
-    end)
-    
-    if ok then
-      barData.text:SetText(result)
-      if barData.freeDurationText then
-        barData.freeDurationText:SetText(result)
-      end
-    else
-      -- Secret value - pass through (SetText handles it)
-      barData.text:SetText(remaining)
-      if barData.freeDurationText then
-        barData.freeDurationText:SetText(remaining)
-      end
-    end
+    barData.text:SetFormattedText(fmt, remaining)
+    if barData.freeDurationText then barData.freeDurationText:SetFormattedText(fmt, remaining) end
     
     -- Use 0%+100% curve for ready fill (covers charge spell animation glitch) (EXACT COPY FROM CDT)
     local readyAlpha = durObj:EvaluateRemainingPercent(readyAlphaCurve100)
@@ -2985,7 +2906,7 @@ UpdateChargeBar = function(barData)
   -- all charges full = chargeShadow:IsShown()=false = IsCooldownReadyForBar returns true
   local hideWhenReady = cfg and cfg.behavior and cfg.behavior.hideWhenReady
   local hideWhenFull  = cfg and cfg.behavior and cfg.behavior.hideWhenFullCharges
-  if (hideWhenReady or hideWhenFull) and IsCooldownReadyForBar(barData, spellID) then
+  if (hideWhenReady or hideWhenFull) and IsCooldownReadyForBar(barData, spellID, isGCDTracker) then
     shouldShow = false
   end
   if EvaluateHideConditions(hideWhen, cfg and cfg.behavior and cfg.behavior.hideLogic) then
@@ -3094,21 +3015,12 @@ UpdateChargeBar = function(barData)
   if barData.showDuration ~= false then
     if barData.cachedChargeDurObj and isRecharging then
       local remaining = barData.cachedChargeDurObj:GetRemainingDuration()
-      local textVal
-      local ok, result = pcall(function()
-        local num = tonumber(remaining)
-        if num then
-          if durationDecimals == 0 then return string.format("%.0f", num)
-          elseif durationDecimals == 1 then return string.format("%.1f", num)
-          else return string.format("%.2f", num) end
-        end
-        return remaining
-      end)
-      textVal = ok and result or remaining
+      local DURATION_FMT = { [0] = "%.0f", [1] = "%.1f", [2] = "%.2f", [3] = "%.3f" }
+      local fmt = DURATION_FMT[durationDecimals] or "%.1f"
 
       if dynamicTextOnSlot and barData.refreshBar then
         -- Dynamic mode: text lives in refreshBar which auto-follows chargeTrackerTex RIGHT edge
-        barData.dynamicTimerText:SetText(textVal)
+        barData.dynamicTimerText:SetFormattedText(fmt, remaining)
         barData.refreshBar:Show()
         -- Suppress normal timer text
         barData.timerText:SetText("")
@@ -3116,8 +3028,8 @@ UpdateChargeBar = function(barData)
         if barData.timerTextContainer then barData.timerTextContainer:Hide() end
         if barData.timerTextFrame then barData.timerTextFrame:Hide() end
       else
-        barData.timerText:SetText(textVal)
-        if barData.freeTimerText then barData.freeTimerText:SetText(textVal) end
+        barData.timerText:SetFormattedText(fmt, remaining)
+        if barData.freeTimerText then barData.freeTimerText:SetFormattedText(fmt, remaining) end
         if barData.timerText then barData.timerText:Show() end
         if barData.timerTextContainer then barData.timerTextContainer:Show() end
         if barData.timerTextFrame then barData.timerTextFrame:Show() end
@@ -3224,17 +3136,12 @@ UpdateChargeBar = function(barData)
       -- Get fresh duration object for current remaining time
       local freshDurObj = C_Spell.GetSpellChargeDuration(data.spellID)
       if freshDurObj then
-        local colorOK = pcall(function()
-          local colorResult = freshDurObj:EvaluateRemainingPercent(data.colorCurve)
-          if colorResult then
-            -- Apply to all recharge textures (captured in closure)
-            for _, tex in ipairs(rechargeTextures) do
-              tex:SetVertexColor(colorResult:GetRGB())
-            end
+        local colorResult = freshDurObj:EvaluateRemainingPercent(data.colorCurve)
+        if colorResult then
+          for _, tex in ipairs(rechargeTextures) do
+            tex:SetVertexColor(colorResult:GetRGB())
           end
-        end)
-        if not colorOK then
-          -- Fallback to base color
+        else
           for _, tex in ipairs(rechargeTextures) do
             tex:SetVertexColor(data.baseColor.r, data.baseColor.g, data.baseColor.b, 1)
           end
@@ -3245,15 +3152,12 @@ UpdateChargeBar = function(barData)
     -- Apply initial color from curve (if durObj available)
     local chargeDurObj = C_Spell.GetSpellChargeDuration(spellID)
     if chargeDurObj then
-      local colorOK = pcall(function()
-        local colorResult = chargeDurObj:EvaluateRemainingPercent(colorCurve)
-        if colorResult then
-          for _, tex in ipairs(rechargeTextures) do
-            tex:SetVertexColor(colorResult:GetRGB())
-          end
+      local colorResult = chargeDurObj:EvaluateRemainingPercent(colorCurve)
+      if colorResult then
+        for _, tex in ipairs(rechargeTextures) do
+          tex:SetVertexColor(colorResult:GetRGB())
         end
-      end)
-      if not colorOK then
+      else
         for _, tex in ipairs(rechargeTextures) do
           tex:SetVertexColor(barColor.r, barColor.g, barColor.b, 1)
         end
@@ -3570,12 +3474,10 @@ function ns.CooldownBars.AddChargeBar(spellID, instance)
   -- If chargeInfo is nil, we still create the bar but mark it as "spec unavailable"
   local isCurrentlyAvailable = chargeInfo ~= nil
   
-  -- Get maxCharges safely (could be secret in combat, or nil if spell unavailable)
+  -- Get maxCharges (non-secret since patch 12.0.1)
   local maxCharges = 2  -- Default for charge spells
   if chargeInfo and chargeInfo.maxCharges then
-    if not issecretvalue or not issecretvalue(chargeInfo.maxCharges) then
-      maxCharges = chargeInfo.maxCharges
-    end
+    maxCharges = chargeInfo.maxCharges
   end
   
   -- If no spell name, try to get it from spell info (works even for unavailable spells)
@@ -4418,13 +4320,7 @@ function ns.CooldownBars.UpdateBarVisibilityForSpec()
       
       -- Update max charges if spec changed
       if chargeInfo then
-        local newMax = barData.maxCharges or 2
-        if chargeInfo.maxCharges then
-          if not issecretvalue or not issecretvalue(chargeInfo.maxCharges) then
-            newMax = chargeInfo.maxCharges
-          end
-        end
-        
+        local newMax = chargeInfo.maxCharges or barData.maxCharges or 2
         local oldMax = barData.maxCharges
         barData.maxCharges = newMax
         barData.maxText:SetText("/" .. barData.maxCharges)
@@ -4643,14 +4539,9 @@ function ns.CooldownBars.ApplyAppearance(spellID, barType)
     -- CRITICAL: Always refresh maxCharges from API (may have changed with spec/talents)
     local chargeInfo = C_Spell.GetSpellCharges(barData.spellID)
     if chargeInfo then
-      -- Get maxCharges safely (could be secret in combat)
       if chargeInfo.maxCharges then
-        if not issecretvalue or not issecretvalue(chargeInfo.maxCharges) then
-          barData.maxCharges = chargeInfo.maxCharges
-        end
-        -- If secret, keep existing barData.maxCharges value
+        barData.maxCharges = chargeInfo.maxCharges
       end
-      -- Note: cooldownDuration is secret, accessed via cachedChargeInfo in UpdateChargeBar
       if barData.maxText and barData.maxCharges then
         barData.maxText:SetText("/" .. barData.maxCharges)
       end
@@ -5581,9 +5472,7 @@ function ns.CooldownBars.ApplyAppearance(spellID, barType)
         if f then fontPath = f end
       end
       
-      pcall(function()
-        barData.nameText:SetFont(fontPath, display.nameFontSize or 12, GetOutlineFlag(display.nameOutline))
-      end)
+      barData.nameText:SetFont(fontPath, display.nameFontSize or 12, GetOutlineFlag(display.nameOutline))
       
       local nameColor = display.nameColor or {r = 1, g = 1, b = 1, a = 1}
       local nr = nameColor.r or 1
@@ -5618,9 +5507,7 @@ function ns.CooldownBars.ApplyAppearance(spellID, barType)
       end
       
       local outlineFlag = GetOutlineFlag(display.durationOutline)
-      pcall(function()
-        barData.text:SetFont(fontPath, display.durationFontSize or 14, outlineFlag)
-      end)
+      barData.text:SetFont(fontPath, display.durationFontSize or 14, outlineFlag)
       
       local durColor = display.durationColor or {r = 1, g = 1, b = 0.5, a = 1}
       local dr = durColor.r or 1
@@ -5632,9 +5519,7 @@ function ns.CooldownBars.ApplyAppearance(spellID, barType)
       
       -- Style FREE mode duration text if it exists (for cooldown bars)
       if barData.freeDurationText then
-        pcall(function()
-          barData.freeDurationText:SetFont(fontPath, display.durationFontSize or 14, outlineFlag)
-        end)
+        barData.freeDurationText:SetFont(fontPath, display.durationFontSize or 14, outlineFlag)
         barData.freeDurationText:SetTextColor(dr, dg, db, da)
         ApplyTextShadow(barData.freeDurationText, display.durationShadow)
       end
@@ -5655,17 +5540,13 @@ function ns.CooldownBars.ApplyAppearance(spellID, barType)
       local outlineFlag = GetOutlineFlag(display.textOutline)
       
       -- Style current text
-      pcall(function()
-        barData.currentText:SetFont(fontPath, display.fontSize or 14, outlineFlag)
-      end)
+      barData.currentText:SetFont(fontPath, display.fontSize or 14, outlineFlag)
       barData.currentText:SetTextColor(textColor.r, textColor.g, textColor.b, textColor.a or 1)
       ApplyTextShadow(barData.currentText, display.textShadow)
       
       -- Style max text
       if barData.maxText then
-        pcall(function()
-          barData.maxText:SetFont(fontPath, display.fontSize or 14, outlineFlag)
-        end)
+        barData.maxText:SetFont(fontPath, display.fontSize or 14, outlineFlag)
         barData.maxText:SetTextColor(0.6, 0.6, 0.6, 1)  -- Dimmer
         ApplyTextShadow(barData.maxText, display.textShadow)
       end
@@ -5894,17 +5775,13 @@ function ns.CooldownBars.ApplyAppearance(spellID, barType)
         local outlineFlag = GetOutlineFlag(display.durationOutline)
         
         -- Style original timer text
-        pcall(function()
-          barData.timerText:SetFont(fontPath, display.durationFontSize or 14, outlineFlag)
-        end)
+        barData.timerText:SetFont(fontPath, display.durationFontSize or 14, outlineFlag)
         barData.timerText:SetTextColor(durColor.r, durColor.g, durColor.b, durColor.a or 1)
         ApplyTextShadow(barData.timerText, display.durationShadow)
 
         -- Style dynamic tracker text (dynamicTextOnSlot mode)
         if barData.dynamicTimerText then
-          pcall(function()
-            barData.dynamicTimerText:SetFont(fontPath, display.durationFontSize or 14, outlineFlag)
-          end)
+          barData.dynamicTimerText:SetFont(fontPath, display.durationFontSize or 14, outlineFlag)
           barData.dynamicTimerText:SetTextColor(durColor.r, durColor.g, durColor.b, durColor.a or 1)
           ApplyTextShadow(barData.dynamicTimerText, display.durationShadow)
           -- Apply offset inside refreshBar
@@ -5918,9 +5795,7 @@ function ns.CooldownBars.ApplyAppearance(spellID, barType)
         if barData.chargeSlots then
           for _, slot in ipairs(barData.chargeSlots) do
             if slot.timerText then
-              pcall(function()
-                slot.timerText:SetFont(fontPath, display.durationFontSize or 14, outlineFlag)
-              end)
+              slot.timerText:SetFont(fontPath, display.durationFontSize or 14, outlineFlag)
               slot.timerText:SetTextColor(durColor.r, durColor.g, durColor.b, durColor.a or 1)
               ApplyTextShadow(slot.timerText, display.durationShadow)
             end
@@ -5929,9 +5804,7 @@ function ns.CooldownBars.ApplyAppearance(spellID, barType)
         
         -- Style FREE mode timer text if it exists
         if barData.freeTimerText then
-          pcall(function()
-            barData.freeTimerText:SetFont(fontPath, display.durationFontSize or 14, outlineFlag)
-          end)
+          barData.freeTimerText:SetFont(fontPath, display.durationFontSize or 14, outlineFlag)
           barData.freeTimerText:SetTextColor(durColor.r, durColor.g, durColor.b, durColor.a or 1)
           ApplyTextShadow(barData.freeTimerText, display.durationShadow)
         end
@@ -5965,36 +5838,28 @@ function ns.CooldownBars.ApplyAppearance(spellID, barType)
       
       -- Style original current text
       if barData.currentText then
-        pcall(function()
-          barData.currentText:SetFont(fontPath, display.fontSize or 14, outlineFlag)
-        end)
+        barData.currentText:SetFont(fontPath, display.fontSize or 14, outlineFlag)
         barData.currentText:SetTextColor(textColor.r, textColor.g, textColor.b, textColor.a or 1)
         ApplyTextShadow(barData.currentText, display.textShadow)
       end
       
       -- Style FREE mode current text if it exists
       if barData.stackCurrentText then
-        pcall(function()
-          barData.stackCurrentText:SetFont(fontPath, display.fontSize or 14, outlineFlag)
-        end)
+        barData.stackCurrentText:SetFont(fontPath, display.fontSize or 14, outlineFlag)
         barData.stackCurrentText:SetTextColor(textColor.r, textColor.g, textColor.b, textColor.a or 1)
         ApplyTextShadow(barData.stackCurrentText, display.textShadow)
       end
       
       -- Style original max text
       if barData.maxText then
-        pcall(function()
-          barData.maxText:SetFont(fontPath, display.fontSize or 14, outlineFlag)
-        end)
+        barData.maxText:SetFont(fontPath, display.fontSize or 14, outlineFlag)
         barData.maxText:SetTextColor(0.6, 0.6, 0.6, 1)  -- Dimmer
         ApplyTextShadow(barData.maxText, display.textShadow)
       end
       
       -- Style FREE mode max text if it exists
       if barData.stackMaxText then
-        pcall(function()
-          barData.stackMaxText:SetFont(fontPath, display.fontSize or 14, outlineFlag)
-        end)
+        barData.stackMaxText:SetFont(fontPath, display.fontSize or 14, outlineFlag)
         barData.stackMaxText:SetTextColor(0.6, 0.6, 0.6, 1)  -- Dimmer
         ApplyTextShadow(barData.stackMaxText, display.textShadow)
       end
@@ -6195,9 +6060,7 @@ function ns.CooldownBars.ApplyAppearance(spellID, barType)
               local f = LSM:Fetch("font", display.nameFont)
               if f then fontPath = f end
             end
-            pcall(function()
-              barData.freeNameText:SetFont(fontPath, display.nameFontSize or display.fontSize or 14, GetOutlineFlag(display.nameOutline or display.textOutline))
-            end)
+            barData.freeNameText:SetFont(fontPath, display.nameFontSize or display.fontSize or 14, GetOutlineFlag(display.nameOutline or display.textOutline))
             local nameColor = display.nameColor or {r = 1, g = 1, b = 1, a = 1}
             barData.freeNameText:SetTextColor(nameColor.r or 1, nameColor.g or 1, nameColor.b or 1, nameColor.a or 1)
             barData.freeNameText:SetJustifyH("CENTER")
@@ -6319,9 +6182,7 @@ function ns.CooldownBars.ApplyAppearance(spellID, barType)
             local f = LSM:Fetch("font", display.durationFont)
             if f then fontPath = f end
           end
-          pcall(function()
-            barData.freeDurationText:SetFont(fontPath, display.durationFontSize or 14, GetOutlineFlag(display.durationOutline))
-          end)
+          barData.freeDurationText:SetFont(fontPath, display.durationFontSize or 14, GetOutlineFlag(display.durationOutline))
           local durColor = display.durationColor or {r = 1, g = 1, b = 0.5, a = 1}
           barData.freeDurationText:SetTextColor(durColor.r or 1, durColor.g or 1, durColor.b or 0.5, durColor.a or 1)
           barData.freeDurationText:SetJustifyH("CENTER")
@@ -6394,9 +6255,7 @@ function ns.CooldownBars.ApplyAppearance(spellID, barType)
         local f = LSM:Fetch("font", display.durationFont)
         if f then fontPath = f end
       end
-      pcall(function()
-        barData.readyText:SetFont(fontPath, display.durationFontSize or 14, GetOutlineFlag(display.durationOutline))
-      end)
+      barData.readyText:SetFont(fontPath, display.durationFontSize or 14, GetOutlineFlag(display.durationOutline))
       -- Ready text color: use readyColor if set, otherwise use bar color
       local readyColor = display.readyColor or display.barColor or {r = 0.3, g = 1, b = 0.3, a = 1}
       barData.readyText:SetTextColor(readyColor.r or 0.3, readyColor.g or 1, readyColor.b or 0.3, readyColor.a or 1)
@@ -6478,9 +6337,7 @@ function ns.CooldownBars.ApplyAppearance(spellID, barType)
         barData.readyTextFrame:Show()
         
         -- Style and setup free ready text
-        pcall(function()
-          barData.freeReadyText:SetFont(fontPath, display.durationFontSize or 14, GetOutlineFlag(display.durationOutline))
-        end)
+        barData.freeReadyText:SetFont(fontPath, display.durationFontSize or 14, GetOutlineFlag(display.durationOutline))
         barData.freeReadyText:SetTextColor(readyColor.r or 0.3, readyColor.g or 1, readyColor.b or 0.3, readyColor.a or 1)
         ApplyTextShadow(barData.freeReadyText, display.durationShadow)
         if display.showReadyText == false then
@@ -7955,13 +7812,10 @@ function ns.CooldownBars.StartTimer(timerID)
       
       -- Update color from curve
       if data.colorCurve and data.barData.durObj then
-        local colorOK = pcall(function()
-          local colorResult = data.barData.durObj:EvaluateRemainingPercent(data.colorCurve)
-          if colorResult then
-            data.barTexture:SetVertexColor(colorResult:GetRGB())
-          end
-        end)
-        if not colorOK then
+        local colorResult = data.barData.durObj:EvaluateRemainingPercent(data.colorCurve)
+        if colorResult then
+          data.barTexture:SetVertexColor(colorResult:GetRGB())
+        else
           data.barTexture:SetVertexColor(data.baseColor.r, data.baseColor.g, data.baseColor.b, data.baseColor.a or 1)
         end
       end
@@ -7970,13 +7824,10 @@ function ns.CooldownBars.StartTimer(timerID)
     end)
     
     -- Apply initial color from curve
-    local colorOK = pcall(function()
-      local colorResult = durObj:EvaluateRemainingPercent(colorCurve)
-      if colorResult then
-        barTexture:SetVertexColor(colorResult:GetRGB())
-      end
-    end)
-    if not colorOK then
+    local colorResult = durObj:EvaluateRemainingPercent(colorCurve)
+    if colorResult then
+      barTexture:SetVertexColor(colorResult:GetRGB())
+    else
       barTexture:SetVertexColor(baseColor.r, baseColor.g, baseColor.b, baseColor.a or 1)
     end
   else

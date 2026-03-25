@@ -3994,12 +3994,18 @@ ApplyIconStyle = function(frame, cdID)
             
             -- Use cached charge type (set in ApplyIconStyle, static per spellID)
             if parentFrame._arcIsChargeSpellCached and C_Spell.GetSpellChargeDuration and not auraActive then
-              -- CHARGE SPELL (no aura): push chargeDurObj for timer display
-              local chargeDurObj = C_Spell.GetSpellChargeDuration(spellID)
-              if chargeDurObj then
-                parentFrame._arcBypassCDHook = true
-                self:SetCooldownFromDurationObject(chargeDurObj)
-                parentFrame._arcBypassCDHook = false
+              -- CHARGE SPELL (no aura): push chargeDurObj for timer display.
+              -- Only for maxCharges > 1 — for 1/1 charge spells GetSpellChargeDuration
+              -- returns zero-span (isActive requires maxCharges > 1 per 12.0.1 patch),
+              -- which would clear the animation. Let CDM's own push handle 1/1 spells.
+              local cdInfoForCharges = C_Spell.GetSpellCooldown(spellID)
+              if cdInfoForCharges and cdInfoForCharges.maxCharges and cdInfoForCharges.maxCharges > 1 then
+                local chargeDurObj = C_Spell.GetSpellChargeDuration(spellID)
+                if chargeDurObj then
+                  parentFrame._arcBypassCDHook = true
+                  self:SetCooldownFromDurationObject(chargeDurObj)
+                  parentFrame._arcBypassCDHook = false
+                end
               end
             end
             -- Normal spells + aura-active charge spells: CDM's own push is fine.

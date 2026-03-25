@@ -237,15 +237,15 @@ GetDB = function()
     if db.onlyOnUseTrinkets == nil then db.onlyOnUseTrinkets = false end
     
     -- ═══════════════════════════════════════════════════════════════════════════
+    -- ═══════════════════════════════════════════════════════════════════════════
     -- MIGRATION: Move Arc Auras from old ns.db.profile location (one-time)
-    -- Only runs if old profile location has data AND new location is empty
     -- ═══════════════════════════════════════════════════════════════════════════
     if ns.db and ns.db.profile and ns.db.profile.arcAuras then
         local profileData = ns.db.profile.arcAuras
         
-        -- Only migrate if profile has tracked items AND our trackedItems is empty
+        -- Only migrate if profile has tracked items AND our trackedItems is empty AND not done before
         if profileData.trackedItems and next(profileData.trackedItems) then
-            if not next(db.trackedItems) then
+            if not next(db.trackedItems) and not db.migrationDone then
                 -- Copy tracked items
                 for arcID, config in pairs(profileData.trackedItems) do
                     db.trackedItems[arcID] = CopyTable(config)
@@ -268,10 +268,13 @@ GetDB = function()
                     db.globalSettings = CopyTable(profileData.globalSettings)
                 end
                 
+                db.migrationDone = true
                 print("|cff00ccffArcUI|r: Migrated Arc Auras to character-specific storage")
             end
             
-            -- Clear profile data after migration attempt
+            -- ALWAYS wipe profile data regardless of whether we copied.
+            -- Prevents re-population if AceDB profile changes and trackedItems
+            -- becomes empty again (which would re-trigger the copy condition).
             wipe(profileData.trackedItems)
             if profileData.positions then wipe(profileData.positions) end
             profileData.enabled = false

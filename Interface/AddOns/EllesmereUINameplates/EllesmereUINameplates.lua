@@ -97,6 +97,7 @@ local defaults = {
     showFriendlyPlayers = true,
     friendlyShowDefaultNames = false,
     classColorFriendly = true,
+    friendlyBarColor = { r = 0.314, g = 0.800, b = 0.408 },
     showEnemyPets = false,
     font = "Interface\\AddOns\\EllesmereUI\\media\\fonts\\Expressway.TTF",
     textSlotTop = "enemyName",
@@ -157,6 +158,10 @@ local defaults = {
     castTargetSize = 10,
     castTargetClassColor = true,
     castTargetColor = { r = 1, g = 1, b = 1 },
+    showCastTimer = true,
+    castTimerSize = 10,
+    castTimerColor = { r = 1, g = 1, b = 1 },
+    targetScale = 100,
     showAllDebuffs = false,
     borderStyle = "ellesmere",
     borderColor = { r = 0.067, g = 0.067, b = 0.067 },
@@ -208,6 +213,7 @@ do
     local TB = "Interface\\AddOns\\EllesmereUI\\media\\textures\\"
     ns.healthBarTextures = {
         ["none"]          = nil,
+        ["melli"]         = TB .. "melli.tga",
         ["beautiful"]     = TB .. "beautiful.tga",
         ["plating"]       = TB .. "plating.tga",
         ["atrocity"]      = TB .. "atrocity.tga",
@@ -221,13 +227,15 @@ do
         ["sheer"]         = TB .. "sheer.tga",
     }
     ns.healthBarTextureOrder = {
-        "none", "beautiful", "plating",
-        "atrocity", "divide", "glass",
+        "none", "melli", "atrocity",
+        "beautiful", "plating",
+        "divide", "glass",
         "gradient-lr", "gradient-rl", "gradient-bt", "gradient-tb",
         "matte", "sheer",
     }
     ns.healthBarTextureNames = {
         ["none"]        = "None",
+        ["melli"]       = "Melli (ElvUI)",
         ["beautiful"]   = "Beautiful",
         ["plating"]     = "Plating",
         ["atrocity"]    = "Atrocity",
@@ -264,6 +272,10 @@ local function GetCastScale()
     return (p and p.castScale) or defaults.castScale
 end
 ns.GetCastScale = GetCastScale
+local function GetTargetScale()
+    return (p and p.targetScale) or defaults.targetScale
+end
+ns.GetTargetScale = GetTargetScale
 local function GetHealthBarHeight()
     return (p and p.healthBarHeight) or defaults.healthBarHeight
 end
@@ -1233,10 +1245,50 @@ local frameCache = CreateFramePool("Frame", UIParent, nil, nil, false, function(
     plate.castName:SetMaxLines(1)
     plate.castTarget = plate.cast:CreateFontString(nil, "OVERLAY")
     SetFSFont(plate.castTarget, 10, GetNPOutline())
-    plate.castTarget:SetPoint("RIGHT", plate.cast, "RIGHT", -3, 0)
     plate.castTarget:SetJustifyH("RIGHT")
     plate.castTarget:SetWordWrap(false)
     plate.castTarget:SetMaxLines(1)
+    -- Cast timer text: remaining/elapsed seconds, anchored to the far right.
+    -- castTarget is repositioned to sit immediately left of it.
+    plate.castTimer = plate.cast:CreateFontString(nil, "OVERLAY")
+    SetFSFont(plate.castTimer, 10, GetNPOutline())
+    plate.castTimer:SetPoint("RIGHT", plate.cast, "RIGHT", -3, 0)
+    plate.castTimer:SetJustifyH("RIGHT")
+    plate.castTimer:SetWordWrap(false)
+    plate.castTimer:SetMaxLines(1)
+    plate.castTimer:SetTextColor(1, 1, 1, 1)
+    -- castTarget sits left of castTimer with a small gap
+    plate.castTarget:SetPoint("RIGHT", plate.castTimer, "LEFT", -4, 0)
+    -- OnUpdate: tick the cast timer every frame while a cast is active.
+    -- Uses UnitCastingDuration/UnitChannelDuration duration objects and their
+    -- :GetRemainingDuration() method to avoid taint from UnitCastingInfo's
+    -- secret endTime/startTime values, which cannot be used in arithmetic.
+    plate.cast:SetScript("OnUpdate", function(self)
+        local owner = self._timerPlate
+        if not owner or not owner.unit or not owner.isCasting then return end
+        if not owner._showCastTimer then return end
+        if UnitCastingDuration then
+            local durObj = UnitCastingDuration(owner.unit)
+                or (UnitChannelDuration and UnitChannelDuration(owner.unit))
+            if durObj then
+                local remaining = durObj:GetRemainingDuration()
+                owner.castTimer:SetFormattedText("%.1f", remaining)
+            else
+                owner.castTimer:SetText("")
+            end
+        else
+            local min, max = owner.cast:GetMinMaxValues()
+            local val = owner.cast:GetValue()
+            if max and max > 0 then
+                local remaining = max - val
+                if remaining < 0 then remaining = 0 end
+                owner.castTimer:SetFormattedText("%.1f", remaining)
+            else
+                owner.castTimer:SetText("")
+            end
+        end
+    end)
+    plate.cast._timerPlate = plate
     plate.debuffs = {}
     for i = 1, 4 do
         local d = CreateFrame("Frame", nil, plate)
@@ -1576,10 +1628,9 @@ local function SetupAuraCVars()
         local nameOnly = (db.friendlyNameOnly ~= false)
         local showPlayers = (db.showFriendlyPlayers ~= false)
         local showNPCs = (db.showFriendlyNPCs == true)
-        local showDefaultNames = (db.friendlyShowDefaultNames == true)
         SetCVar("nameplateShowOnlyNameForFriendlyPlayerUnits", nameOnly and 1 or 0)
         SetCVar("nameplateShowFriendlyPlayers", showPlayers and 1 or 0)
-        SetCVar("UnitNameFriendlyPlayerName", (showPlayers or showDefaultNames) and 1 or 0)
+        SetCVar("UnitNameFriendlyPlayerName", showPlayers and 1 or 0)
         SetCVar("nameplateShowFriends", showPlayers and 1 or 0)
         SetCVar("nameplateShowFriendlyNPCs", showNPCs and 1 or 0)
         SetCVar("nameplateShowFriendlyNpcs", showNPCs and 1 or 0)
@@ -2704,7 +2755,7 @@ function NameplateFrame:SetUnit(unit, nameplate)
         local totalH = nameGap + barH + castH2
         local scale = GetStackSpacingScale() / 100
         -- Anchor directly to nameplate to avoid any influence from our
-        -- plate frame's scale changes (ApplyCastScale).
+        -- plate frame's scale changes (ApplyScale).
         self._stackBounds:SetPoint("CENTER", nameplate, "CENTER", 0, GetNameplateYOffset())
         self._stackBounds:SetSize(GetHealthBarWidth(), totalH * scale)
         self._stackBounds:Show()
@@ -2755,8 +2806,24 @@ function NameplateFrame:SetUnit(unit, nameplate)
     local cns = (p and p.castNameSize) or defaults.castNameSize
     local cts = (p and p.castTargetSize) or defaults.castTargetSize
     local cnc = (p and p.castNameColor) or defaults.castNameColor
+    local ctmSz = (p and p.castTimerSize) or defaults.castTimerSize
+    local ctmC = (p and p.castTimerColor) or defaults.castTimerColor
     SetFSFont(self.castName, cns, GetNPOutline())
     SetFSFont(self.castTarget, cts, GetNPOutline())
+    SetFSFont(self.castTimer, ctmSz, GetNPOutline())
+    self.castTimer:SetTextColor(ctmC.r, ctmC.g, ctmC.b, 1)
+    local showTimer = defaults.showCastTimer
+    if p and p.showCastTimer ~= nil then showTimer = p.showCastTimer end
+    self._showCastTimer = showTimer
+    if showTimer then
+        self.castTimer:Show()
+        self.castTarget:ClearAllPoints()
+        self.castTarget:SetPoint("RIGHT", self.castTimer, "LEFT", -4, 0)
+    else
+        self.castTimer:Hide()
+        self.castTarget:ClearAllPoints()
+        self.castTarget:SetPoint("RIGHT", self.cast, "RIGHT", -3, 0)
+    end
     self.castName:SetTextColor(cnc.r, cnc.g, cnc.b, 1)
     -- Cast target color: class-colored if enabled and target is a player, otherwise use castTargetColor
     local useClassColor = defaults.castTargetClassColor
@@ -3394,6 +3461,7 @@ function NameplateFrame:ApplyTarget()
             HideClassPowerOnPlate(self)
         end
     end
+    self:ApplyScale()
 end
 function NameplateFrame:ApplyMouseover()
     if not self.unit then return end
@@ -3652,6 +3720,7 @@ function NameplateFrame:UpdateCast()
         if not self._interrupted then
             self.cast:Hide()
         end
+        self.castTimer:SetText("")
         if self.isCasting then
             if self._castFallback then
                 self._castFallback = nil
@@ -3663,7 +3732,7 @@ function NameplateFrame:UpdateCast()
         end
         self.isCasting = false
         self:HideKickTick()
-        self:ApplyCastScale()
+        self:ApplyScale()
         -- Reposition class power pips (cast bar gone, pips move back to health bar)
         if GetShowClassPower() and classPowerType and self._cpPips and self.unit and UnitIsUnit(self.unit, "target") then
             UpdateClassPowerOnPlate(self)
@@ -3685,18 +3754,13 @@ function NameplateFrame:UpdateCast()
     end
     self.castName:SetText(type(name) ~= "nil" and name or "")
     
-    local spellTarget
-    local spellTargetClass
-    if UnitSpellTargetName then
-        spellTarget = UnitSpellTargetName(self.unit)
-        if UnitSpellTargetClass then
-            spellTargetClass = UnitSpellTargetClass(self.unit)
-        end
-    end
-    if type(spellTarget) == "nil" then
-        spellTarget = UnitName(self.unit .. "target")
-        spellTargetClass = UnitClassBase(self.unit .. "target")
-    end
+    -- Use UnitName for cast target to get a clean name without realm.
+    -- UnitSpellTargetName returns secret/tainted strings that can't be
+    -- manipulated, so we read the target's name via UnitName instead
+    -- (first return is name-only, realm is the second return).
+    local targetUnit = self.unit .. "target"
+    local spellTarget = UnitName(targetUnit)
+    local spellTargetClass = UnitClassBase(targetUnit)
     self.castTarget:SetText(type(spellTarget) ~= "nil" and spellTarget or "")
 
     -- Apply class color to cast target text if enabled and target is a player
@@ -3765,19 +3829,24 @@ function NameplateFrame:UpdateCast()
             NotifyCastStarted()
         end
     end
-    self:ApplyCastScale()
+    self:ApplyScale()
     self:UpdateKickTick(kickProtected, isChannel)
     -- Reposition class power pips (cast bar now visible, pips move below it)
     if GetShowClassPower() and classPowerType and self._cpPips and self.unit and UnitIsUnit(self.unit, "target") then
         UpdateClassPowerOnPlate(self)
     end
 end
-function NameplateFrame:ApplyCastScale()
-    local s = GetCastScale() / 100
-    if self.isCasting and s ~= 1 then
-        self:SetScale(s)
+function NameplateFrame:ApplyScale()
+    local base = 1
+    if self.unit and UnitIsUnit(self.unit, "target") then
+        local ts = GetTargetScale() / 100
+        if ts ~= 1 then base = ts end
+    end
+    local cs = GetCastScale() / 100
+    if self.isCasting and cs ~= 1 then
+        self:SetScale(base * cs)
     else
-        self:SetScale(1)
+        self:SetScale(base)
     end
 end
 function NameplateFrame:ApplyCastColor(uninterruptible)
@@ -3914,7 +3983,7 @@ function NameplateFrame:ShowInterrupted(interrupterGUID)
     end
     self.isCasting = false
     self:HideKickTick()
-    self:ApplyCastScale()
+    self:ApplyScale()
 
     self._interrupted = true
     self.cast:SetReverseFill(false)
@@ -4481,6 +4550,7 @@ do
         "nameYOffset",
         "healthBarHeight", "healthBarWidth", "castBarHeight",
         "castNameSize", "castNameColor", "castTargetSize", "castTargetClassColor", "castTargetColor",
+        "showCastTimer", "castTimerSize", "castTimerColor", "targetScale",
         "debuffSlot", "buffSlot", "ccSlot",
         "debuffYOffset", "sideAuraXOffset", "auraSpacing",
         "debuffTimerPosition", "buffTimerPosition", "ccTimerPosition",

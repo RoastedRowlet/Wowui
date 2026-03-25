@@ -1372,7 +1372,7 @@ initFrame:SetScript("OnEvent", function(self, event, arg1)
         end
 
     elseif event == "PLAYER_SPECIALIZATION_CHANGED" then
-        if IsRestorationDruid() then
+        if arg1 == "player" and IsRestorationDruid() then
             print("|cFF00FF96LifebloomAlert:|r Restoration spec detected — alerts active.")
         end
     end

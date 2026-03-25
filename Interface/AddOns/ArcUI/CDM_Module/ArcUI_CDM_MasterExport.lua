@@ -446,16 +446,16 @@ function ME.Export(selectedKeys)
     -- If the current character deleted everything, importers get an empty set.
     do
         local myCharKey = (UnitName("player") or "") .. " - " .. (GetRealmName() or "")
-        local svCharRef = ns.db and ns.db.sv and ns.db.sv.char
+        local svCharRef = (ns.db and ns.db.sv and ns.db.sv.char) or (ArcUIDB and ArcUIDB.char)
         local myArcAuras = svCharRef and svCharRef[myCharKey] and svCharRef[myCharKey].arcAuras
         for specKey in pairs(exportPayload.specs) do
             local aa = {
                 trackedSpells = {},
                 trackedItems = {},
-                enabled = myArcAuras and myArcAuras.enabled,
-                autoTrackEquippedTrinkets = myArcAuras and myArcAuras.autoTrackEquippedTrinkets,
-                onlyOnUseTrinkets = myArcAuras and myArcAuras.onlyOnUseTrinkets,
-                autoTrackSlots = myArcAuras and myArcAuras.autoTrackSlots and DeepCopy(myArcAuras.autoTrackSlots) or nil,
+                enabled = myArcAuras and myArcAuras.enabled or false,
+                autoTrackEquippedTrinkets = myArcAuras and myArcAuras.autoTrackEquippedTrinkets or false,
+                onlyOnUseTrinkets = myArcAuras and myArcAuras.onlyOnUseTrinkets or false,
+                autoTrackSlots = (myArcAuras and myArcAuras.autoTrackSlots) and DeepCopy(myArcAuras.autoTrackSlots) or {[13] = false, [14] = false},
             }
             if myArcAuras then
                 if myArcAuras.trackedSpells then
@@ -922,7 +922,7 @@ function ME.Import(data, importMode, activeOverrides, selectedProfiles)
                 end
             end
             
-            -- Apply character-level Arc Auras (merge — add missing, don't wipe existing)
+            -- Apply character-level Arc Auras (export is source of truth — replace wholesale)
             if specEntry.arcAuras then
                 -- Ensure char arcAuras DB exists
                 if not ArcUIDB then ArcUIDB = {} end
@@ -967,15 +967,37 @@ function ME.Import(data, importMode, activeOverrides, selectedProfiles)
                 if specEntry.arcAuras.autoTrackEquippedTrinkets ~= nil then
                     arcAuras.autoTrackEquippedTrinkets = specEntry.arcAuras.autoTrackEquippedTrinkets
                 end
-                if specEntry.arcAuras.autoTrackSlots and not arcAuras.autoTrackSlots then
+                -- ALWAYS overwrite autoTrackSlots — exporter's disabled slots must propagate
+                if specEntry.arcAuras.autoTrackSlots ~= nil then
                     arcAuras.autoTrackSlots = DeepCopy(specEntry.arcAuras.autoTrackSlots)
                 end
                 if specEntry.arcAuras.onlyOnUseTrinkets ~= nil then
                     arcAuras.onlyOnUseTrinkets = specEntry.arcAuras.onlyOnUseTrinkets
                 end
                 
+                -- Invalidate ArcAuras DB cache so next GetDB() reads fresh data
+                if ns.ArcAuras and ns.ArcAuras.ClearDBCache then
+                    ns.ArcAuras.ClearDBCache()
+                end
+                
                 if spellCount + itemCount > 0 then
                     print(MSG_PREFIX .. "|cff00ccffImported " .. spellCount .. " spell(s), " .. itemCount .. " item(s) for Arc Auras|r")
+                end
+            else
+                -- Export has no arcAuras section (legacy format or exporter has none).
+                -- Clear the importer's existing Arc Auras to prevent stale items persisting.
+                local charKey = UnitName("player") .. " - " .. GetRealmName()
+                if ArcUIDB and ArcUIDB.char and ArcUIDB.char[charKey] and ArcUIDB.char[charKey].arcAuras then
+                    local arcAuras = ArcUIDB.char[charKey].arcAuras
+                    arcAuras.trackedItems = {}
+                    arcAuras.trackedSpells = {}
+                    arcAuras.enabled = false
+                    arcAuras.autoTrackEquippedTrinkets = false
+                    arcAuras.autoTrackSlots = {[13] = false, [14] = false}
+                    arcAuras.onlyOnUseTrinkets = false
+                    if ns.ArcAuras and ns.ArcAuras.ClearDBCache then
+                        ns.ArcAuras.ClearDBCache()
+                    end
                 end
             end
             
@@ -1175,7 +1197,7 @@ function ME.AutoApplyPendingProfiles()
                 end
             end
             
-            -- Apply character-level Arc Auras (merge — add missing, don't wipe existing)
+            -- Apply character-level Arc Auras (export is source of truth — replace wholesale)
             if specEntry.arcAuras then
                 local charKey = UnitName("player") .. " - " .. GetRealmName()
                 if ArcUIDB and ArcUIDB.char and ArcUIDB.char[charKey] then
@@ -1184,23 +1206,21 @@ function ME.AutoApplyPendingProfiles()
                         charDB.arcAuras = { enabled = true, trackedItems = {}, trackedSpells = {}, positions = {}, globalSettings = {} }
                     end
                     local spellCount, itemCount = 0, 0
+                    -- Replace tracked spells wholesale (wipe so deleted icons don't persist)
+                    charDB.arcAuras.trackedSpells = {}
                     if specEntry.arcAuras.trackedSpells then
-                        if not charDB.arcAuras.trackedSpells then charDB.arcAuras.trackedSpells = {} end
                         for arcID, config in pairs(specEntry.arcAuras.trackedSpells) do
-                            if not charDB.arcAuras.trackedSpells[arcID] then
-                                charDB.arcAuras.trackedSpells[arcID] = DeepCopy(config)
-                                spellCount = spellCount + 1
-                            end
+                            charDB.arcAuras.trackedSpells[arcID] = DeepCopy(config)
+                            spellCount = spellCount + 1
                         end
                     end
+                    -- Replace tracked items wholesale
+                    charDB.arcAuras.trackedItems = {}
                     if specEntry.arcAuras.trackedItems then
-                        charDB.arcAuras.trackedItems = {}
                         for arcID, config in pairs(specEntry.arcAuras.trackedItems) do
                             charDB.arcAuras.trackedItems[arcID] = DeepCopy(config)
                             itemCount = itemCount + 1
                         end
-                    else
-                        charDB.arcAuras.trackedItems = {}
                     end
                     if specEntry.arcAuras.enabled ~= nil then
                         charDB.arcAuras.enabled = specEntry.arcAuras.enabled
@@ -1208,14 +1228,34 @@ function ME.AutoApplyPendingProfiles()
                     if specEntry.arcAuras.autoTrackEquippedTrinkets ~= nil then
                         charDB.arcAuras.autoTrackEquippedTrinkets = specEntry.arcAuras.autoTrackEquippedTrinkets
                     end
-                    if specEntry.arcAuras.autoTrackSlots and not charDB.arcAuras.autoTrackSlots then
+                    -- ALWAYS overwrite autoTrackSlots — exporter's disabled slots must propagate
+                    if specEntry.arcAuras.autoTrackSlots ~= nil then
                         charDB.arcAuras.autoTrackSlots = DeepCopy(specEntry.arcAuras.autoTrackSlots)
                     end
                     if specEntry.arcAuras.onlyOnUseTrinkets ~= nil then
                         charDB.arcAuras.onlyOnUseTrinkets = specEntry.arcAuras.onlyOnUseTrinkets
                     end
+                    -- Invalidate ArcAuras DB cache so next GetDB() reads fresh data
+                    if ns.ArcAuras and ns.ArcAuras.ClearDBCache then
+                        ns.ArcAuras.ClearDBCache()
+                    end
                     if spellCount + itemCount > 0 then
                         print(MSG_PREFIX .. "|cff00ccffAuto-imported " .. spellCount .. " spell(s), " .. itemCount .. " item(s) for Arc Auras|r")
+                    end
+                end
+            else
+                -- Export has no arcAuras section — clear to prevent stale items persisting
+                local charKey = UnitName("player") .. " - " .. GetRealmName()
+                if ArcUIDB and ArcUIDB.char and ArcUIDB.char[charKey] and ArcUIDB.char[charKey].arcAuras then
+                    local arcAuras = ArcUIDB.char[charKey].arcAuras
+                    arcAuras.trackedItems = {}
+                    arcAuras.trackedSpells = {}
+                    arcAuras.enabled = false
+                    arcAuras.autoTrackEquippedTrinkets = false
+                    arcAuras.autoTrackSlots = {[13] = false, [14] = false}
+                    arcAuras.onlyOnUseTrinkets = false
+                    if ns.ArcAuras and ns.ArcAuras.ClearDBCache then
+                        ns.ArcAuras.ClearDBCache()
                     end
                 end
             end

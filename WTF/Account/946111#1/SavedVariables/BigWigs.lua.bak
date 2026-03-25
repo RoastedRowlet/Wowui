@@ -1,0 +1,86 @@
+
+BigWigs3DB = {
+["profileKeys"] = {
+["Lonelylitten - Stormrage"] = "Default",
+},
+["namespaces"] = {
+["BigWigs_Plugins_PrivateAuras"] = {
+["global"] = {
+["showHelpTip"] = false,
+},
+["profiles"] = {
+["Default"] = {
+["player"] = {
+["anchorYOffset"] = 93,
+["anchorXOffset"] = 71,
+},
+},
+},
+},
+["MythicPlus"] = {
+["global"] = {
+["showViewerTeleportTip"] = false,
+},
+},
+["BigWigs_Plugins_BossBlock"] = {
+["global"] = {
+["tableNeedsCopied"] = false,
+},
+},
+},
+["myKeystones"] = {
+["Player-60-0F85ABEF"] = {
+["playerRating"] = 2557,
+["specId"] = 105,
+["keyMap"] = 559,
+["name"] = "Lonelylitten",
+["keyLevel"] = 12,
+["realm"] = "Stormrage",
+},
+},
+["prevWeeklyReset"] = 1774364400,
+["profiles"] = {
+["Default"] = {
+},
+},
+}
+BigWigsIconDB = {
+}
+BigWigsStatsDB = {
+[2912] = {
+[2734] = {
+["LFR"] = {
+["kills"] = 1,
+["fkDuration"] = 234.7780000000494,
+["wipes"] = 1,
+["fkWipes"] = 1,
+["best"] = 234.7780000000494,
+["bestDate"] = "2026/03/24",
+["fkDate"] = "2026/03/24",
+},
+},
+[2733] = {
+["LFR"] = {
+["kills"] = 1,
+["fkDuration"] = 170.3439999999828,
+["wipes"] = 2,
+["fkWipes"] = 2,
+["best"] = 170.3439999999828,
+["bestDate"] = "2026/03/24",
+["fkDate"] = "2026/03/24",
+},
+},
+[2736] = {
+["LFR"] = {
+["kills"] = 1,
+["fkDuration"] = 260.5920000000042,
+["best"] = 260.5920000000042,
+["bestDate"] = "2026/03/24",
+["fkDate"] = "2026/03/24",
+},
+},
+},
+}
+BW_FEAT_SHARE = nil
+BW_FEAT_SHARE2 = nil
+BW_FEAT_ENHANCE = true

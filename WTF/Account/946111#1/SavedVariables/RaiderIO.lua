@@ -14,16 +14,9 @@ RaiderIO_Config = {
 }
 RaiderIO_LastCharacter = "us-Lonelylitten-stormrage"
 RaiderIO_MissingCharacters = {
-["us-Hextechshrap-illidan"] = true,
-["us-Punchberry-illidan"] = true,
-["us-Kaiai-illidan"] = true,
-["us-Kohvu-illidan"] = true,
-["us-Plaguehound-illidan"] = true,
-["us-Polak-illidan"] = true,
-["us-Popefurian-illidan"] = true,
-["us-Fellable-illidan"] = true,
-["us-Unipriest-illidan"] = true,
+["us-Highwaym-stormrage"] = true,
 ["us-Potaties-illidan"] = true,
+["us-Demonpotato-korgath"] = true,
 }
 RaiderIO_MissingServers = {
 }

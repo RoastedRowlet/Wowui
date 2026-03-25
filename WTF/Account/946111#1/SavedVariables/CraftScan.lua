@@ -1947,7 +1947,7 @@ CraftScan_DB = {
 [3513] = {
 ["scan_state"] = 4,
 },
-[16726] = {
+[3508] = {
 ["scan_state"] = 4,
 },
 [16973] = {
@@ -1959,7 +1959,7 @@ CraftScan_DB = {
 [24399] = {
 ["scan_state"] = 4,
 },
-[3508] = {
+[413758] = {
 ["scan_state"] = 4,
 },
 [27832] = {
@@ -2082,7 +2082,7 @@ CraftScan_DB = {
 [3507] = {
 ["scan_state"] = 4,
 },
-[413758] = {
+[16726] = {
 ["scan_state"] = 4,
 },
 [9916] = {
@@ -2230,8 +2230,8 @@ CraftScan_DB = {
 },
 ["concentration"] = {
 ["maxQuantity"] = 1000,
-["lastUpdated"] = 1774316742,
-["amount"] = 192,
+["lastUpdated"] = 1774377434,
+["amount"] = 19,
 ["rechargeTimePerPoint"] = 345600,
 ["currencyID"] = 3161,
 },
@@ -2529,8 +2529,8 @@ CraftScan_DB = {
 },
 ["concentration"] = {
 ["maxQuantity"] = 1000,
-["lastUpdated"] = 1774197995,
-["amount"] = 28,
+["lastUpdated"] = 1774389009,
+["amount"] = 79,
 ["rechargeTimePerPoint"] = 345600,
 ["currencyID"] = 3162,
 },
@@ -2691,19 +2691,19 @@ CraftScan_DB = {
 [449575] = {
 ["scan_state"] = 4,
 },
-[432963] = {
+[449938] = {
 ["scan_state"] = 4,
 },
 [433087] = {
 ["scan_state"] = 4,
 },
-[449574] = {
+[432963] = {
 ["scan_state"] = 4,
 },
 [432962] = {
 ["scan_state"] = 4,
 },
-[449938] = {
+[449574] = {
 ["scan_state"] = 4,
 },
 },
@@ -3129,10 +3129,10 @@ CraftScan_DB = {
 [26887] = {
 ["scan_state"] = 4,
 },
-[25612] = {
+[32807] = {
 ["scan_state"] = 4,
 },
-[32807] = {
+[26882] = {
 ["scan_state"] = 4,
 },
 [26872] = {
@@ -3150,7 +3150,7 @@ CraftScan_DB = {
 [25610] = {
 ["scan_state"] = 4,
 },
-[26882] = {
+[25612] = {
 ["scan_state"] = 4,
 },
 [25614] = {
@@ -3454,19 +3454,19 @@ CraftScan_DB = {
 ["analytics"] = {
 },
 ["customers"] = {
-["Bluesbro-Stormrage"] = {
-["responses"] = {
-[2909] = {
-},
-},
-["guid"] = "Player-60-0E30EA71",
-},
 ["Phantumdeath-Stormrage"] = {
 ["responses"] = {
 [2906] = {
 },
 },
 ["guid"] = "Player-60-0EDECD91",
+},
+["Bluesbro-Stormrage"] = {
+["responses"] = {
+[2909] = {
+},
+},
+["guid"] = "Player-60-0E30EA71",
 },
 },
 },

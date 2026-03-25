@@ -43,8 +43,15 @@ local defaults = {
             maxBuffs = 4,
             buffAnchor = "topleft",
             buffGrowth = "auto",
-            debuffAnchor = "bottomleft",
+            buffSize = 22,
+            buffOffsetX = 0,
+            buffOffsetY = 0,
+            debuffAnchor = "none",
             debuffGrowth = "auto",
+            maxDebuffs = 10,
+            debuffSize = 22,
+            debuffOffsetX = 0,
+            debuffOffsetY = 0,
             namePosition = "left",
             healthTextPosition = "right",
             leftTextContent = "name",
@@ -156,6 +163,11 @@ local defaults = {
             visHideMounted = false,
             visHideNoTarget = false,
             visHideNoEnemy = false,
+            raidMarkerEnabled = false,
+            raidMarkerSize = 28,
+            raidMarkerAlign = "right",
+            raidMarkerX = 0,
+            raidMarkerY = 0,
         },
         target = {
             frameWidth = 181,
@@ -195,6 +207,12 @@ local defaults = {
             debuffGrowth = "auto",
             maxBuffs = 4,
             maxDebuffs = 20,
+            buffSize = 22,
+            buffOffsetX = 0,
+            buffOffsetY = 0,
+            debuffSize = 22,
+            debuffOffsetX = 0,
+            debuffOffsetY = 0,
             namePosition = "left",
             healthTextPosition = "right",
             leftTextContent = "name",
@@ -272,6 +290,11 @@ local defaults = {
             visHideMounted = false,
             visHideNoTarget = false,
             visHideNoEnemy = false,
+            raidMarkerEnabled = false,
+            raidMarkerSize = 28,
+            raidMarkerAlign = "right",
+            raidMarkerX = 0,
+            raidMarkerY = 0,
         },
         playerTarget = {
             frameWidth = 181,
@@ -290,6 +313,12 @@ local defaults = {
             castbarHeight = 14,
             maxBuffs = 4,
             maxDebuffs = 20,
+            buffSize = 22,
+            buffOffsetX = 0,
+            buffOffsetY = 0,
+            debuffSize = 22,
+            debuffOffsetX = 0,
+            debuffOffsetY = 0,
             healthDisplay = "both",
             showBuffs = true,
             onlyPlayerDebuffs = false,
@@ -437,6 +466,12 @@ local defaults = {
             buffAnchor = "topleft",
             buffGrowth = "auto",
             maxBuffs = 4,
+            buffSize = 22,
+            buffOffsetX = 0,
+            buffOffsetY = 0,
+            debuffSize = 22,
+            debuffOffsetX = 0,
+            debuffOffsetY = 0,
             textSize = 12,
             borderSize = 1,
             borderColor = { r = 0, g = 0, b = 0 },
@@ -450,6 +485,11 @@ local defaults = {
             visHideMounted = false,
             visHideNoTarget = false,
             visHideNoEnemy = false,
+            raidMarkerEnabled = false,
+            raidMarkerSize = 28,
+            raidMarkerAlign = "right",
+            raidMarkerX = 0,
+            raidMarkerY = 0,
         },
         boss = {
             frameWidth = 160,
@@ -493,6 +533,12 @@ local defaults = {
             buffAnchor = "topleft",
             buffGrowth = "auto",
             maxBuffs = 4,
+            buffSize = 22,
+            buffOffsetX = 0,
+            buffOffsetY = 0,
+            debuffSize = 22,
+            debuffOffsetX = 0,
+            debuffOffsetY = 0,
             textSize = 12,
             leftTextContent = "name",
             rightTextContent = "perhp",
@@ -595,6 +641,7 @@ end
 local TEXTURE_BASE = "Interface\\AddOns\\EllesmereUI\\media\\textures\\"
 local healthBarTextures = {
     ["none"]          = nil,
+    ["melli"]         = TEXTURE_BASE .. "melli.tga",
     ["beautiful"]     = TEXTURE_BASE .. "beautiful.tga",
     ["plating"]       = TEXTURE_BASE .. "plating.tga",
     ["atrocity"]      = TEXTURE_BASE .. "atrocity.tga",
@@ -608,13 +655,15 @@ local healthBarTextures = {
     ["sheer"]         = TEXTURE_BASE .. "sheer.tga",
 }
 local healthBarTextureOrder = {
-    "none", "beautiful", "plating",
-    "atrocity", "divide", "glass",
+    "none", "melli", "atrocity",
+    "beautiful", "plating",
+    "divide", "glass",
     "gradient-lr", "gradient-rl", "gradient-bt", "gradient-tb",
     "matte", "sheer",
 }
 local healthBarTextureNames = {
     ["none"]        = "None",
+    ["melli"]       = "Melli (ElvUI)",
     ["beautiful"]   = "Beautiful",
     ["plating"]     = "Plating",
     ["atrocity"]    = "Atrocity",
@@ -1511,7 +1560,9 @@ local function UpdateBordersForScale(frame, unit)
 
     local showPortrait = (db.profile.portraitStyle or "attached") ~= "none" and settings.showPortrait ~= false
     local isAttached = (db.profile.portraitStyle or "attached") == "attached"
-    local pSide = settings.portraitSide or "right"
+    -- Use the actual side the frame was built with (stored on the frame) so that
+    -- frames like the pet which hard-code "left" don't get treated as "right".
+    local pSide = frame._portraitSide or settings.portraitSide or "right"
     local effectiveSide = pSide
     if isAttached and pSide == "top" then effectiveSide = "right" end
 
@@ -2476,12 +2527,13 @@ local function CreateTargetAuras(frame, unit)
         end
     end
 
-    local auraSize = 22
     local gap = 1
     local perRow = 7
     local containerWidth = frame:GetWidth()
 
     local settings = GetSettingsForUnit(unit or 'target')
+    local auraSize = (settings and settings.buffSize) or 22
+    local debuffAuraSize = (settings and settings.debuffSize) or 22
 
     local showBuffs = true
     if settings and settings.showBuffs == false then
@@ -2506,7 +2558,7 @@ local function CreateTargetAuras(frame, unit)
     if bAnc == "bottomleft" or bAnc == "bottomright" then
         buffCbOff = cbOffset
     end
-    buffs:SetPoint(bia, frame, bfp, box * gap, boy * gap + buffCbOff)
+    buffs:SetPoint(bia, frame, bfp, box * gap + (settings and settings.buffOffsetX or 0), boy * gap + buffCbOff + (settings and settings.buffOffsetY or 0))
     buffs:SetSize(containerWidth, auraSize)
     buffs.size = auraSize
     buffs.spacing = gap
@@ -2534,9 +2586,9 @@ local function CreateTargetAuras(frame, unit)
         if effectiveAnc == "bottomleft" or effectiveAnc == "bottomright" then
             debuffCbOff = cbOffset
         end
-        debuffs:SetPoint(dia, frame, dfp, dox * gap, doy * gap + debuffCbOff)
-        debuffs:SetSize(containerWidth, auraSize)
-        debuffs.size = auraSize
+        debuffs:SetPoint(dia, frame, dfp, dox * gap + (settings and settings.debuffOffsetX or 0), doy * gap + debuffCbOff + (settings and settings.debuffOffsetY or 0))
+        debuffs:SetSize(containerWidth, debuffAuraSize)
+        debuffs.size = debuffAuraSize
         debuffs.spacing = gap
         debuffs.num = (dAnc ~= "none") and maxDebuffs or 0
         debuffs["size-x"] = perRow
@@ -2636,7 +2688,7 @@ local function StyleFullFrame(frame, unit)
 
         -- Always create player buffs; oUF element disabled later if not wanted
         do
-            local auraSize = 22
+            local auraSize = settings.buffSize or 22
             local gap = 1
             local perRow = 7
             local bfp, bia, bgx, bgy, box, boy = ResolveBuffLayout(
@@ -2652,7 +2704,7 @@ local function StyleFullFrame(frame, unit)
                 buffCbOffset = -cbH
             end
             local buffs = CreateFrame("Frame", nil, frame)
-            buffs:SetPoint(bia, frame, bfp, box * gap, boy * gap + buffCbOffset)
+            buffs:SetPoint(bia, frame, bfp, box * gap + (settings.buffOffsetX or 0), boy * gap + buffCbOffset + (settings.buffOffsetY or 0))
             buffs:SetSize(frame:GetWidth(), auraSize)
             buffs.size = auraSize
             buffs.spacing = gap
@@ -2729,6 +2781,32 @@ local function StyleFullFrame(frame, unit)
     CreateUnifiedBorder(frame, unit)
     UpdateBordersForScale(frame, unit)
     ReparentBarsToClip(frame)
+
+    -- Raid target marker icon -- oUF's RaidTargetIndicator element manages
+    -- visibility via RAID_TARGET_UPDATE. We only assign the element when
+    -- enabled so oUF registers/unregisters the event accordingly.
+    do
+        local raidIconHolder = CreateFrame("Frame", nil, frame)
+        raidIconHolder:SetAllPoints(frame)
+        raidIconHolder:SetFrameLevel(frame:GetFrameLevel() + 20)
+        local raidIcon = raidIconHolder:CreateTexture(nil, "OVERLAY", nil, 7)
+        local rmSize  = settings.raidMarkerSize or 28
+        local rmAlign = settings.raidMarkerAlign or "right"
+        local rmX     = settings.raidMarkerX or 0
+        local rmY     = settings.raidMarkerY or 0
+        local rmAnchor = (rmAlign == "left") and "TOPLEFT"
+            or (rmAlign == "center") and "TOP"
+            or "TOPRIGHT"
+        raidIcon:SetSize(rmSize, rmSize)
+        raidIcon:SetPoint("CENTER", frame, rmAnchor, rmX, rmY)
+        frame._raidMarkerIcon = raidIcon
+        frame._raidMarkerHolder = raidIconHolder
+        if settings.raidMarkerEnabled then
+            frame.RaidTargetIndicator = raidIcon
+        else
+            raidIcon:Hide()
+        end
+    end
 
     -- Text overlay frame -- sits above the StatusBar for clean text rendering.
     local textOverlay = CreateFrame("Frame", nil, frame)
@@ -2951,6 +3029,30 @@ local function StyleFocusFrame(frame, unit)
     CreateUnifiedBorder(frame, unit)
     UpdateBordersForScale(frame, unit)
     ReparentBarsToClip(frame)
+
+    -- Raid target marker icon
+    do
+        local raidIconHolder = CreateFrame("Frame", nil, frame)
+        raidIconHolder:SetAllPoints(frame)
+        raidIconHolder:SetFrameLevel(frame:GetFrameLevel() + 20)
+        local raidIcon = raidIconHolder:CreateTexture(nil, "OVERLAY", nil, 7)
+        local rmSize  = settings.raidMarkerSize or 28
+        local rmAlign = settings.raidMarkerAlign or "right"
+        local rmX     = settings.raidMarkerX or 0
+        local rmY     = settings.raidMarkerY or 0
+        local rmAnchor = (rmAlign == "left") and "TOPLEFT"
+            or (rmAlign == "center") and "TOP"
+            or "TOPRIGHT"
+        raidIcon:SetSize(rmSize, rmSize)
+        raidIcon:SetPoint("CENTER", frame, rmAnchor, rmX, rmY)
+        frame._raidMarkerIcon = raidIcon
+        frame._raidMarkerHolder = raidIconHolder
+        if settings.raidMarkerEnabled then
+            frame.RaidTargetIndicator = raidIcon
+        else
+            raidIcon:Hide()
+        end
+    end
 
     -- Text overlay frame -- sits above the StatusBar for clean text rendering.
     local textOverlay = CreateFrame("Frame", nil, frame.Health)
@@ -3271,14 +3373,15 @@ local function StylePetFrame(frame, unit)
     frame._portraitSide = "left"
     if frame.Portrait and not showPortrait then        frame.Portrait.backdrop:Hide()
     end
-    -- Re-anchor health bar to portrait's actual snapped width (eliminates sub-pixel gap)
+    -- Re-anchor health bar using healthHeight as the portrait width to avoid
+    -- sub-pixel GetWidth() mismatches at frame creation time
     if frame.Portrait and frame.Portrait.backdrop and showPortrait then
-        local snappedPortW = frame.Portrait.backdrop:GetWidth()
+        local portW = math.max(settings.healthHeight, 1)
         health:ClearAllPoints()
-        PP.Point(health, "TOPLEFT", frame, "TOPLEFT", snappedPortW, 0)
+        PP.Point(health, "TOPLEFT", frame, "TOPLEFT", portW, 0)
         PP.Point(health, "RIGHT", frame, "RIGHT", 0, 0)
         PP.Height(health, settings.healthHeight)
-        health._xOffset = snappedPortW
+        health._xOffset = portW
         health._rightInset = 0
         health._topOffset = 0
     end
@@ -4022,6 +4125,7 @@ local function CreateCustomClassPower(playerFrame, style)
 end
 
 local function ReloadFrames()
+    ResolveFontPath()
     if InCombatLockdown() then
         return
     end
@@ -4121,7 +4225,10 @@ local function ReloadFrames()
             -- Restore position and scale from profile
             if unitKey == "boss" then
                 local bossPos = db.profile.positions.boss
-                local bossSpacing = db.profile.bossSpacing or 60
+                local bossSettings = db.profile.boss or {}
+                local barHeight = (bossSettings.healthHeight or 34) + (bossSettings.powerHeight or 6) + (bossSettings.castbarHeight or 14)
+                local gap = 10
+                local bossSpacing = barHeight + gap
                 local bossIdx = tonumber(unit:match("(%d+)$"))
                 local bossAnchored = EllesmereUI and EllesmereUI.IsUnlockAnchored and EllesmereUI.IsUnlockAnchored("boss")
                 if bossPos and bossIdx and not (EllesmereUI and EllesmereUI._unlockActive) and (not bossAnchored or not frame:GetLeft()) then
@@ -4457,11 +4564,12 @@ local function ReloadFrames()
                                 buffCbOff = -cbH
                             end
                             -- Only reanchor + ForceUpdate when layout actually changed
-                            local buffKey = (bia or "") .. (bfp or "") .. (box or 0) .. (boy or 0) .. buffCbOff .. (bgx or 0) .. (bgy or 0) .. (settings.maxBuffs or 4)
+                            local buffKey = (bia or "") .. (bfp or "") .. (box or 0) .. (boy or 0) .. buffCbOff .. (bgx or 0) .. (bgy or 0) .. (settings.maxBuffs or 4) .. (settings.buffSize or 22) .. (settings.buffOffsetX or 0) .. (settings.buffOffsetY or 0)
                             if frame.Buffs._lastBuffKey ~= buffKey then
                                 frame.Buffs._lastBuffKey = buffKey
+                                frame.Buffs.size = settings.buffSize or 22
                                 frame.Buffs:ClearAllPoints()
-                                frame.Buffs:SetPoint(bia, frame, bfp, box * 1, boy * 1 + buffCbOff)
+                                frame.Buffs:SetPoint(bia, frame, bfp, box * 1 + (settings.buffOffsetX or 0), boy * 1 + buffCbOff + (settings.buffOffsetY or 0))
                                 frame.Buffs.initialAnchor = bia
                                 frame.Buffs.growthX = bgx
                                 frame.Buffs.growthY = bgy
@@ -4807,11 +4915,12 @@ local function ReloadFrames()
                                     liveCbOff = -cbH
                                 end
                             end
-                            local buffKey = (bia or "") .. (bfp or "") .. (box or 0) .. (boy or 0) .. (bgx or 0) .. (bgy or 0) .. (settings.maxBuffs or 20) .. liveCbOff
+                            local buffKey = (bia or "") .. (bfp or "") .. (box or 0) .. (boy or 0) .. (bgx or 0) .. (bgy or 0) .. (settings.maxBuffs or 20) .. liveCbOff .. (settings.buffSize or 22) .. (settings.buffOffsetX or 0) .. (settings.buffOffsetY or 0)
                             if frame.Buffs._lastBuffKey ~= buffKey then
                                 frame.Buffs._lastBuffKey = buffKey
+                                frame.Buffs.size = settings.buffSize or 22
                                 frame.Buffs:ClearAllPoints()
-                                frame.Buffs:SetPoint(bia, frame, bfp, box * 1, boy * 1 + liveCbOff)
+                                frame.Buffs:SetPoint(bia, frame, bfp, box * 1 + (settings.buffOffsetX or 0), boy * 1 + liveCbOff + (settings.buffOffsetY or 0))
                                 frame.Buffs.initialAnchor = bia
                                 frame.Buffs.growthX = bgx
                                 frame.Buffs.growthY = bgy
@@ -4853,11 +4962,12 @@ local function ReloadFrames()
                                     liveDbCbOff = -cbH
                                 end
                             end
-                            local debuffKey = (dia or "") .. (dfp or "") .. (dox or 0) .. (doy or 0) .. (dgx or 0) .. (dgy or 0) .. (settings.maxDebuffs or 20) .. liveDbCbOff .. (settings.onlyPlayerDebuffs and "1" or "0")
+                            local debuffKey = (dia or "") .. (dfp or "") .. (dox or 0) .. (doy or 0) .. (dgx or 0) .. (dgy or 0) .. (settings.maxDebuffs or 20) .. liveDbCbOff .. (settings.debuffSize or 22) .. (settings.debuffOffsetX or 0) .. (settings.debuffOffsetY or 0) .. (settings.onlyPlayerDebuffs and "1" or "0")
                             if frame.Debuffs._lastDebuffKey ~= debuffKey then
                                 frame.Debuffs._lastDebuffKey = debuffKey
+                                frame.Debuffs.size = settings.debuffSize or 22
                                 frame.Debuffs:ClearAllPoints()
-                                frame.Debuffs:SetPoint(dia, frame, dfp, dox * 1, doy * 1 + liveDbCbOff)
+                                frame.Debuffs:SetPoint(dia, frame, dfp, dox * 1 + (settings.debuffOffsetX or 0), doy * 1 + liveDbCbOff + (settings.debuffOffsetY or 0))
                                 frame.Debuffs.initialAnchor = dia
                                 frame.Debuffs.growthX = dgx
                                 frame.Debuffs.growthY = dgy
@@ -5143,11 +5253,12 @@ local function ReloadFrames()
                                 focusDbCbOff = -cbH
                             end
                         end
-                        local debuffKey = (dia or "") .. (dfp or "") .. (dox or 0) .. (doy or 0) .. (dgx or 0) .. (dgy or 0) .. (settings.maxDebuffs or 10) .. focusDbCbOff .. (settings.onlyPlayerDebuffs and "1" or "0")
+                        local debuffKey = (dia or "") .. (dfp or "") .. (dox or 0) .. (doy or 0) .. (dgx or 0) .. (dgy or 0) .. (settings.maxDebuffs or 10) .. focusDbCbOff .. (settings.debuffSize or 22) .. (settings.debuffOffsetX or 0) .. (settings.debuffOffsetY or 0) .. (settings.onlyPlayerDebuffs and "1" or "0")
                         if frame.Debuffs._lastDebuffKey ~= debuffKey then
                             frame.Debuffs._lastDebuffKey = debuffKey
+                            frame.Debuffs.size = settings.debuffSize or 22
                             frame.Debuffs:ClearAllPoints()
-                            frame.Debuffs:SetPoint(dia, frame, dfp, dox * 1, doy * 1 + focusDbCbOff)
+                            frame.Debuffs:SetPoint(dia, frame, dfp, dox * 1 + (settings.debuffOffsetX or 0), doy * 1 + focusDbCbOff + (settings.debuffOffsetY or 0))
                             frame.Debuffs.initialAnchor = dia
                             frame.Debuffs.growthX = dgx
                             frame.Debuffs.growthY = dgy
@@ -5179,11 +5290,12 @@ local function ReloadFrames()
                                 focusBfCbOff = -cbH
                             end
                         end
-                        local buffKey = (bia or "") .. (bfp or "") .. (box or 0) .. (boy or 0) .. (bgx or 0) .. (bgy or 0) .. (settings.maxBuffs or 4) .. focusBfCbOff
+                        local buffKey = (bia or "") .. (bfp or "") .. (box or 0) .. (boy or 0) .. (bgx or 0) .. (bgy or 0) .. (settings.maxBuffs or 4) .. focusBfCbOff .. (settings.buffSize or 22) .. (settings.buffOffsetX or 0) .. (settings.buffOffsetY or 0)
                         if frame.Buffs._lastBuffKey ~= buffKey then
                             frame.Buffs._lastBuffKey = buffKey
+                            frame.Buffs.size = settings.buffSize or 22
                             frame.Buffs:ClearAllPoints()
-                            frame.Buffs:SetPoint(bia, frame, bfp, box * 1, boy * 1 + focusBfCbOff)
+                            frame.Buffs:SetPoint(bia, frame, bfp, box * 1 + (settings.buffOffsetX or 0), boy * 1 + focusBfCbOff + (settings.buffOffsetY or 0))
                             frame.Buffs.initialAnchor = bia
                             frame.Buffs.growthX = bgx
                             frame.Buffs.growthY = bgy
@@ -5216,11 +5328,9 @@ local function ReloadFrames()
                     end
                     if frame.Health then
                         frame.Health:ClearAllPoints()
-                        -- Use portrait's actual snapped width for flush alignment
+                        -- Use healthHeight directly as portrait width to avoid GetWidth() timing issues
                         local petPortOff = 0
-                        if showPetPortrait and frame.Portrait and frame.Portrait.backdrop then
-                            petPortOff = frame.Portrait.backdrop:GetWidth()
-                        elseif showPetPortrait then
+                        if showPetPortrait then
                             petPortOff = settings.healthHeight
                         end
                         PP.Point(frame.Health, "TOPLEFT", frame, "TOPLEFT", petPortOff, 0)
@@ -5418,11 +5528,12 @@ local function ReloadFrames()
                                 liveDbCbOff = -cbH
                             end
                         end
-                        local debuffKey = (dia or "") .. (dfp or "") .. (dox or 0) .. (doy or 0) .. (dgx or 0) .. (dgy or 0) .. (settings.maxDebuffs or 10) .. liveDbCbOff .. (settings.onlyPlayerDebuffs and "1" or "0")
+                        local debuffKey = (dia or "") .. (dfp or "") .. (dox or 0) .. (doy or 0) .. (dgx or 0) .. (dgy or 0) .. (settings.maxDebuffs or 10) .. liveDbCbOff .. (settings.debuffSize or 22) .. (settings.debuffOffsetX or 0) .. (settings.debuffOffsetY or 0) .. (settings.onlyPlayerDebuffs and "1" or "0")
                         if frame.Debuffs._lastDebuffKey ~= debuffKey then
                             frame.Debuffs._lastDebuffKey = debuffKey
+                            frame.Debuffs.size = settings.debuffSize or 22
                             frame.Debuffs:ClearAllPoints()
-                            frame.Debuffs:SetPoint(dia, frame, dfp, dox * 1, doy * 1 + liveDbCbOff)
+                            frame.Debuffs:SetPoint(dia, frame, dfp, dox * 1 + (settings.debuffOffsetX or 0), doy * 1 + liveDbCbOff + (settings.debuffOffsetY or 0))
                             frame.Debuffs.initialAnchor = dia
                             frame.Debuffs.growthX = dgx
                             frame.Debuffs.growthY = dgy
@@ -5454,11 +5565,12 @@ local function ReloadFrames()
                                 bossBfCbOff = -cbH
                             end
                         end
-                        local buffKey = (bia or "") .. (bfp or "") .. (box or 0) .. (boy or 0) .. (bgx or 0) .. (bgy or 0) .. (settings.maxBuffs or 4) .. bossBfCbOff
+                        local buffKey = (bia or "") .. (bfp or "") .. (box or 0) .. (boy or 0) .. (bgx or 0) .. (bgy or 0) .. (settings.maxBuffs or 4) .. bossBfCbOff .. (settings.buffSize or 22) .. (settings.buffOffsetX or 0) .. (settings.buffOffsetY or 0)
                         if frame.Buffs._lastBuffKey ~= buffKey then
                             frame.Buffs._lastBuffKey = buffKey
+                            frame.Buffs.size = settings.buffSize or 22
                             frame.Buffs:ClearAllPoints()
-                            frame.Buffs:SetPoint(bia, frame, bfp, box * 1, boy * 1 + bossBfCbOff)
+                            frame.Buffs:SetPoint(bia, frame, bfp, box * 1 + (settings.buffOffsetX or 0), boy * 1 + bossBfCbOff + (settings.buffOffsetY or 0))
                             frame.Buffs.initialAnchor = bia
                             frame.Buffs.growthX = bgx
                             frame.Buffs.growthY = bgy
@@ -5614,6 +5726,40 @@ local function ReloadFrames()
             frames.player._combatIndicator:Hide()
         end
     end
+
+    ---------------------------------------------------------------------------
+    --  Live-update raid target marker icon (size / alignment / X / Y / enabled)
+    --  for player, target, and focus frames.  Uses oUF's EnableElement /
+    --  DisableElement so the RAID_TARGET_UPDATE event is properly toggled.
+    ---------------------------------------------------------------------------
+    local RAID_MARKER_UNITS = { "player", "target", "focus" }
+    for _, rmUnit in ipairs(RAID_MARKER_UNITS) do
+        local rmFrame = frames[rmUnit]
+        local icon = rmFrame and rmFrame._raidMarkerIcon
+        if rmFrame and icon then
+            local rmS = GetSettingsForUnit(rmUnit)
+            local rmSize   = (rmS and rmS.raidMarkerSize)  or 28
+            local rmAlign  = (rmS and rmS.raidMarkerAlign) or "right"
+            local rmX      = (rmS and rmS.raidMarkerX)     or 0
+            local rmY      = (rmS and rmS.raidMarkerY)     or 0
+            local rmEnabled = rmS and rmS.raidMarkerEnabled
+            local rmAnchor = (rmAlign == "left") and "TOPLEFT"
+                or (rmAlign == "center") and "TOP"
+                or "TOPRIGHT"
+            icon:SetSize(rmSize, rmSize)
+            icon:ClearAllPoints()
+            icon:SetPoint("CENTER", rmFrame, rmAnchor, rmX, rmY)
+            if rmEnabled then
+                rmFrame.RaidTargetIndicator = icon
+                rmFrame:EnableElement("RaidTargetIndicator")
+                if icon.ForceUpdate then icon:ForceUpdate() end
+            else
+                rmFrame:DisableElement("RaidTargetIndicator")
+                rmFrame.RaidTargetIndicator = nil
+                icon:Hide()
+            end
+        end
+    end
 end
 
 -- Manage Blizzard's player cast bar ownership based on whether UnitFrames is
@@ -5634,6 +5780,14 @@ local function UnitFrame_OnEnter(self)
     if s and (s.barVisibility or "always") == "mouseover" then
         self:SetAlpha(1)
     end
+    if unit and GameTooltip and GameTooltip_SetDefaultAnchor then
+        local showTooltip = not s or s.showUnitTooltip ~= false
+        if showTooltip then
+            GameTooltip_SetDefaultAnchor(GameTooltip, self)
+            GameTooltip:SetUnit(unit)
+            GameTooltip:Show()
+        end
+    end
 end
 
 local function UnitFrame_OnLeave(self)
@@ -5643,6 +5797,9 @@ local function UnitFrame_OnLeave(self)
     local s = db and db.profile and db.profile[unitKey]
     if s and (s.barVisibility or "always") == "mouseover" then
         self:SetAlpha(0)
+    end
+    if GameTooltip and GameTooltip:IsOwned(self) then
+        GameTooltip:Hide()
     end
 end
 
@@ -6174,7 +6331,11 @@ function InitializeFrames()
 
     oUF:SetActiveStyle("EllesmereBoss")
     local bossPos = db.profile.positions.boss
-    local spacing = db.profile.bossSpacing or 60
+
+    local bossSettings = db.profile.boss or {}
+    local barHeight = (bossSettings.healthHeight or 34) + (bossSettings.powerHeight or 6) + (bossSettings.castbarHeight or 14)
+    local gap = 10
+    local spacing = barHeight + gap
     for i = 1, 5 do
         local bossUnit = "boss" .. i
         local bossFrame = oUF:Spawn(bossUnit, "EllesmereUIUnitFrames_Boss" .. i)

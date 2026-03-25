@@ -13,6 +13,7 @@ local C = {
     timerLow  = { r=1.0,   g=0.3,   b=0.3   },
     barBg     = { r=0.15,  g=0.15,  b=0.15  },
     barFill   = { r=0.047, g=0.824, b=0.624 },
+    focus     = { r=0.6,   g=0.3,   b=0.9   },
 }
 
 local EQT      = {}
@@ -421,6 +422,7 @@ local function ReleaseRow(r)
     r._baseR, r._baseG, r._baseB = nil, nil, nil
     r._rowType = nil; r._objIndex = nil; r._objCount = nil
     if r.numFS then r.numFS:Hide() end
+    if r.focusBg then r.focusBg:Hide() end
     -- Clean up timer/progressbar sub-widgets
     if r.timerFS     then r.timerFS:Hide()     end
     if r.barBg       then r.barBg:Hide()       end
@@ -958,6 +960,87 @@ local function IsPreyQuest(qID, info)
 end
 
 -------------------------------------------------------------------------------
+-- Quest type icon atlases
+-------------------------------------------------------------------------------
+local QUEST_ICON_ATLAS = {
+    important  = "importantavailablequesticon",
+    legendary  = "legendaryavailablequesticon",
+    campaign   = "CampaignAvailableQuestIcon",
+    calling    = "CampaignAvailableDailyQuestIcon",
+    questline  = "questlog-storylineicon",
+    daily      = "Recurringavailablequesticon",
+    weekly     = "Recurringavailablequesticon",
+    recurring  = "Recurringavailablequesticon",
+    meta       = "Wrapperavailablequesticon",
+    dungeon    = "worldquest-icon-dungeon",
+    raid       = "worldquest-icon-raid",
+    normal     = "QuestNormal",
+}
+
+local QUEST_TURNIN_ATLAS = {
+    important  = "UI-QuestPoiImportant-QuestBangTurnIn",
+    legendary  = "UI-QuestPoiLegendary-QuestBangTurnIn",
+    campaign   = "UI-QuestPoiCampaign-QuestBangTurnIn",
+    calling    = "UI-DailyQuestPoiCampaign-QuestBangTurnIn",
+    daily      = "UI-QuestPoiRecurring-QuestBangTurnIn",
+    weekly     = "UI-QuestPoiRecurring-QuestBangTurnIn",
+    recurring  = "UI-QuestPoiRecurring-QuestBangTurnIn",
+    meta       = "UI-QuestPoiWrapper-QuestBangTurnIn",
+    normal     = "UI-QuestIcon-TurnIn-Normal",
+    questline  = "UI-QuestIcon-TurnIn-Normal",
+    dungeon    = "UI-QuestIcon-TurnIn-Normal",
+    raid       = "UI-QuestIcon-TurnIn-Normal",
+}
+
+local QUEST_ICON_SIZE   = 16
+local TURNIN_ICON_SIZE  = 26  -- turn-in atlases render small natively
+
+local function GetQuestIconAtlas(questID)
+    if not questID then return nil, false end
+
+    local logIdx = C_QuestLog.GetLogIndexForQuestID(questID)
+    local info   = logIdx and C_QuestLog.GetInfo(logIdx)
+    local cls    = info and info.questClassification
+    local freq   = info and info.frequency or 0
+    local done   = C_QuestLog.IsComplete(questID)
+
+    local key = "normal"
+    if C_CampaignInfo and C_CampaignInfo.IsCampaignQuest
+       and C_CampaignInfo.IsCampaignQuest(questID) then
+        key = "campaign"
+    elseif cls then
+        local QC = Enum.QuestClassification
+        if     cls == QC.Important then key = "important"
+        elseif cls == QC.Legendary then key = "legendary"
+        elseif cls == QC.Campaign  then key = "campaign"
+        elseif cls == QC.Calling   then key = "calling"
+        elseif cls == QC.Questline then key = "questline"
+        elseif cls == QC.Recurring then key = "recurring"
+        end
+    end
+
+    if key == "normal" then
+        if freq == 1 then key = "daily"
+        elseif freq == 2 then key = "weekly"
+        else
+            local tag = C_QuestLog.GetQuestTagInfo(questID)
+            if tag and tag.tagID then
+                local id = tag.tagID
+                if id == 81 or id == 85 then key = "dungeon"
+                elseif id == 62 or id == 88 or id == 89 then key = "raid"
+                elseif id == 83 then key = "legendary"
+                end
+            end
+        end
+    end
+
+    if done and QUEST_TURNIN_ATLAS[key] then
+        return QUEST_TURNIN_ATLAS[key], true
+    end
+    return QUEST_ICON_ATLAS[key], false
+end
+
+-------------------------------------------------------------------------------
 -- TryCompleteQuest
 -- Attempts to open the quest completion dialog for auto-complete quests.
 local function TryCompleteQuest(qID)
@@ -1168,25 +1251,33 @@ local function GetTrackedRecipes()
                 local reagentN = 0
                 if schematic.reagentSlotSchematics then
                     for _, slot in ipairs(schematic.reagentSlotSchematics) do
-                        if slot.reagentType == 1 and slot.reagents then
+                        if slot.reagentType == 1 and slot.reagents and #slot.reagents > 0 then
+                            -- One row per slot; sum owned across all quality tiers
+                            local firstName, totalOwned = nil, 0
                             for _, reagent in ipairs(slot.reagents) do
                                 local itemID = reagent.itemID
                                 if itemID then
-                                    local r
-                                    if _reagent_pool_n > 0 then
-                                        r = _reagent_pool[_reagent_pool_n]
-                                        _reagent_pool[_reagent_pool_n] = nil
-                                        _reagent_pool_n = _reagent_pool_n - 1
-                                    else
-                                        r = {}
+                                    if not firstName then
+                                        firstName = C_Item.GetItemNameByID(itemID) or ("Item "..itemID)
                                     end
-                                    r.name = C_Item.GetItemNameByID(itemID) or ("Item "..itemID)
-                                    r.owned = C_Item.GetItemCount(itemID, true) or 0
-                                    r.needed = slot.quantityRequired or 1
-                                    r.finished = r.owned >= r.needed
-                                    reagentN = reagentN + 1
-                                    entry.reagents[reagentN] = r
+                                    totalOwned = totalOwned + (C_Item.GetItemCount(itemID, true) or 0)
                                 end
+                            end
+                            if firstName then
+                                local r
+                                if _reagent_pool_n > 0 then
+                                    r = _reagent_pool[_reagent_pool_n]
+                                    _reagent_pool[_reagent_pool_n] = nil
+                                    _reagent_pool_n = _reagent_pool_n - 1
+                                else
+                                    r = {}
+                                end
+                                r.name = firstName
+                                r.owned = totalOwned
+                                r.needed = slot.quantityRequired or 1
+                                r.finished = totalOwned >= r.needed
+                                reagentN = reagentN + 1
+                                entry.reagents[reagentN] = r
                             end
                         end
                     end
@@ -1229,6 +1320,7 @@ function EQT:Refresh(skipAlphaFlash)
     local cc      = db.completedColor or C.complete
     local fc      = db.focusedColor or { r=0.871, g=0.251, b=1.0 }
     local ffs     = db.focusedFontSize
+    local fbgA    = (db.focusBgOpacity or 25) / 100
     local iqSize  = db.questItemSize or 22
     local sc      = db.secColor or C.section
     local compFS  = db.completedFontSize
@@ -1268,7 +1360,7 @@ function EQT:Refresh(skipAlphaFlash)
         s.label:SetPoint("LEFT",  s.frame, "LEFT",  0, 3)
         s.label:SetPoint("RIGHT", s.frame, "RIGHT", -(arrowSize + 4), 3)
         SetFontSafe(s.arrow, arrowFont, arrowSize, OutlineFlag())
-        s.arrow:SetTextColor(C.accent.r, C.accent.g, C.accent.b)
+        s.arrow:SetTextColor(scR, scG, scB)
         s.arrow:SetText(isCollapsed and "+" or "-")
         s.arrow:ClearAllPoints()
         s.arrow:SetPoint("RIGHT", s.frame, "RIGHT", 0, 3)
@@ -1385,6 +1477,9 @@ function EQT:Refresh(skipAlphaFlash)
         self.timerRows[#self.timerRows + 1] = r
     end
 
+    local _curObjQuestID = nil  -- set by RenderList before objectives
+    local _curObjIndex = 0
+
     -- Progress bar row
     local function AddProgressRow(cur, max)
         local r = AcquireRow(content)
@@ -1444,10 +1539,19 @@ function EQT:Refresh(skipAlphaFlash)
 
     local function AddTitleRow(text, cr, cg, cb, qID, isAutoComplete, isComplete, recipeID, isRecraft)
         local r = AcquireRow(content)
+        if r.numFS then r.numFS:Hide() end
         SetFontSafe(r.text, tfp, tfs, tff)
         r.text:SetTextColor(cr, cg, cb)
         r._baseR, r._baseG, r._baseB = cr, cg, cb
         ApplyFontShadow(r.text)
+        -- Inject quest type icon at end of title text
+        if qID then
+            local atlas, isTurnIn = GetQuestIconAtlas(qID)
+            if atlas then
+                local sz = isTurnIn and TURNIN_ICON_SIZE or QUEST_ICON_SIZE
+                text = text .. " |A:" .. atlas .. ":" .. sz .. ":" .. sz .. ":0:0|a"
+            end
+        end
         r.text:SetText(text)
         r.text:Show()
         local item = db.showQuestItems and qID and GetQuestItem(qID)
@@ -1464,6 +1568,17 @@ function EQT:Refresh(skipAlphaFlash)
         if th < tfs then th = tfs end
         local rh = math.max(th + 4, item and iqSize or 0)
         r.frame:SetHeight(rh); r.text:SetHeight(rh)
+        -- Focus highlight for super-tracked quest
+        if qID and superQID and qID == superQID and fbgA > 0 then
+            if not r.focusBg then
+                r.focusBg = r.frame:CreateTexture(nil, "BACKGROUND")
+                r.focusBg:SetAllPoints(r.frame)
+            end
+            r.focusBg:SetColorTexture(fc.r, fc.g, fc.b, fbgA)
+            r.focusBg:Show()
+        elseif r.focusBg then
+            r.focusBg:Hide()
+        end
         if item then
             local btn = AcquireItemBtn()
             btn:SetSize(iqSize, iqSize)
@@ -1503,9 +1618,6 @@ function EQT:Refresh(skipAlphaFlash)
         yOff = yOff + rh + ROW_GAP
         self.rows[#self.rows + 1] = r
     end
-
-    local _curObjQuestID = nil  -- set by RenderList before objectives
-    local _curObjIndex = 0
 
     local function AddObjRow(text, cr, cg, cb, isFinished)
         local r = AcquireRow(content)
@@ -1814,6 +1926,7 @@ function EQT:RefreshProgress()
     local cc      = db.completedColor or C.complete
     local fc      = db.focusedColor or { r=0.871, g=0.251, b=1.0 }
     local ffs     = db.focusedFontSize
+    local fbgA    = (db.focusBgOpacity or 25) / 100
     local compFS  = db.completedFontSize
     local superQID = C_SuperTrack and C_SuperTrack.GetSuperTrackedQuestID and C_SuperTrack.GetSuperTrackedQuestID()
 
@@ -1873,6 +1986,16 @@ function EQT:RefreshProgress()
             else
                 SetFontSafe(r.text, tfp, tfs, tff)
             end
+            if isFocused and fbgA > 0 then
+                if not r.focusBg then
+                    r.focusBg = r.frame:CreateTexture(nil, "BACKGROUND")
+                    r.focusBg:SetAllPoints(r.frame)
+                end
+                r.focusBg:SetColorTexture(fc.r, fc.g, fc.b, fbgA)
+                r.focusBg:Show()
+            elseif r.focusBg then
+                r.focusBg:Hide()
+            end
         elseif qID and r._rowType == "obj" then
             local objs = freshObjs[qID]
             local objIdx = r._objIndex
@@ -1896,7 +2019,7 @@ function EQT:RefreshProgress()
                 local o = objs[objIdx]
                 local nf = o.numFulfilled or 0
                 local nr = o.numRequired or 1
-                if o.type == "progressbar" then
+                if o.type == "progressbar" or o.objType == "progressbar" then
                     local pct = GetQuestProgressBarPercent(qID)
                     if pct then nf = pct; nr = 100 end
                 end
@@ -2387,6 +2510,7 @@ function EQT:Init()
     }
     local QUEST_EVENTS_SAFE = {
         "QUEST_WATCH_LIST_CHANGED","QUEST_WATCH_UPDATE","QUEST_TASK_PROGRESS_UPDATE",
+        "TASK_PROGRESS_UPDATE","WORLD_QUEST_UPDATE",
         "TASK_IS_TOO_DIFFERENT","SCENARIO_CRITERIA_UPDATE","SCENARIO_UPDATE",
         "SCENARIO_COMPLETED","CRITERIA_COMPLETE",
         "UI_WIDGET_UNIT_CHANGED",
@@ -2431,6 +2555,7 @@ function EQT:Init()
         QUEST_TURNED_IN = true,
         QUEST_WATCH_LIST_CHANGED = true,
         SCENARIO_COMPLETED = true,
+        TRACKED_RECIPE_UPDATE = true,
     }
     local SCENARIO_EVENTS = {
         SCENARIO_CRITERIA_UPDATE = true,
@@ -2444,6 +2569,18 @@ function EQT:Init()
         -- would cause quests to jump between sections.
         if event == "SUPER_TRACKING_CHANGED" then
             EQT:RefreshProgress()
+            return
+        end
+        -- World quest / task progress events: invalidate caches and refresh
+        -- so %-based world quests update their progress bars correctly.
+        if event == "TASK_PROGRESS_UPDATE" or event == "WORLD_QUEST_UPDATE" then
+            InvalidateQuestLogCache()
+            _questListsCached = false
+            -- Use SetDirty (deferred) so GetQuestProgressBarPercent has time to
+            -- populate before the rebuild reads it. Calling Refresh() synchronously
+            -- on the event races the engine update and reads 0 out of combat.
+            EQT:SetDirty(false)
+            if EQT.UpdateQuestItemAttribute then EQT.UpdateQuestItemAttribute() end
             return
         end
         -- Non-structural events (progress, selection, POI) are suppressible

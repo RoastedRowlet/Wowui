@@ -235,10 +235,10 @@ BAGANATOR_CONFIG = {
 ["character_bank_view_width"] = 14,
 ["icon_text_font_size"] = 14,
 ["bag_view_type"] = "category",
-["bag_view_width"] = 12,
+["sort_ignore_slots_count_2"] = 0,
 ["disabled_skins"] = {
 },
-["setting_anchors"] = false,
+["bag_view_width"] = 12,
 ["sort_ignore_bank_slots_count"] = 0,
 ["category_section_toggled"] = {
 },
@@ -277,14 +277,14 @@ BAGANATOR_CONFIG = {
 },
 ["bag_view_position"] = {
 "BOTTOMRIGHT",
--379.16943359375,
-0,
+-404.16943359375,
+285.8331909179688,
 },
 ["debug_keywords"] = false,
 ["upgrade_plugin_ignored"] = {
 },
 ["show_sort_button_2"] = true,
-["sort_ignore_slots_count_2"] = 0,
+["setting_anchors"] = false,
 ["bag_icon_size"] = 39,
 ["currency_panel_position"] = {
 "RIGHT",

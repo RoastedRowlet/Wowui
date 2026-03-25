@@ -67,22 +67,6 @@ CliqueDB3 = {
 ["unit"] = "mouseover",
 },
 {
-["type"] = "macro",
-["key"] = "SHIFT-BUTTON2",
-["macrotext"] = "/cast Nature's Swiftness\n/cast [@mouseover] Regrowth\n",
-["sets"] = {
-["default"] = true,
-},
-["icon"] = 134332,
-},
-{
-["type"] = "menu",
-["key"] = "CTRL-BUTTON2",
-["sets"] = {
-["default"] = true,
-},
-},
-{
 ["spell"] = "Rejuvenation",
 ["key"] = "BUTTON1",
 ["sets"] = {
@@ -90,6 +74,15 @@ CliqueDB3 = {
 },
 ["icon"] = 136081,
 ["type"] = "spell",
+},
+{
+["type"] = "macro",
+["key"] = "SHIFT-BUTTON2",
+["macrotext"] = "/cast Nature's Swiftness\n/cast [@mouseover] Regrowth\n",
+["sets"] = {
+["default"] = true,
+},
+["icon"] = 134332,
 },
 {
 ["spell"] = "Regrowth",
@@ -101,12 +94,37 @@ CliqueDB3 = {
 ["type"] = "spell",
 },
 {
+["type"] = "menu",
+["key"] = "CTRL-BUTTON2",
+["sets"] = {
+["default"] = true,
+},
+},
+{
+["type"] = "macro",
+["key"] = "ALT-BUTTON2",
+["macrotext"] = "/cast Nature's Swiftness\n/cast [@mouseover] Regrowth\n",
+["sets"] = {
+["default"] = true,
+},
+["icon"] = 134332,
+},
+{
 ["spell"] = "Revive",
 ["key"] = "CTRL-BUTTON1",
 ["sets"] = {
 ["default"] = true,
 },
 ["icon"] = 132132,
+["type"] = "spell",
+},
+{
+["spell"] = "Remove Corruption",
+["key"] = "BUTTON3",
+["sets"] = {
+["default"] = true,
+},
+["icon"] = 135952,
 ["type"] = "spell",
 },
 {
@@ -128,21 +146,12 @@ CliqueDB3 = {
 ["type"] = "spell",
 },
 {
-["type"] = "macro",
-["key"] = "ALT-BUTTON2",
-["macrotext"] = "/cast Nature's Swiftness\n/cast [@mouseover] Regrowth\n",
+["spell"] = "Revive",
+["key"] = "CTRL-BUTTON1",
 ["sets"] = {
 ["default"] = true,
 },
-["icon"] = 134332,
-},
-{
-["spell"] = "Remove Corruption",
-["key"] = "BUTTON3",
-["sets"] = {
-["default"] = true,
-},
-["icon"] = 135952,
+["icon"] = 132132,
 ["type"] = "spell",
 },
 },

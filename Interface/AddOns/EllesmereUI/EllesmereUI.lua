@@ -727,8 +727,13 @@ do
     --  coordinates to the nearest pixel, which causes blurry edges on
     --  sub-pixel-sized elements.
     ---------------------------------------------------------------------------
+    -- External weak-keyed set for pixel-snap tracking.
+    -- Avoids writing custom keys onto Blizzard's secure widget tables
+    -- (which taints them and causes "secret value" errors).
+    local _pixelSnapDisabled = setmetatable({}, { __mode = "k" })
+
     function PP.DisablePixelSnap(obj)
-        if not obj or obj.PixelSnapDisabled then return end
+        if not obj or _pixelSnapDisabled[obj] then return end
         if obj.IsForbidden and obj:IsForbidden() then return end
 
         -- Textures and FontStrings expose SetSnapToPixelGrid directly
@@ -737,7 +742,7 @@ do
             -- StatusBars need their inner texture unsnapped instead
             target = obj:GetStatusBarTexture()
             if type(target) ~= "table" or not target.SetSnapToPixelGrid then
-                obj.PixelSnapDisabled = true
+                _pixelSnapDisabled[obj] = true
                 return
             end
         end
@@ -746,7 +751,7 @@ do
             target:SetSnapToPixelGrid(false)
             target:SetTexelSnappingBias(0)
         end
-        obj.PixelSnapDisabled = true
+        _pixelSnapDisabled[obj] = true
     end
 
     ---------------------------------------------------------------------------
@@ -760,8 +765,8 @@ do
     --  Blizzard's code on spell swaps, page changes, combat transitions, etc.
     ---------------------------------------------------------------------------
     local function WatchPixelSnap(frame, snap)
-        if (frame and not frame:IsForbidden()) and frame.PixelSnapDisabled and snap then
-            frame.PixelSnapDisabled = nil
+        if (frame and not frame:IsForbidden()) and _pixelSnapDisabled[frame] and snap then
+            _pixelSnapDisabled[frame] = nil
         end
     end
 
@@ -2372,14 +2377,23 @@ function EllesmereUI.NeedsBetaReset()
 end
 
 -- Stamp fresh installs so they never see the reset popup.
--- Only stamps if the DB looks fresh (<=2 keys -- just ppUIScale from Startup).
+-- A fresh install has no _resetVersion at all. By PLAYER_LOGIN, child addons
+-- have already populated EllesmereUIDB so key counting is unreliable. Instead,
+-- check if _resetVersion has never been set (nil) AND no child addon SVs exist.
 function EllesmereUI.StampResetVersion()
     if not EllesmereUIDB then EllesmereUIDB = {} end
     if (EllesmereUIDB._resetVersion or 0) >= REQUIRED_RESET_VERSION then return end
-    local keyCount = 0
-    for _ in pairs(EllesmereUIDB) do keyCount = keyCount + 1 end
-    if keyCount <= 2 then
-        EllesmereUIDB._resetVersion = REQUIRED_RESET_VERSION
+    -- If _resetVersion is nil, this is either a fresh install or a very old install.
+    -- Fresh installs have no child addon SavedVariables. Old installs that need
+    -- the reset will have at least one child DB populated.
+    if EllesmereUIDB._resetVersion == nil then
+        local hasChildDB = _G.EllesmereUIActionBarsDB
+            or _G.EllesmereUIUnitFramesDB
+            or _G.EllesmereUINameplatesDB
+            or _G.EllesmereUIResourceBarsDB
+        if not hasChildDB then
+            EllesmereUIDB._resetVersion = REQUIRED_RESET_VERSION
+        end
     end
 end
 
@@ -5998,7 +6012,7 @@ end
 -------------------------------------------------------------------------------
 --  Slash commands
 -------------------------------------------------------------------------------
-EllesmereUI.VERSION = "5.4.6"
+EllesmereUI.VERSION = "5.5.2"
 
 -- Register this addon's version into a shared global table (taint-free at load time)
 if not _G._EUI_AddonVersions then _G._EUI_AddonVersions = {} end

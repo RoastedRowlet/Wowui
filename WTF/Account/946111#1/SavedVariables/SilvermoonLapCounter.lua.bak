@@ -23,9 +23,9 @@ SilvermoonLapCounterDB = {
 },
 ["Lonelylitten-Stormrage"] = {
 ["bestLapTime"] = 4.885000000002037,
-["lastLapDate"] = "2026-03-23 22:37",
-["lapCount"] = 349,
-["lastLapTime"] = 10.04700000002049,
+["lastLapDate"] = "2026-03-24 22:02",
+["lapCount"] = 373,
+["lastLapTime"] = 12.99599999998463,
 ["firstLapDate"] = "2026-03-03 01:21",
 ["class"] = "DRUID",
 ["bestLapDate"] = "2026-03-12 00:52",

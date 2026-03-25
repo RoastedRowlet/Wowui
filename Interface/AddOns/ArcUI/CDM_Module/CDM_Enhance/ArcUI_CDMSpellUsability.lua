@@ -40,13 +40,27 @@ local ON_CD_COLOR      = { r = 0.4, g = 0.4, b = 0.4, a = 1.0 }
 -- ═══════════════════════════════════════════════════════════════════════════
 
 local function ApplyUsabilityDesat(frame, iconTex, desaturate)
+    local wasRequested = frame._arcUsabilityDesatRequest
     -- Store request for CooldownState + CDMEnhance hooks to read
     frame._arcUsabilityDesatRequest = desaturate and true or nil
 
-    -- ONLY touch desaturation when explicitly configured (true/false)
-    -- When nil (not configured), leave desat alone so CDM's native
-    -- cooldown desaturation isn't wiped by our hook.
-    if desaturate == nil then return end
+    -- ONLY touch desaturation when explicitly configured (true/false).
+    -- When nil (not configured / releasing ownership), actively clear any
+    -- desaturation WE previously applied so icons snap instantly to colored
+    -- when resources become available (e.g. Elemental Blast at 80 Maelstrom).
+    -- Without this, the icon stays desaturated until CDM's next RefreshData cycle (~1s).
+    if desaturate == nil then
+        if wasRequested and iconTex then
+            frame._arcBypassDesatHook = true
+            if iconTex.SetDesaturation then
+                iconTex:SetDesaturation(0)
+            elseif iconTex.SetDesaturated then
+                iconTex:SetDesaturated(false)
+            end
+            frame._arcBypassDesatHook = false
+        end
+        return
+    end
 
     if not iconTex then return end
     frame._arcBypassDesatHook = true
