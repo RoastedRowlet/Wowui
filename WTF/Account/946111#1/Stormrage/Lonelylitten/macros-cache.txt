@@ -72,7 +72,7 @@ VER 3 010000000000000A "Incarn TWW" "6383471"
 /use Celestial Alignment
 /use Nature's Vigil
 /use Fury of Elune
-/use [combat] Tempered Potion
+/use [combat] Potion of Recklessness
 END
 VER 3 0100000000000012 "IQD bell same bu" "134400"
 #132

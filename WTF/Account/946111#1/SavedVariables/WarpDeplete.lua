@@ -1,12 +1,5 @@
 
 WarpDepleteDB = {
-["profileKeys"] = {
-["Lonelylitten - Stormrage"] = "Default",
-["Angryabsol - Stormrage"] = "Default",
-["Barelynoer - Area 52"] = "Default",
-["Madmareep - Stormrage"] = "Default",
-["Zappyxatu - Stormrage"] = "Default",
-},
 ["global"] = {
 ["splits"] = {
 [161] = {
@@ -54,20 +47,25 @@ WarpDepleteDB = {
 [560] = {
 [11] = {
 ["current"] = {
-679,
-1441,
-2724,
-["forces"] = 2143,
-["challenge"] = 2723958,
+603,
+1257,
+1578,
+["forces"] = 1310,
+["challenge"] = 1578494,
 },
 ["best"] = {
-679,
-1441,
-2724,
-["forces"] = 2143,
-["challenge"] = 2723958,
+603,
+1257,
+1578,
+["forces"] = 1310,
+["challenge"] = 1578494,
 },
 ["currentDiff"] = {
+-76,
+-184,
+-1146,
+["forces"] = -833,
+["challenge"] = -1145464,
 },
 },
 [10] = {
@@ -106,19 +104,37 @@ WarpDepleteDB = {
 ["currentDiff"] = {
 },
 },
+[13] = {
+["current"] = {
+693,
+1465,
+1816,
+["forces"] = 1560,
+["challenge"] = 1816396,
+},
+["best"] = {
+693,
+1465,
+1816,
+["forces"] = 1560,
+["challenge"] = 1816396,
+},
+["currentDiff"] = {
+},
+},
 },
 [239] = {
 [11] = {
 ["current"] = {
-265,
-709,
-1052,
-1212,
-["forces"] = 915,
-["challenge"] = 1212267,
+254,
+754,
+1140,
+1346,
+["forces"] = 985,
+["challenge"] = 1346929,
 },
 ["best"] = {
-255,
+254,
 709,
 1052,
 1212,
@@ -126,12 +142,12 @@ WarpDepleteDB = {
 ["challenge"] = 1212267,
 },
 ["currentDiff"] = {
-10,
--48,
--144,
--182,
-["forces"] = -114,
-["challenge"] = -182035,
+-1,
+45,
+88,
+134,
+["forces"] = 70,
+["challenge"] = 134662,
 },
 },
 [9] = {
@@ -196,6 +212,26 @@ WarpDepleteDB = {
 ["currentDiff"] = {
 },
 },
+[11] = {
+["current"] = {
+996,
+443,
+1421,
+1625,
+["forces"] = 1259,
+["challenge"] = 1625415,
+},
+["best"] = {
+996,
+443,
+1421,
+1625,
+["forces"] = 1259,
+["challenge"] = 1625415,
+},
+["currentDiff"] = {
+},
+},
 },
 [559] = {
 [10] = {
@@ -223,60 +259,71 @@ WarpDepleteDB = {
 },
 [11] = {
 ["current"] = {
-418,
-954,
-1365,
-["forces"] = 1212,
-["challenge"] = 1365458,
+333,
+851,
+1184,
+["forces"] = 1043,
+["challenge"] = 1184476,
 },
 ["best"] = {
-418,
-954,
-1365,
-["forces"] = 1212,
-["challenge"] = 1365458,
+333,
+851,
+1184,
+["forces"] = 1043,
+["challenge"] = 1184476,
 },
 ["currentDiff"] = {
+-85,
+-103,
+-181,
+["forces"] = -169,
+["challenge"] = -180982,
 },
 },
 },
-[558] = {
-[10] = {
-["current"] = {
-477,
-783,
-1152,
-1528,
-["forces"] = 1582,
-["challenge"] = 1582441,
-},
-["best"] = {
-477,
-783,
-1152,
-1528,
-["forces"] = 1582,
-["challenge"] = 1582441,
-},
-["currentDiff"] = {
-},
-},
+[402] = {
 [11] = {
 ["current"] = {
-451,
-739,
-1105,
-1424,
-["forces"] = 1259,
-["challenge"] = 1424498,
+1099,
+678,
+246,
+1523,
+["forces"] = 1318,
+["challenge"] = 1522993,
 },
 ["best"] = {
-451,
-739,
-1105,
-1424,
-["forces"] = 1259,
-["challenge"] = 1424498,
+1099,
+678,
+246,
+1523,
+["forces"] = 1318,
+["challenge"] = 1522993,
+},
+["currentDiff"] = {
+-159,
+-134,
+-168,
+-572,
+["forces"] = -149,
+["challenge"] = -572163,
+},
+},
+[10] = {
+["current"] = {
+1133,
+712,
+287,
+1518,
+["forces"] = 1328,
+["challenge"] = 1518468,
+},
+["best"] = {
+1133,
+712,
+287,
+1518,
+["forces"] = 1328,
+["challenge"] = 1518468,
 },
 ["currentDiff"] = {
 },
@@ -356,55 +403,78 @@ WarpDepleteDB = {
 },
 },
 },
-[402] = {
+[558] = {
 [11] = {
 ["current"] = {
-1099,
-678,
-246,
-1523,
-["forces"] = 1318,
-["challenge"] = 1522993,
+451,
+739,
+1105,
+1424,
+["forces"] = 1259,
+["challenge"] = 1424498,
 },
 ["best"] = {
-1099,
-678,
-246,
-1523,
-["forces"] = 1318,
-["challenge"] = 1522993,
+451,
+739,
+1105,
+1424,
+["forces"] = 1259,
+["challenge"] = 1424498,
 },
 ["currentDiff"] = {
--159,
--134,
--168,
--572,
-["forces"] = -149,
-["challenge"] = -572163,
 },
 },
 [10] = {
 ["current"] = {
-1133,
-712,
-287,
-1518,
-["forces"] = 1328,
-["challenge"] = 1518468,
+477,
+783,
+1152,
+1528,
+["forces"] = 1582,
+["challenge"] = 1582441,
 },
 ["best"] = {
-1133,
-712,
-287,
-1518,
-["forces"] = 1328,
-["challenge"] = 1518468,
+477,
+783,
+1152,
+1528,
+["forces"] = 1582,
+["challenge"] = 1582441,
 },
 ["currentDiff"] = {
 },
 },
+[13] = {
+["current"] = {
+525,
+858,
+1311,
+1715,
+["forces"] = 1533,
+["challenge"] = 1715540,
+},
+["best"] = {
+525,
+858,
+1311,
+1715,
+["forces"] = 1533,
+["challenge"] = 1715540,
+},
+["currentDiff"] = {
 },
 },
+[14] = {
+},
+},
+},
+},
+["profileKeys"] = {
+["Lonelylitten - Stormrage"] = "Default",
+["Angryabsol - Stormrage"] = "Default",
+["Zappyxatu - Stormrage"] = "Default",
+["Madmareep - Stormrage"] = "Default",
+["Barelynoer - Area 52"] = "Default",
 },
 ["profiles"] = {
 ["Default"] = {

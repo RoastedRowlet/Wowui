@@ -1,0 +1,121 @@
+VER 3 010000000000001E " " "136060"
+#129
+END
+VER 3 0100000000000020 " " "134400"
+#140
+END
+VER 3 010000000000000F " " "132278"
+#135
+END
+VER 3 0100000000000010 " " "134400"
+#136
+END
+VER 3 0100000000000013 " " "3586270"
+#137
+END
+VER 3 0100000000000007 " " "134400"
+#126
+END
+VER 3 0100000000000008 "Affinity Spells" "134400"
+#121
+#showtooltip
+/cast [talent:3/1] Maim
+/cast [talent:3/2] Incapacitating roar
+/cast [talent:3/3] ursol's vortex
+END
+VER 3 010000000000001F "AutoInnervate" "INV_MISC_QUESTIONMARK"
+#showtooltip Innervate
+/cast [@mouseover, help, nodead] Innervate; Innervate
+END
+VER 3 0100000000000016 "bear" "134400"
+#122
+#showtooltip
+/cast Incarnation: Guardian of Ursoc(Talent, Shapeshift)
+/cleartarget
+/use 13
+/targetlasttarget
+/use Potion of Spectral Intellect
+/use Ravenous Frenzy
+/use Berserking
+END
+VER 3 0100000000000014 "Cancel Kindred" "134400"
+#123
+#showtooltip
+/cancelaura Kindred Spirits
+/cancelaura Lone Spirit
+END
+VER 3 0100000000000003 "Cyclone" "134400"
+#125
+#showtooltip
+/cast [target=focus] Cyclone
+END
+VER 3 010000000000001D "Focus Beam" "134400"
+#142
+#showtooltip
+/cast [@focus, exists, harm] Solar Beam
+END
+VER 3 0100000000000018 "hppot" "5931169"
+#128
+--&0b
+#showtooltip
+/use item:211879--&
+END
+VER 3 0100000000000022 "Incap unshift" "134400"
+/cast Incapacitating Roar
+/cancelform [form:1]
+END
+VER 3 010000000000000A "Incarn TWW" "6383471"
+#126
+#showtooltip
+/use 13
+/use [combat] 16
+/use Celestial Alignment
+/use Nature's Vigil
+/use Fury of Elune
+/use [combat] Tempered Potion
+END
+VER 3 0100000000000012 "IQD bell same bu" "134400"
+#132
+#showtooltip
+/cleartarget
+/use Inscrutable Quantum Device
+/use Instructor's Divine Bell
+/targetlasttarget
+END
+VER 3 0100000000000011 "IQD Pot" "134400"
+#133
+#showtooltip
+/cleartarget
+/use Inscrutable Quantum Device
+/use Potion of Spectral Intellect
+/use Instructor's Divine Bell
+/targetlasttarget
+END
+VER 3 010000000000001B "MO Moonfire" "136096"
+#143
+#showtooltip
+/cast [@mouseover,harm][@target,harm][] Moonfire
+END
+VER 3 010000000000001C "MO Sunfire" "236216"
+#144
+#showtooltip
+/cast [@mouseover,harm][@target,harm][] Sunfire
+END
+VER 3 010000000000000E "SScancelqueue" "134400"
+#138
+#showtooltip starsurge
+/cqs
+/stopmacro [channeling:Convoke the Spirits]
+/cast starsurge
+END
+VER 3 0100000000000009 "Tier 15" "132137"
+#139
+#showtooltip
+/use Nature's Vigil
+/use [@mouseover,help,nodead,talent:1/3][help,nodead][@player] Cenarion Ward
+END
+VER 3 010000000000001A "Trees" "134400"
+#141
+#showtooltip
+/cast [@cursor] Force of Nature
+END
