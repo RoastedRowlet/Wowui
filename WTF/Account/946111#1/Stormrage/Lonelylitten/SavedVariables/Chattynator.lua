@@ -202,4 +202,5 @@ CHATTYNATOR_COMMAND_HISTORY = {
 "/s /reload",
 "/s /wa",
 "/s /reload",
+"/s /arcui",
 }

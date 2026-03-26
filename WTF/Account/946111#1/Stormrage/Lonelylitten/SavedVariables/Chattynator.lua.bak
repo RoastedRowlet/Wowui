@@ -2,8 +2,6 @@
 CHATTYNATOR_CURRENT_PROFILE = "DEFAULT"
 CHATTYNATOR_COMMAND_HISTORY = {
 "/p /pull 10",
-"/p /rc",
-"/p /pull 10",
 "/2 LF |cnIQ4:|Hitem:237838::::::::90:105::13:1:3524:6:40:2739:38:8:46:232875:47:245876:48:245784:49:-2147480301:::::|h[Magister's Ritual Knife |A:Professions-ChatIcon-Quality-Tier5:17:15::1|a]|h|r",
 "/cw Bossdk-Stormrage sent",
 "/cw Bossdk-Stormrage /rc",
