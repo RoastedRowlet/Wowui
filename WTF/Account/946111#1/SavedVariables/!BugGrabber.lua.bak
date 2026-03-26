@@ -1,7 +1,7 @@
 
 BugGrabberDB = {
-["session"] = 622,
 ["lastSanitation"] = 3,
+["session"] = 623,
 ["errors"] = {
 {
 ["message"] = "...erface/AddOns/TargetedSpells/TargetedSpellsMixin.lua:350: attempt to call method 'SetFrameStrata' (a nil value)",
@@ -628,14 +628,6 @@ BugGrabberDB = {
 ["counter"] = 2,
 },
 {
-["message"] = "attempt to perform string conversion on a secret string value (tainted by 'CraftSim')",
-["time"] = 1774413128,
-["locals"] = "self = Frame {\n frame = <table> {\n }\n UI = <table> {\n }\n}\nfullName = <no value>\n",
-["stack"] = "[Interface/AddOns/CraftSim/Modules/CustomerHistory/CustomerHistory.lua]:111: in function 'GetNameAndRealm'\n[Interface/AddOns/CraftSim/Modules/CustomerHistory/CustomerHistory.lua]:31: in function '?'\n[Interface/AddOns/CraftSim/Libs/GUTIL/GUTIL.lua]:240: in function <Interface/AddOns/CraftSim/Libs/GUTIL/GUTIL.lua:240>\n",
-["session"] = 605,
-["counter"] = 5,
-},
-{
 ["message"] = "Interface/AddOns/BigWigs_Core/BossPrototype.lua:3660: bad argument #1 to 'GetPlayerInfoByGUID' (Usage: local localizedClass, englishClass, localizedRace, englishRace, sex, name, realmName = GetPlayerInfoByGUID(guid))",
 ["time"] = 1774413642,
 ["locals"] = "event = \"ENCOUNTER_WARNING\"\ninfo = <table> {\n isDeadly = <no value>\n tooltipSpellID = <no value>\n text = <no value>\n shouldShowChatMessage = true\n iconFileID = <no value>\n shouldShowWarning = false\n shouldPlaySound = true\n casterName = <no value>\n severity = 1\n duration = 3.500000\n casterGUID = <no value>\n color = <table> {\n }\n}\nplayer = nil\nself = <table> {\n colorOptions = <table> {\n }\n enableMobs = <table> {\n }\n enabled = true\n optionHeaders = <table> {\n }\n journalId = 2738\n stageTime = 375513.596000\n db = <table> {\n }\n toggleDefaults = <table> {\n }\n name = \"BigWigs_Bosses_Crown of the Cosmos\"\n notes = <table> {\n }\n localization = <table> {\n }\n toggleOptions = <table> {\n }\n privateAuraSounds = <table> {\n }\n isEngaged = true\n useCustomTimers = true\n sayCountdowns = <table> {\n }\n soundOptions = <table> {\n }\n engageId = 3181\n displayName = \"Crown of the Cosmos\"\n privateAuraSoundOptions = <table> {\n }\n instanceId = 2912\n stage = 1\n respawnTime = 30\n moduleName = \"Crown of the Cosmos\"\n}\nclassColorMessages = true\nkey = 1233602\ncolor = \"blue\"\nCL = <table> {\n parasite = \"Parasite\"\n small_add = \"Small Add\"\n tentacle = \"Tentacle\"\n fixates = \"Fixates\"\n east = \"East\"\n near = \"%s near YOU\"\n marker_npc_desc = \"Mark %s with %s, requires promoted or leader.\"\n remaining = \"%d remaining\"\n wave_count = \"Wave %d of %d\"\n removed_from = \"%s removed from %s\"\n gate_open = \"Gate open\"\n amount_one = \"%dB\"\n threat = \"Threat\"\n boss_landing = \"%s is landing\"\n orbs = \"Orbs\"\n bottom_left = \"Bottom Left\"\n over = \"%s over\"\n you = \"%s on YOU\"\n health_percent = \"%d%% Health\"\n count = \"%s (%d)\"\n safe_to_stop = \"Safe to stop\"\n flying_available = \"You can fly now\"\n removed = \"%s removed\"\n shadow = \"Shadow\"\n raid_damage = \"Raid Damage\"\n whelp = \"Whelp\"\n spawning = \"%s spawning\"\n focus_only = \"|cffff0000Focus target alerts only.|r \"\n waves = \"Waves\"\n pushback = \"Pushback\"\n tank_soak = \"Tank Soak\"\n mob_killed = \"%s killed (%d/%d)\"\n tank_frontal = \"Tank Frontal\"\n tank_debuff = \"Tank Debuff\"\n tank_combo = \"Tank Combo\"\n rift = \"Rift\"\n spike = \"Spike\"\n count_icon = \"%s (%d|T13700%d:0|t)\"\n spirits = \"Spirits\"\n intermission = \"Intermission\"\n blind = \"Blind\"\n shuja_short = \"*Shuja\"\n mob_remaining = \"%s killed, %d remaining\"\n spread = \"Spread\"\n crenna = \"Crenna Earth-Daughter\"\n stackboss = \"%dx %s on BOSS\"\n buff_other = \"Buff on %s: %s\"\n adds_spawned = \"Adds spawned\"\n soaks = \"Soaks\"\n energy_percent = \"%d%% Energy\"\n soak = \"Soak\"\n smash = \"Smash\"\n stage = \"Stage %d\"\n whelps = \"Whelps\"\n shuja = \"Shuja Grimaxe\"\n count_amount = \"%s (%d/%d)\"\n general = \"General\"\n breka_short = \"*Breka\"\n shield = \"Shield\"\n bomb = \"Bomb\"\n totem = \"Totem\"\n nature = \"Nature\"\n parasites = \"Parasites\"\n boss = \"BOSS\"\n weakened = \"Weakened\"\n health_drain = \"Health Drain\"\n rooted = \"Rooted\"\n add_killed = \"Add killed (%d/%d)\"\n adds_spawning = \"Adds spawning\"\n group_damage = \"Group Damage\"\n link = \"Link\"\n fear = \"Fear\"\n trash = \"Trash\"\n next_add = \"Next Add\"\n enrage = \"Enrage\"\n stackyou = \"%dx %s on YOU\"\n custom_sec = \"%s in %d sec\"\n beam = \"Beam\"\n removed_by = \"%s removed by %s\"\n wave = \"Wave %d\"\n add_spawned = \"Add spawned\"\n balls = \"Balls\"\n ball = \"Ball\"\n cancelled = \"%s cancelled\"\n interrupted = \"%s interrupted\"\n medium = \"Medium\"\n bombs = \"Bombs\"\n you_icon = \"%s on |T13700%d:0|tYOU\"\n aboveyou = \"%s above YOU\"\n full_energy = \"Full Energy\"\n mind_control = \"Mind Control\"\n curse = \"Curse\"\n marks = \"Marks\"\n large = \"Large\"\n beams = \"Beams\"\n mark = \"Mark\"\n safe = \"Safe\"\n frontal_cone = \"Frontal Cone\"\n tornadoes = \"Tornadoes\"\n tornado = \"Tornado\"\n middle = \"Middle\"\n dead = \"Dead\"\n north_west = \"North-West\"\n next_ability = \"Next ability\"\n tank_bomb = \"Tank Bomb\"\n stand_still = \"Stand still\"\n extra = \"%s (%s)\"\n spirit = \"Spirit\"\n explosion = \"Explosion\"\n poison = \"Poison\"\n roar = \"Roar\"\n curses = \"Curses\"\n health = \"Health\"\n buff_boss = \"Buff on BOSS: %s\"\n amount_two = \"%dM\"\n count_rticon = \"%s (%d{rt%d})\"\n pool = \"Pool\"\n portals = \"Portals\"\n totems = \"Totems\"\n on_group = \"%s on GROUP\"\n disabled = \"Disabled\"\n portal = \"Portal\"\n marker = \"%s marker\"\n pull_in = \"Pull In\"\n pools = \"Pools\"\n rifts = \"Rifts",
@@ -690,6 +682,14 @@ BugGrabberDB = {
 ["stack"] = "[Interface/AddOns/Blizzard_QuickJoin/QuickJoinToast.lua]:300: in function 'ShowToast'\n[Interface/AddOns/Blizzard_QuickJoin/QuickJoinToast.lua]:201: in function 'CheckDisplayToast'\n[Interface/AddOns/Blizzard_QuickJoin/QuickJoinToast.lua]:192: in function 'CheckShowToast'\n[Interface/AddOns/Blizzard_QuickJoin/QuickJoinToast.lua]:72: in function <...terface/AddOns/Blizzard_QuickJoin/QuickJoinToast.lua:55>\n",
 ["session"] = 620,
 ["counter"] = 1,
+},
+{
+["message"] = "attempt to perform string conversion on a secret string value (tainted by 'CraftSim')",
+["time"] = 1774500755,
+["locals"] = "self = Frame {\n frame = <table> {\n }\n UI = <table> {\n }\n}\nfullName = <no value>\n",
+["stack"] = "[Interface/AddOns/CraftSim/Modules/CustomerHistory/CustomerHistory.lua]:111: in function 'GetNameAndRealm'\n[Interface/AddOns/CraftSim/Modules/CustomerHistory/CustomerHistory.lua]:21: in function '?'\n[Interface/AddOns/CraftSim/Libs/GUTIL/GUTIL.lua]:240: in function <Interface/AddOns/CraftSim/Libs/GUTIL/GUTIL.lua:240>\n",
+["session"] = 623,
+["counter"] = 6,
 },
 },
 }

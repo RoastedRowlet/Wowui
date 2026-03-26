@@ -1,14 +1,6 @@
 
 CHATTYNATOR_CURRENT_PROFILE = "DEFAULT"
 CHATTYNATOR_COMMAND_HISTORY = {
-"/p /rc",
-"/p /pull 10",
-"/p %",
-"/p apparently those all need to be dead lmao",
-"/p the amount of trash needed in here is comical",
-"/p once we figured out the stack strat",
-"/p it was powerful",
-"/p gsg",
 "/p /reload",
 "/s /eui",
 "/s /reload",
@@ -210,4 +202,8 @@ CHATTYNATOR_COMMAND_HISTORY = {
 " /arcui",
 " /RC",
 " /PULL 10",
+"/s /KEY",
+"/s /rc",
+"/s /PULL 10",
+"/cw Palàdin-Stormrage your name is a lie!",
 }
