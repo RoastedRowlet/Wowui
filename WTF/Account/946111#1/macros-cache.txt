@@ -98,6 +98,7 @@ VER 3 000000000000005C "Convoke NS" "134400"
 #061
 #showtooltip Convoke the Spirits
 /cast [nochanneling] Nature's Swiftness
+/use [nochanneling] Fleeting Potion of Recklessness
 /use [nochanneling] Potion of Recklessness
 /cast Incarnation: Tree of Life
 /cast Convoke the Spirits
@@ -331,12 +332,12 @@ VER 3 000000000000004F "primwave" "134400"
 /cast [@mouseover] Primordial Wave
 /cast Wellspring
 END
+VER 3 0000000000000064 "pull 3" "132120"
+/pull 3
+END
 VER 3 0000000000000039 "Pull 3" "409599"
 #052
 #showtooltip
-/pull 3
-END
-VER 3 0000000000000064 "pull 3" "132120"
 /pull 3
 END
 VER 3 000000000000003A "Pull3" "132103"
