@@ -1,0 +1,8 @@
+## Interface: 120000, 120001
+## Title: M33kAuras Settings Migration
+## Author: m33shoq
+## Version: 5.20.7-rg4-m50
+## IconTexture: Interface\AddOns\M33kAuras\Media\Textures\icon.blp
+## SavedVariables: WeakAurasSaved
+## LoadSavedVariablesFirst: 1
+## LoadOnDemand: 1

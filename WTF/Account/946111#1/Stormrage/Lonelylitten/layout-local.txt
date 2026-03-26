@@ -1,6 +1,6 @@
 Version: 1
 Frame: CraftScanScannerMenuButton
-FrameLevel: 200
+FrameLevel: 207
 Anchor: LEFT
 X: 47
 Y: -257
@@ -9,10 +9,10 @@ H: 53
 Frame: Grid2LayoutFrame
 FrameLevel: 1
 Anchor: CENTER
-X: -298
-Y: -189
-W: 107
-H: 77
+X: -258
+Y: -200
+W: 180
+H: 100
 Frame: CraftScanConfigPage
 FrameLevel: 0
 Anchor: TOP

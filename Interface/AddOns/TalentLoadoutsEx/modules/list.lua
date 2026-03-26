@@ -1,0 +1,281 @@
+﻿local _, Addon = ...;
+
+Addon.addDataType = {
+	AddConfig = "Add Config",
+	AddGroup = "Add Group",
+};
+
+local function OnClickToggleButton(toggleButton)
+	if not Addon.isLocked then
+		local parent = toggleButton:GetParent();
+		parent.data.isExpanded = not parent.data.isExpanded;
+		Addon.selectedIndex = parent.index;
+		Addon:UpdateScrollBox(true);
+	end
+end
+
+local function OnClickListButton(self, button)
+	if Addon.isLocked then
+		return;
+	end
+
+	if not self.addDataType then
+		Addon.selectedIndex = self.index;
+	end
+
+	Addon.frame.ScrollBox:ForEachFrame(
+		function(linkButton)
+			if Addon.selectedIndex and Addon.selectedIndex == linkButton.index then
+				linkButton.SelectedBar:Show();
+			else
+				linkButton.SelectedBar:Hide();
+			end
+		end
+	);
+
+	Addon:UpdatePanelButton();
+
+	if self.addDataType then
+		Addon:ShowEditPopup(self.addDataType);
+	elseif IsShiftKeyDown() then
+		if button == "LeftButton" then
+			Addon:PostLink();
+		else
+			Addon:CopyLink();
+		end
+	end
+end
+
+local function OnDoubleClickListButton(button, ...)
+	if Addon.isLocked then
+		return;
+	end
+
+	Addon.selectedIndex = button.index;
+	if button.addDataType then
+		return;
+	elseif button.data.text then
+		Addon:LoadConfig();
+	else
+		OnClickToggleButton(button.ToggleButton);
+	end
+end
+
+local function InitListButton(button, elementData)
+	button.index = elementData.index;
+	button.data = elementData.data;
+	button.isDataLoaded = elementData.isDataLoaded;
+	button.addDataType = elementData.addDataType;
+
+	-- Reset
+	button.GroupStripe:Hide();
+	button.PresetStripe:Hide();
+	button.Check:Hide();
+	button.WarningFrame:Hide();
+	button.ToggleButton:Hide();
+	button.SelectedBar:Hide();
+
+	local talentsFrame = Addon.TalentsFrame;
+	local treeInfo = talentsFrame:GetTreeInfo();
+	local treeID = treeInfo and treeInfo.ID;
+	if not treeID then
+		return; -- Skip
+	end
+
+	local color = NORMAL_FONT_COLOR;
+	if button.addDataType then
+		-- Add Button
+		button.Icon:SetTexture("Interface\\PaperDollInfoFrame\\Character-Plus");
+		button.Icon:SetSize(30, 30);
+		button.Icon:SetPoint("LEFT", 7, 0);
+		color = GREEN_FONT_COLOR;
+	else
+		-- Config or Group
+		button.Icon:SetSize(36, 36);
+		button.Icon:SetPoint("LEFT", 4, 0);
+
+		if type(button.data.icon) == "string" then
+			button.Icon:SetTexture(Addon.HERO_TALENTS_ICON);
+			button.Icon:SetAtlas(button.data.icon);
+		else
+			button.Icon:SetTexture(button.data.icon);
+		end
+
+		if not button.data.text then
+			-- Group
+			if button.data.isPreset then
+				button.PresetStripe:Show();
+			else
+				button.GroupStripe:Show();
+			end
+
+			button.ToggleButton:SetScript("OnClick", OnClickToggleButton);
+			button.ToggleButton.isExpanded = button.data.isExpanded;
+			button.ToggleButton:Show();
+			color = BLUE_FONT_COLOR;
+		elseif button.data.isLegacy then
+			-- Config (Legacy)
+			button.WarningMessage = Addon.LegacyWarningMessage;
+			button.WarningFrame:Show();
+		else
+			-- Config
+			local importStream = ExportUtil.MakeImportDataStream(button.data.text);
+			local errorMessage = Addon:GetValidationError(treeID, importStream, true);
+
+			if button.data.isInGroup then
+				button.Icon:AdjustPointsOffset(10, 0);
+			end
+
+			if errorMessage then
+				button.WarningMessage = errorMessage;
+				button.WarningFrame:Show();
+			elseif button.isDataLoaded then
+				button.Check:Show();
+			end
+		end
+	end
+
+	button.Text:SetText(button.addDataType or button.data.name);
+	button.Text:SetTextColor(color.r, color.g, color.b);
+
+	button:SetScript("OnClick", OnClickListButton);
+	button:SetScript("OnDoubleClick", OnDoubleClickListButton);
+	if Addon.selectedIndex and Addon.selectedIndex == button.index then
+		button.SelectedBar:Show();
+	end
+end
+
+function Addon:InitScrollBox()
+	local view = CreateScrollBoxListLinearView();
+	view:SetElementInitializer("TalentLoadoutExListButtonTemplate", InitListButton)
+	view:SetPadding(0,0,3,0,2);
+	ScrollUtil.InitScrollBoxListWithScrollBar(Addon.frame.ScrollBox, Addon.frame.ScrollBar, view);
+end
+
+local function InitDataProvider(currentText)
+	local dataProvider = CreateDataProvider();
+
+	if Addon.loadedDataList then
+		table.wipe(Addon.loadedDataList);
+	else
+		Addon.loadedDataList = {};
+	end
+
+	local isVisible = true;
+	local isInGroup = false;
+	for index, data in ipairs(Addon:MergeTables(Addon:GetSpecTable(), Addon:GetPresetData())) do
+		if data.text then
+			-- Config
+			local isDataLoaded = Addon:IsDataLoaded(data, currentText);
+			if isDataLoaded then
+				table.insert(Addon.loadedDataList, data);
+			end
+
+			if isVisible then
+				data.isInGroup = isInGroup;
+				dataProvider:Insert({index = index, data = data, isDataLoaded = isDataLoaded});
+			elseif Addon.selectedIndex and Addon.selectedIndex == index then
+				Addon.selectedIndex = nil;
+			end
+		else
+			-- Group
+			dataProvider:Insert({index = index, data = data});
+			isVisible = data.isExpanded;
+			isInGroup = true;
+		end
+	end
+
+	dataProvider:Insert({addDataType = Addon.addDataType.AddConfig});
+	dataProvider:Insert({addDataType = Addon.addDataType.AddGroup});
+
+	return dataProvider;
+end
+
+local specIndex = nil;
+local function UpdateDataProvider(currentText)
+	local scrollBox = Addon.frame.ScrollBox;
+
+	local newDataProvider = InitDataProvider(currentText);
+
+	local oldDataProvider = scrollBox:GetDataProvider();
+	if not oldDataProvider then
+		specIndex = C_SpecializationInfo.GetSpecialization();
+		scrollBox:SetDataProvider(newDataProvider);
+		return;
+	end
+
+	local scrollPercentage = scrollBox:GetScrollPercentage();
+	local scrollTargetOffset = select(5, scrollBox:GetScrollTarget():GetPoint(1));
+
+	local viewSize = scrollBox:GetDataIndexEnd() - scrollBox:GetDataIndexBegin() + 1;
+	local newScrollSize = #newDataProvider.collection - viewSize;
+	local oldScrollSize = #oldDataProvider.collection - viewSize;
+
+	scrollBox:SetDataProvider(newDataProvider);
+
+	local newSpecIndex = C_SpecializationInfo.GetSpecialization();
+	if specIndex ~= newSpecIndex then
+		specIndex = newSpecIndex;
+	elseif oldScrollSize > 0 and newScrollSize > 0 then
+		scrollBox:SetScrollPercentage(scrollPercentage * oldScrollSize / newScrollSize);
+		scrollBox:SetScrollTargetOffset(scrollTargetOffset);
+	end
+end
+
+local currentTextCache = nil;
+function Addon:UpdateScrollBox(forceUpdate)
+	local currentText = Addon:GetExportText();
+	if not forceUpdate and currentText and currentText == currentTextCache then
+		return; -- Skip
+	end
+
+	UpdateDataProvider(currentText);
+	Addon:UpdatePanelButton();
+	Addon:SendUpdateMessage();
+	currentTextCache = currentText;
+end
+
+local updateDelay = 0.1;
+local lastRequestTime = nil;
+function Addon:RequestUpdate()
+	local now = GetTime();
+	if lastRequestTime and now - lastRequestTime < updateDelay then
+		return; -- Skip
+	end
+
+	lastRequestTime = now;
+	C_Timer.After(
+		updateDelay,
+		function()
+			Addon:UpdateScrollBox();
+		end
+	);
+end
+
+function Addon:RegisterUpdateEvent()
+	Addon.frame:RegisterEvent("PLAYER_REGEN_ENABLED");
+	Addon.frame:RegisterEvent("PLAYER_REGEN_DISABLED");
+	Addon.frame:RegisterEvent("TRAIT_NODE_CHANGED");
+	Addon.frame:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED");
+	Addon.frame:SetScript(
+		"OnEvent",
+		function(_, event)
+			if event == "PLAYER_REGEN_ENABLED" then
+				Addon:Unlock();
+			elseif event == "PLAYER_REGEN_DISABLED" then
+				Addon:Lock();
+				Addon:HideAllPopup();
+				Addon:HideEditPopup();
+			else
+				Addon:RequestUpdate();
+			end
+		end
+	);
+
+	Addon.frame:GetParent():HookScript(
+		"OnShow",
+		function()
+			Addon:RequestUpdate();
+		end
+	);
+end

@@ -1,0 +1,500 @@
+﻿<Ui xmlns="http://www.blizzard.com/wow/ui/"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.blizzard.com/wow/ui/	..\FrameXML\UI.xsd">
+
+	<CheckButton name="TalentLoadoutExCheckButtonTemplate" inherits="UICheckButtonTemplate" virtual="true">
+		<KeyValues>
+			<KeyValue key="CheckButtonText" value=""/>
+		</KeyValues>
+		<Layers>
+			<Layer level="ARTWORK">
+				<FontString parentKey="Text" font="ChatFontNormal" text="">
+					<Color r="1" g="1" b="1" a="1"/>
+					<Anchors>
+						<Anchor point="LEFT" relativeKey="$parent" relativePoint="RIGHT"/>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+		<Scripts>
+			<OnLoad>
+				self.Text:SetText(self.CheckButtonText);
+			</OnLoad>
+		</Scripts>
+	</CheckButton>
+	<Frame name="TalentLoadoutExPresetAddonFrameTemplate" virtual="true">
+		<KeyValues>
+			<KeyValue key="title" value=""/>
+			<KeyValue key="addonName" value=""/>
+		</KeyValues>
+		<Layers>
+			<Layer level="ARTWORK">
+				<FontString parentKey="Title" font="ChatFontNormal" text="">
+					<Color r="1" g="1" b="1" a="1"/>
+					<Anchors>
+						<Anchor point="TOPLEFT" x="5" y="-5"/>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+		<Scripts>
+			<OnLoad>
+				self.Title:SetText(self.title);
+				for index, checkButton in ipairs(self.CategoryCheckButtons) do
+					if index == 1 then
+						checkButton:SetPoint("TOPLEFT", self, "TOPLEFT", 20, -20);
+					else
+						checkButton:SetPoint("TOPLEFT", self.CategoryCheckButtons[index - 1], "BOTTOMLEFT");
+					end
+				end
+			</OnLoad>
+		</Scripts>
+	</Frame>
+	<Button name="TalentLoadoutExPanelButtonTemplate" inherits="UIPanelButtonTemplate" virtual="true">
+		<Size x="63" y="22"/>
+		<Scripts>
+			<OnLoad>
+				self:SetEnabled(false);
+			</OnLoad>
+		</Scripts>
+	</Button>
+	<Button name="TalentLoadoutExPanelWideButtonTemplate" inherits="TalentLoadoutExPanelButtonTemplate" virtual="true">
+		<Size x="94" y="22"/>
+	</Button>
+	<Button name="TalentLoadoutExIconButtonTemplate" virtual="true">
+		<Size x="41" y="41"/>
+		<Layers>
+			<Layer level="ARTWORK">
+				<Texture parentKey="texture" setAllPoints="true"/>
+			</Layer>
+			<Layer level="OVERLAY" textureSubLevel="1">
+				<FontString parentKey="text" inherits="GameFontNormalOutline">
+					<Anchors>
+						<Anchor point="BOTTOMLEFT" x="2" y="2"/>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+		<Scripts>
+			<OnEnter>
+				if self.icon and self.name then
+					GameTooltip:SetOwner(self, "ANCHOR_NONE");
+					GameTooltip:ClearAllPoints();
+					GameTooltip:SetPoint("TOPLEFT", self, "BOTTOMLEFT");
+					GameTooltip:ClearLines();
+					GameTooltip:AddLine(self.icon);
+					GameTooltip:AddLine(self.name, 1, 1, 1, 1);
+					GameTooltip:Show();
+				end
+			</OnEnter>
+			<OnLeave>
+				GameTooltip:Hide();
+			</OnLeave>
+		</Scripts>
+		<HighlightTexture inherits="TalentLoadoutExToggleTextureTemplate" alphaMode="ADD" file="Interface\BUTTONS\UI-Panel-MinimizeButton-Highlight">
+			<Size x="41" y="41"/>
+			<Anchors>
+				<Anchor point="CENTER"/>
+			</Anchors>	
+		</HighlightTexture>
+	</Button>
+	<Frame name="TalentLoadoutExMainFrameTemplate" inherits="InsetFrameTemplate" frameStrata="HIGH" virtual="true" enableMouse="true" hidden="true">
+		<Size x="200" y="881"/>
+		<Anchors>
+			<Anchor point="TOPLEFT" relativePoint="TOPRIGHT" x="0" y="0"/>
+		</Anchors>
+		<Layers>
+			<Layer level="BACKGROUND">
+				<FontString parentKey="Title" inherits="Game18Font" text="Talent Loadout Ex">
+					<Anchors>
+						<Anchor point="TOP" x="0" y="-10"/>
+					</Anchors>
+					<Color r="1" g="1" b="1"/>
+				</FontString>
+			</Layer>
+		</Layers>
+		<Frames>
+			<Button parentKey="ImportButton" text="Import" inherits="TalentLoadoutExPanelButtonTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" x="5" y="-35"/>
+				</Anchors>
+			</Button>
+			<Button parentKey="ExportButton" text="Export" inherits="TalentLoadoutExPanelButtonTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeKey="$parent.ImportButton" relativePoint="TOPRIGHT"/>
+				</Anchors>
+			</Button>
+			<Button parentKey="PresetButton" text="Preset" inherits="TalentLoadoutExPanelButtonTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeKey="$parent.ExportButton" relativePoint="TOPRIGHT"/>
+				</Anchors>
+			</Button>
+			<Button parentKey="LoadButton" text="Load" inherits="TalentLoadoutExPanelButtonTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeKey="$parent.ImportButton" relativePoint="BOTTOMLEFT"/>
+				</Anchors>
+			</Button>
+			<Button parentKey="SaveButton" text="Save" inherits="TalentLoadoutExPanelButtonTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeKey="$parent.LoadButton" relativePoint="BOTTOMLEFT"/>
+				</Anchors>
+			</Button>
+			<Button parentKey="EditButton" text="Edit" inherits="TalentLoadoutExPanelButtonTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeKey="$parent.LoadButton" relativePoint="TOPRIGHT"/>
+				</Anchors>
+			</Button>
+			<Button parentKey="DeleteButton" text="Delete" inherits="TalentLoadoutExPanelButtonTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeKey="$parent.EditButton" relativePoint="BOTTOMLEFT"/>
+				</Anchors>
+			</Button>
+			<Button parentKey="UpButton" text="Up" inherits="TalentLoadoutExPanelButtonTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeKey="$parent.EditButton" relativePoint="TOPRIGHT"/>
+				</Anchors>
+			</Button>
+			<Button parentKey="DownButton" text="Down" inherits="TalentLoadoutExPanelButtonTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeKey="$parent.UpButton" relativePoint="BOTTOMLEFT"/>
+				</Anchors>
+			</Button>
+			<Frame parentKey="PvpFrame" inherits="InsetFrameTemplate">
+				<Size y="39"/>
+				<Anchors>
+					<Anchor point="BOTTOMLEFT" relativePoint="BOTTOMLEFT" x="4" y="4"/>
+					<Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMRIGHT" x="-4" y="4"/>
+				</Anchors>
+				<Frames>
+					<CheckButton parentKey="CheckButton" inherits="TalentLoadoutExCheckButtonTemplate">
+						<KeyValues>
+							<KeyValue key="CheckButtonText" value="PvP Talents"/>
+						</KeyValues>
+						<Anchors>
+							<Anchor point="LEFT" relativePoint="LEFT" x="4"/>
+						</Anchors>
+					</CheckButton>
+				</Frames>
+			</Frame>
+			<Frame parentKey="ScrollBox" inherits="WowScrollBoxList">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeKey="$parent.SaveButton" relativePoint="BOTTOMLEFT"/>
+					<Anchor point="BOTTOMRIGHT" relativeKey="$parent.PvpFrame" relativePoint="TOPRIGHT" x="-32" y="3"/>
+				</Anchors>
+			</Frame>
+			<EventFrame parentKey="ScrollBar" inherits="WowTrimScrollBar">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeKey="$parent.ScrollBox" relativePoint="TOPRIGHT" x="3" y="0"/>
+					<Anchor point="BOTTOMLEFT" relativeKey="$parent.ScrollBox" relativePoint="BOTTOMRIGHT" x="3" y="-1"/>
+				</Anchors>
+			</EventFrame>
+			<Frame parentKey="EditPopupFrame" mixin="TalentLoadoutExEditPopupMixin" inherits="IconSelectorPopupFrameTemplate" enableMouse="true" hidden="true" frameLevel="50">
+				<KeyValues>
+					<KeyValue key="editBoxHeaderText" value="Enter Config Name"/>
+				</KeyValues>
+				<Frames>
+					<Frame parentKey="TalentTextFrame" frameStrata="HIGH" enableMouse="true">
+						<Size y="60"/>
+						<Anchors>
+							<Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" x="1" y="-15"/>
+							<Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT" y="-15"/>
+						</Anchors>
+						<Frames>
+							<Frame parentKey="Border" inherits="DialogBorderTemplate"/>
+							<Frame parentKey="Main" inherits="InsetFrameTemplate">
+								<Anchors>
+									<Anchor point="TOPLEFT" x="20" y="-15"/>
+									<Anchor point="BOTTOMRIGHT" x="-20" y="15"/>
+								</Anchors>
+								<Frames>
+									<EditBox parentKey="EditBox" letters="999999" multiLine="false" autoFocus="false" enableMouse="true">
+										<Anchors>
+											<Anchor point="TOPLEFT" x="10" y="-10"/>
+											<Anchor point="BOTTOMRIGHT" x="-10" y="10"/>
+										</Anchors>
+										<FontString inherits="ChatFontNormal"/>
+										<Layers>
+											<Layer level="OVERLAY">
+												<FontString parentKey="Watermark" font="ChatFontNormal" text="Paste loadout code here">
+													<Color r="1" g="1" b="1" a="0.5"/>
+													<Anchors>
+														<Anchor point="LEFT" x="5"/>
+													</Anchors>
+												</FontString>
+											</Layer>
+										</Layers>
+										<Scripts>
+											<OnTextChanged>
+												local text = self:GetText();
+												self.Watermark:SetShown(not (text and #text > 0));
+											</OnTextChanged>
+											<OnEnterPressed>
+												local okayButton = self:GetParent():GetParent():GetParent().BorderBox.OkayButton;
+												if okayButton:IsEnabled() then
+													okayButton:Click("LeftButton");
+												end
+											</OnEnterPressed>
+											<OnEscapePressed>
+												self:GetParent():GetParent():GetParent():Hide();
+											</OnEscapePressed>
+										</Scripts>
+									</EditBox>
+								</Frames>
+							</Frame>
+						</Frames>
+					</Frame>
+					<Frame parentKey="IconListFrame" frameStrata="HIGH" enableMouse="true">
+						<Size y="30"/>
+						<Anchors>
+							<Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" x="1" y="15"/>
+							<Anchor point="TOPRIGHT" relativePoint="BOTTOMRIGHT" y="15"/>
+						</Anchors>
+						<Frames>
+							<Frame parentKey="Border" inherits="DialogBorderTemplate"/>
+						</Frames>
+					</Frame>
+				</Frames>
+			</Frame>
+			<Frame parentKey="TextPopupFrame" enableMouse="true" hidden="true" frameLevel="50">
+				<Size>
+					<AbsDimension x="500" y="400"/>
+				</Size>
+				<Anchors>
+					<Anchor point="TOPRIGHT" relativePoint="TOPLEFT" y="-21"/>
+				</Anchors>
+				<Frames>
+					<Frame parentKey="Border" inherits="DialogBorderTemplate"/>
+					<Frame parentKey="Header" inherits="DialogHeaderTemplate"/>
+					<Frame parentKey="Main" inherits="InsetFrameTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT" x="10" y="-10"/>
+							<Anchor point="BOTTOMRIGHT" x="-10" y="10"/>
+						</Anchors>
+						<Frames>
+							<ScrollFrame parentKey="ScrollFrame" inherits="UIPanelScrollFrameTemplate" toplevel="true">
+								<Anchors>
+									<Anchor point="TOPLEFT">
+										<Offset>
+											<AbsDimension x="30" y="-30"/>
+										</Offset>
+									</Anchor>
+									<Anchor point="BOTTOMRIGHT">
+										<Offset>
+											<AbsDimension x="-30" y="50"/>
+										</Offset>
+									</Anchor>
+								</Anchors>
+								<Size>
+									<AbsDimension x="455" y="330"/>
+								</Size>
+								<Layers>
+									<Layer level="BACKGROUND">
+										<Texture parentKey="TopLeftTex" file="Interface\Common\Common-Input-Border-TL">
+											<Size x="8" y="8"/>
+											<Anchors>
+												<Anchor point="TOPLEFT" x="-5" y="5"/>
+											</Anchors>
+										</Texture>
+										<Texture parentKey="TopRightTex" file="Interface\Common\Common-Input-Border-TR">
+											<Size x="8" y="8"/>
+											<Anchors>
+												<Anchor point="TOPRIGHT" x="5" y="5"/>
+											</Anchors>
+										</Texture>
+										<Texture parentKey="TopTex" file="Interface\Common\Common-Input-Border-T">
+											<Anchors>
+												<Anchor point="TOPLEFT" relativeKey="$parent.TopLeftTex" relativePoint="TOPRIGHT"/>
+												<Anchor point="BOTTOMRIGHT" relativeKey="$parent.TopRightTex" relativePoint="BOTTOMLEFT"/>
+											</Anchors>
+										</Texture>
+										<Texture parentKey="BottomLeftTex" file="Interface\Common\Common-Input-Border-BL">
+											<Size x="8" y="8"/>
+											<Anchors>
+												<Anchor point="BOTTOMLEFT" x="-5" y="-5"/>
+											</Anchors>
+										</Texture>
+										<Texture parentKey="BottomRightTex" file="Interface\Common\Common-Input-Border-BR">
+											<Size x="8" y="8"/>
+											<Anchors>
+												<Anchor point="BOTTOMRIGHT" x="5" y="-5"/>
+											</Anchors>
+										</Texture>
+										<Texture parentKey="BottomTex" file="Interface\Common\Common-Input-Border-B">
+											<Anchors>
+												<Anchor point="TOPLEFT" relativeKey="$parent.BottomLeftTex" relativePoint="TOPRIGHT"/>
+												<Anchor point="BOTTOMRIGHT" relativeKey="$parent.BottomRightTex" relativePoint="BOTTOMLEFT"/>
+											</Anchors>
+										</Texture>
+										<Texture parentKey="LeftTex" file="Interface\Common\Common-Input-Border-L">
+											<Anchors>
+												<Anchor point="TOPLEFT" relativeKey="$parent.TopLeftTex" relativePoint="BOTTOMLEFT"/>
+												<Anchor point="BOTTOMRIGHT" relativeKey="$parent.BottomLeftTex" relativePoint="TOPRIGHT"/>
+											</Anchors>
+										</Texture>
+										<Texture parentKey="RightTex" file="Interface\Common\Common-Input-Border-R">
+											<Anchors>
+												<Anchor point="TOPLEFT" relativeKey="$parent.TopRightTex" relativePoint="BOTTOMLEFT"/>
+												<Anchor point="BOTTOMRIGHT" relativeKey="$parent.BottomRightTex" relativePoint="TOPRIGHT"/>
+											</Anchors>
+										</Texture>
+										<Texture parentKey="MiddleTex" file="Interface\Common\Common-Input-Border-M">
+											<Anchors>
+												<Anchor point="TOPLEFT" relativeKey="$parent.LeftTex" relativePoint="TOPRIGHT"/>
+												<Anchor point="BOTTOMRIGHT" relativeKey="$parent.RightTex" relativePoint="BOTTOMLEFT"/>
+											</Anchors>
+										</Texture>
+									</Layer>
+								</Layers>
+								<ScrollChild>
+									<EditBox parentKey="ScrollText" letters="999999" multiLine="true" autoFocus="true" enableMouse="true">
+										<Size>
+											<AbsDimension x="450" y="344"/>
+										</Size>
+										<FontString inherits="ChatFontNormal"/>
+										<Scripts>
+											<OnEscapePressed>
+												self:GetParent():GetParent():GetParent():Hide();
+											</OnEscapePressed>
+										</Scripts>
+									</EditBox>
+								</ScrollChild>
+							</ScrollFrame>
+							<Button parentKey="ImportButton" text="Import" inherits="TalentLoadoutExPanelWideButtonTemplate" hidden="true">
+								<Anchors>
+									<Anchor point="BOTTOMRIGHT" relativePoint="BOTTOM" x="-5" y="10"/>
+								</Anchors>
+							</Button>
+							<Button parentKey="CancelButton" text="Cancel" inherits="TalentLoadoutExPanelWideButtonTemplate" hidden="true">
+								<Anchors>
+									<Anchor point="BOTTOMLEFT" relativePoint="BOTTOM" x="5" y="10"/>
+								</Anchors>
+								<Scripts>
+									<OnClick>
+										self:GetParent():GetParent():Hide();
+									</OnClick>
+								</Scripts>
+							</Button>
+							<Button parentKey="CloseButton" text="Close" inherits="TalentLoadoutExPanelWideButtonTemplate" hidden="true">
+								<Anchors>
+									<Anchor point="BOTTOM" relativePoint="BOTTOM" x="0" y="10"/>
+								</Anchors>
+								<Scripts>
+									<OnClick>
+										self:GetParent():GetParent():Hide();
+									</OnClick>
+								</Scripts>
+							</Button>
+						</Frames>
+					</Frame>	
+				</Frames>
+				<Scripts>
+					<OnShow>
+						PlaySound(SOUNDKIT.IG_CHARACTER_INFO_OPEN);
+					</OnShow>
+					<OnHide>
+						PlaySound(SOUNDKIT.IG_CHARACTER_INFO_CLOSE);
+					</OnHide>
+				</Scripts>
+			</Frame>
+			<Frame parentKey="PresetPopupFrame" enableMouse="true" hidden="true" frameLevel="50">
+				<Size x="270" y="300"/>
+				<Anchors>
+					<Anchor point="TOPRIGHT" relativePoint="TOPLEFT" y="-21"/>
+				</Anchors>
+				<Frames>
+					<Frame parentKey="Border" inherits="DialogBorderTemplate"/>
+					<Frame parentKey="Header" inherits="DialogHeaderTemplate">
+						<KeyValues>
+							<KeyValue key="textString" value="Preset Data Option"/>
+						</KeyValues>
+					</Frame>
+					<Frame parentKey="Main" inherits="InsetFrameTemplate" >
+						<Anchors>
+							<Anchor point="TOPLEFT" x="10" y="-10"/>
+							<Anchor point="BOTTOMRIGHT" x="-10" y="10"/>
+						</Anchors>
+						<Frames>
+							<CheckButton parentKey="CombineCheckButton" inherits="TalentLoadoutExCheckButtonTemplate">
+								<KeyValues>
+									<KeyValue key="CheckButtonText" value="Combine Groups"/>
+								</KeyValues>
+								<Anchors>
+									<Anchor point="TOPLEFT" x="10" y="-15"/>
+								</Anchors>
+							</CheckButton>
+							<Frame parentArray="PresetAddons" inherits="TalentLoadoutExPresetAddonFrameTemplate">
+								<Size x="100" y="120"/>
+								<KeyValues>
+									<KeyValue key="title" value="Archon(PeaversTalentsData)"/>
+									<KeyValue key="addonName" value="PeaversTalentsData"/>
+								</KeyValues>
+								<Frames>
+									<CheckButton parentArray="CategoryCheckButtons" inherits="TalentLoadoutExCheckButtonTemplate">
+										<KeyValues>
+											<KeyValue key="CheckButtonText" value="Mythic+"/>
+											<KeyValue key="category" value="mythic"/>
+										</KeyValues>
+									</CheckButton>
+									<CheckButton parentArray="CategoryCheckButtons" inherits="TalentLoadoutExCheckButtonTemplate">
+										<KeyValues>
+											<KeyValue key="CheckButtonText" value="Raid Heroic"/>
+											<KeyValue key="category" value="heroic_raid"/>
+										</KeyValues>
+									</CheckButton>
+									<CheckButton parentArray="CategoryCheckButtons" inherits="TalentLoadoutExCheckButtonTemplate">
+										<KeyValues>
+											<KeyValue key="CheckButtonText" value="Raid Mythic"/>
+											<KeyValue key="category" value="mythic_raid"/>
+										</KeyValues>
+									</CheckButton>
+								</Frames>
+							</Frame>
+							<Frame parentArray="PresetAddons" inherits="TalentLoadoutExPresetAddonFrameTemplate">
+								<Size x="100" y="80"/>
+								<KeyValues>
+									<KeyValue key="title" value="Murlok.io(MurlokExport)"/>
+									<KeyValue key="addonName" value="MurlokExport"/>
+								</KeyValues>
+								<Frames>
+									<CheckButton parentArray="CategoryCheckButtons" inherits="TalentLoadoutExCheckButtonTemplate">
+										<KeyValues>
+											<KeyValue key="CheckButtonText" value="Mythic+"/>
+											<KeyValue key="category" value="mm+"/>
+										</KeyValues>
+									</CheckButton>
+									<CheckButton parentArray="CategoryCheckButtons" inherits="TalentLoadoutExCheckButtonTemplate">
+										<KeyValues>
+											<KeyValue key="CheckButtonText" value="Solo PvP (+PvP Talents)"/>
+											<KeyValue key="category" value="solo"/>
+										</KeyValues>
+									</CheckButton>
+								</Frames>
+							</Frame>
+						</Frames>
+						<Scripts>
+							<OnLoad>
+								for index, presetAddonFrame in ipairs(self.PresetAddons) do
+									local relativeTo = index > 1 and self.PresetAddons[index - 1] or self.CombineCheckButton;
+									presetAddonFrame:SetPoint("TOPLEFT", relativeTo, "BOTTOMLEFT");
+								end
+							</OnLoad>
+						</Scripts>
+					</Frame>
+				</Frames>
+				<Scripts>
+					<OnShow>
+						PlaySound(SOUNDKIT.IG_CHARACTER_INFO_OPEN);
+					</OnShow>
+					<OnHide>
+						PlaySound(SOUNDKIT.IG_CHARACTER_INFO_CLOSE);
+					</OnHide>
+					<OnKeyDown>
+						if key == "ESCAPE" then
+							self:Hide();
+						end
+					</OnKeyDown>
+				</Scripts>
+			</Frame>
+		</Frames>
+	</Frame>
+</Ui>

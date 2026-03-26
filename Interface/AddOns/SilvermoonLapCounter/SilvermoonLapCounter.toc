@@ -1,0 +1,8 @@
+## Interface: 120001
+## Title: Silvermoon Lap Counter
+## Notes: Counts laps around Silvermoon City (Midnight) using 4 checkpoints
+## Author: Silvermoon Runner
+## Version: 1.0.0
+## SavedVariables: SilvermoonLapCounterDB
+
+SilvermoonLapCounter.lua
