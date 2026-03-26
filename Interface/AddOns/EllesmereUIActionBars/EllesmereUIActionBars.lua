@@ -4969,47 +4969,25 @@ local function UpdateFlipbook(btn)
     end
 
     if p.procGlowEnabled == false then
-        -- Custom shapes always use Shape Glow even if custom proc glow is "off"
+        -- "Default" glow: use our glow library with Modern WoW Glow (#6)
+        -- which looks identical to Blizzard's native glow but renders
+        -- independently (Blizzard's SpellActivationAlert doesn't self-activate
+        -- in Midnight). Same approach CDM uses — always reliable.
         if not (btn._eabShapeMask and btn._eabShapeApplied) then
-            -- Clean up our custom glow layers.
-            if btn._eabGlowWrapper then
-                StopAllProceduralGlows(btn._eabGlowWrapper)
-                btn._eabGlowWrapper:Hide()
+            if not btn._eabGlowWrapper then
+                local wrapper = CreateFrame("Frame", nil, btn)
+                wrapper:SetAllPoints(btn)
+                wrapper:SetFrameLevel(btn:GetFrameLevel() + 2)
+                wrapper:SetAlpha(0)
+                btn._eabGlowWrapper = wrapper
             end
-            -- Blizzard's ActionButtonSpellAlertManager:ShowAlert no longer
-            -- activates the SpellActivationAlert frame in Midnight. Drive
-            -- the native flipbook glow ourselves: reset any prior custom
-            -- tinting, show the frame, and play the start-burst animation.
-            if region.ProcLoopFlipbook then
-                region.ProcLoopFlipbook:SetDesaturated(false)
-                region.ProcLoopFlipbook:SetVertexColor(1, 1, 1)
-                region.ProcLoopFlipbook:SetScale(1)
-                region.ProcLoopFlipbook:Show()
-            end
-            if region.ProcStartFlipbook then
-                region.ProcStartFlipbook:SetDesaturated(false)
-                region.ProcStartFlipbook:SetVertexColor(1, 1, 1)
-                region.ProcStartFlipbook:SetScale(1)
-                region.ProcStartFlipbook:Show()
-            end
-            if region.ProcLoop then
-                local loopFlip = GetFlipBookAnim(region.ProcLoop)
-                if loopFlip then loopFlip:SetDuration(1.0) end
-            end
-            if region.ProcStartAnim then
-                local startFlip = GetFlipBookAnim(region.ProcStartAnim)
-                if startFlip then startFlip:SetDuration(0.702) end
-            end
-            region:SetScale(1)
-            region:SetAlpha(1)
-            region:Show()
-            btn._eabCustomizedFlipbook = nil
-            -- Play the start-burst; on finish it transitions to the loop.
-            if region.ProcStartAnim then
-                region.ProcStartAnim:Play()
-            elseif region.ProcLoop then
-                region.ProcLoop:Play()
-            end
+            local wrapper = btn._eabGlowWrapper
+            _G_Glows.StopAllGlows(wrapper)
+            -- Style 6 = Modern WoW Glow, gold color (same as Blizzard default)
+            _G_Glows.StartGlow(wrapper, 6, _ufBtnW, 1, 0.788, 0.137, nil, _ufBtnH)
+            -- Suppress Blizzard's native SpellActivationAlert
+            region:SetAlpha(0)
+            btn._eabCustomizedFlipbook = true
             return
         end
     end
@@ -5103,24 +5081,24 @@ local function UpdateFlipbook(btn)
         if region.ProcLoopFlipbook then region.ProcLoopFlipbook:Hide() end
         if region.ProcStartFlipbook then region.ProcStartFlipbook:Hide() end
 
-        local sz = min(_ufBtnW, _ufBtnH)
+        local bW, bH = _ufBtnW, _ufBtnH
 
         if loopEntry.procedural then
             local N = 8
             local th = 2
             local period = 4
-            local lineLen = floor((sz + sz) * (2 / N - 0.1))
-            lineLen = min(lineLen, sz)
+            local lineLen = floor((bW + bH) * (2 / N - 0.1))
+            lineLen = min(lineLen, min(bW, bH))
             if lineLen < 1 then lineLen = 1 end
-            _G_Glows.StartProceduralAnts(wrapper, N, th, period, lineLen, cr, cg, cb)
+            _G_Glows.StartProceduralAnts(wrapper, N, th, period, lineLen, cr, cg, cb, bW, bH)
         elseif loopEntry.buttonGlow then
-            _G_Glows.StartButtonGlow(wrapper, sz, cr, cg, cb)
+            _G_Glows.StartButtonGlow(wrapper, bW, cr, cg, cb, nil, bH)
         elseif loopEntry.autocast then
-            _G_Glows.StartAutoCastShine(wrapper, sz, cr, cg, cb, 1.0)
+            _G_Glows.StartAutoCastShine(wrapper, bW, cr, cg, cb, 1.0, bH)
         elseif loopEntry.shapeGlow then
             local maskPath = btn._eabShapeMaskPath or SHAPE_MASKS[btn._eabShapeName or ""]
             local borderPath = SHAPE_BORDERS[btn._eabShapeName or ""]
-            _G_Glows.StartShapeGlow(wrapper, sz, cr, cg, cb, 1.20, {
+            _G_Glows.StartShapeGlow(wrapper, min(bW, bH), cr, cg, cb, 1.20, {
                 maskPath   = maskPath,
                 borderPath = borderPath,
                 shapeMask  = btn._eabShapeMask,
@@ -5145,10 +5123,9 @@ local function UpdateFlipbook(btn)
             if lf then lf:SetDuration(0) end
         end
 
-        local sz = min(_ufBtnW, _ufBtnH)
         _G_Glows.StopAllGlows(wrapper)
         wrapper:Show()
-        _G_Glows.StartFlipBookGlow(wrapper, sz, loopEntry, cr, cg, cb)
+        _G_Glows.StartFlipBookGlow(wrapper, _ufBtnW, loopEntry, cr, cg, cb, _ufBtnH)
         if wrapper._eabOwnMask then
             MaskFrameTextures(wrapper, wrapper._eabOwnMask)
         end
@@ -5219,14 +5196,30 @@ function EAB:RefreshProcGlows()
 end
 
 function EAB:ScanExistingProcs()
+    local found = 0
+    local total = 0
     for _, info in ipairs(BAR_CONFIG) do
         local buttons = barButtons[info.key]
         if buttons then
             for i = 1, #buttons do
                 local btn = buttons[i]
-                if btn and btn.SpellActivationAlert and btn.SpellActivationAlert:IsShown() then
-                    _procState.active[btn] = true
-                    UpdateFlipbook(btn)
+                if btn and btn._eabSquared then
+                    total = total + 1
+                    local saShown = btn.SpellActivationAlert and btn.SpellActivationAlert:IsShown()
+                    local action = btn.action or (btn.GetAttribute and btn:GetAttribute("action"))
+                    local spellID
+                    if action and HasAction and HasAction(action) then
+                        local actionType, id = GetActionInfo(action)
+                        if actionType == "spell" then spellID = id end
+                    end
+                    local overlayed = spellID and C_SpellActivationOverlay
+                        and C_SpellActivationOverlay.IsSpellOverlayed
+                        and C_SpellActivationOverlay.IsSpellOverlayed(spellID)
+                    if saShown or overlayed then
+                        found = found + 1
+                        _procState.active[btn] = true
+                        UpdateFlipbook(btn)
+                    end
                 end
             end
         end
@@ -6351,6 +6344,8 @@ function EAB:FinishSetup()
             ApplyKeyDownCVar()
             self:HookProcGlow()
             self:ScanExistingProcs()
+            -- Re-scan after a delay to catch procs that Blizzard populates late
+            C_Timer_After(2, function() self:ScanExistingProcs() end)
             EAB.AnchorVehicleButton()
             -- Our fresh EABButton frames are not registered with
             -- ActionBarButtonEventsFrame (doing so causes taint), so
@@ -6813,8 +6808,18 @@ function EAB:FinishSetup()
     -- summoning/dismissal; UNIT_PET covers pet swaps. PLAYER_ENTERING_WORLD
     -- ensures button state is populated on login (PetActionBar was
     -- unregistered from all events, so Blizzard's own update never fires).
+    -- PET_BAR_UPDATE_USABLE fires when action usability changes (energy/focus
+    -- state, etc.) so icon dimming stays current. UNIT_AURA "pet" fires when
+    -- an aura on the pet changes, which can also affect ability usability.
+    local _petUpdateQueued = false
     local function UpdatePetBar(_, event)
+        -- UNIT_AURA fires very frequently; throttle to one update per frame
+        if event == "UNIT_AURA" or event == "PET_BAR_UPDATE_USABLE" then
+            if _petUpdateQueued then return end
+            _petUpdateQueued = true
+        end
         C_Timer_After(0, function()
+            _petUpdateQueued = false
             if event == "PET_BAR_UPDATE_COOLDOWN" then
                 -- Cooldown-only path: safe during combat, no taint risk.
                 -- Update each button's cooldown frame directly.
@@ -6828,27 +6833,52 @@ function EAB:FinishSetup()
                 return
             end
             if InCombatLockdown() then
-                -- Combat-safe path: update textures and usability per-button
+                -- Combat-safe path: update textures and visual state per-button
                 -- without touching protected frame operations (Show/Hide/SetParent).
                 -- This allows pet abilities to appear when summoning a pet mid-combat.
                 local hasPetBar = PetHasActionBar()
                 for i = 1, NUM_PET_ACTION_SLOTS do
                     local btn = _G["PetActionButton" .. i]
                     if btn then
-                        local name, texture, isToken, isActive, autoCast, autoCastEnabled = GetPetActionInfo(i)
+                        local name, texture, isToken, isActive, autoCastAllowed, autoCastEnabled = GetPetActionInfo(i)
                         if hasPetBar and texture then
                             if isToken then btn.icon:SetTexture(_G[texture])
                             else btn.icon:SetTexture(texture) end
+                            -- Dim icon when the ability is not currently usable.
+                            local usable = GetPetActionSlotUsable(i)
+                            local shade = usable and 1 or 0.4
+                            btn.icon:SetVertexColor(shade, shade, shade)
                             btn.icon:Show()
-                            if btn.AutoCastShine then
-                                if autoCastEnabled then
-                                    AutoCastShine_AutoCastStart(btn.AutoCastShine)
-                                else
-                                    AutoCastShine_AutoCastStop(btn.AutoCastShine)
-                                end
+                            -- AutoCastOverlay (AutoCastOverlayMixin) replaced the old
+                            -- AutoCastShine API in modern WoW. SetShown controls the
+                            -- corner-ring frame; ShowAutoCastEnabled starts/stops the
+                            -- rotating shine animation.
+                            if btn.AutoCastOverlay then
+                                btn.AutoCastOverlay:SetShown(autoCastAllowed)
+                                btn.AutoCastOverlay:ShowAutoCastEnabled(autoCastEnabled)
                             end
                         else
                             btn.icon:Hide()
+                            if btn.AutoCastOverlay then btn.AutoCastOverlay:Hide() end
+                        end
+                        -- Reflect the active state so pet mode buttons (Passive /
+                        -- Assist / Defend) highlight the currently selected mode.
+                        -- Attack actions flash instead of showing the full highlight.
+                        -- SetChecked / StartFlash / StopFlash are visual-only and safe
+                        -- to call during combat lockdown.
+                        local ct = btn:GetCheckedTexture()
+                        if isActive then
+                            if IsPetAttackAction(i) then
+                                btn:StartFlash()
+                                if ct then ct:SetAlpha(0.5) end
+                            else
+                                btn:StopFlash()
+                                if ct then ct:SetAlpha(1.0) end
+                            end
+                            btn:SetChecked(true)
+                        else
+                            btn:StopFlash()
+                            btn:SetChecked(false)
                         end
                         -- Update cooldown
                         if btn.cooldown then
@@ -6897,9 +6927,11 @@ function EAB:FinishSetup()
     local _petEventFrame = CreateFrame("Frame")
     _petEventFrame:RegisterEvent("PET_BAR_UPDATE")
     _petEventFrame:RegisterEvent("PET_BAR_UPDATE_COOLDOWN")
+    _petEventFrame:RegisterEvent("PET_BAR_UPDATE_USABLE")
     _petEventFrame:RegisterEvent("PET_UI_UPDATE")
     _petEventFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
     _petEventFrame:RegisterUnitEvent("UNIT_PET", "player")
+    _petEventFrame:RegisterUnitEvent("UNIT_AURA", "pet")
     _petEventFrame:SetScript("OnEvent", UpdatePetBar)
 
 

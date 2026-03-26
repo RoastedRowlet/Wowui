@@ -289,6 +289,9 @@ local function InstallDurationHook(frame)
   -- around its override calls, which are exactly what we want to capture
   hooksecurefunc(cd, "SetCooldownFromDurationObject", function(self, durObj)
     local pf = self._arcParentFrame or frame
+    -- Skip GCD: CDM pushes the GCD durObj (~1.5s) which would trigger the
+    -- lowest threshold color. Keep the stale real-CD durObj through the GCD window.
+    if pf.isOnGCD then return end
     pf._arcTextColorDurObj = durObj
   end)
 
@@ -309,36 +312,44 @@ end
 --   3. Spell API (fallback)
 -- ═══════════════════════════════════════════════════════════════════════════
 
+-- Feed the correct DurationObject onto the frame when spell goes on cooldown.
+-- Called once when isActive becomes true — same pattern as CooldownState shadow frames.
+-- The DurationObject ticks down on its own; no repeated API calls needed.
+local function FeedTextColorDurObj(frame)
+  local hasAura = frame.auraInstanceID and type(frame.auraInstanceID) == "number"
+
+  -- Aura frame (non-IAO): aura timer fed via auraInstanceID path, not here
+  if hasAura and not frame._arcIgnoreAuraOverride then return end
+
+  local ci = frame.cooldownInfo
+  local spellID = ci and (ci.overrideSpellID or ci.spellID)
+  if not spellID or type(spellID) ~= "number" then return end
+
+  -- Multi-charge (maxCharges>1): use GetSpellChargeDuration (per-charge recharge timer)
+  -- Regular / 1-charge: use GetSpellCooldownDuration
+  local chargeInfo = C_Spell.GetSpellCharges(spellID)
+  if chargeInfo and chargeInfo.maxCharges and chargeInfo.maxCharges > 1 then
+    local durObj = C_Spell.GetSpellChargeDuration and C_Spell.GetSpellChargeDuration(spellID)
+    if durObj then frame._arcTextColorDurObj = durObj end
+  else
+    local durObj = C_Spell.GetSpellCooldownDuration(spellID)
+    if durObj then frame._arcTextColorDurObj = durObj end
+  end
+end
+
 local function GetDurationForFrame(frame)
   if not frame then return nil end
 
-  -- HOOKED DUROBJ: CDMEnhance pushed a DurationObject via SetCooldownFromDurationObject.
-  -- Use it for any non-aura frame — this covers both ignoreAuraOverride mode AND charge
-  -- spells, where CDM passes the per-charge recharge DurationObject directly.
-  local hookedDur = frame._arcTextColorDurObj
-  if hookedDur then
-    local hasAura = frame.auraInstanceID and type(frame.auraInstanceID) == "number"
-    if not hasAura or frame._arcIgnoreAuraOverride then
-      return hookedDur
-    end
-  end
+  -- Stored DurationObject (fed when cooldown started, or from SetCooldownFromDurationObject hook)
+  local stored = frame._arcTextColorDurObj
+  if stored then return stored end
 
-  -- AURA: buff/debuff with active auraInstanceID (normal mode — display shows aura timer)
+  -- Aura fallback (normal aura mode — no stored obj yet)
   local auraID = frame.auraInstanceID
   if auraID and type(auraID) == "number" then
     local unit = frame.auraDataUnit or frame.unitToken or "player"
     local dur = C_UnitAuras.GetAuraDuration(unit, auraID)
     if dur then return dur end
-  end
-
-  -- SPELL: get cooldown duration (fallback)
-  local cooldownInfo = frame.cooldownInfo
-  if cooldownInfo then
-    local spellID = cooldownInfo.overrideSpellID or cooldownInfo.spellID
-    if spellID and type(spellID) == "number" then
-      local dur = C_Spell.GetSpellCooldownDuration(spellID)
-      if dur then return dur end
-    end
   end
 
   return nil
@@ -414,19 +425,44 @@ local function ProcessFrame(frame, cfg)
 
   local curve = GetCurveForConfig(cfg)
   if not curve then
-    -- Duration color disabled — reset if we were coloring it
-    if activeFrames[frame] then
-      ResetColor(frame, cfg)
-      activeFrames[frame] = nil
-    end
+    if activeFrames[frame] then ResetColor(frame, cfg); activeFrames[frame] = nil end
     return false
   end
 
   if not frame:IsVisible() then
-    if activeFrames[frame] then
-      activeFrames[frame] = nil
-    end
+    if activeFrames[frame] then activeFrames[frame] = nil end
     return false
+  end
+
+  -- Gate on isActive (non-secret per 12.0.1) — don't color when spell is ready.
+  -- For charge spells use GetSpellCharges.isActive (no GCD filter needed).
+  -- For regular/1-charge use GetSpellCooldown.isActive + GCD filter.
+  -- Aura frames bypass this check — they use auraInstanceID path below.
+  local hasAura = frame.auraInstanceID and type(frame.auraInstanceID) == "number"
+  if not hasAura then
+    local ci = frame.cooldownInfo
+    local spellID = ci and (ci.overrideSpellID or ci.spellID)
+    if spellID then
+      local onCooldown = false
+      local chargeInfo = C_Spell.GetSpellCharges(spellID)
+      if chargeInfo and chargeInfo.maxCharges and chargeInfo.maxCharges > 1 then
+        onCooldown = chargeInfo.isActive == true
+      else
+        local cdInfo = C_Spell.GetSpellCooldown(spellID)
+        onCooldown = cdInfo and cdInfo.isActive == true and cdInfo.isOnGCD ~= true
+      end
+      if not onCooldown then
+        -- Spell came off cooldown — clear stored durObj and reset color
+        frame._arcTextColorDurObj = nil
+        if activeFrames[frame] then ResetColor(frame, cfg); activeFrames[frame] = nil end
+        return false
+      else
+        -- Spell just went on cooldown or is on cooldown — feed durObj if not set yet
+        if not frame._arcTextColorDurObj then
+          FeedTextColorDurObj(frame)
+        end
+      end
+    end
   end
 
   local dur = GetDurationForFrame(frame)
@@ -473,8 +509,15 @@ local function OnTick()
   for cdID, data in pairs(frames) do
     if data.frame then
       local cfg = GetIconSettings(cdID)
-      if ProcessFrame(data.frame, cfg) then
-        hasActive = true
+      -- Fast-skip frames with no durationColor enabled — most frames won't have it
+      if cfg and cfg.cooldownText and cfg.cooldownText.durationColor then
+        if ProcessFrame(data.frame, cfg) then
+          hasActive = true
+        end
+      elseif activeFrames[data.frame] then
+        -- Was active but config disabled — reset and remove
+        ResetColor(data.frame, cfg)
+        activeFrames[data.frame] = nil
       end
     end
   end
@@ -491,7 +534,7 @@ end
 
 function ns.CDMTextColor.Start()
   if not ticker then
-    ticker = C_Timer.NewTicker(0.1, OnTick)
+    ticker = C_Timer.NewTicker(0.5, OnTick)
   end
 end
 
@@ -557,10 +600,19 @@ local eventFrame = CreateFrame("Frame")
 eventFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
 eventFrame:RegisterEvent("PLAYER_REGEN_DISABLED")
 eventFrame:RegisterEvent("SPELL_UPDATE_COOLDOWN")
+eventFrame:RegisterEvent("SPELL_UPDATE_CHARGES")
 eventFrame:RegisterEvent("UNIT_AURA")
 eventFrame:SetScript("OnEvent", function(self, event, unit)
   -- UNIT_AURA fires frequently — only care about player
   if event == "UNIT_AURA" and unit ~= "player" then return end
+  -- SPELL_UPDATE_CHARGES: a charge was gained — clear stored durObj on all active frames
+  -- so the next tick re-feeds the new charge recharge timer (old obj has remaining=0)
+  if event == "SPELL_UPDATE_CHARGES" then
+    for frame in pairs(activeFrames) do
+      frame._arcTextColorDurObj = nil
+    end
+    return
+  end
   -- If ticker already running, nothing to do
   if ticker then return end
   -- Reset "found no config" flag on zone entry so new specs/profiles re-check

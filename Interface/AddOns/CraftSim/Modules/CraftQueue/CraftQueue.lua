@@ -39,6 +39,9 @@ CraftSim.CRAFTQ.currentlyCraftedRecipeData = nil
 
 --- used to check if CraftSim was the one calling the C_TradeSkillUI.CraftRecipe api function
 CraftSim.CRAFTQ.CraftSimCalledCraftRecipe = false
+-- if craftqueue craftlisted recipe was crafted via queue, need to remember for auto decrement and recognition
+---@type number | nil
+CraftSim.CRAFTQ.currentlyCraftedCraftListID = nil
 
 --- used to cache player item counts during sorting and recalculation of craft queue
 --- if canCraft and such functions are not called by craftqueue it should be nil
@@ -974,9 +977,13 @@ function CraftSim.CRAFTQ:QueueOpenRecipe()
         queueButton = CraftSim.CRAFTQ.queueRecipeButtonWO
     end
 
-    local optimizeTopProfit = CraftSim.DB.OPTIONS:Get("CRAFTQUEUE_QUEUE_OPEN_RECIPE_OPTIMIZE_TOP_PROFIT_QUALITY")
-    local optimizeGear = CraftSim.DB.OPTIONS:Get("CRAFTQUEUE_QUEUE_OPEN_RECIPE_OPTIMIZE_PROFESSION_GEAR")
-    local optimizeConcentration = CraftSim.DB.OPTIONS:Get("CRAFTQUEUE_QUEUE_OPEN_RECIPE_OPTIMIZE_CONCENTRATION")
+    local KEYS = CraftSim.WIDGETS.OptimizationOptions.OPTION_KEYS
+    local optimizeTopProfit = CraftSim.DB.OPTIMIZATION_OPTIONS:Get(
+        CraftSim.CONST.OPTIMIZATION_OPTIONS_IDS.CRAFTQUEUE_ADD_RECIPE, KEYS.AUTOSELECT_TOP_PROFIT_QUALITY, true)
+    local optimizeGear = CraftSim.DB.OPTIMIZATION_OPTIONS:Get(
+        CraftSim.CONST.OPTIMIZATION_OPTIONS_IDS.CRAFTQUEUE_ADD_RECIPE, KEYS.OPTIMIZE_PROFESSION_TOOLS, true)
+    local optimizeConcentration = CraftSim.DB.OPTIMIZATION_OPTIONS:Get(
+        CraftSim.CONST.OPTIMIZATION_OPTIONS_IDS.CRAFTQUEUE_ADD_RECIPE, KEYS.OPTIMIZE_CONCENTRATION, true)
 
     if not IsShiftKeyDown() then
         -- just queue without any optimizations
@@ -1005,39 +1012,40 @@ function CraftSim.CRAFTQ:QueueOpenRecipe()
     }
 end
 
-function CraftSim.CRAFTQ:ShowQueueOpenRecipeOptions()
-    MenuUtil.CreateContextMenu(UIParent, function(ownerRegion, rootDescription)
-        local recipeData = CraftSim.MODULES.recipeData
-        if not recipeData then return end
-        if recipeData.supportsQualities then
-            rootDescription:CreateCheckbox(
-                "Optimize " .. f.g("Top Profit Quality"),
-                function()
-                    return CraftSim.DB.OPTIONS:Get("CRAFTQUEUE_QUEUE_OPEN_RECIPE_OPTIMIZE_TOP_PROFIT_QUALITY")
-                end, function()
-                    local value = CraftSim.DB.OPTIONS:Get("CRAFTQUEUE_QUEUE_OPEN_RECIPE_OPTIMIZE_TOP_PROFIT_QUALITY")
-                    CraftSim.DB.OPTIONS:Save("CRAFTQUEUE_QUEUE_OPEN_RECIPE_OPTIMIZE_TOP_PROFIT_QUALITY", not value)
-                end)
-        end
+---@deprecated Use CraftSim.WIDGETS.OptimizationOptions with optimizationOptionsID = CraftSim.CONST.OPTIMIZATION_OPTIONS_IDS.CRAFTQUEUE_ADD_RECIPE instead
+function CraftSim.CRAFTQ:ShowQueueOpenRecipeOptions(rootDescription)
+    local recipeData = CraftSim.MODULES.recipeData
+    if not recipeData then return end
+    local OPT_ID = CraftSim.CONST.OPTIMIZATION_OPTIONS_IDS.CRAFTQUEUE_ADD_RECIPE
+    local KEYS   = CraftSim.WIDGETS.OptimizationOptions.OPTION_KEYS
+    if recipeData.supportsQualities then
         rootDescription:CreateCheckbox(
-            "Optimize " .. f.bb("Profession Gear"),
+            L(CraftSim.CONST.TEXT.RECIPE_SCAN_AUTOSELECT_TOP_PROFIT),
             function()
-                return CraftSim.DB.OPTIONS:Get("CRAFTQUEUE_QUEUE_OPEN_RECIPE_OPTIMIZE_PROFESSION_GEAR")
+                return CraftSim.DB.OPTIMIZATION_OPTIONS:Get(OPT_ID, KEYS.AUTOSELECT_TOP_PROFIT_QUALITY, true)
             end, function()
-                local value = CraftSim.DB.OPTIONS:Get("CRAFTQUEUE_QUEUE_OPEN_RECIPE_OPTIMIZE_PROFESSION_GEAR")
-                CraftSim.DB.OPTIONS:Save("CRAFTQUEUE_QUEUE_OPEN_RECIPE_OPTIMIZE_PROFESSION_GEAR", not value)
+                local value = CraftSim.DB.OPTIMIZATION_OPTIONS:Get(OPT_ID, KEYS.AUTOSELECT_TOP_PROFIT_QUALITY, true)
+                CraftSim.DB.OPTIMIZATION_OPTIONS:Save(OPT_ID, KEYS.AUTOSELECT_TOP_PROFIT_QUALITY, not value)
             end)
-        if recipeData.supportsQualities then
-            rootDescription:CreateCheckbox(
-                "Optimize " .. f.gold("Concentration"),
-                function()
-                    return CraftSim.DB.OPTIONS:Get("CRAFTQUEUE_QUEUE_OPEN_RECIPE_OPTIMIZE_CONCENTRATION")
-                end, function()
-                    local value = CraftSim.DB.OPTIONS:Get("CRAFTQUEUE_QUEUE_OPEN_RECIPE_OPTIMIZE_CONCENTRATION")
-                    CraftSim.DB.OPTIONS:Save("CRAFTQUEUE_QUEUE_OPEN_RECIPE_OPTIMIZE_CONCENTRATION", not value)
-                end)
-        end
-    end)
+    end
+    rootDescription:CreateCheckbox(
+        L(CraftSim.CONST.TEXT.OPTIMIZATION_OPTIONS_OPTIMIZE_PROFESSION_TOOLS),
+        function()
+            return CraftSim.DB.OPTIMIZATION_OPTIONS:Get(OPT_ID, KEYS.OPTIMIZE_PROFESSION_TOOLS, true)
+        end, function()
+            local value = CraftSim.DB.OPTIMIZATION_OPTIONS:Get(OPT_ID, KEYS.OPTIMIZE_PROFESSION_TOOLS, true)
+            CraftSim.DB.OPTIMIZATION_OPTIONS:Save(OPT_ID, KEYS.OPTIMIZE_PROFESSION_TOOLS, not value)
+        end)
+    if recipeData.supportsQualities then
+        rootDescription:CreateCheckbox(
+            L(CraftSim.CONST.TEXT.RECIPE_SCAN_OPTIMIZE_CONCENTRATION),
+            function()
+                return CraftSim.DB.OPTIMIZATION_OPTIONS:Get(OPT_ID, KEYS.OPTIMIZE_CONCENTRATION, true)
+            end, function()
+                local value = CraftSim.DB.OPTIMIZATION_OPTIONS:Get(OPT_ID, KEYS.OPTIMIZE_CONCENTRATION, true)
+                CraftSim.DB.OPTIMIZATION_OPTIONS:Save(OPT_ID, KEYS.OPTIMIZE_CONCENTRATION, not value)
+            end)
+    end
 end
 
 function CraftSim.CRAFTQ:QueueFirstCrafts()

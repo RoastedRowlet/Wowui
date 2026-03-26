@@ -1914,6 +1914,7 @@ function EllesmereUI.MakeUnlockElement(opts)
         linkedKeys    = opts.linkedKeys,
         noResize          = opts.noResize,
         linkedDimensions  = opts.linkedDimensions,
+        noAnchorTarget    = opts.noAnchorTarget,
     }
 end
 
@@ -5955,6 +5956,7 @@ local function ShowSidebarUnlockTip()
 end
 
 function EllesmereUI:Show()
+    if CooldownViewerSettings and CooldownViewerSettings:IsShown() then CooldownViewerSettings:Hide() end
     self:EnsureLoaded()
     CreateMainFrame()
     RefreshSidebarStates()
@@ -5964,6 +5966,7 @@ end
 function EllesmereUI:Hide()   if mainFrame then mainFrame:Hide() end end
 function EllesmereUI:Toggle()
     if self.NeedsBetaReset() then self:ShowWelcomePopup(); return end
+    if CooldownViewerSettings and CooldownViewerSettings:IsShown() then CooldownViewerSettings:Hide() end
     self:EnsureLoaded()
     CreateMainFrame()
     if mainFrame:IsShown() then
@@ -6026,7 +6029,7 @@ end
 -------------------------------------------------------------------------------
 --  Slash commands
 -------------------------------------------------------------------------------
-EllesmereUI.VERSION = "5.5.6"
+EllesmereUI.VERSION = "5.6.1"
 
 -- Register this addon's version into a shared global table (taint-free at load time)
 if not _G._EUI_AddonVersions then _G._EUI_AddonVersions = {} end
@@ -6214,6 +6217,72 @@ SlashCmdList.EUIOPTIONS = function()
     EllesmereUI:Toggle()
 end
 
+-- Debug: /euimem toggles per-second memory delta readout
+SLASH_EUIMEM1 = "/euimem"
+SlashCmdList.EUIMEM = function()
+    if EllesmereUI._memTicker then
+        EllesmereUI._memTicker:Cancel()
+        EllesmereUI._memTicker = nil
+        print("|cff00ff00[EUI Memory Tracker]|r Stopped.")
+        return
+    end
+    local addons = {}
+    for i = 1, C_AddOns.GetNumAddOns() do
+        local name = C_AddOns.GetAddOnInfo(i)
+        if name and name:find("^Ellesmere") and C_AddOns.IsAddOnLoaded(i) then
+            addons[#addons + 1] = name
+        end
+    end
+    UpdateAddOnMemoryUsage()
+    local lastMem = {}
+    for _, name in ipairs(addons) do
+        lastMem[name] = GetAddOnMemoryUsage(name)
+    end
+    print("|cff00ff00[EUI Memory Tracker]|r Tracking " .. #addons .. " addons. /euimem to stop.")
+    local MEM_INTERVAL = 10
+    local sampleCount = 0
+    local accumMem = {}
+    for _, name in ipairs(addons) do accumMem[name] = 0 end
+    EllesmereUI._memTicker = C_Timer.NewTicker(1, function()
+        UpdateAddOnMemoryUsage()
+        sampleCount = sampleCount + 1
+        for _, name in ipairs(addons) do
+            local cur = GetAddOnMemoryUsage(name)
+            local delta = cur - (lastMem[name] or cur)
+            lastMem[name] = cur
+            accumMem[name] = accumMem[name] + delta
+        end
+        if sampleCount < MEM_INTERVAL then return end
+        -- Print averages (skip GC frames where total is negative)
+        local totalAvg = 0
+        for _, name in ipairs(addons) do
+            totalAvg = totalAvg + accumMem[name] / MEM_INTERVAL
+        end
+        if totalAvg < 0 then
+            for _, name in ipairs(addons) do accumMem[name] = 0 end
+            sampleCount = 0
+            return
+        end
+        totalAvg = 0
+        local lines = {}
+        for _, name in ipairs(addons) do
+            local avg = accumMem[name] / MEM_INTERVAL
+            totalAvg = totalAvg + avg
+            if true then
+                local short = name:gsub("^EllesmereUI", "")
+                if short == "" then short = "Core" end
+                local c = math.abs(avg) > 10 and "ffff6060" or math.abs(avg) > 5 and "ffffff60" or "ff60ff60"
+                lines[#lines + 1] = string.format("  |c%s%s|r %+.1f kb/s", c, short, avg)
+            end
+            accumMem[name] = 0
+        end
+        sampleCount = 0
+        local totalColor = math.abs(totalAvg) > 40 and "ffff6060" or math.abs(totalAvg) > 25 and "ffffff60" or "ff60ff60"
+        print(string.format("|c%s[EUI Memory Tracker]|r %+.1f kb/s avg", totalColor, totalAvg))
+        for _, line in ipairs(lines) do print(line) end
+    end)
+end
+
 -- Quick-access: /ee opens global settings
 SLASH_EUIQUICK1 = "/ee"
 SlashCmdList.EUIQUICK = function()
@@ -6294,6 +6363,7 @@ function EllesmereUI:ShowModule(folderName)
         print("|cffff6060[EllesmereUI]|r Cannot open options during combat.")
         return
     end
+    if CooldownViewerSettings and CooldownViewerSettings:IsShown() then CooldownViewerSettings:Hide() end
     if self.NeedsBetaReset() then self:ShowWelcomePopup(); return end
     self:EnsureLoaded()
     CreateMainFrame()
@@ -6492,8 +6562,14 @@ do
         statsFrame:RegisterUnitEvent("UNIT_STATS", "player")
         statsFrame:RegisterEvent("COMBAT_RATING_UPDATE")
         statsFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
+        local _statsThrottled = false
         statsFrame:SetScript("OnEvent", function()
-            UpdateSecondaryStats()
+            if _statsThrottled then return end
+            _statsThrottled = true
+            C_Timer.After(0.5, function()
+                _statsThrottled = false
+                UpdateSecondaryStats()
+            end)
         end)
         statsFrame:Show()
         UpdateSecondaryStats()
@@ -6957,6 +7033,18 @@ EllesmereUI.VIS_VALUES = {
     solo       = "Solo",
 }
 EllesmereUI.VIS_ORDER = { "never", "always", "mouseover", "in_combat", "out_of_combat", "---", "in_raid", "in_party", "solo" }
+
+-- CDM variant (no mouseover -- CDM bars don't support mouseover visibility)
+EllesmereUI.VIS_VALUES_CDM = {
+    never          = "Never",
+    always         = "Always",
+    in_combat      = "In Combat",
+    out_of_combat  = "Out of Combat",
+    in_raid        = "In Raid Group",
+    in_party       = "In Party",
+    solo           = "Solo",
+}
+EllesmereUI.VIS_ORDER_CDM = { "never", "always", "in_combat", "out_of_combat", "---", "in_raid", "in_party", "solo" }
 
 -- Basics-only variant (includes Disable Module)
 EllesmereUI.VIS_VALUES_BASICS = {

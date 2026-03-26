@@ -51,8 +51,11 @@ function module:PopulateTooltip()
     tip:ClearLines()
     tip:AddLine(L["Clique Bindings"], 1, 1, 0)
 
+    local sorted = {unpack(addon.bindings)}
+    addon:SortBindingsByKey(sorted)
+
     local found = false
-    for _, binding in ipairs(addon.bindings) do
+    for _, binding in ipairs(sorted) do
         if binding.key and addon:IsBindingCorrectSpec(binding) then
             local keyPrefix = addon:GetPrefixStringFromBinding(binding)
             if keyPrefix == prefix then

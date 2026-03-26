@@ -1,30 +1,29 @@
 
 RaiderIO_Config = {
+["minimapIcon"] = {
+["minimapPos"] = 180,
+["showInCompartment"] = true,
+["hide"] = false,
+["lock"] = false,
+},
 ["profilePoint"] = {
 ["y"] = 0,
 ["x"] = -16,
 ["point"] = "TOPLEFT",
 },
-["minimapIcon"] = {
-["minimapPos"] = 180,
-["showInCompartment"] = true,
-["lock"] = false,
-["hide"] = false,
-},
 }
 RaiderIO_LastCharacter = "us-Lonelylitten-stormrage"
 RaiderIO_MissingCharacters = {
-["us-Katskratches-area-52"] = true,
-["us-Holywes-area-52"] = true,
-["us-Roinechadk-area-52"] = true,
-["us-Neondh-area-52"] = true,
-["us-Elephante-area-52"] = true,
+["us-Alyxstria-stormrage"] = true,
+["us-Itch-moon-guard"] = true,
+["us-Mijä-stormrage"] = true,
+["us-Seikishikii-stormrage"] = true,
+["us-Djshockcakes-stormrage"] = true,
+["us-Furiosuzu-stormrage"] = true,
 ["us-Lemonsnapple-lightbringer"] = true,
-["us-party5-stormrage"] = true,
-["us-Duckpapa-illidan"] = true,
-["us-Järdani-kelthuzad"] = true,
-["us-Overbite-illidan"] = true,
-["us-Ricelee-proudmoore"] = true,
+["us-Holytankard-stormrage"] = true,
+["us-Pixdk-stormrage"] = true,
+["us-Lyonie-stormrage"] = true,
 }
 RaiderIO_MissingServers = {
 }

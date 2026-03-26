@@ -2850,66 +2850,33 @@ ApplyIconStyle = function(frame, cdID)
   end
 
   -- ═══════════════════════════════════════════════════════════════════
-  -- GCD INTERCEPT — shared by Masque and non-Masque paths.
-  -- Installed once, before the Masque branch, via _arcGCDInterceptHooked guard.
-  --
-  -- WHY a live GetSpellCooldown here: this hook fires synchronously inside
-  -- CDM's own SetCooldown/SetCooldownFromDurationObject call — NOT from our
-  -- OnCooldownEvent dispatch. _arcLastIsOnGCD is written by FeedShadow which
-  -- runs from OnCooldownEvent, a different call chain. At hook-fire time the
-  -- cache may be nil or stale, so we must read live here.
+  -- GCD SWIPE SUPPRESS — hooks CheckCacheCooldownValuesFromSpellCooldown.
+  -- Log confirmed: this is the FIRST method where isOnGCD=true is set.
+  -- Fires once per update cycle. When isOnGCD=true AND isOnActualCooldown=false
+  -- (GCD only, not real CD), suppress swipe+edge on the cooldown frame.
   -- ═══════════════════════════════════════════════════════════════════
-  if frame.Cooldown and swipeCfg and swipeCfg.noGCDSwipe and not frame.Cooldown._arcGCDInterceptHooked then
-    frame.Cooldown._arcGCDInterceptHooked = true
-    frame.Cooldown._arcParentFrame = frame
-
-    local function GCDIntercept(cd)
-      local pf = cd._arcParentFrame
-      if not pf then return end
-      if pf._arcBypassGCDIntercept then return end
-      if not pf._arcNoGCDSwipeEnabled then return end
-      if pf._arcConfig or pf._arcAuraID then return end
-      if pf.wasSetFromAura == true and not pf._arcIgnoreAuraOverride then return end
-      if pf._arcViewerType == "aura" then return end
-
-      local cooldownInfo = pf.cooldownInfo
-      local spellID = cooldownInfo and (cooldownInfo.overrideSpellID or cooldownInfo.spellID)
-      if not spellID then return end
-
-      -- Read CDM's own isOnGCD field — set by CacheCooldownValues() which runs
-      -- synchronously BEFORE CooldownFrame_Set() within RefreshSpellCooldownInfo().
-      -- By the time this hook fires, pf.isOnGCD is already current. Zero API calls.
-      if not pf.isOnGCD then return end
-
-      pf._arcBypassGCDIntercept = true
-
-      if pf._arcIsChargeSpellCached then
-        -- Charge spell: replace GCD feed with recharge timer (or clear if none)
-        local chargeDurObj = nil
-          if C_Spell.GetSpellChargeDuration then
-            chargeDurObj = C_Spell.GetSpellChargeDuration(spellID)
-          end
-        if chargeDurObj then
-          cd:SetCooldownFromDurationObject(chargeDurObj, true)
-        else
-          cd:SetCooldown(0, 0)
-        end
-      else
-        cd:SetCooldown(0, 0)
-      end
-
-      pf._arcBypassGCDIntercept = false
+  if frame.Cooldown and swipeCfg and swipeCfg.noGCDSwipe and not frame.Cooldown._arcGCDSuppressHooked then
+    frame.Cooldown._arcGCDSuppressHooked = true
+    -- Log analysis: SetDrawSwipe(true)=100% GCD, SetDrawEdge(true)=28% GCD.
+    -- Hook both — suppress when isOnGCD=true. SetDrawEdge(true) during non-GCD
+    -- (real CD) is not suppressed since isOnGCD will be false/nil at that point.
+    local function ShouldSuppressGCD()
+      if not frame._arcNoGCDSwipeEnabled then return false end
+      if not frame.isOnGCD then return false end
+      if frame._arcConfig or frame._arcAuraID then return false end
+      if frame.wasSetFromAura == true and not frame._arcIgnoreAuraOverride then return false end
+      if frame._arcViewerType == "aura" then return false end
+      return true
     end
-
-    hooksecurefunc(frame.Cooldown, "SetCooldownFromDurationObject", function(self)
-      GCDIntercept(self)
+    hooksecurefunc(frame.Cooldown, "SetDrawSwipe", function(self, show)
+      if show and ShouldSuppressGCD() then self:SetDrawSwipe(false) end
     end)
-    hooksecurefunc(frame.Cooldown, "SetCooldown", function(self)
-      GCDIntercept(self)
+    hooksecurefunc(frame.Cooldown, "SetDrawEdge", function(self, show)
+      if show and ShouldSuppressGCD() then self:SetDrawEdge(false) end
     end)
   end
 
-  -- Get swipe insets from config (only used when ArcUI controls cooldowns)
+    -- Get swipe insets from config (only used when ArcUI controls cooldowns)
   local swipeInsetX, swipeInsetY
   if swipeCfg and swipeCfg.separateInsets then
     -- Use separate X/Y insets

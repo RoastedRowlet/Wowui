@@ -11,3 +11,15 @@ BigWigs:AddSounds("Lu'ashal", {
 	[1276247] = "long",
 	[1276427] = "alarm",
 })
+
+BigWigs:AddColors("Cragpine", {
+	[1235131] = "yellow",
+	[1235144] = "purple",
+	[1243594] = "blue",
+})
+
+BigWigs:AddSounds("Cragpine", {
+	[1235131] = "long",
+	[1235144] = "info",
+	[1243594] = "warning",
+})

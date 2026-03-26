@@ -487,11 +487,11 @@ local function EnsureShadowCooldown(frame)
       local ci = pf.cooldownInfo
       local spellID = ci and (ci.overrideSpellID or ci.spellID)
       if not spellID then return end
-      local pushObj
-      if pf._arcIsChargeSpellCached and C_Spell.GetSpellChargeDuration then
-        pushObj = C_Spell.GetSpellChargeDuration(spellID)
-      end
-      if not pushObj then pushObj = C_Spell.GetSpellCooldownDuration(spellID) end
+      -- Gate on isActive==true (non-secret) — only push when cooldown is live.
+      -- GetSpellCooldownDuration returns zero-span when isActive is false/secret.
+      local cdInfoIAO = C_Spell.GetSpellCooldown(spellID)
+      if not cdInfoIAO or cdInfoIAO.isActive ~= true then return end
+      local pushObj = C_Spell.GetSpellCooldownDuration(spellID)
       if not pushObj then return end
       pf._arcBypassCDHook = true
       self:SetUseAuraDisplayTime(false)
@@ -557,7 +557,10 @@ FeedShadowCooldown = function(frame, spellID)
   local isChargeSpell = false
   local cdInfo = C_Spell.GetSpellCooldown(spellID)
   if cdInfo and cdInfo.isOnGCD == true then isOnGCD = true end
-  isChargeSpell = C_Spell.GetSpellCharges(spellID) ~= nil
+  local chargesInfo = C_Spell.GetSpellCharges(spellID)
+  -- maxCharges==1 treated as regular cooldown: GetSpellChargeDuration returns zero-span
+  -- for them (isActive requires maxCharges>1 per 12.0.1). Treat as regular CD throughout.
+  isChargeSpell = chargesInfo ~= nil and (not chargesInfo.maxCharges or chargesInfo.maxCharges > 1)
   if not isChargeSpell and frame.cooldownInfo and frame.cooldownInfo.charges == true then
     isChargeSpell = true
   end
@@ -892,21 +895,19 @@ local function HandleIgnoreAuraOverride(frame, iconTex, cfg, stateVisuals)
   local isAuraActive = HasAuraInstanceID(frame.auraInstanceID) or (frame.totemData ~= nil)
 
   -- ── IAO COOLDOWN PUSH ──────────────────────────────────────────────
-  -- When aura is active CDM displays the aura duration on the swipe.
-  -- Override it by pushing the spell cooldown durationObj directly here.
-  -- This is API-agnostic — fires from OnAuraInstanceInfoSet → CooldownState.Apply,
-  -- not from a SetCooldown/SetCooldownFromDurationObject hook. Works regardless
-  -- of which CDM write path Blizzard uses before or after the 12.0.1 hotfix.
+  -- Gate on cdInfo.isActive==true (non-secret per 12.0.1).
+  -- GetSpellCooldownDuration returns zero-span when isActive is false or secret
+  -- (tainted context) — pushing it would clear the display. Only push when live.
   if isAuraActive and frame.Cooldown and not frame._arcBypassCDHook then
-    local chargeDurObj
-    if isChargeSpell then chargeDurObj = C_Spell.GetSpellChargeDuration(spellID) end
-    local durObj = C_Spell.GetSpellCooldownDuration(spellID)
-    local pushObj = (isChargeSpell and chargeDurObj) or durObj
-    if pushObj then
-      frame._arcBypassCDHook = true
-      frame.Cooldown:SetUseAuraDisplayTime(false)
-      frame.Cooldown:SetCooldownFromDurationObject(pushObj)
-      frame._arcBypassCDHook = false
+    local cdInfo = C_Spell.GetSpellCooldown(spellID)
+    if cdInfo and cdInfo.isActive == true then
+      local durObj = C_Spell.GetSpellCooldownDuration(spellID)
+      if durObj then
+        frame._arcBypassCDHook = true
+        frame.Cooldown:SetUseAuraDisplayTime(false)
+        frame.Cooldown:SetCooldownFromDurationObject(durObj)
+        frame._arcBypassCDHook = false
+      end
     end
   end
 

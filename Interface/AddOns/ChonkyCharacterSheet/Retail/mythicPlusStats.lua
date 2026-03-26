@@ -346,12 +346,7 @@ local function UpdateAffixDisplay(index, affixData)
 end
 
 local function updatesideframe()
-	if option("showm_sp") ~= true then return end
-	
-	if CCS.AreSecretsDisabled() then 
-		CCS.secretsdisabled = true
-		return
-	end
+	if option("showm_sp") ~= true or InCombatLockdown() == true then return end
 	
 	local tf = {WeeklyRewardsFrame:GetChildren()};
 	local x=1; -- M+
@@ -455,12 +450,12 @@ local function updatesideframe()
 	end
 
 	-- Update the Mythic Plus portion
+--[[	
 	if C_MythicPlus.GetCurrentAffixes() == nil or 
 	C_MythicPlus.GetCurrentAffixes()[1] == nil or 
 	C_MythicPlus.GetCurrentAffixes()[2] == nil or 
 	C_MythicPlus.GetCurrentAffixes()[3] == nil then return end 
-	
-	_G["ccsm_sf"]:SetScale(option("mplus_sp_scale"))
+--]]	
 	
 	if C_WeeklyRewards.HasAvailableRewards() and _G["ccsm_fs4"] ~= nil then _G["ccsm_fs4"]:Show() else _G["ccsm_fs4"]:Hide() end
 	
@@ -561,7 +556,6 @@ local function updatesideframe()
 			ccsm_bx_btn1_bg:SetTexCoord(0, 1, 0, 1)
 			ccsm_bx_btn1_bg:SetAlpha(1)
 			ccsm_bx_btn1_bg:SetAllPoints(ccsm_bx_btn2_bg)
-
 			
 			if ccsm_bx_btn2 then
 				ccsm_bx_btn2:SetScript("OnEnter", function(self) GameTooltip:SetOwner(self, "ANCHOR_RIGHT", -7, -11);
@@ -832,27 +826,35 @@ local function CreateAffixButton(index, anchorFrame, parentFrame)
 end
 
 local function initializeframes()
+local CCS_CharacterFrame = _G["CCS_CharacterFrame"]
     if InCombatLockdown()then CCS.secretsdisabled = true return end
 	if option("showm_sp") ~= true then return end
 	
 	local bgr, bgg, bgb, bgalpha = option("ccsmbgcolor")[1], option("ccsmbgcolor")[2], option("ccsmbgcolor")[3], option("ccsmbgcolor")[4];
 	
 	-- Create the basic side frame
-	local ccsm_af = _G["ccsm_af"] or CreateFrame("Frame", "ccsm_af", CharacterFrame, "SecureHandlerBaseTemplate");
-	local ccsm_sf = _G["ccsm_sf"] or CreateFrame("Frame", "ccsm_sf", CharacterFrame, "SecureHandlerBaseTemplate");
+	local ccsm_af = _G["ccsm_af"] or CreateFrame("Frame", "ccsm_af", CCS_CharacterFrame, "SecureHandlerBaseTemplate");
+	local ccsm_sf = _G["ccsm_sf"] or CreateFrame("Frame", "ccsm_sf", CCS_CharacterFrame, "SecureHandlerBaseTemplate");
+
+	if not ccsm_sf.hooked then
+		hooksecurefunc(ccsm_sf, "Show", CCS.MythicPlusEventHandler)
+		ccsm_sf.hooked = true
+	end
+
 
 	local hpad = option("hpad") or 279
 	local sheetscale = option("sheetscale") or 1
+	_G["ccsm_sf"]:SetScale(option("mplus_sp_scale"))
 
 	-- offset in raw pixels, not scaled twice
 	local offsetX = (60 + hpad)
 
     if C_AddOns.IsAddOnLoaded("DejaCharacterStats") then
-		ccsm_af:SetPoint("TOPLEFT", CharacterFrame, "TOPRIGHT", offsetX-63, 0)
-		ccsm_af:SetPoint("BOTTOMLEFT", CharacterFrame, "BOTTOMRIGHT", offsetX-63, 0)
+		ccsm_af:SetPoint("TOPLEFT", CCS_CharacterFrame, "TOPRIGHT", offsetX-63, 0)
+		ccsm_af:SetPoint("BOTTOMLEFT", CCS_CharacterFrame, "BOTTOMRIGHT", offsetX-63, 0)
 	else
-		ccsm_af:SetPoint("TOPLEFT", CharacterFrame, "TOPRIGHT", offsetX, 0)
-		ccsm_af:SetPoint("BOTTOMLEFT", CharacterFrame, "BOTTOMRIGHT", offsetX, 0)
+		ccsm_af:SetPoint("TOPLEFT", CCS_CharacterFrame, "TOPRIGHT", offsetX, 0)
+		ccsm_af:SetPoint("BOTTOMLEFT", CCS_CharacterFrame, "BOTTOMRIGHT", offsetX, 0)
 	end
 	
 	ccsm_sf:SetPoint("TOPLEFT", ccsm_af, "TOPRIGHT", 0, 0); 
@@ -954,7 +956,7 @@ local function initializeframes()
 	
 	ccsm_fs4:SetJustifyH("CENTER")
 	ccsm_fs4:SetText("|cFFFFFF00" .. WEEKLY_REWARDS_RETURN_TO_CLAIM .. "|r")
-	ccsm_fs4:Show()               
+	ccsm_fs4:Hide()               
 
 	local affixLevels = { "4", "7", "10", "12", "15" }
 
@@ -1275,7 +1277,7 @@ function module:Initialize()
 	-- Create the new button
 	local btn2 = _G["MPlusScoreIconBtn"] or CreateFrame("Button", "MPlusScoreIconBtn", PaperDollFrame)
 	btn2:SetSize(28, 28)
-	btn2:SetPoint("RIGHT", PaperDollSidebarTabs, "RIGHT", -0.5, 0)
+	btn2:SetPoint("TOPRIGHT", CharacterFrameCloseButton, "BOTTOMRIGHT", 0, -1)
 	btn2:SetFrameStrata("HIGH")
 
 	btn2._ccs_OnEnter = function(self)
@@ -1325,9 +1327,17 @@ function module:Initialize()
 		btn2:SetShown(option("showm_sp_btn"))
 end
 
+local function ForceGenerateWeeklyRewards()
+    if not WeeklyRewardsFrame then return end
+
+	WeeklyRewardsFrame:FullRefresh()
+
+end
+
+
 function CCS.MythicPlusEventHandler(event, ...)
     local arg1 = ...
-    if InCombatLockdown()then CCS.secretsdisabled = true return end
+    --if InCombatLockdown()then CCS.secretsdisabled = true return end
 	if CCS.GetCurrentVersion() ~= CCS.RETAIL then return end
 	
 	if option("showm_sp") ~= true then 
@@ -1361,6 +1371,8 @@ function CCS.MythicPlusEventHandler(event, ...)
     if not CCS.mythicUpdatePending then
         CCS.mythicUpdatePending = true
 		-- Update the Weekly Rewards Frames
+		--print(date("%H:%M:%S") .. format(".%03d", (GetTime() * 1000) % 1000), "Mplus Update:", event)
+		--ForceGenerateWeeklyRewards()
 		WeeklyRewardsFrame:FullRefresh()
         C_Timer.After(1, function()
             CCS.mythicUpdatePending = false

@@ -1,10 +1,6 @@
 
 CHATTYNATOR_CURRENT_PROFILE = "DEFAULT"
 CHATTYNATOR_COMMAND_HISTORY = {
-"/p /reload",
-"/s /eui",
-"/s /reload",
-"/s /eui",
 "/cw Neverrsoberr-Stormrage whatever you feel is appropriate :)",
 "/cw Newmies-Stormrage wait shouldnt you make a warglaive?",
 "/cw Neverrsoberr-Stormrage done!",
@@ -206,4 +202,13 @@ CHATTYNATOR_COMMAND_HISTORY = {
 "/s /rc",
 "/s /PULL 10",
 "/cw Palàdin-Stormrage your name is a lie!",
+" not the lfr eye lmao",
+" gigantic",
+"/cw Porchlight-Stormrage done!",
+"/cw Porchlight-Stormrage /simc",
+"/cw Porchlight-Stormrage /key",
+"/cw Porchlight-Stormrage /arcui",
+"/p LUST",
+"/p lust",
+"/s /key",
 }
