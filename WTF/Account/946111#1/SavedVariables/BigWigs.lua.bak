@@ -8,14 +8,6 @@ BigWigs3DB = {
 ["Barelynoer - Area 52"] = "Default",
 },
 ["namespaces"] = {
-["BigWigs_Plugins_BossBlock"] = {
-["global"] = {
-["tableNeedsCopied"] = false,
-["watchedMovies"] = {
-[1049] = true,
-},
-},
-},
 ["MythicPlus"] = {
 ["global"] = {
 ["showViewerTeleportTip"] = false,
@@ -31,6 +23,14 @@ nil,
 },
 },
 },
+["BigWigs_Plugins_BossBlock"] = {
+["global"] = {
+["tableNeedsCopied"] = false,
+["watchedMovies"] = {
+[1049] = true,
+},
+},
+},
 ["BigWigs_Plugins_PrivateAuras"] = {
 ["global"] = {
 ["showHelpTip"] = false,
@@ -38,8 +38,8 @@ nil,
 ["profiles"] = {
 ["Default"] = {
 ["player"] = {
-["anchorYOffset"] = 93,
 ["anchorXOffset"] = 71,
+["anchorYOffset"] = 93,
 },
 },
 },
@@ -93,8 +93,8 @@ BigWigsStatsDB = {
 },
 ["LFR"] = {
 ["kills"] = 1,
-["bestDate"] = "2026/03/25",
 ["fkDate"] = "2026/03/25",
+["bestDate"] = "2026/03/25",
 ["best"] = 358.9949999999953,
 ["fkDuration"] = 358.9949999999953,
 },
@@ -127,8 +127,8 @@ BigWigsStatsDB = {
 },
 ["LFR"] = {
 ["kills"] = 1,
-["bestDate"] = "2026/03/25",
 ["fkDate"] = "2026/03/25",
+["bestDate"] = "2026/03/25",
 ["best"] = 322.5229999999865,
 ["fkDuration"] = 322.5229999999865,
 },
@@ -151,7 +151,13 @@ BigWigsStatsDB = {
 ["fkDate"] = "2026/03/24",
 },
 ["heroic"] = {
-["wipes"] = 1,
+["kills"] = 1,
+["fkDuration"] = 287.4700000000303,
+["wipes"] = 2,
+["fkWipes"] = 2,
+["best"] = 287.4700000000303,
+["bestDate"] = "2026/03/25",
+["fkDate"] = "2026/03/25",
 },
 ["LFR"] = {
 ["kills"] = 1,
@@ -170,6 +176,15 @@ BigWigsStatsDB = {
 ["best"] = 259.1570000000065,
 ["bestDate"] = "2026/03/24",
 ["fkDate"] = "2026/03/24",
+},
+["heroic"] = {
+["kills"] = 1,
+["fkDuration"] = 340.2859999999637,
+["wipes"] = 6,
+["fkWipes"] = 6,
+["best"] = 340.2859999999637,
+["bestDate"] = "2026/03/26",
+["fkDate"] = "2026/03/26",
 },
 ["LFR"] = {
 ["kills"] = 1,
