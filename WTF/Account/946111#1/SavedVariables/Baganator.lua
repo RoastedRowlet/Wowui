@@ -259,8 +259,8 @@ BAGANATOR_CONFIG = {
 },
 ["bag_view_position"] = {
 "BOTTOMRIGHT",
--180.8372802734375,
-477.4999084472656,
+-254.169921875,
+286.6665344238281,
 },
 ["auto_sort_on_open"] = true,
 ["category_migration"] = 5,

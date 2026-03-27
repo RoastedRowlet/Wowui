@@ -826,15 +826,15 @@ local function CreateAffixButton(index, anchorFrame, parentFrame)
 end
 
 local function initializeframes()
-local CCS_CharacterFrame = _G["CCS_CharacterFrame"]
+local CharacterFrame = _G["CharacterFrame"]
     if InCombatLockdown()then CCS.secretsdisabled = true return end
 	if option("showm_sp") ~= true then return end
 	
 	local bgr, bgg, bgb, bgalpha = option("ccsmbgcolor")[1], option("ccsmbgcolor")[2], option("ccsmbgcolor")[3], option("ccsmbgcolor")[4];
 	
 	-- Create the basic side frame
-	local ccsm_af = _G["ccsm_af"] or CreateFrame("Frame", "ccsm_af", CCS_CharacterFrame, "SecureHandlerBaseTemplate");
-	local ccsm_sf = _G["ccsm_sf"] or CreateFrame("Frame", "ccsm_sf", CCS_CharacterFrame, "SecureHandlerBaseTemplate");
+	local ccsm_af = _G["ccsm_af"] or CreateFrame("Frame", "ccsm_af", CharacterFrame, "SecureHandlerBaseTemplate");
+	local ccsm_sf = _G["ccsm_sf"] or CreateFrame("Frame", "ccsm_sf", CharacterFrame, "SecureHandlerBaseTemplate");
 
 	if not ccsm_sf.hooked then
 		hooksecurefunc(ccsm_sf, "Show", CCS.MythicPlusEventHandler)
@@ -850,11 +850,11 @@ local CCS_CharacterFrame = _G["CCS_CharacterFrame"]
 	local offsetX = (60 + hpad)
 
     if C_AddOns.IsAddOnLoaded("DejaCharacterStats") then
-		ccsm_af:SetPoint("TOPLEFT", CCS_CharacterFrame, "TOPRIGHT", offsetX-63, 0)
-		ccsm_af:SetPoint("BOTTOMLEFT", CCS_CharacterFrame, "BOTTOMRIGHT", offsetX-63, 0)
+		ccsm_af:SetPoint("TOPLEFT", CharacterFrame, "TOPRIGHT", offsetX-63, 0)
+		ccsm_af:SetPoint("BOTTOMLEFT", CharacterFrame, "BOTTOMRIGHT", offsetX-63, 0)
 	else
-		ccsm_af:SetPoint("TOPLEFT", CCS_CharacterFrame, "TOPRIGHT", offsetX, 0)
-		ccsm_af:SetPoint("BOTTOMLEFT", CCS_CharacterFrame, "BOTTOMRIGHT", offsetX, 0)
+		ccsm_af:SetPoint("TOPLEFT", CharacterFrame, "TOPRIGHT", offsetX, 0)
+		ccsm_af:SetPoint("BOTTOMLEFT", CharacterFrame, "BOTTOMRIGHT", offsetX, 0)
 	end
 	
 	ccsm_sf:SetPoint("TOPLEFT", ccsm_af, "TOPRIGHT", 0, 0); 

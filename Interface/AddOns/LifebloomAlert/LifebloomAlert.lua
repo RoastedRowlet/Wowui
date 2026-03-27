@@ -13,14 +13,14 @@ local LIFEBLOOM_ICON = C_Spell.GetSpellTexture(LIFEBLOOM_SPELL_ID)
 local SOUND_CHANNEL_LIST = { "Master", "SFX", "Music", "Ambience", "Dialog" }
 
 local SOUND_LIST = {
-    { label = "Text To Speech",         value = "tts" },
-    { label = "Raid Warning",           value = 8959  },
-    { label = "Ready Check",            value = 8960  },
-    { label = "Alarm Clock",            value = 6759  },
-    { label = "PvP Flag Taken",         value = 8174  },
-    { label = "Level Up",               value = 888   },
-    { label = "Spell Flash (UI)",       value = 641   },
-    { label = "Error (Cannot Do That)", value = 882   },
+    { label = "Text To Speech",         value = "tts"  },
+    { label = "Raid Warning",           value = 8959   },
+    { label = "Ready Check",            value = 8960   },
+    { label = "Alarm Clock Warning 2",  value = 12867  },
+    { label = "PvP Flag Taken",         value = 8174   },
+    { label = "Level Up",               value = 888    },
+    { label = "Alarm Clock Warning 3",  value = 12889  },
+    { label = "Drum",                   value = 185583 },
 }
 
 local TTS_VOICE_LIST = {}
@@ -36,6 +36,11 @@ local BUILTIN_FONTS = {
 }
 
 local DEFAULTS = {
+    -- General
+    activeInSolo      = true,
+    activeInDungeons  = true,
+    activeInRaids     = true,
+
     -- Refresh timer alert
     timerEnabled      = true,
     timerUsePandemic  = true,
@@ -55,7 +60,7 @@ local DEFAULTS = {
 
     -- Volume
     ttsVolume         = 100,
-	soundChannel      = "SFX",
+    soundChannel      = "SFX",
 
     -- Timer text alert
     timerTextEnabled  = false,
@@ -109,6 +114,16 @@ local function IsRestorationDruid()
     if not specIndex then return false end
     local specID = GetSpecializationInfo(specIndex)
     return specID == 105
+end
+
+local function IsActiveInCurrentContent()
+    if IsInRaid() then
+        return db.activeInRaids
+    elseif IsInGroup() then
+        return db.activeInDungeons
+    else
+        return db.activeInSolo
+    end
 end
 
 -------------------------------------------------------------------------------
@@ -170,10 +185,10 @@ local function PlayAlert(soundIndex, ttsText, ttsVoice, ttsRate)
         local LSM = LibStub and LibStub("LibSharedMedia-3.0", true)
         if LSM then
             local path = LSM:Fetch("sound", entry.value:sub(5))
-            if path then PlaySoundFile(path, db.soundChannel or "SFX") end
+            if path then PlaySoundFile(path, channel) end
         end
     elseif type(entry.value) == "number" then
-        PlaySound(entry.value, db.soundChannel or "SFX")
+        PlaySound(entry.value, channel)
     end
 end
 
@@ -566,6 +581,7 @@ end
 coreFrame:SetScript("OnUpdate", function(self, elapsed)
     if not db then return end
     if not IsRestorationDruid() then return end
+    if not IsActiveInCurrentContent() then return end
     self.timer = (self.timer or 0) + elapsed
     if self.timer < 0.1 then return end
     self.timer = 0
@@ -1066,6 +1082,33 @@ local function BuildOptionsPanel()
 
     local yOff = -45
 
+    -- active in section
+    local secActive = content:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+    secActive:SetPoint("TOPLEFT", 10, yOff)
+    secActive:SetText("Active In")
+    yOff = yOff - 25
+
+    CreateCheckbox(content, "Solo", 10, yOff,
+        function() return db.activeInSolo end,
+        function(v) db.activeInSolo = v end)
+    yOff = yOff - 25
+
+    CreateCheckbox(content, "Dungeons", 10, yOff,
+        function() return db.activeInDungeons end,
+        function(v) db.activeInDungeons = v end)
+    yOff = yOff - 25
+
+    CreateCheckbox(content, "Raids", 10, yOff,
+        function() return db.activeInRaids end,
+        function(v) db.activeInRaids = v end)
+    yOff = yOff - 35
+
+    local sep_active = content:CreateTexture(nil, "OVERLAY")
+    sep_active:SetColorTexture(0.4, 0.4, 0.4, 0.6)
+    sep_active:SetSize(530, 1)
+    sep_active:SetPoint("TOPLEFT", 10, yOff)
+    yOff = yOff - 15
+
     -- timer sound alert
     local secTimer = content:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
     secTimer:SetPoint("TOPLEFT", 10, yOff)
@@ -1128,7 +1171,7 @@ local function BuildOptionsPanel()
                 PlaySound(entry.value, db.soundChannel or "SFX")
             end
         end)
-local channelNote4 = content:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    local channelNote4 = content:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     channelNote4:SetPoint("TOPLEFT", 10, yOff - 58)
     channelNote4:SetTextColor(1, 0.2, 0.2, 1)
     channelNote4:SetText("Volume adjustment only works for non Blizzard sounds and TTS.")
@@ -1192,7 +1235,7 @@ local channelNote4 = content:CreateFontString(nil, "OVERLAY", "GameFontNormalSma
                 PlaySound(entry.value, db.soundChannel or "SFX")
             end
         end)
-	local channelNote3 = content:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    local channelNote3 = content:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     channelNote3:SetPoint("TOPLEFT", 10, yOff - 58)
     channelNote3:SetTextColor(1, 0.2, 0.2, 1)
     channelNote3:SetText("Volume adjustment only works for non Blizzard sounds and TTS.")
@@ -1237,23 +1280,23 @@ local channelNote4 = content:CreateFontString(nil, "OVERLAY", "GameFontNormalSma
     secShared:SetPoint("TOPLEFT", 10, yOff)
     secShared:SetText("Volume & TTS Settings")
     yOff = yOff - 25
-	
-	CreateScrollDropdown(content, "Alert Sound Channel:", 10, yOff, SOUND_CHANNEL_LIST,
+
+    CreateScrollDropdown(content, "Alert Sound Channel:", 10, yOff, SOUND_CHANNEL_LIST,
         function()
             local ch = db.soundChannel or "SFX"
             for i, v in ipairs(SOUND_CHANNEL_LIST) do
                 if v == ch then return i end
             end
-            return 2  -- default to SFX
+            return 2
         end,
         function(v)
             db.soundChannel = SOUND_CHANNEL_LIST[v]
         end)
-		local channelNote = content:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    local channelNote = content:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     channelNote:SetPoint("TOPLEFT", 10, yOff - 44)
     channelNote:SetTextColor(0.7, 0.7, 0.7, 1)
     channelNote:SetText("Applies to NON-TTS sounds only. Adjust volume slide that you chose in WoW Sound Settings.")
-		local channelNote2 = content:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    local channelNote2 = content:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     channelNote2:SetPoint("TOPLEFT", 10, yOff - 58)
     channelNote2:SetTextColor(1, 0.2, 0.2, 1)
     channelNote2:SetText("Volume adjustment only works for non Blizzard sounds.")

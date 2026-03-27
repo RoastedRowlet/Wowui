@@ -2718,12 +2718,20 @@ UpdateCooldownBar = function(barData)
     
     -- Apply color (with curve if enabled)
     if useColorCurve then
+      -- Determine which duration source this bar is actually using.
+      -- Spells with maxCharges > 1 use GetSpellChargeDuration; everything else (including
+      -- maxCharges == 1 spells) uses GetSpellCooldownDuration.  Storing this at setup time
+      -- prevents the OnUpdate from alternating between two slightly-out-of-sync duration
+      -- objects, which caused rapid color flickering for maxCharges=1 spells.
+      local useChargeDur = chargeInfo and chargeInfo.maxCharges and chargeInfo.maxCharges > 1
+
       -- Store data for OnUpdate handler
       barData.bar.colorCurveData = {
         spellID = spellID,
         colorCurve = colorCurve,
         baseColor = baseColor,
         elapsed = 0,
+        useChargeDur = useChargeDur,
       }
       
       -- Set up OnUpdate handler for continuous color updates (throttled to 20fps)
@@ -2735,9 +2743,14 @@ UpdateCooldownBar = function(barData)
         if data.elapsed < 0.05 then return end  -- 20fps for color updates
         data.elapsed = 0
         
-        -- Get fresh duration object for current remaining time
-        -- IMPORTANT: Check charge duration FIRST (charge spells need this for recharge tracking)
-        local freshDurObj = C_Spell.GetSpellChargeDuration(data.spellID) or C_Spell.GetSpellCooldownDuration(data.spellID)
+        -- Use the same duration source that the bar itself uses (set at setup time).
+        -- Never fall back to the other source mid-run; that is what caused the flicker.
+        local freshDurObj
+        if data.useChargeDur then
+          freshDurObj = C_Spell.GetSpellChargeDuration(data.spellID)
+        else
+          freshDurObj = C_Spell.GetSpellCooldownDuration(data.spellID)
+        end
         if freshDurObj then
           local colorResult = freshDurObj:EvaluateRemainingPercent(data.colorCurve)
           if colorResult then

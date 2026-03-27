@@ -79,7 +79,3 @@ LittleWigs_WarlordsOfDraenor: enabled
 LittleWigs_Legion: enabled
 LittleWigs_Dragonflight: enabled
 BigWigs_TheDreamrift: enabled
-M33Auras: enabled
-WeakAuras: enabled
-M33kAurasCompanion: enabled
-M33kAurasArchive: enabled

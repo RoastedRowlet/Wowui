@@ -121,7 +121,6 @@ Addon.icons = {
 	heroTalentIcons[classFilename],
 	{
 		-- Delve
-		{6025441, "ui_delves", "Delve"},
 		{1786405, "Ability_racial_dungeondelver", "Delve"},
 		{1064187, "Icon_treasuremap", "Delve"},
 		{5453546, "Inv_helm_armor_bronzebeard_b_01", "Delve"},
@@ -173,14 +172,14 @@ Addon.icons = {
 	-- #region M+: Midnight
 	{
 		-- M+: Midnight Season 1
-		{4578414, "Algeth'ar Academy", "AA"},
-		{7322719, "Maisara Caverns", "MC"},
 		{7439625, "Magisters' Terrace", "MT"},
+		{7322719, "Maisara Caverns", "MC"},
 		{7553062, "Nexus-Point Xenas", "NPX"},
+		{7266215, "Windrunner Spire", "WS"},
+		{4578414, "Algeth'ar Academy", "AA"},
 		{343641,  "Pit of Saron", "POS"},
 		{1711340, "Seat of the Triumvirate", "SEAT"},
-		{1002596, "Skyreach", "SR"},
-		{7266215, "Windrunner Spire", "WS"},
+		{1002596, "Skyreach", "SKY"},
 	};
 	-- #endregion
 	-- #region Raid: TWW 

@@ -22,6 +22,7 @@ CCS.ActiveFontMenu = nil
 CCS.secretsdisabled = false
 CCS.raidupdatedisabled = false
 CCS.activeClickedRow = nil
+CCS.initall = nil
 
 -- Game version flags
 CCS.RETAIL  = 1

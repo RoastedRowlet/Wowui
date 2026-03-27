@@ -183,33 +183,12 @@ ns.TBB_DEFAULT_BAR = TBB_DEFAULT_BAR
 --  Data Access
 -------------------------------------------------------------------------------
 function ns.GetTrackedBuffBars()
-    -- TBB is fully spec-specific, stored in specProfiles[specKey]
-    local specKey = ns.GetActiveSpecKey and ns.GetActiveSpecKey() or "0"
-    if specKey == "0" then return { selectedBar = 1, bars = {} } end
-    if not EllesmereUIDB then return { selectedBar = 1, bars = {} } end
-    if not EllesmereUIDB.spellAssignments then
-        EllesmereUIDB.spellAssignments = { specProfiles = {} }
+    if not ECME or not ECME.db then return { selectedBar = 1, bars = {} } end
+    local p = ECME.db.profile
+    if not p.trackedBuffBars then
+        p.trackedBuffBars = { selectedBar = 1, bars = {} }
     end
-    local sa = EllesmereUIDB.spellAssignments
-    if not sa.specProfiles then sa.specProfiles = {} end
-    if not sa.specProfiles[specKey] then sa.specProfiles[specKey] = { barSpells = {} } end
-    local prof = sa.specProfiles[specKey]
-    if not prof.trackedBuffBars then
-        prof.trackedBuffBars = { selectedBar = 1, bars = {} }
-    end
-    return prof.trackedBuffBars
-end
-
-function ns.GetTBBPositions()
-    -- TBB positions are spec-specific, stored alongside trackedBuffBars
-    local specKey = ns.GetActiveSpecKey and ns.GetActiveSpecKey() or "0"
-    if specKey == "0" then return {} end
-    if not EllesmereUIDB or not EllesmereUIDB.spellAssignments then return {} end
-    local sa = EllesmereUIDB.spellAssignments
-    if not sa.specProfiles or not sa.specProfiles[specKey] then return {} end
-    local prof = sa.specProfiles[specKey]
-    if not prof.tbbPositions then prof.tbbPositions = {} end
-    return prof.tbbPositions
+    return p.trackedBuffBars
 end
 
 function ns.AddTrackedBuffBar()
@@ -236,22 +215,22 @@ function ns.AddTrackedBuffBar()
     -- Auto-position adjacent to previous bar
     local p = ECME and ECME.db and ECME.db.profile
     if p then
-        local _tbbPos = ns.GetTBBPositions()
+        if not p.tbbPositions then p.tbbPositions = {} end
         local prevIdx = #tbb.bars - 1
         if prevIdx >= 1 then
-            local prevPos = _tbbPos[tostring(prevIdx)]
+            local prevPos = p.tbbPositions[tostring(prevIdx)]
             local prevCfg = tbb.bars[prevIdx]
             if prevPos and prevPos.point then
                 local px, py = prevPos.x or 0, prevPos.y or 0
                 if newBar.verticalOrientation then
                     local barW = (prevCfg and prevCfg.height or 24) + 4
-                    _tbbPos[tostring(#tbb.bars)] = {
+                    p.tbbPositions[tostring(#tbb.bars)] = {
                         point = prevPos.point, relPoint = prevPos.relPoint or prevPos.point,
                         x = px + barW, y = py,
                     }
                 else
                     local barH = (prevCfg and prevCfg.height or 24) + 4
-                    _tbbPos[tostring(#tbb.bars)] = {
+                    p.tbbPositions[tostring(#tbb.bars)] = {
                         point = prevPos.point, relPoint = prevPos.relPoint or prevPos.point,
                         x = px, y = py + barH,
                     }
@@ -903,7 +882,7 @@ local function ShowTBBUntrackedOverlay(bar, cfg)
             label:SetShadowOffset(0, 0)
         end
         label:SetPoint("CENTER", ov, "CENTER", 0, 0)
-        label:SetText("Click to Track")
+        label:SetText("Not in Tracked Bars")
         label:SetTextColor(1, 1, 1, 0.9)
         label:SetJustifyH("CENTER")
         ov._label = label
@@ -933,8 +912,6 @@ end
 local function HideTBBUntrackedOverlay(bar)
     if bar._untrackedOverlay then bar._untrackedOverlay:Hide() end
 end
-ns.ShowTBBUntrackedOverlay = ShowTBBUntrackedOverlay
-ns.HideTBBUntrackedOverlay = HideTBBUntrackedOverlay
 
 -------------------------------------------------------------------------------
 --  Blizzard Bar FontString Discovery
@@ -1015,12 +992,21 @@ function ns.UpdateTrackedBuffBarTimers()
             local blzChild = FindChild(cfg)
             local isActive = IsActive(cfg)
 
-            -- Preset detection removed from TBB — presets now belong on
-            -- Custom Aura Bars. TBB only mirrors Blizzard's BuffBar viewer.
-            local auraData = nil
+            -- Fallback for popular presets: direct aura check
+            if not isActive and not blzChild and cfg.popularKey then
+                if cfg.spellIDs then
+                    for _, sid in ipairs(cfg.spellIDs) do
+                        if sid and sid > 0 then
+                            local ok, aura = pcall(C_UnitAuras.GetPlayerAuraBySpellID, sid)
+                            if ok and aura then isActive = true; break end
+                        end
+                    end
+                end
+            end
 
             -- Read Blizzard's StatusBar (the data source)
             local blizzBar = blzChild and blzChild.Bar
+            -- Secret-safe check: does the bar have duration data?
             local barHasData = false
             if blizzBar then
                 local ok, gt = pcall(function() return blizzBar:GetMinMaxValues() > 0 end)
@@ -1070,16 +1056,17 @@ function ns.UpdateTrackedBuffBarTimers()
                     -- Read name + timer from Blizzard's bar FontStrings
                     local blizzNameFS, blizzTimerFS = GetBlizzBarFontStrings(blizzBar)
 
-                    -- Icon texture: resolve via C_Spell API by spellID.
-                    -- Never read GetTexture() from Blizzard frames in combat
-                    -- as it returns secret values that taint comparisons.
-                    if bar._icon and bar._icon:IsShown() then
-                        local iconSID = cfg.spellID
-                        if iconSID and iconSID > 0 and iconSID ~= bar._lastIconSID then
-                            local spInfo = C_Spell and C_Spell.GetSpellInfo and C_Spell.GetSpellInfo(iconSID)
-                            if spInfo and spInfo.iconID then
-                                bar._icon._tex:SetTexture(spInfo.iconID)
-                                bar._lastIconSID = iconSID
+                    -- Icon texture: read from Blizzard's Icon child
+                    if bar._icon and bar._icon:IsShown() and blzChild.Icon then
+                        local iconRegions = { blzChild.Icon:GetRegions() }
+                        for _, rgn in ipairs(iconRegions) do
+                            if rgn:GetObjectType() == "Texture" then
+                                local tex = rgn:GetTexture()
+                                if tex and tex ~= bar._lastBlizzIcon then
+                                    bar._icon._tex:SetTexture(tex)
+                                    bar._lastBlizzIcon = tex
+                                end
+                                break
                             end
                         end
                     end
@@ -1127,23 +1114,12 @@ function ns.UpdateTrackedBuffBarTimers()
                         ClearPandemic(bar)
                     end
                 else
-                    -- Active but no Blizzard bar: use auraData for duration
-                    if auraData and auraData.duration and auraData.duration > 0 and auraData.expirationTime then
-                        local now = GetTime()
-                        local remaining = auraData.expirationTime - now
-                        if remaining < 0 then remaining = 0 end
-                        sb:SetMinMaxValues(0, auraData.duration)
-                        sb:SetValue(remaining)
-                        if cfg.showSpark and bar._spark then bar._spark:Show() end
-                        if bar._timerText and bar._timerText:IsShown() then
-                            bar._timerText:SetText(FormatTime(remaining))
-                        end
-                    else
-                        sb:SetMinMaxValues(0, 1)
-                        sb:SetValue(1)
-                        if bar._timerText then bar._timerText:Hide() end
-                        if bar._spark then bar._spark:Hide() end
-                    end
+                    -- Active but no Blizzard bar (preset aura fallback):
+                    -- show full bar, no timer
+                    sb:SetMinMaxValues(0, 1)
+                    sb:SetValue(1)
+                    if bar._timerText then bar._timerText:Hide() end
+                    if bar._spark then bar._spark:Hide() end
                     if bar._pandemicGlowActive then ClearPandemic(bar) end
                 end
 
@@ -1167,10 +1143,16 @@ function ns.UpdateTrackedBuffBarTimers()
                 if bar._stacksText then bar._stacksText:Hide() end
                 bar._stackCount = 0
 
-                -- Overlay handled by RefreshAllOverlays (centralized in hooks file).
-                -- Just hide the bar when inactive (no overlay logic here).
-                HideTBBUntrackedOverlay(bar)
-                if bar:IsShown() then bar:Hide() end
+                -- Show "Not Tracked" overlay if the spell has no CDM child.
+                -- Popular presets are exempt (buff viewer handles them when active).
+                local hasSpell = (cfg.spellID and cfg.spellID > 0) or (cfg.spellIDs and #cfg.spellIDs > 0)
+                if hasSpell and not cfg.popularKey and not IsTrackedInCDM(cfg) then
+                    if not bar:IsShown() then bar:Show() end
+                    ShowTBBUntrackedOverlay(bar, cfg)
+                else
+                    HideTBBUntrackedOverlay(bar)
+                    if bar:IsShown() then bar:Hide() end
+                end
             end
         end
     end
@@ -1230,7 +1212,7 @@ function ns.BuildTrackedBuffBars()
 
     local tbb = ns.GetTrackedBuffBars()
     local bars = tbb.bars
-    local _tbbPos = ns.GetTBBPositions()
+    if not p.tbbPositions then p.tbbPositions = {} end
 
     -- Hide bars beyond current count
     for i = #bars + 1, #tbbFrames do
@@ -1288,7 +1270,7 @@ function ns.BuildTrackedBuffBars()
 
             -- Saved position
             local posKey = tostring(i)
-            local pos = _tbbPos[posKey]
+            local pos = p.tbbPositions[posKey]
             if pos and pos.point then
                 local unlockKey = "TBB_" .. posKey
                 local anchored = EllesmereUI.IsUnlockAnchored and EllesmereUI.IsUnlockAnchored(unlockKey)
@@ -1371,8 +1353,9 @@ function ns.RegisterTBBUnlockElements()
                     if c then c.height = h; ns.BuildTrackedBuffBars() end
                 end,
                 savePos = function(_, point, relPoint, x, y)
-                    local pos = ns.GetTBBPositions()
-                    pos[posKey] = { point = point, relPoint = relPoint, x = x, y = y }
+                    local pp = ECME.db.profile
+                    if not pp.tbbPositions then pp.tbbPositions = {} end
+                    pp.tbbPositions[posKey] = { point = point, relPoint = relPoint, x = x, y = y }
                     if not EllesmereUI._unlockActive then
                         local f = tbbFrames[idx]
                         if f then
@@ -1383,12 +1366,12 @@ function ns.RegisterTBBUnlockElements()
                     end
                 end,
                 loadPos = function()
-                    local pos = ns.GetTBBPositions()
-                    return pos[posKey]
+                    local pp = ECME.db.profile
+                    return pp.tbbPositions and pp.tbbPositions[posKey]
                 end,
                 clearPos = function()
-                    local pos = ns.GetTBBPositions()
-                    pos[posKey] = nil
+                    local pp = ECME.db.profile
+                    if pp.tbbPositions then pp.tbbPositions[posKey] = nil end
                 end,
                 applyPos = function()
                     ns.BuildTrackedBuffBars()

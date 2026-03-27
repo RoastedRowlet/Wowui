@@ -214,7 +214,7 @@ do
 			barInfo = self:VoidConvergence(eventInfo)
 		elseif durationRounded == 46 then -- Despotic Command
 			if not isBeforeUnraveling(duration) then return end
-			barInfo = self:DespoticCommand(eventInfo)
+			barInfo =  self:DespoticCommand(eventInfo)
 		elseif durationRounded == 45 then -- Twisting Obscurity -> Fractured Projection -> Shattering Twilight
 			if not isBeforeUnraveling(duration) then return end
 			-- Twisting Obscurity -> Fractured Projection -> Shattering Twilight
@@ -225,6 +225,8 @@ do
 			else
 				barInfo = self:TwistingObscurity(eventInfo)
 			end
+
+		-- enrage
 		elseif durationRounded == 490 then
 			if self:ShouldShowBars() then
 				self:Berserk(490, 0)
@@ -255,8 +257,8 @@ function mod:ENCOUNTER_TIMELINE_EVENT_STATE_CHANGED(_, eventID)
 		if state == 2 or state == 3 then -- Finished or Canceled
 			self:StopBar(barInfo.msg)
 
-			if state == 2 and barInfo.onFinished and self:ShouldShowBars() then -- Finished
-				barInfo.onFinished()
+			if state == 2 and self:ShouldShowBars() and barInfo.callback then -- Finished
+				barInfo.callback()
 			end
 
 			activeBars[eventID] = nil
@@ -300,7 +302,7 @@ function mod:VoidConvergence(eventInfo)
 	return {
 		msg = barText,
 		key = 1247738,
-		onFinished = function()
+		callback = function()
 			self:Message(1247738, "orange", barText)
 			self:PlaySound(1247738, "alarm")
 		end
@@ -330,7 +332,7 @@ function mod:ShatteringTwilight(eventInfo)
 	return {
 		msg = barText,
 		key = 1250803,
-		onFinished = function()
+		callback = function()
 			self:Message(1250803, "purple", barText)
 			-- Sound on PAs
 		end
@@ -346,7 +348,7 @@ function mod:FracturedProjection(eventInfo)
 	return {
 		msg = barText,
 		key = 1254081,
-		onFinished = function()
+		callback = function()
 			self:Message(1254081, "red", barText)
 			self:PlaySound(1254081, "warning")
 		end
@@ -362,7 +364,7 @@ function mod:DespoticCommand(eventInfo)
 	return {
 		msg = barText,
 		key = 1248697,
-		onFinished = function()
+		callback = function()
 			self:Message(1248697, "yellow", barText)
 			-- Sound on PAs
 		end
@@ -378,7 +380,7 @@ function mod:TwistingObscurity(eventInfo)
 	return {
 		msg = barText,
 		key = 1250686,
-		onFinished = function()
+		callback = function()
 			self:Message(1250686, "yellow", barText)
 			self:PlaySound(1250686, "alert")
 		end

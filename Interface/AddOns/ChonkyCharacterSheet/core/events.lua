@@ -380,6 +380,15 @@ local eventHandlers = {
             CCS.secretsdisabled = false
             CCS.MythicPlusEventHandler()
         end
+        if CCS.initall == true then
+            for _, module in pairs(CCS.Modules) do
+                if type(module.Initialize) == "function" then
+                    C_Timer.After(0.1, function() module:Initialize() end)
+                end
+            end
+            CCS:FireEvent("CCS_EVENT_OPTIONS")
+            CCS.initall = nil
+        end
         
         if CCS.incombat == true then
             CCS.incombat = false

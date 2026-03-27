@@ -17,37 +17,29 @@ local prefixes = {
 };
 
 local peaversTalentsDataIcons = {
-	-- https://github.com/peavers-warcraft/PeaversTalentsData/blob/master/src/Data/ArchonMythicDB.lua
 	mythic = {
 		[0] = Addon.MYTHICPLUS_ICON,
 		["All Dungeons"] = Addon.MYTHICPLUS_ICON,
-
-		-- Midnight: Season 1
-		["Algethar Academy"] = 4578414,
-		["Magisters"] = 7439625,
-		["Maisara Caverns"] = 7322719,
-		["Nexus Point Xenas"] = 7553062,
-		["Pit Of Saron"] = 343641,
-		["Seat"] = 1711340,
-		["Skyreach"] = 1002596,
-		["Windrunner Spire"] = 7266215,
+		["Ara Kara City Of Echoes"] = 5899326,
+		["Eco Dome Aldani"] = 6921877,
+		["Halls Of Atonement"] = 3601526,
+		["Operation Floodgate"] = 6422372,
+		["Priory Of The Sacred Flame"] = 5899331,
+		["Tazavesh Soleahs Gambit"] = 4062727,
+		["Tazavesh Streets Of Wonder"] = 4058847,
+		["The Dawnbreaker"] = 5899330,
 	},
-
-
-	-- https://github.com/peavers-warcraft/PeaversTalentsData/blob/master/src/Data/ArchonHeroicRaidDB.lua
 	raid = {
-		-- Midnight: Season 1
-		[0] = 7490911,
-		["All Bosses"] = 7490911,
-		["Imperator"] = 7448209,
-		["Vorasius"] = 7448210,
-		["Salhadaar"] = 7448212,
-		["Vaelgor Ezzorak"] = 7448207,
-		["Vanguard"] = 7448211,
-		["Crown"] = 7448205,
-		["Chimaerus"] = 7448202,
-		["Beloren"] = 7448203,
-		["Midnight Falls"] = 7448204,
+		[0] = 6997112,
+		["All Bosses"] = 6997112,
+		["Plexus Sentinel"] = 6922080,
+		["Loomithar"] = 6922087,
+		["Soulbinder Naazindhri"] = 6922081,
+		["Forgeweaver Araz"] = 6922084,
+		["The Soul Hunters"] = 6922082,
+		["Fractillus"] = 6922085,
+		["Nexus King Salhadaar"] = 6922086,
+		["Dimensius"] = 6922083,
 	},
 };
 

@@ -86,10 +86,14 @@ function CraftSim.CRAFT_LOG.UI:InitLogFrame(frame)
     local craftLogX = 250
     local craftLogY = 150
 
-    frame.content.craftResultsOptionsButton = CraftSim.WIDGETS.OptionsButton {
+    frame.content.craftResultsOptionsButton = GGUI.Button {
         parent = frame.content,
         anchorPoints = { { anchorParent = frame.title.frame, anchorA = "LEFT", anchorB = "RIGHT", offsetX = 5 } },
-        menuUtilCallback = function(ownerRegion, rootDescription)
+        cleanTemplate = true,
+        buttonTextureOptions = CraftSim.CONST.BUTTON_TEXTURE_OPTIONS.OPTIONS,
+        sizeX = 20, sizeY = 20,
+        clickCallback = function(_, _)
+            MenuUtil.CreateContextMenu(UIParent, function(ownerRegion, rootDescription)
                 local disableCB = rootDescription:CreateCheckbox(
                     L("CRAFT_LOG_DISABLE_CHECKBOX"),
                     function()
@@ -223,7 +227,8 @@ function CraftSim.CRAFT_LOG.UI:InitLogFrame(frame)
                 local clearDataButton = rootDescription:CreateButton(f.r("Clear Data"), function()
                     CraftSim.CRAFT_LOG:ClearData()
                 end)
-        end,
+            end)
+        end
     }
 
     frame.content.backgroundFrame = GGUI.Frame {

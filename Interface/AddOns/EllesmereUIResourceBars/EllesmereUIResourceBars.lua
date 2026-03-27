@@ -1820,17 +1820,8 @@ local function UpdateHealthBar()
     healthBar:SetMinMaxValues(0, mx)
 
     local curTainted = issecretvalue and issecretvalue(cur)
-    -- Percent for text display. UnitHealthPercent returns a value that may be
-    -- secret, but string.format handles secret values natively (C function).
-    -- We store it as-is and only pass it to format/SetFormattedText, never arithmetic.
-    local pctRaw
-    if UnitHealthPercent then
-        pctRaw = UnitHealthPercent("player", true, CurveConstants and CurveConstants.ScaleTo100)
-    elseif not curTainted and mx > 0 then
-        pctRaw = cur / mx * 100
-    else
-        pctRaw = 0
-    end
+    -- Percent used for text display; derived from raw values (avoids secret-value issues).
+    local pctRaw = (not curTainted and mx > 0) and (cur / mx * 100) or 0
 
     -- Color: threshold via ColorCurve, matching the power bar implementation.
     -- WoW evaluates the curve on the C side (secret-value-safe) and returns a Color object.
@@ -1870,21 +1861,19 @@ local function UpdateHealthBar()
     -- Text
     if hp.textFormat ~= "none" then
         local fmt = hp.textFormat
-        local pctStr = format("%d", pctRaw)
-        local curStr = AbbreviateLargeNumbers(cur)
         local txt
         if fmt == "both" then
-            txt = curStr .. " | " .. pctStr .. "%"
+            txt = AbbreviateLargeNumbers(cur) .. " | " .. format("%d", pctRaw) .. "%"
         elseif fmt == "curhpshort" then
-            txt = curStr
+            txt = AbbreviateLargeNumbers(cur)
         elseif fmt == "perhp" then
-            txt = pctStr .. "%"
+            txt = format("%d", pctRaw) .. "%"
         elseif fmt == "perhpnosign" then
-            txt = pctStr
+            txt = format("%d", pctRaw)
         elseif fmt == "perhpnum" then
-            txt = pctStr .. "% | " .. curStr
+            txt = format("%d", pctRaw) .. "% | " .. AbbreviateLargeNumbers(cur)
         else
-            txt = pctStr .. "%"
+            txt = format("%d", pctRaw) .. "%"
         end
         healthBar._text:SetText(txt)
         healthBar._text:Show()

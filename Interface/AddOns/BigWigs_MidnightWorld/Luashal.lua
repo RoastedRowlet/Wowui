@@ -25,12 +25,12 @@ function mod:GetOptions()
 end
 
 function mod:OnBossEnable()
-	self:ScheduleTimer(function() self:CheckForEngage() end, 1)
+	self:ScheduleTimer("CheckForEngage", 1)
 	self:RegisterEvent("BOSS_KILL")
 end
 
 function mod:OnEncounterStart()
-	self:ScheduleTimer(function() self:CheckForWipe() end, 3)
+	self:CheckForWipe()
 
 	self:RegisterEvent("RAID_BOSS_EMOTE")
 	self:RegisterWhisperEmoteComms("RaidBossWhisperSync")

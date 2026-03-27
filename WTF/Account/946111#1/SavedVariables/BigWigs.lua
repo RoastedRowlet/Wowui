@@ -8,6 +8,35 @@ BigWigs3DB = {
 ["Zappyxatu - Stormrage"] = "Default",
 },
 ["namespaces"] = {
+["BigWigs_Plugins_BossBlock"] = {
+["global"] = {
+["tableNeedsCopied"] = false,
+["watchedMovies"] = {
+[1049] = true,
+},
+},
+},
+["BigWigs_Plugins_Bars"] = {
+["profiles"] = {
+["Default"] = {
+["normalWidth"] = 120,
+["visibleBarLimit"] = 1,
+["emphasize"] = false,
+["expPosition"] = {
+"TOP",
+"TOP",
+386,
+-7,
+},
+["normalPosition"] = {
+"BOTTOMRIGHT",
+"BOTTOMRIGHT",
+0,
+168,
+},
+},
+},
+},
 ["MythicPlus"] = {
 ["global"] = {
 ["showViewerTeleportTip"] = false,
@@ -20,14 +49,6 @@ nil,
 107,
 108,
 },
-},
-},
-},
-["BigWigs_Plugins_BossBlock"] = {
-["global"] = {
-["tableNeedsCopied"] = false,
-["watchedMovies"] = {
-[1049] = true,
 },
 },
 },
@@ -47,11 +68,11 @@ nil,
 },
 ["myKeystones"] = {
 ["Player-60-0C9E885E"] = {
-["playerRating"] = 940,
+["playerRating"] = 1759,
 ["specId"] = 1480,
-["keyMap"] = 559,
+["keyMap"] = 556,
 ["name"] = "Angryabsol",
-["keyLevel"] = 4,
+["keyLevel"] = 13,
 ["realm"] = "Stormrage",
 },
 ["Player-3676-0DF7D3EF"] = {

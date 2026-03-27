@@ -419,14 +419,11 @@ local function FindSlotForElement(element)
 end
 ns.FindSlotForElement = FindSlotForElement
 
-local function SetCombinedHealthText(fs, element, pctText, numText)
-    if element == "healthPctNum" then
-        fs:SetFormattedText("%s | %s", pctText, numText)
-    elseif element == "healthNumPct" then
-        fs:SetFormattedText("%s | %s", numText, pctText)
-    else
-        fs:SetText("")
+local function FormatCombinedHealth(element, pctText, numText)
+    if element == "healthPctNum" then return pctText .. " | " .. numText
+    elseif element == "healthNumPct" then return numText .. " | " .. pctText
     end
+    return ""
 end
 
 -- Estimate pixel width of health text for a given element type.
@@ -2376,14 +2373,14 @@ questCacheWatcher:SetScript("OnEvent", function()
     end
 end)
 
-local function _C(key)
-    return (p and p[key]) or defaults[key]
-end
 local function GetReactionColor(unit)
     local db = p or defaults
+    local function C(key)
+        return db[key] or defaults[key]
+    end
     -- 1. Tapped always highest
     if UnitIsTapDenied(unit) then
-        local c = _C("tapped")
+        local c = C("tapped")
         return c.r, c.g, c.b
     end
     -- 2. Quest mob second highest
@@ -2406,17 +2403,17 @@ local function GetReactionColor(unit)
                 -- Only apply when in a group (solo players always have aggro)
                 if IsInGroup() then
                 if status >= 3 then
-                    local c = _C("dpsHasAggro")
+                    local c = C("dpsHasAggro")
                     return c.r, c.g, c.b
                 elseif status >= 2 then
-                    local c = _C("dpsNearAggro")
+                    local c = C("dpsNearAggro")
                     return c.r, c.g, c.b
                 end
                 end
             else
                 -- Tank: losing aggro / no aggro absolute priority
                 if status < 3 and status >= 2 then
-                    local c = _C("tankLosingAggro")
+                    local c = C("tankLosingAggro")
                     return c.r, c.g, c.b
                 elseif status < 3 then
                     -- Only show no-aggro warning if a non-tank has it.
@@ -2424,7 +2421,7 @@ local function GetReactionColor(unit)
                     local unitTarget = unit .. "target"
                     local targetRole = UnitExists(unitTarget) and UnitGroupRolesAssigned(unitTarget) or "NONE"
                     if targetRole ~= "TANK" then
-                        local c = _C("tankNoAggro")
+                        local c = C("tankNoAggro")
                         return c.r, c.g, c.b
                     end
                     -- Another tank has aggro -- fall through, no warning color
@@ -2434,7 +2431,7 @@ local function GetReactionColor(unit)
                     local classic = db.classicTankAggro
                     if classic == nil then classic = defaults.classicTankAggro end
                     if classic then
-                        local c = _C("tankHasAggro")
+                        local c = C("tankHasAggro")
                         return c.r, c.g, c.b
                     end
                 end
@@ -2443,7 +2440,7 @@ local function GetReactionColor(unit)
         end
     end
     -- 4. Focus color (if enabled)
-    local focusC = _C("focus")
+    local focusC = C("focus")
     if focusC and UnitIsUnit(unit, "focus") then
         local enabled = defaults.focusColorEnabled
         if db.focusColorEnabled ~= nil then enabled = db.focusColorEnabled end
@@ -2454,11 +2451,11 @@ local function GetReactionColor(unit)
     -- 5. Neutral
     local reaction = UnitReaction(unit, "player")
     if reaction and reaction == 4 then
-        local c = _C("neutral")
+        local c = C("neutral")
         return c.r, c.g, c.b
     end
     if UnitCanAttack("player", unit) and not UnitIsEnemy(unit, "player") then
-        local c = _C("neutral")
+        local c = C("neutral")
         return c.r, c.g, c.b
     end
     -- 6. Enemy player class colors
@@ -2476,7 +2473,7 @@ local function GetReactionColor(unit)
         local level = UnitLevel(unit)
         local playerLevel = UnitLevel("player")
         if level == -1 or (playerLevel and level >= playerLevel + 1) then
-            local c = _C("miniboss")
+            local c = C("miniboss")
             if type(inCombat) == "boolean" and inCombat then
                 return c.r, c.g, c.b
             else
@@ -2487,7 +2484,7 @@ local function GetReactionColor(unit)
     -- 8. Caster
     local unitClass = UnitClassBase and UnitClassBase(unit)
     if unitClass == "PALADIN" then
-        local c = _C("caster")
+        local c = C("caster")
         if type(inCombat) == "boolean" and inCombat then
             return c.r, c.g, c.b
         else
@@ -2499,12 +2496,12 @@ local function GetReactionColor(unit)
         local enabled = defaults.tankHasAggroEnabled
         if db.tankHasAggroEnabled ~= nil then enabled = db.tankHasAggroEnabled end
         if enabled then
-            local c = _C("tankHasAggro")
+            local c = C("tankHasAggro")
             return c.r, c.g, c.b
         end
     end
     -- 10. Fallback: enemy in combat / out of combat
-    local eic = _C("enemyInCombat")
+    local eic = C("enemyInCombat")
     if type(inCombat) == "boolean" and inCombat then
         return eic.r, eic.g, eic.b
     end
@@ -3168,7 +3165,7 @@ function NameplateFrame:UpdateHealthValues()
         elseif element == "healthPctNum" or element == "healthNumPct" then
             self.hpText:SetParent(self.healthTextFrame)
             SetFSFont(self.hpText, slotFontSz, GetNPOutline())
-            SetCombinedHealthText(self.hpText, element, pctText, numText)
+            self.hpText:SetText(FormatCombinedHealth(element, pctText, numText))
             self.hpText:ClearAllPoints()
             if slot.anchor == "CENTER" then
                 self.hpText:SetPoint("CENTER", self.health, "CENTER", txOff, tyOff)
@@ -3201,7 +3198,7 @@ function NameplateFrame:UpdateHealthValues()
             elseif topElement == "healthPercentNoSign" then
                 fs:SetText(pctNoSignText)
             else
-                SetCombinedHealthText(fs, topElement, pctText, numText)
+                fs:SetText(FormatCombinedHealth(topElement, pctText, numText))
             end
         end
         SetFSFont(fs, topFontSz, GetNPOutline())
@@ -3560,17 +3557,12 @@ function NameplateFrame:UpdateAuras(updateInfo)
     -- The debuffList is already current when UNIT_AURA fires.
     local importantSet
     if not showAll and self.nameplate then
-        if not self._importantSet then self._importantSet = {} end
-        importantSet = self._importantSet
-        wipe(importantSet)
+        importantSet = {}
         local uf = self.nameplate.UnitFrame
         if uf and uf.AurasFrame and uf.AurasFrame.debuffList and uf.AurasFrame.debuffList.Iterate then
-            if not self._iterateCB then
-                self._iterateCB = function(auraInstanceID)
-                    self._importantSet[auraInstanceID] = true
-                end
-            end
-            uf.AurasFrame.debuffList:Iterate(self._iterateCB)
+            uf.AurasFrame.debuffList:Iterate(function(auraInstanceID)
+                importantSet[auraInstanceID] = true
+            end)
         end
     end
     if C_UnitAuras and C_UnitAuras.GetUnitAuras then

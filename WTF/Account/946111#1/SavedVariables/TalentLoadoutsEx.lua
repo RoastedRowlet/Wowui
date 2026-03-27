@@ -91,10 +91,13 @@ nil,
 ["EVOKER"] = {
 [3] = {
 {
-["isInGroup"] = false,
-["text"] = "CEcBAAAAAAAAAAAAAAAAAAAAAMmZmZbmZmxyAzsMjxwMAAAAAAAAYmBmBjHoGzMzAAAAgZmZmxMzyYmBmZzYwCsMGGbDgZiYDzMDmZAM",
+["pvp2"] = 5615,
 ["name"] = "SC M+",
+["pvp3"] = 5619,
+["isInGroup"] = false,
+["pvp1"] = 5564,
 ["icon"] = 134400,
+["text"] = "CEcBPJc41CfcseY0baneJ1IHrNmZmZbmZmxyAzsMjxwMAAAAAAAAYmBmBjpGzMzAAAAAzMzMmZWGzMwMbGDWglxwYbAMTEbYmZwMDgB",
 },
 {
 ["name"] = "Tst",

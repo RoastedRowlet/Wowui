@@ -313,32 +313,6 @@ end
 -- ADDON BUTTON HELPERS (used by one-time EnumerateFrames scan)
 -- ===================================================================
 
--- Frame name prefixes that are NEVER action buttons.
--- Checked before GetObjectType to exit the loop iteration cheaply.
--- CompactRaidFrame*Buff* alone can be 40 members × 4 buffs = 160+ frames.
-local SKIP_PREFIXES = {
-    "CompactRaidFrame",
-    "CompactPartyFrame",
-    "NamePlate",
-    "ArenaEnemyFrame",
-    "BossFrame",
-    "SpellBookItem",
-    "TalentFrame",
-    "AchievementFrame",
-    "QuestFrame",
-    "LFDSearchStatus",
-}
-
-local function IsSkippedFrameName(name)
-    for i = 1, #SKIP_PREFIXES do
-        local prefix = SKIP_PREFIXES[i]
-        if name:sub(1, #prefix) == prefix then
-            return true
-        end
-    end
-    return false
-end
-
 local function IsForbiddenFrame(f)
     if not f then return true end
     return f.IsForbidden and f:IsForbidden()
@@ -394,92 +368,70 @@ local function GetHotkeyFromButton(button)
     return nil
 end
 
+-- ═══════════════════════════════════════════════════════════════════
+-- KNOWN ADDON BUTTON NAME PATTERNS
+-- Looked up via _G[name] — these frames are always fully initialized.
+-- EnumerateFrames was finding partially-constructed LibActionButton
+-- objects (self.state = nil) causing crashes on any .action access.
+-- Frames registered in _G are always fully set up. Same approach as
+-- eQoL's CooldownPanels (ELVUI_ACTION_BARS=15, ELVUI_ACTION_BUTTONS=12).
+-- ═══════════════════════════════════════════════════════════════════
+local ADDON_BUTTON_PATTERNS = {
+    -- ElvUI: up to 15 bars × 12 buttons
+    { prefix = "ElvUI_Bar",        bars = 15, buttons = 12 },
+    -- Bartender4
+    { prefix = "BT4Button",        bars = 1,  buttons = 180 },
+    -- Dominos
+    { prefix = "DominosActionButton", bars = 1, buttons = 180 },
+}
+
 local function GetActionFromButton(button)
     if not button or IsForbiddenFrame(button) then return nil end
-    
-    -- Try .action property
-    if button.action and type(button.action) == "number" then
-        if HasAction(button.action) then
-            return button.action
-        end
-    end
-    
-    -- Try GetAction method
-    if button.GetAction and type(button.GetAction) == "function" then
-        local action = button:GetAction()
-        if action and type(action) == "number" and action > 0 and HasAction(action) then
-            return action
-        end
-    end
-    
-    -- Try attribute (reading attributes is always unrestricted)
-    if button.GetAttribute and type(button.GetAttribute) == "function" then
-        local action = button:GetAttribute("action")
-        if action then
-            action = tonumber(action)
-            if action and action > 0 and HasAction(action) then
-                return action
-            end
-        end
-    end
-    
+    -- rawget bypasses __index entirely. BT4/ElvUI/Dominos LibActionButton
+    -- objects proxy .action through __index → GetAction() → crash when
+    -- self.state is nil. rawget reads the raw table slot, no metamethods.
+    local action = tonumber(rawget(button, "action"))
+    if action and action > 0 and HasAction(action) then return action end
     return nil
 end
 
--- ═══════════════════════════════════════════════════════════════════
--- BUILD ADDON BUTTON CACHE (runs ONCE, not on every rebuild)
--- Finds ElvUI/Bartender/Dominos buttons via EnumerateFrames and
--- caches them so RebuildCache() never needs to iterate all frames.
---
--- FIX: Name check happens FIRST before GetObjectType/GetActionFromButton.
--- CompactRaidFrame*Buff* alone = 160+ frames per 40-man raid that would
--- otherwise each reach GetObjectType before being filtered → script timeout.
--- ═══════════════════════════════════════════════════════════════════
 local function BuildAddonButtonCache()
     if addonButtonCacheBuilt then return end
     addonButtonCacheBuilt = true
     wipe(addonButtonCache)
-    
-    local f = EnumerateFrames()
-    while f do
-        -- Fast name check FIRST: skip known non-action-button frame families
-        -- before any expensive method calls (GetObjectType, GetActionFromButton).
-        local name = (f.GetName and f:GetName()) or ""
-        if type(name) ~= "string" then name = "" end
-        
-        local shouldCheck = true
-        if name ~= "" then
-            -- Skip standard Blizzard action buttons (handled by slot mappings)
-            if name:match("^ActionButton%d+$") or name:match("^MultiBar.*Button%d+$") then
-                shouldCheck = false
-            -- Skip non-action-button frame families (the main timeout culprit)
-            elseif IsSkippedFrameName(name) then
-                shouldCheck = false
-            end
+
+    local seen = {}
+    local function visit(button)
+        if not button or seen[button] then return end
+        seen[button] = true
+        if IsForbiddenFrame(button) then return end
+        local action = GetActionFromButton(button)
+        if action then
+            addonButtonCache[#addonButtonCache + 1] = button
         end
-        
-        if shouldCheck and not IsForbiddenFrame(f) and type(f.GetObjectType) == "function" then
-            local objType = f:GetObjectType()
-            if objType == "CheckButton" or objType == "Button" then
-                local action = GetActionFromButton(f)
-                if action then
-                    addonButtonCache[#addonButtonCache + 1] = f
+    end
+
+    for _, info in ipairs(ADDON_BUTTON_PATTERNS) do
+        if info.bars > 1 then
+            for bar = 1, info.bars do
+                for btn = 1, info.buttons do
+                    visit(_G[info.prefix .. bar .. "Button" .. btn])
                 end
             end
+        else
+            for btn = 1, info.buttons do
+                visit(_G[info.prefix .. btn])
+            end
         end
-        
-        f = EnumerateFrames(f)
     end
 end
 
 -- ═══════════════════════════════════════════════════════════════════
--- RESCAN CACHED ADDON BUTTONS (fast - no EnumerateFrames)
--- Only re-reads the hotkey/action from already-discovered buttons.
+-- RESCAN CACHED ADDON BUTTONS (fast — no frame iteration)
 -- ═══════════════════════════════════════════════════════════════════
 local function RescanAddonButtons()
     for i = #addonButtonCache, 1, -1 do
         local button = addonButtonCache[i]
-        -- Validate button still exists and is usable
         if not button or IsForbiddenFrame(button) then
             table.remove(addonButtonCache, i)
         else
@@ -491,14 +443,11 @@ local function RescanAddonButtons()
                     if formatted and formatted ~= "" then
                         local actionType, id = GetActionInfo(action)
                         local texture = GetActionTexture(action)
-                        
                         local idIsSecret = id and issecretvalue(id)
                         local textureIsSecret = texture and issecretvalue(texture)
-                        
                         if texture and not textureIsSecret then
                             keybindCache.byTexture[texture] = keybindCache.byTexture[texture] or formatted
                         end
-                        
                         if actionType == "spell" and id and not idIsSecret then
                             keybindCache.bySpellID[id] = keybindCache.bySpellID[id] or formatted
                             if C_Spell and C_Spell.GetBaseSpell then

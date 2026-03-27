@@ -163,7 +163,7 @@ function CraftSim.COST_OPTIMIZATION.UI:Init()
                     local recipeID = row.recipeID --[[@as RecipeID]]
 
                     if IsMouseButtonDown("RightButton") then
-                        CraftSim.WIDGETS.ContextMenu.Open(UIParent, function(ownerRegion, rootDescription)
+                        MenuUtil.CreateContextMenu(UIParent, function(ownerRegion, rootDescription)
                             rootDescription:CreateTitle(item:GetItemLink())
                             rootDescription:CreateDivider()
 

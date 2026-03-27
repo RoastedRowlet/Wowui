@@ -1,10 +1,15 @@
 
 NewSettingsSeen = {
 ["CAA_COMBAT_AUDIO_ALERTS_LABEL"] = true,
-["raidFramesDispelIndicatorType"] = true,
-["enableConnectToPhotoSharing"] = true,
-["raidFramesDisplayClassColor"] = true,
-["raidFramesCenterBigDefensive"] = true,
+["SPELL_DIMINISH_SECTION_HEADER_LABEL"] = true,
 ["raidFramesDisplayLargerRoleSpecificDebuffs"] = true,
+["raidFramesCenterBigDefensive"] = true,
+["EXTERNAL_DEFENSIVES_LABEL"] = true,
+["chatBubblesRaid"] = true,
+["DAMAGE_METER_LABEL"] = true,
 ["raidFramesDispelIndicatorOverlay"] = true,
+["raidFramesDisplayClassColor"] = true,
+["COMBAT_WARNINGS_LABEL"] = true,
+["enableConnectToPhotoSharing"] = true,
+["raidFramesDispelIndicatorType"] = true,
 }

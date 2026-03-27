@@ -65,7 +65,7 @@ function MKPT_env.CreateUI()
     UIFrameFadeIn(f.hideButton, 0.1, f.hideButton:GetAlpha(), 1)
     UIFrameFadeIn(f.closeButton, 0.1, f.closeButton:GetAlpha(), 1)
 
-    GameTooltip:SetOwner(self, "ANCHOR_TOP")
+    GameTooltip:SetOwner(self, "ANCHOR_CURSOR")
     GameTooltip:SetText("Auto hide")
     GameTooltip:Show()
   end)
@@ -101,7 +101,7 @@ function MKPT_env.CreateUI()
     GameTooltip:Show()
   end)
   f.closeButton:SetScript("OnLeave", function(self)
-    if db.ui.autohide and MKPT_env.charDb.state.show then
+    if db.ui.autohide then
       UIFrameFadeOut(f, 0.5, f:GetAlpha(), 0)
     end
     UIFrameFadeOut(f.hideButton, 0.5, f.hideButton:GetAlpha(), 0)

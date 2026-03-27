@@ -24,10 +24,13 @@ TalentLoadoutEx = {
 ["EVOKER"] = {
 [3] = {
 {
-["isInGroup"] = false,
-["text"] = "CEcBAAAAAAAAAAAAAAAAAAAAAMmZmZbmZmxyAzsMjxwMAAAAAAAAYmBmBjHoGzMzAAAAgZmZmxMzyYmBmZzYwCsMGGbDgZiYDzMDmZAM",
+["pvp1"] = 5564,
 ["name"] = "SC M+",
 ["icon"] = 134400,
+["isInGroup"] = false,
+["text"] = "CEcBPJc41CfcseY0baneJ1IHrNmZmZbmZmxyAzsMjxwMAAAAAAAAYmBmBjpGzMzAAAAAzMzMmZWGzMwMbGDWglxwYbAMTEbYmZwMDgB",
+["pvp3"] = 5619,
+["pvp2"] = 5615,
 },
 {
 ["pvp1"] = 5564,

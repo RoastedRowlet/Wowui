@@ -11,9 +11,9 @@ Grid2DB = {
 },
 ["Zappyxatu - Stormrage"] = {
 ["iconSize"] = 18,
-["frameHeight"] = 62,
 ["displayZoomedIcons"] = true,
 ["frameWidth"] = 62,
+["frameHeight"] = 62,
 },
 ["Midnight"] = {
 ["frameWidth"] = 150,
@@ -39,9 +39,9 @@ Grid2DB = {
 },
 ["Madmareep - Stormrage"] = {
 ["iconSize"] = 18,
-["frameWidth"] = 62,
 ["frameHeight"] = 62,
 ["displayZoomedIcons"] = true,
+["frameWidth"] = 62,
 },
 ["Angryabsol - Stormrage"] = {
 ["iconSize"] = 18,
@@ -406,8 +406,8 @@ Grid2DB = {
 },
 ["PosY"] = 224.0000145244594,
 ["groupAnchor"] = "BOTTOMLEFT",
-["horizontal"] = false,
 ["Padding"] = 2,
+["horizontal"] = false,
 ["BorderTexture"] = "None",
 },
 ["TST"] = {
@@ -1057,39 +1057,6 @@ Grid2DB = {
 ["type"] = "multibar-color",
 },
 },
-["statuses"] = {
-["dungeon-role"] = {
-["hideInCombat"] = true,
-},
-["heals-incoming"] = {
-["includePlayerHeals"] = true,
-},
-["buffs-Relevant"] = {
-["type"] = "mbuffs",
-["color1"] = {
-["a"] = 1,
-["b"] = 0,
-["g"] = 1,
-["r"] = 0,
-},
-["aura_filter"] = {
-["sortRule"] = 3,
-["filter"] = "HELPFUL|RAID",
-},
-},
-["debuffs-Relevant"] = {
-["type"] = "mdebuffs",
-["colors"] = {
-},
-["aura_filter"] = {
-["sortRule"] = 3,
-},
-},
-},
-["versions"] = {
-["Grid2"] = 102,
-},
-["__template"] = "Classic",
 ["statusMap"] = {
 ["text-down"] = {
 ["name"] = 99,
@@ -1158,6 +1125,39 @@ Grid2DB = {
 ["ready-check"] = 55,
 ["offline"] = 52,
 ["summon"] = 51,
+},
+},
+["versions"] = {
+["Grid2"] = 102,
+},
+["__template"] = "Classic",
+["statuses"] = {
+["dungeon-role"] = {
+["hideInCombat"] = true,
+},
+["heals-incoming"] = {
+["includePlayerHeals"] = true,
+},
+["buffs-Relevant"] = {
+["type"] = "mbuffs",
+["color1"] = {
+["a"] = 1,
+["b"] = 0,
+["g"] = 1,
+["r"] = 0,
+},
+["aura_filter"] = {
+["sortRule"] = 3,
+["filter"] = "HELPFUL|RAID",
+},
+},
+["debuffs-Relevant"] = {
+["type"] = "mdebuffs",
+["colors"] = {
+},
+["aura_filter"] = {
+["sortRule"] = 3,
+},
 },
 },
 },
@@ -2247,39 +2247,6 @@ Grid2DB = {
 ["type"] = "background",
 },
 },
-["statuses"] = {
-["dungeon-role"] = {
-["hideInCombat"] = true,
-},
-["debuffs-Relevant"] = {
-["type"] = "mdebuffs",
-["colors"] = {
-},
-["aura_filter"] = {
-["sortRule"] = 3,
-},
-},
-["heals-incoming"] = {
-["includePlayerHeals"] = true,
-},
-["buffs-Relevant"] = {
-["type"] = "mbuffs",
-["aura_filter"] = {
-["filter"] = "HELPFUL|RAID",
-["sortRule"] = 3,
-},
-["color1"] = {
-["a"] = 1,
-["r"] = 0,
-["g"] = 1,
-["b"] = 0,
-},
-},
-},
-["versions"] = {
-["Grid2"] = 102,
-},
-["__template"] = "Classic",
 ["statusMap"] = {
 ["icon-right"] = {
 ["dungeon-role"] = 150,
@@ -2348,6 +2315,39 @@ Grid2DB = {
 ["ready-check"] = 55,
 ["offline"] = 52,
 ["summon"] = 51,
+},
+},
+["versions"] = {
+["Grid2"] = 102,
+},
+["__template"] = "Classic",
+["statuses"] = {
+["dungeon-role"] = {
+["hideInCombat"] = true,
+},
+["debuffs-Relevant"] = {
+["type"] = "mdebuffs",
+["colors"] = {
+},
+["aura_filter"] = {
+["sortRule"] = 3,
+},
+},
+["heals-incoming"] = {
+["includePlayerHeals"] = true,
+},
+["buffs-Relevant"] = {
+["type"] = "mbuffs",
+["aura_filter"] = {
+["filter"] = "HELPFUL|RAID",
+["sortRule"] = 3,
+},
+["color1"] = {
+["a"] = 1,
+["r"] = 0,
+["g"] = 1,
+["b"] = 0,
+},
 },
 },
 },
@@ -3597,16 +3597,18 @@ Grid2DB = {
 },
 },
 ["statuses"] = {
-["buff-Regrowth-mine"] = {
+["buffs-Relevant"] = {
+["type"] = "mbuffs",
+["aura_filter"] = {
+["filter"] = "HELPFUL|RAID",
+["sortRule"] = 5,
+},
 ["color1"] = {
 ["a"] = 1,
-["b"] = 1,
+["r"] = 0,
 ["g"] = 1,
-["r"] = 1,
+["b"] = 0,
 },
-["type"] = "buff",
-["mine"] = 1,
-["spellName"] = 8936,
 },
 ["buffs-Defensives"] = {
 ["type"] = "mbuffs",
@@ -3618,6 +3620,17 @@ Grid2DB = {
 ["r"] = 0,
 ["g"] = 1,
 ["b"] = 0,
+},
+},
+["dungeon-role"] = {
+["hideInCombat"] = true,
+},
+["heals-incoming"] = {
+["includePlayerHeals"] = true,
+},
+["threat"] = {
+["color3"] = {
+["g"] = 0.5,
 },
 },
 ["debuffs-Dispellable"] = {
@@ -3640,27 +3653,16 @@ Grid2DB = {
 ["b"] = 0,
 },
 },
-["heals-incoming"] = {
-["includePlayerHeals"] = true,
-},
-["threat"] = {
-["color3"] = {
-["g"] = 0.5,
-},
-},
-["buff-ShiftingSands-mine"] = {
-["spellName"] = 413984,
-["type"] = "buff",
-["mine"] = 1,
+["buff-Regrowth-mine"] = {
 ["color1"] = {
 ["a"] = 1,
-["r"] = 1,
-["g"] = 1,
 ["b"] = 1,
+["g"] = 1,
+["r"] = 1,
 },
-},
-["master-looter"] = {
-["hideInCombat"] = true,
+["type"] = "buff",
+["mine"] = 1,
+["spellName"] = 8936,
 },
 ["buff-Rejuvenation-mine"] = {
 ["color1"] = {
@@ -3764,20 +3766,18 @@ Grid2DB = {
 ["sortRule"] = 3,
 },
 },
-["buffs-Relevant"] = {
-["type"] = "mbuffs",
-["aura_filter"] = {
-["filter"] = "HELPFUL|RAID",
-["sortRule"] = 5,
-},
+["buff-ShiftingSands-mine"] = {
+["spellName"] = 413984,
+["type"] = "buff",
+["mine"] = 1,
 ["color1"] = {
 ["a"] = 1,
-["r"] = 0,
+["r"] = 1,
 ["g"] = 1,
-["b"] = 0,
+["b"] = 1,
 },
 },
-["dungeon-role"] = {
+["master-looter"] = {
 ["hideInCombat"] = true,
 },
 ["buff-WildGrowth-mine"] = {

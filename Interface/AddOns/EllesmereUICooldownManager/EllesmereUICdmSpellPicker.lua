@@ -13,9 +13,7 @@ local cdmBarFrames           = ns.cdmBarFrames
 local cdmBarIcons            = ns.cdmBarIcons
 local ResolveChildSpellID    = ns.ResolveChildSpellID
 local ResolveInfoSpellID     = ns.ResolveInfoSpellID
--- _cdIDToCorrectSID removed from main file; hooks resolve per-frame now.
--- SpellPicker still writes to this for its own local matching.
-local _cdIDToCorrectSID      = ns._cdIDToCorrectSID or {}
+local _cdIDToCorrectSID      = ns._cdIDToCorrectSID
 local _tickCDUtilTrackedSet  = ns._tickCDUtilTrackedSet
 local _tickBuffIconTrackedSet = ns._tickBuffIconTrackedSet
 local ComputeTopRowStride    = ns.ComputeTopRowStride
@@ -196,8 +194,6 @@ function ns.GetCDMSpellsForBar(barKey)
                         local usedOnBar = SpellUsedOnAnyOtherBar(sid, barKey)
                         local baseKnown = cdInfo and cdInfo.spellID
                             and cdInfo.spellID > 0 and spellIDKnown[cdInfo.spellID]
-                        -- Is this spell in the correct Blizzard CDM section for this bar?
-                        local trackedForBar = ns.IsSpellTrackedForBarType(sid, barType)
                         spells[#spells + 1] = {
                             cdID = cdID,
                             spellID = sid,
@@ -208,7 +204,6 @@ function ns.GetCDMSpellsForBar(barKey)
                             isDisplayed = ourPool[sid] or (name and ourPool[name]) or blizzTracked[sid] or false,
                             isKnown = knownSet[cdID] or spellIDKnown[sid] or baseKnown or false,
                             usedOnBar = usedOnBar,
-                            isTrackedForBar = trackedForBar,
                         }
                     end
                 end
@@ -296,34 +291,37 @@ local function GetBarType(barKey)
     return bd and bd.barType
 end
 
--------------------------------------------------------------------------------
---  Centralized Spell Assignment Checks
---  Used by spell pickers, overlay system, and options to determine:
---  1. Is a spell already on ANY bar (CDM bars + TBB)?
---  2. Is a spell tracked in the correct Blizzard CDM section for a bar type?
--------------------------------------------------------------------------------
-
---- Check if a spell is already assigned to another bar within the SAME family.
---- CD/utility bars only check other CD/utility bars.
---- Buff bars only check other buff bars.
---- TBB bars only check other TBB bars.
+--- Check if a spell is on another bar of the SAME family.
+--- Buff bars only check other buff bars; CD/utility bars only check
+--- other CD/utility bars.  This is because Blizzard tracks cooldown
+--- and buff versions of the same spell separately in the CDM.
+--- Checks both saved spell lists AND runtime displayed icons.
 --- Returns nil if not found, or the bar's display name if found.
---- excludeBarKey: skip this bar (so the current bar doesn't block itself).
-SpellUsedOnAnyOtherBar = function(spellID, excludeBarKey)
+SpellUsedOnAnyOtherBar = function(spellID, targetBarKey)
+    local targetType = GetBarType(targetBarKey)
+    local targetIsBuff = (targetType == "buffs")
     local p = ECME.db.profile
-    local excludeType = GetBarType(excludeBarKey)
-    local excludeIsBuff = (excludeType == "buffs")
-
-    -- Check CDM bars (same family only)
     for _, b in ipairs(p.cdmBars.bars) do
-        if b.key ~= excludeBarKey then
+        if b.key ~= targetBarKey then
+            -- Only check bars of the same family
             local otherType = GetBarType(b.key)
             local otherIsBuff = (otherType == "buffs")
-            if excludeIsBuff == otherIsBuff then
+            if targetIsBuff == otherIsBuff then
+                local bName = b.name or b.key
+                -- Check saved spell lists
                 local sd = ns.GetBarSpellData(b.key)
                 if sd and sd.assignedSpells then
                     for _, sid in ipairs(sd.assignedSpells) do
-                        if sid == spellID then return b.name or b.key end
+                        if sid == spellID then return bName end
+                    end
+                end
+                -- Check runtime displayed icons (covers hook-managed
+                -- default bars whose assignedSpells may be empty)
+                local icons = cdmBarIcons[b.key]
+                if icons then
+                    for _, icon in ipairs(icons) do
+                        local _sid = (ns._ecmeFC[icon] and ns._ecmeFC[icon].spellID) or icon._spellID
+                        if _sid == spellID then return bName end
                     end
                 end
             end
@@ -331,134 +329,26 @@ SpellUsedOnAnyOtherBar = function(spellID, excludeBarKey)
     end
     return nil
 end
-ns.SpellUsedOnAnyOtherBar = SpellUsedOnAnyOtherBar
 
---- Same check but for TBB (Tracking Bars check other Tracking Bars only).
-function ns.SpellUsedOnAnyOtherTBB(spellID, excludeIdx)
-    local tbb = ns.GetTrackedBuffBars and ns.GetTrackedBuffBars()
-    if not tbb or not tbb.bars then return nil end
-    for i, cfg in ipairs(tbb.bars) do
-        if i ~= excludeIdx then
-            if cfg.spellID and cfg.spellID == spellID then
-                return cfg.name or ("Tracking Bar " .. i)
-            end
-            if cfg.spellIDs then
-                for _, sid in ipairs(cfg.spellIDs) do
-                    if sid == spellID then return cfg.name or ("Tracking Bar " .. i) end
-                end
-            end
-        end
-    end
-    return nil
-end
-
---- Check if a spell is tracked in the correct Blizzard CDM section for a bar type.
---- Returns true if the spell is properly tracked (no popup/overlay needed).
----
---- Rules:
----   CD/utility bar: must be in Essential/Utility viewer
----   Buff bar: must be in BuffIcon viewer (not just Tracked Bars)
----   TBB: must be in BuffBar viewer (not just Tracked Buffs)
---- Check if a spell is KNOWN (not grayed out) in Blizzard CDM.
---- Uses GetCooldownViewerCategorySet(cat, false) which returns only learned spells.
-function ns.IsSpellKnownInCDM(spellID)
-    if not spellID or spellID <= 0 then return false end
-    if not C_CooldownViewer or not C_CooldownViewer.GetCooldownViewerCategorySet then return true end
-    for cat = 0, 3 do
-        local knownIDs = C_CooldownViewer.GetCooldownViewerCategorySet(cat, false)
-        if knownIDs then
-            for _, cdID in ipairs(knownIDs) do
-                local info = C_CooldownViewer.GetCooldownViewerCooldownInfo(cdID)
-                if info then
-                    local sid = ns.ResolveInfoSpellID(info)
-                    if sid == spellID then return true end
-                    if info.spellID == spellID then return true end
-                    if info.overrideSpellID == spellID then return true end
-                end
-            end
-        end
-    end
-    return false
-end
-
---- Check if a spell is ACTIVELY tracked in the correct Blizzard CDM viewer.
---- Returns true only if the spell has a live frame in the viewer.
---- Used by spell picker popups and overlays.
---- Check if a spell exists in ANY Blizzard CDM category (learned or not).
---- Returns true if the spell is configured in Blizzard CDM at all.
-function ns.IsSpellInAnyCDMCategory(spellID)
-    if not spellID or spellID <= 0 then return false end
-    if not C_CooldownViewer or not C_CooldownViewer.GetCooldownViewerCategorySet then return false end
-    for cat = 0, 3 do
-        local allIDs = C_CooldownViewer.GetCooldownViewerCategorySet(cat, true)
-        if allIDs then
-            for _, cdID in ipairs(allIDs) do
-                local info = C_CooldownViewer.GetCooldownViewerCooldownInfo(cdID)
-                if info then
-                    if info.spellID == spellID then return true end
-                    local sid = ns.ResolveInfoSpellID(info)
-                    if sid == spellID then return true end
-                    if info.overrideSpellID == spellID then return true end
-                end
-            end
-        end
-    end
-    return false
-end
-
-function ns.IsSpellTrackedForBarType(spellID, barType)
-    if not spellID or spellID <= 0 then return false end
-    if barType == "buffs" then
-        return ns._tickBuffIconTrackedSet[spellID] and true or false
-    elseif barType == "tbb" then
-        return ns._tickBarViewerCache[spellID] and true or false
-    else
-        return ns._tickCDUtilTrackedSet[spellID] and true or false
-    end
-end
-
---- Add a preset group to a bar.
---- For custom_buff bars: adds ALL spell IDs as plain entries (each gets
---- its own C_UnitAuras check — only the active variant shows).
---- For other bars: adds primary ID with duration/group metadata.
+--- Add a preset group to a buff bar.
+--- Add a preset group to a buff bar.
+--- Duration and group variant mappings are stored in customSpellDurations/customSpellGroups.
 function ns.AddPresetToBar(barKey, preset)
     local sd = ns.GetBarSpellData(barKey)
     if not sd then return false end
+    local primaryID = preset.spellIDs[1]
     if not sd.assignedSpells then sd.assignedSpells = {} end
     local spellList = sd.assignedSpells
-
-    -- Check bar type
-    local bd = barDataByKey[barKey]
-    local isCustomBuff = bd and bd.barType == "custom_buff"
-
-    if isCustomBuff then
-        if preset.glowBased then
-            -- Glow-based presets removed (Time Spiral etc.)
-            return false
-        else
-            local primaryID = preset.spellIDs[1]
-            for _, existing in ipairs(spellList) do
-                if existing == primaryID then return false, "exists" end
-            end
-            spellList[#spellList + 1] = primaryID
-            if not sd.spellDurations then sd.spellDurations = {} end
-            sd.spellDurations[primaryID] = preset.duration or 30
-        end
-    else
-        -- Legacy: add primary ID with duration/group metadata
-        local primaryID = preset.spellIDs[1]
-        for _, existing in ipairs(spellList) do
-            if existing == primaryID then return false, "exists" end
-        end
-        spellList[#spellList + 1] = primaryID
-        if not sd.customSpellDurations then sd.customSpellDurations = {} end
-        sd.customSpellDurations[primaryID] = preset.duration
-        if not sd.customSpellGroups then sd.customSpellGroups = {} end
-        for _, sid in ipairs(preset.spellIDs) do
-            sd.customSpellGroups[sid] = primaryID
-        end
+    for _, existing in ipairs(spellList) do
+        if existing == primaryID then return false, "exists" end
     end
-
+    spellList[#spellList + 1] = primaryID
+    if not sd.customSpellDurations then sd.customSpellDurations = {} end
+    sd.customSpellDurations[primaryID] = preset.duration
+    if not sd.customSpellGroups then sd.customSpellGroups = {} end
+    for _, sid in ipairs(preset.spellIDs) do
+        sd.customSpellGroups[sid] = primaryID
+    end
     local frame = cdmBarFrames[barKey]
     if frame then frame._blizzCache = nil; frame._prevVisibleCount = nil end
     return true
@@ -568,7 +458,6 @@ function ns.AddCDMBar(barType, name, numRows)
     local typeLabel = barType == "cooldowns" and "Cooldowns"
                    or barType == "utility" and "Utility"
                    or barType == "buffs" and "Buffs"
-                   or barType == "custom_buff" and "Auras"
                    or "Cooldowns"
     -- Count existing custom bars of this type for numbering
     local typeCount = 0
@@ -597,6 +486,7 @@ function ns.AddCDMBar(barType, name, numRows)
         barVisibility = "always", housingHideEnabled = true,
         visHideHousing = true, visOnlyInstances = false,
         visHideMounted = false, visHideNoTarget = false, visHideNoEnemy = false,
+        hideBuffsWhenInactive = true,
         showStackCount = false, stackCountSize = 11,
         stackCountX = 0, stackCountY = 0,
         stackCountR = 1, stackCountG = 1, stackCountB = 1,

@@ -202,4 +202,6 @@ CHATTYNATOR_COMMAND_HISTORY = {
 "/cw Dragondumpy-Area52 but if you want 5 i cant",
 "/cw Dragondumpy-Area52 lmk",
 "/cw Dragondumpy-Area52 i know finding a crafter for them is brutal because how hard them made the veteran crafts this expansion lol",
+"/s /key",
+"/s /EUI",
 }

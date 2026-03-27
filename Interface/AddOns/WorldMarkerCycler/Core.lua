@@ -37,9 +37,6 @@ local function InitSaved()
 end
 
 -- Secure world marker cycler button
-
-
-
 local cycleBtn = CreateFrame("Button", "WorldMarkerCyclerButton", nil, "SecureActionButtonTemplate")
 cycleBtn:SetAttribute("type", "macro")
 cycleBtn:RegisterForClicks("AnyUp", "AnyDown")
@@ -51,13 +48,10 @@ SecureHandlerWrapScript(cycleBtn, "PreClick", cycleBtn, [=[
 ]=])
 
 -- Restore dedicated clear button
-
 local clearBtn = CreateFrame("Button", "WorldMarkerClearButton", UIParent, "SecureActionButtonTemplate")
 clearBtn:SetAttribute("type", "macro")
+clearBtn:SetAttribute("macrotext", "/clearworldmarker 9")
 clearBtn:RegisterForClicks("AnyUp", "AnyDown")
-SecureHandlerWrapScript(clearBtn, "PreClick", clearBtn, [=[
-    self:SetAttribute("macrotext", "/clearworldmarker 9")
-]=])
 clearBtn:SetScript("PostClick", function()
     if WorldMarkerCyclerAPI and WorldMarkerCyclerAPI.ResetCycleIndex then
         WorldMarkerCyclerAPI.ResetCycleIndex()
