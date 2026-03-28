@@ -1,0 +1,74 @@
+VER 3 0100000000000003 "Blistering Scale" "5199621"
+#121
+#showtooltip
+/cast [@mouseover] Blistering Scales
+END
+VER 3 010000000000000D "Combat Pot" "650640"
+#133
+--&04
+#showtooltip
+/use item:212265--&
+END
+VER 3 0100000000000007 "Ebon Might Trink" "5061347"
+#122
+#showtooltip
+#showtooptip Ebon Might
+/use Irideus Fragment
+/cast Ebon Might
+END
+VER 3 0100000000000005 "Eruption -> Blac" "5199630"
+#123
+#showtooltip Eruption
+/cast [nostance:1] Black Attunement
+/cast Eruption
+END
+VER 3 0100000000000004 "Focus Kick" "134400"
+#124
+#showtooltip 
+/cast [@focus, exists, harm] Quell
+END
+VER 3 010000000000000B "Living Flame AR" "4622464"
+#125
+#showtooltip Living Flame
+/use Dreambound Augment Rune
+/cast Living Flame
+END
+VER 3 0100000000000001 "M0 Sale" "134400"
+#126
+#showtooltip
+/4 WTS Mythic 0s Individual or world tour PST for details
+END
+VER 3 0100000000000008 "mouseover dispel" "134400"
+#127
+#showtooltip
+/use [@mouseover,help,nodead] Expunge(Green)
+END
+VER 3 010000000000000C "PotBotwwwwwwwwww" "5931169"
+#128
+--&0b
+#showtooltip
+/use item:211878--&
+END
+VER 3 0100000000000002 "Prescience" "5199639"
+#129
+#showtooltip
+/cast [@mouseover] Prescience
+END
+VER 3 0100000000000009 "Rescue" "4622460"
+#130
+#showtooltip
+/tar [@mouseover]
+/cast Rescue
+/targetlasttarget
+END
+VER 3 010000000000000A "Source of magic" "4630412"
+#131
+#showtooltip
+/cast [@mouseover] Source of magic
+END
+VER 3 0100000000000006 "Trinket Breath" "134400"
+#132
+#showtooltip Breath of Eons(Bronze)
+/use Irideus Fragment
+/cast Breath of Eons(Bronze)
+END

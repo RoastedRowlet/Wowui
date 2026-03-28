@@ -1,7 +1,6 @@
 
 CHATTYNATOR_CURRENT_PROFILE = "DEFAULT"
 CHATTYNATOR_COMMAND_HISTORY = {
-"/i /arcui",
 "/i /clique",
 "/s /arcui",
 "/s /reload",
@@ -202,4 +201,7 @@ CHATTYNATOR_COMMAND_HISTORY = {
 "/p you might wanna figure out far seer",
 "/p this totemic shit",
 "/p is not it",
+" yeah its currently 267",
+"/s /key",
+"/s /RELOAD",
 }

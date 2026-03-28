@@ -1,12 +1,6 @@
 
 CHATTYNATOR_CURRENT_PROFILE = "DEFAULT"
 CHATTYNATOR_COMMAND_HISTORY = {
-"/s /pull 10",
-"/cw Tekapo-Stormrage kk! omw",
-"/cw Tekapo-Stormrage /key",
-"/cw Tekapo-Stormrage /rc",
-"/cw Tekapo-Stormrage :D",
-"/cw Tekapo-Stormrage /rc",
 "/cw Tekapo-Stormrage /PULL 5",
 "/s /eui",
 "/s /reload",
@@ -202,4 +196,11 @@ CHATTYNATOR_COMMAND_HISTORY = {
 "/cw Ayfs-Stormrage lemee see if its lower on another server",
 "/cw Ayfs-Stormrage seems about 100k everywhere",
 "/cw Ayfs-Stormrage sorry :(",
+"/s /key",
+"/p |cnIQ1:|Hitem:204370::::::::90:105:::::::::|h[Stinky Bright Potion]|h|r",
+"/p /KEY",
+"/p /way #2133 56.0 56.6 Mistie",
+"/p /key",
+"/p /reload",
+"/s /mdt",
 }

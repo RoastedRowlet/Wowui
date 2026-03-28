@@ -1,29 +1,24 @@
 
 RaiderIO_Config = {
+["minimapIcon"] = {
+["minimapPos"] = 180,
+["showInCompartment"] = true,
+["hide"] = false,
+["lock"] = false,
+},
 ["profilePoint"] = {
 ["y"] = 0,
 ["x"] = -16,
 ["point"] = "TOPLEFT",
 },
-["minimapIcon"] = {
-["minimapPos"] = 180,
-["showInCompartment"] = true,
-["lock"] = false,
-["hide"] = false,
-},
 }
-RaiderIO_LastCharacter = "us-Angryabsol-stormrage"
+RaiderIO_LastCharacter = "us-Lonelylitten-stormrage"
 RaiderIO_MissingCharacters = {
-["us-Melekieth-illidan"] = true,
-["us-party2-stormrage"] = true,
-["us-Demonlordd-stormrage"] = true,
-["us-party5-stormrage"] = true,
-["us-Obdc-illidan"] = true,
-["us-Bjorhne-illidan"] = true,
-["us-Waynes-illidan"] = true,
-["us-Dreamerdudu-stormrage"] = true,
-["us-Cybrra-illidan"] = true,
-["us-Jawjack-illidan"] = true,
+["us-Witherbloom-hellscream"] = true,
+["us-Bodhim-stormrage"] = true,
+["us-Shemanhunter-frostmourne"] = true,
+["us-Orizüh-stormrage"] = true,
+["us-Dragizard-illidan"] = true,
 }
 RaiderIO_MissingServers = {
 }

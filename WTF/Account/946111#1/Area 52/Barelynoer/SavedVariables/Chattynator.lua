@@ -1,9 +1,6 @@
 
 CHATTYNATOR_CURRENT_PROFILE = "DEFAULT"
 CHATTYNATOR_COMMAND_HISTORY = {
-"/i /arcui",
-"/i /clique",
-"/s /arcui",
 "/s /reload",
 "/s /ARCUI",
 "/s /grid2",
@@ -203,4 +200,13 @@ CHATTYNATOR_COMMAND_HISTORY = {
 "/p this totemic shit",
 "/p is not it",
 " yeah its currently 267",
+"/s /key",
+"/s /RELOAD",
+"/s /EUI",
+"/s /M",
+"/p |cnIQ4:|Hitem:251148::240857::::::90:1473::23:5:12779:13439:6652:13668:12699:1:28:3025:::::|h[Pilfered Precious Band]|h|r",
+"/p /eui",
+"/p /KEY",
+"/p /EUI",
+"/p /KEY",
 }

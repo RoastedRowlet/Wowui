@@ -1,0 +1,12 @@
+
+MythicDungeonToolsDB = {
+["profileKeys"] = {
+["Barelynoer - Area 52"] = "Barelynoer - Area 52",
+["Lonelylitten - Stormrage"] = "Lonelylitten - Stormrage",
+},
+["global"] = {
+["minimap"] = {
+["showInCompartment"] = true,
+},
+},
+}
