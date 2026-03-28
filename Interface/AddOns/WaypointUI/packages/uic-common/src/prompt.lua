@@ -21,7 +21,7 @@ do --Prompt Button
 
     UICCommonPrompt.Button = UIKit.Template(function(id, name, children, ...)
         local frame =
-            UICCommonButton.RedWithText(name)
+            UICCommonButton.RedTextButton(name)
             :size(WIDTH, HEIGHT)
 
         return frame

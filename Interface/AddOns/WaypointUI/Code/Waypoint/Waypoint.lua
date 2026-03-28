@@ -206,10 +206,10 @@ end
 
 WaypointMixin.AnimGroup = UIAnim.New()
 do
-    local function ApplyDefaultState(WUIWaypointFrame)
-        WUIWaypointFrame.ContextIcon:SetScale(1)
-        WUIWaypointFrame.Beam.Mask:SetScale(50)
-        WUIWaypointFrame.AnimGroup_Beam:Play("NORMAL", WUIWaypointFrame.Beam.FXMask)
+    local function ApplyDefaultState(frame)
+        frame.ContextIcon:SetScale(1)
+        frame.Beam.Mask:SetScale(50)
+        frame.AnimGroup_Beam:Play("NORMAL", frame.Beam.FXMask)
     end
 
     WaypointMixin.AnimGroup:State("INSTANT", function(frame)
@@ -378,7 +378,7 @@ function PinpointMixin:UpdateSize()
 end
 
 function PinpointMixin:UpdateOpacity()
-    self:SetAlpha(Config.DBGlobal:GetVariable("PinpointAlpha") or 1)
+    self.Container:SetAlpha(Config.DBGlobal:GetVariable("PinpointAlpha") or 1)
 end
 
 function PinpointMixin:SetIcon(UIContextIconTexture)
@@ -407,7 +407,7 @@ end
 PinpointMixin.AnimGroup = UIAnim.New()
 do
     local function ApplyDefaultState(frame)
-        frame.Container:SetAlpha(1)
+        frame:SetAlpha(1)
         frame.Background.Arrow:Play()
     end
 
@@ -461,11 +461,11 @@ do
         :to(1)
 
     PinpointMixin.AnimGroup_Hover:State("ENABLED", function(frame)
-        Enabled:Play(frame.Container)
+        Enabled:Play(frame)
     end)
 
     PinpointMixin.AnimGroup_Hover:State("DISABLED", function(frame)
-        Disabled:Play(frame.Container)
+        Disabled:Play(frame)
     end)
 end
 
@@ -615,7 +615,7 @@ function NavigatorMixin:UpdateSize()
 end
 
 function NavigatorMixin:UpdateOpacity()
-    self:SetAlpha(Config.DBGlobal:GetVariable("NavigatorAlpha") or 1)
+    self.Container:SetAlpha(Config.DBGlobal:GetVariable("NavigatorAlpha") or 1)
 end
 
 function NavigatorMixin:SetIcon(UIContextIconTexture)
@@ -673,11 +673,11 @@ do
         :to(1)
 
     NavigatorMixin.AnimGroup_Hover:State("ENABLED", function(frame)
-        Enabled:Play(frame.Container)
+        Enabled:Play(frame)
     end)
 
     NavigatorMixin.AnimGroup_Hover:State("DISABLED", function(frame)
-        Disabled:Play(frame.Container)
+        Disabled:Play(frame)
     end)
 end
 
@@ -703,10 +703,10 @@ function Waypoint.GetTintColorInfo(ContextIconTexture)
 
     local useCustomColor = (DBGlobal:GetVariable("CustomColor") == true)
 
-    local questIncomplete = (useCustomColor and ResolveColorIntegrity(DBGlobal:GetVariable("CustomColorQuestIncomplete"))) or (env.Enum.ColorRGB01.QuestIncomplete)
-    local questComplete = (useCustomColor and ResolveColorIntegrity(DBGlobal:GetVariable("CustomColorQuestComplete"))) or (env.Enum.ColorRGB01.QuestNormal)
-    local questCompleteRecurring = (useCustomColor and ResolveColorIntegrity(DBGlobal:GetVariable("CustomColorQuestCompleteRepeatable"))) or (env.Enum.ColorRGB01.QuestRepeatable)
-    local questCompleteImportant = (useCustomColor and ResolveColorIntegrity(DBGlobal:GetVariable("CustomColorQuestCompleteImportant"))) or (env.Enum.ColorRGB01.QuestImportant)
+    local questIncomplete = (useCustomColor and ResolveColorIntegrity(DBGlobal:GetVariable("CustomColorQuestIncomplete"))) or (env.Enum.ColorRGB01.IncompleteQuest)
+    local questComplete = (useCustomColor and ResolveColorIntegrity(DBGlobal:GetVariable("CustomColorQuestComplete"))) or (env.Enum.ColorRGB01.NormalQuest)
+    local questCompleteRecurring = (useCustomColor and ResolveColorIntegrity(DBGlobal:GetVariable("CustomColorQuestCompleteRepeatable"))) or (env.Enum.ColorRGB01.RepeatableQuest)
+    local questCompleteImportant = (useCustomColor and ResolveColorIntegrity(DBGlobal:GetVariable("CustomColorQuestCompleteImportant"))) or (env.Enum.ColorRGB01.ImportantQuest)
     local other = (useCustomColor and ResolveColorIntegrity(DBGlobal:GetVariable("CustomColorOther"))) or (env.Enum.ColorRGB01.Other)
 
     local recolorQuestIncomplete = (useCustomColor and DBGlobal:GetVariable("CustomColorQuestIncompleteTint")) or (not useCustomColor and false)
@@ -730,16 +730,16 @@ function Waypoint.GetTintColorInfo(ContextIconTexture)
             a = 1
         }
         recolor = requestRecolor or false
-    elseif trackingType == Waypoint_Enum.TrackingType.QuestComplete then
+    elseif trackingType == Waypoint_Enum.TrackingType.CompleteQuest then
         color = questComplete
         recolor = requestRecolor or recolorQuestComplete
-    elseif trackingType == Waypoint_Enum.TrackingType.QuestCompleteRecurring then
+    elseif trackingType == Waypoint_Enum.TrackingType.CompleteRepeatableQuest then
         color = questCompleteRecurring
         recolor = requestRecolor or recolorQuestCompleteRecurring
-    elseif trackingType == Waypoint_Enum.TrackingType.QuestCompleteImportant then
+    elseif trackingType == Waypoint_Enum.TrackingType.CompleteImportantQuest then
         color = questCompleteImportant
         recolor = requestRecolor or recolorQuestCompleteImportant
-    elseif trackingType == Waypoint_Enum.TrackingType.QuestIncomplete then
+    elseif trackingType == Waypoint_Enum.TrackingType.IncompleteQuest then
         color = questIncomplete
         recolor = requestRecolor or recolorQuestIncomplete
     else

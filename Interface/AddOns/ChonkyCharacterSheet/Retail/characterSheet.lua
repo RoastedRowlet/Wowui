@@ -1711,9 +1711,10 @@ function module:Initialize()
     toast.description:SetFont(CCS.fontname, 12, CCS.textoutline)
     toast.description:Show()
     
-    if scaling ~= 1 then
+    if scaling ~= 1 or (scaling == 1 and CharacterFrame:GetScale() ~= 1) then
         CharacterFrame:SetScale(scaling); 
     end
+    
     ReputationFrame:SetScale(scaling);
     ReputationFrame:ClearAllPoints()
     ReputationFrame:SetPoint("TOPLEFT", CharacterFrame, "TOPLEFT", 0, 0)

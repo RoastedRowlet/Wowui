@@ -16,8 +16,8 @@ local IsAddOnLoaded = C_AddOns.IsAddOnLoaded
 env.NAME = "Waypoint UI"
 env.LOGO = Path.Root .. "\\Art\\Icons\\Logo"
 env.LOGO_ALT = Path.Root .. "\\Art\\Icons\\Logo-White"
-env.VERSION_STRING = "1.4.1"
-env.VERSION_NUMBER = 010401
+env.VERSION_STRING = "1.4.2"
+env.VERSION_NUMBER = 010402
 env.DEBUG_MODE = false
 
 
@@ -28,18 +28,18 @@ local Enum = {}; env.Enum = Enum
 do
     Enum.ColorRGB01 = {
         Other           = { r = 255 / 255, g = 241 / 255, b = 180 / 255 },
-        QuestNormal     = { r = 255 / 255, g = 255 / 255, b = 156 / 255 },
-        QuestRepeatable = { r = 158 / 255, g = 207 / 255, b = 245 / 255 },
-        QuestImportant  = { r = 249 / 255, g = 196 / 255, b = 255 / 255 },
-        QuestIncomplete = { r = 200 / 255, g = 200 / 255, b = 200 / 255 }
+        NormalQuest     = { r = 255 / 255, g = 255 / 255, b = 156 / 255 },
+        RepeatableQuest = { r = 158 / 255, g = 207 / 255, b = 245 / 255 },
+        ImportantQuest  = { r = 249 / 255, g = 196 / 255, b = 255 / 255 },
+        IncompleteQuest = { r = 200 / 255, g = 200 / 255, b = 200 / 255 }
     }
 
     Enum.ColorHEX = {
         Other           = "|cffFFF1B4",
-        QuestNormal     = "|cffFFEC9C",
-        QuestRepeatable = "|cff9ECFF5",
-        QuestImportant  = "|cffF9C4FF",
-        QuestIncomplete = "|cffE1E1E1"
+        NormalQuest     = "|cffFFEC9C",
+        RepeatableQuest = "|cff9ECFF5",
+        ImportantQuest  = "|cffF9C4FF",
+        IncompleteQuest = "|cffE1E1E1"
     }
 
     Enum.Sound = {
@@ -96,13 +96,13 @@ do
         NavigatorDistance                      = 1,
         NavigatorDynamicDistance               = true,
         CustomColor                            = false,
-        CustomColorQuestIncomplete             = { r = Enum.ColorRGB01.QuestIncomplete.r, g = Enum.ColorRGB01.QuestIncomplete.g, b = Enum.ColorRGB01.QuestIncomplete.b, a = 1 },
+        CustomColorQuestIncomplete             = { r = Enum.ColorRGB01.IncompleteQuest.r, g = Enum.ColorRGB01.IncompleteQuest.g, b = Enum.ColorRGB01.IncompleteQuest.b, a = 1 },
         CustomColorQuestIncompleteTint         = false,
-        CustomColorQuestComplete               = { r = Enum.ColorRGB01.QuestNormal.r, g = Enum.ColorRGB01.QuestNormal.g, b = Enum.ColorRGB01.QuestNormal.b, a = 1 },
+        CustomColorQuestComplete               = { r = Enum.ColorRGB01.NormalQuest.r, g = Enum.ColorRGB01.NormalQuest.g, b = Enum.ColorRGB01.NormalQuest.b, a = 1 },
         CustomColorQuestCompleteTint           = false,
-        CustomColorQuestCompleteRepeatable     = { r = Enum.ColorRGB01.QuestRepeatable.r, g = Enum.ColorRGB01.QuestRepeatable.g, b = Enum.ColorRGB01.QuestRepeatable.b, a = 1 },
+        CustomColorQuestCompleteRepeatable     = { r = Enum.ColorRGB01.RepeatableQuest.r, g = Enum.ColorRGB01.RepeatableQuest.g, b = Enum.ColorRGB01.RepeatableQuest.b, a = 1 },
         CustomColorQuestCompleteRepeatableTint = false,
-        CustomColorQuestCompleteImportant      = { r = Enum.ColorRGB01.QuestImportant.r, g = Enum.ColorRGB01.QuestImportant.g, b = Enum.ColorRGB01.QuestImportant.b, a = 1 },
+        CustomColorQuestCompleteImportant      = { r = Enum.ColorRGB01.ImportantQuest.r, g = Enum.ColorRGB01.ImportantQuest.g, b = Enum.ColorRGB01.ImportantQuest.b, a = 1 },
         CustomColorQuestCompleteImportantTint  = false,
         CustomColorOther                       = { r = Enum.ColorRGB01.Other.r, g = Enum.ColorRGB01.Other.g, b = Enum.ColorRGB01.Other.b, a = 1 },
         CustomColorOtherTint                   = false,

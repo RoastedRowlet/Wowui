@@ -434,7 +434,7 @@ do -- Selection Menu
             value = self.__selectionMenuGetFunc(value)
         end
 
-        self:GetButtonSelectionMenu():SetValue(value)
+        self:GetSelectionMenuButton():SetValue(value)
     end
 
     local function SelectionMenu_OnValueChanged(self, value)
@@ -467,24 +467,24 @@ do -- Selection Menu
 
 
         local widget = Settings_Widgets.ElementSelectionMenu()
-        local buttonSelectionMenu = widget:GetButtonSelectionMenu()
+        local selectionMenuButton = widget:GetSelectionMenuButton()
         widget:parent(parent)
         Mixin(widget, WidgetMixin)
         widget:OnLoad(widgetInfo, root, tab)
-        widget:SetUserInteractableObject(widget:GetButtonSelectionMenu())
+        widget:SetUserInteractableObject(widget:GetSelectionMenuButton())
 
 
         widget:SetDBKey(key)
         widget:PullDBKeyToLocalValue()
 
-        buttonSelectionMenu.__widgetRef = widget
+        selectionMenuButton.__widgetRef = widget
         widget.__setFunc = set
         widget.__selectionMenuGetFunc = selectionMenuGet
         widget.__selectionMenuSetFunc = selectionMenuSet
 
-        buttonSelectionMenu:SetSelectionMenu(SettingFrame.SelectionMenu)
-        buttonSelectionMenu:SetData(ResolveValueThatIsFunctionOrValue(selectionMenuData))
-        buttonSelectionMenu:HookValueChanged(SelectionMenu_OnValueChanged)
+        selectionMenuButton:SetSelectionMenu(SettingFrame.SelectionMenu)
+        selectionMenuButton:SetData(ResolveValueThatIsFunctionOrValue(selectionMenuData))
+        selectionMenuButton:HookValueChanged(SelectionMenu_OnValueChanged)
         widget:SetRefreshHandler(SelectionMenu_Refresh)
 
         return widget

@@ -31,12 +31,6 @@ local SessionData = {
     flags = nil
 }
 
-local MUTED_FLAG_MAP = {
-    ["TomTom_Waypoint"]       = true,
-    ["Dugis_Waypoint"]        = true,
-    ["SilverDragon_Waypoint"] = true
-}
-
 local function PlayUserNavigationAudio()
     local Settings_CustomAudio = Config.DBGlobal:GetVariable("AudioCustom")
     local soundID = env.Enum.Sound.NewUserNavigation
@@ -159,27 +153,12 @@ function MapPin.IsUserNavigationFlagged(flag)
     return false
 end
 
--- function MapPin.ToggleSuperTrackedPinDisplay(shown)
---     for pin in WorldMapFrame:EnumeratePinsByTemplate("WaypointLocationPinTemplate") do
---         pin:SetAlpha(shown and 1 or 0)
---         pin:EnableMouse(shown)
---     end
--- end
-
 function MapPin.ValidateSuperTrackedPinDisplay(_, event)
     if event == "USER_WAYPOINT_UPDATED" and IsSuperTrackingUserWaypoint() and not MapPin.IsUserNavigationTracked() then
         MapPin.ClearUserNavigation(true)
     elseif event == "SUPER_TRACKING_CHANGED" and C_SuperTrack.GetHighestPrioritySuperTrackingType() ~= Enum.SuperTrackingType.UserWaypoint then
         MapPin.ClearUserNavigation(true)
     end
-
-    -- for flag, _ in pairs(MUTED_FLAG_MAP) do
-    --     if MapPin.IsUserNavigationTracked() and MapPin.IsUserNavigationFlagged(flag) then
-    --         MapPin.ToggleSuperTrackedPinDisplay(false)
-    --         return
-    --     end
-    -- end
-    -- MapPin.ToggleSuperTrackedPinDisplay(true)
 end
 
 do --Automatically clear supertracking when the user waypoint is removed

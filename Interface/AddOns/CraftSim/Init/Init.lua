@@ -384,6 +384,8 @@ function CraftSim.INIT:HookToProfessionsFrame()
 
 	ProfessionsFrame:HookScript("OnShow",
 		function()
+			CraftSim.MODULES:ShowRecipeIndependentModules()
+
 			CraftSim.DEBUG:StartProfiling("Update Customer History")
 			CraftSim.CUSTOMER_HISTORY.UI:UpdateDisplay()
 			CraftSim.DEBUG:StopProfiling("Update Customer History")

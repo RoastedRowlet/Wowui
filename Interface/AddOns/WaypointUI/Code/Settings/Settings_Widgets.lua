@@ -601,7 +601,7 @@ do -- Widgets
         Settings_Widgets.ElementButton = UIKit.Template(function(id, name, children, ...)
             local frame =
                 Settings_Widgets.ElementBase(name, {
-                    UICCommon.ButtonRedWithText(name .. ".Button")
+                    UICCommon.RedTextButton(name .. ".Button")
                         :id("Button", id)
                         :point(UIKit.Enum.Point.Right)
                         :size(ACTION_SIZE_750, ACTION_SIZE_125)
@@ -642,20 +642,20 @@ do -- Widgets
     do -- Element (Option Button)
         local ElementSelectionMenuMixin = {}
 
-        function ElementSelectionMenuMixin:GetButtonSelectionMenu()
-            return self.ButtonSelectionMenu
+        function ElementSelectionMenuMixin:GetSelectionMenuButton()
+            return self.SelectionMenuButton
         end
 
         Settings_Widgets.ElementSelectionMenu = UIKit.Template(function(id, name, children, ...)
             local frame =
                 Settings_Widgets.ElementBase(name, {
-                    UICCommon.ButtonSelectionMenu(name .. ".ButtonSelectionMenu")
-                        :id("ButtonSelectionMenu", id)
+                    UICCommon.SelectionMenuButton(name .. ".SelectionMenuButton")
+                        :id("SelectionMenuButton", id)
                         :point(UIKit.Enum.Point.Right)
                         :size(ACTION_SIZE_500, ACTION_SIZE_125)
                 })
 
-            frame.ButtonSelectionMenu = UIKit.GetElementById("ButtonSelectionMenu", id)
+            frame.SelectionMenuButton = UIKit.GetElementById("SelectionMenuButton", id)
 
             Mixin(frame, ElementSelectionMenuMixin)
 

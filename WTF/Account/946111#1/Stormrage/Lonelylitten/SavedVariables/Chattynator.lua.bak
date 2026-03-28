@@ -1,12 +1,6 @@
 
 CHATTYNATOR_CURRENT_PROFILE = "DEFAULT"
 CHATTYNATOR_COMMAND_HISTORY = {
-"/s /pull 10",
-"/cw Tekapo-Stormrage kk! omw",
-"/cw Tekapo-Stormrage /key",
-"/cw Tekapo-Stormrage /rc",
-"/cw Tekapo-Stormrage :D",
-"/cw Tekapo-Stormrage /rc",
 "/cw Tekapo-Stormrage /PULL 5",
 "/s /eui",
 "/s /reload",
@@ -208,4 +202,5 @@ CHATTYNATOR_COMMAND_HISTORY = {
 "/p /way #2133 56.0 56.6 Mistie",
 "/p /key",
 "/p /reload",
+"/s /mdt",
 }

@@ -1,10 +1,6 @@
 
 CHATTYNATOR_CURRENT_PROFILE = "DEFAULT"
 CHATTYNATOR_COMMAND_HISTORY = {
-"/p boots",
-"/p solid 60 IL upgrade lmao",
-"/p ^",
-"/p idk how during that spin cycle how tf im supposed to get an eye beam off",
 "/p i went all the way to the front and started the cast and still got hit lmao",
 "/p that was actually my last one",
 "/p ggs all!",
@@ -204,4 +200,8 @@ CHATTYNATOR_COMMAND_HISTORY = {
 "/s /RELOAD",
 "/s /EUI",
 "/s /eui",
+"/s /SIMC",
+"/s /reload",
+"/s /key",
+"/p i would also roll for neck lol",
 }

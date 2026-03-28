@@ -4,7 +4,6 @@ local RangeAlt = Grid2.statusPrototype:new("rangealt")
 
 local Grid2 = Grid2
 local next = next
-local tonumber = tonumber
 local UnitIsUnit = UnitIsUnit
 local UnitCanAttack = UnitCanAttack
 local UnitPhaseReason = UnitPhaseReason
@@ -137,10 +136,10 @@ local Ranges = {
 local Shared = { GetColor = Grid2.statusLibrary.GetColor }
 
 -- we need to update this on a timer for non-grouped units: target, focus, or when range used is not 38y
-function Shared:UpdateUnits()
+function Shared:UpdateUnits(units)
 	local cache = self.cache
 	local check = self.UnitRangeCheck
-	for unit in next, self.refreshUnits do
+	for unit in next, units do
 		local new = check(unit)
 		local old = cache[unit]
 		if issecretvalue(new) or issecretvalue(old) or new~=old then
@@ -188,6 +187,11 @@ function Shared:Grid_UnitLeft(_, unit)
 	self.timer:SetPlaying( next(self.refreshUnits)~=nil )
 end
 
+function Shared:PLAYER_ENTERING_WORLD(_, isLogin, isReload)
+	if isLogin or isReload then return end
+	self:UpdateUnits(roster_guids)
+end
+
 function Shared:PLAYER_REGEN_ENABLED()
 	InCombat = false
 end
@@ -219,13 +223,14 @@ end
 
 function Shared:OnEnable()
 	InCombat = InCombatLockdown()
-	self.timer = Grid2:CreateTimer( function() self:UpdateUnits() end, self.elapsed, false)
+	self.timer = Grid2:CreateTimer( function() self:UpdateUnits(self.refreshUnits) end, self.elapsed, false)
 	self:RegisterMessage("Grid_UnitUpdated")
 	self:RegisterMessage("Grid_UnitLeft")
 	self:RegisterEvent("PLAYER_REGEN_ENABLED")
 	self:RegisterEvent("PLAYER_REGEN_DISABLED")
 	if self.curRange==38 then
 		self:RegisterRosterUnitEvent("UNIT_IN_RANGE_UPDATE")
+		self:RegisterEvent("PLAYER_ENTERING_WORLD")
 	end
 	if petSpell then
 		self:RegisterMessage('Grid_GroupTypeChanged')
@@ -241,6 +246,7 @@ function Shared:OnDisable()
 	self:UnregisterEvent("PLAYER_REGEN_DISABLED")
 	if self.curRange==38 then
 		self:UnregisterRosterUnitEvent("UNIT_IN_RANGE_UPDATE")
+		self:UnregisterEvent("PLAYER_ENTERING_WORLD")
 	end
 	if petSpell then
 		self:UnregisterMessage('Grid_GroupTypeChanged')

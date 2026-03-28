@@ -1769,6 +1769,93 @@ function CCS:GetUnitEquipmentStats(unit)
     return total
 end
 
+local ENCHANT_PREFIX_PATTERNS = {
+    -- "Enchant Weapon - NAME"
+    -- "Enchant Helm - NAME"
+    -- etc.
+    enUS = {
+        "^Enchant .-%s*[-:–—]%s*",
+    },
+    enGB = {
+        "^Enchant .-%s*[-:–—]%s*",
+    },
+
+    frFR = {
+        -- Strip "Enchantement d’anneau – "
+        "^Enchantement%s+[%z\1-\127\194-\244][\128-\191]*.-%s*[-:–—]%s*",
+        "anneau%s*[-–—:]%s*",   -- ring
+        "arme%s*[-–—:]%s*",     -- weapon (likely "arme - ")
+        "tête%s*[-–—:]%s*",     -- helm ("tête - ")
+        "épaules%s*[-–—:]%s*",  -- shoulders
+        "épaulières%s*[-–—:]%s*",  -- shoulders
+        "torse%s*[-–—:]%s*",    -- chest (or "plastron" if that’s what you see)
+        "bottes%s*[-–—:]%s*",   -- boots
+    },
+
+    deDE = {
+        "^[^%-–—:]+%s*[-:–—:]%s*",
+    },
+
+    esES = {
+        "^Encantar .-%s*[:%-–—]%s*",
+    },
+    esMX = {
+        "^Encantar .-%s*[:%-–—]%s*",
+    },
+
+    ruRU = {
+        "^Чары для [^–—:]+[-–—:]%s*",
+    },
+
+    ptBR = {
+        "^Encantamento d[ae]%s+",          -- strip leading "Encantamento da " or "Encantamento de "
+        "%s*[-:–—]%s*[%w%s\128-\255'’]+$",
+    },
+
+    itIT = {
+        "^Incantamento .-%s*[-:–—:]%s*",
+    },
+
+    -- zhCN, zhTW, koKR: we leave them alone since they are not all that long
+}
+
+local function StripEnchantPrefix(raw)
+    if not raw then return nil end
+
+    local loc = GetLocale()
+    local patterns = ENCHANT_PREFIX_PATTERNS[loc]
+
+    -- Extract and preserve icon (if present)
+    local icon = raw:match("(|A.-|a)$")
+    local text = raw:gsub("(|A.-|a)$", "")
+
+    if patterns then
+        for _, pat in ipairs(patterns) do
+            text = text:gsub(pat, "")
+        end
+    end
+
+    -- frFR/ruRU: clean up any leftover non-printable / non-text glyphs at the start
+    if loc == "frFR" or loc == "ruRU" then
+        -- Remove any leading characters that are not letters, digits, punctuation, or whitespace
+        text = text:gsub("^[^%w%p%s]+", "")
+    end
+
+    if loc == "ruRU" then
+        -- Remove a leading separator like " – " or "- " if it survived
+        text = text:gsub("^%s*[-–—:]%s*", "")
+        text = text:gsub("^[^%w%p%s]+", "") -- need to do clean-up again due to trash bytes remaining.  The ordering is apparently important
+    end
+
+    -- Reattach icon
+    if icon then
+        text = text .. icon
+    end
+
+    return text
+end
+
+
 function CCS.updateLocationInfo(unit, slotIndex, framename)
     if slotIndex == 18 then return end -- skip ranged slot
 
@@ -1992,10 +2079,12 @@ function CCS.updateLocationInfo(unit, slotIndex, framename)
                 if text then
                     -- Enchant line
                     local enchant = text:match(ENCHANTED_TOOLTIP_LINE:gsub("%%s", "(.+)"))
+
                     if enchant then
-                        Enchant = enchant
+                        --Enchant = enchant
+                        Enchant = StripEnchantPrefix(enchant)
                     end
-                    
+                   
                     -- Base item level
                     local ilvl = text:match(ITEM_LEVEL:gsub("%%d", "(%%d+)"))
                     if ilvl and (tonumber(ilvl) ~= tonumber(itemiLevel or 0)) then
@@ -2044,7 +2133,7 @@ function CCS.updateLocationInfo(unit, slotIndex, framename)
         local MISSING_SOCKET = "Interface\\AddOns\\ChonkyCharacterSheet\\Media\\Textures\\missing-socket.png"
 
         -- Show Missing sockets
-        if option("showenchantgemerrors"..suffix) then
+        if option("showenchantgemerrors"..suffix) and option("showmissingsockets") then
 
             if CCS.expansionID == LE_EXPANSION_WAR_WITHIN or expacID == LE_EXPANSION_WAR_WITHIN then
                 if slotIndex == INVSLOT_HEAD or slotIndex == INVSLOT_WRIST or slotIndex == INVSLOT_WAIST then

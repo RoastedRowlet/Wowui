@@ -29,6 +29,7 @@ local defaultStrings = {
     ------------------------------------------------------------
     -- General / Common
     ------------------------------------------------------------
+	["SHOW_MISSING_SOCKETS"]= "Show Missing Sockets",  -- enUS / enGB
 	["ADDON COLORS"] = "Addon Colors", -- enUS / enGB
 	["Button Foreground Color"] = "Button Foreground Color", -- enUS / enGB
 	["Highlight Color"] = "Highlight Color", -- enUS / enGB
@@ -391,6 +392,7 @@ if locale == "enGB" then
     }
 elseif locale == "deDE" then
     localizedStrings = {
+		["SHOW_MISSING_SOCKETS"] = "Fehlende Sockel anzeigen",  -- deDE
         ["ADDON COLORS"] = "Addon-Farben", -- deDE
         ["Button Foreground Color"] = "Schaltflächenvordergrundfarbe", -- deDE
         ["Highlight Color"] = "Hervorhebungsfarbe", -- deDE
@@ -726,6 +728,7 @@ elseif locale == "deDE" then
     }	
 elseif locale == "frFR" then
     localizedStrings = {
+		["SHOW_MISSING_SOCKETS"] = "Afficher les châsses manquantes",  -- frFR
         ["ADDON COLORS"] = "Couleurs de l’addon", -- frFR
         ["Button Foreground Color"] = "Couleur de premier plan du bouton", -- frFR
         ["Highlight Color"] = "Couleur de surbrillance", -- frFR
@@ -1061,6 +1064,7 @@ elseif locale == "frFR" then
     }
 elseif locale == "esES" then
     localizedStrings = {
+		["SHOW_MISSING_SOCKETS"] = "Mostrar ranuras faltantes",  -- esMX
         ["ADDON COLORS"] = "Colores del addon", -- esMX
         ["Button Foreground Color"] = "Color frontal del botón", -- esMX
         ["Highlight Color"] = "Color de resaltado", -- esMX
@@ -1396,6 +1400,7 @@ elseif locale == "esES" then
     }
 elseif locale == "esMX" then
     localizedStrings = {
+		["SHOW_MISSING_SOCKETS"] = "Mostrar ranuras faltantes",  -- esMX
         ["ADDON COLORS"] = "Colores del addon", -- esMX
         ["Button Foreground Color"] = "Color frontal del botón", -- esMX
         ["Highlight Color"] = "Color de resaltado", -- esMX
@@ -1731,6 +1736,7 @@ elseif locale == "esMX" then
     }
 elseif locale == "ruRU" then
     localizedStrings = {
+		["SHOW_MISSING_SOCKETS"] = "Показать отсутствующие гнёзда",  -- ruRU
         ["ADDON COLORS"] = "Цвета аддона", -- ruRU
         ["Button Foreground Color"] = "Цвет переднего плана кнопки", -- ruRU
         ["Highlight Color"] = "Цвет подсветки", -- ruRU
@@ -2066,6 +2072,7 @@ elseif locale == "ruRU" then
     }
 elseif locale == "koKR" then
     localizedStrings = {
+		["SHOW_MISSING_SOCKETS"] = "누락된 소켓 표시",  -- koKR
         ["ADDON COLORS"] = "애드온 색상", -- koKR
         ["Button Foreground Color"] = "버튼 전경색", -- koKR
         ["Highlight Color"] = "강조 색상", -- koKR
@@ -2401,6 +2408,7 @@ elseif locale == "koKR" then
     }
 elseif locale == "zhCN" then
     localizedStrings = {
+		["SHOW_MISSING_SOCKETS"] = "显示缺失的插槽",  -- zhCN
         ["ADDON COLORS"] = "插件颜色", -- zhCN
         ["Button Foreground Color"] = "按钮前景色", -- zhCN
         ["Highlight Color"] = "高亮颜色", -- zhCN
@@ -2736,6 +2744,7 @@ elseif locale == "zhCN" then
     }
 elseif locale == "zhTW" then
     localizedStrings = {
+		["SHOW_MISSING_SOCKETS"] = "顯示缺少的插槽",  -- zhTW
         ["ADDON COLORS"] = "插件顏色", -- zhTW
         ["Button Foreground Color"] = "按鈕前景色", -- zhTW
         ["Highlight Color"] = "高亮顏色", -- zhTW
@@ -3070,6 +3079,7 @@ elseif locale == "zhTW" then
     }
 elseif locale == "ptBR" then
     localizedStrings = {
+		["SHOW_MISSING_SOCKETS"] = "Mostrar soquetes ausentes",  -- ptBR
         ["ADDON COLORS"] = "Cores do addon", -- ptBR
         ["Button Foreground Color"] = "Cor frontal do botão", -- ptBR
         ["Highlight Color"] = "Cor de destaque", -- ptBR
@@ -3405,6 +3415,7 @@ elseif locale == "ptBR" then
     }
 elseif locale == "itIT" then
     localizedStrings = {
+		["SHOW_MISSING_SOCKETS"] = "Mostrare le gemme mancanti",  -- itIT
         ["ADDON COLORS"] = "Colori dell’addon", -- itIT
         ["Button Foreground Color"] = "Colore in primo piano del pulsante", -- itIT
         ["Highlight Color"] = "Colore evidenziato", -- itIT

@@ -393,10 +393,9 @@ local eventHandlers = {
         if CCS.incombat == true then
             CCS.incombat = false
             CCS.CharacterStatsEventHandler()
-            if CCS.GetCurrentVersion() ~= CCS.RETAIL then CCS.RaidProgressEventHandler() end
         end 
 
-        if CCS.GetCurrentVersion() ~= CCS.RETAIL then CCS.RaidProgressEventHandler() end
+        if CCS.GetCurrentVersion() == CCS.RETAIL then CCS.RaidProgressEventHandler() end
 
     end),
 

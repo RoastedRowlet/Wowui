@@ -1327,14 +1327,6 @@ function module:Initialize()
 		btn2:SetShown(option("showm_sp_btn"))
 end
 
-local function ForceGenerateWeeklyRewards()
-    if not WeeklyRewardsFrame then return end
-
-	WeeklyRewardsFrame:FullRefresh()
-
-end
-
-
 function CCS.MythicPlusEventHandler(event, ...)
     local arg1 = ...
     --if InCombatLockdown()then CCS.secretsdisabled = true return end
@@ -1372,8 +1364,11 @@ function CCS.MythicPlusEventHandler(event, ...)
         CCS.mythicUpdatePending = true
 		-- Update the Weekly Rewards Frames
 		--print(date("%H:%M:%S") .. format(".%03d", (GetTime() * 1000) % 1000), "Mplus Update:", event)
-		--ForceGenerateWeeklyRewards()
+
+		C_WeeklyRewards.OnUIInteract();
+		C_WeeklyRewards.CloseInteraction();
 		WeeklyRewardsFrame:FullRefresh()
+		
         C_Timer.After(1, function()
             CCS.mythicUpdatePending = false
             updatesideframe()

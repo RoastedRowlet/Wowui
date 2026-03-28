@@ -15,23 +15,23 @@ local UIDEF = {
     Close                           = UICCommonPreload.ATLAS{ left = 319 / 512, right = 345 / 512, top = 185 / 512, bottom = 211 / 512 },
     SelectionMenu                   = UICCommonPreload.ATLAS{ left = 344 / 512, right = 370 / 512, top = 186 / 512, bottom = 212 / 512 },
 
-    UIButtonRed                     = UICCommonPreload.ATLAS{ inset = 14, scale = 0.7, left = 7 / 512, right = 100 / 512, top = 54 / 512, bottom = 95 / 512 },
-    UIButtonRed_Highlighted         = UICCommonPreload.ATLAS{ inset = 14, scale = 0.7, left = 106 / 512, right = 199 / 512, top = 54 / 512, bottom = 95 / 512 },
-    UIButtonRed_Pushed              = UICCommonPreload.ATLAS{ inset = 14, scale = 0.7, left = 205 / 512, right = 298 / 512, top = 54 / 512, bottom = 95 / 512 },
-    UIButtonRed_Disabled            = UICCommonPreload.ATLAS{ inset = 14, scale = 0.7, left = 304 / 512, right = 397 / 512, top = 54 / 512, bottom = 95 / 512 },
-    UIButtonRedCompact              = UICCommonPreload.ATLAS{ inset = 14, scale = 0.7, left = 7 / 512, right = 48 / 512, top = 148 / 512, bottom = 189 / 512 },
-    UIButtonRedCompact_Highlighted  = UICCommonPreload.ATLAS{ inset = 14, scale = 0.7, left = 54 / 512, right = 95 / 512, top = 148 / 512, bottom = 189 / 512 },
-    UIButtonRedCompact_Pushed       = UICCommonPreload.ATLAS{ inset = 14, scale = 0.7, left = 101 / 512, right = 142 / 512, top = 148 / 512, bottom = 189 / 512 },
-    UIButtonRedCompact_Disabled     = UICCommonPreload.ATLAS{ inset = 14, scale = 0.7, left = 148 / 512, right = 189 / 512, top = 148 / 512, bottom = 189 / 512 },
+    UIRedButton                     = UICCommonPreload.ATLAS{ inset = 14, scale = 0.7, left = 7 / 512, right = 100 / 512, top = 54 / 512, bottom = 95 / 512 },
+    UIRedButton_Highlighted         = UICCommonPreload.ATLAS{ inset = 14, scale = 0.7, left = 106 / 512, right = 199 / 512, top = 54 / 512, bottom = 95 / 512 },
+    UIRedButton_Pushed              = UICCommonPreload.ATLAS{ inset = 14, scale = 0.7, left = 205 / 512, right = 298 / 512, top = 54 / 512, bottom = 95 / 512 },
+    UIRedButton_Disabled            = UICCommonPreload.ATLAS{ inset = 14, scale = 0.7, left = 304 / 512, right = 397 / 512, top = 54 / 512, bottom = 95 / 512 },
+    UIRedButtonCompact              = UICCommonPreload.ATLAS{ inset = 14, scale = 0.7, left = 7 / 512, right = 48 / 512, top = 148 / 512, bottom = 189 / 512 },
+    UIRedButtonCompact_Highlighted  = UICCommonPreload.ATLAS{ inset = 14, scale = 0.7, left = 54 / 512, right = 95 / 512, top = 148 / 512, bottom = 189 / 512 },
+    UIRedButtonCompact_Pushed       = UICCommonPreload.ATLAS{ inset = 14, scale = 0.7, left = 101 / 512, right = 142 / 512, top = 148 / 512, bottom = 189 / 512 },
+    UIRedButtonCompact_Disabled     = UICCommonPreload.ATLAS{ inset = 14, scale = 0.7, left = 148 / 512, right = 189 / 512, top = 148 / 512, bottom = 189 / 512 },
 
-    UIButtonGray                    = UICCommonPreload.ATLAS{ inset = 14, scale = 0.7, left = 7 / 512, right = 100 / 512, top = 7 / 512, bottom = 48 / 512 },
-    UIButtonGray_Highlighted        = UICCommonPreload.ATLAS{ inset = 14, scale = 0.7, left = 106 / 512, right = 199 / 512, top = 7 / 512, bottom = 48 / 512 },
-    UIButtonGray_Pushed             = UICCommonPreload.ATLAS{ inset = 14, scale = 0.7, left = 205 / 512, right = 298 / 512, top = 7 / 512, bottom = 48 / 512 },
-    UIButtonGray_Disabled           = UICCommonPreload.ATLAS{ inset = 14, scale = 0.7, left = 304 / 512, right = 397 / 512, top = 7 / 512, bottom = 48 / 512 },
-    UIButtonGrayCompact             = UICCommonPreload.ATLAS{ inset = 14, scale = 0.7, left = 7 / 512, right = 48 / 512, top = 101 / 512, bottom = 142 / 512 },
-    UIButtonGrayCompact_Highlighted = UICCommonPreload.ATLAS{ inset = 14, scale = 0.7, left = 54 / 512, right = 95 / 512, top = 101 / 512, bottom = 142 / 512 },
-    UIButtonGrayCompact_Pushed      = UICCommonPreload.ATLAS{ inset = 14, scale = 0.7, left = 101 / 512, right = 142 / 512, top = 101 / 512, bottom = 142 / 512 },
-    UIButtonGrayCompact_Disabled    = UICCommonPreload.ATLAS{ inset = 14, scale = 0.7, left = 148 / 512, right = 189 / 512, top = 101 / 512, bottom = 142 / 512 }
+    UIGrayButton                    = UICCommonPreload.ATLAS{ inset = 14, scale = 0.7, left = 7 / 512, right = 100 / 512, top = 7 / 512, bottom = 48 / 512 },
+    UIGrayButton_Highlighted        = UICCommonPreload.ATLAS{ inset = 14, scale = 0.7, left = 106 / 512, right = 199 / 512, top = 7 / 512, bottom = 48 / 512 },
+    UIGrayButton_Pushed             = UICCommonPreload.ATLAS{ inset = 14, scale = 0.7, left = 205 / 512, right = 298 / 512, top = 7 / 512, bottom = 48 / 512 },
+    UIGrayButton_Disabled           = UICCommonPreload.ATLAS{ inset = 14, scale = 0.7, left = 304 / 512, right = 397 / 512, top = 7 / 512, bottom = 48 / 512 },
+    UIGrayButtonCompact             = UICCommonPreload.ATLAS{ inset = 14, scale = 0.7, left = 7 / 512, right = 48 / 512, top = 101 / 512, bottom = 142 / 512 },
+    UIGrayButtonCompact_Highlighted = UICCommonPreload.ATLAS{ inset = 14, scale = 0.7, left = 54 / 512, right = 95 / 512, top = 101 / 512, bottom = 142 / 512 },
+    UIGrayButtonCompact_Pushed      = UICCommonPreload.ATLAS{ inset = 14, scale = 0.7, left = 101 / 512, right = 142 / 512, top = 101 / 512, bottom = 142 / 512 },
+    UIGrayButtonCompact_Disabled    = UICCommonPreload.ATLAS{ inset = 14, scale = 0.7, left = 148 / 512, right = 189 / 512, top = 101 / 512, bottom = 142 / 512 }
 }
 
 do --Button
@@ -63,32 +63,32 @@ do --Button
 
         if not isEnabled then
             local texture =
-                self.isCompact and (self.isRed and UIDEF.UIButtonRedCompact_Disabled or UIDEF.UIButtonGrayCompact_Disabled) or
-                (self.isRed and UIDEF.UIButtonRed_Disabled or UIDEF.UIButtonGray_Disabled)
+                self.isCompact and (self.isRed and UIDEF.UIRedButtonCompact_Disabled or UIDEF.UIGrayButtonCompact_Disabled) or
+                (self.isRed and UIDEF.UIRedButton_Disabled or UIDEF.UIGrayButton_Disabled)
 
             self.Texture:background(texture)
             self.Content:ClearAllPoints()
             self.Content:SetPoint("CENTER", self, "CENTER", 0, CONTENT_Y)
         elseif buttonState == "NORMAL" then
             local texture =
-                self.isCompact and (self.isRed and UIDEF.UIButtonRedCompact or UIDEF.UIButtonGrayCompact) or
-                (self.isRed and UIDEF.UIButtonRed or UIDEF.UIButtonGray)
+                self.isCompact and (self.isRed and UIDEF.UIRedButtonCompact or UIDEF.UIGrayButtonCompact) or
+                (self.isRed and UIDEF.UIRedButton or UIDEF.UIGrayButton)
 
             self.Texture:background(texture)
             self.Content:ClearAllPoints()
             self.Content:SetPoint("CENTER", self, "CENTER", 0, CONTENT_Y)
         elseif buttonState == "HIGHLIGHTED" then
             local texture =
-                self.isCompact and (self.isRed and UIDEF.UIButtonRedCompact_Highlighted or UIDEF.UIButtonGrayCompact_Highlighted) or
-                (self.isRed and UIDEF.UIButtonRed_Highlighted or UIDEF.UIButtonGray_Highlighted)
+                self.isCompact and (self.isRed and UIDEF.UIRedButtonCompact_Highlighted or UIDEF.UIGrayButtonCompact_Highlighted) or
+                (self.isRed and UIDEF.UIRedButton_Highlighted or UIDEF.UIGrayButton_Highlighted)
 
             self.Texture:background(texture)
             self.Content:ClearAllPoints()
             self.Content:SetPoint("CENTER", self, "CENTER", -CONTENT_Y_HIGHLIGHTED, CONTENT_Y_HIGHLIGHTED)
         elseif buttonState == "PUSHED" then
             local texture =
-                self.isCompact and (self.isRed and UIDEF.UIButtonRedCompact_Pushed or UIDEF.UIButtonGrayCompact_Pushed) or
-                (self.isRed and UIDEF.UIButtonRed_Pushed or UIDEF.UIButtonGray_Pushed)
+                self.isCompact and (self.isRed and UIDEF.UIRedButtonCompact_Pushed or UIDEF.UIGrayButtonCompact_Pushed) or
+                (self.isRed and UIDEF.UIRedButton_Pushed or UIDEF.UIGrayButton_Pushed)
 
             self.Texture:background(texture)
             self.Content:ClearAllPoints()
@@ -102,7 +102,7 @@ do --Button
         Sound.PlaySound("UI", SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
     end
 
-    UICCommonButton.RedBase = UIKit.Template(function(id, name, children, ...)
+    UICCommonButton.RedButton = UIKit.Template(function(id, name, children, ...)
         local frame =
             Frame(name, {
                 Frame(name .. ".Content", {
@@ -125,7 +125,7 @@ do --Button
         return frame
     end)
 
-    UICCommonButton.GrayBase = UIKit.Template(function(id, name, children, ...)
+    UICCommonButton.GrayButton = UIKit.Template(function(id, name, children, ...)
         local frame =
             Frame(name, {
                 Frame(name .. ".Content", {
@@ -148,7 +148,7 @@ do --Button
         return frame
     end)
 
-    UICCommonButton.RedBaseSquare = UIKit.Template(function(id, name, children, ...)
+    UICCommonButton.RedCompactButton = UIKit.Template(function(id, name, children, ...)
         local frame =
             Frame(name, {
                 Frame(name .. ".Content", {
@@ -171,7 +171,7 @@ do --Button
         return frame
     end)
 
-    UICCommonButton.GrayBaseSquare = UIKit.Template(function(id, name, children, ...)
+    UICCommonButton.GrayCompactButton = UIKit.Template(function(id, name, children, ...)
         local frame =
             Frame(name, {
                 Frame(name .. ".Content", {
@@ -201,13 +201,13 @@ do --Button (Text)
     local GRAY_TEXT_COLOR = UIKit.Define.Color_RGBA{ r = 216, g = 216, b = 216, a = 1 }
     local GRAY_TEXT_COLOR_HIGHLIGHTED = UIKit.Define.Color_RGBA{ r = 255, g = 255, b = 255, a = 1 }
 
-    local ButtonTextMixin = {}
+    local TextButtonMixin = {}
 
-    function ButtonTextMixin:ButtonText_OnLoad()
-        self:HookButtonStateChange(self.ButtonText_UpdateAnimation)
+    function TextButtonMixin:TextButton_OnLoad()
+        self:HookButtonStateChange(self.TextButton_UpdateAnimation)
     end
 
-    function ButtonTextMixin:ButtonText_UpdateAnimation()
+    function TextButtonMixin:TextButton_UpdateAnimation()
         local isRed = self.isRed
         local isEnabled = self:IsEnabled()
         local buttonState = self:GetButtonState()
@@ -223,17 +223,17 @@ do --Button (Text)
         end
     end
 
-    function ButtonTextMixin:SetText(text)
+    function TextButtonMixin:SetText(text)
         self.Text:SetText(text)
     end
 
-    function ButtonTextMixin:GetText()
+    function TextButtonMixin:GetText()
         return self.Text:GetText()
     end
 
-    UICCommonButton.RedWithText = UIKit.Template(function(id, name, children, ...)
+    UICCommonButton.RedTextButton = UIKit.Template(function(id, name, children, ...)
         local frame =
-            UICCommonButton.RedBase(name, {
+            UICCommonButton.RedButton(name, {
                 Text(name .. ".Text")
                     :id("Text", id)
                     :fontObject(UIFont.UIFontObjectNormal12)
@@ -247,15 +247,15 @@ do --Button (Text)
 
         frame.Text = UIKit.GetElementById("Text", id)
 
-        Mixin(frame, ButtonTextMixin)
-        frame:ButtonText_OnLoad()
+        Mixin(frame, TextButtonMixin)
+        frame:TextButton_OnLoad()
 
         return frame
     end)
 
-    UICCommonButton.GrayWithText = UIKit.Template(function(id, name, children, ...)
+    UICCommonButton.GrayTextButton = UIKit.Template(function(id, name, children, ...)
         local frame =
-            UICCommonButton.GrayBase(name, {
+            UICCommonButton.GrayButton(name, {
                 Text(name .. ".Text")
                     :id("Text", id)
                     :fontObject(UIFont.UIFontObjectNormal12)
@@ -267,8 +267,8 @@ do --Button (Text)
 
         frame.Text = UIKit.GetElementById("Text", id)
 
-        Mixin(frame, ButtonTextMixin)
-        frame:ButtonText_OnLoad()
+        Mixin(frame, TextButtonMixin)
+        frame:TextButton_OnLoad()
 
         return frame
     end)
@@ -277,9 +277,9 @@ end
 do --Button (Close)
     local SIZE = UIKit.Define.Percentage{ value = 62 }
 
-    UICCommonButton.RedClose = UIKit.Template(function(id, name, children, ...)
+    UICCommonButton.RedCloseButton = UIKit.Template(function(id, name, children, ...)
         local frame =
-            UICCommonButton.RedBaseSquare(name, {
+            UICCommonButton.RedCompactButton(name, {
                 Frame(name .. ".Close")
                     :id("Close", id)
                     :point(UIKit.Enum.Point.Center)
@@ -298,15 +298,15 @@ do --Button (Close)
 end
 
 do --Button (Selection Menu)
-    local ButtonSelectionMenuMixin = CreateFromMixins(UICSharedMixin.SelectionMenuRemoteMixin)
+    local SelectionMenuButtonMixin = CreateFromMixins(UICSharedMixin.SelectionMenuRemoteMixin)
 
-    function ButtonSelectionMenuMixin:OnLoad()
+    function SelectionMenuButtonMixin:OnLoad()
         self:InitSelectionMenuRemoteMixin()
     end
 
-    UICCommonButton.SelectionMenu = UIKit.Template(function(id, name, children, ...)
+    UICCommonButton.SelectionMenuButton = UIKit.Template(function(id, name, children, ...)
         local frame =
-            UICCommonButton.GrayWithText(name, {
+            UICCommonButton.GrayTextButton(name, {
                 Frame(name .. ".Arrow")
                     :id("Arrow", id)
                     :point(UIKit.Enum.Point.Right)
@@ -320,7 +320,7 @@ do --Button (Selection Menu)
         frame.Text:textAlignment("LEFT", "MIDDLE")
         frame.Arrow = UIKit.GetElementById("Arrow", id)
 
-        Mixin(frame, ButtonSelectionMenuMixin)
+        Mixin(frame, SelectionMenuButtonMixin)
         frame:OnLoad()
 
         return frame

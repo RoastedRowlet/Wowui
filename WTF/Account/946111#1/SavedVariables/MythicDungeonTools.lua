@@ -1,15 +1,16 @@
 
 MythicDungeonToolsDB = {
 ["profileKeys"] = {
-["Barelynoer - Area 52"] = "Barelynoer - Area 52",
+["Angryabsol - Stormrage"] = "Angryabsol - Stormrage",
 ["Lonelylitten - Stormrage"] = "Lonelylitten - Stormrage",
+["Barelynoer - Area 52"] = "Barelynoer - Area 52",
 },
 ["global"] = {
-["currentDungeonIdx"] = 11,
+["scale"] = 1.4,
+["latestDungeonSeen"] = 150,
 ["minimap"] = {
 ["showInCompartment"] = true,
 },
-["latestDungeonSeen"] = 150,
 ["maximized"] = false,
 ["presets"] = {
 [11] = {
@@ -52,6 +53,6 @@ MythicDungeonToolsDB = {
 },
 },
 ["version"] = 609,
-["scale"] = 1.4,
+["currentDungeonIdx"] = 11,
 },
 }

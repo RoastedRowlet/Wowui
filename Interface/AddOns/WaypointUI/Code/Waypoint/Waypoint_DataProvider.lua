@@ -53,15 +53,15 @@ do
         local questID = Waypoint_Cache.Get("questID")
         if questID then
             if not IsComplete(questID) then
-                return Waypoint_Enum.TrackingType.QuestIncomplete
+                return Waypoint_Enum.TrackingType.IncompleteQuest
             end
             local classification = GetQuestClassification(questID)
-            if classification == Enum.QuestClassification.Recurring or classification == Enum.QuestClassification.Meta then
-                return Waypoint_Enum.TrackingType.QuestCompleteRecurring
+            if classification == Enum.QuestClassification.Recurring or classification == Enum.QuestClassification.Meta or classification == Enum.QuestClassification.Calling then
+                return Waypoint_Enum.TrackingType.CompleteRepeatableQuest
             elseif classification == Enum.QuestClassification.Important then
-                return Waypoint_Enum.TrackingType.QuestCompleteImportant
+                return Waypoint_Enum.TrackingType.CompleteImportantQuest
             end
-            return Waypoint_Enum.TrackingType.QuestComplete
+            return Waypoint_Enum.TrackingType.CompleteQuest
         end
         if Waypoint_Cache.Get("pinType") == Enum.SuperTrackingType.Corpse then
             return Waypoint_Enum.TrackingType.Corpse

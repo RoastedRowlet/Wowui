@@ -1,7 +1,6 @@
 
 CHATTYNATOR_CURRENT_PROFILE = "DEFAULT"
 CHATTYNATOR_COMMAND_HISTORY = {
-"/cw Tekapo-Stormrage /PULL 5",
 "/s /eui",
 "/s /reload",
 "/s /eui",
@@ -203,4 +202,5 @@ CHATTYNATOR_COMMAND_HISTORY = {
 "/p /key",
 "/p /reload",
 "/s /mdt",
+"/s /SIMC",
 }
