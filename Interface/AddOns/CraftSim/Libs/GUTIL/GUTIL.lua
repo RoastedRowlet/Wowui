@@ -832,9 +832,10 @@ end
 
 ---@generic K
 ---@generic V
+---@generic R
 ---@param t table<K, V>
----@param initialValue any
----@param foldFunction fun(foldValue: any, nextElement: V, key: K): any
+---@param initialValue R
+---@param foldFunction fun(foldValue: R, nextElement: V, key: K): R
 function GUTIL:Fold(t, initialValue, foldFunction)
     local accumulator = initialValue
     for key, value in pairs(t) do
@@ -1244,4 +1245,50 @@ function GUTIL:CreateReuseableMenuUtilContextMenuFrame(descriptionElement, initC
             customFrame:Hide()
         end)
     end)
+end
+
+-- encode a string to base64
+---@param str string string to encode
+function GUTIL:EncodeBase64(str)
+    local b = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
+
+    return ((str:gsub('.', function(x)
+        local r, b = '', x:byte()
+        for i = 8, 1, -1 do r = r .. (b % 2 ^ i - b % 2 ^ (i - 1) > 0 and '1' or '0') end
+        return r;
+    end) .. '0000'):gsub('%d%d%d?%d?%d?%d?', function(x)
+        if (#x < 6) then return '' end
+        local c = 0
+        for i = 1, 6 do c = c + (x:sub(i, i) == '1' and 2 ^ (6 - i) or 0) end
+        return b:sub(c + 1, c + 1)
+    end) .. ({ '', '==', '=' })[#str % 3 + 1])
+end
+
+-- decode a base64 string back to the original string
+---@param str string base64 encoded string
+function GUTIL:DecodeBase64(str)
+    if type(str) ~= "string" or str == "" then
+        return nil
+    end
+
+    local b = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
+
+    -- Remove any characters that are not base64 or padding
+    str = str:gsub('[^' .. b .. '=]', '')
+
+    return (str:gsub('.', function(x)
+        if (x == '=') then return '' end
+        local r, f = '', (b:find(x) - 1)
+        for i = 6, 1, -1 do
+            r = r .. (f % 2^i - f % 2^(i - 1) > 0 and '1' or '0')
+        end
+        return r
+    end):gsub('%d%d%d?%d?%d?%d?%d?%d?', function(x)
+        if (#x ~= 8) then return '' end
+        local c = 0
+        for i = 1, 8 do
+            c = c + (x:sub(i, i) == '1' and 2^(8 - i) or 0)
+        end
+        return string.char(c)
+    end))
 end

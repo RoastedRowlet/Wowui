@@ -393,9 +393,11 @@ local eventHandlers = {
         if CCS.incombat == true then
             CCS.incombat = false
             CCS.CharacterStatsEventHandler()
-            CCS.RaidProgressEventHandler()            
+            if CCS.GetCurrentVersion() ~= CCS.RETAIL then CCS.RaidProgressEventHandler() end
         end 
-        CCS.RaidProgressEventHandler()
+
+        if CCS.GetCurrentVersion() ~= CCS.RETAIL then CCS.RaidProgressEventHandler() end
+
     end),
 
     ["PLAYER_REGEN_DISABLED"] = WrapHandler("PLAYER_REGEN_DISABLED", function()

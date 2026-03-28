@@ -86,14 +86,10 @@ function CraftSim.CRAFT_LOG.UI:InitLogFrame(frame)
     local craftLogX = 250
     local craftLogY = 150
 
-    frame.content.craftResultsOptionsButton = GGUI.Button {
+    frame.content.craftResultsOptionsButton = CraftSim.WIDGETS.OptionsButton {
         parent = frame.content,
         anchorPoints = { { anchorParent = frame.title.frame, anchorA = "LEFT", anchorB = "RIGHT", offsetX = 5 } },
-        cleanTemplate = true,
-        buttonTextureOptions = CraftSim.CONST.BUTTON_TEXTURE_OPTIONS.OPTIONS,
-        sizeX = 20, sizeY = 20,
-        clickCallback = function(_, _)
-            MenuUtil.CreateContextMenu(UIParent, function(ownerRegion, rootDescription)
+        menuUtilCallback = function(ownerRegion, rootDescription)
                 local disableCB = rootDescription:CreateCheckbox(
                     L("CRAFT_LOG_DISABLE_CHECKBOX"),
                     function()
@@ -227,8 +223,7 @@ function CraftSim.CRAFT_LOG.UI:InitLogFrame(frame)
                 local clearDataButton = rootDescription:CreateButton(f.r("Clear Data"), function()
                     CraftSim.CRAFT_LOG:ClearData()
                 end)
-            end)
-        end
+        end,
     }
 
     frame.content.backgroundFrame = GGUI.Frame {
@@ -338,7 +333,7 @@ function CraftSim.CRAFT_LOG.UI:InitAdvancedLogFrame(frame)
         parent = frame.content, anchorPoints = {
         { anchorParent = frame.content,     anchorA = "TOPRIGHT", anchorB = "TOPRIGHT", offsetY = -16, offsetX = -10 },
         { anchorParent = frame.title.frame, anchorA = "LEFT",     anchorB = "RIGHT" }, },
-        prefix = L(CraftSim.CONST.TEXT.CRAFT_LOG_CALCULATION_COMPARISON_NUM_CRAFTS_PREFIX),
+        prefix = L("CRAFT_LOG_CALCULATION_COMPARISON_NUM_CRAFTS_PREFIX"),
     }
 
     local reagentCombinationIDsSaveTable = CraftSim.DB.OPTIONS:Get(
@@ -964,17 +959,17 @@ function CraftSim.CRAFT_LOG.UI:UpdateCraftLogDisplay(craftResult, recipeData)
 
         local commissionText = ""
         if craftResult.isWorkOrder then
-            local commission = craftResult.orderData.tipAmount - craftResult.orderData.consortiumCut
+            local commission = (tonumber(craftResult.orderData.tipAmount) or 0) - (tonumber(craftResult.orderData.consortiumCut) or 0)
             commissionText = CraftSim.UTIL:FormatMoney(commission, true)
         end
 
         local messageText =
             resultsText ..
-            L(CraftSim.CONST.TEXT.CRAFT_LOG_LOG_1) .. profitText .. "\n" ..
-            ((craftResult.triggeredIngenuity and (f.gold(L(CraftSim.CONST.TEXT.CRAFT_LOG_LOG_2)) .. savedConcentrationText .. "\n")) or "") ..
+            L("CRAFT_LOG_LOG_1") .. profitText .. "\n" ..
+            ((craftResult.triggeredIngenuity and (f.gold(L("CRAFT_LOG_LOG_2")) .. savedConcentrationText .. "\n")) or "") ..
             ((craftResult.isWorkOrder and (f.gold("Commission: ") .. commissionText .. "\n")) or "") ..
-            ((craftResult.triggeredMulticraft and (f.e(L(CraftSim.CONST.TEXT.CRAFT_LOG_LOG_3)) .. "\n" .. multicraftExtraItemsText)) or "") ..
-            ((craftResult.triggeredResourcefulness and (f.g(L(CraftSim.CONST.TEXT.CRAFT_LOG_LOG_4) .. savedCostsText) .. resourcesText)) or "")
+            ((craftResult.triggeredMulticraft and (f.e(L("CRAFT_LOG_LOG_3")) .. "\n" .. multicraftExtraItemsText)) or "") ..
+            ((craftResult.triggeredResourcefulness and (f.g(L("CRAFT_LOG_LOG_4") .. savedCostsText) .. resourcesText)) or "")
         craftLog:AddMessage("\n" .. messageText)
     end
     -- FrameList

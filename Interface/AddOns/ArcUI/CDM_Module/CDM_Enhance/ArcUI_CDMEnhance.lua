@@ -3011,8 +3011,8 @@ ApplyIconStyle = function(frame, cdID)
       frame._arcSwipeWaitForNoCharges = swipeCfg.swipeWaitForNoCharges
       frame._arcEdgeWaitForNoCharges = swipeCfg.edgeWaitForNoCharges
     end
-    -- GCD filter hooks on visual Cooldown frame — single install point
-    if ns.GCDFilter then ns.GCDFilter.Install(frame, cdID) end
+    -- GCD filter hooks on visual Cooldown frame — cooldown/utility only, never aura frames
+    if ns.GCDFilter and viewerType ~= "aura" then ns.GCDFilter.Install(frame, cdID) end
     
     -- ═══════════════════════════════════════════════════════════════════
     -- APPLY SHOW SWIPE / SHOW EDGE — Masque owns cooldown, don't enforce
@@ -3207,8 +3207,8 @@ ApplyIconStyle = function(frame, cdID)
       frame._arcEdgeWaitForNoCharges = swipeCfg.edgeWaitForNoCharges
       -- Store swipe/edge settings for noGCDSwipe mode to use
     end
-    -- GCD filter hooks on visual Cooldown frame — single install point
-    if ns.GCDFilter then ns.GCDFilter.Install(frame, cdID) end
+    -- GCD filter hooks on visual Cooldown frame — cooldown/utility only, never aura frames
+    if ns.GCDFilter and viewerType ~= "aura" then ns.GCDFilter.Install(frame, cdID) end
     
     -- Apply cooldown swipe customization
     -- IAO frames need hooks even when Masque controls cooldowns, because IAO

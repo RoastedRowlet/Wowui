@@ -27,8 +27,8 @@ function CraftSim.REAGENT_OPTIMIZATION.UI:Init()
         sizeX = sizeX,
         sizeY = sizeY,
         frameID = CraftSim.CONST.FRAMES.REAGENT_OPTIMIZATION_WORK_ORDER,
-        title = CraftSim.LOCAL:GetText(CraftSim.CONST.TEXT.REAGENT_OPTIMIZATION_TITLE) ..
-            " " .. GUTIL:ColorizeText(CraftSim.LOCAL:GetText(CraftSim.CONST.TEXT.SOURCE_COLUMN_WO), GUTIL.COLORS.GREY),
+        title = CraftSim.LOCAL:GetText("REAGENT_OPTIMIZATION_TITLE") ..
+            " " .. GUTIL:ColorizeText(CraftSim.LOCAL:GetText("SOURCE_COLUMN_WO"), GUTIL.COLORS.GREY),
         collapseable = true,
         closeable = true,
         moveable = true,
@@ -50,7 +50,7 @@ function CraftSim.REAGENT_OPTIMIZATION.UI:Init()
         sizeX = sizeX,
         sizeY = sizeY,
         frameID = CraftSim.CONST.FRAMES.REAGENT_OPTIMIZATION,
-        title = CraftSim.LOCAL:GetText(CraftSim.CONST.TEXT.REAGENT_OPTIMIZATION_TITLE),
+        title = CraftSim.LOCAL:GetText("REAGENT_OPTIMIZATION_TITLE"),
         collapseable = true,
         closeable = true,
         moveable = true,
@@ -100,14 +100,14 @@ function CraftSim.REAGENT_OPTIMIZATION.UI:Init()
 
         frame.content.maxQualityLabel = GGUI.Text {
             parent = frame.content, anchorPoints = { { anchorParent = frame.content.maxQualityDropdown.frame, anchorA = "RIGHT", anchorB = "LEFT", offsetX = 16, offsetY = 2 } },
-            text = CraftSim.LOCAL:GetText(CraftSim.CONST.TEXT.REAGENTS_MAXIMUM_QUALITY),
+            text = CraftSim.LOCAL:GetText("REAGENTS_MAXIMUM_QUALITY"),
             justifyOptions = { type = "H", align = "LEFT" },
         }
 
         frame.content.qualityText = GGUI.Text {
             parent = frame.content, anchorParent = frame.content.maxQualityLabel.frame, anchorA = "TOPLEFT", anchorB = "BOTTOMLEFT", offsetY = -10,
             justifyOptions = { type = "H", align = "LEFT" },
-            text = CraftSim.LOCAL:GetText(CraftSim.CONST.TEXT.REAGENTS_REACHABLE_QUALITY)
+            text = CraftSim.LOCAL:GetText("REAGENTS_REACHABLE_QUALITY")
         }
 
         frame.content.qualityIcon = GGUI.QualityIcon({
@@ -125,10 +125,10 @@ function CraftSim.REAGENT_OPTIMIZATION.UI:Init()
             anchorParent = frame.content.qualityText.frame,
             anchorA = "TOPRIGHT", anchorB = "BOTTOMRIGHT", offsetY = -10,
             justifyOptions = { type = "H", align = "RIGHT" },
-            text = CraftSim.LOCAL:GetText(CraftSim.CONST.TEXT.REAGENTS_AVERAGE_PROFIT_LABEL),
+            text = CraftSim.LOCAL:GetText("REAGENTS_AVERAGE_PROFIT_LABEL"),
             tooltipOptions = {
                 anchor = "ANCHOR_CURSOR_RIGHT",
-                text = CraftSim.LOCAL:GetText(CraftSim.CONST.TEXT.REAGENTS_AVERAGE_PROFIT_TOOLTIP),
+                text = CraftSim.LOCAL:GetText("REAGENTS_AVERAGE_PROFIT_TOOLTIP"),
             },
         }
 
@@ -145,7 +145,7 @@ function CraftSim.REAGENT_OPTIMIZATION.UI:Init()
             anchorParent = frame.content.averageProfitLabel.frame,
             anchorA = "TOPRIGHT", anchorB = "BOTTOMRIGHT", offsetY = -10,
             justifyOptions = { type = "H", align = "RIGHT" },
-            text = CraftSim.LOCAL:GetText(CraftSim.CONST.TEXT.REAGENTS_CONCENTRATION_LABEL),
+            text = CraftSim.LOCAL:GetText("REAGENTS_CONCENTRATION_LABEL"),
         }
 
         frame.content.concentrationCostValue = GGUI.Text {
@@ -179,7 +179,7 @@ function CraftSim.REAGENT_OPTIMIZATION.UI:Init()
             anchorA = "LEFT",
             anchorB = "RIGHT",
             offsetX = 20,
-            label = CraftSim.LOCAL:GetText(CraftSim.CONST.TEXT.REAGENTS_ASSIGN),
+            label = CraftSim.LOCAL:GetText("REAGENTS_ASSIGN"),
             sizeX = 15,
             sizeY = 20,
             adjustWidth = true,
@@ -188,7 +188,7 @@ function CraftSim.REAGENT_OPTIMIZATION.UI:Init()
             end
         })
 
-        local advancedOptimizationButtonLabel = CraftSim.LOCAL:GetText(CraftSim.CONST.TEXT.ADVANCED_OPTIMIZATION_BUTTON)
+        local advancedOptimizationButtonLabel = CraftSim.LOCAL:GetText("ADVANCED_OPTIMIZATION_BUTTON")
 
         frame.content.advancedOptimizationButton = GGUI.Button({
             parent = frame.content,
@@ -270,7 +270,7 @@ function CraftSim.REAGENT_OPTIMIZATION.UI:Init()
             end,
             tooltipOptions = {
                 anchor = "ANCHOR_CURSOR_RIGHT",
-                text = CraftSim.LOCAL:GetText(CraftSim.CONST.TEXT.REAGENTS_OPTIMIZE_TOOLTIP),
+                text = CraftSim.LOCAL:GetText("REAGENTS_OPTIMIZE_TOOLTIP"),
             }
         })
 
@@ -284,14 +284,10 @@ function CraftSim.REAGENT_OPTIMIZATION.UI:Init()
             }
         }
 
-        frame.content.advancedOptimizationOptions = GGUI.Button {
+        frame.content.advancedOptimizationOptions = CraftSim.WIDGETS.OptionsButton {
             parent = frame.content,
             anchorPoints = { { anchorParent = frame.content.advancedOptimizationButton.frame, anchorA = "LEFT", anchorB = "RIGHT", offsetX = 5 } },
-            sizeX = 20, sizeY = 20,
-            buttonTextureOptions = CraftSim.CONST.BUTTON_TEXTURE_OPTIONS.OPTIONS,
-            cleanTemplate = true,
-            clickCallback = function(_, _)
-                MenuUtil.CreateContextMenu(UIParent, function(ownerRegion, rootDescription)
+            menuUtilCallback = function(ownerRegion, rootDescription)
                     local concentrationCB = rootDescription:CreateCheckbox(
                         "Optimize " .. f.gold("Concentration Value"),
                         function()
@@ -339,7 +335,7 @@ function CraftSim.REAGENT_OPTIMIZATION.UI:Init()
                             "Suggest the usage of soulbound finishing reagents if profitable");
                     end);
 
-                    local finishingReagentsSoulboundCB = rootDescription:CreateCheckbox(
+                    local finishingReagentsLockedSlotsCB = rootDescription:CreateCheckbox(
                         "Include " .. f.r("Locked ") .. f.bb("Finishing Slots"),
                         function()
                             return CraftSim.DB.OPTIONS:Get("REAGENT_OPTIMIZATION_OPTIMIZE_LOCKED_FINISHING_REAGENTS")
@@ -351,12 +347,11 @@ function CraftSim.REAGENT_OPTIMIZATION.UI:Init()
                             CraftSim.MODULES:UpdateUI()
                         end)
 
-                    finishingReagentsSoulboundCB:SetTooltip(function(tooltip, elementDescription)
+                    finishingReagentsLockedSlotsCB:SetTooltip(function(tooltip, elementDescription)
                         GameTooltip_AddInstructionLine(tooltip,
                             "Optimize Finishing Reagent Slots you do not have unlocked yet");
                     end);
-                end)
-            end
+            end,
         }
 
         local reagentListQualityIconHeaderSize = 25
@@ -478,12 +473,12 @@ function CraftSim.REAGENT_OPTIMIZATION.UI:Init()
             parent = frame.content,
             anchorParent = frame.content,
             anchorA = "BOTTOMRIGHT", anchorB = "TOPLEFT", offsetX = 45, offsetY = -5,
-            text = CraftSim.LOCAL:GetText(CraftSim.CONST.TEXT.REAGENTS_OPTIMIZE_INFO)
+            text = CraftSim.LOCAL:GetText("REAGENTS_OPTIMIZE_INFO")
         }
 
         frame.content.sameAllocationText = GGUI.Text {
             parent = frame.content, anchorPoints = { { anchorParent = frame.content } },
-            text = f.g(CraftSim.LOCAL:GetText(CraftSim.CONST.TEXT.REAGENTS_OPTIMIZE_BEST_ASSIGNED)), hide = true,
+            text = f.g(CraftSim.LOCAL:GetText("REAGENTS_OPTIMIZE_BEST_ASSIGNED")), hide = true,
         }
 
         local finishingReagentIconsOffsetX = 20

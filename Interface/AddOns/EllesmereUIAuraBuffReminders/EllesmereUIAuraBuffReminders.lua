@@ -20,6 +20,13 @@ local DEFAULT_TEXT_COLOR = {r=1, g=1, b=1}
 local _huntersMarkNeeded = false
 local _huntersMarkCooldown = false  -- brief cooldown after casting OOC
 
+-- Flask state snapshotted before PvP restriction activates (aura API locked in PvP).
+local _pvpSnap = { flaskActive=false, wasRestricted=false, pollAccum=0 }
+local _pvpPollFrame = CreateFrame("Frame")
+
+-- Flask/food/rune state snapshotted before M+ ChallengeMode restriction activates.
+local _cmSnap = { flaskActive=false, foodActive=false, runeActive=false, wasRestricted=false }
+
 local texCache = {}
 local function Tex(id)
     local c = texCache[id]; if c then return c end
@@ -27,8 +34,13 @@ local function Tex(id)
     if t then texCache[id] = t end; return t
 end
 
+local _cachedPlayerClass
 local function GetPlayerClass()
-    local _, cls = UnitClass("player"); return cls
+    if not _cachedPlayerClass then
+        local _, cls = UnitClass("player")
+        _cachedPlayerClass = cls
+    end
+    return _cachedPlayerClass
 end
 
 local function GetSpecID()
@@ -249,6 +261,9 @@ local NON_SECRET_SPELL_IDS = {
     [205473]=true, [260286]=true,
     -- Cooldowns
     [8690]=true, [20608]=true,
+    -- Midnight Flasks (PvE and PvP variants; non-secret in 12.0)
+    [1235110]=true, [1235108]=true, [1235111]=true, [1235057]=true, [1239355]=true,
+    [1235113]=true, [1235114]=true, [1235115]=true, [1235116]=true,
 }
 
 -------------------------------------------------------------------------------
@@ -772,6 +787,13 @@ for _, id in ipairs(TWW_FLASK_BUFF_IDS) do
     FLASK_BUFF_IDS[#FLASK_BUFF_IDS+1] = id
     FLASK_BUFF_ID_SET[id] = true
 end
+-- PvP-morphed Midnight flask buff IDs (Blizzard replaces the PvE buff ID with
+-- a separate PvP variant inside arenas and battlegrounds)
+local PVP_FLASK_BUFF_IDS = {1235113, 1235114, 1235115, 1235116}
+for _, id in ipairs(PVP_FLASK_BUFF_IDS) do
+    FLASK_BUFF_IDS[#FLASK_BUFF_IDS+1] = id
+    FLASK_BUFF_ID_SET[id] = true
+end
 
 -- Food Items (Midnight)
 local FOOD_ITEMS = {
@@ -885,6 +907,8 @@ end
 
 local function PlayerHasWellFed()
     if InCombat() then return true end  -- never show food reminder in combat
+    if InMythicPlusKey() then return _cmSnap.foodActive end
+    if InPvPInstance() then return true end  -- food not trackable in PvP, suppress
     for i = 1, 40 do
         local aura = C_UnitAuras.GetAuraDataByIndex("player", i, "HELPFUL")
         if not aura then break end
@@ -897,20 +921,16 @@ local function PlayerHasWellFed()
 end
 
 local function PlayerHasFlaskBuff()
-    for _, id in ipairs(FLASK_BUFF_IDS) do
-        local ok, result = pcall(C_UnitAuras.GetPlayerAuraBySpellID, id)
-        if ok and result ~= nil then return true end
-    end
-    -- Fallback: iterate auras by name (only works out of combat)
-    if not InCombat() then
-        for i = 1, 40 do
-            local aura = C_UnitAuras.GetAuraDataByIndex("player", i, "HELPFUL")
-            if not aura then break end
-            local sid = aura.spellId
-            if sid and not issecretvalue(sid) and FLASK_BUFF_ID_SET[sid] then return true end
-            local aName = aura.name
-            if aName and not issecretvalue(aName) and FLASK_NAME_SET[aName] then return true end
-        end
+    -- Aura API is fully locked in PvP and M+ keystones; use snapshots instead.
+    if InPvPInstance() then return _pvpSnap.flaskActive end
+    if InMythicPlusKey() then return _cmSnap.flaskActive end
+    for i = 1, 40 do
+        local aura = C_UnitAuras.GetAuraDataByIndex("player", i, "HELPFUL")
+        if not aura then break end
+        local sid = aura.spellId
+        if sid and not issecretvalue(sid) and FLASK_BUFF_ID_SET[sid] then return true end
+        local aName = aura.name
+        if aName and not issecretvalue(aName) and (FLASK_NAME_SET[aName] or aName:find("Flask")) then return true end
     end
     return false
 end
@@ -1599,6 +1619,7 @@ if inInstance or rb.showNonInstanced then
                     local isTargetSpell = (buff.check == "huntersMark")
                     missing[#missing+1] = {
                         cat = "raidbuff", data = buff, scale = rb.scale or 1.0,
+                        dismissKey = buff.key and ("raidbuff:" .. buff.key) or nil,
                         setup = function(btn)
                             SetIconSpell(btn, buff.castSpell, Tex(buff.castSpell), buff.name)
                             if isTargetSpell and not InCombat() then
@@ -1789,7 +1810,7 @@ local specialsActive = inInstance or co.showSpecialsNonInstanced
                 showRune = InRealInstancedContent()
             end
             if showRune then
-                local hasRuneBuff = PlayerHasAuraByID(RUNE_BUFF_IDS)
+                local hasRuneBuff = InMythicPlusKey() and _cmSnap.runeActive or PlayerHasAuraByID(RUNE_BUFF_IDS)
                 if not hasRuneBuff then
                     local voidCount = GetItemCount(AUGMENT_RUNE_VOID, false) or 0
                     local etherCount = GetItemCount(AUGMENT_RUNE_ETHER, false) or 0
@@ -1854,7 +1875,7 @@ local specialsActive = inInstance or co.showSpecialsNonInstanced
             end
         end
 
-        -- Flask (OOC only, not during keystones buff is secret)
+        -- Flask (OOC only; detection uses snapshot during keystones and PvP)
         if co.enabled.flask then
             if not PlayerHasFlaskBuff() then
                 local preferredKey = co.preferredFlask or "last_used"
@@ -1873,7 +1894,7 @@ local specialsActive = inInstance or co.showSpecialsNonInstanced
             end
         end
 
-        -- Food / Well Fed (OOC only, not during keystones buff is secret)
+        -- Food / Well Fed (OOC only; detection uses snapshot during keystones)
         if co.enabled.food then
             if not PlayerHasWellFed() then
                 local preferredKey = co.preferredFood or "last_used"
@@ -2054,13 +2075,6 @@ local function Refresh()
 
     CacheInstanceInfo()
 
-    -- Suppress ALL reminders inside M+ keystones.
-    if InMythicPlusKey() then
-        HideCombatIcons(); HideCursorIcons()
-        if InCombat() then FadeOutSecureIcons() else HideAllIcons() end
-        return
-    end
-
     local playerClass = GetPlayerClass()
     local specID = GetSpecID()
     local inInstance = InRealInstancedContent()
@@ -2175,13 +2189,27 @@ local function Refresh()
     end
 end
 
+local REFRESH_THROTTLE_COMBAT = 0.2
+local REFRESH_THROTTLE_OOC    = 1.0
+local _lastRefreshTime = 0
+local _refreshTimerActive = false
+local function _doRefresh()
+    _refreshTimerActive = false
+    refreshQueued = false
+    _lastRefreshTime = GetTime()
+    Refresh()
+end
 local function RequestRefresh()
     if refreshQueued then return end
     refreshQueued = true
-    C_Timer.After(0, function()
-        refreshQueued = false
-        Refresh()
-    end)
+    local throttle = InCombat() and REFRESH_THROTTLE_COMBAT or REFRESH_THROTTLE_OOC
+    local elapsed = GetTime() - _lastRefreshTime
+    if elapsed >= throttle then
+        C_Timer.After(0, _doRefresh)
+    elseif not _refreshTimerActive then
+        _refreshTimerActive = true
+        C_Timer.After(throttle - elapsed, _doRefresh)
+    end
 end
 
 
@@ -2229,6 +2257,7 @@ local function RegisterUnlockElements()
             label = "AuraBuff Reminders",
             group = "AuraBuff Reminders",
             order = 600,
+            noAnchorTarget = true,  -- icon count changes dynamically with auras
             getFrame = function() return iconAnchor end,
             getSize = function()
                 local p = db.profile.display
@@ -2584,6 +2613,92 @@ end
 function EABR:OnEnable()
     -- Expose globals for options
     _G._EABR_AceDB = db
+
+    -- Snapshot flask/food before PvP and M+ restrictions activate.
+    -- Uses direct aura scan to avoid circular calls into PlayerHasFlaskBuff.
+    local function _scanFlaskOOC()
+        for i = 1, 40 do
+            local aura = C_UnitAuras.GetAuraDataByIndex("player", i, "HELPFUL")
+            if not aura then break end
+            local sid = aura.spellId
+            if sid and not issecretvalue(sid) and FLASK_BUFF_ID_SET[sid] then return true end
+            local aName = aura.name
+            if aName and not issecretvalue(aName) and (FLASK_NAME_SET[aName] or aName:find("Flask")) then return true end
+        end
+        return false
+    end
+    local function _scanFoodOOC()
+        for i = 1, 40 do
+            local aura = C_UnitAuras.GetAuraDataByIndex("player", i, "HELPFUL")
+            if not aura then break end
+            local aName = aura.name
+            if aName and not issecretvalue(aName) and (aName == "Well Fed" or aName == "Hearty Well Fed") then return true end
+        end
+        return false
+    end
+    local _runeBuffIDSet = {}
+    for _, id in ipairs(RUNE_BUFF_IDS) do _runeBuffIDSet[id] = true end
+    local function _scanRuneOOC()
+        for i = 1, 40 do
+            local aura = C_UnitAuras.GetAuraDataByIndex("player", i, "HELPFUL")
+            if not aura then break end
+            local sid = aura.spellId
+            if sid and not issecretvalue(sid) and _runeBuffIDSet[sid] then return true end
+        end
+        return false
+    end
+    -- Update snapshots on player aura changes (event-driven, no polling).
+    local function _updateSnapshots()
+        if C_RestrictedActions and C_RestrictedActions.IsAddOnRestrictionActive then
+            local pvpActive = C_RestrictedActions.IsAddOnRestrictionActive(Enum.AddOnRestrictionType.PvPMatch)
+            local cmActive = C_RestrictedActions.IsAddOnRestrictionActive(Enum.AddOnRestrictionType.ChallengeMode)
+            if not pvpActive then
+                _pvpSnap.flaskActive = _scanFlaskOOC()
+            end
+            if not cmActive then
+                _cmSnap.flaskActive = _scanFlaskOOC()
+                _cmSnap.foodActive = _scanFoodOOC()
+                _cmSnap.runeActive = _scanRuneOOC()
+            end
+        end
+    end
+    local _snapFrame = CreateFrame("Frame")
+    _snapFrame:RegisterEvent("UNIT_AURA")
+    _snapFrame:SetScript("OnEvent", function(_, _, unit)
+        if unit == "player" then _updateSnapshots() end
+    end)
+    -- Initial scan
+    _updateSnapshots()
+
+    -- Lightweight poll: only detect restriction state transitions (no aura scans).
+    _pvpPollFrame:SetScript("OnUpdate", function(_, elapsed)
+        if not (C_RestrictedActions and C_RestrictedActions.IsAddOnRestrictionActive) then return end
+        _pvpSnap.pollAccum = _pvpSnap.pollAccum + elapsed
+        if _pvpSnap.pollAccum < 1.0 then return end
+        _pvpSnap.pollAccum = 0
+
+        -- PvP state transitions
+        local pvpActive = C_RestrictedActions.IsAddOnRestrictionActive(Enum.AddOnRestrictionType.PvPMatch)
+        if pvpActive and not _pvpSnap.wasRestricted then
+            _pvpSnap.wasRestricted = true
+        elseif not pvpActive and _pvpSnap.wasRestricted then
+            _pvpSnap.wasRestricted = false
+            _pvpSnap.flaskActive = false
+            RequestRefresh()
+        end
+
+        -- M+ state transitions
+        local cmActive = C_RestrictedActions.IsAddOnRestrictionActive(Enum.AddOnRestrictionType.ChallengeMode)
+        if cmActive and not _cmSnap.wasRestricted then
+            _cmSnap.wasRestricted = true
+        elseif not cmActive and _cmSnap.wasRestricted then
+            _cmSnap.wasRestricted = false
+            _cmSnap.flaskActive = false
+            _cmSnap.foodActive = false
+            _cmSnap.runeActive = false
+            RequestRefresh()
+        end
+    end)
     _G._EABR_RequestRefresh = RequestRefresh
     _G._EABR_HideAllIcons = HideAllIcons
     _G._EABR_GLOW_VALUES = GLOW_VALUES
@@ -2692,13 +2807,7 @@ function EABR:OnEnable()
     -- Register broad UNIT_AURA when group buff checking is needed.
     local _groupAuraRegistered = false
     local function UpdateGroupAuraRegistration()
-        local needGroup = false
-        local rb = db.profile.raidBuffs
-        if rb and rb.showOthersMissing then needGroup = true end
-        if not needGroup then
-            local cls = GetPlayerClass()
-            if cls == "SHAMAN" or cls == "EVOKER" then needGroup = true end
-        end
+        local needGroup = true  -- always broad: raid buff checks need party/raid unit auras for all classes
         if needGroup and not _groupAuraRegistered then
             mainFrame:RegisterEvent("UNIT_AURA")  -- broad: fires for any unit
             mainFrame:RegisterEvent("GROUP_JOINED")
@@ -2726,7 +2835,29 @@ function EABR:OnEnable()
     local _lastRangeSet = {}   -- [unitToken] = true/false (last known in-range state)
     local _rangeAccum   = 0    -- seconds since last poll
 
+    -- Pre-build unit token strings to avoid per-poll allocations
+    local _raidTokens = {}
+    local _partyTokens = {}
+    for i = 1, 40 do _raidTokens[i] = "raid" .. i end
+    for i = 1, 4 do _partyTokens[i] = "party" .. i end
+
     local rangeFrame = CreateFrame("Frame")
+    local _rangeChanged = false
+    local function _checkUnit(u)
+        if not UnitExists(u) then
+            if _lastRangeSet[u] ~= nil then
+                _lastRangeSet[u] = nil
+                _rangeChanged = true
+            end
+            return
+        end
+        local state = _unitInRange(u)
+        if _lastRangeSet[u] ~= state then
+            _lastRangeSet[u] = state
+            _rangeChanged = true
+        end
+    end
+
     rangeFrame:SetScript("OnUpdate", function(_, elapsed)
         -- Only poll OOC and when in a group (avoids all taint risk in combat).
         if InCombat() or not IsInGroup() then
@@ -2737,29 +2868,14 @@ function EABR:OnEnable()
         if _rangeAccum < 0.5 then return end
         _rangeAccum = 0
 
-        local changed = false
-        local function checkUnit(u)
-            if not UnitExists(u) then
-                if _lastRangeSet[u] ~= nil then
-                    _lastRangeSet[u] = nil
-                    changed = true
-                end
-                return
-            end
-            local state = _unitInRange(u)
-            if _lastRangeSet[u] ~= state then
-                _lastRangeSet[u] = state
-                changed = true
-            end
-        end
-
+        _rangeChanged = false
         if IsInRaid() then
-            for i = 1, GetNumGroupMembers() do checkUnit("raid"..i) end
+            for i = 1, GetNumGroupMembers() do _checkUnit(_raidTokens[i]) end
         else
-            for i = 1, GetNumSubgroupMembers() do checkUnit("party"..i) end
+            for i = 1, GetNumSubgroupMembers() do _checkUnit(_partyTokens[i]) end
         end
 
-        if changed then RequestRefresh() end
+        if _rangeChanged then RequestRefresh() end
     end)
 end
 
@@ -2810,7 +2926,6 @@ mainFrame:SetScript("OnEvent", function(_, e, arg1, arg2, arg3)
     end
 
     if e == "PLAYER_ENTERING_WORLD" then
-        -- Loading screen completed: clear middle-click dismissed reminders
         wipe(_dismissedUntilLoad)
         RequestRefresh()
         return
@@ -2818,7 +2933,7 @@ mainFrame:SetScript("OnEvent", function(_, e, arg1, arg2, arg3)
 
     if e == "UNIT_AURA" then
         -- arg1 = unit token. Ignore non-group units (enemies, NPCs, pets).
-        local isEvoker = GetPlayerClass() == "EVOKER"
+        local isEvoker = _cachedPlayerClass == "EVOKER"
         if arg1 == "player" then
             if isEvoker and InCombat() and IsInGroup() then
                 for _, id in ipairs(_ownOnRaidIDs) do
@@ -2829,7 +2944,7 @@ mainFrame:SetScript("OnEvent", function(_, e, arg1, arg2, arg3)
                 end
             end
             RequestRefresh()
-        elseif arg1 and (arg1:match("^party%d") or arg1:match("^raid%d")) then
+        elseif arg1 and (arg1:find("^party%d") or arg1:find("^raid%d")) then
             if isEvoker and InCombat() and IsInGroup() then
                 for _, id in ipairs(_ownOnRaidIDs) do
                     if not _preCombatOwnOnRaidCache[id] then
@@ -2857,30 +2972,32 @@ end)
 -- Item use tracking via bag snapshot diffing on BAG_UPDATE_DELAYED
 local lastBagSnapshot = {}
 
-local function SnapshotBags()
-    local snap = {}
+local _bagSnapReuse = {}
+local function SnapshotBags(out)
+    wipe(out)
     for bag = 0, 4 do
         local numSlots = C_Container and C_Container.GetContainerNumSlots(bag) or 0
         for slot = 1, numSlots do
             local info = C_Container and C_Container.GetContainerItemInfo(bag, slot)
             if info and info.itemID then
-                snap[info.itemID] = (snap[info.itemID] or 0) + info.stackCount
+                out[info.itemID] = (out[info.itemID] or 0) + info.stackCount
             end
         end
     end
-    return snap
 end
 
 local function DetectUsedItem()
     if not db or not db.char then return end
-    local newSnap = SnapshotBags()
+    SnapshotBags(_bagSnapReuse)
     for itemID, oldCount in pairs(lastBagSnapshot) do
-        local newCount = newSnap[itemID] or 0
+        local newCount = _bagSnapReuse[itemID] or 0
         if newCount < oldCount then
             TrackItemUse(itemID)
         end
     end
-    lastBagSnapshot = newSnap
+    -- Copy new snapshot into lastBagSnapshot (reuse table)
+    wipe(lastBagSnapshot)
+    for k, v in pairs(_bagSnapReuse) do lastBagSnapshot[k] = v end
 end
 
 local bagTrackFrame = CreateFrame("Frame")
@@ -2888,7 +3005,7 @@ bagTrackFrame:RegisterEvent("BAG_UPDATE_DELAYED")
 bagTrackFrame:RegisterEvent("PLAYER_LOGIN")
 bagTrackFrame:SetScript("OnEvent", function(_, ev)
     if ev == "PLAYER_LOGIN" then
-        C_Timer.After(1, function() lastBagSnapshot = SnapshotBags() end)
+        C_Timer.After(1, function() SnapshotBags(lastBagSnapshot) end)
     elseif ev == "BAG_UPDATE_DELAYED" then
         DetectUsedItem()
     end

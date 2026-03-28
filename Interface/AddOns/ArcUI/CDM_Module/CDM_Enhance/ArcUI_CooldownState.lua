@@ -1379,6 +1379,8 @@ local function NewApplyCooldownStateVisuals(frame, cfg, normalAlpha, stateVisual
     if not ResolveDependencies() then return end
   end
   if frame._arcConfig or frame._arcAuraID then return end
+  -- Never process CDM aura viewer frames (buff/debuff icons) — they have no cooldown state
+  if frame._arcViewerType == "aura" then return end
 
   local iconTex = ResolveIconTexture(frame)
   if not iconTex then return end
@@ -1614,6 +1616,7 @@ end
 function ns.CooldownState.FeedShadow(frame, cfg)
   if not frame then return end
   if frame._arcConfig or frame._arcAuraID then return end
+  if frame._arcViewerType == "aura" then return end
   local spellID
   if frame.cooldownInfo then
     spellID = frame.cooldownInfo.overrideSpellID or frame.cooldownInfo.spellID
@@ -1635,6 +1638,7 @@ end
 
 function ns.CooldownState.EnsureShadow(frame)
   if not frame then return end
+  if frame._arcViewerType == "aura" then return end
   EnsureShadowCooldown(frame)
 end
 
@@ -1645,6 +1649,7 @@ end
 -- ═══════════════════════════════════════════════════════════════════
 function ns.CooldownState.InstallCooldownAuraHooks(frame)
   if not frame then return end
+  if frame._arcViewerType == "aura" then return end
   if frame._arcCooldownAuraHooked then return end
   frame._arcCooldownAuraHooked = true
 

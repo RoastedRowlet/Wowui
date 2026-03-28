@@ -1,24 +1,22 @@
 
 RaiderIO_Config = {
-["minimapIcon"] = {
-["minimapPos"] = 180,
-["showInCompartment"] = true,
-["hide"] = false,
-["lock"] = false,
-},
 ["profilePoint"] = {
 ["y"] = 0,
 ["x"] = -16,
 ["point"] = "TOPLEFT",
 },
+["minimapIcon"] = {
+["minimapPos"] = 180,
+["showInCompartment"] = true,
+["lock"] = false,
+["hide"] = false,
+},
 }
-RaiderIO_LastCharacter = "us-Lonelylitten-stormrage"
+RaiderIO_LastCharacter = "us-Barelynoer-area-52"
 RaiderIO_MissingCharacters = {
-["us-Witherbloom-hellscream"] = true,
-["us-Bodhim-stormrage"] = true,
-["us-Shemanhunter-frostmourne"] = true,
-["us-Orizüh-stormrage"] = true,
-["us-Dragizard-illidan"] = true,
+["us-Beerdrive-area-52"] = true,
+["us-Goldzealot-area-52"] = true,
+["us-Barelynoer-area-52"] = true,
 }
 RaiderIO_MissingServers = {
 }

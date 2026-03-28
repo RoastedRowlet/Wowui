@@ -48,9 +48,9 @@ function CraftSim.RECIPE_SCAN:ToggleScanButton(row, value)
     content.scanButton:SetEnabled(value)
     content.cancelScanButton:SetVisible(not value)
     if not value then
-        content.scanButton:SetText(CraftSim.LOCAL:GetText(CraftSim.CONST.TEXT.RECIPE_SCAN_SCANNING) .. " 0%")
+        content.scanButton:SetText(CraftSim.LOCAL:GetText("RECIPE_SCAN_SCANNING") .. " 0%")
     else
-        content.scanButton:SetText(CraftSim.LOCAL:GetText(CraftSim.CONST.TEXT.RECIPE_SCAN_SCAN_RECIPIES))
+        content.scanButton:SetText(CraftSim.LOCAL:GetText("RECIPE_SCAN_SCAN_RECIPIES"))
     end
 
     -- if within professionscan always hide the cancel button in the scanning row
@@ -296,14 +296,16 @@ function CraftSim.RECIPE_SCAN:ScanRow(row)
     CraftSim.RECIPE_SCAN:ToggleScanButton(row, false)
     CraftSim.RECIPE_SCAN.UI:ResetResults(row)
 
-    local optimizeGear = CraftSim.DB.OPTIONS:Get("RECIPESCAN_OPTIMIZE_PROFESSION_TOOLS")
-    local concentrationEnabled = CraftSim.DB.OPTIONS:Get("RECIPESCAN_ENABLE_CONCENTRATION")
+    local OPT_ID = CraftSim.CONST.OPTIMIZATION_OPTIONS_IDS.RECIPESCAN_SCAN
+    local KEYS   = CraftSim.WIDGETS.OptimizationOptions.OPTION_KEYS
+    local optimizeGear = CraftSim.DB.OPTIMIZATION_OPTIONS:Get(OPT_ID, KEYS.OPTIMIZE_PROFESSION_TOOLS, false)
+    local concentrationEnabled = CraftSim.DB.OPTIMIZATION_OPTIONS:Get(OPT_ID, KEYS.ENABLE_CONCENTRATION, true)
     local optimizeSubRecipes = CraftSim.DB.OPTIONS:Get("RECIPESCAN_OPTIMIZE_SUBRECIPES")
-    local optimizeConcentration = CraftSim.DB.OPTIONS:Get("RECIPESCAN_OPTIMIZE_CONCENTRATION_VALUE")
-    local optimizeTopProfit = CraftSim.DB.OPTIONS:Get("RECIPESCAN_OPTIMIZE_REAGENTS_TOP_PROFIT")
-    local optimizeFinishingReagents = CraftSim.DB.OPTIONS:Get("RECIPESCAN_OPTIMIZE_FINISHING_REAGENTS")
-    local optimizationScanMode = CraftSim.DB.OPTIONS:Get("RECIPESCAN_SCAN_MODE") ==
-        CraftSim.RECIPE_SCAN.SCAN_MODES.OPTIMIZE
+    local optimizeConcentration = CraftSim.DB.OPTIMIZATION_OPTIONS:Get(OPT_ID, KEYS.OPTIMIZE_CONCENTRATION, false)
+    local optimizeTopProfit = CraftSim.DB.OPTIMIZATION_OPTIONS:Get(OPT_ID, KEYS.AUTOSELECT_TOP_PROFIT_QUALITY, false)
+    local optimizeFinishingReagents = CraftSim.DB.OPTIMIZATION_OPTIONS:Get(OPT_ID, KEYS.OPTIMIZE_FINISHING_REAGENTS, false)
+    local reagentAllocation = CraftSim.DB.OPTIMIZATION_OPTIONS:Get(OPT_ID, KEYS.REAGENT_ALLOCATION, CraftSim.RECIPE_SCAN.SCAN_MODES.OPTIMIZE)
+    local optimizationScanMode = reagentAllocation == CraftSim.RECIPE_SCAN.SCAN_MODES.OPTIMIZE
 
 
     CraftSim.RECIPE_SCAN.rowScanFrameDistributor = GUTIL.FrameDistributor {
@@ -319,7 +321,7 @@ function CraftSim.RECIPE_SCAN:ScanRow(row)
             CraftSim.DEBUG:StartProfiling("Single Recipe Scan")
 
             -- update button
-            content.scanButton:SetText(CraftSim.LOCAL:GetText(CraftSim.CONST.TEXT.RECIPE_SCAN_SCANNING) ..
+            content.scanButton:SetText(CraftSim.LOCAL:GetText("RECIPE_SCAN_SCANNING") ..
                 string.format(" %.0f%%", progress))
             content.resultAmount:SetText(recipeInfoIndex .. "/" .. #recipeInfos)
 
@@ -391,7 +393,7 @@ function CraftSim.RECIPE_SCAN:ScanRow(row)
             if optimizeFinishingReagents then
                 optimizeFinishingReagentOptions = {
                     includeLocked = false,
-                    includeSoulbound = CraftSim.DB.OPTIONS:Get("RECIPESCAN_OPTIMIZE_FINISHING_REAGENTS_INCLUDE_SOULBOUND"),
+                    includeSoulbound = CraftSim.DB.OPTIMIZATION_OPTIONS:Get(OPT_ID, KEYS.INCLUDE_SOULBOUND_FINISHING_REAGENTS, false),
                     progressUpdateCallback = function(progress)
                     content.optimizationProgressStatusText:SetText(string.format("%.0f%%", progress) ..
                         " " ..
@@ -432,7 +434,11 @@ end
 
 ---@param recipeData CraftSim.RecipeData
 function CraftSim.RECIPE_SCAN:SetReagentsByScanMode(recipeData)
-    local scanMode = CraftSim.DB.OPTIONS:Get("RECIPESCAN_SCAN_MODE")
+    local KEYS    = CraftSim.WIDGETS.OptimizationOptions.OPTION_KEYS
+    local scanMode = CraftSim.DB.OPTIMIZATION_OPTIONS:Get(
+        CraftSim.CONST.OPTIMIZATION_OPTIONS_IDS.RECIPESCAN_SCAN,
+        KEYS.REAGENT_ALLOCATION,
+        CraftSim.RECIPE_SCAN.SCAN_MODES.OPTIMIZE)
     if scanMode == CraftSim.RECIPE_SCAN.SCAN_MODES.Q1 then
         recipeData.reagentData:SetReagentsMaxByQuality(1)
     elseif scanMode == CraftSim.RECIPE_SCAN.SCAN_MODES.Q2 then
@@ -583,12 +589,33 @@ function CraftSim.RECIPE_SCAN:SendToCraftQueue()
         return relativeProfit >= marginThreshold;
     end)
 
+    -- If "Create CraftList" mode is enabled, show name popup and create a craft list
+    if CraftSim.DB.OPTIONS:Get("RECIPESCAN_SEND_TO_CRAFTQUEUE_CREATE_CRAFT_LIST") then
+        CraftSim.CRAFTQ.UI:ShowCraftListNamePopup(
+            L("CRAFT_LISTS_CREATE_POPUP_TITLE"),
+            L("CRAFT_LISTS_NEW_LIST_DEFAULT_NAME"),
+            false,
+            function(name, isGlobal)
+                if not name or name == "" then return end
+                local crafterUID = CraftSim.UTIL:GetPlayerCrafterUID()
+                local newList = CraftSim.DB.CRAFT_LISTS:CreateList(name, isGlobal, crafterUID)
+                for _, recipeData in ipairs(filteredResults) do
+                    CraftSim.DB.CRAFT_LISTS:AddRecipe(newList.id, newList.isGlobal, crafterUID, recipeData.recipeID)
+                end
+                CraftSim.CRAFTQ.UI:UpdateCraftListsDisplay()
+            end)
+        return
+    end
+
     local sendToCraftQueueButton = CraftSim.RECIPE_SCAN.frame.content.recipeScanTab.content
         .sendToCraftQueueButton --[[@as GGUI.Button]]
 
     sendToCraftQueueButton:SetEnabled(false)
 
-    local concentrationEnabled = CraftSim.DB.OPTIONS:Get("RECIPESCAN_ENABLE_CONCENTRATION")
+    local concentrationEnabled = CraftSim.DB.OPTIMIZATION_OPTIONS:Get(
+        CraftSim.CONST.OPTIMIZATION_OPTIONS_IDS.RECIPESCAN_SCAN,
+        CraftSim.WIDGETS.OptimizationOptions.OPTION_KEYS.ENABLE_CONCENTRATION,
+        true)
 
     GUTIL.FrameDistributor {
         iterationTable = filteredResults,
@@ -625,8 +652,8 @@ function CraftSim.RECIPE_SCAN:SendToCraftQueue()
 
             -- TSM Enhanced: subtract existing inventory from restock target
             if CraftSimTSM:IsAvailable() and CraftSim.DB.OPTIONS:Get("TSM_SMART_RESTOCK_ENABLED") then
-                local needed = CraftSimTSM:GetSmartRestockAmount(recipeData)
-                restockAmount = math.min(restockAmount, needed)
+                local _, _, owned = CraftSimTSM:GetSmartRestockAmount(recipeData)
+                restockAmount = math.max(0, restockAmount - owned)
             end
 
             if recipeData.cooldownData.isCooldownRecipe == true and recipeData.cooldownData.currentCharges < restockAmount then

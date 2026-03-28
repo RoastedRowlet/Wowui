@@ -6,13 +6,16 @@ MythicDungeonToolsDB = {
 },
 ["global"] = {
 ["currentDungeonIdx"] = 11,
+["minimap"] = {
+["showInCompartment"] = true,
+},
 ["latestDungeonSeen"] = 150,
 ["maximized"] = false,
 ["presets"] = {
 [11] = {
 {
-["week"] = 1,
 ["difficulty"] = 10,
+["week"] = 1,
 ["value"] = {
 ["currentPull"] = 1,
 ["currentSublevel"] = 1,
@@ -30,8 +33,8 @@ MythicDungeonToolsDB = {
 },
 [150] = {
 {
-["week"] = 1,
 ["difficulty"] = 10,
+["week"] = 1,
 ["value"] = {
 ["currentPull"] = 1,
 ["currentSublevel"] = 1,
@@ -48,10 +51,7 @@ MythicDungeonToolsDB = {
 },
 },
 },
-["scale"] = 1.4,
 ["version"] = 609,
-["minimap"] = {
-["showInCompartment"] = true,
-},
+["scale"] = 1.4,
 },
 }
