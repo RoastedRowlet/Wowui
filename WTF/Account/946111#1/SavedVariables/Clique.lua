@@ -3,9 +3,9 @@ CliqueDB = nil
 CliqueDB3 = {
 ["char"] = {
 ["Angryabsol - Stormrage"] = {
+["spec1_profileKey"] = "Angryabsol - Stormrage",
 ["specswap"] = false,
 ["spec3_profileKey"] = "Angryabsol - Stormrage",
-["spec1_profileKey"] = "Angryabsol - Stormrage",
 ["spec2_profileKey"] = "Angryabsol - Stormrage",
 ["stopcastingfix"] = true,
 },
@@ -16,13 +16,13 @@ CliqueDB3 = {
 ["spec2_profileKey"] = "Barelynoer - Area 52",
 },
 ["Lonelylitten - Stormrage"] = {
-["spec1_profileKey"] = "Lonelylitten - Stormrage",
-["spec3_profileKey"] = "Lonelylitten - Stormrage",
-["downclick"] = false,
 ["fastooc"] = false,
-["spec4_profileKey"] = "Lonelylitten - Stormrage",
+["spec1_profileKey"] = "Lonelylitten - Stormrage",
 ["spec2_profileKey"] = "Lonelylitten - Stormrage",
+["downclick"] = false,
+["spec4_profileKey"] = "Lonelylitten - Stormrage",
 ["specswap"] = false,
+["spec3_profileKey"] = "Lonelylitten - Stormrage",
 },
 },
 ["profileKeys"] = {
@@ -243,14 +243,14 @@ CliqueDB3 = {
 ["unit"] = "mouseover",
 },
 {
-["spell"] = "Verdant Embrace",
-["key"] = "ALT-BUTTON1",
-["spellSubName"] = "Green",
+["spell"] = "Cauterizing Flame",
+["key"] = "ALT-BUTTON3",
+["type"] = "spell",
 ["sets"] = {
 ["default"] = true,
 },
-["icon"] = 4622471,
-["type"] = "spell",
+["icon"] = 4630446,
+["spellSubName"] = "Red",
 },
 {
 ["spell"] = "Living Flame",
@@ -270,24 +270,24 @@ CliqueDB3 = {
 },
 },
 {
-["spell"] = "Cauterizing Flame",
-["key"] = "ALT-BUTTON3",
-["type"] = "spell",
-["sets"] = {
-["default"] = true,
-},
-["icon"] = 4630446,
-["spellSubName"] = "Red",
-},
-{
-["spell"] = "Emerald Blossom",
-["key"] = "ALT-BUTTON2",
+["spell"] = "Verdant Embrace",
+["key"] = "ALT-BUTTON1",
 ["spellSubName"] = "Green",
 ["sets"] = {
 ["default"] = true,
 },
-["icon"] = 4622457,
+["icon"] = 4622471,
 ["type"] = "spell",
+},
+{
+["spell"] = "Expunge",
+["key"] = "BUTTON3",
+["type"] = "spell",
+["sets"] = {
+["default"] = true,
+},
+["icon"] = 4630445,
+["spellSubName"] = "Green",
 },
 {
 ["type"] = "target",
@@ -309,14 +309,14 @@ CliqueDB3 = {
 ["type"] = "spell",
 },
 {
-["spell"] = "Expunge",
-["key"] = "BUTTON3",
-["type"] = "spell",
+["spell"] = "Emerald Blossom",
+["key"] = "ALT-BUTTON2",
+["spellSubName"] = "Green",
 ["sets"] = {
 ["default"] = true,
 },
-["icon"] = 4630445,
-["spellSubName"] = "Green",
+["icon"] = 4622457,
+["type"] = "spell",
 },
 {
 ["spell"] = "Return",

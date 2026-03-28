@@ -145,15 +145,6 @@ EllesmereUIDB = {
 ["customSpells"] = {
 },
 },
-["custom_5_369853_734"] = {
-["assignedSpells"] = {
-},
-["removedSpells"] = {
-[-13] = true,
-[58984] = true,
-[-14] = true,
-},
-},
 ["buffs"] = {
 ["assignedSpells"] = {
 158478,
@@ -165,6 +156,15 @@ EllesmereUIDB = {
 },
 ["removedSpells"] = {
 [33763] = true,
+},
+},
+["custom_4_369202_22"] = {
+["assignedSpells"] = {
+58984,
+},
+["removedSpells"] = {
+[-14] = true,
+[-13] = true,
 },
 },
 ["cooldowns"] = {
@@ -185,13 +185,13 @@ EllesmereUIDB = {
 [33891] = 3,
 },
 },
-["custom_4_369202_22"] = {
+["custom_5_369853_734"] = {
 ["assignedSpells"] = {
-58984,
 },
 ["removedSpells"] = {
-[-14] = true,
 [-13] = true,
+[58984] = true,
+[-14] = true,
 },
 },
 ["custom_4_369283_572"] = {
@@ -417,27 +417,27 @@ EllesmereUIDB = {
 },
 ["unlockLayout"] = {
 ["anchors"] = {
-["focusCastbar"] = {
-["target"] = "focus",
-["offsetY"] = 0,
-["side"] = "BOTTOM",
-["offsetX"] = 0,
-},
-["playerCastbar"] = {
-["target"] = "player",
-["side"] = "BOTTOM",
-},
 ["targettarget"] = {
 ["target"] = "target",
 ["offsetY"] = 24.58349609375,
 ["side"] = "TOP",
 ["offsetX"] = 66.66693115234375,
 },
+["playerCastbar"] = {
+["target"] = "player",
+["side"] = "BOTTOM",
+},
 ["targetCastbar"] = {
 ["target"] = "target",
 ["offsetY"] = -0.416748046875,
 ["side"] = "BOTTOM",
 ["offsetX"] = 0.0001220703125,
+},
+["focusCastbar"] = {
+["target"] = "focus",
+["offsetY"] = 0,
+["side"] = "BOTTOM",
+["offsetX"] = 0,
 },
 },
 ["widthMatch"] = {
@@ -838,19 +838,19 @@ EllesmereUIDB = {
 ["barVisibility"] = "always",
 ["barBgB"] = 0,
 ["visOnlyInstances"] = false,
-["keybindR"] = 1,
+["borderR"] = 0,
 ["bgR"] = 0.08,
 ["borderClassColor"] = false,
 ["borderB"] = 0,
 ["anchorTo"] = "none",
 ["visHideNoTarget"] = false,
-["borderR"] = 0,
+["keybindG"] = 1,
 ["pandemicGlowStyle"] = 1,
 ["iconShape"] = "cropped",
-["spacing"] = 0,
+["showTooltip"] = false,
 ["borderSize"] = 1,
-["keybindG"] = 1,
-["bgB"] = 0.08,
+["keybindR"] = 1,
+["spacing"] = 0,
 ["iconSize"] = 56,
 ["housingHideEnabled"] = true,
 ["borderThickness"] = "thin",
@@ -863,7 +863,7 @@ EllesmereUIDB = {
 ["visHideNoEnemy"] = false,
 ["verticalOrientation"] = false,
 ["keybindSize"] = 10,
-["showTooltip"] = false,
+["bgB"] = 0.08,
 ["barBgR"] = 0,
 ["iconZoom"] = 0.08,
 ["bgG"] = 0.08,
@@ -888,19 +888,19 @@ EllesmereUIDB = {
 ["barVisibility"] = "always",
 ["barBgB"] = 0,
 ["visOnlyInstances"] = false,
-["keybindR"] = 1,
+["borderR"] = 0,
 ["bgR"] = 0.08,
 ["borderClassColor"] = false,
 ["borderB"] = 0,
 ["anchorTo"] = "none",
 ["visHideNoTarget"] = false,
-["borderR"] = 0,
+["keybindG"] = 1,
 ["pandemicGlowStyle"] = 1,
 ["barBgR"] = 0,
-["spacing"] = 0,
+["showTooltip"] = false,
 ["borderSize"] = 1,
-["keybindG"] = 1,
-["bgB"] = 0.08,
+["keybindR"] = 1,
+["spacing"] = 0,
 ["iconSize"] = 37,
 ["anchorOffsetX"] = 0,
 ["pandemicGlow"] = true,
@@ -913,7 +913,7 @@ EllesmereUIDB = {
 ["housingHideEnabled"] = true,
 ["verticalOrientation"] = false,
 ["keybindSize"] = 10,
-["showTooltip"] = false,
+["bgB"] = 0.08,
 ["iconShape"] = "none",
 ["iconZoom"] = 0.08,
 ["bgG"] = 0.08,
@@ -939,7 +939,7 @@ EllesmereUIDB = {
 ["barVisibility"] = "always",
 ["visHideNoEnemy"] = false,
 ["bgR"] = 0.08,
-["showTooltip"] = false,
+["spacing"] = 5,
 ["anchorOffsetX"] = 0,
 ["borderClassColor"] = false,
 ["borderB"] = 0,
@@ -947,11 +947,11 @@ EllesmereUIDB = {
 ["visHideNoTarget"] = false,
 ["pandemicGlowStyle"] = 1,
 ["barBgR"] = 0,
-["keybindG"] = 1,
-["spacing"] = 5,
-["borderSize"] = 1,
-["keybindR"] = 1,
+["borderR"] = 0,
 ["bgB"] = 0.08,
+["borderSize"] = 1,
+["keybindG"] = 1,
+["showTooltip"] = false,
 ["iconSize"] = 32,
 ["barBgB"] = 0,
 ["borderThickness"] = "thin",
@@ -964,7 +964,7 @@ EllesmereUIDB = {
 ["verticalOrientation"] = false,
 ["housingHideEnabled"] = true,
 ["keybindSize"] = 10,
-["borderR"] = 0,
+["keybindR"] = 1,
 ["iconShape"] = "none",
 ["iconZoom"] = 0.08,
 ["bgG"] = 0.08,
@@ -1089,27 +1089,27 @@ EllesmereUIDB = {
 ["dismissedConflicts"] = {
 },
 ["unlockAnchors"] = {
-["targettarget"] = {
-["target"] = "target",
-["offsetY"] = 24.58349609375,
-["side"] = "TOP",
-["offsetX"] = 66.66693115234375,
-},
-["playerCastbar"] = {
-["target"] = "player",
-["side"] = "BOTTOM",
-},
 ["targetCastbar"] = {
 ["target"] = "target",
 ["offsetY"] = -0.416748046875,
 ["side"] = "BOTTOM",
 ["offsetX"] = 0.0001220703125,
 },
+["playerCastbar"] = {
+["target"] = "player",
+["side"] = "BOTTOM",
+},
 ["focusCastbar"] = {
 ["target"] = "focus",
 ["offsetY"] = 0,
 ["side"] = "BOTTOM",
 ["offsetX"] = 0,
+},
+["targettarget"] = {
+["target"] = "target",
+["offsetY"] = 24.58349609375,
+["side"] = "TOP",
+["offsetX"] = 66.66693115234375,
 },
 },
 ["customColors"] = {

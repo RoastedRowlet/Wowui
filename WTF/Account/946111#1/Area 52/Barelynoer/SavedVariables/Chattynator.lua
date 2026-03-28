@@ -1,12 +1,6 @@
 
 CHATTYNATOR_CURRENT_PROFILE = "DEFAULT"
 CHATTYNATOR_COMMAND_HISTORY = {
-"/s /way #2405 52.6 72.8 Void Researcher Anomander",
-"/s /run print(C_QuestLog.IsQuestFlaggedCompleted(95245))",
-"/s /way 47.36 58.64 Elrendar River Runestone",
-"/s /way 39.13 56.85 Ath'ran Runestone",
-"/s /reload",
-"/p yo!",
 "/p ^",
 "/p im freaking out",
 "/p ;)",
@@ -203,4 +197,13 @@ CHATTYNATOR_COMMAND_HISTORY = {
 "/cw Dmcsham-Illidan /RC",
 "/cw Dmcsham-Illidan /pull 15",
 "/s /key",
+"/s /KEY",
+"/p where those come from?",
+"/p /ROLL",
+"/p /key",
+"/p want this staff?",
+"/2 LF |cnIQ4:|Hitem:237849::::::::90:1473::13:1:3524:6:40:2736:38:8:46:232875:47:245876:48:245786:49:-2147480301:::::|h[Magister's Valediction |A:Professions-ChatIcon-Quality-Tier5:17:15::1|a]|h|r",
+"/cw Haxpal-Area52 sent",
+"/cw Haxpal-Area52 /key",
+"/p there were some... mistakes lmao",
 }

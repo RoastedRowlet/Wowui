@@ -8,16 +8,11 @@ BigWigs3DB = {
 ["Zappyxatu - Stormrage"] = "Default",
 },
 ["namespaces"] = {
-["BigWigs_Plugins_PrivateAuras"] = {
+["BigWigs_Plugins_BossBlock"] = {
 ["global"] = {
-["showHelpTip"] = false,
-},
-["profiles"] = {
-["Default"] = {
-["player"] = {
-["anchorYOffset"] = 93,
-["anchorXOffset"] = 71,
-},
+["tableNeedsCopied"] = false,
+["watchedMovies"] = {
+[1049] = true,
 },
 },
 },
@@ -36,31 +31,36 @@ nil,
 },
 },
 },
-["BigWigs_Plugins_BossBlock"] = {
-["global"] = {
-["tableNeedsCopied"] = false,
-["watchedMovies"] = {
-[1049] = true,
-},
-},
-},
 ["BigWigs_Plugins_Bars"] = {
 ["profiles"] = {
 ["Default"] = {
 ["normalWidth"] = 120,
+["visibleBarLimit"] = 1,
+["emphasize"] = false,
 ["expPosition"] = {
 "TOP",
 "TOP",
 386,
 -7,
 },
-["visibleBarLimit"] = 1,
-["emphasize"] = false,
 ["normalPosition"] = {
 "BOTTOMRIGHT",
 "BOTTOMRIGHT",
 0,
 168,
+},
+},
+},
+},
+["BigWigs_Plugins_PrivateAuras"] = {
+["global"] = {
+["showHelpTip"] = false,
+},
+["profiles"] = {
+["Default"] = {
+["player"] = {
+["anchorXOffset"] = 71,
+["anchorYOffset"] = 93,
 },
 },
 },
@@ -76,11 +76,11 @@ nil,
 ["realm"] = "Stormrage",
 },
 ["Player-3676-0DF7D3EF"] = {
-["playerRating"] = 1588,
+["playerRating"] = 1982,
 ["specId"] = 1473,
-["keyMap"] = 556,
+["keyMap"] = 559,
 ["name"] = "Barelynoer",
-["keyLevel"] = 11,
+["keyLevel"] = 12,
 ["realm"] = "Area 52",
 },
 ["Player-60-0F85ABEF"] = {

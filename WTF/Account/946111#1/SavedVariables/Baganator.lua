@@ -171,8 +171,8 @@ BAGANATOR_CONFIG = {
 },
 ["bank_view_position"] = {
 "BOTTOMLEFT",
-30,
-75,
+242.5000152587891,
+302.4996643066406,
 },
 ["recent_include_owned"] = false,
 ["guild_view_position_2"] = {
@@ -236,10 +236,10 @@ BAGANATOR_CONFIG = {
 ["character_bank_view_width"] = 14,
 ["icon_text_font_size"] = 14,
 ["bag_icon_size"] = 39,
-["bag_view_width"] = 12,
+["sort_ignore_slots_count_2"] = 0,
 ["disabled_skins"] = {
 },
-["setting_anchors"] = false,
+["bag_view_width"] = 12,
 ["sort_ignore_bank_slots_count"] = 0,
 ["upgrade_plugin_ignored"] = {
 },
@@ -259,8 +259,8 @@ BAGANATOR_CONFIG = {
 },
 ["bag_view_position"] = {
 "BOTTOMRIGHT",
--254.169921875,
-286.6665344238281,
+-470.8365478515625,
+403.3332214355469,
 },
 ["auto_sort_on_open"] = true,
 ["category_migration"] = 5,
@@ -285,7 +285,7 @@ BAGANATOR_CONFIG = {
 ["category_section_toggled"] = {
 },
 ["show_sort_button_2"] = true,
-["sort_ignore_slots_count_2"] = 0,
+["setting_anchors"] = false,
 ["bag_view_type"] = "category",
 ["currency_panel_position"] = {
 "RIGHT",

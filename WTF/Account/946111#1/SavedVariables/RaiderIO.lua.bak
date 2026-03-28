@@ -12,8 +12,24 @@ RaiderIO_Config = {
 ["point"] = "TOPLEFT",
 },
 }
-RaiderIO_LastCharacter = "us-Angryabsol-stormrage"
+RaiderIO_LastCharacter = "us-Barelynoer-area-52"
 RaiderIO_MissingCharacters = {
+["us-Hëxster-stormrage"] = true,
+["us-Yazvoker-area-52"] = true,
+["us-Kaijoeight-area-52"] = true,
+["us-Armspal-stormrage"] = true,
+["us-party4-area-52"] = true,
+["us-Chaosbolt-shuhalo"] = true,
+["us-Hotyoga-area-52"] = true,
+["us-Nihilistx-area-52"] = true,
+["us-Shiiona-stormrage"] = true,
+["us-Shideezhi-area-52"] = true,
+["us-Earthshockz-stormrage"] = true,
+["us-Canninecapp-stormrage"] = true,
+["us-Aerodynamico-area-52"] = true,
+["us-party5-area-52"] = true,
+["us-Cedun-stormrage"] = true,
+["us-Nystheros-icecrown"] = true,
 }
 RaiderIO_MissingServers = {
 }
