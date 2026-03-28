@@ -74,7 +74,7 @@ RaiderIO_DB_EU_F: disabled
 RaiderIO_DB_CN_R: disabled
 RaiderIO_DB_CN_M: disabled
 RaiderIO_DB_CN_F: disabled
-EllesmereUIAuraBuffReminders: disabled
+EllesmereUIAuraBuffReminders: enabled
 BigWigs_Core: enabled
 BigWigs_Options: enabled
 BigWigs_Plugins: enabled

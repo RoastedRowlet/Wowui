@@ -1,7 +1,6 @@
 
 CHATTYNATOR_CURRENT_PROFILE = "DEFAULT"
 CHATTYNATOR_COMMAND_HISTORY = {
-"/s /reload",
 "/s /eui",
 "/s /ARCUI",
 "/cw Highwaym-Stormrage oh shit",
@@ -202,4 +201,9 @@ CHATTYNATOR_COMMAND_HISTORY = {
 "/p /reload",
 "/s /mdt",
 "/s /SIMC",
+"/s /reload",
+"/s /KEY",
+"/p yo",
+"/p im fine with it",
+"/p /reload",
 }

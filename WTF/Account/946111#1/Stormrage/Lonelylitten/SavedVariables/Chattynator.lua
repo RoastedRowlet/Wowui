@@ -1,11 +1,6 @@
 
 CHATTYNATOR_CURRENT_PROFILE = "DEFAULT"
 CHATTYNATOR_COMMAND_HISTORY = {
-"/s /reload",
-"/s /eui",
-"/s /ARCUI",
-"/cw Highwaym-Stormrage oh shit",
-"/cw Highwaym-Stormrage i was gonna crash out if he got it again",
 "/cw Highwaym-Stormrage when he already has 2 lol",
 "/cw Highwaym-Stormrage no",
 "/cw Highwaym-Stormrage its my frist but obv with +1 more its 4 piece",
@@ -202,4 +197,11 @@ CHATTYNATOR_COMMAND_HISTORY = {
 "/p /reload",
 "/s /mdt",
 "/s /SIMC",
+"/s /reload",
+"/s /KEY",
+"/p yo",
+"/p im fine with it",
+"/p /reload",
+"/p this pull",
+"/p is so banned",
 }
