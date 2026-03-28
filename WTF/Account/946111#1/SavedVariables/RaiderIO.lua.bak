@@ -12,16 +12,8 @@ RaiderIO_Config = {
 ["point"] = "TOPLEFT",
 },
 }
-RaiderIO_LastCharacter = "us-Barelynoer-area-52"
+RaiderIO_LastCharacter = "us-Angryabsol-stormrage"
 RaiderIO_MissingCharacters = {
-["us-Nogooning-area-52"] = true,
-["us-Ivling-area-52"] = true,
-["us-Ashenclaire-stormrage"] = true,
-["us-Barelynoer-area-52"] = true,
-["us-Noillimel-ragnaros"] = true,
-["us-Bigusdigus-area-52"] = true,
-["us-Sarinddra-stormrage"] = true,
-["us-Albyt-stormrage"] = true,
 }
 RaiderIO_MissingServers = {
 }

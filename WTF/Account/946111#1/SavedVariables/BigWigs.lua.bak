@@ -8,11 +8,16 @@ BigWigs3DB = {
 ["Barelynoer - Area 52"] = "Default",
 },
 ["namespaces"] = {
-["BigWigs_Plugins_BossBlock"] = {
+["BigWigs_Plugins_PrivateAuras"] = {
 ["global"] = {
-["tableNeedsCopied"] = false,
-["watchedMovies"] = {
-[1049] = true,
+["showHelpTip"] = false,
+},
+["profiles"] = {
+["Default"] = {
+["player"] = {
+["anchorYOffset"] = 93,
+["anchorXOffset"] = 71,
+},
 },
 },
 },
@@ -20,20 +25,28 @@ BigWigs3DB = {
 ["profiles"] = {
 ["Default"] = {
 ["emphasize"] = false,
-["visibleBarLimit"] = 1,
-["normalWidth"] = 120,
 ["expPosition"] = {
 "TOP",
 "TOP",
 386,
 -7,
 },
+["visibleBarLimit"] = 1,
+["normalWidth"] = 120,
 ["normalPosition"] = {
 "BOTTOMRIGHT",
 "BOTTOMRIGHT",
 0,
 168,
 },
+},
+},
+},
+["BigWigs_Plugins_BossBlock"] = {
+["global"] = {
+["tableNeedsCopied"] = false,
+["watchedMovies"] = {
+[1049] = true,
 },
 },
 },
@@ -52,25 +65,12 @@ nil,
 },
 },
 },
-["BigWigs_Plugins_PrivateAuras"] = {
-["global"] = {
-["showHelpTip"] = false,
-},
-["profiles"] = {
-["Default"] = {
-["player"] = {
-["anchorXOffset"] = 71,
-["anchorYOffset"] = 93,
-},
-},
-},
-},
 },
 ["myKeystones"] = {
 ["Player-60-0C9E885E"] = {
-["playerRating"] = 1761,
+["playerRating"] = 1772,
 ["specId"] = 1480,
-["keyMap"] = 161,
+["keyMap"] = 557,
 ["name"] = "Angryabsol",
 ["keyLevel"] = 9,
 ["realm"] = "Stormrage",

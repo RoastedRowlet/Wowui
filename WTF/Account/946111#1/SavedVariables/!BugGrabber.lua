@@ -1,7 +1,7 @@
 
 BugGrabberDB = {
 ["lastSanitation"] = 3,
-["session"] = 679,
+["session"] = 681,
 ["errors"] = {
 {
 ["message"] = "...erface/AddOns/TargetedSpells/TargetedSpellsMixin.lua:350: attempt to call method 'SetFrameStrata' (a nil value)",
@@ -714,6 +714,14 @@ BugGrabberDB = {
 ["stack"] = "[Interface/AddOns/!BugGrabber/BugGrabber.lua]:540: in function '?'\n[Interface/AddOns/!BugGrabber/BugGrabber.lua]:524: in function <Interface/AddOns/!BugGrabber/BugGrabber.lua:524>\n[C]: ?\n[Interface/AddOns/Grid2/modules/IndicatorPrivateAuras.lua]:12: in function <...rface/AddOns/Grid2/modules/IndicatorPrivateAuras.lua:9>\n[Interface/AddOns/Grid2/modules/IndicatorPrivateAuras.lua]:26: in function 'Update'\n[Interface/AddOns/Grid2/GridFrame.lua]:194: in function 'UpdateIndicators'\n[Interface/AddOns/Grid2/GridFrame.lua]:89: in function <Interface/AddOns/Grid2/GridFrame.lua:81>\n[C]: in function 'SetAttribute'\n[Interface/AddOns/Blizzard_RestrictedAddOnEnvironment/SecureGroupHeaders.lua]:210: in function <...rd_RestrictedAddOnEnvironment/SecureGroupHeaders.lua:130>\n[Interface/AddOns/Blizzard_RestrictedAddOnEnvironment/SecureGroupHeaders.lua]:495: in function 'SecureGroupHeader_Update'\n[Interface/AddOns/Blizzard_RestrictedAddOnEnvironment/SecureGroupHeaders.lua]:62: in function <...rd_RestrictedAddOnEnvironment/SecureGroupHeaders.lua:60>\n",
 ["session"] = 676,
 ["counter"] = 9,
+},
+{
+["message"] = "Interface/AddOns/Chattynator/Core/Messages.lua:978: attempt to index local 'communityChannel' (a nil value)",
+["time"] = 1774718280,
+["locals"] = "communityChannel = nil\n(*temporary) = nil\n(*temporary) = nil\n(*temporary) = nil\n(*temporary) = nil\n(*temporary) = nil\n(*temporary) = \"attempt to index local 'communityChannel' (a nil value)\"\n",
+["stack"] = "[Interface/AddOns/Chattynator/Core/Messages.lua]:978: in function <Interface/AddOns/Chattynator/Core/Messages.lua:977>\n[Interface/AddOns/Chattynator/Core/Messages.lua]:1002: in function <Interface/AddOns/Chattynator/Core/Messages.lua:1001>\n[Interface/AddOns/Chattynator/Core/Messages.lua]:1012: in function 'ResolvePrefixedChannelName'\n[Interface/AddOns/Chattynator/Core/Messages.lua]:1016: in function <Interface/AddOns/Chattynator/Core/Messages.lua:1015>\n[Interface/AddOns/Chattynator/Core/Messages.lua]:1413: in function <Interface/AddOns/Chattynator/Core/Messages.lua:1305>\n[Interface/AddOns/Chattynator/Core/Messages.lua]:1420: in function 'MessageEventHandler'\n[Interface/AddOns/Chattynator/Core/Messages.lua]:524: in function <Interface/AddOns/Chattynator/Core/Messages.lua:398>\n",
+["session"] = 681,
+["counter"] = 1,
 },
 },
 }

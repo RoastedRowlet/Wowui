@@ -1,9 +1,6 @@
 
 CHATTYNATOR_CURRENT_PROFILE = "DEFAULT"
 CHATTYNATOR_COMMAND_HISTORY = {
-"/p i went all the way to the front and started the cast and still got hit lmao",
-"/p that was actually my last one",
-"/p ggs all!",
 "/s /eui",
 "/s /fstack",
 "/s /reload",
@@ -204,4 +201,8 @@ CHATTYNATOR_COMMAND_HISTORY = {
 "/s /reload",
 "/s /key",
 "/p i would also roll for neck lol",
+"/s /RELOAD",
+"/s /MFI",
+"/s /mfi",
+"/s /key",
 }

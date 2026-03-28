@@ -68,9 +68,9 @@ nil,
 },
 ["myKeystones"] = {
 ["Player-60-0C9E885E"] = {
-["playerRating"] = 1761,
+["playerRating"] = 1772,
 ["specId"] = 1480,
-["keyMap"] = 161,
+["keyMap"] = 557,
 ["name"] = "Angryabsol",
 ["keyLevel"] = 9,
 ["realm"] = "Stormrage",

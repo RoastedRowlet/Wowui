@@ -222,20 +222,20 @@ CHATTYNATOR_CONFIG = {
 ["g"] = 0.7529412508010864,
 ["b"] = 0.7529412508010864,
 },
-["BG_SYSTEM_NEUTRAL"] = {
+["CHANNEL_Trade"] = {
 ["r"] = 1,
-["g"] = 0.4705882668495178,
-["b"] = 0.03921568766236305,
+["g"] = 0.7529412508010864,
+["b"] = 0.7529412508010864,
 },
 ["RAID"] = {
 ["r"] = 1,
 ["g"] = 0.4980392456054688,
 ["b"] = 0,
 },
-["CHANNEL_Trade"] = {
+["BG_SYSTEM_NEUTRAL"] = {
 ["r"] = 1,
-["g"] = 0.7529412508010864,
-["b"] = 0.7529412508010864,
+["g"] = 0.4705882668495178,
+["b"] = 0.03921568766236305,
 },
 ["FILTERED"] = {
 ["r"] = 1,
@@ -312,7 +312,7 @@ CHATTYNATOR_CONFIG = {
 ["g"] = 1,
 ["b"] = 0,
 },
-["CHANNEL_Services"] = {
+["CHANNEL18"] = {
 ["r"] = 1,
 ["g"] = 0.7529412508010864,
 ["b"] = 0.7529412508010864,
@@ -332,15 +332,15 @@ CHATTYNATOR_CONFIG = {
 ["g"] = 0.7529412508010864,
 ["b"] = 0.7529412508010864,
 },
-["ACHIEVEMENT"] = {
-["r"] = 1,
-["g"] = 1,
-["b"] = 0,
-},
 ["ARENA_POINTS"] = {
 ["r"] = 1,
 ["g"] = 1,
 ["b"] = 1,
+},
+["ACHIEVEMENT"] = {
+["r"] = 1,
+["g"] = 1,
+["b"] = 0,
 },
 ["BN_WHISPER_INFORM"] = {
 ["r"] = 0,
@@ -437,7 +437,7 @@ CHATTYNATOR_CONFIG = {
 ["g"] = 0.8666667342185974,
 ["b"] = 0,
 },
-["CHANNEL18"] = {
+["CHANNEL_Services"] = {
 ["r"] = 1,
 ["g"] = 0.7529412508010864,
 ["b"] = 0.7529412508010864,
@@ -539,10 +539,10 @@ CHATTYNATOR_CONFIG = {
 ["isTemporary"] = false,
 ["backgroundColor"] = "1a1a1a",
 ["groups"] = {
-["PET_BATTLE_COMBAT_LOG"] = false,
-["COMBAT_MISC_INFO"] = false,
-["VOICE_TEXT"] = false,
 ["OPENING"] = false,
+["PET_BATTLE_COMBAT_LOG"] = false,
+["VOICE_TEXT"] = false,
+["COMBAT_MISC_INFO"] = false,
 ["COMBAT_XP_GAIN"] = false,
 ["PET_INFO"] = false,
 ["TRADESKILLS"] = false,
@@ -649,7 +649,7 @@ CHATTYNATOR_CONFIG = {
 },
 }
 CHATTYNATOR_MESSAGE_LOG = {
-["cleanIndex"] = 4927,
+["cleanIndex"] = 4971,
 ["current"] = {
 {
 ["recordedBy"] = "Lonelylitten-Stormrage",
@@ -97734,8 +97734,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Highwaym-Stormrage",
 ["sex"] = 3,
 },
-["type"] = "PARTY_LEADER",
 ["event"] = "CHAT_MSG_PARTY_LEADER",
+["type"] = "PARTY_LEADER",
 },
 ["color"] = {
 ["b"] = 1,
@@ -97755,8 +97755,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Barelynoer-Area52",
 ["sex"] = 2,
 },
-["type"] = "LOOT",
 ["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
 },
 ["color"] = {
 ["b"] = 0,
@@ -97776,8 +97776,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Barelynoer-Area52",
 ["sex"] = 2,
 },
-["type"] = "LOOT",
 ["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
 },
 ["color"] = {
 ["b"] = 0,
@@ -97797,8 +97797,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Barelynoer-Area52",
 ["sex"] = 2,
 },
-["type"] = "LOOT",
 ["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
 },
 ["color"] = {
 ["b"] = 0,
@@ -97818,8 +97818,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Barelynoer-Area52",
 ["sex"] = 2,
 },
-["type"] = "LOOT",
 ["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
 },
 ["color"] = {
 ["b"] = 0,
@@ -97829,6 +97829,759 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["text"] = "You receive item: |cnIQ4:|Hitem:250000::::::::90:1473::23:6:6652:12779:13439:13336:13575:1668::::::|h[Frenzyward of the Black Talon]|h|r",
 ["id"] = "s9_4932",
 ["timestamp"] = 1774715846,
+},
+{
+["recordedBy"] = "Angryabsol-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["name"] = "Solwin Brightstitch",
+},
+["event"] = "CHAT_MSG_MONSTER_SAY",
+["type"] = "MONSTER_SAY",
+},
+["color"] = {
+["r"] = 1,
+["g"] = 1,
+["b"] = 0.6235294342041016,
+},
+["text"] = "Solwin Brightstitch says: Alas, if I had but one worthy customer...",
+["timestamp"] = 1774716030,
+["id"] = "s9_4933",
+},
+{
+["recordedBy"] = "Angryabsol-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["name"] = "Camberon",
+},
+["event"] = "CHAT_MSG_MONSTER_SAY",
+["type"] = "MONSTER_SAY",
+},
+["color"] = {
+["r"] = 1,
+["g"] = 1,
+["b"] = 0.6235294342041016,
+},
+["text"] = "Camberon says: I'm far too busy to keep up with your training, but you're welcome to use my cauldron over there.",
+["timestamp"] = 1774716034,
+["id"] = "s9_4934",
+},
+{
+["recordedBy"] = "Angryabsol-Stormrage",
+["typeInfo"] = {
+["event"] = "CHAT_MSG_SKILL",
+["type"] = "SKILL",
+},
+["color"] = {
+["r"] = 0.3333333432674408,
+["g"] = 0.3333333432674408,
+["b"] = 1,
+},
+["text"] = "Your skill in Midnight Alchemy has increased to 28.",
+["timestamp"] = 1774716052,
+["id"] = "s9_4935",
+},
+{
+["recordedBy"] = "Angryabsol-Stormrage",
+["typeInfo"] = {
+["event"] = "CHAT_MSG_CURRENCY",
+["type"] = "CURRENCY",
+},
+["color"] = {
+["r"] = 0,
+["g"] = 0.6666666865348816,
+["b"] = 0,
+},
+["text"] = "You receive currency: |cnIQ3:|Hcurrency:3256:0|h[Artisan Alchemist's Moxie]|h|rx30",
+["timestamp"] = 1774716054,
+["id"] = "s9_4936",
+},
+{
+["recordedBy"] = "Angryabsol-Stormrage",
+["typeInfo"] = {
+["event"] = "CHAT_MSG_SKILL",
+["type"] = "SKILL",
+},
+["color"] = {
+["r"] = 0.3333333432674408,
+["g"] = 0.3333333432674408,
+["b"] = 1,
+},
+["text"] = "Your skill in Midnight Alchemy has increased to 29.",
+["timestamp"] = 1774716057,
+["id"] = "s9_4937",
+},
+{
+["recordedBy"] = "Angryabsol-Stormrage",
+["typeInfo"] = {
+["event"] = "CHAT_MSG_SKILL",
+["type"] = "SKILL",
+},
+["color"] = {
+["r"] = 0.3333333432674408,
+["g"] = 0.3333333432674408,
+["b"] = 1,
+},
+["text"] = "Your skill in Midnight Alchemy has increased to 30.",
+["timestamp"] = 1774716061,
+["id"] = "s9_4938",
+},
+{
+["recordedBy"] = "Angryabsol-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["class"] = "DEMONHUNTER",
+["race"] = "NightElf",
+["name"] = "Angryabsol-Stormrage",
+["sex"] = 2,
+},
+["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
+},
+["color"] = {
+["r"] = 0,
+["g"] = 0.6666666865348816,
+["b"] = 0,
+},
+["text"] = "You receive item: |cnIQ3:|Hitem:246320::::::::90:1480:::::::::|h[Flicker of Midnight Alchemy Knowledge]|h|r",
+["timestamp"] = 1774716071,
+["id"] = "s9_4939",
+},
+{
+["recordedBy"] = "Angryabsol-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["class"] = "DEMONHUNTER",
+["race"] = "NightElf",
+["name"] = "Angryabsol-Stormrage",
+["sex"] = 2,
+},
+["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
+},
+["color"] = {
+["r"] = 0,
+["g"] = 0.6666666865348816,
+["b"] = 0,
+},
+["text"] = "You receive item: |cnIQ3:|Hitem:246320::::::::90:1480:::::::::|h[Flicker of Midnight Alchemy Knowledge]|h|r",
+["timestamp"] = 1774716071,
+["id"] = "s9_4940",
+},
+{
+["recordedBy"] = "Angryabsol-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["class"] = "DEMONHUNTER",
+["race"] = "NightElf",
+["name"] = "Angryabsol-Stormrage",
+["sex"] = 2,
+},
+["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
+},
+["color"] = {
+["r"] = 0,
+["g"] = 0.6666666865348816,
+["b"] = 0,
+},
+["text"] = "You receive item: |cnIQ1:|Hitem:246585::::::::90:1480::11:::::::|h[Artisan's Consortium Payout]|h|r",
+["timestamp"] = 1774716071,
+["id"] = "s9_4941",
+},
+{
+["recordedBy"] = "Angryabsol-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["class"] = "DEMONHUNTER",
+["race"] = "NightElf",
+["name"] = "Angryabsol-Stormrage",
+["sex"] = 2,
+},
+["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
+},
+["color"] = {
+["r"] = 0,
+["g"] = 0.6666666865348816,
+["b"] = 0,
+},
+["text"] = "You receive item: |cnIQ1:|Hitem:260630::::::::90:1480:::::::::|h[Ingenious Identifier]|h|r",
+["timestamp"] = 1774716074,
+["id"] = "s9_4942",
+},
+{
+["recordedBy"] = "Angryabsol-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["class"] = "DEMONHUNTER",
+["race"] = "NightElf",
+["name"] = "Angryabsol-Stormrage",
+["sex"] = 2,
+},
+["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
+},
+["color"] = {
+["r"] = 0,
+["g"] = 0.6666666865348816,
+["b"] = 0,
+},
+["text"] = "You receive item: |cnIQ1:|Hitem:238512::::::::90:1480::::1:38:14:::::|h[Void-Tempered Leather |A:Professions-ChatIcon-Quality-12-Tier2:17:15::1|a]|h|rx5",
+["timestamp"] = 1774716074,
+["id"] = "s9_4943",
+},
+{
+["recordedBy"] = "Angryabsol-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["class"] = "DEMONHUNTER",
+["race"] = "NightElf",
+["name"] = "Angryabsol-Stormrage",
+["sex"] = 2,
+},
+["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
+},
+["color"] = {
+["r"] = 0,
+["g"] = 0.6666666865348816,
+["b"] = 0,
+},
+["text"] = "You receive item: |cnIQ2:|Hitem:236779::::::::90:1480::::1:38:14:::::|h[Mana Lily |A:Professions-ChatIcon-Quality-12-Tier2:17:15::1|a]|h|rx3",
+["timestamp"] = 1774716074,
+["id"] = "s9_4944",
+},
+{
+["recordedBy"] = "Angryabsol-Stormrage",
+["typeInfo"] = {
+["event"] = "CHAT_MSG_CURRENCY",
+["type"] = "CURRENCY",
+},
+["color"] = {
+["r"] = 0,
+["g"] = 0.6666666865348816,
+["b"] = 0,
+},
+["text"] = "You receive currency: |cnIQ3:|Hcurrency:3150:0|h[Midnight Alchemy Knowledge]|h|rx1",
+["timestamp"] = 1774716148,
+["id"] = "s9_4945",
+},
+{
+["recordedBy"] = "Angryabsol-Stormrage",
+["typeInfo"] = {
+["event"] = "CHAT_MSG_CURRENCY",
+["type"] = "CURRENCY",
+},
+["color"] = {
+["r"] = 0,
+["g"] = 0.6666666865348816,
+["b"] = 0,
+},
+["text"] = "You receive currency: |cnIQ3:|Hcurrency:3256:0|h[Artisan Alchemist's Moxie]|h|rx5",
+["timestamp"] = 1774716148,
+["id"] = "s9_4946",
+},
+{
+["recordedBy"] = "Angryabsol-Stormrage",
+["typeInfo"] = {
+["event"] = "CHAT_MSG_CURRENCY",
+["type"] = "CURRENCY",
+},
+["color"] = {
+["r"] = 0,
+["g"] = 0.6666666865348816,
+["b"] = 0,
+},
+["text"] = "You receive currency: |cnIQ3:|Hcurrency:3150:0|h[Midnight Alchemy Knowledge]|h|rx1",
+["timestamp"] = 1774716150,
+["id"] = "s9_4947",
+},
+{
+["recordedBy"] = "Angryabsol-Stormrage",
+["typeInfo"] = {
+["event"] = "CHAT_MSG_CURRENCY",
+["type"] = "CURRENCY",
+},
+["color"] = {
+["r"] = 0,
+["g"] = 0.6666666865348816,
+["b"] = 0,
+},
+["text"] = "You receive currency: |cnIQ3:|Hcurrency:3256:0|h[Artisan Alchemist's Moxie]|h|rx5",
+["timestamp"] = 1774716150,
+["id"] = "s9_4948",
+},
+{
+["recordedBy"] = "Angryabsol-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["class"] = "SHAMAN",
+["race"] = "Draenei",
+["name"] = "Dorania-Sen'jin",
+["sex"] = 3,
+},
+["event"] = "CHAT_MSG_PARTY",
+["type"] = "PARTY",
+},
+["color"] = {
+["r"] = 0.6666666865348816,
+["g"] = 0.6666666865348816,
+["b"] = 1,
+},
+["text"] = "|Hchannel:PARTY|h[Party]|h |Hplayer:Dorania-Sen'jin:1959:PARTY:|h[|cff0070ddDorania-Sen'jin|r]|h: Hey there! Thanks for the invite.",
+["timestamp"] = 1774716202,
+["id"] = "s9_4949",
+},
+{
+["recordedBy"] = "Angryabsol-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["class"] = "MONK",
+["race"] = "NightElf",
+["name"] = "Highwaym-Stormrage",
+["sex"] = 3,
+},
+["event"] = "CHAT_MSG_PARTY_LEADER",
+["type"] = "PARTY_LEADER",
+},
+["color"] = {
+["r"] = 0.4627451300621033,
+["g"] = 0.7843137979507446,
+["b"] = 1,
+},
+["text"] = "|Hchannel:PARTY|h[Party Leader]|h |Hplayer:Highwaym-Stormrage:2063:PARTY:|h[|cff00ff98Highwaym|r]|h: lust first pull",
+["timestamp"] = 1774716376,
+["id"] = "s9_4950",
+},
+{
+["recordedBy"] = "Angryabsol-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["name"] = "Scourgelord Tyrannus",
+},
+["event"] = "CHAT_MSG_MONSTER_YELL",
+["type"] = "MONSTER_YELL",
+},
+["color"] = {
+["r"] = 1,
+["g"] = 0.250980406999588,
+["b"] = 0.250980406999588,
+},
+["text"] = "Scourgelord Tyrannus yells: Impossible.... Rimefang.... warn....",
+["timestamp"] = 1774717894,
+["id"] = "s9_4951",
+},
+{
+["recordedBy"] = "Angryabsol-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["name"] = "Xal'atath",
+},
+["event"] = "CHAT_MSG_MONSTER_WHISPER",
+["type"] = "MONSTER_WHISPER",
+},
+["color"] = {
+["r"] = 1,
+["g"] = 0.7098039388656616,
+["b"] = 0.9215686917304993,
+},
+["text"] = "Xal'atath whispers: Our agreement stands... for now.",
+["timestamp"] = 1774717894,
+["id"] = "s9_4952",
+},
+{
+["recordedBy"] = "Angryabsol-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["class"] = "DEATHKNIGHT",
+["race"] = "MagharOrc",
+["name"] = "Nogooning-Area52",
+["sex"] = 3,
+},
+["event"] = "CHAT_MSG_ACHIEVEMENT",
+["type"] = "ACHIEVEMENT",
+},
+["color"] = {
+["r"] = 1,
+["g"] = 1,
+["b"] = 0,
+},
+["text"] = "|Hplayer:Nogooning-Area52|h[|cffc41e3aNogooning-Area52|r]|h has earned the achievement |cffffff00|Hachievement:61271:Player-3676-0EBA3A51:1:3:28:26:4294967295:4294967295:4294967295:4294967295|h[Keystone Hero: Pit of Saron]|h|r!",
+["timestamp"] = 1774717894,
+["id"] = "s9_4953",
+},
+{
+["recordedBy"] = "Angryabsol-Stormrage",
+["typeInfo"] = {
+["event"] = "CHAT_MSG_CURRENCY",
+["type"] = "CURRENCY",
+},
+["color"] = {
+["r"] = 0,
+["g"] = 0.6666666865348816,
+["b"] = 0,
+},
+["text"] = "You receive currency: |cnIQ4:|Hcurrency:3347:0|h[Myth Dawncrest]|h|rx14",
+["timestamp"] = 1774717896,
+["id"] = "s9_4954",
+},
+{
+["recordedBy"] = "Angryabsol-Stormrage",
+["typeInfo"] = {
+["event"] = "CHAT_MSG_MONEY",
+["type"] = "MONEY",
+},
+["color"] = {
+["r"] = 1,
+["g"] = 1,
+["b"] = 0,
+},
+["text"] = "You loot 194 Gold, 82 Silver, 56 Copper",
+["timestamp"] = 1774717900,
+["id"] = "s9_4955",
+},
+{
+["recordedBy"] = "Angryabsol-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["name"] = "Martin Victus",
+},
+["event"] = "CHAT_MSG_MONSTER_YELL",
+["type"] = "MONSTER_YELL",
+},
+["color"] = {
+["r"] = 1,
+["g"] = 0.250980406999588,
+["b"] = 0.250980406999588,
+},
+["text"] = "Martin Victus yells: Brave champions, we owe you our lives, our freedom.... Though it be a tiny gesture in the face of this enormous debt, I pledge that from this day forth, all will know of your deeds, and the blazing path of light you cut through the shadow of this dark citadel.",
+["timestamp"] = 1774717903,
+["id"] = "s9_4956",
+},
+{
+["recordedBy"] = "Angryabsol-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["class"] = "MONK",
+["race"] = "NightElf",
+["name"] = "Highwaym-Stormrage",
+["sex"] = 3,
+},
+["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
+},
+["color"] = {
+["r"] = 0,
+["g"] = 0.6666666865348816,
+["b"] = 0,
+},
+["text"] = "Highwaym receives loot: |cnIQ4:|Hitem:49806::::::::90:1480::33:6:12795:13440:6652:12667:13577:12699:1:28:1279:::::|h[Flayer's Black Belt]|h|r.",
+["timestamp"] = 1774717903,
+["id"] = "s9_4957",
+},
+{
+["recordedBy"] = "Angryabsol-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["class"] = "DRUID",
+["race"] = "Troll",
+["name"] = "Oregark-Sargeras",
+["sex"] = 3,
+},
+["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
+},
+["color"] = {
+["r"] = 0,
+["g"] = 0.6666666865348816,
+["b"] = 0,
+},
+["text"] = "Oregark-Sargeras receives loot: |cnIQ4:|Hitem:50228::::::::90:1480::16:5:12795:13440:6652:13668:12699:1:28:1279:::::|h[Barbed Ymirheim Choker]|h|r.",
+["timestamp"] = 1774717910,
+["id"] = "s9_4958",
+},
+{
+["recordedBy"] = "Angryabsol-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["name"] = "Martin Victus",
+},
+["event"] = "CHAT_MSG_MONSTER_YELL",
+["type"] = "MONSTER_YELL",
+},
+["color"] = {
+["r"] = 1,
+["g"] = 0.250980406999588,
+["b"] = 0.250980406999588,
+},
+["text"] = "Martin Victus yells: This day will stand as a testament not only to your valor, but to the fact that no foe, not even the Lich King himself, can stand when Alliance and Horde set aside their differences and---",
+["timestamp"] = 1774717918,
+["id"] = "s9_4959",
+},
+{
+["recordedBy"] = "Angryabsol-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["class"] = "SHAMAN",
+["race"] = "Draenei",
+["name"] = "Dorania-Sen'jin",
+["sex"] = 3,
+},
+["event"] = "CHAT_MSG_PARTY",
+["type"] = "PARTY",
+},
+["color"] = {
+["r"] = 0.6666666865348816,
+["g"] = 0.6666666865348816,
+["b"] = 1,
+},
+["text"] = "|Hchannel:PARTY|h[Party]|h |Hplayer:Dorania-Sen'jin:2183:PARTY:|h[|cff0070ddDorania-Sen'jin|r]|h: ooneed neck?",
+["timestamp"] = 1774717920,
+["id"] = "s9_4960",
+},
+{
+["recordedBy"] = "Angryabsol-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["class"] = "DRUID",
+["race"] = "Troll",
+["name"] = "Oregark-Sargeras",
+["sex"] = 3,
+},
+["event"] = "CHAT_MSG_PARTY",
+["type"] = "PARTY",
+},
+["color"] = {
+["r"] = 0.6666666865348816,
+["g"] = 0.6666666865348816,
+["b"] = 1,
+},
+["text"] = "|Hchannel:PARTY|h[Party]|h |Hplayer:Oregark-Sargeras:2185:PARTY:|h[|cffff7c0aOregark-Sargeras|r]|h: need",
+["timestamp"] = 1774717926,
+["id"] = "s9_4961",
+},
+{
+["recordedBy"] = "Angryabsol-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["class"] = "DRUID",
+["race"] = "Troll",
+["name"] = "Oregark-Sargeras",
+["sex"] = 3,
+},
+["event"] = "CHAT_MSG_PARTY",
+["type"] = "PARTY",
+},
+["color"] = {
+["r"] = 0.6666666865348816,
+["g"] = 0.6666666865348816,
+["b"] = 1,
+},
+["text"] = "|Hchannel:PARTY|h[Party]|h |Hplayer:Oregark-Sargeras:2186:PARTY:|h[|cffff7c0aOregark-Sargeras|r]|h: belt",
+["timestamp"] = 1774717927,
+["id"] = "s9_4962",
+},
+{
+["recordedBy"] = "Angryabsol-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["class"] = "DRUID",
+["race"] = "Troll",
+["name"] = "Oregark-Sargeras",
+["sex"] = 3,
+},
+["event"] = "CHAT_MSG_PARTY",
+["type"] = "PARTY",
+},
+["color"] = {
+["r"] = 0.6666666865348816,
+["g"] = 0.6666666865348816,
+["b"] = 1,
+},
+["text"] = "|Hchannel:PARTY|h[Party]|h |Hplayer:Oregark-Sargeras:2187:PARTY:|h[|cffff7c0aOregark-Sargeras|r]|h: ?",
+["timestamp"] = 1774717927,
+["id"] = "s9_4963",
+},
+{
+["recordedBy"] = "Angryabsol-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["class"] = "DRUID",
+["race"] = "Troll",
+["name"] = "Oregark-Sargeras",
+["sex"] = 3,
+},
+["event"] = "CHAT_MSG_PARTY",
+["type"] = "PARTY",
+},
+["color"] = {
+["r"] = 0.6666666865348816,
+["g"] = 0.6666666865348816,
+["b"] = 1,
+},
+["text"] = "|Hchannel:PARTY|h[Party]|h |Hplayer:Oregark-Sargeras:2188:PARTY:|h[|cffff7c0aOregark-Sargeras|r]|h: haha",
+["timestamp"] = 1774717928,
+["id"] = "s9_4964",
+},
+{
+["recordedBy"] = "Angryabsol-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["name"] = "Lady Jaina Proudmoore",
+},
+["event"] = "CHAT_MSG_MONSTER_YELL",
+["type"] = "MONSTER_YELL",
+},
+["color"] = {
+["r"] = 1,
+["g"] = 0.250980406999588,
+["b"] = 0.250980406999588,
+},
+["text"] = "Lady Jaina Proudmoore yells: NO! YOU MONSTER!",
+["timestamp"] = 1774717933,
+["id"] = "s9_4965",
+},
+{
+["recordedBy"] = "Angryabsol-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["class"] = "DEMONHUNTER",
+["race"] = "NightElf",
+["name"] = "Angryabsol-Stormrage",
+["sex"] = 2,
+},
+["event"] = "CHAT_MSG_PARTY",
+["type"] = "PARTY",
+},
+["color"] = {
+["r"] = 0.6666666865348816,
+["g"] = 0.6666666865348816,
+["b"] = 1,
+},
+["text"] = "|Hchannel:PARTY|h[Party]|h |Hplayer:Angryabsol-Stormrage:2190:PARTY:|h[|cffa330c9Angryabsol|r]|h: i would also roll for neck lol",
+["timestamp"] = 1774717935,
+["id"] = "s9_4966",
+},
+{
+["recordedBy"] = "Angryabsol-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["name"] = "Lady Jaina Proudmoore",
+},
+["event"] = "CHAT_MSG_MONSTER_YELL",
+["type"] = "MONSTER_YELL",
+},
+["color"] = {
+["r"] = 1,
+["g"] = 0.250980406999588,
+["b"] = 0.250980406999588,
+},
+["text"] = "Lady Jaina Proudmoore yells: I... I could not save them... Damn you, Arthas! DAMN YOU!",
+["timestamp"] = 1774717936,
+["id"] = "s9_4967",
+},
+{
+["recordedBy"] = "Angryabsol-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["name"] = "Lady Jaina Proudmoore",
+},
+["event"] = "CHAT_MSG_MONSTER_SAY",
+["type"] = "MONSTER_SAY",
+},
+["color"] = {
+["r"] = 1,
+["g"] = 1,
+["b"] = 0.6235294342041016,
+},
+["text"] = "Lady Jaina Proudmoore says: The Frost Queen is gone. We must keep moving - our objective is near.",
+["timestamp"] = 1774717944,
+["id"] = "s9_4968",
+},
+{
+["recordedBy"] = "Angryabsol-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["class"] = "DRUID",
+["race"] = "Troll",
+["name"] = "Oregark-Sargeras",
+["sex"] = 3,
+},
+["event"] = "CHAT_MSG_PARTY",
+["type"] = "PARTY",
+},
+["color"] = {
+["r"] = 0.6666666865348816,
+["g"] = 0.6666666865348816,
+["b"] = 1,
+},
+["text"] = "|Hchannel:PARTY|h[Party]|h |Hplayer:Oregark-Sargeras:2193:PARTY:|h[|cffff7c0aOregark-Sargeras|r]|h: i will use",
+["timestamp"] = 1774717959,
+["id"] = "s9_4969",
+},
+{
+["recordedBy"] = "Angryabsol-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["class"] = "DRUID",
+["race"] = "Troll",
+["name"] = "Oregark-Sargeras",
+["sex"] = 3,
+},
+["event"] = "CHAT_MSG_PARTY",
+["type"] = "PARTY",
+},
+["color"] = {
+["r"] = 0.6666666865348816,
+["g"] = 0.6666666865348816,
+["b"] = 1,
+},
+["text"] = "|Hchannel:PARTY|h[Party]|h |Hplayer:Oregark-Sargeras:2194:PARTY:|h[|cffff7c0aOregark-Sargeras|r]|h: need more dmg",
+["timestamp"] = 1774717961,
+["id"] = "s9_4970",
+},
+{
+["recordedBy"] = "Angryabsol-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["class"] = "DRUID",
+["race"] = "Troll",
+["name"] = "Oregark-Sargeras",
+["sex"] = 3,
+},
+["event"] = "CHAT_MSG_PARTY",
+["type"] = "PARTY",
+},
+["color"] = {
+["r"] = 0.6666666865348816,
+["g"] = 0.6666666865348816,
+["b"] = 1,
+},
+["text"] = "|Hchannel:PARTY|h[Party]|h |Hplayer:Oregark-Sargeras:2195:PARTY:|h[|cffff7c0aOregark-Sargeras|r]|h: :(",
+["timestamp"] = 1774717962,
+["id"] = "s9_4971",
+},
+{
+["recordedBy"] = "Angryabsol-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["race"] = "NightElf",
+["class"] = "DEMONHUNTER",
+["name"] = "Angryabsol-Stormrage",
+["sex"] = 2,
+},
+["type"] = "LOOT",
+["event"] = "CHAT_MSG_LOOT",
+},
+["color"] = {
+["b"] = 0,
+["g"] = 0.6666666865348816,
+["r"] = 0,
+},
+["text"] = "Your |cnIQ4:|Hitem:180653::::::::90:1480::::4:17:161:18:9:19:162:20:10:::::|h[Mythic Keystone]|h|r was changed to |cnIQ4:|Hitem:180653::::::::90:1480::::4:17:557:18:9:19:162:20:10:::::|h[Mythic Keystone]|h|r.",
+["id"] = "s9_4972",
+["timestamp"] = 1774718039,
 },
 },
 ["version"] = 1,
