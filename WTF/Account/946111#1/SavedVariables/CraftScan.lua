@@ -16,13 +16,2382 @@ CraftScan_DB = {
 ["exclusions"] = "LFW, WTS, LF work",
 ["show_button_height"] = 0,
 ["ping_sound"] = "Interface\\AddOns\\ArcUI\\Sounds\\Xylophone.ogg",
-["collapse_chat_context"] = false,
 ["last_loaded_version"] = "v1.5.0",
+["collapse_chat_context"] = false,
 ["permissive_matching"] = false,
 ["explanations"] = {
 },
 },
 ["realms"] = {
+["Stormrage"] = {
+["characters"] = {
+["Lonelylitten-Stormrage"] = {
+["professions"] = {
+[2494] = {
+["parentProfID"] = 333,
+["recipes"] = {
+[416684] = {
+["scan_state"] = 4,
+},
+[14809] = {
+["scan_state"] = 4,
+},
+[416685] = {
+["scan_state"] = 4,
+},
+[402139] = {
+["scan_state"] = 4,
+},
+[416686] = {
+["scan_state"] = 4,
+},
+[14810] = {
+["scan_state"] = 4,
+},
+[14807] = {
+["scan_state"] = 4,
+},
+[15596] = {
+["scan_state"] = 4,
+},
+[14293] = {
+["scan_state"] = 4,
+},
+[7421] = {
+["scan_state"] = 1,
+},
+},
+},
+[2477] = {
+["parentProfID"] = 164,
+["recipes"] = {
+[413509] = {
+["scan_state"] = 4,
+},
+[413510] = {
+["scan_state"] = 4,
+},
+[24136] = {
+["scan_state"] = 4,
+},
+[23633] = {
+["scan_state"] = 4,
+},
+[413511] = {
+["scan_state"] = 4,
+},
+[413512] = {
+["scan_state"] = 4,
+},
+[413513] = {
+["scan_state"] = 4,
+},
+[413514] = {
+["scan_state"] = 4,
+},
+[16647] = {
+["scan_state"] = 4,
+},
+[16655] = {
+["scan_state"] = 4,
+},
+[16663] = {
+["scan_state"] = 4,
+},
+[413518] = {
+["scan_state"] = 4,
+},
+[15294] = {
+["scan_state"] = 4,
+},
+[413520] = {
+["scan_state"] = 4,
+},
+[413521] = {
+["scan_state"] = 4,
+},
+[12260] = {
+["scan_state"] = 1,
+},
+[413522] = {
+["scan_state"] = 4,
+},
+[27586] = {
+["scan_state"] = 4,
+},
+[413523] = {
+["scan_state"] = 4,
+},
+[413524] = {
+["scan_state"] = 4,
+},
+[16967] = {
+["scan_state"] = 4,
+},
+[24137] = {
+["scan_state"] = 4,
+},
+[16991] = {
+["scan_state"] = 4,
+},
+[23650] = {
+["scan_state"] = 4,
+},
+[9813] = {
+["scan_state"] = 4,
+},
+[15973] = {
+["scan_state"] = 4,
+},
+[280671] = {
+["scan_state"] = 4,
+},
+[16648] = {
+["scan_state"] = 4,
+},
+[16656] = {
+["scan_state"] = 4,
+},
+[16664] = {
+["scan_state"] = 4,
+},
+[8368] = {
+["scan_state"] = 4,
+},
+[16728] = {
+["scan_state"] = 4,
+},
+[24912] = {
+["scan_state"] = 4,
+},
+[16744] = {
+["scan_state"] = 4,
+},
+[9933] = {
+["scan_state"] = 4,
+},
+[9937] = {
+["scan_state"] = 4,
+},
+[20872] = {
+["scan_state"] = 4,
+},
+[9945] = {
+["scan_state"] = 4,
+},
+[9957] = {
+["scan_state"] = 4,
+},
+[9961] = {
+["scan_state"] = 4,
+},
+[27587] = {
+["scan_state"] = 4,
+},
+[9985] = {
+["scan_state"] = 4,
+},
+[9993] = {
+["scan_state"] = 4,
+},
+[7817] = {
+["scan_state"] = 4,
+},
+[10001] = {
+["scan_state"] = 4,
+},
+[10005] = {
+["scan_state"] = 4,
+},
+[10009] = {
+["scan_state"] = 4,
+},
+[10013] = {
+["scan_state"] = 4,
+},
+[43549] = {
+["scan_state"] = 4,
+},
+[16960] = {
+["scan_state"] = 4,
+},
+[24138] = {
+["scan_state"] = 4,
+},
+[16992] = {
+["scan_state"] = 4,
+},
+[28242] = {
+["scan_state"] = 4,
+},
+[414567] = {
+["scan_state"] = 4,
+},
+[2661] = {
+["scan_state"] = 4,
+},
+[2662] = {
+["scan_state"] = 4,
+},
+[2663] = {
+["scan_state"] = 1,
+},
+[2664] = {
+["scan_state"] = 4,
+},
+[2666] = {
+["scan_state"] = 4,
+},
+[2667] = {
+["scan_state"] = 4,
+},
+[2668] = {
+["scan_state"] = 4,
+},
+[16657] = {
+["scan_state"] = 4,
+},
+[2670] = {
+["scan_state"] = 4,
+},
+[2671] = {
+["scan_state"] = 4,
+},
+[2672] = {
+["scan_state"] = 4,
+},
+[2673] = {
+["scan_state"] = 4,
+},
+[2675] = {
+["scan_state"] = 4,
+},
+[16729] = {
+["scan_state"] = 4,
+},
+[24913] = {
+["scan_state"] = 4,
+},
+[16745] = {
+["scan_state"] = 4,
+},
+[15295] = {
+["scan_state"] = 4,
+},
+[20873] = {
+["scan_state"] = 4,
+},
+[7408] = {
+["scan_state"] = 4,
+},
+[20897] = {
+["scan_state"] = 4,
+},
+[36125] = {
+["scan_state"] = 4,
+},
+[27588] = {
+["scan_state"] = 4,
+},
+[16969] = {
+["scan_state"] = 4,
+},
+[23628] = {
+["scan_state"] = 4,
+},
+[16993] = {
+["scan_state"] = 4,
+},
+[28243] = {
+["scan_state"] = 4,
+},
+[23652] = {
+["scan_state"] = 4,
+},
+[9814] = {
+["scan_state"] = 4,
+},
+[9818] = {
+["scan_state"] = 4,
+},
+[21161] = {
+["scan_state"] = 4,
+},
+[16642] = {
+["scan_state"] = 4,
+},
+[16650] = {
+["scan_state"] = 4,
+},
+[16658] = {
+["scan_state"] = 4,
+},
+[2737] = {
+["scan_state"] = 4,
+},
+[2738] = {
+["scan_state"] = 4,
+},
+[8880] = {
+["scan_state"] = 4,
+},
+[2740] = {
+["scan_state"] = 4,
+},
+[2741] = {
+["scan_state"] = 4,
+},
+[16730] = {
+["scan_state"] = 4,
+},
+[24914] = {
+["scan_state"] = 4,
+},
+[16746] = {
+["scan_state"] = 4,
+},
+[9926] = {
+["scan_state"] = 4,
+},
+[414590] = {
+["scan_state"] = 4,
+},
+[20874] = {
+["scan_state"] = 4,
+},
+[20890] = {
+["scan_state"] = 4,
+},
+[9954] = {
+["scan_state"] = 4,
+},
+[9966] = {
+["scan_state"] = 4,
+},
+[9970] = {
+["scan_state"] = 4,
+},
+[9974] = {
+["scan_state"] = 4,
+},
+[27589] = {
+["scan_state"] = 4,
+},
+[9986] = {
+["scan_state"] = 4,
+},
+[16970] = {
+["scan_state"] = 4,
+},
+[16978] = {
+["scan_state"] = 4,
+},
+[24140] = {
+["scan_state"] = 4,
+},
+[23637] = {
+["scan_state"] = 4,
+},
+[28244] = {
+["scan_state"] = 4,
+},
+[23653] = {
+["scan_state"] = 4,
+},
+[3292] = {
+["scan_state"] = 4,
+},
+[3293] = {
+["scan_state"] = 4,
+},
+[3294] = {
+["scan_state"] = 4,
+},
+[3295] = {
+["scan_state"] = 4,
+},
+[3296] = {
+["scan_state"] = 4,
+},
+[3297] = {
+["scan_state"] = 4,
+},
+[27829] = {
+["scan_state"] = 4,
+},
+[11643] = {
+["scan_state"] = 4,
+},
+[16643] = {
+["scan_state"] = 4,
+},
+[16659] = {
+["scan_state"] = 4,
+},
+[16667] = {
+["scan_state"] = 4,
+},
+[16731] = {
+["scan_state"] = 4,
+},
+[3319] = {
+["scan_state"] = 4,
+},
+[15292] = {
+["scan_state"] = 4,
+},
+[3321] = {
+["scan_state"] = 4,
+},
+[3323] = {
+["scan_state"] = 4,
+},
+[3324] = {
+["scan_state"] = 4,
+},
+[3325] = {
+["scan_state"] = 4,
+},
+[21913] = {
+["scan_state"] = 4,
+},
+[3328] = {
+["scan_state"] = 4,
+},
+[3330] = {
+["scan_state"] = 4,
+},
+[3331] = {
+["scan_state"] = 4,
+},
+[3333] = {
+["scan_state"] = 4,
+},
+[3334] = {
+["scan_state"] = 4,
+},
+[3336] = {
+["scan_state"] = 4,
+},
+[16971] = {
+["scan_state"] = 4,
+},
+[16987] = {
+["scan_state"] = 4,
+},
+[16995] = {
+["scan_state"] = 4,
+},
+[9811] = {
+["scan_state"] = 4,
+},
+[7223] = {
+["scan_state"] = 4,
+},
+[27830] = {
+["scan_state"] = 4,
+},
+[16644] = {
+["scan_state"] = 4,
+},
+[16652] = {
+["scan_state"] = 4,
+},
+[16660] = {
+["scan_state"] = 4,
+},
+[8366] = {
+["scan_state"] = 4,
+},
+[28461] = {
+["scan_state"] = 4,
+},
+[16724] = {
+["scan_state"] = 4,
+},
+[16732] = {
+["scan_state"] = 4,
+},
+[9931] = {
+["scan_state"] = 4,
+},
+[9935] = {
+["scan_state"] = 4,
+},
+[20876] = {
+["scan_state"] = 4,
+},
+[9959] = {
+["scan_state"] = 4,
+},
+[9979] = {
+["scan_state"] = 4,
+},
+[9983] = {
+["scan_state"] = 4,
+},
+[9987] = {
+["scan_state"] = 4,
+},
+[9995] = {
+["scan_state"] = 4,
+},
+[10003] = {
+["scan_state"] = 4,
+},
+[10007] = {
+["scan_state"] = 4,
+},
+[10011] = {
+["scan_state"] = 4,
+},
+[10015] = {
+["scan_state"] = 4,
+},
+[16980] = {
+["scan_state"] = 4,
+},
+[16988] = {
+["scan_state"] = 4,
+},
+[23639] = {
+["scan_state"] = 4,
+},
+[24141] = {
+["scan_state"] = 4,
+},
+[2739] = {
+["scan_state"] = 4,
+},
+[16983] = {
+["scan_state"] = 4,
+},
+[6518] = {
+["scan_state"] = 4,
+},
+[23638] = {
+["scan_state"] = 4,
+},
+[413739] = {
+["scan_state"] = 4,
+},
+[9997] = {
+["scan_state"] = 4,
+},
+[16645] = {
+["scan_state"] = 4,
+},
+[16653] = {
+["scan_state"] = 4,
+},
+[16661] = {
+["scan_state"] = 4,
+},
+[16985] = {
+["scan_state"] = 4,
+},
+[27590] = {
+["scan_state"] = 4,
+},
+[402137] = {
+["scan_state"] = 4,
+},
+[413741] = {
+["scan_state"] = 4,
+},
+[16984] = {
+["scan_state"] = 4,
+},
+[28462] = {
+["scan_state"] = 4,
+},
+[413740] = {
+["scan_state"] = 4,
+},
+[16725] = {
+["scan_state"] = 4,
+},
+[9968] = {
+["scan_state"] = 4,
+},
+[16741] = {
+["scan_state"] = 4,
+},
+[16990] = {
+["scan_state"] = 4,
+},
+[15293] = {
+["scan_state"] = 4,
+},
+[402118] = {
+["scan_state"] = 4,
+},
+[16994] = {
+["scan_state"] = 4,
+},
+[416682] = {
+["scan_state"] = 4,
+},
+[413744] = {
+["scan_state"] = 4,
+},
+[23636] = {
+["scan_state"] = 4,
+},
+[6517] = {
+["scan_state"] = 4,
+},
+[416683] = {
+["scan_state"] = 4,
+},
+[12259] = {
+["scan_state"] = 4,
+},
+[9942] = {
+["scan_state"] = 4,
+},
+[9950] = {
+["scan_state"] = 4,
+},
+[24139] = {
+["scan_state"] = 4,
+},
+[413746] = {
+["scan_state"] = 4,
+},
+[402133] = {
+["scan_state"] = 4,
+},
+[402134] = {
+["scan_state"] = 4,
+},
+[16726] = {
+["scan_state"] = 4,
+},
+[416688] = {
+["scan_state"] = 4,
+},
+[402125] = {
+["scan_state"] = 4,
+},
+[9916] = {
+["scan_state"] = 4,
+},
+[3508] = {
+["scan_state"] = 4,
+},
+[3491] = {
+["scan_state"] = 4,
+},
+[402123] = {
+["scan_state"] = 4,
+},
+[3506] = {
+["scan_state"] = 4,
+},
+[416687] = {
+["scan_state"] = 4,
+},
+[413749] = {
+["scan_state"] = 4,
+},
+[402124] = {
+["scan_state"] = 4,
+},
+[16965] = {
+["scan_state"] = 4,
+},
+[16973] = {
+["scan_state"] = 4,
+},
+[413750] = {
+["scan_state"] = 4,
+},
+[23632] = {
+["scan_state"] = 4,
+},
+[3505] = {
+["scan_state"] = 4,
+},
+[3504] = {
+["scan_state"] = 4,
+},
+[402129] = {
+["scan_state"] = 4,
+},
+[402126] = {
+["scan_state"] = 4,
+},
+[3496] = {
+["scan_state"] = 4,
+},
+[402131] = {
+["scan_state"] = 4,
+},
+[3500] = {
+["scan_state"] = 4,
+},
+[9820] = {
+["scan_state"] = 4,
+},
+[402130] = {
+["scan_state"] = 4,
+},
+[3498] = {
+["scan_state"] = 4,
+},
+[413753] = {
+["scan_state"] = 4,
+},
+[402128] = {
+["scan_state"] = 4,
+},
+[15972] = {
+["scan_state"] = 4,
+},
+[27832] = {
+["scan_state"] = 4,
+},
+[3492] = {
+["scan_state"] = 4,
+},
+[3493] = {
+["scan_state"] = 4,
+},
+[3494] = {
+["scan_state"] = 4,
+},
+[3495] = {
+["scan_state"] = 4,
+},
+[413755] = {
+["scan_state"] = 4,
+},
+[3497] = {
+["scan_state"] = 4,
+},
+[16646] = {
+["scan_state"] = 4,
+},
+[16654] = {
+["scan_state"] = 4,
+},
+[16662] = {
+["scan_state"] = 4,
+},
+[3501] = {
+["scan_state"] = 4,
+},
+[3502] = {
+["scan_state"] = 4,
+},
+[3503] = {
+["scan_state"] = 4,
+},
+[413757] = {
+["scan_state"] = 4,
+},
+[8367] = {
+["scan_state"] = 4,
+},
+[28463] = {
+["scan_state"] = 4,
+},
+[3507] = {
+["scan_state"] = 4,
+},
+[413758] = {
+["scan_state"] = 4,
+},
+[24399] = {
+["scan_state"] = 4,
+},
+[16742] = {
+["scan_state"] = 4,
+},
+[3511] = {
+["scan_state"] = 4,
+},
+[9928] = {
+["scan_state"] = 4,
+},
+[3513] = {
+["scan_state"] = 4,
+},
+[413745] = {
+["scan_state"] = 4,
+},
+[3515] = {
+["scan_state"] = 4,
+},
+[413760] = {
+["scan_state"] = 4,
+},
+[402135] = {
+["scan_state"] = 4,
+},
+[9952] = {
+["scan_state"] = 4,
+},
+[2742] = {
+["scan_state"] = 4,
+},
+[413742] = {
+["scan_state"] = 4,
+},
+[402136] = {
+["scan_state"] = 4,
+},
+[413506] = {
+["scan_state"] = 4,
+},
+[9972] = {
+["scan_state"] = 4,
+},
+[27585] = {
+["scan_state"] = 4,
+},
+[9980] = {
+["scan_state"] = 4,
+},
+[413507] = {
+["scan_state"] = 4,
+},
+[16649] = {
+["scan_state"] = 4,
+},
+[16665] = {
+["scan_state"] = 4,
+},
+[402138] = {
+["scan_state"] = 4,
+},
+[413508] = {
+["scan_state"] = 4,
+},
+[16986] = {
+["scan_state"] = 4,
+},
+[23629] = {
+["scan_state"] = 4,
+},
+[15296] = {
+["scan_state"] = 4,
+},
+},
+},
+[2485] = {
+["parentProfID"] = 171,
+["recipes"] = {
+[114786] = {
+["scan_state"] = 4,
+},
+[11459] = {
+["scan_state"] = 4,
+},
+},
+},
+[2906] = {
+["parentProfID"] = 171,
+["recipes"] = {
+[1261495] = {
+["scan_state"] = 4,
+},
+[1262829] = {
+["scan_state"] = 4,
+},
+[1233132] = {
+["scan_state"] = 4,
+},
+[1233133] = {
+["scan_state"] = 4,
+},
+[1233135] = {
+["scan_state"] = 4,
+},
+[1233136] = {
+["scan_state"] = 4,
+},
+[1230874] = {
+["scan_state"] = 4,
+},
+[1233138] = {
+["scan_state"] = 4,
+},
+[1261882] = {
+["scan_state"] = 4,
+},
+[1261233] = {
+["scan_state"] = 4,
+},
+[1230885] = {
+["scan_state"] = 4,
+},
+[1230857] = {
+["scan_state"] = 4,
+},
+[1230891] = {
+["scan_state"] = 1,
+},
+[1230892] = {
+["scan_state"] = 4,
+},
+[1230893] = {
+["scan_state"] = 4,
+},
+[1263548] = {
+["scan_state"] = 4,
+},
+[1233137] = {
+["scan_state"] = 4,
+},
+[1230861] = {
+["scan_state"] = 1,
+},
+[1261885] = {
+["scan_state"] = 4,
+},
+},
+["concentration"] = {
+["maxQuantity"] = 1000,
+["lastUpdated"] = 1774635209,
+["amount"] = 70,
+["rechargeTimePerPoint"] = 345600,
+["currencyID"] = 3161,
+},
+},
+[2823] = {
+["parentProfID"] = 171,
+["recipes"] = {
+[370735] = {
+["scan_state"] = 4,
+},
+[370668] = {
+["scan_state"] = 4,
+},
+[370672] = {
+["scan_state"] = 4,
+},
+[406106] = {
+["scan_state"] = 4,
+},
+[377978] = {
+["scan_state"] = 4,
+},
+[370677] = {
+["scan_state"] = 4,
+},
+[370673] = {
+["scan_state"] = 4,
+},
+[405879] = {
+["scan_state"] = 4,
+},
+[370483] = {
+["scan_state"] = 4,
+},
+[370472] = {
+["scan_state"] = 4,
+},
+[370473] = {
+["scan_state"] = 4,
+},
+[370676] = {
+["scan_state"] = 4,
+},
+},
+["concentration"] = {
+["maxQuantity"] = 1000,
+["lastUpdated"] = 1774654873,
+["amount"] = 1000,
+["rechargeTimePerPoint"] = 345600,
+["currencyID"] = 3054,
+},
+},
+[2481] = {
+["parentProfID"] = 171,
+["recipes"] = {
+[136197] = {
+["scan_state"] = 1,
+},
+},
+},
+[2909] = {
+["parentProfID"] = 333,
+["recipes"] = {
+[1270459] = {
+["scan_state"] = 4,
+},
+[1261501] = {
+["scan_state"] = 4,
+},
+[1281342] = {
+["scan_state"] = 4,
+},
+[1236486] = {
+["scan_state"] = 1,
+},
+[1236487] = {
+["scan_state"] = 4,
+},
+[1246904] = {
+["scan_state"] = 4,
+},
+[1246905] = {
+["scan_state"] = 4,
+},
+[1246906] = {
+["scan_state"] = 4,
+},
+[1281348] = {
+["scan_state"] = 4,
+},
+[1246908] = {
+["scan_state"] = 4,
+},
+[1246909] = {
+["scan_state"] = 4,
+},
+[1236488] = {
+["scan_state"] = 4,
+},
+[1236489] = {
+["scan_state"] = 4,
+},
+[1236490] = {
+["scan_state"] = 4,
+},
+[1246902] = {
+["scan_state"] = 4,
+},
+[1246903] = {
+["scan_state"] = 4,
+},
+[1246907] = {
+["scan_state"] = 4,
+},
+[1281349] = {
+["scan_state"] = 4,
+},
+},
+["concentration"] = {
+["maxQuantity"] = 1000,
+["lastUpdated"] = 1774141605,
+["amount"] = 1000,
+["rechargeTimePerPoint"] = 345600,
+["currencyID"] = 3163,
+},
+},
+[2907] = {
+["parentProfID"] = 164,
+["recipes"] = {
+[1229601] = {
+["scan_state"] = 4,
+},
+[1229602] = {
+["scan_state"] = 4,
+},
+[1229603] = {
+["scan_state"] = 2,
+},
+[1229604] = {
+["scan_state"] = 4,
+},
+[1229605] = {
+["scan_state"] = 4,
+},
+[1229606] = {
+["scan_state"] = 2,
+},
+[1229607] = {
+["scan_state"] = 2,
+},
+[1229608] = {
+["scan_state"] = 2,
+},
+[1229609] = {
+["scan_state"] = 2,
+},
+[1229610] = {
+["scan_state"] = 2,
+},
+[1229611] = {
+["scan_state"] = 2,
+},
+[1229612] = {
+["scan_state"] = 2,
+},
+[1229613] = {
+["scan_state"] = 2,
+},
+[1229614] = {
+["required_concentration"] = 450,
+["scan_state"] = 2,
+},
+[1229615] = {
+["required_concentration"] = 450,
+["scan_state"] = 2,
+},
+[1229616] = {
+["required_concentration"] = 450,
+["scan_state"] = 2,
+},
+[1229617] = {
+["required_concentration"] = 450,
+["scan_state"] = 2,
+},
+[1229618] = {
+["required_concentration"] = 450,
+["scan_state"] = 2,
+},
+[1229619] = {
+["required_concentration"] = 450,
+["scan_state"] = 2,
+},
+[1229620] = {
+["required_concentration"] = 450,
+["scan_state"] = 2,
+},
+[1229621] = {
+["scan_state"] = 3,
+},
+[1229622] = {
+["scan_state"] = 3,
+},
+[1229623] = {
+["scan_state"] = 3,
+},
+[1230767] = {
+["scan_state"] = 4,
+},
+[1262899] = {
+["scan_state"] = 4,
+},
+[1276108] = {
+["scan_state"] = 4,
+},
+[1276109] = {
+["scan_state"] = 4,
+},
+[1276110] = {
+["scan_state"] = 4,
+},
+[1276111] = {
+["scan_state"] = 4,
+},
+[1276112] = {
+["scan_state"] = 4,
+},
+[1262905] = {
+["scan_state"] = 4,
+},
+[1229632] = {
+["scan_state"] = 4,
+},
+[1229633] = {
+["scan_state"] = 4,
+},
+[1229634] = {
+["scan_state"] = 4,
+},
+[1229635] = {
+["scan_state"] = 4,
+},
+[1229636] = {
+["scan_state"] = 4,
+},
+[1229637] = {
+["scan_state"] = 4,
+},
+[1229638] = {
+["scan_state"] = 4,
+},
+[1229639] = {
+["scan_state"] = 4,
+},
+[1229640] = {
+["scan_state"] = 4,
+},
+[1229641] = {
+["scan_state"] = 4,
+},
+[1229642] = {
+["scan_state"] = 4,
+},
+[1229643] = {
+["scan_state"] = 4,
+},
+[1229644] = {
+["scan_state"] = 4,
+},
+[1262919] = {
+["scan_state"] = 4,
+},
+[1229646] = {
+["required_concentration"] = 450,
+["scan_state"] = 2,
+},
+[1229647] = {
+["required_concentration"] = 0,
+["keywords"] = "",
+["scan_state"] = 2,
+},
+[1229648] = {
+["required_concentration"] = 450,
+["scan_state"] = 2,
+},
+[1229649] = {
+["required_concentration"] = 425,
+["scan_state"] = 2,
+},
+[1229650] = {
+["required_concentration"] = 450,
+["scan_state"] = 2,
+},
+[1229651] = {
+["required_concentration"] = 450,
+["scan_state"] = 2,
+},
+[1229652] = {
+["scan_state"] = 2,
+},
+[1229653] = {
+["scan_state"] = 4,
+},
+[1229654] = {
+["required_concentration"] = 425,
+["scan_state"] = 2,
+},
+[1229655] = {
+["scan_state"] = 4,
+},
+[1229656] = {
+["scan_state"] = 2,
+},
+[1229657] = {
+["required_concentration"] = 450,
+["scan_state"] = 2,
+},
+[1229658] = {
+["scan_state"] = 1,
+},
+[1229659] = {
+["required_concentration"] = 450,
+["scan_state"] = 2,
+},
+[1229660] = {
+["scan_state"] = 4,
+},
+[1229661] = {
+["scan_state"] = 4,
+},
+[1229662] = {
+["scan_state"] = 4,
+},
+[1229663] = {
+["scan_state"] = 4,
+},
+[1229664] = {
+["scan_state"] = 3,
+},
+[1229665] = {
+["scan_state"] = 4,
+},
+[1229666] = {
+["scan_state"] = 4,
+},
+[1229667] = {
+["scan_state"] = 4,
+},
+[1229668] = {
+["scan_state"] = 4,
+},
+[1261499] = {
+["scan_state"] = 4,
+},
+[1230765] = {
+["scan_state"] = 2,
+},
+[1264651] = {
+["scan_state"] = 4,
+},
+[1229630] = {
+["scan_state"] = 4,
+},
+[1229645] = {
+["scan_state"] = 4,
+},
+[1229631] = {
+["scan_state"] = 4,
+},
+[1229624] = {
+["scan_state"] = 3,
+},
+[1229625] = {
+["scan_state"] = 3,
+},
+[1229626] = {
+["scan_state"] = 3,
+},
+[1229627] = {
+["scan_state"] = 3,
+},
+[1229628] = {
+["scan_state"] = 3,
+},
+[1229629] = {
+["scan_state"] = 3,
+},
+[1264644] = {
+["scan_state"] = 4,
+},
+[1264645] = {
+["scan_state"] = 4,
+},
+[1264646] = {
+["scan_state"] = 1,
+},
+[1230769] = {
+["scan_state"] = 4,
+},
+[1230766] = {
+["scan_state"] = 4,
+},
+[1230768] = {
+["scan_state"] = 4,
+},
+[1229598] = {
+["scan_state"] = 4,
+},
+[1229599] = {
+["scan_state"] = 4,
+},
+[1229600] = {
+["scan_state"] = 4,
+},
+[1261497] = {
+["scan_state"] = 4,
+},
+},
+["concentration"] = {
+["maxQuantity"] = 1000,
+["lastUpdated"] = 1774807206,
+["amount"] = 522,
+["rechargeTimePerPoint"] = 345600,
+["currencyID"] = 3162,
+},
+},
+},
+["parent_professions"] = {
+[171] = {
+["sound_alert_enabled"] = false,
+["scanning_enabled_last"] = true,
+["visual_alert_enabled"] = true,
+["scanning_enabled"] = false,
+},
+[164] = {
+["scanning_enabled_last"] = true,
+["scanning_enabled"] = true,
+["sound_alert_enabled"] = true,
+["visual_alert_enabled"] = true,
+["local_alerts_only"] = true,
+},
+[333] = {
+["sound_alert_enabled"] = false,
+["visual_alert_enabled"] = true,
+["scanning_enabled"] = false,
+},
+},
+},
+["Zappyxatu-Stormrage"] = {
+["professions"] = {
+[2485] = {
+["parentProfID"] = 171,
+["recipes"] = {
+[114786] = {
+["scan_state"] = 4,
+},
+[11459] = {
+["scan_state"] = 4,
+},
+},
+},
+[2871] = {
+["parentProfID"] = 171,
+["recipes"] = {
+[427185] = {
+["scan_state"] = 4,
+},
+[449573] = {
+["scan_state"] = 4,
+},
+[449575] = {
+["scan_state"] = 4,
+},
+[432963] = {
+["scan_state"] = 4,
+},
+[433087] = {
+["scan_state"] = 4,
+},
+[449574] = {
+["scan_state"] = 4,
+},
+[432962] = {
+["scan_state"] = 4,
+},
+[449938] = {
+["scan_state"] = 4,
+},
+},
+["concentration"] = {
+["maxQuantity"] = 1000,
+["lastUpdated"] = 1773626868,
+["amount"] = 1000,
+["rechargeTimePerPoint"] = 345600,
+["currencyID"] = 3045,
+},
+},
+[2906] = {
+["parentProfID"] = 171,
+["recipes"] = {
+[1261495] = {
+["scan_state"] = 4,
+},
+[1262829] = {
+["scan_state"] = 4,
+},
+[1233132] = {
+["scan_state"] = 4,
+},
+[1233133] = {
+["scan_state"] = 4,
+},
+[1233135] = {
+["scan_state"] = 4,
+},
+[1233136] = {
+["scan_state"] = 4,
+},
+[1259673] = {
+["scan_state"] = 4,
+},
+[1233138] = {
+["scan_state"] = 4,
+},
+[1261878] = {
+["scan_state"] = 4,
+},
+[1230885] = {
+["scan_state"] = 4,
+},
+[1230857] = {
+["scan_state"] = 4,
+},
+[1230891] = {
+["scan_state"] = 4,
+},
+[1230892] = {
+["scan_state"] = 4,
+},
+[1230893] = {
+["scan_state"] = 4,
+},
+[1233137] = {
+["scan_state"] = 4,
+},
+[1230874] = {
+["scan_state"] = 4,
+},
+[1230861] = {
+["scan_state"] = 4,
+},
+},
+["concentration"] = {
+["maxQuantity"] = 1000,
+["lastUpdated"] = 1774635298,
+["amount"] = 58,
+["rechargeTimePerPoint"] = 345600,
+["currencyID"] = 3161,
+},
+},
+},
+["parent_professions"] = {
+[171] = {
+["sound_alert_enabled"] = false,
+["visual_alert_enabled"] = true,
+["scanning_enabled"] = false,
+},
+},
+},
+["Angryabsol-Stormrage"] = {
+["professions"] = {
+[2485] = {
+["parentProfID"] = 171,
+["recipes"] = {
+[114786] = {
+["scan_state"] = 4,
+},
+[11459] = {
+["scan_state"] = 4,
+},
+},
+},
+[2906] = {
+["parentProfID"] = 171,
+["recipes"] = {
+[1230893] = {
+["scan_state"] = 4,
+},
+[1262829] = {
+["scan_state"] = 4,
+},
+[1261495] = {
+["scan_state"] = 4,
+},
+[1233132] = {
+["scan_state"] = 4,
+},
+[1233133] = {
+["scan_state"] = 4,
+},
+[1233137] = {
+["scan_state"] = 4,
+},
+[1230885] = {
+["scan_state"] = 4,
+},
+[1233136] = {
+["scan_state"] = 4,
+},
+[1230857] = {
+["scan_state"] = 4,
+},
+[1233138] = {
+["scan_state"] = 4,
+},
+[1230874] = {
+["scan_state"] = 4,
+},
+[1230891] = {
+["scan_state"] = 4,
+},
+[1230861] = {
+["scan_state"] = 4,
+},
+[1230892] = {
+["scan_state"] = 4,
+},
+[1233135] = {
+["scan_state"] = 4,
+},
+},
+["concentration"] = {
+["maxQuantity"] = 1000,
+["lastUpdated"] = 1774635442,
+["amount"] = 47,
+["rechargeTimePerPoint"] = 345600,
+["currencyID"] = 3161,
+},
+},
+[2494] = {
+["parentProfID"] = 333,
+["recipes"] = {
+[416684] = {
+["scan_state"] = 4,
+},
+[14809] = {
+["scan_state"] = 4,
+},
+[416685] = {
+["scan_state"] = 4,
+},
+[402139] = {
+["scan_state"] = 4,
+},
+[416686] = {
+["scan_state"] = 4,
+},
+[14810] = {
+["scan_state"] = 4,
+},
+[14807] = {
+["scan_state"] = 4,
+},
+[15596] = {
+["scan_state"] = 4,
+},
+[14293] = {
+["scan_state"] = 4,
+},
+[7421] = {
+["scan_state"] = 1,
+},
+},
+},
+[2914] = {
+["parentProfID"] = 755,
+["recipes"] = {
+[1246889] = {
+["scan_state"] = 4,
+},
+[1246891] = {
+["scan_state"] = 4,
+},
+[1246892] = {
+["scan_state"] = 4,
+},
+[1246893] = {
+["scan_state"] = 4,
+},
+[1246894] = {
+["scan_state"] = 4,
+},
+[1246895] = {
+["scan_state"] = 4,
+},
+[1261659] = {
+["scan_state"] = 4,
+},
+[1230479] = {
+["scan_state"] = 4,
+},
+[1230481] = {
+["scan_state"] = 4,
+},
+[1230482] = {
+["scan_state"] = 4,
+},
+[1230483] = {
+["scan_state"] = 4,
+},
+[1230484] = {
+["scan_state"] = 4,
+},
+[1230485] = {
+["scan_state"] = 4,
+},
+[1230486] = {
+["scan_state"] = 4,
+},
+[1230487] = {
+["scan_state"] = 4,
+},
+[1230488] = {
+["scan_state"] = 4,
+},
+[1230489] = {
+["scan_state"] = 1,
+},
+[1230490] = {
+["scan_state"] = 1,
+},
+[1230491] = {
+["scan_state"] = 1,
+},
+[1230492] = {
+["scan_state"] = 1,
+},
+[1230493] = {
+["scan_state"] = 1,
+},
+[1242464] = {
+["scan_state"] = 4,
+},
+[1230495] = {
+["scan_state"] = 4,
+},
+[1230496] = {
+["scan_state"] = 4,
+},
+[1230497] = {
+["scan_state"] = 4,
+},
+[1230498] = {
+["scan_state"] = 4,
+},
+[1230494] = {
+["scan_state"] = 1,
+},
+[1251983] = {
+["scan_state"] = 4,
+},
+[1242461] = {
+["scan_state"] = 4,
+},
+[1242463] = {
+["scan_state"] = 4,
+},
+[1230503] = {
+["scan_state"] = 4,
+},
+[1230504] = {
+["scan_state"] = 4,
+},
+[1242462] = {
+["scan_state"] = 4,
+},
+[1261667] = {
+["scan_state"] = 4,
+},
+},
+["concentration"] = {
+["maxQuantity"] = 1000,
+["lastUpdated"] = 1774575729,
+["amount"] = 8,
+["rechargeTimePerPoint"] = 345600,
+["currencyID"] = 3166,
+},
+},
+[2909] = {
+["parentProfID"] = 333,
+["recipes"] = {
+[1270459] = {
+["scan_state"] = 4,
+},
+[1261501] = {
+["scan_state"] = 4,
+},
+[1281342] = {
+["scan_state"] = 4,
+},
+[1236486] = {
+["scan_state"] = 1,
+},
+[1236487] = {
+["scan_state"] = 4,
+},
+[1246904] = {
+["scan_state"] = 4,
+},
+[1246905] = {
+["scan_state"] = 4,
+},
+[1246906] = {
+["scan_state"] = 4,
+},
+[1281348] = {
+["scan_state"] = 4,
+},
+[1246908] = {
+["scan_state"] = 4,
+},
+[1246909] = {
+["scan_state"] = 4,
+},
+[1236488] = {
+["scan_state"] = 4,
+},
+[1236489] = {
+["scan_state"] = 1,
+},
+[1236490] = {
+["scan_state"] = 4,
+},
+[1246902] = {
+["scan_state"] = 4,
+},
+[1246903] = {
+["scan_state"] = 4,
+},
+[1246907] = {
+["scan_state"] = 4,
+},
+[1281349] = {
+["scan_state"] = 4,
+},
+},
+["concentration"] = {
+["maxQuantity"] = 1000,
+["lastUpdated"] = 1773517013,
+["amount"] = 1000,
+["rechargeTimePerPoint"] = 345600,
+["currencyID"] = 3163,
+},
+},
+[2524] = {
+["parentProfID"] = 755,
+["recipes"] = {
+[26906] = {
+["scan_state"] = 4,
+},
+[26908] = {
+["scan_state"] = 4,
+},
+[26910] = {
+["scan_state"] = 4,
+},
+[26912] = {
+["scan_state"] = 4,
+},
+[26914] = {
+["scan_state"] = 4,
+},
+[26926] = {
+["scan_state"] = 4,
+},
+[26928] = {
+["scan_state"] = 4,
+},
+[25283] = {
+["scan_state"] = 4,
+},
+[25287] = {
+["scan_state"] = 4,
+},
+[34955] = {
+["scan_state"] = 4,
+},
+[34959] = {
+["scan_state"] = 4,
+},
+[32808] = {
+["scan_state"] = 4,
+},
+[25305] = {
+["scan_state"] = 4,
+},
+[36523] = {
+["scan_state"] = 4,
+},
+[25317] = {
+["scan_state"] = 4,
+},
+[32179] = {
+["scan_state"] = 4,
+},
+[25323] = {
+["scan_state"] = 4,
+},
+[25339] = {
+["scan_state"] = 4,
+},
+[413743] = {
+["scan_state"] = 4,
+},
+[26873] = {
+["scan_state"] = 4,
+},
+[26875] = {
+["scan_state"] = 4,
+},
+[34960] = {
+["scan_state"] = 4,
+},
+[26881] = {
+["scan_state"] = 4,
+},
+[26883] = {
+["scan_state"] = 4,
+},
+[26885] = {
+["scan_state"] = 4,
+},
+[25617] = {
+["scan_state"] = 4,
+},
+[25619] = {
+["scan_state"] = 4,
+},
+[25621] = {
+["scan_state"] = 4,
+},
+[405205] = {
+["scan_state"] = 4,
+},
+[25498] = {
+["scan_state"] = 4,
+},
+[26897] = {
+["scan_state"] = 4,
+},
+[36524] = {
+["scan_state"] = 4,
+},
+[26903] = {
+["scan_state"] = 4,
+},
+[26907] = {
+["scan_state"] = 4,
+},
+[26909] = {
+["scan_state"] = 4,
+},
+[37818] = {
+["scan_state"] = 4,
+},
+[26915] = {
+["scan_state"] = 4,
+},
+[26925] = {
+["scan_state"] = 1,
+},
+[26927] = {
+["scan_state"] = 4,
+},
+[25280] = {
+["scan_state"] = 4,
+},
+[25284] = {
+["scan_state"] = 4,
+},
+[34961] = {
+["scan_state"] = 4,
+},
+[36525] = {
+["scan_state"] = 4,
+},
+[25318] = {
+["scan_state"] = 4,
+},
+[25320] = {
+["scan_state"] = 4,
+},
+[26911] = {
+["scan_state"] = 4,
+},
+[413752] = {
+["scan_state"] = 4,
+},
+[36526] = {
+["scan_state"] = 4,
+},
+[32178] = {
+["scan_state"] = 4,
+},
+[32809] = {
+["scan_state"] = 4,
+},
+[63743] = {
+["scan_state"] = 4,
+},
+[38175] = {
+["scan_state"] = 4,
+},
+[25613] = {
+["scan_state"] = 4,
+},
+[25620] = {
+["scan_state"] = 4,
+},
+[32259] = {
+["scan_state"] = 1,
+},
+[25490] = {
+["scan_state"] = 4,
+},
+[25612] = {
+["scan_state"] = 4,
+},
+[32807] = {
+["scan_state"] = 4,
+},
+[26872] = {
+["scan_state"] = 4,
+},
+[26874] = {
+["scan_state"] = 4,
+},
+[26876] = {
+["scan_state"] = 4,
+},
+[26878] = {
+["scan_state"] = 4,
+},
+[25610] = {
+["scan_state"] = 4,
+},
+[26882] = {
+["scan_state"] = 4,
+},
+[25614] = {
+["scan_state"] = 4,
+},
+[26887] = {
+["scan_state"] = 4,
+},
+[25618] = {
+["scan_state"] = 4,
+},
+[25493] = {
+["scan_state"] = 1,
+},
+[25622] = {
+["scan_state"] = 4,
+},
+[25321] = {
+["scan_state"] = 4,
+},
+[26896] = {
+["scan_state"] = 4,
+},
+[32801] = {
+["scan_state"] = 4,
+},
+[26900] = {
+["scan_state"] = 4,
+},
+[26902] = {
+["scan_state"] = 4,
+},
+[413751] = {
+["scan_state"] = 4,
+},
+},
+},
+},
+["parent_professions"] = {
+[171] = {
+["sound_alert_enabled"] = false,
+["visual_alert_enabled"] = true,
+["scanning_enabled"] = false,
+},
+[333] = {
+["sound_alert_enabled"] = false,
+["visual_alert_enabled"] = true,
+["scanning_enabled"] = false,
+},
+[755] = {
+["sound_alert_enabled"] = false,
+["visual_alert_enabled"] = true,
+["scanning_enabled"] = false,
+},
+},
+},
+["Madmareep-Stormrage"] = {
+["professions"] = {
+[2485] = {
+["parentProfID"] = 171,
+["recipes"] = {
+[114786] = {
+["scan_state"] = 4,
+},
+[11459] = {
+["scan_state"] = 4,
+},
+},
+},
+[2871] = {
+["parentProfID"] = 171,
+["recipes"] = {
+[449575] = {
+["scan_state"] = 4,
+},
+[1262829] = {
+["scan_state"] = 4,
+},
+[432963] = {
+["scan_state"] = 4,
+},
+[433087] = {
+["scan_state"] = 4,
+},
+[427185] = {
+["scan_state"] = 4,
+},
+[449573] = {
+["scan_state"] = 4,
+},
+[449574] = {
+["scan_state"] = 4,
+},
+[449938] = {
+["scan_state"] = 4,
+},
+[432962] = {
+["scan_state"] = 4,
+},
+[1261495] = {
+["scan_state"] = 4,
+},
+},
+["concentration"] = {
+["maxQuantity"] = 1000,
+["lastUpdated"] = 1773627134,
+["amount"] = 1000,
+["rechargeTimePerPoint"] = 345600,
+["currencyID"] = 3045,
+},
+},
+[2906] = {
+["parentProfID"] = 171,
+["recipes"] = {
+[1261495] = {
+["scan_state"] = 4,
+},
+[1262829] = {
+["scan_state"] = 4,
+},
+[1233132] = {
+["scan_state"] = 4,
+},
+[1233133] = {
+["scan_state"] = 4,
+},
+[1233135] = {
+["scan_state"] = 4,
+},
+[1233136] = {
+["scan_state"] = 4,
+},
+[1259673] = {
+["scan_state"] = 4,
+},
+[1233138] = {
+["scan_state"] = 4,
+},
+[1261878] = {
+["scan_state"] = 4,
+},
+[1230885] = {
+["scan_state"] = 4,
+},
+[1230857] = {
+["scan_state"] = 4,
+},
+[1230891] = {
+["scan_state"] = 4,
+},
+[1230892] = {
+["scan_state"] = 4,
+},
+[1230893] = {
+["scan_state"] = 4,
+},
+[1230861] = {
+["scan_state"] = 4,
+},
+[1230874] = {
+["scan_state"] = 4,
+},
+[1233137] = {
+["scan_state"] = 4,
+},
+},
+["concentration"] = {
+["maxQuantity"] = 1000,
+["lastUpdated"] = 1774635259,
+["amount"] = 55,
+["rechargeTimePerPoint"] = 345600,
+["currencyID"] = 3161,
+},
+},
+},
+["parent_professions"] = {
+[171] = {
+["sound_alert_enabled"] = false,
+["visual_alert_enabled"] = true,
+["scanning_enabled"] = false,
+},
+},
+},
+},
+["listed_orders"] = {
+["Beardedfist-Stormrage-1229649"] = {
+["customerName"] = "Beardedfist-Stormrage",
+["responseID"] = 1229649,
+},
+["Hollowtrack-Stormrage-1229659"] = {
+["customerName"] = "Hollowtrack-Stormrage",
+["responseID"] = 1229659,
+},
+["Johnnycool-Stormrage-1229648"] = {
+["customerName"] = "Johnnycool-Stormrage",
+["responseID"] = 1229648,
+},
+},
+["analytics"] = {
+},
+["customers"] = {
+["Beardedfist-Stormrage"] = {
+["chat_history"] = {
+{
+["message"] = "LF recraft max |cnIQ4:|Hitem:237845::::::::90:269::13:1:3524:6:40:2738:38:8:46:232875:47:245876:48:245786:49:-2147480301:::::|h[Bloomforged Claw |A:Professions-ChatIcon-Quality-Tier5:17:15::1|a]|h|r",
+},
+{
+["message"] = "I can! R5 guaranteed. This Character!",
+},
+{
+["message"] = "price good sir?",
+},
+{
+["message"] = "whatever tip you feel is appropriate",
+},
+},
+["responses"] = {
+[1229649] = {
+["greeting_sent"] = true,
+["parentProfID"] = 164,
+["professionID"] = 2907,
+["recipeID"] = 1229649,
+["crafterName"] = "Lonelylitten",
+["message"] = {
+"I can! R5 guaranteed. This Character!",
+"",
+},
+["itemID"] = 237845,
+["less_granular"] = {
+2907,
+},
+["responseID"] = 1229649,
+["professionName"] = "Blacksmithing",
+["time"] = 1774807424,
+["customer_answered"] = true,
+},
+[2907] = {
+["greeting_sent"] = true,
+["parentProfID"] = 164,
+["professionID"] = 2907,
+["recipeID"] = 1229649,
+["crafterName"] = "Lonelylitten",
+["message"] = {
+"I can! R5 guaranteed. This Character!",
+"",
+},
+["itemID"] = 237845,
+["less_granular"] = {
+2907,
+},
+["responseID"] = 1229649,
+["professionName"] = "Blacksmithing",
+["time"] = 1774807424,
+["customer_answered"] = true,
+},
+},
+["guid"] = "Player-60-0FE0BFB1",
+},
+["Bluesbro-Stormrage"] = {
+["responses"] = {
+[2909] = {
+},
+},
+["guid"] = "Player-60-0E30EA71",
+},
+["Johnnycool-Stormrage"] = {
+["chat_history"] = {
+{
+["message"] = "LFC to make |cnIQ4:|Hitem:237846::::::::90:72::13:1:3524:5:40:2737:38:8:46:232875:47:245876:48:245784:::::|h[Blood Knight's Warblade |A:Professions-ChatIcon-Quality-Tier5:17:15::1|a]|h|r my mats will tip!!",
+},
+{
+["message"] = "I can! R5 guaranteed. This Character!",
+},
+},
+["responses"] = {
+[1229648] = {
+["greeting_sent"] = true,
+["parentProfID"] = 164,
+["professionID"] = 2907,
+["recipeID"] = 1229648,
+["crafterName"] = "Lonelylitten",
+["message"] = {
+"I can! R5 guaranteed. This Character!",
+"",
+},
+["itemID"] = 237846,
+["responseID"] = 1229648,
+["professionName"] = "Blacksmithing",
+["time"] = 1774807456,
+["less_granular"] = {
+2907,
+},
+},
+[2907] = {
+["greeting_sent"] = true,
+["parentProfID"] = 164,
+["professionID"] = 2907,
+["recipeID"] = 1229648,
+["crafterName"] = "Lonelylitten",
+["message"] = {
+"I can! R5 guaranteed. This Character!",
+"",
+},
+["itemID"] = 237846,
+["responseID"] = 1229648,
+["professionName"] = "Blacksmithing",
+["time"] = 1774807456,
+["less_granular"] = {
+2907,
+},
+},
+},
+["guid"] = "Player-60-0FBF7DC5",
+},
+["Hollowtrack-Stormrage"] = {
+["chat_history"] = {
+{
+["message"] = "LFC |cnIQ4:|Hitem:237837::::::::90:255::13:1:3524:5:40:2748:38:8:46:232875:47:245876:48:245790:::::|h[Farstrider's Mercy |A:Professions-ChatIcon-Quality-Tier5:17:15::1|a]|h|r",
+},
+{
+["message"] = "I can! R5 guaranteed. This Character!",
+},
+{
+["message"] = "Okay I am sending",
+},
+{
+["message"] = "sounds good!",
+},
+{
+["message"] = "You have filled a personal crafting order of Farstrider's Mercy |A:Professions-ChatIcon-Quality-Tier5:17:15::1|a for Hollowtrack and earned a 1,900|TInterface\\MoneyFrame\\UI-GoldIcon:0:0:2:0|t commission.",
+["args"] = {
+1,
+1,
+0,
+1,
+["n"] = 4,
+},
+},
+},
+["responses"] = {
+[1229659] = {
+["greeting_sent"] = true,
+["parentProfID"] = 164,
+["professionID"] = 2907,
+["recipeID"] = 1229659,
+["crafterName"] = "Lonelylitten",
+["message"] = {
+"I can! R5 guaranteed. This Character!",
+"",
+},
+["itemID"] = 237837,
+["less_granular"] = {
+2907,
+},
+["responseID"] = 1229659,
+["professionName"] = "Blacksmithing",
+["time"] = 1774807399,
+["customer_answered"] = true,
+},
+[2907] = {
+["greeting_sent"] = true,
+["parentProfID"] = 164,
+["professionID"] = 2907,
+["recipeID"] = 1229659,
+["crafterName"] = "Lonelylitten",
+["message"] = {
+"I can! R5 guaranteed. This Character!",
+"",
+},
+["itemID"] = 237837,
+["less_granular"] = {
+2907,
+},
+["responseID"] = 1229659,
+["professionName"] = "Blacksmithing",
+["time"] = 1774807399,
+["customer_answered"] = true,
+},
+},
+["guid"] = "Player-60-0FB20E54",
+},
+["Phantumdeath-Stormrage"] = {
+["responses"] = {
+[2906] = {
+},
+},
+["guid"] = "Player-60-0EDECD91",
+},
+},
+},
 ["Area 52"] = {
 ["characters"] = {
 ["Barelynoer-Area52"] = {
@@ -606,13 +2975,13 @@ CraftScan_DB = {
 [22921] = {
 ["scan_state"] = 4,
 },
-[28474] = {
+[226111] = {
 ["scan_state"] = 4,
 },
-[6702] = {
+[226110] = {
 ["scan_state"] = 4,
 },
-[402147] = {
+[226130] = {
 ["scan_state"] = 4,
 },
 [9197] = {
@@ -627,28 +2996,28 @@ CraftScan_DB = {
 [19082] = {
 ["scan_state"] = 4,
 },
-[402144] = {
+[226137] = {
 ["scan_state"] = 4,
 },
 [402143] = {
 ["scan_state"] = 4,
 },
-[9058] = {
-["scan_state"] = 1,
+[10564] = {
+["scan_state"] = 4,
 },
 [10572] = {
 ["scan_state"] = 4,
 },
-[22711] = {
+[10562] = {
 ["scan_state"] = 4,
 },
-[9198] = {
+[10560] = {
 ["scan_state"] = 4,
 },
-[10568] = {
+[226135] = {
 ["scan_state"] = 4,
 },
-[7153] = {
+[9147] = {
 ["scan_state"] = 4,
 },
 [10574] = {
@@ -657,7 +3026,7 @@ CraftScan_DB = {
 [7954] = {
 ["scan_state"] = 4,
 },
-[19104] = {
+[36076] = {
 ["scan_state"] = 4,
 },
 [7953] = {
@@ -669,7 +3038,7 @@ CraftScan_DB = {
 [28222] = {
 ["scan_state"] = 4,
 },
-[24122] = {
+[19091] = {
 ["scan_state"] = 4,
 },
 [28223] = {
@@ -684,13 +3053,13 @@ CraftScan_DB = {
 [19049] = {
 ["scan_state"] = 4,
 },
-[413496] = {
+[19073] = {
 ["scan_state"] = 4,
 },
 [19065] = {
 ["scan_state"] = 4,
 },
-[19073] = {
+[413496] = {
 ["scan_state"] = 4,
 },
 [19081] = {
@@ -705,10 +3074,10 @@ CraftScan_DB = {
 [413497] = {
 ["scan_state"] = 4,
 },
-[24849] = {
+[226129] = {
 ["scan_state"] = 4,
 },
-[19064] = {
+[226126] = {
 ["scan_state"] = 4,
 },
 [6703] = {
@@ -723,31 +3092,31 @@ CraftScan_DB = {
 [6704] = {
 ["scan_state"] = 4,
 },
-[6705] = {
+[19107] = {
 ["scan_state"] = 4,
 },
 [413499] = {
 ["scan_state"] = 4,
 },
-[226121] = {
+[10619] = {
 ["scan_state"] = 4,
 },
 [226127] = {
 ["scan_state"] = 4,
 },
-[9059] = {
-["scan_state"] = 1,
+[414566] = {
+["scan_state"] = 4,
 },
 [413500] = {
 ["scan_state"] = 4,
 },
-[24846] = {
+[23704] = {
 ["scan_state"] = 4,
 },
 [413756] = {
 ["scan_state"] = 4,
 },
-[226105] = {
+[24846] = {
 ["scan_state"] = 4,
 },
 [413501] = {
@@ -756,19 +3125,19 @@ CraftScan_DB = {
 [19106] = {
 ["scan_state"] = 4,
 },
-[23704] = {
+[226105] = {
 ["scan_state"] = 4,
 },
-[414566] = {
-["scan_state"] = 4,
+[9059] = {
+["scan_state"] = 1,
 },
 [413502] = {
 ["scan_state"] = 4,
 },
-[10619] = {
+[226121] = {
 ["scan_state"] = 4,
 },
-[19107] = {
+[6705] = {
 ["scan_state"] = 4,
 },
 [226106] = {
@@ -777,10 +3146,10 @@ CraftScan_DB = {
 [413503] = {
 ["scan_state"] = 4,
 },
-[226126] = {
+[19064] = {
 ["scan_state"] = 4,
 },
-[226129] = {
+[24849] = {
 ["scan_state"] = 4,
 },
 [20854] = {
@@ -789,7 +3158,7 @@ CraftScan_DB = {
 [413504] = {
 ["scan_state"] = 4,
 },
-[19091] = {
+[24122] = {
 ["scan_state"] = 4,
 },
 [22922] = {
@@ -801,34 +3170,34 @@ CraftScan_DB = {
 [413505] = {
 ["scan_state"] = 4,
 },
-[36076] = {
+[19104] = {
 ["scan_state"] = 4,
 },
 [413761] = {
 ["scan_state"] = 4,
 },
-[9147] = {
+[7153] = {
 ["scan_state"] = 4,
 },
-[226135] = {
+[10568] = {
 ["scan_state"] = 4,
 },
-[10560] = {
+[9198] = {
 ["scan_state"] = 4,
 },
-[10562] = {
+[22711] = {
 ["scan_state"] = 4,
 },
 [226108] = {
 ["scan_state"] = 4,
 },
-[10564] = {
-["scan_state"] = 4,
+[9058] = {
+["scan_state"] = 1,
 },
 [10499] = {
 ["scan_state"] = 4,
 },
-[226137] = {
+[402144] = {
 ["scan_state"] = 4,
 },
 [10507] = {
@@ -837,13 +3206,13 @@ CraftScan_DB = {
 [10511] = {
 ["scan_state"] = 4,
 },
-[226130] = {
+[402147] = {
 ["scan_state"] = 4,
 },
-[226110] = {
+[6702] = {
 ["scan_state"] = 4,
 },
-[226111] = {
+[28474] = {
 ["scan_state"] = 4,
 },
 },
@@ -877,10 +3246,10 @@ CraftScan_DB = {
 [1233133] = {
 ["scan_state"] = 4,
 },
-[1230885] = {
+[1233137] = {
 ["scan_state"] = 4,
 },
-[1233135] = {
+[1230885] = {
 ["scan_state"] = 4,
 },
 [1233136] = {
@@ -895,16 +3264,16 @@ CraftScan_DB = {
 [1230874] = {
 ["scan_state"] = 4,
 },
-[1230861] = {
+[1230891] = {
 ["scan_state"] = 4,
 },
-[1230891] = {
+[1230861] = {
 ["scan_state"] = 4,
 },
 [1230892] = {
 ["scan_state"] = 4,
 },
-[1233137] = {
+[1233135] = {
 ["scan_state"] = 4,
 },
 },
@@ -937,8 +3306,8 @@ CraftScan_DB = {
 [14810] = {
 ["scan_state"] = 4,
 },
-[14807] = {
-["scan_state"] = 4,
+[7421] = {
+["scan_state"] = 1,
 },
 [15596] = {
 ["scan_state"] = 4,
@@ -946,8 +3315,8 @@ CraftScan_DB = {
 [14293] = {
 ["scan_state"] = 4,
 },
-[7421] = {
-["scan_state"] = 1,
+[14807] = {
+["scan_state"] = 4,
 },
 },
 },
@@ -1210,25 +3579,25 @@ CraftScan_DB = {
 [1237571] = {
 ["scan_state"] = 4,
 },
-[1261672] = {
-["scan_state"] = 4,
-},
-[1246941] = {
-["scan_state"] = 4,
-},
-[1263633] = {
-["scan_state"] = 4,
-},
-[1246940] = {
-["scan_state"] = 4,
-},
-[1246938] = {
+[1246937] = {
 ["scan_state"] = 4,
 },
 [1246939] = {
 ["scan_state"] = 4,
 },
-[1246937] = {
+[1263633] = {
+["scan_state"] = 4,
+},
+[1246938] = {
+["scan_state"] = 4,
+},
+[1246940] = {
+["scan_state"] = 4,
+},
+[1246941] = {
+["scan_state"] = 4,
+},
+[1261672] = {
 ["scan_state"] = 4,
 },
 },
@@ -1276,25 +3645,25 @@ CraftScan_DB = {
 [1246909] = {
 ["scan_state"] = 4,
 },
-[1236488] = {
-["scan_state"] = 4,
-},
-[1236489] = {
-["scan_state"] = 1,
-},
-[1236490] = {
-["scan_state"] = 4,
-},
-[1246908] = {
-["scan_state"] = 4,
-},
-[1246902] = {
+[1246907] = {
 ["scan_state"] = 4,
 },
 [1246903] = {
 ["scan_state"] = 4,
 },
-[1246907] = {
+[1246902] = {
+["scan_state"] = 4,
+},
+[1246908] = {
+["scan_state"] = 4,
+},
+[1236490] = {
+["scan_state"] = 4,
+},
+[1236489] = {
+["scan_state"] = 1,
+},
+[1236488] = {
 ["scan_state"] = 4,
 },
 },
@@ -1337,2190 +3706,6 @@ CraftScan_DB = {
 },
 },
 ["guid"] = "Player-3676-0A229911",
-},
-},
-},
-["Stormrage"] = {
-["characters"] = {
-["Lonelylitten-Stormrage"] = {
-["professions"] = {
-[2823] = {
-["parentProfID"] = 171,
-["recipes"] = {
-[370735] = {
-["scan_state"] = 4,
-},
-[370668] = {
-["scan_state"] = 4,
-},
-[370672] = {
-["scan_state"] = 4,
-},
-[406106] = {
-["scan_state"] = 4,
-},
-[377978] = {
-["scan_state"] = 4,
-},
-[370677] = {
-["scan_state"] = 4,
-},
-[370676] = {
-["scan_state"] = 4,
-},
-[405879] = {
-["scan_state"] = 4,
-},
-[370483] = {
-["scan_state"] = 4,
-},
-[370472] = {
-["scan_state"] = 4,
-},
-[370473] = {
-["scan_state"] = 4,
-},
-[370673] = {
-["scan_state"] = 4,
-},
-},
-["concentration"] = {
-["maxQuantity"] = 1000,
-["lastUpdated"] = 1774654873,
-["amount"] = 1000,
-["rechargeTimePerPoint"] = 345600,
-["currencyID"] = 3054,
-},
-},
-[2477] = {
-["parentProfID"] = 164,
-["recipes"] = {
-[413509] = {
-["scan_state"] = 4,
-},
-[413510] = {
-["scan_state"] = 4,
-},
-[24136] = {
-["scan_state"] = 4,
-},
-[23633] = {
-["scan_state"] = 4,
-},
-[413511] = {
-["scan_state"] = 4,
-},
-[413512] = {
-["scan_state"] = 4,
-},
-[413513] = {
-["scan_state"] = 4,
-},
-[413514] = {
-["scan_state"] = 4,
-},
-[16647] = {
-["scan_state"] = 4,
-},
-[16655] = {
-["scan_state"] = 4,
-},
-[16663] = {
-["scan_state"] = 4,
-},
-[413518] = {
-["scan_state"] = 4,
-},
-[15294] = {
-["scan_state"] = 4,
-},
-[413520] = {
-["scan_state"] = 4,
-},
-[413521] = {
-["scan_state"] = 4,
-},
-[12260] = {
-["scan_state"] = 1,
-},
-[413522] = {
-["scan_state"] = 4,
-},
-[27586] = {
-["scan_state"] = 4,
-},
-[413523] = {
-["scan_state"] = 4,
-},
-[413524] = {
-["scan_state"] = 4,
-},
-[16967] = {
-["scan_state"] = 4,
-},
-[24137] = {
-["scan_state"] = 4,
-},
-[16991] = {
-["scan_state"] = 4,
-},
-[23650] = {
-["scan_state"] = 4,
-},
-[9813] = {
-["scan_state"] = 4,
-},
-[15973] = {
-["scan_state"] = 4,
-},
-[280671] = {
-["scan_state"] = 4,
-},
-[16648] = {
-["scan_state"] = 4,
-},
-[16656] = {
-["scan_state"] = 4,
-},
-[16664] = {
-["scan_state"] = 4,
-},
-[8368] = {
-["scan_state"] = 4,
-},
-[16728] = {
-["scan_state"] = 4,
-},
-[24912] = {
-["scan_state"] = 4,
-},
-[16744] = {
-["scan_state"] = 4,
-},
-[9933] = {
-["scan_state"] = 4,
-},
-[9937] = {
-["scan_state"] = 4,
-},
-[20872] = {
-["scan_state"] = 4,
-},
-[9945] = {
-["scan_state"] = 4,
-},
-[9957] = {
-["scan_state"] = 4,
-},
-[9961] = {
-["scan_state"] = 4,
-},
-[27587] = {
-["scan_state"] = 4,
-},
-[9985] = {
-["scan_state"] = 4,
-},
-[9993] = {
-["scan_state"] = 4,
-},
-[7817] = {
-["scan_state"] = 4,
-},
-[10001] = {
-["scan_state"] = 4,
-},
-[10005] = {
-["scan_state"] = 4,
-},
-[10009] = {
-["scan_state"] = 4,
-},
-[10013] = {
-["scan_state"] = 4,
-},
-[43549] = {
-["scan_state"] = 4,
-},
-[16960] = {
-["scan_state"] = 4,
-},
-[24138] = {
-["scan_state"] = 4,
-},
-[16992] = {
-["scan_state"] = 4,
-},
-[28242] = {
-["scan_state"] = 4,
-},
-[414567] = {
-["scan_state"] = 4,
-},
-[2661] = {
-["scan_state"] = 4,
-},
-[2662] = {
-["scan_state"] = 4,
-},
-[2663] = {
-["scan_state"] = 1,
-},
-[2664] = {
-["scan_state"] = 4,
-},
-[2666] = {
-["scan_state"] = 4,
-},
-[2667] = {
-["scan_state"] = 4,
-},
-[2668] = {
-["scan_state"] = 4,
-},
-[16657] = {
-["scan_state"] = 4,
-},
-[2670] = {
-["scan_state"] = 4,
-},
-[2671] = {
-["scan_state"] = 4,
-},
-[2672] = {
-["scan_state"] = 4,
-},
-[2673] = {
-["scan_state"] = 4,
-},
-[2675] = {
-["scan_state"] = 4,
-},
-[16729] = {
-["scan_state"] = 4,
-},
-[24913] = {
-["scan_state"] = 4,
-},
-[16745] = {
-["scan_state"] = 4,
-},
-[15295] = {
-["scan_state"] = 4,
-},
-[20873] = {
-["scan_state"] = 4,
-},
-[7408] = {
-["scan_state"] = 4,
-},
-[20897] = {
-["scan_state"] = 4,
-},
-[36125] = {
-["scan_state"] = 4,
-},
-[27588] = {
-["scan_state"] = 4,
-},
-[16969] = {
-["scan_state"] = 4,
-},
-[23628] = {
-["scan_state"] = 4,
-},
-[16993] = {
-["scan_state"] = 4,
-},
-[28243] = {
-["scan_state"] = 4,
-},
-[23652] = {
-["scan_state"] = 4,
-},
-[9814] = {
-["scan_state"] = 4,
-},
-[9818] = {
-["scan_state"] = 4,
-},
-[21161] = {
-["scan_state"] = 4,
-},
-[16642] = {
-["scan_state"] = 4,
-},
-[16650] = {
-["scan_state"] = 4,
-},
-[16658] = {
-["scan_state"] = 4,
-},
-[2737] = {
-["scan_state"] = 4,
-},
-[2738] = {
-["scan_state"] = 4,
-},
-[8880] = {
-["scan_state"] = 4,
-},
-[2740] = {
-["scan_state"] = 4,
-},
-[2741] = {
-["scan_state"] = 4,
-},
-[16730] = {
-["scan_state"] = 4,
-},
-[24914] = {
-["scan_state"] = 4,
-},
-[16746] = {
-["scan_state"] = 4,
-},
-[9926] = {
-["scan_state"] = 4,
-},
-[414590] = {
-["scan_state"] = 4,
-},
-[20874] = {
-["scan_state"] = 4,
-},
-[20890] = {
-["scan_state"] = 4,
-},
-[9954] = {
-["scan_state"] = 4,
-},
-[9966] = {
-["scan_state"] = 4,
-},
-[9970] = {
-["scan_state"] = 4,
-},
-[9974] = {
-["scan_state"] = 4,
-},
-[27589] = {
-["scan_state"] = 4,
-},
-[9986] = {
-["scan_state"] = 4,
-},
-[16970] = {
-["scan_state"] = 4,
-},
-[16978] = {
-["scan_state"] = 4,
-},
-[24140] = {
-["scan_state"] = 4,
-},
-[23637] = {
-["scan_state"] = 4,
-},
-[28244] = {
-["scan_state"] = 4,
-},
-[23653] = {
-["scan_state"] = 4,
-},
-[3292] = {
-["scan_state"] = 4,
-},
-[3293] = {
-["scan_state"] = 4,
-},
-[3294] = {
-["scan_state"] = 4,
-},
-[3295] = {
-["scan_state"] = 4,
-},
-[3296] = {
-["scan_state"] = 4,
-},
-[3297] = {
-["scan_state"] = 4,
-},
-[27829] = {
-["scan_state"] = 4,
-},
-[11643] = {
-["scan_state"] = 4,
-},
-[16643] = {
-["scan_state"] = 4,
-},
-[16659] = {
-["scan_state"] = 4,
-},
-[16667] = {
-["scan_state"] = 4,
-},
-[16731] = {
-["scan_state"] = 4,
-},
-[3319] = {
-["scan_state"] = 4,
-},
-[15292] = {
-["scan_state"] = 4,
-},
-[3321] = {
-["scan_state"] = 4,
-},
-[3323] = {
-["scan_state"] = 4,
-},
-[3324] = {
-["scan_state"] = 4,
-},
-[3325] = {
-["scan_state"] = 4,
-},
-[21913] = {
-["scan_state"] = 4,
-},
-[3328] = {
-["scan_state"] = 4,
-},
-[3330] = {
-["scan_state"] = 4,
-},
-[3331] = {
-["scan_state"] = 4,
-},
-[3333] = {
-["scan_state"] = 4,
-},
-[3334] = {
-["scan_state"] = 4,
-},
-[3336] = {
-["scan_state"] = 4,
-},
-[16971] = {
-["scan_state"] = 4,
-},
-[16987] = {
-["scan_state"] = 4,
-},
-[16995] = {
-["scan_state"] = 4,
-},
-[9811] = {
-["scan_state"] = 4,
-},
-[7223] = {
-["scan_state"] = 4,
-},
-[27830] = {
-["scan_state"] = 4,
-},
-[16644] = {
-["scan_state"] = 4,
-},
-[16652] = {
-["scan_state"] = 4,
-},
-[16660] = {
-["scan_state"] = 4,
-},
-[8366] = {
-["scan_state"] = 4,
-},
-[28461] = {
-["scan_state"] = 4,
-},
-[16724] = {
-["scan_state"] = 4,
-},
-[16732] = {
-["scan_state"] = 4,
-},
-[9931] = {
-["scan_state"] = 4,
-},
-[9935] = {
-["scan_state"] = 4,
-},
-[20876] = {
-["scan_state"] = 4,
-},
-[9959] = {
-["scan_state"] = 4,
-},
-[9979] = {
-["scan_state"] = 4,
-},
-[9983] = {
-["scan_state"] = 4,
-},
-[9987] = {
-["scan_state"] = 4,
-},
-[9995] = {
-["scan_state"] = 4,
-},
-[10003] = {
-["scan_state"] = 4,
-},
-[10007] = {
-["scan_state"] = 4,
-},
-[10011] = {
-["scan_state"] = 4,
-},
-[10015] = {
-["scan_state"] = 4,
-},
-[16980] = {
-["scan_state"] = 4,
-},
-[16988] = {
-["scan_state"] = 4,
-},
-[23639] = {
-["scan_state"] = 4,
-},
-[15296] = {
-["scan_state"] = 4,
-},
-[23629] = {
-["scan_state"] = 4,
-},
-[16986] = {
-["scan_state"] = 4,
-},
-[6518] = {
-["scan_state"] = 4,
-},
-[23638] = {
-["scan_state"] = 4,
-},
-[413739] = {
-["scan_state"] = 4,
-},
-[16665] = {
-["scan_state"] = 4,
-},
-[16645] = {
-["scan_state"] = 4,
-},
-[16653] = {
-["scan_state"] = 4,
-},
-[16661] = {
-["scan_state"] = 4,
-},
-[16649] = {
-["scan_state"] = 4,
-},
-[27590] = {
-["scan_state"] = 4,
-},
-[9980] = {
-["scan_state"] = 4,
-},
-[413741] = {
-["scan_state"] = 4,
-},
-[16984] = {
-["scan_state"] = 4,
-},
-[28462] = {
-["scan_state"] = 4,
-},
-[413740] = {
-["scan_state"] = 4,
-},
-[16725] = {
-["scan_state"] = 4,
-},
-[413506] = {
-["scan_state"] = 4,
-},
-[16741] = {
-["scan_state"] = 4,
-},
-[16990] = {
-["scan_state"] = 4,
-},
-[15293] = {
-["scan_state"] = 4,
-},
-[402118] = {
-["scan_state"] = 4,
-},
-[413742] = {
-["scan_state"] = 4,
-},
-[416682] = {
-["scan_state"] = 4,
-},
-[413744] = {
-["scan_state"] = 4,
-},
-[2742] = {
-["scan_state"] = 4,
-},
-[9952] = {
-["scan_state"] = 4,
-},
-[416683] = {
-["scan_state"] = 4,
-},
-[12259] = {
-["scan_state"] = 4,
-},
-[9942] = {
-["scan_state"] = 4,
-},
-[9950] = {
-["scan_state"] = 4,
-},
-[24139] = {
-["scan_state"] = 4,
-},
-[413746] = {
-["scan_state"] = 4,
-},
-[413745] = {
-["scan_state"] = 4,
-},
-[3513] = {
-["scan_state"] = 4,
-},
-[413758] = {
-["scan_state"] = 4,
-},
-[16973] = {
-["scan_state"] = 4,
-},
-[23632] = {
-["scan_state"] = 4,
-},
-[24399] = {
-["scan_state"] = 4,
-},
-[16726] = {
-["scan_state"] = 4,
-},
-[27832] = {
-["scan_state"] = 4,
-},
-[402123] = {
-["scan_state"] = 4,
-},
-[28463] = {
-["scan_state"] = 4,
-},
-[416687] = {
-["scan_state"] = 4,
-},
-[413749] = {
-["scan_state"] = 4,
-},
-[402124] = {
-["scan_state"] = 4,
-},
-[16965] = {
-["scan_state"] = 4,
-},
-[416688] = {
-["scan_state"] = 4,
-},
-[413750] = {
-["scan_state"] = 4,
-},
-[402125] = {
-["scan_state"] = 4,
-},
-[8367] = {
-["scan_state"] = 4,
-},
-[413757] = {
-["scan_state"] = 4,
-},
-[3493] = {
-["scan_state"] = 4,
-},
-[402126] = {
-["scan_state"] = 4,
-},
-[413755] = {
-["scan_state"] = 4,
-},
-[3501] = {
-["scan_state"] = 4,
-},
-[16662] = {
-["scan_state"] = 4,
-},
-[9820] = {
-["scan_state"] = 4,
-},
-[3497] = {
-["scan_state"] = 4,
-},
-[16646] = {
-["scan_state"] = 4,
-},
-[413753] = {
-["scan_state"] = 4,
-},
-[402128] = {
-["scan_state"] = 4,
-},
-[15972] = {
-["scan_state"] = 4,
-},
-[3491] = {
-["scan_state"] = 4,
-},
-[3492] = {
-["scan_state"] = 4,
-},
-[402129] = {
-["scan_state"] = 4,
-},
-[3494] = {
-["scan_state"] = 4,
-},
-[3495] = {
-["scan_state"] = 4,
-},
-[3496] = {
-["scan_state"] = 4,
-},
-[402130] = {
-["scan_state"] = 4,
-},
-[3498] = {
-["scan_state"] = 4,
-},
-[16654] = {
-["scan_state"] = 4,
-},
-[3500] = {
-["scan_state"] = 4,
-},
-[402131] = {
-["scan_state"] = 4,
-},
-[3502] = {
-["scan_state"] = 4,
-},
-[3503] = {
-["scan_state"] = 4,
-},
-[3504] = {
-["scan_state"] = 4,
-},
-[3505] = {
-["scan_state"] = 4,
-},
-[3506] = {
-["scan_state"] = 4,
-},
-[3507] = {
-["scan_state"] = 4,
-},
-[3508] = {
-["scan_state"] = 4,
-},
-[9916] = {
-["scan_state"] = 4,
-},
-[16742] = {
-["scan_state"] = 4,
-},
-[3511] = {
-["scan_state"] = 4,
-},
-[9928] = {
-["scan_state"] = 4,
-},
-[402134] = {
-["scan_state"] = 4,
-},
-[402133] = {
-["scan_state"] = 4,
-},
-[3515] = {
-["scan_state"] = 4,
-},
-[413760] = {
-["scan_state"] = 4,
-},
-[402135] = {
-["scan_state"] = 4,
-},
-[6517] = {
-["scan_state"] = 4,
-},
-[23636] = {
-["scan_state"] = 4,
-},
-[16994] = {
-["scan_state"] = 4,
-},
-[402136] = {
-["scan_state"] = 4,
-},
-[9968] = {
-["scan_state"] = 4,
-},
-[9972] = {
-["scan_state"] = 4,
-},
-[27585] = {
-["scan_state"] = 4,
-},
-[402137] = {
-["scan_state"] = 4,
-},
-[413507] = {
-["scan_state"] = 4,
-},
-[16985] = {
-["scan_state"] = 4,
-},
-[9997] = {
-["scan_state"] = 4,
-},
-[402138] = {
-["scan_state"] = 4,
-},
-[413508] = {
-["scan_state"] = 4,
-},
-[16983] = {
-["scan_state"] = 4,
-},
-[2739] = {
-["scan_state"] = 4,
-},
-[24141] = {
-["scan_state"] = 4,
-},
-},
-},
-[2485] = {
-["parentProfID"] = 171,
-["recipes"] = {
-[114786] = {
-["scan_state"] = 4,
-},
-[11459] = {
-["scan_state"] = 4,
-},
-},
-},
-[2906] = {
-["parentProfID"] = 171,
-["recipes"] = {
-[1261495] = {
-["scan_state"] = 4,
-},
-[1262829] = {
-["scan_state"] = 4,
-},
-[1233132] = {
-["scan_state"] = 4,
-},
-[1233133] = {
-["scan_state"] = 4,
-},
-[1233135] = {
-["scan_state"] = 4,
-},
-[1233136] = {
-["scan_state"] = 4,
-},
-[1230874] = {
-["scan_state"] = 4,
-},
-[1233138] = {
-["scan_state"] = 4,
-},
-[1261882] = {
-["scan_state"] = 4,
-},
-[1261233] = {
-["scan_state"] = 4,
-},
-[1230885] = {
-["scan_state"] = 4,
-},
-[1230857] = {
-["scan_state"] = 4,
-},
-[1230891] = {
-["scan_state"] = 1,
-},
-[1230892] = {
-["scan_state"] = 4,
-},
-[1230893] = {
-["scan_state"] = 4,
-},
-[1261885] = {
-["scan_state"] = 4,
-},
-[1230861] = {
-["scan_state"] = 1,
-},
-[1233137] = {
-["scan_state"] = 4,
-},
-[1263548] = {
-["scan_state"] = 4,
-},
-},
-["concentration"] = {
-["maxQuantity"] = 1000,
-["lastUpdated"] = 1774635209,
-["amount"] = 70,
-["rechargeTimePerPoint"] = 345600,
-["currencyID"] = 3161,
-},
-},
-[2907] = {
-["parentProfID"] = 164,
-["recipes"] = {
-[1229601] = {
-["scan_state"] = 4,
-},
-[1229602] = {
-["scan_state"] = 4,
-},
-[1229603] = {
-["scan_state"] = 2,
-},
-[1229604] = {
-["scan_state"] = 4,
-},
-[1229605] = {
-["scan_state"] = 4,
-},
-[1229606] = {
-["scan_state"] = 2,
-},
-[1229607] = {
-["scan_state"] = 2,
-},
-[1229608] = {
-["scan_state"] = 2,
-},
-[1229609] = {
-["scan_state"] = 2,
-},
-[1229610] = {
-["scan_state"] = 2,
-},
-[1229611] = {
-["scan_state"] = 2,
-},
-[1229612] = {
-["scan_state"] = 2,
-},
-[1229613] = {
-["scan_state"] = 2,
-},
-[1229614] = {
-["required_concentration"] = 450,
-["scan_state"] = 2,
-},
-[1229615] = {
-["required_concentration"] = 450,
-["scan_state"] = 2,
-},
-[1229616] = {
-["required_concentration"] = 450,
-["scan_state"] = 2,
-},
-[1229617] = {
-["required_concentration"] = 450,
-["scan_state"] = 2,
-},
-[1229618] = {
-["required_concentration"] = 450,
-["scan_state"] = 2,
-},
-[1229619] = {
-["required_concentration"] = 450,
-["scan_state"] = 2,
-},
-[1229620] = {
-["required_concentration"] = 450,
-["scan_state"] = 2,
-},
-[1229621] = {
-["scan_state"] = 3,
-},
-[1229622] = {
-["scan_state"] = 3,
-},
-[1229623] = {
-["scan_state"] = 3,
-},
-[1230767] = {
-["scan_state"] = 4,
-},
-[1262899] = {
-["scan_state"] = 4,
-},
-[1276108] = {
-["scan_state"] = 4,
-},
-[1276109] = {
-["scan_state"] = 4,
-},
-[1276110] = {
-["scan_state"] = 4,
-},
-[1276111] = {
-["scan_state"] = 4,
-},
-[1276112] = {
-["scan_state"] = 4,
-},
-[1262905] = {
-["scan_state"] = 4,
-},
-[1229632] = {
-["scan_state"] = 4,
-},
-[1229633] = {
-["scan_state"] = 4,
-},
-[1229634] = {
-["scan_state"] = 4,
-},
-[1229635] = {
-["scan_state"] = 4,
-},
-[1229636] = {
-["scan_state"] = 4,
-},
-[1229637] = {
-["scan_state"] = 4,
-},
-[1229638] = {
-["scan_state"] = 4,
-},
-[1229639] = {
-["scan_state"] = 4,
-},
-[1229640] = {
-["scan_state"] = 4,
-},
-[1229641] = {
-["scan_state"] = 4,
-},
-[1229642] = {
-["scan_state"] = 4,
-},
-[1229643] = {
-["scan_state"] = 4,
-},
-[1229644] = {
-["scan_state"] = 4,
-},
-[1262919] = {
-["scan_state"] = 4,
-},
-[1229646] = {
-["required_concentration"] = 450,
-["scan_state"] = 2,
-},
-[1229647] = {
-["required_concentration"] = 0,
-["keywords"] = "",
-["scan_state"] = 2,
-},
-[1229648] = {
-["required_concentration"] = 450,
-["scan_state"] = 2,
-},
-[1229649] = {
-["required_concentration"] = 425,
-["scan_state"] = 2,
-},
-[1229650] = {
-["required_concentration"] = 450,
-["scan_state"] = 2,
-},
-[1229651] = {
-["required_concentration"] = 450,
-["scan_state"] = 2,
-},
-[1229652] = {
-["scan_state"] = 2,
-},
-[1229653] = {
-["scan_state"] = 4,
-},
-[1229654] = {
-["required_concentration"] = 425,
-["scan_state"] = 2,
-},
-[1229655] = {
-["scan_state"] = 4,
-},
-[1229656] = {
-["scan_state"] = 2,
-},
-[1229657] = {
-["required_concentration"] = 450,
-["scan_state"] = 2,
-},
-[1229658] = {
-["scan_state"] = 1,
-},
-[1229659] = {
-["required_concentration"] = 450,
-["scan_state"] = 2,
-},
-[1229660] = {
-["scan_state"] = 4,
-},
-[1229661] = {
-["scan_state"] = 4,
-},
-[1229662] = {
-["scan_state"] = 4,
-},
-[1229663] = {
-["scan_state"] = 4,
-},
-[1229664] = {
-["scan_state"] = 3,
-},
-[1229665] = {
-["scan_state"] = 4,
-},
-[1229666] = {
-["scan_state"] = 4,
-},
-[1229667] = {
-["scan_state"] = 4,
-},
-[1229668] = {
-["scan_state"] = 4,
-},
-[1261497] = {
-["scan_state"] = 4,
-},
-[1230765] = {
-["scan_state"] = 2,
-},
-[1229599] = {
-["scan_state"] = 4,
-},
-[1229630] = {
-["scan_state"] = 4,
-},
-[1230768] = {
-["scan_state"] = 4,
-},
-[1230766] = {
-["scan_state"] = 4,
-},
-[1230769] = {
-["scan_state"] = 4,
-},
-[1229625] = {
-["scan_state"] = 3,
-},
-[1229626] = {
-["scan_state"] = 3,
-},
-[1229627] = {
-["scan_state"] = 3,
-},
-[1229629] = {
-["scan_state"] = 3,
-},
-[1229628] = {
-["scan_state"] = 3,
-},
-[1264644] = {
-["scan_state"] = 4,
-},
-[1264645] = {
-["scan_state"] = 4,
-},
-[1264646] = {
-["scan_state"] = 1,
-},
-[1229624] = {
-["scan_state"] = 3,
-},
-[1229631] = {
-["scan_state"] = 4,
-},
-[1229645] = {
-["scan_state"] = 4,
-},
-[1229598] = {
-["scan_state"] = 4,
-},
-[1264651] = {
-["scan_state"] = 4,
-},
-[1229600] = {
-["scan_state"] = 4,
-},
-[1261499] = {
-["scan_state"] = 4,
-},
-},
-["concentration"] = {
-["maxQuantity"] = 1000,
-["lastUpdated"] = 1774641360,
-["amount"] = 346,
-["rechargeTimePerPoint"] = 345600,
-["currencyID"] = 3162,
-},
-},
-[2481] = {
-["parentProfID"] = 171,
-["recipes"] = {
-[136197] = {
-["scan_state"] = 1,
-},
-},
-},
-[2909] = {
-["parentProfID"] = 333,
-["recipes"] = {
-[1270459] = {
-["scan_state"] = 4,
-},
-[1261501] = {
-["scan_state"] = 4,
-},
-[1281342] = {
-["scan_state"] = 4,
-},
-[1236486] = {
-["scan_state"] = 1,
-},
-[1236487] = {
-["scan_state"] = 4,
-},
-[1246904] = {
-["scan_state"] = 4,
-},
-[1246905] = {
-["scan_state"] = 4,
-},
-[1246906] = {
-["scan_state"] = 4,
-},
-[1281348] = {
-["scan_state"] = 4,
-},
-[1246908] = {
-["scan_state"] = 4,
-},
-[1246909] = {
-["scan_state"] = 4,
-},
-[1281349] = {
-["scan_state"] = 4,
-},
-[1246907] = {
-["scan_state"] = 4,
-},
-[1246903] = {
-["scan_state"] = 4,
-},
-[1246902] = {
-["scan_state"] = 4,
-},
-[1236490] = {
-["scan_state"] = 4,
-},
-[1236489] = {
-["scan_state"] = 4,
-},
-[1236488] = {
-["scan_state"] = 4,
-},
-},
-["concentration"] = {
-["maxQuantity"] = 1000,
-["lastUpdated"] = 1774141605,
-["amount"] = 1000,
-["rechargeTimePerPoint"] = 345600,
-["currencyID"] = 3163,
-},
-},
-[2494] = {
-["parentProfID"] = 333,
-["recipes"] = {
-[416684] = {
-["scan_state"] = 4,
-},
-[14809] = {
-["scan_state"] = 4,
-},
-[416685] = {
-["scan_state"] = 4,
-},
-[402139] = {
-["scan_state"] = 4,
-},
-[416686] = {
-["scan_state"] = 4,
-},
-[14810] = {
-["scan_state"] = 4,
-},
-[7421] = {
-["scan_state"] = 1,
-},
-[15596] = {
-["scan_state"] = 4,
-},
-[14293] = {
-["scan_state"] = 4,
-},
-[14807] = {
-["scan_state"] = 4,
-},
-},
-},
-},
-["parent_professions"] = {
-[171] = {
-["sound_alert_enabled"] = false,
-["visual_alert_enabled"] = true,
-["scanning_enabled_last"] = true,
-["scanning_enabled"] = false,
-},
-[164] = {
-["scanning_enabled_last"] = true,
-["scanning_enabled"] = true,
-["sound_alert_enabled"] = true,
-["visual_alert_enabled"] = true,
-["local_alerts_only"] = true,
-},
-[333] = {
-["sound_alert_enabled"] = false,
-["visual_alert_enabled"] = true,
-["scanning_enabled"] = false,
-},
-},
-},
-["Zappyxatu-Stormrage"] = {
-["professions"] = {
-[2485] = {
-["parentProfID"] = 171,
-["recipes"] = {
-[114786] = {
-["scan_state"] = 4,
-},
-[11459] = {
-["scan_state"] = 4,
-},
-},
-},
-[2871] = {
-["parentProfID"] = 171,
-["recipes"] = {
-[427185] = {
-["scan_state"] = 4,
-},
-[449573] = {
-["scan_state"] = 4,
-},
-[449575] = {
-["scan_state"] = 4,
-},
-[449574] = {
-["scan_state"] = 4,
-},
-[433087] = {
-["scan_state"] = 4,
-},
-[449938] = {
-["scan_state"] = 4,
-},
-[432962] = {
-["scan_state"] = 4,
-},
-[432963] = {
-["scan_state"] = 4,
-},
-},
-["concentration"] = {
-["maxQuantity"] = 1000,
-["lastUpdated"] = 1773626868,
-["amount"] = 1000,
-["rechargeTimePerPoint"] = 345600,
-["currencyID"] = 3045,
-},
-},
-[2906] = {
-["parentProfID"] = 171,
-["recipes"] = {
-[1261495] = {
-["scan_state"] = 4,
-},
-[1262829] = {
-["scan_state"] = 4,
-},
-[1233132] = {
-["scan_state"] = 4,
-},
-[1233133] = {
-["scan_state"] = 4,
-},
-[1233135] = {
-["scan_state"] = 4,
-},
-[1233136] = {
-["scan_state"] = 4,
-},
-[1259673] = {
-["scan_state"] = 4,
-},
-[1233138] = {
-["scan_state"] = 4,
-},
-[1261878] = {
-["scan_state"] = 4,
-},
-[1230885] = {
-["scan_state"] = 4,
-},
-[1230857] = {
-["scan_state"] = 4,
-},
-[1230891] = {
-["scan_state"] = 4,
-},
-[1230892] = {
-["scan_state"] = 4,
-},
-[1230893] = {
-["scan_state"] = 4,
-},
-[1230861] = {
-["scan_state"] = 4,
-},
-[1230874] = {
-["scan_state"] = 4,
-},
-[1233137] = {
-["scan_state"] = 4,
-},
-},
-["concentration"] = {
-["maxQuantity"] = 1000,
-["lastUpdated"] = 1774635298,
-["amount"] = 58,
-["rechargeTimePerPoint"] = 345600,
-["currencyID"] = 3161,
-},
-},
-},
-["parent_professions"] = {
-[171] = {
-["sound_alert_enabled"] = false,
-["visual_alert_enabled"] = true,
-["scanning_enabled"] = false,
-},
-},
-},
-["Angryabsol-Stormrage"] = {
-["professions"] = {
-[2485] = {
-["parentProfID"] = 171,
-["recipes"] = {
-[114786] = {
-["scan_state"] = 4,
-},
-[11459] = {
-["scan_state"] = 4,
-},
-},
-},
-[2906] = {
-["parentProfID"] = 171,
-["recipes"] = {
-[1230893] = {
-["scan_state"] = 4,
-},
-[1262829] = {
-["scan_state"] = 4,
-},
-[1261495] = {
-["scan_state"] = 4,
-},
-[1233132] = {
-["scan_state"] = 4,
-},
-[1233133] = {
-["scan_state"] = 4,
-},
-[1230885] = {
-["scan_state"] = 4,
-},
-[1233135] = {
-["scan_state"] = 4,
-},
-[1233136] = {
-["scan_state"] = 4,
-},
-[1230857] = {
-["scan_state"] = 4,
-},
-[1233138] = {
-["scan_state"] = 4,
-},
-[1230874] = {
-["scan_state"] = 4,
-},
-[1230861] = {
-["scan_state"] = 4,
-},
-[1230891] = {
-["scan_state"] = 4,
-},
-[1230892] = {
-["scan_state"] = 4,
-},
-[1233137] = {
-["scan_state"] = 4,
-},
-},
-["concentration"] = {
-["maxQuantity"] = 1000,
-["lastUpdated"] = 1774635442,
-["amount"] = 47,
-["rechargeTimePerPoint"] = 345600,
-["currencyID"] = 3161,
-},
-},
-[2494] = {
-["parentProfID"] = 333,
-["recipes"] = {
-[416684] = {
-["scan_state"] = 4,
-},
-[14809] = {
-["scan_state"] = 4,
-},
-[416685] = {
-["scan_state"] = 4,
-},
-[402139] = {
-["scan_state"] = 4,
-},
-[416686] = {
-["scan_state"] = 4,
-},
-[14810] = {
-["scan_state"] = 4,
-},
-[7421] = {
-["scan_state"] = 1,
-},
-[15596] = {
-["scan_state"] = 4,
-},
-[14293] = {
-["scan_state"] = 4,
-},
-[14807] = {
-["scan_state"] = 4,
-},
-},
-},
-[2909] = {
-["parentProfID"] = 333,
-["recipes"] = {
-[1270459] = {
-["scan_state"] = 4,
-},
-[1261501] = {
-["scan_state"] = 4,
-},
-[1281342] = {
-["scan_state"] = 4,
-},
-[1236486] = {
-["scan_state"] = 1,
-},
-[1236487] = {
-["scan_state"] = 4,
-},
-[1246904] = {
-["scan_state"] = 4,
-},
-[1246905] = {
-["scan_state"] = 4,
-},
-[1246906] = {
-["scan_state"] = 4,
-},
-[1281348] = {
-["scan_state"] = 4,
-},
-[1246908] = {
-["scan_state"] = 4,
-},
-[1246909] = {
-["scan_state"] = 4,
-},
-[1281349] = {
-["scan_state"] = 4,
-},
-[1246907] = {
-["scan_state"] = 4,
-},
-[1246903] = {
-["scan_state"] = 4,
-},
-[1246902] = {
-["scan_state"] = 4,
-},
-[1236490] = {
-["scan_state"] = 4,
-},
-[1236489] = {
-["scan_state"] = 1,
-},
-[1236488] = {
-["scan_state"] = 4,
-},
-},
-["concentration"] = {
-["maxQuantity"] = 1000,
-["lastUpdated"] = 1773517013,
-["amount"] = 1000,
-["rechargeTimePerPoint"] = 345600,
-["currencyID"] = 3163,
-},
-},
-[2524] = {
-["parentProfID"] = 755,
-["recipes"] = {
-[26906] = {
-["scan_state"] = 4,
-},
-[26908] = {
-["scan_state"] = 4,
-},
-[26910] = {
-["scan_state"] = 4,
-},
-[26912] = {
-["scan_state"] = 4,
-},
-[26914] = {
-["scan_state"] = 4,
-},
-[26926] = {
-["scan_state"] = 4,
-},
-[26928] = {
-["scan_state"] = 4,
-},
-[25283] = {
-["scan_state"] = 4,
-},
-[25287] = {
-["scan_state"] = 4,
-},
-[34955] = {
-["scan_state"] = 4,
-},
-[34959] = {
-["scan_state"] = 4,
-},
-[32808] = {
-["scan_state"] = 4,
-},
-[25305] = {
-["scan_state"] = 4,
-},
-[36523] = {
-["scan_state"] = 4,
-},
-[25317] = {
-["scan_state"] = 4,
-},
-[32179] = {
-["scan_state"] = 4,
-},
-[25323] = {
-["scan_state"] = 4,
-},
-[25339] = {
-["scan_state"] = 4,
-},
-[413743] = {
-["scan_state"] = 4,
-},
-[26873] = {
-["scan_state"] = 4,
-},
-[26875] = {
-["scan_state"] = 4,
-},
-[34960] = {
-["scan_state"] = 4,
-},
-[26881] = {
-["scan_state"] = 4,
-},
-[26883] = {
-["scan_state"] = 4,
-},
-[26885] = {
-["scan_state"] = 4,
-},
-[25617] = {
-["scan_state"] = 4,
-},
-[25619] = {
-["scan_state"] = 4,
-},
-[25621] = {
-["scan_state"] = 4,
-},
-[405205] = {
-["scan_state"] = 4,
-},
-[25498] = {
-["scan_state"] = 4,
-},
-[26897] = {
-["scan_state"] = 4,
-},
-[36524] = {
-["scan_state"] = 4,
-},
-[26903] = {
-["scan_state"] = 4,
-},
-[26907] = {
-["scan_state"] = 4,
-},
-[26909] = {
-["scan_state"] = 4,
-},
-[37818] = {
-["scan_state"] = 4,
-},
-[26915] = {
-["scan_state"] = 4,
-},
-[26925] = {
-["scan_state"] = 1,
-},
-[26927] = {
-["scan_state"] = 4,
-},
-[25280] = {
-["scan_state"] = 4,
-},
-[25284] = {
-["scan_state"] = 4,
-},
-[34961] = {
-["scan_state"] = 4,
-},
-[36525] = {
-["scan_state"] = 4,
-},
-[25318] = {
-["scan_state"] = 4,
-},
-[25320] = {
-["scan_state"] = 4,
-},
-[413751] = {
-["scan_state"] = 4,
-},
-[413752] = {
-["scan_state"] = 4,
-},
-[26900] = {
-["scan_state"] = 4,
-},
-[32801] = {
-["scan_state"] = 4,
-},
-[32809] = {
-["scan_state"] = 4,
-},
-[63743] = {
-["scan_state"] = 4,
-},
-[25321] = {
-["scan_state"] = 4,
-},
-[25613] = {
-["scan_state"] = 4,
-},
-[25493] = {
-["scan_state"] = 1,
-},
-[32259] = {
-["scan_state"] = 1,
-},
-[26887] = {
-["scan_state"] = 4,
-},
-[26882] = {
-["scan_state"] = 4,
-},
-[25612] = {
-["scan_state"] = 4,
-},
-[26872] = {
-["scan_state"] = 4,
-},
-[26874] = {
-["scan_state"] = 4,
-},
-[26876] = {
-["scan_state"] = 4,
-},
-[26878] = {
-["scan_state"] = 4,
-},
-[25610] = {
-["scan_state"] = 4,
-},
-[32807] = {
-["scan_state"] = 4,
-},
-[25614] = {
-["scan_state"] = 4,
-},
-[25490] = {
-["scan_state"] = 4,
-},
-[25618] = {
-["scan_state"] = 4,
-},
-[25620] = {
-["scan_state"] = 4,
-},
-[25622] = {
-["scan_state"] = 4,
-},
-[38175] = {
-["scan_state"] = 4,
-},
-[26896] = {
-["scan_state"] = 4,
-},
-[32178] = {
-["scan_state"] = 4,
-},
-[36526] = {
-["scan_state"] = 4,
-},
-[26902] = {
-["scan_state"] = 4,
-},
-[26911] = {
-["scan_state"] = 4,
-},
-},
-},
-[2914] = {
-["parentProfID"] = 755,
-["recipes"] = {
-[1246889] = {
-["scan_state"] = 4,
-},
-[1246891] = {
-["scan_state"] = 4,
-},
-[1246892] = {
-["scan_state"] = 4,
-},
-[1246893] = {
-["scan_state"] = 4,
-},
-[1246894] = {
-["scan_state"] = 4,
-},
-[1246895] = {
-["scan_state"] = 4,
-},
-[1261659] = {
-["scan_state"] = 4,
-},
-[1230479] = {
-["scan_state"] = 4,
-},
-[1230481] = {
-["scan_state"] = 4,
-},
-[1230482] = {
-["scan_state"] = 4,
-},
-[1230483] = {
-["scan_state"] = 4,
-},
-[1230484] = {
-["scan_state"] = 4,
-},
-[1230485] = {
-["scan_state"] = 4,
-},
-[1230486] = {
-["scan_state"] = 4,
-},
-[1230487] = {
-["scan_state"] = 4,
-},
-[1230488] = {
-["scan_state"] = 4,
-},
-[1230489] = {
-["scan_state"] = 1,
-},
-[1230490] = {
-["scan_state"] = 1,
-},
-[1230491] = {
-["scan_state"] = 1,
-},
-[1230492] = {
-["scan_state"] = 1,
-},
-[1230493] = {
-["scan_state"] = 1,
-},
-[1242464] = {
-["scan_state"] = 4,
-},
-[1230495] = {
-["scan_state"] = 4,
-},
-[1230496] = {
-["scan_state"] = 4,
-},
-[1230497] = {
-["scan_state"] = 4,
-},
-[1230498] = {
-["scan_state"] = 4,
-},
-[1261667] = {
-["scan_state"] = 4,
-},
-[1251983] = {
-["scan_state"] = 4,
-},
-[1242462] = {
-["scan_state"] = 4,
-},
-[1242463] = {
-["scan_state"] = 4,
-},
-[1230503] = {
-["scan_state"] = 4,
-},
-[1230504] = {
-["scan_state"] = 4,
-},
-[1242461] = {
-["scan_state"] = 4,
-},
-[1230494] = {
-["scan_state"] = 1,
-},
-},
-["concentration"] = {
-["maxQuantity"] = 1000,
-["lastUpdated"] = 1774575729,
-["amount"] = 8,
-["rechargeTimePerPoint"] = 345600,
-["currencyID"] = 3166,
-},
-},
-},
-["parent_professions"] = {
-[171] = {
-["sound_alert_enabled"] = false,
-["visual_alert_enabled"] = true,
-["scanning_enabled"] = false,
-},
-[333] = {
-["sound_alert_enabled"] = false,
-["visual_alert_enabled"] = true,
-["scanning_enabled"] = false,
-},
-[755] = {
-["sound_alert_enabled"] = false,
-["visual_alert_enabled"] = true,
-["scanning_enabled"] = false,
-},
-},
-},
-["Madmareep-Stormrage"] = {
-["professions"] = {
-[2485] = {
-["parentProfID"] = 171,
-["recipes"] = {
-[114786] = {
-["scan_state"] = 4,
-},
-[11459] = {
-["scan_state"] = 4,
-},
-},
-},
-[2871] = {
-["parentProfID"] = 171,
-["recipes"] = {
-[449575] = {
-["scan_state"] = 4,
-},
-[1262829] = {
-["scan_state"] = 4,
-},
-[432963] = {
-["scan_state"] = 4,
-},
-[433087] = {
-["scan_state"] = 4,
-},
-[427185] = {
-["scan_state"] = 4,
-},
-[449573] = {
-["scan_state"] = 4,
-},
-[449574] = {
-["scan_state"] = 4,
-},
-[449938] = {
-["scan_state"] = 4,
-},
-[432962] = {
-["scan_state"] = 4,
-},
-[1261495] = {
-["scan_state"] = 4,
-},
-},
-["concentration"] = {
-["maxQuantity"] = 1000,
-["lastUpdated"] = 1773627134,
-["amount"] = 1000,
-["rechargeTimePerPoint"] = 345600,
-["currencyID"] = 3045,
-},
-},
-[2906] = {
-["parentProfID"] = 171,
-["recipes"] = {
-[1261495] = {
-["scan_state"] = 4,
-},
-[1262829] = {
-["scan_state"] = 4,
-},
-[1233132] = {
-["scan_state"] = 4,
-},
-[1233133] = {
-["scan_state"] = 4,
-},
-[1233135] = {
-["scan_state"] = 4,
-},
-[1233136] = {
-["scan_state"] = 4,
-},
-[1259673] = {
-["scan_state"] = 4,
-},
-[1233138] = {
-["scan_state"] = 4,
-},
-[1261878] = {
-["scan_state"] = 4,
-},
-[1230885] = {
-["scan_state"] = 4,
-},
-[1230857] = {
-["scan_state"] = 4,
-},
-[1230891] = {
-["scan_state"] = 4,
-},
-[1230892] = {
-["scan_state"] = 4,
-},
-[1230893] = {
-["scan_state"] = 4,
-},
-[1233137] = {
-["scan_state"] = 4,
-},
-[1230874] = {
-["scan_state"] = 4,
-},
-[1230861] = {
-["scan_state"] = 4,
-},
-},
-["concentration"] = {
-["maxQuantity"] = 1000,
-["lastUpdated"] = 1774635259,
-["amount"] = 55,
-["rechargeTimePerPoint"] = 345600,
-["currencyID"] = 3161,
-},
-},
-},
-["parent_professions"] = {
-[171] = {
-["sound_alert_enabled"] = false,
-["visual_alert_enabled"] = true,
-["scanning_enabled"] = false,
-},
-},
-},
-},
-["listed_orders"] = {
-},
-["analytics"] = {
-},
-["customers"] = {
-["Phantumdeath-Stormrage"] = {
-["responses"] = {
-[2906] = {
-},
-},
-["guid"] = "Player-60-0EDECD91",
-},
-["Bluesbro-Stormrage"] = {
-["responses"] = {
-[2909] = {
-},
-},
-["guid"] = "Player-60-0E30EA71",
 },
 },
 },
