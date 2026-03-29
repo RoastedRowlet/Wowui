@@ -1,8 +1,6 @@
 
 CHATTYNATOR_CURRENT_PROFILE = "DEFAULT"
 CHATTYNATOR_COMMAND_HISTORY = {
-"/cw Highwaym-Stormrage when he already has 2 lol",
-"/cw Highwaym-Stormrage no",
 "/cw Highwaym-Stormrage its my frist but obv with +1 more its 4 piece",
 "/cw Highwaym-Stormrage no he snagged it with a 99",
 "/cw Vhsvvp-Area52 ahhhhh you went disc for that last one",
@@ -204,4 +202,5 @@ CHATTYNATOR_COMMAND_HISTORY = {
 "/p /reload",
 "/p this pull",
 "/p is so banned",
+"/s /key",
 }

@@ -3,11 +3,11 @@ Frame: Grid2LayoutFrame
 FrameLevel: 1
 Anchor: CENTER
 X: -258
-Y: -200
+Y: -77
 W: 180
-H: 100
+H: 346
 Frame: CraftScanScannerMenuButton
-FrameLevel: 219
+FrameLevel: 220
 Anchor: LEFT
 X: 47
 Y: -257

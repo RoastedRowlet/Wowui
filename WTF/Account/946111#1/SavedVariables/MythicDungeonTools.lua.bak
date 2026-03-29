@@ -6,11 +6,11 @@ MythicDungeonToolsDB = {
 ["Barelynoer - Area 52"] = "Barelynoer - Area 52",
 },
 ["global"] = {
-["scale"] = 1.4,
-["latestDungeonSeen"] = 150,
+["currentDungeonIdx"] = 11,
 ["minimap"] = {
 ["showInCompartment"] = true,
 },
+["latestDungeonSeen"] = 150,
 ["maximized"] = false,
 ["presets"] = {
 [11] = {
@@ -53,6 +53,6 @@ MythicDungeonToolsDB = {
 },
 },
 ["version"] = 609,
-["currentDungeonIdx"] = 11,
+["scale"] = 1.4,
 },
 }

@@ -1,7 +1,6 @@
 
 CHATTYNATOR_CURRENT_PROFILE = "DEFAULT"
 CHATTYNATOR_COMMAND_HISTORY = {
-"/p ggs all!",
 "/s /eui",
 "/s /fstack",
 "/s /reload",
@@ -203,4 +202,7 @@ CHATTYNATOR_COMMAND_HISTORY = {
 "/s /key",
 "/p i would also roll for neck lol",
 "/s /RELOAD",
+"/s /MFI",
+"/s /mfi",
+"/s /key",
 }

@@ -1,10 +1,6 @@
 
 CHATTYNATOR_CURRENT_PROFILE = "DEFAULT"
 CHATTYNATOR_COMMAND_HISTORY = {
-"/p ^",
-"/p im freaking out",
-"/p ;)",
-"/p other than the squid we dont talk about that one lmao",
 "/p yo",
 "/p its like season 1 TWW",
 "/p well i guess its different",
@@ -206,4 +202,16 @@ CHATTYNATOR_COMMAND_HISTORY = {
 "/cw Haxpal-Area52 sent",
 "/cw Haxpal-Area52 /key",
 "/p there were some... mistakes lmao",
+"/s mb",
+"/s /KEY",
+"/p oops",
+"/p /key",
+"/p lol",
+"/p the post inspect gratz",
+"/p /played",
+" caught me as im logging off lol",
+" why such an early push?",
+" mate wasnt playing fellowship",
+" oh yeah its pointless",
+" /SIMC",
 }
