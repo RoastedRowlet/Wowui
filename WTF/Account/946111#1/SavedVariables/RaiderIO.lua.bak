@@ -1,50 +1,22 @@
 
 RaiderIO_Config = {
-["minimapIcon"] = {
-["minimapPos"] = 180,
-["showInCompartment"] = true,
-["hide"] = false,
-["lock"] = false,
-},
 ["profilePoint"] = {
 ["y"] = 0,
 ["x"] = -16,
 ["point"] = "TOPLEFT",
 },
+["minimapIcon"] = {
+["minimapPos"] = 180,
+["showInCompartment"] = true,
+["lock"] = false,
+["hide"] = false,
+},
 }
-RaiderIO_LastCharacter = "us-Barelynoer-area-52"
+RaiderIO_LastCharacter = "us-Angryabsol-stormrage"
 RaiderIO_MissingCharacters = {
-["us-Phande-area-52"] = true,
-["us-party4-area-52"] = true,
-["us-Peeweenemii-illidan"] = true,
-["us-Darksÿde-illidan"] = true,
-["us-Baláncedruid-illidan"] = true,
-["us-Kratcow-illidan"] = true,
-["us-Fatdave-illidan"] = true,
-["us-Zëddruid-illidan"] = true,
-["us-Tyrenie-area-52"] = true,
-["us-Raenaris-illidan"] = true,
-["us-Wreakchaos-illidan"] = true,
-["us-Bloodymyst-akama"] = true,
-["us-Jannîz-illidan"] = true,
-["us-Warhoff-alterac-mountains"] = true,
-["us-Cérth-area-52"] = true,
-["us-Harwood-illidan"] = true,
-["us-Soulseater-illidan"] = true,
-["us-Leonskenedie-illidan"] = true,
-["us-Shielder-area-52"] = true,
-["us-Gisep-illidan"] = true,
-["us-Malcozu-illidan"] = true,
-["us-Ascends-illidan"] = true,
-["us-Snakegg-illidan"] = true,
-["us-Jcvd-illidan"] = true,
-["us-Môchii-illidan"] = true,
-["us-Youdianhao-illidan"] = true,
-["us-Gamesckcaulk-illidan"] = true,
-["us-Manbrewpigg-tichondrius"] = true,
-["us-party5-area-52"] = true,
-["us-Sharalyn-illidan"] = true,
-["us-Enveas-illidan"] = true,
+["us-Jimmyktk-stormrage"] = true,
+["us-Paosi-stormrage"] = true,
+["us-Donnagas-stormrage"] = true,
 }
 RaiderIO_MissingServers = {
 }
