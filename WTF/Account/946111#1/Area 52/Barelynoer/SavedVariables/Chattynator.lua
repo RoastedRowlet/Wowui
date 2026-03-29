@@ -1,18 +1,6 @@
 
 CHATTYNATOR_CURRENT_PROFILE = "DEFAULT"
 CHATTYNATOR_COMMAND_HISTORY = {
-"/p yo",
-"/p its like season 1 TWW",
-"/p well i guess its different",
-"/p it does actual damage now",
-"/p its like DF season 3 damage. ",
-"/p maybe a little more",
-"/p itll do between the OP class dps and the 3rd dps in damage",
-"/p it doesnt have all the other bs anymore",
-"/p it only buffs dps with ebon",
-"/p well the warcraft logs meters not the details meters lol",
-"/p https://www.warcraftlogs.com/reports/2pWyNxTMwdjqRVYQ?fight=7&type=damage-done",
-"/p random beta log i found",
 "/p though in a different one the evoker was doing literally 0",
 "/p so who knows lmao",
 "/s sec",

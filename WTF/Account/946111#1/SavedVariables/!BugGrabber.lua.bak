@@ -1,6 +1,6 @@
 
 BugGrabberDB = {
-["session"] = 692,
+["session"] = 698,
 ["lastSanitation"] = 3,
 ["errors"] = {
 {
@@ -660,14 +660,6 @@ BugGrabberDB = {
 ["counter"] = 2,
 },
 {
-["message"] = "...Professions/Blizzard_ProfessionsCrafterOrderView.lua:75: bad argument #1 to 'SetHeight' (Usage: self:SetHeight(height). Secret values are only allowed during untainted execution for this argument.)",
-["time"] = 1774654890,
-["locals"] = "self = Frame {\n layoutIndex = 2\n RewardName = FontString {\n }\n Reward = Button {\n }\n}\nreward = <table> {\n count = 1\n itemLink = \"|cnIQ1:|Hitem:246585::::::::90:105::11:::::::|h[]|h|r\"\n}\nitemName = \"Artisan's Consortium Payout\"\nitemQuality = 1\ncolorData = <table> {\n hex = \"|cffffffff\"\n r = 1\n color = <table> {\n }\n g = 1\n b = 1\n}\n",
-["stack"] = "[Interface/AddOns/Blizzard_Professions/Blizzard_ProfessionsCrafterOrderView.lua]:75: in function 'SetReward'\n[Interface/AddOns/Blizzard_ProfessionsTemplates/Blizzard_ProfessionsTemplates.lua]:409: in function <...ofessionsTemplates/Blizzard_ProfessionsTemplates.lua:404>\n",
-["session"] = 668,
-["counter"] = 17,
-},
-{
 ["message"] = "...AddOns/Blizzard_SharedXML/SharedTooltipTemplates.lua:202: attempt to perform arithmetic on a secret number value (tainted by 'CraftScan')",
 ["time"] = 1774654890,
 ["locals"] = "tooltipFrame = GameTooltip {\n ItemTooltip = Frame {\n }\n BottomOverlay = Texture {\n }\n NineSlice = Frame {\n }\n suppressAutomaticCompareItem = false\n textLeft1Font = \"GameTooltipHeaderText\"\n textRight2Font = \"GameTooltipText\"\n TopOverlay = Texture {\n }\n TextLeft1 = GameTooltipTextLeft1 {\n }\n supportsItemComparison = true\n supportsDataRefresh = true\n StatusBar = GameTooltipStatusBar {\n }\n shouldRefreshData = false\n TextRight1 = GameTooltipTextRight1 {\n }\n layoutType = \"TooltipDefaultLayout\"\n updateTooltipTimer = 0.129000\n shoppingTooltips = <table> {\n }\n textLeft2Font = \"GameTooltipText\"\n TextRight2 = GameTooltipTextRight2 {\n }\n TextLeft2 = GameTooltipTextLeft2 {\n }\n waitingForData = false\n textRight1Font = \"GameTooltipHeaderText\"\n}\nframe = Frame {\n dirty = false\n spacing = 2\n}\nverticalPadding = 0\ntextSpacing = 2\ntextHeight = 12\n(*temporary) = <no value>\n(*temporary) = Frame {\n dirty = false\n spacing = 2\n}\n(*temporary) = <no value>\n(*temporary) = nil\n(*temporary) = nil\n(*temporary) = nil\n(*temporary) = nil\n(*temporary) = nil\n(*temporary) = nil\n(*temporary) = \"attempt to perform arithmetic on a secret number value (tainted by 'CraftScan')\"\n",
@@ -722,6 +714,22 @@ BugGrabberDB = {
 ["stack"] = "[Interface/AddOns/Chattynator/Core/Messages.lua]:978: in function <Interface/AddOns/Chattynator/Core/Messages.lua:977>\n[Interface/AddOns/Chattynator/Core/Messages.lua]:1002: in function <Interface/AddOns/Chattynator/Core/Messages.lua:1001>\n[Interface/AddOns/Chattynator/Core/Messages.lua]:1012: in function 'ResolvePrefixedChannelName'\n[Interface/AddOns/Chattynator/Core/Messages.lua]:1016: in function <Interface/AddOns/Chattynator/Core/Messages.lua:1015>\n[Interface/AddOns/Chattynator/Core/Messages.lua]:1413: in function <Interface/AddOns/Chattynator/Core/Messages.lua:1305>\n[Interface/AddOns/Chattynator/Core/Messages.lua]:1420: in function 'MessageEventHandler'\n[Interface/AddOns/Chattynator/Core/Messages.lua]:524: in function <Interface/AddOns/Chattynator/Core/Messages.lua:398>\n",
 ["session"] = 681,
 ["counter"] = 1,
+},
+{
+["message"] = "...Professions/Blizzard_ProfessionsCrafterOrderView.lua:75: bad argument #1 to 'SetHeight' (Usage: self:SetHeight(height). Secret values are only allowed during untainted execution for this argument.)",
+["time"] = 1774807563,
+["locals"] = "self = Frame {\n layoutIndex = 2\n RewardName = FontString {\n }\n Reward = Button {\n }\n}\nreward = <table> {\n count = 1\n itemLink = \"|cnIQ1:|Hitem:246585::::::::90:105::11:::::::|h[]|h|r\"\n}\nitemName = \"Artisan's Consortium Payout\"\nitemQuality = 1\ncolorData = <table> {\n hex = \"|cffffffff\"\n r = 1\n color = <table> {\n }\n g = 1\n b = 1\n}\n",
+["stack"] = "[Interface/AddOns/Blizzard_Professions/Blizzard_ProfessionsCrafterOrderView.lua]:75: in function 'SetReward'\n[Interface/AddOns/Blizzard_ProfessionsTemplates/Blizzard_ProfessionsTemplates.lua]:409: in function <...ofessionsTemplates/Blizzard_ProfessionsTemplates.lua:404>\n",
+["session"] = 693,
+["counter"] = 19,
+},
+{
+["message"] = "...AddOns/Blizzard_SharedXML/SharedTooltipTemplates.lua:213: attempt to compare local 'frameWidth' (a secret number value tainted by 'CraftSim')",
+["time"] = 1774807563,
+["locals"] = "tooltipFrame = GameTooltip {\n ItemTooltip = Frame {\n }\n BottomOverlay = Texture {\n }\n NineSlice = Frame {\n }\n suppressAutomaticCompareItem = false\n textLeft1Font = \"GameTooltipHeaderText\"\n shouldRefreshData = false\n textRight2Font = \"GameTooltipText\"\n TopOverlay = Texture {\n }\n shoppingTooltips = <table> {\n }\n StatusBar = GameTooltipStatusBar {\n }\n supportsDataRefresh = true\n insertedFrames = <table> {\n }\n progressBarPool = <table> {\n }\n updateTooltipTimer = 0.052000\n TextRight1 = GameTooltipTextRight1 {\n }\n TextLeft1 = GameTooltipTextLeft1 {\n }\n layoutType = \"TooltipDefaultLayout\"\n textRight1Font = \"GameTooltipHeaderText\"\n waitingForData = false\n TextRight2 = GameTooltipTextRight2 {\n }\n TextLeft2 = GameTooltipTextLeft2 {\n }\n supportsItemComparison = true\n textLeft2Font = \"GameTooltipText\"\n}\nframe = Frame {\n dirty = false\n spacing = 2\n}\nverticalPadding = 0\ntextSpacing = 2\ntextHeight = 12\nneededHeight = 80\nnumLinesNeeded = 6\ncurrentLine = 0\nframeWidth = <no value>\n(*temporary) = 0\n(*temporary) = GameTooltip {\n ItemTooltip = Frame {\n }\n BottomOverlay = Texture {\n }\n NineSlice = Frame {\n }\n suppressAutomaticCompareItem = false\n textLeft1Font = \"GameTooltipHeaderText\"\n shouldRefreshData = false\n textRight2Font = \"GameTooltipText\"\n TopOverlay = Texture {\n }\n shoppingTooltips = <table> {\n }\n StatusBar = GameTooltipStatusBar {\n }\n supportsDataRefresh = true\n insertedFrames = <table> {\n }\n progressBarPool = <table> {\n }\n updateTooltipTimer = 0.052000\n TextRight1 = GameTooltipTextRight1 {\n }\n TextLeft1 = GameTooltipTextLeft1 {\n }\n layoutType = \"TooltipDefaultLayout\"\n textRight1Font = \"GameTooltipHeaderText\"\n waitingForData = false\n TextRight2 = GameTooltipTextRight2 {\n }\n TextLeft2 = GameTooltipTextLeft2 {\n }\n supportsItemComparison = true\n textLeft2Font = \"GameTooltipText\"\n}\n(*temporary) = 0\n(*temporary) = false\n(*temporary) = 0\n(*temporary) = 0\n(*temporary) = \"attempt to compare local 'frameWidth' (a secret number value tainted by 'CraftSim')\"\n",
+["stack"] = "[Interface/AddOns/Blizzard_SharedXML/SharedTooltipTemplates.lua]:213: in function 'GameTooltip_InsertFrame'\n[Interface/AddOns/Blizzard_ProfessionsTemplates/Blizzard_ProfessionsTemplates.lua]:418: in function <...ofessionsTemplates/Blizzard_ProfessionsTemplates.lua:404>\n",
+["session"] = 693,
+["counter"] = 4,
 },
 },
 }

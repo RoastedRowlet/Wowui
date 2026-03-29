@@ -659,7 +659,7 @@ CraftScan_DB = {
 [413746] = {
 ["scan_state"] = 4,
 },
-[402133] = {
+[9916] = {
 ["scan_state"] = 4,
 },
 [402134] = {
@@ -674,7 +674,7 @@ CraftScan_DB = {
 [402125] = {
 ["scan_state"] = 4,
 },
-[9916] = {
+[402133] = {
 ["scan_state"] = 4,
 },
 [3508] = {
@@ -954,8 +954,8 @@ CraftScan_DB = {
 },
 ["concentration"] = {
 ["maxQuantity"] = 1000,
-["lastUpdated"] = 1774635209,
-["amount"] = 70,
+["lastUpdated"] = 1774807945,
+["amount"] = 225,
 ["rechargeTimePerPoint"] = 345600,
 ["currencyID"] = 3161,
 },
@@ -1375,8 +1375,8 @@ CraftScan_DB = {
 },
 ["concentration"] = {
 ["maxQuantity"] = 1000,
-["lastUpdated"] = 1774807206,
-["amount"] = 522,
+["lastUpdated"] = 1774807857,
+["amount"] = 343,
 ["rechargeTimePerPoint"] = 345600,
 ["currencyID"] = 3162,
 },
@@ -1509,8 +1509,8 @@ CraftScan_DB = {
 },
 ["concentration"] = {
 ["maxQuantity"] = 1000,
-["lastUpdated"] = 1774635298,
-["amount"] = 58,
+["lastUpdated"] = 1774808023,
+["amount"] = 207,
 ["rechargeTimePerPoint"] = 345600,
 ["currencyID"] = 3161,
 },
@@ -1555,16 +1555,16 @@ CraftScan_DB = {
 [1233133] = {
 ["scan_state"] = 4,
 },
-[1233137] = {
+[1230857] = {
 ["scan_state"] = 4,
 },
-[1230885] = {
+[1233135] = {
 ["scan_state"] = 4,
 },
 [1233136] = {
 ["scan_state"] = 4,
 },
-[1230857] = {
+[1233137] = {
 ["scan_state"] = 4,
 },
 [1233138] = {
@@ -1582,14 +1582,14 @@ CraftScan_DB = {
 [1230892] = {
 ["scan_state"] = 4,
 },
-[1233135] = {
+[1230885] = {
 ["scan_state"] = 4,
 },
 },
 ["concentration"] = {
 ["maxQuantity"] = 1000,
-["lastUpdated"] = 1774635442,
-["amount"] = 47,
+["lastUpdated"] = 1774808165,
+["amount"] = 198,
 ["rechargeTimePerPoint"] = 345600,
 ["currencyID"] = 3161,
 },
@@ -1741,72 +1741,6 @@ CraftScan_DB = {
 ["amount"] = 8,
 ["rechargeTimePerPoint"] = 345600,
 ["currencyID"] = 3166,
-},
-},
-[2909] = {
-["parentProfID"] = 333,
-["recipes"] = {
-[1270459] = {
-["scan_state"] = 4,
-},
-[1261501] = {
-["scan_state"] = 4,
-},
-[1281342] = {
-["scan_state"] = 4,
-},
-[1236486] = {
-["scan_state"] = 1,
-},
-[1236487] = {
-["scan_state"] = 4,
-},
-[1246904] = {
-["scan_state"] = 4,
-},
-[1246905] = {
-["scan_state"] = 4,
-},
-[1246906] = {
-["scan_state"] = 4,
-},
-[1281348] = {
-["scan_state"] = 4,
-},
-[1246908] = {
-["scan_state"] = 4,
-},
-[1246909] = {
-["scan_state"] = 4,
-},
-[1236488] = {
-["scan_state"] = 4,
-},
-[1236489] = {
-["scan_state"] = 1,
-},
-[1236490] = {
-["scan_state"] = 4,
-},
-[1246902] = {
-["scan_state"] = 4,
-},
-[1246903] = {
-["scan_state"] = 4,
-},
-[1246907] = {
-["scan_state"] = 4,
-},
-[1281349] = {
-["scan_state"] = 4,
-},
-},
-["concentration"] = {
-["maxQuantity"] = 1000,
-["lastUpdated"] = 1773517013,
-["amount"] = 1000,
-["rechargeTimePerPoint"] = 345600,
-["currencyID"] = 3163,
 },
 },
 [2524] = {
@@ -2039,6 +1973,72 @@ CraftScan_DB = {
 },
 },
 },
+[2909] = {
+["parentProfID"] = 333,
+["recipes"] = {
+[1270459] = {
+["scan_state"] = 4,
+},
+[1261501] = {
+["scan_state"] = 4,
+},
+[1281342] = {
+["scan_state"] = 4,
+},
+[1236486] = {
+["scan_state"] = 1,
+},
+[1236487] = {
+["scan_state"] = 4,
+},
+[1246904] = {
+["scan_state"] = 4,
+},
+[1246905] = {
+["scan_state"] = 4,
+},
+[1246906] = {
+["scan_state"] = 4,
+},
+[1281348] = {
+["scan_state"] = 4,
+},
+[1246908] = {
+["scan_state"] = 4,
+},
+[1246909] = {
+["scan_state"] = 4,
+},
+[1236488] = {
+["scan_state"] = 4,
+},
+[1236489] = {
+["scan_state"] = 1,
+},
+[1236490] = {
+["scan_state"] = 4,
+},
+[1246902] = {
+["scan_state"] = 4,
+},
+[1246903] = {
+["scan_state"] = 4,
+},
+[1246907] = {
+["scan_state"] = 4,
+},
+[1281349] = {
+["scan_state"] = 4,
+},
+},
+["concentration"] = {
+["maxQuantity"] = 1000,
+["lastUpdated"] = 1773517013,
+["amount"] = 1000,
+["rechargeTimePerPoint"] = 345600,
+["currencyID"] = 3163,
+},
+},
 },
 ["parent_professions"] = {
 [171] = {
@@ -2170,8 +2170,8 @@ CraftScan_DB = {
 },
 ["concentration"] = {
 ["maxQuantity"] = 1000,
-["lastUpdated"] = 1774635259,
-["amount"] = 55,
+["lastUpdated"] = 1774807983,
+["amount"] = 206,
 ["rechargeTimePerPoint"] = 345600,
 ["currencyID"] = 3161,
 },
@@ -2187,78 +2187,16 @@ CraftScan_DB = {
 },
 },
 ["listed_orders"] = {
-["Beardedfist-Stormrage-1229649"] = {
-["customerName"] = "Beardedfist-Stormrage",
-["responseID"] = 1229649,
-},
-["Hollowtrack-Stormrage-1229659"] = {
-["customerName"] = "Hollowtrack-Stormrage",
-["responseID"] = 1229659,
-},
-["Johnnycool-Stormrage-1229648"] = {
-["customerName"] = "Johnnycool-Stormrage",
-["responseID"] = 1229648,
-},
 },
 ["analytics"] = {
 },
 ["customers"] = {
-["Beardedfist-Stormrage"] = {
-["chat_history"] = {
-{
-["message"] = "LF recraft max |cnIQ4:|Hitem:237845::::::::90:269::13:1:3524:6:40:2738:38:8:46:232875:47:245876:48:245786:49:-2147480301:::::|h[Bloomforged Claw |A:Professions-ChatIcon-Quality-Tier5:17:15::1|a]|h|r",
-},
-{
-["message"] = "I can! R5 guaranteed. This Character!",
-},
-{
-["message"] = "price good sir?",
-},
-{
-["message"] = "whatever tip you feel is appropriate",
-},
-},
+["Phantumdeath-Stormrage"] = {
 ["responses"] = {
-[1229649] = {
-["greeting_sent"] = true,
-["parentProfID"] = 164,
-["professionID"] = 2907,
-["recipeID"] = 1229649,
-["crafterName"] = "Lonelylitten",
-["message"] = {
-"I can! R5 guaranteed. This Character!",
-"",
-},
-["itemID"] = 237845,
-["less_granular"] = {
-2907,
-},
-["responseID"] = 1229649,
-["professionName"] = "Blacksmithing",
-["time"] = 1774807424,
-["customer_answered"] = true,
-},
-[2907] = {
-["greeting_sent"] = true,
-["parentProfID"] = 164,
-["professionID"] = 2907,
-["recipeID"] = 1229649,
-["crafterName"] = "Lonelylitten",
-["message"] = {
-"I can! R5 guaranteed. This Character!",
-"",
-},
-["itemID"] = 237845,
-["less_granular"] = {
-2907,
-},
-["responseID"] = 1229649,
-["professionName"] = "Blacksmithing",
-["time"] = 1774807424,
-["customer_answered"] = true,
+[2906] = {
 },
 },
-["guid"] = "Player-60-0FE0BFB1",
+["guid"] = "Player-60-0EDECD91",
 },
 ["Bluesbro-Stormrage"] = {
 ["responses"] = {
@@ -2266,129 +2204,6 @@ CraftScan_DB = {
 },
 },
 ["guid"] = "Player-60-0E30EA71",
-},
-["Johnnycool-Stormrage"] = {
-["chat_history"] = {
-{
-["message"] = "LFC to make |cnIQ4:|Hitem:237846::::::::90:72::13:1:3524:5:40:2737:38:8:46:232875:47:245876:48:245784:::::|h[Blood Knight's Warblade |A:Professions-ChatIcon-Quality-Tier5:17:15::1|a]|h|r my mats will tip!!",
-},
-{
-["message"] = "I can! R5 guaranteed. This Character!",
-},
-},
-["responses"] = {
-[1229648] = {
-["greeting_sent"] = true,
-["parentProfID"] = 164,
-["professionID"] = 2907,
-["recipeID"] = 1229648,
-["crafterName"] = "Lonelylitten",
-["message"] = {
-"I can! R5 guaranteed. This Character!",
-"",
-},
-["itemID"] = 237846,
-["responseID"] = 1229648,
-["professionName"] = "Blacksmithing",
-["time"] = 1774807456,
-["less_granular"] = {
-2907,
-},
-},
-[2907] = {
-["greeting_sent"] = true,
-["parentProfID"] = 164,
-["professionID"] = 2907,
-["recipeID"] = 1229648,
-["crafterName"] = "Lonelylitten",
-["message"] = {
-"I can! R5 guaranteed. This Character!",
-"",
-},
-["itemID"] = 237846,
-["responseID"] = 1229648,
-["professionName"] = "Blacksmithing",
-["time"] = 1774807456,
-["less_granular"] = {
-2907,
-},
-},
-},
-["guid"] = "Player-60-0FBF7DC5",
-},
-["Hollowtrack-Stormrage"] = {
-["chat_history"] = {
-{
-["message"] = "LFC |cnIQ4:|Hitem:237837::::::::90:255::13:1:3524:5:40:2748:38:8:46:232875:47:245876:48:245790:::::|h[Farstrider's Mercy |A:Professions-ChatIcon-Quality-Tier5:17:15::1|a]|h|r",
-},
-{
-["message"] = "I can! R5 guaranteed. This Character!",
-},
-{
-["message"] = "Okay I am sending",
-},
-{
-["message"] = "sounds good!",
-},
-{
-["message"] = "You have filled a personal crafting order of Farstrider's Mercy |A:Professions-ChatIcon-Quality-Tier5:17:15::1|a for Hollowtrack and earned a 1,900|TInterface\\MoneyFrame\\UI-GoldIcon:0:0:2:0|t commission.",
-["args"] = {
-1,
-1,
-0,
-1,
-["n"] = 4,
-},
-},
-},
-["responses"] = {
-[1229659] = {
-["greeting_sent"] = true,
-["parentProfID"] = 164,
-["professionID"] = 2907,
-["recipeID"] = 1229659,
-["crafterName"] = "Lonelylitten",
-["message"] = {
-"I can! R5 guaranteed. This Character!",
-"",
-},
-["itemID"] = 237837,
-["less_granular"] = {
-2907,
-},
-["responseID"] = 1229659,
-["professionName"] = "Blacksmithing",
-["time"] = 1774807399,
-["customer_answered"] = true,
-},
-[2907] = {
-["greeting_sent"] = true,
-["parentProfID"] = 164,
-["professionID"] = 2907,
-["recipeID"] = 1229659,
-["crafterName"] = "Lonelylitten",
-["message"] = {
-"I can! R5 guaranteed. This Character!",
-"",
-},
-["itemID"] = 237837,
-["less_granular"] = {
-2907,
-},
-["responseID"] = 1229659,
-["professionName"] = "Blacksmithing",
-["time"] = 1774807399,
-["customer_answered"] = true,
-},
-},
-["guid"] = "Player-60-0FB20E54",
-},
-["Phantumdeath-Stormrage"] = {
-["responses"] = {
-[2906] = {
-},
-},
-["guid"] = "Player-60-0EDECD91",
 },
 },
 },
@@ -3116,7 +2931,7 @@ CraftScan_DB = {
 [413756] = {
 ["scan_state"] = 4,
 },
-[24846] = {
+[226105] = {
 ["scan_state"] = 4,
 },
 [413501] = {
@@ -3125,7 +2940,7 @@ CraftScan_DB = {
 [19106] = {
 ["scan_state"] = 4,
 },
-[226105] = {
+[24846] = {
 ["scan_state"] = 4,
 },
 [9059] = {
@@ -3246,16 +3061,16 @@ CraftScan_DB = {
 [1233133] = {
 ["scan_state"] = 4,
 },
-[1233137] = {
+[1230857] = {
 ["scan_state"] = 4,
 },
-[1230885] = {
+[1233135] = {
 ["scan_state"] = 4,
 },
 [1233136] = {
 ["scan_state"] = 4,
 },
-[1230857] = {
+[1233137] = {
 ["scan_state"] = 4,
 },
 [1233138] = {
@@ -3273,7 +3088,7 @@ CraftScan_DB = {
 [1230892] = {
 ["scan_state"] = 4,
 },
-[1233135] = {
+[1230885] = {
 ["scan_state"] = 4,
 },
 },

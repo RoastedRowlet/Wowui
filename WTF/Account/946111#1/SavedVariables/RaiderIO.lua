@@ -12,18 +12,10 @@ RaiderIO_Config = {
 ["hide"] = false,
 },
 }
-RaiderIO_LastCharacter = "us-Lonelylitten-stormrage"
+RaiderIO_LastCharacter = "us-Barelynoer-area-52"
 RaiderIO_MissingCharacters = {
-["us-Jugjuggies-malganis"] = true,
-["us-Gonelocks-stormrage"] = true,
-["us-Feorarla-illidan"] = true,
-["us-Chücknorris-stormrage"] = true,
-["us-Elephante-area-52"] = true,
-["us-Wtbbluechew-illidan"] = true,
-["us-Smokeshift-the-forgotten-coast"] = true,
-["us-party4-stormrage"] = true,
-["us-Racquelota-illidan"] = true,
-["us-Colphulis-illidan"] = true,
+["us-Thoriunn-area-52"] = true,
+["us-Nekrashtar-area-52"] = true,
 }
 RaiderIO_MissingServers = {
 }

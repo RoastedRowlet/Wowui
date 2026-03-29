@@ -16,27 +16,12 @@ BigWigs3DB = {
 },
 },
 },
-["MythicPlus"] = {
-["global"] = {
-["showViewerTeleportTip"] = false,
-},
-["profiles"] = {
-["Default"] = {
-["viewerPosition"] = {
-nil,
-nil,
-107,
-108,
-},
-},
-},
-},
 ["BigWigs_Plugins_Bars"] = {
 ["profiles"] = {
 ["Default"] = {
-["normalWidth"] = 120,
-["visibleBarLimit"] = 1,
 ["emphasize"] = false,
+["visibleBarLimit"] = 1,
+["normalWidth"] = 120,
 ["expPosition"] = {
 "TOP",
 "TOP",
@@ -48,6 +33,21 @@ nil,
 "BOTTOMRIGHT",
 0,
 168,
+},
+},
+},
+},
+["MythicPlus"] = {
+["global"] = {
+["showViewerTeleportTip"] = false,
+},
+["profiles"] = {
+["Default"] = {
+["viewerPosition"] = {
+nil,
+nil,
+107,
+108,
 },
 },
 },
@@ -84,11 +84,11 @@ nil,
 ["realm"] = "Area 52",
 },
 ["Player-60-0F85ABEF"] = {
-["playerRating"] = 2839,
+["playerRating"] = 2840,
 ["specId"] = 105,
-["keyMap"] = 402,
+["keyMap"] = 556,
 ["name"] = "Lonelylitten",
-["keyLevel"] = 11,
+["keyLevel"] = 12,
 ["realm"] = "Stormrage",
 },
 },

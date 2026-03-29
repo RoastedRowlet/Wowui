@@ -1,16 +1,6 @@
 
 CHATTYNATOR_CURRENT_PROFILE = "DEFAULT"
 CHATTYNATOR_COMMAND_HISTORY = {
-"/cw Highwaym-Stormrage no he snagged it with a 99",
-"/cw Vhsvvp-Area52 ahhhhh you went disc for that last one",
-"/cw Vhsvvp-Area52 i was like... why is literally no one taking damage lmao",
-"/cw Vhsvvp-Area52 the void shield ",
-"/cw Vhsvvp-Area52 theres nothing to do lmao",
-"/cw Vhsvvp-Area52 esp that one",
-"/raid great news everyone",
-"/raid i wont crash out this week",
-"/raid fear no longer a private aura",
-"/cw Vhsvvp-Area52 260",
 "/cw Vhsvvp-Area52 i didnt hit much today",
 "/cw Potaties-Illidan LMAOOOO",
 "/cw Highwaym-Stormrage what is it?",

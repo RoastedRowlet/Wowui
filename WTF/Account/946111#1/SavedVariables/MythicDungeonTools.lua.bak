@@ -1,9 +1,11 @@
 
 MythicDungeonToolsDB = {
 ["profileKeys"] = {
-["Angryabsol - Stormrage"] = "Angryabsol - Stormrage",
 ["Lonelylitten - Stormrage"] = "Lonelylitten - Stormrage",
+["Angryabsol - Stormrage"] = "Angryabsol - Stormrage",
+["Zappyxatu - Stormrage"] = "Zappyxatu - Stormrage",
 ["Barelynoer - Area 52"] = "Barelynoer - Area 52",
+["Madmareep - Stormrage"] = "Madmareep - Stormrage",
 },
 ["global"] = {
 ["currentDungeonIdx"] = 11,

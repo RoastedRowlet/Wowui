@@ -34,12 +34,12 @@ BAGANATOR_CONFIG = {
 },
 ["Barelynoer-Area52"] = {
 },
-["Minimeditite-Area52"] = {
-},
 ["Madmareep-Stormrage"] = {
 {
 ["currencyID"] = 3056,
 },
+},
+["Minimeditite-Area52"] = {
 },
 },
 ["sort_ignore_slots_count_2"] = {
@@ -232,7 +232,8 @@ BAGANATOR_CONFIG = {
 ["add_to_category_buttons_2"] = "drag",
 ["view_type"] = "unset",
 ["bank_current_tab"] = 2,
-["icon_text_quality_colors"] = false,
+["currencies_tracked"] = {
+},
 ["character_bank_view_width"] = 14,
 ["icon_text_font_size"] = 14,
 ["bag_icon_size"] = 39,
@@ -243,7 +244,6 @@ BAGANATOR_CONFIG = {
 ["sort_ignore_bank_slots_count"] = 0,
 ["upgrade_plugin_ignored"] = {
 },
-["debug_keywords"] = false,
 ["skins"] = {
 ["blizzard"] = {
 ["no_frame_borders"] = false,
@@ -257,6 +257,7 @@ BAGANATOR_CONFIG = {
 ["empty_slot_background"] = true,
 },
 },
+["debug_keywords"] = false,
 ["bag_view_position"] = {
 "BOTTOMRIGHT",
 -470.8365478515625,
@@ -295,8 +296,7 @@ BAGANATOR_CONFIG = {
 0,
 },
 ["lock_frames"] = false,
-["currencies_tracked"] = {
-},
+["icon_text_quality_colors"] = false,
 ["junk_plugin_ignored"] = {
 },
 ["currency_headers_collapsed"] = {

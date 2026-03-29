@@ -8,16 +8,11 @@ BigWigs3DB = {
 ["Zappyxatu - Stormrage"] = "Default",
 },
 ["namespaces"] = {
-["BigWigs_Plugins_PrivateAuras"] = {
+["BigWigs_Plugins_BossBlock"] = {
 ["global"] = {
-["showHelpTip"] = false,
-},
-["profiles"] = {
-["Default"] = {
-["player"] = {
-["anchorYOffset"] = 93,
-["anchorXOffset"] = 71,
-},
+["tableNeedsCopied"] = false,
+["watchedMovies"] = {
+[1049] = true,
 },
 },
 },
@@ -40,14 +35,14 @@ nil,
 ["profiles"] = {
 ["Default"] = {
 ["emphasize"] = false,
+["visibleBarLimit"] = 1,
+["normalWidth"] = 120,
 ["expPosition"] = {
 "TOP",
 "TOP",
 386,
 -7,
 },
-["visibleBarLimit"] = 1,
-["normalWidth"] = 120,
 ["normalPosition"] = {
 "BOTTOMRIGHT",
 "BOTTOMRIGHT",
@@ -57,11 +52,16 @@ nil,
 },
 },
 },
-["BigWigs_Plugins_BossBlock"] = {
+["BigWigs_Plugins_PrivateAuras"] = {
 ["global"] = {
-["tableNeedsCopied"] = false,
-["watchedMovies"] = {
-[1049] = true,
+["showHelpTip"] = false,
+},
+["profiles"] = {
+["Default"] = {
+["player"] = {
+["anchorXOffset"] = 71,
+["anchorYOffset"] = 93,
+},
 },
 },
 },

@@ -1,9 +1,6 @@
 
 CHATTYNATOR_CURRENT_PROFILE = "DEFAULT"
 CHATTYNATOR_COMMAND_HISTORY = {
-"/s /eui",
-"/s /fstack",
-"/s /reload",
 "/s /EUI",
 "/s /RELOAD",
 "/s /EUI",

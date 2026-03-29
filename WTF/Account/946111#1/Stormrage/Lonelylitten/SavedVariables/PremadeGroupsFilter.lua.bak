@@ -20,11 +20,7 @@ PremadeGroupsFilterState = {
 ["act"] = true,
 },
 ["dungeon6"] = true,
-["tanks"] = {
-["max"] = "",
-["min"] = "",
-["act"] = false,
-},
+["dungeon4"] = true,
 ["dps"] = {
 ["max"] = "",
 ["min"] = "",
@@ -39,19 +35,23 @@ PremadeGroupsFilterState = {
 ["difficulty"] = {
 },
 ["dungeon1"] = false,
-["dungeon2"] = true,
-["dungeon3"] = true,
-["dungeon8"] = true,
-["dungeon5"] = true,
 ["dungeon7"] = true,
-["dungeon4"] = true,
+["dungeon5"] = true,
+["dungeon8"] = true,
+["dungeon3"] = true,
+["dungeon2"] = true,
+["tanks"] = {
+["max"] = "",
+["min"] = "",
+["act"] = false,
+},
 },
 },
 ["c121f4"] = {
 ["enabled"] = true,
 },
 ["version"] = 8,
-["c3f5"] = {
+["c9f8"] = {
 ["enabled"] = true,
 },
 ["c114f6"] = {
@@ -63,7 +63,7 @@ PremadeGroupsFilterState = {
 ["c3f6"] = {
 ["enabled"] = true,
 },
-["c9f8"] = {
+["c3f5"] = {
 ["enabled"] = true,
 },
 }
