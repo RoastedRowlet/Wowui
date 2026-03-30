@@ -1,13 +1,5 @@
 
 TalentLoadoutEx = {
-["SHAMAN"] = {
-[3] = {
-},
-},
-["MONK"] = {
-[2] = {
-},
-},
 ["DEMONHUNTER"] = {
 {
 },
@@ -19,14 +11,49 @@ TalentLoadoutEx = {
 ["icon"] = 134400,
 },
 {
+["text"] = "CgcBAAAAAAAAAAAAAAAAAAAAAAA2MmZmxMzMGzMAAAAAAAegxsNYGAAAAAAAAmxMMmZmZmZmZGzsYGjFtsxMzMzWbzMzAYYAIwMGMmB",
 ["name"] = "Raid",
-["pvp2"] = 5734,
-["pvp3"] = 5733,
+["icon"] = 134400,
 ["isInGroup"] = false,
 ["pvp1"] = 5729,
-["icon"] = 134400,
-["text"] = "CgcBAAAAAAAAAAAAAAAAAAAAAAA2MmZmxMzMGzMAAAAAAAegxsNYGAAAAAAAAmxMMmZmZmZmZGzsYGjFtsxMzMzWbzMzAYYAIwMGMmB",
+["pvp3"] = 5733,
+["pvp2"] = 5734,
 },
+},
+},
+["EVOKER"] = {
+[3] = {
+{
+["text"] = "CEcBPJc41CfcseY0baneJ1IHrNmZmZbmZmxyAzsMjxwMAAAAAAAAYmBmBjpGzMzAAAAAzMzMmZWGzMwMbGDWglxwYbAMTEbYmZwMDgB",
+["pvp2"] = 5615,
+["icon"] = 134400,
+["isInGroup"] = false,
+["pvp1"] = 5564,
+["pvp3"] = 5619,
+["name"] = "SC M+",
+},
+{
+["text"] = "CEcBPJc41CfcseY0baneJ1IHrNmZmZbmZmxyAzsMjxwMAAAAAAAAYmBzAjpGzMzAAAAgZmZmxMzyYmBmZzYwCsMGGbDgZiYDzMDmZAM",
+["name"] = "Tst",
+["icon"] = 134400,
+["isInGroup"] = false,
+["pvp1"] = 5564,
+["pvp3"] = 5619,
+["pvp2"] = 5615,
+},
+{
+["pvp1"] = 5564,
+["pvp2"] = 5615,
+["icon"] = 134400,
+["isInGroup"] = false,
+["text"] = "CEcBAAAAAAAAAAAAAAAAAAAAAMmZmZbmZmxyAzsMjxwMAAAAAAAAYmBmBjHoGzMzAAAAgZmZmxMzyYmBmZzAjZswCMwMM0IWwMzMzAAD",
+["pvp3"] = 5619,
+["name"] = "Chrono M+",
+},
+},
+},
+["SHAMAN"] = {
+[3] = {
 },
 },
 ["Option"] = {
@@ -47,20 +74,20 @@ TalentLoadoutEx = {
 ["DRUID"] = {
 {
 {
-["icon"] = 134400,
-["name"] = "Raid",
-["pvp1"] = 182,
-["text"] = "CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMDMmlZmZmBYYWmZbYmZGbsMzyMjhZBDAGgltxGmmZWGBAAAYzMzMzgNjhxMAmZAgB",
 ["pvp3"] = 3058,
+["name"] = "Raid",
 ["pvp2"] = 180,
+["pvp1"] = 182,
+["icon"] = 134400,
+["text"] = "CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMDMmlZmZmBYYWmZbYmZGbsMzyMjhZBDAGgltxGmmZWGBAAAYzMzMzgNjhxMAmZAgB",
 },
 {
-["pvp3"] = 3058,
-["pvp2"] = 180,
-["text"] = "CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNMmZgxsMzMzMLMgxMLzsYmZmlxyMLjZGshBAjltZGMmtRgJAAAALMzMzgNjZMGAAmZgB",
-["pvp1"] = 182,
 ["icon"] = 134400,
+["pvp2"] = 180,
 ["name"] = "M+",
+["text"] = "CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNMmZgxsMzMzMLMgxMLzsYmZmlxyMLjZGshBAjltZGMmtRgJAAAALMzMzgNjZMGAAmZgB",
+["pvp3"] = 3058,
+["pvp1"] = 182,
 },
 },
 {
@@ -88,35 +115,8 @@ nil,
 },
 },
 },
-["EVOKER"] = {
-[3] = {
-{
-["pvp2"] = 5615,
-["name"] = "SC M+",
-["pvp3"] = 5619,
-["isInGroup"] = false,
-["pvp1"] = 5564,
-["icon"] = 134400,
-["text"] = "CEcBPJc41CfcseY0baneJ1IHrNmZmZbmZmxyAzsMjxwMAAAAAAAAYmBmBjpGzMzAAAAAzMzMmZWGzMwMbGDWglxwYbAMTEbYmZwMDgB",
-},
-{
-["name"] = "Tst",
-["pvp2"] = 5615,
-["pvp3"] = 5619,
-["isInGroup"] = false,
-["pvp1"] = 5564,
-["icon"] = 134400,
-["text"] = "CEcBPJc41CfcseY0baneJ1IHrNmZmZbmZmxyAzsMjxwMAAAAAAAAYmBzAjpGzMzAAAAgZmZmxMzyYmBmZzYwCsMGGbDgZiYDzMDmZAM",
-},
-{
-["pvp2"] = 5615,
-["name"] = "Chrono M+",
-["pvp3"] = 5619,
-["isInGroup"] = false,
-["text"] = "CEcBAAAAAAAAAAAAAAAAAAAAAMmZmZbmZmxyAzsMjxwMAAAAAAAAYmBmBjHoGzMzAAAAgZmZmxMzyYmBmZzAjZswCMwMM0IWwMzMzAAD",
-["icon"] = 134400,
-["pvp1"] = 5564,
-},
+["MONK"] = {
+[2] = {
 },
 },
 ["PRIEST"] = {
