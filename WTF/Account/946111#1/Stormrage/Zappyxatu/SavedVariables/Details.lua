@@ -31,8 +31,9 @@ _detalhes_database = {
 ["show_options"] = false,
 ["ignored_cooldowns"] = {
 },
-["height"] = 18,
 ["framme_locked"] = false,
+["cooldowns"] = {
+},
 ["own_frame"] = {
 ["defensive-raid"] = false,
 ["ofensive"] = false,
@@ -40,8 +41,7 @@ _detalhes_database = {
 ["utility"] = false,
 ["defensive-personal"] = false,
 },
-["cooldowns"] = {
-},
+["height"] = 18,
 ["show_conditions"] = {
 ["only_inside_instance"] = true,
 ["only_in_group"] = true,
@@ -59,7 +59,7 @@ _detalhes_database = {
 ["utility"] = false,
 },
 },
-["combat_counter"] = 42,
+["combat_counter"] = 46,
 ["damage_meter_sessions"] = {
 },
 ["force_font_outline"] = "",
@@ -102,7 +102,9 @@ _detalhes_database = {
 },
 },
 },
-["damage_meter_session_info"] = {
+["nick_tag_cache"] = {
+["nextreset"] = 1775358289,
+["last_version"] = 16,
 },
 ["cached_talents"] = {
 },
@@ -154,10 +156,9 @@ _detalhes_database = {
 },
 ["data_harvested_for_charts"] = {
 },
-["cached_roles"] = {
+["damage_meter_session_info"] = {
 },
-["character_data"] = {
-["logons"] = 21,
+["cached_roles"] = {
 },
 ["combat_log"] = {
 ["inverse_deathlog_overalldata"] = false,
@@ -169,34 +170,9 @@ _detalhes_database = {
 ["evoker_show_realtimedps"] = false,
 ["inverse_deathlog_mplus"] = false,
 },
-["player_stats"] = {
+["character_data"] = {
+["logons"] = 23,
 },
-["mythic_plus_log"] = {
-},
-["SoloTablesSaved"] = {
-["Mode"] = 1,
-},
-["benchmark_db"] = {
-["frame"] = {
-},
-},
-["on_death_menu"] = false,
-["coach"] = {
-["enabled"] = false,
-["welcome_panel_pos"] = {
-},
-["last_coach_name"] = false,
-},
-["nick_tag_cache"] = {
-["nextreset"] = 1775358289,
-["last_version"] = 16,
-},
-["last_realversion"] = 171,
-["last_version"] = "12.0.1 14812",
-["combat_id"] = 0,
-["savedStyles"] = {
-},
-["last_instance_time"] = 0,
 ["plugin_database"] = {
 ["DETAILS_PLUGIN_COMPARETWO_WINDOW"] = {
 ["enabled"] = true,
@@ -213,11 +189,11 @@ _detalhes_database = {
 1,
 0.5,
 },
-["arrow_anchor_y"] = 0,
 ["main_frame_size"] = {
 299.9999389648438,
 500.0000610351563,
 },
+["arrow_anchor_y"] = 0,
 ["minimap"] = {
 ["minimapPos"] = 107.6053533137717,
 ["radius"] = 160,
@@ -225,30 +201,19 @@ _detalhes_database = {
 },
 ["main_frame_locked"] = false,
 ["arrow_anchor_x"] = 0,
+["author"] = "Terciob",
+["row_texture"] = "Details Serenity",
+["square_grow_direction"] = "right",
+["y"] = -0.0001220703125,
 ["row_color"] = {
 0.1,
 0.1,
 0.1,
 0.4,
 },
-["row_texture"] = "Details Serenity",
-["square_grow_direction"] = "right",
-["use_spark"] = true,
-["author"] = "Terciob",
 ["square_amount"] = 5,
 ["enabled"] = false,
 ["arrow_size"] = 10,
-["y"] = -0.0001220703125,
-["row_spacement"] = 21,
-["main_frame_color"] = {
-0,
-0,
-0,
-0.2,
-},
-["main_frame_strata"] = "LOW",
-["arrow_texture"] = "Interface\\CHATFRAME\\ChatFrameExpandArrow",
-["font_size"] = 10,
 ["per_second"] = {
 ["enabled"] = false,
 ["point"] = "CENTER",
@@ -260,6 +225,17 @@ _detalhes_database = {
 ["update_speed"] = 0.05,
 ["size"] = 32,
 },
+["row_spacement"] = 21,
+["main_frame_color"] = {
+0,
+0,
+0,
+0.2,
+},
+["main_frame_strata"] = "LOW",
+["arrow_texture"] = "Interface\\CHATFRAME\\ChatFrameExpandArrow",
+["use_spark"] = true,
+["font_size"] = 10,
 ["x"] = 0,
 ["font_face"] = "Friz Quadrata TT",
 ["square_size"] = 32,
@@ -273,6 +249,27 @@ _detalhes_database = {
 ["row_height"] = 20,
 ["scale"] = 1,
 },
+},
+["player_stats"] = {
+},
+["last_day"] = "30",
+["benchmark_db"] = {
+["frame"] = {
+},
+},
+["ignore_nicktag"] = false,
+["on_death_menu"] = false,
+["last_realversion"] = 171,
+["last_version"] = "12.0.1 14812",
+["combat_id"] = 0,
+["savedStyles"] = {
+},
+["last_instance_time"] = 0,
+["coach"] = {
+["enabled"] = false,
+["welcome_panel_pos"] = {
+},
+["last_coach_name"] = false,
 },
 ["announce_deaths"] = {
 ["enabled"] = false,
@@ -308,7 +305,7 @@ _detalhes_database = {
 },
 ["raid_roster"] = {
 },
-["tempo_start"] = 792852.451,
+["tempo_start"] = 862092.436,
 ["last_events_tables"] = {
 },
 ["alternate_power"] = {
@@ -405,12 +402,15 @@ _detalhes_database = {
 ["start_time"] = 0,
 ["TimeData"] = {
 },
-["combat_counter"] = 41,
+["combat_counter"] = 45,
 },
-["ignore_nicktag"] = false,
+["SoloTablesSaved"] = {
+["Mode"] = 1,
+},
 ["arena_data_headers"] = {
 },
-["last_day"] = "29",
+["mythic_plus_log"] = {
+},
 ["announce_cooldowns"] = {
 ["enabled"] = false,
 ["ignored_cooldowns"] = {
