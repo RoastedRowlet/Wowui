@@ -12,8 +12,9 @@ RaiderIO_Config = {
 ["point"] = "TOPLEFT",
 },
 }
-RaiderIO_LastCharacter = "us-Lonelylitten-stormrage"
+RaiderIO_LastCharacter = "us-Madmareep-stormrage"
 RaiderIO_MissingCharacters = {
+["us-Madmareep-stormrage"] = true,
 }
 RaiderIO_MissingServers = {
 }

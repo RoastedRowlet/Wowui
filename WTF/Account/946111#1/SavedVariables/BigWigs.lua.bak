@@ -15,10 +15,10 @@ BigWigs3DB = {
 },
 },
 },
-["BigWigs_Bosses_Echo of Doragosa"] = {
+["BigWigs_Bosses_Derelict Duo"] = {
 ["profiles"] = {
 ["Default"] = {
-[388822] = 3129591,
+[1219491] = 7323895,
 },
 },
 },
@@ -51,13 +51,6 @@ nil,
 },
 },
 },
-["BigWigs_Bosses_Ranjit"] = {
-["profiles"] = {
-["Default"] = {
-[153757] = 3129591,
-},
-},
-},
 ["BigWigs_Plugins_PrivateAuras"] = {
 ["global"] = {
 ["showHelpTip"] = false,
@@ -65,9 +58,16 @@ nil,
 ["profiles"] = {
 ["Default"] = {
 ["player"] = {
-["anchorYOffset"] = 93,
 ["anchorXOffset"] = 71,
+["anchorYOffset"] = 93,
 },
+},
+},
+},
+["BigWigs_Bosses_Echo of Doragosa"] = {
+["profiles"] = {
+["Default"] = {
+[388822] = 3129591,
 },
 },
 },
@@ -75,14 +75,14 @@ nil,
 ["profiles"] = {
 ["Default"] = {
 ["normalWidth"] = 120,
+["visibleBarLimit"] = 1,
+["emphasize"] = false,
 ["expPosition"] = {
 "TOP",
 "TOP",
 386,
 -7,
 },
-["visibleBarLimit"] = 1,
-["emphasize"] = false,
 ["normalPosition"] = {
 "BOTTOMRIGHT",
 "BOTTOMRIGHT",
@@ -92,10 +92,10 @@ nil,
 },
 },
 },
-["BigWigs_Bosses_Muro'jin and Nekraxx"] = {
+["BigWigs_Bosses_Ranjit"] = {
 ["profiles"] = {
 ["Default"] = {
-[1243900] = 3129591,
+[153757] = 3129591,
 },
 },
 },
@@ -107,10 +107,10 @@ nil,
 },
 },
 },
-["BigWigs_Bosses_Derelict Duo"] = {
+["BigWigs_Bosses_Muro'jin and Nekraxx"] = {
 ["profiles"] = {
 ["Default"] = {
-[1219491] = 7323895,
+[1243900] = 3129591,
 },
 },
 },

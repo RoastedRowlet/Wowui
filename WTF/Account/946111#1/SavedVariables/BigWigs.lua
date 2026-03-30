@@ -71,6 +71,14 @@ nil,
 },
 },
 },
+["BigWigs_Plugins_BossBlock"] = {
+["global"] = {
+["tableNeedsCopied"] = false,
+["watchedMovies"] = {
+[1049] = true,
+},
+},
+},
 ["BigWigs_Bosses_Muro'jin and Nekraxx"] = {
 ["profiles"] = {
 ["Default"] = {
@@ -78,11 +86,10 @@ nil,
 },
 },
 },
-["BigWigs_Plugins_BossBlock"] = {
-["global"] = {
-["tableNeedsCopied"] = false,
-["watchedMovies"] = {
-[1049] = true,
+["BigWigs_Bosses_Ranjit"] = {
+["profiles"] = {
+["Default"] = {
+[153757] = 3129591,
 },
 },
 },
@@ -104,13 +111,6 @@ nil,
 0,
 168,
 },
-},
-},
-},
-["BigWigs_Bosses_Ranjit"] = {
-["profiles"] = {
-["Default"] = {
-[153757] = 3129591,
 },
 },
 },

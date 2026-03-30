@@ -12,17 +12,9 @@ RaiderIO_Config = {
 ["hide"] = false,
 },
 }
-RaiderIO_LastCharacter = "us-Lonelylitten-stormrage"
+RaiderIO_LastCharacter = "us-Madmareep-stormrage"
 RaiderIO_MissingCharacters = {
-["us-Baelean-illidan"] = true,
-["us-Regulatorz-illidan"] = true,
-["us-Palaboom-illidan"] = true,
-["us-Pixwhur-illidan"] = true,
-["us-Ãzülä-illidan"] = true,
-["us-Filianoreds-illidan"] = true,
-["us-Pòria-illidan"] = true,
-["us-Jituizii-illidan"] = true,
-["us-Skyangel-illidan"] = true,
+["us-Madmareep-stormrage"] = true,
 }
 RaiderIO_MissingServers = {
 }
