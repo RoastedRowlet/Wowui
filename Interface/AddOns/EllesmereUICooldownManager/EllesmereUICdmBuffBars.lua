@@ -107,6 +107,8 @@ local PANDEMIC_THRESHOLD = 0.30
 
 --- Check if a spell is in the pandemic window via C_UnitAuras.
 --- Returns true if the aura exists, has duration, and remaining <= 30%.
+--- Only checks player auras; target debuffs use Blizzard's native
+--- PandemicIcon on CDM frames (avoids tainted secret values).
 function ns.IsInPandemicWindow(spellID)
     if not spellID or spellID <= 0 then return false end
     local aura = C_UnitAuras.GetPlayerAuraBySpellID(spellID)
@@ -630,7 +632,11 @@ local function ApplyTrackedBuffBarSettings(bar, cfg)
     if cfg.showSpark then
         local sparkAnchor = (bar._gradientActive and bar._gradClip) or fillTex
         bar._spark:SetSize(8, h)
-        bar._spark:SetRotation(0)
+        if isVert then
+            bar._spark:SetRotation(math.pi / 2)
+        else
+            bar._spark:SetRotation(0)
+        end
         bar._spark:ClearAllPoints()
         if isVert then
             bar._spark:SetPoint("CENTER", sparkAnchor, "TOP", 0, 0)
@@ -783,38 +789,36 @@ local function MatchFrameToConfig(frame, cfg)
 end
 
 local _findChildGeneration = 0
+-- Frame cache lives in a separate table, never on the config (which is in
+-- SavedVariables). Prevents frame references from leaking into serialization.
+local _findChildCache = {}
+
 function ns.InvalidateTBBFrameCache()
     _findChildGeneration = _findChildGeneration + 1
+    wipe(_findChildCache)
 end
 
 local function FindChild(cfg)
     -- Fast path: cached result from previous match (hit or miss).
-    if cfg._linkedGen == _findChildGeneration then
-        local cached = cfg._linkedFrame
-        if cached then
-            if cached.cooldownID == cfg._linkedCdID then
-                return cached
-            end
-        else
-            -- Cached miss: no matching frame existed last scan. Skip until
-            -- generation changes (reanchor fires when CDM state changes).
-            return nil
+    local cached = _findChildCache[cfg]
+    if cached and cached.gen == _findChildGeneration then
+        if cached.frame and cached.frame.cooldownID == cached.cdID then
+            return cached.frame
         end
     end
-    -- Full scan: iterate pool once, match by spell ID variants
+    -- Full scan: iterate BuffBarCooldownViewer pool (TBB's own viewer).
+    local entry = { gen = _findChildGeneration, frame = nil, cdID = nil }
+    _findChildCache[cfg] = entry
     local viewer = _G["BuffBarCooldownViewer"]
-    if not viewer or not viewer.itemFramePool then return nil end
-    cfg._linkedFrame = nil
-    cfg._linkedCdID = nil
-    cfg._linkedGen = _findChildGeneration
-    for frame in viewer.itemFramePool:EnumerateActive() do
-        if MatchFrameToConfig(frame, cfg) then
-            cfg._linkedFrame = frame
-            cfg._linkedCdID = frame.cooldownID
-            return frame
+    if viewer and viewer.itemFramePool then
+        for frame in viewer.itemFramePool:EnumerateActive() do
+            if MatchFrameToConfig(frame, cfg) then
+                entry.frame = frame
+                entry.cdID = frame.cooldownID
+                return frame
+            end
         end
     end
-    -- No match found: cached as nil. Won't re-scan until next generation.
     return nil
 end
 ns.FindTBBChild = FindChild
@@ -1088,9 +1092,6 @@ function ns.UpdateTrackedBuffBarTimers()
         else
             local blzChild = FindChild(cfg)
 
-            -- Active check: trust Blizzard's frame visibility, not spell IDs.
-            -- Same principle as buff icons -- the frame IS the data.
-            -- Nil guard: IsShown can be absent on tainted Blizzard frames.
             local isActive = blzChild and blzChild.IsShown and blzChild:IsShown() or false
 
             -- Read Blizzard's StatusBar (the data source for fill/timer)
@@ -1176,8 +1177,13 @@ function ns.UpdateTrackedBuffBarTimers()
                     end
 
                     -- Pandemic glow (via C_UnitAuras, combat-safe)
+                    -- Also check Blizzard's PandemicIcon on the source
+                    -- frame for debuffs (avoids tainted secret values).
                     if _anyPandemic and cfg.pandemicGlow then
-                        if ns.IsInPandemicWindow(cfg.spellID) then
+                        local inPandemic = ns.IsInPandemicWindow(cfg.spellID)
+                            or (blzChild and blzChild.PandemicIcon
+                                and blzChild.PandemicIcon:IsShown())
+                        if inPandemic then
                             if not bar._pandemicGlowActive then UpdatePandemic(bar, cfg) end
                             if bar._pandemicGlowTarget then bar._pandemicGlowTarget:SetAlpha(1) end
                         elseif bar._pandemicGlowActive then

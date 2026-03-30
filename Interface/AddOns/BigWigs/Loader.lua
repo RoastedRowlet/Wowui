@@ -57,7 +57,7 @@ do
 	local ALPHA = "ALPHA"
 
 	local releaseType
-	local myGitHash = "ca4141c" -- The ZIP packager will replace this with the Git hash.
+	local myGitHash = "303e6a3" -- The ZIP packager will replace this with the Git hash.
 	local releaseString
 	--[=[@alpha@
 	-- The following code will only be present in alpha ZIPs.
@@ -1138,12 +1138,12 @@ do
 end
 
 -- XXX 12.0.1 s1
-if public.isRetail and not BW_FEAT_ENHANCE then
-	BW_FEAT_ENHANCE = true
-	if BigWigs3DB then -- No popup for fresh users
-		Popup(L.enhancedModeWelcome, true, 250)
-	end
-end
+--if public.isRetail and not BW_FEAT_ENHANCE then
+--	BW_FEAT_ENHANCE = true
+--	if BigWigs3DB then -- No popup for fresh users
+--		Popup(L.enhancedModeWelcome, true, 250)
+--	end
+--end
 
 -- XXX 12.0.0
 --if (public.isRetail or public.isMists or public.isWrath) and not BW_FEAT_SHARE2 then

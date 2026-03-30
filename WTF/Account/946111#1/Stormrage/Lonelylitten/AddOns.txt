@@ -85,3 +85,4 @@ LittleWigs_WarlordsOfDraenor: enabled
 LittleWigs_Legion: enabled
 LittleWigs_Dragonflight: enabled
 BigWigs_TheDreamrift: enabled
+BigWigs_MarchOnQuelDanas: enabled

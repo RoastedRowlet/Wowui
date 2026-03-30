@@ -826,7 +826,7 @@ L.redirectPopupsColor = "横幅信息的颜色"
 L.blockDungeonPopups = "屏蔽地下城弹出式横幅"
 L.blockDungeonPopupsDesc = "进入地下城时弹出的横幅有时会包含很长的文字。启用此功能将完全屏蔽它们。"
 L.itemLevel = "物品等级%d"
-L.newRespawnPoint = "新的复活位置"
+L.newRespawnPoint = "新的重生点"
 L.playerLevel = "等级 %d"
 
 L.userNotifySfx = "首领屏蔽禁用了声音效果，强制它重新启用。"
@@ -1143,6 +1143,7 @@ L.privateaura = "只要“私有光环”出现在你身上"
 L.customSoundDesc = "播放选定的自定义的声音，而不是由模块提供的。"
 L.resetSoundDesc = "重置以上音效为默认。"
 L.resetAllCustomSound = "如果设置全部首领战斗自定义的声音，此按钮将重置“全部”以这里自定义的声音来代替。"
+--L.soundResetPrint = "The module '|cFF436EEE%s|r' uses a custom sound called '|cFF436EEE%s|r' that no longer exists. Resetting to default."
 
 -----------------------------------------------------------------------
 -- Statistics.lua
@@ -1178,7 +1179,6 @@ L.blizzBasicAsBars = "暴雪内置的首领预警显示在 BigWigs 计时条上"
 L.blizzBasicAsBlizzTimeline = "暴雪内置的首领预警及首领技能显示“类型”"
 L.developerMode = "开发者模式"
 L.enhancedModeWarning = "警告！\n\n禁用增强模式将禁用许多 BigWigs 功能，包括：\n\n计时条颜色、法术重命名、计数器、自定义声音/语音、倒计时、计时条开关、额外消息提示等。"
-L.enhancedModeWelcome = "BigWigs“增强模式”已启用！\n\n完全恢复大部分至暗之夜更新前的功能，包括：\n\n计时条颜色、法术重命名、计数器、自定义声音/语音、倒计时、计时条开关、额外消息提示等。"
 
 -----------------------------------------------------------------------
 -- Victory.lua
@@ -1200,6 +1200,6 @@ L.defeated = "%s被击败了！"
 
 L.wipe = "团灭"
 L.wipeSoundTitle = "当团灭时播放音效"
-L.respawn = "刷新"
-L.showRespawnBar = "显示刷新计时条"
-L.showRespawnBarDesc = "当团灭之后显示首领刷新计时条。"
+L.respawn = "重生"
+L.showRespawnBar = "显示重生倒数计时条"
+L.showRespawnBarDesc = "当团灭后显示首领重生倒数计时条。"

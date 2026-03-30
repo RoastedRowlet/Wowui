@@ -175,7 +175,7 @@ L["GUILD_LF_MPLUS_DEFAULT"] = "Reclutamiento para Míticas+"
 L["GUILD_LF_MPLUS_WITH_SCORE"] = "Reclutamiento %d+ jugadoras míticas+"
 L["GUILD_LF_PVP"] = "Reclutar jugadores PvP"
 L["GUILD_LF_RAID_DEFAULT"] = "Reclutar Raiders"
-L["GUILD_LF_RAID_HEROIC"] = "Reclutamiento para Raid Heroica"
+L["GUILD_LF_RAID_HEROIC"] = "Reclutar Raiders Heroico"
 L["GUILD_LF_RAID_MYTHIC"] = "Reclutar Raiders Mítico"
 L["GUILD_LF_RAID_NORMAL"] = "Reclutar Raiders Normal"
 L["GUILD_LF_SOCIAL"] = "Reclutar jugadores Sociales"
@@ -654,27 +654,20 @@ L["RAID_DR"] = "Falla Onírica - DR"
 L["RAID_DS"] = "Alma de Dragón - DS"
 L["RAID_ENCOUNTERS_DEFEATED_TITLE"] = "Encuentros de banda derrotados"
 L["RAID_FL"] = "Tierras de Fuego - FL"
---[[Translation missing --]]
---[[ L["RAID_HOF"] = ""--]] 
+L["RAID_HOF"] = "Corazón del Miedo - HoF"
 L["RAID_ICC"] = "Ciudadela de la Corona de Hielo - ICC"
 L["RAID_LOU"] = "Liberación de Minahonda - LOU"
 L["RAID_MFO"] = "Forja de Maná Omega - MFO"
---[[Translation missing --]]
---[[ L["RAID_MQD"] = ""--]] 
---[[Translation missing --]]
---[[ L["RAID_MSV"] = ""--]] 
+L["RAID_MQD"] = "Marcha a Quel'Danas - MQD"
+L["RAID_MSV"] = "Cámaras Mogu'shan"
 L["RAID_NP"] = "Palacio Nerub'ar - NP"
 L["RAID_RS"] = "El Sagrario Rubí - RS"
---[[Translation missing --]]
---[[ L["RAID_ToES"] = ""--]] 
---[[Translation missing --]]
---[[ L["RAID_TOES"] = ""--]] 
---[[Translation missing --]]
---[[ L["RAID_TOT"] = ""--]] 
+L["RAID_ToES"] = "Veranda de la Primavera Eterna - ToES"
+L["RAID_TOES"] = "Veranda de la Primavera Eterna"
+L["RAID_TOT"] = "Solio del Trueno - ToT"
 L["RAID_TOTFW"] = "Trono de los Cuatro Vientos - TOTFW"
 L["RAID_VS"] = "Aguja del Vacío - VS"
---[[Translation missing --]]
---[[ L["RAID_VS_DR_MQD"] = ""--]] 
+L["RAID_VS_DR_MQD"] = "AV/FO/MQD"
 L["RAIDERIO_AVERAGE_PLAYER_SCORE"] = "Puntuación media de +%s en tiempo"
 L["RAIDERIO_BEST_RUN"] = "Mejor resultado M+ de Raider.IO"
 L["RAIDERIO_CLIENT_CUSTOMIZATION"] = "Personalización del cliente de RaiderIO"

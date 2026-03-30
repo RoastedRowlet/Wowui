@@ -1142,6 +1142,7 @@ L.privateaura = "Whenever a 'Private Aura' is on you"
 L.customSoundDesc = "Play the selected custom sound instead of the one supplied by the module."
 L.resetSoundDesc = "Resets the above sounds to their defaults."
 L.resetAllCustomSound = "If you've customized sounds for any boss encounter settings, this button will reset ALL of them so the sounds defined here will be used instead."
+L.soundResetPrint = "The module '|cFF436EEE%s|r' uses a custom sound called '|cFF436EEE%s|r' that no longer exists. Resetting to default."
 
 -----------------------------------------------------------------------
 -- Statistics.lua
@@ -1177,7 +1178,6 @@ L.blizzBasicAsBars = "Blizzard basic timers displayed as BigWigs bars"
 L.blizzBasicAsBlizzTimeline = "Blizzard basic timers displayed on the Blizzard timeline"
 L.developerMode = "Developer Mode"
 L.enhancedModeWarning = "WARNING!\n\nDisabling enhanced mode will disable many BigWigs features, including:\n\nBar colors, spell renames, counters, custom sound/voice, countdowns, bars on/off, extra messages, etc."
-L.enhancedModeWelcome = "BigWigs 'Enhanced Mode' enabled!\n\nFull restoration of most pre-Midnight features, including:\n\nBar colors, spell renames, counters, custom sound/voice, countdowns, bars on/off, extra messages, etc."
 
 -----------------------------------------------------------------------
 -- Victory.lua

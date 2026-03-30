@@ -3399,8 +3399,10 @@ initFrame:SetScript("OnEvent", function(self)
     local function UpdateCDMPreviewAndResize()
         UpdateCDMPreview()
         if _cdmPreview and _cdmHeaderFixedH > 0 then
-            local newTotal = _cdmHeaderFixedH + _cdmPreview:GetHeight() * (_cdmPreview:GetScale() or 1)
-            EllesmereUI:UpdateContentHeaderHeight(newTotal)
+            -- Wrapper height is already capped by the Update function's resize logic
+            local wrapperH = _cdmPreview._wrapper and _cdmPreview._wrapper:GetHeight()
+                             or math.min(_cdmPreview:GetHeight() * (_cdmPreview:GetScale() or 1), 200)
+            EllesmereUI:UpdateContentHeaderHeight(_cdmHeaderFixedH + wrapperH)
         end
     end
 
@@ -5152,16 +5154,159 @@ initFrame:SetScript("OnEvent", function(self)
         local PAD = EllesmereUI.CONTENT_PAD or 10
 
         -- Create preview container scale to match real in-game icon sizes
-        local pf = CreateFrame("Frame", nil, parent)
-        pf:SetClipsChildren(false)
-
         local previewScale = UIParent:GetEffectiveScale() / parent:GetEffectiveScale()
-        pf:SetScale(previewScale)
-
         local localParentW = (parent:GetWidth() - PAD * 2) / previewScale
         local initH = (barData.iconSize or 36) + 10
+
+        -- Max visible height for the preview area (in parent-space pixels)
+        local PREVIEW_MAX_H = 200
+
+        -- Wrapper frame at parent scale; holds the scroll frame and scrollbar
+        local wrapper = CreateFrame("Frame", nil, parent)
+        wrapper:SetPoint("TOPLEFT", parent, "TOPLEFT", PAD, yOff)
+        wrapper:SetSize(parent:GetWidth() - PAD * 2, PREVIEW_MAX_H)
+        wrapper:SetClipsChildren(true)
+
+        local pf = CreateFrame("Frame", nil, parent)
+        pf:SetClipsChildren(false)
+        pf:SetScale(previewScale)
         pf:SetSize(localParentW, initH)
-        PP.Point(pf, "TOPLEFT", parent, "TOPLEFT", PAD / previewScale, yOff / previewScale)
+
+        local sf = CreateFrame("ScrollFrame", nil, wrapper)
+        sf:SetAllPoints()
+        sf:SetScrollChild(pf)
+        sf:EnableMouseWheel(true)
+
+        -- Thin scrollbar track (4px, right side)
+        local pvTrack = CreateFrame("Frame", nil, wrapper)
+        pvTrack:SetWidth(4)
+        pvTrack:SetPoint("TOPRIGHT", wrapper, "TOPRIGHT", -2, -2)
+        pvTrack:SetPoint("BOTTOMRIGHT", wrapper, "BOTTOMRIGHT", -2, 2)
+        pvTrack:SetFrameLevel(wrapper:GetFrameLevel() + 5)
+        do
+            local bg = pvTrack:CreateTexture(nil, "BACKGROUND")
+            bg:SetAllPoints()
+            bg:SetColorTexture(1, 1, 1, 0.02)
+        end
+        pvTrack:Hide()
+
+        local pvThumb = CreateFrame("Button", nil, pvTrack)
+        pvThumb:SetWidth(4)
+        pvThumb:SetFrameLevel(pvTrack:GetFrameLevel() + 1)
+        pvThumb:EnableMouse(true)
+        pvThumb:RegisterForDrag("LeftButton")
+        pvThumb:SetScript("OnDragStart", function() end)
+        pvThumb:SetScript("OnDragStop", function() end)
+        do
+            local t = pvThumb:CreateTexture(nil, "ARTWORK")
+            t:SetAllPoints()
+            t:SetColorTexture(1, 1, 1, 0.27)
+        end
+
+        -- Smooth scroll state
+        local pvScrollTarget = 0
+        local pvSmoothing = false
+        local PV_SCROLL_STEP = 40
+        local PV_SMOOTH_SPEED = 12
+        local pvSmoothFrame = CreateFrame("Frame")
+        pvSmoothFrame:Hide()
+
+        local function UpdatePVThumb()
+            local maxScroll = EllesmereUI.SafeScrollRange(sf)
+            if maxScroll <= 0 then pvTrack:Hide(); return end
+            pvTrack:Show()
+            local trackH = pvTrack:GetHeight()
+            local visH = sf:GetHeight()
+            local ratio = visH / (visH + maxScroll)
+            local thumbH = math.max(20, trackH * ratio)
+            pvThumb:SetHeight(thumbH)
+            local curScroll = 0
+            do
+                local ok, val = pcall(sf.GetVerticalScroll, sf)
+                if ok and val then
+                    local ok2, n = pcall(tonumber, val)
+                    if ok2 and n then curScroll = n end
+                end
+            end
+            local scrollRatio = curScroll / maxScroll
+            local maxTravel = trackH - thumbH
+            pvThumb:ClearAllPoints()
+            pvThumb:SetPoint("TOP", pvTrack, "TOP", 0, -(scrollRatio * maxTravel))
+        end
+
+        pvSmoothFrame:SetScript("OnUpdate", function(_, elapsed)
+            local cur = sf:GetVerticalScroll()
+            local maxScroll = EllesmereUI.SafeScrollRange(sf)
+            pvScrollTarget = math.max(0, math.min(maxScroll, pvScrollTarget))
+            local diff = pvScrollTarget - cur
+            if math.abs(diff) < 0.3 then
+                sf:SetVerticalScroll(pvScrollTarget)
+                UpdatePVThumb()
+                pvSmoothing = false
+                pvSmoothFrame:Hide()
+                return
+            end
+            local newScroll = cur + diff * math.min(1, PV_SMOOTH_SPEED * elapsed)
+            newScroll = math.max(0, math.min(maxScroll, newScroll))
+            sf:SetVerticalScroll(newScroll)
+            UpdatePVThumb()
+        end)
+
+        local function PVSmoothScrollTo(target)
+            local maxScroll = EllesmereUI.SafeScrollRange(sf)
+            pvScrollTarget = math.max(0, math.min(maxScroll, target))
+            if not pvSmoothing then
+                pvSmoothing = true
+                pvSmoothFrame:Show()
+            end
+        end
+
+        sf:SetScript("OnMouseWheel", function(self, delta)
+            local maxScroll = EllesmereUI.SafeScrollRange(self)
+            if maxScroll <= 0 then return end
+            local base = pvSmoothing and pvScrollTarget or self:GetVerticalScroll()
+            PVSmoothScrollTo(base - delta * PV_SCROLL_STEP)
+        end)
+        sf:SetScript("OnScrollRangeChanged", UpdatePVThumb)
+
+        -- Thumb drag
+        pvThumb:SetScript("OnMouseDown", function(self, button)
+            if button ~= "LeftButton" then return end
+            pvSmoothing = false
+            pvSmoothFrame:Hide()
+            local _, cursorY = GetCursorPosition()
+            local dragStartY = cursorY / self:GetEffectiveScale()
+            local dragStartScroll = sf:GetVerticalScroll()
+            self:SetScript("OnUpdate", function(self2)
+                if not IsMouseButtonDown("LeftButton") then
+                    self2:SetScript("OnUpdate", nil)
+                    return
+                end
+                local _, cy = GetCursorPosition()
+                cy = cy / self2:GetEffectiveScale()
+                local deltaY = dragStartY - cy
+                local trackH = pvTrack:GetHeight()
+                local maxTravel = trackH - self2:GetHeight()
+                if maxTravel <= 0 then return end
+                local maxScroll = EllesmereUI.SafeScrollRange(sf)
+                local newScroll = math.max(0, math.min(maxScroll,
+                    dragStartScroll + (deltaY / maxTravel) * maxScroll))
+                pvScrollTarget = newScroll
+                sf:SetVerticalScroll(newScroll)
+                UpdatePVThumb()
+            end)
+        end)
+        pvThumb:SetScript("OnMouseUp", function(self, button)
+            if button ~= "LeftButton" then return end
+            self:SetScript("OnUpdate", nil)
+        end)
+
+        -- Store refs for height management after Update()
+        pf._wrapper = wrapper
+        pf._scrollFrame = sf
+        pf._previewScale = previewScale
+        pf._PREVIEW_MAX_H = PREVIEW_MAX_H
+        pf._updatePVThumb = UpdatePVThumb
 
         -- Pixel-snap helper for the preview's effective scale
         local function Snap(val)
@@ -6402,8 +6547,7 @@ initFrame:SetScript("OnEvent", function(self)
                 pvBarBg:Hide()
             end
 
-            -- Bar opacity affects entire preview
-            self:SetAlpha(bd.barBgAlpha or 1)
+            self:SetAlpha(1)
 
             -- Buff bar info text
             if not self._buffInfoText then
@@ -6452,6 +6596,19 @@ initFrame:SetScript("OnEvent", function(self)
                 self:SetHeight(totalH + 10)
             end
 
+            -- Resize wrapper to min(content, max) and toggle scrollbar
+            local parentH = self:GetHeight() * (self._previewScale or 1)
+            local maxH = self._PREVIEW_MAX_H or 200
+            if parentH > maxH then
+                -- Add bottom padding so info text is fully visible when scrolled down
+                self:SetHeight(self:GetHeight() + 30)
+                self._wrapper:SetHeight(maxH)
+            else
+                self._wrapper:SetHeight(parentH)
+                if self._scrollFrame then self._scrollFrame:SetVerticalScroll(0) end
+            end
+            if self._updatePVThumb then self._updatePVThumb() end
+
             -- Restart active state preview on first icon if toggled on
             if _cdmActivePreviewOn then
                 StopActiveStatePreview()
@@ -6467,7 +6624,8 @@ initFrame:SetScript("OnEvent", function(self)
         if _cdmActivePreviewOn then
             StartActiveStatePreview()
         end
-        return pf:GetHeight() * previewScale
+        -- Return wrapper height (already capped by Update's resize logic)
+        return wrapper:GetHeight()
     end
 
     local function BuildCDMBarsPage(pageName, parent, yOffset)
@@ -6889,15 +7047,6 @@ initFrame:SetScript("OnEvent", function(self)
         do
             local rightRgn = visRow._rightRegion
             if rightRgn._control then rightRgn._control:Hide() end
-            if isBuffBar then
-                -- Buff bars don't support visibility options (their icon count
-                -- is dynamic and these options cause layout issues).
-                local disabledLbl = rightRgn:CreateFontString(nil, "OVERLAY")
-                disabledLbl:SetFont(FONT_PATH, 11, GetCDMOptOutline())
-                disabledLbl:SetPoint("RIGHT", rightRgn, "RIGHT", -20, 0)
-                disabledLbl:SetTextColor(0.4, 0.4, 0.4, 0.6)
-                disabledLbl:SetText("N/A for Buff Bars")
-            else
             local visItems = EllesmereUI.VIS_OPT_ITEMS
             local cbDD, cbDDRefresh = EllesmereUI.BuildVisOptsCBDropdown(
                 rightRgn, 210, rightRgn:GetFrameLevel() + 2,
@@ -6912,7 +7061,6 @@ initFrame:SetScript("OnEvent", function(self)
             rightRgn._control = cbDD
             rightRgn._lastInline = nil
             EllesmereUI.RegisterWidgetRefresh(cbDDRefresh)
-            end
         end
 
         -- Sync icon on Visibility (left)
@@ -6938,8 +7086,8 @@ initFrame:SetScript("OnEvent", function(self)
             })
         end
 
-        -- Sync icon on Visibility Options (right) -- not for buff bars
-        if not isBuffBar then do
+        -- Sync icon on Visibility Options (right)
+        do
             local rgn = visRow._rightRegion
             EllesmereUI.BuildSyncIcon({
                 region  = rgn,
@@ -6967,117 +7115,42 @@ initFrame:SetScript("OnEvent", function(self)
                     ns.CDMApplyVisibility(); EllesmereUI:RefreshPage()
                 end,
             })
-        end end
-
-        -- Row 2: Anchor to Cursor | Cursor Position (cog: X + Y)
-        local cursorRow
-        cursorRow, h = W:DualRow(parent, y,
-            { type="toggle", text="Anchor to Cursor",
-              getValue=function() return BD().anchorTo == "mouse" end,
-              setValue=function(v)
-                  BD().anchorTo = v and "mouse" or "none"
-                  ns.BuildAllCDMBars(); ns.RegisterCDMUnlockElements()
-                  Refresh(); EllesmereUI:RefreshPage(true)
-              end },
-            { type="dropdown", text="Cursor Position",
-              values={ left="Left", right="Right", top="Top", bottom="Bottom" },
-              order={ "left", "right", "top", "bottom" },
-              disabled=function() return BD().anchorTo ~= "mouse" end,
-              disabledTooltip=EllesmereUI.DisabledTooltip("Anchor to Cursor"),
-              getValue=function() return BD().anchorPosition or "right" end,
-              setValue=function(v)
-                  BD().anchorPosition = v
-                  ns.BuildAllCDMBars(); Refresh()
-              end });  y = y - h
-
-        -- "(Applies on Window Close)" subtitle on the Anchor to Cursor toggle label
-        do
-            local suffix = cursorRow._leftRegion:CreateFontString(nil, "OVERLAY")
-            suffix:SetFont(EllesmereUI.EXPRESSWAY, 11, "")
-            suffix:SetTextColor(1, 1, 1, 0.35)
-            suffix:SetText("(Applies on Window Close)")
-            local anchorLabel
-            for i = 1, cursorRow._leftRegion:GetNumRegions() do
-                local reg = select(i, cursorRow._leftRegion:GetRegions())
-                if reg and reg.GetText and reg:GetText() == "Anchor to Cursor" then
-                    anchorLabel = reg
-                    break
-                end
-            end
-            if anchorLabel then
-                suffix:SetPoint("LEFT", anchorLabel, "RIGHT", 5, 0)
-            else
-                suffix:SetPoint("LEFT", cursorRow._leftRegion, "LEFT", 120, 0)
-            end
         end
 
-        -- Inline cog on Cursor Position (right) — X + Y offsets
+        -- Row 2: Anchor to Cursor | Cursor Position (cog: X + Y)
         do
-            local rightRgn = cursorRow._rightRegion
-            local _, cursorCogShow = EllesmereUI.BuildCogPopup({
-                title = "Cursor Offset",
-                rows = {
-                    { type="slider", label="X Offset", min=-125, max=125, step=1,
-                      get=function() return BD().anchorOffsetX or 0 end,
-                      set=function(v)
-                          BD().anchorOffsetX = v
-                          ns.BuildAllCDMBars(); Refresh()
-                      end },
-                    { type="slider", label="Y Offset", min=-125, max=125, step=1,
-                      get=function() return BD().anchorOffsetY or 0 end,
-                      set=function(v)
-                          BD().anchorOffsetY = v
-                          ns.BuildAllCDMBars(); Refresh()
-                      end },
-                },
+            local _, cursorH = EllesmereUI.BuildCursorAnchorRow({
+                W = W, parent = parent, y = y,
+                getData = BD,
+                onApply = function()
+                    ns.BuildAllCDMBars(); ns.RegisterCDMUnlockElements()
+                    Refresh()
+                end,
+                makeCogBtn = MakeCogBtn,
             })
-            MakeCogBtn(rightRgn, cursorCogShow, nil, EllesmereUI.DIRECTIONS_ICON)
+            y = y - cursorH
         end
 
         local opacityRow
         opacityRow, h = W:DualRow(parent, y,
-            { type="slider", text="Bar Opacity",
-              min=0, max=100, step=5,
-              getValue=function() return math.floor((BD().barBgAlpha or 1) * 100 + 0.5) end,
-              setValue=function(v)
-                  BD().barBgAlpha = v / 100
-                  ns.BuildAllCDMBars(); Refresh()
-                  UpdateCDMPreview()
-              end },
             { type="toggle", text="Bar Background",
               getValue=function() return BD().barBgEnabled == true end,
               setValue=function(v)
                   BD().barBgEnabled = v
                   ns.BuildAllCDMBars(); Refresh()
                   UpdateCDMPreview(); EllesmereUI:RefreshPage()
+              end },
+            { type="toggle", text="Vertical Orientation",
+              getValue=function() return BD().verticalOrientation end,
+              setValue=function(v)
+                  BD().verticalOrientation = v
+                  BD().growDirection = v and "DOWN" or "RIGHT"
+                  ns.BuildAllCDMBars(); Refresh(); UpdateCDMPreviewAndResize()
               end });  y = y - h
 
-        -- Sync icon on Bar Opacity (left)
+        -- Inline color swatch on Bar Background (left)
         do
             local rgn = opacityRow._leftRegion
-            EllesmereUI.BuildSyncIcon({
-                region  = rgn,
-                tooltip = "Apply Opacity to all Bars",
-                isSynced = function()
-                    local v = BD().barBgAlpha or 1
-                    local pp = DB(); if not pp or not pp.cdmBars then return false end
-                    for _, b in ipairs(pp.cdmBars.bars) do
-                        if (b.barBgAlpha or 1) ~= v then return false end
-                    end
-                    return true
-                end,
-                onClick = function()
-                    local v = BD().barBgAlpha or 1
-                    local pp = DB(); if not pp or not pp.cdmBars then return end
-                    for _, b in ipairs(pp.cdmBars.bars) do b.barBgAlpha = v end
-                    ns.BuildAllCDMBars(); Refresh(); UpdateCDMPreview(); EllesmereUI:RefreshPage()
-                end,
-            })
-        end
-
-        -- Inline color swatch on Bar Background (right)
-        do
-            local rgn = opacityRow._rightRegion
             local ctrl = rgn and rgn._control
             if ctrl and EllesmereUI.BuildColorSwatch then
                 local bgSwatch, updateBgSwatch = EllesmereUI.BuildColorSwatch(
@@ -7107,7 +7180,7 @@ initFrame:SetScript("OnEvent", function(self)
             end
         end
 
-        -- Row 3: Number of Rows | Vertical Orientation
+        -- Row 3: Number of Rows
         local numRowsRow
         numRowsRow, h = W:DualRow(parent, y,
             { type="slider", text="Number of Rows",
@@ -7119,13 +7192,7 @@ initFrame:SetScript("OnEvent", function(self)
                   ns.BuildAllCDMBars(); Refresh(); UpdateCDMPreviewAndResize()
                   EllesmereUI:RefreshPage()
               end },
-            { type="toggle", text="Vertical Orientation",
-              getValue=function() return BD().verticalOrientation end,
-              setValue=function(v)
-                  BD().verticalOrientation = v
-                  BD().growDirection = v and "DOWN" or "RIGHT"
-                  ns.BuildAllCDMBars(); Refresh(); UpdateCDMPreviewAndResize()
-              end });  y = y - h
+            { type="label", text="" });  y = y - h
 
         -- Inline cog on Number of Rows: Custom Top Row Count (only relevant when numRows == 2)
         do
@@ -7186,23 +7253,7 @@ initFrame:SetScript("OnEvent", function(self)
         -- Hide Buffs When Inactive (global setting, applies to all buff bars)
         if barData.barType == "buffs" or barData.key == "buffs" then
             local prof = ns.ECME and ns.ECME.db and ns.ECME.db.profile
-            _, h = W:DualRow(parent, y,
-                { type="toggle", text="Hide Buffs When Inactive",
-                  tooltip = "Global setting that applies to all buff bars.\nControls Blizzard's Edit Mode visibility for buff icons.",
-                  getValue=function()
-                      local p = ns.ECME and ns.ECME.db and ns.ECME.db.profile
-                      return p and p.cdmBars and p.cdmBars.hideBuffsWhenInactive == true
-                  end,
-                  setValue=function(v)
-                      local p = ns.ECME and ns.ECME.db and ns.ECME.db.profile
-                      if p and p.cdmBars then
-                          p.cdmBars.hideBuffsWhenInactive = v
-                      end
-                      if ns.SyncHideWhenInactive then ns.SyncHideWhenInactive() end
-                      Refresh()
-                  end },
-                { type="label", text="" }
-            );  y = y - h
+            -- Hide Buffs When Inactive toggle removed: always forced ON.
         end
 
         _, h = W:Spacer(parent, y, 8);  y = y - h
@@ -7220,10 +7271,9 @@ initFrame:SetScript("OnEvent", function(self)
             ["4"]       = "Auto-Cast Shine",
             ["5"]       = "GCD",
             ["7"]       = "Classic WoW Glow",
-            none        = "No Animation",
             hideActive  = "Hide Active State",
         }
-        local ACTIVE_ANIM_ORDER = { "blizzard", "hideActive", "1", "---", "3", "4", "5", "7", "none" }
+        local ACTIVE_ANIM_ORDER = { "blizzard", "hideActive", "1", "---", "3", "4", "5", "7" }
 
         local function IsCustomShape()
             local s = BD().iconShape or "none"
@@ -7359,6 +7409,24 @@ initFrame:SetScript("OnEvent", function(self)
                 EllesmereUI.RegisterWidgetRefresh(function() updateGlowSwatch(); updateClassSwatch(); UpdateBuffGlowState() end)
                 UpdateBuffGlowState()
             end
+
+            -- Icon Spacing | Icon Zoom row for buff bars
+            _, h = W:DualRow(parent, y,
+                { type="slider", text="Icon Spacing",
+                  min=-10, max=20, step=1,
+                  getValue=function() return BD().spacing or 2 end,
+                  setValue=function(v)
+                      BD().spacing = v
+                      ns.BuildAllCDMBars(); Refresh(); UpdateCDMPreviewAndResize()
+                  end },
+                { type="slider", text="Icon Zoom",
+                  min=0, max=0.20, step=0.01,
+                  getValue=function() return BD().iconZoom or 0.08 end,
+                  setValue=function(v)
+                      BD().iconZoom = v
+                      ns.RefreshCDMIconAppearance(BD().key); Refresh(); UpdateCDMPreview()
+                  end });  y = y - h
+
         else
         scaleAnimRow, h = W:DualRow(parent, y,
             { type="slider", text="Icon Scale",

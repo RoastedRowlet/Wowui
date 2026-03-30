@@ -1143,6 +1143,7 @@ L.privateaura = "Siempre que tengas una 'Aura Privada'"
 L.customSoundDesc = "Reproduce el sonido personalizado seleccionado en lugar del proporcionado por el módulo."
 L.resetSoundDesc = "Restablece los sonidos anteriores a sus valores predeterminados."
 L.resetAllCustomSound = "Si has personalizado sonidos para algún encuentro con jefes, este botón los reiniciará TODOS para que se utilicen los sonidos definidos aquí."
+--L.soundResetPrint = "The module '|cFF436EEE%s|r' uses a custom sound called '|cFF436EEE%s|r' that no longer exists. Resetting to default."
 
 -----------------------------------------------------------------------
 -- Statistics.lua
@@ -1178,7 +1179,6 @@ L.newFastestVictoryPrint = "Nuevo registro victoria más rápida: (-%s)" -- New 
 --L.blizzBasicAsBlizzTimeline = "Blizzard basic timers displayed on the Blizzard timeline"
 --L.developerMode = "Developer Mode"
 --L.enhancedModeWarning = "WARNING!\n\nDisabling enhanced mode will disable many BigWigs features, including:\n\nBar colors, spell renames, counters, custom sound/voice, countdowns, bars on/off, extra messages, etc."
---L.enhancedModeWelcome = "BigWigs 'Enhanced Mode' enabled!\n\nFull restoration of most pre-Midnight features, including:\n\nBar colors, spell renames, counters, custom sound/voice, countdowns, bars on/off, extra messages, etc."
 
 -----------------------------------------------------------------------
 -- Victory.lua

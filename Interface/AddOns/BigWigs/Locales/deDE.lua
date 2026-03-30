@@ -403,9 +403,9 @@ L.anyCombatTimerTooltip = "|TInterface\\AddOns\\BigWigs\\Media\\Icons\\minimap_r
 L.bossCombatTimer = "Timer für Bosskämpfe"
 L.bossCombatTimerDesc = "Ein Timer, welcher die Kampfdauer für Bossbegegnungen anzeigt, mit einem Tooltip des Kampfverlaufs für Bosse."
 L.bossCombatTimerTooltip = "|TInterface\\AddOns\\BigWigs\\Media\\Icons\\minimap_raid:0:0|tBoss Kampfverlauf"
---L.bossStagesTimer = "Boss Stages Timer"
---L.bossStagesTimerDesc = "A timer that resets every time a boss encounter changes stage, with a tooltip to see boss stage history. Only active on bosses with multiple stages."
---L.bossStagesTimerTooltip = "|TInterface\\AddOns\\BigWigs\\Media\\Icons\\minimap_raid:0:0|tBoss Stages History"
+L.bossStagesTimer = "Phasen-Timer für Bosskämpfe"
+L.bossStagesTimerDesc = "Ein Timer, welcher bei jeder neuen Phase einer Bossbegegnung zurückgesetzt wird, mit einem Tooltip des Phasenverlaufs für Bosse. Nur bei Bossen mit mehreren Phasen aktiv."
+L.bossStagesTimerTooltip = "|TInterface\\AddOns\\BigWigs\\Media\\Icons\\minimap_raid:0:0|tBoss Phasenverlauf"
 L.instanceTimer = "Instanz-Timer"
 L.instanceTimerDesc = "Ein Timer, welcher die Dauer einer Instanz anzeigt (Dungeon/Schlachtzug/etc), mit einem Tooltip des Instanzverlaufs."
 L.instanceTimerTooltip = "|TInterface\\AddOns\\BigWigs\\Media\\Icons\\minimap_raid:0:0|tInstanzverlauf"
@@ -1143,6 +1143,7 @@ L.privateaura = "Immer wenn eine 'Private Aura' auf Dir ist"
 L.customSoundDesc = "Den speziell gewählten Sound anstatt des vom Modul bereitgestellten abspielen."
 L.resetSoundDesc = "Setzt die obigen Sounds auf ihren Standard zurück."
 L.resetAllCustomSound = "Wenn Du Sounds für Bossbegegnungen geändert hast, werden diese ALLE über diese Schaltfläche zurückgesetzt, sodass stattdessen die hier gewählten genutzt werden."
+L.soundResetPrint = "Das Modul '|cFF436EEE%s|r' nutzt einen benutzerdefinierten Sound namens '|cFF436EEE%s|r' welcher nicht mehr existiert. Zurücksetzen auf Standard erfolgt."
 
 -----------------------------------------------------------------------
 -- Statistics.lua
@@ -1178,7 +1179,6 @@ L.blizzBasicAsBars = "Blizzard Standardtimer als BigWigs Leisten anzeigen"
 L.blizzBasicAsBlizzTimeline = "Blizzard Standardtimer in der Blizzard Zeitlinie anzeigen"
 L.developerMode = "Entwicklermodus"
 L.enhancedModeWarning = "WARNUNG!\n\nDie Deaktivierung des erweiterten Modus deaktiviert viele BigWigs Funktionen, inklusive:\n\nLeistenfarben, Zauberumbenennung, Timer, angepasster Sound/Stimme, Countdowns, Leisten an/aus, Extra Nachrichten, etc."
-L.enhancedModeWelcome = "BigWigs 'Erweiterter Modus' aktiviert!\n\nVolle Wiederherstellung der meisten Funktionen vor Midnight, inklusive:\n\nLeistenfarben, Zauberumbenennung, Timer, angepasster Sound/Stimme, Countdowns, Leisten an/aus, Extra Nachrichten, etc."
 
 -----------------------------------------------------------------------
 -- Victory.lua

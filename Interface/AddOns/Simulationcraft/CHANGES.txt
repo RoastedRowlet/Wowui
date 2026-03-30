@@ -1,26 +1,10 @@
-lightweight tag 3fbf4735605e7a767c57456ca48ded9da72f7810 12.0.1-02
+lightweight tag 686ed639ab1a4958f8916c52d8bb56ff99282371 12.0.1-03
 Author:	Dave Hendler <sollaires@gmail.com>
-Date:	Thu Mar 5 16:26:53 2026 -0800
+Date:	Sun Mar 29 09:58:05 2026 -0700
 
-commit 3fbf4735605e7a767c57456ca48ded9da72f7810
+commit 686ed639ab1a4958f8916c52d8bb56ff99282371
 Author: Dave Hendler <sollaires@gmail.com>
-Date:   Thu Mar 5 16:26:53 2026 -0800
+Date:   Sun Mar 29 09:58:05 2026 -0700
 
-    Bump version
-
-commit af6a784b052f047e91c1deb3413c4ee152c466d6
-Author: Jesse Manelius <jessemanelius@gmail.com>
-Date:   Thu Mar 5 23:42:40 2026 +0200
-
-    Cache spells right away
-    Add global SimulationcraftAPI that is used to expose some of the functions
-    fix some global variable leakage
-
-commit af6a784b052f047e91c1deb3413c4ee152c466d6
-Author: Jesse Manelius <jessemanelius@gmail.com>
-Date:   Thu Mar 5 23:42:40 2026 +0200
-
-    Cache spells right away
-    Add global SimulationcraftAPI that is used to expose some of the functions
-    fix some global variable leakage
+    Fix a combat crash due to secret values
 

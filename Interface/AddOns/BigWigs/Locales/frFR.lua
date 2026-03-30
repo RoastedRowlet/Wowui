@@ -1143,6 +1143,7 @@ L.privateaura = "Lorsqu'une 'aura privée' est sur vous"
 L.customSoundDesc = "Joue le son personnalisé sélectionné au lieu de celui fourni par le module."
 L.resetSoundDesc = "Réinitialise les sons ci-dessous à leurs valeurs par défaut."
 L.resetAllCustomSound = "Si vous avez des sons personnalisés pour certains paramètres des rencontres de boss, ce bouton les réinitialisera TOUS afin que les sons par défaut soient utilisés à la place."
+--L.soundResetPrint = "The module '|cFF436EEE%s|r' uses a custom sound called '|cFF436EEE%s|r' that no longer exists. Resetting to default."
 
 -----------------------------------------------------------------------
 -- Statistics.lua
@@ -1178,7 +1179,6 @@ L.blizzBasicAsBars = "CàR classiques de Blizzard affichés en tant que barres d
 L.blizzBasicAsBlizzTimeline = "CàR classiques de Blizzard affichés sur la ligne temporelle de Blizzard"
 L.developerMode = "Mode développeur"
 L.enhancedModeWarning = "ATTENTION !\n\nDésactiver le mode avancé désactivera beaucoup de fonctionnalités de BigWigs, incluant :\n\nles couleurs de barres, le renommage des sorts, les contres, les sons / voix personnalisées, les CàR, l'activation des barres, les messages supplémentaires, etc."
-L.enhancedModeWelcome = "'Mode avancé' de BigWigs activé !\n\nRestoration complète des fonctionnalités d'avant Midnight, incluant :\n\nles couleurs de barres, le renommage des sorts, les contres, les sons / voix personnalisées, les CàR, l'activation des barres, les messages supplémentaires, etc."
 
 -----------------------------------------------------------------------
 -- Victory.lua

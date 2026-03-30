@@ -128,9 +128,9 @@ do
 			barInfo = self:VoidConvergence(eventInfo)
 		elseif durationRounded == 15 then -- Twisting Obscurity
 			barInfo = self:TwistingObscurity(eventInfo)
-		elseif durationRounded == 23 then -- Despotic Command
+		elseif durationRounded == 22 then -- Despotic Command
 			barInfo = self:DespoticCommand(eventInfo)
-		elseif durationRounded == 26 then -- Fractured Projection
+		elseif durationRounded == 27 then -- Fractured Projection
 			barInfo = self:FracturedProjection(eventInfo)
 		elseif durationRounded == 44 then -- Shattering Twilight
 			barInfo = self:ShatteringTwilight(eventInfo)
@@ -146,19 +146,18 @@ do
 		elseif durationRounded == 46.5 then -- Void Convergence
 			if not isBeforeUnraveling(duration) then return end
 			barInfo = self:VoidConvergence(eventInfo)
-		elseif durationRounded == 45.5 then -- Twisting Obscurity
-			if not isBeforeUnraveling(duration) then return end
-			barInfo = self:TwistingObscurity(eventInfo)
 		elseif durationRounded == 46 then -- Despotic Command
 			if not isBeforeUnraveling(duration) then return end
 			barInfo = self:DespoticCommand(eventInfo)
-		elseif durationRounded == 45 then -- Fractured Projection or Shattering Twilight
+		elseif durationRounded == 45 then
 			if not isBeforeUnraveling(duration) then return end
-			-- These two alternate, so we need to check which one is next
-			if shatteringTwilightCount <= fracturedProjectionCount then
+			-- Twisting Obscurity -> Fractured Projection -> Shattering Twilight
+			if fracturedProjectionCount > shatteringTwilightCount then
+				barInfo = self:ShatteringTwilight(eventInfo)
+			elseif twistingObscurityCount > fracturedProjectionCount then
 				barInfo = self:FracturedProjection(eventInfo)
 			else
-				barInfo = self:ShatteringTwilight(eventInfo)
+				barInfo = self:TwistingObscurity(eventInfo)
 			end
 		elseif durationRounded == 370 then -- Berserk
 			if self:ShouldShowBars() then
@@ -214,7 +213,7 @@ do
 			barInfo = self:VoidConvergence(eventInfo)
 		elseif durationRounded == 46 then -- Despotic Command
 			if not isBeforeUnraveling(duration) then return end
-			barInfo =  self:DespoticCommand(eventInfo)
+			barInfo = self:DespoticCommand(eventInfo)
 		elseif durationRounded == 45 then -- Twisting Obscurity -> Fractured Projection -> Shattering Twilight
 			if not isBeforeUnraveling(duration) then return end
 			-- Twisting Obscurity -> Fractured Projection -> Shattering Twilight
@@ -225,8 +224,6 @@ do
 			else
 				barInfo = self:TwistingObscurity(eventInfo)
 			end
-
-		-- enrage
 		elseif durationRounded == 490 then
 			if self:ShouldShowBars() then
 				self:Berserk(490, 0)
@@ -257,8 +254,8 @@ function mod:ENCOUNTER_TIMELINE_EVENT_STATE_CHANGED(_, eventID)
 		if state == 2 or state == 3 then -- Finished or Canceled
 			self:StopBar(barInfo.msg)
 
-			if state == 2 and self:ShouldShowBars() and barInfo.callback then -- Finished
-				barInfo.callback()
+			if state == 2 and self:ShouldShowBars() and barInfo.onFinished then -- Finished
+				barInfo.onFinished()
 			end
 
 			activeBars[eventID] = nil
@@ -302,7 +299,7 @@ function mod:VoidConvergence(eventInfo)
 	return {
 		msg = barText,
 		key = 1247738,
-		callback = function()
+		onFinished = function()
 			self:Message(1247738, "orange", barText)
 			self:PlaySound(1247738, "alarm")
 		end
@@ -332,7 +329,7 @@ function mod:ShatteringTwilight(eventInfo)
 	return {
 		msg = barText,
 		key = 1250803,
-		callback = function()
+		onFinished = function()
 			self:Message(1250803, "purple", barText)
 			-- Sound on PAs
 		end
@@ -348,7 +345,7 @@ function mod:FracturedProjection(eventInfo)
 	return {
 		msg = barText,
 		key = 1254081,
-		callback = function()
+		onFinished = function()
 			self:Message(1254081, "red", barText)
 			self:PlaySound(1254081, "warning")
 		end
@@ -364,7 +361,7 @@ function mod:DespoticCommand(eventInfo)
 	return {
 		msg = barText,
 		key = 1248697,
-		callback = function()
+		onFinished = function()
 			self:Message(1248697, "yellow", barText)
 			-- Sound on PAs
 		end
@@ -380,7 +377,7 @@ function mod:TwistingObscurity(eventInfo)
 	return {
 		msg = barText,
 		key = 1250686,
-		callback = function()
+		onFinished = function()
 			self:Message(1250686, "yellow", barText)
 			self:PlaySound(1250686, "alert")
 		end

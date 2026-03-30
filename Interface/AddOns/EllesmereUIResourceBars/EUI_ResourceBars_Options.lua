@@ -936,6 +936,16 @@ initFrame:SetScript("OnEvent", function(self)
         local _syncRows = {}
 
         -- Bar texture dropdown values (built from _ERB globals)
+        -- Re-append SharedMedia textures now (options open later than init,
+        -- so SM packs that register textures lazily are available by now).
+        if EllesmereUI.AppendSharedMediaTextures then
+            EllesmereUI.AppendSharedMediaTextures(
+                _G._ERB_BarTextureNames or {},
+                _G._ERB_BarTextureOrder or {},
+                nil,
+                _G._ERB_BarTextures
+            )
+        end
         local hbtValues = {}
         local hbtOrder = {}
         do
@@ -1594,6 +1604,19 @@ initFrame:SetScript("OnEvent", function(self)
             UpdateCogDisThresh()
         end
 
+        -- Row: Anchor to Cursor | Cursor Position (cog: X + Y)
+        do
+            local _, cursorH = EllesmereUI.BuildCursorAnchorRow({
+                W = W, parent = parent, y = y,
+                getData = function() local p = DB(); return p and p.secondary or {} end,
+                onApply = function() RebuildClass(); SmoothRefresh() end,
+                makeCogBtn = MakeCogBtn,
+                disabledFn = function() local p = DB(); return p and not p.secondary.enabled end,
+                disabledTip = "Enable Class Resource",
+            })
+            y = y - cursorH
+        end
+
         _, h = W:Spacer(parent, y, 16);  y = y - h
 
         -----------------------------------------------------------------------
@@ -2078,6 +2101,22 @@ initFrame:SetScript("OnEvent", function(self)
             UpdatePowerThreshCogDis()
         end
 
+        -- Row: Anchor to Cursor | Cursor Position (cog: X + Y)
+        do
+            local _, cursorH = EllesmereUI.BuildCursorAnchorRow({
+                W = W, parent = parent, y = y,
+                getData = function() local p = DB(); return p and p.primary or {} end,
+                onApply = function() RebuildPower(); SmoothRefresh() end,
+                makeCogBtn = MakeCogBtn,
+                disabledFn = function()
+                    if noPrimaryPower then return true end
+                    local p = DB(); return p and not p.primary.enabled
+                end,
+                disabledTip = "Enable Power Bar",
+            })
+            y = y - cursorH
+        end
+
         _, h = W:Spacer(parent, y, 16);  y = y - h
 
         -----------------------------------------------------------------------
@@ -2458,6 +2497,19 @@ initFrame:SetScript("OnEvent", function(self)
             swatch:HookScript("OnShow", UpdateHealthThreshSwDis)
             EllesmereUI.RegisterWidgetRefresh(UpdateHealthThreshSwDis)
             UpdateHealthThreshSwDis()
+        end
+
+        -- Row: Anchor to Cursor | Cursor Position (cog: X + Y)
+        do
+            local _, cursorH = EllesmereUI.BuildCursorAnchorRow({
+                W = W, parent = parent, y = y,
+                getData = function() local p = DB(); return p and p.health or {} end,
+                onApply = function() RebuildHealth(); SmoothRefresh() end,
+                makeCogBtn = MakeCogBtn,
+                disabledFn = function() local p = DB(); return p and not p.health.enabled end,
+                disabledTip = "Enable Health Bar",
+            })
+            y = y - cursorH
         end
 
         _, h = W:Spacer(parent, y, 16);  y = y - h
@@ -2880,6 +2932,15 @@ initFrame:SetScript("OnEvent", function(self)
         -- Wipe click mappings (shared with display page)
         wipe(_clickMappings)
 
+        -- Re-append SharedMedia textures for cast bar (catches lazy-registered SM packs)
+        if EllesmereUI.AppendSharedMediaTextures then
+            EllesmereUI.AppendSharedMediaTextures(
+                _G._ERB_CastBarTextureNames or {},
+                _G._ERB_CastBarTextureOrder or {},
+                nil,
+                _G._ERB_CastBarTextures
+            )
+        end
         -- Texture dropdown values (same as nameplates)
         local texValues = {}
         local texOrder = {}

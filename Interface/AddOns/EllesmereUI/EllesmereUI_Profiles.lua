@@ -168,11 +168,17 @@ EllesmereUI._Serializer = Serializer
 -------------------------------------------------------------------------------
 --  Deep copy utility
 -------------------------------------------------------------------------------
-local function DeepCopy(src)
+local function DeepCopy(src, seen)
     if type(src) ~= "table" then return src end
+    if seen and seen[src] then return seen[src] end
+    if not seen then seen = {} end
     local copy = {}
+    seen[src] = copy
     for k, v in pairs(src) do
-        copy[k] = DeepCopy(v)
+        -- Skip frame references and other userdata that can't be serialized
+        if type(v) ~= "userdata" and type(v) ~= "function" then
+            copy[k] = DeepCopy(v, seen)
+        end
     end
     return copy
 end
@@ -522,15 +528,18 @@ end
 function EllesmereUI.RefreshAllAddons()
     -- ResourceBars (full rebuild)
     if _G._ERB_Apply then _G._ERB_Apply() end
-    -- CDM: restore the current spec's spell assignments BEFORE rebuilding.
-    -- Profile data may contain spells from a different class/spec; the spec
-    -- profile system is the source of truth for which spells are displayed.
-    if _G._ECME_LoadSpecProfile and _G._ECME_GetCurrentSpecKey then
-        local curKey = _G._ECME_GetCurrentSpecKey()
-        if curKey then _G._ECME_LoadSpecProfile(curKey) end
+    -- CDM: skip during spec-profile switch. CDM's own PLAYER_SPECIALIZATION_CHANGED
+    -- handler will update the active spec key and rebuild with the correct spec
+    -- spells via SwitchSpecProfile's deferred FullCDMRebuild. Running it here
+    -- would use a stale active spec key (not yet updated by CDM) and show the
+    -- wrong spec's spells until the deferred rebuild overwrites them.
+    if not EllesmereUI._specProfileSwitching then
+        if _G._ECME_LoadSpecProfile and _G._ECME_GetCurrentSpecKey then
+            local curKey = _G._ECME_GetCurrentSpecKey()
+            if curKey then _G._ECME_LoadSpecProfile(curKey) end
+        end
+        if _G._ECME_Apply then _G._ECME_Apply() end
     end
-    -- CDM (full rebuild, now with correct spec spells)
-    if _G._ECME_Apply then _G._ECME_Apply() end
     -- Cursor (style + position)
     if _G._ECL_Apply then _G._ECL_Apply() end
     if _G._ECL_ApplyTrail then _G._ECL_ApplyTrail() end
@@ -1391,6 +1400,7 @@ do
                     if current ~= targetProfile then
                         local fontWillChange = EllesmereUI.ProfileChangesFont(
                             EllesmereUIDB.profiles[targetProfile])
+                        EllesmereUI._specProfileSwitching = true
                         EllesmereUI.SwitchProfile(targetProfile)
                         EllesmereUI.RefreshAllAddons()
                         if fontWillChange then
@@ -1453,6 +1463,7 @@ do
                             if cur ~= target then
                                 local fontChange = EllesmereUI.ProfileChangesFont(
                                     EllesmereUIDB.profiles[target])
+                                EllesmereUI._specProfileSwitching = true
                                 EllesmereUI.SwitchProfile(target)
                                 EllesmereUI.RefreshAllAddons()
                                 if fontChange then
@@ -1525,6 +1536,7 @@ do
             local current = db.activeProfile or "Default"
             if current ~= targetProfile then
                 local function doSwitch()
+                    EllesmereUI._specProfileSwitching = true
                     local fontWillChange = EllesmereUI.ProfileChangesFont(db.profiles[targetProfile])
                     EllesmereUI.SwitchProfile(targetProfile)
                     EllesmereUI.RefreshAllAddons()

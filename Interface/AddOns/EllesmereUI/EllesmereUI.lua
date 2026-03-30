@@ -253,7 +253,7 @@ local ADDON_ROSTER = {
     { folder = "EllesmereUIRaidFrames",        display = "Raid Frames",        search_name = "EllesmereUI Raid Frames",        icon_on = ICONS_PATH .. "sidebar\\raidframes-ig-on.png",      icon_off = ICONS_PATH .. "sidebar\\raidframes-ig.png",      comingSoon = true },
     { folder = "EllesmereUICooldownManager",   display = "Cooldown Manager",   search_name = "EllesmereUI Cooldown Manager",   icon_on = ICONS_PATH .. "sidebar\\cdmeffects-ig-on.png",      icon_off = ICONS_PATH .. "sidebar\\cdmeffects-ig.png"      },
     { folder = "EllesmereUIResourceBars",      display = "Resource Bars",      search_name = "EllesmereUI Resource Bars",      icon_on = ICONS_PATH .. "sidebar\\resourcebars-ig-on-2.png",  icon_off = ICONS_PATH .. "sidebar\\resourcebars-ig-2.png"  },
-    { folder = "EllesmereUIAuraBuffReminders", display = "AuraBuff Reminders", search_name = "EllesmereUI AuraBuff Reminders", icon_on = ICONS_PATH .. "sidebar\\beacons-ig-on.png",         icon_off = ICONS_PATH .. "sidebar\\beacons-ig.png"         },
+    { folder = "EllesmereUIAuraBuffReminders", display = "AuraBuff Reminders", search_name = "EllesmereUI AuraBuff Reminders", icon_on = ICONS_PATH .. "sidebar\\beacons-ig-on.png",         icon_off = ICONS_PATH .. "sidebar\\beacons-ig.png",         maintenance = true },
     { folder = "EllesmereUIBasics",            display = "Basics",             search_name = "EllesmereUI Basics",             icon_on = ICONS_PATH .. "sidebar\\basics-ig-on-2.png",        icon_off = ICONS_PATH .. "sidebar\\basics-ig-2.png"      },
     { folder = "EllesmereUIPartyMode",         display = "Party Mode",         search_name = "EllesmereUI Party Mode",         icon_on = ICONS_PATH .. "sidebar\\partymode-ig-on.png",       icon_off = ICONS_PATH .. "sidebar\\partymode-ig.png",       alwaysLoaded = true },
 }
@@ -681,16 +681,17 @@ do
     --  Convenience wrappers — pixel-snapped frame geometry
     ---------------------------------------------------------------------------
     function PP.Size(frame, w, h)
-        local sw = PP.Scale(w)
-        frame:SetSize(sw, h and PP.Scale(h) or sw)
+        local sw = math.floor(w + 0.5)
+        local sh = h and math.floor(h + 0.5) or sw
+        frame:SetSize(sw, sh)
     end
 
     function PP.Width(frame, w)
-        frame:SetWidth(PP.Scale(w))
+        frame:SetWidth(math.floor(w + 0.5))
     end
 
     function PP.Height(frame, h)
-        frame:SetHeight(PP.Scale(h))
+        frame:SetHeight(math.floor(h + 0.5))
     end
 
     function PP.Point(obj, anchor, p1, p2, p3, p4)
@@ -3602,8 +3603,8 @@ local function CreateMainFrame()
         dlIcon:Hide()
         btn._dlIcon = dlIcon
 
-        -- Power toggle button (not shown for comingSoon or alwaysLoaded entries)
-        if not info.comingSoon and not info.alwaysLoaded then
+        -- Power toggle button (not shown for comingSoon, maintenance, or alwaysLoaded entries)
+        if not info.comingSoon and not info.maintenance and not info.alwaysLoaded then
             -- Register helper once (on EllesmereUI to avoid new upvalues)
             if not EllesmereUI._addonToggleInit then
                 EllesmereUI._addonToggleInit = true
@@ -3670,6 +3671,7 @@ local function CreateMainFrame()
         btn._loaded = false
         btn._alwaysLoaded = info.alwaysLoaded or false
         btn._comingSoon = info.comingSoon or false
+        btn._maintenance = info.maintenance or false
 
         -- Hover highlight
         local hlTex = SolidTex(btn, "HIGHLIGHT", 1, 1, 1, 0)
@@ -3679,6 +3681,12 @@ local function CreateMainFrame()
             if self._comingSoon then
                 if EllesmereUI.ShowWidgetTooltip then
                     EllesmereUI.ShowWidgetTooltip(self, "Coming soon")
+                end
+                return
+            end
+            if self._maintenance then
+                if EllesmereUI.ShowWidgetTooltip then
+                    EllesmereUI.ShowWidgetTooltip(self, "In Maintenance")
                 end
                 return
             end
@@ -3697,6 +3705,7 @@ local function CreateMainFrame()
         btn:SetScript("OnLeave", function(self)
             if EllesmereUI.HideWidgetTooltip then EllesmereUI.HideWidgetTooltip() end
             if self._comingSoon then return end
+            if self._maintenance then return end
             if self._notEnabled then return end
             hlTex:SetAlpha(0)
             self._hoverGlow:Hide()
@@ -3711,6 +3720,7 @@ local function CreateMainFrame()
         end)
         btn:SetScript("OnClick", function(self)
             if self._comingSoon then return end
+            if self._maintenance then return end
             if self._notEnabled then return end
             if self._loaded and modules[self._folder] then
                 EllesmereUI:SelectModule(self._folder)
@@ -5786,14 +5796,23 @@ local function RefreshSidebarStates()
     -- Two-pass: enabled addons first (roster order), disabled addons after
     local enabledList = {}
     local disabledList = {}
+    local maintenanceList = {}
+    local comingSoonList = {}
     for _, info in ipairs(ADDON_ROSTER) do
         local loaded = info.alwaysLoaded or IsAddonLoaded(info.folder)
-        if loaded then
+        if info.maintenance then
+            maintenanceList[#maintenanceList + 1] = info
+        elseif info.comingSoon then
+            comingSoonList[#comingSoonList + 1] = info
+        elseif loaded then
             enabledList[#enabledList + 1] = info
         else
             disabledList[#disabledList + 1] = info
         end
     end
+    -- Order: enabled, disabled, maintenance, coming soon
+    for _, info in ipairs(maintenanceList) do disabledList[#disabledList + 1] = info end
+    for _, info in ipairs(comingSoonList) do disabledList[#disabledList + 1] = info end
 
     local rowIndex = 0
     for _, info in ipairs(enabledList) do
@@ -6027,7 +6046,7 @@ end
 -------------------------------------------------------------------------------
 --  Slash commands
 -------------------------------------------------------------------------------
-EllesmereUI.VERSION = "5.6.5"
+EllesmereUI.VERSION = "5.8.6"
 
 -- Register this addon's version into a shared global table (taint-free at load time)
 if not _G._EUI_AddonVersions then _G._EUI_AddonVersions = {} end
@@ -6111,8 +6130,23 @@ if not _G._EUI_ConflictChecked then
             { addon = "Platynator",               label = "Platynator",                 targets = { "EllesmereUINameplates" } },
             { addon = "Plater",                   label = "Plater Nameplates",          targets = { "EllesmereUINameplates" } },
             { addon = "Kui_Nameplates",            label = "KUI Nameplates",             targets = { "EllesmereUINameplates" } },
+            { addon = "TidyPlates",               label = "TidyPlates",                 targets = { "EllesmereUINameplates" } },
+            { addon = "TidyPlates_ThreatPlates",  label = "TidyPlates ThreatPlates",    targets = { "EllesmereUINameplates" } },
+            { addon = "Healers-Have-To-Die",      label = "Healers Have To Die",        targets = { "EllesmereUINameplates" } },
+            { addon = "Aloft",                    label = "Aloft",                      targets = { "EllesmereUINameplates" } },
             { addon = "SenseiClassResourceBar",   label = "Sensei Class Resource Bar",  targets = { "EllesmereUIResourceBars" } },
             { addon = "FriendGroups",             label = "FriendGroups",               targets = { "EllesmereUIBasics" } },
+            { addon = "SexyMap",                  label = "SexyMap",                    targets = { "EllesmereUIBasics" } },
+            -- { addon = "Prat-3.0",                 label = "Prat",                       targets = { "EllesmereUIBasics" } },
+            -- { addon = "Chatter",                  label = "Chatter",                    targets = { "EllesmereUIBasics" } },
+            -- { addon = "Chattynator",              label = "Chattynator",                targets = { "EllesmereUIBasics" } },
+            -- { addon = "Glass",                    label = "Glass",                      targets = { "EllesmereUIBasics" } },
+            -- { addon = "AdiBags",                  label = "AdiBags",                    targets = { "EllesmereUIBasics" } },
+            -- { addon = "ArkInventory",             label = "ArkInventory",               targets = { "EllesmereUIBasics" } },
+            -- { addon = "Baganator",                label = "Baganator",                  targets = { "EllesmereUIBasics" } },
+            -- { addon = "Bagnon",                   label = "Bagnon",                     targets = { "EllesmereUIBasics" } },
+            -- { addon = "BetterBags",               label = "BetterBags",                 targets = { "EllesmereUIBasics" } },
+            -- { addon = "Sorted",                   label = "Sorted",                     targets = { "EllesmereUIBasics" } },
             { addon = "UltimateMouseCursor",      label = "Ultimate Mouse Cursor",      targets = { "EllesmereUICursor" } },
             { addon = "BetterCooldownManager",    label = "Better Cooldown Manager",    targets = { "EllesmereUICooldownManager" } },
             { addon = "CooldownManagerCentered",    label = "Cooldown Manager Centered",    targets = { "EllesmereUICooldownManager" } },

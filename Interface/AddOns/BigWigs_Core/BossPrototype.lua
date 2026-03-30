@@ -594,6 +594,7 @@ do
 		local stage = self:GetStage() or 0
 		local eventErrorMessage = unhandledEventString:format(GetTime() - self.stageTime, stage, eventInfo.spellName, eventInfo.spellID, eventInfo.duration)
 		self:Error(eventErrorMessage, true)
+		self:Debug(("TL event ID %d after %.1fs (stage %s) was missed."):format(eventInfo.id, GetTime() - self.stageTime, stage))
 	end
 end
 
@@ -3639,7 +3640,7 @@ end
 
 do
 	local GetPlayerInfoByGUID = GetPlayerInfoByGUID
-	local GetClassColor = C_ClassColor and C_ClassColor.GetClassColor
+	local GetClassColor = C_ClassColor and C_ClassColor.GetClassColor -- XXX [Mainline:✓ MoP:✗ Wrath:✗ Vanilla:✗]
 	--- Temporarily replace the next Blizzard boss message with a TargetMessage
 	-- @number duration the duration the block should last
 	-- @param key the option key

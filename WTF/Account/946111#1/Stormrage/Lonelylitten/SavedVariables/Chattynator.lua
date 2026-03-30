@@ -202,4 +202,6 @@ CHATTYNATOR_COMMAND_HISTORY = {
 "/cw Beardedfist-Stormrage whatever tip you feel is appropriate",
 "/cw Hollowtrack-Stormrage sounds good!",
 "/cw Hollowtrack-Stormrage done!",
+"/s /BW",
+"/g because blizz is based",
 }

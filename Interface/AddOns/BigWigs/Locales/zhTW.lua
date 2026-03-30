@@ -1143,6 +1143,7 @@ L.privateaura = "當私有光環施放在你身上時（點名）"
 L.customSoundDesc = "播放選定的自訂的聲音，而不是由模塊提供的。"
 L.resetSoundDesc = "將前面的音效設定重設為預設值。"
 L.resetAllCustomSound = "如果設置全部首領戰鬥自訂的聲音，此按鈕將重置「全部」以這裡自訂的聲音來代替。"
+--L.soundResetPrint = "The module '|cFF436EEE%s|r' uses a custom sound called '|cFF436EEE%s|r' that no longer exists. Resetting to default."
 
 -----------------------------------------------------------------------
 -- Statistics.lua
@@ -1178,7 +1179,6 @@ L.blizzBasicAsBars = "BigWigs 風格的計時條 + 暴雪的內建計時"
 L.blizzBasicAsBlizzTimeline = "暴雪的「首領技能」時間軸 + 暴雪的內建計時（完全使用暴雪原生）"
 L.developerMode = "開發者模式"
 L.enhancedModeWarning = "警告！\n\n停用 BigWigs 的增強計時會同步關閉 BigWigs 的其他首領戰功能，包含：\n\n計時條顏色、技能別名、技能計數、自訂音效和語音、倒數計時、計時條開關、額外訊息等等。"
-L.enhancedModeWelcome = "增強模式已啟用！\n\n大部份功能已恢復至《至暗之夜》版本前的狀態，包含：\n\n計時條顏色、技能別名、技能計數、自訂音效和語音、倒數計時、計時條開關、額外訊息等等。"
 
 -----------------------------------------------------------------------
 -- Victory.lua

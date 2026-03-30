@@ -810,9 +810,11 @@ local function GetScenarioSection()
                         })
                     end
                 elseif numRequired > 0 then
-                    -- Only use quantityString prefix when it adds meaningful info (not just "0" or "1")
+                    -- Config option: useQuantityString
+                    -- true  = use WoW's quantityString when available (shows "2", "3", etc.)
+                    -- false = always use explicit "x/y" format (shows "2/7", "3/7", etc.)
                     local qs = crit.quantityString
-                    local useQS = qs and qs ~= "" and qs ~= "0" and qs ~= "1"
+                    local useQS = Cfg("useQuantityString") and qs and qs ~= ""
                     if useQS then
                         displayText = qs .. " " .. desc
                     else
@@ -1227,10 +1229,16 @@ local function GetTrackedRecipes()
 
     local tracked = C_TradeSkillUI.GetRecipesTracked(false)
     local recraft = C_TradeSkillUI.GetRecipesTracked(true)
-    if recraft then for _, v in ipairs(recraft) do
-        if type(v) == "table" then v._isRecraft = true end
-        tracked[#tracked + 1] = v
-    end end
+
+    -- Build a set of recipeIDs that are from the recraft list
+    local recraftIDs = {}
+    if recraft then
+        for _, v in ipairs(recraft) do
+            local rid = type(v) == "table" and (v.recipeID or v.recipeSchematicID) or v
+            if rid then recraftIDs[rid] = true end
+            tracked[#tracked + 1] = v
+        end
+    end
     if not tracked or #tracked == 0 then return _recipes end
 
     local listN = 0
@@ -1246,7 +1254,7 @@ local function GetTrackedRecipes()
                     _recipe_entries[listN] = entry
                 end
                 entry.recipeID = recipeID
-                entry.isRecraft = (type(tracked_entry) == "table" and tracked_entry._isRecraft) or false
+                entry.isRecraft = recraftIDs[recipeID] or false
                 entry.name = schematic.name or ("Recipe #"..recipeID)
                 local reagentN = 0
                 if schematic.reagentSlotSchematics then
@@ -1320,7 +1328,7 @@ function EQT:Refresh(skipAlphaFlash)
     local cc      = db.completedColor or C.complete
     local fc      = db.focusedColor or { r=0.871, g=0.251, b=1.0 }
     local ffs     = db.focusedFontSize
-    local fbgA    = (db.focusBgOpacity or 25) / 100
+    local fbgA    = (db.focusBgOpacity or 0) / 100
     local iqSize  = db.questItemSize or 22
     local sc      = db.secColor or C.section
     local compFS  = db.completedFontSize
@@ -1926,7 +1934,7 @@ function EQT:RefreshProgress()
     local cc      = db.completedColor or C.complete
     local fc      = db.focusedColor or { r=0.871, g=0.251, b=1.0 }
     local ffs     = db.focusedFontSize
-    local fbgA    = (db.focusBgOpacity or 25) / 100
+    local fbgA    = (db.focusBgOpacity or 0) / 100
     local compFS  = db.completedFontSize
     local superQID = C_SuperTrack and C_SuperTrack.GetSuperTrackedQuestID and C_SuperTrack.GetSuperTrackedQuestID()
 
@@ -2565,6 +2573,8 @@ function EQT:Init()
         QUEST_TURNED_IN = true,
         QUEST_WATCH_LIST_CHANGED = true,
         SCENARIO_COMPLETED = true,
+        SCENARIO_CRITERIA_UPDATE = true,
+        SCENARIO_UPDATE = true,
         TRACKED_RECIPE_UPDATE = true,
     }
     local SCENARIO_EVENTS = {

@@ -80,3 +80,4 @@ LittleWigs_Legion: enabled
 LittleWigs_Dragonflight: enabled
 BigWigs_TheDreamrift: enabled
 EllesmereUIAuraBuffReminders: enabled
+BigWigs_MarchOnQuelDanas: enabled
