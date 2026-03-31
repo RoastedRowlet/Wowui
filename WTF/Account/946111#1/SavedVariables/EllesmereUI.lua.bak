@@ -7,6 +7,7 @@ EllesmereUIDB = {
 },
 ["durWarnYOffset"] = 102,
 ["unlockWidthMatch"] = {
+["CDM_custom_4_867585_153"] = "ERB_CastBar",
 ["playerCastbar"] = "player",
 ["focusCastbar"] = "focus",
 ["targetCastbar"] = "target",
@@ -14,9 +15,9 @@ EllesmereUIDB = {
 ["lastSpecByChar"] = {
 ["Lonelylitten - Stormrage"] = 105,
 ["Angryabsol - Stormrage"] = 1480,
-["Zappyxatu - Stormrage"] = 264,
-["Madmareep - Stormrage"] = 258,
 ["Barelynoer - Area 52"] = 1473,
+["Madmareep - Stormrage"] = 258,
+["Zappyxatu - Stormrage"] = 264,
 },
 ["_capturedOnce"] = true,
 ["profileOrder"] = {
@@ -89,6 +90,7 @@ EllesmereUIDB = {
 ["activeProfile"] = "Default",
 ["phantomBounds"] = {
 },
+["showSpellID"] = true,
 ["lastNonSpecProfile"] = "Devourer",
 ["specProfiles"] = {
 [105] = "Default",
@@ -99,9 +101,9 @@ EllesmereUIDB = {
 ["specProfiles"] = {
 ["264"] = {
 ["trackedBuffBars"] = {
-["selectedBar"] = 1,
 ["bars"] = {
 },
+["selectedBar"] = 1,
 },
 ["barSpells"] = {
 ["cooldowns"] = {
@@ -127,11 +129,33 @@ EllesmereUIDB = {
 },
 ["105"] = {
 ["trackedBuffBars"] = {
-["selectedBar"] = 1,
 ["bars"] = {
 },
+["selectedBar"] = 1,
 },
 ["barSpells"] = {
+["custom_4_867585_153"] = {
+["assignedSpells"] = {
+58984,
+-14,
+-13,
+},
+["removedSpells"] = {
+},
+},
+["custom_4_369202_22"] = {
+["assignedSpells"] = {
+58984,
+},
+["removedSpells"] = {
+[-14] = true,
+[-13] = true,
+},
+},
+["custom_4_369283_572"] = {
+["assignedSpells"] = {
+},
+},
 ["custom_4_369082_17"] = {
 ["assignedSpells"] = {
 391528,
@@ -145,26 +169,8 @@ EllesmereUIDB = {
 ["customSpells"] = {
 },
 },
-["custom_5_369853_734"] = {
+["custom_4_867575_773"] = {
 ["assignedSpells"] = {
-},
-["removedSpells"] = {
-[-13] = true,
-[58984] = true,
-[-14] = true,
-},
-},
-["buffs"] = {
-["assignedSpells"] = {
-158478,
-22812,
-102342,
-1261867,
-5215,
-22842,
-},
-["removedSpells"] = {
-[33763] = true,
 },
 },
 ["cooldowns"] = {
@@ -185,17 +191,18 @@ EllesmereUIDB = {
 [33891] = 3,
 },
 },
-["custom_4_369202_22"] = {
+["buffs"] = {
+["removedSpells"] = {
+[33763] = true,
+},
+},
+["custom_5_369853_734"] = {
 ["assignedSpells"] = {
-58984,
 },
 ["removedSpells"] = {
-[-14] = true,
 [-13] = true,
-},
-},
-["custom_4_369283_572"] = {
-["assignedSpells"] = {
+[58984] = true,
+[-14] = true,
 },
 },
 ["utility"] = {
@@ -226,9 +233,9 @@ EllesmereUIDB = {
 },
 ["1473"] = {
 ["trackedBuffBars"] = {
+["selectedBar"] = 1,
 ["bars"] = {
 },
-["selectedBar"] = 1,
 },
 ["barSpells"] = {
 ["cooldowns"] = {
@@ -249,9 +256,9 @@ EllesmereUIDB = {
 },
 ["1480"] = {
 ["trackedBuffBars"] = {
+["selectedBar"] = 1,
 ["bars"] = {
 },
-["selectedBar"] = 1,
 },
 ["barSpells"] = {
 ["cooldowns"] = {
@@ -262,13 +269,6 @@ EllesmereUIDB = {
 },
 },
 ["buffs"] = {
-["assignedSpells"] = {
-1227619,
-1238488,
-1256301,
-1239524,
-1246556,
-},
 },
 ["custom_4_262348_483"] = {
 ["assignedSpells"] = {
@@ -300,9 +300,9 @@ EllesmereUIDB = {
 },
 ["258"] = {
 ["trackedBuffBars"] = {
+["selectedBar"] = 1,
 ["bars"] = {
 },
-["selectedBar"] = 1,
 },
 ["barSpells"] = {
 ["cooldowns"] = {
@@ -323,9 +323,9 @@ EllesmereUIDB = {
 },
 ["102"] = {
 ["trackedBuffBars"] = {
+["selectedBar"] = 1,
 ["bars"] = {
 },
-["selectedBar"] = 1,
 },
 ["barSpells"] = {
 ["custom_4_115759_241"] = {
@@ -361,8 +361,6 @@ EllesmereUIDB = {
 },
 },
 ["buffs"] = {
-["assignedSpells"] = {
-},
 ["removedSpells"] = {
 [231042] = true,
 },
@@ -407,7 +405,36 @@ EllesmereUIDB = {
 },
 },
 },
-["previewHintDismissed"] = true,
+["unlockAnchors"] = {
+["CDM_custom_4_867585_153"] = {
+["target"] = "CDM_utility",
+["offsetY"] = -0.333526611328125,
+["side"] = "BOTTOM",
+["offsetX"] = 9.1552734375e-05,
+},
+["focusCastbar"] = {
+["target"] = "focus",
+["offsetY"] = 0.333343505859375,
+["side"] = "BOTTOM",
+["offsetX"] = 0,
+},
+["playerCastbar"] = {
+["target"] = "player",
+["side"] = "BOTTOM",
+},
+["targettarget"] = {
+["target"] = "target",
+["offsetY"] = 24.66659545898438,
+["side"] = "TOP",
+["offsetX"] = 66.66668701171875,
+},
+["targetCastbar"] = {
+["target"] = "target",
+["offsetY"] = -0.5,
+["side"] = "BOTTOM",
+["offsetX"] = 0,
+},
+},
 ["sidebarUnlockTipSeen"] = true,
 ["profiles"] = {
 ["Default"] = {
@@ -417,28 +444,40 @@ EllesmereUIDB = {
 },
 ["unlockLayout"] = {
 ["anchors"] = {
-["targetCastbar"] = {
-["target"] = "target",
-["offsetY"] = -0.250030517578125,
+["CDM_custom_4_867585_153"] = {
+["target"] = "CDM_utility",
+["offsetY"] = -0.333526611328125,
 ["side"] = "BOTTOM",
-["offsetX"] = 0,
-},
-["targettarget"] = {
-["target"] = "target",
-["offsetY"] = 24.416748046875,
-["side"] = "TOP",
-["offsetX"] = 66.66693115234375,
+["offsetX"] = 9.1552734375e-05,
 },
 ["focusCastbar"] = {
 ["target"] = "focus",
-["offsetY"] = 0,
+["offsetY"] = 0.333343505859375,
+["side"] = "BOTTOM",
+["offsetX"] = 0,
+},
+["playerCastbar"] = {
+["target"] = "player",
+["side"] = "BOTTOM",
+},
+["targettarget"] = {
+["target"] = "target",
+["offsetY"] = 24.66659545898438,
+["side"] = "TOP",
+["offsetX"] = 66.66668701171875,
+},
+["targetCastbar"] = {
+["target"] = "target",
+["offsetY"] = -0.5,
 ["side"] = "BOTTOM",
 ["offsetX"] = 0,
 },
 },
 ["widthMatch"] = {
 ["targetCastbar"] = "target",
+["CDM_custom_4_867585_153"] = "ERB_CastBar",
 ["focusCastbar"] = "focus",
+["playerCastbar"] = "player",
 },
 ["heightMatch"] = {
 },
@@ -462,11 +501,11 @@ EllesmereUIDB = {
 ["point"] = "CENTER",
 ["x"] = 421.800048828125,
 },
-["QueueStatus"] = {
-["y"] = 358.0001831054688,
+["ExtraActionButton"] = {
+["y"] = -344.9998168945313,
 ["relPoint"] = "CENTER",
 ["point"] = "CENTER",
-["x"] = 1009.500122070313,
+["x"] = -273.3334655761719,
 },
 ["Bar8"] = {
 ["y"] = -488.5000839233398,
@@ -546,11 +585,11 @@ EllesmereUIDB = {
 ["point"] = "CENTER",
 ["x"] = -535.1666564941406,
 },
-["ExtraActionButton"] = {
-["y"] = -344.9998168945313,
+["QueueStatus"] = {
+["y"] = 358.0001831054688,
 ["relPoint"] = "CENTER",
 ["point"] = "CENTER",
-["x"] = -273.3334655761719,
+["x"] = 1009.500122070313,
 },
 ["RepBar"] = {
 ["y"] = 572.250244140625,
@@ -563,22 +602,22 @@ EllesmereUIDB = {
 ["Bar3"] = {
 ["buttonHeight"] = 32,
 ["_savedBarAlpha"] = 1,
-["buttonWidth"] = 32,
-["barVisibility"] = "mouseover",
+["overrideNumIcons"] = 12,
 ["overrideNumRows"] = 1,
 ["mouseoverAlpha"] = 0,
 ["mouseoverEnabled"] = true,
-["overrideNumIcons"] = 12,
+["buttonWidth"] = 32,
+["barVisibility"] = "mouseover",
 },
 ["Bar6"] = {
 ["buttonHeight"] = 32,
 ["_savedBarAlpha"] = 1,
-["buttonWidth"] = 32,
-["barVisibility"] = "mouseover",
+["overrideNumIcons"] = 12,
 ["overrideNumRows"] = 1,
 ["mouseoverAlpha"] = 0,
 ["mouseoverEnabled"] = true,
-["overrideNumIcons"] = 12,
+["buttonWidth"] = 32,
+["barVisibility"] = "mouseover",
 },
 ["QueueStatus"] = {
 ["barVisibility"] = "always",
@@ -586,12 +625,12 @@ EllesmereUIDB = {
 ["Bar8"] = {
 ["buttonHeight"] = 32,
 ["_savedBarAlpha"] = 1,
-["buttonWidth"] = 32,
-["barVisibility"] = "mouseover",
+["overrideNumIcons"] = 12,
 ["overrideNumRows"] = 1,
 ["mouseoverAlpha"] = 0,
 ["mouseoverEnabled"] = true,
-["overrideNumIcons"] = 12,
+["buttonWidth"] = 32,
+["barVisibility"] = "mouseover",
 },
 ["XPBar"] = {
 ["alwaysHidden"] = true,
@@ -600,52 +639,52 @@ EllesmereUIDB = {
 ["PetBar"] = {
 ["buttonHeight"] = 32,
 ["_savedBarAlpha"] = 1,
-["buttonWidth"] = 32,
-["barVisibility"] = "mouseover",
+["overrideNumIcons"] = 10,
 ["overrideNumRows"] = 1,
 ["mouseoverAlpha"] = 0,
 ["mouseoverEnabled"] = true,
-["overrideNumIcons"] = 10,
+["buttonWidth"] = 32,
+["barVisibility"] = "mouseover",
 },
 ["Bar2"] = {
 ["buttonHeight"] = 32,
 ["_savedBarAlpha"] = 1,
-["buttonWidth"] = 32,
-["barVisibility"] = "mouseover",
+["overrideNumIcons"] = 12,
 ["overrideNumRows"] = 1,
 ["mouseoverAlpha"] = 0,
 ["mouseoverEnabled"] = true,
-["overrideNumIcons"] = 12,
+["buttonWidth"] = 32,
+["barVisibility"] = "mouseover",
 },
 ["Bar5"] = {
 ["buttonHeight"] = 32,
 ["_savedBarAlpha"] = 1,
-["buttonWidth"] = 32,
-["barVisibility"] = "mouseover",
+["overrideNumIcons"] = 12,
 ["overrideNumRows"] = 1,
 ["mouseoverAlpha"] = 0,
 ["mouseoverEnabled"] = true,
-["overrideNumIcons"] = 12,
+["buttonWidth"] = 32,
+["barVisibility"] = "mouseover",
 },
 ["MainBar"] = {
 ["buttonHeight"] = 32,
 ["_savedBarAlpha"] = 1,
-["buttonWidth"] = 32,
-["barVisibility"] = "mouseover",
+["overrideNumIcons"] = 12,
 ["overrideNumRows"] = 1,
 ["mouseoverAlpha"] = 0,
 ["mouseoverEnabled"] = true,
-["overrideNumIcons"] = 12,
+["buttonWidth"] = 32,
+["barVisibility"] = "mouseover",
 },
 ["Bar4"] = {
 ["buttonHeight"] = 32,
 ["_savedBarAlpha"] = 1,
-["buttonWidth"] = 32,
-["barVisibility"] = "mouseover",
+["overrideNumIcons"] = 12,
 ["overrideNumRows"] = 1,
 ["mouseoverAlpha"] = 0,
 ["mouseoverEnabled"] = true,
-["overrideNumIcons"] = 12,
+["buttonWidth"] = 32,
+["barVisibility"] = "mouseover",
 },
 ["Bar7"] = {
 ["buttonHeight"] = 51,
@@ -660,12 +699,12 @@ EllesmereUIDB = {
 ["StanceBar"] = {
 ["buttonHeight"] = 32,
 ["_savedBarAlpha"] = 1,
-["buttonWidth"] = 32,
-["barVisibility"] = "mouseover",
+["overrideNumIcons"] = 5,
 ["overrideNumRows"] = 1,
 ["mouseoverAlpha"] = 0,
 ["mouseoverEnabled"] = true,
-["overrideNumIcons"] = 5,
+["buttonWidth"] = 32,
+["barVisibility"] = "mouseover",
 },
 ["BagBar"] = {
 ["alwaysHidden"] = true,
@@ -761,13 +800,13 @@ EllesmereUIDB = {
 ["y"] = -261.66650390625,
 ["x"] = -394.5833740234375,
 },
-["pet"] = {
-["y"] = -34.16656494140625,
-["x"] = -537.5000915527344,
-},
 ["targettarget"] = {
 ["y"] = -119.7497711181641,
 ["x"] = 359.7503662109375,
+},
+["pet"] = {
+["y"] = -34.16656494140625,
+["x"] = -537.5000915527344,
 },
 ["focus"] = {
 ["y"] = -261.6665344238281,
@@ -833,167 +872,6 @@ EllesmereUIDB = {
 ["x"] = -6.103515625e-05,
 },
 },
-["cdmBars"] = {
-["rotationHelperGlowStyle"] = 5,
-["rotationHelperEnabled"] = false,
-["bars"] = {
-{
-["visHideHousing"] = true,
-["anchorPosition"] = "left",
-["keybindB"] = 1,
-["numRows"] = 1,
-["borderA"] = 1,
-["key"] = "cooldowns",
-["keybindOffsetX"] = 2,
-["anchorOffsetY"] = 0,
-["enabled"] = true,
-["keybindA"] = 0.9,
-["name"] = "Cooldowns",
-["borderG"] = 0,
-["barVisibility"] = "always",
-["barBgB"] = 0,
-["visOnlyInstances"] = false,
-["keybindR"] = 1,
-["anchorOffsetX"] = 0,
-["borderClassColor"] = false,
-["borderB"] = 0,
-["anchorTo"] = "none",
-["visHideNoTarget"] = false,
-["borderR"] = 0,
-["pandemicGlowStyle"] = 1,
-["iconShape"] = "cropped",
-["spacing"] = 0,
-["borderSize"] = 1,
-["keybindG"] = 1,
-["bgB"] = 0.08,
-["iconSize"] = 56,
-["housingHideEnabled"] = true,
-["borderThickness"] = "thin",
-["showCooldownText"] = true,
-["bgA"] = 0.6,
-["verticalOrientation"] = false,
-["pandemicGlow"] = true,
-["visHideMounted"] = false,
-["keybindOffsetY"] = -2,
-["visHideNoEnemy"] = false,
-["barBgAlpha"] = 1,
-["keybindSize"] = 10,
-["showTooltip"] = false,
-["barBgR"] = 0,
-["iconZoom"] = 0.08,
-["bgG"] = 0.08,
-["barBgG"] = 0,
-["bgR"] = 0.08,
-["showKeybind"] = false,
-["barBgEnabled"] = false,
-},
-{
-["visHideHousing"] = true,
-["anchorPosition"] = "left",
-["keybindB"] = 1,
-["numRows"] = 1,
-["borderA"] = 1,
-["key"] = "utility",
-["keybindOffsetX"] = 2,
-["anchorOffsetY"] = 0,
-["enabled"] = true,
-["keybindA"] = 0.9,
-["name"] = "Utility",
-["borderG"] = 0,
-["barVisibility"] = "always",
-["barBgB"] = 0,
-["visOnlyInstances"] = false,
-["keybindR"] = 1,
-["bgR"] = 0.08,
-["borderClassColor"] = false,
-["borderB"] = 0,
-["anchorTo"] = "none",
-["visHideNoTarget"] = false,
-["borderR"] = 0,
-["pandemicGlowStyle"] = 1,
-["barBgR"] = 0,
-["spacing"] = 0,
-["borderSize"] = 1,
-["keybindG"] = 1,
-["bgB"] = 0.08,
-["iconSize"] = 37,
-["anchorOffsetX"] = 0,
-["pandemicGlow"] = true,
-["showCooldownText"] = true,
-["bgA"] = 0.6,
-["verticalOrientation"] = false,
-["visHideNoEnemy"] = false,
-["visHideMounted"] = false,
-["keybindOffsetY"] = -2,
-["housingHideEnabled"] = true,
-["barBgAlpha"] = 1,
-["keybindSize"] = 10,
-["showTooltip"] = false,
-["iconShape"] = "none",
-["iconZoom"] = 0.08,
-["bgG"] = 0.08,
-["barBgG"] = 0,
-["borderThickness"] = "thin",
-["showKeybind"] = false,
-["barBgEnabled"] = false,
-},
-{
-["visHideHousing"] = true,
-["anchorPosition"] = "left",
-["keybindB"] = 1,
-["numRows"] = 1,
-["borderA"] = 1,
-["key"] = "buffs",
-["keybindOffsetX"] = 2,
-["anchorOffsetY"] = 0,
-["enabled"] = true,
-["keybindA"] = 0.9,
-["barBgEnabled"] = false,
-["name"] = "Buffs",
-["borderG"] = 0,
-["barVisibility"] = "always",
-["visHideNoEnemy"] = false,
-["bgR"] = 0.08,
-["showTooltip"] = false,
-["pandemicGlow"] = true,
-["borderClassColor"] = false,
-["borderB"] = 0,
-["anchorTo"] = "none",
-["visHideNoTarget"] = false,
-["pandemicGlowStyle"] = 1,
-["barBgR"] = 0,
-["keybindG"] = 1,
-["spacing"] = 5,
-["borderSize"] = 1,
-["keybindR"] = 1,
-["bgB"] = 0.08,
-["iconSize"] = 32,
-["barBgB"] = 0,
-["borderThickness"] = "thin",
-["showCooldownText"] = true,
-["bgA"] = 0.6,
-["verticalOrientation"] = false,
-["visHideMounted"] = false,
-["visOnlyInstances"] = false,
-["keybindOffsetY"] = -2,
-["barBgAlpha"] = 1,
-["housingHideEnabled"] = true,
-["keybindSize"] = 10,
-["borderR"] = 0,
-["iconShape"] = "none",
-["iconZoom"] = 0.08,
-["bgG"] = 0.08,
-["barBgG"] = 0,
-["anchorOffsetX"] = 0,
-["showKeybind"] = false,
-["hideBuffsWhenInactive"] = true,
-},
-},
-["enabled"] = true,
-["hideBlizzard"] = true,
-},
-["tbbPositions"] = {
-},
 ["trackedBuffBars"] = {
 ["selectedBar"] = 1,
 ["bars"] = {
@@ -1041,8 +919,34 @@ EllesmereUIDB = {
 ["selectedMapping"] = 1,
 },
 },
-["reskinBorders"] = true,
-["activeSpecKey"] = "0",
+["tbbPositions"] = {
+},
+["cdmBars"] = {
+["bars"] = {
+{
+["pandemicGlow"] = true,
+["iconShape"] = "cropped",
+["pandemicGlowStyle"] = 1,
+["spacing"] = 0,
+["iconSize"] = 56,
+["barBgAlpha"] = 1,
+},
+{
+["pandemicGlow"] = true,
+["barBgAlpha"] = 1,
+["pandemicGlowStyle"] = 1,
+["spacing"] = 0,
+["iconSize"] = 37,
+},
+{
+["pandemicGlow"] = true,
+["barBgAlpha"] = 1,
+["hideBuffsWhenInactive"] = true,
+["spacing"] = 5,
+["pandemicGlowStyle"] = 1,
+},
+},
+},
 },
 ["EllesmereUIResourceBars"] = {
 ["castBar"] = {
@@ -1053,11 +957,11 @@ EllesmereUIDB = {
 ["point"] = "CENTER",
 ["x"] = -9.1552734375e-05,
 },
-["width"] = 313.3333740234375,
+["width"] = 313,
 ["fillB"] = 1,
 },
 ["primary"] = {
-["width"] = 335.0000610351563,
+["width"] = 335,
 ["unlockPos"] = {
 ["y"] = -209.3328638076782,
 ["relPoint"] = "CENTER",
@@ -1076,36 +980,13 @@ EllesmereUIDB = {
 },
 },
 },
-["fonts"] = {
-["global"] = "Expressway",
-["outlineMode"] = "shadow",
-},
+["previewHintDismissed"] = true,
 ["unlockTipSeen"] = true,
 ["dismissedConflicts"] = {
 },
-["unlockAnchors"] = {
-["targetCastbar"] = {
-["target"] = "target",
-["offsetY"] = -0.250030517578125,
-["side"] = "BOTTOM",
-["offsetX"] = 0,
-},
-["playerCastbar"] = {
-["target"] = "player",
-["side"] = "BOTTOM",
-},
-["focusCastbar"] = {
-["target"] = "focus",
-["offsetY"] = 0,
-["side"] = "BOTTOM",
-["offsetX"] = 0,
-},
-["targettarget"] = {
-["target"] = "target",
-["offsetY"] = 24.416748046875,
-["side"] = "TOP",
-["offsetX"] = 66.66693115234375,
-},
+["fonts"] = {
+["global"] = "Expressway",
+["outlineMode"] = "shadow",
 },
 ["customColors"] = {
 },
@@ -1117,16 +998,16 @@ EllesmereUIDB = {
 ["graphicsDepthEffects"] = "0",
 ["ResampleAlwaysSharpen"] = "1",
 ["Contrast"] = "60",
-["graphicsOutlineMode"] = "0",
-["graphicsViewDistance"] = "1",
+["graphicsLiquidDetail"] = "0",
+["graphicsProjectedTextures"] = "1",
 ["graphicsComputeEffects"] = "0",
 ["graphicsParticleDensity"] = "5",
 ["graphicsTextureResolution"] = "2",
-["graphicsGroundClutter"] = "1",
 ["graphicsEnvironmentDetail"] = "1",
-["graphicsProjectedTextures"] = "1",
-["graphicsLiquidDetail"] = "0",
+["graphicsGroundClutter"] = "1",
+["graphicsViewDistance"] = "1",
+["graphicsOutlineMode"] = "0",
 ["graphicsShadowQuality"] = "1",
 },
-["showSpellID"] = true,
+["_buffBarMigrationV2Done"] = true,
 }

@@ -27,7 +27,7 @@ EllesmereUICooldownManager: disabled
 EllesmereUICursor: disabled
 Auctionator: enabled
 AutoFlood: enabled
-Baganator: enabled
+Baganator: disabled
 BlizzMove: enabled
 BlizzMove_Debug: enabled
 !BugGrabber: enabled

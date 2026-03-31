@@ -1,7 +1,7 @@
 
 BugGrabberDB = {
-["session"] = 724,
 ["lastSanitation"] = 3,
+["session"] = 733,
 ["errors"] = {
 {
 ["message"] = "...erface/AddOns/TargetedSpells/TargetedSpellsMixin.lua:350: attempt to call method 'SetFrameStrata' (a nil value)",
@@ -725,8 +725,8 @@ BugGrabberDB = {
 },
 {
 ["message"] = "LUA_WARNING: Interface/AddOns/!BugGrabber/BugGrabber.lua:-1: insecure scripts exceeded execution limit for addon !BugGrabber",
-["session"] = 715,
 ["time"] = 1774838566,
+["session"] = 715,
 ["counter"] = 10,
 },
 {
@@ -744,6 +744,14 @@ BugGrabberDB = {
 ["stack"] = "[Interface/AddOns/Blizzard_QuickJoin/QuickJoinToast.lua]:224: in function 'GetHighestPriorityGroup'\n[Interface/AddOns/Blizzard_QuickJoin/QuickJoinToast.lua]:197: in function 'CheckDisplayToast'\n[Interface/AddOns/Blizzard_QuickJoin/QuickJoinToast.lua]:440: in function 'ToastPulse'\n[*QuickJoinToast.xml:103_OnFinished]:1: in function <[string \"*QuickJoinToast.xml:103_OnFinished\"]:1>\n",
 ["session"] = 717,
 ["counter"] = 23,
+},
+{
+["message"] = "...s/CraftSim/Modules/SimulationMode/SimulationMode.lua:235: attempt to index field 'recipeData' (a nil value)",
+["time"] = 1774904664,
+["locals"] = "self = <table> {\n isActive = true\n frameWO = <table> {\n }\n UI = <table> {\n }\n frame = <table> {\n }\n}\n(*temporary) = nil\n(*temporary) = nil\n(*temporary) = \"attempt to index field 'recipeData' (a nil value)\"\nCraftSim = <table> {\n COOLDOWNS = <table> {\n }\n STATISTICS = <table> {\n }\n OPTIONAL_REAGENT_DATA = <table> {\n }\n NEWS = <table> {\n }\n OnCraftData = <table> {\n }\n DEBUG = <table> {\n }\n PRICE_DETAILS = <table> {\n }\n CRAFT_LOG = Frame {\n }\n WIDGETS = <table> {\n }\n ProfessionGear = <table> {\n }\n CRAFT_BUFFS = Frame {\n }\n NodeData = <table> {\n }\n TOOLENCHANTDATA = <table> {\n }\n PRICE_OVERRIDE = <table> {\n }\n ConcentrationData = <table> {\n }\n LOCAL_MX = <table> {\n }\n ENCHANT_RECIPE_DATA = <table> {\n }\n REAGENT_DATA = <table> {\n }\n COST_OPTIMIZATION = <table> {\n }\n EXPLANATIONS = <table> {\n }\n LibCompress = <table> {\n }\n TopGearResult = <table> {\n }\n ReagentData = <table> {\n }\n LOCAL_DE = <table> {\n }\n CONCENTRATION_TRACKER = <table> {\n }\n SUPPORTERS = <table> {\n }\n LibGraph = <table> {\n }\n OptionalReagentSlot = <table> {\n }\n Reagent = <table> {\n }\n OPTIONAL_CURRENCY_REAGENT_DATA = <table> {\n }\n PRICE_APIS = <table> {\n }\n LOCAL_FR = <table> {\n }\n SPECIALIZATION_DATA = <table> {\n }\n PRICE_SOURCE = <table> {\n }\n UTIL = <table> {\n }\n LOCAL_ES = <table> {\n }\n CraftSimObject = <table> {\n }\n PerkData = <table> {\n }\n ITEM_COUNT = Frame {\n }\n TOPGEAR = <table> {\n }\n PriceData = <table> {\n }\n OptionalReagent = <table> {\n }\n CONCENTRATION_CURVE_DATA = <table> {\n }\n CraftQueueItem = <table> {\n }\n CraftQueue = <table> {\n }\n LOCAL_IT = <table> {\n }\n CONTROL_PANEL = <table> {\n }\n BagBuff = <table> {\n }\n ResultData = <table> {\n }\n Buff = <table> {\n }\n RECIPE_SCAN = <table> {\n }\n AVERAGEPROFIT = <table> {\n }\n BuffData = <table> {\n }\n JSONBuilder = <table> {\n }\n CraftRecipeData = <table> {\n }\n SIMULATION_MODE = <table> {\n }\n CraftSessionData = <table> {\n }\n OPTIONS = <table> {\n }\n ReagentListItem = <table> {\n }\n INIT = Frame {\n }\n CALC = <table> {\n }\n ProfessionGearSet = <table> {\n }\n SpecializationData = <table> {\n }\n ProfessionData = <table> {\n }\n LOCAL_RU = <table> {\n }\n CraftResultItem = <table> {\n }\n CraftResult = <table> {\n }\n ReagentOptimizationResult = <table> {\n }\n LOCAL_CN = <table> {\n }\n Statweights = <table> {\n }\n LOCAL_EN = <table> {\n }\n SalvageReagentSlot = <table> {\n }\n ProfessionStat = <table> {\n }\n ProfessionStats = <table> {\n }\n CRAFT_LISTS = <table> {\n }\n CraftResultReagent = <table> {\n }\n GUTIL = <table> {\n }\n CUSTOMER_HISTORY = Frame {\n }\n ReagentItem = <table> {\n }\n REAGENT_OPTIMIZATION = <table> {\n }\n AceSerializer = <table> {\n }\n LibIcon = <table> {\n }\n MODULES = <table> {\n }\n FRAME = <table> {\n }\n RecipeData = <table> {\n }\n LOCAL_TW = <table> {\n }\n LOCAL_KO = <table> {\n }\n Object = <table> {\n }\n LOCAL_PT = <table> {\n }\n DB = <table> {\n }\n LOCAL = <table> {\n }\n CooldownData = <table> {\n }\n PRICE_API = <table> {\n }\n SPECIALIZATION_INFO = <table> {\n }\n GGUI = <table> {\n }\n CRAFTQ = Frame {\n }\n CONST = <table> {\n }\n MEDIA = <table> {\n }\n}\n",
+["stack"] = "[Interface/AddOns/CraftSim/Modules/SimulationMode/SimulationMode.lua]:235: in function 'UpdateSimulationMode'\n[Interface/AddOns/CraftSim/Modules/Modules.lua]:300: in function 'UpdateUI'\n[Interface/AddOns/CraftSim/Init/Init.lua]:115: in function <Interface/AddOns/CraftSim/Init/Init.lua:113>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:210: in function <...e/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua:209>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:213: in function 'TriggerEvent'\n[Interface/AddOns/Blizzard_ProfessionsTemplates/Blizzard_ProfessionsRecipeSchematicForm.lua]:103: in function <...emplates/Blizzard_ProfessionsRecipeSchematicForm.lua:99>\n[C]: in function 'Click'\n[Interface/AddOns/CraftSim/Modules/SimulationMode/UI.lua]:145: in function <...erface/AddOns/CraftSim/Modules/SimulationMode/UI.lua:140>\n[Interface/AddOns/CraftSim/Util/Frames.lua]:164: in function <Interface/AddOns/CraftSim/Util/Frames.lua:163>\n[C]: ?\n",
+["session"] = 726,
+["counter"] = 1,
 },
 },
 }
