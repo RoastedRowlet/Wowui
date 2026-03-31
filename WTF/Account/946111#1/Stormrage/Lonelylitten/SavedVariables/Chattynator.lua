@@ -202,4 +202,7 @@ CHATTYNATOR_COMMAND_HISTORY = {
 "/g |cnIQ4:|Hitem:250246::::::::90:105::35:4:12801:13440:6652:12699::::::|h[Refueling Orb]|h|r|cnIQ4:|Hitem:258050::::::::90:105::35:4:12801:13440:6652:12701::::::|h[Arcanic of the High Sage]|h|r|cnIQ4:|Hitem:151340::::::::90:105::35:4:12801:13440:42:12699::::::|h[Echo of L'ura]|h|r",
 "/g send help im too sad",
 "/g /simc",
+"/s /ARCUI",
+"/raid tank got oneshot lol",
+"/raid /GRID2",
 }
