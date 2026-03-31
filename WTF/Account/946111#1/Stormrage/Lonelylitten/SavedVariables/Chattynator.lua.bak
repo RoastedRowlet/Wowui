@@ -1,20 +1,6 @@
 
 CHATTYNATOR_CURRENT_PROFILE = "DEFAULT"
 CHATTYNATOR_COMMAND_HISTORY = {
-"/s /arcui",
-"/s /RC",
-"/s /RELOAD",
-"/cw Chiéfkiefn-Stormrage yeah",
-"/cw Chiéfkiefn-Stormrage sounds good",
-"/cw Chiéfkiefn-Stormrage /reload",
-"/s /key",
-"/p boss reset lol",
-"/p wtf",
-"/p /KEY",
-"/p /SIMC",
-"/p /key",
-"/p /KEY",
-"/cw Wavverunner-Stormrage done",
 "/cw Zomgboom-Stormrage wahtever you want to tip",
 "/cw Zomgboom-Stormrage /M",
 "/cw Zomgboom-Stormrage /KEY",
@@ -216,4 +202,10 @@ CHATTYNATOR_COMMAND_HISTORY = {
 "/g it might be fucked team",
 "/g im at 400 laps around silvermoon",
 "/g so true",
+"/s /grid2",
+"/s /simc",
+"/g this vault is the most troll thing i've ever seen",
+"/g |cnIQ4:|Hitem:250246::::::::90:105::35:4:12801:13440:6652:12699::::::|h[Refueling Orb]|h|r|cnIQ4:|Hitem:258050::::::::90:105::35:4:12801:13440:6652:12701::::::|h[Arcanic of the High Sage]|h|r|cnIQ4:|Hitem:151340::::::::90:105::35:4:12801:13440:42:12699::::::|h[Echo of L'ura]|h|r",
+"/g send help im too sad",
+"/g /simc",
 }

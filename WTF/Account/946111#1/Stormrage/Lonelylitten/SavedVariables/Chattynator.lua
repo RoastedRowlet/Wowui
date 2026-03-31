@@ -1,12 +1,6 @@
 
 CHATTYNATOR_CURRENT_PROFILE = "DEFAULT"
 CHATTYNATOR_COMMAND_HISTORY = {
-"/cw Zomgboom-Stormrage wahtever you want to tip",
-"/cw Zomgboom-Stormrage /M",
-"/cw Zomgboom-Stormrage /KEY",
-"/cw Zomgboom-Stormrage /arcui",
-"/cw Zomgboom-Stormrage /lba",
-"/cw Ferrís-Stormrage done!",
 "/cw Ferrís-Stormrage /arcui",
 "/p hero the rogue",
 "/p on the rogue",
