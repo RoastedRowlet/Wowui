@@ -136,7 +136,7 @@ local RACE_RACIALS = {
     BloodElf           = { 202719, 50613, 25046, 69179, 80483, 155145, 129597, 232633, 28730 },
     Dwarf              = { 20594 },
     Troll              = { 26297 },
-    Draenei            = { 28880 },
+    Draenei            = { 28880, 59543, 59545, 121093, 59544, 370626, 59547, 59548, 59542, 416250 },
     NightElf           = { 58984 },
     Human              = { 59752 },
     DarkIronDwarf      = { 265221 },
@@ -765,6 +765,10 @@ local function SwitchSpecProfile(newSpecKey)
     -- Block reanchors so stale data doesn't cause flicker
     ns._specChangePending = true
 
+    -- Hide TBB bars immediately so stale spell data doesn't flash
+    ns._tbbSpecSwapPending = true
+    if ns.HideAllTBB then ns.HideAllTBB() end
+
     local p = ECME.db.profile
     local oldSpecKey = ns.GetActiveSpecKey()
 
@@ -778,13 +782,19 @@ local function SwitchSpecProfile(newSpecKey)
 
     -- Deferred rebuild (Blizzard CDM needs time to update its frames)
     C_Timer.After(0.5, function()
-        ns._specChangePending = false
         -- Clear the flag that told RefreshAllAddons to skip CDM. The profile
         -- system may have switched db.profile before CDM's handler ran; now
         -- that the active spec key is correct, we can rebuild safely.
+        ns._specChangePending = false
         if EllesmereUI then EllesmereUI._specProfileSwitching = false end
         ns.FullCDMRebuild("spec_switch")
+        -- Show TBB bars one frame after rebuild so the tick populates data first
+        C_Timer.After(0, function()
+            ns._tbbSpecSwapPending = false
+            if ns.BuildTrackedBuffBars then ns.BuildTrackedBuffBars() end
+        end)
         RegisterCDMUnlockElements()
+        if ns.RegisterTBBUnlockElements then ns.RegisterTBBUnlockElements() end
 
         -- CDM frames just moved to their new-profile positions. Re-sync
         -- any external bars (resource bars, cast bar) that anchor to CDM
@@ -3775,7 +3785,7 @@ local function CDMFirstLoginCapture()
     end
 
     p._capturedOnce = nil  -- no longer per-profile
-    ECME.db.sv._capturedOnce = true
+    ECME.db.sv._capturedOnce_CDM = true
 end
 
 --- Repopulate all main bars from Blizzard CDM for the current spec.
@@ -4069,7 +4079,11 @@ function ECME:OnInitialize()
     end)
 
     -- Check if we need first-login capture (per-install flag on SV root)
-    self._needsCapture = not self.db.sv._capturedOnce
+    -- Migrate old shared flag to per-addon key (v5.9.6+)
+    if self.db.sv._capturedOnce and not self.db.sv._capturedOnce_CDM then
+        self.db.sv._capturedOnce_CDM = true
+    end
+    self._needsCapture = not self.db.sv._capturedOnce_CDM
 
     -- Expose for options
     _G._ECME_AceDB = self.db
@@ -4991,6 +5005,18 @@ function ECME:CDMFinishSetup()
     -- Register with unlock mode
     RegisterCDMUnlockElements()
     if ns.RegisterTBBUnlockElements then ns.RegisterTBBUnlockElements() end
+    -- TBB registers late (after _applySavedPositions already ran).
+    -- Re-apply anchors for TBB elements only.
+    C_Timer.After(0, function()
+        local tbb = ns.GetTrackedBuffBars()
+        local bars = tbb and tbb.bars
+        if not bars then return end
+        for i = 1, #bars do
+            if EllesmereUI.ReapplyOwnAnchor then
+                EllesmereUI.ReapplyOwnAnchor("TBB_" .. tostring(i))
+            end
+        end
+    end)
 
     -- Deferred re-build: the initial BuildAllCDMBars may have run before
     -- Blizzard CDM populated icons (0 visible -> 1x1 frames). By the next

@@ -27,6 +27,7 @@ function MKPT_env.InitializeSavedVariables()
         hideWeeklyTreasures = false,
         hideUniqueBooks = false,
         hideUniqueTreasures = false,
+        hideDundun = false,
         hideWhenDone = false,
         minimized = true,
         showAllProfessions = false,

@@ -9,8 +9,10 @@ local ADDON_NAME = ...
 -- AceDB replaced by EllesmereUI.Lite.NewDB
 local EABR = EllesmereUI.Lite.NewAddon("EllesmereUIAuraBuffReminders")
 
+local _B = {}  -- beacon state table, populated later
 local Known = function(id) return id and (IsPlayerSpell(id) or IsSpellKnown(id)) end
-local InCombat = function() return InCombatLockdown and InCombatLockdown() end
+local _eabrInCombat = false
+local InCombat = function() return _eabrInCombat or (InCombatLockdown and InCombatLockdown()) end
 local floor, max, min, abs = math.floor, math.max, math.min, math.abs
 local isSecret = issecretvalue or function() return false end
 local AURA_SCAN_LIMIT = 255  -- Midnight supports more than the legacy 40 buff limit
@@ -263,7 +265,7 @@ local NON_SECRET_SPELL_IDS = {
     [1235110]=true, [1235108]=true, [1235111]=true, [1235057]=true, [1239355]=true,
     [1235113]=true, [1235114]=true, [1235115]=true, [1235116]=true,
     -- Partnered Trinket (Emerald Coach's Whistle)
-    [383798]=true,
+    [383798]=true, [389581]=true,
 }
 
 -------------------------------------------------------------------------------
@@ -700,14 +702,15 @@ local HEALTHSTONE_ITEM_IDS = { 5512, 224464 }  -- Healthstone, Demonic Healthsto
 -- Partnered Trinket: Emerald Coaches Whistle (buff 383798, icon 134157, 60 min)
 local PARTNERED_TRINKET = {
     key = "coaches_whistle", name = "Emerald Coach's Whistle",
-    buffID = 383798, buffIDs = {383798}, icon = 134157, duration = 3600,
+    buffID = 389581, buffIDs = {389581, 383798}, icon = 134157, duration = 3600,
 }
 
 -- Pet tracking: Hunter pets, Warlock pets
 local PET_CLASSES = { HUNTER = true, WARLOCK = true }
 
--- Classes with custom weapon imbue systems (skip generic weapon enchant reminder)
-local _IMBUE_CLASSES = { ROGUE=true, PALADIN=true, SHAMAN=true, DEATHKNIGHT=true }
+-- Classes with custom weapon imbue systems (skip generic weapon enchant reminder).
+-- Paladin excluded: only Lightsmith has rites, checked dynamically via HasImbueSpells.
+local _IMBUE_CLASSES = { ROGUE=true, SHAMAN=true, DEATHKNIGHT=true }
 
 -------------------------------------------------------------------------------
 --  SPELL DATA Consumables (OOC only, not during keystones)
@@ -730,6 +733,14 @@ local PALADIN_RITES = {
     { key="rite_adj",  name="Rite of Adjuration",     castSpell=433583, buffIDs={433583}, wepEnchID={7144} },
     { key="rite_sanc", name="Rite of Sanctification",  castSpell=433568, buffIDs={433568}, wepEnchID={7143} },
 }
+
+-- Does the player know any Paladin rite spell? (Lightsmith only)
+local function HasImbueSpells()
+    for _, rite in ipairs(PALADIN_RITES) do
+        if IsSpellKnown(rite.castSpell) then return true end
+    end
+    return false
+end
 
 -- Shaman Imbues (non-secret in 12.0)
 local SHAMAN_IMBUES = {
@@ -802,7 +813,11 @@ local FLASK_BUFF_ID_SET = {}
 local FLASK_NAME_SET = {}
 for _, f in ipairs(FLASK_ITEMS) do
     FLASK_BUFF_ID_SET[f.buffID] = true
-    FLASK_NAME_SET[f.name] = true
+    -- Build name set from localized spell names (works in all languages)
+    local info = C_Spell and C_Spell.GetSpellInfo and C_Spell.GetSpellInfo(f.buffID)
+    local locName = info and info.name
+    if locName then FLASK_NAME_SET[locName] = true end
+    FLASK_NAME_SET[f.name] = true  -- English fallback
 end
 -- TWW flask buff IDs (detection only, so we don't false-positive when a
 -- player still has a TWW flask active)
@@ -908,6 +923,7 @@ local RUNE_BUFF_IDS = {1264426, 453250, 1234969, 1242347, 393438, 347901}
 
 -- Inky Black Potion
 local INKY_BLACK_ITEM = 124640
+local INKY_BLACK_BUFF = 242783  -- buff applied by Inky Black Potion
 
 -------------------------------------------------------------------------------
 --  Helpers: Well Fed / Flask buff detection (by name, not spell ID secret)
@@ -973,7 +989,7 @@ local function PlayerHasFlaskBuff()
     if _AC.valid then
         _AC.ensureNames()
         for aName in pairs(_AC.byName) do
-            if FLASK_NAME_SET[aName] or aName:find("Flask") then return true end
+            if FLASK_NAME_SET[aName] then return true end
         end
     end
     return false
@@ -1196,8 +1212,7 @@ local combatActiveIcons = {}
 -------------------------------------------------------------------------------
 local CURSOR_IMPORTANT = {
     -- All raid buffs are important (checked by cat == "raidbuff")
-    -- Specific aura/consumable keys:
-    es = true, som = true,
+    -- Beacon tracking uses its own independent system (_B)
 }
 local cursorAnchor
 local cursorIconPool = {}
@@ -1378,19 +1393,20 @@ local function FadeOutSecureIcons()
     end
 end
 
-local function ApplyGlow(btn, glowType, cr, cg, cb)
+local function ApplyGlow(btn, glowType, cr, cg, cb, overrideSz)
     if glowType == 0 then return end
     local entry = GLOW_TYPES[glowType]; if not entry then return end
     if not btn._eabrGlowWrapper then
         local w = CreateFrame("Frame", nil, btn); w:SetAllPoints(btn); w:SetFrameLevel(btn:GetFrameLevel()+1)
         btn._eabrGlowWrapper = w
     end
-    local wrapper = btn._eabrGlowWrapper; local sz = btn:GetWidth() or ICON_SIZE
+    local wrapper = btn._eabrGlowWrapper; local sz = overrideSz or btn:GetWidth() or ICON_SIZE
     StopAllGlows(wrapper)
     if entry.procedural then StartPixelGlow(wrapper, sz, cr, cg, cb)
     elseif entry.buttonGlow then StartButtonGlow(wrapper, sz, cr, cg, cb, 1.36)
     elseif entry.autocast then StartAutoCastShine(wrapper, sz, cr, cg, cb, 1.0)
     else StartFlipBookGlow(wrapper, sz, entry, cr, cg, cb) end
+    wrapper:SetAlpha(1)
     wrapper:Show()
 end
 
@@ -1583,21 +1599,22 @@ local function HideAllIcons()
 end
 
 local function ResizeAnchorCentered(newW, newH)
-    if not iconAnchor then return end
+    if not iconAnchor or InCombatLockdown() then return end
     iconAnchor:SetSize(newW, newH)
 end
 
 local _layoutScratch = {}  -- reused each call
 local function LayoutIcons()
+    if InCombatLockdown() then return end
     -- Merge beacon icons into the layout so everything is one continuous row.
     -- Beacon logic is untouched; we just include visible beacon frames in positioning.
     local allIcons = _layoutScratch
     wipe(allIcons)
     for _, btn in ipairs(activeIcons) do allIcons[#allIcons+1] = btn end
-    if _beaconIcons then
-        for _, id in ipairs(BEACON_ALL or {}) do
-            if _beaconIconState and _beaconIconState[id] and _beaconIcons[id] then
-                allIcons[#allIcons+1] = _beaconIcons[id]
+    if _B.icons then
+        for _, id in ipairs(_B.ALL or {}) do
+            if _B.iconState and _B.iconState[id] and _B.icons[id] then
+                allIcons[#allIcons+1] = _B.icons[id]
             end
         end
     end
@@ -1626,8 +1643,10 @@ local function ShowIcon(iconIdx, m)
     local p = db.profile.display
     local glowType = p.glowType or 0
     local gc = p.glowColor or DEFAULT_GLOW_COLOR
+    local baseScale = p.scale or 1.0
+    local sz = floor(ICON_SIZE * baseScale + 0.5)
     RemoveGlow(btn)
-    ApplyGlow(btn, glowType, gc.r, gc.g, gc.b)
+    ApplyGlow(btn, glowType, gc.r, gc.g, gc.b, sz)
     if p.showText then
         local tc = p.textColor or DEFAULT_TEXT_COLOR
         local fontPath = ResolveFontPath(p.textFont)
@@ -1668,8 +1687,10 @@ local function ShowTalentIcon(iconIdx, m)
     local p = db.profile.display
     local glowType = p.glowType or 0
     local gc = p.glowColor or DEFAULT_GLOW_COLOR
+    local baseScale = p.scale or 1.0
+    local sz = floor(ICON_SIZE * baseScale + 0.5)
     RemoveGlow(btn)
-    ApplyGlow(btn, glowType, gc.r, gc.g, gc.b)
+    ApplyGlow(btn, glowType, gc.r, gc.g, gc.b, sz)
     if p.showText then
         local tc = p.textColor or DEFAULT_TEXT_COLOR
         local fontPath = ResolveFontPath(p.textFont)
@@ -1803,6 +1824,7 @@ if inInstance or au.showNonInstanced then
                         e.mode = "spell"; e.spellID = aura.castSpell
                         e.label = ShortLabel(aura.name)
                         e.cat = "aura"; e.data = aura; e.scale = au.scale or 1.0
+                        e.dismissKey = "aura:" .. aura.key
                         missing[#missing+1] = e
                     end
                 end
@@ -1830,6 +1852,7 @@ local specialsActive = inInstance or co.showSpecialsNonInstanced
                             e.mode = "spell"; e.spellID = poison.castSpell
                             e.label = ShortLabel(poison.name, "ROGUE")
                             e.cat = "consumable"; e.data = poison; e.scale = co.scale or 1.0
+                            e.dismissKey = "consumable:" .. poison.key
                             missing[#missing+1] = e
                         end
                     end
@@ -1846,6 +1869,7 @@ local specialsActive = inInstance or co.showSpecialsNonInstanced
                             e.mode = "spell"; e.spellID = rite.castSpell
                             e.label = ShortLabel(rite.name)
                             e.cat = "consumable"; e.data = rite; e.scale = co.scale or 1.0
+                            e.dismissKey = "consumable:" .. rite.key
                             missing[#missing+1] = e
                         end
                     end
@@ -1865,6 +1889,7 @@ local specialsActive = inInstance or co.showSpecialsNonInstanced
                             e.mode = "spell"; e.spellID = imbue.castSpell
                             e.label = ShortLabel(imbue.name, "SHAMAN_IMBUE")
                             e.cat = "consumable"; e.data = imbue; e.scale = co.scale or 1.0
+                            e.dismissKey = "consumable:" .. imbue.key
                             missing[#missing+1] = e
                         end
                     end
@@ -1930,61 +1955,55 @@ local specialsActive = inInstance or co.showSpecialsNonInstanced
         end
 
         -- Weapon Enchants (temp weapon enchant items)
-        -- Skip for classes with their own imbue system (poisons, rites, imbues, runeforging)
-        if co.enabled.weapon_enchant and not _IMBUE_CLASSES[playerClass] then
+        -- Skip for classes with their own imbue system (poisons, imbues, runeforging).
+        -- Paladin: only skip if player knows a rite spell (Lightsmith only).
+        local hasClassImbue = _IMBUE_CLASSES[playerClass]
+            or (playerClass == "PALADIN" and HasImbueSpells())
+        if co.enabled.weapon_enchant and not hasClassImbue then
             local hasMH, _, _, _, hasOH = GetWeaponEnchantInfo()
             local mhCat = GetWeaponCategory(16)
             local ohCat = GetWeaponCategory(17)
 
-            -- Determine which slot needs an enchant: prefer MH, fall back to OH
-            local targetSlot, targetCat
-            if mhCat and not hasMH then
-                targetSlot = 16
-                targetCat = mhCat
-            elseif ohCat and hasMH and not hasOH then
-                targetSlot = 17
-                targetCat = ohCat
-            end
-
-            if targetSlot and targetCat then
-                local preferredKey = co.preferredWeaponEnchant or "last_used"
-                local lastUsedID = db.char and db.char.lastUsedWeaponEnchant or nil
-                local bestItemID = FindWeaponEnchantItem(preferredKey, lastUsedID, targetCat)
-                local hasBags = (bestItemID ~= nil)
-                if not bestItemID then
-                    -- Resolve display item even when out of stock
-                    if preferredKey == "last_used" then
-                        bestItemID = lastUsedID
-                    else
-                        for _, choice in ipairs(WEAPON_ENCHANT_CHOICES) do
-                            if choice.key == preferredKey then
-                                for _, we in ipairs(WEAPON_ENCHANT_ITEMS) do
-                                    if we.name == choice.name then bestItemID = we.itemID; break end
-                                end
-                                break
-                            end
-                        end
-                    end
-                    -- Final fallback: first matching weapon enchant in data table
+            -- Check each weapon slot independently (both can show at once)
+            local preferredKey = co.preferredWeaponEnchant or "last_used"
+            local lastUsedID = db.char and db.char.lastUsedWeaponEnchant or nil
+            for _, si in ipairs({{slot=16, cat=mhCat, has=hasMH}, {slot=17, cat=ohCat, has=hasOH}}) do
+                if si.cat and not si.has then
+                    local bestItemID = FindWeaponEnchantItem(preferredKey, lastUsedID, si.cat)
+                    local hasBags = (bestItemID ~= nil)
                     if not bestItemID then
-                        for _, we in ipairs(WEAPON_ENCHANT_ITEMS) do
-                            if we.weaponType == "NEUTRAL" or we.weaponType == targetCat then
-                                bestItemID = we.itemID; break
+                        if preferredKey == "last_used" then
+                            bestItemID = lastUsedID
+                        else
+                            for _, choice in ipairs(WEAPON_ENCHANT_CHOICES) do
+                                if choice.key == preferredKey then
+                                    for _, we in ipairs(WEAPON_ENCHANT_ITEMS) do
+                                        if we.name == choice.name then bestItemID = we.itemID; break end
+                                    end
+                                    break
+                                end
+                            end
+                        end
+                        if not bestItemID then
+                            for _, we in ipairs(WEAPON_ENCHANT_ITEMS) do
+                                if we.weaponType == "NEUTRAL" or we.weaponType == si.cat then
+                                    bestItemID = we.itemID; break
+                                end
                             end
                         end
                     end
-                end
-                if bestItemID then
-                    local e = AcquireEntry()
-                    e.mode = "macro"
-                    e.macro = "/use item:" .. bestItemID .. "\n/use " .. targetSlot
-                    e.texture = GetItemIcon(bestItemID) or 134400
-                    e.label = ShortLabel("Weapon Enchant")
-                    e.tooltipItem = bestItemID
-                    e.desaturated = not hasBags
-                    e.cat = "consumable"; e.scale = co.scale or 1.0
-                    e.dismissKey = "consumable:weapon_enchant"
-                    missing[#missing+1] = e
+                    if bestItemID then
+                        local e = AcquireEntry()
+                        e.mode = "macro"
+                        e.macro = "/use item:" .. bestItemID .. "\n/use " .. si.slot
+                        e.texture = GetItemIcon(bestItemID) or 134400
+                        e.label = ShortLabel(si.slot == 16 and "Main Hand" or "Off Hand")
+                        e.tooltipItem = bestItemID
+                        e.desaturated = not hasBags
+                        e.cat = "consumable"; e.scale = co.scale or 1.0
+                        e.dismissKey = "consumable:weapon_enchant_" .. si.slot
+                        missing[#missing+1] = e
+                    end
                 end
             end
         end
@@ -2055,7 +2074,7 @@ local specialsActive = inInstance or co.showSpecialsNonInstanced
                 local currentZone = tostring(C_Map.GetBestMapForUnit("player") or 0)
                 if co._inkyZoneSet[currentZone] then
                     local hasPotion = (GetItemCount(INKY_BLACK_ITEM, false) or 0) > 0
-                    local hasBuff = PlayerHasBuffByName("Inky Black Potion")
+                    local hasBuff = PlayerHasAuraByID({INKY_BLACK_BUFF})
                     if not hasBuff and hasPotion then
                         local e = AcquireEntry()
                         e.mode = "item"; e.itemID = INKY_BLACK_ITEM
@@ -2094,6 +2113,7 @@ local specialsActive = inInstance or co.showSpecialsNonInstanced
                         e.mode = "spell"; e.spellID = shield.castSpell
                         e.label = ShortLabel(shield.name, "SHAMAN_SHIELD")
                         e.cat = "consumable"; e.data = shield; e.scale = co.scale or 1.0
+                        e.dismissKey = "consumable:" .. shield.key
                         missing[#missing+1] = e
                     end
                 end
@@ -2133,6 +2153,7 @@ local specialsActive = inInstance or co.showSpecialsNonInstanced
                 e.mode = "texture"; e.texture = 538745
                 e.label = "HS"
                 e.cat = "consumable"; e.scale = co.scale or 1.0
+                e.dismissKey = "consumable:healthstone"
                 missing[#missing+1] = e
             end
         end
@@ -2140,16 +2161,32 @@ local specialsActive = inInstance or co.showSpecialsNonInstanced
 
     ---------------------------------------------------------------------------
     --  Pet reminder (Hunter/Warlock, OOC only)
+    --  Suppressed for:
+    --    MM Hunter without Unbreakable Bond (1223323) -- petless spec
+    --    Warlock with Grimoire of Sacrifice buff (196099) -- intentionally no pet
     ---------------------------------------------------------------------------
     if not inCombat and PET_CLASSES[playerClass] then
         local co = db.profile.consumables
         if co and co.enabled and co.enabled.pet ~= false then
-            if not (UnitExists("pet") and not UnitIsDeadOrGhost("pet")) then
+            local suppress = false
+            if playerClass == "HUNTER" then
+                -- MM spec (254) without Unbreakable Bond = petless build
+                local spec = GetSpecialization and GetSpecialization()
+                if spec then
+                    local sid = GetSpecializationInfo(spec)
+                    if sid == 254 and not Known(1223323) then suppress = true end
+                end
+            elseif playerClass == "WARLOCK" then
+                -- Grimoire of Sacrifice active = intentionally petless
+                if Known(108503) and PlayerHasAuraByID({196099}) then suppress = true end
+            end
+            if not suppress and not (UnitExists("pet") and not UnitIsDeadOrGhost("pet")) then
                 local e = AcquireEntry()
                 e.mode = "texture"
                 e.texture = playerClass == "HUNTER" and 132161 or 136218
                 e.label = "Pet"
                 e.cat = "consumable"; e.scale = co.scale or 1.0
+                e.dismissKey = "consumable:pet"
                 missing[#missing+1] = e
             end
         end
@@ -2161,7 +2198,8 @@ local specialsActive = inInstance or co.showSpecialsNonInstanced
     do
         local co = db.profile.consumables
         if co and co.enabled and co.enabled.coaches_whistle ~= false
-           and inInstance and (IsInGroup() or IsInRaid())
+           and inInstance and _cachedDiffID ~= 208
+           and (IsInGroup() or IsInRaid())
            and (GetInventoryItemID("player", 13) == 193718 or GetInventoryItemID("player", 14) == 193718) then
             local hasBuff = PlayerHasAuraByID(PARTNERED_TRINKET.buffIDs)
             if not hasBuff then
@@ -2169,23 +2207,33 @@ local specialsActive = inInstance or co.showSpecialsNonInstanced
                 e.mode = "texture"; e.texture = PARTNERED_TRINKET.icon
                 e.label = "Whistle"
                 e.cat = "consumable"; e.scale = co.scale or 1.0
+                e.dismissKey = "consumable:coaches_whistle"
                 missing[#missing+1] = e
             end
         end
     end
 
     ---------------------------------------------------------------------------
-    --  DK Runeforging (OOC only, check weapon enchant)
+    --  DK Runeforging (OOC only, check permanent enchant via item link)
     ---------------------------------------------------------------------------
     if not inCombat and playerClass == "DEATHKNIGHT" then
         local co = db.profile.consumables
         if co and co.enabled and co.enabled.runeforge ~= false then
-            local hasMH = GetWeaponEnchantInfo()
-            if not hasMH then
+            local needsRune = false
+            for _, slot in ipairs({16, 17}) do
+                local link = GetInventoryItemLink("player", slot)
+                if link then
+                    local ench = link:match("item:%d+:(-?%d+):")
+                    local enchID = tonumber(ench) or 0
+                    if enchID == 0 then needsRune = true; break end
+                end
+            end
+            if needsRune then
                 local e = AcquireEntry()
                 e.mode = "texture"; e.texture = 135957
                 e.label = "Rune"
                 e.cat = "consumable"; e.scale = co.scale or 1.0
+                e.dismissKey = "consumable:runeforge"
                 missing[#missing+1] = e
             end
         end
@@ -2247,8 +2295,8 @@ end
 end
 
 -- Reusable tables wiped each Refresh() call to avoid per-call allocation.
-local _refreshMissing = {}
-local _refreshTalentMissing = {}
+-- Wrapped to save file-scope local slots (200 limit).
+local _refreshMissing, _refreshTalentMissing, _wasResting = {}, {}, false
 
 local function Refresh()
     _cachedOutline = nil
@@ -2267,12 +2315,22 @@ local function Refresh()
         return
     end
 
-    -- Suppress while dead or in a rested area (city/inn)
+    -- Suppress while dead or in a rested area (city/inn).
+    -- Track rested state so combat at training dummies doesn't re-enable reminders.
     if UnitIsDeadOrGhost("player") then
         HideCombatIcons(); HideCursorIcons(); HideAllIcons(); return
     end
-    if IsResting() and not InCombat() then
-        HideCombatIcons(); HideCursorIcons(); HideAllIcons(); return
+    if IsResting() then
+        _wasResting = true
+        HideCombatIcons(); HideCursorIcons()
+        if InCombat() then FadeOutSecureIcons() else HideAllIcons() end
+        return
+    end
+    if _wasResting then
+        if InCombat() then
+            HideCombatIcons(); HideCursorIcons(); FadeOutSecureIcons(); return
+        end
+        _wasResting = false
     end
 
     CacheInstanceInfo()
@@ -2305,25 +2363,25 @@ local function Refresh()
     ---------------------------------------------------------------------------
     --  2) Auras (suppressed in M+ keystones)
     ---------------------------------------------------------------------------
-    if not inKeystone then
+    if not inKeystone and not inCombat then
         CollectAuras(missing, playerClass, specID, inInstance, inCombat)
     end
     if _memProbe then _m3 = collectgarbage("count") end
 
     ---------------------------------------------------------------------------
-    --  3) Consumables (suppressed in M+ keystones)
+    --  3) Consumables (suppressed in M+ keystones and always in combat)
     ---------------------------------------------------------------------------
-    if not inKeystone then
+    if not inKeystone and not inCombat then
         CollectConsumables(missing, playerClass, specID, inInstance, inKeystone, inCombat)
     end
     if _memProbe then _m4 = collectgarbage("count") end
 
     ---------------------------------------------------------------------------
-    --  4) Talent Reminders (suppressed in M+ keystones)
+    --  4) Talent Reminders (suppressed in M+ keystones and always in combat)
     ---------------------------------------------------------------------------
     local talentMissing = _refreshTalentMissing
     wipe(talentMissing)
-    if not inKeystone then
+    if not inKeystone and not inCombat then
         CollectTalentReminders(talentMissing, inInstance, inKeystone, inCombat)
     end
     if _memProbe then _m5 = collectgarbage("count") end
@@ -2583,45 +2641,43 @@ end
 --  Standalone Beacon Reminders — IsSpellOverlayed-based, combat-safe.
 --  Independent from the main aura/buff system.
 -------------------------------------------------------------------------------
-local _beaconFrame = CreateFrame("Frame")
-local _beaconIsPaladin = false
-local _beaconOverlayRegistered = false
-local _beaconAnchor
-local _beaconIcons = {}       -- [spellID] = frame
-local _beaconIconState = {}   -- [spellID] = true/false
-local _beaconGlowState = {}  -- [spellID] = true/false
-
-local BEACON_BOL = 53563
-local BEACON_BOF = 156910
-local BEACON_VIRTUE = 200025
-local BEACON_ALL = { BEACON_BOL, BEACON_BOF }
-
+_B.frame = CreateFrame("Frame")
+_B.isPaladin = false
+_B.overlayRegistered = false
+_B.anchor = nil
+_B.icons = {}
+_B.iconState = {}
+_B.glowState = {}
+_B.cachedInInstance = false
+_B.refreshPending = false
+_B.BOL = 53563
+_B.BOF = 156910
+_B.VIRTUE = 200025
+_B.ALL = { _B.BOL, _B.BOF }
 local IsSpellOverlayed = (C_SpellActivationOverlay and C_SpellActivationOverlay.IsSpellOverlayed) or IsSpellOverlayed
-
-local _beaconCachedInInstance = false
 
 local function BeaconUpdateInstanceCache()
     local _, instanceType, difficultyID = GetInstanceInfo()
     difficultyID = tonumber(difficultyID) or 0
-    if difficultyID == 0 then _beaconCachedInInstance = false; return end
+    if difficultyID == 0 then _B.cachedInInstance = false; return end
     if C_Garrison and C_Garrison.IsOnGarrisonMap and C_Garrison.IsOnGarrisonMap() then
-        _beaconCachedInInstance = false; return
+        _B.cachedInInstance = false; return
     end
-    _beaconCachedInInstance = (instanceType == "party" or instanceType == "raid")
+    _B.cachedInInstance = (instanceType == "party" or instanceType == "raid" or (instanceType == "scenario" and difficultyID == 208))
 end
 
 local function BeaconUpdateOverlayEvents()
-    if _beaconCachedInInstance and _beaconIsPaladin then
-        if not _beaconOverlayRegistered then
-            _beaconFrame:RegisterEvent("SPELL_ACTIVATION_OVERLAY_GLOW_SHOW")
-            _beaconFrame:RegisterEvent("SPELL_ACTIVATION_OVERLAY_GLOW_HIDE")
-            _beaconOverlayRegistered = true
+    if _B.cachedInInstance and _B.isPaladin then
+        if not _B.overlayRegistered then
+            _B.frame:RegisterEvent("SPELL_ACTIVATION_OVERLAY_GLOW_SHOW")
+            _B.frame:RegisterEvent("SPELL_ACTIVATION_OVERLAY_GLOW_HIDE")
+            _B.overlayRegistered = true
         end
     else
-        if _beaconOverlayRegistered then
-            _beaconFrame:UnregisterEvent("SPELL_ACTIVATION_OVERLAY_GLOW_SHOW")
-            _beaconFrame:UnregisterEvent("SPELL_ACTIVATION_OVERLAY_GLOW_HIDE")
-            _beaconOverlayRegistered = false
+        if _B.overlayRegistered then
+            _B.frame:UnregisterEvent("SPELL_ACTIVATION_OVERLAY_GLOW_SHOW")
+            _B.frame:UnregisterEvent("SPELL_ACTIVATION_OVERLAY_GLOW_HIDE")
+            _B.overlayRegistered = false
         end
     end
 end
@@ -2652,7 +2708,7 @@ local function BeaconLayoutIcons()
     -- Beacon icons are now merged into the main LayoutIcons row.
     -- Just trigger a main refresh so they appear in the unified line.
     -- Hide the separate beacon anchor since we don't use it anymore.
-    if _beaconAnchor then EllesmereUI.SetElementVisibility(_beaconAnchor, false) end
+    if _B.anchor then EllesmereUI.SetElementVisibility(_B.anchor, false) end
     -- Re-layout main icons to include/exclude beacon icons
     LayoutIcons()
 end
@@ -2663,13 +2719,15 @@ local function BeaconApplyGlow(f, show)
         local glowType = p and p.glowType or 0
         if glowType > 0 then
             local gc = p and p.glowColor or DEFAULT_GLOW_COLOR
-            ApplyGlow(f, glowType, gc.r, gc.g, gc.b)
+            local baseScale = p and p.scale or 1.0
+            local sz = floor(ICON_SIZE * baseScale + 0.5)
+            ApplyGlow(f, glowType, gc.r, gc.g, gc.b, sz)
         end
-        _beaconGlowState[f._spellID] = true
+        _B.glowState[f._spellID] = true
     else
-        if _beaconGlowState[f._spellID] then
+        if _B.glowState[f._spellID] then
             RemoveGlow(f)
-            _beaconGlowState[f._spellID] = false
+            _B.glowState[f._spellID] = false
         end
     end
 end
@@ -2686,7 +2744,7 @@ local function BeaconApplyText(f)
         f._text:ClearAllPoints()
         f._text:SetPoint("TOP", f, "BOTTOM", xOff, yOff)
         f._text:SetTextColor(tc.r, tc.g, tc.b, 1)
-        f._text:SetText(ShortLabel(f._spellID == BEACON_BOL and "Beacon of Light" or "Beacon of Faith"))
+        f._text:SetText(ShortLabel(f._spellID == _B.BOL and "Beacon of Light" or "Beacon of Faith"))
         f._text:Show()
     else
         f._text:SetText("")
@@ -2695,23 +2753,23 @@ local function BeaconApplyText(f)
 end
 
 local function BeaconSetVisible(spellID, show)
-    local f = _beaconIcons[spellID]
+    local f = _B.icons[spellID]
     if not f then return end
     local changed = false
     if show then
-        if not _beaconIconState[spellID] then
+        if not _B.iconState[spellID] then
             BeaconApplyText(f)
             f:Show()
-            _beaconIconState[spellID] = true
+            _B.iconState[spellID] = true
             BeaconApplyGlow(f, true)
             changed = true
         end
     else
-        if _beaconIconState[spellID] then
+        if _B.iconState[spellID] then
             BeaconApplyGlow(f, false)
             f._text:SetText("")
             f:Hide()
-            _beaconIconState[spellID] = false
+            _B.iconState[spellID] = false
             changed = true
         end
     end
@@ -2719,20 +2777,20 @@ local function BeaconSetVisible(spellID, show)
 end
 
 local function BeaconRefresh()
-    if not _beaconIsPaladin then return end
+    if not _B.isPaladin then return end
     if euiPanelOpen or not IsSpellOverlayed then
-        BeaconSetVisible(BEACON_BOL, false)
-        BeaconSetVisible(BEACON_BOF, false)
+        BeaconSetVisible(_B.BOL, false)
+        BeaconSetVisible(_B.BOF, false)
         return
     end
     if UnitInVehicle("player") or (IsMounted() and IsFlying()) then
-        BeaconSetVisible(BEACON_BOL, false)
-        BeaconSetVisible(BEACON_BOF, false)
+        BeaconSetVisible(_B.BOL, false)
+        BeaconSetVisible(_B.BOF, false)
         return
     end
-    if not _beaconCachedInInstance or not (IsInGroup() or IsInRaid()) then
-        BeaconSetVisible(BEACON_BOL, false)
-        BeaconSetVisible(BEACON_BOF, false)
+    if not _B.cachedInInstance or not (IsInGroup() or IsInRaid()) then
+        BeaconSetVisible(_B.BOL, false)
+        BeaconSetVisible(_B.BOF, false)
         return
     end
 
@@ -2740,44 +2798,43 @@ local function BeaconRefresh()
     local enabled = au and au.enabled
 
     local trackBOL = enabled and enabled.bol ~= false
-                     and Known(BEACON_BOL) and not Known(BEACON_VIRTUE)
+                     and Known(_B.BOL) and not Known(_B.VIRTUE)
     local trackBOF = enabled and enabled.bof ~= false
-                     and Known(BEACON_BOF)
+                     and Known(_B.BOF)
 
-    BeaconSetVisible(BEACON_BOL, trackBOL and IsSpellOverlayed(BEACON_BOL))
-    BeaconSetVisible(BEACON_BOF, trackBOF and IsSpellOverlayed(BEACON_BOF))
+    BeaconSetVisible(_B.BOL, trackBOL and IsSpellOverlayed(_B.BOL))
+    BeaconSetVisible(_B.BOF, trackBOF and IsSpellOverlayed(_B.BOF))
 end
 
-local _beaconRefreshPending = false
 local function BeaconRefreshSoon()
-    if _beaconRefreshPending then return end
-    _beaconRefreshPending = true
+    if _B.refreshPending then return end
+    _B.refreshPending = true
     C_Timer.After(0, function()
-        _beaconRefreshPending = false
+        _B.refreshPending = false
         BeaconRefresh()
     end)
 end
 
 local function BeaconInit()
     local _, classFile = UnitClass("player")
-    _beaconIsPaladin = (classFile == "PALADIN")
-    if not _beaconIsPaladin then return end
+    _B.isPaladin = (classFile == "PALADIN")
+    if not _B.isPaladin then return end
 
-    _beaconIcons[BEACON_BOL] = BeaconMakeIcon(BEACON_BOL)
-    _beaconIcons[BEACON_BOF] = BeaconMakeIcon(BEACON_BOF)
+    _B.icons[_B.BOL] = BeaconMakeIcon(_B.BOL)
+    _B.icons[_B.BOF] = BeaconMakeIcon(_B.BOF)
 
     -- Anchor follows the main combat anchor position
-    _beaconAnchor = CreateFrame("Frame", "EABR_BeaconAnchor", UIParent)
-    _beaconAnchor:SetSize(1, 1)
-    _beaconAnchor:SetFrameStrata("HIGH")
-    _beaconAnchor:EnableMouse(false)
-    _beaconAnchor:Show()
-    EllesmereUI.SetElementVisibility(_beaconAnchor, false)
+    _B.anchor = CreateFrame("Frame", "EABR_BeaconAnchor", UIParent)
+    _B.anchor:SetSize(1, 1)
+    _B.anchor:SetFrameStrata("HIGH")
+    _B.anchor:EnableMouse(false)
+    _B.anchor:Show()
+    EllesmereUI.SetElementVisibility(_B.anchor, false)
     -- Anchor to the combat anchor (created by OnEnable before this call)
     if combatAnchor then
-        _beaconAnchor:SetPoint("CENTER", combatAnchor, "CENTER", 0, -60)
+        _B.anchor:SetPoint("CENTER", combatAnchor, "CENTER", 0, -60)
     else
-        _beaconAnchor:SetPoint("CENTER", UIParent, "CENTER", 0, 200)
+        _B.anchor:SetPoint("CENTER", UIParent, "CENTER", 0, 200)
     end
 
     BeaconUpdateInstanceCache()
@@ -2787,20 +2844,20 @@ end
 
 -- Expose for options and anchor positioning
 _G._EABR_BeaconRefresh = BeaconRefresh
-_G._EABR_BeaconAnchor = function() return _beaconAnchor end
+_G._EABR_BeaconAnchor = function() return _B.anchor end
 
-_beaconFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
-_beaconFrame:RegisterEvent("ZONE_CHANGED_NEW_AREA")
-_beaconFrame:RegisterEvent("SPELLS_CHANGED")
-_beaconFrame:RegisterEvent("PLAYER_TALENT_UPDATE")
-_beaconFrame:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
-_beaconFrame:RegisterEvent("TRAIT_CONFIG_UPDATED")
-_beaconFrame:RegisterEvent("GROUP_ROSTER_UPDATE")
-_beaconFrame:RegisterEvent("PLAYER_LEVEL_CHANGED")
-_beaconFrame:SetScript("OnEvent", function(_, e, id)
-    if not _beaconIsPaladin then return end
+_B.frame:RegisterEvent("PLAYER_ENTERING_WORLD")
+_B.frame:RegisterEvent("ZONE_CHANGED_NEW_AREA")
+_B.frame:RegisterEvent("SPELLS_CHANGED")
+_B.frame:RegisterEvent("PLAYER_TALENT_UPDATE")
+_B.frame:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
+_B.frame:RegisterEvent("TRAIT_CONFIG_UPDATED")
+_B.frame:RegisterEvent("GROUP_ROSTER_UPDATE")
+_B.frame:RegisterEvent("PLAYER_LEVEL_CHANGED")
+_B.frame:SetScript("OnEvent", function(_, e, id)
+    if not _B.isPaladin then return end
     if e == "SPELL_ACTIVATION_OVERLAY_GLOW_SHOW" or e == "SPELL_ACTIVATION_OVERLAY_GLOW_HIDE" then
-        if id == BEACON_BOL or id == BEACON_BOF then
+        if id == _B.BOL or id == _B.BOF then
             BeaconRefresh()
         end
         return
@@ -3106,15 +3163,18 @@ mainFrame:SetScript("OnEvent", function(_, e, arg1, arg2, arg3)
     end
 
     if e == "PLAYER_REGEN_DISABLED" then
+        _eabrInCombat = true
         _huntersMarkNeeded = true
         FadeOutSecureIcons()
+        HideAllIcons()
+        HideCursorIcons()
         SnapshotPlayerAuras()
         SnapshotOwnOnRaidBuffs()
-        RequestRefresh()
         return
     end
 
     if e == "PLAYER_REGEN_ENABLED" then
+        _eabrInCombat = false
         -- Leaving combat: clean up combat icons, do full OOC refresh with secure buttons
         _huntersMarkNeeded = false
         _huntersMarkCooldown = false
@@ -3216,16 +3276,18 @@ local function DetectUsedItem()
     for k, v in pairs(_bagSnapReuse) do lastBagSnapshot[k] = v end
 end
 
-local bagTrackFrame = CreateFrame("Frame")
-bagTrackFrame:RegisterEvent("BAG_UPDATE_DELAYED")
-bagTrackFrame:RegisterEvent("PLAYER_LOGIN")
-bagTrackFrame:SetScript("OnEvent", function(_, ev)
-    if ev == "PLAYER_LOGIN" then
-        C_Timer.After(1, function() SnapshotBags(lastBagSnapshot) end)
-    elseif ev == "BAG_UPDATE_DELAYED" then
-        DetectUsedItem()
-    end
-end)
+do
+    local f = CreateFrame("Frame")
+    f:RegisterEvent("BAG_UPDATE_DELAYED")
+    f:RegisterEvent("PLAYER_LOGIN")
+    f:SetScript("OnEvent", function(_, ev)
+        if ev == "PLAYER_LOGIN" then
+            C_Timer.After(1, function() SnapshotBags(lastBagSnapshot) end)
+        elseif ev == "BAG_UPDATE_DELAYED" then
+            DetectUsedItem()
+        end
+    end)
+end
 
 mainFrame:RegisterEvent("ENCOUNTER_START")
 mainFrame:RegisterEvent("PLAYER_REGEN_DISABLED")
@@ -3254,6 +3316,128 @@ mainFrame:RegisterEvent("PLAYER_ALIVE")
 mainFrame:RegisterEvent("PLAYER_UNGHOST")
 mainFrame:RegisterEvent("BAG_UPDATE")
 mainFrame:RegisterEvent("BAG_UPDATE_COOLDOWN")
+
+-------------------------------------------------------------------------------
+--  Ready Check Mana Warning
+--  Shows a centered text warning for ~10 seconds when a ready check fires
+--  in a raid group and the player is a healer with < 80% mana.
+--  Out-of-combat only.
+-------------------------------------------------------------------------------
+do
+    local warnFrame, warnFS, warnTimer, warnCurve
+
+    local function HideWarning()
+        if warnFrame then
+            if warnFrame._breathe then warnFrame._breathe:Stop() end
+            warnFrame:Hide()
+        end
+        if warnTimer then warnTimer:Cancel(); warnTimer = nil end
+    end
+
+    local function BuildWarnFrame()
+        if warnFrame then return end
+        warnFrame = CreateFrame("Frame", nil, UIParent)
+        warnFrame:SetSize(600, 60)
+        warnFrame:SetPoint("CENTER", UIParent, "CENTER", 0, 75)
+        warnFrame:SetFrameStrata("FULLSCREEN")
+        warnFrame:SetFrameLevel(100)
+        warnFrame:Hide()
+        warnFS = warnFrame:CreateFontString(nil, "OVERLAY")
+        local font = ResolveFontPath()
+        local outline = GetABROutline()
+        warnFS:SetFont(font, 48, outline)
+        if outline == "" and GetABRUseShadow() then
+            warnFS:SetShadowOffset(1, -1)
+            warnFS:SetShadowColor(0, 0, 0, 1)
+        end
+        warnFS:SetPoint("CENTER")
+        warnFS:SetText("LOW MANA")
+        -- Breathe animation: fade between 60% and 100% alpha
+        local ag = warnFrame:CreateAnimationGroup()
+        local fadeOut = ag:CreateAnimation("Alpha")
+        fadeOut:SetFromAlpha(1)
+        fadeOut:SetToAlpha(0.6)
+        fadeOut:SetDuration(0.4)
+        fadeOut:SetOrder(1)
+        fadeOut:SetSmoothing("IN_OUT")
+        local fadeIn = ag:CreateAnimation("Alpha")
+        fadeIn:SetFromAlpha(0.6)
+        fadeIn:SetToAlpha(1)
+        fadeIn:SetDuration(0.4)
+        fadeIn:SetOrder(2)
+        fadeIn:SetSmoothing("IN_OUT")
+        ag:SetLooping("REPEAT")
+        warnFrame._breathe = ag
+        -- Curve: alpha 1 at/below 80%, alpha 0 above.
+        -- The curve colors the FontString directly via SetVertexColor,
+        -- using alpha to control visibility -- no secret value reads.
+        if C_CurveUtil and C_CurveUtil.CreateColorCurve then
+            warnCurve = C_CurveUtil.CreateColorCurve()
+            local mc = EllesmereUI.GetPowerColor("MANA")
+            local r = math.min(mc.r * 1.5, 1)
+            local g = math.min(mc.g * 1.5, 1)
+            local b = math.min(mc.b * 1.5, 1)
+            warnCurve:AddPoint(0.0,    CreateColor(r, g, b, 1))
+            warnCurve:AddPoint(0.80,   CreateColor(r, g, b, 1))
+            warnCurve:AddPoint(0.8001, CreateColor(r, g, b, 0))
+            warnCurve:AddPoint(1.0,    CreateColor(r, g, b, 0))
+        end
+    end
+
+    -- Only listen for READY_CHECK when out of combat AND in a raid.
+    -- GROUP_ROSTER_UPDATE / zone change track raid membership.
+    -- PLAYER_REGEN toggles combat state.
+    local rcFrame = CreateFrame("Frame")
+    local _inRaid = false
+
+    local function UpdateReadyCheckRegistration()
+        local shouldListen = _inRaid and not InCombatLockdown()
+        if shouldListen then
+            rcFrame:RegisterEvent("READY_CHECK")
+        else
+            rcFrame:UnregisterEvent("READY_CHECK")
+            HideWarning()
+        end
+    end
+
+    rcFrame:RegisterEvent("PLAYER_REGEN_DISABLED")
+    rcFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
+    rcFrame:RegisterEvent("GROUP_ROSTER_UPDATE")
+    rcFrame:RegisterEvent("ZONE_CHANGED_NEW_AREA")
+    rcFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
+    rcFrame:SetScript("OnEvent", function(_, event)
+        if event == "GROUP_ROSTER_UPDATE" or event == "ZONE_CHANGED_NEW_AREA"
+           or event == "PLAYER_ENTERING_WORLD" then
+            _inRaid = IsInRaid()
+            UpdateReadyCheckRegistration()
+            return
+        end
+        if event == "PLAYER_REGEN_DISABLED" or event == "PLAYER_REGEN_ENABLED" then
+            UpdateReadyCheckRegistration()
+            return
+        end
+        -- READY_CHECK (only fires when out of combat AND in raid)
+        local spec = GetSpecialization and GetSpecialization()
+        if not spec then return end
+        local role = GetSpecializationRole(spec)
+        if role ~= "HEALER" then return end
+        if not UnitPowerPercent then return end
+        BuildWarnFrame()
+        if not warnCurve then return end
+        -- Let WoW's C side evaluate mana % against the curve.
+        -- Result: mana color at full alpha if below 80%, zero alpha if above.
+        -- SetVertexColor applies the secret RGBA directly -- no reads needed.
+        local color = UnitPowerPercent("player", Enum.PowerType.Mana, false, warnCurve)
+        if not color or not color.GetRGBA then return end
+        warnFS:SetVertexColor(color:GetRGBA())
+        warnFrame:Show()
+        if warnFrame._breathe and not warnFrame._breathe:IsPlaying() then
+            warnFrame._breathe:Play()
+        end
+        if warnTimer then warnTimer:Cancel() end
+        warnTimer = C_Timer.NewTimer(10, HideWarning)
+    end)
+end
 
 -- Temporary: /abrmem toggles per-Refresh memory probes
 SLASH_ABRMEM1 = "/abrmem"

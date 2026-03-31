@@ -38,7 +38,12 @@
         "MinimalSliderWithSteppersMixin",
         "Add",
         "EXPANSION_NAME11",
-        "ReloadUI"
+        "ReloadUI",
+        "StaticPopupDialogs",
+        "CreateSettingsListSectionHeaderInitializer",
+        "StaticPopup_Show",
+        "ChatFrame1",
+        "LE_PARTY_CATEGORY_INSTANCE"
     ],
     "Lua.type.weakUnionCheck": true
 }

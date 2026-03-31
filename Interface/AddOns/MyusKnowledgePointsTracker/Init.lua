@@ -16,6 +16,7 @@ local MKPT_RenownRequirement = MKPT_env.MKPT_RenownRequirement
 local MKPT_ItemRequirement = MKPT_env.MKPT_ItemRequirement
 local MKPT_FirstTimeRecipe = MKPT_env.MKPT_FirstTimeRecipe
 local MKPT_KpItemRequirement = MKPT_env.MKPT_KpItemRequirement
+local MKPT_Currency = MKPT_env.MKPT_Currency
 
 local db = {}
 

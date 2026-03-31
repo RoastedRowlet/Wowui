@@ -1,7 +1,7 @@
 
 BugGrabberDB = {
+["session"] = 740,
 ["lastSanitation"] = 3,
-["session"] = 737,
 ["errors"] = {
 {
 ["message"] = "...erface/AddOns/TargetedSpells/TargetedSpellsMixin.lua:350: attempt to call method 'SetFrameStrata' (a nil value)",
@@ -749,8 +749,8 @@ BugGrabberDB = {
 },
 {
 ["message"] = "LUA_WARNING: Interface/AddOns/!BugGrabber/BugGrabber.lua:-1: insecure scripts exceeded execution limit for addon !BugGrabber",
-["time"] = 1774922900,
 ["session"] = 737,
+["time"] = 1774922900,
 ["counter"] = 20,
 },
 },

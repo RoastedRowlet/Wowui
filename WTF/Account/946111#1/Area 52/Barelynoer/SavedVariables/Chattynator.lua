@@ -1,14 +1,6 @@
 
 CHATTYNATOR_CURRENT_PROFILE = "DEFAULT"
 CHATTYNATOR_COMMAND_HISTORY = {
-"/p im freaking out",
-"/p can devourer use offhands?",
-"/p or mw?",
-"/p ggs all!",
-"/p hey!",
-"/p I'd trade if i could",
-"/p vers gross",
-"/p ggs!",
 "/s /reload",
 "/p yoyo",
 "/p DISPEL",
@@ -210,4 +202,6 @@ CHATTYNATOR_COMMAND_HISTORY = {
 "/p Yeah i got air time with that boer",
 "/p hover",
 "/p sorry",
+"/s /simc",
+"/s /grid2",
 }

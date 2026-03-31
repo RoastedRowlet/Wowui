@@ -125,6 +125,19 @@ local function InitializeRightClickMenu(self, level, menuList)
       f:RenderTree()
     end
     UIDropDownMenu_AddButton(showCatchUp)
+
+    if MKPT_env.charDb.state.expansion == Enum.ExpansionLevel.Midnight then
+      local showDundun = UIDropDownMenu_CreateInfo()
+      showDundun.text = Utils.DUNDUN_ICON .. " " .. Utils.CatchUpTextColor(MKPT_env.MKPT_ShardOfDundun.name)
+      showDundun.checked = MKPT_env.db.config.hideDundun == false
+      showDundun.isNotRadio = true
+      showDundun.keepShownOnClick = true
+      showDundun.func = function()
+        MKPT_env.db.config.hideDundun = not MKPT_env.db.config.hideDundun
+        f:RenderTree()
+      end
+      UIDropDownMenu_AddButton(showDundun)
+    end
   end
 
   UIDropDownMenu_AddSeparator()

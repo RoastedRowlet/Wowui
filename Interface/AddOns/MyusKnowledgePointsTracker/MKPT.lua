@@ -46,6 +46,7 @@ function EventHandler.PLAYER_ENTERING_WORLD(isInitialLogin, isReloadingUi, _)
   events:RegisterEvent("NAVIGATION_DESTINATION_REACHED")
   events:RegisterEvent("PLAYER_REGEN_DISABLED")
   events:RegisterEvent("PLAYER_REGEN_ENABLED")
+  events:RegisterEvent("CURRENCY_DISPLAY_UPDATE")
 
   events:UnregisterEvent("PLAYER_ENTERING_WORLD")
 end
@@ -66,6 +67,10 @@ function EventHandler.SKILL_LINES_CHANGED()
 end
 
 function EventHandler.CURRENCY_DISPLAY_UPDATE(currencyId, ...)
+  if currencyId == 3376 then
+    local f = MKPT_env.ui
+    f:RenderTree()
+  end
   local profession = MKPT_env.MKPT_Profession.FindProfessionByCatchUpCurrencyId(currencyId)
   if profession then
     local f = MKPT_env.ui
