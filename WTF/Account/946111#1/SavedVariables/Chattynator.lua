@@ -232,9 +232,9 @@ CHATTYNATOR_CONFIG = {
 ["g"] = 0.7529412508010864,
 ["r"] = 1,
 },
-["CHANNEL_Trade"] = {
-["b"] = 0.7529412508010864,
-["g"] = 0.7529412508010864,
+["BG_SYSTEM_NEUTRAL"] = {
+["b"] = 0.03921568766236305,
+["g"] = 0.4705882668495178,
 ["r"] = 1,
 },
 ["FILTERED"] = {
@@ -307,12 +307,12 @@ CHATTYNATOR_CONFIG = {
 ["g"] = 0.501960813999176,
 ["r"] = 0.7529412508010864,
 },
-["CHANNEL_Services"] = {
+["CHANNEL18"] = {
 ["b"] = 0.7529412508010864,
 ["g"] = 0.7529412508010864,
 ["r"] = 1,
 },
-["CHANNEL18"] = {
+["CHANNEL_Services"] = {
 ["b"] = 0.7529412508010864,
 ["g"] = 0.7529412508010864,
 ["r"] = 1,
@@ -337,8 +337,8 @@ CHATTYNATOR_CONFIG = {
 ["g"] = 0.7529412508010864,
 ["r"] = 1,
 },
-["ARENA_POINTS"] = {
-["b"] = 1,
+["ACHIEVEMENT"] = {
+["b"] = 0,
 ["g"] = 1,
 ["r"] = 1,
 },
@@ -427,8 +427,8 @@ CHATTYNATOR_CONFIG = {
 ["g"] = 0.4980392456054688,
 ["r"] = 1,
 },
-["ACHIEVEMENT"] = {
-["b"] = 0,
+["ARENA_POINTS"] = {
+["b"] = 1,
 ["g"] = 1,
 ["r"] = 1,
 },
@@ -467,9 +467,9 @@ CHATTYNATOR_CONFIG = {
 ["g"] = 0.4980392456054688,
 ["r"] = 1,
 },
-["BG_SYSTEM_NEUTRAL"] = {
-["b"] = 0.03921568766236305,
-["g"] = 0.4705882668495178,
+["CHANNEL_Trade"] = {
+["b"] = 0.7529412508010864,
+["g"] = 0.7529412508010864,
 ["r"] = 1,
 },
 ["PET_BATTLE_COMBAT_LOG"] = {
@@ -543,10 +543,10 @@ CHATTYNATOR_CONFIG = {
 ["invert"] = true,
 ["name"] = "GENERAL",
 ["groups"] = {
-["COMBAT_MISC_INFO"] = false,
-["OPENING"] = false,
-["COMBAT_XP_GAIN"] = false,
 ["PET_BATTLE_COMBAT_LOG"] = false,
+["COMBAT_MISC_INFO"] = false,
+["COMBAT_XP_GAIN"] = false,
+["OPENING"] = false,
 ["VOICE_TEXT"] = false,
 ["PET_INFO"] = false,
 ["TRADESKILLS"] = false,
@@ -649,7 +649,7 @@ CHATTYNATOR_CONFIG = {
 },
 }
 CHATTYNATOR_MESSAGE_LOG = {
-["cleanIndex"] = 3274,
+["cleanIndex"] = 3338,
 ["current"] = {
 {
 ["recordedBy"] = "Lonelylitten-Stormrage",
@@ -64896,8 +64896,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Barelynoer",
 ["sex"] = 2,
 },
-["type"] = "MONSTER_EMOTE",
 ["event"] = "CHAT_MSG_MONSTER_EMOTE",
+["type"] = "MONSTER_EMOTE",
 },
 ["color"] = {
 ["b"] = 0.250980406999588,
@@ -64917,8 +64917,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Althorian-Quel'dorei",
 ["sex"] = 2,
 },
-["type"] = "PARTY",
 ["event"] = "CHAT_MSG_PARTY",
+["type"] = "PARTY",
 },
 ["color"] = {
 ["b"] = 1,
@@ -64938,8 +64938,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Barelynoer-Area52",
 ["sex"] = 2,
 },
-["type"] = "PARTY_LEADER",
 ["event"] = "CHAT_MSG_PARTY_LEADER",
+["type"] = "PARTY_LEADER",
 },
 ["color"] = {
 ["b"] = 1,
@@ -64959,8 +64959,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Daosheng-Aegwynn",
 ["sex"] = 2,
 },
-["type"] = "PARTY",
 ["event"] = "CHAT_MSG_PARTY",
+["type"] = "PARTY",
 },
 ["color"] = {
 ["b"] = 1,
@@ -64980,8 +64980,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Barelynoer-Area52",
 ["sex"] = 2,
 },
-["type"] = "PARTY_LEADER",
 ["event"] = "CHAT_MSG_PARTY_LEADER",
+["type"] = "PARTY_LEADER",
 },
 ["color"] = {
 ["b"] = 1,
@@ -65001,8 +65001,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Daosheng-Aegwynn",
 ["sex"] = 2,
 },
-["type"] = "PARTY",
 ["event"] = "CHAT_MSG_PARTY",
+["type"] = "PARTY",
 },
 ["color"] = {
 ["b"] = 1,
@@ -65022,8 +65022,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Althorian-Quel'dorei",
 ["sex"] = 2,
 },
-["type"] = "PARTY",
 ["event"] = "CHAT_MSG_PARTY",
+["type"] = "PARTY",
 },
 ["color"] = {
 ["b"] = 1,
@@ -65043,8 +65043,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Zugter-Illidan",
 ["sex"] = 2,
 },
-["type"] = "GUILD_ACHIEVEMENT",
 ["event"] = "CHAT_MSG_GUILD_ACHIEVEMENT",
+["type"] = "GUILD_ACHIEVEMENT",
 },
 ["color"] = {
 ["b"] = 0.250980406999588,
@@ -65061,8 +65061,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["player"] = {
 ["name"] = "Magister Umbric",
 },
-["type"] = "MONSTER_SAY",
 ["event"] = "CHAT_MSG_MONSTER_SAY",
+["type"] = "MONSTER_SAY",
 },
 ["color"] = {
 ["b"] = 0.6235294342041016,
@@ -65082,8 +65082,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Althorian-Quel'dorei",
 ["sex"] = 2,
 },
-["type"] = "PARTY",
 ["event"] = "CHAT_MSG_PARTY",
+["type"] = "PARTY",
 },
 ["color"] = {
 ["b"] = 1,
@@ -65103,8 +65103,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Daosheng-Aegwynn",
 ["sex"] = 2,
 },
-["type"] = "PARTY",
 ["event"] = "CHAT_MSG_PARTY",
+["type"] = "PARTY",
 },
 ["color"] = {
 ["b"] = 1,
@@ -65124,8 +65124,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Barelynoer-Area52",
 ["sex"] = 2,
 },
-["type"] = "PARTY_LEADER",
 ["event"] = "CHAT_MSG_PARTY_LEADER",
+["type"] = "PARTY_LEADER",
 },
 ["color"] = {
 ["b"] = 1,
@@ -65145,8 +65145,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Althorian-Quel'dorei",
 ["sex"] = 2,
 },
-["type"] = "PARTY",
 ["event"] = "CHAT_MSG_PARTY",
+["type"] = "PARTY",
 },
 ["color"] = {
 ["b"] = 1,
@@ -65166,8 +65166,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Barelynoer-Area52",
 ["sex"] = 2,
 },
-["type"] = "PARTY_LEADER",
 ["event"] = "CHAT_MSG_PARTY_LEADER",
+["type"] = "PARTY_LEADER",
 },
 ["color"] = {
 ["b"] = 1,
@@ -65187,8 +65187,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Daosheng-Aegwynn",
 ["sex"] = 2,
 },
-["type"] = "PARTY",
 ["event"] = "CHAT_MSG_PARTY",
+["type"] = "PARTY",
 },
 ["color"] = {
 ["b"] = 1,
@@ -65208,8 +65208,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Althorian-Quel'dorei",
 ["sex"] = 2,
 },
-["type"] = "PARTY",
 ["event"] = "CHAT_MSG_PARTY",
+["type"] = "PARTY",
 },
 ["color"] = {
 ["b"] = 1,
@@ -65229,8 +65229,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Daosheng-Aegwynn",
 ["sex"] = 2,
 },
-["type"] = "PARTY",
 ["event"] = "CHAT_MSG_PARTY",
+["type"] = "PARTY",
 },
 ["color"] = {
 ["b"] = 1,
@@ -65250,8 +65250,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Althorian-Quel'dorei",
 ["sex"] = 2,
 },
-["type"] = "PARTY",
 ["event"] = "CHAT_MSG_PARTY",
+["type"] = "PARTY",
 },
 ["color"] = {
 ["b"] = 1,
@@ -65271,8 +65271,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Barelynoer-Area52",
 ["sex"] = 2,
 },
-["type"] = "PARTY_LEADER",
 ["event"] = "CHAT_MSG_PARTY_LEADER",
+["type"] = "PARTY_LEADER",
 },
 ["color"] = {
 ["b"] = 1,
@@ -65292,8 +65292,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Barelynoer-Area52",
 ["sex"] = 2,
 },
-["type"] = "PARTY_LEADER",
 ["event"] = "CHAT_MSG_PARTY_LEADER",
+["type"] = "PARTY_LEADER",
 },
 ["color"] = {
 ["b"] = 1,
@@ -65313,8 +65313,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Barelynoer-Area52",
 ["sex"] = 2,
 },
-["type"] = "PARTY_LEADER",
 ["event"] = "CHAT_MSG_PARTY_LEADER",
+["type"] = "PARTY_LEADER",
 },
 ["color"] = {
 ["b"] = 1,
@@ -65334,8 +65334,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Daosheng-Aegwynn",
 ["sex"] = 2,
 },
-["type"] = "PARTY",
 ["event"] = "CHAT_MSG_PARTY",
+["type"] = "PARTY",
 },
 ["color"] = {
 ["b"] = 1,
@@ -65355,8 +65355,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Barelynoer-Area52",
 ["sex"] = 2,
 },
-["type"] = "PARTY_LEADER",
 ["event"] = "CHAT_MSG_PARTY_LEADER",
+["type"] = "PARTY_LEADER",
 },
 ["color"] = {
 ["b"] = 1,
@@ -65376,8 +65376,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Barelynoer-Area52",
 ["sex"] = 2,
 },
-["type"] = "PARTY_LEADER",
 ["event"] = "CHAT_MSG_PARTY_LEADER",
+["type"] = "PARTY_LEADER",
 },
 ["color"] = {
 ["b"] = 1,
@@ -65397,8 +65397,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Daosheng-Aegwynn",
 ["sex"] = 2,
 },
-["type"] = "PARTY",
 ["event"] = "CHAT_MSG_PARTY",
+["type"] = "PARTY",
 },
 ["color"] = {
 ["b"] = 1,
@@ -65418,8 +65418,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Barelynoer-Area52",
 ["sex"] = 2,
 },
-["type"] = "PARTY_LEADER",
 ["event"] = "CHAT_MSG_PARTY_LEADER",
+["type"] = "PARTY_LEADER",
 },
 ["color"] = {
 ["b"] = 1,
@@ -65439,8 +65439,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Althorian-Quel'dorei",
 ["sex"] = 2,
 },
-["type"] = "PARTY",
 ["event"] = "CHAT_MSG_PARTY",
+["type"] = "PARTY",
 },
 ["color"] = {
 ["b"] = 1,
@@ -65460,8 +65460,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Daosheng-Aegwynn",
 ["sex"] = 2,
 },
-["type"] = "PARTY",
 ["event"] = "CHAT_MSG_PARTY",
+["type"] = "PARTY",
 },
 ["color"] = {
 ["b"] = 1,
@@ -65481,8 +65481,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Daosheng-Aegwynn",
 ["sex"] = 2,
 },
-["type"] = "PARTY",
 ["event"] = "CHAT_MSG_PARTY",
+["type"] = "PARTY",
 },
 ["color"] = {
 ["b"] = 1,
@@ -65502,8 +65502,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Althorian-Quel'dorei",
 ["sex"] = 2,
 },
-["type"] = "PARTY",
 ["event"] = "CHAT_MSG_PARTY",
+["type"] = "PARTY",
 },
 ["color"] = {
 ["b"] = 1,
@@ -65523,8 +65523,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Barelynoer-Area52",
 ["sex"] = 2,
 },
-["type"] = "PARTY_LEADER",
 ["event"] = "CHAT_MSG_PARTY_LEADER",
+["type"] = "PARTY_LEADER",
 },
 ["color"] = {
 ["b"] = 1,
@@ -65544,8 +65544,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Shreddingtôn-BleedingHollow",
 ["sex"] = 2,
 },
-["type"] = "PARTY",
 ["event"] = "CHAT_MSG_PARTY",
+["type"] = "PARTY",
 },
 ["color"] = {
 ["b"] = 1,
@@ -65565,8 +65565,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Daosheng-Aegwynn",
 ["sex"] = 2,
 },
-["type"] = "PARTY",
 ["event"] = "CHAT_MSG_PARTY",
+["type"] = "PARTY",
 },
 ["color"] = {
 ["b"] = 1,
@@ -65586,8 +65586,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Barelynoer-Area52",
 ["sex"] = 2,
 },
-["type"] = "PARTY_LEADER",
 ["event"] = "CHAT_MSG_PARTY_LEADER",
+["type"] = "PARTY_LEADER",
 },
 ["color"] = {
 ["b"] = 1,
@@ -65607,8 +65607,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Daosheng-Aegwynn",
 ["sex"] = 2,
 },
-["type"] = "PARTY",
 ["event"] = "CHAT_MSG_PARTY",
+["type"] = "PARTY",
 },
 ["color"] = {
 ["b"] = 1,
@@ -65628,8 +65628,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Daosheng-Aegwynn",
 ["sex"] = 2,
 },
-["type"] = "PARTY",
 ["event"] = "CHAT_MSG_PARTY",
+["type"] = "PARTY",
 },
 ["color"] = {
 ["b"] = 1,
@@ -65649,8 +65649,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Shreddingtôn-BleedingHollow",
 ["sex"] = 2,
 },
-["type"] = "PARTY",
 ["event"] = "CHAT_MSG_PARTY",
+["type"] = "PARTY",
 },
 ["color"] = {
 ["b"] = 1,
@@ -65670,8 +65670,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Barelynoer-Area52",
 ["sex"] = 2,
 },
-["type"] = "PARTY_LEADER",
 ["event"] = "CHAT_MSG_PARTY_LEADER",
+["type"] = "PARTY_LEADER",
 },
 ["color"] = {
 ["b"] = 1,
@@ -65691,8 +65691,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Daosheng-Aegwynn",
 ["sex"] = 2,
 },
-["type"] = "PARTY",
 ["event"] = "CHAT_MSG_PARTY",
+["type"] = "PARTY",
 },
 ["color"] = {
 ["b"] = 1,
@@ -65712,8 +65712,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Shreddingtôn-BleedingHollow",
 ["sex"] = 2,
 },
-["type"] = "LOOT",
 ["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
 },
 ["color"] = {
 ["b"] = 0,
@@ -65730,8 +65730,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["player"] = {
 ["name"] = "Xal'atath",
 },
-["type"] = "MONSTER_WHISPER",
 ["event"] = "CHAT_MSG_MONSTER_WHISPER",
+["type"] = "MONSTER_WHISPER",
 },
 ["color"] = {
 ["b"] = 0.9215686917304993,
@@ -65751,8 +65751,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Shreddingtôn-BleedingHollow",
 ["sex"] = 2,
 },
-["type"] = "ACHIEVEMENT",
 ["event"] = "CHAT_MSG_ACHIEVEMENT",
+["type"] = "ACHIEVEMENT",
 },
 ["color"] = {
 ["b"] = 0,
@@ -65772,8 +65772,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Shreddingtôn-BleedingHollow",
 ["sex"] = 2,
 },
-["type"] = "ACHIEVEMENT",
 ["event"] = "CHAT_MSG_ACHIEVEMENT",
+["type"] = "ACHIEVEMENT",
 },
 ["color"] = {
 ["b"] = 0,
@@ -65787,8 +65787,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 {
 ["recordedBy"] = "Barelynoer-Area52",
 ["typeInfo"] = {
-["type"] = "CURRENCY",
 ["event"] = "CHAT_MSG_CURRENCY",
+["type"] = "CURRENCY",
 },
 ["color"] = {
 ["b"] = 0,
@@ -65805,8 +65805,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["player"] = {
 ["name"] = "Magister Umbric",
 },
-["type"] = "MONSTER_SAY",
 ["event"] = "CHAT_MSG_MONSTER_SAY",
+["type"] = "MONSTER_SAY",
 },
 ["color"] = {
 ["b"] = 0.6235294342041016,
@@ -65826,8 +65826,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Shreddingtôn-BleedingHollow",
 ["sex"] = 2,
 },
-["type"] = "LOOT",
 ["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
 },
 ["color"] = {
 ["b"] = 0,
@@ -65847,8 +65847,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Althorian-Quel'dorei",
 ["sex"] = 2,
 },
-["type"] = "LOOT",
 ["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
 },
 ["color"] = {
 ["b"] = 0,
@@ -65862,8 +65862,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 {
 ["recordedBy"] = "Barelynoer-Area52",
 ["typeInfo"] = {
-["type"] = "MONEY",
 ["event"] = "CHAT_MSG_MONEY",
+["type"] = "MONEY",
 },
 ["color"] = {
 ["b"] = 0,
@@ -65880,8 +65880,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["player"] = {
 ["name"] = "Magister Umbric",
 },
-["type"] = "MONSTER_SAY",
 ["event"] = "CHAT_MSG_MONSTER_SAY",
+["type"] = "MONSTER_SAY",
 },
 ["color"] = {
 ["b"] = 0.6235294342041016,
@@ -65901,8 +65901,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Is-Thrall",
 ["sex"] = 3,
 },
-["type"] = "LOOT",
 ["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
 },
 ["color"] = {
 ["b"] = 0,
@@ -65922,8 +65922,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Daosheng-Aegwynn",
 ["sex"] = 2,
 },
-["type"] = "PARTY",
 ["event"] = "CHAT_MSG_PARTY",
+["type"] = "PARTY",
 },
 ["color"] = {
 ["b"] = 1,
@@ -65943,8 +65943,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Barelynoer-Area52",
 ["sex"] = 2,
 },
-["type"] = "PARTY_LEADER",
 ["event"] = "CHAT_MSG_PARTY_LEADER",
+["type"] = "PARTY_LEADER",
 },
 ["color"] = {
 ["b"] = 1,
@@ -65964,8 +65964,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Is-Thrall",
 ["sex"] = 3,
 },
-["type"] = "PARTY",
 ["event"] = "CHAT_MSG_PARTY",
+["type"] = "PARTY",
 },
 ["color"] = {
 ["b"] = 1,
@@ -65985,8 +65985,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Althorian-Quel'dorei",
 ["sex"] = 2,
 },
-["type"] = "PARTY",
 ["event"] = "CHAT_MSG_PARTY",
+["type"] = "PARTY",
 },
 ["color"] = {
 ["b"] = 1,
@@ -66006,8 +66006,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Daosheng-Aegwynn",
 ["sex"] = 2,
 },
-["type"] = "PARTY",
 ["event"] = "CHAT_MSG_PARTY",
+["type"] = "PARTY",
 },
 ["color"] = {
 ["b"] = 1,
@@ -66027,8 +66027,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Is-Thrall",
 ["sex"] = 3,
 },
-["type"] = "PARTY",
 ["event"] = "CHAT_MSG_PARTY",
+["type"] = "PARTY",
 },
 ["color"] = {
 ["b"] = 1,
@@ -66048,8 +66048,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Barelynoer-Area52",
 ["sex"] = 2,
 },
-["type"] = "PARTY_LEADER",
 ["event"] = "CHAT_MSG_PARTY_LEADER",
+["type"] = "PARTY_LEADER",
 },
 ["color"] = {
 ["b"] = 1,
@@ -66069,8 +66069,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Althorian-Quel'dorei",
 ["sex"] = 2,
 },
-["type"] = "PARTY",
 ["event"] = "CHAT_MSG_PARTY",
+["type"] = "PARTY",
 },
 ["color"] = {
 ["b"] = 1,
@@ -66090,8 +66090,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Shreddingtôn-BleedingHollow",
 ["sex"] = 2,
 },
-["type"] = "PARTY",
 ["event"] = "CHAT_MSG_PARTY",
+["type"] = "PARTY",
 },
 ["color"] = {
 ["b"] = 1,
@@ -66111,8 +66111,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Shreddingtôn-BleedingHollow",
 ["sex"] = 2,
 },
-["type"] = "PARTY",
 ["event"] = "CHAT_MSG_PARTY",
+["type"] = "PARTY",
 },
 ["color"] = {
 ["b"] = 1,
@@ -66132,8 +66132,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Althorian-Quel'dorei",
 ["sex"] = 2,
 },
-["type"] = "PARTY",
 ["event"] = "CHAT_MSG_PARTY",
+["type"] = "PARTY",
 },
 ["color"] = {
 ["b"] = 1,
@@ -66153,8 +66153,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Barelynoer-Area52",
 ["sex"] = 2,
 },
-["type"] = "PARTY_LEADER",
 ["event"] = "CHAT_MSG_PARTY_LEADER",
+["type"] = "PARTY_LEADER",
 },
 ["color"] = {
 ["b"] = 1,
@@ -66174,8 +66174,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Daosheng-Aegwynn",
 ["sex"] = 2,
 },
-["type"] = "PARTY",
 ["event"] = "CHAT_MSG_PARTY",
+["type"] = "PARTY",
 },
 ["color"] = {
 ["b"] = 1,
@@ -66195,8 +66195,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Barelynoer-Area52",
 ["sex"] = 2,
 },
-["type"] = "PARTY_LEADER",
 ["event"] = "CHAT_MSG_PARTY_LEADER",
+["type"] = "PARTY_LEADER",
 },
 ["color"] = {
 ["b"] = 1,

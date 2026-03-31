@@ -1,13 +1,6 @@
 
 CHATTYNATOR_CURRENT_PROFILE = "DEFAULT"
 CHATTYNATOR_COMMAND_HISTORY = {
-"/p ggs!",
-"/p /key",
-"/p /simc",
-"/p /key",
-"/p im absolutely gaming",
-"/p /key",
-"/p /reload",
 "/s /arcui",
 "/s /RC",
 "/s /RELOAD",
@@ -206,4 +199,7 @@ CHATTYNATOR_COMMAND_HISTORY = {
 "/cw Fabs-Stormrage 2 today lol",
 "/cw Fabs-Stormrage npnp!",
 "/cw Fabs-Stormrage /key",
+"/cw Mystryy-Stormrage oh snap i stepped away. 2 sec",
+"/cw Mystryy-Stormrage caught me in the timeways ;)",
+"/cw Mystryy-Stormrage done!",
 }

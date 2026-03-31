@@ -8,51 +8,10 @@ BigWigs3DB = {
 ["Zappyxatu - Stormrage"] = "Default",
 },
 ["namespaces"] = {
-["BigWigs_Bosses_Ranjit"] = {
+["BigWigs_Bosses_Crawth"] = {
 ["profiles"] = {
 ["Default"] = {
-[153757] = 3129591,
-},
-},
-},
-["BigWigs_Plugins_PrivateAuras"] = {
-["global"] = {
-["showHelpTip"] = false,
-},
-["profiles"] = {
-["Default"] = {
-["player"] = {
-["anchorYOffset"] = 93,
-["anchorXOffset"] = 71,
-},
-},
-},
-},
-["BigWigs_Bosses_Echo of Doragosa"] = {
-["profiles"] = {
-["Default"] = {
-[388822] = 3129591,
-},
-},
-},
-["BigWigs_Plugins_Bars"] = {
-["profiles"] = {
-["Default"] = {
-["emphasize"] = false,
-["expPosition"] = {
-"TOP",
-"TOP",
-386,
--7,
-},
-["visibleBarLimit"] = 1,
-["normalWidth"] = 120,
-["normalPosition"] = {
-"BOTTOMRIGHT",
-"BOTTOMRIGHT",
-0,
-168,
-},
+[377004] = 3129591,
 },
 },
 },
@@ -67,6 +26,40 @@ BigWigs3DB = {
 ["profiles"] = {
 ["Default"] = {
 [386173] = 3129591,
+},
+},
+},
+["BigWigs_Bosses_Ranjit"] = {
+["profiles"] = {
+["Default"] = {
+[153757] = 3129591,
+},
+},
+},
+["BigWigs_Bosses_Muro'jin and Nekraxx"] = {
+["profiles"] = {
+["Default"] = {
+[1243900] = 3129591,
+},
+},
+},
+["BigWigs_Plugins_PrivateAuras"] = {
+["global"] = {
+["showHelpTip"] = false,
+},
+["profiles"] = {
+["Default"] = {
+["player"] = {
+["anchorXOffset"] = 71,
+["anchorYOffset"] = 93,
+},
+},
+},
+},
+["BigWigs_Bosses_Echo of Doragosa"] = {
+["profiles"] = {
+["Default"] = {
+[388822] = 3129591,
 },
 },
 },
@@ -85,18 +78,24 @@ nil,
 },
 },
 },
-["BigWigs_Bosses_Muro'jin and Nekraxx"] = {
+["BigWigs_Plugins_Bars"] = {
 ["profiles"] = {
 ["Default"] = {
-[1243900] = 3129591,
+["emphasize"] = false,
+["visibleBarLimit"] = 1,
+["normalWidth"] = 120,
+["expPosition"] = {
+"TOP",
+"TOP",
+386,
+-7,
 },
+["normalPosition"] = {
+"BOTTOMRIGHT",
+"BOTTOMRIGHT",
+0,
+168,
 },
-},
-["BigWigs_Plugins_BossBlock"] = {
-["global"] = {
-["tableNeedsCopied"] = false,
-["watchedMovies"] = {
-[1049] = true,
 },
 },
 },
@@ -107,10 +106,11 @@ nil,
 },
 },
 },
-["BigWigs_Bosses_Crawth"] = {
-["profiles"] = {
-["Default"] = {
-[377004] = 3129591,
+["BigWigs_Plugins_BossBlock"] = {
+["global"] = {
+["tableNeedsCopied"] = false,
+["watchedMovies"] = {
+[1049] = true,
 },
 },
 },

@@ -1,9 +1,6 @@
 
 CHATTYNATOR_CURRENT_PROFILE = "DEFAULT"
 CHATTYNATOR_COMMAND_HISTORY = {
-"/p im absolutely gaming",
-"/p /key",
-"/p /reload",
 "/s /arcui",
 "/s /RC",
 "/s /RELOAD",

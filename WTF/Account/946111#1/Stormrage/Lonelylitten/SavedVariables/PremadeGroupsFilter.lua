@@ -38,13 +38,13 @@ PremadeGroupsFilterState = {
 ["expression"] = "",
 ["difficulty"] = {
 },
-["dungeon4"] = true,
+["dungeon1"] = false,
 ["dungeon2"] = true,
 ["dungeon3"] = true,
 ["dungeon8"] = true,
 ["dungeon5"] = true,
 ["dungeon7"] = true,
-["dungeon1"] = false,
+["dungeon4"] = true,
 },
 },
 ["c121f4"] = {

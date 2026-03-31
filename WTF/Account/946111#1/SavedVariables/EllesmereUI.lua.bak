@@ -980,14 +980,14 @@ EllesmereUIDB = {
 },
 },
 },
-["previewHintDismissed"] = true,
-["unlockTipSeen"] = true,
-["dismissedConflicts"] = {
-},
 ["fonts"] = {
 ["global"] = "Expressway",
 ["outlineMode"] = "shadow",
 },
+["unlockTipSeen"] = true,
+["dismissedConflicts"] = {
+},
+["previewHintDismissed"] = true,
 ["customColors"] = {
 },
 ["unlockSnapEnabled"] = true,
