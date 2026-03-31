@@ -367,11 +367,11 @@ WarpDepleteDB = {
 },
 [10] = {
 ["current"] = {
-585,
-1201,
-1648,
-["forces"] = 1703,
-["challenge"] = 1703097,
+412,
+914,
+1268,
+["forces"] = 1132,
+["challenge"] = 1269401,
 },
 ["best"] = {
 372,
@@ -381,11 +381,11 @@ WarpDepleteDB = {
 ["challenge"] = 1069109,
 },
 ["currentDiff"] = {
-213,
-762,
-592,
-["forces"] = 634,
-["challenge"] = 633988,
+40,
+475,
+212,
+["forces"] = 63,
+["challenge"] = 200292,
 },
 },
 [4] = {
@@ -672,6 +672,16 @@ WarpDepleteDB = {
 63,
 ["forces"] = 29,
 ["challenge"] = 62325,
+},
+},
+[12] = {
+["current"] = {
+[3] = 342,
+[2] = 851,
+},
+["best"] = {
+},
+["currentDiff"] = {
 },
 },
 [13] = {

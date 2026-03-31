@@ -10,11 +10,11 @@ DSHDB = {
 ["profiles"] = {
 ["Angryabsol - Stormrage"] = {
 },
-["Zappyxatu - Stormrage"] = {
-},
 ["Barelynoer - Area 52"] = {
 },
 ["Lonelylitten - Stormrage"] = {
+},
+["Zappyxatu - Stormrage"] = {
 },
 },
 }

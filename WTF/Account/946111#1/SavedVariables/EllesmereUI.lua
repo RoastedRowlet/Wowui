@@ -7,10 +7,10 @@ EllesmereUIDB = {
 },
 ["durWarnYOffset"] = 102,
 ["unlockWidthMatch"] = {
-["focusCastbar"] = "focus",
-["playerCastbar"] = "player",
 ["targetCastbar"] = "target",
 ["CDM_custom_4_867585_153"] = "ERB_CastBar",
+["focusCastbar"] = "focus",
+["playerCastbar"] = "player",
 },
 ["lastSpecByChar"] = {
 ["Lonelylitten - Stormrage"] = 105,
@@ -405,7 +405,10 @@ EllesmereUIDB = {
 },
 },
 },
-["previewHintDismissed"] = true,
+["fonts"] = {
+["global"] = "Expressway",
+["outlineMode"] = "shadow",
+},
 ["sidebarUnlockTipSeen"] = true,
 ["profiles"] = {
 ["Default"] = {
@@ -445,10 +448,10 @@ EllesmereUIDB = {
 },
 },
 ["widthMatch"] = {
-["CDM_custom_4_867585_153"] = "ERB_CastBar",
 ["playerCastbar"] = "player",
-["focusCastbar"] = "focus",
+["CDM_custom_4_867585_153"] = "ERB_CastBar",
 ["targetCastbar"] = "target",
+["focusCastbar"] = "focus",
 },
 ["heightMatch"] = {
 },
@@ -951,10 +954,7 @@ EllesmereUIDB = {
 },
 },
 },
-["fonts"] = {
-["global"] = "Expressway",
-["outlineMode"] = "shadow",
-},
+["previewHintDismissed"] = true,
 ["unlockTipSeen"] = true,
 ["dismissedConflicts"] = {
 },

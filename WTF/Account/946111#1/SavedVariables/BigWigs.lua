@@ -8,6 +8,41 @@ BigWigs3DB = {
 ["Zappyxatu - Stormrage"] = "Default",
 },
 ["namespaces"] = {
+["BigWigs_Plugins_BossBlock"] = {
+["global"] = {
+["tableNeedsCopied"] = false,
+["watchedMovies"] = {
+[1049] = true,
+},
+},
+},
+["BigWigs_Bosses_Ranjit"] = {
+["profiles"] = {
+["Default"] = {
+[153757] = 3129591,
+},
+},
+},
+["BigWigs_Plugins_PrivateAuras"] = {
+["global"] = {
+["showHelpTip"] = false,
+},
+["profiles"] = {
+["Default"] = {
+["player"] = {
+["anchorYOffset"] = 93,
+["anchorXOffset"] = 71,
+},
+},
+},
+},
+["BigWigs_Bosses_Echo of Doragosa"] = {
+["profiles"] = {
+["Default"] = {
+[388822] = 3129591,
+},
+},
+},
 ["BigWigs_Bosses_Crawth"] = {
 ["profiles"] = {
 ["Default"] = {
@@ -29,40 +64,6 @@ BigWigs3DB = {
 },
 },
 },
-["BigWigs_Bosses_Ranjit"] = {
-["profiles"] = {
-["Default"] = {
-[153757] = 3129591,
-},
-},
-},
-["BigWigs_Bosses_Muro'jin and Nekraxx"] = {
-["profiles"] = {
-["Default"] = {
-[1243900] = 3129591,
-},
-},
-},
-["BigWigs_Plugins_PrivateAuras"] = {
-["global"] = {
-["showHelpTip"] = false,
-},
-["profiles"] = {
-["Default"] = {
-["player"] = {
-["anchorXOffset"] = 71,
-["anchorYOffset"] = 93,
-},
-},
-},
-},
-["BigWigs_Bosses_Echo of Doragosa"] = {
-["profiles"] = {
-["Default"] = {
-[388822] = 3129591,
-},
-},
-},
 ["MythicPlus"] = {
 ["global"] = {
 ["showViewerTeleportTip"] = false,
@@ -78,11 +79,16 @@ nil,
 },
 },
 },
+["BigWigs_Bosses_Zuraal"] = {
+["profiles"] = {
+["Default"] = {
+[1263399] = 3129591,
+},
+},
+},
 ["BigWigs_Plugins_Bars"] = {
 ["profiles"] = {
 ["Default"] = {
-["emphasize"] = false,
-["visibleBarLimit"] = 1,
 ["normalWidth"] = 120,
 ["expPosition"] = {
 "TOP",
@@ -90,6 +96,8 @@ nil,
 386,
 -7,
 },
+["visibleBarLimit"] = 1,
+["emphasize"] = false,
 ["normalPosition"] = {
 "BOTTOMRIGHT",
 "BOTTOMRIGHT",
@@ -99,18 +107,10 @@ nil,
 },
 },
 },
-["BigWigs_Bosses_Zuraal"] = {
+["BigWigs_Bosses_Muro'jin and Nekraxx"] = {
 ["profiles"] = {
 ["Default"] = {
-[1263399] = 3129591,
-},
-},
-},
-["BigWigs_Plugins_BossBlock"] = {
-["global"] = {
-["tableNeedsCopied"] = false,
-["watchedMovies"] = {
-[1049] = true,
+[1243900] = 3129591,
 },
 },
 },
@@ -127,9 +127,9 @@ nil,
 ["Player-3676-0DF7D3EF"] = {
 ["playerRating"] = 2395,
 ["specId"] = 1473,
-["keyMap"] = 556,
+["keyMap"] = 560,
 ["name"] = "Barelynoer",
-["keyLevel"] = 10,
+["keyLevel"] = 9,
 ["realm"] = "Area 52",
 },
 ["Player-60-0F85ABEF"] = {

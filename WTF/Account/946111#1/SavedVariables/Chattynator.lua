@@ -232,9 +232,9 @@ CHATTYNATOR_CONFIG = {
 ["g"] = 0.7529412508010864,
 ["r"] = 1,
 },
-["BG_SYSTEM_NEUTRAL"] = {
-["b"] = 0.03921568766236305,
-["g"] = 0.4705882668495178,
+["CHANNEL_Trade"] = {
+["b"] = 0.7529412508010864,
+["g"] = 0.7529412508010864,
 ["r"] = 1,
 },
 ["FILTERED"] = {
@@ -307,12 +307,12 @@ CHATTYNATOR_CONFIG = {
 ["g"] = 0.501960813999176,
 ["r"] = 0.7529412508010864,
 },
-["CHANNEL18"] = {
+["CHANNEL_Services"] = {
 ["b"] = 0.7529412508010864,
 ["g"] = 0.7529412508010864,
 ["r"] = 1,
 },
-["CHANNEL_Services"] = {
+["CHANNEL18"] = {
 ["b"] = 0.7529412508010864,
 ["g"] = 0.7529412508010864,
 ["r"] = 1,
@@ -337,8 +337,8 @@ CHATTYNATOR_CONFIG = {
 ["g"] = 0.7529412508010864,
 ["r"] = 1,
 },
-["ACHIEVEMENT"] = {
-["b"] = 0,
+["ARENA_POINTS"] = {
+["b"] = 1,
 ["g"] = 1,
 ["r"] = 1,
 },
@@ -427,8 +427,8 @@ CHATTYNATOR_CONFIG = {
 ["g"] = 0.4980392456054688,
 ["r"] = 1,
 },
-["ARENA_POINTS"] = {
-["b"] = 1,
+["ACHIEVEMENT"] = {
+["b"] = 0,
 ["g"] = 1,
 ["r"] = 1,
 },
@@ -467,9 +467,9 @@ CHATTYNATOR_CONFIG = {
 ["g"] = 0.4980392456054688,
 ["r"] = 1,
 },
-["CHANNEL_Trade"] = {
-["b"] = 0.7529412508010864,
-["g"] = 0.7529412508010864,
+["BG_SYSTEM_NEUTRAL"] = {
+["b"] = 0.03921568766236305,
+["g"] = 0.4705882668495178,
 ["r"] = 1,
 },
 ["PET_BATTLE_COMBAT_LOG"] = {
@@ -543,10 +543,10 @@ CHATTYNATOR_CONFIG = {
 ["invert"] = true,
 ["name"] = "GENERAL",
 ["groups"] = {
-["PET_BATTLE_COMBAT_LOG"] = false,
-["COMBAT_MISC_INFO"] = false,
-["COMBAT_XP_GAIN"] = false,
 ["OPENING"] = false,
+["PET_BATTLE_COMBAT_LOG"] = false,
+["COMBAT_XP_GAIN"] = false,
+["COMBAT_MISC_INFO"] = false,
 ["VOICE_TEXT"] = false,
 ["PET_INFO"] = false,
 ["TRADESKILLS"] = false,
@@ -618,6 +618,23 @@ CHATTYNATOR_CONFIG = {
 },
 ["name"] = "New tab",
 ["isTemporary"] = false,
+["groups"] = {
+},
+["addons"] = {
+},
+["backgroundColor"] = "1a1a1a",
+["filters"] = {
+},
+},
+{
+["tabColor"] = "FF80FF",
+["channels"] = {
+},
+["whispersTemp"] = {
+["Límpdiscit-Tichondrius"] = true,
+},
+["name"] = "Límpdiscit-Tichondrius",
+["isTemporary"] = true,
 ["groups"] = {
 },
 ["addons"] = {
@@ -66206,6 +66223,1083 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["text"] = "|Hchannel:PARTY|h[Party Leader]|h |Hplayer:Barelynoer-Area52:7949:PARTY:|h[|cff33937fBarelynoer|r]|h: ggs!",
 ["id"] = "s10_3338",
 ["timestamp"] = 1774908938,
+},
+{
+["recordedBy"] = "Barelynoer-Area52",
+["typeInfo"] = {
+["player"] = {
+["race"] = "NightElf",
+["class"] = "DEMONHUNTER",
+["name"] = "Moonjack-Stormrage",
+["sex"] = 3,
+},
+["type"] = "PARTY",
+["event"] = "CHAT_MSG_PARTY",
+},
+["color"] = {
+["b"] = 1,
+["g"] = 0.6666666865348816,
+["r"] = 0.6666666865348816,
+},
+["text"] = "|Hchannel:PARTY|h[Party]|h |Hplayer:Moonjack-Stormrage:4:PARTY:|h[|cffa330c9Moonjack-Stormrage|r]|h: hello",
+["id"] = "s10_3339",
+["timestamp"] = 1774921498,
+},
+{
+["recordedBy"] = "Barelynoer-Area52",
+["typeInfo"] = {
+["player"] = {
+["race"] = "Tauren",
+["class"] = "WARRIOR",
+["name"] = "Whitebison",
+["sex"] = 2,
+},
+["type"] = "EMOTE",
+["event"] = "CHAT_MSG_TEXT_EMOTE",
+},
+["color"] = {
+["b"] = 0.250980406999588,
+["g"] = 0.501960813999176,
+["r"] = 1,
+},
+["text"] = "|Hplayer:Whitebison:6:TEXT_EMOTE:|h|cffc69b6dWhitebison|r|h-Destromath hugs Sadiina-Tichondrius.",
+["id"] = "s10_3340",
+["timestamp"] = 1774921508,
+},
+{
+["recordedBy"] = "Barelynoer-Area52",
+["typeInfo"] = {
+["player"] = {
+["race"] = "BloodElf",
+["class"] = "DEATHKNIGHT",
+["name"] = "Kilon-Nordrassil",
+["sex"] = 3,
+},
+["type"] = "PARTY",
+["event"] = "CHAT_MSG_PARTY",
+},
+["color"] = {
+["b"] = 1,
+["g"] = 0.6666666865348816,
+["r"] = 0.6666666865348816,
+},
+["text"] = "|Hchannel:PARTY|h[Party]|h |Hplayer:Kilon-Nordrassil:7:PARTY:|h[|cffc41e3aKilon-Nordrassil|r]|h: ello",
+["id"] = "s10_3341",
+["timestamp"] = 1774921511,
+},
+{
+["recordedBy"] = "Barelynoer-Area52",
+["typeInfo"] = {
+["player"] = {
+["race"] = "Dracthyr",
+["class"] = "EVOKER",
+["name"] = "Barelynoer-Area52",
+["sex"] = 2,
+},
+["type"] = "PARTY",
+["event"] = "CHAT_MSG_PARTY",
+},
+["color"] = {
+["b"] = 1,
+["g"] = 0.6666666865348816,
+["r"] = 0.6666666865348816,
+},
+["text"] = "|Hchannel:PARTY|h[Party]|h |Hplayer:Barelynoer-Area52:8:PARTY:|h[|cff33937fBarelynoer|r]|h: yo!",
+["id"] = "s10_3342",
+["timestamp"] = 1774921520,
+},
+{
+["recordedBy"] = "Barelynoer-Area52",
+["typeInfo"] = {
+["player"] = {
+["race"] = "BloodElf",
+["class"] = "DEATHKNIGHT",
+["name"] = "Kilon-Nordrassil",
+["sex"] = 3,
+},
+["type"] = "PARTY",
+["event"] = "CHAT_MSG_PARTY",
+},
+["color"] = {
+["b"] = 1,
+["g"] = 0.6666666865348816,
+["r"] = 0.6666666865348816,
+},
+["text"] = "|Hchannel:PARTY|h[Party]|h |Hplayer:Kilon-Nordrassil:11:PARTY:|h[|cffc41e3aKilon-Nordrassil|r]|h: ty for the invite",
+["id"] = "s10_3343",
+["timestamp"] = 1774921526,
+},
+{
+["recordedBy"] = "Barelynoer-Area52",
+["typeInfo"] = {
+["player"] = {
+["name"] = "Divide",
+},
+["type"] = "ACHIEVEMENT",
+["event"] = "CHAT_MSG_ACHIEVEMENT",
+},
+["color"] = {
+["b"] = 0,
+["g"] = 1,
+["r"] = 1,
+},
+["text"] = "Divide has earned the achievement |cffffff00|Hachievement:61493:Guild-3676-00000692C5EC:1:3:30:26:4294967295:4294967295:4294967295:4294967295|h[Hall of Fame: Chimaerus, the Undreamt God]|h|r!",
+["id"] = "s10_3344",
+["timestamp"] = 1774921601,
+},
+{
+["recordedBy"] = "Barelynoer-Area52",
+["typeInfo"] = {
+["player"] = {
+["name"] = "Pool Noodle Pirates",
+},
+["type"] = "ACHIEVEMENT",
+["event"] = "CHAT_MSG_ACHIEVEMENT",
+},
+["color"] = {
+["b"] = 0,
+["g"] = 1,
+["r"] = 1,
+},
+["text"] = "Pool Noodle Pirates has earned the achievement |cffffff00|Hachievement:61493:Guild-3676-0000065EF05D:1:3:30:26:4294967295:4294967295:4294967295:4294967295|h[Hall of Fame: Chimaerus, the Undreamt God]|h|r!",
+["id"] = "s10_3345",
+["timestamp"] = 1774921625,
+},
+{
+["recordedBy"] = "Barelynoer-Area52",
+["typeInfo"] = {
+["player"] = {
+["race"] = "Worgen",
+["class"] = "DRUID",
+["name"] = "Vvgh-Area52",
+["sex"] = 2,
+},
+["type"] = "GUILD_ACHIEVEMENT",
+["event"] = "CHAT_MSG_GUILD_ACHIEVEMENT",
+},
+["color"] = {
+["b"] = 0.250980406999588,
+["g"] = 1,
+["r"] = 0.250980406999588,
+},
+["text"] = "|Hplayer:Vvgh-Area52|h[|cffff7c0aVvgh|r]|h has earned the achievement |cffffff00|Hachievement:61262:Player-3676-0EAD41CD:1:3:30:26:4294967295:4294967295:4294967295:4294967295|h[Keystone Hero: Windrunner Spire]|h|r!",
+["id"] = "s10_3346",
+["timestamp"] = 1774921650,
+},
+{
+["recordedBy"] = "Barelynoer-Area52",
+["typeInfo"] = {
+["player"] = {
+["name"] = "Fun Detected",
+},
+["type"] = "ACHIEVEMENT",
+["event"] = "CHAT_MSG_ACHIEVEMENT",
+},
+["color"] = {
+["b"] = 0,
+["g"] = 1,
+["r"] = 1,
+},
+["text"] = "Fun Detected has earned the achievement |cffffff00|Hachievement:61493:Guild-3676-0000058977EC:1:3:30:26:4294967295:4294967295:4294967295:4294967295|h[Hall of Fame: Chimaerus, the Undreamt God]|h|r!",
+["id"] = "s10_3347",
+["timestamp"] = 1774921747,
+},
+{
+["recordedBy"] = "Barelynoer-Area52",
+["typeInfo"] = {
+["player"] = {
+["name"] = "Mid",
+},
+["type"] = "ACHIEVEMENT",
+["event"] = "CHAT_MSG_ACHIEVEMENT",
+},
+["color"] = {
+["b"] = 0,
+["g"] = 1,
+["r"] = 1,
+},
+["text"] = "Mid has earned the achievement |cffffff00|Hachievement:61493:Guild-76-0000056B65B6:1:3:30:26:4294967295:4294967295:4294967295:4294967295|h[Hall of Fame: Chimaerus, the Undreamt God]|h|r!",
+["id"] = "s10_3348",
+["timestamp"] = 1774922020,
+},
+{
+["recordedBy"] = "Barelynoer-Area52",
+["typeInfo"] = {
+["player"] = {
+["name"] = "Functional",
+},
+["type"] = "ACHIEVEMENT",
+["event"] = "CHAT_MSG_ACHIEVEMENT",
+},
+["color"] = {
+["b"] = 0,
+["g"] = 1,
+["r"] = 1,
+},
+["text"] = "Functional has earned the achievement |cffffff00|Hachievement:61493:Guild-3676-000006BB782E:1:3:30:26:4294967295:4294967295:4294967295:4294967295|h[Hall of Fame: Chimaerus, the Undreamt God]|h|r!",
+["id"] = "s10_3349",
+["timestamp"] = 1774922632,
+},
+{
+["recordedBy"] = "Barelynoer-Area52",
+["typeInfo"] = {
+["player"] = {
+["race"] = "NightElf",
+["class"] = "MONK",
+["name"] = "Lewdly-Illidan",
+["sex"] = 3,
+},
+["type"] = "ACHIEVEMENT",
+["event"] = "CHAT_MSG_ACHIEVEMENT",
+},
+["color"] = {
+["b"] = 0,
+["g"] = 1,
+["r"] = 1,
+},
+["text"] = "|Hplayer:Lewdly-Illidan|h[|cff00ff98Lewdly-Illidan|r]|h has earned the achievement |cffffff00|Hachievement:61647:Player-57-0D995A47:1:3:30:26:4294967295:4294967295:4294967295:4294967295|h[Mythic: Nexus-Point Xenas]|h|r!",
+["id"] = "s10_3350",
+["timestamp"] = 1774922900,
+},
+{
+["recordedBy"] = "Barelynoer-Area52",
+["typeInfo"] = {
+["player"] = {
+["race"] = "NightElf",
+["class"] = "MONK",
+["name"] = "Lewdly-Illidan",
+["sex"] = 3,
+},
+["type"] = "ACHIEVEMENT",
+["event"] = "CHAT_MSG_ACHIEVEMENT",
+},
+["color"] = {
+["b"] = 0,
+["g"] = 1,
+["r"] = 1,
+},
+["text"] = "|Hplayer:Lewdly-Illidan|h[|cff00ff98Lewdly-Illidan|r]|h has earned the achievement |cffffff00|Hachievement:61646:Player-57-0D995A47:1:3:30:26:4294967295:4294967295:4294967295:4294967295|h[Heroic: Nexus-Point Xenas]|h|r!",
+["id"] = "s10_3351",
+["timestamp"] = 1774922900,
+},
+{
+["recordedBy"] = "Barelynoer-Area52",
+["typeInfo"] = {
+["player"] = {
+["name"] = "Xal'atath",
+},
+["type"] = "MONSTER_WHISPER",
+["event"] = "CHAT_MSG_MONSTER_WHISPER",
+},
+["color"] = {
+["b"] = 0.9215686917304993,
+["g"] = 0.7098039388656616,
+["r"] = 1,
+},
+["text"] = "Xal'atath whispers: Our agreement stands... for now.",
+["id"] = "s10_3352",
+["timestamp"] = 1774922900,
+},
+{
+["recordedBy"] = "Barelynoer-Area52",
+["typeInfo"] = {
+["player"] = {
+["race"] = "ZandalariTroll",
+["class"] = "WARRIOR",
+["name"] = "Alceras-Tichondrius",
+["sex"] = 2,
+},
+["type"] = "ACHIEVEMENT",
+["event"] = "CHAT_MSG_ACHIEVEMENT",
+},
+["color"] = {
+["b"] = 0,
+["g"] = 1,
+["r"] = 1,
+},
+["text"] = "|Hplayer:Alceras-Tichondrius|h[|cffc69b6dAlceras-Tichondrius|r]|h has earned the achievement |cffffff00|Hachievement:61268:Player-11-0AFA9193:1:3:30:26:4294967295:4294967295:4294967295:4294967295|h[Keystone Hero: Nexus-Point Xenas]|h|r!",
+["id"] = "s10_3353",
+["timestamp"] = 1774922900,
+},
+{
+["recordedBy"] = "Barelynoer-Area52",
+["typeInfo"] = {
+["player"] = {
+["race"] = "BloodElf",
+["class"] = "DEATHKNIGHT",
+["name"] = "Kilon-Nordrassil",
+["sex"] = 3,
+},
+["type"] = "ACHIEVEMENT",
+["event"] = "CHAT_MSG_ACHIEVEMENT",
+},
+["color"] = {
+["b"] = 0,
+["g"] = 1,
+["r"] = 1,
+},
+["text"] = "|Hplayer:Kilon-Nordrassil|h[|cffc41e3aKilon-Nordrassil|r]|h has earned the achievement |cffffff00|Hachievement:61268:Player-121-09C711A3:1:3:30:26:4294967295:4294967295:4294967295:4294967295|h[Keystone Hero: Nexus-Point Xenas]|h|r!",
+["id"] = "s10_3354",
+["timestamp"] = 1774922900,
+},
+{
+["recordedBy"] = "Barelynoer-Area52",
+["typeInfo"] = {
+["player"] = {
+["race"] = "NightElf",
+["class"] = "DEMONHUNTER",
+["name"] = "Moonjack-Stormrage",
+["sex"] = 3,
+},
+["type"] = "ACHIEVEMENT",
+["event"] = "CHAT_MSG_ACHIEVEMENT",
+},
+["color"] = {
+["b"] = 0,
+["g"] = 1,
+["r"] = 1,
+},
+["text"] = "|Hplayer:Moonjack-Stormrage|h[|cffa330c9Moonjack-Stormrage|r]|h has earned the achievement |cffffff00|Hachievement:61268:Player-60-0F026D86:1:3:30:26:4294967295:4294967295:4294967295:4294967295|h[Keystone Hero: Nexus-Point Xenas]|h|r!",
+["id"] = "s10_3355",
+["timestamp"] = 1774922900,
+},
+{
+["recordedBy"] = "Barelynoer-Area52",
+["typeInfo"] = {
+["player"] = {
+["race"] = "NightElf",
+["class"] = "MONK",
+["name"] = "Lewdly-Illidan",
+["sex"] = 3,
+},
+["type"] = "ACHIEVEMENT",
+["event"] = "CHAT_MSG_ACHIEVEMENT",
+},
+["color"] = {
+["b"] = 0,
+["g"] = 1,
+["r"] = 1,
+},
+["text"] = "|Hplayer:Lewdly-Illidan|h[|cff00ff98Lewdly-Illidan|r]|h has earned the achievement |cffffff00|Hachievement:61268:Player-57-0D995A47:1:3:30:26:4294967295:4294967295:4294967295:4294967295|h[Keystone Hero: Nexus-Point Xenas]|h|r!",
+["id"] = "s10_3356",
+["timestamp"] = 1774922900,
+},
+{
+["recordedBy"] = "Barelynoer-Area52",
+["typeInfo"] = {
+["type"] = "CURRENCY",
+["event"] = "CHAT_MSG_CURRENCY",
+},
+["color"] = {
+["b"] = 0,
+["g"] = 0.6666666865348816,
+["r"] = 0,
+},
+["text"] = "You receive currency: |cnIQ4:|Hcurrency:3345:0|h[Hero Dawncrest]|h|rx12 (You've earned the maximum amount of |cnIQ4:|Hcurrency:3347:0|h[Myth Dawncrest]|h|r)",
+["id"] = "s10_3357",
+["timestamp"] = 1774922901,
+},
+{
+["recordedBy"] = "Barelynoer-Area52",
+["typeInfo"] = {
+["player"] = {
+["race"] = "NightElf",
+["class"] = "DEMONHUNTER",
+["name"] = "Moonjack-Stormrage",
+["sex"] = 3,
+},
+["type"] = "LOOT",
+["event"] = "CHAT_MSG_LOOT",
+},
+["color"] = {
+["b"] = 0,
+["g"] = 0.6666666865348816,
+["r"] = 0,
+},
+["text"] = "Moonjack-Stormrage receives loot: |cnIQ3:|Hitem:258839::::::::90:1473::16::1:28:1279:::::|h[Concealed Catalogue]|h|r.",
+["id"] = "s10_3358",
+["timestamp"] = 1774922905,
+},
+{
+["recordedBy"] = "Barelynoer-Area52",
+["typeInfo"] = {
+["player"] = {
+["race"] = "NightElf",
+["class"] = "DEMONHUNTER",
+["name"] = "Moonjack-Stormrage",
+["sex"] = 3,
+},
+["type"] = "LOOT",
+["event"] = "CHAT_MSG_LOOT",
+},
+["color"] = {
+["b"] = 0,
+["g"] = 0.6666666865348816,
+["r"] = 0,
+},
+["text"] = "Moonjack-Stormrage receives loot: |cnIQ4:|Hitem:251216::::::::90:1473::16:5:12795:13440:6652:13577:12699:1:28:1279:::::|h[Maledict Vest]|h|r.",
+["id"] = "s10_3359",
+["timestamp"] = 1774922905,
+},
+{
+["recordedBy"] = "Barelynoer-Area52",
+["typeInfo"] = {
+["player"] = {
+["name"] = "Alleria Windrunner",
+},
+["type"] = "MONSTER_SAY",
+["event"] = "CHAT_MSG_MONSTER_SAY",
+},
+["color"] = {
+["b"] = 0.6235294342041016,
+["g"] = 1,
+["r"] = 1,
+},
+["text"] = "Alleria Windrunner says: Farewell, old friend...",
+["id"] = "s10_3360",
+["timestamp"] = 1774922907,
+},
+{
+["recordedBy"] = "Barelynoer-Area52",
+["typeInfo"] = {
+["player"] = {
+["race"] = "ZandalariTroll",
+["class"] = "WARRIOR",
+["name"] = "Alceras-Tichondrius",
+["sex"] = 2,
+},
+["type"] = "PARTY_LEADER",
+["event"] = "CHAT_MSG_PARTY_LEADER",
+},
+["color"] = {
+["b"] = 1,
+["g"] = 0.7843137979507446,
+["r"] = 0.4627451300621033,
+},
+["text"] = "|Hchannel:PARTY|h[Party Leader]|h |Hplayer:Alceras-Tichondrius:150:PARTY:|h[|cffc69b6dAlceras-Tichondrius|r]|h: ggs",
+["id"] = "s10_3361",
+["timestamp"] = 1774922914,
+},
+{
+["recordedBy"] = "Barelynoer-Area52",
+["typeInfo"] = {
+["player"] = {
+["race"] = "Dracthyr",
+["class"] = "EVOKER",
+["name"] = "Barelynoer-Area52",
+["sex"] = 2,
+},
+["type"] = "LOOT",
+["event"] = "CHAT_MSG_LOOT",
+},
+["color"] = {
+["b"] = 0,
+["g"] = 0.6666666865348816,
+["r"] = 0,
+},
+["text"] = "You receive loot: |cnIQ4:|Hitem:251093::::::::90:1473::33:5:12795:13440:6652:13668:12699:1:28:1279:::::|h[Omission of Light]|h|r",
+["id"] = "s10_3362",
+["timestamp"] = 1774922916,
+},
+{
+["recordedBy"] = "Barelynoer-Area52",
+["typeInfo"] = {
+["type"] = "MONEY",
+["event"] = "CHAT_MSG_MONEY",
+},
+["color"] = {
+["b"] = 0,
+["g"] = 1,
+["r"] = 1,
+},
+["text"] = "You loot 150 Gold, 33 Silver, 43 Copper",
+["id"] = "s10_3363",
+["timestamp"] = 1774922917,
+},
+{
+["recordedBy"] = "Barelynoer-Area52",
+["typeInfo"] = {
+["player"] = {
+["race"] = "NightElf",
+["class"] = "MONK",
+["name"] = "Lewdly-Illidan",
+["sex"] = 3,
+},
+["type"] = "PARTY",
+["event"] = "CHAT_MSG_PARTY",
+},
+["color"] = {
+["b"] = 1,
+["g"] = 0.6666666865348816,
+["r"] = 0.6666666865348816,
+},
+["text"] = "|Hchannel:PARTY|h[Party]|h |Hplayer:Lewdly-Illidan:153:PARTY:|h[|cff00ff98Lewdly-Illidan|r]|h: ggs ty for the invite",
+["id"] = "s10_3364",
+["timestamp"] = 1774922921,
+},
+{
+["recordedBy"] = "Barelynoer-Area52",
+["typeInfo"] = {
+["player"] = {
+["race"] = "NightElf",
+["class"] = "DEMONHUNTER",
+["name"] = "Moonjack-Stormrage",
+["sex"] = 3,
+},
+["type"] = "PARTY",
+["event"] = "CHAT_MSG_PARTY",
+},
+["color"] = {
+["b"] = 1,
+["g"] = 0.6666666865348816,
+["r"] = 0.6666666865348816,
+},
+["text"] = "|Hchannel:PARTY|h[Party]|h |Hplayer:Moonjack-Stormrage:154:PARTY:|h[|cffa330c9Moonjack-Stormrage|r]|h: need ring?",
+["id"] = "s10_3365",
+["timestamp"] = 1774922922,
+},
+{
+["recordedBy"] = "Barelynoer-Area52",
+["typeInfo"] = {
+["player"] = {
+["race"] = "BloodElf",
+["class"] = "DEATHKNIGHT",
+["name"] = "Kilon-Nordrassil",
+["sex"] = 3,
+},
+["type"] = "PARTY",
+["event"] = "CHAT_MSG_PARTY",
+},
+["color"] = {
+["b"] = 1,
+["g"] = 0.6666666865348816,
+["r"] = 0.6666666865348816,
+},
+["text"] = "|Hchannel:PARTY|h[Party]|h |Hplayer:Kilon-Nordrassil:155:PARTY:|h[|cffc41e3aKilon-Nordrassil|r]|h: gg ty for the group",
+["id"] = "s10_3366",
+["timestamp"] = 1774922926,
+},
+{
+["recordedBy"] = "Barelynoer-Area52",
+["typeInfo"] = {
+["player"] = {
+["race"] = "Dracthyr",
+["class"] = "EVOKER",
+["name"] = "Barelynoer-Area52",
+["sex"] = 2,
+},
+["type"] = "PARTY",
+["event"] = "CHAT_MSG_PARTY",
+},
+["color"] = {
+["b"] = 1,
+["g"] = 0.6666666865348816,
+["r"] = 0.6666666865348816,
+},
+["text"] = "|Hchannel:PARTY|h[Party]|h |Hplayer:Barelynoer-Area52:156:PARTY:|h[|cff33937fBarelynoer|r]|h: i do!",
+["id"] = "s10_3367",
+["timestamp"] = 1774922926,
+},
+{
+["recordedBy"] = "Barelynoer-Area52",
+["typeInfo"] = {
+["player"] = {
+["race"] = "NightElf",
+["class"] = "DEMONHUNTER",
+["name"] = "Moonjack-Stormrage",
+["sex"] = 3,
+},
+["type"] = "PARTY",
+["event"] = "CHAT_MSG_PARTY",
+},
+["color"] = {
+["b"] = 1,
+["g"] = 0.6666666865348816,
+["r"] = 0.6666666865348816,
+},
+["text"] = "|Hchannel:PARTY|h[Party]|h |Hplayer:Moonjack-Stormrage:157:PARTY:|h[|cffa330c9Moonjack-Stormrage|r]|h: and need the chest monk?",
+["id"] = "s10_3368",
+["timestamp"] = 1774922930,
+},
+{
+["recordedBy"] = "Barelynoer-Area52",
+["typeInfo"] = {
+["player"] = {
+["race"] = "NightElf",
+["class"] = "DEMONHUNTER",
+["name"] = "Moonjack-Stormrage",
+["sex"] = 3,
+},
+["type"] = "PARTY",
+["event"] = "CHAT_MSG_PARTY",
+},
+["color"] = {
+["b"] = 1,
+["g"] = 0.6666666865348816,
+["r"] = 0.6666666865348816,
+},
+["text"] = "|Hchannel:PARTY|h[Party]|h |Hplayer:Moonjack-Stormrage:158:PARTY:|h[|cffa330c9Moonjack-Stormrage|r]|h: i have tier",
+["id"] = "s10_3369",
+["timestamp"] = 1774922932,
+},
+{
+["recordedBy"] = "Barelynoer-Area52",
+["typeInfo"] = {
+["player"] = {
+["race"] = "NightElf",
+["class"] = "MONK",
+["name"] = "Lewdly-Illidan",
+["sex"] = 3,
+},
+["type"] = "PARTY",
+["event"] = "CHAT_MSG_PARTY",
+},
+["color"] = {
+["b"] = 1,
+["g"] = 0.6666666865348816,
+["r"] = 0.6666666865348816,
+},
+["text"] = "|Hchannel:PARTY|h[Party]|h |Hplayer:Lewdly-Illidan:159:PARTY:|h[|cff00ff98Lewdly-Illidan|r]|h: sure",
+["id"] = "s10_3370",
+["timestamp"] = 1774922937,
+},
+{
+["recordedBy"] = "Barelynoer-Area52",
+["typeInfo"] = {
+["player"] = {
+["race"] = "NightElf",
+["class"] = "MONK",
+["name"] = "Lewdly-Illidan",
+["sex"] = 3,
+},
+["type"] = "PARTY",
+["event"] = "CHAT_MSG_PARTY",
+},
+["color"] = {
+["b"] = 1,
+["g"] = 0.6666666865348816,
+["r"] = 0.6666666865348816,
+},
+["text"] = "|Hchannel:PARTY|h[Party]|h |Hplayer:Lewdly-Illidan:160:PARTY:|h[|cff00ff98Lewdly-Illidan|r]|h: thanks!",
+["id"] = "s10_3371",
+["timestamp"] = 1774922947,
+},
+{
+["recordedBy"] = "Barelynoer-Area52",
+["typeInfo"] = {
+["player"] = {
+["race"] = "NightElf",
+["class"] = "DEMONHUNTER",
+["name"] = "Moonjack-Stormrage",
+["sex"] = 3,
+},
+["type"] = "PARTY",
+["event"] = "CHAT_MSG_PARTY",
+},
+["color"] = {
+["b"] = 1,
+["g"] = 0.6666666865348816,
+["r"] = 0.6666666865348816,
+},
+["text"] = "|Hchannel:PARTY|h[Party]|h |Hplayer:Moonjack-Stormrage:161:PARTY:|h[|cffa330c9Moonjack-Stormrage|r]|h: p",
+["id"] = "s10_3372",
+["timestamp"] = 1774922951,
+},
+{
+["recordedBy"] = "Barelynoer-Area52",
+["typeInfo"] = {
+["player"] = {
+["race"] = "NightElf",
+["class"] = "DEMONHUNTER",
+["name"] = "Moonjack-Stormrage",
+["sex"] = 3,
+},
+["type"] = "PARTY",
+["event"] = "CHAT_MSG_PARTY",
+},
+["color"] = {
+["b"] = 1,
+["g"] = 0.6666666865348816,
+["r"] = 0.6666666865348816,
+},
+["text"] = "|Hchannel:PARTY|h[Party]|h |Hplayer:Moonjack-Stormrage:162:PARTY:|h[|cffa330c9Moonjack-Stormrage|r]|h: wished it was my bis ring",
+["id"] = "s10_3373",
+["timestamp"] = 1774922965,
+},
+{
+["recordedBy"] = "Barelynoer-Area52",
+["typeInfo"] = {
+["player"] = {
+["race"] = "NightElf",
+["class"] = "DEMONHUNTER",
+["name"] = "Moonjack-Stormrage",
+["sex"] = 3,
+},
+["type"] = "PARTY",
+["event"] = "CHAT_MSG_PARTY",
+},
+["color"] = {
+["b"] = 1,
+["g"] = 0.6666666865348816,
+["r"] = 0.6666666865348816,
+},
+["text"] = "|Hchannel:PARTY|h[Party]|h |Hplayer:Moonjack-Stormrage:164:PARTY:|h[|cffa330c9Moonjack-Stormrage|r]|h: :T",
+["id"] = "s10_3374",
+["timestamp"] = 1774922967,
+},
+{
+["recordedBy"] = "Barelynoer-Area52",
+["typeInfo"] = {
+["player"] = {
+["race"] = "Goblin",
+["class"] = "PRIEST",
+["name"] = "Límpdiscit-Tichondrius",
+["sex"] = 3,
+},
+["type"] = "WHISPER",
+["event"] = "CHAT_MSG_WHISPER_INFORM",
+},
+["color"] = {
+["b"] = 1,
+["g"] = 0.501960813999176,
+["r"] = 1,
+},
+["text"] = "To |Hplayer:Límpdiscit-Tichondrius:198:WHISPER:LÍMPDISCIT-TICHONDRIUS|h[|cffffffffLímpdiscit-Tichondrius|r]|h: top tier disc priest name",
+["id"] = "s10_3375",
+["timestamp"] = 1774923054,
+},
+{
+["recordedBy"] = "Barelynoer-Area52",
+["typeInfo"] = {
+["player"] = {
+["race"] = "Goblin",
+["class"] = "PRIEST",
+["name"] = "Límpdiscit-Tichondrius",
+["sex"] = 3,
+},
+["type"] = "WHISPER",
+["event"] = "CHAT_MSG_WHISPER",
+},
+["color"] = {
+["b"] = 1,
+["g"] = 0.501960813999176,
+["r"] = 1,
+},
+["text"] = "|Hplayer:Límpdiscit-Tichondrius:223:WHISPER:LÍMPDISCIT-TICHONDRIUS|h[|cffffffffLímpdiscit-Tichondrius|r]|h whispers: thanks",
+["id"] = "s10_3376",
+["timestamp"] = 1774923074,
+},
+{
+["recordedBy"] = "Barelynoer-Area52",
+["typeInfo"] = {
+["player"] = {
+["race"] = "Dracthyr",
+["class"] = "EVOKER",
+["name"] = "Barelynoer-Area52",
+["sex"] = 2,
+},
+["type"] = "LOOT",
+["event"] = "CHAT_MSG_LOOT",
+},
+["color"] = {
+["b"] = 0,
+["g"] = 0.6666666865348816,
+["r"] = 0,
+},
+["text"] = "You receive item: |cnIQ4:|Hitem:240983::::::::90:1473:::::::::|h[Indecipherable Eversong Diamond |A:Professions-ChatIcon-Quality-12-Tier2:17:15::1|a]|h|r",
+["id"] = "s10_3377",
+["timestamp"] = 1774923164,
+},
+{
+["recordedBy"] = "Barelynoer-Area52",
+["typeInfo"] = {
+["player"] = {
+["race"] = "Dracthyr",
+["class"] = "EVOKER",
+["name"] = "Barelynoer-Area52",
+["sex"] = 2,
+},
+["type"] = "LOOT",
+["event"] = "CHAT_MSG_LOOT",
+},
+["color"] = {
+["b"] = 0,
+["g"] = 0.6666666865348816,
+["r"] = 0,
+},
+["text"] = "You receive item: |cnIQ3:|Hitem:243987::::::::90:1473:::::::::|h[Enchant Ring - Nature's Fury |A:Professions-ChatIcon-Quality-12-Tier2:17:15::1|a]|h|r",
+["id"] = "s10_3378",
+["timestamp"] = 1774923165,
+},
+{
+["recordedBy"] = "Barelynoer-Area52",
+["typeInfo"] = {
+["player"] = {
+["name"] = "Headmaster",
+},
+["type"] = "MONSTER_SAY",
+["event"] = "CHAT_MSG_MONSTER_SAY",
+},
+["color"] = {
+["b"] = 0.6235294342041016,
+["g"] = 1,
+["r"] = 1,
+},
+["text"] = "Headmaster says: At Algeth'ar Academy we believe in teaching by example. Please show these students how it is done.",
+["id"] = "s10_3379",
+["timestamp"] = 1774923199,
+},
+{
+["recordedBy"] = "Barelynoer-Area52",
+["typeInfo"] = {
+["player"] = {
+["race"] = "Harronir",
+["class"] = "SHAMAN",
+["name"] = "Imasofty-Area52",
+["sex"] = 2,
+},
+["type"] = "PARTY",
+["event"] = "CHAT_MSG_PARTY",
+},
+["color"] = {
+["b"] = 1,
+["g"] = 0.6666666865348816,
+["r"] = 0.6666666865348816,
+},
+["text"] = "|Hchannel:PARTY|h[Party]|h |Hplayer:Imasofty-Area52:354:PARTY:|h[|cff0070ddImasofty|r]|h: brio rq brb",
+["id"] = "s10_3380",
+["timestamp"] = 1774923201,
+},
+{
+["recordedBy"] = "Barelynoer-Area52",
+["typeInfo"] = {
+["player"] = {
+["name"] = "Nascent",
+},
+["type"] = "ACHIEVEMENT",
+["event"] = "CHAT_MSG_ACHIEVEMENT",
+},
+["color"] = {
+["b"] = 0,
+["g"] = 1,
+["r"] = 1,
+},
+["text"] = "Nascent has earned the achievement |cffffff00|Hachievement:61493:Guild-162-000002BD8335:1:3:30:26:4294967295:4294967295:4294967295:4294967295|h[Hall of Fame: Chimaerus, the Undreamt God]|h|r!",
+["id"] = "s10_3381",
+["timestamp"] = 1774923983,
+},
+{
+["recordedBy"] = "Barelynoer-Area52",
+["typeInfo"] = {
+["player"] = {
+["name"] = "Headmaster",
+},
+["type"] = "MONSTER_SAY",
+["event"] = "CHAT_MSG_MONSTER_SAY",
+},
+["color"] = {
+["b"] = 0.6235294342041016,
+["g"] = 1,
+["r"] = 1,
+},
+["text"] = "Headmaster says: At Algeth'ar Academy we believe in teaching by example. Please show these students how it is done.",
+["id"] = "s10_3382",
+["timestamp"] = 1774924190,
+},
+{
+["recordedBy"] = "Barelynoer-Area52",
+["typeInfo"] = {
+["player"] = {
+["name"] = "q it up",
+},
+["type"] = "ACHIEVEMENT",
+["event"] = "CHAT_MSG_ACHIEVEMENT",
+},
+["color"] = {
+["b"] = 0,
+["g"] = 1,
+["r"] = 1,
+},
+["text"] = "q it up has earned the achievement |cffffff00|Hachievement:61493:Guild-3684-000006169106:1:3:30:26:4294967295:4294967295:4294967295:4294967295|h[Hall of Fame: Chimaerus, the Undreamt God]|h|r!",
+["id"] = "s10_3383",
+["timestamp"] = 1774924203,
+},
+{
+["recordedBy"] = "Barelynoer-Area52",
+["typeInfo"] = {
+["player"] = {
+["name"] = "Café Disco",
+},
+["type"] = "ACHIEVEMENT",
+["event"] = "CHAT_MSG_ACHIEVEMENT",
+},
+["color"] = {
+["b"] = 0,
+["g"] = 1,
+["r"] = 1,
+},
+["text"] = "Café Disco has earned the achievement |cffffff00|Hachievement:61493:Guild-3676-0000063C87C6:1:3:30:26:4294967295:4294967295:4294967295:4294967295|h[Hall of Fame: Chimaerus, the Undreamt God]|h|r!",
+["id"] = "s10_3384",
+["timestamp"] = 1774924242,
+},
+{
+["recordedBy"] = "Barelynoer-Area52",
+["typeInfo"] = {
+["player"] = {
+["race"] = "NightElf",
+["class"] = "DRUID",
+["name"] = "Eggy-Gurubashi",
+["sex"] = 3,
+},
+["type"] = "GUILD_ACHIEVEMENT",
+["event"] = "CHAT_MSG_GUILD_ACHIEVEMENT",
+},
+["color"] = {
+["b"] = 0.250980406999588,
+["g"] = 1,
+["r"] = 0.250980406999588,
+},
+["text"] = "|Hplayer:Eggy-Gurubashi|h[|cffff7c0aEggy-Gurubashi|r]|h has earned the achievement |cffffff00|Hachievement:11184:Player-1136-098981AE:1:3:30:26:4294967295:4294967295:4294967295:4294967295|h[Keystone Challenger]|h|r!",
+["id"] = "s10_3385",
+["timestamp"] = 1774924281,
+},
+{
+["recordedBy"] = "Barelynoer-Area52",
+["typeInfo"] = {
+["player"] = {
+["race"] = "NightElf",
+["class"] = "DRUID",
+["name"] = "Eggy-Gurubashi",
+["sex"] = 3,
+},
+["type"] = "GUILD_ACHIEVEMENT",
+["event"] = "CHAT_MSG_GUILD_ACHIEVEMENT",
+},
+["color"] = {
+["b"] = 0.250980406999588,
+["g"] = 1,
+["r"] = 0.250980406999588,
+},
+["text"] = "|Hplayer:Eggy-Gurubashi|h[|cffff7c0aEggy-Gurubashi|r]|h has earned the achievement |cffffff00|Hachievement:11185:Player-1136-098981AE:1:3:30:26:4294967295:4294967295:4294967295:4294967295|h[Keystone Conqueror]|h|r!",
+["id"] = "s10_3386",
+["timestamp"] = 1774924281,
+},
+{
+["recordedBy"] = "Barelynoer-Area52",
+["typeInfo"] = {
+["player"] = {
+["race"] = "NightElf",
+["class"] = "DRUID",
+["name"] = "Eggy-Gurubashi",
+["sex"] = 3,
+},
+["type"] = "GUILD_ACHIEVEMENT",
+["event"] = "CHAT_MSG_GUILD_ACHIEVEMENT",
+},
+["color"] = {
+["b"] = 0.250980406999588,
+["g"] = 1,
+["r"] = 0.250980406999588,
+},
+["text"] = "|Hplayer:Eggy-Gurubashi|h[|cffff7c0aEggy-Gurubashi|r]|h has earned the achievement |cffffff00|Hachievement:11162:Player-1136-098981AE:1:3:30:26:4294967295:4294967295:4294967295:4294967295|h[Keystone Master]|h|r!",
+["id"] = "s10_3387",
+["timestamp"] = 1774924281,
+},
+{
+["recordedBy"] = "Barelynoer-Area52",
+["typeInfo"] = {
+["player"] = {
+["race"] = "NightElf",
+["class"] = "DRUID",
+["name"] = "Eggy-Gurubashi",
+["sex"] = 3,
+},
+["type"] = "GUILD_ACHIEVEMENT",
+["event"] = "CHAT_MSG_GUILD_ACHIEVEMENT",
+},
+["color"] = {
+["b"] = 0.250980406999588,
+["g"] = 1,
+["r"] = 0.250980406999588,
+},
+["text"] = "|Hplayer:Eggy-Gurubashi|h[|cffff7c0aEggy-Gurubashi|r]|h has earned the achievement |cffffff00|Hachievement:61267:Player-1136-098981AE:1:3:30:26:4294967295:4294967295:4294967295:4294967295|h[Keystone Hero: Magisters' Terrace]|h|r!",
+["id"] = "s10_3388",
+["timestamp"] = 1774924281,
+},
+{
+["recordedBy"] = "Barelynoer-Area52",
+["typeInfo"] = {
+["player"] = {
+["race"] = "BloodElf",
+["class"] = "PALADIN",
+["name"] = "Biscuitlube-Tichondrius",
+["sex"] = 3,
+},
+["type"] = "SAY",
+["event"] = "CHAT_MSG_SAY",
+},
+["color"] = {
+["b"] = 1,
+["g"] = 1,
+["r"] = 1,
+},
+["text"] = "|Hplayer:Biscuitlube-Tichondrius:431:SAY:|h[|cfff48cbaBiscuitlube-Tichondrius|r]|h says: WHAT ARE THESE BIRDS DOING HERE",
+["id"] = "s10_3389",
+["timestamp"] = 1774924322,
+},
+{
+["recordedBy"] = "Barelynoer-Area52",
+["typeInfo"] = {
+["player"] = {
+["name"] = "Unprotected Hex",
+},
+["type"] = "ACHIEVEMENT",
+["event"] = "CHAT_MSG_ACHIEVEMENT",
+},
+["color"] = {
+["b"] = 0,
+["g"] = 1,
+["r"] = 1,
+},
+["text"] = "Unprotected Hex has earned the achievement |cffffff00|Hachievement:61493:Guild-3676-0000063F8565:1:3:30:26:4294967295:4294967295:4294967295:4294967295|h[Hall of Fame: Chimaerus, the Undreamt God]|h|r!",
+["id"] = "s10_3390",
+["timestamp"] = 1774924387,
+},
+{
+["recordedBy"] = "Barelynoer-Area52",
+["typeInfo"] = {
+["player"] = {
+["name"] = "tentickles",
+},
+["type"] = "ACHIEVEMENT",
+["event"] = "CHAT_MSG_ACHIEVEMENT",
+},
+["color"] = {
+["b"] = 0,
+["g"] = 1,
+["r"] = 1,
+},
+["text"] = "tentickles has earned the achievement |cffffff00|Hachievement:61493:Guild-3676-000006FD8A2A:1:3:30:26:4294967295:4294967295:4294967295:4294967295|h[Hall of Fame: Chimaerus, the Undreamt God]|h|r!",
+["id"] = "s10_3391",
+["timestamp"] = 1774924505,
+},
+{
+["recordedBy"] = "Barelynoer-Area52",
+["typeInfo"] = {
+["player"] = {
+["name"] = "Raiding Rainbows",
+},
+["type"] = "ACHIEVEMENT",
+["event"] = "CHAT_MSG_ACHIEVEMENT",
+},
+["color"] = {
+["b"] = 0,
+["g"] = 1,
+["r"] = 1,
+},
+["text"] = "Raiding Rainbows has earned the achievement |cffffff00|Hachievement:61493:Guild-57-00000040AFDF:1:3:30:26:4294967295:4294967295:4294967295:4294967295|h[Hall of Fame: Chimaerus, the Undreamt God]|h|r!",
+["id"] = "s10_3392",
+["timestamp"] = 1774924523,
 },
 },
 ["version"] = 1,

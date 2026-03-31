@@ -222,20 +222,20 @@ CHATTYNATOR_CONFIG = {
 ["g"] = 0.7529412508010864,
 ["b"] = 0.7529412508010864,
 },
-["BG_SYSTEM_NEUTRAL"] = {
+["CHANNEL_Trade"] = {
 ["r"] = 1,
-["g"] = 0.4705882668495178,
-["b"] = 0.03921568766236305,
+["g"] = 0.7529412508010864,
+["b"] = 0.7529412508010864,
 },
 ["RAID"] = {
 ["r"] = 1,
 ["g"] = 0.4980392456054688,
 ["b"] = 0,
 },
-["CHANNEL_Trade"] = {
+["BG_SYSTEM_NEUTRAL"] = {
 ["r"] = 1,
-["g"] = 0.7529412508010864,
-["b"] = 0.7529412508010864,
+["g"] = 0.4705882668495178,
+["b"] = 0.03921568766236305,
 },
 ["FILTERED"] = {
 ["r"] = 1,
@@ -312,7 +312,7 @@ CHATTYNATOR_CONFIG = {
 ["g"] = 1,
 ["b"] = 0,
 },
-["CHANNEL_Services"] = {
+["CHANNEL18"] = {
 ["r"] = 1,
 ["g"] = 0.7529412508010864,
 ["b"] = 0.7529412508010864,
@@ -332,15 +332,15 @@ CHATTYNATOR_CONFIG = {
 ["g"] = 0.7529412508010864,
 ["b"] = 0.7529412508010864,
 },
-["ACHIEVEMENT"] = {
-["r"] = 1,
-["g"] = 1,
-["b"] = 0,
-},
 ["ARENA_POINTS"] = {
 ["r"] = 1,
 ["g"] = 1,
 ["b"] = 1,
+},
+["ACHIEVEMENT"] = {
+["r"] = 1,
+["g"] = 1,
+["b"] = 0,
 },
 ["BN_WHISPER_INFORM"] = {
 ["r"] = 0,
@@ -437,7 +437,7 @@ CHATTYNATOR_CONFIG = {
 ["g"] = 0.8666667342185974,
 ["b"] = 0,
 },
-["CHANNEL18"] = {
+["CHANNEL_Services"] = {
 ["r"] = 1,
 ["g"] = 0.7529412508010864,
 ["b"] = 0.7529412508010864,
@@ -539,10 +539,10 @@ CHATTYNATOR_CONFIG = {
 ["isTemporary"] = false,
 ["backgroundColor"] = "1a1a1a",
 ["groups"] = {
-["OPENING"] = false,
-["PET_BATTLE_COMBAT_LOG"] = false,
-["VOICE_TEXT"] = false,
 ["COMBAT_MISC_INFO"] = false,
+["OPENING"] = false,
+["VOICE_TEXT"] = false,
+["PET_BATTLE_COMBAT_LOG"] = false,
 ["COMBAT_XP_GAIN"] = false,
 ["PET_INFO"] = false,
 ["TRADESKILLS"] = false,

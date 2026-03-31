@@ -1,7 +1,7 @@
 
 BugGrabberDB = {
 ["lastSanitation"] = 3,
-["session"] = 735,
+["session"] = 737,
 ["errors"] = {
 {
 ["message"] = "...erface/AddOns/TargetedSpells/TargetedSpellsMixin.lua:350: attempt to call method 'SetFrameStrata' (a nil value)",
@@ -724,12 +724,6 @@ BugGrabberDB = {
 ["counter"] = 1,
 },
 {
-["message"] = "LUA_WARNING: Interface/AddOns/!BugGrabber/BugGrabber.lua:-1: insecure scripts exceeded execution limit for addon !BugGrabber",
-["time"] = 1774838566,
-["session"] = 715,
-["counter"] = 10,
-},
-{
 ["message"] = "...terface/AddOns/Blizzard_QuickJoin/QuickJoinToast.lua:300: bad argument #2 to 'SignalToastDisplayed' (Usage: C_SocialQueue.SignalToastDisplayed(groupGUID, priority). Secret values are only allowed during untainted execution for this argument.)",
 ["time"] = 1774847306,
 ["locals"] = "self = QuickJoinToastButton {\n ToastToFriendAnim = AnimationGroup {\n }\n groups = <table> {\n }\n Toast = Frame {\n }\n QueueButton = Texture {\n }\n commandName = \"TOGGLESOCIAL\"\n alertContainer = ChatAlertFrame {\n }\n fitsSize = true\n FriendToToastAnim = AnimationGroup {\n }\n FlashingLayer = Texture {\n }\n FriendsButton = Texture {\n }\n queuedUpdates = <table> {\n }\n QuickKeybindHighlightTexture = Texture {\n }\n isLFGList = true\n displayedToast = <table> {\n }\n ToastToToastAnim = AnimationGroup {\n }\n Icon = Texture {\n }\n isOnRight = false\n added = true\n FriendCount = FontString {\n }\n throttle = <table> {\n }\n groupsAwaitingDisplay = <table> {\n }\n ToastActiveAnim = AnimationGroup {\n }\n QueueCount = FontString {\n }\n queues = <table> {\n }\n Toast2 = Frame {\n }\n}\ngroup = <table> {\n suppressToast = false\n displayedQueues = <table> {\n }\n delayUntil = 809074.668000\n priority = <no value>\n guid = \"Party-3684-1-00004FBD8C22\"\n}\npriority = <no value>\nqueues = <table> {\n 1 = <table> {\n }\n}\nupdateQueues = true\n",
@@ -752,6 +746,12 @@ BugGrabberDB = {
 ["stack"] = "[Interface/AddOns/CraftSim/Modules/SimulationMode/SimulationMode.lua]:235: in function 'UpdateSimulationMode'\n[Interface/AddOns/CraftSim/Modules/Modules.lua]:300: in function 'UpdateUI'\n[Interface/AddOns/CraftSim/Init/Init.lua]:115: in function <Interface/AddOns/CraftSim/Init/Init.lua:113>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:210: in function <...e/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua:209>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:213: in function 'TriggerEvent'\n[Interface/AddOns/Blizzard_ProfessionsTemplates/Blizzard_ProfessionsRecipeSchematicForm.lua]:103: in function <...emplates/Blizzard_ProfessionsRecipeSchematicForm.lua:99>\n[C]: in function 'Click'\n[Interface/AddOns/CraftSim/Modules/SimulationMode/UI.lua]:145: in function <...erface/AddOns/CraftSim/Modules/SimulationMode/UI.lua:140>\n[Interface/AddOns/CraftSim/Util/Frames.lua]:164: in function <Interface/AddOns/CraftSim/Util/Frames.lua:163>\n[C]: ?\n",
 ["session"] = 726,
 ["counter"] = 1,
+},
+{
+["message"] = "LUA_WARNING: Interface/AddOns/!BugGrabber/BugGrabber.lua:-1: insecure scripts exceeded execution limit for addon !BugGrabber",
+["time"] = 1774922900,
+["session"] = 737,
+["counter"] = 20,
 },
 },
 }

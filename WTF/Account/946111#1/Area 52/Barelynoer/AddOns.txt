@@ -43,7 +43,7 @@ WaypointUI: enabled
 WorldMarkerCycler: enabled
 Blizzard_CombatText: enabled
 AutoFlood: enabled
-Baganator: enabled
+Baganator: disabled
 BlizzMove: enabled
 BlizzMove_Debug: enabled
 Chattynator: enabled

@@ -63,14 +63,6 @@ BigWigs3DB = {
 },
 },
 },
-["BigWigs_Plugins_BossBlock"] = {
-["global"] = {
-["tableNeedsCopied"] = false,
-["watchedMovies"] = {
-[1049] = true,
-},
-},
-},
 ["BigWigs_Bosses_Zuraal"] = {
 ["profiles"] = {
 ["Default"] = {
@@ -78,18 +70,11 @@ BigWigs3DB = {
 },
 },
 },
-["MythicPlus"] = {
+["BigWigs_Plugins_BossBlock"] = {
 ["global"] = {
-["showViewerTeleportTip"] = false,
-},
-["profiles"] = {
-["Default"] = {
-["viewerPosition"] = {
-nil,
-nil,
-70,
--72,
-},
+["tableNeedsCopied"] = false,
+["watchedMovies"] = {
+[1049] = true,
 },
 },
 },
@@ -114,6 +99,21 @@ nil,
 },
 },
 },
+["MythicPlus"] = {
+["global"] = {
+["showViewerTeleportTip"] = false,
+},
+["profiles"] = {
+["Default"] = {
+["viewerPosition"] = {
+nil,
+nil,
+70,
+-72,
+},
+},
+},
+},
 },
 ["myKeystones"] = {
 ["Player-60-0C9E885E"] = {
@@ -127,9 +127,9 @@ nil,
 ["Player-3676-0DF7D3EF"] = {
 ["playerRating"] = 2395,
 ["specId"] = 1473,
-["keyMap"] = 556,
+["keyMap"] = 560,
 ["name"] = "Barelynoer",
-["keyLevel"] = 10,
+["keyLevel"] = 9,
 ["realm"] = "Area 52",
 },
 ["Player-60-0F85ABEF"] = {
