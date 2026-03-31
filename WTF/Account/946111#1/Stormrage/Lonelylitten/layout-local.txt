@@ -1,6 +1,6 @@
 Version: 1
 Frame: CraftScanScannerMenuButton
-FrameLevel: 241
+FrameLevel: 242
 Anchor: LEFT
 X: 47
 Y: -257
@@ -20,3 +20,10 @@ X: 98
 Y: -48
 W: 1105
 H: 658
+Frame: SilvermoonLapCounterStats
+FrameLevel: 1
+Anchor: TOPLEFT
+X: 164
+Y: -65
+W: 340
+H: 83
