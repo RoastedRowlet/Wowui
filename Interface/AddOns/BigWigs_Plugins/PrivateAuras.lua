@@ -920,7 +920,7 @@ do
 		if mode and mode ~= self.moduleName then return end
 		inConfigureMode = true
 
-		for unitType, unitAnchors in next, anchors do
+		for _, unitAnchors in next, anchors do
 			for i = 1, #unitAnchors do
 				local anchor = unitAnchors[i]
 				if not anchor.configModeFrame then
@@ -1064,7 +1064,6 @@ local function UpdateAnchorPosition(anchor)
 end
 
 function plugin:UpdateAllAnchors()
-	self:UnregisterEvent("PLAYER_REGEN_ENABLED")
 	self:UpdateAnchors("player", "player")
 	self:UpdateAnchors("other")
 end
@@ -1099,13 +1098,7 @@ do
 
 	local AddPrivateAuraAnchor = C_UnitAuras.AddPrivateAuraAnchor
 	local RemovePrivateAuraAnchor = C_UnitAuras.RemovePrivateAuraAnchor
-	local InCombatLockdown = InCombatLockdown
 	function plugin:UpdateAnchors(unitType, token)
-		if InCombatLockdown() then
-			self:RegisterEvent("PLAYER_REGEN_ENABLED", "UpdateAllAnchors")
-			return
-		end
-
 		for i = 1, #anchors[unitType] do
 			local anchor = anchors[unitType][i]
 			if anchor.anchorId then
@@ -1161,6 +1154,7 @@ do
 					parent = anchor,
 					showCountdownFrame = anchorDB.showCooldown,
 					showCountdownNumbers = anchorDB.showCooldownText,
+					isContainer = false,
 					iconInfo = {
 						iconAnchor = {
 							point = "CENTER",

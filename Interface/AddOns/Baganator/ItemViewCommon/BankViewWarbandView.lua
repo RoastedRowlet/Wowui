@@ -150,7 +150,7 @@ function BaganatorItemViewCommonBankViewWarbandViewMixin:ApplySearch(text)
 end
 
 function BaganatorItemViewCommonBankViewWarbandViewMixin:ApplyTabButtonSearch(text)
-  if not self:IsShown() then
+  if not self:IsShown() or not self.Tabs then
     return
   end
 
@@ -631,4 +631,8 @@ function BaganatorItemViewCommonBankViewWarbandViewMixin:WithdrawMoney()
   addonTable.Dialogs.ShowMoneyBox(BANK_MONEY_WITHDRAW_PROMPT, ACCEPT, CANCEL, function(value)
     C_Bank.WithdrawMoney(Enum.BankType.Account, value)
   end)
+end
+
+if table.freeze then
+  table.freeze(BaganatorItemViewCommonBankViewWarbandViewMixin)
 end

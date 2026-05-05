@@ -14,7 +14,7 @@ function TimerMixin:OnLoad()
     self.delay = 0
 end
 
-function TimerMixin.SetAction(self, action)
+function TimerMixin:SetAction(action)
     self.action = action
 end
 
@@ -28,12 +28,12 @@ local function OnUpdate(self, elapsed)
     end
 end
 
-function TimerMixin.Start(self, delay)
+function TimerMixin:Start(delay)
     self.delay = delay
     Method_SetScript(self, "OnUpdate", OnUpdate)
 end
 
-function TimerMixin.Stop(self)
+function TimerMixin:Stop()
     Method_SetScript(self, "OnUpdate", nil)
 end
 

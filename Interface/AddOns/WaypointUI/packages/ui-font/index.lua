@@ -1,10 +1,13 @@
 local env = select(2, ...)
 local React = env.modules:Import("packages\\react")
+local UIFont_Enum = env.modules:Import("packages\\ui-font\\enum")
 local UIFont_CustomFont = env.modules:Import("packages\\ui-font\\custom-font")
 local UIFont_FontUtil = env.modules:Import("packages\\ui-font\\font-util")
 local UIFont = env.modules:New("packages\\ui-font")
 
+UIFont.Enum = UIFont_Enum
 UIFont.CustomFont = UIFont_CustomFont
+UIFont.FontUtil = UIFont_FontUtil
 
 do -- Fonts
     local UI_FONT_SCHEMATIC = {

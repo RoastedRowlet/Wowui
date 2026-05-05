@@ -156,7 +156,7 @@ local function StartProceduralAnts(wrapper, N, th, period, lineLen, cr, cg, cb, 
             tex:SetColorTexture(1, 1, 1, 1)
             d.lines[i] = tex
         end
-        d.lines[i]:SetVertexColor(cr or 1, cg or 1, cb or 1, 1)
+        d.lines[i]:SetVertexColor(cr, cg, cb, 1)
         d.lines[i]:Show()
     end
     for i = totalTex + 1, #d.lines do d.lines[i]:Hide() end
@@ -358,7 +358,10 @@ end
 local function StartShapeGlow(wrapper, sz, cr, cg, cb, scale, opts)
     scale = scale or 1.20
     opts = opts or {}
-    local btn = wrapper:GetParent()
+    -- anchorFrame overrides GetParent() for cases where the wrapper is
+    -- parented to a different frame (e.g. action bar wrappers use
+    -- btn:GetParent() to escape mask clipping).
+    local btn = opts.anchorFrame or wrapper:GetParent()
     if not btn then return end
     if not wrapper._euiSgData then
         local glow   = btn:CreateTexture(nil, "OVERLAY", nil, 5)

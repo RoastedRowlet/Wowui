@@ -1,16 +1,19 @@
-## Interface: 120000, 120001
+## Interface: 120000, 120001, 120005
 ## Title: |cff0cd29fEllesmereUI|r AuraBuff Reminders
 ## Category: |cff0cd29fEllesmere|rUI
 ## Group: EllesmereUI
 ## Notes: Reminders for upkeeping Auras, Buffs and Consumables
 ## Author: Ellesmere
-## Version: 5.9.8
+## Version: 7.4.9
 ## Dependencies: EllesmereUI
 ## SavedVariables: EllesmereUIAuraBuffRemindersDB
 ## IconTexture: Interface\AddOns\EllesmereUI\media\eg-logo.tga
 
 # Main Lua
 EllesmereUIAuraBuffReminders.lua
+
+# Talent Reminders (standalone, no ABR dependency)
+EllesmereUIABR_TalentReminders.lua
 
 # Options
 EUI_AuraBuffReminders_Options.lua

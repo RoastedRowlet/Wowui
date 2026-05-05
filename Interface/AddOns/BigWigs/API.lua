@@ -153,23 +153,43 @@ do
 	end
 end
 
+do
+	local localeTable = {}
+	function API.GetBossModuleLocale(moduleName)
+		return localeTable[moduleName]
+	end
+	local tfreeze = table.freeze or function() end
+	function API.SetBossModuleLocale(moduleName, moduleLocaleTable)
+		if API.IsLocale("enUS") then error("This function is for non-default locales only.") return end
+		if type(moduleName) ~= "string" then error("Module name must be a string.") return end
+		if type(moduleLocaleTable) ~= "table" then error("Locale must be a table.") return end
+		if localeTable[moduleName] then error(("Locale table for module %q already exists."):format(moduleName)) return end
+		tfreeze(moduleLocaleTable)
+		localeTable[moduleName] = moduleLocaleTable
+	end
+end
+
+do
+	local currentLocale = GetLocale()
+	function API.IsLocale(localeName)
+		return localeName == currentLocale
+	end
+end
+
 --------------------------------------------------------------------------------
 -- Profile import/export
 --
 
-do
-	-- A custom profile name and callback function is completely optional
-	-- When specified, a callback function will be called with a boolean as the first arg. True if the user accepted, false otherwise
-	local IsAddOnLoaded = C_AddOns.IsAddOnLoaded
-	function API.RegisterProfile(addonName, profileString, optionalCustomProfileName, optionalCallbackFunction)
-		if type(addonName) ~= "string" or #addonName < 3 then error("Invalid addon name for profile import.") end
-		if type(profileString) ~= "string" or #profileString < 3 then error("Invalid profile string for profile import.") end
-		if optionalCustomProfileName and (type(optionalCustomProfileName) ~= "string" or #optionalCustomProfileName < 3) then error("Invalid custom profile name for the string you want to import.") end
-		if optionalCallbackFunction and type(optionalCallbackFunction) ~= "function" then error("Invalid custom callback function for the string you want to import.") end
-		addonTbl.LoadCoreAndOptions()
-		if not BigWigsOptions.VerifyAddOnProfileString(profileString) then error("Invalid profile string for profile import.") end
-		BigWigsOptions.SaveImportStringDataFromAddOn(addonName, profileString, optionalCustomProfileName, optionalCallbackFunction)
-	end
+-- A custom profile name and callback function is completely optional
+-- When specified, a callback function will be called with a boolean as the first arg. True if the user accepted, false otherwise
+function API.RegisterProfile(addonName, profileString, optionalCustomProfileName, optionalCallbackFunction)
+	if type(addonName) ~= "string" or #addonName < 3 then error("Invalid addon name for profile import.") end
+	if type(profileString) ~= "string" or #profileString < 3 then error("Invalid profile string for profile import.") end
+	if optionalCustomProfileName and (type(optionalCustomProfileName) ~= "string" or #optionalCustomProfileName < 3) then error("Invalid custom profile name for the string you want to import.") end
+	if optionalCallbackFunction and type(optionalCallbackFunction) ~= "function" then error("Invalid custom callback function for the string you want to import.") end
+	addonTbl.LoadCoreAndOptions()
+	if not BigWigsOptions.VerifyAddOnProfileString(profileString) then error("Invalid profile string for profile import.") end
+	BigWigsOptions.SaveImportStringDataFromAddOn(addonName, profileString, optionalCustomProfileName, optionalCallbackFunction)
 end
 
 -- Input the name of YOUR addon, i.e. the addon making the profile request
@@ -288,6 +308,27 @@ do
 end
 
 --------------------------------------------------------------------------------
+-- Utility
+--
+
+do
+	local floor = math.floor
+	function API.SecondsToTime(seconds, noFloat)
+		local L = API:GetLocale("BigWigs")
+		if seconds > 60 then
+			local min = floor(seconds/60)
+			local sec = seconds % 60
+			return L.shortMinutesAndSeconds:format(min, sec)
+		elseif seconds < 10 and not noFloat then
+			local sec = floor(seconds * 10) / 10 -- Turn 9.965 into 9.9 not 10
+			return L.shortSubTenSeconds:format(sec)
+		else
+			return L.shortSecondsOnly:format(seconds)
+		end
+	end
+end
+
+--------------------------------------------------------------------------------
 -- Validation
 --
 
@@ -306,6 +347,22 @@ do
 			list[k] = L[k]
 		end
 		return list
+	end
+end
+
+do
+	local pcall = pcall
+	local dummy = UIParent:CreateFontString()
+	dummy:Hide()
+	local IsKnownFile = C_UIFileAsset and C_UIFileAsset.IsKnownFile -- XXX [Mainline:✓ MoP:✗ Wrath:✗ TBC:✗ Vanilla:✗]
+	function API.IsValidMediaPath(mediaPath)
+		if IsKnownFile then
+			local result = IsKnownFile(mediaPath)
+			return result
+		else
+			local result = pcall(dummy.SetFont, dummy, mediaPath, 10)
+			return result
+		end
 	end
 end
 

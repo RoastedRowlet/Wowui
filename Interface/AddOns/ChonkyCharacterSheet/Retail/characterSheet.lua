@@ -20,74 +20,6 @@ local modtex = _G["CharacterModelFramebgtex"] or modbg:CreateTexture("CharacterM
 local modelbtn = _G["CCS_clk_Btn"] or CreateFrame("Button", "CCS_clk_Btn", PaperDollFrame, "UIPanelButtonTemplate")
 local bg_texture = "Interface\\AddOns\\ChonkyCharacterSheet\\Media\\Textures\\bgmidnight.png"
 
---[[
-local CharacterFrame = _G["CharacterFrame"] or CreateFrame("Frame", "CharacterFrame", CharacterFrame)
-CharacterFrame:EnableMouse(false)
-CharacterFrame:EnableMouseWheel(false)
-
-local function CCS_CreateCharacterFrameProxy()
-    -- Create the new layout root
-    CharacterFrame:SetPoint("TOPLEFT", CharacterFrame, "TOPLEFT", 0, 0)
-    if C_AddOns.IsAddOnLoaded("Armory") ~= true then
-        CharacterFrame:SetPoint("TOPRIGHT", CharacterFrame, "TOPRIGHT", 0, 0)
-    end
-
-    -- Move all regions
-    local numRegions = CharacterFrame:GetNumRegions()
-
-    for i = 1, numRegions do
-        local region = select(i, CharacterFrame:GetRegions())
-        if region and region:GetObjectType() then
-            region:SetParent(CharacterFrame)
-        end
-    end
-
-    -- Move all children (but don’t touch CharacterFrame itself)
-    local numChildren = CharacterFrame:GetNumChildren()
-    for i = 1, numChildren do
-        local child = select(i, CharacterFrame:GetChildren())
-        if child and child ~= CharacterFrame then
-            child:SetParent(CharacterFrame)
-        end
-    end
-
-    -- Re-anchor anything that was anchored to CharacterFrame
-    local function Reanchor(frame)
-        if not frame or frame == CharacterFrame or not frame.GetNumPoints then return end
-
-        local points = {}
-        for p = 1, frame:GetNumPoints() do
-            local point, relTo, relPoint, x, y = frame:GetPoint(p)
-            if relTo == CharacterFrame then
-                table.insert(points, {point, CharacterFrame, relPoint, x, y})
-            end
-        end
-
-        if #points > 0 then
-            frame:ClearAllPoints()
-            for _, pt in ipairs(points) do
-                frame:SetPoint(pt[1], pt[2], pt[3], pt[4], pt[5])
-            end
-        end
-    end
-
-    -- Reanchor all children
-    numChildren = CharacterFrame:GetNumChildren()
-    for i = 1, numChildren do
-        local child = select(i, CharacterFrame:GetChildren())
-        Reanchor(child)
-    end
-
-    -- Reanchor all regions
-    numRegions = CharacterFrame:GetNumRegions()
-    for i = 1, numRegions do
-        local region = select(i, CharacterFrame:GetRegions())
-        Reanchor(region)
-    end
-
-    return CharacterFrame
-end--]]
-
 local function hookfix() 
 
     if not CCS.AreSecretsDisabled() and _G["ccsm_sf"] and (option("showm_sp_onopen") == true) then
@@ -127,6 +59,11 @@ local function hookfix()
         CharacterFrameCloseButton:SetPoint("TOPRIGHT", CharacterFrameBg, "TOPRIGHT", -5, 0)
         CharacterFrameCloseButton:SetSize(32, 32)
         CharacterFrameCloseButton:SetScale(.5)
+        CharacterFrame.NineSlice:Hide()
+        CharacterFrame.PortraitContainer:Hide()
+        if CharacterFrame.Background ~= nil then
+            CharacterFrame.Background:Hide()
+        end
     end
 
     if C_AddOns.IsAddOnLoaded("ZygorGuidesVIewer") then
@@ -157,9 +94,11 @@ local function MoveModelLeft()
     CharacterModelScene:ClearAllPoints();
     CharacterModelScene:SetHeight(Height)
     CharacterModelScene:SetWidth(Height/CCS.ModelAspect)
-    CharacterModelScene:SetPoint("CENTER", CharacterFrameInset.Bg, "CENTER", 0, 0);
+    CharacterModelScene:SetPoint("CENTER", CharacterFrameInset.Bg, "CENTER", 0, -20);
+    CharacterModelScene:SetPoint("TOP", CharacterFrameInset.Bg, "TOP", 0, -5);    
     CharacterModelScene:SetFrameStrata("Medium")
     CharacterModelScene:SetFrameLevel(9000)
+    CharacterModelScene:Show();
     
     CharacterModelFrameBackgroundTopLeft:Hide();
     CharacterModelFrameBackgroundBotLeft:Hide();
@@ -174,7 +113,7 @@ local function MoveModelLeft()
     modbg:SetPoint("TOPLEFT", CharacterHeadSlot, "TOPLEFT", 0, 0)
     modbg:SetPoint("RIGHT", CharacterHandsSlot, "RIGHT", 0, 0)    
     modbg:SetPoint("BOTTOM", CharacterMainHandSlot, "BOTTOM", 0, 0)            
-    
+
 end
 
 local function MoveModelRight() 
@@ -755,15 +694,22 @@ local function ReputationFrame_Update()
                     if isParagon and C_Reputation.IsFactionParagonForCurrentPlayer(factionID) and k2.ParagonIcon then
                         local currentValue,threshold,rewardQuestID,hasRewardPending = C_Reputation.GetFactionParagonInfo(factionID)
                         local r,g,b = 0,.5,.9
-                        
+                        local actualval = currentValue - (floor(currentValue/threshold)-(hasRewardPending and 1 or 0))*threshold
                         factiontext = L["PARAGON"]
                         barMax = threshold
-                        barValue = currentValue - (floor(currentValue/threshold)-(hasRewardPending and 1 or 0))*threshold 
+                        barValue = currentValue - (floor(currentValue/threshold)-(hasRewardPending and 1 or 0))*threshold
+                        
                         barMin = 0
                         k2.ParagonIcon:SetShown(hasRewardPending); 
                         k2.ReputationBar:SetStatusBarColor(r,g,b)
-                        k2.ReputationBar:SetMinMaxValues(0, barMax);
-                        k2.ReputationBar:SetValue(barValue);
+                        if option("showparagonmax") then
+                            -- Force a visually full bar
+                            k2.ReputationBar:SetMinMaxValues(0, 1)
+                            k2.ReputationBar:SetValue(1)
+                        else
+                            k2.ReputationBar:SetMinMaxValues(0, barMax);                        
+                            k2.ReputationBar:SetValue(barValue);
+                        end
                         
                     end
                     
@@ -1040,6 +986,68 @@ local function PrepTransmogTab()
     tab:SetScript("OnLeave", function() GameTooltip:Hide() end)
 end
 
+local function CCS_FilterTitles(search)
+    local filtered = {}
+
+    for titleID = 1, GetNumTitles() do
+        if IsTitleKnown(titleID) then
+            local name = GetTitleName(titleID)
+            if name and name ~= "" then
+                if search == "" or name:lower():find(search, 1, true) then
+                    table.insert(filtered, { id = titleID, name = name })
+                end
+            end
+        end
+    end
+
+    -- Sort the results alphabetically
+    table.sort(filtered, function(a, b)
+        return a.name:lower() < b.name:lower()
+    end)
+
+    return filtered
+end
+
+local function CCS_UpdateTitleList()
+    local parent = PaperDollFrame.TitleManagerPane
+    local search = parent.SearchBox and parent.SearchBox:GetText() or ""
+    search = search:lower()
+
+    local filtered = CCS_FilterTitles(search)
+    local provider = CreateDataProvider()
+
+    -- Keep a titles array on the pane, like Blizzard does
+    parent.titles = {}
+
+    for index, entry in ipairs(filtered) do
+        parent.titles[index] = entry
+
+        provider:Insert({
+            index = index,
+            playerTitle = entry,   --Just for reference { id = ..., name = ... }
+        })
+    end
+
+    parent.ScrollBox:SetDataProvider(provider, ScrollBoxConstants.RetainScrollPosition)
+end
+
+local function CreateTitleSearchBox()
+    local parent = PaperDollFrame.TitleManagerPane
+    if parent.SearchBox then return end
+
+    local box = CreateFrame("EditBox", "CCS_TitleSearchBox", parent, "SearchBoxTemplate")
+    parent.SearchBox = box
+
+    box:SetSize(200, 20)
+    box:SetPoint("TOPRIGHT", parent, "TOPRIGHT", 0, 0)
+    box:SetAutoFocus(false)
+
+    box:SetScript("OnTextChanged", function(self)
+        SearchBoxTemplate_OnTextChanged(self)
+        CCS_UpdateTitleList()
+    end)
+end
+
 function CCS.HookSetup()
     if CCS.Hooked then return end
 
@@ -1090,27 +1098,56 @@ function CCS.HookSetup()
                 ReputationFrame_Update()
         end)
     end
+
     hooksecurefunc(TokenFrame, "Show", function() C_Timer.After(0, hookfix) end)
     hooksecurefunc(TokenFrame.ScrollBox, "Update", function() CurrencyFrame_Update() end)
    
     hooksecurefunc(PaperDollFrame, "Show", function() hookfix(); 
-
         if C_AddOns.IsAddOnLoaded("Armory") == true then
             CharacterFrame.Expand() 
         end
+        
+        C_Timer.After(0, function() CharacterFrameTitleText:SetTextColor(
+        option("fontcolor_nametitle")[1] or 1,
+        option("fontcolor_nametitle")[2] or 1,
+        option("fontcolor_nametitle")[3] or 1,
+        option("fontcolor_nametitle")[4] or 1
+        ) end)
+        C_Timer.After(0, hookfix)
     end)
+
+    hooksecurefunc("PaperDollTitlesPane_Update", function()
+        CCS_UpdateTitleList()
+    end)
+
+    hooksecurefunc("PaperDollTitlesPane_Update", function()
+        CreateTitleSearchBox()
+    end)
+
     hooksecurefunc(CharacterFrame, "Show", function() 
-            InitializeFrameUpdates()
-            CCS:FireEvent("CCS_EVENT_CSHOW")
-            GameTooltip:Hide()
-            CCS.tooltip:Hide()
-            C_Timer.After(0, hookfix)
-            if _G["CCS_stat_sf"] then _G["CCS_stat_sf"]:SetVerticalScroll(0) end
-            CharacterModelScene.ControlFrame:Hide()            
-            if C_AddOns.IsAddOnLoaded("NDui") then
-                CharacterFrameCloseButton:Hide()
-            end
-          
+        if _G["ccsm_sf"] and _G["ccsm_sf"].currentSortBy and _G["ccsm_sf"].currentDir and (_G["ccsm_sf"].currentSortBy ~= option("mplus_sortby") or _G["ccsm_sf"].currentDir ~= option("mplus_direction"))then
+            _G["ccsm_sf"].currentSortBy = option("mplus_sortby") or "Name"
+            _G["ccsm_sf"].currentDir = option("mplus_direction") or "Ascending"
+            CCS.updatemplussideframe()
+        end
+
+        InitializeFrameUpdates()
+        CCS:FireEvent("CCS_EVENT_CSHOW")
+        GameTooltip:Hide()
+        CCS.tooltip:Hide()
+        C_Timer.After(0, hookfix)
+       
+        if _G["CCS_stat_sf"] then _G["CCS_stat_sf"]:SetVerticalScroll(0) end
+        CharacterModelScene.ControlFrame:Hide()            
+        if C_AddOns.IsAddOnLoaded("NDui") then
+            CharacterFrameCloseButton:Hide()
+        end
+            
+        if not CCS.tempEnchantTicker and option("showtempenchants") then
+            CCS.tempEnchantTicker = C_Timer.NewTicker(1, function()
+                CCS:UpdateTempEnchantDisplay()
+            end)
+        end
         CharacterFrameTab1.Text:SetTextColor(1,1,1,1)
         CharacterFrameTab2.Text:SetTextColor(1,1,1,1)
         CharacterFrameTab3.Text:SetTextColor(1,1,1,1)
@@ -1166,8 +1203,6 @@ function CCS.HookSetup()
         CharacterFrameTab3.MiddleHighlight:SetGradient("Vertical", CreateColor(0, 0, 0, 1), CreateColor(0, 0, 0, 1)) -- Dark Gray
         CharacterFrameTab3.MiddleActive:SetGradient("Vertical", CreateColor(.25, .25, .25, 1), CreateColor(0, 0, 0, 1)) -- Dark Gray
         CharacterFrameTab3.Middle:SetGradient("Vertical", CreateColor(0, 0, 0, 1), CreateColor(0, 0, 0, 1)) -- Dark Gray
-            
-            
             
     end )
 
@@ -1267,9 +1302,6 @@ function CCS.HookSetup()
                 NarciMiniTalentTree:ClearAllPoints(); 
                 NarciMiniTalentTree:SetPoint("TOPLEFT", CharacterFrameBg, "TOPRIGHT", 0, 0)
             end            
-
-            
-            
         end)
         PaperDollSidebarTab3._ccsHooked = true
     end
@@ -1278,6 +1310,12 @@ function CCS.HookSetup()
         GameTooltip:Hide(); 
         CCS.tooltip:Hide(); 
         StopBGAnimation();
+
+        if CCS.tempEnchantTicker then
+            CCS.tempEnchantTicker:Cancel()
+            CCS.tempEnchantTicker = nil
+        end
+        
         end )
     CCS.Hooked = true
 end
@@ -1385,13 +1423,13 @@ function module:Initialize()
         PlaySound(SOUNDKIT.IG_CHARACTER_INFO_TAB)
     end)
    CCS:ApplyIconStyle(CCSsetbtn, "gear", 32)
-   
+    local ttfontsize = option("fontsize_nametitle") or 12
     CharacterModelScene.GearEnchantAnimation:ClearAllPoints()
     CharacterFrameTitleText:ClearAllPoints();
-    CharacterFrameTitleText:SetPoint("TOP", CharacterFrame, "TOP", 0, -5)
+    CharacterFrameTitleText:SetPoint("TOP", CharacterFrame, "TOP", 0, -5*ttfontsize/12)
     CharacterFrameTitleText:SetPoint("LEFT", CharacterFrame, "LEFT", 50, 0)
     CharacterFrameTitleText:SetPoint("RIGHT", CharacterFrameInset.Bg, "RIGHT", -40, 0)
-    CharacterFrameTitleText:SetFont( option("fontname_nametitle") or CCS.fontname, (option("fontsize_nametitle") or 12) , CCS.textoutline)
+    CharacterFrameTitleText:SetFont( option("fontname_nametitle") or CCS.fontname, ttfontsize , CCS.textoutline)
     if option("showfontshadow") == true then
         CharacterFrameTitleText:SetShadowColor(unpack(option("fontshadowcolor") or {0,0,0,1}))
         CharacterFrameTitleText:SetShadowOffset(option("fontshadowx") or 0, option("fontshadowy") or 0)
@@ -1623,6 +1661,7 @@ function module:Initialize()
         CharacterFrameTab2.Text:SetTextColor(1,1,1,1)
         CharacterFrameTab3.Text:SetTextColor(1,1,1,1)
 
+        CharacterFrameTab1:SetPoint("TOPLEFT", CharacterFrame, "BOTTOMLEFT", 11, 2)
         CharacterFrameTab1.Left:ClearAllPoints()
         CharacterFrameTab1.LeftActive:ClearAllPoints()
         CharacterFrameTab1.LeftHighlight:ClearAllPoints()
@@ -1640,6 +1679,8 @@ function module:Initialize()
         CharacterFrameTab1.MiddleHighlight:SetGradient("Vertical", CreateColor(0, 0, 0, 1), CreateColor(0, 0, 0, 1)) -- Dark Gray
         CharacterFrameTab1.MiddleActive:SetGradient("Vertical", CreateColor(0, 0, 0, 1), CreateColor(0, 0, 0, 1)) -- Dark Gray
         CharacterFrameTab1.Middle:SetGradient("Vertical", CreateColor(0, 0, 0, 1), CreateColor(0, 0, 0, 1)) -- Dark Gray
+
+        CharacterFrameTab2:SetPoint("TOPLEFT", CharacterFrameTab1, "TOPRIGHT", 3, 0)
         CharacterFrameTab2.Left:ClearAllPoints()
         CharacterFrameTab2.LeftActive:ClearAllPoints()
         CharacterFrameTab2.LeftHighlight:ClearAllPoints()
@@ -1657,6 +1698,8 @@ function module:Initialize()
         CharacterFrameTab2.MiddleHighlight:SetGradient("Vertical", CreateColor(0, 0, 0, 1), CreateColor(0, 0, 0, 1)) -- Dark Gray        
         CharacterFrameTab2.MiddleActive:SetGradient("Vertical", CreateColor(0, 0, 0, 1), CreateColor(0, 0, 0, 1)) -- Dark Gray
         CharacterFrameTab2.Middle:SetGradient("Vertical", CreateColor(0, 0, 0, 1), CreateColor(0, 0, 0, 1)) -- Dark Gray
+
+        CharacterFrameTab3:SetPoint("TOPLEFT", CharacterFrameTab2, "TOPRIGHT", 3, 0)
         CharacterFrameTab3.Left:ClearAllPoints()
         CharacterFrameTab3.LeftActive:ClearAllPoints()
         CharacterFrameTab3.LeftHighlight:ClearAllPoints()
@@ -1675,7 +1718,7 @@ function module:Initialize()
         CharacterFrameTab3.MiddleActive:SetGradient("Vertical", CreateColor(0, 0, 0, 1), CreateColor(0, 0, 0, 1)) -- Dark Gray
         CharacterFrameTab3.Middle:SetGradient("Vertical", CreateColor(0, 0, 0, 1), CreateColor(0, 0, 0, 1)) -- Dark Gray
      
-    PaperDollFrame:SetPoint("BOTTOMRIGHT", CharacterFrameBg, "BOTTOMRIGHT", 0, 0)
+        PaperDollFrame:SetPoint("BOTTOMRIGHT", CharacterFrameBg, "BOTTOMRIGHT", 0, 0)
     
     -- [Toast] Create Base Frame
     local toast = _G["CCS_TOAST"] or CreateFrame("FRAME","CCS_TOAST",UIParent)
@@ -1729,7 +1772,7 @@ function module:Initialize()
     
     -- Create the character model button
     modelbtn:SetSize(23, 23)
-    modelbtn:SetPoint("BOTTOMRIGHT", CharacterFrame, "BOTTOMRIGHT", -100, 7)
+    modelbtn:SetPoint("BOTTOMRIGHT", _G["CCS_loot_Btn1"], "BOTTOMRIGHT", 180, 0)    
     modelbtn:SetFrameStrata("HIGH")
     
     if option("hideshowchbtn") == true then
@@ -1786,14 +1829,16 @@ function module:Initialize()
     
     local Height = 520  -- Hard code it for now
     local Left = 120  -- Hard code it for now
-    
+   
     CharacterModelScene:ClearAllPoints();
     CharacterModelScene:SetHeight(Height)
     CharacterModelScene:SetWidth(Height/CCS.ModelAspect)
-    CharacterModelScene:SetPoint("LEFT", CharacterFrameBg, "LEFT", Left, -20);
+    CharacterModelScene:SetPoint("CENTER", CharacterFrameInset.Bg, "CENTER", 0, -20);
+    CharacterModelScene:SetPoint("TOP", CharacterFrameInset.Bg, "TOP", 0, -5);    
     CharacterModelScene:SetFrameStrata("Medium")
     CharacterModelScene:SetFrameLevel(9000)
     CharacterModelScene:Show();
+    
     CharacterModelFrameBackgroundTopLeft:Hide();
     CharacterModelFrameBackgroundBotLeft:Hide();
     CharacterModelFrameBackgroundTopRight:Hide();
@@ -1920,7 +1965,7 @@ function CCS.CharacterSheetEventHandler(event, ...)
         ChangeModelBg()
         ReputationFrame_Update()
         CurrencyFrame_Update()
-        --print(date("%H:%M:%S") .. format(".%03d", (GetTime() * 1000) % 1000), "your message")
+        --print(date("%H:%M:%S") .. format(".%03d", (GetTime() * 1000) % 1000), "message")
         return true
     elseif event == "CCS_EVENT_CSHOW" then
 

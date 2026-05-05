@@ -262,9 +262,10 @@ function Shared.IsArcAuraID(cooldownID)
 end
 
 -- Parse "arc_trinket_13" -> "trinket", 13
+-- Also handles optional "_N" dedup suffix (e.g. "arc_timer_188443_2" -> "timer", 188443)
 function Shared.ParseArcAuraID(arcID)
     if not Shared.IsArcAuraID(arcID) then return nil, nil end
-    local arcType, id = arcID:match("^arc_(%w+)_(%d+)$")
+    local arcType, id = arcID:match("^arc_(%w+)_(%d+)")
     return arcType, tonumber(id)
 end
 

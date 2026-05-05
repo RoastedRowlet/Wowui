@@ -1,6 +1,13 @@
 
 WMC_Saved = {
 ["placeKey"] = "G",
+["customCycleEnabled"] = false,
+["customCycleMarkers"] = {
+2,
+3,
+4,
+8,
+},
 ["clearModifier"] = "CTRL-",
 ["clearKey"] = "B",
 ["orderList"] = {
@@ -46,4 +53,8 @@ WMC_MouseoverSaved = {
 1,
 },
 ["placeModifier"] = "",
+}
+WMC_RaidPickerSaved = {
+["openModifier"] = "",
+["openKey"] = "",
 }

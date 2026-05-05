@@ -2,7 +2,7 @@
 local CraftSim = select(2, ...)
 
 
-local print = CraftSim.DEBUG:RegisterDebugID("Classes.RecipeData.ResultData")
+local Logger = CraftSim.DEBUG:RegisterLogger("ResultData")
 
 ---@class CraftSim.ResultData : CraftSim.CraftSimObject
 CraftSim.ResultData = CraftSim.CraftSimObject:extend()
@@ -42,17 +42,13 @@ function CraftSim.ResultData:UpdatePossibleResultItems()
 
     if recipeData.isEnchantingRecipe and recipeData.baseOperationInfo then
         local craftingDataID = self.recipeData.baseOperationInfo.craftingDataID
-        if not CraftSim.ENCHANT_RECIPE_DATA[craftingDataID] then
-            print("CraftSim: Enchant Recipe Missing in Data: " .. recipeData.recipeID .. "/" .. craftingDataID)
+        local ed = CraftSim.ENCHANT_RECIPE_DATA[craftingDataID]
+        if not ed then
+            Logger:LogDebug("CraftSim: Enchant Recipe Missing in Data: " .. recipeData.recipeID .. "/" .. craftingDataID)
             return
         end
-        local itemIDs = {
-            CraftSim.ENCHANT_RECIPE_DATA[craftingDataID].q1,
-            CraftSim.ENCHANT_RECIPE_DATA[craftingDataID].q2,
-            CraftSim.ENCHANT_RECIPE_DATA[craftingDataID].q3,
-        }
-
-        for _, itemID in pairs(itemIDs) do
+        -- q1–q3 scroll ids: expectedItem uses itemsByQuality[expectedQuality] when supportsQualities; not only lowest.
+        for _, itemID in pairs({ ed.q1, ed.q2, ed.q3 }) do
             table.insert(self.itemsByQuality, Item:CreateFromItemID(itemID))
         end
         -- only for quality supporting gear, non quality gear would be the toylike Scepter of Spectacle: Air for example
@@ -64,18 +60,18 @@ function CraftSim.ResultData:UpdatePossibleResultItems()
             table.insert(self.itemsByQuality, Item:CreateFromItemLink(itemLink))
         end
     elseif recipeData.supportsQualities and not recipeData.isSalvageRecipe and not recipeData.recipeInfo.isGatheringRecipe then
-        print("fetching quality ids itemids:", false, true)
+        Logger:LogDebug("fetching quality ids itemids:", false, true)
         local itemIDs = C_TradeSkillUI.GetRecipeQualityItemIDs(recipeData.recipeID)
         for _, itemID in pairs(itemIDs or {}) do
-            print("itemID: " .. itemID)
+            Logger:LogDebug("itemID: " .. itemID)
             table.insert(self.itemsByQuality, Item:CreateFromItemID(itemID))
         end
     else
-        print("fetching quality ids itemids:", false, true)
+        Logger:LogDebug("fetching quality ids itemids:", false, true)
         local itemIDs = CraftSim.UTIL:GetDifferentQualityIDsByCraftingReagentTbl(recipeData.recipeID,
             craftingReagentInfoTbl, recipeData.allocationItemGUID)
         for _, itemID in pairs(itemIDs) do
-            print("itemID: " .. itemID)
+            Logger:LogDebug("itemID: " .. itemID)
             table.insert(self.itemsByQuality, Item:CreateFromItemID(itemID))
         end
     end
@@ -86,12 +82,20 @@ function CraftSim.ResultData:UpdatePossibleResultItems()
         end
     end
 
-    if not recipeData.isGear then
-        local crafterUID = recipeData:GetCrafterUID()
-        -- if not gear update -> itemRecipeDB
+    local crafterUID = recipeData:GetCrafterUID()
+    if recipeData.learned then
         for qualityID, item in ipairs(self.itemsByQuality) do
             local itemID = item:GetItemID()
-            CraftSim.DB.ITEM_RECIPE:Add(recipeData.recipeID, qualityID, itemID, crafterUID)
+            if itemID then
+                CraftSim.DB.ITEM_RECIPE:Add(recipeData.recipeID, qualityID, itemID, crafterUID)
+            end
+        end
+    else
+        for _, item in ipairs(self.itemsByQuality) do
+            local itemID = item:GetItemID()
+            if itemID then
+                CraftSim.DB.ITEM_RECIPE:RemoveCrafterIfRecipeMatches(itemID, recipeData.recipeID, crafterUID)
+            end
         end
     end
 end
@@ -123,7 +127,7 @@ function CraftSim.ResultData:Update()
     -- based on stats predict the resulting items if there are any
 
     if #self.itemsByQuality == 0 then
-        print("ResultData: No OutputItems")
+        Logger:LogDebug("ResultData: No OutputItems")
         return
     end
 
@@ -264,4 +268,42 @@ function CraftSim.ResultData:GetJSON(indent)
         nil)
     jb:End()
     return jb.json
+end
+
+--- One representative item for a simple tooltip (e.g. Craft Lists). No quality tier / expected-quality logic.
+--- Enchants: craftingDataID + ENCHANT_RECIPE_DATA (GetRecipeOutputItemData is invalid for them). Others: recipe hyperlink or first output slot.
+---@param recipeID number
+---@param recipeInfo TradeSkillRecipeInfo?
+---@return number? itemID
+---@return string? itemLink
+function CraftSim.ResultData.GetCraftListTooltipItemIDOrLink(recipeID, recipeInfo)
+    if not recipeInfo then
+        return nil, nil
+    end
+    if recipeInfo.isEnchantingRecipe then
+        local op = C_TradeSkillUI.GetCraftingOperationInfo(recipeID, {}, nil, false)
+        if not op then
+            return nil, nil
+        end
+        local ed = CraftSim.ENCHANT_RECIPE_DATA[op.craftingDataID]
+        -- Single scroll item id for tooltip; craft list does not distinguish q1/q2/q3.
+        if ed and not ed.noOutputTinker and ed.q1 then
+            return ed.q1, nil
+        end
+        return nil, nil
+    end
+    if recipeInfo.hyperlink and recipeInfo.hyperlink ~= "" then
+        return nil, recipeInfo.hyperlink
+    end
+    local outputItemData = C_TradeSkillUI.GetRecipeOutputItemData(recipeID, {}, nil, 1)
+    if outputItemData then
+        local iid = outputItemData.itemID
+        if iid and iid > 0 then
+            return iid, nil
+        end
+        if outputItemData.hyperlink and outputItemData.hyperlink ~= "" then
+            return nil, outputItemData.hyperlink
+        end
+    end
+    return nil, nil
 end

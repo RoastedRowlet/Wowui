@@ -434,7 +434,9 @@ local function AddControlDisabledTooltip(controlAnchor, cfg)
         if cfg.disabled() then
             local tt = cfg.disabledTooltip
             if type(tt) == "function" then tt = tt() end
-            ShowWidgetTooltip(controlAnchor, DisabledTooltip(tt))
+            local raw = cfg.rawTooltip
+            if type(raw) == "function" then raw = raw() end
+            ShowWidgetTooltip(controlAnchor, raw and tt or DisabledTooltip(tt))
         end
     end)
     hit:SetScript("OnLeave", function() HideWidgetTooltip() end)
@@ -498,9 +500,14 @@ local function BuildDropdownMenu(ddBtn, menuW, order, values, getValue, setValue
     -- Menu bg/border: same colours for both styles (DD_BTN with menu-specific alpha)
     local _menuOpts = values._menuOpts
     local _moIcon = _menuOpts and _menuOpts.icon
+    local _moIconAtlas = _menuOpts and _menuOpts.iconAtlas
+    local _moIconPressedAtlas = _menuOpts and _menuOpts.iconPressedAtlas
+    local _moIconOnClick = _menuOpts and _menuOpts.iconOnClick
+    local _moIconTooltip = _menuOpts and _menuOpts.iconTooltip
     local _moBackground = _menuOpts and _menuOpts.background
     local _moBgVertexColor = _menuOpts and _menuOpts.backgroundVertexColor
     local _moItemH = _menuOpts and _menuOpts.itemHeight or 26
+    local _moMaxTextPct = _menuOpts and _menuOpts.maxTextWidthPct
     local _moOnItemHover = _menuOpts and _menuOpts.onItemHover
     local _moOnItemLeave = _menuOpts and _menuOpts.onItemLeave
     local mBgR, mBgG, mBgB, mBgA = DD_BG_R, DD_BG_G, DD_BG_B, DD_BG_HA
@@ -711,17 +718,90 @@ local function BuildDropdownMenu(ddBtn, menuW, order, values, getValue, setValue
             iLbl:SetAlpha(1)
             iLbl:SetPoint("LEFT", item, "LEFT", isWide and 12 or 10, 0)
             iLbl:SetJustifyH("LEFT")
+            if _moMaxTextPct then
+                iLbl:SetWordWrap(false)
+                iLbl:SetWidth(menuW * _moMaxTextPct)
+            end
             iLbl:SetText(mainText)
             -- Optional annotation (smaller font, 75% alpha, same color)
-            -- Optional icon from _menuOpts.icon callback
-            if _moIcon then
-                local iconPath, il, ir, it, ib = _moIcon(key)
-                if iconPath then
+            -- Optional icon. Three sources supported:
+            --   _menuOpts.icon(key)            -> texture path (+ optional texcoord)
+            --   _menuOpts.iconAtlas(key)       -> atlas name (Blizzard atlas)
+            --   _menuOpts.iconPressedAtlas(key)-> pressed-state atlas name
+            -- When _menuOpts.iconOnClick is also provided, the icon becomes
+            -- a clickable Button with its own frame level so clicks don't
+            -- propagate to the item's OnClick (used for sound previews).
+            local _haveAtlas = _moIconAtlas and _moIconAtlas(key) or nil
+            local _iconPath, _il, _ir, _it, _ib
+            if _moIcon and not _haveAtlas then
+                _iconPath, _il, _ir, _it, _ib = _moIcon(key)
+            end
+            if _haveAtlas or _iconPath then
+                local icoSz = _moItemH - 8
+                if _moIconOnClick then
+                    local iconBtn = CreateFrame("Button", nil, item)
+                    iconBtn:SetSize(icoSz, icoSz)
+                    iconBtn:SetPoint("RIGHT", item, "RIGHT", -6, 0)
+                    iconBtn:SetFrameLevel(item:GetFrameLevel() + 2)
+                    if _haveAtlas then
+                        iconBtn:SetNormalAtlas(_haveAtlas)
+                        local pressedAtlas = _moIconPressedAtlas and _moIconPressedAtlas(key)
+                        if pressedAtlas then
+                            iconBtn:SetPushedAtlas(pressedAtlas)
+                        end
+                        iconBtn:SetHighlightAtlas(_haveAtlas)
+                        -- Atlas icons like common-icon-sound have an intrinsic
+                        -- colour (yellow). SetVertexColor alone just scales that
+                        -- colour, so we desaturate first, then tint to #929292.
+                        local _nr, _ng, _nb = 0.573, 0.573, 0.573
+                        local nrmTex = iconBtn:GetNormalTexture()
+                        if nrmTex then
+                            if nrmTex.SetDesaturated then nrmTex:SetDesaturated(true) end
+                            nrmTex:SetVertexColor(_nr, _ng, _nb, 1)
+                        end
+                        local psdTex = iconBtn:GetPushedTexture()
+                        if psdTex then
+                            if psdTex.SetDesaturated then psdTex:SetDesaturated(true) end
+                            psdTex:SetVertexColor(_nr, _ng, _nb, 1)
+                        end
+                        local hlTex = iconBtn:GetHighlightTexture()
+                        if hlTex then
+                            if hlTex.SetDesaturated then hlTex:SetDesaturated(true) end
+                            hlTex:SetVertexColor(_nr, _ng, _nb, 1)
+                            hlTex:SetAlpha(0.4)
+                        end
+                    else
+                        local ico = iconBtn:CreateTexture(nil, "ARTWORK")
+                        ico:SetAllPoints()
+                        ico:SetTexture(_iconPath)
+                        if _il then ico:SetTexCoord(_il, _ir, _it, _ib) end
+                        ico:SetVertexColor(0.8, 0.8, 0.8, 1)
+                        iconBtn._ico = ico
+                    end
+                    iconBtn:SetScript("OnEnter", function()
+                        if iconBtn._ico then iconBtn._ico:SetVertexColor(1, 1, 1, 1) end
+                        if _moIconTooltip then
+                            ShowWidgetTooltip(iconBtn, _moIconTooltip(key))
+                        end
+                    end)
+                    iconBtn:SetScript("OnLeave", function()
+                        if iconBtn._ico then iconBtn._ico:SetVertexColor(0.8, 0.8, 0.8, 1) end
+                        if _moIconTooltip then HideWidgetTooltip() end
+                    end)
+                    iconBtn:SetScript("OnClick", function()
+                        _moIconOnClick(key)
+                    end)
+                    iLbl:SetPoint("RIGHT", iconBtn, "LEFT", -4, 0)
+                else
                     local ico = item:CreateTexture(nil, "ARTWORK")
-                    local icoSz = _moItemH - 8; ico:SetSize(icoSz, icoSz)
+                    ico:SetSize(icoSz, icoSz)
                     ico:SetPoint("RIGHT", item, "RIGHT", -6, 0)
-                    ico:SetTexture(iconPath)
-                    if il then ico:SetTexCoord(il, ir, it, ib) end
+                    if _haveAtlas then
+                        ico:SetAtlas(_haveAtlas)
+                    else
+                        ico:SetTexture(_iconPath)
+                        if _il then ico:SetTexCoord(_il, _ir, _it, _ib) end
+                    end
                     iLbl:SetPoint("RIGHT", ico, "LEFT", -4, 0)
                 end
             end
@@ -1315,6 +1395,15 @@ end
 
 -- opts (optional table): { color = {r,g,b}, width = number } to override text color or force width
 ShowWidgetTooltip = function(label, text, opts)
+    -- Suppress tooltips in M+/raid/PvP combat -- frame APIs return secret
+    -- values in tainted execution and tooltips aren't useful mid-pull.
+    do
+        local _, iType = IsInInstance()
+        if iType == "party" and C_ChallengeMode and C_ChallengeMode.IsChallengeModeActive
+           and C_ChallengeMode.IsChallengeModeActive() then return end
+        if iType == "raid" and InCombatLockdown() then return end
+        if (iType == "pvp" or iType == "arena") and InCombatLockdown() then return end
+    end
     local tt = GetTooltipFrame()
     local MAX_W = 250
     local PAD = 8  -- horizontal padding each side (matches text anchor insets)
@@ -1334,6 +1423,10 @@ ShowWidgetTooltip = function(label, text, opts)
     tt:ClearAllPoints()
     if opts and opts.anchor == "below" then
         tt:SetPoint("TOP", label, "BOTTOM", 0, -4)
+    elseif opts and opts.anchor == "left" then
+        tt:SetPoint("RIGHT", label, "LEFT", -4, 0)
+    elseif opts and opts.anchor == "right" then
+        tt:SetPoint("LEFT", label, "RIGHT", 4, 0)
     else
         tt:SetPoint("BOTTOM", label, "TOP", 0, 4)
     end
@@ -1343,12 +1436,57 @@ ShowWidgetTooltip = function(label, text, opts)
     tt:Show()
     -- Auto-size width: use natural text width + padding, capped at MAX_W
     if not (opts and opts.width) then
-        local naturalW = tt.text:GetStringWidth() + PAD * 2
-        tt:SetWidth(math.min(naturalW, MAX_W))
+        local sw = tt.text:GetStringWidth()
+        if issecretvalue and issecretvalue(sw) then
+            tt:SetWidth(MAX_W)
+        else
+            local naturalW = sw + PAD * 2
+            tt:SetWidth(math.min(naturalW, MAX_W))
+        end
     end
     tt:SetHeight(10)
     local textH = tt.text:GetStringHeight()
-    tt:SetHeight(textH + 16)
+    if issecretvalue and issecretvalue(textH) then
+        tt:SetHeight(26)
+    else
+        tt:SetHeight(textH + 16)
+    end
+    -- Clamp to screen edges so tooltips don't go off-screen
+    -- Skip clamping if frame metrics are secret (tainted execution in M+)
+    local ttScale = tt:GetEffectiveScale()
+    local _ttLeft = tt:GetLeft()
+    local _ttRight = tt:GetRight()
+    local _isv = issecretvalue
+    if not (_isv and (_isv(ttScale) or _isv(_ttLeft) or _isv(_ttRight))) then
+        local screenW = GetScreenWidth() * UIParent:GetEffectiveScale()
+        local ttLeft = (_ttLeft or 0) * ttScale
+        local ttRight = (_ttRight or 0) * ttScale
+        if ttLeft < 0 then
+            local pt, rel, relPt, px, py = tt:GetPoint(1)
+            if pt then
+                tt:SetPoint(pt, rel, relPt, (px or 0) - ttLeft / ttScale, py or 0)
+            end
+        elseif ttRight > screenW then
+            local pt, rel, relPt, px, py = tt:GetPoint(1)
+            if pt then
+                tt:SetPoint(pt, rel, relPt, (px or 0) - (ttRight - screenW) / ttScale, py or 0)
+            end
+        end
+        local screenH = GetScreenHeight() * UIParent:GetEffectiveScale()
+        local ttTop = (tt:GetTop() or 0) * ttScale
+        local ttBottom = (tt:GetBottom() or 0) * ttScale
+        if ttBottom < 0 then
+            local pt, rel, relPt, px, py = tt:GetPoint(1)
+            if pt then
+                tt:SetPoint(pt, rel, relPt, px or 0, (py or 0) - ttBottom / ttScale)
+            end
+        elseif ttTop > screenH then
+            local pt, rel, relPt, px, py = tt:GetPoint(1)
+            if pt then
+                tt:SetPoint(pt, rel, relPt, px or 0, (py or 0) - (ttTop - screenH) / ttScale)
+            end
+        end
+    end
     -- Cancel any in-progress fade-out so its OnFinished doesn't hide us
     if tt._fadeOutAG then tt._fadeOutAG:Stop() end
     if tt._fadeAG then tt._fadeAG:Stop() end
@@ -1364,18 +1502,22 @@ ShowWidgetTooltip = function(label, text, opts)
     tt._fadeAG:Play()
 end
 
-HideWidgetTooltip = function()
+HideWidgetTooltip = function(instant)
     local tt = GetTooltipFrame()
     if not tt:IsShown() then return end
-    -- Fade out
     if tt._fadeOutAG then tt._fadeOutAG:Stop() end
+    if tt._fadeAG then tt._fadeAG:Stop() end
+    if instant then
+        tt:SetAlpha(0); tt:Hide()
+        return
+    end
+    -- Fade out
     if not tt._fadeOutAG then
         tt._fadeOutAG = tt:CreateAnimationGroup()
         tt._fadeOut = tt._fadeOutAG:CreateAnimation("Alpha")
         tt._fadeOut:SetDuration(0.25)
         tt._fadeOut:SetSmoothing("IN")
     end
-    if tt._fadeAG then tt._fadeAG:Stop() end
     tt._fadeOut:SetFromAlpha(tt:GetAlpha())
     tt._fadeOut:SetToAlpha(0)
     tt._fadeOutAG:SetScript("OnFinished", function() tt:SetAlpha(0); tt:Hide() end)
@@ -1423,15 +1565,19 @@ end
 EllesmereUI.ResolveThemeColor = ResolveThemeColor
 
 --- Internal: snap accent color to all registered one-time elements (no transition)
+-- Reusable color objects for gradient updates (avoids allocations per tick)
+local _gradStart = CreateColor(0, 0, 0, 0)
+local _gradEnd   = CreateColor(0, 0, 0, 0)
+
 local function UpdateAccentElements(r, g, b)
     for _, entry in ipairs(EllesmereUI._accentElements) do
         if entry.type == "solid" and entry.obj then
             entry.obj:SetColorTexture(r, g, b, entry.a or 1)
         elseif entry.type == "gradient" and entry.obj then
             entry.obj:SetColorTexture(r, g, b, 1)
-            entry.obj:SetGradient("HORIZONTAL",
-                CreateColor(r, g, b, entry.startA or 0.15),
-                CreateColor(r, g, b, 0))
+            _gradStart.r, _gradStart.g, _gradStart.b, _gradStart.a = r, g, b, entry.startA or 0.15
+            _gradEnd.r, _gradEnd.g, _gradEnd.b, _gradEnd.a = r, g, b, 0
+            entry.obj:SetGradient("HORIZONTAL", _gradStart, _gradEnd)
         elseif entry.type == "vertex" and entry.obj then
             entry.obj:SetVertexColor(r, g, b, 1)
         elseif entry.type == "callback" and entry.fn then
@@ -1528,16 +1674,13 @@ local function ApplyAccentLive(r, g, b)
     -- 3. Invalidate cached popups so they rebuild with new accent
     EllesmereUI._InvalidateConfirmPopup()
 
-    -- 4. Background tint (for Custom Color picker dragging -- no crossfade)
-    if EllesmereUI._applyBgTint then
-        EllesmereUI._applyBgTint(r, g, b)
-    end
-
-    -- 5. Rebuild current page -- widget factories read from ELLESMERE_GREEN
-    EllesmereUI:RefreshPage(true)
+    -- 4. Fast-path refresh only (no full rebuild to avoid memory churn)
+    EllesmereUI:RefreshPage()
 end
 
 --- SetActiveTheme: main theme setter. Persists and applies with animated transition.
+--- Only changes the options panel background. Accent color is independent
+--- (controlled by the accent swatch / class color toggle).
 EllesmereUI.SetActiveTheme = function(theme)
     if not EllesmereUIDB then EllesmereUIDB = {} end
     EllesmereUIDB.activeTheme = theme
@@ -1548,19 +1691,19 @@ EllesmereUI.SetActiveTheme = function(theme)
     if EllesmereUI._applyThemeBG then
         EllesmereUI._applyThemeBG(theme, r, g, b)
     end
-
-    -- Animate accent color transition
-    ApplyAccentAnimated(r, g, b)
 end
 
---- SetAccentColor: for Custom Color mode -- persists user's color and applies live.
+--- SetAccentColor: persists accent color and applies live.
 EllesmereUI.SetAccentColor = function(r, g, b)
     if not EllesmereUIDB then EllesmereUIDB = {} end
-    EllesmereUIDB.accentColor = { r = r, g = g, b = b }
-    -- Only apply live if we're actually in Custom Color mode
-    if EllesmereUI.GetActiveTheme() == "Custom Color" then
-        ApplyAccentLive(r, g, b)
-    end
+    EllesmereUIDB.customAccentColor = { r = r, g = g, b = b }
+    ApplyAccentLive(r, g, b)
+end
+
+--- ApplyAccentColorLive: applies accent color live without persisting.
+--- Used when switching between custom/class accent modes.
+EllesmereUI.ApplyAccentColorLive = function(r, g, b)
+    ApplyAccentLive(r, g, b)
 end
 
 --- GetPlayerClassColor: returns the class color for the current player
@@ -1659,6 +1802,22 @@ local function BuildDropdownControl(parent, ddW, fLevel, values, order, getValue
         ddBtn._ddMenu = menu
         ddBtn._ddRefresh = refresh
         WireDropdownScripts(ddBtn, ddLbl, ddBg, ddBrd, menu, refresh, RD_DD_COLOURS)
+    end
+    -- Public hook: invalidate the cached menu so the next click rebuilds
+    -- from the current contents of `order` / `values`. Use this when the
+    -- dropdown's options can change at runtime (e.g. a dropdown listing
+    -- the spells currently on a CDM bar).
+    ddBtn._invalidateMenu = function()
+        if menu then
+            menu:Hide()
+            if menu.SetParent then pcall(menu.SetParent, menu, nil) end
+            menu = nil
+            refresh = nil
+            ddBtn._ddMenu = nil
+            ddBtn._ddRefresh = nil
+        end
+        -- Also refresh the label text in case the current selection's label changed
+        ddLbl:SetText(DDResolveLabel(values, order, getValue()))
     end
 
     -- Lightweight hover scripts (before menu is created).
@@ -2637,7 +2796,9 @@ function WidgetFactory:DualRow(parent, yOffset, leftCfg, rightCfg)
                 if cfg.disabled and cfg.disabled() and cfg.disabledTooltip then
                     local tt = cfg.disabledTooltip
                     if type(tt) == "function" then tt = tt() end
-                    ShowWidgetTooltip(label, DisabledTooltip(tt))
+                    local raw = cfg.rawTooltip
+                    if type(raw) == "function" then raw = raw() end
+                    ShowWidgetTooltip(label, raw and tt or DisabledTooltip(tt))
                 elseif cfg.tooltip then
                     ShowWidgetTooltip(label, cfg.tooltip, ttOpts)
                 end
@@ -2857,7 +3018,12 @@ function WidgetFactory:DualRow(parent, yOffset, leftCfg, rightCfg)
                     end)
                     swatchBlock:SetScript("OnLeave", function() HideWidgetTooltip() end)
                     local function UpdateSwatchDisabled()
-                        local dis = type(sc.disabled) == "function" and sc.disabled() or sc.disabled
+                        local dis
+                        if type(sc.disabled) == "function" then
+                            dis = sc.disabled()
+                        else
+                            dis = sc.disabled
+                        end
                         if dis then
                             swatch:SetAlpha(0.3)
                             swatchBlock:Show()
@@ -2884,7 +3050,12 @@ function WidgetFactory:DualRow(parent, yOffset, leftCfg, rightCfg)
                     local function UpdateAlpha()
                         -- Skip when disabled -- disabled handler controls alpha
                         if _sd then
-                            local dis = type(_sd) == "function" and _sd() or _sd
+                            local dis
+                            if type(_sd) == "function" then
+                                dis = _sd()
+                            else
+                                dis = _sd
+                            end
                             if dis then return end
                         end
                         _sw:SetAlpha(_ra())
@@ -2927,6 +3098,10 @@ function WidgetFactory:DualRow(parent, yOffset, leftCfg, rightCfg)
         div:SetPoint("TOP", frame, "TOP", 0, 0)
         div:SetPoint("BOTTOM", frame, "BOTTOM", 0, 0)
     end
+
+    -- Store widget config on regions so sync icons can check disabled state
+    leftRegion._widgetCfg = leftCfg
+    rightRegion._widgetCfg = rightCfg
 
     -- Expose half regions so callers can anchor child elements to them
     frame._leftRegion  = leftRegion
@@ -2984,7 +3159,9 @@ function WidgetFactory:TripleRow(parent, yOffset, leftCfg, midCfg, rightCfg, spl
                 if cfg.disabled and cfg.disabled() and cfg.disabledTooltip then
                     local tt = cfg.disabledTooltip
                     if type(tt) == "function" then tt = tt() end
-                    ShowWidgetTooltip(label, DisabledTooltip(tt))
+                    local raw = cfg.rawTooltip
+                    if type(raw) == "function" then raw = raw() end
+                    ShowWidgetTooltip(label, raw and tt or DisabledTooltip(tt))
                 elseif cfg.tooltip then
                     ShowWidgetTooltip(label, cfg.tooltip, ttOpts)
                 end
@@ -3232,6 +3409,10 @@ function WidgetFactory:TripleRow(parent, yOffset, leftCfg, midCfg, rightCfg, spl
         PP.Point(div, "TOP", rgn, "TOPRIGHT", 0, 0)
         PP.Point(div, "BOTTOM", rgn, "BOTTOMRIGHT", 0, 0)
     end
+
+    leftRegion._widgetCfg = leftCfg
+    if midRegion then midRegion._widgetCfg = midCfg end
+    rightRegion._widgetCfg = rightCfg
 
     frame._leftRegion  = leftRegion
     frame._midRegion   = midRegion
@@ -4892,7 +5073,7 @@ end
 --------------------------------------------------------------------------------
 local LABEL_Y_NORMAL  =  0   -- label vertical offset when synced
 local LABEL_Y_SHIFTED =  8   -- label vertical offset when desynced (shifted up)
-local SUBTEXT_Y       = -8   -- "Apply to All" vertical offset below center
+local SUBTEXT_Y       = -10  -- "Apply to All" vertical offset below center
 local ANIM_DUR        = 0.20 -- seconds for slide/fade transition
 
 local function BuildSyncIcon(opts)
@@ -4909,7 +5090,7 @@ local function BuildSyncIcon(opts)
 
     local prefixText = applyBtn:CreateFontString(nil, "OVERLAY")
     prefixText:SetFont(EXPRESSWAY, 11, "")
-    prefixText:SetTextColor(ar, ag, ab, 1)
+    prefixText:SetTextColor(1, 1, 1, 0.65)
     prefixText:SetText("Apply to:")
     prefixText:SetPoint("LEFT", applyBtn, "LEFT", 0, 0)
 
@@ -4917,23 +5098,19 @@ local function BuildSyncIcon(opts)
     allBtn:SetFrameLevel(region:GetFrameLevel() + 4)
     local allText = allBtn:CreateFontString(nil, "OVERLAY")
     allText:SetFont(EXPRESSWAY, 11, "")
-    allText:SetTextColor(ar, ag, ab, 1)
+    allText:SetTextColor(ar, ag, ab, 0.65)
     allText:SetText("All")
     allText:SetPoint("CENTER", allBtn, "CENTER", 0, 0)
     allBtn:SetSize(20, 14)
     allBtn:SetPoint("LEFT", prefixText, "RIGHT", 4, 0)
 
-    -- Hover: lighten links 50% toward white
-    local function Lighten(r, g, b)
-        return r + (1 - r) * 0.75, g + (1 - g) * 0.75, b + (1 - b) * 0.75
-    end
     allBtn:SetScript("OnEnter", function()
         local r, g, b = EllesmereUI.GetAccentColor()
-        allText:SetTextColor(Lighten(r, g, b))
+        allText:SetTextColor(r, g, b, 1)
     end)
     allBtn:SetScript("OnLeave", function()
         local r, g, b = EllesmereUI.GetAccentColor()
-        allText:SetTextColor(r, g, b, 1)
+        allText:SetTextColor(r, g, b, 0.65)
     end)
 
     -- " | Multiple" link (only when multiApply opts are provided)
@@ -4949,7 +5126,7 @@ local function BuildSyncIcon(opts)
         multiBtn:SetFrameLevel(region:GetFrameLevel() + 4)
         multiText = multiBtn:CreateFontString(nil, "OVERLAY")
         multiText:SetFont(EXPRESSWAY, 11, "")
-        multiText:SetTextColor(ar, ag, ab, 1)
+        multiText:SetTextColor(ar, ag, ab, 0.65)
         multiText:SetText("Multiple")
         multiText:SetPoint("CENTER", multiBtn, "CENTER", 0, 0)
         multiBtn:SetSize(50, 14)
@@ -4957,11 +5134,11 @@ local function BuildSyncIcon(opts)
 
         multiBtn:SetScript("OnEnter", function()
             local r, g, b = EllesmereUI.GetAccentColor()
-            multiText:SetTextColor(Lighten(r, g, b))
+            multiText:SetTextColor(r, g, b, 1)
         end)
         multiBtn:SetScript("OnLeave", function()
             local r, g, b = EllesmereUI.GetAccentColor()
-            multiText:SetTextColor(r, g, b, 1)
+            multiText:SetTextColor(r, g, b, 0.65)
         end)
     end
 
@@ -4997,6 +5174,9 @@ local function BuildSyncIcon(opts)
     local animState = opts.isSynced() and 0 or 1  -- start at correct state
 
     local function ApplyState(s)
+        -- Force hidden when the parent widget is disabled
+        local parentCfg = region._widgetCfg
+        if parentCfg and parentCfg.disabled and parentCfg.disabled() then s = 0 end
         -- s: 0 = synced (label centered, subtext hidden), 1 = desynced (label up, subtext visible)
         local labelY = LABEL_Y_NORMAL + s * (LABEL_Y_SHIFTED - LABEL_Y_NORMAL)
         label:ClearAllPoints()
@@ -5066,10 +5246,11 @@ local function BuildSyncIcon(opts)
     EllesmereUI.RegisterWidgetRefresh(function()
         -- Re-color accent in case it changed
         local r, g, b = EllesmereUI.GetAccentColor()
-        prefixText:SetTextColor(r, g, b, 1)
-        allText:SetTextColor(r, g, b, 1)
-        if multiText then multiText:SetTextColor(r, g, b, 1) end
+        prefixText:SetTextColor(1, 1, 1, 0.65)
+        allText:SetTextColor(r, g, b, 0.65)
+        if multiText then multiText:SetTextColor(r, g, b, 0.65) end
         ResizeBtn()
+
 
         local synced = opts.isSynced()
         local target = synced and 0 or 1
@@ -5087,9 +5268,9 @@ local function BuildSyncIcon(opts)
                 end
                 EllesmereUI._deferredDriftChecks[function()
                     local r2, g2, b2 = EllesmereUI.GetAccentColor()
-                    prefixText:SetTextColor(r2, g2, b2, 1)
-                    allText:SetTextColor(r2, g2, b2, 1)
-                    if multiText then multiText:SetTextColor(r2, g2, b2, 1) end
+                    prefixText:SetTextColor(1, 1, 1, 0.65)
+                    allText:SetTextColor(r2, g2, b2, 0.65)
+                    if multiText then multiText:SetTextColor(r2, g2, b2, 0.65) end
                     ResizeBtn()
                     AnimateTo(opts.isSynced() and 0 or 1)
                 end] = true
@@ -5104,9 +5285,9 @@ local function BuildSyncIcon(opts)
             end
             EllesmereUI._deferredDriftChecks[function()
                 local r2, g2, b2 = EllesmereUI.GetAccentColor()
-                prefixText:SetTextColor(r2, g2, b2, 1)
-                allText:SetTextColor(r2, g2, b2, 1)
-                if multiText then multiText:SetTextColor(r2, g2, b2, 1) end
+                prefixText:SetTextColor(1, 1, 1, 0.65)
+                allText:SetTextColor(r2, g2, b2, 0.65)
+                if multiText then multiText:SetTextColor(r2, g2, b2, 0.65) end
                 ResizeBtn()
                 AnimateTo(opts.isSynced() and 0 or 1)
             end] = true
@@ -5131,6 +5312,153 @@ EllesmereUI.ShowWidgetTooltip   = ShowWidgetTooltip
 EllesmereUI.HideWidgetTooltip   = HideWidgetTooltip
 EllesmereUI.DisabledTooltip     = DisabledTooltip
 EllesmereUI.BuildSegmentedControl = BuildSegmentedControl
+
+-------------------------------------------------------------------------------
+--  ShowContextMenu(anchor, items)
+--
+--  Shared pooled context menu used by Blizz UI Enhanced (character sheet gear-
+--  set cog, etc.). Pops up at the cursor.
+--
+--  items = { { text = "Foo", onClick = fn, isDisabled = fn? }, ... }
+--
+--  Behavior:
+--    - Click-outside-to-dismiss (polled ~10hz)
+--    - Auto-closes on combat enter so insecure clicks can't taint protected
+--      paths while lockdown is active
+-------------------------------------------------------------------------------
+local _ctxMenu
+local function ShowContextMenu(anchor, items)
+    local PP_L = EllesmereUI.PP
+    if not _ctxMenu then
+        _ctxMenu = CreateFrame("Frame", nil, UIParent)
+        _ctxMenu:SetFrameStrata("FULLSCREEN_DIALOG")
+        _ctxMenu:SetFrameLevel(200)
+        _ctxMenu:SetClampedToScreen(true)
+        _ctxMenu:EnableMouse(true)
+
+        local RS = EllesmereUI.RESKIN or {}
+        local bg = _ctxMenu:CreateTexture(nil, "BACKGROUND")
+        bg:SetAllPoints()
+        bg:SetColorTexture(RS.BG_R or 0.067, RS.BG_G or 0.067, RS.BG_B or 0.067, RS.QT_ALPHA or 0.97)
+        _ctxMenu._bg = bg
+
+        if PP_L and PP_L.CreateBorder then
+            PP_L.CreateBorder(_ctxMenu, 1, 1, 1, RS.BRD_ALPHA or 0.18, 1)
+        end
+
+        _ctxMenu._items = {}
+        _ctxMenu._elapsed = 0
+
+        -- Throttled click-outside poll (~10hz)
+        _ctxMenu._pollClickOff = function(self, dt)
+            self._elapsed = self._elapsed + dt
+            if self._elapsed < 0.1 then return end
+            self._elapsed = 0
+            if not self:IsMouseOver() and IsMouseButtonDown("LeftButton") then
+                self:Hide()
+            end
+        end
+
+        _ctxMenu:HookScript("OnHide", function(self)
+            self:SetScript("OnUpdate", nil)
+        end)
+
+        -- Combat entry closes the menu to avoid tainting protected paths.
+        _ctxMenu:RegisterEvent("PLAYER_REGEN_DISABLED")
+        _ctxMenu:SetScript("OnEvent", function(self) self:Hide() end)
+    end
+
+    -- Hide pooled rows past the current item count
+    for _, btn in ipairs(_ctxMenu._items) do btn:Hide() end
+
+    local ITEM_H = 26
+    local MENU_PAD = 4
+    local fontPath = (EllesmereUI.GetFontPath and EllesmereUI.GetFontPath()) or STANDARD_TEXT_FONT or "Fonts\\FRIZQT__.TTF"
+    local outline  = (EllesmereUI.GetFontOutlineFlag and EllesmereUI.GetFontOutlineFlag()) or ""
+
+    if not _ctxMenu._measureFS then
+        _ctxMenu._measureFS = _ctxMenu:CreateFontString(nil, "OVERLAY")
+    end
+    local mfs = _ctxMenu._measureFS
+    mfs:SetFont(fontPath, 12, outline)
+    local maxTextW = 0
+    for _, item in ipairs(items) do
+        mfs:SetText(item.text or "")
+        local w = mfs:GetStringWidth() or 0
+        if w > maxTextW then maxTextW = w end
+    end
+    mfs:SetText("")
+    mfs:Hide()
+
+    local MENU_W = math.max(140, maxTextW + 40)
+    local EG = EllesmereUI.ELLESMERE_GREEN
+    local hlAlpha = EllesmereUI.DD_ITEM_HL_A or 0.08
+
+    for i, item in ipairs(items) do
+        local btn = _ctxMenu._items[i]
+        if not btn then
+            btn = CreateFrame("Button", nil, _ctxMenu)
+            local hl = btn:CreateTexture(nil, "BACKGROUND", nil, 1)
+            hl:SetAllPoints()
+            btn._hl = hl
+            local lbl = btn:CreateFontString(nil, "OVERLAY")
+            lbl:SetPoint("LEFT", btn, "LEFT", 10, 0)
+            lbl:SetPoint("RIGHT", btn, "RIGHT", -10, 0)
+            lbl:SetJustifyH("LEFT")
+            btn._lbl = lbl
+            _ctxMenu._items[i] = btn
+        end
+        btn:SetSize(MENU_W - MENU_PAD * 2, ITEM_H)
+        btn:ClearAllPoints()
+        btn:SetPoint("TOPLEFT", _ctxMenu, "TOPLEFT", MENU_PAD, -(MENU_PAD + (i - 1) * ITEM_H))
+        btn._hl:SetColorTexture(1, 1, 1, 0)
+        btn._lbl:SetFont(fontPath, 12, outline)
+        btn._lbl:SetText(item.text or "")
+
+        local disabled = item.isDisabled and item.isDisabled()
+        if disabled then
+            btn._lbl:SetTextColor(0.4, 0.4, 0.4, 0.5)
+            btn._onClick = nil
+            btn:SetScript("OnClick", nil)
+            btn:SetScript("OnEnter", function() btn._lbl:SetTextColor(0.4, 0.4, 0.4, 0.5) end)
+            btn:SetScript("OnLeave", function() btn._lbl:SetTextColor(0.4, 0.4, 0.4, 0.5) end)
+        else
+            btn._lbl:SetTextColor(1, 1, 1, 1)
+            btn._onClick = item.onClick
+            btn:SetScript("OnClick", function()
+                _ctxMenu:Hide()
+                if btn._onClick then btn._onClick() end
+            end)
+            btn:SetScript("OnEnter", function()
+                btn._hl:SetColorTexture(1, 1, 1, hlAlpha)
+                if EG then
+                    btn._lbl:SetTextColor(EG.r, EG.g, EG.b, 1)
+                else
+                    btn._lbl:SetTextColor(1, 1, 1, 1)
+                end
+            end)
+            btn:SetScript("OnLeave", function()
+                btn._hl:SetColorTexture(1, 1, 1, 0)
+                btn._lbl:SetTextColor(1, 1, 1, 1)
+            end)
+        end
+        btn:Show()
+    end
+
+    _ctxMenu:SetSize(MENU_W, MENU_PAD * 2 + #items * ITEM_H)
+
+    -- Position at cursor
+    local scale = _ctxMenu:GetEffectiveScale()
+    local cx, cy = GetCursorPosition()
+    _ctxMenu:ClearAllPoints()
+    _ctxMenu:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", cx / scale, cy / scale)
+    _ctxMenu:Show()
+
+    _ctxMenu._elapsed = 0
+    _ctxMenu:SetScript("OnUpdate", _ctxMenu._pollClickOff)
+end
+
+EllesmereUI.ShowContextMenu = ShowContextMenu
 
 -------------------------------------------------------------------------------
 --  BuildCursorAnchorRow
@@ -5162,8 +5490,23 @@ local function BuildCursorAnchorRow(opts)
           disabledTooltip = opts.disabledTip,
           getValue = function() return getData().anchorTo == "mouse" end,
           setValue = function(v)
-              getData().anchorTo = v and "mouse" or "none"
-              onApply()
+              local old = getData().anchorTo
+              local new = v and "mouse" or "none"
+              getData().anchorTo = new
+              -- Cursor anchor requires a reload to take effect cleanly
+              -- (Blizzard viewer Layout fights icon positions on live switch).
+              local changed = (old == "mouse") ~= (new == "mouse")
+              if changed then
+                  EllesmereUI:ShowConfirmPopup({
+                      title = "Reload Required",
+                      message = "Changing cursor anchor requires a UI reload to take effect.",
+                      confirmText = "Reload Now",
+                      cancelText = "Later",
+                      onConfirm = function() ReloadUI() end,
+                  })
+              else
+                  onApply()
+              end
               EllesmereUI:RefreshPage(true)
           end },
         { type = "dropdown", text = "Cursor Position",
@@ -5325,6 +5668,10 @@ function EllesmereUI.BuildVisOptsCBDropdown(parentFrame, ddW, fLevel, items, get
             lbl:SetFont(fontPath, 13, "")
             lbl:SetTextColor(0.75, 0.75, 0.75, 1)
             lbl:SetPoint("LEFT", box, "RIGHT", 8, 0)
+            lbl:SetPoint("RIGHT", row, "RIGHT", -10, 0)
+            lbl:SetJustifyH("LEFT")
+            lbl:SetWordWrap(false)
+            lbl:SetMaxLines(1)
             lbl:SetText(item.label)
             local hl = row:CreateTexture(nil, "ARTWORK")
             hl:SetAllPoints()

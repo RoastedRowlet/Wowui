@@ -6,4 +6,5 @@
 	<Script file="TomTom.lua"/>
 	<Script file="DugisGuideViewerZ.lua"/>
 	<Script file="SilverDragon.lua"/>
+	<Script file="APR.lua"/>
 </Ui>

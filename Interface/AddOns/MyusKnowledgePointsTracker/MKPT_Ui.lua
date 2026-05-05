@@ -1,6 +1,7 @@
 local AddonName, MKPT_env, _ = ...
 
 local Utils = MKPT_env.Utils
+local L = MKPT_env.L
 
 local f = CreateFrame("Frame", "MKPT_Frame", UIParent, "BackdropTemplate")
 MKPT_env.ui = f
@@ -66,7 +67,7 @@ function MKPT_env.CreateUI()
     UIFrameFadeIn(f.closeButton, 0.1, f.closeButton:GetAlpha(), 1)
 
     GameTooltip:SetOwner(self, "ANCHOR_TOP")
-    GameTooltip:SetText("Auto hide")
+    GameTooltip:SetText(L["Auto hide"])
     GameTooltip:Show()
   end)
   f.hideButton:SetScript("OnLeave", function(self)
@@ -97,7 +98,7 @@ function MKPT_env.CreateUI()
     UIFrameFadeIn(f.hideButton, 0.1, f.hideButton:GetAlpha(), 1)
     UIFrameFadeIn(f.closeButton, 0.1, f.closeButton:GetAlpha(), 1)
     GameTooltip:SetOwner(self, "ANCHOR_TOP")
-    GameTooltip:SetText("Close")
+    GameTooltip:SetText(L["Close"])
     GameTooltip:Show()
   end)
   f.closeButton:SetScript("OnLeave", function(self)
@@ -152,11 +153,11 @@ function MKPT_env.CreateUI()
 
   if firstTimeLoaded then
     f:UpdateDetail(
-      "Click on an item to track\n" ..
-      Utils.WeeklyTextColor("Weekly") .. " - " ..
-      Utils.CatchUpTextColor("Catch-Up") .. " - " ..
-      Utils.UniqueTextColor("Unique") .. " - " ..
-      Utils.MissingTextColor("Missing")
+      L["Click on an item to track"] .. "\n" ..
+      Utils.WeeklyTextColor(L["Weekly"]) .. " - " ..
+      Utils.CatchUpTextColor(L["Catch-Up"]) .. " - " ..
+      Utils.UniqueTextColor(L["Unique"]) .. " - " ..
+      Utils.MissingTextColor(L["Missing"])
     )
     charDb.firstTimeLoaded = false
   end
@@ -186,6 +187,7 @@ local framePool = CreateFramePool(
       b:SetPropagateMouseClicks(true)
       b:SetPropagateMouseMotion(true)
     end
+    b:SetScript("OnClick", nil)
 
     b:UnregisterAllEvents()
   end,
@@ -263,10 +265,13 @@ local function AddProfessionButton(profession)
   b.background:SetVertexColor(backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a)
 
   local remaining = profession:CalculateRemainingKps()
-  b.leftText:SetText(Utils.WeeklyTextColor("W:" .. remaining.weekly) .. Utils.CatchUpTextColor(" +" .. remaining.catchUp))
+  b.leftText:SetText(Utils.WeeklyTextColor(L["W:"] .. remaining.weekly) ..
+  Utils.CatchUpTextColor(" +" .. remaining.catchUp))
 
   local missing = profession:CalculateSpendableKps()
-  b.rightText:SetText(Utils.UniqueTextColor("U:" .. remaining.unique) .. " " .. Utils.MissingTextColor(missing))
+  local unallocated = profession:GetUnallocatedKps()
+  local rightText = unallocated > 0 and Utils.UnspentKpsTextColor(unallocated) or Utils.MissingTextColor(missing)
+  b.rightText:SetText(Utils.UniqueTextColor(L["U:"] .. remaining.unique) .. " " .. rightText)
 
   local middleText = profession.name
   local skillLevel = profession:GetSkillLevel()
@@ -413,12 +418,13 @@ local function AddCurrencyButton(currency, currency2)
   local currentText = quantities.quantity .. "/" .. quantities.max
 
   b.icon:SetTexture(currency.icon)
-  b.leftText:SetText(Utils.WhiteTextColor(currency.name .. " " .. currentText)..weeklyText)
+  b.leftText:SetText(Utils.WhiteTextColor(currency.name .. " " .. currentText) .. weeklyText)
 
   b.middleText:SetText()
   b.middleText:SetJustifyH("CENTER")
 
-  b.rightText:SetText(CreateTextureMarkup(currency2.icon, 64, 64, 16, 16, 0.05, 0.95, 0.05, 0.95).." "..currency2:GetQuantity().quantity)
+  b.rightText:SetText(CreateTextureMarkup(currency2.icon, 64, 64, 16, 16, 0.05, 0.95, 0.05, 0.95) ..
+    " " .. currency2:GetQuantity().quantity)
   b.rightText:SetJustifyH("CENTER")
 
   b.highlight:SetAlpha(0)
@@ -460,7 +466,7 @@ function f:RenderTree()
     end
   end
   if professionCount == 0 then
-    f:UpdateDetail("No professions found")
+    f:UpdateDetail(L["No professions found"])
   end
 
   local dundun = MKPT_env.MKPT_ShardOfDundun
@@ -570,6 +576,7 @@ function MKPT_env.ToggleAutoHide()
     f.hideButton:SetHighlightTexture("Interface\\AddOns\\MyusKnowledgePointsTracker\\Textures\\MKPT_AutohideOff.tga",
       "BLEND")
   end
+  Settings.NotifyUpdate("MKPT_Autohide")
 end
 
 function MKPT_env.RefreshAutoHide()

@@ -295,3 +295,23 @@ end
 function ScrollContainerBaseMixin:ScrollToRight(instant)
     self:SetHorizontalScroll(self.__ContentFrame:GetWidth(), instant)
 end
+
+function ScrollContainerBaseMixin:ScrollDown(delta, instant)
+    delta = delta or self.__stepSize
+    self:SetVerticalScroll(self:GetVerticalScroll() + delta, instant)
+end
+
+function ScrollContainerBaseMixin:ScrollUp(delta, instant)
+    delta = delta or self.__stepSize
+    self:SetVerticalScroll(self:GetVerticalScroll() - delta, instant)
+end
+
+function ScrollContainerBaseMixin:ScrollRight(delta, instant)
+    delta = delta or self.__stepSize
+    self:SetHorizontalScroll(self:GetHorizontalScroll() + delta, instant)
+end
+
+function ScrollContainerBaseMixin:ScrollLeft(delta, instant)
+    delta = delta or self.__stepSize
+    self:SetHorizontalScroll(self:GetHorizontalScroll() - delta, instant)
+end

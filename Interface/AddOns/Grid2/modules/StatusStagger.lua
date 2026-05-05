@@ -1,4 +1,4 @@
-if Grid2.isClassic or true then return end -- TODO refactor for midnight
+if true then return end -- TODO refactor for midnight
 
 -- Stagger monk status, created by Michael
 local Stagger = Grid2.statusPrototype:new("monk-stagger")
@@ -10,11 +10,11 @@ local UnitStagger = UnitStagger
 local UnitHealthMax = UnitHealthMax
 
 function Stagger:OnEnable()
-	self:RegisterEvent("UNIT_POWER_UPDATE")
+	self:RegisterRosterUnitEvent("UNIT_POWER_UPDATE")
 end
 
 function Stagger:OnDisable()
-	self:UnregisterEvent("UNIT_POWER_UPDATE")
+	self:UnregisterRosterUnitEvent("UNIT_POWER_UPDATE")
 end
 
 function Stagger:UNIT_POWER_UPDATE(_,unit)

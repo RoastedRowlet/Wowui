@@ -40,6 +40,7 @@ local DEFAULTS = {
     activeInSolo      = true,
     activeInDungeons  = true,
     activeInRaids     = true,
+	activeInPvP	  	  = false,
 
     -- Refresh timer alert
     timerEnabled      = true,
@@ -60,7 +61,7 @@ local DEFAULTS = {
 
     -- Volume
     ttsVolume         = 100,
-    soundChannel      = "SFX",
+    soundChannel      = "Master",
 
     -- Timer text alert
     timerTextEnabled  = false,
@@ -124,6 +125,10 @@ local function IsActiveInCurrentContent()
     else
         return db.activeInSolo
     end
+end
+
+local function IsInPvP()
+    return C_PvP.IsActiveBattlefield() or C_PvP.IsArena()
 end
 
 -------------------------------------------------------------------------------
@@ -582,6 +587,7 @@ coreFrame:SetScript("OnUpdate", function(self, elapsed)
     if not db then return end
     if not IsRestorationDruid() then return end
     if not IsActiveInCurrentContent() then return end
+	if not db.activeInPvP and IsInPvP() then return end
     self.timer = (self.timer or 0) + elapsed
     if self.timer < 0.1 then return end
     self.timer = 0
@@ -1101,6 +1107,11 @@ local function BuildOptionsPanel()
     CreateCheckbox(content, "Raids", 10, yOff,
         function() return db.activeInRaids end,
         function(v) db.activeInRaids = v end)
+    yOff = yOff - 25
+	
+	CreateCheckbox(content, "PvP (Battlegrounds & Arena)", 10, yOff,
+        function() return db.activeInPvP end,
+        function(v) db.activeInPvP = v end)
     yOff = yOff - 35
 
     local sep_active = content:CreateTexture(nil, "OVERLAY")

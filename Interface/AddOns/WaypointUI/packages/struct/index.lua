@@ -149,3 +149,11 @@ function Struct.New(definition)
 
     return setmetatable(structType, definitionMetatable)
 end
+
+function Struct.Wipe(object)
+    for key in next, object do
+        if key ~= "id" and key ~= "definition" and key ~= "isStruct" then
+            rawset(object, key, nil)
+        end
+    end
+end

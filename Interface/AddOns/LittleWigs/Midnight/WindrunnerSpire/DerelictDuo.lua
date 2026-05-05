@@ -72,7 +72,7 @@ end
 
 function mod:ENCOUNTER_TIMELINE_EVENT_ADDED(_, eventInfo)
 	if eventInfo.source ~= 0 then return end -- Enum.EncounterTimelineEventSource.Encounter
-	local duration = math.floor(eventInfo.duration * 100.0 + 0.5) / 100.0
+	local duration = self:RoundNumber(eventInfo.duration, 2)
 	local barInfo
 	if duration == 8 or duration == 27.33 then -- Splattering Spew
 		barInfo = self:SplatteringSpewTimeline(eventInfo)
@@ -134,6 +134,7 @@ function mod:SplatteringSpewTimeline(eventInfo)
 		msg = barText,
 		key = 472745,
 		callback = function()
+			self:TargetMessageFromBlizzMessage(1, 472745, "blue")
 			self:Message(472745, "orange", barText)
 			self:PlaySound(472745, "alarm")
 		end
@@ -176,6 +177,7 @@ function mod:DebilitatingShriekTimeline(eventInfo)
 		msg = barText,
 		key = 472736,
 		cancelCallback = function()
+			self:TargetMessageFromBlizzMessage(1, 472793, "blue") -- Heaving Yank
 			self:Message(472736, "yellow", barText)
 			self:PlaySound(472736, "long")
 		end

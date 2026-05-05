@@ -137,11 +137,11 @@ function TextureMixin:SetBackdropColor(background, border)
     end
 end
 
-function TextureMixin:SetRotation(rotation)
+function TextureMixin:SetRotation(radians, normalizedRotationPoint)
     if self.__Backdrop then
-        self.__Backdrop:SetRotation(rotation)
+        self.__Backdrop:SetRotation(radians, normalizedRotationPoint)
     end
-    self.__Texture:SetRotation(rotation)
+    self.__Texture:SetRotation(radians, normalizedRotationPoint)
 end
 
 function TextureMixin:GetRotation()

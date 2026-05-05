@@ -15,14 +15,12 @@
         "~\\.vscode\\extensions\\ketho.wow-api-0.22.3\\Annotations\\Core"
     ],
     "Lua.diagnostics.globals": [
-        "SlashCmdList",
         "SecureHandlerWrapScript",
+        "SlashCmdList",
         "SecureHandlerExecute",
+        "UIParent",
         "SettingsPanel",
         "Settings",
-        "UIDropDownMenu_Initialize",
-        "UIDropDownMenu_SetSelectedValue",
-        "UIDropDownMenu_AddButton",
-        "UIDropDownMenu_CreateInfo"
+        "GameTooltip"
     ]
 }

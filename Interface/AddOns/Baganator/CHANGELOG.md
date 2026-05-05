@@ -1,8 +1,6 @@
 # Baganator
 
-## [794](https://github.com/TheMouseNest/Baganator/tree/794) (2026-03-18)
-[Full Changelog](https://github.com/TheMouseNest/Baganator/compare/793...794) [Previous Releases](https://github.com/TheMouseNest/Baganator/releases)
+## [802](https://github.com/TheMouseNest/Baganator/tree/802) (2026-05-02)
+[Full Changelog](https://github.com/TheMouseNest/Baganator/compare/801...802) 
 
-- [Fixes #614] Error in MoP with an item sometimes not showing charges text  
-- Update CIMI icons when decor is added to chest (#636)  
-- Retail: Fix "Group by" for gear upgrade tracks not working for Adventurer  
+- Single bag: Bugfix for exporting profiles using hidden special containers  

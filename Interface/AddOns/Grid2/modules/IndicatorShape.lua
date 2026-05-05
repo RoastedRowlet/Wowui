@@ -2,7 +2,9 @@
 
 local Grid2 = Grid2
 local unpack = unpack
-
+local min = math.min
+local GetAtlasInfo = C_Texture.GetAtlasInfo
+local canaccessvalue = Grid2.canaccessvalue
 local SetAlphaFromBoolean = Grid2.SetAlphaFromBoolean
 
 local function Shape_Create(self, parent)
@@ -15,7 +17,12 @@ end
 local function Shape_OnUpdate(self, parent, unit, status, state, secret, invert)
 	local f = parent[self.name]
 	if status then
-		f.Icon:SetVertexColor(status:GetColor(unit))
+		if self.opacity then
+			local r, g, b, a = status:GetColor(unit)
+			f.Icon:SetVertexColor(r, g, b, canaccessvalue(a) and min(self.opacity, a or 1) or self.opacity)
+		else
+			f.Icon:SetVertexColor(status:GetColor(unit))
+		end
 		SetAlphaFromBoolean(f, state, 1, 0, secret, invert)
 	else
 		f:SetAlpha(0)
@@ -25,21 +32,25 @@ end
 local function Shape_Layout(self, parent)
 	local f = parent[self.name]
 	local level = parent:GetFrameLevel() + self.frameLevel
+	local width = self.width or parent.container:GetWidth()
+	local height = self.height or parent.container:GetHeight()
 	f:SetParent(parent)
 	f:ClearAllPoints()
 	f:SetPoint(self.anchor, parent.container, self.anchorRel, self.offsetx, self.offsety)
 	f:SetFrameLevel(level)
-	f:SetSize( self.iconSize, self.iconSize )
+	f:SetSize(width, height)
 	f.Icon:SetTexCoord( unpack(self.iconCoord) )
 	f.Icon:SetTexture( self.iconPath )
+	f.Icon:SetBlendMode(self.blendMode)
 	f.Icon:Show()
 	if self.dbx.shadowEnabled then
 		local IconShadow = f.IconShadow or f:CreateTexture(nil, "BORDER")
 		IconShadow:ClearAllPoints()
 		IconShadow:SetPoint("CENTER", self.shadowX, self.shadowY)
-		IconShadow:SetSize(self.shadowSize, self.shadowSize)
+		IconShadow:SetSize(width + self.shadowSize, height + self.shadowSize)
 		IconShadow:SetTexture(self.iconPath)
 		IconShadow:SetTexCoord( unpack(self.iconCoord) )
+		IconShadow:SetBlendMode(self.blendMode)
 		IconShadow:SetVertexColor(self.color.r, self.color.g, self.color.b, self.color.a)
 		IconShadow:Show()
 		f.IconShadow = IconShadow
@@ -69,13 +80,21 @@ local function Shape_UpdateDB(self)
 	-- misc variables
 	self.color      = Grid2.MakeColor(dbx.shadowColor, "BLACK")
 	self.frameLevel = dbx.level or 4
-	self.iconSize   = dbx.size or 14
 	self.iconPath   = dbx.iconPath or "Interface\\Addons\\Grid2\\media\\shapes"
+	self.blendMode  = dbx.blend or 'BLEND'
+	self.opacity    = dbx.opacity
+	self.width      = dbx.width or dbx.size or 14
+	if self.width==0 then self.width = nil end
+	self.height     = dbx.height or dbx.size or 14
+	if self.height==0 then self.height = nil end
 	-- shape selection and rotation
 	local i, j, u, v
 	local r = dbx.iconRotation or 0
 	local k = dbx.iconIndex or 0
-	if k>=0 then
+	local a = (dbx.iconPath and GetAtlasInfo(dbx.iconPath)) or (type(k)=='string' and GetAtlasInfo(k))
+	if a then
+		self.iconPath, i, j, u, v = a.file, a.leftTexCoord, a.rightTexCoord, a.topTexCoord, a.bottomTexCoord
+	elseif (tonumber(k) or 0)>=0 then
 		i, j, u, v = k/8, (k+1)/8, 0, 1
 	elseif dbx.iconCoord then
 		i, j, u, v = unpack(dbx.iconCoord)
@@ -87,7 +106,7 @@ local function Shape_UpdateDB(self)
 	self.iconCoord = { x[5-r],y[5-r], x[8-r],y[8-r], x[6-r],y[6-r], x[7-r],y[7-r] }
 	-- shadow
 	if dbx.shadowEnabled then
-		self.shadowSize = self.iconSize + (dbx.shadowSize or 0)
+		self.shadowSize = dbx.shadowSize or 0
 		self.shadowX    = dbx.shadowX or 0
 		self.shadowY    = dbx.shadowY or 0
 	end

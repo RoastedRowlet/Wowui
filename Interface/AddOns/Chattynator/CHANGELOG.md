@@ -1,6 +1,6 @@
 # Chattynator
 
-## [200](https://github.com/TheMouseNest/Chattynator/tree/200) (2026-03-22)
-[Full Changelog](https://github.com/TheMouseNest/Chattynator/compare/199...200) 
+## [205](https://github.com/TheMouseNest/Chattynator/tree/205) (2026-05-01)
+[Full Changelog](https://github.com/TheMouseNest/Chattynator/compare/204...205) 
 
-- Fix error when dragging tabs  
+- Fix whisper tabs not generating properly  

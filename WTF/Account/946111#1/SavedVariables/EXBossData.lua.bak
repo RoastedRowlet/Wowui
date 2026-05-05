@@ -1,0 +1,7474 @@
+
+EXBossDataDB = {
+["events"] = {
+nil,
+nil,
+nil,
+{
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "heal",
+["useCustom"] = false,
+},
+["eventID"] = 4,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Watch Healing",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Healing",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Healing",
+},
+},
+},
+{
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 5,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Drop Water",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Drop Water",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Drop Water",
+},
+},
+},
+{
+["enabled"] = false,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 6,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Beam On You",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Beam On You",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Beam On You",
+},
+},
+},
+{
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "cooldown",
+["useCustom"] = false,
+},
+["eventID"] = 7,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Watch Dodge",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Dodge",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Dodge",
+},
+},
+},
+{
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "cooldown",
+["useCustom"] = false,
+},
+["eventID"] = 8,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Watch Dodge",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Dodge",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Dodge",
+},
+},
+},
+{
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "heal",
+["useCustom"] = false,
+},
+["eventID"] = 9,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Watch Healing",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Healing",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Healing",
+},
+},
+},
+{
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 10,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Switch Add",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Switch Add",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Switch Add",
+},
+},
+},
+{
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "heal",
+["useCustom"] = false,
+},
+["eventID"] = 11,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Prepare Target",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Target",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Target",
+},
+},
+},
+{
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "heal",
+["useCustom"] = false,
+},
+["eventID"] = 12,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Watch Healing",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Healing",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Healing",
+},
+},
+},
+{
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 13,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Break Link",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Break Link",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Break Link",
+},
+},
+},
+{
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "heal",
+["useCustom"] = false,
+},
+["eventID"] = 14,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Watch Healing",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Healing",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Healing",
+},
+},
+},
+{
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 15,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Phase Change",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Phase Change",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Phase Change",
+},
+},
+},
+{
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "tank",
+["useCustom"] = false,
+},
+["eventID"] = 16,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+},
+},
+{
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "cooldown",
+["useCustom"] = false,
+},
+["eventID"] = 17,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Watch Frontal",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Frontal",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Frontal",
+},
+},
+},
+{
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "cooldown",
+["useCustom"] = false,
+},
+["eventID"] = 18,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "None",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "None",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "None",
+},
+},
+},
+{
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 19,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Kite Add",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Kite Add",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Kite Add",
+},
+},
+},
+{
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "heal",
+["useCustom"] = false,
+},
+["eventID"] = 20,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Phase Change",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Phase Change",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Phase Change",
+},
+},
+},
+{
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 21,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Prepare Arrow",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Arrow",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Arrow",
+},
+},
+},
+{
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "cooldown",
+["useCustom"] = false,
+},
+["eventID"] = 22,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Prepare Target",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Target",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Target",
+},
+},
+},
+{
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "cooldown",
+["useCustom"] = false,
+},
+["eventID"] = 23,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Watch Dodge",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Dodge",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Dodge",
+},
+},
+},
+{
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "tank",
+["useCustom"] = false,
+},
+["eventID"] = 24,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+},
+},
+{
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "tank",
+["useCustom"] = false,
+},
+["eventID"] = 25,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+},
+},
+{
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "heal",
+["useCustom"] = false,
+},
+["eventID"] = 26,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Prepare Dispel",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Dispel",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Dispel",
+},
+},
+},
+{
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "heal",
+["useCustom"] = false,
+},
+["eventID"] = 27,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+},
+},
+{
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "cooldown",
+["useCustom"] = false,
+},
+["eventID"] = 28,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Target Drop Water",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Target Drop Water",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Target Drop Water",
+},
+},
+},
+{
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 29,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Prepare Hook",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Hook",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Hook",
+},
+},
+},
+nil,
+nil,
+nil,
+{
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "heal",
+["useCustom"] = false,
+},
+["eventID"] = 33,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Prepare Target",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Target",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Target",
+},
+},
+},
+{
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 34,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Phase Change",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Phase Change",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Phase Change",
+},
+},
+},
+{
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "tank",
+["useCustom"] = false,
+},
+["eventID"] = 35,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+},
+},
+{
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 36,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Switch Add",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Switch Add",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Switch Add",
+},
+},
+},
+nil,
+nil,
+nil,
+nil,
+nil,
+nil,
+nil,
+nil,
+nil,
+nil,
+nil,
+{
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "cooldown",
+["useCustom"] = false,
+},
+["eventID"] = 48,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "小心Launch",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "小心Launch",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "小心Launch",
+},
+},
+},
+{
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "heal",
+["useCustom"] = false,
+},
+["eventID"] = 49,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+},
+},
+{
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "heal",
+["useCustom"] = false,
+},
+["eventID"] = 50,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Watch Healing",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Healing",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Healing",
+},
+},
+},
+{
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "cooldown",
+["useCustom"] = false,
+},
+["eventID"] = 51,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Watch Dodge",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Dodge",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Dodge",
+},
+},
+},
+nil,
+{
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "cooldown",
+["useCustom"] = false,
+},
+["eventID"] = 53,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Watch Shockwave",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Shockwave",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Shockwave",
+},
+},
+},
+nil,
+nil,
+nil,
+nil,
+nil,
+{
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "tank",
+["useCustom"] = false,
+},
+["eventID"] = 59,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+},
+},
+{
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "tank",
+["useCustom"] = false,
+},
+["eventID"] = 60,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+},
+},
+{
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "cooldown",
+["useCustom"] = false,
+},
+["eventID"] = 61,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Watch Dodge",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Dodge",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Dodge",
+},
+},
+},
+{
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "heal",
+["useCustom"] = false,
+},
+["eventID"] = 62,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+},
+},
+{
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "cooldown",
+["useCustom"] = false,
+},
+["eventID"] = 63,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "None",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "None",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "None",
+},
+},
+},
+{
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "tank",
+["useCustom"] = false,
+},
+["eventID"] = 64,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+},
+},
+{
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 65,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Away Add",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Away Add",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Away Add",
+},
+},
+},
+{
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "heal",
+["useCustom"] = false,
+},
+["eventID"] = 66,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Prepare AOE (Break)",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare AOE (Break)",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare AOE (Break)",
+},
+},
+},
+nil,
+nil,
+nil,
+nil,
+{
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 71,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Special Mechanic",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Special Mechanic",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Special Mechanic",
+},
+},
+},
+{
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "cooldown",
+["useCustom"] = false,
+},
+["eventID"] = 72,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "None",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "None",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "None",
+},
+},
+},
+{
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "cooldown",
+["useCustom"] = false,
+},
+["eventID"] = 73,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Watch Frontal",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Frontal",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Frontal",
+},
+},
+},
+{
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 74,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Break Shield",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Break Shield",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Break Shield",
+},
+},
+},
+{
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "heal",
+["useCustom"] = false,
+},
+["eventID"] = 75,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Watch Healing",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Healing",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Healing",
+},
+},
+},
+{
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 76,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Special Mechanic",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Special Mechanic",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Special Mechanic",
+},
+},
+},
+{
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "heal",
+["useCustom"] = false,
+},
+["eventID"] = 77,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Watch Healing",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Healing",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Healing",
+},
+},
+},
+{
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "tank",
+["useCustom"] = false,
+},
+["eventID"] = 78,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+},
+},
+{
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 79,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Spread Now",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Spread Now",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Spread Now",
+},
+},
+},
+{
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 80,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Watch Dodge",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Dodge",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Dodge",
+},
+},
+},
+{
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 81,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Special Mechanic",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Special Mechanic",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Special Mechanic",
+},
+},
+},
+{
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "tank",
+["useCustom"] = false,
+},
+["eventID"] = 82,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+},
+},
+{
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 83,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Watch Dodge",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Dodge",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Dodge",
+},
+},
+},
+{
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "heal",
+["useCustom"] = false,
+},
+["eventID"] = 84,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+},
+},
+{
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "heal",
+["useCustom"] = false,
+},
+["eventID"] = 85,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Stack Share",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Stack Share",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Stack Share",
+},
+},
+},
+nil,
+nil,
+nil,
+nil,
+nil,
+nil,
+nil,
+{
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 93,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Watch Dodge",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Dodge",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Dodge",
+},
+},
+},
+{
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "tank",
+["useCustom"] = false,
+},
+["eventID"] = 94,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+},
+},
+{
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "heal",
+["useCustom"] = false,
+},
+["eventID"] = 95,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Prepare Clear Stack",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Clear Stack",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Clear Stack",
+},
+},
+},
+{
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 96,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Prepare Enter Circle",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Enter Circle",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Enter Circle",
+},
+},
+},
+{
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 97,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Hit Clone",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Hit Clone",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Hit Clone",
+},
+},
+},
+{
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "heal",
+["useCustom"] = false,
+},
+["eventID"] = 98,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Stack Drop Circle",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Stack Drop Circle",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Stack Drop Circle",
+},
+},
+},
+{
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "cooldown",
+["useCustom"] = false,
+},
+["eventID"] = 99,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "None",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "None",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "None",
+},
+},
+},
+{
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "heal",
+["useCustom"] = false,
+},
+["eventID"] = 100,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Prepare Target",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Target",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Target",
+},
+},
+},
+{
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "cooldown",
+["useCustom"] = false,
+},
+["eventID"] = 101,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Watch Frontal",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Frontal",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Frontal",
+},
+},
+},
+{
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 102,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Switch Add",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Switch Add",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Switch Add",
+},
+},
+},
+{
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 103,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Prepare Absorb Orb",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Absorb Orb",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Absorb Orb",
+},
+},
+},
+{
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "cooldown",
+["useCustom"] = false,
+},
+["eventID"] = 104,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Watch Frontal",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Frontal",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Frontal",
+},
+},
+},
+{
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "heal",
+["useCustom"] = false,
+},
+["eventID"] = 105,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Watch Healing",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Healing",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Healing",
+},
+},
+},
+{
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "heal",
+["useCustom"] = false,
+},
+["eventID"] = 106,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+},
+},
+{
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "cooldown",
+["useCustom"] = false,
+},
+["eventID"] = 107,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Target Clear Line",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Target Clear Line",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Target Clear Line",
+},
+},
+},
+{
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "cooldown",
+["useCustom"] = false,
+},
+["eventID"] = 108,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Prepare Link",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Link",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Link",
+},
+},
+},
+{
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "heal",
+["useCustom"] = false,
+},
+["eventID"] = 109,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Prepare Target",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Target",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Target",
+},
+},
+},
+{
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 110,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Phase Change",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Phase Change",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Phase Change",
+},
+},
+},
+{
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "tank",
+["useCustom"] = false,
+},
+["eventID"] = 111,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+},
+},
+{
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "cooldown",
+["useCustom"] = false,
+},
+["eventID"] = 112,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Watch Dodge",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Dodge",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Dodge",
+},
+},
+},
+[500] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 500,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Boss Enrage",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Boss Enrage",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Boss Enrage",
+},
+},
+},
+[131] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "heal",
+["useCustom"] = false,
+},
+["eventID"] = 131,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Prepare Target",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Target",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Target",
+},
+},
+},
+[139] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 139,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Switch Boss",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Switch Boss",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Switch Boss",
+},
+},
+},
+[147] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "cooldown",
+["useCustom"] = false,
+},
+["eventID"] = 147,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Fix Camera",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Fix Camera",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Fix Camera",
+},
+},
+},
+[155] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 155,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Step Trap",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Step Trap",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Step Trap",
+},
+},
+},
+[373] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "heal",
+["useCustom"] = false,
+},
+["eventID"] = 373,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Watch Healing",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Healing",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Healing",
+},
+},
+},
+[195] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 195,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Special Mechanic",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Special Mechanic",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Special Mechanic",
+},
+},
+},
+[203] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "cooldown",
+["useCustom"] = false,
+},
+["eventID"] = 203,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Prepare Target",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Target",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Target",
+},
+},
+},
+[211] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 211,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Prepare Stack",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Stack",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Stack",
+},
+},
+},
+[219] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "cooldown",
+["useCustom"] = false,
+},
+["eventID"] = 219,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "None",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "None",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "None",
+},
+},
+},
+[649] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "cooldown",
+["useCustom"] = false,
+},
+["eventID"] = 649,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Watch Dodge",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Dodge",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Dodge",
+},
+},
+},
+[235] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 235,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Watch Clear Orb",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Clear Orb",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Clear Orb",
+},
+},
+},
+[243] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "heal",
+["useCustom"] = false,
+},
+["eventID"] = 243,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+},
+},
+[251] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "tank",
+["useCustom"] = false,
+},
+["eventID"] = 251,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "准备跑圈",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "准备跑圈",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "准备跑圈",
+},
+},
+},
+[262] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "cooldown",
+["useCustom"] = false,
+},
+["eventID"] = 262,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Watch Dodge",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Dodge",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Dodge",
+},
+},
+},
+[278] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "tank",
+["useCustom"] = false,
+},
+["eventID"] = 278,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+},
+},
+[294] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "tank",
+["useCustom"] = false,
+},
+["eventID"] = 294,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+},
+},
+[310] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 310,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Switch Add",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Switch Add",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Switch Add",
+},
+},
+},
+[650] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "heal",
+["useCustom"] = false,
+},
+["eventID"] = 650,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Prepare Target",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Target",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Target",
+},
+},
+},
+[358] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 358,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Empower Holy Paladin",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Empower Holy Paladin",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Empower Holy Paladin",
+},
+},
+},
+[374] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "cooldown",
+["useCustom"] = false,
+},
+["eventID"] = 374,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Watch Dodge",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Dodge",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Dodge",
+},
+},
+},
+[555] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "cooldown",
+["useCustom"] = false,
+},
+["eventID"] = 555,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Boss Enrage",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Boss Enrage",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Boss Enrage",
+},
+},
+},
+[118] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "heal",
+["useCustom"] = false,
+},
+["eventID"] = 118,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+},
+},
+[126] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "cooldown",
+["useCustom"] = false,
+},
+["eventID"] = 126,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "None",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "None",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "None",
+},
+},
+},
+[132] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "heal",
+["useCustom"] = false,
+},
+["eventID"] = 132,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Watch Healing",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Healing",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Healing",
+},
+},
+},
+[140] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "heal",
+["useCustom"] = false,
+},
+["eventID"] = 140,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Prepare Target",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Target",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Target",
+},
+},
+},
+[148] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 148,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Burst Vulnerability",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Burst Vulnerability",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Burst Vulnerability",
+},
+},
+},
+[156] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "tank",
+["useCustom"] = false,
+},
+["eventID"] = 156,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+},
+},
+[164] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "tank",
+["useCustom"] = false,
+},
+["eventID"] = 164,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "坦克Knockback",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "坦克Knockback",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "坦克Knockback",
+},
+},
+},
+[172] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "cooldown",
+["useCustom"] = false,
+},
+["eventID"] = 172,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Watch Dodge",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Dodge",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Dodge",
+},
+},
+},
+[359] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 359,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Empower Protection Paladin",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Empower Protection Paladin",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Empower Protection Paladin",
+},
+},
+},
+[375] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "cooldown",
+["useCustom"] = false,
+},
+["eventID"] = 375,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Watch Dodge",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Dodge",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Dodge",
+},
+},
+},
+[196] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "heal",
+["useCustom"] = false,
+},
+["eventID"] = 196,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+},
+},
+[204] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 204,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+},
+},
+[212] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "heal",
+["useCustom"] = false,
+},
+["eventID"] = 212,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Prepare Target",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Target",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Target",
+},
+},
+},
+[220] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "tank",
+["useCustom"] = false,
+},
+["eventID"] = 220,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+},
+},
+[236] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "cooldown",
+["useCustom"] = false,
+},
+["eventID"] = 236,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Interrupt Now",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Interrupt Now",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Interrupt Now",
+},
+},
+},
+[244] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "cooldown",
+["useCustom"] = false,
+},
+["eventID"] = 244,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Tank Knockback",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Tank Knockback",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Tank Knockback",
+},
+},
+},
+[252] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "cooldown",
+["useCustom"] = false,
+},
+["eventID"] = 252,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Watch Dodge",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Dodge",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Dodge",
+},
+},
+},
+[280] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "cooldown",
+["useCustom"] = false,
+},
+["eventID"] = 280,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Watch Frontal",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Frontal",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Frontal",
+},
+},
+},
+[296] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "cooldown",
+["useCustom"] = false,
+},
+["eventID"] = 296,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Stack Drop Circle",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Stack Drop Circle",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Stack Drop Circle",
+},
+},
+},
+[312] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 312,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Summon Add",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Summon Add",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Summon Add",
+},
+},
+},
+[360] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 360,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Empower Ret Paladin",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Empower Ret Paladin",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Empower Ret Paladin",
+},
+},
+},
+[376] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "cooldown",
+["useCustom"] = false,
+},
+["eventID"] = 376,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Watch Dodge",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Dodge",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Dodge",
+},
+},
+},
+[133] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "heal",
+["useCustom"] = false,
+},
+["eventID"] = 133,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+},
+},
+[141] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "cooldown",
+["useCustom"] = false,
+},
+["eventID"] = 141,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Interrupt Now",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Interrupt Now",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Interrupt Now",
+},
+},
+},
+[149] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 149,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Special Mechanic",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Special Mechanic",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Special Mechanic",
+},
+},
+},
+[157] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 157,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Spread Close",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Spread Close",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Spread Close",
+},
+},
+},
+[165] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 165,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Switch Add",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Switch Add",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Switch Add",
+},
+},
+},
+[688] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "cooldown",
+["useCustom"] = false,
+},
+["eventID"] = 688,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "None",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "None",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "None",
+},
+},
+},
+[361] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "cooldown",
+["useCustom"] = false,
+},
+["eventID"] = 361,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "None",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "None",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "None",
+},
+},
+},
+[377] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 377,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Prepare Absorb Orb",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Absorb Orb",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Absorb Orb",
+},
+},
+},
+[197] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 197,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Stack Share",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Stack Share",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Stack Share",
+},
+},
+},
+[205] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "cooldown",
+["useCustom"] = false,
+},
+["eventID"] = 205,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+},
+},
+[213] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 213,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Prepare Stack",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Stack",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Stack",
+},
+},
+},
+[221] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "tank",
+["useCustom"] = false,
+},
+["eventID"] = 221,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+},
+},
+[237] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "heal",
+["useCustom"] = false,
+},
+["eventID"] = 237,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Prepare Target",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Target",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Target",
+},
+},
+},
+[245] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "heal",
+["useCustom"] = false,
+},
+["eventID"] = 245,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+},
+},
+[253] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 253,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Phase Change",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Phase Change",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Phase Change",
+},
+},
+},
+[282] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "tank",
+["useCustom"] = false,
+},
+["eventID"] = 282,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+},
+},
+[298] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "cooldown",
+["useCustom"] = false,
+},
+["eventID"] = 298,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Watch Knockback",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Knockback",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Knockback",
+},
+},
+},
+[362] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 362,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Special Mechanic",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Special Mechanic",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Special Mechanic",
+},
+},
+},
+[378] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "cooldown",
+["useCustom"] = false,
+},
+["eventID"] = 378,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Watch Frontal",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Frontal",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Frontal",
+},
+},
+},
+[458] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "cooldown",
+["useCustom"] = false,
+},
+["eventID"] = 458,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Watch Shockwave",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Shockwave",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Shockwave",
+},
+},
+},
+[119] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 119,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Clear Water",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Clear Water",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Clear Water",
+},
+},
+},
+[134] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "tank",
+["useCustom"] = false,
+},
+["eventID"] = 134,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+},
+},
+[142] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "cooldown",
+["useCustom"] = false,
+},
+["eventID"] = 142,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Watch Shockwave",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Shockwave",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Shockwave",
+},
+},
+},
+[150] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "tank",
+["useCustom"] = false,
+},
+["eventID"] = 150,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+},
+},
+[158] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 158,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Phase Change",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Phase Change",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Phase Change",
+},
+},
+},
+[166] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 166,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Find Beacon",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Find Beacon",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Find Beacon",
+},
+},
+},
+[363] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "heal",
+["useCustom"] = false,
+},
+["eventID"] = 363,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+},
+},
+[379] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "cooldown",
+["useCustom"] = false,
+},
+["eventID"] = 379,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Watch Frontal",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Frontal",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Frontal",
+},
+},
+},
+[198] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "cooldown",
+["useCustom"] = false,
+},
+["eventID"] = 198,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Watch Dodge",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Dodge",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Dodge",
+},
+},
+},
+[206] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "tank",
+["useCustom"] = false,
+},
+["eventID"] = 206,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+},
+},
+[214] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "heal",
+["useCustom"] = false,
+},
+["eventID"] = 214,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Prepare Target",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Target",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Target",
+},
+},
+},
+[238] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 238,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+},
+},
+[246] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "heal",
+["useCustom"] = false,
+},
+["eventID"] = 246,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Switch Add",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Switch Add",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Switch Add",
+},
+},
+},
+[254] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 254,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Watch Knockback",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Knockback",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Knockback",
+},
+},
+},
+[284] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "cooldown",
+["useCustom"] = false,
+},
+["eventID"] = 284,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "集合放圈",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "集合放圈",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "集合放圈",
+},
+},
+},
+[300] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "cooldown",
+["useCustom"] = false,
+},
+["eventID"] = 300,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Watch Frontal",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Frontal",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Frontal",
+},
+},
+},
+[364] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "tank",
+["useCustom"] = false,
+},
+["eventID"] = 364,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+},
+},
+[380] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 380,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Switch Add",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Switch Add",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Switch Add",
+},
+},
+},
+[492] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "tank",
+["useCustom"] = false,
+},
+["eventID"] = 492,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Intercept Add",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Intercept Add",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Intercept Add",
+},
+},
+},
+[135] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 135,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Switch Boss",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Switch Boss",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Switch Boss",
+},
+},
+},
+[143] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "heal",
+["useCustom"] = false,
+},
+["eventID"] = 143,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Watch Healing",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Healing",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Healing",
+},
+},
+},
+[151] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "cooldown",
+["useCustom"] = false,
+},
+["eventID"] = 151,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Watch Dodge",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Dodge",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Dodge",
+},
+},
+},
+[632] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "heal",
+["useCustom"] = false,
+},
+["eventID"] = 632,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+},
+},
+[167] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "heal",
+["useCustom"] = false,
+},
+["eventID"] = 167,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+},
+},
+[365] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 365,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Spread Now",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Spread Now",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Spread Now",
+},
+},
+},
+[381] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 381,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Enter Bubble",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Enter Bubble",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Enter Bubble",
+},
+},
+},
+[199] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "cooldown",
+["useCustom"] = false,
+},
+["eventID"] = 199,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Watch Dodge",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Dodge",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Dodge",
+},
+},
+},
+[215] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "cooldown",
+["useCustom"] = false,
+},
+["eventID"] = 215,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Phase Change",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Phase Change",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Phase Change",
+},
+},
+},
+[223] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "cooldown",
+["useCustom"] = false,
+},
+["eventID"] = 223,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "躲开Frontal",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "躲开Frontal",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "躲开Frontal",
+},
+},
+},
+[239] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "tank",
+["useCustom"] = false,
+},
+["eventID"] = 239,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+},
+},
+[247] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 247,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Watch Launch",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Launch",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Launch",
+},
+},
+},
+[255] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 255,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Special Mechanic",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Special Mechanic",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Special Mechanic",
+},
+},
+},
+[538] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "heal",
+["useCustom"] = false,
+},
+["eventID"] = 538,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Clear Water",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Clear Water",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Clear Water",
+},
+},
+},
+[286] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "tank",
+["useCustom"] = false,
+},
+["eventID"] = 286,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+},
+},
+[302] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "tank",
+["useCustom"] = false,
+},
+["eventID"] = 302,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+},
+},
+[603] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "cooldown",
+["useCustom"] = false,
+},
+["eventID"] = 603,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "None",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "None",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "None",
+},
+},
+},
+[635] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 635,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "None",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "None",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "None",
+},
+},
+},
+[494] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "heal",
+["useCustom"] = false,
+},
+["eventID"] = 494,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Stack Share",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Stack Share",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Stack Share",
+},
+},
+},
+[128] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 128,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Switch Add",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Switch Add",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Switch Add",
+},
+},
+},
+[136] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 136,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Switch Boss",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Switch Boss",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Switch Boss",
+},
+},
+},
+[144] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 144,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+},
+},
+[152] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 152,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Watch Dodge",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Dodge",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Dodge",
+},
+},
+},
+[636] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "cooldown",
+["useCustom"] = false,
+},
+["eventID"] = 636,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Tank Knockback",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Tank Knockback",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Tank Knockback",
+},
+},
+},
+[168] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "cooldown",
+["useCustom"] = false,
+},
+["eventID"] = 168,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Watch Dodge",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Dodge",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Dodge",
+},
+},
+},
+[261] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 261,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Watch Clear Orb",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Clear Orb",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Clear Orb",
+},
+},
+},
+[200] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "cooldown",
+["useCustom"] = false,
+},
+["eventID"] = 200,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Boss Enrage",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Boss Enrage",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Boss Enrage",
+},
+},
+},
+[208] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "cooldown",
+["useCustom"] = false,
+},
+["eventID"] = 208,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "None",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "None",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "None",
+},
+},
+},
+[216] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "cooldown",
+["useCustom"] = false,
+},
+["eventID"] = 216,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Away Boss",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Away Boss",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Away Boss",
+},
+},
+},
+[224] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "cooldown",
+["useCustom"] = false,
+},
+["eventID"] = 224,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Prepare Target",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Target",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Target",
+},
+},
+},
+[263] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "cooldown",
+["useCustom"] = false,
+},
+["eventID"] = 263,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Away Boss",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Away Boss",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Away Boss",
+},
+},
+},
+[295] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "heal",
+["useCustom"] = false,
+},
+["eventID"] = 295,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Prepare Dispel",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Dispel",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Dispel",
+},
+},
+},
+[248] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "heal",
+["useCustom"] = false,
+},
+["eventID"] = 248,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+},
+},
+[256] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "cooldown",
+["useCustom"] = false,
+},
+["eventID"] = 256,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Watch Dodge",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Dodge",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Dodge",
+},
+},
+},
+[272] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 272,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Away Boss",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Away Boss",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Away Boss",
+},
+},
+},
+[288] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "cooldown",
+["useCustom"] = false,
+},
+["eventID"] = 288,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+},
+},
+[304] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "cooldown",
+["useCustom"] = false,
+},
+["eventID"] = 304,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+},
+},
+[561] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "cooldown",
+["useCustom"] = false,
+},
+["eventID"] = 561,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "None",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "None",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "None",
+},
+},
+},
+[279] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "heal",
+["useCustom"] = false,
+},
+["eventID"] = 279,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+},
+},
+[281] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 281,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Phase Change",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Phase Change",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Phase Change",
+},
+},
+},
+[283] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 283,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "召唤小怪",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "召唤小怪",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "召唤小怪",
+},
+},
+},
+[384] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 384,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Prepare Line Block",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Line Block",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Line Block",
+},
+},
+},
+[285] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 285,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+},
+},
+[287] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "heal",
+["useCustom"] = false,
+},
+["eventID"] = 287,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Prepare Dispel",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Dispel",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Dispel",
+},
+},
+},
+[293] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "cooldown",
+["useCustom"] = false,
+},
+["eventID"] = 293,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "None",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "None",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "None",
+},
+},
+},
+[431] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 431,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Special Mechanic",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Special Mechanic",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Special Mechanic",
+},
+},
+},
+[313] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "cooldown",
+["useCustom"] = false,
+},
+["eventID"] = 313,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "None",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "None",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "None",
+},
+},
+},
+[273] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "cooldown",
+["useCustom"] = false,
+},
+["eventID"] = 273,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Watch Dodge",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Dodge",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Dodge",
+},
+},
+},
+[305] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "heal",
+["useCustom"] = false,
+},
+["eventID"] = 305,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Switch Add",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Switch Add",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Switch Add",
+},
+},
+},
+[257] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "cooldown",
+["useCustom"] = false,
+},
+["eventID"] = 257,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Interrupt Now",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Interrupt Now",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Interrupt Now",
+},
+},
+},
+[137] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "tank",
+["useCustom"] = false,
+},
+["eventID"] = 137,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+},
+},
+[145] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "heal",
+["useCustom"] = false,
+},
+["eventID"] = 145,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+},
+},
+[153] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "cooldown",
+["useCustom"] = false,
+},
+["eventID"] = 153,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "点名Frontal",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "点名Frontal",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "点名Frontal",
+},
+},
+},
+[161] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 161,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Prepare Line Block",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Line Block",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Line Block",
+},
+},
+},
+[169] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "cooldown",
+["useCustom"] = false,
+},
+["eventID"] = 169,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Boss Enrage",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Boss Enrage",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Boss Enrage",
+},
+},
+},
+[353] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 353,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Phase Change",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Phase Change",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Phase Change",
+},
+},
+},
+[433] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 433,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Phase Change",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Phase Change",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Phase Change",
+},
+},
+},
+[385] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 385,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Prepare Line Block",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Line Block",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Line Block",
+},
+},
+},
+[201] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "cooldown",
+["useCustom"] = false,
+},
+["eventID"] = 201,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Interrupt Now",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Interrupt Now",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Interrupt Now",
+},
+},
+},
+[209] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "cooldown",
+["useCustom"] = false,
+},
+["eventID"] = 209,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Watch Dodge",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Dodge",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Dodge",
+},
+},
+},
+[217] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 217,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Rescue Now ",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Rescue Now ",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Rescue Now ",
+},
+},
+},
+[225] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "heal",
+["useCustom"] = false,
+},
+["eventID"] = 225,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "召唤小怪",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "召唤小怪",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "召唤小怪",
+},
+},
+},
+[249] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "heal",
+["useCustom"] = false,
+},
+["eventID"] = 249,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+},
+},
+[241] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "heal",
+["useCustom"] = false,
+},
+["eventID"] = 241,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Prepare Target",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Target",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Target",
+},
+},
+},
+[497] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 497,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Boss Vulnerability",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Boss Vulnerability",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Boss Vulnerability",
+},
+},
+},
+[258] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "heal",
+["useCustom"] = false,
+},
+["eventID"] = 258,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Watch Healing",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Healing",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Healing",
+},
+},
+},
+[274] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 274,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Watch Block Orb",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Block Orb",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Block Orb",
+},
+},
+},
+[290] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "heal",
+["useCustom"] = false,
+},
+["eventID"] = 290,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Prepare Target",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Target",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Target",
+},
+},
+},
+[306] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "tank",
+["useCustom"] = false,
+},
+["eventID"] = 306,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+},
+},
+[417] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "cooldown",
+["useCustom"] = false,
+},
+["eventID"] = 417,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "None",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "None",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "None",
+},
+},
+},
+[242] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "heal",
+["useCustom"] = false,
+},
+["eventID"] = 242,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+},
+},
+[309] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "heal",
+["useCustom"] = false,
+},
+["eventID"] = 309,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Prepare Target",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Target",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Target",
+},
+},
+},
+[299] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "heal",
+["useCustom"] = false,
+},
+["eventID"] = 299,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+},
+},
+[218] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "heal",
+["useCustom"] = false,
+},
+["eventID"] = 218,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+},
+},
+[210] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "tank",
+["useCustom"] = false,
+},
+["eventID"] = 210,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+},
+},
+[418] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "cooldown",
+["useCustom"] = false,
+},
+["eventID"] = 418,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "None",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "None",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "None",
+},
+},
+},
+[434] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "heal",
+["useCustom"] = false,
+},
+["eventID"] = 434,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+},
+},
+[130] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 130,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Watch Clear Orb",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Clear Orb",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Clear Orb",
+},
+},
+},
+[117] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "cooldown",
+["useCustom"] = false,
+},
+["eventID"] = 117,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Interrupt Now",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Interrupt Now",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Interrupt Now",
+},
+},
+},
+[482] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 482,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "You Are White",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "You Are White",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "You Are White",
+},
+},
+},
+[154] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "heal",
+["useCustom"] = false,
+},
+["eventID"] = 154,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Prepare Dispel",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Dispel",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Dispel",
+},
+},
+},
+[259] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "heal",
+["useCustom"] = false,
+},
+["eventID"] = 259,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Watch Healing",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Healing",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Healing",
+},
+},
+},
+[138] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "heal",
+["useCustom"] = false,
+},
+["eventID"] = 138,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Watch Defensives",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Defensives",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Defensives",
+},
+},
+},
+[146] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "cooldown",
+["useCustom"] = false,
+},
+["eventID"] = 146,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Watch Dodge",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Dodge",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Dodge",
+},
+},
+},
+[307] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "heal",
+["useCustom"] = false,
+},
+["eventID"] = 307,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+},
+},
+[644] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 644,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Special Mechanic",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Special Mechanic",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Special Mechanic",
+},
+},
+},
+[170] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "cooldown",
+["useCustom"] = false,
+},
+["eventID"] = 170,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "None",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "None",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "None",
+},
+},
+},
+[301] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 301,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Watch Dodge",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Dodge",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Dodge",
+},
+},
+},
+[303] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "heal",
+["useCustom"] = false,
+},
+["eventID"] = 303,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Prepare Line Block",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Line Block",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Line Block",
+},
+},
+},
+[194] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 194,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Special Mechanic",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Special Mechanic",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Special Mechanic",
+},
+},
+},
+[275] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "heal",
+["useCustom"] = false,
+},
+["eventID"] = 275,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Prepare Target",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Target",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Target",
+},
+},
+},
+[419] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 419,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Enter Bubble",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Enter Bubble",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Enter Bubble",
+},
+},
+},
+[435] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "heal",
+["useCustom"] = false,
+},
+["eventID"] = 435,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+},
+},
+[226] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "tank",
+["useCustom"] = false,
+},
+["eventID"] = 226,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+},
+},
+[234] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "cooldown",
+["useCustom"] = false,
+},
+["eventID"] = 234,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Watch Dodge",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Dodge",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Dodge",
+},
+},
+},
+[483] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 483,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "You Are Black",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "You Are Black",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "You Are Black",
+},
+},
+},
+[250] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "cooldown",
+["useCustom"] = false,
+},
+["eventID"] = 250,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Prepare Target",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Target",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Target",
+},
+},
+},
+[260] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 260,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Prepare Stack",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Stack",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Stack",
+},
+},
+},
+[276] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "tank",
+["useCustom"] = false,
+},
+["eventID"] = 276,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+},
+},
+[292] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "cooldown",
+["useCustom"] = false,
+},
+["eventID"] = 292,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Prepare Soak",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Soak",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Soak",
+},
+},
+},
+[308] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 308,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Fix Camera",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Fix Camera",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Fix Camera",
+},
+},
+},
+[277] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 277,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Chase",
+},
+},
+},
+[429] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "heal",
+["useCustom"] = false,
+},
+["eventID"] = 429,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Kite Add",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Kite Add",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Kite Add",
+},
+},
+},
+[495] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "heal",
+["useCustom"] = false,
+},
+["eventID"] = 495,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Stack Share",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Stack Share",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Stack Share",
+},
+},
+},
+[311] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "cooldown",
+["useCustom"] = false,
+},
+["eventID"] = 311,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Interrupt Now",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Interrupt Now",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Interrupt Now",
+},
+},
+},
+[397] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 397,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Prepare Orb Pass",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Orb Pass",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Prepare Orb Pass",
+},
+},
+},
+[557] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "cooldown",
+["useCustom"] = false,
+},
+["eventID"] = 557,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "None",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "None",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "None",
+},
+},
+},
+[420] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "tank",
+["useCustom"] = false,
+},
+["eventID"] = 420,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+},
+},
+[436] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "cooldown",
+["useCustom"] = false,
+},
+["eventID"] = 436,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "小心Launch",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "小心Launch",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "小心Launch",
+},
+},
+},
+[556] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "tank",
+["useCustom"] = false,
+},
+["eventID"] = 556,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Tank Buster",
+},
+},
+},
+[560] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "mechanic",
+["useCustom"] = false,
+},
+["eventID"] = 560,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "准备追人",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "准备追人",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "准备追人",
+},
+},
+},
+[437] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "heal",
+["useCustom"] = false,
+},
+["eventID"] = 437,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Watch Defensives",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Defensives",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Watch Defensives",
+},
+},
+},
+[633] = {
+["enabled"] = true,
+["color"] = {
+["enabled"] = true,
+["scheme"] = "cooldown",
+["useCustom"] = false,
+},
+["eventID"] = 633,
+["centralEnabled"] = false,
+["triggers"] = {
+{
+["enabled"] = true,
+["sourceType"] = "pack",
+["label"] = "Boss Enrage",
+},
+{
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Boss Enrage",
+},
+[0] = {
+["enabled"] = false,
+["sourceType"] = "pack",
+["label"] = "Boss Enrage",
+},
+},
+},
+},
+["timer"] = {
+["timelineMode"] = {
+["byEncounter"] = {
+},
+["fixedDriverByEncounter"] = {
+},
+["default"] = "auto",
+["fixedDriverDefault"] = "time",
+},
+},
+["bossConfig"] = {
+["legacyMigrated"] = true,
+["version"] = 3,
+["slotSelection"] = {
+["raid_dps"] = "PresetConfig",
+["mplus_heal"] = "PresetConfig",
+["raid_tank"] = "PresetConfig",
+["raid_heal"] = "PresetConfig",
+["mplus_dps"] = "PresetConfig",
+["mplus_tank"] = "PresetConfig",
+},
+["userOverrides"] = {
+["raid_dps"] = {
+},
+["mplus_heal"] = {
+},
+["raid_tank"] = {
+},
+["raid_heal"] = {
+},
+["mplus_dps"] = {
+},
+["mplus_tank"] = {
+},
+},
+},
+["wtfVersion"] = 3,
+}

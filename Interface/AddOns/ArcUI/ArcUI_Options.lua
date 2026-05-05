@@ -621,6 +621,17 @@ local function GetOptionsTable()
             return tbl
           end)(),
 
+          crExport = (function()
+            local tbl = ns.GetCRExportOnlyOptionsTable and ns.GetCRExportOnlyOptionsTable() or {
+              type = "group",
+              name = "Cooldown Reminder Export",
+              args = { loading = { type = "description", name = "Loading...", order = 1 } }
+            }
+            tbl.name = "Cooldown Reminder Export"
+            tbl.order = 3.5
+            return tbl
+          end)(),
+
           unifiedImport = (function()
             local tbl = ns.GetUnifiedImportExportOptionsTable and ns.GetUnifiedImportExportOptionsTable() or {
               type = "group",
@@ -642,6 +653,17 @@ local function GetOptionsTable()
         }
         tbl.name  = "Migration"
         tbl.order = 5
+        return tbl
+      end)(),
+
+      cooldownReminder = (function()
+        local tbl = ns.GetCooldownReminderOptionsTable and ns.GetCooldownReminderOptionsTable() or {
+          type = "group",
+          name = "Cooldown Reminder",
+          args = { loading = { type = "description", name = "Loading...", order = 1 } }
+        }
+        tbl.name  = "Cooldown Reminder"
+        tbl.order = 3.5
         return tbl
       end)(),
 

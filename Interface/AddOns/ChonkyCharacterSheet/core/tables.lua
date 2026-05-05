@@ -23,6 +23,7 @@ CCS.secretsdisabled = false
 CCS.raidupdatedisabled = false
 CCS.activeClickedRow = nil
 CCS.initall = nil
+CCS.tempEnchantTicker = nil
 
 -- Game version flags
 CCS.RETAIL  = 1
@@ -63,6 +64,14 @@ CCS.Throttles = {
     Init = 0,
 }
 
+-- Item Upgrade Tracks
+CCS.Explorer = 1
+CCS.Adventurer = 2
+CCS.Veteran = 3
+CCS.Champion = 4
+CCS.Hero = 5
+CCS.Myth = 6
+
 function CCS:GetDefaultFontForLocale()
 
 --Testing info
@@ -91,7 +100,7 @@ function CCS:GetDefaultFontForLocale()
     -- Default for enUS and others
     return "Fonts\\FRIZQT__.TTF"
 end
-
+CCS.fontname = CCS:GetDefaultFontForLocale()
 
 -- Determine current game version flag
 function CCS.GetCurrentVersion()
@@ -128,9 +137,9 @@ ns.optionDefs = {
     { type="checkbox", cat="GENERAL", ver=bit.bor(CCS.ALL), key="show_inspect", label=L["SHOW_INSPECT"], value=true, default=true, slots=1 },
     { type="checkbox", cat="GENERAL", ver=bit.bor(CCS.RETAIL), key="showraidprogress", label=L["SHOW_RAID_PROGRESS"], value=true, default=true, slots=1 },
     { type="header", cat="GENERAL", ver=bit.bor(CCS.ALL), key=nil, label="", slots=1, color={1, 1, 1}, fontSize=20, fontOutline="THICKOUTLINE" },
-    { type="checkbox", cat="GENERAL", ver=bit.bor(CCS.RETAIL), key="showm_sp", label=L["SHOW_MYTHIC_SP"], value=true, default=false, slots=1 },
+    { type="checkbox", cat="GENERAL", ver=bit.bor(CCS.RETAIL), key="showm_sp", label=L["SHOW_MYTHIC_SP"], value=true, default=true, slots=1 },
     { type="checkbox", cat="GENERAL", ver=bit.bor(CCS.RETAIL), key="showm_sp_btn", label=L["SHOW_MYTHIC_SP_BTN"], value=true, default=true, slots=1 },    
-    { type="checkbox", cat="GENERAL", ver=bit.bor(CCS.RETAIL), key="showm_sp_onopen", label=L["SHOW_MYTHIC_SP_ONOPEN"], value=true, default=true, slots=2 },    
+    { type="checkbox", cat="GENERAL", ver=bit.bor(CCS.RETAIL), key="showm_sp_onopen", label=L["SHOW_MYTHIC_SP_ONOPEN"], value=false, default=false, slots=2 },    
     { type="divider", cat="GENERAL", ver=bit.bor(CCS.ALL), slots=4 },
     { type="slider", cat="GENERAL", ver=bit.bor(CCS.ALL), key="sheetscale", label=L["SHEET_SCALE"], value=1, default=1, min=0.5, max=1.25, step=0.05, slots=2 },
     { type="slider", cat="GENERAL", ver=bit.bor(CCS.ALL), key="vpad", label=L["V_PAD"], value=23, default=23, min=0, max=40, step=1, slots=2 },
@@ -169,6 +178,7 @@ ns.optionDefs = {
     { type="slider", cat="GENERAL", ver=bit.bor(CCS.ALL), key="fontshadowx", label=L["Shadow X Offset"], value=0, default=0, min=-15, max=15, step=1, slots=1 },
     { type="slider", cat="GENERAL", ver=bit.bor(CCS.ALL), key="fontshadowy", label=L["Shadow Y Offset"], value=0, default=0, min=-15, max=15, step=1, slots=1 },
     { type="dropdown", cat="GENERAL", ver=bit.bor(CCS.ALL), key="textoutline", label=L["TEXT_OUTLINE"], value="Thin Outline", default="Thin Outline", values={"No Outline", "Thin Outline", "Thick Outline"}, slots=2 },
+    { type="checkbox", cat="GENERAL", ver=bit.bor(CCS.RETAIL), key="font_slug", label=L["Slug Rendering"], value=false, default=false, slots=2 },    
     { type="divider", cat="GENERAL", ver=bit.bor(CCS.ALL), slots=4 },
     { type="header", cat="GENERAL", ver=bit.bor(CCS.ALL), key=nil, label=L["ADDON COLORS"], slots=4, color={1, 1, 1}, fontSize=16, fontOutline="THICKOUTLINE" },
     { type="color", cat="GENERAL", ver=bit.bor(CCS.ALL), key="button_color", label=L["Button Foreground Color"], value={0.49, 0.196, 0.659, 1}, default={0.49, 0.196, 0.659, 1}, slots=1 },
@@ -183,6 +193,7 @@ ns.optionDefs = {
     { type="color", cat="CHAR-SHEET", ver=bit.bor(CCS.ALL), key="bgcolor", label=L["CCS_BG_COLOR"], value={0,0,0,0.89}, default={0,0,0,0.89}, slots=1 },
     { type="dropdown", cat="CHAR-SHEET", ver=bit.bor(CCS.RETAIL), key="bgtype", label=L["BG_TYPE"], value="Midnight", default="Midnight", values={"Default", "Class", "Race", "Midnight", "Hide"}, slots=2 },
     { type="checkbox", cat="CHAR-SHEET", ver=bit.bor(CCS.RETAIL), key="showbganimations", label=ANIMATION, value=true, default=true, slots=1 },
+    { type="checkbox", cat="CHAR-SHEET", ver=bit.bor(CCS.RETAIL), key="showparagonmax", label=L["PARAGON_MAX_BAR"], value=false, default=false, slots=1 },
     { type="divider", cat="CHAR-SHEET", ver=bit.bor(CCS.RETAIL), slots=4 },
     { type="header", cat="CHAR-SHEET", ver=bit.bor(CCS.ALL), key=nil, label=L["HEADER_ITEM_DISPLAY"], slots=4, color={1,1,1}, fontSize=16, fontOutline="THICKOUTLINE" },
     { type="divider", cat="CHAR-SHEET", ver=bit.bor(CCS.ALL), slots=4 },
@@ -194,20 +205,32 @@ ns.optionDefs = {
     { type="checkbox", cat="CHAR-SHEET", ver=bit.bor(CCS.RETAIL, CCS.MOP), key="hideshowchbtn", label=L["HIDE_SHOW_CHAR_BTN"], value=false, default=false, slots=1 },
     { type="checkbox", cat="CHAR-SHEET", ver=bit.bor(CCS.ALL), key="hideiconborders", label=L["HIDE_ICON_BORDERS"], value=true, default=true, slots=1 },
     { type="checkbox", cat="CHAR-SHEET", ver=bit.bor(CCS.ALL), key="showenchants", label=L["SHOW_ENCHANTS"], value=true, default=true, slots=1 },
+    { type="checkbox", cat="CHAR-SHEET", ver=bit.bor(CCS.ALL), key="showtempenchants", label=L["SHOW_TEMP_ENCHANTS"], value=true, default=true, slots=1 },
     { type="checkbox", cat="CHAR-SHEET", ver=bit.bor(CCS.ALL), key="showgems", label=L["SHOW_GEMS"], value=true, default=true, slots=1 },
     { type="checkbox", cat="CHAR-SHEET", ver=bit.bor(CCS.ALL), key="showilvl", label=L["SHOW_ILVL"], value=true, default=true, slots=1 },
     { type="checkbox", cat="CHAR-SHEET", ver=bit.bor(CCS.ALL), key="showpvpilvl", label=L["SHOW_PVP_ILVL"], value=true, default=true, slots=1 },
+    { type="checkbox", cat="CHAR-SHEET", ver=bit.bor(CCS.ALL), key="showhighwater", label=L["SHOW_HIGHWATER"], value=false, default=false, slots=1 },
     { type="checkbox", cat="CHAR-SHEET", ver=bit.bor(CCS.ALL), key="showenchantgemerrors", label=L["SHOW_ENCHANT_GEM_ERRORS"], value=true, default=true, slots=1 },
     { type="checkbox", cat="CHAR-SHEET", ver=bit.bor(CCS.RETAIL), key="showmissingsockets", label=L["SHOW_MISSING_SOCKETS"], value=false, default=false, slots=1 },
     { type="checkbox", cat="CHAR-SHEET", ver=bit.bor(CCS.ALL), key="showitemupgrade", label=L["SHOW_ITEM_UPGRADE"], value=true, default=true, slots=1 },
-    { type="checkbox", cat="CHAR-SHEET", ver=bit.bor(CCS.ALL), key="upgradecolorrarity", label=L["Upgrade Color by Rarity"], value=false, default=false, slots=1 },
-    { type="color", cat="CHAR-SHEET", ver=bit.bor(CCS.ALL), key="itemupgradecolor", label=L["ITEM_UPGRADE_COLOR"], value={0.98,0.60,0.35,1}, default={0.98,0.60,0.35,1}, slots=1 },
+--    { type="checkbox", cat="CHAR-SHEET", ver=bit.bor(CCS.ALL), key="upgradecolorrarity", label=L["Upgrade Color by Rarity"], value=false, default=false, slots=1 },
     { type="checkbox", cat="CHAR-SHEET", ver=bit.bor(CCS.ALL), key="showitemcolor", label=L["SHOW_ITEM_COLOR_BG"], value=true, default=true, slots=1 },
     { type="checkbox", cat="CHAR-SHEET", ver=bit.bor(CCS.ALL), key="showsetitems", label=L["SHOW_SET_ITEMS"], value=true, default=true, slots=1 },
     { type="checkbox", cat="CHAR-SHEET", ver=bit.bor(CCS.ALL), key="showsetclasscolor", label=L["SHOW_SET_CLASS_COLOR"], value=true, default=true, slots=1 },
-    { type="color", cat="CHAR-SHEET", ver=bit.bor(CCS.ALL), key="setitemcolor", label=L["SET_ITEM_COLOR"], value={0.05,0.75,0.45,1}, default={0.05,0.75,0.45,1}, slots=4 },
+    { type="color", cat="CHAR-SHEET", ver=bit.bor(CCS.ALL), key="setitemcolor", label=L["SET_ITEM_COLOR"], value={0.05,0.75,0.45,1}, default={0.05,0.75,0.45,1}, slots=1 },
+    { type="color", cat="CHAR-SHEET", ver=bit.bor(CCS.ALL), key="itemupgradecolor", label=L["ITEM_UPGRADE_COLOR"], value={0.98,0.60,0.35,1}, default={0.98,0.60,0.35,1}, slots=2 },
     { type="slider", cat="CHAR-SHEET", ver=bit.bor(CCS.ALL), key="itemcolorbrightness", label=L["Item Background Brightness"], value=1.00, default=1.00, min=0.30, max=1.00, step=0.01, slots=2 },
     { type="slider", cat="CHAR-SHEET", ver=bit.bor(CCS.ALL), key="enchantnamelength", label=L["ENCHANT_NAME_LENGTH"], value=100, default=100, min=20, max=100, step=1, slots=2 },
+    { type="divider", cat="CHAR-SHEET", ver=bit.bor(CCS.RETAIL), slots=4 },
+    { type="header", cat="CHAR-SHEET", ver=bit.bor(CCS.RETAIL), key=nil, label=L["Upgrade Color by Rarity"], slots=4, color={1,1,1}, fontSize=16, fontOutline="THICKOUTLINE" },
+    { type="divider", cat="CHAR-SHEET", ver=bit.bor(CCS.RETAIL), slots=4 },
+    { type="checkbox", cat="CHAR-SHEET", ver=bit.bor(CCS.RETAIL), key="customupgradecolor", label=L["Custom Upgrade Color"], value=true, default=true, slots=2 },
+    { type="color", cat="CHAR-SHEET", ver=bit.bor(CCS.RETAIL), key="custom_color_explorer", label=L["Explorer"], value={0.62, 0.62, 0.62, 1}, default={0.62, 0.62, 0.62, 1}, slots=1 },
+    { type="color", cat="CHAR-SHEET", ver=bit.bor(CCS.RETAIL), key="custom_color_adventurer", label=L["Adventurer"], value={1.00, 1.00, 1.00, 1}, default={1.00, 1.00, 1.00, 1}, slots=1 },
+    { type="color", cat="CHAR-SHEET", ver=bit.bor(CCS.RETAIL), key="custom_color_veteran", label=L["Veteran"], value={0.12, 1.00, 0.00, 1}, default={0.12, 1.00, 0.00, 1}, slots=1 },
+    { type="color", cat="CHAR-SHEET", ver=bit.bor(CCS.RETAIL), key="custom_color_champion", label=L["Champion"], value={0.00, 0.44, 0.87, 1}, default={0.00, 0.44, 0.87, 1}, slots=1 },
+    { type="color", cat="CHAR-SHEET", ver=bit.bor(CCS.RETAIL), key="custom_color_hero", label=L["Hero"], value={1, .3, 1, 1}, default={1, .3, 1, 1}, slots=1 },
+    { type="color", cat="CHAR-SHEET", ver=bit.bor(CCS.RETAIL), key="custom_color_myth", label=L["Myth"], value={1.00, 0.50, 0.00, 1}, default={1.00, 0.50, 0.00, 1}, slots=1 },
 
     -- Spec Display Options
     { type="divider", cat="CHAR-SHEET", ver=bit.bor(CCS.RETAIL, CCS.MOP), slots=4 },
@@ -352,6 +375,11 @@ ns.optionDefs = {
    -- { type="checkbox", cat="CHAR-STATS", ver=bit.bor(CCS.RETAIL), key="pvp_bloodtokens",label=L["pvp_bloodtokens"],value=true, default=true, slots=1 },
    -- { type="checkbox", cat="CHAR-STATS", ver=bit.bor(CCS.RETAIL), key="pvp_trophy",     label=L["pvp_trophy"],     value=true, default=true, slots=1 },
 
+    -- Custom Priority Profiles (dynamic section - UI managed by options.lua)
+    { type="divider", cat="CHAR-STATS", ver=bit.bor(CCS.RETAIL), slots=4 },
+    { type="header",  cat="CHAR-STATS", ver=bit.bor(CCS.RETAIL), key=nil, label=L["Custom Priority Profiles"], slots=4, color={1,1,1}, fontSize=16, fontOutline="THICKOUTLINE" },
+    { type="priority_slots_section", cat="CHAR-STATS", ver=bit.bor(CCS.RETAIL), key=nil, slots=4 },
+
     -- TBC and Classic Stats Options
     { type="checkbox", cat="CHAR-STATS", ver=bit.bor(CCS.TBC), key="show_basestats", label=L["SHOW_BASESTATS"], value=true, default=true, slots=2 },
     { type="color",    cat="CHAR-STATS", ver=bit.bor(CCS.TBC), key="ccs_basestats_color", label=L["BGCOLOR_BASESTATS"], value={0.64, 0.47, 0.1, 0.4}, default={0.64, 0.47, 0.1, 0.4}, slots=2 }, -- Gold
@@ -391,14 +419,17 @@ ns.optionDefs = {
     { type="slider", cat="CHAR-STATS-FONT", ver=bit.bor(CCS.RETAIL, CCS.TBC), key="fontsize_stats", label=FONT_SIZE, value=10, default=10, min=3, max=34, step=1, slots=1 },
     { type="color",  cat="CHAR-STATS-FONT", ver=bit.bor(CCS.RETAIL, CCS.TBC), key="fontcolor_stats", label=COLOR, value={1,1,1,1}, default={1,1,1,1}, slots=1 },
 
-
     -- Mythic+ Side Panel
     { type="divider", cat="CHAR-MPLUS", ver=bit.bor(CCS.RETAIL), slots=4 },
     { type="header", cat="CHAR-MPLUS", ver=bit.bor(CCS.RETAIL), key=nil, label=L["HEADER_MYTHIC_PANEL"], slots=4, color={1,1,1}, fontSize=20, fontOutline="THICKOUTLINE" },
     { type="divider", cat="CHAR-MPLUS", ver=bit.bor(CCS.RETAIL), slots=4 },
     { type="checkbox", cat="CHAR-MPLUS", ver=bit.bor(CCS.RETAIL), key="showmythicplusscore", label=L["SHOW_MYTHIC_SCORE"], value=true, default=true, slots=1 },
     { type="checkbox", cat="CHAR-MPLUS", ver=bit.bor(CCS.RETAIL), key="showm_overundertime", label=L["SHOW_M_OVERUNDER"], value=true, default=true, slots=1 },
-    { type="color", cat="CHAR-MPLUS", ver=bit.bor(CCS.RETAIL), key="ccsmbgcolor", label=L["CCS_M_BG_COLOR"], value={0,0,0,0.85}, default={0,0,0,0.85}, slots=2 },
+    { type="checkbox", cat="CHAR-MPLUS", ver=bit.bor(CCS.RETAIL), key="showm_altbtn", label=L["ALTERNATE_SIDE_BUTTON"], value=false, default=false, slots=2 },
+    { type="color", cat="CHAR-MPLUS", ver=bit.bor(CCS.RETAIL), key="ccsmbgcolor", label=L["CCS_M_BG_COLOR"], value={0,0,0,0.85}, default={0,0,0,0.85}, slots=4 },
+    { type="dropdown", cat="CHAR-MPLUS", ver=bit.bor(CCS.RETAIL), key="mplus_sortby", label=RAID_FRAME_SORT_LABELccccc, value="Name", default="Name", values={"Name", "Level", "Rating", "Time"}, slots=2 },
+    { type="dropdown", cat="CHAR-MPLUS", ver=bit.bor(CCS.RETAIL), key="mplus_direction", label=L["Sort Direction"], value="Ascending", default="Ascending", values={"Ascending", "Descending"}, slots=2 },
+
     { type="divider", cat="CHAR-MPLUS", ver=bit.bor(CCS.RETAIL), slots=4 },
     { type="font",   cat="CHAR-MPLUS", ver=bit.bor(CCS.RETAIL), key="fontname_mplus", label=L["FONT_NAME_MPLUS"], value="Fonts\\FRIZQT__.TTF", default="Fonts\\FRIZQT__.TTF", slots=2 },
     { type="slider", cat="CHAR-MPLUS", ver=bit.bor(CCS.RETAIL), key="fontsize_mplus", label=L["FONT_SIZE_MPLUS"], value=11, default=11, min=3, max=34, step=1, slots=2 },
@@ -463,7 +494,9 @@ ns.optionDefs = {
     { type="divider", cat="CHAR-RAID", ver=bit.bor(CCS.RETAIL), slots=4 },
     { type="header", cat="CHAR-RAID", ver=bit.bor(CCS.RETAIL), key=nil, label=L["HEADER_RAID_PROGRESS"], slots=4, color={1,1,1}, fontSize=20, fontOutline="THICKOUTLINE" },
     { type="divider", cat="CHAR-RAID", ver=bit.bor(CCS.RETAIL), slots=4 },
-    { type="color", cat="CHAR-RAID", ver=bit.bor(CCS.RETAIL), key="bgcolor_raid", label=L["RAID_BG_COLOR"], value={.12,.12,.12,1}, default={.12,.12,.12,1}, slots=4 },
+    { type="color", cat="CHAR-RAID", ver=bit.bor(CCS.RETAIL), key="bgcolor_raid", label=L["RAID_BG_COLOR"], value={.12,.12,.12,1}, default={.12,.12,.12,1}, slots=2 },
+    { type="checkbox", cat="CHAR-RAID", ver=bit.bor(CCS.RETAIL), key="showr_altbtn", label=L["ALTERNATE_SIDE_BUTTON"], value=false, default=false, slots=2 },
+
     { type="font",   cat="CHAR-RAID", ver=bit.bor(CCS.RETAIL), key="fontname_raidtitle", label=L["FONT_NAME_RAID_TITLE"], value="Fonts\\FRIZQT__.TTF", default="Fonts\\FRIZQT__.TTF", slots=2 },
     { type="slider", cat="CHAR-RAID", ver=bit.bor(CCS.RETAIL), key="fontsize_raidtitle", label=L["FONT_SIZE_RAID_TITLE"], value=20, default=20, min=3, max=34, step=1, slots=2 },
     { type="font",   cat="CHAR-RAID", ver=bit.bor(CCS.RETAIL), key="fontname_raiddiff", label=L["FONT_NAME_RAID_DIFFICULTY"], value="Fonts\\FRIZQT__.TTF", default="Fonts\\FRIZQT__.TTF", slots=2 },
@@ -491,7 +524,7 @@ ns.optionDefs = {
     { type="checkbox", cat="INSPECT-SHEET", ver=bit.bor(CCS.ALL), key="showitemcolor_inspect", label=L["SHOW_ITEM_COLOR_INSPECT"], value=true, default=true, slots=1 },
     { type="checkbox", cat="INSPECT-SHEET", ver=bit.bor(CCS.ALL), key="showmodel_inspect", label=L["SHOW_MODEL_INSPECT"], value=true, default=true, slots=1 },
     { type="checkbox", cat="INSPECT-SHEET", ver=bit.bor(CCS.RETAIL), key="showmythicplusscore_inspect", label=L["SHOW_MYTHIC_SCORE_INSPECT"], value=true, default=true, slots=1 },
-
+    { type="checkbox", cat="INSPECT-SHEET", ver=bit.bor(CCS.RETAIL), key="showm_sp_btn_inspect", label=L["SHOW_MYTHIC_SP_BTN"], value=true, default=true, slots=1 },    
 
     { type="divider", cat="INSPECT-SHEET", ver=bit.bor(CCS.ALL), slots=4 },        
     { type="checkbox", cat="INSPECT-SHEET", ver=bit.bor(CCS.ALL), key="showilvl_inspect", label=L["SHOW_ITEMILVL_INSPECT"], value=true, default=true, slots=1 },
@@ -565,6 +598,7 @@ CCS.fonts = {
     ["El Messiri"] = "Interface\\AddOns\\ChonkyCharacterSheet\\Media\\Fonts\\ElMessiri-VariableFont_wght.ttf",
     ["Emblem"] = "Interface\\AddOns\\ChonkyCharacterSheet\\Media\\Fonts\\Emblem.ttf",
     ["Enigmatic Unicode"] = "Interface\\AddOns\\ChonkyCharacterSheet\\Media\\Fonts\\Enigma__2.TTF",
+    ["Expressway"] = "Interface\\AddOns\\ChonkyCharacterSheet\\Media\\Fonts\\Expressway.ttf",    
     ["Fira Mono"] = "Interface\\AddOns\\ChonkyCharacterSheet\\Media\\Fonts\\FiraMono-Regular.ttf",
     ["Fira Mono Medium"] = "Interface\\AddOns\\ChonkyCharacterSheet\\Media\\Fonts\\FiraMono-Medium.ttf",
     ["Fira Sans Condensed Heavy"] = "Interface\\AddOns\\ChonkyCharacterSheet\\Media\\Fonts\\FiraSansCondensed-Heavy.ttf",
@@ -596,6 +630,63 @@ CCS.fonts = {
     ["Wakanda 4 Ever"] = "Interface\\AddOns\\ChonkyCharacterSheet\\Media\\Fonts\\Wakanda.ttf",
     ["White Rabbit"] = "Interface\\AddOns\\ChonkyCharacterSheet\\Media\\Fonts\\WHITRABT.TTF",
 }
+
+CCS.fontFiles = {
+    ["2002.TTF"] = "2002 (Korean)",
+    ["Accidental Presidency.ttf"] = "Accidental Presidency",
+    ["AnonymousPro-Bold.ttf"] = "Anonymous Pro",
+    ["ARIALN.TTF"] = "Arial Narrow",
+    ["ARHei.TTF"] = "AR Hei",
+    ["ARHEIUHK_BD.TTF"] = "AR Hei UHK Bold",
+    ["ARKai_C.ttf"] = "ARKai_C (Simplified Chinese)",
+    ["ARKai_T.ttf"] = "ARKai_T (Traditional Chinese)",
+    ["Avengeance.ttf"] = "Avengeance",
+    ["Bazooka.ttf"] = "Bazooka",
+    ["bHEI00M.ttf"] = "BHEI00M (Traditional Chinese)",
+    ["BLEI00D.TTF"] = "BL Hei",
+    ["BKAI00M.TTF"] = "BKai Medium",
+    ["BradleyGratis.ttf"] = "Bradley Gratis",
+    ["Brave.ttf"] = "Brave",
+    ["Danvers.ttf"] = "CaptainMarvel",
+    ["Carlito-Regular.ttf"] = "Carlito",
+    ["CRYSRG__.TTF"] = "Crystal",
+    ["DejaVuSansMono.ttf"] = "DejaVu Sans Mono",
+    ["DORISPP.TTF"] = "Doris PP",
+    ["ElMessiri-VariableFont_wght.ttf"] = "El Messiri",
+    ["Emblem.ttf"] = "Emblem",
+    ["Enigma__2.TTF"] = "Enigmatic Unicode",
+    ["Expressway.ttf"] = "Expressway",
+    ["FiraMono-Regular.ttf"] = "Fira Mono",
+    ["FiraMono-Medium.ttf"] = "Fira Mono Medium",
+    ["FiraSansCondensed-Heavy.ttf"] = "Fira Sans Condensed Heavy",
+    ["FiraSansCondensed-Medium.ttf"] = "Fira Sans Condensed Medium",
+    ["FiraSans-Heavy.ttf"] = "Fira Sans Heavy",
+    ["FiraSans-Medium.ttf"] = "Fira Sans Medium",
+    ["FSEX300.ttf"] = "Fixedsys Excelsior 3.01",
+    ["FORCED SQUARE.ttf"] = "FORCED SQUARE",
+    ["FRIZQT___CYR.TTF"] = "Friz Quadrata (Cyrillic)",
+    ["FRIZQT__.TTF"] = "Friz Quadrata TT",
+    ["Futura Condensed.ttf"] = "Futura",
+    ["HARRYP__.TTF"] = "Harry P",
+    ["K_PAGETEXT.TTF"] = "Korean Page Text",
+    ["LiberationSans-Regular.ttf"] = "Liberation Sans",
+    ["MONOFONT.TTF"] = "Monofonto",
+    ["MORPHEUS_CYR.TTF"] = "Morpheus",
+    ["Memoirs.ttf"] = "Mouse Memoirs",
+    ["Walt.ttf"] = "New Walt Disney Font",
+    ["NotoNaskhArabic-Regular.ttf"] = "Noto Naskh Arabic",
+    ["Nueva Std Cond.ttf"] = "Nueva Std Cond",
+    ["Oswald-Regular.ttf"] = "Oswald",
+    ["Rebellion.ttf"] = "Rebellion",
+    ["SF Diego Sans.ttf"] = "SF Diego Sans",
+    ["Jedi.ttf"] = "Star Jedi",
+    ["Shield.ttf"] = "Star Shield",
+    ["SKURRI.TTF"] = "Skurri",
+    ["TrashHand.TTF"] = "TrashHand",
+    ["Wakanda.ttf"] = "Wakanda 4 Ever",
+    ["WHITRABT.TTF"] = "White Rabbit",
+}
+
 
 CCS.fontLabels = {
     ["2002 (Korean)"] = {
@@ -899,6 +990,20 @@ CCS.fontLabels = {
         ptBR = "Unicode enigmático",
         itIT = "Unicode enigmatico",
     },
+    ["Expressway"] = {
+        enUS = "Expressway",
+        koKR = "익스프레스웨이",  
+        frFR = "Expressway", 
+        deDE = "Expressway", 
+        zhCN = "Expressway", 
+        esES = "Expressway", 
+        zhTW = "Expressway", 
+        esMX = "Expressway", 
+        ruRU = "Экспрессуэй",
+        ptBR = "Expressway", 
+        itIT = "Expressway", 
+    },
+   
     ["Fira Mono"] = {
         enUS = "Fira Mono",
         koKR = "피라 모노",
@@ -1360,6 +1465,13 @@ CCS.Paragon_Factions = {
     [79220] = { factionID = 2594},-- The Assembly of the Deeps
     [79196] = { factionID = 2600},-- The Severed Threads
     [79196] = { factionID = 2736},-- Manaforge Vandals
+    -- Midnight
+    [93566] = {factionID = 2696}, -- Amani Tribe
+    [89032] = {factionID = 2699}, -- The Singularity
+    [89035] = {factionID = 2704}, -- Hara'ti
+    [93811] = {factionID = 2710}, -- Silvermoon Court
+    [94492] = {factionID = 2770}, -- Slayer's Duellum
+
 }
 
 CCS.GemInfo = {
@@ -1381,6 +1493,75 @@ CCS.GemInfo = {
     [136258]  = { text = EMPTY_SOCKET_RED, gtype = CCS.GEM_PRISMATIC},
     [136259]  = { text = EMPTY_SOCKET_YELLOW, gtype = CCS.GEM_PRISMATIC},    
 }    
+
+CCS.SPEC_ID_TO_INDEX = {
+    -- Death Knight
+    [250] = 1, -- Blood
+    [251] = 2, -- Frost
+    [252] = 3, -- Unholy
+
+    -- Demon Hunter
+    [577] = 1, -- Havoc
+    [581] = 2, -- Vengeance
+    [1480] = 3, -- Devourer
+
+    -- Druid
+    [102] = 1, -- Balance
+    [103] = 2, -- Feral
+    [104] = 3, -- Guardian
+    [105] = 4, -- Restoration
+
+    -- Evoker
+    [1467] = 1, -- Devastation
+    [1468] = 2, -- Preservation
+    [1473] = 3, -- Augmentation
+
+    -- Hunter
+    [253] = 1, -- Beast Mastery
+    [254] = 2, -- Marksmanship
+    [255] = 3, -- Survival
+
+    -- Mage
+    [62] = 1, -- Arcane
+    [63] = 2, -- Fire
+    [64] = 3, -- Frost
+
+    -- Monk
+    [268] = 1, -- Brewmaster
+    [270] = 2, -- Mistweaver
+    [269] = 3, -- Windwalker
+
+    -- Paladin
+    [65] = 1, -- Holy
+    [66] = 2, -- Protection
+    [70] = 3, -- Retribution
+
+    -- Priest
+    [256] = 1, -- Discipline
+    [257] = 2, -- Holy
+    [258] = 3, -- Shadow
+
+    -- Rogue
+    [259] = 1, -- Assassination
+    [260] = 2, -- Outlaw
+    [261] = 3, -- Subtlety
+
+    -- Shaman
+    [262] = 1, -- Elemental
+    [263] = 2, -- Enhancement
+    [264] = 3, -- Restoration
+
+    -- Warlock
+    [265] = 1, -- Affliction
+    [266] = 2, -- Demonology
+    [267] = 3, -- Destruction
+
+    -- Warrior
+    [71] = 1, -- Arms
+    [72] = 2, -- Fury
+    [73] = 3, -- Protection
+}
+
 
 CCS.Class_Bg = {
     [1] = { -- Warrior
@@ -1442,6 +1623,7 @@ CCS.Class_Bg = {
     [12] = { -- Demon Hunter
         [1] = { name = "Havoc", texture = "Interface\\TalentFrame\\TalentsClassBackgroundDemonHunter", map = {1612, 774, 0.000488281, 0.787598, 0.000488281, 0.378418} },
         [2] = { name = "Vengeance", texture = "Interface\\TalentFrame\\TalentsClassBackgroundDemonHunter", map = {1612, 774, 0.000488281, 0.787598, 0.379395, 0.757324} },
+        [3] = { name = "Devourer", texture = "Interface\\TalentFrame\\TalentsClassBackgroundDemonHunterDevourer", map = {1612, 774, 0.000488281, 0.787598, 0.000976562, 0.756836} },
     },
     [13] = { -- Evoker
         [1] = { name = "Devastation", texture = "Interface\\TalentFrame\\TalentsClassBackgroundEvoker", map = {1612, 774, 0.000488281, 0.787598, 0.000488281, 0.378418} },
@@ -1497,12 +1679,16 @@ CCS.Race_Bg = {
     },
     [22] = { -- Worgen
         texture = "Interface\\Glues\\CharacterCreate\\CharacterCreateStartingZones5",
-        map     = {1022, 664, 0.000488281, 0.999512, 0.000488281, 0.324707},
+        map     = {1022, 664, 0.5, 0.999512, 0.000488281, 0.324707},
     },
     [24] = { -- Pandaren
         texture = "Interface\\Glues\\CharacterCreate\\CharacterCreateStartingZones4",
         map     = {1022, 664, 0.000488281, 0.499512, 0.000488281, 0.324707},
     },
+    [26] = { -- Pandaren
+        texture = "Interface\\Glues\\CharacterCreate\\CharacterCreateStartingZones4",
+        map     = {1022, 664, 0.000488281, 0.499512, 0.000488281, 0.324707},
+    },    
     [27] = { -- Nightborne
         texture = "Interface\\Glues\\CharacterCreate\\CharacterCreateStartingZones3",
         map     = {1022, 664, 0.500488, 0.999512, 0.325684, 0.649902},
@@ -1521,7 +1707,7 @@ CCS.Race_Bg = {
     },
     [31] = { -- Zandalari Troll
         texture = "Interface\\Glues\\CharacterCreate\\CharacterCreateStartingZones5",
-        map     = {1022, 664, 0.000488281, 0.999512, 0.325684, 0.649902},
+        map     = {1022, 664, 0, 0.5, 0.325684, 0.649902},
     },
     [32] = { -- Kul Tiran
         texture = "Interface\\Glues\\CharacterCreate\\CharacterCreateStartingZones2",
@@ -1553,19 +1739,27 @@ CCS.Race_Bg = {
     },
     [84] = { -- Earthen (Horde) 
         texture = "Interface\\Glues\\CharacterCreate\\CharacterCreateStartingZones5",
-        map     = {1022, 664, 0.000488281, 0.999512, 0.650879, 0.975098},
+        map     = {1022, 664, 0.000488281, 0.5, 0.325684, 0.649902},
     },
     [85] = { -- Earthen (Alliance) 
         texture = "Interface\\Glues\\CharacterCreate\\CharacterCreateStartingZones5",
-        map     = {1022, 664, 0.000488281, 0.999512, 0.650879, 0.975098},
+        map     = {1022, 664, 0.000488281, 0.5, 0.325684, 0.649902},
     },
+    [86] = { -- Haranir
+        texture = "Interface\\Glues\\CharacterCreate\\CharacterCreateStartingZones5",
+        map     = {1022, 664, 0.500488, 0.999512, 0.325684, 0.649902},
+    },    
+    [91] = { -- Haranir
+        texture = "Interface\\Glues\\CharacterCreate\\CharacterCreateStartingZones5",
+        map     = {1022, 664, 0.500488, 0.999512, 0.325684, 0.649902},
+    },        
     [998] = { -- Death Knight
         texture = "Interface\\Glues\\Models\\UI_DeathKnight\\UI_Deathknight_LowRes",
-        map     = {1024, 512, 0, 1, 0, 1},
+        map     = {2048, 2048, 0, 1, 0, 1},
     },
     [999] = { -- Demon Hunter
         texture = "Interface\\Glues\\Models\\UI_DemonHunter\\UI_DemonHunter_LowRes",
-        map     = {1024, 512, 0, 1, 0, 1},
+        map     = {2048, 2048, 0, 1, 0, 1},
     },
 }
 
@@ -2081,9 +2275,9 @@ CCS.ClassSpecStatPriority = {
         },
         -- Retribution
         [3] = {
-            [48] = {1,3,2,4}, -- Templar
+            [48] = {1,2,3,4}, -- Templar
             [49] = {1,1,1,1}, -- *** Lightsmith
-            [50] = {1,3,2,4}, -- Herald of the Sun
+            [50] = {1,2,3,4}, -- Herald of the Sun
         },
     },
     [5] = { -- Priest
@@ -2191,92 +2385,92 @@ CCS.ClassSpecStatPriority = {
 
 CCS.UpgradeTrackNames = {
     enUS = {
-        ["Explorer"]   = {0.62, 0.62, 0.62, 1}, -- Grey
-        ["Adventurer"] = {1.00, 1.00, 1.00, 1}, -- White
-        ["Veteran"]    = {0.12, 1.00, 0.00, 1}, -- Green
-        ["Champion"]   = {0.00, 0.44, 0.87, 1}, -- Blue
-        ["Hero"]       = {1, .3, 1, 1}, -- Purple
-        ["Myth"]       = {1.00, 0.50, 0.00, 1}, -- Orange
+        ["Explorer"]   = CCS.Explorer,
+        ["Adventurer"] = CCS.Adventurer,
+        ["Veteran"]    = CCS.Veteran,
+        ["Champion"]   = CCS.Champion,
+        ["Hero"]       = CCS.Hero,
+        ["Myth"]       = CCS.Myth,
     },
     esES = {
-        ["Expedicionario"] = {0.62, 0.62, 0.62, 1},
-        ["Aventurero"]     = {1.00, 1.00, 1.00, 1},
-        ["Veterano"]       = {0.12, 1.00, 0.00, 1},
-        ["Campeón"]        = {0.00, 0.44, 0.87, 1},
-        ["Héroe"]          = {1, .3, 1, 1},
-        ["Mito"]           = {1.00, 0.50, 0.00, 1},
+        ["Expedicionario"] = CCS.Explorer,
+        ["Aventurero"]     = CCS.Adventurer,
+        ["Veterano"]       = CCS.Veteran,
+        ["Campeón"]        = CCS.Champion,
+        ["Héroe"]          = CCS.Hero,
+        ["Mito"]           = CCS.Myth,
     },
     esMX = {
-        ["Expedicionario"] = {0.62, 0.62, 0.62, 1},
-        ["Aventurero"]     = {1.00, 1.00, 1.00, 1},
-        ["Veterano"]       = {0.12, 1.00, 0.00, 1},
-        ["Campeón"]        = {0.00, 0.44, 0.87, 1},
-        ["Héroe"]          = {1, .3, 1, 1},
-        ["Mito"]           = {1.00, 0.50, 0.00, 1},
-    },    
+        ["Expedicionario"] = CCS.Explorer,
+        ["Aventurero"]     = CCS.Adventurer,
+        ["Veterano"]       = CCS.Veteran,
+        ["Campeón"]        = CCS.Champion,
+        ["Héroe"]          = CCS.Hero,
+        ["Mito"]           = CCS.Myth,
+    },
     deDE = {
-        ["Forscher"]   = {0.62, 0.62, 0.62, 1},
-        ["Abenteurer"] = {1.00, 1.00, 1.00, 1},
-        ["Veteran"]    = {0.12, 1.00, 0.00, 1},
-        ["Champion"]   = {0.00, 0.44, 0.87, 1},
-        ["Held"]       = {1, .3, 1, 1},
-        ["Mythos"]     = {1.00, 0.50, 0.00, 1},
+        ["Forscher"]   = CCS.Explorer,
+        ["Abenteurer"] = CCS.Adventurer,
+        ["Veteran"]    = CCS.Veteran,
+        ["Champion"]   = CCS.Champion,
+        ["Held"]       = CCS.Hero,
+        ["Mythos"]     = CCS.Myth,
     },
     frFR = {
-        ["Explorateur"] = {0.62, 0.62, 0.62, 1},
-        ["Aventurier"]  = {1.00, 1.00, 1.00, 1},
-        ["Vétéran"]     = {0.12, 1.00, 0.00, 1},
-        ["Champion"]    = {0.00, 0.44, 0.87, 1},
-        ["Héros"]       = {1, .3, 1, 1},
-        ["Mythe"]       = {1.00, 0.50, 0.00, 1},
+        ["Explorateur"] = CCS.Explorer,
+        ["Aventurier"]  = CCS.Adventurer,
+        ["Vétéran"]     = CCS.Veteran,
+        ["Champion"]    = CCS.Champion,
+        ["Héros"]       = CCS.Hero,
+        ["Mythe"]       = CCS.Myth,
     },
     itIT = {
-        ["Esploratore"]   = {0.62, 0.62, 0.62, 1},
-        ["Avventuriero"]  = {1.00, 1.00, 1.00, 1},
-        ["Veterano"]      = {0.12, 1.00, 0.00, 1},
-        ["Campione"]      = {0.00, 0.44, 0.87, 1},
-        ["Eroe"]          = {1, .3, 1, 1},
-        ["Mito"]          = {1.00, 0.50, 0.00, 1},
+        ["Esploratore"]   = CCS.Explorer,
+        ["Avventuriero"]  = CCS.Adventurer,
+        ["Veterano"]      = CCS.Veteran,
+        ["Campione"]      = CCS.Champion,
+        ["Eroe"]          = CCS.Hero,
+        ["Mito"]          = CCS.Myth,
     },
     ptBR = {
-        ["Explorador"]  = {0.62, 0.62, 0.62, 1},
-        ["Aventureiro"] = {1.00, 1.00, 1.00, 1},
-        ["Veterano"]    = {0.12, 1.00, 0.00, 1},
-        ["Campeão"]     = {0.00, 0.44, 0.87, 1},
-        ["Herói"]       = {1, .3, 1, 1},
-        ["Mito"]        = {1.00, 0.50, 0.00, 1},
+        ["Explorador"]  = CCS.Explorer,
+        ["Aventureiro"] = CCS.Adventurer,
+        ["Veterano"]    = CCS.Veteran,
+        ["Campeão"]     = CCS.Champion,
+        ["Herói"]       = CCS.Hero,
+        ["Mito"]        = CCS.Myth,
     },
     ruRU = {
-        ["Исследователь"]          = {0.62, 0.62, 0.62, 1},
-        ["Искатель приключений"]   = {1.00, 1.00, 1.00, 1},
-        ["Ветеран"]                = {0.12, 1.00, 0.00, 1},
-        ["Защитник"]               = {0.00, 0.44, 0.87, 1},
-        ["Герой"]                  = {1, .3, 1, 1},
-        ["Легенда"]                = {1.00, 0.50, 0.00, 1},
+        ["Исследователь"]        = CCS.Explorer,
+        ["Искатель приключений"] = CCS.Adventurer,
+        ["Ветеран"]              = CCS.Veteran,
+        ["Защитник"]             = CCS.Champion,
+        ["Герой"]                = CCS.Hero,
+        ["Легенда"]              = CCS.Myth,
     },
     koKR = {
-        ["탐험가"] = {0.62, 0.62, 0.62, 1},
-        ["모험가"] = {1.00, 1.00, 1.00, 1},
-        ["노련가"] = {0.12, 1.00, 0.00, 1},
-        ["챔피언"] = {0.00, 0.44, 0.87, 1},
-        ["영웅"]   = {1, .3, 1, 1},
-        ["신화"]   = {1.00, 0.50, 0.00, 1},
+        ["탐험가"] = CCS.Explorer,
+        ["모험가"] = CCS.Adventurer,
+        ["노련가"] = CCS.Veteran,
+        ["챔피언"] = CCS.Champion,
+        ["영웅"]   = CCS.Hero,
+        ["신화"]   = CCS.Myth,
     },
     zhCN = {
-        ["探索者"] = {0.62, 0.62, 0.62, 1},
-        ["冒险者"] = {1.00, 1.00, 1.00, 1},
-        ["老兵"]   = {0.12, 1.00, 0.00, 1},
-        ["勇士"]   = {0.00, 0.44, 0.87, 1},
-        ["英雄"]   = {1, .3, 1, 1},
-        ["神话"]   = {1.00, 0.50, 0.00, 1},
+        ["探索者"] = CCS.Explorer,
+        ["冒险者"] = CCS.Adventurer,
+        ["老兵"]   = CCS.Veteran,
+        ["勇士"]   = CCS.Champion,
+        ["英雄"]   = CCS.Hero,
+        ["神话"]   = CCS.Myth,
     },
     zhTW = {
-        ["探險者"] = {0.62, 0.62, 0.62, 1},
-        ["冒險者"] = {1.00, 1.00, 1.00, 1},
-        ["精兵"]   = {0.12, 1.00, 0.00, 1},
-        ["勇士"]   = {0.00, 0.44, 0.87, 1},
-        ["英雄"]   = {1, .3, 1, 1},
-        ["神話"]   = {1.00, 0.50, 0.00, 1},
+        ["探險者"] = CCS.Explorer,
+        ["冒險者"] = CCS.Adventurer,
+        ["精兵"]   = CCS.Veteran,
+        ["勇士"]   = CCS.Champion,
+        ["英雄"]   = CCS.Hero,
+        ["神話"]   = CCS.Myth,
     },
 }
 
@@ -2287,3 +2481,161 @@ CCS.statKeyMap = {
     secondary_versatility = "VERSATILITY",
 }
 
+-- These are not intended to be completely accurate as we only want a way to translate the enchantID to a localized spell name
+CCS.tempenchantLookup = {
+    [2623] = { spellID = 25117 }, -- Minor Wizard Oil
+    [2624] = { spellID = 25118 }, -- Minor Mana Oil
+    [2625] = { spellID = 25120 }, -- Lesser Mana Oil
+    [2626] = { spellID = 25119 }, -- Lesser Wizard Oil
+    [2627] = { spellID = 25121 }, -- Wizard Oil
+    [2628] = { spellID = 25122 }, -- Brilliant Wizard Oil
+    [2629] = { spellID = 25123 }, -- Brilliant Mana Oil
+
+    [2676] = { spellID = 28016 }, -- Superior Mana Oil
+    [2677] = { spellID = 28016 }, -- Superior Mana Oil
+    [2678] = { spellID = 28017 }, -- Superior Wizard Oil
+
+    [2713] = { spellID = 132775 }, -- Sharpened VII
+    [2718] = { spellID = 42135 }, -- Lesser Rune of Warding
+    [2719] = { spellID = 29507 }, -- Lesser Ward of Shielding
+
+    [2791] = { spellID = 32282 }, -- Greater Rune of Warding
+    [2795] = { spellID = 32427 }, -- Comfortable Insoles
+
+    [2955] = { spellID = 322763 }, -- Weighted VII
+    [3102] = { spellID = 8313 }, -- Poison
+
+    [3265] = { spellID = 45395 }, -- Blessed Weapon Coating
+    [3266] = { spellID = 45397 }, -- Righteous Weapon Coating
+
+    [3298] = { spellID = 47904 }, -- Exceptional Mana Oil
+    [3299] = { spellID = 25121 }, -- Exceptional Wizard Oil
+
+    [3322] = { spellID = 51385 }, -- Frozen Rune Weapon
+    [3341] = { spellID = 51385 }, -- Frozen Rune Weapon 2
+    [3342] = { spellID = 51385 }, -- Frozen Rune Weapon 3
+    [3343] = { spellID = 51385 }, -- Frozen Rune Weapon 4
+    [3344] = { spellID = 51385 }, -- Frozen Rune Weapon 5
+
+    [5332] = { spellID = 295576 }, -- Frostbrand
+    [5398] = { spellID = 382021 }, -- Earthliving
+    [5400] = { spellID = 176031 }, -- Flametongue
+    [5401] = { spellID = 32910 }, -- Windfury
+
+    [6188] = { spellID = 307118 }, -- Shadowcore Oil
+    [6190] = { spellID = 307119 }, -- Embalmer's Oil
+
+    [6198] = { spellID = 132775 }, -- Sharpened VIII
+    [6199] = { spellID = 322763 }, -- Weighted VIII
+    [6200] = { spellID = 132775 }, -- Sharpened IX
+    [6201] = { spellID = 322763 }, -- Weighted IX
+
+    [6498] = { spellID = 382021 }, -- Earthliving
+
+    [6512] = { spellID = 385325 }, -- Buzzing Rune
+    [6513] = { spellID = 385325 }, -- Buzzing Rune
+    [6514] = { spellID = 385325 }, -- Buzzing Rune
+    [6515] = { spellID = 383525 }, -- Chirping Rune
+    [6516] = { spellID = 383529 }, -- Howling Rune
+    [6517] = { spellID = 383529 }, -- Howling Rune
+    [6518] = { spellID = 383529 }, -- Howling Rune
+
+    [6529] = { spellID = 382365 }, -- Completely Safe Rockets (T1)
+    [6530] = { spellID = 382365 }, -- Completely Safe Rockets (T2)
+    [6531] = { spellID = 382365 }, -- Completely Safe Rockets (T3)
+
+    [6532] = { spellID = 382366 }, -- Endless Stack of Needles (T1)
+    [6533] = { spellID = 382366 }, -- Endless Stack of Needles (T2)
+    [6534] = { spellID = 382366 }, -- Endless Stack of Needles (T3)
+
+    [6694] = { spellID = 383525 }, -- Chirping Rune
+    [6695] = { spellID = 383525 }, -- Chirping Rune
+
+    [6696] = { spellID = 322763 }, -- Weighted AP (T1)
+    [6697] = { spellID = 322763 }, -- Weighted AP (T2)
+    [6698] = { spellID = 322763 }, -- Weighted AP (T3)
+
+    [6837] = { spellID = 408271 }, -- Hissing Rune
+    [6838] = { spellID = 408271 }, -- Hissing Rune
+    [6839] = { spellID = 408271 }, -- Hissing Rune
+
+    [7143] = { spellID = 433550 }, -- Rite of Sanctification
+    [7144] = { spellID = 433584 }, -- Rite of Adjuration
+
+    [7467] = { spellID = 444755 }, -- Bubbling Wax (merged)
+
+    -- TWW Oils
+    [7493] = { spellID = 451869 }, -- Algari Mana Oil (T1)
+    [7494] = { spellID = 451873 }, -- Algari Mana Oil (T2)
+    [7495] = { spellID = 451874 }, -- Algari Mana Oil (T3)
+
+    [7496] = { spellID = 451882 }, -- Oil of Deep Toxins (T1)
+    [7497] = { spellID = 451901 }, -- Oil of Deep Toxins (T2)
+    [7498] = { spellID = 451902 }, -- Oil of Deep Toxins (T3)
+
+    [7500] = { spellID = 451926 }, -- Oil of Beledar's Grace (T1)
+    [7501] = { spellID = 451925 }, -- Oil of Beledar's Grace (T2)
+    [7502] = { spellID = 451927 }, -- Oil of Beledar's Grace (T3)
+
+    [7528] = { spellID = 457481 }, -- Tidecaller's Guard
+
+    -- TWW Whetstones / Weightstones
+    [7543] = { spellID = 458932 }, -- Sharpened AP (T1)
+    [7544] = { spellID = 458933 }, -- Sharpened AP (T2)
+    [7545] = { spellID = 458934 }, -- Sharpened AP (T3)
+
+    [7546] = { spellID = 458935 }, -- Razor Sharp Finesse (T1)
+    [7547] = { spellID = 458936 }, -- Razor Sharp Finesse (T2)
+    [7548] = { spellID = 458937 }, -- Razor Sharp Finesse (T3)
+
+    [7549] = { spellID = 458935 }, -- Weighted AP (T1)
+    [7550] = { spellID = 458936 }, -- Weighted AP (T2)
+    [7551] = { spellID = 458937 }, -- Weighted AP (T3)
+
+    [7587] = { spellID = 462757 }, -- Thunderstrike Ward
+
+    -- Midnight
+    [7905] = { spellID = 1224328 }, -- Sharpened AP (12.0 Tier2)
+    [7906] = { spellID = 1224331 }, -- Sharpened AP (12.0 Tier1)
+
+    [7907] = { spellID = 1224332 }, -- Weighted AP (12.0 Tier1)
+    [7908] = { spellID = 1224333 }, -- Weighted AP (12.0 Tier2)
+
+    [7909] = { spellID = 1224332 }, -- Razor Sharp Finesse (12.0 Tier1)
+    [7910] = { spellID = 1224333 }, -- Razor Sharp Finesse (12.0 Tier2)
+
+    [8042] = { spellID = 1237006 }, -- Illusory Adornment - Blooming Light (T1)
+
+    [8051] = { spellID = 1237008 }, -- Thalassian Phoenix Oil (T1)
+    [8052] = { spellID = 1237006 }, -- Thalassian Phoenix Oil (T2)
+
+    [8053] = { spellID = 1237002 }, -- Oil of Dawn (T1)
+    [8054] = { spellID = 1237001 }, -- Oil of Dawn (T2)
+
+    [8055] = { spellID = 1237004 }, -- Smuggler's Enchanted Edge (T1)
+    [8056] = { spellID = 1237003 }, -- Smuggler's Enchanted Edge (T2)
+
+    [8608] = { spellID = 1262057 }, -- Laced Zoomshots (T1)
+    [8609] = { spellID = 1262110 }, -- Laced Zoomshots (T2)
+
+    [8610] = { spellID = 1262121 }, -- Weighted Boomshots (T1)
+    [8611] = { spellID = 1262123 }, -- Weighted Boomshots (T2)
+}
+
+CCS.DefaultTrackColors = {
+    [CCS.Explorer]   = {0.62, 0.62, 0.62, 1},
+    [CCS.Adventurer] = {1.00, 1.00, 1.00, 1},
+    [CCS.Veteran]    = {0.12, 1.00, 0.00, 1},
+    [CCS.Champion]   = {0.00, 0.44, 0.87, 1},
+    [CCS.Hero]       = {1, .3, 1, 1},
+    [CCS.Myth]       = {1.00, 0.50, 0.00, 1},
+}
+
+CCS.CustomTrackOptions = {
+    [CCS.Explorer]   = "custom_color_explorer",
+    [CCS.Adventurer] = "custom_color_adventurer",
+    [CCS.Veteran]    = "custom_color_veteran",
+    [CCS.Champion]   = "custom_color_champion",
+    [CCS.Hero]       = "custom_color_hero",
+    [CCS.Myth]       = "custom_color_myth",
+}

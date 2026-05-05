@@ -286,7 +286,7 @@ GroupfinderFlags.categoryID = Local_InterfaceOptions_AddCategory(GroupfinderFlag
 ----------------------------------------------------------------------------
 
 -- hooking the gametooltip
-local function HookfunctionForGametooltip(...)
+local function HookfunctionForGametooltip(tooltip, ...)
 
 	if not (GroupfinderFlagsDB.showFlagInTooltip or GroupfinderFlagsDB.showCountrynameInTooltip) then
 		return
@@ -294,12 +294,14 @@ local function HookfunctionForGametooltip(...)
 
 	-- variables
 	local _
-	local unit, realm, languageList, unitPlayerLocation
+	local guid, unit, realm, languageList, unitPlayerLocation
 
-	-- get unit infos from the game tooltip
-	_, unit = GameTooltip:GetUnit()
+	guid = tooltip:GetPrimaryTooltipData().guid
+	if issecretvalue(guid) then return end
 
-	if not issecretvalue(unit) then
+	_, unit = tooltip:GetUnit()
+	if issecretvalue(unit) then return end
+		
 		-- only proceed if unit is not nil
 		if unit ~= nil then
 
@@ -343,7 +345,6 @@ local function HookfunctionForGametooltip(...)
 				end
 			end
 		end
-	end
 end
 
 
@@ -800,7 +801,7 @@ TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Unit, function(tool
 		return
 	end
 
-	HookfunctionForGametooltip()
+	HookfunctionForGametooltip(tooltip)
 end)
 
 -- loading saved settings

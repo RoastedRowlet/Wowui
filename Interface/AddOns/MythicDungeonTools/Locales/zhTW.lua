@@ -27,6 +27,8 @@ L["Abyssal Eel"] = "深海鰻魚"
 L["Achillite"] = "亞奇力特"
 L["Acidic Bile"] = "酸性膽汁"
 L["Acolyte"] = "Acolyte"
+--[[Translation missing --]]
+L["Action blocked: Restricted environment"] = "Action blocked: Restricted environment"
 L["Adderis"] = "阿德利斯"
 L["Addled Arcanomancer"] = "混亂的秘卜師"
 L["Addled Thug"] = "笨拙的搬運工"
@@ -73,6 +75,8 @@ L["Altairus"] = "艾塔伊洛斯"
 L["AltarOfShadow"] = "暗影祭壇"
 L["altKeyDownStatusText"] = "顯示敵群數量"
 L["altKeyGroupsTip"] = "在所有敵人上面按住 ALT 不放來顯示敵方群組數量"
+--[[Translation missing --]]
+L["Always overwrite matching routes on import"] = "Always overwrite matching routes on import"
 L["Amalgam of Souls"] = "眾魂融合體"
 L["Amanitar"] = "Amanitar"
 L["Amarth"] = "亞瑪斯"
@@ -91,6 +95,8 @@ L["Animated Guardian"] = "活化的守護者"
 L["Animated Shadow"] = "活化暗影"
 L["Animated Storm"] = "活化風暴"
 L["Animated Weapon"] = "Animated Weapon"
+--[[Translation missing --]]
+L["Announce focus marker on ready check"] = "Announce my Focus Marker on ready check."
 L["Anodized Coilbearer"] = "電鍍線圈機器人"
 L["Anomalus"] = "Anomalus"
 L["Anub'ar Champion"] = "Anub'ar Champion"
@@ -193,6 +199,8 @@ L["Atik"] = "阿提克"
 L["Atrium of Sethraliss"] = "瑟沙利斯中庭"
 L["Attumen the Huntsman"] = "午夜"
 L["Auriaya"] = "Auriaya"
+--[[Translation missing --]]
+L["Auto Assign"] = "Auto Assign"
 L["Automatic Coloring"] = "自動著色"
 L["Automatically color pulls"] = "自動著色拉怪"
 L["Avanoxx"] = "阿瓦諾克斯"
@@ -359,6 +367,9 @@ after this pull]=] ] = [=[這波拉怪後
 L[ [=[Bounty stacks 
 after this pull]=] ] = [=[這波拉怪後
 連帶幾堆]=]
+--[[Translation missing --]]
+L[ [=[Bounty stacks
+after this pull]=] ] = ""
 L[ [=[Bounty stacks
 after this pull]=] ] = "這波拉怪後 連帶幾堆"
 L["Bracken Warscourge"] = "蕨皮戰譴者"
@@ -411,6 +422,8 @@ L["Captain Dailcry"] = "德爾凱隊長"
 L["Captain Eudora"] = "尤多拉船長"
 L["Captain Jolly"] = "喬利船長"
 L["Captain Raoul"] = "拉沃船長"
+--[[Translation missing --]]
+L["Captive"] = "Captive"
 L["Careless Hopgoblin"] = "粗心的蹦跳哥布林"
 L["Carrion Spinner"] = "Carrion Spinner"
 L["Carrion Worm"] = "食腐骨蟲"
@@ -759,6 +772,8 @@ L["Does not delete your drawings"] = "不會刪除你的繪圖"
 L["Dokigg the Brutalizer"] = "『殘暴者』多奇格"
 L["Domatrax"] = "多瑪崔斯"
 L["Domina Venomblade"] = "多米娜‧毒刃"
+--[[Translation missing --]]
+L["Don't show again"] = "Don't show again"
 L["dotiLowerSublevel1"] = "Sublevel 1"
 L["dotiUpperSublevel1"] = "Sublevel 1"
 L["Draconic Illusion"] = "Draconic Illusion"
@@ -1051,7 +1066,31 @@ L["Fleshripper Vulture"] = "碎屍禿鷹"
 L["Flux Engineer"] = "Flux Engineer"
 --[[Translation missing --]]
 L["Flying Snow"] = "Flying Snow"
+--[[Translation missing --]]
+L["Focus Marker"] = "Focus Marker"
+--[[Translation missing --]]
+L["Focus Marker Assignments"] = "Focus Marker Assignments"
 L["Focused Ritualist"] = "專注的祭儀師"
+--[[Translation missing --]]
+L["focusMarkerAssignmentQueuedToast"] = "Focus marker will update to %s after combat from %s."
+--[[Translation missing --]]
+L["focusMarkerAssignmentsTooltip"] = "Assign focus markers to group members and sync them to MDT users."
+--[[Translation missing --]]
+L["focusMarkerAssignmentToast"] = "Focus marker set to %s. (Sent by %s)"
+--[[Translation missing --]]
+L["focusMarkerKeybindMissingToast"] = "No key bind is set. Set one now or disable these notifications."
+--[[Translation missing --]]
+L["focusMarkerMacroDragTooltip"] = "Drag this macro to your action bar."
+--[[Translation missing --]]
+L["focusMarkerMacroQueued"] = "Focus marker action will update after combat."
+--[[Translation missing --]]
+L["focusMarkerMacroUpdated"] = "Focus marker action updated."
+--[[Translation missing --]]
+L["focusMarkerMacroUpdateFailed"] = "Could not update focus marker action: %s"
+--[[Translation missing --]]
+L["focusMarkerNoMacroSlotsText"] = "Delete a macro, then try the MDT focus marker macro again."
+--[[Translation missing --]]
+L["focusMarkerNoMacroSlotsTitle"] = "No macro slot available."
 L["Font of Fealty"] = "忠誠之泉"
 L["Footbomb Hooligan"] = "足球炸彈流氓"
 L["Forces"] = "敵方部隊"
@@ -1723,6 +1762,8 @@ L["Maiden of Virtue"] = "貞潔聖女"
 L["MaisaraCaverns"] = "Maisara Caverns"
 --[[Translation missing --]]
 L["MaisaraCavernsShortName"] = "CAVNS"
+--[[Translation missing --]]
+L["Make copy"] = "Make copy"
 L["Make this preset the live preset"] = "將此路線變成即時連線的路線"
 --[[Translation missing --]]
 L["Make window transparent in combat"] = "Make window transparent in combat"
@@ -1750,8 +1791,14 @@ L["Manifested Shadow"] = "現形暗影"
 L["Manifested Timeways"] = "時間之道化身"
 L["Marauding Geist"] = "Marauding Geist"
 L["Margrave Stradama"] = "藩侯史特拉達瑪"
+--[[Translation missing --]]
+L["Mark as my route"] = "Mark as my route"
+--[[Translation missing --]]
+L["Mark Settings"] = "Mark Settings"
 L["Marked Sister"] = "符印女巫"
 L["Market Peacekeeper"] = "市場保安官"
+--[[Translation missing --]]
+L["Marks"] = "Marks"
 L["Maruuk"] = "莫魯克"
 --[[Translation missing --]]
 L["Master Archer"] = "Master Archer"
@@ -1770,6 +1817,8 @@ L["MDI Mode"] = "MDI 模式"
 L["MDT Error"] = "MDT Error"
 --[[Translation missing --]]
 L["MDT Legacy maps"] = "MDT Legacy maps"
+--[[Translation missing --]]
+L["MDT Set Focus Macro"] = "MDT Set Focus Macro"
 L["MDT: Cannot add enemy - you are trying to add too many enemies of the same kind"] = "MDT: 無法加入敵人 - 你已加入太多同類型的敵人"
 L["MDT: Error importing preset"] = "MDT: 匯入路線時發生錯誤"
 L["MDT: Spells for %s:"] = "MDT: %s 的技能:"
@@ -1920,6 +1969,8 @@ L["neltharusShortName"] = "奈堡"
 L["Nerubian Hauler"] = "奈幽搬運工"
 L["Ner'zhul"] = "耐祖奧"
 L["Netherspace"] = "虛空空間"
+--[[Translation missing --]]
+L["Never show MDT focus marker notification."] = "Never show MDT focus marker notification."
 L["New"] = "新增"
 L["New NPC at Cursor Position"] = "新增游標位置的NPC"
 L["New Patrol Waypoint at Cursor Position"] = "新增游標位置的傳送路線"
@@ -1946,6 +1997,8 @@ L["Nightfall Tactician"] = "夜暮謀士"
 L["Nightmare Dweller"] = "夢魘居者"
 L["Nitrogg Thundertower"] = "奈楚格‧雷塔"
 L["Njorndir Preparation"] = "Njorndir Preparation"
+--[[Translation missing --]]
+L["No player"] = "No player"
 L["Noble Skirmisher"] = "貴族爭鬥者"
 L["noDungeonData1"] = "尚未有地城資料。"
 L["noDungeonData2"] = "輸入 /mdt devmode 來建立你自己的資料"
@@ -2024,6 +2077,8 @@ L["Overseer Korgus"] = "監督者寇格斯"
 L["Overseer Lahar"] = "監督者來哈爾"
 L["Overseer's Redoubt"] = "監督者壁壘"
 L["Overseer's Summit"] = "監督者瞭望台"
+--[[Translation missing --]]
+L["Overwrite"] = "Overwrite"
 L["Ozumat"] = "歐蘇瑪特"
 L["P.O.S.T. Master"] = "郵務主管"
 L["P.O.S.T. Worker"] = "郵務工作員"
@@ -2506,6 +2561,8 @@ L["Sergeant Bainbridge"] = "拜恩比吉中士"
 L["Sergeant Shaynemail"] = "士官謝娜梅爾"
 L["Serpentrix"] = "巨鱗蛇"
 L["Servant of Asaad"] = "亞沙德的僕從"
+--[[Translation missing --]]
+L["Set Keybind"] = "Set Keybind"
 L["Set Target Marker"] = "設定目標標記"
 L["Settings"] = "設定"
 L["Sewer Gate"] = "下水道門"
@@ -2868,6 +2925,8 @@ L["Svala Sorrowgrave"] = "Svala Sorrowgrave"
 L["Swampface"] = "沼臉"
 --[[Translation missing --]]
 L["Swiftshot Archer"] = "Swiftshot Archer"
+--[[Translation missing --]]
+L["Sync Marks"] = "Sync Marks"
 L["Taah'bat"] = "塔巴特"
 L["Taener Duelmal"] = "特納‧迪爾摩"
 L["Tainted Sentry"] = "被感染的哨衛"
@@ -3211,6 +3270,8 @@ L["Urh Relic"] = "厄聖物"
 L["Use /mdt reset to restore the default position and scale of MDT."] = "輸入 /mdt reset 來重置 MDT 視窗，恢復成預設的大小和位置。"
 L["Use as a starting point:"] = "從這個規劃路線開始編輯:"
 L["Use forces count"] = "側欄顯示部隊數量"
+--[[Translation missing --]]
+L["Use macro instead of keybind"] = "Use macro instead of keybind."
 L["Utgarde Keep"] = "Utgarde Keep"
 L["Utgarde Pinnacle"] = "Utgarde Pinnacle"
 L["Valarjar Aspirant"] = "華爾拉亞志士"
@@ -3392,6 +3453,8 @@ L["Wise Mari"] = "智者瑪利"
 L["Wither Biter"] = "枯萎啃噬者"
 L["Wither Slasher"] = "新手斬擊者"
 L["Witherbark"] = "枯木"
+--[[Translation missing --]]
+L["Witherbark Prisoner"] = "Witherbark Prisoner"
 L["Withered Fiend"] = "凋萎魔"
 L["Withered Manawraith"] = "凋萎者法力怨靈"
 L["Witherling"] = "枯萎者"

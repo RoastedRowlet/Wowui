@@ -12,20 +12,20 @@ local strfind = string.find
 -- Generate our version variables
 --
 
-local BIGWIGS_VERSION = 411
+local BIGWIGS_VERSION = 414
 local CONTENT_PACK_VERSIONS = {
-	["LittleWigs"] = {12, 0, 28},
-	["BigWigs_Classic"] = {12, 0, 11},
-	["BigWigs_BurningCrusade"] = {12, 0, 9},
-	["BigWigs_WrathOfTheLichKing"] = {12, 0, 3},
-	["BigWigs_Cataclysm"] = {12, 0, 0},
-	["BigWigs_MistsOfPandaria"] = {12, 0, 3},
-	["BigWigs_WarlordsOfDraenor"] = {12, 0, 0},
-	["BigWigs_Legion"] = {12, 0, 0},
-	["BigWigs_BattleForAzeroth"] = {12, 0, 0},
-	["BigWigs_Shadowlands"] = {12, 0, 0},
-	["BigWigs_Dragonflight"] = {12, 0, 3},
-	["BigWigs_TheWarWithin"] = {12, 0, 1},
+	["LittleWigs"] = {12, 0, 44},
+	["BigWigs_Classic"] = {12, 0, 16},
+	["BigWigs_BurningCrusade"] = {12, 0, 12},
+	["BigWigs_WrathOfTheLichKing"] = {12, 0, 7},
+	["BigWigs_Cataclysm"] = {12, 0, 3},
+	["BigWigs_MistsOfPandaria"] = {12, 0, 5},
+	["BigWigs_WarlordsOfDraenor"] = {12, 0, 1},
+	["BigWigs_Legion"] = {12, 0, 1},
+	["BigWigs_BattleForAzeroth"] = {12, 0, 3},
+	["BigWigs_Shadowlands"] = {12, 0, 2},
+	["BigWigs_Dragonflight"] = {12, 0, 4},
+	["BigWigs_TheWarWithin"] = {12, 0, 2},
 }
 local BIGWIGS_RELEASE_STRING
 local versionQueryString, versionResponseString = "Q^%d^%s^%d^%s", "V^%d^%s^%d^%s"
@@ -57,7 +57,7 @@ do
 	local ALPHA = "ALPHA"
 
 	local releaseType
-	local myGitHash = "5b0e3d7" -- The ZIP packager will replace this with the Git hash.
+	local myGitHash = "fdd2c6b" -- The ZIP packager will replace this with the Git hash.
 	local releaseString
 	--[=[@alpha@
 	-- The following code will only be present in alpha ZIPs.
@@ -146,21 +146,22 @@ public.GetBestMapForUnit = GetBestMapForUnit
 public.GetInstanceInfo = GetInstanceInfoModified
 public.GetMapInfo = GetMapInfo
 public.GetPlayerAuraBySpellID = C_UnitAuras.GetPlayerAuraBySpellID
-public.GetUnitAuraBySpellID = C_UnitAuras.GetUnitAuraBySpellID -- XXX [Mainline:✓ MoP:✗ Wrath:✗ Vanilla:✓]
+public.GetUnitAuraBySpellID = C_UnitAuras.GetUnitAuraBySpellID -- XXX [Mainline:✓ MoP:✗ Wrath:✓ Vanilla:✓]
 public.GetSpellCooldown = C_Spell.GetSpellCooldown
 public.GetSpellDescription = C_Spell.GetSpellDescription
 public.GetSpellLink = C_Spell.GetSpellLink
 public.GetSpellName = C_Spell.GetSpellName
 public.GetSpellTexture = C_Spell.GetSpellTexture
 public.IsItemInRange = C_Item.IsItemInRange
-public.IsSpellKnownOrInSpellBook = C_SpellBook.IsSpellKnownOrInSpellBook -- XXX [Mainline:✓ MoP:✓ Wrath:✗ Vanilla:✓]
+public.IsSpellKnownOrInSpellBook = C_SpellBook.IsSpellKnownOrInSpellBook -- XXX [Mainline:✓ MoP:✓ Wrath:✓ Vanilla:✓]
 public.IsPlayerSpell = IsPlayerSpell or public.IsSpellKnownOrInSpellBook
 public.IsSpellKnown = IsSpellKnown or public.IsSpellKnownOrInSpellBook
 public.PlaySoundFile = PlaySoundFile
 public.RegisterAddonMessagePrefix = RegisterAddonMessagePrefix
 public.SendAddonMessage = SendAddonMessage
+public.SendBattleNetMessage = C_BattleNet and C_BattleNet.SendWhisper or BNSendWhisper -- XXX [Mainline:✓ MoP:✗ Wrath:✗ TBC:✗ Vanilla:✗]
+public.SendChatMessage = C_ChatInfo.SendChatMessage
 public.SetRaidTarget = SetRaidTarget
-public.SendChatMessage = C_ChatInfo and C_ChatInfo.SendChatMessage or SendChatMessage -- XXX [Mainline:✓ MoP:✓ Wrath:✗ Vanilla:✓]
 public.UnitCanAttack = UnitCanAttack
 public.UnitDetailedThreatSituation = UnitDetailedThreatSituation
 public.UnitThreatSituation = UnitThreatSituation
@@ -177,9 +178,8 @@ public.Print = sysprint
 public.isTestBuild = IsPublicTestClient() -- PTR/beta
 do
 	local _, _, _, build = GetBuildInfo()
-	public.isMidnight = build >= 120000
-	public.isBeta = public.isTestBuild and build >= 120001
-	public.isNext = build >= 120002
+	public.isBeta = public.isTestBuild and build >= 130000
+	public.isNext = build >= 120005
 end
 
 -- Version
@@ -709,6 +709,7 @@ do
 		frame:SetBorder("HeldBagLayout")
 		frame:SetPortraitTextureSizeAndOffset(38, -5, 0)
 		frame:SetPortraitTextureRaw("Interface\\AddOns\\BigWigs\\Media\\Icons\\minimap_raid.tga")
+		frame.GetTitleText = nil
 
 		local text = frame:CreateFontString(nil, nil, "GameFontGreenLarge")
 		text:SetSize(380, 0)
@@ -1336,6 +1337,8 @@ do
 		BigWigs_TrialOfValor = "BigWigs_Legion",
 		BigWigs_SiegeOfZuldazar = "BigWigs",
 		FS_Core = "Abandoned", -- abandoned addon breaking the load order
+		Fake_Keystones = "Abandoned", -- abandoned addon breaking LibKeystone
+		["!Fake_Keystones"] = "Abandoned", -- abandoned addon breaking LibKeystone
 		BigWigs_Azeroth = "BigWigs_BattleForAzeroth",
 		BigWigs_BattleOfDazaralor = "BigWigs_BattleForAzeroth",
 		BigWigs_CrucibleOfStorms = "BigWigs_BattleForAzeroth",
@@ -1480,24 +1483,24 @@ do
 	end
 
 	local locales = {
-		--ruRU = "Russian (ruRU)",
+		ruRU = "Russian (ruRU)",
 		--zhCN = "Simplified Chinese (zhCN)",
 		--zhTW = "Traditional Chinese (zhTW)",
-		--itIT = "Italian (itIT)",
+		itIT = "Italian (itIT)",
 		--koKR = "Korean (koKR)",
-		--esES = "Spanish (esES)",
-		--esMX = "Spanish (esMX)",
+		esES = "Spanish (esES)",
+		esMX = "Spanish (esMX)",
 		--deDE = "German (deDE)",
-		--ptBR = "Portuguese (ptBR)",
+		ptBR = "Portuguese (ptBR)",
 		--frFR = "French (frFR)",
 	}
 	local realms = {
 		--[542] = locales.frFR, -- frFR
-		--[3207] = locales.ptBR, [3208] = locales.ptBR, [3209] = locales.ptBR, [3210] = locales.ptBR, [3234] = locales.ptBR, -- ptBR
-		--[1425] = locales.esMX, [1427] = locales.esMX, [1428] = locales.esMX, -- esMX
-		--[1309] = locales.itIT, [1316] = locales.itIT, -- itIT
-		--[1378] = locales.esES, [1379] = locales.esES, [1380] = locales.esES, [1381] = locales.esES, [1382] = locales.esES, [1383] = locales.esES, -- esES
-		--[1384] = locales.esES, [1385] = locales.esES, [1386] = locales.esES, [1387] = locales.esES, [1395] = locales.esES, -- esES
+		[3207] = locales.ptBR, [3208] = locales.ptBR, [3209] = locales.ptBR, [3210] = locales.ptBR, [3234] = locales.ptBR, -- ptBR
+		[1425] = locales.esMX, [1427] = locales.esMX, [1428] = locales.esMX, -- esMX
+		[1309] = locales.itIT, [1316] = locales.itIT, -- itIT
+		[1378] = locales.esES, [1379] = locales.esES, [1380] = locales.esES, [1381] = locales.esES, [1382] = locales.esES, [1383] = locales.esES, -- esES
+		[1384] = locales.esES, [1385] = locales.esES, [1386] = locales.esES, [1387] = locales.esES, [1395] = locales.esES, -- esES
 	}
 	local criticalList = {
 		--[locales.itIT] = true,
@@ -1616,12 +1619,12 @@ end
 --
 
 do
-	local DBMdotRevision = "20260325092947" -- The changing version of the local client, changes with every new zip using the project-date-integer packager replacement.
-	local DBMdotDisplayVersion = "12.0.33" -- "N.N.N" for a release and "N.N.N alpha" for the alpha duration.
-	local DBMdotReleaseRevision = "20260324000000" -- Hardcoded time, manually changed every release, they use it to track the highest release version, a new DBM release is the only time it will change.
+	local DBMdotRevision = "20260429043851" -- The changing version of the local client, changes with every new zip using the project-date-integer packager replacement.
+	local DBMdotDisplayVersion = "12.0.44" -- "N.N.N" for a release and "N.N.N alpha" for the alpha duration.
+	local DBMdotReleaseRevision = "20260428000000" -- Hardcoded time, manually changed every release, they use it to track the highest release version, a new DBM release is the only time it will change.
 	local protocol = 3
 	local versionPrefix = "V"
-	local PForceDisable = 23
+	local PForceDisable = 24
 
 	local timer = nil
 	local function sendDBMMsg()
@@ -1846,7 +1849,7 @@ do
 			CreateFrame("Frame"), CreateFrame("Frame"), CreateFrame("Frame"), CreateFrame("Frame"), CreateFrame("Frame"), CreateFrame("Frame"),
 		}
 		local UnitIsPlayer = UnitIsPlayer
-		local function UNIT_TARGET(frame, event, unit)
+		local function UNIT_TARGET(_, _, unit)
 			local unitTarget = unit.."target"
 			local guid = UnitGUID(unitTarget)
 			if guid and not UnitIsPlayer(unitTarget) then
@@ -1932,6 +1935,12 @@ do
 			end
 			bwFrame:UnregisterEvent("ZONE_CHANGED")
 			bwFrame:UnregisterEvent("ZONE_CHANGED_NEW_AREA")
+
+			-- XXX 12.0.5
+			if public.isRetail and C_ScenarioInfo.GetUnitCriteriaProgressValues and public.currentExpansion.currentSeason[instanceID] and not BW_FEAT_M_PERCENT then
+				BW_FEAT_M_PERCENT = true
+				Popup(L.tempProgressAnnounce, true, 220)
+			end
 		else
 			if disabledZones[instanceID] then -- We have a content addon for the this zone but it is disabled in the addons menu
 				local msg = L.disabledAddOn:format(disabledZones[instanceID])
@@ -2032,15 +2041,11 @@ do
 end
 
 function mod:BigWigs_BossModuleRegistered(_, _, module)
-	if module.worldBoss then
+	if module:IsWorldModule() then
 		local id = -(module.mapId)
 		enableZones[id] = "world"
-		if type(module.worldBoss) == "table" then
-			for i = 1, #module.worldBoss do
-				worldBosses[module.worldBoss[i]] = id
-			end
-		else
-			worldBosses[module.worldBoss] = id
+		for mobId in next, module.enableMobs do
+			worldBosses[mobId] = id
 		end
 	elseif type(module.instanceId) == "table" then
 		for i = 1, #module.instanceId do

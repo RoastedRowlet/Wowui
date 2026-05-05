@@ -29,6 +29,51 @@ local Shared = ns.CDMShared
 local Registry = ns.FrameRegistry
 
 -- ═══════════════════════════════════════════════════════════════════════════
+-- FRAME REBIND CALLBACK REGISTRY
+--
+-- CDM repools frames silently between events (spec change, talent change,
+-- pet (un)summon, instance enter, vehicle exit, etc.). When a frame's
+-- cooldownID rebinds, modules with per-frame caches keyed on that frame
+-- (visual state, throttle caches, lookup caches in Display, etc.) need to
+-- know so they can invalidate.
+--
+-- Architecture: SINGLE dispatch point. The mixin-level SetCooldownID hook
+-- below already fires for every CDM rebind across all viewers — we just
+-- add a callback registry to it. Each module subscribes once and gets
+-- notified with (frame, oldCdID, newCdID). oldCdID may be nil (first bind),
+-- newCdID may be nil (release via ClearCooldownID).
+--
+-- CPU cost: registry is a 1-3 entry array. Per rebind = O(N_subscribers)
+-- function calls. Rebinds are rare events (login, spec change, etc.) so
+-- the practical cost is negligible. No new tickers, no new event registrations.
+--
+-- Subscribers MUST NOT call any CDM API that touches secret data (no
+-- frame:ShouldBeActive, no frame:GetAuraData) — same taint rules as anywhere.
+-- ═══════════════════════════════════════════════════════════════════════════
+local frameRebindSubscribers = {}
+
+function Controller.OnFrameRebind(callback)
+    if type(callback) ~= "function" then return end
+    -- Idempotent: don't double-subscribe the same closure
+    for _, existing in ipairs(frameRebindSubscribers) do
+        if existing == callback then return end
+    end
+    frameRebindSubscribers[#frameRebindSubscribers + 1] = callback
+end
+
+local function DispatchFrameRebind(frame, oldCdID, newCdID)
+    -- Synchronous dispatch — runs in same tick as CDM's SetCooldownID.
+    -- Subscribers do their own targeted cleanup; failures in one
+    -- subscriber don't affect others.
+    for i = 1, #frameRebindSubscribers do
+        local cb = frameRebindSubscribers[i]
+        if cb then cb(frame, oldCdID, newCdID) end
+    end
+end
+
+-- ═══════════════════════════════════════════════════════════════════════════
+
+-- ═══════════════════════════════════════════════════════════════════════════
 -- SECRET-SAFE AURA INSTANCE ID CHECK
 -- auraInstanceID may become secret in future WoW versions
 -- Uses ns.API.HasAuraInstanceID from Core.lua (handles secret values)
@@ -733,7 +778,7 @@ local function AssignFrameToGroup(cdID, frame, groupName, row, col, viewerType, 
         frame:SetParent(group.container)
         frame:SetFrameStrata(group.container._cdmgFrameStrata or "MEDIUM")
         frame:SetScale(1)
-        frame:SetAlpha(1)
+        if not (frame._arcIsArcAura or frame._arcAuraID) then frame:SetAlpha(1) end
     end
     
     -- Ensure frame is shown (unless hidden by bar tracking or unequipped hiding)
@@ -878,7 +923,7 @@ local function AssignFrameToFree(cdID, frame, x, y, iconSize, viewerType, viewer
     
     -- Only show if not hidden due to hideWhenUnequipped or bar tracking settings
     if not frame._arcHiddenUnequipped and not IsFrameHiddenByBar(frame) then
-        frame:SetAlpha(1)
+        if not (frame._arcIsArcAura or frame._arcAuraID) then frame:SetAlpha(1) end
         frame:Show()
     end
     
@@ -1396,7 +1441,7 @@ local function Reconcile()
                     -- Fix the frame state (skip if legitimately hidden by bar tracking)
                     frame:SetScale(1)
                     if not frame._arcHiddenUnequipped and not IsFrameHiddenByBar(frame) then
-                        frame:SetAlpha(1)
+                        if not (frame._arcIsArcAura or frame._arcAuraID) then frame:SetAlpha(1) end
                         frame:Show()
                     end
                     frame._arcRecoveryProtection = GetTime() + 0.5
@@ -2261,7 +2306,7 @@ local function Reconcile()
                     freeData.frame:SetParent(UIParent)
                     freeData.frame:SetFrameStrata("MEDIUM")
                     freeData.frame:SetScale(1)
-                    freeData.frame:SetAlpha(1)
+                    if not (freeData.frame._arcIsArcAura or freeData.frame._arcAuraID) then freeData.frame:SetAlpha(1) end
                     freeData.frame:Show()
                 end
             end
@@ -3264,6 +3309,141 @@ local function InstallCDMHooks()
     -- and any other CDM RefreshLayout → RefreshData cycle.
     -- Previously we only detected this on panel close. Now it's instant.
     -- ═══════════════════════════════════════════════════════════════════════════
+
+    -- ─── FAST-PATH PLACEMENT ────────────────────────────────────────────────
+    -- Problem: after CDM's RefreshLayout (ReleaseAll → reacquire → RefreshData),
+    -- frames may be parented to CDM's default container OR have stale anchors
+    -- pointing at the OLD cdID's slot. The full Reconcile() doesn't run until
+    -- DEBOUNCE_NORMAL (0.15s) later, so for that window the icon sits at the
+    -- wrong position before snapping into place.
+    --
+    -- Fix: when SetCooldownID fires for a cdID that has a known savedPosition,
+    -- synchronously reparent + reposition the frame to its target slot in the
+    -- same tick. The full reconcile still runs at +0.15s and remains the
+    -- source of truth (member tracking, partner resolution, validation, etc.)
+    -- — this is just a fast initial guess to eliminate the visible delay.
+    --
+    -- Safety: only acts when savedPositions[cooldownID] points to an existing
+    -- group/free placement. Brand-new icons or unrecognised cdIDs fall through
+    -- to reconcile as before. Skipped during spec change, talent change,
+    -- restoration protection, options panel open, and CDM panel open — those
+    -- contexts have their own placement logic.
+    local function TryFastPathPlace(itemFrame, cooldownID)
+        if not itemFrame or not cooldownID or type(cooldownID) ~= "number" then return end
+        if not ns.CDMGroups then return end
+
+        -- Bail in any state where placement is owned by another path
+        if state.specChangeDetected then return end
+        if state.talentChangeDetected then return end
+        if ns.CDMGroups.specChangeInProgress then return end
+        if ns.CDMGroups._pendingSpecChange then return end
+        if ns.CDMGroups.talentChangeInProgress then return end
+        if ns.CDMGroups._restorationProtectionEnd and GetTime() < ns.CDMGroups._restorationProtectionEnd then return end
+        if ns.CDMGroups._talentRestorationEnd and GetTime() < ns.CDMGroups._talentRestorationEnd then return end
+        if ns._arcUIOptionsOpen then return end
+        if ns.CDMGroups.cdmOptionsPanelOpen then return end
+        -- Free dragging / group dragging: don't fight the user
+        if itemFrame._freeDragging or itemFrame._groupDragging then return end
+        -- Hidden by bar tracking — that path manages its own visibility
+        if itemFrame._arcHiddenByBar then return end
+
+        -- Need a saved position to know where this cdID belongs
+        local savedPositions = ns.CDMGroups.savedPositions
+        local saved = savedPositions and savedPositions[cooldownID]
+        if not saved then return end
+
+        if saved.type == "group" and saved.target then
+            local groups = ns.CDMGroups.groups
+            local group = groups and groups[saved.target]
+            if not group or not group.container then return end
+
+            -- Prefer current member.row/col when dynamic layout is on (reflow
+            -- may have moved this cdID off its saved slot). Mirror the
+            -- AssignFrameToCooldown lookup pattern so static and dynamic
+            -- layouts converge to the same answer.
+            local row, col = saved.row, saved.col
+            if group.dynamicLayout and group.members and group.members[cooldownID] then
+                local member = group.members[cooldownID]
+                if member.row ~= nil and member.col ~= nil then
+                    row = member.row
+                    col = member.col
+                end
+            end
+            if row == nil or col == nil then return end
+
+            -- Skip if frame is already correctly parented AND already at the
+            -- right target slot (cdID didn't actually move groups/positions).
+            local currentParent = itemFrame:GetParent()
+            local alreadyInGroup = currentParent == group.container
+            if alreadyInGroup
+              and itemFrame._cdmgTargetCdID == cooldownID
+              and itemFrame._cdmgTargetRow == row
+              and itemFrame._cdmgTargetCol == col then
+                return
+            end
+
+            -- Compute slot dimensions and place
+            local slotW, slotH = 36, 36
+            if ns.CDMGroups.GetSlotDimensions and group.layout then
+                slotW, slotH = ns.CDMGroups.GetSlotDimensions(group.layout)
+            end
+
+            if ns.CDMGroups.SetupFrameInContainer then
+                -- SetupFrameInContainer parents, sizes, anchors and writes
+                -- _cdmgTargetPoint/X/Y so FcOnClearAllPoints can self-heal
+                -- if CDM re-clears anchors later in the same tick.
+                ns.CDMGroups.SetupFrameInContainer(itemFrame, group.container, slotW, slotH, cooldownID)
+                -- Stamp target slot for the early-skip check above
+                itemFrame._cdmgTargetCdID = cooldownID
+                itemFrame._cdmgTargetRow  = row
+                itemFrame._cdmgTargetCol  = col
+                -- Make sure it's visible (Pool_HideAndClearAnchors hid it)
+                if not itemFrame._arcHiddenUnequipped and not IsFrameHiddenByBar(itemFrame) then
+                    itemFrame:Show()
+                end
+                -- Install frame hooks if not yet (cheap idempotent)
+                InstallFrameHooks(itemFrame)
+                TimelineAdd("ACTION", "FAST_PATH_PLACE", string.format(
+                    "cdID=%s → group=%s row=%s col=%s",
+                    tostring(cooldownID), tostring(saved.target), tostring(row), tostring(col)))
+            end
+        elseif saved.type == "free" then
+            -- Free icon: parent to UIParent, place at saved x/y
+            local x = saved.x or 0
+            local y = saved.y or 0
+            local size = saved.iconSize or 36
+
+            -- Skip if already correctly positioned as free icon
+            if itemFrame._cdmgIsFreeIcon
+              and itemFrame._cdmgFreeTargetX == x
+              and itemFrame._cdmgFreeTargetY == y then
+                return
+            end
+
+            itemFrame._cdmgSettingPosition = true
+            itemFrame:SetParent(UIParent)
+            itemFrame:ClearAllPoints()
+            itemFrame:SetPoint("CENTER", UIParent, "CENTER", x, y)
+            itemFrame:SetSize(size, size)
+            itemFrame:SetScale(1)
+            itemFrame:SetAlpha(1)
+            itemFrame._cdmgSettingPosition = false
+
+            itemFrame._cdmgIsFreeIcon     = true
+            itemFrame._cdmgFreeTargetX    = x
+            itemFrame._cdmgFreeTargetY    = y
+            itemFrame._cdmgFreeTargetSize = size
+
+            if not itemFrame._arcHiddenUnequipped and not IsFrameHiddenByBar(itemFrame) then
+                itemFrame:Show()
+            end
+            InstallFrameHooks(itemFrame)
+            TimelineAdd("ACTION", "FAST_PATH_PLACE", string.format(
+                "cdID=%s → free x=%s y=%s",
+                tostring(cooldownID), tostring(x), tostring(y)))
+        end
+    end
+
     if CooldownViewerItemDataMixin then
         -- Hook SetCooldownID - fires when CDM assigns a (possibly new) cooldownID to a frame
         if CooldownViewerItemDataMixin.SetCooldownID then
@@ -3295,7 +3475,17 @@ local function InstallCDMHooks()
                     end
                 end
                 
+                -- ─── FAST-PATH PLACEMENT ─────────────────────────────────
+                -- Run BEFORE the in-container gate. After CDM's ReleaseAll the
+                -- frame may have lost its anchors / been demoted from our
+                -- container — fast-path reparents + repositions in the same
+                -- tick so there's no visible delay until reconcile fires.
+                -- No-ops if savedPositions[cooldownID] doesn't exist or any
+                -- protection window is active.
+                TryFastPathPlace(itemFrame, cooldownID)
+
                 -- Only care about frames we're managing (in our containers or free icons)
+                -- Re-read parent: TryFastPathPlace may have just reparented us in.
                 local parent = itemFrame:GetParent()
                 local isInContainer = parent and parent._isCDMGContainer
                 local isFreeIcon = itemFrame._cdmgIsFreeIcon
@@ -3321,6 +3511,12 @@ local function InstallCDMHooks()
                         tostring(itemFrame:GetName() or tostring(itemFrame)),
                         tostring(prevCdID), tostring(cooldownID)))
                 end
+                
+                -- Notify all module subscribers BEFORE the deferred reconcile
+                -- so they can invalidate their per-frame caches in the same
+                -- tick CDM made the rebind. Same-tick invalidation prevents
+                -- visual / data desync during the 0.15s reconcile window.
+                DispatchFrameRebind(itemFrame, prevCdID, cooldownID)
                 
                 -- Schedule a debounced reconcile to update group membership tracking
                 -- DEBOUNCE_NORMAL (0.15s) batches multiple SetCooldownID calls from a single RefreshData cycle
@@ -3361,6 +3557,7 @@ local function InstallCDMHooks()
                 if not isInContainer and not isFreeIcon then return end
                 
                 -- Frame's cooldownID was cleared - purge stale caches
+                local oldCdID = itemFrame._arcLastEnhancedCdID
                 itemFrame._arcCfg = nil
                 itemFrame._arcCfgVersion = nil
                 itemFrame._arcCfgCdID = nil
@@ -3369,6 +3566,11 @@ local function InstallCDMHooks()
                 itemFrame._arcTargetTint = nil
                 itemFrame._arcTargetGlow = nil
                 itemFrame._arcCooldownEventDriven = nil
+                
+                -- Notify subscribers of release (newCdID=nil signals "frame
+                -- returned to pool"). Modules that don't care about releases
+                -- early-return on `if not newCdID then return end`.
+                DispatchFrameRebind(itemFrame, oldCdID, nil)
             end)
             Debug("Hooked CooldownViewerItemDataMixin.ClearCooldownID")
         end

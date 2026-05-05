@@ -1,5 +1,5 @@
 ---@class GGUI-2.1
-local GGUI = LibStub:NewLibrary("GGUI-2.1", 27)
+local GGUI = LibStub:NewLibrary("GGUI-2.1", 28)
 if not GGUI then return end -- if version already exists
 
 ---@type GGUI_GUTIL
@@ -64,6 +64,12 @@ end
 -- GGUI CONST
 GGUI.CONST = {}
 GGUI.CONST.EMPTY_TEXTURE = "Interface\\containerframe\\bagsitemslot2x"
+GGUI.CONST.SORT_ARROW_UP_ATLAS = "glues-characterSelect-icon-arrowUp"
+GGUI.CONST.SORT_ARROW_DOWN_ATLAS = "glues-characterSelect-icon-arrowDown"
+GGUI.CONST.NOT_SORTED_ATLAS = "glues-characterSelect-icon-minus-disabled"
+
+GGUI.CONST.HIGHLIGHTED_BLUE_ATLAS = "GarrMissionLocation-Maw-ButtonHighlight"
+GGUI.CONST.HIGHTLIGHTED_VERTICAL_EDGE_BLUE_ATLAS = "!editmode-actionbar-highlight-nineslice-edgeleft"
 
 ---@class GGUI.AnchorPoint
 ---@field anchorParent Region?
@@ -104,12 +110,20 @@ function GGUI:MakeFrameCloseable(frame, onCloseCallback, closeButtonOptions)
     closeButtonOptions.anchorParent = closeButtonOptions.anchorParent or frame
     closeButtonOptions.anchorA = closeButtonOptions.anchorA or "TOP"
     closeButtonOptions.anchorB = closeButtonOptions.anchorB or "TOPRIGHT"
-    closeButtonOptions.sizeX = closeButtonOptions.sizeX or 25
+    closeButtonOptions.sizeX = closeButtonOptions.sizeX or 20
     closeButtonOptions.sizeY = closeButtonOptions.sizeY or 20
     closeButtonOptions.offsetX = closeButtonOptions.offsetX or -20
     closeButtonOptions.offsetY = closeButtonOptions.offsetY or -10
     closeButtonOptions.anchorPoints = closeButtonOptions.anchorPoints
-    closeButtonOptions.label = closeButtonOptions.label or "X"
+    closeButtonOptions.cleanTemplate = true
+    closeButtonOptions.buttonTextureOptions = {
+        isAtlas = true,
+        normal = "uitools-icon-close",
+        pushed = "uitools-icon-close",
+        highlight = "uitools-icon-close",
+        disabled = "uitools-icon-close",
+        highlightBlendmode = "ADD",
+    }
     closeButtonOptions.clickCallback = function()
         frame:Hide()
         if onCloseCallback then
@@ -208,25 +222,29 @@ function GGUI:SetTooltipsByTooltipOptions(frame, optionsOwner)
 
         GameTooltip:SetOwner(tooltipOptions.owner or frame, tooltipOptions.anchor);
 
+
         if tooltipOptions.spellID then
             local _, currentSpellID = GameTooltip:GetSpell()
-
             if currentSpellID ~= tooltipOptions.spellID then
-                -- to not set it again and hide the tooltip..
                 GameTooltip:SetSpellByID(tooltipOptions.spellID)
             end
         elseif tooltipOptions.itemID then
             GameTooltip:SetItemByID(tooltipOptions.itemID)
         elseif tooltipOptions.itemLink then
             GameTooltip:SetHyperlink(tooltipOptions.itemLink)
-        elseif tooltipOptions.text then
-            GameTooltip:SetText(tooltipOptions.text, nil, nil, nil, nil,
-                tooltipOptions.textWrap)
-        elseif tooltipOptions.frame then
-            if tooltipOptions.frameUpdateCallback then
-                tooltipOptions.frameUpdateCallback(tooltipOptions.frame)
+        else
+            local text = tooltipOptions.text
+            if tooltipOptions.textCallback then
+                text = tooltipOptions.textCallback()
             end
-            GameTooltip_InsertFrame(GameTooltip, tooltipOptions.frame)
+            if text then
+                GameTooltip:SetText(text, nil, nil, nil, nil, tooltipOptions.textWrap)
+            elseif tooltipOptions.frame then
+                if tooltipOptions.frameUpdateCallback then
+                    tooltipOptions.frameUpdateCallback(tooltipOptions.frame)
+                end
+                GameTooltip_InsertFrame(GameTooltip, tooltipOptions.frame)
+            end
         end
 
         if tooltipOptions.scale then
@@ -428,6 +446,8 @@ end
 ---@field tooltipOptions? GGUI.TooltipOptions
 ---@field hide? boolean
 ---@field raiseOnInteraction? boolean
+---@field clickThrough? boolean
+---@field closeOnEscape? boolean Needs a global name to work
 
 ---@class GGUI.BackdropOptions
 ---@field backdropInfo? backdropInfo
@@ -486,6 +506,7 @@ function GGUI.Frame:new(options)
     self.onCollapseOpenCallback = options.onCollapseOpenCallback
     self.closeOnClickOutside = options.closeOnClickOutside or false
     self.onCloseCallback = options.onCloseCallback
+    self.clickThrough = options.clickThrough or false
 
     GGUI:DebugTable(options, options, "Frame Options")
 
@@ -503,13 +524,24 @@ function GGUI.Frame:new(options)
     frame.hookFrame = hookFrame
     hookFrame:SetSize(options.sizeX, options.sizeY)
     frame:SetSize(options.sizeX, options.sizeY)
+
+    if options.closeOnEscape then
+        tinsert(UISpecialFrames, frame:GetName())
+    end
+
+    if not self.clickThrough then
+        frame:SetPropagateMouseClicks(false)
+        frame:SetPropagateMouseMotion(false)
+        hookFrame:SetPropagateMouseClicks(false)
+        hookFrame:SetPropagateMouseMotion(false)
+    end
     if not options.fitFrame then
         frame:SetScale(options.scale)
     else
         frame:ClearAllPoints()
         frame:SetAllPoints(options.fitFrame)
     end
-    
+
     frame:SetFrameStrata(options.frameStrata or options.parent:GetFrameStrata())
     frame:SetFrameLevel(options.frameLevel or (options.parent:GetFrameLevel() + 1))
 
@@ -696,10 +728,17 @@ function GGUI:MakeFrameCollapsable(gFrame)
         anchorB = "TOPRIGHT",
         offsetX = offsetX,
         offsetY = -10,
-        label = " - ",
-        sizeX = 12,
+        cleanTemplate = true,
+        buttonTextureOptions = {
+            isAtlas = true,
+            normal = "uitools-icon-minimize",
+            pushed = "uitools-icon-minimize",
+            highlight = "uitools-icon-minimize",
+            disabled = "uitools-icon-minimize",
+            highlightBlendmode = "ADD",
+        },
+        sizeX = 20,
         sizeY = 20,
-        adjustWidth = true,
         clickCallback = function()
             if gFrame.collapsed then
                 gFrame:Decollapse()
@@ -715,7 +754,6 @@ function GGUI.Frame:Collapse()
         self.collapsed = true
         -- make smaller and hide content, only show frameTitle
         self.frame:SetSize(self.originalX, 40)
-        self.frame.collapseButton:SetText("+")
         self.frame.content:Hide()
         if self.frame.scrollFrame then
             self.frame.scrollFrame:Hide()
@@ -733,7 +771,6 @@ function GGUI.Frame:Decollapse()
     if self.collapseable and self.frame.collapseButton then
         -- restore
         self.collapsed = false
-        self.frame.collapseButton:SetText("-")
         self.frame:SetSize(self.originalX, self.originalY)
         self.frame.content:Show()
         if self.frame.scrollFrame then
@@ -1677,6 +1714,14 @@ function GGUI.Text:new(options)
     end
 end
 
+function GGUI.Text:SetWidth(width)
+    self.frame:SetWidth(width)
+end
+
+function GGUI.Text:SetHeight(height)
+    self.frame:SetHeight(height)
+end
+
 function GGUI.Text:GetText()
     return self.frame:GetText() or ""
 end
@@ -1848,6 +1893,7 @@ end
 ---@field hideBackground? boolean
 ---@field tooltipOptions? GGUI.TooltipOptions
 ---@field borderOptions? GGUI.BorderOptions
+---@field globalName? string
 
 ---@class GGUI.FontOptions
 ---@field fontFile? string
@@ -1892,6 +1938,7 @@ function GGUI.Button:new(options)
     self.secure = options.secure or false
     self.macroText = options.macroText or ""
     self.cleanTemplate = options.cleanTemplate or false
+    self.globalName = options.globalName
 
     ---@type string?
     local templates = "UIPanelButtonTemplate" -- Note: this template is wierd with custom highlight textures..
@@ -1908,7 +1955,7 @@ function GGUI.Button:new(options)
         end
     end
 
-    local button = CreateFrame("Button", nil, options.parent, templates)
+    local button = CreateFrame("Button", self.globalName, options.parent, templates)
     GGUI.Button.super.new(self, button)
     button:SetScale(options.scale)
 
@@ -1938,7 +1985,6 @@ function GGUI.Button:new(options)
                     options.buttonTextureOptions.highlightBlendmode or "ADD")
             end
         else
-
             if options.buttonTextureOptions.normal then
                 button:SetNormalTexture(options.buttonTextureOptions.normal)
             end
@@ -2078,7 +2124,6 @@ function GGUI.Button:SetTexture(textureOptions)
     button:ClearDisabledTexture()
     button:ClearHighlightTexture()
     if textureOptions.isAtlas then
-        
         if textureOptions.normal then
             button:SetNormalAtlas(textureOptions.normal)
         end
@@ -2519,7 +2564,7 @@ function GGUI.ScrollFrame:new(options)
     self.scrollBar = CreateFrame("EventFrame", nil, scrollFrame, "MinimalScrollBar")
     self.scrollBar:SetPoint("TOPLEFT", scrollFrame, "TOPRIGHT", scrollBarOffsetX, 0)
     self.scrollBar:SetPoint("BOTTOMLEFT", scrollFrame, "BOTTOMRIGHT", scrollBarOffsetX, 0)
-    
+
 
     ScrollUtil.InitScrollFrameWithScrollBar(scrollFrame, self.scrollBar);
 
@@ -3152,6 +3197,10 @@ end
 
 ---@class GGUI.FrameList : GGUI.Widget
 ---@overload fun(options:GGUI.FrameListConstructorOptions): GGUI.FrameList
+---@field activeSortColumnIndex number? index of the currently sorted column, or nil if none
+---@field activeSortAscending boolean true when the active column sort is ascending
+---@field activeSortFunc (fun(rowA:GGUI.FrameList.Row, rowB:GGUI.FrameList.Row):boolean)? active sort function derived from column header clicks
+---@field header Frame the header row frame containing all column header frames
 GGUI.FrameList = GGUI.Widget:extend()
 
 ---@class GGUI.FrameListConstructorOptions : GGUI.ConstructorOptions
@@ -3179,6 +3228,15 @@ GGUI.FrameList = GGUI.Widget:extend()
 ---@field private autoAdjustHeightCallback? fun(newHeight: number)
 ---@field disableScrolling? boolean
 ---@field label? string
+---@field savedVariablesTableLayoutConfig? GGUI.FrameList.LayoutConfig
+
+---@class GGUI.FrameList.LayoutConfig
+---@field activeSortColumnIndex number?
+---@field activeSortAscending boolean?
+---@field columns table<number, GGUI.FrameList.ColumnLayoutConfig>
+
+---@class GGUI.FrameList.ColumnLayoutConfig
+---@field width number
 
 ---@class GGUI.FrameList.SelectionOptions
 ---@field noSelectionColor boolean?
@@ -3188,18 +3246,57 @@ GGUI.FrameList = GGUI.Widget:extend()
 
 ---@class GGUI.FrameList.ColumnOption
 ---@field width? number
+---@field headerScale? number
 ---@field label? string
 ---@field justifyOptions? GGUI.JustifyOptions
 ---@field backdropOptions? GGUI.BackdropOptions
 ---@field tooltipOptions? GGUI.TooltipOptions
 ---@field fontOptions? GGUI.FontOptions
 ---@field onClickCallback? fun(column: Frame, columnIndex: number)
+---@field sortFunc? fun(rowA:GGUI.FrameList.Row, rowB:GGUI.FrameList.Row): boolean optional sort function; if provided the column header becomes clickable and toggles between ascending/descending sort
+---@field customSortArrowOffsetX? number
+---@field resizable? boolean if true the column can be resized by dragging its header edges
+---@field minWidth? number minimum column width when resizing (default 5)
+---@field resizeCallback? fun(columnFrame: Frame, newWidth: number) called after the column is resized; use it to update row content widths
 
 function GGUI.FrameList:new(options)
     self.isGGUI = true
     ---@type GGUI.FrameListConstructorOptions
     options = options or {}
     options.parent = options.parent or UIParent
+
+    self.savedVariablesTableLayoutConfig = options.savedVariablesTableLayoutConfig
+
+    -- One-time creation of the global drag-tracker frame used for column resizing
+    if not GGUI._resizeDragTrackerFrame then
+        local trackerFrame = CreateFrame("Frame", nil, UIParent)
+        trackerFrame:SetAllPoints(UIParent)
+        trackerFrame:EnableMouse(true)
+        trackerFrame:Hide()
+        trackerFrame:SetFrameStrata("TOOLTIP")
+
+        trackerFrame:SetScript("OnUpdate", function(_)
+            local state = GGUI._resizeDragState
+            if not state then return end
+            local scale = UIParent:GetScale()
+            local cursorX = GetCursorPosition() / scale
+            local delta = cursorX - state.startCursorX
+            -- Left column grows/shrinks by delta; clamp so neither column goes below its minWidth
+            local totalWidth = state.leftStartWidth + state.rightStartWidth
+            local desiredLeftWidth = state.leftStartWidth + delta
+            local maxLeftWidth = totalWidth - state.rightMinWidth -- right column must keep its minimum
+            local newLeftWidth = math.max(state.leftMinWidth, math.min(maxLeftWidth, desiredLeftWidth))
+            local newRightWidth = totalWidth - newLeftWidth
+            if newLeftWidth ~= state.currentLeftWidth or newRightWidth ~= state.currentRightWidth then
+                state.currentLeftWidth = newLeftWidth
+                state.currentRightWidth = newRightWidth
+                state.frameList:_ApplyBoundaryResize(state.leftColumnIndex, newLeftWidth, state.rightColumnIndex,
+                    newRightWidth)
+            end
+        end)
+
+        GGUI._resizeDragTrackerFrame = trackerFrame
+    end
     options.anchorParent = options.anchorParent or UIParent
     options.sizeY = options.sizeY or 100
     options.anchorA = options.anchorA or "CENTER"
@@ -3226,6 +3323,9 @@ function GGUI.FrameList:new(options)
     end
     ---@type GGUI.FrameList.Row
     self.selectedRow = nil
+    self.activeSortColumnIndex = nil
+    self.activeSortAscending = true
+    self.activeSortFunc = nil
 
     if not options.columnOptions or #options.columnOptions == 0 then
         GGUI:ThrowError("FrameList needs a least one column! (columnOptions)")
@@ -3282,18 +3382,120 @@ function GGUI.FrameList:new(options)
     local header = CreateFrame("Frame", nil, mainFrame)
     header:SetPoint("BOTTOMLEFT", mainFrame, "TOPLEFT")
     header:SetSize(rowWidth, 25)
+    self.header = header
 
     self.headerColumns = {}
     local lastHeaderColumn = nil
     for index, columnOption in pairs(options.columnOptions) do
+        if self.savedVariablesTableLayoutConfig then
+            local columnLayoutConfig = self:GetColumnLayoutConfig(index)
+            if columnLayoutConfig.width then
+                columnOption.width = columnLayoutConfig.width
+            end
+        end
         local headerColumn = CreateFrame("Frame", nil, header)
+        headerColumn.highlightAtlas = headerColumn:CreateTexture(nil, "HIGHLIGHT")
+        headerColumn.highlightAtlas:SetAtlas(GGUI.CONST.HIGHLIGHTED_BLUE_ATLAS)
+        headerColumn.highlightAtlas:SetPoint("CENTER", headerColumn, "CENTER")
         headerColumn:SetSize(columnOption.width, 25)
+        headerColumn.highlightAtlas:SetSize(columnOption.width, 25)
 
         local columnTooltipOptions = columnOption.tooltipOptions
 
         if columnTooltipOptions then
             columnTooltipOptions.anchor = columnTooltipOptions.anchor or "ANCHOR_CURSOR"
             columnTooltipOptions.owner = columnTooltipOptions.owner or headerColumn
+        end
+
+        -- Determine the effective click callback for the header text
+        local columnOnClickCallback
+        if columnOption.sortFunc then
+            local capturedIndex = index
+            local capturedSortFunc = columnOption.sortFunc
+            local capturedCallback = columnOption.onClickCallback
+            -- Pre-create the descending sort function to avoid allocations on each click.
+            -- Reversing the two arguments inverts the caller-supplied ascending comparator.
+            local sortFuncDesc = function(rowA, rowB)
+                return capturedSortFunc(rowB, rowA)
+            end
+            columnOnClickCallback = function()
+                if self.activeSortColumnIndex == capturedIndex then
+                    -- Cycle: asc -> desc -> unsorted
+                    if self.activeSortAscending then
+                        -- Currently ascending -> switch to descending
+                        self.activeSortAscending = false
+                    else
+                        if self.savedVariablesTableLayoutConfig then
+                            self.savedVariablesTableLayoutConfig.activeSortColumnIndex = nil
+                            self.savedVariablesTableLayoutConfig.activeSortAscending = nil
+                        end
+                        -- Currently descending -> clear sort entirely
+                        headerColumn.sortArrowUp:Hide()
+                        headerColumn.sortArrowDown:Hide()
+                        headerColumn.notSortedIndicator:Show()
+                        self.activeSortColumnIndex = nil
+                        self.activeSortAscending = true
+                        self.activeSortFunc = nil
+                        self:UpdateDisplay()
+                        if capturedCallback then
+                            capturedCallback(headerColumn, capturedIndex)
+                        end
+                        return
+                    end
+                else
+                    -- Hide arrows on the previously sorted column
+                    if self.activeSortColumnIndex then
+                        local prevCol = self.headerColumns[self.activeSortColumnIndex]
+                        if prevCol and prevCol.sortArrowUp then
+                            prevCol.sortArrowUp:Hide()
+                            prevCol.sortArrowDown:Hide()
+                            prevCol.notSortedIndicator:Show()
+                        end
+                    end
+                    self.activeSortColumnIndex = capturedIndex
+                    self.activeSortAscending = true
+                end
+                if self.savedVariablesTableLayoutConfig then
+                    self.savedVariablesTableLayoutConfig.activeSortColumnIndex = self.activeSortColumnIndex
+                    self.savedVariablesTableLayoutConfig.activeSortAscending = self.activeSortAscending
+                end
+
+                -- Update the active sort function based on the current direction
+                if self.activeSortAscending then
+                    headerColumn.sortArrowUp:Show()
+                    headerColumn.sortArrowDown:Hide()
+                    headerColumn.notSortedIndicator:Hide()
+                    self.activeSortFunc = capturedSortFunc
+                else
+                    headerColumn.sortArrowUp:Hide()
+                    headerColumn.sortArrowDown:Show()
+                    headerColumn.notSortedIndicator:Hide()
+                    self.activeSortFunc = sortFuncDesc
+                end
+
+                self:UpdateDisplay()
+
+                if capturedCallback then
+                    capturedCallback(headerColumn, capturedIndex)
+                end
+            end
+        else
+            columnOnClickCallback = columnOption.onClickCallback
+        end
+
+        if columnOnClickCallback then
+            headerColumn:SetScript("OnMouseDown", function()
+                columnOnClickCallback(headerColumn, index)
+            end)
+            -- Set a backdrop so that SetBackdropColor has something to colorize
+            headerColumn:HookScript("OnEnter", function()
+                -- set backdrop to an atlas
+                headerColumn.highlightAtlas:Show()
+            end)
+            headerColumn:HookScript("OnLeave", function()
+                headerColumn.highlightAtlas:Hide()
+            end)
+            headerColumn:SetMouseClickEnabled(true)
         end
 
         headerColumn.text = GGUI.Text({
@@ -3305,8 +3507,31 @@ function GGUI.FrameList:new(options)
             justifyOptions = columnOption.justifyOptions or { type = "H", align = "LEFT" },
             fontOptions = columnOption.fontOptions,
             tooltipOptions = columnTooltipOptions,
-            onClickCallback = columnOption.onClickCallback,
+            scale = columnOption.headerScale or 1,
         })
+
+        -- Create sort direction arrows for sortable columns (hidden by default)
+        if columnOption.sortFunc then
+            local offsetX = columnOption.customSortArrowOffsetX or -2
+            local size = 20
+
+            headerColumn.sortArrowUp = headerColumn:CreateTexture(nil, "OVERLAY")
+            headerColumn.sortArrowUp:SetAtlas(GGUI.CONST.SORT_ARROW_UP_ATLAS)
+            headerColumn.sortArrowUp:SetSize(size, size)
+            headerColumn.sortArrowUp:SetPoint("TOPRIGHT", headerColumn, "TOPRIGHT", offsetX, -2)
+            headerColumn.sortArrowUp:Hide()
+
+            headerColumn.sortArrowDown = headerColumn:CreateTexture(nil, "OVERLAY")
+            headerColumn.sortArrowDown:SetAtlas(GGUI.CONST.SORT_ARROW_DOWN_ATLAS)
+            headerColumn.sortArrowDown:SetSize(size, size)
+            headerColumn.sortArrowDown:SetPoint("BOTTOMRIGHT", headerColumn, "BOTTOMRIGHT", offsetX, -2)
+            headerColumn.sortArrowDown:Hide()
+
+            headerColumn.notSortedIndicator = headerColumn:CreateTexture(nil, "OVERLAY")
+            headerColumn.notSortedIndicator:SetAtlas(GGUI.CONST.NOT_SORTED_ATLAS)
+            headerColumn.notSortedIndicator:SetSize(size, size)
+            headerColumn.notSortedIndicator:SetPoint("RIGHT", headerColumn, "RIGHT", offsetX, -2)
+        end
 
         if index == 1 then
             headerColumn:SetPoint("TOPLEFT", header, "TOPLEFT", options.headerOffsetX, 0)
@@ -3322,6 +3547,17 @@ function GGUI.FrameList:new(options)
         self.headerColumns[index] = headerColumn
     end
 
+    -- Add one resize handle per boundary where BOTH adjacent columns are resizable.
+    -- The handle sits on the RIGHT edge of the left column's header and resizes both columns
+    -- simultaneously to keep the total list width constant.
+    for index = 1, #options.columnOptions - 1 do
+        local leftOption = options.columnOptions[index]
+        local rightOption = options.columnOptions[index + 1]
+        if leftOption.resizable and rightOption.resizable then
+            self:_AddResizeHandle(self.headerColumns[index], index, leftOption, index + 1, rightOption)
+        end
+    end
+
     if options.label then
         self.label = GGUI.Text {
             parent = options.parent,
@@ -3331,6 +3567,169 @@ function GGUI.FrameList:new(options)
     end
 
     GGUI.FrameList.super.new(self, mainFrame)
+
+    if self.savedVariablesTableLayoutConfig and self.savedVariablesTableLayoutConfig.activeSortColumnIndex then
+        local columnIndex = self.savedVariablesTableLayoutConfig.activeSortColumnIndex
+        local ascending = self.savedVariablesTableLayoutConfig.activeSortAscending
+
+        if columnIndex and options.columnOptions[columnIndex] and options.columnOptions[columnIndex].sortFunc then
+            self.activeSortColumnIndex = columnIndex
+            self.activeSortAscending = ascending
+            self.activeSortFunc = ascending and options.columnOptions[columnIndex].sortFunc or
+                function(rowA, rowB)
+                    return options.columnOptions[columnIndex].sortFunc(rowB, rowA)
+                end
+        end
+
+        local headerColumn = self.headerColumns[columnIndex]
+        if headerColumn then
+            if self.activeSortAscending then
+                headerColumn.sortArrowUp:Show()
+                headerColumn.sortArrowDown:Hide()
+                headerColumn.notSortedIndicator:Hide()
+            else
+                headerColumn.sortArrowUp:Hide()
+                headerColumn.sortArrowDown:Show()
+                headerColumn.notSortedIndicator:Hide()
+            end
+        end
+    end
+end
+
+---@param leftHeaderColumn Frame header column frame for the left column (handle is placed on its right edge)
+---@param leftColumnIndex number index of the left column in the boundary
+---@param leftColumnOption GGUI.FrameList.ColumnOption column option for the left column
+---@param rightColumnIndex number index of the right column in the boundary
+---@param rightColumnOption GGUI.FrameList.ColumnOption column option for the right column
+function GGUI.FrameList:_AddResizeHandle(leftHeaderColumn, leftColumnIndex, leftColumnOption, rightColumnIndex,
+                                         rightColumnOption)
+    local HANDLE_WIDTH = 6
+
+    local handle = CreateFrame("Frame", nil, leftHeaderColumn, "BackdropTemplate")
+    handle.highlightAtlas = handle:CreateTexture(nil, "HIGHLIGHT")
+    handle.highlightAtlas:SetAtlas(GGUI.CONST.HIGHTLIGHTED_VERTICAL_EDGE_BLUE_ATLAS)
+    handle.highlightAtlas:SetPoint("CENTER", handle, "CENTER")
+    handle.highlightAtlas:SetSize(HANDLE_WIDTH + 5, 20)
+    handle:SetSize(HANDLE_WIDTH, 25)
+    handle:EnableMouse(true)
+    handle:SetFrameLevel(leftHeaderColumn:GetFrameLevel() + 10)
+    handle:SetPoint("CENTER", leftHeaderColumn, "RIGHT", 0, 0)
+
+    handle:HookScript("OnEnter", function()
+        handle.highlightAtlas:Show()
+    end)
+    handle:HookScript("OnLeave", function()
+        if not (GGUI._resizeDragState and GGUI._resizeDragState.handle == handle) then
+            handle.highlightAtlas:Hide()
+        end
+    end)
+
+    local capturedFrameList = self
+    local capturedLeftIndex = leftColumnIndex
+    local capturedRightIndex = rightColumnIndex
+    local capturedLeftMinWidth = leftColumnOption.minWidth or 5
+    local capturedRightMinWidth = rightColumnOption.minWidth or 5
+    handle:SetScript("OnMouseDown", function(_, button)
+        if button ~= "LeftButton" then return end
+        local scale = UIParent:GetScale()
+        local cursorX = GetCursorPosition() / scale
+        local leftWidth = capturedFrameList.headerColumns[capturedLeftIndex]:GetWidth()
+        local rightWidth = capturedFrameList.headerColumns[capturedRightIndex]:GetWidth()
+        GGUI._resizeDragState = {
+            handle = handle,
+            frameList = capturedFrameList,
+            leftColumnIndex = capturedLeftIndex,
+            rightColumnIndex = capturedRightIndex,
+            leftMinWidth = capturedLeftMinWidth,
+            rightMinWidth = capturedRightMinWidth,
+            startCursorX = cursorX,
+            leftStartWidth = leftWidth,
+            rightStartWidth = rightWidth,
+            currentLeftWidth = leftWidth,
+            currentRightWidth = rightWidth,
+        }
+        GGUI._resizeDragTrackerFrame:Show()
+    end)
+
+    handle:SetScript("OnMouseUp", function(_, button)
+        if button == "LeftButton" then
+            if GGUI._resizeDragState then
+                local handle = GGUI._resizeDragState.handle
+                if handle then
+                    handle:SetBackdropColor(1, 1, 1, 0)
+                end
+                GGUI._resizeDragState = nil
+            end
+        end
+        GGUI._resizeDragTrackerFrame:Hide()
+    end)
+end
+
+---Apply a boundary resize: update both column widths in headers, all row columns, and call both resize callbacks.
+---@param leftColumnIndex number
+---@param newLeftWidth number
+---@param rightColumnIndex number
+---@param newRightWidth number
+function GGUI.FrameList:_ApplyBoundaryResize(leftColumnIndex, newLeftWidth, rightColumnIndex, newRightWidth)
+    local leftOption = self.columnOptions[leftColumnIndex]
+    local rightOption = self.columnOptions[rightColumnIndex]
+    local leftHeader = self.headerColumns[leftColumnIndex]
+    local rightHeader = self.headerColumns[rightColumnIndex]
+
+    leftOption.width = newLeftWidth
+    rightOption.width = newRightWidth
+
+    leftHeader:SetWidth(newLeftWidth)
+    leftHeader.text.frame:SetWidth(newLeftWidth)
+
+    rightHeader:SetWidth(newRightWidth)
+    rightHeader.text.frame:SetWidth(newRightWidth)
+
+    if leftHeader.highlightAtlas then
+        leftHeader.highlightAtlas:SetWidth(newLeftWidth)
+    end
+
+    if rightHeader.highlightAtlas then
+        rightHeader.highlightAtlas:SetWidth(newRightWidth)
+    end
+
+    for _, row in pairs(self.rows) do
+        local leftCol = row.columns[leftColumnIndex]
+        if leftCol then
+            leftCol:SetWidth(newLeftWidth)
+            if leftOption.resizeCallback then
+                leftOption.resizeCallback(leftCol, newLeftWidth)
+            end
+        end
+        local rightCol = row.columns[rightColumnIndex]
+        if rightCol then
+            rightCol:SetWidth(newRightWidth)
+            if rightOption.resizeCallback then
+                rightOption.resizeCallback(rightCol, newRightWidth)
+            end
+        end
+    end
+    local leftLayoutConfig = self:GetColumnLayoutConfig(leftColumnIndex)
+    local rightLayoutConfig = self:GetColumnLayoutConfig(rightColumnIndex)
+    leftLayoutConfig.width = newLeftWidth
+    rightLayoutConfig.width = newRightWidth
+    self:SaveColumnLayoutConfig(leftColumnIndex, leftLayoutConfig)
+    self:SaveColumnLayoutConfig(rightColumnIndex, rightLayoutConfig)
+end
+
+---@return GGUI.FrameList.ColumnLayoutConfig
+function GGUI.FrameList:GetDefaultColumnLayoutConfig()
+    return {}
+end
+
+function GGUI.FrameList:GetColumnLayoutConfig(columnIndex)
+    self.savedVariablesTableLayoutConfig.columns = self.savedVariablesTableLayoutConfig.columns or {}
+    return self.savedVariablesTableLayoutConfig.columns[columnIndex] or self:GetDefaultColumnLayoutConfig()
+end
+
+function GGUI.FrameList:SaveColumnLayoutConfig(columnIndex, layoutConfig)
+    self.savedVariablesTableLayoutConfig.columns = self.savedVariablesTableLayoutConfig.columns or {}
+    self.savedVariablesTableLayoutConfig.columns[columnIndex] = layoutConfig
 end
 
 ---@param anchorPoints GGUI.AnchorPoint[]
@@ -3739,23 +4138,34 @@ function GGUI.FrameList:UpdateDisplay(sortFunc)
     -- filter and show active rows and hide all inactive
     -- but keep reference!!
     wipe(self.activeRows)
-    tAppendAll(self.activeRows, GUTIL:Filter(self.rows, function(row)
-        if row.active then
-            row:Show()
-            return true
-        else
-            row:Hide()
-            return false
-        end
-    end))
+    tAppendAll(self.activeRows, GUTIL:Filter(self.rows,
+        ---@param row GGUI.FrameList.Row
+        function(row)
+            if row.active then
+                row:Show()
+                if row ~= self.selectedRow then
+                    -- only apply selection color to active rows that are not selected, selected row keeps its color until another row is selected
+                    if row.originalBackdropOptions then
+                        GGUI:SetBackdropByBackdropOptions(row.frame, row.originalBackdropOptions)
+                    else
+                        row.frame:SetBackdropColor(0, 0, 0, 0)
+                    end
+                end
+                return true
+            else
+                row:Hide()
+                return false
+            end
+        end))
 
     if #self.activeRows == 0 then
         return
     end
 
-    if #self.activeRows > 1 and sortFunc then
+    local effectiveSortFunc = sortFunc or self.activeSortFunc
+    if #self.activeRows > 1 and effectiveSortFunc then
         -- in place sort to keep reference!
-        table.sort(self.activeRows, sortFunc)
+        table.sort(self.activeRows, effectiveSortFunc)
     end
 
     local lastRow = nil
@@ -4945,6 +5355,7 @@ end
 ---@field optionsTable? table
 ---@field optionsKey? any
 ---@field onToggleCallback? fun(button: GGUI.ToggleButton, newValue: boolean)
+---@field label? string
 ---@field labelOn? string
 ---@field labelOff? string
 
@@ -4957,12 +5368,15 @@ function GGUI.ToggleButton:new(options)
     -- lock states on click
     self.isOn = options.isOn == nil -- default true
 
-    options.label = (self.isOn and options.labelOn) or options.labelOff or options.label
     options.buttonTextureOptions = {
         normal = "128-RedButton-UP",
+        disabled = "128-RedButton-Disable",
         isAtlas = true,
     }
 
+    self.adjustWidthX = options.sizeX or 5
+    self.adjustWidth = options.adjustWidth or false
+    self.label = options.label or ""
     self.labelOn = options.labelOn
     self.labelOff = options.labelOff
     GGUI.ToggleButton.super.new(self, options)
@@ -4989,6 +5403,11 @@ function GGUI.ToggleButton:new(options)
     self:SetToggle(self.isOn)
 end
 
+function GGUI.ToggleButton:SetEnabled(enabled)
+    self.button:SetEnabled(enabled)
+    self.button:EnableMouse(enabled)
+end
+
 ---@param toggle boolean
 ---@param userInput? boolean whether this toggle change was triggered by user input (click) or programmatically by calling SetToggle. Default: false
 function GGUI.ToggleButton:SetToggle(toggle, userInput)
@@ -5002,7 +5421,8 @@ function GGUI.ToggleButton:SetToggle(toggle, userInput)
         end
 
         if self.button:GetFontString() then
-            self:SetText(self.labelOn)
+            local label = self.labelOn or self.label
+            self:SetText(label, self.adjustWidthX, self.adjustWidth)
         end
     else
         self.button:DesaturateHierarchy(1)
@@ -5011,7 +5431,8 @@ function GGUI.ToggleButton:SetToggle(toggle, userInput)
             self.labelTexture:SetDesatured(true)
         end
         if self.button:GetFontString() then
-            self:SetText(self.labelOff)
+            local label = self.labelOff or self.label
+            self:SetText(label, self.adjustWidthX, self.adjustWidth)
         end
     end
 
@@ -5054,4 +5475,495 @@ function GGUI.FilterButton:new(options)
             options.menuUtilCallback(ownerRegion, rootDescription)
         end)
     end)
+end
+
+--- GGUI.TutorialButton
+
+---@class GGUI.TutorialButton.HelpPlateRectDefinition
+---@field frame? Frame
+---@field useMainButton? boolean
+---@field x? number
+---@field y? number
+---@field width? number
+---@field height? number
+---@field offsetX? number
+---@field offsetY? number
+---@field extraWidth? number
+---@field extraHeight? number
+---@field includeFrameWidth? boolean
+---@field includeFrameHeight? boolean
+
+---@class GGUI.TutorialButton.HelpPlateStepDefinition
+---@field button? GGUI.TutorialButton.HelpPlateRectDefinition
+---@field highlight? GGUI.TutorialButton.HelpPlateRectDefinition
+---@field ButtonPos? { x:number, y:number }
+---@field HighLightBox? { x:number, y:number, width:number, height:number }
+---@field toolTipDir? string
+---@field toolTipText? string
+---@field ToolTipDir? string
+---@field ToolTipText? string
+
+---@class GGUI.TutorialButton.HelpPlateDefinition
+---@field parent? Frame
+---@field mainButton? Frame
+---@field framePos? { x:number, y:number }
+---@field frameSize? { width:number, height:number }
+---@field steps GGUI.TutorialButton.HelpPlateStepDefinition[]
+
+---@class GGUI.TutorialButton.ConstructorOptions : GGUI.ConstructorOptions
+---@field hide? boolean
+---@field label? string
+---@field parent? Frame
+---@field anchorPoints? GGUI.AnchorPoint[]
+---@field anchorParent? Region -- DEPRICATED Use anchorPoints
+---@field anchorA? FramePoint -- DEPRICATED Use anchorPoints
+---@field anchorB? FramePoint -- DEPRICATED Use anchorPoints
+---@field offsetX? number -- DEPRICATED Use anchorPoints
+---@field offsetY? number -- DEPRICATED Use anchorPoints
+---@field scale? number default: 1
+---@field clickCallback? fun(button: GGUI.TutorialButton, mouseButton: MouseButton)
+---@field tooltipOptions? GGUI.TooltipOptions
+---@field glowOnInit? boolean default: false
+---@field autoToggleMode? "helpPlate"|"helpTip"|"callback" default: inferred by configured help data
+---@field helpPlateInfo? table HelpPlate definition table with FramePos/FrameSize and indexed tiles
+---@field helpPlateDefinition? GGUI.TutorialButton.HelpPlateDefinition Declarative definition for dynamic HelpPlate generation
+---@field rebuildHelpPlateOnShow? boolean default: true when helpPlateDefinition is set, otherwise false
+---@field helpPlateParent? Frame Parent frame passed to HelpPlate.Show
+---@field helpPlateMainButton? Frame Main tutorial button passed to HelpPlate.Show/ShowTutorialTooltip
+---@field helpTipInfo? table HelpTip info table passed to HelpTip:Show
+---@field helpTipParent? Frame Parent frame passed to HelpTip:Show
+---@field helpTipRelativeRegion? Region Relative region passed to HelpTip:Show
+
+---@class GGUI.TutorialButton : GGUI.Widget
+---@overload fun(options:GGUI.TutorialButton.ConstructorOptions): GGUI.TutorialButton
+GGUI.TutorialButton = GGUI.Widget:extend()
+
+---@param frame Frame
+---@param relativeTo Frame
+---@return number? x
+---@return number? y
+---@return number? width
+---@return number? height
+local function TutorialButton_GetTopLeftRectRelativeTo(frame, relativeTo)
+    if not frame or not relativeTo then
+        return nil, nil, nil, nil
+    end
+
+    local left = frame:GetLeft()
+    local top = frame:GetTop()
+    local parentLeft = relativeTo:GetLeft()
+    local parentTop = relativeTo:GetTop()
+
+    if not left or not top or not parentLeft or not parentTop then
+        return nil, nil, nil, nil
+    end
+
+    local frameScale = frame:GetEffectiveScale() or 1
+    local parentScale = relativeTo:GetEffectiveScale() or 1
+    if parentScale == 0 then
+        return nil, nil, nil, nil
+    end
+
+    -- Convert both frames into the same (screen) space, then back into parent's space.
+    local x = ((left * frameScale) - (parentLeft * parentScale)) / parentScale
+    local y = ((top * frameScale) - (parentTop * parentScale)) / parentScale
+
+    local width = (frame:GetWidth() or 0) * (frameScale / parentScale)
+    local height = (frame:GetHeight() or 0) * (frameScale / parentScale)
+
+    return x, y, width, height
+end
+
+---@param rectDef GGUI.TutorialButton.HelpPlateRectDefinition?
+---@param parent Frame
+---@param mainButton Frame?
+---@return number? x
+---@return number? y
+---@return number? width
+---@return number? height
+local function TutorialButton_BuildRectFromDefinition(rectDef, parent, mainButton)
+    if not rectDef then
+        return nil, nil, nil, nil
+    end
+
+    local x, y, width, height = nil, nil, nil, nil
+    local targetFrame = rectDef.frame
+    if not targetFrame and rectDef.useMainButton then
+        targetFrame = mainButton
+    end
+
+    if targetFrame then
+        x, y, width, height = TutorialButton_GetTopLeftRectRelativeTo(targetFrame, parent)
+    end
+
+    x = (x or rectDef.x or 0) + (rectDef.offsetX or 0)
+    y = (y or rectDef.y or 0) + (rectDef.offsetY or 0)
+
+    if rectDef.includeFrameWidth and width then
+        x = x + width
+    end
+    if rectDef.includeFrameHeight and height then
+        y = y + height
+    end
+
+    width = rectDef.width or width
+    height = rectDef.height or height
+
+    if width and rectDef.extraWidth then
+        width = width + rectDef.extraWidth
+    end
+    if height and rectDef.extraHeight then
+        height = height + rectDef.extraHeight
+    end
+
+    return x, y, width, height
+end
+
+---@param definition GGUI.TutorialButton.HelpPlateDefinition?
+---@param fallbackParent Frame?
+---@param fallbackMainButton Frame?
+---@return table? helpPlateInfo
+---@return Frame? parent
+---@return Frame? mainButton
+local function TutorialButton_BuildHelpPlateInfoFromDefinition(definition, fallbackParent, fallbackMainButton)
+    if not definition then
+        return nil, fallbackParent, fallbackMainButton
+    end
+
+    local parent = definition.parent or fallbackParent
+    if not parent then
+        return nil, fallbackParent, fallbackMainButton
+    end
+
+    local framePos = definition.framePos or { x = 0, y = 0 }
+    local frameSize = definition.frameSize or {
+        width = parent:GetWidth() or 900,
+        height = parent:GetHeight() or 520,
+    }
+
+    local info = {
+        FramePos = { x = framePos.x or 0, y = framePos.y or 0 },
+        FrameSize = { width = frameSize.width or 900, height = frameSize.height or 520 },
+    }
+
+    local mainButton = definition.mainButton or fallbackMainButton
+
+    for index, step in ipairs(definition.steps or {}) do
+        local buttonX, buttonY = nil, nil
+        if step.ButtonPos then
+            buttonX = step.ButtonPos.x
+            buttonY = step.ButtonPos.y
+        else
+            buttonX, buttonY = TutorialButton_BuildRectFromDefinition(step.button, parent, mainButton)
+        end
+
+        local highLightBox = step.HighLightBox
+        if not highLightBox and step.highlight then
+            local hx, hy, hw, hh = TutorialButton_BuildRectFromDefinition(step.highlight, parent, mainButton)
+            if hx and hy and hw and hh then
+                highLightBox = {
+                    x = hx,
+                    y = hy,
+                    width = hw,
+                    height = hh,
+                }
+            end
+        end
+
+        if buttonX and buttonY and highLightBox then
+            info[index] = {
+                ButtonPos = { x = buttonX, y = buttonY },
+                HighLightBox = highLightBox,
+                ToolTipDir = step.ToolTipDir or step.toolTipDir or "LEFT",
+                ToolTipText = step.ToolTipText or step.toolTipText or "",
+            }
+        end
+    end
+
+    return info, parent, mainButton
+end
+
+---@param options GGUI.TutorialButton.ConstructorOptions
+function GGUI.TutorialButton:new(options)
+    options = options or {}
+    options.label = options.label or ""
+    options.anchorA = options.anchorA or "CENTER"
+    options.anchorB = options.anchorB or "CENTER"
+    options.offsetX = options.offsetX or 0
+    options.offsetY = options.offsetY or 0
+    options.hide = options.hide or false
+
+    -- Try MainHelpPlateButton first (Blizzard's standard help button template from Blizzard_HelpPlate addon)
+    local button = CreateFrame("Button", nil, options.parent, "MainHelpPlateButton")
+
+    GGUI.TutorialButton.super.new(self, button)
+
+    -- Ensure button is visible and interactive even if sibling frames overlap it.
+    button:EnableMouse(true)
+    button:SetFrameStrata("TOOLTIP")
+    button:SetToplevel(true)
+    button:SetFrameLevel((options.parent and options.parent:GetFrameLevel() or 0) + 200)
+    button:Raise()
+
+    button:SetText(options.label)
+    button:SetShown(not options.hide)
+    -- since the button and its internal ring , glow and other textuers are all designed for 64x64, we can scale down the whole button to keep the intended look while allowing for smaller sizes
+    button:SetScale(options.scale or 1)
+    -- also adapt textures to scale
+    --button.I:SetScale(options.scale or 1)
+    --button.Ring:SetScale(options.scale or 1)
+    -- MainHelpPlateButton template uses large hit insets for 64x64. When downsized
+    -- (e.g. 25x25), those insets can collapse the clickable region to zero.
+    button:SetHitRectInsets(0, 0, 0, 0)
+
+    if options.anchorPoints then
+        self:SetPointsByAnchorPoints(options.anchorPoints)
+    else
+        button:SetPoint(options.anchorA, options.anchorParent, options.anchorB, options.offsetX, options.offsetY)
+    end
+
+    self.clickCallback = options.clickCallback
+    self.helpPlateInfo = options.helpPlateInfo
+    self.helpPlateDefinition = options.helpPlateDefinition
+    self.rebuildHelpPlateOnShowExplicit = options.rebuildHelpPlateOnShow ~= nil
+    self.rebuildHelpPlateOnShow = options.rebuildHelpPlateOnShow
+    if self.rebuildHelpPlateOnShow == nil then
+        self.rebuildHelpPlateOnShow = self.helpPlateDefinition ~= nil
+    end
+    self.helpPlateParent = options.helpPlateParent
+    self.helpPlateMainButton = options.helpPlateMainButton
+    self.helpTipInfo = options.helpTipInfo
+    self.helpTipParent = options.helpTipParent
+    self.helpTipRelativeRegion = options.helpTipRelativeRegion
+    self.autoToggleMode = options.autoToggleMode
+
+    if not self.autoToggleMode then
+        if self.helpPlateInfo or self.helpPlateDefinition then
+            self.autoToggleMode = "helpPlate"
+        elseif self.helpTipInfo then
+            self.autoToggleMode = "helpTip"
+        else
+            self.autoToggleMode = "callback"
+        end
+    end
+
+    if self.helpPlateDefinition then
+        self:BuildHelpPlateInfoFromDefinition()
+    end
+
+    button:RegisterForClicks("AnyUp")
+    button:HookScript("OnEnter", function(btn)
+        btn:SetAlpha(1)
+    end)
+    button:HookScript("OnLeave", function(btn)
+        btn:SetAlpha(0.85)
+    end)
+    button:HookScript("OnMouseDown", function(btn)
+        btn:SetScale((options.scale or 1) * 0.96)
+    end)
+    button:HookScript("OnMouseUp", function(btn)
+        btn:SetScale(options.scale or 1)
+    end)
+    button:HookScript("OnClick", function(_, clickedButton)
+        local handled = false
+        if self.clickCallback then
+            handled = self.clickCallback(self, clickedButton) == true
+        end
+
+        if handled then
+            return
+        end
+
+        if self.autoToggleMode == "helpPlate" then
+            self:ToggleHelpPlate()
+        elseif self.autoToggleMode == "helpTip" then
+            self:ToggleHelpTip()
+        end
+    end)
+
+    self.tooltipOptions = options.tooltipOptions
+    if self.tooltipOptions then
+        GGUI:SetTooltipsByTooltipOptions(button, self)
+    end
+
+    if options.glowOnInit then
+        self:StartGlow()
+    end
+
+    -- Default idle alpha so hover feedback is obvious.
+    button:SetAlpha(0.85)
+end
+
+--- Start the glow/flash animation on the tutorial button
+function GGUI.TutorialButton:StartGlow()
+    if self.frame.ConfigureForTutorial then
+        self.frame:ConfigureForTutorial()
+        return
+    end
+
+    if self.frame.Flash then
+        self.frame.Flash:Show()
+    end
+    if self.frame.flashAnim then
+        self.frame.flashAnim:Play()
+    end
+end
+
+--- Stop the glow/flash animation on the tutorial button
+function GGUI.TutorialButton:StopGlow()
+    if self.frame.HideTutorial then
+        self.frame:HideTutorial()
+    end
+
+    if self.frame.flashAnim then
+        self.frame.flashAnim:Stop()
+    end
+    if self.frame.Flash then
+        self.frame.Flash:Hide()
+    end
+end
+
+---@param text string
+function GGUI.TutorialButton:SetText(text)
+    self.frame:SetText(text)
+end
+
+---@param helpPlateInfo table
+---@param parent Frame?
+---@param mainButton Frame?
+function GGUI.TutorialButton:SetHelpPlateContext(helpPlateInfo, parent, mainButton)
+    self.helpPlateInfo = helpPlateInfo
+    self.helpPlateParent = parent or self.helpPlateParent
+    self.helpPlateMainButton = mainButton or self.helpPlateMainButton
+end
+
+---@param helpPlateDefinition GGUI.TutorialButton.HelpPlateDefinition
+---@param parent Frame?
+---@param mainButton Frame?
+function GGUI.TutorialButton:SetHelpPlateDefinition(helpPlateDefinition, parent, mainButton)
+    self.helpPlateDefinition = helpPlateDefinition
+    -- If this setting was not explicitly provided by the caller, definition-based
+    -- tutorials should rebuild on each show to reflect live frame geometry.
+    if not self.rebuildHelpPlateOnShowExplicit then
+        self.rebuildHelpPlateOnShow = true
+    end
+    self.helpPlateParent = parent or self.helpPlateParent
+    self.helpPlateMainButton = mainButton or self.helpPlateMainButton
+    self:BuildHelpPlateInfoFromDefinition()
+end
+
+---@return table? helpPlateInfo
+function GGUI.TutorialButton:BuildHelpPlateInfoFromDefinition()
+    if not self.helpPlateDefinition then
+        return nil
+    end
+
+    local info, parent, mainButton = TutorialButton_BuildHelpPlateInfoFromDefinition(
+        self.helpPlateDefinition,
+        self.helpPlateParent or self.frame:GetParent(),
+        self.helpPlateMainButton or self.frame)
+
+    if info then
+        self:SetHelpPlateContext(info, parent, mainButton)
+    end
+
+    return info
+end
+
+---@param helpTipInfo table
+---@param parent Frame?
+---@param relativeRegion Region?
+function GGUI.TutorialButton:SetHelpTipContext(helpTipInfo, parent, relativeRegion)
+    self.helpTipInfo = helpTipInfo
+    self.helpTipParent = parent or self.helpTipParent
+    self.helpTipRelativeRegion = relativeRegion or self.helpTipRelativeRegion
+end
+
+---@param userToggled? boolean
+function GGUI.TutorialButton:ShowHelpPlate(userToggled)
+    if self.helpPlateDefinition and (self.rebuildHelpPlateOnShow or not self.helpPlateInfo) then
+        self:BuildHelpPlateInfoFromDefinition()
+    end
+
+    if not (HelpPlate and HelpPlate.Show and self.helpPlateInfo) then
+        return
+    end
+
+    local parent = self.helpPlateParent or self.frame:GetParent()
+    local mainButton = self.helpPlateMainButton or self.frame
+    HelpPlate.Show(self.helpPlateInfo, parent, mainButton)
+
+    if userToggled ~= nil and userToggled then
+        self:StopGlow()
+    end
+end
+
+---@param userToggled? boolean
+function GGUI.TutorialButton:HideHelpPlate(userToggled)
+    if HelpPlate and HelpPlate.Hide then
+        HelpPlate.Hide(userToggled and true or false)
+    end
+end
+
+---@return boolean
+function GGUI.TutorialButton:IsHelpPlateShowing()
+    if HelpPlate and HelpPlate.IsShowingHelpInfo and self.helpPlateInfo then
+        return HelpPlate.IsShowingHelpInfo(self.helpPlateInfo)
+    end
+    return false
+end
+
+---@param userToggled? boolean
+function GGUI.TutorialButton:ToggleHelpPlate(userToggled)
+    if self:IsHelpPlateShowing() then
+        self:HideHelpPlate(userToggled)
+    else
+        self:ShowHelpPlate(userToggled)
+    end
+end
+
+function GGUI.TutorialButton:ShowTutorialTooltip()
+    if HelpPlate and HelpPlate.ShowTutorialTooltip and self.helpPlateInfo then
+        local mainButton = self.helpPlateMainButton or self.frame
+        HelpPlate.ShowTutorialTooltip(self.helpPlateInfo, mainButton)
+    end
+end
+
+function GGUI.TutorialButton:HideTutorialTooltip()
+    if HelpPlate and HelpPlate.HideTooltip then
+        HelpPlate.HideTooltip()
+    end
+end
+
+function GGUI.TutorialButton:ShowHelpTip()
+    if not (HelpTip and HelpTip.Show and self.helpTipInfo) then
+        return nil
+    end
+    local parent = self.helpTipParent or self.frame
+    local relativeRegion = self.helpTipRelativeRegion or self.frame
+    return HelpTip:Show(parent, self.helpTipInfo, relativeRegion)
+end
+
+function GGUI.TutorialButton:HideHelpTip()
+    if HelpTip and HelpTip.Hide and self.helpTipInfo then
+        local parent = self.helpTipParent or self.frame
+        HelpTip:Hide(parent, self.helpTipInfo.text)
+    end
+end
+
+---@return boolean
+function GGUI.TutorialButton:IsHelpTipShowing()
+    if HelpTip and HelpTip.IsShowing and self.helpTipInfo then
+        local parent = self.helpTipParent or self.frame
+        return HelpTip:IsShowing(parent, self.helpTipInfo.text)
+    end
+    return false
+end
+
+function GGUI.TutorialButton:ToggleHelpTip()
+    if self:IsHelpTipShowing() then
+        self:HideHelpTip()
+    else
+        self:ShowHelpTip()
+    end
 end

@@ -12,7 +12,6 @@ local tostring = tostring
 local UnitPowerType = UnitPowerType
 local UnitPower = UnitPower
 local UnitPowerMax = UnitPowerMax
-local unit_is_valid = Grid2.roster_guids
 local canaccessvalue = Grid2.canaccessvalue
 
 local ScaleTo100 = CurveConstants.ScaleTo100
@@ -35,6 +34,8 @@ local function status_OnDisable(self)
 end
 
 -- Alternative power status
+local PowerAltFmtFunc, PowerAltFmtData
+
 PowerAlt.GetColor = Grid2.statusLibrary.GetColor
 PowerAlt.OnEnable = status_OnEnable
 PowerAlt.OnDisable= status_OnDisable
@@ -59,7 +60,11 @@ function PowerAlt:GetPercent(unit)
 end
 
 function PowerAlt:GetText(unit)
-	return AbbreviateLargeNumbers( UnitPower(unit,10) )
+	return PowerAltFmtFunc( UnitPower(unit,10), PowerAltFmtData )
+end
+
+function PowerAlt:UpdateDB()
+	PowerAltFmtFunc, PowerAltFmtData = Grid2:GetNumbersFormatFunction()
 end
 
 Grid2.setupFunc["poweralt"] = function(baseKey, dbx)
@@ -70,6 +75,7 @@ end
 Grid2:DbSetStatusDefaultValue( "poweralt", {type = "poweralt", color1= {r=1,g=0,b=0.5,a=1}} )
 
 -- Power status
+local PowerFmtFunc, PowerFmtData
 local powerColors = {}
 
 Power.OnEnable  = status_OnEnable
@@ -104,7 +110,7 @@ function Power:GetPercent(unit)
 end
 
 function Power:GetText(unit)
-	return AbbreviateLargeNumbers( UnitPower(unit) )
+	return PowerFmtFunc( UnitPower(unit), PowerFmtData )
 end
 
 function Power:UpdateDB()
@@ -124,6 +130,7 @@ function Power:UpdateDB()
 	self.IsActive = self.filtered and self.IsActiveFilter or self.IsActiveStandard
 	self.UpdateUnitPower = self.filtered and self.UpdateUnitPowerFilter or self.UpdateIndicatorsFromEvent
 	fmtPercent = Grid2.db.profile.formatting.percentFormat
+	PowerFmtFunc, PowerFmtData = Grid2:GetNumbersFormatFunction()
 end
 
 Grid2.setupFunc["power"] = function(baseKey, dbx)
@@ -145,6 +152,8 @@ Grid2:DbSetStatusDefaultValue( "power", {type = "power", colorCount = 10,
 })
 
 -- Mana, Manaalt statuses
+local ManaFmtFunc, ManaFmtData
+
 local function Mana_UpdateUnitPower(self, _, unit, powerType)
 	if powerType=='MANA' or powerType==nil then -- powerType==nil => UNIT_DISPLAYPOWER event
 		self:UpdateIndicators(unit)
@@ -198,10 +207,11 @@ local function Mana_GetPercent(self, unit)
 end
 
 local function Mana_GetText(self, unit)
-	return AbbreviateLargeNumbers( UnitPower(unit,0) )
+	return ManaFmtFunc( UnitPower(unit,0), ManaFmtData )
 end
 
 local function Mana_UpdateDB(self)
+	ManaFmtFunc, ManaFmtData = Grid2:GetNumbersFormatFunction()
 	self.UpdateUnitPower = self.filtered and Mana_UpdateUnitPowerF or Mana_UpdateUnitPower
 	if not self.dbx.displayType then -- false|nil = display mana only when is primary resource (standard behaviour)
 		self.IsActive = self.filtered and Mana_IsActivePrimaryF or Mana_IsActivePrimary

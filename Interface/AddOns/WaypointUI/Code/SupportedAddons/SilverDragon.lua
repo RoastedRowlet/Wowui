@@ -1,5 +1,6 @@
 local env = select(2, ...)
 local Config = env.Config
+local Path = env.modules:Import("packages\\path")
 local MapPin = env.modules:Import("@\\MapPin")
 local SupportedAddons = env.modules:Import("@\\SupportedAddons")
 local SupportedAddons_TomTom = env.modules:Import("@\\SupportedAddons\\TomTom")
@@ -66,7 +67,7 @@ end
 function SupportedAddons_SilverDragon.PlaceWaypointAtSession()
     if not SessionWaypointInfo.mapID or not SessionWaypointInfo.x or not SessionWaypointInfo.y then return end
     SupportedAddons_TomTom.IgnoreWaypoint(SessionWaypointInfo.mapID, SessionWaypointInfo.x, SessionWaypointInfo.y)
-    MapPin.NewUserNavigation(SessionWaypointInfo.name, SessionWaypointInfo.mapID, SessionWaypointInfo.x, SessionWaypointInfo.y, "SilverDragon_Waypoint")
+    MapPin.NewUserNavigation(SessionWaypointInfo.name, SessionWaypointInfo.mapID, SessionWaypointInfo.x, SessionWaypointInfo.y, "SilverDragon_Waypoint", Path.Root .. "\\Art\\Icons\\VignetteElite", nil, nil, nil, true)
 end
 
 local function OnPointTo(_, sourceID, mapID, x, y)

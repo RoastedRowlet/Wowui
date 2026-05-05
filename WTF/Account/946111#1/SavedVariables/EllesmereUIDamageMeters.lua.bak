@@ -1,0 +1,2 @@
+
+EllesmereUIDamageMetersDB = nil

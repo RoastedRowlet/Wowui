@@ -17,7 +17,7 @@ local MSG_PREFIX = "|cff00ccffArcUI|r: "
 
 local state = {
     importString  = "",
-    detectedType  = nil,   -- "bars" | "cdm" | "master"
+    detectedType  = nil,   -- "bars" | "cdm" | "master" | "cr"
     detectedData  = nil,
     importError   = nil,
 
@@ -32,6 +32,11 @@ local state = {
     cdmImportFlattenGlobals = false,
     cdmImportGroupSettings  = true,
     cdmImportProfiles       = true,
+
+    -- Cooldown Reminder-specific
+    crImportMode     = "merge",  -- "merge" | "replace"
+    crImportGlobals  = true,
+    crImportPerSpell = true,
 
     -- Master-specific
     masterImportMode        = "merge",
@@ -71,6 +76,12 @@ local function TryDetect(str)
         if data then return "bars", data, nil end
     end
 
+    -- Cooldown Reminder (AceSerializer + ARCUI_CR prefix)
+    if ns.CRImportExport and ns.CRImportExport.ParseImportString then
+        local data, err = ns.CRImportExport.ParseImportString(str)
+        if data then return "cr", data, nil end
+    end
+
     return nil, nil, "Could not detect import type — invalid or corrupted string"
 end
 
@@ -81,6 +92,9 @@ local function OnStringParsed(t, d)
     -- Reset type-specific state
     state.barsImportMode = "add"
     state.masterImportMode = "merge"
+    state.crImportMode = "merge"
+    state.crImportGlobals = true
+    state.crImportPerSpell = true
     wipe(state.masterActiveOverrides)
 
     if t == "master" and d and ns.CDMMasterExport and ns.CDMMasterExport.BuildImportSelectorArgs then
@@ -110,6 +124,7 @@ local TYPE_LABELS = {
     bars   = "|cffFFD100Bars Export|r",
     cdm    = "|cff00CCFFIcon Manager Export|r",
     master = "|cff00FF88Master Export|r",
+    cr     = "|cffFF7777Cooldown Reminder Export|r",
 }
 
 local function BuildPreview(t, d)
@@ -192,6 +207,11 @@ local function BuildPreview(t, d)
             "%d bar(s) — |cffFFFF00%d aura|r  |cff00FFFF%d cooldown|r  |cff00FF88%d resource|r  |cffCC66FF%d timer|r",
             total, auraCount, cooldownCount, resourceCount, timerCount
         ))
+
+    elseif t == "cr" then
+        if ns.CRImportExport and ns.CRImportExport.GenerateImportPreview then
+            table.insert(lines, ns.CRImportExport.GenerateImportPreview(d))
+        end
     end
 
     return table.concat(lines, "\n")
@@ -245,6 +265,18 @@ local function DoImport()
         else
             print(MSG_PREFIX .. "|cffff0000Import failed:|r " .. (result or "Unknown"))
         end
+
+    elseif state.detectedType == "cr" then
+        local success, result = ns.CRImportExport.Import(state.detectedData, {
+            importMode      = state.crImportMode,
+            importGlobals   = state.crImportGlobals,
+            importPerSpell  = state.crImportPerSpell,
+        })
+        if success then
+            print(MSG_PREFIX .. "|cff00ff00Cooldown Reminder import: " .. (result or "ok") .. "|r")
+        else
+            print(MSG_PREFIX .. "|cffff0000Import failed:|r " .. (result or "Unknown"))
+        end
     end
 
     -- Clear after import
@@ -281,6 +313,8 @@ local function GetConfirmText()
         return "Replace mode will WIPE existing profiles for matching specs.\n\nAre you sure?"
     elseif state.detectedType == "bars" and state.barsImportMode == "replace" then
         return "Replace mode will wipe ALL existing bars.\n\nAre you sure?"
+    elseif state.detectedType == "cr" and state.crImportMode == "replace" then
+        return "Replace mode will WIPE all current Cooldown Reminder spell/trigger configs.\n\nAre you sure?"
     end
     return false
 end
@@ -299,7 +333,7 @@ function UIE.GetOptionsTable()
             -- ── Top description ──────────────────────────────────────────
             desc = {
                 type     = "description",
-                name     = "Paste any ArcUI export string — |cffFFD100Bars|r, |cff00CCFFIcon Manager|r, or |cff00FF88Master Export|r. " ..
+                name     = "Paste any ArcUI export string — |cffFFD100Bars|r, |cff00CCFFIcon Manager|r, |cffFF7777Cooldown Reminder|r, or |cff00FF88Master Export|r. " ..
                            "The type is detected automatically. All existing export strings are supported.\n",
                 order    = 1,
                 fontSize = "medium",
@@ -388,6 +422,60 @@ function UIE.GetOptionsTable()
                 end,
                 order  = 12,
                 hidden = function() return state.detectedType ~= "bars" end,
+            },
+
+            -- ════════════════════════════════════════════════════════════
+            -- COOLDOWN REMINDER-SPECIFIC IMPORT UI
+            -- ════════════════════════════════════════════════════════════
+            crOptionsHeader = {
+                type   = "header",
+                name   = "Cooldown Reminder Import Options",
+                order  = 16,
+                hidden = function() return state.detectedType ~= "cr" end,
+            },
+            crImportMode = {
+                type   = "select",
+                name   = "Import Mode",
+                order  = 17,
+                width  = 1.2,
+                hidden = function() return state.detectedType ~= "cr" end,
+                values = {
+                    merge   = "Merge (overwrite same spells, keep others)",
+                    replace = "Replace all reminders",
+                },
+                get = function() return state.crImportMode end,
+                set = function(_, val) state.crImportMode = val end,
+            },
+            crImportGlobals = {
+                type   = "toggle",
+                name   = "Import Global Settings",
+                desc   = "Import the animation, queue/replace mode, position, audio, and other global settings.",
+                order  = 18,
+                width  = 1.2,
+                hidden = function() return state.detectedType ~= "cr" end,
+                get    = function() return state.crImportGlobals end,
+                set    = function(_, v) state.crImportGlobals = v end,
+            },
+            crImportPerSpell = {
+                type   = "toggle",
+                name   = "Import Per-Spell Reminders",
+                desc   = "Import the list of tracked spells/items, their per-spell trigger configs (animation, glow, priority, sound/TTS overrides), and per-spell delay/mute toggles.",
+                order  = 19,
+                width  = 1.2,
+                hidden = function() return state.detectedType ~= "cr" end,
+                get    = function() return state.crImportPerSpell end,
+                set    = function(_, v) state.crImportPerSpell = v end,
+            },
+            crImportModeDesc = {
+                type   = "description",
+                name   = function()
+                    if state.crImportMode == "replace" then
+                        return "|cffff6600WARNING: This will WIPE all current Cooldown Reminder spell/trigger configs before importing.|r"
+                    end
+                    return "|cff888888Existing reminders not in the import will be kept. Same-spell entries get overwritten by the import.|r"
+                end,
+                order  = 19.5,
+                hidden = function() return state.detectedType ~= "cr" end,
             },
 
             -- ════════════════════════════════════════════════════════════

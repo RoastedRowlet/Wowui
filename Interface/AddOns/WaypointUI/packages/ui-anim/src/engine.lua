@@ -120,8 +120,43 @@ local function TriggerStart(inst)
 end
 
 
+local function ResolveValue(value)
+    if type(value) == "function" then
+        return value()
+    end
+
+    return value
+end
+
+local function ResolveInstanceValues(inst)
+    if inst.valuesResolved then
+        return inst.to ~= nil
+    end
+
+    inst.valuesResolved = true
+
+    local fromVal = inst.hasFrom and ResolveValue(inst.fromResolver) or nil
+    local toVal = ResolveValue(inst.toResolver)
+    inst.fromResolver, inst.toResolver = nil, nil
+
+    if toVal == nil then
+        return false
+    end
+
+    if fromVal == nil then
+        fromVal = Processor_Read(inst.target, inst.property)
+    end
+
+    inst.from = fromVal
+    inst.to = toVal
+    inst.delta = toVal - fromVal
+    return true
+end
+
+
 local function FinalizeInstance(inst)
     if not inst or inst.loopType then return end
+    if not ResolveInstanceValues(inst) then return end
     local endVal = inst.dir == 1 and inst.to or inst.from
     if endVal ~= nil then FastApply(inst, endVal) end
 end
@@ -205,8 +240,9 @@ local function CreateInstance(def, target, wrapper, wrapperInfo, runId)
     local prop = def.__property
     inst.target, inst.property, inst.duration = target, prop, duration
     inst.easing = Processor_GetEasing(def.__easing)
-    inst.from = def.__hasFrom and def.__from or nil
-    inst.to, inst.loopType = def.__to, loopType
+    inst.from, inst.to, inst.delta, inst.loopType = nil, nil, 0, loopType
+    inst.fromResolver, inst.toResolver = def.__from, def.__to
+    inst.hasFrom, inst.valuesResolved = def.__hasFrom, false
     inst.loopDelayS, inst.loopDelayE = def.__loopDelayStart or 0, def.__loopDelayEnd or 0
     inst.dir, inst.t, inst.timer, inst.accum = 1, 0, 0, 0
     inst.startAt, inst.startAtPending = startAt, startAt > 0
@@ -224,14 +260,13 @@ local function CreateInstance(def, target, wrapper, wrapperInfo, runId)
         inst.state, inst.timer = STATE_WAIT, startDelay
     else
         inst.state = STATE_PLAY
+        if not ResolveInstanceValues(inst) then return nil end
         if inst.startAtPending then
             inst.t = inst.startAt
             inst.startAtPending = false
         end
         TriggerStart(inst)
     end
-    if not inst.from then inst.from = Processor_Read(target, prop) end
-    inst.delta = (inst.to or 0) - (inst.from or 0)
     if inst.state == STATE_PLAY and inst.t > 0 then
         ApplyAtElapsed(inst, inst.t)
     end
@@ -273,8 +308,8 @@ local function StopWrapperInstances(wrapper, target, stateName, includeAnimation
 end
 
 function DefProto:Play(target)
-    local prop, dur, toVal = self.__property, self.__duration, self.__to
-    if not (prop and dur and toVal ~= nil) then return self end
+    local prop, dur = self.__property, self.__duration
+    if not (prop and dur and self.__to ~= nil) then return self end
     if target == nil then error("UIAnim.Animate:Play requires a target.", 2) end
     local resolved = Processor_ResolveTarget(target)
     if not resolved then return self end
@@ -285,12 +320,17 @@ function DefProto:Play(target)
     local isAnim = currentWrapperIsAnimation
     if not isLooping and info and not isAnim then info.pendingCount = info.pendingCount + 1 end
     if dur <= 0 then
+        local toVal = ResolveValue(self.__to)
+        if toVal == nil then
+            if not isLooping and info and not isAnim then NotifyFinish(info) end
+            return self
+        end
         Processor_Apply(resolved, prop, toVal)
         if not isLooping and info and not isAnim then NotifyFinish(info) end
         return self
     end
     local inst = CreateInstance(self, resolved, wrapper, info, nil)
-    if not inst.target then
+    if not inst or not inst.target then
         if not isLooping and info and not isAnim then NotifyFinish(info) end
         return self
     end
@@ -405,8 +445,8 @@ local function WrapperPlay(self, target, name, isSecure, ...)
     local stateFn = info.states[stateName]
     if stateFn then
         stateInfo.activeStateName = stateName
-        local prevWrapper, prevRunId, prevInfo = currentWrapper, currentRunId, currentWrapperInfo
-        currentWrapper, currentRunId, currentWrapperInfo = self, stateInfo.runId, stateInfo
+        local prevWrapper, prevRunId, prevIsAnim, prevAnimName, prevInfo = currentWrapper, currentRunId, currentWrapperIsAnimation, currentAnimationName, currentWrapperInfo
+        currentWrapper, currentRunId, currentWrapperIsAnimation, currentAnimationName, currentWrapperInfo = self, stateInfo.runId, false, nil, stateInfo
         local defCache = info.defCache[stateName]
         if not defCache then
             defCache = { idx = 0 }
@@ -415,7 +455,7 @@ local function WrapperPlay(self, target, name, isSecure, ...)
             defCache.idx = 0
         end
         stateFn(stateTarget, ...)
-        currentWrapper, currentRunId, currentWrapperInfo = prevWrapper, prevRunId, prevInfo
+        currentWrapper, currentRunId, currentWrapperIsAnimation, currentAnimationName, currentWrapperInfo = prevWrapper, prevRunId, prevIsAnim, prevAnimName, prevInfo
         lastPlayedWrapper = self
         lastPlayedWrapperInfo = stateInfo
     end
@@ -454,32 +494,38 @@ function WrapperProto:IsPlaying(target, name)
     return false
 end
 
-function WrapperProto.onFinish(cb)
-    local wrapper = lastPlayedWrapper
-    if not wrapper then return WrapperProto end
+function WrapperProto:onFinish(cb)
+    if lastPlayedWrapper ~= self then return self end
+
     local info = lastPlayedWrapperInfo
     if not info then
-        lastPlayedWrapper = nil; return WrapperProto
+        lastPlayedWrapper = nil
+        return self
     end
+
     if cb then
         if (info.pendingCount or 0) == 0 then cb() else info.finishCallback = cb end
     end
+
     lastPlayedWrapper = nil
     lastPlayedWrapperInfo = nil
-    return wrapper
+    return self
 end
 
-function WrapperProto.onStart(cb)
-    local wrapper = lastPlayedWrapper
-    if not wrapper then return WrapperProto end
+function WrapperProto:onStart(cb)
+    if lastPlayedWrapper ~= self then return self end
+
     local info = lastPlayedWrapperInfo
     if not info then
-        lastPlayedWrapper = nil; return WrapperProto
+        lastPlayedWrapper = nil
+        return self
     end
+
     if cb then
         if info.startNotified then cb() else info.startCallback = cb end
     end
-    return wrapper
+
+    return self
 end
 
 function WrapperProto:Stop(target, cancelAnims)
@@ -542,6 +588,10 @@ local function StepInstance(inst, dt)
             end
             remain = remain - timer
             inst.state, inst.t, inst.timer = STATE_PLAY, 0, 0
+            if not ResolveInstanceValues(inst) then
+                if info then NotifyFinish(info) end
+                return true
+            end
             if inst.startAtPending then
                 inst.t = inst.startAt
                 inst.startAtPending = false
@@ -549,6 +599,10 @@ local function StepInstance(inst, dt)
             end
             TriggerStart(inst)
         elseif state == STATE_PLAY then
+            if not ResolveInstanceValues(inst) then
+                if info then NotifyFinish(info) end
+                return true
+            end
             local dur, elapsed = inst.duration, inst.t
             local timeLeft = dur - elapsed
             if remain < timeLeft then

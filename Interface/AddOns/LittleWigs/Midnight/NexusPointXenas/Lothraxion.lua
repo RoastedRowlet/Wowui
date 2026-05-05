@@ -58,7 +58,7 @@ end
 
 function mod:ENCOUNTER_TIMELINE_EVENT_ADDED(_, eventInfo)
 	if eventInfo.source ~= 0 then return end -- Enum.EncounterTimelineEventSource.Encounter
-	local duration = math.floor(eventInfo.duration + 0.5)
+	local duration = self:RoundNumber(eventInfo.duration, 0)
 	local barInfo
 	if duration == 2 or duration == 26 then -- Searing Rend
 		barInfo = self:SearingRendTimeline(eventInfo)
@@ -159,6 +159,7 @@ function mod:DivineGuileTimeline(eventInfo)
 		msg = barText,
 		key = 1257595,
 		callback = function()
+			self:StopBlizzMessages(1)
 			self:Message(1257595, "cyan", barText)
 			self:PlaySound(1257595, "long")
 		end

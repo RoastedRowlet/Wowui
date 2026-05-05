@@ -16,6 +16,7 @@ END
 VER 3 0100000000000006 "Meta Trinket" "134400"
 #showtooltip Void Metamorphosis
 /use 13
+/use Light's Potential
 /use Potion of Recklessness
 /cast Void Metamorphosis
 END

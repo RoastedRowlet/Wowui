@@ -28,10 +28,9 @@ L.Functionality.CVarWarning = string.format(
 	ENABLE
 )
 
-L.Functionality.V2DeprecationWarning = string.format(
-	"%s\n\nDue to the changes in v2, the following settings were reset for you:\n\n%s\n\nAdditionally, we suggest verifying your layouting as it may also be impacted.",
-	addonNameWithIcon,
-	"%s"
+L.Functionality.V3MigrationWarning = string.format(
+	"%s\n\nDue to API restriction updates, the Party functionality for Targeted Spells had to be completely overhauled. Please check out Edit Mode for a preview.",
+	addonNameWithIcon
 )
 
 L.Settings.EnabledLabel = "Enabled"
@@ -63,10 +62,6 @@ L.Settings.LoadConditionRoleLabels = {
 	[Private.Enum.Role.Tank] = "Tank",
 	[Private.Enum.Role.Damager] = "DPS",
 }
-
-L.Settings.RoleFilterLabel = "Role Filter"
-L.Settings.RoleFilterTooltip = "Allows you to ignore certain roles from being shown. Use at your own risk."
-L.Settings.RoleFilterLabels = L.Settings.LoadConditionRoleLabels
 
 L.Settings.FrameWidthLabel = "Width"
 L.Settings.FrameWidthTooltip = nil
@@ -105,10 +100,8 @@ L.Settings.FrameGrowLabels = {
 }
 
 L.Settings.GlowImportantLabel = "Glow Important Spells"
-L.Settings.GlowImportantTooltip = "What's important and what isn't is declared by the game."
 
 L.Settings.OnlyImportantLabel = "Only Show Important Spells"
-L.Settings.OnlyImportantTooltip = "Note that you're relying on what the game considers important, use at your own risk."
 
 L.Settings.GlowTypeLabel = "Glow Type"
 L.Settings.GlowTypeTooltip = nil
@@ -120,45 +113,73 @@ L.Settings.GlowTypeLabels = {
 }
 
 L.Settings.ShowDurationLabel = "Show Duration"
-L.Settings.ShowDurationTooltip = nil
-
-L.Settings.ShowDurationFractionsLabel = "Show Fractions"
-L.Settings.ShowDurationFractionsTooltip = nil
 
 L.Settings.IndicateInterruptsLabel = "Indicate Interrupts"
-L.Settings.IndicateInterruptsTooltip =
-	"Desaturates the icon, shows an indicator on top of the icon and delays hiding the icon by 1 second. Does not work with channeled spells."
 
 L.Settings.RenderInterruptSourceNameLabel = "Render Interrupt Source Name"
-L.Settings.RenderInterruptSourceNameTooltip = nil
 
 L.Settings.ShowSwipeLabel = "Show Swipe"
-L.Settings.ShowSwipeTooltip = nil
 
 L.Settings.BorderStyleLabel = "Border Style"
 L.Settings.BorderStyleTooltip = nil
-L.Settings.BorderStyleSolid = "Solid"
 
-L.Settings.OpacityLabel = "Opacity"
-L.Settings.OpacityTooltip = nil
+L.Settings.ForegroundBarTextureLabel = "Progress Bar Texture"
+L.Settings.ForegroundBarTextureTooltip = nil
+
+L.Settings.BackgroundBarTextureLabel = "Background Bar Texture"
+L.Settings.BackgroundBarTextureTooltip = nil
+
+L.Settings.BackgroundBarColorLabel = "Background Bar Color"
+L.Settings.BackgroundBarColorTooltip =
+	"Opacity is only available in Edit Mode due to the default settings UI not exposing it."
+
+L.Settings.ProgressBarColorLabel = "Bar Color"
+L.Settings.ProgressBarColorTooltip =
+	"Opacity is only available in Edit Mode due to the default settings UI not exposing it."
+
+L.Settings.MirrorLayoutLabel = "Mirror Layout"
+
+L.Settings.TextToSpeechVoiceLabel = "TTS Voice"
+L.Settings.TextToSpeechVoiceTooltip =
+	"Voice used for Text-To-Speech announcements. Shared between Self and Party settings."
+
+L.Settings.AnnounceUntargetedSpellsLabel = "Untargeted TTS Settings"
+L.Settings.AnnounceUntargetedSpellsTooltip = "Text-To-Speech for untargeted spells (AoE, frontals, etc.) by NPC type."
+
+L.Settings.AnnounceTargetedSpellsLabel = "Targeted TTS Settings"
+L.Settings.AnnounceTargetedSpellsTooltip = "Text-To-Speech for spells that target a specific player, by NPC type."
+
+L.Settings.NpcTypeLabels = {
+	[Private.Enum.NpcType.Boss] = "Bosses",
+	[Private.Enum.NpcType.Lieutenant] = "Lieutenants",
+	[Private.Enum.NpcType.Caster] = "Has Mana",
+	[Private.Enum.NpcType.Melee] = "Regular Melee",
+	[Private.Enum.NpcType.Minion] = "Minions",
+}
+
+L.Settings.HideUntargetedSpellsLabel = "Hide Untargeted Spells"
+
+L.Settings.HideTargetedSpellsLabel = "Hide Targeted Spells"
+
+L.Settings.SelfOnlyLabel = "Only Show Player-Targeting Spells"
+
+L.Settings.InlineDurationLabel = "Inline Duration Position"
+
+L.Settings.UseInterruptabilityColorsLabel = "Use Interrupt Colors"
+L.Settings.UseInterruptabilityColorsTooltip = nil
+
+L.Settings.UseTargetClassColorLabel = "Use Target Class Color"
+L.Settings.UseTargetClassColorTooltip =
+	"Colors the bar in the class color of the targeted unit at 75% alpha. Untargeted spells will use a brightened Background Bar Color"
+
+L.Settings.UninterruptibleColorLabel = "Uninterruptible Color"
+L.Settings.UninterruptibleColorTooltip = nil
+
+L.Settings.InterruptibleColorLabel = "Interruptible Color"
+L.Settings.InterruptibleColorTooltip = nil
 
 L.Settings.IconZoomLabel = "Icon Zoom"
 L.Settings.IconZoomTooltip = nil
-
-L.Settings.FrameOffsetXLabel = "Offset X"
-L.Settings.FrameOffsetXTooltip = nil
-
-L.Settings.FrameOffsetYLabel = "Offset Y"
-L.Settings.FrameOffsetYTooltip = nil
-
-L.Settings.FrameSourceAnchorLabel = "Source Anchor"
-L.Settings.FrameSourceAnchorTooltip = nil
-
-L.Settings.FrameTargetAnchorLabel = "Target Anchor"
-L.Settings.FrameTargetAnchorTooltip = nil
-
-L.Settings.IncludeSelfInPartyLabel = "Include Self In Party"
-L.Settings.IncludeSelfInPartyTooltip = "Only works when using Raid-Style Party Frames."
 
 L.Settings.ClickToOpenSettingsLabel = "Click to open settings"
 
@@ -175,15 +196,22 @@ L.Settings.FeatureFlagLabels = {
 	[Private.Enum.FeatureFlag.GlowImportant] = L.Settings.GlowImportantLabel,
 	[Private.Enum.FeatureFlag.OnlyImportant] = L.Settings.OnlyImportantLabel,
 	[Private.Enum.FeatureFlag.ShowDuration] = L.Settings.ShowDurationLabel,
-	[Private.Enum.FeatureFlag.ShowDurationFractions] = L.Settings.ShowDurationFractionsLabel,
 	[Private.Enum.FeatureFlag.ShowSwipe] = L.Settings.ShowSwipeLabel,
 	[Private.Enum.FeatureFlag.IndicateInterrupts] = L.Settings.IndicateInterruptsLabel,
 	[Private.Enum.FeatureFlag.RenderInterruptSourceName] = L.Settings.RenderInterruptSourceNameLabel,
-	[Private.Enum.FeatureFlag.IncludeSelfInParty] = L.Settings.IncludeSelfInPartyLabel,
+	[Private.Enum.FeatureFlag.ShowIcon] = "Show Icon",
+	[Private.Enum.FeatureFlag.ShowTargetMarker] = "Show Target Marker",
+	[Private.Enum.FeatureFlag.ShowSpellName] = "Show Spell Name",
+	[Private.Enum.FeatureFlag.ShowTargetName] = "Show Target Name",
+	[Private.Enum.FeatureFlag.ShowTargetClassColor] = "Show Target Class Color",
+	[Private.Enum.FeatureFlag.MirrorLayout] = L.Settings.MirrorLayoutLabel,
+	[Private.Enum.FeatureFlag.InlineDuration] = L.Settings.InlineDurationLabel,
+	[Private.Enum.FeatureFlag.HideUntargetedSpells] = L.Settings.HideUntargetedSpellsLabel,
+	[Private.Enum.FeatureFlag.HideTargetedSpells] = L.Settings.HideTargetedSpellsLabel,
+	[Private.Enum.FeatureFlag.SelfOnly] = L.Settings.SelfOnlyLabel,
 }
 
 L.Settings.FeatureFlagSettingTitles = {
 	[Private.Enum.FeatureFlag.GlowImportant] = "Display",
 	[Private.Enum.FeatureFlag.IndicateInterrupts] = "Interrupt Settings",
-	[Private.Enum.FeatureFlag.IncludeSelfInParty] = "Party Settings",
 }

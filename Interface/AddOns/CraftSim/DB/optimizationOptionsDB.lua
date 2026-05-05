@@ -3,7 +3,7 @@ local CraftSim = select(2, ...)
 
 local GUTIL = CraftSim.GUTIL
 
-local print = CraftSim.DEBUG:RegisterDebugID("Database.optimizationOptionsDB")
+local Logger = CraftSim.DEBUG:RegisterLogger("optimizationOptionsDB")
 
 ---@class CraftSim.DB
 CraftSim.DB = CraftSim.DB
@@ -93,4 +93,25 @@ function CraftSim.DB.OPTIMIZATION_OPTIONS.MIGRATION:M_0_1_Import_from_OptionsDB(
         [KEYS.OPTIMIZE_FINISHING_REAGENTS]           = oldData["RECIPESCAN_OPTIMIZE_FINISHING_REAGENTS"],
         [KEYS.INCLUDE_SOULBOUND_FINISHING_REAGENTS]  = oldData["RECIPESCAN_OPTIMIZE_FINISHING_REAGENTS_INCLUDE_SOULBOUND"],
     }
+end
+
+function CraftSim.DB.OPTIMIZATION_OPTIONS.MIGRATION:M_1_2_RecipeScan_Migrate_Reagent_Allocation_Autoselect_Top_Profit()
+    local KEYS = CraftSim.WIDGETS.OptimizationOptions.OPTION_KEYS
+    local IDS  = CraftSim.CONST.OPTIMIZATION_OPTIONS_IDS
+    local RA   = CraftSim.WIDGETS.OptimizationOptions.REAGENT_ALLOCATION
+    local data = CraftSimDB.optimizationOptionsDB.data[IDS.RECIPESCAN_SCAN]
+
+    if data then
+        local currentAlloc = data[KEYS.REAGENT_ALLOCATION]
+        -- Only migrate if the stored value is the old generic "OPTIMIZE" mode
+        if currentAlloc == "OPTIMIZE" then
+            if data[KEYS.AUTOSELECT_TOP_PROFIT_QUALITY] then
+                data[KEYS.REAGENT_ALLOCATION] = RA.OPTIMIZE_MOST_PROFITABLE
+            else
+                data[KEYS.REAGENT_ALLOCATION] = RA.OPTIMIZE_HIGHEST
+            end
+        end
+        -- Remove the legacy key regardless
+        data[KEYS.AUTOSELECT_TOP_PROFIT_QUALITY] = nil
+    end
 end

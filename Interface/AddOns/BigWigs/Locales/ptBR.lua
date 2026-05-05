@@ -5,6 +5,9 @@ if not L then return end
 -- API.lua
 L.showAddonBar = "O addon '|cFF436EEE%s|r' criou a barra '%s'."
 --L.requestAddonProfile = "The addon '|cFF436EEE%s|r' just made a copy of your profile export string."
+--L.shortMinutesAndSeconds = "%d Min %d Sec" -- 1 Minute 2 Seconds
+--L.shortSecondsOnly = "%d Sec" -- 28 Seconds
+--L.shortSubTenSeconds = "%.1f Sec" -- 3.2 Seconds
 
 -- Core.lua
 L.berserk = "Frenesi"
@@ -428,10 +431,14 @@ L.autoRoleExplainer = "Sempre que você se junta a um grupo ou muda sua especial
 --L.historyTimeFormat = "History: Time Format"
 --L.twelveHour = "12 Hour"
 --L.twentyFourHour = "24 Hour"
+--L.hideTooltipInCombat = "Hide Tooltip in Combat"
+--L.customText = "Custom Text (Must Contain %s)"
 
 -----------------------------------------------------------------------
 -- Keystones.lua
 --
+
+--L.keys = "Keys"
 
 L.keystoneTitle = "BigWigs Pedras chaves"
 L.keystoneHeaderParty = "Grupo"
@@ -523,7 +530,7 @@ L.keystoneShortName_TheDawnbreaker = "ALVO"
 --L.keystoneShortName_ReturnToKarazhanLower = "LKARA"
 --L.keystoneShortName_ReturnToKarazhanUpper = "UKARA"
 --L.keystoneShortName_CathedralOfEternalNight = "COEN"
---L.keystoneShortName_SeatOfTheTriumvirate = "SOTT"
+--L.keystoneShortName_SeatOfTheTriumvirate = "SEAT"
 --L.keystoneShortName_WindrunnerSpire = "SPIRE"
 --L.keystoneShortName_MagistersTerrace = "MT"
 --L.keystoneShortName_MaisaraCaverns = "CAVERN"
@@ -560,7 +567,7 @@ L.keystoneShortName_TheDawnbreaker_Bar = "Alvorada"
 --L.keystoneShortName_ReturnToKarazhanLower_Bar = "Lower Kara"
 --L.keystoneShortName_ReturnToKarazhanUpper_Bar = "Upper Kara"
 --L.keystoneShortName_CathedralOfEternalNight_Bar = "Cathedral"
---L.keystoneShortName_SeatOfTheTriumvirate_Bar = "Triumvirate"
+--L.keystoneShortName_SeatOfTheTriumvirate_Bar = "Seat"
 --L.keystoneShortName_WindrunnerSpire_Bar = "Spire"
 --L.keystoneShortName_MagistersTerrace_Bar = "Terrace"
 --L.keystoneShortName_MaisaraCaverns_Bar = "Caverns"
@@ -583,6 +590,28 @@ L.instanceKeysOtherDungeonColorDesc = "Escolha a cor da fonte para jogadores que
 L.instanceKeysEndOfRunDesc = "Por padrão, a lista só aparecerá quando você entrar em uma masmorra mítica. Ativar esta opção também mostrará a lista quando a Mítica+ terminar."
 --L.instanceKeysHideTitle = "Hide title"
 --L.instanceKeysHideTitleDesc = "Hide the \"Who has a key?\" title."
+
+-- Challenges UI Decoration
+--L.partyRatingHeader = "|TInterface\\AddOns\\BigWigs\\Media\\Icons\\minimap_raid:0:0|tParty Rating"
+L.dungeonScoreString = "|c%s%03d|r |cFFFFFFFF+%02d|r |cFF%s%02d:%02d|r |c%s(%s)|r"
+--L.dungeonScoreNoDataString = "|cFFFFFFFFNo data|r |c%s(%s)|r"
+L.dungeonTeleportHeader = "|TInterface\\AddOns\\BigWigs\\Media\\Icons\\minimap_raid:0:0|tTeleporte"
+
+-- Progress %
+--L.progressPercent = "Progress %"
+--L.progressPercentDesc = "Tools to help you calculate how much Mythic+ progress you will gain from each NPC you kill."
+--L.progressPercentTooltip = "Show progress % in tooltips when mousing over enemy NPCs"
+--L.progressPercentTooltipText = {
+--	"|TInterface\\AddOns\\BigWigs\\Media\\Icons\\minimap_raid:0:0|tProgress: %s%%",
+--	"|TInterface\\AddOns\\BigWigs\\Media\\Icons\\minimap_raid:0:0|tProgress: %s%% (%d)",
+--	"|TInterface\\AddOns\\BigWigs\\Media\\Icons\\minimap_raid:0:0|tProgress: %s%% (%d/%d)",
+--}
+--L.progressPercentNameplate = "Show progress % on nameplates of enemy NPCs"
+--L.progressCurrentPull = "Current Pull"
+--L.progressCurrentPullDesc = "Show total progress you will gain from the current group of NPCs you are in combat with.\n\nNOT YET FUNCTIONAL!"
+--L.tempProgressAnnounce = "You can now see progress % each NPC will give you when mousing over them and on their nameplates.\n\nConfigure in |cFF436EEETools|r > |cFF436EEEMythic+|r > |cFF436EEEProgress %|r."
+--L.settingsForCurrentTarget = "Settings for your current target"
+--L.settingsForOtherTargets = "Settings for all other targets"
 
 -----------------------------------------------------------------------
 -- LFGTimer.lua
@@ -1179,6 +1208,7 @@ L.newFastestVictoryPrint = "Nova vitória mais rápida: (-%s)" -- New fastest vi
 --L.blizzBasicAsBlizzTimeline = "Blizzard basic timers displayed on the Blizzard timeline"
 --L.developerMode = "Developer Mode"
 --L.enhancedModeWarning = "WARNING!\n\nDisabling enhanced mode will disable many BigWigs features, including:\n\nBar colors, spell renames, counters, custom sound/voice, countdowns, bars on/off, extra messages, etc."
+--L.blizzTimelineEnhancedWarning = "WARNING!\n\nThe Blizzard timeline doesn't support BigWigs enhanced features. You will NOT get renamed spells and you will see inaccurate timers.\n\nAre you sure you want to enable it?"
 
 -----------------------------------------------------------------------
 -- Victory.lua

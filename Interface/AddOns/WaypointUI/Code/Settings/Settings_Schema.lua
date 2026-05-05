@@ -325,6 +325,25 @@ do -- Schema
                             key                            = "WaypointBeamAlpha"
                         },
                         {
+                            widgetName               = L["FONT_FLAGS"],
+                            widgetType               = Settings_Enum.WidgetType.SelectionMenu,
+                            widgetSelectionMenu_data = function()
+                                return {
+                                    L["NONE"],
+                                    L["OUTLINE"],
+                                    L["THICKOUTLINE"],
+                                    L["MONOCHROME"]
+                                }
+                            end,
+                            widgetSelectionMenu_get  = function(value)
+                                return Config.DBGlobal:GetVariable("WaypointDistanceTextFontFlags")
+                            end,
+                            widgetSelectionMenu_set  = function(index)
+                                return Config.DBGlobal:SetVariable("WaypointDistanceTextFontFlags", index)
+                            end,
+                            key                      = "WaypointDistanceTextFontFlags"
+                        },
+                        {
                             widgetName = L["CONFIG_APPEARANCE_WAYPOINT_FOOTER"],
                             widgetType = Settings_Enum.WidgetType.CheckButton,
                             key        = "WaypointDistanceText",
@@ -442,7 +461,7 @@ do -- Schema
                             key        = "CustomColor"
                         },
                         {
-                            widgetName               = L["CONFIG_APPEARANCE_COLOR_CUSTOMCOLOR_QUEST_COMPLETE_DEFAULT"],
+                            widgetName               = L["CONFIG_APPEARANCE_COLOR_CUSTOMCOLOR_COMPLETED_NORMAL_QUEST"],
                             widgetType               = Settings_Enum.WidgetType.Container,
                             widgetContainer_isNested = true,
                             showWhen                 = function() return Config.DBGlobal:GetVariable("CustomColor") == true end,
@@ -470,7 +489,7 @@ do -- Schema
                             }
                         },
                         {
-                            widgetName               = L["CONFIG_APPEARANCE_COLOR_CUSTOMCOLOR_QUEST_COMPLETE_REPEATABLE"],
+                            widgetName               = L["CONFIG_APPEARANCE_COLOR_CUSTOMCOLOR_COMPLETED_REPEATABLE_QUEST"],
                             widgetType               = Settings_Enum.WidgetType.Container,
                             widgetContainer_isNested = true,
                             showWhen                 = function() return Config.DBGlobal:GetVariable("CustomColor") == true end,
@@ -498,7 +517,7 @@ do -- Schema
                             }
                         },
                         {
-                            widgetName               = L["CONFIG_APPEARANCE_COLOR_CUSTOMCOLOR_QUEST_COMPLETE_IMPORTANT"],
+                            widgetName               = L["CONFIG_APPEARANCE_COLOR_CUSTOMCOLOR_COMPLETED_IMPORTANT_QUEST"],
                             widgetType               = Settings_Enum.WidgetType.Container,
                             widgetContainer_isNested = true,
                             showWhen                 = function() return Config.DBGlobal:GetVariable("CustomColor") == true end,
@@ -526,7 +545,7 @@ do -- Schema
                             }
                         },
                         {
-                            widgetName               = L["CONFIG_APPEARANCE_COLOR_CUSTOMCOLOR_QUEST_INCOMPLETE"],
+                            widgetName               = L["CONFIG_APPEARANCE_COLOR_CUSTOMCOLOR_INCOMPLETE_QUEST"],
                             widgetType               = Settings_Enum.WidgetType.Container,
                             widgetContainer_isNested = true,
                             showWhen                 = function() return Config.DBGlobal:GetVariable("CustomColor") == true end,
@@ -805,6 +824,28 @@ do -- Schema
                             widgetType        = Settings_Enum.WidgetType.CheckButton,
                             key               = "DugisAutoReplaceWaypoint",
                             showWhen          = function() return Config.DBGlobal:GetVariable("DugisSupportEnabled") == true end,
+                            indent            = 1
+                        }
+                    }
+                },
+                {
+                    widgetName = L["CONFIG_EXTENSIONS_APRSUPPORT"],
+                    widgetType = Settings_Enum.WidgetType.Container,
+                    showWhen   = function() return IsAddOnLoaded("APR") end,
+
+                    children   = {
+                        {
+                            widgetName        = L["CONFIG_EXTENSIONS_APRSUPPORT_ENABLE"],
+                            widgetDescription = Settings_Define.Descriptor{ description = L["CONFIG_EXTENSIONS_APRSUPPORT_ENABLE_DESCRIPTION"] },
+                            widgetType        = Settings_Enum.WidgetType.CheckButton,
+                            key               = "APRSupportEnabled"
+                        },
+                        {
+                            widgetName        = L["CONFIG_EXTENSIONS_APRSUPPORT_AUTOREPLACEWAYPOINT"],
+                            widgetDescription = Settings_Define.Descriptor{ description = L["CONFIG_EXTENSIONS_APRSUPPORT_AUTOREPLACEWAYPOINT_DESCRIPTION"] },
+                            widgetType        = Settings_Enum.WidgetType.CheckButton,
+                            key               = "APRAutoReplaceWaypoint",
+                            showWhen          = function() return Config.DBGlobal:GetVariable("APRSupportEnabled") == true end,
                             indent            = 1
                         }
                     }

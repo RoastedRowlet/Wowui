@@ -248,18 +248,9 @@ end
 
 -- specialization helper functions
 do
-	Grid2Options.GetSpecializationInfo = Grid2.isWoW90 and GetSpecializationInfo or function(index)
-		local name = index==2 and L['Secondary'] or L['Primary']
-		local icon = index==2 and "Interface\\Icons\\WoW_Token02" or "Interface\\Icons\\WoW_Token01"
-		return index, name, name, icon
-	end
-	Grid2Options.GetNumSpecializationsForClassID = Grid2.isWoW90 and GetNumSpecializationsForClassID or Grid2.GetNumSpecializations
-	Grid2Options.GetSpecializationInfoForClassID = Grid2.isWoW90 and GetSpecializationInfoForClassID or function(classID, index)
-		local _, name, _, icon = Grid2Options.GetSpecializationInfo(index)
-		local info = C_CreatureInfo.GetClassInfo(classID)
-		name = string.format("%s: %s", info and info.className or '', name)
-		return index, name, name, icon
-	end
+	Grid2Options.GetSpecializationInfo = GetSpecializationInfo
+	Grid2Options.GetNumSpecializationsForClassID = GetNumSpecializationsForClassID
+	Grid2Options.GetSpecializationInfoForClassID = GetSpecializationInfoForClassID
 end
 
 -- Grid2Options.Tooltip generic tooltip to parse hyperlinks
@@ -287,7 +278,6 @@ do
 		Location   = { type = "header", order = 2,   name = L["Location"]   },
 		Appearance = { type = "header", order = 10,  name = L["Appearance"] },
 		Icon	   = { type = "header", order = 10,  name = L["Icon"] },
-		Shape	   = { type = "header", order = 10,  name = L["Shape"] },
 		Border     = { type = "header", order = 20,  name = L["Border"]     },
 		Shadow     = { type = "header", order = 30,  name = L["Shadow"]     },
 		Effect     = { type = "header", order = 30,  name = L["Effect"] },
@@ -300,6 +290,7 @@ do
 		CoolBar    = { type = "header", order = 150, name = L["Cooldown Bar"]	},
 		CoolColors = { type = "header", order = 160, name = L["Cooldown Colors"]	},
 		CoolAnim   = { type = "header", order = 200, name = L["Cooldown Animation"] },
+		MiscIcons  = { type = "header", order = 240, name = L["Miscellaneous"] },
 		Tooltip    = { type = "header", order = 250, name = L["Tooltip"]	},
 		Highlight  = { type = "header", order = 300, name = L["Highlight"]	},
 		-- statuses headers

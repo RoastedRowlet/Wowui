@@ -11,4 +11,5 @@ NewSettingsSeen = {
 ["raidFramesDisplayClassColor"] = true,
 ["COMBAT_WARNINGS_LABEL"] = true,
 ["raidFramesDispelIndicatorOverlay"] = true,
+["CAA_COMBAT_AUDIO_ALERTS_LABEL"] = true,
 }

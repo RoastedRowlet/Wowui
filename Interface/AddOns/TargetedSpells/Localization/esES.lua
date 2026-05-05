@@ -28,10 +28,9 @@ L.Functionality.CVarWarning = string.format(
 	ENABLE
 )
 
-L.Functionality.V2DeprecationWarning = string.format(
-	"%s\n\nDue to the changes in v2, the following settings were reset for you:\n\n%s\n\nAdditionally, we suggest verifying your layouting as it may also be impacted.",
-	addonNameWithIcon,
-	"%s"
+L.Functionality.V3MigrationWarning = string.format(
+	"%s\n\nDebido a actualizaciones en las restricciones de la API, la funcionalidad de Grupo de Targeted Spells tuvo que ser completamente revisada. Consulta el Modo de Edición para una vista previa.",
+	addonNameWithIcon
 )
 
 L.Settings.EnabledLabel = "Activado"
@@ -64,10 +63,6 @@ L.Settings.LoadConditionRoleLabels = {
 	[Private.Enum.Role.Damager] = "Daño",
 }
 
-L.Settings.RoleFilterLabel = "Role Filter"
-L.Settings.RoleFilterTooltip = "Allows you to ignore certain roles from being shown. Use at your own risk."
-L.Settings.RoleFilterLabels = L.Settings.LoadConditionRoleLabels
-
 L.Settings.FrameWidthLabel = "Ancho"
 L.Settings.FrameWidthTooltip = nil
 
@@ -77,11 +72,11 @@ L.Settings.FrameHeightTooltip = nil
 L.Settings.FontSizeLabel = "Tamaño de fuente"
 L.Settings.FontSizeTooltip = nil
 
-L.Settings.FontFlagsLabel = "Font Options"
+L.Settings.FontFlagsLabel = "Opciones de fuente"
 L.Settings.FontFlagsTooltip = nil
 L.Settings.FontFlagsLabels = {
-	[Private.Enum.FontFlags.OUTLINE] = "Outline",
-	[Private.Enum.FontFlags.SHADOW] = "Shadow",
+	[Private.Enum.FontFlags.OUTLINE] = "Contorno",
+	[Private.Enum.FontFlags.SHADOW] = "Sombra",
 }
 
 L.Settings.FrameGapLabel = "Espaciado"
@@ -105,10 +100,8 @@ L.Settings.FrameGrowLabels = {
 }
 
 L.Settings.GlowImportantLabel = "Resaltar hechizos importantes"
-L.Settings.GlowImportantTooltip = "Lo que es importante y lo que no lo es lo declara el juego."
 
-L.Settings.OnlyImportantLabel = "Only Show Important Spells"
-L.Settings.OnlyImportantTooltip = "Note that you're relying on what the game considers important, use at your own risk."
+L.Settings.OnlyImportantLabel = "Mostrar solo hechizos importantes"
 
 L.Settings.GlowTypeLabel = "Tipo de resplandor"
 L.Settings.GlowTypeTooltip = nil
@@ -120,45 +113,74 @@ L.Settings.GlowTypeLabels = {
 }
 
 L.Settings.ShowDurationLabel = "Mostrar duración"
-L.Settings.ShowDurationTooltip = nil
-
-L.Settings.ShowDurationFractionsLabel = "Mostrar fracciones"
-L.Settings.ShowDurationFractionsTooltip = nil
 
 L.Settings.IndicateInterruptsLabel = "Indicar interrupciones"
-L.Settings.IndicateInterruptsTooltip =
-	"Desatura el icono, muestra un indicador encima del icono y retrasa ocultar el icono 1 segundo. No funciona con hechizos canalizados."
 
-L.Settings.RenderInterruptSourceNameLabel = "Render Interrupt Source Name"
-L.Settings.RenderInterruptSourceNameTooltip = nil
+L.Settings.RenderInterruptSourceNameLabel = "Mostrar nombre de fuente de interrupción"
 
 L.Settings.ShowSwipeLabel = "Mostrar barrido"
-L.Settings.ShowSwipeTooltip = nil
 
-L.Settings.BorderStyleLabel = "Border Style"
+L.Settings.BorderStyleLabel = "Estilo de borde"
 L.Settings.BorderStyleTooltip = nil
-L.Settings.BorderStyleSolid = "Solid"
 
-L.Settings.OpacityLabel = "Opacidad"
-L.Settings.OpacityTooltip = nil
+L.Settings.ForegroundBarTextureLabel = "Textura de la barra de progreso"
+L.Settings.ForegroundBarTextureTooltip = nil
 
-L.Settings.IconZoomLabel = "Icon Zoom"
+L.Settings.BackgroundBarTextureLabel = "Textura de fondo de la barra"
+L.Settings.BackgroundBarTextureTooltip = nil
+
+L.Settings.BackgroundBarColorLabel = "Color de fondo de la barra"
+L.Settings.BackgroundBarColorTooltip =
+	"La opacidad solo está disponible en el Modo de Edición, ya que la interfaz de configuración predeterminada no la muestra."
+
+L.Settings.ProgressBarColorLabel = "Color de barra"
+L.Settings.ProgressBarColorTooltip =
+	"La opacidad solo está disponible en el Modo de Edición, ya que la interfaz de configuración predeterminada no la muestra."
+
+L.Settings.MirrorLayoutLabel = "Invertir diseño"
+
+L.Settings.TextToSpeechVoiceLabel = "Voz TTS"
+L.Settings.TextToSpeechVoiceTooltip =
+	"Voz usada para los anuncios de texto a voz. Compartida entre las configuraciones de Self y Party."
+
+L.Settings.AnnounceUntargetedSpellsLabel = "Configuración TTS sin objetivo"
+L.Settings.AnnounceUntargetedSpellsTooltip =
+	"Texto a voz para hechizos sin objetivo (AoE, frontales, etc.) por tipo de PNJ."
+
+L.Settings.AnnounceTargetedSpellsLabel = "Configuración TTS con objetivo"
+L.Settings.AnnounceTargetedSpellsTooltip =
+	"Texto a voz para hechizos que apuntan a un jugador específico, por tipo de PNJ."
+
+L.Settings.NpcTypeLabels = {
+	[Private.Enum.NpcType.Boss] = "Jefes",
+	[Private.Enum.NpcType.Lieutenant] = "Lugartenientes",
+	[Private.Enum.NpcType.Caster] = "Tiene maná",
+	[Private.Enum.NpcType.Melee] = "Enemigos normales",
+	[Private.Enum.NpcType.Minion] = "Secuaces",
+}
+
+L.Settings.HideUntargetedSpellsLabel = "Ocultar hechizos sin objetivo"
+L.Settings.HideTargetedSpellsLabel = "Ocultar hechizos con objetivo"
+
+L.Settings.SelfOnlyLabel = "Mostrar solo hechizos dirigidos al jugador"
+
+L.Settings.InlineDurationLabel = "Posición de duración integrada"
+
+L.Settings.UseInterruptabilityColorsLabel = "Usar colores de interrupción"
+L.Settings.UseInterruptabilityColorsTooltip = nil
+
+L.Settings.UseTargetClassColorLabel = "Usar color de clase del objetivo"
+L.Settings.UseTargetClassColorTooltip =
+	"Colorea la barra con el color de clase de la unidad objetivo al 75 % de opacidad. Los hechizos sin objetivo usarán un Color de Barra de Fondo más brillante."
+
+L.Settings.UninterruptibleColorLabel = "Color ininterrumpible"
+L.Settings.UninterruptibleColorTooltip = nil
+
+L.Settings.InterruptibleColorLabel = "Color interrumpible"
+L.Settings.InterruptibleColorTooltip = nil
+
+L.Settings.IconZoomLabel = "Zoom del icono"
 L.Settings.IconZoomTooltip = nil
-
-L.Settings.FrameOffsetXLabel = "Desplazamiento X"
-L.Settings.FrameOffsetXTooltip = nil
-
-L.Settings.FrameOffsetYLabel = "Desplazamiento Y"
-L.Settings.FrameOffsetYTooltip = nil
-
-L.Settings.FrameSourceAnchorLabel = "Ancla de origen"
-L.Settings.FrameSourceAnchorTooltip = nil
-
-L.Settings.FrameTargetAnchorLabel = "Ancla de destino"
-L.Settings.FrameTargetAnchorTooltip = nil
-
-L.Settings.IncludeSelfInPartyLabel = "Incluirse a uno mismo en el grupo"
-L.Settings.IncludeSelfInPartyTooltip = "Solo funciona cuando se usan los marcos de grupo estilo banda."
 
 L.Settings.ClickToOpenSettingsLabel = "Haz clic para abrir la configuración"
 
@@ -168,22 +190,29 @@ L.Settings.Export = "Exportar"
 L.Settings.FontLabel = "Fuente"
 L.Settings.FontTooltip = nil
 
-L.Settings.FeatureFlagsLabel = "Features"
+L.Settings.FeatureFlagsLabel = "Características"
 L.Settings.FeatureFlagsTooltip = nil
 
 L.Settings.FeatureFlagLabels = {
 	[Private.Enum.FeatureFlag.GlowImportant] = L.Settings.GlowImportantLabel,
 	[Private.Enum.FeatureFlag.OnlyImportant] = L.Settings.OnlyImportantLabel,
 	[Private.Enum.FeatureFlag.ShowDuration] = L.Settings.ShowDurationLabel,
-	[Private.Enum.FeatureFlag.ShowDurationFractions] = L.Settings.ShowDurationFractionsLabel,
 	[Private.Enum.FeatureFlag.ShowSwipe] = L.Settings.ShowSwipeLabel,
 	[Private.Enum.FeatureFlag.IndicateInterrupts] = L.Settings.IndicateInterruptsLabel,
 	[Private.Enum.FeatureFlag.RenderInterruptSourceName] = L.Settings.RenderInterruptSourceNameLabel,
-	[Private.Enum.FeatureFlag.IncludeSelfInParty] = L.Settings.IncludeSelfInPartyLabel,
+	[Private.Enum.FeatureFlag.ShowIcon] = "Mostrar icono",
+	[Private.Enum.FeatureFlag.ShowTargetMarker] = "Mostrar marcador de objetivo",
+	[Private.Enum.FeatureFlag.ShowSpellName] = "Mostrar nombre del hechizo",
+	[Private.Enum.FeatureFlag.ShowTargetName] = "Mostrar nombre del objetivo",
+	[Private.Enum.FeatureFlag.ShowTargetClassColor] = "Mostrar color de clase del objetivo",
+	[Private.Enum.FeatureFlag.MirrorLayout] = L.Settings.MirrorLayoutLabel,
+	[Private.Enum.FeatureFlag.InlineDuration] = L.Settings.InlineDurationLabel,
+	[Private.Enum.FeatureFlag.HideUntargetedSpells] = L.Settings.HideUntargetedSpellsLabel,
+	[Private.Enum.FeatureFlag.HideTargetedSpells] = L.Settings.HideTargetedSpellsLabel,
+	[Private.Enum.FeatureFlag.SelfOnly] = L.Settings.SelfOnlyLabel,
 }
 
 L.Settings.FeatureFlagSettingTitles = {
-	[Private.Enum.FeatureFlag.GlowImportant] = "Display",
-	[Private.Enum.FeatureFlag.IndicateInterrupts] = "Interrupt Settings",
-	[Private.Enum.FeatureFlag.IncludeSelfInParty] = "Party Settings",
+	[Private.Enum.FeatureFlag.GlowImportant] = "Visualización",
+	[Private.Enum.FeatureFlag.IndicateInterrupts] = "Configuración de interrupción",
 }

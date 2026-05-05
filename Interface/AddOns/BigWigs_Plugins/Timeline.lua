@@ -19,6 +19,7 @@ local hasCustomTimers = {}
 
 plugin.defaultDB = {
 	timersMode = "enhanced",
+	blizzTimeline = false,
 }
 
 local function updateProfile()
@@ -132,6 +133,19 @@ do
 						type = "toggle",
 						name = L.enableBlizzTimeline,
 						desc = L.enableBlizzTimelineDesc,
+						get = function() return db.blizzTimeline end,
+						set = function(_, value)
+							db.blizzTimeline = value
+							if value then
+								C_CVar.SetCVar("encounterTimelineEnabled", "1")
+							end
+							C_UI.Reload()
+						end,
+						confirm = function(_, value)
+							if value then
+								return L.blizzTimelineEnhancedWarning
+							end
+						end,
 						width = 2,
 						order = 1,
 					},
@@ -231,8 +245,8 @@ do
 
 	function plugin:DoTestMessage(name, icon)
 		local severity = math.random(1, 3)
-		plugin:SendMessage("BigWigs_Message", plugin, nil, name, colors[severity], icon, false)
-		plugin:SendMessage("BigWigs_Sound", plugin, nil, sounds[severity])
+		self:SendMessage("BigWigs_Message", self, nil, name, colors[severity], icon, false)
+		self:SendMessage("BigWigs_Sound", self, nil, sounds[severity])
 	end
 end
 
@@ -265,11 +279,13 @@ function plugin:UpdateBarsShown(event, module)
 		self:RegisterEvent("ENCOUNTER_TIMELINE_EVENT_STATE_CHANGED")
 		self:RegisterEvent("ENCOUNTER_TIMELINE_EVENT_REMOVED")
 		self:StartBars()
+		self:SendMessage("BigWigs_ShowBlizzTimers")
 	else
 		self:UnregisterEvent("ENCOUNTER_TIMELINE_EVENT_ADDED")
 		self:UnregisterEvent("ENCOUNTER_TIMELINE_EVENT_STATE_CHANGED")
 		self:UnregisterEvent("ENCOUNTER_TIMELINE_EVENT_REMOVED")
 		self:StopBars()
+		self:SendMessage("BigWigs_HideBlizzTimers")
 	end
 end
 
@@ -281,14 +297,26 @@ function plugin:OnRegister()
 	self.displayName = L.timeline
 	C_CVar.SetCVar("combatWarningsEnabled", "1")
 	C_CVar.SetCVar("encounterWarningsEnabled", "0")
+	CriticalEncounterWarnings:SetScript("OnShow", nil)
+	CriticalEncounterWarnings:UnregisterAllEvents()
+	MediumEncounterWarnings:SetScript("OnShow", nil)
+	MediumEncounterWarnings:UnregisterAllEvents()
+	MinorEncounterWarnings:SetScript("OnShow", nil)
+	MinorEncounterWarnings:UnregisterAllEvents()
 end
 
 function plugin:OnPluginEnable()
+	updateProfile()
+	self:RegisterMessage("BigWigs_ProfileUpdate", updateProfile)
+	if not db.blizzTimeline then
+		local f = CreateFrame("Frame")
+		f:Hide()
+		C_CVar.SetCVar("encounterTimelineEnabled", "0")
+		EncounterTimeline:SetParent(f)
+	end
+
 	self:RegisterMessage("BigWigs_StartConfigureMode")
 	self:RegisterMessage("BigWigs_StopConfigureMode")
-	self:RegisterMessage("BigWigs_ProfileUpdate", updateProfile)
-	updateProfile()
-
 	self:RegisterMessage("BigWigs_OnBossEngage", "UpdateBarsShown")
 	self:RegisterMessage("BigWigs_OnBossEngageMidEncounter", "UpdateBarsShown")
 	self:RegisterMessage("BigWigs_OnBossDisable", "UpdateBarsShown")
@@ -341,7 +369,7 @@ function plugin:ENCOUNTER_TIMELINE_EVENT_ADDED(_, eventInfo)
 	local maxQueueDuration = eventInfo.maxQueueDuration
 
 	-- Secret
-	local spellId = eventInfo.spellID
+	--local spellId = eventInfo.spellID
 	local spellName = eventInfo.spellName
 	local icon = eventInfo.iconFileID
 	-- local roleAndSpellIndicators = eventInfo.icons

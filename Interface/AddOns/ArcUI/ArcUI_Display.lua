@@ -4498,115 +4498,95 @@ function ns.Display.UpdateDurationBar(barNumber, stacks, maxStacks, active, sour
     
   elseif active and sourceBar and sourceBar.GetTotemInfo then
     -- TOTEM DURATION BAR
-    -- WoW 12.0: Use fast polling with SetValue (AllowedWhenTainted - accepts secrets)
-    -- No SetSmoothing for totem bars - polling-driven, no DurationObject
+    -- 12.0.5+: GetDurationObject() → GetTotemDuration(slot).
+    -- GetTotemDuration returns nil when slot inactive, valid durObj when active.
+    -- Use SetTimerDuration for bar animation (no polling needed) and
+    -- GetRemainingDuration() in a text OnUpdate — same pattern as aura bars.
     if barFrame.bar.SetSmoothing then
       barFrame.bar:SetSmoothing(false)
     end
-    local totemSlot = sourceBar:GetTotemInfo()
-    
-    if totemSlot then
-      -- Reset VertexColor in case ColorCurve was previously active
+
+    -- Clear any legacy polling state
+    barFrame.bar.totemPollingData = nil
+    barFrame.bar:SetScript("OnUpdate", nil)
+
+    local durObj = sourceBar:GetDurationObject()
+
+    if durObj then
       local barTextureTotem = barFrame.bar:GetStatusBarTexture()
       if barTextureTotem then barTextureTotem:SetVertexColor(1, 1, 1, 1) end
-      
-      -- WoW 12.0: Get min/max from sourceBar - duration is SECRET but SetMinMaxValues accepts secrets!
-      local minVal, maxVal = sourceBar:GetMinMaxValues()
-      barFrame.bar:SetMinMaxValues(minVal, maxVal)
-      
-      -- Get duration display settings
+
+      local fillMode = barConfig.display.durationBarFillMode or "drain"
+      local timerDirection = (fillMode == "fill")
+        and Enum.StatusBarTimerDirection.ElapsedTime
+        or  Enum.StatusBarTimerDirection.RemainingTime
+
+      barFrame.bar:SetMinMaxValues(0, 1)
+      barFrame.bar:SetTimerDuration(durObj, Enum.StatusBarInterpolation.Linear, timerDirection)
+
+      -- Duration text: poll GetRemainingDuration() on the fresh durObj each frame.
+      -- GetTotemDuration returns nil (not a zero-span object) when slot gone,
+      -- so `if durObj then` correctly gates the text update.
       local showDuration = barConfig.display.showDuration
       local decimals = barConfig.display.durationDecimals or 1
       local dc = barConfig.display.durationColor or {r=1, g=1, b=1, a=1}
-      
-      -- Store data for OnUpdate handler
-      barFrame.bar.totemPollingData = {
-        sourceBar = sourceBar,
-        durationFrame = durationFrame,
-        showDuration = showDuration,
-        decimals = decimals,
-        baseColor = baseColor,
-        elapsed = 0,
-        barNumber = barNumber,  -- For hiding all frames on expiry
-      }
-      
-      -- Fast polling OnUpdate
-      local barTexture = barFrame.bar:GetStatusBarTexture()
-      barFrame.bar:SetScript("OnUpdate", function(self, elapsed)
-        local data = self.totemPollingData
-        if not data then return end
-        
-        -- Check totem every frame for instant response
-        local currentSlot = data.sourceBar:GetTotemInfo()
-        if not currentSlot then
-          -- Totem/pet is gone - hide ALL frames immediately (not just bar alpha)
-          -- This prevents ghost text/icons lingering until Core's 0.5s ticker catches up
-          self:SetScript("OnUpdate", nil)
-          self.totemPollingData = nil
-          
-          local frames = barFrames[data.barNumber]
-          if frames then
-            frames.barFrame:Hide()
-            frames.textFrame:Hide()
-            if frames.durationFrame then frames.durationFrame:Hide() end
-            if frames.iconFrame then frames.iconFrame:Hide() end
-            if frames.nameFrame then frames.nameFrame:Hide() end
-            if frames.barIconFrame then frames.barIconFrame:Hide() end
-          end
-          return
-        end
-        
-        -- Throttle value updates only
-        data.elapsed = data.elapsed + elapsed
-        if data.elapsed < 0.02 then return end
-        data.elapsed = 0
-        
-        -- Get time left (may be secret - that's fine!)
-        local timeLeft = data.sourceBar:GetValue()
-        
-        -- SetValue accepts secrets (AllowedWhenTainted)
-        self:SetValue(timeLeft)
-        
-        -- Update duration text (SetText accepts secrets)
-        if data.durationFrame and data.showDuration then
-          data.durationFrame.text:SetFormattedText(DURATION_FMT[data.decimals] or "%.1f", timeLeft)
-        end
-      end)
-      
-      -- Initial value
-      local initialValue = sourceBar:GetValue()
-      barFrame.bar:SetValue(initialValue)
-      
-      -- Initial duration text
+
       if durationFrame and showDuration then
-        durationFrame.text:SetFormattedText(DURATION_FMT[decimals] or "%.1f", initialValue)
+        durationFrame.storedDecimals = decimals
+        durationFrame.sourceBar = sourceBar
+        durationFrame.isActive = true
+
+        if not durationFrame.totemDurationOnUpdate then
+          durationFrame.totemDurationOnUpdate = function(self, elapsed)
+            self.elapsed = (self.elapsed or 0) + elapsed
+            if self.elapsed < 0.1 then return end  -- 10 fps
+            self.elapsed = 0
+            if not self.isActive or not self.sourceBar then
+              self:SetScript("OnUpdate", nil)
+              self.text:SetText("")
+              self:Hide()
+              return
+            end
+            -- GetDurationObject returns nil when slot inactive (API returns nil, not zero-span)
+            local currentDurObj = self.sourceBar:GetDurationObject()
+            if currentDurObj then
+              self.text:SetFormattedText(DURATION_FMT[self.storedDecimals] or "%.1f",
+                currentDurObj:GetRemainingDuration())
+            else
+              self:SetScript("OnUpdate", nil)
+              self.isActive = false
+              self.sourceBar = nil
+              self.text:SetText("")
+              self:Hide()
+            end
+          end
+        end
+
+        durationFrame:SetScript("OnUpdate", durationFrame.totemDurationOnUpdate)
         durationFrame.text:SetTextColor(dc.r, dc.g, dc.b, dc.a)
         durationFrame:Show()
       end
-      
+
       barFrame.bar:SetStatusBarColor(baseColor.r, baseColor.g, baseColor.b, baseColor.a or 1)
-      
-      -- NOW restore bar visibility (color is already applied, no flicker)
       barFrame.bar:SetAlpha(1)
     else
-      -- No valid totem slot - clear OnUpdate
-      barFrame.bar.totemPollingData = nil
-      barFrame.bar:SetScript("OnUpdate", nil)
+      -- No duration object — slot inactive, clear everything
       UnregisterAuraPolling(barNumber)
       barFrame.bar:SetMinMaxValues(0, maxValue)
       barFrame.bar:SetValue(0)
-      -- Reset VertexColor and apply base color
       local barTexture = barFrame.bar:GetStatusBarTexture()
       if barTexture then barTexture:SetVertexColor(1, 1, 1, 1) end
       barFrame.bar:SetStatusBarColor(baseColor.r, baseColor.g, baseColor.b, baseColor.a or 1)
       if durationFrame then
+        durationFrame.isActive = false
+        durationFrame.sourceBar = nil
+        durationFrame:SetScript("OnUpdate", nil)
         durationFrame:Hide()
       end
-      -- Restore visibility after color is applied
       barFrame.bar:SetAlpha(1)
     end
-    
-    ApplyBarGradient(barFrame.bar, barConfig, baseColor)  -- Pass baseColor to avoid secrets
+
+    ApplyBarGradient(barFrame.bar, barConfig, baseColor)
     barFrame.bar:Show()
     
   elseif active and sourceBar and sourceBar.GetAuraInfo then

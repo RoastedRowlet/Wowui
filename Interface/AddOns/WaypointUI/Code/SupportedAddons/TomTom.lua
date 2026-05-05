@@ -1,6 +1,7 @@
 local env = select(2, ...)
 local L = env.L
 local Config = env.Config
+local Path = env.modules:Import("packages\\path")
 local LazyTimer = env.modules:Import("packages\\lazy-timer")
 local MapPin = env.modules:Import("@\\MapPin")
 local SupportedAddons = env.modules:Import("@\\SupportedAddons")
@@ -23,11 +24,11 @@ local REPLACE_PROMPT_INFO = {
     text         = L["TOMTOM_REPLACEPROMPT"],
     options      = {
         {
-            text     = L["TOMTOM_REPLACEPROMPT_YES"],
+            text     = L["REPLACE"],
             callback = HandleAccept
         },
         {
-            text     = L["TOMTOM_REPLACEPROMPT_NO"],
+            text     = L["CANCEL"],
             callback = nil
         }
     },
@@ -39,7 +40,7 @@ local REPLACE_PROMPT_INFO = {
 function SupportedAddons_TomTom.PlaceWaypointAtSession()
     if not TomTomWaypointInfo or not TomTomWaypointInfo.mapID or not TomTomWaypointInfo.x or not TomTomWaypointInfo.y then return end
     if not SupportedAddons_TomTom.IsWaypointIgnored(TomTomWaypointInfo.mapID, TomTomWaypointInfo.x, TomTomWaypointInfo.y) then
-        MapPin.NewUserNavigation(TomTomWaypointInfo.name, TomTomWaypointInfo.mapID, TomTomWaypointInfo.x, TomTomWaypointInfo.y, "TomTom_Waypoint")
+        MapPin.NewUserNavigation(TomTomWaypointInfo.name, TomTomWaypointInfo.mapID, TomTomWaypointInfo.x, TomTomWaypointInfo.y, "TomTom_Waypoint", Path.Root .. "\\Art\\Icons\\TomTomArrow", nil, nil, nil, true)
     end
 end
 

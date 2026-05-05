@@ -66,6 +66,7 @@ local cycleBtn = CreateFrame(
     "SecureActionButtonTemplate"
 )
 cycleBtn:SetAttribute("type", "macro")
+cycleBtn:SetAttribute("macrotext", "")
 cycleBtn:RegisterForClicks("AnyDown")
 
 -- Clear mouseover marker
@@ -76,7 +77,7 @@ local clearBtn = CreateFrame(
     "SecureActionButtonTemplate"
 )
 clearBtn:SetAttribute("type", "macro")
-clearBtn:SetAttribute("macrotext", "/targetmarker [@mouseover,exists] 0")
+clearBtn:SetAttribute("macrotext", "")
 clearBtn:RegisterForClicks("AnyDown")
 
 -- =========================
@@ -107,9 +108,12 @@ SecureHandlerWrapScript(cycleBtn, "PreClick", cycleBtn, [=[
     end
     self:SetAttribute(
         "macrotext",
-        "/targetmarker [@mouseover] " .. marker
+        "/tm [@mouseover,harm,nodead][] " .. marker
     )
 ]=])
+
+-- Clear mouseover marker
+clearBtn:SetAttribute("macrotext", "/tm [@mouseover,harm,nodead][] 0")
 
 -- =========================
 -- Key Bindings
@@ -220,11 +224,19 @@ SLASH_WMCMOUSEOVERADD1 = "/wmcmadd"
 SlashCmdList["WMCMOUSEOVERADD"] = function(msg)
     EnsureSV()
     local sv = SV()
-    local which, mods, key = msg:match("^(%w+)%s+([%w%-]*)%s*(%w*)$")
+    -- Accepts: "cycle SHIFT- F1" or "cycle F1" or "cycle SHIFT-F1" or "cycle BUTTON4"
+    local which, rest = msg:match("^(%w+)%s+(.+)$")
     if not which or (which ~= "cycle" and which ~= "clear") then
         print(L["Usage: /wmcmadd <cycle|clear> <modifiers> <key>"])
         print(L["Example: /wmcmadd cycle CTRL- SHIFT- F1"])
         return
+    end
+    rest = rest or ""
+    local mods, key = rest:match("^([%w%-]+)%s+([%w%p]+)$")
+    if not key then
+        -- Try to parse as just key (no modifier)
+        key = rest:match("^%s*([%w%p]+)%s*$")
+        mods = ""
     end
     mods = mods or ""
     key = key or ""

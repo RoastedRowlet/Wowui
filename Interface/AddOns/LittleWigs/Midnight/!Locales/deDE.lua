@@ -111,7 +111,7 @@ end
 
 L = BigWigs:NewBossLocale("Den of Nalorakk Trash", "deDE")
 if L then
-    L.offerings_acquired = "Gaben erhalten"
+	L.offerings_acquired = "Gaben erhalten"
 	L.offerings_acquired_desc = "Zeigt einen Alarm, wenn eine Gabe erhalten wurde."
 end
 
@@ -121,6 +121,11 @@ L = BigWigs:NewBossLocale("Maisara Caverns Trash", "deDE")
 if L then
 	L.prisoners_freed = "Gefangene befreit"
 	L.prisoners_freed_desc = "Zeigt einen Alarm, wenn ein Gefangener befreit wurde."
+	L.custom_on_cooking_pot_autotalk_desc = "Wählt automatisch die NSC Dialogoption zur Gewährung des Buffs 'Herzhafter Eintopf der Blutfratzen'.\n\n|T4659336:16|tHerzhafter Eintopf der Blutfratzen\n{1269056}"
+	L.custom_on_ritual_cauldron_autotalk_desc = "Wählt automatisch die NSC Dialogoption zur Gewährung des Buffs 'Ritualgemisch'.\n\n|T236271:16|tRitualgemisch\n{1271300}"
+
+	L.cooking_pot = "Kochtopf"
+	L.ritual_cauldron = "Ritualkessel"
 end
 
 -- Murder Row
@@ -129,4 +134,13 @@ L = BigWigs:NewBossLocale("Murder Row Trash", "deDE")
 if L then
 	L.snitches_interrogated = "Spitzel verhört"
 	L.snitches_interrogated_desc = "Zeigt einen Alarm, wenn ein Spitzel verhört wurde."
+end
+
+-- Nexus-Point Xenas
+
+L = BigWigs:NewBossLocale("Nexus-Point Xenas Trash", "deDE")
+if L then
+	L.custom_on_arcane_tripwire_autotalk_desc = "|cFFFF0000Benötigt 25 Fertigkeitspunkte der Ingenieurskunst von Midnight.|r Wählt automatisch die NSC Dialogoption zum Deaktivieren des arkanen Stolperdrahtes."
+
+	L.arcane_tripwire = "Arkaner Stolperdraht"
 end

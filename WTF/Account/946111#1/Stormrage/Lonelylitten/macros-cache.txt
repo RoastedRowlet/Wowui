@@ -54,6 +54,11 @@ VER 3 010000000000001D "Focus Beam" "134400"
 #showtooltip
 /cast [@focus, exists, harm] Solar Beam
 END
+VER 3 0100000000000023 "Focus Soothe" "134400"
+#showtooltip
+/cast [@focus, exists, harm] Soothe
+/cast [@focus, exists, harm] Cyclone
+END
 VER 3 0100000000000018 "hppot" "5931169"
 #128
 --&0b
@@ -72,6 +77,7 @@ VER 3 010000000000000A "Incarn TWW" "6383471"
 /use Celestial Alignment
 /use Nature's Vigil
 /use Fury of Elune
+/use [combat] Light's Potential
 /use [combat] Potion of Recklessness
 END
 VER 3 0100000000000012 "IQD bell same bu" "134400"

@@ -111,7 +111,7 @@ end
 
 L = BigWigs:NewBossLocale("Den of Nalorakk Trash", "zhCN")
 if L then
-    L.offerings_acquired = "获得的供品"
+	L.offerings_acquired = "获得的供品"
 	L.offerings_acquired_desc = "当收集到获得的供品时显示警告。"
 end
 
@@ -121,6 +121,11 @@ L = BigWigs:NewBossLocale("Maisara Caverns Trash", "zhCN")
 if L then
 	L.prisoners_freed = "解救囚犯"
 	L.prisoners_freed_desc = "当解救囚犯时显示警告。"
+	L.custom_on_cooking_pot_autotalk_desc = "自动选择NPC的对话选项，获取“丰盛的邪枝炖汤”增益。\n\n|T4659336:16|t丰盛的邪枝炖汤\n{1269056}"
+	L.custom_on_ritual_cauldron_autotalk_desc = "自动选择NPC的对话选项，获取“仪式混合物”增益。\n\n|T236271:16|t仪式混合物\n{1271300}"
+
+	L.cooking_pot = "烹饪锅"
+	L.ritual_cauldron = "仪式大锅"
 end
 
 -- Murder Row
@@ -129,4 +134,13 @@ L = BigWigs:NewBossLocale("Murder Row Trash", "zhCN")
 if L then
 	L.snitches_interrogated = "讯问扒手"
 	L.snitches_interrogated_desc = "当讯问扒手时显示警告。"
+end
+
+-- Nexus-Point Xenas
+
+L = BigWigs:NewBossLocale("Nexus-Point Xenas Trash", "zhCN")
+if L then
+	L.custom_on_arcane_tripwire_autotalk_desc = "|cFFFF0000需要至暗之夜工程学 25 点技能。|r自动与NPC对话，选择禁用奥术绊索的选项。"
+
+	L.arcane_tripwire = "奥术绊索"
 end

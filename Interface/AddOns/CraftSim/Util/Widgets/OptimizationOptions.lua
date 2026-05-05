@@ -17,6 +17,8 @@ CraftSim.WIDGETS = CraftSim.WIDGETS or {}
 ---@field OPTIMIZE_CONCENTRATION boolean?         show "Optimize Concentration" checkbox (hidden when recipe does not support qualities)
 ---@field OPTIMIZE_FINISHING_REAGENTS boolean?    show "Optimize Finishing Reagents" checkbox
 ---@field INCLUDE_SOULBOUND_FINISHING_REAGENTS boolean? show "Include Soulbound Finishing Reagents" sub-option (only visible when OPTIMIZE_FINISHING_REAGENTS is also shown)
+---@field ONLY_HIGHEST_QUALITY_SOULBOUND_FINISHING_REAGENTS boolean? show "Only Highest Quality Soulbound Finishing Reagents" sub-option (only visible when OPTIMIZE_FINISHING_REAGENTS is also shown)
+---@field FINISHING_REAGENTS_ALGORITHM boolean?  show "Finishing Reagents Algorithm" radio sub-menu (only visible when OPTIMIZE_FINISHING_REAGENTS is also shown)
 
 ---Default values for each option key when no stored value exists.
 ---Use CraftSim.WIDGETS.OptimizationOptions.OPTION_KEYS values as field names.
@@ -28,6 +30,8 @@ CraftSim.WIDGETS = CraftSim.WIDGETS or {}
 ---@field OPTIMIZE_CONCENTRATION boolean?
 ---@field OPTIMIZE_FINISHING_REAGENTS boolean?
 ---@field INCLUDE_SOULBOUND_FINISHING_REAGENTS boolean?
+---@field ONLY_HIGHEST_QUALITY_SOULBOUND_FINISHING_REAGENTS boolean?
+---@field FINISHING_REAGENTS_ALGORITHM string?     one of CraftSim.WIDGETS.OptimizationOptions.FINISHING_REAGENTS_ALGORITHM
 
 ---@class CraftSim.WIDGETS.OptimizationOptions.ConstructorOptions
 ---@field parent Frame
@@ -51,13 +55,20 @@ CraftSim.WIDGETS = CraftSim.WIDGETS or {}
 ---@overload fun(options: CraftSim.WIDGETS.OptimizationOptions.ConstructorOptions): CraftSim.WIDGETS.OptimizationOptions
 CraftSim.WIDGETS.OptimizationOptions = CraftSim.WIDGETS.OptionsButton:extend()
 
----Reagent allocation mode values mirroring CraftSim.RECIPE_SCAN.SCAN_MODES.
+---Reagent allocation mode values.
 ---@enum CraftSim.WIDGETS.OptimizationOptions.REAGENT_ALLOCATION
 CraftSim.WIDGETS.OptimizationOptions.REAGENT_ALLOCATION = {
-    Q1       = "Q1",
-    Q2       = "Q2",
-    Q3       = "Q3",
-    OPTIMIZE = "OPTIMIZE",
+    Q1                     = "Q1",
+    Q2                     = "Q2",
+    Q3                     = "Q3",
+    OPTIMIZE               = "OPTIMIZE",
+    OPTIMIZE_HIGHEST       = "OPTIMIZE_HIGHEST",
+    OPTIMIZE_MOST_PROFITABLE = "OPTIMIZE_MOST_PROFITABLE",
+    OPTIMIZE_TARGET_1      = "OPTIMIZE_TARGET_1",
+    OPTIMIZE_TARGET_2      = "OPTIMIZE_TARGET_2",
+    OPTIMIZE_TARGET_3      = "OPTIMIZE_TARGET_3",
+    OPTIMIZE_TARGET_4      = "OPTIMIZE_TARGET_4",
+    OPTIMIZE_TARGET_5      = "OPTIMIZE_TARGET_5",
 }
 
 ---DB key names for each individual optimization option value.
@@ -70,6 +81,15 @@ CraftSim.WIDGETS.OptimizationOptions.OPTION_KEYS = {
     OPTIMIZE_CONCENTRATION               = "OPTIMIZE_CONCENTRATION",
     OPTIMIZE_FINISHING_REAGENTS          = "OPTIMIZE_FINISHING_REAGENTS",
     INCLUDE_SOULBOUND_FINISHING_REAGENTS = "INCLUDE_SOULBOUND_FINISHING_REAGENTS",
+    ONLY_HIGHEST_QUALITY_SOULBOUND_FINISHING_REAGENTS = "ONLY_HIGHEST_QUALITY_SOULBOUND_FINISHING_REAGENTS",
+    FINISHING_REAGENTS_ALGORITHM         = "FINISHING_REAGENTS_ALGORITHM",
+}
+
+---Algorithm mode values for finishing reagent optimization.
+---@enum CraftSim.WIDGETS.OptimizationOptions.FINISHING_REAGENTS_ALGORITHM
+CraftSim.WIDGETS.OptimizationOptions.FINISHING_REAGENTS_ALGORITHM = {
+    SIMPLE      = "SIMPLE",
+    PERMUTATION = "PERMUTATION",
 }
 
 ---@param options CraftSim.WIDGETS.OptimizationOptions.ConstructorOptions
@@ -108,6 +128,7 @@ function CraftSim.WIDGETS.OptimizationOptions:new(options)
 
     local RA   = CraftSim.WIDGETS.OptimizationOptions.REAGENT_ALLOCATION
     local KEYS = CraftSim.WIDGETS.OptimizationOptions.OPTION_KEYS
+    local FA   = CraftSim.WIDGETS.OptimizationOptions.FINISHING_REAGENTS_ALGORITHM
 
     local function buildMenu(ownerRegion, rootDescription)
         local recipeData = options.recipeDataProvider and options.recipeDataProvider()
@@ -133,24 +154,54 @@ function CraftSim.WIDGETS.OptimizationOptions:new(options)
             local sub = rootDescription:CreateButton(L("RECIPE_SCAN_REAGENT_ALLOCATION"))
 
             sub:CreateRadio(
-                L("RECIPE_SCAN_REAGENT_ALLOCATION_Q1") .. " " .. GUTIL:GetQualityIconString(1, 20, 20),
+                L("RECIPE_SCAN_REAGENT_ALLOCATION_Q1") ..
+                " " .. GUTIL:GetQualityIconString(1, 20, 20) .. " | " .. GUTIL:GetQualityIconStringSimplified(1, 20, 20),
                 function() return getOption(KEYS.REAGENT_ALLOCATION) == RA.Q1 end,
-                function() saveOption(KEYS.REAGENT_ALLOCATION, RA.Q1) end)
+                function() saveOption(KEYS.REAGENT_ALLOCATION, RA.Q1) return MenuResponse.Refresh end)
 
             sub:CreateRadio(
-                L("RECIPE_SCAN_REAGENT_ALLOCATION_Q2") .. " " .. GUTIL:GetQualityIconString(2, 20, 20),
+                L("RECIPE_SCAN_REAGENT_ALLOCATION_Q2") ..
+                " " .. GUTIL:GetQualityIconString(2, 20, 20) .. " | " .. GUTIL:GetQualityIconStringSimplified(2, 20, 20),
                 function() return getOption(KEYS.REAGENT_ALLOCATION) == RA.Q2 end,
-                function() saveOption(KEYS.REAGENT_ALLOCATION, RA.Q2) end)
+                function() saveOption(KEYS.REAGENT_ALLOCATION, RA.Q2) return MenuResponse.Refresh end)
 
             sub:CreateRadio(
                 L("RECIPE_SCAN_REAGENT_ALLOCATION_Q3") .. " " .. GUTIL:GetQualityIconString(3, 20, 20),
                 function() return getOption(KEYS.REAGENT_ALLOCATION) == RA.Q3 end,
-                function() saveOption(KEYS.REAGENT_ALLOCATION, RA.Q3) end)
+                function() saveOption(KEYS.REAGENT_ALLOCATION, RA.Q3) return MenuResponse.Refresh end)
 
-            sub:CreateRadio(
-                L("RECIPE_SCAN_MODE_OPTIMIZE"),
-                function() return getOption(KEYS.REAGENT_ALLOCATION) == RA.OPTIMIZE end,
-                function() saveOption(KEYS.REAGENT_ALLOCATION, RA.OPTIMIZE) end)
+            -- Optimize sub-submenu
+            local optimizeSub = sub:CreateButton(L("RECIPE_SCAN_MODE_OPTIMIZE"))
+
+            optimizeSub:CreateRadio(
+                L("CRAFT_LISTS_OPTIONS_REAGENT_ALLOCATION_OPTIMIZE_HIGHEST"),
+                function()
+                    local ra = getOption(KEYS.REAGENT_ALLOCATION) or RA.OPTIMIZE_HIGHEST
+                    return ra == RA.OPTIMIZE_HIGHEST or ra == RA.OPTIMIZE
+                end,
+                function() saveOption(KEYS.REAGENT_ALLOCATION, RA.OPTIMIZE_HIGHEST) return MenuResponse.Refresh end)
+
+            optimizeSub:CreateRadio(
+                L("CRAFT_LISTS_OPTIONS_REAGENT_ALLOCATION_OPTIMIZE_MOST_PROFITABLE"),
+                function() return getOption(KEYS.REAGENT_ALLOCATION) == RA.OPTIMIZE_MOST_PROFITABLE end,
+                function() saveOption(KEYS.REAGENT_ALLOCATION, RA.OPTIMIZE_MOST_PROFITABLE) return MenuResponse.Refresh end)
+
+            -- Target Quality sub-submenu
+            local targetQualityButton = optimizeSub:CreateButton(
+                L("CRAFT_LISTS_OPTIONS_REAGENT_ALLOCATION_TARGET_QUALITY"))
+
+            for i = 1, 5 do
+                local qualityID = i
+                local allocationValue = RA["OPTIMIZE_TARGET_" .. qualityID]
+                local qualityLabel = GUTIL:GetQualityIconString(qualityID, 20, 20)
+                if qualityID <= 2 then
+                    qualityLabel = qualityLabel .. " | " .. GUTIL:GetQualityIconStringSimplified(qualityID, 20, 20)
+                end
+                targetQualityButton:CreateRadio(
+                    qualityLabel,
+                    function() return getOption(KEYS.REAGENT_ALLOCATION) == allocationValue end,
+                    function() saveOption(KEYS.REAGENT_ALLOCATION, allocationValue) return MenuResponse.Refresh end)
+            end
         end
 
         -- Autoselect Top Profit Quality (quality-gated)
@@ -177,14 +228,66 @@ function CraftSim.WIDGETS.OptimizationOptions:new(options)
                 function() saveOption(KEYS.OPTIMIZE_CONCENTRATION, not getOption(KEYS.OPTIMIZE_CONCENTRATION)) end)
         end
 
-        -- Optimize Finishing Reagents (+ optional soulbound sub-option)
+        -- Optimize Finishing Reagents (+ optional algorithm sub-menu + optional soulbound sub-option)
         if showOptions[KEYS.OPTIMIZE_FINISHING_REAGENTS] then
             rootDescription:CreateCheckbox(
                 L("RECIPE_SCAN_OPTIMIZE_FINISHING_REAGENTS"),
                 function() return getOption(KEYS.OPTIMIZE_FINISHING_REAGENTS) end,
                 function() saveOption(KEYS.OPTIMIZE_FINISHING_REAGENTS, not getOption(KEYS.OPTIMIZE_FINISHING_REAGENTS)) end)
 
-            if showOptions[KEYS.INCLUDE_SOULBOUND_FINISHING_REAGENTS] then
+            if showOptions[KEYS.FINISHING_REAGENTS_ALGORITHM] then
+                local algorithmSub = rootDescription:CreateButton(
+                    L("OPTIMIZATION_OPTIONS_FINISHING_REAGENTS_ALGORITHM"))
+
+                local simpleRadio = algorithmSub:CreateRadio(
+                    L("OPTIMIZATION_OPTIONS_FINISHING_REAGENTS_SIMPLE"),
+                    function() return getOption(KEYS.FINISHING_REAGENTS_ALGORITHM) ~= FA.PERMUTATION end,
+                    function() saveOption(KEYS.FINISHING_REAGENTS_ALGORITHM, FA.SIMPLE) return MenuResponse.Refresh end)
+                simpleRadio:SetTooltip(function(tooltip, _)
+                    GameTooltip_AddInstructionLine(tooltip,
+                        L("OPTIMIZATION_OPTIONS_FINISHING_REAGENTS_SIMPLE_TOOLTIP"))
+                end)
+
+                local permutationRadio = algorithmSub:CreateRadio(
+                    L("OPTIMIZATION_OPTIONS_FINISHING_REAGENTS_PERMUTATION"),
+                    function() return getOption(KEYS.FINISHING_REAGENTS_ALGORITHM) == FA.PERMUTATION end,
+                    function() saveOption(KEYS.FINISHING_REAGENTS_ALGORITHM, FA.PERMUTATION) return MenuResponse.Refresh end)
+                permutationRadio:SetTooltip(function(tooltip, _)
+                    GameTooltip_AddInstructionLine(tooltip,
+                        L("OPTIMIZATION_OPTIONS_FINISHING_REAGENTS_PERMUTATION_TOOLTIP"))
+                end)
+
+                if showOptions[KEYS.INCLUDE_SOULBOUND_FINISHING_REAGENTS] then
+                    local includeSBCB = algorithmSub:CreateCheckbox(
+                        L("OPTIMIZATION_OPTIONS_INCLUDE_SOULBOUND_FINISHING_REAGENTS"),
+                        function() return getOption(KEYS.INCLUDE_SOULBOUND_FINISHING_REAGENTS) end,
+                        function()
+                            saveOption(KEYS.INCLUDE_SOULBOUND_FINISHING_REAGENTS,
+                                not getOption(KEYS.INCLUDE_SOULBOUND_FINISHING_REAGENTS))
+                        end)
+                    includeSBCB:SetTooltip(function(tooltip, _)
+                        GameTooltip_AddInstructionLine(tooltip,
+                            "If enabled, CraftSim will suggest soulbound finishing reagents during optimization")
+                    end)
+                end
+
+                if showOptions[KEYS.ONLY_HIGHEST_QUALITY_SOULBOUND_FINISHING_REAGENTS] then
+                    local onlyHighestSBCB = algorithmSub:CreateCheckbox(
+                        L("OPTIMIZATION_OPTIONS_ONLY_HIGHEST_QUALITY_SOULBOUND_FINISHING_REAGENTS"),
+                        function() return getOption(KEYS.ONLY_HIGHEST_QUALITY_SOULBOUND_FINISHING_REAGENTS) end,
+                        function()
+                            saveOption(KEYS.ONLY_HIGHEST_QUALITY_SOULBOUND_FINISHING_REAGENTS,
+                                not getOption(KEYS.ONLY_HIGHEST_QUALITY_SOULBOUND_FINISHING_REAGENTS))
+                        end)
+                    onlyHighestSBCB:SetTooltip(function(tooltip, _)
+                        GameTooltip_AddInstructionLine(tooltip,
+                            L("OPTIMIZATION_OPTIONS_ONLY_HIGHEST_QUALITY_SOULBOUND_FINISHING_REAGENTS_TOOLTIP"))
+                    end)
+                end
+            end
+
+            if showOptions[KEYS.INCLUDE_SOULBOUND_FINISHING_REAGENTS] and not showOptions[KEYS.FINISHING_REAGENTS_ALGORITHM] then
+                -- Fallback: show at root level when algorithm submenu is not shown
                 local includeSBCB = rootDescription:CreateCheckbox(
                     L("OPTIMIZATION_OPTIONS_INCLUDE_SOULBOUND_FINISHING_REAGENTS"),
                     function() return getOption(KEYS.INCLUDE_SOULBOUND_FINISHING_REAGENTS) end,

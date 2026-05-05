@@ -92,7 +92,7 @@ function mod:ENCOUNTER_TIMELINE_EVENT_ADDED(_, eventInfo)
 	if C_EncounterTimeline.GetEventState(eventInfo.id) == 1 then -- Paused
 		return -- ignore paused bars when added, they are always canceled some time later
 	end
-	local duration = math.floor(eventInfo.duration * 100.0 + 0.5) / 100.0
+	local duration = self:RoundNumber(eventInfo.duration, 2)
 	local barInfo
 	if duration > 100 then return end -- filter fake Devour the Unworthy (102.4)
 	if duration == 3 or duration == 16.85 then -- Umbral Lash
@@ -209,6 +209,7 @@ function mod:NullVanguardTimeline(eventInfo)
 		msg = barText,
 		key = 1252703,
 		callback = function()
+			self:StopBlizzMessages(1)
 			self:Message(1252703, "cyan", barText)
 			self:PlaySound(1252703, "info")
 		end,

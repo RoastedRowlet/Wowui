@@ -76,7 +76,7 @@ do --Prompt
         if self.AnimGroup:IsPlaying(self, "OUTRO") then return end
         if self.timeoutTimer then self.timeoutTimer:Cancel() end
 
-        self.AnimGroup:Play(self, "OUTRO").onFinish(function()
+        self.AnimGroup:Play(self, "OUTRO"):onFinish(function()
             self:Hide()
         end)
     end

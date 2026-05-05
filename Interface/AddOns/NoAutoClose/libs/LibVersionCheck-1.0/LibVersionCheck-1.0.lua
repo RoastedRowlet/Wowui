@@ -6,7 +6,7 @@
 
 local embedAddonName = ...;
 
-local MAJOR, MINOR = "LibVersionCheck-1.0", 3;
+local MAJOR, MINOR = "LibVersionCheck-1.0", 5;
 
 --- @class LibVersionCheck-1.0
 local LibVersionCheck = LibStub:NewLibrary(MAJOR, MINOR);
@@ -25,7 +25,7 @@ local whisperMsgCapture = "^" .. whisperMsgFormat:format("(.+)", "(.+)") .. "$";
 
 --- @return string?
 local function getGroupChannel()
-    if IsInInstance() then
+    if IsInGroup(LE_PARTY_CATEGORY_INSTANCE) or IsInRaid(LE_PARTY_CATEGORY_INSTANCE) then
         return "INSTANCE_CHAT";
     end
     if IsInRaid() then

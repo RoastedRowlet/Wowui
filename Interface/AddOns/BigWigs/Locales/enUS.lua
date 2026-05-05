@@ -4,6 +4,9 @@ local L = addonTbl.API:NewLocale("BigWigs", "enUS")
 -- API.lua
 L.showAddonBar = "The addon '|cFF436EEE%s|r' created the '%s' bar."
 L.requestAddonProfile = "The addon '|cFF436EEE%s|r' just made a copy of your profile export string."
+L.shortMinutesAndSeconds = "%d Min %d Sec" -- 1 Minute 2 Seconds
+L.shortSecondsOnly = "%d Sec" -- 28 Seconds
+L.shortSubTenSeconds = "%.1f Sec" -- 3.2 Seconds
 
 -- Core.lua
 L.berserk = "Berserk"
@@ -308,7 +311,7 @@ L.defeat_desc = "The total amount of times you've been defeated by this boss enc
 L.victory = "Victory"
 L.victory_desc = "The total amount of times you were victorious against this boss encounter."
 L.fastest = "Fastest"
-L.fastest_desc = "The fastest victory and the date it occured on. (Year/Month/Day)"
+L.fastest_desc = "The fastest victory and the date it occurred on. (Year/Month/Day)"
 L.first = "First"
 L.first_desc = "The first time you were victorious against this boss encounter, formatted as:\n[Amount of defeats prior to first victory] - [Combat duration] - [Year/Month/Day of victory]"
 
@@ -427,10 +430,14 @@ L.startingMythicKeystone = "Starting a Mythic+"
 L.historyTimeFormat = "History: Time Format"
 L.twelveHour = "12 Hour"
 L.twentyFourHour = "24 Hour"
+L.hideTooltipInCombat = "Hide Tooltip in Combat"
+L.customText = "Custom Text (Must Contain %s)"
 
 -----------------------------------------------------------------------
 -- Keystones.lua
 --
+
+L.keys = "Keys"
 
 L.keystoneTitle = "BigWigs Keystones"
 L.keystoneHeaderParty = "Party"
@@ -522,7 +529,7 @@ L.keystoneShortName_VaultOfTheWardens = "VOTW"
 L.keystoneShortName_ReturnToKarazhanLower = "LKARA"
 L.keystoneShortName_ReturnToKarazhanUpper = "UKARA"
 L.keystoneShortName_CathedralOfEternalNight = "COEN"
-L.keystoneShortName_SeatOfTheTriumvirate = "SOTT"
+L.keystoneShortName_SeatOfTheTriumvirate = "SEAT"
 L.keystoneShortName_WindrunnerSpire = "SPIRE"
 L.keystoneShortName_MagistersTerrace = "MT"
 L.keystoneShortName_MaisaraCaverns = "CAVERN"
@@ -559,7 +566,7 @@ L.keystoneShortName_VaultOfTheWardens_Bar = "Vault"
 L.keystoneShortName_ReturnToKarazhanLower_Bar = "Lower Kara"
 L.keystoneShortName_ReturnToKarazhanUpper_Bar = "Upper Kara"
 L.keystoneShortName_CathedralOfEternalNight_Bar = "Cathedral"
-L.keystoneShortName_SeatOfTheTriumvirate_Bar = "Triumvirate"
+L.keystoneShortName_SeatOfTheTriumvirate_Bar = "Seat"
 L.keystoneShortName_WindrunnerSpire_Bar = "Spire"
 L.keystoneShortName_MagistersTerrace_Bar = "Terrace"
 L.keystoneShortName_MaisaraCaverns_Bar = "Caverns"
@@ -582,6 +589,28 @@ L.instanceKeysOtherDungeonColorDesc = "Choose the font color for players that ha
 L.instanceKeysEndOfRunDesc = "By default the list will only show when you enter a mythic dungeon. Enabling this option will also show the list when the Mythic+ is over."
 L.instanceKeysHideTitle = "Hide title"
 L.instanceKeysHideTitleDesc = "Hide the \"Who has a key?\" title."
+
+-- Challenges UI Decoration
+L.partyRatingHeader = "|TInterface\\AddOns\\BigWigs\\Media\\Icons\\minimap_raid:0:0|tParty Rating"
+L.dungeonScoreString = "|c%s%03d|r |cFFFFFFFF+%02d|r |cFF%s%02d:%02d|r |c%s(%s)|r"
+L.dungeonScoreNoDataString = "|cFFFFFFFFNo data|r |c%s(%s)|r"
+L.dungeonTeleportHeader = "|TInterface\\AddOns\\BigWigs\\Media\\Icons\\minimap_raid:0:0|tTeleport"
+
+-- Progress %
+L.progressPercent = "Progress %"
+L.progressPercentDesc = "Tools to help you calculate how much Mythic+ progress you will gain from each NPC you kill."
+L.progressPercentTooltip = "Show progress % in tooltips when mousing over enemy NPCs"
+L.progressPercentTooltipText = {
+	"|TInterface\\AddOns\\BigWigs\\Media\\Icons\\minimap_raid:0:0|tProgress: %s%%",
+	"|TInterface\\AddOns\\BigWigs\\Media\\Icons\\minimap_raid:0:0|tProgress: %s%% (%d)",
+	"|TInterface\\AddOns\\BigWigs\\Media\\Icons\\minimap_raid:0:0|tProgress: %s%% (%d/%d)",
+}
+L.progressPercentNameplate = "Show progress % on nameplates of enemy NPCs"
+L.progressCurrentPull = "Current Pull"
+L.progressCurrentPullDesc = "Show total progress you will gain from the current group of NPCs you are in combat with.\n\nNOT YET FUNCTIONAL!"
+L.tempProgressAnnounce = "You can now see progress % each NPC will give you when mousing over them and on their nameplates.\n\nConfigure in |cFF436EEETools|r > |cFF436EEEMythic+|r > |cFF436EEEProgress %|r."
+L.settingsForCurrentTarget = "Settings for your current target"
+L.settingsForOtherTargets = "Settings for all other targets"
 
 -----------------------------------------------------------------------
 -- LFGTimer.lua
@@ -1118,7 +1147,7 @@ L.pullKeybindingDesc = "Choose a keybinding for starting a pull timer."
 L.icons = "Icons"
 L.raidIconsDescription = "Some encounters might include elements such as bomb-type abilities targetted on a specific player, a player being chased, or a specific player might be of interest in other ways. Here you can customize which raid icons should be used to mark these players.\n\nIf an encounter only has one ability that is worth marking for, only the first icon will be used. One icon will never be used for two different abilities on the same encounter, and any given ability will always use the same icon next time.\n\n|cffff4411Note that if a player has already been marked manually, BigWigs will never change their icon.|r"
 L.primary = "Primary"
-L.primaryDesc = "The first raid target icon that a encounter script should use."
+L.primaryDesc = "The first raid target icon that an encounter script should use."
 L.secondary = "Secondary"
 L.secondaryDesc = "The second raid target icon that a encounter script should use."
 
@@ -1178,6 +1207,7 @@ L.blizzBasicAsBars = "Blizzard basic timers displayed as BigWigs bars"
 L.blizzBasicAsBlizzTimeline = "Blizzard basic timers displayed on the Blizzard timeline"
 L.developerMode = "Developer Mode"
 L.enhancedModeWarning = "WARNING!\n\nDisabling enhanced mode will disable many BigWigs features, including:\n\nBar colors, spell renames, counters, custom sound/voice, countdowns, bars on/off, extra messages, etc."
+L.blizzTimelineEnhancedWarning = "WARNING!\n\nThe Blizzard timeline doesn't support BigWigs enhanced features. You will NOT get renamed spells and you will see inaccurate timers.\n\nAre you sure you want to enable it?"
 
 -----------------------------------------------------------------------
 -- Victory.lua

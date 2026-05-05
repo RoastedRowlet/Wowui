@@ -10,17 +10,13 @@ CraftSim.CUSTOMER_HISTORY.UI = {}
 ---@type CraftSim.CUSTOMER_HISTORY.FRAME
 CraftSim.CUSTOMER_HISTORY.frame = nil
 
-local print = CraftSim.DEBUG:RegisterDebugID("Modules.CustomerHistory.UI")
+local Logger = CraftSim.DEBUG:RegisterLogger("CustomerHistory.UI")
 local f = GUTIL:GetFormatter()
-
----@param LOCALIZATION_ID CraftSim.LOCALIZATION_IDS
-local function L(LOCALIZATION_ID)
-    return CraftSim.LOCAL:GetText(LOCALIZATION_ID)
-end
+local L = CraftSim.UTIL:GetLocalizer()
 
 function CraftSim.CUSTOMER_HISTORY.UI:Init()
-    local sizeX = 1050
-    local sizeY = 500
+    local sizeX = 910
+    local sizeY = 270
     ---@class CraftSim.CUSTOMER_HISTORY.FRAME : GGUI.Frame
     CraftSim.CUSTOMER_HISTORY.frame = GGUI.Frame({
         parent = ProfessionsFrame,
@@ -33,7 +29,7 @@ function CraftSim.CUSTOMER_HISTORY.UI:Init()
         closeable = true,
         moveable = true,
         backdropOptions = CraftSim.CONST.DEFAULT_BACKDROP_OPTIONS,
-        onCloseCallback = CraftSim.CONTROL_PANEL:HandleModuleClose("MODULE_CUSTOMER_HISTORY"),
+        onCloseCallback = CraftSim.MODULES:HandleModuleClose("MODULE_CUSTOMER_HISTORY"),
         frameTable = CraftSim.INIT.FRAMES,
         frameConfigTable = CraftSim.DB.OPTIONS:Get("GGUI_CONFIG"),
         frameStrata = CraftSim.CONST.MODULES_FRAME_STRATA,
@@ -49,10 +45,20 @@ function CraftSim.CUSTOMER_HISTORY.UI:Init()
             {
                 label = L("CUSTOMER_HISTORY_CUSTOMER_HEADER"),
                 width = 150,
+                headerScale = 0.9,
+                resizable = true,
+                resizeCallback = function(columnFrame, newWidth)
+                    columnFrame.text:SetWidth(newWidth - 10)
+                end,
             },
             {
                 label = L("CUSTOMER_HISTORY_TOTAL_TIP_HEADER"),
                 width = 100,
+                headerScale = 0.9,
+                resizable = true,
+                resizeCallback = function(columnFrame, newWidth)
+                    columnFrame.text:SetWidth(newWidth - 10)
+                end,
             }
         }
 
@@ -61,108 +67,110 @@ function CraftSim.CUSTOMER_HISTORY.UI:Init()
             parent = frame.content,
             anchorPoints = { { anchorParent = frame.title.frame, anchorA = "LEFT", anchorB = "RIGHT", offsetX = 5 } },
             menuUtilCallback = function(ownerRegion, rootDescription)
-                    local enabledCB = rootDescription:CreateCheckbox(
-                        L("CUSTOMER_HISTORY_CATEGORY_ENABLE_HISTORY_RECORDING"),
-                        function()
-                            return CraftSim.DB.OPTIONS:Get("CUSTOMER_HISTORY_ENABLED")
-                        end, function()
-                            local value = CraftSim.DB.OPTIONS:Get(
-                                "CUSTOMER_HISTORY_ENABLED")
-                            CraftSim.DB.OPTIONS:Save("CUSTOMER_HISTORY_ENABLED",
-                                not value)
-                        end)
+                local enabledCB = rootDescription:CreateCheckbox(
+                    L("CUSTOMER_HISTORY_CATEGORY_ENABLE_HISTORY_RECORDING"),
+                    function()
+                        return CraftSim.DB.OPTIONS:Get("CUSTOMER_HISTORY_ENABLED")
+                    end, function()
+                        local value = CraftSim.DB.OPTIONS:Get(
+                            "CUSTOMER_HISTORY_ENABLED")
+                        CraftSim.DB.OPTIONS:Save("CUSTOMER_HISTORY_ENABLED",
+                            not value)
+                    end)
 
-                    local patronOrderCB = rootDescription:CreateCheckbox(
-                        L("CUSTOMER_HISTORY_CATEGORY_RECORD_PATRON_ORDERS"),
-                        function()
-                            return CraftSim.DB.OPTIONS:Get("CUSTOMER_HISTORY_RECORD_PATRON_ORDERS")
-                        end, function()
-                            local value = CraftSim.DB.OPTIONS:Get(
-                                "CUSTOMER_HISTORY_RECORD_PATRON_ORDERS")
-                            CraftSim.DB.OPTIONS:Save("CUSTOMER_HISTORY_RECORD_PATRON_ORDERS",
-                                not value)
-                        end)
+                local patronOrderCB = rootDescription:CreateCheckbox(
+                    L("CUSTOMER_HISTORY_CATEGORY_RECORD_PATRON_ORDERS"),
+                    function()
+                        return CraftSim.DB.OPTIONS:Get("CUSTOMER_HISTORY_RECORD_PATRON_ORDERS")
+                    end, function()
+                        local value = CraftSim.DB.OPTIONS:Get(
+                            "CUSTOMER_HISTORY_RECORD_PATRON_ORDERS")
+                        CraftSim.DB.OPTIONS:Save("CUSTOMER_HISTORY_RECORD_PATRON_ORDERS",
+                            not value)
+                    end)
 
-                    local removeCustomersCategory = rootDescription:CreateButton(L("CUSTOMER_HISTORY_CATEGORY_REMOVE_CUSTOMERS"))
+                local removeCustomersCategory = rootDescription:CreateButton(L(
+                    "CUSTOMER_HISTORY_CATEGORY_REMOVE_CUSTOMERS"))
 
-                    local autoRemovalCategory = removeCustomersCategory:CreateButton(L("CUSTOMER_HISTORY_CATEGORY_AUTO_REMOVAL"))
+                local autoRemovalCategory = removeCustomersCategory:CreateButton(L(
+                    "CUSTOMER_HISTORY_CATEGORY_AUTO_REMOVAL"))
 
-                    GUTIL:CreateReuseableMenuUtilContextMenuFrame(autoRemovalCategory, function(frame)
-                        frame.label = GGUI.Text {
-                            parent = frame,
-                            anchorPoints = { { anchorParent = frame, anchorA = "LEFT", anchorB = "LEFT" } },
-                            text = L("CUSTOMER_HISTORY_PURGE_DAYS_INPUT_LABEL"),
-                            justifyOptions = { type = "H", align = "LEFT" },
-                        }
-                        frame.input = GGUI.NumericInput {
-                            parent = frame, anchorParent = frame,
-                            sizeX = 30, sizeY = 25, offsetX = 5,
-                            anchorA = "RIGHT", anchorB = "RIGHT",
-                            initialValue = CraftSim.DB.OPTIONS:Get("CUSTOMER_HISTORY_AUTO_PURGE_INTERVAL"),
-                            borderAdjustWidth = 1.32,
-                            allowDecimals = true,
-                            onNumberValidCallback = function(input)
-                                CraftSim.DB.OPTIONS:Save("CUSTOMER_HISTORY_AUTO_PURGE_INTERVAL",
-                                    tonumber(input.currentValue))
-                            end,
-                        }
+                GUTIL:CreateReuseableMenuUtilContextMenuFrame(autoRemovalCategory, function(frame)
+                    frame.label = GGUI.Text {
+                        parent = frame,
+                        anchorPoints = { { anchorParent = frame, anchorA = "LEFT", anchorB = "LEFT" } },
+                        text = L("CUSTOMER_HISTORY_PURGE_DAYS_INPUT_LABEL"),
+                        justifyOptions = { type = "H", align = "LEFT" },
+                    }
+                    frame.input = GGUI.NumericInput {
+                        parent = frame, anchorParent = frame,
+                        sizeX = 30, sizeY = 25, offsetX = 5,
+                        anchorA = "RIGHT", anchorB = "RIGHT",
+                        initialValue = CraftSim.DB.OPTIONS:Get("CUSTOMER_HISTORY_AUTO_PURGE_INTERVAL"),
+                        borderAdjustWidth = 1.32,
+                        allowDecimals = true,
+                        onNumberValidCallback = function(input)
+                            CraftSim.DB.OPTIONS:Save("CUSTOMER_HISTORY_AUTO_PURGE_INTERVAL",
+                                tonumber(input.currentValue))
+                        end,
+                    }
 
-                        ---@type GGUI.TooltipOptions
-                        frame.tooltipOptions = {
+                    ---@type GGUI.TooltipOptions
+                    frame.tooltipOptions = {
+                        owner = frame,
+                        anchor = "ANCHOR_TOP",
+                        text = L("CUSTOMER_HISTORY_PURGE_DAYS_INPUT_TOOLTIP"),
+                    }
+
+                    GGUI:SetTooltipsByTooltipOptions(frame, frame)
+                end, 200, 25, "CUSTOMER_HISTORY_OPTIONS_AUTO_PURGE_INTERVAL_INPUT")
+
+                GUTIL:CreateReuseableMenuUtilContextMenuFrame(removeCustomersCategory, function(frame)
+                    frame.label = GGUI.Text {
+                        parent = frame,
+                        anchorPoints = { { anchorParent = frame, anchorA = "LEFT", anchorB = "LEFT" } },
+                        text = "Tip Threshold: ",
+                        justifyOptions = { type = "H", align = "LEFT" },
+                    }
+                    frame.input = GGUI.CurrencyInput {
+                        parent = frame, anchorParent = frame,
+                        sizeX = 100, sizeY = 25, offsetX = 5,
+                        anchorA = "RIGHT", anchorB = "RIGHT",
+                        borderAdjustWidth = 0.95,
+                        debug = true,
+                        initialValue = CraftSim.DB.OPTIONS:Get("CUSTOMER_HISTORY_REMOVAL_TIP_THRESHOLD"),
+                        tooltipOptions = {
                             owner = frame,
                             anchor = "ANCHOR_TOP",
-                            text = L("CUSTOMER_HISTORY_PURGE_DAYS_INPUT_TOOLTIP"),
-                        }
+                            text = f.white("Format: " .. GUTIL:FormatMoney(1000000, false, nil, false, false)),
+                        },
+                        onValueValidCallback = function()
+                            local tipValue = frame.input.total
+                            CraftSim.DB.OPTIONS:Save("CUSTOMER_HISTORY_REMOVAL_TIP_THRESHOLD",
+                                tonumber(tipValue))
+                        end,
+                    }
+                end, 200, 25, "CUSTOMER_HISTORY_OPTIONS_REMOVAL_TIP_THRESHOLD_INPUT")
 
-                        GGUI:SetTooltipsByTooltipOptions(frame, frame)
-                    end, 200, 25, "CUSTOMER_HISTORY_OPTIONS_AUTO_PURGE_INTERVAL_INPUT")
+                removeCustomersCategory:CreateButton(L("CUSTOMER_HISTORY_CATEGORY_REMOVE_BELOW_THRESHOLD"), function()
+                    CraftSim.CUSTOMER_HISTORY:PurgeCustomers(CraftSim.DB.OPTIONS:Get(
+                        "CUSTOMER_HISTORY_REMOVAL_TIP_THRESHOLD"))
+                end)
 
-                    GUTIL:CreateReuseableMenuUtilContextMenuFrame(removeCustomersCategory, function(frame)
-                        frame.label = GGUI.Text {
-                            parent = frame,
-                            anchorPoints = { { anchorParent = frame, anchorA = "LEFT", anchorB = "LEFT" } },
-                            text = "Tip Threshold: ",
-                            justifyOptions = { type = "H", align = "LEFT" },
-                        }
-                        frame.input = GGUI.CurrencyInput {
-                            parent = frame, anchorParent = frame,
-                            sizeX = 100, sizeY = 25, offsetX = 5,
-                            anchorA = "RIGHT", anchorB = "RIGHT",
-                            borderAdjustWidth = 0.95,
-                            debug = true,
-                            initialValue = CraftSim.DB.OPTIONS:Get("CUSTOMER_HISTORY_REMOVAL_TIP_THRESHOLD"),
-                            tooltipOptions = {
-                                owner = frame,
-                                anchor = "ANCHOR_TOP",
-                                text = f.white("Format: " .. GUTIL:FormatMoney(1000000, false, nil, false, false)),
-                            },
-                            onValueValidCallback = function()
-                                local tipValue = frame.input.total
-                                CraftSim.DB.OPTIONS:Save("CUSTOMER_HISTORY_REMOVAL_TIP_THRESHOLD",
-                                    tonumber(tipValue))
-                            end,
-                        }
-                    end, 200, 25, "CUSTOMER_HISTORY_OPTIONS_REMOVAL_TIP_THRESHOLD_INPUT")
-
-                    removeCustomersCategory:CreateButton(L("CUSTOMER_HISTORY_CATEGORY_REMOVE_BELOW_THRESHOLD"), function()
-                        CraftSim.CUSTOMER_HISTORY:PurgeCustomers(CraftSim.DB.OPTIONS:Get(
-                            "CUSTOMER_HISTORY_REMOVAL_TIP_THRESHOLD"))
-                    end)
-
-                    removeCustomersCategory:CreateButton(L("CUSTOMER_HISTORY_CATEGORY_REMOVE_ALL_CUSTOMERS"), function()
-                        CraftSim.WIDGETS.ContextMenu.Open(UIParent, function(ownerRegion, rootDescription)
-                            rootDescription:CreateTitle(L("CUSTOMER_HISTORY_CATEGORY_REMOVE_ALL_CUSTOMER_DATA"))
-                            rootDescription:CreateButton(L("STATIC_POPUPS_YES"), function()
-                                CraftSim.CUSTOMER_HISTORY:PurgeCustomers(math.huge)
-                            end)
-                            rootDescription:CreateButton(L("STATIC_POPUPS_NO"), function() end)
+                removeCustomersCategory:CreateButton(L("CUSTOMER_HISTORY_CATEGORY_REMOVE_ALL_CUSTOMERS"), function()
+                    CraftSim.WIDGETS.ContextMenu.Open(UIParent, function(ownerRegion, rootDescription)
+                        rootDescription:CreateTitle(L("CUSTOMER_HISTORY_CATEGORY_REMOVE_ALL_CUSTOMER_DATA"))
+                        rootDescription:CreateButton(L("STATIC_POPUPS_YES"), function()
+                            CraftSim.CUSTOMER_HISTORY:PurgeCustomers(math.huge)
                         end)
+                        rootDescription:CreateButton(L("STATIC_POPUPS_NO"), function() end)
                     end)
+                end)
             end,
         }
 
         frame.content.customerList = GGUI.FrameList({
-            sizeY = 370,
+            sizeY = 150,
             columnOptions = columnOptionsCustomerList,
             parent = frame.content,
             anchorParent = frame.content,
@@ -241,129 +249,64 @@ function CraftSim.CUSTOMER_HISTORY.UI:Init()
             justifyOptions = { type = "H", align = "RIGHT" }
         })
 
-        frame.content.customerName = GGUI.Text({
-            parent = frame.content,
-            anchorParent = frame.content,
-            anchorA = "TOP",
-            anchorB = "TOP",
-            text = "",
-            offsetX = 80,
-            offsetY = -37,
-            scale = 1.5,
-        })
-
-        frame.content.whisperButton = GGUI.Button {
-            parent = frame.content, anchorParent = frame.content.customerName.frame,
-            label = L("CUSTOMER_HISTORY_WHISPER_BUTTON_LABEL"), adjustWidth = true,
-            anchorA = "LEFT", anchorB = "RIGHT", offsetX = 10,
-        }
-
-        local chatMessageColumnWidth = 450
-
-        ---@type GGUI.FrameList.ColumnOption[]
-        local columnOptionsChatFrame = {
-            {
-                label = "", -- Timestamp
-                width = 100,
-                justifyOptions = { type = "H", align = "RIGHT" }
-            },
-            {
-                label = "", -- Sender
-                width = 100,
-                justifyOptions = { type = "H", align = "RIGHT" }
-            },
-            {
-                label = "", -- Message
-                width = chatMessageColumnWidth,
-                justifyOptions = { type = "H", align = "LEFT" }
-            }
-        }
-
-        frame.content.chatMessageList = GGUI.FrameList({
-            parent = frame.content,
-            anchorParent = frame.content.customerName.frame,
-            anchorA = "TOP",
-            anchorB = "BOTTOM",
-            offsetY = -8,
-            columnOptions = columnOptionsChatFrame,
-            showBorder = true,
-            rowHeight = 20,
-            sizeY = 200,
-            rowConstructor = function(columns)
-                local timeColumn = columns[1]
-                local senderColumn = columns[2]
-                local messageColumn = columns[3]
-
-                timeColumn.text = GGUI.Text({
-                    parent = timeColumn,
-                    anchorParent = timeColumn,
-                    anchorA = "RIGHT",
-                    anchorB = "RIGHT",
-                    justifyOptions = { type = "H", align = "RIGHT" },
-                    text = L("CUSTOMER_HISTORY_CHAT_MESSAGE_TIMESTAMP")
-                })
-                senderColumn.text = GGUI.Text({
-                    parent = senderColumn,
-                    anchorParent = senderColumn,
-                    anchorA = "RIGHT",
-                    anchorB = "RIGHT",
-                    justifyOptions = { type = "H", align = "RIGHT" },
-                    text = L("CUSTOMER_HISTORY_CHAT_MESSAGE_SENDER")
-                })
-                messageColumn.text = GGUI.Text({
-                    parent = messageColumn,
-                    anchorParent = messageColumn,
-                    anchorA = "TOPLEFT",
-                    anchorB = "TOPLEFT",
-                    justifyOptions = { type = "HV", alignH = "LEFT", alignV = "CENTER" },
-                    text = L("CUSTOMER_HISTORY_CHAT_MESSAGE_MESSAGE"),
-                    fixedWidth = chatMessageColumnWidth,
-                    offsetY = -4.1,
-                })
-
-                GGUI:EnableHyperLinksForFrameAndChilds(messageColumn)
-            end
-        })
-
         ---@type GGUI.FrameList.ColumnOption[]
         local columnOptionsCraftList = {
             {
                 label = L("CUSTOMER_HISTORY_CRAFT_HISTORY_DATE_HEADER"), -- Timestamp
-                width = 100,
-                justifyOptions = { type = "H", align = "LEFT" }
+                width = 80,
+                justifyOptions = { type = "H", align = "LEFT" },
+                resizable = true,
+                resizeCallback = function(columnFrame, newWidth)
+                    columnFrame.text:SetWidth(newWidth - 10)
+                end,
+                headerScale = 0.9,
             },
             {
                 label = L("CUSTOMER_HISTORY_CRAFT_HISTORY_RESULT_HEADER"), -- Result
-                width = 250,
-                justifyOptions = { type = "H", align = "RIGHT" }
+                width = 200,
+                justifyOptions = { type = "H", align = "RIGHT" },
+                resizable = true,
+                resizeCallback = function(columnFrame, newWidth)
+                    columnFrame.text:SetWidth(newWidth - 10)
+                end,
+                headerScale = 0.9,
             },
             {
                 label = L("CUSTOMER_HISTORY_CRAFT_HISTORY_TIP_HEADER"), -- Tip
-                width = 100,
-                justifyOptions = { type = "H", align = "RIGHT" }
+                width = 70,
+                justifyOptions = { type = "H", align = "RIGHT" },
+                resizable = true,
+                resizeCallback = function(columnFrame, newWidth)
+                    columnFrame.text:SetWidth(newWidth - 10)
+                end,
+                headerScale = 0.9,
             },
             {
                 label = L("CUSTOMER_HISTORY_CRAFT_HISTORY_CUSTOMER_REAGENTS_HEADER"),
                 width = 150,
-                justifyOptions = { type = "H", align = "CENTER" }
+                justifyOptions = { type = "H", align = "CENTER" },
+                resizable = true,
+                headerScale = 0.9,
             },
             {
                 label = L("CUSTOMER_HISTORY_CRAFT_HISTORY_CUSTOMER_NOTE_HEADER"), -- Customer Note
                 width = 50,
-                justifyOptions = { type = "H", align = "CENTER" }
+                justifyOptions = { type = "H", align = "CENTER" },
+                resizable = true,
+                headerScale = 0.9,
             }
         }
 
         frame.content.craftList = GGUI.FrameList({
             parent = frame.content,
-            anchorParent = frame.content.chatMessageList.frame,
+            anchorParent = frame.content.customerList.frame,
             anchorA = "TOPLEFT",
-            anchorB = "BOTTOMLEFT",
-            offsetY = -30,
+            anchorB = "TOPRIGHT",
+            offsetX = 30,
             columnOptions = columnOptionsCraftList,
             showBorder = true,
             rowHeight = 20,
-            sizeY = 158,
+            sizeY = 150,
             rowConstructor = function(columns)
                 local timeColumn = columns[1]
                 local resultColumn = columns[2]
@@ -377,15 +320,17 @@ function CraftSim.CUSTOMER_HISTORY.UI:Init()
                     anchorA = "LEFT",
                     anchorB = "LEFT",
                     justifyOptions = { type = "H", align = "LEFT" },
-                    text = L("CUSTOMER_HISTORY_CRAFT_LIST_TIMESTAMP")
+                    text = L("CUSTOMER_HISTORY_CRAFT_LIST_TIMESTAMP"),
+                    scale = 0.9,
                 })
                 resultColumn.text = GGUI.Text({
                     parent = resultColumn,
                     anchorParent = resultColumn,
-                    anchorA = "RIGHT",
-                    anchorB = "RIGHT",
+                    anchorA = "LEFT",
+                    anchorB = "LEFT",
                     justifyOptions = { type = "H", align = "LEFT" },
-                    text = L("CUSTOMER_HISTORY_CRAFT_LIST_RESULTLINK")
+                    text = L("CUSTOMER_HISTORY_CRAFT_LIST_RESULTLINK"),
+                    scale = 0.9,
                 })
                 tipColumn.text = GGUI.Text({
                     parent = tipColumn,
@@ -394,6 +339,7 @@ function CraftSim.CUSTOMER_HISTORY.UI:Init()
                     anchorB = "RIGHT",
                     justifyOptions = { type = "H", align = "RIGHT" },
                     text = L("CUSTOMER_HISTORY_CRAFT_LIST_TIP"),
+                    scale = 0.9,
                 })
                 reagentColumn.icon = GGUI.HelpIcon({
                     parent = reagentColumn,
@@ -408,6 +354,12 @@ function CraftSim.CUSTOMER_HISTORY.UI:Init()
                 GGUI:EnableHyperLinksForFrameAndChilds(resultColumn)
             end
         })
+
+        frame.content.whisperButton = GGUI.Button {
+            parent = frame.content, anchorParent = frame.content.craftList.frame,
+            label = L("CUSTOMER_HISTORY_WHISPER_BUTTON_LABEL"), adjustWidth = true,
+            anchorA = "TOPLEFT", anchorB = "BOTTOMLEFT", offsetX = 0,
+        }
     end
 
     createContent(CraftSim.CUSTOMER_HISTORY.frame)
@@ -459,29 +411,21 @@ function CraftSim.CUSTOMER_HISTORY.UI:UpdateCustomerHistoryList()
     end
 
     if CraftSim.DB.CUSTOMER_HISTORY:Count() == 0 then
-        CraftSim.CUSTOMER_HISTORY.frame.content.customerName:Hide()
         CraftSim.CUSTOMER_HISTORY.frame.content.whisperButton:Hide()
         CraftSim.CUSTOMER_HISTORY.frame.content.craftList:Hide()
-        CraftSim.CUSTOMER_HISTORY.frame.content.chatMessageList:Hide()
     else
-        CraftSim.CUSTOMER_HISTORY.frame.content.customerName:Show()
         CraftSim.CUSTOMER_HISTORY.frame.content.whisperButton:Show()
         CraftSim.CUSTOMER_HISTORY.frame.content.craftList:Show()
-        CraftSim.CUSTOMER_HISTORY.frame.content.chatMessageList:Show()
     end
 end
 
 ---@param customerHistory CraftSim.DB.CustomerHistory
 function CraftSim.CUSTOMER_HISTORY.UI:OnCustomerSelected(customerHistory)
-    ---@type GGUI.Text
-    local customerName = CraftSim.CUSTOMER_HISTORY.frame.content.customerName
     local fullName = customerHistory.customer .. "-" .. customerHistory.realm
-    customerName:SetText(customerHistory.customer .. "-" .. customerHistory.realm)
     CraftSim.CUSTOMER_HISTORY.frame.content.whisperButton.clickCallback = function()
         CraftSim.CUSTOMER_HISTORY:StartWhisper(fullName)
     end
 
-    CraftSim.CUSTOMER_HISTORY.UI:UpdateCustomerChatHistory(customerHistory.customer, customerHistory.chatHistory)
     CraftSim.CUSTOMER_HISTORY.UI:UpdateCustomerCraftHistory(customerHistory.craftHistory)
 end
 
@@ -519,7 +463,10 @@ function CraftSim.CUSTOMER_HISTORY.UI:UpdateCustomerCraftHistory(craftHistory)
 
             local reagentItems = CraftSim.GUTIL:Map(craft.reagents,
                 -- Skip currency reagents
-                function(r) return r.reagentInfo.reagent.itemID and Item:CreateFromItemID(r.reagentInfo.reagent.itemID) or nil end)
+                function(r)
+                    return r.reagentInfo.reagent.itemID and Item:CreateFromItemID(r.reagentInfo.reagent.itemID) or
+                        nil
+                end)
             CraftSim.GUTIL:ContinueOnAllItemsLoaded(reagentItems, function()
                 local reagentText = ""
                 for _, reagent in pairs(craft.reagents) do
@@ -531,7 +478,8 @@ function CraftSim.CUSTOMER_HISTORY.UI:UpdateCustomerCraftHistory(craftHistory)
                         if qualityID then
                             qualityIcon = CraftSim.GUTIL:GetQualityIconString(qualityID, 20, 20, 0, 0)
                         end
-                        reagentText = reagentText .. itemIcon .. qualityIcon .. " x " .. reagent.reagentInfo.quantity .. "\n"
+                        reagentText = reagentText ..
+                            itemIcon .. qualityIcon .. " x " .. reagent.reagentInfo.quantity .. "\n"
                     end
                 end
                 reagentColumn.icon:SetText(reagentText)
@@ -540,77 +488,6 @@ function CraftSim.CUSTOMER_HISTORY.UI:UpdateCustomerCraftHistory(craftHistory)
     end
 
     craftList:UpdateDisplay()
-end
-
----@param chatHistory CraftSim.DB.CustomerHistory.ChatMessage
-function CraftSim.CUSTOMER_HISTORY.UI:UpdateCustomerChatHistory(customer, chatHistory)
-    ---@type GGUI.FrameList
-    local chatMessageList = CraftSim.CUSTOMER_HISTORY.frame.content.chatMessageList
-
-    chatMessageList:Remove()
-
-    ---@type CraftSim.DB.CustomerHistory.ChatMessage[]
-    local chatMessagesReversed = CraftSim.GUTIL:Sort(chatHistory,
-        ---@param chatMessageA CraftSim.DB.CustomerHistory.ChatMessage
-        ---@param chatMessageB CraftSim.DB.CustomerHistory.ChatMessage
-        function(chatMessageA, chatMessageB)
-            return chatMessageA.timestamp < chatMessageB.timestamp
-        end)
-
-    -- insert headers per day
-    ---@type (CraftSim.DB.CustomerHistory.ChatMessage | {day:string})[]
-    local chatMessages = {}
-    local currentDate = nil
-    for _, chatMessage in pairs(chatMessagesReversed) do
-        local dayString = CraftSim.CUSTOMER_HISTORY.UI:GetNormalizedDayString(chatMessage.timestamp)
-        if currentDate ~= dayString then
-            table.insert(chatMessages, {
-                day = dayString
-            })
-            currentDate = dayString
-        end
-        table.insert(chatMessages, chatMessage)
-    end
-
-    for _, chatMessage in pairs(chatMessages) do
-        chatMessageList:Add(function(row)
-            local columns = row.columns
-            local timeColumn = columns[1]
-            local senderColumn = columns[2]
-            local messageColumn = columns[3]
-
-            if chatMessage.day then
-                timeColumn.text:SetText(f.whisper("[" .. chatMessage.day .. "]"))
-                senderColumn.text:SetText("")
-                messageColumn.text:SetText("")
-            else
-                timeColumn.text:SetText(f.whisper("[" ..
-                    CraftSim.CUSTOMER_HISTORY.UI:GetNormalizedTimeString(chatMessage.timestamp) .. "]"))
-
-                local sender = "[" .. tostring(customer) .. "]: "
-
-                if chatMessage.fromPlayer then
-                    sender = L("CUSTOMER_HISTORY_CHAT_MESSAGE_YOU")
-                end
-
-                senderColumn.text:SetText(f.whisper(tostring(sender)))
-                messageColumn.text:SetText(f.whisper(tostring(chatMessage.content)))
-            end
-
-            -- adjust row height
-            ---@type Frame
-            local rowFrame = row.frame
-            ---@type SimpleFontString
-            local messageText = messageColumn.text.frame
-            local messageHeight = math.max(20, messageText:GetStringHeight())
-            rowFrame:SetHeight(messageHeight)
-        end)
-    end
-
-    chatMessageList:UpdateDisplay()
-    RunNextFrame(function()
-        chatMessageList:ScrollDown()
-    end)
 end
 
 ---@param timestamp number

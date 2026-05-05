@@ -147,13 +147,25 @@ end
 
 function Addon:InitScrollBox()
 	local view = CreateScrollBoxListLinearView();
+	view:Init(0, 0, 3, 0, 2);
 	view:SetElementInitializer("TalentLoadoutExListButtonTemplate", InitListButton)
-	view:SetPadding(0,0,3,0,2);
+
+	Addon.dataProvider = CreateDataProvider();
 	ScrollUtil.InitScrollBoxListWithScrollBar(Addon.frame.ScrollBox, Addon.frame.ScrollBar, view);
+	Addon.frame.ScrollBox:SetDataProvider(Addon.dataProvider);
 end
 
-local function InitDataProvider(currentText)
-	local dataProvider = CreateDataProvider();
+local specIndex = nil;
+local function UpdateDataProvider(currentText)
+	local dataProvider = Addon.dataProvider;
+
+	local scrollBox = Addon.frame.ScrollBox;
+	local scrollPercentage = scrollBox:GetScrollPercentage();
+	local scrollTargetOffset = select(5, scrollBox:GetScrollTarget():GetPoint(1));
+	local viewSize = scrollBox:GetDataIndexEnd() - scrollBox:GetDataIndexBegin() + 1;
+	local oldScrollSize = #dataProvider.collection - viewSize;
+
+	dataProvider:Flush();
 
 	if Addon.loadedDataList then
 		table.wipe(Addon.loadedDataList);
@@ -188,37 +200,16 @@ local function InitDataProvider(currentText)
 	dataProvider:Insert({addDataType = Addon.addDataType.AddConfig});
 	dataProvider:Insert({addDataType = Addon.addDataType.AddGroup});
 
-	return dataProvider;
-end
-
-local specIndex = nil;
-local function UpdateDataProvider(currentText)
-	local scrollBox = Addon.frame.ScrollBox;
-
-	local newDataProvider = InitDataProvider(currentText);
-
-	local oldDataProvider = scrollBox:GetDataProvider();
-	if not oldDataProvider then
-		specIndex = C_SpecializationInfo.GetSpecialization();
-		scrollBox:SetDataProvider(newDataProvider);
-		return;
-	end
-
-	local scrollPercentage = scrollBox:GetScrollPercentage();
-	local scrollTargetOffset = select(5, scrollBox:GetScrollTarget():GetPoint(1));
-
-	local viewSize = scrollBox:GetDataIndexEnd() - scrollBox:GetDataIndexBegin() + 1;
-	local newScrollSize = #newDataProvider.collection - viewSize;
-	local oldScrollSize = #oldDataProvider.collection - viewSize;
-
-	scrollBox:SetDataProvider(newDataProvider);
-
 	local newSpecIndex = C_SpecializationInfo.GetSpecialization();
 	if specIndex ~= newSpecIndex then
 		specIndex = newSpecIndex;
-	elseif oldScrollSize > 0 and newScrollSize > 0 then
-		scrollBox:SetScrollPercentage(scrollPercentage * oldScrollSize / newScrollSize);
-		scrollBox:SetScrollTargetOffset(scrollTargetOffset);
+		Addon.frame.ScrollBox:ScrollToBegin();
+	else
+		local newScrollSize = #dataProvider.collection - viewSize;
+		if oldScrollSize > 0 and newScrollSize > 0 then
+			scrollBox:SetScrollPercentage(scrollPercentage * oldScrollSize / newScrollSize);
+			scrollBox:SetScrollTargetOffset(scrollTargetOffset);
+		end
 	end
 end
 
@@ -237,7 +228,7 @@ end
 
 local updateDelay = 0.1;
 local lastRequestTime = nil;
-function Addon:RequestUpdate()
+function Addon:RequestUpdate(forceUpdate)
 	local now = GetTime();
 	if lastRequestTime and now - lastRequestTime < updateDelay then
 		return; -- Skip
@@ -247,7 +238,7 @@ function Addon:RequestUpdate()
 	C_Timer.After(
 		updateDelay,
 		function()
-			Addon:UpdateScrollBox();
+			Addon:UpdateScrollBox(forceUpdate);
 		end
 	);
 end
@@ -256,6 +247,7 @@ function Addon:RegisterUpdateEvent()
 	Addon.frame:RegisterEvent("PLAYER_REGEN_ENABLED");
 	Addon.frame:RegisterEvent("PLAYER_REGEN_DISABLED");
 	Addon.frame:RegisterEvent("TRAIT_NODE_CHANGED");
+	Addon.frame:RegisterEvent("PLAYER_PVP_TALENT_UPDATE");
 	Addon.frame:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED");
 	Addon.frame:SetScript(
 		"OnEvent",
@@ -266,6 +258,8 @@ function Addon:RegisterUpdateEvent()
 				Addon:Lock();
 				Addon:HideAllPopup();
 				Addon:HideEditPopup();
+			elseif event == "PLAYER_PVP_TALENT_UPDATE" then
+				Addon:RequestUpdate(true);
 			else
 				Addon:RequestUpdate();
 			end

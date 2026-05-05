@@ -12,7 +12,7 @@ Grid2Options.indicatorIconPath = "Interface\\Addons\\Grid2Options\\media\\indica
 Grid2Options.indicatorTypes = {}
 
 -- Indicators sort order
-Grid2Options.indicatorTypesOrder= { tooltip = 1, alpha = 2, background = 3, border = 4, glowborder = 5, multibar = 6, bar = 7, text = 8, square = 9, shape = 10, icon = 11, privateaura = 12, icons = 13, privateauras = 14, portrait = 15 }
+Grid2Options.indicatorTypesOrder= { tooltip = 1, alpha = 2, background = 3, border = 4, glowborder = 5, multibar = 6, bar = 7, text = 8, square = 9, shape = 10, icon = 11, icons = 12, privateauras = 13, privateaurasdispel = 14, portrait = 15 }
 
 Grid2Options.indicatorTitleIconsOptions = {
 	size = 24, offsetx = -4, offsety = -3, anchor = 'TOPRIGHT', spacing = 5,
@@ -139,13 +139,11 @@ do
 			elseif (newIndicatorValues.type == "shape") then
 				dbx.level = 6
 				dbx.size = defaults.shape.size
-			elseif (newIndicatorValues.type == "privateaura") then
-				dbx.level = 8
-				dbx.load = { unitType = { self = true, player = true } }
 			elseif (newIndicatorValues.type == "privateauras") then
 				dbx.level = 8
 				dbx.maxIcons = 2
-				dbx.load = { unitType = { self = true, player = true } }
+			elseif (newIndicatorValues.type == "privateaurasdispel") then
+				dbx.level = 7
 			end
 			Grid2:DbSetIndicator(newIndicatorName,dbx)
 			-- Create runtime indicator
@@ -508,8 +506,8 @@ function Grid2Options:AddIndicatorOptions(indicator, statusOptions, layoutOption
 	self:MakeIndicatorTitleOptions(options, indicator)
 	if statusOptions then options.statuses = { type = "group", order = 10, name = L["statuses"], args = statusOptions } end
 	if colorOptions  then options.colors   = { type = "group", order = 20, name = L["Colors"],   args = colorOptions  } end
-	if layoutOptions then options.layout   = { type = "group", order = 40, name = L["Layout"],   args = layoutOptions } end
-	if loadOptions   then options.load     = { type = "group", order = 30, name = L["Load"],     args = loadOptions   } end
+	if layoutOptions then options.layout   = { type = "group", order = statusOptions and 40 or 30, name = L["Layout"],   args = layoutOptions } end
+	if loadOptions   then options.load     = { type = "group", order = statusOptions and 30 or 40, name = L["Load"],     args = loadOptions   } end
 end
 
 -- Don't remove options param (openmanager hooks this function and needs this parameter)

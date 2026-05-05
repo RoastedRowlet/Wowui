@@ -1,13 +1,16 @@
+VER 3 010000000000000C "Blessing" "134400"
+#showtooltip
+/cast [@mouseover] 
+END
 VER 3 0100000000000003 "Blistering Scale" "5199621"
 #121
 #showtooltip
 /cast [@mouseover] Blistering Scales
 END
-VER 3 010000000000000D "Combat Pot" "650640"
-#133
---&04
-#showtooltip
-/use item:212265--&
+VER 3 010000000000000E "Breath" "134400"
+/use 13
+/use [combat] Light's Potential
+/cast Deep Breath
 END
 VER 3 0100000000000007 "Ebon Might Trink" "5061347"
 #122
@@ -43,12 +46,6 @@ VER 3 0100000000000008 "mouseover dispel" "134400"
 #showtooltip
 /use [@mouseover,help,nodead] Expunge(Green)
 END
-VER 3 010000000000000C "PotBotwwwwwwwwww" "5931169"
-#128
---&0b
-#showtooltip
-/use item:211878--&
-END
 VER 3 0100000000000002 "Prescience" "5199639"
 #129
 #showtooltip
@@ -61,6 +58,10 @@ VER 3 0100000000000009 "Rescue" "4622460"
 /cast Rescue
 /targetlasttarget
 END
+VER 3 010000000000000D "Reversion MO" "134400"
+#showtooltip
+/cast [@mouseover] Reversion
+END
 VER 3 010000000000000A "Source of magic" "4630412"
 #131
 #showtooltip
@@ -69,6 +70,7 @@ END
 VER 3 0100000000000006 "Trinket Breath" "134400"
 #132
 #showtooltip Breath of Eons(Bronze)
-/use Irideus Fragment
+/use [combat] Light's Potential
+/use 13
 /cast Breath of Eons(Bronze)
 END

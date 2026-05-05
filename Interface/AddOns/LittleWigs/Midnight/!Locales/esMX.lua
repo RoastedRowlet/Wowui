@@ -111,7 +111,7 @@ end
 
 L = BigWigs:NewBossLocale("Den of Nalorakk Trash", "esMX")
 if L then
-    --L.offerings_acquired = "Offerings Acquired"
+	--L.offerings_acquired = "Offerings Acquired"
 	--L.offerings_acquired_desc = "Show an alert when an offering has been acquired."
 end
 
@@ -121,6 +121,11 @@ L = BigWigs:NewBossLocale("Maisara Caverns Trash", "esMX")
 if L then
 	--L.prisoners_freed = "Prisoners Freed"
 	--L.prisoners_freed_desc = "Show an alert when a prisoner has been freed."
+	--L.custom_on_cooking_pot_autotalk_desc = "Automatically select the NPC dialog option to grant the 'Hearty Vilebranch Stew' buff.\n\n|T4659336:16|tHearty Vilebranch Stew\n{1269056}"
+	--L.custom_on_ritual_cauldron_autotalk_desc = "Automatically select the NPC dialog option to grant the 'Ritual Concoction' buff.\n\n|T236271:16|tRitual Concoction\n{1271300}"
+
+	--L.cooking_pot = "Cooking Pot"
+	--L.ritual_cauldron = "Ritual Cauldron"
 end
 
 -- Murder Row
@@ -129,4 +134,13 @@ L = BigWigs:NewBossLocale("Murder Row Trash", "esMX")
 if L then
 	--L.snitches_interrogated = "Snitches Interrogated"
 	--L.snitches_interrogated_desc = "Show an alert when a snitch has been interrogated."
+end
+
+-- Nexus-Point Xenas
+
+L = BigWigs:NewBossLocale("Nexus-Point Xenas Trash", "esMX")
+if L then
+	--L.custom_on_arcane_tripwire_autotalk_desc = "|cFFFF0000Requires 25 skill in Midnight Engineering.|r Automatically select the NPC dialog option to disable the Arcane Tripwire."
+
+	--L.arcane_tripwire = "Arcane Tripwire"
 end

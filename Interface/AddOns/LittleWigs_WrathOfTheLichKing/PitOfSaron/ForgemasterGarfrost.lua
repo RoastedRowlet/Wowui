@@ -85,7 +85,7 @@ end
 
 function mod:ENCOUNTER_TIMELINE_EVENT_ADDED(_, eventInfo)
 	if eventInfo.source ~= 0 then return end -- Enum.EncounterTimelineEventSource.Encounter
-	local duration = math.floor(eventInfo.duration* 10.0 + 0.5) / 10.0
+	local duration = self:RoundNumber(eventInfo.duration, 1)
 	local barInfo
 	if duration == 7 then -- Throw Saronite
 		barInfo = self:ThrowSaroniteTimeline(eventInfo)
@@ -159,6 +159,7 @@ function mod:OrebreakerTimeline(eventInfo)
 		msg = barText,
 		key = 1261546,
 		callback = function()
+			self:TargetMessageFromBlizzMessage(1, 1261546, "blue")
 			self:Message(1261546, "purple", barText)
 			if self:Tank() then
 				self:PlaySound(1261546, "warning")

@@ -4,8 +4,8 @@ end
 local addonName, MDT = ...
 local L = MDT.L
 L = L or {}
-
 -- MDT
+L["Action blocked: Restricted environment"] = "操作已被阻止：受限环境"
 L["seatItemA"] = "大多数怪物踏入虚空区域(地图边的黑水)时 会获得此BUFF"
 L["Spellwoven Familiar"] = "魔网编织魔宠"
 L["Midnight Season 1"] = "至暗之夜 第一赛季"
@@ -23,14 +23,9 @@ L["MaisaraCaverns"] = "迈萨拉洞窟"
 L["MaisaraCavernsShortName"] = "迈萨"
 L["NexusPointXenas"] = "节点希纳斯"
 L["NexusPointXenasShortName"] = "节点"
-
-
-
 L["exampleItemNameNoSpellId"] = "亡语者侍僧"
 L["exampleItemDescriptionNoSpellId"] = "A sample item with no associated spell ID.%s%sNew lines supported"
 L["exampleItemDescriptionWithSpellId"] = "A sample item that references a spell ID."
-
-
 -- L["CNNAME"] = ""
 L["Core Technician"] = "核心技师"
 L["Outcast Servant"] = "下层仆从"
@@ -207,79 +202,8 @@ L["Phalanx Breaker"] = "破阵铁骑"
 L["Haunting Grunt"] = "恼人的步兵"
 L["Scouting Trapper"] = "侦察诱捕者"
 L["Deathwhisper Necrolyte"] = "亡语者侍僧"
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 L[" >Legion"] = "> 军团再临"
 L[" K'aresh Elemental"] = "卡雷什元素"
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 L["%s HP"] = "%s 血量"
 L["%s is in sublevel: %s"] = "%s 在子区域: %s"
 L["(G %d)"] = "(G %d)"
@@ -682,7 +606,7 @@ L["CityofEchoes"] = "艾拉-卡拉，回响之城"
 L["CityOfThreads"] = "千丝之城"
 L["cityOfThreadsShortName"] = "千丝"
 L["Claw Fighter"] = "利爪斗士"
-L["Clear all Markers"] = "Clear all Markers"
+L["Clear all Markers"] = "清除所有标记"
 L["Click the fullscreen button for a maximized view of MDT."] = "点击全屏按钮可查看MDT最大化视图"
 L["Click to adjust color settings"] = "点击调整颜色设置"
 L["Click to assign player"] = "点击分配给玩家"
@@ -704,8 +628,7 @@ L["Coldmist Widow"] = "冷雾寡妇蛛"
 L["Color Blind Friendly"] = "色盲模式"
 L["Colorpicker"] = "颜色选择器"
 L["Colossal Tentacle"] = "巨型触须"
---[[Translation missing --]]
-L["Combat Transparency"] = "Combat Transparency"
+L["Combat Transparency"] = "战斗透明度"
 --[[Translation missing --]]
 L["Commander Durand"] = "Commander Durand"
 L["Commander Kolurg"] = "指挥官库鲁尔格"
@@ -732,6 +655,9 @@ L["Control Undead"] = "控制亡灵"
 L["Cooking Pot"] = "烹饪锅"
 L["copiedToClipboard"] = "复制!"
 L["Copy"] = "复制"
+L["Make copy"] = "创建副本"
+L["Overwrite"] = "覆盖"
+L["Always overwrite matching routes on import"] = "导入时始终覆盖匹配的路线"
 L["Copy error"] = "复制错误"
 L["Cordana Felsong"] = "科达娜·邪歌"
 L["Corpse Collector"] = "屍骸收集者"
@@ -1030,7 +956,7 @@ L["Duskwatch Sentry"] = "暮色卫队哨兵"
 L["Dwarven Bomber"] = "矮人轰炸者"
 L["Dynamite Mine Cart"] = "炸藥礦坑推車"
 L["E.D.N.A"] = "E.D.N.A."
-L["Earlier Version"] = "你有一个名称为'%s'%s的早期版本路线, 你希望更新或者创建一个新的副本?%s%s%s"
+L["Earlier Version"] = "你已经有一个匹配的路线'%s'.%s你想覆盖它还是创建副本?%s%s%s"
 L["Earth Infused Golem"] = "大地注能的魔像"
 L["Earthen Custodian"] = "土灵管理者"
 L["Earthen Guardian"] = "土灵守护者"
@@ -1275,8 +1201,7 @@ L["Gashtooth"] = "伤齿"
 L["Gate of the Setting Sun"] = "Gate of the Setting Sun"
 --[[Translation missing --]]
 L["Gate Watch Tower"] = "Gate Watch Tower"
---[[Translation missing --]]
-L["gateOfTheSettingSunShortName"] = "GATE"
+L["gateOfTheSettingSunShortName"] = "残阳"
 L["Gatewarden Zo'mazz"] = "看門者佐瑪茲"
 L["Gazerax"] = "加泽拉克斯"
 L["Geezle Gigazap"] = "吉泽尔·超震"
@@ -1796,8 +1721,7 @@ L["Magmatusk"] = "岩浆之牙"
 L["Maiden of Grief"] = "悲伤圣女"
 L["Maiden of Virtue"] = "贞节圣女"
 L["Make this preset the live preset"] = "将此路线设置成实时连线的路线"
---[[Translation missing --]]
-L["Make window transparent in combat"] = "Make window transparent in combat"
+L["Make window transparent in combat"] = "战斗中使窗口透明"
 L["Makogg Emberblade"] = "马考格·烬刃"
 L["Mak'rana Hardshell"] = "玛拉纳硬壳战士"
 L["Mak'rana Siltwalker"] = "玛拉纳沙地行者"
@@ -1836,7 +1760,7 @@ L["mawOfSoulsShortName"] = "噬魂"
 L["Mchimba the Embalmer"] = "殓尸者姆沁巴"
 L["MDI Mode"] = "MDI模式"
 L["MDT Error"] = "MDT 错误"
-L["MDT: Cannot add enemy - you are trying to add too many enemies of the same kind"] = "MDT: Cannot add enemy - you are trying to add too many enemies of the same kind"
+L["MDT: Cannot add enemy - you are trying to add too many enemies of the same kind"] = "MDT: 无法添加敌人 - 你正在尝试添加过多同类敌人"
 L["MDT: Error importing preset"] = "MDT: 导入路线时发生错误"
 L["MDT: Spells for %s:"] = "MDT: %s 的法术:"
 L["MDT: Use /mdt minimap to show the minimap icon again"] = "MDT: 输入 /mdt minimap 再次显示小地图按钮"
@@ -1908,16 +1832,14 @@ L["mlJockeyNote"] = "机甲驾驶员 21 和 22 在他们的机械化维和者被
 L["Mogul Razdunk"] = "瑞茲當克老大"
 --[[Translation missing --]]
 L["Mogu'shan Palace"] = "Mogu'shan Palace"
---[[Translation missing --]]
-L["mogushanPalaceShortName"] = "MOGU"
+L["mogushanPalaceShortName"] = "魔古"
 L["Molten Colossus"] = "熔火巨人"
 L["Molten Giant"] = "熔火巨人"
 L["Monstrous Corpse Spider"] = "畸形僵尸蛛"
 L["Monstrous Decay"] = "巨型腐朽"
 L["Monzumi"] = "蒙祖米"
 L["Moorabi"] = "莫拉比"
---[[Translation missing --]]
-L["MoP Challenge Mode"] = "MoP Challenge Mode"
+L["MoP Challenge Mode"] = "熊猫人之谜挑战模式"
 L["Moragg"] = "摩拉格"
 L["Morchie"] = "米罗克"
 L["Mordretha, the Endless Empress"] = "『不朽女皇』莫瑞莎"
@@ -2258,6 +2180,7 @@ L["Remnant of Fury"] = "愤怒残余"
 L["Rename"] = "重命名"
 L["Rename Preset"] = "重命名路线"
 L["Rename the preset"] = "重命名路线"
+L["Mark as my route"] = "标记为我的路线"
 L["Repentance"] = "忏悔"
 L["Reposing Knight"] = "休息中的骑士"
 L["Repurposed Loaderbot"] = "改造的载货机器人"
@@ -2430,10 +2353,8 @@ L["Scarlet Scourge Hewer"] = "Scarlet Scourge Hewer"
 L["Scarlet Treasurer"] = "Scarlet Treasurer"
 --[[Translation missing --]]
 L["Scarlet Zealot"] = "Scarlet Zealot"
---[[Translation missing --]]
-L["scarletHallsShortName"] = "HALLS"
---[[Translation missing --]]
-L["scarletMonasteryShortName"] = "SCARL"
+L["scarletHallsShortName"] = "血厅"
+L["scarletMonasteryShortName"] = "血修"
 L["Scavenging Leaper"] = "拾荒跳跃者"
 --[[Translation missing --]]
 L["Scholomance"] = "Scholomance"
@@ -2441,8 +2362,7 @@ L["Scholomance"] = "Scholomance"
 L["Scholomance Acolyte"] = "Scholomance Acolyte"
 --[[Translation missing --]]
 L["Scholomance Neophyte"] = "Scholomance Neophyte"
---[[Translation missing --]]
-L["scholomanceShortName"] = "SCOLO"
+L["scholomanceShortName"] = "通灵"
 L["Scorchling"] = "灼烧元素"
 L["Scourge Brute"] = "天灾蛮兵"
 L["Scourge Hulk"] = "天灾巨人"
@@ -2500,8 +2420,7 @@ L["Shado-Pan Monastery"] = "Shado-Pan Monastery"
 L["Shado-Pan Stormbringer"] = "Shado-Pan Stormbringer"
 --[[Translation missing --]]
 L["Shado-Pan Warden"] = "Shado-Pan Warden"
---[[Translation missing --]]
-L["shadoPanMonasteryShortName"] = "SHADO"
+L["shadoPanMonasteryShortName"] = "影踪"
 L["Shadow Hunter"] = "暗影猎手"
 L["Shadow Mistress"] = "暗影女妖"
 L["Shadow of Zul"] = "祖尔之影"
@@ -2567,8 +2486,7 @@ L["siegeGuttersNote"] = "切割者注释:%s当玩家靠近时步兵会秒杀掉�
 L["Siegemaster Olugar"] = "攻城大师奥鲁加"
 L["Siegemaster Rokra"] = "攻城大师罗卡尔"
 L["siegeOfBoralusShortName"] = "围攻"
---[[Translation missing --]]
-L["siegeOfNiuzaoTempleShortName"] = "SIEGE"
+L["siegeOfNiuzaoTempleShortName"] = "砮皂"
 --[[Translation missing --]]
 L["Sik'thik Amber-Weaver"] = "Sik'thik Amber-Weaver"
 --[[Translation missing --]]
@@ -2763,8 +2681,7 @@ L["Storm's End"] = "风暴之陨"
 L["Stormstout Brewery"] = "Stormstout Brewery"
 --[[Translation missing --]]
 L["Stormstout Brewhall"] = "Stormstout Brewhall"
---[[Translation missing --]]
-L["stormstoutBreweryShortName"] = "BREW"
+L["stormstoutBreweryShortName"] = "酒厂"
 L["Stormsurge Totem"] = "风暴激流图腾"
 L["Stormwake Hydra"] = "唤雷多头蛇"
 --[[Translation missing --]]
@@ -2992,7 +2909,7 @@ L["Time-Lost Smack-o-Tron"] = "迷时咚咚机器人"
 L["Time-Lost Tidehunter"] = "迷时猎潮者"
 L["Time-Lost Wakethrasher"] = "迷时鞭漪者"
 L["Time-Lost Waveshaper"] = "迷时塑波者"
-L["Timer"] = "Timer"
+L["Timer"] = "计时器"
 L["Timestream Anomaly"] = "时流畸体"
 L["Timestream Leech"] = "时流汲取者"
 L["Tirathon Saltheril"] = "提拉宋·萨瑟利尔"
@@ -3243,8 +3160,7 @@ L["War Ohuna"] = "战鹰"
 L["Warlord Parjesh"] = "督军帕杰什"
 L["Warlord Sargha"] = "督军莎尔佳"
 L["Warning"] = "警告"
---[[Translation missing --]]
-L["WARNING_OLD_DUNGEON_IMPORT"] = "This route is from a dungeon that is not available in the current version of MDT. Install MDT Legacy to import this route."
+L["WARNING_OLD_DUNGEON_IMPORT"] = "这条路线来自当前版本 MDT 中不可用的地下城。请安装 MDT Legacy 以导入这条路线。"
 L["Warp Shade"] = "迁跃之影"
 L["Warp Stalker"] = "迁跃兽"
 L["Waste Pipes"] = "废物管道"

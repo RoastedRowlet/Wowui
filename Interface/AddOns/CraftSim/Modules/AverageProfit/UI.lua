@@ -13,7 +13,7 @@ CraftSim.AVERAGEPROFIT = CraftSim.AVERAGEPROFIT
 ---@class CraftSim.AVERAGEPROFIT.UI
 CraftSim.AVERAGEPROFIT.UI = {}
 
-local print = CraftSim.DEBUG:RegisterDebugID("Modules.AverageProfit.UI")
+local Logger = CraftSim.DEBUG:RegisterLogger("AverageProfit.UI")
 
 function CraftSim.AVERAGEPROFIT.UI:Init()
     local sizeX = 320
@@ -35,7 +35,7 @@ function CraftSim.AVERAGEPROFIT.UI:Init()
         closeable = true,
         moveable = true,
         backdropOptions = CraftSim.CONST.DEFAULT_BACKDROP_OPTIONS,
-        onCloseCallback = CraftSim.CONTROL_PANEL:HandleModuleClose("MODULE_AVERAGE_PROFIT"),
+        onCloseCallback = CraftSim.MODULES:HandleModuleClose("MODULE_AVERAGE_PROFIT"),
         frameTable = CraftSim.INIT.FRAMES,
         frameConfigTable = CraftSim.DB.OPTIONS:Get("GGUI_CONFIG"),
         frameStrata = CraftSim.CONST.MODULES_FRAME_STRATA,
@@ -59,7 +59,7 @@ function CraftSim.AVERAGEPROFIT.UI:Init()
         closeable = true,
         moveable = true,
         backdropOptions = CraftSim.CONST.DEFAULT_BACKDROP_OPTIONS,
-        onCloseCallback = CraftSim.CONTROL_PANEL:HandleModuleClose("MODULE_AVERAGE_PROFIT"),
+        onCloseCallback = CraftSim.MODULES:HandleModuleClose("MODULE_AVERAGE_PROFIT"),
         frameTable = CraftSim.INIT.FRAMES,
         frameConfigTable = CraftSim.DB.OPTIONS:Get("GGUI_CONFIG"),
         frameStrata = CraftSim.CONST.MODULES_FRAME_STRATA,

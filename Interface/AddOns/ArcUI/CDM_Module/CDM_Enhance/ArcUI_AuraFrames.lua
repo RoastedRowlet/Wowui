@@ -477,7 +477,14 @@ function AF.UpdateAuraFrame(frame)
     -- Only preview at 0.35 if the frame is actually hidden (alpha 0).
     -- If the frame is already visible (e.g. missing-aura opacity set to 1),
     -- leave it alone — don't force it down to 0.35.
-    local currentAlpha = frame._arcTargetAlpha or 0
+    -- Use _lastAppliedAlpha as the authoritative fallback: _arcTargetAlpha is only
+    -- set when stateVisuals is configured, so when all settings are at defaults
+    -- (e.g. missing alpha=1.0) _arcTargetAlpha is nil despite the frame being at 1.
+    -- frame:GetAlpha() is the final fallback: ForceRefreshAllVisualStates nils both
+    -- _arcTargetAlpha and _lastAppliedAlpha before calling UpdateAuraFrame, so those
+    -- fields are unreliable here.  GetAlpha() still holds the real rendered value (1.0
+    -- for a visible frame) before we write anything — the only safe source of truth.
+    local currentAlpha = frame._arcTargetAlpha or frame._lastAppliedAlpha or frame:GetAlpha() or 0
     targetAlpha = (currentAlpha <= 0) and 0.35 or currentAlpha
     targetDesat = 0
   elseif isReady then
@@ -657,9 +664,14 @@ end
 -- The hooks call UpdateAuraFrame directly — no duplicate glow calls.
 -- ===================================================================
 
+-- Registry of all hooked aura frames for combat-state re-evaluation.
+-- Keyed by frame reference so each frame appears once.
+local hookedAuraFrames = {}
+
 function AF.InstallHooks(frame, cdID)
   if frame._arcAuraStateHooked then return end
   frame._arcAuraStateHooked = true
+  hookedAuraFrames[frame] = true
 
   if frame.OnAuraInstanceInfoSet then
     hooksecurefunc(frame, "OnAuraInstanceInfoSet", function(self)
@@ -714,9 +726,14 @@ function AF.InstallHooks(frame, cdID)
       end
       -- SINGLE STACK
       if self._arcSingleStackText then
-        local unit = self.auraDataUnit or "player"
-        local count = C_UnitAuras.GetAuraApplicationDisplayCount(unit, self.auraInstanceID, 1)
-        self._arcSingleStackText:SetText(count)
+        local auraID = self.auraInstanceID
+        if HasAuraInstanceID(auraID) then
+          local unit = self.auraDataUnit or "player"
+          local count = C_UnitAuras.GetAuraApplicationDisplayCount(unit, auraID, 1)
+          self._arcSingleStackText:SetText(count)
+        else
+          self._arcSingleStackText:SetText("")
+        end
       end
     end)
   end
@@ -759,6 +776,42 @@ function AF.InstallHooks(frame, cdID)
       end
     end)
   end
+
+  -- ── STACK TEXT REFRESH HOOKS ───────────────────────────────────────
+  -- OnAuraInstanceInfoSet/Cleared above only fire on aura GAINED/LOST.
+  -- They miss the most common stack-delay case: same auraInstanceID,
+  -- applications changes (debuff/buff stacks tick up while still active).
+  -- Mirror the Core bars pattern:
+  --   OnUnitAuraUpdatedEvent → player-buff stack refresh on same instance
+  --   OnNewTarget            → target-debuff stack changes (CDM target-switch hook)
+  local function UpdateSingleStackText(self)
+    if not self._arcSingleStackText then return end
+    local auraID = self.auraInstanceID
+    if not HasAuraInstanceID(auraID) then
+      self._arcSingleStackText:SetText("")
+      return
+    end
+    local unit = self.auraDataUnit or "player"
+    local count = C_UnitAuras.GetAuraApplicationDisplayCount(unit, auraID, 1)
+    self._arcSingleStackText:SetText(count)
+  end
+
+  if frame.OnUnitAuraUpdatedEvent then
+    hooksecurefunc(frame, "OnUnitAuraUpdatedEvent", function(self)
+      if self._arcSingleStackText then
+        UpdateSingleStackText(self)
+      end
+    end)
+  end
+
+  if frame.OnNewTarget then
+    hooksecurefunc(frame, "OnNewTarget", function(self)
+      if not self._arcSingleStackText then return end
+      if self.auraDataUnit ~= "target" then return end
+      UpdateSingleStackText(self)
+    end)
+  end
+
   frame._arcAuraEventDriven = true
 
   -- ── TOTEM HOOKS ────────────────────────────────────────────────────
@@ -771,23 +824,154 @@ function AF.InstallHooks(frame, cdID)
   -- needs a totem update (NeedsTotemUpdate check passed) — much sparser than
   -- hooking SetTotemData/ClearTotemData which fire on every CDM refresh cycle.
   -- After this fires, frame.totemData reflects the new state (set or nil).
+  -- NOTE: OnPlayerTotemUpdateEvent fires slightly BEFORE totemData is updated by CDM.
+  -- Deferring by one frame ensures we read the correct post-update totemData value.
   if frame.OnPlayerTotemUpdateEvent and not frame._arcTotemDataHooked then
     frame._arcTotemDataHooked = true
 
     hooksecurefunc(frame, "OnPlayerTotemUpdateEvent", function(self)
-      if self._arcCooldownEventDriven then
-        local cfg = ns.CDMEnhance and ns.CDMEnhance.GetEffectiveIconSettingsForFrame
-          and ns.CDMEnhance.GetEffectiveIconSettingsForFrame(self)
-        if cfg and ns.CooldownState and ns.CooldownState.Apply then
-          ns.CooldownState.Apply(self, cfg)
+      local capturedSelf = self
+      C_Timer.After(0, function()
+        -- Clear throttle cache so UpdateAuraFrame always runs after a totem state change
+        capturedSelf._arcLastOptimizedCall = nil
+        capturedSelf._arcLastAuraActive = nil
+        if capturedSelf._arcCooldownEventDriven then
+          local cfg = ns.CDMEnhance and ns.CDMEnhance.GetEffectiveIconSettingsForFrame
+            and ns.CDMEnhance.GetEffectiveIconSettingsForFrame(capturedSelf)
+          if cfg and ns.CooldownState and ns.CooldownState.Apply then
+            ns.CooldownState.Apply(capturedSelf, cfg)
+          end
+        else
+          if ns.AuraFrames and ns.AuraFrames.UpdateAuraFrame then
+            ns.AuraFrames.UpdateAuraFrame(capturedSelf)
+          end
         end
-      else
-        if ns.AuraFrames and ns.AuraFrames.UpdateAuraFrame then
-          ns.AuraFrames.UpdateAuraFrame(self)
-        end
-      end
+      end)
     end)
   end
+
+  -- ── COOLDOWN WIDGET OnCooldownDone HOOK (totem expiry catcher) ──────
+  -- Per Blizzard's own line-712 comment in CooldownViewer.lua:
+  --   "No external event is dispatched when a totem finishes"
+  -- CDM uses the cooldown widget's OnCooldownDone as its internal totem-
+  -- expiry signal. When the totem's duration runs out, OnCooldownDone
+  -- fires → CDM's mixin handler clears totemData + runs RefreshData.
+  --
+  -- Without this hook AuraFrames waits ~350ms for the followup
+  -- OnPlayerTotemUpdateEvent (probe-confirmed: totem expired at 230.036
+  -- → CDDone fired immediately, but TotemUpd fired only at 230.382).
+  -- That delay is visible to the user as a stuck totem icon.
+  --
+  -- HookScript chains additively after Blizzard's SetScript-installed
+  -- closure (set in OnLoad). Defer one tick so CDM's mixin handler
+  -- finishes clearing totemData first; by the time we read totemData
+  -- it's already nil for expired totems.
+  if frame.Cooldown and not frame._arcCooldownDoneHooked then
+    frame._arcCooldownDoneHooked = true
+    frame.Cooldown:HookScript("OnCooldownDone", function()
+      local capturedFrame = frame
+      C_Timer.After(0, function()
+        if not capturedFrame._arcEnhanced then return end
+        -- Reseed cache: totem just dropped (or aura ticked off), live
+        -- aura state is whatever auraInstanceID + totemData read now.
+        capturedFrame._arcAuraActive = HasAuraInstanceID(capturedFrame.auraInstanceID)
+                                       or (capturedFrame.totemData ~= nil)
+        capturedFrame._arcLastOptimizedCall = nil
+        capturedFrame._arcLastAuraActive    = nil
+
+        local cfg = ns.CDMEnhance and ns.CDMEnhance.GetEffectiveIconSettingsForFrame
+          and ns.CDMEnhance.GetEffectiveIconSettingsForFrame(capturedFrame)
+
+        if capturedFrame._arcCooldownEventDriven then
+          if cfg and ns.CooldownState and ns.CooldownState.Apply then
+            ns.CooldownState.Apply(capturedFrame, cfg)
+          end
+        else
+          AF.UpdateAuraFrame(capturedFrame)
+        end
+
+        -- Re-evaluate auraActiveState glow directly. UpdateAuraFrame's
+        -- glow path has multiple routing branches that can skip — this
+        -- catches the totem-just-expired case where the glow should
+        -- transition off.
+        local aaCfg = cfg and cfg.auraActiveState
+        if aaCfg and (aaCfg.glow or aaCfg.glowWhenMissing) then
+          local hasAuraOrTotem = capturedFrame._arcAuraActive
+          if AF.ShouldShowAuraActiveGlow(aaCfg, capturedFrame, hasAuraOrTotem) then
+            AF.ShowAuraActiveGlow(capturedFrame, aaCfg)
+          else
+            AF.HideAuraActiveGlow(capturedFrame)
+          end
+        end
+
+        if ns.CustomLabel and ns.CustomLabel.UpdateVisibility then
+          ns.CustomLabel.UpdateVisibility(capturedFrame)
+        end
+      end)
+    end)
+  end
+
+  -- ── SPELL OVERRIDE HOOK ────────────────────────────────────────────
+  -- COOLDOWN_VIEWER_SPELL_OVERRIDE_UPDATED fires when a proc swaps the
+  -- spell tied to a CDM frame (Hot Streak, Tidewaters, Maelstrom Weapon
+  -- visual swaps, etc.). Blizzard's flow: SetOverrideSpell → RefreshData →
+  -- RefreshAuraInstance. If the override carries a different aura instance
+  -- the OnAuraInstanceInfoSet hook covers visuals. But if SetAuraInstanceInfo
+  -- early-returns (same auraInstanceID + auraSpellID) OR the override has
+  -- no aura at all, OnAuraInstanceInfoSet/Cleared never fire — visuals
+  -- (alpha, desat, glow) stay at whatever the prior state applied even
+  -- though active state, texture, or aura-active-glow may have flipped.
+  --
+  -- Defer one frame so RefreshData (RefreshAuraInstance, RefreshActive,
+  -- RefreshSpellTexture, RefreshIconBorder) finishes settling before we
+  -- re-evaluate. cooldownID stays the same across overrides so frame
+  -- placement is unaffected — this only refreshes visual state.
+  if frame.OnCooldownViewerSpellOverrideUpdatedEvent and not frame._arcOverrideHooked then
+    frame._arcOverrideHooked = true
+
+    hooksecurefunc(frame, "OnCooldownViewerSpellOverrideUpdatedEvent", function(self)
+      local capturedSelf = self
+      C_Timer.After(0, function()
+        -- Reseed the cache used by the threshold glow ticker
+        capturedSelf._arcAuraActive = HasAuraInstanceID(capturedSelf.auraInstanceID)
+
+        -- Clear UpdateAuraFrame's throttle so it actually re-evaluates
+        capturedSelf._arcLastOptimizedCall = nil
+        capturedSelf._arcLastAuraActive    = nil
+
+        local cfg = ns.CDMEnhance and ns.CDMEnhance.GetEffectiveIconSettingsForFrame
+          and ns.CDMEnhance.GetEffectiveIconSettingsForFrame(capturedSelf)
+
+        if capturedSelf._arcCooldownEventDriven then
+          -- Cooldown frame: CooldownState owns alpha/desat/glow
+          if cfg and ns.CooldownState and ns.CooldownState.Apply then
+            ns.CooldownState.Apply(capturedSelf, cfg)
+          end
+        else
+          -- Aura frame: UpdateAuraFrame owns alpha/desat/threshold glow
+          AF.UpdateAuraFrame(capturedSelf)
+        end
+
+        -- Re-evaluate auraActiveState glow directly — UpdateAuraFrame's glow
+        -- path has several routing branches that can skip; this catches the
+        -- glowWhenMissing case where the prior state left the glow visible.
+        local aaCfg = cfg and cfg.auraActiveState
+        if aaCfg and (aaCfg.glow or aaCfg.glowWhenMissing) then
+          local hasAura = capturedSelf._arcAuraActive
+          if AF.ShouldShowAuraActiveGlow(aaCfg, capturedSelf, hasAura) then
+            AF.ShowAuraActiveGlow(capturedSelf, aaCfg)
+          else
+            AF.HideAuraActiveGlow(capturedSelf)
+          end
+        end
+
+        if ns.CustomLabel and ns.CustomLabel.UpdateVisibility then
+          ns.CustomLabel.UpdateVisibility(capturedSelf)
+        end
+      end)
+    end)
+  end
+
 end
 
 -- ===================================================================
@@ -852,9 +1036,146 @@ end
 -- Run after ADDON_LOADED so ns.CDMEnhance is guaranteed populated
 local shimFrame = CreateFrame("Frame")
 shimFrame:RegisterEvent("ADDON_LOADED")
+shimFrame:RegisterEvent("PLAYER_REGEN_DISABLED")
+shimFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
 shimFrame:SetScript("OnEvent", function(self, event, addon)
   if addon == ADDON then
     InstallCompatShims()
     self:UnregisterEvent("ADDON_LOADED")
+  elseif event == "PLAYER_REGEN_DISABLED" or event == "PLAYER_REGEN_ENABLED" then
+    -- Re-evaluate glowWhenMissing+glowCombatOnly for all hooked aura frames.
+    -- Hooks only fire on aura gained/lost — they miss the "already missing, enter combat" case.
+    local inCombat = event == "PLAYER_REGEN_DISABLED"
+    for frame in pairs(hookedAuraFrames) do
+      local cfg = GetEffectiveIconSettingsForFrame(frame)
+      local aaCfg = cfg and cfg.auraActiveState
+      if aaCfg and aaCfg.glowCombatOnly and (aaCfg.glow or aaCfg.glowWhenMissing) then
+        if inCombat then
+          local hasAura = HasAuraInstanceID(frame.auraInstanceID)
+          if AF.ShouldShowAuraActiveGlow(aaCfg, frame, hasAura) then
+            AF.ShowAuraActiveGlow(frame, aaCfg)
+          else
+            AF.HideAuraActiveGlow(frame)
+          end
+        else
+          AF.HideAuraActiveGlow(frame)
+        end
+      end
+    end
   end
 end)
+
+-- ===================================================================
+-- FULL-UPDATE VISUAL SWEEP (RefreshLayout hook)
+--
+-- Beta 4 / WoW 12.0 changed CooldownViewerMixin:OnUnitAura — when UNIT_AURA
+-- fires with isFullUpdate=true (zone change, vehicle exit, mind control, taxi,
+-- post-spec settle, login, etc.) Blizzard bails early with self:RefreshLayout()
+-- and skips the per-frame OnUnitAuraRemovedEvent / Updated / Added dispatch.
+--
+-- RefreshLayout() does ReleaseAll → reacquire → RefreshData(). Hooks DO fire
+-- during the churn (ClearCooldownID → OnAuraInstanceInfoCleared, then
+-- SetCooldownID → RefreshData → SetAuraInstanceInfo → OnAuraInstanceInfoSet).
+--
+-- BUT there are race windows where the visual state on the frame can desync
+-- from the actual auraInstanceID:
+--   1. Hidden viewer at full-update time: RefreshLayout's RefreshData() is
+--      gated by `if self:IsShown()`. Frames get released (Cleared hook fires,
+--      sets cooldownAlpha) but never re-set, so the frame stays "missing" even
+--      after the viewer reshows with a real aura active.
+--   2. Same-instance churn: in some sequences SetAuraInstanceInfo early-returns
+--      because auraInstanceID hasn't changed, so OnAuraInstanceInfoSet doesn't
+--      fire — visuals stay at whatever the prior Cleared hook applied.
+--
+-- Belt-and-suspenders: hook CooldownViewerMixin:RefreshLayout. After CDM
+-- finishes its rebuild (one frame later via C_Timer.After(0)), walk every
+-- hooked aura frame, reseed _arcAuraActive from live auraInstanceID, clear
+-- the throttle cache, and call UpdateAuraFrame to re-apply alpha/desat/glow.
+-- ===================================================================
+
+local _refreshLayoutVisualSweepPending = false
+
+local function RunPostRefreshLayoutVisualSweep()
+  _refreshLayoutVisualSweepPending = false
+  if not IsCDMEnabled() then return end
+
+  for frame in pairs(hookedAuraFrames) do
+    -- Reseed the cache used by the threshold glow ticker
+    frame._arcAuraActive = HasAuraInstanceID(frame.auraInstanceID)
+
+    -- Clear UpdateAuraFrame's throttle so it actually re-evaluates
+    frame._arcLastOptimizedCall = nil
+    frame._arcLastAuraActive    = nil
+
+    -- Re-apply alpha/desat/glow based on live aura state.
+    -- UpdateAuraFrame guards against missing config / disabled CDM internally.
+    AF.UpdateAuraFrame(frame)
+
+    -- Re-evaluate auraActiveState glow directly — UpdateAuraFrame's glow path
+    -- depends on cfg presence and several routing branches; this catches the
+    -- glowWhenMissing case where the prior Cleared hook left the glow visible.
+    local cfg = GetEffectiveIconSettingsForFrame(frame)
+    local aaCfg = cfg and cfg.auraActiveState
+    if aaCfg and (aaCfg.glow or aaCfg.glowWhenMissing) then
+      local hasAura = frame._arcAuraActive
+      if AF.ShouldShowAuraActiveGlow(aaCfg, frame, hasAura) then
+        AF.ShowAuraActiveGlow(frame, aaCfg)
+      else
+        AF.HideAuraActiveGlow(frame)
+      end
+    end
+  end
+end
+
+-- Hook fires AFTER Blizzard's RefreshLayout completes. Defer one frame so
+-- the subsequent RefreshData (and any OnAuraInstanceInfoSet hooks it triggers)
+-- finishes settling before we re-evaluate. Coalesce multiple viewers calling
+-- RefreshLayout in the same tick into a single sweep.
+if CooldownViewerMixin and CooldownViewerMixin.RefreshLayout then
+  hooksecurefunc(CooldownViewerMixin, "RefreshLayout", function(self)
+    if _refreshLayoutVisualSweepPending then return end
+    _refreshLayoutVisualSweepPending = true
+    C_Timer.After(0, RunPostRefreshLayoutVisualSweep)
+  end)
+end
+
+-- Expose for manual triggering (debug / spec change settlement, etc.)
+AF.RunPostRefreshLayoutVisualSweep = function()
+  if _refreshLayoutVisualSweepPending then return end
+  _refreshLayoutVisualSweepPending = true
+  C_Timer.After(0, RunPostRefreshLayoutVisualSweep)
+end
+
+-- ═══════════════════════════════════════════════════════════════════════════
+-- FRAME REBIND SUBSCRIBER
+--
+-- When CDM repools a frame (silent rebind to a new cdID), our per-frame
+-- throttle/state caches survive on the frame Lua table and would short-
+-- circuit the next visual eval against the OLD cdID's aura state.
+--
+-- FrameController dispatches this synchronously inside the SetCooldownID
+-- mixin hook — same tick as the rebind. Modules that don't care about
+-- release events (newCdID=nil) early-return.
+--
+-- We nil ONLY caches that drive aura-frame visual decisions:
+--   _arcLastOptimizedCall     — throttle gate (would skip eval otherwise)
+--   _arcLastAuraActive        — throttle compare value
+--   _arcLastPandemicAuraActive — pandemic-glow transition tracker
+--   _arcPandemicGlowActive    — pandemic glow display state
+--
+-- The hookedAuraFrames registry is intentionally NOT pruned — it's keyed
+-- on frame identity (Lua table reference), so a frame rebinding to a new
+-- cdID stays the same key and entry. CDM never destroys frames in the
+-- pool, just releases them.
+-- ═══════════════════════════════════════════════════════════════════════════
+if ns.FrameController and ns.FrameController.OnFrameRebind then
+  ns.FrameController.OnFrameRebind(function(frame, oldCdID, newCdID)
+    if not frame then return end
+    -- Both bind (newCdID set) and release (newCdID nil) need cache nilling
+    -- because either way the next visual eval should re-read live state.
+    frame._arcLastOptimizedCall      = nil
+    frame._arcLastAuraActive         = nil
+    frame._arcLastPandemicAuraActive = nil
+    frame._arcPandemicGlowActive     = nil
+  end)
+end

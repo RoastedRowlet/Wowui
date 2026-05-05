@@ -11,6 +11,7 @@ local UnitCanAttack = UnitCanAttack
 local UnitCreatureType= UnitCreatureType
 local UnitIsTapDenied = UnitIsTapDenied
 local canaccessvalue = Grid2.canaccessvalue
+local roster_guids = Grid2.roster_guids
 
 -- Simple static color status
 local Color = {
@@ -32,7 +33,7 @@ local Shared = {}
 Shared.IsActive = Color.IsActive
 
 function Shared:UpdateUnit(_, unit)
-	if unit then
+	if roster_guids[unit] then
 		self:UpdateIndicators(unit)
 	end
 end
@@ -236,10 +237,10 @@ function ClassColor:UnitColor(unit)
 		return colors.HOSTILE
 	elseif Grid2:UnitIsPet(unit) then
 		local c = UnitCreatureType(unit)
-		return colors[c or "UNKNOWN_PET"] or colors.UNKNOWN_PET
+		return colors[canaccessvalue(c) and c or "UNKNOWN_PET"] or colors.UNKNOWN_PET
 	else
 		local _, c = UnitClass(unit)
-		return colors[c or "UNKNOWN_UNIT"] or colors.UNKNOWN_UNIT
+		return colors[canaccessvalue(c) and c or "UNKNOWN_UNIT"] or colors.UNKNOWN_UNIT
 	end
 end
 

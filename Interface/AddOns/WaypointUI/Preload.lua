@@ -16,8 +16,8 @@ local IsAddOnLoaded = C_AddOns.IsAddOnLoaded
 env.NAME = "Waypoint UI"
 env.LOGO = Path.Root .. "\\Art\\Icons\\Logo"
 env.LOGO_ALT = Path.Root .. "\\Art\\Icons\\Logo-White"
-env.VERSION_STRING = "1.4.2"
-env.VERSION_NUMBER = 010402
+env.VERSION_STRING = "1.4.4"
+env.VERSION_NUMBER = 010404
 env.DEBUG_MODE = false
 
 
@@ -80,6 +80,7 @@ do
         WaypointAlpha                          = 1,
         WaypointBeam                           = true,
         WaypointBeamAlpha                      = 1,
+        WaypointDistanceTextFontFlags          = 1, --UIFont.Enum.FontFlags
         WaypointDistanceText                   = true,
         WaypointDistanceTextType               = 1,
         WaypointDistanceTextScale              = 1,
@@ -119,6 +120,8 @@ do
         TomTomAutoReplaceWaypoint              = true,
         DugisSupportEnabled                    = true,
         DugisAutoReplaceWaypoint               = true,
+        APRSupportEnabled                      = false,
+        APRAutoReplaceWaypoint                 = true,
         SilverDragonSupportEnabled             = false
     }
     local DB_GLOBAL_PERSISTENT_DEFAULTS = {}
@@ -383,9 +386,9 @@ do
         local INLINE_ADDON_ICON = Utils_InlineIcon.New(env.LOGO_ALT, 16, 16)
         local PIPE = Utils_InlineIcon.New(Path.Root .. "\\Art\\Icons\\Pipe", 16, 16)
 
-        local INVALID_WAY_LINE_1 = INLINE_ADDON_ICON .. " /way " .. GenericEnum.ColorHEX.Normal .. "#<mapID> <x> <y> <name>" .. "|r"
-        local INVALID_WAY_LINE_2 = PIPE .. " /way " .. GenericEnum.ColorHEX.Normal .. "<x> <y> <name>" .. "|r"
-        local INVALID_WAY_LINE_3 = PIPE .. " /way " .. GenericEnum.ColorHEX.Normal .. "reset" .. "|r"
+        local INVALID_WAY_LINE_1 = INLINE_ADDON_ICON .. " /way " .. GenericEnum.ColorHEX.NORMAL_FONT_COLOR .. "#<mapID> <x> <y> <name>" .. "|r"
+        local INVALID_WAY_LINE_2 = PIPE .. " /way " .. GenericEnum.ColorHEX.NORMAL_FONT_COLOR .. "<x> <y> <name>" .. "|r"
+        local INVALID_WAY_LINE_3 = PIPE .. " /way " .. GenericEnum.ColorHEX.NORMAL_FONT_COLOR .. "reset" .. "|r"
 
         local function ThrowSlashWayError()
             DEFAULT_CHAT_FRAME:AddMessage(INVALID_WAY_LINE_1)
@@ -505,11 +508,15 @@ do
             fontPath = UIFont.CustomFont.GetFontPathForIndex(1)
         end
 
+        UIFont.WUIFooterFont:SetFontFile(fontPath)
+        UIFont.WUIFooterFont:SetFontFlags(UIFont.Enum.FontFlags[Config.DBGlobal:GetVariable("WaypointDistanceTextFontFlags") or 1])
+        
         UIFont.SetNormalFont(fontPath)
         Config.DBGlobal:SetVariable("fontPath", fontPath)
     end
 
     SavedVariables.OnChange("WaypointDB_Global", "fontPath", UpdateFonts)
+    SavedVariables.OnChange("WaypointDB_Global", "WaypointDistanceTextFontFlags", UpdateFonts)
 
     function FontHandler.Load()
         UpdateFonts()

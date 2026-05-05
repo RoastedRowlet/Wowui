@@ -46,11 +46,11 @@ function WaypointMixin:OnLoad()
     self.lastScale = nil
 
     self:SetScript("OnUpdate", self.OnUpdate)
-    SavedVariables.OnChange("WaypointDB_Global", "WaypointDistanceText", function() self:SetFooterTextAppearance() end)
-    SavedVariables.OnChange("WaypointDB_Global", "WaypointDistanceTextType", function() self:SetFooterTextAppearance() end)
-    SavedVariables.OnChange("WaypointDB_Global", "WaypointDistanceTextAlpha", function() self:SetFooterTextAppearance() end)
-    SavedVariables.OnChange("WaypointDB_Global", "WaypointDistanceSubtextAlpha", function() self:SetFooterTextAppearance() end)
-    SavedVariables.OnChange("WaypointDB_Global", "WaypointDistanceTextScale", function() self:SetFooterTextAppearance() end)
+    local footerTextCallbackKeys = { "WaypointDistanceTextFontFlags", "WaypointDistanceTextType", "WaypointDistanceTextAlpha", "WaypointDistanceSubtextAlpha", "WaypointDistanceTextScale" }
+    for _, event in ipairs(footerTextCallbackKeys) do
+        SavedVariables.OnChange("WaypointDB_Global", event, function() self:SetFooterTextAppearance() end)
+    end
+    SavedVariables.OnChange("WaypointDB_Global", "WaypointDistanceText", function() self:UpdateFooter() end)
     SavedVariables.OnChange("WaypointDB_Global", "WaypointBeam", function() self:UpdateBeam() end)
     SavedVariables.OnChange("WaypointDB_Global", "WaypointBeamAlpha", function() self:UpdateBeam() end)
     SavedVariables.OnChange("WaypointDB_Global", "WaypointAlpha", function() self:UpdateOpacity() end)
@@ -111,6 +111,19 @@ function WaypointMixin:UpdateText()
     self.Footer:_Render()
 end
 
+function WaypointMixin:ShowArrivalTimeText()
+    self.Footer.ArrivalTimeText.isVisible = true
+    self.Footer.ArrivalTimeText:Show()
+    self.AnimGroup_ArrivalTimeText:Play(self.Footer.ArrivalTimeText, "FADE_IN")
+end
+
+function WaypointMixin:HideArrivalTimeText()
+    self.AnimGroup_ArrivalTimeText:Play(self.Footer.ArrivalTimeText, "FADE_OUT"):onFinish(function()
+        self.Footer.ArrivalTimeText.isVisible = false
+        self.Footer.ArrivalTimeText:Hide()
+    end)
+end
+
 function WaypointMixin:UpdateDistanceText()
     local waypointDistanceText = Config.DBGlobal:GetVariable("WaypointDistanceText")
     local waypointDistanceTextType = Config.DBGlobal:GetVariable("WaypointDistanceTextType")
@@ -133,8 +146,14 @@ function WaypointMixin:UpdateDistanceText()
     if isArrivalTime and isValidArrivalTime then
         local _, _, _, h, m, s = Utils_Formatting.FormatTime(Waypoint_ArrivalTime:GetSeconds())
         self.Footer.ArrivalTimeText:SetText(h .. m .. s)
+        if not self.Footer.ArrivalTimeText.isVisible then
+            self:ShowArrivalTimeText()
+            self.Footer:_Render()
+        end
     else
-        self.Footer.ArrivalTimeText:SetText("")
+        if self.Footer.ArrivalTimeText.isVisible then
+            self:HideArrivalTimeText()
+        end
     end
 end
 
@@ -264,11 +283,11 @@ do
         :to(1)
 
     WaypointMixin.AnimGroup_Hover:State("ENABLED", function(frame)
-        Enabled:Play(frame)
+        Enabled:Play(frame.AnimationFrame)
     end)
 
     WaypointMixin.AnimGroup_Hover:State("DISABLED", function(frame)
-        Disabled:Play(frame)
+        Disabled:Play(frame.AnimationFrame)
     end)
 end
 
@@ -284,6 +303,19 @@ do
 
     WaypointMixin.AnimGroup_Beam:State("NORMAL", function(frame)
         Translate:Play(frame)
+    end)
+end
+
+WaypointMixin.AnimGroup_ArrivalTimeText = UIAnim.New()
+do
+    local FadeIn = UIAnim.Animate():property(UIAnim.Enum.Property.Alpha):easing(UIAnim.Enum.Easing.Linear):duration(0.175):to(function() return Config.DBGlobal:GetVariable("WaypointDistanceSubtextAlpha") end)
+    WaypointMixin.AnimGroup_ArrivalTimeText:State("FADE_IN", function(frame)
+        FadeIn:Play(frame)
+    end)
+
+    local FadeOut = UIAnim.Animate():property(UIAnim.Enum.Property.Alpha):easing(UIAnim.Enum.Easing.Linear):duration(0.175):to(0)
+    WaypointMixin.AnimGroup_ArrivalTimeText:State("FADE_OUT", function(frame)
+        FadeOut:Play(frame)
     end)
 end
 
@@ -327,21 +359,23 @@ function PinpointMixin:UpdateText()
                 local questCompletionText = Waypoint_Cache.Get("questCompletionText") or L["WAYPOINTSYSTEM_PINPOINT_QUEST_COMPLETE"]
 
                 if pinpointExtendedInfo then
-                    newText = questName .. "\n" .. GenericEnum.ColorHEX.Gray .. questCompletionText .. "|r"
+                    newText = questName .. "\n" .. GenericEnum.ColorHEX.GRAY_FONT_COLOR .. questCompletionText .. "|r"
                 else
                     newText = questCompletionText
                 end
             else
-                local allObjectives = Waypoint_Cache.Get("questObjectiveInfo").objectives
+                local questObjectiveInfo = Waypoint_Cache.Get("questObjectiveInfo")
+                if questObjectiveInfo then
+                    local allObjectives = questObjectiveInfo.objectives
 
-                -- Display incomplete objectives
-                local numObjectives = #allObjectives
-                local objectivesAdded = 1
-                for i = 1, numObjectives do
-                    if allObjectives[i].text and not allObjectives[i].finished then
-                        local newLine = objectivesAdded > 1 and "\n" or ""
-                        newText = newText .. newLine .. allObjectives[i].text
-                        objectivesAdded = objectivesAdded + 1
+                    local numObjectives = #allObjectives
+                    local objectivesAdded = 1
+                    for i = 1, numObjectives do
+                        if allObjectives[i].text and not allObjectives[i].finished then
+                            local newLine = objectivesAdded > 1 and "\n" or ""
+                            newText = newText .. newLine .. allObjectives[i].text
+                            objectivesAdded = objectivesAdded + 1
+                        end
                     end
                 end
             end
@@ -349,7 +383,7 @@ function PinpointMixin:UpdateText()
             if pinpointExtendedInfo then
                 local description = ""
                 local newLine = pinName and #pinName > 0 and "\n" or ""
-                if pinDescription and #pinDescription > 0 then description = newLine .. GenericEnum.ColorHEX.Gray .. pinDescription .. "|r" end
+                if pinDescription and #pinDescription > 0 then description = newLine .. GenericEnum.ColorHEX.GRAY_FONT_COLOR .. pinDescription .. "|r" end
 
                 newText = pinName .. description
             else
@@ -461,11 +495,11 @@ do
         :to(1)
 
     PinpointMixin.AnimGroup_Hover:State("ENABLED", function(frame)
-        Enabled:Play(frame)
+        Enabled:Play(frame.AnimationFrame)
     end)
 
     PinpointMixin.AnimGroup_Hover:State("DISABLED", function(frame)
-        Disabled:Play(frame)
+        Disabled:Play(frame.AnimationFrame)
     end)
 end
 
@@ -549,8 +583,8 @@ function NavigatorMixin:UpdatePosition()
         self.currentPositionY = self.targetPositionY
     else
         -- Interpolate
-        self.currentPositionX = self.currentPositionX + (self.targetPositionX - self.currentPositionX) / 2
-        self.currentPositionY = self.currentPositionY + (self.targetPositionY - self.currentPositionY) / 2
+        self.currentPositionX = self.currentPositionX + (self.targetPositionX - self.currentPositionX) / 3
+        self.currentPositionY = self.currentPositionY + (self.targetPositionY - self.currentPositionY) / 3
     end
 
     self:ClearAllPoints()
@@ -649,12 +683,12 @@ do
 
     local FadeIn = UIAnim.Animate():property(UIAnim.Enum.Property.Alpha):easing(UIAnim.Enum.Easing.Linear):duration(0.175):to(1)
     NavigatorMixin.AnimGroup:State("FADE_IN", function(frame)
-        FadeIn:Play(frame)
+        FadeIn:Play(frame.AnimationFrame)
     end)
 
     local FadeOut = UIAnim.Animate():property(UIAnim.Enum.Property.Alpha):easing(UIAnim.Enum.Easing.Linear):duration(0.175):to(0)
     NavigatorMixin.AnimGroup:State("FADE_OUT", function(frame)
-        FadeOut:Play(frame)
+        FadeOut:Play(frame.AnimationFrame)
     end)
 end
 
@@ -721,12 +755,22 @@ function Waypoint.GetTintColorInfo(ContextIconTexture)
     local requestRecolor = ContextIconTexture and ContextIconTexture.requestRecolor or false
     local trackingType = Waypoint_Cache.Get("trackingType")
     local pinType = Waypoint_Cache.Get("pinType")
+    local isUserNavigationTracked = MapPin.IsUserNavigationTracked()
+    local userNavigation = MapPin.GetUserNavigation()
 
-    if pinType == Enum.SuperTrackingType.Corpse then
+    if isUserNavigationTracked and userNavigation and userNavigation.r and userNavigation.g and userNavigation.b then
         color = {
-            r = GenericEnum.ColorRGB01.White.r,
-            g = GenericEnum.ColorRGB01.White.g,
-            b = GenericEnum.ColorRGB01.White.b,
+            r = userNavigation.r,
+            g = userNavigation.g,
+            b = userNavigation.b,
+            a = 1
+        }
+        recolor = requestRecolor or true
+    elseif pinType == Enum.SuperTrackingType.Corpse then
+        color = {
+            r = GenericEnum.ColorRGB01.WHITE_FONT_COLOR.r,
+            g = GenericEnum.ColorRGB01.WHITE_FONT_COLOR.g,
+            b = GenericEnum.ColorRGB01.WHITE_FONT_COLOR.b,
             a = 1
         }
         recolor = requestRecolor or false
@@ -905,7 +949,7 @@ do --Animation
 
     local function Play(frameObj, state, onFinish)
         local handle = frameObj.AnimGroup:Play(frameObj, state)
-        if handle and onFinish then handle.onFinish(onFinish) end
+        if handle and onFinish then handle:onFinish(onFinish) end
     end
 
     local blockTransitionChange = false

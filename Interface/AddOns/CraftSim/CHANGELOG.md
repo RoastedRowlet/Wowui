@@ -1,31 +1,23 @@
 # CraftSim
 
-## [23.1.1](https://github.com/derfloh205/CraftSim/tree/23.1.1) (2026-03-28)
-[Full Changelog](https://github.com/derfloh205/CraftSim/compare/23.1.0...23.1.1) [Previous Releases](https://github.com/derfloh205/CraftSim/releases)
+## [26.1.6](https://github.com/derfloh205/CraftSim/tree/26.1.6) (2026-04-23)
+[Full Changelog](https://github.com/derfloh205/CraftSim/compare/26.1.5...26.1.6) [Previous Releases](https://github.com/derfloh205/CraftSim/releases)
 
-- feat: add updates for Korean localization and public orders to news  
-- feat: update version to 23.1.1 and add patch notes for public orders feature  
-- fix: increase fixedWidth for itemCountColumn in InitLogFrame  
-- fix: extract setup function  
-- feat: enable addWorkOrdersButton based on profession focus  
-    - Added logic to enable the addWorkOrdersButton in the CraftQueue UI based on the current profession and its proximity to the profession spell focus.  
-    - Improved user experience by ensuring the button's state reflects the player's profession context.  
-- feat: add support for public orders in CraftQueue  
-    - Introduced new options for including public orders in the crafting queue.  
-    - Added localization strings for public orders and their maximum count.  
-    - Implemented functionality to handle public orders in the queue processing logic.  
-    - Updated UI to allow users to configure public order settings.  
-- fix: ensure we load windows  
-- chore: DB2 Data Update: 12.0.1.66709  
-- feat: add koKR (Korean) translation (#1154)  
-    * feat: add koKR (Korean) translation  
-    * feat: Added localized strings  
-    * Update Locals/koKR.lua  
-    Co-authored-by: Copilot <175728472+Copilot@users.noreply.github.com>  
-    * fix: 즉시시가 -> 즉시 구매가가  
-    * fix: typo in koKR.lua  
-    * fix: tab -> space only  
-    * fix: remove the whitespace-only line.  
-    ---------  
-    Co-authored-by: Mingu Jo <whalsrn0710@naver.com>  
-    Co-authored-by: Copilot <175728472+Copilot@users.noreply.github.com>  
+- fix: update crafting cost calculations and add new slash commands in news  
+    Co-authored-by: Copilot <copilot@github.com>  
+- fix: open options menu when no command is provided in slash command input  
+- fix: save Moxie value to DB if different from saved value (#1332)  
+    Alts were showing old data  
+    Co-authored-by: genjuwow <derfloh205@gmail.com>  
+- chore: DB2 Data Update: 12.0.5.67165 (#1336)  
+    Co-authored-by: derfloh205 <9341090+derfloh205@users.noreply.github.com>  
+    Co-authored-by: genjuwow <derfloh205@gmail.com>  
+- chore: DB2 Data Update: 12.0.5.67114 (#1333)  
+    Co-authored-by: derfloh205 <9341090+derfloh205@users.noreply.github.com>  
+- refactor: improve code readability by adjusting line breaks in TriageAndQueue and ScanList functions  
+- fix for target quality skipping higher qualities  
+- feat: enhance CMD\_bruto to summon Traders Bruto or BFA Bruto based on availability  
+- feat: add commands to summon Brutosaur and collect mail, update help text  
+- feat: update CMD\_openprofession to accept argument for profession selection  
+- feat: add CMD\_openprofession command to handle profession opening logic  
+- some macro supporting checks  

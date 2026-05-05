@@ -274,7 +274,6 @@ local function CreateBossRow(bossData, anchor, parent, rowHeight, rowCount)
 
 end
 
-
 local function updateRaidStatusFrame()
 	local textstring = ""
     if option("showraidprogress") ~= true or _G["ccsrf_sf"] == nil then return end
@@ -349,9 +348,9 @@ function module:Initialize()
 
 ---- Create the second button
     local ccsr_btn2 = _G["ccsr_btn2"] or CreateFrame("Button", "ccsr_btn2", PaperDollFrame)
-	ccsr_btn2:SetSize(28, 28)
+	ccsr_btn2:SetSize(20, 20)
 	ccsr_btn2:SetPoint("RIGHT", PaperDollSidebarTabs, "RIGHT", -0.5, -15)
-	ccsr_btn2:SetPoint("TOPRIGHT", CharacterFrameCloseButton, "BOTTOMRIGHT", 0, -30)
+	ccsr_btn2:SetPoint("TOPRIGHT", CharacterFrameCloseButton, "BOTTOMRIGHT", 0, -22)
 	ccsr_btn2:SetFrameStrata("HIGH")
 
 	ccsr_btn2._ccs_OnEnter = function(self)
@@ -364,14 +363,26 @@ function module:Initialize()
 	ccsr_btn2._ccs_OnLeave = function(self)
 		CCS.tooltip:Hide()
 	end
-
-	CCS:ApplyIconStyle(ccsr_btn2, "rightarrow", 20)
+	if option("showr_altbtn") then
+		local ccsr_btn2_tex = ccsr_btn2.tex or ccsr_btn2:CreateTexture(nil, "ARTWORK")
+		ccsr_btn2.tex = ccsr_btn2_tex
+		CCS:ApplyIconStyle(ccsr_btn2, "ightarrow", 17)
+		ccsr_btn2_tex:SetAllPoints()
+		ccsr_btn2_tex:Show()
+		ccsr_btn2_tex:SetTexture("Interface\\AddOns\\ChonkyCharacterSheet\\Media\\Textures\\raid.png")
+	else
+		CCS:ApplyIconStyle(ccsr_btn2, "rightarrow", 17)
+		if ccsr_btn2 and ccsr_btn2.tex ~= nil then
+			ccsr_btn2.tex:Hide()
+		end
+	end
 
 	-- Click behavior
 	ccsr_btn2:SetScript("OnClick", function(self, button)
 		PlaySound(SOUNDKIT.GS_LOGIN_CHANGE_REALM_OK)
 		if not InCombatLockdown() then
 			if _G["ccsm_sf"] and _G["ccsm_sf"]:IsShown() then _G["ccsm_sf"]:Hide() end
+			if _G["ccssg_sf"] and _G["ccssg_sf"]:IsShown() then _G["ccssg_sf"]:Hide() end
 			
 			if _G["ccsrf_sf"]:IsShown() then
 				_G["ccsrf_sf"]:Hide()

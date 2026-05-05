@@ -233,8 +233,8 @@ function CraftSim.LOCAL_PT:GetData()
         EXPLANATIONS_BASIC_PROFIT_TAB = "Cálculo Básico de Lucro",
 
         -- Cost Details Frame
-        COST_OPTIMIZATION_TITLE = "Otimização de Custo do CraftSim",
-        COST_OPTIMIZATION_EXPLANATION =
+        PRICING_TITLE = "Otimização de Custo do CraftSim",
+        PRICING_EXPLANATION =
             "Aqui você tem uma visão geral de todos os valores possíveis dos reagentes utilizados.\nA " ..
             f.bb("'Fonte Utilizada'") ..
             " coluna indica quais dos valores é utilizado.\n\n" ..
@@ -247,10 +247,8 @@ function CraftSim.LOCAL_PT:GetData()
             f.l("OR") ..
             " sempre será usado se definido. " ..
             f.bb("Custos de Criação") .. " só será usado se menor que " .. f.g("AH"),
-        COST_OPTIMIZATION_CRAFTING_COSTS = "Custos de Criação: ",
-        COST_OPTIMIZATION_ITEM_HEADER = "Item",
-        COST_OPTIMIZATION_AH_PRICE_HEADER = "Preço na AH",
-        COST_OPTIMIZATION_OVERRIDE_HEADER = "Personalizar",
+        PRICING_CRAFTING_COSTS = "Custos de Criação: ",
+        PRICING_ITEM_HEADER = "Item",
         COST_OPTIMIZATION_CRAFTING_HEADER = "Criação",
         COST_OPTIMIZATION_USED_SOURCE = "Fonte Utilizada",
         COST_OPTIMIZATION_REAGENT_COSTS_TAB = "Custos dos Reagentes",
@@ -270,12 +268,12 @@ function CraftSim.LOCAL_PT:GetData()
             f.l("CraftSim") ..
             " desconsiderará os requisitos de recarga receitas ao calcular reagentes criados por si próprio",
         COST_OPTIMIZATION_SUB_RECIPE_SELECT_RECIPE_CRAFTER = "Selecione Criador de Receitas",
-        COST_OPTIMIZATION_REAGENT_LIST_AH_COLUMN_AUCTION_BUYOUT = "Arremate da AH: ",
-        COST_OPTIMIZATION_REAGENT_LIST_OVERRIDE = "\n\nPersonalizar",
-        COST_OPTIMIZATION_REAGENT_LIST_EXPECTED_COSTS_TOOLTIP = "\n\nCriando ",
-        COST_OPTIMIZATION_REAGENT_LIST_EXPECTED_COSTS_PRE_ITEM = "\n- Custo Estimado por Item: ",
-        COST_OPTIMIZATION_REAGENT_LIST_CONCENTRATION_COST = f.gold("Custo de Concentração: "),
-        COST_OPTIMIZATION_REAGENT_LIST_CONCENTRATION = "Concentração: ",
+        PRICING_REAGENT_LIST_AH_COLUMN_AUCTION_BUYOUT = "Arremate da AH: ",
+        PRICING_REAGENT_LIST_OVERRIDE = "\n\nPersonalizar",
+        PRICING_REAGENT_LIST_EXPECTED_COSTS_TOOLTIP = "\n\nCriando ",
+        PRICING_REAGENT_LIST_EXPECTED_COSTS_PRE_ITEM = "\n- Custo Estimado por Item: ",
+        PRICING_REAGENT_LIST_CONCENTRATION_COST = f.gold("Custo de Concentração: "),
+        PRICING_REAGENT_LIST_CONCENTRATION = "Concentração: ",
 
         -- Statistics Frame
         STATISTICS_TITLE = "Estatísticas do CraftSim",
@@ -403,6 +401,13 @@ function CraftSim.LOCAL_PT:GetData()
         RECIPE_SCAN_OPTIMIZE_FINISHING_REAGENTS = "Optimize Finishing Reagents",
         OPTIMIZATION_OPTIONS_OPTIMIZE_PROFESSION_TOOLS = "Optimize Profession Tools",
         OPTIMIZATION_OPTIONS_INCLUDE_SOULBOUND_FINISHING_REAGENTS = "Include Soulbound Finishing Reagents",
+        OPTIMIZATION_OPTIONS_FINISHING_REAGENTS_ALGORITHM = "Finishing Reagents Algorithm",
+        OPTIMIZATION_OPTIONS_FINISHING_REAGENTS_SIMPLE = "Simple",
+        OPTIMIZATION_OPTIONS_FINISHING_REAGENTS_SIMPLE_TOOLTIP =
+        "Optimizes reagent allocation first, then concentration, then selects the best finishing reagent for each slot individually.",
+        OPTIMIZATION_OPTIONS_FINISHING_REAGENTS_PERMUTATION = "Permutation Based",
+        OPTIMIZATION_OPTIONS_FINISHING_REAGENTS_PERMUTATION_TOOLTIP =
+        "Tries all possible finishing reagent combinations and for each individually optimizes reagents (if enabled) and concentration (if enabled), then selects the most profitable combination.\n\nWarning: This may take significantly longer to complete.",
         RECIPE_SCAN_AUTOSELECT_OPEN_PROFESSION = "Autoselect Open Profession",
 
         -- Recipe Top Gear
@@ -428,7 +433,7 @@ function CraftSim.LOCAL_PT:GetData()
         TOP_GEAR_SIM_MODES_CRAFTING_SPEED = "Melhor Velocidade de Criação",
 
         -- Options
-        OPTIONS_TITLE = "Opções CraftSim",
+        OPTIONS_TITLE = "CraftSim",
         OPTIONS_GENERAL_TAB = "Geral",
         OPTIONS_GENERAL_PRICE_SOURCE = "Fonte de Preço",
         OPTIONS_GENERAL_CURRENT_PRICE_SOURCE = "Fonte Atual de Preços: ",
@@ -700,10 +705,13 @@ maior ou igual ao limite de taxa de venda configurado.
         COOLDOWNS_NEXT_HEADER = "Próxima Carga",
         COOLDOWNS_ALL_HEADER = "Cargas Completas",
         COOLDOWNS_TAB_OVERVIEW = "Visão Geral",
+        COOLDOWNS_TAB_BLACKLIST = "Blacklist",
         COOLDOWNS_TAB_OPTIONS = "Ajustes",
         COOLDOWNS_EXPANSION_FILTER_BUTTON = "Filtrar Expansão",
         COOLDOWNS_RECIPE_LIST_TEXT_TOOLTIP = f.bb("\n\nReceitas compartilhando essa Recarga:\n"),
         COOLDOWNS_RECIPE_READY = f.g("Disponível"),
+        COOLDOWNS_ADD_TO_BLACKLIST = "Adicionar à blacklist",
+        COOLDOWNS_BLACKLIST_RESTORE = "Remover da blacklist",
 
         -- concentration module
 
@@ -720,6 +728,8 @@ maior ou igual ao limite de taxa de venda configurado.
         CONCENTRATION_TRACKER_FORMAT_MODE_EUROPE_MAX_DATE = "Europeu - Data Máxima",
         CONCENTRATION_TRACKER_FORMAT_MODE_AMERICA_MAX_DATE = "Americano - Data Máxima",
         CONCENTRATION_TRACKER_FORMAT_MODE_HOURS_LEFT = "Horas Restantes",
+        CONCENTRATION_TRACKER_LIST_ROW_MOXIE = "Moxie: %s",
+        CONCENTRATION_TRACKER_LIST_ROW_MOXIE_UNKNOWN = "-",
 
         -- static popups
         STATIC_POPUPS_YES = "Sim",

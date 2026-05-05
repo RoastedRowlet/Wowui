@@ -4,6 +4,7 @@ local CraftSim = select(2, ...)
 local GGUI = CraftSim.GGUI
 local GUTIL = CraftSim.GUTIL
 local f = GUTIL:GetFormatter()
+local L = CraftSim.UTIL:GetLocalizer()
 
 ---@class CraftSim.REAGENT_OPTIMIZATION.UI
 CraftSim.REAGENT_OPTIMIZATION.UI = {}
@@ -11,7 +12,7 @@ CraftSim.REAGENT_OPTIMIZATION.UI = {}
 ---@type CraftSim.RecipeData
 CraftSim.REAGENT_OPTIMIZATION.UI.recipeData = nil
 
-local print = CraftSim.DEBUG:RegisterDebugID("Modules.ReagentOptimization.UI")
+local Logger = CraftSim.DEBUG:RegisterLogger("ReagentOptimization.UI")
 
 function CraftSim.REAGENT_OPTIMIZATION.UI:Init()
     local sizeX = 310
@@ -37,7 +38,7 @@ function CraftSim.REAGENT_OPTIMIZATION.UI:Init()
         offsetX = offsetX,
         offsetY = offsetY,
         backdropOptions = CraftSim.CONST.DEFAULT_BACKDROP_OPTIONS,
-        onCloseCallback = CraftSim.CONTROL_PANEL:HandleModuleClose("MODULE_REAGENT_OPTIMIZATION"),
+        onCloseCallback = CraftSim.MODULES:HandleModuleClose("MODULE_REAGENT_OPTIMIZATION"),
         frameTable = CraftSim.INIT.FRAMES,
         frameConfigTable = CraftSim.DB.OPTIONS:Get("GGUI_CONFIG"),
         frameStrata = CraftSim.CONST.MODULES_FRAME_STRATA,
@@ -59,7 +60,7 @@ function CraftSim.REAGENT_OPTIMIZATION.UI:Init()
         offsetX = offsetX,
         offsetY = offsetY,
         backdropOptions = CraftSim.CONST.DEFAULT_BACKDROP_OPTIONS,
-        onCloseCallback = CraftSim.CONTROL_PANEL:HandleModuleClose("MODULE_REAGENT_OPTIMIZATION"),
+        onCloseCallback = CraftSim.MODULES:HandleModuleClose("MODULE_REAGENT_OPTIMIZATION"),
         frameTable = CraftSim.INIT.FRAMES,
         frameConfigTable = CraftSim.DB.OPTIONS:Get("GGUI_CONFIG"),
         frameStrata = CraftSim.CONST.MODULES_FRAME_STRATA,
@@ -208,20 +209,41 @@ function CraftSim.REAGENT_OPTIMIZATION.UI:Init()
                         "REAGENT_OPTIMIZATION_OPTIMIZE_FINISHING_REAGENTS")
                     local optimizeConcentration = CraftSim.DB.OPTIONS:Get(
                         "REAGENT_OPTIMIZATION_OPTIMIZE_CONCENTRATION_VALUE")
+                    local finishingAlgorithm = CraftSim.DB.OPTIONS:Get(
+                        "REAGENT_OPTIMIZATION_FINISHING_REAGENTS_ALGORITHM") or "SIMPLE"
+                    local usePermutation = optimizeFinishingReagents and finishingAlgorithm == "PERMUTATION"
                     local advancedOptimizationButton = reagentOptimizationFrame.content
                         .advancedOptimizationButton --[[@as GGUI.Button]]
                     advancedOptimizationButton:SetEnabled(false)
-                    if optimizeConcentration then
+
+                    local function finalizeOptimization()
+                        CraftSim.REAGENT_OPTIMIZATION.UI:UpdateReagentDisplay(
+                            CraftSim.REAGENT_OPTIMIZATION.UI.recipeData)
+                        advancedOptimizationButton:SetEnabled(false) -- keep disabled until update from init
+                        advancedOptimizationButton:SetText("Optimized")
+                    end
+
+                    if usePermutation then
+                        -- Permutation mode: all sub-optimisations run per-combination inside the method.
+                        CraftSim.REAGENT_OPTIMIZATION.UI.recipeData:OptimizeFinishingReagentsPermutation {
+                            includeLocked = CraftSim.DB.OPTIONS:Get(
+                                "REAGENT_OPTIMIZATION_OPTIMIZE_LOCKED_FINISHING_REAGENTS"),
+                            includeSoulbound = CraftSim.DB.OPTIONS:Get(
+                                "REAGENT_OPTIMIZATION_OPTIMIZE_SOULBOUND_FINISHING_REAGENTS"),
+                            onlyHighestQualitySoulbound = CraftSim.DB.OPTIONS:Get(
+                                "REAGENT_OPTIMIZATION_ONLY_HIGHEST_QUALITY_SOULBOUND_FINISHING_REAGENTS"),
+                            optimizeConcentration = optimizeConcentration,
+                            progressUpdateCallback = function(progress)
+                                advancedOptimizationButton:SetText(string.format("Optimizing - %.2f%%", progress))
+                            end,
+                            finally = finalizeOptimization,
+                        }
+                    elseif optimizeConcentration then
                         CraftSim.REAGENT_OPTIMIZATION.UI.recipeData:OptimizeConcentration({
                             finally = function()
                                 if optimizeFinishingReagents then
                                     CraftSim.REAGENT_OPTIMIZATION.UI.recipeData:OptimizeFinishingReagents {
-                                        finally = function()
-                                            CraftSim.REAGENT_OPTIMIZATION.UI:UpdateReagentDisplay(
-                                                CraftSim.REAGENT_OPTIMIZATION.UI.recipeData)
-                                            advancedOptimizationButton:SetEnabled(false) -- keep disabled until update from init
-                                            advancedOptimizationButton:SetText("Optimized")
-                                        end,
+                                        finally = finalizeOptimization,
                                         progressUpdateCallback = function(progress)
                                             advancedOptimizationButton:SetText(string.format("Optimizing - %.2f%%",
                                                 progress))
@@ -229,13 +251,12 @@ function CraftSim.REAGENT_OPTIMIZATION.UI:Init()
                                         includeLocked = CraftSim.DB.OPTIONS:Get(
                                             "REAGENT_OPTIMIZATION_OPTIMIZE_LOCKED_FINISHING_REAGENTS"),
                                         includeSoulbound = CraftSim.DB.OPTIONS:Get(
-                                            "REAGENT_OPTIMIZATION_OPTIMIZE_SOULBOUND_FINISHING_REAGENTS")
+                                            "REAGENT_OPTIMIZATION_OPTIMIZE_SOULBOUND_FINISHING_REAGENTS"),
+                                        onlyHighestQualitySoulbound = CraftSim.DB.OPTIONS:Get(
+                                            "REAGENT_OPTIMIZATION_ONLY_HIGHEST_QUALITY_SOULBOUND_FINISHING_REAGENTS"),
                                     }
                                 else
-                                    CraftSim.REAGENT_OPTIMIZATION.UI:UpdateReagentDisplay(
-                                        CraftSim.REAGENT_OPTIMIZATION.UI.recipeData)
-                                    advancedOptimizationButton:SetEnabled(false) -- keep disabled until update from init
-                                    advancedOptimizationButton:SetText("Optimized")
+                                    finalizeOptimization()
                                 end
                             end,
                             progressUpdateCallback = function(progress)
@@ -245,25 +266,19 @@ function CraftSim.REAGENT_OPTIMIZATION.UI:Init()
                     else
                         if optimizeFinishingReagents then
                             CraftSim.REAGENT_OPTIMIZATION.UI.recipeData:OptimizeFinishingReagents {
-                                finally = function()
-                                    CraftSim.REAGENT_OPTIMIZATION.UI:UpdateReagentDisplay(
-                                        CraftSim.REAGENT_OPTIMIZATION.UI.recipeData)
-                                    advancedOptimizationButton:SetEnabled(false) -- keep disabled until update from init
-                                    advancedOptimizationButton:SetText("Optimized")
-                                end,
+                                finally = finalizeOptimization,
                                 progressUpdateCallback = function(progress)
                                     advancedOptimizationButton:SetText(string.format("Optimizing - %.2f%%", progress))
                                 end,
                                 includeLocked = CraftSim.DB.OPTIONS:Get(
                                     "REAGENT_OPTIMIZATION_OPTIMIZE_LOCKED_FINISHING_REAGENTS"),
                                 includeSoulbound = CraftSim.DB.OPTIONS:Get(
-                                    "REAGENT_OPTIMIZATION_OPTIMIZE_SOULBOUND_FINISHING_REAGENTS")
+                                    "REAGENT_OPTIMIZATION_OPTIMIZE_SOULBOUND_FINISHING_REAGENTS"),
+                                onlyHighestQualitySoulbound = CraftSim.DB.OPTIONS:Get(
+                                    "REAGENT_OPTIMIZATION_ONLY_HIGHEST_QUALITY_SOULBOUND_FINISHING_REAGENTS"),
                             }
                         else
-                            CraftSim.REAGENT_OPTIMIZATION.UI:UpdateReagentDisplay(
-                                CraftSim.REAGENT_OPTIMIZATION.UI.recipeData)
-                            advancedOptimizationButton:SetEnabled(false) -- keep disabled until update from init
-                            advancedOptimizationButton:SetText("Optimized")
+                            finalizeOptimization()
                         end
                     end
                 end
@@ -288,69 +303,118 @@ function CraftSim.REAGENT_OPTIMIZATION.UI:Init()
             parent = frame.content,
             anchorPoints = { { anchorParent = frame.content.advancedOptimizationButton.frame, anchorA = "LEFT", anchorB = "RIGHT", offsetX = 5 } },
             menuUtilCallback = function(ownerRegion, rootDescription)
-                    local concentrationCB = rootDescription:CreateCheckbox(
-                        "Optimize " .. f.gold("Concentration Value"),
-                        function()
-                            return CraftSim.DB.OPTIONS:Get("REAGENT_OPTIMIZATION_OPTIMIZE_CONCENTRATION_VALUE")
-                        end, function()
-                            local value = CraftSim.DB.OPTIONS:Get("REAGENT_OPTIMIZATION_OPTIMIZE_CONCENTRATION_VALUE")
-                            CraftSim.DB.OPTIONS:Save("REAGENT_OPTIMIZATION_OPTIMIZE_CONCENTRATION_VALUE", not value)
-                            CraftSim.MODULES:UpdateUI()
-                        end)
+                local concentrationCB = rootDescription:CreateCheckbox(
+                    "Optimize " .. f.gold("Concentration Value"),
+                    function()
+                        return CraftSim.DB.OPTIONS:Get("REAGENT_OPTIMIZATION_OPTIMIZE_CONCENTRATION_VALUE")
+                    end, function()
+                        local value = CraftSim.DB.OPTIONS:Get("REAGENT_OPTIMIZATION_OPTIMIZE_CONCENTRATION_VALUE")
+                        CraftSim.DB.OPTIONS:Save("REAGENT_OPTIMIZATION_OPTIMIZE_CONCENTRATION_VALUE", not value)
+                        CraftSim.MODULES:UpdateUI()
+                    end)
 
-                    concentrationCB:SetTooltip(function(tooltip, elementDescription)
-                        GameTooltip_AddInstructionLine(tooltip,
-                            "Optimize Profit " .. f.l("per Point") .. " of " .. f.gold("Concentration"));
-                    end);
+                concentrationCB:SetTooltip(function(tooltip, elementDescription)
+                    GameTooltip_AddInstructionLine(tooltip,
+                        "Optimize Profit " .. f.l("per Point") .. " of " .. f.gold("Concentration"));
+                end);
 
-                    local finishingReagentsCB = rootDescription:CreateCheckbox(
-                        "Optimize " .. f.bb("Finishing Reagents"),
-                        function()
-                            return CraftSim.DB.OPTIONS:Get("REAGENT_OPTIMIZATION_OPTIMIZE_FINISHING_REAGENTS")
-                        end, function()
-                            local value = CraftSim.DB.OPTIONS:Get("REAGENT_OPTIMIZATION_OPTIMIZE_FINISHING_REAGENTS")
-                            CraftSim.DB.OPTIONS:Save("REAGENT_OPTIMIZATION_OPTIMIZE_FINISHING_REAGENTS", not value)
-                            CraftSim.MODULES:UpdateUI()
-                        end)
+                local finishingReagentsCB = rootDescription:CreateCheckbox(
+                    "Optimize " .. f.bb("Finishing Reagents"),
+                    function()
+                        return CraftSim.DB.OPTIONS:Get("REAGENT_OPTIMIZATION_OPTIMIZE_FINISHING_REAGENTS")
+                    end, function()
+                        local value = CraftSim.DB.OPTIONS:Get("REAGENT_OPTIMIZATION_OPTIMIZE_FINISHING_REAGENTS")
+                        CraftSim.DB.OPTIONS:Save("REAGENT_OPTIMIZATION_OPTIMIZE_FINISHING_REAGENTS", not value)
+                        CraftSim.MODULES:UpdateUI()
+                    end)
 
-                    finishingReagentsCB:SetTooltip(function(tooltip, elementDescription)
-                        GameTooltip_AddInstructionLine(tooltip,
-                            "Optimize most profitable finishing reagents");
-                    end);
+                finishingReagentsCB:SetTooltip(function(tooltip, elementDescription)
+                    GameTooltip_AddInstructionLine(tooltip,
+                        "Optimize most profitable finishing reagents");
+                end);
 
-                    local finishingReagentsSoulboundCB = rootDescription:CreateCheckbox(
-                        "Include " .. f.e("Soulbound") .. f.bb(" Finishing Reagents"),
-                        function()
-                            return CraftSim.DB.OPTIONS:Get("REAGENT_OPTIMIZATION_OPTIMIZE_SOULBOUND_FINISHING_REAGENTS")
-                        end, function()
-                            local value = CraftSim.DB.OPTIONS:Get(
-                                "REAGENT_OPTIMIZATION_OPTIMIZE_SOULBOUND_FINISHING_REAGENTS")
-                            CraftSim.DB.OPTIONS:Save("REAGENT_OPTIMIZATION_OPTIMIZE_SOULBOUND_FINISHING_REAGENTS",
-                                not value)
-                            CraftSim.MODULES:UpdateUI()
-                        end)
+                local FA = CraftSim.WIDGETS.OptimizationOptions.FINISHING_REAGENTS_ALGORITHM
+                local finishingAlgorithmButton = rootDescription:CreateButton(
+                    L("OPTIMIZATION_OPTIONS_FINISHING_REAGENTS_ALGORITHM"))
 
-                    finishingReagentsSoulboundCB:SetTooltip(function(tooltip, elementDescription)
-                        GameTooltip_AddInstructionLine(tooltip,
-                            "Suggest the usage of soulbound finishing reagents if profitable");
-                    end);
+                local simpleRadio = finishingAlgorithmButton:CreateRadio(
+                    L("OPTIMIZATION_OPTIONS_FINISHING_REAGENTS_SIMPLE"),
+                    function()
+                        local algo = CraftSim.DB.OPTIONS:Get("REAGENT_OPTIMIZATION_FINISHING_REAGENTS_ALGORITHM") or
+                        FA.SIMPLE
+                        return algo ~= FA.PERMUTATION
+                    end,
+                    function() CraftSim.DB.OPTIONS:Save("REAGENT_OPTIMIZATION_FINISHING_REAGENTS_ALGORITHM", FA.SIMPLE) end)
+                simpleRadio:SetTooltip(function(tooltip, _)
+                    GameTooltip_AddInstructionLine(tooltip, L("OPTIMIZATION_OPTIONS_FINISHING_REAGENTS_SIMPLE_TOOLTIP"))
+                end)
 
-                    local finishingReagentsLockedSlotsCB = rootDescription:CreateCheckbox(
-                        "Include " .. f.r("Locked ") .. f.bb("Finishing Slots"),
-                        function()
-                            return CraftSim.DB.OPTIONS:Get("REAGENT_OPTIMIZATION_OPTIMIZE_LOCKED_FINISHING_REAGENTS")
-                        end, function()
-                            local value = CraftSim.DB.OPTIONS:Get(
-                                "REAGENT_OPTIMIZATION_OPTIMIZE_LOCKED_FINISHING_REAGENTS")
-                            CraftSim.DB.OPTIONS:Save("REAGENT_OPTIMIZATION_OPTIMIZE_LOCKED_FINISHING_REAGENTS",
-                                not value)
-                            CraftSim.MODULES:UpdateUI()
-                        end)
+                local permutationRadio = finishingAlgorithmButton:CreateRadio(
+                    L("OPTIMIZATION_OPTIONS_FINISHING_REAGENTS_PERMUTATION"),
+                    function()
+                        local algo = CraftSim.DB.OPTIONS:Get("REAGENT_OPTIMIZATION_FINISHING_REAGENTS_ALGORITHM") or
+                        FA.SIMPLE
+                        return algo == FA.PERMUTATION
+                    end,
+                    function() CraftSim.DB.OPTIONS:Save("REAGENT_OPTIMIZATION_FINISHING_REAGENTS_ALGORITHM",
+                            FA.PERMUTATION) end)
+                permutationRadio:SetTooltip(function(tooltip, _)
+                    GameTooltip_AddInstructionLine(tooltip,
+                        L("OPTIMIZATION_OPTIONS_FINISHING_REAGENTS_PERMUTATION_TOOLTIP"))
+                end)
 
-                    finishingReagentsLockedSlotsCB:SetTooltip(function(tooltip, elementDescription)
-                        GameTooltip_AddInstructionLine(tooltip,
-                            "Optimize Finishing Reagent Slots you do not have unlocked yet");
-                    end);
+                local finishingReagentsSoulboundCB = finishingAlgorithmButton:CreateCheckbox(
+                    "Include " .. f.e("Soulbound") .. f.bb(" Finishing Reagents"),
+                    function()
+                        return CraftSim.DB.OPTIONS:Get("REAGENT_OPTIMIZATION_OPTIMIZE_SOULBOUND_FINISHING_REAGENTS")
+                    end, function()
+                        local value = CraftSim.DB.OPTIONS:Get(
+                            "REAGENT_OPTIMIZATION_OPTIMIZE_SOULBOUND_FINISHING_REAGENTS")
+                        CraftSim.DB.OPTIONS:Save("REAGENT_OPTIMIZATION_OPTIMIZE_SOULBOUND_FINISHING_REAGENTS",
+                            not value)
+                        CraftSim.MODULES:UpdateUI()
+                    end)
+
+                finishingReagentsSoulboundCB:SetTooltip(function(tooltip, elementDescription)
+                    GameTooltip_AddInstructionLine(tooltip,
+                        "Suggest the usage of soulbound finishing reagents if profitable")
+                end)
+
+                local onlyHighestQualitySoulboundCB = finishingAlgorithmButton:CreateCheckbox(
+                    L("OPTIMIZATION_OPTIONS_ONLY_HIGHEST_QUALITY_SOULBOUND_FINISHING_REAGENTS"),
+                    function()
+                        return CraftSim.DB.OPTIONS:Get(
+                        "REAGENT_OPTIMIZATION_ONLY_HIGHEST_QUALITY_SOULBOUND_FINISHING_REAGENTS")
+                    end, function()
+                        local value = CraftSim.DB.OPTIONS:Get(
+                            "REAGENT_OPTIMIZATION_ONLY_HIGHEST_QUALITY_SOULBOUND_FINISHING_REAGENTS")
+                        CraftSim.DB.OPTIONS:Save(
+                            "REAGENT_OPTIMIZATION_ONLY_HIGHEST_QUALITY_SOULBOUND_FINISHING_REAGENTS",
+                            not value)
+                        CraftSim.MODULES:UpdateUI()
+                    end)
+
+                onlyHighestQualitySoulboundCB:SetTooltip(function(tooltip, elementDescription)
+                    GameTooltip_AddInstructionLine(tooltip,
+                        L("OPTIMIZATION_OPTIONS_ONLY_HIGHEST_QUALITY_SOULBOUND_FINISHING_REAGENTS_TOOLTIP"))
+                end)
+
+                local finishingReagentsLockedSlotsCB = rootDescription:CreateCheckbox(
+                    "Include " .. f.r("Locked ") .. f.bb("Finishing Slots"),
+                    function()
+                        return CraftSim.DB.OPTIONS:Get("REAGENT_OPTIMIZATION_OPTIMIZE_LOCKED_FINISHING_REAGENTS")
+                    end, function()
+                        local value = CraftSim.DB.OPTIONS:Get(
+                            "REAGENT_OPTIMIZATION_OPTIMIZE_LOCKED_FINISHING_REAGENTS")
+                        CraftSim.DB.OPTIONS:Save("REAGENT_OPTIMIZATION_OPTIMIZE_LOCKED_FINISHING_REAGENTS",
+                            not value)
+                        CraftSim.MODULES:UpdateUI()
+                    end)
+
+                finishingReagentsLockedSlotsCB:SetTooltip(function(tooltip, elementDescription)
+                    GameTooltip_AddInstructionLine(tooltip,
+                        "Optimize Finishing Reagent Slots you do not have unlocked yet");
+                end);
             end,
         }
 
@@ -574,7 +638,8 @@ function CraftSim.REAGENT_OPTIMIZATION.UI:UpdateReagentDisplay(recipeData)
         local initialValue = recipeMaxQualities[recipeData.recipeID] or recipeData.maxQuality
         local initialQualityIconLabel
         if recipeData:HasSimplifiedQualityResult() then
-            initialQualityIconLabel = GUTIL:GetQualityIconStringSimplified(initialValue, qualityIconSize, qualityIconSize, 0, -2)
+            initialQualityIconLabel = GUTIL:GetQualityIconStringSimplified(initialValue, qualityIconSize, qualityIconSize,
+                0, -2)
         else
             initialQualityIconLabel = GUTIL:GetQualityIconString(initialValue, qualityIconSize, qualityIconSize, 0, -2)
         end
@@ -668,7 +733,8 @@ function CraftSim.REAGENT_OPTIMIZATION.UI:UpdateReagentDisplay(recipeData)
             if reagent.hasQuality then
                 reagentList:Add(function(_, columns)
                     local iconColumn = columns[1]
-                    local qualityColumns = isSimplified and { columns[2], columns[3] } or { columns[2], columns[3], columns[4] }
+                    local qualityColumns = isSimplified and { columns[2], columns[3] } or
+                    { columns[2], columns[3], columns[4] }
 
                     iconColumn.text:SetText(GUTIL:IconToText(reagent.items[1].item:GetItemIcon(), 25, 25))
 

@@ -339,14 +339,16 @@ local function GetSpellCooldownState(spellID)
   local chargeDurObj = nil
   
   -- For charge spells, get charge duration (tracks recharge, ignores GCD)
+  -- ignoreGCD=true (12.0.5 PTR 4): returns durObj with GCD stripped out, so
+  -- consumers get the real recharge timer even during a GCD window.
   if isChargeSpell and C_Spell.GetSpellChargeDuration then
-    local obj = C_Spell.GetSpellChargeDuration(spellID)
+    local obj = C_Spell.GetSpellChargeDuration(spellID, true)
       chargeDurObj = obj
   end
   
   -- Always get regular cooldown duration too
   if C_Spell.GetSpellCooldownDuration then
-    local obj = C_Spell.GetSpellCooldownDuration(spellID)
+    local obj = C_Spell.GetSpellCooldownDuration(spellID, true)
       durationObj = obj
   end
   
@@ -1099,6 +1101,10 @@ local DEFAULT_ICON_SETTINGS = {
     -- Free position (relative to icon center)
     freeX = 0,
     freeY = 0,
+    -- 3.6.6 Duration-text formatting (12.0.5 native Cooldown APIs — zero polling)
+    decimals = 0,                    -- 0 = integer seconds, 1 = one decimal via engine
+    decimalThreshold = 0,            -- seconds; show decimal only when remaining < this. 0 = always show (no threshold).
+    abbrevThreshold = 0,             -- seconds; 0 = off (engine default), positive = M:SS form below this many seconds remaining
   },
 }
 
@@ -3281,7 +3287,7 @@ ApplyIconStyle = function(frame, cdID)
             local chargeInfo = C_Spell.GetSpellCharges(spellID)
             -- maxCharges must be explicitly >1. nil or 1 = normal spell, not a charge spell.
             local isMultiCharge = chargeInfo ~= nil and chargeInfo.maxCharges ~= nil and chargeInfo.maxCharges > 1
-            local chargeDurObj = isMultiCharge and C_Spell.GetSpellChargeDuration and C_Spell.GetSpellChargeDuration(spellID)
+            local chargeDurObj = isMultiCharge and C_Spell.GetSpellChargeDuration and C_Spell.GetSpellChargeDuration(spellID, true)
             frame._arcIsChargeSpellCached = (isMultiCharge and chargeDurObj ~= nil)
           end
         else
@@ -4412,6 +4418,7 @@ function SetupChargeText(frame, cdID, cfg)
         frame._arcSingleStackText = fs
       end
       frame._arcSingleStackContainer:SetFrameLevel(frame:GetFrameLevel() + 3)
+      frame._arcSingleStackContainer:Show()  -- ensure container is visible (may have been hidden by toggle-off)
       local fs = frame._arcSingleStackText
       local fontPath = GetFontPath(chargeCfg.font)
       SafeSetFont(fs, fontPath, chargeCfg.size or 16, chargeCfg.outline or "OUTLINE")
@@ -4450,20 +4457,74 @@ function SetupChargeText(frame, cdID, cfg)
       end
       if not frame._arcSingleStackAuraHooked then
         frame._arcSingleStackAuraHooked = true
-        if frame.SetAuraInstanceInfo then
-          hooksecurefunc(frame, "SetAuraInstanceInfo", function(self)
-            local cdID2 = self.cooldownID
-            local cfg2 = cdID2 and ns.CDMEnhance and ns.CDMEnhance.GetIconSettings and ns.CDMEnhance.GetIconSettings(cdID2)
-            if cfg2 and cfg2.chargeText and cfg2.chargeText.showSingleStack then
+
+        local function ShouldUpdateStack(self)
+          local cdID2 = self.cooldownID
+          local cfg2 = cdID2 and ns.CDMEnhance and ns.CDMEnhance.GetIconSettings and ns.CDMEnhance.GetIconSettings(cdID2)
+          return cfg2 and cfg2.chargeText and cfg2.chargeText.showSingleStack
+        end
+
+        -- OnAuraInstanceInfoSet: canonical CDM hook, fires on aura set (~4x/session)
+        if frame.OnAuraInstanceInfoSet then
+          hooksecurefunc(frame, "OnAuraInstanceInfoSet", function(self)
+            if ShouldUpdateStack(self) then
               UpdateSingleStackText(self)
             end
           end)
         end
+
+        -- OnUnitAuraUpdatedEvent: fires on STACK REFRESH (same instID, applications changes)
+        -- This is the critical missing hook — without it stacks go stale on refresh
+        if frame.OnUnitAuraUpdatedEvent then
+          hooksecurefunc(frame, "OnUnitAuraUpdatedEvent", function(self)
+            if ShouldUpdateStack(self) then
+              UpdateSingleStackText(self)
+            end
+          end)
+        end
+
+        -- OnUnitAuraAddedEvent: fires when a new aura instance is added
+        if frame.OnUnitAuraAddedEvent then
+          hooksecurefunc(frame, "OnUnitAuraAddedEvent", function(self)
+            if ShouldUpdateStack(self) then
+              UpdateSingleStackText(self)
+            end
+          end)
+        end
+
+        -- ClearAuraInstanceInfo: fires when aura falls off
         if frame.ClearAuraInstanceInfo then
           hooksecurefunc(frame, "ClearAuraInstanceInfo", function(self)
             if self._arcSingleStackText then
               self._arcSingleStackShowing = false
               self._arcSingleStackText:SetText("")
+            end
+          end)
+        end
+
+        -- OnAuraInstanceInfoCleared: canonical CDM clear hook
+        if frame.OnAuraInstanceInfoCleared then
+          hooksecurefunc(frame, "OnAuraInstanceInfoCleared", function(self)
+            if self._arcSingleStackText then
+              self._arcSingleStackShowing = false
+              self._arcSingleStackText:SetText("")
+            end
+          end)
+        end
+
+        -- OnCooldownIDSet: fires after every SetCooldownID (including repool).
+        -- CDM calls FindLinkedSpellForCurrentAuras + RefreshData here, so by the
+        -- time our hook fires the frame may already have auraInstanceID set from
+        -- an existing active aura — update text so it doesn't stay blank after repool.
+        if frame.OnCooldownIDSet then
+          hooksecurefunc(frame, "OnCooldownIDSet", function(self)
+            if ShouldUpdateStack(self) then
+              -- Defer one frame so CDM's aura linking in OnCooldownIDSet completes first
+              C_Timer.After(0, function()
+                if ShouldUpdateStack(self) then
+                  UpdateSingleStackText(self)
+                end
+              end)
             end
           end)
         end
@@ -4964,6 +5025,14 @@ function SetupCooldownText(frame, cdID, cfg)
     -- Update cdID reference
     if cdText._arcCdTextHooked then
       cdText._arcCdID = cdID
+    end
+    
+    -- 3.6.6: Apply user-configured duration-text options via Blizzard's native
+    -- Cooldown API. Engine-rendered — zero per-frame CPU cost. Includes decimal
+    -- precision below a threshold, abbreviation form (M:SS), minimum-duration
+    -- suppression (hide GCD countdowns), and swipe-only mode.
+    if ns.CooldownFormatter and ns.CooldownFormatter.Apply and frame.Cooldown then
+      ns.CooldownFormatter.Apply(frame.Cooldown, textCfg)
     end
   end
   
@@ -6750,13 +6819,13 @@ EnhanceFrame = function(frame, cdID, viewerType, viewerName)
       local spellID = cooldownInfo.overrideSpellID or cooldownInfo.spellID
       if spellID then
         frame._arcCachedSpellID = spellID
-        -- Also cache initial duration objects
+        -- Also cache initial duration objects (ignoreGCD=true for GCD-free readings)
         if C_Spell.GetSpellCooldownDuration then
-          local durObj = C_Spell.GetSpellCooldownDuration(spellID)
+          local durObj = C_Spell.GetSpellCooldownDuration(spellID, true)
             frame._arcCachedCooldownDuration = durObj
         end
         if C_Spell.GetSpellChargeDuration then
-          local chargeObj = C_Spell.GetSpellChargeDuration(spellID)
+          local chargeObj = C_Spell.GetSpellChargeDuration(spellID, true)
             frame._arcCachedChargeDuration = chargeObj
         end
       end
@@ -7570,15 +7639,17 @@ local function ApplyCooldownPreview(frame, cdID, enable)
       -- CDM cooldown frame: re-push real cooldown directly so active timers
       -- don't flash empty after preview cleared. One-shot, no polling.
       -- 12.0.1: startTime/duration are secret — use DurationObject instead.
+      -- 12.0.5 PTR 4: ignoreGCD=true so the visible swipe matches shadow
+      -- semantics (GCD-free duration).
       local spellID = frame.cooldownInfo
         and (frame.cooldownInfo.overrideSpellID or frame.cooldownInfo.spellID)
       if spellID and frame.Cooldown then
         local cdInfo = C_Spell.GetSpellCooldown(spellID)
         if cdInfo and cdInfo.startTime and cdInfo.startTime > 0 then
-          local durObj = C_Spell.GetSpellCooldownDuration(spellID)
+          local durObj = C_Spell.GetSpellCooldownDuration(spellID, true)
           if durObj then
             frame._arcBypassCDHook = true
-            frame.Cooldown:SetCooldown(0, 0)
+            frame.Cooldown:Clear()
             frame.Cooldown:SetCooldownFromDurationObject(durObj)
             frame._arcBypassCDHook = false
           end
@@ -9497,10 +9568,13 @@ function ns.CDMEnhance.ShowProcGlow(frame, glowCfg)
     HideCDMProcGlow(frame)
   end
 
-  -- Proc is now active — immediately re-apply visuals so readyProcOverride / cooldownProcOverride
-  -- pushes the alpha to 1. Without this the frame stays at alpha=0 until the next unrelated event.
+  -- Proc is now active — feed shadow first so binary state is current,
+  -- then dispatch visuals so readyProcOverride / cooldownProcOverride applies correctly.
   local cfg = GetEffectiveIconSettingsForFrame(frame)
   if cfg then
+    if ns.CooldownState and ns.CooldownState.FeedShadow then
+      ns.CooldownState.FeedShadow(frame, cfg)
+    end
     ApplyCooldownStateVisuals(frame, cfg, cfg.alpha or 1.0)
   end
 end
@@ -9519,10 +9593,13 @@ function ns.CDMEnhance.HideProcGlow(frame)
   frame._arcProcGlowType = nil
   frame._arcProcGlowSpellID = nil
 
-  -- Proc ended — immediately re-apply visuals so readyState alpha (e.g. 0) is restored.
-  -- Without this the frame stays at alpha=1 until the next unrelated event fires.
+  -- Proc ended — feed shadow first so binary state is current,
+  -- then dispatch visuals so readyState alpha (e.g. 0) is restored correctly.
   local cfg = GetEffectiveIconSettingsForFrame(frame)
   if cfg then
+    if ns.CooldownState and ns.CooldownState.FeedShadow then
+      ns.CooldownState.FeedShadow(frame, cfg)
+    end
     ApplyCooldownStateVisuals(frame, cfg, cfg.alpha or 1.0)
   end
   

@@ -23,22 +23,22 @@ BAGANATOR_CONFIG = {
 },
 ["Lonelylitten-Stormrage"] = {
 {
-["currencyID"] = 3257,
+["currencyID"] = 3345,
 },
 {
-["currencyID"] = 3341,
+["currencyID"] = 3347,
 },
 {
-["currencyID"] = 3383,
-},
-{
-["currencyID"] = 3256,
-},
-{
-["currencyID"] = 3343,
+["currencyID"] = 3378,
 },
 },
 ["Barelynoer-Area52"] = {
+{
+["currencyID"] = 3378,
+},
+{
+["currencyID"] = 3418,
+},
 },
 ["Minimeditite-Area52"] = {
 },
@@ -117,7 +117,7 @@ BAGANATOR_CONFIG = {
 ["category_edit_search_mode"] = "visual",
 ["icon_context_fading"] = true,
 ["warband_current_tab"] = 1,
-["category_item_grouping"] = true,
+["category_item_grouping"] = false,
 ["icon_top_left_corner_array"] = {
 "junk",
 "battle_pet_level",
@@ -237,10 +237,10 @@ BAGANATOR_CONFIG = {
 ["character_bank_view_width"] = 14,
 ["icon_text_font_size"] = 14,
 ["bag_view_type"] = "category",
-["bag_view_width"] = 12,
+["setting_anchors"] = false,
 ["disabled_skins"] = {
 },
-["setting_anchors"] = false,
+["sort_ignore_slots_count_2"] = 0,
 ["sort_ignore_bank_slots_count"] = 0,
 ["category_section_toggled"] = {
 },
@@ -267,8 +267,8 @@ BAGANATOR_CONFIG = {
 },
 ["bag_view_position"] = {
 "BOTTOMRIGHT",
--345.004150390625,
-160.8330078125,
+-195.8389892578125,
+367.499755859375,
 },
 ["skins"] = {
 ["blizzard"] = {
@@ -286,7 +286,7 @@ BAGANATOR_CONFIG = {
 ["upgrade_plugin_ignored"] = {
 },
 ["show_sort_button_2"] = true,
-["sort_ignore_slots_count_2"] = 0,
+["bag_view_width"] = 12,
 ["bag_icon_size"] = 39,
 ["currency_panel_position"] = {
 "RIGHT",

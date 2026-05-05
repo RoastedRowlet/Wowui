@@ -85,7 +85,7 @@ end
 
 local function SetPvpTalent(slot, pvpTalentID)
 	if pvpTalentID and (GetPvpTalentInfoByID(pvpTalentID)) then
-		LearnPvpTalent(tonumber(pvpTalentID), slot); ---@diagnostic disable-line: redundant-parameter
+		LearnPvpTalent(tonumber(pvpTalentID), slot);
 	end
 end
 
@@ -118,8 +118,8 @@ function Addon:LoadConfig()
 		if data.isLegacy then
 			Addon:Print("Legacy format text is obsolated.");
 		else
-			Addon:ImportTextAsync(data.text);
 			Addon:SetPvpTalent(data.pvp1, data.pvp2, data.pvp3);
+			Addon:ImportTextAsync(data.text);
 			Addon:SendUpdateMessage();
 		end
 	end
@@ -401,9 +401,11 @@ function Addon:UpdateData()
 	TalentLoadoutEx.Option.Preset = TalentLoadoutEx.Option.Preset or {};
 	TalentLoadoutEx.Option.Preset.isCombineGroups = TalentLoadoutEx.Option.isCombinePresetGroups or false;
 	TalentLoadoutEx.Option.Preset.PeaversTalentsData = TalentLoadoutEx.Option.Preset.PeaversTalentsData or { mythic = true, heroic_raid = true, mythic_raid = true };
-	TalentLoadoutEx.Option.Preset.MurlokExport = TalentLoadoutEx.Option.Preset.MurlokExport or { ["mm+"] = true, solo = true };
+	TalentLoadoutEx.Option.Preset.MurlokExport = TalentLoadoutEx.Option.Preset.MurlokExport or { ["m+"] = true, solo = true };
 
-	-- Delete Old Preset Options
+	-- Fix Old Preset Options
+	TalentLoadoutEx.Option.Preset.MurlokExport["m+"] = TalentLoadoutEx.Option.Preset.MurlokExport["mm+"] or true;
+	TalentLoadoutEx.Option.Preset.MurlokExport["mm+"] = nil;
 	TalentLoadoutEx.Option.PresetDataSourceAddonIndex = nil;
 	TalentLoadoutEx.Option.PeaversTalentsData = nil;
 

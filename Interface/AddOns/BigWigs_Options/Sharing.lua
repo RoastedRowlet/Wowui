@@ -253,6 +253,21 @@ local mythicPlusSettingsToExport = {
 	"instanceKeysShowAllPlayers",
 	"instanceKeysShowDungeonEnd",
 	"instanceKeysHideTitle",
+	-- Progress %
+	"progressTooltipFormat",
+	"progressNameplate",
+	"progressNameplateFormat",
+	"progressNameplateTargetOffsetX",
+	"progressNameplateTargetOffsetY",
+	"progressNameplateOtherOffsetX",
+	"progressNameplateOtherOffsetY",
+	"progressNameplateFontName",
+	"progressNameplateFontSize",
+	"progressNameplateFontColorTarget",
+	"progressNameplateFontColorOther",
+	"progressNameplateOutline",
+	"progressNameplateMonochrome",
+	"progressNameplateSlugRendering",
 }
 
 -- BattleRes
@@ -291,6 +306,8 @@ local battleResSettingsToExport = {
 	"cooldownEdge",
 	"cooldownSwipe",
 	"cooldownInverse",
+	"durationCustomText",
+	"chargesCustomText",
 }
 
 -- PrivateAuras
@@ -329,6 +346,8 @@ local combatTimerSettingsToExport = {
 	"anyCombatHistoryAmount",
 	"anyCombatHistoryResetConditions",
 	"anyCombatHistoryTimeFormat",
+	"anyCombatHistoryHiddenInCombat",
+	"anyCombatCustomText",
 
 	-- Boss Combat
 	"bossCombatDisabled",
@@ -355,6 +374,7 @@ local combatTimerSettingsToExport = {
 	"bossCombatHistoryAmount",
 	"bossCombatHistoryResetConditions",
 	"bossCombatHistoryTimeFormat",
+	"bossCombatCustomText",
 
 	-- Boss Stages
 	"bossStagesDisabled",
@@ -379,6 +399,7 @@ local combatTimerSettingsToExport = {
 	"bossStagesInactive",
 	"bossStagesTextFormat",
 	"bossStagesHistoryTimeFormat",
+	"bossStagesCustomText",
 }
 
 -- Default Options

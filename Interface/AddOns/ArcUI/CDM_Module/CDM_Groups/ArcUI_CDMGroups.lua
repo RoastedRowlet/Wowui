@@ -421,6 +421,32 @@ local function IsFrameHiddenByBar(frame)
     return frame._arcHiddenByBar == true
 end
 
+-- ═══════════════════════════════════════════════════════════════════════════
+-- SHOW FRAME (alpha-aware)
+--
+-- Replaces the bare `frame:SetAlpha(1); frame:Show()` pattern used at every
+-- placement / repositioning callsite. For CDM-managed frames this is unchanged
+-- — they re-enhance after positioning and apply the right state alpha.
+--
+-- For Arc Aura frames (_arcIsArcAura / _arcAuraID): SKIP the SetAlpha(1).
+-- Arc Aura frames own their own alpha via the readyAlpha / cooldownAlpha
+-- system in ApplySpellStateVisuals / UpdateArcItemFrame. Stomping alpha to 1
+-- here was the cause of the "load → hides → flashes visible → goes away"
+-- behavior reported on group join / zone change / orphan recovery — CDMGroups
+-- was force-showing frames the user had configured to hide while ready.
+--
+-- Show() is still safe (it's a visibility flag, not an alpha override).
+-- ═══════════════════════════════════════════════════════════════════════════
+local function ShowFrameRespectingArcAura(frame)
+    if not frame then return end
+    if not (frame._arcIsArcAura or frame._arcAuraID) then
+        -- Non-Arc-Aura frame: original behavior, force visible
+        frame:SetAlpha(1)
+    end
+    frame:Show()
+end
+ns.CDMGroups.ShowFrameRespectingArcAura = ShowFrameRespectingArcAura
+
 -- Safe wrapper for EnhanceFrame - SKIPS during restoration to prevent orphaned borders
 -- Borders should only be applied AFTER frames have settled into their final positions
 local function SafeEnhanceFrame(frame, cdID, viewerType, viewerName)
@@ -1037,7 +1063,7 @@ function ns.CDMGroups.TrackFreeIcon(cooldownID, x, y, iconSize, optionalFrame)
     -- CRITICAL: MUST show frame when tracking - CDMEnhance will handle inactive state LATER
     -- EXCEPT: Skip showing if frame is hidden due to hideWhenUnequipped setting
     if not frame._arcHiddenUnequipped and not frame._arcSlotEmpty and not IsFrameHiddenByBar(frame) then
-        frame:SetAlpha(1)
+        if not (frame._arcIsArcAura or frame._arcAuraID) then frame:SetAlpha(1) end
         frame:Show()
     end
     frame._arcRecoveryProtection = GetTime() + 0.5
@@ -1523,7 +1549,7 @@ function ns.CDMGroups.RegisterExternalFrame(frameID, frame, viewerType, defaultG
                 
                 -- Show frame only if the group container is currently visible
                 if not group.container or not group.container._arcGroupHidden then
-                    frame:SetAlpha(1)
+                    if not (frame._arcIsArcAura or frame._arcAuraID) then frame:SetAlpha(1) end
                     frame:Show()
                 end
                 
@@ -4446,7 +4472,7 @@ function ns.CDMGroups.LoadProfile(profileName, skipActivation)
                 frame:SetScale(1)
                 -- Only show if not hidden due to hideWhenUnequipped setting
                 if not frame._arcHiddenUnequipped and not frame._arcSlotEmpty and not IsFrameHiddenByBar(frame) then
-                    frame:SetAlpha(1)
+                    if not (frame._arcIsArcAura or frame._arcAuraID) then frame:SetAlpha(1) end
                     frame:Show()
                 end
                 frame._cdmgIsFreeIcon = true
@@ -4488,7 +4514,7 @@ function ns.CDMGroups.LoadProfile(profileName, skipActivation)
             frame:SetScale(1)
             -- Only show if not hidden due to hideWhenUnequipped setting
             if not frame._arcHiddenUnequipped and not frame._arcSlotEmpty and not IsFrameHiddenByBar(frame) then
-                frame:SetAlpha(1)
+                if not (frame._arcIsArcAura or frame._arcAuraID) then frame:SetAlpha(1) end
                 frame:Show()
             end
             frame._cdmgIsFreeIcon = true
@@ -4533,7 +4559,7 @@ function ns.CDMGroups.LoadProfile(profileName, skipActivation)
             frame:SetScale(1)
             -- Only show if not hidden due to hideWhenUnequipped setting
             if not frame._arcHiddenUnequipped and not frame._arcSlotEmpty and not IsFrameHiddenByBar(frame) then
-                frame:SetAlpha(1)
+                if not (frame._arcIsArcAura or frame._arcAuraID) then frame:SetAlpha(1) end
                 frame:Show()
             end
             frame._cdmgIsFreeIcon = true
@@ -5559,7 +5585,7 @@ function ns.CDMGroups.RestoreArcAurasPositions(debugPrefix)
                         frame:ClearAllPoints()
                         frame:SetPoint("CENTER", UIParent, "CENTER", cachedX, cachedY)
                         frame:SetFrameStrata("MEDIUM")
-                        frame:SetAlpha(1)
+                        if not (frame._arcIsArcAura or frame._arcAuraID) then frame:SetAlpha(1) end
                         frame:Show()
                         
                         -- Register with CDMGroups tracking
@@ -5610,7 +5636,7 @@ function ns.CDMGroups.RestoreArcAurasPositions(debugPrefix)
                                 frame:ClearAllPoints()
                                 frame:SetPoint("CENTER", UIParent, "CENTER", x, y)
                                 frame:SetFrameStrata("MEDIUM")
-                                frame:SetAlpha(1)
+                                if not (frame._arcIsArcAura or frame._arcAuraID) then frame:SetAlpha(1) end
                                 frame:Show()
                                 
                                 ns.CDMGroups.TrackFreeIcon(arcID, x, y, 36, frame)
@@ -5625,7 +5651,7 @@ function ns.CDMGroups.RestoreArcAurasPositions(debugPrefix)
                             frame:ClearAllPoints()
                             frame:SetPoint("CENTER", UIParent, "CENTER", saved.x or 0, saved.y or 0)
                             frame:SetFrameStrata("MEDIUM")
-                            frame:SetAlpha(1)
+                            if not (frame._arcIsArcAura or frame._arcAuraID) then frame:SetAlpha(1) end
                             frame:Show()
                             
                             -- Also call TrackFreeIcon to ensure tracking is set up
@@ -5645,7 +5671,7 @@ function ns.CDMGroups.RestoreArcAurasPositions(debugPrefix)
                         frame:ClearAllPoints()
                         frame:SetPoint("CENTER", UIParent, "CENTER", x, y)
                         frame:SetFrameStrata("MEDIUM")
-                        frame:SetAlpha(1)
+                        if not (frame._arcIsArcAura or frame._arcAuraID) then frame:SetAlpha(1) end
                         frame:Show()
                         
                         ns.CDMGroups.TrackFreeIcon(arcID, x, y, 36, frame)
@@ -5677,7 +5703,7 @@ function ns.CDMGroups.ForceShowAllArcAuras()
                 if ns.ArcAuras.ApplyInitialStateVisuals then
                     ns.ArcAuras.ApplyInitialStateVisuals(arcID, frame)
                 else
-                    frame:SetAlpha(1)
+                    if not (frame._arcIsArcAura or frame._arcAuraID) then frame:SetAlpha(1) end
                 end
                 count = count + 1
             end
@@ -9925,7 +9951,7 @@ function ns.CDMGroups.CreateGroup(name)
                     -- Only show if not hidden due to hideWhenUnequipped setting or group visibility
                     if not frame._arcHiddenUnequipped and not frame._arcSlotEmpty and not IsFrameHiddenByBar(frame)
                        and not (self.container and self.container._arcGroupHidden) then
-                        frame:SetAlpha(1)
+                        if not (frame._arcIsArcAura or frame._arcAuraID) then frame:SetAlpha(1) end
                         frame:Show()
                     end
                     

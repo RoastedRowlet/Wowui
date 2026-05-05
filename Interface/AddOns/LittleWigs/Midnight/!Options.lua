@@ -155,7 +155,7 @@ BigWigs:AddSounds("Den of Nalorakk Trash", {
 })
 
 BigWigs:AddColors("Arcanotron Custos", {
-	[474345] = "cyan",
+	[474345] = {"cyan","green"},
 	[474496] = "purple",
 	[1214032] = "yellow",
 	[1214081] = "orange",
@@ -170,12 +170,14 @@ BigWigs:AddSounds("Arcanotron Custos", {
 
 BigWigs:AddColors("Seranel Sunlash", {
 	[1224903] = "orange",
+	[1225193] = "red",
 	[1225787] = "yellow",
 	[1248689] = "purple",
 })
 
 BigWigs:AddSounds("Seranel Sunlash", {
 	[1224903] = "alarm",
+	[1225193] = "warning",
 	[1225787] = "alert",
 	[1248689] = "info",
 })
@@ -195,11 +197,13 @@ BigWigs:AddSounds("Gemellus", {
 })
 
 BigWigs:AddColors("Degentrius", {
+	[1215087] = "red",
 	[1215897] = "yellow",
 	[1280113] = "purple",
 })
 
 BigWigs:AddSounds("Degentrius", {
+	[1215087] = "info",
 	[1215897] = "alert",
 	[1280113] = "alarm",
 })
@@ -207,6 +211,7 @@ BigWigs:AddSounds("Degentrius", {
 BigWigs:AddColors("Muro'jin and Nekraxx", {
 	[1243900] = "red",
 	[1246666] = "yellow",
+	[1249947] = "cyan",
 	[1260643] = "yellow",
 	[1260731] = "orange",
 	[1266480] = "purple",
@@ -215,6 +220,8 @@ BigWigs:AddColors("Muro'jin and Nekraxx", {
 BigWigs:AddSounds("Muro'jin and Nekraxx", {
 	[1243900] = "alarm",
 	[1246666] = "alert",
+	[1249479] = "alert",
+	[1249947] = "long",
 	[1260643] = "info",
 	[1260731] = "alarm",
 	[1266480] = "alert",
@@ -295,9 +302,16 @@ BigWigs:AddSounds("Murder Row Trash", {
 })
 
 BigWigs:AddColors("Chief Corewright Kasreth", {
+	[1251579] = "yellow",
+	[1257509] = "cyan",
+	[1264048] = "orange",
 })
 
 BigWigs:AddSounds("Chief Corewright Kasreth", {
+	[1251579] = "alert",
+	[1251772] = "info",
+	[1257509] = "long",
+	[1264048] = "alarm",
 })
 
 BigWigs:AddColors("Corewarden Nysarra", {
@@ -326,6 +340,12 @@ BigWigs:AddSounds("Lothraxion", {
 	[1253950] = "alert",
 	[1255531] = "alarm",
 	[1257595] = "long",
+})
+
+BigWigs:AddColors("Nexus-Point Xenas Trash", {
+})
+
+BigWigs:AddSounds("Nexus-Point Xenas Trash", {
 })
 
 BigWigs:AddColors("Lightblossom Trinity", {
@@ -371,13 +391,13 @@ BigWigs:AddSounds("Charonus", {
 })
 
 BigWigs:AddColors("Emberdawn", {
-	[465904] = "yellow",
+	[465904] = {"green","yellow"},
 	[466064] = "purple",
 	[466556] = "orange",
 })
 
 BigWigs:AddSounds("Emberdawn", {
-	[465904] = "long",
+	[465904] = {"info","long"},
 	[466064] = "alert",
 	[466556] = "alarm",
 })
@@ -411,6 +431,7 @@ BigWigs:AddSounds("Commander Kroluk", {
 })
 
 BigWigs:AddColors("Restless Heart", {
+	[468429] = "yellow",
 	[472556] = "cyan",
 	[472662] = "purple",
 	[474528] = "yellow",
@@ -418,6 +439,7 @@ BigWigs:AddColors("Restless Heart", {
 })
 
 BigWigs:AddSounds("Restless Heart", {
+	[468429] = "warning",
 	[472556] = "info",
 	[472662] = "alert",
 	[474528] = "long",

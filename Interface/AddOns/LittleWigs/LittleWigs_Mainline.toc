@@ -1,4 +1,4 @@
-## Interface: 120001, 120005, 120000
+## Interface: 120001, 120005, 120007
 
 ## Title: LittleWigs
 ## Notes: Boss warnings for 5-man dungeons & scenarios.
@@ -23,9 +23,9 @@
 
 ## Dependencies: BigWigs
 ## LoadOnDemand: 1
-## Version: v12.0.31
+## Version: v12.0.44
 
-## X-BigWigs-Minimum: 403
+## X-BigWigs-Minimum: 412
 ## X-BigWigs-LoadOn-InstanceId: 2805,2811,2813,2825,2859,2874,2915,2923, 2933,2952,2953,2961,2962,2963,2964,2965,2966,2979,3003
 Midnight\modules.xml
 Midnight\!Locales\[TextLocale].lua [AllowLoadTextLocale deDE, esES, esMX, frFR, itIT, koKR, ptBR, ruRU, zhCN, zhTW]

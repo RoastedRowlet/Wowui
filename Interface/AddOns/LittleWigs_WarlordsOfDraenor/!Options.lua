@@ -418,26 +418,30 @@ BigWigs:AddColors("Ranjit", {
 	[153757] = "yellow",
 	[156793] = "orange",
 	[165731] = {"blue","yellow"},
+	[1252690] = "red",
 	[1258152] = "red",
 })
 
 BigWigs:AddSounds("Ranjit", {
 	[153757] = "alert",
-	[156793] = "warning",
+	[156793] = "long",
 	[165731] = "alarm",
+	[1252690] = "alarm",
 	[1258152] = "alarm",
 })
 
 BigWigs:AddColors("Araknath", {
-	[154110] = {"orange","yellow"},
+	[154110] = {"orange","purple"},
 	[154135] = "red",
 	[154159] = "yellow",
+	[154162] = "yellow",
 })
 
 BigWigs:AddSounds("Araknath", {
 	[154110] = {"alarm","warning"},
-	[154135] = "info",
+	[154135] = {"alert","info"},
 	[154159] = "long",
+	[154162] = "info",
 })
 
 BigWigs:AddColors("Rukhran", {

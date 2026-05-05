@@ -30,7 +30,7 @@ do -- Row
     local TEXT_SIZE = UIKit.Define.Percentage{ value = 100, operator = "-", delta = 12.5 }
     local TEXT_COLOR = UIKit.Define.Color_RGBA{ r = 255, g = 255, b = 255, a = 0.75 }
     local TEXT_COLOR_HIGHLIGHTED = UIKit.Define.Color_RGBA{ r = 255, g = 255, b = 255, a = 1 }
-    local TEXT_COLOR_SELECTED = GenericEnum.UIColorRGB.Normal
+    local TEXT_COLOR_SELECTED = GenericEnum.UIColorRGB.NORMAL_FONT_COLOR
     local TEXT_Y_PUSHED = -1
     local TEXT_Y = 0
 
@@ -340,7 +340,7 @@ do -- Selection Menu
 
     function SelectionMenuMixin:Close()
         if self.AnimGroup:IsPlaying(self, "OUTRO") then return end
-        self.AnimGroup:Play(self, "OUTRO").onFinish(function()
+        self.AnimGroup:Play(self, "OUTRO"):onFinish(function()
             self:Hide()
         end)
         self.isOpen = false

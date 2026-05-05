@@ -17,11 +17,11 @@ local REPLACE_PROMPT_INFO = {
     text         = L["DUGISGUIDEVIEWERZ_REPLACEPROMPT"],
     options      = {
         {
-            text     = L["DUGISGUIDEVIEWERZ_REPLACEPROMPT_YES"],
+            text     = L["REPLACE"],
             callback = HandleAccept
         },
         {
-            text     = L["DUGISGUIDEVIEWERZ_REPLACEPROMPT_NO"],
+            text     = L["CANCEL"],
             callback = nil
         }
     },

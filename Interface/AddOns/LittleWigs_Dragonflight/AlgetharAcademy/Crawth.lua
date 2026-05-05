@@ -141,6 +141,10 @@ if mod:Retail() then -- Midnight+
 			self:RegisterEvent("ENCOUNTER_TIMELINE_EVENT_REMOVED")
 		end
 	end
+
+	function mod:OnWin()
+		activeBars = {}
+	end
 end
 
 --------------------------------------------------------------------------------
@@ -149,7 +153,7 @@ end
 
 function mod:ENCOUNTER_TIMELINE_EVENT_ADDED(_, eventInfo)
 	if eventInfo.source ~= 0 then return end -- Enum.EncounterTimelineEventSource.Encounter
-	local duration = math.floor(eventInfo.duration + 0.5)
+	local duration = self:RoundNumber(eventInfo.duration, 0)
 	local barInfo
 	if duration == 5 then -- Savage Peck
 		barInfo = self:SavagePeckTimeline(eventInfo)
@@ -182,10 +186,6 @@ function mod:ENCOUNTER_TIMELINE_EVENT_STATE_CHANGED(_, eventID)
 		elseif state == 3 then -- Canceled
 			self:StopBar(barInfo.msg)
 			activeBars[eventID] = nil
-			-- when all bars are canceled it's because Play Ball is starting
-			if not self:IsWiping() then
-				self:PlayBall()
-			end
 		end
 	end
 end
@@ -224,6 +224,7 @@ function mod:DeafeningScreechTimeline(eventInfo)
 		msg = barText,
 		key = 377004,
 		callback = function()
+			self:StopBlizzMessages(1)
 			self:Message(377004, "yellow", barText)
 			self:PlaySound(377004, "warning")
 		end
@@ -252,6 +253,7 @@ do
 			-- cast at 75% and 45% health
 			local percent = playBallCount == 1 and 75 or 45
 			playBallCount = playBallCount + 1
+			self:StopBlizzMessages(1)
 			self:Message(377182, "cyan", CL.percent:format(percent, self:SpellName(377182)))
 			self:PlaySound(377182, "long")
 		end
@@ -305,6 +307,9 @@ function mod:GoalOfTheSearingBlaze(_, _, info)
 		searingBlazeGoals = barValue
 		self:Message(389481, "cyan", CL.count_amount:format(info.text, barValue, 3)) -- Goal of the Searing Blaze (n/3)
 		self:PlaySound(389481, "info")
+	elseif self:Retail() and shownState == 1 and barValue == 0 and searingBlazeGoals ~= 3 then
+		searingBlazeGoals = barValue
+		self:PlayBall()
 	else
 		searingBlazeGoals = barValue
 	end
@@ -340,6 +345,9 @@ function mod:GoalOfTheRushingWinds(_, _, info)
 		rushingWindsGoals = barValue
 		self:Message(389483, "cyan", CL.count_amount:format(info.text, barValue, 3)) -- Goal of the Rushing Winds (n/3)
 		self:PlaySound(389483, "info")
+	elseif self:Retail() and shownState == 1 and barValue == 0 and rushingWindsGoals ~= 3 then
+		rushingWindsGoals = barValue
+		self:PlayBall()
 	else
 		rushingWindsGoals = barValue
 	end

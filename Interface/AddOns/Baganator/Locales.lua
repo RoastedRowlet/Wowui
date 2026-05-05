@@ -18,6 +18,8 @@ BAGANATOR_LOCALES = Locales
 
 local L = Locales.enUS
 
+L["THANKS_FOR_USING_BAGANATOR_DONATE"] = "Thanks for using Baganator. Consider donating to support development"
+
 L["BAGANATOR"] = "Baganator"
 L["TO_OPEN_OPTIONS_X"] = "Access options with /bgr"
 L["VERSION_COLON_X"] = "Version: %s"
@@ -417,6 +419,14 @@ L["SAVED_SEARCHES"] = "Saved Searches"
 L["SAVE_SEARCH"] = "Save Search"
 L["CHOOSE_A_LABEL_FOR_THIS_SEARCH"] = "Choose a label for this search"
 L["NOTHING_TO_SAVE"] = "Nothing to save"
+
+L["ENTER_THE_NEW_PROFILE_NAME"] = "Enter the new profile name"
+L["THAT_STYLE_NAME_ALREADY_EXISTS"] = "That style name already exists"
+L["THAT_PROFILE_NAME_ALREADY_EXISTS"] = "That profile name already exists"
+L["OVERWRITE_CURRENT_PROFILE"] = "Overwrite current profile?"
+L["OVERWRITE"] = "Overwrite"
+L["MAKE_NEW"] = "Make new"
+L["INVALID_IMPORT"] = "Invalid import"
 
 L["SYNDICATOR_ENABLE_MESSAGE"] = "|cffd1b219Syndicator|r is required to use Baganator."
 L["SYNDICATOR_INSTALL_MESSAGE"] = "Use your addon website/client to install |cffd1b219Syndicator|r in order to use Baganator."
@@ -3934,7 +3944,7 @@ L["WARBOUND_UNTIL_EQUIPPED"] = "장착할 때까지 전투부대 귀속"
 L["WELCOME_DESCRIPTION"] = "어떤 종류의 가방을 원하는지 결정하세요. 이것은 나중에 변경될 수 있습니다."
 L["WELCOME_TO_BAGANATOR"] = "Baganator 이용을 환영합니다"
 L["WHEN_HOLDING_ALT"] = "Alt 키를 누른 상태"
-L["WUE"] = "전투부대 귀속"
+L["WUE"] = "WuE"
 L["X_INFORMATION"] = "%s 정보"
 L["X_LOGS"] = "%s 기록"
 L["XS_BAGS"] = "%s의 가방"

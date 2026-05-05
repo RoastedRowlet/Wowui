@@ -2,11 +2,11 @@
 -- Module Declaration
 --
 
-local mod, CL = BigWigs:NewBoss("Cragpine", -2437, 2782)
+local mod, CL = BigWigs:NewBoss("Cragpine", -2437, 2782) -- World boss for the "Zul'Aman" zone
 if not mod then return end
 mod:RegisterEnableMob(244424) -- Cragpine
 mod.otherMenu = -2443
-mod.worldBoss = 244424
+mod:SetWorldModule(true)
 
 --------------------------------------------------------------------------------
 -- Initialization
@@ -33,6 +33,8 @@ function mod:OnEncounterStart()
 	self:RegisterEvent("RAID_BOSS_WHISPER")
 	self:RegisterEvent("UNIT_SPELLCAST_START")
 
+	self:BlockBossEmotes()
+
 	self:CDBar(1235131, 11) -- Rootquake
 	self:CDBar(1235144, 38) -- War Club
 end
@@ -47,7 +49,7 @@ function mod:BOSS_KILL(_, id)
 	end
 end
 
-function mod:RAID_BOSS_WHISPER(_, msg)
+function mod:RAID_BOSS_WHISPER()
 	self:PersonalMessage(1243594)
 	self:PlaySound(1243594, "warning")
 end

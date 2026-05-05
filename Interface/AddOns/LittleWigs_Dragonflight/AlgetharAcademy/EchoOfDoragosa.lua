@@ -111,13 +111,14 @@ end
 
 function mod:ENCOUNTER_TIMELINE_EVENT_ADDED(_, eventInfo)
 	if eventInfo.source ~= 0 then return end -- Enum.EncounterTimelineEventSource.Encounter
-	local duration = math.floor(eventInfo.duration + 0.5)
+	local duration = self:RoundNumber(eventInfo.duration, 1)
 	local barInfo
 	if duration == 7 or duration == 10 then -- Arcane Missiles
-		if duration == 10 then return end -- not actually cast
 		barInfo = self:ArcaneMissilesTimeline(eventInfo)
-	elseif duration == 9 or duration == 12 then -- Astral Blast
-		barInfo = self:AstralBlastTimeline(eventInfo)
+	elseif duration == 6.5 or duration == 9 or duration == 12 then -- Astral Blast
+		if duration ~= 6.5 then -- 6.5s duration Astral Blasts are always canceled by Power Vacuum
+			barInfo = self:AstralBlastTimeline(eventInfo)
+		end
 	elseif duration == 14 then -- Energy Bomb
 		barInfo = self:EnergyBombTimeline(eventInfo)
 	elseif duration == 28 then -- Power Vacuum
@@ -199,6 +200,7 @@ function mod:EnergyBombTimeline(eventInfo)
 		msg = barText,
 		key = 374343,
 		callback = function()
+			self:TargetMessageFromBlizzMessage(1, 374343, "blue")
 			self:Message(374343, "yellow", barText)
 			self:PlaySound(374343, "alert")
 		end
@@ -213,6 +215,7 @@ function mod:PowerVacuumTimeline(eventInfo)
 		msg = barText,
 		key = 388822,
 		callback = function()
+			self:StopBlizzMessages(1)
 			self:Message(388822, "red", barText)
 			self:PlaySound(388822, "alarm")
 		end

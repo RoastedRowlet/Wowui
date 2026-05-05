@@ -211,8 +211,8 @@ function CraftSim.LOCAL_RU:GetData()
         EXPLANATIONS_BASIC_PROFIT_TAB = "Базовый расчет прибыли",
 
         -- Cost Details Frame
-        COST_OPTIMIZATION_TITLE = "Оптимизация затрат CraftSim",
-        COST_OPTIMIZATION_EXPLANATION =
+        PRICING_TITLE = "Оптимизация затрат CraftSim",
+        PRICING_EXPLANATION =
             "Здесь вы можете увидеть обзор всех возможных цен на использованные материалы.\nСтолбец " ..
             f.bb("'Использованный источник'") ..
             " указывает, какая из цен используется.\n\n" ..
@@ -225,10 +225,8 @@ function CraftSim.LOCAL_RU:GetData()
             f.l("OR") ..
             " всегда будет использоваться, если установлено. " ..
             f.bb("Стоимость изготовления") .. " будет использоваться, только если ниже " .. f.g("AH"),
-        COST_OPTIMIZATION_CRAFTING_COSTS = "Стоимость изготовления: ",
-        COST_OPTIMIZATION_ITEM_HEADER = "Предмет",
-        COST_OPTIMIZATION_AH_PRICE_HEADER = "Цена AH",
-        COST_OPTIMIZATION_OVERRIDE_HEADER = "Переопределение",
+        PRICING_CRAFTING_COSTS = "Стоимость изготовления: ",
+        PRICING_ITEM_HEADER = "Предмет",
         COST_OPTIMIZATION_CRAFTING_HEADER = "Изготовление",
         COST_OPTIMIZATION_USED_SOURCE = "Использованный источник",
 
@@ -344,6 +342,13 @@ function CraftSim.LOCAL_RU:GetData()
         RECIPE_SCAN_OPTIMIZE_FINISHING_REAGENTS = "Optimize Finishing Reagents",
         OPTIMIZATION_OPTIONS_OPTIMIZE_PROFESSION_TOOLS = "Optimize Profession Tools",
         OPTIMIZATION_OPTIONS_INCLUDE_SOULBOUND_FINISHING_REAGENTS = "Include Soulbound Finishing Reagents",
+        OPTIMIZATION_OPTIONS_FINISHING_REAGENTS_ALGORITHM = "Finishing Reagents Algorithm",
+        OPTIMIZATION_OPTIONS_FINISHING_REAGENTS_SIMPLE = "Simple",
+        OPTIMIZATION_OPTIONS_FINISHING_REAGENTS_SIMPLE_TOOLTIP =
+        "Optimizes reagent allocation first, then concentration, then selects the best finishing reagent for each slot individually.",
+        OPTIMIZATION_OPTIONS_FINISHING_REAGENTS_PERMUTATION = "Permutation Based",
+        OPTIMIZATION_OPTIONS_FINISHING_REAGENTS_PERMUTATION_TOOLTIP =
+        "Tries all possible finishing reagent combinations and for each individually optimizes reagents (if enabled) and concentration (if enabled), then selects the most profitable combination.\n\nWarning: This may take significantly longer to complete.",
         RECIPE_SCAN_AUTOSELECT_OPEN_PROFESSION = "Autoselect Open Profession",
 
         -- Recipe Top Gear
@@ -369,7 +374,7 @@ function CraftSim.LOCAL_RU:GetData()
         TOP_GEAR_SIM_MODES_CRAFTING_SPEED = "Высшая скорость изготовления",
 
         -- Options
-        OPTIONS_TITLE = "Параметры CraftSim",
+        OPTIONS_TITLE = "CraftSim",
         OPTIONS_GENERAL_TAB = "Общие",
         OPTIONS_GENERAL_PRICE_SOURCE = "Источник цен",
         OPTIONS_GENERAL_CURRENT_PRICE_SOURCE = "Текущий источник цен: ",
@@ -607,6 +612,8 @@ function CraftSim.LOCAL_RU:GetData()
         COOLDOWNS_ALL_HEADER = "Полный заряд",
 
         CONCENTRATION_TRACKER_TITLE = "Концентрация CraftSim",
+        CONCENTRATION_TRACKER_LIST_ROW_MOXIE = "Moxie: %s",
+        CONCENTRATION_TRACKER_LIST_ROW_MOXIE_UNKNOWN = "-",
 
         -- static popups
         STATIC_POPUPS_YES = "Да",

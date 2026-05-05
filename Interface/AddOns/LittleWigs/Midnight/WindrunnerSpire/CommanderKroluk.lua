@@ -97,20 +97,28 @@ function mod:ENCOUNTER_TIMELINE_EVENT_ADDED(_, eventInfo)
 	if C_EncounterTimeline.GetEventState(eventInfo.id) == 1 then -- Paused
 		return -- ignore paused bars when added, they are always canceled immediately
 	end
-	local duration = math.floor(eventInfo.duration + 0.5)
+	local duration = self:RoundNumber(eventInfo.duration, 0)
 	local barInfo
 	if duration > 120 then return end -- filter placeholder bars
 	if duration == 3 or (not self:IsWiping() and duration == 30) then -- Rampage
-		self:CancelBarForSpell(467620)
+		if not self:Mythic() then
+			self:CancelBarForSpell(467620)
+		end
 		barInfo = self:RampageTimeline(eventInfo)
 	elseif duration == 8 or duration == 0 then -- Bladestorm
-		self:CancelBarForSpell(470963)
+		if not self:Mythic() then
+			self:CancelBarForSpell(470963)
+		end
 		barInfo = self:BladestormTimeline(eventInfo)
 	elseif duration == 10 or duration == 37 then -- Reckless Leap
-		self:CancelBarForSpell(472081)
+		if not self:Mythic() then
+			self:CancelBarForSpell(472081)
+		end
 		barInfo = self:RecklessLeapTimeline(eventInfo)
 	elseif duration == 18 or duration == 45 then -- Intimidating Shout
-		self:CancelBarForSpell(1253272)
+		if not self:Mythic() then
+			self:CancelBarForSpell(1253272)
+		end
 		barInfo = self:IntimidatingShoutTimeline(eventInfo)
 	elseif not self:IsWiping() then
 		self:ErrorForTimelineEvent(eventInfo)
@@ -217,6 +225,7 @@ function mod:RecklessLeapTimeline(eventInfo)
 		msg = barText,
 		key = 472081,
 		callback = function()
+			self:TargetMessageFromBlizzMessage(5, 472081, "blue") -- cast twice
 			self:Message(472081, "orange", barText)
 			self:PlaySound(472081, "alarm")
 		end
@@ -231,6 +240,7 @@ function mod:IntimidatingShoutTimeline(eventInfo)
 		msg = barText,
 		key = 1253272,
 		callback = function()
+			self:StopBlizzMessages(1)
 			self:Message(1253272, "red", barText)
 			self:PlaySound(1253272, "warning")
 		end

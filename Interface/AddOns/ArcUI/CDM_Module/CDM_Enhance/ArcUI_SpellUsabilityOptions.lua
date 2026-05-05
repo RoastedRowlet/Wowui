@@ -600,6 +600,77 @@ local function BuildUsabilityEntries(orderBase, mode, hideSection)
     end,
   }
 
+  entries["spellUsabilityGlowFrameStrata"] = {
+    type = "select",
+    name = "Glow Strata",
+    desc = "Override the frame strata of the usable glow.\n\n|cffffd700Inherit (Default)|r - Uses the icon's frame strata\n|cffffd700LOW|r - Below standard UI level\n|cffffd700MEDIUM|r - Standard UI level\n|cffffd700HIGH|r - Above most UI elements\n|cffffd700DIALOG|r - Above HIGH frames\n\nThis only changes the glow's strata, NOT the icon itself.",
+    values = {
+      ["inherit"] = "Inherit (Default)",
+      ["LOW"] = "LOW",
+      ["MEDIUM"] = "MEDIUM",
+      ["HIGH"] = "HIGH",
+      ["DIALOG"] = "DIALOG",
+    },
+    sorting = {"inherit", "LOW", "MEDIUM", "HIGH", "DIALOG"},
+    get = function()
+      local c = GetCfg(mode)
+      if c and c.spellUsability then
+        return c.spellUsability.usableGlowFrameStrata or "inherit"
+      end
+      return "inherit"
+    end,
+    set = function(_, v)
+      ApplySetting(mode, function(c)
+        if not c.spellUsability then c.spellUsability = {} end
+        c.spellUsability.usableGlowFrameStrata = (v ~= "inherit") and v or nil
+      end)
+      RefreshGlow()
+    end,
+    order = orderBase + 0.042, width = 0.85,
+    hidden = function()
+      if hideSection() then return true end
+      local c = GetCfg(mode)
+      return not (c and c.spellUsability and c.spellUsability.usableGlow)
+    end,
+  }
+
+  entries["spellUsabilityGlowFrameLevel"] = {
+    type = "input",
+    name = "Glow Frame Level",
+    desc = "Set the frame level of the usable glow.\n\nHigher values render above other frames in the same strata. Works with both inherited and custom strata.\n\nLeave blank for default. Accepts a number from 1 to 10000.",
+    get = function()
+      local c = GetCfg(mode)
+      if c and c.spellUsability and c.spellUsability.usableGlowFrameLevel then
+        return tostring(c.spellUsability.usableGlowFrameLevel)
+      end
+      return ""
+    end,
+    set = function(_, v)
+      if v == nil or v == "" then
+        ApplySetting(mode, function(c)
+          if not c.spellUsability then c.spellUsability = {} end
+          c.spellUsability.usableGlowFrameLevel = nil
+        end)
+        RefreshGlow()
+        return
+      end
+      local num = tonumber(v)
+      if not num then return end
+      num = math.floor(math.max(1, math.min(10000, num)))
+      ApplySetting(mode, function(c)
+        if not c.spellUsability then c.spellUsability = {} end
+        c.spellUsability.usableGlowFrameLevel = num
+      end)
+      RefreshGlow()
+    end,
+    order = orderBase + 0.043, width = 0.55,
+    hidden = function()
+      if hideSection() then return true end
+      local c = GetCfg(mode)
+      return not (c and c.spellUsability and c.spellUsability.usableGlow)
+    end,
+  }
+
   return entries
 end
 

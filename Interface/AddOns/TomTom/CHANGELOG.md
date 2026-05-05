@@ -1,8 +1,27 @@
 # TomTom
 
-## [v4.2.24-release](https://github.com/jnwhiteh/TomTom/tree/v4.2.24-release) (2026-03-14)
-[Full Changelog](https://github.com/jnwhiteh/TomTom/commits/v4.2.24-release) [Previous Releases](https://github.com/jnwhiteh/TomTom/releases)
+## [v4.3.1-release](https://github.com/jnwhiteh/TomTom/tree/v4.3.1-release) (2026-04-26)
+[Full Changelog](https://github.com/jnwhiteh/TomTom/commits/v4.3.1-release) [Previous Releases](https://github.com/jnwhiteh/TomTom/releases)
 
+- Revert Wrath interface version to 30403  
+- Update TOC interface versions  
+- Clean up paste window: remove dead code and redundant size calls  
+- Add auto-close option and fix Ctrl+Enter in paste window  
+- Update TOC  
+- Decouple distance-callback dispatch from minimap visibility  
+    bc040bd tied callbacks.distance dispatch to the minimap frame's  
+    OnUpdate, which stops firing when show\_minimap=false because the  
+    frame is never registered with HBDP. Breaks Routes integration and  
+    the default cleardistance/arrival callbacks for users with  
+    profile.minimap.enable=false. Move dispatch to a dedicated ticker  
+    frame that runs independent of HBDP registration.  
+    Also gate Minimap\_OnEvent's re-registration on data.show\_minimap so  
+    hidden waypoints don't leak onto the minimap after loading screens.  
+- Merge pull request #14 from jnwhiteh/frFR  
+- Update Localization.frFR.lua  
+- Update Localization.frFR.lua  
+- Refine French localization for clarity  
+    Updated French localization strings for clarity and accuracy.  
 - Update frFR locale (thanks Tolsow!)  
 - Guard set waypoint from objectives  
 - Fix some issues with the minimap button and compartment  
@@ -676,15 +695,3 @@
 - Guard for an odd error when a waypoint's angle can't be determined  
 - Removed old property  
 - * Next time, make the change in PerfectRaid, not TomTom  
-- Set wowi-dirname so zips are generated properly  
-- * Added an arrow model courtesy of Guillotine to possibly be used later  
-- * Removed bad comment  
-- * Added a guard when removing waypoints to catch an error  
-    * Simplified the distance callbacks a bit so the outer distance makes more sense  
-    * Moved the arrow rotation function out of the OnUpdate  
-    * Use the arrow rotation function rather than the OnUpdate function to ensure things are displayd correctly on options change  
-    * Make the distance list local to the point, instead of the callbacks table  
-    * Release the callbacks table when the waypoint is cleared  
-- * Updated localization  
-- * Updated enUS localization file  
-- * Added deDE localization, courtesy of Elto  

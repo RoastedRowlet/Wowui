@@ -96,7 +96,7 @@ function ScrollBarMixin:SetLinkedScrollContainerScroll(isInstant)
     end
 end
 
-function ScrollBarMixin.OnTrackMouseDown(self, button)
+function ScrollBarMixin:OnTrackMouseDown(button)
     if self.__thumbDragTravel then
         self:UpdateThumbDrag()
         return

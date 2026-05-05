@@ -1,5 +1,3 @@
-if Grid2.versionCli<30000 then return end
-
 local Vehicle = Grid2.statusPrototype:new("vehicle")
 
 local L = LibStub:GetLibrary("AceLocale-3.0"):GetLocale("Grid2")
@@ -13,7 +11,9 @@ local owner_of_unit = Grid2.owner_of_unit
 local classcolors
 
 function Vehicle:UpdateUnit(_, unit)
-	self:UpdateIndicators(unit)
+	if Grid2:IsUnitInRaid(unit) then
+		self:UpdateIndicators(unit)
+	end
 end
 
 function Vehicle:OnEnable()
@@ -46,7 +46,7 @@ local text = L["vehicle"]
 function Vehicle:GetText(unit)
 	local owner = owner_of_unit[unit]
 	if owner and UnitHasVehicleUI(owner) then
-		return UnitName(owner)
+		return (UnitName(owner))  -- extra () to remove realm(second parameter)
 	else
 		return text
 	end

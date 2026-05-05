@@ -5,6 +5,9 @@ if not L then return end
 -- API.lua
 L.showAddonBar = "'|cFF436EEE%s|r' 애드온이 '%s' 바를 생성했습니다."
 L.requestAddonProfile = "애드온 '|cFF436EEE%s|r'이 방금 프로필 내보내기 문자열을 복사했습니다."
+L.shortMinutesAndSeconds = "%d 분 %d 초" -- 1 Minute 2 Seconds
+L.shortSecondsOnly = "%d 초" -- 28 Seconds
+L.shortSubTenSeconds = "%.1f 초" -- 3.2 Seconds
 
 -- Core.lua
 L.berserk = "광폭화"
@@ -428,10 +431,14 @@ L.startingMythicKeystone = "신화+ 시작 중"
 L.historyTimeFormat = "기록: 시간 형식"
 L.twelveHour = "12시간제"
 L.twentyFourHour = "24시간제"
+L.hideTooltipInCombat = "전투 중 툴팁 숨기기"
+L.customText = "사용자 지정 텍스트 (%s가 포함되어야 함)"
 
 -----------------------------------------------------------------------
 -- Keystones.lua
 --
+
+L.keys = "쐐기돌"
 
 L.keystoneTitle = "BigWigs 쐐기돌"
 L.keystoneHeaderParty = "파티"
@@ -583,6 +590,28 @@ L.instanceKeysOtherDungeonColorDesc = "현재 있는 던전과 관련이 없는 
 L.instanceKeysEndOfRunDesc = "기본적으로 목록은 신화 던전에 들어갈 때만 표시됩니다. 이 옵션을 활성화하면 신화+가 끝난 후에도 목록이 표시됩니다."
 L.instanceKeysHideTitle = "제목 숨기기"
 L.instanceKeysHideTitleDesc = "\"누가 쐐기돌을 가지고 있나요?\" 제목을 숨깁니다."
+
+-- Challenges UI Decoration
+L.partyRatingHeader = "|TInterface\\AddOns\\BigWigs\\Media\\Icons\\minimap_raid:0:0|t파티 평점"
+L.dungeonScoreString = "|c%s%03d|r |cFFFFFFFF+%02d|r |cFF%s%02d:%02d|r |c%s(%s)|r"
+L.dungeonScoreNoDataString = "|cFFFFFFFF데이터 없음|r |c%s(%s)|r"
+L.dungeonTeleportHeader = "|TInterface\\AddOns\\BigWigs\\Media\\Icons\\minimap_raid:0:0|t순간이동"
+
+-- Progress %
+L.progressPercent = "진행률 %"
+L.progressPercentDesc = "각 NPC를 처치할 때마다 획득할 수 있는 신화+ 진행률 수치를 계산하는 데 도움이 되는 도구입니다."
+L.progressPercentTooltip = "적 NPC 위에 마우스를 올렸을 때 툴팁에 진행률 % 표시"
+L.progressPercentTooltipText = {
+	"|TInterface\\AddOns\\BigWigs\\Media\\Icons\\minimap_raid:0:0|t진행률: %s%%",
+	"|TInterface\\AddOns\\BigWigs\\Media\\Icons\\minimap_raid:0:0|t진행률: %s%% (%d)",
+	"|TInterface\\AddOns\\BigWigs\\Media\\Icons\\minimap_raid:0:0|t진행률: %s%% (%d/%d)",
+}
+L.progressPercentNameplate = "적 NPC의 이름표에 진행률 % 표시"
+L.progressCurrentPull = "현재 전투"
+L.progressCurrentPullDesc = "현재 전투 중인 NPC 무리에서 얻을 수 있는 총 진행률을 표시합니다.\n\n아직 작동하지 않습니다!"
+L.tempProgressAnnounce = "이제 NPC 위에 마우스를 올리거나 이름표에서 각 NPC가 제공하는 진행률 %를 확인할 수 있습니다.\n\n|cFF436EEE도구|r > |cFF436EEE신화+|r > |cFF436EEE진행률 %|r에서 설정하세요."
+L.settingsForCurrentTarget = "현재 대상에 대한 설정"
+L.settingsForOtherTargets = "다른 모든 대상에 대한 설정"
 
 -----------------------------------------------------------------------
 -- LFGTimer.lua
@@ -1179,6 +1208,7 @@ L.blizzBasicAsBars = "블리자드 기본 타이머를 BigWigs 바 형태로 표
 L.blizzBasicAsBlizzTimeline = "블리자드 기본 타이머를 블리자드 타임라인에 표시"
 L.developerMode = "개발자 모드"
 L.enhancedModeWarning = "경고!\n\n고급 모드를 비활성화하면 다음과 같은 BigWigs의 많은 기능이 사용 불가능해집니다:\n\n바 색상, 주문 이름 변경, 카운터, 사용자 지정 사운드/음성, 카운트다운, 바 표시/숨기기, 추가 메시지 등."
+--L.blizzTimelineEnhancedWarning = "WARNING!\n\nThe Blizzard timeline doesn't support BigWigs enhanced features. You will NOT get renamed spells and you will see inaccurate timers.\n\nAre you sure you want to enable it?"
 
 -----------------------------------------------------------------------
 -- Victory.lua

@@ -158,6 +158,11 @@ function MKPT_Profession:CalculateSpendableKps()
   return max(totalMissing - currencyInfo.numAvailable, 0)
 end
 
+function MKPT_Profession:GetUnallocatedKps()
+  local currencyInfo = C_ProfSpecs.GetCurrencyInfoForSkillLine(self.id) or { numAvailable = 0 }
+  return currencyInfo.numAvailable
+end
+
 function MKPT_Profession:ToggleTrack()
   if self:IsHighlighted() then
     self:Untrack()

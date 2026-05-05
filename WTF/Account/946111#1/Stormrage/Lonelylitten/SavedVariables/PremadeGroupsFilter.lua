@@ -15,12 +15,68 @@ PremadeGroupsFilterState = {
 ["act"] = false,
 },
 ["heals"] = {
-["max"] = "0",
-["min"] = "0",
-["act"] = true,
+["max"] = "",
+["min"] = "",
+["act"] = false,
 },
-["dungeon6"] = true,
+["partyfit"] = true,
+["dungeon6"] = false,
+["dungeon4"] = true,
+["dps"] = {
+["max"] = "",
+["min"] = "",
+["act"] = false,
+},
+["members"] = {
+["max"] = "",
+["min"] = "",
+["act"] = false,
+},
+["expression"] = "",
+["difficulty"] = {
+},
+["dungeon1"] = false,
+["dungeon7"] = false,
+["dungeon5"] = false,
+["dungeon8"] = false,
+["dungeon3"] = false,
+["dungeon2"] = false,
 ["tanks"] = {
+["max"] = "",
+["min"] = "",
+["act"] = false,
+},
+},
+},
+["c121f4"] = {
+["enabled"] = true,
+},
+["version"] = 8,
+["c9f8"] = {
+["enabled"] = true,
+},
+["c114f6"] = {
+["enabled"] = true,
+},
+["c114f5"] = {
+["enabled"] = true,
+},
+["c3f6"] = {
+["enabled"] = true,
+["raid"] = {
+["difficulty"] = {
+},
+["heals"] = {
+["max"] = "",
+["min"] = "",
+["act"] = false,
+},
+["tanks"] = {
+["max"] = "",
+["min"] = "",
+["act"] = false,
+},
+["defeated"] = {
 ["max"] = "",
 ["min"] = "",
 ["act"] = false,
@@ -36,34 +92,41 @@ PremadeGroupsFilterState = {
 ["act"] = false,
 },
 ["expression"] = "",
-["difficulty"] = {
-},
-["dungeon1"] = false,
-["dungeon2"] = true,
-["dungeon3"] = true,
-["dungeon8"] = true,
-["dungeon5"] = true,
-["dungeon7"] = true,
-["dungeon4"] = true,
 },
 },
-["c121f4"] = {
-["enabled"] = true,
-},
-["version"] = 8,
 ["c3f5"] = {
 ["enabled"] = true,
+["raid"] = {
+["difficulty"] = {
+["val"] = 3,
+["act"] = true,
 },
-["c114f6"] = {
-["enabled"] = true,
+["heals"] = {
+["max"] = "",
+["min"] = "",
+["act"] = false,
 },
-["c114f5"] = {
-["enabled"] = true,
+["tanks"] = {
+["max"] = "",
+["min"] = "",
+["act"] = false,
 },
-["c3f6"] = {
-["enabled"] = true,
+["defeated"] = {
+["max"] = "",
+["min"] = "",
+["act"] = false,
 },
-["c9f8"] = {
-["enabled"] = true,
+["dps"] = {
+["max"] = "",
+["min"] = "",
+["act"] = false,
+},
+["members"] = {
+["max"] = "",
+["min"] = "",
+["act"] = false,
+},
+["expression"] = "",
+},
 },
 }

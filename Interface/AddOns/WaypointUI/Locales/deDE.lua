@@ -6,6 +6,13 @@ if GetLocale() ~= "deDE" then return end
 local env = select(2, ...)
 local L = env.L
 
+-- Font
+L["FONT_FLAGS"] = "Font Flags"
+L["NONE"] = "None"
+L["OUTLINE"] = "Outline"
+L["THICKOUTLINE"] = "Thick Outline"
+L["MONOCHROME"] = "Monochrome"
+
 -- Waypoint System
 L["WAYPOINTSYSTEM_PINPOINT_QUEST_COMPLETE"] = "Bereit zur Abgabe"
 
@@ -82,10 +89,10 @@ L["CONFIG_APPEARANCE_COLOR_CUSTOMCOLOR"] = "Benutzerdefinierte Farbe verwenden"
 L["CONFIG_APPEARANCE_COLOR_CUSTOMCOLOR_COLOR"] = "Farbe"
 L["CONFIG_APPEARANCE_COLOR_CUSTOMCOLOR_TINTICON"] = "Icon einfärben"
 L["CONFIG_APPEARANCE_COLOR_CUSTOMCOLOR_RESET"] = "Zurücksetzen"
-L["CONFIG_APPEARANCE_COLOR_CUSTOMCOLOR_QUEST_COMPLETE_DEFAULT"] = "Normale Quest"
-L["CONFIG_APPEARANCE_COLOR_CUSTOMCOLOR_QUEST_COMPLETE_REPEATABLE"] = "Wiederholbare Quest"
-L["CONFIG_APPEARANCE_COLOR_CUSTOMCOLOR_QUEST_COMPLETE_IMPORTANT"] = "Wichtige Quest"
-L["CONFIG_APPEARANCE_COLOR_CUSTOMCOLOR_QUEST_INCOMPLETE"] = "Unvollständige Quest"
+L["CONFIG_APPEARANCE_COLOR_CUSTOMCOLOR_COMPLETED_NORMAL_QUEST"] = "Normale Quest"
+L["CONFIG_APPEARANCE_COLOR_CUSTOMCOLOR_COMPLETED_REPEATABLE_QUEST"] = "Wiederholbare Quest"
+L["CONFIG_APPEARANCE_COLOR_CUSTOMCOLOR_COMPLETED_IMPORTANT_QUEST"] = "Wichtige Quest"
+L["CONFIG_APPEARANCE_COLOR_CUSTOMCOLOR_INCOMPLETE_QUEST"] = "Unvollständige Quest"
 L["CONFIG_APPEARANCE_COLOR_CUSTOMCOLOR_OTHER"] = "Other"
 
 L["CONFIG_AUDIO"] = "Audio"
@@ -122,6 +129,11 @@ L["CONFIG_EXTENSIONS_DUGISSUPPORT_AUTOREPLACEWAYPOINT_DESCRIPTION"] = "Automatic
 L["CONFIG_EXTENSIONS_SILVERDRAGONSUPPORT"] = "SilverDragon"
 L["CONFIG_EXTENSIONS_SILVERDRAGONSUPPORT_ENABLE"] = "Enhance Silver Dragon Waypoints"
 L["CONFIG_EXTENSIONS_SILVERDRAGONSUPPORT_ENABLE_DESCRIPTION"] = "Requires SilverDragon's built-in waypoint feature to be enabled."
+L["CONFIG_EXTENSIONS_APRSUPPORT"] = "Azeroth Pilot Reloaded"
+L["CONFIG_EXTENSIONS_APRSUPPORT_ENABLE"] = "Track APR Waypoints"
+L["CONFIG_EXTENSIONS_APRSUPPORT_ENABLE_DESCRIPTION"] = "Enables Azeroth Pilot Reloaded waypoint tracking."
+L["CONFIG_EXTENSIONS_APRSUPPORT_AUTOREPLACEWAYPOINT"] = "Auto-Replace Waypoint"
+L["CONFIG_EXTENSIONS_APRSUPPORT_AUTOREPLACEWAYPOINT_DESCRIPTION"] = "Automatically replaces the active waypoint with the incoming APR waypoint."
 
 L["CONFIG_ABOUT"] = "Über"
 L["CONFIG_ABOUT_CONTRIBUTORS"] = "Mitwirkende"
@@ -164,13 +176,10 @@ L["CONTRIBUTORS_SYVERGISWOLD_DESCRIPTION"] = "Code - Feature"
 
 -- Extra Feature
 L["GUIDE_PIN_ASSISTANT_REPLACEPROMPT"] = "Do you want to replace your current waypoint with \"%s\"?"
-L["GUIDE_PIN_ASSISTANT_REPLACEPROMPT_YES"] = "Replace"
-L["GUIDE_PIN_ASSISTANT_REPLACEPROMPT_NO"] = "Cancel"
 
 -- Supported Add-ons
 L["TOMTOM_REPLACEPROMPT"] = "Do you want to replace your current waypoint with the TomTom waypoint \"%s\"?"
-L["TOMTOM_REPLACEPROMPT_YES"] = "Replace"
-L["TOMTOM_REPLACEPROMPT_NO"] = "Cancel"
 L["DUGISGUIDEVIEWERZ_REPLACEPROMPT"] = "Do you want to replace your current waypoint with the Dugi waypoint \"%s\"?"
-L["DUGISGUIDEVIEWERZ_REPLACEPROMPT_YES"] = "Replace"
-L["DUGISGUIDEVIEWERZ_REPLACEPROMPT_NO"] = "Cancel"
+L["APR_REPLACEPROMPT"] = "Do you want to replace your current waypoint with the APR waypoint \"%s\"?"
+L["REPLACE"] = "Replace"
+L["CANCEL"] = "Cancel"

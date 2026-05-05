@@ -5,6 +5,9 @@ if not L then return end
 -- API.lua
 L.showAddonBar = "插件「|cFF436EEE%s|r」創建了「%s」計時器。"
 L.requestAddonProfile = "插件「|cFF436EEE%s|r」剛剛複製了你的設定檔匯出字串。"
+L.shortMinutesAndSeconds = "%d 分 %d 秒" -- 1 Minute 2 Seconds
+L.shortSecondsOnly = "%d 秒" -- 28 Seconds
+L.shortSubTenSeconds = "%.1f 秒" -- 3.2 Seconds
 
 -- Core.lua
 L.berserk = "狂暴"
@@ -403,9 +406,9 @@ L.anyCombatTimerTooltip = "|TInterface\\AddOns\\BigWigs\\Media\\Icons\\minimap_r
 L.bossCombatTimer = "首領戰鬥計時"
 L.bossCombatTimerDesc = "顯示你與首領戰鬥的持續時長，並在滑鼠指向時以浮動提示列出首領戰鬥紀錄。"
 L.bossCombatTimerTooltip = "|TInterface\\AddOns\\BigWigs\\Media\\Icons\\minimap_raid:0:0|t首領戰紀錄"
---L.bossStagesTimer = "Boss Stages Timer"
---L.bossStagesTimerDesc = "A timer that resets every time a boss encounter changes stage, with a tooltip to see boss stage history. Only active on bosses with multiple stages."
---L.bossStagesTimerTooltip = "|TInterface\\AddOns\\BigWigs\\Media\\Icons\\minimap_raid:0:0|tBoss Stages History"
+L.bossStagesTimer = "首領階段計時"
+L.bossStagesTimerDesc = "在具有多個階段的首領戰鬥中啟用，階段轉換時會自動重置，並在滑鼠指向時以浮動提示列出各個階段的時長。"
+L.bossStagesTimerTooltip = "|TInterface\\AddOns\\BigWigs\\Media\\Icons\\minimap_raid:0:0|t首領階段時長"
 L.instanceTimer = "副本計時"
 L.instanceTimerDesc = "顯示你在當前副本（地城、團隊等）的停留時長，並在滑鼠指向時以浮動提示列出副本紀錄。" -- instance要副本還是地城?
 L.instanceTimerTooltip = "|TInterface\\AddOns\\BigWigs\\Media\\Icons\\minimap_raid:0:0|t副本紀錄"
@@ -428,10 +431,14 @@ L.startingMythicKeystone = "啟動傳奇鑰石 (M+)"
 L.historyTimeFormat = "紀錄：時間格式"
 L.twelveHour = "12 小時制"
 L.twentyFourHour = "24 小時制"
+--L.hideTooltipInCombat = "Hide Tooltip in Combat"
+--L.customText = "Custom Text (Must Contain %s)"
 
 -----------------------------------------------------------------------
 -- Keystones.lua
 --
+
+--L.keys = "Keys"
 
 L.keystoneTitle = "BigWigs 鑰石清單"
 L.keystoneHeaderParty = "隊伍"
@@ -584,6 +591,28 @@ L.instanceKeysEndOfRunDesc = "預設只在進入傳奇地城時顯示鑰石列�
 L.instanceKeysHideTitle = "隱藏標題"
 L.instanceKeysHideTitleDesc = "隱藏「誰有鑰石？」標題。"
 
+-- Challenges UI Decoration
+--L.partyRatingHeader = "|TInterface\\AddOns\\BigWigs\\Media\\Icons\\minimap_raid:0:0|tParty Rating"
+L.dungeonScoreString = "|c%s%03d|r |cFFFFFFFF+%02d|r |cFF%s%02d:%02d|r |c%s（%s）|r"
+--L.dungeonScoreNoDataString = "|cFFFFFFFFNo data|r |c%s(%s)|r"
+L.dungeonTeleportHeader = "|TInterface\\AddOns\\BigWigs\\Media\\Icons\\minimap_raid:0:0|t傳送"
+
+-- Progress %
+L.progressPercent = "進度 %"
+L.progressPercentDesc = "計算傳奇+ 進度的工具，告訴你擊殺每個敵對目標可以提供多少進度。"
+L.progressPercentTooltip = "滑鼠指向敵方單位時，在浮動資訊提示顯示進度百分比"
+L.progressPercentTooltipText = {
+	"|TInterface\\AddOns\\BigWigs\\Media\\Icons\\minimap_raid:0:0|t進度：%s%%",
+	"|TInterface\\AddOns\\BigWigs\\Media\\Icons\\minimap_raid:0:0|t進度：%s%%（%d）",
+	"|TInterface\\AddOns\\BigWigs\\Media\\Icons\\minimap_raid:0:0|t進度：%s%%（%d/%d）",
+}
+L.progressPercentNameplate = "在敵方名條顯示進度百分比"
+L.progressCurrentPull = "當前拉怪進度"
+L.progressCurrentPullDesc = "顯示當前這波戰鬥能提供多少進度。\n\n此功能尚未實裝！"
+L.tempProgressAnnounce = "現在，可以在浮動資訊提示和名條上顯示進度。\n\n請至 |cFF436EEE工具|r > |cFF436EEE傳奇鑰石+|r > |cFF436EEE進度 %|r 設定。"
+--L.settingsForCurrentTarget = "Settings for your current target"
+--L.settingsForOtherTargets = "Settings for all other targets"
+
 -----------------------------------------------------------------------
 -- LFGTimer.lua
 --
@@ -612,8 +641,8 @@ L.positionX = "X 座標"
 L.positionY = "Y 座標"
 L.positionExact = "精確位置"
 L.positionDesc = "在框中輸入座標，或移動控制條把錨點定位至精確位置。"
---L.copyCustomAnchorWidth = "Copy Custom Anchor Width"
---L.copyCustomAnchorWidthDesc = "Overwrite your width setting with the width of the custom anchor."
+L.copyCustomAnchorWidth = "繼承錨點框體寬度"
+L.copyCustomAnchorWidthDesc = "當你使用「自定錨點」將計時條依附在特定框體（例如玩家框架）時，勾選此選項可以將計時條的寬度設為與該依附框體相同。"
 L.width = "寬度"
 L.height = "高度"
 L.size = "尺寸"
@@ -1143,7 +1172,7 @@ L.privateaura = "當私有光環施放在你身上時（點名）"
 L.customSoundDesc = "播放選定的自訂的聲音，而不是由模塊提供的。"
 L.resetSoundDesc = "將前面的音效設定重設為預設值。"
 L.resetAllCustomSound = "如果設置全部首領戰鬥自訂的聲音，此按鈕將重置「全部」以這裡自訂的聲音來代替。"
---L.soundResetPrint = "The module '|cFF436EEE%s|r' uses a custom sound called '|cFF436EEE%s|r' that no longer exists. Resetting to default."
+L.soundResetPrint = "「|cFF436EEE%s|r」模組使用的自訂音效「|cFF436EEE%s|r」已不存在。現已重置為預設音效。"
 
 -----------------------------------------------------------------------
 -- Statistics.lua
@@ -1179,6 +1208,7 @@ L.blizzBasicAsBars = "BigWigs 風格的計時條 + 暴雪的內建計時"
 L.blizzBasicAsBlizzTimeline = "暴雪的「首領技能」時間軸 + 暴雪的內建計時（完全使用暴雪原生）"
 L.developerMode = "開發者模式"
 L.enhancedModeWarning = "警告！\n\n停用 BigWigs 的增強計時會同步關閉 BigWigs 的其他首領戰功能，包含：\n\n計時條顏色、技能別名、技能計數、自訂音效和語音、倒數計時、計時條開關、額外訊息等等。"
+--L.blizzTimelineEnhancedWarning = "WARNING!\n\nThe Blizzard timeline doesn't support BigWigs enhanced features. You will NOT get renamed spells and you will see inaccurate timers.\n\nAre you sure you want to enable it?"
 
 -----------------------------------------------------------------------
 -- Victory.lua

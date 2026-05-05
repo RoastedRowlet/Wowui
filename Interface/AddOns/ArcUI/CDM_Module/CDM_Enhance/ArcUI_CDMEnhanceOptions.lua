@@ -129,11 +129,11 @@ local SECTION_FIELDS = {
   border = { "border.enabled", "border.texture", "border.color", "border.thickness", "border.inset", "border.useClassColor", "border.followDesaturation" },
   cooldownSwipe = { "cooldownSwipe.showSwipe", "cooldownSwipe.showEdge", "cooldownSwipe.showBling", "cooldownSwipe.reverse", "cooldownSwipe.noGCDSwipe", "cooldownSwipe.swipeWaitForNoCharges", "cooldownSwipe.edgeWaitForNoCharges", "cooldownSwipe.swipeColor", "cooldownSwipe.auraSwipeColor", "cooldownSwipe.edgeColor", "cooldownSwipe.edgeScale", "cooldownSwipe.swipeInset", "cooldownSwipe.swipeInsetX", "cooldownSwipe.swipeInsetY", "cooldownSwipe.separateInsets", "cooldownSwipe.ignoreAuraOverride" },
   chargeText = { "chargeText.enabled", "chargeText.showSingleStack", "chargeText.hideAtZero", "chargeText.font", "chargeText.size", "chargeText.color", "chargeText.outline", "chargeText.anchor", "chargeText.offsetX", "chargeText.offsetY", "chargeText.shadow", "chargeText.shadowColor", "chargeText.shadowOffsetX", "chargeText.shadowOffsetY", "chargeText.mode", "chargeText.position", "chargeText.freeX", "chargeText.freeY" },
-  cooldownText = { "cooldownText.enabled", "cooldownText.hideWhenHasCharges", "cooldownText.durationColor", "cooldownText.durationColorPreset", "cooldownText.durationColorCustom", "cooldownText.font", "cooldownText.size", "cooldownText.color", "cooldownText.outline", "cooldownText.anchor", "cooldownText.offsetX", "cooldownText.offsetY", "cooldownText.shadow", "cooldownText.shadowColor", "cooldownText.shadowOffsetX", "cooldownText.shadowOffsetY", "cooldownText.mmss", "cooldownText.decimals", "cooldownText.mode", "cooldownText.position", "cooldownText.freeX", "cooldownText.freeY" },
+  cooldownText = { "cooldownText.enabled", "cooldownText.hideWhenHasCharges", "cooldownText.durationColor", "cooldownText.durationColorPreset", "cooldownText.durationColorCustom", "cooldownText.font", "cooldownText.size", "cooldownText.color", "cooldownText.outline", "cooldownText.anchor", "cooldownText.offsetX", "cooldownText.offsetY", "cooldownText.shadow", "cooldownText.shadowColor", "cooldownText.shadowOffsetX", "cooldownText.shadowOffsetY", "cooldownText.mmss", "cooldownText.decimals", "cooldownText.decimalThreshold", "cooldownText.abbrevThreshold", "cooldownText.mode", "cooldownText.position", "cooldownText.freeX", "cooldownText.freeY" },
   keybindText = { "keybindText.enabled", "keybindText.font", "keybindText.size", "keybindText.color", "keybindText.outline", "keybindText.anchor", "keybindText.offsetX", "keybindText.offsetY", "hideKeybind" },
   customLabel = { "customLabel.text", "customLabel.size", "customLabel.color", "customLabel.anchor", "customLabel.xOffset", "customLabel.yOffset", "customLabel.showWhenActive", "customLabel.showWhenInactive", "customLabel.showInReadyState", "customLabel.showInCooldownState", "customLabel.showWhileRecharging", "customLabel.text2", "customLabel.size2", "customLabel.color2", "customLabel.anchor2", "customLabel.xOffset2", "customLabel.yOffset2", "customLabel.showWhenActive2", "customLabel.showWhenInactive2", "customLabel.showInReadyState2", "customLabel.showInCooldownState2", "customLabel.showWhileRecharging2", "customLabel.text3", "customLabel.size3", "customLabel.color3", "customLabel.anchor3", "customLabel.xOffset3", "customLabel.yOffset3", "customLabel.showWhenActive3", "customLabel.showWhenInactive3", "customLabel.showInReadyState3", "customLabel.showInCooldownState3", "customLabel.showWhileRecharging3", "customLabel.labelCount", "customLabel.font", "customLabel.outline", "customLabel.frameStrata", "customLabel.frameLevel" },
   alertEvents = { "alertEvents" },
-  spellUsability = { "spellUsability.enabled", "spellUsability.useNormalColor", "spellUsability.normalColor", "spellUsability.normalDesaturate", "spellUsability.useOnCooldownColor", "spellUsability.onCooldownColor", "spellUsability.onCooldownDesaturate", "spellUsability.notEnoughResourceAlpha", "spellUsability.notEnoughResourceColor", "spellUsability.notEnoughResourceDesaturate", "spellUsability.notUsableAlpha", "spellUsability.notUsableColor", "spellUsability.notUsableDesaturate", "spellUsability.usableGlow", "spellUsability.usableGlowCombatOnly", "spellUsability.usableGlowType", "spellUsability.usableGlowColor", "spellUsability.usableGlowScale", "spellUsability.usableGlowSpeed", "spellUsability.usableGlowLines", "spellUsability.usableGlowThickness", "spellUsability.usableGlowParticles" },
+  spellUsability = { "spellUsability.enabled", "spellUsability.useNormalColor", "spellUsability.normalColor", "spellUsability.normalDesaturate", "spellUsability.useOnCooldownColor", "spellUsability.onCooldownColor", "spellUsability.onCooldownDesaturate", "spellUsability.notEnoughResourceAlpha", "spellUsability.notEnoughResourceColor", "spellUsability.notEnoughResourceDesaturate", "spellUsability.notUsableAlpha", "spellUsability.notUsableColor", "spellUsability.notUsableDesaturate", "spellUsability.usableGlow", "spellUsability.usableGlowCombatOnly", "spellUsability.usableGlowType", "spellUsability.usableGlowColor", "spellUsability.usableGlowScale", "spellUsability.usableGlowSpeed", "spellUsability.usableGlowLines", "spellUsability.usableGlowThickness", "spellUsability.usableGlowParticles", "spellUsability.usableGlowXOffset", "spellUsability.usableGlowYOffset", "spellUsability.usableGlowFrameStrata", "spellUsability.usableGlowFrameLevel" },
 }
 
 -- Purple indicator for customized sections
@@ -238,6 +238,57 @@ local function GetCooldownHeaderName(sectionName, displayName)
     return CUSTOM_INDICATOR .. displayName
   end
   return displayName
+end
+
+-- ───────────────────────────────────────────────────────────────────────
+-- Detect whether the currently-selected cooldown icon(s) are ALL custom
+-- timer icons (arcType == "timer"). Used to relabel per-icon section
+-- headers like "Cooldown Ready State" → "Not Active" when editing a
+-- custom timer icon.
+--
+-- IMPORTANT: matches arcType == "timer" ONLY. Other Arc Aura categories
+-- (spell cooldowns, trinkets, items — which all carry isArcAura=true)
+-- keep the canonical "Cooldown Ready State" / "On Cooldown State" labels.
+--
+-- Returns true only when:
+--   - Edit-all mode is OFF (bulk edit retains canonical labels)
+--   - Selection is non-empty
+--   - Every selected cdID has arcType == "timer" (mixed selection → false)
+--
+-- Rebuilds the unified icon cache if stale so the lookup sees current data.
+-- ───────────────────────────────────────────────────────────────────────
+local function IsCurrentCooldownSelectionAllCustomTimer()
+  if editAllUnifiedMode then return false end
+
+  -- Refresh cache if filter mode changed (mirrors GetCooldownIconByIndex)
+  if cachedUnifiedFilterMode ~= unifiedFilterMode then
+    RebuildUnifiedIconCache()
+  end
+
+  -- cdID → arcType lookup. Linear scan over the cache is fine — this only
+  -- fires when the section header is rendered, not on every layout pass.
+  local function isCustomTimerCdID(cdID)
+    for _, entry in ipairs(cachedUnifiedIcons) do
+      if entry.cooldownID == cdID then
+        return entry.arcType == "timer"
+      end
+    end
+    return false
+  end
+
+  -- Multi-select takes precedence
+  if next(selectedCooldownIcons) then
+    for cdID, _ in pairs(selectedCooldownIcons) do
+      if not isCustomTimerCdID(cdID) then return false end
+    end
+    return true
+  end
+
+  if selectedCooldownIcon then
+    return isCustomTimerCdID(selectedCooldownIcon)
+  end
+
+  return false
 end
 
 -- ===================================================================
@@ -5406,6 +5457,49 @@ function ns.GetCDMAuraIconsOptionsTable()
       order = 164, width = "full", 
       hidden = function() return HideAuraCooldownText() or not (GetAuraCfg() and GetAuraCfg().cooldownText and GetAuraCfg().cooldownText.mode == "free") end,
     },
+    -- ─── 3.6.6 Duration-text formatting (engine-rendered, zero polling) ───
+    cdFormatHeader = {
+      type = "description", name = "\n|cffffd700Format|r", order = 164.1, width = "full", hidden = HideAuraCooldownText,
+    },
+    cdDecimals = {
+      type = "select", name = "Decimals",
+      desc = "How many decimal places the countdown shows. Rendered by the game engine — no polling cost.",
+      values = { [0] = "0 (3s)", [1] = "1 (3.5s)" },
+      get = function() local c = GetAuraCfg(); return c and c.cooldownText and c.cooldownText.decimals or 0 end,
+      set = function(_, v) ApplyAuraSetting(function(c) if not c.cooldownText then c.cooldownText = {} end; c.cooldownText.decimals = v end) end,
+      order = 164.2, width = 0.6, hidden = HideAuraCooldownText,
+    },
+    cdDecimalThresholdEnabled = {
+      type = "toggle", name = "Show Below Threshold",
+      desc = "When ON, only show the decimal under a custom remaining-time threshold. When OFF, the decimal is shown across the entire countdown.",
+      get = function() local c = GetAuraCfg(); return c and c.cooldownText and (c.cooldownText.decimalThreshold or 0) > 0 end,
+      set = function(_, v) ApplyAuraSetting(function(c) if not c.cooldownText then c.cooldownText = {} end; c.cooldownText.decimalThreshold = v and 5 or 0 end) end,
+      order = 164.24, width = 0.95,
+      hidden = function() if HideAuraCooldownText() then return true end local c = GetAuraCfg(); return not c or not c.cooldownText or (c.cooldownText.decimals or 0) == 0 end,
+    },
+    cdDecimalThreshold = {
+      type = "input", name = "Below (s)",
+      desc = "Show the decimal only when remaining time is below this many seconds. Accepts whole or decimal seconds.",
+      get = function() local c = GetAuraCfg(); local v = c and c.cooldownText and c.cooldownText.decimalThreshold or 0; return tostring(v) end,
+      set = function(_, v) local n = tonumber(v); if not n or n <= 0 then return end; ApplyAuraSetting(function(c) if not c.cooldownText then c.cooldownText = {} end; c.cooldownText.decimalThreshold = n end) end,
+      order = 164.25, width = 0.85,
+      hidden = function() if HideAuraCooldownText() then return true end local c = GetAuraCfg(); if not c or not c.cooldownText then return true end if (c.cooldownText.decimals or 0) == 0 then return true end return (c.cooldownText.decimalThreshold or 0) <= 0 end,
+    },
+    cdAbbrevEnabled = {
+      type = "toggle", name = "Abbreviate (M:SS)",
+      desc = "When ON, the countdown shows M:SS form (e.g. 1:31) below a threshold you set. When OFF, leaves Blizzard's default behavior in place.",
+      get = function() local c = GetAuraCfg(); if not (c and c.cooldownText) then return false end local v = c.cooldownText.abbrevThreshold; if type(v) == "string" then return v ~= "default" and v ~= "" end return type(v) == "number" and v > 0 end,
+      set = function(_, v) ApplyAuraSetting(function(c) if not c.cooldownText then c.cooldownText = {} end; c.cooldownText.abbrevThreshold = v and 60 or 0 end) end,
+      order = 164.29, width = 0.95, hidden = HideAuraCooldownText,
+    },
+    cdAbbrevThreshold = {
+      type = "input", name = "Below (s)",
+      desc = "Show M:SS form when remaining time is below this many seconds. Accepts whole or decimal seconds (e.g. 60, 300, 3600).",
+      get = function() local c = GetAuraCfg(); local v = c and c.cooldownText and c.cooldownText.abbrevThreshold; if type(v) == "string" then if v == "1m" then v = 60 elseif v == "5m" then v = 300 elseif v == "1h" then v = 3600 else v = 0 end end if type(v) ~= "number" then v = 0 end return tostring(v) end,
+      set = function(_, v) local n = tonumber(v); if not n or n <= 0 then return end; ApplyAuraSetting(function(c) if not c.cooldownText then c.cooldownText = {} end; c.cooldownText.abbrevThreshold = n end) end,
+      order = 164.3, width = 0.85,
+      hidden = function() if HideAuraCooldownText() then return true end local c = GetAuraCfg(); if not c or not c.cooldownText then return true end local v = c.cooldownText.abbrevThreshold; if type(v) == "string" then return v == "default" or v == "" end return type(v) ~= "number" or v <= 0 end,
+    },
     cdColorHeader = {
       type = "description", name = "\n|cffffd700Color|r", order = 164.5, width = "full", hidden = HideAuraCooldownText,
     },
@@ -6574,7 +6668,10 @@ function ns.GetCDMCooldownIconsOptionsTable()
     -- ═══════════════════════════════════════════════════════════════════
     readyStateHeader = {
       type = "toggle",
-      name = function() return GetCooldownHeaderName("activeState", "Cooldown Ready State") end,
+      name = function()
+        local label = IsCurrentCooldownSelectionAllCustomTimer() and "Not Active" or "Cooldown Ready State"
+        return GetCooldownHeaderName("activeState", label)
+      end,
       desc = "Click to expand/collapse. Configure how the icon appears when the ability IS READY (not on cooldown). Purple dot indicates per-icon customizations.",
       dialogControl = "CollapsibleHeader",
       get = function() return not collapsedSections.readyState end,
@@ -7187,7 +7284,10 @@ function ns.GetCDMCooldownIconsOptionsTable()
     -- ═══════════════════════════════════════════════════════════════════
     cooldownStateHeader = {
       type = "toggle",
-      name = function() return GetCooldownHeaderName("inactiveState", "On Cooldown State") end,
+      name = function()
+        local label = IsCurrentCooldownSelectionAllCustomTimer() and "Active State" or "On Cooldown State"
+        return GetCooldownHeaderName("inactiveState", label)
+      end,
       desc = "Click to expand/collapse. Configure how the icon appears when the ability IS ON COOLDOWN. Purple dot indicates per-icon customizations.",
       dialogControl = "CollapsibleHeader",
       get = function() return not collapsedSections.cooldownState end,
@@ -9341,6 +9441,49 @@ function ns.GetCDMCooldownIconsOptionsTable()
       order = 164, width = "full", 
       hidden = function() return HideCooldownCooldownText() or not (GetCooldownCfg() and GetCooldownCfg().cooldownText and GetCooldownCfg().cooldownText.mode == "free") end,
     },
+    -- ─── 3.6.6 Duration-text formatting (engine-rendered, zero polling) ───
+    cdFormatHeader = {
+      type = "description", name = "\n|cffffd700Format|r", order = 164.1, width = "full", hidden = HideCooldownCooldownText,
+    },
+    cdDecimals = {
+      type = "select", name = "Decimals",
+      desc = "How many decimal places the countdown shows. Rendered by the game engine — no polling cost.",
+      values = { [0] = "0 (3s)", [1] = "1 (3.5s)" },
+      get = function() local c = GetCooldownCfg(); return c and c.cooldownText and c.cooldownText.decimals or 0 end,
+      set = function(_, v) ApplySharedCooldownSetting(function(c) if not c.cooldownText then c.cooldownText = {} end; c.cooldownText.decimals = v end) end,
+      order = 164.2, width = 0.6, hidden = HideCooldownCooldownText,
+    },
+    cdDecimalThresholdEnabled = {
+      type = "toggle", name = "Show Below Threshold",
+      desc = "When ON, only show the decimal under a custom remaining-time threshold. When OFF, the decimal is shown across the entire countdown.",
+      get = function() local c = GetCooldownCfg(); return c and c.cooldownText and (c.cooldownText.decimalThreshold or 0) > 0 end,
+      set = function(_, v) ApplySharedCooldownSetting(function(c) if not c.cooldownText then c.cooldownText = {} end; c.cooldownText.decimalThreshold = v and 5 or 0 end) end,
+      order = 164.24, width = 0.95,
+      hidden = function() if HideCooldownCooldownText() then return true end local c = GetCooldownCfg(); return not c or not c.cooldownText or (c.cooldownText.decimals or 0) == 0 end,
+    },
+    cdDecimalThreshold = {
+      type = "input", name = "Below (s)",
+      desc = "Show the decimal only when remaining time is below this many seconds. Accepts whole or decimal seconds.",
+      get = function() local c = GetCooldownCfg(); local v = c and c.cooldownText and c.cooldownText.decimalThreshold or 0; return tostring(v) end,
+      set = function(_, v) local n = tonumber(v); if not n or n <= 0 then return end; ApplySharedCooldownSetting(function(c) if not c.cooldownText then c.cooldownText = {} end; c.cooldownText.decimalThreshold = n end) end,
+      order = 164.25, width = 0.85,
+      hidden = function() if HideCooldownCooldownText() then return true end local c = GetCooldownCfg(); if not c or not c.cooldownText then return true end if (c.cooldownText.decimals or 0) == 0 then return true end return (c.cooldownText.decimalThreshold or 0) <= 0 end,
+    },
+    cdAbbrevEnabled = {
+      type = "toggle", name = "Abbreviate (M:SS)",
+      desc = "When ON, the countdown shows M:SS form (e.g. 1:31) below a threshold you set. When OFF, leaves Blizzard's default behavior in place.",
+      get = function() local c = GetCooldownCfg(); if not (c and c.cooldownText) then return false end local v = c.cooldownText.abbrevThreshold; if type(v) == "string" then return v ~= "default" and v ~= "" end return type(v) == "number" and v > 0 end,
+      set = function(_, v) ApplySharedCooldownSetting(function(c) if not c.cooldownText then c.cooldownText = {} end; c.cooldownText.abbrevThreshold = v and 60 or 0 end) end,
+      order = 164.29, width = 0.95, hidden = HideCooldownCooldownText,
+    },
+    cdAbbrevThreshold = {
+      type = "input", name = "Below (s)",
+      desc = "Show M:SS form when remaining time is below this many seconds. Accepts whole or decimal seconds (e.g. 60, 300, 3600).",
+      get = function() local c = GetCooldownCfg(); local v = c and c.cooldownText and c.cooldownText.abbrevThreshold; if type(v) == "string" then if v == "1m" then v = 60 elseif v == "5m" then v = 300 elseif v == "1h" then v = 3600 else v = 0 end end if type(v) ~= "number" then v = 0 end return tostring(v) end,
+      set = function(_, v) local n = tonumber(v); if not n or n <= 0 then return end; ApplySharedCooldownSetting(function(c) if not c.cooldownText then c.cooldownText = {} end; c.cooldownText.abbrevThreshold = n end) end,
+      order = 164.3, width = 0.85,
+      hidden = function() if HideCooldownCooldownText() then return true end local c = GetCooldownCfg(); if not c or not c.cooldownText then return true end local v = c.cooldownText.abbrevThreshold; if type(v) == "string" then return v == "default" or v == "" end return type(v) ~= "number" or v <= 0 end,
+    },
     resetCooldownText = {
       type = "execute",
       name = "Reset Section",
@@ -10879,6 +11022,50 @@ function ns.GetCDMGlobalAuraDefaultsOptionsTable()
       cdTextColorHeader = {
         type = "description", name = "|cffffd700Color|r", fontSize = "medium",
         order = 46, width = "full", hidden = function() return collapsedGlobalAuraSections.cooldownText end,
+      },
+      -- ─── 3.6.6 Duration-text formatting (engine-rendered, zero polling) ───
+      cdTextFormatHeader = {
+        type = "description", name = "|cffffd700Format|r", fontSize = "medium",
+        order = 45, width = "full", hidden = function() return collapsedGlobalAuraSections.cooldownText end,
+      },
+      cdTextDecimals = {
+        type = "select", name = "Decimals",
+        desc = "How many decimal places the countdown shows. Rendered by the game engine — no polling cost.",
+        values = { [0] = "0 (3s)", [1] = "1 (3.5s)" },
+        get = function() local g = GetAuraGlobalCfg(); return g.cooldownText and g.cooldownText.decimals or 0 end,
+        set = function(_, v) ApplyAuraGlobalSetting("cooldownText.decimals", v); RefreshGlobalAuras() end,
+        order = 45.1, width = 0.6, hidden = function() return collapsedGlobalAuraSections.cooldownText end,
+      },
+      cdTextDecimalThresholdEnabled = {
+        type = "toggle", name = "Show Below Threshold",
+        desc = "When ON, only show the decimal under a custom remaining-time threshold. When OFF, the decimal is shown across the entire countdown.",
+        get = function() local g = GetAuraGlobalCfg(); return g.cooldownText and (g.cooldownText.decimalThreshold or 0) > 0 end,
+        set = function(_, v) ApplyAuraGlobalSetting("cooldownText.decimalThreshold", v and 5 or 0); RefreshGlobalAuras() end,
+        order = 45.14, width = 0.95,
+        hidden = function() if collapsedGlobalAuraSections.cooldownText then return true end local g = GetAuraGlobalCfg(); return not g.cooldownText or (g.cooldownText.decimals or 0) == 0 end,
+      },
+      cdTextDecimalThreshold = {
+        type = "input", name = "Below (s)",
+        desc = "Show the decimal only when remaining time is below this many seconds. Accepts whole or decimal seconds.",
+        get = function() local g = GetAuraGlobalCfg(); local v = g.cooldownText and g.cooldownText.decimalThreshold or 0; return tostring(v) end,
+        set = function(_, v) local n = tonumber(v); if not n or n <= 0 then return end; ApplyAuraGlobalSetting("cooldownText.decimalThreshold", n); RefreshGlobalAuras() end,
+        order = 45.15, width = 0.85,
+        hidden = function() if collapsedGlobalAuraSections.cooldownText then return true end local g = GetAuraGlobalCfg(); if not g.cooldownText then return true end if (g.cooldownText.decimals or 0) == 0 then return true end return (g.cooldownText.decimalThreshold or 0) <= 0 end,
+      },
+      cdTextAbbrevEnabled = {
+        type = "toggle", name = "Abbreviate (M:SS)",
+        desc = "When ON, the countdown shows M:SS form (e.g. 1:31) below a threshold you set. When OFF, leaves Blizzard's default behavior in place.",
+        get = function() local g = GetAuraGlobalCfg(); if not g.cooldownText then return false end local v = g.cooldownText.abbrevThreshold; if type(v) == "string" then return v ~= "default" and v ~= "" end return type(v) == "number" and v > 0 end,
+        set = function(_, v) ApplyAuraGlobalSetting("cooldownText.abbrevThreshold", v and 60 or 0); RefreshGlobalAuras() end,
+        order = 45.19, width = 0.95, hidden = function() return collapsedGlobalAuraSections.cooldownText end,
+      },
+      cdTextAbbrevThreshold = {
+        type = "input", name = "Below (s)",
+        desc = "Show M:SS form when remaining time is below this many seconds. Accepts whole or decimal seconds (e.g. 60, 300, 3600).",
+        get = function() local g = GetAuraGlobalCfg(); local v = g.cooldownText and g.cooldownText.abbrevThreshold; if type(v) == "string" then if v == "1m" then v = 60 elseif v == "5m" then v = 300 elseif v == "1h" then v = 3600 else v = 0 end end if type(v) ~= "number" then v = 0 end return tostring(v) end,
+        set = function(_, v) local n = tonumber(v); if not n or n <= 0 then return end; ApplyAuraGlobalSetting("cooldownText.abbrevThreshold", n); RefreshGlobalAuras() end,
+        order = 45.2, width = 0.85,
+        hidden = function() if collapsedGlobalAuraSections.cooldownText then return true end local g = GetAuraGlobalCfg(); if not g.cooldownText then return true end local v = g.cooldownText.abbrevThreshold; if type(v) == "string" then return v == "default" or v == "" end return type(v) ~= "number" or v <= 0 end,
       },
       cdTextDurationColor = {
         type = "toggle", name = "Color by Duration",
@@ -12504,6 +12691,50 @@ function ns.GetCDMGlobalCooldownDefaultsOptionsTable()
         get = function() local g = GetCooldownGlobalCfg(); return g.cooldownText and g.cooldownText.hideWhenHasCharges == true end,
         set = function(_, v) ApplyCooldownGlobalSetting("cooldownText.hideWhenHasCharges", v); RefreshGlobalCooldowns() end,
         order = 41.5, width = 0.85, hidden = function() return collapsedGlobalCooldownSections.cooldownText end,
+      },
+      -- ─── 3.6.6 Duration-text formatting (engine-rendered, zero polling) ───
+      cdTextFormatHeader = {
+        type = "description", name = "|cffffd700Format|r", fontSize = "medium",
+        order = 41.7, width = "full", hidden = function() return collapsedGlobalCooldownSections.cooldownText end,
+      },
+      cdTextDecimals = {
+        type = "select", name = "Decimals",
+        desc = "How many decimal places the countdown shows. Rendered by the game engine — no polling cost.",
+        values = { [0] = "0 (3s)", [1] = "1 (3.5s)" },
+        get = function() local g = GetCooldownGlobalCfg(); return g.cooldownText and g.cooldownText.decimals or 0 end,
+        set = function(_, v) ApplyCooldownGlobalSetting("cooldownText.decimals", v); RefreshGlobalCooldowns() end,
+        order = 41.71, width = 0.6, hidden = function() return collapsedGlobalCooldownSections.cooldownText end,
+      },
+      cdTextDecimalThresholdEnabled = {
+        type = "toggle", name = "Show Below Threshold",
+        desc = "When ON, only show the decimal under a custom remaining-time threshold. When OFF, the decimal is shown across the entire countdown.",
+        get = function() local g = GetCooldownGlobalCfg(); return g.cooldownText and (g.cooldownText.decimalThreshold or 0) > 0 end,
+        set = function(_, v) ApplyCooldownGlobalSetting("cooldownText.decimalThreshold", v and 5 or 0); RefreshGlobalCooldowns() end,
+        order = 41.715, width = 0.95,
+        hidden = function() if collapsedGlobalCooldownSections.cooldownText then return true end local g = GetCooldownGlobalCfg(); return not g.cooldownText or (g.cooldownText.decimals or 0) == 0 end,
+      },
+      cdTextDecimalThreshold = {
+        type = "input", name = "Below (s)",
+        desc = "Show the decimal only when remaining time is below this many seconds. Accepts whole or decimal seconds.",
+        get = function() local g = GetCooldownGlobalCfg(); local v = g.cooldownText and g.cooldownText.decimalThreshold or 0; return tostring(v) end,
+        set = function(_, v) local n = tonumber(v); if not n or n <= 0 then return end; ApplyCooldownGlobalSetting("cooldownText.decimalThreshold", n); RefreshGlobalCooldowns() end,
+        order = 41.72, width = 0.85,
+        hidden = function() if collapsedGlobalCooldownSections.cooldownText then return true end local g = GetCooldownGlobalCfg(); if not g.cooldownText then return true end if (g.cooldownText.decimals or 0) == 0 then return true end return (g.cooldownText.decimalThreshold or 0) <= 0 end,
+      },
+      cdTextAbbrevEnabled = {
+        type = "toggle", name = "Abbreviate (M:SS)",
+        desc = "When ON, the countdown shows M:SS form (e.g. 1:31) below a threshold you set. When OFF, leaves Blizzard's default behavior in place.",
+        get = function() local g = GetCooldownGlobalCfg(); if not g.cooldownText then return false end local v = g.cooldownText.abbrevThreshold; if type(v) == "string" then return v ~= "default" and v ~= "" end return type(v) == "number" and v > 0 end,
+        set = function(_, v) ApplyCooldownGlobalSetting("cooldownText.abbrevThreshold", v and 60 or 0); RefreshGlobalCooldowns() end,
+        order = 41.725, width = 0.95, hidden = function() return collapsedGlobalCooldownSections.cooldownText end,
+      },
+      cdTextAbbrevThreshold = {
+        type = "input", name = "Below (s)",
+        desc = "Show M:SS form when remaining time is below this many seconds. Accepts whole or decimal seconds (e.g. 60, 300, 3600).",
+        get = function() local g = GetCooldownGlobalCfg(); local v = g.cooldownText and g.cooldownText.abbrevThreshold; if type(v) == "string" then if v == "1m" then v = 60 elseif v == "5m" then v = 300 elseif v == "1h" then v = 3600 else v = 0 end end if type(v) ~= "number" then v = 0 end return tostring(v) end,
+        set = function(_, v) local n = tonumber(v); if not n or n <= 0 then return end; ApplyCooldownGlobalSetting("cooldownText.abbrevThreshold", n); RefreshGlobalCooldowns() end,
+        order = 41.73, width = 0.85,
+        hidden = function() if collapsedGlobalCooldownSections.cooldownText then return true end local g = GetCooldownGlobalCfg(); if not g.cooldownText then return true end local v = g.cooldownText.abbrevThreshold; if type(v) == "string" then return v == "default" or v == "" end return type(v) ~= "number" or v <= 0 end,
       },
       cdTextDurationColor = {
         type = "toggle", name = "Color by Duration",

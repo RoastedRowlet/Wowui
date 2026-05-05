@@ -63,8 +63,9 @@ initFrame:SetScript("OnEvent", function(self)
     ---------------------------------------------------------------------------
     --  Helpers
     ---------------------------------------------------------------------------
+    local _selectedBarKey = "MainBar"
     local function SelectedKey()
-        return EAB.db.profile.selectedBar or "MainBar"
+        return _selectedBarKey
     end
 
     local function SB()
@@ -260,15 +261,11 @@ initFrame:SetScript("OnEvent", function(self)
         specChangeFrame:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
         specChangeFrame:SetScript("OnEvent", function(self, event)
             if event == "ACTIVE_TALENT_GROUP_CHANGED" and _barsHeaderBuilder then
-                -- Only rebuild if ActionBars is the active module and panel is open
-                if not EllesmereUI:IsShown() or EllesmereUI:GetActiveModule() ~= "EllesmereUIActionBars" then
-                    activePreview = nil
-                    return
-                end
-                -- Force a full rebuild of the preview and header on spec change
                 activePreview = nil
-                EllesmereUI:SetContentHeader(_barsHeaderBuilder)
-                UpdatePreviewAndResize()
+                if EllesmereUI:IsShown() and EllesmereUI:GetActiveModule() == "EllesmereUIActionBars" then
+                    EllesmereUI:SetContentHeader(_barsHeaderBuilder)
+                    UpdatePreviewAndResize()
+                end
             end
         end)
     end
@@ -746,8 +743,9 @@ initFrame:SetScript("OnEvent", function(self)
                     bf:SetPoint("TOPLEFT", self, "TOPLEFT", xOff, yOff)
                     bf:Show()
 
-                    -- Icon texture from real button
-                    local realBtn = _G[info.buttonPrefix .. i]
+                    -- Icon texture from our EABButton (not the hidden Blizzard button)
+                    local eabBtns = ns.barButtons and ns.barButtons[info.key]
+                    local realBtn = eabBtns and eabBtns[i] or _G[info.buttonPrefix .. i]
                     local hasAction = realBtn and ns.ButtonHasAction(realBtn, info.buttonPrefix)
                     local iconTex = hasAction and realBtn.icon and realBtn.icon:GetTexture()
 
@@ -1140,8 +1138,6 @@ initFrame:SetScript("OnEvent", function(self)
         BuildVisRow("MicroBar", "MICRO MENU")
         _, h = W:Spacer(parent, y, 12);  y = y - h
         BuildVisRow("BagBar", "BAG BAR")
-        _, h = W:Spacer(parent, y, 12);  y = y - h
-        BuildVisRow("QueueStatus", "QUEUE STATUS EYECON")
 
         return math.abs(y)
     end
@@ -1259,16 +1255,18 @@ initFrame:SetScript("OnEvent", function(self)
                 EllesmereUI.RegisterWidgetRefresh(cbDDRefresh)
             end
 
+            local wDis, wTip, wRaw = EllesmereUI.MatchGuard(barKey, "Width", _blizzDis, BLIZZ_DIS_TIP)
+            local hDis, hTip, hRaw = EllesmereUI.MatchGuard(barKey, "Height", _blizzDis, BLIZZ_DIS_TIP)
             _, h = W:DualRow(parent, y,
                 { type="slider", text="Width", min=50, max=600, step=1,
-                  disabled=_blizzDis, disabledTooltip=BLIZZ_DIS_TIP,
+                  disabled=wDis, disabledTooltip=wTip, rawTooltip=wRaw,
                   getValue=function() return EAB.db.profile.bars[barKey].width or 400 end,
                   setValue=function(v)
                       EAB.db.profile.bars[barKey].width = v
                       if ns.ApplyDataBarLayout then ns.ApplyDataBarLayout(barKey) end
                   end },
                 { type="slider", text="Height", min=4, max=40, step=1,
-                  disabled=_blizzDis, disabledTooltip=BLIZZ_DIS_TIP,
+                  disabled=hDis, disabledTooltip=hTip, rawTooltip=hRaw,
                   getValue=function() return EAB.db.profile.bars[barKey].height or 18 end,
                   setValue=function(v)
                       EAB.db.profile.bars[barKey].height = v
@@ -1457,6 +1455,23 @@ initFrame:SetScript("OnEvent", function(self)
                     },
                 })
             end
+            -- Inline cog: Visibility settings (left region)
+            do
+                local rgn = visRow1._leftRegion
+                local _, visCogShow = EllesmereUI.BuildCogPopup({
+                    title = "Visibility",
+                    rows = {
+                        { type="toggle", label="Show All on Mouseover",
+                          tooltip="When hovering any action bar set to Mouseover, all Mouseover bars will appear.",
+                          get=function() return EAB.db.profile.mouseoverShowAll or false end,
+                          set=function(v)
+                              EAB.db.profile.mouseoverShowAll = v
+                          end },
+                    },
+                })
+                local visCtrl = rgn._control
+                local visCogBtn = MakeCogBtn(rgn, visCogShow, visCtrl, EllesmereUI.COGS_ICON)
+            end
         end
 
         -- Row 2: Always Show Buttons | Bar Opacity
@@ -1479,11 +1494,18 @@ initFrame:SetScript("OnEvent", function(self)
             { type="slider", text="Bar Opacity", min=0, max=100, step=5,
               getValue=function()
                   local bs = SB()
-                  local eff = bs.mouseoverEnabled and 1 or (bs.mouseoverAlpha or 1)
-                  return floor(eff * 100 + 0.5)
+                  if bs.mouseoverEnabled then
+                      return floor((bs._savedBarAlpha or 1) * 100 + 0.5)
+                  end
+                  return floor((bs.mouseoverAlpha or 1) * 100 + 0.5)
               end,
               setValue=function(v)
-                  SSet("mouseoverAlpha", v / 100, function(k) EAB:ApplyBarOpacity(k) end)
+                  local bs = SB()
+                  if bs.mouseoverEnabled then
+                      bs._savedBarAlpha = v / 100
+                  else
+                      SSet("mouseoverAlpha", v / 100, function(k) EAB:ApplyBarOpacity(k) end)
+                  end
                   SUpdatePreview()
               end });  y = y - h
         -- Sync icon: Bar Opacity (right)
@@ -1547,6 +1569,8 @@ initFrame:SetScript("OnEvent", function(self)
                   setValue=function(v)
                       SB().buttonWidth  = v
                       SB().buttonHeight = v
+                      SB()._matchExtraPixels = nil
+                      SB()._matchExtraPixelsH = nil
                       EAB:ApplyButtonSizeForBar(SelectedKey())
                       SUpdatePreviewAndResize()
                       EllesmereUI:RefreshPage()
@@ -1775,21 +1799,8 @@ initFrame:SetScript("OnEvent", function(self)
                 MakeCogBtn(rightRgn, growCogShow)
             end
 
-            -- Row 3: Vertical Orientation | Show Paging Arrows (MainBar only)
+            -- Row 3: Vertical Orientation | Bar Background
             do
-                local rightWidget
-                if SelectedKey() == "MainBar" then
-                    rightWidget = { type="toggle", text="Show Paging Arrows",
-                      getValue=function() return SGet("showPagingArrows") or false end,
-                      setValue=function(v)
-                          SSet("showPagingArrows", v, function(k)
-                              if ns.LayoutPagingFrame then ns.LayoutPagingFrame() end
-                          end)
-                      end,
-                      tooltip="Show page up/down arrows next to Action Bar 1 for cycling through action bar pages 1-6." }
-                else
-                    rightWidget = { type="label", text="" }
-                end
                 local orientRow
                 orientRow, h = W:DualRow(parent, y,
                     { type="toggle", text="Vertical Orientation",
@@ -1807,7 +1818,13 @@ initFrame:SetScript("OnEvent", function(self)
                           EllesmereUI:RefreshPage()
                       end,
                       tooltip="Toggle between horizontal and vertical bar layout." },
-                    rightWidget);  y = y - h
+                    { type="toggle", text="Bar Background",
+                      getValue=function() return SGet("bgEnabled") end,
+                      setValue=function(v)
+                          SSet("bgEnabled", v, function(k) EAB:ApplyBackgroundForBar(k) end)
+                          SUpdatePreview()
+                          EllesmereUI:RefreshPage()
+                      end });  y = y - h
                 -- Sync icon: Orientation (left)
                 do
                     local rgn = orientRow._leftRegion
@@ -1903,13 +1920,148 @@ initFrame:SetScript("OnEvent", function(self)
                     pagingCogBtn:SetAlpha(pagingCogInitOff and 0.15 or 0.4)
                     if pagingCogInitOff then pagingCogBlock:Show() else pagingCogBlock:Hide() end
                 end
+
+                -- Sync icon: Bar Background (right region)
+                do
+                    local rgn = orientRow._rightRegion
+                    EllesmereUI.BuildSyncIcon({
+                        region  = rgn,
+                        tooltip = "Apply Background Settings to all Bars",
+                        onClick = function()
+                            local s = SB()
+                            local en = s.bgEnabled
+                            local c = s.bgColor
+                            local px = s.bgPadX or 0
+                            local py = s.bgPadY or 0
+                            for _, key in ipairs(GROUP_BAR_ORDER) do
+                                EAB.db.profile.bars[key].bgEnabled = en
+                                if c then EAB.db.profile.bars[key].bgColor = { r=c.r, g=c.g, b=c.b, a=c.a } end
+                                EAB.db.profile.bars[key].bgPadX = px
+                                EAB.db.profile.bars[key].bgPadY = py
+                                EAB:ApplyBackgroundForBar(key)
+                            end
+                            EllesmereUI:RefreshPage()
+                        end,
+                        isSynced = function()
+                            local s = SB()
+                            local en = s.bgEnabled or false
+                            local px = s.bgPadX or 0
+                            local py = s.bgPadY or 0
+                            for _, key in ipairs(GROUP_BAR_ORDER) do
+                                local bs = EAB.db.profile.bars[key]
+                                if (bs.bgEnabled or false) ~= en then return false end
+                                if (bs.bgPadX or 0) ~= px then return false end
+                                if (bs.bgPadY or 0) ~= py then return false end
+                            end
+                            return true
+                        end,
+                        flashTargets = function() return { rgn } end,
+                        multiApply = {
+                            elementKeys   = GROUP_BAR_ORDER,
+                            elementLabels = SHORT_LABELS,
+                            getCurrentKey = function() return SelectedKey() end,
+                            onApply       = function(checkedKeys)
+                                local s = SB()
+                                local en = s.bgEnabled
+                                local c = s.bgColor
+                                local px = s.bgPadX or 0
+                                local py = s.bgPadY or 0
+                                for _, key in ipairs(checkedKeys) do
+                                    EAB.db.profile.bars[key].bgEnabled = en
+                                    if c then EAB.db.profile.bars[key].bgColor = { r=c.r, g=c.g, b=c.b, a=c.a } end
+                                    EAB.db.profile.bars[key].bgPadX = px
+                                    EAB.db.profile.bars[key].bgPadY = py
+                                    EAB:ApplyBackgroundForBar(key)
+                                end
+                                EllesmereUI:RefreshPage()
+                            end,
+                        },
+                    })
+                end
+                -- Inline swatch + cog on Bar Background (right region)
+                do
+                    local bgRgn = orientRow._rightRegion
+                    local bgColorGet = function()
+                        local c = SGet("bgColor")
+                        if not c then return 0, 0, 0, 0.5 end
+                        return c.r, c.g, c.b, c.a
+                    end
+                    local bgColorSet = function(r, g, b, a)
+                        SSetColor("bgColor", r, g, b, a, function(k) EAB:ApplyBackgroundForBar(k) end)
+                        SUpdatePreview()
+                    end
+                    local bgSwatch, bgUpdateSwatch = EllesmereUI.BuildColorSwatch(bgRgn, bgRgn:GetFrameLevel() + 5, bgColorGet, bgColorSet, true, 20)
+                    PP.Point(bgSwatch, "RIGHT", bgRgn._control, "LEFT", -12, 0)
+                    bgRgn._lastInline = bgSwatch
+                    EllesmereUI.RegisterWidgetRefresh(function()
+                        local off = BgDisabled()
+                        bgSwatch:SetAlpha(off and 0.15 or 1)
+                        bgUpdateSwatch()
+                    end)
+                    bgSwatch:SetAlpha(BgDisabled() and 0.15 or 1)
+                    local bgSwatchOrigClick = bgSwatch:GetScript("OnClick")
+                    bgSwatch:SetScript("OnClick", function(self, ...)
+                        if BgDisabled() then return end
+                        if bgSwatchOrigClick then bgSwatchOrigClick(self, ...) end
+                    end)
+                    bgSwatch:SetScript("OnEnter", function(self)
+                        if BgDisabled() then
+                            EllesmereUI.ShowWidgetTooltip(self, EllesmereUI.DisabledTooltip("Bar Background"))
+                        end
+                    end)
+                    bgSwatch:SetScript("OnLeave", function() EllesmereUI.HideWidgetTooltip() end)
+
+                    local _, bgCogShowRaw = EllesmereUI.BuildCogPopup({
+                        title = "Bar Background Settings",
+                        rows = {
+                            { type="slider", label="Width", min=0, max=40, step=1,
+                              get=function() return SVal("bgPadX", 0) end,
+                              set=function(v)
+                                  SSet("bgPadX", v, function(k) EAB:ApplyBackgroundForBar(k) end)
+                                  SUpdatePreview()
+                              end },
+                            { type="slider", label="Height", min=0, max=40, step=1,
+                              get=function() return SVal("bgPadY", 0) end,
+                              set=function(v)
+                                  SSet("bgPadY", v, function(k) EAB:ApplyBackgroundForBar(k) end)
+                                  SUpdatePreview()
+                              end },
+                        },
+                    })
+                    local bgCogAnchor = bgRgn._lastInline or bgRgn._control
+                    local bgCogBtn = MakeCogBtn(bgRgn, bgCogShowRaw, bgCogAnchor, EllesmereUI.RESIZE_ICON)
+                    bgCogBtn:ClearAllPoints()
+                    bgCogBtn:SetPoint("RIGHT", bgCogAnchor, "LEFT", -9, 0)
+                    bgCogBtn:SetAlpha(BgDisabled() and 0.15 or 0.4)
+                    bgCogBtn:SetScript("OnEnter", function(self)
+                        if BgDisabled() then
+                            EllesmereUI.ShowWidgetTooltip(self, EllesmereUI.DisabledTooltip("Bar Background"))
+                        else
+                            self:SetAlpha(0.7)
+                        end
+                    end)
+                    bgCogBtn:SetScript("OnLeave", function(self)
+                        EllesmereUI.HideWidgetTooltip()
+                        self:SetAlpha(BgDisabled() and 0.15 or 0.4)
+                    end)
+                    bgCogBtn:SetScript("OnClick", function(self)
+                        if BgDisabled() then return end
+                        bgCogShowRaw(self)
+                    end)
+                    EllesmereUI.RegisterWidgetRefresh(function()
+                        bgCogBtn:SetAlpha(BgDisabled() and 0.15 or 0.4)
+                    end)
+                end
             end
 
-            -------------------------------------------------------------------
             -------------------------------------------------------------------
             --  ICON APPEARANCE
             -------------------------------------------------------------------
             iconsSectionHeader, h = W:SectionHeader(parent, SECTION_ICON_APPEARANCE, y);  y = y - h
+
+            local function BlizzStyleOn()
+                return EAB.db.profile.useBlizzardStyle or false
+            end
 
             -- Helper: is current shape "none" (no custom shape)?
             local function ShapeIsNone()
@@ -1938,6 +2090,7 @@ initFrame:SetScript("OnEvent", function(self)
             local classColorBorderRow
             classColorBorderRow, h = W:DualRow(parent, y,
                 { type="multiSwatch", text="Border Color",
+                  disabled=BlizzStyleOn, disabledTooltip="This option requires Blizzard Style Action Bars to be disabled",
                   swatches = {
                     { tooltip = "Custom Color",
                       hasAlpha = true,
@@ -1998,6 +2151,7 @@ initFrame:SetScript("OnEvent", function(self)
                       end },
                   } },
                 { type="dropdown", text="Custom Button Shape",
+                  disabled=BlizzStyleOn, disabledTooltip="This option requires Blizzard Style Action Bars to be disabled",
                   values=SHAPE_VALUES, order=SHAPE_ORDER,
                   getValue=function()
                       local v = SGet("buttonShape")
@@ -2040,6 +2194,7 @@ initFrame:SetScript("OnEvent", function(self)
                           EAB:ApplyPaddingForBar(k)
                           EAB:ApplyBordersForBar(k)
                           EAB:ApplyFontsForBar(k)
+                          EAB:ApplyIconBackgroundForBar(k)
                       end)
                       EAB:RefreshProcGlows()
                       SUpdatePreview()
@@ -2192,6 +2347,7 @@ initFrame:SetScript("OnEvent", function(self)
             local zoomBorderRow
             zoomBorderRow, h = W:DualRow(parent, y,
                 { type="slider", text="Icon Zoom", min=0, max=10, step=0.5,
+                  disabled=BlizzStyleOn, disabledTooltip="This option requires Blizzard Style Action Bars to be disabled",
                   getValue=function() return SVal("iconZoom", EAB.db.profile.iconZoom or 5.5) end,
                   setValue=function(v)
                       SSet("iconZoom", v, function(k)
@@ -2201,6 +2357,7 @@ initFrame:SetScript("OnEvent", function(self)
                       SUpdatePreview()
                   end },
                 { type="dropdown", text="Border Size",
+                  disabled=BlizzStyleOn, disabledTooltip="This option requires Blizzard Style Action Bars to be disabled",
                   values=ns.BORDER_THICKNESS_LABELS, order=ns.BORDER_THICKNESS_ORDER,
                   itemDisabled=function(val)
                       if ShapeIsCustom() and (val == "thin" or val == "normal" or val == "heavy") then return true end
@@ -2334,199 +2491,61 @@ initFrame:SetScript("OnEvent", function(self)
                 })
             end
 
-            -- Row 3: Bar Background (toggle + inline swatch + cog) | Click Through
-            local bgAlwaysRow
-            bgAlwaysRow, h = W:DualRow(parent, y,
-                { type="toggle", text="Bar Background",
-                  getValue=function()
-                      return SGet("bgEnabled")
-                  end,
+            -- Row 3: Show Blizzard Icon Background (+ cog) | Desaturate on Cooldown
+            local ibgRow
+            ibgRow, h = W:DualRow(parent, y,
+                { type="toggle", text="Show Blizzard Icon Background",
+                  tooltip="Shows Blizzard's default icon slot background texture behind empty action bar slots.",
+                  getValue=function() return EAB.db.profile.showBlizzIconBg or false end,
                   setValue=function(v)
-                      SSet("bgEnabled", v, function(k) EAB:ApplyBackgroundForBar(k) end)
-                      SUpdatePreview()
+                      EAB.db.profile.showBlizzIconBg = v
+                      for _, info in ipairs(ns.BAR_CONFIG or {}) do
+                          EAB:ApplyIconBackgroundForBar(info.key)
+                      end
                       EllesmereUI:RefreshPage()
                   end },
-                { type="toggle", text="Click Through",
-                  getValue=function()
-                      return SGet("clickThrough")
-                  end,
-                  setValue=function(v)
-                      SSet("clickThrough", v, function(k) EAB:ApplyClickThroughForBar(k) end)
-                  end });  y = y - h
-            -- Sync icon: Bar Background settings (left region)
+                { type="toggle", text="Desaturate on Cooldown",
+                  tooltip="Desaturates (grays out) action button icons while the ability is on cooldown. GCD-only cooldowns are excluded.",
+                  getValue=function() return EAB.db.profile.desaturateOnCooldown or false end,
+                  setValue=function(v) EAB.db.profile.desaturateOnCooldown = v end });  y = y - h
+            -- Inline cog: Icon Background Opacity (left region)
             do
-                local rgn = bgAlwaysRow._leftRegion
-                EllesmereUI.BuildSyncIcon({
-                    region  = rgn,
-                    tooltip = "Apply Background Settings to all Bars",
-                    onClick = function()
-                        local s = SB()
-                        local en = s.bgEnabled
-                        local c = s.bgColor
-                        local px = s.bgPadX or 0
-                        local py = s.bgPadY or 0
-                        for _, key in ipairs(GROUP_BAR_ORDER) do
-                            EAB.db.profile.bars[key].bgEnabled = en
-                            if c then EAB.db.profile.bars[key].bgColor = { r=c.r, g=c.g, b=c.b, a=c.a } end
-                            EAB.db.profile.bars[key].bgPadX = px
-                            EAB.db.profile.bars[key].bgPadY = py
-                            EAB:ApplyBackgroundForBar(key)
-                        end
-                        EllesmereUI:RefreshPage()
-                    end,
-                    isSynced = function()
-                        local s = SB()
-                        local en = s.bgEnabled or false
-                        local px = s.bgPadX or 0
-                        local py = s.bgPadY or 0
-                        for _, key in ipairs(GROUP_BAR_ORDER) do
-                            local bs = EAB.db.profile.bars[key]
-                            if (bs.bgEnabled or false) ~= en then return false end
-                            if (bs.bgPadX or 0) ~= px then return false end
-                            if (bs.bgPadY or 0) ~= py then return false end
-                        end
-                        return true
-                    end,
-                    flashTargets = function() return { rgn } end,
-                    multiApply = {
-                        elementKeys   = GROUP_BAR_ORDER,
-                        elementLabels = SHORT_LABELS,
-                        getCurrentKey = function() return SelectedKey() end,
-                        onApply       = function(checkedKeys)
-                            local s = SB()
-                            local en = s.bgEnabled
-                            local c = s.bgColor
-                            local px = s.bgPadX or 0
-                            local py = s.bgPadY or 0
-                            for _, key in ipairs(checkedKeys) do
-                                EAB.db.profile.bars[key].bgEnabled = en
-                                if c then EAB.db.profile.bars[key].bgColor = { r=c.r, g=c.g, b=c.b, a=c.a } end
-                                EAB.db.profile.bars[key].bgPadX = px
-                                EAB.db.profile.bars[key].bgPadY = py
-                                EAB:ApplyBackgroundForBar(key)
-                            end
-                            EllesmereUI:RefreshPage()
-                        end,
-                    },
-                })
-            end
-            -- Sync icon: Click Through (right region)
-            do
-                local rgn = bgAlwaysRow._rightRegion
-                EllesmereUI.BuildSyncIcon({
-                    region  = rgn,
-                    tooltip = "Apply Click Through to all Bars",
-                    onClick = function()
-                        local v = SB().clickThrough or false
-                        for _, key in ipairs(GROUP_BAR_ORDER) do
-                            EAB.db.profile.bars[key].clickThrough = v
-                            EAB:ApplyClickThroughForBar(key)
-                        end
-                        EllesmereUI:RefreshPage()
-                    end,
-                    isSynced = function()
-                        local v = SB().clickThrough or false
-                        for _, key in ipairs(GROUP_BAR_ORDER) do
-                            if (EAB.db.profile.bars[key].clickThrough or false) ~= v then return false end
-                        end
-                        return true
-                    end,
-                    flashTargets = function() return { rgn } end,
-                    multiApply = {
-                        elementKeys   = GROUP_BAR_ORDER,
-                        elementLabels = SHORT_LABELS,
-                        getCurrentKey = function() return SelectedKey() end,
-                        onApply       = function(checkedKeys)
-                            local v = SB().clickThrough or false
-                            for _, key in ipairs(checkedKeys) do
-                                EAB.db.profile.bars[key].clickThrough = v
-                                EAB:ApplyClickThroughForBar(key)
-                            end
-                            EllesmereUI:RefreshPage()
-                        end,
-                    },
-                })
-            end
-
-            -- Inline elements on Bar Background (left): color swatch + cog (Width/Height)
-            do
-                local leftRgn = bgAlwaysRow._leftRegion
-
-                -- Color swatch
-                local bgColorGet = function()
-                    local c = SGet("bgColor")
-                    if not c then return 0, 0, 0, 0.5 end
-                    return c.r, c.g, c.b, c.a
-                end
-                local bgColorSet = function(r, g, b, a)
-                    SSetColor("bgColor", r, g, b, a, function(k) EAB:ApplyBackgroundForBar(k) end)
-                    SUpdatePreview()
-                end
-                local bgSwatch, bgUpdateSwatch = EllesmereUI.BuildColorSwatch(leftRgn, leftRgn:GetFrameLevel() + 5, bgColorGet, bgColorSet, true, 20)
-                PP.Point(bgSwatch, "RIGHT", leftRgn._control, "LEFT", -12, 0)
-                leftRgn._lastInline = bgSwatch
-                EllesmereUI.RegisterWidgetRefresh(function()
-                    local off = BgDisabled()
-                    bgSwatch:SetAlpha(off and 0.15 or 1)
-                    bgUpdateSwatch()
-                end)
-                bgSwatch:SetAlpha(BgDisabled() and 0.15 or 1)
-                -- Wrap OnClick to block color picker when bg is disabled (keep mouse enabled for tooltip)
-                local bgSwatchOrigClick = bgSwatch:GetScript("OnClick")
-                bgSwatch:SetScript("OnClick", function(self, ...)
-                    if BgDisabled() then return end
-                    if bgSwatchOrigClick then bgSwatchOrigClick(self, ...) end
-                end)
-                bgSwatch:SetScript("OnEnter", function(self)
-                    if BgDisabled() then
-                        EllesmereUI.ShowWidgetTooltip(self, EllesmereUI.DisabledTooltip("Bar Background"))
-                    end
-                end)
-                bgSwatch:SetScript("OnLeave", function(self)
-                    EllesmereUI.HideWidgetTooltip()
-                end)
-
-                -- Cog for Width/Height
-                local _, bgCogShowRaw = EllesmereUI.BuildCogPopup({
-                    title = "Bar Background Settings",
+                local rgn = ibgRow._leftRegion
+                local _, ibgCogShow = EllesmereUI.BuildCogPopup({
+                    title = "Icon Background",
                     rows = {
-                        { type="slider", label="Width", min=0, max=40, step=1,
-                          get=function() return SVal("bgPadX", 0) end,
+                        { type="slider", label="Opacity", min=0, max=100, step=1,
+                          tooltip="Controls the opacity of the Blizzard icon slot background texture.",
+                          get=function() return math.floor((EAB.db.profile.blizzIconBgAlpha or 1) * 100 + 0.5) end,
                           set=function(v)
-                              SSet("bgPadX", v, function(k) EAB:ApplyBackgroundForBar(k) end)
-                              SUpdatePreview()
-                          end },
-                        { type="slider", label="Height", min=0, max=40, step=1,
-                          get=function() return SVal("bgPadY", 0) end,
-                          set=function(v)
-                              SSet("bgPadY", v, function(k) EAB:ApplyBackgroundForBar(k) end)
-                              SUpdatePreview()
+                              EAB.db.profile.blizzIconBgAlpha = v / 100
+                              for _, info in ipairs(ns.BAR_CONFIG or {}) do
+                                  EAB:ApplyIconBackgroundForBar(info.key)
+                              end
                           end },
                     },
                 })
-                local bgCogShow = bgCogShowRaw
-                local bgCogAnchor = leftRgn._lastInline or leftRgn._control
-                local bgCogBtn = MakeCogBtn(leftRgn, bgCogShow, bgCogAnchor, EllesmereUI.RESIZE_ICON)
-                bgCogBtn:ClearAllPoints()
-                bgCogBtn:SetPoint("RIGHT", bgCogAnchor, "LEFT", -9, 0)
-                bgCogBtn:SetAlpha(BgDisabled() and 0.15 or 0.4)
-                bgCogBtn:SetScript("OnEnter", function(self)
-                    if BgDisabled() then
-                        EllesmereUI.ShowWidgetTooltip(self, EllesmereUI.DisabledTooltip("Bar Background"))
+                local ibgCtrl = rgn._control
+                local ibgCogBtn = MakeCogBtn(rgn, ibgCogShow, ibgCtrl, EllesmereUI.COGS_ICON)
+                local function IbgOff() return not (EAB.db.profile.showBlizzIconBg or false) end
+                ibgCogBtn:SetAlpha(IbgOff() and 0.15 or 0.4)
+                ibgCogBtn:SetScript("OnEnter", function(self)
+                    if IbgOff() then
+                        EllesmereUI.ShowWidgetTooltip(self, EllesmereUI.DisabledTooltip("Show Blizzard Icon Background"))
                     else
                         self:SetAlpha(0.7)
                     end
                 end)
-                bgCogBtn:SetScript("OnLeave", function(self)
+                ibgCogBtn:SetScript("OnLeave", function(self)
                     EllesmereUI.HideWidgetTooltip()
-                    self:SetAlpha(BgDisabled() and 0.15 or 0.4)
+                    self:SetAlpha(IbgOff() and 0.15 or 0.4)
                 end)
-                bgCogBtn:SetScript("OnClick", function(self)
-                    if BgDisabled() then return end
-                    bgCogShow(self)
+                ibgCogBtn:SetScript("OnClick", function(self)
+                    if IbgOff() then return end
+                    ibgCogShow(self)
                 end)
                 EllesmereUI.RegisterWidgetRefresh(function()
-                    bgCogBtn:SetAlpha(BgDisabled() and 0.15 or 0.4)
+                    ibgCogBtn:SetAlpha(IbgOff() and 0.15 or 0.4)
                 end)
             end
 
@@ -2663,6 +2682,219 @@ initFrame:SetScript("OnEvent", function(self)
                         end,
                     },
                 })
+            end
+
+            -- Row 5: Show Item Rank | Click Through
+            local rankRow
+            rankRow, h = W:DualRow(parent, y,
+                { type="toggle", text="Show Item Rank",
+                  tooltip="Shows the consumable rank (quality) diamond icon on action buttons.",
+                  getValue=function() return SGet("showRankIcon") or false end,
+                  setValue=function(v)
+                      SSet("showRankIcon", v)
+                      if _G._EAB_Apply then _G._EAB_Apply() end
+                  end },
+                { type="toggle", text="Click Through",
+                  getValue=function()
+                      return SGet("clickThrough")
+                  end,
+                  setValue=function(v)
+                      SSet("clickThrough", v, function(k) EAB:ApplyClickThroughForBar(k) end)
+                  end }
+            );  y = y - h
+            do
+                local rgn = rankRow._leftRegion
+                EllesmereUI.BuildSyncIcon({
+                    region  = rgn,
+                    tooltip = "Apply Show Item Rank to all Bars",
+                    onClick = function()
+                        local v = SB().showRankIcon or false
+                        for _, key in ipairs(GROUP_BAR_ORDER) do
+                            EAB.db.profile.bars[key].showRankIcon = v
+                        end
+                        if _G._EAB_Apply then _G._EAB_Apply() end
+                        EllesmereUI:RefreshPage()
+                    end,
+                    isSynced = function()
+                        local v = SB().showRankIcon or false
+                        for _, key in ipairs(GROUP_BAR_ORDER) do
+                            if (EAB.db.profile.bars[key].showRankIcon or false) ~= v then return false end
+                        end
+                        return true
+                    end,
+                    flashTargets = function() return { rgn } end,
+                    multiApply = {
+                        elementKeys   = GROUP_BAR_ORDER,
+                        elementLabels = SHORT_LABELS,
+                        getCurrentKey = function() return SelectedKey() end,
+                        onApply       = function(checkedKeys)
+                            local v = SB().showRankIcon or false
+                            for _, key in ipairs(checkedKeys) do
+                                EAB.db.profile.bars[key].showRankIcon = v
+                            end
+                            if _G._EAB_Apply then _G._EAB_Apply() end
+                            EllesmereUI:RefreshPage()
+                        end,
+                    },
+                })
+            end
+            -- Sync icon: Click Through (right region of rankRow)
+            do
+                local rgn = rankRow._rightRegion
+                EllesmereUI.BuildSyncIcon({
+                    region  = rgn,
+                    tooltip = "Apply Click Through to all Bars",
+                    onClick = function()
+                        local v = SB().clickThrough or false
+                        for _, key in ipairs(GROUP_BAR_ORDER) do
+                            EAB.db.profile.bars[key].clickThrough = v
+                            EAB:ApplyClickThroughForBar(key)
+                        end
+                        EllesmereUI:RefreshPage()
+                    end,
+                    isSynced = function()
+                        local v = SB().clickThrough or false
+                        for _, key in ipairs(GROUP_BAR_ORDER) do
+                            if (EAB.db.profile.bars[key].clickThrough or false) ~= v then return false end
+                        end
+                        return true
+                    end,
+                    flashTargets = function() return { rgn } end,
+                    multiApply = {
+                        elementKeys   = GROUP_BAR_ORDER,
+                        elementLabels = SHORT_LABELS,
+                        getCurrentKey = function() return SelectedKey() end,
+                        onApply       = function(checkedKeys)
+                            local v = SB().clickThrough or false
+                            for _, key in ipairs(checkedKeys) do
+                                EAB.db.profile.bars[key].clickThrough = v
+                                EAB:ApplyClickThroughForBar(key)
+                            end
+                            EllesmereUI:RefreshPage()
+                        end,
+                    },
+                })
+            end
+
+            -------------------------------------------------------------------
+            --  PAGING (MainBar + Bars 2-8 only, not Stance/Pet/Micro/Bag)
+            -------------------------------------------------------------------
+            do
+                local selKey = SelectedKey()
+                local _bkp = ns.EAB_VTABLE and ns.EAB_VTABLE.BAR_KEY_TO_PAGE
+                local showPaging = selKey and _bkp and _bkp[selKey]
+                if showPaging then
+                    _, h = W:SectionHeader(parent, "PAGING", y);  y = y - h
+
+                    local _, playerClass = UnitClass("player")
+                    local EAB_VT = ns.EAB_VTABLE or {}
+                    local PG_STATES = EAB_VT.PAGING_STATES or {}
+                    local BKP = EAB_VT.BAR_KEY_TO_PAGE or {}
+
+                    -- Build dropdown values: None, Bar 1-8
+                    local pagingValues = { none = "Default" }
+                    local pagingOrder = { "none" }
+                    local barList = {
+                        { key = "MainBar", label = "Action Bar 1 (Main)" },
+                        { key = "Bar2",    label = "Action Bar 2" },
+                        { key = "Bar3",    label = "Action Bar 3" },
+                        { key = "Bar4",    label = "Action Bar 4" },
+                        { key = "Bar5",    label = "Action Bar 5" },
+                        { key = "Bar6",    label = "Action Bar 6" },
+                        { key = "Bar7",    label = "Action Bar 7" },
+                        { key = "Bar8",    label = "Action Bar 8" },
+                    }
+                    for _, bl in ipairs(barList) do
+                        -- Skip self (can't page a bar to itself)
+                        if bl.key ~= selKey then
+                            local pg = BKP[bl.key]
+                            if pg then
+                                pagingValues[tostring(pg)] = bl.label
+                                pagingOrder[#pagingOrder + 1] = tostring(pg)
+                            end
+                        end
+                    end
+
+                    local function GetPagingVal(stateId)
+                        local paging = SGet("paging")
+                        if not paging then return "none" end
+                        local v = paging[stateId]
+                        if not v then return "none" end
+                        return tostring(v)
+                    end
+                    local function SetPagingVal(stateId, val)
+                        local bars = EAB.db.profile.bars[selKey]
+                        if not bars.paging then bars.paging = {} end
+                        if val == "none" then
+                            bars.paging[stateId] = false
+                        else
+                            bars.paging[stateId] = tonumber(val)
+                        end
+                        -- Clean up: if all values are false (all disabled), reset
+                        local anySet = false
+                        for _, v in pairs(bars.paging) do
+                            if v then anySet = true; break end
+                        end
+                        if not anySet then bars.paging = {} end
+                        if ns.RebuildBarPaging then ns.RebuildBarPaging(selKey) end
+                    end
+
+                    -- Row 1: Show Paging Arrows (MainBar only) | Shift Modifier
+                    local pagingArrowsWidget
+                    if selKey == "MainBar" then
+                        pagingArrowsWidget = { type="toggle", text="Show Paging Arrows",
+                          getValue=function() return SGet("showPagingArrows") or false end,
+                          setValue=function(v)
+                              SSet("showPagingArrows", v, function()
+                                  if ns.LayoutPagingFrame then ns.LayoutPagingFrame() end
+                              end)
+                          end,
+                          tooltip="Show page up/down arrows next to Action Bar 1 for cycling through action bar pages 1-6." }
+                    else
+                        pagingArrowsWidget = { type="label", text="" }
+                    end
+                    _, h = W:DualRow(parent, y,
+                        pagingArrowsWidget,
+                        { type="dropdown", text="Shift Modifier",
+                          values=pagingValues, order=pagingOrder,
+                          getValue=function() return GetPagingVal("shift") end,
+                          setValue=function(v) SetPagingVal("shift", v) end });  y = y - h
+
+                    -- Row 2: Ctrl Modifier | Alt Modifier
+                    _, h = W:DualRow(parent, y,
+                        { type="dropdown", text="Ctrl Modifier",
+                          values=pagingValues, order=pagingOrder,
+                          getValue=function() return GetPagingVal("ctrl") end,
+                          setValue=function(v) SetPagingVal("ctrl", v) end },
+                        { type="dropdown", text="Alt Modifier",
+                          values=pagingValues, order=pagingOrder,
+                          getValue=function() return GetPagingVal("alt") end,
+                          setValue=function(v) SetPagingVal("alt", v) end });  y = y - h
+
+                    -- Class form dropdowns (paired into DualRows)
+                    local classStatesLocal = PG_STATES.class and PG_STATES.class[playerClass]
+                    if classStatesLocal then
+                        for i = 1, #classStatesLocal, 2 do
+                            local left = classStatesLocal[i]
+                            local right = classStatesLocal[i + 1]
+                            local rightWidget
+                            if right then
+                                rightWidget = { type="dropdown", text=right.label,
+                                  values=pagingValues, order=pagingOrder,
+                                  getValue=function() return GetPagingVal(right.id) end,
+                                  setValue=function(v) SetPagingVal(right.id, v) end }
+                            else
+                                rightWidget = { type="label", text="" }
+                            end
+                            _, h = W:DualRow(parent, y,
+                                { type="dropdown", text=left.label,
+                                  values=pagingValues, order=pagingOrder,
+                                  getValue=function() return GetPagingVal(left.id) end,
+                                  setValue=function(v) SetPagingVal(left.id, v) end },
+                                rightWidget);  y = y - h
+                        end
+                    end
+                end
             end
 
             _, h = W:Spacer(parent, y, 20);  y = y - h
@@ -3402,7 +3634,7 @@ initFrame:SetScript("OnEvent", function(self)
                 barLabels, barOrder,
                 function() return SelectedKey() end,
                 function(v)
-                    EAB.db.profile.selectedBar = v
+                    _selectedBarKey = v
                     EllesmereUI:InvalidateContentHeaderCache()
                     EllesmereUI:SetContentHeader(_barsHeaderBuilder)
                     -- Always force full rebuild — combined keys (MicroBagBars,
@@ -3455,6 +3687,62 @@ initFrame:SetScript("OnEvent", function(self)
             return barsHeaderBaseH + hintH
         end
         EllesmereUI:SetContentHeader(_barsHeaderBuilder)
+
+        -------------------------------------------------------------------
+        --  Top action buttons: Quick Keybind + Blizzard/EUI Style toggle
+        -------------------------------------------------------------------
+        do
+            local BTN_W = 312
+            local BTN_H = 38
+            local GAP = 40
+            local ROW_H = BTN_H + 20
+            local rowFrame = CreateFrame("Frame", nil, parent)
+            local totalW = parent:GetWidth() - EllesmereUI.CONTENT_PAD * 2
+            PP.Size(rowFrame, totalW, ROW_H)
+            PP.Point(rowFrame, "TOPLEFT", parent, "TOPLEFT", EllesmereUI.CONTENT_PAD, y)
+
+            -- Quick Keybind Mode button (left)
+            local qkbBtn = CreateFrame("Button", nil, rowFrame)
+            PP.Size(qkbBtn, BTN_W, BTN_H)
+            PP.Point(qkbBtn, "RIGHT", rowFrame, "CENTER", -(GAP / 2), 0)
+            qkbBtn:SetFrameLevel(rowFrame:GetFrameLevel() + 1)
+            EllesmereUI.MakeStyledButton(qkbBtn, "Quick Keybind Mode", 14,
+                EllesmereUI.WB_COLOURS, function()
+                    if InCombatLockdown() then return end
+                    if not C_AddOns.IsAddOnLoaded("Blizzard_QuickKeybind") then
+                        C_AddOns.LoadAddOn("Blizzard_QuickKeybind")
+                    end
+                    if QuickKeybindFrame then
+                        EllesmereUI:Toggle()
+                        QuickKeybindFrame:Show()
+                    end
+                end)
+
+            -- Blizzard / EUI Style toggle button (right)
+            local isBlizz = EAB.db and EAB.db.profile and EAB.db.profile.useBlizzardStyle
+            local styleBtn = CreateFrame("Button", nil, rowFrame)
+            PP.Size(styleBtn, BTN_W, BTN_H)
+            PP.Point(styleBtn, "LEFT", rowFrame, "CENTER", GAP / 2, 0)
+            styleBtn:SetFrameLevel(rowFrame:GetFrameLevel() + 1)
+            local _, _, styleLbl = EllesmereUI.MakeStyledButton(styleBtn,
+                isBlizz and "EUI Style Action Bars" or "Blizzard Style Action Bars", 14,
+                EllesmereUI.WB_COLOURS, function()
+                    local old = EAB.db.profile.useBlizzardStyle or false
+                    local new = not old
+                    EllesmereUI:ShowConfirmPopup({
+                        title       = "Reload Required",
+                        message     = "Changing icon style requires a UI reload to apply.",
+                        confirmText = "Reload Now",
+                        cancelText  = "Cancel",
+                        onConfirm   = function()
+                            EAB.db.profile.useBlizzardStyle = new
+                            ReloadUI()
+                        end,
+                    })
+                end)
+
+            y = y - ROW_H
+        end
 
         -------------------------------------------------------------------
         --  Build shared settings (single mode)
@@ -3786,8 +4074,12 @@ initFrame:SetScript("OnEvent", function(self)
         _, h = W:DualRow(parent, y,
             { type="colorpicker", text="Bar Interactions Color",
               tooltip=INTERACTIONS_TIP,
-              disabled=function() return p.pushedUseClassColor end,
-              disabledTooltip="Class Colors",
+              disabled=function() return EAB.db.profile.useBlizzardStyle or p.pushedUseClassColor end,
+              disabledTooltip=function()
+                  if EAB.db.profile.useBlizzardStyle then return "This option requires Blizzard Style Action Bars to be disabled" end
+                  return "Class Colors"
+              end,
+              rawTooltip=true,
               getValue=function()
                   local c = p.pushedCustomColor
                   if not c then return 0.973, 0.839, 0.604, 1 end
@@ -3799,6 +4091,8 @@ initFrame:SetScript("OnEvent", function(self)
               hasAlpha=true },
             { type="toggle", text="Class Colored Bar Interactions",
               tooltip=INTERACTIONS_TIP,
+              disabled=function() return EAB.db.profile.useBlizzardStyle end,
+              disabledTooltip="This option requires Blizzard Style Action Bars to be disabled",
               getValue=function() return p.pushedUseClassColor end,
               setValue=function(v)
                   SetUnifiedClassColor(v)
@@ -3808,6 +4102,8 @@ initFrame:SetScript("OnEvent", function(self)
         row, h = W:DualRow(parent, y,
             { type="dropdown", text="Pushed Type",
               tooltip="The overlay that appears on the icon when you press and hold a spell button",
+              disabled=function() return EAB.db.profile.useBlizzardStyle end,
+              disabledTooltip="This option requires Blizzard Style Action Bars to be disabled",
               values=pushedTypeValues, order=pushedTypeOrder,
               getValue=function() return p.pushedTextureType or 2 end,
               setValue=function(v)
@@ -3818,6 +4114,8 @@ initFrame:SetScript("OnEvent", function(self)
               end },
             { type="dropdown", text="Highlight Type",
               tooltip="The overlay that appears on the icon when you hover your mouse over a spell button",
+              disabled=function() return EAB.db.profile.useBlizzardStyle end,
+              disabledTooltip="This option requires Blizzard Style Action Bars to be disabled",
               values=highlightTypeValues, order=highlightTypeOrder,
               getValue=function() return p.highlightTextureType or 2 end,
               setValue=function(v)
@@ -3946,22 +4244,8 @@ initFrame:SetScript("OnEvent", function(self)
               getValue=function() return p.hideCastingAnimations or castAnimForced() end,
               setValue=function(v)
                   p.hideCastingAnimations = v
-                  -- Live-apply: register/unregister casting events
-                  if ActionBarActionEventsFrame then
-                      if v then
-                          ActionBarActionEventsFrame:UnregisterEvent("UNIT_SPELLCAST_START")
-                          ActionBarActionEventsFrame:UnregisterEvent("UNIT_SPELLCAST_STOP")
-                          ActionBarActionEventsFrame:UnregisterEvent("UNIT_SPELLCAST_SUCCEEDED")
-                          ActionBarActionEventsFrame:UnregisterEvent("UNIT_SPELLCAST_FAILED")
-                          ActionBarActionEventsFrame:UnregisterEvent("UNIT_SPELLCAST_INTERRUPTED")
-                      else
-                          ActionBarActionEventsFrame:RegisterUnitEvent("UNIT_SPELLCAST_START", "player")
-                          ActionBarActionEventsFrame:RegisterUnitEvent("UNIT_SPELLCAST_STOP", "player")
-                          ActionBarActionEventsFrame:RegisterUnitEvent("UNIT_SPELLCAST_SUCCEEDED", "player")
-                          ActionBarActionEventsFrame:RegisterUnitEvent("UNIT_SPELLCAST_FAILED", "player")
-                          ActionBarActionEventsFrame:RegisterUnitEvent("UNIT_SPELLCAST_INTERRUPTED", "player")
-                      end
-                  end
+                  -- ActionBarActionEventsFrame is killed at file-load time.
+                  -- Casting animation visibility is handled by ApplySettings.
               end },
             { type="label", text="" });  y = y - h
 
@@ -3990,8 +4274,12 @@ initFrame:SetScript("OnEvent", function(self)
         row, h = W:DualRow(parent, y,
             { type="dropdown", text="Custom Proc Glow",
               values=procGlowValues, order=procGlowOrder,
-              disabled=function() return hasCustomShape end,
-              disabledTooltip="Custom shapes always use Shape Glow — change your bar shape to None or Cropped to pick a different glow",
+              disabled=function() return EAB.db.profile.useBlizzardStyle or hasCustomShape end,
+              disabledTooltip=function()
+                  if EAB.db.profile.useBlizzardStyle then return "This option requires Blizzard Style Action Bars to be disabled" end
+                  return "Custom shapes always use Shape Glow -- change your bar shape to None or Cropped to pick a different glow"
+              end,
+              rawTooltip=true,
               getValue=function() if p.procGlowEnabled == false then return 0 end; return p.procGlowType or 1 end,
               setValue=function(v)
                   local wasOff = (p.procGlowType == 0) or (p.procGlowEnabled == false)

@@ -31,6 +31,7 @@ local Enum = Enum
 local friendlyEnabled = false
 local friendlyPlates = {}
 ns.friendlyPlates = friendlyPlates
+local _cachedFriendlyTargetPlate = nil
 
 local FRIENDLY_BAR_W = 150
 local FRIENDLY_PLATE_Y_OFFSET = -18
@@ -107,12 +108,12 @@ local function ApplyFriendlyFontOverride()
     end
     local font = GetFont()
     if SystemFont_NamePlate and SystemFont_NamePlate.SetFont then
-        local _, h, flags = SystemFont_NamePlate:GetFont()
-        SystemFont_NamePlate:SetFont(font, h or 9, flags or GetNPOutline())
+        local _, _, flags = SystemFont_NamePlate:GetFont()
+        SystemFont_NamePlate:SetFont(font, 15, flags or GetNPOutline())
     end
     if SystemFont_NamePlate_Outlined and SystemFont_NamePlate_Outlined.SetFont then
-        local _, h, flags = SystemFont_NamePlate_Outlined:GetFont()
-        SystemFont_NamePlate_Outlined:SetFont(font, h or 9, flags or GetNPOutline())
+        local _, _, flags = SystemFont_NamePlate_Outlined:GetFont()
+        SystemFont_NamePlate_Outlined:SetFont(font, 15, flags or GetNPOutline())
     end
     fontOverrideApplied = true
 end
@@ -809,13 +810,14 @@ function ns.RemoveFriendlyPlate(unit)
     if friendlyMouseoverPlate == plate then
         friendlyMouseoverPlate = nil
     end
+    if _cachedFriendlyTargetPlate == plate then _cachedFriendlyTargetPlate = nil end
     plate:ClearUnit()
     friendlyFrameCache:Release(plate)
     friendlyPlates[unit] = nil
 end
 
 -- Same as RemoveFriendlyPlate but does NOT restore the Blizzard UF.
--- Used when promoting friendly → enemy so the Blizzard UF stays suppressed
+-- Used when promoting friendly -> enemy so the Blizzard UF stays suppressed
 -- until HideBlizzardFrame takes over in the enemy plate's SetUnit.
 function ns.RemoveFriendlyPlateNoRestore(unit)
     local plate = friendlyPlates[unit]
@@ -823,6 +825,7 @@ function ns.RemoveFriendlyPlateNoRestore(unit)
     if friendlyMouseoverPlate == plate then
         friendlyMouseoverPlate = nil
     end
+    if _cachedFriendlyTargetPlate == plate then _cachedFriendlyTargetPlate = nil end
     -- Clean up our plate without restoring Blizzard UF
     plate:UnregisterAllEvents()
     plate.name:SetText("")
@@ -861,7 +864,19 @@ end
 
 friendlyManager:SetScript("OnEvent", function(self, event)
     if event == "PLAYER_TARGET_CHANGED" then
-        for _, plate in pairs(friendlyPlates) do plate:ApplyTarget() end
+        -- PERF: only update old + new target instead of iterating all
+        local oldTarget = _cachedFriendlyTargetPlate
+        _cachedFriendlyTargetPlate = nil
+        for _, plate in pairs(friendlyPlates) do
+            if plate.unit and UnitIsUnit(plate.unit, "target") then
+                _cachedFriendlyTargetPlate = plate
+                break
+            end
+        end
+        if oldTarget and oldTarget.unit then oldTarget:ApplyTarget() end
+        if _cachedFriendlyTargetPlate and _cachedFriendlyTargetPlate ~= oldTarget then
+            _cachedFriendlyTargetPlate:ApplyTarget()
+        end
     elseif event == "UPDATE_MOUSEOVER_UNIT" then
         if friendlyMouseoverPlate then
             friendlyMouseoverPlate.highlight:Hide()
@@ -937,24 +952,33 @@ function ns.UpdateFriendlyNameplateSystem()
     local shouldEnable = IsFriendlyEnabled()       -- health-bar mode
     local nameOnly     = IsNameOnlyMode()           -- name-only mode
 
-    -- In follower dungeons, force-hide all friendly nameplates via CVars
-    if IsInFollowerDungeon() then
-        if SetCVar then
-            pcall(SetCVar, "nameplateShowFriendlyPlayers", 0)
-            pcall(SetCVar, "nameplateShowFriends", 0)
+    -- In follower dungeons, force-hide friendly nameplates via CVars.
+    -- SetCVar for nameplate CVars is protected in combat; skip to avoid taint.
+    -- Friendly player CVars are only touched when the user has EUI managing
+    -- friendly player nameplates. When disabled we leave those CVars alone
+    -- so Blizzard's own Nameplate settings own them. Friendly NPC CVars are
+    -- always managed because they have their own EUI toggle.
+    if not InCombatLockdown() and SetCVar then
+        local fp = FP()
+        local euiManagesPlayers = fp and (fp.showFriendlyPlayers ~= false)
+        if IsInFollowerDungeon() then
+            if euiManagesPlayers then
+                pcall(SetCVar, "nameplateShowFriendlyPlayers", 0)
+                pcall(SetCVar, "nameplateShowFriends", 0)
+            end
             pcall(SetCVar, "nameplateShowFriendlyNPCs", 0)
             pcall(SetCVar, "nameplateShowFriendlyNpcs", 0)
-        end
-    else
-        -- Restore user's preferred friendly CVar state
-        local fp = FP()
-        if fp and SetCVar then
-            local showPlayers = (fp.showFriendlyPlayers ~= false)
-            local showNPCs = (fp.showFriendlyNPCs == true)
-            pcall(SetCVar, "nameplateShowFriendlyPlayers", showPlayers and 1 or 0)
-            pcall(SetCVar, "nameplateShowFriends", showPlayers and 1 or 0)
-            pcall(SetCVar, "nameplateShowFriendlyNPCs", showNPCs and 1 or 0)
-            pcall(SetCVar, "nameplateShowFriendlyNpcs", showNPCs and 1 or 0)
+        else
+            -- Restore user's preferred friendly CVar state
+            if fp then
+                local showNPCs = (fp.showFriendlyNPCs == true)
+                if euiManagesPlayers then
+                    pcall(SetCVar, "nameplateShowFriendlyPlayers", 1)
+                    pcall(SetCVar, "nameplateShowFriends", 1)
+                end
+                pcall(SetCVar, "nameplateShowFriendlyNPCs", showNPCs and 1 or 0)
+                pcall(SetCVar, "nameplateShowFriendlyNpcs", showNPCs and 1 or 0)
+            end
         end
     end
 
@@ -1014,7 +1038,7 @@ function ns.UpdateFriendlyNameplateSystem()
         ApplyFriendlyFontOverride()
         -- (nameplate sizing handled by Blizzard in name-only mode)
         -- Set class-color CVar for Blizzard's name-only rendering
-        if SetCVar then
+        if SetCVar and not InCombatLockdown() then
             local cc = (_fp and _fp.classColorFriendly ~= false) and 1 or 0
             pcall(SetCVar, "nameplateUseClassColorForFriendlyPlayerUnitNames", cc)
         end
@@ -1055,14 +1079,20 @@ end
 local initFrame = CreateFrame("Frame")
 initFrame:RegisterEvent("PLAYER_LOGIN")
 initFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
+initFrame:RegisterEvent("ZONE_CHANGED_NEW_AREA")
 initFrame:SetScript("OnEvent", function(self, event)
     if event == "PLAYER_LOGIN" then
         self:UnregisterEvent("PLAYER_LOGIN")
         ns.UpdateFriendlyNameplateSystem()
-    elseif event == "PLAYER_ENTERING_WORLD" then
+    elseif event == "PLAYER_ENTERING_WORLD" or event == "ZONE_CHANGED_NEW_AREA" then
         -- Re-evaluate the friendly system on every zone transition so
         -- follower dungeons (and similar) correctly disable/enable it.
         ns.UpdateFriendlyNameplateSystem()
+        -- Delayed re-check: instance/follower dungeon state may not be
+        -- available yet when PLAYER_ENTERING_WORLD first fires on zone-in.
+        C_Timer.After(1, function()
+            ns.UpdateFriendlyNameplateSystem()
+        end)
         -- Sweep every zone transition / reload to pick up any plates that
         -- were missed during the initial enable or that appeared between
         -- PLAYER_LOGIN and the world being fully rendered.

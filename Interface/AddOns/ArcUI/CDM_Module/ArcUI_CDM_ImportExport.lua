@@ -479,6 +479,11 @@ local function BuildExportData(options)
                 autoTrackEquippedTrinkets = arcAuras.autoTrackEquippedTrinkets,
                 autoTrackSlots = arcAuras.autoTrackSlots and DeepCopy(arcAuras.autoTrackSlots) or nil,
                 onlyOnUseTrinkets = arcAuras.onlyOnUseTrinkets,
+                -- Custom Icons (Arc Auras timer-driven icons): user-defined
+                -- timers with start/end triggers. DeepCopy so importers get
+                -- their own mutable copy. Empty table is intentional — lets
+                -- importers know to wipe their existing custom timers.
+                customTimers = arcAuras.customTimers and DeepCopy(arcAuras.customTimers) or {},
             }
         end
     end
@@ -1294,6 +1299,17 @@ function IE.Import(importString, options)
         
         local arcAuras = ns.db.char.arcAuras
         
+        -- If the export has arcAuras disabled, treat as a full wipe —
+        -- the exporter intended Arc Auras to be off with no tracked icons.
+        -- Clear everything and set enabled=false, don't import any items/spells.
+        if data.arcAuras.enabled == false then
+            wipe(arcAuras.trackedItems)
+            wipe(arcAuras.trackedSpells)
+            if arcAuras.positions then wipe(arcAuras.positions) end
+            if arcAuras.customTimers then wipe(arcAuras.customTimers) end
+            arcAuras.enabled = false
+        else
+        
         -- Add tracked items (REPLACE existing - wipe first to prevent duplicates from old items surviving)
         if data.arcAuras.trackedItems then
             wipe(arcAuras.trackedItems)
@@ -1348,6 +1364,28 @@ function IE.Import(importString, options)
         if data.arcAuras.onlyOnUseTrinkets ~= nil then
             arcAuras.onlyOnUseTrinkets = data.arcAuras.onlyOnUseTrinkets
         end
+
+        -- Custom Icons (Arc Auras timer-driven icons). Mirror the
+        -- trackedSpells pattern: wipe existing then replace. Each config
+        -- may carry the new-shape startTrigger/endTrigger fields or the
+        -- legacy triggerType/resetOn* bools — the timer engine's
+        -- NormalizeConfigTriggers handles both on frame creation.
+        if data.arcAuras.customTimers then
+            if not arcAuras.customTimers then
+                arcAuras.customTimers = {}
+            else
+                wipe(arcAuras.customTimers)
+            end
+            for arcID, config in pairs(data.arcAuras.customTimers) do
+                arcAuras.customTimers[arcID] = DeepCopy(config)
+                importedCounts.arcAuras = importedCounts.arcAuras + 1
+            end
+            -- Ask the timer engine to tear down its existing frames and
+            -- rebuild from the freshly-imported config table.
+            if ns.ArcAurasTimer and ns.ArcAurasTimer.RebuildAll then
+                ns.ArcAurasTimer.RebuildAll()
+            end
+        end
         
         -- Also copy to target profile for profile system
         local cdmGroupsDB = ns.db.char.cdmGroups
@@ -1364,9 +1402,11 @@ function IE.Import(importString, options)
                     autoTrackEquippedTrinkets = arcAuras.autoTrackEquippedTrinkets,
                     autoTrackSlots = arcAuras.autoTrackSlots and DeepCopy(arcAuras.autoTrackSlots) or nil,
                     onlyOnUseTrinkets = arcAuras.onlyOnUseTrinkets,
+                    customTimers = arcAuras.customTimers and DeepCopy(arcAuras.customTimers) or nil,
                 }
             end
         end
+        end -- end else (arcAuras.enabled ~= false)
     end
     
     -- ═══════════════════════════════════════════════════════════════════════════

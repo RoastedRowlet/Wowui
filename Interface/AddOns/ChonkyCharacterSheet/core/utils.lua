@@ -25,6 +25,24 @@ function CCS.GetFontKeyByPath(path)
     return nil
 end
 
+function CCS.display_time(timex, spelltimer)
+	local timestring = ""
+	
+	if timex < 0 then timex = timex*-1 end
+	
+	local hours = floor(mod(timex, 86400)/3600)
+	local minutes = floor(mod(timex, 3600)/60)
+	local seconds = floor(mod(timex,60))
+	if spelltimer == false then
+		timestring = format("%02d:%02d:%02d", hours, minutes, seconds)
+	else
+		if hours > 0 then timestring = timestring .. hours .. "h " end
+		if minutes > 0 then timestring = timestring .. format("%02dm ",minutes) end
+		if seconds > 0 and hours <= 0 then timestring = timestring .. format("%02ds ", seconds)  end
+	end
+	return timestring
+end
+
 -- All of this tooltip code because blizzard needs to control GameTooltip and causes secret issues if a tooltip displays money... Frickin glorious...
 function CCS:CreateTooltip(name)
     local tooltip = _G[name] or CreateFrame("GameTooltip", name, UIParent, "TooltipBackdropTemplate") -- GameTooltipTemplate, 
@@ -59,7 +77,7 @@ end
 CCS.tooltip = CCS:CreateTooltip("ccs_tooltip")
 
 function CCS.RenderSafeTooltip(tooltip, link, unit)
-    if not link then return end
+    if not link or CCS.AreSecretsDisabled() then return end
     unit = unit or "player"
 
     -- Hidden parser
@@ -467,64 +485,23 @@ function CCS:PrimeFontsAndTextures()
     CCS.FontsPrimed = true
 end
 
-function CCS:LoadBlizzardAddOns()
-    if self.BlizzardLoaded then return end
-
-    local function safeLoad(addonName)
-        if not C_AddOns.IsAddOnLoaded(addonName) then
-            local loaded, reason = AddOnUtil.LoadAddOn(addonName)
-            if not loaded then
-                return false
-            end
+function CCS.FontPathExists(path)
+    for _, fontPath in pairs(CCS.fonts) do
+        if fontPath == path then
+            return true
         end
-        return true
     end
-
-    -- Load required Blizzard UI addons
-    local addons = {
-        "Blizzard_CharacterFrame",
-        "Blizzard_TokenUI",
-        "Blizzard_ChallengesUI",
-        "Blizzard_WeeklyRewards",
-        "Blizzard_EncounterJournal",
-        "Blizzard_Transmog"
-    }
-
-    for _, addon in ipairs(addons) do
-        safeLoad(addon)
-    end
-
-    -- Initialize WeeklyRewards UI if available
-    if type(WeeklyRewards_LoadUI) == "function" then
-        WeeklyRewards_LoadUI()
-    end
-    TokenFrame:SetPoint("TOPLEFT", CharacterFrame, "TOPLEFT", 0, 0)
-    if CharacterFrameBg then
-        TokenFrame:SetPoint("BOTTOMRIGHT", CharacterFrameBg, "BOTTOMRIGHT", 0, 0)
-    else
-        TokenFrame:SetPoint("BOTTOMRIGHT", CharacterFrame, "BOTTOMRIGHT", 0, 0)
-    end
-
-    -- Safely configure WeeklyRewardsFrame
-    if WeeklyRewardsFrame and WeeklyRewardsFrame.PVPFrame and WeeklyRewardsFrame.WorldFrame then
-        WeeklyRewardsFrame:SetActivityShown(false, WeeklyRewardsFrame.PVPFrame, Enum.WeeklyRewardChestThresholdType.RankedPvP)
-        WeeklyRewardsFrame:SetActivityShown(true, WeeklyRewardsFrame.WorldFrame, Enum.WeeklyRewardChestThresholdType.World)
-        WeeklyRewardsFrame:SetUpActivity(
-            WeeklyRewardsFrame.WorldFrame,
-            WORLD,
-            "evergreen-weeklyrewards-category-world",
-            Enum.WeeklyRewardChestThresholdType.World
-        )
-        WeeklyRewardsFrame:FullRefresh()
-    end
-    if C_MythicPlus ~= nil then
-        C_MythicPlus.RequestCurrentAffixes();
-        C_MythicPlus.RequestMapInfo();
-    end
-
-    self.BlizzardLoaded = true
+    return false
 end
 
+function CCS.FontFileExists(fileName)
+    return CCS.fontFiles[fileName] ~= nil
+end
+
+function CCS.GetFileNameFromPath(path)
+    if not path then return nil end
+    return path:match("([^\\/:]+)$")
+end
 
 -- Check if an option applies for a given version (or current by default)
 function CCS.IsVersion(option, flag)
@@ -953,7 +930,7 @@ function CCS.testExportImport()
 
         print("|cff9999ffStarting export/import validation test...|r")
 
-        -- Step 1: Export
+        -- Export
         local exportStr = CCS.ExportProfile(originalProfile)
         if type(exportStr) ~= "string" then
             print("|cffff0000Test failed! ExportProfile did not return a string.|r")
@@ -961,7 +938,7 @@ function CCS.testExportImport()
         end
         print("|cff00ff00Export successful.|r")
 
-        -- Step 2: Compression check
+        -- Compression check
         local LibDeflate = LibDeflate
         if LibDeflate then
             local decoded = LibDeflate:DecodeForPrint(exportStr)
@@ -979,7 +956,7 @@ function CCS.testExportImport()
             print("|cffffff00Warning: LibDeflate not found, skipping compression test.|r")
         end
 
-        -- Step 3: Import
+        -- Import
         local success, imported = pcall(CCS.ImportProfile, exportStr)
         if not success then
             print("|cffff0000ImportProfile threw an error:|r " .. tostring(imported))
@@ -990,7 +967,7 @@ function CCS.testExportImport()
             return
         end
 
-        -- Step 4: Schema validation
+        -- Schema validation
         local valid, err = CCS.validateProfileStructure(imported)
         if not valid then
             print("|cffff0000Test failed! Schema invalid:|r " .. err)
@@ -998,7 +975,7 @@ function CCS.testExportImport()
         end
         print("|cff00ff00Profile schema validation passed.|r")
 
-        -- Step 5: Deep equality check
+        -- Deep equality check
         if CCS.deepCompare(originalProfile, imported) then
             print("|cff00ff00Table structure identical after import.|r")
         else
@@ -1509,6 +1486,7 @@ function CCS:ParseItemStats(unit, slot)
         if ench then
             for _, entry in ipairs(ench) do
                 local statvalue = entry.value
+
                 if enchantID < 7700 and CCS.tocversion >= 120000 then
                     statvalue = statvalue / 15
                 end
@@ -1531,7 +1509,7 @@ function CCS:ParseItemStats(unit, slot)
             enchantProcessed = true
         end
 
-        -- 1) raw bonusIDs
+        -- raw bonusIDs
         for _, b in ipairs(parsed.bonusIDs) do
             local e = CCS.embellishmentBonus[b]
             if e then
@@ -1542,7 +1520,7 @@ function CCS:ParseItemStats(unit, slot)
             end
         end
 
-        -- 2) key:value pairs
+        -- key:value pairs
         for key, val in pairs(parsed.pairs) do
             local e = CCS.embellishmentBonus[key]
             if e then
@@ -1855,6 +1833,14 @@ local function StripEnchantPrefix(raw)
     return text
 end
 
+function CCS.GetTrackColor(quality)
+    local opt = CCS.CustomTrackOptions[quality]
+    if opt then
+        local c = option(opt)
+        if c then return c end
+    end
+    return CCS.DefaultTrackColors[quality] or {1,1,1,1}
+end
 
 function CCS.updateLocationInfo(unit, slotIndex, framename)
     if slotIndex == 18 then return end -- skip ranged slot
@@ -1886,7 +1872,6 @@ function CCS.updateLocationInfo(unit, slotIndex, framename)
         SubElementSetPoint2 = "LEFT" 
         neg = -1
     end
-	
     -- Get item link and info
     local link = GetInventoryItemLink(unit, slotIndex)
     local itemLoc = isPlayer and ItemLocation:CreateFromEquipmentSlot(slotIndex) or nil
@@ -1911,6 +1896,8 @@ function CCS.updateLocationInfo(unit, slotIndex, framename)
     local nameTxt = _G[slotFrameName.."namefs"] or _G[slotFrameName]:CreateFontString(slotFrameName.."namefs")
     local ilvlTxt = _G[slotFrameName.."ilvlfs"] or _G[slotFrameName]:CreateFontString(slotFrameName.."ilvlfs")
     local enchantTxt = _G[slotFrameName.."enchantfs"] or _G[slotFrameName]:CreateFontString(slotFrameName.."enchantfs")
+    local wpBuffname = _G[slotFrameName.."wpBuffname"] or _G[slotFrameName]:CreateFontString(slotFrameName.."wpBuffname")
+    local wpBufftime = _G[slotFrameName.."wpBufftime"] or _G[slotFrameName]:CreateFontString(slotFrameName.."wpBufftime")
     local bgfader = _G[slotFrameName.."bgfader"] or CreateFrame("Frame", slotFrameName.."bgfader", _G[slotFrameName])
     local bgfadertex = _G[bgfader:GetName().."tex"] or bgfader:CreateTexture(bgfader:GetName().."tex", "BACKGROUND", nil, 1)
 
@@ -1982,6 +1969,31 @@ function CCS.updateLocationInfo(unit, slotIndex, framename)
         option("fontcolor_enchant"..suffix)[3] or 1,
         option("fontcolor_enchant"..suffix)[4] or 1
     )
+    -- Temporary Item Buffs
+    wpBuffname:SetPoint(SubElementSetPoint, wpBufftime, SubElementSetPoint2, 5 * neg, 0)
+    wpBuffname:SetFont(option("fontname_enchant"..suffix) or CCS.fontname, option("fontsize_enchant"..suffix) or 10, CCS.textoutline)
+
+    if option("showfontshadow") == true then
+        wpBuffname:SetShadowColor(unpack(option("fontshadowcolor") or {0,0,0,1}))
+        wpBuffname:SetShadowOffset(option("fontshadowx") or 0, option("fontshadowy") or 0)
+    end	            
+    wpBuffname:SetTextColor(
+        option("fontcolor_enchant"..suffix)[1] or 1,
+        option("fontcolor_enchant"..suffix)[2] or 1,
+        option("fontcolor_enchant"..suffix)[3] or 1,
+        option("fontcolor_enchant"..suffix)[4] or 1
+    )
+	
+    wpBufftime:SetPoint(SubElementSetPoint, _G[slotFrameName], SubElementSetPoint, 0 * neg, 29)
+    wpBufftime:SetFont(option("fontname_enchant"..suffix) or CCS.fontname, option("fontsize_enchant"..suffix) or 10, CCS.textoutline)
+	wpBufftime:SetJustifyH("LEFT")
+
+    if option("showfontshadow") == true then
+        wpBufftime:SetShadowColor(unpack(option("fontshadowcolor") or {0,0,0,1}))
+        wpBufftime:SetShadowOffset(option("fontshadowx") or 0, option("fontshadowy") or 0)
+    end	            
+    wpBufftime:SetTextColor(1,1,1,1)
+    wpBufftime:SetWidth(60*(option("fontsize_enchant"..suffix) or 12)/12)
 
     -- Optional: durability positioning
     if isPlayer and durabilityTxt then
@@ -2012,20 +2024,25 @@ function CCS.updateLocationInfo(unit, slotIndex, framename)
     gemIconframe1:SetSize(15, 15)
     gemIconframe1:SetPoint("TOP"..SubElementSetPoint2, slotFrameName, "TOP"..SubElementSetPoint, -3 * neg, 6)
     gemIconframe1:SetFrameStrata("HIGH")
+    gemIconframe1:SetFrameLevel(10)
     
     gemIconframe2:SetSize(15, 15)
     gemIconframe2:SetPoint(SubElementSetPoint2, slotFrameName, SubElementSetPoint, -3 * neg, 0)
     gemIconframe2:SetFrameStrata("HIGH")
+    gemIconframe2:SetFrameLevel(10)
     
     gemIconframe3:SetSize(15, 15)
     gemIconframe3:SetPoint("BOTTOM"..SubElementSetPoint2, slotFrameName, "BOTTOM"..SubElementSetPoint, -3 * neg, -6)
     gemIconframe3:SetFrameStrata("HIGH")
-
-
+    gemIconframe3:SetFrameLevel(10)
+    
     -- Hide all elements by default
     nameTxt:Hide()
     ilvlTxt:Hide()
     enchantTxt:Hide()
+    wpBuffname:Hide()
+    wpBufftime:Hide()
+
     if durabilityTxt then durabilityTxt:Hide() end
     gemIconframe1:Hide()
     gemIconframe2:Hide()
@@ -2038,6 +2055,8 @@ function CCS.updateLocationInfo(unit, slotIndex, framename)
         nameTxt:SetText("")
         ilvlTxt:SetText("")
         enchantTxt:SetText("")
+        wpBuffname:SetText("")
+        wpBufftime:SetText("")
         if durabilityTxt then durabilityTxt:SetText("") end
         return
 	else 
@@ -2045,7 +2064,40 @@ function CCS.updateLocationInfo(unit, slotIndex, framename)
         local _, _, _, _, _, _, Gem1, Gem2, Gem3, _, _, _, _, _, _ = string.find(link, "|?c?f?f?(%x*)|?H?([^:]*):?(%d+):?(%d*):?(%d*):?(%d*):?(%d*):?(%d*):?(%-?%d*):?(%-?%d*):?(%d*):?(%d*)|?h?%[?([^%[%]]*)%]?|?h?|?r?")
         local itemName, _, itemRarity, itemiLevel, _, itemType, _, _, _, _, _, _, _, _, expacID, setID, _ = C_Item.GetItemInfo(link)
         local Color = "ffffffff"
+        local chigh, ahigh
+        local cilvl = itemiLevel
+        local chighc = "|cffff0000"
+        if isPlayer then
+            chigh, ahigh = C_ItemUpgrade.GetHighWatermarkForItem(GetInventoryItemLink("player",slotIndex))
+        end
 
+        if isPlayer and option("showtempenchants") and (slotIndex == 16 or slotIndex == 17) then
+            local hasMainHandEnchant, mainHandExpiration, mainHandCharges, mainHandEnchantID, hasOffHandEnchant, offHandExpiration, offHandCharges, offHandEnchantID, hasRangedEnchant, rangedExpiration, rangedCharges, rangedEnchantID = GetWeaponEnchantInfo()
+            local displaytext = ""
+            local tempEnchantName = ""
+                        
+            if hasMainHandEnchant and mainHandExpiration ~= nil and slotIndex == 16 then
+                if CCS.tempenchantLookup[mainHandEnchantID] and CCS.tempenchantLookup[mainHandEnchantID].spellID ~= nil then
+                    tempEnchantName = C_Spell.GetSpellName(CCS.tempenchantLookup[mainHandEnchantID].spellID) or ""
+                end
+				wpBuffname:SetText(tempEnchantName or "")
+				wpBufftime:SetText(CCS.display_time(mainHandExpiration/1000, false))
+				wpBuffname:Show()
+				wpBufftime:Show()
+            end
+            
+            if hasOffHandEnchant and offHandExpiration ~= nil and slotIndex == 17 then
+                if CCS.tempenchantLookup[offHandEnchantID] and CCS.tempenchantLookup[offHandEnchantID].spellID ~= nil then
+                    tempEnchantName = C_Spell.GetSpellName(CCS.tempenchantLookup[offHandEnchantID].spellID) or ""
+                end
+				wpBuffname:SetText(tempEnchantName or "")
+				wpBufftime:SetText(CCS.display_time(offHandExpiration/1000, false))
+				wpBuffname:Show()
+				wpBufftime:Show()
+            end
+
+        end  
+        
         local itemID = tonumber(link:match("item:(%d+)"))
         if not C_Item.IsItemDataCachedByID(itemID) then
             C_Item.RequestLoadItemDataByID(itemID)
@@ -2173,128 +2225,154 @@ function CCS.updateLocationInfo(unit, slotIndex, framename)
             end
             nameTxt:Show()
         end
-        
-        -- iLvl information [White] 
-        if option("showilvl"..suffix) == true then
-            if option("showitemupgrade"..suffix) then 
-                if string.len(ItemUpgradeLevel) > 0 then
-                    local upr, upg, upb, upalpha = option("itemupgradecolor"..suffix)[1], option("itemupgradecolor"..suffix)[2], option("itemupgradecolor"..suffix)[3], option("itemupgradecolor"..suffix)[4];
+            local iDivider = "/"
+            -- iLvl information [White] 
+            if option("showilvl"..suffix) == false then
+                itemiLevel = ""
+                iDivider = ""
+            end
+            
+        if option("showitemupgrade"..suffix) then 
+            if string.len(ItemUpgradeLevel) > 0 then
 
-                    if option("upgradecolorrarity") == true and CCS.UpgradeTrackNames[locale] and CCS.UpgradeTrackNames[locale][ItemUpgradeTrack] then
-                        upr, upg, upb, upalpha = unpack(CCS.UpgradeTrackNames[locale][ItemUpgradeTrack])
-                    end
-                    
-                    ItemUpgradeLevel = WrapTextInColor("(" .. ItemUpgradeLevel .. ")", CreateColor(upr, upg, upb, upalpha))
+                -- Start with the base upgrade color
+                local upr, upg, upb, upalpha = 
+                    option("itemupgradecolor"..suffix)[1],
+                    option("itemupgradecolor"..suffix)[2],
+                    option("itemupgradecolor"..suffix)[3],
+                    option("itemupgradecolor"..suffix)[4]
+
+                -- Override with rarity/custom colors if enabled
+                if option("customupgradecolor") == true 
+                   and CCS.UpgradeTrackNames[locale] 
+                   and CCS.UpgradeTrackNames[locale][ItemUpgradeTrack] then
+
+                    local trackID = CCS.UpgradeTrackNames[locale][ItemUpgradeTrack]
+                    upr, upg, upb, upalpha = unpack(CCS.GetTrackColor(trackID))
                 end
+
+                ItemUpgradeLevel = WrapTextInColor(
+                    "(" .. ItemUpgradeLevel .. ")",
+                    CreateColor(upr, upg, upb, upalpha)
+                )
+            end
+        else
+            ItemUpgradeLevel = ""
+        end
+
+
+            if option("showhighwater") and not CCS.AreSecretsDisabled() and isPlayer and chigh ~= nil and tonumber(chigh) and cilvl ~= nil and tonumber(cilvl) and tonumber(chigh) > tonumber(cilvl) then
+                chigh = iDivider..chigh
             else
-                ItemUpgradeLevel = ""
+                chighc = ""
+                chigh = ""
             end
             
             if displaytoleft and itemiLevel ~= nil then
-                ilvlTxt:SetText(ItemUpgradeLevel .." ".. itemiLevel) 
-                --ilvlTxt:SetText(ItemUpgradeLevel .. " |cFFffffff" .. itemiLevel .. "|r") 
+                ilvlTxt:SetText(ItemUpgradeLevel.." "..chighc.. itemiLevel.."|r"..chigh) 
             elseif itemiLevel ~= nil then
-                --ilvlTxt:SetText("|cFFffffff" .. itemiLevel .. " " .. ItemUpgradeLevel .. "|r")
-                ilvlTxt:SetText(itemiLevel .." ".. ItemUpgradeLevel) 
+                ilvlTxt:SetText(chighc..itemiLevel.."|r" ..chigh.." ".. ItemUpgradeLevel) 
             end
             ilvlTxt:Show()
-        end
+
         
         -- Enchant Info [Mint/Red, 10]  (Mint #2afab5)
+		if Enchant == "" and option("showenchantgemerrors"..suffix) == true then
+		
+			enchantTxt:SetTextColor(1,0,0,1)
+		
+			-- See if an enchant is missing from a slot. Extra code is to allow us to turn on/off the slots each time blizzard makes a change.
+			if slotIndex == 1 then --  "Head" -
+				if CCS.expansionID == LE_EXPANSION_WAR_WITHIN or expacID == LE_EXPANSION_WAR_WITHIN then
+					--Enchant = "<" .. ENSCRIBE .. ": " .. ADDON_MISSING .. ">"
+				elseif CCS.expansionID == LE_EXPANSION_MIDNIGHT then
+					Enchant = "<" .. ENSCRIBE .. ": " .. ADDON_MISSING .. ">"                        
+				end
+			elseif slotIndex == 2 then --  "Neck" !
+				if CCS.expansionID == LE_EXPANSION_WAR_WITHIN or expacID == LE_EXPANSION_WAR_WITHIN then
+					--Enchant = "<" .. ENSCRIBE .. ": " .. ADDON_MISSING .. ">"
+				elseif CCS.expansionID == LE_EXPANSION_MIDNIGHT then
+					--Enchant = "<" .. ENSCRIBE .. ": " .. ADDON_MISSING .. ">"                        
+				end                
+			elseif slotIndex == 3 then --  "Shoulder"
+				if CCS.expansionID == LE_EXPANSION_WAR_WITHIN or expacID == LE_EXPANSION_WAR_WITHIN then
+					--Enchant = "<" .. ENSCRIBE .. ": " .. ADDON_MISSING .. ">"
+				elseif CCS.expansionID == LE_EXPANSION_MIDNIGHT then
+					Enchant = "<" .. ENSCRIBE .. ": " .. ADDON_MISSING .. ">"                        
+				end
+			elseif slotIndex == 5 then --  "Chest" !
+				if CCS.expansionID == LE_EXPANSION_WAR_WITHIN or expacID == LE_EXPANSION_WAR_WITHIN then
+					Enchant = "<" .. ENSCRIBE .. ": " .. ADDON_MISSING .. ">"
+				elseif CCS.expansionID == LE_EXPANSION_MIDNIGHT then
+					Enchant = "<" .. ENSCRIBE .. ": " .. ADDON_MISSING .. ">"                        
+				end
+			elseif slotIndex == 6 then --  "Waist" -
+				if CCS.expansionID == LE_EXPANSION_WAR_WITHIN or expacID == LE_EXPANSION_WAR_WITHIN then
+					--Enchant = "<" .. ENSCRIBE .. ": " .. ADDON_MISSING .. ">"
+				elseif CCS.expansionID == LE_EXPANSION_MIDNIGHT then
+					--Enchant = "<" .. ENSCRIBE .. ": " .. ADDON_MISSING .. ">"                        
+				end                
+			elseif slotIndex == 7 then --  "Legs" -
+				if CCS.expansionID == LE_EXPANSION_WAR_WITHIN or expacID == LE_EXPANSION_WAR_WITHIN then
+					Enchant = "<" .. ENSCRIBE .. ": " .. ADDON_MISSING .. ">"
+				elseif CCS.expansionID == LE_EXPANSION_MIDNIGHT then
+					Enchant = "<" .. ENSCRIBE .. ": " .. ADDON_MISSING .. ">"                        
+				end                
+			elseif slotIndex == 8 then --  "Feet" !
+				if CCS.expansionID == LE_EXPANSION_WAR_WITHIN or expacID == LE_EXPANSION_WAR_WITHIN then
+					Enchant = "<" .. ENSCRIBE .. ": " .. ADDON_MISSING .. ">"
+				elseif CCS.expansionID == LE_EXPANSION_MIDNIGHT then
+					Enchant = "<" .. ENSCRIBE .. ": " .. ADDON_MISSING .. ">"                        
+				end                
+			elseif slotIndex == 9 then --  "Wrist" !
+				if CCS.expansionID == LE_EXPANSION_WAR_WITHIN or expacID == LE_EXPANSION_WAR_WITHIN then
+					Enchant = "<" .. ENSCRIBE .. ": " .. ADDON_MISSING .. ">"
+				elseif CCS.expansionID == LE_EXPANSION_MIDNIGHT then
+					--Enchant = "<" .. ENSCRIBE .. ": " .. ADDON_MISSING .. ">"                        
+				end                
+			elseif slotIndex == 10 then --  "Hands" !
+				if CCS.expansionID == LE_EXPANSION_WAR_WITHIN or expacID == LE_EXPANSION_WAR_WITHIN then
+					--Enchant = "<" .. ENSCRIBE .. ": " .. ADDON_MISSING .. ">"
+				elseif CCS.expansionID == LE_EXPANSION_MIDNIGHT then
+					--Enchant = "<" .. ENSCRIBE .. ": " .. ADDON_MISSING .. ">"                        
+				end                
+			elseif slotIndex == 11 then --  "Finger0" !
+				if CCS.expansionID == LE_EXPANSION_WAR_WITHIN or expacID == LE_EXPANSION_WAR_WITHIN then
+					Enchant = "<" .. ENSCRIBE .. ": " .. ADDON_MISSING .. ">"
+				elseif CCS.expansionID == LE_EXPANSION_MIDNIGHT then
+					Enchant = "<" .. ENSCRIBE .. ": " .. ADDON_MISSING .. ">"                        
+				end                
+			elseif slotIndex == 12 then --  "Finger1" !
+				if CCS.expansionID == LE_EXPANSION_WAR_WITHIN or expacID == LE_EXPANSION_WAR_WITHIN then
+					Enchant = "<" .. ENSCRIBE .. ": " .. ADDON_MISSING .. ">"
+				elseif CCS.expansionID == LE_EXPANSION_MIDNIGHT then
+					Enchant = "<" .. ENSCRIBE .. ": " .. ADDON_MISSING .. ">"                        
+				end                
+			elseif slotIndex == 15 then --  "Back" !
+				if CCS.expansionID == LE_EXPANSION_WAR_WITHIN or expacID == LE_EXPANSION_WAR_WITHIN then
+					Enchant = "<" .. ENSCRIBE .. ": " .. ADDON_MISSING .. ">"
+				elseif CCS.expansionID == LE_EXPANSION_MIDNIGHT then
+					--Enchant = "<" .. ENSCRIBE .. ": " .. ADDON_MISSING .. ">"                        
+				end                
+			elseif slotIndex == 16 then --  "MainHand" !
+				if CCS.expansionID == LE_EXPANSION_WAR_WITHIN or expacID == LE_EXPANSION_WAR_WITHIN then
+					Enchant = "<" .. ENSCRIBE .. ": " .. ADDON_MISSING .. ">"
+				elseif CCS.expansionID == LE_EXPANSION_MIDNIGHT then
+					Enchant = "<" .. ENSCRIBE .. ": " .. ADDON_MISSING .. ">"                        
+				end                
+			elseif slotIndex == 17 and itemType == "Weapon" then --  "SecondaryHand" -
+				if CCS.expansionID == LE_EXPANSION_WAR_WITHIN or expacID == LE_EXPANSION_WAR_WITHIN then
+					Enchant = "<" .. ENSCRIBE .. ": " .. ADDON_MISSING .. ">"
+				elseif CCS.expansionID == LE_EXPANSION_MIDNIGHT then
+					Enchant = "<" .. ENSCRIBE .. ": " .. ADDON_MISSING .. ">"                        
+				end                
+			end
+			enchantTxt:SetText(Enchant)
+            enchantTxt:Show()
+		end
+
         if option("showenchants"..suffix) == true then
-           
-            if Enchant == "" and option("showenchantgemerrors"..suffix) == true then
-            
-                enchantTxt:SetTextColor(1,0,0,1)
-            
-                -- See if an enchant is missing from a slot. Extra code is to allow us to turn on/off the slots each time blizzard makes a change.
-                if slotIndex == 1 then --  "Head" -
-                    if CCS.expansionID == LE_EXPANSION_WAR_WITHIN or expacID == LE_EXPANSION_WAR_WITHIN then
-                        --Enchant = "<" .. ENSCRIBE .. ": " .. ADDON_MISSING .. ">"
-                    elseif CCS.expansionID == LE_EXPANSION_MIDNIGHT then
-                        Enchant = "<" .. ENSCRIBE .. ": " .. ADDON_MISSING .. ">"                        
-                    end
-                elseif slotIndex == 2 then --  "Neck" !
-                    if CCS.expansionID == LE_EXPANSION_WAR_WITHIN or expacID == LE_EXPANSION_WAR_WITHIN then
-                        --Enchant = "<" .. ENSCRIBE .. ": " .. ADDON_MISSING .. ">"
-                    elseif CCS.expansionID == LE_EXPANSION_MIDNIGHT then
-                        --Enchant = "<" .. ENSCRIBE .. ": " .. ADDON_MISSING .. ">"                        
-                    end                
-                elseif slotIndex == 3 then --  "Shoulder"
-                    if CCS.expansionID == LE_EXPANSION_WAR_WITHIN or expacID == LE_EXPANSION_WAR_WITHIN then
-                        --Enchant = "<" .. ENSCRIBE .. ": " .. ADDON_MISSING .. ">"
-                    elseif CCS.expansionID == LE_EXPANSION_MIDNIGHT then
-                        Enchant = "<" .. ENSCRIBE .. ": " .. ADDON_MISSING .. ">"                        
-                    end
-                elseif slotIndex == 5 then --  "Chest" !
-                    if CCS.expansionID == LE_EXPANSION_WAR_WITHIN or expacID == LE_EXPANSION_WAR_WITHIN then
-                        Enchant = "<" .. ENSCRIBE .. ": " .. ADDON_MISSING .. ">"
-                    elseif CCS.expansionID == LE_EXPANSION_MIDNIGHT then
-                        Enchant = "<" .. ENSCRIBE .. ": " .. ADDON_MISSING .. ">"                        
-                    end
-                elseif slotIndex == 6 then --  "Waist" -
-                    if CCS.expansionID == LE_EXPANSION_WAR_WITHIN or expacID == LE_EXPANSION_WAR_WITHIN then
-                        --Enchant = "<" .. ENSCRIBE .. ": " .. ADDON_MISSING .. ">"
-                    elseif CCS.expansionID == LE_EXPANSION_MIDNIGHT then
-                        --Enchant = "<" .. ENSCRIBE .. ": " .. ADDON_MISSING .. ">"                        
-                    end                
-                elseif slotIndex == 7 then --  "Legs" -
-                    if CCS.expansionID == LE_EXPANSION_WAR_WITHIN or expacID == LE_EXPANSION_WAR_WITHIN then
-                        Enchant = "<" .. ENSCRIBE .. ": " .. ADDON_MISSING .. ">"
-                    elseif CCS.expansionID == LE_EXPANSION_MIDNIGHT then
-                        Enchant = "<" .. ENSCRIBE .. ": " .. ADDON_MISSING .. ">"                        
-                    end                
-                elseif slotIndex == 8 then --  "Feet" !
-                    if CCS.expansionID == LE_EXPANSION_WAR_WITHIN or expacID == LE_EXPANSION_WAR_WITHIN then
-                        Enchant = "<" .. ENSCRIBE .. ": " .. ADDON_MISSING .. ">"
-                    elseif CCS.expansionID == LE_EXPANSION_MIDNIGHT then
-                        Enchant = "<" .. ENSCRIBE .. ": " .. ADDON_MISSING .. ">"                        
-                    end                
-                elseif slotIndex == 9 then --  "Wrist" !
-                    if CCS.expansionID == LE_EXPANSION_WAR_WITHIN or expacID == LE_EXPANSION_WAR_WITHIN then
-                        Enchant = "<" .. ENSCRIBE .. ": " .. ADDON_MISSING .. ">"
-                    elseif CCS.expansionID == LE_EXPANSION_MIDNIGHT then
-                        --Enchant = "<" .. ENSCRIBE .. ": " .. ADDON_MISSING .. ">"                        
-                    end                
-                elseif slotIndex == 10 then --  "Hands" !
-                    if CCS.expansionID == LE_EXPANSION_WAR_WITHIN or expacID == LE_EXPANSION_WAR_WITHIN then
-                        --Enchant = "<" .. ENSCRIBE .. ": " .. ADDON_MISSING .. ">"
-                    elseif CCS.expansionID == LE_EXPANSION_MIDNIGHT then
-                        --Enchant = "<" .. ENSCRIBE .. ": " .. ADDON_MISSING .. ">"                        
-                    end                
-                elseif slotIndex == 11 then --  "Finger0" !
-                    if CCS.expansionID == LE_EXPANSION_WAR_WITHIN or expacID == LE_EXPANSION_WAR_WITHIN then
-                        Enchant = "<" .. ENSCRIBE .. ": " .. ADDON_MISSING .. ">"
-                    elseif CCS.expansionID == LE_EXPANSION_MIDNIGHT then
-                        Enchant = "<" .. ENSCRIBE .. ": " .. ADDON_MISSING .. ">"                        
-                    end                
-                elseif slotIndex == 12 then --  "Finger1" !
-                    if CCS.expansionID == LE_EXPANSION_WAR_WITHIN or expacID == LE_EXPANSION_WAR_WITHIN then
-                        Enchant = "<" .. ENSCRIBE .. ": " .. ADDON_MISSING .. ">"
-                    elseif CCS.expansionID == LE_EXPANSION_MIDNIGHT then
-                        Enchant = "<" .. ENSCRIBE .. ": " .. ADDON_MISSING .. ">"                        
-                    end                
-                elseif slotIndex == 15 then --  "Back" !
-                    if CCS.expansionID == LE_EXPANSION_WAR_WITHIN or expacID == LE_EXPANSION_WAR_WITHIN then
-                        Enchant = "<" .. ENSCRIBE .. ": " .. ADDON_MISSING .. ">"
-                    elseif CCS.expansionID == LE_EXPANSION_MIDNIGHT then
-                        --Enchant = "<" .. ENSCRIBE .. ": " .. ADDON_MISSING .. ">"                        
-                    end                
-                elseif slotIndex == 16 then --  "MainHand" !
-                    if CCS.expansionID == LE_EXPANSION_WAR_WITHIN or expacID == LE_EXPANSION_WAR_WITHIN then
-                        Enchant = "<" .. ENSCRIBE .. ": " .. ADDON_MISSING .. ">"
-                    elseif CCS.expansionID == LE_EXPANSION_MIDNIGHT then
-                        Enchant = "<" .. ENSCRIBE .. ": " .. ADDON_MISSING .. ">"                        
-                    end                
-                elseif slotIndex == 17 and itemType == "Weapon" then --  "SecondaryHand" -
-                    if CCS.expansionID == LE_EXPANSION_WAR_WITHIN or expacID == LE_EXPANSION_WAR_WITHIN then
-                        Enchant = "<" .. ENSCRIBE .. ": " .. ADDON_MISSING .. ">"
-                    elseif CCS.expansionID == LE_EXPANSION_MIDNIGHT then
-                        Enchant = "<" .. ENSCRIBE .. ": " .. ADDON_MISSING .. ">"                        
-                    end                
-                end
-            end
-            
+
             -- detect trailing icon escape (|A...|a or |T...|t)
             local enchantlen = option("enchantnamelength") or 100
             local ellipsis = "..."
@@ -2315,7 +2393,7 @@ function CCS.updateLocationInfo(unit, slotIndex, framename)
             enchantTxt:Show()
             
         end
-        
+
         -- Display Durability text (white)
         if isPlayer and option("showdurability") == true and durMax ~= nil and durCur ~= nil and durMax > 0 and durCur ~= durMax then
             local DurPercent = string.format("%.f", durCur/durMax*100)
@@ -2486,7 +2564,53 @@ function CCS.updateLocationInfo(unit, slotIndex, framename)
             bgfader:Show()
         end 
     end
+end
 
+function CCS:UpdateTempEnchantDisplay()
+    local mhwpBuffname = _G["CharacterMainHandSlotwpBuffname"]
+    local mhwpBufftime = _G["CharacterMainHandSlotwpBufftime"]
+    local ohwpBuffname = _G["CharacterSecondaryHandSlotwpBuffname"]
+    local ohwpBufftime = _G["CharacterSecondaryHandSlotwpBufftime"]
+
+	if option("showtempenchants") == false then return end
+	
+	local hasMainHandEnchant, mainHandExpiration, mainHandCharges, mainHandEnchantID, hasOffHandEnchant, offHandExpiration, offHandCharges, offHandEnchantID, hasRangedEnchant, rangedExpiration, rangedCharges, rangedEnchantID = GetWeaponEnchantInfo()
+	local displaytext = ""
+	local tempEnchantName = ""
+
+    if mhwpBuffname ~= nil and mhwpBufftime ~= nil then
+        if hasMainHandEnchant and mainHandExpiration ~= nil then
+            if CCS.tempenchantLookup[mainHandEnchantID] and CCS.tempenchantLookup[mainHandEnchantID].spellID ~= nil then
+                tempEnchantName = C_Spell.GetSpellName(CCS.tempenchantLookup[mainHandEnchantID].spellID) or ""
+            end
+            mhwpBuffname:SetText(tempEnchantName or "")
+            mhwpBufftime:SetText(CCS.display_time(mainHandExpiration/1000, false))
+            mhwpBuffname:Show()
+            mhwpBufftime:Show()
+        else
+            mhwpBuffname:SetText("")
+            mhwpBufftime:SetText("")
+            mhwpBuffname:Hide()
+            mhwpBufftime:Hide() 
+        end
+	end
+
+    if ohwpBuffname ~= nil and ohwpBufftime ~= nil then
+        if hasOffHandEnchant  and offHandExpiration ~= nil then
+            if CCS.tempenchantLookup[offHandEnchantID] and CCS.tempenchantLookup[offHandEnchantID].spellID ~= nil then
+                tempEnchantName = C_Spell.GetSpellName(CCS.tempenchantLookup[offHandEnchantID].spellID) or ""
+            end
+            ohwpBuffname:SetText(tempEnchantName or "")
+            ohwpBufftime:SetText(CCS.display_time(offHandExpiration/1000, false))
+            ohwpBuffname:Show()
+            ohwpBufftime:Show()
+        else
+            ohwpBuffname:SetText("")
+            ohwpBufftime:SetText("")
+            ohwpBuffname:Hide()
+            ohwpBufftime:Hide() 
+        end
+    end
 end
 
 local option = function(key) return CCS:GetOptionValue(key) end
@@ -2538,7 +2662,7 @@ function CCS:ShowStatHighlights(statRowData)
 
                 if value and value > 0 then
                     -- Update icon + text
-                    ccsStat.icon:SetTexture(statRowData.icon)  -- your stat icon table
+                    ccsStat.icon:SetTexture(statRowData.icon)  -- stat icon table
                     ccsStat.text:SetText("+" .. value)
 
                     -- Show the overlay
@@ -2552,3 +2676,66 @@ function CCS:ShowStatHighlights(statRowData)
 
     end
 end
+
+function CCS.GetSpecIndexFromSpecID(specID)
+    return CCS.SPEC_ID_TO_INDEX[specID]
+end
+
+function CCS:LoadBlizzardAddOns()
+    if self.BlizzardLoaded then return end
+
+    local function safeLoad(addonName)
+        if not C_AddOns.IsAddOnLoaded(addonName) then
+            local loaded, reason = AddOnUtil.LoadAddOn(addonName)
+            if not loaded then
+                return false
+            end
+        end
+        return true
+    end
+
+    -- Load required Blizzard UI addons
+    local addons = {
+        "Blizzard_CharacterFrame",
+        "Blizzard_TokenUI",
+        "Blizzard_ChallengesUI",
+        "Blizzard_WeeklyRewards",
+        "Blizzard_EncounterJournal",
+        "Blizzard_Transmog"
+    }
+
+    for _, addon in ipairs(addons) do
+        safeLoad(addon)
+    end
+
+    -- Initialize WeeklyRewards UI if available
+    if type(WeeklyRewards_LoadUI) == "function" then
+        WeeklyRewards_LoadUI()
+    end
+    TokenFrame:SetPoint("TOPLEFT", CharacterFrame, "TOPLEFT", 0, 0)
+    if CharacterFrameBg then
+        TokenFrame:SetPoint("BOTTOMRIGHT", CharacterFrameBg, "BOTTOMRIGHT", 0, 0)
+    else
+        TokenFrame:SetPoint("BOTTOMRIGHT", CharacterFrame, "BOTTOMRIGHT", 0, 0)
+    end
+   
+    -- Safely configure WeeklyRewardsFrame
+    if WeeklyRewardsFrame and WeeklyRewardsFrame.PVPFrame and WeeklyRewardsFrame.WorldFrame then
+        WeeklyRewardsFrame:SetActivityShown(false, WeeklyRewardsFrame.PVPFrame, Enum.WeeklyRewardChestThresholdType.RankedPvP)
+        WeeklyRewardsFrame:SetActivityShown(true, WeeklyRewardsFrame.WorldFrame, Enum.WeeklyRewardChestThresholdType.World)
+        WeeklyRewardsFrame:SetUpActivity(
+            WeeklyRewardsFrame.WorldFrame,
+            WORLD,
+            "evergreen-weeklyrewards-category-world",
+            Enum.WeeklyRewardChestThresholdType.World
+        )
+        WeeklyRewardsFrame:FullRefresh()
+    end
+    if C_MythicPlus ~= nil then
+        C_MythicPlus.RequestCurrentAffixes();
+        C_MythicPlus.RequestMapInfo();
+    end
+
+    self.BlizzardLoaded = true
+end
+

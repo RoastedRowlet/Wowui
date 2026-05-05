@@ -111,7 +111,7 @@ end
 
 L = BigWigs:NewBossLocale("Den of Nalorakk Trash", "frFR")
 if L then
-    L.offerings_acquired = "Offrandes acquises"
+	L.offerings_acquired = "Offrandes acquises"
 	L.offerings_acquired_desc = "Affiche une alerte lorsqu'une offrande a été acquise."
 end
 
@@ -121,6 +121,11 @@ L = BigWigs:NewBossLocale("Maisara Caverns Trash", "frFR")
 if L then
 	L.prisoners_freed = "Prisonniers libérés"
 	L.prisoners_freed_desc = "Affiche une alerte lorsqu'un prisonnier a été libéré."
+	L.custom_on_cooking_pot_autotalk_desc = "Sélectionne automatiquement le dialogue avec le PNJ afin d'avoir l'amélioration 'Ragoût vilebranche copieux'.\n\n|T4659336:16|tRagoût vilebranche copieux\n{1269056}"
+	L.custom_on_ritual_cauldron_autotalk_desc = "Sélectionne automatiquement le dialogue avec le PNJ afin d'avoir l'amélioration 'Mixture rituelle' buff.\n\n|T236271:16|tMixture rituelle\n{1271300}"
+
+	L.cooking_pot = "Marmite"
+	L.ritual_cauldron = "Chaudron rituel"
 end
 
 -- Murder Row
@@ -129,4 +134,13 @@ L = BigWigs:NewBossLocale("Murder Row Trash", "frFR")
 if L then
 	L.snitches_interrogated = "Mouchards interrogés"
 	L.snitches_interrogated_desc = "Affiche une alerte lorsqu'un prisonnier a été interrogé."
+end
+
+-- Nexus-Point Xenas
+
+L = BigWigs:NewBossLocale("Nexus-Point Xenas Trash", "frFR")
+if L then
+	L.custom_on_arcane_tripwire_autotalk_desc = "|cFFFF0000Requiert 25 points de compétence en Ingénierie de Midnight.|r Sélectionne automatiquement le dialogue avec le PNK afin de désactiver le Dispositif de détection arcanique."
+
+	L.arcane_tripwire = "Dispositif de détection arcanique"
 end

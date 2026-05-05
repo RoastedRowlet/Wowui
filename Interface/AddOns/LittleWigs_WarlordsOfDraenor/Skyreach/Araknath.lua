@@ -93,7 +93,7 @@ end
 
 function mod:ENCOUNTER_TIMELINE_EVENT_ADDED(_, eventInfo)
 	if eventInfo.source ~= 0 then return end -- Enum.EncounterTimelineEventSource.Encounter
-	local duration = math.floor(eventInfo.duration + 0.5)
+	local duration = self:RoundNumber(eventInfo.duration, 0)
 	local barInfo
 	if duration == 5 or duration == 10 or duration == 15 then -- Fiery Smash
 		barInfo = self:FierySmashTimeline(eventInfo)
@@ -150,7 +150,7 @@ function mod:FierySmashTimeline(eventInfo)
 		msg = barText,
 		key = 154110,
 		callback = function()
-			self:Message(154110, "yellow", barText)
+			self:Message(154110, "purple", barText)
 			self:PlaySound(154110, "alarm")
 		end
 	}
@@ -163,10 +163,11 @@ function mod:EnergizeTimeline(eventInfo)
 	return {
 		msg = barText,
 		key = 154162,
-		--callback = function() -- has Blizzard message
-			--self:Message(154162, "yellow", barText)
-			--self:PlaySound(154162, "alarm")
-		--end
+		callback = function()
+			self:StopBlizzMessages(1)
+			self:Message(154162, "yellow", barText)
+			self:PlaySound(154162, "info")
+		end
 	}
 end
 
@@ -179,7 +180,7 @@ function mod:SupernovaTimeline(eventInfo)
 		key = 154135,
 		callback = function()
 			self:Message(154135, "red", barText)
-			self:PlaySound(154135, "info")
+			self:PlaySound(154135, "alert")
 		end
 	}
 end

@@ -226,7 +226,7 @@ function Grid2Layout:OnModuleInitialize()
 	-- custom defaults
 	self.customDefaults = self.db.global.customDefaults
 	-- avoid insecure headers in release versions
-	self.useInsecureHeaders = (Grid2.debugging or Grid2.isVanilla) and self.db.global.useInsecureHeaders or nil
+	self.useInsecureHeaders = Grid2.debugging and self.db.global.useInsecureHeaders or nil
 	-- add custom layouts
 	self:AddCustomLayouts()
 end
@@ -477,19 +477,26 @@ function Grid2Layout:PlaceHeaders()
 	local yMult2 	 = horizontal and yMult1*padding or 0
 	local xMult3     = xMult2 + (vertical   and xMult1*spacing*2 or 0)
 	local yMult3     = yMult2 + (horizontal and yMult1*spacing*2 or 0)
-	local prevFrame
+	local prevFrame, prevInline
 	self:RestorePosition()
 	for i, frame in self:IterateHeaders(false) do -- non detached headers
 		frame:SetOrientation(horizontal)
 		frame:ClearAllPoints()
 		frame:SetParent(self.frame)
-		if prevFrame then
-			frame:SetPoint(anchor, prevFrame, relPoint, xMult2, yMult2 )
-		else
+		if not prevFrame then
 			frame:SetPoint(anchor, self.frame, anchor, spacing * xMult1, spacing * yMult1)
+		elseif not frame.isInline then
+			frame:SetPoint(anchor, prevFrame, relPoint, xMult2, yMult2)
+			prevInline = nil
+		else -- special case to display several headers on the same row/column
+			local relPoint = self.relativePoints[not vertical][anchor]
+			local xMult = vertical and 0 or padding * xMult1
+			local yMult = vertical and padding * yMult1 or 0
+			frame:SetPoint(anchor, prevInline or prevFrame, relPoint, xMult, yMult)
+			prevInline = frame
 		end
 		frame:Show()
-		prevFrame = frame
+		prevFrame = frame.isInline and prevFrame or frame
 	end
 	for i, frame in self:IterateHeaders(true) do -- detached headers
 		frame:SetOrientation(frame.groupHorizontal)
@@ -651,6 +658,7 @@ do
 		header.headerClass = BuiltInHeaders[header.headerName] or 'other'
 		header.wasDetached = header.isDetached
 		header.isDetached = setupIndex>1 and (dbx.detachHeader or p.detachedHeaders=='player' or p.detachedHeaders==header.headerType) or nil
+		header.isInline = dbx.inlineHeader
 		header.groupHorizontal = GetSetupValue( header.isDetached, p.groupHorizontals[header.headerClass], p.horizontal )
 		header.groupAnchor = GetSetupValue( header.isDetached, p.groupAnchors[header.headerClass], p.groupAnchor )
 		header.headerAnchor = GetSetupValue( header.isDetached, p.anchors[header.headerClass], p.anchor )
@@ -799,23 +807,26 @@ end
 
 function Grid2Layout:UpdateSize()
 	local p = self.db.profile
-	local mcol,mrow,curCol,maxRow,remSize = "GetWidth","GetHeight",0,0,0
-	if p.horizontal then mcol,mrow = mrow,mcol end
+	local x1 = strfind(p.groupAnchor, "LEFT") and self.frame:GetLeft() or self.frame:GetRight()
+	local y1 = strfind(p.groupAnchor, "TOP" ) and self.frame:GetTop()  or self.frame:GetBottom()
+	local x2 = x1
+	local y2 = y1
 	for _,g in self:IterateHeaders(false) do -- only non-detaches headers
-		local row = g[mrow](g)
-		if maxRow<row then maxRow = row end
-		local col = g[mcol](g) + p.Padding
-		curCol = curCol + col
-		remSize = (g.dbx.type=='custom' or (g[1] and g[1]:IsVisible())) and 0 or remSize + col
+		if g[1] and g[1]:IsVisible() then
+			x1 = math.min(g:GetLeft(), x1)
+			x2 = math.max(g:GetRight(), x2)
+			y1 = math.max(g:GetTop(), y1)
+			y2 = math.min(g:GetBottom(), y2)
+		end
 	end
-	curCol = curCol - remSize
-	local col = math.max( curCol + p.Spacing*2 - p.Padding, 1 )
-	local row = math.max( maxRow + p.Spacing*2, 1 )
-	if p.horizontal then col,row = row,col end
-	self.frame.frameBack:SetShown(curCol>1 and maxRow>1)
-	self.frame.frameBack:SetSize(col,row)
+	local width = x2 - x1
+	local height = y1 - y2
+	local twidth = math.max(width + p.Spacing, 1)
+	local theight = math.max(height + p.Spacing, 1)
+	self.frame.frameBack:SetShown(width>1 and height>1)
+	self.frame.frameBack:SetSize(twidth,theight)
 	if not Grid2:RunSecure(7, self, "UpdateSize") then
-		self.frame:SetSize(col,row)
+		self.frame:SetSize(twidth,theight)
 	end
 end
 

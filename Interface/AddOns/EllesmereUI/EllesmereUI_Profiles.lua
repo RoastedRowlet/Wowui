@@ -47,13 +47,22 @@ StaticPopupDialogs["EUI_PROFILE_RELOAD"] = {
 --  All addons use _dbRegistry for profile access. Order matters for UI display.
 -------------------------------------------------------------------------------
 local ADDON_DB_MAP = {
-    { folder = "EllesmereUINameplates",        display = "Nameplates",         svName = "EllesmereUINameplatesDB"        },
-    { folder = "EllesmereUIActionBars",        display = "Action Bars",        svName = "EllesmereUIActionBarsDB"        },
-    { folder = "EllesmereUIUnitFrames",        display = "Unit Frames",        svName = "EllesmereUIUnitFramesDB"        },
-    { folder = "EllesmereUICooldownManager",   display = "Cooldown Manager",   svName = "EllesmereUICooldownManagerDB"   },
-    { folder = "EllesmereUIResourceBars",      display = "Resource Bars",      svName = "EllesmereUIResourceBarsDB"      },
-    { folder = "EllesmereUIAuraBuffReminders", display = "AuraBuff Reminders", svName = "EllesmereUIAuraBuffRemindersDB" },
-    { folder = "EllesmereUIBasics",            display = "Basics",             svName = "EllesmereUIBasicsDB"            },
+    { folder = "EllesmereUIActionBars",        display = "Action Bars",         svName = "EllesmereUIActionBarsDB"        },
+    { folder = "EllesmereUINameplates",        display = "Nameplates",          svName = "EllesmereUINameplatesDB"        },
+    { folder = "EllesmereUIUnitFrames",        display = "Unit Frames",         svName = "EllesmereUIUnitFramesDB"        },
+    { folder = "EllesmereUICooldownManager",   display = "Cooldown Manager",    svName = "EllesmereUICooldownManagerDB"   },
+    { folder = "EllesmereUIResourceBars",      display = "Resource Bars",       svName = "EllesmereUIResourceBarsDB"      },
+    { folder = "EllesmereUIAuraBuffReminders", display = "AuraBuff Reminders",  svName = "EllesmereUIAuraBuffRemindersDB" },
+    -- v6.6 split-out addons (were previously bundled under EllesmereUIBasics).
+    -- The old Basics entry is intentionally removed -- it's a shim with no
+    -- user-visible profile data and listing it produced a misleading
+    -- "Not included: Basics" warning on every imported v6.6+ profile.
+    { folder = "EllesmereUIQoL",               display = "Quality of Life",     svName = "EllesmereUIQoLDB"               },
+    { folder = "EllesmereUIBlizzardSkin",      display = "Blizz UI Enhanced",   svName = "EllesmereUIBlizzardSkinDB"      },
+    { folder = "EllesmereUIFriends",           display = "Friends List",        svName = "EllesmereUIFriendsDB"           },
+    { folder = "EllesmereUIMythicTimer",       display = "Mythic+ Timer",       svName = "EllesmereUIMythicTimerDB"       },
+    { folder = "EllesmereUIQuestTracker",      display = "Quest Tracker",       svName = "EllesmereUIQuestTrackerDB"      },
+    { folder = "EllesmereUIMinimap",           display = "Minimap",             svName = "EllesmereUIMinimapDB"           },
 }
 EllesmereUI._ADDON_DB_MAP = ADDON_DB_MAP
 
@@ -245,6 +254,23 @@ local function RepointAllDBs(profileName)
     local profileData = EllesmereUIDB.profiles[profileName]
     if not profileData.addons then profileData.addons = {} end
 
+    -- Sync: copy synced module data from outgoing profile to incoming.
+    -- activeProfile is already set to the new name by callers, so read
+    -- the outgoing profile from the db registry (not yet re-pointed).
+    local sm = EllesmereUIDB.syncedModules
+    if sm then
+        local reg = EllesmereUI.Lite and EllesmereUI.Lite._dbRegistry
+        local outName = reg and reg[1] and reg[1]._profileName or "Default"
+        local outProf = EllesmereUIDB.profiles[outName]
+        if outProf and outProf.addons and outName ~= profileName then
+            for folder, synced in pairs(sm) do
+                if synced and outProf.addons[folder] then
+                    profileData.addons[folder] = DeepCopy(outProf.addons[folder])
+                end
+            end
+        end
+    end
+
     local registry = EllesmereUI.Lite and EllesmereUI.Lite._dbRegistry
     if not registry then return end
     for _, db in ipairs(registry) do
@@ -273,10 +299,11 @@ local function RepointAllDBs(profileName)
         EllesmereUIDB.unlockHeightMatch = DeepCopy(ul.heightMatch  or {})
         EllesmereUIDB.phantomBounds     = DeepCopy(ul.phantomBounds or {})
     end
-    -- Seed castbar anchor defaults if the profile predates them.
-    -- These follow the same per-profile unlockLayout system as all
-    -- other elements — this just ensures old profiles get the defaults.
-    do
+    -- Seed castbar anchor defaults ONLY on brand-new profiles (no unlockLayout
+    -- yet). Re-seeding every load would clobber a user's deliberate un-anchor
+    -- or manual position with the default "target BOTTOM" anchor the next
+    -- time the profile is applied (e.g. via spec profile assignment).
+    if not ul then
         local anchors = EllesmereUIDB.unlockAnchors
         local wMatch  = EllesmereUIDB.unlockWidthMatch
         if anchors and wMatch then
@@ -550,11 +577,9 @@ end
 function EllesmereUI.RefreshAllAddons()
     -- ResourceBars (full rebuild)
     if _G._ERB_Apply then _G._ERB_Apply() end
-    -- CDM: skip during spec-profile switch. CDM's own PLAYER_SPECIALIZATION_CHANGED
-    -- handler will update the active spec key and rebuild with the correct spec
-    -- spells via SwitchSpecProfile's deferred FullCDMRebuild. Running it here
-    -- would use a stale active spec key (not yet updated by CDM) and show the
-    -- wrong spec's spells until the deferred rebuild overwrites them.
+    -- CDM: skip during spec-profile switch. CDM's SPELLS_CHANGED handler
+    -- will detect the spec key mismatch and rebuild with the correct spec.
+    -- Running it here would race with that rebuild.
     if not EllesmereUI._specProfileSwitching then
         if _G._ECME_LoadSpecProfile and _G._ECME_GetCurrentSpecKey then
             local curKey = _G._ECME_GetCurrentSpecKey()
@@ -576,6 +601,18 @@ function EllesmereUI.RefreshAllAddons()
     if _G._EUF_ReloadFrames then _G._EUF_ReloadFrames() end
     -- Nameplates
     if _G._ENP_RefreshAllSettings then _G._ENP_RefreshAllSettings() end
+    -- Quest Tracker
+    if _G._EQT_RefreshAll then _G._EQT_RefreshAll() end
+    -- Chat (sidebar icons, borders, fonts, visibility)
+    if _G._ECHAT_RefreshAll then _G._ECHAT_RefreshAll() end
+    -- Friends List
+    if _G._EFR_ApplyFriends then _G._EFR_ApplyFriends() end
+    -- Mythic Timer
+    if _G._EMT_Apply then _G._EMT_Apply() end
+    -- Dragon Riding HUD
+    if _G._EDR_Rebuild then _G._EDR_Rebuild() end
+    -- Minimap (flyout button state)
+    if _G._EMIN_RefreshFlyout then _G._EMIN_RefreshFlyout() end
     -- Global class/power colors (updates oUF, nameplates, raid frames)
     if EllesmereUI.ApplyColorsToOUF then EllesmereUI.ApplyColorsToOUF() end
     -- After all addons have rebuilt and positioned their frames from
@@ -584,20 +621,46 @@ function EllesmereUI.RefreshAllAddons()
     -- and resync anchor offsets so the anchor relationships stay correct for
     -- future drags. Triple-deferred so it runs AFTER debounced rebuilds have
     -- completed and frames are at final positions.
-    C_Timer.After(0, function()
+    -- Position re-application and anchor resync are deferred to
+    -- OnSpecSwitchComplete (if spec switching) or run inline here
+    -- for non-spec profile switches (manual switch from options).
+    if not EllesmereUI._specProfileSwitching then
         C_Timer.After(0, function()
             C_Timer.After(0, function()
-                -- Re-apply centralized positions (migrates legacy formats)
                 if EllesmereUI._applySavedPositions then
                     EllesmereUI._applySavedPositions()
                 end
-                -- Resync anchor offsets (does NOT move frames)
                 if EllesmereUI.ResyncAnchorOffsets then
                     EllesmereUI.ResyncAnchorOffsets()
                 end
             end)
         end)
-    end)
+    end
+    -- If CDM is loaded, it calls OnSpecSwitchComplete from ProcessSpecChange
+    -- after its SPELLS_CHANGED rebuild finishes. If CDM is NOT loaded,
+    -- complete immediately since there's nothing to wait for.
+    local cdmLoaded = C_AddOns and C_AddOns.IsAddOnLoaded
+        and C_AddOns.IsAddOnLoaded("EllesmereUICooldownManager")
+    if not cdmLoaded then
+        EllesmereUI.OnSpecSwitchComplete()
+    end
+end
+
+--- Called by CDM (or RefreshAllAddons if CDM not loaded) when the spec
+--- switch rebuild is fully settled. Clears the suppression flag and
+--- re-applies width/height matches so all matched frames pick up
+--- the new profile dimensions.
+function EllesmereUI.OnSpecSwitchComplete()
+    EllesmereUI._specProfileSwitching = false
+    if EllesmereUI.ApplyAllWidthHeightMatches then
+        EllesmereUI.ApplyAllWidthHeightMatches()
+    end
+    if EllesmereUI._applySavedPositions then
+        EllesmereUI._applySavedPositions()
+    end
+    if EllesmereUI.ResyncAnchorOffsets then
+        EllesmereUI.ResyncAnchorOffsets()
+    end
 end
 
 -------------------------------------------------------------------------------
@@ -1120,6 +1183,11 @@ function EllesmereUI.ImportProfile(importStr, profileName)
             stored.addons["EllesmereUICooldownManager"].barGlows = nil
         end
         stored.spellAssignments = nil
+        -- Snap all positions to the physical pixel grid (imported profiles
+        -- may come from a different version without pixel snapping)
+        if EllesmereUI.SnapProfilePositions then
+            EllesmereUI.SnapProfilePositions(stored)
+        end
         db.profiles[profileName] = stored
         -- Add to order if not present
         local found = false
@@ -1129,44 +1197,19 @@ function EllesmereUI.ImportProfile(importStr, profileName)
         if not found then
             table.insert(db.profileOrder, 1, profileName)
         end
-        -- Write spell assignments to dedicated store
-        if payload.data.spellAssignments then
-            if not EllesmereUIDB.spellAssignments then
-                EllesmereUIDB.spellAssignments = { specProfiles = {} }
-            end
-            local sa = EllesmereUIDB.spellAssignments
-            local imported = payload.data.spellAssignments
-            if imported.specProfiles then
-                for key, data in pairs(imported.specProfiles) do
-                    sa.specProfiles[key] = DeepCopy(data)
-                end
-            end
-            if imported.barGlows and next(imported.barGlows) then
-                -- barGlows is now per-spec in specProfiles, not global. Skip import.
+        -- CDM spell assignments are NOT written here. The caller shows
+        -- a spec picker popup that lets the user choose which specs to
+        -- import, then calls ApplyImportedSpecProfiles() with only the
+        -- selected specs. Writing here would bypass that selection.
+        -- Disable all reskin module syncs so the pre-logout sync
+        -- doesn't overwrite other profiles with the imported data.
+        if EllesmereUI._reskinModules and EllesmereUIDB then
+            if not EllesmereUIDB.syncedModules then EllesmereUIDB.syncedModules = {} end
+            for folder in pairs(EllesmereUI._reskinModules) do
+                EllesmereUIDB.syncedModules[folder] = false
             end
         end
-        -- Backward compat: extract specProfiles from CDM addon data (pre-migration format)
-        if payload.data.addons and payload.data.addons["EllesmereUICooldownManager"] then
-            local cdm = payload.data.addons["EllesmereUICooldownManager"]
-            if cdm.specProfiles then
-                if not EllesmereUIDB.spellAssignments then
-                    EllesmereUIDB.spellAssignments = { specProfiles = {} }
-                end
-                for key, data in pairs(cdm.specProfiles) do
-                    if not EllesmereUIDB.spellAssignments.specProfiles[key] then
-                        EllesmereUIDB.spellAssignments.specProfiles[key] = DeepCopy(data)
-                    end
-                end
-            end
-            if cdm.barGlows then
-                if not EllesmereUIDB.spellAssignments then
-                    EllesmereUIDB.spellAssignments = { specProfiles = {} }
-                end
-                if not next(EllesmereUIDB.spellAssignments.barGlows or {}) then
-                    -- barGlows is now per-spec in specProfiles, not global. Skip import.
-                end
-            end
-        end
+
         if specLocked then
             return true, nil, "spec_locked"
         end
@@ -1176,8 +1219,9 @@ function EllesmereUI.ImportProfile(importStr, profileName)
         -- Apply imported data into the live db.profile tables
         EllesmereUI.ApplyProfileData(payload.data)
         FixupImportedClassColors()
-        -- Reload UI so every addon rebuilds from scratch with correct data
-        ReloadUI()
+        -- Don't ReloadUI() here: the caller (options panel import flow)
+        -- may need to show the CDM spec picker popup before reloading.
+        -- The caller handles the reload/refresh after the popup completes.
         return true, nil
     --[[ ADDON-SPECIFIC EXPORT DISABLED
     elseif payload.type == "partial" then
@@ -1422,7 +1466,7 @@ do
                     if current ~= targetProfile then
                         local fontWillChange = EllesmereUI.ProfileChangesFont(
                             EllesmereUIDB.profiles[targetProfile])
-                        EllesmereUI._specProfileSwitching = true
+                        -- _specProfileSwitching disabled (see doSwitch comment)
                         EllesmereUI.SwitchProfile(targetProfile)
                         EllesmereUI.RefreshAllAddons()
                         if fontWillChange then
@@ -1485,7 +1529,7 @@ do
                             if cur ~= target then
                                 local fontChange = EllesmereUI.ProfileChangesFont(
                                     EllesmereUIDB.profiles[target])
-                                EllesmereUI._specProfileSwitching = true
+                                -- _specProfileSwitching disabled (see doSwitch comment)
                                 EllesmereUI.SwitchProfile(target)
                                 EllesmereUI.RefreshAllAddons()
                                 if fontChange then
@@ -1558,7 +1602,11 @@ do
             local current = db.activeProfile or "Default"
             if current ~= targetProfile then
                 local function doSwitch()
-                    EllesmereUI._specProfileSwitching = true
+                    -- _specProfileSwitching disabled: was causing width/height
+                    -- matches to never re-apply because SPELLS_CHANGED fires
+                    -- before PLAYER_SPECIALIZATION_CHANGED (CDM completes
+                    -- before the flag is set, flag stuck true forever).
+                    -- EllesmereUI._specProfileSwitching = true
                     local fontWillChange = EllesmereUI.ProfileChangesFont(db.profiles[targetProfile])
                     EllesmereUI.SwitchProfile(targetProfile)
                     EllesmereUI.RefreshAllAddons()
@@ -1597,11 +1645,13 @@ do
                     end)
                 end
             end
-        elseif isFirstLogin or charChanged then
-            -- No spec assignment for this character. If the current
-            -- activeProfile is spec-assigned (left over from a previous
-            -- character), switch to the last non-spec profile so this
-            -- character doesn't inherit another spec's layout.
+        elseif charChanged then
+            -- No spec assignment for this character and character changed
+            -- (alt swap). If the current activeProfile is spec-assigned
+            -- (left over from the previous character), switch to the last
+            -- non-spec profile so this character doesn't inherit another
+            -- character's spec layout. Skip on plain /reload (same char)
+            -- to respect the user's intentional profile choice.
             local current = db.activeProfile or "Default"
             local currentIsSpecAssigned = false
             if db.specProfiles then
@@ -1648,7 +1698,7 @@ end
 --  To update the weekly spotlight: change WEEKLY_SPOTLIGHT.
 -------------------------------------------------------------------------------
 EllesmereUI.POPULAR_PRESETS = {
-    { name = "EllesmereUI (2k)", description = "The default EllesmereUI look", exportString = "!EUI_T3vwZTTXw6)k3hN5bRc7B6jrzjzvkYwJmtI9TsvUajHeXysaEbaTTIl9FF6Z50RyHlsYkoz09HRvab6(S(Dw6gn((f1EjlZAsz)rus2683pnDrwH1bbEhErDys90QSSI3uy75zPDHFVWXpW6W7HNU5UvzS)5M1lwa3WxYQQZllkCpe(XzP4qB7KSUyr50p)lP3vUU57WnMwmDEzvnsbJsRCz)rqstA1Tzn12HjNC9OpD8I066RZQlxxnndEMYBUPoR5JfVY5Gy2)lYl0Z2X2kgNR68zz1(jxF(zVzS6M)qHZbwwwHUoEo2rH(arZiNBkNUU(406MjPv6ZSp9l6tM1bE2bb(bEXE2EwboQjliz07gp(DxQpBCPcJJC2loYfOsRyBFFNqxpp1K4L8lNCQbd9kKJScSTC9T9zeeWs2jN8)m(tJRsN(5mdocPLadgAJdEim4oEeV6ZhBuOqd4wKw2h4fhhgf4gge77ARMk3KXV7k9zYlgvIbXErmDJdxXqJC3Ps8hMZLVHCy45ki4ahFnPlmxU8rShRG(NmMvqOxKLxaygTzJaqgA74yfA5AZfIUjh)6l)00YYfZk)ArTHXHn(BRBYxK3CNHzbJfD8JcJIbLr2RS83UHHHUlgh5jRz3HXm2IAmzuRixgzhhf5ezVjPQRfOa88dddCdcDO5dmZVQ8RMgHBZ83ULf9gLUVk(aUI0nKKjSj2nzvBdMvlsVlRQL4KzDgfgg7eVDT4RaRgp5ThbtJy41NPWKltZlyEzgtL)b(rUoXHHoXEXooBeIkeKJT0BVVHHqMnQTHzxMY(GyMLPJFCidKYXFd6RxfgHmKe2eziAe3rgIjZ9T8J8J3mcve4U1XbGMPE93eSvl1X9WdAL818znZVmTz68VtqDGTeByyK4aMwTNnTPOTJVM3ERadc8ncdCEw(TZB0PcfGlhLLZMZtlAkxoQCDXS6VFpkKtNnReD6DcsozXIS6Lzvz)65hZDaVmTi9wujy7NmD2s2GDvzDEto9qXj64g2j3X8b8rxgxlF7q)WOdH43vzlUQmVaKNhFYBhFY1xW4GvTUIDY3ypngUXlW3n21kia0p(jcucC8dSFmJpB4PNZ2r6HgMWb4AXc2CeU9BkcCHOhr2brXEqCM7XzGeD1ycgzfPtwKnBmyubkZVdZRxYxYRFdZe7nLRRZlUDmEnkxePe3lzr2nmZbhMsNDRJa5YVppR48I0Pn5FjdEiMX(6M3DZ1Pf3M9owspmJRtHzTy9YRl)ADbe5JnYFo7Uj5fZENixKdnPSiXnCelMbibSJsMtugqKNiVr2qvpV8RmqHPF(yMHvZPOjyT8)(mCgDtMC71q4NOd1z2lH7iBgsGtkRMLvncZcGzSXVJ3wog9b0ULRXBbgXrIrmkjFAzX7Z)ZScmFqGcyu1XZHNTMelRslMLTmF6zlyK7QSSzfaubZjMPdgD7rlaVJ(eoqwDh2zeoUCrj6wKmHO4KBPNoPI9VKJjFyqYY2Q7y8l5fz1fre)s82455t)m7Q1qcSZZlqYzkYgNww0qdL9HTKXJWPwiFoIlXztVUdkcbqguVtlHl2fzcGFlVoFc6eaycl(A6DW9hiFA1K7qIi1KBqtKD4rf5lpJPBI8PBMbCM2SUkTj7Dfh)A0WViDzgKeGg1PZrxxyRuJJz3ut(Qt7WbFG4GaoJJqTOI5uaAd1Rs7jIYy2Pni5XmzMSi)p)Z0QzxaWR66f2t7yPXkgJR0ZGmSBBy1ChRmf4h4ZpzScwzijscRd1ggoNgag8VRyXDNxuJbyR1NRrIBcTQ5YSXzFRzSsTFgotmObD6rApHE4Gpd4qhadwmusutoRUQ3vLNvWemmiMt19oFB5jfzlb4dg9x)18vzKxI1bHTTajBPiU2zCjOHllYAzti1QQlX1poK0IJRCkezb9ONNIfXrJf5L)Vllxk87bg6mX)bxItYbdQ7dfAGcxqIueqPEv6ugKgt4C)Zkim3j6FSGWoVacRbcltW4IF(GGdt(vjT9ca8laW)fbaB)mda)p9SGDcuY7xaG5LqEXpFWV(jJ4u2lGVVa((xh479OizDD2iUzbywcDS4uK8qCw(VmM3p8jtuDc6E0iRb75K8rPMrvNTiBkdDJDfK)v98iIrazlwC(RR)EHtKJ)HfUo2rohwez567EiddZliiKD1yl3Oa2)gz7AzFyHNhUAhW)64hEi1joKDRvEI(O06JcRc8NhpVkJjdwmtjOzu9TvPZalaJlAE)aMnhGY8haOxy2ILJcOpCmUcbe5NCt(IfWaf7hef4ezf6ecSLun234FgF81dk5416MUm9BA0UvYQYvRxKwDbw()KfLLZwSUUPp)8HrId7ohe4TpIBrYvINaza0lzB7WiRixph5D9bH1n8F0j8Tmb03KvvMxV8cjOAT8EzWVmji0C0aEBolC4laiEJFqpiiDDYKImOKrCrfccMMVKfEbn2nzWXmKI6AReHLZheHgAGNqsq(jvavG9ug8EAURWwo4VFvA1NPSbGHyKcZZcDqXHIhZzWiXTnboIJNIp8h4anQ48E4)nijv2(cPZh3DmrCQhctmMMC1eOmUVMBUhM0WWJxxPGRgmtHkEgcImfGmhUxFmhX928P2Rx4eIsmwgamZ4YLVgcJcRKRhjlaj)Bz8Fp53idhrwQhjaGfZ0RZRahM38URp)F)U3o(OFrzdkL)f(0ZaI8xNxdnRxYJ0WcoP(EXw2XbUEHoUqBRVN64opS7QSPG3ODIfEv2i)5CU5rnMlaZQDk0d(KaFeyCz6QvmKzeMu67tqXWqYSTw30WebK2E6SLVFrzd3sKFdC4wMyDaPpti7iuahytRom6r6AHjL8VaH6)6)k72K)1RZ)cdA4FD16QvL1z)34AZxIRgYrhp(8F7eX0Oe42uU5NwvU84xF5P3tbieXcUKypmWZ9OfQ2spatltk3KHRkHxYnGT4Sf39EME(1z3KUErdCl1ucrGzhW8xdULWfMNLUOz(vzvaYbsinLRG7qlV4q(QPasfTK4PemoLpFV9QJH5WXjzkTIo)AroGfvTEvto7reP9EGNVuIY)Zk6pjMgq7G5)duwBK7FmqviusNFYvmFVHa8S5PBi40XLRyI7mi3eqoqzRX8je(fqIrAzKgcZKGgoRQ8RnZ1GGVHLvBTVFY5aNDt60S)4OzZExr9FOPq(JLzZYt)d8w)Jt(2kM5Bnl94dgpgepUsfeqnqoCFKZnVYHNFkPsyC042yeEjvP5mZHQpZHxq8mgZIbz0LkrMAA9cpmHtufEmDkmFB)oJ0fT6QcMD5ui5xCvJpgbFmk45axLRKNXq6jm6m4HbX8DW6to3auhcIim3UolD2DYz1roRUkZTyAFkeAkMufDXms(pRZQBUSCIUz)POcsJ)3U4YnrA3QrTCxkET2ImL5C388MjLFd3cpFGroC6rjBpz5QM7uZCQkYGgZ6i5vKvzGK5f5tkRRLcMyUwaVBpx597BhXfoGyESraDP7bAia(ryr87MLJVAvzfoRwCn9Ksga9YECUvg8mAGXfcCa8hrV6ZloUC5K0gjFz7gk5lXFxHbjjUYGQ1C9LwHgKqGb0JsfY0ig2ogpeS)xk(8BsRp62BRkLuwGs9eP0p0YQ6OGSogtIt3xO9Kz4N4RdzPzJ5iFMFH9JkuecH(TYCG4PlOubAq)e6k6QH7Omuqf3Is3UM3LmL2rRegs0qgDmbHa)8kiO3h7gkaySTplHA(tFWuA(zwgFq(TgH6OTwWrvSicAsIa0yc4RE9qcvXDAzRzl6cHbaPvGYYv83v8)Unrp62(raSIugzw6wzroCXlyA(lLqx5mToTJLpyO65ISj4dqbcQCz0qibfwolhXeacbi8uMrbKndb7NMGRXeFGOYIOMxGgvAUmNONdx7YWCKwtADykizW8dKKZzPRO1sYvQK3ULsSrAoxH7(eKBCsMTQ(TzPv7UyeGXzMOu3jvchQclDVvd7AQBPhlzdqgezalXturwULwqAYfvZt3i(9gc42k2TJITIA5BBePuLNxOkrViFvOxBEti8uj687yHliGdtanTvK9adjJrJrlej)sbsx9BWoqZN4YPQgXX1D8KwZxY8p1Q2mGC71KkAZrqN81gFHEAQTeGkBnXpyt2BZYaB2pQ5OqQWEt3vpEyBOE00rwUg4tj9IwN3EunEyBkYNCnCVOvUgFueoMS3oAXIxJeDn1Jhnd3T6ZeAOY2(97IZi2aXRYA4Drdn65rFgJalTZBF7dSzEwB)(d4kkma0wVDMby26MQ0f7KZpKGHHtPkKSFY8065qdL0a(mreAfKs67yu2tSo53B8tv9hVPVryWUFWJAby0VTSfGNkOLJJH00IxuHgmn3Vm)M8POAedPOrGXODgpeRWCKyQZnxTMqwUHvzNSiVj7CZfsxhYhYAmG7oH6xjKrRuhekGTQ0HoRiDfuifHjZlRBY1k01szlyBlTfCJjlhEvRQSXL3SN8ErGswf1DuzeGPTFpW2ADLulK4hntPf7TNkJM6tPnX5QvzZKeKc9wHD7ZvRKcb1DUGU7czJ4yqlQ8M6KtRUrmVAGTMCmj0Ds6MHBaZ8cPbvCpZgf0c(JfUUDk5D4rroOcZbENrkC7ruR1)MydCgrH7yJ2RYzs1x9fhKEzk9mnDEGMqwzI44kaVqrkhXM8j85()klCJ0rjNRPJzUPiFEkyafP3ViiFnOFvxZ4IcOJAFhLnmpO61lbfNXUU87qx2Y4P7KU(2LmzXNQwxKHRLudWDFM(7CCPOG1yIPQGhWp5RWoNDmAWKx857(0KfqrxWn81AC5ItBQkxXGygZxR5j81WMftlTQz(cOpA3Id1nm(cEuaFoLcLhL8vgdCZ6Q7gtTMPKpxPS4753Ch9OrmtJMSpLo7)Lgy2aTmRPS421azht)ADAXuQr0FnlDvzXNYkMoNyggEetbYgq2Oro)aRmc4K)DjGmc9a3HVE2RYMMNUO(TLfIfMd9cyzWwLDtwvv2SFhh)tOHNn4m2Q5tRRZMbmzTst6QEKtzmM5DYu)GkG3E1lPwlU8UgMKePq1Jcsn9NvuaWcOx0sdaE1Ngxv2vkFcCBgnzFhKOGpnS(UGWw1Gl0ez66Q6YQJAy2TZX1Ke6Z547wLXD5vSO5kcaAMkOIuw00Mug7C5jV(8Ff3g)3jYzcJg0UbTyUPHbs3Oq(FR6Rf28FXs3r9)hH)YWfeL3Pqf7IK23mboG7qh6INcTmQgfPElroUhUp61NIfucVV7kC8PXBN3V09ULSJX2KmsSVVj8DDRWtB7sNMpgwnJ6pFh6unH9aRBqpT5lPvLb6zDZxPFTQS4pZ4EzvnGFGHXAioFVRzoZy6Y86AUVIpMVgqrg3DxQBSj15YcxVGiVYLKlD980zLFLn5lht)(nK76e2mMv95prde6Uol7lLFcRkhxNP7yGkLniedg36gX92tR0)1I8MtbRquksH5NKw9oJvUAL2(5V9RGaxP(khph4Lnl0Z3oYh3td7Hg212dEdnc9SCC9CJ4wXMV5w0S4J7TFT9Dp848xhl3O4aVi8fqR700d1qXyB9wBHtJDOf8MPezfBf5y5YNg3iwyAxKjJS8c3JPr7nvHydBMxRVLDKRTLVx4Hc7CMyq9s(eVhtGEIfW4VVkaC910EbHmOs3qwLW2hAQQCDcS8IJ2dA0wVFUY5Wzpbdqkv8gtXTjSakYlkW3p0YwkmzARqM00Izre6SpAlOVG1s0QOqwfoXX(22H2rr8rNzNbAkHj3op4uHFIvRt43rt4yLDYyPgDSsTmUTtXPDSFhZfnJjhiyufHbca5SIZyHIkeD2HxY7ySujoaaS9w03XCI9nat1rjIZlHaVcpHXpkID0tF(ebR4XgS4LalMnE5y81yMFvvZIKDfJbfZG9BW4)ojoZqobUDrjYBVuMaJ7xR)K(eZmsd9ZIN5jKhov8nlJ(Ig(YGIKevwGCvZsx3ukjQ3d70G3ASW72wuqFE1mb8It0fJWePkt2kPVXNxMJonXi)SQ5RUON9sLupP2JctYyPuCb2rk2aTyNwWmQRGJeThXkzz6342o8ohztZdxDczLWzn5(8Ovdo4B5iESe4cr8Y81v(J7iJqwlwnKxXnmo9I2gL0md5JQDrQrTI2qsI4JOxQBZEzt7TKwQEXskqekNzD5R)azpWhmuvaLHZhqTf6uyJfZTa428NMVyHzMEbUADHuR)kbUO5CKPL2wvIcbjSw5cdUluRkUy)liTMC6ACQKENs7eHVH2efuIMMPjk8QgJ5pxTmLBOUAL024JfVYJmsPDVHEx(3LviyWvp(EUXazAq9oekadsuhQPqgfzFCc2lJcCdg1X7t7U7dqRhFBTMMneuuhbFxuGbT(2De7nTs9D9enX6SSFWAzktnrybJNZ3wTIUb6TC32RDonT36402BRtCWt3uCWXyc0ZYiBibZsBdZiP6KsAM(7pi7VDZeSZW6Bwwntaup9eevnwAIi3GA9fL1fOhKwoxTx2gm0BSMnPb9VVrFDKuNMPQlhLeUmZYIKl7BG1neLEtXxT1CN5sHE219BicAF7aFZyJodeBSNWHKwrB5RSP7JD1r3QxuMhCjLPrZeTnePOZVrW1vzRPmm4p3GX98HhKVjA2maNhWhobDCimxNprmDJfnw1aZnbQ8acV1F6DBlogineIEXM12iYMYJ(JcZeHhDlHeSINQqegUl9ITZ0xZHXxi0fBHtS)ASNKs)P3T)Elm)iLItFADc7OGgTBGj2B4fFODkdcgPN6eIvY2wVRaCrOm)qb9By9ZbLOb0X1LWmKssJvexhvJ(b(wLsPs0UFk9ZZlUkTQHAlKrkjBi5fMSwI3OZsk14hfzE2VSF8fBlDrZCNTfYkdrJk6bE8CiCPgSwM(t5WmyG0(EpYkAO0ZntbiAB5HOusCPNLbL9lL0kOP2qgklEtVzhJNtHNOzjA8aA12qkME3q66GeQ3TgPPDBWYUPGTZL7itxOnBPNJffXOB1odu0ySzywr6a8vwCdz1AP81KHoKxrGwXP3pkel9wqdKzwqCKLBSJn(soOs6JsJdxIiyFsBfg55cTEcxpWUry02mdHhEXqL1Wx0OXZZG(SdfaeG7l5k6fgRZ7XJt8atul3iloUX1P58vGbJqBMA6GBmrmYHk7S9pF4nvqlLLfVpsYCF7ppxM5NXrnJEYcg(d7w(m9M4QN5uWV6MqwhclH6IoXdhnPUSAYdPC)wq8E67VSuvJk6MMt7BLJqTT8kIn5F(i2NOrIOSlfOlJ2g2ANsrjq3k5f(DDL(0rcV(QnyiqP(bZhi36wT9UNIVE8vzTpvv1RDypfl9KuwuB8HHlBztj)UJ1MmOtCV1MSTqQBBlTlrLIm24lAfK0PqJE9M2srbBWTzdjEU5u43u63gPB)O365p8CG7KtF7uu3uk5BP9J95)2FQcrMBNis5i22l7ENLa5iUr1pVygS5Nk5BdwEy52P4Ud5za(ITgrCVXWZ()b2f1Fm5x0pYC)O(6PemC53D6QuFrC3q5NpbBMAg8aSC(kUACjUowJVWmajk5GLldq5n1ysdQyUzZe446BVBL0E01OhyVHgUPp9K8tqB20iIs22BPt)5xS5U7OLX9qDZzh6ot)LqT3TEzOARgQySw9NAOUx0UXi93LG9RFaMjb2fMcNB2Dr5MFXtt1(7xrc9unCV9ayGoBmuhamcTzAim4kJgrU88Qwv(792uQTvMPcHqFxzVxnBO)dGH2vMpuM9gTmrK1tR12CG6)31YdJALTTA1o3XM4BUBhXalATe9r3YGjD72ZM6Jr)fE1BR87GcY9lEWDGStBx3369gSCYbkjAdvMU1A96V7Ad3O4osRU5BpuSVhuxd2qBEU3yteTJlv24NII4EzPY6xh)pVLkRDN8fbK2y9O)fSWz7(kL13Ma5HMWv30H2Z8VgUUHTcCT1kN7DvoheyR3(KVHDS0qzEyUgy9NPZgk3zGekFevqVPU18Gl5V)eA3ZSf3V8F3AxgA1L0E2Rxpfze3F8Y(2IC9K57dpNIbto2ODeTkWAxZ9R3SR2uoXBQv47vAXd338bwVTbx(Wb3nyTstUNsu23fE7VSfjRtIL93jSh7cJ1P61FYAsv)1W1xfwBELon639p6f4coGkAU6LnVhhzChr9(RBZ7XGoH3WgWa80TsiDeRuxh1FF(eNFv8TY(Q11mNI21oP3uZal1UemI7LbeymT(YWQnGJXVwNzenZXxE6EEYSBZA)ZGdh(CAoI89b8eZpdgYpuu07xIN3bQpmtuMo78BaHTBa8nxji02nI)PRH(eEWh9qVdc1(g(SNdULN9bXmst7RnuyYjFJPros7yftWiUHmXPRJVn8btYzpFPtC89HN2loWk2L(8wj)6tPlMyCAOVtS7(n6VIlN4FAEcKdFKK4JzZpiPWxdN9K4FLD8bESN1dE)p0PEFXW7hyHVwsHH222iC(Em8w8wa()SoBnEOSQE5E8JSWp(io(omYEFLkbUwheIF7Q899TqPI8BMJygCS8b5oZrXNDJ7Pfe(nht8Mtj(a64KCsXuSeXk184z7CaC(DYychhCNGSptJuGhk1N(2h4acChFxp7997(INVZbwmBzjrhWg8B1KkmVv8D(jMXCob7P5sGF0bUbbXEUU(X0B4wuYL5tRk1NHWq0IHjZJ2BfBKLdAn7Wg)4ypQ)g6FjM0FZ2IzMTmRY9DoCJDG3PkXNUgskXIdRB7e5Ikb)qNqF398lJZR8cXVvzIpjusDSNue5yP9X9zp1Xw0ojpWatNw)q8muLfgqMlrBeD4TtUKEf4LVxN8JxCitv4KfQiFj16IX4qPDu5(60M0r8Jkx1azgdDZVrV1)N1Pv4H(qnT(0scLhbfFHJDOypIjaVgNqfxRtiSqdPXdl8PieCBAr7aj2)a(PKP2P9BT2xRlDw6rejNF2bRhWT)mC34bjE3KFT5VhbAv3dhjtqSqr6IaawNJpEe0dEXX3EUPUOX0LPmmbSwq85BD8ZlQWCO2x4dV06Wlxi)ibNVyg0VZyPzzfuJruN99iHXBX7GNL5DtYutNi0hcDbhXNey6BCd)2tR043wQtTLA0iEsRCrWUjeT5kfEhg5Nqmt1orWBDQdP)tBF4DyLsLJh9RLRVDojk7EC)t2xLFjRQcSI0Tiied1rSn7(04pT2)eYvAVhR3gyjo6H0IsUc7d0fwsJPDIU5qplX)QtRFAjiAr(WRcpdad4bTt8F3KLG5zlJJa19QgbwT5gBWaXXnYq2l9vXtnSwbT7PZ2m8CtULvc)RZRYW8vzvqSE1fY1Wk9waPwCaWebURiOQ4qnyYTgNgr6whToSr1iUHKXFOGRkxPnTyVa4IyHWC7gED(wlWDO0OcvBaeobMNo8mrGMjjX1ogMpAl2JlFiUkD2m5I0kSvaBsdt9E6nSDsP6eIguVZz)3)jJxtxyAErhYPWzKgP075tvG6Sn3OwNw2ZCjYtmSUhD6y8maRBcDrNtW)OWZ7vm3lM9(J8VNi2T8y4TlDqe7(JMV74Y7lI)a44dbB3bFVnGTTPlNjIDxxU(xi2hnKDprxg))BXS7n(1pZO22YCx2v04EYg4HKmMjOEK8JbWfdJOR)DPyWmxPAi6TltDb7gsD1R0ytWaB2hYmUuxaMEC3UxVdtptLD88fFAWGj7qqkAvC6pi1tvLcTnU8tkY(c)RMChR)9liLHr8ptLtmi4WpG4tdGp9seQF8rO6lhPN94t9J72xwR9Ly(Fvfu8qYFTtUX3dDu8dxXBZ5JmKu)ohIpLnEIda2(CvmXlgR9npYo6WnlfAj8m(G20lOdHp1UT9psE)5oCSE3PFMciJNAQVeq(Ixci)sa5xci)xDazxoe1)8ciR2Qapl9b85B5DgQnT7aQoby933Ebo0lu0pp47p1RFZgBhyBuNFqi7VS(n)KbSpqGD7EwBZhnk(djXUhgY)U2jq1UO65kJ9GdFCq7EjFQo9l4wAWWzBhb8BfXMVPWFob7BRnIvQWhOjYEc8VNlcuFbN23qb7jWF3ih)aYO)jgZNNN3lzZV3lae92f8ZbSFFLuYtiSh88hBQ(pmS99p1qJ10xFRw(3SomP2EIVeT6LOvVeT6LOvVeT6F4rRuV1bptq(VSg)VSKcgEu8GUp5i6d4t)yq15jx8cQ(FhA80USIc)ZDj(T786293SArmFJY(BgX36Lv75zrDG3LONPaRDaXDjwARXvjLXtsLtVSOo9gHTV4B7u0vQt2pYORd4q1lcz)EW9gETDiQF2IR2F0)nu1tpHH3qG2wrK)Pi8A)jhzgE1rCKJTZHs)HS3U31GV76I6y8oM)Cv2K9HpBO77fI4Je0VVqJ7wNY0EtrFiW(deRzFXR3yRYAdL3k5tCKEUG3jr4lW7BCGEbEFZW79K5h(wR)3ti(ozqEpS6nxNT6PPOJ)US3OVhpGQKhybDouf8LN3cYhbpQu1oeJUoRUCDfwVduRziESGrsr6Rx)yg3CwH4KaJoGM(f(1P542Q0zaLB4iC70zJy(cZsRU76ckciz8Ce))YiGDnC8scoxkmWy54cZo1Ddb9Ce7kX(g30rcXV2eljB)KBYxSye7)m0fN8u8CvuC0O1(td)RSdDWp50wbr22(eo3oF8E8QyMgfp3ICdLFN4njmj9lekNHuIYujqs0xd3k2OnRKggRFzA1NRfsuIn(yXR8H01yUN3EnNLaT048L45BOysgrWgU8FKpwJPhKOa9jzuHTCOE)k6ttFx86a2dSuCCDAYL08jMDIYGPAKyQKADz2d4jUhZvQiBbqGaXfttGwWrnA8mKgGbfePi8NpoiND8RfKXPMZLqPlmCUMBDPpSIbtzXjK4WbKM(bfMatWg)gKZLTVxmxJLYhXz5iE(0rhwSK(9ir23c6HfcRT3VImg1I4hHGQIXcS399PUiFBwrwv6IVVvKfli5SXTyltpendn40Leh)vv5lzc3VFr)j2mqQYTBdP4KCdrSqOJ2WeLMl6lgEwEMcAEGUPF81rKTggJf(J8t2sTdmWM5m2Eol6oPH1VcrccSdEkFzFBvAXSZV5TLcKZtnFQrC7PbCTJ04kHJBeOcuXq4(XhyfO))4X27KWxlV7b(oG2YRTxNYEMqPNfb22fO0Nob5SJTd8TiE5rcuQjkfa)mGb51mAi8gSR19UeoPo28tfp5OD1u(BkZafdAbxTBzlCaZEeysq7dLg86vw4OXDWzCBE6cyopTRhS4WjC4cv)H4InShLru7tFk8O4rJ3dNh7atVNGNFVNbdPTnVNEnShWuShR9w2W7ST)JWeMN3rxR4(q8BB)YYBiJfNBgpgrxEA8oBchak4rOKupNPEJq4qhYSCJ9ngIOtAO7LPBqpwUrHE(oW3lslBxu2rX75zcyAtZt343sxSoRU2kPJDCFOTE0XsNTvODy4d5KkKCoS3jNbn)m3iIIxLVs85sXgN9PZbVKzGXINNsvDM0X4mXKXE03T5SqA1hGwUlbgFooLUD2QjDuXgaY7XIngOjXkWyP5UUj3gjlFKPeyK5)jqXCfuz5uLsDy8FBp1VCmOrkCpSnsdNrVEySkZOEs)yEbMT9JJajWVRbROCIJp8EXN7Ev0J6VtnGdZL(O668BlwcNFWuf3SRo9QQs2iKbxXjja398(jnvPt)mteT(MBgjov8WJhVVJEiWGD(RR)EHtKJ)HfUoWPuArKLRV7HfobWrZj7QXwUrbS)nY21Y(WcpppRah8FD8d5joW03SAguE3(45AmHm4yt)84EsKO3sy9BD)xZt1UZpmszYSQC16fPvxKb7gWjlklNTGj9qLR5ZuW1iBiPFdq82Z5z85uh)YP9KCz63u8t3YP9XtfXpkq0j9S4JFqHNzHgctkqGspIwuCNypB7WiRixpEunih5SL5yRhoTVcwOJCAg9)MSQY86LkzuT2xcd6uYwlba(kLs34heKoWhJAhIMBxrwvBQ44UL0LR((Q4sLV19ldjdDu)JM2aFPMmQ(ZoULcclXfX(HtgtnrMCTheVYDMp3rYeDgX9JZfFwfO1TjwEK4OH5EQsYXv6Hgtk1okrJeaGqk7QcJVAlDkhVBL0MTeWCsm6ri8ZT71Pz)gKz9e2Zy9l5mrubD4Rcp0B5FpWAXwWrnVuGDMMTlbncF(NJSczLHeX)2G1XlI)UtBJIz1N7tH5ImXhpmgLRxOJBqaDiVACqJk4qg4h2IGASjBIElxt1QNbh)q8FMASDv2YYVKnt8imHHFilZ5Xxu476hG)HJLhCf6(54T87NPL8yfNXGoTJI8W)XXgjo)e8dPX379HC8SD9JoeMIqgURJdd5LHdhW8WVhBaW6gm2yVpnCSbZMx)qFl2)gdrTz)RLJd8)ZsuOii2ZI3lyd(fgAmpiqZXfiPgbACtS)Kne5W2slvVtrQifB9)75o(2mzJd13WBL2bUi2d8zhGzME0XJp)3orCdd1(AZpWSAalKi5(hmTe80rlc1193tsOGDtcfdkOFyciY0rqsE7ejXTTFMOjNDIMI8D6O7SF6ijHDuV4fxGRvf)sQuUkmd(tzQ1mr9vKAxDL2pdL2YXDqgWzcDjajwUVTowOu2tV7ocYNwI6bslchYNqI5b7k9SO12pxPFKkn7hNRegy8MsYfjag3jPlao7KVTILsqnRoqCWlx3SGLaYLerxppLfdNnX)Fd" },
+    { name = "EllesmereUI (2k)", description = "The default EllesmereUI look", exportString = "!EUI_S33EtTTv6d)vPFbGX6QLu)liK0WBtcSaPB7o7mmcBbOFyl5vwouAN97(7ZLZvPJSTasA3DBMz3cg5JoNNZZ9R)(pUomBzrBo8djzfBkVCw(IIQjhgh(9)46PzRN1uuu9(kVWWjgFWFVYpkEY3)VXVD7tRkG)ZTBwSa)gFPOzDzDvva84HzZZPL2ZpBt1I6zp8H8NQ30cFY0S8Qz3x3Sg)RbzT5n3v0(M81T3K3aFuS4tu)a(nQV921fT)cS7scm)h9MwxoVaE6Jp7QRo7J6N(NROTPFy2Bo5JxpBZ626Lx7n5A)O0KjHHxN6z(2GDc9y11lMx)y1AZ36b0Rn0pmjjEs80PE6xBq2vNDU578GPrhg6fhNmDIN3uVuCl45LDBnUbOJQ5BnI)dMVmVdJn(30T8Qcdo0cwGVjFb0R)Rscx7boJ8IddssM4pjzlVS4yCFnneaDWzlIowDazwGZPzV9IJV(nlYxV(II11BAMv0hKAS93YRMUgbyiE)SPTCrz7tJ7MZ3ZZpoapGmQjHW07MtCXffhMg6f6HV0GSv23xXzRwK)urt)JIFO30KjaQvA82rkpGHKIxZKy6W5Z4boOcCGHGKJ7cRpn7YwGmR44U0u93)b0(rUHmWTJYU40F49xzHD7hWiDE(Pjj(j4MpLUPpV(XclYxVDGb8IjLtak5yV0GORtNyrk76ski9qGOutvQGGHzF4TVZ6m27iIxqtYESCE79FmVD29aYNXzET7dAxIJHEm7B(1QRBaFNiGa(IWDOZVntvCFr5D33YBmMOC195vaVUJR3unF9V)VHpmolF(86kKJRpSUlwuSEzrtXNp9OzTahB8fGmJNMnVCD(nlkExDZYZZVRS6U3rF8QnRVVy(BiwOVPErnEr7bSXrKfVSBqHgtqPgEz3rSOtPFUb(50PbecEu267RF84fL)2VD6m4nslCQyH)86cIrbT0WFW3xUrU8HNAkNd7d1Ub2)3dKViCb(4JQkxMJhH1WviE0BQN9dlQFuVjLBIUBo5MgLq4dl5D3VaHJ92ktYaEf5TBAYBloR6ncXd4MmktkS4TZVRO7x0dWcjO2X1nZlAUS83kQiquC2nAOWrlWllcm6NbY)oVEDjDCiPZW9sabPFQ6aVOPhgbpxswtXIZRlRAHB1382pD1BV4hbSMvIprke0l7xR8eu2t9Mg5Ns3d0Ag)swZjHKakwqGu62FBtXMcGHt7gcpc3VGu2dtttNgfLeLgGsw2XoxEwWD(b((Si3GOj43xT19FbB9dCapa6NFQ4(YzlkE7VwIsMzyDmZTG)hkcEe7DVPwC2uB9e5Qh6LqSq5dhkTye3Ph4j2APjHaOLKsrxQrYLpAkT8kq3OwEsuBC2ffRybhi4iAcVFf)B37xZBsAbJY(5Z1RxyQPkoJe6Y6c4N92Qza7T2IgJ117LUUeGCQeqYYPJLupJcoEGFQPahFCxpn7J5LiVwfjIFePo7ZcrGbeGm2FTTjxWgFtBBDLA7p9WqGamauijmjez9mcKy)esmFSxcOCiRJITgfmDY0qIozVbrw04bPmELHQeXzNxGI7uKktjO40a)PGcQOuLrCgoi(qVjbrErX(rfhmHuzLUHdvKkbJMNka2r4EQwIrx(7AHqSbveZ9PwYkEEIqtZ2SUGKGM3m)eW6kuSnkgn2AXjjn(hsVwVS1)Rn5nfOixsczC2YAyvQbt1UeKhF0If4c4RKBEfyrhy2e9KgVTlBFcukGxWIffZAbXAWl3aLWqnHRk(vqCzbTu(0vwj86)h11lRIiryGiCPCAhIBvIIFbQBeIYsTLH6dajGHXzcdjpa3zGcd3q0mNdQhbAtqBxVWSVuU(9GogFQ(TvflFIp3Sbv)DujqcaLMDZDVTcvwAo8atZQ2S8I6hxZx3Xzieg0CP4tBwsaF5stBI3vx1QXbUrOg1DI)Bd8FrCm1(49WvgRk20Sc(vYA7Gkc9X8zn1iih)OWShkE6MYQ58XeTaM281nLfvG4zuZcqvwW47YFd2d5Gz7aQSungCv(f(BYFXiPAyxbQ90wUIW28ZYx8y(tieAErf(wtYad7p72lYRURGowk9gnx5DFGJjDezn9oQPbGM47dUJYB(PY1L3qw(bctQkaGlT9UH0T6kqa(dvfRxJUK4(YklscewtKeE0LRp9oGT6d41cReQ5U8Nnp)GQA0lWs5uIwE5n5TibKgdaGc3Z3tiQJXNhzIlOrrGJfT2INeHJrYBp9EwW8GH44l8ycFvayuit0be1XsJ08rs8iIBI2iaBPFKXmWpimBjI1SFOHrAYHRiAaHjbgxtxGAoZ3vQf2cMBq69Zew(uG6XKl4eIXazkH0mcPjeeTWeb0IxvMeB995RkyUVozO6CHcYUdqSoPSbyIHud(zBwrGiMrWL4AcOrv1vfeMTXlX4McyMSaW5U6(M6n3DpEYHBzBAasgdAKbBJeAxe)tObjKDZjipdM5aJBAWC2a)XNHPsgxe8X6Zeu5DO9)fjjSXjGGEOcxkC4o4QsWaZMZNvaYqnyL7LEpz0PusbWV8SQfpDA1AYNdc2emev8KowlaluklsBgey1eHyrMYA8exUQOyocdj8eyFoY79ytARDWkYYoPbzk9vrWHwpbKz8UzzgYs12pkz7B3qcs2NWA8W29rQtc6D42sqJitMuAjBoL1yjUBiPmBrkWaCQ7krjwirBy(aJb7zSczKES1KKQp)LVPsxyTlSLUWSOu6KyiEXTuYVXYygwlMXkQXjBPxzXn26qHYpgssZZqUsp599e0yPlSq8X3sXmoup2ty0HuxSoQTfJkHSlzmmhT(QfVFYugs6RLzdYqr0XHx9VpDVAdWqs(XDKg7gtCiobdkSClS76WNrk4JCvLdZp(QzV03AXEwcw(6iWRRzwU1J4fAH1lx2N2AQbub(RPOphwW(Fus(gMU9BP5vVEI((ABL1Zry2qcg7zuRt1q(Jt0Nl16(Qk37fyo1(l6ZWt(FvK5fXHzTkCcPpGBjG7Tanqp2yr8rR86Bm7wmVSJdZE)zxC6)4SpD1rFGuvZHJEChvIximAir97wFbBZL7Zu1bGLc8J297djVAqxU9k420VQQbmiXxFUEVsEw1LguUe4VxM5oGQJdi1EVjr44hi8A8(5gHr5cvNEy3L5pFdDE64mV9)2eY)TW(2)xxqVTN2cEfSTLxJrBQYRTPVu8tPKW4)snpSVFQ)lBf7h5T)YwXbIb3WEj9)2eJ8x2ks5J(Rs042tBffbj8L4I0x3WWT)2nQtrTo5HbbaFbPHbM2KMXzmGtPkJKvZi3B2RyQT7u5qsKpIqVfMD968VqznJrkFULuVy0s6Fw5(X(7uY9YgLxU7it1Xe(pMOXnaB6xSBj7P1TibBmS8IZTHHY4JXz0YFkIjxF2duE2)NRm)4)vcfNJ8nQJvk95C6wUKJiXzNmCp7qW5YMcDYnAgsWUPt7RS1iDLQeY5SKvo(9AXH(z5rioxohLBB2MZe5AEBVepcIt7LnACQhkYAsJmdWzQJ5ohXCNxw9CF)wKyovK5qCMdQsjTrLhcJkhQgThshNl8gvQ90x(uF(AUOMFooQzu()ZronsQX2l8nUZ3e3YX6vmric4asU7K0tpNKp0bRZNz2hoqUG23wQHJ612sL3(5SncyCPX9(NQHU5)6mpl6LQUgjwLRuoXHh5PchZv2n6mbq6Lz52YH2xNF5UESChIeDbe8xgYORDT)YqMUbC5VmK5VmKHtL9gUne8vpf2)ldzQ40w3HlG(tTHm6Qo8vwKIH0qYW7DvIsu6tos1o7wlqUG0Vwwkzxhtwzu(akw9SSTIlYjlVkgjIGxxtFzNYmu9j52aHbvOAu6vpKIXdMEgVwM)9YQBPX5fRNJ1jJYEVxETn96L8DFlIl)GLUM7YCAGW81ZyZ)4YYU9YOpM61rvWj8yHrvO4iZF6zC2(AwXO8oJddY2s9D)Fy5vws2hlN1ulkS7x4MF3j)Mrew(6MS8Dkj(9r8nPv8(LQCDfc5B1zOOY4ZHf0yhoQJO(VQPvN7iB5Go6RJwaVWQzEVcR1OD032ngCaMWJ0DUJsBHDWMSxvVoQKX7VcTLOI8)ZxOT6wLYdxpZM6X)AvpZFZkZSDgBlhSoFUMeAPgbLG57tblpQiBfNDC(D)xNWsZUk0xfva(p3Aha7bzt0DuMUnqfViv)sr2xa4UwMrJC7Jp1EF5SRkxsnHpQCvRF88fBwF1J10NYfzA9n)FyJp4lfDJ13Kd5E2g2Ncm6EBKNRGfB1IY2lxGT4pZAsFYHCjxsFlXpk6EjPOvXIsAw0ykWD0zY3VOB0ql87Yx32BHfRRUNjekA4rfupzPUzwX6ZN1EE961rzF4OJFlwAgbz0FfODS3M0oG2Lr8ggBcdbCtSKfKsD6f47X9ZeRTkc(WTBNebLaWnfFPS4rUJy0IGzbi3vL7JT9b17wayNxK3Ep(coT6QYwUh7iwP3(RRkBkMBFqOyNrhe(NOUBNOxCsR1AJfcPYkVR6OflWBBamjANJG(Nk8G1g9Pd(Ctylh3uK)agty2ziQh)hYxXDXUjz32KVSq2OiqlS89yOpF3GVsSncM3s9j0Z(8NU66ZF7fyhGI0aUfpUFEDXrZMvurnVg(1taW7BkkmWAji7PyRZ6df32kA2nrzRn7Vsk0naULxnVyELVi3YWMsX88f1vfaYc1)zX3yrZVapX0d9NmzINp8ttynN5)2pxLKqTXn)iV0OapQbELMLF7TL)QbeBcTL5Ja2sarIyS5VOGcFi)MIf4HZJFs87Z9hJqtGfIfNM95pDYBV46Jp6ccjqIjBbJcZymMonhcazg39mMH4hjudQP)5hsV8pVAw9YYQ7UeP54w5cTtaaPccXMojbCs6cbehoEkeH3uVCvEtXhRNJTlLpD2NElcFAlN9G26lFooT4JUOOTy(hlxSOCDXS6Q5e5p(8ssg8gVdRf3CaWVeG5WxcyZZdElD3vNuSOnhRwC84X3rNqeh8B9MI1Tkgre0G6AHrzrrPzaKp9aVjh4fo93RIIOl(Gm)G0FVkik97RsNg(9Wl2pb()tsJG))a4tOhc(6QVsCMxSxMxc8TsI)(QPHbWtozc8D9N4nf(5qUXygJln)CBD1HDhVGg7UTVYbzHt8)9ka32hE)aFVkF4vcBApp8aaFa965ZSX(g(w0(z7FXaC7SRdhSP5tN5MExht(9B8n21jGEf41tcC94njgVFMIzStfE7egjBaP8Zzb)g8lqGMM6hr(DisMqkbZBKLseK1ciTaU1I5Aoc(b2iJeEVnETMqTR4Gjm9aXOdFd4VdO67SlWKGYAfCI94EETvtE9taJ6vlYBleDC77ZxF)hkR29cJNrGtdi4VLYNgemCFr(I27)0ML3q9GlVS26v4dWTDocwnv0mJXwbMUPjXn11vflW(ZkWud7pCYg(QS3uRAAsrAj2WTQusxi3jqHvAg3wC)CvjYTUzZQ2sWim1x3LAjKgkOa)OSfGueCpB1SVagl1RAWJzV)uG89juObiG5JUa4Cv9kG5hXWgH1KGG8nn5NGDn2YAkXQ0z3jS9lxUQUby6sT9CeEW1RjHAaI)Rb(L8o8haCqGVviTLX2x4T1vGK8OStXZ9T5Zk(NhnF(zvR)Ng6c(pxwmVm)Fsp6)eehcyPRFm)PdV6kugvai5USOA(cAVICjL98TdyjMYEDNO9fYvIlwhT4fpIAY93pDxYkmRjVC(hZBEq0NB9jve8yO2DczkSALEzvWB1QlZLyJKTt0Da5UlWDNFhGHIXLL59oSAZWEpm1)Q72YbX(3Lb9k3IJL9NpqTOBV9Q8Qho6U7AQv4EjC6HtIINgR1F1lH66xOQpmfJfqaZEnqRLLLu7lMrhOxhgjQBVfBtymfg9HHzk8(lkYNJTdDUzJPF1G2TsYMusigEqH7dHG)FPEJr)ml16OyqZoj7FTbKw(X6BiqSUTK5h3hjw1h(yezGOwtFSZBixufitQ1alDdMkN9LIMf5pjXPeGO7lBVP(xje2FgfZIFbMOL4yZ0EKoQtmUTF7YvTp5UxC6spBckMKbQqvEdOVMcMNMOB91(GCEjypYJVWNs3G0gr1ENve5WFpHqNVSnF2d7xgyk6r4iVdjdj(idVP6226LoyGPPqrDnbQbbVocqrCUoTcuu7MCUjitnUUaInh366e)SQ51X9Rlb3CQ9GYD4YP2hgJCAxH33PflAY11af3C93jYd1x6QE495RTPfJ13JjAdM4wbliED2mB6ka7WsExNMHPbFzJnA)K3JfpHCx1iEajR(UXqwjJLsBdT1mGOibLZBiRr295ps9kT6tGyH1aOE7vRKBIXfkBwWm2FcUqAbiLukY5OMfwqk(mHN)DVXbdUuCFTqmIYEa7WIW)ZGpLupbkhF1amyry9b00KkmxjpBGzSPdeWDNTyzhfxlsfmH6)3mvG8NrQa8NzQB9b4yREAPU54prG8rRHjIi8ZSdwKaZEEUiKgkhI(QVI1sGh7nKicT)d1yBh1gZ3t7oNPAmFUFHJulc8l0EALGCqpsaBbzEOu4anoeSO9iGbL82rufAMRGgnxWAsDpmebiTpajs245dlxwnDae(nIG5LZusFfiSkujdIjaBu9XiVpmZjqMKe4tQk85fnOn8vCzwd0FgCtm6fNaBBt9HTiVj77xS4KceikAbMMY0zhWXTryHuSDsEeti2Sl9iEYPXAhUfP1TWpGVybBwCPa70SQInTn5l0823g6rGI0BNBqauHN73j0Oe4f8urdDhbA7VA9NkYB2F8su4SsdfDp3L9nKHUeDyllz2y1ZJzxEqlcPzNa6BOHVq16igKrapLcdwlf7GquAlYM2E3W8NnWdmX2qJhfulOsVKjyw7DnFEKo0e7hdLKPEZylZ2q)qTMwISS08p2XCtF9vT0Gtczb5LUAvXCTnxkgnAvhzjLPzZjS6H1HHDYc3mEbiKttCiLe48V)(61TLg2RrT2DHMgAS6aPNnT0bvBK3unTqIHFD9IyoZbAIbT4AFWekbYk2oLpP428nlizvcVYPmZHnOMmOvZNWIxGgz1sORMBU0alU8eu4am1)QFQYJBjWjmhk2yyXMtGMzYTWsNx2b)YN(tN)gA7BBfbR(mDPRT5TJvhAEJY)Gidf4BCT(rcaHbbQAoWmudm3uDuRxlBa3LRYNPA66KgPsRETE4EKLQQU2qR)FrQ1FmT0OKDN6Adcm12Kyq2QzSJuI7MTxGoObNlCJAk71dbRDPrYO7hBBkb6Sd(IpCraAbBPAN2kAHxt2xrda7kdIYDVJt7y9NnxcpqbF)OW0jEPXgAC44Jj3kh65nnoC6KOKeWGu2Lm98Prh35oX3lomki0pnKgdxcDAs8Ng57feKm1x8X0Bin1logmzoYlv42Mqn75DFArfJqbTKX0iJh0ZdfY5E0MsMOw6rJoU1beC11sIESgzfy0(s59oxlwXu2K7oTKFudJpv3r4OwvtFPsBSGD0wfT6QIwXRET1yY81SLRBa2lWhjWRmyGX4WOCnIVoZXHvS62YzKJRiDbnTvDAwtEtXBxu2sZucMVkpEanlRxY8rTTxIFeVy5iPaxg53SUU5g(Ubu8umwlm0rQJdhq3jrGGDE5d4Isw8QBfMzUhLjGDTYRJ9OknO6WfIIngDtQNnbSZz6CXGtmkLI0biFncBBnAGpWVZYCggk8Mff5vm7DwbuFLlknm0CQdpUGIXNnJUM0kYy7jZU(AtZM16Ghi21YhxynVLxPusWv(2RdxeTuCLPkmHcyyTPOSEUqCkdEeIeSqFTvsY800Z(b9FeXXsmJpolPKd)hJDqoWXDFf2v(5zOqPCAQamzaLy(bz4YURPEZQ16Rxu8hQp0rKspP0uqHX3XK9e(dv2XugJS1IcPuE2)DCe0UO4oGyu(ALRR4fpbl8wzl6XQI7YP4ssxrOk5baj6fOfOIvwR0bP(dR0(gvezZVruT(6a6zfY1E(9qUVG3bS1X32X0Bt0N5TuqKbDWFhpKCSrb(JlafwWTHR0YM)g8AdSdrLPOtg(oIiRIaUX5BARXOXUQLVVpT6laNks1iJVca4oKTcNzb(5k6QJNQkUYuhh12mE8W1HaMYtU48y8Qq4DsmjUlaHT2tseqx0CXa4RQcSB6D4Sfcogg(Yxo7mfJOptpDKMb8QbE3ZEqFGyBv(G4ZzRIVRjFoo(xSMFf3nBonFaZBE6c5e5WaBflAuLoPIjCJ1ONbD9hLwbAp8LQEt4(jEQ3KGjXXbtc5zdOUtCAnoXqyJ(KCek7hbP6fJjFKdnwUBLhLDB5If4vFGsRLPjSVx9ZmoBkitQyk0YPaGy6vzpO2g1WLsmxZWTbDh7ffNe7pnmAskQWDhAuR9K6mkWHyeAm05yiuwlVo4HK7VuDqec9eeVAK2lLxamvkD3X4FAqhdGctNgKe45fonLb2QS8qgKrXB(ybJk8VdCIBEGdZj)4INHY4nkmLk1Wna38gWMrG4XfTzE2UL3as6QkwGRkX3X44)d84DXb3fuXzZ4oHGeewsknXmk)H3CIeRwe6FjuIF9AqJ4sljiy6uqvZGyY(gJ9HCL14M8fJiPf0O9Y0oZ3JhgA6Hgi6pdKfvX83UCf6eIlBZVtYnsraXWrb7sfUnJ1dSgLuVNu2G7pZorlNWmI5yKEFYxcmjcI)hMMmji1xGHIIJNMDxbWVH9huVPdLvZUfUh0r8ljlVTPEwz7tDjiLKNa6kg(f6DSQPCjWEzOMf4ajbF3zqvqgp5MjM9corMYvLZgA1SUIsIi2DEaQvAgWI7HRUVyjMBvc3iPchKvkDXo)xKZsQrae8PYW8ZiaisI8t4Bjj3iHX8fuciD6TFQwY8MXfvFlKSef)yZKqXF0M9iNvsY5FnZmGc4VwSSsWU5GJMDBTdjxDew5SeO2xz79EHkAsMhop5VzEU6zuQCka6yw(X26OGui6ljOEiLC2kYRsgDVT5W0SyulL3UwdHj1NE(mPBIDQ8iJmyIyi0zHD2TLlUnoPNN30wMVqK0sAIxzA6W2QYQS6Ad(vHAAyIhwKSqJab69lJ4b4JtIV3F6eVEnSid6eAi2)TLoPVOpLoWBNoXjgVV(AwJX5q50TGk)mjoCBuKt86dPHDUitySmNCac2Ui2GYiu(akKt8sWTJrMIhtAeyQtUu9rMdQAy3yQD7wftyHPl0vzFfiaAb3JniR6PyCK)SgWWK4vrU6YZ9XEweAjQjb0k1huo2Bc8AnuZ5NYxSPy96jz9iumOJOj3mlGXU010T5jBbkjzZUhn1FoQHfn2zb07vLRKE7fxfXvfBalZL24JfwrfIFRZShCLDvnrpAT7kzMmbHDNjAyaN)cm9Oy8b6AGc5uyOdIUuCVjNSDYdbI5j2goTixbzyus1VY7i1VI78P8urUUEMr20oO0c0PYsuY3GJdoo)BWzu78ck6xNERHQicOplwYwx9biYfZCVUYVsqOGmVd7Q8RMspLhzUHMM1(3Q)aillg0TRznpn53t7UDw7KU9xGr6HpSpskfZSqHG3okeIoo9nLnZ4qv5N15PXScfTtsBzTYdjuc5G6l3Mp7EYZcrz5Kh(sW)sCgAu(M1S)(MMHJmvWAA4ZRWCMFrhPRD8Da5mN7Php4Dhn9DVdGVrzTn5L448nana25(v9w9z1wfqODSx17UOmAg5V9nhTd4n37O)XbM2b5M8XM8Mt8tpPVlsioBsR(aHmiq6Ag(aRjwHjTTlkamB(W2zqD19ZuS(NlYktJ84pkt(HwrYdZzh0UA5ukgoAODMMJiuleMUlJ0OtANPTy0OTvXT7ZrxAS8kqRyqpVPyz7SEK4ArdaKrF88p85lV(OpDY1xC0Pa0piBLv5r8Zvhegp5Wj4)cs8crws6sN4aFpU(ic9dbZNtaA8E5D8NRkBFhwLi0feh)gqg9zyC)AFsYhUxELAALjWOTEDjnPw5lzkgBymlGfAmgv4XFt2l0J5lkRtWr)nrKhrwc(uLFIyS9ts85W88RvXt6oX63BJKceouF8GcZu0bufXpb5UpIXQoP(HvcBJRIaBysS304PKsgW5lWleJKxY0PP(PXym(37ZNzEAkDyNpfPPXVvxrzLIAvCUvpiamNGq1Ne5nLs)89DVceoJaLIJ(fIAi1iIeiOXwaLVQw8eNjnIKjcZOcoP6WQCceQ)3VVO60k03XFHCyoiiLsefv8XeA54dKpnOCbG7Z8cJqeHe7GEbc)KWUGcDxLEv0zKa5FwrDxjyIQ3m8Ca2J0ZJJ9iSf1E5Mha1C6RR2Ccvjt58ZG(yZ3gMsDW6itE(DgVprI7iFEJO63dSiCUOViwxQSRhJBabgLrevL5(KRf17EaixrjmhLM)ICmw(WQrUmU9Vahs5RlExjpI9LaCj3SOSBkwu)iPD8Y8FvCrlY1zp(2rOGPr9NitcjEf5WmAgxzF8cxFVY50o64mUe00jbSohki)kiEtbMkXXCPervuD3jGGCmLjFqVx55PFS1gJZpd5MJCmhaeogtCooR3fjYg)AzGoqow0CpglvrO4urwNHgM4mk001LyTNPjJeP4if2AHJLiaMEU(JspH9XrK33TI9nakuL5WryHvAMLKAuzeCZy4MEBu00t7EHjal)ciRfp2DiuuaBfcOfDsFyQoBs4SMHdsajZtP(JKJav6E(z(ZjudnLVa1W8JeFxgY0LObztcqWJneSltaFteuXY2JKuWma1feXepPCnYU262(EGnbP45UzfyvwQEXIS5SdOWQrRZV2ouRDUhyUPI0t0aMU79JjnNckkspafsihrgc7NJyhbqnkGwc1FfI637AvDBPXSeFKRj7TK9g6tFy1seaDt(1S4etUie4s0ywjNRlePWrhY8jL67krxf7ePwJMuZs)RlEvkyJIosDkuFI4z6YrszqVq4dYX1oTeIdmsbsJKHoMRmqmNwKLVKvYzWXSXkCcUtsCsDN74qtR63JsHmcojKw5yEhZvYLqDyfhuXHJf9P(uRYNOBrwrj2NrDzj1Rovw(luCtmZj99jF2z10v7a8AGtMsLMeIu2rAAlz5aPa0(QgISA22FGzxfq6Xz1TggA1Fmz2nKwb28oM0n4WWn2iye1vEVkEsozT4O5GUfTogMS1qkKstL6kutfoXaKKUC2q7uQIgupSGGTrqRkruP7XeP)rxY4jAT)u6nzlevi9Zn9(WkR2tLLDPUPdHFdsvnK4RPcoP906JdE54jcTuygHeCDBivW2i3BNCyeR(nvIkyDDl4cDOhxLiGTA1TN)FsuOC6V1jT62xYw84p41blTsQe(oik3cjORPF1WeFdrWoajOdI1bW76sSUfQIxdA2rXbCalh2nDVqGE3V)ZGm2HoSrI0jOVwcdKc0tnsShkpM4MUIhLPpI8QGRtHVcIIhGla7qdwVEuURdxgGC4f6wzZtQNfqHz8Yj8KKGzSBl8XgcQTfNDmGX2OuLoCg9kgVer8xmvCK6pnkQXbOEtS3OIu6Lxovo36sPAoQDgwzZ15ESihK7L9TMNsf4OVX2Br9zUr2Gq1JOe8vF2CPW8wTAFyDXzlxeIzdjVe4YToDnTo1gmkZ9DH9NgfZyEJkNTCPjCxl2OcC9EcB0U0RaldzNazHNPu4vdReyG4d7WdiBZSiqPvvLEbVoH)S2QphibJApdU3jcSVx28coOosTP42NiGEkmmIKuB54nLgVMFoyvfHh6Ka0Hl3UP9gYqnmHVeqVb942xv2CZO6e)0Q5yvcGPOOiNCPSrR6cWykUGNgYugBF1mSAMosEjFSu0SH(CrNPcQa77bxreeeoAcc)qnxJdAV4midbxUAdq3BVH37ouzExEAlS)W2sQKGvTlzMu)wKpDjB7AZgXmW2Lkkcugoi6bwSl13P33mOU7zT8GYAawSlkYHBNo4kV4UWaMsbDCBxQ(qz5nzqEx7nu5vkP20U6YicG9LST9PzdloqyBVsY1Ej(7qD2arUy1PB1EooBAQWXrpTQaR2NMY5f)oxiewvanhonzHP8I8O0qQ8qz(QftcUWha2sihmI1lE)nc3(GnAD7vu7ex(mCdiNzK((XhlIoxStimdrlw2LWpXbHYR0U10XOeasSruE2c(zQrlj95TeXcddkhhhLNTht8BEnAsbGCpmxo1vu9v1uSD5Q9TdzUHB0mfntqv0Tvy0SSVnv2KLk4Ab3MkHi7FOGWobl6KnKjQqVJbc2tFuuUqzWCsbnzxR)SmzIT0rLB4g2QwdNQoWbN1G6WHcYHwp40IWcTxHaO4HB4KqFeB647SIWUtDJqxV1EJA7P7jcBvx0bdnsp(88U0b5v3Y6xIXBfnieF1iEMDCL1yJ9KZydX5p3LWvoQRIHWd7ncxAsNwHPN7tSRX7PBpYlOiVI0KtiRPl9lYJxkYvfigtLrmBMwQQYKSVJnEHUwT9Q9GTOir1d2X9jdgTvsajZ1Xk6sBnSNd7m4U2xsGwA5vcGD6i7(rxtR7dHwtRHzs0qfsnLk)iOqZIufPjtam)GOroBps6JXfh9cEx)5jXGozvEGeMQGmPCjhIJXI5brC6KnlvPL7YwtbrxJQ7yWvyitihmYDd5VkZEDJv173jObk5zA9oyHKkfLa4ckmHLARLK4kqKd4nG(5m1nIaW0nqmoIbxhEI7BK58P4(B4(qrSCCN3aaMVPSiPg7KH6SgloszHT5KJTzb8u59Un)lB3(pue7S0h3MdTADTyoSRMMNYD0QMDe5aBLU4msm9RgrEhKcjzs2JbQOU21XZwJF7pDaIhl(LoJrNJCVG9Eb78gdhsiAMi2mv3vwny4gaJaqbFRoY0732b5MGYDCoYP64GdfuFznsn2WmGgUAzEgduJX7kJ0eZvQ5(mYsP9ZZjUr4SCOIWXjVqxKmOaXbI(GRudQFNVKckRd)o)c8LrFDh2MSYbDIHDBmAOmi6L5wdhjqKJ4j7W3e6K7554Cc932rS83M3j2g)g9FZuTONV7egxg5ShEsGZULxnVh8ICeaRNSuE(wcgY4n8)pxg3)TXE9ErFj4WaJ)XH4CCjj5(Bz82s4XTLYzUmjEl59Oky2IkiHDCRdtGz9FnA0AKqrxM6(QAu7Z241rBF6GwFoS9KDtbsqZUUAtnKDDBltE2PXBUSet2O16fVE32F50382Ms1rpXHtvLXzfvEZp5QtPy7kaxgq5m5sh06jNjtzh3imGrnB17cBXEIDgAJXyw7iAkopN0BC4aAoqUQ7qj9bIGexTo7wT)HTVvy88UnIYHj5dAt34CFZZ3CMEUaXvWMfZddDC62ILvBnvuho(EetcvOknAVS2ESbBrOUIIYoTQQFWFC7)HNRzrd79Xov(YEAye319hU8n2pdJgSwoCet5)eyA03GG82ZWODYg8BHnqJp0U7Njs)5j8TFtI(6WMlzX0OBAvVh2nL0TO7(FABOSQrEDF5uNPBX9AFqFvIA6ROHv7FELlcnKEu1z1dNOkGARb38)mmc7fhxYUMQfyzo6Fz2wJT(I)5ZSTXPbkBBDN4TT9yY6094GHeJWeqNHPTx6LcKQonI71WgXUgc6OM46hCTEriEq7c3QXDoYp1TvlqJOsuEwHHYT9PVIMMmwlh5UtQ7WVT9cMZvFEXr3YAlPo)xhZfhiqhoTzBiBM52UV2wo3f8KBRJ2MDFdexJTh3HoXsA755WonYBlbdSxye7yx5Z1UVTfom7wHgnZKYXX(TQ)wWfWp1EmfPNVkgACpZuLnhwTIcm6e2TycQ5USQO9kUIF6vUUyB2WQ1gJdNfS4rVOyzz18IgQtz4LnRUA9ML4MK76XInm8Z(zYU9B(M7wwu1EDZgQX7onRfBw9pW)m3SBWeqXpBbEYIYEeBzSCgPuw9WtxFZcCOvHpWJ4dWDUJv4GigxGQnlVb7Rn02PiVP9(fLFH)GOSBxKVg)Qyg4LpFbMCnjzpchGB30G)coQ7QfVR8LRwuE7t8xnjRPST4685)F8cdl0YI26Q72GBBmQEWFDDEfUh8cZESiFvD11fvZUNpmaEFt5kybHvJ7lr4r5y8K8pQRenelXit9YvfZkZxS(t1vNkAuq4wctsQMIBlAAkM)3P1)T8Yl6KTxVzDXCJgSJi18LFL3bhm7NeRzn4kqu8ZuSIJZwsJ0zobXvFveQz(DXta2S7xaxJAea6cN6WONEsvym2V(PuKH(iQBpdyWh9D))2SU97UO4X8gSiW5o96NQB)urXCQXniYYryTo)OpC0jN(jCn(nairlXVJFLRUV47(P6Y5RXHvmfI)RrM0xYfMsN)(vutIjIgrdClHu3JMmrqHDs9s6QAEXxQVMMOduipWj3A9Jx)yXtnW1bSriILBQVLA6q3utTAbKPy(86hVTUbxeK8QCzbqgSgVDzSIBWEZqZdxJy4ZOwObS4lkXzTd2KHOTf(Oai7jajUULqPPYm5w5xIR5hgMzGEq9(uC2OTih79PCPQ(oCwmcFD90yKWDPU4JymyWfXxCwJKmwNeLjz3TO(rCGzYjeaOpo13SoI6UueTwTzt1bikWuZ8Y2M82Cat6JV9Kt)8hXh7jUBru5trBjLw3oZlgr3BHgFHIFwoXd5wyPACrYnogQ9aZ9Ho77ZFv8UeX1PF3dRBcCH)(okPEQVpz2vrX2PNp1w)hrFH5GGdPU8Y0ep)OId45bhW5iVCovf(CTm39MfWTS5IMxsOFRFa5xbYRGVWggmC)sU7jhMTSU9r(V2ux9BiMgYyRH4U3zcwJVVZAVhWm)y5ACIEHpd2J7TiU1qFEsVA1TW)B4WA8QgGvg3VB85X3OXN4SoxI5MJe1tKNA3M)(unpnRPDcGSvw8LcuKboTAwKVc4Zj6Ujnf4Ouu)ra)NIz0TP1aSoaweuV63tjEIyGmJTFLR20aerxEF5TTx(q5kKAli76z5RWE(88ZeuPS22xvVcNTnCvf9yDZcCe7AUBqEuMFKQ36gYZpRagUCABXsEaliM2bZKJQAKE1Q47v)LoulYrqKmrDMCOpHnb0fIJp13Hqki8)sJxFDHdkAn80O9smovcI8b218uYaN23l(I1jby2tBDB4pq)lhS(6DUi9a0axMdMZEtOS5FHKtE9AK1JG0AAcHwA0UYhU55dqeZ5CfF14QYDWwiElnUaaOebi5299FhV6jCEbBD8dPFhVzn(SZbSZUphkSx9zMTXnDR4w8EfvEkG7vmtdErFLLGWDBmcX02JyFQ71eWpIxOClz8yXWorqwsShicqQDhZJ1npCL7GfcBGhkRmOCOQSGNT6uREpe7ZfGYj6XGaCW)cqT9XnlArMvW1VXisq9E5kUv2jzdKTVfcOR3dIPotVKCnnlh7goexbrvLiaC45jvuFMQDQQbVR(eKVJ4y7yKxJ35AANUjehcroVP(oCghJZibqfd4yAPF8hlRkxMVI0jchER8p7okNOvGCf73sTxpJwaTRoSm6OKkv(GsfBtmiEsmojoEtlOJcknbuN0yMoi2q8FMzmKM9HYBo5ymlE9MC9XBU7sGhEfJ0a2IdinVPj)2wqOWzyiojrrMDbDk1ZRog(s47wmF9XjBC9ShanxHVpRmdMKo4Nna71imTCPQIt2hepG7)TamtmRFeDkmClD08514qJDfOApE7ZfUj30rBaPwu3SrSjeTv9GmpFSgrt5byC(Sw0afbWMzdJ1rj3Y)eDSTWO4oLm1i4hL25ltc6xN)LI5)J66LIoLp3shbj()Rn5nCF9scheJIMd9iMt7UDQdkFoRbegHRocKDXoZUD9A3bwPbVbCbznTOafkaGkUKcukMuMra4UajRwi)yGAXOkN0ZGscviaoBYQ4WyRTgx8ZiTxgSxRhcCBG3iWszw5A46Ht3ACylvu8X6VG3I0noiSvICi2UCxnYg1IDpqc9SFKBCP2N9FHPm4NGyvcy)8cYA1JF(pGvGeODVOfGzs6kgv2SlsEdUZfZbgc(AFVcSmrCzfEiQkEiLI6Sog0RQPiV9NWPfi39uWpdR11tkV92YzWhJkj5ykVOfTqDiZytobW2AbyPs1hZRYVJvzdS5A(sGtMMRc35POJ21jx7hf7LgeDD6eVX0glbRE5vi8A)Pbjjjxhg5liW8I7grSrqGrI7XIZJpjJPt)hrDta18yj0hewehLgfgLWZu7rSnoWZ)WOjt889NmDsaR)00SnTLlkBrZW23M5Ogud8H9JstMegED6(dQPxlFdA52f0RbmVrYcJUnWrWOM1k9cWNa)(Ss3n1Teh53xSyvHXeyh44JVJbfLbOT8iKPx9kKK9qXt3uwbknqKyG2JBAp72lYRUJkCuWWvsat1MLxu)4AzJ)w8LKCM4jyHEOaPwvA(2iiDR3GgYGTSsRscKQ9kCGFrTRAwmbnaWOFx1Lg7o(C3n73bQ7BUtzEei73Qmgu9NFmRTn7PUMnRvUpiksWvQ1Mtkwo4a7NMykhlMERcJPSaD)s1bogUAUYAjTrfEEPPPX(H((W)HYpFyhjwvRXyPjiZy(FcB)nRwHkj9dV5ewUel9qnjz1nkyGppDm7R9P6gs1Z14fHCc6hannxuHIjdWDMjpbIViJmA1FLJaJbXlgavOLUDSNeGW1Zar7rnXte9anj3NEkRQrQmSMdnKvIpqdikHS95fRZbRnH9YzveuI7ZNWjrYNETPoawMgpiLTjITQxhsEThmrHq3j)3Was1SKZeyP6chI0BRtVsT)e6dRWOeb8(QAv(xjMaDDAF1y9x9eO9JblCf6(vat92YvcNQ9y5k10PJBg08gsnt2m0hHB)LceuNdymwz0ZXPn5xaX7LvpiMJQosQkrhRxmyaevBLqGJW1tYbpdvDvPzaxS2Yz5lmMFaScgeTPwRE1EuWZX82suAEdn5LfD0ttpTnn7QZo7dxD65eeuJKPMZD6pIHjwTIFJ2cooM4jcjXqMd)fRHMGf)sRrF0pYS2jg4RfUw8aREzxqqW3)VD1Y9zxJoGqd77G9sKbO6vFCMVEcmSzk88Kv0bFyibe(Mkm9nxaH2zsSacSWhhTeHxdba22GYS9vkDnet)H5QJvfPGQExmYfLzLl(4MeEmvMGn(0SpZQdAWAsiiBVysdQgoGEeDKUTvg2BxMNd22aqwWI2a02rGrhLruZP1by5pg22yiinM88SbEoIP(20Uf9JzhrRdoq7r2QptM5Y(3TTKblwLIQNoukAYuzwHoEgc9CWd3HxG(VBM4obvFn17)BjB8(DHP)q0ZFYHHj4OhWpjm1pGNdAQI(Du65)AWvFRdslMjVWY9xhw8KTIHg2)PAtmwkrP1uFqo8rzKX1)rYF3bdCWwRTAMJndw2AabhFnC2fhEY3SUyXtboQdd3(Ty4o6N7AYk1rf)XY4)pwM8ou)CFyX3DQCswmW248c0qxyTaAZZO0qFV0g3Tf7DCGtmzm7QfO5Tusaih8SSX6uaOEOC2dKhG7P4Utd4Tg(rtfbrwK(cC4ciZXWiEJHxw8xyDU6e)IH1kSJQo7VoIuoVOPLSnW1bfIYA)3H72FKbf9SyCaVLjgkf2o1sasWYI(smQmWnVUfOSfw12olzBQt2ByUUnonwkQ0xVoBbVbz31u)4jLnf0ekhy5FXP)W7r3yoX(60WXE77yJTJ7287pcR6kgU7l1YnspFhc4EzvnQil0wHhc6GmZwy4lgmvsuCRuEOhHhV(AZZTmMKTMmHHXisiSwCN(fu92fZ(XWuYL0PunFbUDgsJkOWSp823HoeW2ZHd63GHXM3hhhyPJUK)GP7NDzPjoVH6htJNl7RbD8HMdcglt(fIXTGu(zW0rNlqBB2bJK1vxfHhY9KW248AKg97oICRPtUw7HtD1P5qhpX3hdZTbV70LlUvosKqbFQwHMBZOYDR5TVzPUcq)o4iTnxKzhraXiWKILOoiao588kO1d2p(OszUthzBR6r233LDcsHoedd5bPHcQHLFW6SQ6Om4uv0HCnXO8TzhDasYUVFGLqwtwkK0L6mkRcNjxDJSLrCF65MuzSmanIU(67UVED71ZMBY6wKJvLR)b8pEmnwDgqLdH6fWs9(Y5ZlQ(U3CcgoHbKZsmADJ5)haR2bca9ZNxRIMxMDH48WXvuN2QEHodDX(ZLvpAJf(B3LDtkTcpVOzDDv(c4sRd64GIoSeRng2RU85MdocJs7pNPIYawpANJxCYc5iKuUeY9AXX13mPFgPl2Ff4a7qwMlPxVc8Chu7vmL(OWanidxB5KVyoTY8TXzq77yi0ZI)KZH38EOzY(Qr4ajVXZLnL7GCnCiYC6P(TPKOJWoS)CV4rhSd80TWfdyi9HYBl(UlZ)Y))Y7AP52ghj8FfFC3dtk8KaK(u28yNu7MzsnX1CyVWs2MXJQLMsLKCQKAQ5)(2paij4dzPeRSQkNlrwceaDJgG9JVUXYM7MX82XbuomshcQnsfj)wnK9qvuCeG2yOnSp1K2VkF79KJXUql1)yNKOf(TBCBIHxPgt8eCS14xrX5puFynCuAkEm2Xov4VNuPW03vtaWtparv)ZA0oTVwxryxjGRWwiAZjH3UR7Qv2ekFPBB9B(Vvu(IeW6vhGS8XCVA7F2O8k7LnAL0RUSXl0w9LnQmdEjq3OZfAFg8)EPwiVSXymImOzW)RSokMUc2V4B7GVILYAOwWjq)8vXR))E4v2wChEhZx1Sl5ltBpLYhizB5XPTJWx(WGch9Ay8EUi2JVKXeMSDiE9Yn4C9N)1F7D)NF9xU6L)Bkf)wwxhAzW9(TDpXRhC3PNobq39Z(3ooOe64drhmG5e4DhKb5XcPBJHuih2JNqmVFXx4BwxmT(g(lDChEgJuUdZbdPZl8AdoKmxG9BdZ)5p3gz5FUAZQLBXIgFye22R2QZ5roIGJ)GVUKvi4gdtYTCpHiM)(4fIqxU7rspKi4GGWYWNbH(kBYr8AYV7gdiY2q6HwI18q0oXARV2dYESzsZ6U0IqcdEcx8QLGe6wrbHxX(t0w0L1q()EOqwRWbYr57XfsoVZx7SxKd3U0tdQNiFS9Ygn59xRRQULUsHJXuMXvkLJIuXULLXiot)ViY9OCtOB9zYbzFq3JQ7X8I1hxZjfwmpluUGW60y2JZSomtlNaUHTr4pygnjxIsV48nNUYY8chI0xYd8yfZA9d1l2GEGoV466vRUTg25q7HrMF8A3nk(WDgUJZAOkeJ24uAe5Hmqt2wvxDdM2jlI5giMyxew(wxDdokYcbjZTPctrdEXfbojS)aAbLfYobLFK3Vy9AqBeckRThjWO1c7sqYOlrjiS1(X6v7OdGYJnGMftNpJD5DvATOoS1vlOygEbYNV4VvDxXfVgZr5Ql(WdBwVAB1FNtIpkHCF5RU6D)(BIdd)oJW5Gi8)E7Mv3)Qx)(3sSiqupWIEptE8v4OUqzZoXuD)CnlqZy(LrJ))3O6StnvZKiW5PCS7CzTgHy)Puc)8BT2uin(t9g7ZpYwxif6NDl2QIt((6ZVLAuc3DQxRphpoZ6Cp7KWX912NHuTYM)CKQFEQsA2ZZ3xFQvo7C8mCv2PEF95hvdAPyoXhMD(r0OLMN6xCDEs1(t8A95NgPOskNAj8ZpQwvCY1c)8JOrJpYo1s4NF7RHJWFwEyw2PwhLZnjCQcbsf4omUo8vYBOU6qfVWxUDBSwdXf4m0BYFyZQpTKRZLbbfPSO8(L3THVH3HVxRrphta3SeZ547AQUL6WTLBQ2wvDB5NLy1CZqnBt19R(m8DHwSBvl4VkXuZaggYr0Ly1YCD5URVUSgtG5BlPSbgDZDOJ4gelOnWdVfAew09kru3JTt2BalVD52Bw1SBzZdqZW01VIQSvjJwD1DlU5R8ul2l4vkimDyeQXJ5MfuLRKjRqherWgseL0Lw7dRl)SgRZC5iuw)iXqq(AF8UXPkCKPfAtJmx48MlBm5(lBucLtEzJvBZ0x2OT6ClfPG5lCjt0JkHnh6WFszKAb(bRfRJhjDJ0wM70kHVuMjr5IUriRukncTqv6K8p1cxx4PKcTY69Lwb9BtJD4zOuLolhNzsmcismETWiWL5nmCFitlgasG5f)1gP)Y)vVNre(lQR0cMW6MIYsLfm62KvQL6ukdM(EN2BSLoZGzVuJ)Kl3v6Zg8qdkFjtWWZYncGQekkKZcHupGB7a2MvPvYsJYNY2804Q8LkLBaZwucmkGv1(B9sUKj5W0w(wWCdRvW6Ok3uMBhqskAqnkyXNMo9yFi1clWkBzw(GPAo9uAyAPPPA3qbsri950Lw1GHYqSC4HGgK(t54dzZezLcqPRbLzMj4YEmI)sP1zjMTXeYv7QVSBZIWUjCwPzjPpwTdlZxOGe1yUMafITgMo9u1HLJt3FHTbw9ES2WBvFKwHZZhRJyQ4rAfjwT32Wv1SYTFT5gSINfjz(CO(vsOjyk8zmaFh2NzTUm(J0jo0NKELK(eifjZ4VmthEcPh5dK82eNOXpqSFXUcpGJ7XMFc2DqNnP8WbEypYrcD8Yy4Lh9wANHw7v)JgpBukTx644T6J5DGuYYYzLKKx3HFgEtJd2ZjbXF4384b6i2wgwgIgf9wAaIrRS79RXqBYh8tv3p89OfYsjv0Hef0T7m9kAUYxXrRLO7396gjSorf0TEOzGPPzdP6uauVnwETXWKRATC4xdvYIVH5IeFnJfbgXmX394NmC0XroKd5qtvDDNlcLJ5E54oT0ynJ5f8Oj7W1HoUT1in5Ttj1bTO5TQFeRzb2KDk20(0iDeBs5SokFP7r2A8uHdGtnqoI18e2QsAj9pwS5vOcsv3QzmfogVxtSrQxn5AkGB1bIi4nxhoWT4jW0a3Qp(SMfexaBdHZbjrhkU4S(19rnIlZ61GUh5kRmpIZQqbj6Pc(wWiaAqzC5WjdbGv1bMQ(aBRd1xmgHouGBPeqx7Ynshok7b5urW4eZkdDra3hF8pwwvJLd9ddixVqM1(pUOiX41lKdHZJuQob2mIt0vXCtH2vhSR64jiKUuoNqNdc)wbJXNVt4DnBbnlGmTaYNsG3pHFPPb1vcE26LInewUgI)QuiCngmB9XU1Sf3Phbex5su8wBaDSZ8HsoWeWoB2uMclYom6sskbT7fWBTi9k5EXMsWZuW63LdvhgQVsWw5ErH58yHCeYVQR(0U4bcewlLkPe0bfnlbnNBcOWImeS2isLn6C)lCCjHFtv9hwTeuyiR4vV5xU6n)2u1FrzXxWeCam7avC35ZfzbBQkWGRJDPDu954y6BsbTIyrUeSt5fh7SJ1(YuuE7Qn3VOz37R2CxfDNuaVMauV6TlR3vrNOw)7zu1ANX02P27dhKtdoupq8OUY4hG3hM51UhSoSIam86RRkU2D0E1WiCgpyNMohmYdu(3Q1EWKafyMLfm8xjmcWSEWQlTc)tPodmrRbmuuRqRcGtYJ(crc2RdBhAmcTh0h5O9gYa3GaDl6DeMOARvdt7WI8mLgSybnO7rmTUZ9d7X(5Hvm2jSCk6ye0djS)noopKe9jsQ)soCpKm23pTvm3HLX1P8dcymxWniKTRmtoXo0X0mzpy0erJ2QCWsV1MRrC9ZwMoLv9839KyIyQi1alatR(TtATBppse9MhFi)(tUHFuPKW(v5BEDDNf8)rn6Mpje2deQNoney1JtvmdnPCO6R91s)WYYGuiJh0s1waMLCH8avovMMoZJvoDusf0PtkswZPr6EG)F)CJ47wHudHm9bPfqI2OjkzoJIOD6pFCAHoR(WpfkJIk8V)uLiv)WhnZ9hRZ8tAwgCe6Bo0CGyE88KLObtPo2Gm0QVAPkX3xXnp4uGXA7XxLvFcVyNyv(w9WU6LnS)zXS2dVdQWe75U6vxVOEIB)P7xD7d8fSX2)eo59V(Fp" },
 }
 
 EllesmereUI.WEEKLY_SPOTLIGHT = nil  -- { name = "...", description = "...", exportString = "!EUI_..." }

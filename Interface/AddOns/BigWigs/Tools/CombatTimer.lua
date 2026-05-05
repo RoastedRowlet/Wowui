@@ -16,9 +16,9 @@ local db
 local ProfileUtils = {
 	MinimumWidth = 30,
 	MaximumWidth = 100,
-
 	MinimumHeight = 16,
 	MaximumHeight = 50,
+	MinimumFontSize = 10,
 }
 
 --------------------------------------------------------------------------------
@@ -60,6 +60,8 @@ do
 		anyCombatHistoryAmount = 10,
 		anyCombatHistoryResetConditions = 7,
 		anyCombatHistoryTimeFormat = 2,
+		anyCombatHistoryHiddenInCombat = false,
+		anyCombatCustomText = "%s",
 
 		-- Boss Combat
 		bossCombatDisabled = true,
@@ -86,6 +88,7 @@ do
 		bossCombatHistoryAmount = 10,
 		bossCombatHistoryResetConditions = 1,
 		bossCombatHistoryTimeFormat = 2,
+		bossCombatCustomText = "%s",
 
 		-- Boss Stages
 		bossStagesDisabled = true,
@@ -110,6 +113,7 @@ do
 		bossStagesInactive = "NONE",
 		bossStagesTextFormat = 2,
 		bossStagesHistoryTimeFormat = 2,
+		bossStagesCustomText = "%s",
 
 		-- Instance Timer
 		--instanceTimerDisabled = true,
@@ -206,7 +210,7 @@ do
 				db.profile.anyCombatPosition = CopyTable(defaults.anyCombatPosition)
 			end
 		end
-		if db.profile.anyCombatFontSize < 12 or db.profile.anyCombatFontSize > 200 then
+		if db.profile.anyCombatFontSize < ProfileUtils.MinimumFontSize or db.profile.anyCombatFontSize > 200 then
 			db.profile.anyCombatFontSize = defaults.anyCombatFontSize
 		end
 		if db.profile.anyCombatOutline ~= "NONE" and db.profile.anyCombatOutline ~= "OUTLINE" and db.profile.anyCombatOutline ~= "THICKOUTLINE" then
@@ -235,6 +239,16 @@ do
 		end
 		if db.profile.anyCombatHistoryTimeFormat < 1 or db.profile.anyCombatHistoryTimeFormat > 2 or math.floor(db.profile.anyCombatHistoryTimeFormat+0.5) ~= db.profile.anyCombatHistoryTimeFormat then
 			db.profile.anyCombatHistoryTimeFormat = defaults.anyCombatHistoryTimeFormat
+		end
+		if not db.profile.anyCombatCustomText:find("%s", nil, true) or db.profile.anyCombatCustomText:find("%%[^s]") then
+			db.profile.anyCombatCustomText = defaults.anyCombatCustomText
+		else
+			local success, newValue = xpcall(string.format, function() end, db.profile.anyCombatCustomText, L.hide)
+			if not success then -- Must not produce errors
+				db.profile.anyCombatCustomText = defaults.anyCombatCustomText
+			elseif newValue:find("%s", nil, true) then -- Must not still contain %s after being formatted with text (shouldn't really happen)
+				db.profile.anyCombatCustomText = defaults.anyCombatCustomText
+			end
 		end
 
 		ValidateColor(db.profile.anyCombatColor, defaults.anyCombatColor, 0.3)
@@ -270,7 +284,7 @@ do
 				db.profile.bossCombatPosition = CopyTable(defaults.bossCombatPosition)
 			end
 		end
-		if db.profile.bossCombatFontSize < 12 or db.profile.bossCombatFontSize > 200 then
+		if db.profile.bossCombatFontSize < ProfileUtils.MinimumFontSize or db.profile.bossCombatFontSize > 200 then
 			db.profile.bossCombatFontSize = defaults.bossCombatFontSize
 		end
 		if db.profile.bossCombatOutline ~= "NONE" and db.profile.bossCombatOutline ~= "OUTLINE" and db.profile.bossCombatOutline ~= "THICKOUTLINE" then
@@ -299,6 +313,16 @@ do
 		end
 		if db.profile.bossCombatHistoryTimeFormat < 1 or db.profile.bossCombatHistoryTimeFormat > 2 or math.floor(db.profile.bossCombatHistoryTimeFormat+0.5) ~= db.profile.bossCombatHistoryTimeFormat then
 			db.profile.bossCombatHistoryTimeFormat = defaults.bossCombatHistoryTimeFormat
+		end
+		if not db.profile.bossCombatCustomText:find("%s", nil, true) or db.profile.bossCombatCustomText:find("%%[^s]") then
+			db.profile.bossCombatCustomText = defaults.bossCombatCustomText
+		else
+			local success, newValue = xpcall(string.format, function() end, db.profile.bossCombatCustomText, L.hide)
+			if not success then -- Must not produce errors
+				db.profile.bossCombatCustomText = defaults.bossCombatCustomText
+			elseif newValue:find("%s", nil, true) then -- Must not still contain %s after being formatted with text (shouldn't really happen)
+				db.profile.bossCombatCustomText = defaults.bossCombatCustomText
+			end
 		end
 
 		ValidateColor(db.profile.bossCombatColor, defaults.bossCombatColor, 0.3)
@@ -334,7 +358,7 @@ do
 				db.profile.bossStagesPosition = CopyTable(defaults.bossStagesPosition)
 			end
 		end
-		if db.profile.bossStagesFontSize < 12 or db.profile.bossStagesFontSize > 200 then
+		if db.profile.bossStagesFontSize < ProfileUtils.MinimumFontSize or db.profile.bossStagesFontSize > 200 then
 			db.profile.bossStagesFontSize = defaults.bossStagesFontSize
 		end
 		if db.profile.bossStagesOutline ~= "NONE" and db.profile.bossStagesOutline ~= "OUTLINE" and db.profile.bossStagesOutline ~= "THICKOUTLINE" then
@@ -357,6 +381,16 @@ do
 		end
 		if db.profile.bossStagesHistoryTimeFormat < 1 or db.profile.bossStagesHistoryTimeFormat > 2 or math.floor(db.profile.bossStagesHistoryTimeFormat+0.5) ~= db.profile.bossStagesHistoryTimeFormat then
 			db.profile.bossStagesHistoryTimeFormat = defaults.bossStagesHistoryTimeFormat
+		end
+		if not db.profile.bossStagesCustomText:find("%s", nil, true) or db.profile.bossStagesCustomText:find("%%[^s]") then
+			db.profile.bossStagesCustomText = defaults.bossStagesCustomText
+		else
+			local success, newValue = xpcall(string.format, function() end, db.profile.bossStagesCustomText, L.hide)
+			if not success then -- Must not produce errors
+				db.profile.bossStagesCustomText = defaults.bossStagesCustomText
+			elseif newValue:find("%s", nil, true) then -- Must not still contain %s after being formatted with text (shouldn't really happen)
+				db.profile.bossStagesCustomText = defaults.bossStagesCustomText
+			end
 		end
 
 		ValidateColor(db.profile.bossStagesColor, defaults.bossStagesColor, 0.3)
@@ -392,7 +426,7 @@ do
 		--		db.profile.instanceTimerPosition = CopyTable(defaults.instanceTimerPosition)
 		--	end
 		--end
-		--if db.profile.instanceTimerFontSize < 14 or db.profile.instanceTimerFontSize > 200 then
+		--if db.profile.instanceTimerFontSize < ProfileUtils.MinimumFontSize or db.profile.instanceTimerFontSize > 200 then
 		--	db.profile.instanceTimerFontSize = defaults.instanceTimerFontSize
 		--end
 		--if db.profile.instanceTimerOutline ~= "NONE" and db.profile.instanceTimerOutline ~= "OUTLINE" and db.profile.instanceTimerOutline ~= "THICKOUTLINE" then
@@ -428,7 +462,7 @@ do
 		--ValidateColor(db.profile.instanceTimerBorderColorInactive, defaults.instanceTimerBorderColorInactive, 0)
 	end
 	ProfileUtils.ValidateMediaSettings = function()
-		if not LibSharedMedia:IsValid("font", db.profile.anyCombatFontName) then
+		if not LibSharedMedia:IsValid("font", db.profile.anyCombatFontName) or not BigWigsAPI.IsValidMediaPath(LibSharedMedia:Fetch("font", db.profile.anyCombatFontName)) then
 			db.profile.anyCombatFontName = defaults.anyCombatFontName
 		end
 		if not LibSharedMedia:IsValid("border", db.profile.anyCombatBorderName) then -- If the border is suddenly invalid then reset the size and offset also
@@ -437,7 +471,7 @@ do
 			db.profile.anyCombatBorderOffset = defaults.anyCombatBorderOffset
 		end
 
-		if not LibSharedMedia:IsValid("font", db.profile.bossCombatFontName) then
+		if not LibSharedMedia:IsValid("font", db.profile.bossCombatFontName) or not BigWigsAPI.IsValidMediaPath(LibSharedMedia:Fetch("font", db.profile.bossCombatFontName)) then
 			db.profile.bossCombatFontName = defaults.bossCombatFontName
 		end
 		if not LibSharedMedia:IsValid("border", db.profile.bossCombatBorderName) then -- If the border is suddenly invalid then reset the size and offset also
@@ -446,7 +480,7 @@ do
 			db.profile.bossCombatBorderOffset = defaults.bossCombatBorderOffset
 		end
 
-		if not LibSharedMedia:IsValid("font", db.profile.bossStagesFontName) then
+		if not LibSharedMedia:IsValid("font", db.profile.bossStagesFontName) or not BigWigsAPI.IsValidMediaPath(LibSharedMedia:Fetch("font", db.profile.bossStagesFontName)) then
 			db.profile.bossStagesFontName = defaults.bossStagesFontName
 		end
 		if not LibSharedMedia:IsValid("border", db.profile.bossStagesBorderName) then -- If the border is suddenly invalid then reset the size and offset also
@@ -455,7 +489,7 @@ do
 			db.profile.bossStagesBorderOffset = defaults.bossStagesBorderOffset
 		end
 
-		--if not LibSharedMedia:IsValid("font", db.profile.instanceTimerFontName) then
+		--if not LibSharedMedia:IsValid("font", db.profile.instanceTimerFontName) or not BigWigsAPI.IsValidMediaPath(LibSharedMedia:Fetch("font", db.profile.instanceTimerFontName)) then
 		--	db.profile.instanceTimerFontName = defaults.instanceTimerFontName
 		--end
 		--if not LibSharedMedia:IsValid("border", db.profile.instanceTimerBorderName) then -- If the border is suddenly invalid then reset the size and offset also
@@ -489,6 +523,8 @@ do
 		db.profile.anyCombatHistoryAmount = defaults.anyCombatHistoryAmount
 		db.profile.anyCombatHistoryResetConditions = defaults.anyCombatHistoryResetConditions
 		db.profile.anyCombatHistoryTimeFormat = defaults.anyCombatHistoryTimeFormat
+		db.profile.anyCombatHistoryHiddenInCombat = defaults.anyCombatHistoryHiddenInCombat
+		db.profile.anyCombatCustomText = defaults.anyCombatCustomText
 	end
 	ProfileUtils.ResetAnyCombatBorder = function()
 		db.profile.anyCombatBorderColor = CopyTable(defaults.anyCombatBorderColor)
@@ -529,6 +565,7 @@ do
 		db.profile.bossCombatHistoryAmount = defaults.bossCombatHistoryAmount
 		db.profile.bossCombatHistoryResetConditions = defaults.bossCombatHistoryResetConditions
 		db.profile.bossCombatHistoryTimeFormat = defaults.bossCombatHistoryTimeFormat
+		db.profile.bossCombatCustomText = defaults.bossCombatCustomText
 	end
 	ProfileUtils.ResetBossCombatBorder = function()
 		db.profile.bossCombatBorderColor = CopyTable(defaults.bossCombatBorderColor)
@@ -567,6 +604,7 @@ do
 		db.profile.bossStagesInactive = defaults.bossStagesInactive
 		db.profile.bossStagesTextFormat = defaults.bossStagesTextFormat
 		db.profile.bossStagesHistoryTimeFormat = defaults.bossStagesHistoryTimeFormat
+		db.profile.bossStagesCustomText = defaults.bossStagesCustomText
 	end
 	ProfileUtils.ResetBossStagesBorder = function()
 		db.profile.bossStagesBorderColor = CopyTable(defaults.bossStagesBorderColor)
@@ -631,14 +669,17 @@ local widgets = {
 	anyCombatActive = false,
 	anyCombatHistoryTime = {},
 	anyCombatHistoryDuration = {},
+	anyCombatCustomText = "%d:%02d",
 
 	bossCombatActive = false,
 	bossCombatHistoryTime = {},
 	bossCombatHistoryDuration = {},
+	bossCombatCustomText = "%d:%02d",
 
 	bossStagesActive = false,
 	bossStagesHistoryTime = {},
 	bossStagesHistoryDuration = {},
+	bossStagesCustomText = "%d:%02d",
 
 	--instanceTimerActive = false,
 	--instanceTimerHistoryTime = {},
@@ -676,13 +717,14 @@ do
 		end
 	end)
 	main:SetScript("OnEnter", function(self)
+		if db.profile.anyCombatHistoryHiddenInCombat and InCombatLockdown() then return end
 		bwTooltip:SetOwner(self, "ANCHOR_TOP")
 		bwTooltip:AddLine(L.anyCombatTimerTooltip)
 		for i = 1, #widgets.anyCombatHistoryTime do
 			if i == 1 and widgets.anyCombatActive then
 				bwTooltip:AddDoubleLine(widgets.anyCombatHistoryTime[i], L.inProgress, 1, 1, 1, 0, 1, 0)
 			else
-				bwTooltip:AddDoubleLine(widgets.anyCombatHistoryTime[i], SecondsToTime(widgets.anyCombatHistoryDuration[i]), 1, 1, 1, 0, 1, 0)
+				bwTooltip:AddDoubleLine(widgets.anyCombatHistoryTime[i], BigWigsAPI.SecondsToTime(widgets.anyCombatHistoryDuration[i], db.profile.anyCombatTextFormat == 1), 1, 1, 1, 0, 1, 0)
 			end
 		end
 		bwTooltip:Show()
@@ -713,7 +755,7 @@ do
 		widgets.anyCombatHistoryDuration[1] = current
 		local m = current/60
 		local s = current % 60
-		text:SetFormattedText(db.profile.anyCombatTextFormat == 2 and "%d:%04.1f" or "%d:%02d", m, s)
+		text:SetFormattedText(widgets.anyCombatCustomText, m, s)
 	end)
 	local anim = updater:CreateAnimation()
 	anim:SetDuration(1)
@@ -726,7 +768,7 @@ do
 				prevCombatEnd = 0
 				widgets.anyCombatHistoryTime = {}
 				widgets.anyCombatHistoryDuration = {}
-				text:SetText(db.profile.anyCombatTextFormat == 2 and "0:00.0" or "0:00")
+				text:SetFormattedText(widgets.anyCombatCustomText, 0, 0)
 			end
 		elseif event == "CHALLENGE_MODE_START" then
 			if bit.band(db.profile.anyCombatHistoryResetConditions, 4) == 4 then
@@ -734,7 +776,7 @@ do
 				prevCombatEnd = 0
 				widgets.anyCombatHistoryTime = {}
 				widgets.anyCombatHistoryDuration = {}
-				text:SetText(db.profile.anyCombatTextFormat == 2 and "0:00.0" or "0:00")
+				text:SetFormattedText(widgets.anyCombatCustomText, 0, 0)
 			end
 		elseif event == "PLAYER_REGEN_DISABLED" then
 			widgets.anyCombatActive = true
@@ -755,12 +797,12 @@ do
 				current = current + secondsToAdd
 			else
 				current = 0
-				table.insert(widgets.anyCombatHistoryTime, 1, date(db.profile.anyCombatHistoryTimeFormat == 1 and "[%I:%M:%S %p]" or "[%H:%M:%S]"))
-				table.insert(widgets.anyCombatHistoryDuration, 1, current)
 				-- Limit to 10 entries
 				widgets.anyCombatHistoryTime[db.profile.anyCombatHistoryAmount] = nil
 				widgets.anyCombatHistoryDuration[db.profile.anyCombatHistoryAmount] = nil
-				text:SetText(db.profile.anyCombatTextFormat == 2 and "0:00.0" or "0:00")
+				table.insert(widgets.anyCombatHistoryTime, 1, date(db.profile.anyCombatHistoryTimeFormat == 1 and "[%I:%M:%S %p]" or "[%H:%M:%S]"))
+				table.insert(widgets.anyCombatHistoryDuration, 1, current)
+				text:SetFormattedText(widgets.anyCombatCustomText, 0, 0)
 			end
 			if db.profile.anyCombatTextFormat == 2 then
 				anim:SetDuration(0.1)
@@ -839,7 +881,7 @@ do
 		for i = 1, #widgets.bossCombatHistoryTime do
 			bwTooltip:AddDoubleLine(
 				widgets.bossCombatHistoryTime[i][1],
-				("%s [%s]"):format(SecondsToTime(widgets.bossCombatHistoryDuration[i][1]), encounterStatusTexts[widgets.bossCombatHistoryDuration[i][2]]),
+				("%s [%s]"):format(BigWigsAPI.SecondsToTime(widgets.bossCombatHistoryDuration[i][1], db.profile.bossCombatTextFormat == 1), encounterStatusTexts[widgets.bossCombatHistoryDuration[i][2]]),
 				1, 1, 1,
 				0, 1, 0
 			)
@@ -874,7 +916,7 @@ do
 				tbl[1] = current
 				local m = current/60
 				local s = current % 60
-				text:SetFormattedText(db.profile.bossCombatTextFormat == 2 and "%d:%04.1f" or "%d:%02d", m, s)
+				text:SetFormattedText(widgets.bossCombatCustomText, m, s)
 			end
 		end
 	end)
@@ -887,33 +929,32 @@ do
 				self:GetScript("OnEvent")(self, "PLAYER_LEAVING_WORLD")
 				widgets.bossCombatHistoryTime = {}
 				widgets.bossCombatHistoryDuration = {}
-				text:SetText(db.profile.bossCombatTextFormat == 2 and "0:00.0" or "0:00")
+				text:SetFormattedText(widgets.bossCombatCustomText, 0, 0)
 			end
 		elseif event == "CHALLENGE_MODE_START" then
 			if bit.band(db.profile.bossCombatHistoryResetConditions, 4) == 4 then
 				self:GetScript("OnEvent")(self, "PLAYER_LEAVING_WORLD")
 				widgets.bossCombatHistoryTime = {}
 				widgets.bossCombatHistoryDuration = {}
-				text:SetText(db.profile.bossCombatTextFormat == 2 and "0:00.0" or "0:00")
+				text:SetFormattedText(widgets.bossCombatCustomText, 0, 0)
 			end
 		elseif event == "ENCOUNTER_START" then
-			local tooltipText = ("%s %s"):format(date(db.profile.bossCombatHistoryTimeFormat == 1 and "[%I:%M:%S %p]" or "[%H:%M:%S]"), encounterName)
-			table.insert(widgets.bossCombatHistoryTime, 1, {tooltipText, encounterID})
-			table.insert(widgets.bossCombatHistoryDuration, 1, {0, 2})
 			-- Limit to 10 entries
 			widgets.bossCombatHistoryTime[db.profile.bossCombatHistoryAmount] = nil
 			widgets.bossCombatHistoryDuration[db.profile.bossCombatHistoryAmount] = nil
+			local tooltipText = ("%s %s"):format(date(db.profile.bossCombatHistoryTimeFormat == 1 and "[%I:%M:%S %p]" or "[%H:%M:%S]"), encounterName)
+			table.insert(widgets.bossCombatHistoryTime, 1, {tooltipText, encounterID})
+			table.insert(widgets.bossCombatHistoryDuration, 1, {0, 2})
 			if not widgets.bossCombatActive then
 				widgets.bossCombatActive = true
 				if db.profile.bossCombatTextFormat == 2 then
 					anim:SetDuration(0.1)
 					increment = 0.1
-					text:SetText("0:00.0")
 				else
 					anim:SetDuration(1)
 					increment = 1
-					text:SetText("0:00")
 				end
+				text:SetFormattedText(widgets.bossCombatCustomText, 0, 0)
 				updater:Play()
 				if db.profile.bossCombatInactive == "COLOR" then
 					local textColor = db.profile.bossCombatColor
@@ -1012,7 +1053,7 @@ do
 			if i == 1 and widgets.bossStagesActive then
 				bwTooltip:AddDoubleLine(widgets.bossStagesHistoryTime[i], L.inProgress, 1, 1, 1, 0, 1, 0)
 			else
-				bwTooltip:AddDoubleLine(widgets.bossStagesHistoryTime[i], SecondsToTime(widgets.bossStagesHistoryDuration[i]), 1, 1, 1, 0, 1, 0)
+				bwTooltip:AddDoubleLine(widgets.bossStagesHistoryTime[i], BigWigsAPI.SecondsToTime(widgets.bossStagesHistoryDuration[i], db.profile.bossStagesTextFormat == 1), 1, 1, 1, 0, 1, 0)
 			end
 		end
 		bwTooltip:Show()
@@ -1044,7 +1085,7 @@ do
 		widgets.bossStagesHistoryDuration[1] = current
 		local m = current/60
 		local s = current % 60
-		text:SetFormattedText(db.profile.bossStagesTextFormat == 2 and "%d:%04.1f" or "%d:%02d", m, s)
+		text:SetFormattedText(widgets.bossStagesCustomText, m, s)
 	end)
 	local anim = updater:CreateAnimation()
 	anim:SetDuration(1)
@@ -1054,7 +1095,7 @@ do
 			currentModule = module
 			widgets.bossStagesHistoryTime = {}
 			widgets.bossStagesHistoryDuration = {}
-			text:SetText(db.profile.bossStagesTextFormat == 2 and "0:00.0" or "0:00")
+			text:SetFormattedText(widgets.bossStagesCustomText, 0, 0)
 		end
 	end
 
@@ -1071,12 +1112,11 @@ do
 				if db.profile.bossStagesTextFormat == 2 then
 					anim:SetDuration(0.1)
 					increment = 0.1
-					text:SetText("0:00.0")
 				else
 					anim:SetDuration(1)
 					increment = 1
-					text:SetText("0:00")
 				end
+				text:SetFormattedText(widgets.bossStagesCustomText, 0, 0)
 				updater:Play()
 				if db.profile.bossStagesInactive == "COLOR" then
 					local textColor = db.profile.bossStagesColor
@@ -1149,7 +1189,7 @@ do
 			if i == 1 and widgets.instanceTimerActive then
 				bwTooltip:AddDoubleLine(widgets.instanceTimerHistoryTime[i], L.inProgress, 1, 1, 1, 0, 1, 0)
 			else
-				bwTooltip:AddDoubleLine(widgets.instanceTimerHistoryTime[i], SecondsToTime(widgets.instanceTimerHistoryDuration[i]), 1, 1, 1, 0, 1, 0)
+				bwTooltip:AddDoubleLine(widgets.instanceTimerHistoryTime[i], BigWigsAPI.SecondsToTime(widgets.instanceTimerHistoryDuration[i], db.profile.instanceTimerTextFormat == 1), 1, 1, 1, 0, 1, 0)
 			end
 		end
 		bwTooltip:Show()
@@ -1193,11 +1233,11 @@ do
 			end
 			local zoneAndDifficulty = L.parentheses:format(GetRealZoneText(instanceID), difficultyName)
 			local tooltipText = ("%s %s"):format(date(db.profile.instanceTimerHistoryTimeFormat == 1 and "[%I:%M:%S %p]" or "[%H:%M:%S]"), zoneAndDifficulty)
-			table.insert(widgets.instanceTimerHistoryTime, 1, tooltipText)
-			table.insert(widgets.instanceTimerHistoryDuration, 1, 0)
 			-- Limit to 10 entries
 			widgets.instanceTimerHistoryTime[db.profile.instanceTimerHistoryAmount] = nil
 			widgets.instanceTimerHistoryDuration[db.profile.instanceTimerHistoryAmount] = nil
+			table.insert(widgets.instanceTimerHistoryTime, 1, tooltipText)
+			table.insert(widgets.instanceTimerHistoryDuration, 1, 0)
 			if db.profile.instanceTimerTextFormat == 2 then
 				anim:SetDuration(0.1)
 				increment = 0.1
@@ -1278,7 +1318,8 @@ local function UpdateAnyCombatWidget()
 			flags = db.profile.anyCombatOutline
 		end
 		widgets.anyCombatText:SetFont(LibSharedMedia:Fetch("font", db.profile.anyCombatFontName), db.profile.anyCombatFontSize, flags)
-		widgets.anyCombatText:SetText(db.profile.anyCombatTextFormat == 2 and "0:00.0" or "0:00")
+		widgets.anyCombatCustomText = db.profile.anyCombatCustomText:format(db.profile.anyCombatTextFormat == 2 and "%d:%04.1f" or "%d:%02d")
+		widgets.anyCombatText:SetFormattedText(widgets.anyCombatCustomText, 0, 0)
 
 		local borderTable = {
 			edgeFile = LibSharedMedia:Fetch("border", db.profile.anyCombatBorderName),
@@ -1364,7 +1405,8 @@ local function UpdateBossCombatWidget()
 			flags = db.profile.bossCombatOutline
 		end
 		widgets.bossCombatText:SetFont(LibSharedMedia:Fetch("font", db.profile.bossCombatFontName), db.profile.bossCombatFontSize, flags)
-		widgets.bossCombatText:SetText(db.profile.bossCombatTextFormat == 2 and "0:00.0" or "0:00")
+		widgets.bossCombatCustomText = db.profile.bossCombatCustomText:format(db.profile.bossCombatTextFormat == 2 and "%d:%04.1f" or "%d:%02d")
+		widgets.bossCombatText:SetFormattedText(widgets.bossCombatCustomText, 0, 0)
 
 		local borderTable = {
 			edgeFile = LibSharedMedia:Fetch("border", db.profile.bossCombatBorderName),
@@ -1451,7 +1493,8 @@ local function UpdateBossStagesWidget()
 			flags = db.profile.bossStagesOutline
 		end
 		widgets.bossStagesText:SetFont(LibSharedMedia:Fetch("font", db.profile.bossStagesFontName), db.profile.bossStagesFontSize, flags)
-		widgets.bossStagesText:SetText(db.profile.bossStagesTextFormat == 2 and "0:00.0" or "0:00")
+		widgets.bossStagesCustomText = db.profile.bossStagesCustomText:format(db.profile.bossStagesTextFormat == 2 and "%d:%04.1f" or "%d:%02d")
+		widgets.bossStagesText:SetFormattedText(widgets.bossStagesCustomText, 0, 0)
 
 		local borderTable = {
 			edgeFile = LibSharedMedia:Fetch("border", db.profile.bossStagesBorderName),
@@ -1802,7 +1845,7 @@ do
 								desc = L.fontSizeDesc,
 								order = 5,
 								width = 2,
-								softMax = 100, max = 200, min = 12, step = 1,
+								softMax = 100, max = 200, min = ProfileUtils.MinimumFontSize, step = 1,
 								disabled = AnyCombatDisabled,
 							},
 							anyCombatMonochrome = {
@@ -2021,6 +2064,40 @@ do
 									end
 								end,
 								hidden = AnyCombatDisabled,
+							},
+							anyCombatCustomText = {
+								type = "input",
+								validate = function(_, value)
+									if not value:find("%s", nil, true) or value:find("%%[^s]") then -- Must contain %s and no other format characters
+										return false
+									else
+										local success, newValue = xpcall(string.format, function() end, value, L.hide)
+										if not success then -- Must not produce errors
+											return false
+										elseif newValue:find("%s", nil, true) then -- Must not still contain %s after being formatted with text (shouldn't really happen)
+											return false
+										else
+											return true
+										end
+									end
+								end,
+								name = L.customText,
+								width = 1.2,
+								order = 7,
+								disabled = AnyCombatDisabled,
+							},
+							anyCombatCustomTextSeparator = {
+								type = "description",
+								name = " ",
+								order = 8,
+								width = "full",
+							},
+							anyCombatHistoryHiddenInCombat = {
+								type = "toggle",
+								name = L.hideTooltipInCombat,
+								width = 1.5,
+								order = 9,
+								disabled = AnyCombatDisabled,
 							},
 						},
 					},
@@ -2267,7 +2344,7 @@ do
 								desc = L.fontSizeDesc,
 								order = 5,
 								width = 2,
-								softMax = 100, max = 200, min = 12, step = 1,
+								softMax = 100, max = 200, min = ProfileUtils.MinimumFontSize, step = 1,
 								disabled = BossCombatDisabled,
 							},
 							bossCombatMonochrome = {
@@ -2486,6 +2563,27 @@ do
 									end
 								end,
 								hidden = BossCombatDisabled,
+							},
+							bossCombatCustomText = {
+								type = "input",
+								validate = function(_, value)
+									if not value:find("%s", nil, true) or value:find("%%[^s]") then -- Must contain %s and no other format characters
+										return false
+									else
+										local success, newValue = xpcall(string.format, function() end, value, L.hide)
+										if not success then -- Must not produce errors
+											return false
+										elseif newValue:find("%s", nil, true) then -- Must not still contain %s after being formatted with text (shouldn't really happen)
+											return false
+										else
+											return true
+										end
+									end
+								end,
+								name = L.customText,
+								width = 1.2,
+								order = 7,
+								disabled = BossCombatDisabled,
 							},
 						},
 					},
@@ -2732,7 +2830,7 @@ do
 								desc = L.fontSizeDesc,
 								order = 5,
 								width = 2,
-								softMax = 100, max = 200, min = 12, step = 1,
+								softMax = 100, max = 200, min = ProfileUtils.MinimumFontSize, step = 1,
 								disabled = BossStagesDisabled,
 							},
 							bossStagesMonochrome = {
@@ -2903,6 +3001,7 @@ do
 							bossStagesTextFormat = {
 								type = "select",
 								name = L.textFormat,
+								width = 1.2,
 								values = {
 									"1:23",
 									"1:23.4",
@@ -2913,11 +3012,33 @@ do
 							bossStagesHistoryTimeFormat = {
 								type = "select",
 								name = L.historyTimeFormat,
+								width = 1.2,
 								values = {
 									L.twelveHour,
 									L.twentyFourHour,
 								},
 								order = 4,
+								disabled = BossStagesDisabled,
+							},
+							bossStagesCustomText = {
+								type = "input",
+								validate = function(_, value)
+									if not value:find("%s", nil, true) or value:find("%%[^s]") then -- Must contain %s and no other format characters
+										return false
+									else
+										local success, newValue = xpcall(string.format, function() end, value, L.hide)
+										if not success then -- Must not produce errors
+											return false
+										elseif newValue:find("%s", nil, true) then -- Must not still contain %s after being formatted with text (shouldn't really happen)
+											return false
+										else
+											return true
+										end
+									end
+								end,
+								name = L.customText,
+								width = 1.2,
+								order = 5,
 								disabled = BossStagesDisabled,
 							},
 						},
@@ -3165,7 +3286,7 @@ do
 								desc = L.fontSizeDesc,
 								order = 5,
 								width = 2,
-								softMax = 100, max = 200, min = 14, step = 1,
+								softMax = 100, max = 200, min = ProfileUtils.MinimumFontSize, step = 1,
 								disabled = InstanceTimerDisabled,
 							},
 							instanceTimerMonochrome = {

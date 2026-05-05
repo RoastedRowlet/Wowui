@@ -10,7 +10,7 @@ CraftSim.UTIL = {}
 
 CraftSim.UTIL.frameLevel = 100
 
-local print = CraftSim.DEBUG:RegisterDebugID("Util")
+local Logger = CraftSim.DEBUG:RegisterLogger("Util")
 
 function CraftSim.UTIL:NextFrameLevel()
     local frameLevel = CraftSim.UTIL.frameLevel
@@ -34,6 +34,43 @@ function CraftSim.UTIL:GetOrderTypeText(orderType)
     end
 
     return orderTypeText
+end
+
+--- Profession id for the open Professions UI. Prefer GetChildProfessionInfo (crafting tab); fall back to
+--- ProfessionsFrame.professionInfo (e.g. orders tab) so work-order actions still resolve a profession.
+---@return number? profession
+function CraftSim.UTIL:GetProfessionsFrameProfession()
+    local child = C_TradeSkillUI.GetChildProfessionInfo()
+    if child and child.profession then
+        return child.profession
+    end
+    if ProfessionsFrame and ProfessionsFrame.professionInfo and ProfessionsFrame.professionInfo.profession then
+        return ProfessionsFrame.professionInfo.profession
+    end
+    return nil
+end
+
+--- True when the player is in range of the crafting table / spell focus for the current professions frame profession.
+---@return boolean
+function CraftSim.UTIL:IsNearProfessionsFrameCraftingTable()
+    local p = CraftSim.UTIL:GetProfessionsFrameProfession()
+    return p ~= nil and C_TradeSkillUI.IsNearProfessionSpellFocus(p)
+end
+
+--- True when "Add work orders" should be clickable: at the profession table, or the Crafting Orders tab is allowed
+--- and enabled by Blizzard while the Professions frame is open (with a profession we can resolve for API calls).
+---@return boolean
+function CraftSim.UTIL:ShouldEnableCraftQueueAddWorkOrdersButton()
+    if CraftSim.UTIL:IsNearProfessionsFrameCraftingTable() then
+        return true
+    end
+    if not ProfessionsFrame or not ProfessionsFrame:IsVisible() then
+        return false
+    end
+    if not C_CraftingOrders.ShouldShowCraftingOrderTab() or not ProfessionsFrame.isCraftingOrdersTabEnabled then
+        return false
+    end
+    return CraftSim.UTIL:GetProfessionsFrameProfession() ~= nil
 end
 
 -- thx ketho forum guy
@@ -189,7 +226,7 @@ function CraftSim.UTIL:IsItemExpansionCompatible(recipeExpansionID, itemID, cont
     end
 
     local itemName, _, _, _, _, _, _, _, _, _, _, _, _, _, itemExpacID = C_Item.GetItemInfo(itemID)
-    print(string.format("IsItemExpansionCompatible(%s, %s): recipeExpansionID=%s, itemID=%s, itemExpacID=%s",
+    Logger:LogDebug(string.format("IsItemExpansionCompatible(%s, %s): recipeExpansionID=%s, itemID=%s, itemExpacID=%s",
         tostring(context), tostring(itemName), tostring(recipeExpansionID), tostring(itemID), tostring(itemExpacID)))
 
     if not recipeExpansionID then
@@ -260,10 +297,74 @@ function CraftSim.UTIL:GetCrafterUIDFromCrafterData(crafterData)
     return crafterData.name .. "-" .. crafterData.realm
 end
 
+--- Player name cannot contain '-'; realm may contain hyphens. Split on the first '-' only.
+---@param crafterUID CrafterUID
+---@return string? name
+---@return string? realm
+function CraftSim.UTIL:SplitCrafterUID(crafterUID)
+    if not crafterUID or crafterUID == "" then
+        return nil, nil
+    end
+    local pos = string.find(crafterUID, "-", 1, true)
+    if not pos or pos < 2 then
+        return nil, nil
+    end
+    local name = string.sub(crafterUID, 1, pos - 1)
+    local realm = string.sub(crafterUID, pos + 1)
+    if realm == "" then
+        return nil, nil
+    end
+    return name, realm
+end
+
+--- How many times each character name appears (case-insensitive), for Name-Realm UIDs only.
+---@param crafterUIDs CrafterUID[]
+---@return table<string, number> lowerNameToCount
+function CraftSim.UTIL:CountCrafterNamesByUIDList(crafterUIDs)
+    ---@type table<string, number>
+    local counts = {}
+    for _, uid in ipairs(crafterUIDs) do
+        local name = select(1, self:SplitCrafterUID(uid))
+        if name then
+            local key = string.lower(name)
+            counts[key] = (counts[key] or 0) + 1
+        end
+    end
+    return counts
+end
+
+--- Name only if unique in the peer list; Name-Realm when the same name appears on multiple characters.
+---@param crafterUID CrafterUID
+---@param nameCounts table<string, number> from CountCrafterNamesByUIDList
+---@return string
+function CraftSim.UTIL:FormatCrafterUIDForPeerList(crafterUID, nameCounts)
+    local name, realm = self:SplitCrafterUID(crafterUID)
+    if not name or not realm then
+        return crafterUID
+    end
+    local key = string.lower(name)
+    if (nameCounts[key] or 0) <= 1 then
+        return name
+    end
+    return name .. "-" .. realm
+end
+
+--- Class-colored display text, or grey if class is unknown.
+---@param crafterUID CrafterUID
+---@param displayText string
+---@return string
+function CraftSim.UTIL:ColorizeCrafterNameByUID(crafterUID, displayText)
+    local crafterClass = CraftSim.DB.CRAFTER:GetClass(crafterUID)
+    if crafterClass then
+        return C_ClassColor.GetClassColor(crafterClass):WrapTextInColorCode(displayText)
+    end
+    return f.grey(displayText)
+end
+
 ---@param crafterUID CrafterUID
 ---@return CraftSim.CrafterData? crafterData nil if not fully cached
 function CraftSim.UTIL:GetCrafterDataFromCrafterUID(crafterUID)
-    local name, realm = strsplit("-", crafterUID)
+    local name, realm = CraftSim.UTIL:SplitCrafterUID(crafterUID)
     local crafterClass = CraftSim.DB.CRAFTER:GetClass(crafterUID)
 
     if name and realm and crafterClass then
@@ -308,8 +409,7 @@ function CraftSim.UTIL:IsCurrentExpansionRecipe(recipeID)
     if recipeInfo then
         local professionInfo = C_TradeSkillUI.GetProfessionInfoByRecipeID(recipeInfo.recipeID)
         if not professionInfo.profession then
-            print("No Profession loaded yet?", false, true)
-            print(professionInfo, true)
+            Logger:LogDebug("No Profession loaded yet?", false, true)
         end
 
         -- do not use C_TradeSkillUI.IsRecipeInSkillLine because its not using cached data..
@@ -347,6 +447,23 @@ function CraftSim.UTIL:GetLocalizer()
     return function(ID)
         return CraftSim.LOCAL:GetText(ID)
     end
+end
+
+--- Clock icon + localized current/max charges. Same data path as Recipe Scan (`GetCooldownDataForRecipeCrafter`).
+---@param recipeData CraftSim.RecipeData
+---@return string
+function CraftSim.UTIL:GetRecipeCooldownChargesInlineSuffix(recipeData)
+    local cooldownData = recipeData:GetCooldownDataForRecipeCrafter()
+    if not cooldownData or not cooldownData.isCooldownRecipe then
+        return ""
+    end
+    local currentCharges = cooldownData:GetCurrentCharges()
+    if currentCharges == nil then
+        currentCharges = 0
+    end
+    local timeIcon = CreateAtlasMarkup(CraftSim.CONST.CRAFT_QUEUE_STATUS_TEXTURES.COOLDOWN.texture, 13, 13)
+    local fmt = CraftSim.LOCAL:GetText("RECIPE_COOLDOWN_CHARGES_INLINE")
+    return " " .. timeIcon .. string.format(fmt, currentCharges, cooldownData.maxCharges)
 end
 
 ---@param costConstant number
@@ -472,9 +589,10 @@ end
 ---@param copperValue number
 ---@param useColor? boolean -- colors the numbers green if positive and red if negative
 ---@param percentRelativeTo number? if included: will be treated as 100% and a % value in relation to the coppervalue will be added
-function CraftSim.UTIL:FormatMoney(copperValue, useColor, percentRelativeTo)
+---@param showCopper? boolean -- whether to show copper value false by default
+function CraftSim.UTIL:FormatMoney(copperValue, useColor, percentRelativeTo, showCopper)
     return GUTIL:FormatMoney(copperValue, useColor, percentRelativeTo, true,
-        CraftSim.DB.OPTIONS:Get("MONEY_FORMAT_USE_TEXTURES"))
+        CraftSim.DB.OPTIONS:Get("MONEY_FORMAT_USE_TEXTURES"), showCopper)
 end
 
 --- Returns true if the item is grey/poor quality (cannot be sold on AH, vendor-only)
@@ -483,7 +601,7 @@ end
 function CraftSim.UTIL:IsGreyItem(itemID)
     local rarity = select(3, C_Item.GetItemInfo(itemID))
     if rarity == nil then
-        return false -- item data not yet cached; treat as non-grey (safe fallback)
+        return false   -- item data not yet cached; treat as non-grey (safe fallback)
     end
     return rarity == 0 -- Enum.ItemQuality.Poor = 0
 end
@@ -494,6 +612,45 @@ end
 function CraftSim.UTIL:GetVendorSellPriceByItemID(itemID)
     local vendorSellPrice = select(11, C_Item.GetItemInfo(itemID))
     return vendorSellPrice or 0
+end
+
+--- Reference copper per unit for patron-order Manu Moxie (Craft Queue options). Tooltips always; also commission profit when CRAFTQUEUE_QUEUE_PATRON_ORDERS_INCLUDE_MOXIE_IN_PROFIT is enabled.
+---@param currencyID number
+---@return number copperPerUnit
+function CraftSim.UTIL:GetPatronOrderMoxieCopperPerUnit(currencyID)
+    return CraftSim.PATRON_MOXIE_VALUE_DB:GetCopperPerMoxie(currencyID)
+end
+
+--- Manu Moxie currency for the recipe's profession (API may omit `professionInfo.profession`; fall back via skill line).
+---@param recipeData CraftSim.RecipeData
+---@return number?
+function CraftSim.UTIL:GetRecipeProfessionMoxieCurrencyID(recipeData)
+    local pd = recipeData.professionData
+    if not pd or not pd.professionInfo then
+        return nil
+    end
+    local profession = pd.professionInfo.profession
+    local mapped = profession and CraftSim.CONST.MOXIE_CURRENCY_ID_BY_PROFESSION[profession]
+    if mapped then
+        return mapped
+    end
+    local sid = pd.skillLineID
+    if not sid then
+        return nil
+    end
+    for prof, lines in pairs(CraftSim.CONST.TRADESKILLLINEIDS) do
+        if type(prof) == "number" and type(lines) == "table" then
+            local moxieID = CraftSim.CONST.MOXIE_CURRENCY_ID_BY_PROFESSION[prof]
+            if moxieID then
+                for _, lineID in pairs(lines) do
+                    if lineID == sid then
+                        return moxieID
+                    end
+                end
+            end
+        end
+    end
+    return nil
 end
 
 ---@param profession Enum.Profession
@@ -518,8 +675,8 @@ end
 ---@return number? enchantID
 function CraftSim.UTIL:GetEnchantIDFromItemLink(itemLink)
     if not itemLink or not itemLink:find("|Hitem:") then return nil end
-    
-    local parts = {strsplit(":", itemLink)}    
+
+    local parts = { strsplit(":", itemLink) }
     return tonumber(parts[4])
 end
 
@@ -551,4 +708,255 @@ function CraftSim.UTIL:DecodeTable(string)
         return nil
     end
     return deserializedTable
+end
+
+---@param key string
+---@return table layoutConfig
+function CraftSim.UTIL:GetFrameListLayoutConfig(key)
+    local layoutConfigs = CraftSim.DB.OPTIONS:Get("FRAME_LIST_LAYOUT_CONFIGS")
+
+    layoutConfigs[key] = layoutConfigs[key] or {}
+
+    return layoutConfigs[key]
+end
+
+function CraftSim.UTIL:DisenchantWarbankItem(itemID)
+    if not C_SpellBook.ContainsAnyDisenchantSpell() then return end
+
+    local itemLocation = GUTIL:GetItemLocationFromItemID(itemID)
+    if not itemLocation then
+        CraftSim.DEBUG:SystemPrint(f.l("CraftSim: ") .. "ItemID not found in bags or equipped: " .. itemID)
+        return
+    end
+end
+
+---@param isWarbank boolean
+---@return ItemLocationMixin[]
+function CraftSim.UTIL:GetFreeBankSlots(isWarbank)
+    local startBagID = isWarbank and Enum.BagIndex.AccountBankTab_1 or Enum.BagIndex.CharacterBankTab_1
+    local endBagID = isWarbank and Enum.BagIndex.AccountBankTab_5 or Enum.BagIndex.CharacterBankTab_6
+
+    local freeSlots = {}
+
+    for bag = startBagID, endBagID do
+        local numSlots = C_Container.GetContainerNumSlots(bag)
+        for slot = 1, numSlots do
+            local itemLocation = ItemLocation:CreateFromBagAndSlot(bag, slot)
+            if not C_Container.GetContainerItemInfo(bag, slot) then
+                table.insert(freeSlots, itemLocation)
+            end
+        end
+    end
+
+    return freeSlots
+end
+
+---@return ItemLocationMixin[]
+function CraftSim.UTIL:GetFreeInventorySlots()
+    local startBagID = Enum.BagIndex.Backpack
+    local endBagID = Enum.BagIndex.Bag_4
+
+    local freeSlots = {}
+    for bag = startBagID, endBagID do
+        local numSlots = C_Container.GetContainerNumSlots(bag)
+        for slot = 1, numSlots do
+            local itemLocation = ItemLocation:CreateFromBagAndSlot(bag, slot)
+            if not C_Container.GetContainerItemInfo(bag, slot) then
+                table.insert(freeSlots, itemLocation)
+            end
+        end
+    end
+
+    return freeSlots
+end
+
+---@param itemInfo number | string itemID or itemLink
+---@param maxCount number? maximum number of items to move, defaults to all found items
+function CraftSim.UTIL:MoveItemIntoBank(itemInfo, maxCount)
+    -- check if warbank open
+    local bankOpen = BankFrame:GetActiveBankType() == Enum.BankType.Character
+    local warbankOpen = BankFrame:GetActiveBankType() == Enum.BankType.Account
+    if not bankOpen and not warbankOpen then
+        CraftSim.DEBUG:SystemPrint(f.l("CraftSim: ") .. "No bank open")
+        return
+    end
+
+    -- fetch items based on itemInfo from inventory
+    ---@type ItemMixin[]
+    local items = {}
+    for bag = Enum.BagIndex.Backpack, Enum.BagIndex.Bag_4 do
+        for slot = 1, C_Container.GetContainerNumSlots(bag) do
+            local itemLocation = ItemLocation:CreateFromBagAndSlot(bag, slot)
+            if itemLocation:IsValid() then
+                local item = Item:CreateFromItemLocation(itemLocation)
+                if item then
+                    table.insert(items, item)
+                end
+            end
+        end
+    end
+
+    GUTIL:ContinueOnAllItemsLoaded(items, function()
+        local items = GUTIL:Filter(items, function(item)
+            local itemID = item:GetItemID()
+            local itemLink = item:GetItemLink()
+            local itemName = item:GetItemName()
+
+            -- 1) check if link matches 2) check if itemID matches 3) check if name contains given string for partial name search
+            return itemLink == itemInfo or itemID == tonumber(itemInfo) or
+                string.find(itemName, itemInfo, 1, true) ~= nil
+        end)
+
+        if #items == 0 then
+            CraftSim.DEBUG:SystemPrint(f.l("CraftSim: ") .. "Item not found in bags: " .. tostring(itemInfo))
+            return
+        end
+
+        local freeBankSlots = self:GetFreeBankSlots(warbankOpen)
+        if #freeBankSlots == 0 then
+            CraftSim.DEBUG:SystemPrint(f.l("CraftSim: ") .. "No free bank slots available")
+            return
+        end
+
+        -- start moving items to free slots
+
+        local itemMoveCount = math.min(#items, #freeBankSlots, maxCount or math.huge)
+
+        CraftSim.DEBUG:SystemPrint(f.l("CraftSim: ") ..
+            "Moving " .. itemMoveCount .. " items to " .. (warbankOpen and "warbank" or "bank"))
+
+        -- it works within 1 frame.. but split it a bit just in case
+
+        GUTIL.FrameDistributor {
+            iterationTable = items,
+            iterationsPerFrame = CraftSim.DB.OPTIONS:Get("BANKING_MAX_ITEMS_PER_FRAME"),
+            maxIterations = itemMoveCount,
+            finally = function()
+                CraftSim.DEBUG:SystemPrint(f.l("CraftSim: ") .. "Finished moving items")
+            end,
+            continue = function(frameDistributor, key, _, _, _)
+                local item = items[key]
+                local freeSlot = freeBankSlots[key]
+
+                -- inframe check if bank is still open
+                if warbankOpen and BankFrame:GetActiveBankType() ~= Enum.BankType.Account then
+                    CraftSim.DEBUG:SystemPrint(f.l("CraftSim: ") .. "Warbank closed, stopping move")
+                    frameDistributor:Break()
+                    return
+                elseif bankOpen and BankFrame:GetActiveBankType() ~= Enum.BankType.Character then
+                    CraftSim.DEBUG:SystemPrint(f.l("CraftSim: ") .. "Bank closed, stopping move")
+                    frameDistributor:Break()
+                    return
+                end
+
+                local bag, slot = item:GetItemLocation():GetBagAndSlot()
+
+                ClearCursor()
+
+                C_Container.PickupContainerItem(bag, slot)
+                if GetCursorInfo() == "item" then
+                    C_Container.PickupContainerItem(freeSlot:GetBagAndSlot())
+                end
+                ClearCursor()
+
+                frameDistributor:Continue()
+            end
+        }:Continue()
+    end)
+end
+
+---@param itemInfo number | string itemID or itemLink
+---@param maxCount number? maximum number of items to move, defaults to all found items
+function CraftSim.UTIL:MoveItemIntoInventory(itemInfo, maxCount)
+    -- check if warbank open
+    local bankOpen = BankFrame:GetActiveBankType() == Enum.BankType.Character
+    local warbankOpen = BankFrame:GetActiveBankType() == Enum.BankType.Account
+    if not bankOpen and not warbankOpen then
+        CraftSim.DEBUG:SystemPrint(f.l("CraftSim: ") .. "No bank open")
+        return
+    end
+
+    -- fetch items based on itemInfo from bank
+    local bagStart = warbankOpen and Enum.BagIndex.AccountBankTab_1 or Enum.BagIndex.CharacterBankTab_1
+    local bagEnd = warbankOpen and Enum.BagIndex.AccountBankTab_5 or Enum.BagIndex.CharacterBankTab_6
+    ---@type ItemMixin[]
+    local items = {}
+    for bag = bagStart, bagEnd do
+        for slot = 1, C_Container.GetContainerNumSlots(bag) do
+            local itemLocation = ItemLocation:CreateFromBagAndSlot(bag, slot)
+            if itemLocation:IsValid() then
+                local item = Item:CreateFromItemLocation(itemLocation)
+                if item then
+                    table.insert(items, item)
+                end
+            end
+        end
+    end
+
+    GUTIL:ContinueOnAllItemsLoaded(items, function()
+        local items = GUTIL:Filter(items, function(item)
+            local itemID = item:GetItemID()
+            local itemLink = item:GetItemLink()
+            local itemName = item:GetItemName()
+
+            -- 1) check if link matches 2) check if itemID matches 3) check if name contains given string for partial name search
+            return itemLink == itemInfo or itemID == tonumber(itemInfo) or
+                string.find(itemName, itemInfo, 1, true) ~= nil
+        end)
+
+        if #items == 0 then
+            CraftSim.DEBUG:SystemPrint(f.l("CraftSim: ") .. "Item not found in bags: " .. tostring(itemInfo))
+            return
+        end
+
+
+        local freeInventorySlots = self:GetFreeInventorySlots()
+        if #freeInventorySlots == 0 then
+            CraftSim.DEBUG:SystemPrint(f.l("CraftSim: ") .. "No free inventory slots available")
+            return
+        end
+
+        -- start moving items to free slots
+
+        local itemMoveCount = math.min(#items, #freeInventorySlots, maxCount or math.huge)
+
+        CraftSim.DEBUG:SystemPrint(f.l("CraftSim: ") .. "Moving " .. itemMoveCount .. " items to bags")
+        -- it works within 1 frame.. but split it a bit just in case
+
+        GUTIL.FrameDistributor {
+            iterationTable = items,
+            iterationsPerFrame = CraftSim.DB.OPTIONS:Get("BANKING_MAX_ITEMS_PER_FRAME"),
+            maxIterations = itemMoveCount,
+            finally = function()
+                CraftSim.DEBUG:SystemPrint(f.l("CraftSim: ") .. "Finished moving items")
+            end,
+            continue = function(frameDistributor, key, _, _, _)
+                local item = items[key]
+                local freeSlot = freeInventorySlots[key]
+
+                -- inframe check if bank is still open
+                if warbankOpen and BankFrame:GetActiveBankType() ~= Enum.BankType.Account then
+                    CraftSim.DEBUG:SystemPrint(f.l("CraftSim: ") .. "Warbank closed, stopping move")
+                    frameDistributor:Break()
+                    return
+                elseif bankOpen and BankFrame:GetActiveBankType() ~= Enum.BankType.Character then
+                    CraftSim.DEBUG:SystemPrint(f.l("CraftSim: ") .. "Bank closed, stopping move")
+                    frameDistributor:Break()
+                    return
+                end
+
+                local bag, slot = item:GetItemLocation():GetBagAndSlot()
+
+                ClearCursor()
+
+                C_Container.PickupContainerItem(bag, slot)
+                if GetCursorInfo() == "item" then
+                    C_Container.PickupContainerItem(freeSlot:GetBagAndSlot())
+                end
+                ClearCursor()
+
+                frameDistributor:Continue()
+            end
+        }:Continue()
+    end)
 end

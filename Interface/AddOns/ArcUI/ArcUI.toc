@@ -1,8 +1,8 @@
-## Interface: 120000, 120001
+## Interface: 120000, 120001, 120005
 ## Title: Arc UI
 ## Notes: Buff/Debuff stack tracking bars, icons, resource bars, cooldown bars, and timer bars with CD Manager integration
 ## Author: Arc
-## Version: 3.6.2.g
+## Version: 3.6.7
 ## X-Wago-ID:mNw7Q2No
 ## SavedVariables: ArcUIDB, ArcUI_CDMEnhance_Debug
 
@@ -32,9 +32,6 @@ Libs\LibSerialize\lib.xml
 Libs\LibEditModeOverride\LibEditModeOverride.xml
 Libs\LibEQOL\LibEQOL.xml
 
-# Custom Textures (community-contributed bar textures and fonts)
-#ArcUI_CustomTextures.lua
-
 # Core Files
 ArcUI_DB.lua
 ArcUI_BarGroupAlign.lua
@@ -47,34 +44,34 @@ ArcUI_CooldownBars.lua
 ArcUI_CustomTracking.lua
 ArcUI_TalentPicker.lua
 ArcUI_DataRepair.lua
+
 # Main Options (creates AceDB)
 ArcUI_Options.lua
 
-
+# Cooldown Reminder
+ArcUI_CooldownReminder.lua
+ArcUI_CooldownReminder_Options.lua
 
 # Options Panels
 ArcUI_TrackingOptions.lua
-#ArcUI_ResourceOptions.lua
 ArcUI_Presets.lua
 ArcUI_AppearanceOptions.lua
 ArcUI_CooldownBarOptions.lua
-#ArcUI_TimerBars.lua
 ArcUI_TimerBarOptions.lua
 ArcUI_CustomOptions.lua
 
-# Bars Import/Export
+# Import/Export
 ArcUI_Bars_ImportExport.lua
+ArcUI_CR_ImportExport.lua
 
-# ═══════════════════════════════════════════════════════════════════════════
 # CDM Module - Cooldown Manager Integration
-# ═══════════════════════════════════════════════════════════════════════════
-
 CDM_Module\ArcUI_CDM_Shared.lua
+CDM_Module\CDM_Enhance\ArcUI_CooldownFormatter.lua
 CDM_Module\CDM_Enhance\ArcUI_Glows.lua
 CDM_Module\CDM_Enhance\ArcUI_CDMEnhance.lua
 CDM_Module\CDM_Enhance\ArcUI_GCDFilter.lua
 CDM_Module\CDM_Enhance\ArcUI_AuraFrames.lua
-CDM_Module\CDM_Enhance\ArcUI_CooldownState.lua 
+CDM_Module\CDM_Enhance\ArcUI_CooldownState.lua
 CDM_Module\CDM_Enhance\ArcUI_Keybinds.lua
 CDM_Module\CDM_Enhance\ArcUI_CustomLabel.lua
 CDM_Module\CDM_Enhance\ArcUI_Masque.lua
@@ -91,7 +88,8 @@ CDM_Module\CDM_Groups\ArcUI_CDMGroups_Layout.lua
 CDM_Module\CDM_Groups\ArcUI_CDMGroups_Placeholders.lua
 CDM_Module\CDM_Groups\ArcUI_CDMGroups_StateManager.lua
 CDM_Module\CDM_Groups\ArcUI_CDMGroups_ImportRestore.lua
-# CDM Groups Anchoring (must load before CDMGroups - zero idle CPU, event-driven only)
+
+# CDM Groups Anchoring (must load before CDMGroups)
 CDM_Module\CDM_Groups\ArcUI_CDMGroupsAnchors.lua
 CDM_Module\CDM_Groups\ArcUI_CDMGroups.lua
 CDM_Module\CDM_Groups\ArcUI_CDMGroups_DynamicLayout.lua
@@ -99,12 +97,15 @@ CDM_Module\CDM_Groups\ArcUI_CDMGroups_DynamicLayout.lua
 # CDM Groups Integration (external frame registration - after CDMGroups)
 CDM_Module\CDM_Groups\ArcUI_CDMGroups_Integration.lua
 
-# Arc Auras - Custom Item/Spell Tracking (uses Integration API)
+# Arc Auras - Custom Item/Spell Tracking
 CDM_Module\Arc_Auras\ArcUI_ArcAuras.lua
 CDM_Module\Arc_Auras\ArcUI_ArcAurasCooldown.lua
+CDM_Module\Arc_Auras\ArcUI_ArcAurasTimer.lua
+CDM_Module\Arc_Auras\ArcUI_CustomIcons_Presets.lua
+CDM_Module\Arc_Auras\ArcUI_CustomIcons_Options.lua
 CDM_Module\Arc_Auras\ArcUI_ArcAuras_Options.lua
 
-# Edit Mode Containers - LibEQOL-based positioning (replaces CDMContainerSync)
+# Edit Mode Containers - LibEQOL-based positioning
 CDM_Module\ArcUI_EditModeContainers.lua
 
 # CDM Container Sync - Anchors base CDM viewers to group proxies
@@ -115,10 +116,9 @@ CDM_Module\ArcUI_CDM_ImportExport.lua
 CDM_Module\ArcUI_CDM_MasterExport.lua
 CDM_Module\ArcUI_CDM_SharedProfiles.lua
 ArcUI_UnifiedImportExport.lua
+
 # CDM Options Panels
 CDM_Module\CDM_Groups\ArcUI_CDMGroupsOptions.lua
 CDM_Module\CDM_Enhance\ArcUI_CDMEnhanceOptions.lua
 CDM_Module\CDM_Enhance\ArcUI_CustomLabelOptions.lua
 CDM_Module\CDM_Enhance\ArcUI_SpellUsabilityOptions.lua
-## Debug tools — uncomment to enable, comment out for release builds
-#CDM_Module\CDM_Enhance\ArcUI_FrameTypeDebugger.lua

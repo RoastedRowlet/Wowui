@@ -64,11 +64,11 @@ local REPLACE_PROMPT_INFO = {
     text         = L["GUIDE_PIN_ASSISTANT_REPLACEPROMPT"],
     options      = {
         {
-            text     = L["GUIDE_PIN_ASSISTANT_REPLACEPROMPT_YES"],
+            text     = L["REPLACE"],
             callback = PlaceUserNavigationAtGuidePin
         },
         {
-            text     = L["GUIDE_PIN_ASSISTANT_REPLACEPROMPT_NO"],
+            text     = L["CANCEL"],
         }
     },
     hideOnEscape = true,

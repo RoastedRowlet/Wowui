@@ -103,7 +103,7 @@ end
 
 function mod:ENCOUNTER_TIMELINE_EVENT_ADDED(_, eventInfo)
 	if eventInfo.source ~= 0 then return end -- Enum.EncounterTimelineEventSource.Encounter
-	local duration = math.floor(eventInfo.duration* 100.0 + 0.5) / 100.0
+	local duration = self:RoundNumber(eventInfo.duration, 2)
 	local barInfo
 	if duration == 11 or (duration == 19 and count19 % 2 == 1) then -- Blight Smash
 		barInfo = self:BlightSmashTimeline(eventInfo)
@@ -211,6 +211,7 @@ function mod:GetEmIckTimeline(eventInfo)
 		msg = barText,
 		key = 1264363,
 		callback = function()
+			self:StopBlizzMessages(1)
 			self:Message(1264363, "red", barText)
 			self:PlaySound(1264363, "alert")
 		end

@@ -96,10 +96,10 @@ local function updateProfile()
 	if db.fadetime < 1 or db.fadetime > 10 then
 		db.fadetime = plugin.defaultDB.fadetime
 	end
-	if not LibSharedMedia:IsValid(FONT, db.fontName) then
+	if not LibSharedMedia:IsValid(FONT, db.fontName) or not BigWigsAPI.IsValidMediaPath(LibSharedMedia:Fetch("font", db.fontName)) then
 		db.fontName = plugin.defaultDB.fontName
 	end
-	if not LibSharedMedia:IsValid(FONT, db.emphFontName) then
+	if not LibSharedMedia:IsValid(FONT, db.emphFontName) or not BigWigsAPI.IsValidMediaPath(LibSharedMedia:Fetch("font", db.emphFontName)) then
 		db.emphFontName = plugin.defaultDB.emphFontName
 	end
 	if type(db.normalPosition[1]) ~= "string" or type(db.normalPosition[2]) ~= "string"
@@ -295,6 +295,9 @@ do
 
 	for i = 1, 4 do
 		local fs = normalMessageFrame:CreateFontString()
+		--if fs.SetSmoothScaling then -- XXX [Mainline:✓ MoP:✗ Wrath:✗ TBC:✗ Vanilla:✗]
+			--fs:SetSmoothScaling(true)
+		--end
 		fs:SetWidth(0)
 		fs:SetHeight(0)
 		fs.elapsed = 0
@@ -377,13 +380,16 @@ do
 				name = L.testMessagesBtn,
 				desc = L.testMessagesBtn_desc,
 				func = function()
-					testCount = testCount + 1
-					local color = colors[testCount]
-					local sound = sounds[testCount]
-					local emphasized = testCount == 2
-					plugin:SendMessage("BigWigs_Message", plugin, nil, L[color], color, testIcons[(testCount%3)+1], emphasized)
-					plugin:SendMessage("BigWigs_Sound", plugin, nil, sound)
-					if testCount == 7 then testCount = 0 end
+					local function DoTest()
+						testCount = testCount + 1
+						local color = colors[testCount]
+						local sound = sounds[testCount]
+						local emphasized = testCount == 2
+						plugin:SendMessage("BigWigs_Message", plugin, nil, L[color], color, testIcons[(testCount%3)+1], false)
+						plugin:SendMessage("BigWigs_Sound", plugin, nil, sound)
+						if testCount == 7 then testCount = 0 end
+					end
+					plugin:SimpleTimer(DoTest, 0.3) -- Avoid lag from everything else in the execution path (AceGUI processing)
 				end,
 				width = 1.5,
 				order = 0.4,
@@ -792,11 +798,11 @@ do
 		local min = db.fontSize
 		local max = min + 10
 		if self.elapsed <= scaleUpTime then
-			self:SetTextHeight(floor(min + ((max - min) * self.elapsed / scaleUpTime)))
+			self:SetFontHeight(floor(min + ((max - min) * self.elapsed / scaleUpTime)))
 		elseif self.elapsed <= scaleDownTime then
-			self:SetTextHeight(floor(max - ((max - min) * (self.elapsed - scaleUpTime) / (scaleDownTime - scaleUpTime))))
+			self:SetFontHeight(floor(max - ((max - min) * (self.elapsed - scaleUpTime) / (scaleDownTime - scaleUpTime))))
 		else
-			self:SetTextHeight(min)
+			self:SetFontHeight(min)
 			anim:SetScript("OnUpdate", nil)
 		end
 	end
@@ -955,9 +961,9 @@ do
 		-- Not Secret
 		-- local duration = eventInfo.duration
 		local severity = eventInfo.severity
-		local shouldPlaySound = eventInfo.shouldPlaySound
+		--local shouldPlaySound = eventInfo.shouldPlaySound
 		-- local shouldShowChatMessage = eventInfo.shouldShowChatMessage
-		local shouldShowWarning = eventInfo.shouldShowWarning
+		--local shouldShowWarning = eventInfo.shouldShowWarning
 
 		-- Secret
 		local text = eventInfo.text

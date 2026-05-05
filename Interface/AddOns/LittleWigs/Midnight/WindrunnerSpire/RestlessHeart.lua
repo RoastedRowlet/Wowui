@@ -69,7 +69,7 @@ end
 
 function mod:ENCOUNTER_TIMELINE_EVENT_ADDED(_, eventInfo)
 	if eventInfo.source ~= 0 then return end -- Enum.EncounterTimelineEventSource.Encounter
-	local duration = math.floor(eventInfo.duration * 10.0 + 0.5) / 10.0
+	local duration = self:RoundNumber(eventInfo.duration, 1)
 	local barInfo
 	if duration == 9 or duration == 11 then -- Arrow Rain
 		barInfo = self:ArrowRainTimeline(eventInfo)
@@ -158,6 +158,7 @@ function mod:GustShotTimeline(eventInfo)
 		msg = barText,
 		key = 1253986,
 		callback = function()
+			self:TargetMessageFromBlizzMessage(1, 1253986, "blue")
 			self:Message(1253986, "red", barText)
 			self:PlaySound(1253986, "alarm")
 		end
@@ -171,10 +172,11 @@ function mod:BullseyeWindblastTimeline(eventInfo)
 	return {
 		msg = barText,
 		key = 468429,
-		--callback = function() -- has Blizzard message
-			--self:Message(468429, "yellow", barText)
-			--self:PlaySound(468429, "warning")
-		--end
+		callback = function()
+			self:StopBlizzMessages(1)
+			self:Message(468429, "yellow", barText)
+			self:PlaySound(468429, "warning")
+		end
 	}
 end
 

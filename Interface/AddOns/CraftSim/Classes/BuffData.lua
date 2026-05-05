@@ -11,7 +11,7 @@ local L = CraftSim.UTIL:GetLocalizer()
 
 local debug = false
 
-local print = CraftSim.DEBUG:RegisterDebugID("Classes.RecipeData.BuffData")
+local Logger = CraftSim.DEBUG:RegisterLogger("BuffData")
 
 ---@param recipeData CraftSim.RecipeData
 function CraftSim.BuffData:new(recipeData)
@@ -38,7 +38,7 @@ function CraftSim.BuffData:CreateBuffsByRecipeData()
 
     local profession = self.recipeData.professionData.professionInfo.profession
 
-    print("Creating initial buff data objects: " .. tostring(profession), false, true)
+    Logger:LogDebug("Creating initial buff data objects: " .. tostring(profession), false, true)
 
     -- TWW Buffs
     if self.recipeData.expansionID == CraftSim.CONST.EXPANSION_IDS.THE_WAR_WITHIN then
@@ -223,7 +223,22 @@ function CraftSim.BuffData:UpdateProfessionStats()
     self.professionStats:Clear()
 
     for _, buff in pairs(self.buffs) do
-        if buff.active then
+        local countTowardStats = buff.active
+        if not countTowardStats and buff.buffID == CraftSim.CONST.BUFF_IDS.EVERBURNING_IGNITION then
+            countTowardStats = CraftSim.PRE_CRAFT_BUFF_GATE:ShouldAssumeBuffActiveForProfessionStats(self.recipeData,
+                buff.buffID)
+        end
+        if not countTowardStats and self.recipeData.isEnchantingRecipe and
+            CraftSim.CONST.ENCHANTING_SHATTER_BUFF_ASSUME_ACTIVE_FOR_STATS[buff.buffID] then
+            if buff.buffID == CraftSim.CONST.BUFF_IDS.SHATTERING_ESSENCE_MIDNIGHT or
+                buff.buffID == CraftSim.CONST.BUFF_IDS.SHATTERING_ESSENCE then
+                countTowardStats = CraftSim.PRE_CRAFT_BUFF_GATE:ShouldAssumeBuffActiveForProfessionStats(self.recipeData,
+                    buff.buffID)
+            else
+                countTowardStats = true
+            end
+        end
+        if countTowardStats then
             self.professionStats:add(buff.professionStats)
         end
     end
@@ -249,7 +264,7 @@ function CraftSim.BuffData:SetBuffByUID(buffUID, active)
     end)
 
     if buff then
-        print("Setting " .. buff.name .. ": " .. tostring(active))
+        Logger:LogDebug("Setting " .. buff.name .. ": " .. tostring(active))
         buff.active = active
     end
 end

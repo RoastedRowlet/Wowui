@@ -23,3 +23,14 @@ BigWigs:AddSounds("Cragpine", {
 	[1235144] = "info",
 	[1243594] = "warning",
 })
+
+BigWigs:AddColors("Thorm'belan", {
+	[1257325] = "orange",
+	[1257825] = {"red","yellow"},
+	[1258641] = {"blue","orange","red"},
+})
+
+BigWigs:AddSounds("Thorm'belan", {
+	[1257825] = "long",
+	[1258641] = {"info","warning"},
+})

@@ -139,7 +139,7 @@ end
 
 function mod:ENCOUNTER_TIMELINE_EVENT_ADDED(_, eventInfo)
 	if eventInfo.source ~= 0 then return end -- Enum.EncounterTimelineEventSource.Encounter
-	local duration = math.floor(eventInfo.duration + 0.5)
+	local duration = self:RoundNumber(eventInfo.duration, 0)
 	local barInfo
 	if duration == 2 or duration == 4 or (duration == 6 and count6 % 3 ~= 1) or (duration == 12 and count12 % 2 == 0) or duration == 14 then -- Mind Blast
 		barInfo = self:MindBlastTimeline(eventInfo)
@@ -262,6 +262,9 @@ function mod:RepulseTimeline(eventInfo)
 		msg = barText,
 		key = 1263528,
 		callback = function()
+			-- ability cadence resets after each Repulse
+			count6 = 1
+			count12 = 1
 			self:Message(1263528, "yellow", barText)
 			self:PlaySound(1263528, "alarm")
 		end

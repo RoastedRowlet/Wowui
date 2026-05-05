@@ -1,7 +1,7 @@
-## Interface: 120000, 120001
+## Interface: 120005
 ## Title: Socket Helper
 ## Author: Metriss - Stormrage
-## Version: v2.2.20
+## Version: v2.2.21
 ## SavedVariables: DSHDB
 ## Notes: Helps with changing Gems and Domination Socket Shards
 

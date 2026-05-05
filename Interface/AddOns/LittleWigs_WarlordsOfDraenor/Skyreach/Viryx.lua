@@ -116,7 +116,7 @@ end
 
 function mod:ENCOUNTER_TIMELINE_EVENT_ADDED(_, eventInfo)
 	if eventInfo.source ~= 0 then return end -- Enum.EncounterTimelineEventSource.Encounter
-	local duration = math.floor(eventInfo.duration + 0.5)
+	local duration = self:RoundNumber(eventInfo.duration, 0)
 	local barInfo
 	if duration == 5 or duration == 10 then -- Scorching Ray
 		barInfo = self:ScorchingRayTimeline(eventInfo)
@@ -206,7 +206,7 @@ function mod:CastDownTimeline(eventInfo)
 		msg = barText,
 		key = 153954,
 		callback = function()
-			self:Message(153954, "cyan", barText)
+			self:TargetMessageFromBlizzMessage(1, 153954, "cyan")
 			self:PlaySound(153954, "warning")
 		end
 	}
@@ -220,7 +220,8 @@ function mod:LensFlareTimeline(eventInfo)
 		msg = barText,
 		key = 1253840,
 		callback = function()
-			self:Message(1253840, "orange", barText)
+			self:TargetMessageFromBlizzMessage(1, 1253840, "blue")
+			self:Message(1253840, "orange")
 			self:PlaySound(1253840, "alarm")
 		end
 	}

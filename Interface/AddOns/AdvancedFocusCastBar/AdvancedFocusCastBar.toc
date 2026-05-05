@@ -1,0 +1,28 @@
+## Interface: 120001
+## Title: Advanced Focus Cast Bar
+## DefaultState: Enabled
+## SavedVariables: AdvancedFocusCastBarSaved
+## IconTexture: Interface\Icons\spell_hunter_focusingshot
+## Category: Archon
+## Notes: A focus cast bar with bells and whistles.
+## Version: 1.0.12
+## Author: Xephyris-Blackrock-EU
+
+## X-Curse-Project-ID: 1441078
+## X-Wago-ID: 96d2DPGO
+
+Libs\LibStub\LibStub.lua
+Libs\LibCustomGlow-1.0\LibCustomGlow-1.0.lua
+Libs\CallbackHandler-1.0\CallbackHandler-1.0.lua
+Libs\LibEditMode\embed.xml
+Libs\LibSharedMedia-3.0\lib.xml
+
+Templates\AdvancedFocusCastBar.xml
+Enum.lua
+Init.lua
+
+Localization\enUS.lua
+Localization\[TextLocale].lua [AllowLoadTextLocale deDE]
+
+Settings.lua
+AdvancedFocusCastBarMixin.lua

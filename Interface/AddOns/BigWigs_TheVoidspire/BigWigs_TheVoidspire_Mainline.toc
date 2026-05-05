@@ -1,4 +1,4 @@
-## Interface: 120001, 120005, 120000
+## Interface: 120001, 120005, 120007
 
 ## Title: BigWigs [|cffeda55fThe Voidspire|r]
 ## Title-deDE: BigWigs [|cffeda55fDie Leerenspitze|r]
@@ -23,7 +23,7 @@
 ## Notes-zhCN: BigWigs 虚影尖塔模块
 ## Notes-zhTW: BigWigs 虛無之尖模組
 ## IconTexture: Interface\AddOns\BigWigs\Media\Icons\minimap_raid.tga
-## Version: v411.7
+## Version: v414.9
 
 ## LoadOnDemand: 1
 ## Dependencies: BigWigs

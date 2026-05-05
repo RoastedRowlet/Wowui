@@ -34,24 +34,35 @@ local function InitSaved()
     sv.clearKey      = sv.clearKey      or "B"
     sv.clearModifier = sv.clearModifier or "CTRL-"
     sv.orderList     = sv.orderList     or {6,4,3,7,1,2,5,8}
+    -- Custom cycle mode: use a subset of markers instead of the full orderList
+    if sv.customCycleEnabled == nil then sv.customCycleEnabled = false end
+    sv.customCycleMarkers = sv.customCycleMarkers or {8, 4, 3, 2} -- default: skull, cross, diamond, triangle
 end
 
 -- Secure world marker cycler button
-local cycleBtn = CreateFrame("Button", "WorldMarkerCyclerButton", nil, "SecureActionButtonTemplate")
+
+
+
+local cycleBtn = CreateFrame("Button", "WorldMarkerCyclerButton", UIParent, "SecureActionButtonTemplate")
 cycleBtn:SetAttribute("type", "macro")
-cycleBtn:RegisterForClicks("AnyUp", "AnyDown")
+cycleBtn:RegisterForClicks("AnyDown")
 SecureHandlerWrapScript(cycleBtn, "PreClick", cycleBtn, [=[
-    if not down or not next(order) then return end
+    if not down then return end
+    if not order or type(order) ~= "table" or #order == 0 then return end
     i = (i % #order) + 1
     local marker = order[i] or 1
-    self:SetAttribute("macrotext", "/worldmarker [@cursor] " .. marker)
+    self:SetAttribute("macrotext", "/wm [@cursor] " .. marker)
 ]=])
 
 -- Restore dedicated clear button
+
 local clearBtn = CreateFrame("Button", "WorldMarkerClearButton", UIParent, "SecureActionButtonTemplate")
 clearBtn:SetAttribute("type", "macro")
-clearBtn:SetAttribute("macrotext", "/clearworldmarker 9")
-clearBtn:RegisterForClicks("AnyUp", "AnyDown")
+clearBtn:RegisterForClicks("AnyDown")
+SecureHandlerWrapScript(clearBtn, "PreClick", clearBtn, [=[
+    if not down then return end
+    self:SetAttribute("macrotext", "/cwm 9")
+]=])
 clearBtn:SetScript("PostClick", function()
     if WorldMarkerCyclerAPI and WorldMarkerCyclerAPI.ResetCycleIndex then
         WorldMarkerCyclerAPI.ResetCycleIndex()
@@ -67,9 +78,13 @@ local bindingsFrame = CreateFrame("Frame", "WorldMarkerCyclerBindings")
 local function BuildOrderTable()
     local sv = SV()
     local body = "i=0;order=newtable() "
-    if sv and sv.orderList then
-        for _, id in ipairs(sv.orderList) do
-            body = body .. string.format("tinsert(order,%d) ", id)
+    if sv then
+        -- Use custom cycle markers when enabled, otherwise use full orderList
+        local list = (sv.customCycleEnabled and sv.customCycleMarkers) or sv.orderList
+        if list then
+            for _, id in ipairs(list) do
+                body = body .. string.format("tinsert(order,%d) ", id)
+            end
         end
     end
     SecureHandlerExecute(cycleBtn, body)
@@ -152,6 +167,31 @@ function WorldMarkerCyclerAPI.SetOrder(list)
         SV().orderList = list
         BuildOrderTable()
     end
+end
+
+-- Custom cycle mode API
+function WorldMarkerCyclerAPI.SetCustomCycleEnabled(enabled)
+    EnsureSV()
+    SV().customCycleEnabled = enabled and true or false
+    BuildOrderTable()
+end
+
+function WorldMarkerCyclerAPI.GetCustomCycleEnabled()
+    local sv = SV()
+    return sv and sv.customCycleEnabled or false
+end
+
+function WorldMarkerCyclerAPI.SetCustomCycleMarkers(list)
+    EnsureSV()
+    if type(list) == "table" and #list > 0 then
+        SV().customCycleMarkers = list
+        BuildOrderTable()
+    end
+end
+
+function WorldMarkerCyclerAPI.GetCustomCycleMarkers()
+    local sv = SV()
+    return sv and sv.customCycleMarkers or {}
 end
 
 -- Reset the cycling index so the next cycle starts from the top
@@ -238,4 +278,99 @@ SlashCmdList["WMCBIND"] = function(msg)
         self:SetScript("OnKeyDown", nil)
     end)
     f:Show()
+end
+
+-- Debug: dump saved values and active binding state
+SLASH_WMCDEBUG1 = "/wmcdebug"
+SlashCmdList["WMCDEBUG"] = function()
+    print("=== WMC Debug ===")
+    print("Locale:", GetLocale())
+
+    -- World marker saved values
+    local sv = _G.WMC_Saved
+    if sv then
+        local pk = sv.placeKey or "(nil)"
+        local pm = sv.placeModifier or "(nil)"
+        local ck = sv.clearKey or "(nil)"
+        local cm = sv.clearModifier or "(nil)"
+        print("World placeKey=[" .. tostring(pk) .. "] mod=[" .. tostring(pm) .. "]")
+        print("World clearKey=[" .. tostring(ck) .. "] mod=[" .. tostring(cm) .. "]")
+        -- Check byte values to detect non-ASCII garbage
+        print("  placeKey bytes: " .. (pk and pk:gsub(".", function(c) return string.format("%02X ", c:byte()) end) or "nil"))
+        print("  clearKey bytes: " .. (ck and ck:gsub(".", function(c) return string.format("%02X ", c:byte()) end) or "nil"))
+        -- Check if binding is actually registered
+        local fullCycle = (pm or "") .. (pk or "")
+        local fullClear = (cm or "") .. (ck or "")
+        if fullCycle ~= "" then
+            local action = GetBindingAction(fullCycle)
+            print("  Binding for [" .. fullCycle .. "] -> action=[" .. tostring(action) .. "]")
+        end
+        if fullClear ~= "" then
+            local action = GetBindingAction(fullClear)
+            print("  Binding for [" .. fullClear .. "] -> action=[" .. tostring(action) .. "]")
+        end
+    else
+        print("WMC_Saved is nil!")
+    end
+
+    -- Target marker saved values
+    local tsv = _G.WMC_TargetSaved
+    if tsv then
+        print("Target placeKey=[" .. tostring(tsv.placeKey) .. "] mod=[" .. tostring(tsv.placeModifier) .. "]")
+        print("Target clearKey=[" .. tostring(tsv.clearKey) .. "] mod=[" .. tostring(tsv.clearModifier) .. "]")
+        print("  placeKey bytes: " .. ((tsv.placeKey or ""):gsub(".", function(c) return string.format("%02X ", c:byte()) end)))
+    else
+        print("WMC_TargetSaved is nil!")
+    end
+
+    -- Mouseover marker saved values
+    local msv = _G.WMC_MouseoverSaved
+    if msv then
+        print("Mouse placeKey=[" .. tostring(msv.placeKey) .. "] mod=[" .. tostring(msv.placeModifier) .. "]")
+        print("Mouse clearKey=[" .. tostring(msv.clearKey) .. "] mod=[" .. tostring(msv.clearModifier) .. "]")
+    else
+        print("WMC_MouseoverSaved is nil!")
+    end
+
+    -- Raid picker saved values
+    local rsv = _G.WMC_RaidPickerSaved
+    if rsv then
+        print("Raid openKey=[" .. tostring(rsv.openKey) .. "] mod=[" .. tostring(rsv.openModifier) .. "]")
+    else
+        print("WMC_RaidPickerSaved is nil!")
+    end
+
+    print("=== End WMC Debug ===")
+end
+
+-- Test: manually try placing a world marker with different commands
+SLASH_WMCTEST1 = "/wmctest"
+SlashCmdList["WMCTEST"] = function(msg)
+    local idx = tonumber(msg) or 1
+    print("|cff00ff00[WMC Test] Trying to place world marker " .. idx .. " via different methods...|r")
+
+    -- Method 1: Direct API call
+    local ok1, err1 = pcall(PlaceRaidMarker, idx)
+    print("  PlaceRaidMarker(" .. idx .. "): " .. (ok1 and "OK" or ("FAIL: " .. tostring(err1))))
+
+    -- Method 2: Direct API call with 0 args (at player)
+    local ok2, err2 = pcall(ClearRaidMarker, idx)
+    print("  ClearRaidMarker(" .. idx .. "): " .. (ok2 and "OK" or ("FAIL: " .. tostring(err2))))
+
+    -- Check button state
+    local mt = cycleBtn:GetAttribute("macrotext") or "(nil)"
+    print("  cycleBtn macrotext: " .. mt)
+    print("  cycleBtn name: " .. (cycleBtn:GetName() or "nil"))
+    print("  cycleBtn shown: " .. tostring(cycleBtn:IsShown()))
+    print("  cycleBtn visible: " .. tostring(cycleBtn:IsVisible()))
+
+    -- Check bindings
+    local sv = _G.WMC_Saved
+    if sv then
+        local fullKey = (sv.placeModifier or "") .. (sv.placeKey or "")
+        if fullKey ~= "" then
+            local action = GetBindingAction(fullKey, true)
+            print("  GetBindingAction('" .. fullKey .. "'): " .. tostring(action))
+        end
+    end
 end

@@ -18,7 +18,6 @@ Private.Settings.Keys = {
 		SortOrder = "FRAME_SORT_ORDER_SELF",
 		GlowType = "GLOW_TYPE_SELF",
 		Grow = "FRAME_GROW_SELF",
-		Opacity = "OPACITY_SELF",
 		IconZoom = "ICON_ZOOM_SELF",
 		Import = "IMPORT_SELF",
 		Export = "EXPORT_SELF",
@@ -26,32 +25,37 @@ Private.Settings.Keys = {
 		FontFlags = "FONT_FLAGS_SELF",
 		FeatureFlags = "FEATURE_FLAGS_SELF",
 		BorderStyle = "BORDER_STYLE_SELF",
+		AnnounceUntargetedSpells = "ANNOUNCE_UNTARGETED_SPELLS_SELF",
+		AnnounceTargetedSpells = "ANNOUNCE_TARGETED_SPELLS_SELF",
+		TextToSpeechVoice = "TTS_VOICE_SELF",
 	},
 	Party = {
 		Enabled = "ENABLED_PARTY",
 		LoadConditionContentType = "LOAD_CONDITION_CONTENT_TYPE_PARTY",
 		LoadConditionRole = "LOAD_CONDITION_ROLE_PARTY",
-		RoleFilter = "ROLE_EXCLUSION_PARTY",
 		Width = "FRAME_WIDTH_PARTY",
 		Height = "FRAME_HEIGHT_PARTY",
 		FontSize = "FONT_SIZE_PARTY",
 		Gap = "FRAME_GAP_PARTY",
-		Direction = "GROW_DIRECTION_PARTY",
-		OffsetX = "FRAME_OFFSET_X_PARTY",
-		OffsetY = "FRAME_OFFSET_Y_PARTY",
-		SourceAnchor = "FRAME_SOURCE_ANCHOR_PARTY",
-		TargetAnchor = "FRAME_TARGET_ANCHOR_PARTY",
 		SortOrder = "FRAME_SORT_ORDER_PARTY",
-		Grow = "FRAME_GROW_PARTY",
 		GlowType = "GLOW_TYPE_PARTY",
-		Opacity = "OPACITY_PARTY",
-		IconZoom = "ICON_ZOOM_PARTY",
+		Grow = "FRAME_GROW_PARTY",
+		ForegroundBarTexture = "FOREGROUND_BAR_TEXTURE_PARTY",
+		BackgroundBarTexture = "BACKGROUND_BAR_TEXTURE_PARTY",
+		BackgroundBarColor = "BACKGROUND_BAR_COLOR_PARTY",
+		ProgressBarColor = "PROGRESS_BAR_COLOR_PARTY",
+		UseInterruptabilityColors = "USE_INTERRUPTABILITY_COLORS_PARTY",
+		UseTargetClassColor = "USE_TARGET_CLASS_COLOR_PARTY",
+		UninterruptibleColor = "UNINTERRUPTIBLE_COLOR_PARTY",
+		InterruptibleColor = "INTERRUPTIBLE_COLOR_PARTY",
 		Import = "IMPORT_PARTY",
 		Export = "EXPORT_PARTY",
 		Font = "FONT_PARTY",
 		FontFlags = "FONT_FLAGS_PARTY",
 		FeatureFlags = "FEATURE_FLAGS_PARTY",
-		BorderStyle = "BORDER_STYLE_PARTY",
+		AnnounceUntargetedSpells = "ANNOUNCE_UNTARGETED_SPELLS_PARTY",
+		AnnounceTargetedSpells = "ANNOUNCE_TARGETED_SPELLS_PARTY",
+		TextToSpeechVoice = "TTS_VOICE_PARTY",
 	},
 }
 
@@ -73,8 +77,10 @@ function Private.Settings.GetSettingsDisplayOrder(kind)
 			Private.Settings.Keys.Self.Font,
 			Private.Settings.Keys.Self.FontSize,
 			Private.Settings.Keys.Self.FontFlags,
-			Private.Settings.Keys.Self.Opacity,
 			Private.Settings.Keys.Self.IconZoom,
+			Private.Settings.Keys.Self.AnnounceUntargetedSpells,
+			Private.Settings.Keys.Self.AnnounceTargetedSpells,
+			Private.Settings.Keys.Self.TextToSpeechVoice,
 		}
 	end
 
@@ -82,25 +88,27 @@ function Private.Settings.GetSettingsDisplayOrder(kind)
 		Private.Settings.Keys.Party.Enabled,
 		Private.Settings.Keys.Party.LoadConditionContentType,
 		Private.Settings.Keys.Party.LoadConditionRole,
-		Private.Settings.Keys.Party.RoleFilter,
 		Private.Settings.Keys.Party.Width,
 		Private.Settings.Keys.Party.Height,
 		Private.Settings.Keys.Party.Gap,
-		Private.Settings.Keys.Party.Direction,
-		Private.Settings.Keys.Party.SourceAnchor,
-		Private.Settings.Keys.Party.TargetAnchor,
-		Private.Settings.Keys.Party.Grow,
-		Private.Settings.Keys.Party.OffsetX,
-		Private.Settings.Keys.Party.OffsetY,
 		Private.Settings.Keys.Party.SortOrder,
+		Private.Settings.Keys.Party.Grow,
 		Private.Settings.Keys.Party.GlowType,
 		Private.Settings.Keys.Party.FeatureFlags,
-		Private.Settings.Keys.Party.BorderStyle,
 		Private.Settings.Keys.Party.Font,
 		Private.Settings.Keys.Party.FontSize,
 		Private.Settings.Keys.Party.FontFlags,
-		Private.Settings.Keys.Party.Opacity,
-		Private.Settings.Keys.Party.IconZoom,
+		Private.Settings.Keys.Party.ForegroundBarTexture,
+		Private.Settings.Keys.Party.BackgroundBarTexture,
+		Private.Settings.Keys.Party.BackgroundBarColor,
+		Private.Settings.Keys.Party.ProgressBarColor,
+		Private.Settings.Keys.Party.UseInterruptabilityColors,
+		Private.Settings.Keys.Party.UninterruptibleColor,
+		Private.Settings.Keys.Party.InterruptibleColor,
+		Private.Settings.Keys.Party.UseTargetClassColor,
+		Private.Settings.Keys.Party.AnnounceUntargetedSpells,
+		Private.Settings.Keys.Party.AnnounceTargetedSpells,
+		Private.Settings.Keys.Party.TextToSpeechVoice,
 	}
 end
 
@@ -110,7 +118,6 @@ function Private.Settings.GetFeatureFlagsForKind(kind)
 			Private.Enum.FeatureFlag.GlowImportant,
 			Private.Enum.FeatureFlag.OnlyImportant,
 			Private.Enum.FeatureFlag.ShowDuration,
-			Private.Enum.FeatureFlag.ShowDurationFractions,
 			Private.Enum.FeatureFlag.ShowSwipe,
 			Private.Enum.FeatureFlag.IndicateInterrupts,
 			Private.Enum.FeatureFlag.RenderInterruptSourceName,
@@ -118,30 +125,33 @@ function Private.Settings.GetFeatureFlagsForKind(kind)
 	end
 
 	return {
-		Private.Enum.FeatureFlag.IncludeSelfInParty,
 		Private.Enum.FeatureFlag.GlowImportant,
 		Private.Enum.FeatureFlag.OnlyImportant,
 		Private.Enum.FeatureFlag.ShowDuration,
-		Private.Enum.FeatureFlag.ShowDurationFractions,
-		Private.Enum.FeatureFlag.ShowSwipe,
+		Private.Enum.FeatureFlag.ShowIcon,
+		Private.Enum.FeatureFlag.ShowTargetMarker,
+		Private.Enum.FeatureFlag.ShowSpellName,
+		Private.Enum.FeatureFlag.ShowTargetName,
+		Private.Enum.FeatureFlag.ShowTargetClassColor,
+		Private.Enum.FeatureFlag.HideUntargetedSpells,
+		Private.Enum.FeatureFlag.HideTargetedSpells,
+		Private.Enum.FeatureFlag.SelfOnly,
+		Private.Enum.FeatureFlag.MirrorLayout,
+		Private.Enum.FeatureFlag.InlineDuration,
 		Private.Enum.FeatureFlag.IndicateInterrupts,
 		Private.Enum.FeatureFlag.RenderInterruptSourceName,
 	}
 end
 
-function Private.Settings.GetDefaultEditModeFramePosition()
-	return { point = "CENTER", x = 0, y = 100 }
+function Private.Settings.GetDefaultEditModeFramePosition(kind)
+	if kind == Private.Enum.FrameKind.Self then
+		return { point = "CENTER", x = 0, y = 100 }
+	end
+
+	return { point = "CENTER", x = 0, y = 325 }
 end
 
 function Private.Settings.GetSliderSettingsForOption(key)
-	if key == Private.Settings.Keys.Self.Opacity or key == Private.Settings.Keys.Party.Opacity then
-		return {
-			min = 0.2,
-			max = 1,
-			step = 0.01,
-		}
-	end
-
 	if key == Private.Settings.Keys.Self.IconZoom or key == Private.Settings.Keys.Party.IconZoom then
 		return {
 			min = 1,
@@ -153,7 +163,7 @@ function Private.Settings.GetSliderSettingsForOption(key)
 	if key == Private.Settings.Keys.Self.FontSize or key == Private.Settings.Keys.Party.FontSize then
 		return {
 			min = 8,
-			max = key == Private.Settings.Keys.Self.FontSize and 32 or 24,
+			max = 32,
 			step = 1,
 		}
 	end
@@ -166,10 +176,18 @@ function Private.Settings.GetSliderSettingsForOption(key)
 		}
 	end
 
-	if key == Private.Settings.Keys.Party.Width or key == Private.Settings.Keys.Party.Height then
+	if key == Private.Settings.Keys.Party.Width then
 		return {
-			min = 16,
-			max = 60,
+			min = 60,
+			max = 800,
+			step = 1,
+		}
+	end
+
+	if key == Private.Settings.Keys.Party.Height then
+		return {
+			min = 10,
+			max = 120,
 			step = 1,
 		}
 	end
@@ -184,16 +202,8 @@ function Private.Settings.GetSliderSettingsForOption(key)
 
 	if key == Private.Settings.Keys.Party.Gap then
 		return {
-			min = -60,
+			min = -10,
 			max = 60,
-			step = 1,
-		}
-	end
-
-	if key == Private.Settings.Keys.Party.OffsetX or key == Private.Settings.Keys.Party.OffsetY then
-		return {
-			min = -200,
-			max = 200,
 			step = 1,
 		}
 	end
@@ -230,8 +240,7 @@ function Private.Settings.GetSelfDefaultSettings()
 		SortOrder = Private.Enum.SortOrder.Ascending,
 		Grow = Private.Enum.Grow.Start,
 		FontSize = 20,
-		Position = Private.Settings.GetDefaultEditModeFramePosition(),
-		Opacity = 1,
+		Position = Private.Settings.GetDefaultEditModeFramePosition(Private.Enum.FrameKind.Self),
 		IconZoom = 1,
 		GlowType = Private.Enum.GlowType.PixelGlow,
 		Font = "Fonts\\FRIZQT__.TTF",
@@ -243,12 +252,26 @@ function Private.Settings.GetSelfDefaultSettings()
 			[Private.Enum.FeatureFlag.GlowImportant] = true,
 			[Private.Enum.FeatureFlag.OnlyImportant] = false,
 			[Private.Enum.FeatureFlag.ShowDuration] = true,
-			[Private.Enum.FeatureFlag.ShowDurationFractions] = true,
 			[Private.Enum.FeatureFlag.ShowSwipe] = true,
 			[Private.Enum.FeatureFlag.IndicateInterrupts] = false,
 			[Private.Enum.FeatureFlag.RenderInterruptSourceName] = false,
 		},
 		BorderStyle = "Blizzard Tooltip Border",
+		AnnounceUntargetedSpells = {
+			[Private.Enum.NpcType.Boss] = true,
+			[Private.Enum.NpcType.Lieutenant] = true,
+			[Private.Enum.NpcType.Caster] = true,
+			[Private.Enum.NpcType.Melee] = true,
+			[Private.Enum.NpcType.Minion] = false,
+		},
+		AnnounceTargetedSpells = {
+			[Private.Enum.NpcType.Boss] = false,
+			[Private.Enum.NpcType.Lieutenant] = false,
+			[Private.Enum.NpcType.Caster] = false,
+			[Private.Enum.NpcType.Melee] = false,
+			[Private.Enum.NpcType.Minion] = false,
+		},
+		TextToSpeechVoice = -1,
 	}
 end
 
@@ -256,11 +279,10 @@ end
 function Private.Settings.GetPartyDefaultSettings()
 	return {
 		Enabled = true,
-		Width = 36,
-		Height = 36,
+		Width = 300,
+		Height = 30,
 		FontSize = 14,
 		Gap = 2,
-		Direction = Private.Enum.Direction.Horizontal,
 		LoadConditionContentType = {
 			[Private.Enum.ContentType.OpenWorld] = false,
 			[Private.Enum.ContentType.Delve] = true,
@@ -274,19 +296,8 @@ function Private.Settings.GetPartyDefaultSettings()
 			[Private.Enum.Role.Tank] = true,
 			[Private.Enum.Role.Damager] = true,
 		},
-		RoleFilter = {
-			[Private.Enum.Role.Healer] = true,
-			[Private.Enum.Role.Tank] = true,
-			[Private.Enum.Role.Damager] = true,
-		},
-		OffsetX = 2,
-		OffsetY = 15,
-		SourceAnchor = Private.Enum.Anchor.Left,
-		TargetAnchor = Private.Enum.Anchor.Right,
 		SortOrder = Private.Enum.SortOrder.Ascending,
 		Grow = Private.Enum.Grow.Start,
-		Opacity = 1,
-		IconZoom = 1,
 		GlowType = Private.Enum.GlowType.PixelGlow,
 		Font = "Fonts\\FRIZQT__.TTF",
 		FontFlags = {
@@ -296,14 +307,44 @@ function Private.Settings.GetPartyDefaultSettings()
 		FeatureFlags = {
 			[Private.Enum.FeatureFlag.GlowImportant] = true,
 			[Private.Enum.FeatureFlag.OnlyImportant] = false,
-			[Private.Enum.FeatureFlag.ShowDuration] = true,
-			[Private.Enum.FeatureFlag.ShowDurationFractions] = true,
-			[Private.Enum.FeatureFlag.ShowSwipe] = true,
 			[Private.Enum.FeatureFlag.IndicateInterrupts] = true,
 			[Private.Enum.FeatureFlag.RenderInterruptSourceName] = true,
-			[Private.Enum.FeatureFlag.IncludeSelfInParty] = true,
+			[Private.Enum.FeatureFlag.ShowDuration] = true,
+			[Private.Enum.FeatureFlag.ShowIcon] = true,
+			[Private.Enum.FeatureFlag.ShowTargetMarker] = false,
+			[Private.Enum.FeatureFlag.ShowSpellName] = true,
+			[Private.Enum.FeatureFlag.ShowTargetName] = true,
+			[Private.Enum.FeatureFlag.ShowTargetClassColor] = true,
+			[Private.Enum.FeatureFlag.MirrorLayout] = false,
+			[Private.Enum.FeatureFlag.HideUntargetedSpells] = false,
+			[Private.Enum.FeatureFlag.HideTargetedSpells] = false,
+			[Private.Enum.FeatureFlag.SelfOnly] = false,
+			[Private.Enum.FeatureFlag.InlineDuration] = true,
 		},
-		BorderStyle = "Blizzard Tooltip Border",
+		ForegroundBarTexture = "Blizzard Raid Bar",
+		BackgroundBarTexture = "Solid",
+		BackgroundBarColor = "FF1A1A1A",
+		ProgressBarColor = "FFFFFF00",
+		UseInterruptabilityColors = true,
+		UseTargetClassColor = false,
+		UninterruptibleColor = "FFFF4444",
+		InterruptibleColor = "FF44FF44",
+		AnnounceUntargetedSpells = {
+			[Private.Enum.NpcType.Boss] = true,
+			[Private.Enum.NpcType.Lieutenant] = true,
+			[Private.Enum.NpcType.Caster] = true,
+			[Private.Enum.NpcType.Melee] = true,
+			[Private.Enum.NpcType.Minion] = false,
+		},
+		AnnounceTargetedSpells = {
+			[Private.Enum.NpcType.Boss] = false,
+			[Private.Enum.NpcType.Lieutenant] = false,
+			[Private.Enum.NpcType.Caster] = false,
+			[Private.Enum.NpcType.Melee] = false,
+			[Private.Enum.NpcType.Minion] = false,
+		},
+		TextToSpeechVoice = -1,
+		Position = Private.Settings.GetDefaultEditModeFramePosition(Private.Enum.FrameKind.Party),
 	}
 end
 
@@ -316,6 +357,20 @@ function Private.Settings.GetFontOptions()
 		fonts = fonts,
 		byLabel = byLabel,
 	}
+end
+
+function Private.Settings.GetStatusBarOptions()
+	local bars = CopyTable(LibSharedMedia:List(LibSharedMedia.MediaType.STATUSBAR))
+	table.sort(bars)
+
+	return bars
+end
+
+function Private.Settings.GetBackgroundOptions()
+	local backgrounds = CopyTable(LibSharedMedia:List(LibSharedMedia.MediaType.BACKGROUND))
+	table.sort(backgrounds)
+
+	return backgrounds
 end
 
 function Private.Settings.GetBorderOptions()
@@ -332,23 +387,56 @@ function Private.Settings.GetBorderOptions()
 	return borders
 end
 
-function Private.Settings.IsContentTypeAvailableForKind(kind, contentTypeId)
-	if kind == Private.Enum.FrameKind.Self then
-		return true
+function Private.Settings.GetTtsVoiceOptions()
+	local seen = {}
+	local voices = {}
+
+	for _, list in ipairs({ C_VoiceChat.GetTtsVoices(), C_VoiceChat.GetRemoteTtsVoices() }) do
+		if list then
+			for _, voice in ipairs(list) do
+				if not seen[voice.voiceID] then
+					seen[voice.voiceID] = true
+					table.insert(voices, voice)
+				end
+			end
+		end
 	end
 
-	if kind == Private.Enum.FrameKind.Party then
-		return contentTypeId ~= Private.Enum.ContentType.Raid
-	end
+	table.sort(voices, function(a, b)
+		return a.name < b.name
+	end)
 
-	return true
+	return voices
 end
 
-function Private.Settings.IsAnyRoleFilterActive()
-	return not TargetedSpellsSaved.Settings.Party.RoleFilter[Private.Enum.Role.Healer]
-		or not TargetedSpellsSaved.Settings.Party.RoleFilter[Private.Enum.Role.Tank]
-		or not TargetedSpellsSaved.Settings.Party.RoleFilter[Private.Enum.Role.Damager]
-		or false
+function Private.Settings.GetContentTypesForKind(kind)
+	if kind == Private.Enum.FrameKind.Self then
+		return Private.Enum.ContentType
+	end
+
+	return {
+		OpenWorld = Private.Enum.ContentType.OpenWorld,
+		Delve = Private.Enum.ContentType.Delve,
+		Dungeon = Private.Enum.ContentType.Dungeon,
+		Arena = Private.Enum.ContentType.Arena,
+		Battleground = Private.Enum.ContentType.Battleground,
+	}
+end
+
+function Private.Settings.GetGlowTypesForKind(kind)
+	if kind == Private.Enum.FrameKind.Self then
+		return {
+			Private.Enum.GlowType.PixelGlow,
+			Private.Enum.GlowType.Star4,
+			Private.Enum.GlowType.AutoCastGlow,
+			Private.Enum.GlowType.ProcGlow,
+		}
+	end
+
+	return {
+		Private.Enum.GlowType.PixelGlow,
+		Private.Enum.GlowType.Star4,
+	}
 end
 
 table.insert(Private.LoginFnQueue, function()
@@ -631,14 +719,14 @@ table.insert(Private.LoginFnQueue, function()
 			}
 		end
 
-		if key == Private.Settings.Keys.Party.TargetAnchor then
+		if key == Private.Settings.Keys.Party.ForegroundBarTexture then
 			local function GetValue()
-				return TargetedSpellsSaved.Settings.Party.TargetAnchor
+				return TargetedSpellsSaved.Settings.Party.ForegroundBarTexture
 			end
 
 			local function SetValue(value)
-				if value ~= TargetedSpellsSaved.Settings.Party.TargetAnchor then
-					TargetedSpellsSaved.Settings.Party.TargetAnchor = value
+				if value ~= TargetedSpellsSaved.Settings.Party.ForegroundBarTexture then
+					TargetedSpellsSaved.Settings.Party.ForegroundBarTexture = value
 					Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, value)
 				end
 			end
@@ -646,8 +734,8 @@ table.insert(Private.LoginFnQueue, function()
 			local function GetOptions()
 				local container = Settings.CreateControlTextContainer()
 
-				for k, v in pairs(Private.Enum.Anchor) do
-					container:Add(v, k)
+				for _, label in ipairs(Private.Settings.GetStatusBarOptions()) do
+					container:Add(label, label)
 				end
 
 				return container:GetData()
@@ -657,13 +745,13 @@ table.insert(Private.LoginFnQueue, function()
 				category,
 				key,
 				Settings.VarType.String,
-				L.Settings.FrameTargetAnchorLabel,
-				defaults.TargetAnchor,
+				L.Settings.ForegroundBarTextureLabel,
+				defaults.ForegroundBarTexture,
 				GetValue,
 				SetValue
 			)
 			local initializer =
-				Settings.CreateDropdown(category, setting, GetOptions, L.Settings.FrameTargetAnchorTooltip)
+				Settings.CreateDropdown(category, setting, GetOptions, L.Settings.ForegroundBarTextureTooltip)
 
 			return {
 				initializer = initializer,
@@ -672,14 +760,14 @@ table.insert(Private.LoginFnQueue, function()
 			}
 		end
 
-		if key == Private.Settings.Keys.Party.SourceAnchor then
+		if key == Private.Settings.Keys.Party.BackgroundBarTexture then
 			local function GetValue()
-				return TargetedSpellsSaved.Settings.Party.SourceAnchor
+				return TargetedSpellsSaved.Settings.Party.BackgroundBarTexture
 			end
 
 			local function SetValue(value)
-				if value ~= TargetedSpellsSaved.Settings.Party.SourceAnchor then
-					TargetedSpellsSaved.Settings.Party.SourceAnchor = value
+				if value ~= TargetedSpellsSaved.Settings.Party.BackgroundBarTexture then
+					TargetedSpellsSaved.Settings.Party.BackgroundBarTexture = value
 					Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, value)
 				end
 			end
@@ -687,8 +775,8 @@ table.insert(Private.LoginFnQueue, function()
 			local function GetOptions()
 				local container = Settings.CreateControlTextContainer()
 
-				for k, v in pairs(Private.Enum.Anchor) do
-					container:Add(v, k)
+				for _, label in ipairs(Private.Settings.GetBackgroundOptions()) do
+					container:Add(label, label)
 				end
 
 				return container:GetData()
@@ -698,13 +786,14 @@ table.insert(Private.LoginFnQueue, function()
 				category,
 				key,
 				Settings.VarType.String,
-				L.Settings.FrameSourceAnchorLabel,
-				defaults.SourceAnchor,
+				L.Settings.BackgroundBarTextureLabel,
+				defaults.BackgroundBarTexture,
 				GetValue,
 				SetValue
 			)
 			local initializer =
-				Settings.CreateDropdown(category, setting, GetOptions, L.Settings.FrameSourceAnchorTooltip)
+				Settings.CreateDropdown(category, setting, GetOptions, L.Settings.BackgroundBarTextureTooltip)
+
 			return {
 				initializer = initializer,
 				hideSteppers = false,
@@ -712,17 +801,15 @@ table.insert(Private.LoginFnQueue, function()
 			}
 		end
 
-		if key == Private.Settings.Keys.Party.OffsetY then
-			local sliderSettings = Private.Settings.GetSliderSettingsForOption(key)
-
+		if key == Private.Settings.Keys.Party.BackgroundBarColor then
 			local function GetValue()
-				return TargetedSpellsSaved.Settings.Party.OffsetY
+				return TargetedSpellsSaved.Settings.Party.BackgroundBarColor
 			end
 
 			local function SetValue(value)
-				if value ~= TargetedSpellsSaved.Settings.Party.OffsetY then
-					TargetedSpellsSaved.Settings.Party.OffsetY = value
-
+				print(value)
+				if value ~= TargetedSpellsSaved.Settings.Party.BackgroundBarColor then
+					TargetedSpellsSaved.Settings.Party.BackgroundBarColor = value
 					Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, value)
 				end
 			end
@@ -730,16 +817,13 @@ table.insert(Private.LoginFnQueue, function()
 			local setting = Settings.RegisterProxySetting(
 				category,
 				key,
-				Settings.VarType.Number,
-				L.Settings.FrameOffsetYLabel,
-				defaults.OffsetY,
+				Settings.VarType.String,
+				L.Settings.BackgroundBarColorLabel,
+				defaults.BackgroundBarColor,
 				GetValue,
 				SetValue
 			)
-			local options = Settings.CreateSliderOptions(sliderSettings.min, sliderSettings.max, sliderSettings.step)
-			options:SetLabelFormatter(MinimalSliderWithSteppersMixin.Label.Right)
-
-			local initializer = Settings.CreateSlider(category, setting, options, L.Settings.FrameOffsetYTooltip)
+			local initializer = Settings.CreateColorSwatch(category, setting, L.Settings.BackgroundBarColorTooltip)
 
 			return {
 				initializer = initializer,
@@ -748,17 +832,14 @@ table.insert(Private.LoginFnQueue, function()
 			}
 		end
 
-		if key == Private.Settings.Keys.Party.OffsetX then
-			local sliderSettings = Private.Settings.GetSliderSettingsForOption(key)
-
+		if key == Private.Settings.Keys.Party.ProgressBarColor then
 			local function GetValue()
-				return TargetedSpellsSaved.Settings.Party.OffsetX
+				return TargetedSpellsSaved.Settings.Party.ProgressBarColor
 			end
 
 			local function SetValue(value)
-				if value ~= TargetedSpellsSaved.Settings.Party.OffsetX then
-					TargetedSpellsSaved.Settings.Party.OffsetX = value
-
+				if value ~= TargetedSpellsSaved.Settings.Party.ProgressBarColor then
+					TargetedSpellsSaved.Settings.Party.ProgressBarColor = value
 					Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, value)
 				end
 			end
@@ -766,16 +847,13 @@ table.insert(Private.LoginFnQueue, function()
 			local setting = Settings.RegisterProxySetting(
 				category,
 				key,
-				Settings.VarType.Number,
-				L.Settings.FrameOffsetXLabel,
-				defaults.OffsetX,
+				Settings.VarType.String,
+				L.Settings.ProgressBarColorLabel,
+				defaults.ProgressBarColor,
 				GetValue,
 				SetValue
 			)
-			local options = Settings.CreateSliderOptions(sliderSettings.min, sliderSettings.max, sliderSettings.step)
-			options:SetLabelFormatter(MinimalSliderWithSteppersMixin.Label.Right)
-
-			local initializer = Settings.CreateSlider(category, setting, options, L.Settings.FrameOffsetXTooltip)
+			local initializer = Settings.CreateColorSwatch(category, setting, L.Settings.ProgressBarColorTooltip)
 
 			return {
 				initializer = initializer,
@@ -784,19 +862,92 @@ table.insert(Private.LoginFnQueue, function()
 			}
 		end
 
-		if key == Private.Settings.Keys.Self.Opacity or key == Private.Settings.Keys.Party.Opacity then
-			local tableRef = key == Private.Settings.Keys.Self.Opacity and TargetedSpellsSaved.Settings.Self
-				or TargetedSpellsSaved.Settings.Party
-			local sliderSettings = Private.Settings.GetSliderSettingsForOption(key)
-
+		if key == Private.Settings.Keys.Party.UseInterruptabilityColors then
 			local function GetValue()
-				return tableRef.Opacity
+				return TargetedSpellsSaved.Settings.Party.UseInterruptabilityColors
 			end
 
 			local function SetValue(value)
-				if value ~= tableRef.Opacity then
-					tableRef.Opacity = value
+				if value ~= TargetedSpellsSaved.Settings.Party.UseInterruptabilityColors then
+					TargetedSpellsSaved.Settings.Party.UseInterruptabilityColors = value
+					Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, value)
 
+					if value and TargetedSpellsSaved.Settings.Party.UseTargetClassColor then
+						TargetedSpellsSaved.Settings.Party.UseTargetClassColor = false
+						Private.EventRegistry:TriggerEvent(
+							Private.Enum.Events.SETTING_CHANGED,
+							Private.Settings.Keys.Party.UseTargetClassColor,
+							false
+						)
+					end
+				end
+			end
+
+			local setting = Settings.RegisterProxySetting(
+				category,
+				key,
+				Settings.VarType.Boolean,
+				L.Settings.UseInterruptabilityColorsLabel,
+				defaults.UseInterruptabilityColors,
+				GetValue,
+				SetValue
+			)
+			local initializer = Settings.CreateCheckbox(category, setting, L.Settings.UseInterruptabilityColorsTooltip)
+
+			return {
+				initializer = initializer,
+				hideSteppers = false,
+				IsSectionEnabled = nil,
+			}
+		end
+
+		if key == Private.Settings.Keys.Party.UseTargetClassColor then
+			local function GetValue()
+				return TargetedSpellsSaved.Settings.Party.UseTargetClassColor
+			end
+
+			local function SetValue(value)
+				if value ~= TargetedSpellsSaved.Settings.Party.UseTargetClassColor then
+					TargetedSpellsSaved.Settings.Party.UseTargetClassColor = value
+					Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, value)
+
+					if value and TargetedSpellsSaved.Settings.Party.UseInterruptabilityColors then
+						TargetedSpellsSaved.Settings.Party.UseInterruptabilityColors = false
+						Private.EventRegistry:TriggerEvent(
+							Private.Enum.Events.SETTING_CHANGED,
+							Private.Settings.Keys.Party.UseInterruptabilityColors,
+							false
+						)
+					end
+				end
+			end
+
+			local setting = Settings.RegisterProxySetting(
+				category,
+				key,
+				Settings.VarType.Boolean,
+				L.Settings.UseTargetClassColorLabel,
+				defaults.UseTargetClassColor,
+				GetValue,
+				SetValue
+			)
+			local initializer = Settings.CreateCheckbox(category, setting, L.Settings.UseTargetClassColorTooltip)
+
+			return {
+				initializer = initializer,
+				hideSteppers = false,
+				IsSectionEnabled = nil,
+			}
+		end
+
+		if key == Private.Settings.Keys.Party.UninterruptibleColor then
+			local function GetValue()
+				return TargetedSpellsSaved.Settings.Party.UninterruptibleColor
+			end
+
+			local function SetValue(value)
+				if value ~= TargetedSpellsSaved.Settings.Party.UninterruptibleColor then
+					TargetedSpellsSaved.Settings.Party.UninterruptibleColor = value
 					Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, value)
 				end
 			end
@@ -804,36 +955,67 @@ table.insert(Private.LoginFnQueue, function()
 			local setting = Settings.RegisterProxySetting(
 				category,
 				key,
-				Settings.VarType.Number,
-				L.Settings.OpacityLabel,
-				defaults.Opacity,
+				Settings.VarType.String,
+				L.Settings.UninterruptibleColorLabel,
+				defaults.UninterruptibleColor,
 				GetValue,
 				SetValue
 			)
-			local options = Settings.CreateSliderOptions(sliderSettings.min, sliderSettings.max, sliderSettings.step)
-			options:SetLabelFormatter(MinimalSliderWithSteppersMixin.Label.Right, FormatPercentage)
-
-			local initializer = Settings.CreateSlider(category, setting, options, L.Settings.OpacityTooltip)
+			local initializer = Settings.CreateColorSwatch(category, setting, L.Settings.UninterruptibleColorTooltip)
 
 			return {
 				initializer = initializer,
 				hideSteppers = false,
-				IsSectionEnabled = nil,
+				IsSectionEnabled = function()
+					return TargetedSpellsSaved.Settings.Party.Enabled
+						and TargetedSpellsSaved.Settings.Party.UseInterruptabilityColors
+				end,
 			}
 		end
 
-		if key == Private.Settings.Keys.Self.IconZoom or key == Private.Settings.Keys.Party.IconZoom then
-			local tableRef = key == Private.Settings.Keys.Self.IconZoom and TargetedSpellsSaved.Settings.Self
-				or TargetedSpellsSaved.Settings.Party
-			local sliderSettings = Private.Settings.GetSliderSettingsForOption(key)
-
+		if key == Private.Settings.Keys.Party.InterruptibleColor then
 			local function GetValue()
-				return tableRef.IconZoom
+				return TargetedSpellsSaved.Settings.Party.InterruptibleColor
 			end
 
 			local function SetValue(value)
-				if value ~= tableRef.IconZoom then
-					tableRef.IconZoom = value
+				if value ~= TargetedSpellsSaved.Settings.Party.InterruptibleColor then
+					TargetedSpellsSaved.Settings.Party.InterruptibleColor = value
+					Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, value)
+				end
+			end
+
+			local setting = Settings.RegisterProxySetting(
+				category,
+				key,
+				Settings.VarType.String,
+				L.Settings.InterruptibleColorLabel,
+				defaults.InterruptibleColor,
+				GetValue,
+				SetValue
+			)
+			local initializer = Settings.CreateColorSwatch(category, setting, L.Settings.InterruptibleColorTooltip)
+
+			return {
+				initializer = initializer,
+				hideSteppers = false,
+				IsSectionEnabled = function()
+					return TargetedSpellsSaved.Settings.Party.Enabled
+						and TargetedSpellsSaved.Settings.Party.UseInterruptabilityColors
+				end,
+			}
+		end
+
+		if key == Private.Settings.Keys.Self.IconZoom then
+			local sliderSettings = Private.Settings.GetSliderSettingsForOption(key)
+
+			local function GetValue()
+				return TargetedSpellsSaved.Settings.Self.IconZoom
+			end
+
+			local function SetValue(value)
+				if value ~= TargetedSpellsSaved.Settings.Self.IconZoom then
+					TargetedSpellsSaved.Settings.Self.IconZoom = value
 
 					Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, value)
 				end
@@ -878,10 +1060,11 @@ table.insert(Private.LoginFnQueue, function()
 			local function GetOptions()
 				local container = Settings.CreateControlTextContainer()
 
-				for label, id in pairs(Private.Enum.GlowType) do
-					local translated = L.Settings.GlowTypeLabels[id]
+				local kind = key == Private.Settings.Keys.Self.GlowType and Private.Enum.FrameKind.Self
+					or Private.Enum.FrameKind.Party
 
-					container:Add(id, translated)
+				for _, id in ipairs(Private.Settings.GetGlowTypesForKind(kind)) do
+					container:Add(id, L.Settings.GlowTypeLabels[id])
 				end
 
 				return container:GetData()
@@ -905,17 +1088,55 @@ table.insert(Private.LoginFnQueue, function()
 			}
 		end
 
-		if key == Private.Settings.Keys.Self.Grow or key == Private.Settings.Keys.Party.Grow then
-			local tableRef = key == Private.Settings.Keys.Self.Grow and TargetedSpellsSaved.Settings.Self
-				or TargetedSpellsSaved.Settings.Party
-
+		if key == Private.Settings.Keys.Self.Grow then
 			local function GetValue()
-				return tableRef.Grow
+				return TargetedSpellsSaved.Settings.Self.Grow
 			end
 
 			local function SetValue(value)
-				if value ~= tableRef.Grow then
-					tableRef.Grow = value
+				if value ~= TargetedSpellsSaved.Settings.Self.Grow then
+					TargetedSpellsSaved.Settings.Self.Grow = value
+					Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, value)
+				end
+			end
+
+			local function GetOptions()
+				local container = Settings.CreateControlTextContainer()
+
+				for label, id in pairs(Private.Enum.Grow) do
+					local translated = L.Settings.FrameGrowLabels[id]
+					container:Add(id, translated)
+				end
+
+				return container:GetData()
+			end
+
+			local setting = Settings.RegisterProxySetting(
+				category,
+				key,
+				Settings.VarType.Number,
+				L.Settings.FrameGrowLabel,
+				defaults.Grow,
+				GetValue,
+				SetValue
+			)
+			local initializer = Settings.CreateDropdown(category, setting, GetOptions, L.Settings.FrameGrowTooltip)
+
+			return {
+				initializer = initializer,
+				hideSteppers = false,
+				IsSectionEnabled = nil,
+			}
+		end
+
+		if key == Private.Settings.Keys.Party.Grow then
+			local function GetValue()
+				return TargetedSpellsSaved.Settings.Party.Grow
+			end
+
+			local function SetValue(value)
+				if value ~= TargetedSpellsSaved.Settings.Party.Grow then
+					TargetedSpellsSaved.Settings.Party.Grow = value
 					Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, value)
 				end
 			end
@@ -994,17 +1215,14 @@ table.insert(Private.LoginFnQueue, function()
 			}
 		end
 
-		if key == Private.Settings.Keys.Self.Direction or key == Private.Settings.Keys.Party.Direction then
-			local tableRef = key == Private.Settings.Keys.Self.Direction and TargetedSpellsSaved.Settings.Self
-				or TargetedSpellsSaved.Settings.Party
-
+		if key == Private.Settings.Keys.Self.Direction then
 			local function GetValue()
-				return tableRef.Direction
+				return TargetedSpellsSaved.Settings.Self.Direction
 			end
 
 			local function SetValue(value)
-				if value ~= tableRef.Direction then
-					tableRef.Direction = value
+				if value ~= TargetedSpellsSaved.Settings.Self.Direction then
+					TargetedSpellsSaved.Settings.Self.Direction = value
 					Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, value)
 				end
 			end
@@ -1273,69 +1491,6 @@ table.insert(Private.LoginFnQueue, function()
 			}
 		end
 
-		if key == Private.Settings.Keys.Party.RoleFilter then
-			local defaultValue = GetMask(Private.Enum.Role, function(id)
-				return defaults.RoleFilter[id]
-			end)
-
-			local function GetValue()
-				return GetMask(Private.Enum.Role, function(id)
-					return TargetedSpellsSaved.Settings.Party.RoleFilter[id]
-				end)
-			end
-
-			local function SetValue(mask)
-				local hasChanges = false
-
-				for label, id in pairs(Private.Enum.Role) do
-					local enabled = DecodeBitToBool(mask, id)
-
-					if enabled ~= TargetedSpellsSaved.Settings.Party.RoleFilter[id] then
-						TargetedSpellsSaved.Settings.Party.RoleFilter[id] = enabled
-						hasChanges = true
-					end
-				end
-
-				if hasChanges then
-					Private.EventRegistry:TriggerEvent(
-						Private.Enum.Events.SETTING_CHANGED,
-						key,
-						TargetedSpellsSaved.Settings.Party.RoleFilter
-					)
-				end
-			end
-
-			local setting = Settings.RegisterProxySetting(
-				category,
-				key,
-				Settings.VarType.Number,
-				L.Settings.RoleFilterLabel,
-				defaultValue,
-				GetValue,
-				SetValue
-			)
-
-			local function GetOptions()
-				local container = Settings.CreateControlTextContainer()
-
-				for label, id in pairs(Private.Enum.Role) do
-					local translated = L.Settings.RoleFilterLabels[id]
-
-					container:AddCheckbox(id, translated, L.Settings.RoleFilterTooltip)
-				end
-
-				return container:GetData()
-			end
-
-			local initializer = Settings.CreateDropdown(category, setting, GetOptions, L.Settings.RoleFilterTooltip)
-
-			return {
-				initializer = initializer,
-				hideSteppers = true,
-				IsSectionEnabled = nil,
-			}
-		end
-
 		if
 			key == Private.Settings.Keys.Self.LoadConditionContentType
 			or key == Private.Settings.Keys.Party.LoadConditionContentType
@@ -1426,6 +1581,245 @@ table.insert(Private.LoginFnQueue, function()
 			return {
 				initializer = initializer,
 				hideSteppers = true,
+				IsSectionEnabled = nil,
+			}
+		end
+
+		if
+			key == Private.Settings.Keys.Self.AnnounceUntargetedSpells
+			or key == Private.Settings.Keys.Party.AnnounceUntargetedSpells
+		then
+			local defaultValue = GetMask(Private.Enum.NpcType, function(id)
+				return defaults.AnnounceUntargetedSpells[id]
+			end)
+
+			local function GetValue()
+				return GetMask(Private.Enum.NpcType, function(id)
+					return TargetedSpellsSaved.Settings.Self.AnnounceUntargetedSpells[id]
+				end)
+			end
+
+			local function SetValue(mask)
+				local hasChanges = false
+
+				for _, id in pairs(Private.Enum.NpcType) do
+					local enabled = DecodeBitToBool(mask, id)
+
+					if enabled ~= TargetedSpellsSaved.Settings.Self.AnnounceUntargetedSpells[id] then
+						TargetedSpellsSaved.Settings.Self.AnnounceUntargetedSpells[id] = enabled
+						TargetedSpellsSaved.Settings.Party.AnnounceUntargetedSpells[id] = enabled
+						hasChanges = true
+					end
+				end
+
+				if not hasChanges then
+					return
+				end
+
+				Private.EventRegistry:TriggerEvent(
+					Private.Enum.Events.SETTING_CHANGED,
+					Private.Settings.Keys.Self.AnnounceUntargetedSpells,
+					TargetedSpellsSaved.Settings.Self.AnnounceUntargetedSpells
+				)
+				Private.EventRegistry:TriggerEvent(
+					Private.Enum.Events.SETTING_CHANGED,
+					Private.Settings.Keys.Party.AnnounceUntargetedSpells,
+					TargetedSpellsSaved.Settings.Party.AnnounceUntargetedSpells
+				)
+			end
+
+			local setting = Settings.RegisterProxySetting(
+				category,
+				key,
+				Settings.VarType.Number,
+				L.Settings.AnnounceUntargetedSpellsLabel,
+				defaultValue,
+				GetValue,
+				SetValue
+			)
+
+			local function GetOptions()
+				local container = Settings.CreateControlTextContainer()
+
+				for _, id in pairs(Private.Enum.NpcType) do
+					local function IsEnabled()
+						return TargetedSpellsSaved.Settings.Self.AnnounceUntargetedSpells[id]
+					end
+
+					local function Toggle()
+						local bool = not TargetedSpellsSaved.Settings.Self.AnnounceUntargetedSpells[id]
+						TargetedSpellsSaved.Settings.Self.AnnounceUntargetedSpells[id] = bool
+						TargetedSpellsSaved.Settings.Party.AnnounceUntargetedSpells[id] = bool
+					end
+
+					container:AddCheckbox(
+						id,
+						L.Settings.NpcTypeLabels[id],
+						L.Settings.AnnounceUntargetedSpellsTooltip,
+						IsEnabled,
+						Toggle
+					)
+				end
+
+				return container:GetData()
+			end
+
+			local initializer =
+				Settings.CreateDropdown(category, setting, GetOptions, L.Settings.AnnounceUntargetedSpellsTooltip)
+
+			return {
+				initializer = initializer,
+				hideSteppers = true,
+				IsSectionEnabled = nil,
+			}
+		end
+
+		if
+			key == Private.Settings.Keys.Self.AnnounceTargetedSpells
+			or key == Private.Settings.Keys.Party.AnnounceTargetedSpells
+		then
+			local defaultValue = GetMask(Private.Enum.NpcType, function(id)
+				return defaults.AnnounceTargetedSpells[id]
+			end)
+
+			local function GetValue()
+				return GetMask(Private.Enum.NpcType, function(id)
+					return TargetedSpellsSaved.Settings.Self.AnnounceTargetedSpells[id]
+				end)
+			end
+
+			local function SetValue(mask)
+				local hasChanges = false
+
+				for _, id in pairs(Private.Enum.NpcType) do
+					local enabled = DecodeBitToBool(mask, id)
+
+					if enabled ~= TargetedSpellsSaved.Settings.Self.AnnounceTargetedSpells[id] then
+						TargetedSpellsSaved.Settings.Self.AnnounceTargetedSpells[id] = enabled
+						TargetedSpellsSaved.Settings.Party.AnnounceTargetedSpells[id] = enabled
+						hasChanges = true
+					end
+				end
+
+				if not hasChanges then
+					return
+				end
+
+				Private.EventRegistry:TriggerEvent(
+					Private.Enum.Events.SETTING_CHANGED,
+					Private.Settings.Keys.Self.AnnounceTargetedSpells,
+					TargetedSpellsSaved.Settings.Self.AnnounceTargetedSpells
+				)
+				Private.EventRegistry:TriggerEvent(
+					Private.Enum.Events.SETTING_CHANGED,
+					Private.Settings.Keys.Party.AnnounceTargetedSpells,
+					TargetedSpellsSaved.Settings.Party.AnnounceTargetedSpells
+				)
+			end
+
+			local setting = Settings.RegisterProxySetting(
+				category,
+				key,
+				Settings.VarType.Number,
+				L.Settings.AnnounceTargetedSpellsLabel,
+				defaultValue,
+				GetValue,
+				SetValue
+			)
+
+			local function GetOptions()
+				local container = Settings.CreateControlTextContainer()
+
+				for _, id in pairs(Private.Enum.NpcType) do
+					local function IsEnabled()
+						return TargetedSpellsSaved.Settings.Self.AnnounceTargetedSpells[id]
+					end
+
+					local function Toggle()
+						local bool = not TargetedSpellsSaved.Settings.Self.AnnounceTargetedSpells[id]
+						TargetedSpellsSaved.Settings.Self.AnnounceTargetedSpells[id] = bool
+						TargetedSpellsSaved.Settings.Party.AnnounceTargetedSpells[id] = bool
+					end
+
+					container:AddCheckbox(
+						id,
+						L.Settings.NpcTypeLabels[id],
+						L.Settings.AnnounceTargetedSpellsTooltip,
+						IsEnabled,
+						Toggle
+					)
+				end
+
+				return container:GetData()
+			end
+
+			local initializer =
+				Settings.CreateDropdown(category, setting, GetOptions, L.Settings.AnnounceTargetedSpellsTooltip)
+
+			return {
+				initializer = initializer,
+				hideSteppers = true,
+				IsSectionEnabled = nil,
+			}
+		end
+
+		if
+			key == Private.Settings.Keys.Self.TextToSpeechVoice
+			or key == Private.Settings.Keys.Party.TextToSpeechVoice
+		then
+			local function GetValue()
+				return TargetedSpellsSaved.Settings.Self.TextToSpeechVoice or 0
+			end
+
+			local function SetValue(value)
+				if value ~= TargetedSpellsSaved.Settings.Self.TextToSpeechVoice then
+					TargetedSpellsSaved.Settings.Self.TextToSpeechVoice = value
+					TargetedSpellsSaved.Settings.Party.TextToSpeechVoice = value
+
+					Private.EventRegistry:TriggerEvent(
+						Private.Enum.Events.SETTING_CHANGED,
+						Private.Settings.Keys.Self.TextToSpeechVoice,
+						value
+					)
+					Private.EventRegistry:TriggerEvent(
+						Private.Enum.Events.SETTING_CHANGED,
+						Private.Settings.Keys.Party.TextToSpeechVoice,
+						value
+					)
+
+					local deafeningRoar = C_Spell.GetSpellName(1256047)
+
+					if deafeningRoar then
+						C_VoiceChat.SpeakText(value, deafeningRoar, 2, C_TTSSettings.GetSpeechVolume(), true)
+					end
+				end
+			end
+
+			local function GetOptions()
+				local container = Settings.CreateControlTextContainer()
+
+				for _, voice in ipairs(Private.Settings.GetTtsVoiceOptions()) do
+					container:Add(voice.voiceID, voice.name)
+				end
+
+				return container:GetData()
+			end
+
+			local setting = Settings.RegisterProxySetting(
+				category,
+				key,
+				Settings.VarType.Number,
+				L.Settings.TextToSpeechVoiceLabel,
+				0,
+				GetValue,
+				SetValue
+			)
+			local initializer =
+				Settings.CreateDropdown(category, setting, GetOptions, L.Settings.TextToSpeechVoiceTooltip)
+
+			return {
+				initializer = initializer,
+				hideSteppers = false,
 				IsSectionEnabled = nil,
 			}
 		end

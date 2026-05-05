@@ -3,7 +3,7 @@ local CraftSim = select(2, ...)
 
 CraftSim.CALC = {}
 
-local print = CraftSim.DEBUG:RegisterDebugID("ProfitCalculation")
+local Logger = CraftSim.DEBUG:RegisterLogger("ProfitCalculation")
 
 ---@param recipeData CraftSim.RecipeData
 function CraftSim.CALC:GetResourcefulnessSavedCosts(recipeData)
@@ -60,16 +60,33 @@ function CraftSim.CALC:CalculateCommissionProfit(recipeData)
         end
 
         -- also if npc work order add item value of rewards to the comissionprofit
+        local includeMoxieInProfit = CraftSim.DB.OPTIONS:Get("CRAFTQUEUE_QUEUE_PATRON_ORDERS_INCLUDE_MOXIE_IN_PROFIT")
         for _, reward in ipairs(recipeData.orderData.npcOrderRewards or {}) do
-            if not reward.currencyType then -- skip if Artisan's Moxie currency
+            if reward.currencyType then
+                if includeMoxieInProfit and tContains(CraftSim.CONST.MOXIE_CURRENCY_IDS, reward.currencyType) then
+                    local count = tonumber(reward.count) or 0
+                    comissionProfit = comissionProfit +
+                        CraftSim.UTIL:GetPatronOrderMoxieCopperPerUnit(reward.currencyType) * count
+                end
+            else
                 local itemID = Item:CreateFromItemLink(reward.itemLink):GetItemID()
                 if CraftSim.CONST.PATRON_ORDERS_REAGENT_BAG_REWARD_ITEMS[itemID] then
                     comissionProfit = comissionProfit + CraftSim.DB.OPTIONS:Get("CRAFTQUEUE_QUEUE_PATRON_ORDERS_REAGENT_BAG_VALUE")
                 else
                     local price = CraftSim.PRICE_SOURCE:GetMinBuyoutByItemID(itemID)
                     price = price * CraftSim.CONST.AUCTION_HOUSE_CUT
-                    comissionProfit = comissionProfit + price * reward.count
+                    comissionProfit = comissionProfit + price * tonumber(reward.count or 0)
                 end
+            end
+        end
+        -- First-craft moxie in profit: NPC (patron) orders only; personal/guild/public have no consortium moxie line.
+        if includeMoxieInProfit and recipeData.recipeInfo and recipeData.recipeInfo.firstCraft and
+            recipeData.orderData.orderType == Enum.CraftingOrderType.Npc then
+            local moxieID = CraftSim.UTIL:GetRecipeProfessionMoxieCurrencyID(recipeData)
+            if moxieID then
+                comissionProfit = comissionProfit +
+                    CraftSim.UTIL:GetPatronOrderMoxieCopperPerUnit(moxieID) *
+                    CraftSim.CONST.PATRON_ORDER_FIRST_CRAFT_EXTRA_MOXIE
             end
         end
     end
@@ -87,10 +104,10 @@ end
 ---@return number meanProfit
 ---@return CraftSim.ProbabilityInfo[] probabilityTable
 function CraftSim.CALC:GetAverageProfit(recipeData)
-    print("Get Average Profit", false, true)
-    print("Supports Crafting Stats: " .. tostring(recipeData.supportsCraftingStats))
-    print("Multicraft: " .. tostring(recipeData.supportsMulticraft))
-    print("Resourcefulness: " .. tostring(recipeData.supportsResourcefulness))
+    Logger:LogDebug("Get Average Profit", false, true)
+    Logger:LogDebug("Supports Crafting Stats: " .. tostring(recipeData.supportsCraftingStats))
+    Logger:LogDebug("Multicraft: " .. tostring(recipeData.supportsMulticraft))
+    Logger:LogDebug("Resourcefulness: " .. tostring(recipeData.supportsResourcefulness))
     local priceData = recipeData.priceData
     local professionStats = recipeData.professionStats
     -- TSM Enhanced: expected deposit cost (0 when disabled or TSM not loaded)
@@ -117,7 +134,7 @@ function CraftSim.CALC:GetAverageProfit(recipeData)
     -- for work orders we do not consider item amount or auction house cut, just the comissionProfit
     ---@param value number
     local function adaptResultValue(value)
-        if recipeData.orderData and comissionProfit > 0 then
+        if recipeData.orderData then
             return comissionProfit
         else
             local expectedItem = recipeData.resultData.itemsByQuality[recipeData.resultData.expectedQuality]
@@ -139,7 +156,7 @@ function CraftSim.CALC:GetAverageProfit(recipeData)
 
         local probabilityTable = {}
 
-        print("Build Probability Table (MC, RES)")
+        Logger:LogDebug("Build Probability Table (MC, RES)")
 
         local bitMax = "11"
         local numBits = string.len(bitMax)
@@ -174,7 +191,7 @@ function CraftSim.CALC:GetAverageProfit(recipeData)
             end
 
             combinationProfit = resultValue - craftingCosts - expectedDeposit
-            --print(table.concat(combination, "") .. ":" .. CraftSim.GUTIL:Round(combinationChance*100, 2) .. "% -> " .. CraftSim.UTIL:FormatMoney(combinationProfit, true))
+            --Logger:LogDebug(table.concat(combination, "") .. ":" .. CraftSim.GUTIL:Round(combinationChance*100, 2) .. "% -> " .. CraftSim.UTIL:FormatMoney(combinationProfit, true))
             table.insert(probabilityTable, {
                 multicraft = MC,
                 resourcefulness = RES,
@@ -190,8 +207,8 @@ function CraftSim.CALC:GetAverageProfit(recipeData)
             expectedProfit = expectedProfit + (entry.profit * entry.chance)
         end
 
-        print("Probability Sum: " .. tostring(probabilitySum))
-        print("ExpectedProfit: " .. CraftSim.UTIL:FormatMoney(expectedProfit, true))
+        Logger:LogDebug("Probability Sum: " .. tostring(probabilitySum))
+        Logger:LogDebug("ExpectedProfit: " .. CraftSim.UTIL:FormatMoney(expectedProfit, true))
 
         return expectedProfit, probabilityTable
     elseif not recipeData.supportsMulticraft and recipeData.supportsResourcefulness then
@@ -204,7 +221,7 @@ function CraftSim.CALC:GetAverageProfit(recipeData)
 
         local probabilityTable = {}
 
-        print("Build Probability Table (RES)")
+        Logger:LogDebug("Build Probability Table (RES)")
 
         local bitMax = "1"
         local numBits = string.len(bitMax)
@@ -231,7 +248,7 @@ function CraftSim.CALC:GetAverageProfit(recipeData)
                 recipeData.baseItemAmount)
 
             combinationProfit = resultValue - craftingCosts - expectedDeposit
-            --print(table.concat(combination, "") .. ":" .. CraftSim.GUTIL:Round(combinationChance*100, 2) .. "% -> " .. CraftSim.UTIL:FormatMoney(combinationProfit, true))
+            --Logger:LogDebug(table.concat(combination, "") .. ":" .. CraftSim.GUTIL:Round(combinationChance*100, 2) .. "% -> " .. CraftSim.UTIL:FormatMoney(combinationProfit, true))
             table.insert(probabilityTable, {
                 resourcefulness = RES,
                 chance = combinationChance,
@@ -246,17 +263,17 @@ function CraftSim.CALC:GetAverageProfit(recipeData)
             expectedProfit = expectedProfit + (entry.profit * entry.chance)
         end
 
-        print("Probability Sum: " .. tostring(probabilitySum))
-        print("ExpectedProfit: " .. CraftSim.UTIL:FormatMoney(expectedProfit, true))
+        Logger:LogDebug("Probability Sum: " .. tostring(probabilitySum))
+        Logger:LogDebug("ExpectedProfit: " .. CraftSim.UTIL:FormatMoney(expectedProfit, true))
 
         return expectedProfit, probabilityTable
     elseif not recipeData.supportsResourcefulness then
         -- before having a salvage item allocated in prospecting e.g.
-        print("recipe does not support anything?")
+        Logger:LogDebug("recipe does not support anything?")
         return 0, {}
     end
 
-    print(CraftSim.GUTIL:ColorizeText("Szenario not implemented yet", CraftSim.GUTIL.COLORS.RED), false, true)
+    Logger:LogDebug(CraftSim.GUTIL:ColorizeText("Szenario not implemented yet", CraftSim.GUTIL.COLORS.RED), false, true)
 
 
     return 0, {}

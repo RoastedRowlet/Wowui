@@ -111,7 +111,7 @@ end
 
 L = BigWigs:NewBossLocale("Den of Nalorakk Trash", "koKR")
 if L then
-    L.offerings_acquired = "획득한 제물"
+	L.offerings_acquired = "획득한 제물"
 	L.offerings_acquired_desc = "제물이 획득되었을 때 알림을 표시합니다."
 end
 
@@ -121,6 +121,11 @@ L = BigWigs:NewBossLocale("Maisara Caverns Trash", "koKR")
 if L then
 	L.prisoners_freed = "포로 해방"
 	L.prisoners_freed_desc = "포로가 해방되었을 때 알림을 표시합니다."
+	L.custom_on_cooking_pot_autotalk_desc = "NPC 대화에서 '든든한 썩은가지 스튜' 버프를 부여하는 항목을 자동으로 선택합니다.\n\n|T4659336:16|t든든한 썩은가지 스튜\n{1269056}"
+	L.custom_on_ritual_cauldron_autotalk_desc = "NPC 대화에서 '의식 혼합물' 버프를 부여하는 항목을 자동으로 선택합니다.\n\n|T236271:16|t의식 혼합물\n{1271300}"
+
+	L.cooking_pot = "요리 냄비"
+	L.ritual_cauldron = "의식용 가마솥"
 end
 
 -- Murder Row
@@ -129,4 +134,13 @@ L = BigWigs:NewBossLocale("Murder Row Trash", "koKR")
 if L then
 	L.snitches_interrogated = "끄나풀 심문"
 	L.snitches_interrogated_desc = "끄나풀이 심문되었을 때 알림을 표시합니다."
+end
+
+-- Nexus-Point Xenas
+
+L = BigWigs:NewBossLocale("Nexus-Point Xenas Trash", "koKR")
+if L then
+	L.custom_on_arcane_tripwire_autotalk_desc = "|cFFFF0000한밤 기계공학 25 필요.|r NPC 대화에서 비전 철사덫을 비활성화하는 옵션을 자동으로 선택합니다."
+
+	L.arcane_tripwire = "비전 철사덫"
 end

@@ -5,6 +5,9 @@ if not L then return end
 -- API.lua
 L.showAddonBar = "El addon '|cFF436EEE%s|r' creó la barra '%s'."
 L.requestAddonProfile = "El addon '|cFF436EEE%s|r' acaba de copiar una cadena de exportación de tu perfil."
+L.shortMinutesAndSeconds = "%d Min %d Seg" -- 1 Minute 2 Seconds
+L.shortSecondsOnly = "%d Seg" -- 28 Seconds
+L.shortSubTenSeconds = "%.1f Seg" -- 3.2 Seconds
 
 -- Core.lua
 L.berserk = "Enfurecer"
@@ -280,9 +283,9 @@ L.battleres_settings_export_desc = "Exporta toda la configuración de Resurrecci
 L.imported_privateAuras_settings = "Configuración de Auras privadas"
 L.privateAuras_settings_import_desc = "Importa toda la configuración de Auras privadas."
 L.privateAuras_settings_export_desc = "Exporta toda la configuración de Auras privadas."
---L.imported_combattimer_settings = "Combat Timer Settings"
---L.combattimer_settings_import_desc = "Import all Combat Timer settings."
---L.combattimer_settings_export_desc = "Export all Combat Timer settings."
+L.imported_combattimer_settings = "Configuración de Temporizador de combate"
+L.combattimer_settings_import_desc = "Importa toda la configuración de Temporizador de combate"
+L.combattimer_settings_export_desc = "Exporta toda la configuración de Temporizador de combate"
 
 -- InstanceSharing.lua
 L.sharing_window_title = "Compartir configuración del jefe"
@@ -353,16 +356,16 @@ L.reloadUIWarning = "Cambiar esta función recargará tu interfaz, mostrando la 
 -- AutoInvite.lua
 --
 
---L.autoInviteTitle = "Auto Invite"
---L.autoInviteDesc = "Automatically invite players to your group when they whisper you a specific keyword from the list below."
---L.yes = "Yes"
---L.no = "No"
---L.addWords = "Add Words"
---L.removeWords = "Remove Words (Click To Delete)"
---L.invalidWordWarning = "Word must be lowercase and not already in the list."
---L.groupIsFullConvertToRaid = "Group is full. Convert to raid?"
---L.whisperToPlayerMyGroupIsFull = "[BigWigs] My group is now full."
---L.keywordDetectedInvitingPlayer = "Keyword detected, inviting %s."
+L.autoInviteTitle = "Invitación auto"
+L.autoInviteDesc = "Invita automáticamente a jugadores a tu grupo cuando te susurran una palabra clave específica de la lista de abajo."
+L.yes = "Sí"
+L.no = "No"
+L.addWords = "Agregar palabras"
+L.removeWords = "Eliminar palabras (haz clic para borrar)"
+L.invalidWordWarning = "La palabra debe estar en minúsculas y no estar ya en la lista."
+L.groupIsFullConvertToRaid = "El grupo está lleno. ¿Convertir a banda?"
+L.whisperToPlayerMyGroupIsFull = "[BigWigs] Mi grupo está completo."
+L.keywordDetectedInvitingPlayer = "Palabra clave detectada, invitando a %s."
 
 -----------------------------------------------------------------------
 -- AutoRole.lua
@@ -428,10 +431,14 @@ L.battleResTitle = "Res en Combate"
 --L.historyTimeFormat = "History: Time Format"
 --L.twelveHour = "12 Hour"
 --L.twentyFourHour = "24 Hour"
+--L.hideTooltipInCombat = "Hide Tooltip in Combat"
+--L.customText = "Custom Text (Must Contain %s)"
 
 -----------------------------------------------------------------------
 -- Keystones.lua
 --
+
+--L.keys = "Keys"
 
 L.keystoneTitle = "BigWigs Piedras angulares"
 L.keystoneHeaderParty = "Grupo"
@@ -523,7 +530,7 @@ L.keystoneShortName_TheDawnbreaker = "DAWN"
 --L.keystoneShortName_ReturnToKarazhanLower = "LKARA"
 --L.keystoneShortName_ReturnToKarazhanUpper = "UKARA"
 --L.keystoneShortName_CathedralOfEternalNight = "COEN"
---L.keystoneShortName_SeatOfTheTriumvirate = "SOTT"
+--L.keystoneShortName_SeatOfTheTriumvirate = "SEAT"
 --L.keystoneShortName_WindrunnerSpire = "SPIRE"
 --L.keystoneShortName_MagistersTerrace = "MT"
 --L.keystoneShortName_MaisaraCaverns = "CAVERN"
@@ -560,7 +567,7 @@ L.keystoneShortName_TheDawnbreaker_Bar = "Rompealbas"
 --L.keystoneShortName_ReturnToKarazhanLower_Bar = "Lower Kara"
 --L.keystoneShortName_ReturnToKarazhanUpper_Bar = "Upper Kara"
 --L.keystoneShortName_CathedralOfEternalNight_Bar = "Cathedral"
---L.keystoneShortName_SeatOfTheTriumvirate_Bar = "Triumvirate"
+--L.keystoneShortName_SeatOfTheTriumvirate_Bar = "Seat"
 --L.keystoneShortName_WindrunnerSpire_Bar = "Spire"
 --L.keystoneShortName_MagistersTerrace_Bar = "Terrace"
 --L.keystoneShortName_MaisaraCaverns_Bar = "Caverns"
@@ -583,6 +590,28 @@ L.instanceKeysOtherDungeonColorDesc = "Escoge el color de la fuente para los jug
 L.instanceKeysEndOfRunDesc = "Por defecto, la lista solo se mostrará cuando entres a un calabozo mítico. Activar esta opción también mostrará la lista cuando la Mítica+ termine."
 --L.instanceKeysHideTitle = "Hide title"
 --L.instanceKeysHideTitleDesc = "Hide the \"Who has a key?\" title."
+
+-- Challenges UI Decoration
+--L.partyRatingHeader = "|TInterface\\AddOns\\BigWigs\\Media\\Icons\\minimap_raid:0:0|tParty Rating"
+L.dungeonScoreString = "|c%s%03d|r |cFFFFFFFF+%02d|r |cFF%s%02d:%02d|r |c%s(%s)|r"
+--L.dungeonScoreNoDataString = "|cFFFFFFFFNo data|r |c%s(%s)|r"
+L.dungeonTeleportHeader = "|TInterface\\AddOns\\BigWigs\\Media\\Icons\\minimap_raid:0:0|tTeletransporte"
+
+-- Progress %
+--L.progressPercent = "Progress %"
+--L.progressPercentDesc = "Tools to help you calculate how much Mythic+ progress you will gain from each NPC you kill."
+--L.progressPercentTooltip = "Show progress % in tooltips when mousing over enemy NPCs"
+--L.progressPercentTooltipText = {
+--	"|TInterface\\AddOns\\BigWigs\\Media\\Icons\\minimap_raid:0:0|tProgress: %s%%",
+--	"|TInterface\\AddOns\\BigWigs\\Media\\Icons\\minimap_raid:0:0|tProgress: %s%% (%d)",
+--	"|TInterface\\AddOns\\BigWigs\\Media\\Icons\\minimap_raid:0:0|tProgress: %s%% (%d/%d)",
+--}
+--L.progressPercentNameplate = "Show progress % on nameplates of enemy NPCs"
+--L.progressCurrentPull = "Current Pull"
+--L.progressCurrentPullDesc = "Show total progress you will gain from the current group of NPCs you are in combat with.\n\nNOT YET FUNCTIONAL!"
+--L.tempProgressAnnounce = "You can now see progress % each NPC will give you when mousing over them and on their nameplates.\n\nConfigure in |cFF436EEETools|r > |cFF436EEEMythic+|r > |cFF436EEEProgress %|r."
+--L.settingsForCurrentTarget = "Settings for your current target"
+--L.settingsForOtherTargets = "Settings for all other targets"
 
 -----------------------------------------------------------------------
 -- LFGTimer.lua
@@ -612,8 +641,8 @@ L.positionX = "Posición X"
 L.positionY = "Posición Y"
 L.positionExact = "Posicionamiento exacto"
 L.positionDesc = "Escribe en el recuadro o mueve el deslizador si necesitas un posicionamiento exacto desde el ancla."
---L.copyCustomAnchorWidth = "Copy Custom Anchor Width"
---L.copyCustomAnchorWidthDesc = "Overwrite your width setting with the width of the custom anchor."
+L.copyCustomAnchorWidth = "Copiar ancho del ancla personalizada"
+L.copyCustomAnchorWidthDesc = "Sobrescribe tu configuración de ancho con el ancho del ancla personalizada."
 L.width = "Anchura"
 L.height = "Altura"
 L.size = "Tamaño"
@@ -727,8 +756,8 @@ L.icon = "Icono"
 L.iconDesc = "Muestra u oculta los iconos de la barra."
 L.iconPosition = "Posición del icono"
 L.iconPositionDesc = "Elige en qué lugar de la barra debe posicionarse el icono."
---L.iconTooltip = "Icon Tooltip"
---L.iconTooltipDesc = "Show a tooltip when you mouse over the icon with information about the boss ability."
+L.iconTooltip = "Información sobre el icono"
+L.iconTooltipDesc = "Muestra un tooltip al pasar el cursor sobre el icono con información sobre la habilidad del jefe."
 L.font = "Fuente"
 L.restart = "Restablecer"
 L.restartDesc = "Restablece las barras enfatizadas para que empiecen desde el principio y cuenten desde 10."
@@ -1179,6 +1208,7 @@ L.newFastestVictoryPrint = "Nueva victoria más rápida: (-%s)" -- New fastest v
 --L.blizzBasicAsBlizzTimeline = "Blizzard basic timers displayed on the Blizzard timeline"
 --L.developerMode = "Developer Mode"
 --L.enhancedModeWarning = "WARNING!\n\nDisabling enhanced mode will disable many BigWigs features, including:\n\nBar colors, spell renames, counters, custom sound/voice, countdowns, bars on/off, extra messages, etc."
+--L.blizzTimelineEnhancedWarning = "WARNING!\n\nThe Blizzard timeline doesn't support BigWigs enhanced features. You will NOT get renamed spells and you will see inaccurate timers.\n\nAre you sure you want to enable it?"
 
 -----------------------------------------------------------------------
 -- Victory.lua

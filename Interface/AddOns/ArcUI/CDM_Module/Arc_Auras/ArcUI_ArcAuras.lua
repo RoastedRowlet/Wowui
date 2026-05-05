@@ -1,10 +1,15 @@
 -- ═══════════════════════════════════════════════════════════════════════════
 -- ArcUI Arc Auras - Custom Tracking System
 -- Track items (trinkets, potions) and spells not covered by CDM
+-- v1.5 - Refactor: Unified item-cooldown path. Removed pcall (4 sites), removed
+--        IsMatchingGCD/IsLikelyGCD/GetItemBaseCooldown in favor of a single
+--        duration-threshold filter (< 2.5s = GCD/windup noise) used by both
+--        the full-rebuild path (ApplyItemCooldownToFrame) and the delta path
+--        (BAG_UPDATE_COOLDOWN handler). Matches ArcUI_CooldownReminder.
 -- v1.4 - Refactor: Removed continuity protection cache (_startTime/_lastDuration
---        used as stale-value fallback). GCD suppression via IsLikelyGCD() is
---        sufficient; continuity protection was the root cause of potions not
---        resetting after ENCOUNTER_END. ENCOUNTER_END handler simplified.
+--        used as stale-value fallback). GCD suppression was sufficient;
+--        continuity protection was the root cause of potions not resetting
+--        after ENCOUNTER_END. ENCOUNTER_END handler simplified.
 -- v1.3 - Fix: Ready glow stuck on during cooldown. _arcReadyGlowActive was
 --        cleared BEFORE calling HideReadyGlow(), causing its early-exit guard
 --        to skip the actual glow stop. Now call HideReadyGlow first, then clear flags.
@@ -41,6 +46,7 @@ local ID_PREFIX = {
     TRINKET = "arc_trinket_",
     ITEM = "arc_item_",
     SPELL = "arc_spell_",
+    TIMER = "arc_timer_",
 }
 
 -- Frame Strata/Level Constants - Standardized to match CDM icons
@@ -305,6 +311,9 @@ function ArcAuras.ClearDBCache()
     cachedCharKey = nil
 end
 
+-- Public DB accessor for sibling modules (e.g. ArcAurasTimer).
+function ArcAuras.GetDB() return GetDB() end
+
 -- ═══════════════════════════════════════════════════════════════════════════
 -- ID HELPERS
 -- ═══════════════════════════════════════════════════════════════════════════
@@ -333,6 +342,11 @@ function ArcAuras.ParseArcID(arcID)
     elseif arcID:find("^" .. ID_PREFIX.SPELL) then
         local spellID = tonumber(arcID:sub(#ID_PREFIX.SPELL + 1))
         return "spell", spellID
+    elseif arcID:find("^" .. ID_PREFIX.TIMER) then
+        -- Timer IDs can have a "_N" dedup suffix. Extract the leading digits only.
+        local tail = arcID:sub(#ID_PREFIX.TIMER + 1)
+        local spellID = tonumber(tail:match("^(%d+)"))
+        return "timer", spellID
     end
     
     return nil
@@ -416,67 +430,7 @@ ArcAuras.IsItemEquipped = IsItemEquipped
 -- ═══════════════════════════════════════════════════════════════════════════
 
 -- Cache: itemID -> base cooldown in seconds (nil = not yet cached, false = no cooldown)
-local baseCooldownCache = {}
-
--- Get the base cooldown for an item (in seconds)
--- Returns nil if item has no on-use spell, or the base cooldown duration
-local function GetItemBaseCooldown(itemID)
-    if not itemID then return nil end
-    
-    -- Check cache first
-    if baseCooldownCache[itemID] ~= nil then
-        return baseCooldownCache[itemID] or nil  -- false -> nil
-    end
-    
-    -- Get item's spell
-    local spellName, spellID = GetItemSpell(itemID)
-    if not spellID then
-        baseCooldownCache[itemID] = false  -- No spell = no cooldown
-        return nil
-    end
-    
-    -- Get base cooldown via GetSpellBaseCooldown (returns ms)
-    if GetSpellBaseCooldown then
-        local baseCooldownMs = GetSpellBaseCooldown(spellID)
-        if baseCooldownMs and baseCooldownMs > 0 then
-            local baseCooldownSec = baseCooldownMs / 1000
-            baseCooldownCache[itemID] = baseCooldownSec
-            return baseCooldownSec
-        end
-    end
-    
-    -- No base cooldown found
-    baseCooldownCache[itemID] = false
-    return nil
-end
-
--- Check if a duration is likely GCD (not the real cooldown)
--- Returns true if this appears to be GCD, false if it's a real cooldown
-local function IsLikelyGCD(itemID, duration)
-    if not duration or duration <= 0 then return false end
-    
-    -- GCD is typically 0.5s to 1.6s (hasted to unhasted)
-    -- If duration is outside this range, it's definitely not GCD
-    if duration > 2.0 then return false end
-    
-    -- Get the item's base cooldown
-    local baseCooldown = GetItemBaseCooldown(itemID)
-    
-    -- If we know the base cooldown and current duration doesn't match, it's GCD
-    if baseCooldown and baseCooldown > 2.0 then
-        -- Item has a real cooldown > 2s, but we're seeing a short duration
-        -- This means we're seeing GCD, not the real cooldown
-        return true
-    end
-    
-    -- If item has no known base cooldown but duration is in GCD range, assume GCD
-    -- This is a fallback for items where GetSpellBaseCooldown doesn't work
-    if not baseCooldown and duration <= 1.6 and duration >= 0.5 then
-        return true
-    end
-    
-    return false
-end
+local baseCooldownCache = {}  -- retained; may be useful for future features; currently unused
 
 -- ═══════════════════════════════════════════════════════════════════════════
 -- STACK COUNT HELPERS (EVENT-DRIVEN, NOT POLLED)
@@ -613,6 +567,32 @@ end
 --   2. Cooldown starting (item used - charges changed)
 --   3. Trinket swap (detected in UpdateTrinketCooldown)
 local function GetStackDisplay(config, arcID)
+    -- Custom Icons (Arc Auras timers): read live stack count from the
+    -- timer engine. Timer stacks change frequently (every proc event)
+    -- and the count is stored in RAM per-timer, so there's nothing to
+    -- cache and no cache to miss — just ask the engine.
+    if ns.ArcAurasTimer and ns.ArcAurasTimer.GetStackCount then
+        local db = ns.db and ns.db.char and ns.db.char.arcAuras
+        if db and db.customTimers and db.customTimers[arcID] then
+            local stacks = ns.ArcAurasTimer.GetStackCount(arcID)
+            if stacks and stacks > 0 then
+                return stacks, true   -- isCharges=true so chargeText styling applies
+            end
+            -- Idle (no stacks accumulated). If Track Stacks is enabled on
+            -- this timer, return 0 as a persistent placeholder so the
+            -- count is always visible — same way normal spell-charge text
+            -- always displays its current count. This makes the stack
+            -- text easy to find and style even before the first proc.
+            local cfg = db.customTimers[arcID]
+            local trackStacks = cfg and cfg.startTrigger
+                and cfg.startTrigger.trackStacks == true
+            if trackStacks then
+                return 0, true
+            end
+            return nil, false
+        end
+    end
+
     -- Check cache first
     local cached = stackCache[arcID]
     if cached then
@@ -641,6 +621,12 @@ local function GetStackDisplay(config, arcID)
     
     return value, isCharges
 end
+
+-- Forward declaration: ApplyStackText is defined later in the file (around
+-- line 1580) but is referenced earlier in RefreshStackTextStyle. Declaring
+-- the local up here makes the upvalue resolve correctly at definition time
+-- of RefreshStackTextStyle. The actual function body is assigned below.
+local ApplyStackText
 
 -- Apply CDMEnhance chargeText styling to a fontstring
 local function ApplyStackTextStyle(frame, fontString)
@@ -740,7 +726,24 @@ function ArcAuras.RefreshStackTextStyle()
             -- Immediately apply the style (don't wait for OnUpdate)
             ApplyStackTextStyle(frame, frame._arcStackText)
             frame._arcStackStyleApplied = true
+            -- Also push the current displayed value. Without this, timer
+            -- frames (which have no periodic stack-update loop like items
+            -- do in UpdateArcItemFrame) lose their text whenever
+            -- ApplyStackTextStyle runs without a corresponding value
+            -- refresh. ApplyStackText is forward-declared above so this
+            -- reference resolves correctly at parse time.
+            if ApplyStackText then
+                ApplyStackText(frame, arcID)
+            end
         end
+    end
+    -- 3.6.6: spell frames render their charge text via ArcAurasCooldown's
+    -- UpdateChargeText (separate path from ApplyStackText above which handles
+    -- item / timer frames). Re-push the current charge value for spell frames
+    -- so changing a chargeText option in the panel doesn't blank the number
+    -- until the next cooldown event.
+    if ns.ArcAurasCooldown and ns.ArcAurasCooldown.RefreshAllChargeText then
+        ns.ArcAurasCooldown.RefreshAllChargeText()
     end
 end
 
@@ -816,6 +819,10 @@ local function CreateArcAuraFrame(arcID, config)
     cooldown:SetEdgeTexture("Interface\\Cooldown\\UI-HUD-ActionBar-SecondaryCooldown", 1, 1, 1, 1)
     
     frame.Cooldown = cooldown
+    -- Assign .Text so preserve duration text logic can find it (matches CDM frame structure)
+    if cooldown.GetCountdownFontString then
+        cooldown.Text = cooldown:GetCountdownFontString()
+    end
     
     -- ═══════════════════════════════════════════════════════════════════════════
     -- SPELL-SPECIFIC: Hidden Desaturation Cooldown + Hooks
@@ -825,70 +832,12 @@ local function CreateArcAuraFrame(arcID, config)
     --   SetCooldownFromDurationObject(durObj) → frame shown → IsShown()=true → desat ON
     --   OnCooldownDone fires → CD expired → desat OFF instantly
     -- ═══════════════════════════════════════════════════════════════════════════
-    if config.type == "spell" then
+    if config.type == "spell" or config.type == "timer" then
         frame._arcIsSpellCooldown = true  -- Flag: OnUpdate loop skips this frame
         frame._arcSpellID = config.spellID
         
-        local desatCooldown = CreateFrame("Cooldown", frameName .. "_DesatCD", frame, "CooldownFrameTemplate")
-        desatCooldown:SetAllPoints(icon)
-        desatCooldown:SetDrawSwipe(false)
-        desatCooldown:SetDrawEdge(false)
-        desatCooldown:SetDrawBling(false)
-        desatCooldown:SetHideCountdownNumbers(true)
-        desatCooldown:SetAlpha(0) -- INVISIBLE! But IsShown() still reflects CD state.
-        frame._arcDesatCooldown = desatCooldown
-        
-        -- Use OnShow/OnHide instead of hooksecurefunc on our own frame.
-        -- hooksecurefunc would attribute CPU to whichever frame called SetCooldown
-        -- (e.g. CDM's viewer during RefreshData), making it invisible to the profiler.
-        -- OnShow/OnHide fire on the desatCooldown frame itself → CPU attributed correctly.
-        local _desatApply = Track and Track("ArcAuras.DesatCD.Apply", function(self)
-            local fd = self._arcFrameData
-            if not fd or not fd.icon then return end
-            local isOnCD = self:IsShown()
-            if ns.ArcAurasCooldown and ns.ArcAurasCooldown.ApplySpellStateVisuals then
-                ns.ArcAurasCooldown.ApplySpellStateVisuals(fd, isOnCD)
-            elseif fd.desaturate then
-                fd.icon:SetDesaturated(isOnCD)
-            else
-                fd.icon:SetDesaturated(false)
-            end
-        end) or function(self)
-            local fd = self._arcFrameData
-            if not fd or not fd.icon then return end
-            local isOnCD = self:IsShown()
-            if ns.ArcAurasCooldown and ns.ArcAurasCooldown.ApplySpellStateVisuals then
-                ns.ArcAurasCooldown.ApplySpellStateVisuals(fd, isOnCD)
-            elseif fd.desaturate then
-                fd.icon:SetDesaturated(isOnCD)
-            else
-                fd.icon:SetDesaturated(false)
-            end
-        end
-        desatCooldown:SetScript("OnShow", _desatApply)
-        desatCooldown:SetScript("OnHide", _desatApply)
-        
-        -- OnCooldownDone: CD expired → apply ready visuals
-        -- SetScript (not HookScript) since desatCooldown is our own frame
-        local _desatOnDone = Track and Track("ArcAuras.DesatCD.OnCooldownDone", function(self)
-            local fd = self._arcFrameData
-            if not fd or not fd.icon then return end
-            if ns.ArcAurasCooldown and ns.ArcAurasCooldown.ApplySpellStateVisuals then
-                ns.ArcAurasCooldown.ApplySpellStateVisuals(fd, false)
-            else
-                fd.icon:SetDesaturated(false)
-            end
-        end) or function(self)
-            local fd = self._arcFrameData
-            if not fd or not fd.icon then return end
-            if ns.ArcAurasCooldown and ns.ArcAurasCooldown.ApplySpellStateVisuals then
-                ns.ArcAurasCooldown.ApplySpellStateVisuals(fd, false)
-            else
-                fd.icon:SetDesaturated(false)
-            end
-        end
-        desatCooldown:SetScript("OnCooldownDone", _desatOnDone)
-        
+        -- State detection uses GetSpellCooldown().isActive and GetSpellCharges().isActive
+        -- (both non-secret). No shadow frame needed.
         -- Visible cooldown: OnCooldownDone → re-feed for instant visual update
         local _cooldownOnDone = Track and Track("ArcAuras.Cooldown.OnCooldownDone", function(self)
             local fd = self._arcFrameData
@@ -914,7 +863,7 @@ local function CreateArcAuraFrame(arcID, config)
         local flipbook = cooldownFlash:CreateTexture(nil, "ARTWORK")
         flipbook:SetAllPoints()
         flipbook:SetAlpha(0)
-        pcall(function() flipbook:SetAtlas("UI-HUD-ActionBar-GCD-Flipbook") end)
+        flipbook:SetAtlas("UI-HUD-ActionBar-GCD-Flipbook")
         cooldownFlash.Flipbook = flipbook
         
         local flashAnim = cooldownFlash:CreateAnimationGroup()
@@ -934,16 +883,18 @@ local function CreateArcAuraFrame(arcID, config)
         showAnim:SetToAlpha(1)
         flashAnim.ShowAnim = showAnim
         
-        local playAnimOk, playAnim = pcall(function()
-            local anim = flashAnim:CreateAnimation("FlipBook")
-            anim:SetDuration(0.75)
-            anim:SetOrder(1)
-            anim:SetFlipBookRows(11)
-            anim:SetFlipBookColumns(2)
-            anim:SetFlipBookFrames(22)
-            return anim
-        end)
-        if not playAnimOk or not playAnim then
+        -- FlipBook animation if supported, else Alpha fallback. Feature-detect
+        -- the FlipBook-specific setters rather than pcall the whole creation —
+        -- CreateAnimation("FlipBook") may succeed silently on older clients
+        -- but lack the FlipBook setters.
+        local playAnim = flashAnim:CreateAnimation("FlipBook")
+        if playAnim and type(playAnim.SetFlipBookRows) == "function" then
+            playAnim:SetDuration(0.75)
+            playAnim:SetOrder(1)
+            playAnim:SetFlipBookRows(11)
+            playAnim:SetFlipBookColumns(2)
+            playAnim:SetFlipBookFrames(22)
+        else
             playAnim = flashAnim:CreateAnimation("Alpha")
             playAnim:SetDuration(0.75)
             playAnim:SetOrder(1)
@@ -1124,6 +1075,50 @@ function ArcAuras.CreateFrame(arcID, config)
     -- Register with CDMGroups for positioning, dragging, groups
     -- CDMGroups handles: saved positions, group membership, drag handlers, free icon tracking
     if not skipCDMGroups then
+        -- ─────────────────────────────────────────────────────────────────
+        -- DEFAULT SPAWN POSITION
+        --
+        -- If this frame has NO existing saved position (i.e. it's brand new
+        -- — first time being created, never moved by the user), seed a
+        -- free-icon entry at screen-center, slightly above the middle. This
+        -- prevents new icons from auto-stacking off to the right side of
+        -- the screen as additional members of the Essential viewer's icon
+        -- row, which is what happens when RegisterExternalFrame falls
+        -- through to its default placement.
+        --
+        -- Existing icons (returning from /reload, profile copy, etc.) hit
+        -- the savedPositions[arcID] check and skip the seed entirely so we
+        -- don't stomp their placements.
+        -- ─────────────────────────────────────────────────────────────────
+        if ns.CDMGroups and ns.CDMGroups.savedPositions
+           and not ns.CDMGroups.savedPositions[arcID] then
+            local DEFAULT_X = 0       -- horizontal center
+            local DEFAULT_Y = 50      -- slightly above vertical center
+            local iconSize  = 36      -- matches CDMGroups default
+            ns.CDMGroups.savedPositions[arcID] = {
+                type     = "free",
+                x        = DEFAULT_X,
+                y        = DEFAULT_Y,
+                iconSize = iconSize,
+            }
+            -- Also register in freeIcons so the drag handler can find it.
+            if ns.CDMGroups.freeIcons then
+                ns.CDMGroups.freeIcons[arcID] = ns.CDMGroups.freeIcons[arcID] or {}
+                ns.CDMGroups.freeIcons[arcID].x        = DEFAULT_X
+                ns.CDMGroups.freeIcons[arcID].y        = DEFAULT_Y
+                ns.CDMGroups.freeIcons[arcID].iconSize = iconSize
+            end
+            -- Persist to spec profile so the centered position survives a
+            -- /reload immediately, even before the user drags the icon.
+            if ns.CDMGroups.SavePositionToSpec then
+                ns.CDMGroups.SavePositionToSpec(arcID, ns.CDMGroups.savedPositions[arcID])
+            end
+            if ns.CDMGroups.SaveFreeIconToSpec then
+                ns.CDMGroups.SaveFreeIconToSpec(arcID,
+                    { x = DEFAULT_X, y = DEFAULT_Y, iconSize = iconSize })
+            end
+        end
+
         if ns.CDMGroups and ns.CDMGroups.RegisterExternalFrame then
             ns.CDMGroups.RegisterExternalFrame(arcID, frame, "cooldown", "Essential")
         else
@@ -1178,8 +1173,8 @@ function ArcAuras.DestroyFrame(arcID)
             if ns.Glows then
                 ns.Glows.StopAll(frame)
             end
-            if ActionButtonSpellAlertManager then
-                pcall(function() ActionButtonSpellAlertManager:HideAlert(frame) end)
+            if ActionButtonSpellAlertManager and ActionButtonSpellAlertManager.HideAlert then
+                ActionButtonSpellAlertManager:HideAlert(frame)
             end
         end
         
@@ -1260,14 +1255,14 @@ function ArcAuras.DestroyFrame(arcID)
     -- ═══════════════════════════════════════════════════════════════════════════
     -- STEP 4: Clear drag handlers and scripts
     -- ═══════════════════════════════════════════════════════════════════════════
-    pcall(function()
+    if frame and frame.SetMovable then
         frame:SetMovable(false)
         frame:EnableMouse(false)
         frame:RegisterForDrag()  -- Unregister all drag buttons
         frame:SetScript("OnDragStart", nil)
         frame:SetScript("OnDragStop", nil)
         frame:SetScript("OnUpdate", nil)
-    end)
+    end
     
     -- ═══════════════════════════════════════════════════════════════════════════
     -- STEP 5: Hide visual elements
@@ -1346,6 +1341,20 @@ function ArcAuras.UpdateFrameIcon(frame, config)
         end
         frame._currentItemName = config.name or (C_Spell.GetSpellInfo(config.spellID) or {}).name
         frame._currentItemID = nil
+    elseif config.type == "timer" and config.spellID then
+        -- Custom timer icon: user override from customTimers config, else spell icon.
+        local db = GetDB()
+        local timerConfig = db and db.customTimers and db.customTimers[frame._arcAuraID]
+        if timerConfig and timerConfig.icon then
+            icon = timerConfig.icon
+        else
+            local spellInfo = C_Spell.GetSpellInfo(config.spellID)
+            if spellInfo then
+                icon = spellInfo.iconID or spellInfo.originalIconID
+            end
+        end
+        frame._currentItemName = config.name or (C_Spell.GetSpellInfo(config.spellID) or {}).name
+        frame._currentItemID = nil
     end
     
     if icon then
@@ -1409,260 +1418,138 @@ end
 -- COOLDOWN UPDATE LOGIC
 -- ═══════════════════════════════════════════════════════════════════════════
 
-local function UpdateTrinketCooldown(frame, slotID)
-    -- Skip cooldown update if preview is active (don't override fake preview cooldown)
+-- ═══════════════════════════════════════════════════════════════════════════
+-- ITEM COOLDOWN RESOLUTION (unified, no pcall, GCD threshold filter)
+-- ═══════════════════════════════════════════════════════════════════════════
+-- Item-cooldown APIs (GetInventoryItemCooldown, C_Container.GetItemCooldown,
+-- C_Item.GetItemCooldown) have NO ignoreGCD parameter — they return the raw
+-- (startTime, duration) tuple. When the user uses an item and a GCD fires,
+-- these APIs report the ~1-1.5s GCD as the item's cooldown. There is also
+-- NO secret-safe DurationObject variant for items.
+--
+-- Filter rule: any reported duration below ITEM_GCD_THRESHOLD seconds is
+-- treated as GCD/windup noise → return zero. GCD caps at 1.5s (unhasted);
+-- real item cooldowns are always much longer (trinkets ≥20s, potions ≥60s,
+-- shared trinket-slot CD = 20-30s). This matches the approach used in
+-- ArcUI_CooldownReminder and is the simplest robust filter that works
+-- without any pcall or secret-value comparison.
+local ITEM_GCD_THRESHOLD = 1.5
+
+-- Get the use-spell ID for an item (cached). Non-secret — GetItemSpell returns
+-- the use-spell name+ID, or nil for passive items.
+local itemUseSpellCache = {}
+local function GetItemUseSpellID(itemID)
+    if not itemID then return nil end
+    local cached = itemUseSpellCache[itemID]
+    if cached ~= nil then return cached or nil end
+    local _, spellID = GetItemSpell(itemID)
+    spellID = tonumber(spellID)
+    itemUseSpellCache[itemID] = spellID or false
+    return spellID
+end
+
+-- Resolve item cooldown to (startTime, duration, isGCD).
+-- Returns 0,0,true when the reported duration is GCD-length noise.
+-- All APIs are non-secret and return raw numbers — no pcall needed.
+local function ResolveItemCooldown(itemID, slotID)
+    local startTime, duration
+    if slotID then
+        startTime, duration = GetInventoryItemCooldown("player", slotID)
+    end
+    if not startTime then
+        if C_Container and C_Container.GetItemCooldown then
+            startTime, duration = C_Container.GetItemCooldown(itemID)
+        elseif C_Item and C_Item.GetItemCooldown then
+            startTime, duration = C_Item.GetItemCooldown(itemID)
+        end
+    end
+    startTime = startTime or 0
+    duration  = duration  or 0
+
+    -- GCD/windup filter — anything below the threshold is noise, treat as ready.
+    if duration > 0 and duration <= ITEM_GCD_THRESHOLD then
+        return 0, 0, true
+    end
+
+    return startTime, duration, false
+end
+
+local function ApplyItemCooldownToFrame(frame, itemID, slotID)
     if frame._arcSwipePreviewActive then
         return frame._isOnCooldown, frame._remaining or 0
     end
-    
-    local startTime, duration, enable = GetInventoryItemCooldown("player", slotID)
-    
+
+    local arcID    = frame._arcAuraID
+    local settings = ArcAuras.GetCachedSettings(arcID)
+    local noGCDSwipe = settings and settings.cooldownSwipe and settings.cooldownSwipe.noGCDSwipe
+
+    local startTime, duration, isGCD = ResolveItemCooldown(itemID, slotID)
+
+    if isGCD then
+        if noGCDSwipe and frame._lastDuration ~= 0 then
+            frame.Cooldown:Clear()
+            frame._lastStartTime = 0
+            frame._lastDuration  = 0
+        end
+        frame._isOnCooldown = false
+        frame._remaining    = 0
+        frame._duration     = 0
+        return false, 0
+    end
+
+    local cooldownChanged = (startTime ~= frame._lastStartTime) or (duration ~= frame._lastDuration)
+    if cooldownChanged then
+        if frame._durationObj and C_DurationUtil then
+            frame._durationObj:SetTimeFromStart(startTime, duration)
+            frame.Cooldown:SetCooldownFromDurationObject(frame._durationObj, true)
+        else
+            frame.Cooldown:SetCooldown(startTime, duration)
+        end
+        ApplySwipeColors(frame, settings)
+        frame._lastStartTime = startTime
+        frame._lastDuration  = duration
+    end
+
+    local isOnCooldown = duration and duration > 0
+    local remaining    = 0
+    if isOnCooldown then
+        remaining = (startTime + duration) - GetTime()
+        if remaining < 0 then remaining = 0; isOnCooldown = false end
+    end
+
+    frame._isOnCooldown = isOnCooldown
+    frame._remaining    = remaining
+    frame._duration     = duration
+
+    if frame.Cooldown and frame.Cooldown.SetScript then
+        if isOnCooldown then
+            local aid = frame._arcAuraID
+            frame.Cooldown:SetScript("OnCooldownDone", function()
+                frame.Cooldown:SetScript("OnCooldownDone", nil)
+                ArcAuras.UpdateArcItemFrame(frame, aid)
+            end)
+        else
+            frame.Cooldown:SetScript("OnCooldownDone", nil)
+        end
+    end
+
+    return isOnCooldown, remaining
+end
+
+local function UpdateTrinketCooldown(frame, slotID)
     -- Update icon if item changed
     local currentItemID = GetInventoryItemID("player", slotID)
     if currentItemID ~= frame._currentItemID then
         local config = frame._arcConfig
         ArcAuras.UpdateFrameIcon(frame, config)
-        -- Invalidate stack cache when trinket changes
         InvalidateStackCache(frame._arcAuraID)
+        if currentItemID then itemUseSpellCache[currentItemID] = nil end
     end
-    
-    -- Smart GCD filtering: Compare current duration to item's base cooldown
-    -- If they don't match and duration is short, it's GCD not a real cooldown
-    local arcID = frame._arcAuraID
-    local settings = ArcAuras.GetCachedSettings(arcID)
-    local noGCDSwipe = settings and settings.cooldownSwipe and settings.cooldownSwipe.noGCDSwipe
-    
-    if noGCDSwipe and duration and duration > 0 and IsLikelyGCD(currentItemID, duration) then
-        -- This is GCD, not a real cooldown - hide it
-        if frame._lastDuration ~= 0 then
-            frame.Cooldown:Clear()
-            frame._lastStartTime = 0
-            frame._lastDuration = 0
-        end
-        
-        frame._isOnCooldown = false
-        frame._remaining = 0
-        frame._duration = 0
-        
-        return false, 0
-    end
-    
-    -- Only call SetCooldown when values actually change (reduces API calls)
-    local cooldownChanged = (startTime ~= frame._lastStartTime) or (duration ~= frame._lastDuration)
-    
-    if cooldownChanged then
-        -- Apply cooldown using Duration Object if available
-        if frame._durationObj and C_DurationUtil then
-            frame._durationObj:SetTimeFromStart(startTime or 0, duration or 0)
-            frame.Cooldown:SetCooldownFromDurationObject(frame._durationObj, true)
-        else
-            frame.Cooldown:SetCooldown(startTime or 0, duration or 0)
-        end
-        
-        -- Apply swipe/edge colors (skips when Masque controls cooldowns)
-        ApplySwipeColors(frame, settings)
-        
-        -- Update cached values
-        frame._lastStartTime = startTime
-        frame._lastDuration = duration
-    end
-    
-    -- Calculate state (NON-SECRET - direct comparison works!)
-    local isOnCooldown = duration and duration > 0
-    local remaining = 0
-    if isOnCooldown then
-        remaining = (startTime + duration) - GetTime()
-        if remaining < 0 then
-            remaining = 0
-            isOnCooldown = false
-        end
-    end
-    
-    frame._isOnCooldown = isOnCooldown
-    frame._remaining = remaining
-    frame._duration = duration
-    
-    -- EXPIRY: Hook OnCooldownDone on the Cooldown frame so the ready-state transition
-    -- fires exactly when the swipe ends, with no timer math or drift.
-    -- NOTE: Must use ArcAuras.UpdateArcItemFrame (namespace) not the local — this closure
-    -- is created before the local function is declared at line ~1729, so the local is nil here.
-    if frame.Cooldown and frame.Cooldown.SetScript then
-        if isOnCooldown then
-            local arcID = frame._arcAuraID
-            frame.Cooldown:SetScript("OnCooldownDone", function()
-                frame.Cooldown:SetScript("OnCooldownDone", nil)
-                ArcAuras.UpdateArcItemFrame(frame, arcID)
-            end)
-        else
-            frame.Cooldown:SetScript("OnCooldownDone", nil)
-        end
-    end
-    
-    return isOnCooldown, remaining
+    return ApplyItemCooldownToFrame(frame, currentItemID, slotID)
 end
 
 local function UpdateItemCooldown(frame, itemID)
-    -- Skip cooldown update if preview is active (don't override fake preview cooldown)
-    if frame._arcSwipePreviewActive then
-        return frame._isOnCooldown, frame._remaining or 0
-    end
-    
-    local startTime, duration, enable = C_Container.GetItemCooldown(itemID)
-    
-    -- FALLBACK: C_Container.GetItemCooldown returns nil when item is consumed (not in bags).
-    -- C_Item.GetItemCooldown still reports the cooldown even when the item is gone.
-    if startTime == nil and C_Item and C_Item.GetItemCooldown then
-        local ok, s, d, e = pcall(C_Item.GetItemCooldown, itemID)
-        if ok and s then
-            startTime, duration = s, d
-            enable = e and 1 or 0
-        end
-    end
-    
-    -- Smart GCD filtering for items:
-    -- GCD should NEVER cause a state flip (ready↔cooldown) for items.
-    -- C_Container.GetItemCooldown returns GCD duration when player uses ANY ability,
-    -- causing visual flicker between cooldown/ready branches with different desat/alpha.
-    -- The noGCDSwipe setting controls the swipe animation only.
-    local arcID = frame._arcAuraID
-    local settings = ArcAuras.GetCachedSettings(arcID)
-    local noGCDSwipe = settings and settings.cooldownSwipe and settings.cooldownSwipe.noGCDSwipe
-    
-    if duration and duration > 0 and IsLikelyGCD(itemID, duration) then
-        -- This is GCD, not a real cooldown
-        -- Always suppress state change for items (prevents flicker)
-        if noGCDSwipe then
-            -- Also clear the swipe visual
-            if frame._lastDuration ~= 0 then
-                frame.Cooldown:Clear()
-                frame._lastStartTime = 0
-                frame._lastDuration = 0
-            end
-        end
-        
-        -- Keep previous state - don't let GCD flip isOnCooldown
-        frame._remaining = 0
-        return frame._isOnCooldown or false, 0
-    end
-    
-    -- Detect cooldown STARTING (was off, now on) - item was just used!
-    -- This is when charges change for items like Healthstone
-    local cooldownJustStarted = (frame._lastDuration == 0 or frame._lastDuration == nil) and duration and duration > 1
-    if cooldownJustStarted then
-        -- Invalidate stack cache for THIS item only - charges likely changed
-        stackCache[arcID] = nil
-        -- Force usability recheck on next tick
-        frame._lastUsableCheckTime = nil
-    end
-    
-    -- Detect cooldown ENDING (was on, now off) - item may be usable again
-    local cooldownJustEnded = (frame._lastDuration and frame._lastDuration > 1) and (not duration or duration <= 0)
-    if cooldownJustEnded then
-        -- Force usability recheck
-        frame._lastUsableCheckTime = nil
-        -- Reset ready confirmation counter so glow doesn't flash on immediately
-        frame._arcReadyConfirmTicks = 0
-    end
-    
-    -- Check if item is actually usable (handles once-per-combat items like Healthstone)
-    -- Healthstone has duration=0.001 but is not usable until combat ends
-    -- PERFORMANCE: Only check usability when state might have changed
-    local isLockedOut = false
-    if not frame._lastUsableCheckTime or (GetTime() - frame._lastUsableCheckTime) > 0.5 then
-        local usable, noMana = C_Item.IsUsableItem(itemID)
-        frame._lastUsableCheckTime = GetTime()
-        frame._lastUsableResult = usable
-        
-        -- Item is "locked out" if:
-        -- 1. Not usable (usable = false)
-        -- 2. Has no meaningful cooldown (duration < 1 second) OR cooldown is basically done
-        -- This catches items like Healthstone that show duration=0.001 but can't be used
-        if not usable and duration then
-            local remaining = (startTime and duration > 0) and ((startTime + duration) - GetTime()) or 0
-            if remaining < 1 then
-                isLockedOut = true
-            end
-        end
-    else
-        -- Use cached usability result
-        if not frame._lastUsableResult and duration then
-            local remaining = (startTime and duration > 0) and ((startTime + duration) - GetTime()) or 0
-            if remaining < 1 then
-                isLockedOut = true
-            end
-        end
-    end
-    
-    -- For locked out items, don't show cooldown swipe - just mark as unavailable
-    if isLockedOut then
-        -- Clear cooldown animation to stop flickering
-        if frame._lastDuration ~= 0 or not frame._arcLockedOut then
-            frame.Cooldown:Clear()
-            frame._lastStartTime = 0
-            frame._lastDuration = 0
-        end
-        
-        frame._isOnCooldown = false
-        frame._remaining = 0
-        frame._duration = 0
-        frame._arcLockedOut = true  -- Special flag for visual handling
-        
-        return false, 0
-    end
-    
-    -- Clear locked out flag if item becomes usable again
-    frame._arcLockedOut = false
-    
-    -- Only call SetCooldown when values actually change (reduces API calls)
-    local cooldownChanged = (startTime ~= frame._lastStartTime) or (duration ~= frame._lastDuration)
-    
-    if cooldownChanged then
-        -- Apply cooldown
-        if frame._durationObj and C_DurationUtil then
-            frame._durationObj:SetTimeFromStart(startTime or 0, duration or 0)
-            frame.Cooldown:SetCooldownFromDurationObject(frame._durationObj, true)
-        else
-            frame.Cooldown:SetCooldown(startTime or 0, duration or 0)
-        end
-        
-        -- Apply swipe/edge colors (skips when Masque controls cooldowns)
-        ApplySwipeColors(frame, settings)
-        
-        -- Update cached values
-        frame._lastStartTime = startTime
-        frame._lastDuration = duration
-    end
-    
-    -- Calculate state
-    local isOnCooldown = duration and duration > 0
-    local remaining = 0
-    if isOnCooldown then
-        remaining = (startTime + duration) - GetTime()
-        if remaining < 0 then
-            remaining = 0
-            isOnCooldown = false
-        end
-    end
-    
-    frame._isOnCooldown = isOnCooldown
-    frame._remaining = remaining
-    frame._duration = duration
-    
-    -- EXPIRY: Hook OnCooldownDone (see UpdateTrinketCooldown)
-    -- NOTE: Must use ArcAuras.UpdateArcItemFrame (namespace) not the local — forward reference.
-    if frame.Cooldown and frame.Cooldown.SetScript then
-        if isOnCooldown then
-            local arcID = frame._arcAuraID
-            frame.Cooldown:SetScript("OnCooldownDone", function()
-                frame.Cooldown:SetScript("OnCooldownDone", nil)
-                ArcAuras.UpdateArcItemFrame(frame, arcID)
-            end)
-        else
-            frame.Cooldown:SetScript("OnCooldownDone", nil)
-        end
-    end
-    
-    return isOnCooldown, remaining
+    return ApplyItemCooldownToFrame(frame, itemID, nil)
 end
 
 -- Apply visual states based on settings
@@ -1747,7 +1634,10 @@ end
 -- ═══════════════════════════════════════════════════════════════════════════
 
 -- Updates stack/count text only. Called from BAG_UPDATE_COOLDOWN for count-based items.
-local function ApplyStackText(frame, arcID)
+-- Definition of the function forward-declared above. Assigning to the
+-- existing upvalue rather than creating a new local so RefreshStackTextStyle
+-- (defined earlier) gets a working reference.
+ApplyStackText = function(frame, arcID)
     if not frame._arcStackText then return end
     local config = frame._arcConfig
     if not config then return end
@@ -1766,6 +1656,11 @@ local function ApplyStackText(frame, arcID)
         frame._arcStackText:Hide()
     end
 end
+
+-- Public: ArcUI_ArcAurasTimer needs to push stack text updates into the
+-- shared ApplyStackText pipeline whenever a custom timer's stack count
+-- changes (every proc / per-stack expiry).
+ArcAuras.ApplyStackText = ApplyStackText
 
 -- Returns cached stateVisuals, refreshing only when settings generation changed.
 local function GetCachedStateVisuals(frame, arcID)
@@ -1805,6 +1700,29 @@ local function ApplyCooldownStateVisuals(frame, arcID, isOnCooldown)
             frame:SetAlpha(cooldownAlpha)
             frame._arcBypassFrameAlphaHook = false
             frame._lastAppliedAlpha = cooldownAlpha
+        end
+        -- Preserve duration text
+        local preserveText = (sv and sv.preserveDurationText) or (cs.preserveDurationText == true)
+        local parentContainer = frame:GetParent()
+        local groupHidden = frame._arcGroupHidden or (parentContainer and parentContainer._arcGroupHidden)
+        if preserveText and not groupHidden then
+            if frame.Cooldown and frame.Cooldown.Text and frame.Cooldown.Text.SetIgnoreParentAlpha then
+                frame.Cooldown.Text:SetIgnoreParentAlpha(true)
+                frame.Cooldown.Text:SetAlpha(1)
+            end
+            if frame._arcCooldownText and frame._arcCooldownText.SetIgnoreParentAlpha then
+                frame._arcCooldownText:SetIgnoreParentAlpha(true)
+                frame._arcCooldownText:SetAlpha(1)
+            end
+            frame._arcPreserveDurationText = true
+        elseif frame._arcPreserveDurationText then
+            if frame.Cooldown and frame.Cooldown.Text and frame.Cooldown.Text.SetIgnoreParentAlpha then
+                frame.Cooldown.Text:SetIgnoreParentAlpha(false)
+            end
+            if frame._arcCooldownText and frame._arcCooldownText.SetIgnoreParentAlpha then
+                frame._arcCooldownText:SetIgnoreParentAlpha(false)
+            end
+            frame._arcPreserveDurationText = false
         end
         -- Desaturation
         local noDesaturate = (sv and sv.noDesaturate) or (cs.noDesaturate == true)
@@ -1853,9 +1771,16 @@ local function ApplyCooldownStateVisuals(frame, arcID, isOnCooldown)
     else
         -- READY STATE
         local readyAlpha = rs.alpha ~= nil and rs.alpha or (sv and sv.readyAlpha) or 1.0
-        if readyAlpha <= 0 and ns.CDMEnhance and ns.CDMEnhance.IsOptionsPanelOpen and ns.CDMEnhance.IsOptionsPanelOpen() then
-            readyAlpha = 0.35
+        local hideEverything = readyAlpha <= 0   -- frame is supposed to be invisible
+        if hideEverything and ns.CDMEnhance and ns.CDMEnhance.IsOptionsPanelOpen and ns.CDMEnhance.IsOptionsPanelOpen() then
+            readyAlpha = 0.35   -- panel preview override; flash still suppressed below
         end
+        -- Tell ArcAurasCooldown not to play the CD→ready flash bling on
+        -- frames whose ready-state alpha is 0. Without this, the flash
+        -- animation is its own frame with its own alpha and plays for
+        -- ~0.8s independent of the parent's alpha — visible "ghost flash"
+        -- on icons the user has hidden via readyAlpha=0.
+        frame._arcHideCooldownFlash = hideEverything
         frame._arcTargetAlpha = nil
         frame._arcEnforceReadyAlpha = true
         frame._arcReadyAlphaValue = readyAlpha
@@ -2079,31 +2004,29 @@ local function UpdateArcItemFrame(frame, arcID)
                         end
                     end
                     
-                    -- Preserve Duration Text - make text visible even when frame is dimmed
                     local preserveText = (stateVisuals and stateVisuals.preserveDurationText) or (cs.preserveDurationText == true)
                     local parentContainer = frame:GetParent()
                     local groupHidden = frame._arcGroupHidden or (parentContainer and parentContainer._arcGroupHidden)
                     if preserveText and not groupHidden then
-                        -- Make cooldown text ignore parent alpha
                         if frame.Cooldown and frame.Cooldown.Text and frame.Cooldown.Text.SetIgnoreParentAlpha then
                             frame.Cooldown.Text:SetIgnoreParentAlpha(true)
                             frame.Cooldown.Text:SetAlpha(1)
                         end
-                        -- Also handle any custom text overlays
                         if frame._arcCooldownText and frame._arcCooldownText.SetIgnoreParentAlpha then
                             frame._arcCooldownText:SetIgnoreParentAlpha(true)
                             frame._arcCooldownText:SetAlpha(1)
                         end
-                    else
-                        -- Reset text alpha behavior
+                        frame._arcPreserveDurationText = true
+                    elseif frame._arcPreserveDurationText then
                         if frame.Cooldown and frame.Cooldown.Text and frame.Cooldown.Text.SetIgnoreParentAlpha then
                             frame.Cooldown.Text:SetIgnoreParentAlpha(false)
                         end
                         if frame._arcCooldownText and frame._arcCooldownText.SetIgnoreParentAlpha then
                             frame._arcCooldownText:SetIgnoreParentAlpha(false)
                         end
+                        frame._arcPreserveDurationText = false
                     end
-                    
+
                     -- Stop ready glows (only on state change)
                     if frame._lastVisualState ~= "cooldown" then
                         frame._lastVisualState = "cooldown"
@@ -2222,12 +2145,15 @@ local function UpdateArcItemFrame(frame, arcID)
                             end
                         end
                     end
-                    -- Reset text alpha behavior when ready
-                    if frame.Cooldown and frame.Cooldown.Text and frame.Cooldown.Text.SetIgnoreParentAlpha then
-                        frame.Cooldown.Text:SetIgnoreParentAlpha(false)
-                    end
-                    if frame._arcCooldownText and frame._arcCooldownText.SetIgnoreParentAlpha then
-                        frame._arcCooldownText:SetIgnoreParentAlpha(false)
+                    -- Reset preserve text on ready (matches ArcAurasCooldown pattern)
+                    if frame._arcPreserveDurationText then
+                        if frame.Cooldown and frame.Cooldown.Text and frame.Cooldown.Text.SetIgnoreParentAlpha then
+                            frame.Cooldown.Text:SetIgnoreParentAlpha(false)
+                        end
+                        if frame._arcCooldownText and frame._arcCooldownText.SetIgnoreParentAlpha then
+                            frame._arcCooldownText:SetIgnoreParentAlpha(false)
+                        end
+                        frame._arcPreserveDurationText = false
                     end
                     
                     -- Stop threshold glow when ready
@@ -2806,6 +2732,13 @@ function ArcAuras.ShowTooltip(frame)
         else
             GameTooltip:AddLine(config.name or "Unknown Spell", 1, 1, 1)
         end
+    elseif config.type == "timer" then
+        if config.spellID then
+            GameTooltip:SetSpellByID(config.spellID)
+        else
+            GameTooltip:AddLine(config.name or "Custom Timer", 1, 1, 1)
+        end
+        GameTooltip:AddLine("|cffFFCC00Custom Timer|r", 1, 0.8, 0)
     end
     
     GameTooltip:AddLine(" ")
@@ -4586,6 +4519,22 @@ function ArcAuras.ApplyInitialStateVisuals(arcID, frame)
         frame._arcBypassFrameAlphaHook = false
         frame._lastAppliedAlpha = cooldownAlpha
         
+        -- Preserve duration text (same pattern as UpdateArcItemFrame)
+        local preserveText = (stateVisuals and stateVisuals.preserveDurationText) or (cs.preserveDurationText == true)
+        local parentContainer = frame:GetParent()
+        local groupHidden = frame._arcGroupHidden or (parentContainer and parentContainer._arcGroupHidden)
+        if preserveText and not groupHidden then
+            if frame.Cooldown and frame.Cooldown.Text and frame.Cooldown.Text.SetIgnoreParentAlpha then
+                frame.Cooldown.Text:SetIgnoreParentAlpha(true)
+                frame.Cooldown.Text:SetAlpha(1)
+            end
+            if frame._arcCooldownText and frame._arcCooldownText.SetIgnoreParentAlpha then
+                frame._arcCooldownText:SetIgnoreParentAlpha(true)
+                frame._arcCooldownText:SetAlpha(1)
+            end
+            frame._arcPreserveDurationText = true
+        end
+        
         -- Desaturation
         local noDesaturate = (stateVisuals and stateVisuals.noDesaturate) or (cs.noDesaturate == true)
         if iconTex then
@@ -4915,9 +4864,10 @@ local _arcAurasOnEvent = function(self, event, arg1)
             local itemID = GetInventoryItemID("player", slot)
             local db = GetDB()
             
+            local savedConfig = db and db.trackedItems and db.trackedItems[arcID]
+            
             if frame then
                 local config = frame._arcConfig
-                local savedConfig = db and db.trackedItems and db.trackedItems[arcID]
                 
                 if itemID then
                     -- Trinket equipped - check on-use filter for auto-track slots
@@ -4953,13 +4903,22 @@ local _arcAurasOnEvent = function(self, event, arg1)
                         local onlyOnUse = db and db.onlyOnUseTrinkets
                         local isPassive = IsItemPassive(itemID)
                         
-                        -- ALWAYS create the auto-track slot frame (so position is preserved)
-                        local success = ArcAuras.AddTrackedItem({
-                            type = "trinket",
-                            slotID = slot,
-                            enabled = true,
-                            isAutoTrackSlot = true,
-                        })
+                        local success
+                        if savedConfig then
+                            -- trackedItems entry exists (frame was destroyed e.g. passive→active swap)
+                            -- Use ShowTrinketSlotFrame which calls RecreateItemFrame, NOT AddTrackedItem
+                            -- (AddTrackedItem returns early without creating a frame when entry exists)
+                            ArcAuras.ShowTrinketSlotFrame(arcID)
+                            success = ArcAuras.frames[arcID] ~= nil
+                        else
+                            -- Brand new slot — create entry and frame from scratch
+                            success = ArcAuras.AddTrackedItem({
+                                type = "trinket",
+                                slotID = slot,
+                                enabled = true,
+                                isAutoTrackSlot = true,
+                            })
+                        end
                         
                         -- If passive and on-use filter is on, hide immediately
                         if success and onlyOnUse and isPassive then
@@ -4977,12 +4936,18 @@ local _arcAurasOnEvent = function(self, event, arg1)
         end
     elseif event == "GET_ITEM_INFO_RECEIVED" then
         -- Item data loaded - update any item-type frames that match this itemID
+        -- AND bust the use-spell cache so it re-resolves on next query (item
+        -- spell info may not have been available when the cache was first hit).
         local itemID = arg1
         if itemID then
+            itemUseSpellCache[itemID] = nil
             for arcID, frame in pairs(ArcAuras.frames) do
                 local config = frame._arcConfig
                 if config and config.type == "item" and config.itemID == itemID then
                     ArcAuras.UpdateFrameIcon(frame, config)
+                    -- Drive a full visual refresh so cooldown swipe / desat
+                    -- catch up to the now-loaded item data.
+                    ArcAuras.UpdateArcItemFrame(frame, arcID)
                 end
             end
         end
@@ -4996,33 +4961,39 @@ local _arcAurasOnEvent = function(self, event, arg1)
         end
     elseif event == "BAG_UPDATE_COOLDOWN" then
         -- Only update cooldown state — no full rebuild.
+        -- Unified: delegates to ResolveItemCooldown for the SAME threshold
+        -- GCD filter used by ApplyItemCooldownToFrame. Previously used a
+        -- different IsLikelyGCD+GetItemBaseCooldown heuristic that could
+        -- disagree with the full-rebuild path.
         -- State-change guard: each frame exits immediately if startTime/duration unchanged.
         for arcID, frame in pairs(ArcAuras.frames) do
             if frame:IsShown() and not frame._arcIsSpellCooldown then
                 local config = frame._arcConfig
                 if config then
-                    local startTime, duration
+                    local itemID, slotID
                     if config.type == "trinket" and config.slotID then
-                        local iid = GetInventoryItemID("player", config.slotID)
-                        if iid then startTime, duration = C_Container.GetItemCooldown(iid) end
+                        slotID = config.slotID
+                        itemID = GetInventoryItemID("player", slotID)
                     elseif config.type == "item" and config.itemID then
-                        startTime, duration = C_Container.GetItemCooldown(config.itemID)
+                        itemID = config.itemID
                     end
-                    if startTime then
-                        local itemID = config.itemID or (config.type == "trinket" and GetInventoryItemID("player", config.slotID))
-                        -- Skip GCD fires entirely
-                        if not (duration and duration > 0 and IsLikelyGCD(itemID, duration)) then
-                            local isOnCooldown = duration and duration > 0 and ((startTime + duration) - GetTime()) > 0
+
+                    if itemID then
+                        local startTime, duration, isGCD = ResolveItemCooldown(itemID, slotID)
+
+                        -- GCD/windup: skip entirely (same behavior as before)
+                        if not isGCD then
+                            local isOnCooldown = duration > 0 and ((startTime + duration) - GetTime()) > 0
                             -- Only act if something changed
                             if isOnCooldown ~= frame._isOnCooldown
                                 or startTime ~= frame._lastStartTime
                                 or duration ~= frame._lastDuration then
                                 -- Feed cooldown animation
                                 if frame._durationObj and C_DurationUtil then
-                                    frame._durationObj:SetTimeFromStart(startTime or 0, duration or 0)
+                                    frame._durationObj:SetTimeFromStart(startTime, duration)
                                     frame.Cooldown:SetCooldownFromDurationObject(frame._durationObj, true)
                                 else
-                                    frame.Cooldown:SetCooldown(startTime or 0, duration or 0)
+                                    frame.Cooldown:SetCooldown(startTime, duration)
                                 end
                                 frame._lastStartTime = startTime
                                 frame._lastDuration = duration
@@ -5061,7 +5032,8 @@ local _arcAurasOnEvent = function(self, event, arg1)
 
     elseif event == "ENCOUNTER_END" then
         -- Boss ended - item CDs (potions, trinkets) may have been reset by Blizzard.
-        -- GCD suppression in IsLikelyGCD means no continuity cache to clear here.
+        -- Threshold GCD filter in ResolveItemCooldown means no continuity cache
+        -- to clear here — any short-duration bleed after the reset is filtered out.
         InvalidateStackCache()
         ScheduleUsabilityCheck()
         for arcID, frame in pairs(ArcAuras.frames) do
@@ -5296,10 +5268,12 @@ function ArcAuras.CreateCatalogEntry(cdID, frame)
         return nil
     end
     
-    local arcType, id = Shared.ParseArcAuraID(cdID)
+    -- Use the local ParseArcID (handles spell/item/trinket and tolerates suffixes).
+    -- Shared.ParseArcAuraID is stricter and doesn't know about spell/timer prefixes.
+    local arcType, id = ArcAuras.ParseArcID(cdID)
     if not arcType then return nil end
     
-    local name, icon, itemID
+    local name, icon, itemID, spellID
     
     if arcType == "trinket" and id then
         -- Trinket slot
@@ -5318,24 +5292,55 @@ function ArcAuras.CreateCatalogEntry(cdID, frame)
         local itemName, _, _, _, _, _, _, _, _, itemIcon = GetItemInfo(id)
         name = itemName or "Item"
         icon = itemIcon or 134400
+    elseif arcType == "spell" and id then
+        -- Spell cooldown frame (Arc Auras spell tracking)
+        spellID = id
+        local info = C_Spell.GetSpellInfo(spellID)
+        if info then
+            name = info.name
+            icon = info.iconID or info.originalIconID
+        end
+        -- Icon override from trackedSpells
+        local db = GetDB()
+        local trackedCfg = db and db.trackedSpells and db.trackedSpells[cdID]
+        if trackedCfg and trackedCfg.iconOverride then
+            icon = trackedCfg.iconOverride
+        end
+        name = name or ("Spell " .. spellID)
+    elseif arcType == "timer" and id then
+        -- Custom timer frame — icon and name come from the watched spell,
+        -- or the user's icon override in customTimers.
+        spellID = id
+        local info = C_Spell.GetSpellInfo(spellID)
+        if info then
+            name = info.name
+            icon = info.iconID or info.originalIconID
+        end
+        local db = GetDB()
+        local timerCfg = db and db.customTimers and db.customTimers[cdID]
+        if timerCfg and timerCfg.icon then
+            icon = timerCfg.icon
+        end
+        name = (name or ("Spell " .. spellID)) .. " |cff888888(Timer)|r"
     end
     
     -- Fallback to frame data if available
     if frame then
         if frame._currentItemName and frame._currentItemName ~= "" then
-            name = frame._currentItemName
+            -- Don't clobber the timer suffix
+            if arcType ~= "timer" then name = frame._currentItemName end
         end
         if frame.Icon and frame.Icon.GetTexture then
             local frameIcon = frame.Icon:GetTexture()
             if frameIcon and frameIcon ~= 134400 then
-                icon = frameIcon
+                icon = icon or frameIcon
             end
         end
     end
     
     return {
         cooldownID = cdID,
-        spellID = nil,  -- Items don't have spellID
+        spellID = spellID,
         itemID = itemID,
         name = name or "Unknown",
         icon = icon or 134400,
@@ -5343,6 +5348,7 @@ function ArcAuras.CreateCatalogEntry(cdID, frame)
         viewerName = "EssentialCooldownViewer",
         isArcAura = true,
         arcType = arcType,
+        isCustomTimer = arcType == "timer" or nil,
     }
 end
 

@@ -3,6 +3,9 @@ local UIAnim_Enum = env.modules:New("packages\\ui-anim\\enum")
 
 UIAnim_Enum.Easing = {
     Linear       = "Linear",
+    SineIn       = "SineIn",
+    SineOut      = "SineOut",
+    SineInOut    = "SineInOut",
     QuadIn       = "QuadIn",
     QuadOut      = "QuadOut",
     QuadInOut    = "QuadInOut",

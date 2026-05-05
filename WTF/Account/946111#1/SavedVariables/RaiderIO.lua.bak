@@ -1,19 +1,52 @@
 
 RaiderIO_Config = {
-["minimapIcon"] = {
-["minimapPos"] = 180,
-["showInCompartment"] = true,
-["hide"] = false,
-["lock"] = false,
-},
 ["profilePoint"] = {
 ["y"] = 0,
 ["x"] = -16,
 ["point"] = "TOPLEFT",
 },
+["minimapIcon"] = {
+["minimapPos"] = 180,
+["showInCompartment"] = true,
+["lock"] = false,
+["hide"] = false,
+},
 }
 RaiderIO_LastCharacter = "us-Lonelylitten-stormrage"
 RaiderIO_MissingCharacters = {
+["us-Illaeste-stormrage"] = true,
+["us-Gigaachadd-stormrage"] = true,
+["us-Tasat-illidan"] = true,
+["us-Glinte-zuljin"] = true,
+["us-Suny-zuljin"] = true,
+["us-Beefcäkë-stormrage"] = true,
+["us-Eriooss-ragnaros"] = true,
+["us-Gundoor-stormrage"] = true,
+["us-Sunnadin-zuljin"] = true,
+["us-Superdohko-stormrage"] = true,
+["us-Scater-illidan"] = true,
+["us-Nagysham-stormrage"] = true,
+["us-Claqz-stormrage"] = true,
+["us-Baconboogers-stormrage"] = true,
+["us-Cironus-stormrage"] = true,
+["us-Ticx-illidan"] = true,
+["us-Ioriara-stormrage"] = true,
+["us-Morbizzle-stormrage"] = true,
+["us-Draztik-stormrage"] = true,
+["us-Furrygoth-illidan"] = true,
+["us-Kaassii-illidan"] = true,
+["us-Dotakekw-stormrage"] = true,
+["us-Zholton-stormrage"] = true,
+["us-Inkamaru-stormrage"] = true,
+["us-Keydepletes-illidan"] = true,
+["us-Aetherlens-frostmourne"] = true,
+["us-Wickedwing-stormrage"] = true,
+["us-Madcaps-stormrage"] = true,
+["us-Haronda-stormrage"] = true,
+["us-Burnsday-stormrage"] = true,
+["us-Andoxd-zuljin"] = true,
+["us-Biggbley-stormrage"] = true,
+["us-Sahrëi-moon-guard"] = true,
 }
 RaiderIO_MissingServers = {
 }

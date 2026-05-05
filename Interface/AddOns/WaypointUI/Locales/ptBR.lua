@@ -6,6 +6,13 @@ if GetLocale() ~= "ptBR" then return end
 local env = select(2, ...)
 local L = env.L
 
+-- Font
+L["FONT_FLAGS"] = "Font Flags"
+L["NONE"] = "None"
+L["OUTLINE"] = "Outline"
+L["THICKOUTLINE"] = "Thick Outline"
+L["MONOCHROME"] = "Monochrome"
+
 -- Waypoint System
 L["WAYPOINTSYSTEM_PINPOINT_QUEST_COMPLETE"] = "Pronto para entregar"
 
@@ -82,10 +89,10 @@ L["CONFIG_APPEARANCE_COLOR_CUSTOMCOLOR"] = "Usar cor personalizada"
 L["CONFIG_APPEARANCE_COLOR_CUSTOMCOLOR_COLOR"] = "Cor"
 L["CONFIG_APPEARANCE_COLOR_CUSTOMCOLOR_TINTICON"] = "Ícone colorido"
 L["CONFIG_APPEARANCE_COLOR_CUSTOMCOLOR_RESET"] = "Redefinir"
-L["CONFIG_APPEARANCE_COLOR_CUSTOMCOLOR_QUEST_COMPLETE_DEFAULT"] = "Missão normal"
-L["CONFIG_APPEARANCE_COLOR_CUSTOMCOLOR_QUEST_COMPLETE_REPEATABLE"] = "Missão repetível"
-L["CONFIG_APPEARANCE_COLOR_CUSTOMCOLOR_QUEST_COMPLETE_IMPORTANT"] = "Missão importante"
-L["CONFIG_APPEARANCE_COLOR_CUSTOMCOLOR_QUEST_INCOMPLETE"] = "Missão incompleta"
+L["CONFIG_APPEARANCE_COLOR_CUSTOMCOLOR_COMPLETED_NORMAL_QUEST"] = "Missão normal"
+L["CONFIG_APPEARANCE_COLOR_CUSTOMCOLOR_COMPLETED_REPEATABLE_QUEST"] = "Missão repetível"
+L["CONFIG_APPEARANCE_COLOR_CUSTOMCOLOR_COMPLETED_IMPORTANT_QUEST"] = "Missão importante"
+L["CONFIG_APPEARANCE_COLOR_CUSTOMCOLOR_INCOMPLETE_QUEST"] = "Missão incompleta"
 L["CONFIG_APPEARANCE_COLOR_CUSTOMCOLOR_OTHER"] = "Outro"
 
 L["CONFIG_AUDIO"] = "Áudio"
@@ -122,6 +129,11 @@ L["CONFIG_EXTENSIONS_DUGISSUPPORT_AUTOREPLACEWAYPOINT_DESCRIPTION"] = "Rastreia 
 L["CONFIG_EXTENSIONS_SILVERDRAGONSUPPORT"] = "SilverDragon"
 L["CONFIG_EXTENSIONS_SILVERDRAGONSUPPORT_ENABLE"] = "Aprimorar marcadores do SilverDragon"
 L["CONFIG_EXTENSIONS_SILVERDRAGONSUPPORT_ENABLE_DESCRIPTION"] = "Requer que o recurso de marcador de mapa integrado do SilverDragon esteja ativado."
+L["CONFIG_EXTENSIONS_APRSUPPORT"] = "Azeroth Pilot Reloaded"
+L["CONFIG_EXTENSIONS_APRSUPPORT_ENABLE"] = "Track APR Waypoints"
+L["CONFIG_EXTENSIONS_APRSUPPORT_ENABLE_DESCRIPTION"] = "Enables Azeroth Pilot Reloaded waypoint tracking."
+L["CONFIG_EXTENSIONS_APRSUPPORT_AUTOREPLACEWAYPOINT"] = "Auto-Replace Waypoint"
+L["CONFIG_EXTENSIONS_APRSUPPORT_AUTOREPLACEWAYPOINT_DESCRIPTION"] = "Automatically replaces the active waypoint with the incoming APR waypoint."
 
 L["CONFIG_ABOUT"] = "Sobre"
 L["CONFIG_ABOUT_CONTRIBUTORS"] = "Contribuidores"
@@ -164,13 +176,10 @@ L["CONTRIBUTORS_SYVERGISWOLD_DESCRIPTION"] = "Code - Feature"
 
 -- Extra Feature
 L["GUIDE_PIN_ASSISTANT_REPLACEPROMPT"] = "Deseja substituir seu marcador atual por \"%s\"?"
-L["GUIDE_PIN_ASSISTANT_REPLACEPROMPT_YES"] = "Substituir"
-L["GUIDE_PIN_ASSISTANT_REPLACEPROMPT_NO"] = "Cancelar"
 
 -- Supported Add-ons
 L["TOMTOM_REPLACEPROMPT"] = "Deseja substituir seu marcador atual pelo marcador do TomTom \"%s\"?"
-L["TOMTOM_REPLACEPROMPT_YES"] = "Substituir"
-L["TOMTOM_REPLACEPROMPT_NO"] = "Cancelar"
 L["DUGISGUIDEVIEWERZ_REPLACEPROMPT"] = "Deseja substituir seu marcador atual pelo marcador do Dugi \"%s\"?"
-L["DUGISGUIDEVIEWERZ_REPLACEPROMPT_YES"] = "Substituir"
-L["DUGISGUIDEVIEWERZ_REPLACEPROMPT_NO"] = "Cancelar"
+L["APR_REPLACEPROMPT"] = "Deseja substituir seu marcador atual pelo marcador do APR \"%s\"?"
+L["REPLACE"] = "Substituir"
+L["CANCEL"] = "Cancelar"

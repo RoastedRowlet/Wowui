@@ -1,4 +1,4 @@
-## Interface: 50502, 50503
+## Interface: 50504, 50503
 
 ## Title: LittleWigs
 ## Notes: Boss warnings for 5-man dungeons & scenarios.
@@ -23,6 +23,6 @@
 
 ## Dependencies: BigWigs
 ## LoadOnDemand: 1
-## Version: v12.0.31
+## Version: v12.0.44
 
-## X-BigWigs-Minimum: 404
+## X-BigWigs-Minimum: 412

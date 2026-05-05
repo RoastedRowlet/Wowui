@@ -1,12 +1,12 @@
-## Interface: 120001, 120005
+## Interface: 120005, 120007
 ## Title: Targeted Spells
 ## DefaultState: Enabled
 ## SavedVariables: TargetedSpellsSaved
 ## IconTexture: Interface\Icons\ability_hunter_snipershot
-## OptionalDeps: !!AddonLocale, Masque
+## OptionalDeps: !!AddonLocale
 ## Category: Archon
 ## Notes: Highlights spells targeting the player and/or the party
-## Version: 2.0.1
+## Version: 3.2.6
 ## Author: Xephyris-Blackrock-EU
 
 ## X-Curse-Project-ID: 1418323
@@ -18,6 +18,7 @@ Libs\LibEditMode\embed.xml
 Libs\LibSharedMedia-3.0\lib.xml
 
 Templates\TargetedSpellsFrameTemplate.xml
+Templates\TargetedSpellsBarFrameTemplate.xml
 
 Enum.lua
 Init.lua
@@ -25,9 +26,11 @@ Utils.lua
 Glows.lua
 
 Localization\enUS.lua
-Localization\[TextLocale].lua [AllowLoadTextLocale deDE, frFR, zhCN, esES, esMX, koKR]
+Localization\[TextLocale].lua [AllowLoadTextLocale deDE, frFR, zhCN, esES, esMX, koKR, ruRU, itIT, ptBR]
 
 Settings.lua
 TargetedSpellsMixin.lua
+TargetedSpellsIconMixin.lua
+TargetedSpellsBarMixin.lua
 EditMode.lua
 Driver.lua

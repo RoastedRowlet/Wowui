@@ -1,12 +1,10 @@
-tag 76bf5dc23e516f45c64587765c7b15e8677bc29e 1.1.2
+lightweight tag d46d246590ebae0bd425979342921b18fd7898b5 1.1.3
 Author:	ComagHaveFun <ComagHaveFun@localhost>
-Date:	Sun Mar 8 23:47:22 2026 +0100
+Date:	Wed Apr 22 15:40:00 2026 +0200
 
-- Add edge detection to checkpoint zones so they only trigger on entry (outside -> inside transition) instead of every tick while standing inside. This prevents the last checkpoint from being re-registered for the new lap, which caused an extra lap every 4 real laps (thanks to Ziraxxis via CurseForge for catching this)
-
-commit badbcf271e2a7a3f6a07c31c19ae83eb62253763
+commit d46d246590ebae0bd425979342921b18fd7898b5
 Author: ComagHaveFun <ComagHaveFun@localhost>
-Date:   Sun Mar 8 23:46:27 2026 +0100
+Date:   Wed Apr 22 15:40:00 2026 +0200
 
-    - Add edge detection to checkpoint zones so they only trigger on entry (outside -> inside transition) instead of every tick while standing inside. This prevents the last checkpoint from being re-registered for the new lap, which caused an extra lap every 4 real laps (thanks to Ziraxxis via CurseForge for catching this)
+    - Bump supported interface version
 

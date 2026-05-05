@@ -301,11 +301,50 @@ function boss:IsEnableMob(mobId)
 	return self.enableMobs[mobId]
 end
 
+do
+	local trashModuleList = {}
+	--- Mark this module as being a module for trash mobs
+	-- @bool isTrashModule If true, this module is marked as a trash module and the display name is changed to "Trash"
+	function boss:SetTrashModule(isTrashModule)
+		if isTrashModule then
+			trashModuleList[self] = true
+			self.displayName = CL.trash
+		end
+	end
+
+	--- Check if this is a module for trash mobs
+	-- @return boolean
+	function boss:IsTrashModule()
+		return trashModuleList[self] or false
+	end
+end
+
+do
+	local worldModuleList = {}
+	--- Mark this module as being a module for world bosses
+	-- @bool isWorldModule If true, this module is marked as a world module
+	function boss:SetWorldModule(isWorldModule)
+		if isWorldModule then
+			worldModuleList[self] = true
+		end
+	end
+
+	--- Check if this is a module for world bosses
+	-- @return boolean
+	function boss:IsWorldModule()
+		return worldModuleList[self] or false
+	end
+end
+
 --- Set this module to have custom timers and stop listening to Blizzard's timeline timers.
 -- @bool useCustomTimers When true, disables listening to Blizz timeline timers
-function boss:UseCustomTimers(useCustomTimers)
+-- @bool noAfterBossError When true, no error will be shown to the user at the end of the boss encounter if :ErrorForTimelineEvent was triggered
+function boss:UseCustomTimers(useCustomTimers, noAfterBossError)
 	if useCustomTimers then
 		self.useCustomTimers = true
+		if noAfterBossError then
+			self.noAfterBossError = true
+		end
 	end
 end
 
@@ -440,11 +479,6 @@ function boss:GetRespawnTime()
 	end
 end
 
---- The NPC/mob id of the world boss.
--- Used to specify that a module is for a world boss, not an instance boss.
--- @within Enable triggers
-boss.worldBoss = nil
-
 --- The map id the boss should be listed under in the configuration menu, generally used for world bosses.
 -- @within Enable triggers
 boss.otherMenu = nil
@@ -493,15 +527,24 @@ end
 do
 	local AddPrivateAuraAppliedSound = C_UnitAuras.AddPrivateAuraAppliedSound
 	local RemovePrivateAuraAppliedSound = C_UnitAuras.RemovePrivateAuraAppliedSound
-	local InCombatLockdown = InCombatLockdown
+	local InChatMessagingLockdown = C_ChatInfo.InChatMessagingLockdown or function() end
+	local modulesNeedingUpdated = {}
+	local frame = CreateFrame("Frame")
+	frame:SetScript("OnEvent", function(self, event, restrictionType, state)
+		if restrictionType == 5 and state == 0 then
+			self:UnregisterEvent(event)
+			for module in next, modulesNeedingUpdated do
+				module:RegisterPrivateAuraSounds()
+			end
+			modulesNeedingUpdated = {}
+		end
+	end)
 	function boss:RegisterPrivateAuraSounds()
 		if not self:HasPrivateAuraSounds() then return end
 
-		if InCombatLockdown() then
-			self:RegisterEvent("PLAYER_REGEN_ENABLED", function(event)
-				self:UnregisterEvent(event)
-				self:RegisterPrivateAuraSounds()
-			end)
+		if InChatMessagingLockdown() then
+			modulesNeedingUpdated[self] = true
+			frame:RegisterEvent("ADDON_RESTRICTION_STATE_CHANGED")
 			return
 		end
 
@@ -829,15 +872,19 @@ function boss:Disable(isWipe)
 			end
 			self.errorChatPrints = nil
 			core:Print(("Extra info: %s, %s (%d#%s)"):format(self.moduleName, self:DifficultyName(), BigWigsAPI.GetVersion(), BigWigsAPI.GetVersionHash()))
+			if not self.noAfterBossError and self:ShouldShowBars() then
+				core:Error(("BigWigs: %q had issues reading the timeline. Show the devs a screenshot of the messages in your chat, NOT this error message."):format(self.moduleName), true)
+			end
 		end
 	end
 end
-function boss:Reboot(isWipe)
+function boss:Reboot(wipeTime, unitInfo)
 	if self:IsEnabled() then
+		local isWipe = wipeTime and true or false
 		self:Debug("Rebooting module", "isWipe:", isWipe, self:GetEncounterID())
 		if isWipe then
 			-- Devs, in 99% of cases you'll want to use OnBossWipe
-			self:SendMessage("BigWigs_OnBossWipe", self)
+			self:SendMessage("BigWigs_OnBossWipe", self, wipeTime, unitInfo)
 		end
 		self:Disable(isWipe)
 		self:Enable(isWipe)
@@ -849,15 +896,40 @@ end
 -- @section localization
 --
 
---- Get the current localization strings.
--- @return keyed table of localized strings
-function boss:GetLocale()
-	if not self.localization then
-		self.localization = {}
+do
+	local moduleLocaleList = {}
+	--- Get the current localization strings.
+	-- @return keyed table of localized strings
+	function boss:GetLocale()
+		if moduleLocaleList[self] then
+			return moduleLocaleList[self]
+		else -- DEPRECATED fallback
+			if not self.localization then
+				self.localization = {}
+			end
+			return self.localization
+		end
 	end
-	return self.localization
+	boss.NewLocale = boss.GetLocale -- DEPRECATED
+
+	local tfreeze = table.freeze or function() end
+	--- Set the default locale table.
+	-- @param localeTable the default locale table
+	function boss:SetDefaultLocale(localeTable)
+		if moduleLocaleList[self] then
+			error(("Module %q already has a default locale set."):format(self.moduleName))
+			return
+		end
+		local otherLocaleTable = BigWigsAPI.GetBossModuleLocale(self.moduleName)
+		if otherLocaleTable then
+			for key, value in next, otherLocaleTable do
+				localeTable[key] = value
+			end
+		end
+		tfreeze(localeTable)
+		moduleLocaleList[self] = localeTable
+	end
 end
-boss.NewLocale = boss.GetLocale
 
 do
 	local SetSpellRename = BigWigsAPI.SetSpellRename
@@ -1323,7 +1395,8 @@ do
 	local function wipeCheck(module)
 		if not IsEncounterInProgress() then
 			module:Debug(":StartWipeCheck IsEncounterInProgress() is nil, wiped", module:GetEncounterID())
-			module:Wipe()
+			local wipeTime = GetTime()
+			module:Wipe(wipeTime)
 		end
 	end
 
@@ -1620,7 +1693,8 @@ do
 			end
 
 			self:Debug(":CheckForWipe() found nothing active, rebooting module", self:GetEncounterID())
-			self:Wipe()
+			local wipeTime = GetTime()
+			self:Wipe(wipeTime)
 		end
 	end
 
@@ -1665,9 +1739,9 @@ do
 		end
 	end
 
-	function boss:Wipe()
+	function boss:Wipe(wipeTime, unitInfo)
 		if self:IsEnabled() then
-			self:Reboot(true)
+			self:Reboot(wipeTime, unitInfo)
 			if self.OnWipe then self:OnWipe() end
 		end
 	end
@@ -1762,7 +1836,7 @@ do
 		return modulesWiping[self]
 	end
 
-	function boss:EncounterEnd(_, id, name, diff, size, status)
+	function boss:EncounterEnd(_, id, name, diff, size, status, unitInfo)
 		if self:IsEncounterID(id) and self:IsEnabled() then
 			if status == 1 then
 				if self:GetJournalID() or self:GetAllowWin() then
@@ -1773,7 +1847,9 @@ do
 			elseif status == 0 then
 				modulesWiping[self] = true
 				self:SendMessage("BigWigs_StopBars", self)
-				SimpleTimer(5, function() modulesWiping[self] = nil self:Wipe() end) -- Delayed due to issues with some multi-boss encounters showing/hiding the boss frames (IEEU) rapidly whilst wiping.
+				local wipeTime = GetTime()
+				-- Delayed due to issues with some multi-boss encounters showing/hiding the boss frames (IEEU) rapidly whilst wiping.
+				SimpleTimer(5, function() modulesWiping[self] = nil self:Wipe(wipeTime, unitInfo) end)
 			end
 			self:SendMessage("BigWigs_EncounterEnd", self, id, name, diff, size, status) -- Do NOT use this for wipe detection, use BigWigs_OnBossWipe.
 		end
@@ -2749,7 +2825,7 @@ end
 local checkFlag
 do
 	local noDefaultError   = "Module %s uses %q as a toggle option, but it does not exist in the modules default values."
-	local notNumberError   = "Module %s tried to access %q, but in the database it's a %s."
+	--local notNumberError   = "Module %s tried to access %q, but in the database it's a %s."
 	local nilKeyError      = "Module %s tried to check the bitflags for a nil option key."
 	local invalidFlagError = "Module %s tried to check for an invalid flag type %q (%q). Flags must be bits."
 	local noDBError        = "Module %s does not have a .db property, which is weird."
@@ -3405,6 +3481,61 @@ do
 			end
 			self:Message(key, color, CL.other:format(text or self:SpellName(key), player), icon)
 		end)
+	end
+end
+
+--- Temporarily replace the next Blizzard boss message with a personal message in blue
+-- @number duration the duration the block should last
+-- @param key the option key
+-- @param[opt] localeString if nil then the "%s on YOU" string will be used, if false then the text field will be printed directly, otherwise the common locale will be referenced via CL[localeString]
+-- @param[opt] text the message text (if nil, key is used, if true, the raw Blizzard message is used)
+-- @param[opt] icon the message icon (spell id or texture name or true to use the Blizzard provided icon)
+function boss:PersonalMessageFromBlizzMessage(duration, key, localeString, text, icon)
+	self:StopBlizzMessages(duration)
+
+	if self:CanPassRoleRestrictions(key) then
+		local isEmphasized = self:CheckFlag(key, C.EMPHASIZE) or self:CheckFlag(key, C.ME_ONLY_EMPHASIZE)
+		if self:CheckFlag(key, C.MESSAGE) or isEmphasized then
+			local timer = self:ScheduleTimer(function()
+				self:UnregisterEvent("ENCOUNTER_WARNING")
+			end, duration)
+
+			self:RegisterEvent("ENCOUNTER_WARNING", function(event, infoTable)
+				self:CancelTimer(timer)
+				self:UnregisterEvent(event)
+
+				if text == true then
+					local iconToUse = nil
+					if icon == true then
+						iconToUse = infoTable.iconFileID
+					elseif icon ~= false then
+						iconToUse = icons[icon or key]
+					end
+					self:SendMessage("BigWigs_Message", self, key, infoTable.text, "blue", iconToUse, isEmphasized)
+				else
+					local str = localeString and CL[localeString] or CL.you
+					local msg = localeString == false and text or format(str, type(text) == "string" and text or spells[text or key])
+					self:SendMessage("BigWigs_Message", self, key, msg, "blue", icon ~= false and icons[icon or key], isEmphasized)
+				end
+			end)
+		end
+	end
+end
+
+--- Prevent any middle-screen boss emotes from showing.
+--- Only allowed for trash or world modules, normal modules do this automatically.
+--- If your module doesn't disable, you will need to manually allow them again.
+function boss:BlockBossEmotes()
+	if self:IsTrashModule() or self:IsWorldModule() then
+		self:SendMessage("BigWigs_BlockBossEmotes", self)
+	end
+end
+
+--- Allow middle-screen boss emotes to show, use after blocking them.
+--- This will be called automatically on module disable, so you don't need to call this unless your module doesn't disable itself.
+function boss:AllowBossEmotes()
+	if self:IsTrashModule() or self:IsWorldModule() then
+		self:SendMessage("BigWigs_AllowBossEmotes", self)
 	end
 end
 
@@ -4077,12 +4208,13 @@ do
 	function boss:Sync(msg, extra, noResend)
 		if msg then
 			if IsInGroup() then
+				local messageToTransmit
 				if extra then
-					msg = "B^".. msg .."^".. extra
+					messageToTransmit = "B^".. msg .."^".. extra
 				else
-					msg = "B^".. msg
+					messageToTransmit = "B^".. msg
 				end
-				local result = SendAddonMessage("BigWigs", msg, IsInGroup(2) and "INSTANCE_CHAT" or "RAID")
+				local result = SendAddonMessage("BigWigs", messageToTransmit, IsInGroup(2) and "INSTANCE_CHAT" or "RAID")
 				if type(result) == "number" and result > 0 then
 					if result == 3 or result == 8 or result == 9 then -- AddonMessageThrottle, ChannelThrottle, GeneralError
 						if not noResend then
@@ -4090,7 +4222,7 @@ do
 							return
 						end
 					elseif result ~= 11 then -- AddOnMessageLockdown
-						local errorMsg = format("Failed to send boss comm %q. Error code: %d", msg, result)
+						local errorMsg = format("Failed to send boss comm %q. Error code: %d", messageToTransmit, result)
 						core:Error(errorMsg)
 					end
 				end

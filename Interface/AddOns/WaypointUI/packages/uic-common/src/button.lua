@@ -196,7 +196,7 @@ do --Button
 end
 
 do --Button (Text)
-    local RED_TEXT_COLOR = GenericEnum.UIColorRGB.Normal
+    local RED_TEXT_COLOR = GenericEnum.UIColorRGB.NORMAL_FONT_COLOR
     local RED_TEXT_COLOR_HIGHLIGHTED = UIKit.Define.Color_RGBA{ r = 255, g = 255, b = 255, a = 1 }
     local GRAY_TEXT_COLOR = UIKit.Define.Color_RGBA{ r = 216, g = 216, b = 216, a = 1 }
     local GRAY_TEXT_COLOR_HIGHLIGHTED = UIKit.Define.Color_RGBA{ r = 255, g = 255, b = 255, a = 1 }
@@ -213,7 +213,7 @@ do --Button (Text)
         local buttonState = self:GetButtonState()
 
         if not isEnabled then
-            self.Text:textColor(isRed and RED_TEXT_COLOR or GRAY_TEXT_COLOR)
+            self.Text:textColor(GRAY_TEXT_COLOR)
         elseif buttonState == "NORMAL" then
             self.Text:textColor(isRed and RED_TEXT_COLOR or GRAY_TEXT_COLOR)
         elseif buttonState == "HIGHLIGHTED" then

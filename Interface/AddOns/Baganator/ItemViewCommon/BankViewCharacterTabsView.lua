@@ -160,7 +160,7 @@ function BaganatorItemViewCommonBankViewCharacterTabsViewMixin:ApplySearch(text)
 end
 
 function BaganatorItemViewCommonBankViewCharacterTabsViewMixin:ApplyTabButtonSearch(text)
-  if not self:IsShown() then
+  if not self:IsShown() or not self.Tabs then
     return
   end
 
@@ -602,4 +602,8 @@ function BaganatorItemViewCommonBankViewCharacterTabsViewMixin:OnFinished(charac
   self.Container:SetHeight(math.max(self.Container:GetHeight(), self:GetHeight() - spaceOccupied + self.Container:GetHeight()))
 
   self:UpdateScroll(50 + searchSpacing + topSpacing * 1/4 + externalVerticalSpacing + buttonPadding + self.CurrencyWidget:GetExtraHeight(), self:GetParent():GetScale())
+end
+
+if table.freeze then
+  table.freeze(BaganatorItemViewCommonBankViewCharacterTabsViewMixin)
 end

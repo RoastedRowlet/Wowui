@@ -1,8 +1,8 @@
-## Interface: 120001
+## Interface: 120005
 ## Title: Talent Loadout Ex
 ## Author: Morizo
 ## Notes: Multiple talent settings will be saved without limitation.
-## Version: 3.13.2
+## Version: 3.13.5
 ## IconTexture: Interface\AddOns\TalentLoadoutsEx\icon.blp
 ## DefaultState: Enabled
 ## LoadOnDemand: 0

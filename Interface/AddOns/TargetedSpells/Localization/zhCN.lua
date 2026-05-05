@@ -28,10 +28,9 @@ L.Functionality.CVarWarning = string.format(
 	ENABLE
 )
 
-L.Functionality.V2DeprecationWarning = string.format(
-	"%s\n\nDue to the changes in v2, the following settings were reset for you:\n\n%s\n\nAdditionally, we suggest verifying your layouting as it may also be impacted.",
-	addonNameWithIcon,
-	"%s"
+L.Functionality.V3MigrationWarning = string.format(
+	"%s\n\n由于 API 限制更新，Targeted Spells 的小队功能已被完全重新设计。请查看编辑模式以预览效果。",
+	addonNameWithIcon
 )
 
 L.Settings.EnabledLabel = "启用"
@@ -63,10 +62,6 @@ L.Settings.LoadConditionRoleLabels = {
 	[Private.Enum.Role.Tank] = "坦克",
 	[Private.Enum.Role.Damager] = "输出",
 }
-
-L.Settings.RoleFilterLabel = "Role Filter"
-L.Settings.RoleFilterTooltip = "Allows you to ignore certain roles from being shown. Use at your own risk."
-L.Settings.RoleFilterLabels = L.Settings.LoadConditionRoleLabels
 
 L.Settings.FrameWidthLabel = "宽度"
 L.Settings.FrameWidthTooltip = nil
@@ -105,10 +100,8 @@ L.Settings.FrameGrowLabels = {
 }
 
 L.Settings.GlowImportantLabel = "高亮重要法术"
-L.Settings.GlowImportantTooltip = "重要与否完全由游戏本身决定。"
 
-L.Settings.OnlyImportantLabel = "Only Show Important Spells"
-L.Settings.OnlyImportantTooltip = "Note that you're relying on what the game considers important, use at your own risk."
+L.Settings.OnlyImportantLabel = "仅显示重要法术"
 
 L.Settings.GlowTypeLabel = "高亮类型"
 L.Settings.GlowTypeTooltip = nil
@@ -120,45 +113,72 @@ L.Settings.GlowTypeLabels = {
 }
 
 L.Settings.ShowDurationLabel = "显示持续时间"
-L.Settings.ShowDurationTooltip = nil
-
-L.Settings.ShowDurationFractionsLabel = "显示小数"
-L.Settings.ShowDurationFractionsTooltip = nil
 
 L.Settings.IndicateInterruptsLabel = "标记可打断法术"
-L.Settings.IndicateInterruptsTooltip =
-	"使图标去色，在图标上显示标记，并延迟1秒隐藏图标。对引导类法术无效。"
 
-L.Settings.RenderInterruptSourceNameLabel = "Render Interrupt Source Name"
-L.Settings.RenderInterruptSourceNameTooltip = nil
+L.Settings.RenderInterruptSourceNameLabel = "显示打断来源名称"
 
 L.Settings.ShowSwipeLabel = "显示滑动"
-L.Settings.ShowSwipeTooltip = nil
 
-L.Settings.BorderStyleLabel = "Border Style"
+L.Settings.BorderStyleLabel = "边框样式"
 L.Settings.BorderStyleTooltip = nil
-L.Settings.BorderStyleSolid = "Solid"
 
-L.Settings.OpacityLabel = "不透明度"
-L.Settings.OpacityTooltip = nil
+L.Settings.ForegroundBarTextureLabel = "进度条纹理"
+L.Settings.ForegroundBarTextureTooltip = nil
 
-L.Settings.IconZoomLabel = "Icon Zoom"
+L.Settings.BackgroundBarTextureLabel = "背景条纹理"
+L.Settings.BackgroundBarTextureTooltip = nil
+
+L.Settings.BackgroundBarColorLabel = "背景条颜色"
+L.Settings.BackgroundBarColorTooltip =
+	"不透明度仅在编辑模式中可用，因为默认设置界面未公开此选项。"
+
+L.Settings.ProgressBarColorLabel = "进度条颜色"
+L.Settings.ProgressBarColorTooltip =
+	"不透明度仅在编辑模式中可用，因为默认设置界面未公开此选项。"
+
+L.Settings.MirrorLayoutLabel = "镜像布局"
+
+L.Settings.TextToSpeechVoiceLabel = "TTS Voice"
+L.Settings.TextToSpeechVoiceTooltip = "Voice for TTS announcements. Shared between Self and Party settings."
+
+L.Settings.AnnounceUntargetedSpellsLabel = "Untargeted TTS Settings"
+L.Settings.AnnounceUntargetedSpellsTooltip = "TTS for untargeted spells by NPC type."
+
+L.Settings.AnnounceTargetedSpellsLabel = "Targeted TTS Settings"
+L.Settings.AnnounceTargetedSpellsTooltip = "TTS for targeted spells by NPC type."
+
+L.Settings.NpcTypeLabels = {
+	[Private.Enum.NpcType.Boss] = "Bosses",
+	[Private.Enum.NpcType.Lieutenant] = "Lieutenants",
+	[Private.Enum.NpcType.Caster] = "Has Mana",
+	[Private.Enum.NpcType.Melee] = "Regular Melee",
+	[Private.Enum.NpcType.Minion] = "Minions",
+}
+
+L.Settings.HideUntargetedSpellsLabel = "隐藏无目标法术"
+
+L.Settings.HideTargetedSpellsLabel = "隐藏有目标法术"
+
+L.Settings.SelfOnlyLabel = "仅显示针对玩家的法术"
+
+L.Settings.InlineDurationLabel = "内嵌持续时间位置"
+
+L.Settings.UseInterruptabilityColorsLabel = "使用打断颜色"
+L.Settings.UseInterruptabilityColorsTooltip = nil
+
+L.Settings.UseTargetClassColorLabel = "使用目标职业颜色"
+L.Settings.UseTargetClassColorTooltip =
+	"以75%不透明度将条形颜色设为目标单位的职业颜色。未选中目标的法术将使用加亮后的背景条颜色。"
+
+L.Settings.UninterruptibleColorLabel = "不可打断颜色"
+L.Settings.UninterruptibleColorTooltip = nil
+
+L.Settings.InterruptibleColorLabel = "可打断颜色"
+L.Settings.InterruptibleColorTooltip = nil
+
+L.Settings.IconZoomLabel = "图标缩放"
 L.Settings.IconZoomTooltip = nil
-
-L.Settings.FrameOffsetXLabel = "X轴偏移"
-L.Settings.FrameOffsetXTooltip = nil
-
-L.Settings.FrameOffsetYLabel = "Y轴偏移"
-L.Settings.FrameOffsetYTooltip = nil
-
-L.Settings.FrameSourceAnchorLabel = "源锚点"
-L.Settings.FrameSourceAnchorTooltip = nil
-
-L.Settings.FrameTargetAnchorLabel = "目标锚点"
-L.Settings.FrameTargetAnchorTooltip = nil
-
-L.Settings.IncludeSelfInPartyLabel = "在小队中包含自己"
-L.Settings.IncludeSelfInPartyTooltip = "仅在使用团队样式小队框架时生效。"
 
 L.Settings.ClickToOpenSettingsLabel = "点击打开设置"
 
@@ -168,22 +188,29 @@ L.Settings.Export = "导出"
 L.Settings.FontLabel = "字体"
 L.Settings.FontTooltip = nil
 
-L.Settings.FeatureFlagsLabel = "Features"
+L.Settings.FeatureFlagsLabel = "功能"
 L.Settings.FeatureFlagsTooltip = nil
 
 L.Settings.FeatureFlagLabels = {
 	[Private.Enum.FeatureFlag.GlowImportant] = L.Settings.GlowImportantLabel,
 	[Private.Enum.FeatureFlag.OnlyImportant] = L.Settings.OnlyImportantLabel,
 	[Private.Enum.FeatureFlag.ShowDuration] = L.Settings.ShowDurationLabel,
-	[Private.Enum.FeatureFlag.ShowDurationFractions] = L.Settings.ShowDurationFractionsLabel,
 	[Private.Enum.FeatureFlag.ShowSwipe] = L.Settings.ShowSwipeLabel,
 	[Private.Enum.FeatureFlag.IndicateInterrupts] = L.Settings.IndicateInterruptsLabel,
 	[Private.Enum.FeatureFlag.RenderInterruptSourceName] = L.Settings.RenderInterruptSourceNameLabel,
-	[Private.Enum.FeatureFlag.IncludeSelfInParty] = L.Settings.IncludeSelfInPartyLabel,
+	[Private.Enum.FeatureFlag.ShowIcon] = "显示图标",
+	[Private.Enum.FeatureFlag.ShowTargetMarker] = "显示目标标记",
+	[Private.Enum.FeatureFlag.ShowSpellName] = "显示法术名称",
+	[Private.Enum.FeatureFlag.ShowTargetName] = "显示目标名称",
+	[Private.Enum.FeatureFlag.ShowTargetClassColor] = "显示目标职业颜色",
+	[Private.Enum.FeatureFlag.MirrorLayout] = L.Settings.MirrorLayoutLabel,
+	[Private.Enum.FeatureFlag.InlineDuration] = L.Settings.InlineDurationLabel,
+	[Private.Enum.FeatureFlag.HideUntargetedSpells] = L.Settings.HideUntargetedSpellsLabel,
+	[Private.Enum.FeatureFlag.HideTargetedSpells] = L.Settings.HideTargetedSpellsLabel,
+	[Private.Enum.FeatureFlag.SelfOnly] = L.Settings.SelfOnlyLabel,
 }
 
 L.Settings.FeatureFlagSettingTitles = {
-	[Private.Enum.FeatureFlag.GlowImportant] = "Display",
-	[Private.Enum.FeatureFlag.IndicateInterrupts] = "Interrupt Settings",
-	[Private.Enum.FeatureFlag.IncludeSelfInParty] = "Party Settings",
+	[Private.Enum.FeatureFlag.GlowImportant] = "显示",
+	[Private.Enum.FeatureFlag.IndicateInterrupts] = "打断设置",
 }

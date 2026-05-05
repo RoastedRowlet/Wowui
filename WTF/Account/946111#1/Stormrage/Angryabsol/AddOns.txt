@@ -80,3 +80,11 @@ LittleWigs_Legion: enabled
 LittleWigs_Dragonflight: enabled
 BigWigs_TheDreamrift: enabled
 BigWigs_MarchOnQuelDanas: enabled
+EllesmereUIMythicTimer: disabled
+EllesmereUIQuestTracker: disabled
+EllesmereUIFriends: disabled
+EllesmereUIChat: enabled
+M33kAurasCompanion: enabled
+M33kAurasArchive: enabled
+M33Auras: disabled
+WeakAuras: disabled

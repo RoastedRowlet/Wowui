@@ -9,6 +9,34 @@ local ADDON, ns = ...
 -- Round to nearest integer for pixel-perfect SetSize calls.
 local function PixelSize(n) return math.floor(n + 0.5) end
 
+-- SanitizeOutline: return a valid TBFFlags value (or nil) for SetFont.
+-- WoW 12.0.5 type-validates the flags argument against the TBFFlags enum
+-- (see SimpleFontStringAPIDocumentation.lua — flags is Type=TBFFlags, Nilable=true).
+-- Legacy DB entries store "NONE" because "None" was an options-dropdown value;
+-- "NONE" is not a valid TBFFlags token and now throws "bad argument #4 to '?'",
+-- which aborts ApplyAppearance mid-execution (so text position / movability /
+-- shadow stops applying). We normalize "NONE"/"None"/empty to nil, the
+-- documented "no flags" value, and pass through the valid tokens unchanged.
+local _validOutlineFlags = {
+  OUTLINE = true,
+  THICKOUTLINE = true,
+  MONOCHROME = true,
+  ["OUTLINE, MONOCHROME"] = true,
+  ["THICKOUTLINE, MONOCHROME"] = true,
+  ["MONOCHROME, OUTLINE"] = true,
+  ["MONOCHROME, THICKOUTLINE"] = true,
+}
+local function SanitizeOutline(flag)
+  if flag == nil or flag == "" or flag == "NONE" or flag == "None" then
+    return nil
+  end
+  if _validOutlineFlags[flag] then
+    return flag
+  end
+  -- Unknown / malformed flag value — fall back to nil rather than risk an error.
+  return nil
+end
+
 -- SnapToGroupPx: identical formula to CDMGroups Layout() snapPx.
 -- Uses UIParent:GetScale() (not container:GetEffectiveScale()) to match CDMGroups exactly.
 -- CDMGroups builds _slotAreaW with this formula; re-snapping with a different formula
@@ -772,11 +800,33 @@ end
 -- Uses GetPowerRegenForPowerType to predict next essence tick
 -- Tracks _essenceNextTick / _essenceLastCount across frames for smooth fill
 -- Reuses cached tables to avoid per-frame allocations
+--
+-- 12.0.5 NOTE: GetPowerRegenForPowerType returns a SECRET number in combat,
+-- so we can't compare it there. We snapshot the haste-scaled tick duration
+-- on out-of-combat events (PLAYER_REGEN_ENABLED, PLAYER_ENTERING_WORLD,
+-- spec/talent change) and reuse that cached value during combat. Mid-combat
+-- haste procs (Bloodlust, trinkets) won't update the fill animation speed,
+-- but the "ready" state is always accurate because it comes from UnitPower.
 -- ===================================================================
 local _essenceNextTick = nil
 local _essenceLastCount = nil
 local _essenceDataCache = {}
 local _essenceCacheMax = 0
+local _essenceCachedTickDuration = 5  -- safe fallback: 0% haste = 5s/essence
+
+-- Snapshot the current haste-scaled essence tick duration.
+-- Only called from out-of-combat event handlers, so GetPowerRegenForPowerType
+-- returns a non-secret value that we can safely compare and divide.
+-- Early-outs for non-Evokers so other classes pay zero cost.
+local function SnapshotEssenceTickDuration()
+  local _, playerClass = UnitClass("player")
+  if playerClass ~= "EVOKER" then return end
+  local rate = GetPowerRegenForPowerType(Enum.PowerType.Essence)
+  if rate and not (issecretvalue and issecretvalue(rate)) and rate > 0 then
+    _essenceCachedTickDuration = 1 / rate
+  end
+end
+ns.Resources.SnapshotEssenceTickDuration = SnapshotEssenceTickDuration
 
 function ns.Resources.GetEssenceCooldownDetails()
   local max = UnitPowerMax("player", Enum.PowerType.Essence) or 5
@@ -785,9 +835,18 @@ function ns.Resources.GetEssenceCooldownDetails()
   local current = UnitPower("player", Enum.PowerType.Essence)
   local now = GetTime()
   
-  -- Calculate tick duration from regen rate
-  local regenRate = GetPowerRegenForPowerType(Enum.PowerType.Essence) or 0.2
-  local tickDuration = (regenRate > 0) and (1 / regenRate) or 5
+  -- Calculate tick duration from regen rate.
+  -- 12.0.5: GetPowerRegenForPowerType is secret in combat. When non-secret
+  -- (out of combat), refresh the cache from the live value. When secret
+  -- (in combat), use the last snapshotted value so haste scaling is preserved.
+  local regenRate = GetPowerRegenForPowerType(Enum.PowerType.Essence)
+  local tickDuration
+  if regenRate and not (issecretvalue and issecretvalue(regenRate)) and regenRate > 0 then
+    tickDuration = 1 / regenRate
+    _essenceCachedTickDuration = tickDuration
+  else
+    tickDuration = _essenceCachedTickDuration
+  end
   
   -- Initialize tracking state
   if _essenceLastCount == nil then _essenceLastCount = current end
@@ -3167,18 +3226,55 @@ local function UpdateThresholdLayers(barNumber, secretValue, passedMaxValue, dis
     -- identically to WeakAuras/ElvUI. Physical-pixel rounding causes either unequal
     -- segments or bar overhang — both more visible than a ~0.5px subpixel blend.
 
+    -- segSizes[i] and segOffsets[i]: exact WoW-unit width and start position for each segment.
+    -- All computed in integer PHYSICAL PIXELS then converted once to WoW units.
+    -- This eliminates float accumulation drift that shifts fill relative to border.
+    -- Gaps are always exactly snapSpc WoW units. Segment widths differ by at most 1px.
+    local segSizes   = {}
+    local segOffsets = {}
+
     if isMatchingGroup then
       local mfW = mainFrame:GetWidth()
       local mfH = mainFrame:GetHeight()
       local totalGapSnapped = snapSpc * math.max(0, numSegments - 1)
       totalGaps = totalGapSnapped
 
+      local _, screenH = GetPhysicalScreenSize()
+      local uiScale = UIParent:GetScale()
+      local ppu = (screenH and screenH > 0 and uiScale and uiScale > 0)
+                  and (screenH / 768) * uiScale or 1
+
+      -- snapSpc in physical pixels (integer)
+      local snapSpcPx = math.floor(snapSpc * ppu + 0.5)
+
       if isLayoutVertical then
-        segmentWidth  = mfW
-        segmentHeight = (mfH - totalGapSnapped) / numSegments
+        segmentWidth = mfW
+        local mfHpx     = math.floor(mfH * ppu + 0.5)
+        local contentPx = mfHpx - snapSpcPx * math.max(0, numSegments - 1)
+        local base = math.floor(contentPx / numSegments)
+        local rem  = contentPx - base * numSegments
+        local curPx = 0
+        for j = 1, numSegments do
+          local szPx = (j <= rem) and (base + 1) or base
+          segOffsets[j] = curPx / ppu
+          segSizes[j]   = szPx  / ppu
+          curPx = curPx + szPx + snapSpcPx
+        end
+        segmentHeight = segSizes[1]
       else
         segmentHeight = mfH
-        segmentWidth  = (mfW - totalGapSnapped) / numSegments
+        local mfWpx     = math.floor(mfW * ppu + 0.5)
+        local contentPx = mfWpx - snapSpcPx * math.max(0, numSegments - 1)
+        local base = math.floor(contentPx / numSegments)
+        local rem  = contentPx - base * numSegments
+        local curPx = 0
+        for j = 1, numSegments do
+          local szPx = (j <= rem) and (base + 1) or base
+          segOffsets[j] = curPx / ppu
+          segSizes[j]   = szPx  / ppu
+          curPx = curPx + szPx + snapSpcPx
+        end
+        segmentWidth = segSizes[1]
       end
     else
       local scale = cfg.display.barScale or 1.0
@@ -3260,12 +3356,14 @@ local function UpdateThresholdLayers(barNumber, secretValue, passedMaxValue, dis
         div:SetColorTexture(bc.r, bc.g, bc.b, bc.a or 1)
         
         if isLayoutVertical then
-          local yPos = d * segmentHeight
+          -- Divider sits at the start of segment d+1 (precomputed pixel-perfect offset).
+          local yPos = segOffsets[d + 1] or (d * segmentHeight)
           div:SetPoint("LEFT", mainFrame, "BOTTOMLEFT", bt, yPos)
           div:SetPoint("RIGHT", mainFrame, "BOTTOMRIGHT", -bt, yPos)
           div:SetHeight(bt)
         else
-          local xPos = d * segmentWidth
+          -- Divider sits at the start of segment d+1 (precomputed pixel-perfect offset).
+          local xPos = segOffsets[d + 1] or (d * segmentWidth)
           div:SetPoint("TOPLEFT", mainFrame, "TOPLEFT", xPos, -bt)
           div:SetPoint("BOTTOMLEFT", mainFrame, "BOTTOMLEFT", xPos, bt)
           div:SetWidth(bt)
@@ -3365,10 +3463,9 @@ local function UpdateThresholdLayers(barNumber, secretValue, passedMaxValue, dis
       segFrame:ClearAllPoints()
       if isLayoutVertical then
         if isMatchingGroup then
-          -- Float positioning: segmentHeight = mfH/N exactly. GPU handles subpixel edges.
-          local yOffset = (i - 1) * (segmentHeight + snapSpc)
-          segFrame:SetPoint("BOTTOMLEFT", mainFrame, "BOTTOMLEFT", 0, yOffset)
-          segFrame:SetSize(segmentWidth, segmentHeight)
+          -- Positions precomputed in integer pixels, no float accumulation drift.
+          segFrame:SetPoint("BOTTOMLEFT", mainFrame, "BOTTOMLEFT", 0, segOffsets[i])
+          segFrame:SetSize(segmentWidth, segSizes[i])
         else
           local snapH    = PixelSnap(segmentHeight, mainFrame:GetEffectiveScale())
           local snapStep = PixelSnap(segmentHeight + spacing, mainFrame:GetEffectiveScale())
@@ -3378,10 +3475,9 @@ local function UpdateThresholdLayers(barNumber, secretValue, passedMaxValue, dis
         end
       else
         if isMatchingGroup then
-          -- Float positioning: segmentWidth = mfW/N exactly. GPU handles subpixel edges.
-          local xOffset = (i - 1) * (segmentWidth + snapSpc)
-          segFrame:SetPoint("TOPLEFT", mainFrame, "TOPLEFT", xOffset, 0)
-          segFrame:SetSize(segmentWidth, segmentHeight)
+          -- Positions precomputed in integer pixels, no float accumulation drift.
+          segFrame:SetPoint("TOPLEFT", mainFrame, "TOPLEFT", segOffsets[i], 0)
+          segFrame:SetSize(segSizes[i], segmentHeight)
         else
           local snapW    = PixelSnap(segmentWidth, mainFrame:GetEffectiveScale())
           local snapStep = PixelSnap(segmentWidth + spacing, mainFrame:GetEffectiveScale())
@@ -3566,7 +3662,7 @@ local function UpdateThresholdLayers(barNumber, secretValue, passedMaxValue, dis
       end
       
       -- Update cooldown text
-      segFrame.cdText:SetFont(cdTextFontPath, textSize, cdTextOutline)
+      segFrame.cdText:SetFont(cdTextFontPath, textSize, SanitizeOutline(cdTextOutline))
       segFrame.cdText:SetTextColor(cdTextColor.r, cdTextColor.g, cdTextColor.b, cdTextColor.a or 1)
       segFrame.cdText:ClearAllPoints()
       segFrame.cdText:SetPoint("CENTER", segFrame, "CENTER", textOffsetX, textOffsetY)
@@ -4230,7 +4326,7 @@ local function UpdateThresholdLayers(barNumber, secretValue, passedMaxValue, dis
       end
       
       -- Update cooldown text
-      iconFrame.cdText:SetFont(iconCDTextFontPath, iconCDTextSize, iconCDTextOutline)
+      iconFrame.cdText:SetFont(iconCDTextFontPath, iconCDTextSize, SanitizeOutline(iconCDTextOutline))
       iconFrame.cdText:SetTextColor(iconCDTextColor.r, iconCDTextColor.g, iconCDTextColor.b, iconCDTextColor.a or 1)
       iconFrame.cdText:ClearAllPoints()
       iconFrame.cdText:SetPoint("CENTER", iconFrame, "CENTER", iconCDTextOffsetX, iconCDTextOffsetY)
@@ -4407,7 +4503,7 @@ local function UpdateThresholdLayers(barNumber, secretValue, passedMaxValue, dis
       end
       local fontSize = cfg.display.durationFontSize or 18
       local outline = cfg.display.durationOutline or "THICKOUTLINE"
-      fs:SetFont(fontPath, fontSize, outline)
+      fs:SetFont(fontPath, fontSize, SanitizeOutline(outline))
       local dc = cfg.display.durationColor or {r=1, g=1, b=1, a=1}
       fs:SetTextColor(dc.r, dc.g, dc.b, dc.a or 1)
       if cfg.display.durationShadow then
@@ -4432,7 +4528,7 @@ local function UpdateThresholdLayers(barNumber, secretValue, passedMaxValue, dis
       local durationStrata = cfg.display.durationTextStrata or cfg.display.barFrameStrata or "HIGH"
       local barLevel = cfg.display.barFrameLevel or 10
       local durationLevel = cfg.display.durationTextLevel or (barLevel + 3)
-      pfs:SetFont(fontPath, fontSize, outline)
+      pfs:SetFont(fontPath, fontSize, SanitizeOutline(outline))
       pfs:SetTextColor(dc.r, dc.g, dc.b, dc.a or 1)
       if cfg.display.durationShadow then
         pfs:SetShadowOffset(1, -1) ; pfs:SetShadowColor(0, 0, 0, 1)
@@ -4726,10 +4822,15 @@ local function UpdateThresholdLayers(barNumber, secretValue, passedMaxValue, dis
       -- Smoothing
       local enableSmooth = cfg.display.enableSmoothing
       
-      -- Segment gap (built into segment size like Display.lua)
-      local segGap = cfg.display.segmentedSpacing or 1
+      -- Segment positioning: work in integer physical pixels so every boundary lands
+      -- on an exact physical pixel — same approach as Display.lua perStack loop.
+      -- Float division (totalSize/segmentCount) causes inconsistent gaps at non-integer scales.
+      local scale = mainFrame:GetEffectiveScale()
+      local _, _screenH = GetPhysicalScreenSize()
+      local pmult = (_screenH and _screenH > 0 and scale and scale > 0) and (768 / _screenH) / scale or 1
       local totalSize = isVertical and mainFrame:GetHeight() or mainFrame:GetWidth()
-      local segmentSize = totalSize / segmentCount
+      local totalPixels = math.floor(totalSize / pmult + 0.5)
+      local segGapPx = math.floor((cfg.display.segmentedSpacing or 1) + 0.5)
       
       -- Current value for comparison
       -- Use raw secretValue for fractional resources (Destruction soul shards: 3.5 fills segment 4 to 50%)
@@ -4756,30 +4857,32 @@ local function UpdateThresholdLayers(barNumber, secretValue, passedMaxValue, dis
         segBar:SetFrameLevel(mainFrame:GetFrameLevel() + i)
         ApplyBarSmoothing(segBar, enableSmooth)
         
-        -- 2-point anchoring (matches Display.lua pattern)
+        -- 2-point anchoring using integer pixel boundaries (matches Display.lua)
         segBar:ClearAllPoints()
+        local startPixel = math.floor((i - 1) * totalPixels / segmentCount)
+        local endPixel   = math.floor(i       * totalPixels / segmentCount)
+        local sizePixels = math.max(2, endPixel - startPixel - segGapPx)
+        local offset  = startPixel * pmult
+        local barSize = sizePixels * pmult
+
         if isVertical then
           if reverseFill then
-            -- Reverse: position from TOP (fills top-to-bottom)
-            segBar:SetPoint("TOPLEFT", mainFrame, "TOPLEFT", 0, -(i - 1) * segmentSize)
-            segBar:SetPoint("TOPRIGHT", mainFrame, "TOPRIGHT", 0, -(i - 1) * segmentSize)
+            segBar:SetPoint("TOPRIGHT", mainFrame, "TOPRIGHT", 0, -(offset))
+            segBar:SetPoint("TOPLEFT",  mainFrame, "TOPLEFT",  0, -(offset))
           else
-            -- Normal: position from BOTTOM (fills bottom-to-top)
-            segBar:SetPoint("BOTTOMLEFT", mainFrame, "BOTTOMLEFT", 0, (i - 1) * segmentSize)
-            segBar:SetPoint("BOTTOMRIGHT", mainFrame, "BOTTOMRIGHT", 0, (i - 1) * segmentSize)
+            segBar:SetPoint("BOTTOMLEFT",  mainFrame, "BOTTOMLEFT",  0, offset)
+            segBar:SetPoint("BOTTOMRIGHT", mainFrame, "BOTTOMRIGHT", 0, offset)
           end
-          segBar:SetHeight(math.max(2, segmentSize - segGap))
+          segBar:SetHeight(barSize)
         else
           if reverseFill then
-            -- Reverse: position from RIGHT (fills right-to-left)
-            segBar:SetPoint("TOPRIGHT", mainFrame, "TOPRIGHT", -(i - 1) * segmentSize, 0)
-            segBar:SetPoint("BOTTOMRIGHT", mainFrame, "BOTTOMRIGHT", -(i - 1) * segmentSize, 0)
+            segBar:SetPoint("TOPRIGHT",    mainFrame, "TOPRIGHT",    -(offset), 0)
+            segBar:SetPoint("BOTTOMRIGHT", mainFrame, "BOTTOMRIGHT", -(offset), 0)
           else
-            -- Normal: position from LEFT (fills left-to-right)
-            segBar:SetPoint("TOPLEFT", mainFrame, "TOPLEFT", (i - 1) * segmentSize, 0)
-            segBar:SetPoint("BOTTOMLEFT", mainFrame, "BOTTOMLEFT", (i - 1) * segmentSize, 0)
+            segBar:SetPoint("TOPLEFT",    mainFrame, "TOPLEFT",    offset, 0)
+            segBar:SetPoint("BOTTOMLEFT", mainFrame, "BOTTOMLEFT", offset, 0)
           end
-          segBar:SetWidth(math.max(2, segmentSize - segGap))
+          segBar:SetWidth(barSize)
         end
         
         -- Use SetMinMaxValues(i-1, i) so StatusBar handles fill natively
@@ -5138,7 +5241,7 @@ local function UpdateThresholdLayers(barNumber, secretValue, passedMaxValue, dis
       
       for i = 1, numSegs do
         local fs = mainFrame.simpleCdTexts[i]
-        fs:SetFont(cdTextFontPath, cdTextSize, cdTextOutline)
+        fs:SetFont(cdTextFontPath, cdTextSize, SanitizeOutline(cdTextOutline))
         fs:SetTextColor(cdTextColor.r, cdTextColor.g, cdTextColor.b, cdTextColor.a or 1)
         fs:ClearAllPoints()
         
@@ -5609,106 +5712,93 @@ function ns.Resources.UpdateBar(barNumber)
       end
     end
     
-    -- Render tick marks anchored to the fill bar (same space as fill, no border offset needed)
+    -- Render tick marks anchored to the fill bar
     local thickness = cfg.display.tickThickness or 2
     local tc = cfg.display.tickColor or {r=1, g=1, b=1, a=0.8}
     local tickHeightPct = cfg.display.tickHeightPercent or 100
-    local heightAnchor = cfg.display.tickHeightAnchor or "center"     -- "center", "top", "bottom"
-    local thicknessAnchor = cfg.display.tickThicknessAnchor or "center"  -- "center", "start", "end"
-    
-    -- Account for border so ticks don't overflow the bar edges
+    local heightAnchor = cfg.display.tickHeightAnchor or "center"
+    local thicknessAnchor = cfg.display.tickThicknessAnchor or "center"
+    local scale = mainFrame:GetEffectiveScale()
+    local _, _screenH = GetPhysicalScreenSize()
+    local _pmult = (_screenH and _screenH > 0 and scale and scale > 0) and (768 / _screenH) / scale or 1
+
+    -- For perStack mode: use border-inset and pixel-snapped positions matching the
+    -- segment loop formula (Display.lua pattern). For other modes: simple float math.
+    local isPerStack = (displayMode == "perStack")
+    local segInset = 0
+    if isPerStack and cfg.display.showBorder then
+      segInset = _pmult * (cfg.display.drawnBorderThickness or 2)
+    end
     local borderInset = cfg.display.drawnBorderThickness or 2
     if not cfg.display.showBorder then borderInset = 0 end
-    local availWidth = math.max(1, width - (2 * borderInset))
-    local availHeight = math.max(1, height - (2 * borderInset))
-    
+
+    local tickTotalSize = isVertical and height or width
+    local tickInsetSize = tickTotalSize - 2 * segInset
+    local availWidth  = math.max(1, width  - 2 * (isPerStack and segInset or borderInset))
+    local availHeight = math.max(1, height - 2 * (isPerStack and segInset or borderInset))
+
+    -- For perStack: integer pixel total so tick positions match segment boundaries exactly
+    local _totalPx = isPerStack and math.floor(tickInsetSize / _pmult + 0.5) or nil
+
     for _, tickValue in ipairs(tickPositions) do
       if mainFrame.tickMarks[tickIndex] then
         local tick = mainFrame.tickMarks[tickIndex]
-        local pixelThickness = PixelUtil.GetNearestPixelSize(thickness, mainFrame:GetEffectiveScale(), thickness)
+        local pixelThickness = PixelUtil.GetNearestPixelSize(thickness, scale, thickness)
         local halfThick = pixelThickness / 2
-        
+
         tick:ClearAllPoints()
         tick:SetColorTexture(tc.r, tc.g, tc.b, tc.a or 1)
-        
+
         if isVertical then
-          -- Vertical bar: ticks are horizontal lines crossing the bar
-          -- Position along bar (Y), height spans X (perpendicular)
-          local rawY = (tickValue / tickMaxValue) * height
+          local rawY
+          if isPerStack then
+            rawY = segInset + math.floor(tickValue / tickMaxValue * _totalPx) * _pmult
+          else
+            rawY = (tickValue / tickMaxValue) * height
+          end
           local tickSpan = availWidth * (tickHeightPct / 100)
           tick:SetSize(tickSpan, pixelThickness)
-          
-          -- Thickness anchor (along Y axis): shifts tick position
+
           local posY = rawY
-          if thicknessAnchor == "center" then
-            posY = rawY - halfThick
-          elseif thicknessAnchor == "end" then
-            posY = rawY - pixelThickness
-          end
-          -- else "start": posY = rawY (grows from position)
-          
-          -- Height anchor (along X, perpendicular): where the tick span sits
+          if thicknessAnchor == "center" then posY = rawY - halfThick
+          elseif thicknessAnchor == "end" then posY = rawY - pixelThickness end
+
           if heightAnchor == "top" then
-            -- "top" in vertical = left side
-            if isReverseFill then
-              tick:SetPoint("TOPLEFT", mainFrame.tickOverlay, "TOPLEFT", 0, -posY)
-            else
-              tick:SetPoint("BOTTOMLEFT", mainFrame.tickOverlay, "BOTTOMLEFT", 0, posY)
-            end
+            if isReverseFill then tick:SetPoint("TOPLEFT",    mainFrame.tickOverlay, "TOPLEFT",    0, -posY)
+            else                  tick:SetPoint("BOTTOMLEFT", mainFrame.tickOverlay, "BOTTOMLEFT", 0,  posY) end
           elseif heightAnchor == "bottom" then
-            -- "bottom" in vertical = right side
-            if isReverseFill then
-              tick:SetPoint("TOPRIGHT", mainFrame.tickOverlay, "TOPRIGHT", 0, -posY)
-            else
-              tick:SetPoint("BOTTOMRIGHT", mainFrame.tickOverlay, "BOTTOMRIGHT", 0, posY)
-            end
+            if isReverseFill then tick:SetPoint("TOPRIGHT",    mainFrame.tickOverlay, "TOPRIGHT",    0, -posY)
+            else                  tick:SetPoint("BOTTOMRIGHT", mainFrame.tickOverlay, "BOTTOMRIGHT", 0,  posY) end
           else
-            -- "center" (default): single anchor auto-centers the perpendicular axis
-            if isReverseFill then
-              tick:SetPoint("TOP", mainFrame.tickOverlay, "TOP", 0, -posY)
-            else
-              tick:SetPoint("BOTTOM", mainFrame.tickOverlay, "BOTTOM", 0, posY)
-            end
+            if isReverseFill then tick:SetPoint("TOP",    mainFrame.tickOverlay, "TOP",    0, -posY)
+            else                  tick:SetPoint("BOTTOM", mainFrame.tickOverlay, "BOTTOM", 0,  posY) end
           end
         else
-          -- Horizontal bar: ticks are vertical lines crossing the bar
-          -- Position along bar (X), height spans Y (perpendicular)
-          local rawX = (tickValue / tickMaxValue) * width
+          local rawX
+          if isPerStack then
+            rawX = segInset + math.floor(tickValue / tickMaxValue * _totalPx) * _pmult
+          else
+            rawX = (tickValue / tickMaxValue) * width
+          end
           local tickSpan = availHeight * (tickHeightPct / 100)
           tick:SetSize(pixelThickness, tickSpan)
-          
-          -- Thickness anchor (along X axis): shifts tick position
+
           local posX = rawX
-          if thicknessAnchor == "center" then
-            posX = rawX - halfThick
-          elseif thicknessAnchor == "end" then
-            posX = rawX - pixelThickness
-          end
-          -- else "start": posX = rawX (grows from position)
-          
-          -- Height anchor (along Y, perpendicular): where the tick span sits
+          if thicknessAnchor == "center" then posX = rawX - halfThick
+          elseif thicknessAnchor == "end" then posX = rawX - pixelThickness end
+
           if heightAnchor == "top" then
-            if isReverseFill then
-              tick:SetPoint("TOPRIGHT", mainFrame.tickOverlay, "TOPRIGHT", -posX, 0)
-            else
-              tick:SetPoint("TOPLEFT", mainFrame.tickOverlay, "TOPLEFT", posX, 0)
-            end
+            if isReverseFill then tick:SetPoint("TOPRIGHT",    mainFrame.tickOverlay, "TOPRIGHT",    -posX, 0)
+            else                  tick:SetPoint("TOPLEFT",     mainFrame.tickOverlay, "TOPLEFT",      posX, 0) end
           elseif heightAnchor == "bottom" then
-            if isReverseFill then
-              tick:SetPoint("BOTTOMRIGHT", mainFrame.tickOverlay, "BOTTOMRIGHT", -posX, 0)
-            else
-              tick:SetPoint("BOTTOMLEFT", mainFrame.tickOverlay, "BOTTOMLEFT", posX, 0)
-            end
+            if isReverseFill then tick:SetPoint("BOTTOMRIGHT", mainFrame.tickOverlay, "BOTTOMRIGHT", -posX, 0)
+            else                  tick:SetPoint("BOTTOMLEFT",  mainFrame.tickOverlay, "BOTTOMLEFT",   posX, 0) end
           else
-            -- "center" (default): single anchor auto-centers the perpendicular axis
-            if isReverseFill then
-              tick:SetPoint("RIGHT", mainFrame.tickOverlay, "RIGHT", -posX, 0)
-            else
-              tick:SetPoint("LEFT", mainFrame.tickOverlay, "LEFT", posX, 0)
-            end
+            if isReverseFill then tick:SetPoint("RIGHT", mainFrame.tickOverlay, "RIGHT", -posX, 0)
+            else                  tick:SetPoint("LEFT",  mainFrame.tickOverlay, "LEFT",   posX, 0) end
           end
         end
-        
+
         tick:Show()
         tickIndex = tickIndex + 1
       end
@@ -6084,7 +6174,7 @@ function ns.Resources.ApplyAppearance(barNumber)
   local fontSize = display.fontSize or 20
   local outline = display.textOutline or "THICKOUTLINE"
   local font = (LSM and LSM:Fetch("font", fontName)) or "Fonts\\FRIZQT__.TTF"
-  textFrame.text:SetFont(font, fontSize, outline)
+  textFrame.text:SetFont(font, fontSize, SanitizeOutline(outline))
   
   -- Apply text shadow setting
   if display.textShadow then
@@ -6873,11 +6963,15 @@ eventFrame:SetScript("OnEvent", function(self, event, arg1, arg2, ...)
       else
         InitWithRetry()
       end
+      SnapshotEssenceTickDuration()  -- 12.0.5: cache haste-scaled essence tick out of combat
     end)
     
   elseif event == "PLAYER_REGEN_ENABLED" or event == "PLAYER_REGEN_DISABLED" then
     if not isInitialized then return end
     ns.Resources.UpdateAllBars()
+    if event == "PLAYER_REGEN_ENABLED" then
+      SnapshotEssenceTickDuration()  -- 12.0.5: refresh cached essence tick when combat ends
+    end
     
   elseif event == "PLAYER_SPECIALIZATION_CHANGED" then
     -- Spec changed - refresh all bar visibility and update max values
@@ -6887,6 +6981,7 @@ eventFrame:SetScript("OnEvent", function(self, event, arg1, arg2, ...)
       SyncAllAutoPowerProfiles()
       ns.Resources.UpdateMaxValues()
       ns.Resources.RefreshAllBars()
+      SnapshotEssenceTickDuration()  -- 12.0.5: spec change may alter haste
     end)
     
   elseif event == "TRAIT_CONFIG_UPDATED" then
@@ -6896,6 +6991,7 @@ eventFrame:SetScript("OnEvent", function(self, event, arg1, arg2, ...)
     C_Timer.After(0.2, function()
       ns.Resources.UpdateMaxValues()
       ns.Resources.UpdateAllBars()
+      SnapshotEssenceTickDuration()  -- 12.0.5: talents may alter haste
     end)
     
   elseif event == "UNIT_SPELLCAST_START" and arg1 == "player" then
@@ -7288,6 +7384,12 @@ function ns.Resources.OnGroupContainerSizeChanged(groupName, newWidth, newHeight
               mainFrame:SetPoint("LEFT", container, "RIGHT", offsetX, offsetY)
             end
           end
+          -- Tick marks (segmented) and dividers (fragmented) are drawn inside UpdateBar
+          -- using mainFrame:GetWidth(). After a resize, redraw them at the new width.
+          local mode = cfg.display.thresholdMode
+          if mode == "fragmented" or mode == "segmented" or mode == "perStack" or cfg.display.showTickMarks then
+            ns.Resources.UpdateBar(barNumber)
+          end
         end
       end
     end
@@ -7395,6 +7497,15 @@ local function OnContainerSizeChanged(container, width, height)
             else
               mainFrame:SetPoint("LEFT", container, "RIGHT", offsetX, offsetY)
             end
+          end
+          -- Tick marks (segmented mode) and dividers (fragmented mode) are drawn in
+          -- UpdateBar using mainFrame:GetWidth() at draw time. After a container resize
+          -- (button add/remove), mainFrame is the correct new size but UpdateBar hasn't
+          -- run yet, so tick/divider positions are still computed from the old width.
+          -- Re-run UpdateBar for any mode that draws width-dependent elements.
+          local mode = cfg.display.thresholdMode
+          if mode == "fragmented" or mode == "segmented" or mode == "perStack" or cfg.display.showTickMarks then
+            ns.Resources.UpdateBar(barNumber)
           end
         end
       end

@@ -214,7 +214,7 @@ do -- Range
 end
 
 do -- Range with Text
-    local TEXT_COLOR = GenericEnum.UIColorRGB.Normal
+    local TEXT_COLOR = GenericEnum.UIColorRGB.NORMAL_FONT_COLOR
     local TEXT_WIDTH = UIKit.Define.Percentage{ value = 34, operator = "-", delta = 5 }
     local RANGE_WIDTH = UIKit.Define.Percentage{ value = 66 }
 

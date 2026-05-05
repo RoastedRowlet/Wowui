@@ -8,54 +8,13 @@ local f = GUTIL:GetFormatter()
 ---@field UI CraftSim.CUSTOMER_HISTORY.UI
 ---@field frame CraftSim.CUSTOMER_HISTORY.FRAME
 CraftSim.CUSTOMER_HISTORY = GUTIL:CreateRegistreeForEvents(
-    { "CHAT_MSG_WHISPER", "CHAT_MSG_WHISPER_INFORM", "CRAFTINGORDERS_FULFILL_ORDER_RESPONSE" }
+    { "CRAFTINGORDERS_FULFILL_ORDER_RESPONSE" }
 )
 
-local print = CraftSim.DEBUG:RegisterDebugID("Modules.CustomerHistory")
+local Logger = CraftSim.DEBUG:RegisterLogger("CustomerHistory")
 
 function CraftSim.CUSTOMER_HISTORY:Init()
     CraftSim.CUSTOMER_HISTORY:AutoPurge()
-end
-
-function CraftSim.CUSTOMER_HISTORY:CHAT_MSG_WHISPER(message, fullSenderName)
-    local sender, realm = CraftSim.CUSTOMER_HISTORY:GetNameAndRealm(fullSenderName)
-
-    -- DEBUG
-    -- sender = "Smitey"
-    -- realm = "Thrall"
-    -- message = "Hello again! I thought maybe I should write a really long message to test the capacity for the the customer history and to see if the message will clip out or not. So anyway this is a really long message. Hi."
-    CraftSim.CUSTOMER_HISTORY:OnWhisper(sender, realm, message, false)
-end
-
-function CraftSim.CUSTOMER_HISTORY:CHAT_MSG_WHISPER_INFORM(message, _, _, _, fullTargetName)
-    local target, targetRealm = CraftSim.CUSTOMER_HISTORY:GetNameAndRealm(fullTargetName)
-
-    CraftSim.CUSTOMER_HISTORY:OnWhisper(target, targetRealm, message, true)
-end
-
----@param customer string
----@param customerRealm string
----@param message string
----@param fromPlayer boolean
-function CraftSim.CUSTOMER_HISTORY:OnWhisper(customer, customerRealm, message, fromPlayer)
-    if not CraftSim.DB.OPTIONS:Get("CUSTOMER_HISTORY_ENABLED") then return end
-
-
-    print("OnWhisper")
-    print("sender: " .. tostring(customer))
-    print("realm: " .. tostring(customerRealm))
-    print("message: " .. tostring(message))
-    print("fromPlayer: " .. tostring(fromPlayer))
-
-    local customerHistory = CraftSim.DB.CUSTOMER_HISTORY:Get(customer, customerRealm)
-    ---@type CraftSim.DB.CustomerHistory.ChatMessage
-    local chatMessage = {
-        content = message,
-        fromPlayer = fromPlayer,
-        timestamp = C_DateAndTime.GetServerTimeLocal()
-    }
-    table.insert(customerHistory.chatHistory, chatMessage)
-    CraftSim.DB.CUSTOMER_HISTORY:Save(customerHistory)
 end
 
 ---@param result Enum.CraftingOrderResult
@@ -75,8 +34,7 @@ function CraftSim.CUSTOMER_HISTORY:CRAFTINGORDERS_FULFILL_ORDER_RESPONSE(result,
             end
         end
 
-        print("Claimed Order: ", false, true)
-        print(claimedOrder, true)
+        Logger:LogDebug("Claimed Order: ", false, true)
         local customer, realm = CraftSim.CUSTOMER_HISTORY:GetNameAndRealm(claimedOrder.customerName)
         local customerHistory = CraftSim.DB.CUSTOMER_HISTORY:Get(customer, realm)
         ---@type CraftSim.DB.CustomerHistory.Craft
@@ -145,14 +103,14 @@ function CraftSim.CUSTOMER_HISTORY:AutoPurge()
         -- debug
         local dayDiff = GUTIL:GetDaysBetweenTimestamps(currentTime,
             CraftSim.DB.OPTIONS:Get("CUSTOMER_HISTORY_AUTO_PURGE_LAST_PURGE"))
-        print("Day Difference:" .. dayDiff)
+        Logger:LogDebug("Day Difference:" .. dayDiff)
 
         if dayDiff >= CraftSim.DB.OPTIONS:Get("CUSTOMER_HISTORY_AUTO_PURGE_INTERVAL") then
-            print("auto purge 0 tip customers.." .. tostring(dayDiff))
+            Logger:LogDebug("auto purge 0 tip customers.." .. tostring(dayDiff))
             CraftSim.DB.CUSTOMER_HISTORY:PurgeCustomers(tipThreshold)
             CraftSim.DB.OPTIONS:Save("CUSTOMER_HISTORY_AUTO_PURGE_LAST_PURGE", C_DateAndTime.GetServerTimeLocal())
         else
-            print("do not purge, daydiff too low: " .. tostring(dayDiff))
+            Logger:LogDebug("do not purge, daydiff too low: " .. tostring(dayDiff))
         end
     end
 end

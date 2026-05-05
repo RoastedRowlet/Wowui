@@ -546,6 +546,8 @@ function ns.CDMSpellUsability.UpdateGlow(frame, cfg, spellID, isUsable, allDeple
                  .. (gc and (gc.r or 0) .. (gc.g or 0) .. (gc.b or 0) or "")
                  .. (glowSu.usableGlowScale or 1)
                  .. (glowSu.usableGlowSpeed or 0.25)
+                 .. "|s=" .. tostring(glowSu.usableGlowFrameStrata or "inherit")
+                 .. "|l=" .. tostring(glowSu.usableGlowFrameLevel or "")
         if frame._arcCDMUsableGlowActive
         and frame._arcCDMUsableGlowType == glowType
         and frame._arcCDMUsableGlowSig  == sig then
@@ -565,6 +567,7 @@ function ns.CDMSpellUsability.UpdateGlow(frame, cfg, spellID, isUsable, allDeple
         local glowOffset = -padding
 
         if ns.Glows then
+            local glowStrata = glowSu.usableGlowFrameStrata
             ns.Glows.Start(frame, "ArcUI_UsableGlow", glowType, {
                 color = color,
                 lines = glowSu.usableGlowLines or 8,
@@ -574,6 +577,8 @@ function ns.CDMSpellUsability.UpdateGlow(frame, cfg, spellID, isUsable, allDeple
                 scale = glowSu.usableGlowScale or 1,
                 xOffset = glowOffset + (glowSu.usableGlowXOffset or 0),
                 yOffset = glowOffset + (glowSu.usableGlowYOffset or 0),
+                strata = (glowStrata ~= "inherit") and glowStrata or nil,
+                frameLevel = glowSu.usableGlowFrameLevel,
             })
         end
         frame._arcCDMUsableGlowActive = true

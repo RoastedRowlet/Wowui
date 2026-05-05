@@ -495,7 +495,21 @@ function ME.Export(selectedKeys)
     local specCount = 0
     for _ in pairs(exportPayload.specs) do specCount = specCount + 1 end
     exportPayload.specCount = specCount
-    
+
+    -- Cooldown Reminder bundle: include the current character's CR
+    -- settings (globals + per-spell triggers + tracked spells/items)
+    -- if the CR module is loaded. The user can opt out at import time
+    -- via the Master importer's CR toggle.
+    if ns.CRImportExport and ns.CRImportExport.GetExportPayloadForMaster then
+        local crPayload = ns.CRImportExport.GetExportPayloadForMaster({
+            includeGlobals  = true,
+            includePerSpell = true,
+        })
+        if crPayload then
+            exportPayload.cooldownReminder = crPayload
+        end
+    end
+
     -- Bar export: Coming Soon (disabled for this release)
 
     -- CDM native layout — export active layout for current character
@@ -662,6 +676,23 @@ function ME.GenerateImportPreview(data)
         if data.cdmEnhance.globalCooldownSettings then table.insert(extras, "Cooldown Defaults") end
         if #extras > 0 then
             table.insert(lines, "|cffffd100Includes:|r " .. table.concat(extras, ", "))
+        end
+    end
+
+    -- Cooldown Reminder bundle present?
+    if data.cooldownReminder then
+        local crP = data.cooldownReminder
+        local wlCount = 0
+        if crP.perSpell and crP.perSpell.whitelist then
+            for _ in pairs(crP.perSpell.whitelist) do wlCount = wlCount + 1 end
+        end
+        local globalsLabel = (crP.globals and "globals") or nil
+        local spellsLabel  = (wlCount > 0) and (wlCount .. " reminders") or nil
+        local bits = {}
+        if globalsLabel then table.insert(bits, globalsLabel) end
+        if spellsLabel  then table.insert(bits, spellsLabel)  end
+        if #bits > 0 then
+            table.insert(lines, "|cffff7777Cooldown Reminder:|r " .. table.concat(bits, ", "))
         end
     end
     
@@ -1046,6 +1077,17 @@ function ME.Import(data, importMode, activeOverrides, selectedProfiles)
         end
     end
     
+    -- Apply Cooldown Reminder bundle: route through CRImportExport.Import
+    -- so all the engine wiring (RebuildTrackedSpells, ApplySettings,
+    -- AceConfig refresh) runs the same way as a direct CR import.
+    -- The Master importer's checkbox can pre-set crBundleEnabled in opts;
+    -- if not provided we default to applying the bundle when present.
+    if data.cooldownReminder and ns.CRImportExport and ns.CRImportExport.Import then
+        local crOpts = (importMode == "replace") and { importMode = "replace" }
+                                                  or  { importMode = "merge" }
+        ns.CRImportExport.Import({ payload = data.cooldownReminder }, crOpts)
+    end
+
     -- Bar import: Coming Soon (disabled for this release)
     local barImportCount = 0
     

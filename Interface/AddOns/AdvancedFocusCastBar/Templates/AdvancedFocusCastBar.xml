@@ -1,0 +1,108 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/ https://raw.githubusercontent.com/Gethe/wow-ui-source/beta/Interface/AddOns/Blizzard_SharedXML/UI.xsd">
+    <Frame name="AdvancedFocusCastBarFrameTemplate" mixin="AdvancedFocusCastBarMixin" virtual="true" clampedToScreen="true">
+        <Layers>
+            <Layer level="OVERLAY">
+                <Texture parentKey="Icon">
+                    <TexCoords left="0.06" right="0.94" top="0.06" bottom="0.94" />
+                    <Anchors>
+                        <Anchor point="TOPLEFT" />
+                        <Anchor point="BOTTOMLEFT" />
+                    </Anchors>
+                </Texture>
+            </Layer>
+        </Layers>
+        <Frames>
+            <StatusBar parentKey="CastBar" clipChildren="true">
+                <Layers>
+                    <Layer level="BACKGROUND">
+                        <Texture parentKey="Background" setAllPoints="true">
+                            <Color r="0.1" g="0.1" b="0.1" a="1" />
+                        </Texture>
+                    </Layer>
+                    <Layer level="OVERLAY">
+                        <FontString parentKey="SpellNameText" inherits="GameFontHighlightSmall" justifyH="LEFT" wordwrap="false">
+                            <Anchors>
+                                <Anchor point="LEFT" x="4" y="0" />
+                            </Anchors>
+                        </FontString>
+                        <FontString parentKey="CastTimeText" inherits="GameFontHighlightSmall" justifyH="RIGHT">
+                            <Anchors>
+                                <Anchor point="RIGHT" x="-4" y="0" />
+                            </Anchors>
+                        </FontString>
+                        <MaskTexture parentKey="Mask" file="Interface\BUTTONS\WHITE8X8" hWrapMode="CLAMPTOBLACKADDITIVE" vWrapMode="CLAMPTOBLACKADDITIVE">
+                            <TextureSliceMargins left="1" right="1" top="1" bottom="1" />
+                            <Anchors>
+                                <Anchor point="CENTER" />
+                            </Anchors>
+                        </MaskTexture>
+                    </Layer>
+                </Layers>
+                <Frames>
+                    <StatusBar parentKey="Positioner">
+                        <BarTexture />
+                        <Anchors>
+                            <Anchor point="CENTER" />
+                        </Anchors>
+                    </StatusBar>
+                    <StatusBar parentKey="InterruptBar" clipChildren="true">
+                        <BarTexture />
+                    </StatusBar>
+                </Frames>
+            </StatusBar>
+            <Frame parentKey="Border" inherits="BackdropTemplate">
+                <Anchors>
+                    <Anchor point="TOPLEFT" x="-1" y="1" />
+                    <Anchor point="BOTTOMRIGHT" x="1" y="-1" />
+                </Anchors>
+            </Frame>
+            <Frame parentKey="CustomElementsFrame" setAllPoints="true">
+                <Layers>
+                    <Layer level="OVERLAY">
+                        <Texture parentKey="TargetMarker" hidden="true" file="Interface/TargetingFrame/UI-RaidTargetingIcons">
+                            <Size x="16" y="16" />
+                            <Anchors>
+                                <Anchor point="CENTER" relativePoint="TOP" x="0" y="0" />
+                            </Anchors>
+                        </Texture>
+                        <FontString parentKey="InterruptSourceText" inherits="GameFontHighlightSmall" justifyH="CENTER" text="" hidden="true">
+                            <Anchors>
+                                <Anchor point="BOTTOMRIGHT" x="0" y="-8" />
+                            </Anchors>
+                        </FontString>
+                        <FontString parentKey="TargetNameText1" inherits="GameFontHighlightSmall" justifyH="CENTER" text="">
+                            <Anchors>
+                                <Anchor point="BOTTOMRIGHT" x="0" y="-8" />
+                            </Anchors>
+                        </FontString>
+                        <FontString parentKey="TargetNameText2" inherits="GameFontHighlightSmall" justifyH="CENTER" text="">
+                            <Anchors>
+                                <Anchor point="BOTTOMRIGHT" x="0" y="-8" />
+                            </Anchors>
+                        </FontString>
+                        <FontString parentKey="TargetNameText3" inherits="GameFontHighlightSmall" justifyH="CENTER" text="">
+                            <Anchors>
+                                <Anchor point="BOTTOMRIGHT" x="0" y="-8" />
+                            </Anchors>
+                        </FontString>
+                        <FontString parentKey="TargetNameText4" inherits="GameFontHighlightSmall" justifyH="CENTER" text="">
+                            <Anchors>
+                                <Anchor point="BOTTOMRIGHT" x="0" y="-8" />
+                            </Anchors>
+                        </FontString>
+                        <FontString parentKey="TargetNameText5" inherits="GameFontHighlightSmall" justifyH="CENTER" text="">
+                            <Anchors>
+                                <Anchor point="BOTTOMRIGHT" x="0" y="-8" />
+                            </Anchors>
+                        </FontString>
+                    </Layer>
+                </Layers>
+            </Frame>
+        </Frames>
+        <Scripts>
+            <OnLoad method="OnLoad" />
+            <OnUpdate method="OnUpdate" />
+            <OnEvent method="OnEvent" />
+        </Scripts>
+    </Frame>
+</Ui>

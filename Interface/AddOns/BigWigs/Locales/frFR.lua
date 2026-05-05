@@ -5,6 +5,9 @@ if not L then return end
 -- API.lua
 L.showAddonBar = "L'addon '|cFF436EEE%s|r' a créé la barre '%s'."
 L.requestAddonProfile = "L'addon '|cFF436EEE%s|r' vient de faire une copie de votre chaîne d'export de profil."
+L.shortMinutesAndSeconds = "%d min %d sec" -- 1 Minute 2 Seconds
+L.shortSecondsOnly = "%d sec" -- 28 Seconds
+L.shortSubTenSeconds = "%.1f sec" -- 3.2 Seconds
 
 -- Core.lua
 L.berserk = "Berserk"
@@ -403,9 +406,9 @@ L.anyCombatTimerTooltip = "|TInterface\\AddOns\\BigWigs\\Media\\Icons\\minimap_r
 L.bossCombatTimer = "Chrono de combat de Boss"
 L.bossCombatTimerDesc = "Un chrono qui affiche depuis combien de temps vous êtes en rencontre de boss, avec une bulle d'aide pour voir l'historique de combat du boss."
 L.bossCombatTimerTooltip = "|TInterface\\AddOns\\BigWigs\\Media\\Icons\\minimap_raid:0:0|tHistorique de combat de boss"
---L.bossStagesTimer = "Boss Stages Timer"
---L.bossStagesTimerDesc = "A timer that resets every time a boss encounter changes stage, with a tooltip to see boss stage history. Only active on bosses with multiple stages."
---L.bossStagesTimerTooltip = "|TInterface\\AddOns\\BigWigs\\Media\\Icons\\minimap_raid:0:0|tBoss Stages History"
+L.bossStagesTimer = "Chrono de Phases de Boss"
+L.bossStagesTimerDesc = "Un chronomètre qui se réinitialise à chaque fois que le boss change de phase, avec une bulle d'aide pour voir l'historique des phases du boss. Seulement actif sur les boss ayant plusieurs phases."
+L.bossStagesTimerTooltip = "|TInterface\\AddOns\\BigWigs\\Media\\Icons\\minimap_raid:0:0|tHistorique des Phases de Boss"
 L.instanceTimer = "Chrono d'instance"
 L.instanceTimerDesc = "Un chrono qui affiche depuis combien de temps vous êtes en instance (donjon / raid / etc), avec une bulle d'aide pour voir l'historique de l'instance."
 L.instanceTimerTooltip = "|TInterface\\AddOns\\BigWigs\\Media\\Icons\\minimap_raid:0:0|tHistorique d'instance"
@@ -428,10 +431,14 @@ L.startingMythicKeystone = "Commence un mythique +"
 L.historyTimeFormat = "Historique : Format d'heure"
 L.twelveHour = "12 Heures"
 L.twentyFourHour = "24 Heures"
+L.hideTooltipInCombat = "Cacher la bulle d'aide en combat"
+L.customText = "Texte personnalisé (Doit contenir %s)"
 
 -----------------------------------------------------------------------
 -- Keystones.lua
 --
+
+L.keys = "Clefs"
 
 L.keystoneTitle = "BigWigs clefs mythique +"
 L.keystoneHeaderParty = "Groupe"
@@ -583,6 +590,28 @@ L.instanceKeysOtherDungeonColorDesc = "Choisissez la couleur de la police des pe
 L.instanceKeysEndOfRunDesc = "Par défaut, la liste ne s'affichera que si vous êtes dans un donjon mythique. Activer cette option vous affichera la liste même lorsque le donjon mythique + est terminé."
 L.instanceKeysHideTitle = "Cacher le titre"
 L.instanceKeysHideTitleDesc = "Cacher le titre \"Qui a une clef ?\"."
+
+-- Challenges UI Decoration
+L.partyRatingHeader = "|TInterface\\AddOns\\BigWigs\\Media\\Icons\\minimap_raid:0:0|tCote du groupe"
+L.dungeonScoreString = "|c%s%03d|r |cFFFFFFFF+%02d|r |cFF%s%02d:%02d|r |c%s(%s)|r"
+L.dungeonScoreNoDataString = "|cFFFFFFFFPas de données|r |c%s(%s)|r"
+L.dungeonTeleportHeader = "|TInterface\\AddOns\\BigWigs\\Media\\Icons\\minimap_raid:0:0|tTéléportation"
+
+-- Progress %
+L.progressPercent = "Progrès %"
+L.progressPercentDesc = "Outils qui vous aident à calculer le progrès en mythique + que vous gagnerez sur chaque PNJ que vous tuerez."
+L.progressPercentTooltip = "Affiche le progrès en % dans la bulle d'aide lorsque vous survolez un PNJ ennemi"
+L.progressPercentTooltipText = {
+	"|TInterface\\AddOns\\BigWigs\\Media\\Icons\\minimap_raid:0:0|tProgrès : %s%%",
+	"|TInterface\\AddOns\\BigWigs\\Media\\Icons\\minimap_raid:0:0|tProgrès : %s%% (%d)",
+	"|TInterface\\AddOns\\BigWigs\\Media\\Icons\\minimap_raid:0:0|tProgrès : %s%% (%d/%d)",
+}
+L.progressPercentNameplate = "Affiche le progrès en % sur les barres d'infos des PNJ ennemis"
+L.progressCurrentPull = "Combat actuel"
+L.progressCurrentPullDesc = "Affiche le progrès total que vous gagnerez sur le groupe de PNJ ennemis que vous combattez actuellement.\n\nPAS ENCORE IMPLÉMENTÉ !"
+L.tempProgressAnnounce = "Vous pouvez maintenant voir le progrès en % que chaque PNJ ennemi vous rapportera lorsque vous les survolez avec votre souris et sur leur barre d'info.\n\nÀ configurer dans |cFF436EEEOutils|r > |cFF436EEEMythique +|r > |cFF436EEEProgrès %|r."
+L.settingsForCurrentTarget = "Paramètres pour votre cible actuelle"
+L.settingsForOtherTargets = "Paramètres pour les autres cibles"
 
 -----------------------------------------------------------------------
 -- LFGTimer.lua
@@ -1143,7 +1172,7 @@ L.privateaura = "Lorsqu'une 'aura privée' est sur vous"
 L.customSoundDesc = "Joue le son personnalisé sélectionné au lieu de celui fourni par le module."
 L.resetSoundDesc = "Réinitialise les sons ci-dessous à leurs valeurs par défaut."
 L.resetAllCustomSound = "Si vous avez des sons personnalisés pour certains paramètres des rencontres de boss, ce bouton les réinitialisera TOUS afin que les sons par défaut soient utilisés à la place."
---L.soundResetPrint = "The module '|cFF436EEE%s|r' uses a custom sound called '|cFF436EEE%s|r' that no longer exists. Resetting to default."
+L.soundResetPrint = "Le module '|cFF436EEE%s|r' utilise un son personnalisé appelé '|cFF436EEE%s|r' qui n'existe plus. Réinitialisation par défaut."
 
 -----------------------------------------------------------------------
 -- Statistics.lua
@@ -1179,6 +1208,7 @@ L.blizzBasicAsBars = "CàR classiques de Blizzard affichés en tant que barres d
 L.blizzBasicAsBlizzTimeline = "CàR classiques de Blizzard affichés sur la ligne temporelle de Blizzard"
 L.developerMode = "Mode développeur"
 L.enhancedModeWarning = "ATTENTION !\n\nDésactiver le mode avancé désactivera beaucoup de fonctionnalités de BigWigs, incluant :\n\nles couleurs de barres, le renommage des sorts, les contres, les sons / voix personnalisées, les CàR, l'activation des barres, les messages supplémentaires, etc."
+--L.blizzTimelineEnhancedWarning = "WARNING!\n\nThe Blizzard timeline doesn't support BigWigs enhanced features. You will NOT get renamed spells and you will see inaccurate timers.\n\nAre you sure you want to enable it?"
 
 -----------------------------------------------------------------------
 -- Victory.lua

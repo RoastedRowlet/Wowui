@@ -28,10 +28,9 @@ L.Functionality.CVarWarning = string.format(
 	ENABLE
 )
 
-L.Functionality.V2DeprecationWarning = string.format(
-	"%s\n\nDue to the changes in v2, the following settings were reset for you:\n\n%s\n\nAdditionally, we suggest verifying your layouting as it may also be impacted.",
-	addonNameWithIcon,
-	"%s"
+L.Functionality.V3MigrationWarning = string.format(
+	"%s\n\nAPI 제한 업데이트로 인해 Targeted Spells의 파티 기능이 완전히 개편되었습니다. 편집 모드에서 미리보기를 확인하세요.",
+	addonNameWithIcon
 )
 
 L.Settings.EnabledLabel = "활성화"
@@ -63,10 +62,6 @@ L.Settings.LoadConditionRoleLabels = {
 	[Private.Enum.Role.Tank] = "탱커",
 	[Private.Enum.Role.Damager] = "딜러",
 }
-
-L.Settings.RoleFilterLabel = "Role Filter"
-L.Settings.RoleFilterTooltip = "Allows you to ignore certain roles from being shown. Use at your own risk."
-L.Settings.RoleFilterLabels = L.Settings.LoadConditionRoleLabels
 
 L.Settings.FrameWidthLabel = "너비"
 L.Settings.FrameWidthTooltip = nil
@@ -105,10 +100,8 @@ L.Settings.FrameGrowLabels = {
 }
 
 L.Settings.GlowImportantLabel = "중요 주문 강조"
-L.Settings.GlowImportantTooltip = "중요 여부는 게임에 의해 결정됩니다."
 
-L.Settings.OnlyImportantLabel = "Only Show Important Spells"
-L.Settings.OnlyImportantTooltip = "Note that you're relying on what the game considers important, use at your own risk."
+L.Settings.OnlyImportantLabel = "중요 주문만 표시"
 
 L.Settings.GlowTypeLabel = "반짝임 유형"
 L.Settings.GlowTypeTooltip = nil
@@ -120,45 +113,72 @@ L.Settings.GlowTypeLabels = {
 }
 
 L.Settings.ShowDurationLabel = "지속시간 표시"
-L.Settings.ShowDurationTooltip = nil
-
-L.Settings.ShowDurationFractionsLabel = "소수점 표시"
-L.Settings.ShowDurationFractionsTooltip = nil
 
 L.Settings.IndicateInterruptsLabel = "차단 표시"
-L.Settings.IndicateInterruptsTooltip =
-	"아이콘을 흑백으로 표시하고, 아이콘 위에 표시기를 보여주며, 아이콘 숨김을 1초 지연합니다. 정신 집중 주문에는 작동하지 않습니다."
 
 L.Settings.RenderInterruptSourceNameLabel = "차단자 이름 표시"
-L.Settings.RenderInterruptSourceNameTooltip = nil
 
 L.Settings.ShowSwipeLabel = "회전 표시"
-L.Settings.ShowSwipeTooltip = nil
 
-L.Settings.BorderStyleLabel = "Border Style"
+L.Settings.BorderStyleLabel = "테두리 스타일"
 L.Settings.BorderStyleTooltip = nil
-L.Settings.BorderStyleSolid = "Solid"
 
-L.Settings.OpacityLabel = "불투명도"
-L.Settings.OpacityTooltip = nil
+L.Settings.ForegroundBarTextureLabel = "진행 바 텍스처"
+L.Settings.ForegroundBarTextureTooltip = nil
 
-L.Settings.IconZoomLabel = "Icon Zoom"
+L.Settings.BackgroundBarTextureLabel = "배경 바 텍스처"
+L.Settings.BackgroundBarTextureTooltip = nil
+
+L.Settings.BackgroundBarColorLabel = "배경 바 색상"
+L.Settings.BackgroundBarColorTooltip =
+	"불투명도는 기본 설정 UI에서 표시되지 않기 때문에 편집 모드에서만 사용할 수 있습니다."
+
+L.Settings.ProgressBarColorLabel = "바 색상"
+L.Settings.ProgressBarColorTooltip =
+	"불투명도는 기본 설정 UI에서 표시되지 않기 때문에 편집 모드에서만 사용할 수 있습니다."
+
+L.Settings.MirrorLayoutLabel = "레이아웃 반전"
+
+L.Settings.TextToSpeechVoiceLabel = "TTS Voice"
+L.Settings.TextToSpeechVoiceTooltip = "Voice for TTS announcements. Shared between Self and Party settings."
+
+L.Settings.AnnounceUntargetedSpellsLabel = "Untargeted TTS Settings"
+L.Settings.AnnounceUntargetedSpellsTooltip = "TTS for untargeted spells by NPC type."
+
+L.Settings.AnnounceTargetedSpellsLabel = "Targeted TTS Settings"
+L.Settings.AnnounceTargetedSpellsTooltip = "TTS for targeted spells by NPC type."
+
+L.Settings.NpcTypeLabels = {
+	[Private.Enum.NpcType.Boss] = "Bosses",
+	[Private.Enum.NpcType.Lieutenant] = "Lieutenants",
+	[Private.Enum.NpcType.Caster] = "Has Mana",
+	[Private.Enum.NpcType.Melee] = "Regular Melee",
+	[Private.Enum.NpcType.Minion] = "Minions",
+}
+
+L.Settings.HideUntargetedSpellsLabel = "대상 없는 주문 숨기기"
+
+L.Settings.HideTargetedSpellsLabel = "대상 있는 주문 숨기기"
+
+L.Settings.SelfOnlyLabel = "플레이어를 대상으로 하는 주문만 표시"
+
+L.Settings.InlineDurationLabel = "지속시간 인라인 위치"
+
+L.Settings.UseInterruptabilityColorsLabel = "방해 색상 사용"
+L.Settings.UseInterruptabilityColorsTooltip = nil
+
+L.Settings.UseTargetClassColorLabel = "대상 직업 색상 사용"
+L.Settings.UseTargetClassColorTooltip =
+	"대상 유닛의 직업 색상을 75% 불투명도로 바에 적용합니다. 대상이 없는 주문은 밝기가 높아진 배경 바 색상을 사용합니다."
+
+L.Settings.UninterruptibleColorLabel = "방해 불가 색상"
+L.Settings.UninterruptibleColorTooltip = nil
+
+L.Settings.InterruptibleColorLabel = "방해 가능 색상"
+L.Settings.InterruptibleColorTooltip = nil
+
+L.Settings.IconZoomLabel = "아이콘 확대"
 L.Settings.IconZoomTooltip = nil
-
-L.Settings.FrameOffsetXLabel = "X 위치 조정"
-L.Settings.FrameOffsetXTooltip = nil
-
-L.Settings.FrameOffsetYLabel = "Y 위치 조정"
-L.Settings.FrameOffsetYTooltip = nil
-
-L.Settings.FrameSourceAnchorLabel = "기준 앵커"
-L.Settings.FrameSourceAnchorTooltip = nil
-
-L.Settings.FrameTargetAnchorLabel = "대상 앵커"
-L.Settings.FrameTargetAnchorTooltip = nil
-
-L.Settings.IncludeSelfInPartyLabel = "파티에 자신 포함"
-L.Settings.IncludeSelfInPartyTooltip = "공격대 스타일 파티 프레임을 사용할 때만 작동합니다."
 
 L.Settings.ClickToOpenSettingsLabel = "클릭 설정 열기"
 
@@ -169,22 +189,29 @@ L.Settings.FontLabel = "글꼴"
 
 L.Settings.FontTooltip = nil
 
-L.Settings.FeatureFlagsLabel = "Features"
+L.Settings.FeatureFlagsLabel = "기능"
 L.Settings.FeatureFlagsTooltip = nil
 
 L.Settings.FeatureFlagLabels = {
 	[Private.Enum.FeatureFlag.GlowImportant] = L.Settings.GlowImportantLabel,
 	[Private.Enum.FeatureFlag.OnlyImportant] = L.Settings.OnlyImportantLabel,
 	[Private.Enum.FeatureFlag.ShowDuration] = L.Settings.ShowDurationLabel,
-	[Private.Enum.FeatureFlag.ShowDurationFractions] = L.Settings.ShowDurationFractionsLabel,
 	[Private.Enum.FeatureFlag.ShowSwipe] = L.Settings.ShowSwipeLabel,
 	[Private.Enum.FeatureFlag.IndicateInterrupts] = L.Settings.IndicateInterruptsLabel,
 	[Private.Enum.FeatureFlag.RenderInterruptSourceName] = L.Settings.RenderInterruptSourceNameLabel,
-	[Private.Enum.FeatureFlag.IncludeSelfInParty] = L.Settings.IncludeSelfInPartyLabel,
+	[Private.Enum.FeatureFlag.ShowIcon] = "아이콘 표시",
+	[Private.Enum.FeatureFlag.ShowTargetMarker] = "대상 마커 표시",
+	[Private.Enum.FeatureFlag.ShowSpellName] = "주문 이름 표시",
+	[Private.Enum.FeatureFlag.ShowTargetName] = "대상 이름 표시",
+	[Private.Enum.FeatureFlag.ShowTargetClassColor] = "대상 직업 색상 표시",
+	[Private.Enum.FeatureFlag.MirrorLayout] = L.Settings.MirrorLayoutLabel,
+	[Private.Enum.FeatureFlag.InlineDuration] = L.Settings.InlineDurationLabel,
+	[Private.Enum.FeatureFlag.HideUntargetedSpells] = L.Settings.HideUntargetedSpellsLabel,
+	[Private.Enum.FeatureFlag.HideTargetedSpells] = L.Settings.HideTargetedSpellsLabel,
+	[Private.Enum.FeatureFlag.SelfOnly] = L.Settings.SelfOnlyLabel,
 }
 
 L.Settings.FeatureFlagSettingTitles = {
-	[Private.Enum.FeatureFlag.GlowImportant] = "Display",
-	[Private.Enum.FeatureFlag.IndicateInterrupts] = "Interrupt Settings",
-	[Private.Enum.FeatureFlag.IncludeSelfInParty] = "Party Settings",
+	[Private.Enum.FeatureFlag.GlowImportant] = "표시",
+	[Private.Enum.FeatureFlag.IndicateInterrupts] = "차단 설정",
 }

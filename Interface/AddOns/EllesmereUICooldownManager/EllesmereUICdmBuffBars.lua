@@ -26,6 +26,15 @@ local _anyStacks    = false
 local function StartGlow(...) if ns.StartNativeGlow then return ns.StartNativeGlow(...) end end
 local function StopGlow(...)  if ns.StopNativeGlow  then return ns.StopNativeGlow(...)  end end
 
+-- External weak-keyed lookup for Blizzard bar FontString refs.
+-- Avoids writing custom properties onto Blizzard StatusBar frames.
+local _blizzBarFS = setmetatable({}, { __mode = "k" })
+local function BBFS(bar)
+    local d = _blizzBarFS[bar]
+    if not d then d = {}; _blizzBarFS[bar] = d end
+    return d
+end
+
 -------------------------------------------------------------------------------
 --  Textures
 -------------------------------------------------------------------------------
@@ -87,14 +96,14 @@ local function GetFont()
 end
 local function GetOutline()
     if EllesmereUI and EllesmereUI.GetFontOutlineFlag then
-        return EllesmereUI.GetFontOutlineFlag()
+        return EllesmereUI.GetFontOutlineFlag("cdm")
     end
     return "OUTLINE"
 end
 local function SetFont(fs, size)
     if not (fs and fs.SetFont) then return end
     fs:SetFont(GetFont(), size, GetOutline())
-    if EllesmereUI and EllesmereUI.GetFontUseShadow and EllesmereUI.GetFontUseShadow() then
+    if EllesmereUI and EllesmereUI.GetFontUseShadow and EllesmereUI.GetFontUseShadow("cdm") then
         fs:SetShadowColor(0, 0, 0, 1)
         fs:SetShadowOffset(1, -1)
     else
@@ -102,19 +111,36 @@ local function SetFont(fs, size)
     end
 end
 
--- Pandemic threshold: glow when remaining% <= this value (30%)
-local PANDEMIC_THRESHOLD = 0.30
+-------------------------------------------------------------------------------
+--  Pandemic state via Blizzard hooks
+-------------------------------------------------------------------------------
+local _pandemicState  = {}   -- frame -> true when in pandemic
+local _pandemicHooked = {}   -- frame -> true once hooks are installed
+ns._pandemicState = _pandemicState
 
---- Check if a spell is in the pandemic window via C_UnitAuras.
---- Returns true if the aura exists, has duration, and remaining <= 30%.
---- Only checks player auras; target debuffs use Blizzard's native
---- PandemicIcon on CDM frames (avoids tainted secret values).
-function ns.IsInPandemicWindow(spellID)
-    if not spellID or spellID <= 0 then return false end
-    local aura = C_UnitAuras.GetPlayerAuraBySpellID(spellID)
-    if not aura or not aura.duration or aura.duration <= 0 or not aura.expirationTime then return false end
-    local rem = aura.expirationTime - GetTime()
-    return rem > 0 and (rem / aura.duration) <= PANDEMIC_THRESHOLD
+function ns.HookPandemicState(frame)
+    if not frame or _pandemicHooked[frame] then return end
+    if not frame.ShowPandemicStateFrame then return end
+    _pandemicHooked[frame] = true
+    hooksecurefunc(frame, "ShowPandemicStateFrame", function(self)
+        _pandemicState[self] = true
+        -- Hide Blizzard's PandemicIcon unless "Blizzard Default" (-1).
+        -- Custom glow styles (>0) replace it; None (0/false) suppresses it.
+        local fc = ns._ecmeFC and ns._ecmeFC[self]
+        local bk = fc and fc.barKey
+        if bk then
+            local bd = ns.barDataByKey and ns.barDataByKey[bk]
+            local style = bd and bd.pandemicGlow and bd.pandemicGlowStyle
+            if not style or style ~= -1 then
+                if self.PandemicIcon then self.PandemicIcon:Hide() end
+            end
+        end
+    end)
+    if frame.HidePandemicStateFrame then
+        hooksecurefunc(frame, "HidePandemicStateFrame", function(self)
+            _pandemicState[self] = nil
+        end)
+    end
 end
 
 -------------------------------------------------------------------------------
@@ -153,6 +179,7 @@ local TBB_DEFAULT_BAR = {
     height    = 24,
     width     = 270,
     verticalOrientation = false,
+    reverseFill = false,
     texture   = "none",
     fillR = _classR, fillG = _classG, fillB = _classB, fillA = 1,
     bgR = 0, bgG = 0, bgB = 0, bgA = 0.4,
@@ -182,8 +209,8 @@ local TBB_DEFAULT_BAR = {
     stackThresholdMaxEnabled = false,
     stackThresholdMax = 10,
     stackThresholdTicks = "",
-    pandemicGlow = false,
-    pandemicGlowStyle = 1,
+    pandemicGlow = true,
+    pandemicGlowStyle = -1,
     pandemicGlowColor = { r = 1, g = 1, b = 0 },
     pandemicGlowLines = 8,
     pandemicGlowThickness = 2,
@@ -196,8 +223,8 @@ ns.TBB_DEFAULT_BAR = TBB_DEFAULT_BAR
 -------------------------------------------------------------------------------
 function ns.GetTrackedBuffBars()
     -- TBB is fully spec-specific, stored in specProfiles[specKey]
-    local specKey = ns.GetActiveSpecKey and ns.GetActiveSpecKey() or "0"
-    if specKey == "0" then return { selectedBar = 1, bars = {} } end
+    local specKey = ns.GetActiveSpecKey and ns.GetActiveSpecKey()
+    if not specKey then return { selectedBar = 1, bars = {} } end
     if not EllesmereUIDB then return { selectedBar = 1, bars = {} } end
     if not EllesmereUIDB.spellAssignments then
         EllesmereUIDB.spellAssignments = { specProfiles = {} }
@@ -214,8 +241,8 @@ end
 
 function ns.GetTBBPositions()
     -- TBB positions are spec-specific, stored alongside trackedBuffBars
-    local specKey = ns.GetActiveSpecKey and ns.GetActiveSpecKey() or "0"
-    if specKey == "0" then return {} end
+    local specKey = ns.GetActiveSpecKey and ns.GetActiveSpecKey()
+    if not specKey then return {} end
     if not EllesmereUIDB or not EllesmereUIDB.spellAssignments then return {} end
     local sa = EllesmereUIDB.spellAssignments
     if not sa.specProfiles or not sa.specProfiles[specKey] then return {} end
@@ -318,6 +345,7 @@ local function CreateTrackedBuffBarFrame(parent, idx)
     bar:SetStatusBarTexture("Interface\\Buttons\\WHITE8x8")
     bar:SetMinMaxValues(0, 1)
     bar:SetValue(0.65)
+    bar:SetClipsChildren(true)
     wrapFrame._bar = bar
 
     local bg = bar:CreateTexture(nil, "BACKGROUND")
@@ -327,7 +355,7 @@ local function CreateTrackedBuffBarFrame(parent, idx)
 
     -- Spark
     local spark = bar:CreateTexture(nil, "OVERLAY", nil, 2)
-    spark:SetTexture("Interface\\AddOns\\EllesmereUINameplates\\Media\\cast_spark.tga")
+    spark:SetTexture("Interface\\AddOns\\EllesmereUI\\media\\cast_spark.tga")
     spark:SetBlendMode("ADD")
     spark:Hide()
     wrapFrame._spark = spark
@@ -423,6 +451,7 @@ local function SetupTBBThresholdOverlay(bar, cfg)
     local texPath = EllesmereUI.ResolveTexturePath(TBB_TEXTURES, cfg.texture or "none", "Interface\\Buttons\\WHITE8x8")
     overlay:SetStatusBarTexture(texPath)
     overlay:SetOrientation(cfg.verticalOrientation and "VERTICAL" or "HORIZONTAL")
+    overlay:SetReverseFill(cfg.reverseFill and true or false)
     overlay:GetStatusBarTexture():SetVertexColor(
         cfg.stackThresholdR or 0.8, cfg.stackThresholdG or 0.1,
         cfg.stackThresholdB or 0.1, cfg.stackThresholdA or 1)
@@ -505,15 +534,17 @@ local function ApplyTrackedBuffBarSettings(bar, cfg)
     -- width/height are always visual dimensions (what you see on screen).
     -- Horizontal: width = long side, height = short side.
     -- Vertical: width = short side, height = long side.
-    local w = cfg.width or 200
-    local h = cfg.height or 24
+    local PPt = EllesmereUI and EllesmereUI.PP
+    local snap = PPt and PPt.Snap or function(v) return v end
+    local w = snap(cfg.width or 200)
+    local h = snap(cfg.height or 24)
     local isVert = cfg.verticalOrientation
     bar._lastVertical = isVert
     local iconMode = cfg.iconDisplay or "none"
     local hasIcon = iconMode ~= "none"
     local iSize = isVert and w or h
 
-    -- Size wrapFrame: always width x height as stored
+    -- Size wrapFrame: always width x height as stored, snapped to pixel grid
     if isVert then
         bar:SetSize(w, hasIcon and (h + iSize) or h)
     else
@@ -546,8 +577,9 @@ local function ApplyTrackedBuffBarSettings(bar, cfg)
         sb:SetAllPoints(bar)
     end
 
-    -- Orientation
+    -- Orientation and fill direction
     sb:SetOrientation(isVert and "VERTICAL" or "HORIZONTAL")
+    sb:SetReverseFill(cfg.reverseFill and true or false)
 
     -- Texture
     local texPath = EllesmereUI.ResolveTexturePath(TBB_TEXTURES, cfg.texture or "none", "Interface\\Buttons\\WHITE8x8")
@@ -735,7 +767,7 @@ local function ApplyTrackedBuffBarSettings(bar, cfg)
         if bSz > 0 then
             local PP = EllesmereUI and EllesmereUI.PP
             if PP then
-                if not bar._barBorder._ppBorders then
+                if not PP.GetBorders(bar._barBorder) then
                     PP.CreateBorder(bar._barBorder, cfg.borderR or 0, cfg.borderG or 0, cfg.borderB or 0, 1, bSz)
                 else
                     PP.UpdateBorder(bar._barBorder, bSz, cfg.borderR or 0, cfg.borderG or 0, cfg.borderB or 0, 1)
@@ -784,12 +816,31 @@ local function MatchFrameToConfig(frame, cfg)
     if not gci then return false end
     local info = gci(cdID)
     if not info then return false end
+    -- Fast path: match via cooldownInfo struct fields.
     if cfg.spellIDs then
         for _, sid in ipairs(cfg.spellIDs) do
             if MatchesSID(info, sid) then return true end
         end
     elseif cfg.spellID and cfg.spellID > 0 then
-        return MatchesSID(info, cfg.spellID)
+        if MatchesSID(info, cfg.spellID) then return true end
+    else
+        return false
+    end
+    -- Fallback: compare against the frame's canonical spell ID. Buff bar
+    -- frames expose the actual aura variant via GetAuraSpellID which may
+    -- not appear in the cooldownInfo struct (e.g. Eclipse Solar/Lunar).
+    local GetCanonical = ns.GetCanonicalSpellIDForFrame
+    if GetCanonical then
+        local frameSID = GetCanonical(frame)
+        if frameSID then
+            if cfg.spellIDs then
+                for _, sid in ipairs(cfg.spellIDs) do
+                    if frameSID == sid then return true end
+                end
+            elseif cfg.spellID and cfg.spellID > 0 then
+                return frameSID == cfg.spellID
+            end
+        end
     end
     return false
 end
@@ -838,6 +889,7 @@ function ns.IsSpellInBuffBarViewer(spellID)
     if not viewer or not viewer.itemFramePool then return false end
     local gci = C_CooldownViewer and C_CooldownViewer.GetCooldownViewerCooldownInfo
     if not gci then return false end
+    local GetCanonical = ns.GetCanonicalSpellIDForFrame
     for frame in viewer.itemFramePool:EnumerateActive() do
         local cdID = frame.cooldownID
         if cdID then
@@ -845,9 +897,59 @@ function ns.IsSpellInBuffBarViewer(spellID)
             if info and MatchesSID(info, spellID) then
                 return true
             end
+            -- Fallback: check frame's canonical spell ID (aura variants).
+            if GetCanonical then
+                local frameSID = GetCanonical(frame)
+                if frameSID == spellID then return true end
+            end
         end
     end
     return false
+end
+
+--- Enumerate all spells currently in BuffBarCooldownViewer (Blizzard's
+--- "Tracked Bars" section). Returns an array of {spellID, cdID, name, icon}
+--- entries sorted by layoutIndex then spellID. This is the source of truth
+--- for the TBB spell picker -- TBB IS our display of these bars, so the
+--- picker must enumerate THIS pool and not the Tracked Buffs icon viewer.
+function ns.GetTrackedBarSpells()
+    local result = {}
+    local viewer = _G["BuffBarCooldownViewer"]
+    if not viewer or not viewer.itemFramePool then return result end
+    local GetCanonical = ns.GetCanonicalSpellIDForFrame
+
+    local seen = {}
+    for frame in viewer.itemFramePool:EnumerateActive() do
+        if frame:IsShown() or frame.cooldownInfo then
+            local sid = GetCanonical and GetCanonical(frame)
+            if sid and sid > 0 and not seen[sid] then
+                seen[sid] = true
+                local name = C_Spell and C_Spell.GetSpellName and C_Spell.GetSpellName(sid)
+                -- Append subtext (e.g. "Solar", "Lunar") to disambiguate
+                -- spells that share a base name like Eclipse.
+                if name and C_Spell.GetSpellSubtext then
+                    local sub = C_Spell.GetSpellSubtext(sid)
+                    if sub and sub ~= "" then
+                        name = name .. " (" .. sub .. ")"
+                    end
+                end
+                local icon = C_Spell and C_Spell.GetSpellTexture and C_Spell.GetSpellTexture(sid)
+                result[#result + 1] = {
+                    spellID     = sid,
+                    cdID        = frame.cooldownID,
+                    name        = name or ("Spell " .. sid),
+                    icon        = icon,
+                    layoutIndex = frame.layoutIndex or 0,
+                }
+            end
+        end
+    end
+
+    table.sort(result, function(a, b)
+        if a.layoutIndex ~= b.layoutIndex then return a.layoutIndex < b.layoutIndex end
+        return (a.name or "") < (b.name or "")
+    end)
+    return result
 end
 
 --- Frame-based check: is a spellID present in Essential or Utility viewers?
@@ -878,8 +980,7 @@ end
 --  Stacks Helper (reads Blizzard child Applications frame)
 -------------------------------------------------------------------------------
 local function UpdateStacks(bar, blzChild, cfg)
-    -- Read stacks from blzChild.Icon.Applications (same as BetterBuffBars).
-    -- BuffBar viewer children have Icon -> Applications FontString.
+    -- Read stacks from blzChild.Icon.Applications FontString.
     if blzChild and blzChild.Icon and blzChild.Icon.Applications then
         -- Pass the text straight through without comparing (it may be tainted).
         -- SetText accepts secret strings natively.
@@ -887,9 +988,23 @@ local function UpdateStacks(bar, blzChild, cfg)
         if ok and txt then
             bar._stacksText:SetText(txt)
             bar._stacksText:Show()
-            -- stackCount for threshold overlay: pcall the tonumber
-            local ok2, n = pcall(tonumber, txt)
-            bar._stackCount = (ok2 and n) or 0
+            -- Stack count for threshold overlay: read from aura data via the
+            -- Blizzard child's auraInstanceID. The applications field is a
+            -- secret number so we can't compare it directly, but StatusBar
+            -- SetValue accepts secret numbers natively. Feed it straight to
+            -- the threshold overlay (FeedTBBThresholdOverlay uses SetValue).
+            local auraInstID = blzChild.auraInstanceID
+            local auraUnit = blzChild.auraDataUnit
+            if auraInstID and auraUnit then
+                local ad = C_UnitAuras.GetAuraDataByAuraInstanceID(auraUnit, auraInstID)
+                if ad and ad.applications then
+                    bar._stackCount = ad.applications  -- secret number, fed to SetValue
+                else
+                    bar._stackCount = 0
+                end
+            else
+                bar._stackCount = 0
+            end
             return
         end
     end
@@ -899,10 +1014,21 @@ local function UpdateStacks(bar, blzChild, cfg)
         if appsText then
             local ok, txt = pcall(appsText.GetText, appsText)
             if ok and txt and txt ~= "" then
-                bar._stackCount = tonumber(txt) or 0
                 if bar._stacksText and not bar._stacksHidden then
                     bar._stacksText:SetText(txt)
                     bar._stacksText:Show()
+                end
+                local auraInstID = blzChild.auraInstanceID
+                local auraUnit = blzChild.auraDataUnit
+                if auraInstID and auraUnit then
+                    local ad = C_UnitAuras.GetAuraDataByAuraInstanceID(auraUnit, auraInstID)
+                    if ad and ad.applications then
+                        bar._stackCount = ad.applications
+                    else
+                        bar._stackCount = 0
+                    end
+                else
+                    bar._stackCount = 0
                 end
                 return
             end
@@ -973,62 +1099,6 @@ local function UpdatePandemic(bar, cfg)
 end
 
 -------------------------------------------------------------------------------
---  "Not Tracked in CDM" Overlay for Tracking Bars
---  Shown when a bar has a valid spell but it isn't in Blizzard's CDM.
---  Clicking opens the Blizzard CDM settings to the Buffs tab.
--------------------------------------------------------------------------------
-local function ShowTBBUntrackedOverlay(bar, cfg)
-    if not bar._untrackedOverlay then
-        local ov = CreateFrame("Button", nil, bar)
-        ov:SetAllPoints(bar._bar or bar)
-        ov:SetFrameLevel(bar:GetFrameLevel() + 8)
-        local ovTex = ov:CreateTexture(nil, "OVERLAY", nil, 6)
-        ovTex:SetAllPoints()
-        ovTex:SetColorTexture(0.6, 0.075, 0.075, 0.65)
-        local label = ov:CreateFontString(nil, "OVERLAY")
-        local outFlag = EllesmereUI.GetFontOutlineFlag and EllesmereUI.GetFontOutlineFlag() or "OUTLINE"
-        label:SetFont(GetFont(), 10, outFlag)
-        if EllesmereUI.GetFontUseShadow and EllesmereUI.GetFontUseShadow() then
-            label:SetShadowOffset(1, -1)
-        else
-            label:SetShadowOffset(0, 0)
-        end
-        label:SetPoint("CENTER", ov, "CENTER", 0, 0)
-        label:SetText("Click to Track")
-        label:SetTextColor(1, 1, 1, 0.9)
-        label:SetJustifyH("CENTER")
-        ov._label = label
-        ov:SetScript("OnClick", function()
-            if ns.OpenBlizzardCDMTab then
-                ns.OpenBlizzardCDMTab(true)
-            end
-        end)
-        ov:SetScript("OnEnter", function(self)
-            local spellName = ""
-            local sid = cfg.spellID
-            if sid and sid > 0 then
-                spellName = C_Spell.GetSpellName(sid) or ""
-            elseif cfg.name and cfg.name ~= "" then
-                spellName = cfg.name
-            end
-            if spellName ~= "" then spellName = "|cff0cd29d" .. spellName .. "|r " end
-            EllesmereUI.ShowWidgetTooltip(self,
-                spellName .. "needs to be in Blizzard CDM's |cff0cd29dTracked Bars|r.\nClick to open CDM settings and add it.")
-        end)
-        ov:SetScript("OnLeave", function() EllesmereUI.HideWidgetTooltip() end)
-        bar._untrackedOverlay = ov
-    end
-    bar._untrackedOverlay:Show()
-    if not bar:IsShown() then bar:Show() end
-end
-
-local function HideTBBUntrackedOverlay(bar)
-    if bar._untrackedOverlay then bar._untrackedOverlay:Hide() end
-end
-ns.ShowTBBUntrackedOverlay = ShowTBBUntrackedOverlay
-ns.HideTBBUntrackedOverlay = HideTBBUntrackedOverlay
-
--------------------------------------------------------------------------------
 --  Blizzard Bar FontString Discovery
 --  Finds the name and timer FontStrings on a Blizzard Bar StatusBar.
 --  Caches references on the frame for subsequent ticks (zero alloc after first).
@@ -1036,8 +1106,9 @@ ns.HideTBBUntrackedOverlay = HideTBBUntrackedOverlay
 local function GetBlizzBarFontStrings(blizzBar)
     if not blizzBar then return nil, nil end
     -- Return cached refs if already discovered (and found)
-    if blizzBar._tbbNameFS then
-        return blizzBar._tbbNameFS, blizzBar._tbbTimerFS
+    local cached = _blizzBarFS[blizzBar]
+    if cached and cached.nameFS then
+        return cached.nameFS, cached.timerFS
     end
     -- Discover by iterating regions. The StatusBar has 2 FontStrings:
     -- 1st FontString = spell name, 2nd FontString = timer text.
@@ -1051,9 +1122,10 @@ local function GetBlizzBarFontStrings(blizzBar)
             if fsIdx == 2 then timerFS = rgn end
         end
     end
-    -- Cache (use false as sentinel for "searched but not found")
-    blizzBar._tbbNameFS  = nameFS or false
-    blizzBar._tbbTimerFS = timerFS or false
+    -- Cache via external table (use false as sentinel for "searched but not found")
+    local d = BBFS(blizzBar)
+    d.nameFS  = nameFS or false
+    d.timerFS = timerFS or false
     return nameFS, timerFS
 end
 
@@ -1097,18 +1169,14 @@ function ns.UpdateTrackedBuffBarTimers()
             bar:Hide()
         else
             local blzChild = FindChild(cfg)
+            if blzChild then ns.HookPandemicState(blzChild) end
 
             local isActive = blzChild and blzChild.IsShown and blzChild:IsShown() or false
 
             -- Read Blizzard's StatusBar (the data source for fill/timer)
             local blizzBar = blzChild and blzChild.Bar
 
-            -- If untracked overlay is showing, keep it visible regardless of aura state
-            local untrackedShowing = bar._untrackedOverlay and bar._untrackedOverlay:IsShown()
-            if untrackedShowing then
-                if not bar:IsShown() then bar:Show() end
-            elseif isActive then
-                HideTBBUntrackedOverlay(bar)
+            if isActive then
                 if not bar:IsShown() then bar:Show() end
                 local sb = bar._bar
 
@@ -1154,14 +1222,35 @@ function ns.UpdateTrackedBuffBarTimers()
                         end
                     end
 
-                    -- Name + timer from Blizzard's FontStrings (passthrough)
-                    local blizzNameFS, blizzTimerFS = GetBlizzBarFontStrings(blizzBar)
-                    -- Name: set once (doesn't change while active)
-                    if bar._nameText and bar._nameText:IsShown() and blizzNameFS
-                        and not bar._nameSet then
-                        bar._nameText:SetText(blizzNameFS:GetText())
-                        bar._nameSet = true
+                    -- Name: read from aura data (same source as icon) so the
+                    -- name always matches the actual buff, not the Blizzard
+                    -- frame's font string which can be stale after pool
+                    -- recycling. Falls back to C_Spell for the config spell ID.
+                    if bar._nameText and bar._nameText:IsShown() then
+                        local nameStr
+                        if blzChild and blzChild.auraInstanceID and blzChild.auraDataUnit then
+                            local ok, ad = pcall(C_UnitAuras.GetAuraDataByAuraInstanceID,
+                                blzChild.auraDataUnit, blzChild.auraInstanceID)
+                            if ok and ad and ad.name then nameStr = ad.name end
+                        end
+                        if not nameStr then
+                            local blizzNameFS = GetBlizzBarFontStrings(blizzBar)
+                            if blizzNameFS then
+                                local ok, txt = pcall(blizzNameFS.GetText, blizzNameFS)
+                                if ok and txt then nameStr = txt end
+                            end
+                        end
+                        if not nameStr and cfg.spellID and cfg.spellID > 0 then
+                            local spInfo = C_Spell.GetSpellInfo(cfg.spellID)
+                            if spInfo then nameStr = spInfo.name end
+                        end
+                        if nameStr then
+                            bar._nameText:SetText(nameStr)
+                            bar._nameSet = true
+                        end
                     end
+                    -- Timer: passthrough from Blizzard's FontString (changes constantly)
+                    local _, blizzTimerFS = GetBlizzBarFontStrings(blizzBar)
                     -- Timer: passthrough every frame (changes constantly)
                     if cfg.showTimer and bar._timerText and blizzTimerFS then
                         bar._timerText:SetText(blizzTimerFS:GetText())
@@ -1170,25 +1259,39 @@ function ns.UpdateTrackedBuffBarTimers()
                         bar._timerText:Hide()
                     end
 
-                    -- Icon (via C_Spell, never read Blizzard textures)
+                    -- Icon: read from the live aura data so dynamic buffs
+                    -- (Roll the Bones) show the actual rolled buff icon.
+                    -- Fall back to cfg.spellID for non-dynamic buffs.
                     if bar._icon and bar._icon:IsShown() then
-                        local iconSID = cfg.spellID
-                        if iconSID and iconSID > 0 and iconSID ~= bar._lastIconSID then
-                            local spInfo = C_Spell.GetSpellInfo(iconSID)
-                            if spInfo and spInfo.iconID then
-                                bar._icon._tex:SetTexture(spInfo.iconID)
-                                bar._lastIconSID = iconSID
+                        local gotIcon = false
+                        if blzChild and blzChild.auraInstanceID and blzChild.auraDataUnit then
+                            local ok, ad = pcall(C_UnitAuras.GetAuraDataByAuraInstanceID,
+                                blzChild.auraDataUnit, blzChild.auraInstanceID)
+                            if ok and ad and ad.icon then
+                                bar._icon._tex:SetTexture(ad.icon)
+                                gotIcon = true
+                            end
+                        end
+                        if not gotIcon then
+                            local iconSID = cfg.spellID
+                            if iconSID and iconSID > 0 and iconSID ~= bar._lastIconSID then
+                                local spInfo = C_Spell.GetSpellInfo(iconSID)
+                                if spInfo and spInfo.iconID then
+                                    bar._icon._tex:SetTexture(spInfo.iconID)
+                                    bar._lastIconSID = iconSID
+                                end
                             end
                         end
                     end
 
-                    -- Pandemic glow (via C_UnitAuras, combat-safe)
-                    -- Also check Blizzard's PandemicIcon on the source
-                    -- frame for debuffs (avoids tainted secret values).
+                    -- Pandemic glow: Blizzard's ShowPandemicStateFrame
+                    -- hook sets _pandemicState. User must configure
+                    -- pandemic alerts in Blizzard CDM settings.
                     if _anyPandemic and cfg.pandemicGlow then
-                        local inPandemic = ns.IsInPandemicWindow(cfg.spellID)
-                            or (blzChild and blzChild.PandemicIcon
-                                and blzChild.PandemicIcon:IsShown())
+                        local inPandemic = blzChild and _pandemicState[blzChild]
+                        -- TBBs always show our glow (including Blizzard Default)
+                        -- because Blizzard's native PandemicIcon is on the
+                        -- hidden blzChild frame, not our visible TBB bar.
                         if inPandemic then
                             if not bar._pandemicGlowActive then UpdatePandemic(bar, cfg) end
                             if bar._pandemicGlowTarget then bar._pandemicGlowTarget:SetAlpha(1) end
@@ -1222,20 +1325,14 @@ function ns.UpdateTrackedBuffBarTimers()
                     end
                 end
             else
-                -- Inactive: clear state
+                -- Inactive: clear state and hide
                 bar._nameSet = nil
                 bar._cachedBlizzFillTex = nil
                 bar._cachedOurFillTex = nil
                 if _anyPandemic and bar._pandemicGlowActive then ClearPandemic(bar) end
                 if bar._stacksText then bar._stacksText:Hide() end
                 bar._stackCount = 0
-
-                -- Keep bar visible if untracked overlay is shown
-                if bar._untrackedOverlay and bar._untrackedOverlay:IsShown() then
-                    if not bar:IsShown() then bar:Show() end
-                else
-                    if bar:IsShown() then bar:Hide() end
-                end
+                if bar:IsShown() then bar:Hide() end
             end
         end
     end
@@ -1289,26 +1386,6 @@ end
 -------------------------------------------------------------------------------
 --  Build / Rebuild All Tracking Bars
 -------------------------------------------------------------------------------
-SLASH_TBBDEBUG1 = "/tbbdebug"
-SlashCmdList.TBBDEBUG = function()
-    local anchors = EllesmereUIDB and EllesmereUIDB.unlockAnchors
-    if not anchors then print("|cffff0000[TBB]|r no unlockAnchors"); return end
-    local found = false
-    for k, v in pairs(anchors) do
-        if k:sub(1, 4) == "TBB_" then
-            print("|cff00ff00[TBB]|r " .. k .. " -> target=" .. tostring(v.target) .. " side=" .. tostring(v.side))
-            found = true
-        end
-    end
-    if not found then print("|cffff0000[TBB]|r no TBB anchors found in unlockAnchors") end
-end
-
-function ns.HideAllTBB()
-    for i = 1, #tbbFrames do
-        if tbbFrames[i] then tbbFrames[i]:Hide() end
-    end
-end
-
 function ns.BuildTrackedBuffBars()
     ECME = ns.ECME
     if not ECME or not ECME.db then return end
@@ -1324,15 +1401,9 @@ function ns.BuildTrackedBuffBars()
         local tbb = ns.GetTrackedBuffBars()
         local bars = tbb and tbb.bars
         if bars then
-            for _, cfg in ipairs(bars) do
-                local w = cfg.width or 200
-                local h = cfg.height or 24
-                if not cfg.verticalOrientation and h > w then
-                    cfg.width, cfg.height = h, w
-                elseif cfg.verticalOrientation and w > h then
-                    cfg.width, cfg.height = h, w
-                end
-            end
+            -- Width/height auto-swap removed: the Vertical Orientation
+            -- toggle already swaps dimensions on toggle (options line 2756).
+            -- The per-build swap fought slider input, making resizes erratic.
         end
     end
 
@@ -1360,6 +1431,7 @@ function ns.BuildTrackedBuffBars()
     _anyStacks    = false
 
     local anyEnabled = false
+    local lastGroupedBar  -- tracks previous enabled bar for grouped anchoring
     for i, cfg in ipairs(bars) do
         -- Update gating flags
         if cfg.pandemicGlow                             then _anyPandemic  = true end
@@ -1371,7 +1443,7 @@ function ns.BuildTrackedBuffBars()
         end
         local bar = tbbFrames[i]
 
-        if cfg.enabled == false or ns._tbbSpecSwapPending then
+        if cfg.enabled == false then
             bar:Hide()
         else
             anyEnabled = true
@@ -1407,22 +1479,41 @@ function ns.BuildTrackedBuffBars()
                 bar._nameSet = displayName and displayName ~= "" or false
             end
 
-            -- Saved position
-            local posKey = tostring(i)
-            local pos = _tbbPos[posKey]
-            if pos and pos.point then
-                local unlockKey = "TBB_" .. posKey
-                local anchored = EllesmereUI.IsUnlockAnchored and EllesmereUI.IsUnlockAnchored(unlockKey)
-                if not anchored or not bar:GetLeft() then
-                    bar:ClearAllPoints()
-                    if pos.scale then pcall(function() bar:SetScale(pos.scale) end) end
-                    bar:SetPoint(pos.point, UIParent, pos.relPoint or pos.point, pos.x or 0, pos.y or 0)
+            -- Saved position / grouping
+            local groupEnabled = tbb.groupEnabled
+            if groupEnabled and lastGroupedBar then
+                -- Grouped: position relative to previous enabled bar
+                local growDir = (tbb.groupGrowDirection or "DOWN"):upper()
+                local spacing = tbb.groupSpacing or 2
+                bar:ClearAllPoints()
+                if growDir == "DOWN" then
+                    bar:SetPoint("TOP", lastGroupedBar, "BOTTOM", 0, -spacing)
+                elseif growDir == "UP" then
+                    bar:SetPoint("BOTTOM", lastGroupedBar, "TOP", 0, spacing)
+                elseif growDir == "RIGHT" then
+                    bar:SetPoint("LEFT", lastGroupedBar, "RIGHT", spacing, 0)
+                elseif growDir == "LEFT" then
+                    bar:SetPoint("RIGHT", lastGroupedBar, "LEFT", -spacing, 0)
                 end
             else
-                bar:ClearAllPoints()
-                bar:SetPoint("CENTER", UIParent, "CENTER", 0, 200 - (i - 1) * ((cfg.height or 24) + 4))
+                -- Independent positioning (bar 1 always, or grouping disabled)
+                local posKey = tostring(i)
+                local pos = _tbbPos[posKey]
+                if pos and pos.point then
+                    local unlockKey = "TBB_" .. posKey
+                    local anchored = EllesmereUI.IsUnlockAnchored and EllesmereUI.IsUnlockAnchored(unlockKey)
+                    if not anchored or not bar:GetLeft() then
+                        bar:ClearAllPoints()
+                        if pos.scale then pcall(function() bar:SetScale(pos.scale) end) end
+                        bar:SetPoint(pos.point, UIParent, pos.relPoint or pos.point, pos.x or 0, pos.y or 0)
+                    end
+                else
+                    bar:ClearAllPoints()
+                    bar:SetPoint("CENTER", UIParent, "CENTER", 0, 200 - (i - 1) * ((cfg.height or 24) + 4))
+                end
             end
 
+            if tbb.groupEnabled then lastGroupedBar = bar end
             bar._tbbReady    = true
             bar._isPassive   = nil
             bar._stackCount  = 0
@@ -1440,7 +1531,6 @@ function ns.BuildTrackedBuffBars()
                 if tbbAccum < 0.016 then return end
                 self._lastDt = tbbAccum
                 tbbAccum = 0
-                if ns._specChangePending or ns._tbbSpecSwapPending then return end
                 ns.UpdateTrackedBuffBarTimers()
             end)
         end
@@ -1468,6 +1558,7 @@ function ns.RegisterTBBUnlockElements()
     local bars = tbb and tbb.bars
     if not bars or #bars == 0 then return end
 
+    local groupEnabled = tbb.groupEnabled
     local elements = {}
     for i, cfg in ipairs(bars) do
         local idx = i
@@ -1476,30 +1567,82 @@ function ns.RegisterTBBUnlockElements()
         if bar then
             elements[#elements + 1] = MK({
                 key   = "TBB_" .. posKey,
-                label = "Tracking Bar: " .. (cfg.name or ("Bar " .. idx)),
+                label = groupEnabled and idx == 1
+                    and "Tracking Bar Group"
+                    or ("Tracking Bar: " .. (cfg.name or ("Bar " .. idx))),
                 group = "Cooldown Manager",
                 order = 650,
                 noAnchorTarget = true,
+                noResize = true,
                 isHidden = function()
                     local t = ns.GetTrackedBuffBars()
                     local b = t and t.bars
-                    return not b or idx > #b
+                    if not b or idx > #b then return true end
+                    -- When grouping, only bar 1 shows a mover
+                    if t.groupEnabled and idx > 1 then return true end
+                    return false
                 end,
                 getFrame = function() return tbbFrames[idx] end,
                 getSize  = function()
-                    local f = tbbFrames[idx]
-                    if f then return f:GetWidth(), f:GetHeight() end
-                    return 200, 24
+                    -- Return total frame size (including icon) so width-
+                    -- matching reads the actual rendered dimensions.
+                    local t = ns.GetTrackedBuffBars()
+                    local c = t.bars and t.bars[idx]
+                    local PPg = EllesmereUI and EllesmereUI.PP
+                    local sn = PPg and PPg.Snap or function(v) return v end
+                    if c then
+                        local w = sn(c.width or 270)
+                        local h = sn(c.height or 24)
+                        local hasIcon = (c.iconDisplay or "none") ~= "none"
+                        local isVert = c.verticalOrientation
+                        if hasIcon then
+                            if isVert then h = h + w else w = w + h end
+                        end
+                        return w, h
+                    end
+                    return 270, 24
                 end,
                 setWidth = function(_, w)
                     local t = ns.GetTrackedBuffBars()
                     local c = t.bars and t.bars[idx]
-                    if c then c.width = w; ns.BuildTrackedBuffBars() end
+                    if not c then return end
+                    local iconMode = c.iconDisplay or "none"
+                    local hasIcon = iconMode ~= "none"
+                    local isVert = c.verticalOrientation
+                    if hasIcon and not isVert then
+                        w = w - (c.height or 24)
+                    end
+                    local f = tbbFrames[idx]
+                    local PPt = EllesmereUI and EllesmereUI.PP
+                    w = PPt and PPt.Snap(w) or math.floor(w + 0.5)
+                    if EllesmereUI._unlockActive then
+                        c.width = w
+                    end
+                    if f then
+                        local totalW = hasIcon and not isVert and (w + (c.height or 24)) or w
+                        f:SetWidth(totalW)
+                    end
                 end,
                 setHeight = function(_, h)
                     local t = ns.GetTrackedBuffBars()
                     local c = t.bars and t.bars[idx]
-                    if c then c.height = h; ns.BuildTrackedBuffBars() end
+                    if not c then return end
+                    local iconMode = c.iconDisplay or "none"
+                    local hasIcon = iconMode ~= "none"
+                    local isVert = c.verticalOrientation
+                    if hasIcon and isVert then
+                        h = h - (c.width or 200)
+                    end
+                    local PPt = EllesmereUI and EllesmereUI.PP
+                    h = PPt and PPt.Snap(h) or math.floor(h + 0.5)
+                    local f = tbbFrames[idx]
+                    if EllesmereUI._unlockActive then
+                        c.height = h
+                    end
+                    if f then
+                        local totalH = hasIcon and isVert and (h + (c.width or 200)) or h
+                        f:SetHeight(totalH)
+                    end
                 end,
                 savePos = function(_, point, relPoint, x, y)
                     local pos = ns.GetTBBPositions()

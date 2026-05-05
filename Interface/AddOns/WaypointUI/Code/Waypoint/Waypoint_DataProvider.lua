@@ -37,9 +37,9 @@ do
     local CLAMP_THRESHOLD = 0.125
 
     function DataProviderUtil.GetCompletionText(questID)
-        if not C_QuestLog.GetLogIndexForQuestID(questID) then return nil end
-        C_QuestLog.SetSelectedQuest(questID)
-        return GetQuestLogCompletionText()
+        local questLogIndex = C_QuestLog.GetLogIndexForQuestID(questID)
+        if not questLogIndex then return nil end
+        return GetQuestLogCompletionText(questLogIndex)
     end
 
     function DataProviderUtil.GetObjectiveInfo(objectives)
@@ -145,21 +145,19 @@ do
             local poiType = Waypoint_Cache.Get("poiType")
             local poiInfo = Waypoint_Cache.Get("poiInfo")
             local isVignette = Waypoint_Cache.Get("vignetteID") ~= nil
+            local isUserNavigationTracked = MapPin.IsUserNavigationTracked()
+            local userNavigation = MapPin.GetUserNavigation()
 
             if pinType == Enum.SuperTrackingType.Corpse then
                 return Waypoint_Define.ContextIconTexture{ type = "ATLAS", path = "poi-torghast" }
+            elseif isUserNavigationTracked and userNavigation and userNavigation.iconTexture then
+                return Waypoint_Define.ContextIconTexture{ type = "TEXTURE", path = userNavigation.iconTexture, requestRecolor = userNavigation.requestRecolor }
             elseif poiType == Enum.SuperTrackingMapPinType.TaxiNode then
                 return Waypoint_Define.ContextIconTexture{ type = "ATLAS", path = "Crosshair_Taxi_128" }
             elseif poiInfo and poiInfo.atlasName then
                 return Waypoint_Define.ContextIconTexture{ type = "ATLAS", path = poiInfo.atlasName }
-            elseif MapPin.IsUserNavigationTracked() or MapPin.IsUserNavigationFlagged("RareScanner_Waypoint") or MapPin.IsUserNavigationFlagged("SilverDragon_Waypoint") then
-                if MapPin.IsUserNavigationFlagged("RareScanner_Waypoint") or MapPin.IsUserNavigationFlagged("SilverDragon_Waypoint") then
-                    return Waypoint_Define.ContextIconTexture{ type = "TEXTURE", path = PATH_CONTEXT_ICON .. "VignetteElite", requestRecolor = true }
-                elseif MapPin.IsUserNavigationFlagged("TomTom_Waypoint") then
-                    return Waypoint_Define.ContextIconTexture{ type = "TEXTURE", path = PATH_CONTEXT_ICON .. "TomTomArrow", requestRecolor = true }
-                else
-                    return Waypoint_Define.ContextIconTexture{ type = "TEXTURE", path = PATH_CONTEXT_ICON .. "Navigation", requestRecolor = true }
-                end
+            elseif isUserNavigationTracked then
+                return Waypoint_Define.ContextIconTexture{ type = "TEXTURE", path = PATH_CONTEXT_ICON .. "Navigation", requestRecolor = true }
             elseif pinType == Enum.SuperTrackingType.UserWaypoint then
                 return Waypoint_Define.ContextIconTexture{ type = "TEXTURE", path = PATH_CONTEXT_ICON .. "MapPin", requestRecolor = true }
             elseif poiType == Enum.SuperTrackingMapPinType.DigSite then

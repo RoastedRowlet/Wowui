@@ -108,6 +108,7 @@ BigWigs:AddColors("Crown of the Cosmos", {
 	[1233602] = "cyan",
 	[1233787] = "purple",
 	[1233865] = "yellow",
+	[1237038] = "yellow",
 	[1237614] = "cyan",
 	[1237837] = "cyan",
 	[1238843] = "red",
@@ -117,6 +118,8 @@ BigWigs:AddColors("Crown of the Cosmos", {
 	[1246461] = "purple",
 	[1246918] = "orange",
 	[1255368] = "red",
+	[1261016] = "cyan",
+	[1261339] = "orange",
 	["stages"] = "cyan",
 })
 
@@ -125,5 +128,7 @@ BigWigs:AddSounds("Crown of the Cosmos", {
 	[1238843] = "long",
 	[1243743] = "alert",
 	[1255368] = "alert",
+	[1261016] = "info",
+	[1261339] = "info",
 	["stages"] = "long",
 })

@@ -146,6 +146,7 @@ if MODERN or CF_WRATH then
 			[152106]=have1, [152107]=have1, [152108]=have1, -- paragon boxes
 			-- Midnight
 			[255825]=onPreyHunt, -- disarmed trap
+			[268297]=c1, -- bag o' gold
 			[264274]=have1, -- fabled adventurer's
 			[268545]=have1, [257023]=have1, [257026]=have1, [262346]=have1, -- preyseeker's
 			[265995]=have1, -- quel'thalas adventurer's
@@ -153,7 +154,9 @@ if MODERN or CF_WRATH then
 			[250116]=have1, -- quel'thalas treasures [sign weekly]
 			[269702]=have1, -- abundant [rare]
 			[269703]=have1, -- avid learner's [rare]
-			[269701]=have1, -- surplus party favors [rare]
+			[269701]=have1, -- surplus party270244 favors [rare]
+			[270244]=have1, -- field pouch
+			[264914]=have1, -- ranger's cache
 			-- Midnight Apex [S1]
 			[254677]=have1, -- apex cache
 			[263465]=have1, -- saltheril's soiree
@@ -161,6 +164,9 @@ if MODERN or CF_WRATH then
 			[263466]=have1, -- abundant
 			[263467]=have1, -- avid learner's
 			[260193]=have1, -- fabled veteran's
+			-- Midnight inscription treatises [weekly]
+			[245755]=95127, [245756]=95137, [245757]=95131, [245758]=95134, [245759]=95129, [245760]=95133,
+			[245761]=95130, [245762]=95135, [245763]=95128, [245809]=95138, [245828]=95136,
 		}
 		filtered = {
 			[224292]=have3, -- radiant fuel shard

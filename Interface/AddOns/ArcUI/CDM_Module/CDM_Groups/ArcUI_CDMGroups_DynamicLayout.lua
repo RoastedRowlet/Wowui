@@ -515,7 +515,41 @@ local function HookFrameForDynamicLayout(frame, group)
             end
         end)
     end
-    
+
+    -- Cooldown widget OnCooldownDone: per Blizzard's own line-712 comment in
+    -- CooldownViewer.lua: "No external event is dispatched when a totem
+    -- finishes". For BuffIconCooldownItemMixin (which totem aura frames use)
+    -- OnCooldownDone only calls RefreshActive() — it does NOT clear
+    -- totemData. The actual ClearTotemData call happens later via
+    -- OnPlayerTotemUpdateEvent → RefreshTotemData (~350ms after expiry per
+    -- probe: CDDone at 230.036, TotemUpd at 230.382).
+    --
+    -- We use OnCooldownDone purely as an EARLY heads-up to mark the group
+    -- dirty so the 0.2s dirty ticker re-checks state. By the time the
+    -- ticker runs (or by the time OnPlayerTotemUpdateEvent fires), CDM
+    -- will have cleared totemData and IsAuraActive will read it as false.
+    --
+    -- DO NOT WRITE TO frame._arcDLAuraActive here. That cache is for AURA
+    -- tracking (driven by OnAuraInstanceInfoSet/Cleared), not totem
+    -- tracking. Totem state is read live from frame.totemData ~= nil
+    -- inside IsAuraActive. Polluting _arcDLAuraActive=true (which the
+    -- previous version did because frame.totemData was still non-nil at
+    -- this moment) caused IsAuraActive to permanently return cached_active
+    -- even after totemData was eventually cleared — the totem stayed in
+    -- the layout slot indefinitely.
+    --
+    -- HookScript chains additively after Blizzard's SetScript closure.
+    if frame.Cooldown and not frame._arcDLCooldownDoneHooked then
+        frame._arcDLCooldownDoneHooked = true
+        frame.Cooldown:HookScript("OnCooldownDone", function()
+            local capturedFrame = frame
+            local currentGroup = GetFrameCurrentGroup(capturedFrame)
+            if ShouldTriggerDynamicLayout(currentGroup, capturedFrame) then
+                DL.MarkGroupDirty(currentGroup.name)
+            end
+        end)
+    end
+
     dynamicLayoutHookedFrames[frame] = true
 end
 
@@ -552,7 +586,16 @@ DL.IsOptionsPanelOpen = IsOptionsPanelOpen
 -- Returns: alpha value (0-1), defaults to 1.0 if no settings found
 function DL.GetFrameMissingAlpha(frame)
     if not frame then return 1.0 end
-    
+
+    -- IMPORTANT (don't "fix" again): the cooldownStateVisuals schema uses
+    -- legacy names from cooldown frames, but for aura/buff/debuff/totem
+    -- frames the semantic mapping is:
+    --   readyState    = aura PRESENT / totem UP    ("Active" in the UI dropdown)
+    --   cooldownState = aura MISSING / totem GONE  ("Inactive" in the UI dropdown)
+    -- So the alpha for "aura/totem missing" lives in cooldownState.alpha.
+    -- DO NOT change this to readyState.alpha — that's the alpha when the
+    -- aura IS active, which would invert dynamic-layout's gap detection.
+    --
     -- Fast path: read directly from frame's cached CDMEnhance settings
     local cfg = frame._arcCfg
     if cfg and cfg.cooldownStateVisuals then
@@ -561,7 +604,7 @@ function DL.GetFrameMissingAlpha(frame)
             return cs.alpha
         end
     end
-    
+
     -- Fallback: try CDMEnhance.GetIconSettings if frame cache isn't populated yet
     local cdID = frame.cooldownID
     if cdID and ns.CDMEnhance and ns.CDMEnhance.GetIconSettings then
@@ -573,7 +616,7 @@ function DL.GetFrameMissingAlpha(frame)
             end
         end
     end
-    
+
     -- No settings at all → default is 1.0 (fully visible)
     return 1.0
 end
@@ -611,35 +654,59 @@ function DL.IsIconInvisible(member)
         if cdID then state.tickInvisibleCache[cdID] = nil end  -- Cache: not an aura
         return nil  -- Not an aura = exclude from dynamic layout (cooldowns not affected)
     end
-    
+
     local frame = member.frame
     local result
-    
-    -- WoW 12.0: totemData ONLY EXISTS when totem is active (it's a secret table)
-    -- When totem expires, totemData becomes nil
-    -- We can check existence (nil vs not-nil) without triggering secret comparison
-    -- preferredTotemUpdateSlot persists even after totem expires, so don't use it!
-    if frame.totemData ~= nil then
-        result = false  -- totemData exists = totem active = visible
+    local isCurrentlyActive
+
+    -- ═══════════════════════════════════════════════════════════════════════
+    -- DETERMINE ACTIVE STATE
+    --
+    -- Totem-capable frames: read frame.totemData ~= nil ONLY. Never
+    -- consult _arcDLAuraActive — that cache is for aura tracking and gets
+    -- polluted by totemData snapshots taken during a totem's active phase.
+    --
+    -- Pure aura frames: use the aura cache (set by
+    -- OnAuraInstanceInfoSet/Cleared hooks).
+    -- ═══════════════════════════════════════════════════════════════════════
+    if frame.OnPlayerTotemUpdateEvent then
+        isCurrentlyActive = (frame.totemData ~= nil)
     else
-        -- Read _arcDLAuraActive set by OnAuraInstanceInfoSet/Cleared hooks.
-        -- Seed on first call if hooks haven't fired yet.
         if frame._arcDLAuraActive == nil then
             frame._arcDLAuraActive = HasAuraInstanceID(frame.auraInstanceID)
         end
-        if frame._arcDLAuraActive then
-            result = false  -- active aura = visible
+        isCurrentlyActive = frame._arcDLAuraActive == true
+    end
+
+    if isCurrentlyActive then
+        result = false  -- active = visible, not a gap
+    else
+        -- ═══════════════════════════════════════════════════════════════
+        -- INACTIVE: trust the frame's actual rendered alpha as the truth.
+        --
+        -- AuraFrames / CDMEnhance / Bar visibility all converge on
+        -- frame:SetAlpha(...). If anything in that chain decided to hide
+        -- the icon (alpha ≈ 0), it's a gap. If it kept the icon visible
+        -- (alpha > threshold) for any reason — including default settings,
+        -- options panel open, user config keeping inactive icons visible —
+        -- we keep the slot occupied so the layout doesn't surprise the
+        -- user by compacting around something they can still see.
+        --
+        -- This single read replaces the previous schema-digging pile
+        -- (cooldownStateVisuals.cooldownState.alpha lookups, frame._arcCfg
+        -- cache reads, fallbacks to GetIconSettings, etc.) which was
+        -- broken when frames had no per-icon settings configured —
+        -- defaults returned alpha=1.0 even when AuraFrames had hidden the
+        -- frame via a different code path.
+        -- ═══════════════════════════════════════════════════════════════
+        local alpha = frame:GetAlpha() or 0
+        if alpha <= CONFIG.INVISIBLE_THRESHOLD then
+            result = true   -- frame is hidden → real gap
         else
-            -- Inactive aura — only a gap if CDMEnhance hides it (alpha ≈ 0)
-            local missingAlpha = DL.GetFrameMissingAlpha(frame)
-            if missingAlpha <= CONFIG.INVISIBLE_THRESHOLD then
-                result = true   -- Alpha ≈ 0 → frame hidden → gap
-            else
-                result = false  -- Frame stays visible when inactive → NOT a gap
-            end
+            result = false  -- frame is visible → keep slot
         end
     end
-    
+
     -- Cache result for this tick
     if cdID then state.tickInvisibleCache[cdID] = result end
     return result
@@ -685,23 +752,39 @@ function DL.IsAuraActive(member)
     if not member or not member.frame then
         return false, "no_frame"
     end
-    
+
     -- Use robust check for aura type
     if not DL.IsAuraFrame(member) then
         return false, "not_aura"
     end
-    
+
     local frame = member.frame
-    
-    -- WoW 12.0: totemData ONLY EXISTS when totem is active (it's a secret table)
-    -- When totem expires, totemData becomes nil
-    -- preferredTotemUpdateSlot persists after totem expires, so don't use it!
-    if frame.totemData ~= nil then
-        return true, "totem_active"
+
+    -- ═══════════════════════════════════════════════════════════════════
+    -- TOTEM-CAPABLE FRAMES: live-only read, never trust the aura cache.
+    --
+    -- For frames that can hold totem data (any BuffIcon frame whose
+    -- mixin has OnPlayerTotemUpdateEvent), the canonical truth is
+    -- frame.totemData ~= nil. The aura cache `_arcDLAuraActive` is
+    -- written by OnAuraInstanceInfoSet/Cleared hooks (which never fire
+    -- for pure totem frames) AND historically by the RefreshLayout
+    -- sweep (which used to seed it from totemData). That pollution made
+    -- the cache stick at `true` after a totem expired, because nothing
+    -- flips it back when totemData is cleared.
+    --
+    -- Solution: for totem-capable frames, return based purely on the
+    -- live totemData read, and ignore _arcDLAuraActive entirely.
+    -- ═══════════════════════════════════════════════════════════════════
+    if frame.OnPlayerTotemUpdateEvent then
+        if frame.totemData ~= nil then
+            return true, "totem_active"
+        end
+        return false, "totem_inactive"
     end
-    
-    -- Read from cache set by OnAuraInstanceInfoSet/Cleared hooks.
-    -- Seed cache on first call if hooks haven't fired yet.
+
+    -- Pure aura frames (no totem capability): use the aura cache.
+    -- _arcDLAuraActive is set by OnAuraInstanceInfoSet/Cleared hooks
+    -- which fire reliably for these frames.
     if frame._arcDLAuraActive == nil then
         frame._arcDLAuraActive = HasAuraInstanceID(frame.auraInstanceID)
     end
@@ -1097,23 +1180,30 @@ function DL.CalculateDynamicSlots(group, rows, cols, excludeInactiveAuras)
             else
                 local isAura = DL.IsAuraFrame(member)
                 local isActive = true
-                
+
                 -- ONLY exclude inactive auras when BOTH the parameter AND the group toggle agree
                 -- When Dynamic Auras is OFF, auras are treated identically to cooldowns (always active)
                 if isAura and excludeInactiveAuras and group.dynamicLayout then
                     isActive = DL.IsAuraActive(member)
-                    
-                    -- If aura is inactive, check if CDMEnhance would actually hide it
-                    -- Read frame._arcCfg.cooldownStateVisuals.cooldownState.alpha
-                    -- If alpha > 0, frame stays visible → treat as active for layout
+
+                    -- If the aura/totem is inactive, defer to the frame's
+                    -- actual rendered alpha. AuraFrames / CDMEnhance / Bar
+                    -- visibility all converge on frame:SetAlpha(...) — if
+                    -- the frame is visually visible (alpha > threshold),
+                    -- keep the layout slot. If it's hidden (alpha ≈ 0),
+                    -- treat as a real gap. Single live read replaces the
+                    -- previous config-schema dig (cooldownStateVisuals
+                    -- field lookups) which returned defaults of 1.0 when
+                    -- a frame had no per-icon settings, even though
+                    -- AuraFrames may have hidden it via a different path.
                     if not isActive then
-                        local missingAlpha = DL.GetFrameMissingAlpha(member.frame)
-                        if missingAlpha > CONFIG.INVISIBLE_THRESHOLD then
-                            isActive = true  -- Frame stays visible → keep in layout
+                        local alpha = member.frame:GetAlpha() or 0
+                        if alpha > CONFIG.INVISIBLE_THRESHOLD then
+                            isActive = true  -- frame still visible → keep in layout
                         end
                     end
                 end
-                
+
                 if isActive then
                     activeAuras[cdID] = true
                     table.insert(allActiveItems, { cdID = cdID, member = member, isAura = isAura })
@@ -1855,6 +1945,102 @@ RunDirtyTick = (Track and Track("DL.RunDirtyTick", RunDirtyTick)) or RunDirtyTic
 -- own aura state truth. RunDirtyTick only runs when a hook has marked a group dirty.
 local _dirtyTicker = C_Timer.NewTicker(CONFIG.CHECK_INTERVAL, function() RunDirtyTick() end)
 
+-- ═══════════════════════════════════════════════════════════════════════════
+-- FULL-UPDATE SWEEP (RefreshLayout hook)
+--
+-- Beta 4 / WoW 12.0 changed CooldownViewerMixin:OnUnitAura — when UNIT_AURA
+-- fires with isFullUpdate=true (zone change, vehicle exit, mind control, taxi,
+-- post-spec settle, login, etc.) it now bails out early with self:RefreshLayout()
+-- and skips the per-frame OnUnitAuraRemovedEvent / Updated / Added dispatch.
+--
+-- RefreshLayout() does ReleaseAll → reacquire → RefreshData(). Hooks DO fire
+-- during the churn (ClearCooldownID → OnAuraInstanceInfoCleared, then
+-- SetCooldownID → RefreshData → SetAuraInstanceInfo → OnAuraInstanceInfoSet).
+--
+-- BUT: there are two race windows where the per-frame _arcDLAuraActive cache
+-- can desync from the actual auraInstanceID on the frame:
+--   1. Hidden viewer at full-update time: RefreshLayout's RefreshData() is
+--      gated by `if self:IsShown()`. Frames get released (Cleared hook fires)
+--      but never re-set, so _arcDLAuraActive=false even when the aura is
+--      actually present once the viewer reshows.
+--   2. Same-instance churn: in some sequences SetAuraInstanceInfo early-returns
+--      because auraInstanceID hasn't changed, so OnAuraInstanceInfoSet doesn't
+--      fire even though the frame transitioned through the released-acquired path.
+--
+-- Belt-and-suspenders: hook CooldownViewerMixin:RefreshLayout. After CDM
+-- finishes its rebuild (one frame later via C_Timer.After(0)), walk every
+-- dynamic-aura group's members, re-seed _arcDLAuraActive from the live
+-- auraInstanceID, and mark the group dirty if anything changed. The dirty
+-- ticker then handles the reflow within CHECK_INTERVAL (0.2s).
+-- ═══════════════════════════════════════════════════════════════════════════
+
+local _refreshLayoutSweepPending = false
+
+local function RunPostRefreshLayoutSweep()
+    _refreshLayoutSweepPending = false
+    if not _cdmGroupsEnabled then return end
+    if IsOptionsPanelOpen() then return end
+    if ns.CDMGroups.specChangeInProgress then return end
+    if ns.CDMGroups._pendingSpecChange then return end
+    if state.pendingPostTalentRefresh then return end
+    if not ns.CDMGroups.groups then return end
+
+    for groupName, group in pairs(ns.CDMGroups.groups) do
+        if group.autoReflow and group.dynamicLayout and group.members then
+            local stateChanged = false
+            for cdID, member in pairs(group.members) do
+                local frame = member and member.frame
+                if frame and not member.isPlaceholder then
+                    -- Skip totem-capable frames. _arcDLAuraActive is the AURA
+                    -- cache; totem state is read live from frame.totemData
+                    -- inside IsAuraActive. Writing to the cache here from
+                    -- a transient totemData snapshot leaves the cache stuck
+                    -- `true` after the totem eventually expires (the aura-
+                    -- side hooks that flip it back to false don't fire for
+                    -- pure totem frames).
+                    if not frame.OnPlayerTotemUpdateEvent then
+                        local liveActive = HasAuraInstanceID(frame.auraInstanceID)
+                        if frame._arcDLAuraActive ~= liveActive then
+                            frame._arcDLAuraActive = liveActive
+                            stateChanged = true
+                        end
+                    else
+                        -- Totem-capable: still track group dirtiness if its
+                        -- live totem state differs from what the dirty
+                        -- ticker last reflowed against. Cheapest check:
+                        -- mark dirty unconditionally on full-update sweeps
+                        -- — dirty ticker is a no-op when nothing actually
+                        -- moves.
+                        stateChanged = true
+                    end
+                end
+            end
+            if stateChanged then
+                DL.MarkGroupDirty(groupName)
+                LogEvent("FULLUPDATE_RESEED", groupName, "RefreshLayout sweep flipped DL cache")
+            end
+        end
+    end
+end
+
+-- Hook fires AFTER Blizzard's RefreshLayout completes. Defer one frame so
+-- the subsequent RefreshData (and any OnAuraInstanceInfoSet hooks it triggers)
+-- finishes settling before we re-evaluate.
+if CooldownViewerMixin and CooldownViewerMixin.RefreshLayout then
+    hooksecurefunc(CooldownViewerMixin, "RefreshLayout", function(self)
+        if _refreshLayoutSweepPending then return end
+        _refreshLayoutSweepPending = true
+        C_Timer.After(0, RunPostRefreshLayoutSweep)
+    end)
+end
+
+-- Expose for manual triggering (debug / spec change settlement, etc.)
+DL.RunPostRefreshLayoutSweep = function()
+    if _refreshLayoutSweepPending then return end
+    _refreshLayoutSweepPending = true
+    C_Timer.After(0, RunPostRefreshLayoutSweep)
+end
+
 -- Expose for external stop if needed (e.g. full disable of CDMGroups)
 function DL.StopMaintainerTickers()
     if _dirtyTicker then _dirtyTicker:Cancel() end
@@ -2573,6 +2759,25 @@ if Shared and Shared.RegisterPanelCallback then
             DL.OnOptionsPanelClosed()
         end,
     })
+end
+
+-- ═══════════════════════════════════════════════════════════════════════════
+-- FRAME REBIND SUBSCRIBER
+--
+-- frame._arcDLAuraActive caches the OnAuraInstanceInfoSet/Cleared hook
+-- result. When CDM repools a frame to a new cdID, the cache survives on
+-- the same Lua table and would carry stale "active" state into the new
+-- cdID's layout decisions until the next aura event fires.
+--
+-- FrameController dispatches synchronously on rebind. We just nil the
+-- cache so the next read at line 627-628 reseeds from live
+-- HasAuraInstanceID(frame.auraInstanceID).
+-- ═══════════════════════════════════════════════════════════════════════════
+if ns.FrameController and ns.FrameController.OnFrameRebind then
+    ns.FrameController.OnFrameRebind(function(frame, oldCdID, newCdID)
+        if not frame then return end
+        frame._arcDLAuraActive = nil
+    end)
 end
 
 -- ═══════════════════════════════════════════════════════════════════════════

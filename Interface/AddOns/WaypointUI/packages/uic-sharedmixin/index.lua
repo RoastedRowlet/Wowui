@@ -131,12 +131,14 @@ do -- Button
     function ButtonMixin:Enable()
         self.isEnabled = true
         TriggerHooks(self.onEnableChangeHooks, self, true)
+        TriggerHooks(self.onStateChangeHooks, self, nil)
     end
 
     function ButtonMixin:Disable()
         self.isEnabled = false
         self.state = "NORMAL"
         TriggerHooks(self.onEnableChangeHooks, self, false)
+        TriggerHooks(self.onStateChangeHooks, self, nil)
     end
 
     function ButtonMixin:SetEnabled(isEnabled)

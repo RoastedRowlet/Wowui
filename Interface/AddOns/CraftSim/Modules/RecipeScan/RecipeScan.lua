@@ -38,9 +38,7 @@ CraftSim.RECIPE_SCAN.SORT_MODES = {
     CRAFTING_COST = "CRAFTING_COST",
 }
 
-local print = CraftSim.DEBUG:RegisterDebugID("Modules.RecipeScan")
-local printF = CraftSim.DEBUG:RegisterDebugID("Modules.RecipeScan.Filter")
-local printS = CraftSim.DEBUG:RegisterDebugID("Modules.RecipeScan.Scanning")
+local Logger = CraftSim.DEBUG:RegisterLogger("RecipeScan")
 
 ---@param row CraftSim.RECIPE_SCAN.PROFESSION_LIST.ROW
 function CraftSim.RECIPE_SCAN:ToggleScanButton(row, value)
@@ -91,7 +89,8 @@ end
 
 ---@param row CraftSim.RECIPE_SCAN.PROFESSION_LIST.ROW
 function CraftSim.RECIPE_SCAN:EndScan(row)
-    printS("scan finished")
+    local ms = CraftSim.DEBUG:StopProfiling("Total Recipe Scan")
+    Logger:LogDebug("Scan finished: " .. ms .. " ms")
     collectgarbage("collect") -- By Option?
     CraftSim.RECIPE_SCAN:ToggleScanButton(row, true)
     CraftSim.RECIPE_SCAN.isScanning = false
@@ -129,25 +128,29 @@ end
 ---@param crafterUID string
 ---@param recipeInfo TradeSkillRecipeInfo
 function CraftSim.RECIPE_SCAN.FilterRecipeInfo(crafterUID, recipeInfo)
-    printF("Filtering Recipe: " .. tostring(recipeInfo.name))
+    if not recipeInfo then
+        Logger:LogDebug("FilterRecipeInfo: recipeInfo is nil for crafter " .. tostring(crafterUID) .. " - excluding")
+        return false
+    end
+    Logger:LogDebug("Filtering Recipe: " .. tostring(recipeInfo.name))
     if tContains(CraftSim.CONST.ALCHEMICAL_EXPERIMENTATION_RECIPE_IDS, recipeInfo.recipeID) then
-        printF("Is Alchemical Experimentation: Exclude")
+        Logger:LogDebug("Is Alchemical Experimentation: Exclude")
         return false
     end
     if recipeInfo.isDummyRecipe then
-        printF("Is Dummy: Exclude")
+        Logger:LogDebug("Is Dummy: Exclude")
         return false
     end
     if tContains(CraftSim.CONST.BLIZZARD_DUMMY_RECIPES, recipeInfo.recipeID) then
-        printF("Is Dummy2: Exclude")
+        Logger:LogDebug("Is Dummy2: Exclude")
         return false
     end
     if not CraftSim.DB.OPTIONS:Get("RECIPESCAN_INCLUDE_NOT_LEARNED") and not recipeInfo.learned then
-        printF("Is not learned: Exclude")
+        Logger:LogDebug("Is not learned: Exclude")
         return false
     end
     if tContains(CraftSim.CONST.QUEST_PLAN_CATEGORY_IDS, recipeInfo.categoryID) then
-        printF("Is Quest: Exclude")
+        Logger:LogDebug("Is Quest: Exclude")
         return false
     end
 
@@ -155,12 +158,12 @@ function CraftSim.RECIPE_SCAN.FilterRecipeInfo(crafterUID, recipeInfo)
     local professionInfo = CraftSim.DB.CRAFTER:GetProfessionInfoForRecipe(crafterUID, recipeInfo.recipeID)
 
     if not professionInfo then
-        printF("professionInfo not Cached: Get from Api")
+        Logger:LogDebug("professionInfo not Cached: Get from Api")
         professionInfo = C_TradeSkillUI.GetProfessionInfoByRecipeID(recipeInfo.recipeID)
     end
 
     if not professionInfo.profession then
-        printF("ProfessionInfo - profession missing: Exclude")
+        Logger:LogDebug("ProfessionInfo - profession missing: Exclude")
         return false
     end
 
@@ -171,7 +174,7 @@ function CraftSim.RECIPE_SCAN.FilterRecipeInfo(crafterUID, recipeInfo)
     end
 
     if CraftSim.DB.OPTIONS:Get("RECIPESCAN_ONLY_FAVORITES") and not CraftSim.DB.CRAFTER:IsFavorite(recipeInfo.recipeID, crafterUID, professionInfo.profession) then
-        printF("Is not favorite: Exclude")
+        Logger:LogDebug("Is not favorite: Exclude")
         return false
     end
 
@@ -179,37 +182,49 @@ function CraftSim.RECIPE_SCAN.FilterRecipeInfo(crafterUID, recipeInfo)
     -- if recipe does not have any profession info, exclude recipe
     -- it seems some pandaren recipes may not have this info such as C_TradeSkillUI.GetProfessionInfoByRecipeID(381364)
     if not professionInfo or not professionInfo.profession or not professionInfo.professionID then
-        printF("ProfessionInfo missing information: Exclude")
+        Logger:LogDebug("ProfessionInfo missing information: Exclude")
         return false
     end
 
-    local includedExpansions = {}
-    for expansionID, included in pairs(CraftSim.DB.OPTIONS:Get("RECIPESCAN_FILTERED_EXPANSIONS")) do
-        if included then
-            table.insert(includedExpansions, expansionID)
+    -- Expansion filter: check if the expansion for this recipe is enabled
+    local expansionID = CraftSim.UTIL:GetExpansionIDBySkillLineID(professionInfo.professionID)
+    local includedExpansions = CraftSim.DB.OPTIONS:Get("RECIPESCAN_FILTERED_EXPANSIONS")
+    local expansionEnabled = includedExpansions[expansionID] ~= false
+
+    if not expansionEnabled then
+        Logger:LogDebug("Expansion filtered: Exclude (expansionID: " .. tostring(expansionID) .. ")")
+        return false
+    end
+
+    -- Category filter: per-profession per-expansion category toggles (default: all categories enabled)
+    local filteredCategories = CraftSim.DB.OPTIONS:Get("RECIPESCAN_FILTERED_CATEGORIES")
+    local crafterProfessionUID = CraftSim.RECIPE_SCAN:GetCrafterProfessionUID(crafterUID, professionInfo.profession)
+    local expansionCategoryFilter = filteredCategories and filteredCategories[crafterProfessionUID]
+        and filteredCategories[crafterProfessionUID][expansionID] or nil
+
+    local categoryIncluded = true
+    if expansionCategoryFilter and recipeInfo.categoryID then
+        if expansionCategoryFilter[recipeInfo.categoryID] == false then
+            Logger:LogDebug("Category filtered: Exclude (categoryID: " .. tostring(recipeInfo.categoryID) .. ")")
+            categoryIncluded = false
         end
     end
 
-    local recipeExpansionIncluded = GUTIL:Some(includedExpansions, function(expansionID)
-        local skillLineID = CraftSim.CONST.TRADESKILLLINEIDS[professionInfo.profession][expansionID]
-        return professionInfo.professionID == skillLineID
-    end)
-
-    if recipeExpansionIncluded and recipeInfo.isEnchantingRecipe then
+    if categoryIncluded and recipeInfo.isEnchantingRecipe then
         local baseOperationInfo = C_TradeSkillUI.GetCraftingOperationInfo(recipeInfo.recipeID, {}, nil, false)
         if not baseOperationInfo then return false end
         -- except if its a tinker with no output
         local enchantData = CraftSim.ENCHANT_RECIPE_DATA[baseOperationInfo.craftingDataID]
         if enchantData then
             if enchantData.noOutputTinker then
-                printF("Is noOutputTinker: Exclude")
+                Logger:LogDebug("Is noOutputTinker: Exclude")
                 return false
             end
-            printF(GUTIL:ColorizeText("Include", GUTIL.COLORS.GREEN))
+            Logger:LogDebug(GUTIL:ColorizeText("Include", GUTIL.COLORS.GREEN))
             return true
         end
 
-        printF("Missing Enchant Data: " .. tostring(recipeInfo.recipeID))
+        Logger:LogDebug("Missing Enchant Data: " .. tostring(recipeInfo.recipeID))
         -- filter out but throw error async to not stop
         pcall(function()
             error("CraftSim Recipe Scan Error: Missing Enchanting Data for " ..
@@ -217,39 +232,40 @@ function CraftSim.RECIPE_SCAN.FilterRecipeInfo(crafterUID, recipeInfo)
         end)
         return false
     end
-    if recipeExpansionIncluded then
+    if categoryIncluded then
         if recipeInfo and not recipeInfo.isGatheringRecipe and not recipeInfo.isSalvageRecipe and not recipeInfo.isRecraft then
             if recipeInfo.hyperlink then
                 local isGear = recipeInfo.hasSingleItemOutput and recipeInfo.qualityIlvlBonuses ~= nil
                 local isSoulbound = GUTIL:isItemSoulbound(GUTIL:GetItemIDByLink(recipeInfo.hyperlink))
                 if not CraftSim.DB.OPTIONS:Get("RECIPESCAN_INCLUDE_SOULBOUND") then
                     if isGear and isSoulbound then
-                        printF("Is Gear+Soulbound: Exclude")
+                        Logger:LogDebug("Is Gear+Soulbound: Exclude")
                         return false
                     end
                     if not CraftSim.DB.OPTIONS:Get("RECIPESCAN_INCLUDE_GEAR") and isGear then
-                        printF("Is Gear: Exclude")
+                        Logger:LogDebug("Is Gear: Exclude")
                         return false
                     end
 
                     if isSoulbound then
-                        printF("Is Soulbound: Exclude")
+                        Logger:LogDebug("Is Soulbound: Exclude")
                         return false
                     end
                 end
 
                 if not CraftSim.DB.OPTIONS:Get("RECIPESCAN_INCLUDE_GEAR") and isGear then
-                    printF("Is Gear: Exclude")
+                    Logger:LogDebug("Is Gear: Exclude")
                     return false
                 end
-                printF(GUTIL:ColorizeText("Include", GUTIL.COLORS.GREEN))
+                Logger:LogDebug(GUTIL:ColorizeText("Include", GUTIL.COLORS.GREEN))
                 return true
             end
-            printF("Is Gathering/Salvage/Recraft: Exclude")
+            Logger:LogDebug("Is Gathering/Salvage/Recraft: Exclude")
             return false
         end
     end
-    printF("Is not expansion: Exclude (ExpacID: " .. tostring(expansionID) .. ")")
+    Logger:LogDebug("Expansion/Category filtered or non-craftable: Exclude (expansionID: " ..
+        tostring(expansionID) .. ", categoryID: " .. tostring(recipeInfo.categoryID) .. ")")
     return false
 end
 
@@ -260,7 +276,7 @@ function CraftSim.RECIPE_SCAN:GetScanRecipeInfo(row)
     -- if its the currently open profession we can just take it directly
     if row.crafterProfessionUID == playerCrafterProfessionUID then
         local recipeIDs = C_TradeSkillUI.GetAllRecipeIDs()
-        printF("Total RecipeIDs: " .. #recipeIDs)
+        Logger:LogDebug("Total RecipeIDs: " .. #recipeIDs)
         return GUTIL:Map(recipeIDs, function(recipeID)
             local recipeInfo = C_TradeSkillUI.GetRecipeInfo(recipeID)
             if CraftSim.RECIPE_SCAN.FilterRecipeInfo(row.crafterUID, recipeInfo) then
@@ -283,55 +299,149 @@ function CraftSim.RECIPE_SCAN:GetScanRecipeInfo(row)
     end)
 end
 
+--- Build a flat list of {recipeInfo, listOptions} scan items from the selected craft lists for this row.
+--- Only includes recipes belonging to the row's profession.
+---@param row CraftSim.RECIPE_SCAN.PROFESSION_LIST.ROW
+---@return { recipeInfo: TradeSkillRecipeInfo, listOptions: CraftSim.CraftList.Options }[]
+function CraftSim.RECIPE_SCAN:GetCraftListScanItems(row)
+    local crafterUID = row.crafterUID
+    local allLists = CraftSim.DB.CRAFT_LISTS:GetAllLists(crafterUID)
+    local selectedMap = CraftSim.DB.OPTIONS:Get("RECIPESCAN_CRAFTLIST_SCAN_SELECTED")
+    local selectedForCrafter = selectedMap[crafterUID] or {}
+
+    local selectedLists = GUTIL:Filter(allLists, function(list)
+        return selectedForCrafter[list.id] == true
+    end)
+
+    local scanItems = {}
+    local seenRecipeListPairs = {} -- track unique (recipeID:listID) combinations to avoid duplicates
+
+    local playerCrafterProfessionUID = CraftSim.RECIPE_SCAN:GetPlayerCrafterProfessionUID()
+
+    for _, list in ipairs(selectedLists) do
+        local listRef = list
+        local listOptions = listRef.options or CraftSim.DB.CRAFT_LISTS.DefaultOptions()
+        -- Support both new recipeEntries and legacy recipeIDs formats (NormalizeListRecipes handles both)
+        local recipeIDs = {}
+        for _, entry in ipairs(listRef.recipeEntries or {}) do
+            tinsert(recipeIDs, entry.recipeID)
+        end
+        if #recipeIDs == 0 then
+            for _, id in ipairs(listRef.recipeIDs or {}) do
+                tinsert(recipeIDs, id)
+            end
+        end
+        for _, recipeID in ipairs(recipeIDs) do
+            local key = tostring(recipeID) .. ":" .. tostring(listRef.id)
+            if not seenRecipeListPairs[key] then
+                seenRecipeListPairs[key] = true
+                -- get recipeInfo - from live API if current profession, else from cache
+                local recipeInfo = nil
+                if row.crafterProfessionUID == playerCrafterProfessionUID then
+                    recipeInfo = C_TradeSkillUI.GetRecipeInfo(recipeID)
+                else
+                    recipeInfo = CraftSim.DB.CRAFTER:GetRecipeInfo(crafterUID, recipeID)
+                end
+
+                if recipeInfo and not recipeInfo.isDummyRecipe and not recipeInfo.isGatheringRecipe
+                    and not recipeInfo.isRecraft and not recipeInfo.isSalvageRecipe then
+                    -- Check the recipe belongs to the row's profession
+                    local profInfo = CraftSim.DB.CRAFTER:GetProfessionInfoForRecipe(crafterUID, recipeID)
+                    if not profInfo then
+                        profInfo = C_TradeSkillUI.GetProfessionInfoByRecipeID(recipeID)
+                    end
+                    if profInfo and profInfo.profession == row.profession then
+                        -- Include unlearned only if list options allow it
+                        if listOptions.enableUnlearned or recipeInfo.learned then
+                            tinsert(scanItems, { recipeInfo = recipeInfo, listOptions = listOptions })
+                        end
+                    end
+                end
+            end
+        end
+    end
+
+    return scanItems
+end
+
 ---@param row CraftSim.RECIPE_SCAN.PROFESSION_LIST.ROW
 function CraftSim.RECIPE_SCAN:ScanRow(row)
     wipe(row.currentResults)
     CraftSim.RECIPE_SCAN.isScanning = true
 
-    printS("Start Scan for: " .. tostring(row.crafterProfessionUID))
+    Logger:LogDebug("Start Scan for: " .. tostring(row.crafterProfessionUID))
 
-    local recipeInfos = CraftSim.RECIPE_SCAN:GetScanRecipeInfo(row)
-    printS("Scanning " .. tostring(#recipeInfos) .. " Recipes")
+    -- Determine if we're in "Only Craftlists" mode
+    local onlyCraftlists = CraftSim.DB.OPTIONS:Get("RECIPESCAN_ONLY_CRAFTLISTS")
+
+    ---@type { recipeInfo: TradeSkillRecipeInfo, listOptions: CraftSim.CraftList.Options? }[]
+    local scanItems
+    if onlyCraftlists then
+        local craftListItems = CraftSim.RECIPE_SCAN:GetCraftListScanItems(row)
+        scanItems = craftListItems
+        Logger:LogDebug("CraftList Scan: " .. tostring(#scanItems) .. " items from selected craft lists")
+    else
+        local recipeInfos = CraftSim.RECIPE_SCAN:GetScanRecipeInfo(row)
+        scanItems = GUTIL:Map(recipeInfos, function(ri)
+            return { recipeInfo = ri, listOptions = nil }
+        end)
+        Logger:LogDebug("Scanning " .. tostring(#scanItems) .. " Recipes")
+    end
 
     CraftSim.RECIPE_SCAN:ToggleScanButton(row, false)
     CraftSim.RECIPE_SCAN.UI:ResetResults(row)
 
-    local OPT_ID = CraftSim.CONST.OPTIMIZATION_OPTIONS_IDS.RECIPESCAN_SCAN
-    local KEYS   = CraftSim.WIDGETS.OptimizationOptions.OPTION_KEYS
-    local optimizeGear = CraftSim.DB.OPTIMIZATION_OPTIONS:Get(OPT_ID, KEYS.OPTIMIZE_PROFESSION_TOOLS, false)
-    local concentrationEnabled = CraftSim.DB.OPTIMIZATION_OPTIONS:Get(OPT_ID, KEYS.ENABLE_CONCENTRATION, true)
-    local optimizeSubRecipes = CraftSim.DB.OPTIONS:Get("RECIPESCAN_OPTIMIZE_SUBRECIPES")
-    local optimizeConcentration = CraftSim.DB.OPTIMIZATION_OPTIONS:Get(OPT_ID, KEYS.OPTIMIZE_CONCENTRATION, false)
-    local optimizeTopProfit = CraftSim.DB.OPTIMIZATION_OPTIONS:Get(OPT_ID, KEYS.AUTOSELECT_TOP_PROFIT_QUALITY, false)
-    local optimizeFinishingReagents = CraftSim.DB.OPTIMIZATION_OPTIONS:Get(OPT_ID, KEYS.OPTIMIZE_FINISHING_REAGENTS, false)
-    local reagentAllocation = CraftSim.DB.OPTIMIZATION_OPTIONS:Get(OPT_ID, KEYS.REAGENT_ALLOCATION, CraftSim.RECIPE_SCAN.SCAN_MODES.OPTIMIZE)
-    local optimizationScanMode = reagentAllocation == CraftSim.RECIPE_SCAN.SCAN_MODES.OPTIMIZE
+    local OPT_ID                          = CraftSim.CONST.OPTIMIZATION_OPTIONS_IDS.RECIPESCAN_SCAN
+    local KEYS                            = CraftSim.WIDGETS.OptimizationOptions.OPTION_KEYS
+    local FA                              = CraftSim.WIDGETS.OptimizationOptions.FINISHING_REAGENTS_ALGORITHM
+    -- Global optimization options (used when not in craft list mode)
+    local globalOptimizeGear              = CraftSim.DB.OPTIMIZATION_OPTIONS:Get(OPT_ID, KEYS.OPTIMIZE_PROFESSION_TOOLS,
+        false)
+    local globalConcentrationEnabled      = CraftSim.DB.OPTIMIZATION_OPTIONS:Get(OPT_ID, KEYS.ENABLE_CONCENTRATION, true)
+    local globalOptimizeConcentration     = CraftSim.DB.OPTIMIZATION_OPTIONS:Get(OPT_ID, KEYS.OPTIMIZE_CONCENTRATION,
+        false)
+    local globalOptimizeFinishingReagents = CraftSim.DB.OPTIMIZATION_OPTIONS:Get(OPT_ID, KEYS
+    .OPTIMIZE_FINISHING_REAGENTS, false)
+    local globalFinishingAlgorithm        = CraftSim.DB.OPTIMIZATION_OPTIONS:Get(OPT_ID,
+        KEYS.FINISHING_REAGENTS_ALGORITHM, FA.SIMPLE)
+    local globalReagentAllocation         = CraftSim.DB.OPTIMIZATION_OPTIONS:Get(OPT_ID, KEYS.REAGENT_ALLOCATION,
+        CraftSim.RECIPE_SCAN.SCAN_MODES.OPTIMIZE)
+    local RA                              = CraftSim.WIDGETS.OptimizationOptions.REAGENT_ALLOCATION
+    local globalOptimizationScanMode      = globalReagentAllocation == RA.OPTIMIZE
+        or globalReagentAllocation == RA.OPTIMIZE_HIGHEST
+        or globalReagentAllocation == RA.OPTIMIZE_MOST_PROFITABLE
+        or string.match(tostring(globalReagentAllocation), "^OPTIMIZE_TARGET_%d+$") ~= nil
+    local optimizeSubRecipes              = CraftSim.DB.OPTIONS:Get("RECIPESCAN_OPTIMIZE_SUBRECIPES")
 
+    CraftSim.DEBUG:StartProfiling("Total Recipe Scan")
 
     CraftSim.RECIPE_SCAN.rowScanFrameDistributor = GUTIL.FrameDistributor {
-        iterationTable = recipeInfos,
+        iterationTable = scanItems,
         iterationsPerFrame = 1,
         finally = function()
             CraftSim.RECIPE_SCAN:EndScan(row)
         end,
-        continue = function(frameDistributor, recipeInfoIndex, recipeInfo, _, progress)
+        continue = function(frameDistributor, scanItemIndex, scanItem, _, progress)
             local crafterData = row.crafterData
             local content = row.content
 
             CraftSim.DEBUG:StartProfiling("Single Recipe Scan")
 
+            local recipeInfo = scanItem.recipeInfo
+            local listOptions = scanItem.listOptions
+
             -- update button
             content.scanButton:SetText(CraftSim.LOCAL:GetText("RECIPE_SCAN_SCANNING") ..
                 string.format(" %.0f%%", progress))
-            content.resultAmount:SetText(recipeInfoIndex .. "/" .. #recipeInfos)
+            content.resultAmount:SetText(scanItemIndex .. "/" .. #scanItems)
 
             ---@cast recipeInfo TradeSkillRecipeInfo
-            printS("Scanning Recipe: " .. tostring(recipeInfo.name))
+            Logger:LogDebug("Scanning Recipe: " .. tostring(recipeInfo.name))
 
             local recipeData = CraftSim.RecipeData({ recipeID = recipeInfo.recipeID, crafterData = crafterData });
 
             if not recipeData then
-                printS("No RecipeData created: End Scan")
+                Logger:LogDebug("No RecipeData created: End Scan")
                 frameDistributor:Break()
                 return
             end
@@ -340,36 +450,45 @@ function CraftSim.RECIPE_SCAN:ScanRow(row)
                 -- since the result links are needed for calculations and probably not loaded within a scan
                 GUTIL:ContinueOnAllItemsLoaded(recipeData.resultData.itemsByQuality, function()
                     CraftSim.DEBUG:StopProfiling("Single Recipe Scan")
-                    
-                    -- Apply profit margin filter (after optimization)
-                    local profitMarginThreshold = CraftSim.DB.OPTIONS:Get("RECIPESCAN_SCAN_PROFIT_MARGIN_THRESHOLD")
-                    if profitMarginThreshold > 0 then
-                        local relativeProfit = recipeData.relativeProfitCached or 0
-                        if relativeProfit < profitMarginThreshold then
-                            printS("Recipe filtered by profit margin: " .. tostring(recipeInfo.recipeID))
-                            frameDistributor:Continue()
-                            return
-                        end
-                    end
 
-                    -- Apply TSM sale rate filter (after optimization)
-                    if TSM_API and recipeData.resultData and recipeData.resultData.expectedItem then
-                        local tsmSaleRateThreshold = CraftSim.DB.OPTIONS:Get("RECIPESCAN_SCAN_TSM_SALERATE_THRESHOLD")
-                        if tsmSaleRateThreshold > 0 then
-                            local resultSaleRate = CraftSimTSM:GetItemSaleRate(recipeData.resultData.expectedItem:GetItemLink())
-                            if resultSaleRate < tsmSaleRateThreshold then
-                                printS("Recipe filtered by TSM sale rate: " .. tostring(recipeInfo.recipeID))
+                    -- Apply profit margin filter only in normal mode (not craft list mode)
+                    if not listOptions then
+                        local profitMarginThreshold = CraftSim.DB.OPTIONS:Get("RECIPESCAN_SCAN_PROFIT_MARGIN_THRESHOLD")
+                        if profitMarginThreshold > 0 then
+                            local relativeProfit = recipeData.relativeProfitCached or 0
+                            if relativeProfit < profitMarginThreshold then
+                                Logger:LogDebug("Recipe filtered by profit margin: " .. tostring(recipeInfo.recipeID))
                                 frameDistributor:Continue()
                                 return
                             end
                         end
+
+                        -- Apply TSM sale rate filter (after optimization)
+                        if TSM_API and recipeData.resultData and recipeData.resultData.expectedItem then
+                            local tsmSaleRateThreshold = CraftSim.DB.OPTIONS:Get(
+                            "RECIPESCAN_SCAN_TSM_SALERATE_THRESHOLD")
+                            if tsmSaleRateThreshold > 0 then
+                                local resultSaleRate = CraftSimTSM:GetItemSaleRate(recipeData.resultData.expectedItem
+                                    :GetItemLink())
+                                if resultSaleRate < tsmSaleRateThreshold then
+                                    Logger:LogDebug("Recipe filtered by TSM sale rate: " .. tostring(recipeInfo.recipeID))
+                                    frameDistributor:Continue()
+                                    return
+                                end
+                            end
+                        end
                     end
-                    
+
                     CraftSim.RECIPE_SCAN.UI:AddRecipe(row, recipeData)
 
                     table.insert(row.currentResults, recipeData)
 
-                    printS("Continue Scan..")
+                    -- Update last crafting cost DB if option is enabled
+                    if CraftSim.DB.OPTIONS:Get("RECIPESCAN_UPDATE_LAST_CRAFTING_COST") then
+                        CraftSim.DB.LAST_CRAFTING_COST:Save(recipeData)
+                    end
+
+                    Logger:LogDebug("Continue Scan..")
 
                     frameDistributor:Continue()
                 end)
@@ -377,8 +496,66 @@ function CraftSim.RECIPE_SCAN:ScanRow(row)
 
             recipeData.professionGearSet:LoadCurrentEquippedSet()
 
-            if not optimizationScanMode then
-                CraftSim.RECIPE_SCAN:SetReagentsByScanMode(recipeData)
+            -- Resolve effective optimization options and prepare reagent setup
+            local optimizeGear, concentrationEnabled, optimizeConcentration
+            local optimizeFinishingReagents, finishingAlgorithm
+            local optimizeReagentOptions = nil
+
+            if listOptions then
+                -- Craft list mode: use list options, following the same logic as CraftLists.lua
+                optimizeGear              = listOptions.optimizeProfessionTools
+                concentrationEnabled      = listOptions.enableConcentration
+                optimizeConcentration     = listOptions.optimizeConcentration
+                optimizeFinishingReagents = listOptions.optimizeFinishingReagents
+                finishingAlgorithm        = listOptions.finishingReagentsAlgorithm or FA.SIMPLE
+
+                local reagentAllocation   = listOptions.reagentAllocation or "OPTIMIZE_HIGHEST"
+                local SCAN_MODES          = CraftSim.RECIPE_SCAN.SCAN_MODES
+                if reagentAllocation == SCAN_MODES.Q1 then
+                    recipeData.reagentData:SetReagentsMaxByQuality(1)
+                elseif reagentAllocation == SCAN_MODES.Q2 then
+                    recipeData.reagentData:SetReagentsMaxByQuality(2)
+                elseif reagentAllocation == SCAN_MODES.Q3 then
+                    if recipeData:IsSimplifiedQualityRecipe() then
+                        recipeData.reagentData:SetReagentsMaxByQuality(2)
+                    else
+                        recipeData.reagentData:SetReagentsMaxByQuality(3)
+                    end
+                else
+                    recipeData:SetCheapestQualityReagentsMax()
+                    if reagentAllocation == "OPTIMIZE_MOST_PROFITABLE" then
+                        optimizeReagentOptions = { highestProfit = true }
+                    else
+                        local targetQuality = tonumber(string.match(reagentAllocation, "^OPTIMIZE_TARGET_(%d+)$"))
+                        if targetQuality then
+                            optimizeReagentOptions = { maxQuality = targetQuality }
+                        end
+                    end
+                end
+            else
+                -- Global scan mode: use global optimization options
+                optimizeGear              = globalOptimizeGear
+                concentrationEnabled      = globalConcentrationEnabled
+                optimizeConcentration     = globalOptimizeConcentration
+                optimizeFinishingReagents = globalOptimizeFinishingReagents
+                finishingAlgorithm        = globalFinishingAlgorithm
+
+                if not globalOptimizationScanMode then
+                    CraftSim.RECIPE_SCAN:SetReagentsByScanMode(recipeData)
+                else
+                    recipeData:SetCheapestQualityReagentsMax()
+                    if globalReagentAllocation == RA.OPTIMIZE_MOST_PROFITABLE then
+                        optimizeReagentOptions = { highestProfit = true }
+                    else
+                        local targetQuality = tonumber(string.match(tostring(globalReagentAllocation), "^OPTIMIZE_TARGET_(%d+)$"))
+                        if targetQuality then
+                            optimizeReagentOptions = { maxQuality = targetQuality }
+                        else
+                            -- OPTIMIZE_HIGHEST or any legacy/unrecognized value: optimize for highest quality
+                            optimizeReagentOptions = {}
+                        end
+                    end
+                end
             end
 
             recipeData:Update()
@@ -391,15 +568,27 @@ function CraftSim.RECIPE_SCAN:ScanRow(row)
             local optimizeFinishingReagentOptions = nil
 
             if optimizeFinishingReagents then
+                local includeSoulbound, onlyHighestQualitySoulbound
+                if listOptions then
+                    includeSoulbound = listOptions.includeSoulboundFinishingReagents
+                    onlyHighestQualitySoulbound = listOptions.onlyHighestQualitySoulboundFinishingReagents
+                else
+                    includeSoulbound = CraftSim.DB.OPTIMIZATION_OPTIONS:Get(OPT_ID,
+                        KEYS.INCLUDE_SOULBOUND_FINISHING_REAGENTS, false)
+                    onlyHighestQualitySoulbound = CraftSim.DB.OPTIMIZATION_OPTIONS:Get(OPT_ID,
+                        KEYS.ONLY_HIGHEST_QUALITY_SOULBOUND_FINISHING_REAGENTS, false)
+                end
                 optimizeFinishingReagentOptions = {
                     includeLocked = false,
-                    includeSoulbound = CraftSim.DB.OPTIMIZATION_OPTIONS:Get(OPT_ID, KEYS.INCLUDE_SOULBOUND_FINISHING_REAGENTS, false),
+                    includeSoulbound = includeSoulbound,
+                    onlyHighestQualitySoulbound = onlyHighestQualitySoulbound,
+                    permutationBased = finishingAlgorithm == FA.PERMUTATION,
                     progressUpdateCallback = function(progress)
-                    content.optimizationProgressStatusText:SetText(string.format("%.0f%%", progress) ..
-                        " " ..
-                        GUTIL:IconToText(recipeData.recipeIcon, 20, 20) ..
-                        CreateAtlasMarkup("Banker", 20, 20))
-                end
+                        content.optimizationProgressStatusText:SetText(string.format("%.0f%%", progress) ..
+                            " " ..
+                            GUTIL:IconToText(recipeData.recipeIcon, 20, 20) ..
+                            CreateAtlasMarkup("Banker", 20, 20))
+                    end
                 }
             end
 
@@ -411,9 +600,7 @@ function CraftSim.RECIPE_SCAN:ScanRow(row)
                 optimizeConcentration = concentrationEnabled and optimizeConcentration,
                 optimizeFinishingReagentsOptions = optimizeFinishingReagentOptions,
                 optimizeGear = optimizeGear,
-                optimizeReagentOptions = optimizationScanMode and {
-                    highestProfit = optimizeTopProfit,
-                },
+                optimizeReagentOptions = optimizeReagentOptions,
                 optimizeReagentProgressCallback = function(progress)
                     -- TODO
                 end,
@@ -434,7 +621,7 @@ end
 
 ---@param recipeData CraftSim.RecipeData
 function CraftSim.RECIPE_SCAN:SetReagentsByScanMode(recipeData)
-    local KEYS    = CraftSim.WIDGETS.OptimizationOptions.OPTION_KEYS
+    local KEYS     = CraftSim.WIDGETS.OptimizationOptions.OPTION_KEYS
     local scanMode = CraftSim.DB.OPTIMIZATION_OPTIONS:Get(
         CraftSim.CONST.OPTIMIZATION_OPTIONS_IDS.RECIPESCAN_SCAN,
         KEYS.REAGENT_ALLOCATION,
@@ -479,7 +666,8 @@ function CraftSim.RECIPE_SCAN:UpdateProfessionListByCache()
     -- capture profession UID before the async wait so we can detect changes
     local professionInfoAtCall = C_TradeSkillUI.GetBaseProfessionInfo()
     local professionUIDAtCall = professionInfoAtCall and
-        CraftSim.RECIPE_SCAN:GetCrafterProfessionUID(CraftSim.UTIL:GetPlayerCrafterUID(), professionInfoAtCall.profession) or ""
+        CraftSim.RECIPE_SCAN:GetCrafterProfessionUID(CraftSim.UTIL:GetPlayerCrafterUID(), professionInfoAtCall
+            .profession) or ""
 
     local function update()
         local professionChanged = CraftSim.RECIPE_SCAN.lastOpenProfessionUID ~= nil and
@@ -600,7 +788,7 @@ function CraftSim.RECIPE_SCAN:SendToCraftQueue()
                 local crafterUID = CraftSim.UTIL:GetPlayerCrafterUID()
                 local newList = CraftSim.DB.CRAFT_LISTS:CreateList(name, isGlobal, crafterUID)
                 for _, recipeData in ipairs(filteredResults) do
-                    CraftSim.DB.CRAFT_LISTS:AddRecipe(newList.id, newList.isGlobal, crafterUID, recipeData.recipeID)
+                    CraftSim.DB.CRAFT_LISTS:AddRecipe(newList.id, crafterUID, recipeData.recipeID)
                 end
                 CraftSim.CRAFTQ.UI:UpdateCraftListsDisplay()
             end)
@@ -650,20 +838,28 @@ function CraftSim.RECIPE_SCAN:SendToCraftQueue()
                     tsmItemString) or 0
             end
 
-            -- TSM Enhanced: subtract existing inventory from restock target
+            -- subtract existing inventory from restock target using the selected inventory addon
+            -- (TSM Smart Restock still takes priority if enabled and TSM is the active inventory source)
             if CraftSimTSM:IsAvailable() and CraftSim.DB.OPTIONS:Get("TSM_SMART_RESTOCK_ENABLED") then
                 local _, _, owned = CraftSimTSM:GetSmartRestockAmount(recipeData)
                 restockAmount = math.max(0, restockAmount - owned)
+            elseif recipeData.resultData.expectedItem then
+                local itemID = recipeData.resultData.expectedItem:GetItemID()
+                local itemLink = recipeData.resultData.expectedItem:GetItemLink()
+                if itemID or itemLink then
+                    local owned = CraftSim.INVENTORY_SOURCE:GetInventoryCount(itemLink or itemID) or 0
+                    restockAmount = math.max(0, restockAmount - owned)
+                end
             end
 
             if recipeData.cooldownData.isCooldownRecipe == true and recipeData.cooldownData.currentCharges < restockAmount then
                 restockAmount = recipeData.cooldownData.currentCharges
             end
 
-            if restockAmount >=1 then
+            if restockAmount >= 1 then
                 CraftSim.CRAFTQ:AddRecipe { recipeData = recipeData, amount = restockAmount }
             end
-            
+
             frameDistributor:Continue()
         end
     }:Continue()

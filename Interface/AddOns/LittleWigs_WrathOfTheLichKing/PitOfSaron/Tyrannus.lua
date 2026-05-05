@@ -100,7 +100,7 @@ end
 
 function mod:ENCOUNTER_TIMELINE_EVENT_ADDED(_, eventInfo)
 	if eventInfo.source ~= 0 then return end -- Enum.EncounterTimelineEventSource.Encounter
-	local duration = math.floor(eventInfo.duration + 0.5)
+	local duration = self:RoundNumber(eventInfo.duration, 0)
 	local barInfo
 	if duration == 7 or (duration == 28 and count28 % 3 == 1) then -- Rime Blast
 		barInfo = self:RimeBlastTimeline(eventInfo)
@@ -229,6 +229,7 @@ function mod:ArmyoftheDeadTimeline(eventInfo)
 		key = 1263406,
 		callback = function()
 			self:SetStage(2)
+			self:StopBlizzMessages(2)
 			self:Message(1263406, "cyan", barText)
 			self:PlaySound(1263406, "long")
 		end

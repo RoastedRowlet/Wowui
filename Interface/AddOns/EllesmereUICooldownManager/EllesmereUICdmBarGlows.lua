@@ -1,8 +1,8 @@
 -------------------------------------------------------------------------------
 --  EllesmereUICdmBarGlows.lua
---  Bar Glows: Overlays glow effects on action bar buttons when configured
---  buff/aura spells become active (or inactive in MISSING mode).
---  Simplified v3: uses C_UnitAuras.GetPlayerAuraBySpellID for detection.
+--  Bar Glows: Overlays glow effects on action bar / CDM bar buttons when
+--  configured buff/aura spells become active (or inactive in MISSING mode).
+--  v4: CDM bar assignments keyed by cooldownID for stability across reanchors.
 -------------------------------------------------------------------------------
 local ADDON_NAME, ns = ...
 
@@ -13,23 +13,16 @@ local StopNativeGlow  = function(...) if ns.StopNativeGlow then return ns.StopNa
 -- Slot offsets per bar index (matches EllesmereUIActionBars BAR_SLOT_OFFSETS)
 local BAR_OFFSETS = { 0, 60, 48, 24, 36, 144, 156, 168 }
 
--- CDM bar key mapping for bar glow indices 101+
-local CDM_GLOW_BAR_KEYS = { [101] = "cooldowns", [102] = "utility" }
+-------------------------------------------------------------------------------
+--  Button Lookup
+-------------------------------------------------------------------------------
 
--- Action bar / CDM bar button lookup
-local function GetActionButton(barIdx, btnIdx)
-    -- CDM bars: look up icon from cdmBarIcons
-    local cdmKey = CDM_GLOW_BAR_KEYS[barIdx]
-    if cdmKey then
-        local icons = ns.cdmBarIcons and ns.cdmBarIcons[cdmKey]
-        return icons and icons[btnIdx]
-    end
-    -- EllesmereUI action bar buttons: EABButton<slot> where slot = offset + btnIdx
+-- Action bar button lookup (stable slot-based)
+local function GetActionBarButton(barIdx, btnIdx)
     local offset = BAR_OFFSETS[barIdx] or 0
     local slot = offset + btnIdx
     local btn = _G["EABButton" .. slot]
     if btn then return btn end
-    -- Fallback: Blizzard bar names
     local BLIZZ_PREFIXES = {
         "ActionButton",
         "MultiBarBottomLeftButton",
@@ -46,16 +39,31 @@ local function GetActionButton(barIdx, btnIdx)
     return btn
 end
 
+-- CDM bar icon lookup by cooldownID (stable across reanchors).
+-- Walks all CDM bars (default + extras) since the 1-spell-per-bar invariant
+-- guarantees a cooldownID can only live on one bar at a time.
+local function FindCDMButtonByCooldownID(cooldownID)
+    if not ns.cdmBarIcons then return nil end
+    for _, icons in pairs(ns.cdmBarIcons) do
+        for i = 1, #icons do
+            local icon = icons[i]
+            if icon and icon.cooldownID == cooldownID then
+                return icon
+            end
+        end
+    end
+    return nil
+end
+
 -------------------------------------------------------------------------------
 --  Data Access
 -------------------------------------------------------------------------------
 
 --- Get barGlows data from SavedVariables (with lazy init)
 function ns.GetBarGlows()
-    -- Bar glows are fully spec-specific, stored in specProfiles[specKey].barGlows
-    local specKey = ns.GetActiveSpecKey and ns.GetActiveSpecKey() or "0"
-    if specKey == "0" then return { enabled = true, selectedBar = 1, assignments = {} } end
-    if not EllesmereUIDB then return { enabled = true, selectedBar = 1, assignments = {} } end
+    local specKey = ns.GetActiveSpecKey and ns.GetActiveSpecKey()
+    if not specKey then return { enabled = true, selectedBar = "cooldowns", assignments = {} } end
+    if not EllesmereUIDB then return { enabled = true, selectedBar = "cooldowns", assignments = {} } end
     if not EllesmereUIDB.spellAssignments then
         EllesmereUIDB.spellAssignments = { specProfiles = {} }
     end
@@ -66,17 +74,24 @@ function ns.GetBarGlows()
     if not prof.barGlows or not next(prof.barGlows) then
         prof.barGlows = {
             enabled = true,
-            selectedBar = 101,
+            selectedBar = "cooldowns",
             assignments = {},
         }
     end
     return prof.barGlows
 end
 
---- Get assignments for a specific action bar button
+--- Get assignments for an action bar button (index-based)
 function ns.GetButtonAssignments(barIdx, btnIdx)
     local bg = ns.GetBarGlows()
     local key = barIdx .. "_" .. btnIdx
+    return bg.assignments[key]
+end
+
+--- Get assignments for a CDM bar icon (cooldownID-based)
+function ns.GetCDMButtonAssignments(cooldownID)
+    local bg = ns.GetBarGlows()
+    local key = "cdm_" .. cooldownID
     return bg.assignments[key]
 end
 
@@ -102,8 +117,7 @@ function ns.GetAllCDMBuffSpells()
     local trackedOrder = {}
 
     for _, bar in ipairs(p.cdmBars.bars) do
-        local isBuff = (bar.barType == "buffs") or (bar.key == "buffs")
-        if isBuff then
+        if ns.IsBarBuffFamily(bar) then
             local spells = ns.GetCDMSpellsForBar and ns.GetCDMSpellsForBar(bar.key)
             if spells then
                 for _, sp in ipairs(spells) do
@@ -115,7 +129,6 @@ function ns.GetAllCDMBuffSpells()
                             icon = sp.icon,
                             barKey = bar.key,
                             barName = bar.name or bar.key,
-                            isDisplayed = sp.isDisplayed,
                         }
                         trackedSet[sp.spellID] = entry
                         trackedOrder[#trackedOrder + 1] = entry
@@ -125,12 +138,6 @@ function ns.GetAllCDMBuffSpells()
         end
     end
 
-    -- Split by Blizzard BuffBar viewer presence (tracked bars).
-    -- Only spells in the BuffBar viewer (vi=4) count as tracked for TBB.
-    -- BuffIcon viewer spells go to untracked (fires popup to add to
-    -- Blizzard's tracked bars first).
-    -- Uses frame-based matching (IsSpellInBuffBarViewer) instead of
-    -- spell-ID cache lookup for robust ID resolution.
     local IsInViewer = ns.IsSpellInBuffBarViewer
     local tracked, untracked = {}, {}
     for _, entry in ipairs(trackedOrder) do
@@ -157,7 +164,6 @@ local function SetupOverlays()
     local bg = ns.GetBarGlows()
     _cachedBG = bg
     if not bg or not bg.enabled then
-        -- Disabled: stop all glows
         for key, overlay in pairs(overlayFrames) do
             StopNativeGlow(overlay)
             overlay:Hide()
@@ -168,29 +174,41 @@ local function SetupOverlays()
     local activeKeys = {}
     for assignKey, buffList in pairs(bg.assignments) do
         if buffList and #buffList > 0 then
-            local barIdx, btnIdx = assignKey:match("^(%d+)_(%d+)$")
-            barIdx = tonumber(barIdx)
-            btnIdx = tonumber(btnIdx)
-            if barIdx and btnIdx then
-                local btn = GetActionButton(barIdx, btnIdx)
-                if btn then
-                    for i, entry in ipairs(buffList) do
-                        local key = assignKey .. "_" .. i
-                        local overlay = overlayFrames[key]
-                        if not overlay then
-                            overlay = CreateFrame("Frame", "ECME_Glow_" .. key, btn)
-                            overlayFrames[key] = overlay
-                        end
-                        if overlay:GetParent() ~= btn then
-                            overlay:SetParent(btn)
-                        end
-                        overlay:SetAllPoints(btn)
-                        overlay:SetFrameLevel(btn:GetFrameLevel() + 10)
-                        overlay:SetAlpha(1)
-                        overlay._assignEntry = entry
-                        overlay:Show()
-                        activeKeys[key] = true
+            local btn
+
+            -- CDM bar assignment: "cdm_<cooldownID>"
+            local cdID = assignKey:match("^cdm_(%d+)$")
+            if cdID then
+                cdID = tonumber(cdID)
+                -- Find which CDM bar has this cooldownID (walks all bars)
+                btn = FindCDMButtonByCooldownID(cdID)
+            else
+                -- Action bar assignment: "<barIdx>_<btnIdx>"
+                local barIdx, btnIdx = assignKey:match("^(%d+)_(%d+)$")
+                barIdx = tonumber(barIdx)
+                btnIdx = tonumber(btnIdx)
+                if barIdx and btnIdx then
+                    btn = GetActionBarButton(barIdx, btnIdx)
+                end
+            end
+
+            if btn then
+                for i, entry in ipairs(buffList) do
+                    local key = assignKey .. "_" .. i
+                    local overlay = overlayFrames[key]
+                    if not overlay then
+                        overlay = CreateFrame("Frame", "ECME_Glow_" .. key, btn)
+                        overlayFrames[key] = overlay
                     end
+                    if overlay:GetParent() ~= btn then
+                        overlay:SetParent(btn)
+                    end
+                    overlay:SetAllPoints(btn)
+                    overlay:SetFrameLevel(btn:GetFrameLevel() + 10)
+                    overlay:SetAlpha(1)
+                    overlay._assignEntry = entry
+                    overlay:Show()
+                    activeKeys[key] = true
                 end
             end
         end
@@ -210,7 +228,7 @@ local function SetupOverlays()
 end
 
 --- Update glow visuals based on current aura state.
---- Called each CDM tick (~10Hz from UpdateAllCDMBars).
+--- Called each CDM tick (~10Hz from BuffTicker).
 local function UpdateOverlayVisuals()
     local bg = _cachedBG
     if not bg or not bg.enabled then return end
@@ -221,8 +239,6 @@ local function UpdateOverlayVisuals()
             local spellID = entry.spellID
             local mode = entry.mode or "ACTIVE"
 
-            -- Check if aura/buff is active via the CDM active cache
-            -- (populated each tick from viewer frames with auraInstanceID)
             local auraActive = false
             if spellID and spellID > 0 then
                 local cache = ns._tickBlizzActiveCache
@@ -231,7 +247,6 @@ local function UpdateOverlayVisuals()
                 end
             end
 
-            -- Determine if glow should be on
             local shouldGlow
             if mode == "MISSING" then
                 shouldGlow = not auraActive
@@ -245,6 +260,13 @@ local function UpdateOverlayVisuals()
                 if shouldGlow then
                     StopNativeGlow(overlay)
                     local style = entry.glowStyle or 1
+                    -- Force Custom Shape Glow for custom-shaped icons
+                    local glowParent = overlay:GetParent()
+                    local gpfc = glowParent and ns._ecmeFC and ns._ecmeFC[glowParent]
+                    local shapeName = gpfc and gpfc.shapeName
+                    if shapeName and shapeName ~= "square" and shapeName ~= "csquare" and shapeName ~= "none" then
+                        style = 2
+                    end
                     local cr, cg, cb = 1, 0.82, 0.1
                     if entry.classColor then
                         local _, ct = UnitClass("player")
@@ -284,6 +306,3 @@ function ns.InitBarGlows()
     SetupOverlays()
 end
 
--- No-ops for removed functionality (options may reference these)
-ns.ApplyPerSlotHidingAndPackSoon = function() end
-ns.HookAllCDMChildren = function() end

@@ -381,6 +381,31 @@ local function HookCDMFrameForAuraMap(frame, barNumber)
         end
       end)
     end
+
+    -- Cooldown widget OnCooldownDone: per Blizzard's own line-712 comment in
+    -- CooldownViewer.lua: "No external event is dispatched when a totem
+    -- finishes". CDM uses the cooldown widget's OnCooldownDone as its
+    -- internal totem-expiry signal — when totem duration runs out,
+    -- OnCooldownDone fires, then CDM's mixin handler clears totemData and
+    -- runs RefreshData. Without hooking this, bars wait ~350ms for the
+    -- followup OnPlayerTotemUpdateEvent (confirmed by probe: totem expired
+    -- at 230.036s → CDDone fired immediately, but TotemUpd fired only at
+    -- 230.382s). HookScript chains additively after Blizzard's SetScript.
+    -- Defer one tick so CDM's mixin handler clears totemData before our
+    -- UpdateBarBuffInfo reads frame.totemData.
+    if frame.Cooldown then
+      frame.Cooldown:HookScript("OnCooldownDone", function()
+        local hookData = hookedAuraFrames[frame]
+        if not hookData or not next(hookData.barNumbers) then return end
+        local bars = {}
+        for barNum in pairs(hookData.barNumbers) do bars[barNum] = true end
+        C_Timer.After(0, function()
+          for barNum in pairs(bars) do
+            UpdateBarBuffInfo(barNum)
+          end
+        end)
+      end)
+    end
   end
 
   -- Register this bar as using this frame
@@ -2869,85 +2894,41 @@ UpdateBarBuffInfo = function(barNumber)
       end
     elseif trackType == "pet" or trackType == "totem" or trackType == "ground" then
       -- PET/TOTEM/GROUND EFFECT TRACKING: Create duration reference
-      -- WoW 12.0: Use fast polling with GetTotemTimeLeft + SetValue
-      -- SetValue is "AllowedWhenTainted" - addon code CAN pass secrets
+      -- 12.0.5+: GetTotemDuration(slot) returns a duration object.
+      -- GetTotemDuration returns nil when the slot is inactive, valid durObj when active.
+      -- The durObj itself never goes nil mid-life; don't nil-check it after acquisition.
       if state.totemCdmFrame then
         local totemCdmFrame = state.totemCdmFrame
-        -- Capture original cooldownID - this identifies OUR specific totem
         local originalCooldownID = totemCdmFrame.cooldownID
-        
+
+        -- Resolve totem slot from CDM frame. Returns nil if frame is stale or inactive.
+        local function ResolveSlot()
+          if totemCdmFrame.cooldownID ~= originalCooldownID then return nil end
+          if totemCdmFrame.totemData == nil then return nil end
+          local slot = totemCdmFrame.preferredTotemUpdateSlot
+          if not slot and totemCdmFrame.totemData then
+            local ok, val = pcall(function() return totemCdmFrame.totemData.slot end)
+            if ok then slot = val end
+          end
+          if not slot then return nil end
+          if not issecretvalue(slot) and slot <= 0 then return nil end
+          return slot
+        end
+
         effectiveDurationRef = {
-          GetValue = function()
-            -- Check if frame is still tracking OUR cooldown (non-secret check)
-            if totemCdmFrame.cooldownID ~= originalCooldownID then return 0 end
-            
-            -- WoW 12.0: totemData ONLY EXISTS when totem/pet is active
-            if totemCdmFrame.totemData == nil then return 0 end
-            
-            -- Query slot FRESH from frame each time
-            -- WoW 12.0: preferredTotemUpdateSlot may be secret - pass directly to APIs
-            local currentSlot = totemCdmFrame.preferredTotemUpdateSlot
-            if not currentSlot and totemCdmFrame.totemData then
-              local ok, val = pcall(function() return totemCdmFrame.totemData.slot end)
-              if ok then currentSlot = val end
-            end
-            if not currentSlot then return 0 end
-            -- Skip numeric check - slot may be secret; GetTotemTimeLeft accepts secrets
-            if not issecretvalue(currentSlot) and currentSlot <= 0 then return 0 end
-            
-            -- Use GetTotemTimeLeft - returns secret in combat but SetValue accepts it
-            if GetTotemTimeLeft then
-              local timeLeft = GetTotemTimeLeft(currentSlot)
-              if timeLeft then
-                return timeLeft
-              end
-            end
-            return 0
-          end,
-          GetMinMaxValues = function()
-            -- WoW 12.0: Get duration from GetTotemInfo - it's SECRET but SetMinMaxValues accepts secrets!
-            if totemCdmFrame.totemData == nil then
-              local maxDur = barConfig.tracking.maxDuration or 30
-              return 0, maxDur
-            end
-            local currentSlot = totemCdmFrame.preferredTotemUpdateSlot
-            if not currentSlot and totemCdmFrame.totemData then
-              local ok, val = pcall(function() return totemCdmFrame.totemData.slot end)
-              if ok then currentSlot = val end
-            end
-            if currentSlot then
-              -- Skip numeric check - slot may be secret; GetTotemInfo accepts secrets
-              if issecretvalue(currentSlot) or currentSlot > 0 then
-                local haveTotem, name, startTime, duration = GetTotemInfo(currentSlot)
-                if duration then
-                  return 0, duration  -- Pass secret duration directly - SetMinMaxValues is AllowedWhenTainted!
-                end
-              end
-            end
-            -- Fallback to config if no totem data available
-            local maxDur = barConfig.tracking.maxDuration or 30
-            return 0, maxDur
-          end,
+          -- GetTotemInfo: presence signal used by Display to identify the totem bar branch.
+          -- Returns slot (may be secret) when active, nil when stale/expired.
           GetTotemInfo = function()
-            -- Check if frame is still tracking OUR cooldown
-            if totemCdmFrame.cooldownID ~= originalCooldownID then return nil, nil end
-            
-            -- WoW 12.0: totemData ONLY EXISTS when totem/pet is active
-            if totemCdmFrame.totemData == nil then return nil, nil end
-            
-            local currentSlot = totemCdmFrame.preferredTotemUpdateSlot
-            if not currentSlot and totemCdmFrame.totemData then
-              local ok, val = pcall(function() return totemCdmFrame.totemData.slot end)
-              if ok then currentSlot = val end
-            end
-            return currentSlot, nil
+            return ResolveSlot()
           end,
-          -- No DurationObject - use polling
+          -- GetDurationObject: calls GetTotemDuration(slot).
+          -- Returns nil when slot is inactive (API contract), valid durObj when active.
+          -- Display uses this for SetTimerDuration (bar) and GetRemainingDuration (text).
           GetDurationObject = function()
-            return nil
+            local slot = ResolveSlot()
+            if not slot then return nil end
+            return GetTotemDuration and GetTotemDuration(slot) or nil
           end,
-          needsFastPolling = true,
-          pollingInterval = 0.02
         }
       end
     end
@@ -4203,6 +4184,66 @@ end
 -- ===================================================================
 _G.ArcUI_API = ns.API
 _G.ArcUI_Display = ns.Display
+
+-- ===================================================================
+-- FRAME REBIND SUBSCRIBER
+--
+-- Core caches CDM frame references in TWO places:
+--   1. barStates[barNum].cachedFrame / cachedBarFrame  — per-bar source
+--      frame for UpdateBarBuffInfo. When CDM repools (spec change, pet
+--      summon, instance enter, etc.), the OLD frame's cooldownID becomes
+--      nil; reads of cdmFrame.auraInstanceID return nil and the bar
+--      shows wrong/no duration / wrong opacity. THIS IS the actual root
+--      cause of the "bar loses visual" reports.
+--   2. hookedAuraFrames[frame].barNumbers — bars subscribed to a frame's
+--      events. When a frame is released (newCdID=nil), barNumbers entries
+--      stay until the bar re-resolves and re-subscribes; meanwhile,
+--      hooks fire on the released frame and try to update bars whose
+--      cached frame may also be that dead one.
+--
+-- FrameController dispatches synchronously inside the SetCooldownID /
+-- ClearCooldownID mixin hooks — same tick as the rebind. We invalidate
+-- the per-bar caches AND clear the bar's registration on the rebinding
+-- frame. The next UpdateAllBars cycle will re-resolve via
+-- FindBuffFrameByCooldownID / FindBarFrameByCooldownID and re-register
+-- via RegisterBarFrameHooks, picking up the new pool frame.
+--
+-- CPU cost: barStates iteration is bounded by max bar count (30). The
+-- hookedAuraFrames lookup is O(1). Called only on actual rebinds, which
+-- are rare events (login, spec change, talent change, instance enter,
+-- vehicle exit, pet (un)summon).
+-- ===================================================================
+if ns.FrameController and ns.FrameController.OnFrameRebind then
+  ns.FrameController.OnFrameRebind(function(frame, oldCdID, newCdID)
+    if not frame then return end
+
+    -- Invalidate any bar cache pointing at this frame so the next
+    -- UpdateAllBars re-resolves against the live cdID → frame mapping.
+    -- We only nil the pointers; we don't trigger an immediate re-resolve
+    -- here because UpdateAllBars runs on its own cadence and CDMEnhance's
+    -- 0.15s reconcile will follow up to refresh us anyway.
+    for _barNum, state in pairs(barStates) do
+      if state.cachedFrame == frame then
+        state.cachedFrame = nil
+        state.trackingOK = false
+      end
+      if state.cachedBarFrame == frame then
+        state.cachedBarFrame = nil
+        state.trackingOK = false
+      end
+    end
+
+    -- Clear this frame's bar registrations. Stale entries would cause
+    -- the released frame's hook callbacks (which still fire on any later
+    -- aura event for whatever new cdID it gets bound to) to trigger
+    -- UpdateBarBuffInfo for the wrong bar. The bars will re-register on
+    -- their next UpdateAllBars cycle when they re-resolve.
+    local hookData = hookedAuraFrames[frame]
+    if hookData and hookData.barNumbers then
+      wipe(hookData.barNumbers)
+    end
+  end)
+end
 
 -- ===================================================================
 -- END OF ArcUI_Core.lua

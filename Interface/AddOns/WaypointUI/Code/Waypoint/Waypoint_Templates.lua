@@ -155,7 +155,7 @@ do -- Context Icon
 
     function ContextIconMixin:Decolor()
         self.ImageTexture:SetDesaturated(false)
-        self.ImageTexture:SetColor(GenericEnum.ColorRGB01.White)
+        self.ImageTexture:SetColor(GenericEnum.ColorRGB01.WHITE_FONT_COLOR)
     end
 
     function ContextIconMixin:SetData(ContextIconTexture)

@@ -1,0 +1,2 @@
+
+WeakAurasSaved = nil

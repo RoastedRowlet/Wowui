@@ -71,15 +71,14 @@ end
 ---@return number? qualityID
 ---@return boolean? simplified
 function GUTIL:GetQualityIDFromLink(itemLink)
-  
-  local simplified = string.find(itemLink, "Quality%-12%-Tier")
-  local qualityID
-  if simplified then
-    qualityID = string.match(itemLink, "Quality%-12%-Tier(%d+)")
-  else
-    qualityID = string.match(itemLink, "Quality%-Tier(%d+)")
-  end
-  return tonumber(qualityID), simplified and true or false
+    local simplified = string.find(itemLink, "Quality%-12%-Tier")
+    local qualityID
+    if simplified then
+        qualityID = string.match(itemLink, "Quality%-12%-Tier(%d+)")
+    else
+        qualityID = string.match(itemLink, "Quality%-Tier(%d+)")
+    end
+    return tonumber(qualityID), simplified and true or false
 end
 
 function GUTIL:StringStartsWith(mainString, prefix)
@@ -242,6 +241,73 @@ function GUTIL:CreateRegistreeForEvents(events)
         registree:RegisterEvent(event)
     end
     return registree
+end
+
+--[[
+Custom Event System
+GUTIL:RegisterCustomEvents(registree, {"EVENT1", "EVENT2", ...})
+  - Registers the given table/object for custom events.
+  - When GUTIL:TriggerCustomEvent("EVENT1", ...), calls registree:EVENT1(...)
+GUTIL:TriggerCustomEvent("EVENT1", ...)
+  - Calls all registrees that registered for EVENT1, if they have a method EVENT1
+--]]
+
+GUTIL.__customEventRegistry = GUTIL.__customEventRegistry or {}
+
+--- Register a table/object for custom events. The table must have methods named after the events.
+---@param registree table
+---@param events string[]
+function GUTIL:RegisterCustomEvents(registree, events)
+    -- Allow registration even if the method is not yet defined; only check on trigger
+    for _, event in ipairs(events) do
+        if not self.__customEventRegistry[event] then
+            self.__customEventRegistry[event] = {}
+        end
+        if not tContains(self.__customEventRegistry[event], registree) then
+            table.insert(self.__customEventRegistry[event], registree)
+        end
+    end
+end
+
+--- Trigger a custom event, calling all registrees' methods for that event.
+---@param event string
+function GUTIL:TriggerCustomEvent(event, ...)
+    -- log if possible
+    if self.__eventLogger then
+        self.__eventLogger:PushLogProperty("args", { ... })
+        if self.__eventLoggerLevel == 1 then
+            self.__eventLogger:LogVerbose("{event}", event)
+        elseif self.__eventLoggerLevel == 2 then
+            self.__eventLogger:LogDebug("{event}", event)
+        elseif self.__eventLoggerLevel == 3 then
+            self.__eventLogger:LogInfo("{event}", event)
+        elseif self.__eventLoggerLevel == 4 then
+            self.__eventLogger:LogWarning("{event}", event)
+        elseif self.__eventLoggerLevel == 5 then
+            self.__eventLogger:LogError("{event}", event)
+        elseif self.__eventLoggerLevel == 6 then
+            self.__eventLogger:LogFatal("{event}", event)
+        end
+        self.__eventLogger:PopLogProperty("args")
+    end
+
+    local registrees = self.__customEventRegistry[event]
+    if registrees then
+        for _, registree in ipairs(registrees) do
+            if type(registree[event]) == "function" then
+                if registree[event] then
+                    registree[event](registree, ...)
+                end
+            end
+        end
+    end
+end
+
+---@param logger LibLog-1.0.Logger
+---@param customLogLevel LibLog-1.0.LogLevel? What level should events be logged at, default: LogLevel.DEBUG (2)
+function GUTIL:SetEventLogger(logger, customLogLevel)
+    self.__eventLogger = logger
+    self.__eventLoggerLevel = customLogLevel or 2
 end
 
 ---Validate if a string is of format 100g50s10c
@@ -479,7 +545,8 @@ end
 ---@param percentRelativeTo number? if included: will be treated as 100% and a % value in relation to the coppervalue will be added
 ---@param separateThousands? boolean
 ---@param useTextures? boolean
-function GUTIL:FormatMoney(copperValue, useColor, percentRelativeTo, separateThousands, useTextures)
+---@param showCopper? boolean -- whether to show copper value false by default
+function GUTIL:FormatMoney(copperValue, useColor, percentRelativeTo, separateThousands, useTextures, showCopper)
     copperValue = GUTIL:Round(copperValue) -- there is no such thing as decimal coppers (we no fuel station here)
     local absValue = abs(copperValue) or 0
     local minusText = ""
@@ -519,7 +586,11 @@ function GUTIL:FormatMoney(copperValue, useColor, percentRelativeTo, separateTho
         cSep = f.copper("c")
     end
 
-    moneyText = cString .. cSep
+    if showCopper then
+        moneyText = cString .. cSep
+    else
+        moneyText = ""
+    end
 
     if sValue > 0 or gValue > 0 then
         moneyText = sString .. sSep .. moneyText
@@ -660,12 +731,12 @@ local function initEventWaitFrame()
         end
     end
 
-    GUTIL.eventWaitFrame:SetScript("OnEvent", function(event, ...)
+    GUTIL.eventWaitFrame:SetScript("OnEvent", function(self, event, ...)
         if not GUTIL.eventWaitFrame.callbackMap[event] then return end
         local callbacks = GUTIL.eventWaitFrame.callbackMap[event]
         for _, callback in ipairs(callbacks) do
             xpcall(callback, function()
-                print(debugstack("Error in Callback for GUTIL:WaitForEvent"))
+                print(debugstack())
             end, ...)
         end
         GUTIL.eventWaitFrame.callbackMap[event] = nil
@@ -678,14 +749,17 @@ end
 ---@param event WowEvent
 ---@param callback function
 ---@param maxWaitSeconds number?
-function GUTIL:WaitForEvent(event, callback, maxWaitSeconds)
+---@param callOnMiss boolean? If true, the callback will be called even if the event is not fired within the maxWaitSeconds
+function GUTIL:WaitForEvent(event, callback, maxWaitSeconds, callOnMiss)
     GUTIL.eventWaitFrame = GUTIL.eventWaitFrame or initEventWaitFrame()
 
     GUTIL.eventWaitFrame:RegisterCallback(event, callback)
-
     if maxWaitSeconds then
         C_Timer.After(maxWaitSeconds, function()
             GUTIL.eventWaitFrame:UnregisterCallback(event, callback)
+            if callOnMiss then
+                callback()
+            end
         end)
     end
 end
@@ -702,16 +776,16 @@ function GUTIL:NextFrameIF(condition, callback)
 end
 
 function GUTIL:EquipItemByLink(link)
-        for bag = Enum.BagIndex.Backpack, Enum.BagIndex.CharacterBankTab_6 + Constants.InventoryConstants.NumAccountBankSlots do
-            for slot = 1, C_Container.GetContainerNumSlots(bag) do
-                local item = C_Container.GetContainerItemLink(bag, slot)
-                if item and item == link then
-                    if CursorHasItem() or CursorHasMoney() or CursorHasSpell() then ClearCursor() end
-                    C_Container.PickupContainerItem(bag, slot)
-                    AutoEquipCursorItem()
-                    return true
-                end
+    for bag = Enum.BagIndex.Backpack, Enum.BagIndex.CharacterBankTab_6 + Constants.InventoryConstants.NumAccountBankSlots do
+        for slot = 1, C_Container.GetContainerNumSlots(bag) do
+            local item = C_Container.GetContainerItemLink(bag, slot)
+            if item and item == link then
+                if CursorHasItem() or CursorHasMoney() or CursorHasSpell() then ClearCursor() end
+                C_Container.PickupContainerItem(bag, slot)
+                AutoEquipCursorItem()
+                return true
             end
+        end
     end
 end
 
@@ -1280,15 +1354,82 @@ function GUTIL:DecodeBase64(str)
         if (x == '=') then return '' end
         local r, f = '', (b:find(x) - 1)
         for i = 6, 1, -1 do
-            r = r .. (f % 2^i - f % 2^(i - 1) > 0 and '1' or '0')
+            r = r .. (f % 2 ^ i - f % 2 ^ (i - 1) > 0 and '1' or '0')
         end
         return r
     end):gsub('%d%d%d?%d?%d?%d?%d?%d?', function(x)
         if (#x ~= 8) then return '' end
         local c = 0
         for i = 1, 8 do
-            c = c + (x:sub(i, i) == '1' and 2^(8 - i) or 0)
+            c = c + (x:sub(i, i) == '1' and 2 ^ (8 - i) or 0)
         end
         return string.char(c)
     end))
+end
+
+--- care for stackoverflow if there are recursive references
+---@param table table
+function GUTIL:CopyTableDeep(table)
+    local copy = {}
+    for k, v in pairs(table) do
+        if type(v) == "table" then
+            if v == table then
+                copy[k] = nil
+            else
+                copy[k] = self:CopyTableDeep(v)
+            end
+        elseif type(v) == "number" then
+            copy[k] = tonumber(v)
+        elseif type(v) == "string" then
+            copy[k] = tostring(v)
+        else
+            copy[k] = v
+        end
+    end
+    return copy
+end
+
+--- ItemLink safe, Quote safe
+---@param input string
+---@return string command
+---@return table parsedArguments
+function GUTIL:ParseSlashCommandInput(input)
+    local arguments = {}
+    local currentArg = ""
+    local inQuotes = false
+    local inLink = false
+
+    if input == "" then
+        return "", {}
+    end
+
+    for i = 1, #input do
+        local char = input:sub(i, i)
+
+        if char == '"' then
+            inQuotes = not inQuotes
+        elseif char == "[" and not inQuotes and not inLink then
+            inLink = true
+            currentArg = currentArg .. char
+        elseif char == "]" and inLink and not inQuotes then
+            inLink = false
+            currentArg = currentArg .. char
+        elseif char == " " and not inQuotes and not inLink then
+            if currentArg ~= "" then
+                table.insert(arguments, currentArg)
+                currentArg = ""
+            end
+        else
+            currentArg = currentArg .. char
+        end
+    end
+
+    if currentArg ~= "" then
+        table.insert(arguments, currentArg)
+    end
+
+    local command = arguments[1]:lower()
+    table.remove(arguments, 1)
+
+    return command, arguments
 end

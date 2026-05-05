@@ -4,7 +4,7 @@
 
 local mod, CL = BigWigs:NewBoss("Seat of the Triumvirate Trash", 1753)
 if not mod then return end
-mod.displayName = CL.trash
+mod:SetTrashModule(true)
 mod:RegisterEnableMob(
 	125836, -- Alleria Windrunner
 	124171, -- Shadowguard Subjugator
@@ -182,11 +182,11 @@ function mod:CollapseCast(args)
 end
 
 function mod:VoidRiftsClosed(_, text)
-    -- [UPDATE_UI_WIDGET] widgetID:7577, widgetType:8, shownState:1, text:Void Rifts Closed: 0/4
+	-- [UPDATE_UI_WIDGET] widgetID:7577, widgetType:8, shownState:1, text:Void Rifts Closed: 0/4
 	local closed = text:match("(%d+)/%d+")
-    if closed and tonumber(closed) > 0 and text ~= lastText then
-        lastText = text
-        self:Message("void_rifts_closed", "green", text, false)
-        self:PlaySound("void_rifts_closed", "info")
-    end
+	if closed and tonumber(closed) > 0 and text ~= lastText then
+		lastText = text
+		self:Message("void_rifts_closed", "green", text, false)
+		self:PlaySound("void_rifts_closed", "info")
+	end
 end

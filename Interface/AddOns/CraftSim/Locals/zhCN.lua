@@ -219,7 +219,7 @@ function CraftSim.LOCAL_CN:GetData()
         CRAFT_LOG_REAGENT_DETAILS_TAB = "材料详情",
         CRAFT_LOG_RESULT_ANALYSIS_TAB = "结果分析",
         CRAFT_LOG_RESULT_ANALYSIS_TAB_DISTRIBUTION_LABEL = "成品分布",
-        CRAFT_LOG_RESULT_ANALYSIS_TAB_DISTRIBUTION_HELP = 
+        CRAFT_LOG_RESULT_ANALYSIS_TAB_DISTRIBUTION_HELP =
         "制造物品成品的相对分布。\n（忽略产能数量）",
         CRAFT_LOG_RESULT_ANALYSIS_TAB_MULTICRAFT = "产能",
         CRAFT_LOG_RESULT_ANALYSIS_TAB_RESOURCEFULNESS = "充裕",
@@ -236,8 +236,8 @@ function CraftSim.LOCAL_CN:GetData()
         EXPLANATIONS_BASIC_PROFIT_TAB = "基本利润计算",
 
         -- Cost Details Frame
-        COST_OPTIMIZATION_TITLE = "CraftSim 成本明细",
-        COST_OPTIMIZATION_EXPLANATION =
+        PRICING_TITLE = "CraftSim 成本明细",
+        PRICING_EXPLANATION =
             "所有材料可能价格概述如下。\n" ..
             f.bb("'使用来源'") ..
             " 字段指示哪一个价格已被使用。\n\n" ..
@@ -251,10 +251,8 @@ function CraftSim.LOCAL_CN:GetData()
             " 如已设置则会优先使用它。 " ..
             f.bb("制造成本") .. " 仅在低于 " .. f.g("拍卖") .. " 时才会使用。" .. "\n\n" ..
             f.bb("右键点击") .. " 任何材料，以自定义值覆盖其价格",
-        COST_OPTIMIZATION_CRAFTING_COSTS = "制造成本：",
-        COST_OPTIMIZATION_ITEM_HEADER = "物品",
-        COST_OPTIMIZATION_AH_PRICE_HEADER = "拍卖价格",
-        COST_OPTIMIZATION_OVERRIDE_HEADER = "重订价格",
+        PRICING_CRAFTING_COSTS = "制造成本：",
+        PRICING_ITEM_HEADER = "物品",
         COST_OPTIMIZATION_CRAFTING_HEADER = "制造数据",
         COST_OPTIMIZATION_USED_SOURCE = "使用来源",
         COST_OPTIMIZATION_REAGENT_COSTS_TAB = "材料成本",
@@ -272,12 +270,12 @@ function CraftSim.LOCAL_CN:GetData()
         COST_OPTIMIZATION_SUB_RECIPE_INCLUDE_COOLDOWN_RECIPES_TOOLTIP =
             "启用后，计算自制材料时 " .. f.l("CraftSim") .. " 将忽略配方的冷却时间要求。",
         COST_OPTIMIZATION_SUB_RECIPE_SELECT_RECIPE_CRAFTER = "选择配方工匠",
-        COST_OPTIMIZATION_REAGENT_LIST_AH_COLUMN_AUCTION_BUYOUT = "拍卖价格：",
-        COST_OPTIMIZATION_REAGENT_LIST_OVERRIDE = "\n\n重定价格",
-        COST_OPTIMIZATION_REAGENT_LIST_EXPECTED_COSTS_TOOLTIP = "\n\n正在制造 ",
-        COST_OPTIMIZATION_REAGENT_LIST_EXPECTED_COSTS_PRE_ITEM = "\n- 每个物品的预期成本：",
-        COST_OPTIMIZATION_REAGENT_LIST_CONCENTRATION_COST = f.gold("专注成本："),
-        COST_OPTIMIZATION_REAGENT_LIST_CONCENTRATION = "专注：",
+        PRICING_REAGENT_LIST_AH_COLUMN_AUCTION_BUYOUT = "拍卖价格：",
+        PRICING_REAGENT_LIST_OVERRIDE = "\n\n重定价格",
+        PRICING_REAGENT_LIST_EXPECTED_COSTS_TOOLTIP = "\n\n正在制造 ",
+        PRICING_REAGENT_LIST_EXPECTED_COSTS_PRE_ITEM = "\n- 每个物品的预期成本：",
+        PRICING_REAGENT_LIST_CONCENTRATION_COST = f.gold("专注成本："),
+        PRICING_REAGENT_LIST_CONCENTRATION = "专注：",
 
         -- Statistics Frame
         STATISTICS_TITLE = "CraftSim 统计数据",
@@ -410,6 +408,13 @@ function CraftSim.LOCAL_CN:GetData()
         RECIPE_SCAN_OPTIMIZE_FINISHING_REAGENTS = "优化" .. f.bb("完成材料"),
         OPTIMIZATION_OPTIONS_OPTIMIZE_PROFESSION_TOOLS = "Optimize Profession Tools",
         OPTIMIZATION_OPTIONS_INCLUDE_SOULBOUND_FINISHING_REAGENTS = "Include Soulbound Finishing Reagents",
+        OPTIMIZATION_OPTIONS_FINISHING_REAGENTS_ALGORITHM = "Finishing Reagents Algorithm",
+        OPTIMIZATION_OPTIONS_FINISHING_REAGENTS_SIMPLE = "Simple",
+        OPTIMIZATION_OPTIONS_FINISHING_REAGENTS_SIMPLE_TOOLTIP =
+        "Optimizes reagent allocation first, then concentration, then selects the best finishing reagent for each slot individually.",
+        OPTIMIZATION_OPTIONS_FINISHING_REAGENTS_PERMUTATION = "Permutation Based",
+        OPTIMIZATION_OPTIONS_FINISHING_REAGENTS_PERMUTATION_TOOLTIP =
+        "Tries all possible finishing reagent combinations and for each individually optimizes reagents (if enabled) and concentration (if enabled), then selects the most profitable combination.\n\nWarning: This may take significantly longer to complete.",
         RECIPE_SCAN_SEND_TO_CRAFT_QUEUE = "发送到制造队列",
         RECIPE_SCAN_PROFIT_MARGIN_THRESHOLD = "利润率阈值 (%)：",
         RECIPE_SCAN_DEFAULT_QUEUE_AMOUNT = "默认队列数量：",
@@ -452,7 +457,7 @@ function CraftSim.LOCAL_CN:GetData()
         TOP_GEAR_SIM_MODES_CRAFTING_SPEED = "最佳制造速度",
 
         -- Options
-        OPTIONS_TITLE = "CraftSim 选项",
+        OPTIONS_TITLE = "CraftSim",
         OPTIONS_GENERAL_TAB = "一般",
         OPTIONS_GENERAL_PRICE_SOURCE = "价格来源",
         OPTIONS_GENERAL_CURRENT_PRICE_SOURCE = "当前价格来源：",
@@ -661,12 +666,13 @@ function CraftSim.LOCAL_CN:GetData()
             f.g("最有专注价值的") ..
             "配方。然后将其加入制造队列，以达到最大可制作数量。",
         CRAFT_QUEUE_RESTOCK_FAVORITES_OFFSET_CONCENTRATION_CRAFT_AMOUNT = "偏移" .. f.gold("专注") .. f.bb("队列数量"),
-        CRAFT_QUEUE_RESTOCK_FAVORITES_OFFSET_CONCENTRATION_CRAFT_AMOUNT_TOOLTIP = "启用后，专注制造将会根据你的" .. f.bb("奇思") .. "预期制造数量排队",
+        CRAFT_QUEUE_RESTOCK_FAVORITES_OFFSET_CONCENTRATION_CRAFT_AMOUNT_TOOLTIP = "启用后，专注制造将会根据你的" ..
+            f.bb("奇思") .. "预期制造数量排队",
         CRAFT_QUEUE_RESTOCK_FAVORITES_QUEUE_MAIN_PROFESSIONS = "排队添加" .. f.bb("当前的主专业"),
         CRAFT_QUEUE_RESTOCK_FAVORITES_QUEUE_MAIN_PROFESSIONS_TOOLTIP = "启用后，CraftSim 将同时处理当前角色的两种主专业",
         CRAFT_QUEUE_RESTOCK_FAVORITES_OFFSET_QUEUE_AMOUNT_LABEL = "偏移队列数量：",
         CRAFT_QUEUE_RESTOCK_FAVORITES_OFFSET_QUEUE_AMOUNT_TOOLTIP = "始终将指定数量添加到排队制造的数量中",
-        CRAFT_QUEUE_RESTOCK_FAVORITES_AUTO_SHOPPING_LIST = "扫描后自动创建购物清单",
+        CRAFT_QUEUE_RESTOCK_FAVORITES_AUTO_SHOPPING_LIST = "队列操作后自动创建购物清单",
         CRAFT_QUEUE_CRAFT_BUTTON_ROW_LABEL_WRONG_PROFESSION = "专业错误",
         CRAFT_QUEUE_CRAFT_BUTTON_ROW_LABEL_ON_COOLDOWN = "冷却中",
         CRAFT_QUEUE_RECIPE_REQUIREMENTS_HEADER = "状态",
@@ -748,16 +754,13 @@ function CraftSim.LOCAL_CN:GetData()
         CRAFT_QUEUE_ORDER_CUSTOMER = "\n\n订单发布人：",
         CRAFT_QUEUE_ORDER_MINIMUM_QUALITY = "\n最低品质：",
         CRAFT_QUEUE_ORDER_REWARDS = "\n奖励：",
-        CRAFT_QUEUE_RESTOCK_FAVORITES_OPTIONS_AUTO_SHOPPING_LIST = "启用后，CraftSim 扫描后会自动创建购物清单。",
+        CRAFT_QUEUE_RESTOCK_FAVORITES_OPTIONS_AUTO_SHOPPING_LIST = "启用后，CraftSim 会在队列操作后自动创建购物清单。",
         CRAFT_QUEUE_IGNORE_SPARK_RECIPES_CHECKBOX_LABEL = "忽略" .. f.e("火花") .. "配方",
         CRAFT_QUEUE_IGNORE_SPARK_RECIPES_CHECKBOX_TOOLTIP = "忽略需要火花材料的配方",
         CRAFT_QUEUE_MENU_AUTO_SHOW = "当配方加入制造队列后" .. f.g("自动打开"),
         CRAFT_QUEUE_MENU_INGENUITY_IGNORE = f.r("忽略") .. f.gold("奇思触发") .. "时的队列数量减少",
-        CRAFT_QUEUE_MENU_DEQUEUE_CONCENTRATION = "在" .. f.gold("专注") .. "全用完后" .. f.r("移除") ,
+        CRAFT_QUEUE_MENU_DEQUEUE_CONCENTRATION = "在" .. f.gold("专注") .. "全用完后" .. f.r("移除"),
         CRAFT_QUEUE_MENU_DEQUEUE_CONCENTRATION_TOOLTIP = "当剩余的专注不足以继续制作时，自动移除已制作的配方。",
-        CRAFT_QUEUE_HELP = f.bb("左键点击") .. " .. 跳转到配方\n" ..
-            f.bb("右键点击") .. " .. 打开配方选项\n" ..
-            f.bb("中键点击") .. " .. 从队列中移除配方",
 
         -- craft buffs
 
@@ -778,10 +781,13 @@ function CraftSim.LOCAL_CN:GetData()
         COOLDOWNS_NEXT_HEADER = "下次充能",
         COOLDOWNS_ALL_HEADER = "充能完毕",
         COOLDOWNS_TAB_OVERVIEW = "概览",
+        COOLDOWNS_TAB_BLACKLIST = "黑名单",
         COOLDOWNS_TAB_OPTIONS = "选项",
         COOLDOWNS_EXPANSION_FILTER_BUTTON = "资料片过滤器",
         COOLDOWNS_RECIPE_LIST_TEXT_TOOLTIP = f.bb("\n\n配方共享冷却：\n"),
         COOLDOWNS_RECIPE_READY = f.g("就绪"),
+        COOLDOWNS_ADD_TO_BLACKLIST = "加入黑名单",
+        COOLDOWNS_BLACKLIST_RESTORE = "移出黑名单",
 
         -- concentration module
 
@@ -798,6 +804,8 @@ function CraftSim.LOCAL_CN:GetData()
         CONCENTRATION_TRACKER_FORMAT_MODE_EUROPE_MAX_DATE = "欧洲 - 最大日期",
         CONCENTRATION_TRACKER_FORMAT_MODE_AMERICA_MAX_DATE = "美洲 - 最大日期",
         CONCENTRATION_TRACKER_FORMAT_MODE_HOURS_LEFT = "小时剩余",
+        CONCENTRATION_TRACKER_LIST_ROW_MOXIE = "Moxie：%s",
+        CONCENTRATION_TRACKER_LIST_ROW_MOXIE_UNKNOWN = "-",
         CONCENTRATION_TRACKER_PIN_TOOLTIP = "固定概览",
         CONCENTRATION_TRACKER_LIST_TAB_LABEL = "队列",
         CONCENTRATION_TRACKER_LIST_TAB_REMOVE_AND_BLACKLIST = "移除并加入黑名单",

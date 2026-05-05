@@ -15,7 +15,7 @@ CraftSim.STATISTICS.UI = {}
 
 CraftSim.STATISTICS.UI.CONCENTRATION_GRAPH_LINE_COLOR = { 0.93, 0.79, 0.0, 0.8 }
 
-local print = CraftSim.DEBUG:RegisterDebugID("Modules.Statistics.UI")
+local Logger = CraftSim.DEBUG:RegisterLogger("Statistics.UI")
 
 function CraftSim.STATISTICS.UI:Init()
     local sizeX = 500
@@ -35,7 +35,7 @@ function CraftSim.STATISTICS.UI:Init()
         backdropOptions = CraftSim.CONST.DEFAULT_BACKDROP_OPTIONS,
         frameTable = CraftSim.INIT.FRAMES,
         frameConfigTable = CraftSim.DB.OPTIONS:Get("GGUI_CONFIG"),
-        onCloseCallback = CraftSim.CONTROL_PANEL:HandleModuleClose("MODULE_STATISTICS"),
+        onCloseCallback = CraftSim.MODULES:HandleModuleClose("MODULE_STATISTICS"),
         frameStrata = CraftSim.CONST.MODULES_FRAME_STRATA,
         raiseOnInteraction = true,
         frameLevel = frameLevel
@@ -54,7 +54,7 @@ function CraftSim.STATISTICS.UI:Init()
         backdropOptions = CraftSim.CONST.DEFAULT_BACKDROP_OPTIONS,
         frameTable = CraftSim.INIT.FRAMES,
         frameConfigTable = CraftSim.DB.OPTIONS:Get("GGUI_CONFIG"),
-        onCloseCallback = CraftSim.CONTROL_PANEL:HandleModuleClose("MODULE_STATISTICS"),
+        onCloseCallback = CraftSim.MODULES:HandleModuleClose("MODULE_STATISTICS"),
         frameStrata = CraftSim.CONST.MODULES_FRAME_STRATA,
         raiseOnInteraction = true,
         frameLevel = frameLevel

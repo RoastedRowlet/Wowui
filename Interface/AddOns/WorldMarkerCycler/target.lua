@@ -68,7 +68,7 @@ local clearBtn = CreateFrame(
     "SecureActionButtonTemplate"
 )
 clearBtn:SetAttribute("type", "macro")
-clearBtn:SetAttribute("macrotext", "/targetmarker 0")
+clearBtn:SetAttribute("macrotext", "/tm 0")
 clearBtn:RegisterForClicks("AnyDown")
 
 -- =========================
@@ -96,7 +96,7 @@ SecureHandlerWrapScript(cycleBtn, "PreClick", cycleBtn, [=[
     local marker = order[i] or 1
     self:SetAttribute(
         "macrotext",
-        "/targetmarker [@target] " .. marker
+        "/tm " .. marker
     )
 ]=])
 

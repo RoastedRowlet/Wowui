@@ -30,8 +30,8 @@ function Addon:CommitConfigByName(name)
 	end
 
 	Addon:Print("Loading: |cff00ccff"..name.."|r");
-	Addon:ImportTextAsync(data.text);
 	Addon:SetPvpTalent(data.pvp1, data.pvp2, data.pvp3);
+	Addon:ImportTextAsync(data.text);
 	Addon:SendUpdateMessage();
 
 	local isLoaded = false;

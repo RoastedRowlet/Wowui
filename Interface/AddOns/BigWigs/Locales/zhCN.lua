@@ -5,6 +5,9 @@ if not L then return end
 -- API.lua
 L.showAddonBar = "插件 '|cFF436EEE%s|r' 创建了 '%s' 计时条。"
 L.requestAddonProfile = "插件 '|cFF436EEE%s|r' 刚刚复制了您的配置文件导出字符串。"
+L.shortMinutesAndSeconds = "%d 分 %d 秒" -- 1 Minute 2 Seconds
+L.shortSecondsOnly = "%d 秒" -- 28 Seconds
+L.shortSubTenSeconds = "%.1f 秒" -- 3.2 Seconds
 
 -- Core.lua
 L.berserk = "狂暴"
@@ -418,20 +421,24 @@ L.hide = "隐藏"
 L.colorFade = "颜色/渐隐"
 L.inProgress = "进行中"
 L.textFormat = "文本格式"
-L.tooltipHistoryMaxLines = "历史记录：最大行数"
+L.tooltipHistoryMaxLines = "记录：最大行数"
 L.tooltipHistoryMaxLinesDesc = "选择在鼠标提示框中最多显示的历史记录行数。"
-L.tooltipHistoryResetConditions = "历史记录：重置条件"
+L.tooltipHistoryResetConditions = "记录：重置条件"
 L.tooltipHistoryResetConditionsDesc = "选择在何种情况下鼠标提示框中的历史记录应被重置。"
 L.enteringRaid = "团队副本时"
 L.enteringDungeon = "地下城时"
 L.startingMythicKeystone = "史诗钥石时"
-L.historyTimeFormat = "历史记录：时间格式"
+L.historyTimeFormat = "记录：时间格式"
 L.twelveHour = "12小时"
 L.twentyFourHour = "24小时"
+L.hideTooltipInCombat = "在战斗中隐藏提示框"
+L.customText = "自定义文本（必须含有 %s）"
 
 -----------------------------------------------------------------------
 -- Keystones.lua
 --
+
+L.keys = "钥石"
 
 L.keystoneTitle = "BigWigs 钥石信息"
 L.keystoneHeaderParty = "队伍"
@@ -497,77 +504,77 @@ L.keystoneSlashKeystone = "同时注册 |cFF33FF99/keystone|r 命令"
 L.unavailableWhilstInCombat = "战斗中无法使用"
 
 -- It doesn't really matter what you call it as long as it's recognizable and limited to ~6 characters
-L.keystoneShortName_TheRookery = "驭雷栖巢"
-L.keystoneShortName_DarkflameCleft = "暗焰裂口"
-L.keystoneShortName_PrioryOfTheSacredFlame = "圣焰隐修院"
-L.keystoneShortName_CinderbrewMeadery = "燧酿酒庄"
-L.keystoneShortName_OperationFloodgate = "水闸行动"
-L.keystoneShortName_TheaterOfPain = "伤势剧场"
-L.keystoneShortName_TheMotherlode = "暴富矿区"
-L.keystoneShortName_OperationMechagonWorkshop = "麦卡贡-车间"
-L.keystoneShortName_EcoDomeAldani = "生态圆顶"
-L.keystoneShortName_HallsOfAtonement = "赎罪大厅"
-L.keystoneShortName_AraKaraCityOfEchoes = "回响之城"
-L.keystoneShortName_TazaveshSoleahsGambit = "索·莉亚宏图"
-L.keystoneShortName_TazaveshStreetsOfWonder = "琳彩天街"
+L.keystoneShortName_TheRookery = "驭雷"
+L.keystoneShortName_DarkflameCleft = "暗焰"
+L.keystoneShortName_PrioryOfTheSacredFlame = "隐修院"
+L.keystoneShortName_CinderbrewMeadery = "燧酿"
+L.keystoneShortName_OperationFloodgate = "水闸"
+L.keystoneShortName_TheaterOfPain = "伤势"
+L.keystoneShortName_TheMotherlode = "暴富"
+L.keystoneShortName_OperationMechagonWorkshop = "车间"
+L.keystoneShortName_EcoDomeAldani = "圆顶" --生态圆顶
+L.keystoneShortName_HallsOfAtonement = "赎罪"
+L.keystoneShortName_AraKaraCityOfEchoes = "回响"
+L.keystoneShortName_TazaveshSoleahsGambit = "宏图"
+L.keystoneShortName_TazaveshStreetsOfWonder = "天街"
 L.keystoneShortName_TheDawnbreaker = "破晨号"
-L.keystoneShortName_BlackRookHold = "黑鸦堡垒"
-L.keystoneShortName_CourtOfStars = "群星庭院"
-L.keystoneShortName_DarkheartThicket = "黑心林地"
-L.keystoneShortName_EyeOfAzshara = "艾萨拉之眼"
+L.keystoneShortName_BlackRookHold = "黑鸦"
+L.keystoneShortName_CourtOfStars = "群星"
+L.keystoneShortName_DarkheartThicket = "林地"
+L.keystoneShortName_EyeOfAzshara = "艾萨拉"
 L.keystoneShortName_HallsOfValor = "英灵殿"
-L.keystoneShortName_MawOfSouls = "噬魂之喉"
-L.keystoneShortName_NeltharionsLair = "奈萨里奥巢穴"
-L.keystoneShortName_TheArcway = "魔法回廊"
-L.keystoneShortName_VaultOfTheWardens = "守望者地窟"
-L.keystoneShortName_ReturnToKarazhanLower = "卡拉赞下层"
-L.keystoneShortName_ReturnToKarazhanUpper = "卡拉赞上层"
-L.keystoneShortName_CathedralOfEternalNight = "永夜大教堂"
-L.keystoneShortName_SeatOfTheTriumvirate = "执政团之座"
-L.keystoneShortName_WindrunnerSpire = "风行者之塔"
-L.keystoneShortName_MagistersTerrace = "魔导师平台"
-L.keystoneShortName_MaisaraCaverns = "迈萨拉洞窟"
-L.keystoneShortName_NexusPointXenas = "节点希纳斯"
-L.keystoneShortName_AlgetharAcademy = "艾杰斯亚学院"
+L.keystoneShortName_MawOfSouls = "噬魂"
+L.keystoneShortName_NeltharionsLair = "巢穴"
+L.keystoneShortName_TheArcway = "回廊"
+L.keystoneShortName_VaultOfTheWardens = "地窟"
+L.keystoneShortName_ReturnToKarazhanLower = "卡下"
+L.keystoneShortName_ReturnToKarazhanUpper = "卡上"
+L.keystoneShortName_CathedralOfEternalNight = "永夜"
+L.keystoneShortName_SeatOfTheTriumvirate = "执政团"
+L.keystoneShortName_WindrunnerSpire = "风行者"
+L.keystoneShortName_MagistersTerrace = "魔导师"
+L.keystoneShortName_MaisaraCaverns = "迈萨拉"
+L.keystoneShortName_NexusPointXenas = "节点"
+L.keystoneShortName_AlgetharAcademy = "学院"
 L.keystoneShortName_Skyreach = "通天峰"
-L.keystoneShortName_PitOfSaron = "萨隆矿坑"
+L.keystoneShortName_PitOfSaron = "萨隆"
 
 -- These short names are for the bar that shows during the Mythic+ countdown
 -- Use the real dungeon names but make them shorter to fit on the bar better
-L.keystoneShortName_TheRookery_Bar = "驭雷栖巢"
-L.keystoneShortName_DarkflameCleft_Bar = "暗焰裂口"
-L.keystoneShortName_PrioryOfTheSacredFlame_Bar = "圣焰隐修院"
-L.keystoneShortName_CinderbrewMeadery_Bar = "燧酿酒庄"
-L.keystoneShortName_OperationFloodgate_Bar = "水闸行动"
-L.keystoneShortName_TheaterOfPain_Bar = "伤逝剧场"
-L.keystoneShortName_TheMotherlode_Bar = "暴富矿区"
-L.keystoneShortName_OperationMechagonWorkshop_Bar = "麦卡贡-车间"
-L.keystoneShortName_EcoDomeAldani_Bar = "生态圆顶"
-L.keystoneShortName_HallsOfAtonement_Bar = "赎罪大厅"
-L.keystoneShortName_AraKaraCityOfEchoes_Bar = "回响之城"
-L.keystoneShortName_TazaveshSoleahsGambit_Bar = "索·莉亚宏图"
-L.keystoneShortName_TazaveshStreetsOfWonder_Bar = "琳彩天街"
+L.keystoneShortName_TheRookery_Bar = "驭雷"
+L.keystoneShortName_DarkflameCleft_Bar = "暗焰"
+L.keystoneShortName_PrioryOfTheSacredFlame_Bar = "隐修院"
+L.keystoneShortName_CinderbrewMeadery_Bar = "燧酿"
+L.keystoneShortName_OperationFloodgate_Bar = "水闸"
+L.keystoneShortName_TheaterOfPain_Bar = "伤逝"
+L.keystoneShortName_TheMotherlode_Bar = "暴富"
+L.keystoneShortName_OperationMechagonWorkshop_Bar = "车间"
+L.keystoneShortName_EcoDomeAldani_Bar = "圆顶"
+L.keystoneShortName_HallsOfAtonement_Bar = "赎罪"
+L.keystoneShortName_AraKaraCityOfEchoes_Bar = "回响"
+L.keystoneShortName_TazaveshSoleahsGambit_Bar = "宏图"
+L.keystoneShortName_TazaveshStreetsOfWonder_Bar = "天街"
 L.keystoneShortName_TheDawnbreaker_Bar = "破晨号"
-L.keystoneShortName_BlackRookHold_Bar = "黑鸦堡垒"
-L.keystoneShortName_CourtOfStars_Bar = "群星庭院"
-L.keystoneShortName_DarkheartThicket_Bar = "黑心林地"
-L.keystoneShortName_EyeOfAzshara_Bar = "艾萨拉之眼"
+L.keystoneShortName_BlackRookHold_Bar = "黑鸦"
+L.keystoneShortName_CourtOfStars_Bar = "群星"
+L.keystoneShortName_DarkheartThicket_Bar = "林地"
+L.keystoneShortName_EyeOfAzshara_Bar = "艾萨拉"
 L.keystoneShortName_HallsOfValor_Bar = "英灵殿"
-L.keystoneShortName_MawOfSouls_Bar = "噬魂之喉"
-L.keystoneShortName_NeltharionsLair_Bar = "奈萨里奥的巢穴"
-L.keystoneShortName_TheArcway_Bar = "魔法回廊"
-L.keystoneShortName_VaultOfTheWardens_Bar = "守望者地窟"
-L.keystoneShortName_ReturnToKarazhanLower_Bar = "卡拉赞下层"
-L.keystoneShortName_ReturnToKarazhanUpper_Bar = "卡拉赞上层"
-L.keystoneShortName_CathedralOfEternalNight_Bar = "永夜大教堂"
-L.keystoneShortName_SeatOfTheTriumvirate_Bar = "执政团之座"
-L.keystoneShortName_WindrunnerSpire_Bar = "风行者之塔"
-L.keystoneShortName_MagistersTerrace_Bar = "魔导师平台"
-L.keystoneShortName_MaisaraCaverns_Bar = "迈萨拉洞窟"
-L.keystoneShortName_NexusPointXenas_Bar = "节点希纳斯"
-L.keystoneShortName_AlgetharAcademy_Bar = "艾杰斯亚学院"
+L.keystoneShortName_MawOfSouls_Bar = "噬魂"
+L.keystoneShortName_NeltharionsLair_Bar = "巢穴"
+L.keystoneShortName_TheArcway_Bar = "回廊"
+L.keystoneShortName_VaultOfTheWardens_Bar = "地窟"
+L.keystoneShortName_ReturnToKarazhanLower_Bar = "卡下"
+L.keystoneShortName_ReturnToKarazhanUpper_Bar = "卡上"
+L.keystoneShortName_CathedralOfEternalNight_Bar = "永夜"
+L.keystoneShortName_SeatOfTheTriumvirate_Bar = "执政团"
+L.keystoneShortName_WindrunnerSpire_Bar = "风行者"
+L.keystoneShortName_MagistersTerrace_Bar = "魔导师"
+L.keystoneShortName_MaisaraCaverns_Bar = "迈萨拉"
+L.keystoneShortName_NexusPointXenas_Bar = "节点"
+L.keystoneShortName_AlgetharAcademy_Bar = "学院"
 L.keystoneShortName_Skyreach_Bar = "通天峰"
-L.keystoneShortName_PitOfSaron_Bar = "萨隆矿坑"
+L.keystoneShortName_PitOfSaron_Bar = "萨隆"
 
 -- Instance Keys "Who has a key?"
 L.instanceKeysTitle = "谁拥有钥石？"
@@ -583,6 +590,28 @@ L.instanceKeysOtherDungeonColorDesc = "为持有非当前地下城钥石选择�
 L.instanceKeysEndOfRunDesc = "默认情况下，列表仅在你进入史诗钥石地下城时显示。启用此选项后，还将在史诗钥石结束后继续显示列表。"
 L.instanceKeysHideTitle = "隐藏标题"
 L.instanceKeysHideTitleDesc = "隐藏 \"谁拥有钥石？\" 标题。"
+
+-- Challenges UI Decoration
+L.partyRatingHeader = "|TInterface\\AddOns\\BigWigs\\Media\\Icons\\minimap_raid:0:0|t队伍评分"
+L.dungeonScoreString = "|c%s%03d|r |cFFFFFFFF+%02d|r |cFF%s%02d:%02d|r |c%s（%s）|r"
+L.dungeonScoreNoDataString = "|cFFFFFFFF暂无数据|r |c%s（%s）|r"
+L.dungeonTeleportHeader = "|TInterface\\AddOns\\BigWigs\\Media\\Icons\\minimap_raid:0:0|t传送"
+
+-- Progress %
+L.progressPercent = "进度 %"
+L.progressPercentDesc = "助你精准掌握在史诗钥石地下城，击杀每只敌对目标后能提供多少进度。"
+L.progressPercentTooltip = "鼠标指向敌对NPC时，在提示信息中显示进度 %"
+L.progressPercentTooltipText = {
+	"|TInterface\\AddOns\\BigWigs\\Media\\Icons\\minimap_raid:0:0|t进度：%s%%",
+	"|TInterface\\AddOns\\BigWigs\\Media\\Icons\\minimap_raid:0:0|t进度：%s%%（%d）",
+	"|TInterface\\AddOns\\BigWigs\\Media\\Icons\\minimap_raid:0:0|t进度：%s%%（%d/%d）",
+}
+L.progressPercentNameplate = "在敌对NPC的姓名板上显示进度 %"
+L.progressCurrentPull = "当前波次"
+L.progressCurrentPullDesc = "显示你当前战斗中这组NPC将提供的总进度。\n\n尚未实装！"
+L.tempProgressAnnounce = "现在，当你鼠标指向NPC或在姓名板上时，可以看到每个NPC提供的进度 %。\n\n请在 |cFF436EEE工具|r > |cFF436EEE史诗钥石地下城|r > |cFF436EEE进度 %|r 中进行设置。"
+L.settingsForCurrentTarget = "当前目标设置"
+L.settingsForOtherTargets = "其他目标设置"
 
 -----------------------------------------------------------------------
 -- LFGTimer.lua
@@ -702,7 +731,7 @@ L.testBarsBtn_desc = "创建一个测试计时条以便于测试当前显示设�
 
 L.toggleAnchorsBtnShow = "显示移动锚点"
 L.toggleAnchorsBtnHide = "隐藏移动锚点"
-L.toggleAnchorsBtnHide_desc = "隐藏全部移动锚点，锁定一切就位。"
+L.toggleAnchorsBtnHide_desc = "隐藏全部移动锚点，锁定所有元素的位置。"
 L.toggleBarsAnchorsBtnShow_desc = "显示全部移动锚点，允许您移动计时条。"
 
 L.emphasizeAt = "…（秒）后醒目"
@@ -711,7 +740,7 @@ L.growingUpwardsDesc = "切换在锚点向上或向下成长。"
 L.texture = "材质"
 L.emphasize = L.EMPHASIZE
 L.emphasizeMultiplier = "尺寸倍数"
-L.emphasizeMultiplierDesc = "如禁用计时条移向醒目锚点，此选项将决定以一般计时条乘以尺寸倍数作为醒目计时条的尺寸。"
+L.emphasizeMultiplierDesc = "如果你禁用了计时条移动到醒目计时条的功能，该选项通过乘以计时条尺寸来决定醒目计时条尺寸。"
 
 L.enable = "启用"
 L.move = "移动"
@@ -1143,7 +1172,7 @@ L.privateaura = "只要“私有光环”出现在你身上"
 L.customSoundDesc = "播放选定的自定义的声音，而不是由模块提供的。"
 L.resetSoundDesc = "重置以上音效为默认。"
 L.resetAllCustomSound = "如果设置全部首领战斗自定义的声音，此按钮将重置“全部”以这里自定义的声音来代替。"
---L.soundResetPrint = "The module '|cFF436EEE%s|r' uses a custom sound called '|cFF436EEE%s|r' that no longer exists. Resetting to default."
+L.soundResetPrint = "模块'|cFF436EEE%s|r'使用了一个名为'|cFF436EEE%s|r'的自定义音效，但该音效已不存在。已重置为默认。"
 
 -----------------------------------------------------------------------
 -- Statistics.lua
@@ -1156,13 +1185,13 @@ L.bestTimeBar = "最快时间"
 L.healthPrint = "血量：%s。"
 L.healthFormat = "%s （%.1f%%）"
 L.chatMessages = "聊天信息"
-L.newFastestVictoryOption = "新的最快获胜"
+L.newFastestVictoryOption = "新的最快记录"
 L.victoryOption = "你取得了胜利"
 L.defeatOption = "你被击败了"
 L.bossHealthOption = "首领血量"
-L.bossVictoryPrint = "你战胜了 “%s”，用时 %s 。" -- You were victorious against 'BOSS_NAME' after COMBAT_DURATION.
-L.bossDefeatPrint = "你被 “%s” 击败了，用时 %s 。" -- You were defeated by 'BOSS_NAME' after COMBAT_DURATION.
-L.newFastestVictoryPrint = "新的最快获胜：（-%s）" -- New fastest victory: (-COMBAT_DURATION)
+L.bossVictoryPrint = "你击败首领 “%s”，用时 %s 。" -- You were victorious against 'BOSS_NAME' after COMBAT_DURATION.
+L.bossDefeatPrint = "你被首领 “%s” 击败，用时 %s 。" -- You were defeated by 'BOSS_NAME' after COMBAT_DURATION.
+L.newFastestVictoryPrint = "新的最快记录：（-%s）" -- New fastest victory: (-COMBAT_DURATION)
 
 -----------------------------------------------------------------------
 -- Timeline.lua
@@ -1179,6 +1208,7 @@ L.blizzBasicAsBars = "暴雪内置的首领预警显示在 BigWigs 计时条上"
 L.blizzBasicAsBlizzTimeline = "暴雪内置的首领预警及首领技能显示“类型”"
 L.developerMode = "开发者模式"
 L.enhancedModeWarning = "警告！\n\n禁用增强模式将禁用许多 BigWigs 功能，包括：\n\n计时条颜色、法术重命名、计数器、自定义声音/语音、倒计时、计时条开关、额外消息提示等。"
+L.blizzTimelineEnhancedWarning = "警告！\n\n暴雪内置时间轴不支持 BigWigs 增强功能。你将无法看到重命名的法术，并且计时会不准确。\n\n确定要启用吗？"
 
 -----------------------------------------------------------------------
 -- Victory.lua
@@ -1192,7 +1222,7 @@ L.victoryMessageBigWigs = "显示 BigWigs 信息"
 L.victoryMessageBigWigsDesc = "BigWigs 信息显示是简单的“首领已被击败”信息。"
 L.victoryMessageBlizzard = "显示暴雪内置信息"
 L.victoryMessageBlizzardDesc = "暴雪内置信息会以特效显示“首领已被击败”在动画上。"
-L.defeated = "%s被击败了！"
+L.defeated = "%s 被击败！"
 
 -----------------------------------------------------------------------
 -- Wipe.lua

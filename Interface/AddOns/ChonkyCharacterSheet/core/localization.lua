@@ -29,6 +29,35 @@ local defaultStrings = {
     ------------------------------------------------------------
     -- General / Common
     ------------------------------------------------------------
+	["Explorer"]             = "Explorer",             -- enUS / enGB
+	["Adventurer"]           = "Adventurer",           -- enUS / enGB
+	["Veteran"]              = "Veteran",              -- enUS / enGB
+	["Champion"]             = "Champion",             -- enUS / enGB
+	["Hero"]                 = "Hero",                 -- enUS / enGB
+	["Myth"]                 = "Myth",                 -- enUS / enGB
+	["Custom Upgrade Color"] = "Custom Upgrade Color", -- enUS / enGB
+	["Slug Rendering"] = "Slug Rendering", -- enUS / enGB
+	["Secret"] = "Secret", -- enUS / enGB	
+	["Sort by"] = "Sort By", -- enUS / enGB
+	["Sort Direction"] = "Sort Direction",  -- enUS / enGB
+	["ALTERNATE_SIDE_BUTTON"] = "Alternate Side Button", -- enUS / enGB
+	["PARAGON_MAX_BAR"] = "Paragon Max Bar", -- enUS / enGB
+	["SHOW_TEMP_ENCHANTS"] = "Weapon Buffs", -- enUS / enGB
+	["SHOW_HIGHWATER"] = "iLvl Alerts", -- enUS / enGB
+	-- Stat dropdown display names
+	["CriticalStrike"] = ITEM_MOD_CRIT_RATING_SHORT or "Critical Strike", -- all
+	["Mastery"] = ITEM_MOD_MASTERY_RATING_SHORT or "Mastery", -- all
+	["Haste"] = ITEM_MOD_HASTE_RATING_SHORT or "Haste", -- all
+	["Versatility"] = STAT_VERSATILITY or "Versatility", -- all
+
+	["Slot"] = "Slot",   -- enUS / enGB
+	["Custom Priority Profiles"] = "Custom Priority Profiles",  -- enUS / enGB
+	["Add Priority Slot"] = "Add Priority Slot", -- enUS / enGB
+	["1st Priority"] = "1st", -- enUS / enGB
+	["2nd Priority"] = "2nd", -- enUS / enGB
+	["3rd Priority"] = "3rd", -- enUS / enGB
+	["4th Priority"] = "4th", -- enUS / enGB
+	
 	["SHOW_MISSING_SOCKETS"]= "Show Missing Sockets",  -- enUS / enGB
 	["ADDON COLORS"] = "Addon Colors", -- enUS / enGB
 	["Button Foreground Color"] = "Button Foreground Color", -- enUS / enGB
@@ -392,6 +421,28 @@ if locale == "enGB" then
     }
 elseif locale == "deDE" then
     localizedStrings = {
+		["Explorer"]             = "Forscher",    -- deDE
+		["Adventurer"]           = "Abenteurer",  -- deDE
+		["Veteran"]              = "Veteran",     -- deDE
+		["Champion"]             = "Champion",    -- deDE
+		["Hero"]                 = "Held",        -- deDE
+		["Myth"]                 = "Mythos",      -- deDE
+		["Custom Upgrade Color"] = "Benutzerdefinierte Aufwertungsfarbe", -- deDE
+		["Slug Rendering"] = "Slug-Rendering", -- deDE
+		["Secret"] = "Geheim", -- deDE 
+		["Sort by"] = "Sortieren nach", -- deDE
+		["Sort Direction"] = "Sortierrichtung", -- deDE
+        ["ALTERNATE_SIDE_BUTTON"] = "Alternativer Seitenknopf", -- deDE
+		["PARAGON_MAX_BAR"] = "Paragon: Max-Leiste", -- deDE
+		["SHOW_TEMP_ENCHANTS"] = "Waffenstärkungen", -- deDE
+		["SHOW_HIGHWATER"] = "Gegenstandslevel-Warnungen", -- deDE
+		["Slot"] = "Platz",  -- deDE
+		["Custom Priority Profiles"] = "Benutzerdefinierte Prioritätsprofile",  -- deDE
+		["Add Priority Slot"] = "Prioritätsplatz hinzufügen", -- deDE
+		["1st Priority"] = "1.", -- deDE
+		["2nd Priority"] = "2.", -- deDE
+		["3rd Priority"] = "3.", -- deDE
+		["4th Priority"] = "4.", -- deDE
 		["SHOW_MISSING_SOCKETS"] = "Fehlende Sockel anzeigen",  -- deDE
         ["ADDON COLORS"] = "Addon-Farben", -- deDE
         ["Button Foreground Color"] = "Schaltflächenvordergrundfarbe", -- deDE
@@ -728,6 +779,28 @@ elseif locale == "deDE" then
     }	
 elseif locale == "frFR" then
     localizedStrings = {
+		["Explorer"]             = "Explorateur", -- frFR
+		["Adventurer"]           = "Aventurier",  -- frFR
+		["Veteran"]              = "Vétéran",     -- frFR
+		["Champion"]             = "Champion",    -- frFR
+		["Hero"]                 = "Héros",       -- frFR
+		["Myth"]                 = "Mythe",       -- frFR
+		["Custom Upgrade Color"] = "Couleur d'amélioration personnalisée", -- frFR
+		["Slug Rendering"] = "Rendu Slug", -- frFR
+		["Secret"] = "Secret", -- frFR
+		["Sort by"] = "Trier par", -- frFR
+		["Sort Direction"] = "Sens du tri", -- frFR
+        ["ALTERNATE_SIDE_BUTTON"] = "Bouton latéral alternatif", -- frFR
+		["PARAGON_MAX_BAR"] = "Barre de parangon max", -- frFR
+		["SHOW_TEMP_ENCHANTS"] = "Améliorations d'arme", -- frFR
+		["SHOW_HIGHWATER"] = "Alertes de niveau d’objet", -- frFR
+		["Slot"] = "Emplacement",  -- frFR
+		["Custom Priority Profiles"] = "Profils de priorité personnalisés",  -- frFR
+		["Add Priority Slot"] = "Ajouter un emplacement de priorité", -- frFR
+		["1st Priority"] = "1er", -- frFR
+		["2nd Priority"] = "2e", -- frFR
+		["3rd Priority"] = "3e", -- frFR
+		["4th Priority"] = "4e", -- frFR
 		["SHOW_MISSING_SOCKETS"] = "Afficher les châsses manquantes",  -- frFR
         ["ADDON COLORS"] = "Couleurs de l’addon", -- frFR
         ["Button Foreground Color"] = "Couleur de premier plan du bouton", -- frFR
@@ -1064,13 +1137,35 @@ elseif locale == "frFR" then
     }
 elseif locale == "esES" then
     localizedStrings = {
-		["SHOW_MISSING_SOCKETS"] = "Mostrar ranuras faltantes",  -- esMX
-        ["ADDON COLORS"] = "Colores del addon", -- esMX
-        ["Button Foreground Color"] = "Color frontal del botón", -- esMX
-        ["Highlight Color"] = "Color de resaltado", -- esMX
-        ["Border Color"] = "Color del borde", -- esMX
-        ["Use Class Color"] = "Usar color de clase", -- esMX
-		["STATS_TOGGLE"] = "Haz clic para activar o desactivar el resaltado de estadísticas del equipo", -- esMX
+		["Explorer"]             = "Expedicionario", -- esES
+		["Adventurer"]           = "Aventurero",     -- esES
+		["Veteran"]              = "Veterano",       -- esES
+		["Champion"]             = "Campeón",        -- esES
+		["Hero"]                 = "Héroe",          -- esES
+		["Myth"]                 = "Mito",           -- esES
+		["Custom Upgrade Color"] = "Color de mejora personalizado", -- esES
+		["Slug Rendering"] = "Representación Slug", -- esES
+		["Secret"] = "Oculto", -- esES
+		["Sort by"] = "Ordenar por", -- esES
+		["Sort Direction"] = "Dirección de ordenación", -- esES
+        ["ALTERNATE_SIDE_BUTTON"] = "Botón lateral alternativo", -- esES
+		["PARAGON_MAX_BAR"] = "Barra de parangón al máximo", -- esES
+		["SHOW_TEMP_ENCHANTS"] = "Mejoras de arma", -- esES
+		["SHOW_HIGHWATER"] = "Alertas de nivel de objeto", -- esES
+		["Slot"] = "Ranura",  -- esES
+		["Custom Priority Profiles"] = "Perfiles de prioridad personalizados",  -- esES
+		["Add Priority Slot"] = "Agregar ranura de prioridad", -- esES
+		["1st Priority"] = "1.º", -- esES
+		["2nd Priority"] = "2.º", -- esES
+		["3rd Priority"] = "3.º", -- esES
+		["4th Priority"] = "4.º", -- esES
+		["SHOW_MISSING_SOCKETS"] = "Mostrar ranuras faltantes",  -- esES
+        ["ADDON COLORS"] = "Colores del addon", -- esES
+        ["Button Foreground Color"] = "Color frontal del botón", -- esES
+        ["Highlight Color"] = "Color de resaltado", -- esES
+        ["Border Color"] = "Color del borde", -- esES
+        ["Use Class Color"] = "Usar color de clase", -- esES
+		["STATS_TOGGLE"] = "Haz clic para activar o desactivar el resaltado de estadísticas del equipo", -- esES
 		["RAID_BG_COLOR"] = "Color de fondo del marco de banda", -- esES
 		["Long Text Handling"] = "Manejo de texto largo", -- esES
 		["Full Text"] = "Texto completo", -- esES
@@ -1400,6 +1495,28 @@ elseif locale == "esES" then
     }
 elseif locale == "esMX" then
     localizedStrings = {
+		["Explorer"]             = "Expedicionario", -- esMX
+		["Adventurer"]           = "Aventurero",     -- esMX
+		["Veteran"]              = "Veterano",       -- esMX
+		["Champion"]             = "Campeón",        -- esMX
+		["Hero"]                 = "Héroe",          -- esMX
+		["Myth"]                 = "Mito",           -- esMX
+		["Custom Upgrade Color"] = "Color de mejora personalizado", -- esMX
+		["Slug Rendering"] = "Representación Slug", -- esMX
+		["Secret"] = "Oculto", -- esMX
+		["Sort by"] = "Ordenar por", -- esMX
+		["Sort Direction"] = "Dirección de ordenación", -- esMX
+        ["ALTERNATE_SIDE_BUTTON"] = "Botón lateral alternativo", -- esMX
+		["PARAGON_MAX_BAR"] = "Barra de parangón al máximo", -- esMX
+		["SHOW_TEMP_ENCHANTS"] = "Mejoras de arma", -- esMX
+		["SHOW_HIGHWATER"] = "Alertas de nivel de objeto", -- esES
+		["Slot"] = "Ranura",  -- esMX
+		["Custom Priority Profiles"] = "Perfiles de prioridad personalizados",  -- esMX
+		["Add Priority Slot"] = "Agregar ranura de prioridad", -- esMX
+		["1st Priority"] = "1.º", -- esMX
+		["2nd Priority"] = "2.º", -- esMX
+		["3rd Priority"] = "3.º", -- esMX
+		["4th Priority"] = "4.º", -- esMX
 		["SHOW_MISSING_SOCKETS"] = "Mostrar ranuras faltantes",  -- esMX
         ["ADDON COLORS"] = "Colores del addon", -- esMX
         ["Button Foreground Color"] = "Color frontal del botón", -- esMX
@@ -1736,6 +1853,28 @@ elseif locale == "esMX" then
     }
 elseif locale == "ruRU" then
     localizedStrings = {
+		["Explorer"]             = "Исследователь",        -- ruRU
+		["Adventurer"]           = "Искатель приключений", -- ruRU
+		["Veteran"]              = "Ветеран",              -- ruRU
+		["Champion"]             = "Защитник",             -- ruRU
+		["Hero"]                 = "Герой",                -- ruRU
+		["Myth"]                 = "Легенда",              -- ruRU
+		["Custom Upgrade Color"] = "Пользовательский цвет улучшения", -- ruRU
+		["Slug Rendering"] = "Отрисовка Slug", -- ruRU
+		["Secret"] = "Скрыто", -- ruRU
+		["Sort by"] = "Сортировать по", -- ruRU
+		["Sort Direction"] = "Направление сортировки", -- ruRU
+        ["ALTERNATE_SIDE_BUTTON"] = "Альтернативная боковая кнопка", -- ruRU
+		["PARAGON_MAX_BAR"] = "Парагон: максимальная полоса", -- ruRU
+		["SHOW_TEMP_ENCHANTS"] = "Усиления оружия", -- ruRU
+		["SHOW_HIGHWATER"] = "Предупреждения об уровне предмета", -- ruRU
+		["Slot"] = "Ячейка",  -- ruRU
+		["Custom Priority Profiles"] = "Пользовательские профили приоритетов",  -- ruRU
+		["Add Priority Slot"] = "Добавить ячейку приоритета", -- ruRU
+		["1st Priority"] = "1‑й", -- ruRU
+		["2nd Priority"] = "2‑й", -- ruRU
+		["3rd Priority"] = "3‑й", -- ruRU
+		["4th Priority"] = "4‑й", -- ruRU
 		["SHOW_MISSING_SOCKETS"] = "Показать отсутствующие гнёзда",  -- ruRU
         ["ADDON COLORS"] = "Цвета аддона", -- ruRU
         ["Button Foreground Color"] = "Цвет переднего плана кнопки", -- ruRU
@@ -2072,6 +2211,28 @@ elseif locale == "ruRU" then
     }
 elseif locale == "koKR" then
     localizedStrings = {
+		["Explorer"]             = "탐험가", -- koKR
+		["Adventurer"]           = "모험가", -- koKR
+		["Veteran"]              = "노련가", -- koKR
+		["Champion"]             = "챔피언", -- koKR
+		["Hero"]                 = "영웅",   -- koKR
+		["Myth"]                 = "신화",   -- koKR
+		["Custom Upgrade Color"] = "사용자 지정 업그레이드 색상", -- koKR
+		["Slug Rendering"] = "렌더링 슬러그", -- koKR
+		["Secret"] = "비공개", -- koKR
+		["Sort by"] = "정렬 기준", -- koKR
+		["Sort Direction"] = "정렬 방향", -- koKR
+        ["ALTERNATE_SIDE_BUTTON"] = "대체 측면 버튼", -- koKR
+		["PARAGON_MAX_BAR"] = "만렙 막대", -- koKR
+		["SHOW_TEMP_ENCHANTS"] = "무기 강화", -- koKR
+		["SHOW_HIGHWATER"] = "아이템 레벨 알림", -- koKR (very short)
+		["Slot"] = "슬롯",  -- koKR
+		["Custom Priority Profiles"] = "사용자 지정 우선순위 프로필",  -- koKR
+		["Add Priority Slot"] = "우선순위 슬롯 추가", -- koKR
+		["1st Priority"] = "1순위", -- koKR
+		["2nd Priority"] = "2순위", -- koKR
+		["3rd Priority"] = "3순위", -- koKR
+		["4th Priority"] = "4순위", -- koKR
 		["SHOW_MISSING_SOCKETS"] = "누락된 소켓 표시",  -- koKR
         ["ADDON COLORS"] = "애드온 색상", -- koKR
         ["Button Foreground Color"] = "버튼 전경색", -- koKR
@@ -2408,6 +2569,28 @@ elseif locale == "koKR" then
     }
 elseif locale == "zhCN" then
     localizedStrings = {
+		["Explorer"]             = "探索者", -- zhCN
+		["Adventurer"]           = "冒险者", -- zhCN
+		["Veteran"]              = "老兵",   -- zhCN
+		["Champion"]             = "勇士",   -- zhCN
+		["Hero"]                 = "英雄",   -- zhCN
+		["Myth"]                 = "神话",   -- zhCN
+		["Custom Upgrade Color"] = "自定义升级颜色", -- zhCN
+		["Slug Rendering"] = "渲染 Slug", -- zhCN
+		["Secret"] = "隐藏", -- zhCN
+		["Sort by"] = "排序方式", -- zhCN
+		["Sort Direction"] = "排序方向", -- zhCN
+        ["ALTERNATE_SIDE_BUTTON"] = "替代侧边按钮", -- zhCN
+		["PARAGON_MAX_BAR"] = "巅峰声望满条", -- zhCN
+		["SHOW_TEMP_ENCHANTS"] = "武器增益", -- zhCN
+		["SHOW_HIGHWATER"] = "物品等级警示", -- zhCN
+		["Slot"] = "槽位",  -- zhCN
+		["Custom Priority Profiles"] = "自定义优先级配置",  -- zhCN
+		["Add Priority Slot"] = "添加优先级槽位", -- zhCN
+		["1st Priority"] = "第1", -- zhCN
+		["2nd Priority"] = "第2", -- zhCN
+		["3rd Priority"] = "第3", -- zhCN
+		["4th Priority"] = "第4", -- zhCN
 		["SHOW_MISSING_SOCKETS"] = "显示缺失的插槽",  -- zhCN
         ["ADDON COLORS"] = "插件颜色", -- zhCN
         ["Button Foreground Color"] = "按钮前景色", -- zhCN
@@ -2744,6 +2927,28 @@ elseif locale == "zhCN" then
     }
 elseif locale == "zhTW" then
     localizedStrings = {
+		["Explorer"]             = "探險者", -- zhTW
+		["Adventurer"]           = "冒險者", -- zhTW
+		["Veteran"]              = "精兵",   -- zhTW
+		["Champion"]             = "勇士",   -- zhTW
+		["Hero"]                 = "英雄",   -- zhTW
+		["Myth"]                 = "神話",   -- zhTW
+		["Custom Upgrade Color"] = "自訂升級顏色", -- zhTW
+		["Slug Rendering"] = "渲染 Slug", -- zhTW
+		["Secret"] = "隱藏", -- zhTW
+		["Sort by"] = "排序方式", -- zhTW
+		["Sort Direction"] = "排序方向", -- zhTW
+        ["ALTERNATE_SIDE_BUTTON"] = "替代側邊按鈕", -- zhTW
+		["PARAGON_MAX_BAR"] = "巔峰聲望滿條", -- zhTW
+		["SHOW_TEMP_ENCHANTS"] = "武器增益", -- zhTW
+		["SHOW_HIGHWATER"] = "物品等級警示", -- zhTW
+		["Slot"] = "欄位",  -- zhTW
+		["Custom Priority Profiles"] = "自訂優先順序設定檔",  -- zhTW
+		["Add Priority Slot"] = "新增優先順序欄位", -- zhTW
+		["1st Priority"] = "第1", -- zhTW
+		["2nd Priority"] = "第2", -- zhTW
+		["3rd Priority"] = "第3", -- zhTW
+		["4th Priority"] = "第4", -- zhTW
 		["SHOW_MISSING_SOCKETS"] = "顯示缺少的插槽",  -- zhTW
         ["ADDON COLORS"] = "插件顏色", -- zhTW
         ["Button Foreground Color"] = "按鈕前景色", -- zhTW
@@ -3079,6 +3284,28 @@ elseif locale == "zhTW" then
     }
 elseif locale == "ptBR" then
     localizedStrings = {
+		["Explorer"]             = "Explorador",   -- ptBR
+		["Adventurer"]           = "Aventureiro",  -- ptBR
+		["Veteran"]              = "Veterano",     -- ptBR
+		["Champion"]             = "Campeão",      -- ptBR
+		["Hero"]                 = "Herói",        -- ptBR
+		["Myth"]                 = "Mito",         -- ptBR
+		["Custom Upgrade Color"] = "Cor de melhoria personalizada", -- ptBR
+		["Slug Rendering"] = "Renderização Slug", -- ptBR
+		["Secret"] = "Oculto", -- ptBR
+		["Sort by"] = "Classificar por", -- ptBR
+		["Sort Direction"] = "Direção da classificação", -- ptBR
+        ["ALTERNATE_SIDE_BUTTON"] = "Botão lateral alternativo", -- ptBR
+		["PARAGON_MAX_BAR"] = "Barra de Paragon no máximo", -- ptBR
+		["SHOW_TEMP_ENCHANTS"] = "Aprimoramentos de Arma", -- ptBR
+		["SHOW_HIGHWATER"] = "Alertas de nível de item", -- ptBR
+		["Slot"] = "Espaço",  -- ptBR
+		["Custom Priority Profiles"] = "Perfis de prioridade personalizados",  -- ptBR
+		["Add Priority Slot"] = "Adicionar espaço de prioridade", -- ptBR
+		["1st Priority"] = "1º", -- ptBR
+		["2nd Priority"] = "2º", -- ptBR
+		["3rd Priority"] = "3º", -- ptBR
+		["4th Priority"] = "4º", -- ptBR
 		["SHOW_MISSING_SOCKETS"] = "Mostrar soquetes ausentes",  -- ptBR
         ["ADDON COLORS"] = "Cores do addon", -- ptBR
         ["Button Foreground Color"] = "Cor frontal do botão", -- ptBR
@@ -3415,6 +3642,27 @@ elseif locale == "ptBR" then
     }
 elseif locale == "itIT" then
     localizedStrings = {
+		["Explorer"]             = "Esploratore",  -- itIT
+		["Adventurer"]           = "Avventuriero", -- itIT
+		["Veteran"]              = "Veterano",     -- itIT
+		["Champion"]             = "Campione",     -- itIT
+		["Hero"]                 = "Eroe",         -- itIT
+		["Myth"]                 = "Mito",         -- itIT
+		["Custom Upgrade Color"] = "Colore di potenziamento personalizzato", -- itIT		["Slug Rendering"] = "Rendering Slug", -- itIT
+		["Secret"] = "Nascosto", -- itIT
+		["Sort by"] = "Ordina per", -- itIT
+		["Sort Direction"] = "Direzione di ordinamento", -- itIT
+        ["ALTERNATE_SIDE_BUTTON"] = "Pulsante laterale alternativo", -- itIT
+		["PARAGON_MAX_BAR"] = "Barra Paragon al massimo", -- itIT
+		["SHOW_TEMP_ENCHANTS"] = "Potenziamenti arma", -- itIT
+		["SHOW_HIGHWATER"] = "Avvisi livello oggetto", -- itIT
+		["Slot"] = "Slot",  -- itIT
+		["Custom Priority Profiles"] = "Profili di priorità personalizzati",  -- itIT
+		["Add Priority Slot"] = "Aggiungi slot priorità", -- itIT
+		["1st Priority"] = "1º", -- itIT
+		["2nd Priority"] = "2º", -- itIT
+		["3rd Priority"] = "3º", -- itIT
+		["4th Priority"] = "4º", -- itIT
 		["SHOW_MISSING_SOCKETS"] = "Mostrare le gemme mancanti",  -- itIT
         ["ADDON COLORS"] = "Colori dell’addon", -- itIT
         ["Button Foreground Color"] = "Colore in primo piano del pulsante", -- itIT

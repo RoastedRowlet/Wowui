@@ -1577,7 +1577,6 @@ function module:Initialize()
     CharacterFrameBg:SetPoint("BOTTOMRIGHT", CharacterFrame, "BOTTOMRIGHT", Bgoffset+65, 0); --279  .449
    
     CharacterFrame.TopTileStreaks:Hide()
-    --ReputationFrame.ReputationDetailFrame:SetFrameStrata("HIGH")
     
     local charbg = _G["CharacterFrameBgbg"] or CreateFrame("Frame", "CharacterFrameBgbg", CharacterFrame)
     local charbgtex = _G["CharacterFrameBgbgtex"] or charbg:CreateTexture("CharacterFrameBgbgtex", "BACKGROUND", nil, 1)    
@@ -1594,8 +1593,6 @@ function module:Initialize()
     charbgtex:SetTexture("Interface\\Masks\\SquareMask.BLP")
     charbgtex:SetVertexColor(bgr,bgg,bgb,bgalpha);
 
-    --CharacterFrameCloseButton:SetNormalTexture("Interface\\AddOns\\ChonkyCharacterSheet\\Media\\Textures\\close.png")
-    --CharacterFrameCloseButton:SetHighlightTexture("Interface\\AddOns\\ChonkyCharacterSheet\\Media\\Textures\\close-h.png")
     CCS:SkinBlizzardButton(CharacterFrameCloseButton, "x", 26)
     CharacterFrameCloseButton:ClearAllPoints();
     CharacterFrameCloseButton:SetPoint("TOPRIGHT", CharacterFrameBg, "TOPRIGHT", -10, -10)
@@ -1606,8 +1603,6 @@ function module:Initialize()
     CCSsetbtn:SetSize(32, 32)
     CCSsetbtn:SetPoint("TOPRIGHT", CharacterFrameCloseButton, "TOPLEFT", -5, 0)
     CCSsetbtn:SetScale(.5)
-    --CCSsetbtn:SetNormalTexture("Interface\\AddOns\\ChonkyCharacterSheet\\Media\\Textures\\settings.png")
-    --CCSsetbtn:SetHighlightTexture("Interface\\AddOns\\ChonkyCharacterSheet\\Media\\Textures\\settings-h.png")
     CCS:ApplyIconStyle(CCSsetbtn, "gear", 32)    
     CCSsetbtn:Show()
     local optionsFrame = _G["CCS_Options"]

@@ -1,4 +1,4 @@
-## Interface: 120001
+## Interface: 120005
 ## Title: Silvermoon Lap Counter
 ## Notes: Counts laps around Silvermoon City (Midnight) using 4 checkpoints
 ## Author: Silvermoon Runner

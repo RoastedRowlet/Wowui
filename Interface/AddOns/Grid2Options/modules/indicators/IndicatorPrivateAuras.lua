@@ -1,8 +1,8 @@
-if not (C_UnitAuras and C_UnitAuras.AddPrivateAuraAnchor) then return end
-
 local Grid2Options = Grid2Options
 local L = Grid2Options.L
 local indexValues = { 1, 2, 3, 4 }
+
+-- private auras icons
 
 Grid2Options:RegisterIndicatorOptions("privateauras", true, function(self, indicator)
 	local options, filter = {}, {}
@@ -14,17 +14,22 @@ Grid2Options:RegisterIndicatorOptions("privateauras", true, function(self, indic
 end)
 
 function Grid2Options:MakeIndicatorPrivateAurasCustomOptions( indicator, options )
+	local function GetIndex1()
+		return indicator.dbx.auraIndex or 1
+	end
+	local function GetIndex2()
+		return (indicator.dbx.auraIndex or 1) + (indicator.dbx.maxIcons or 4) - 1
+	end
 	options.auraIndex1 = {
 		type = "select",
 		order = 1.98,
 		name = L["First Aura"],
 		desc = L["Select the index of the first private aura to display."],
-		get = function () return indicator.dbx.auraIndex or 1 end,
+		get = GetIndex1,
 		set = function (_, v)
+			local index2 = GetIndex2()
 			indicator.dbx.auraIndex = v
-			if v>(indicator.dbx.maxIcons or 2) then
-				indicator.dbx.maxIcons = v
-			end
+			indicator.dbx.maxIcons = math.max(1, index2-v+1)
 			self:RefreshIndicator(indicator, "Layout")
 		end,
 		values = indexValues,
@@ -34,10 +39,11 @@ function Grid2Options:MakeIndicatorPrivateAurasCustomOptions( indicator, options
 		order = 1.99,
 		name = L["Last Aura"],
 		desc = L["Select the index of the last private aura to display."],
-		get = function () return indicator.dbx.maxIcons or 2 end,
+		get = GetIndex2,
 		set = function (_, v)
-			if v>=(indicator.dbx.auraIndex or 1) then
-				indicator.dbx.maxIcons = v
+			local index1 = GetIndex1()
+			if v>=index1 then
+				indicator.dbx.maxIcons = v - index1 + 1
 				self:RefreshIndicator(indicator, "Layout")
 			end
 		end,
@@ -237,4 +243,86 @@ function Grid2Options:MakeIndicatorPrivateAurasCustomOptions( indicator, options
 	}
 end
 
+-- private auras overlay
 
+local ORIENT_VALUES = { [0] = L["Top to Bottom"], [1] = L["Bottom to Top"], [2] = L["Left to Right"] }
+
+function Grid2Options:MakeIndicatorPrivateAurasDispellsCustomOptions( indicator, options )
+	self:MakeHeaderOptions( options, "Appearance"  )
+	options.opacity = {
+		type = "range",
+		order = 40,
+		name = L["Opacity"],
+		desc = L["Set the dispel overlay opacity."],
+		softMin = 0.5,
+		min = 0,
+		max = 1,
+		step = 0.01,
+		bigStep = 0.05,
+		get = function () return indicator.dbx.opacity or 1 end,
+		set = function (_, v)
+			indicator.dbx.opacity = v
+			self:RefreshIndicator(indicator, "Layout")
+		end,
+	}
+	options.sizeAdjust = {
+		type = "range",
+		order = 45,
+		width = "normal",
+		name = L["Size Adjust"],
+		desc = L["Adjust the default size of the dispel overlay rectangle."],
+		softMin = -10,
+		softMax = 10,
+		step = 1,
+		get = function () return indicator.dbx.sizeAdjust or 0 end,
+		set = function (_, v)
+			indicator.dbx.sizeAdjust = (v~=0) and v or nil
+			self:RefreshIndicator(indicator, "Layout")
+		end,
+	}
+	options.orientation = {
+		type = 'select',
+		order = 50,
+		name = L["Orientation"],
+		desc = L["Select the dispel overlay gradient orientation."],
+		get = function() return indicator.dbx.orientation or 0 end,
+		set = function(_, v)
+			indicator.dbx.orientation = (v~=0) and v or nil
+			self:RefreshIndicator(indicator, "Layout")
+		end,
+		values = ORIENT_VALUES,
+	}
+	self:MakeHeaderOptions( options, "Display"  )
+	options.displayAllDispells = {
+		type = "toggle",
+		order = 100,
+		width = "full",
+		name = L["Show for all typed debuffs"],
+		desc = L["Show the indicator for all dispellable debuffs even if i cannot dispel them."],
+		get = function () return indicator.dbx.displayAllDispells end,
+		set = function (_, v)
+			indicator.dbx.displayAllDispells = v or nil
+			self:RefreshIndicator(indicator, "Layout")
+		end,
+	}
+	options.hideNormalDispells = {
+		type = "toggle",
+		order = 110,
+		width = "full",
+		name = L["Hide for normal dispellable debuffs"],
+		desc = L["Hide this indicator if non-private debuffs that i can dispel are up on the unit frame."],
+		get = function () return indicator.dbx.hideNormalDispells end,
+		set = function (_, v)
+			indicator.dbx.hideNormalDispells = v or nil
+			self:RefreshIndicator(indicator, "Layout")
+		end,
+	}
+end
+
+Grid2Options:RegisterIndicatorOptions("privateaurasdispel", true, function(self, indicator)
+	local options, filter = {}, {}
+	self:MakeIndicatorTypeLevelOptions(indicator,options)
+	self:MakeIndicatorPrivateAurasDispellsCustomOptions(indicator, options)
+	self:MakeIndicatorLoadOptions(indicator, filter)
+	self:AddIndicatorOptions(indicator, nil, options, nil, filter)
+end)

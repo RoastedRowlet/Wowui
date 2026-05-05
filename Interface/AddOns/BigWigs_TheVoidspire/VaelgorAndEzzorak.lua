@@ -25,7 +25,7 @@ mod:SetPrivateAuraSounds({
 	{1245175, sound = "none"}, -- Voidbolt
 	-- {1280355, sound = "none"}, -- Rakfang
 	1265152, -- Impale
-	{1248865, 1249595, sound = "info"}, -- Radiant Barrier
+	{1249595, sound = "none"}, -- Radiant Barrier
 	1270497, -- Shadowmark
 })
 mod:UseCustomTimers(true)
@@ -229,6 +229,7 @@ function mod:TimersMythic(_, eventInfo)
 				elseif durationRounded == 25 then -- Dread Breath or Rakfang
 					countForDuration[durationRounded] = (countForDuration[durationRounded] or 0) + 1
 					if countForDuration[durationRounded] == 1 then
+						eventInfo.duration = eventInfo.duration + 6.5 -- extend this, always delayed
 						barInfo = self:DreadBreath(eventInfo)
 					elseif countForDuration[durationRounded] == 2 then
 						barInfo = self:Rakfang(eventInfo)
@@ -259,24 +260,41 @@ function mod:TimersMythic(_, eventInfo)
 				end
 			end
 		else
-			eventInfo.timestamp = GetTime()
-			table.insert(storedTimelineEvents, eventInfo)
-			if scheduleBackups then
-				self:CancelTimer(scheduleBackups)
-				scheduleBackups = nil
-			end
-			scheduleBackups = self:ScheduleTimer(function ()
-				for _, event in next, storedTimelineEvents do
-					if self:ShouldShowBars() and not self:IsWiping() then
-						self:StartBackupBar(event, true)
-					end
+			-- Dread breath does not work well with the stored timeline events
+			-- it has unique enough timers to capture it always
+			if durationRounded == 65 or durationRounded == 57 then -- Dread Breath
+				if self:IsBeforeRadiantBarrier(eventInfo.duration, 5) then -- Breath buffer
+					barInfo = self:DreadBreath(eventInfo)
+				else -- not happening
+					return
 				end
-				table.wipe(storedTimelineEvents)
-			end, 0.5)
-			return
+			-- Vaelwing also gets lost, so we re-capture that where we can
+			elseif durationRounded == 17 or durationRounded == 24 then -- Vaelwing
+				if self:IsBeforeRadiantBarrier(eventInfo.duration) then -- Breath buffer
+					barInfo = self:Vaelwing(eventInfo)
+				else -- not happening
+					return
+				end
+			else
+				eventInfo.timestamp = GetTime()
+				table.insert(storedTimelineEvents, eventInfo)
+				if scheduleBackups then
+					self:CancelTimer(scheduleBackups)
+					scheduleBackups = nil
+				end
+				scheduleBackups = self:ScheduleTimer(function ()
+					for _, event in next, storedTimelineEvents do
+						if self:ShouldShowBars() and not self:IsWiping() then
+							self:StartBackupBar(event, true)
+						end
+					end
+					table.wipe(storedTimelineEvents)
+				end, 0.5)
+				return
+			end
 		end
 	else -- Intermissions
-		if durationRounded == 8 then -- Midnight Flames,should be the last timer starting in Mythic
+		if durationRounded == 8 then -- Midnight Flames
 			barInfo = self:MidnightFlames(eventInfo)
 			-- this bar is the last one started so we can start all our own now.
 			for _, event in next, storedTimelineEvents do
@@ -553,7 +571,7 @@ function mod:TimerOther(_, eventInfo)
 					end
 				end
 				table.wipe(storedTimelineEvents)
-			end, 1.5) -- Long capture to grab delayed cancels. Still happens sometimes.
+			end, 3) -- breaths can take a while to trigger.
 			return
 		end
 	else -- Intermissions
@@ -608,7 +626,6 @@ function mod:ENCOUNTER_TIMELINE_EVENT_STATE_CHANGED(_, eventID)
 		elseif newState == 3 then -- Enum.EncounterTimelineEventState.Canceled
 			self:SendMessage("BigWigs_StopBar", nil, nil, eventID)
 		elseif newState == 2 then -- Enum.EncounterTimelineEventState.Finished
-			local info = C_EncounterTimeline.GetEventInfo(eventID)
 			self:SendMessage("BigWigs_StopBar", nil, nil, eventID)
 		end
 	end
@@ -690,7 +707,7 @@ function mod:DreadBreath(eventInfo)
 		customBuffer = 5,
 		msg = barText,
 		onFinished = function()
-			self:TargetMessageFromBlizzMessage(1, 1262289, "orange", barText)
+			self:TargetMessageFromBlizzMessage(1, 1244221, "orange", barText)
 			-- PA Sounds
 		end,
 		this = self.DreadBreath
