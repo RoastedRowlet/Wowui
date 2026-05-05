@@ -1,7 +1,7 @@
 
 BugGrabberDB = {
-["session"] = 150,
 ["lastSanitation"] = 3,
+["session"] = 155,
 ["errors"] = {
 {
 ["message"] = "...s/AdvancedFocusCastBar/AdvancedFocusCastBarMixin.lua:1861: bad argument #1 to 'SetAlpha' (Usage: self:SetAlpha(alpha))",
@@ -101,8 +101,8 @@ BugGrabberDB = {
 },
 {
 ["message"] = "LUA_WARNING: Couldn't open Interface/AddOns/WeakAuras/Bindings.xml",
-["time"] = 1777140638,
 ["session"] = 52,
+["time"] = 1777140638,
 ["counter"] = 1,
 },
 {
@@ -275,20 +275,20 @@ BugGrabberDB = {
 },
 {
 ["message"] = "LUA_WARNING: Interface/AddOns/!BugGrabber/BugGrabber.lua:-1: insecure scripts exceeded execution limit for addon !BugGrabber",
-["session"] = 115,
 ["time"] = 1777601702,
+["session"] = 115,
 ["counter"] = 10,
 },
 {
 ["message"] = "LUA_WARNING: ...ce/AddOns/Blizzard_CooldownViewer/CooldownViewer.lua:704: bad argument #1 to 'EnableSpellRangeCheck' (Usage: C_Spell.EnableSpellRangeCheck(spellIdentifier, enable))\n|cffffd200Stack:|r\n[C]: in function 'secureexecuterange'\n[Interface/AddOns/Blizzard_EditMode/Shared/EditModeManager.lua]:97: in function 'HideSystemSelections'\n[Interface/AddOns/Blizzard_EditMode/Shared/EditModeManager.lua]:104: in function <.../AddOns/Blizzard_EditMode/Shared/EditModeManager.lua:100>\n[C]: ?\n[C]: ?\n[C]: ?\n[C]: in function 'ExitEditMode'\n[Interface/AddOns/Blizzard_EditMode/Shared/EditModeManager.lua]:126: in function <.../AddOns/Blizzard_EditMode/Shared/EditModeManager.lua:124>\n[C]: ?\n[C]: ?\n[C]: ?\n[C]: ?\n[C]: in function 'Hide'\n[Interface/AddOns/Blizzard_UIParentPanelManager/Shared/UIParentPanelManager.lua]:863: in function <...UIParentPanelManager/Shared/UIParentPanelManager.lua:853>\n[C]: in function 'HideUIPanel'\n[Interface/AddOns/Blizzard_EditMode/Shared/EditModeManager.lua]:42: in function 'onCloseCallback'\n[Interface/AddOns/Blizzard_SharedXML/Mainline/SharedUIPanelTemplates.lua]:143: in function <...izzard_SharedXML/Mainline/SharedUIPanelTemplates.lua:138>\n[C]: in function 'Click'\n[Interface/AddOns/Blizzard_UIParent/Mainline/UIParent.lua]:2351: in function <...rface/AddOns/Blizzard_UIParent/Mainline/UIParent.lua:2316>\n[C]: ?\n[C]: ?\n[C]: in function 'ToggleGameMenu'\n[TOGGLEGAMEMENU]:1: in function <[string \"TOGGLEGAMEMENU\"]:1>\n",
-["session"] = 115,
 ["time"] = 1777602017,
+["session"] = 115,
 ["counter"] = 1,
 },
 {
 ["message"] = "LUA_WARNING: ...ce/AddOns/Blizzard_CooldownViewer/CooldownViewer.lua:877: attempted to index a table that cannot be accessed while tainted (execution tainted by 'TalentLoadoutsEx')\n|cffffd200Stack:|r\n[C]: in function 'secureexecuterange'\n[Interface/AddOns/Blizzard_EditMode/Shared/EditModeManager.lua]:97: in function 'HideSystemSelections'\n[Interface/AddOns/Blizzard_EditMode/Shared/EditModeManager.lua]:104: in function <.../AddOns/Blizzard_EditMode/Shared/EditModeManager.lua:100>\n[C]: ?\n[C]: ?\n[C]: ?\n[C]: in function 'ExitEditMode'\n[Interface/AddOns/Blizzard_EditMode/Shared/EditModeManager.lua]:126: in function <.../AddOns/Blizzard_EditMode/Shared/EditModeManager.lua:124>\n[C]: ?\n[C]: ?\n[C]: ?\n[C]: ?\n[C]: in function 'Hide'\n[Interface/AddOns/Blizzard_UIParentPanelManager/Shared/UIParentPanelManager.lua]:863: in function <...UIParentPanelManager/Shared/UIParentPanelManager.lua:853>\n[C]: in function 'HideUIPanel'\n[Interface/AddOns/Blizzard_EditMode/Shared/EditModeManager.lua]:42: in function 'onCloseCallback'\n[Interface/AddOns/Blizzard_SharedXML/Mainline/SharedUIPanelTemplates.lua]:143: in function <...izzard_SharedXML/Mainline/SharedUIPanelTemplates.lua:138>\n[C]: in function 'Click'\n[Interface/AddOns/Blizzard_UIParent/Mainline/UIParent.lua]:2351: in function <...rface/AddOns/Blizzard_UIParent/Mainline/UIParent.lua:2316>\n[C]: ?\n[C]: ?\n[C]: in function 'ToggleGameMenu'\n[TOGGLEGAMEMENU]:1: in function <[string \"TOGGLEGAMEMENU\"]:1>\n",
-["session"] = 115,
 ["time"] = 1777602017,
+["session"] = 115,
 ["counter"] = 1,
 },
 {
@@ -349,11 +349,11 @@ BugGrabberDB = {
 },
 {
 ["message"] = "[ADDON_ACTION_BLOCKED] AddOn 'EllesmereUIBlizzardSkin' tried to call the protected function 'InspectFrame:SetFrameStrata()'.",
-["time"] = 1777932009,
+["time"] = 1777949649,
 ["locals"] = "self=<table>\nevent=\"ADDON_ACTION_BLOCKED\"\naddonName=\"EllesmereUIBlizzardSkin\"\naddonFunc=\"InspectFrame:SetFrameStrata()\"\nname=\"EllesmereUIBlizzardSkin\"\nbadAddons=<table>{\n EllesmereUIBlizzardSkin=true\n}\nL=<table>{\n NO_DISPLAY_2=\"|cffffff00The standard display is called BugSack, and can probably be found on the same site where you found !BugGrabber.|r\"\n ERROR_DETECTED=\"%s |cffffff00captured, click the link for more information.|r\"\n BUGGRABBER_STOPPED=\"|cffffff00There are too many errors in your UI. As a result, your game experience may be degraded. Disable or update the failing addons if you don't want to see this message again.|r\"\n USAGE=\"|cffffff00Usage: /buggrabber <1-%d>.|r\"\n STOP_NAG=\"|cffffff00!BugGrabber will not nag about missing a display addon again until next patch.|r\"\n NO_DISPLAY_STOP=\"|cffffff00If you don't want to be reminded about this again, run /stopnag.|r\"\n NO_DISPLAY_1=\"|cffffff00You seem to be running !BugGrabber with no display addon to go along with it. Although a slash command is provided for accessing error reports, a display can help you manage these errors in a more convenient way.|r\"\n ERROR_UNABLE=\"|cffffff00!BugGrabber is unable to retrieve errors from other players by itself. Please install BugSack or a similar display addon that might give you this functionality.|r\"\n ADDON_CALL_PROTECTED=\"[%s] AddOn '%s' tried to call the protected function '%s'.\"\n}\n",
 ["stack"] = "[Interface/AddOns/!BugGrabber/BugGrabber.lua]:540: in function '?'\n[Interface/AddOns/!BugGrabber/BugGrabber.lua]:524: in function <Interface/AddOns/!BugGrabber/BugGrabber.lua:524>\n[C]: in function 'SetFrameStrata'\n[Interface/AddOns/EllesmereUIBlizzardSkin/EllesmereUIBlizzardSkin_InspectSheet.lua]:914: in function <...lizzardSkin/EllesmereUIBlizzardSkin_InspectSheet.lua:297>\n[Interface/AddOns/EllesmereUIBlizzardSkin/EllesmereUIBlizzardSkin_InspectSheet.lua]:944: in function <...lizzardSkin/EllesmereUIBlizzardSkin_InspectSheet.lua:938>\n[Interface/AddOns/EllesmereUIBlizzardSkin/EllesmereUIBlizzardSkin_InspectSheet.lua]:1072: in function <...lizzardSkin/EllesmereUIBlizzardSkin_InspectSheet.lua:1070>\n",
-["session"] = 143,
-["counter"] = 7,
+["session"] = 155,
+["counter"] = 8,
 },
 },
 }

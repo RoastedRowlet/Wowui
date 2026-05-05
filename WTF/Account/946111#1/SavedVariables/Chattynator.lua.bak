@@ -222,20 +222,20 @@ CHATTYNATOR_CONFIG = {
 ["g"] = 0.7529412508010864,
 ["b"] = 0.7529412508010864,
 },
-["BG_SYSTEM_NEUTRAL"] = {
+["CHANNEL_Trade"] = {
 ["r"] = 1,
-["g"] = 0.4705882668495178,
-["b"] = 0.03921568766236305,
+["g"] = 0.7529412508010864,
+["b"] = 0.7529412508010864,
 },
 ["RAID"] = {
 ["r"] = 1,
 ["g"] = 0.4980392456054688,
 ["b"] = 0,
 },
-["CHANNEL_Trade"] = {
+["BG_SYSTEM_NEUTRAL"] = {
 ["r"] = 1,
-["g"] = 0.7529412508010864,
-["b"] = 0.7529412508010864,
+["g"] = 0.4705882668495178,
+["b"] = 0.03921568766236305,
 },
 ["FILTERED"] = {
 ["r"] = 1,
@@ -312,7 +312,7 @@ CHATTYNATOR_CONFIG = {
 ["g"] = 1,
 ["b"] = 0,
 },
-["CHANNEL_Services"] = {
+["CHANNEL18"] = {
 ["r"] = 1,
 ["g"] = 0.7529412508010864,
 ["b"] = 0.7529412508010864,
@@ -332,15 +332,15 @@ CHATTYNATOR_CONFIG = {
 ["g"] = 0.7529412508010864,
 ["b"] = 0.7529412508010864,
 },
-["ACHIEVEMENT"] = {
-["r"] = 1,
-["g"] = 1,
-["b"] = 0,
-},
 ["ARENA_POINTS"] = {
 ["r"] = 1,
 ["g"] = 1,
 ["b"] = 1,
+},
+["ACHIEVEMENT"] = {
+["r"] = 1,
+["g"] = 1,
+["b"] = 0,
 },
 ["BN_WHISPER_INFORM"] = {
 ["r"] = 0,
@@ -437,7 +437,7 @@ CHATTYNATOR_CONFIG = {
 ["g"] = 0.8666667342185974,
 ["b"] = 0,
 },
-["CHANNEL18"] = {
+["CHANNEL_Services"] = {
 ["r"] = 1,
 ["g"] = 0.7529412508010864,
 ["b"] = 0.7529412508010864,
@@ -546,10 +546,10 @@ CHATTYNATOR_CONFIG = {
 ["isTemporary"] = false,
 ["backgroundColor"] = "1a1a1a",
 ["groups"] = {
-["COMBAT_MISC_INFO"] = false,
-["OPENING"] = false,
-["VOICE_TEXT"] = false,
 ["PET_BATTLE_COMBAT_LOG"] = false,
+["COMBAT_MISC_INFO"] = false,
+["VOICE_TEXT"] = false,
+["OPENING"] = false,
 ["COMBAT_XP_GAIN"] = false,
 ["PET_INFO"] = false,
 ["TRADESKILLS"] = false,
@@ -650,7 +650,7 @@ CHATTYNATOR_CONFIG = {
 },
 }
 CHATTYNATOR_MESSAGE_LOG = {
-["cleanIndex"] = 3486,
+["cleanIndex"] = 3493,
 ["current"] = {
 {
 ["recordedBy"] = "Lonelylitten-Stormrage",
@@ -70186,8 +70186,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["player"] = {
 ["name"] = "Silvermoon Guard",
 },
-["type"] = "MONSTER_SAY",
 ["event"] = "CHAT_MSG_MONSTER_SAY",
+["type"] = "MONSTER_SAY",
 },
 ["color"] = {
 ["b"] = 0.6235294342041016,
@@ -70204,8 +70204,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["player"] = {
 ["name"] = "Camberon",
 },
-["type"] = "MONSTER_SAY",
 ["event"] = "CHAT_MSG_MONSTER_SAY",
+["type"] = "MONSTER_SAY",
 },
 ["color"] = {
 ["b"] = 0.6235294342041016,
@@ -70225,8 +70225,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Angryabsol",
 ["sex"] = 2,
 },
-["type"] = "LOOT",
 ["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
 },
 ["color"] = {
 ["b"] = 0,
@@ -70240,8 +70240,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 {
 ["recordedBy"] = "Angryabsol-Stormrage",
 ["typeInfo"] = {
-["type"] = "SKILL",
 ["event"] = "CHAT_MSG_SKILL",
+["type"] = "SKILL",
 },
 ["color"] = {
 ["b"] = 1,
@@ -70261,8 +70261,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["name"] = "Angryabsol",
 ["sex"] = 2,
 },
-["type"] = "LOOT",
 ["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
 },
 ["color"] = {
 ["b"] = 0,
@@ -70276,8 +70276,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 {
 ["recordedBy"] = "Angryabsol-Stormrage",
 ["typeInfo"] = {
-["type"] = "SKILL",
 ["event"] = "CHAT_MSG_SKILL",
+["type"] = "SKILL",
 },
 ["color"] = {
 ["b"] = 1,
@@ -70287,6 +70287,24 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["text"] = "Your skill in Midnight Alchemy has increased to 34.",
 ["id"] = "s18_3492",
 ["timestamp"] = 1777877989,
+},
+{
+["recordedBy"] = "Angryabsol-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["name"] = "Camberon",
+},
+["event"] = "CHAT_MSG_MONSTER_SAY",
+["type"] = "MONSTER_SAY",
+},
+["color"] = {
+["r"] = 1,
+["g"] = 1,
+["b"] = 0.6235294342041016,
+},
+["text"] = "Camberon says: I'm far too busy to keep up with your training, but you're welcome to use my cauldron over there.",
+["timestamp"] = 1777921351,
+["id"] = "s18_3493",
 },
 },
 ["version"] = 1,

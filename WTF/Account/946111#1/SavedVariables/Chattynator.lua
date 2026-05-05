@@ -232,9 +232,9 @@ CHATTYNATOR_CONFIG = {
 ["g"] = 0.7529412508010864,
 ["r"] = 1,
 },
-["BG_SYSTEM_NEUTRAL"] = {
-["b"] = 0.03921568766236305,
-["g"] = 0.4705882668495178,
+["CHANNEL_Trade"] = {
+["b"] = 0.7529412508010864,
+["g"] = 0.7529412508010864,
 ["r"] = 1,
 },
 ["FILTERED"] = {
@@ -307,12 +307,12 @@ CHATTYNATOR_CONFIG = {
 ["g"] = 0.501960813999176,
 ["r"] = 0.7529412508010864,
 },
-["CHANNEL18"] = {
+["CHANNEL_Services"] = {
 ["b"] = 0.7529412508010864,
 ["g"] = 0.7529412508010864,
 ["r"] = 1,
 },
-["CHANNEL_Services"] = {
+["CHANNEL18"] = {
 ["b"] = 0.7529412508010864,
 ["g"] = 0.7529412508010864,
 ["r"] = 1,
@@ -337,8 +337,8 @@ CHATTYNATOR_CONFIG = {
 ["g"] = 0.7529412508010864,
 ["r"] = 1,
 },
-["ACHIEVEMENT"] = {
-["b"] = 0,
+["ARENA_POINTS"] = {
+["b"] = 1,
 ["g"] = 1,
 ["r"] = 1,
 },
@@ -427,8 +427,8 @@ CHATTYNATOR_CONFIG = {
 ["g"] = 0.4980392456054688,
 ["r"] = 1,
 },
-["ARENA_POINTS"] = {
-["b"] = 1,
+["ACHIEVEMENT"] = {
+["b"] = 0,
 ["g"] = 1,
 ["r"] = 1,
 },
@@ -467,9 +467,9 @@ CHATTYNATOR_CONFIG = {
 ["g"] = 0.4980392456054688,
 ["r"] = 1,
 },
-["CHANNEL_Trade"] = {
-["b"] = 0.7529412508010864,
-["g"] = 0.7529412508010864,
+["BG_SYSTEM_NEUTRAL"] = {
+["b"] = 0.03921568766236305,
+["g"] = 0.4705882668495178,
 ["r"] = 1,
 },
 ["PET_BATTLE_COMBAT_LOG"] = {
@@ -544,10 +544,10 @@ CHATTYNATOR_CONFIG = {
 ["invert"] = true,
 ["name"] = "GENERAL",
 ["groups"] = {
-["OPENING"] = false,
-["PET_BATTLE_COMBAT_LOG"] = false,
-["COMBAT_XP_GAIN"] = false,
 ["COMBAT_MISC_INFO"] = false,
+["OPENING"] = false,
+["COMBAT_XP_GAIN"] = false,
+["PET_BATTLE_COMBAT_LOG"] = false,
 ["VOICE_TEXT"] = false,
 ["PET_INFO"] = false,
 ["TRADESKILLS"] = false,
@@ -650,7 +650,7 @@ CHATTYNATOR_CONFIG = {
 },
 }
 CHATTYNATOR_MESSAGE_LOG = {
-["cleanIndex"] = 3492,
+["cleanIndex"] = 3493,
 ["current"] = {
 {
 ["recordedBy"] = "Lonelylitten-Stormrage",
@@ -70294,8 +70294,8 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["player"] = {
 ["name"] = "Camberon",
 },
-["type"] = "MONSTER_SAY",
 ["event"] = "CHAT_MSG_MONSTER_SAY",
+["type"] = "MONSTER_SAY",
 },
 ["color"] = {
 ["b"] = 0.6235294342041016,
