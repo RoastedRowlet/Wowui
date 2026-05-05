@@ -14,6 +14,9 @@ RaiderIO_Config = {
 }
 RaiderIO_LastCharacter = "us-Barelynoer-area-52"
 RaiderIO_MissingCharacters = {
+["us-Atrexa-area-52"] = true,
+["us-Iburstyou-area-52"] = true,
+["us-Elenairë-area-52"] = true,
 }
 RaiderIO_MissingServers = {
 }

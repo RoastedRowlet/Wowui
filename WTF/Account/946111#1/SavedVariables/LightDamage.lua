@@ -61,7 +61,7 @@ LightDamageGlobal = {
 },
 ["alpha"] = 0.92,
 ["width"] = 404.9997863769531,
-["y"] = -0,
+["y"] = 0,
 ["relPoint"] = "BOTTOMRIGHT",
 ["height"] = 273.3329162597656,
 ["sceneSizes"] = {
@@ -103,7 +103,7 @@ LightDamageGlobal = {
 ["fontSizeBase"] = 13,
 ["damageTakenView"] = "friendly",
 ["showPercent"] = true,
-["mode"] = "split",
+["mode"] = "damage",
 ["alwaysShowSelf"] = true,
 ["fontShadow"] = false,
 ["barGap"] = 1,

@@ -61,7 +61,29 @@ EllesmereUIDB = {
 ["profileOrder"] = {
 "Default",
 },
-["showStatCategory_Crests"] = false,
+["global"] = {
+["friendGroupColors"] = {
+["_ungrouped"] = {
+["b"] = 0.615686274509804,
+["g"] = 0.8235294117647058,
+["r"] = 0.04705882352941176,
+},
+},
+["_friendNotesMigrated"] = true,
+["friendGroups"] = {
+},
+["friendPendingCollapsed"] = false,
+["friendAssignments"] = {
+},
+["friendGroupOrder"] = {
+"_ungrouped",
+"_favorites",
+},
+["friendNotes"] = {
+},
+["friendUngroupedCollapsed"] = false,
+["friendFavCollapsed"] = false,
+},
 ["statSectionsOrder"] = {
 "Attributes",
 "Secondary",
@@ -87,13 +109,13 @@ EllesmereUIDB = {
 ["cdm_remove_ghost_buff_spelldata_v1"] = true,
 ["chat_mouseover_to_always_v1"] = true,
 ["pixel_perfect_comprehensive_v11"] = true,
-["friend_notes_wipe_v1"] = true,
 ["power_color_defaults_v5"] = true,
+["friend_notes_wipe_v1"] = true,
 ["mt_bestruns_wipe_v1"] = true,
 ["break_blizz_owned_anchors_v1"] = true,
 ["v66_basics_split_disabled_state"] = true,
-["cdm_unanchor_buff_bars"] = true,
 ["cdm_consolidate_buff_bars"] = true,
+["cdm_unanchor_buff_bars"] = true,
 ["quest_tracker_blizzard_skin_rebuild_v1"] = true,
 },
 ["themedCharacterSheetScale"] = 1.15,
@@ -457,6 +479,9 @@ EllesmereUIDB = {
 },
 },
 },
+["_resetVersion"] = 9,
+["themedCharacterSheet"] = false,
+["showFPS"] = true,
 ["macroFactory"] = {
 ["EUI_Trinket2"] = {
 },
@@ -471,72 +496,8 @@ EllesmereUIDB = {
 ["EUI_Food"] = {
 },
 },
-["themedCharacterSheet"] = false,
-["showFPS"] = true,
-["_resetVersion"] = 9,
 ["unlockGridMode"] = "dimmed",
 ["multiChargeSpells"] = {
-},
-["_friendsWipeDone"] = true,
-["cdmSpecValidated"] = {
-["Zappyxatu-Stormrage"] = {
-["264"] = true,
-},
-["Angryabsol-Stormrage"] = {
-["1480"] = true,
-},
-["Barelynoer-Area 52"] = {
-["1473"] = true,
-},
-["Madmareep-Stormrage"] = {
-["258"] = true,
-},
-["Lonelylitten-Stormrage"] = {
-["105"] = true,
-["102"] = true,
-},
-},
-["unlockHeightMatch"] = {
-},
-["fonts"] = {
-["global"] = "Expressway",
-["outlineMode"] = "shadow",
-},
-["showMythicRating"] = false,
-["specProfiles"] = {
-[105] = "Default",
-},
-["ppUIScaleAuto"] = false,
-["lastNonSpecProfile"] = "Devourer",
-["_questTrackerSecColorMigrated"] = true,
-["showItemLevel"] = false,
-["phantomBounds"] = {
-},
-["_positionSnapV3Done"] = true,
-["showStatCategory_SecondaryStats"] = false,
-["activeProfile"] = "Default",
-["cdmButtonTipSeen"] = true,
-["_syncDefaultsStamped"] = true,
-["_capturedOnce_EAB"] = true,
-["unlockAnchors"] = {
-["targettarget"] = {
-["target"] = "target",
-["offsetY"] = 24.16668701171875,
-["side"] = "TOP",
-["offsetX"] = 66.24993896484375,
-},
-["targetCastbar"] = {
-["target"] = "target",
-["offsetY"] = -0.83331298828125,
-["side"] = "BOTTOM",
-["offsetX"] = 0,
-},
-["focusCastbar"] = {
-["target"] = "focus",
-["offsetY"] = 0.000152587890625,
-["side"] = "BOTTOM",
-["offsetX"] = 0,
-},
 },
 ["cdmCachedBarSizes"] = {
 ["Zappyxatu-Stormrage"] = {
@@ -573,6 +534,67 @@ EllesmereUIDB = {
 },
 },
 },
+["unlockHeightMatch"] = {
+},
+["cdmSpecValidated"] = {
+["Zappyxatu-Stormrage"] = {
+["264"] = true,
+},
+["Angryabsol-Stormrage"] = {
+["1480"] = true,
+},
+["Barelynoer-Area 52"] = {
+["1473"] = true,
+},
+["Madmareep-Stormrage"] = {
+["258"] = true,
+},
+["Lonelylitten-Stormrage"] = {
+["105"] = true,
+["102"] = true,
+},
+},
+["fonts"] = {
+["global"] = "Expressway",
+["outlineMode"] = "shadow",
+},
+["showMythicRating"] = false,
+["specProfiles"] = {
+[105] = "Default",
+},
+["ppUIScaleAuto"] = false,
+["lastNonSpecProfile"] = "Devourer",
+["_questTrackerSecColorMigrated"] = true,
+["activeProfile"] = "Default",
+["phantomBounds"] = {
+},
+["_positionSnapV3Done"] = true,
+["showStatCategory_SecondaryStats"] = false,
+["showItemLevel"] = false,
+["cdmButtonTipSeen"] = true,
+["_syncDefaultsStamped"] = true,
+["_capturedOnce_EAB"] = true,
+["unlockAnchors"] = {
+["focusCastbar"] = {
+["target"] = "focus",
+["offsetY"] = 0.000152587890625,
+["side"] = "BOTTOM",
+["offsetX"] = 0,
+},
+["targettarget"] = {
+["target"] = "target",
+["offsetY"] = 24.16668701171875,
+["side"] = "TOP",
+["offsetX"] = 66.24993896484375,
+},
+["targetCastbar"] = {
+["target"] = "target",
+["offsetY"] = -0.83331298828125,
+["side"] = "BOTTOM",
+["offsetX"] = 0,
+},
+},
+["_friendsWipeDone"] = true,
 ["sidebarUnlockTipSeen"] = true,
 ["profiles"] = {
 ["Default"] = {
@@ -729,13 +751,13 @@ EllesmereUIDB = {
 ["focusReminderB"] = 1,
 ["focusCastSoundKey"] = "none",
 ["barVisibility"] = "always",
-["showStackCount"] = false,
+["barBgEnabled"] = false,
 ["cooldownFontSize"] = 12,
 ["stackCountSize"] = 11,
-["borderG"] = 0,
+["showStackCount"] = false,
 ["desaturateOnCD"] = true,
 ["name"] = "FocusKick",
-["barBgEnabled"] = false,
+["borderG"] = 0,
 ["nameplateAnchorSide"] = "LEFT",
 ["barType"] = "cooldowns",
 ["showItemCount"] = true,
@@ -747,21 +769,21 @@ EllesmereUIDB = {
 ["iconShape"] = "none",
 ["bgR"] = 0.08,
 ["spacing"] = 1.666666666666667,
-["showCooldownText"] = true,
-["bgA"] = 0.6,
+["nameplateOffsetX"] = 0,
+["focusReminderUseAccent"] = true,
 ["borderSize"] = 1,
 ["borderR"] = 0,
 ["growDirection"] = "RIGHT",
-["iconSize"] = 28.33333333333333,
+["focusReminderEnabled"] = false,
 ["showCharges"] = true,
 ["focusReminderOffsetY"] = 0,
-["nameplateOffsetX"] = 0,
-["focusReminderUseAccent"] = true,
+["showCooldownText"] = true,
+["bgA"] = 0.6,
 ["verticalOrientation"] = false,
 ["focusReminderOffsetX"] = 0,
 ["focusReminderG"] = 1,
 ["focusReminderR"] = 1,
-["focusReminderEnabled"] = false,
+["iconSize"] = 28.33333333333333,
 ["bgB"] = 0.08,
 ["anchorOffsetX"] = 0,
 ["focusKickUseTarget"] = false,
@@ -777,13 +799,13 @@ EllesmereUIDB = {
 ["enabled"] = true,
 ["barVisibility"] = "never",
 ["numRows"] = 1,
-["growDirection"] = "RIGHT",
-["key"] = "__ghost_cd",
 ["spacing"] = 0,
+["name"] = "Hidden CDs",
+["growDirection"] = "RIGHT",
 ["isGhostBar"] = true,
 ["barType"] = "cooldowns",
 ["iconSize"] = 0.8333333333333333,
-["name"] = "Hidden CDs",
+["key"] = "__ghost_cd",
 },
 },
 },
@@ -858,6 +880,9 @@ EllesmereUIDB = {
 ["useClassColor"] = false,
 ["visHideHousing"] = false,
 ["enabled"] = true,
+["trail"] = false,
+["visOnlyInstances"] = false,
+["instanceOnly"] = false,
 ["castCircle"] = {
 ["instanceOnly"] = false,
 ["sparkEnabled"] = true,
@@ -870,9 +895,6 @@ EllesmereUIDB = {
 ["useClassColor"] = true,
 ["hex"] = "3FA7FF",
 },
-["visOnlyInstances"] = false,
-["instanceOnly"] = false,
-["trail"] = false,
 ["gcd"] = {
 ["instanceOnly"] = false,
 ["radius"] = 21,
@@ -931,7 +953,7 @@ EllesmereUIDB = {
 ["visibility"] = "always",
 ["lock"] = false,
 ["hideGameTime"] = false,
-["showCoords"] = false,
+["hideMail"] = false,
 ["clockOffsetY"] = 0,
 ["hideTrackingButton"] = true,
 ["locationOffsetX"] = 0,
@@ -939,7 +961,7 @@ EllesmereUIDB = {
 ["customBtnSize"] = 24,
 ["clockScale"] = 1.15,
 ["addonBtnSize"] = 24,
-["hideMail"] = false,
+["showCoords"] = false,
 ["zoneInside"] = false,
 ["hideRaidDifficulty"] = false,
 ["useClassColor"] = false,
@@ -983,19 +1005,6 @@ EllesmereUIDB = {
 },
 ["EllesmereUIFriends"] = {
 },
-["EllesmereUIMinimap"] = {
-["minimap"] = {
-["showClock"] = false,
-["mapSize"] = 198,
-["position"] = {
-["y"] = 479.1666666666666,
-["relPoint"] = "CENTER",
-["point"] = "CENTER",
-["x"] = 933.3333333333333,
-},
-["_capturedOnce"] = true,
-},
-},
 ["EllesmereUIResourceBars"] = {
 ["castBar"] = {
 ["fillG"] = 1,
@@ -1023,6 +1032,19 @@ EllesmereUIDB = {
 },
 ["secondary"] = {
 ["thresholdR"] = 0.04705882352941176,
+},
+},
+["EllesmereUIMinimap"] = {
+["minimap"] = {
+["showClock"] = false,
+["mapSize"] = 198,
+["position"] = {
+["y"] = 479.1666666666666,
+["relPoint"] = "CENTER",
+["point"] = "CENTER",
+["x"] = 933.3333333333333,
+},
+["_capturedOnce"] = true,
 },
 },
 ["EllesmereUIChat"] = {
@@ -1462,19 +1484,19 @@ EllesmereUIDB = {
 ["pixel_perfect_profile_v1"] = true,
 ["uf_absorb_style_dropdown_v1"] = true,
 ["cdm_remove_ghost_buff_bar_v2"] = true,
-["basics_minimap_hide_buttons_split"] = true,
-["qt_minimap_reset_stale_enabled_false"] = true,
-["cdm_mouseover_visibility_to_always"] = true,
-["erb_disable_expand_if_height_matched_v1"] = true,
-["cdm_remove_misc_bars"] = true,
-["cdm_remove_ghost_buff_bar_v1"] = true,
-["np_stacking_spacing_50_to_75_v2"] = true,
 ["cdm_pandemic_glow_color_table"] = true,
 ["quest_tracker_sec_color_default"] = true,
+["cdm_mouseover_visibility_to_always"] = true,
+["eab_round_button_sizes"] = true,
+["cdm_remove_misc_bars"] = true,
+["cdm_remove_ghost_buff_bar_v1"] = true,
+["uf_per_unit_portrait_style_v1"] = true,
+["basics_minimap_hide_buttons_split"] = true,
+["qt_minimap_reset_stale_enabled_false"] = true,
 ["np_border_ellesmere_to_simple_v3"] = true,
 ["cdm_repair_bar_keys_v1"] = true,
-["cdm_active_state_anim_none_to_hideactive"] = true,
 ["v66_basics_split_data"] = true,
+["cdm_active_state_anim_none_to_hideactive"] = true,
 ["friends_data_wipe_v1"] = true,
 ["v67_bar_texture_global"] = true,
 ["qt_minimap_ensure_enabled_v2"] = true,
@@ -1484,8 +1506,8 @@ EllesmereUIDB = {
 ["basics_minimap_round_to_circle"] = true,
 ["erb_round_size_fields"] = true,
 ["basics_minimap_strip_scale"] = true,
-["uf_per_unit_portrait_style_v1"] = true,
-["eab_round_button_sizes"] = true,
+["np_stacking_spacing_50_to_75_v2"] = true,
+["erb_disable_expand_if_height_matched_v1"] = true,
 },
 ["fonts"] = {
 ["global"] = "Expressway",
@@ -1498,29 +1520,7 @@ EllesmereUIDB = {
 ["dismissedConflicts"] = {
 ["ChonkyCharacterSheet"] = true,
 },
-["global"] = {
-["friendGroupColors"] = {
-["_ungrouped"] = {
-["b"] = 0.615686274509804,
-["g"] = 0.8235294117647058,
-["r"] = 0.04705882352941176,
-},
-},
-["_friendNotesMigrated"] = true,
-["friendGroups"] = {
-},
-["friendPendingCollapsed"] = false,
-["friendAssignments"] = {
-},
-["friendGroupOrder"] = {
-"_ungrouped",
-"_favorites",
-},
-["friendNotes"] = {
-},
-["friendUngroupedCollapsed"] = false,
-["friendFavCollapsed"] = false,
-},
+["showStatCategory_Crests"] = false,
 ["showStatCategory_Tertiary"] = false,
 ["unlockSnapEnabled"] = true,
 ["showEnchants"] = false,

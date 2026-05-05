@@ -161,32 +161,24 @@ BigWigs3DB = {
 },
 },
 ["myKeystones"] = {
-["Player-60-0C9E885E"] = {
-["playerRating"] = 2064,
-["specId"] = 577,
-["keyMap"] = 0,
-["name"] = "Angryabsol",
-["keyLevel"] = 0,
-["realm"] = "Stormrage",
-},
-["Player-3676-0DF7D3EF"] = {
-["playerRating"] = 3809,
-["specId"] = 1473,
-["keyMap"] = 402,
-["name"] = "Barelynoer",
-["keyLevel"] = 19,
-["realm"] = "Area 52",
-},
 ["Player-60-0F85ABEF"] = {
 ["playerRating"] = 3892,
 ["specId"] = 105,
-["keyMap"] = 558,
+["keyMap"] = 239,
 ["name"] = "Lonelylitten",
 ["keyLevel"] = 20,
 ["realm"] = "Stormrage",
 },
+["Player-3676-0DF7D3EF"] = {
+["playerRating"] = 3822,
+["specId"] = 1473,
+["keyMap"] = 161,
+["name"] = "Barelynoer",
+["keyLevel"] = 20,
+["realm"] = "Area 52",
 },
-["prevWeeklyReset"] = 1777388400,
+},
+["prevWeeklyReset"] = 1777993200,
 ["profiles"] = {
 ["Default"] = {
 },
@@ -218,7 +210,7 @@ BigWigsStatsDB = {
 ["fkDate"] = "2026/04/03",
 },
 ["heroic"] = {
-["kills"] = 2,
+["kills"] = 3,
 ["fkDate"] = "2026/04/15",
 ["bestDate"] = "2026/04/22",
 ["fkWipes"] = 16,

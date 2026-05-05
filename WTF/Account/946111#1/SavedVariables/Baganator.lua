@@ -238,10 +238,10 @@ BAGANATOR_CONFIG = {
 ["character_bank_view_width"] = 14,
 ["icon_text_font_size"] = 14,
 ["bag_icon_size"] = 39,
-["sort_ignore_slots_count_2"] = 0,
+["setting_anchors"] = false,
 ["disabled_skins"] = {
 },
-["bag_view_width"] = 12,
+["sort_ignore_slots_count_2"] = 0,
 ["sort_ignore_bank_slots_count"] = 0,
 ["upgrade_plugin_ignored"] = {
 },
@@ -261,8 +261,8 @@ BAGANATOR_CONFIG = {
 },
 ["bag_view_position"] = {
 "BOTTOMRIGHT",
--195.8389892578125,
-367.499755859375,
+-235.8388671875,
+116.3333053588867,
 },
 ["auto_sort_on_open"] = true,
 ["category_migration"] = 5,
@@ -287,7 +287,7 @@ BAGANATOR_CONFIG = {
 ["category_section_toggled"] = {
 },
 ["show_sort_button_2"] = true,
-["setting_anchors"] = false,
+["bag_view_width"] = 12,
 ["bag_view_type"] = "category",
 ["currency_panel_position"] = {
 "RIGHT",

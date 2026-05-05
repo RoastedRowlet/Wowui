@@ -509,17 +509,16 @@ ChonkyCharacterSheetDB = {
 0,
 1,
 },
-["fontcolor_enchant"] = {
-0.1647,
-0.9804,
-0.7098,
-1,
-},
+["customupgradecolor"] = true,
 ["fontsize_enchant_inspect"] = 10,
 ["showspectitle"] = true,
 ["mplus_sortby"] = "Name",
 ["fontname_mplus_affix"] = "Fonts\\FRIZQT__.TTF",
-["spec_4_priority_slots"] = {
+["setitemcolor"] = {
+0.8588235974311829,
+0.8431373238563538,
+0,
+1,
 },
 ["fontcolor_wc_diff_complete"] = {
 0.12,
@@ -544,14 +543,15 @@ ChonkyCharacterSheetDB = {
 ["attribute_power"] = true,
 ["collapse_defense"] = false,
 ["secondary_crit"] = true,
-["setitemcolor"] = {
-0.8588235974311829,
-0.8431373238563538,
-0,
-1,
+["spec_4_priority_slots"] = {
 },
 ["defense_dodge"] = true,
-["customupgradecolor"] = true,
+["fontcolor_enchant"] = {
+0.1647,
+0.9804,
+0.7098,
+1,
+},
 ["fontsize_mplus_key"] = 10,
 ["ccs_general_color"] = {
 0.45,

@@ -1,7 +1,7 @@
 
 BugGrabberDB = {
 ["lastSanitation"] = 3,
-["session"] = 155,
+["session"] = 161,
 ["errors"] = {
 {
 ["message"] = "...s/AdvancedFocusCastBar/AdvancedFocusCastBarMixin.lua:1861: bad argument #1 to 'SetAlpha' (Usage: self:SetAlpha(alpha))",
@@ -160,14 +160,6 @@ BugGrabberDB = {
 ["stack"] = "[Interface/AddOns/Blizzard_PrivateAurasUI/Blizzard_PrivateAurasUI.lua]:591: in function 'callback'\n[Interface/AddOns/Blizzard_SharedXMLBase/TableUtil.lua]:792: in function 'Iterate'\n[Interface/AddOns/Blizzard_PrivateAurasUI/Blizzard_PrivateAurasUI.lua]:590: in function 'CheckUpdateBuffFrames'\n[Interface/AddOns/Blizzard_PrivateAurasUI/Blizzard_PrivateAurasUI.lua]:664: in function 'Update'\n[Interface/AddOns/Blizzard_PrivateAurasUI/Blizzard_PrivateAurasUI.lua]:1252: in function <.../Blizzard_PrivateAurasUI/Blizzard_PrivateAurasUI.lua:1238>\n[tail call]: ?\n",
 ["session"] = 80,
 ["counter"] = 12,
-},
-{
-["message"] = "C stack overflow",
-["time"] = 1777419651,
-["locals"] = "frame=InspectFrame <Blizzard_InspectUI.xml:4>{\n _euiTalentsBtn=Button <EllesmereUIBlizzardSkin_InspectSheet.lua:541>\n TitleContainer=Frame <SharedUIPanelTemplates.xml:576>\n _euiMPlusScoreText=FontString <EllesmereUIBlizzardSkin_InspectSheet.lua:715>\n Tabs=<table>\n _euiModelBgFrame=true\n _euiAvgIlvlText=FontString <EllesmereUIBlizzardSkin_InspectSheet.lua:706>\n _textOverlayFrame=EUI_InspectSheet_TextOverlay <EllesmereUIBlizzardSkin_InspectSheet.lua:658>\n _ppBorderSize=1\n _ppBorderColor=<table>\n _ppBorders=Frame <EllesmereUI.lua:1187>\n loaded=true\n layoutType=\"PortraitFrameTemplate\"\n unit=\"target\"\n _euiModelBgGlow=Texture <EllesmereUIBlizzardSkin_InspectSheet.lua:337>\n Bg=InspectFrameBg <SharedUIPanelTemplates.xml:663>\n _ebsBg=Texture <EllesmereUIBlizzardSkin_InspectSheet.lua:303>\n NineSlice=Frame <SharedUIPanelTemplates.xml:550>\n TopTileStreaks=Texture <SharedUIPanelTemplates.xml:671>\n ccshooked=true\n _euiModelBg=Texture <EllesmereUIBlizzardSkin_InspectSheet.lua:331>\n CloseButton=InspectFrameCloseButton <SharedUIPanelTemplates.xml:680>\n _euiTransmogBtn=Button <EllesmereUIBlizzardSkin_InspectSheet.lua:541>\n Inset=InspectFrameInset <SharedUIPanelTemplates.xml:686>\n numTabs=3\n PortraitContainer=Frame <SharedUIPanelTemplates.xml:551>\n selectedTab=1\n}\nforce=nil\ncontextKey=nil\nFramePositionDelegate=Frame <UIParentPanelManager.lua:156>\n",
-["stack"] = "[Interface/AddOns/Blizzard_UIParentPanelManager/Shared/UIParentPanelManager.lua]:842: in function <...UIParentPanelManager/Shared/UIParentPanelManager.lua:828>\n[C]: in function 'ShowUIPanel'\n[Interface/AddOns/Blizzard_InspectUI/Blizzard_InspectUI.lua]:41: in function <...ace/AddOns/Blizzard_InspectUI/Blizzard_InspectUI.lua:36>\n",
-["session"] = 91,
-["counter"] = 2,
 },
 {
 ["message"] = "[ADDON_ACTION_FORBIDDEN] AddOn 'PremadeGroupsFilter' tried to call the protected function 'LinkAchievementInWhisper()'.",
@@ -348,12 +340,28 @@ BugGrabberDB = {
 ["counter"] = 3,
 },
 {
+["message"] = "BigWigs: BigWigs: \"Belo'ren, Child of Al'ar\" had issues reading the timeline. Show the devs a screenshot of the messages in your chat, NOT this error message.",
+["time"] = 1777999535,
+["locals"] = "self=<table>{\n name=\"BigWigs\"\n C=<table>\n}\nmsg=\"BigWigs: \"Belo'ren, Child of Al'ar\" had issues reading the timeline. Show the devs a screenshot of the messages in your chat, NOT this error message.\"\nnoPrint=true\ncore=<table>{\n name=\"BigWigs\"\n C=<table>\n}\n",
+["stack"] = "[Interface/AddOns/BigWigs_Core/Core.lua]:413: in function 'Error'\n[Interface/AddOns/BigWigs_Core/BossPrototype.lua]:802: in function 'Disable'\n[Interface/AddOns/BigWigs_Core/BossPrototype.lua]:1661: in function <Interface/AddOns/BigWigs_Core/BossPrototype.lua:1661>\n",
+["session"] = 158,
+["counter"] = 1,
+},
+{
 ["message"] = "[ADDON_ACTION_BLOCKED] AddOn 'EllesmereUIBlizzardSkin' tried to call the protected function 'InspectFrame:SetFrameStrata()'.",
-["time"] = 1777949649,
+["time"] = 1778003829,
 ["locals"] = "self=<table>\nevent=\"ADDON_ACTION_BLOCKED\"\naddonName=\"EllesmereUIBlizzardSkin\"\naddonFunc=\"InspectFrame:SetFrameStrata()\"\nname=\"EllesmereUIBlizzardSkin\"\nbadAddons=<table>{\n EllesmereUIBlizzardSkin=true\n}\nL=<table>{\n NO_DISPLAY_2=\"|cffffff00The standard display is called BugSack, and can probably be found on the same site where you found !BugGrabber.|r\"\n ERROR_DETECTED=\"%s |cffffff00captured, click the link for more information.|r\"\n BUGGRABBER_STOPPED=\"|cffffff00There are too many errors in your UI. As a result, your game experience may be degraded. Disable or update the failing addons if you don't want to see this message again.|r\"\n USAGE=\"|cffffff00Usage: /buggrabber <1-%d>.|r\"\n STOP_NAG=\"|cffffff00!BugGrabber will not nag about missing a display addon again until next patch.|r\"\n NO_DISPLAY_STOP=\"|cffffff00If you don't want to be reminded about this again, run /stopnag.|r\"\n NO_DISPLAY_1=\"|cffffff00You seem to be running !BugGrabber with no display addon to go along with it. Although a slash command is provided for accessing error reports, a display can help you manage these errors in a more convenient way.|r\"\n ERROR_UNABLE=\"|cffffff00!BugGrabber is unable to retrieve errors from other players by itself. Please install BugSack or a similar display addon that might give you this functionality.|r\"\n ADDON_CALL_PROTECTED=\"[%s] AddOn '%s' tried to call the protected function '%s'.\"\n}\n",
 ["stack"] = "[Interface/AddOns/!BugGrabber/BugGrabber.lua]:540: in function '?'\n[Interface/AddOns/!BugGrabber/BugGrabber.lua]:524: in function <Interface/AddOns/!BugGrabber/BugGrabber.lua:524>\n[C]: in function 'SetFrameStrata'\n[Interface/AddOns/EllesmereUIBlizzardSkin/EllesmereUIBlizzardSkin_InspectSheet.lua]:914: in function <...lizzardSkin/EllesmereUIBlizzardSkin_InspectSheet.lua:297>\n[Interface/AddOns/EllesmereUIBlizzardSkin/EllesmereUIBlizzardSkin_InspectSheet.lua]:944: in function <...lizzardSkin/EllesmereUIBlizzardSkin_InspectSheet.lua:938>\n[Interface/AddOns/EllesmereUIBlizzardSkin/EllesmereUIBlizzardSkin_InspectSheet.lua]:1072: in function <...lizzardSkin/EllesmereUIBlizzardSkin_InspectSheet.lua:1070>\n",
-["session"] = 155,
-["counter"] = 8,
+["session"] = 159,
+["counter"] = 9,
+},
+{
+["message"] = "C stack overflow",
+["time"] = 1778009896,
+["locals"] = "frame=InspectFrame <Blizzard_InspectUI.xml:4>{\n TitleContainer=Frame <SharedUIPanelTemplates.xml:576>\n Tabs=<table>\n loaded=true\n layoutType=\"PortraitFrameTemplate\"\n unit=\"party4\"\n Bg=InspectFrameBg <SharedUIPanelTemplates.xml:663>\n NineSlice=Frame <SharedUIPanelTemplates.xml:550>\n TopTileStreaks=Texture <SharedUIPanelTemplates.xml:671>\n ccshooked=true\n CloseButton=InspectFrameCloseButton <SharedUIPanelTemplates.xml:680>\n Inset=InspectFrameInset <SharedUIPanelTemplates.xml:686>\n numTabs=3\n PortraitContainer=Frame <SharedUIPanelTemplates.xml:551>\n selectedTab=1\n}\nforce=nil\ncontextKey=nil\nFramePositionDelegate=Frame <UIParentPanelManager.lua:156>\n",
+["stack"] = "[Interface/AddOns/Blizzard_UIParentPanelManager/Shared/UIParentPanelManager.lua]:842: in function <...UIParentPanelManager/Shared/UIParentPanelManager.lua:828>\n[C]: in function 'ShowUIPanel'\n[Interface/AddOns/Blizzard_InspectUI/Blizzard_InspectUI.lua]:41: in function <...ace/AddOns/Blizzard_InspectUI/Blizzard_InspectUI.lua:36>\n",
+["session"] = 159,
+["counter"] = 3,
 },
 },
 }

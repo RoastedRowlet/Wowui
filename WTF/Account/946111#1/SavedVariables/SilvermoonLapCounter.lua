@@ -23,13 +23,13 @@ SilvermoonLapCounterDB = {
 },
 ["Lonelylitten-Stormrage"] = {
 ["bestLapTime"] = 4.885000000002037,
-["lastLapDate"] = "2026-05-04 03:11",
+["lastLapDate"] = "2026-05-05 19:27",
 ["realm"] = "Stormrage",
-["lastLapTime"] = 7.869999999995343,
+["lastLapTime"] = 9.681000000000495,
 ["firstLapDate"] = "2026-03-03 01:21",
 ["class"] = "DRUID",
 ["bestLapDate"] = "2026-03-12 00:52",
-["lapCount"] = 530,
+["lapCount"] = 532,
 },
 ["Zappyxatu-Stormrage"] = {
 ["class"] = "SHAMAN",
@@ -43,13 +43,13 @@ SilvermoonLapCounterDB = {
 },
 ["Barelynoer-Area 52"] = {
 ["bestLapTime"] = 4.764999999999418,
-["lastLapDate"] = "2026-05-04 22:42",
+["lastLapDate"] = "2026-05-05 16:08",
 ["realm"] = "Area 52",
-["lastLapTime"] = 9.939000000013039,
+["lastLapTime"] = 155.2389999999996,
 ["firstLapDate"] = "2026-03-05 20:10",
 ["class"] = "EVOKER",
 ["bestLapDate"] = "2026-03-12 13:40",
-["lapCount"] = 142,
+["lapCount"] = 143,
 },
 ["Madmareep-Stormrage"] = {
 ["class"] = "PRIEST",
