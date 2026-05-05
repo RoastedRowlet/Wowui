@@ -1,11 +1,8 @@
 
 Blizzard_Console_SavedVars = {
 ["version"] = 3,
+["height"] = 300,
 ["messageHistory"] = {
-{
-"Time set to 5/3/2026 (Sun) 23:28",
-0,
-},
 {
 "Time set to 5/3/2026 (Sun) 23:29",
 0,
@@ -4006,10 +4003,93 @@ Blizzard_Console_SavedVars = {
 "-------------------------------------------------- Previous Session --------------------------------------------------",
 0,
 },
+{
+"-------------------------------------------------- Previous Session --------------------------------------------------",
+0,
 },
-["height"] = 300,
-["fontHeight"] = 14,
+{
+"Time set to 5/4/2026 (Mon) 19:31",
+0,
+},
+{
+"Time set to 5/4/2026 (Mon) 19:31",
+0,
+},
+{
+"World transfer pending...",
+0,
+},
+{
+"World transfer aborted (reason: 8)",
+0,
+},
+{
+"World transfer pending...",
+0,
+},
+{
+"Got new connection 3",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Got new connection 3",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"World transfer pending...",
+0,
+},
+{
+"Got new connection 3",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"World transfer pending...",
+0,
+},
+{
+"Got new connection 3",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"World transfer pending...",
+0,
+},
+{
+"Got new connection 3",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Changed difficulty successfully",
+0,
+},
+{
+"Completed challenge mode mapID 2811, level 20, time 1949325",
+0,
+},
+},
 ["isShown"] = false,
+["fontHeight"] = 14,
 ["commandHistory"] = {
 },
 }
