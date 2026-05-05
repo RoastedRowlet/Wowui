@@ -23,6 +23,20 @@ EllesmereUIDB = {
 ["showGems"] = false,
 ["showStatCategory_Tertiary"] = false,
 ["durWarnYOffset"] = 102,
+["showStatCategory_Crests"] = false,
+["unlockWidthMatch"] = {
+["focusCastbar"] = "focus",
+["targetCastbar"] = "target",
+},
+["lastSpecByChar"] = {
+["Lonelylitten - Stormrage"] = 105,
+["Angryabsol - Stormrage"] = 577,
+["Zappyxatu - Stormrage"] = 264,
+["Madmareep - Stormrage"] = 258,
+["Barelynoer - Area 52"] = 1473,
+},
+["_capturedOnce"] = true,
+["reskinQueuePopup"] = true,
 ["global"] = {
 ["friendGroupColors"] = {
 ["_ungrouped"] = {
@@ -46,20 +60,6 @@ EllesmereUIDB = {
 ["friendUngroupedCollapsed"] = false,
 ["friendFavCollapsed"] = false,
 },
-["unlockWidthMatch"] = {
-["focusCastbar"] = "focus",
-["targetCastbar"] = "target",
-},
-["lastSpecByChar"] = {
-["Lonelylitten - Stormrage"] = 105,
-["Angryabsol - Stormrage"] = 577,
-["Zappyxatu - Stormrage"] = 264,
-["Madmareep - Stormrage"] = 258,
-["Barelynoer - Area 52"] = 1473,
-},
-["_capturedOnce"] = true,
-["reskinQueuePopup"] = true,
-["showStatCategory_Crests"] = false,
 ["statSectionsOrder"] = {
 "Attributes",
 "Secondary",
@@ -438,6 +438,13 @@ EllesmereUIDB = {
 },
 },
 },
+["_friendsWipeDone"] = true,
+["themedCharacterSheet"] = false,
+["showFPS"] = true,
+["_resetVersion"] = 9,
+["unlockGridMode"] = "dimmed",
+["multiChargeSpells"] = {
+},
 ["cdmCachedBarSizes"] = {
 ["Zappyxatu-Stormrage"] = {
 ["264"] = {
@@ -470,26 +477,6 @@ EllesmereUIDB = {
 },
 },
 },
-["themedCharacterSheet"] = false,
-["showFPS"] = true,
-["macroFactory"] = {
-["EUI_Trinket2"] = {
-},
-["EUI_Health"] = {
-},
-["EUI_Potion"] = {
-},
-["EUI_Focus"] = {
-},
-["EUI_Trinket1"] = {
-},
-["EUI_Food"] = {
-},
-},
-["unlockGridMode"] = "dimmed",
-["multiChargeSpells"] = {
-},
-["_friendsWipeDone"] = true,
 ["unlockAnchors"] = {
 ["focusCastbar"] = {
 ["target"] = "focus",
@@ -510,6 +497,28 @@ EllesmereUIDB = {
 ["offsetX"] = 0,
 },
 },
+["unlockHeightMatch"] = {
+},
+["_capturedOnce_EAB"] = true,
+["showMythicRating"] = false,
+["_syncDefaultsStamped"] = true,
+["ppUIScaleAuto"] = false,
+["cdmButtonTipSeen"] = true,
+["showItemLevel"] = false,
+["activeProfile"] = "Default",
+["showStatCategory_SecondaryStats"] = false,
+["_positionSnapV3Done"] = true,
+["phantomBounds"] = {
+},
+["_questTrackerSecColorMigrated"] = true,
+["lastNonSpecProfile"] = "Devourer",
+["specProfiles"] = {
+[105] = "Default",
+},
+["fonts"] = {
+["global"] = "Expressway",
+["outlineMode"] = "shadow",
+},
 ["cdmSpecValidated"] = {
 ["Zappyxatu-Stormrage"] = {
 ["264"] = true,
@@ -528,29 +537,20 @@ EllesmereUIDB = {
 ["102"] = true,
 },
 },
-["_capturedOnce_EAB"] = true,
-["showMythicRating"] = false,
-["_syncDefaultsStamped"] = true,
-["ppUIScaleAuto"] = false,
-["cdmButtonTipSeen"] = true,
-["activeProfile"] = "Default",
-["showItemLevel"] = false,
-["showStatCategory_SecondaryStats"] = false,
-["_positionSnapV3Done"] = true,
-["phantomBounds"] = {
+["macroFactory"] = {
+["EUI_Trinket2"] = {
 },
-["_questTrackerSecColorMigrated"] = true,
-["lastNonSpecProfile"] = "Devourer",
-["specProfiles"] = {
-[105] = "Default",
+["EUI_Health"] = {
 },
-["fonts"] = {
-["global"] = "Expressway",
-["outlineMode"] = "shadow",
+["EUI_Potion"] = {
 },
-["unlockHeightMatch"] = {
+["EUI_Focus"] = {
 },
-["_resetVersion"] = 9,
+["EUI_Trinket1"] = {
+},
+["EUI_Food"] = {
+},
+},
 ["sidebarUnlockTipSeen"] = true,
 ["profiles"] = {
 ["Default"] = {
@@ -673,7 +673,7 @@ EllesmereUIDB = {
 ["barType"] = "cooldowns",
 ["desaturateOnCD"] = true,
 ["name"] = "FocusKick",
-["barBgEnabled"] = false,
+["borderG"] = 0,
 ["bgR"] = 0.08,
 ["showStackCount"] = false,
 ["showItemCount"] = true,
@@ -685,21 +685,21 @@ EllesmereUIDB = {
 ["iconShape"] = "none",
 ["nameplateAnchorSide"] = "LEFT",
 ["spacing"] = 1.666666666666667,
-["showCooldownText"] = true,
-["bgA"] = 0.6,
+["nameplateOffsetX"] = 0,
+["focusReminderUseAccent"] = true,
 ["borderSize"] = 1,
 ["borderR"] = 0,
 ["growDirection"] = "RIGHT",
-["iconSize"] = 28.33333333333333,
+["focusReminderEnabled"] = false,
 ["showCharges"] = true,
 ["focusReminderOffsetY"] = 0,
-["nameplateOffsetX"] = 0,
-["focusReminderUseAccent"] = true,
+["showCooldownText"] = true,
+["bgA"] = 0.6,
 ["verticalOrientation"] = false,
 ["focusReminderOffsetX"] = 0,
 ["focusReminderG"] = 1,
 ["focusReminderR"] = 1,
-["focusReminderEnabled"] = false,
+["iconSize"] = 28.33333333333333,
 ["bgB"] = 0.08,
 ["anchorOffsetX"] = 0,
 ["focusKickUseTarget"] = false,
@@ -707,7 +707,7 @@ EllesmereUIDB = {
 ["iconZoom"] = 0.08,
 ["bgG"] = 0.08,
 ["barBgG"] = 0,
-["borderG"] = 0,
+["barBgEnabled"] = false,
 ["nameplateOffsetY"] = 0,
 ["suppressGCD"] = true,
 },
@@ -715,13 +715,13 @@ EllesmereUIDB = {
 ["enabled"] = true,
 ["barVisibility"] = "never",
 ["numRows"] = 1,
-["spacing"] = 0,
-["key"] = "__ghost_cd",
 ["growDirection"] = "RIGHT",
+["name"] = "Hidden CDs",
+["spacing"] = 0,
 ["isGhostBar"] = true,
 ["barType"] = "cooldowns",
 ["iconSize"] = 0.8333333333333333,
-["name"] = "Hidden CDs",
+["key"] = "__ghost_cd",
 },
 },
 },
@@ -825,7 +825,6 @@ EllesmereUIDB = {
 ["useClassColor"] = false,
 ["alpha"] = 80,
 },
-["trail"] = false,
 ["castCircle"] = {
 ["instanceOnly"] = false,
 ["sparkEnabled"] = true,
@@ -838,6 +837,7 @@ EllesmereUIDB = {
 ["useClassColor"] = true,
 ["alpha"] = 80,
 },
+["trail"] = false,
 ["instanceOnly"] = false,
 ["visOnlyInstances"] = false,
 ["enabled"] = true,
@@ -882,9 +882,9 @@ EllesmereUIDB = {
 ["_capturedOnce"] = true,
 ["visHideHousing"] = false,
 ["zoneInside"] = false,
-["hideMail"] = false,
-["hideGameTime"] = false,
 ["showCoords"] = false,
+["hideGameTime"] = false,
+["hideMail"] = false,
 ["clockOffsetY"] = 0,
 ["hideTrackingButton"] = true,
 ["addonBtnSize"] = 24,
@@ -943,17 +943,33 @@ EllesmereUIDB = {
 },
 ["EllesmereUIDragonRiding"] = {
 },
-["EllesmereUIMinimap"] = {
-["minimap"] = {
-["showClock"] = false,
-["mapSize"] = 198,
-["position"] = {
-["y"] = 479.1666666666666,
+["EllesmereUIResourceBars"] = {
+["castBar"] = {
+["fillG"] = 1,
+["unlockPos"] = {
+["y"] = -260.8333333333333,
 ["relPoint"] = "CENTER",
 ["point"] = "CENTER",
-["x"] = 933.3333333333333,
+["x"] = 0,
 },
-["_capturedOnce"] = true,
+["width"] = 313.3333333333333,
+["fillB"] = 1,
+},
+["primary"] = {
+["width"] = 335,
+["unlockPos"] = {
+["y"] = -209.1666666666667,
+["relPoint"] = "CENTER",
+["point"] = "CENTER",
+["x"] = 0,
+},
+},
+["health"] = {
+["fillG"] = 1,
+["fillB"] = 1,
+},
+["secondary"] = {
+["thresholdR"] = 0.04705882352941176,
 },
 },
 ["EllesmereUIChat"] = {
@@ -1151,9 +1167,10 @@ EllesmereUIDB = {
 },
 ["EllesmereUIQuestTracker"] = {
 ["questTracker"] = {
+["recipesCollapsed"] = false,
+["secFontSize"] = 13,
 ["worldCollapsed"] = true,
 ["completedFontSize"] = 10,
-["secFontSize"] = 13,
 ["height"] = 628,
 ["pos"] = {
 ["y"] = -44.99999999999999,
@@ -1161,7 +1178,6 @@ EllesmereUIDB = {
 ["point"] = "CENTER",
 ["x"] = 885.8333333333333,
 },
-["recipesCollapsed"] = false,
 ["_capturedOnce"] = true,
 ["width"] = 260,
 },
@@ -1234,17 +1250,17 @@ EllesmereUIDB = {
 ["point"] = "CENTER",
 ["x"] = 1041.666666666667,
 },
-["QueueStatus"] = {
-["y"] = 358.3333333333333,
-["relPoint"] = "CENTER",
-["point"] = "CENTER",
-["x"] = 1009.166666666667,
-},
 ["MainBar"] = {
 ["y"] = -584.1666666666666,
 ["relPoint"] = "CENTER",
 ["point"] = "CENTER",
 ["x"] = -419.1666666666666,
+},
+["QueueStatus"] = {
+["y"] = 358.3333333333333,
+["relPoint"] = "CENTER",
+["point"] = "CENTER",
+["x"] = 1009.166666666667,
 },
 ["StanceBar"] = {
 ["y"] = -456.6666666666666,
@@ -1383,33 +1399,17 @@ EllesmereUIDB = {
 },
 },
 },
-["EllesmereUIResourceBars"] = {
-["castBar"] = {
-["fillG"] = 1,
-["unlockPos"] = {
-["y"] = -260.8333333333333,
+["EllesmereUIMinimap"] = {
+["minimap"] = {
+["showClock"] = false,
+["mapSize"] = 198,
+["position"] = {
+["y"] = 479.1666666666666,
 ["relPoint"] = "CENTER",
 ["point"] = "CENTER",
-["x"] = 0,
+["x"] = 933.3333333333333,
 },
-["width"] = 313.3333333333333,
-["fillB"] = 1,
-},
-["primary"] = {
-["width"] = 335,
-["unlockPos"] = {
-["y"] = -209.1666666666667,
-["relPoint"] = "CENTER",
-["point"] = "CENTER",
-["x"] = 0,
-},
-},
-["health"] = {
-["fillG"] = 1,
-["fillB"] = 1,
-},
-["secondary"] = {
-["thresholdR"] = 0.04705882352941176,
+["_capturedOnce"] = true,
 },
 },
 },
@@ -1424,15 +1424,15 @@ EllesmereUIDB = {
 ["pixel_perfect_profile_v1"] = true,
 ["uf_absorb_style_dropdown_v1"] = true,
 ["cdm_remove_ghost_buff_bar_v2"] = true,
-["eab_round_button_sizes"] = true,
-["uf_per_unit_portrait_style_v1"] = true,
-["cdm_mouseover_visibility_to_always"] = true,
 ["erb_disable_expand_if_height_matched_v1"] = true,
+["np_stacking_spacing_50_to_75_v2"] = true,
+["cdm_mouseover_visibility_to_always"] = true,
+["eab_round_button_sizes"] = true,
 ["basics_minimap_strip_scale"] = true,
 ["cdm_remove_ghost_buff_bar_v1"] = true,
-["np_stacking_spacing_50_to_75_v2"] = true,
-["basics_minimap_hide_buttons_split"] = true,
-["qt_minimap_reset_stale_enabled_false"] = true,
+["uf_per_unit_portrait_style_v1"] = true,
+["cdm_pandemic_glow_color_table"] = true,
+["quest_tracker_sec_color_default"] = true,
 ["np_border_ellesmere_to_simple_v3"] = true,
 ["cdm_repair_bar_keys_v1"] = true,
 ["basics_minimap_round_to_circle"] = true,
@@ -1442,12 +1442,12 @@ EllesmereUIDB = {
 ["qt_minimap_ensure_enabled_v2"] = true,
 ["cdm_active_state_per_bar_to_per_icon"] = true,
 ["np_border_v5"] = true,
-["cdm_active_state_anim_none_to_hideactive"] = true,
 ["v66_basics_split_data"] = true,
+["cdm_active_state_anim_none_to_hideactive"] = true,
 ["erb_round_size_fields"] = true,
 ["cdm_remove_misc_bars"] = true,
-["quest_tracker_sec_color_default"] = true,
-["cdm_pandemic_glow_color_table"] = true,
+["qt_minimap_reset_stale_enabled_false"] = true,
+["basics_minimap_hide_buttons_split"] = true,
 },
 },
 },
@@ -1458,13 +1458,13 @@ EllesmereUIDB = {
 ["quest_tracker_blizzard_skin_rebuild_v1"] = true,
 ["chat_mouseover_to_always_v1"] = true,
 ["pixel_perfect_comprehensive_v11"] = true,
-["cdm_consolidate_buff_bars"] = true,
 ["cdm_unanchor_buff_bars"] = true,
+["cdm_consolidate_buff_bars"] = true,
 ["mt_bestruns_wipe_v1"] = true,
 ["break_blizz_owned_anchors_v1"] = true,
 ["v66_basics_split_disabled_state"] = true,
-["friend_notes_wipe_v1"] = true,
 ["power_color_defaults_v5"] = true,
+["friend_notes_wipe_v1"] = true,
 ["cdm_remove_ghost_buff_spelldata_v1"] = true,
 },
 ["unlockTipSeen"] = true,
