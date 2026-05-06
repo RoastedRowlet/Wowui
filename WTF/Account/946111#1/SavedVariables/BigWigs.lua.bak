@@ -15,53 +15,20 @@ BigWigs3DB = {
 },
 },
 },
-["BigWigs_Bosses_Echo of Doragosa"] = {
+["BigWigs_Bosses_Saprish"] = {
 ["profiles"] = {
 ["Default"] = {
-[388822] = 3129591,
+[1263523] = 3129591,
 },
 },
 },
-["BigWigs_Bosses_Ick & Krick"] = {
-["profiles"] = {
-["Default"] = {
-[1264336] = 3129591,
-},
-},
-},
-["BigWigs_Bosses_Derelict Duo"] = {
-["profiles"] = {
-["Default"] = {
-[1219491] = 7323895,
-},
-},
-},
-["BigWigs_Bosses_Vexamus"] = {
-["profiles"] = {
-["Default"] = {
-[386173] = 3129591,
-},
-},
-},
-["MythicPlus"] = {
+["BigWigs_Plugins_BossBlock"] = {
 ["global"] = {
-["showViewerTeleportTip"] = false,
-},
-["profiles"] = {
-["Default"] = {
-["viewerPosition"] = {
-"TOPLEFT",
-"TOPLEFT",
-230,
--178,
-},
-},
-},
-},
-["BigWigs_Bosses_Zuraal"] = {
-["profiles"] = {
-["Default"] = {
-[1263399] = 3129591,
+["tableNeedsCopied"] = false,
+["watchedMovies"] = {
+[1050] = true,
+[1049] = true,
+[-2529] = true,
 },
 },
 },
@@ -80,11 +47,11 @@ BigWigs3DB = {
 ["Default"] = {
 ["player"] = {
 ["maxIcons"] = 5,
-["growthDirection"] = "RIGHT",
-["anchorPoint"] = "TOP",
 ["anchorYOffset"] = -216,
+["anchorPoint"] = "TOP",
 ["anchorRelPoint"] = "TOP",
 ["anchorXOffset"] = 426,
+["growthDirection"] = "RIGHT",
 },
 },
 },
@@ -100,6 +67,27 @@ BigWigs3DB = {
 },
 },
 },
+["BigWigs_Bosses_Echo of Doragosa"] = {
+["profiles"] = {
+["Default"] = {
+[388822] = 3129591,
+},
+},
+},
+["BigWigs_Bosses_Ick & Krick"] = {
+["profiles"] = {
+["Default"] = {
+[1264336] = 3129591,
+},
+},
+},
+["BigWigs_Plugins_Timeline"] = {
+["profiles"] = {
+["Default"] = {
+["blizzTimeline"] = true,
+},
+},
+},
 ["BigWigs_Bosses_Chimaerus the Undreamt God"] = {
 ["profiles"] = {
 ["Default"] = {
@@ -107,9 +95,25 @@ BigWigs3DB = {
 },
 },
 },
+["BigWigs_Bosses_Derelict Duo"] = {
+["profiles"] = {
+["Default"] = {
+[1219491] = 7323895,
+},
+},
+},
+["BigWigs_Bosses_Vexamus"] = {
+["profiles"] = {
+["Default"] = {
+[386173] = 3129591,
+},
+},
+},
 ["BigWigs_Plugins_Bars"] = {
 ["profiles"] = {
 ["Default"] = {
+["emphasize"] = false,
+["visibleBarLimit"] = 1,
 ["normalWidth"] = 120,
 ["expPosition"] = {
 "TOP",
@@ -117,13 +121,33 @@ BigWigs3DB = {
 386,
 -7,
 },
-["visibleBarLimit"] = 1,
-["emphasize"] = false,
 ["normalPosition"] = {
 "BOTTOMRIGHT",
 "BOTTOMRIGHT",
 0,
 168,
+},
+},
+},
+},
+["BigWigs_Bosses_Zuraal"] = {
+["profiles"] = {
+["Default"] = {
+[1263399] = 3129591,
+},
+},
+},
+["MythicPlus"] = {
+["global"] = {
+["showViewerTeleportTip"] = false,
+},
+["profiles"] = {
+["Default"] = {
+["viewerPosition"] = {
+"TOPLEFT",
+"TOPLEFT",
+230,
+-178,
 },
 },
 },
@@ -135,42 +159,18 @@ BigWigs3DB = {
 },
 },
 },
-["BigWigs_Bosses_Saprish"] = {
-["profiles"] = {
-["Default"] = {
-[1263523] = 3129591,
-},
-},
-},
-["BigWigs_Plugins_BossBlock"] = {
-["global"] = {
-["tableNeedsCopied"] = false,
-["watchedMovies"] = {
-[1050] = true,
-[1049] = true,
-[-2529] = true,
-},
-},
-},
-["BigWigs_Plugins_Timeline"] = {
-["profiles"] = {
-["Default"] = {
-["blizzTimeline"] = true,
-},
-},
-},
 },
 ["myKeystones"] = {
 ["Player-60-0F85ABEF"] = {
 ["playerRating"] = 3892,
-["specId"] = 105,
+["specId"] = 102,
 ["keyMap"] = 239,
 ["name"] = "Lonelylitten",
 ["keyLevel"] = 20,
 ["realm"] = "Stormrage",
 },
 ["Player-3676-0DF7D3EF"] = {
-["playerRating"] = 3822,
+["playerRating"] = 3836,
 ["specId"] = 1473,
 ["keyMap"] = 161,
 ["name"] = "Barelynoer",
@@ -187,14 +187,32 @@ BigWigs3DB = {
 BigWigsIconDB = {
 }
 BigWigsStatsDB = {
-[2966] = {
-[-3372] = {
-["solotier8"] = {
+[2939] = {
+[2795] = {
+["heroic"] = {
+["kills"] = 6,
+["fkDate"] = "2026/04/01",
+["bestDate"] = "2026/04/07",
+["fkWipes"] = 6,
+["best"] = 327.752000000095,
+["wipes"] = 9,
+["fkDuration"] = 495.9110000000801,
+},
+["normal"] = {
 ["kills"] = 1,
-["fkDuration"] = 208.5349999999162,
-["best"] = 208.5349999999162,
-["bestDate"] = "2026/04/11",
-["fkDate"] = "2026/04/11",
+["fkDate"] = "2026/03/25",
+["bestDate"] = "2026/03/25",
+["best"] = 313.8260000000009,
+["fkDuration"] = 313.8260000000009,
+},
+["mythic"] = {
+["kills"] = 2,
+["fkDate"] = "2026/04/22",
+["bestDate"] = "2026/04/29",
+["fkWipes"] = 18,
+["best"] = 389.2179999999935,
+["wipes"] = 32,
+["fkDuration"] = 400.1720000000059,
 },
 },
 },
@@ -230,42 +248,13 @@ BigWigsStatsDB = {
 ["fkDate"] = "2026/04/03",
 },
 ["heroic"] = {
-["kills"] = 1,
+["kills"] = 2,
 ["fkDuration"] = 396.4109999999637,
-["wipes"] = 81,
+["wipes"] = 104,
 ["fkWipes"] = 81,
 ["best"] = 396.4109999999637,
 ["bestDate"] = "2026/04/29",
 ["fkDate"] = "2026/04/29",
-},
-},
-},
-[2939] = {
-[2795] = {
-["heroic"] = {
-["kills"] = 6,
-["fkDate"] = "2026/04/01",
-["bestDate"] = "2026/04/07",
-["fkWipes"] = 6,
-["best"] = 327.752000000095,
-["wipes"] = 9,
-["fkDuration"] = 495.9110000000801,
-},
-["normal"] = {
-["kills"] = 1,
-["fkDate"] = "2026/03/25",
-["bestDate"] = "2026/03/25",
-["best"] = 313.8260000000009,
-["fkDuration"] = 313.8260000000009,
-},
-["mythic"] = {
-["kills"] = 2,
-["fkDate"] = "2026/04/22",
-["bestDate"] = "2026/04/29",
-["fkWipes"] = 18,
-["best"] = 389.2179999999935,
-["wipes"] = 32,
-["fkDuration"] = 400.1720000000059,
 },
 },
 },
@@ -441,6 +430,17 @@ BigWigsStatsDB = {
 ["best"] = 112.469000000001,
 ["wipes"] = 1,
 ["fkDuration"] = 234.7780000000494,
+},
+},
+},
+[2966] = {
+[-3372] = {
+["solotier8"] = {
+["kills"] = 1,
+["fkDuration"] = 208.5349999999162,
+["best"] = 208.5349999999162,
+["bestDate"] = "2026/04/11",
+["fkDate"] = "2026/04/11",
 },
 },
 },

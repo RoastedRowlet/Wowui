@@ -9,15 +9,6 @@ CliqueDB3 = {
 ["specswap"] = false,
 ["spec2_profileKey"] = "Angryabsol - Stormrage",
 },
-["Lonelylitten - Stormrage"] = {
-["fastooc"] = false,
-["spec1_profileKey"] = "Lonelylitten - Stormrage",
-["specswap"] = false,
-["downclick"] = false,
-["spec4_profileKey"] = "Lonelylitten - Stormrage",
-["spec2_profileKey"] = "Lonelylitten - Stormrage",
-["spec3_profileKey"] = "Lonelylitten - Stormrage",
-},
 ["Madmareep - Stormrage"] = {
 ["spec1_profileKey"] = "Madmareep - Stormrage",
 ["spec3_profileKey"] = "Madmareep - Stormrage",
@@ -25,10 +16,19 @@ CliqueDB3 = {
 ["specswap"] = false,
 },
 ["Barelynoer - Area 52"] = {
-["spec1_profileKey"] = "Barelynoer - Area 52",
 ["spec3_profileKey"] = "Barelynoer - Area 52",
+["spec1_profileKey"] = "Barelynoer - Area 52",
 ["specswap"] = false,
 ["spec2_profileKey"] = "Barelynoer - Area 52",
+},
+["Lonelylitten - Stormrage"] = {
+["spec1_profileKey"] = "Lonelylitten - Stormrage",
+["specswap"] = false,
+["downclick"] = false,
+["fastooc"] = false,
+["spec4_profileKey"] = "Lonelylitten - Stormrage",
+["spec2_profileKey"] = "Lonelylitten - Stormrage",
+["spec3_profileKey"] = "Lonelylitten - Stormrage",
 },
 },
 ["profileKeys"] = {
@@ -249,6 +249,23 @@ CliqueDB3 = {
 ["unit"] = "mouseover",
 },
 {
+["type"] = "menu",
+["key"] = "CTRL-BUTTON2",
+["sets"] = {
+["default"] = true,
+},
+},
+{
+["spell"] = "Verdant Embrace",
+["key"] = "ALT-BUTTON1",
+["type"] = "spell",
+["sets"] = {
+["default"] = true,
+},
+["icon"] = 4622471,
+["spellSubName"] = "Green",
+},
+{
 ["spell"] = "Cauterizing Flame",
 ["key"] = "ALT-BUTTON3",
 ["spellSubName"] = "Red",
@@ -269,23 +286,6 @@ CliqueDB3 = {
 ["spellSubName"] = "Red",
 },
 {
-["type"] = "menu",
-["key"] = "CTRL-BUTTON2",
-["sets"] = {
-["default"] = true,
-},
-},
-{
-["spell"] = "Verdant Embrace",
-["key"] = "ALT-BUTTON1",
-["type"] = "spell",
-["sets"] = {
-["default"] = true,
-},
-["icon"] = 4622471,
-["spellSubName"] = "Green",
-},
-{
 ["spell"] = "Expunge",
 ["key"] = "BUTTON3",
 ["spellSubName"] = "Green",
@@ -296,13 +296,14 @@ CliqueDB3 = {
 ["type"] = "spell",
 },
 {
-["type"] = "target",
-["key"] = "CTRL-BUTTON1",
+["spell"] = "Emerald Blossom",
+["key"] = "ALT-BUTTON2",
+["type"] = "spell",
 ["sets"] = {
 ["default"] = true,
 },
-["icon"] = 132331,
-["unit"] = "mouseover",
+["icon"] = 4622457,
+["spellSubName"] = "Green",
 },
 {
 ["spell"] = "Return",
@@ -315,14 +316,13 @@ CliqueDB3 = {
 ["spellSubName"] = "Bronze",
 },
 {
-["spell"] = "Emerald Blossom",
-["key"] = "ALT-BUTTON2",
-["type"] = "spell",
+["type"] = "target",
+["key"] = "CTRL-BUTTON1",
 ["sets"] = {
 ["default"] = true,
 },
-["icon"] = 4622457,
-["spellSubName"] = "Green",
+["icon"] = 132331,
+["unit"] = "mouseover",
 },
 {
 ["spell"] = "Return",

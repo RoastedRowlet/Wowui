@@ -1865,30 +1865,27 @@ function AdvancedFocusCastBarMixin:OnUpdate(elapsed)
 			return
 		end
 
-		-- this whole block doesnt make sense to run if the HideWhenUninterruptible isn't turned on.
-		if AdvancedFocusCastBarSaved.Settings.FeatureFlags[Private.Enum.FeatureFlag.HideWhenUninterruptible] then
-			self:SetAlphaFromFeatureFlag(interruptDuration, theOpacity)
-			self:DeriveAndSetNextColor(interruptDuration)
+		self:SetAlphaFromFeatureFlag(interruptDuration, theOpacity)
+		self:DeriveAndSetNextColor(interruptDuration)
 
-			if
-				self.castInformation.isChannel
-				and AdvancedFocusCastBarSaved.Settings.FeatureFlags[Private.Enum.FeatureFlag.UnfillChannels]
-			then
-				self.CastBar.Positioner:SetValue(self.castInformation.duration:GetRemainingDuration())
-			else
-				self.CastBar.Positioner:SetValue(self.castInformation.duration:GetElapsedDuration())
-			end
-
-			self.CastBar.InterruptBar:SetValue(interruptDuration:GetRemainingDuration())
-			
-			self.CastBar.InterruptBar:SetAlphaFromBoolean(
-				interruptDuration:IsZero(),
-				0,
-				C_CurveUtil.EvaluateColorValueFromBoolean(self.castInformation.notInterruptible, 0, theOpacity)
-			)
-			-- the soft hide immediately following this would override hiding the bar so return.
-			return
+		if
+			self.castInformation.isChannel
+			and AdvancedFocusCastBarSaved.Settings.FeatureFlags[Private.Enum.FeatureFlag.UnfillChannels]
+		then
+			self.CastBar.Positioner:SetValue(self.castInformation.duration:GetRemainingDuration())
+		else
+			self.CastBar.Positioner:SetValue(self.castInformation.duration:GetElapsedDuration())
 		end
+
+		self.CastBar.InterruptBar:SetValue(interruptDuration:GetRemainingDuration())
+
+		self.CastBar.InterruptBar:SetAlphaFromBoolean(
+			interruptDuration:IsZero(),
+			0,
+			C_CurveUtil.EvaluateColorValueFromBoolean(self.castInformation.notInterruptible, 0, theOpacity)
+		)
+		-- the soft hide immediately following this would override hiding the bar so return.
+		return
 	end
 
 	-- soft hides the bar if the ending event is for some reason missing.
