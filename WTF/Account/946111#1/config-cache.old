@@ -1,5 +1,5 @@
 SET cameraDistanceMaxZoomFactor "2.6"
-SET showTimestamps "%I:%M "
+SET showTimestamps "%I:%M:%S %p "
 SET softTargetInteractionTutorialTotalInteractions "2"
 SET accountNeedsTurnStrafeDialog "0"
 SET CAASayYourDebuffs "0"

@@ -35,6 +35,26 @@ function Addon:GetNodes(specID, configID, treeID)
 	return nodeIDs;
 end
 
+-- https://warcraft.wiki.gg/wiki/API_C_Traits.GetTraitCurrencyInfo
+-- Enum.TraitCurrencyFlag
+Addon.NodeType = {
+	Class = 4,
+	Spec  = 8,
+	Hero  = 0,
+};
+
+-- [nodeID] = Addon.NodeType
+Addon.NodeTypeDictionary = {};
+
+-- [specID] = nodeID
+Addon.ApexNodeIDs = {};
+
+-- [specID] = { subTreeID, subTreeID }
+Addon.SubTreeIDs = {};
+
+-- [specID] = { traitCurrencyID, traitCurrencyID }
+Addon.SubTreeTraitCurrencyIDs = {};
+
 -- [nodeID] = Order
 local nodeOrderList = {};
 function Addon:GetNodeOrder(specID, configID, treeID)
@@ -45,7 +65,29 @@ function Addon:GetNodeOrder(specID, configID, treeID)
 	local order = {};
 	for index, nodeID in ipairs(Addon:GetNodes(specID, configID, treeID)) do
 		order[nodeID] = index;
+
+		local nodeCosts = C_Traits.GetNodeCost(configID, nodeID);
+		local traitCurrencyID = nodeCosts and nodeCosts[1] and nodeCosts[1].ID;
+		Addon.NodeTypeDictionary[nodeID] = traitCurrencyID and C_Traits.GetTraitCurrencyInfo(traitCurrencyID);
+
+		local nodeInfo = C_Traits.GetNodeInfo(configID, nodeID);
+		if nodeInfo.maxRanks >= 4 then
+			Addon.ApexNodeIDs[specID] = nodeID;
+		end
 	end
+
+	local subTreeIDs = C_ClassTalents.GetHeroTalentSpecsForClassSpec();
+	Addon.SubTreeIDs[specID] = subTreeIDs;
+	local SubTreeTraitCurrencyIDs = {};
+	for _, subTreeID in ipairs(subTreeIDs) do
+		local subTreeInfo = C_Traits.GetSubTreeInfo(configID, subTreeID);
+		table.insert(SubTreeTraitCurrencyIDs, subTreeInfo.traitCurrencyID);
+		for _, nodeID in ipairs(subTreeInfo.subTreeSelectionNodeIDs) do
+			Addon.NodeTypeDictionary[nodeID] = Addon.NodeType.Hero;
+		end
+	end
+
+	Addon.SubTreeTraitCurrencyIDs[specID] = SubTreeTraitCurrencyIDs;
 
 	nodeOrderList[specID] = order;
 	return order;

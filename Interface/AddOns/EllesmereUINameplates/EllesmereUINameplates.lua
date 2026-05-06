@@ -3082,54 +3082,60 @@ local function HideBlizzardFrame(nameplate, unit)
     if not nameplate then return end
     local uf = nameplate.UnitFrame
     if not uf then return end
-    if unit and UnitCanAttack("player", unit) then
-        uf:SetAlpha(0)
-        if uf.healthBar then
-            uf.healthBar:SetParent(npOffscreenParent)
-        end
-        -- Move visual children off the UnitFrame so Blizzard's layout engine
-        -- stops recalculating bounds from them.
-        MoveToOffscreen(uf.HealthBarsContainer, unit)
-        MoveToOffscreen(uf.castBar, unit)
-        MoveToOffscreen(uf.name, unit)
-        MoveToOffscreen(uf.selectionHighlight, unit)
-        MoveToOffscreen(uf.aggroHighlight, unit)
-        MoveToOffscreen(uf.softTargetFrame, unit)
-        MoveToOffscreen(uf.SoftTargetFrame, unit)
-        MoveToOffscreen(uf.ClassificationFrame, unit)
-        MoveToOffscreen(uf.RaidTargetFrame, unit)
-        MoveToOffscreen(uf.PlayerLevelDiffFrame, unit)
-        if uf.BuffFrame then uf.BuffFrame:SetAlpha(0) end
-        -- Move AurasFrame list frames offscreen -- we query C_UnitAuras
-        -- directly for debuff/CC data so these visual lists are unused.
-        if uf.AurasFrame then
-            MoveToOffscreen(uf.AurasFrame.DebuffListFrame, unit)
-            MoveToOffscreen(uf.AurasFrame.BuffListFrame, unit)
-            MoveToOffscreen(uf.AurasFrame.CrowdControlListFrame, unit)
-            MoveToOffscreen(uf.AurasFrame.LossOfControlFrame, unit)
-        end
-        -- All visual children are reparented offscreen so layout
-        -- recalculations won't shift bounds.
-        -- Only silence the castBar events (we render our own cast bar).
-        if uf.castBar then
-            uf.castBar:UnregisterAllEvents()
-        end
-        -- Keep WidgetContainer functional but reparent it to the nameplate
-        -- itself so its layout doesn't affect the UnitFrame's bounds.
-        if uf.WidgetContainer then
-            uf.WidgetContainer:SetParent(nameplate)
-        end
+    -- Suppress unconditionally -- if we're called, an EUI plate is taking
+    -- over this nameplate. Never gate on UnitCanAttack: that API can return
+    -- false on the first frame (unit not fully registered yet), which skips
+    -- the entire block and leaves Blizzard's UnitFrame visible behind ours
+    -- as a giant black box.
+    uf:SetAlpha(0)
+    if uf.healthBar then
+        uf.healthBar:SetParent(npOffscreenParent)
+    end
+    -- Move visual children off the UnitFrame so Blizzard's layout engine
+    -- stops recalculating bounds from them.
+    MoveToOffscreen(uf.HealthBarsContainer, unit)
+    MoveToOffscreen(uf.castBar, unit)
+    MoveToOffscreen(uf.name, unit)
+    MoveToOffscreen(uf.selectionHighlight, unit)
+    MoveToOffscreen(uf.aggroHighlight, unit)
+    MoveToOffscreen(uf.softTargetFrame, unit)
+    MoveToOffscreen(uf.SoftTargetFrame, unit)
+    MoveToOffscreen(uf.ClassificationFrame, unit)
+    MoveToOffscreen(uf.RaidTargetFrame, unit)
+    MoveToOffscreen(uf.PlayerLevelDiffFrame, unit)
+    if uf.BuffFrame then uf.BuffFrame:SetAlpha(0) end
+    -- Move AurasFrame list frames offscreen -- we query C_UnitAuras
+    -- directly for debuff/CC data so these visual lists are unused.
+    if uf.AurasFrame then
+        MoveToOffscreen(uf.AurasFrame.DebuffListFrame, unit)
+        MoveToOffscreen(uf.AurasFrame.BuffListFrame, unit)
+        MoveToOffscreen(uf.AurasFrame.CrowdControlListFrame, unit)
+        MoveToOffscreen(uf.AurasFrame.LossOfControlFrame, unit)
+    end
+    -- All visual children are reparented offscreen so layout
+    -- recalculations won't shift bounds.
+    -- Only silence the castBar events (we render our own cast bar).
+    if uf.castBar then
+        uf.castBar:UnregisterAllEvents()
+    end
+    -- Keep WidgetContainer functional but reparent it to the nameplate
+    -- itself so its layout doesn't affect the UnitFrame's bounds.
+    if uf.WidgetContainer then
+        uf.WidgetContainer:SetParent(nameplate)
     end
     if not hookedUFs[uf] then
         hookedUFs[uf] = true
         local locked = false
         hooksecurefunc(uf, "SetAlpha", function(self)
             if locked then return end
-            locked = true
+            -- Only force alpha 0 while an EUI plate owns this nameplate.
+            -- When the nameplate is recycled for a friendly unit, the EUI
+            -- plate is released and ns.plates[unit] is nil, so the hook
+            -- becomes a no-op and Blizzard can show the friendly frame.
             local ufUnit = self.unit or (self.GetUnit and self:GetUnit())
-            if ufUnit and UnitExists(ufUnit) and UnitCanAttack("player", ufUnit) then
-                self:SetAlpha(0)
-            end
+            if not ufUnit or not ns.plates[ufUnit] then return end
+            locked = true
+            self:SetAlpha(0)
             locked = false
         end)
     end
@@ -3147,13 +3153,11 @@ local function HideBlizzardFrame(nameplate, unit)
             if not ufUnit then return end
             local plate = ns.plates[ufUnit]
             if plate and plate.unit then
-                -- Skip if UNIT_AURA already handled this frame's update
-                if plate._auraHandledThisFrame then
-                    plate._auraHandledThisFrame = nil
-                    return
-                end
+                -- RefreshAuras fired: debuffList is now current. Clear the
+                -- pending stash and fallback (we handle it here).
                 local pending = plate._pendingAuraUpdate
                 plate._pendingAuraUpdate = nil
+                plate._auraFallbackPending = nil
                 plate:UpdateAuras(pending)
             end
         end)
@@ -3711,6 +3715,8 @@ function NameplateFrame:ClearUnit()
     self.unit = nil
     self.nameplate = nil
     self._shownAuras = nil
+    self._pendingAuraUpdate = nil
+    self._auraFallbackPending = nil
     self._absorbHidden = nil
     self.cast:Hide()
     self.castShieldFrame:Hide()
@@ -5058,12 +5064,27 @@ function NameplateFrame:UNIT_AURA(_, updateInfo)
                 return
             end
         end
-        -- Adds/removes: run UpdateAuras directly instead of deferring to
-        -- RefreshAuras hook. The deferral caused debuffs to not show/hide
-        -- until the next aura event when RefreshAuras didn't fire in time.
-        -- Flag so RefreshAuras hook skips the redundant rebuild.
-        self._pendingAuraUpdate = nil
-        self._auraHandledThisFrame = true
+        -- Adds/removes: defer to RefreshAuras hook where debuffList is
+        -- guaranteed current. Reading debuffList here races with Blizzard's
+        -- processing and causes auras to not display on other plates.
+        self._pendingAuraUpdate = updateInfo
+        -- Fallback: if RefreshAuras doesn't fire (e.g. Blizzard's UnitFrame
+        -- suppressed), process next frame.
+        if not self._auraFallbackPending then
+            self._auraFallbackPending = true
+            if not self._auraFallbackCB then
+                self._auraFallbackCB = function()
+                    self._auraFallbackPending = nil
+                    if self._pendingAuraUpdate and self.unit then
+                        local pending = self._pendingAuraUpdate
+                        self._pendingAuraUpdate = nil
+                        self:UpdateAuras(pending)
+                    end
+                end
+            end
+            C_Timer.After(0, self._auraFallbackCB)
+        end
+        return
     end
     self:UpdateAuras(updateInfo)
 end

@@ -88,13 +88,95 @@ function Addon:GetLoadoutEntryInfo(importText, configID)
 	return loadoutEntryInfo;
 end
 
-local function ResetTree()
-	local configID = C_ClassTalents.GetActiveConfigID();
-	if not configID then
-		Addon:Print("Error: C_ClassTalents.GetActiveConfigID() = nil");
-		return false;
+local function PrintImportError(configID, entry, ranksPurchased)
+	local entryInfo = entry.selectionEntryID and C_Traits.GetEntryInfo(configID, entry.selectionEntryID);
+	local definitionInfo = entryInfo and entryInfo.definitionID and C_Traits.GetDefinitionInfo(entryInfo.definitionID);
+
+	if not definitionInfo then
+		Addon:Print("Error: Loadout entry cannot use. (definitionInfo is nil)");
+		return;
 	end
 
+	local name = definitionInfo.overrideName;
+	if not name then
+		local spellInfo = definitionInfo.spellID and C_Spell.GetSpellInfo(definitionInfo.spellID);
+		name = spellInfo and spellInfo.name;
+	end
+
+	if not name then
+		Addon:Print("Error: Loadout entry cannot use. (spellInfo is nil)");
+	elseif ranksPurchased then
+		Addon:Print(string.format("Cannot Learn: %s(Rank: %d).", name, ranksPurchased));
+	else
+		Addon:Print(string.format("Cannot Learn: %s.", name));
+	end
+end
+
+local RankTraitNodeTypes = {
+	[Enum.TraitNodeType.Single] = true,
+	[Enum.TraitNodeType.Tiered] = true,
+}
+
+local function TryPurchaseNode(configID, entry)
+	local nodeID = entry.nodeID;
+	local nodeInfo = C_Traits.GetNodeInfo(configID, nodeID);
+
+	if RankTraitNodeTypes[nodeInfo.type] then
+		-- Rank
+		local ranksPurchased = entry.ranksPurchased;
+		if nodeInfo.activeRank == ranksPurchased then
+			return true; -- Skip
+		end
+
+		local hasError = false;
+		for _ = 1, ranksPurchased do
+			if not C_Traits.PurchaseRank(configID, nodeID) then
+				hasError = true;
+			end
+		end
+
+		if hasError then
+			local specID = PlayerUtil.GetCurrentSpecID();
+			local apexNodeIDs = Addon.ApexNodeIDs[specID];
+			if nodeID == apexNodeIDs then
+				-- Skip
+			else
+				local newRank = C_Traits.GetNodeInfo(configID, nodeID).ranksPurchased;
+				if newRank ~= ranksPurchased then
+					PrintImportError(configID, entry, ranksPurchased);
+					return false;
+				end
+			end
+		end
+	else
+		-- Selection
+		local activeEntryID = nodeInfo.activeEntry and nodeInfo.activeEntry.entryID;
+		if activeEntryID == entry.selectionEntryID then
+			return true; -- Skip
+		end
+
+		if not C_Traits.SetSelection(configID, nodeID, entry.selectionEntryID, false) then
+			PrintImportError(configID, entry);
+			return false;
+		end
+	end
+
+	return true;
+end
+
+local function RefundRank(configID, nodeInfo)
+	if nodeInfo.ranksPurchased == 0 then
+		return; -- Skip
+	end
+
+	local nodeID = nodeInfo.ID;
+	C_Traits.RefundAllRanks(configID, nodeID);
+	for _ = 1, nodeInfo.maxRanks do
+		C_Traits.RefundRank(configID, nodeID);
+	end
+end
+
+local function ImportTextByNodeType(configID, loadoutEntryInfo, nodeType)
 	local specID = PlayerUtil.GetCurrentSpecID();
 	local treeID = C_ClassTalents.GetTraitTreeForSpec(specID);
 	if not treeID then
@@ -102,8 +184,102 @@ local function ResetTree()
 		return false;
 	end
 
-	C_Traits.ResetTree(configID, treeID);
+	local apexNodeID = Addon.ApexNodeIDs[specID];
+	local apexRank = 0;
+
+	local targetNodeIDs = {};
+	for _, entry in ipairs(loadoutEntryInfo) do
+		local nodeID = entry.nodeID;
+		if nodeType == Addon.NodeTypeDictionary[nodeID] then
+			targetNodeIDs[nodeID] = entry;
+			if nodeID == apexNodeID then
+				apexRank = apexRank + entry.ranksPurchased;
+			end
+		end
+	end
+
+	local isHeroResetted = false;
+	if nodeType == Addon.NodeType.Hero then
+		for _, subTreeID in ipairs(Addon.SubTreeIDs[specID]) do
+			local subTreeInfo = C_Traits.GetSubTreeInfo(configID, subTreeID);
+			for _, nodeID in ipairs(subTreeInfo.subTreeSelectionNodeIDs) do
+				local nodeInfo = C_Traits.GetNodeInfo(configID, nodeID);
+				local activeEntryID = nodeInfo and nodeInfo.activeEntry and nodeInfo.activeEntry.entryID;
+				if activeEntryID then
+					local entry = targetNodeIDs[nodeID];
+					local selectionEntryID = entry and entry.selectionEntryID;
+					if activeEntryID ~= selectionEntryID then
+						isHeroResetted = true;
+						C_Traits.RefundRank(configID, nodeID);
+						break;
+					end
+				end
+			end
+
+			if isHeroResetted then
+				break;
+			end
+		end
+	end
+
+	if isHeroResetted then
+		for _, traitCurrencyID in ipairs(Addon.SubTreeTraitCurrencyIDs[specID]) do
+			C_Traits.ResetTreeByCurrency(configID, treeID, traitCurrencyID);
+		end
+	else
+		for _, nodeID in ipairs(C_Traits.GetTreeNodes(treeID)) do
+			if nodeType == Addon.NodeTypeDictionary[nodeID] then
+				local entry = targetNodeIDs[nodeID];
+				local nodeInfo = C_Traits.GetNodeInfo(configID, nodeID);
+
+				if nodeInfo.activeRank > nodeInfo.ranksPurchased then
+					-- Skip
+				elseif not entry then
+					RefundRank(configID, nodeInfo);
+				elseif nodeID == apexNodeID then
+					-- Apex Talents
+					if apexRank == nodeInfo.ranksPurchased then
+						-- Skip
+					else
+						RefundRank(configID, nodeInfo);
+					end
+				elseif RankTraitNodeTypes[nodeInfo.type] then
+					-- Rank
+					if nodeInfo.ranksPurchased == entry.ranksPurchased then
+						-- Skip
+					elseif nodeInfo.ranksPurchased > 0 then
+						RefundRank(configID, nodeInfo);
+					end
+				else
+					-- Selection
+					local activeEntryID = nodeInfo.activeEntry and nodeInfo.activeEntry.entryID;
+					if activeEntryID == entry.selectionEntryID then
+						-- Skip
+					elseif entry.selectionEntryID == 0 then
+						RefundRank(configID, nodeInfo);
+					end
+				end
+			end
+		end
+	end
+
+	for _, entry in ipairs(loadoutEntryInfo) do
+		local nodeID = entry.nodeID;
+		if nodeType == Addon.NodeTypeDictionary[nodeID] then
+			if not TryPurchaseNode(configID, entry) then
+				return false;
+			end
+		end
+	end
+
 	return true;
+end
+
+local function ImportTextPcall(configID, loadoutEntryInfo)
+	return
+		ImportTextByNodeType(configID, loadoutEntryInfo, Addon.NodeType.Class) and
+		ImportTextByNodeType(configID, loadoutEntryInfo, Addon.NodeType.Spec) and
+		ImportTextByNodeType(configID, loadoutEntryInfo, Addon.NodeType.Hero);
 end
 
 function Addon:ImportText(importText)
@@ -123,68 +299,19 @@ function Addon:ImportText(importText)
 		return;
 	end
 
-	Addon:SetTrackNode(false);
-	if not ResetTree() then
-		Addon:SetTrackNode(true);
-		return;
-	end
-
 	Addon.isLocked = true;
-	local hasError = false;
-	local errorNames = {};
-	for _, entry in ipairs(loadoutEntryInfo) do
-		local result = true;
-		local errorRank = nil;
-		local nodeInfo = C_Traits.GetNodeInfo(configID, entry.nodeID);
-		if nodeInfo.type == Enum.TraitNodeType.Single or nodeInfo.type == Enum.TraitNodeType.Tiered then
-			for rank = 1, entry.ranksPurchased do
-				result = C_Traits.PurchaseRank(configID, entry.nodeID);
-				if not result then
-					errorRank = rank;
-					break;
-				end
-			end
-		else
-			-- Enum.TraitNodeType.Selection or Enum.TraitNodeType.SubTreeSelection
-			result = C_Traits.SetSelection(configID, entry.nodeID, entry.selectionEntryID);
-		end
+	Addon:SetTrackNode(false);
 
-		if not result then
-			hasError = true;
-			local entryInfo = entry.selectionEntryID and C_Traits.GetEntryInfo(configID, entry.selectionEntryID);
-			local definitionInfo = entryInfo and entryInfo.definitionID and C_Traits.GetDefinitionInfo(entryInfo.definitionID);
+	local pcallResult, result = pcall(ImportTextPcall, configID, loadoutEntryInfo);
 
-			if definitionInfo then
-				local name = definitionInfo.overrideName;
-				if not name then
-					local spellInfo = definitionInfo.spellID and C_Spell.GetSpellInfo(definitionInfo.spellID);
-					name = spellInfo and spellInfo.name;
-				end
-
-				if not name then
-					Addon:Print("Error: Loadout entry cannot use.");
-					DevTools_Dump(entry);
-					break;
-				elseif errorRank and entry.ranksPurchased > 1 then
-					table.insert(errorNames, string.format("%s (%d)", name, errorRank));
-				else
-					table.insert(errorNames, name);
-				end
-			end
-		end
-	end
-
-	local errorNameCount = #errorNames;
-	if errorNameCount > 1 then
-		Addon:Print(string.format("Cannot Learn: %d nodes.", errorNameCount));
-	elseif errorNameCount > 0 then
-		Addon:Print(string.format("Cannot Learn: %s.", errorNames[1]));
-	end
-
-	Addon:SetTrackNode(true);
 	Addon.isLocked = false;
+	Addon:SetTrackNode(true);
 
-	return not hasError;
+	if not pcallResult then
+		error(result);
+	end
+
+	return result;
 end
 
 function Addon:ImportTextAsync(importText)

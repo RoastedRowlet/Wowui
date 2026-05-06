@@ -75,12 +75,11 @@ function UI:FillPinnedFromData(pinnedBar, listObj, d, rank, dur, mode, maxV, pos
     pinnedBar._data = d; pinnedBar._mode = mode; pinnedBar._isDeath = false; pinnedBar._guid = d.guid; pinnedBar._nameStr = d.name; pinnedBar._classStr = d.class
     if pinnedBar.specIcon then
         local specID = d.specID
-        local seg = ns.Segments and ns.Segments:GetViewSegment()
-        if seg and seg.isActive and d.guid == ns.state.playerGUID then
+        if d.guid == ns.state.playerGUID then
             local idx = GetSpecialization()
             if idx then specID = GetSpecializationInfo(idx) end
         end
-        local icon = ns:GetSpecIcon(specID, d.class)
+        local icon = ns:GetSpecIcon(specID, d.class, d.specIconID)
         if ns.db.display.showSpecIcon and icon then
             pinnedBar.specIcon:SetTexture(icon)
             pinnedBar.specIcon:Show()
@@ -129,11 +128,12 @@ function UI:FillPinnedFromAPI(pinnedBar, listObj, src, rank, mode, maxAmt, sType
     if not pinnedBar._apiData then pinnedBar._apiData = {} end
     pinnedBar._apiData.isAPI = true; pinnedBar._apiData.sourceGUID = src.sourceGUID; pinnedBar._apiData.sourceCreatureID = src.sourceCreatureID
     pinnedBar._apiData.isLocalPlayer = true; pinnedBar._apiData.totalAmount = src.totalAmount; pinnedBar._apiData.amountPerSecond = src.amountPerSecond; pinnedBar._apiData.sessionType = sType
+    pinnedBar._apiData.specIconID = src.specIconID
     pinnedBar._data = pinnedBar._apiData; pinnedBar._mode = mode; pinnedBar._isDeath = false; pinnedBar._guid = src.sourceGUID; pinnedBar._nameStr = src.name; pinnedBar._classStr = cls
     if pinnedBar.specIcon then
         local specIdx = GetSpecialization()
         local specID = specIdx and GetSpecializationInfo(specIdx) or nil
-        local icon = ns:GetSpecIcon(specID, cls)
+        local icon = ns:GetSpecIcon(specID, cls, src.specIconID)
         if ns.db.display.showSpecIcon and icon then pinnedBar.specIcon:SetTexture(icon); pinnedBar.specIcon:Show() else pinnedBar.specIcon:Hide() end
     end
     pinnedBar.frame:Show()
