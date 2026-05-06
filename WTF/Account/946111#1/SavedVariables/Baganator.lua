@@ -35,12 +35,12 @@ BAGANATOR_CONFIG = {
 ["currencyID"] = 3418,
 },
 },
+["Minimeditite-Area52"] = {
+},
 ["Madmareep-Stormrage"] = {
 {
 ["currencyID"] = 3056,
 },
-},
-["Minimeditite-Area52"] = {
 },
 },
 ["sort_ignore_slots_count_2"] = {
@@ -234,18 +234,18 @@ BAGANATOR_CONFIG = {
 ["add_to_category_buttons_2"] = "drag",
 ["view_type"] = "unset",
 ["bank_current_tab"] = 2,
-["currencies_tracked"] = {
-},
+["icon_text_quality_colors"] = false,
 ["character_bank_view_width"] = 14,
 ["icon_text_font_size"] = 14,
 ["bag_icon_size"] = 39,
-["sort_ignore_slots_count_2"] = 0,
+["bag_view_width"] = 12,
 ["disabled_skins"] = {
 },
-["bag_view_width"] = 12,
+["setting_anchors"] = false,
 ["sort_ignore_bank_slots_count"] = 0,
 ["upgrade_plugin_ignored"] = {
 },
+["debug_keywords"] = false,
 ["skins"] = {
 ["blizzard"] = {
 ["no_frame_borders"] = false,
@@ -259,7 +259,6 @@ BAGANATOR_CONFIG = {
 ["empty_slot_background"] = true,
 },
 },
-["debug_keywords"] = false,
 ["bag_view_position"] = {
 "BOTTOMRIGHT",
 -235.8388671875,
@@ -288,7 +287,7 @@ BAGANATOR_CONFIG = {
 ["category_section_toggled"] = {
 },
 ["show_sort_button_2"] = true,
-["setting_anchors"] = false,
+["sort_ignore_slots_count_2"] = 0,
 ["bag_view_type"] = "category",
 ["currency_panel_position"] = {
 "RIGHT",
@@ -298,7 +297,8 @@ BAGANATOR_CONFIG = {
 0,
 },
 ["lock_frames"] = false,
-["icon_text_quality_colors"] = false,
+["currencies_tracked"] = {
+},
 ["junk_plugin_ignored"] = {
 },
 ["currency_headers_collapsed"] = {

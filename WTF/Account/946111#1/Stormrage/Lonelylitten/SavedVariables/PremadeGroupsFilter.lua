@@ -25,12 +25,12 @@ PremadeGroupsFilterState = {
 ["act"] = false,
 },
 ["dungeon6"] = false,
+["dungeon2"] = false,
 ["dps"] = {
 ["max"] = "",
 ["min"] = "",
 ["act"] = false,
 },
-["dungeon2"] = false,
 ["members"] = {
 ["max"] = "",
 ["min"] = "",
@@ -39,12 +39,12 @@ PremadeGroupsFilterState = {
 ["expression"] = "",
 ["difficulty"] = {
 },
-["dungeon1"] = false,
+["dungeon4"] = false,
 ["dungeon3"] = false,
 ["dungeon5"] = false,
 ["dungeon8"] = false,
 ["dungeon7"] = false,
-["dungeon4"] = true,
+["dungeon1"] = false,
 ["partyfit"] = true,
 },
 },

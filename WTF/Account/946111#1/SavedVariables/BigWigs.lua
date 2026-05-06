@@ -112,9 +112,9 @@ BigWigs3DB = {
 ["BigWigs_Plugins_Bars"] = {
 ["profiles"] = {
 ["Default"] = {
-["normalWidth"] = 120,
-["visibleBarLimit"] = 1,
 ["emphasize"] = false,
+["visibleBarLimit"] = 1,
+["normalWidth"] = 120,
 ["expPosition"] = {
 "TOP",
 "TOP",
@@ -130,10 +130,10 @@ BigWigs3DB = {
 },
 },
 },
-["BigWigs_Bosses_Zuraal"] = {
+["BigWigs_Bosses_Muro'jin and Nekraxx"] = {
 ["profiles"] = {
 ["Default"] = {
-[1263399] = 3129591,
+[1243900] = 3129591,
 },
 },
 },
@@ -152,10 +152,10 @@ BigWigs3DB = {
 },
 },
 },
-["BigWigs_Bosses_Muro'jin and Nekraxx"] = {
+["BigWigs_Bosses_Zuraal"] = {
 ["profiles"] = {
 ["Default"] = {
-[1243900] = 3129591,
+[1263399] = 3129591,
 },
 },
 },
@@ -170,11 +170,11 @@ BigWigs3DB = {
 ["realm"] = "Stormrage",
 },
 ["Player-3676-0DF7D3EF"] = {
-["playerRating"] = 3836,
+["playerRating"] = 3837,
 ["specId"] = 1473,
-["keyMap"] = 161,
+["keyMap"] = 239,
 ["name"] = "Barelynoer",
-["keyLevel"] = 19,
+["keyLevel"] = 20,
 ["realm"] = "Area 52",
 },
 },
@@ -187,6 +187,77 @@ BigWigs3DB = {
 BigWigsIconDB = {
 }
 BigWigsStatsDB = {
+[2939] = {
+[2795] = {
+["heroic"] = {
+["kills"] = 6,
+["fkDate"] = "2026/04/01",
+["bestDate"] = "2026/04/07",
+["fkWipes"] = 6,
+["best"] = 327.752000000095,
+["wipes"] = 9,
+["fkDuration"] = 495.9110000000801,
+},
+["normal"] = {
+["kills"] = 1,
+["fkDate"] = "2026/03/25",
+["bestDate"] = "2026/03/25",
+["best"] = 313.8260000000009,
+["fkDuration"] = 313.8260000000009,
+},
+["mythic"] = {
+["kills"] = 3,
+["fkDate"] = "2026/04/22",
+["bestDate"] = "2026/04/29",
+["fkWipes"] = 18,
+["best"] = 389.2179999999935,
+["wipes"] = 32,
+["fkDuration"] = 400.1720000000059,
+},
+},
+},
+[2913] = {
+[2739] = {
+["normal"] = {
+["kills"] = 1,
+["fkDuration"] = 201.7679999999236,
+["wipes"] = 3,
+["fkWipes"] = 3,
+["best"] = 201.7679999999236,
+["bestDate"] = "2026/04/03",
+["fkDate"] = "2026/04/03",
+},
+["heroic"] = {
+["kills"] = 3,
+["fkDate"] = "2026/04/15",
+["bestDate"] = "2026/04/22",
+["fkWipes"] = 16,
+["best"] = 221.594000000001,
+["wipes"] = 20,
+["fkDuration"] = 233.0529999998398,
+},
+},
+[2740] = {
+["normal"] = {
+["kills"] = 1,
+["fkDuration"] = 308.7250000000931,
+["wipes"] = 2,
+["fkWipes"] = 2,
+["best"] = 308.7250000000931,
+["bestDate"] = "2026/04/03",
+["fkDate"] = "2026/04/03",
+},
+["heroic"] = {
+["kills"] = 2,
+["fkDuration"] = 396.4109999999637,
+["wipes"] = 104,
+["fkWipes"] = 81,
+["best"] = 396.4109999999637,
+["bestDate"] = "2026/04/29",
+["fkDate"] = "2026/04/29",
+},
+},
+},
 [2912] = {
 [2735] = {
 ["normal"] = {
@@ -362,48 +433,6 @@ BigWigsStatsDB = {
 },
 },
 },
-[2913] = {
-[2739] = {
-["normal"] = {
-["kills"] = 1,
-["fkDuration"] = 201.7679999999236,
-["wipes"] = 3,
-["fkWipes"] = 3,
-["best"] = 201.7679999999236,
-["bestDate"] = "2026/04/03",
-["fkDate"] = "2026/04/03",
-},
-["heroic"] = {
-["kills"] = 3,
-["fkDate"] = "2026/04/15",
-["bestDate"] = "2026/04/22",
-["fkWipes"] = 16,
-["best"] = 221.594000000001,
-["wipes"] = 20,
-["fkDuration"] = 233.0529999998398,
-},
-},
-[2740] = {
-["normal"] = {
-["kills"] = 1,
-["fkDuration"] = 308.7250000000931,
-["wipes"] = 2,
-["fkWipes"] = 2,
-["best"] = 308.7250000000931,
-["bestDate"] = "2026/04/03",
-["fkDate"] = "2026/04/03",
-},
-["heroic"] = {
-["kills"] = 2,
-["fkDuration"] = 396.4109999999637,
-["wipes"] = 104,
-["fkWipes"] = 81,
-["best"] = 396.4109999999637,
-["bestDate"] = "2026/04/29",
-["fkDate"] = "2026/04/29",
-},
-},
-},
 [2966] = {
 [-3372] = {
 ["solotier8"] = {
@@ -412,35 +441,6 @@ BigWigsStatsDB = {
 ["best"] = 208.5349999999162,
 ["bestDate"] = "2026/04/11",
 ["fkDate"] = "2026/04/11",
-},
-},
-},
-[2939] = {
-[2795] = {
-["heroic"] = {
-["kills"] = 6,
-["fkDate"] = "2026/04/01",
-["bestDate"] = "2026/04/07",
-["fkWipes"] = 6,
-["best"] = 327.752000000095,
-["wipes"] = 9,
-["fkDuration"] = 495.9110000000801,
-},
-["normal"] = {
-["kills"] = 1,
-["fkDate"] = "2026/03/25",
-["bestDate"] = "2026/03/25",
-["best"] = 313.8260000000009,
-["fkDuration"] = 313.8260000000009,
-},
-["mythic"] = {
-["kills"] = 3,
-["fkDate"] = "2026/04/22",
-["bestDate"] = "2026/04/29",
-["fkWipes"] = 18,
-["best"] = 389.2179999999935,
-["wipes"] = 32,
-["fkDuration"] = 400.1720000000059,
 },
 },
 },
