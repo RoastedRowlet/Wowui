@@ -117,13 +117,15 @@ local RankTraitNodeTypes = {
 	[Enum.TraitNodeType.Tiered] = true,
 }
 
-local function TryPurchaseNode(configID, entry)
+local function TryPurchaseNode(configID, entry, apexRank)
 	local nodeID = entry.nodeID;
 	local nodeInfo = C_Traits.GetNodeInfo(configID, nodeID);
 
 	if RankTraitNodeTypes[nodeInfo.type] then
 		-- Rank
-		local ranksPurchased = entry.ranksPurchased;
+		local specID = PlayerUtil.GetCurrentSpecID();
+		local isApex = (nodeID == Addon.ApexNodeIDs[specID]);
+		local ranksPurchased = isApex and apexRank or entry.ranksPurchased;
 		if nodeInfo.activeRank == ranksPurchased then
 			return true; -- Skip
 		end
@@ -136,16 +138,10 @@ local function TryPurchaseNode(configID, entry)
 		end
 
 		if hasError then
-			local specID = PlayerUtil.GetCurrentSpecID();
-			local apexNodeIDs = Addon.ApexNodeIDs[specID];
-			if nodeID == apexNodeIDs then
-				-- Skip
-			else
-				local newRank = C_Traits.GetNodeInfo(configID, nodeID).ranksPurchased;
-				if newRank ~= ranksPurchased then
-					PrintImportError(configID, entry, ranksPurchased);
-					return false;
-				end
+			local newRank = C_Traits.GetNodeInfo(configID, nodeID).activeRank;
+			if newRank ~= ranksPurchased then
+				PrintImportError(configID, entry, ranksPurchased);
+				return false;
 			end
 		end
 	else
@@ -266,8 +262,8 @@ local function ImportTextByNodeType(configID, loadoutEntryInfo, nodeType)
 	for _, entry in ipairs(loadoutEntryInfo) do
 		local nodeID = entry.nodeID;
 		if nodeType == Addon.NodeTypeDictionary[nodeID] then
-			if not TryPurchaseNode(configID, entry) then
-				return false;
+			if not TryPurchaseNode(configID, entry, apexRank) then
+				return UnitLevel("player") < GetMaxPlayerLevel();
 			end
 		end
 	end
