@@ -2,6 +2,12 @@
 CliqueDB = nil
 CliqueDB3 = {
 ["char"] = {
+["Madmareep - Stormrage"] = {
+["spec1_profileKey"] = "Madmareep - Stormrage",
+["spec3_profileKey"] = "Madmareep - Stormrage",
+["specswap"] = false,
+["spec2_profileKey"] = "Madmareep - Stormrage",
+},
 ["Angryabsol - Stormrage"] = {
 ["spec1_profileKey"] = "Angryabsol - Stormrage",
 ["stopcastingfix"] = true,
@@ -10,25 +16,19 @@ CliqueDB3 = {
 ["spec3_profileKey"] = "Angryabsol - Stormrage",
 },
 ["Barelynoer - Area 52"] = {
-["spec3_profileKey"] = "Barelynoer - Area 52",
 ["spec1_profileKey"] = "Barelynoer - Area 52",
-["spec2_profileKey"] = "Barelynoer - Area 52",
+["spec3_profileKey"] = "Barelynoer - Area 52",
 ["specswap"] = false,
+["spec2_profileKey"] = "Barelynoer - Area 52",
 },
 ["Lonelylitten - Stormrage"] = {
 ["spec1_profileKey"] = "Lonelylitten - Stormrage",
-["spec2_profileKey"] = "Lonelylitten - Stormrage",
+["specswap"] = false,
 ["downclick"] = false,
 ["fastooc"] = false,
-["specswap"] = false,
 ["spec3_profileKey"] = "Lonelylitten - Stormrage",
+["spec2_profileKey"] = "Lonelylitten - Stormrage",
 ["spec4_profileKey"] = "Lonelylitten - Stormrage",
-},
-["Madmareep - Stormrage"] = {
-["spec1_profileKey"] = "Madmareep - Stormrage",
-["spec3_profileKey"] = "Madmareep - Stormrage",
-["specswap"] = false,
-["spec2_profileKey"] = "Madmareep - Stormrage",
 },
 },
 ["profileKeys"] = {
@@ -73,22 +73,6 @@ CliqueDB3 = {
 ["unit"] = "mouseover",
 },
 {
-["spell"] = "Regrowth",
-["key"] = "BUTTON2",
-["sets"] = {
-["default"] = true,
-},
-["icon"] = 136085,
-["type"] = "spell",
-},
-{
-["type"] = "menu",
-["key"] = "CTRL-BUTTON2",
-["sets"] = {
-["default"] = true,
-},
-},
-{
 ["spell"] = "Rejuvenation",
 ["key"] = "BUTTON1",
 ["sets"] = {
@@ -107,6 +91,22 @@ CliqueDB3 = {
 ["icon"] = 134332,
 },
 {
+["spell"] = "Regrowth",
+["key"] = "BUTTON2",
+["sets"] = {
+["default"] = true,
+},
+["icon"] = 136085,
+["type"] = "spell",
+},
+{
+["type"] = "menu",
+["key"] = "CTRL-BUTTON2",
+["sets"] = {
+["default"] = true,
+},
+},
+{
 ["type"] = "macro",
 ["key"] = "ALT-BUTTON2",
 ["macrotext"] = "/cast Nature's Swiftness\n/cast [@mouseover] Regrowth\n",
@@ -114,24 +114,6 @@ CliqueDB3 = {
 ["default"] = true,
 },
 ["icon"] = 134332,
-},
-{
-["type"] = "target",
-["key"] = "CTRL-BUTTON1",
-["sets"] = {
-["default"] = true,
-},
-["icon"] = 132331,
-["unit"] = "mouseover",
-},
-{
-["spell"] = "Nature's Cure",
-["key"] = "BUTTON3",
-["sets"] = {
-["default"] = true,
-},
-["icon"] = 236288,
-["type"] = "spell",
 },
 {
 ["spell"] = "Revive",
@@ -149,6 +131,24 @@ CliqueDB3 = {
 ["default"] = true,
 },
 ["icon"] = 135952,
+["type"] = "spell",
+},
+{
+["type"] = "target",
+["key"] = "CTRL-BUTTON1",
+["sets"] = {
+["default"] = true,
+},
+["icon"] = 132331,
+["unit"] = "mouseover",
+},
+{
+["spell"] = "Nature's Cure",
+["key"] = "BUTTON3",
+["sets"] = {
+["default"] = true,
+},
+["icon"] = 236288,
 ["type"] = "spell",
 },
 {
@@ -353,15 +353,68 @@ CliqueDB3 = {
 ["sets"] = {
 ["default"] = true,
 },
-["key"] = "BUTTON1",
+["key"] = "SHIFT-BUTTON1",
 ["unit"] = "mouseover",
 },
 {
-["type"] = "menu",
+["spell"] = "Healing Wave",
 ["key"] = "BUTTON2",
 ["sets"] = {
 ["default"] = true,
 },
+["icon"] = 136043,
+["type"] = "spell",
+},
+{
+["type"] = "menu",
+["sets"] = {
+["default"] = true,
+},
+["key"] = "SHIFT-BUTTON2",
+["icon"] = 132212,
+},
+{
+["type"] = "menu",
+["key"] = "CTRL-BUTTON2",
+["sets"] = {
+["default"] = true,
+},
+},
+{
+["spell"] = "Unleash Life",
+["key"] = "BUTTON1",
+["sets"] = {
+["default"] = true,
+},
+["icon"] = 462328,
+["type"] = "spell",
+},
+{
+["spell"] = "Ancestral Spirit",
+["key"] = "CTRL-BUTTON1",
+["sets"] = {
+["default"] = true,
+},
+["icon"] = 136077,
+["type"] = "spell",
+},
+{
+["type"] = "target",
+["key"] = "CTRL-BUTTON1",
+["sets"] = {
+["default"] = true,
+},
+["icon"] = 132331,
+["unit"] = "mouseover",
+},
+{
+["spell"] = "Purify Spirit",
+["key"] = "BUTTON3",
+["type"] = "spell",
+["sets"] = {
+["default"] = true,
+},
+["icon"] = 236288,
 },
 },
 },

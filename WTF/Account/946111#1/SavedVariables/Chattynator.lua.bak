@@ -222,20 +222,20 @@ CHATTYNATOR_CONFIG = {
 ["g"] = 0.7529412508010864,
 ["b"] = 0.7529412508010864,
 },
-["CHANNEL_Trade"] = {
+["BG_SYSTEM_NEUTRAL"] = {
 ["r"] = 1,
-["g"] = 0.7529412508010864,
-["b"] = 0.7529412508010864,
+["g"] = 0.4705882668495178,
+["b"] = 0.03921568766236305,
 },
 ["RAID"] = {
 ["r"] = 1,
 ["g"] = 0.4980392456054688,
 ["b"] = 0,
 },
-["BG_SYSTEM_NEUTRAL"] = {
+["CHANNEL_Trade"] = {
 ["r"] = 1,
-["g"] = 0.4705882668495178,
-["b"] = 0.03921568766236305,
+["g"] = 0.7529412508010864,
+["b"] = 0.7529412508010864,
 },
 ["FILTERED"] = {
 ["r"] = 1,
@@ -312,7 +312,7 @@ CHATTYNATOR_CONFIG = {
 ["g"] = 1,
 ["b"] = 0,
 },
-["CHANNEL18"] = {
+["CHANNEL_Services"] = {
 ["r"] = 1,
 ["g"] = 0.7529412508010864,
 ["b"] = 0.7529412508010864,
@@ -332,15 +332,15 @@ CHATTYNATOR_CONFIG = {
 ["g"] = 0.7529412508010864,
 ["b"] = 0.7529412508010864,
 },
-["ARENA_POINTS"] = {
-["r"] = 1,
-["g"] = 1,
-["b"] = 1,
-},
 ["ACHIEVEMENT"] = {
 ["r"] = 1,
 ["g"] = 1,
 ["b"] = 0,
+},
+["ARENA_POINTS"] = {
+["r"] = 1,
+["g"] = 1,
+["b"] = 1,
 },
 ["BN_WHISPER_INFORM"] = {
 ["r"] = 0,
@@ -437,7 +437,7 @@ CHATTYNATOR_CONFIG = {
 ["g"] = 0.8666667342185974,
 ["b"] = 0,
 },
-["CHANNEL_Services"] = {
+["CHANNEL18"] = {
 ["r"] = 1,
 ["g"] = 0.7529412508010864,
 ["b"] = 0.7529412508010864,
@@ -546,10 +546,10 @@ CHATTYNATOR_CONFIG = {
 ["isTemporary"] = false,
 ["backgroundColor"] = "1a1a1a",
 ["groups"] = {
-["PET_BATTLE_COMBAT_LOG"] = false,
 ["COMBAT_MISC_INFO"] = false,
-["VOICE_TEXT"] = false,
 ["OPENING"] = false,
+["VOICE_TEXT"] = false,
+["PET_BATTLE_COMBAT_LOG"] = false,
 ["COMBAT_XP_GAIN"] = false,
 ["PET_INFO"] = false,
 ["TRADESKILLS"] = false,
@@ -650,7 +650,7 @@ CHATTYNATOR_CONFIG = {
 },
 }
 CHATTYNATOR_MESSAGE_LOG = {
-["cleanIndex"] = 3493,
+["cleanIndex"] = 3500,
 ["current"] = {
 {
 ["recordedBy"] = "Lonelylitten-Stormrage",
@@ -70305,6 +70305,141 @@ CHATTYNATOR_MESSAGE_LOG = {
 ["text"] = "Camberon says: I'm far too busy to keep up with your training, but you're welcome to use my cauldron over there.",
 ["timestamp"] = 1777921351,
 ["id"] = "s18_3493",
+},
+{
+["recordedBy"] = "Zappyxatu-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["name"] = "Overlord Geya'rah",
+},
+["event"] = "CHAT_MSG_MONSTER_SAY",
+["type"] = "MONSTER_SAY",
+},
+["color"] = {
+["b"] = 0.6235294342041016,
+["g"] = 1,
+["r"] = 1,
+},
+["text"] = "Overlord Geya'rah says: Your people have broken their word, Trollbane.",
+["id"] = "s18_3494",
+["timestamp"] = 1778112117,
+},
+{
+["recordedBy"] = "Zappyxatu-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["name"] = "Danath Trollbane",
+},
+["event"] = "CHAT_MSG_MONSTER_SAY",
+["type"] = "MONSTER_SAY",
+},
+["color"] = {
+["b"] = 0.6235294342041016,
+["g"] = 1,
+["r"] = 1,
+},
+["text"] = "Danath Trollbane says: I understand your frustration, Geya'rah. But do not rush to conclusions.",
+["id"] = "s18_3495",
+["timestamp"] = 1778112119,
+},
+{
+["recordedBy"] = "Zappyxatu-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["race"] = "Dwarf",
+["class"] = "SHAMAN",
+["name"] = "Zappyxatu",
+["sex"] = 2,
+},
+["event"] = "CHAT_MSG_LOOT",
+["type"] = "LOOT",
+},
+["color"] = {
+["b"] = 0,
+["g"] = 0.6666666865348816,
+["r"] = 0,
+},
+["text"] = "You receive item: |cnIQ4:|Hitem:237634::::::::80:264::174:4:6652:12283:12921:1479::::::|h[Fauld of Channeled Fury]|h|r",
+["id"] = "s18_3496",
+["timestamp"] = 1778112131,
+},
+{
+["recordedBy"] = "Zappyxatu-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["class"] = "EVOKER",
+["race"] = "Dracthyr",
+["name"] = "Farrahdormu-Illidan",
+["sex"] = 2,
+},
+["event"] = "CHAT_MSG_GUILD_ACHIEVEMENT",
+["type"] = "GUILD_ACHIEVEMENT",
+},
+["color"] = {
+["r"] = 0.250980406999588,
+["g"] = 1,
+["b"] = 0.250980406999588,
+},
+["text"] = "|Hplayer:Farrahdormu-Illidan|h[|cff33937fFarrahdormu-Illidan|r]|h has earned the achievement |cffffff00|Hachievement:42191:Player-57-0D5EE7AC:1:5:6:26:4294967295:4294967295:4294967295:4294967295|h[Safer Deposit]|h|r!",
+["timestamp"] = 1778113536,
+["id"] = "s18_3497",
+},
+{
+["recordedBy"] = "Zappyxatu-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["class"] = "EVOKER",
+["race"] = "Dracthyr",
+["name"] = "Farrahdormu-Illidan",
+["sex"] = 2,
+},
+["event"] = "CHAT_MSG_GUILD_ACHIEVEMENT",
+["type"] = "GUILD_ACHIEVEMENT",
+},
+["color"] = {
+["r"] = 0.250980406999588,
+["g"] = 1,
+["b"] = 0.250980406999588,
+},
+["text"] = "|Hplayer:Farrahdormu-Illidan|h[|cff33937fFarrahdormu-Illidan|r]|h has earned the achievement |cffffff00|Hachievement:15069:Player-57-0D5EE7AC:1:5:6:26:4294967295:4294967295:4294967295:4294967295|h[The Archivists' Codex]|h|r!",
+["timestamp"] = 1778113536,
+["id"] = "s18_3498",
+},
+{
+["recordedBy"] = "Zappyxatu-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["name"] = "Messenger Aelor",
+},
+["event"] = "CHAT_MSG_MONSTER_SAY",
+["type"] = "MONSTER_SAY",
+},
+["color"] = {
+["r"] = 1,
+["g"] = 1,
+["b"] = 0.6235294342041016,
+},
+["text"] = "Messenger Aelor says: Hello? Zappyxatu? Can you hear me? I bring a message from Magister Umbric!",
+["timestamp"] = 1778113537,
+["id"] = "s18_3499",
+},
+{
+["recordedBy"] = "Zappyxatu-Stormrage",
+["typeInfo"] = {
+["player"] = {
+["name"] = "Silvermoon Citizen",
+},
+["event"] = "CHAT_MSG_MONSTER_SAY",
+["type"] = "MONSTER_SAY",
+},
+["color"] = {
+["r"] = 1,
+["g"] = 1,
+["b"] = 0.6235294342041016,
+},
+["text"] = "Silvermoon Citizen says: Keen eyes, my friend! I'm practicing my illusion skills for Decor Duel.\r\nYou'd make a good Seeker I'd wager.",
+["timestamp"] = 1778113679,
+["id"] = "s18_3500",
 },
 },
 ["version"] = 1,

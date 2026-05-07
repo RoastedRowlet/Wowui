@@ -12,24 +12,25 @@ RaiderIO_Config = {
 ["hide"] = false,
 },
 }
-RaiderIO_LastCharacter = "us-Barelynoer-area-52"
+RaiderIO_LastCharacter = "us-Zappyxatu-stormrage"
 RaiderIO_MissingCharacters = {
-["us-Tahrufal-illidan"] = true,
-["us-Shroud-area-52"] = true,
-["us-Experian-dalaran"] = true,
-["us-Nkzfurry-malganis"] = true,
-["us-Aratro-area-52"] = true,
-["us-Jeodon-aegwynn"] = true,
-["us-Layil-area-52"] = true,
-["us-Hoax-undermine"] = true,
-["us-Gojiramang-thrall"] = true,
-["us-Lythvine-area-52"] = true,
-["us-Msjiggle-bleeding-hollow"] = true,
-["us-Cluntasaur-area-52"] = true,
-["us-Thatx-area-52"] = true,
-["us-Telastanda-illidan"] = true,
-["us-Chadley-bleeding-hollow"] = true,
-["us-Brokedetails-area-52"] = true,
+["us-Diverdown-area-52"] = true,
+["us-Banebloodhuf-area-52"] = true,
+["us-Robererectus-area-52"] = true,
+["us-Bjòrñ-area-52"] = true,
+["us-Crypy-illidan"] = true,
+["us-Thîcc-illidan"] = true,
+["us-Juicylucie-illidan"] = true,
+["us-Dearee-area-52"] = true,
+["us-Joeytwonuts-illidan"] = true,
+["us-Illidyson-area-52"] = true,
+["us-Rheanna-illidan"] = true,
+["us-party5-stormrage"] = true,
+["us-Alklfg-area-52"] = true,
+["us-Minywons-area-52"] = true,
+["us-Farrahdormu-illidan"] = true,
+["us-Daedalust-illidan"] = true,
+["us-Zappyxatu-stormrage"] = true,
 }
 RaiderIO_MissingServers = {
 }

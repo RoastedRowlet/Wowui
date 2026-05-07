@@ -89,6 +89,18 @@ TalentLoadoutEx = {
 },
 ["SHAMAN"] = {
 [3] = {
+{
+["isInGroup"] = false,
+["text"] = "CgQAAAAAAAAAAAAAAAAAAAAAAAAAAgBAAAAjZmZZbZMzMzMzMzYGDLwGMjFN2GAzAbYmBz2MjRzyyMDzMzGLGzMGMLzAAwAYmBzMAwgB",
+["name"] = "Vashezzo",
+["icon"] = 134400,
+},
+{
+["isInGroup"] = false,
+["text"] = "CgQAAAAAAAAAAAAAAAAAAAAAAAAAAgBAAAAjZmZZbZmZmZGzMGDDLwGMjFN2GAzAbYmBz2YmRzyyMzmZMYZGzMGWmlZAAYAMzgZGAMDG",
+["name"] = "new",
+["icon"] = 134400,
+},
 },
 },
 ["Option"] = {
@@ -109,24 +121,24 @@ TalentLoadoutEx = {
 ["DRUID"] = {
 {
 {
-["name"] = "Raid",
 ["pvp2"] = 180,
+["name"] = "Raid",
 ["pvp3"] = 3058,
 ["text"] = "CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNMmZgxsMzMzMgHAWmZbGzYGbsMjZmZMzGGAMALbjNMNzsMCAAAwmZmZmBbGzYMDgZGAYA",
 ["icon"] = 134400,
 ["pvp1"] = 182,
 },
 {
-["name"] = "Chim",
 ["pvp2"] = 180,
+["name"] = "Chim",
 ["pvp3"] = 3058,
 ["pvp1"] = 182,
 ["icon"] = 134400,
 ["text"] = "CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMDMmlZmZmBMDjZWGbzYGbsMzyYmZMLYAwAssN2w0MzyAAAAgNm5BmZwmhxYGAzMAwA",
 },
 {
-["pvp2"] = 180,
 ["name"] = "M+",
+["pvp2"] = 180,
 ["icon"] = 134400,
 ["pvp1"] = 182,
 ["pvp3"] = 3058,
@@ -141,8 +153,8 @@ TalentLoadoutEx = {
 ["name"] = "dragons",
 },
 {
-["name"] = "Vor",
 ["pvp2"] = 180,
+["name"] = "Vor",
 ["pvp3"] = 3058,
 ["pvp1"] = 182,
 ["icon"] = 134400,

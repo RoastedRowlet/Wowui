@@ -162,12 +162,20 @@ BigWigs3DB = {
 },
 ["myKeystones"] = {
 ["Player-3676-0DF7D3EF"] = {
-["playerRating"] = 3837,
+["playerRating"] = 3851,
 ["specId"] = 1473,
 ["keyMap"] = 239,
 ["name"] = "Barelynoer",
 ["keyLevel"] = 20,
 ["realm"] = "Area 52",
+},
+["Player-60-0F7B141D"] = {
+["playerRating"] = 0,
+["specId"] = 264,
+["keyMap"] = 0,
+["name"] = "Zappyxatu",
+["keyLevel"] = 0,
+["realm"] = "Stormrage",
 },
 ["Player-60-0F85ABEF"] = {
 ["playerRating"] = 3892,

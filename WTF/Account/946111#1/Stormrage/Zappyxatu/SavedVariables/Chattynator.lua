@@ -5,4 +5,5 @@ CHATTYNATOR_COMMAND_HISTORY = {
 "/s /bartender",
 "/s /ARCUI",
 "/s /reload",
+"/s /RELOAD",
 }

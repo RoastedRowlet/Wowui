@@ -14,18 +14,6 @@ RaiderIO_Config = {
 }
 RaiderIO_LastCharacter = "us-Lonelylitten-stormrage"
 RaiderIO_MissingCharacters = {
-["us-Qannaqa-proudmoore"] = true,
-["us-Experian-dalaran"] = true,
-["us-Aratro-area-52"] = true,
-["us-Savagefatsac-illidan"] = true,
-["us-Anstrian-zuljin"] = true,
-["us-Serkerester-stormrage"] = true,
-["us-Tahrufal-illidan"] = true,
-["us-Gojiramang-thrall"] = true,
-["us-Heimdaahltre-stormrage"] = true,
-["us-Msjiggle-bleeding-hollow"] = true,
-["us-Cleftÿ-illidan"] = true,
-["us-Shroud-wildhammer"] = true,
 }
 RaiderIO_MissingServers = {
 }

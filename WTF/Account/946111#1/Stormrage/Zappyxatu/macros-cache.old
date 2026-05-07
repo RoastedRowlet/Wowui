@@ -8,15 +8,9 @@ VER 3 0100000000000002 "FOCUS KICK" "134400"
 #showtooltip wind shear
 /cast [@focus,exists][@target] wind shear
 END
-VER 3 0100000000000004 "Healing Rain" "134400"
-/cast [@cursor] Healing Rain
-END
 VER 3 0100000000000001 "HPPOT" "5931169"
 #121
 --&0b
 #showtooltip
 /use item:211879--&
-END
-VER 3 0100000000000005 "ToProj Cursor" "134400"
-/cast [@cursor] totemic projection
 END
