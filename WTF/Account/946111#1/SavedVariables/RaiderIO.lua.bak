@@ -1,54 +1,21 @@
 
 RaiderIO_Config = {
+["minimapIcon"] = {
+["minimapPos"] = 180,
+["showInCompartment"] = true,
+["hide"] = false,
+["lock"] = false,
+},
 ["profilePoint"] = {
 ["y"] = 0,
 ["x"] = -16,
 ["point"] = "TOPLEFT",
 },
-["minimapIcon"] = {
-["minimapPos"] = 180,
-["showInCompartment"] = true,
-["lock"] = false,
-["hide"] = false,
-},
 }
 RaiderIO_LastCharacter = "us-Zappyxatu-stormrage"
 RaiderIO_MissingCharacters = {
-["us-Shaojhao-ragnaros"] = true,
-["us-Upliftd-area-52"] = true,
 ["us-Holynoly-stormrage"] = true,
-["us-Raevore-whisperwind"] = true,
-["us-Bigfang-zuljin"] = true,
-["us-Monkjuice-nerzhul"] = true,
-["us-Galuf-thunderlord"] = true,
-["us-Edorad-azuremyst"] = true,
-["us-Zshiftin-stormrage"] = true,
-["us-Ohhnooj-frostmourne"] = true,
-["us-Kittyzilla-area-52"] = true,
-["us-Julzpally-saurfang"] = true,
-["us-Hin-stormrage"] = true,
 ["us-Zappyxatu-stormrage"] = true,
-["us-Detoozz-illidan"] = true,
-["us-Rüë-stormrage"] = true,
-["us-Arzes-sargeras"] = true,
-["us-Ðetonax-azralon"] = true,
-["us-Ramenshamen-stormrage"] = true,
-["us-Sgun-stormrage"] = true,
-["us-Drelador-stormrage"] = true,
-["us-Itonic-stormrage"] = true,
-["us-Minniiee-bleeding-hollow"] = true,
-["us-Entroopi-stormrage"] = true,
-["us-party5-stormrage"] = true,
-["us-Qury-stormrage"] = true,
-["us-Solowarrior-frostmourne"] = true,
-["us-Kimíkø-stormrage"] = true,
-["us-Udderwedoing-hyjal"] = true,
-["us-Avatarvast-stormrage"] = true,
-["us-Straddh-area-52"] = true,
-["us-Gharsely-caelestrasz"] = true,
-["us-Thorziin-stormrage"] = true,
-["us-Ekclipse-shadowsong"] = true,
-["us-Snugjob-illidan"] = true,
 }
 RaiderIO_MissingServers = {
 }
