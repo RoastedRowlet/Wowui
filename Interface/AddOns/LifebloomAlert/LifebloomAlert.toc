@@ -1,8 +1,0 @@
-## Interface: 120001, 120005
-## Title: LifebloomAlert
-## Notes: Sound alerts for Lifebloom pandemic range and missing Lifebloom. Restoration Druid only.
-## Author: Pureformance
-## Version: 2.0.0
-## SavedVariables: LifebloomAlertDB
-
-LifebloomAlert.lua

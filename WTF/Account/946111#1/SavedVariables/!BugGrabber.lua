@@ -1,7 +1,7 @@
 
 BugGrabberDB = {
-["session"] = 212,
 ["lastSanitation"] = 3,
+["session"] = 213,
 ["errors"] = {
 {
 ["message"] = "...s/AdvancedFocusCastBar/AdvancedFocusCastBarMixin.lua:1861: bad argument #1 to 'SetAlpha' (Usage: self:SetAlpha(alpha))",
@@ -101,8 +101,8 @@ BugGrabberDB = {
 },
 {
 ["message"] = "LUA_WARNING: Couldn't open Interface/AddOns/WeakAuras/Bindings.xml",
-["time"] = 1777140638,
 ["session"] = 52,
+["time"] = 1777140638,
 ["counter"] = 1,
 },
 {
@@ -267,20 +267,20 @@ BugGrabberDB = {
 },
 {
 ["message"] = "LUA_WARNING: Interface/AddOns/!BugGrabber/BugGrabber.lua:-1: insecure scripts exceeded execution limit for addon !BugGrabber",
-["session"] = 115,
 ["time"] = 1777601702,
+["session"] = 115,
 ["counter"] = 10,
 },
 {
 ["message"] = "LUA_WARNING: ...ce/AddOns/Blizzard_CooldownViewer/CooldownViewer.lua:704: bad argument #1 to 'EnableSpellRangeCheck' (Usage: C_Spell.EnableSpellRangeCheck(spellIdentifier, enable))\n|cffffd200Stack:|r\n[C]: in function 'secureexecuterange'\n[Interface/AddOns/Blizzard_EditMode/Shared/EditModeManager.lua]:97: in function 'HideSystemSelections'\n[Interface/AddOns/Blizzard_EditMode/Shared/EditModeManager.lua]:104: in function <.../AddOns/Blizzard_EditMode/Shared/EditModeManager.lua:100>\n[C]: ?\n[C]: ?\n[C]: ?\n[C]: in function 'ExitEditMode'\n[Interface/AddOns/Blizzard_EditMode/Shared/EditModeManager.lua]:126: in function <.../AddOns/Blizzard_EditMode/Shared/EditModeManager.lua:124>\n[C]: ?\n[C]: ?\n[C]: ?\n[C]: ?\n[C]: in function 'Hide'\n[Interface/AddOns/Blizzard_UIParentPanelManager/Shared/UIParentPanelManager.lua]:863: in function <...UIParentPanelManager/Shared/UIParentPanelManager.lua:853>\n[C]: in function 'HideUIPanel'\n[Interface/AddOns/Blizzard_EditMode/Shared/EditModeManager.lua]:42: in function 'onCloseCallback'\n[Interface/AddOns/Blizzard_SharedXML/Mainline/SharedUIPanelTemplates.lua]:143: in function <...izzard_SharedXML/Mainline/SharedUIPanelTemplates.lua:138>\n[C]: in function 'Click'\n[Interface/AddOns/Blizzard_UIParent/Mainline/UIParent.lua]:2351: in function <...rface/AddOns/Blizzard_UIParent/Mainline/UIParent.lua:2316>\n[C]: ?\n[C]: ?\n[C]: in function 'ToggleGameMenu'\n[TOGGLEGAMEMENU]:1: in function <[string \"TOGGLEGAMEMENU\"]:1>\n",
-["session"] = 115,
 ["time"] = 1777602017,
+["session"] = 115,
 ["counter"] = 1,
 },
 {
 ["message"] = "LUA_WARNING: ...ce/AddOns/Blizzard_CooldownViewer/CooldownViewer.lua:877: attempted to index a table that cannot be accessed while tainted (execution tainted by 'TalentLoadoutsEx')\n|cffffd200Stack:|r\n[C]: in function 'secureexecuterange'\n[Interface/AddOns/Blizzard_EditMode/Shared/EditModeManager.lua]:97: in function 'HideSystemSelections'\n[Interface/AddOns/Blizzard_EditMode/Shared/EditModeManager.lua]:104: in function <.../AddOns/Blizzard_EditMode/Shared/EditModeManager.lua:100>\n[C]: ?\n[C]: ?\n[C]: ?\n[C]: in function 'ExitEditMode'\n[Interface/AddOns/Blizzard_EditMode/Shared/EditModeManager.lua]:126: in function <.../AddOns/Blizzard_EditMode/Shared/EditModeManager.lua:124>\n[C]: ?\n[C]: ?\n[C]: ?\n[C]: ?\n[C]: in function 'Hide'\n[Interface/AddOns/Blizzard_UIParentPanelManager/Shared/UIParentPanelManager.lua]:863: in function <...UIParentPanelManager/Shared/UIParentPanelManager.lua:853>\n[C]: in function 'HideUIPanel'\n[Interface/AddOns/Blizzard_EditMode/Shared/EditModeManager.lua]:42: in function 'onCloseCallback'\n[Interface/AddOns/Blizzard_SharedXML/Mainline/SharedUIPanelTemplates.lua]:143: in function <...izzard_SharedXML/Mainline/SharedUIPanelTemplates.lua:138>\n[C]: in function 'Click'\n[Interface/AddOns/Blizzard_UIParent/Mainline/UIParent.lua]:2351: in function <...rface/AddOns/Blizzard_UIParent/Mainline/UIParent.lua:2316>\n[C]: ?\n[C]: ?\n[C]: in function 'ToggleGameMenu'\n[TOGGLEGAMEMENU]:1: in function <[string \"TOGGLEGAMEMENU\"]:1>\n",
-["session"] = 115,
 ["time"] = 1777602017,
+["session"] = 115,
 ["counter"] = 1,
 },
 {
@@ -306,14 +306,6 @@ BugGrabberDB = {
 ["stack"] = "[Interface/AddOns/Blizzard_ActionBar/Shared/ActionButton.lua]:847: in function <...ce/AddOns/Blizzard_ActionBar/Shared/ActionButton.lua:845>\n[Interface/AddOns/Blizzard_ActionBar/Shared/ActionButton.lua]:863: in function 'ActionButton_ApplyCooldown'\n[Interface/AddOns/Blizzard_ActionBar/Shared/ActionButton.lua]:842: in function 'ActionButton_UpdateCooldown'\n[Interface/AddOns/Blizzard_ActionBar/Shared/ActionButton.lua]:571: in function 'Update'\n[Interface/AddOns/Blizzard_ActionBar/Shared/ActionButton.lua]:544: in function 'UpdateAction'\n[Interface/AddOns/Blizzard_ActionBar/Shared/ActionButton.lua]:975: in function 'OnEvent'\n[Interface/AddOns/Blizzard_ActionBar/Shared/ActionButton.lua]:1455: in function <...ce/AddOns/Blizzard_ActionBar/Shared/ActionButton.lua:1454>\n[C]: ?\n[C]: ?\n",
 ["session"] = 128,
 ["counter"] = 3,
-},
-{
-["message"] = "bad argument #2 to '?' (Usage: self:SetCooldown(start, duration [, modRate]). Secret values are only allowed during untainted execution for this argument.)",
-["time"] = 1777759743,
-["locals"] = "cooldown=EABButton26Cooldown <ActionButtonTemplate.xml:111>\nstart=<no value>\nduration=<no value>\nenable=true\nmodRate=<no value>\n",
-["stack"] = "[Interface/AddOns/Blizzard_ActionBar/Shared/ActionButton.lua]:847: in function <...ce/AddOns/Blizzard_ActionBar/Shared/ActionButton.lua:845>\n[Interface/AddOns/Blizzard_ActionBar/Shared/ActionButton.lua]:866: in function 'ActionButton_ApplyCooldown'\n[Interface/AddOns/Blizzard_ActionBar/Shared/ActionButton.lua]:842: in function 'ActionButton_UpdateCooldown'\n[Interface/AddOns/Blizzard_ActionBar/Shared/ActionButton.lua]:571: in function 'Update'\n[Interface/AddOns/Blizzard_ActionBar/Shared/ActionButton.lua]:544: in function 'UpdateAction'\n[Interface/AddOns/Blizzard_ActionBar/Shared/ActionButton.lua]:975: in function 'OnEvent'\n[Interface/AddOns/Blizzard_ActionBar/Shared/ActionButton.lua]:1455: in function <...ce/AddOns/Blizzard_ActionBar/Shared/ActionButton.lua:1454>\n[C]: ?\n[C]: ?\n",
-["session"] = 128,
-["counter"] = 27210,
 },
 {
 ["message"] = "[ADDON_ACTION_BLOCKED] AddOn 'CraftScan' tried to call the protected function 'JoinChannelByName()'.",
@@ -389,8 +381,8 @@ BugGrabberDB = {
 },
 {
 ["message"] = "LUA_WARNING: ...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:3187: attempt to index field 'activityIDs' (a secret table value, while execution tainted by 'PremadeGroupsFilter')\n|cffffd200Stack:|r\n[C]: in function 'secureexecuterange'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:395: in function 'InvokeInitializers'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:786: in function 'Update'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:305: in function 'SetScrollPercentageInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:169: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:754: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:124: in function 'FullUpdate'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:721: in function <...ddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua:720>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:210: in function <...e/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua:209>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:213: in function 'TriggerEvent'\n...[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2683: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:2679>\n[C]: in function 'LFGListSearchPanel_UpdateResultList'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2569: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:2568>\n[C]: in function 'Show'\n[Interface/AddOns/Blizzard_UIParentPanelManager/Shared/UIParentPanelManager.lua]:842: in function <...UIParentPanelManager/Shared/UIParentPanelManager.lua:828>\n[C]: in function 'ShowUIPanel'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/PVEFrame.lua]:104: in function <...ce/AddOns/Blizzard_GroupFinder/Mainline/PVEFrame.lua:58>\n[C]: in function 'PVEFrame_ShowFrame'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/PVEFrame.lua]:55: in function 'PVEFrame_ToggleFrame'\n[TOGGLEGROUPFINDER]:1: in function <[string \"TOGGLEGROUPFINDER\"]:1>\n",
-["time"] = 1778107183,
 ["session"] = 170,
+["time"] = 1778107183,
 ["counter"] = 6,
 },
 {
@@ -434,12 +426,44 @@ BugGrabberDB = {
 ["counter"] = 1,
 },
 {
+["message"] = ".../Blizzard_UIPanels_Game/Mainline/CastingBarFrame.lua:212: attempted to index a table that cannot be accessed while tainted (execution tainted by 'CraftScan')",
+["time"] = 1778268773,
+["locals"] = "self=OverlayPlayerCastingBarFrame <CastingBarFrame.xml:500>{\n showTradeSkills=true\n ChargeFlash=Texture <CastingBarFrame.xml:329>\n Flakes03=Texture <CastingBarFrame.xml:288>\n BorderMask=MaskTexture <CastingBarFrame.xml:382>\n maxValue=1.431000\n Sparkles02=Texture <CastingBarFrame.xml:316>\n InterruptGlowAnim=AnimationGroup <CastingBarFrame.xml:186>\n overrideBarType=<no value>\n BorderShield=Texture <CastingBarFrame.xml:258>\n StandardGlow=Texture <CastingBarFrame.xml:364>\n showShield=false\n barType=<no value>\n spellID=77472\n FlashLoopingAnim=AnimationGroup <CastingBarFrame.xml:125>\n ChargeGlow=Texture <CastingBarFrame.xml:228>\n TextBorder=Texture <CastingBarFrame.xml:215>\n unit=\"player\"\n InterruptGlow=Texture <CastingBarFrame.xml:223>\n showIcon=true\n StagePoints=<table>\n BaseGlow=Texture <CastingBarFrame.xml:293>\n StagePips=<table>\n Icon=Texture <CastingBarFrame.xml:264>\n InterruptSparkAnim=AnimationGroup <CastingBarFrame.xml:197>\n CastTimeText=FontString <CastingBarFrame.xml:336>\n Flakes02=Texture <CastingBarFrame.xml:283>\n CraftingFinish=AnimationGroup <CastingBarFrame.xml:162>\n WispMask=MaskTexture <CastingBarFrame.xml:303>\n HoldFadeOutAnim=AnimationGroup <CastingBarFrame.xml:110>\n ChannelShadow=Texture <CastingBarFrame.xml:376>\n Shine=Texture <CastingBarFrame.xml:349>\n FadeOutAnim=AnimationGroup <CastingBarFrame.xml:104>\n StageFinish=AnimationGroup <CastingBarFrame.xml:152>\n castID=\"Cast-3-3776-658-32441-8004-0000FE3A05\"\n StandardFinish=AnimationGroup <AnimationTemplates.xml:14>\n Border=Texture <CastingBarFrame.xml:270>\n ChannelFinish=AnimationGroup <CastingBarFrame.xml:166>\n isHighlightedImportantCast=false\n WispGlow=Texture <CastingBarFrame.xml:298>\n value=0\n look=\"OVERLAY\"\n StageFlash=AnimationGroup <CastingBarFrame.xml:148>\n Spark=Texture <CastingBarFrame.xml:343>\n CraftGlow=Texture <CastingBarFrame.xml:370>\n Sparkles01=Texture <CastingBarFrame.xml:311>\n EnergyGlow=Texture <CastingBarFrame.xml:243>\n Flakes01=Texture <CastingBarFrame.xml:278>\n EnergyMask=MaskTexture <CastingBarFrame.xml:248>\n Flash=Texture <CastingBarFrame.xml:323>\n playCastFX=true\n CraftingMask=MaskTexture <CastingBarFrame.xml:354>\n InterruptShakeAnim=AnimationGroup <CastingBarFrame.xml:190>\n isHighlightedCastTarget=false\n showCastbar=true\n FlashAnim=AnimationGroup <CastingBarFrame.xml:145>\n StageTiers=<table>\n DropShadow=Texture <CastingBarFrame.xml:209>\n Background=Texture <CastingBarFrame.xml:235>\n Text=FontString <CastingBarFrame.xml:330>\n NumStages=0\n}\nbarType=<no value>\n(*temporary)=<forbidden table>\n(*temporary)=\"attempted to index a table that cannot be accessed while tainted (execution tainted by 'CraftScan')\"\n",
+["stack"] = "[Interface/AddOns/Blizzard_UIPanels_Game/Mainline/CastingBarFrame.lua]:212: in function 'GetTypeInfo'\n[Interface/AddOns/Blizzard_UIPanels_Game/Mainline/CastingBarFrame.lua]:340: in function <.../Blizzard_UIPanels_Game/Mainline/CastingBarFrame.lua:309>\n",
+["session"] = 213,
+["counter"] = 5,
+},
+{
+["message"] = "[ADDON_ACTION_BLOCKED] AddOn 'CraftScan' tried to call the protected function 'MultiBarRightButton1:SetShown()'.",
+["time"] = 1778269434,
+["locals"] = "self=<table>\nevent=\"ADDON_ACTION_BLOCKED\"\naddonName=\"CraftScan\"\naddonFunc=\"MultiBarRightButton1:SetShown()\"\nname=\"CraftScan\"\nbadAddons=<table>{\n CraftScan=true\n}\nL=<table>{\n NO_DISPLAY_2=\"|cffffff00The standard display is called BugSack, and can probably be found on the same site where you found !BugGrabber.|r\"\n ERROR_DETECTED=\"%s |cffffff00captured, click the link for more information.|r\"\n BUGGRABBER_STOPPED=\"|cffffff00There are too many errors in your UI. As a result, your game experience may be degraded. Disable or update the failing addons if you don't want to see this message again.|r\"\n USAGE=\"|cffffff00Usage: /buggrabber <1-%d>.|r\"\n STOP_NAG=\"|cffffff00!BugGrabber will not nag about missing a display addon again until next patch.|r\"\n NO_DISPLAY_STOP=\"|cffffff00If you don't want to be reminded about this again, run /stopnag.|r\"\n NO_DISPLAY_1=\"|cffffff00You seem to be running !BugGrabber with no display addon to go along with it. Although a slash command is provided for accessing error reports, a display can help you manage these errors in a more convenient way.|r\"\n ERROR_UNABLE=\"|cffffff00!BugGrabber is unable to retrieve errors from other players by itself. Please install BugSack or a similar display addon that might give you this functionality.|r\"\n ADDON_CALL_PROTECTED=\"[%s] AddOn '%s' tried to call the protected function '%s'.\"\n}\n",
+["stack"] = "[Interface/AddOns/!BugGrabber/BugGrabber.lua]:540: in function '?'\n[Interface/AddOns/!BugGrabber/BugGrabber.lua]:524: in function <Interface/AddOns/!BugGrabber/BugGrabber.lua:524>\n[C]: in function 'SetShown'\n[Interface/AddOns/Blizzard_ActionBar/Shared/ActionBar.lua]:206: in function 'UpdateShownButtons'\n[Interface/AddOns/Blizzard_ActionBar/Shared/ActionButton.lua]:548: in function 'UpdateAction'\n[Interface/AddOns/Blizzard_ActionBar/Shared/ActionButton.lua]:975: in function 'OnEvent'\n[Interface/AddOns/Blizzard_ActionBar/Shared/ActionButton.lua]:223: in function <...ce/AddOns/Blizzard_ActionBar/Shared/ActionButton.lua:220>\n",
+["session"] = 213,
+["counter"] = 1,
+},
+{
 ["message"] = "[ADDON_ACTION_BLOCKED] AddOn 'EllesmereUIBlizzardSkin' tried to call the protected function 'InspectFrame:SetFrameStrata()'.",
-["time"] = 1778183957,
-["locals"] = "self=<table>\nevent=\"ADDON_ACTION_BLOCKED\"\naddonName=\"EllesmereUIBlizzardSkin\"\naddonFunc=\"InspectFrame:SetFrameStrata()\"\nname=\"EllesmereUIBlizzardSkin\"\nbadAddons=<table>{\n EllesmereUIBlizzardSkin=true\n}\nL=<table>{\n NO_DISPLAY_2=\"|cffffff00The standard display is called BugSack, and can probably be found on the same site where you found !BugGrabber.|r\"\n ERROR_DETECTED=\"%s |cffffff00captured, click the link for more information.|r\"\n BUGGRABBER_STOPPED=\"|cffffff00There are too many errors in your UI. As a result, your game experience may be degraded. Disable or update the failing addons if you don't want to see this message again.|r\"\n USAGE=\"|cffffff00Usage: /buggrabber <1-%d>.|r\"\n STOP_NAG=\"|cffffff00!BugGrabber will not nag about missing a display addon again until next patch.|r\"\n NO_DISPLAY_STOP=\"|cffffff00If you don't want to be reminded about this again, run /stopnag.|r\"\n NO_DISPLAY_1=\"|cffffff00You seem to be running !BugGrabber with no display addon to go along with it. Although a slash command is provided for accessing error reports, a display can help you manage these errors in a more convenient way.|r\"\n ERROR_UNABLE=\"|cffffff00!BugGrabber is unable to retrieve errors from other players by itself. Please install BugSack or a similar display addon that might give you this functionality.|r\"\n ADDON_CALL_PROTECTED=\"[%s] AddOn '%s' tried to call the protected function '%s'.\"\n}\n",
+["time"] = 1778269452,
+["locals"] = "self=<table>\nevent=\"ADDON_ACTION_BLOCKED\"\naddonName=\"EllesmereUIBlizzardSkin\"\naddonFunc=\"InspectFrame:SetFrameStrata()\"\nname=\"EllesmereUIBlizzardSkin\"\nbadAddons=<table>{\n EllesmereUIBlizzardSkin=true\n CraftScan=true\n}\nL=<table>{\n NO_DISPLAY_2=\"|cffffff00The standard display is called BugSack, and can probably be found on the same site where you found !BugGrabber.|r\"\n ERROR_DETECTED=\"%s |cffffff00captured, click the link for more information.|r\"\n BUGGRABBER_STOPPED=\"|cffffff00There are too many errors in your UI. As a result, your game experience may be degraded. Disable or update the failing addons if you don't want to see this message again.|r\"\n USAGE=\"|cffffff00Usage: /buggrabber <1-%d>.|r\"\n STOP_NAG=\"|cffffff00!BugGrabber will not nag about missing a display addon again until next patch.|r\"\n NO_DISPLAY_STOP=\"|cffffff00If you don't want to be reminded about this again, run /stopnag.|r\"\n NO_DISPLAY_1=\"|cffffff00You seem to be running !BugGrabber with no display addon to go along with it. Although a slash command is provided for accessing error reports, a display can help you manage these errors in a more convenient way.|r\"\n ERROR_UNABLE=\"|cffffff00!BugGrabber is unable to retrieve errors from other players by itself. Please install BugSack or a similar display addon that might give you this functionality.|r\"\n ADDON_CALL_PROTECTED=\"[%s] AddOn '%s' tried to call the protected function '%s'.\"\n}\n",
 ["stack"] = "[Interface/AddOns/!BugGrabber/BugGrabber.lua]:540: in function '?'\n[Interface/AddOns/!BugGrabber/BugGrabber.lua]:524: in function <Interface/AddOns/!BugGrabber/BugGrabber.lua:524>\n[C]: in function 'SetFrameStrata'\n[Interface/AddOns/EllesmereUIBlizzardSkin/EllesmereUIBlizzardSkin_InspectSheet.lua]:914: in function <...lizzardSkin/EllesmereUIBlizzardSkin_InspectSheet.lua:297>\n[Interface/AddOns/EllesmereUIBlizzardSkin/EllesmereUIBlizzardSkin_InspectSheet.lua]:944: in function <...lizzardSkin/EllesmereUIBlizzardSkin_InspectSheet.lua:938>\n[Interface/AddOns/EllesmereUIBlizzardSkin/EllesmereUIBlizzardSkin_InspectSheet.lua]:1072: in function <...lizzardSkin/EllesmereUIBlizzardSkin_InspectSheet.lua:1070>\n",
-["session"] = 202,
-["counter"] = 13,
+["session"] = 213,
+["counter"] = 14,
+},
+{
+["message"] = "attempted to iterate a table that cannot be accessed while tainted (execution tainted by 'CraftScan')",
+["time"] = 1778270048,
+["locals"] = "self=OverlayPlayerCastingBarFrame <CastingBarFrame.xml:500>{\n showTradeSkills=true\n ChargeFlash=Texture <CastingBarFrame.xml:329>\n Flakes03=Texture <CastingBarFrame.xml:288>\n BorderMask=MaskTexture <CastingBarFrame.xml:382>\n maxValue=1.376000\n Sparkles02=Texture <CastingBarFrame.xml:316>\n casting=true\n InterruptGlowAnim=AnimationGroup <CastingBarFrame.xml:186>\n BorderShield=Texture <CastingBarFrame.xml:258>\n StandardGlow=Texture <CastingBarFrame.xml:364>\n showShield=false\n barType=<no value>\n spellID=51505\n FlashLoopingAnim=AnimationGroup <CastingBarFrame.xml:125>\n ChargeGlow=Texture <CastingBarFrame.xml:228>\n TextBorder=Texture <CastingBarFrame.xml:215>\n unit=\"player\"\n InterruptGlow=Texture <CastingBarFrame.xml:223>\n showIcon=true\n StagePoints=<table>\n BaseGlow=Texture <CastingBarFrame.xml:293>\n StagePips=<table>\n Icon=Texture <CastingBarFrame.xml:264>\n InterruptSparkAnim=AnimationGroup <CastingBarFrame.xml:197>\n CastTimeText=FontString <CastingBarFrame.xml:336>\n Flakes02=Texture <CastingBarFrame.xml:283>\n CraftingFinish=AnimationGroup <CastingBarFrame.xml:162>\n WispMask=MaskTexture <CastingBarFrame.xml:303>\n HoldFadeOutAnim=AnimationGroup <CastingBarFrame.xml:110>\n ChannelShadow=Texture <CastingBarFrame.xml:376>\n Shine=Texture <CastingBarFrame.xml:349>\n FadeOutAnim=AnimationGroup <CastingBarFrame.xml:104>\n StageFinish=AnimationGroup <CastingBarFrame.xml:152>\n castID=\"Cast-3-3776-658-32441-73899-00077E3A97\"\n StandardFinish=AnimationGroup <AnimationTemplates.xml:14>\n Border=Texture <CastingBarFrame.xml:270>\n ChannelFinish=AnimationGroup <CastingBarFrame.xml:166>\n isHighlightedImportantCast=false\n WispGlow=Texture <CastingBarFrame.xml:298>\n value=0\n look=\"OVERLAY\"\n StageFlash=AnimationGroup <CastingBarFrame.xml:148>\n Spark=Texture <CastingBarFrame.xml:343>\n CraftGlow=Texture <CastingBarFrame.xml:370>\n Sparkles01=Texture <CastingBarFrame.xml:311>\n EnergyGlow=Texture <CastingBarFrame.xml:243>\n Flakes01=Texture <CastingBarFrame.xml:278>\n EnergyMask=MaskTexture <CastingBarFrame.xml:248>\n Flash=Texture <CastingBarFrame.xml:323>\n playCastFX=true\n CraftingMask=MaskTexture <CastingBarFrame.xml:354>\n InterruptShakeAnim=AnimationGroup <CastingBarFrame.xml:190>\n isHighlightedCastTarget=false\n showCastbar=false\n FlashAnim=AnimationGroup <CastingBarFrame.xml:145>\n StageTiers=<table>\n DropShadow=Texture <CastingBarFrame.xml:209>\n Background=Texture <CastingBarFrame.xml:235>\n Text=FontString <CastingBarFrame.xml:330>\n NumStages=0\n}\n(for state)=<forbidden table>\n(for control)=nil\n",
+["stack"] = "[Interface/AddOns/Blizzard_UIPanels_Game/Mainline/CastingBarFrame.lua]:722: in function 'StopFinishAnims'\n[Interface/AddOns/Blizzard_UIPanels_Game/Mainline/CastingBarFrame.lua]:732: in function 'StopAnims'\n[Interface/AddOns/Blizzard_UIPanels_Game/Mainline/CastingBarFrame.lua]:364: in function <.../Blizzard_UIPanels_Game/Mainline/CastingBarFrame.lua:309>\n",
+["session"] = 213,
+["counter"] = 228,
+},
+{
+["message"] = "bad argument #2 to '?' (Usage: self:SetCooldown(start, duration [, modRate]). Secret values are only allowed during untainted execution for this argument.)",
+["time"] = 1778270064,
+["locals"] = "cooldown=EABButton29Cooldown <ActionButtonTemplate.xml:111>\nstart=<no value>\nduration=<no value>\nenable=true\nmodRate=<no value>\n",
+["stack"] = "[Interface/AddOns/Blizzard_ActionBar/Shared/ActionButton.lua]:847: in function <...ce/AddOns/Blizzard_ActionBar/Shared/ActionButton.lua:845>\n[Interface/AddOns/Blizzard_ActionBar/Shared/ActionButton.lua]:866: in function 'ActionButton_ApplyCooldown'\n[Interface/AddOns/Blizzard_ActionBar/Shared/ActionButton.lua]:842: in function 'ActionButton_UpdateCooldown'\n[Interface/AddOns/Blizzard_ActionBar/Shared/ActionButton.lua]:571: in function 'Update'\n[Interface/AddOns/Blizzard_ActionBar/Shared/ActionButton.lua]:544: in function 'UpdateAction'\n[Interface/AddOns/Blizzard_ActionBar/Shared/ActionButton.lua]:975: in function 'OnEvent'\n[Interface/AddOns/Blizzard_ActionBar/Shared/ActionButton.lua]:223: in function <...ce/AddOns/Blizzard_ActionBar/Shared/ActionButton.lua:220>\n",
+["session"] = 213,
+["counter"] = 29561,
 },
 },
 }

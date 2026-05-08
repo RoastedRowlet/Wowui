@@ -1,6 +1,0 @@
-<Bindings>
-  <Binding name="MDTTOGGLE" Category="BINDING_HEADER_MDT">
-    MDT:ShowInterface()
-  </Binding>
-  <Binding name="CLICK MDTFocusMarkerButton:LeftButton" Category="BINDING_HEADER_MDT" />
-</Bindings>

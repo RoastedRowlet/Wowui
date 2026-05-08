@@ -1,7 +1,0 @@
-## 6.1.2 (2026-05-05)
-
-- Added a version check and changelog window from the version text in the bottom-left corner.
-- Added update notifications with copyable CurseForge and Wago download links when a newer party member version is detected.
-- Added copyable GitHub, Discord, and Patreon link dialogs in the bottom toolbar.
-- Side panel buttons now close their open dialogs when clicked again.
-- Fixed Maisara Caverns detection for zone 2437.
