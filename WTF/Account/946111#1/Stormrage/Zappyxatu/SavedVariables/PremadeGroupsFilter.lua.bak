@@ -33,13 +33,14 @@ PremadeGroupsFilterState = {
 ["difficulty"] = {
 },
 ["partyfit"] = true,
+["dungeon8"] = true,
 ["dungeon5"] = false,
 ["tanks"] = {
 ["max"] = "",
 ["min"] = "",
 ["act"] = false,
 },
-["dungeon3"] = true,
+["dungeon3"] = false,
 },
 },
 ["c121f4"] = {

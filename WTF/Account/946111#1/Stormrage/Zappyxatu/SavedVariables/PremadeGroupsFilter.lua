@@ -32,7 +32,8 @@ PremadeGroupsFilterState = {
 ["expression"] = "",
 ["difficulty"] = {
 },
-["dungeon3"] = true,
+["dungeon3"] = false,
+["dungeon8"] = true,
 ["tanks"] = {
 ["max"] = "",
 ["min"] = "",

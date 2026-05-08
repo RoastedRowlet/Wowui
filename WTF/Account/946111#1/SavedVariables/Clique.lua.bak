@@ -2,6 +2,12 @@
 CliqueDB = nil
 CliqueDB3 = {
 ["char"] = {
+["Barelynoer - Area 52"] = {
+["spec1_profileKey"] = "Barelynoer - Area 52",
+["spec3_profileKey"] = "Barelynoer - Area 52",
+["specswap"] = false,
+["spec2_profileKey"] = "Barelynoer - Area 52",
+},
 ["Angryabsol - Stormrage"] = {
 ["spec1_profileKey"] = "Angryabsol - Stormrage",
 ["spec2_profileKey"] = "Angryabsol - Stormrage",
@@ -10,10 +16,10 @@ CliqueDB3 = {
 ["stopcastingfix"] = true,
 },
 ["Lonelylitten - Stormrage"] = {
-["fastooc"] = false,
 ["spec1_profileKey"] = "Lonelylitten - Stormrage",
 ["spec2_profileKey"] = "Lonelylitten - Stormrage",
 ["downclick"] = false,
+["fastooc"] = false,
 ["spec4_profileKey"] = "Lonelylitten - Stormrage",
 ["specswap"] = false,
 ["spec3_profileKey"] = "Lonelylitten - Stormrage",
@@ -23,12 +29,6 @@ CliqueDB3 = {
 ["spec3_profileKey"] = "Madmareep - Stormrage",
 ["spec2_profileKey"] = "Madmareep - Stormrage",
 ["specswap"] = false,
-},
-["Barelynoer - Area 52"] = {
-["spec1_profileKey"] = "Barelynoer - Area 52",
-["spec3_profileKey"] = "Barelynoer - Area 52",
-["specswap"] = false,
-["spec2_profileKey"] = "Barelynoer - Area 52",
 },
 },
 ["profileKeys"] = {
@@ -357,6 +357,13 @@ CliqueDB3 = {
 ["unit"] = "mouseover",
 },
 {
+["type"] = "menu",
+["key"] = "CTRL-BUTTON2",
+["sets"] = {
+["default"] = true,
+},
+},
+{
 ["spell"] = "Healing Wave",
 ["key"] = "BUTTON2",
 ["sets"] = {
@@ -366,37 +373,12 @@ CliqueDB3 = {
 ["type"] = "spell",
 },
 {
+["type"] = "menu",
 ["sets"] = {
 ["default"] = true,
 },
-["type"] = "menu",
-["icon"] = 132212,
 ["key"] = "SHIFT-BUTTON2",
-},
-{
-["type"] = "menu",
-["key"] = "CTRL-BUTTON2",
-["sets"] = {
-["default"] = true,
-},
-},
-{
-["spell"] = "Unleash Life",
-["key"] = "BUTTON1",
-["sets"] = {
-["default"] = true,
-},
-["icon"] = 462328,
-["type"] = "spell",
-},
-{
-["spell"] = "Ancestral Spirit",
-["key"] = "CTRL-BUTTON1",
-["sets"] = {
-["default"] = true,
-},
-["icon"] = 136077,
-["type"] = "spell",
+["icon"] = 132212,
 },
 {
 ["type"] = "target",
@@ -415,6 +397,24 @@ CliqueDB3 = {
 },
 ["icon"] = 236288,
 ["type"] = "spell",
+},
+{
+["spell"] = "Ancestral Spirit",
+["key"] = "CTRL-BUTTON1",
+["sets"] = {
+["default"] = true,
+},
+["icon"] = 136077,
+["type"] = "spell",
+},
+{
+["spell"] = "Riptide",
+["key"] = "BUTTON1",
+["type"] = "spell",
+["sets"] = {
+["default"] = true,
+},
+["icon"] = 252995,
 },
 },
 },
