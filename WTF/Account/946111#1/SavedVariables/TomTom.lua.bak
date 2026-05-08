@@ -22,6 +22,11 @@ nil,
 -11.66664409637451,
 },
 },
+["paste"] = {
+["button"] = {
+["showInCompartment"] = true,
+},
+},
 ["block"] = {
 ["position"] = {
 "TOPRIGHT",
@@ -29,11 +34,6 @@ nil,
 "TOPRIGHT",
 -248.3324127197266,
 -120.8334274291992,
-},
-},
-["paste"] = {
-["button"] = {
-["showInCompartment"] = true,
 },
 },
 },

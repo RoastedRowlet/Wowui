@@ -1,7 +1,7 @@
 
 BugGrabberDB = {
+["session"] = 204,
 ["lastSanitation"] = 3,
-["session"] = 201,
 ["errors"] = {
 {
 ["message"] = "...s/AdvancedFocusCastBar/AdvancedFocusCastBarMixin.lua:1861: bad argument #1 to 'SetAlpha' (Usage: self:SetAlpha(alpha))",
@@ -101,8 +101,8 @@ BugGrabberDB = {
 },
 {
 ["message"] = "LUA_WARNING: Couldn't open Interface/AddOns/WeakAuras/Bindings.xml",
-["session"] = 52,
 ["time"] = 1777140638,
+["session"] = 52,
 ["counter"] = 1,
 },
 {
@@ -267,20 +267,20 @@ BugGrabberDB = {
 },
 {
 ["message"] = "LUA_WARNING: Interface/AddOns/!BugGrabber/BugGrabber.lua:-1: insecure scripts exceeded execution limit for addon !BugGrabber",
-["time"] = 1777601702,
 ["session"] = 115,
+["time"] = 1777601702,
 ["counter"] = 10,
 },
 {
 ["message"] = "LUA_WARNING: ...ce/AddOns/Blizzard_CooldownViewer/CooldownViewer.lua:704: bad argument #1 to 'EnableSpellRangeCheck' (Usage: C_Spell.EnableSpellRangeCheck(spellIdentifier, enable))\n|cffffd200Stack:|r\n[C]: in function 'secureexecuterange'\n[Interface/AddOns/Blizzard_EditMode/Shared/EditModeManager.lua]:97: in function 'HideSystemSelections'\n[Interface/AddOns/Blizzard_EditMode/Shared/EditModeManager.lua]:104: in function <.../AddOns/Blizzard_EditMode/Shared/EditModeManager.lua:100>\n[C]: ?\n[C]: ?\n[C]: ?\n[C]: in function 'ExitEditMode'\n[Interface/AddOns/Blizzard_EditMode/Shared/EditModeManager.lua]:126: in function <.../AddOns/Blizzard_EditMode/Shared/EditModeManager.lua:124>\n[C]: ?\n[C]: ?\n[C]: ?\n[C]: ?\n[C]: in function 'Hide'\n[Interface/AddOns/Blizzard_UIParentPanelManager/Shared/UIParentPanelManager.lua]:863: in function <...UIParentPanelManager/Shared/UIParentPanelManager.lua:853>\n[C]: in function 'HideUIPanel'\n[Interface/AddOns/Blizzard_EditMode/Shared/EditModeManager.lua]:42: in function 'onCloseCallback'\n[Interface/AddOns/Blizzard_SharedXML/Mainline/SharedUIPanelTemplates.lua]:143: in function <...izzard_SharedXML/Mainline/SharedUIPanelTemplates.lua:138>\n[C]: in function 'Click'\n[Interface/AddOns/Blizzard_UIParent/Mainline/UIParent.lua]:2351: in function <...rface/AddOns/Blizzard_UIParent/Mainline/UIParent.lua:2316>\n[C]: ?\n[C]: ?\n[C]: in function 'ToggleGameMenu'\n[TOGGLEGAMEMENU]:1: in function <[string \"TOGGLEGAMEMENU\"]:1>\n",
-["time"] = 1777602017,
 ["session"] = 115,
+["time"] = 1777602017,
 ["counter"] = 1,
 },
 {
 ["message"] = "LUA_WARNING: ...ce/AddOns/Blizzard_CooldownViewer/CooldownViewer.lua:877: attempted to index a table that cannot be accessed while tainted (execution tainted by 'TalentLoadoutsEx')\n|cffffd200Stack:|r\n[C]: in function 'secureexecuterange'\n[Interface/AddOns/Blizzard_EditMode/Shared/EditModeManager.lua]:97: in function 'HideSystemSelections'\n[Interface/AddOns/Blizzard_EditMode/Shared/EditModeManager.lua]:104: in function <.../AddOns/Blizzard_EditMode/Shared/EditModeManager.lua:100>\n[C]: ?\n[C]: ?\n[C]: ?\n[C]: in function 'ExitEditMode'\n[Interface/AddOns/Blizzard_EditMode/Shared/EditModeManager.lua]:126: in function <.../AddOns/Blizzard_EditMode/Shared/EditModeManager.lua:124>\n[C]: ?\n[C]: ?\n[C]: ?\n[C]: ?\n[C]: in function 'Hide'\n[Interface/AddOns/Blizzard_UIParentPanelManager/Shared/UIParentPanelManager.lua]:863: in function <...UIParentPanelManager/Shared/UIParentPanelManager.lua:853>\n[C]: in function 'HideUIPanel'\n[Interface/AddOns/Blizzard_EditMode/Shared/EditModeManager.lua]:42: in function 'onCloseCallback'\n[Interface/AddOns/Blizzard_SharedXML/Mainline/SharedUIPanelTemplates.lua]:143: in function <...izzard_SharedXML/Mainline/SharedUIPanelTemplates.lua:138>\n[C]: in function 'Click'\n[Interface/AddOns/Blizzard_UIParent/Mainline/UIParent.lua]:2351: in function <...rface/AddOns/Blizzard_UIParent/Mainline/UIParent.lua:2316>\n[C]: ?\n[C]: ?\n[C]: in function 'ToggleGameMenu'\n[TOGGLEGAMEMENU]:1: in function <[string \"TOGGLEGAMEMENU\"]:1>\n",
-["time"] = 1777602017,
 ["session"] = 115,
+["time"] = 1777602017,
 ["counter"] = 1,
 },
 {
@@ -389,8 +389,8 @@ BugGrabberDB = {
 },
 {
 ["message"] = "LUA_WARNING: ...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:3187: attempt to index field 'activityIDs' (a secret table value, while execution tainted by 'PremadeGroupsFilter')\n|cffffd200Stack:|r\n[C]: in function 'secureexecuterange'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:395: in function 'InvokeInitializers'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:786: in function 'Update'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:305: in function 'SetScrollPercentageInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:169: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:754: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:124: in function 'FullUpdate'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:721: in function <...ddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua:720>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:210: in function <...e/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua:209>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:213: in function 'TriggerEvent'\n...[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2683: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:2679>\n[C]: in function 'LFGListSearchPanel_UpdateResultList'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2569: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:2568>\n[C]: in function 'Show'\n[Interface/AddOns/Blizzard_UIParentPanelManager/Shared/UIParentPanelManager.lua]:842: in function <...UIParentPanelManager/Shared/UIParentPanelManager.lua:828>\n[C]: in function 'ShowUIPanel'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/PVEFrame.lua]:104: in function <...ce/AddOns/Blizzard_GroupFinder/Mainline/PVEFrame.lua:58>\n[C]: in function 'PVEFrame_ShowFrame'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/PVEFrame.lua]:55: in function 'PVEFrame_ToggleFrame'\n[TOGGLEGROUPFINDER]:1: in function <[string \"TOGGLEGROUPFINDER\"]:1>\n",
-["session"] = 170,
 ["time"] = 1778107183,
+["session"] = 170,
 ["counter"] = 6,
 },
 {
@@ -426,20 +426,20 @@ BugGrabberDB = {
 ["counter"] = 1,
 },
 {
-["message"] = "[ADDON_ACTION_BLOCKED] AddOn 'EllesmereUIBlizzardSkin' tried to call the protected function 'InspectFrame:SetFrameStrata()'.",
-["time"] = 1778130838,
-["locals"] = "self=<table>\nevent=\"ADDON_ACTION_BLOCKED\"\naddonName=\"EllesmereUIBlizzardSkin\"\naddonFunc=\"InspectFrame:SetFrameStrata()\"\nname=\"EllesmereUIBlizzardSkin\"\nbadAddons=<table>{\n EllesmereUIBlizzardSkin=true\n}\nL=<table>{\n NO_DISPLAY_2=\"|cffffff00The standard display is called BugSack, and can probably be found on the same site where you found !BugGrabber.|r\"\n ERROR_DETECTED=\"%s |cffffff00captured, click the link for more information.|r\"\n BUGGRABBER_STOPPED=\"|cffffff00There are too many errors in your UI. As a result, your game experience may be degraded. Disable or update the failing addons if you don't want to see this message again.|r\"\n USAGE=\"|cffffff00Usage: /buggrabber <1-%d>.|r\"\n STOP_NAG=\"|cffffff00!BugGrabber will not nag about missing a display addon again until next patch.|r\"\n NO_DISPLAY_STOP=\"|cffffff00If you don't want to be reminded about this again, run /stopnag.|r\"\n NO_DISPLAY_1=\"|cffffff00You seem to be running !BugGrabber with no display addon to go along with it. Although a slash command is provided for accessing error reports, a display can help you manage these errors in a more convenient way.|r\"\n ERROR_UNABLE=\"|cffffff00!BugGrabber is unable to retrieve errors from other players by itself. Please install BugSack or a similar display addon that might give you this functionality.|r\"\n ADDON_CALL_PROTECTED=\"[%s] AddOn '%s' tried to call the protected function '%s'.\"\n}\n",
-["stack"] = "[Interface/AddOns/!BugGrabber/BugGrabber.lua]:540: in function '?'\n[Interface/AddOns/!BugGrabber/BugGrabber.lua]:524: in function <Interface/AddOns/!BugGrabber/BugGrabber.lua:524>\n[C]: in function 'SetFrameStrata'\n[Interface/AddOns/EllesmereUIBlizzardSkin/EllesmereUIBlizzardSkin_InspectSheet.lua]:914: in function <...lizzardSkin/EllesmereUIBlizzardSkin_InspectSheet.lua:297>\n[Interface/AddOns/EllesmereUIBlizzardSkin/EllesmereUIBlizzardSkin_InspectSheet.lua]:944: in function <...lizzardSkin/EllesmereUIBlizzardSkin_InspectSheet.lua:938>\n[Interface/AddOns/EllesmereUIBlizzardSkin/EllesmereUIBlizzardSkin_InspectSheet.lua]:1072: in function <...lizzardSkin/EllesmereUIBlizzardSkin_InspectSheet.lua:1070>\n",
-["session"] = 189,
-["counter"] = 12,
-},
-{
 ["message"] = "...dOns/Blizzard_ChatFrameBase/Shared/ChatFrameUtil.lua:701: attempt to compare local 'messageAccessID' (a secret number value, while execution tainted by 'BigWigs_Core')",
 ["time"] = 1778172721,
 ["locals"] = "sourceChatFrame=ChatFrame1 <FloatingChatFrame.xml:645>{\n tellTimer=169809.913000\n shouldFadeAfterInactivity=false\n hasActiveChanges=false\n isScrollingMessageFrame=true\n systemPositionDirty=false\n buttonFrame=ChatFrame1ButtonFrame <FloatingChatFrame.xml:455>\n snappedFrames=<table>\n alternativeDefaultLanguage=\"Common\"\n hasOwnFontObject=true\n oldAlpha=0\n channelList=<table>\n FontStringContainer=Frame <ScrollingMessageFrame.xml:9>\n messageTypeList=<table>\n fontObject=table: 000001516D869C80 <UnknownFile:0>\n systemNameString=\"Chat Frame\"\n EditModeResizeButton=Button <EditModeSystemTemplates.xml:173>\n settingsDialogAnchor=<table>\n clickAnywhereButton=ChatFrame1ClickAnywhereButton <FloatingChatFrame.xml:403>\n isLayoutDirty=false\n systemInfo=<table>\n fadeDurationSecs=3\n buttonSide=\"left\"\n ResizeButton=ChatFrame1ResizeButton <FloatingChatFrame.xml:416>\n overrideFadeTimestamp=170028.153000\n settingDisplayInfoMap=<table>\n fontStringPool=<table>\n dirtySettings=<table>\n mouseOutTime=0\n hasBeenFaded=true\n isInitialized=1\n historyBuffer=<table>\n defaultLanguage=\"Common\"\n allowScroll=false\n isUninteractable=false\n name=\"General\"\n checkedGMOTD=true\n isDocked=1\n ScrollToBottomButton=Button <FloatingChatFrame.xml:475>\n isDisplayDirty=false\n downKeys=<table>\n savedSystemInfo=<table>\n onDisplayRefreshedCallbacks=<table>\n visibleLines=<table>\n oldestFadingLineTimestamp=Infinite\n textIsCopyable=false\n editBox=ChatFrame1EditBox <FloatingChatFrame.xml:496>\n scrollOffset=0\n timeVisibleSecs=120\n mouseInTime=0\n zoneChannelList=<table>\n insertMode=2\n Background=ChatFrame1Background <FloatingChatFrame.xml:6>\n Selection=Frame <EditModeSystemTemplates.xml:167>\n ScrollBar=Frame <ChatFrame.xml:5>\n allowAtGlues=true\n system=8\n settingMap=<table>\n isStaticDocked=true\n isLocked=true\n}\nchatType=\"CHANNEL\"\nchatTarget=\"3\"\nwindowName=\"LocalDefense\"\nframe=ChatFrame7 <FloatingChatFrame.xml:692>{\n oldestFadingLineTimestamp=Infinite\n shouldFadeAfterInactivity=false\n buttonSide=\"left\"\n textIsCopyable=false\n overrideFadeTimestamp=0\n fontStringPool=<table>\n isScrollingMessageFrame=true\n isUninteractable=false\n buttonFrame=ChatFrame7ButtonFrame <FloatingChatFrame.xml:455>\n isDocked=1\n alternativeDefaultLanguage=\"Common\"\n hasOwnFontObject=true\n allowScroll=true\n oldAlpha=0\n channelList=<table>\n messageTypeList=<table>\n timeVisibleSecs=120\n hasBeenFaded=true\n defaultLanguage=\"Common\"\n isInitialized=1\n fontObject=table: 000001516D8B62C0 <UnknownFile:0>\n isLayoutDirty=true\n name=\"LocalDefense\"\n fadeDurationSecs=3\n isDisplayDirty=false\n onDisplayRefreshedCallbacks=<table>\n visibleLines=<table>\n scrollOffset=0\n zoneChannelList=<table>\n historyBuffer=<table>\n Background=ChatFrame7Background <FloatingChatFrame.xml:6>\n editBox=ChatFrame7EditBox <FloatingChatFrame.xml:496>\n ScrollToBottomButton=Button <FloatingChatFrame.xml:475>\n ResizeButton=ChatFrame7ResizeButton <FloatingChatFrame.xml:416>\n insertMode=2\n ScrollBar=Frame <ChatFrame.xml:5>\n FontStringContainer=Frame <ScrollingMessageFrame.xml:9>\n clickAnywhereButton=ChatFrame7ClickAnywhereButton <FloatingChatFrame.xml:403>\n isLocked=true\n}\naccessID=<no value>\n(for index)=12\n(for limit)=128\n(for step)=1\ni=12\ntext=<no value>\nr=1\ng=1\nb=0.623529\nchatTypeID=13\nmessageAccessID=<no value>\nlineID=<no value>\n(*temporary)=13\n(*temporary)=<no value>\n(*temporary)=<no value>\n(*temporary)=\"CHAT_MSG_MONSTER_SAY\"\n(*temporary)=<table>{\n 1=<no value>\n 2=<no value>\n 3=\"\"\n 4=\"\"\n 5=<no value>\n 6=\"\"\n 7=0\n 8=0\n 9=\"\"\n 10=0\n 11=2526\n 13=<no value>\n 14=false\n 15=false\n 16=false\n 17=false\n n=17\n}\n(*temporary)=<no value>\n(*temporary)=\"CHAT_MSG_MONSTER_SAY\"\n(*temporary)=<table>{\n 1=<no value>\n 2=<no value>\n 3=\"\"\n 4=\"\"\n 5=<no value>\n 6=\"\"\n 7=0\n 8=0\n 9=\"\"\n 10=0\n 11=2526\n 13=<no value>\n 14=false\n 15=false\n 16=false\n 17=false\n n=17\n}\n(*temporary)=\"attempt to compare local 'messageAccessID' (a secret number value, while execution tainted by 'BigWigs_Core')\"\n",
 ["stack"] = "[Interface/AddOns/Blizzard_ChatFrameBase/Shared/ChatFrameUtil.lua]:701: in function 'PopOutChat'\n[Interface/AddOns/Blizzard_ChatFrameBase/Shared/ChatFrameUtil.lua]:641: in function <...dOns/Blizzard_ChatFrameBase/Shared/ChatFrameUtil.lua:640>\n[tail call]: ?\n[C]: in function 'securecallfunction'\n[Interface/AddOns/Blizzard_Menu/Menu.lua]:902: in function 'Pick'\n[Interface/AddOns/Blizzard_Menu/MenuTemplates.lua]:80: in function <Interface/AddOns/Blizzard_Menu/MenuTemplates.lua:74>\n",
 ["session"] = 201,
 ["counter"] = 1,
+},
+{
+["message"] = "[ADDON_ACTION_BLOCKED] AddOn 'EllesmereUIBlizzardSkin' tried to call the protected function 'InspectFrame:SetFrameStrata()'.",
+["time"] = 1778183957,
+["locals"] = "self=<table>\nevent=\"ADDON_ACTION_BLOCKED\"\naddonName=\"EllesmereUIBlizzardSkin\"\naddonFunc=\"InspectFrame:SetFrameStrata()\"\nname=\"EllesmereUIBlizzardSkin\"\nbadAddons=<table>{\n EllesmereUIBlizzardSkin=true\n}\nL=<table>{\n NO_DISPLAY_2=\"|cffffff00The standard display is called BugSack, and can probably be found on the same site where you found !BugGrabber.|r\"\n ERROR_DETECTED=\"%s |cffffff00captured, click the link for more information.|r\"\n BUGGRABBER_STOPPED=\"|cffffff00There are too many errors in your UI. As a result, your game experience may be degraded. Disable or update the failing addons if you don't want to see this message again.|r\"\n USAGE=\"|cffffff00Usage: /buggrabber <1-%d>.|r\"\n STOP_NAG=\"|cffffff00!BugGrabber will not nag about missing a display addon again until next patch.|r\"\n NO_DISPLAY_STOP=\"|cffffff00If you don't want to be reminded about this again, run /stopnag.|r\"\n NO_DISPLAY_1=\"|cffffff00You seem to be running !BugGrabber with no display addon to go along with it. Although a slash command is provided for accessing error reports, a display can help you manage these errors in a more convenient way.|r\"\n ERROR_UNABLE=\"|cffffff00!BugGrabber is unable to retrieve errors from other players by itself. Please install BugSack or a similar display addon that might give you this functionality.|r\"\n ADDON_CALL_PROTECTED=\"[%s] AddOn '%s' tried to call the protected function '%s'.\"\n}\n",
+["stack"] = "[Interface/AddOns/!BugGrabber/BugGrabber.lua]:540: in function '?'\n[Interface/AddOns/!BugGrabber/BugGrabber.lua]:524: in function <Interface/AddOns/!BugGrabber/BugGrabber.lua:524>\n[C]: in function 'SetFrameStrata'\n[Interface/AddOns/EllesmereUIBlizzardSkin/EllesmereUIBlizzardSkin_InspectSheet.lua]:914: in function <...lizzardSkin/EllesmereUIBlizzardSkin_InspectSheet.lua:297>\n[Interface/AddOns/EllesmereUIBlizzardSkin/EllesmereUIBlizzardSkin_InspectSheet.lua]:944: in function <...lizzardSkin/EllesmereUIBlizzardSkin_InspectSheet.lua:938>\n[Interface/AddOns/EllesmereUIBlizzardSkin/EllesmereUIBlizzardSkin_InspectSheet.lua]:1072: in function <...lizzardSkin/EllesmereUIBlizzardSkin_InspectSheet.lua:1070>\n",
+["session"] = 202,
+["counter"] = 13,
 },
 },
 }

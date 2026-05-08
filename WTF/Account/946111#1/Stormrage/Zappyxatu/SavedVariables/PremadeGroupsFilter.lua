@@ -9,13 +9,6 @@ PremadeGroupsFilterState = {
 ["c2f4"] = {
 ["enabled"] = true,
 ["dungeon"] = {
-["difficulty"] = {
-},
-["tanks"] = {
-["max"] = "",
-["min"] = "",
-["act"] = false,
-},
 ["mprating"] = {
 ["max"] = "",
 ["min"] = "",
@@ -37,6 +30,16 @@ PremadeGroupsFilterState = {
 ["act"] = false,
 },
 ["expression"] = "",
+["difficulty"] = {
+},
+["dungeon3"] = true,
+["tanks"] = {
+["max"] = "",
+["min"] = "",
+["act"] = false,
+},
+["dungeon5"] = false,
+["partyfit"] = true,
 },
 },
 ["c121f4"] = {
