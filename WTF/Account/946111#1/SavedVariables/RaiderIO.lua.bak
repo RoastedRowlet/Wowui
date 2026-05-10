@@ -1,43 +1,24 @@
 
 RaiderIO_Config = {
+["minimapIcon"] = {
+["minimapPos"] = 180,
+["showInCompartment"] = true,
+["hide"] = false,
+["lock"] = false,
+},
 ["profilePoint"] = {
 ["y"] = 0,
 ["x"] = -16,
 ["point"] = "TOPLEFT",
 },
-["minimapIcon"] = {
-["minimapPos"] = 180,
-["showInCompartment"] = true,
-["lock"] = false,
-["hide"] = false,
-},
 }
-RaiderIO_LastCharacter = "us-Zappyxatu-stormrage"
+RaiderIO_LastCharacter = "us-Barelynoer-area-52"
 RaiderIO_MissingCharacters = {
-["us-Diverdown-area-52"] = true,
-["us-Banebloodhuf-area-52"] = true,
-["us-Ceedeez-skullcrusher"] = true,
-["us-Xstouttacus-eonar"] = true,
-["us-Frostysnake-black-dragonflight"] = true,
-["us-Goonerkarran-area-52"] = true,
-["us-Grimstab-skullcrusher"] = true,
-["us-Whitefvng-area-52"] = true,
-["us-Warsmite-area-52"] = true,
-["us-Chocûla-area-52"] = true,
-["us-Melodramatic-velen"] = true,
-["us-Holypoppin-area-52"] = true,
-["us-Webrage-area-52"] = true,
-["us-party5-stormrage"] = true,
-["us-Huruaki-area-52"] = true,
-["us-Fartcrusader-area-52"] = true,
-["us-Kyrie-black-dragonflight"] = true,
-["us-Chamah-area-52"] = true,
-["us-Turlisp-area-52"] = true,
-["us-Holyholms-area-52"] = true,
-["us-Feratonian-mannoroth"] = true,
-["us-Zirokun-zuluhed"] = true,
-["us-Dscim-area-52"] = true,
-["us-Zappyxatu-stormrage"] = true,
+["us-Druidsrtrash-illidan"] = true,
+["us-Tekarie-area-52"] = true,
+["us-Isannan-area-52"] = true,
+["us-Fallingmoon-area-52"] = true,
+["us-Irish-area-52"] = true,
 }
 RaiderIO_MissingServers = {
 }
