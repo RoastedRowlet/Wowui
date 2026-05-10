@@ -377,15 +377,15 @@ local function getMasterOption(self)
 	local key = self:GetUserData("key")
 	local module = self:GetUserData("module")
 	if type(key) == "string" and key:find("^custom_") then
-		return module.db.profile[key]
+		return module.db.profile.toggles[key]
 	end
-	if type(module.db.profile[key]) ~= "number" then
-		module.db.profile[key] = module.toggleDefaults[key]
+	if type(module.db.profile.toggles[key]) ~= "number" then
+		module.db.profile.toggles[key] = module.toggleDefaults[key]
 	end
-	if module.db.profile[key] == 0 then
+	if module.db.profile.toggles[key] == 0 then
 		return false -- nothing go away
 	end
-	if bit.band(module.db.profile[key], module.toggleDefaults[key]) == module.toggleDefaults[key] then
+	if bit.band(module.db.profile.toggles[key], module.toggleDefaults[key]) == module.toggleDefaults[key] then
 		return true -- all default baby
 	end
 	return nil -- some options set
@@ -396,7 +396,7 @@ local function getSlaveOption(self)
 	local key = self:GetUserData("key")
 	local module = self:GetUserData("module")
 	local flag = self:GetUserData("flag")
-	local current = module.db.profile[key]
+	local current = module.db.profile.toggles[key]
 	if type(current) ~= "number" or type(flag) ~= "number" then
 		error(notNumberError:format(tostring(key), tostring(module.moduleName), tostring(current), tostring(flag)))
 	end
@@ -409,15 +409,15 @@ local function masterOptionToggled(self, event, value)
 	local module = self:GetUserData("module")
 	local keyIsString = type(key) == "string"
 	if keyIsString and key:find("custom_select", nil, true) then
-		module.db.profile[key] = value or 1
+		module.db.profile.toggles[key] = value or 1
 	elseif keyIsString and key:find("custom_", nil, true) then
-		module.db.profile[key] = value or false
+		module.db.profile.toggles[key] = value or false
 	else
 		if value then
 			-- If an option is disabled by default using the "OFF" toggle flag, then when we turn it on, we want all the default flags on also
-			module.db.profile[key] = module.toggleDisabled and module.toggleDisabled[key] or module.toggleDefaults[key]
+			module.db.profile.toggles[key] = module.toggleDisabled and module.toggleDisabled[key] or module.toggleDefaults[key]
 		else
-			module.db.profile[key] = 0
+			module.db.profile.toggles[key] = 0
 		end
 		local dropdown = self:GetUserData("dropdown")
 		-- This data ONLY exists if we're looking at the advanced options tab,
@@ -442,9 +442,9 @@ local function slaveOptionToggled(self, event, value)
 	local flag = self:GetUserData("flag")
 	local master = self:GetUserData("master")
 	if value then
-		module.db.profile[key] = module.db.profile[key] + flag
+		module.db.profile.toggles[key] = module.db.profile.toggles[key] + flag
 	else
-		module.db.profile[key] = module.db.profile[key] - flag
+		module.db.profile.toggles[key] = module.db.profile.toggles[key] - flag
 	end
 	master:SetValue(getMasterOption(master))
 
@@ -597,7 +597,7 @@ local function advancedTabSelect(widget, callback, tab)
 		local group = AceGUI:Create("SimpleGroup")
 		group:SetFullWidth(true)
 		widget:AddChild(group)
-		soundModule:SetSoundOptions(module.name, key, module.db.profile[key])
+		soundModule:SetSoundOptions(module.name, key, module.db.profile.toggles[key])
 		acd:Open("BigWigs: Sounds Override", group)
 	elseif tab == "colors" then
 		local group = AceGUI:Create("SimpleGroup")
@@ -738,7 +738,7 @@ end
 local function customDropdownValueChanged(widget, _, value)
 	local key = widget:GetUserData("key")
 	local module = widget:GetUserData("module")
-	module.db.profile[key] = value or 1
+	module.db.profile.toggles[key] = value or 1
 end
 
 local function getDefaultToggleOption(scrollFrame, dropdown, module, bossOption)
@@ -767,7 +767,7 @@ local function getDefaultToggleOption(scrollFrame, dropdown, module, bossOption)
 		customDropdown:SetUserData("key", dbKey)
 		customDropdown:SetUserData("module", module)
 		customDropdown:SetCallback("OnValueChanged", customDropdownValueChanged)
-		customDropdown:SetValue(module.db.profile[dbKey] or 1)
+		customDropdown:SetValue(module.db.profile.toggles[dbKey] or 1)
 
 		if icon then
 			local iconWidget = AceGUI:Create("Icon")

@@ -1,0 +1,17 @@
+## Interface: 120000, 120001, 120005
+## Title: |cff0cd29fEllesmereUI|r Friends
+## Category: |cff0cd29fEllesmere|rUI
+## Group: EllesmereUI
+## Notes: A modern, light friends list reskin with improved functionality
+## Author: Ellesmere
+## Version: 7.5.9
+## Dependencies: EllesmereUI
+## SavedVariables: EllesmereUIFriendsDB
+## IconTexture: Interface\AddOns\EllesmereUI\media\eg-logo.tga
+
+# Main Luas
+EllesmereUIFriends_RealmGroups.lua
+EllesmereUIFriends.lua
+
+# Options
+EUI_Friends_Options.lua

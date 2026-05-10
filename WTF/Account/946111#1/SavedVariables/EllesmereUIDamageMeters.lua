@@ -1,2 +1,3 @@
 
-EllesmereUIDamageMetersDB = nil
+EllesmereUIDamageMetersDB = {
+}

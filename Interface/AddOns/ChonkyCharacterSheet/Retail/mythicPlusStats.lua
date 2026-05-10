@@ -405,6 +405,7 @@ end
 
 function CCS.updatemplussideframe(sortby, sortdirection)
 	if option("showm_sp") ~= true or InCombatLockdown() == true then return end
+	if CCS.initall == true then return end
 
     -- fall back to stored state or default state if nil
     sortby = sortby or ccsm_sf.currentSortBy or option("mplus_sortby") or "Name"
@@ -1414,13 +1415,17 @@ local function initializeframes()
 end
 
 function module:Initialize()     
+
+    if CCS.AreSecretsDisabled() then 
+        CCS.initall = true
+        return 
+    end
+
 	if option("showm_sp") ~= true then return end
 	
 	local btn = _G["MPlusScoreBtn"] or CreateFrame("Button", "MPlusScoreBtn", CharacterHeadSlot)
 	local textstring = CCS.getraiderioscoreplayer(true) or ""
-
-    if InCombatLockdown()then CCS.secretsdisabled = true return end
-
+	
 	initializeframes()
 ----
 ---- Create the main button
@@ -1485,15 +1490,15 @@ function module:Initialize()
 		btn2.tex = btn2_tex
 		CCS:ApplyIconStyle(btn2, "ightarrow", 17)
 		btn2_tex:SetAllPoints()
-		btn2_tex:Show()
-		btn2_tex:SetTexture("Interface\\AddOns\\ChonkyCharacterSheet\\Media\\Textures\\mplus.png")
+		btn2.bg:SetTexture("Interface\\AddOns\\ChonkyCharacterSheet\\Media\\Textures\\mplus.png")
+		--btn2_tex:Show()
+		--btn2_tex:SetTexture("Interface\\AddOns\\ChonkyCharacterSheet\\Media\\Textures\\mplus.png")
 	else
 		CCS:ApplyIconStyle(btn2, "rightarrow", 17)
 		if btn2 and btn2.tex ~= nil then
 			btn2.tex:Hide()
 		end
 	end
-
 
 	-- Click behavior
 	btn2:SetScript("OnClick", function(self, button)
@@ -1532,8 +1537,10 @@ end
 
 function CCS.MythicPlusEventHandler(event, ...)
     local arg1 = ...
-    --if InCombatLockdown()then CCS.secretsdisabled = true return end
+
 	if CCS.GetCurrentVersion() ~= CCS.RETAIL then return end
+
+    if CCS.initall == true then return end
 	
 	if option("showm_sp") ~= true then 
 		if _G["MPlusScoreIconBtn"] then _G["MPlusScoreIconBtn"]:Hide() end

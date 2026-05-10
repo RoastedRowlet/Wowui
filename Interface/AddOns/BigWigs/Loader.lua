@@ -12,9 +12,9 @@ local strfind = string.find
 -- Generate our version variables
 --
 
-local BIGWIGS_VERSION = 414
+local BIGWIGS_VERSION = 415
 local CONTENT_PACK_VERSIONS = {
-	["LittleWigs"] = {12, 0, 44},
+	["LittleWigs"] = {12, 0, 45},
 	["BigWigs_Classic"] = {12, 0, 16},
 	["BigWigs_BurningCrusade"] = {12, 0, 12},
 	["BigWigs_WrathOfTheLichKing"] = {12, 0, 7},
@@ -57,7 +57,7 @@ do
 	local ALPHA = "ALPHA"
 
 	local releaseType
-	local myGitHash = "fdd2c6b" -- The ZIP packager will replace this with the Git hash.
+	local myGitHash = "414c990" -- The ZIP packager will replace this with the Git hash.
 	local releaseString
 	--[=[@alpha@
 	-- The following code will only be present in alpha ZIPs.
@@ -1205,6 +1205,24 @@ end
 ldbi:Register("BigWigs", dataBroker, BigWigsIconDB)
 
 do
+	-- XXX temp 12.0.5
+	if type(BigWigs3DB) == "table" and type(BigWigs3DB.namespaces) == "table" then
+		for moduleName, storage in next, BigWigs3DB.namespaces do
+			if moduleName:find("BigWigs_Bosses_", nil, true) and type(storage) == "table" and storage.profiles then
+				for profileName, moduleTable in next, storage.profiles do
+					if type(moduleTable) == "table" and not moduleTable.toggles then
+						local newTable = {}
+						for optionKeyForBossToggle, valueOfBossToggle in next, moduleTable do
+							newTable[optionKeyForBossToggle] = valueOfBossToggle
+						end
+						storage.profiles[profileName] = {toggles = newTable}
+					end
+				end
+			end
+		end
+	end
+	-- XXX end temp
+
 	-- Core DB setup
 	local defaults = {
 		profile = {
@@ -1619,9 +1637,9 @@ end
 --
 
 do
-	local DBMdotRevision = "20260429043851" -- The changing version of the local client, changes with every new zip using the project-date-integer packager replacement.
-	local DBMdotDisplayVersion = "12.0.44" -- "N.N.N" for a release and "N.N.N alpha" for the alpha duration.
-	local DBMdotReleaseRevision = "20260428000000" -- Hardcoded time, manually changed every release, they use it to track the highest release version, a new DBM release is the only time it will change.
+	local DBMdotRevision = "20260508010056" -- The changing version of the local client, changes with every new zip using the project-date-integer packager replacement.
+	local DBMdotDisplayVersion = "12.0.45" -- "N.N.N" for a release and "N.N.N alpha" for the alpha duration.
+	local DBMdotReleaseRevision = "20260507000000" -- Hardcoded time, manually changed every release, they use it to track the highest release version, a new DBM release is the only time it will change.
 	local protocol = 3
 	local versionPrefix = "V"
 	local PForceDisable = 24

@@ -295,12 +295,21 @@ local eventHandlers = {
     },
 
     ["PLAYER_ENTERING_WORLD"] = {
-        --[[{ fn = WrapHandler("PLAYER_ENTERING_WORLD", (
+
+        { fn = WrapHandler("PLAYER_ENTERING_WORLD", (
             function () 
-                print("TEST") 
-                print(CCS.fontname, CCS:GetOptionValue("default_font"))
+                if CCS.initall == true and not CCS.AreSecretsDisabled() then
+                    CCS.initall = nil
+                    
+                    for _, module in pairs(CCS.Modules) do
+                        if type(module.Initialize) == "function" then
+                            C_Timer.After(0.1, function() module:Initialize() end)
+                        end
+                    end
+                    CCS:FireEvent("CCS_EVENT_OPTIONS")
+                end
             end
-            ), "TEST Handler"), versions = { CCS.RETAIL } },--]]
+            ), "Secrets Handler"), versions = { CCS.RETAIL } },
         { fn = WrapHandler("PLAYER_ENTERING_WORLD", CCS.CharacterSheetEventHandler, "CharacterSheetEventHandler"), versions = { CCS.RETAIL } },
         { fn = WrapHandler("PLAYER_ENTERING_WORLD", CCS.MOPCharacterSheetEventHandler, "MOPCharacterSheetEventHandler"), versions = { CCS.MOP } },
         { fn = WrapHandler("PLAYER_ENTERING_WORLD", CCS.TBCCharacterSheetEventHandler, "TBCCharacterSheetEventHandler"), versions = { CCS.TBC } },
@@ -394,13 +403,18 @@ local eventHandlers = {
                 CCS.textoutline = CCS.textoutline .. ", SLUG"
             end
         end
-
-        for _, module in pairs(CCS.Modules) do
-            if type(module.Initialize) == "function" then
-                C_Timer.After(0.15, function() module:Initialize() end)
+        if CCS.AreSecretsDisabled() then
+            CCS.initall = true
+        else
+            CCS.initall = nil
+            for _, module in pairs(CCS.Modules) do
+                if type(module.Initialize) == "function" then
+                    C_Timer.After(0.15, function() module:Initialize() end)
+                end
             end
+            CCS:FireEvent("CCS_EVENT_OPTIONS")
         end
-        CCS:FireEvent("CCS_EVENT_OPTIONS")
+
     end),
 
     ["PLAYER_LOOT_SPEC_UPDATED"] = {
@@ -409,15 +423,16 @@ local eventHandlers = {
 
     ["PLAYER_REGEN_ENABLED"] = WrapHandler("PLAYER_REGEN_ENABLED", function()
 
-
-        if CCS.initall == true then
+        if CCS.initall == true and not CCS.AreSecretsDisabled() then
+            CCS.initall = nil
+            
             for _, module in pairs(CCS.Modules) do
                 if type(module.Initialize) == "function" then
                     C_Timer.After(0.1, function() module:Initialize() end)
                 end
             end
+
             CCS:FireEvent("CCS_EVENT_OPTIONS")
-            CCS.initall = nil
         end
         
         if CCS.GetCurrentVersion() == CCS.RETAIL then 

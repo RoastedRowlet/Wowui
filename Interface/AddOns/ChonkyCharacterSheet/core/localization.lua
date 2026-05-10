@@ -29,6 +29,7 @@ local defaultStrings = {
     ------------------------------------------------------------
     -- General / Common
     ------------------------------------------------------------
+	["Movement"] = "Movement", -- enUS / enGB
 	["Explorer"]             = "Explorer",             -- enUS / enGB
 	["Adventurer"]           = "Adventurer",           -- enUS / enGB
 	["Veteran"]              = "Veteran",              -- enUS / enGB
@@ -306,7 +307,7 @@ local defaultStrings = {
 	["crests_champion"] = "Show Champion Crests", -- enUS / enGB
 	["crests_veteran"] = "Show Veteran Crests", -- enUS / enGB
 	["crests_adventurer"] = "Show Adventurer Crests", -- enUS / enGB
-	["Catalyst"] = "Catalyst Charges",  -- enUS / enGB
+	["Catalyst"] = "Catalyst",  -- enUS / enGB
 	["crests_catalyst"] = "Show Catalyst Row",  -- enUS / enGB	
 	["show_pvp"] = "Show PVP Section", -- enUS / enGB
 	["collapse_pvp"] = "Collapse PVP Section", -- enUS / enGB
@@ -421,6 +422,7 @@ if locale == "enGB" then
     }
 elseif locale == "deDE" then
     localizedStrings = {
+        ["Movement"] = "Bewegung",        -- deDE
 		["Explorer"]             = "Forscher",    -- deDE
 		["Adventurer"]           = "Abenteurer",  -- deDE
 		["Veteran"]              = "Veteran",     -- deDE
@@ -458,7 +460,7 @@ elseif locale == "deDE" then
 		["SHOW_MYTHIC_SP"] = "Mythic+ Seitenleisten‑Modul aktivieren", -- deDE
 		["SHOW_MYTHIC_SP_ONOPEN"] = "Mythic+ Seitenleiste beim Öffnen des Charakterfensters anzeigen", -- deDE
 		["Versatility Display"] = "Vielseitigkeitsanzeige", -- deDE
-		["Catalyst"] = "Katalysatorladungen", -- deDE
+		["Catalyst"] = "Katalysator", -- deDE
 		["crests_catalyst"] = "Katalysatorzeile anzeigen", -- deDE
 		["Secondary"] = "Sekundär", -- deDE
 		["Crests"] = "Wappen", -- deDE
@@ -779,6 +781,7 @@ elseif locale == "deDE" then
     }	
 elseif locale == "frFR" then
     localizedStrings = {
+        ["Movement"] = "Déplacement",     -- frFR
 		["Explorer"]             = "Explorateur", -- frFR
 		["Adventurer"]           = "Aventurier",  -- frFR
 		["Veteran"]              = "Vétéran",     -- frFR
@@ -816,7 +819,7 @@ elseif locale == "frFR" then
 		["SHOW_MYTHIC_SP"] = "Activer le module du panneau Mythique+", -- frFR
 		["SHOW_MYTHIC_SP_ONOPEN"] = "Afficher le panneau Mythique+ à l’ouverture de la fiche de personnage", -- frFR
 		["Versatility Display"] = "Affichage de la Polyvalence", -- frFR
-		["Catalyst"] = "Charges du Catalyseur", -- frFR
+		["Catalyst"] = "Catalyseur", -- frFR
 		["crests_catalyst"] = "Afficher la ligne du Catalyseur", -- frFR
 		["Secondary"] = "Secondaires", -- frFR
 		["Crests"] = "Armoiries", -- frFR
@@ -1137,6 +1140,7 @@ elseif locale == "frFR" then
     }
 elseif locale == "esES" then
     localizedStrings = {
+        ["Movement"] = "Movimiento",      -- esES / esMX
 		["Explorer"]             = "Expedicionario", -- esES
 		["Adventurer"]           = "Aventurero",     -- esES
 		["Veteran"]              = "Veterano",       -- esES
@@ -1174,7 +1178,7 @@ elseif locale == "esES" then
 		["SHOW_MYTHIC_SP"] = "Activar el módulo del panel lateral de Míticas+", -- esES
 		["SHOW_MYTHIC_SP_ONOPEN"] = "Mostrar el panel lateral de Míticas+ al abrir la hoja de personaje", -- esES
 		["Versatility Display"] = "Versatilidad: Modo de Visualización", -- esES
-		["Catalyst"] = "Cargas del Catalizador", -- esES
+		["Catalyst"] = "Catalizador", -- esES
 		["crests_catalyst"] = "Mostrar fila del Catalizador", -- esES
 		["Secondary"] = "Secundarias", -- esES
 		["Crests"] = "Crestas", -- esES
@@ -1495,6 +1499,7 @@ elseif locale == "esES" then
     }
 elseif locale == "esMX" then
     localizedStrings = {
+        ["Movement"] = "Movimiento",      -- esES / esMX
 		["Explorer"]             = "Expedicionario", -- esMX
 		["Adventurer"]           = "Aventurero",     -- esMX
 		["Veteran"]              = "Veterano",       -- esMX
@@ -1532,7 +1537,7 @@ elseif locale == "esMX" then
 		["SHOW_MYTHIC_SP"] = "Activar el módulo del panel lateral de Míticas+", -- esMX
 		["SHOW_MYTHIC_SP_ONOPEN"] = "Mostrar el panel lateral de Míticas+ al abrir la hoja de personaje", -- esMX
 		["Versatility Display"] = "Versatilidad: Modo de Visualización", -- esMX
-		["Catalyst"] = "Cargas del Catalizador", -- esMX
+		["Catalyst"] = "Catalizador", -- esMX
 		["crests_catalyst"] = "Mostrar fila del Catalizador", -- esMX
 		["Secondary"] = "Secundarias", -- esMX
 		["Crests"] = "Crestas", -- esMX
@@ -1853,6 +1858,7 @@ elseif locale == "esMX" then
     }
 elseif locale == "ruRU" then
     localizedStrings = {
+        ["Movement"] = "Передвижение",    -- ruRU
 		["Explorer"]             = "Исследователь",        -- ruRU
 		["Adventurer"]           = "Искатель приключений", -- ruRU
 		["Veteran"]              = "Ветеран",              -- ruRU
@@ -1890,7 +1896,7 @@ elseif locale == "ruRU" then
 		["SHOW_MYTHIC_SP"] = "Включить модуль боковой панели Mythic+", -- ruRU
 		["SHOW_MYTHIC_SP_ONOPEN"] = "Показывать боковую панель Mythic+ при открытии окна персонажа", -- ruRU
 		["Versatility Display"] = "Отображение универсальности", -- ruRU
-		["Catalyst"] = "Заряды Катализатора", -- ruRU
+		["Catalyst"] = "Катализатор", -- ruRU
 		["crests_catalyst"] = "Показать строку Катализатора", -- ruRU
 		["Secondary"] = "Вторичные", -- ruRU
 		["Crests"] = "Гербы", -- ruRU
@@ -2211,6 +2217,7 @@ elseif locale == "ruRU" then
     }
 elseif locale == "koKR" then
     localizedStrings = {
+        ["Movement"] = "이동",            -- koKR
 		["Explorer"]             = "탐험가", -- koKR
 		["Adventurer"]           = "모험가", -- koKR
 		["Veteran"]              = "노련가", -- koKR
@@ -2248,7 +2255,7 @@ elseif locale == "koKR" then
 		["SHOW_MYTHIC_SP"] = "신화+ 사이드 패널 모듈 활성화", -- koKR
 		["SHOW_MYTHIC_SP_ONOPEN"] = "캐릭터 창을 열 때 신화+ 사이드 패널 표시", -- koKR
 		["Versatility Display"] = "유연성 표시", -- koKR
-		["Catalyst"] = "변환 촉매 충전량", -- koKR
+		["Catalyst"] = "촉매", -- koKR
 		["crests_catalyst"] = "촉매 행 표시", -- koKR
 		["Secondary"] = "보조", -- koKR
 		["Crests"] = "문장", -- koKR
@@ -2569,6 +2576,7 @@ elseif locale == "koKR" then
     }
 elseif locale == "zhCN" then
     localizedStrings = {
+        ["Movement"] = "移动",            -- zhCN
 		["Explorer"]             = "探索者", -- zhCN
 		["Adventurer"]           = "冒险者", -- zhCN
 		["Veteran"]              = "老兵",   -- zhCN
@@ -2606,7 +2614,7 @@ elseif locale == "zhCN" then
 		["SHOW_MYTHIC_SP"] = "启用史诗钥石地下城侧边面板模块", -- zhCN
 		["SHOW_MYTHIC_SP_ONOPEN"] = "打开角色信息时显示史诗钥石侧边面板", -- zhCN
 		["Versatility Display"] = "多样性显示方式", -- zhCN
-		["Catalyst"] = "转化催化剂充能", -- zhCN
+		["Catalyst"] = "催化器", -- zhCN
 		["crests_catalyst"] = "显示催化剂栏位", -- zhCN
 		["Secondary"] = "次要", -- zhCN
 		["Crests"] = "纹章", -- zhCN
@@ -2927,6 +2935,7 @@ elseif locale == "zhCN" then
     }
 elseif locale == "zhTW" then
     localizedStrings = {
+        ["Movement"] = "移動",            -- zhTW
 		["Explorer"]             = "探險者", -- zhTW
 		["Adventurer"]           = "冒險者", -- zhTW
 		["Veteran"]              = "精兵",   -- zhTW
@@ -2964,7 +2973,7 @@ elseif locale == "zhTW" then
 		["SHOW_MYTHIC_SP"] = "啟用傳奇+側邊面板模組", -- zhTW
 		["SHOW_MYTHIC_SP_ONOPEN"] = "開啟角色資訊時顯示傳奇+側邊面板", -- zhTW
 		["Versatility Display"] = "多樣性顯示方式", -- zhTW
-		["Catalyst"] = "轉化催化劑充能", -- zhTW
+		["Catalyst"] = "催化器", -- zhTW
 		["crests_catalyst"] = "顯示催化劑列", -- zhTW
 		["Secondary"] = "次要", -- zhTW
 		["Crests"] = "紋章", -- zhTW
@@ -3284,6 +3293,7 @@ elseif locale == "zhTW" then
     }
 elseif locale == "ptBR" then
     localizedStrings = {
+        ["Movement"] = "Movimento",       -- ptBR
 		["Explorer"]             = "Explorador",   -- ptBR
 		["Adventurer"]           = "Aventureiro",  -- ptBR
 		["Veteran"]              = "Veterano",     -- ptBR
@@ -3321,7 +3331,7 @@ elseif locale == "ptBR" then
 		["SHOW_MYTHIC_SP"] = "Ativar módulo do painel lateral de Míticas+", -- ptBR
 		["SHOW_MYTHIC_SP_ONOPEN"] = "Mostrar o painel lateral de Míticas+ ao abrir a ficha do personagem", -- ptBR
 		["Versatility Display"] = "Exibição de Versatilidade", -- ptBR	
-		["Catalyst"] = "Cargas do Catalisador", -- ptBR
+		["Catalyst"] = "Catalisador", -- ptBR
 		["crests_catalyst"] = "Mostrar linha do Catalisador", -- ptBR
 		["Secondary"] = "Secundários", -- ptBR
 		["Crests"] = "Brasões", -- ptBR
@@ -3642,6 +3652,7 @@ elseif locale == "ptBR" then
     }
 elseif locale == "itIT" then
     localizedStrings = {
+        ["Movement"] = "Movimento",       -- itIT
 		["Explorer"]             = "Esploratore",  -- itIT
 		["Adventurer"]           = "Avventuriero", -- itIT
 		["Veteran"]              = "Veterano",     -- itIT
@@ -3678,7 +3689,7 @@ elseif locale == "itIT" then
 		["SHOW_MYTHIC_SP"] = "Abilita il modulo del pannello laterale Mitiche+", -- itIT
 		["SHOW_MYTHIC_SP_ONOPEN"] = "Mostra il pannello Mitiche+ all’apertura della scheda del personaggio", -- itIT
 		["Versatility Display"] = "Visualizzazione Versatilità", -- itIT	
-		["Catalyst"] = "Cariche del Catalizzatore", -- itIT
+		["Catalyst"] = "Catalizzatore", -- itIT
 		["crests_catalyst"] = "Mostra riga del Catalizzatore", -- itIT
 		["Secondary"] = "Secondarie", -- itIT
 		["Crests"] = "Stemmi", -- itIT	

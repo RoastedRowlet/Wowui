@@ -440,7 +440,9 @@ end
 
 -- Tricking Blizzard into loading the fonts instead of lazy loading them.  That way they are immediately available.
 function CCS:PrimeFontsAndTextures()
-    if CCS.FontsPrimed then return end
+    local buildType = select(6, GetBuildInfo())
+    buildType = strtrim(tostring(buildType or ""))
+    if CCS.FontsPrimed or buildType == "Test" then return end
 
     local preloadFrame = CCS.FontPreloadFrame or CreateFrame("Frame", nil, UIParent)
     CCS.FontPreloadFrame = preloadFrame
@@ -2621,12 +2623,15 @@ end
 
 
 function CCS.AreSecretsDisabled()
+    if CCS.GetCurrentVersion() ~= CCS.RETAIL then return false end   
+
     local inInstance, instanceType = IsInInstance()
     
     if  InCombatLockdown() or
         C_ChallengeMode.GetActiveChallengeMapID() ~= nil or  -- Mythic+
         C_InstanceEncounter.IsEncounterInProgress() or -- Raid/Boss Encounter
-        (inInstance and (instanceType == "pvp" or instanceType == "arena")) then 
+        (inInstance and (instanceType == "pvp" or instanceType == "arena")) 
+        then 
         return true 
     end
 

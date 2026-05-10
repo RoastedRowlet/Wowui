@@ -181,7 +181,7 @@ function mod:TimersMythic(_, eventInfo)
 			end, eventInfo.duration)
 			self:ScheduleTimer(function() -- Schedule an Alndust Upheaval warning for Mythic
 				local barText = CL.count:format(CL.soak, almdustUpheavalCount)
-				self:TargetMessageFromBlizzMessage(1, 1262289, "orange", barText)
+				self:TargetMessageFromBlizzMessage(1262289, 1, "orange", barText)
 				self:PlaySound(1262289, "warning") -- soak if assigned
 			end, eventInfo.duration + 0.5)
 			return
@@ -446,7 +446,7 @@ function mod:AlndustUpheaval(eventInfo)
 		msg = barText,
 		onFinished = function()
 			-- self:Message(1262289, "yellow", barText)
-			self:TargetMessageFromBlizzMessage(1, 1262289, "orange", barText)
+			self:TargetMessageFromBlizzMessage(1262289, 1, "orange", barText)
 			self:PlaySound(1262289, "warning") -- soak if assigned
 		end
 	}

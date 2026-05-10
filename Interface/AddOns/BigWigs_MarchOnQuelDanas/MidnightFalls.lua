@@ -68,32 +68,57 @@ local INTERMISSION_DARK_QUASAR_INFO = {
 -- Localization
 --
 
-local L = mod:GetLocale()
-if L then
-	L.deaths_dirge = "Memory Game"
-	L.heavens_glaives = "Glaives"
-	L.heavens_lance = "Lance"
-	L.prism_kicks = "Kicks"
-	L.dark_constellation = "Stars"
-	L.the_dark_archangel = "Big Boom"
-	L.dark_rune = "Memory Mark"
-	L.dark_rune_bar = "Solve the Game"
+local L = mod:SetDefaultLocale({ -- SetOption:skip-locale
+	deaths_dirge = "Memory Game",
+	heavens_glaives = "Glaives",
+	heavens_lance = "Lance",
+	prism_kicks = "Kicks",
+	dark_constellation = "Stars",
+	the_dark_archangel = "Big Boom",
+	dark_rune = "Memory Mark",
+	dark_rune_bar = "Solve the Game",
 
-	L.starsplinter = "Blazes" -- Mythic intermission and P4 bar text
-	L.starsplinter_you = "Blaze"
+	left = "[L] %s", -- left/west group bars in p3
+	right = "[R] %s", -- right/east group bars in p3
 
-	L.left = "[L] %s" -- left/west group bars in p3
-	L.right = "[R] %s" -- right/east group bars in p3
+	custom_select_limit_warnings = "[Mythic] Restrict Stage 3 Warnings",
+	custom_select_limit_warnings_desc = "Only show warnings for abilities on your side.",
+	custom_select_limit_warnings_icon = "misc_arrowlup",
+	custom_select_limit_warnings_value1 = "Groups 1 & 2 go left, groups 3 & 4 go right.",
+	custom_select_limit_warnings_value2 = "Odd groups left, even groups right.",
+	custom_select_limit_warnings_value3 = "Show warnings for both sides.",
+	custom_select_limit_warnings_value4 = "Show warnings for left side only.",
+	custom_select_limit_warnings_value5 = "Show warnings for right side only.",
+})
 
-	L.custom_select_limit_warnings = "[Mythic] Restrict Stage 3 Warnings"
-	L.custom_select_limit_warnings_desc = "Only show warnings for abilities on your side."
-	L.custom_select_limit_warnings_icon = "misc_arrowlup"
-	L.custom_select_limit_warnings_value1 = "Groups 1 & 2 go left, groups 3 & 4 go right."
-	L.custom_select_limit_warnings_value2 = "Odd groups left, even groups right."
-	L.custom_select_limit_warnings_value3 = "Show warnings for both sides."
-	L.custom_select_limit_warnings_value4 = "Show warnings for left side only."
-	L.custom_select_limit_warnings_value5 = "Show warnings for right side only."
-end
+--------------------------------------------------------------------------------
+-- Renames
+--
+
+mod:SetRenames({
+	["stages"] = {
+		CL.intermission, CL.stage:format(2), CL.stage:format(3), CL.stage:format(4),
+		original = false,
+		notes = {CL.intermission, CL.stage:format(2), CL.stage:format(3), CL.stage:format(4)}
+	}, -- Stages
+	[1253915] = {L.heavens_glaives}, -- Heaven's Glaives (Glaives)
+	[1279420] = {CL.beams}, -- Dark Quasar (Beams)
+	[1249620] = {L.deaths_dirge}, -- Death's Dirge (Memory Game)
+	[1249609] = {L.dark_rune}, -- Dark Rune (Memory Mark)
+	[1251386] = {L.prism_kicks}, -- Safeguard Prism (Kicks)
+	[1267049] = {L.heavens_lance}, -- Heaven's Lance (Lance)
+	[1284980] = {L.deaths_dirge}, -- Grim Symphony (Memory Game)
+	[1284931] = {L.prism_kicks}, -- Termination Prism (Kicks)
+	[1282441] = {1282441}, -- Starsplinter
+	[1284525] = {CL.beams, CL.beam, notes = {CL.plural, CL.singular}}, -- Galvanize (Beams)
+	[1282412] = {CL.dodge}, -- Core Harvest (Dodge)
+	[1281194] = {CL.knockback}, -- Dark Meltdown (Knockback)
+	[1250898] = {L.the_dark_archangel}, -- The Dark Archangel (Big Boom)
+	[1266388] = {L.dark_constellation}, -- Dark Constellation (Stars)
+	[1266897] = {CL.soaks}, -- Light Siphon (Soaks)
+	[1273158] = {L.deaths_dirge}, -- Death's Requiem (Memory Game)
+	[1276525] = {1276525}, -- Heaven & Hell
+})
 
 --------------------------------------------------------------------------------
 -- Initialization
@@ -139,30 +164,7 @@ function mod:GetOptions()
 		[1253915] = -32197, -- Stage One: Final Tolls
 		[1284525] = -33638, -- Stage Two: The Dark Reactor
 		[1250898] = -33639, -- Stage Three: Midnight Falls
-	},{
-		[1253915] = L.heavens_glaives,
-		[1279420] = CL.beams, -- Dark Quasar
-		[1249620] = L.deaths_dirge,
-		[1249609] = L.dark_rune,
-		[1251386] = L.prism_kicks, -- Safeguard Prism
-		[1267049] = L.heavens_lance,
-
-		[1284525] = CL.beams, -- Galvanize
-		[1282412] = CL.dodge, -- Core Harvest
-		[1281194] = CL.knockback, -- Dark Meltdown
-		[1266388] = L.dark_constellation,
-		[1250898] = L.the_dark_archangel,
-		[1266897] = CL.soaks, -- Light Siphon
-
-		[1284980] = L.deaths_dirge, -- Grim Symphony
-		[1284931] = L.prism_kicks, -- Termination Prism
-		[1273158] = L.deaths_dirge, -- Death's Requiem
-		[1282441] = L.starsplinter,
 	}
-end
-
-function mod:GetName(key)
-	return self.notes and self.notes[key] or self:SpellName(key)
 end
 
 function mod:OnBossEnable()
@@ -541,16 +543,14 @@ function mod:ENCOUNTER_WARNING(_, info)
 	local stage = self:GetStage()
 	if stage == 1 or stage == 3 then
 		if info.severity == 2 then -- Dark Rune
-			self:PersonalMessage(1249609)
-			-- self:Bar(1249609, stage == 1 and 10 or 15, L.dark_rune_bar)
+			self:PersonalMessage(1249609, nil, self:GetRename(1249609)) -- Memory Mark
 		end
 	elseif stage == 2 or stage == 4 then
 		if info.severity == 2 then -- Galvanize
-			self:PersonalMessage(1284525)
+			self:PersonalMessage(1284525, nil, self:GetRename(1284525, 2)) -- Beam
 		elseif info.severity == 1 then -- Starsplinter
 			-- (p2 is set on intermission start)
-			self:PersonalMessage(1282441, nil, L.starsplinter_you)
-			-- self:Bar(1282441, 3, CL.you:format(L.starsplinter_you))
+			self:PersonalMessage(1282441, nil, self:GetRename(1282441))
 		end
 	end
 end
@@ -558,7 +558,7 @@ end
 -- Stage 1
 
 function mod:DarkQuasar(duration)
-	local barText = CL.count:format(self:GetName(1279420), quasarCount)
+	local barText = CL.count:format(self:GetRename(1279420), quasarCount)
 	quasarCount = quasarCount + 1
 	return {
 		msg = barText,
@@ -571,7 +571,7 @@ function mod:DarkQuasar(duration)
 end
 
 function mod:HeavensGlaives(duration)
-	local barText = CL.count:format(self:GetName(1253915), glaivesCount)
+	local barText = CL.count:format(self:GetRename(1253915), glaivesCount)
 	glaivesCount = glaivesCount + 1
 	return {
 		msg = barText,
@@ -584,7 +584,7 @@ function mod:HeavensGlaives(duration)
 end
 
 function mod:DeathsDirge(duration)
-	local barText = CL.count:format(self:GetName(1249620), dirgeCount)
+	local barText = CL.count:format(self:GetRename(1249620), dirgeCount)
 	dirgeCount = dirgeCount + 1
 	return {
 		msg = barText,
@@ -597,7 +597,7 @@ function mod:DeathsDirge(duration)
 end
 
 function mod:SafeguardPrism(duration)
-	local barText = CL.count:format(self:GetName(1251386), prismCount)
+	local barText = CL.count:format(self:GetRename(1251386), prismCount)
 	prismCount = prismCount + 1
 	return {
 		msg = barText,
@@ -611,7 +611,7 @@ function mod:SafeguardPrism(duration)
 end
 
 function mod:HeavensLance(duration)
-	local barText = CL.count:format(self:GetName(1267049), lanceCount)
+	local barText = CL.count:format(self:GetRename(1267049), lanceCount)
 	lanceCount = lanceCount + 1
 	return {
 		msg = barText,
@@ -627,12 +627,12 @@ end
 
 function mod:TotalEclipse(duration)
 	return {
-		msg = CL.intermission,
+		msg = self:GetRename("stages"), -- Intermission
 		key = "stages",
 		icon = 1261871,
 		endTime = GetTime() + duration,
 		onFinished = function()
-			self:Message("stages", "cyan", CL.intermission, false)
+			self:Message("stages", "cyan", self:GetRename("stages"), false) -- Intermission
 			self:PlaySound("stages", "long")
 		end,
 		onCanceled = function(barInfo)
@@ -646,7 +646,7 @@ end
 -- Mythic
 
 function mod:GrimSymphony(duration)
-	local barText = CL.count:format(self:GetName(1284980), dirgeCount)
+	local barText = CL.count:format(self:GetRename(1284980), dirgeCount)
 	dirgeCount = dirgeCount + 1
 	return {
 		msg = barText,
@@ -659,7 +659,7 @@ function mod:GrimSymphony(duration)
 end
 
 function mod:TerminationPrism(duration)
-	local barText = CL.count:format(self:GetName(1284931), prismCount)
+	local barText = CL.count:format(self:GetRename(1284931), prismCount)
 	prismCount = prismCount + 1
 	return {
 		msg = barText,
@@ -680,15 +680,15 @@ function mod:IntoTheDarkwell(duration)
 	self:ResetCounts()
 
 	if self:ShouldShowBars() then
-		self:Bar(1279420, 10.5, CL.count:format(self:GetName(1279420), quasarCount))
+		self:Bar(1279420, 10.5, CL.count:format(self:GetRename(1279420), quasarCount)) -- Dark Quasar
 		self:ScheduleTimer("IntermissionDarkQuasar", 10.5)
 		if self:Mythic() then
-			self:Bar(1282441, 38, L.starsplinter)
+			self:Bar(1282441, 38, self:GetRename(1282441)) -- Starsplinter
 		end
 	end
 
 	return {
-		msg = CL.stage:format(2),
+		msg = self:GetRename("stages", 2), -- Stage 2
 		key = "stages",
 		icon = 1282047,
 	}
@@ -698,12 +698,12 @@ function mod:IntermissionDarkQuasar()
 	local info = INTERMISSION_DARK_QUASAR_INFO[self:Difficulty()]
 	if not info then return end
 
-	self:Message(1279420, "yellow", CL.count_amount:format(self:GetName(1279420), quasarCount, info.count))
+	self:Message(1279420, "yellow", CL.count_amount:format(self:GetRename(1279420), quasarCount, info.count))
 	self:PlaySound(1279420, "alert")
 	quasarCount = quasarCount + 1
 
 	if quasarCount <= info.count then
-		self:Bar(1279420, info.duration, CL.count_amount:format(self:GetName(1279420), quasarCount, info.count))
+		self:Bar(1279420, info.duration, CL.count_amount:format(self:GetRename(1279420), quasarCount, info.count))
 		self:ScheduleTimer("IntermissionDarkQuasar", info.duration)
 	end
 end
@@ -713,27 +713,27 @@ end
 function mod:DarkMeltdown(duration)
 	quasarCount = 1
 	if self:ShouldShowBars() then
-		self:Message("stages", "cyan", CL.stage:format(2), false)
+		self:Message("stages", "cyan", self:GetRename("stages", 2), false) -- Stage 2
 		self:PlaySound("stages", "long")
 	end
 	return {
-		msg = CL.stage:format(3),
+		msg = self:GetRename("stages", 3), -- Stage 3
 		key = "stages",
 		icon = 1281194,
 		onFinished = function()
 			self:SetStage(3)
-			self:Message("stages", "cyan", CL.stage:format(3), false)
+			self:Message("stages", "cyan", self:GetRename("stages", 3), false) -- Stage 3
 			self:PlaySound("stages", "long")
 
 			self:ResetCounts()
 
-			self:Bar(1281194, 8, self:GetName(1281194)) -- Dark Meltdown
+			self:Bar(1281194, 8, self:GetRename(1281194)) -- Dark Meltdown
 		end
 	}
 end
 
 function mod:Galvanize(duration)
-	local barText = CL.count:format(self:GetName(1284525), galvanizeCount)
+	local barText = CL.count:format(self:GetRename(1284525), galvanizeCount)
 	galvanizeCount = galvanizeCount + 1
 	return {
 		msg = barText,
@@ -746,7 +746,7 @@ function mod:Galvanize(duration)
 end
 
 function mod:CoreHarvest(duration)
-	local barText = CL.count:format(self:GetName(1282412), harvestCount)
+	local barText = CL.count:format(self:GetRename(1282412), harvestCount)
 	harvestCount = harvestCount + 1
 	return {
 		msg = barText,
@@ -768,7 +768,7 @@ function mod:LightSiphon(duration)
 		local sides = { "left", "right", "right", "left", "left", "right" }
 		local side = sides[siphonCount]
 
-		barText = CL.count:format(self:GetName(1266897), siphonCount)
+		barText = CL.count:format(self:GetRename(1266897), siphonCount)
 		siphonCount = siphonCount + 1
 
 		if side then
@@ -778,7 +778,7 @@ function mod:LightSiphon(duration)
 			barText = L[side]:format(barText)
 		end
 	else
-		barText = CL.count:format(self:GetName(1266897), siphonCount)
+		barText = CL.count:format(self:GetRename(1266897), siphonCount)
 		siphonCount = siphonCount + 1
 	end
 
@@ -795,7 +795,7 @@ function mod:LightSiphon(duration)
 end
 
 function mod:TheDarkArchangel(duration)
-	local barText = CL.count:format(self:GetName(1250898), archangelCount)
+	local barText = CL.count:format(self:GetRename(1250898), archangelCount)
 	archangelCount = archangelCount + 1
 	return {
 		msg = barText,
@@ -810,9 +810,9 @@ end
 function mod:DarkConstellation(duration, count, totalCount)
 	local barText
 	if count then
-		barText = CL.count_amount:format(self:GetName(1266388), count, totalCount)
+		barText = CL.count_amount:format(self:GetRename(1266388), count, totalCount)
 	else
-		barText = CL.count:format(self:GetName(1266388), constellationCount)
+		barText = CL.count:format(self:GetRename(1266388), constellationCount)
 		constellationCount = constellationCount + 1
 	end
 	return {
@@ -829,7 +829,7 @@ end
 
 function mod:DarkConstellationMythic(duration)
 	local side = constellationCount % 2 == 1 and "left" or "right"
-	local barText = L[side]:format(self:GetName(1266388))
+	local barText = L[side]:format(self:GetRename(1266388))
 
 	local durations = {
 		20, 4, 4, 4, 4, 4, 4, 4, 4,
@@ -849,7 +849,7 @@ function mod:DarkConstellationMythic(duration)
 	if playerSide and side ~= playerSide then
 		local nextDuration = durations[constellationCount]
 		if nextDuration then
-			self:Bar(1266388, duration + nextDuration, L[playerSide]:format(self:GetName(1266388)))
+			self:Bar(1266388, duration + nextDuration, L[playerSide]:format(self:GetRename(1266388)))
 		end
 		return false
 	end
@@ -869,7 +869,7 @@ function mod:DeathsRequiem(duration)
 	local sides = { "right", "left", "left", "right", "right", "left" }
 	local side = sides[dirgeCount]
 
-	local barText = CL.count:format(self:GetName(1273158), dirgeCount)
+	local barText = CL.count:format(self:GetRename(1273158), dirgeCount)
 	dirgeCount = dirgeCount + 1
 
 	if side then
@@ -896,41 +896,41 @@ end
 function mod:CheckForPhaseFour()
 	if self:GetStage() == 3 and UnitExists("boss1") and not UnitExists("boss2") and self:ShouldShowBars() and not self:IsWiping() then
 		self:UnregisterEvent("INSTANCE_ENCOUNTER_ENGAGE_UNIT")
-		self:StopBar(self:GetName(1249796))
+		self:StopBar(1249796) -- Shattered Sky
 
 		self:SetStage(4)
-		self:Message("stages", "cyan", CL.stage:format(4), false)
+		self:Message("stages", "cyan", self:GetRename("stages", 4), false) -- Stage 4
 		self:PlaySound("stages", "long")
 
 		starsplinterCount = 1
 		heavenHellCount = 1
 
-		self:Bar(1282441, 12.7, CL.count:format(self:GetName(1282441), starsplinterCount))
+		self:Bar(1282441, 12.7, CL.count:format(self:GetRename(1282441), starsplinterCount)) -- Starsplinter
 		self:ScheduleTimer("StarsplinterRepeater", 12.7)
 
-		self:Bar(1276525, 19.9, CL.count:format(self:GetName(1276525), heavenHellCount))
+		self:Bar(1276525, 19.9, CL.count:format(self:GetRename(1276525), heavenHellCount))
 		self:ScheduleTimer("HeavenHellRepeater", 19.9)
 
 		-- Midnight Perpetual
 		self:Bar("berserk", 79, 1287447)
 		self:ScheduleTimer(function()
-			self:Message("berserk", "red", CL.casting:format(self:GetName(1287447)), 1287447)
+			self:Message("berserk", "red", CL.casting:format(self:SpellName(1287447)), 1287447) -- Midnight Perpetual
 			self:PlaySound("berserk", "alarm")
 		end, 79-4)
 	end
 end
 
 function mod:StarsplinterRepeater()
-	self:Message(1282441, "orange", CL.count:format(self:GetName(1282441), starsplinterCount))
+	self:Message(1282441, "orange", CL.count:format(self:GetRename(1282441), starsplinterCount))
 	starsplinterCount = starsplinterCount + 1
-	self:Bar(1282441, 20, CL.count:format(self:GetName(1282441), starsplinterCount))
+	self:Bar(1282441, 20, CL.count:format(self:GetRename(1282441), starsplinterCount))
 	self:ScheduleTimer("StarsplinterRepeater", 20)
 end
 
 function mod:HeavenHellRepeater()
-	self:Message(1276525, "red", CL.count:format(self:GetName(1276525), heavenHellCount))
+	self:Message(1276525, "red", CL.count:format(self:GetRename(1276525), heavenHellCount))
 	self:PlaySound(1276525, "alert")
 	heavenHellCount = heavenHellCount + 1
-	self:Bar(1276525, 20, CL.count:format(self:GetName(1276525), heavenHellCount))
+	self:Bar(1276525, 20, CL.count:format(self:GetRename(1276525), heavenHellCount))
 	self:ScheduleTimer("HeavenHellRepeater", 20)
 end

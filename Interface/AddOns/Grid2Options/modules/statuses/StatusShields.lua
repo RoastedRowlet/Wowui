@@ -1,0 +1,15 @@
+local L = Grid2Options.L
+
+Grid2Options:RegisterStatusOptions("shields-overflow", "health", nil, {
+	title = L["display damage absorb shields above max hp"],
+	titleIcon = "Interface\\ICONS\\Spell_Holy_PowerWordShield"
+})
+
+Grid2Options:RegisterStatusOptions("shields", "health", function(self, status, options, optionParams)
+	self:MakeStatusStandardOptions(status, options, optionParams)
+	self:MakeStatusHealthFormatOptions(status, options, optionParams)
+end, {
+	title = L["display remaining amount of damage absorb shields"],
+	titleIcon = "Interface\\ICONS\\Spell_Holy_PowerWordShield",
+	colorCount = 1,
+})

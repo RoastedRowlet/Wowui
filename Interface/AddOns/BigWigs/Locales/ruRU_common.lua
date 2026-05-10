@@ -197,6 +197,10 @@ L.autotalk_boss_desc = "Автоматический выбирать вариа
 L.autotalk_generic_desc = "Автоматический выбирать вариант диалога с НПЦ для продвижения по подземелью."
 L.autotalk_notice = "Произведено автоматическое взаидействовие с НПЦ %s."
 
+-- GUI notes
+--L.singular = "Singular"
+--L.plural = "Plural"
+
 -- Common ability name replacements
 L.absorb = "Поглoщ." -- Used for shield-like abilities that absorb damage or healing
 L.heal_absorb = "Поглощение лечения" -- Used for shield-like abilities that absorb healing only

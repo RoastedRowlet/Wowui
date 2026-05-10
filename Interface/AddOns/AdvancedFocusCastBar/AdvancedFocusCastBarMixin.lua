@@ -2125,8 +2125,15 @@ function AdvancedFocusCastBarMixin:ProcessCastInformation()
 
 					---@type FontString
 					local frame = self.CustomElementsFrame["TargetNameText" .. i]
-					frame:SetText(self:GetMaybeColoredUnitName(unit))
-					frame:SetAlphaFromBoolean(UnitIsSpellTarget(AdvancedFocusCastBarSaved.Settings.Unit, unit), 1, 0)
+					-- MDI spectators can be in the party
+					if frame then
+						frame:SetText(self:GetMaybeColoredUnitName(unit))
+						frame:SetAlphaFromBoolean(
+							UnitIsSpellTarget(AdvancedFocusCastBarSaved.Settings.Unit, unit),
+							1,
+							0
+						)
+					end
 				end
 			else
 				self.CustomElementsFrame.TargetNameText1:SetText(self:GetMaybeColoredUnitName("player"))
@@ -2359,7 +2366,7 @@ function AdvancedFocusCastBarMixin:OnEvent(event, ...)
 		end
 
 		if self:UnitIsIrrelevant() then
-			-- hide if focus moved to an irrelevant unit. 
+			-- hide if focus moved to an irrelevant unit.
 			if self:IsShown() then
 				self:Hide()
 			end

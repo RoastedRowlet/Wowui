@@ -1208,7 +1208,7 @@ L.blizzBasicAsBars = "CàR classiques de Blizzard affichés en tant que barres d
 L.blizzBasicAsBlizzTimeline = "CàR classiques de Blizzard affichés sur la ligne temporelle de Blizzard"
 L.developerMode = "Mode développeur"
 L.enhancedModeWarning = "ATTENTION !\n\nDésactiver le mode avancé désactivera beaucoup de fonctionnalités de BigWigs, incluant :\n\nles couleurs de barres, le renommage des sorts, les contres, les sons / voix personnalisées, les CàR, l'activation des barres, les messages supplémentaires, etc."
---L.blizzTimelineEnhancedWarning = "WARNING!\n\nThe Blizzard timeline doesn't support BigWigs enhanced features. You will NOT get renamed spells and you will see inaccurate timers.\n\nAre you sure you want to enable it?"
+L.blizzTimelineEnhancedWarning = "ATTENTION !\n\nLa ligne temporelle de Blizzard ne supporte pas les fonctionnalités avancées de Bigwigs. Vous n'aurez PAS les sorts renommés, et vous verrez des CàR imprécis.\n\nÊtes-vous sûr de vouloir l'activer ?"
 
 -----------------------------------------------------------------------
 -- Victory.lua

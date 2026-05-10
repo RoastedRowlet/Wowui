@@ -1,0 +1,255 @@
+-- mana, manaalt, lowmana, power, poweralt
+
+local Mana = Grid2.statusPrototype:new("mana")
+local ManaAlt = Grid2.statusPrototype:new("manaalt", false)
+local Power = Grid2.statusPrototype:new("power",false)
+local PowerAlt = Grid2.statusPrototype:new("poweralt",false)
+
+local max = math.max
+local fmt = string.format
+local next = next
+local tostring = tostring
+local UnitPowerType = UnitPowerType
+local UnitPower = UnitPower
+local UnitPowerMax = UnitPowerMax
+local canaccessvalue = Grid2.canaccessvalue
+
+local ScaleTo100 = CurveConstants.ScaleTo100
+local format = string.format
+local fmtPercent = "%.0f%%"
+
+local statuses = {}  -- Enabled statuses
+
+-- Methods shared by all statuses
+local function status_OnEnable(self)
+	self:RegisterRosterUnitEvent("UNIT_POWER_UPDATE", self.UpdateUnitPower)
+	self:RegisterRosterUnitEvent("UNIT_MAXPOWER", self.UpdateUnitPower)
+	self:RegisterRosterUnitEvent("UNIT_DISPLAYPOWER", self.UpdateUnitPower)
+end
+
+local function status_OnDisable(self)
+	self:UnregisterRosterUnitEvent("UNIT_POWER_UPDATE")
+	self:UnregisterRosterUnitEvent("UNIT_MAXPOWER")
+	self:UnregisterRosterUnitEvent("UNIT_DISPLAYPOWER")
+end
+
+-- Alternative power status
+local PowerAltFmtFunc, PowerAltFmtData
+
+PowerAlt.GetColor = Grid2.statusLibrary.GetColor
+PowerAlt.OnEnable = status_OnEnable
+PowerAlt.OnDisable= status_OnDisable
+
+function PowerAlt:UpdateUnitPower(_, unit, powerType)
+	if powerType=="ALTERNATE" then
+		self:UpdateIndicators(unit)
+	end
+end
+
+function PowerAlt:IsActive(unit)
+	local power = UnitPowerMax(unit,10)
+	return canaccessvalue(power) and power>0
+end
+
+function PowerAlt:GetPercentText(unit)
+	return format( fmtPercent, UnitPowerPercent(unit, 10, false, ScaleTo100) )
+end
+
+function PowerAlt:GetPercent(unit)
+	return UnitPowerPercent(unit,10,false)
+end
+
+function PowerAlt:GetText(unit)
+	return PowerAltFmtFunc( UnitPower(unit,10), PowerAltFmtData )
+end
+
+function PowerAlt:UpdateDB()
+	PowerAltFmtFunc, PowerAltFmtData = Grid2:GetNumbersFormatFunction()
+end
+
+Grid2.setupFunc["poweralt"] = function(baseKey, dbx)
+	Grid2:RegisterStatus(PowerAlt, {"percent", "text", "color"}, baseKey, dbx)
+	return PowerAlt
+end
+
+Grid2:DbSetStatusDefaultValue( "poweralt", {type = "poweralt", color1= {r=1,g=0,b=0.5,a=1}} )
+
+-- Power status
+local PowerFmtFunc, PowerFmtData
+local powerColors = {}
+
+Power.OnEnable  = status_OnEnable
+Power.OnDisable = status_OnDisable
+
+function Power:UpdateUnitPowerFilter(_, unit, powerType)
+	if not self.filtered[unit] then
+		self:UpdateIndicators(unit)
+	end
+end
+
+function Power:IsActiveStandard(unit)
+  return true
+end
+
+function Power:IsActiveFilter(unit)
+  return not self.filtered[unit]
+end
+
+function Power:GetColor(unit)
+	local _, type = UnitPowerType(unit)
+	local c = powerColors[type] or powerColors.MANA
+	return c.r, c.g, c.b, c.a
+end
+
+function Power:GetPercentText(unit)
+	return format( fmtPercent, UnitPowerPercent(unit, nil, false, ScaleTo100) )
+end
+
+function Power:GetPercent(unit)
+	return UnitPowerPercent(unit,nil,false)
+end
+
+function Power:GetText(unit)
+	return PowerFmtFunc( UnitPower(unit), PowerFmtData )
+end
+
+function Power:UpdateDB()
+	local dbx = self.dbx
+	powerColors["MANA"] = dbx.color1
+	powerColors["RAGE"] = dbx.color2
+	powerColors["FOCUS"] = dbx.color3
+	powerColors["ENERGY"] = dbx.color4
+	powerColors["RUNIC_POWER"] = dbx.color5
+	powerColors["INSANITY"] = dbx.color6
+	powerColors["MAELSTROM"] = dbx.color7
+	powerColors["LUNAR_POWER"] = dbx.color8
+	powerColors["FURY"] = dbx.color9
+	powerColors["PAIN"] = dbx.color10
+	powerColors["POWER_TYPE_FOCUS"] = self.dbx.color3 	  -- Codes returned by UnitPowerType() in
+	powerColors["POWER_TYPE_RED_POWER"] = self.dbx.color2 -- garrison proving grounds for friendly NPCs
+	self.IsActive = self.filtered and self.IsActiveFilter or self.IsActiveStandard
+	self.UpdateUnitPower = self.filtered and self.UpdateUnitPowerFilter or self.UpdateIndicatorsFromEvent
+	fmtPercent = Grid2.db.profile.formatting.percentFormat
+	PowerFmtFunc, PowerFmtData = Grid2:GetNumbersFormatFunction()
+end
+
+Grid2.setupFunc["power"] = function(baseKey, dbx)
+	Grid2:RegisterStatus(Power, {"percent", "text", "color"}, baseKey, dbx)
+	return Power
+end
+
+Grid2:DbSetStatusDefaultValue( "power", {type = "power", colorCount = 10,
+	color1 = {r=0,g=0.5,b=1  ,a=1},   -- mana
+	color2 = {r=1,g=0  ,b=0  ,a=1},   -- rage
+	color3 = {r=1,g=0.5,b=0  ,a=1},   -- focus
+	color4 = {r=1,g=1  ,b=0  ,a=1},   -- energy
+	color5 = {r=0,g=0.8,b=0.8,a=1},   -- runic power
+	color6 = {r=0.40, g=0.00, b=0.80, a=1}, -- insanity
+	color7 = {r=0.00, g=0.50, b=1.00, a=1}, -- maelstrom
+	color8 = {r=0.30, g=0.52, b=0.90, a=1}, -- astral power
+	color9 = {r=0.788, g=0.259, b=0.992, a=1}, -- fury
+	color10 = {r=1.00, g=0.61, b=0.00, a=1} -- pain
+})
+
+-- Mana, Manaalt statuses
+local ManaFmtFunc, ManaFmtData
+
+local function Mana_UpdateUnitPower(self, _, unit, powerType)
+	if powerType=='MANA' or powerType==nil then -- powerType==nil => UNIT_DISPLAYPOWER event
+		self:UpdateIndicators(unit)
+	end
+end
+
+local function Mana_UpdateUnitPowerF(self, _, unit, powerType)
+	if not self.filtered[unit] and (powerType=='MANA' or powerType==nil) then
+		self:UpdateIndicators(unit)
+	end
+end
+
+local function Mana_IsActiveAlways(self, unit)
+	return UnitPowerMax(unit,0)>0
+end
+
+local function Mana_IsActiveAlwaysF(self, unit)
+	return not self.filtered[unit] and UnitPowerMax(unit,0)>0
+end
+
+local function Mana_IsActivePrimary(self, unit)
+	return UnitPowerType(unit)==0
+end
+
+local function Mana_IsActivePrimaryF(self, unit)
+	return not self.filtered[unit] and UnitPowerType(unit)==0
+end
+
+local function Mana_IsActiveSecondary(self, unit)
+	if UnitPowerType(unit)~=0 then
+		local m = UnitPowerMax(unit,0)
+		return canaccessvalue(m) and m~=0
+	end
+	return false
+end
+
+local function Mana_IsActiveSecondaryF(self, unit)
+	if not self.filtered[unit] and UnitPowerType(unit)~=0 then
+		local m = UnitPowerMax(unit,0)
+		return canaccessvalue(m) and m~=0
+	end
+	return false
+end
+
+local function Mana_GetPercentText(self, unit)
+	return format( fmtPercent, UnitPowerPercent(unit, 0, false, ScaleTo100) )
+end
+
+local function Mana_GetPercent(self, unit)
+	return UnitPowerPercent(unit,0,false)
+end
+
+local function Mana_GetText(self, unit)
+	return ManaFmtFunc( UnitPower(unit,0), ManaFmtData )
+end
+
+local function Mana_UpdateDB(self)
+	ManaFmtFunc, ManaFmtData = Grid2:GetNumbersFormatFunction()
+	self.UpdateUnitPower = self.filtered and Mana_UpdateUnitPowerF or Mana_UpdateUnitPower
+	if not self.dbx.displayType then -- false|nil = display mana only when is primary resource (standard behaviour)
+		self.IsActive = self.filtered and Mana_IsActivePrimaryF or Mana_IsActivePrimary
+	elseif self.dbx.displayType==2 then -- 2 = display mana only when is secondary resource
+		self.IsActive = self.filtered and Mana_IsActiveSecondaryF or Mana_IsActiveSecondary
+	else -- 1 = display mana always
+		self.IsActive = self.filtered and Mana_IsActiveAlwaysF or Mana_IsActiveAlways
+	end
+end
+
+-- Mana status
+Mana.GetColor   = Grid2.statusLibrary.GetColor
+Mana.OnEnable   = status_OnEnable
+Mana.OnDisable  = status_OnDisable
+Mana.GetPercentText = Mana_GetPercentText
+Mana.GetPercent = Mana_GetPercent
+Mana.GetText    = Mana_GetText
+Mana.UpdateDB   = Mana_UpdateDB
+
+Grid2.setupFunc["mana"] = function(baseKey, dbx)
+	Grid2:RegisterStatus(Mana, {"percent", "text", "color"}, baseKey, dbx)
+	return Mana
+end
+
+Grid2:DbSetStatusDefaultValue( "mana", {type = "mana", color1= {r=0,g=0,b=1,a=1}} )
+
+-- Mana Alt status
+ManaAlt.GetColor   = Grid2.statusLibrary.GetColor
+ManaAlt.OnEnable   = status_OnEnable
+ManaAlt.OnDisable  = status_OnDisable
+ManaAlt.GetPercentText = Mana_GetPercentText
+ManaAlt.GetPercent = Mana_GetPercent
+ManaAlt.GetText    = Mana_GetText
+ManaAlt.UpdateDB   = Mana_UpdateDB
+
+Grid2.setupFunc["manaalt"] = function(baseKey, dbx)
+	Grid2:RegisterStatus(ManaAlt, {"percent", "text", "color"}, baseKey, dbx)
+	return ManaAlt
+end
+
+Grid2:DbSetStatusDefaultValue( "manaalt", {type = "manaalt", displayType = 2, color1={r=0,g=0,b=1,a=1}} )

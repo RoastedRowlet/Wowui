@@ -1737,13 +1737,14 @@ CCS.Race_Bg = {
         texture = "Interface\\DRESSUPFRAME\\DressUpBackground-Dracthyr1",
         map     = {512, 512, 0, 1, 0, 1},
     },
+    
     [84] = { -- Earthen (Horde) 
         texture = "Interface\\Glues\\CharacterCreate\\CharacterCreateStartingZones5",
-        map     = {1022, 664, 0.000488281, 0.5, 0.325684, 0.649902},
+        map     = {1022, 664, 0.000488281, 0.5, 0, 0.325684},
     },
     [85] = { -- Earthen (Alliance) 
         texture = "Interface\\Glues\\CharacterCreate\\CharacterCreateStartingZones5",
-        map     = {1022, 664, 0.000488281, 0.5, 0.325684, 0.649902},
+        map     = {1022, 664, 0.000488281, 0.5, 0, 0.325684},
     },
     [86] = { -- Haranir
         texture = "Interface\\Glues\\CharacterCreate\\CharacterCreateStartingZones5",

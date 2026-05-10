@@ -1,3 +1,9 @@
+VER 3 0100000000000007 "Cursor WRT" "134400"
+/cast [@cursor] Wind Rush Totem
+END
+VER 3 0100000000000006 "CursorSLT" "134400"
+/cast [@cursor] Spirit Link Totem
+END
 VER 3 0100000000000003 "Ele Blast NS" "134400"
 #showtooltip Elemental Blast
 /use Nature's Swiftness

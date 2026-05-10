@@ -312,6 +312,10 @@ local function updateRaidStatusFrame()
 end
 	
 function module:Initialize()
+    if CCS.AreSecretsDisabled() then 
+        CCS.initall = true
+        return 
+    end
     if option("showraidprogress") ~= true then return end
 	if InCombatLockdown() then CCS.incombat = true return end
     local ccsr_btn = _G["ccsr_btn1"] or CreateFrame("Frame", "ccsr_btn1", CharacterHandsSlot)
@@ -366,10 +370,11 @@ function module:Initialize()
 	if option("showr_altbtn") then
 		local ccsr_btn2_tex = ccsr_btn2.tex or ccsr_btn2:CreateTexture(nil, "ARTWORK")
 		ccsr_btn2.tex = ccsr_btn2_tex
-		CCS:ApplyIconStyle(ccsr_btn2, "ightarrow", 17)
+		CCS:ApplyIconStyle(ccsr_btn2, "ightarrow", 20)
+		ccsr_btn2.bg:SetTexture("Interface\\AddOns\\ChonkyCharacterSheet\\Media\\Textures\\raid.png")
 		ccsr_btn2_tex:SetAllPoints()
-		ccsr_btn2_tex:Show()
-		ccsr_btn2_tex:SetTexture("Interface\\AddOns\\ChonkyCharacterSheet\\Media\\Textures\\raid.png")
+		--ccsr_btn2_tex:Show()
+		--ccsr_btn2_tex:SetTexture("Interface\\AddOns\\ChonkyCharacterSheet\\Media\\Textures\\raid.png")
 	else
 		CCS:ApplyIconStyle(ccsr_btn2, "rightarrow", 17)
 		if ccsr_btn2 and ccsr_btn2.tex ~= nil then
@@ -482,7 +487,7 @@ function module:Initialize()
 	local anchor = ccsrf_sf
 	local layoutChain = {}  -- Ordered list of frames to anchor
 
-    -- Phase 1: Create all frames
+    -- Create all frames
     for _, raidData in ipairs(visibleGroups) do
             -- Create header row for this raid
             local rowCount = 1      -- For zebra striping
@@ -501,7 +506,7 @@ function module:Initialize()
             end
     end
 
-    -- Phase 2: Anchor all frames
+    -- Anchor all frames
     for i, entry in ipairs(layoutChain) do
         local frame = entry.frame
         if i == 1 and entry.isHeader then
@@ -522,7 +527,10 @@ function CCS.RaidProgressEventHandler(event, ...)
 	if option("showraidprogress") == false then return end
 
 	if CCS.GetCurrentVersion() ~= CCS.RETAIL then return end
-    if event == "PLAYER_LEVEL_UP" then
+   
+	if CCS.initall == true then return end
+
+	if event == "PLAYER_LEVEL_UP" then
        C_Timer.After(.2, function() if UnitLevel("player") == CCS.MaxLevel then  _G["ccsr_btn"]:Show() end end)
     end
 

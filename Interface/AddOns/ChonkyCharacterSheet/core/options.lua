@@ -211,6 +211,11 @@ end
 -- End of Basic Frame Creation
 -------------------------
 function CCS.InitializeModules()
+    if CCS.AreSecretsDisabled() then 
+        CCS.initall = true
+        return 
+    end
+
     local throttle = 0
 
     if CCS.Throttles then throttle = CCS.Throttles.Init end

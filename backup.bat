@@ -3,9 +3,9 @@ rmdir /S /Q Cache
 rmdir /S /Q Interface
 rmdir /S /Q WTF
 
-xcopy "D:\World of Warcraft\_retail_\Cache" "D:\WoWUI\Wowui\Cache" /s /e /i /h
-xcopy "D:\World of Warcraft\_retail_\Interface" "D:\WoWUI\Wowui\Interface" /s /e /i /h
-xcopy "D:\World of Warcraft\_retail_\WTF" "D:\WoWUI\Wowui\WTF" /s /e /i /h
+xcopy "G:\World of Warcraft\_retail_\Cache" "Cache" /s /e /i /h
+xcopy "G:\World of Warcraft\_retail_\Interface" "Interface" /s /e /i /h
+xcopy "G:\World of Warcraft\_retail_\WTF" "WTF" /s /e /i /h
 
 :: Stage all changes (new, modified, and deleted files)
 git add -A

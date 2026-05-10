@@ -1897,62 +1897,66 @@ do
 
 	local hookedIcons = {}
 	local frame = CreateFrame("Frame")
+	local function OnShow(self)
+		if self.DungeonIcons then
+			for i = 1, #self.DungeonIcons do
+				local icon = self.DungeonIcons[i]
+				if not hookedIcons[icon] then
+					local scoreFontstring = icon:CreateFontString(nil, nil, "SystemFont_Huge1_Outline")
+					scoreFontstring:SetJustifyH("CENTER")
+					scoreFontstring:SetPoint("BOTTOM", 0, 4)
+					scoreFontstring:SetShadowOffset(1, -1)
+					scoreFontstring:SetShadowColor(0, 0, 0)
+					scoreFontstring:Show()
+					local dungeonNameFontstring = icon:CreateFontString(nil, nil, "SystemFont_Shadow_Med1_Outline")
+					dungeonNameFontstring:SetJustifyH("CENTER")
+					dungeonNameFontstring:SetPoint("BOTTOMLEFT", icon, "TOPLEFT", 1, 1)
+					dungeonNameFontstring:SetPoint("BOTTOMRIGHT", icon, "TOPRIGHT", -1, 1)
+					dungeonNameFontstring:SetTextColor(1, 1, 1)
+					dungeonNameFontstring:SetWordWrap(false)
+					dungeonNameFontstring:Show()
+					hookedIcons[icon] = {scoreFontstring, dungeonNameFontstring}
+					icon:HookScript("OnEnter", OnEnter)
+				end
+
+				hookedIcons[icon][1]:ClearText()
+				hookedIcons[icon][2]:ClearText()
+
+				-- Dungeon names as header text
+				hookedIcons[icon][2]:SetText(dungeonNamesTiny[icon.mapID] or icon.mapID)
+				hookedIcons[icon][2]:SetTextScale(1)
+				while hookedIcons[icon][2]:IsTruncated() do -- For really long single words like "MOTHERLODE!!"
+					hookedIcons[icon][2]:SetTextScale(hookedIcons[icon][2]:GetTextScale() - 0.01)
+				end
+				-- Highest score text, mimic Blizz code for the highest level text
+				local _, overAllScore = C_MythicPlus.GetSeasonBestAffixScoreInfoForMap(icon.mapID)
+				local inTimeInfo, overtimeInfo = C_MythicPlus.GetSeasonBestForMap(icon.mapID)
+				if overAllScore and (inTimeInfo or overtimeInfo) then
+					local color
+					if overAllScore then
+						color = C_ChallengeMode.GetSpecificDungeonOverallScoreRarityColor(overAllScore)
+					end
+					if not color then
+						color = HIGHLIGHT_FONT_COLOR
+					end
+					hookedIcons[icon][1]:SetTextColor(color.r, color.g, color.b)
+					hookedIcons[icon][1]:SetText(overAllScore)
+				end
+			end
+		end
+		-- Kill off the "Season Best" text so we can display the dungeon names instead
+		if self.WeeklyInfo and self.WeeklyInfo.Child and self.WeeklyInfo.Child.SeasonBest then
+			self.WeeklyInfo.Child.SeasonBest:ClearText()
+			self.WeeklyInfo.Child.SeasonBest:Hide()
+		end
+	end
 	frame:SetScript("OnEvent", function(self, event, addonName)
 		if event == "ADDON_LOADED" and addonName == "Blizzard_ChallengesUI" then
 			self:UnregisterEvent(event)
 			self:SetScript("OnEvent", nil)
-			self.HookScript(ChallengesFrame, "OnShow", function(challengesFrame)
-				if challengesFrame.DungeonIcons then
-					for i = 1, #challengesFrame.DungeonIcons do
-						local icon = challengesFrame.DungeonIcons[i]
-						if not hookedIcons[icon] then
-							local scoreFontstring = icon:CreateFontString(nil, nil, "SystemFont_Huge1_Outline")
-							scoreFontstring:SetJustifyH("CENTER")
-							scoreFontstring:SetPoint("BOTTOM", 0, 4)
-							scoreFontstring:SetShadowOffset(1, -1)
-							scoreFontstring:SetShadowColor(0, 0, 0)
-							scoreFontstring:Show()
-							local dungeonNameFontstring = icon:CreateFontString(nil, nil, "SystemFont_Shadow_Med1_Outline")
-							dungeonNameFontstring:SetJustifyH("CENTER")
-							dungeonNameFontstring:SetPoint("BOTTOMLEFT", icon, "TOPLEFT", 1, 1)
-							dungeonNameFontstring:SetPoint("BOTTOMRIGHT", icon, "TOPRIGHT", -1, 1)
-							dungeonNameFontstring:SetTextColor(1, 1, 1)
-							dungeonNameFontstring:SetWordWrap(false)
-							dungeonNameFontstring:Show()
-							hookedIcons[icon] = {scoreFontstring, dungeonNameFontstring}
-							icon:HookScript("OnEnter", OnEnter)
-						end
-
-						hookedIcons[icon][1]:ClearText()
-						hookedIcons[icon][2]:ClearText()
-
-						-- Dungeon names as header text
-						hookedIcons[icon][2]:SetText(dungeonNamesTiny[icon.mapID] or icon.mapID)
-						hookedIcons[icon][2]:SetTextScale(1)
-						while hookedIcons[icon][2]:IsTruncated() do -- For really long single words like "MOTHERLODE!!"
-							hookedIcons[icon][2]:SetTextScale(hookedIcons[icon][2]:GetTextScale() - 0.01)
-						end
-						-- Highest score text, mimic Blizz code for the highest level text
-						local _, overAllScore = C_MythicPlus.GetSeasonBestAffixScoreInfoForMap(icon.mapID)
-						local inTimeInfo, overtimeInfo = C_MythicPlus.GetSeasonBestForMap(icon.mapID)
-						if overAllScore and (inTimeInfo or overtimeInfo) then
-							local color
-							if overAllScore then
-								color = C_ChallengeMode.GetSpecificDungeonOverallScoreRarityColor(overAllScore)
-							end
-							if not color then
-								color = HIGHLIGHT_FONT_COLOR
-							end
-							hookedIcons[icon][1]:SetTextColor(color.r, color.g, color.b)
-							hookedIcons[icon][1]:SetText(overAllScore)
-						end
-					end
-				end
-				-- Kill off the "Season Best" text so we can display the dungeon names instead
-				if challengesFrame.WeeklyInfo and challengesFrame.WeeklyInfo.Child and challengesFrame.WeeklyInfo.Child.SeasonBest then
-					challengesFrame.WeeklyInfo.Child.SeasonBest:ClearText()
-					challengesFrame.WeeklyInfo.Child.SeasonBest:Hide()
-				end
+			self.HookScript(ChallengesFrame, "OnShow", function(f)
+				OnShow(f)
+				BigWigsLoader.CTimerAfter(1, function() OnShow(f) end) -- Compensate for any data updates (that would move the icons) happening after the panel opens
 			end)
 		end
 	end)

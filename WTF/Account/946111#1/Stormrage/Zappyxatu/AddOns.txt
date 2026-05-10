@@ -86,7 +86,7 @@ LittleWigs_MistsOfPandaria: enabled
 LittleWigs_Shadowlands: enabled
 LittleWigs_TheWarWithin: enabled
 MessageQueue: enabled
-MRT: enabled
+MRT: disabled
 MythicDungeonTools: enabled
 MyusKnowledgePointsTracker: enabled
 NoAutoClose: enabled

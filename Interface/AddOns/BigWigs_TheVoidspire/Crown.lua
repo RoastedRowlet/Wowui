@@ -234,8 +234,8 @@ function mod:TimersMythic(_, eventInfo)
 
 	local stage = self:GetStage()
 	local duration = eventInfo.duration
-	local durationRounded = self:RoundNumber(duration, 0)
 	local durationRoundedOne = self:RoundNumber(duration, 1)
+	local durationRounded = self:RoundNumber(durationRoundedOne, 0) -- round 1 first to get our .5s to round up instead of .499 rounding down
 
 	if stage == 2 and timelineEventCount == 1 then
 		-- set by IntermissionEnd
@@ -343,12 +343,14 @@ function mod:TimersMythic(_, eventInfo)
 			barInfo = self:RangerCaptainsMark(duration)
 		elseif durationRounded == 20 or durationRounded == 18 then
 			barInfo = self:VoidExpulsion(duration)
-		elseif durationRoundedOne == 1.5 then
-			barInfo = self:RiftSimulacrum(duration)
 		elseif durationRounded == 50 then
 			barInfo = self:CallOfTheVoid(duration)
 		elseif durationRounded == 2 or durationRounded == 10 or durationRounded == 23 then
-			barInfo = self:VoidstalkerSting(duration)
+			if durationRoundedOne == 1.5 then
+				barInfo = self:RiftSimulacrum(duration)
+			else
+				barInfo = self:VoidstalkerSting(duration)
+			end
 		elseif durationRounded == 25 then
 			durationEventCount[durationRounded] = (durationEventCount[durationRounded] or 0) + 1
 			local count = durationEventCount[durationRounded]
@@ -374,15 +376,21 @@ function mod:TimersMythic(_, eventInfo)
 			-- callback handles substage
 			barInfo = self:DevouringCosmos(duration)
 
-		elseif durationRounded == 10 or durationRounded == 9 or durationRounded == 35 then
-			-- Grasp of Emptiness
-			if durationRounded == 9 then
+		elseif durationRounded == 10 then
+			if graspOfEmptinessCount == 1 then -- initial p3 timer
+				barInfo = self:GraspOfEmptiness(duration)
+			else
+				barInfo = self:RiftSimulacrum(duration)
+			end
+		elseif durationRounded == 35 or durationRounded == 9 then
+			durationEventCount[durationRounded] = (durationEventCount[durationRounded] or 0) + 1
+			local count = durationEventCount[durationRounded]
+			if durationRounded == 9 and (substage > 1 and count == 1) then -- only try to extend on initial substage timer
 				barInfo = updateBar(1232467, "GraspOfEmptiness", duration)
 			else
 				barInfo = self:GraspOfEmptiness(duration)
 			end
 		elseif durationRounded == 7 or durationRounded == 6 or durationRounded == 41 or durationRounded == 19 then
-			-- Aspect of the End
 			if durationRounded == 6 then
 				barInfo = updateBar(1239080, "AspectOfTheEnd", duration)
 			else
@@ -391,36 +399,29 @@ function mod:TimersMythic(_, eventInfo)
 		elseif durationRounded == 37 or durationRounded == 36 then
 			barInfo = self:VoidExpulsion(duration)
 		elseif durationRounded == 16 then
-			if stingCount == 1 then -- initial p3 timer
+			if cosmicPortalCount == 1 then -- initial p3 timer
+				barInfo = self:CosmicPortal(duration)
+			elseif durationRoundedOne == 15.5 then
 				barInfo = self:VoidstalkerSting(duration)
 			else
 				barInfo = self:GraspOfEmptiness(duration)
 			end
 		elseif durationRounded == 15 then
-			if cosmicPortalCount == 1 then -- initial p3 timer
-				barInfo = self:CosmicPortal(duration)
-			else
-				barInfo = self:VoidstalkerSting(duration)
-			end
-		elseif durationRounded == 17 and stingCount == 2 then -- first recast
+			barInfo = self:CosmicPortal(duration)
+		elseif durationRounded == 17 and ((substage == 1 and stingCount == 1) or stingCount == 2) then -- initial p3 timer and first recast (actually 16.5)
 			barInfo = self:VoidstalkerSting(duration)
 		elseif durationRounded == 30 or durationRounded == 29 then
 			barInfo = self:NullCorona(duration)
 		elseif durationRounded == 11 then
 			barInfo = self:RiftSimulacrum(duration)
 		elseif durationRounded == 12 then
-			if riftSimulacrumCount == 1 then -- initial p3 timer
-				barInfo = self:RiftSimulacrum(duration)
-			else
-				barInfo = self:VoidstalkerSting(duration)
-			end
+			barInfo = self:VoidstalkerSting(duration)
 		elseif durationRounded == 14 then
 			durationEventCount[durationRounded] = (durationEventCount[durationRounded] or 0) + 1
 			local count = durationEventCount[durationRounded]
-			if substage > 1 and count == 1 then  -- stage timer
-				barInfo = self:CosmicPortal(duration)
-			elseif substage == 3 and count % 2 == 0 then
+			if substage == 3 and count % 2 == 1 then
 				-- XXX if add is killed before the first cast, Voidstalker Sting will use this
+				-- maybe track if the last Dark Hand got canceled?
 				barInfo = self:DarkHand(duration)
 			else
 				barInfo = self:VoidstalkerSting(duration)
@@ -757,6 +758,9 @@ function mod:SilverstrikeBarrage()
 	return {
 		msg = barText,
 		key = 1243982,
+		onEnd = function() -- not used, just for the parser
+			mod:Bar(1243982, 10)
+		end,
 	}
 end
 
@@ -770,7 +774,7 @@ function mod:SilverstrikeArrow()
 		key = 1233602,
 		onFinished = function()
 			self:Message(1233602, "cyan", barText)
-			self:TargetMessageFromBlizzMessage(0.5, 1233602, "blue", CL.you:format(L.silverstrike_arrow))
+			self:PersonalMessageFromBlizzMessage(1233602, 0.5, nil, L.silverstrike_arrow)
 			-- PA target sound
 		end,
 	}
@@ -909,7 +913,7 @@ function mod:VoidstalkerSting()
 		msg = barText,
 		key = 1237038,
 		onEnd = function() -- not used, just for the parser
-			self:Message(1237038, "yellow", barText)
+			mod:Bar(1237038, 10)
 		end,
 	}
 end
@@ -994,7 +998,7 @@ function mod:AspectOfTheEnd()
 		key = 1239080,
 		onFinished = function()
 			self:Message(1239080, "orange", barText)
-			self:TargetMessageFromBlizzMessage(0.5, 1239080, "blue", CL.you:format(L.aspect_of_the_end))
+			self:PersonalMessageFromBlizzMessage(1239080, 0.5, nil, L.aspect_of_the_end)
 		end,
 	}
 end

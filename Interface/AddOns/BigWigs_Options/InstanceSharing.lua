@@ -51,9 +51,9 @@ do
 				if module.SetupOptions then module:SetupOptions() end
 
 				-- Flags
-				if module.db and module.db.profile then
+				if module.db and module.db.profile and module.db.profile.toggles then
 					allBossesDb[module.name] = CopyTable(allBossesDb[module.name] or {})
-					allBossesDb[module.name].flags = module.db.profile
+					allBossesDb[module.name].flags = module.db.profile.toggles
 				else
 					error(("Module %s does not have a db.profile table."):format(module.name))
 				end
@@ -504,12 +504,12 @@ local function ImportFlags(flagSettings, moduleName)
 	local module = BigWigs:GetBossModule(moduleName:sub(16))
 	if module then
 		if module.SetupOptions then module:SetupOptions() end
-		if module.db and module.db.profile then
-			for key, value in pairs(module.db.profile) do
+		if module.db and module.db.profile and module.db.profile.toggles then
+			for key, value in pairs(module.db.profile.toggles) do
 				if flagSettings and flagSettings[key] then
-					module.db.profile[key] = flagSettings[key]
+					module.db.profile.toggles[key] = flagSettings[key]
 				else -- wipe to set default
-					module.db.profile[key] = nil
+					module.db.profile.toggles[key] = nil
 				end
 			end
 		end

@@ -57,6 +57,7 @@ END
 VER 3 0100000000000023 "Focus Soothe" "134400"
 #showtooltip
 /cast [@focus, exists, harm] Soothe
+/cast [@focus, exists, harm] Cyclone
 END
 VER 3 0100000000000018 "hppot" "5931169"
 #128

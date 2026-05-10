@@ -632,14 +632,37 @@ do
 							end
 						end
 					end
-					module.db = loader.db:RegisterNamespace(module.name, { profile = module.toggleDefaults })
-					local db = module.db.profile
-					for k, v in next, db do -- Option validation
-						local defaultType = type(module.toggleDefaults[k])
+
+					-- Set up renames storage DB
+					local renames = {}
+					if module:HasRenames() then
+						for optionKey in next, module.toggleDefaults do
+							if module:IsRenameAvailable(optionKey) then
+								renames[optionKey] = {}
+								for i = 1, module:GetRenameCount(optionKey) do
+									renames[optionKey][i] = module:GetRenameDefault(optionKey, i)
+								end
+							end
+						end
+					end
+
+					module.db = loader.db:RegisterNamespace(module.name, { profile = {renames = renames, toggles = module.toggleDefaults} })
+					-- Option validation
+					for tableName, storageTable in next, module.db.profile do
+						if tableName ~= "renames" and tableName ~= "toggles" then
+							module.db.profile[tableName] = nil
+						elseif type(storageTable) ~= "table" then
+							module.db:ResetProfile() -- Panic reset
+							break
+						end
+					end
+					-- Option validation for toggles
+					for toggleName, toggleValue in next, module.db.profile.toggles do
+						local defaultType = type(module.toggleDefaults[toggleName])
 						if defaultType == "nil" then
-							db[k] = nil
-						elseif type(v) ~= defaultType then
-							db[k] = module.toggleDefaults[k]
+							module.db.profile.toggles[toggleName] = nil
+						elseif type(toggleValue) ~= defaultType then
+							module.db.profile.toggles[toggleName] = module.toggleDefaults[toggleName]
 						end
 					end
 				end

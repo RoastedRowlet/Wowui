@@ -197,6 +197,10 @@ L.autotalk_boss_desc = "自动选择NPC对话选项，使首领战开始。"
 L.autotalk_generic_desc = "自动选择使你进入地下城下一阶段的NPC对话选项。"
 L.autotalk_notice = "自动与NPC %s 交互。"
 
+-- GUI notes
+L.singular = "单数"
+L.plural = "复数"
+
 -- Common ability name replacements
 L.absorb = "吸收盾" -- Used for shield-like abilities that absorb damage or healing
 L.heal_absorb = "治疗吸收盾" -- Used for shield-like abilities that absorb healing only

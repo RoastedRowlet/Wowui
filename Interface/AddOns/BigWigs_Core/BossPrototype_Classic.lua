@@ -525,9 +525,6 @@ function boss:HasPrivateAuraSounds()
 end
 
 do
-	local AddPrivateAuraAppliedSound = C_UnitAuras.AddPrivateAuraAppliedSound
-	local RemovePrivateAuraAppliedSound = C_UnitAuras.RemovePrivateAuraAppliedSound
-	local InChatMessagingLockdown = C_ChatInfo.InChatMessagingLockdown or function() end
 	local modulesNeedingUpdated = {}
 	local frame = CreateFrame("Frame")
 	frame:SetScript("OnEvent", function(self, event, restrictionType, state)
@@ -539,6 +536,10 @@ do
 			modulesNeedingUpdated = {}
 		end
 	end)
+	--C_RestrictedActions.IsAddOnRestrictionActive(1) -- Enum.AddOnRestrictionType.Encounter = 1
+	local AddPrivateAuraAppliedSound = C_UnitAuras.AddPrivateAuraAppliedSound
+	local RemovePrivateAuraAppliedSound = C_UnitAuras.RemovePrivateAuraAppliedSound
+	local InChatMessagingLockdown = C_ChatInfo.InChatMessagingLockdown or function() end
 	function boss:RegisterPrivateAuraSounds()
 		if not self:HasPrivateAuraSounds() then return end
 
@@ -604,7 +605,7 @@ end
 -- This is a wrapper around the self.db.profile[key] table.
 -- @return boolean or number, depending on option type
 function boss:GetOption(key)
-	return self.db.profile[key]
+	return self.db.profile.toggles[key]
 end
 
 --- Module enabled check.
@@ -897,12 +898,23 @@ end
 --
 
 do
+	local function CopyTable(settingsTable)
+		local copy = {}
+		for key, value in next, settingsTable do
+			if type(value) == "table" then
+				copy[key] = CopyTable(value)
+			else
+				copy[key] = value
+			end
+		end
+		return copy
+	end
 	local moduleLocaleList = {}
 	--- Get the current localization strings.
 	-- @return keyed table of localized strings
 	function boss:GetLocale()
 		if moduleLocaleList[self] then
-			return moduleLocaleList[self]
+			return CopyTable(moduleLocaleList[self])
 		else -- DEPRECATED fallback
 			if not self.localization then
 				self.localization = {}
@@ -912,7 +924,6 @@ do
 	end
 	boss.NewLocale = boss.GetLocale -- DEPRECATED
 
-	local tfreeze = table.freeze or function() end
 	--- Set the default locale table.
 	-- @param localeTable the default locale table
 	function boss:SetDefaultLocale(localeTable)
@@ -926,8 +937,8 @@ do
 				localeTable[key] = value
 			end
 		end
-		tfreeze(localeTable)
 		moduleLocaleList[self] = localeTable
+		return localeTable
 	end
 end
 
@@ -938,13 +949,122 @@ do
 	end
 end
 
+-------------------------------------------------------------------------------
+-- Renames
+-- @section renames
+--
+
+do
+	local moduleRenamesList = {}
+	--- Get the current rename for this key and position.
+	-- @return string
+	function boss:GetRename(key, position)
+		if not position then position = 1 end
+		if not moduleRenamesList[self][key] or not moduleRenamesList[self][key][position] then
+			error(("Module %q has no rename for key %q at position %q."):format(self.moduleName, tostring(key), tostring(position)))
+			return
+		else
+			local db = self.db.profile.renames
+			local name = db[key] and db[key][position]
+			if not name then
+				error(("Module %q has no stored rename for key %q at position %q."):format(self.moduleName, tostring(key), tostring(position)))
+				return
+			else
+				local nameType = type(name)
+				if nameType == "number" then
+					return spells[name]
+				else
+					return name
+				end
+			end
+		end
+	end
+
+	--- Get the default rename for this key and position.
+	-- @return string or number (spell ID)
+	function boss:GetRenameDefault(key, position)
+		if not position then position = 1 end
+		if not moduleRenamesList[self][key] or not moduleRenamesList[self][key][position] then
+			error(("Module %q has no rename for key %q at position %q."):format(self.moduleName, tostring(key), tostring(position)))
+			return
+		else
+			return moduleRenamesList[self][key][position]
+		end
+	end
+
+	--- Get the note associated with this rename using its key and position.
+	-- @return string (note) if one exists, or nil
+	function boss:GetRenameNote(key, position)
+		if not position then position = 1 end
+		if not moduleRenamesList[self][key] or not moduleRenamesList[self][key][position] then
+			error(("Module %q has no rename for key %q at position %q."):format(self.moduleName, tostring(key), tostring(position)))
+			return
+		elseif moduleRenamesList[self][key].notes then
+			return moduleRenamesList[self][key].notes[position]
+		end
+	end
+
+	--- Get the amount of renames for this key.
+	-- @return number
+	function boss:GetRenameCount(key)
+		if not moduleRenamesList[self][key] then
+			error(("Module %q has no rename for key %q."):format(self.moduleName, tostring(key)))
+			return
+		else
+			return #moduleRenamesList[self][key]
+		end
+	end
+
+	--- Get the original name associated with this rename using its key
+	-- @return string or number (spell ID)
+	function boss:GetRenameOriginal(key)
+		if not moduleRenamesList[self][key] then
+			error(("Module %q has no rename for key %q."):format(self.moduleName, tostring(key)))
+			return
+		else
+			local original = moduleRenamesList[self][key].original
+			if original or original == false then
+				return original
+			else
+				return key
+			end
+		end
+	end
+
+	--- Check if this module has a rename set for this key
+	-- @return boolean
+	function boss:IsRenameAvailable(key)
+		if moduleRenamesList[self][key] then
+			return true
+		end
+	end
+
+	--- Check if this module has a list of spell renames
+	-- @return boolean
+	function boss:HasRenames()
+		if moduleRenamesList[self] then
+			return true
+		end
+	end
+
+	--- Assign a list of spell renames.
+	-- @param renamesTable the table storing the renames
+	function boss:SetRenames(renamesTable)
+		if moduleRenamesList[self] then
+			error(("Module %q already has a renames list set."):format(self.moduleName))
+			return
+		end
+		moduleRenamesList[self] = renamesTable
+	end
+end
+
 --- Create a custom marking option
 -- @bool state Boolean value to represent default state
 -- @string markType The type of string to return (player, npc, npc_aura)
 -- @number icon An icon id to be used for the option texture
 -- @param id The spell id or journal id to be translated into a name, or a string to represent an entry in the boss module locale table. "test" would look up CL.test
 -- @number ... a series of raid icons being used by the marker function e.g. (1, 2, 3)
--- @return an option string to be used in conjuction with :GetOption
+-- @return an option string to be used in conjunction with :GetOption
 function boss:AddMarkerOption(state, markType, icon, id, ...)
 	local moduleLocale = self:GetLocale()
 	local str = ""
@@ -974,7 +1094,7 @@ end
 -- @bool state Boolean value to represent default state
 -- @string[opt] talkType The type of description to use ("boss" or nil for generic)
 -- @string[opt] name A unique name the option should have if you want to create multiple options in one module
--- @return an option string to be used in conjuction with :GetOption
+-- @return an option string to be used in conjunction with :GetOption
 function boss:AddAutoTalkOption(state, talkType, name)
 	if name and type(name) ~= "string" then
 		core:Error("Invalid auto talk name: ".. tostring(name))
@@ -2713,7 +2833,7 @@ do
 		-- @return boolean
 		function boss:Dispeller(dispelType, isOffensive, key)
 			if key then
-				local o = self.db.profile[key]
+				local o = self.db.profile.toggles[key]
 				if not o then core:Print(format("Module %s uses %q as a dispel lookup, but it doesn't exist in the module options.", self.name, key)) return end
 				if band(o, C.DISPEL) ~= C.DISPEL then return true end
 			end
@@ -2834,19 +2954,19 @@ do
 		if type(key) == "nil" then core:Print(format(nilKeyError, self.moduleName)) return end
 		if type(flag) ~= "number" then core:Print(format(invalidFlagError, self.moduleName, type(flag), tostring(flag))) return end
 		if type(self.db) ~= "table" then local msg = format(noDBError, self.moduleName) core:Print(msg) error(msg) return end
-		if type(self.db.profile[key]) ~= "number" then
+		if type(self.db.profile.toggles[key]) ~= "number" then
 			if not self.toggleDefaults[key] then
 				core:Print(format(noDefaultError, self.moduleName, key))
 				return
 			end
 			--if debug then
-			--	core:Print(format(notNumberError, self.moduleName, key, type(self.db.profile[key])))
+			--	core:Print(format(notNumberError, self.moduleName, key, type(self.db.profile.toggles[key])))
 			--	return
 			--end
-			self.db.profile[key] = self.toggleDefaults[key]
+			self.db.profile.toggles[key] = self.toggleDefaults[key]
 		end
 
-		local fullKey = self.db.profile[key]
+		local fullKey = self.db.profile.toggles[key]
 		if band(fullKey, C.TANK) == C.TANK and not self:Tank() then return end
 		if band(fullKey, C.HEALER) == C.HEALER and not self:Healer() then return end
 		if band(fullKey, C.TANK_HEALER) == C.TANK_HEALER and not self:Tank() and not self:Healer() then return end
@@ -2873,18 +2993,18 @@ do
 			core:Print(msg)
 			error(msg)
 			return
-		elseif type(self.db.profile[key]) ~= "number" then
+		elseif type(self.db.profile.toggles[key]) ~= "number" then
 			if not self.toggleDefaults[key] then
 				core:Print(format(noDefaultError, self.moduleName, key))
 				return
 			end
 			--if debug then
-			--	core:Print(format(notNumberError, self.moduleName, key, type(self.db.profile[key])))
+			--	core:Print(format(notNumberError, self.moduleName, key, type(self.db.profile.toggles[key])))
 			--	return
 			--end
-			self.db.profile[key] = self.toggleDefaults[key]
+			self.db.profile.toggles[key] = self.toggleDefaults[key]
 		else
-			local fullKey = self.db.profile[key]
+			local fullKey = self.db.profile.toggles[key]
 			if band(fullKey, C.TANK) == C.TANK and not self:Tank() then
 				return
 			elseif band(fullKey, C.HEALER) == C.HEALER and not self:Healer() then
@@ -2901,7 +3021,7 @@ do
 	-- @string flag the option flag to check
 	-- @return boolean
 	function boss:CheckFlag(key, flag)
-		return band(self.db.profile[key], flag) == flag
+		return band(self.db.profile.toggles[key], flag) == flag
 	end
 end
 
@@ -3202,9 +3322,9 @@ do
 			local msg = textType == "string" and text or spells[text or key]
 			local texture = icon ~= false and icons[icon or textType == "number" and text or key]
 			if playersInTable == 1 and (playerTable[1] == myNameWithColor or playerTable[1] == myName) then
-				local meEmphasized = band(self.db.profile[key], C.ME_ONLY_EMPHASIZE) == C.ME_ONLY_EMPHASIZE
+				local meEmphasized = band(self.db.profile.toggles[key], C.ME_ONLY_EMPHASIZE) == C.ME_ONLY_EMPHASIZE
 				if not meEmphasized then -- We already did a ME_ONLY_EMPHASIZE print in :TargetsMessage
-					local emphasized = band(self.db.profile[key], C.EMPHASIZE) == C.EMPHASIZE
+					local emphasized = band(self.db.profile.toggles[key], C.EMPHASIZE) == C.EMPHASIZE
 					if markers then
 						self:SendMessage("BigWigs_Message", self, key, format(CL.you_icon, msg, markers[1]), "blue", texture, emphasized)
 					else
@@ -3219,7 +3339,7 @@ do
 				end
 				local list = self:TableToString(playerTable, playersInTable)
 				-- Don't Emphasize if it's on other people when both EMPHASIZE and ME_ONLY_EMPHASIZE are enabled.
-				local isEmphasized = band(self.db.profile[key], C.EMPHASIZE) == C.EMPHASIZE and band(self.db.profile[key], C.ME_ONLY_EMPHASIZE) ~= C.ME_ONLY_EMPHASIZE
+				local isEmphasized = band(self.db.profile.toggles[key], C.EMPHASIZE) == C.EMPHASIZE and band(self.db.profile.toggles[key], C.ME_ONLY_EMPHASIZE) ~= C.ME_ONLY_EMPHASIZE
 				self:SendMessage("BigWigs_Message", self, key, format(CL.other, msg, list), color, texture, isEmphasized)
 			end
 			twipe(playerTable)
@@ -3240,9 +3360,9 @@ do
 	-- @param[opt] markers a table containing the markers that should be attached next to the player names e.g. {1, 2, 3}
 	function boss:TargetsMessageOld(key, color, playerTable, playerCount, text, icon, customTime, markers)
 		local playersInTable = #playerTable
-		if band(self.db.profile[key], C.ME_ONLY) == C.ME_ONLY then -- We allow ME_ONLY even if MESSAGE off
+		if band(self.db.profile.toggles[key], C.ME_ONLY) == C.ME_ONLY then -- We allow ME_ONLY even if MESSAGE off
 			if (playerTable[playersInTable] == myNameWithColor or playerTable[playersInTable] == myName) and checkFlag(self, key, C.ME_ONLY) then -- Use checkFlag for the role check
-				local isEmphasized = band(self.db.profile[key], C.EMPHASIZE) == C.EMPHASIZE or band(self.db.profile[key], C.ME_ONLY_EMPHASIZE) == C.ME_ONLY_EMPHASIZE
+				local isEmphasized = band(self.db.profile.toggles[key], C.EMPHASIZE) == C.EMPHASIZE or band(self.db.profile.toggles[key], C.ME_ONLY_EMPHASIZE) == C.ME_ONLY_EMPHASIZE
 				local textType = type(text)
 				local msg = textType == "string" and text or spells[text or key]
 				local texture = icon ~= false and icons[icon or textType == "number" and text or key]
@@ -3262,7 +3382,7 @@ do
 				end)
 			end
 		elseif checkFlag(self, key, C.MESSAGE) then
-			if (playerTable[playersInTable] == myNameWithColor or playerTable[playersInTable] == myName) and band(self.db.profile[key], C.ME_ONLY_EMPHASIZE) == C.ME_ONLY_EMPHASIZE then
+			if (playerTable[playersInTable] == myNameWithColor or playerTable[playersInTable] == myName) and band(self.db.profile.toggles[key], C.ME_ONLY_EMPHASIZE) == C.ME_ONLY_EMPHASIZE then
 				local textType = type(text)
 				local msg = textType == "string" and text or spells[text or key]
 				local texture = icon ~= false and icons[icon or textType == "number" and text or key]
@@ -3453,12 +3573,12 @@ do
 	local GetPlayerInfoByGUID = GetPlayerInfoByGUID
 	local GetClassColor = C_ClassColor and C_ClassColor.GetClassColor -- XXX [Mainline:✓ MoP:✗ Wrath:✗ Vanilla:✗]
 	--- Temporarily replace the next Blizzard boss message with a TargetMessage
-	-- @number duration the duration the block should last
 	-- @param key the option key
+	-- @number duration the duration the block should last
 	-- @string color the message color category
 	-- @param[opt] text the message text (if nil, key is used)
 	-- @param[opt] icon the message icon (spell id or texture name, key is used if nil)
-	function boss:TargetMessageFromBlizzMessage(duration, key, color, text, icon)
+	function boss:TargetMessageFromBlizzMessage(key, duration, color, text, icon)
 		self:StopBlizzMessages(duration)
 
 		local timer = self:ScheduleTimer(function()
@@ -3485,12 +3605,12 @@ do
 end
 
 --- Temporarily replace the next Blizzard boss message with a personal message in blue
--- @number duration the duration the block should last
 -- @param key the option key
+-- @number duration the duration the block should last
 -- @param[opt] localeString if nil then the "%s on YOU" string will be used, if false then the text field will be printed directly, otherwise the common locale will be referenced via CL[localeString]
 -- @param[opt] text the message text (if nil, key is used, if true, the raw Blizzard message is used)
 -- @param[opt] icon the message icon (spell id or texture name or true to use the Blizzard provided icon)
-function boss:PersonalMessageFromBlizzMessage(duration, key, localeString, text, icon)
+function boss:PersonalMessageFromBlizzMessage(key, duration, localeString, text, icon)
 	self:StopBlizzMessages(duration)
 
 	if self:CanPassRoleRestrictions(key) then
@@ -3589,7 +3709,12 @@ do
 			time = length
 		end
 		local textType = type(text)
-		local msg = textType == "string" and text or spells[text or key]
+		local msg
+		if not text and self:IsRenameAvailable(key) then
+			msg = self:GetRename(key, 1)
+		else
+			msg = textType == "string" and text or spells[text or key]
+		end
 		local isBarEnabled = checkFlag(self, key, C.BAR)
 		if isBarEnabled then
 			self:SendMessage("BigWigs_StartBar", self, key, msg, time, icons[icon or textType == "number" and text or key], false, maxTime, nil, eventId)
@@ -3638,7 +3763,12 @@ do
 			time = length
 		end
 		local textType = type(text)
-		local msg = textType == "string" and text or spells[text or key]
+		local msg
+		if not text and self:IsRenameAvailable(key) then
+			msg = self:GetRename(key, 1)
+		else
+			msg = textType == "string" and text or spells[text or key]
+		end
 		local isBarEnabled = checkFlag(self, key, C.BAR)
 		if checkFlag(self, key, C.BAR) then
 			self:SendMessage("BigWigs_StartBar", self, key, msg, time, icons[icon or textType == "number" and text or key], true, maxTime, nil, eventId)

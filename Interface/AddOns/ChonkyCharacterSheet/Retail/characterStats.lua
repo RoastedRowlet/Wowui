@@ -1170,9 +1170,9 @@ local function GetStatDurability(rowData)
 
     leftText = DURABILITY
 	if totalCost > 0 then
-		rightText = string.format("(%.2f%%) : %s", percent, FormatRepairCost(totalCost))
+		rightText = string.format("(%.0f%%) : %s", percent, FormatRepairCost(totalCost))
 	else
-		rightText = string.format("(%.2f%%)", percent)
+		rightText = string.format("(%.0f%%)", percent)
 	end
 	
 	return leftText, rightText, tt_name, tt_desc, link, isZero
@@ -1244,7 +1244,7 @@ local function GetStatMovespeed(rowData)
 	local leftText, rightText, tt_name, tt_desc, isZero = "","|cffffd100<" .. L["Secret"] .. ">|r","","",false
 	local link = nil
 
-	leftText=format("%s", STAT_MOVEMENT_SPEED)
+	leftText=format("%s", L["Movement"])
 
 	if not CCS.AreSecretsDisabled() then
 		rightText = UpdateMoveSpeed()
@@ -1270,7 +1270,7 @@ local function GetStatCurrency(rowData)
 	end
 	
 	if currencyData ~= nil then
-		leftText = currencyData.name
+		leftText = rowData.name -- currencyData.name
 		--isZero = (currencyData.quantity == 0)
 		--if currencyData.useTotalEarnedForMaxQty == true or 
 		if rowData.id == 1586 or
@@ -1413,7 +1413,7 @@ local STAT_SECTIONS = {
             { key="crests_veteran",    name=L["Veteran"]     or "Veteran",     id=3341, statFunc=GetStatCurrency, icon="Interface\\Icons\\inv_120_crest_veteran" },
             { key="crests_adventurer", name=L["Adventurer"]  or "Adventurer",  id=3383, statFunc=GetStatCurrency, icon="Interface\\Icons\\inv_120_crest_adventurer" },
             { key="crests_catalyst", name=L["Catalyst"]  or "Catalyst",  id=3378, statFunc=GetStatCurrency, icon="Interface\\Icons\\inv_120_crest_adventurer" },
-            { key="crests_voidcore", name=L["Catalyst"]  or "Catalyst",  id=3418, statFunc=GetStatCurrency, icon="Interface\\Icons\\inv_120_crest_adventurer" },
+            { key="crests_voidcore", name=BONUS_LOOT_LABEL  or "Bonus Loot",  id=3418, statFunc=GetStatCurrency, icon="Interface\\Icons\\inv_120_crest_adventurer" },
         },
     },
 
@@ -1503,6 +1503,11 @@ local function UpdateStatsScrollRange(scrollFrame)
 end
 
 local function UpdateLayout()
+
+    if CCS.initall == true then 
+        return 
+	end
+	
     local previousSection = nil
     local sectionSpacing = 7
     local rowSpacing = 2
@@ -2093,7 +2098,7 @@ local function TruncateToWidth(fs, text, maxWidth)
 end
 
 UpdateAllStats = function(parent)
- 
+    if CCS.initall == true then return end
     CreateAndUpdateiLvlframe(parent)
 
 	if ShouldShowPriority() then
@@ -2165,14 +2170,14 @@ UpdateAllStats = function(parent)
                         local fs = rowFrame.leftText
                         local text = leftText or ""
 						
-						if not CCS.AreSecretsDisabled() then 
+						--if not CCS.AreSecretsDisabled() then 
 							fs:SetText(text)
 							-- Compute max label width
 							local reservedRightWidth
 							local MAX_LABEL_WIDTH
 							
 							if rowFrame.reservedRightWidth == nil then
-								reservedRightWidth = rowFrame.rightText:GetStringWidth()+4
+								reservedRightWidth = 110 -- rowFrame.rightText:GetStringWidth()+4
 								MAX_LABEL_WIDTH =
 								rowFrame:GetWidth()
 								- rowFrame.icon:GetWidth()
@@ -2212,7 +2217,7 @@ UpdateAllStats = function(parent)
 								fs:SetJustifyH("LEFT")
 								fs:SetJustifyV("MIDDLE")
 								fs:SetNonSpaceWrap(true) 						
-						end	
+						--end	
                     end
 
                     -------------------------------------------------
@@ -2470,6 +2475,12 @@ local function CreateStatsScrollBar(scrollFrame)
 end
 
 function module:Initialize()
+
+    if CCS.AreSecretsDisabled() then 
+        CCS.initall = true
+        return 
+    end
+	
     if UnitLevel("player") < 10 then return end
     
     if option("showcharacterstats") then
@@ -2571,6 +2582,9 @@ function CCS.CharacterStatsEventHandler(event, ...)
     local arg1 = ...
 
     if CCS.GetCurrentVersion() ~= CCS.RETAIL then return end
+
+    if CCS.initall == true then return end
+
     if UnitLevel("player") < 10 then return end
     if UnitLevel("player") == 10 and InCombatLockdown() and event == "PLAYER_LEVEL_UP" then CCS.incombat = true return end
 

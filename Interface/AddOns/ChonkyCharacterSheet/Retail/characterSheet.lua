@@ -21,7 +21,6 @@ local modelbtn = _G["CCS_clk_Btn"] or CreateFrame("Button", "CCS_clk_Btn", Paper
 local bg_texture = "Interface\\AddOns\\ChonkyCharacterSheet\\Media\\Textures\\bgmidnight.png"
 
 local function hookfix() 
-
     if not CCS.AreSecretsDisabled() and _G["ccsm_sf"] and (option("showm_sp_onopen") == true) then
             _G["ccsm_sf"]:Show()
             _G["ccs_sf"]:Hide()             
@@ -578,7 +577,7 @@ local function loopitems()
 end
 
 local function TryLoopItems()
-
+    if CCS.initall == true then return end
     local allReady = true
     for slot = 1, 19 do
         local link = GetInventoryItemLink("player", slot)
@@ -1000,10 +999,30 @@ local function CCS_FilterTitles(search)
         end
     end
 
-    -- Sort the results alphabetically
+    -- Add "No Title" manually
+    local noTitleName = _G["PLAYER_TITLE_NONE"] or "No Title"
+    if search == "" or noTitleName:lower():find(search, 1, true) then
+        table.insert(filtered, { id = 0, name = noTitleName })
+    end
+
+--[[    -- Sort the results alphabetically
     table.sort(filtered, function(a, b)
         return a.name:lower() < b.name:lower()
     end)
+--]]
+    table.sort(filtered, function(a, b)
+        -- Force "No Title" (id = 0) to the top
+        if a.id == 0 and b.id ~= 0 then
+            return true
+        elseif b.id == 0 and a.id ~= 0 then
+            return false
+        end
+
+        -- Otherwise sort alphabetically
+        return a.name:lower() < b.name:lower()
+    end)
+
+
 
     return filtered
 end
@@ -1106,7 +1125,7 @@ function CCS.HookSetup()
         if C_AddOns.IsAddOnLoaded("Armory") == true then
             CharacterFrame.Expand() 
         end
-        
+
         C_Timer.After(0, function() CharacterFrameTitleText:SetTextColor(
         option("fontcolor_nametitle")[1] or 1,
         option("fontcolor_nametitle")[2] or 1,
@@ -1324,7 +1343,7 @@ end
 function module:Initialize()
     -- Set up the character sheet for the current player
 
-    if InCombatLockdown() then 
+    if CCS.AreSecretsDisabled() then 
         CCS.initall = true
         return 
     end
@@ -1923,6 +1942,8 @@ function CCS.CharacterSheetEventHandler(event, ...)
     local arg1 = ...
 
     if CCS.GetCurrentVersion() ~= CCS.RETAIL then return end
+
+    if CCS.initall == true then return end
    
     if event == "PLAYER_ENTERING_WORLD" then
             for slot = 1, 19 do

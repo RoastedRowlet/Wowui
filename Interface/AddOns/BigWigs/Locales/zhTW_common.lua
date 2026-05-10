@@ -197,6 +197,10 @@ L.autotalk_boss_desc = "自動選擇開始首領戰鬥的對話選項。"
 L.autotalk_generic_desc = "自動選擇使地城進入下一階段的對話選項。"
 L.autotalk_notice = "自動與 NPC %s互動。"
 
+-- GUI notes
+--L.singular = "Singular"
+--L.plural = "Plural"
+
 -- Common ability name replacements
 L.absorb = "吸收" -- Used for shield-like abilities that absorb damage or healing
 L.heal_absorb = "治療吸收盾" -- Used for shield-like abilities that absorb healing only

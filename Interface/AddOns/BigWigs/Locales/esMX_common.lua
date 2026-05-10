@@ -197,6 +197,10 @@ L.autotalk_boss_desc = "Selecciona automáticamente el dialogo del NPC que provo
 L.autotalk_generic_desc = "Selecciona automáticamente el dialogo del NPC que hace que avances a la siguiente etapa de la mazmorra."
 L.autotalk_notice = "Interactuando automáticamente con los NPC %s."
 
+-- GUI notes
+--L.singular = "Singular"
+--L.plural = "Plural"
+
 -- Common ability name replacements
 L.absorb = "Absorber" -- Used for shield-like abilities that absorb damage or healing
 L.heal_absorb = "Absorción de sanación" -- Used for shield-like abilities that absorb healing only

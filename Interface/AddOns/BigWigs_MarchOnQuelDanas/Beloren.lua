@@ -46,21 +46,36 @@ local convergenceCount = 1
 -- Localization
 --
 
-local L = mod:GetLocale()
-if L then
-	L.infused_quills = "Quills"
-	L.voidlight_convergence = "Color Swaps"
+local L = mod:SetDefaultLocale({ -- SetOption:skip-locale
+	infused_quills = "Quills",
+	voidlight_convergence = "Color Swaps",
 
-	L.light_void_dive = "Light/Void Dive"
-	L.light_void_dive_desc = 1241292
-	L.light_void_dive_icon = 1241292
-end
+	light_void_dive = "Light/Void Dive",
+	light_void_dive_desc = 1241292,
+	light_void_dive_icon = 1241292,
+})
+
+--------------------------------------------------------------------------------
+-- Renames
+--
+
+mod:SetRenames({
+	["stages"] = {CL.stage:format(1), CL.intermission, original = false, notes = {CL.stage:format(1), CL.intermission}}, -- Stages
+	[1242515] = {L.voidlight_convergence}, -- Voidlight Convergence (Color Swaps)
+	[1241282] = {CL.adds}, -- Embers of Beloren (Adds)
+	["light_void_dive"] = {CL.soaks, original = ("%s/%s"):format(mod:SpellName(1241292), mod:SpellName(1241339))}, -- Light/Void Dive (Soaks)
+	[1242981] = {CL.orbs}, -- Radiant Echoes (Orbs)
+	[1260763] = {CL.tank_combo}, -- Guardian's Edict (Tank Combo)
+	[1244344] = {CL.heal_absorbs}, -- Eternal Burns (Heal Absorbs)
+	[1242260] = {L.infused_quills}, -- Infused Quills (Quills)
+	[1246709] = {CL.landing}, -- Death Drop (Landing)
+})
 
 --------------------------------------------------------------------------------
 -- Initialization
 --
 
-function mod:GetOptions() -- SetOption:skip-unused
+function mod:GetOptions()
 	return {
 		"stages",
 		-- "berserk", -- 1241267 Voidlight Rage
@@ -81,15 +96,6 @@ function mod:GetOptions() -- SetOption:skip-unused
 	}, {
 		-- [1241282] = -33025, -- Stage One: Phoenix Reborn
 		-- [1241313] = -32160, -- Stage Two: Ashen Shell
-	}, {
-		[1242515] = L.voidlight_convergence,
-		[1241282] = CL.adds, -- Embers of Beloren
-		["light_void_dive"] = CL.soaks,
-		[1242981] = CL.orbs,
-		[1260763] = CL.tank_combo, -- Guardian's Edict
-		[1244344] = CL.heal_absorbs, -- Eternal Burns
-		[1242260] = L.infused_quills,
-		[1246709] = CL.landing, -- Death Drop
 	}
 end
 
@@ -163,7 +169,7 @@ function mod:TimersMythic(_, eventInfo)
 	else
 		if durationRounded == 6 then
 			barInfo = self:DeathDrop(duration)
-		elseif durationRounded == 30 then
+		elseif durationRounded == 40 then
 			barInfo = self:Rebirth(duration)
 		end
 	end
@@ -225,7 +231,7 @@ function mod:TimersOther(_, eventInfo)
 	else
 		if durationRounded == 6 then
 			barInfo = self:DeathDrop(duration)
-		elseif durationRounded == 30 then
+		elseif durationRounded == 40 then
 			barInfo = self:Rebirth(duration)
 		end
 	end
@@ -287,8 +293,8 @@ end
 --
 
 function mod:EmbersOfBeloren(duration)
-	local barText = CL.count:format(CL.adds, embersCount)
-	local diveBarText = CL.count:format(CL.soaks, embersCount)
+	local barText = CL.count:format(self:GetRename(1241282), embersCount)
+	local diveBarText = CL.count:format(self:GetRename("light_void_dive"), embersCount)
 	embersCount = embersCount + 1
 	return {
 		msg = barText,
@@ -304,7 +310,7 @@ function mod:EmbersOfBeloren(duration)
 end
 
 function mod:RadiantEchoes(duration)
-	local barText = CL.count:format(CL.orbs, echosCount)
+	local barText = CL.count:format(self:GetRename(1242981), echosCount)
 	echosCount = echosCount + 1
 	return {
 		msg = barText,
@@ -317,7 +323,7 @@ function mod:RadiantEchoes(duration)
 end
 
 function mod:GuardiansEdict(duration)
-	local barText = CL.count:format(CL.tank_combo, edictCount)
+	local barText = CL.count:format(self:GetRename(1260763), edictCount)
 	edictCount = edictCount + 1
 	return {
 		msg = barText,
@@ -332,7 +338,7 @@ function mod:GuardiansEdict(duration)
 end
 
 function mod:EternalBurns(duration)
-	local barText = CL.count:format(CL.heal_absorbs, burnsCount)
+	local barText = CL.count:format(self:GetRename(1244344), burnsCount)
 	burnsCount = burnsCount + 1
 	return {
 		msg = barText,
@@ -347,7 +353,7 @@ function mod:EternalBurns(duration)
 end
 
 function mod:InfusedQuills(duration)
-	local barText = CL.count:format(L.infused_quills, quillsCount)
+	local barText = CL.count:format(self:GetRename(1242260), quillsCount)
 	quillsCount = quillsCount + 1
 	return {
 		msg = barText,
@@ -361,13 +367,13 @@ end
 
 function mod:VoidlightConvergence(duration)
 	if self:ShouldShowBars() then
-		self:Message(1242515, "cyan", CL.count:format(L.voidlight_convergence, convergenceCount))
+		self:Message(1242515, "cyan", CL.count:format(self:GetRename(1242515), convergenceCount))
 		if convergenceCount > 1 or phaseCount > 1 then
 			self:PlaySound(1242515, "long")
 		end
 	end
 	convergenceCount = convergenceCount + 1
-	local barText = CL.count:format(L.voidlight_convergence, convergenceCount)
+	local barText = CL.count:format(self:GetRename(1242515), convergenceCount)
 	return {
 		msg = barText,
 		key = 1242515,
@@ -390,12 +396,15 @@ function mod:DeathDrop(duration)
 	convergenceCount = 1
 
 	if self:ShouldShowBars() then
-		self:Message("stages", "cyan", CL.count:format(CL.intermission, phaseCount), false)
+		self:Message("stages", "cyan", CL.count:format(self:GetRename("stages", 2), phaseCount), false) -- Intermission
 		self:PlaySound("stages", "long")
 	end
 	return {
-		msg = CL.landing,
+		msg = self:GetRename(1246709),
 		key = 1246709,
+		onEnd = function() -- not used, just for the parser
+			mod:Bar(1246709, 10)
+		end,
 	}
 end
 
@@ -403,11 +412,12 @@ end
 
 function mod:Rebirth(duration)
 	phaseCount = phaseCount + 1
-	local barText = CL.count:format(CL.stage:format(1), phaseCount)
+	local barText = CL.count:format(self:GetRename("stages"), phaseCount)
 
 	return {
 		msg = barText,
 		key = "stages",
+		icon = "inv_12_dualityphoenix_phoenix_rebirth",
 		endTime = GetTime() + duration + 1.5, -- XXX started canceling later after the edict hotfix?
 		onFinished = function()
 			isIntermission = false
@@ -415,7 +425,7 @@ function mod:Rebirth(duration)
 				self:Message("stages", "cyan", barText, false)
 				self:PlaySound("stages", "info")
 
-				self:Bar(1242515, 4.5, CL.count:format(L.voidlight_convergence, convergenceCount))
+				self:Bar(1242515, 4.5, CL.count:format(self:GetRename(1242515), convergenceCount))
 			end
 		end,
 		onCanceled = function(barInfo)
