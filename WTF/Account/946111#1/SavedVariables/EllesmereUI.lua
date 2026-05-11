@@ -23,6 +23,23 @@ EllesmereUIDB = {
 ["showGems"] = false,
 ["showStatCategory_Tertiary"] = false,
 ["durWarnYOffset"] = 102,
+["showStatCategory_Crests"] = false,
+["unlockWidthMatch"] = {
+["CDM_cooldowns"] = "ERB_Power",
+["focusCastbar"] = "focus",
+["CDM_utility"] = "ERB_Power",
+["targetCastbar"] = "target",
+["ERB_CastBar"] = "ERB_Power",
+},
+["lastSpecByChar"] = {
+["Lonelylitten - Stormrage"] = 105,
+["Angryabsol - Stormrage"] = 1480,
+["Zappyxatu - Stormrage"] = 264,
+["Madmareep - Stormrage"] = 258,
+["Barelynoer - Area 52"] = 1473,
+},
+["_capturedOnce"] = true,
+["reskinQueuePopup"] = true,
 ["global"] = {
 ["friendGroupColors"] = {
 ["_ungrouped"] = {
@@ -46,23 +63,6 @@ EllesmereUIDB = {
 ["friendUngroupedCollapsed"] = false,
 ["friendFavCollapsed"] = false,
 },
-["unlockWidthMatch"] = {
-["CDM_cooldowns"] = "ERB_Power",
-["focusCastbar"] = "focus",
-["CDM_utility"] = "ERB_Power",
-["targetCastbar"] = "target",
-["ERB_CastBar"] = "ERB_Power",
-},
-["lastSpecByChar"] = {
-["Lonelylitten - Stormrage"] = 105,
-["Angryabsol - Stormrage"] = 1480,
-["Zappyxatu - Stormrage"] = 264,
-["Madmareep - Stormrage"] = 258,
-["Barelynoer - Area 52"] = 1473,
-},
-["_capturedOnce"] = true,
-["reskinQueuePopup"] = true,
-["showStatCategory_Crests"] = false,
 ["statSectionsOrder"] = {
 "Attributes",
 "Secondary",
@@ -164,15 +164,15 @@ EllesmereUIDB = {
 ["stackThresholdR"] = 0.8,
 ["nameX"] = 0,
 ["stackThresholdG"] = 0.1,
-["stackThresholdMaxEnabled"] = false,
+["stackThresholdB"] = 0.1,
 ["fillR"] = 0,
 ["stackThreshold"] = 5,
 ["enabled"] = true,
 ["bgG"] = 0,
 ["gradientG"] = 0.2,
 ["reverseFill"] = false,
-["stackThresholdB"] = 0.1,
-["gradientA"] = 1,
+["stackThresholdMaxEnabled"] = false,
+["stackThresholdMax"] = 10,
 ["nameY"] = 0,
 ["fillB"] = 0.8666667342185974,
 ["bgR"] = 0,
@@ -185,38 +185,38 @@ EllesmereUIDB = {
 ["spellID"] = 79206,
 ["pandemicGlow"] = true,
 ["showTimer"] = true,
-["pandemicGlowSpeed"] = 4,
+["texture"] = "none",
 ["iconX"] = 0,
 ["timerPosition"] = "right",
 ["opacity"] = 1,
 ["showSpark"] = false,
-["timerX"] = 0,
-["stackThresholdTicks"] = "",
-["pandemicGlowThickness"] = 2,
+["bgB"] = 0,
+["timerY"] = 0,
+["pandemicGlowSpeed"] = 4,
 ["stackThresholdA"] = 1,
 ["iconBorderSize"] = 0,
 ["iconSize"] = 24,
 ["nameSize"] = 11,
 ["stacksY"] = 0,
-["texture"] = "none",
+["pandemicGlowThickness"] = 2,
 ["bgA"] = 0.4,
 ["verticalOrientation"] = false,
 ["timerSize"] = 11,
 ["gradientR"] = 0.2,
-["bgB"] = 0,
+["timerX"] = 0,
 ["pandemicGlowColor"] = {
 ["r"] = 1,
 ["g"] = 1,
 ["b"] = 0,
 },
-["timerY"] = 0,
+["stackThresholdTicks"] = "",
 ["width"] = 342,
 ["pandemicGlowLines"] = 8,
 ["showName"] = false,
 ["pandemicGlowStyle"] = -1,
 ["fillA"] = 1,
 ["gradientDir"] = "HORIZONTAL",
-["stackThresholdMax"] = 10,
+["gradientA"] = 1,
 ["iconDisplay"] = "none",
 ["fillG"] = 0.4392157196998596,
 },
@@ -551,6 +551,13 @@ EllesmereUIDB = {
 },
 },
 },
+["_friendsWipeDone"] = true,
+["themedCharacterSheet"] = false,
+["showFPS"] = true,
+["_resetVersion"] = 9,
+["unlockGridMode"] = "dimmed",
+["multiChargeSpells"] = {
+},
 ["cdmCachedBarSizes"] = {
 ["Zappyxatu-Stormrage"] = {
 ["264"] = {
@@ -588,42 +595,6 @@ EllesmereUIDB = {
 },
 },
 },
-["themedCharacterSheet"] = false,
-["showFPS"] = true,
-["macroFactory"] = {
-["EUI_Trinket2"] = {
-},
-["EUI_HealingRain"] = {
-},
-["EUI_Potion"] = {
-},
-["EUI_CapacitorTotem"] = {
-},
-["EUI_Health"] = {
-},
-["EUI_CleanseSpirit"] = {
-},
-["EUI_SpiritLink"] = {
-},
-["EUI_Focus"] = {
-},
-["EUI_Purge"] = {
-},
-["EUI_Trinket1"] = {
-},
-["EUI_WindrushTotem"] = {
-},
-["EUI_WindShear"] = {
-},
-["EUI_Hex"] = {
-},
-["EUI_Food"] = {
-},
-},
-["unlockGridMode"] = "dimmed",
-["multiChargeSpells"] = {
-},
-["_friendsWipeDone"] = true,
 ["unlockAnchors"] = {
 ["CDM_buffs"] = {
 ["target"] = "CDM_cooldowns",
@@ -668,6 +639,28 @@ EllesmereUIDB = {
 ["offsetX"] = 0,
 },
 },
+["unlockHeightMatch"] = {
+},
+["_capturedOnce_EAB"] = true,
+["showMythicRating"] = false,
+["_syncDefaultsStamped"] = true,
+["ppUIScaleAuto"] = false,
+["cdmButtonTipSeen"] = true,
+["showItemLevel"] = false,
+["activeProfile"] = "Default",
+["showStatCategory_SecondaryStats"] = false,
+["_positionSnapV3Done"] = true,
+["phantomBounds"] = {
+},
+["_questTrackerSecColorMigrated"] = true,
+["lastNonSpecProfile"] = "Devourer",
+["specProfiles"] = {
+[105] = "Default",
+},
+["fonts"] = {
+["global"] = "Expressway",
+["outlineMode"] = "shadow",
+},
 ["cdmSpecValidated"] = {
 ["Zappyxatu-Stormrage"] = {
 ["264"] = true,
@@ -686,29 +679,36 @@ EllesmereUIDB = {
 ["102"] = true,
 },
 },
-["_capturedOnce_EAB"] = true,
-["showMythicRating"] = false,
-["_syncDefaultsStamped"] = true,
-["ppUIScaleAuto"] = false,
-["cdmButtonTipSeen"] = true,
-["activeProfile"] = "Default",
-["showItemLevel"] = false,
-["showStatCategory_SecondaryStats"] = false,
-["_positionSnapV3Done"] = true,
-["phantomBounds"] = {
+["macroFactory"] = {
+["EUI_Trinket2"] = {
 },
-["_questTrackerSecColorMigrated"] = true,
-["lastNonSpecProfile"] = "Devourer",
-["specProfiles"] = {
-[105] = "Default",
+["EUI_HealingRain"] = {
 },
-["fonts"] = {
-["global"] = "Expressway",
-["outlineMode"] = "shadow",
+["EUI_Potion"] = {
 },
-["unlockHeightMatch"] = {
+["EUI_CapacitorTotem"] = {
 },
-["_resetVersion"] = 9,
+["EUI_Health"] = {
+},
+["EUI_Focus"] = {
+},
+["EUI_SpiritLink"] = {
+},
+["EUI_CleanseSpirit"] = {
+},
+["EUI_WindShear"] = {
+},
+["EUI_Trinket1"] = {
+},
+["EUI_WindrushTotem"] = {
+},
+["EUI_Purge"] = {
+},
+["EUI_Hex"] = {
+},
+["EUI_Food"] = {
+},
+},
 ["sidebarUnlockTipSeen"] = true,
 ["profiles"] = {
 ["Default"] = {
@@ -774,19 +774,19 @@ EllesmereUIDB = {
 ["cdmBars"] = {
 ["bars"] = {
 {
-["pandemicGlow"] = true,
 ["spacing"] = 0,
+["pandemicGlowStyle"] = 1,
+["pandemicGlow"] = true,
 ["iconSize"] = 50,
 ["barBgAlpha"] = 1,
-["pandemicGlowStyle"] = 1,
 },
 {
-["pandemicGlow"] = true,
-["activeStateAnim"] = "blizzard",
 ["spacing"] = 0,
+["activeStateAnim"] = "blizzard",
+["pandemicGlowStyle"] = 1,
+["pandemicGlow"] = true,
 ["iconSize"] = 36.66666666666666,
 ["barBgAlpha"] = 1,
-["pandemicGlowStyle"] = 1,
 },
 {
 ["hideBuffsWhenInactive"] = true,
@@ -804,7 +804,7 @@ EllesmereUIDB = {
 ["key"] = "focuskick",
 ["swipeAlpha"] = 0.7,
 ["anchorOffsetY"] = 0,
-["barType"] = "cooldowns",
+["showStackCount"] = false,
 ["enabled"] = true,
 ["focusReminderSize"] = 26,
 ["focusReminderB"] = 1,
@@ -813,12 +813,12 @@ EllesmereUIDB = {
 ["outOfRangeOverlay"] = false,
 ["cooldownFontSize"] = 12,
 ["stackCountSize"] = 11,
-["pandemicGlow"] = false,
+["anchorOffsetX"] = 0,
 ["desaturateOnCD"] = true,
 ["name"] = "FocusKick",
 ["borderG"] = 0,
 ["anchorTo"] = "none",
-["showStackCount"] = false,
+["barType"] = "cooldowns",
 ["showItemCount"] = true,
 ["barBgB"] = 0,
 ["nameplateAnchorSide"] = "LEFT",
@@ -827,12 +827,12 @@ EllesmereUIDB = {
 ["activeStateAnim"] = "blizzard",
 ["iconShape"] = "none",
 ["borderThickness"] = "thin",
-["spacing"] = 1.666666666666667,
+["growDirection"] = "RIGHT",
 ["showCooldownText"] = true,
 ["bgA"] = 0.6,
 ["borderSize"] = 1,
 ["borderR"] = 0,
-["growDirection"] = "RIGHT",
+["bgB"] = 0.08,
 ["iconSize"] = 28.33333333333333,
 ["showCharges"] = true,
 ["focusReminderOffsetY"] = 0,
@@ -843,7 +843,7 @@ EllesmereUIDB = {
 ["focusReminderG"] = 1,
 ["focusReminderR"] = 1,
 ["focusReminderEnabled"] = false,
-["bgB"] = 0.08,
+["spacing"] = 1.666666666666667,
 ["bgR"] = 0.08,
 ["focusKickUseTarget"] = false,
 ["barBgR"] = 0,
@@ -851,7 +851,7 @@ EllesmereUIDB = {
 ["bgG"] = 0.08,
 ["barBgG"] = 0,
 ["nameplateOffsetY"] = 0,
-["anchorOffsetX"] = 0,
+["pandemicGlow"] = false,
 ["suppressGCD"] = true,
 },
 {
@@ -1046,7 +1046,6 @@ EllesmereUIDB = {
 ["useClassColor"] = false,
 ["alpha"] = 80,
 },
-["trail"] = false,
 ["castCircle"] = {
 ["instanceOnly"] = false,
 ["sparkEnabled"] = true,
@@ -1059,6 +1058,7 @@ EllesmereUIDB = {
 ["useClassColor"] = true,
 ["alpha"] = 80,
 },
+["trail"] = false,
 ["instanceOnly"] = false,
 ["visOnlyInstances"] = false,
 ["enabled"] = true,
@@ -1103,9 +1103,9 @@ EllesmereUIDB = {
 ["_capturedOnce"] = true,
 ["visHideHousing"] = false,
 ["zoneInside"] = false,
-["hideMail"] = false,
-["hideGameTime"] = false,
 ["showCoords"] = false,
+["hideGameTime"] = false,
+["hideMail"] = false,
 ["clockOffsetY"] = 0,
 ["hideTrackingButton"] = true,
 ["addonBtnSize"] = 24,
@@ -1269,24 +1269,31 @@ EllesmereUIDB = {
 },
 ["EllesmereUIDragonRiding"] = {
 },
-["EllesmereUIMinimap"] = {
-["minimap"] = {
-["ungroupedButtons"] = {
-["LibDBIcon10_BugSack"] = 1,
+["EllesmereUIResourceBars"] = {
+["castBar"] = {
+["unlockPos"] = {
+["point"] = "CENTER",
+["relPoint"] = "CENTER",
 },
-["showClock"] = false,
-["mapSize"] = 198,
-["hidePortals"] = true,
-["interactableBtnSize"] = 24,
-["position"] = {
-["y"] = 479.1666666666666,
+["width"] = 321.6666666666666,
+},
+["primary"] = {
+["textSize"] = 17,
+["height"] = 17,
+["unlockPos"] = {
+["point"] = "CENTER",
+["relPoint"] = "CENTER",
+},
+["width"] = 341.6666666666666,
+},
+["secondary"] = {
+["thresholdR"] = 0.04705882352941176,
+["unlockPos"] = {
+["y"] = 6.6666259765625,
 ["relPoint"] = "CENTER",
 ["point"] = "CENTER",
-["x"] = 933.3333333333333,
+["x"] = -802.166748046875,
 },
-["addonBtnSize"] = 30,
-["_capturedOnce"] = true,
-["hideGreatVault"] = true,
 },
 },
 ["EllesmereUIChat"] = {
@@ -1303,11 +1310,21 @@ EllesmereUIDB = {
 },
 ["EllesmereUIQoL"] = {
 ["cursor"] = {
-["visHideHousing"] = false,
+["gcd"] = {
+["enabled"] = false,
+["radius"] = 21,
+["scale"] = 100,
+["attached"] = true,
+["instanceOnly"] = false,
+["ringTex"] = "light",
+["hex"] = "FFFFFF",
+["useClassColor"] = false,
+["alpha"] = 80,
+},
 ["visHideMounted"] = false,
 ["visHideNoEnemy"] = false,
 ["scale"] = 1,
-["enabled"] = true,
+["hex"] = "FF44CB",
 ["visibility"] = "always",
 ["instanceOnly"] = false,
 ["trail"] = false,
@@ -1325,18 +1342,8 @@ EllesmereUIDB = {
 },
 ["visHideNoTarget"] = false,
 ["visOnlyInstances"] = false,
-["hex"] = "FF44CB",
-["gcd"] = {
-["enabled"] = false,
-["radius"] = 21,
-["scale"] = 100,
-["attached"] = true,
-["instanceOnly"] = false,
-["ringTex"] = "light",
-["hex"] = "FFFFFF",
-["useClassColor"] = false,
-["alpha"] = 80,
-},
+["enabled"] = true,
+["visHideHousing"] = false,
 ["useClassColor"] = false,
 ["texture"] = "ring_normal",
 },
@@ -1445,18 +1452,13 @@ EllesmereUIDB = {
 ["tidecaller"] = true,
 },
 },
-["unlockPos"] = {
-["y"] = 245.8333333333333,
-["relPoint"] = "CENTER",
-["point"] = "CENTER",
-["x"] = 0,
-},
-["display"] = {
-["scale"] = 2.2,
-},
 ["talentReminders"] = {
 {
-["spellID"] = 374346,
+["_nameSet"] = {
+["Algeth'ar Academy"] = true,
+["Skyreach"] = true,
+["Windrunner Spire"] = true,
+},
 ["spellName"] = "Overawe",
 ["showNotNeeded"] = false,
 ["class"] = "EVOKER",
@@ -1465,14 +1467,15 @@ EllesmereUIDB = {
 "Skyreach",
 "Windrunner Spire",
 },
-["_nameSet"] = {
-["Algeth'ar Academy"] = true,
-["Skyreach"] = true,
-["Windrunner Spire"] = true,
-},
+["spellID"] = 374346,
 },
 {
-["spellID"] = 370888,
+["_nameSet"] = {
+["Nexus-Point Xenas"] = true,
+["Maisara Caverns"] = true,
+["Seat of the Triumvirate"] = true,
+["Pit of Saron"] = true,
+},
 ["spellName"] = "Twin Guardian",
 ["showNotNeeded"] = false,
 ["class"] = "EVOKER",
@@ -1482,15 +1485,15 @@ EllesmereUIDB = {
 "Pit of Saron",
 "Seat of the Triumvirate",
 },
+["spellID"] = 370888,
+},
+{
 ["_nameSet"] = {
 ["Nexus-Point Xenas"] = true,
 ["Maisara Caverns"] = true,
-["Pit of Saron"] = true,
 ["Seat of the Triumvirate"] = true,
+["Pit of Saron"] = true,
 },
-},
-{
-["spellID"] = 58875,
 ["spellName"] = "Spirit Walk",
 ["showNotNeeded"] = false,
 ["class"] = "SHAMAN",
@@ -1500,15 +1503,15 @@ EllesmereUIDB = {
 "Pit of Saron",
 "Seat of the Triumvirate",
 },
-["_nameSet"] = {
-["Nexus-Point Xenas"] = true,
-["Maisara Caverns"] = true,
-["Pit of Saron"] = true,
-["Seat of the Triumvirate"] = true,
-},
+["spellID"] = 58875,
 },
 {
-["spellID"] = 192063,
+["_nameSet"] = {
+["Algeth'ar Academy"] = true,
+["Skyreach"] = true,
+["Windrunner Spire"] = true,
+["Magister's Terrace"] = true,
+},
 ["spellName"] = "Gust of Wind",
 ["showNotNeeded"] = false,
 ["class"] = "SHAMAN",
@@ -1518,27 +1521,25 @@ EllesmereUIDB = {
 "Skyreach",
 "Windrunner Spire",
 },
-["_nameSet"] = {
-["Magister's Terrace"] = true,
-["Algeth'ar Academy"] = true,
-["Skyreach"] = true,
-["Windrunner Spire"] = true,
-},
+["spellID"] = 192063,
 },
 {
-["spellID"] = 383016,
+["_nameSet"] = {
+["Pit of Saron"] = true,
+},
 ["spellName"] = "Improved Purify Spirit",
 ["showNotNeeded"] = false,
 ["class"] = "SHAMAN",
 ["zoneNames"] = {
 "Pit of Saron",
 },
-["_nameSet"] = {
-["Pit of Saron"] = true,
-},
+["spellID"] = 383016,
 },
 {
-["spellID"] = 383013,
+["_nameSet"] = {
+["Algeth'ar Academy"] = true,
+["Windrunner Spire"] = true,
+},
 ["spellName"] = "Poison Cleansing Totem",
 ["showNotNeeded"] = false,
 ["class"] = "SHAMAN",
@@ -1546,13 +1547,15 @@ EllesmereUIDB = {
 "Algeth'ar Academy",
 "Windrunner Spire",
 },
-["_nameSet"] = {
-["Algeth'ar Academy"] = true,
-["Windrunner Spire"] = true,
-},
+["spellID"] = 383013,
 },
 {
-["spellID"] = 462817,
+["_nameSet"] = {
+["Magister's Terrace"] = true,
+["Seat of the Triumvirate"] = true,
+["Pit of Saron"] = true,
+["Nexus-Point Xenas"] = true,
+},
 ["spellName"] = "Jet Stream",
 ["showNotNeeded"] = false,
 ["class"] = "SHAMAN",
@@ -1562,15 +1565,16 @@ EllesmereUIDB = {
 "Pit of Saron",
 "Seat of the Triumvirate",
 },
-["_nameSet"] = {
-["Nexus-Point Xenas"] = true,
-["Magister's Terrace"] = true,
-["Pit of Saron"] = true,
-["Seat of the Triumvirate"] = true,
-},
+["spellID"] = 462817,
 },
 {
-["spellID"] = 370,
+["_nameSet"] = {
+["Seat of the Triumvirate"] = true,
+["Nexus-Point Xenas"] = true,
+["Maisara Caverns"] = true,
+["Skyreach"] = true,
+["Magister's Terrace"] = true,
+},
 ["spellName"] = "Purge",
 ["showNotNeeded"] = false,
 ["class"] = "SHAMAN",
@@ -1581,14 +1585,19 @@ EllesmereUIDB = {
 "Seat of the Triumvirate",
 "Skyreach",
 },
-["_nameSet"] = {
-["Seat of the Triumvirate"] = true,
-["Nexus-Point Xenas"] = true,
-["Maisara Caverns"] = true,
-["Skyreach"] = true,
-["Magister's Terrace"] = true,
+["spellID"] = 370,
 },
 },
+["display"] = {
+["scale"] = 2.2,
+["showUnderDurationDungeon"] = 59,
+["showUnderDuration"] = 47,
+},
+["unlockPos"] = {
+["y"] = 245.8333333333333,
+["relPoint"] = "CENTER",
+["point"] = "CENTER",
+["x"] = 0,
 },
 },
 ["EllesmereUIQuestTracker"] = {
@@ -1608,31 +1617,24 @@ EllesmereUIDB = {
 ["width"] = 260,
 },
 },
-["EllesmereUIResourceBars"] = {
-["castBar"] = {
-["unlockPos"] = {
-["point"] = "CENTER",
-["relPoint"] = "CENTER",
+["EllesmereUIMinimap"] = {
+["minimap"] = {
+["ungroupedButtons"] = {
+["LibDBIcon10_BugSack"] = 1,
 },
-["width"] = 321.6666666666666,
-},
-["primary"] = {
-["textSize"] = 17,
-["height"] = 17,
-["unlockPos"] = {
-["point"] = "CENTER",
-["relPoint"] = "CENTER",
-},
-["width"] = 341.6666666666666,
-},
-["secondary"] = {
-["thresholdR"] = 0.04705882352941176,
-["unlockPos"] = {
-["y"] = 6.6666259765625,
+["showClock"] = false,
+["mapSize"] = 198,
+["hidePortals"] = true,
+["interactableBtnSize"] = 24,
+["position"] = {
+["y"] = 479.1666666666666,
 ["relPoint"] = "CENTER",
 ["point"] = "CENTER",
-["x"] = -802.166748046875,
+["x"] = 933.3333333333333,
 },
+["addonBtnSize"] = 30,
+["_capturedOnce"] = true,
+["hideGreatVault"] = true,
 },
 },
 ["EllesmereUIActionBars"] = {
@@ -1864,15 +1866,15 @@ EllesmereUIDB = {
 ["pixel_perfect_profile_v1"] = true,
 ["uf_absorb_style_dropdown_v1"] = true,
 ["cdm_remove_ghost_buff_bar_v2"] = true,
-["eab_round_button_sizes"] = true,
-["uf_per_unit_portrait_style_v1"] = true,
-["cdm_mouseover_visibility_to_always"] = true,
 ["erb_disable_expand_if_height_matched_v1"] = true,
+["np_stacking_spacing_50_to_75_v2"] = true,
+["cdm_mouseover_visibility_to_always"] = true,
+["eab_round_button_sizes"] = true,
 ["basics_minimap_strip_scale"] = true,
 ["cdm_remove_ghost_buff_bar_v1"] = true,
-["np_stacking_spacing_50_to_75_v2"] = true,
-["basics_minimap_hide_buttons_split"] = true,
-["qt_minimap_reset_stale_enabled_false"] = true,
+["uf_per_unit_portrait_style_v1"] = true,
+["cdm_pandemic_glow_color_table"] = true,
+["quest_tracker_sec_color_default"] = true,
 ["np_border_ellesmere_to_simple_v3"] = true,
 ["cdm_repair_bar_keys_v1"] = true,
 ["basics_minimap_round_to_circle"] = true,
@@ -1882,31 +1884,31 @@ EllesmereUIDB = {
 ["qt_minimap_ensure_enabled_v2"] = true,
 ["cdm_active_state_per_bar_to_per_icon"] = true,
 ["np_border_v5"] = true,
-["cdm_active_state_anim_none_to_hideactive"] = true,
 ["v66_basics_split_data"] = true,
+["cdm_active_state_anim_none_to_hideactive"] = true,
 ["erb_round_size_fields"] = true,
 ["cdm_remove_misc_bars"] = true,
-["quest_tracker_sec_color_default"] = true,
-["cdm_pandemic_glow_color_table"] = true,
+["qt_minimap_reset_stale_enabled_false"] = true,
+["basics_minimap_hide_buttons_split"] = true,
 },
 },
 },
 ["_migrations"] = {
 ["power_color_fury_to_classcolor_v1"] = true,
-["cdm_remove_ghost_buff_spelldata_v1"] = true,
+["position_snap_v3"] = true,
 ["cdm_wipe_legacy_glows_tbb_locations"] = true,
-["quest_tracker_blizzard_skin_rebuild_v1"] = true,
-["cdm_consolidate_buff_bars"] = true,
+["cdm_remove_ghost_buff_spelldata_v1"] = true,
+["cdm_unanchor_buff_bars"] = true,
 ["chat_mouseover_to_always_v1"] = true,
 ["pixel_perfect_comprehensive_v11"] = true,
-["cdm_unanchor_buff_bars"] = true,
+["cdm_consolidate_buff_bars"] = true,
 ["v66_basics_split_disabled_state"] = true,
 ["mt_bestruns_wipe_v1"] = true,
 ["break_blizz_owned_anchors_v1"] = true,
 ["friend_notes_wipe_v1"] = true,
-["power_color_defaults_v5"] = true,
 ["charsheet_default_enabled_v1"] = true,
-["position_snap_v3"] = true,
+["power_color_defaults_v5"] = true,
+["quest_tracker_blizzard_skin_rebuild_v1"] = true,
 },
 ["unlockTipSeen"] = true,
 ["dismissedConflicts"] = {

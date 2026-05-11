@@ -1,4 +1,11 @@
 Version: 1
+Frame: CraftScanScannerMenuButton
+FrameLevel: 76
+Anchor: LEFT
+X: 30
+Y: -247
+W: 53
+H: 53
 Frame: GroupLootHistoryFrame
 FrameLevel: 1
 Anchor: TOP
@@ -13,10 +20,3 @@ X: 0
 Y: 0
 W: 1105
 H: 658
-Frame: CraftScanScannerMenuButton
-FrameLevel: 30
-Anchor: LEFT
-X: 30
-Y: -247
-W: 53
-H: 53
