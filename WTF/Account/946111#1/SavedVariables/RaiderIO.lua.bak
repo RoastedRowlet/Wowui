@@ -12,8 +12,32 @@ RaiderIO_Config = {
 ["hide"] = false,
 },
 }
-RaiderIO_LastCharacter = "us-Barelynoer-area-52"
+RaiderIO_LastCharacter = "us-Zappyxatu-stormrage"
 RaiderIO_MissingCharacters = {
+["us-Holynoly-stormrage"] = true,
+["us-Goofygobrr-illidan"] = true,
+["us-Badshellfish-stormrage"] = true,
+["us-Dæthdil-stormrage"] = true,
+["us-Acidburñ-stormrage"] = true,
+["us-Flytemon-malganis"] = true,
+["us-Quintile-illidan"] = true,
+["us-Cloudstriker-stormrage"] = true,
+["us-Andilorn-emerald-dream"] = true,
+["us-Iknight-stormrage"] = true,
+["us-Stealthuda-tichondrius"] = true,
+["us-Finadin-stormrage"] = true,
+["us-Greenur-stormrage"] = true,
+["us-Jennâtolls-stormrage"] = true,
+["us-Rákshasa-stormrage"] = true,
+["us-Bobinhood-stormrage"] = true,
+["us-Ongcd-stormrage"] = true,
+["us-Graymala-stormrage"] = true,
+["us-Iadyelf-moon-guard"] = true,
+["us-Oppennheimer-stormrage"] = true,
+["us-Fänna-stormrage"] = true,
+["us-Albarracin-stormrage"] = true,
+["us-Guguhotpot-illidan"] = true,
+["us-Frëddèrîcá-proudmoore"] = true,
 }
 RaiderIO_MissingServers = {
 }
