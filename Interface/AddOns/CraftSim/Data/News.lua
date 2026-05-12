@@ -22,6 +22,10 @@ function CraftSim.NEWS:GET_NEWS(itemMap)
         CraftSim.MEDIA:GetAsTextIcon(CraftSim.MEDIA.IMAGES.PIXEL_HEART, 0.15)
     local news = {
         f.bb("Hello and thank you for using CraftSim! ( You are awesome! )\n"),
+        newP("26.1.7"),
+        f.P .. f.bb("Work Order Queuing"),
+        f.a .. "- Fixed a bug where gear optimization chose mc for work orders",
+        collab(CraftSim.NEWS.GITHUB_COLLABS.AVILENE),
         newP("26.1.6"),
         f.PG .. f.g("New Slash Commands"),
         f.a .. "- " .. f.l("/craftsim bruto") .. " - Summon Brutosaur Mount",
@@ -33,8 +37,6 @@ function CraftSim.NEWS:GET_NEWS(itemMap)
         f.a .. "- Fixed crafting and avg crafting costs including client reagents",
         f.p .. f.bb("Craft Lists"),
         f.a .. "- Fixed target quality option queueing lower qualities",
-
-
         newP("26.1.5"),
         f.PG .. f.bb("Concentration Tracker"),
         f.a .. "- Show Moxie Count for Character on hover",

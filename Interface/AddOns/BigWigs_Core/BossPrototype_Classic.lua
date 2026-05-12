@@ -1034,7 +1034,7 @@ do
 	--- Check if this module has a rename set for this key
 	-- @return boolean
 	function boss:IsRenameAvailable(key)
-		if moduleRenamesList[self][key] then
+		if moduleRenamesList[self] and moduleRenamesList[self][key] then
 			return true
 		end
 	end

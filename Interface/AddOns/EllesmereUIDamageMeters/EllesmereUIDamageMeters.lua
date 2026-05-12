@@ -22,51 +22,6 @@ local ICON_HOVER_ALPHA  = 0.9
 local RESIZE_ICON       = "Interface\\AddOns\\EllesmereUI\\media\\icons\\resize_element.png"
 local MAX_WINDOWS       = 5
 
--- Profiler: zero cost when off, /dmprof to toggle
-local ProfBegin, ProfEnd
-do
-    local _profData, _profActive = {}, false
-    local dps = debugprofilestop
-    ProfBegin = function(label)
-        if not _profActive then return 0 end
-        return dps()
-    end
-    ProfEnd = function(label, t0)
-        if not _profActive then return end
-        local elapsed = dps() - t0
-        local d = _profData[label]
-        if not d then d = { n = 0, total = 0, peak = 0 }; _profData[label] = d end
-        d.n = d.n + 1
-        d.total = d.total + elapsed
-        if elapsed > d.peak then d.peak = elapsed end
-    end
-    SLASH_DMPROF1 = "/dmprof"
-    SlashCmdList["DMPROF"] = function(msg)
-        if msg == "reset" then
-            wipe(_profData)
-            print("|cff00ccffDM Prof:|r data cleared")
-            return
-        end
-        _profActive = not _profActive
-        if _profActive then
-            wipe(_profData)
-            print("|cff00ccffDM Prof:|r ON -- type /dmprof again to stop and print report")
-        else
-            local sorted = {}
-            for label, d in pairs(_profData) do
-                sorted[#sorted + 1] = { label = label, n = d.n, total = d.total, peak = d.peak }
-            end
-            table.sort(sorted, function(a, b) return a.peak > b.peak end)
-            print("|cff00ccffDM Prof Report:|r")
-            print(string.format("  %-30s %8s %10s %10s", "Label", "Calls", "Avg(ms)", "Peak(ms)"))
-            for _, e in ipairs(sorted) do
-                local avg = e.n > 0 and (e.total / e.n) or 0
-                print(string.format("  %-30s %8d %10.3f %10.3f", e.label, e.n, avg, e.peak))
-            end
-        end
-    end
-end
-
 local DM_TYPE_NAMES = {
     [Enum.DamageMeterType.DamageDone]           = "Damage Done",
     [Enum.DamageMeterType.HealingDone]          = "Healing Done",
@@ -133,6 +88,8 @@ local DM_DEFAULTS = {
             showClassColor  = true,
             showPinnedSelf  = false,
             showHoverTooltip = true,
+            breakdownAnchorPoint = "row", -- "row" (Above Row) | "center" (Center of Screen)
+            breakdownBarTexture = "match",
             barColorUseAccent = true,
             barColor        = { r = 0.35, g = 0.55, b = 0.8 },
             barFillAlpha    = 1,
@@ -148,6 +105,7 @@ local DM_DEFAULTS = {
             standaloneTimerUseAccent = false,
             standaloneTimerColor  = { r = 1, g = 1, b = 1 },
             standaloneTimerPos    = nil,
+            standaloneTimerAnchor = "free",
             refreshRate = 0.5,
             hdrBgColor      = { r = 0x1B/255, g = 0x1B/255, b = 0x1B/255 },
             hdrBgAlpha      = 1,
@@ -156,6 +114,7 @@ local DM_DEFAULTS = {
             hdrTextOffX     = 0,
             hdrTextOffY     = 0,
             hdrIconSize     = 22,
+            hdrMouseoverIcons = false,
             hdrTextUseAccent = true,
             hdrTextColor    = { r = 1, g = 1, b = 1 },
             -- Per-window settings
@@ -183,6 +142,58 @@ end
 
 local function DB() return ns.EDM.DB() end
 local function GetHeaderH() local c = DB(); return c.hdrHeight or 22 end
+
+-- Header icon visibility (hide until title bar hovered)
+local function SetHeaderButtonsShown(W, shown)
+    if not W or not W.hdrBtns then return end
+    for _, btn in ipairs(W.hdrBtns) do
+        btn:SetAlpha(shown and 1 or 0)
+        btn:EnableMouse(shown)
+    end
+end
+
+local function EnsureHeaderButtonsHoverHooks(W)
+    if not W or W._hdrHideUntilHoverHooksInstalled then return end
+    W._hdrHideUntilHoverHooksInstalled = true
+
+    local function Show()
+        local cfg = DB()
+        if not cfg.hdrMouseoverIcons then return end
+        SetHeaderButtonsShown(W, true)
+    end
+
+    local function MaybeHide()
+        local cfg = DB()
+        if not cfg.hdrMouseoverIcons then return end
+        if not W.header then return end
+        C_Timer.After(0, function()
+            if not W.header then return end
+            if W.header:IsMouseOver() then return end
+            SetHeaderButtonsShown(W, false)
+        end)
+    end
+
+    if W.header then
+        W.header:HookScript("OnEnter", Show)
+        W.header:HookScript("OnLeave", MaybeHide)
+    end
+    if W.hdrBtns then
+        for _, btn in ipairs(W.hdrBtns) do
+            btn:HookScript("OnEnter", Show)
+            btn:HookScript("OnLeave", MaybeHide)
+        end
+    end
+end
+
+local function ApplyHeaderButtonsHoverVisibility(W, cfg)
+    if not W or not W.header or not W.hdrBtns then return end
+    EnsureHeaderButtonsHoverHooks(W)
+    if cfg and cfg.hdrMouseoverIcons then
+        SetHeaderButtonsShown(W, W.header:IsMouseOver())
+    else
+        SetHeaderButtonsShown(W, true)
+    end
+end
 
 -- Per-window DB accessor
 local function WinDB(idx)
@@ -297,8 +308,12 @@ instanceFrame:SetScript("OnEvent", function(_, event)
             instanceFrame._sessionPending = true
             C_Timer.After(0.1, function()
                 instanceFrame._sessionPending = nil
+                -- Don't wipe _targetsCache here; the cache key includes session
+                -- so stale data is never returned. Wiping causes repeated API
+                -- bursts when hovering between frequent session update events.
                 for _, w in ipairs(_windows) do
                     w._barCacheKey = nil
+                    w._cachedTargets = nil
                     w.Refresh()
                 end
             end)
@@ -306,9 +321,11 @@ instanceFrame:SetScript("OnEvent", function(_, event)
     elseif event == "DAMAGE_METER_RESET" then
         -- Blizzard cleared all session data (auto-reset CVar, manual reset, etc.)
         _combatStartTime = 0; _combatEndTime = 0
+        if _targetsCache then wipe(_targetsCache) end
         for _, w in ipairs(_windows) do
             w._barCacheKey = nil
             w._barSources = nil
+            w._cachedTargets = nil
             w.Refresh()
         end
     elseif event == "PLAYER_ENTERING_WORLD" then
@@ -441,6 +458,15 @@ end
 local function GetBarTexturePath()
     local cfg = DB()
     local key = cfg and cfg.barTexture or "none"
+    return EUI.ResolveTexturePath(DM_BAR_TEXTURES, key, BAR_TEX), key
+end
+
+local function GetBreakdownBarTexturePath()
+    local cfg = DB()
+    local key = cfg and cfg.breakdownBarTexture
+    if not key or key == "match" then
+        key = cfg and cfg.barTexture or "none"
+    end
     return EUI.ResolveTexturePath(DM_BAR_TEXTURES, key, BAR_TEX), key
 end
 
@@ -694,18 +720,20 @@ local function AggregateEnemyPlayers(srcData)
 end
 
 -------------------------------------------------------------------------------
---  Damage Done targets: cross-reference EnemyDamageTaken to find which enemies
---  a specific player hit. Returns sorted { name, total }[1..maxTargets] or nil.
---  Works between pulls in M+ (player names are not secret even in protected instances).
+--  Damage Done targets: cross-reference EnemyDamageTaken to build a complete
+--  map of ALL players' damage per enemy in one pass. First hover triggers the
+--  build; all subsequent hovers for any player are instant cache lookups.
+--  Invalidated on DAMAGE_METER_RESET and COMBAT_SESSION_UPDATED.
 -------------------------------------------------------------------------------
-local TARGETS_MAX_ENEMIES = 20  -- cap enemy iterations for perf
-local function BuildPlayerTargets(playerName, session, sessionID, maxTargets)
-    if not playerName then return nil end
-    if issecretvalue and issecretvalue(playerName) then return nil end
-    if playerName == "" then return nil end
+local _targetsCache = {}  -- { key = sessionKey, map = { [playerName] = sorted targets } }
+
+local function BuildAllPlayerTargets(session, sessionID)
+
+    local cacheKey = tostring(session) .. "|" .. tostring(sessionID)
+    if _targetsCache.key == cacheKey then return _targetsCache.map end
+
     if not C_DamageMeter then return nil end
 
-    -- Get EnemyDamageTaken session (list of enemies)
     local enemySession
     if sessionID and C_DamageMeter.GetCombatSessionFromID then
         local ok, s = pcall(C_DamageMeter.GetCombatSessionFromID, sessionID, Enum.DamageMeterType.EnemyDamageTaken)
@@ -714,15 +742,20 @@ local function BuildPlayerTargets(playerName, session, sessionID, maxTargets)
         local ok, s = pcall(C_DamageMeter.GetCombatSessionFromType, session, Enum.DamageMeterType.EnemyDamageTaken)
         if ok then enemySession = s end
     end
-    if not enemySession or not enemySession.combatSources or #enemySession.combatSources == 0 then return nil end
+    if not enemySession or not enemySession.combatSources or #enemySession.combatSources == 0 then
+        _targetsCache.key = cacheKey; _targetsCache.map = nil
+    
+        return nil
+    end
 
-    local targets = {}
-    local enemyCount = math.min(#enemySession.combatSources, TARGETS_MAX_ENEMIES)
-    for ei = 1, enemyCount do
+    -- Build per-player target totals keyed by unitName (readable from EnemyDamageTaken).
+    -- Uses creatureID as enemy key (numeric, never secret) to avoid secret table keys.
+    local enemyNames = {}  -- creatureID -> display name
+    local byPlayer = {}    -- unitName -> { [creatureID] = totalDamage }
+    for ei = 1, #enemySession.combatSources do
         local enemy = enemySession.combatSources[ei]
-        local eName = enemy.name
-
-        -- Get this enemy's spell details to find our player
+        local eKey = enemy.sourceCreatureID or ei
+        enemyNames[eKey] = enemy.name
         local srcData
         if sessionID and C_DamageMeter.GetCombatSessionSourceFromID then
             local ok, sd = pcall(C_DamageMeter.GetCombatSessionSourceFromID, sessionID, Enum.DamageMeterType.EnemyDamageTaken, enemy.sourceGUID, enemy.sourceCreatureID)
@@ -732,27 +765,58 @@ local function BuildPlayerTargets(playerName, session, sessionID, maxTargets)
             if ok then srcData = sd end
         end
         if srcData and srcData.combatSpells then
-            local playerTotal = 0
             for _, spell in ipairs(srcData.combatSpells) do
                 local det = spell.combatSpellDetails
-                if det and det.unitName == playerName then
+                if det and det.unitName and not (issecretvalue and issecretvalue(det.unitName)) then
+                    local pName = det.unitName
                     local ok, amt = pcall(function() return spell.totalAmount end)
-                    playerTotal = playerTotal + ((ok and amt) or 0)
+                    local amount = (ok and amt) or 0
+                    if amount > 0 then
+                        local pt = byPlayer[pName]
+                        if not pt then pt = {}; byPlayer[pName] = pt end
+                        pt[eKey] = (pt[eKey] or 0) + amount
+                    end
                 end
-            end
-            if playerTotal > 0 then
-                targets[#targets + 1] = { name = eName, total = playerTotal }
             end
         end
     end
-    if #targets == 0 then return nil end
-    table.sort(targets, function(a, b) return a.total > b.total end)
-    if #targets > maxTargets then
+
+    -- Convert each player's enemy map to a sorted array
+    local map = {}
+    for pName, enemies in pairs(byPlayer) do
+        local list = {}
+        for eKey, total in pairs(enemies) do
+            list[#list + 1] = { name = enemyNames[eKey], total = total }
+        end
+        table.sort(list, function(a, b) return a.total > b.total end)
+        map[pName] = list
+    end
+
+    _targetsCache.key = cacheKey; _targetsCache.map = map
+
+    return map
+end
+
+local function BuildPlayerTargets(playerName, session, sessionID, maxTargets)
+
+    if not playerName then return nil end
+    if issecretvalue and issecretvalue(playerName) then return nil end
+    if playerName == "" then return nil end
+
+    local map = BuildAllPlayerTargets(session, sessionID)
+    if not map then return nil end
+
+    local list = map[playerName]
+    if not list or #list == 0 then return nil end
+
+    if #list > maxTargets then
         local trimmed = {}
-        for i = 1, maxTargets do trimmed[i] = targets[i] end
+        for i = 1, maxTargets do trimmed[i] = list[i] end
+    
         return trimmed
     end
-    return targets
+
+    return list
 end
 
 -------------------------------------------------------------------------------
@@ -761,7 +825,7 @@ end
 local TT_MAX = 8
 local TT_BAR_H = 18
 local TT_BAR_SP = 1
-local TT_WIDTH = 210
+local TT_WIDTH = 275
 
 local _ttFrame, _ttBars, _ttVisible = nil, {}, false
 local _activeRow = nil
@@ -789,7 +853,7 @@ local function EnsureTooltipFrame()
     _ttFrame._hdrBg = hdrBg
     _ttFrame._hdrText = _ttFrame._hdr:CreateFontString(nil, "OVERLAY")
     _ttFrame._hdrText:SetPoint("LEFT", _ttFrame._hdr, "LEFT", 5, 0)
-    _ttFrame._hdrText:SetWidth(225); _ttFrame._hdrText:SetJustifyH("LEFT"); _ttFrame._hdrText:SetWordWrap(false)
+    _ttFrame._hdrText:SetWidth(TT_WIDTH - 25); _ttFrame._hdrText:SetJustifyH("LEFT"); _ttFrame._hdrText:SetWordWrap(false)
     SetDMFont(_ttFrame._hdrText, 10)
 
     -- Combat lockdown message (shown instead of bars)
@@ -830,7 +894,11 @@ local function EnsureTooltipFrame()
     _ttFrame:Hide()
 end
 
+local _ttLastSp = -1
+local _ttSorted = {}
+
 local function PopulatePreview(bar, curSession, curSessionID, curDMType)
+
     if _ttFrame and _ttFrame._combatMsg then _ttFrame._combatMsg:Hide() end
     -- Hide target sub-elements from prior tooltip
     if _ttFrame and _ttFrame._tgtDivider then
@@ -841,15 +909,18 @@ local function PopulatePreview(bar, curSession, curSessionID, curDMType)
     if not bar._srcGUID and not bar._src.sourceCreatureID then return false end
     if not C_DamageMeter then return false end
 
-    -- Reposition tooltip bars with physical-pixel spacing
+    -- Reposition tooltip bars with physical-pixel spacing (only when spacing changes)
     local ttSp = PhysicalPixels(1)
     local ttStride = TT_BAR_H + ttSp
-    for ti = 1, TT_MAX do
-        local b = _ttBars[ti]
-        if b then
-            b.row:ClearAllPoints()
-            b.row:SetPoint("TOPLEFT", _ttFrame, "TOPLEFT", 0, -(TT_HDR_H + (ti-1) * ttStride))
-            b.row:SetPoint("TOPRIGHT", _ttFrame, "TOPRIGHT", 0, -(TT_HDR_H + (ti-1) * ttStride))
+    if ttSp ~= _ttLastSp then
+        _ttLastSp = ttSp
+        for ti = 1, TT_MAX do
+            local b = _ttBars[ti]
+            if b then
+                b.row:ClearAllPoints()
+                b.row:SetPoint("TOPLEFT", _ttFrame, "TOPLEFT", 0, -(TT_HDR_H + (ti-1) * ttStride))
+                b.row:SetPoint("TOPRIGHT", _ttFrame, "TOPRIGHT", 0, -(TT_HDR_H + (ti-1) * ttStride))
+            end
         end
     end
 
@@ -882,7 +953,7 @@ local function PopulatePreview(bar, curSession, curSessionID, curDMType)
         local reversed = {}
         for ri = #raw, 1, -1 do reversed[#reversed + 1] = raw[ri] end
         ApplyTTHeader(StripRealm(bar._src.name) or "Unknown", "Death Recap")
-        local texPath, texKey = GetBarTexturePath()
+        local texPath, texKey = GetBreakdownBarTexturePath()
         local deathTime = reversed[#reversed] and reversed[#reversed].timestamp or GetTime()
         local total = #reversed
         local count = math.min(TT_MAX, total)
@@ -928,7 +999,7 @@ local function PopulatePreview(bar, curSession, curSessionID, curDMType)
                 b.row:Show()
             else b.row:Hide() end
         end
-        _ttFrame:SetSize(250, TT_HDR_H + count * ttStride - (count > 0 and ttSp or 0))
+        _ttFrame:SetSize(TT_WIDTH, TT_HDR_H + count * ttStride - (count > 0 and ttSp or 0))
         return true
     end
 
@@ -946,7 +1017,7 @@ local function PopulatePreview(bar, curSession, curSessionID, curDMType)
         if not players then return false end
 
         ApplyTTHeader(StripRealm(bar._src.name) or "Unknown", "Damage Taken")
-        local texPath, texKey = GetBarTexturePath()
+        local texPath, texKey = GetBreakdownBarTexturePath()
         local maxAmt = players[1].total
         local count = math.min(TT_MAX, #players)
         for i = 1, TT_MAX do
@@ -981,15 +1052,14 @@ local function PopulatePreview(bar, curSession, curSessionID, curDMType)
                 b.row:Show()
             else b.row:Hide() end
         end
-        _ttFrame:SetSize(250, TT_HDR_H + count * ttStride - (count > 0 and ttSp or 0))
+        _ttFrame:SetSize(TT_WIDTH, TT_HDR_H + count * ttStride - (count > 0 and ttSp or 0))
         return true
     end
 
     -- Standard spell breakdown tooltip
+    -- Pass guid/cid straight through -- API accepts its own secret values
     local guid = bar._srcGUID
     local cid = bar._src.sourceCreatureID
-    if issecretvalue and issecretvalue(guid) then guid = nil end
-    if cid and issecretvalue and issecretvalue(cid) then cid = nil end
     local srcData
     if curSessionID and C_DamageMeter.GetCombatSessionSourceFromID then
         srcData = C_DamageMeter.GetCombatSessionSourceFromID(curSessionID, curDMType, guid, cid)
@@ -1000,35 +1070,50 @@ local function PopulatePreview(bar, curSession, curSessionID, curDMType)
 
     ApplyTTHeader(StripRealm(bar._src.name) or "Unknown", DM_TYPE_NAMES[curDMType] or "Damage Done")
 
-    local sorted = {}
+    wipe(_ttSorted)
     for _, spell in ipairs(srcData.combatSpells) do
-        local ok, amt = pcall(function() return spell.totalAmount end)
-        sorted[#sorted + 1] = { spell = spell, amount = (ok and amt) or 0 }
+        local amt = spell.totalAmount
+        if issecretvalue and issecretvalue(amt) then amt = 0
+        elseif type(amt) ~= "number" then amt = 0 end
+        _ttSorted[#_ttSorted + 1] = { spell = spell, amount = amt }
     end
-    local maxAmt = sorted[1] and sorted[1].amount or 1
+    local maxAmt = _ttSorted[1] and _ttSorted[1].amount or 1
     local totalDmg = 0
-    local canPercent = maxAmt and (not issecretvalue or not issecretvalue(maxAmt)) and type(maxAmt) == "number"
-    if canPercent then for _, e in ipairs(sorted) do totalDmg = totalDmg + e.amount end end
-    local texPath, texKey = GetBarTexturePath()
-    local count = math.min(TT_MAX, #sorted)
+    local canPercent = type(maxAmt) == "number" and (not issecretvalue or not issecretvalue(maxAmt))
+    if canPercent then for _, e in ipairs(_ttSorted) do totalDmg = totalDmg + e.amount end end
+    local texPath, texKey = GetBreakdownBarTexturePath()
+    local count = math.min(TT_MAX, #_ttSorted)
     for i = 1, TT_MAX do
         local b = _ttBars[i]
         if i <= count then
-            local entry = sorted[i]
+            local entry = _ttSorted[i]
             local spell = entry.spell
+            local hasIcon = false
             if spell.spellID then
                 local spIcon = C_Spell and C_Spell.GetSpellTexture and C_Spell.GetSpellTexture(spell.spellID)
                 if spIcon then
+                    hasIcon = true
                     b.spellIcon:SetTexture(spIcon); b.spellIcon:Show()
-                    b.fill:ClearAllPoints(); b.fill:SetPoint("TOPLEFT", b.spellIcon, "TOPRIGHT", 0, 0); b.fill:SetPoint("BOTTOMRIGHT", b.row, "BOTTOMRIGHT", 0, 0)
-                else b.spellIcon:Hide(); b.fill:ClearAllPoints(); b.fill:SetAllPoints(b.row) end
-            else b.spellIcon:Hide(); b.fill:ClearAllPoints(); b.fill:SetAllPoints(b.row) end
+                end
+            end
+            if not hasIcon then b.spellIcon:Hide() end
+            -- Only re-anchor fill when icon state changes
+            if hasIcon ~= b._lastHasIcon then
+                b._lastHasIcon = hasIcon
+                b.fill:ClearAllPoints()
+                if hasIcon then
+                    b.fill:SetPoint("TOPLEFT", b.spellIcon, "TOPRIGHT", 0, 0)
+                    b.fill:SetPoint("BOTTOMRIGHT", b.row, "BOTTOMRIGHT", 0, 0)
+                else
+                    b.fill:SetAllPoints(b.row)
+                end
+            end
             ApplyBarTexture(b.fill, texPath, texKey); b.fill:SetMinMaxValues(0, maxAmt); b.fill:SetValue(entry.amount)
             b.fill:SetStatusBarColor(0x33/255, 0x33/255, 0x33/255)
             local spellName
             if spell.spellID then
-                local okS, sn = pcall(function() return C_Spell and C_Spell.GetSpellName and C_Spell.GetSpellName(spell.spellID) end)
-                spellName = (okS and sn) or nil
+                spellName = C_Spell and C_Spell.GetSpellName and C_Spell.GetSpellName(spell.spellID)
+                if issecretvalue and issecretvalue(spellName) then spellName = nil end
             end
             b.label:SetText(spellName or spell.creatureName or "Unknown")
             if canPercent and totalDmg > 0 then
@@ -1103,26 +1188,63 @@ local function PopulatePreview(bar, curSession, curSessionID, curDMType)
     if ttTargetCount > 0 then
         totalH = totalH + (ttSp * 2) + 1 + 10 + 10 + (ttTargetCount * ttStride)
     end
-    _ttFrame:SetSize(250, totalH)
+    _ttFrame:SetSize(TT_WIDTH, totalH)
+
     return true
 end
 
+local _ttLastGUID, _ttLastSession, _ttLastSessionID, _ttLastDMType
+local _ttLastScale, _ttLastAnchor
+
 local function ShowBarTooltip(bar, curSession, curSessionID, curDMType)
+
     local cfg = DB()
     if cfg.showHoverTooltip == false then return end
     EnsureTooltipFrame()
+    local barRow = bar.row
+    local anchorMode = cfg.breakdownAnchorPoint
+    local desiredAnchor = (anchorMode == "center") and "CENTER" or barRow
+    -- Skip full rebuild if tooltip is already populated for this exact player + session
+    local barGUID = bar._srcGUID
+    if barGUID == _ttLastGUID and curSession == _ttLastSession and curSessionID == _ttLastSessionID and curDMType == _ttLastDMType then
+        if _ttLastAnchor ~= desiredAnchor then
+            _ttFrame:ClearAllPoints()
+            if desiredAnchor == "CENTER" then
+                _ttFrame:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
+                _ttLastAnchor = "CENTER"
+            else
+                _ttFrame:SetPoint("BOTTOMRIGHT", barRow, "TOPRIGHT", 0, 0)
+                _ttLastAnchor = barRow
+            end
+        end
+        _ttFrame:Show()
+    
+        return
+    end
     if PopulatePreview(bar, curSession, curSessionID, curDMType) then
-        _ttFrame:ClearAllPoints()
-        _ttFrame:SetWidth(250)
+        _ttLastGUID = barGUID; _ttLastSession = curSession; _ttLastSessionID = curSessionID; _ttLastDMType = curDMType
         local scale = (cfg.hoverTooltipScale or 100) / 100
-        _ttFrame:SetScale(scale)
-        _ttFrame:SetPoint("BOTTOMRIGHT", bar.row, "TOPRIGHT", 0, 0)
+        if scale ~= _ttLastScale then
+            _ttFrame:SetScale(scale)
+            _ttLastScale = scale
+        end
+        _ttFrame:ClearAllPoints()
+        if anchorMode == "center" then
+            _ttFrame:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
+            _ttLastAnchor = "CENTER"
+        else
+            _ttFrame:SetPoint("BOTTOMRIGHT", barRow, "TOPRIGHT", 0, 0)
+            _ttLastAnchor = barRow
+        end
         _ttFrame:Show()
     end
+
 end
 
 local function HideBarTooltip()
     if _ttFrame then _ttFrame:Hide() end
+    _ttLastGUID = nil; _ttLastAnchor = nil
+
 end
 
 local _hoverPollFrame = CreateFrame("Frame")
@@ -1320,12 +1442,10 @@ local function ShowEDMMenu(items, anchorBtn)
         local acc = 0
         _edmMenu:SetScript("OnUpdate", function(self, dt)
             acc = acc + dt; if acc < 0.1 then return end; acc = 0
-            local t0 = ProfBegin("CtxMenu.Poll")
             local over = self:IsMouseOver()
                 or (_edmSub and _edmSub:IsShown() and _edmSub:IsMouseOver())
                 or (_edmMenuAnchor and _edmMenuAnchor:IsMouseOver())
             if not over and IsMouseButtonDown("LeftButton") then self:Hide() end
-            ProfEnd("CtxMenu.Poll", t0)
         end)
         _edmMenu:HookScript("OnHide", function()
             if _edmSub then _edmSub:Hide() end
@@ -1451,9 +1571,13 @@ local function CreateDMWindow(winIdx)
                     for bi = 1, TT_MAX do _ttBars[bi].row:Hide() end
                     _ttFrame._combatMsg:SetText("No death recap available")
                     _ttFrame._combatMsg:Show()
-                    _ttFrame:SetSize(250, TT_HDR_H + 40)
+                    _ttFrame:SetSize(TT_WIDTH, TT_HDR_H + 40)
                     _ttFrame:ClearAllPoints()
-                    _ttFrame:SetPoint("BOTTOMRIGHT", bar.row, "TOPRIGHT", 0, 0)
+                    if cfg2 and cfg2.breakdownAnchorPoint == "center" then
+                        _ttFrame:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
+                    else
+                        _ttFrame:SetPoint("BOTTOMRIGHT", bar.row, "TOPRIGHT", 0, 0)
+                    end
                     _ttFrame:Show()
                     return
                 end
@@ -1475,9 +1599,13 @@ local function CreateDMWindow(winIdx)
                 for bi = 1, TT_MAX do _ttBars[bi].row:Hide() end
                 _ttFrame._combatMsg:SetText("Detailed information is\nsecret while in combat")
                 _ttFrame._combatMsg:Show()
-                _ttFrame:SetSize(250, TT_HDR_H + 40)
+                _ttFrame:SetSize(TT_WIDTH, TT_HDR_H + 40)
                 _ttFrame:ClearAllPoints()
-                _ttFrame:SetPoint("BOTTOMRIGHT", bar.row, "TOPRIGHT", 0, 0)
+                if cfg2 and cfg2.breakdownAnchorPoint == "center" then
+                    _ttFrame:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
+                else
+                    _ttFrame:SetPoint("BOTTOMRIGHT", bar.row, "TOPRIGHT", 0, 0)
+                end
                 _ttFrame:Show()
                 return
             end
@@ -1814,6 +1942,9 @@ local function CreateDMWindow(winIdx)
     -- Ordered list of header buttons for live resize/reposition
     W.hdrBtns = { W.settingsBtn, W.segmentBtn, W.modeBtn, W.resetBtn, W.winActionBtn }
 
+    -- Option: hide header icons until the title bar is hovered
+    ApplyHeaderButtonsHoverVisibility(W, cfg)
+
     ---------------------------------------------------------------------------
     --  Snap helpers (X-axis alignment + width matching against other DM windows)
     ---------------------------------------------------------------------------
@@ -1907,8 +2038,7 @@ local function CreateDMWindow(winIdx)
     local dragStartCX, dragStartCY, dragStartLeft, dragStartTop
     local dragFrame = CreateFrame("Frame"); dragFrame:Hide()
     dragFrame:SetScript("OnUpdate", function()
-        local t0 = ProfBegin("Drag.OnUpdate")
-        if not dragging then ProfEnd("Drag.OnUpdate", t0); return end
+        if not dragging then return end
         -- Stop drag if mouse button was released (catches cases where OnMouseUp doesn't fire)
         if not IsMouseButtonDown("LeftButton") then
             dragging = false; dragFrame:Hide()
@@ -1919,7 +2049,6 @@ local function CreateDMWindow(winIdx)
                 frame:ClearAllPoints()
                 frame:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", left, top)
             end
-            ProfEnd("Drag.OnUpdate", t0); return
         end
         local cx, cy = GetCursorPosition(); local es = frame:GetEffectiveScale()
         local newLeft = dragStartLeft + (cx/es - dragStartCX)
@@ -1966,7 +2095,6 @@ local function CreateDMWindow(winIdx)
         if PP and PP.Snap then newLeft = PP.Snap(newLeft); newTop = PP.Snap(newTop) end
         frame:ClearAllPoints()
         frame:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", newLeft, newTop)
-        ProfEnd("Drag.OnUpdate", t0)
     end)
 
     header:SetScript("OnMouseDown", function(_, button)
@@ -2017,11 +2145,9 @@ local function CreateDMWindow(winIdx)
     W.content = content
 
     viewport:SetScript("OnSizeChanged", function(self, w)
-        local t0 = ProfBegin("Viewport.OnSizeChanged")
-        if W.stickyGuard then ProfEnd("Viewport.OnSizeChanged", t0); return end
+        if W.stickyGuard then return end
         if w and w > 0 then content:SetWidth(w) end
         W.UpdateSticky(nil, W.visibleCount)
-        ProfEnd("Viewport.OnSizeChanged", t0)
     end)
 
     -- Mouse wheel scrolling (no visual scrollbar)
@@ -2168,8 +2294,7 @@ local function CreateDMWindow(winIdx)
     local resizeAxis = nil  -- nil = free, "w" = width only, "h" = height only
     local resizeShiftWas = false
     resizeFrame:SetScript("OnUpdate", function()
-        local t0 = ProfBegin("Resize.OnUpdate")
-        if not W.resizing then ProfEnd("Resize.OnUpdate", t0); return end
+        if not W.resizing then return end
         local cx, cy = GetCursorPosition(); local es = frame:GetEffectiveScale()
         local dx = cx/es - resizeStartX
         local dy = resizeStartY - cy/es
@@ -2204,7 +2329,6 @@ local function CreateDMWindow(winIdx)
         frame:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", resizeAnchorLeft, resizeAnchorTop)
         frame:SetSize(newW, newH)
         resizeShiftWas = shiftDown
-        ProfEnd("Resize.OnUpdate", t0)
     end)
 
     W.resizeGrip:SetScript("OnMouseDown", function(_, button)
@@ -2235,20 +2359,17 @@ local function CreateDMWindow(winIdx)
         local fadeSpeed = 1 / 0.12; local fadeAlpha = 0; local fadeTarget = 0
         local fadeFrame2 = CreateFrame("Frame"); fadeFrame2:Hide()
         fadeFrame2:SetScript("OnUpdate", function(self, dt)
-            local t0 = ProfBegin("Fade.OnUpdate")
-            if fadeAlpha == fadeTarget then self:Hide(); ProfEnd("Fade.OnUpdate", t0); return end
+            if fadeAlpha == fadeTarget then self:Hide(); return end
             local step = fadeSpeed * dt
             fadeAlpha = fadeTarget > fadeAlpha and math.min(fadeTarget, fadeAlpha + step) or math.max(fadeTarget, fadeAlpha - step)
             if W.resizeGrip and not W.windowLocked and not W.resizeGrip:IsMouseOver() then W.resizeGrip:SetAlpha(fadeAlpha * 0.3) end
             if W.lockBtn and not W.lockBtn:IsMouseOver() then W.lockBtn:SetAlpha(fadeAlpha * 0.3) end
-            ProfEnd("Fade.OnUpdate", t0)
         end)
         local function FadeIn() fadeTarget = 1; fadeFrame2:Show() end
         local function FadeOut() fadeTarget = 0; fadeFrame2:Show() end
         local wasOver = false
         local hoverTicker  -- forward ref
         local function HoverPoll()
-            local t0 = ProfBegin("WindowHover.Poll")
             local over = frame:IsMouseOver() or (W.resizeGrip and W.resizeGrip:IsMouseOver()) or (W.lockBtn and W.lockBtn:IsMouseOver())
             if over and not wasOver then
                 wasOver = true; W.isHovered = true
@@ -2259,7 +2380,6 @@ local function CreateDMWindow(winIdx)
                 -- Stop polling until next OnEnter
                 if hoverTicker then hoverTicker:Cancel(); hoverTicker = nil end
             end
-            ProfEnd("WindowHover.Poll", t0)
         end
         local function StartHoverPoll()
             if hoverTicker then return end
@@ -2389,8 +2509,8 @@ local function CreateDMWindow(winIdx)
     end
 
     function W.UpdateSticky(sources, visibleCount)
-        local t0 = ProfBegin("UpdateSticky")
-        if W.stickyGuard then ProfEnd("UpdateSticky", t0); return end
+
+        if W.stickyGuard then return end
         -- Don't show sticky while home screen or source window is open
         if (homeFrame and homeFrame:IsShown()) or W.sourceOpen then
             W.stickyPlayer.row:Hide(); W.stickySep:Hide(); return
@@ -2514,20 +2634,20 @@ local function CreateDMWindow(winIdx)
         end
         bar._src = src; bar._srcGUID = src.sourceGUID; bar._class = classFile
         W.stickySep:Show()
-        ProfEnd("UpdateSticky", t0)
+
     end
 
     -- (PEAK_BUDGET is at file scope)
 
     RefreshUI = function(session)
-        local t0 = ProfBegin("Refresh.UI")
-        if not frame then ProfEnd("Refresh.UI", t0); return end
+
+        if not frame then return end
         W._lastSession = session  -- cache for scroll-triggered refresh
 
         -- Populate rows
         local count = 0
         if session and session.combatSources then
-            local tBars = ProfBegin("Refresh.Bars")
+
             local sources = session.combatSources
             local c = DB(); local barH = PhysicalPixels(c.barHeight or 18); local barSp = PhysicalPixels(c.barSpacing); local stride = barH + barSp
             local leftFS = c.leftFontSize or c.fontSize or 11; local rightFS = c.rightFontSize or c.fontSize or 11
@@ -2687,22 +2807,18 @@ local function CreateDMWindow(winIdx)
                     bar._cachedSrcName = nil; bar._cachedDisplayName = nil; bar._cachedAmtText = nil
                 end
             end
-            ProfEnd("Refresh.Bars", tBars)
+
         else
             for i = 1, BAR_POOL_SIZE do W.rowPool[i].row:Hide() end
         end
         W.visibleCount = count
 
-        local tSticky = ProfBegin("Refresh.Sticky")
         W.UpdateSticky(W._barSources, count)
-        ProfEnd("Refresh.Sticky", tSticky)
 
-        local tScroll = ProfBegin("Refresh.Scroll")
+
+
         RecalcViewport(count)
-        ProfEnd("Refresh.Scroll", tScroll)
 
-        -- Timer
-        local tTimer = ProfBegin("Refresh.Timer")
         local dur
         if W.curSessionID then
             -- Historical session: use API duration
@@ -2729,22 +2845,17 @@ local function CreateDMWindow(winIdx)
         local titlePrefix = isOverall and "Overall " or ""
         W.titleText:SetText(titlePrefix .. (DM_TYPE_NAMES[W.curDMType] or "Damage Done"))
         if winIdx == 1 then UpdateSATimerText() end
-        ProfEnd("Refresh.Timer", tTimer)
 
         if W.sourceOpen then
-            local tBreak = ProfBegin("Refresh.Breakdown")
             W.RefreshBreakdown()
-            ProfEnd("Refresh.Breakdown", tBreak)
         end
-        ProfEnd("Refresh.UI", t0)
+
     end
 
     function W.Refresh()
-        local t0 = ProfBegin("Refresh.TOTAL")
-        if not frame then ProfEnd("Refresh.TOTAL", t0); return end
+        if not frame then return end
 
         local apiStart = debugprofilestop()
-        local tApi = ProfBegin("Refresh.API")
         local session
         if W.curSessionID and C_DamageMeter and C_DamageMeter.GetCombatSessionFromID then
             local ok, s = pcall(C_DamageMeter.GetCombatSessionFromID, W.curSessionID, W.curDMType)
@@ -2752,7 +2863,6 @@ local function CreateDMWindow(winIdx)
         elseif C_DamageMeter and C_DamageMeter.GetCombatSessionFromType then
             session = C_DamageMeter.GetCombatSessionFromType(W.curSession, W.curDMType)
         end
-        ProfEnd("Refresh.API", tApi)
         local apiMs = debugprofilestop() - apiStart
 
         -- If API spiked, defer UI work to next frame so peaks don't stack
@@ -2761,7 +2871,7 @@ local function CreateDMWindow(winIdx)
         else
             RefreshUI(session)
         end
-        ProfEnd("Refresh.TOTAL", t0)
+
     end
 
     function W.RefreshBreakdown()
@@ -2815,7 +2925,7 @@ local function CreateDMWindow(winIdx)
                         spIcon = C_Spell and C_Spell.GetSpellTexture and C_Spell.GetSpellTexture(spID)
                     end
                     if not spIcon then spIcon = 135274 end
-                    bar.classIcon:SetTexture(spIcon); bar.classIcon:SetSize(barH, barH); bar.classIcon:Show(); iconOffset = barH
+                    bar.classIcon:SetTexture(spIcon); bar.classIcon:SetTexCoord(0.065, 0.935, 0.065, 0.935); bar.classIcon:SetSize(barH, barH); bar.classIcon:Show(); iconOffset = barH
                     bar.fill:ClearAllPoints(); bar.fill:SetPoint("TOPLEFT", bar.row, "TOPLEFT", iconOffset, 0)
                     bar.fill:SetPoint("TOPRIGHT", bar.row, "TOPRIGHT", 0, 0); bar.fill:SetHeight(barH)
                     -- Fill = HP% remaining at this event
@@ -2963,7 +3073,7 @@ local function CreateDMWindow(winIdx)
                 local iconOffset = 0
                 if spell.spellID then
                     local spIcon = C_Spell and C_Spell.GetSpellTexture and C_Spell.GetSpellTexture(spell.spellID)
-                    if spIcon then bar.classIcon:SetTexture(spIcon); bar.classIcon:SetSize(barH, barH); bar.classIcon:Show(); iconOffset = barH
+                    if spIcon then bar.classIcon:SetTexture(spIcon); bar.classIcon:SetTexCoord(0.065, 0.935, 0.065, 0.935); bar.classIcon:SetSize(barH, barH); bar.classIcon:Show(); iconOffset = barH
                     else bar.classIcon:Hide() end
                 else bar.classIcon:Hide() end
                 bar.fill:ClearAllPoints(); bar.fill:SetPoint("TOPLEFT", bar.row, "TOPLEFT", iconOffset, 0)
@@ -3472,6 +3582,8 @@ ns.ApplyHeader = function()
             w._closeIconTex:SetSize(iconSz + 2, iconSz + 2)
             w._closeIconTex:SetPoint("CENTER", w.winActionBtn, "CENTER", 0, 0)
         end
+
+        ApplyHeaderButtonsHoverVisibility(w, cfg)
     end
 end
 
@@ -3526,7 +3638,14 @@ local function ApplySATimerStyle()
     local r, g, b = GetSATimerColor()
     _saTimerFS:SetTextColor(r, g, b, 1)
     _saTimerFS:ClearAllPoints()
-    if cfg.standaloneTimerAlignLeft then
+    local anchor = cfg.standaloneTimerAnchor or "free"
+    local alignLeft
+    if anchor == "free" then
+        alignLeft = cfg.standaloneTimerAlignLeft
+    else
+        alignLeft = anchor == "topleft" or anchor == "bottomleft"
+    end
+    if alignLeft then
         _saTimerFS:SetPoint("LEFT")
         _saTimerFS:SetJustifyH("LEFT")
     else
@@ -3537,18 +3656,75 @@ end
 
 UpdateSATimerText = function()
     if not _saTimer or not _saTimerFS then return end
-    local t0 = ProfBegin("SATimer.Update")
     local cfg = DB()
-    if not cfg.standaloneTimer then ProfEnd("SATimer.Update", t0); return end
+    if not cfg.standaloneTimer then return end
     -- Only visible during group combat (or options preview)
     if not _inCombat then
         if not _saTimerPreview and _saTimer:IsShown() then _saTimer:Hide() end
-        ProfEnd("SATimer.Update", t0); return
+        return
     end
     if not _saTimer:IsShown() then _saTimer:Show() end
     local elapsed = GetCombatElapsed()
     _saTimerFS:SetText(FormatTimer(elapsed > 0 and elapsed or 0))
-    ProfEnd("SATimer.Update", t0)
+end
+
+local function RepositionSATimer()
+    if not _saTimer then return end
+    local cfg = DB()
+    local anchor = cfg.standaloneTimerAnchor or "free"
+
+    _saTimer:ClearAllPoints()
+
+    if anchor == "free" then
+        _saTimer:SetMovable(true)
+        _saTimer:EnableMouse(true)
+        local pos = cfg.standaloneTimerPos
+        if pos and pos.x and pos.y then
+            _saTimer:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", pos.x, pos.y)
+        else
+            local W1 = _windows[1]
+            if W1 and W1.frame then
+                _saTimer:SetPoint("BOTTOMRIGHT", W1.frame, "TOPRIGHT", 0, 5)
+            else
+                _saTimer:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
+            end
+        end
+        return
+    end
+
+    _saTimer:SetMovable(false)
+    _saTimer:EnableMouse(false)
+
+    -- Find the highest (max top) and lowest (min bottom) window
+    local topWin, botWin
+    local maxTop, minBot = -math.huge, math.huge
+    for _, w in ipairs(_windows) do
+        if w.frame and w.frame:IsShown() then
+            local t = w.frame:GetTop()
+            local b = w.frame:GetBottom()
+            if t and t > maxTop then maxTop = t; topWin = w end
+            if b and b < minBot then minBot = b; botWin = w end
+        end
+    end
+
+    local isTop = anchor == "topleft" or anchor == "topright"
+    local isLeft = anchor == "topleft" or anchor == "bottomleft"
+    local ref = isTop and topWin or botWin
+
+    if not ref or not ref.frame then
+        _saTimer:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
+        return
+    end
+
+    if isTop and isLeft then
+        _saTimer:SetPoint("BOTTOMLEFT", ref.frame, "TOPLEFT", 0, 0)
+    elseif isTop then
+        _saTimer:SetPoint("BOTTOMRIGHT", ref.frame, "TOPRIGHT", 0, 0)
+    elseif isLeft then
+        _saTimer:SetPoint("TOPLEFT", ref.frame, "BOTTOMLEFT", 0, 0)
+    else
+        _saTimer:SetPoint("TOPRIGHT", ref.frame, "BOTTOMRIGHT", 0, 0)
+    end
 end
 
 local function CreateSATimer()
@@ -3562,13 +3738,17 @@ local function CreateSATimer()
     _saTimer:EnableMouse(true)
     _saTimer:SetFrameStrata("HIGH")
     _saTimer:SetScript("OnMouseDown", function(self, button)
-        if button == "LeftButton" and IsShiftKeyDown() then self:StartMoving() end
+        if button == "LeftButton" and IsShiftKeyDown() then
+            local c = DB()
+            if (c.standaloneTimerAnchor or "free") == "free" then self:StartMoving() end
+        end
     end)
     _saTimer:SetScript("OnMouseUp", function(self)
         self:StopMovingOrSizing()
-        local left, top = self:GetLeft(), self:GetTop()
-        if left and top then
-            local c = DB(); c.standaloneTimerPos = { x = left, y = top }
+        local c = DB()
+        if (c.standaloneTimerAnchor or "free") == "free" then
+            local left, top = self:GetLeft(), self:GetTop()
+            if left and top then c.standaloneTimerPos = { x = left, y = top } end
         end
     end)
 
@@ -3588,18 +3768,7 @@ local function CreateSATimer()
     ResizeToText()
     _saTimerFS:SetText("0:00")
 
-    -- Position: saved or default (above window 1, right-aligned)
-    local pos = cfg.standaloneTimerPos
-    if pos and pos.x and pos.y then
-        _saTimer:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", pos.x, pos.y)
-    else
-        local W1 = _windows[1]
-        if W1 and W1.frame then
-            _saTimer:SetPoint("BOTTOMRIGHT", W1.frame, "TOPRIGHT", 0, 5)
-        else
-            _saTimer:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
-        end
-    end
+    RepositionSATimer()
 
     _saTimer:Hide()  -- starts hidden; combat state controls visibility
 end
@@ -3615,6 +3784,7 @@ ns.ApplySATimer = function()
         local w = (_saTimerFS:GetStringWidth() or 30) + 4
         local h = (_saTimerFS:GetStringHeight() or 14) + 4
         _saTimer:SetSize(w, h)
+        RepositionSATimer()
         if _saTimerPreview then
             _saTimerFS:SetText("11:37")
         else
@@ -3656,7 +3826,6 @@ end
 local _sharedTicker
 
 local function SharedRefreshTick()
-    local t0 = ProfBegin("RefreshTick")
     -- Player out of combat but group still fighting (player died mid-pull)
     if _needsFinalRefresh then
         if not IsGroupInCombat() then
@@ -3666,7 +3835,6 @@ local function SharedRefreshTick()
             _needsFinalRefresh = false
             for _, w in ipairs(_windows) do w.Refresh() end
             if _sharedTicker then _sharedTicker:Cancel(); _sharedTicker = nil end
-            ProfEnd("RefreshTick", t0)
             return
         end
         -- Group still fighting: fall through to normal refresh
@@ -3674,11 +3842,9 @@ local function SharedRefreshTick()
     if _combatEndTime > 0 then
         -- Combat fully ended, ticker should stop
         if _sharedTicker then _sharedTicker:Cancel(); _sharedTicker = nil end
-        ProfEnd("RefreshTick", t0)
         return
     end
     for _, w in ipairs(_windows) do w.Refresh() end
-    ProfEnd("RefreshTick", t0)
 end
 
 local function StartSharedTicker()
@@ -3716,6 +3882,8 @@ combatFrame:SetScript("OnEvent", function(_, event)
         _inCombat = true
         _combatEndTime = 0
         _needsFinalRefresh = false
+        _ttLastGUID = nil
+        if _targetsCache then wipe(_targetsCache) end
         -- Sync timer with API: if session already has elapsed time, backdate our start
         local apiDur = C_DamageMeter and C_DamageMeter.GetSessionDurationSeconds
             and C_DamageMeter.GetSessionDurationSeconds(Enum.DamageMeterSessionType.Current)
@@ -3726,6 +3894,10 @@ combatFrame:SetScript("OnEvent", function(_, event)
         end
         StartSharedTicker()
     else
+        -- Feign Death + group still fighting: keep timer running
+        if UnitIsFeignDeath and UnitIsFeignDeath("player") and IsGroupInCombat() then return end
+        _ttLastGUID = nil
+        if _targetsCache then wipe(_targetsCache) end
         -- Check if group is still fighting (player died but boss alive)
         if IsGroupInCombat() then
             _needsFinalRefresh = true  -- let tick poll until group leaves combat
@@ -3805,6 +3977,10 @@ initFrame:SetScript("OnEvent", function(self)
         if winIdx > winCount then
             if cfg.standaloneTimer then CreateSATimer() end
             if _inCombat and not _sharedTicker then StartSharedTicker() end
+            -- Pre-create tooltip frame so first hover doesn't pay creation cost
+            EnsureTooltipFrame()
+            local sc = (cfg.hoverTooltipScale or 100) / 100
+            if _ttFrame then _ttFrame:SetScale(sc); _ttLastScale = sc end
             return
         end
         _windows[winIdx] = CreateDMWindow(winIdx)

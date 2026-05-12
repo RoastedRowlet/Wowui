@@ -19,17 +19,9 @@ PremadeGroupsFilterState = {
 ["min"] = "",
 ["act"] = false,
 },
-["tanks"] = {
-["max"] = "",
-["min"] = "",
-["act"] = false,
-},
+["partyfit"] = true,
 ["dungeon6"] = false,
-["dps"] = {
-["max"] = "",
-["min"] = "",
-["act"] = false,
-},
+["dungeon1"] = false,
 ["dungeon2"] = false,
 ["members"] = {
 ["max"] = "",
@@ -39,27 +31,12 @@ PremadeGroupsFilterState = {
 ["expression"] = "",
 ["difficulty"] = {
 },
-["dungeon1"] = false,
-["dungeon3"] = false,
+["dungeon4"] = false,
+["dungeon7"] = false,
 ["dungeon5"] = false,
 ["dungeon8"] = false,
-["dungeon7"] = false,
-["dungeon4"] = false,
-["partyfit"] = true,
-},
-},
-["c121f4"] = {
-["enabled"] = true,
-},
-["version"] = 8,
-["c3f5"] = {
-["enabled"] = true,
-["raid"] = {
-["difficulty"] = {
-["act"] = true,
-["val"] = 2,
-},
-["heals"] = {
+["dungeon3"] = false,
+["dps"] = {
 ["max"] = "",
 ["min"] = "",
 ["act"] = false,
@@ -69,23 +46,14 @@ PremadeGroupsFilterState = {
 ["min"] = "",
 ["act"] = false,
 },
-["members"] = {
-["max"] = "",
-["min"] = "",
-["act"] = false,
 },
-["dps"] = {
-["max"] = "",
-["min"] = "",
-["act"] = false,
 },
-["defeated"] = {
-["max"] = "",
-["min"] = "",
-["act"] = false,
+["c121f4"] = {
+["enabled"] = true,
 },
-["expression"] = "",
-},
+["version"] = 8,
+["c9f8"] = {
+["enabled"] = true,
 },
 ["c114f6"] = {
 ["enabled"] = true,
@@ -108,7 +76,7 @@ PremadeGroupsFilterState = {
 ["min"] = "",
 ["act"] = false,
 },
-["members"] = {
+["defeated"] = {
 ["max"] = "",
 ["min"] = "",
 ["act"] = false,
@@ -118,7 +86,7 @@ PremadeGroupsFilterState = {
 ["min"] = "",
 ["act"] = false,
 },
-["defeated"] = {
+["members"] = {
 ["max"] = "",
 ["min"] = "",
 ["act"] = false,
@@ -126,7 +94,39 @@ PremadeGroupsFilterState = {
 ["expression"] = "",
 },
 },
-["c9f8"] = {
+["c3f5"] = {
 ["enabled"] = true,
+["raid"] = {
+["difficulty"] = {
+["val"] = 2,
+["act"] = true,
+},
+["heals"] = {
+["max"] = "",
+["min"] = "",
+["act"] = false,
+},
+["tanks"] = {
+["max"] = "",
+["min"] = "",
+["act"] = false,
+},
+["defeated"] = {
+["max"] = "",
+["min"] = "",
+["act"] = false,
+},
+["dps"] = {
+["max"] = "",
+["min"] = "",
+["act"] = false,
+},
+["members"] = {
+["max"] = "",
+["min"] = "",
+["act"] = false,
+},
+["expression"] = "",
+},
 },
 }

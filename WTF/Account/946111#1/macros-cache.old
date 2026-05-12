@@ -115,12 +115,6 @@ VER 3 0000000000000010 "CW" "134400"
 #showtooltip cenarion ward
 /cast [@mouseover] Cenarion ward
 END
-VER 3 000000000000005F "DrinkBot" "1387609"
-#019
-#showtooltip item:226811
-/use [btn:1] item:226811
-/cast [btn:2] Conjure Refreshment
-END
 VER 3 0000000000000058 "DrinkBot" "134400"
 #169
 #showtooltip item:0
@@ -130,6 +124,12 @@ END
 VER 3 000000000000005A "DrinkBot" "INV_MISC_QUESTIONMARK"
 #showtooltip item:222744
 /use [btn:1] item:222744
+/cast [btn:2] Conjure Refreshment
+END
+VER 3 000000000000005F "DrinkBot" "1387609"
+#019
+#showtooltip item:226811
+/use [btn:1] item:226811
 /cast [btn:2] Conjure Refreshment
 END
 VER 3 0000000000000050 "Earth Shield" "134400"
@@ -147,6 +147,14 @@ VER 3 0000000000000031 "EngiRez" "134400"
 #021
 #showtooltip
 /use [@mouseover,help,dead][help,dead][] Complicated Cuffs
+END
+VER 3 0000000000000070 "EUI_CapacitorTotem" "INV_MISC_QUESTIONMARK"
+#showtooltip Capacitor Totem
+/cast [@cursor] Capacitor Totem
+END
+VER 3 000000000000006F "EUI_WindrushTotem" "INV_MISC_QUESTIONMARK"
+#showtooltip Wind Rush Totem
+/cast [@cursor] Wind Rush Totem
 END
 VER 3 000000000000000F "Flourish Vigil" "538743"
 #022
