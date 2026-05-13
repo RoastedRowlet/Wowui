@@ -12,25 +12,17 @@ RaiderIO_Config = {
 ["point"] = "TOPLEFT",
 },
 }
-RaiderIO_LastCharacter = "us-Lonelylitten-stormrage"
+RaiderIO_LastCharacter = "us-Zappyxatu-stormrage"
 RaiderIO_MissingCharacters = {
-["us-Garaharl-moon-guard"] = true,
-["us-Sannatri-moon-guard"] = true,
-["us-Spixia-stormrage"] = true,
-["us-Kiyni-tichondrius"] = true,
-["us-Boyde-windrunner"] = true,
-["us-Dönatelo-tichondrius"] = true,
-["us-Skâdí-illidan"] = true,
-["us-Surtur-stormrage"] = true,
-["us-Kixmage-proudmoore"] = true,
-["us-Jerberus-tichondrius"] = true,
-["us-Alliectrify-dalaran"] = true,
-["us-Hearthstone-hyjal"] = true,
-["us-Suplol-area-52"] = true,
-["us-Huntdoodzed-area-52"] = true,
-["us-Tengen-alleria"] = true,
-["us-Fideeni-stormrage"] = true,
-["us-Snaketooth-thaurissan"] = true,
+["us-Nihilation-stormrage"] = true,
+["us-Kianel-stormrage"] = true,
+["us-Yaloon-stormrage"] = true,
+["us-Audíoslave-stormrage"] = true,
+["us-Kyugren-ragnaros"] = true,
+["us-Bearelzebub-stormrage"] = true,
+["us-Shadowsobs-stormrage"] = true,
+["us-Clownjin-barthilas"] = true,
+["us-Maiyhem-stormrage"] = true,
 }
 RaiderIO_MissingServers = {
 }

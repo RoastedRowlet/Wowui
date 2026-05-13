@@ -3,10 +3,10 @@ CliqueDB = nil
 CliqueDB3 = {
 ["char"] = {
 ["Barelynoer - Area 52"] = {
-["spec3_profileKey"] = "Barelynoer - Area 52",
 ["spec1_profileKey"] = "Barelynoer - Area 52",
-["spec2_profileKey"] = "Barelynoer - Area 52",
+["spec3_profileKey"] = "Barelynoer - Area 52",
 ["specswap"] = false,
+["spec2_profileKey"] = "Barelynoer - Area 52",
 },
 ["Angryabsol - Stormrage"] = {
 ["spec1_profileKey"] = "Angryabsol - Stormrage",
@@ -23,16 +23,16 @@ CliqueDB3 = {
 },
 ["Lonelylitten - Stormrage"] = {
 ["spec1_profileKey"] = "Lonelylitten - Stormrage",
-["spec2_profileKey"] = "Lonelylitten - Stormrage",
+["spec3_profileKey"] = "Lonelylitten - Stormrage",
 ["downclick"] = false,
 ["fastooc"] = false,
-["specswap"] = false,
-["spec3_profileKey"] = "Lonelylitten - Stormrage",
 ["spec4_profileKey"] = "Lonelylitten - Stormrage",
+["spec2_profileKey"] = "Lonelylitten - Stormrage",
+["specswap"] = false,
 },
 ["Zappyxatu - Stormrage"] = {
-["spec1_profileKey"] = "Zappyxatu - Stormrage",
 ["spec3_profileKey"] = "Zappyxatu - Stormrage",
+["spec1_profileKey"] = "Zappyxatu - Stormrage",
 ["spec2_profileKey"] = "Zappyxatu - Stormrage",
 ["specswap"] = false,
 },
@@ -363,21 +363,6 @@ CliqueDB3 = {
 ["unit"] = "mouseover",
 },
 {
-["type"] = "menu",
-["sets"] = {
-["default"] = true,
-},
-["key"] = "SHIFT-BUTTON2",
-["icon"] = 132212,
-},
-{
-["type"] = "menu",
-["key"] = "CTRL-BUTTON2",
-["sets"] = {
-["default"] = true,
-},
-},
-{
 ["spell"] = "Healing Wave",
 ["key"] = "BUTTON2",
 ["sets"] = {
@@ -387,6 +372,21 @@ CliqueDB3 = {
 ["type"] = "spell",
 },
 {
+["sets"] = {
+["default"] = true,
+},
+["type"] = "menu",
+["icon"] = 132212,
+["key"] = "SHIFT-BUTTON2",
+},
+{
+["type"] = "menu",
+["key"] = "CTRL-BUTTON2",
+["sets"] = {
+["default"] = true,
+},
+},
+{
 ["type"] = "target",
 ["key"] = "CTRL-BUTTON1",
 ["sets"] = {
@@ -394,6 +394,15 @@ CliqueDB3 = {
 },
 ["icon"] = 132331,
 ["unit"] = "mouseover",
+},
+{
+["spell"] = "Ancestral Spirit",
+["key"] = "CTRL-BUTTON1",
+["sets"] = {
+["default"] = true,
+},
+["icon"] = 136077,
+["type"] = "spell",
 },
 {
 ["spell"] = "Riptide",
@@ -411,15 +420,6 @@ CliqueDB3 = {
 ["default"] = true,
 },
 ["icon"] = 236288,
-["type"] = "spell",
-},
-{
-["spell"] = "Ancestral Spirit",
-["key"] = "CTRL-BUTTON1",
-["sets"] = {
-["default"] = true,
-},
-["icon"] = 136077,
 ["type"] = "spell",
 },
 {

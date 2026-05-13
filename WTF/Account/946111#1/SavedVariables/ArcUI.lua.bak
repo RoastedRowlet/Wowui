@@ -232,111 +232,45 @@ ArcUIDB = {
 ["Lonelylitten - Stormrage"] = {
 ["resourceBars"] = {
 {
-["behavior"] = {
-["showOnSpecs"] = {
-4,
-},
-},
-["tracking"] = {
-["enabled"] = true,
-["maxValue"] = 273000,
-["powerName"] = "Mana",
-},
 ["display"] = {
-["textAnchorOffsetY"] = -1,
-["anchorToGroup"] = true,
-["textAnchor"] = "CENTERRIGHT",
-["enableSmoothing"] = true,
-["height"] = 20,
 ["fontSize"] = 16,
 ["textMovable"] = false,
 ["matchSlotsOnly"] = true,
-["textShowPercentSymbol"] = false,
+["textAnchorOffsetY"] = -1,
 ["texture"] = "Grid2 Flat",
+["anchorToGroup"] = true,
+["textAnchor"] = "CENTERRIGHT",
 ["textAnchorOffsetX"] = -35,
-["anchorGroupName"] = "Essential",
 ["barPosition"] = {
 ["y"] = -215.0833587646484,
 ["x"] = 0.8331207036972046,
 },
-["barMovable"] = false,
+["enableSmoothing"] = true,
 ["width"] = 333,
 ["matchGroupWidth"] = true,
+["textShowPercentSymbol"] = false,
+["height"] = 20,
+["anchorGroupName"] = "Essential",
+["barMovable"] = false,
 ["textFormat"] = "percent",
 },
+["tracking"] = {
+["enabled"] = true,
+["powerName"] = "Mana",
+["maxValue"] = 273000,
 },
-{
 ["behavior"] = {
-["showOnSpec"] = 0,
 ["showOnSpecs"] = {
 4,
 },
 },
-["display"] = {
-["colorCurveThreshold2Value"] = 35,
-["colorCurveThreshold4Value"] = 0,
-["colorCurveEnabled"] = true,
-["anchorGroupName"] = "Utility",
-["colorCurveThreshold4Enabled"] = true,
-["colorCurveDirection"] = "fill",
-["fontSize"] = 16,
-["anchorToGroup"] = true,
-["textAnchor"] = "RIGHT",
-["textAnchorOffsetX"] = -35,
-["colorCurveThreshold4Color"] = {
-["a"] = 1,
-["r"] = 0.9686275124549866,
-["g"] = 1,
-["b"] = 0.8666667342185974,
 },
-["colorCurveThreshold2Enabled"] = true,
-["height"] = 15,
-["colorCurveDirectionFilling"] = true,
-["colorCurveThreshold3Color"] = {
-["a"] = 1,
-["r"] = 1,
-["g"] = 0.003921568859368563,
-["b"] = 0,
+{
+["behavior"] = {
+["showOnSpecs"] = {
+4,
 },
-["colorCurveThresholdAsPercent"] = false,
-["colorCurveThreshold3Value"] = 100,
-["textMovable"] = false,
-["thresholdMode"] = "colorCurve",
-["colorCurveThreshold5Enabled"] = false,
-["texture"] = "Grid2 Flat",
-["backgroundTexture"] = "Dragonflight",
-["barPosition"] = {
-["y"] = -260.7499694824219,
-["relPoint"] = "CENTER",
-["point"] = "CENTER",
-["x"] = -0.3334379494190216,
-},
-["textPosition"] = {
-["y"] = -105,
-["relPoint"] = "CENTER",
-["point"] = "CENTER",
-["x"] = 0,
-},
-["thresholdAsPercent"] = false,
-["width"] = 333,
-["matchGroupWidth"] = true,
-["colorCurveThreshold3Enabled"] = true,
-["enabled"] = true,
-["colorCurveThreshold2Color"] = {
-["a"] = 1,
-["b"] = 0,
-["g"] = 0.4274510145187378,
-["r"] = 0.7098039388656616,
-},
-},
-["tracking"] = {
-["enabled"] = true,
-["showRuneTimer"] = false,
-["powerName"] = "Energy",
-["overrideMax"] = false,
-["maxValue"] = 100,
-["powerType"] = 3,
-["resourceCategory"] = "primary",
+["showOnSpec"] = 0,
 },
 ["thresholds"] = {
 {
@@ -373,56 +307,74 @@ ArcUIDB = {
 ["maxValue"] = 100,
 },
 },
+["tracking"] = {
+["enabled"] = true,
+["showRuneTimer"] = false,
+["powerName"] = "Energy",
+["overrideMax"] = false,
+["maxValue"] = 100,
+["powerType"] = 3,
+["resourceCategory"] = "primary",
 },
-{
 ["display"] = {
-["tickPercent"] = 10,
-["textAnchorOffsetY"] = -1.5,
+["colorCurveDirectionFilling"] = true,
+["backgroundTexture"] = "Dragonflight",
+["colorCurveThresholdAsPercent"] = false,
+["colorCurveThreshold3Value"] = 100,
+["matchGroupWidth"] = true,
+["textMovable"] = false,
+["anchorToGroup"] = true,
+["fontSize"] = 16,
+["barPosition"] = {
+["y"] = -260.7499694824219,
+["relPoint"] = "CENTER",
+["point"] = "CENTER",
+["x"] = -0.3334379494190216,
+},
+["colorCurveEnabled"] = true,
+["colorCurveThreshold2Color"] = {
+["a"] = 1,
+["b"] = 0,
+["g"] = 0.4274510145187378,
+["r"] = 0.7098039388656616,
+},
+["colorCurveThreshold4Enabled"] = true,
+["colorCurveDirection"] = "fill",
+["texture"] = "Grid2 Flat",
+["enabled"] = true,
+["textAnchor"] = "RIGHT",
+["textAnchorOffsetX"] = -35,
+["thresholdAsPercent"] = false,
+["colorCurveThreshold4Color"] = {
+["a"] = 1,
+["r"] = 0.9686275124549866,
+["g"] = 1,
+["b"] = 0.8666667342185974,
+},
+["thresholdMode"] = "colorCurve",
+["colorCurveThreshold4Value"] = 0,
+["width"] = 333,
+["anchorGroupName"] = "Utility",
+["colorCurveThreshold3Enabled"] = true,
+["colorCurveThreshold2Enabled"] = true,
+["colorCurveThreshold2Value"] = 35,
+["height"] = 15,
+["colorCurveThreshold5Enabled"] = false,
+["colorCurveThreshold3Color"] = {
+["a"] = 1,
+["r"] = 1,
+["g"] = 0.003921568859368563,
+["b"] = 0,
+},
 ["textPosition"] = {
-["y"] = -140,
+["y"] = -105,
 ["relPoint"] = "CENTER",
 ["point"] = "CENTER",
 ["x"] = 0,
 },
-["anchorToGroup"] = true,
-["textAnchor"] = "CENTER",
-["tickMode"] = "custom",
-["showTickMarks"] = true,
-["textMovable"] = false,
-["matchGroupWidth"] = true,
-["texture"] = "Grid2 Flat",
-["enabled"] = true,
-["barPosition"] = {
-["y"] = 0,
-["relPoint"] = "BOTTOMLEFT",
-["point"] = "BOTTOMLEFT",
-["x"] = 0,
-},
-["width"] = 236,
-["anchorGroupName"] = "Essential",
-},
-["behavior"] = {
-["showOnSpec"] = 0,
-["showOnSpecs"] = {
-1,
 },
 },
-["abilityThresholds"] = {
 {
-["enabled"] = true,
-["name"] = "Tick",
-["cost"] = 40,
-},
-},
-["tracking"] = {
-["enabled"] = true,
-["powerType"] = 8,
-["resourceCategory"] = "primary",
-["overrideMax"] = false,
-["showRuneTimer"] = false,
-["maxValue"] = 120,
-["powerName"] = "Astral Power",
-},
 ["thresholds"] = {
 {
 ["color"] = {
@@ -458,23 +410,89 @@ ArcUIDB = {
 ["maxValue"] = 100,
 },
 },
+["display"] = {
+["enabled"] = true,
+["textAnchor"] = "CENTER",
+["tickPercent"] = 10,
+["barPosition"] = {
+["y"] = 0,
+["relPoint"] = "BOTTOMLEFT",
+["point"] = "BOTTOMLEFT",
+["x"] = 0,
+},
+["anchorGroupName"] = "Essential",
+["textMovable"] = false,
+["matchGroupWidth"] = true,
+["width"] = 236,
+["tickMode"] = "custom",
+["anchorToGroup"] = true,
+["textAnchorOffsetY"] = -1.5,
+["textPosition"] = {
+["y"] = -140,
+["relPoint"] = "CENTER",
+["point"] = "CENTER",
+["x"] = 0,
+},
+["showTickMarks"] = true,
+["texture"] = "Grid2 Flat",
+},
+["abilityThresholds"] = {
+{
+["enabled"] = true,
+["name"] = "Tick",
+["cost"] = 40,
+},
+},
+["tracking"] = {
+["enabled"] = true,
+["powerType"] = 8,
+["resourceCategory"] = "primary",
+["overrideMax"] = false,
+["showRuneTimer"] = false,
+["maxValue"] = 120,
+["powerName"] = "Astral Power",
+},
+["behavior"] = {
+["showOnSpecs"] = {
+1,
+},
+["showOnSpec"] = 0,
+},
 },
 {
 ["display"] = {
+["enableMaxColor"] = true,
 ["tickPercent"] = 10,
+["tickColor"] = {
+["a"] = 0.800000011920929,
+["b"] = 0,
+["g"] = 0,
+["r"] = 0,
+},
 ["textPosition"] = {
 ["y"] = -175,
 ["relPoint"] = "CENTER",
 ["point"] = "CENTER",
 ["x"] = 0,
 },
+["anchorOffsetY"] = -16,
+["texture"] = "Grid2 Flat",
 ["enabled"] = true,
+["barPosition"] = {
+["y"] = -279.666748046875,
+["relPoint"] = "CENTER",
+["point"] = "CENTER",
+["x"] = 1.33324122428894,
+},
 ["barColor"] = {
 ["a"] = 1,
 ["b"] = 0.09019608050584793,
 ["g"] = 0.615686297416687,
 ["r"] = 1,
 },
+["width"] = 333,
+["anchorGroupName"] = "Utility",
+["colorCurveEnabled"] = false,
 ["showText"] = false,
 ["maxColor"] = {
 ["a"] = 1,
@@ -483,27 +501,25 @@ ArcUIDB = {
 ["r"] = 0.8705883026123047,
 },
 ["height"] = 9,
-["enableMaxColor"] = true,
-["showTickMarks"] = true,
-["anchorGroupName"] = "Utility",
-["tickColor"] = {
-["a"] = 0.800000011920929,
-["b"] = 0,
-["g"] = 0,
-["r"] = 0,
-},
-["anchorOffsetY"] = -16,
-["colorCurveEnabled"] = false,
-["texture"] = "Grid2 Flat",
-["barPosition"] = {
-["y"] = -279.666748046875,
-["relPoint"] = "CENTER",
-["point"] = "CENTER",
-["x"] = 1.33324122428894,
-},
-["width"] = 333,
 ["matchGroupWidth"] = true,
 ["anchorToGroup"] = true,
+["showTickMarks"] = true,
+},
+["behavior"] = {
+["showOnSpec"] = 0,
+["hideBlizzardFrame"] = true,
+["showOnSpecs"] = {
+4,
+},
+},
+["tracking"] = {
+["enabled"] = true,
+["showRuneTimer"] = false,
+["powerName"] = "Combo Points",
+["overrideMax"] = false,
+["secondaryType"] = "comboPoints",
+["resourceCategory"] = "secondary",
+["maxValue"] = 5,
 },
 ["thresholds"] = {
 {
@@ -540,40 +556,6 @@ ArcUIDB = {
 ["maxValue"] = 100,
 },
 },
-["tracking"] = {
-["enabled"] = true,
-["showRuneTimer"] = false,
-["powerName"] = "Combo Points",
-["overrideMax"] = false,
-["secondaryType"] = "comboPoints",
-["resourceCategory"] = "secondary",
-["maxValue"] = 5,
-},
-["behavior"] = {
-["hideBlizzardFrame"] = true,
-["showOnSpec"] = 0,
-["showOnSpecs"] = {
-4,
-},
-},
-},
-},
-["achSettings"] = {
-["achOnArcAuras"] = false,
-["achStrata"] = "INHERIT",
-["achCombatOnly"] = false,
-["assistedCombatHighlight"] = false,
-["achAlwaysAnimate"] = false,
-["achScale"] = 1,
-["_migrated"] = true,
-["achLevel"] = 5,
-["achStyle"] = "ants",
-["achShowBurst"] = true,
-["achColor"] = {
-["a"] = 1,
-["r"] = 1,
-["g"] = 1,
-["b"] = 1,
 },
 },
 ["arcAuras"] = {
@@ -628,6 +610,24 @@ ArcUIDB = {
 ["activeResources"] = {
 },
 ["activeCharges"] = {
+},
+},
+["achSettings"] = {
+["achOnArcAuras"] = false,
+["achStrata"] = "INHERIT",
+["achCombatOnly"] = false,
+["assistedCombatHighlight"] = false,
+["achAlwaysAnimate"] = false,
+["achScale"] = 1,
+["_migrated"] = true,
+["achLevel"] = 5,
+["achStyle"] = "ants",
+["achShowBurst"] = true,
+["achColor"] = {
+["a"] = 1,
+["r"] = 1,
+["g"] = 1,
+["b"] = 1,
 },
 },
 ["bphSettings"] = {
@@ -724,6 +724,7 @@ ArcUIDB = {
 ["class_11_spec_1"] = {
 ["characterName"] = "Lonelylitten",
 ["createdAt"] = 1769993055,
+["activeProfile"] = "Balance",
 ["layoutProfiles"] = {
 ["Default"] = {
 ["iconSettings"] = {
@@ -1088,9 +1089,9 @@ ArcUIDB = {
 },
 ["arc_trinket_14"] = {
 ["y"] = 150,
-["x"] = 0,
 ["type"] = "free",
 ["iconSize"] = 36,
+["x"] = 0,
 },
 [225] = {
 ["type"] = "group",
@@ -1188,9 +1189,9 @@ ArcUIDB = {
 },
 ["arc_trinket_13"] = {
 ["y"] = 50,
-["x"] = 0,
 ["type"] = "free",
 ["iconSize"] = 36,
+["x"] = 0,
 },
 [46996] = {
 ["y"] = 100,
@@ -1278,35 +1279,6 @@ ArcUIDB = {
 ["viewerType"] = "cooldown",
 },
 },
-["arcAuras"] = {
-["enabled"] = true,
-["autoTrackSlots"] = {
-[13] = true,
-[14] = true,
-},
-["onlyOnUseTrinkets"] = true,
-["trackedItems"] = {
-["arc_trinket_14"] = {
-["enabled"] = true,
-["type"] = "trinket",
-["hideWhenUnequipped"] = false,
-["isAutoTrackSlot"] = true,
-["slotID"] = 14,
-["isPassive"] = true,
-},
-["arc_trinket_13"] = {
-["enabled"] = true,
-["type"] = "trinket",
-["hideWhenUnequipped"] = false,
-["isAutoTrackSlot"] = true,
-["slotID"] = 13,
-["isPassive"] = false,
-},
-},
-["positions"] = {
-},
-["autoTrackEquippedTrinkets"] = true,
-},
 ["freeIcons"] = {
 [152304] = {
 ["y"] = 100,
@@ -1372,6 +1344,8 @@ ArcUIDB = {
 ["gridCols"] = 6,
 ["iconSize"] = 36,
 ["lockGridSize"] = false,
+["frameLevel"] = 1,
+["iconWidth"] = 26,
 ["anchor"] = {
 ["enabled"] = true,
 ["sourcePoint"] = "BOTTOM",
@@ -1387,9 +1361,6 @@ ArcUIDB = {
 ["offsetY"] = 0,
 ["destPoint"] = "TOP",
 },
-["showBorder"] = false,
-["frameLevel"] = 1,
-["iconWidth"] = 26,
 ["borderColor"] = {
 ["a"] = 1,
 ["b"] = 0.3,
@@ -1399,15 +1370,16 @@ ArcUIDB = {
 ["frameStrata"] = "MEDIUM",
 ["autoReflow"] = true,
 ["spacing"] = 0,
-["alignment"] = "center",
 ["position"] = {
 ["y"] = -139.9166507720947,
 ["x"] = -8.392333984375e-05,
 },
+["alignment"] = "center",
+["iconHeight"] = 26,
 ["dynamicLayout"] = false,
 ["showBackground"] = false,
 ["visibility"] = "always",
-["iconHeight"] = 26,
+["showBorder"] = false,
 },
 ["Essential"] = {
 ["containerPadding"] = -4,
@@ -1418,31 +1390,31 @@ ArcUIDB = {
 ["r"] = 0,
 },
 ["gridRows"] = 1,
-["gridCols"] = 5,
+["gridCols"] = 7,
 ["iconSize"] = 36,
 ["lockGridSize"] = false,
-["showBorder"] = false,
 ["frameLevel"] = 1,
 ["iconWidth"] = 47.5,
+["showBorder"] = false,
+["dynamicContainerSize"] = false,
+["frameStrata"] = "MEDIUM",
+["autoReflow"] = true,
+["spacing"] = 0,
+["position"] = {
+["y"] = -181,
+["x"] = 0,
+},
+["alignment"] = "center",
+["iconHeight"] = 47.5,
+["dynamicLayout"] = false,
+["showBackground"] = false,
+["visibility"] = "always",
 ["borderColor"] = {
 ["a"] = 1,
 ["b"] = 0.2,
 ["g"] = 0.6,
 ["r"] = 0.8,
 },
-["dynamicContainerSize"] = false,
-["frameStrata"] = "MEDIUM",
-["autoReflow"] = true,
-["spacing"] = 0,
-["alignment"] = "center",
-["position"] = {
-["y"] = -181,
-["x"] = 0,
-},
-["dynamicLayout"] = false,
-["showBackground"] = false,
-["visibility"] = "always",
-["iconHeight"] = 47.5,
 },
 ["Utility"] = {
 ["containerPadding"] = -4,
@@ -1471,34 +1443,62 @@ ArcUIDB = {
 ["offsetY"] = -46,
 ["destPoint"] = "BOTTOM",
 },
-["showBorder"] = false,
 ["frameLevel"] = 1,
 ["iconWidth"] = 37,
+["dynamicContainerSize"] = true,
+["autoReflow"] = true,
+["frameStrata"] = "MEDIUM",
 ["borderColor"] = {
 ["a"] = 1,
 ["b"] = 0.9,
 ["g"] = 0.6,
 ["r"] = 0.3,
 },
-["dynamicContainerSize"] = true,
-["frameStrata"] = "MEDIUM",
-["autoReflow"] = true,
-["spacing"] = 0,
-["alignment"] = "center",
 ["position"] = {
 ["y"] = -273.5000419616699,
 ["x"] = -3.0517578125e-05,
 },
+["spacing"] = 0,
+["alignment"] = "center",
+["iconHeight"] = 37,
 ["dynamicLayout"] = false,
 ["showBackground"] = false,
 ["visibility"] = "always",
-["iconHeight"] = 37,
+["showBorder"] = false,
 },
+},
+["arcAuras"] = {
+["enabled"] = true,
+["autoTrackSlots"] = {
+[13] = true,
+[14] = true,
+},
+["onlyOnUseTrinkets"] = true,
+["trackedItems"] = {
+["arc_trinket_14"] = {
+["enabled"] = true,
+["type"] = "trinket",
+["hideWhenUnequipped"] = false,
+["isAutoTrackSlot"] = true,
+["slotID"] = 14,
+["isPassive"] = true,
+},
+["arc_trinket_13"] = {
+["enabled"] = true,
+["type"] = "trinket",
+["hideWhenUnequipped"] = false,
+["isAutoTrackSlot"] = true,
+["slotID"] = 13,
+["isPassive"] = false,
+},
+},
+["positions"] = {
+},
+["autoTrackEquippedTrinkets"] = true,
 },
 ["matchMode"] = "all",
 },
 },
-["activeProfile"] = "Balance",
 },
 ["class_11_spec_4"] = {
 ["characterName"] = "Lonelylitten",
@@ -1724,19 +1724,19 @@ ArcUIDB = {
 },
 ["hideShadow"] = false,
 ["keepBright"] = false,
-["pandemicBorder"] = {
+["debuffBorder"] = {
 ["enabled"] = false,
+},
+["procGlow"] = {
 },
 ["position"] = {
 },
 ["chargeText"] = {
 },
-["debuffBorder"] = {
-["enabled"] = false,
-},
 ["height"] = 36,
 ["padding"] = 0,
-["procGlow"] = {
+["pandemicBorder"] = {
+["enabled"] = false,
 },
 ["auraActiveState"] = {
 },
@@ -2359,19 +2359,19 @@ ArcUIDB = {
 ["hideShadow"] = false,
 ["rangeIndicator"] = {
 },
-["procGlow"] = {
+["debuffBorder"] = {
+["enabled"] = false,
+},
+["chargeText"] = {
 },
 ["pandemicBorder"] = {
 ["enabled"] = false,
 },
 ["position"] = {
 },
-["debuffBorder"] = {
-["enabled"] = false,
-},
 ["height"] = 36,
 ["padding"] = 0,
-["chargeText"] = {
+["procGlow"] = {
 },
 ["auraActiveState"] = {
 },
@@ -3288,12 +3288,13 @@ ArcUIDB = {
 ["row"] = 0,
 ["sortIndex"] = 1,
 },
-[71314] = {
+[123704] = {
 ["type"] = "group",
-["col"] = 2,
+["col"] = 3,
 ["target"] = "Essential",
-["row"] = 0,
 ["viewerType"] = "cooldown",
+["row"] = 1,
+["sortIndex"] = 7,
 },
 [1159] = {
 ["type"] = "group",
@@ -3302,12 +3303,12 @@ ArcUIDB = {
 ["row"] = 1,
 ["viewerType"] = "utility",
 },
-[1160] = {
+[71314] = {
 ["type"] = "group",
-["col"] = 6,
-["target"] = "Utility",
+["col"] = 2,
+["target"] = "Essential",
 ["row"] = 0,
-["viewerType"] = "utility",
+["viewerType"] = "cooldown",
 },
 [71316] = {
 ["type"] = "group",
@@ -3344,13 +3345,12 @@ ArcUIDB = {
 ["row"] = 0,
 ["viewerType"] = "utility",
 },
-[123704] = {
+[1160] = {
 ["type"] = "group",
-["col"] = 3,
-["target"] = "Essential",
-["viewerType"] = "cooldown",
-["row"] = 1,
-["sortIndex"] = 7,
+["col"] = 6,
+["target"] = "Utility",
+["row"] = 0,
+["viewerType"] = "utility",
 },
 [152137] = {
 ["type"] = "group",
@@ -3511,6 +3511,7 @@ nil,
 nil,
 {
 ["_configVersion"] = 15,
+["_migrated"] = 3,
 ["thresholds"] = {
 {
 ["color"] = {
@@ -3546,44 +3547,11 @@ nil,
 ["maxValue"] = 10,
 },
 },
-["_migrated"] = 3,
-["display"] = {
-["anchorPoint"] = "BOTTOM",
-["textPosition"] = {
-["y"] = 170,
-["relPoint"] = "CENTER",
-["point"] = "CENTER",
-["x"] = 0,
+["behavior"] = {
+["showOnSpecs"] = {
+1,
 },
-["texture"] = "Grid2 Flat",
-["durationAnchor"] = "CENTERRIGHT",
-["anchorGroupName"] = "Essential",
-["durationFont"] = "Friz Quadrata TT",
-["barPosition"] = {
-["y"] = 0,
-["relPoint"] = "CENTER",
-["point"] = "CENTER",
-["x"] = 0,
-},
-["enabled"] = true,
-["durationAnchorOffsetY"] = -1,
-["barMovable"] = false,
-["showDuration"] = true,
-["barReverseFill"] = true,
-["anchorToGroup"] = true,
-["iconMultiPositions"] = {
-},
-["showText"] = false,
-["durationFontSize"] = 15,
-["barColor"] = {
-["a"] = 1,
-["r"] = 0.01568627543747425,
-["g"] = 0,
-["b"] = 0.6000000238418579,
-},
-["durationAnchorOffsetX"] = -14,
-["width"] = 118,
-["anchorOffsetY"] = -27,
+["showOnSpec"] = 0,
 },
 ["colorRanges"] = {
 {
@@ -3644,15 +3612,48 @@ nil,
 ["customMaxStacks"] = 10,
 ["spellID"] = 1239669,
 },
-["behavior"] = {
-["showOnSpec"] = 0,
-["showOnSpecs"] = {
-1,
+["display"] = {
+["showDuration"] = true,
+["durationFontSize"] = 15,
+["durationFont"] = "Friz Quadrata TT",
+["anchorPoint"] = "BOTTOM",
+["durationAnchorOffsetX"] = -14,
+["textPosition"] = {
+["y"] = 170,
+["relPoint"] = "CENTER",
+["point"] = "CENTER",
+["x"] = 0,
+},
+["anchorOffsetY"] = -27,
+["texture"] = "Grid2 Flat",
+["enabled"] = true,
+["durationAnchor"] = "CENTERRIGHT",
+["iconMultiPositions"] = {
+},
+["barMovable"] = false,
+["width"] = 118,
+["anchorGroupName"] = "Essential",
+["showText"] = false,
+["barColor"] = {
+["a"] = 1,
+["r"] = 0.01568627543747425,
+["g"] = 0,
+["b"] = 0.6000000238418579,
+},
+["anchorToGroup"] = true,
+["barReverseFill"] = true,
+["durationAnchorOffsetY"] = -1,
+["barPosition"] = {
+["y"] = 0,
+["relPoint"] = "CENTER",
+["point"] = "CENTER",
+["x"] = 0,
 },
 },
 },
 {
 ["_configVersion"] = 39,
+["_migrated"] = 3,
 ["thresholds"] = {
 {
 ["color"] = {
@@ -3688,42 +3689,11 @@ nil,
 ["maxValue"] = 10,
 },
 },
-["_migrated"] = 3,
-["display"] = {
-["textPosition"] = {
-["y"] = 140,
-["relPoint"] = "CENTER",
-["point"] = "CENTER",
-["x"] = 0,
+["behavior"] = {
+["showOnSpecs"] = {
+1,
 },
-["texture"] = "Grid2 Flat",
-["durationAnchor"] = "CENTERLEFT",
-["anchorGroupName"] = "Essential",
-["durationFont"] = "Friz Quadrata TT",
-["barPosition"] = {
-["y"] = -243.3333387722573,
-["relPoint"] = "CENTER",
-["point"] = "CENTER",
-["x"] = 35.00000078231098,
-},
-["enabled"] = true,
-["durationAnchorOffsetY"] = -1,
-["showDuration"] = true,
-["anchorToGroup"] = true,
-["iconMultiPositions"] = {
-},
-["showText"] = false,
-["durationFontSize"] = 15,
-["barColor"] = {
-["a"] = 1,
-["r"] = 0.7372549176216125,
-["g"] = 0.5176470875740051,
-["b"] = 0,
-},
-["durationAnchorOffsetX"] = 17,
-["width"] = 118,
-["anchorOffsetY"] = -27,
-["anchorOffsetX"] = 127,
+["showOnSpec"] = 0,
 },
 ["colorRanges"] = {
 {
@@ -3785,10 +3755,40 @@ nil,
 ["customMaxStacks"] = 10,
 ["spellID"] = 1239669,
 },
-["behavior"] = {
-["showOnSpec"] = 0,
-["showOnSpecs"] = {
-1,
+["display"] = {
+["anchorOffsetX"] = 127,
+["showDuration"] = true,
+["durationFontSize"] = 15,
+["durationFont"] = "Friz Quadrata TT",
+["durationAnchorOffsetX"] = 17,
+["textPosition"] = {
+["y"] = 140,
+["relPoint"] = "CENTER",
+["point"] = "CENTER",
+["x"] = 0,
+},
+["anchorOffsetY"] = -27,
+["texture"] = "Grid2 Flat",
+["enabled"] = true,
+["durationAnchor"] = "CENTERLEFT",
+["iconMultiPositions"] = {
+},
+["barColor"] = {
+["a"] = 1,
+["r"] = 0.7372549176216125,
+["g"] = 0.5176470875740051,
+["b"] = 0,
+},
+["width"] = 118,
+["anchorGroupName"] = "Essential",
+["showText"] = false,
+["anchorToGroup"] = true,
+["durationAnchorOffsetY"] = -1,
+["barPosition"] = {
+["y"] = -243.3333387722573,
+["relPoint"] = "CENTER",
+["point"] = "CENTER",
+["x"] = 35.00000078231098,
 },
 },
 },
@@ -5542,23 +5542,57 @@ nil,
 ["Barelynoer - Area 52"] = {
 ["resourceBars"] = {
 {
+["behavior"] = {
+["showOnSpecs"] = {
+2,
+3,
+},
+},
+["tracking"] = {
+["enabled"] = true,
+["resourceCategory"] = "secondary",
+["secondaryType"] = "essence",
+["maxValue"] = 6,
+["powerName"] = "Essence",
+},
 ["display"] = {
-["anchorOffsetX"] = 2.5,
-["fragmentedChargingColor"] = {
+["activeCountColors"] = {
+{
+["color"] = {
+["a"] = 1,
+["r"] = 0.8509804606437683,
+["g"] = 0.4313725829124451,
+["b"] = 0.572549045085907,
+},
+["to"] = 1,
+["from"] = 0,
+},
+{
+["enabled"] = false,
+["color"] = {
 ["a"] = 1,
 ["r"] = 1,
+["g"] = 0.8,
+["b"] = 0,
+},
+["to"] = 5,
+["from"] = 4,
+},
+{
+["enabled"] = false,
+["color"] = {
+["a"] = 1,
+["r"] = 0,
 ["g"] = 1,
-["b"] = 1,
+["b"] = 0,
 },
-["thresholdMode"] = "fragmented",
+["to"] = 6,
+["from"] = 6,
+},
+},
 ["anchorOffsetY"] = -16,
-["texture"] = "Grid2 Flat",
 ["anchorToGroup"] = true,
-["colorCurveEnabled"] = false,
-["barPosition"] = {
-["y"] = -232.2496948242188,
-["x"] = -0.3331461846828461,
-},
+["anchorGroupName"] = "AugEssential",
 ["fragmentedColors"] = {
 {
 ["a"] = 1,
@@ -5603,103 +5637,30 @@ nil,
 ["g"] = 0.6431372761726379,
 ["b"] = 0.3764706254005432,
 },
-["width"] = 336,
-["anchorGroupName"] = "AugEssential",
-["activeCountColors"] = {
-{
-["color"] = {
-["a"] = 1,
-["r"] = 0.8509804606437683,
-["g"] = 0.4313725829124451,
-["b"] = 0.572549045085907,
-},
-["to"] = 1,
-["from"] = 0,
-},
-{
-["enabled"] = false,
-["color"] = {
+["showText"] = false,
+["height"] = 16,
+["texture"] = "Grid2 Flat",
+["smartChargingColor"] = false,
+["anchorOffsetX"] = 2.5,
+["fragmentedChargingColor"] = {
 ["a"] = 1,
 ["r"] = 1,
-["g"] = 0.8,
-["b"] = 0,
-},
-["to"] = 5,
-["from"] = 4,
-},
-{
-["enabled"] = false,
-["color"] = {
-["a"] = 1,
-["r"] = 0,
 ["g"] = 1,
-["b"] = 0,
+["b"] = 1,
 },
-["to"] = 6,
-["from"] = 6,
-},
-},
-["showText"] = false,
-["matchGroupWidth"] = true,
-["height"] = 16,
-["fragmentedSpacing"] = 0,
+["thresholdMode"] = "fragmented",
 ["enableActiveCountColors"] = true,
-["smartChargingColor"] = false,
-},
-["tracking"] = {
-["enabled"] = true,
-["resourceCategory"] = "secondary",
-["secondaryType"] = "essence",
-["maxValue"] = 6,
-["powerName"] = "Essence",
-},
-["behavior"] = {
-["showOnSpecs"] = {
-2,
-3,
-},
-},
-},
-{
-["behavior"] = {
-["showOnSpec"] = 0,
-["hideBlizzardFrame"] = true,
-["showOnSpecs"] = {
-},
-},
-["display"] = {
-["enabled"] = false,
-["textPosition"] = {
-["y"] = -105,
-["relPoint"] = "CENTER",
-["point"] = "CENTER",
-["x"] = 0,
-},
 ["barPosition"] = {
-["y"] = -135,
-["relPoint"] = "CENTER",
-["point"] = "CENTER",
-["x"] = 0,
+["y"] = -232.2496948242188,
+["x"] = -0.3331461846828461,
 },
+["fragmentedSpacing"] = 0,
+["width"] = 336,
+["matchGroupWidth"] = true,
 ["colorCurveEnabled"] = false,
 },
-["tracking"] = {
-["enabled"] = true,
-["showRuneTimer"] = false,
-["maxValue"] = 250000,
-["resourceCategory"] = "autoPrimary",
-["overrideMax"] = false,
-["powerName"] = "Auto Primary",
-["usePerSpecProfiles"] = true,
-["autoShareCategories"] = {
-["tickMarks"] = true,
-["colors"] = true,
-["text"] = true,
-["background"] = true,
-["border"] = true,
-["fill"] = true,
 },
-},
+{
 ["autoPowerProfiles"] = {
 ["_base"] = {
 ["display"] = {
@@ -5867,6 +5828,63 @@ nil,
 },
 },
 },
+["display"] = {
+["textPosition"] = {
+["y"] = -105,
+["relPoint"] = "CENTER",
+["point"] = "CENTER",
+["x"] = 0,
+},
+["enabled"] = false,
+["barPosition"] = {
+["y"] = -135,
+["relPoint"] = "CENTER",
+["point"] = "CENTER",
+["x"] = 0,
+},
+["colorCurveEnabled"] = false,
+},
+["tracking"] = {
+["enabled"] = true,
+["showRuneTimer"] = false,
+["maxValue"] = 250000,
+["resourceCategory"] = "autoPrimary",
+["overrideMax"] = false,
+["powerName"] = "Auto Primary",
+["usePerSpecProfiles"] = true,
+["autoShareCategories"] = {
+["tickMarks"] = true,
+["colors"] = true,
+["text"] = true,
+["background"] = true,
+["border"] = true,
+["fill"] = true,
+},
+},
+["behavior"] = {
+["hideBlizzardFrame"] = true,
+["showOnSpec"] = 0,
+["showOnSpecs"] = {
+},
+},
+},
+},
+["achSettings"] = {
+["achOnArcAuras"] = false,
+["achStrata"] = "INHERIT",
+["achCombatOnly"] = false,
+["assistedCombatHighlight"] = false,
+["achAlwaysAnimate"] = false,
+["achScale"] = 1,
+["_migrated"] = true,
+["achStyle"] = "ants",
+["achLevel"] = 5,
+["achShowBurst"] = true,
+["achColor"] = {
+["a"] = 1,
+["r"] = 1,
+["g"] = 1,
+["b"] = 1,
 },
 },
 ["arcAuras"] = {
@@ -5924,24 +5942,6 @@ nil,
 ["activeResources"] = {
 },
 ["activeCharges"] = {
-},
-},
-["achSettings"] = {
-["achOnArcAuras"] = false,
-["achStrata"] = "INHERIT",
-["achCombatOnly"] = false,
-["assistedCombatHighlight"] = false,
-["achAlwaysAnimate"] = false,
-["achScale"] = 1,
-["_migrated"] = true,
-["achStyle"] = "ants",
-["achLevel"] = 5,
-["achShowBurst"] = true,
-["achColor"] = {
-["a"] = 1,
-["r"] = 1,
-["g"] = 1,
-["b"] = 1,
 },
 },
 ["bphSettings"] = {
@@ -6038,7 +6038,6 @@ nil,
 ["class_13_spec_3"] = {
 ["characterName"] = "Barelynoer",
 ["createdAt"] = 1769733909,
-["activeProfile"] = "Augmentation",
 ["layoutProfiles"] = {
 ["Augmentation"] = {
 ["iconSettings"] = {
@@ -6800,6 +6799,7 @@ nil,
 ["matchMode"] = "all",
 },
 },
+["activeProfile"] = "Augmentation",
 },
 ["class_13_spec_2"] = {
 ["characterName"] = "Barelynoer",
@@ -7275,7 +7275,6 @@ nil,
 ["bars"] = {
 {
 ["_configVersion"] = 56,
-["_migrated"] = 3,
 ["thresholds"] = {
 {
 ["color"] = {
@@ -7284,25 +7283,26 @@ nil,
 },
 },
 },
+["_migrated"] = 3,
 ["display"] = {
-["anchorToGroup"] = true,
+["anchorPoint"] = "BOTTOM",
+["texture"] = "Grid2 Flat",
+["anchorGroupName"] = "AugEssential",
 ["barPosition"] = {
 ["y"] = 134.1666696655254,
 },
-["barMovable"] = false,
+["durationAnchorOffsetY"] = -1,
+["anchorToGroup"] = true,
+["showText"] = false,
+["height"] = 14,
+["matchSlotsOnly"] = true,
 ["barColor"] = {
 ["g"] = 1,
 ["r"] = 1,
 },
 ["width"] = 343,
-["anchorPoint"] = "BOTTOM",
 ["matchGroupWidth"] = true,
-["showText"] = false,
-["matchSlotsOnly"] = true,
-["height"] = 14,
-["durationAnchorOffsetY"] = -1,
-["anchorGroupName"] = "AugEssential",
-["texture"] = "Grid2 Flat",
+["barMovable"] = false,
 },
 ["colorRanges"] = {
 {
@@ -7313,15 +7313,15 @@ nil,
 },
 },
 ["tracking"] = {
+["displaySpellID"] = 358267,
+["iconTextureID"] = 4622463,
+["maxStacks"] = 0,
 ["enabled"] = true,
-["buffName"] = "Hover",
 ["dynamicMaxDuration"] = true,
 ["maxDuration"] = 0,
-["displaySpellID"] = 358267,
+["buffName"] = "Hover",
 ["useDurationBar"] = true,
 ["cooldownID"] = 56880,
-["maxStacks"] = 0,
-["iconTextureID"] = 4622463,
 ["spellID"] = 358267,
 },
 ["behavior"] = {
@@ -7332,7 +7332,6 @@ nil,
 },
 {
 ["_configVersion"] = 10,
-["_migrated"] = 3,
 ["thresholds"] = {
 {
 ["color"] = {
@@ -7368,36 +7367,37 @@ nil,
 ["maxValue"] = 10,
 },
 },
+["_migrated"] = 3,
 ["display"] = {
-["enabled"] = true,
-["showDuration"] = true,
-["durationFontSize"] = 12,
-["barPosition"] = {
-["y"] = -215.8333381575844,
-["relPoint"] = "CENTER",
-["point"] = "CENTER",
-["x"] = -3.333333407839141,
-},
-["iconMultiPositions"] = {
-},
-["barColor"] = {
-["a"] = 1,
-["r"] = 1,
-["g"] = 1,
-["b"] = 1,
-},
-["anchorGroupName"] = "Essential",
-["showText"] = false,
-["matchGroupWidth"] = true,
-["height"] = 15,
 ["textPosition"] = {
 ["y"] = 200,
 ["relPoint"] = "CENTER",
 ["point"] = "CENTER",
 ["x"] = 0,
 },
-["anchorToGroup"] = true,
 ["texture"] = "Grid2 Flat",
+["anchorGroupName"] = "Essential",
+["barPosition"] = {
+["y"] = -215.8333381575844,
+["relPoint"] = "CENTER",
+["point"] = "CENTER",
+["x"] = -3.333333407839141,
+},
+["enabled"] = true,
+["showDuration"] = true,
+["anchorToGroup"] = true,
+["iconMultiPositions"] = {
+},
+["showText"] = false,
+["height"] = 15,
+["durationFontSize"] = 12,
+["barColor"] = {
+["a"] = 1,
+["r"] = 1,
+["g"] = 1,
+["b"] = 1,
+},
+["matchGroupWidth"] = true,
 },
 ["colorRanges"] = {
 {
@@ -7455,10 +7455,10 @@ nil,
 ["spellID"] = 358267,
 },
 ["behavior"] = {
+["showOnSpec"] = 0,
 ["showOnSpecs"] = {
 2,
 },
-["showOnSpec"] = 0,
 },
 },
 },

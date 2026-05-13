@@ -45,8 +45,10 @@ PremadeGroupsFilterState = {
 ["expression"] = "",
 ["difficulty"] = {
 },
+["dungeon4"] = false,
+["dungeon2"] = true,
 ["dungeon3"] = false,
-["dungeon8"] = true,
+["dungeon8"] = false,
 ["tanks"] = {
 ["max"] = "1",
 ["min"] = "1",
@@ -69,6 +71,9 @@ PremadeGroupsFilterState = {
 ["c114f6"] = {
 ["enabled"] = true,
 },
+["c114f5"] = {
+["enabled"] = true,
+},
 ["c6f4"] = {
 ["role"] = {
 ["heals"] = {
@@ -82,13 +87,12 @@ PremadeGroupsFilterState = {
 ["expression"] = "",
 },
 },
-["c114f5"] = {
-["enabled"] = true,
-},
 ["c3f5"] = {
 ["enabled"] = true,
 ["raid"] = {
 ["difficulty"] = {
+["val"] = 2,
+["act"] = true,
 },
 ["heals"] = {
 ["max"] = "",
