@@ -123,7 +123,8 @@ function mod:TimersMythic(_, eventInfo)
 			barInfo = self:VoidMarked(eventInfo)
 		elseif (voidFallCount == 2 and durationEventCount[durationRounded] == 2)
 		or (voidFallCount >= 3 and durationEventCount[durationRounded] == 3) then -- Umbral Collapse
-			barInfo = self:UmbralCollapse(eventInfo)
+			self:DummyUmbralEvent(eventInfo)
+			return
 		elseif voidFallCount >= 3 and durationEventCount[durationRounded] == 1 then -- Shadow's Advance
 			barInfo = self:ShadowsAdvance(eventInfo)
 		end

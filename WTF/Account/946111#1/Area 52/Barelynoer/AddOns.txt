@@ -132,3 +132,4 @@ EllesmereUIQoL: enabled
 FocusMarker: enabled
 LightDamage: enabled
 NotEvenClose: enabled
+EllesmereUIBags: disabled

@@ -380,7 +380,7 @@ L.autoRoleExplainer = "當你加入隊伍或是在隊伍中更換專精時，Big
 
 L.battleResTitle = "戰鬥復活"
 L.battleResDesc = "以一個圖示顯示戰復可用次數與與冷卻時間。"
-L.battleResDesc2 = "\n將滑鼠提示指向圖示，可以查看|cFF33FF99戰鬥復活紀錄|r。\n\n"
+L.battleResDesc2 = "\n將滑鼠提示指向圖示，可以查看|cFF33FF99戰鬥復活紀錄|r。\n注意：滑鼠提示僅在非戰鬥狀態下顯示。\n\n"
 L.battleResHistory = "戰復紀錄："
 L.battleResResetAll = "將所有戰復設定重設為預設值。"
 L.battleResDurationText = "計時文字"
@@ -393,7 +393,6 @@ L.iconTextureSpellIDError = "要設定顯示的圖示，你必需輸入一個有
 L.battleResModeIcon = "圖示模式"
 L.battleResModeText = "純文字模式"
 L.battleResModeTextTooltip = "顯示一個臨時背景，以便你調整戰鬥復活功能的位置，並查看滑鼠指向的區域範圍。"
-L.battleResNoteTooltip = "注意：滑鼠提示僅在非戰鬥狀態下顯示。"
 
 -----------------------------------------------------------------------
 -- CombatTimer.lua

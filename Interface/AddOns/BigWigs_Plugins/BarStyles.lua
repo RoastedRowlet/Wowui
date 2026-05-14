@@ -68,7 +68,7 @@ if BigWigsLoader.isRetail then
 		bg:SetTexCoord(0, 1, 0, 1)
 		bg:ClearTextureSlice()
 		bg:ClearVertexOffsets()
-		bg:SetAllPoints(bar)
+		bg:SetAllPoints()
 		local bgColor = bar:Get("bigwigs:restorebarcolor")
 		if bgColor then
 			bar:SetBackgroundColor(bgColor[1], bgColor[2], bgColor[3], bgColor[4])

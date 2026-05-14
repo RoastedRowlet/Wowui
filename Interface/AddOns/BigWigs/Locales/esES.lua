@@ -380,7 +380,7 @@ L.autoRoleExplainer = "Cuando te unas a un grupo o cambies tu especialización d
 
 L.battleResTitle = "Battle res"
 L.battleResDesc = "Un icono que muestra cuántas cargas de resurrección en combate hay disponibles y el tiempo para conseguir otra carga."
-L.battleResDesc2 = "\nTu |cFF33FF99Historial de resurrección en combate|r puede verse en la ventana de opciones cuando pases el ratón por encima del icono.\n\n"
+L.battleResDesc2 = "\nTu |cFF33FF99Historial de resurrección en combate|r puede verse en la ventana de opciones cuando pases el ratón por encima del icono.\nAviso: Esta ventana de opciones solo se mostrará al estar fuera de combate.\n\n"
 L.battleResHistory = "Battle res historial:"
 L.battleResResetAll = "Reinicia todas las opciones de resurrección en combate a sus valores predeterminados."
 L.battleResDurationText = "Duración del texto"
@@ -393,7 +393,6 @@ L.iconTextureSpellIDError = "Tienes que introducir un ID de hechizo válido para
 L.battleResModeIcon = "Modo: Icono"
 L.battleResModeText = "Modo: Solo texto"
 L.battleResModeTextTooltip = "Mostrar un fondo temporal para ayudar a mover la opción de Battle res y para ver el área del ratón."
-L.battleResNoteTooltip = "Aviso: Esta ventana de opciones solo se mostrará al estar fuera de combate."
 
 -----------------------------------------------------------------------
 -- CombatTimer.lua

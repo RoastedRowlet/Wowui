@@ -92,3 +92,20 @@ function Addon:GetNodeOrder(specID, configID, treeID)
 	nodeOrderList[specID] = order;
 	return order;
 end
+
+local function ResetNodeData()
+	table.wipe(Addon.NodeTypeDictionary);
+	table.wipe(Addon.ApexNodeIDs);
+	table.wipe(Addon.SubTreeIDs);
+	table.wipe(Addon.SubTreeTraitCurrencyIDs);
+	table.wipe(nodeOrderList);
+
+	local specID = PlayerUtil.GetCurrentSpecID();
+	local treeID = C_ClassTalents.GetTraitTreeForSpec(specID);
+	local configID = C_ClassTalents.GetActiveConfigID();
+	Addon:GetNodeOrder(specID, configID, treeID);
+end
+
+local frame = CreateFrame("Frame");
+frame:RegisterEvent("PLAYER_LEVEL_UP");
+frame:SetScript("OnEvent", ResetNodeData);

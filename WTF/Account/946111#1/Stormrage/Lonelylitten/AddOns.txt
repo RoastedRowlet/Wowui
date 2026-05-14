@@ -27,7 +27,7 @@ EllesmereUICooldownManager: disabled
 EllesmereUICursor: disabled
 Auctionator: enabled
 AutoFlood: enabled
-Baganator: enabled
+Baganator: disabled
 BlizzMove: enabled
 BlizzMove_Debug: enabled
 !BugGrabber: enabled
@@ -54,7 +54,7 @@ RangeDisplay_Options: enabled
 SilvermoonLapCounter: enabled
 SimpleCombatLogger: enabled
 Simulationcraft: enabled
-Syndicator: enabled
+Syndicator: disabled
 TalentLoadoutsEx: enabled
 TargetedSpells: enabled
 TomTom: enabled
@@ -131,3 +131,4 @@ M33kAuras: enabled
 M33kAurasModelPaths: enabled
 M33kAurasOptions: enabled
 NotEvenClose: enabled
+EllesmereUIBags: enabled

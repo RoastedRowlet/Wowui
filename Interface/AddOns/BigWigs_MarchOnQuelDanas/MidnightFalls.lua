@@ -75,7 +75,6 @@ local L = mod:SetDefaultLocale({ -- SetOption:skip-locale
 	prism_kicks = "Kicks",
 	dark_constellation = "Stars",
 	the_dark_archangel = "Big Boom",
-	dark_rune = "Memory Mark",
 	dark_rune_bar = "Solve the Game",
 
 	left = "[L] %s", -- left/west group bars in p3
@@ -104,7 +103,7 @@ mod:SetRenames({
 	[1253915] = {L.heavens_glaives}, -- Heaven's Glaives (Glaives)
 	[1279420] = {CL.beams}, -- Dark Quasar (Beams)
 	[1249620] = {L.deaths_dirge}, -- Death's Dirge (Memory Game)
-	[1249609] = {L.dark_rune}, -- Dark Rune (Memory Mark)
+	[1249609] = {CL.mark}, -- Dark Rune (Mark)
 	[1251386] = {L.prism_kicks}, -- Safeguard Prism (Kicks)
 	[1267049] = {L.heavens_lance}, -- Heaven's Lance (Lance)
 	[1284980] = {L.deaths_dirge}, -- Grim Symphony (Memory Game)
@@ -133,7 +132,7 @@ function mod:GetOptions()
 		1253915, -- Heaven's Glaives
 		1279420, -- Dark Quasar
 		1249620, -- Death's Dirge
-			1249609, -- Dark Rune
+			{1249609, "ME_ONLY_EMPHASIZE"}, -- Dark Rune
 		1251386, -- Safeguard Prism
 		{1267049, "TANK"}, --- Heaven's Lance
 		-- Mythic
@@ -542,8 +541,8 @@ end
 function mod:ENCOUNTER_WARNING(_, info)
 	local stage = self:GetStage()
 	if stage == 1 or stage == 3 then
-		if info.severity == 2 then -- Dark Rune
-			self:PersonalMessage(1249609, nil, self:GetRename(1249609)) -- Memory Mark
+		if info.severity == 2 then -- Dark Rune (when the memory game is on you)
+			self:PersonalMessage(1249609, nil, self:GetRename(1249609)) -- Mark
 		end
 	elseif stage == 2 or stage == 4 then
 		if info.severity == 2 then -- Galvanize

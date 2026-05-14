@@ -5,9 +5,9 @@ RangeDisplayDB3 = {
 ["profileKeys"] = {
 ["Zappyxatu - Stormrage"] = "Default",
 ["Angryabsol - Stormrage"] = "Default",
-["Madmareep - Stormrage"] = "Default",
-["Barelynoer - Area 52"] = "Default",
 ["Lonelylitten - Stormrage"] = "Default",
+["Barelynoer - Area 52"] = "Default",
+["Madmareep - Stormrage"] = "Default",
 },
 ["profiles"] = {
 ["Default"] = {

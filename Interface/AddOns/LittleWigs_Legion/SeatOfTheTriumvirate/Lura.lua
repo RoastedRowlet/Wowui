@@ -8,7 +8,7 @@ mod:RegisterEnableMob(124729) -- L'ura
 mod:SetEncounterID(2068)
 mod:SetRespawnTime(30)
 mod:SetPrivateAuraSounds({
-	{1265426, sound = "alarm"}, -- Discordant Beam
+	{1265426, sound = "warning"}, -- Discordant Beam
 	{1265650, sound = "alert"}, -- Anguish
 })
 
@@ -72,7 +72,7 @@ if mod:Retail() then -- Midnight+
 			"warmup",
 			1265421, -- Dirge of Despair
 			1264196, -- Disintegrate
-			1265463, -- Discordant Beam
+			{1265463, "ME_ONLY_EMPHASIZE"}, -- Discordant Beam
 			1265689, -- Grim Chorus
 			1266003, -- Symphony of the Eternal Night
 			1266001, -- Backlash
@@ -195,6 +195,7 @@ function mod:DisintegrateTimeline(eventInfo)
 		msg = barText,
 		key = 1264196,
 		callback = function()
+			self:StopBlizzMessages(1)
 			self:Message(1264196, "yellow", barText)
 			self:PlaySound(1264196, "alert")
 		end
@@ -209,8 +210,9 @@ function mod:DiscordantBeamTimeline(eventInfo)
 		msg = barText,
 		key = 1265463,
 		callback = function()
-			self:Message(1265463, "purple", barText)
-			self:PlaySound(1265463, "alarm")
+			self:PersonalMessageFromBlizzMessage(1265463, 1)
+			self:Message(1265463, "orange", barText)
+			--self:PlaySound(1265463, "warning") -- Sound is played via PA when it's on you
 		end
 	}
 end

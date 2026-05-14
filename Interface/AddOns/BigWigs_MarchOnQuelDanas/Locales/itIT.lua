@@ -12,7 +12,6 @@ BigWigsAPI.SetBossModuleLocale("Midnight Falls", {
 	the_dark_archangel = "Detonazione",
 	prism_kicks = "Interruzioni",
 	dark_constellation = "Stelle",
-	dark_rune = "Runa",
 	dark_rune_bar = "Risolvi il gioco",
 
 	left = "[S] %s", -- left/west group bars in p3

@@ -12,7 +12,6 @@ BigWigsAPI.SetBossModuleLocale("Midnight Falls", {
 	the_dark_archangel = "대천사",
 	prism_kicks = "차단",
 	dark_constellation = "별자리",
-	dark_rune = "음표",
 	dark_rune_bar = "음표 게임",
 
 	left = "[왼] %s", -- left/west group bars in p3

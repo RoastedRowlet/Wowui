@@ -1,7 +1,7 @@
 
 BugGrabberDB = {
-["session"] = 354,
 ["lastSanitation"] = 3,
+["session"] = 361,
 ["errors"] = {
 {
 ["message"] = "...s/AdvancedFocusCastBar/AdvancedFocusCastBarMixin.lua:1861: bad argument #1 to 'SetAlpha' (Usage: self:SetAlpha(alpha))",
@@ -85,8 +85,8 @@ BugGrabberDB = {
 },
 {
 ["message"] = "LUA_WARNING: Couldn't open Interface/AddOns/WeakAuras/Bindings.xml",
-["time"] = 1777140638,
 ["session"] = 52,
+["time"] = 1777140638,
 ["counter"] = 1,
 },
 {
@@ -251,20 +251,20 @@ BugGrabberDB = {
 },
 {
 ["message"] = "LUA_WARNING: Interface/AddOns/!BugGrabber/BugGrabber.lua:-1: insecure scripts exceeded execution limit for addon !BugGrabber",
-["session"] = 115,
 ["time"] = 1777601702,
+["session"] = 115,
 ["counter"] = 10,
 },
 {
 ["message"] = "LUA_WARNING: ...ce/AddOns/Blizzard_CooldownViewer/CooldownViewer.lua:704: bad argument #1 to 'EnableSpellRangeCheck' (Usage: C_Spell.EnableSpellRangeCheck(spellIdentifier, enable))\n|cffffd200Stack:|r\n[C]: in function 'secureexecuterange'\n[Interface/AddOns/Blizzard_EditMode/Shared/EditModeManager.lua]:97: in function 'HideSystemSelections'\n[Interface/AddOns/Blizzard_EditMode/Shared/EditModeManager.lua]:104: in function <.../AddOns/Blizzard_EditMode/Shared/EditModeManager.lua:100>\n[C]: ?\n[C]: ?\n[C]: ?\n[C]: in function 'ExitEditMode'\n[Interface/AddOns/Blizzard_EditMode/Shared/EditModeManager.lua]:126: in function <.../AddOns/Blizzard_EditMode/Shared/EditModeManager.lua:124>\n[C]: ?\n[C]: ?\n[C]: ?\n[C]: ?\n[C]: in function 'Hide'\n[Interface/AddOns/Blizzard_UIParentPanelManager/Shared/UIParentPanelManager.lua]:863: in function <...UIParentPanelManager/Shared/UIParentPanelManager.lua:853>\n[C]: in function 'HideUIPanel'\n[Interface/AddOns/Blizzard_EditMode/Shared/EditModeManager.lua]:42: in function 'onCloseCallback'\n[Interface/AddOns/Blizzard_SharedXML/Mainline/SharedUIPanelTemplates.lua]:143: in function <...izzard_SharedXML/Mainline/SharedUIPanelTemplates.lua:138>\n[C]: in function 'Click'\n[Interface/AddOns/Blizzard_UIParent/Mainline/UIParent.lua]:2351: in function <...rface/AddOns/Blizzard_UIParent/Mainline/UIParent.lua:2316>\n[C]: ?\n[C]: ?\n[C]: in function 'ToggleGameMenu'\n[TOGGLEGAMEMENU]:1: in function <[string \"TOGGLEGAMEMENU\"]:1>\n",
-["session"] = 115,
 ["time"] = 1777602017,
+["session"] = 115,
 ["counter"] = 1,
 },
 {
 ["message"] = "LUA_WARNING: ...ce/AddOns/Blizzard_CooldownViewer/CooldownViewer.lua:877: attempted to index a table that cannot be accessed while tainted (execution tainted by 'TalentLoadoutsEx')\n|cffffd200Stack:|r\n[C]: in function 'secureexecuterange'\n[Interface/AddOns/Blizzard_EditMode/Shared/EditModeManager.lua]:97: in function 'HideSystemSelections'\n[Interface/AddOns/Blizzard_EditMode/Shared/EditModeManager.lua]:104: in function <.../AddOns/Blizzard_EditMode/Shared/EditModeManager.lua:100>\n[C]: ?\n[C]: ?\n[C]: ?\n[C]: in function 'ExitEditMode'\n[Interface/AddOns/Blizzard_EditMode/Shared/EditModeManager.lua]:126: in function <.../AddOns/Blizzard_EditMode/Shared/EditModeManager.lua:124>\n[C]: ?\n[C]: ?\n[C]: ?\n[C]: ?\n[C]: in function 'Hide'\n[Interface/AddOns/Blizzard_UIParentPanelManager/Shared/UIParentPanelManager.lua]:863: in function <...UIParentPanelManager/Shared/UIParentPanelManager.lua:853>\n[C]: in function 'HideUIPanel'\n[Interface/AddOns/Blizzard_EditMode/Shared/EditModeManager.lua]:42: in function 'onCloseCallback'\n[Interface/AddOns/Blizzard_SharedXML/Mainline/SharedUIPanelTemplates.lua]:143: in function <...izzard_SharedXML/Mainline/SharedUIPanelTemplates.lua:138>\n[C]: in function 'Click'\n[Interface/AddOns/Blizzard_UIParent/Mainline/UIParent.lua]:2351: in function <...rface/AddOns/Blizzard_UIParent/Mainline/UIParent.lua:2316>\n[C]: ?\n[C]: ?\n[C]: in function 'ToggleGameMenu'\n[TOGGLEGAMEMENU]:1: in function <[string \"TOGGLEGAMEMENU\"]:1>\n",
-["session"] = 115,
 ["time"] = 1777602017,
+["session"] = 115,
 ["counter"] = 1,
 },
 {
@@ -274,14 +274,6 @@ BugGrabberDB = {
 ["stack"] = "[Interface/AddOns/Blizzard_UIPanels_Game/Mainline/CastingBarFrame.lua]:212: in function 'GetTypeInfo'\n[Interface/AddOns/Blizzard_UIPanels_Game/Mainline/CastingBarFrame.lua]:340: in function <.../Blizzard_UIPanels_Game/Mainline/CastingBarFrame.lua:309>\n",
 ["session"] = 126,
 ["counter"] = 19,
-},
-{
-["message"] = "[ADDON_ACTION_BLOCKED] AddOn 'FocusMarker' tried to call the protected function 'UNKNOWN()'.",
-["time"] = 1777694854,
-["locals"] = "self=<table>\nevent=\"ADDON_ACTION_BLOCKED\"\naddonName=\"FocusMarker\"\naddonFunc=\"UNKNOWN()\"\nname=\"FocusMarker\"\nbadAddons=<table>{\n FocusMarker=true\n}\nL=<table>{\n NO_DISPLAY_2=\"|cffffff00The standard display is called BugSack, and can probably be found on the same site where you found !BugGrabber.|r\"\n ERROR_DETECTED=\"%s |cffffff00captured, click the link for more information.|r\"\n BUGGRABBER_STOPPED=\"|cffffff00There are too many errors in your UI. As a result, your game experience may be degraded. Disable or update the failing addons if you don't want to see this message again.|r\"\n USAGE=\"|cffffff00Usage: /buggrabber <1-%d>.|r\"\n STOP_NAG=\"|cffffff00!BugGrabber will not nag about missing a display addon again until next patch.|r\"\n NO_DISPLAY_STOP=\"|cffffff00If you don't want to be reminded about this again, run /stopnag.|r\"\n NO_DISPLAY_1=\"|cffffff00You seem to be running !BugGrabber with no display addon to go along with it. Although a slash command is provided for accessing error reports, a display can help you manage these errors in a more convenient way.|r\"\n ERROR_UNABLE=\"|cffffff00!BugGrabber is unable to retrieve errors from other players by itself. Please install BugSack or a similar display addon that might give you this functionality.|r\"\n ADDON_CALL_PROTECTED=\"[%s] AddOn '%s' tried to call the protected function '%s'.\"\n}\n",
-["stack"] = "[Interface/AddOns/!BugGrabber/BugGrabber.lua]:540: in function '?'\n[Interface/AddOns/!BugGrabber/BugGrabber.lua]:524: in function <Interface/AddOns/!BugGrabber/BugGrabber.lua:524>\n[C]: ?\n[C]: in function 'SendChatMessage'\n[Interface/AddOns/FocusMarker/FocusMarker.lua]:95: in function <Interface/AddOns/FocusMarker/FocusMarker.lua:83>\n",
-["session"] = 127,
-["counter"] = 1,
 },
 {
 ["message"] = "...ce/AddOns/Blizzard_ActionBar/Shared/ActionButton.lua:847: bad argument #1 to 'SetCooldown' (Usage: self:SetCooldown(start, duration [, modRate]). Secret values are only allowed during untainted execution for this argument.)",
@@ -349,8 +341,8 @@ BugGrabberDB = {
 },
 {
 ["message"] = "LUA_WARNING: ...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:3187: attempt to index field 'activityIDs' (a secret table value, while execution tainted by 'PremadeGroupsFilter')\n|cffffd200Stack:|r\n[C]: in function 'secureexecuterange'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:395: in function 'InvokeInitializers'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:786: in function 'Update'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:305: in function 'SetScrollPercentageInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:169: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:754: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:124: in function 'FullUpdate'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:721: in function <...ddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua:720>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:210: in function <...e/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua:209>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:213: in function 'TriggerEvent'\n...[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2683: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:2679>\n[C]: in function 'LFGListSearchPanel_UpdateResultList'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2569: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:2568>\n[C]: in function 'Show'\n[Interface/AddOns/Blizzard_UIParentPanelManager/Shared/UIParentPanelManager.lua]:842: in function <...UIParentPanelManager/Shared/UIParentPanelManager.lua:828>\n[C]: in function 'ShowUIPanel'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/PVEFrame.lua]:104: in function <...ce/AddOns/Blizzard_GroupFinder/Mainline/PVEFrame.lua:58>\n[C]: in function 'PVEFrame_ShowFrame'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/PVEFrame.lua]:55: in function 'PVEFrame_ToggleFrame'\n[TOGGLEGROUPFINDER]:1: in function <[string \"TOGGLEGROUPFINDER\"]:1>\n",
-["time"] = 1778107183,
 ["session"] = 170,
+["time"] = 1778107183,
 ["counter"] = 6,
 },
 {
@@ -467,17 +459,9 @@ BugGrabberDB = {
 },
 {
 ["message"] = "LUA_WARNING: Interface/AddOns/EllesmereUIAuraBuffReminders/EllesmereUIAuraBuffReminders.lua:1 ...ace/AddOns/EllesmereUIAuraBuffReminders/EllesmereUIAuraBuffReminders.lua:1763: <name> or '...' expected near 'false'",
-["session"] = 237,
 ["time"] = 1778473848,
+["session"] = 237,
 ["counter"] = 1,
-},
-{
-["message"] = "[ADDON_ACTION_BLOCKED] AddOn 'CraftScan' tried to call the protected function 'JoinChannelByName()'.",
-["time"] = 1778475260,
-["locals"] = "self=<table>\nevent=\"ADDON_ACTION_BLOCKED\"\naddonName=\"CraftScan\"\naddonFunc=\"JoinChannelByName()\"\nname=\"CraftScan\"\nbadAddons=<table>{\n CraftScan=true\n}\nL=<table>{\n NO_DISPLAY_2=\"|cffffff00The standard display is called BugSack, and can probably be found on the same site where you found !BugGrabber.|r\"\n ERROR_DETECTED=\"%s |cffffff00captured, click the link for more information.|r\"\n BUGGRABBER_STOPPED=\"|cffffff00There are too many errors in your UI. As a result, your game experience may be degraded. Disable or update the failing addons if you don't want to see this message again.|r\"\n USAGE=\"|cffffff00Usage: /buggrabber <1-%d>.|r\"\n STOP_NAG=\"|cffffff00!BugGrabber will not nag about missing a display addon again until next patch.|r\"\n NO_DISPLAY_STOP=\"|cffffff00If you don't want to be reminded about this again, run /stopnag.|r\"\n NO_DISPLAY_1=\"|cffffff00You seem to be running !BugGrabber with no display addon to go along with it. Although a slash command is provided for accessing error reports, a display can help you manage these errors in a more convenient way.|r\"\n ERROR_UNABLE=\"|cffffff00!BugGrabber is unable to retrieve errors from other players by itself. Please install BugSack or a similar display addon that might give you this functionality.|r\"\n ADDON_CALL_PROTECTED=\"[%s] AddOn '%s' tried to call the protected function '%s'.\"\n}\n",
-["stack"] = "[Interface/AddOns/!BugGrabber/BugGrabber.lua]:540: in function '?'\n[Interface/AddOns/!BugGrabber/BugGrabber.lua]:524: in function <Interface/AddOns/!BugGrabber/BugGrabber.lua:524>\n[C]: in function 'JoinChannelByName'\n[Interface/AddOns/CraftScan/Utils/Comm.lua]:49: in function <Interface/AddOns/CraftScan/Utils/Comm.lua:48>\n",
-["session"] = 249,
-["counter"] = 11,
 },
 {
 ["message"] = "...UIAuraBuffReminders/EllesmereUIAuraBuffReminders.lua:304: attempt to index global 'db' (a nil value)",
@@ -505,8 +489,8 @@ BugGrabberDB = {
 },
 {
 ["message"] = "LUA_WARNING: Interface/AddOns/EllesmereUIAuraBuffReminders/EllesmereUIAuraBuffReminders.lua:1 ...ace/AddOns/EllesmereUIAuraBuffReminders/EllesmereUIAuraBuffReminders.lua:970: '=' expected near 'if'",
-["session"] = 283,
 ["time"] = 1778480963,
+["session"] = 283,
 ["counter"] = 1,
 },
 {
@@ -575,8 +559,8 @@ BugGrabberDB = {
 },
 {
 ["message"] = "LUA_WARNING: Interface/AddOns/EllesmereUIAuraBuffReminders/EllesmereUIAuraBuffReminders.lua:1 ...ace/AddOns/EllesmereUIAuraBuffReminders/EllesmereUIAuraBuffReminders.lua:2427: function at line 1802 has more than 60 upvalues",
-["time"] = 1778485470,
 ["session"] = 334,
+["time"] = 1778485470,
 ["counter"] = 1,
 },
 {
@@ -652,14 +636,6 @@ BugGrabberDB = {
 ["counter"] = 1,
 },
 {
-["message"] = "[ADDON_ACTION_BLOCKED] AddOn 'EllesmereUIBlizzardSkin' tried to call the protected function 'InspectFrame:SetFrameStrata()'.",
-["time"] = 1778633480,
-["locals"] = "self=<table>\nevent=\"ADDON_ACTION_BLOCKED\"\naddonName=\"EllesmereUIBlizzardSkin\"\naddonFunc=\"InspectFrame:SetFrameStrata()\"\nname=\"EllesmereUIBlizzardSkin\"\nbadAddons=<table>{\n BlizzMove=true\n EllesmereUIBlizzardSkin=true\n WarpDeplete=true\n CraftScan=true\n RaiderIO=true\n}\nL=<table>{\n NO_DISPLAY_2=\"|cffffff00The standard display is called BugSack, and can probably be found on the same site where you found !BugGrabber.|r\"\n ERROR_DETECTED=\"%s |cffffff00captured, click the link for more information.|r\"\n BUGGRABBER_STOPPED=\"|cffffff00There are too many errors in your UI. As a result, your game experience may be degraded. Disable or update the failing addons if you don't want to see this message again.|r\"\n USAGE=\"|cffffff00Usage: /buggrabber <1-%d>.|r\"\n STOP_NAG=\"|cffffff00!BugGrabber will not nag about missing a display addon again until next patch.|r\"\n NO_DISPLAY_STOP=\"|cffffff00If you don't want to be reminded about this again, run /stopnag.|r\"\n NO_DISPLAY_1=\"|cffffff00You seem to be running !BugGrabber with no display addon to go along with it. Although a slash command is provided for accessing error reports, a display can help you manage these errors in a more convenient way.|r\"\n ERROR_UNABLE=\"|cffffff00!BugGrabber is unable to retrieve errors from other players by itself. Please install BugSack or a similar display addon that might give you this functionality.|r\"\n ADDON_CALL_PROTECTED=\"[%s] AddOn '%s' tried to call the protected function '%s'.\"\n}\n",
-["stack"] = "[Interface/AddOns/!BugGrabber/BugGrabber.lua]:540: in function '?'\n[Interface/AddOns/!BugGrabber/BugGrabber.lua]:524: in function <Interface/AddOns/!BugGrabber/BugGrabber.lua:524>\n[C]: in function 'SetFrameStrata'\n[Interface/AddOns/EllesmereUIBlizzardSkin/EllesmereUIBlizzardSkin_InspectSheet.lua]:914: in function <...lizzardSkin/EllesmereUIBlizzardSkin_InspectSheet.lua:297>\n[Interface/AddOns/EllesmereUIBlizzardSkin/EllesmereUIBlizzardSkin_InspectSheet.lua]:944: in function <...lizzardSkin/EllesmereUIBlizzardSkin_InspectSheet.lua:938>\n[Interface/AddOns/EllesmereUIBlizzardSkin/EllesmereUIBlizzardSkin_InspectSheet.lua]:1072: in function <...lizzardSkin/EllesmereUIBlizzardSkin_InspectSheet.lua:1070>\n",
-["session"] = 350,
-["counter"] = 16,
-},
-{
 ["message"] = ".../Mainline/Blizzard_UIWidgetTemplateTextWithState.lua:35: attempt to perform arithmetic on local 'textHeight' (a secret number value, while execution tainted by 'WarpDeplete')",
 ["time"] = 1778633921,
 ["locals"] = "self=Frame <Blizzard_UIWidgetManager.lua:432>{\n tooltipLoc=0\n tooltipYOffset=0\n widgetType=8\n tooltipContainsHyperLink=false\n tooltip=\"\"\n widgetID=7404\n widgetContainer=Frame <GameTooltip.lua:580>\n tooltipAnchor=\"ANCHOR_BOTTOMLEFT\"\n FadeInAnim=AnimationGroup <Blizzard_UIWidgetTemplateBase.xml:16>\n disableTooltip=true\n scriptedAnimationEffectID=0\n modelSceneLayer=0\n layoutDirection=0\n outAnimType=0\n inAnimType=0\n widgetTag=\"\"\n orderIndex=1\n widgetSetID=1800\n defaultTooltipAnchor=\"ANCHOR_BOTTOMLEFT\"\n hasTimer=true\n FadeOutAnim=AnimationGroup <Blizzard_UIWidgetTemplateBase.xml:23>\n Text=FontString <Blizzard_UIWidgetTemplateTextWithState.xml:7>\n tooltipXOffset=0\n}\nwidgetInfo=<table>{\n scriptedAnimationEffectID=0\n modelSceneLayer=0\n widgetScale=0\n tooltipLoc=0\n fontType=0\n shownState=1\n widgetSizeSetting=250\n bottomPadding=0\n enabledState=1\n textSizeType=0\n text=\"|nThis delve contains a bonus treasure chest that can be opened with a Restored Coffer Key.|nTime Left: 14 |4Hr:Hr; 1 |4Min:Min;|n|n|TInterface\\ICONS\\INV_10_Blacksmithing_Consumable_Key_Color1.BLP:15|t |cnIQ4:Restored Coffer Key|r: |cnWHITE_FONT_COLOR:1|r\r\"\n orderIndex=1\n layoutDirection=0\n inAnimType=0\n widgetTag=\"\"\n hasTimer=true\n outAnimType=0\n tooltip=\"\"\n hAlign=0\n}\nwidgetContainer=Frame <GameTooltip.lua:580>{\n horizontalAnchorXOffset=2\n verticalAnchorPoint=\"TOPLEFT\"\n disableWidgetTooltips=true\n widgetFrames=<table>\n horizontalRelativePoint=\"RIGHT\"\n verticalAnchorYOffset=0\n shownWidgetCount=0\n dirty=false\n widgetSetLayoutDirection=0\n numWidgetsShowing=0\n numTimers=1\n timerWidgets=<table>\n horizontalRowContainerPool=<table>\n widgetPools=<table>\n BackModelScene=ModelScene <Blizzard_UIWidgetManager.xml:46>\n FrontModelScene=ModelScene <Blizzard_UIWidgetManager.xml:33>\n verticalRelativePoint=\"BOTTOMLEFT\"\n widgetSetID=1800\n horizontalAnchorPoint=\"LEFT\"\n showAndHideOnWidgetSetRegistration=false\n}\ntextHeight=<no value>\n(*temporary)=0\n(*temporary)=0\n(*temporary)=0\n(*temporary)=1\n(*temporary)=0\n(*temporary)=\"attempt to perform arithmetic on local 'textHeight' (a secret number value, while execution tainted by 'WarpDeplete')\"\n",
@@ -682,6 +658,30 @@ BugGrabberDB = {
 ["stack"] = "[Interface/AddOns/EllesmereUIDamageMeters/EllesmereUIDamageMeters.lua]:1067: in function <.../EllesmereUIDamageMeters/EllesmereUIDamageMeters.lua:900>\n[Interface/AddOns/EllesmereUIDamageMeters/EllesmereUIDamageMeters.lua]:1224: in function <.../EllesmereUIDamageMeters/EllesmereUIDamageMeters.lua:1199>\n[Interface/AddOns/EllesmereUIDamageMeters/EllesmereUIDamageMeters.lua]:1256: in function <.../EllesmereUIDamageMeters/EllesmereUIDamageMeters.lua:1252>\n",
 ["session"] = 354,
 ["counter"] = 4,
+},
+{
+["message"] = "[ADDON_ACTION_BLOCKED] AddOn 'FocusMarker' tried to call the protected function 'UNKNOWN()'.",
+["time"] = 1778705711,
+["locals"] = "self=<table>\nevent=\"ADDON_ACTION_BLOCKED\"\naddonName=\"FocusMarker\"\naddonFunc=\"UNKNOWN()\"\nname=\"FocusMarker\"\nbadAddons=<table>{\n FocusMarker=true\n}\nL=<table>{\n NO_DISPLAY_2=\"|cffffff00The standard display is called BugSack, and can probably be found on the same site where you found !BugGrabber.|r\"\n ERROR_DETECTED=\"%s |cffffff00captured, click the link for more information.|r\"\n BUGGRABBER_STOPPED=\"|cffffff00There are too many errors in your UI. As a result, your game experience may be degraded. Disable or update the failing addons if you don't want to see this message again.|r\"\n USAGE=\"|cffffff00Usage: /buggrabber <1-%d>.|r\"\n STOP_NAG=\"|cffffff00!BugGrabber will not nag about missing a display addon again until next patch.|r\"\n NO_DISPLAY_STOP=\"|cffffff00If you don't want to be reminded about this again, run /stopnag.|r\"\n NO_DISPLAY_1=\"|cffffff00You seem to be running !BugGrabber with no display addon to go along with it. Although a slash command is provided for accessing error reports, a display can help you manage these errors in a more convenient way.|r\"\n ERROR_UNABLE=\"|cffffff00!BugGrabber is unable to retrieve errors from other players by itself. Please install BugSack or a similar display addon that might give you this functionality.|r\"\n ADDON_CALL_PROTECTED=\"[%s] AddOn '%s' tried to call the protected function '%s'.\"\n}\n",
+["stack"] = "[Interface/AddOns/!BugGrabber/BugGrabber.lua]:540: in function '?'\n[Interface/AddOns/!BugGrabber/BugGrabber.lua]:524: in function <Interface/AddOns/!BugGrabber/BugGrabber.lua:524>\n[C]: ?\n[C]: in function 'SendChatMessage'\n[Interface/AddOns/FocusMarker/FocusMarker.lua]:95: in function <Interface/AddOns/FocusMarker/FocusMarker.lua:83>\n",
+["session"] = 357,
+["counter"] = 2,
+},
+{
+["message"] = "[ADDON_ACTION_BLOCKED] AddOn 'CraftScan' tried to call the protected function 'JoinChannelByName()'.",
+["time"] = 1778709060,
+["locals"] = "self=<table>\nevent=\"ADDON_ACTION_BLOCKED\"\naddonName=\"CraftScan\"\naddonFunc=\"JoinChannelByName()\"\nname=\"CraftScan\"\nbadAddons=<table>{\n CraftScan=true\n}\nL=<table>{\n NO_DISPLAY_2=\"|cffffff00The standard display is called BugSack, and can probably be found on the same site where you found !BugGrabber.|r\"\n ERROR_DETECTED=\"%s |cffffff00captured, click the link for more information.|r\"\n BUGGRABBER_STOPPED=\"|cffffff00There are too many errors in your UI. As a result, your game experience may be degraded. Disable or update the failing addons if you don't want to see this message again.|r\"\n USAGE=\"|cffffff00Usage: /buggrabber <1-%d>.|r\"\n STOP_NAG=\"|cffffff00!BugGrabber will not nag about missing a display addon again until next patch.|r\"\n NO_DISPLAY_STOP=\"|cffffff00If you don't want to be reminded about this again, run /stopnag.|r\"\n NO_DISPLAY_1=\"|cffffff00You seem to be running !BugGrabber with no display addon to go along with it. Although a slash command is provided for accessing error reports, a display can help you manage these errors in a more convenient way.|r\"\n ERROR_UNABLE=\"|cffffff00!BugGrabber is unable to retrieve errors from other players by itself. Please install BugSack or a similar display addon that might give you this functionality.|r\"\n ADDON_CALL_PROTECTED=\"[%s] AddOn '%s' tried to call the protected function '%s'.\"\n}\n",
+["stack"] = "[Interface/AddOns/!BugGrabber/BugGrabber.lua]:540: in function '?'\n[Interface/AddOns/!BugGrabber/BugGrabber.lua]:524: in function <Interface/AddOns/!BugGrabber/BugGrabber.lua:524>\n[C]: in function 'JoinChannelByName'\n[Interface/AddOns/CraftScan/Utils/Comm.lua]:49: in function <Interface/AddOns/CraftScan/Utils/Comm.lua:48>\n",
+["session"] = 358,
+["counter"] = 12,
+},
+{
+["message"] = "[ADDON_ACTION_BLOCKED] AddOn 'EllesmereUIBlizzardSkin' tried to call the protected function 'InspectFrame:SetFrameStrata()'.",
+["time"] = 1778728338,
+["locals"] = "self=<table>\nevent=\"ADDON_ACTION_BLOCKED\"\naddonName=\"EllesmereUIBlizzardSkin\"\naddonFunc=\"InspectFrame:SetFrameStrata()\"\nname=\"EllesmereUIBlizzardSkin\"\nbadAddons=<table>{\n EllesmereUIBlizzardSkin=true\n}\nL=<table>{\n NO_DISPLAY_2=\"|cffffff00The standard display is called BugSack, and can probably be found on the same site where you found !BugGrabber.|r\"\n ERROR_DETECTED=\"%s |cffffff00captured, click the link for more information.|r\"\n BUGGRABBER_STOPPED=\"|cffffff00There are too many errors in your UI. As a result, your game experience may be degraded. Disable or update the failing addons if you don't want to see this message again.|r\"\n USAGE=\"|cffffff00Usage: /buggrabber <1-%d>.|r\"\n STOP_NAG=\"|cffffff00!BugGrabber will not nag about missing a display addon again until next patch.|r\"\n NO_DISPLAY_STOP=\"|cffffff00If you don't want to be reminded about this again, run /stopnag.|r\"\n NO_DISPLAY_1=\"|cffffff00You seem to be running !BugGrabber with no display addon to go along with it. Although a slash command is provided for accessing error reports, a display can help you manage these errors in a more convenient way.|r\"\n ERROR_UNABLE=\"|cffffff00!BugGrabber is unable to retrieve errors from other players by itself. Please install BugSack or a similar display addon that might give you this functionality.|r\"\n ADDON_CALL_PROTECTED=\"[%s] AddOn '%s' tried to call the protected function '%s'.\"\n}\n",
+["stack"] = "[Interface/AddOns/!BugGrabber/BugGrabber.lua]:540: in function '?'\n[Interface/AddOns/!BugGrabber/BugGrabber.lua]:524: in function <Interface/AddOns/!BugGrabber/BugGrabber.lua:524>\n[C]: in function 'SetFrameStrata'\n[Interface/AddOns/EllesmereUIBlizzardSkin/EllesmereUIBlizzardSkin_InspectSheet.lua]:914: in function <...lizzardSkin/EllesmereUIBlizzardSkin_InspectSheet.lua:297>\n[Interface/AddOns/EllesmereUIBlizzardSkin/EllesmereUIBlizzardSkin_InspectSheet.lua]:944: in function <...lizzardSkin/EllesmereUIBlizzardSkin_InspectSheet.lua:938>\n[Interface/AddOns/EllesmereUIBlizzardSkin/EllesmereUIBlizzardSkin_InspectSheet.lua]:1072: in function <...lizzardSkin/EllesmereUIBlizzardSkin_InspectSheet.lua:1070>\n",
+["session"] = 359,
+["counter"] = 17,
 },
 },
 }

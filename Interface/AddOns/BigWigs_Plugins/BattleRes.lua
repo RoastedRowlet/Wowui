@@ -1423,8 +1423,6 @@ battleResFrame:SetScript("OnEnter", function(self)
 	bwTooltip:AddLine(" ")
 	if isTesting and plugin.db.profile.mode == 2 then
 		bwTooltip:AddLine(L.battleResModeTextTooltip, 1, 1, 1)
-	else
-		bwTooltip:AddLine(L.battleResNoteTooltip, 1, 1, 1)
 	end
 	bwTooltip:Show()
 end)

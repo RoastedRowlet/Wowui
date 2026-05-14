@@ -36,8 +36,8 @@ LittleWigs_Legion: enabled
 LittleWigs_Dragonflight: enabled
 BigWigs_TheDreamrift: enabled
 BigWigs_MarchOnQuelDanas: enabled
-Baganator: enabled
-Syndicator: enabled
+Baganator: disabled
+Syndicator: disabled
 EllesmereUIMythicTimer: disabled
 EllesmereUIQuestTracker: enabled
 EllesmereUIFriends: enabled
@@ -110,3 +110,4 @@ TomTom: enabled
 WarpDeplete: enabled
 WaypointUI: enabled
 WorldMarkerCycler: enabled
+EllesmereUIBags: enabled

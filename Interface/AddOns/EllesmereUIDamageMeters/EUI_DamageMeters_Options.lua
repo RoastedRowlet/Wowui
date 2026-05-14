@@ -147,7 +147,7 @@ initFrame:SetScript("OnEvent", function(self)
         rrRow, h = W:DualRow(parent, y,
             { type="slider", text="Refresh Rate",
               tooltip = "Increase to improve performance, Decrease to update meters faster",
-              min = 0.1, max = 1, step = 0.05,
+              min = 0.1, max = 2, step = 0.1,
               getValue = function() return Cfg("refreshRate") or 0.5 end,
               setValue = function(v) Set("refreshRate", v) end,
               fmt = function(v) return format("%.2fs", v) end },
@@ -622,6 +622,10 @@ initFrame:SetScript("OnEvent", function(self)
                     { type = "toggle", label = "Show in Center of Screen",
                       get = function() return Cfg("breakdownAnchorPoint") == "center" end,
                       set = function(v) Set("breakdownAnchorPoint", v and "center" or "row") end },
+                    { type = "toggle", label = "Show All Spells",
+                      tooltip = "Disable to only show top 8 entries.",
+                      get = function() return Cfg("showAllBreakdownSpells") ~= false end,
+                      set = function(v) Set("showAllBreakdownSpells", v) end },
                 },
             })
             local cogBtn = CreateFrame("Button", nil, rgn)
@@ -1101,7 +1105,7 @@ initFrame:SetScript("OnEvent", function(self)
             { type = "slider", text = "Background Opacity",
               min = 0, max = 1, step = 0.05,
               disabled = barOff, disabledTooltip = "Enable Bar History",
-              getValue = function() return SHDB().bgAlpha or 0.75 end,
+              getValue = function() return SHDB().bgAlpha or 0.25 end,
               setValue = function(v) SHDB().bgAlpha = v; RefreshSH() end },
             { type = "toggle", text = "Hide Top Bar",
               disabled = barOff, disabledTooltip = "Enable Bar History",

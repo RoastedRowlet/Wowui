@@ -380,7 +380,7 @@ L.autoRoleExplainer = "Jedes mal, wenn einer Gruppe beigetreten wird, oder die T
 
 L.battleResTitle = "Battle Res"
 L.battleResDesc = "Zeigt ein Symbol an, welches die Anzahl der verfügbaren Battle Res Aufladungen sowie die Zeit bis zur nächsten Aufladung anzeigt."
-L.battleResDesc2 = "\nDer |cFF33FF99Battle Res Verlauf|r wird im Tooltip beim Überfahren des Symbols mit der Maus angezeigt.\n\n"
+L.battleResDesc2 = "\nDer |cFF33FF99Battle Res Verlauf|r wird im Tooltip beim Überfahren des Symbols mit der Maus angezeigt.\nHinweis: Dieser Tooltip wird nur außerhalb des Kampfes angezeigt.\n\n"
 L.battleResHistory = "Battle Res Verlauf:"
 L.battleResResetAll = "Alle Battle Res Einstellungen auf ihre Standardwerte zurücksetzen."
 L.battleResDurationText = "Dauer Text"
@@ -393,7 +393,6 @@ L.iconTextureSpellIDError = "Es muss eine gültige Zauber ID zur Nutzung der Sym
 L.battleResModeIcon = "Modus: Symbol"
 L.battleResModeText = "Modus: Nur Text"
 L.battleResModeTextTooltip = "Es wird vorübergehend ein Hintergrund angezeigt, um beim Bewegen der Battle Res Funktion behilflich zu sein und den Mouseover Bereich anzuzeigen."
-L.battleResNoteTooltip = "Hinweis: Dieser Tooltip wird nur außerhalb des Kampfes angezeigt."
 
 -----------------------------------------------------------------------
 -- CombatTimer.lua

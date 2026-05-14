@@ -380,7 +380,7 @@ L.autoRoleExplainer = "그룹에 가입하거나 그룹에 있는 동안 특성 
 
 L.battleResTitle = "전투 부활"
 L.battleResDesc = "사용 가능한 전투 부활 충전 횟수와 다음 충전 획득까지 남은 시간을 표시하는 아이콘."
-L.battleResDesc2 = "\n아이콘 마우스 오버 시 |cFF33FF99전투 부활 기록|r을 툴팁으로 확인할 수 있습니다.\n\n"
+L.battleResDesc2 = "\n아이콘 마우스 오버 시 |cFF33FF99전투 부활 기록|r을 툴팁으로 확인할 수 있습니다.\n참고: 이 툴팁은 전투 중이 아닐 때만 표시됩니다.\n\n"
 L.battleResHistory = "전투 부활 기록:"
 L.battleResResetAll = "모든 전투 부활 설정을 기본값으로 초기화합니다."
 L.battleResDurationText = "지속 시간 텍스트"
@@ -393,7 +393,6 @@ L.iconTextureSpellIDError = "아이콘 텍스처로 사용할 유효한 주문 I
 L.battleResModeIcon = "모드: 아이콘"
 L.battleResModeText = "모드: 텍스트만"
 L.battleResModeTextTooltip = "전투 부활 기능을 이동하고 마우스 오버 영역을 확인하는 데 도움이 되도록 임시 배경을 표시합니다."
-L.battleResNoteTooltip = "참고: 이 툴팁은 전투 중이 아닐 때만 표시됩니다."
 
 -----------------------------------------------------------------------
 -- CombatTimer.lua

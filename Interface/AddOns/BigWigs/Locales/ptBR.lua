@@ -380,7 +380,7 @@ L.autoRoleExplainer = "Sempre que você se junta a um grupo ou muda sua especial
 
 --L.battleResTitle = "Battle Res"
 --L.battleResDesc = "An icon that shows how many battle resurrection charges are available and the time until another charge is gained."
---L.battleResDesc2 = "\nYour |cFF33FF99Battle Resurrection History|r can be viewed in the tooltip when you mouse over the icon.\n\n"
+--L.battleResDesc2 = "\nYour |cFF33FF99Battle Resurrection History|r can be viewed in the tooltip when you mouse over the icon.\nNote: The tooltip will only show when you are out of combat.\n\n"
 --L.battleResHistory = "Battle Res History:"
 --L.battleResResetAll = "Reset all the Battle Resurrection settings to their default values."
 --L.battleResDurationText = "Duration Text"
@@ -393,7 +393,6 @@ L.autoRoleExplainer = "Sempre que você se junta a um grupo ou muda sua especial
 --L.battleResModeIcon = "Mode: Icon"
 --L.battleResModeText = "Mode: Text Only"
 --L.battleResModeTextTooltip = "Showing a temporary background to help you move the Battle Res feature and to see where the mouseover area is."
---L.battleResNoteTooltip = "Note: This tooltip will only show when you are out of combat."
 
 -----------------------------------------------------------------------
 -- CombatTimer.lua

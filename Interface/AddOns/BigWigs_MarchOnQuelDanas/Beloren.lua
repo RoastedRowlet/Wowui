@@ -418,7 +418,7 @@ function mod:Rebirth(duration)
 		msg = barText,
 		key = "stages",
 		icon = "inv_12_dualityphoenix_phoenix_rebirth",
-		endTime = GetTime() + duration + 1.5, -- XXX started canceling later after the edict hotfix?
+		endTime = GetTime() + duration + 1.5,
 		onFinished = function()
 			isIntermission = false
 			if self:ShouldShowBars() and not self:IsWiping() then
@@ -430,7 +430,8 @@ function mod:Rebirth(duration)
 		end,
 		onCanceled = function(barInfo)
 			isIntermission = false
-			if math.abs(GetTime() - barInfo.endTime) < 0.1 then
+			-- always gets cancelled, don't show phase message on win or wipe
+			if GetTime() >= barInfo.endTime then
 				barInfo:onFinished()
 			end
 		end
