@@ -14,7 +14,7 @@ local strfind = string.find
 
 local BIGWIGS_VERSION = 415
 local CONTENT_PACK_VERSIONS = {
-	["LittleWigs"] = {12, 0, 46},
+	["LittleWigs"] = {12, 0, 48},
 	["BigWigs_Classic"] = {12, 0, 16},
 	["BigWigs_BurningCrusade"] = {12, 0, 12},
 	["BigWigs_WrathOfTheLichKing"] = {12, 0, 7},
@@ -57,7 +57,7 @@ do
 	local ALPHA = "ALPHA"
 
 	local releaseType
-	local myGitHash = "b30341a" -- The ZIP packager will replace this with the Git hash.
+	local myGitHash = "8b9290c" -- The ZIP packager will replace this with the Git hash.
 	local releaseString
 	--[=[@alpha@
 	-- The following code will only be present in alpha ZIPs.
@@ -179,7 +179,7 @@ public.isTestBuild = IsPublicTestClient() -- PTR/beta
 do
 	local _, _, _, build = GetBuildInfo()
 	public.isBeta = public.isTestBuild and build >= 130000
-	public.isNext = build >= 120005
+	public.isNext = build >= 120007
 end
 
 -- Version
@@ -315,6 +315,7 @@ do
 				[2939] = "BigWigs_TheDreamrift",
 				[2912] = "BigWigs_TheVoidspire",
 				[2913] = "BigWigs_MarchOnQuelDanas",
+				[1592] = "BigWigs_Sporefall",
 			}
 		}
 	else -- Retail
@@ -347,6 +348,7 @@ do
 				[2939] = "BigWigs_TheDreamrift",
 				[2912] = "BigWigs_TheVoidspire",
 				[2913] = "BigWigs_MarchOnQuelDanas",
+				[1592] = "BigWigs_Sporefall",
 			}
 		}
 	end
@@ -443,6 +445,7 @@ do
 		[2912] = mn, -- The Voidspire
 		[2913] = mn, -- March on Quel'Danas
 		[2939] = mn, -- The Dreamrift
+		[1592] = mn, -- Sporefall
 
 
 		--[[ LittleWigs: Classic ]]--
@@ -1210,7 +1213,7 @@ do
 		for moduleName, storage in next, BigWigs3DB.namespaces do
 			if moduleName:find("BigWigs_Bosses_", nil, true) and type(storage) == "table" and storage.profiles then
 				for profileName, moduleTable in next, storage.profiles do
-					if type(moduleTable) == "table" and not moduleTable.toggles then
+					if type(moduleTable) == "table" and not moduleTable.toggles and not moduleTable.renames then
 						local newTable = {}
 						for optionKeyForBossToggle, valueOfBossToggle in next, moduleTable do
 							newTable[optionKeyForBossToggle] = valueOfBossToggle
@@ -1414,6 +1417,7 @@ do
 		BigWigs_TheVoidspire = true,
 		BigWigs_TheDreamrift = true,
 		BigWigs_MarchOnQuelDanas = true,
+		BigWigs_Sporefall = true,
 	}
 	-- Try to teach people not to force load our modules.
 	for i = 1, GetNumAddOns() do
@@ -1637,9 +1641,9 @@ end
 --
 
 do
-	local DBMdotRevision = "20260508010056" -- The changing version of the local client, changes with every new zip using the project-date-integer packager replacement.
+	local DBMdotRevision = "20260514074436" -- The changing version of the local client, changes with every new zip using the project-date-integer packager replacement.
 	local DBMdotDisplayVersion = "12.0.46" -- "N.N.N" for a release and "N.N.N alpha" for the alpha duration.
-	local DBMdotReleaseRevision = "20260507000000" -- Hardcoded time, manually changed every release, they use it to track the highest release version, a new DBM release is the only time it will change.
+	local DBMdotReleaseRevision = "20260513000000" -- Hardcoded time, manually changed every release, they use it to track the highest release version, a new DBM release is the only time it will change.
 	local protocol = 3
 	local versionPrefix = "V"
 	local PForceDisable = 24

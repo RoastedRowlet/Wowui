@@ -5,8 +5,8 @@ CliqueDB3 = {
 ["Barelynoer - Area 52"] = {
 ["spec1_profileKey"] = "Barelynoer - Area 52",
 ["spec3_profileKey"] = "Barelynoer - Area 52",
-["specswap"] = false,
 ["spec2_profileKey"] = "Barelynoer - Area 52",
+["specswap"] = false,
 },
 ["Angryabsol - Stormrage"] = {
 ["spec1_profileKey"] = "Angryabsol - Stormrage",
@@ -24,17 +24,17 @@ CliqueDB3 = {
 ["Lonelylitten - Stormrage"] = {
 ["fastooc"] = false,
 ["spec1_profileKey"] = "Lonelylitten - Stormrage",
-["spec3_profileKey"] = "Lonelylitten - Stormrage",
+["specswap"] = false,
 ["downclick"] = false,
 ["spec4_profileKey"] = "Lonelylitten - Stormrage",
+["spec3_profileKey"] = "Lonelylitten - Stormrage",
 ["spec2_profileKey"] = "Lonelylitten - Stormrage",
-["specswap"] = false,
 },
 ["Zappyxatu - Stormrage"] = {
 ["spec1_profileKey"] = "Zappyxatu - Stormrage",
 ["spec3_profileKey"] = "Zappyxatu - Stormrage",
-["spec2_profileKey"] = "Zappyxatu - Stormrage",
 ["specswap"] = false,
+["spec2_profileKey"] = "Zappyxatu - Stormrage",
 },
 },
 ["profileKeys"] = {
@@ -79,6 +79,22 @@ CliqueDB3 = {
 ["unit"] = "mouseover",
 },
 {
+["spell"] = "Regrowth",
+["key"] = "BUTTON2",
+["sets"] = {
+["default"] = true,
+},
+["icon"] = 136085,
+["type"] = "spell",
+},
+{
+["type"] = "menu",
+["key"] = "CTRL-BUTTON2",
+["sets"] = {
+["default"] = true,
+},
+},
+{
 ["spell"] = "Rejuvenation",
 ["key"] = "BUTTON1",
 ["sets"] = {
@@ -97,22 +113,6 @@ CliqueDB3 = {
 ["icon"] = 134332,
 },
 {
-["spell"] = "Regrowth",
-["key"] = "BUTTON2",
-["sets"] = {
-["default"] = true,
-},
-["icon"] = 136085,
-["type"] = "spell",
-},
-{
-["type"] = "menu",
-["key"] = "CTRL-BUTTON2",
-["sets"] = {
-["default"] = true,
-},
-},
-{
 ["type"] = "macro",
 ["key"] = "ALT-BUTTON2",
 ["macrotext"] = "/cast Nature's Swiftness\n/cast [@mouseover] Regrowth\n",
@@ -120,24 +120,6 @@ CliqueDB3 = {
 ["default"] = true,
 },
 ["icon"] = 134332,
-},
-{
-["spell"] = "Revive",
-["key"] = "CTRL-BUTTON1",
-["sets"] = {
-["default"] = true,
-},
-["icon"] = 132132,
-["type"] = "spell",
-},
-{
-["spell"] = "Remove Corruption",
-["key"] = "BUTTON3",
-["sets"] = {
-["default"] = true,
-},
-["icon"] = 135952,
-["type"] = "spell",
 },
 {
 ["type"] = "target",
@@ -155,6 +137,24 @@ CliqueDB3 = {
 ["default"] = true,
 },
 ["icon"] = 236288,
+["type"] = "spell",
+},
+{
+["spell"] = "Revive",
+["key"] = "CTRL-BUTTON1",
+["sets"] = {
+["default"] = true,
+},
+["icon"] = 132132,
+["type"] = "spell",
+},
+{
+["spell"] = "Remove Corruption",
+["key"] = "BUTTON3",
+["sets"] = {
+["default"] = true,
+},
+["icon"] = 135952,
 ["type"] = "spell",
 },
 {
@@ -364,14 +364,6 @@ CliqueDB3 = {
 },
 {
 ["type"] = "menu",
-["sets"] = {
-["default"] = true,
-},
-["key"] = "SHIFT-BUTTON2",
-["icon"] = 132212,
-},
-{
-["type"] = "menu",
 ["key"] = "CTRL-BUTTON2",
 ["sets"] = {
 ["default"] = true,
@@ -387,6 +379,14 @@ CliqueDB3 = {
 ["type"] = "spell",
 },
 {
+["type"] = "menu",
+["sets"] = {
+["default"] = true,
+},
+["key"] = "SHIFT-BUTTON2",
+["icon"] = 132212,
+},
+{
 ["type"] = "target",
 ["key"] = "CTRL-BUTTON1",
 ["sets"] = {
@@ -394,15 +394,6 @@ CliqueDB3 = {
 },
 ["icon"] = 132331,
 ["unit"] = "mouseover",
-},
-{
-["spell"] = "Riptide",
-["key"] = "BUTTON1",
-["sets"] = {
-["default"] = true,
-},
-["icon"] = 252995,
-["type"] = "spell",
 },
 {
 ["spell"] = "Purify Spirit",
@@ -420,6 +411,15 @@ CliqueDB3 = {
 ["default"] = true,
 },
 ["icon"] = 136077,
+["type"] = "spell",
+},
+{
+["spell"] = "Riptide",
+["key"] = "BUTTON1",
+["sets"] = {
+["default"] = true,
+},
+["icon"] = 252995,
 ["type"] = "spell",
 },
 {

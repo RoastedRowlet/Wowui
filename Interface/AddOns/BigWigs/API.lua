@@ -244,6 +244,36 @@ do
 end
 
 --------------------------------------------------------------------------------
+-- Specialization (LibSpecialization)
+--
+
+do
+	local listID, listRole, listPosition = {}, {}, {}
+	do
+		local LibSpec = LibStub("LibSpecialization", true)
+		if LibSpec then
+			local function addToTable(specID, role, position, playerName)
+				listID[playerName] = specID
+				listRole[playerName] = role
+				listPosition[playerName] = position
+			end
+			local lsTable = {}
+			LibSpec.RegisterGroup(lsTable, addToTable)
+			LibSpec.RegisterGuild(lsTable, addToTable)
+		end
+	end
+	function API.GetSpecializationID(playerName)
+		return listID[playerName]
+	end
+	function API.GetSpecializationRole(playerName)
+		return listRole[playerName]
+	end
+	function API.GetSpecializationPosition(playerName)
+		return listPosition[playerName]
+	end
+end
+
+--------------------------------------------------------------------------------
 -- Spell renames
 --
 

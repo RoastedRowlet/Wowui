@@ -318,7 +318,7 @@ L.first_desc = "你在与该首领战斗时首次获胜的详细信息，格式�
 
 -- Difficulty levels for statistics display on bosses
 L.unknown = "未知"
-L.LFR = "随机团队"
+L.LFR = "随机"
 L.normal = "普通"
 L.heroic = "英雄"
 L.mythic = "史诗"
@@ -341,6 +341,7 @@ L.N25 = "25人普通"
 L.H10 = "10人英雄"
 L.H25 = "25人英雄"
 L.titan = "25人泰坦" -- Chinese-only "Titan Reforged" servers
+L.mythic_flex = "史诗（弹性）" -- 233. 史诗 - 弹性团队副本
 
 -----------------------------------------------------------------------
 -- TOOLS

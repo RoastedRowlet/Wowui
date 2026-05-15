@@ -119,7 +119,7 @@ function mod:GetOptions()
 		1255368, -- Void Expulsion
 		{1233865, "HEALER"}, -- Null Corona
 		{1233787, "TANK"}, -- Dark Hand (Morium)
-		1243743, -- Interrupting Tremor (Demiar)
+		{1243743, "CASTBAR"}, -- Interrupting Tremor (Demiar)
 		1243753, -- Ravenous Abyss (Vorelus)
 
 		-- Intermission: Crushing Singularity
@@ -867,6 +867,7 @@ function mod:InterruptingTremor()
 			self:StopBlizzMessages(1)
 			self:Message(1243743, "orange", barText)
 			self:PlaySound(1243743, "alert")
+			self:CastBar(1243743, 5)
 		end,
 	}
 end

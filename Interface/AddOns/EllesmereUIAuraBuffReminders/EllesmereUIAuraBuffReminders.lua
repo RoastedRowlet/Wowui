@@ -30,6 +30,7 @@ local DEFAULT_TEXT_COLOR = {r=1, g=1, b=1}
 -- cast or combat end. OOC falls back to target debuff check.
 local _huntersMarkNeeded = false
 
+local db  -- set in EABR:OnInitialize()
 -- Flask state snapshotted before PvP restriction activates (aura API locked in PvP).
 
 
@@ -137,10 +138,16 @@ local function InMythicPlusKey()
     return C_ChallengeMode and C_ChallengeMode.IsChallengeModeActive and C_ChallengeMode.IsChallengeModeActive()
 end
 
+local function InMythicZeroDungeon()
+    if _cachedIType == "party" and (_cachedDiffID == 23 or _cachedDiffID == 8) then return true end
+    return false
+end
+
+
 -- Mythic 0 dungeon (party, normal difficulty 1) or Mythic raid (difficulty 16)
 local function InMythicZeroDungeonOrMythicRaid()
-    if _cachedIType == "party" and (_cachedDiffID == 23 or _cachedDiffID == 8) then return true end
-    if _cachedIType == "raid" and _cachedDiffID == 16 then return true end
+    if InMythicZeroDungeon() then return true end
+    if IsInRaid() and _cachedDiffID == 16 then return true end
     return false
 end
 
@@ -290,6 +297,17 @@ function _AC.ensureNames()
     end
 end
 
+local function IsUnderDuration(duration, expirationTime)
+    if InMythicZeroDungeon() and db and db.profile.display.showUnderDurationDungeon > 0 and duration >= db.profile.display.showUnderDurationDungeon*60 and expirationTime - GetTime() < db.profile.display.showUnderDurationDungeon*60 then
+        return true
+    end
+    if IsInRaid() and db and db.profile.display.showUnderDurationRaid > 0 and duration >= db.profile.display.showUnderDurationRaid*60 and expirationTime - GetTime() < db.profile.display.showUnderDurationRaid*60 then
+        return true
+    end
+    
+    return false 
+end
+
 local function PlayerHasAuraByID(spellIDs)
     if not spellIDs or not spellIDs[1] then return true end
     local inCombat = InCombat()
@@ -300,7 +318,12 @@ local function PlayerHasAuraByID(spellIDs)
         if NON_SECRET_SPELL_IDS[id] then
             local ok, result = pcall(C_UnitAuras.GetPlayerAuraBySpellID, id)
             if ok then
-                if result ~= nil then return true end
+                if result ~= nil then 
+                    if IsUnderDuration(result.duration, result.expirationTime) then
+                        return false
+                    end
+                    return true 
+                end
                 if inCombat and _preCombatAuraCache[id] then return true end
             else
                 if inCombat and _preCombatAuraCache[id] then return true end
@@ -309,7 +332,12 @@ local function PlayerHasAuraByID(spellIDs)
             -- Non-whitelisted OOC: use GetPlayerAuraBySpellID anyway (may return
             -- secret values, but non-nil means the aura exists)
             local ok, result = pcall(C_UnitAuras.GetPlayerAuraBySpellID, id)
-            if ok and result ~= nil then return true end
+            if ok and result ~= nil then
+                if IsUnderDuration(result.duration, result.expirationTime) then
+                    return false
+                end
+                return true
+            end
         else
             if _preCombatAuraCache[id] then return true end
         end
@@ -937,7 +965,12 @@ local function PlayerHasWellFed()
         local aura = C_UnitAuras.GetAuraDataByIndex("player", i, "HELPFUL")
         if not aura then break end
         local ic = aura.icon
-        if ic and not isSecret(ic) and ic == 136000 then return true end
+        if ic and not isSecret(ic) and ic == 136000 then 
+            if IsUnderDuration(aura.duration, aura.expirationTime) then
+                return false
+            end
+            return true
+        end
     end
     return false
 end
@@ -949,7 +982,12 @@ local function PlayerHasFlaskBuff()
     -- Direct ID lookup for known flask buff IDs (zero allocation)
     for id in pairs(FLASK_BUFF_ID_SET) do
         local ok, result = pcall(C_UnitAuras.GetPlayerAuraBySpellID, id)
-        if ok and result ~= nil then return true end
+        if ok and result ~= nil then 
+            if IsUnderDuration(result.duration, result.expirationTime) then
+                return false
+            end
+            return true
+        end
     end
     -- Name-based fallback for flasks not in our ID set (lazy scan)
     if _AC.valid then
@@ -1121,6 +1159,8 @@ local defaults = {
             opacity = 1.0,
             frameStrata = "MEDIUM",
             cursorAttach = false,
+            showUnderDurationDungeon = 20,
+            showUnderDurationRaid = 10,
         },
         raidBuffs = {
             showNonInstanced = false,
@@ -1171,7 +1211,6 @@ local defaults = {
     },
 }
 
-local db  -- set in EABR:OnInitialize()
 local euiPanelOpen = false
 
 -------------------------------------------------------------------------------
@@ -1813,8 +1852,14 @@ local specialsActive = inInstance or co.showSpecialsNonInstanced
             if playerClass == "PALADIN" then
                 for _, rite in ipairs(PALADIN_RITES) do
                     if co.enabled[rite.key] and Known(rite.castSpell) then
-                        local hasMH = GetWeaponEnchantInfo()
+                        local hasMH, mhExpire = GetWeaponEnchantInfo()
+                        local show = false
                         if not hasMH then
+                            show = true
+                        elseif mhExpire and mhExpire > 0 and IsUnderDuration(3600, mhExpire / 1000 + GetTime()) then
+                            show = true
+                        end
+                        if show then
                             local e = AcquireEntry()
                             e.mode = "spell"; e.spellID = rite.castSpell
                             e.label = ShortLabel(rite.name)
@@ -1831,14 +1876,26 @@ local specialsActive = inInstance or co.showSpecialsNonInstanced
             -- both weapon slots. GetWeaponEnchantInfo returns the specific
             -- enchant ID on each hand (4th and 8th return values).
             if playerClass == "SHAMAN" then
-                local hasMH, _, _, mhEnchID, hasOH, _, _, ohEnchID = GetWeaponEnchantInfo()
+                local hasMH, mhExpire, _, mhEnchID, hasOH, ohExpire, _, ohEnchID = GetWeaponEnchantInfo()
                 for _, imbue in ipairs(SHAMAN_IMBUES) do
                     if co.enabled[imbue.key] and Known(imbue.castSpell) then
                         local found = false
                         if imbue.wepEnchID then
                             for _, eid in ipairs(imbue.wepEnchID) do
                                 if eid > 0 and ((hasMH and mhEnchID == eid) or (hasOH and ohEnchID == eid)) then
-                                    found = true; break
+                                    -- Use the matched hand's expire time, not min of both.
+                                    -- Unenchanted hand returns 0, which would always trigger.
+                                    local matchExpire
+                                    if hasMH and mhEnchID == eid then
+                                        matchExpire = mhExpire
+                                    else
+                                        matchExpire = ohExpire
+                                    end
+                                    if matchExpire and matchExpire > 0 and IsUnderDuration(3600, matchExpire / 1000 + GetTime()) then
+                                        found = false
+                                    else
+                                        found = true
+                                    end
                                 end
                             end
                         end
@@ -2179,6 +2236,7 @@ end
 -- Reusable tables wiped each Refresh() call to avoid per-call allocation.
 -- Wrapped to save file-scope local slots (200 limit).
 local _refreshMissing, _wasResting = {}, false
+local UpdateDurationTicker  -- forward-declare; defined after RequestRefresh
 
 local function Refresh()
     _cachedOutline = nil
@@ -2428,6 +2486,8 @@ local function Refresh()
             _memProbe.display = 0; _memProbe.total = 0
         end
     end
+
+    UpdateDurationTicker()
 end
 
 local REFRESH_THROTTLE_COMBAT = 0.5
@@ -2450,6 +2510,35 @@ local function RequestRefresh()
     elseif not _refreshTimerActive then
         _refreshTimerActive = true
         C_Timer.After(throttle - elapsed, _doRefresh)
+    end
+end
+
+-- Duration-threshold ticker: polls every 15s so expiring buffs trigger
+-- reminders even when no event fires. Only runs when OOC, in a dungeon
+-- or raid, not in an active keystone, and a threshold is set.
+local _durationTicker
+UpdateDurationTicker = function()
+    local shouldTick = false
+    if db and not InCombat() and not InMythicPlusKey() then
+        local d = db.profile.display
+        if d and ((d.showUnderDurationDungeon or 0) > 0
+              or  (d.showUnderDurationRaid or 0) > 0) then
+            if (_cachedIType == "party" or _cachedIType == "raid") then
+                shouldTick = true
+            end
+        end
+    end
+    if shouldTick and not _durationTicker then
+        _durationTicker = C_Timer.NewTicker(15, function()
+            if InCombat() or InMythicPlusKey() then
+                if _durationTicker then _durationTicker:Cancel(); _durationTicker = nil end
+                return
+            end
+            RequestRefresh()
+        end)
+    elseif not shouldTick and _durationTicker then
+        _durationTicker:Cancel()
+        _durationTicker = nil
     end
 end
 

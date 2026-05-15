@@ -341,6 +341,7 @@ L.N25 = "Normal 25"
 L.H10 = "Heroico 10"
 L.H25 = "Heroico 25"
 --L.titan = "Titan" -- Chinese-only "Titan Reforged" servers
+--L.mythic_flex = "Mythic (Flex)" -- Mythic (Flexible 15-25 player raids)
 
 -----------------------------------------------------------------------
 -- TOOLS

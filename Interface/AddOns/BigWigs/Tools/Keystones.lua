@@ -516,14 +516,6 @@ local GetMapUIInfo = C_ChallengeMode.GetMapUIInfo
 if db.profile.hideFromGuild then
 	LibKeystone.SetGuildHidden(true)
 end
-local specializationPlayerList = {}
-do
-	local function addToTable(specID, _, _, playerName)
-		specializationPlayerList[playerName] = specID
-	end
-	LibSpec.RegisterGroup(specializationPlayerList, addToTable)
-	LibSpec.RegisterGuild(specializationPlayerList, addToTable)
-end
 
 --------------------------------------------------------------------------------
 -- GUI Widgets
@@ -713,11 +705,12 @@ do
 		local guid = BigWigsLoader.UnitGUID("player")
 		local name = BigWigsLoader.UnitName("player")
 		local realm = GetRealmName()
+		local specID = LibSpec.MySpecialization()
 		BigWigs3DB.myKeystones[guid] = {
 			keyLevel = myKeyLevel,
 			keyMap = myKeyMap,
 			playerRating = myRating,
-			specId = specializationPlayerList[name] or 0,
+			specId = specID or 0,
 			name = name,
 			realm = realm,
 		}
@@ -1643,7 +1636,7 @@ do
 			if (not isGuildList and InMyParty(pName)) or (isGuildList and not InMyParty(pName)) then
 				local decoratedName = nil
 				local nameTooltip = pName
-				local specID = specializationPlayerList[pName]
+				local specID = BigWigsAPI.GetSpecializationID(pName)
 				if specID then
 					local _, specName, _, specIcon, role, classFile, className = GetSpecializationInfoByID(specID)
 					local color = C_ClassColor.GetClassColor(classFile):GenerateHexColor()

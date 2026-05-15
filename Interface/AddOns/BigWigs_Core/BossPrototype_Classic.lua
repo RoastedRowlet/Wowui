@@ -67,7 +67,7 @@ local allowedEvents = {}
 local difficulty, maxPlayers
 local UpdateDispelStatus, UpdateInterruptStatus = nil, nil
 local myGUID, myRole, myRolePosition
-local myGroupGUIDs, myGroupRoles, myGroupRolePositions = {}, {}, {}
+local myGroupGUIDs = {}
 local solo = false
 local classColorMessages = true
 local englishSayMessages = false
@@ -75,20 +75,14 @@ do -- Update some data that may be called at the top of modules (prior to initia
 	local _, _, diff, _, currentMaxPlayers = GetInstanceInfo()
 	difficulty, maxPlayers = diff, currentMaxPlayers
 	myGUID = UnitGUID("player")
-	local function update(_, role, position, player)
-		myGroupRolePositions[player] = position
-		myGroupRoles[player] = role
-		if player == myName then
-			myRole, myRolePosition = role, position
-			if #enabledModules > 0 then
-				UpdateDispelStatus()
-				UpdateInterruptStatus()
-			end
-		end
+	local function update()
+		local _, role, position = LibSpec.MySpecialization()
+		myRole, myRolePosition = role, position
+		UpdateDispelStatus()
+		UpdateInterruptStatus()
 	end
 	if LibSpec then
-		LibSpec.RegisterGroup({}, update)
-		LibSpec.RequestGroupSpecialization()
+		LibSpec.RegisterPlayerSpecChange({}, update)
 	end
 end
 local talentRoles = {
@@ -2670,46 +2664,33 @@ end
 
 --- Ask LibSpecialization to update the role positions of everyone in your group.
 function boss:UpdateRolePositions()
-	if LibSpec then
-		LibSpec.RequestGroupSpecialization()
-	end
+	--if LibSpec then
+	--	LibSpec.RequestGroupSpecialization()
+	--end
 end
 
---- Check if your talent tree role is MELEE.
--- @string[opt="playerName"] playerName check if another player is MELEE.
--- @return boolean
-function boss:Melee(playerName)
-	if playerName then
-		return myGroupRolePositions[playerName] == "MELEE"
-	else
-		return myRolePosition == "MELEE" or myRole == "TANK"
-	end
-end
-
---- Check if your talent tree role is RANGED.
--- @string[opt="playerName"] playerName check if another player is RANGED.
--- @return boolean
-function boss:Ranged(playerName)
-	if playerName then
-		return myGroupRolePositions[playerName] == "RANGED"
-	else
-		return myRolePosition == "RANGED" or myRole == "HEALER"
-	end
-end
-
---- Check if your talent tree role is TANK.
--- @string[opt="player"] unit check if the chosen role of another unit is set to TANK, or if that unit is listed in the MAINTANK frames.
--- @return boolean
-function boss:Tank(unit)
-	if unit then
-		local role = myGroupRoles[unit]
-		if role then
-			return role == "TANK"
+do
+	local GetSpecializationPosition = BigWigsAPI.GetSpecializationPosition
+	--- Check if your talent tree role is MELEE.
+	-- @string[opt="playerName"] playerName check if another player is MELEE.
+	-- @return boolean
+	function boss:Melee(playerName)
+		if playerName then
+			return GetSpecializationPosition(playerName) == "MELEE"
 		else
-			return GetPartyAssignment("MAINTANK", unit) or UnitGroupRolesAssigned(unit) == "TANK"
+			return myRolePosition == "MELEE"
 		end
-	else
-		return myRole == "TANK"
+	end
+
+	--- Check if your talent tree role is RANGED.
+	-- @string[opt="playerName"] playerName check if another player is RANGED.
+	-- @return boolean
+	function boss:Ranged(playerName)
+		if playerName then
+			return GetSpecializationPosition(playerName) == "RANGED"
+		else
+			return myRolePosition == "RANGED"
+		end
 	end
 end
 
@@ -2748,36 +2729,55 @@ do
 	end
 end
 
---- Check if your talent tree role is HEALER.
--- @string[opt="player"] unit check if the chosen role of another unit is set to HEALER.
--- @return boolean
-function boss:Healer(unit)
-	if unit then
-		local role = myGroupRoles[unit]
-		if role then
-			return role == "HEALER"
+do
+	local GetSpecializationRole = BigWigsAPI.GetSpecializationRole
+	--- Check if your talent tree role is TANK.
+	-- @string[opt="player"] unit check if the chosen role of another unit is set to TANK, or if that unit is listed in the MAINTANK frames.
+	-- @return boolean
+	function boss:Tank(unit)
+		if unit then
+			local role = GetSpecializationRole(unit)
+			if role then
+				return role == "TANK"
+			else
+				return GetPartyAssignment("MAINTANK", unit) or UnitGroupRolesAssigned(unit) == "TANK"
+			end
 		else
-			return UnitGroupRolesAssigned(unit) == "HEALER"
+			return myRole == "TANK"
 		end
-	else
-		return myRole == "HEALER"
 	end
-end
 
---- Check if your talent tree role is DAMAGER.
--- @string[opt="player"] unit check if the chosen role of another unit is set to DAMAGER.
--- @return boolean
-function boss:Damager(unit)
-	if unit then
-		local role = myGroupRoles[unit]
-		if role then
-			return role == "DAMAGER"
+	--- Check if your talent tree role is HEALER.
+	-- @string[opt="player"] unit check if the chosen role of another unit is set to HEALER.
+	-- @return boolean
+	function boss:Healer(unit)
+		if unit then
+			local role = GetSpecializationRole(unit)
+			if role then
+				return role == "HEALER"
+			else
+				return UnitGroupRolesAssigned(unit) == "HEALER"
+			end
 		else
-			return UnitGroupRolesAssigned(unit) == "DAMAGER"
+			return myRole == "HEALER"
 		end
-	else
-		if myRole == "DAMAGER" then
-			return myRolePosition
+	end
+
+	--- Check if your talent tree role is DAMAGER.
+	-- @string[opt="player"] unit check if the chosen role of another unit is set to DAMAGER.
+	-- @return boolean
+	function boss:Damager(unit)
+		if unit then
+			local role = GetSpecializationRole(unit)
+			if role then
+				return role == "DAMAGER"
+			else
+				return UnitGroupRolesAssigned(unit) == "DAMAGER"
+			end
+		else
+			if myRole == "DAMAGER" then
+				return myRolePosition
+			end
 		end
 	end
 end

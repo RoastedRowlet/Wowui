@@ -5,8 +5,8 @@ CliqueDB3 = {
 ["Barelynoer - Area 52"] = {
 ["spec1_profileKey"] = "Barelynoer - Area 52",
 ["spec3_profileKey"] = "Barelynoer - Area 52",
-["spec2_profileKey"] = "Barelynoer - Area 52",
 ["specswap"] = false,
+["spec2_profileKey"] = "Barelynoer - Area 52",
 },
 ["Angryabsol - Stormrage"] = {
 ["spec1_profileKey"] = "Angryabsol - Stormrage",
@@ -18,17 +18,17 @@ CliqueDB3 = {
 ["Zappyxatu - Stormrage"] = {
 ["spec1_profileKey"] = "Zappyxatu - Stormrage",
 ["spec3_profileKey"] = "Zappyxatu - Stormrage",
-["specswap"] = false,
 ["spec2_profileKey"] = "Zappyxatu - Stormrage",
+["specswap"] = false,
 },
 ["Lonelylitten - Stormrage"] = {
 ["fastooc"] = false,
 ["spec1_profileKey"] = "Lonelylitten - Stormrage",
-["spec2_profileKey"] = "Lonelylitten - Stormrage",
+["spec3_profileKey"] = "Lonelylitten - Stormrage",
 ["downclick"] = false,
 ["spec4_profileKey"] = "Lonelylitten - Stormrage",
-["spec3_profileKey"] = "Lonelylitten - Stormrage",
 ["specswap"] = false,
+["spec2_profileKey"] = "Lonelylitten - Stormrage",
 },
 ["Madmareep - Stormrage"] = {
 ["spec1_profileKey"] = "Madmareep - Stormrage",
@@ -363,14 +363,6 @@ CliqueDB3 = {
 ["unit"] = "mouseover",
 },
 {
-["icon"] = 132212,
-["type"] = "menu",
-["key"] = "SHIFT-BUTTON2",
-["sets"] = {
-["default"] = true,
-},
-},
-{
 ["type"] = "menu",
 ["key"] = "CTRL-BUTTON2",
 ["sets"] = {
@@ -387,6 +379,14 @@ CliqueDB3 = {
 ["type"] = "spell",
 },
 {
+["icon"] = 132212,
+["type"] = "menu",
+["key"] = "SHIFT-BUTTON2",
+["sets"] = {
+["default"] = true,
+},
+},
+{
 ["type"] = "target",
 ["key"] = "CTRL-BUTTON1",
 ["sets"] = {
@@ -394,15 +394,6 @@ CliqueDB3 = {
 },
 ["icon"] = 132331,
 ["unit"] = "mouseover",
-},
-{
-["spell"] = "Riptide",
-["key"] = "BUTTON1",
-["sets"] = {
-["default"] = true,
-},
-["icon"] = 252995,
-["type"] = "spell",
 },
 {
 ["spell"] = "Purify Spirit",
@@ -420,6 +411,15 @@ CliqueDB3 = {
 ["default"] = true,
 },
 ["icon"] = 136077,
+["type"] = "spell",
+},
+{
+["spell"] = "Riptide",
+["key"] = "BUTTON1",
+["sets"] = {
+["default"] = true,
+},
+["icon"] = 252995,
 ["type"] = "spell",
 },
 {

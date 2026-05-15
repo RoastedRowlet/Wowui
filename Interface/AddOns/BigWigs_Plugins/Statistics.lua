@@ -33,6 +33,7 @@ local difficultyTable = {
 	[215] = "SOD", -- Normal (20 player Sunken Temple - Classic Season of Discovery)
 	[220] = "story", -- Story
 	[226] = "SOD", -- 20 Player (Molten Core & ZG - Classic Season of Discovery)
+	[233] = "mythic_flex", -- Mythic (Flexible 15-25 player raids)
 	[244] = "titan", -- Raid: 25 Titan-Reforged
 }
 local GetTime, date = GetTime, BigWigsLoader.date

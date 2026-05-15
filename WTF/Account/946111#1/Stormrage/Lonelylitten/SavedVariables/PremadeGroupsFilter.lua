@@ -21,8 +21,12 @@ PremadeGroupsFilterState = {
 },
 ["partyfit"] = true,
 ["dungeon6"] = false,
-["dungeon1"] = false,
-["dungeon2"] = false,
+["dungeon4"] = false,
+["dps"] = {
+["max"] = "",
+["min"] = "",
+["act"] = false,
+},
 ["members"] = {
 ["max"] = "",
 ["min"] = "",
@@ -31,25 +35,49 @@ PremadeGroupsFilterState = {
 ["expression"] = "",
 ["difficulty"] = {
 },
-["dungeon4"] = false,
+["dungeon1"] = false,
 ["dungeon7"] = false,
-["dungeon5"] = true,
+["dungeon5"] = false,
 ["dungeon8"] = false,
 ["dungeon3"] = false,
-["dps"] = {
-["max"] = "",
-["min"] = "",
-["act"] = false,
-},
+["dungeon2"] = false,
 ["tanks"] = {
-["max"] = "",
-["min"] = "",
-["act"] = false,
+["max"] = "1",
+["min"] = "1",
+["act"] = true,
 },
 },
 },
 ["c121f4"] = {
 ["enabled"] = true,
+["delve"] = {
+["tanks"] = {
+["max"] = "",
+["min"] = "",
+["act"] = false,
+},
+["delvetier"] = {
+["max"] = "",
+["min"] = "",
+["act"] = false,
+},
+["heals"] = {
+["max"] = "",
+["min"] = "",
+["act"] = false,
+},
+["dps"] = {
+["max"] = "",
+["min"] = "",
+["act"] = false,
+},
+["members"] = {
+["max"] = "",
+["min"] = "",
+["act"] = false,
+},
+["expression"] = "",
+},
 },
 ["version"] = 8,
 ["c9f8"] = {
@@ -99,7 +127,7 @@ PremadeGroupsFilterState = {
 ["raid"] = {
 ["difficulty"] = {
 ["val"] = 2,
-["act"] = true,
+["act"] = false,
 },
 ["heals"] = {
 ["max"] = "",
@@ -116,16 +144,17 @@ PremadeGroupsFilterState = {
 ["min"] = "",
 ["act"] = false,
 },
-["dps"] = {
-["max"] = "",
-["min"] = "",
-["act"] = false,
-},
 ["members"] = {
 ["max"] = "",
 ["min"] = "",
 ["act"] = false,
 },
+["dps"] = {
+["max"] = "",
+["min"] = "",
+["act"] = false,
+},
+["matchingid"] = false,
 ["expression"] = "",
 },
 },

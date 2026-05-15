@@ -341,6 +341,7 @@ L.N25 = "25人普通"
 L.H10 = "10人英雄"
 L.H25 = "25人英雄"
 L.titan = "25人泰坦" -- Chinese-only "Titan Reforged" servers
+--L.mythic_flex = "Mythic (Flex)" -- Mythic (Flexible 15-25 player raids)
 
 -----------------------------------------------------------------------
 -- TOOLS

@@ -171,7 +171,7 @@ BigWigs:AddSounds("Arcanotron Custos", {
 BigWigs:AddColors("Seranel Sunlash", {
 	[1224903] = "orange",
 	[1225193] = "red",
-	[1225787] = "yellow",
+	[1225787] = {"blue","yellow"},
 	[1248689] = "purple",
 })
 
@@ -184,8 +184,8 @@ BigWigs:AddSounds("Seranel Sunlash", {
 
 BigWigs:AddColors("Gemellus", {
 	[1223847] = "cyan",
-	[1224299] = "orange",
-	[1253709] = "red",
+	[1224299] = {"blue","orange"},
+	[1253709] = {"blue","red"},
 	[1284954] = "yellow",
 })
 
