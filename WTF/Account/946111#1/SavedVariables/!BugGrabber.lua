@@ -1,6 +1,6 @@
 
 BugGrabberDB = {
-["session"] = 382,
+["session"] = 388,
 ["lastSanitation"] = 3,
 ["errors"] = {
 {
@@ -698,6 +698,44 @@ BugGrabberDB = {
 ["stack"] = "[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:4002: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:3997>\n[C]: in function 'sort'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:4010: in function 'LFGListUtil_SortApplicants'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:1699: in function 'LFGListApplicationViewer_UpdateResultList'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:1504: in function 'onEvent'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:277: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:185>\n",
 ["session"] = 379,
 ["counter"] = 570,
+},
+{
+["message"] = "attempt to perform string conversion on a secret string value (execution tainted by 'BugSack')",
+["time"] = 1778903957,
+["locals"] = "text=\"yeah probably\"\nchattype=\"WHISPER\"\nlanguage=7\ndestination=<no value>\nself=<table>{\n bChoking=false\n BURST=4000\n nBypass=8018\n securelyHookedBNGameData=true\n MSG_OVERHEAD=40\n securelyHookedLogged=true\n securelyHooked=true\n MIN_FPS=20\n LastAvailUpdate=66496.233000\n BlockedQueuesDelay=0\n MAX_CPS=800\n OnUpdateDelay=0\n Frame=Frame <ChatThrottleLib.lua:219>\n Prio=<table>\n version=31\n avail=-1204\n nTotalSent=0\n HardThrottlingBeginTime=69029.260000\n}\n(*temporary)=13\nbMyTraffic=false\nChatThrottleLib=<table>{\n bChoking=false\n BURST=4000\n nBypass=8018\n securelyHookedBNGameData=true\n MSG_OVERHEAD=40\n securelyHookedLogged=true\n securelyHooked=true\n MIN_FPS=20\n LastAvailUpdate=66496.233000\n BlockedQueuesDelay=0\n MAX_CPS=800\n OnUpdateDelay=0\n Frame=Frame <ChatThrottleLib.lua:219>\n Prio=<table>\n version=31\n avail=-1204\n nTotalSent=0\n HardThrottlingBeginTime=69029.260000\n}\n",
+["stack"] = "[Interface/AddOns/BugSack/Libs/AceComm-3.0/ChatThrottleLib.lua]:286: in function <.../AddOns/BugSack/Libs/AceComm-3.0/ChatThrottleLib.lua:281>\n[tail call]: ?\n[C]: in function 'SendChatMessage'\n[Interface/AddOns/Blizzard_ChatFrameBase/Shared/ChatFrameEditBox.lua]:294: in function 'SendText'\n[Interface/AddOns/Blizzard_ChatFrameBase/Shared/ChatFrameEditBox.lua]:407: in function <...s/Blizzard_ChatFrameBase/Shared/ChatFrameEditBox.lua:403>\n",
+["session"] = 385,
+["counter"] = 1,
+},
+{
+["message"] = "LUA_WARNING: ...ddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBar.lua:213: attempt to perform arithmetic on local 'trackExtent' (a secret number value, while execution tainted by 'BigWigs_Core')\n|cffffd200Stack:|r\n[C]: in function 'secureexecuterange'\n[Interface/AddOns/Blizzard_SharedXML/ScrollingMessageFrame.lua]:165: in function 'CallOnDisplayRefreshed' with args (self=ChatFrame1 <FloatingChatFrame.xml:645>)\n[Interface/AddOns/Blizzard_SharedXML/ScrollingMessageFrame.lua]:658: in function 'RefreshDisplay' with args (self=ChatFrame1 <FloatingChatFrame.xml:645>)\n[Interface/AddOns/Blizzard_SharedXML/ScrollingMessageFrame.lua]:611: in function 'RefreshIfNecessary' with args (self=ChatFrame1 <FloatingChatFrame.xml:645>)\n[Interface/AddOns/Blizzard_SharedXML/ScrollingMessageFrame.lua]:366: in function <.../AddOns/Blizzard_SharedXML/ScrollingMessageFrame.lua:362> with args (self=ChatFrame1 <FloatingChatFrame.xml:645>, elapsed=0.004000)\n",
+["session"] = 385,
+["time"] = 1778903957,
+["counter"] = 1,
+},
+{
+["message"] = "LUA_WARNING: ...ddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBar.lua:213: attempt to perform arithmetic on local 'trackExtent' (a secret number value, while execution tainted by 'BigWigs_Core')\n|cffffd200Stack:|r\n[C]: in function 'secureexecuterange'\n[Interface/AddOns/Blizzard_SharedXML/ScrollingMessageFrame.lua]:165: in function 'CallOnDisplayRefreshed' with args (self=ChatFrame1 <FloatingChatFrame.xml:645>)\n[Interface/AddOns/Blizzard_SharedXML/ScrollingMessageFrame.lua]:658: in function 'RefreshDisplay' with args (self=ChatFrame1 <FloatingChatFrame.xml:645>)\n[Interface/AddOns/Blizzard_SharedXML/ScrollingMessageFrame.lua]:611: in function 'RefreshIfNecessary' with args (self=ChatFrame1 <FloatingChatFrame.xml:645>)\n[Interface/AddOns/Blizzard_SharedXML/ScrollingMessageFrame.lua]:366: in function <.../AddOns/Blizzard_SharedXML/ScrollingMessageFrame.lua:362> with args (self=ChatFrame1 <FloatingChatFrame.xml:645>, elapsed=0.003000)\n",
+["session"] = 385,
+["time"] = 1778904086,
+["counter"] = 10,
+},
+{
+["message"] = "LUA_WARNING: ...ddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBar.lua:213: attempt to perform arithmetic on local 'trackExtent' (a secret number value, while execution tainted by 'BigWigs_Core')\n|cffffd200Stack:|r\n[C]: in function 'secureexecuterange'\n[Interface/AddOns/Blizzard_SharedXML/ScrollingMessageFrame.lua]:165: in function 'CallOnDisplayRefreshed' with args (self=ChatFrame1 <FloatingChatFrame.xml:645>)\n[Interface/AddOns/Blizzard_SharedXML/ScrollingMessageFrame.lua]:658: in function 'RefreshDisplay' with args (self=ChatFrame1 <FloatingChatFrame.xml:645>)\n[Interface/AddOns/Blizzard_SharedXML/ScrollingMessageFrame.lua]:611: in function 'RefreshIfNecessary' with args (self=ChatFrame1 <FloatingChatFrame.xml:645>)\n[Interface/AddOns/Blizzard_SharedXML/ScrollingMessageFrame.lua]:366: in function <.../AddOns/Blizzard_SharedXML/ScrollingMessageFrame.lua:362> with args (self=ChatFrame1 <FloatingChatFrame.xml:645>, elapsed=0.002000)\n",
+["session"] = 385,
+["time"] = 1778904104,
+["counter"] = 25,
+},
+{
+["message"] = "LUA_WARNING: ...ddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBar.lua:213: attempt to perform arithmetic on local 'trackExtent' (a secret number value, while execution tainted by 'BigWigs_Core')\n|cffffd200Stack:|r\n[C]: in function 'secureexecuterange'\n[Interface/AddOns/Blizzard_SharedXML/ScrollingMessageFrame.lua]:165: in function 'CallOnDisplayRefreshed' with args (self=ChatFrame1 <FloatingChatFrame.xml:645>)\n[Interface/AddOns/Blizzard_SharedXML/ScrollingMessageFrame.lua]:658: in function 'RefreshDisplay' with args (self=ChatFrame1 <FloatingChatFrame.xml:645>)\n[Interface/AddOns/Blizzard_SharedXML/ScrollingMessageFrame.lua]:611: in function 'RefreshIfNecessary' with args (self=ChatFrame1 <FloatingChatFrame.xml:645>)\n[Interface/AddOns/Blizzard_SharedXML/ScrollingMessageFrame.lua]:366: in function <.../AddOns/Blizzard_SharedXML/ScrollingMessageFrame.lua:362> with args (self=ChatFrame1 <FloatingChatFrame.xml:645>, elapsed=0.001000)\n",
+["session"] = 385,
+["time"] = 1778904101,
+["counter"] = 2,
+},
+{
+["message"] = "LUA_WARNING: ...ddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBar.lua:213: attempt to perform arithmetic on local 'trackExtent' (a secret number value, while execution tainted by 'BigWigs_Core')\n|cffffd200Stack:|r\n[C]: in function 'secureexecuterange'\n[Interface/AddOns/Blizzard_SharedXML/ScrollingMessageFrame.lua]:165: in function 'CallOnDisplayRefreshed' with args (self=ChatFrame1 <FloatingChatFrame.xml:645>)\n[Interface/AddOns/Blizzard_SharedXML/ScrollingMessageFrame.lua]:658: in function 'RefreshDisplay' with args (self=ChatFrame1 <FloatingChatFrame.xml:645>)\n[Interface/AddOns/Blizzard_SharedXML/ScrollingMessageFrame.lua]:611: in function 'RefreshIfNecessary' with args (self=ChatFrame1 <FloatingChatFrame.xml:645>)\n[Interface/AddOns/Blizzard_SharedXML/ScrollingMessageFrame.lua]:366: in function <.../AddOns/Blizzard_SharedXML/ScrollingMessageFrame.lua:362> with args (self=ChatFrame1 <FloatingChatFrame.xml:645>, elapsed=0.022000)\n",
+["session"] = 385,
+["time"] = 1778904104,
+["counter"] = 1,
 },
 },
 }

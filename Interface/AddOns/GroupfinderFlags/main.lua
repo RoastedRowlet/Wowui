@@ -294,57 +294,71 @@ local function HookfunctionForGametooltip(tooltip, ...)
 
 	-- variables
 	local _
-	local guid, unit, realm, languageList, unitPlayerLocation
+	local languageList, unitPlayerLocation
 
-	guid = tooltip:GetPrimaryTooltipData().guid
-	if issecretvalue(guid) then return end
+	--guid = tooltip:GetPrimaryTooltipData().guid
+	--if issecretvalue(guid) then return end
 
-	_, unit = tooltip:GetUnit()
-	if issecretvalue(unit) then return end
-		
-		-- only proceed if unit is not nil
-		if unit ~= nil then
+	--_, unit = tooltip:GetUnit()
+	
 
-			-- gets name and realm of the player
-			_, realm = UnitName(unit)
-
-			-- if realm is nil check if player is from user's own realm
-			unitPlayerLocation = PlayerLocation:CreateFromUnit(unit)
-			if (realm == nil or realm == "") and C_PlayerInfo.UnitIsSameServer(unitPlayerLocation) then
-				realm = GroupfinderFlags.OWN_REALM
-			end
-
-			realm = NormalizeRealmname(realm)
-
-			-- check whether region is selected
-			if GroupfinderFlagsDB.region ~= nil and (GroupfinderFlagsDB.region == "europe" or GroupfinderFlagsDB.region == "america") then
-
-				-- get region specific realm language list
-				if GroupfinderFlagsDB.region == "europe" then
-					languageList = GroupfinderFlags.EU_REALM_LANGUAGES
-				elseif GroupfinderFlagsDB.region == "america" then
-					languageList = GroupfinderFlags.US_REALM_LANGUAGES
-				end
-
-
-				-- only proceed if player's realm is in database
-				if languageList[realm] ~= nil then
-
-					-- if option "showFlagOnlyIfOtherCountry" is active, only proceed with different languages
-					if not GroupfinderFlagsDB.showFlagOnlyIfOtherCountry or languageList[realm] ~= languageList[GroupfinderFlags.OWN_REALM] then
-
-						-- adding the flag by :AddLine()
-						local flag = GroupfinderFlags.TEXT_IMAGE_PATH..GroupfinderFlags.FLAGS[languageList[realm]]
-						local country_name = "|cFFFFFFFF" .. GroupfinderFlags.COUNTRYNAMES[GroupfinderFlags.LOCALE_CODE][languageList[realm]] .. "|r"
-						local timezone = (GroupfinderFlagsDB.showTimezoneOnUSandOceania and GroupfinderFlagsDB.region == "america" and GroupfinderFlags.US_REALM_TIMEZONES[realm]) and "|cFFFFFFFF (" .. GroupfinderFlags.US_REALM_TIMEZONES[realm] .. ")|r" or ""
-						local both_activated = GroupfinderFlagsDB.showFlagInTooltip and GroupfinderFlagsDB.showCountrynameInTooltip
-						GameTooltip:AddLine((GroupfinderFlagsDB.showFlagInTooltip and flag or "") .. (both_activated and "|cFFFFFFFF - |r" or "") .. (GroupfinderFlagsDB.showCountrynameInTooltip and country_name or "") .. timezone)
-						--  and readjusting the height and the width of the tooltip by :Show()
-						GameTooltip:Show()
-					end
+	-- takne from https://github.com/Amadeus-/WoWAddonDevGuide/blob/master/12a_Secret_Safe_APIs.md
+	local tooltipData, guid, unit, name, realm
+	if tooltip:IsTooltipType(Enum.TooltipDataType.Unit) then
+		tooltipData = tooltip:GetPrimaryTooltipData()
+		if tooltipData and canaccessvalue(tooltipData) then
+			guid = tooltipData.guid
+			if guid and canaccessvalue(guid) then
+				unit = UnitTokenFromGUID(guid)
+				if unit and canaccessvalue(unit) then
+					name, realm = UnitName(unit)
 				end
 			end
 		end
+	end
+
+	if unit and unit ~= "none" then
+		
+		if issecretvalue(realm) or issecretvalue(name) then return end
+			
+
+		-- if realm is nil check if player is from user's own realm
+		unitPlayerLocation = PlayerLocation:CreateFromUnit(unit)
+		if (realm == nil or realm == "") and C_PlayerInfo.UnitIsSameServer(unitPlayerLocation) then
+			realm = GroupfinderFlags.OWN_REALM
+		end
+
+		realm = NormalizeRealmname(realm)
+
+		-- check whether region is selected
+		if GroupfinderFlagsDB.region ~= nil and (GroupfinderFlagsDB.region == "europe" or GroupfinderFlagsDB.region == "america") then
+
+			-- get region specific realm language list
+			if GroupfinderFlagsDB.region == "europe" then
+				languageList = GroupfinderFlags.EU_REALM_LANGUAGES
+			elseif GroupfinderFlagsDB.region == "america" then
+				languageList = GroupfinderFlags.US_REALM_LANGUAGES
+			end
+
+
+			-- only proceed if player's realm is in database
+			if languageList[realm] ~= nil then
+
+				-- if option "showFlagOnlyIfOtherCountry" is active, only proceed with different languages
+				if not GroupfinderFlagsDB.showFlagOnlyIfOtherCountry or languageList[realm] ~= languageList[GroupfinderFlags.OWN_REALM] then
+
+					-- adding the flag by :AddLine()
+					local flag = GroupfinderFlags.TEXT_IMAGE_PATH..GroupfinderFlags.FLAGS[languageList[realm]]
+					local country_name = "|cFFFFFFFF" .. GroupfinderFlags.COUNTRYNAMES[GroupfinderFlags.LOCALE_CODE][languageList[realm]] .. "|r"
+					local timezone = (GroupfinderFlagsDB.showTimezoneOnUSandOceania and GroupfinderFlagsDB.region == "america" and GroupfinderFlags.US_REALM_TIMEZONES[realm]) and "|cFFFFFFFF (" .. GroupfinderFlags.US_REALM_TIMEZONES[realm] .. ")|r" or ""
+					local both_activated = GroupfinderFlagsDB.showFlagInTooltip and GroupfinderFlagsDB.showCountrynameInTooltip
+					GameTooltip:AddLine((GroupfinderFlagsDB.showFlagInTooltip and flag or "") .. (both_activated and "|cFFFFFFFF - |r" or "") .. (GroupfinderFlagsDB.showCountrynameInTooltip and country_name or "") .. timezone)
+					--  and readjusting the height and the width of the tooltip by :Show()
+					GameTooltip:Show()
+				end
+			end
+		end
+	end
 end
 
 

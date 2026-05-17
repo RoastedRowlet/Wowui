@@ -451,6 +451,7 @@ END
 VER 3 0000000000000003 "swiftmend" "134400"
 #181
 #showtooltip Swiftmend
+/use [combat] Light's Potential
 /cast Nature's Vigil
 /cast [@mouseover,help,nodead] Swiftmend
 END

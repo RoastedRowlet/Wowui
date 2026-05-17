@@ -54,11 +54,11 @@ BigWigs3DB = {
 ["Default"] = {
 ["player"] = {
 ["maxIcons"] = 5,
-["growthDirection"] = "RIGHT",
-["anchorPoint"] = "TOP",
 ["anchorYOffset"] = -216,
+["anchorPoint"] = "TOP",
 ["anchorRelPoint"] = "TOP",
 ["anchorXOffset"] = 426,
+["growthDirection"] = "RIGHT",
 },
 },
 },
@@ -154,14 +154,14 @@ BigWigs3DB = {
 ["profiles"] = {
 ["Default"] = {
 ["emphasize"] = false,
+["visibleBarLimit"] = 1,
+["normalWidth"] = 120,
 ["expPosition"] = {
 "BOTTOMLEFT",
 "BOTTOMLEFT",
 330,
 21,
 },
-["visibleBarLimit"] = 1,
-["normalWidth"] = 120,
 ["normalPosition"] = {
 "BOTTOMLEFT",
 "BOTTOMLEFT",
@@ -201,9 +201,9 @@ BigWigs3DB = {
 ["Player-60-0F85ABEF"] = {
 ["playerRating"] = 3892,
 ["specId"] = 105,
-["keyMap"] = 402,
+["keyMap"] = 557,
 ["name"] = "Lonelylitten",
-["keyLevel"] = 20,
+["keyLevel"] = 21,
 ["realm"] = "Stormrage",
 },
 },

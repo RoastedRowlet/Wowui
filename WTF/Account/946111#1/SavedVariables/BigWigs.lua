@@ -17,63 +17,6 @@ BigWigs3DB = {
 },
 },
 },
-["BigWigs_Bosses_Saprish"] = {
-["profiles"] = {
-["Default"] = {
-["toggles"] = {
-[1263523] = 3129591,
-},
-},
-},
-},
-["BigWigs_Plugins_BossBlock"] = {
-["global"] = {
-["tableNeedsCopied"] = false,
-["watchedMovies"] = {
-[1050] = true,
-[-2516] = true,
-[1049] = true,
-[-2529] = true,
-},
-},
-},
-["BigWigs_Bosses_Ranjit"] = {
-["profiles"] = {
-["Default"] = {
-["toggles"] = {
-[153757] = 3129591,
-},
-},
-},
-},
-["BigWigs_Plugins_PrivateAuras"] = {
-["global"] = {
-["showHelpTip"] = false,
-},
-["profiles"] = {
-["Default"] = {
-["player"] = {
-["maxIcons"] = 5,
-["growthDirection"] = "RIGHT",
-["anchorPoint"] = "TOP",
-["anchorYOffset"] = -216,
-["anchorRelPoint"] = "TOP",
-["anchorXOffset"] = 426,
-},
-},
-},
-},
-["BigWigs_Plugins_Sounds"] = {
-["profiles"] = {
-["Default"] = {
-["Alarm"] = {
-["BigWigs_Bosses_Midnight Falls"] = {
-[1253915] = "BigWigs: Beware (Algalon)",
-},
-},
-},
-},
-},
 ["BigWigs_Bosses_Echo of Doragosa"] = {
 ["profiles"] = {
 ["Default"] = {
@@ -88,22 +31,6 @@ BigWigs3DB = {
 ["Default"] = {
 ["toggles"] = {
 [1264336] = 3129591,
-},
-},
-},
-},
-["BigWigs_Plugins_Timeline"] = {
-["profiles"] = {
-["Default"] = {
-["blizzTimeline"] = true,
-},
-},
-},
-["BigWigs_Bosses_Chimaerus the Undreamt God"] = {
-["profiles"] = {
-["Default"] = {
-["toggles"] = {
-[1264756] = 3129591,
 },
 },
 },
@@ -141,20 +68,48 @@ BigWigs3DB = {
 },
 },
 },
-["BigWigs_Bosses_Muro'jin and Nekraxx"] = {
-["profiles"] = {
-["Default"] = {
-["toggles"] = {
-[1243900] = 3129591,
-},
-},
-},
-},
 ["BigWigs_Bosses_Zuraal"] = {
 ["profiles"] = {
 ["Default"] = {
 ["toggles"] = {
 [1263399] = 3129591,
+},
+},
+},
+},
+["BigWigs_Plugins_PrivateAuras"] = {
+["global"] = {
+["showHelpTip"] = false,
+},
+["profiles"] = {
+["Default"] = {
+["player"] = {
+["maxIcons"] = 5,
+["growthDirection"] = "RIGHT",
+["anchorPoint"] = "TOP",
+["anchorYOffset"] = -216,
+["anchorRelPoint"] = "TOP",
+["anchorXOffset"] = 426,
+},
+},
+},
+},
+["BigWigs_Plugins_Sounds"] = {
+["profiles"] = {
+["Default"] = {
+["Alarm"] = {
+["BigWigs_Bosses_Midnight Falls"] = {
+[1253915] = "BigWigs: Beware (Algalon)",
+},
+},
+},
+},
+},
+["BigWigs_Bosses_Chimaerus the Undreamt God"] = {
+["profiles"] = {
+["Default"] = {
+["toggles"] = {
+[1264756] = 3129591,
 },
 },
 },
@@ -180,6 +135,51 @@ BigWigs3DB = {
 },
 },
 },
+["BigWigs_Bosses_Muro'jin and Nekraxx"] = {
+["profiles"] = {
+["Default"] = {
+["toggles"] = {
+[1243900] = 3129591,
+},
+},
+},
+},
+["BigWigs_Plugins_Timeline"] = {
+["profiles"] = {
+["Default"] = {
+["blizzTimeline"] = true,
+},
+},
+},
+["BigWigs_Bosses_Saprish"] = {
+["profiles"] = {
+["Default"] = {
+["toggles"] = {
+[1263523] = 3129591,
+},
+},
+},
+},
+["BigWigs_Plugins_BossBlock"] = {
+["global"] = {
+["tableNeedsCopied"] = false,
+["watchedMovies"] = {
+[1050] = true,
+[-2516] = true,
+[1049] = true,
+[-2529] = true,
+},
+},
+},
+["BigWigs_Bosses_Ranjit"] = {
+["profiles"] = {
+["Default"] = {
+["toggles"] = {
+[153757] = 3129591,
+},
+},
+},
+},
 },
 ["myKeystones"] = {
 ["Player-3676-0DF7D3EF"] = {
@@ -191,9 +191,9 @@ BigWigs3DB = {
 ["realm"] = "Area 52",
 },
 ["Player-60-0F7B141D"] = {
-["playerRating"] = 3747,
+["playerRating"] = 3774,
 ["specId"] = 264,
-["keyMap"] = 161,
+["keyMap"] = 559,
 ["name"] = "Zappyxatu",
 ["keyLevel"] = 20,
 ["realm"] = "Stormrage",
@@ -201,9 +201,9 @@ BigWigs3DB = {
 ["Player-60-0F85ABEF"] = {
 ["playerRating"] = 3892,
 ["specId"] = 105,
-["keyMap"] = 402,
+["keyMap"] = 557,
 ["name"] = "Lonelylitten",
-["keyLevel"] = 20,
+["keyLevel"] = 21,
 ["realm"] = "Stormrage",
 },
 },
