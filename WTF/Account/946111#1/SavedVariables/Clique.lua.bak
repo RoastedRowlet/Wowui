@@ -3,17 +3,17 @@ CliqueDB = nil
 CliqueDB3 = {
 ["char"] = {
 ["Barelynoer - Area 52"] = {
-["spec1_profileKey"] = "Barelynoer - Area 52",
 ["spec3_profileKey"] = "Barelynoer - Area 52",
-["spec2_profileKey"] = "Barelynoer - Area 52",
+["spec1_profileKey"] = "Barelynoer - Area 52",
 ["specswap"] = false,
+["spec2_profileKey"] = "Barelynoer - Area 52",
 },
 ["Angryabsol - Stormrage"] = {
 ["spec1_profileKey"] = "Angryabsol - Stormrage",
-["specswap"] = false,
 ["spec3_profileKey"] = "Angryabsol - Stormrage",
 ["stopcastingfix"] = true,
 ["spec2_profileKey"] = "Angryabsol - Stormrage",
+["specswap"] = false,
 },
 ["Madmareep - Stormrage"] = {
 ["spec1_profileKey"] = "Madmareep - Stormrage",
@@ -22,19 +22,19 @@ CliqueDB3 = {
 ["spec2_profileKey"] = "Madmareep - Stormrage",
 },
 ["Lonelylitten - Stormrage"] = {
-["fastooc"] = false,
 ["spec1_profileKey"] = "Lonelylitten - Stormrage",
-["specswap"] = false,
-["downclick"] = false,
-["spec4_profileKey"] = "Lonelylitten - Stormrage",
-["spec3_profileKey"] = "Lonelylitten - Stormrage",
 ["spec2_profileKey"] = "Lonelylitten - Stormrage",
+["downclick"] = false,
+["fastooc"] = false,
+["specswap"] = false,
+["spec3_profileKey"] = "Lonelylitten - Stormrage",
+["spec4_profileKey"] = "Lonelylitten - Stormrage",
 },
 ["Zappyxatu - Stormrage"] = {
 ["spec1_profileKey"] = "Zappyxatu - Stormrage",
 ["spec3_profileKey"] = "Zappyxatu - Stormrage",
-["specswap"] = false,
 ["spec2_profileKey"] = "Zappyxatu - Stormrage",
+["specswap"] = false,
 },
 },
 ["profileKeys"] = {
@@ -363,13 +363,6 @@ CliqueDB3 = {
 ["unit"] = "mouseover",
 },
 {
-["type"] = "menu",
-["key"] = "CTRL-BUTTON2",
-["sets"] = {
-["default"] = true,
-},
-},
-{
 ["spell"] = "Healing Wave",
 ["key"] = "BUTTON2",
 ["sets"] = {
@@ -387,6 +380,13 @@ CliqueDB3 = {
 ["key"] = "SHIFT-BUTTON2",
 },
 {
+["type"] = "menu",
+["key"] = "CTRL-BUTTON2",
+["sets"] = {
+["default"] = true,
+},
+},
+{
 ["type"] = "target",
 ["key"] = "CTRL-BUTTON1",
 ["sets"] = {
@@ -394,15 +394,6 @@ CliqueDB3 = {
 },
 ["icon"] = 132331,
 ["unit"] = "mouseover",
-},
-{
-["spell"] = "Purify Spirit",
-["key"] = "BUTTON3",
-["sets"] = {
-["default"] = true,
-},
-["icon"] = 236288,
-["type"] = "spell",
 },
 {
 ["spell"] = "Ancestral Spirit",
@@ -420,6 +411,15 @@ CliqueDB3 = {
 ["default"] = true,
 },
 ["icon"] = 252995,
+["type"] = "spell",
+},
+{
+["spell"] = "Purify Spirit",
+["key"] = "BUTTON3",
+["sets"] = {
+["default"] = true,
+},
+["icon"] = 236288,
 ["type"] = "spell",
 },
 {

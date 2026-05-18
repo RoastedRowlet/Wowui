@@ -1,8 +1,21 @@
 # WarpDeplete
 
-## [v5.2.0](https://github.com/happenslol/WarpDeplete/tree/v5.2.0) (2026-05-04)
-[Full Changelog](https://github.com/happenslol/WarpDeplete/commits/v5.2.0) [Previous Releases](https://github.com/happenslol/WarpDeplete/releases)
+## [v5.3.0](https://github.com/happenslol/WarpDeplete/tree/v5.3.0) (2026-05-17)
+[Full Changelog](https://github.com/happenslol/WarpDeplete/commits/v5.3.0) [Previous Releases](https://github.com/happenslol/WarpDeplete/releases)
 
+- chore: Bump version  
+- feat: Add UI option to clear recorded splits per dungeon and level (#152)  
+    * feat: add UI option to clear recorded splits per dungeon and level  
+    - Added a new 'Clear Splits' section in the Options menu (under the Splits tab).  
+    - Added a dropdown to select a specific dungeon, dynamically populated from the database.  
+    - Added a secondary dropdown to select a specific keystone level or 'All Levels' for the chosen dungeon.  
+    - Implemented deletion logic to accurately clean up `WarpDeplete.db.global.splits` based on the selected map ID and level.  
+    - Added a confirmation prompt to prevent accidental data loss.  
+    * Updated locales  
+    - Updated English and French localization files (`enUS.lua`, `frFR.lua`) with new UI strings.  
+    * Allow deleting specific key level across all dungeons  
+- chore: Update ruRU.lua (#151)  
+- chore: update French translations (#150)  
 - chore: Bump version  
 - feat: Add fallback split levels and permanent split visibility (#147)  
     * Add split fallback and always show option  
@@ -48,7 +61,3 @@
 - feat: Add checks for midnight expansion (#133)  
 - chore: Add interface version for midnight (#132)  
 - chore: update gitignore (#131)  
-- chore: Update all locales (#129)  
-- chore: Update embeds.xml (#130)  
-- fix: Fix shared media dependency url (#128)  
-- fix: Fix external dependency links again (#127)  

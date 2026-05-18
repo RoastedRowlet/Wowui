@@ -1,0 +1,10 @@
+lightweight tag 4c7cf249d3d9031ac4aeacd77ec107c2853d7621 v1.6.4f
+Author:	Viktor Dvorak <beleg@volny.cz>
+Date:	Sat Apr 25 12:26:22 2026 +0200
+
+commit 4c7cf249d3d9031ac4aeacd77ec107c2853d7621
+Author: Viktor Dvorak <beleg@volny.cz>
+Date:   Sat Apr 25 12:26:22 2026 +0200
+
+    speed secret value fix
+

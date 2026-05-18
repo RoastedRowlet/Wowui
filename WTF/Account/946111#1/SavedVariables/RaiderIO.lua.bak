@@ -12,39 +12,8 @@ RaiderIO_Config = {
 ["hide"] = false,
 },
 }
-RaiderIO_LastCharacter = "us-Lonelylitten-stormrage"
+RaiderIO_LastCharacter = "us-Barelynoer-area-52"
 RaiderIO_MissingCharacters = {
-["us-Tekyo-tichondrius"] = true,
-["us-Shooggie-malganis"] = true,
-["us-Kanakaloka-thrall"] = true,
-["us-Esqueletors-ragnaros"] = true,
-["us-Volibear-illidan"] = true,
-["us-Cyu-thrall"] = true,
-["us-Copperlok-thrall"] = true,
-["us-Slicky-chromaggus"] = true,
-["us-Chundoriel-area-52"] = true,
-["us-Smokedremix-malganis"] = true,
-["us-Tokrozkaz-illidan"] = true,
-["us-Murlinator-illidan"] = true,
-["us-Limamei-azralon"] = true,
-["us-Makhaï-ragnaros"] = true,
-["us-Swiftygrowly-illidan"] = true,
-["us-Pennance-stormrage"] = true,
-["us-Unhingedrage-area-52"] = true,
-["us-Kifrest-ragnaros"] = true,
-["us-Jemmartlok-illidan"] = true,
-["us-Jeztror-tichondrius"] = true,
-["us-Infinite-madoran"] = true,
-["us-Scartz-stormrage"] = true,
-["us-Sarvdk-zuljin"] = true,
-["us-Cursed-proudmoore"] = true,
-["us-Xaxadopam-area-52"] = true,
-["us-Unholybro-aggramar"] = true,
-["us-Okirki-area-52"] = true,
-["us-Vertrix-drakkari"] = true,
-["us-Hearlok-illidan"] = true,
-["us-Livingkntpib-garona"] = true,
-["us-Vrx-area-52"] = true,
 }
 RaiderIO_MissingServers = {
 }

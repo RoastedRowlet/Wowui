@@ -1,6 +1,6 @@
 
 BugGrabberDB = {
-["session"] = 388,
+["session"] = 396,
 ["lastSanitation"] = 3,
 ["errors"] = {
 {
@@ -676,14 +676,6 @@ BugGrabberDB = {
 ["counter"] = 4,
 },
 {
-["message"] = ".../EllesmereUIDamageMeters/EllesmereUIDamageMeters.lua:1266: attempt to call a nil value",
-["time"] = 1778771825,
-["locals"] = "bar=<table>{\n label=FontString <EllesmereUIDamageMeters.lua:1554>\n _cachedAmtText=\"38.89M (133.2K)\"\n _cachedSrcName=\"Maryillo-Dragonmaw\"\n _cachedColorClass=\"DRUID\"\n _cachedDisplayName=\"Maryillo\"\n amount=FontString <EllesmereUIDamageMeters.lua:1556>\n _win=<table>\n _src=<table>\n fill=StatusBar <EllesmereUIDamageMeters.lua:1546>\n _hl=Texture <EllesmereUIDamageMeters.lua:1576>\n _class=\"DRUID\"\n _cachedSlot=1\n _cachedClass=\"DRUID\"\n _srcGUID=\"Player-84-0A77B0E0\"\n pos=FontString <EllesmereUIDamageMeters.lua:1553>\n row=Button <EllesmereUIDamageMeters.lua:1544>\n classIcon=Texture <EllesmereUIDamageMeters.lua:1548>\n}\ncurSession=1\ncurSessionID=nil\ncurDMType=0\ncfg=<table>{\n breakdownBarTexture=\"match\"\n rightTextColor=<table>\n leftTextColor=<table>\n barHeight=18\n standaloneTimer=true\n rightFontSize=14\n standaloneTimerAnchor=\"free\"\n iconStyle=\"spec\"\n showClassColor=true\n iconColorUseAccent=false\n leftFontSize=14\n standaloneTimerUseAccent=false\n standaloneTimerColor=<table>\n barTexture=\"atrocity\"\n barColor=<table>\n rightTextUseClassColor=false\n barFillAlpha=1\n barSpacing=2\n showHoverTooltip=true\n visibility=\"always\"\n bgR=0\n fontSize=14\n bgAlpha=1\n hdrTextUseAccent=false\n numberFormat=2\n hdrTextColor=<table>\n showPinnedSelf=false\n bgB=0\n breakdownAnchorPoint=\"row\"\n windowCount=4\n hdrMouseoverIcons=false\n leftTextUseClassColor=false\n standaloneTimerPos=<table>\n windows=<table>\n standaloneTimerSize=36\n barColorUseAccent=true\n hdrHeight=22\n bookmarks=<table>\n hdrIconSize=22\n hdrTextOffY=0\n hdrTextOffX=0\n hdrFontSize=11\n spellHistory=<table>\n bgG=0\n hdrBgAlpha=1\n iconColor=<table>\n refreshRate=1\n hdrBgColor=<table>\n}\nbarRow=Button <EllesmereUIDamageMeters.lua:1544>\nanchorMode=\"row\"\ndesiredAnchor=Button <EllesmereUIDamageMeters.lua:1544>\nbarGUID=\"Player-84-0A77B0E0\"\n(*temporary)=nil\n(*temporary)=\"attempt to call a nil value\"\n_ttLastGUID=nil\n_ttLastSession=1\n_ttLastSessionID=nil\n_ttLastDMType=0\n_ttLastAnchor=nil\n_ttFrame=Frame <EllesmereUIDamageMeters.lua:852>{\n _combatMsg=FontString <EllesmereUIDamageMeters.lua:875>\n _bg=Texture <EllesmereUIDamageMeters.lua:856>\n _hdr=Frame <EllesmereUIDamageMeters.lua:862>\n _tgtLabel=FontString <EllesmereUIDamageMeters.lua:1162>\n _tgtBars=<table>\n _hdrBg=Texture <EllesmereUIDamageMeters.lua:866>\n _hdrText=FontString <EllesmereUIDamageMeters.lua:869>\n _tgtDivider=Texture <EllesmereUIDamageMeters.lua:1160>\n}\n_ttLastScale=1\n",
-["stack"] = "[Interface/AddOns/EllesmereUIDamageMeters/EllesmereUIDamageMeters.lua]:1266: in function <.../EllesmereUIDamageMeters/EllesmereUIDamageMeters.lua:1224>\n[Interface/AddOns/EllesmereUIDamageMeters/EllesmereUIDamageMeters.lua]:1283: in function <.../EllesmereUIDamageMeters/EllesmereUIDamageMeters.lua:1279>\n",
-["session"] = 373,
-["counter"] = 10,
-},
-{
 ["message"] = "BigWigs: BigWigs: \"Lightblinded Vanguard\" had issues reading the timeline. Show the devs a screenshot of the messages in your chat, NOT this error message.",
 ["time"] = 1778772208,
 ["locals"] = "self=<table>{\n name=\"BigWigs\"\n C=<table>\n}\nmsg=\"BigWigs: \"Lightblinded Vanguard\" had issues reading the timeline. Show the devs a screenshot of the messages in your chat, NOT this error message.\"\nnoPrint=true\ncore=<table>{\n name=\"BigWigs\"\n C=<table>\n}\n",
@@ -736,6 +728,14 @@ BugGrabberDB = {
 ["session"] = 385,
 ["time"] = 1778904104,
 ["counter"] = 1,
+},
+{
+["message"] = ".../EllesmereUIDamageMeters/EllesmereUIDamageMeters.lua:1266: attempt to call a nil value",
+["time"] = 1779118654,
+["locals"] = "bar=<table>{\n label=FontString <EllesmereUIDamageMeters.lua:1554>\n _cachedAmtText=\"6.54M (75.2K)\"\n _cachedSrcName=\"Lonelylitten\"\n _cachedColorClass=\"DRUID\"\n _cachedDisplayName=\"Lonelylitten\"\n amount=FontString <EllesmereUIDamageMeters.lua:1556>\n _win=<table>\n _src=<table>\n fill=StatusBar <EllesmereUIDamageMeters.lua:1546>\n _hl=Texture <EllesmereUIDamageMeters.lua:1576>\n _class=\"DRUID\"\n _cachedSlot=1\n pos=FontString <EllesmereUIDamageMeters.lua:1553>\n _srcGUID=\"Player-60-0F85ABEF\"\n _cachedClass=\"DRUID\"\n row=Button <EllesmereUIDamageMeters.lua:1544>\n classIcon=Texture <EllesmereUIDamageMeters.lua:1548>\n}\ncurSession=1\ncurSessionID=nil\ncurDMType=2\ncfg=<table>{\n breakdownBarTexture=\"match\"\n rightTextColor=<table>\n leftTextColor=<table>\n barHeight=18\n standaloneTimer=true\n rightFontSize=14\n standaloneTimerAnchor=\"free\"\n iconStyle=\"spec\"\n showClassColor=true\n iconColorUseAccent=false\n leftFontSize=14\n standaloneTimerUseAccent=false\n standaloneTimerColor=<table>\n barTexture=\"atrocity\"\n barColor=<table>\n rightTextUseClassColor=false\n barFillAlpha=1\n barSpacing=2\n showHoverTooltip=true\n visibility=\"always\"\n bgR=0\n fontSize=14\n bgAlpha=1\n hdrTextUseAccent=false\n numberFormat=2\n hdrTextColor=<table>\n showPinnedSelf=false\n bgB=0\n breakdownAnchorPoint=\"row\"\n windowCount=4\n hdrMouseoverIcons=false\n leftTextUseClassColor=false\n standaloneTimerPos=<table>\n windows=<table>\n standaloneTimerSize=36\n barColorUseAccent=true\n hdrHeight=22\n bookmarks=<table>\n hdrIconSize=22\n hdrTextOffY=0\n hdrTextOffX=0\n hdrFontSize=11\n spellHistory=<table>\n bgG=0\n hdrBgAlpha=1\n iconColor=<table>\n refreshRate=1\n hdrBgColor=<table>\n}\nbarRow=Button <EllesmereUIDamageMeters.lua:1544>\nanchorMode=\"row\"\ndesiredAnchor=Button <EllesmereUIDamageMeters.lua:1544>\nbarGUID=\"Player-60-0F85ABEF\"\n(*temporary)=nil\n(*temporary)=\"attempt to call a nil value\"\n_ttLastGUID=nil\n_ttLastSession=0\n_ttLastSessionID=nil\n_ttLastDMType=0\n_ttLastAnchor=nil\n_ttFrame=Frame <EllesmereUIDamageMeters.lua:852>{\n _combatMsg=FontString <EllesmereUIDamageMeters.lua:875>\n _bg=Texture <EllesmereUIDamageMeters.lua:856>\n _hdr=Frame <EllesmereUIDamageMeters.lua:862>\n _tgtLabel=FontString <EllesmereUIDamageMeters.lua:1162>\n _tgtBars=<table>\n _hdrBg=Texture <EllesmereUIDamageMeters.lua:866>\n _hdrText=FontString <EllesmereUIDamageMeters.lua:869>\n _tgtDivider=Texture <EllesmereUIDamageMeters.lua:1160>\n}\n_ttLastScale=1\n",
+["stack"] = "[Interface/AddOns/EllesmereUIDamageMeters/EllesmereUIDamageMeters.lua]:1266: in function <.../EllesmereUIDamageMeters/EllesmereUIDamageMeters.lua:1224>\n[Interface/AddOns/EllesmereUIDamageMeters/EllesmereUIDamageMeters.lua]:1283: in function <.../EllesmereUIDamageMeters/EllesmereUIDamageMeters.lua:1279>\n",
+["session"] = 391,
+["counter"] = 22,
 },
 },
 }

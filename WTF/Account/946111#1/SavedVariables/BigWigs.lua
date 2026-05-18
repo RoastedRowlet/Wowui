@@ -17,140 +17,6 @@ BigWigs3DB = {
 },
 },
 },
-["BigWigs_Bosses_Echo of Doragosa"] = {
-["profiles"] = {
-["Default"] = {
-["toggles"] = {
-[388822] = 3129591,
-},
-},
-},
-},
-["BigWigs_Bosses_Ick & Krick"] = {
-["profiles"] = {
-["Default"] = {
-["toggles"] = {
-[1264336] = 3129591,
-},
-},
-},
-},
-["BigWigs_Bosses_Derelict Duo"] = {
-["profiles"] = {
-["Default"] = {
-["toggles"] = {
-[1219491] = 7323895,
-},
-},
-},
-},
-["BigWigs_Bosses_Vexamus"] = {
-["profiles"] = {
-["Default"] = {
-["toggles"] = {
-[386173] = 3129591,
-},
-},
-},
-},
-["MythicPlus"] = {
-["global"] = {
-["showViewerTeleportTip"] = false,
-},
-["profiles"] = {
-["Default"] = {
-["viewerPosition"] = {
-"TOPLEFT",
-"TOPLEFT",
-230,
--178,
-},
-},
-},
-},
-["BigWigs_Bosses_Zuraal"] = {
-["profiles"] = {
-["Default"] = {
-["toggles"] = {
-[1263399] = 3129591,
-},
-},
-},
-},
-["BigWigs_Plugins_PrivateAuras"] = {
-["global"] = {
-["showHelpTip"] = false,
-},
-["profiles"] = {
-["Default"] = {
-["player"] = {
-["maxIcons"] = 5,
-["growthDirection"] = "RIGHT",
-["anchorPoint"] = "TOP",
-["anchorYOffset"] = -216,
-["anchorRelPoint"] = "TOP",
-["anchorXOffset"] = 426,
-},
-},
-},
-},
-["BigWigs_Plugins_Sounds"] = {
-["profiles"] = {
-["Default"] = {
-["Alarm"] = {
-["BigWigs_Bosses_Midnight Falls"] = {
-[1253915] = "BigWigs: Beware (Algalon)",
-},
-},
-},
-},
-},
-["BigWigs_Bosses_Chimaerus the Undreamt God"] = {
-["profiles"] = {
-["Default"] = {
-["toggles"] = {
-[1264756] = 3129591,
-},
-},
-},
-},
-["BigWigs_Plugins_Bars"] = {
-["profiles"] = {
-["Default"] = {
-["normalWidth"] = 120,
-["expPosition"] = {
-"BOTTOMLEFT",
-"BOTTOMLEFT",
-330,
-21,
-},
-["visibleBarLimit"] = 1,
-["emphasize"] = false,
-["normalPosition"] = {
-"BOTTOMLEFT",
-"BOTTOMLEFT",
-330,
-0,
-},
-},
-},
-},
-["BigWigs_Bosses_Muro'jin and Nekraxx"] = {
-["profiles"] = {
-["Default"] = {
-["toggles"] = {
-[1243900] = 3129591,
-},
-},
-},
-},
-["BigWigs_Plugins_Timeline"] = {
-["profiles"] = {
-["Default"] = {
-["blizzTimeline"] = true,
-},
-},
-},
 ["BigWigs_Bosses_Saprish"] = {
 ["profiles"] = {
 ["Default"] = {
@@ -180,8 +46,150 @@ BigWigs3DB = {
 },
 },
 },
+["BigWigs_Plugins_PrivateAuras"] = {
+["global"] = {
+["showHelpTip"] = false,
+},
+["profiles"] = {
+["Default"] = {
+["player"] = {
+["maxIcons"] = 5,
+["anchorYOffset"] = -216,
+["anchorPoint"] = "TOP",
+["anchorRelPoint"] = "TOP",
+["anchorXOffset"] = 426,
+["growthDirection"] = "RIGHT",
+},
+},
+},
+},
+["BigWigs_Plugins_Sounds"] = {
+["profiles"] = {
+["Default"] = {
+["Alarm"] = {
+["BigWigs_Bosses_Midnight Falls"] = {
+[1253915] = "BigWigs: Beware (Algalon)",
+},
+},
+},
+},
+},
+["BigWigs_Bosses_Echo of Doragosa"] = {
+["profiles"] = {
+["Default"] = {
+["toggles"] = {
+[388822] = 3129591,
+},
+},
+},
+},
+["BigWigs_Bosses_Ick & Krick"] = {
+["profiles"] = {
+["Default"] = {
+["toggles"] = {
+[1264336] = 3129591,
+},
+},
+},
+},
+["BigWigs_Plugins_Timeline"] = {
+["profiles"] = {
+["Default"] = {
+["blizzTimeline"] = true,
+},
+},
+},
+["BigWigs_Bosses_Chimaerus the Undreamt God"] = {
+["profiles"] = {
+["Default"] = {
+["toggles"] = {
+[1264756] = 3129591,
+},
+},
+},
+},
+["BigWigs_Bosses_Derelict Duo"] = {
+["profiles"] = {
+["Default"] = {
+["toggles"] = {
+[1219491] = 7323895,
+},
+},
+},
+},
+["BigWigs_Bosses_Vexamus"] = {
+["profiles"] = {
+["Default"] = {
+["toggles"] = {
+[386173] = 3129591,
+},
+},
+},
+},
+["BigWigs_Plugins_Bars"] = {
+["profiles"] = {
+["Default"] = {
+["normalWidth"] = 120,
+["visibleBarLimit"] = 1,
+["emphasize"] = false,
+["expPosition"] = {
+"BOTTOMLEFT",
+"BOTTOMLEFT",
+330,
+21,
+},
+["normalPosition"] = {
+"BOTTOMLEFT",
+"BOTTOMLEFT",
+330,
+0,
+},
+},
+},
+},
+["BigWigs_Bosses_Zuraal"] = {
+["profiles"] = {
+["Default"] = {
+["toggles"] = {
+[1263399] = 3129591,
+},
+},
+},
+},
+["BigWigs_Bosses_Muro'jin and Nekraxx"] = {
+["profiles"] = {
+["Default"] = {
+["toggles"] = {
+[1243900] = 3129591,
+},
+},
+},
+},
+["MythicPlus"] = {
+["global"] = {
+["showViewerTeleportTip"] = false,
+},
+["profiles"] = {
+["Default"] = {
+["viewerPosition"] = {
+"TOPLEFT",
+"TOPLEFT",
+230,
+-178,
+},
+},
+},
+},
 },
 ["myKeystones"] = {
+["Player-60-0C9E885E"] = {
+["playerRating"] = 2064,
+["specId"] = 1480,
+["keyMap"] = 0,
+["name"] = "Angryabsol",
+["keyLevel"] = 0,
+["realm"] = "Stormrage",
+},
 ["Player-3676-0DF7D3EF"] = {
 ["playerRating"] = 3851,
 ["specId"] = 1473,
@@ -200,7 +208,7 @@ BigWigs3DB = {
 },
 ["Player-60-0F85ABEF"] = {
 ["playerRating"] = 3892,
-["specId"] = 105,
+["specId"] = 102,
 ["keyMap"] = 557,
 ["name"] = "Lonelylitten",
 ["keyLevel"] = 21,
@@ -216,23 +224,41 @@ BigWigs3DB = {
 BigWigsIconDB = {
 }
 BigWigsStatsDB = {
-[2966] = {
-[-3372] = {
-["solotier8"] = {
+[2939] = {
+[2795] = {
+["heroic"] = {
+["kills"] = 7,
+["fkDuration"] = 495.9110000000801,
+["wipes"] = 10,
+["fkWipes"] = 6,
+["best"] = 327.752000000095,
+["bestDate"] = "2026/04/07",
+["fkDate"] = "2026/04/01",
+},
+["mythic"] = {
+["kills"] = 3,
+["fkDuration"] = 400.1720000000059,
+["wipes"] = 32,
+["fkWipes"] = 18,
+["best"] = 389.2179999999935,
+["bestDate"] = "2026/04/29",
+["fkDate"] = "2026/04/22",
+},
+["normal"] = {
 ["kills"] = 1,
-["fkDate"] = "2026/04/11",
-["bestDate"] = "2026/04/11",
-["best"] = 208.5349999999162,
-["fkDuration"] = 208.5349999999162,
+["fkDuration"] = 313.8260000000009,
+["best"] = 313.8260000000009,
+["bestDate"] = "2026/03/25",
+["fkDate"] = "2026/03/25",
 },
 },
 },
 [2913] = {
 [2739] = {
 ["heroic"] = {
-["kills"] = 3,
+["kills"] = 4,
 ["fkDuration"] = 233.0529999998398,
-["wipes"] = 20,
+["wipes"] = 21,
 ["fkWipes"] = 16,
 ["best"] = 221.594000000001,
 ["bestDate"] = "2026/04/22",
@@ -280,35 +306,6 @@ BigWigsStatsDB = {
 ["best"] = 143.2100000000064,
 ["bestDate"] = "2026/05/12",
 ["fkDate"] = "2026/05/12",
-},
-},
-},
-[2939] = {
-[2795] = {
-["heroic"] = {
-["kills"] = 6,
-["fkDuration"] = 495.9110000000801,
-["wipes"] = 10,
-["fkWipes"] = 6,
-["best"] = 327.752000000095,
-["bestDate"] = "2026/04/07",
-["fkDate"] = "2026/04/01",
-},
-["mythic"] = {
-["kills"] = 3,
-["fkDuration"] = 400.1720000000059,
-["wipes"] = 32,
-["fkWipes"] = 18,
-["best"] = 389.2179999999935,
-["bestDate"] = "2026/04/29",
-["fkDate"] = "2026/04/22",
-},
-["normal"] = {
-["kills"] = 1,
-["fkDuration"] = 313.8260000000009,
-["best"] = 313.8260000000009,
-["bestDate"] = "2026/03/25",
-["fkDate"] = "2026/03/25",
 },
 },
 },
@@ -484,6 +481,17 @@ BigWigsStatsDB = {
 ["best"] = 96.65799999999581,
 ["bestDate"] = "2026/05/12",
 ["fkDate"] = "2026/03/24",
+},
+},
+},
+[2966] = {
+[-3372] = {
+["solotier8"] = {
+["kills"] = 1,
+["fkDate"] = "2026/04/11",
+["bestDate"] = "2026/04/11",
+["best"] = 208.5349999999162,
+["fkDuration"] = 208.5349999999162,
 },
 },
 },
