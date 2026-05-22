@@ -52,7 +52,7 @@ PremadeGroupsFilterState = {
 ["tanks"] = {
 ["max"] = "1",
 ["min"] = "1",
-["act"] = false,
+["act"] = true,
 },
 ["dungeon3"] = false,
 ["dungeon2"] = false,

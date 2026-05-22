@@ -1,17 +1,19 @@
 
 CompassHUDDB = {
 ["profileKeys"] = {
-["Angryabsol - Stormrage"] = "Default",
 ["Lonelylitten - Stormrage"] = "Default",
+["Angryabsol - Stormrage"] = "Default",
+["Zappyxatu - Stormrage"] = "Default",
 ["Barelynoer - Area 52"] = "Default",
+["Madmareep - Stormrage"] = "Default",
 },
 ["profiles"] = {
 ["Default"] = {
-["PositionY"] = 1162.666625976563,
+["PositionY"] = 1179.000122070313,
 ["Compartment"] = {
 ["hide"] = true,
 },
-["PositionX"] = 808.166748046875,
+["PositionX"] = 796.5001831054688,
 },
 },
 }

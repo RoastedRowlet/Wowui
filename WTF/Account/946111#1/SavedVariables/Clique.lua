@@ -5,35 +5,35 @@ CliqueDB3 = {
 ["Barelynoer - Area 52"] = {
 ["spec1_profileKey"] = "Barelynoer - Area 52",
 ["spec3_profileKey"] = "Barelynoer - Area 52",
-["spec2_profileKey"] = "Barelynoer - Area 52",
 ["specswap"] = false,
+["spec2_profileKey"] = "Barelynoer - Area 52",
 },
 ["Angryabsol - Stormrage"] = {
 ["spec1_profileKey"] = "Angryabsol - Stormrage",
 ["spec3_profileKey"] = "Angryabsol - Stormrage",
-["stopcastingfix"] = true,
-["spec2_profileKey"] = "Angryabsol - Stormrage",
 ["specswap"] = false,
+["spec2_profileKey"] = "Angryabsol - Stormrage",
+["stopcastingfix"] = true,
+},
+["Zappyxatu - Stormrage"] = {
+["spec3_profileKey"] = "Zappyxatu - Stormrage",
+["spec1_profileKey"] = "Zappyxatu - Stormrage",
+["specswap"] = false,
+["spec2_profileKey"] = "Zappyxatu - Stormrage",
+},
+["Lonelylitten - Stormrage"] = {
+["spec1_profileKey"] = "Lonelylitten - Stormrage",
+["specswap"] = false,
+["downclick"] = false,
+["fastooc"] = false,
+["spec2_profileKey"] = "Lonelylitten - Stormrage",
+["spec3_profileKey"] = "Lonelylitten - Stormrage",
+["spec4_profileKey"] = "Lonelylitten - Stormrage",
 },
 ["Madmareep - Stormrage"] = {
 ["spec1_profileKey"] = "Madmareep - Stormrage",
 ["spec3_profileKey"] = "Madmareep - Stormrage",
-["specswap"] = false,
 ["spec2_profileKey"] = "Madmareep - Stormrage",
-},
-["Lonelylitten - Stormrage"] = {
-["fastooc"] = false,
-["spec1_profileKey"] = "Lonelylitten - Stormrage",
-["spec3_profileKey"] = "Lonelylitten - Stormrage",
-["downclick"] = false,
-["spec4_profileKey"] = "Lonelylitten - Stormrage",
-["spec2_profileKey"] = "Lonelylitten - Stormrage",
-["specswap"] = false,
-},
-["Zappyxatu - Stormrage"] = {
-["spec1_profileKey"] = "Zappyxatu - Stormrage",
-["spec3_profileKey"] = "Zappyxatu - Stormrage",
-["spec2_profileKey"] = "Zappyxatu - Stormrage",
 ["specswap"] = false,
 },
 },
@@ -52,10 +52,10 @@ CliqueDB3 = {
 ["Taurostotem - Area 52"] = {
 ["bindings"] = {
 {
+["type"] = "target",
 ["sets"] = {
 ["default"] = true,
 },
-["type"] = "target",
 ["key"] = "BUTTON1",
 ["unit"] = "mouseover",
 },
@@ -71,10 +71,10 @@ CliqueDB3 = {
 ["Lonelylitten - Stormrage"] = {
 ["bindings"] = {
 {
+["type"] = "target",
 ["sets"] = {
 ["default"] = true,
 },
-["type"] = "target",
 ["key"] = "SHIFT-BUTTON1",
 ["unit"] = "mouseover",
 },
@@ -171,10 +171,10 @@ CliqueDB3 = {
 ["Angryabsol - Stormrage"] = {
 ["bindings"] = {
 {
+["type"] = "target",
 ["sets"] = {
 ["default"] = true,
 },
-["type"] = "target",
 ["key"] = "BUTTON1",
 ["unit"] = "mouseover",
 },
@@ -190,10 +190,10 @@ CliqueDB3 = {
 ["Evileevee - Area 52"] = {
 ["bindings"] = {
 {
+["type"] = "target",
 ["sets"] = {
 ["default"] = true,
 },
-["type"] = "target",
 ["key"] = "BUTTON1",
 ["unit"] = "mouseover",
 },
@@ -209,10 +209,10 @@ CliqueDB3 = {
 ["Dankmankeys - Stormrage"] = {
 ["bindings"] = {
 {
+["type"] = "target",
 ["sets"] = {
 ["default"] = true,
 },
-["type"] = "target",
 ["key"] = "BUTTON1",
 ["unit"] = "mouseover",
 },
@@ -228,10 +228,10 @@ CliqueDB3 = {
 ["Madmareep - Stormrage"] = {
 ["bindings"] = {
 {
-["type"] = "target",
 ["sets"] = {
 ["default"] = true,
 },
+["type"] = "target",
 ["key"] = "BUTTON1",
 ["unit"] = "mouseover",
 },
@@ -247,10 +247,10 @@ CliqueDB3 = {
 ["Barelynoer - Area 52"] = {
 ["bindings"] = {
 {
-["type"] = "target",
 ["sets"] = {
 ["default"] = true,
 },
+["type"] = "target",
 ["key"] = "SHIFT-BUTTON1",
 ["unit"] = "mouseover",
 },
@@ -264,62 +264,62 @@ CliqueDB3 = {
 {
 ["spell"] = "Verdant Embrace",
 ["key"] = "ALT-BUTTON1",
-["spellSubName"] = "Green",
+["type"] = "spell",
 ["sets"] = {
 ["default"] = true,
 },
 ["icon"] = 4622471,
-["type"] = "spell",
+["spellSubName"] = "Green",
 },
 {
 ["spell"] = "Cauterizing Flame",
 ["key"] = "ALT-BUTTON3",
-["type"] = "spell",
+["spellSubName"] = "Red",
 ["sets"] = {
 ["default"] = true,
 },
 ["icon"] = 4630446,
-["spellSubName"] = "Red",
+["type"] = "spell",
 },
 {
 ["spell"] = "Living Flame",
 ["key"] = "BUTTON2",
-["spellSubName"] = "Red",
+["type"] = "spell",
 ["sets"] = {
 ["default"] = true,
 },
 ["icon"] = 5199640,
-["type"] = "spell",
+["spellSubName"] = "Red",
 },
 {
 ["spell"] = "Expunge",
 ["key"] = "BUTTON3",
-["type"] = "spell",
+["spellSubName"] = "Green",
 ["sets"] = {
 ["default"] = true,
 },
 ["icon"] = 4630445,
-["spellSubName"] = "Green",
+["type"] = "spell",
 },
 {
 ["spell"] = "Emerald Blossom",
 ["key"] = "ALT-BUTTON2",
-["spellSubName"] = "Green",
+["type"] = "spell",
 ["sets"] = {
 ["default"] = true,
 },
 ["icon"] = 4622457,
-["type"] = "spell",
+["spellSubName"] = "Green",
 },
 {
 ["spell"] = "Return",
 ["key"] = "CTRL-BUTTON1",
-["spellSubName"] = "Bronze",
+["type"] = "spell",
 ["sets"] = {
 ["default"] = true,
 },
 ["icon"] = 4622472,
-["type"] = "spell",
+["spellSubName"] = "Bronze",
 },
 {
 ["type"] = "target",
@@ -333,32 +333,32 @@ CliqueDB3 = {
 {
 ["spell"] = "Return",
 ["key"] = "CTRL-BUTTON1",
-["spellSubName"] = "Bronze",
+["type"] = "spell",
 ["sets"] = {
 ["default"] = true,
 },
 ["icon"] = 4622472,
-["type"] = "spell",
+["spellSubName"] = "Bronze",
 },
 {
 ["spell"] = "Echo",
 ["key"] = "BUTTON1",
-["type"] = "spell",
+["spellSubName"] = "Bronze",
 ["sets"] = {
 ["default"] = true,
 },
 ["icon"] = 4622456,
-["spellSubName"] = "Bronze",
+["type"] = "spell",
 },
 },
 },
 ["Zappyxatu - Stormrage"] = {
 ["bindings"] = {
 {
-["type"] = "target",
 ["sets"] = {
 ["default"] = true,
 },
+["type"] = "target",
 ["key"] = "SHIFT-BUTTON1",
 ["unit"] = "mouseover",
 },
@@ -372,12 +372,12 @@ CliqueDB3 = {
 ["type"] = "spell",
 },
 {
+["icon"] = 132212,
 ["type"] = "menu",
+["key"] = "SHIFT-BUTTON2",
 ["sets"] = {
 ["default"] = true,
 },
-["key"] = "SHIFT-BUTTON2",
-["icon"] = 132212,
 },
 {
 ["type"] = "menu",
@@ -436,10 +436,10 @@ CliqueDB3 = {
 ["Minimeditite - Area 52"] = {
 ["bindings"] = {
 {
-["type"] = "target",
 ["sets"] = {
 ["default"] = true,
 },
+["type"] = "target",
 ["key"] = "BUTTON1",
 ["unit"] = "mouseover",
 },

@@ -1,39 +1,37 @@
 
 RaiderIO_Config = {
+["minimapIcon"] = {
+["minimapPos"] = 180,
+["showInCompartment"] = true,
+["hide"] = false,
+["lock"] = false,
+},
 ["profilePoint"] = {
 ["y"] = 0,
 ["x"] = -16,
 ["point"] = "TOPLEFT",
 },
-["minimapIcon"] = {
-["minimapPos"] = 180,
-["showInCompartment"] = true,
-["lock"] = false,
-["hide"] = false,
-},
 }
-RaiderIO_LastCharacter = "us-Lonelylitten-stormrage"
+RaiderIO_LastCharacter = "us-Zappyxatu-stormrage"
 RaiderIO_MissingCharacters = {
-["us-Huntinuraz-stormrage"] = true,
-["us-Gryzmo-stormrage"] = true,
-["us-Nalaylea-thrall"] = true,
-["us-Gamarra-stormrage"] = true,
-["us-Pleebmonk-stormrage"] = true,
-["us-Peeclass-illidan"] = true,
-["us-Evelirieda-stormrage"] = true,
-["us-Castercurse-stormrage"] = true,
-["us-Silverwolfè-stormrage"] = true,
-["us-Moraxzagan-thrall"] = true,
-["us-Timelybunny-proudmoore"] = true,
-["us-party5-stormrage"] = true,
-["us-Hahazapzap-stormrage"] = true,
-["us-Fipal-stormrage"] = true,
-["us-Mobdk-stormrage"] = true,
-["us-Bigdaddyclaw-stormrage"] = true,
-["us-Libnull-stormrage"] = true,
-["us-Paganiniv-azralon"] = true,
-["us-Shirogeek-stormrage"] = true,
-["us-Cuteboyuwu-stormrage"] = true,
+["us-Thismfspittn-area-52"] = true,
+["us-Achihunt-zuljin"] = true,
+["us-Rusich-stormrage"] = true,
+["us-Drawrannger-stormrage"] = true,
+["us-Raukø-stormrage"] = true,
+["us-Fna-darkspear"] = true,
+["us-Thepodd-stormrage"] = true,
+["us-Gibnz-zuljin"] = true,
+["us-Micey-blackhand"] = true,
+["us-Satura-stormrage"] = true,
+["us-Somnis-proudmoore"] = true,
+["us-Jòrdàn-gilneas"] = true,
+["us-Shadowzet-illidan"] = true,
+["us-Mahara-zuluhed"] = true,
+["us-Kärmel-proudmoore"] = true,
+["us-Yulaw-burning-blade"] = true,
+["us-Harrydunne-dalaran"] = true,
+["us-Fixx-illidan"] = true,
 }
 RaiderIO_MissingServers = {
 }

@@ -1,7 +1,7 @@
 
 BugGrabberDB = {
+["session"] = 434,
 ["lastSanitation"] = 3,
-["session"] = 401,
 ["errors"] = {
 {
 ["message"] = "...s/AdvancedFocusCastBar/AdvancedFocusCastBarMixin.lua:1861: bad argument #1 to 'SetAlpha' (Usage: self:SetAlpha(alpha))",
@@ -85,8 +85,8 @@ BugGrabberDB = {
 },
 {
 ["message"] = "LUA_WARNING: Couldn't open Interface/AddOns/WeakAuras/Bindings.xml",
-["session"] = 52,
 ["time"] = 1777140638,
+["session"] = 52,
 ["counter"] = 1,
 },
 {
@@ -251,20 +251,20 @@ BugGrabberDB = {
 },
 {
 ["message"] = "LUA_WARNING: Interface/AddOns/!BugGrabber/BugGrabber.lua:-1: insecure scripts exceeded execution limit for addon !BugGrabber",
-["time"] = 1777601702,
 ["session"] = 115,
+["time"] = 1777601702,
 ["counter"] = 10,
 },
 {
 ["message"] = "LUA_WARNING: ...ce/AddOns/Blizzard_CooldownViewer/CooldownViewer.lua:704: bad argument #1 to 'EnableSpellRangeCheck' (Usage: C_Spell.EnableSpellRangeCheck(spellIdentifier, enable))\n|cffffd200Stack:|r\n[C]: in function 'secureexecuterange'\n[Interface/AddOns/Blizzard_EditMode/Shared/EditModeManager.lua]:97: in function 'HideSystemSelections'\n[Interface/AddOns/Blizzard_EditMode/Shared/EditModeManager.lua]:104: in function <.../AddOns/Blizzard_EditMode/Shared/EditModeManager.lua:100>\n[C]: ?\n[C]: ?\n[C]: ?\n[C]: in function 'ExitEditMode'\n[Interface/AddOns/Blizzard_EditMode/Shared/EditModeManager.lua]:126: in function <.../AddOns/Blizzard_EditMode/Shared/EditModeManager.lua:124>\n[C]: ?\n[C]: ?\n[C]: ?\n[C]: ?\n[C]: in function 'Hide'\n[Interface/AddOns/Blizzard_UIParentPanelManager/Shared/UIParentPanelManager.lua]:863: in function <...UIParentPanelManager/Shared/UIParentPanelManager.lua:853>\n[C]: in function 'HideUIPanel'\n[Interface/AddOns/Blizzard_EditMode/Shared/EditModeManager.lua]:42: in function 'onCloseCallback'\n[Interface/AddOns/Blizzard_SharedXML/Mainline/SharedUIPanelTemplates.lua]:143: in function <...izzard_SharedXML/Mainline/SharedUIPanelTemplates.lua:138>\n[C]: in function 'Click'\n[Interface/AddOns/Blizzard_UIParent/Mainline/UIParent.lua]:2351: in function <...rface/AddOns/Blizzard_UIParent/Mainline/UIParent.lua:2316>\n[C]: ?\n[C]: ?\n[C]: in function 'ToggleGameMenu'\n[TOGGLEGAMEMENU]:1: in function <[string \"TOGGLEGAMEMENU\"]:1>\n",
-["time"] = 1777602017,
 ["session"] = 115,
+["time"] = 1777602017,
 ["counter"] = 1,
 },
 {
 ["message"] = "LUA_WARNING: ...ce/AddOns/Blizzard_CooldownViewer/CooldownViewer.lua:877: attempted to index a table that cannot be accessed while tainted (execution tainted by 'TalentLoadoutsEx')\n|cffffd200Stack:|r\n[C]: in function 'secureexecuterange'\n[Interface/AddOns/Blizzard_EditMode/Shared/EditModeManager.lua]:97: in function 'HideSystemSelections'\n[Interface/AddOns/Blizzard_EditMode/Shared/EditModeManager.lua]:104: in function <.../AddOns/Blizzard_EditMode/Shared/EditModeManager.lua:100>\n[C]: ?\n[C]: ?\n[C]: ?\n[C]: in function 'ExitEditMode'\n[Interface/AddOns/Blizzard_EditMode/Shared/EditModeManager.lua]:126: in function <.../AddOns/Blizzard_EditMode/Shared/EditModeManager.lua:124>\n[C]: ?\n[C]: ?\n[C]: ?\n[C]: ?\n[C]: in function 'Hide'\n[Interface/AddOns/Blizzard_UIParentPanelManager/Shared/UIParentPanelManager.lua]:863: in function <...UIParentPanelManager/Shared/UIParentPanelManager.lua:853>\n[C]: in function 'HideUIPanel'\n[Interface/AddOns/Blizzard_EditMode/Shared/EditModeManager.lua]:42: in function 'onCloseCallback'\n[Interface/AddOns/Blizzard_SharedXML/Mainline/SharedUIPanelTemplates.lua]:143: in function <...izzard_SharedXML/Mainline/SharedUIPanelTemplates.lua:138>\n[C]: in function 'Click'\n[Interface/AddOns/Blizzard_UIParent/Mainline/UIParent.lua]:2351: in function <...rface/AddOns/Blizzard_UIParent/Mainline/UIParent.lua:2316>\n[C]: ?\n[C]: ?\n[C]: in function 'ToggleGameMenu'\n[TOGGLEGAMEMENU]:1: in function <[string \"TOGGLEGAMEMENU\"]:1>\n",
-["time"] = 1777602017,
 ["session"] = 115,
+["time"] = 1777602017,
 ["counter"] = 1,
 },
 {
@@ -341,8 +341,8 @@ BugGrabberDB = {
 },
 {
 ["message"] = "LUA_WARNING: ...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:3187: attempt to index field 'activityIDs' (a secret table value, while execution tainted by 'PremadeGroupsFilter')\n|cffffd200Stack:|r\n[C]: in function 'secureexecuterange'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:395: in function 'InvokeInitializers'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:786: in function 'Update'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:305: in function 'SetScrollPercentageInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:169: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:754: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:124: in function 'FullUpdate'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:721: in function <...ddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua:720>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:210: in function <...e/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua:209>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:213: in function 'TriggerEvent'\n...[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2683: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:2679>\n[C]: in function 'LFGListSearchPanel_UpdateResultList'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2569: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:2568>\n[C]: in function 'Show'\n[Interface/AddOns/Blizzard_UIParentPanelManager/Shared/UIParentPanelManager.lua]:842: in function <...UIParentPanelManager/Shared/UIParentPanelManager.lua:828>\n[C]: in function 'ShowUIPanel'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/PVEFrame.lua]:104: in function <...ce/AddOns/Blizzard_GroupFinder/Mainline/PVEFrame.lua:58>\n[C]: in function 'PVEFrame_ShowFrame'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/PVEFrame.lua]:55: in function 'PVEFrame_ToggleFrame'\n[TOGGLEGROUPFINDER]:1: in function <[string \"TOGGLEGROUPFINDER\"]:1>\n",
-["session"] = 170,
 ["time"] = 1778107183,
+["session"] = 170,
 ["counter"] = 6,
 },
 {
@@ -459,8 +459,8 @@ BugGrabberDB = {
 },
 {
 ["message"] = "LUA_WARNING: Interface/AddOns/EllesmereUIAuraBuffReminders/EllesmereUIAuraBuffReminders.lua:1 ...ace/AddOns/EllesmereUIAuraBuffReminders/EllesmereUIAuraBuffReminders.lua:1763: <name> or '...' expected near 'false'",
-["time"] = 1778473848,
 ["session"] = 237,
+["time"] = 1778473848,
 ["counter"] = 1,
 },
 {
@@ -489,8 +489,8 @@ BugGrabberDB = {
 },
 {
 ["message"] = "LUA_WARNING: Interface/AddOns/EllesmereUIAuraBuffReminders/EllesmereUIAuraBuffReminders.lua:1 ...ace/AddOns/EllesmereUIAuraBuffReminders/EllesmereUIAuraBuffReminders.lua:970: '=' expected near 'if'",
-["time"] = 1778480963,
 ["session"] = 283,
+["time"] = 1778480963,
 ["counter"] = 1,
 },
 {
@@ -559,8 +559,8 @@ BugGrabberDB = {
 },
 {
 ["message"] = "LUA_WARNING: Interface/AddOns/EllesmereUIAuraBuffReminders/EllesmereUIAuraBuffReminders.lua:1 ...ace/AddOns/EllesmereUIAuraBuffReminders/EllesmereUIAuraBuffReminders.lua:2427: function at line 1802 has more than 60 upvalues",
-["session"] = 334,
 ["time"] = 1778485470,
+["session"] = 334,
 ["counter"] = 1,
 },
 {
@@ -693,49 +693,57 @@ BugGrabberDB = {
 },
 {
 ["message"] = "LUA_WARNING: ...ddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBar.lua:213: attempt to perform arithmetic on local 'trackExtent' (a secret number value, while execution tainted by 'BigWigs_Core')\n|cffffd200Stack:|r\n[C]: in function 'secureexecuterange'\n[Interface/AddOns/Blizzard_SharedXML/ScrollingMessageFrame.lua]:165: in function 'CallOnDisplayRefreshed' with args (self=ChatFrame1 <FloatingChatFrame.xml:645>)\n[Interface/AddOns/Blizzard_SharedXML/ScrollingMessageFrame.lua]:658: in function 'RefreshDisplay' with args (self=ChatFrame1 <FloatingChatFrame.xml:645>)\n[Interface/AddOns/Blizzard_SharedXML/ScrollingMessageFrame.lua]:611: in function 'RefreshIfNecessary' with args (self=ChatFrame1 <FloatingChatFrame.xml:645>)\n[Interface/AddOns/Blizzard_SharedXML/ScrollingMessageFrame.lua]:366: in function <.../AddOns/Blizzard_SharedXML/ScrollingMessageFrame.lua:362> with args (self=ChatFrame1 <FloatingChatFrame.xml:645>, elapsed=0.004000)\n",
-["time"] = 1778903957,
 ["session"] = 385,
+["time"] = 1778903957,
 ["counter"] = 1,
 },
 {
 ["message"] = "LUA_WARNING: ...ddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBar.lua:213: attempt to perform arithmetic on local 'trackExtent' (a secret number value, while execution tainted by 'BigWigs_Core')\n|cffffd200Stack:|r\n[C]: in function 'secureexecuterange'\n[Interface/AddOns/Blizzard_SharedXML/ScrollingMessageFrame.lua]:165: in function 'CallOnDisplayRefreshed' with args (self=ChatFrame1 <FloatingChatFrame.xml:645>)\n[Interface/AddOns/Blizzard_SharedXML/ScrollingMessageFrame.lua]:658: in function 'RefreshDisplay' with args (self=ChatFrame1 <FloatingChatFrame.xml:645>)\n[Interface/AddOns/Blizzard_SharedXML/ScrollingMessageFrame.lua]:611: in function 'RefreshIfNecessary' with args (self=ChatFrame1 <FloatingChatFrame.xml:645>)\n[Interface/AddOns/Blizzard_SharedXML/ScrollingMessageFrame.lua]:366: in function <.../AddOns/Blizzard_SharedXML/ScrollingMessageFrame.lua:362> with args (self=ChatFrame1 <FloatingChatFrame.xml:645>, elapsed=0.003000)\n",
-["time"] = 1778904086,
 ["session"] = 385,
+["time"] = 1778904086,
 ["counter"] = 10,
 },
 {
 ["message"] = "LUA_WARNING: ...ddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBar.lua:213: attempt to perform arithmetic on local 'trackExtent' (a secret number value, while execution tainted by 'BigWigs_Core')\n|cffffd200Stack:|r\n[C]: in function 'secureexecuterange'\n[Interface/AddOns/Blizzard_SharedXML/ScrollingMessageFrame.lua]:165: in function 'CallOnDisplayRefreshed' with args (self=ChatFrame1 <FloatingChatFrame.xml:645>)\n[Interface/AddOns/Blizzard_SharedXML/ScrollingMessageFrame.lua]:658: in function 'RefreshDisplay' with args (self=ChatFrame1 <FloatingChatFrame.xml:645>)\n[Interface/AddOns/Blizzard_SharedXML/ScrollingMessageFrame.lua]:611: in function 'RefreshIfNecessary' with args (self=ChatFrame1 <FloatingChatFrame.xml:645>)\n[Interface/AddOns/Blizzard_SharedXML/ScrollingMessageFrame.lua]:366: in function <.../AddOns/Blizzard_SharedXML/ScrollingMessageFrame.lua:362> with args (self=ChatFrame1 <FloatingChatFrame.xml:645>, elapsed=0.002000)\n",
-["time"] = 1778904104,
 ["session"] = 385,
+["time"] = 1778904104,
 ["counter"] = 25,
 },
 {
 ["message"] = "LUA_WARNING: ...ddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBar.lua:213: attempt to perform arithmetic on local 'trackExtent' (a secret number value, while execution tainted by 'BigWigs_Core')\n|cffffd200Stack:|r\n[C]: in function 'secureexecuterange'\n[Interface/AddOns/Blizzard_SharedXML/ScrollingMessageFrame.lua]:165: in function 'CallOnDisplayRefreshed' with args (self=ChatFrame1 <FloatingChatFrame.xml:645>)\n[Interface/AddOns/Blizzard_SharedXML/ScrollingMessageFrame.lua]:658: in function 'RefreshDisplay' with args (self=ChatFrame1 <FloatingChatFrame.xml:645>)\n[Interface/AddOns/Blizzard_SharedXML/ScrollingMessageFrame.lua]:611: in function 'RefreshIfNecessary' with args (self=ChatFrame1 <FloatingChatFrame.xml:645>)\n[Interface/AddOns/Blizzard_SharedXML/ScrollingMessageFrame.lua]:366: in function <.../AddOns/Blizzard_SharedXML/ScrollingMessageFrame.lua:362> with args (self=ChatFrame1 <FloatingChatFrame.xml:645>, elapsed=0.001000)\n",
-["time"] = 1778904101,
 ["session"] = 385,
+["time"] = 1778904101,
 ["counter"] = 2,
 },
 {
 ["message"] = "LUA_WARNING: ...ddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBar.lua:213: attempt to perform arithmetic on local 'trackExtent' (a secret number value, while execution tainted by 'BigWigs_Core')\n|cffffd200Stack:|r\n[C]: in function 'secureexecuterange'\n[Interface/AddOns/Blizzard_SharedXML/ScrollingMessageFrame.lua]:165: in function 'CallOnDisplayRefreshed' with args (self=ChatFrame1 <FloatingChatFrame.xml:645>)\n[Interface/AddOns/Blizzard_SharedXML/ScrollingMessageFrame.lua]:658: in function 'RefreshDisplay' with args (self=ChatFrame1 <FloatingChatFrame.xml:645>)\n[Interface/AddOns/Blizzard_SharedXML/ScrollingMessageFrame.lua]:611: in function 'RefreshIfNecessary' with args (self=ChatFrame1 <FloatingChatFrame.xml:645>)\n[Interface/AddOns/Blizzard_SharedXML/ScrollingMessageFrame.lua]:366: in function <.../AddOns/Blizzard_SharedXML/ScrollingMessageFrame.lua:362> with args (self=ChatFrame1 <FloatingChatFrame.xml:645>, elapsed=0.022000)\n",
-["time"] = 1778904104,
 ["session"] = 385,
+["time"] = 1778904104,
 ["counter"] = 1,
 },
 {
-["message"] = ".../EllesmereUIDamageMeters/EllesmereUIDamageMeters.lua:1266: attempt to call a nil value",
-["time"] = 1779118654,
-["locals"] = "bar=<table>{\n label=FontString <EllesmereUIDamageMeters.lua:1554>\n _cachedAmtText=\"6.54M (75.2K)\"\n _cachedSrcName=\"Lonelylitten\"\n _cachedColorClass=\"DRUID\"\n _cachedDisplayName=\"Lonelylitten\"\n amount=FontString <EllesmereUIDamageMeters.lua:1556>\n _win=<table>\n _src=<table>\n fill=StatusBar <EllesmereUIDamageMeters.lua:1546>\n _hl=Texture <EllesmereUIDamageMeters.lua:1576>\n _class=\"DRUID\"\n _cachedSlot=1\n pos=FontString <EllesmereUIDamageMeters.lua:1553>\n _srcGUID=\"Player-60-0F85ABEF\"\n _cachedClass=\"DRUID\"\n row=Button <EllesmereUIDamageMeters.lua:1544>\n classIcon=Texture <EllesmereUIDamageMeters.lua:1548>\n}\ncurSession=1\ncurSessionID=nil\ncurDMType=2\ncfg=<table>{\n breakdownBarTexture=\"match\"\n rightTextColor=<table>\n leftTextColor=<table>\n barHeight=18\n standaloneTimer=true\n rightFontSize=14\n standaloneTimerAnchor=\"free\"\n iconStyle=\"spec\"\n showClassColor=true\n iconColorUseAccent=false\n leftFontSize=14\n standaloneTimerUseAccent=false\n standaloneTimerColor=<table>\n barTexture=\"atrocity\"\n barColor=<table>\n rightTextUseClassColor=false\n barFillAlpha=1\n barSpacing=2\n showHoverTooltip=true\n visibility=\"always\"\n bgR=0\n fontSize=14\n bgAlpha=1\n hdrTextUseAccent=false\n numberFormat=2\n hdrTextColor=<table>\n showPinnedSelf=false\n bgB=0\n breakdownAnchorPoint=\"row\"\n windowCount=4\n hdrMouseoverIcons=false\n leftTextUseClassColor=false\n standaloneTimerPos=<table>\n windows=<table>\n standaloneTimerSize=36\n barColorUseAccent=true\n hdrHeight=22\n bookmarks=<table>\n hdrIconSize=22\n hdrTextOffY=0\n hdrTextOffX=0\n hdrFontSize=11\n spellHistory=<table>\n bgG=0\n hdrBgAlpha=1\n iconColor=<table>\n refreshRate=1\n hdrBgColor=<table>\n}\nbarRow=Button <EllesmereUIDamageMeters.lua:1544>\nanchorMode=\"row\"\ndesiredAnchor=Button <EllesmereUIDamageMeters.lua:1544>\nbarGUID=\"Player-60-0F85ABEF\"\n(*temporary)=nil\n(*temporary)=\"attempt to call a nil value\"\n_ttLastGUID=nil\n_ttLastSession=0\n_ttLastSessionID=nil\n_ttLastDMType=0\n_ttLastAnchor=nil\n_ttFrame=Frame <EllesmereUIDamageMeters.lua:852>{\n _combatMsg=FontString <EllesmereUIDamageMeters.lua:875>\n _bg=Texture <EllesmereUIDamageMeters.lua:856>\n _hdr=Frame <EllesmereUIDamageMeters.lua:862>\n _tgtLabel=FontString <EllesmereUIDamageMeters.lua:1162>\n _tgtBars=<table>\n _hdrBg=Texture <EllesmereUIDamageMeters.lua:866>\n _hdrText=FontString <EllesmereUIDamageMeters.lua:869>\n _tgtDivider=Texture <EllesmereUIDamageMeters.lua:1160>\n}\n_ttLastScale=1\n",
-["stack"] = "[Interface/AddOns/EllesmereUIDamageMeters/EllesmereUIDamageMeters.lua]:1266: in function <.../EllesmereUIDamageMeters/EllesmereUIDamageMeters.lua:1224>\n[Interface/AddOns/EllesmereUIDamageMeters/EllesmereUIDamageMeters.lua]:1283: in function <.../EllesmereUIDamageMeters/EllesmereUIDamageMeters.lua:1279>\n",
-["session"] = 391,
-["counter"] = 22,
+["message"] = ".../EllesmereUIDamageMeters/EllesmereUIDamageMeters.lua:340: attempt to call a nil value",
+["time"] = 1779230168,
+["locals"] = "_=Frame <EllesmereUIDamageMeters.lua:270>\nevent=\"PLAYER_ENTERING_WORLD\"\n(*temporary)=nil\n(*temporary)=\"attempt to call a nil value\"\n_combatStartTime=103216.853000\n_combatEndTime=103329.357000\n_windows=<table>{\n 1=<table>\n 2=<table>\n 3=<table>\n 4=<table>\n}\ninstanceFrame=Frame <EllesmereUIDamageMeters.lua:270>\n_inCombat=false\n_needsFinalRefresh=false\n",
+["stack"] = "[Interface/AddOns/EllesmereUIDamageMeters/EllesmereUIDamageMeters.lua]:340: in function <.../EllesmereUIDamageMeters/EllesmereUIDamageMeters.lua:276>\n",
+["session"] = 411,
+["counter"] = 1,
 },
 {
 ["message"] = "[ADDON_ACTION_BLOCKED] AddOn 'EllesmereUIBlizzardSkin' tried to call the protected function 'InspectFrame:SetFrameStrata()'.",
-["time"] = 1779159959,
+["time"] = 1779247047,
 ["locals"] = "self=<table>\nevent=\"ADDON_ACTION_BLOCKED\"\naddonName=\"EllesmereUIBlizzardSkin\"\naddonFunc=\"InspectFrame:SetFrameStrata()\"\nname=\"EllesmereUIBlizzardSkin\"\nbadAddons=<table>{\n EllesmereUIBlizzardSkin=true\n}\nL=<table>{\n NO_DISPLAY_2=\"|cffffff00The standard display is called BugSack, and can probably be found on the same site where you found !BugGrabber.|r\"\n ERROR_DETECTED=\"%s |cffffff00captured, click the link for more information.|r\"\n BUGGRABBER_STOPPED=\"|cffffff00There are too many errors in your UI. As a result, your game experience may be degraded. Disable or update the failing addons if you don't want to see this message again.|r\"\n USAGE=\"|cffffff00Usage: /buggrabber <1-%d>.|r\"\n STOP_NAG=\"|cffffff00!BugGrabber will not nag about missing a display addon again until next patch.|r\"\n NO_DISPLAY_STOP=\"|cffffff00If you don't want to be reminded about this again, run /stopnag.|r\"\n NO_DISPLAY_1=\"|cffffff00You seem to be running !BugGrabber with no display addon to go along with it. Although a slash command is provided for accessing error reports, a display can help you manage these errors in a more convenient way.|r\"\n ERROR_UNABLE=\"|cffffff00!BugGrabber is unable to retrieve errors from other players by itself. Please install BugSack or a similar display addon that might give you this functionality.|r\"\n ADDON_CALL_PROTECTED=\"[%s] AddOn '%s' tried to call the protected function '%s'.\"\n}\n",
 ["stack"] = "[Interface/AddOns/!BugGrabber/BugGrabber.lua]:540: in function '?'\n[Interface/AddOns/!BugGrabber/BugGrabber.lua]:524: in function <Interface/AddOns/!BugGrabber/BugGrabber.lua:524>\n[C]: in function 'SetFrameStrata'\n[Interface/AddOns/EllesmereUIBlizzardSkin/EllesmereUIBlizzardSkin_InspectSheet.lua]:966: in function <...lizzardSkin/EllesmereUIBlizzardSkin_InspectSheet.lua:297>\n[Interface/AddOns/EllesmereUIBlizzardSkin/EllesmereUIBlizzardSkin_InspectSheet.lua]:996: in function <...lizzardSkin/EllesmereUIBlizzardSkin_InspectSheet.lua:990>\n[Interface/AddOns/EllesmereUIBlizzardSkin/EllesmereUIBlizzardSkin_InspectSheet.lua]:1124: in function <...lizzardSkin/EllesmereUIBlizzardSkin_InspectSheet.lua:1122>\n",
-["session"] = 401,
-["counter"] = 21,
+["session"] = 417,
+["counter"] = 24,
+},
+{
+["message"] = ".../EllesmereUIDamageMeters/EllesmereUIDamageMeters.lua:1266: attempt to call a nil value",
+["time"] = 1779413485,
+["locals"] = "bar=<table>{\n label=FontString <EllesmereUIDamageMeters.lua:1554>\n _cachedAmtText=\"10.08M (90.8K)\"\n _cachedSrcName=\"Mistiicake\"\n _cachedColorClass=\"MONK\"\n _cachedDisplayName=\"Mistiicake\"\n amount=FontString <EllesmereUIDamageMeters.lua:1556>\n _win=<table>\n _src=<table>\n fill=StatusBar <EllesmereUIDamageMeters.lua:1546>\n _cachedClass=\"MONK\"\n _cachedSlot=1\n _hl=Texture <EllesmereUIDamageMeters.lua:1576>\n _class=\"MONK\"\n _srcGUID=\"Player-3676-0E501AF1\"\n pos=FontString <EllesmereUIDamageMeters.lua:1553>\n row=Button <EllesmereUIDamageMeters.lua:1544>\n classIcon=Texture <EllesmereUIDamageMeters.lua:1548>\n}\ncurSession=1\ncurSessionID=nil\ncurDMType=2\ncfg=<table>{\n breakdownBarTexture=\"match\"\n rightTextColor=<table>\n leftTextColor=<table>\n barHeight=18\n standaloneTimer=true\n rightFontSize=14\n standaloneTimerAnchor=\"free\"\n iconStyle=\"spec\"\n showClassColor=true\n iconColorUseAccent=false\n leftFontSize=14\n standaloneTimerUseAccent=false\n standaloneTimerColor=<table>\n barTexture=\"atrocity\"\n barColor=<table>\n rightTextUseClassColor=false\n barFillAlpha=1\n barSpacing=2\n showHoverTooltip=true\n visibility=\"always\"\n bgR=0\n fontSize=14\n bgAlpha=1\n hdrTextUseAccent=false\n numberFormat=2\n hdrTextColor=<table>\n showPinnedSelf=false\n bgB=0\n breakdownAnchorPoint=\"row\"\n windowCount=4\n hdrMouseoverIcons=false\n iconColor=<table>\n bgG=0\n leftTextUseClassColor=false\n hdrBgAlpha=1\n barColorUseAccent=true\n hdrHeight=22\n hdrFontSize=11\n hdrTextOffX=0\n hdrTextOffY=0\n hdrIconSize=22\n bookmarks=<table>\n spellHistory=<table>\n standaloneTimerSize=36\n windows=<table>\n standaloneTimerPos=<table>\n refreshRate=1\n hdrBgColor=<table>\n}\nbarRow=Button <EllesmereUIDamageMeters.lua:1544>\nanchorMode=\"row\"\ndesiredAnchor=Button <EllesmereUIDamageMeters.lua:1544>\nbarGUID=\"Player-3676-0E501AF1\"\n(*temporary)=nil\n(*temporary)=\"attempt to call a nil value\"\n_ttLastGUID=nil\n_ttLastSession=1\n_ttLastSessionID=nil\n_ttLastDMType=2\n_ttLastAnchor=nil\n_ttFrame=Frame <EllesmereUIDamageMeters.lua:852>{\n _combatMsg=FontString <EllesmereUIDamageMeters.lua:875>\n _bg=Texture <EllesmereUIDamageMeters.lua:856>\n _hdr=Frame <EllesmereUIDamageMeters.lua:862>\n _tgtLabel=FontString <EllesmereUIDamageMeters.lua:1162>\n _tgtBars=<table>\n _hdrBg=Texture <EllesmereUIDamageMeters.lua:866>\n _hdrText=FontString <EllesmereUIDamageMeters.lua:869>\n _tgtDivider=Texture <EllesmereUIDamageMeters.lua:1160>\n}\n_ttLastScale=1\n",
+["stack"] = "[Interface/AddOns/EllesmereUIDamageMeters/EllesmereUIDamageMeters.lua]:1266: in function <.../EllesmereUIDamageMeters/EllesmereUIDamageMeters.lua:1224>\n[Interface/AddOns/EllesmereUIDamageMeters/EllesmereUIDamageMeters.lua]:1283: in function <.../EllesmereUIDamageMeters/EllesmereUIDamageMeters.lua:1279>\n",
+["session"] = 430,
+["counter"] = 30,
 },
 },
 }

@@ -46,7 +46,7 @@ PremadeGroupsFilterState = {
 ["difficulty"] = {
 },
 ["dungeon4"] = false,
-["dungeon2"] = true,
+["dungeon2"] = false,
 ["dungeon3"] = false,
 ["dungeon8"] = false,
 ["tanks"] = {
@@ -54,7 +54,7 @@ PremadeGroupsFilterState = {
 ["min"] = "1",
 ["act"] = true,
 },
-["dungeon5"] = false,
+["dungeon5"] = true,
 ["partyfit"] = true,
 },
 },
