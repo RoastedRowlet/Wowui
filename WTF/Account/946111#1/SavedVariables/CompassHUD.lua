@@ -10,10 +10,11 @@ CompassHUDDB = {
 ["profiles"] = {
 ["Default"] = {
 ["PositionY"] = 1179.000122070313,
+["Lock"] = true,
 ["Compartment"] = {
 ["hide"] = true,
 },
-["PositionX"] = 796.5001831054688,
+["PositionX"] = 808.166748046875,
 },
 },
 }

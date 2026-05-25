@@ -234,7 +234,7 @@ local function getChunkLookup(table, length)
 end
 
 local lookup = {'Unknown-Unknown','Mage-Frost',}
-local provider = {region='US',realm='Archimonde',name='US',type='subscribers',zone=46,date='2026-05-21',data={Li='Linthori:BAEALgADCgMJAwABLgAECgcJDQABAAAAAA==.',Ne='Nelson:BAEALgAECgYJBgABLgAECggJHQACANkWAA==.',Or='Ori:BAEALgADCgcJCwABLgAECgcJDQABAAAAAA==.',Ph='Philsner:BAEALgAECgcJDQAAAA==.',},}
+local provider = {region='US',realm='Archimonde',name='US',type='subscribers',zone=46,date='2026-05-24',data={Li='Linthori:BAEALgADCgMJAwABLgAECgcJDQABAAAAAA==.',Ne='Nelson:BAEALgAECgYJBgABLgAECggJJQACANcbAA==.',Or='Ori:BAEALgADCgcJCwABLgAECgcJDQABAAAAAA==.',Ph='Philsner:BAEALgAECgcJDQAAAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

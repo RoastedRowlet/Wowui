@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'Evoker-Augmentation','Evoker-Devastation',}
-local provider = {region='US',realm='Rexxar',name='US',type='subscribers',zone=46,date='2026-05-21',data={Ki='Kinkyhawt:BAEBLgAECn8WAAMBAAYJkh1yIwCWAQZoDAAABABTAGkMAAAEAFEAawwAAAQATQBqDAAAAwBKAGwMAAADADUA6gwAAAQAUgABAAYJ+RxyIwCWAQZoDAAAAwBTAGkMAAADAFAAawwAAAMARgBqDAAAAQAlAGwMAAADADUA6gwAAAMAUgACAAUJchuiFQCUAQVoDAAAAQAzAGkMAAABAFEAawwAAAEATQBqDAAAAgBKAOoMAAABAEYAAAA=.',},}
+local lookup = {'Warrior-Fury','Evoker-Augmentation','Evoker-Devastation',}
+local provider = {region='US',realm='Rexxar',name='US',type='subscribers',zone=46,date='2026-05-24',data={Ho='Holyfaxiss:BAEALgAECgcJCgABLgAECgcJGwABAEsiAA==.',Ki='Kinkyhawt:BAEBLgAECn8WAAMCAAYJkh0RJQCWAQZoDAAABABTAGkMAAAEAFEAawwAAAQATQBqDAAAAwBKAGwMAAADADUA6gwAAAQAUgACAAYJ+RwRJQCWAQZoDAAAAwBTAGkMAAADAFAAawwAAAMARgBqDAAAAQAlAGwMAAADADUA6gwAAAMAUgADAAUJchuiFQCUAQVoDAAAAQAzAGkMAAABAFEAawwAAAEATQBqDAAAAgBKAOoMAAABAEYAAAA=.',Wa='Warfaxis:BAEBLgAECn8bAAIBAAcJSyLvEABOAgdoDAAAAwBSAGkMAAADAFsAawwAAAMAUwBqDAAABABdAGwMAAAEAFgA6gwAAAcAWwBuDAAAAwBaAAEABwlLIu8QAE4CB2gMAAADAFIAaQwAAAMAWwBrDAAAAwBTAGoMAAAEAF0AbAwAAAQAWADqDAAABwBbAG4MAAADAFoAAAA=.',},}
 provider.parse = parse
 
 local rawData = provider.data

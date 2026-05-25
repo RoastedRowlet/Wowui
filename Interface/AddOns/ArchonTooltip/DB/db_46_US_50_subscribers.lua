@@ -234,7 +234,7 @@ local function getChunkLookup(table, length)
 end
 
 local lookup = {'DeathKnight-Unholy','DeathKnight-Frost','Shaman-Elemental',}
-local provider = {region='US',realm='CenarionCircle',name='US',type='subscribers',zone=46,date='2026-05-21',data={An='Aninja:BAEALgADCgQJBAABLgAFFAQJDgABADEaAA==.',Dr='Drïzl:BAEALgAECgMJAwABLgAFFAQJDgABADEaAA==.',Ex='Exïle:BAEALgAECgYJBgABLgAFFAQJDgABADEaAA==.',Ni='Ninjadk:BAECLgAFFH8OAAIBAAQJMRoBNwBRAQRoDAAABABgAGkMAAADAEAAawwAAAIAEgDqDAAABQBYAAEABAkxGgE3AFEBBGgMAAAEAGAAaQwAAAMAQABrDAAAAgASAOoMAAAFAFgALgAECn8uAAMBAAgJLyVBEQC+AgABAAgJLyVBEQC+AgACAAEJuBvpJQBAAAAAAA==.',Ti='Tizl:BAEALgAECgUJBQABLgAFFAQJDgABADEaAA==.',Wt='Wtfox:BAEALgAECgYJDwABLgAECggJKAADAG4XAA==.',},}
+local provider = {region='US',realm='CenarionCircle',name='US',type='subscribers',zone=46,date='2026-05-24',data={An='Aninja:BAEALgADCgQJBAABLgAFFAQJDgABADEaAA==.',Dr='Drïzl:BAEALgAECgMJAwABLgAFFAQJDgABADEaAA==.',Ex='Exïle:BAEALgAECgYJBgABLgAFFAQJDgABADEaAA==.',Ni='Ninjadk:BAECLgAFFH8OAAIBAAQJMRrmPQBLAQRoDAAABABgAGkMAAADAEAAawwAAAIAEgDqDAAABQBYAAEABAkxGuY9AEsBBGgMAAAEAGAAaQwAAAMAQABrDAAAAgASAOoMAAAFAFgALgAECn8xAAMBAAkJsiGYCgD+AgABAAkJsiGYCgD+AgACAAEJuBu3KABAAAAAAA==.',Ti='Tizl:BAEALgAECgUJBQABLgAFFAQJDgABADEaAA==.',Wt='Wtfox:BAEALgAECgYJDwABLgAECggJKAADAG4XAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

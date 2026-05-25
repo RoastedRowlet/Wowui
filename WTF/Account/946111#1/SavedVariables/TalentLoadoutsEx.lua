@@ -15,9 +15,9 @@ TalentLoadoutEx = {
 ["icon"] = 134400,
 },
 {
+["icon"] = 6025441,
 ["name"] = "Dungeons",
 ["isExpanded"] = true,
-["icon"] = 6025441,
 },
 {
 ["isInGroup"] = true,
