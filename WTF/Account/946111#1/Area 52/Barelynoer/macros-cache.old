@@ -7,6 +7,11 @@ VER 3 0100000000000003 "Blistering Scale" "5199621"
 #showtooltip
 /cast [@mouseover] Blistering Scales
 END
+VER 3 010000000000000E "Breath" "134400"
+/use 13
+/use [combat] Light's Potential
+/cast Deep Breath
+END
 VER 3 0100000000000007 "Ebon Might Trink" "5061347"
 #122
 #showtooltip
@@ -67,5 +72,5 @@ VER 3 0100000000000006 "Trinket Breath" "134400"
 #showtooltip Breath of Eons(Bronze)
 /use [combat] Light's Potential
 /use 13
-/use Breath of Eons
+/cast Breath of Eons(Bronze)
 END

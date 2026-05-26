@@ -8,7 +8,6 @@ VER 3 0100000000000003 "Blistering Scale" "5199621"
 /cast [@mouseover] Blistering Scales
 END
 VER 3 010000000000000E "Breath" "134400"
-/use 13
 /use [combat] Light's Potential
 /cast Deep Breath
 END

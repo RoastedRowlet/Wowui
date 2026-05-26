@@ -234,7 +234,7 @@ local function getChunkLookup(table, length)
 end
 
 local lookup = {'Priest-Discipline','DemonHunter-Devourer',}
-local provider = {region='US',realm='Malfurion',name='US',type='subscribers',zone=46,date='2026-05-24',data={Ho='Hope:BAEALgAECgUJBQABLgAFFAcJDQABADANAA==.',Pa='Paraclete:BAEALgAFFAMJAwAAAA==.',Se='Seagulls:BAEBLgAECn8eAAICAAkJQh9aEQCdAgloDAAABQBTAGkMAAAEAFQAawwAAAQASgBqDAAAAwBeAGwMAAADAFMAbQwAAAIAPQDqDAAABQBXAG4MAAADAFAAbwwAAAEAVAACAAkJQh9aEQCdAgloDAAABQBTAGkMAAAEAFQAawwAAAQASgBqDAAAAwBeAGwMAAADAFMAbQwAAAIAPQDqDAAABQBXAG4MAAADAFAAbwwAAAEAVAAAAA==.',},}
+local provider = {region='US',realm='Malfurion',name='US',type='subscribers',zone=46,date='2026-05-25',data={Ho='Hope:BAEALgAECgUJBQABLgAFFAcJDQABADANAA==.',Pa='Paraclete:BAEALgAFFAMJAwAAAA==.',Se='Seagulls:BAEBLgAECn8jAAICAAkJQh9PEACpAgloDAAABgBTAGkMAAAFAFQAawwAAAUASgBqDAAABABeAGwMAAADAFMAbQwAAAIAPQDqDAAABgBXAG4MAAADAFAAbwwAAAEAVAACAAkJQh9PEACpAgloDAAABgBTAGkMAAAFAFQAawwAAAUASgBqDAAABABeAGwMAAADAFMAbQwAAAIAPQDqDAAABgBXAG4MAAADAFAAbwwAAAEAVAAAAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

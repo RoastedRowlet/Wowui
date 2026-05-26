@@ -27,7 +27,7 @@ PremadeGroupsFilterState = {
 ["act"] = false,
 },
 ["notdeclined"] = false,
-["dungeon3"] = false,
+["dungeon3"] = true,
 ["members"] = {
 ["max"] = "",
 ["min"] = "",
@@ -57,7 +57,7 @@ PremadeGroupsFilterState = {
 ["raid"] = {
 ["difficulty"] = {
 ["val"] = 2,
-["act"] = false,
+["act"] = true,
 },
 ["heals"] = {
 ["max"] = "",
@@ -112,9 +112,6 @@ PremadeGroupsFilterState = {
 ["c114f6"] = {
 ["enabled"] = true,
 },
-["c114f5"] = {
-["enabled"] = true,
-},
 ["c6f4"] = {
 ["role"] = {
 ["heals"] = {
@@ -127,6 +124,9 @@ PremadeGroupsFilterState = {
 },
 ["expression"] = "",
 },
+},
+["c114f5"] = {
+["enabled"] = true,
 },
 ["c9f8"] = {
 ["enabled"] = true,

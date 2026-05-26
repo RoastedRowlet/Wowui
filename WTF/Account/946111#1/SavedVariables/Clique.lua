@@ -10,10 +10,10 @@ CliqueDB3 = {
 },
 ["Angryabsol - Stormrage"] = {
 ["spec1_profileKey"] = "Angryabsol - Stormrage",
-["spec3_profileKey"] = "Angryabsol - Stormrage",
 ["specswap"] = false,
 ["spec2_profileKey"] = "Angryabsol - Stormrage",
 ["stopcastingfix"] = true,
+["spec3_profileKey"] = "Angryabsol - Stormrage",
 },
 ["Zappyxatu - Stormrage"] = {
 ["spec1_profileKey"] = "Zappyxatu - Stormrage",
@@ -33,8 +33,8 @@ CliqueDB3 = {
 ["Madmareep - Stormrage"] = {
 ["spec1_profileKey"] = "Madmareep - Stormrage",
 ["spec3_profileKey"] = "Madmareep - Stormrage",
-["spec2_profileKey"] = "Madmareep - Stormrage",
 ["specswap"] = false,
+["spec2_profileKey"] = "Madmareep - Stormrage",
 },
 },
 ["profileKeys"] = {
@@ -372,12 +372,12 @@ CliqueDB3 = {
 ["type"] = "spell",
 },
 {
-["icon"] = 132212,
-["type"] = "menu",
 ["key"] = "SHIFT-BUTTON2",
 ["sets"] = {
 ["default"] = true,
 },
+["icon"] = 132212,
+["type"] = "menu",
 },
 {
 ["type"] = "menu",
