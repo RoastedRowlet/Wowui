@@ -11,30 +11,30 @@ CliqueDB3 = {
 ["Angryabsol - Stormrage"] = {
 ["spec1_profileKey"] = "Angryabsol - Stormrage",
 ["specswap"] = false,
-["spec3_profileKey"] = "Angryabsol - Stormrage",
-["stopcastingfix"] = true,
 ["spec2_profileKey"] = "Angryabsol - Stormrage",
-},
-["Madmareep - Stormrage"] = {
-["spec1_profileKey"] = "Madmareep - Stormrage",
-["spec3_profileKey"] = "Madmareep - Stormrage",
-["spec2_profileKey"] = "Madmareep - Stormrage",
-["specswap"] = false,
-},
-["Lonelylitten - Stormrage"] = {
-["spec1_profileKey"] = "Lonelylitten - Stormrage",
-["spec2_profileKey"] = "Lonelylitten - Stormrage",
-["downclick"] = false,
-["fastooc"] = false,
-["spec4_profileKey"] = "Lonelylitten - Stormrage",
-["specswap"] = false,
-["spec3_profileKey"] = "Lonelylitten - Stormrage",
+["stopcastingfix"] = true,
+["spec3_profileKey"] = "Angryabsol - Stormrage",
 },
 ["Zappyxatu - Stormrage"] = {
 ["spec1_profileKey"] = "Zappyxatu - Stormrage",
 ["spec3_profileKey"] = "Zappyxatu - Stormrage",
 ["spec2_profileKey"] = "Zappyxatu - Stormrage",
 ["specswap"] = false,
+},
+["Lonelylitten - Stormrage"] = {
+["spec1_profileKey"] = "Lonelylitten - Stormrage",
+["spec3_profileKey"] = "Lonelylitten - Stormrage",
+["downclick"] = false,
+["fastooc"] = false,
+["specswap"] = false,
+["spec2_profileKey"] = "Lonelylitten - Stormrage",
+["spec4_profileKey"] = "Lonelylitten - Stormrage",
+},
+["Madmareep - Stormrage"] = {
+["spec1_profileKey"] = "Madmareep - Stormrage",
+["spec3_profileKey"] = "Madmareep - Stormrage",
+["specswap"] = false,
+["spec2_profileKey"] = "Madmareep - Stormrage",
 },
 },
 ["profileKeys"] = {
@@ -52,10 +52,10 @@ CliqueDB3 = {
 ["Taurostotem - Area 52"] = {
 ["bindings"] = {
 {
+["type"] = "target",
 ["sets"] = {
 ["default"] = true,
 },
-["type"] = "target",
 ["key"] = "BUTTON1",
 ["unit"] = "mouseover",
 },
@@ -71,10 +71,10 @@ CliqueDB3 = {
 ["Lonelylitten - Stormrage"] = {
 ["bindings"] = {
 {
+["type"] = "target",
 ["sets"] = {
 ["default"] = true,
 },
-["type"] = "target",
 ["key"] = "SHIFT-BUTTON1",
 ["unit"] = "mouseover",
 },
@@ -171,10 +171,10 @@ CliqueDB3 = {
 ["Angryabsol - Stormrage"] = {
 ["bindings"] = {
 {
+["type"] = "target",
 ["sets"] = {
 ["default"] = true,
 },
-["type"] = "target",
 ["key"] = "BUTTON1",
 ["unit"] = "mouseover",
 },
@@ -190,10 +190,10 @@ CliqueDB3 = {
 ["Evileevee - Area 52"] = {
 ["bindings"] = {
 {
+["type"] = "target",
 ["sets"] = {
 ["default"] = true,
 },
-["type"] = "target",
 ["key"] = "BUTTON1",
 ["unit"] = "mouseover",
 },
@@ -209,10 +209,10 @@ CliqueDB3 = {
 ["Dankmankeys - Stormrage"] = {
 ["bindings"] = {
 {
+["type"] = "target",
 ["sets"] = {
 ["default"] = true,
 },
-["type"] = "target",
 ["key"] = "BUTTON1",
 ["unit"] = "mouseover",
 },
@@ -228,10 +228,10 @@ CliqueDB3 = {
 ["Madmareep - Stormrage"] = {
 ["bindings"] = {
 {
-["type"] = "target",
 ["sets"] = {
 ["default"] = true,
 },
+["type"] = "target",
 ["key"] = "BUTTON1",
 ["unit"] = "mouseover",
 },
@@ -247,12 +247,32 @@ CliqueDB3 = {
 ["Barelynoer - Area 52"] = {
 ["bindings"] = {
 {
-["type"] = "target",
 ["sets"] = {
 ["default"] = true,
 },
+["type"] = "target",
 ["key"] = "SHIFT-BUTTON1",
 ["unit"] = "mouseover",
+},
+{
+["spell"] = "Cauterizing Flame",
+["key"] = "ALT-BUTTON3",
+["spellSubName"] = "Red",
+["sets"] = {
+["default"] = true,
+},
+["icon"] = 4630446,
+["type"] = "spell",
+},
+{
+["spell"] = "Living Flame",
+["key"] = "BUTTON2",
+["type"] = "spell",
+["sets"] = {
+["default"] = true,
+},
+["icon"] = 5199640,
+["spellSubName"] = "Red",
 },
 {
 ["type"] = "menu",
@@ -264,61 +284,21 @@ CliqueDB3 = {
 {
 ["spell"] = "Verdant Embrace",
 ["key"] = "ALT-BUTTON1",
-["spellSubName"] = "Green",
+["type"] = "spell",
 ["sets"] = {
 ["default"] = true,
 },
 ["icon"] = 4622471,
-["type"] = "spell",
-},
-{
-["spell"] = "Cauterizing Flame",
-["key"] = "ALT-BUTTON3",
-["type"] = "spell",
-["sets"] = {
-["default"] = true,
-},
-["icon"] = 4630446,
-["spellSubName"] = "Red",
-},
-{
-["spell"] = "Living Flame",
-["key"] = "BUTTON2",
-["spellSubName"] = "Red",
-["sets"] = {
-["default"] = true,
-},
-["icon"] = 5199640,
-["type"] = "spell",
+["spellSubName"] = "Green",
 },
 {
 ["spell"] = "Expunge",
 ["key"] = "BUTTON3",
-["type"] = "spell",
+["spellSubName"] = "Green",
 ["sets"] = {
 ["default"] = true,
 },
 ["icon"] = 4630445,
-["spellSubName"] = "Green",
-},
-{
-["spell"] = "Emerald Blossom",
-["key"] = "ALT-BUTTON2",
-["spellSubName"] = "Green",
-["sets"] = {
-["default"] = true,
-},
-["icon"] = 4622457,
-["type"] = "spell",
-},
-{
-["spell"] = "Return",
-["key"] = "CTRL-BUTTON1",
-["spellSubName"] = "Bronze",
-["sets"] = {
-["default"] = true,
-},
-["icon"] = 4622472,
 ["type"] = "spell",
 },
 {
@@ -333,32 +313,52 @@ CliqueDB3 = {
 {
 ["spell"] = "Return",
 ["key"] = "CTRL-BUTTON1",
-["spellSubName"] = "Bronze",
+["type"] = "spell",
 ["sets"] = {
 ["default"] = true,
 },
 ["icon"] = 4622472,
-["type"] = "spell",
+["spellSubName"] = "Bronze",
 },
 {
-["spell"] = "Echo",
-["key"] = "BUTTON1",
+["spell"] = "Emerald Blossom",
+["key"] = "ALT-BUTTON2",
 ["type"] = "spell",
 ["sets"] = {
 ["default"] = true,
 },
-["icon"] = 4622456,
+["icon"] = 4622457,
+["spellSubName"] = "Green",
+},
+{
+["spell"] = "Return",
+["key"] = "CTRL-BUTTON1",
+["type"] = "spell",
+["sets"] = {
+["default"] = true,
+},
+["icon"] = 4622472,
 ["spellSubName"] = "Bronze",
+},
+{
+["spell"] = "Echo",
+["key"] = "BUTTON1",
+["spellSubName"] = "Bronze",
+["sets"] = {
+["default"] = true,
+},
+["icon"] = 4622456,
+["type"] = "spell",
 },
 },
 },
 ["Zappyxatu - Stormrage"] = {
 ["bindings"] = {
 {
-["type"] = "target",
 ["sets"] = {
 ["default"] = true,
 },
+["type"] = "target",
 ["key"] = "SHIFT-BUTTON1",
 ["unit"] = "mouseover",
 },
@@ -379,12 +379,12 @@ CliqueDB3 = {
 ["type"] = "spell",
 },
 {
+["key"] = "SHIFT-BUTTON2",
 ["sets"] = {
 ["default"] = true,
 },
-["type"] = "menu",
 ["icon"] = 132212,
-["key"] = "SHIFT-BUTTON2",
+["type"] = "menu",
 },
 {
 ["type"] = "target",
@@ -436,10 +436,10 @@ CliqueDB3 = {
 ["Minimeditite - Area 52"] = {
 ["bindings"] = {
 {
-["type"] = "target",
 ["sets"] = {
 ["default"] = true,
 },
+["type"] = "target",
 ["key"] = "BUTTON1",
 ["unit"] = "mouseover",
 },

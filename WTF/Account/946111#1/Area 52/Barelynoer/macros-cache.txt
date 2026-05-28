@@ -25,9 +25,15 @@ VER 3 0100000000000005 "Eruption -> Blac" "5199630"
 /cast Eruption
 END
 VER 3 0100000000000004 "Focus Kick" "134400"
-#124
-#showtooltip 
-/cast [@focus, exists, harm] Quell
+/cast [@focus,exists,nodead,harm] Quell
+/stopmacro [@focus,exists,nodead,harm]
+/focus target
+/cleartarget
+/targetenemy
+/cast Quell
+/target focus
+/clearfocus
+/startattack
 END
 VER 3 010000000000000B "Living Flame AR" "4622464"
 #125
