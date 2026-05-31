@@ -1691,11 +1691,7 @@ if inInstance or rb.showNonInstanced then
                 if buff.check == "huntersMark" then
                     isMissing = inCombat and _huntersMarkNeeded
                 elseif rb.showOthersMissing and buff.check == "raid" and (IsInGroup() or IsInRaid()) then
-                    if inCombat then
-                        isMissing = not PlayerHasAuraByID(buff.buffIDs)
-                    else
-                        isMissing = AnyGroupMemberMissingBuff(buff.buffIDs)
-                    end
+                    isMissing = AnyGroupMemberMissingBuff(buff.buffIDs)
                 else
                     isMissing = not PlayerHasAuraByID(buff.buffIDs)
                 end
@@ -1723,7 +1719,8 @@ if inInstance or au.showNonInstanced then
             -- Handled by standalone system, skip
         elseif au.enabled[aura.key] and (aura.class == playerClass) and Known(aura.castSpell)
            and not (aura.notIfKnown and Known(aura.notIfKnown))
-           and not (aura.requireTalent and not Known(aura.requireTalent)) then
+           and not (aura.requireTalent and not Known(aura.requireTalent))
+           and not (aura.noPvP and InPvPInstance()) then
             -- Spec check
             local specOk = true
             if aura.specs then
@@ -1985,15 +1982,25 @@ local specialsActive = inInstance or co.showSpecialsNonInstanced
             if IsSpellKnown(sid) then _hasImbueSpell = true; break end
         end
         if co.enabled.weapon_enchant and not _hasImbueSpell then
-            local hasMH, _, _, _, hasOH = GetWeaponEnchantInfo()
+            local hasMH, mhExpire, _, _, hasOH, ohExpire = GetWeaponEnchantInfo()
             local mhCat = GetWeaponCategory(16)
             local ohCat = GetWeaponCategory(17)
 
-            -- Check each weapon slot independently (both can show at once)
+            -- Check each weapon slot independently (both can show at once).
+            -- Remind if: no enchant, OR enchant is under the duration threshold.
             local preferredKey = co.preferredWeaponEnchant or "last_used"
             local lastUsedID = db.char and db.char.lastUsedWeaponEnchant or nil
-            for _, si in ipairs({{slot=16, cat=mhCat, has=hasMH}, {slot=17, cat=ohCat, has=hasOH}}) do
+            for _, si in ipairs({{slot=16, cat=mhCat, has=hasMH, expire=mhExpire}, {slot=17, cat=ohCat, has=hasOH, expire=ohExpire}}) do
+                local shouldRemind = false
                 if si.cat and not si.has then
+                    shouldRemind = true
+                elseif si.cat and si.has and si.expire and si.expire > 0 then
+                    local expireTime = si.expire / 1000 + GetTime()
+                    if IsUnderDuration(3600, expireTime) then
+                        shouldRemind = true
+                    end
+                end
+                if shouldRemind then
                     local bestItemID = FindWeaponEnchantItem(preferredKey, lastUsedID, si.cat)
                     local hasBags = (bestItemID ~= nil)
                     if not bestItemID then
@@ -3237,10 +3244,11 @@ mainFrame:SetScript("OnEvent", function(_, e, arg1, arg2, arg3)
     end
 
     if e == "PLAYER_REGEN_DISABLED" then
-        -- Drop broad UNIT_AURA during combat (group events are useless --
-        -- CollectRaidBuffs only checks player auras in combat). Evoker
-        -- keeps broad for ownOnRaid cache updates.
-        if _needGroupAura and not _isEvokerOwnOnRaid then _setBroad(false) end
+        -- Drop broad UNIT_AURA during combat unless we need group tracking.
+        -- Evoker keeps broad for ownOnRaid cache updates; showOthersMissing
+        -- keeps broad so AnyGroupMemberMissingBuff gets timely refreshes.
+        local keepBroad = _isEvokerOwnOnRaid or (db and db.profile.raidBuffs and db.profile.raidBuffs.showOthersMissing)
+        if _needGroupAura and not keepBroad then _setBroad(false) end
         -- Only flag Hunter's Mark needed if the target doesn't already have it
         _huntersMarkNeeded = true
         if C_UnitAuras and C_UnitAuras.GetUnitAuraBySpellID
@@ -3316,11 +3324,9 @@ mainFrame:SetScript("OnEvent", function(_, e, arg1, arg2, arg3)
             RequestRefresh()
         else
             -- Group member aura change. Fast unit-type check via first byte.
-            -- In combat only Evoker reaches here (ownOnRaid cache); non-Evoker
-            -- classes unregister broad UNIT_AURA on combat start.
-            -- OOC: coalesce group events into a single deferred refresh instead
-            -- of calling RequestRefresh() per event (100+ events/sec in a raid
-            -- would each enter RequestRefresh just to hit the queued guard).
+            -- Broad UNIT_AURA stays registered in combat for Evoker ownOnRaid
+            -- and for showOthersMissing raid buff tracking. Coalesce group
+            -- events into a single deferred refresh to avoid per-event spam.
             local c = arg1 and arg1:byte(1)
             if c == 112 or c == 114 then  -- 'p' or 'r'
                 if _isEvokerOwnOnRaid and InCombat() and IsInGroup() then
@@ -3332,7 +3338,8 @@ mainFrame:SetScript("OnEvent", function(_, e, arg1, arg2, arg3)
                             end
                         end
                     end
-                elseif not _groupAuraDirty then
+                end
+                if not _groupAuraDirty then
                     _groupAuraDirty = true
                     C_Timer.After(0.3, function()
                         _groupAuraDirty = false

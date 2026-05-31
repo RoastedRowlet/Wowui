@@ -308,13 +308,37 @@ local function SkinInspectSheet()
     if GetFFD(frame).bg then
         GetFFD(frame).bg:Show()
     else
-        GetFFD(frame).bg = frame:CreateTexture(nil, "BACKGROUND", nil, -8)
-        GetFFD(frame).bg:SetAtlas("housing-basic-panel--stone-background")
-        GetFFD(frame).bg:SetAllPoints(frame)
-        GetFFD(frame).bg:SetAlpha(1)
+        local BG_ASPECT = 561 / 433
+        local bg = frame:CreateTexture(nil, "BACKGROUND", nil, -8)
+        bg:SetTexture("Interface\\AddOns\\EllesmereUI\\media\\modern_blizz.png")
+        bg:SetAllPoints(frame)
+        bg:SetAlpha(1)
+        GetFFD(frame).bg = bg
         GetFFD(frame).bgOverlay = frame:CreateTexture(nil, "BACKGROUND", nil, -7)
-        GetFFD(frame).bgOverlay:SetColorTexture(0, 0, 0, 0.7)
+        GetFFD(frame).bgOverlay:SetColorTexture(0, 0, 0, 0.55)
         GetFFD(frame).bgOverlay:SetAllPoints(frame)
+        -- Aspect-ratio-preserving cover mode (matches character sheet)
+        local BASE_L, BASE_R, BASE_T, BASE_B = 0.25, 1, 0, 0.75
+        local BASE_U = BASE_R - BASE_L
+        local BASE_V = BASE_B - BASE_T
+        local function UpdateBgTexCoords()
+            local fw, fh = frame:GetSize()
+            if fw == 0 or fh == 0 then return end
+            local frameAspect = fw / fh
+            if frameAspect > BG_ASPECT then
+                local visV = BASE_V * (BG_ASPECT / frameAspect)
+                local trimV = (BASE_V - visV) / 2
+                bg:SetTexCoord(BASE_L, BASE_R, BASE_T + trimV, BASE_B - trimV)
+            else
+                local visU = BASE_U * (frameAspect / BG_ASPECT)
+                local trimU = (BASE_U - visU) / 2
+                bg:SetTexCoord(BASE_L + trimU, BASE_R - trimU, BASE_T, BASE_B)
+            end
+        end
+        hooksecurefunc(frame, "SetSize", UpdateBgTexCoords)
+        hooksecurefunc(frame, "SetWidth", UpdateBgTexCoords)
+        hooksecurefunc(frame, "SetHeight", UpdateBgTexCoords)
+        UpdateBgTexCoords()
     end
 
     -- Hide Blizzard backgrounds and borders
@@ -331,8 +355,8 @@ local function SkinInspectSheet()
     if InspectFrameBg then InspectFrameBg:SetAlpha(0) end
     if InspectFrameInset and InspectFrameInset.Bg then InspectFrameInset.Bg:SetAlpha(0) end
 
-    -- Create model background (identical pattern to character sheet)
-    -- Model scene bg: deferred until InspectModelScene exists (created lazily by Blizzard)
+    -- Create model background (matches character sheet: character-bg.png, no glow/gradient)
+    -- Deferred until InspectModelFrame exists (created lazily by Blizzard)
     local function TryCreateModelBg()
         if GetFFD(frame).modelBgFrame then return end
         local myModel = _G.InspectModelFrame
@@ -340,62 +364,30 @@ local function SkinInspectSheet()
         local bgFrame = CreateFrame("Frame", nil, myModel)
         bgFrame:SetFrameLevel(math.max(1, myModel:GetFrameLevel() - 1))
         bgFrame:ClearAllPoints()
-        local headSlot = _G.InspectHeadSlot
-        local handsSlot = _G.InspectHandsSlot
-        local mainHandSlot = _G.InspectMainHandSlot
-        if headSlot then
-            bgFrame:SetPoint("TOPLEFT", headSlot, "TOPRIGHT", 0, 0)
-        else
-            bgFrame:SetPoint("TOPLEFT", myModel, "TOPLEFT", 0, 0)
-        end
-        if handsSlot then
-            bgFrame:SetPoint("TOPRIGHT", handsSlot, "TOPLEFT", 0, 0)
-        else
-            bgFrame:SetPoint("TOPRIGHT", myModel, "TOPRIGHT", 0, 0)
-        end
-        if mainHandSlot then
-            bgFrame:SetPoint("BOTTOM", mainHandSlot, "TOP", 0, 0)
-        else
-            bgFrame:SetPoint("BOTTOM", myModel, "BOTTOM", 0, 0)
-        end
+        -- Extend bg to window edges with 4px inset on each side
+        bgFrame:SetPoint("TOPLEFT", frame, "TOPLEFT", 4, -60)
+        bgFrame:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -4, 4)
         local bgTex = bgFrame:CreateTexture(nil, "BACKGROUND")
         bgTex:SetAllPoints(bgFrame)
-        bgTex:SetAtlas("transmog-locationBG")
-        bgTex:SetAlpha(0.5)
-
-        local GLOW_HEIGHT_RATIO = 386 / 860
-        local bgGlowTex = bgFrame:CreateTexture(nil, "BORDER")
-        bgGlowTex:SetAtlas("transmog-locationBG-glow")
-        bgGlowTex:SetPoint("BOTTOMLEFT",  bgFrame, "BOTTOMLEFT",  0, 0)
-        bgGlowTex:SetPoint("BOTTOMRIGHT", bgFrame, "BOTTOMRIGHT", 0, 0)
-        bgGlowTex:SetHeight(math.max(1, (bgFrame:GetHeight() or 0) * GLOW_HEIGHT_RATIO))
-        bgGlowTex:SetAlpha(0.5)
-        bgFrame:HookScript("OnSizeChanged", function(_, _, h)
-            bgGlowTex:SetHeight(math.max(1, (h or 0) * GLOW_HEIGHT_RATIO))
-        end)
-
-        -- Top fade: gradient overlay matching bgFrame bounds
-        local fadeFrame = CreateFrame("Frame", nil, bgFrame)
-        fadeFrame:SetFrameLevel(bgFrame:GetFrameLevel() + 1)
-        fadeFrame:SetAllPoints()
-        fadeFrame:EnableMouse(false)
-        local topFade = fadeFrame:CreateTexture(nil, "ARTWORK")
-        topFade:SetTexture("Interface\\AddOns\\EllesmereUIBlizzardSkin\\Media\\top-gradient-mask.tga")
-        topFade:SetPoint("TOPLEFT", fadeFrame, "TOPLEFT", 0, 0)
-        topFade:SetPoint("TOPRIGHT", fadeFrame, "TOPRIGHT", 0, 0)
-        topFade:SetHeight(60)
-        topFade:SetAlpha(0.5)
+        bgTex:SetTexture("Interface\\AddOns\\EllesmereUIBlizzardSkin\\Media\\character-bg.png")
+        bgTex:SetAlpha(1)
 
         GetFFD(frame).modelBg      = bgTex
-        GetFFD(frame).modelBgGlow  = bgGlowTex
         GetFFD(frame).modelBgFrame = bgFrame
-        GetFFD(frame).modelTopFade = fadeFrame
     end
     TryCreateModelBg()
-    -- Retry on show in case model scene wasn't ready on first skin
-    frame:HookScript("OnShow", function()
-        C_Timer.After(0, TryCreateModelBg)
-    end)
+    -- Retry on show in case model frame wasn't ready on first skin.
+    -- Staggered retries: Blizzard creates InspectModelFrame lazily
+    -- after the inspect target is set, which can take multiple frames.
+    -- HookScript only once to prevent accumulation on repeated reskins.
+    if not GetFFD(frame)._modelBgHooked then
+        GetFFD(frame)._modelBgHooked = true
+        frame:HookScript("OnShow", function()
+            C_Timer.After(0, TryCreateModelBg)
+            C_Timer.After(0.2, TryCreateModelBg)
+            C_Timer.After(0.5, TryCreateModelBg)
+        end)
+    end
 
     -- Hide portrait (separate handling to ensure it's fully hidden)
     if InspectFramePortrait then
@@ -697,18 +689,22 @@ local function SkinInspectSheet()
     -- Grid layout: 2 columns, 8 rows
     local cellWidth = 280
     local cellHeight = 41
-    local gridStartX = 14
+    local gridStartX = 10
     local gridStartY = -60
 
     -- Create overlay frame for text labels (above items, transparent, no mouse input)
-    local textOverlayFrame = CreateFrame("Frame", "EUI_InspectSheet_TextOverlay", frame)
-    textOverlayFrame:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, 0)
-    textOverlayFrame:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", 0, 0)
-    textOverlayFrame:SetFrameLevel(frame:GetFrameLevel() + 10)  -- Ensure it's above the frame
-    textOverlayFrame:EnableMouse(false)
-    textOverlayFrame:SetAlpha(1)  -- Always visible by default
+    -- Reuse existing overlay to prevent frame multiplication on repeated reskins
+    local textOverlayFrame = GetFFD(frame).textOverlayFrame
+    if not textOverlayFrame then
+        textOverlayFrame = CreateFrame("Frame", "EUI_InspectSheet_TextOverlay", frame)
+        textOverlayFrame:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, 0)
+        textOverlayFrame:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", 0, 0)
+        textOverlayFrame:SetFrameLevel(frame:GetFrameLevel() + 10)
+        textOverlayFrame:EnableMouse(false)
+        GetFFD(frame).textOverlayFrame = textOverlayFrame
+    end
+    textOverlayFrame:SetAlpha(1)
     textOverlayFrame:Show()
-    GetFFD(frame).textOverlayFrame = textOverlayFrame
 
     -- Position slots and style them
     if InspectPaperDollItemsFrame then
@@ -938,26 +934,24 @@ local function SkinInspectSheet()
         end
     end
 
-    -- Hook to update tabs when they change
-    if frame.HookScript then
+    -- Hook to update tabs when they change (once only)
+    if frame.HookScript and not GetFFD(frame)._tabHooked then
+        GetFFD(frame)._tabHooked = true
         frame:HookScript("OnShow", function()
             UpdateTabVisuals()
         end)
-    end
 
-    -- Hook to tabs to hide/show labels when clicked
-    for i = 1, 3 do
-        local tab = _G["InspectFrameTab" .. i]
-        if tab then
-            tab:HookScript("OnClick", function()
-                UpdateTabVisuals()
-                -- Check current tab dynamically
-                local isTab1 = (frame.selectedTab or 1) == 1
-                ApplyTabVisibility(isTab1)
-            end)
+        for i = 1, 3 do
+            local tab = _G["InspectFrameTab" .. i]
+            if tab then
+                tab:HookScript("OnClick", function()
+                    UpdateTabVisuals()
+                    local isTab1 = (frame.selectedTab or 1) == 1
+                    ApplyTabVisibility(isTab1)
+                end)
+            end
         end
     end
-
 
     UpdateTabVisuals()
 
@@ -1031,46 +1025,56 @@ end
 if EllesmereUI then
     EllesmereUI.ApplyThemedInspectSheet = ApplyThemedInspectSheet
 
-    -- Setup at PLAYER_LOGIN to register drag hooks early
+    -- Register hooks when Blizzard_InspectUI loads (it's load-on-demand,
+    -- so InspectFrame doesn't exist at PLAYER_LOGIN)
     local initFrame = CreateFrame("Frame")
-    initFrame:RegisterEvent("PLAYER_LOGIN")
-    initFrame:SetScript("OnEvent", function(self)
-        self:UnregisterEvent("PLAYER_LOGIN")
+    local _inspHooked = false
 
-        if InspectFrame then
-            InspectFrame:HookScript("OnShow", function()
-                skinned = false
-                ApplyThemedInspectSheet()
-                -- Apply visibility settings when frame opens
-                C_Timer.After(0.1, function()
-                    if EllesmereUI._refreshInspectItemLevelVisibility then
-                        EllesmereUI._refreshInspectItemLevelVisibility()
-                    end
-                    if EllesmereUI._refreshInspectUpgradeTrackVisibility then
-                        EllesmereUI._refreshInspectUpgradeTrackVisibility()
-                    end
-                    if EllesmereUI._refreshInspectEnchantsVisibility then
-                        EllesmereUI._refreshInspectEnchantsVisibility()
-                    end
-                end)
-            end)
+    local function HookInspectFrame()
+        if _inspHooked or not InspectFrame then return end
+        _inspHooked = true
 
-            InspectFrame:HookScript("OnHide", function()
-                skinned = false
-            end)
-
-            -- Event listener to keep NineSlice hidden even when Blizzard events fire
-            local nineSliceHiddenFrame = CreateFrame("Frame")
-            nineSliceHiddenFrame:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
-            nineSliceHiddenFrame:RegisterEvent("UNIT_INVENTORY_CHANGED")
-            nineSliceHiddenFrame:SetScript("OnEvent", function(self, event, ...)
-                if InspectFrame and InspectFrame:IsShown() then
-                    EnsureInspectNineSliceHidden()
+        InspectFrame:HookScript("OnShow", function()
+            skinned = false
+            ApplyThemedInspectSheet()
+            C_Timer.After(0.1, function()
+                if not InspectFrame or not InspectFrame:IsShown() then return end
+                if EllesmereUI._refreshInspectItemLevelVisibility then
+                    EllesmereUI._refreshInspectItemLevelVisibility()
+                end
+                if EllesmereUI._refreshInspectUpgradeTrackVisibility then
+                    EllesmereUI._refreshInspectUpgradeTrackVisibility()
+                end
+                if EllesmereUI._refreshInspectEnchantsVisibility then
+                    EllesmereUI._refreshInspectEnchantsVisibility()
                 end
             end)
+        end)
 
-            -- Hook OnShow to ensure NineSlice stays hidden
-            InspectFrame:HookScript("OnShow", EnsureInspectNineSliceHidden)
+        InspectFrame:HookScript("OnHide", function()
+            skinned = false
+        end)
+
+        local nineSliceHiddenFrame = CreateFrame("Frame")
+        nineSliceHiddenFrame:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
+        nineSliceHiddenFrame:RegisterEvent("UNIT_INVENTORY_CHANGED")
+        nineSliceHiddenFrame:SetScript("OnEvent", function(self, event, ...)
+            if InspectFrame and InspectFrame:IsShown() then
+                EnsureInspectNineSliceHidden()
+            end
+        end)
+
+        InspectFrame:HookScript("OnShow", EnsureInspectNineSliceHidden)
+    end
+
+    initFrame:RegisterEvent("PLAYER_LOGIN")
+    initFrame:RegisterEvent("ADDON_LOADED")
+    initFrame:SetScript("OnEvent", function(self, event, arg1)
+        if event == "PLAYER_LOGIN" then
+            HookInspectFrame()
+        elseif event == "ADDON_LOADED" and arg1 == "Blizzard_InspectUI" then
+            self:UnregisterEvent("ADDON_LOADED")
+            HookInspectFrame()
         end
     end)
 
@@ -1119,7 +1123,8 @@ if EllesmereUI then
     -- Also hook to INSPECT_READY to reskin when new inspection data arrives
     local inspectHook = CreateFrame("Frame")
     inspectHook:RegisterEvent("INSPECT_READY")
-    inspectHook:SetScript("OnEvent", function(self, event)
+    inspectHook:SetScript("OnEvent", function(self, event, guid)
+        if not InspectFrame or not InspectFrame:IsShown() then return end
         skinned = false
         ApplyThemedInspectSheet()
         EnsureInspectNineSliceHidden()

@@ -1227,10 +1227,18 @@ function CCS:ResetOptionsToDefaults()
                 elseif def.type == "checkbox" and def.frame.SetChecked then
                     def.frame:SetChecked(defaultValue == true or tonumber(defaultValue) == 1)
                 elseif def.type == "dropdown" then 
-                    UIDropDownMenu_SetSelectedValue(def.frame, defaultValue)
+                    if def.frame.isCCSScrollDropdown and def.frame.SetSelectedValue then
+                        def.frame:SetSelectedValue(defaultValue)
+                    else
+                        UIDropDownMenu_SetSelectedValue(def.frame, defaultValue)
+                    end
                 elseif def.type == "font" then
                     local fontname = CCS:GetDefaultFontForLocale()
-                    UIDropDownMenu_SetSelectedValue(def.frame, fontname)
+                    if def.frame.SetSelectedValue then
+                        def.frame:SetSelectedValue(fontname)   -- use custom API
+                    else
+                        UIDropDownMenu_SetSelectedValue(def.frame, fontname)
+                    end
                 elseif def.type == "color" and def.frame.texture then
                     local c = defaultValue
                     if type(c) == "table" and #c >= 3 then
@@ -1891,7 +1899,6 @@ function CCS.updateLocationInfo(unit, slotIndex, framename)
     if _G[slotFrameName].textureSlotBackdrop1 then _G[slotFrameName].textureSlotBackdrop1:Hide() end
     if _G[slotFrameName].textureSlot2 then _G[slotFrameName].textureSlot2:Hide() end
     if _G[slotFrameName].textureSlotBackdrop2 then _G[slotFrameName].textureSlotBackdrop2:Hide() end
-    
 
     -- Create or reuse UI elements
     _G[slotFrameName]:SetFrameStrata("HIGH")
@@ -2138,7 +2145,7 @@ function CCS.updateLocationInfo(unit, slotIndex, framename)
                         --Enchant = enchant
                         Enchant = StripEnchantPrefix(enchant)
                     end
-                   
+                  
                     -- Base item level
                     local ilvl = text:match(ITEM_LEVEL:gsub("%%d", "(%%d+)"))
                     if ilvl and (tonumber(ilvl) ~= tonumber(itemiLevel or 0)) then
@@ -2234,8 +2241,22 @@ function CCS.updateLocationInfo(unit, slotIndex, framename)
                 iDivider = ""
             end
             
+
+        -- Ascendant Voidforged override (likely will use this for other similar upgrades in the future)
+        local ascIcon, ascTier = CCS.GetAscendantVoidforgedTag(link)
+        if ascIcon then
+            local ascIconsize = option("fontsize_iilvl"..suffix) or 10
+            local tex = "|T" .. ascIcon .. ":"..ascIconsize..":"..ascIconsize.."|t"
+            local label = ascTier or ""
+
+            -- Display icon + tier text
+            ItemUpgradeTrack = label
+            ItemUpgradeLevel = L[label] .. " " .. tex
+            
+        end
+
         if option("showitemupgrade"..suffix) then 
-            if string.len(ItemUpgradeLevel) > 0 then
+            if ItemUpgradeLevel and ItemUpgradeLevel ~= "" then
 
                 -- Start with the base upgrade color
                 local upr, upg, upb, upalpha = 
@@ -2253,6 +2274,7 @@ function CCS.updateLocationInfo(unit, slotIndex, framename)
                     upr, upg, upb, upalpha = unpack(CCS.GetTrackColor(trackID))
                 end
 
+                -- Wrap the text in color
                 ItemUpgradeLevel = WrapTextInColor(
                     "(" .. ItemUpgradeLevel .. ")",
                     CreateColor(upr, upg, upb, upalpha)
@@ -2262,22 +2284,20 @@ function CCS.updateLocationInfo(unit, slotIndex, framename)
             ItemUpgradeLevel = ""
         end
 
-
-            if option("showhighwater") and not CCS.AreSecretsDisabled() and isPlayer and chigh ~= nil and tonumber(chigh) and cilvl ~= nil and tonumber(cilvl) and tonumber(chigh) > tonumber(cilvl) then
-                chigh = iDivider..chigh
-            else
-                chighc = ""
-                chigh = ""
-            end
-            
-            if displaytoleft and itemiLevel ~= nil then
-                ilvlTxt:SetText(ItemUpgradeLevel.." "..chighc.. itemiLevel.."|r"..chigh) 
-            elseif itemiLevel ~= nil then
-                ilvlTxt:SetText(chighc..itemiLevel.."|r" ..chigh.." ".. ItemUpgradeLevel) 
-            end
-            ilvlTxt:Show()
-
+        if option("showhighwater") and not CCS.AreSecretsDisabled() and isPlayer and chigh ~= nil and tonumber(chigh) and cilvl ~= nil and tonumber(cilvl) and tonumber(chigh) > tonumber(cilvl) then
+            chigh = iDivider..chigh
+        else
+            chighc = ""
+            chigh = ""
+        end
         
+        if displaytoleft and itemiLevel ~= nil then
+            ilvlTxt:SetText(ItemUpgradeLevel.." "..chighc.. itemiLevel.."|r"..chigh) 
+        elseif itemiLevel ~= nil then
+            ilvlTxt:SetText(chighc..itemiLevel.."|r" ..chigh.." ".. ItemUpgradeLevel) 
+        end
+        ilvlTxt:Show()
+
         -- Enchant Info [Mint/Red, 10]  (Mint #2afab5)
 		if Enchant == "" and option("showenchantgemerrors"..suffix) == true then
 		

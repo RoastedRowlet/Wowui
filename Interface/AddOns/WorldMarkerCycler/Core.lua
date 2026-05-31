@@ -33,10 +33,24 @@ local function InitSaved()
     sv.placeModifier = sv.placeModifier or ""
     sv.clearKey      = sv.clearKey      or "B"
     sv.clearModifier = sv.clearModifier or "CTRL-"
-    sv.orderList     = sv.orderList     or {6,4,3,7,1,2,5,8}
+    -- Validate orderList: must be exactly 8 numbers in range 1-8
+    local function isValidOrderList(tbl)
+        if type(tbl) ~= "table" or #tbl ~= 8 then return false end
+        for i = 1, 8 do
+            if type(tbl[i]) ~= "number" or tbl[i] < 1 or tbl[i] > 8 then return false end
+        end
+        return true
+    end
+    if not isValidOrderList(sv.orderList) then
+        sv.orderList = {6,4,3,7,1,2,5,8}
+    end
     -- Custom cycle mode: use a subset of markers instead of the full orderList
     if sv.customCycleEnabled == nil then sv.customCycleEnabled = false end
     sv.customCycleMarkers = sv.customCycleMarkers or {8, 4, 3, 2} -- default: skull, cross, diamond, triangle
+    -- Click edge: nil = auto-detect from key name. true = force AnyDown. false = force AnyUp.
+    -- Auto-detect: BUTTON* keys use AnyDown, keyboard keys use AnyUp.
+    -- Only set this if sv.useClickDown is explicitly true/false from a prior /wmcclickedge command.
+    -- Leave nil to keep auto mode.
 end
 
 -- Secure world marker cycler button
@@ -45,10 +59,39 @@ end
 
 local cycleBtn = CreateFrame("Button", "WorldMarkerCyclerButton", UIParent, "SecureActionButtonTemplate")
 cycleBtn:SetAttribute("type", "macro")
-cycleBtn:RegisterForClicks("AnyDown")
+-- Default: AnyUp for keyboard bindings. Call ApplyCycleClickEdge() after SV loads
+-- to switch to AnyDown for mouse button binding users.
+cycleBtn:RegisterForClicks("AnyUp")
+
+local function ApplyCycleClickEdge()
+    local sv = SV()
+    -- Manual override (explicitly forced by user via /wmcclickedge up|down) wins.
+    -- nil means "auto" — detect from the bound key name.
+    if sv and sv.useClickDown == true then
+        cycleBtn:RegisterForClicks("AnyDown")
+        return
+    elseif sv and sv.useClickDown == false then
+        cycleBtn:RegisterForClicks("AnyUp")
+        return
+    end
+    -- Auto-detect: WoW mouse buttons (BUTTON1, BUTTON4, BUTTON6, etc.) bound via
+    -- SetOverrideBindingClick fire AnyDown. Keyboard keys (including keys sent by
+    -- MMO mouse software like Numpad1-12) fire AnyUp.
+    if sv then
+        local key = (sv.placeKey or ""):upper()
+        if key:find("^BUTTON%d") then
+            cycleBtn:RegisterForClicks("AnyDown")
+            return
+        end
+    end
+    cycleBtn:RegisterForClicks("AnyUp")
+end
+
 SecureHandlerWrapScript(cycleBtn, "PreClick", cycleBtn, [=[
-    if not down then return end
-    if not order or type(order) ~= "table" or #order == 0 then return end
+    if not order or type(order) ~= "table" or #order == 0 then
+        self:SetAttribute("macrotext", "")
+        return
+    end
     i = (i % #order) + 1
     local marker = order[i] or 1
     self:SetAttribute("macrotext", "/wm [@cursor] " .. marker)
@@ -58,9 +101,8 @@ SecureHandlerWrapScript(cycleBtn, "PreClick", cycleBtn, [=[
 
 local clearBtn = CreateFrame("Button", "WorldMarkerClearButton", UIParent, "SecureActionButtonTemplate")
 clearBtn:SetAttribute("type", "macro")
-clearBtn:RegisterForClicks("AnyDown")
+clearBtn:RegisterForClicks("AnyUp", "AnyDown")
 SecureHandlerWrapScript(clearBtn, "PreClick", clearBtn, [=[
-    if not down then return end
     self:SetAttribute("macrotext", "/cwm 9")
 ]=])
 clearBtn:SetScript("PostClick", function()
@@ -110,6 +152,8 @@ local function UpdateBindings()
     if clearFullKey ~= "" then
         SetOverrideBindingClick(bindingsFrame, true, clearFullKey, clearBtn:GetName())
     end
+    -- Re-apply click edge in case the newly bound key is/isn't a mouse button
+    ApplyCycleClickEdge()
 end
 
 -- Event bootstrap
@@ -119,6 +163,7 @@ loader:RegisterEvent("PLAYER_LOGIN")
 loader:SetScript("OnEvent", function(_, event, addon)
     if event == "ADDON_LOADED" and addon == ADDON_NAME then
         InitSaved()
+        ApplyCycleClickEdge()
         BuildOrderTable()
         UpdateBindings()
         -- Notify UI.lua that SVs are ready
@@ -163,7 +208,7 @@ end
 
 function WorldMarkerCyclerAPI.SetOrder(list)
     EnsureSV()
-    if type(list) == "table" then
+    if type(list) == "table" and #list == 8 then
         SV().orderList = list
         BuildOrderTable()
     end
@@ -194,6 +239,23 @@ function WorldMarkerCyclerAPI.GetCustomCycleMarkers()
     return sv and sv.customCycleMarkers or {}
 end
 
+-- Toggle click edge for users who bind to a mouse button (AnyDown) vs keyboard (AnyUp)
+function WorldMarkerCyclerAPI.SetUseClickDown(enabled)
+    EnsureSV()
+    -- nil = auto-detect, true = force AnyDown, false = force AnyUp
+    if enabled == nil then
+        SV().useClickDown = nil
+    else
+        SV().useClickDown = enabled and true or false
+    end
+    ApplyCycleClickEdge()
+end
+
+function WorldMarkerCyclerAPI.GetUseClickDown()
+    local sv = SV()
+    return sv and sv.useClickDown or false
+end
+
 -- Reset the cycling index so the next cycle starts from the top
 function WorldMarkerCyclerAPI.ResetCycleIndex()
     if not InCombatLockdown() then
@@ -201,6 +263,50 @@ function WorldMarkerCyclerAPI.ResetCycleIndex()
     else
         -- Optionally, queue for after combat or notify user
         print("WorldMarkerCycler: Cannot reset cycle index during combat.")
+    end
+end
+
+
+SLASH_WMCCLICKEDGE1 = "/wmcclickedge"
+SlashCmdList["WMCCLICKEDGE"] = function(msg)
+    local mode = msg and msg:lower():match("^%s*(%S+)")
+    local sv = SV()
+    local boundKey = sv and (sv.placeKey or ""):upper() or ""
+    local keyIsMouseBtn = boundKey:find("^BUTTON%d") ~= nil
+
+    if mode == "down" then
+        WorldMarkerCyclerAPI.SetUseClickDown(true)
+        print("WorldMarkerCycler: click edge FORCED to DOWN.")
+        if not keyIsMouseBtn and boundKey ~= "" then
+            print("|cffff4444Warning: your bound key '" .. boundKey .. "' is a keyboard key. Forcing DOWN will break it. Type /wmcclickedge up to restore.|r")
+        end
+    elseif mode == "up" then
+        WorldMarkerCyclerAPI.SetUseClickDown(false)
+        print("WorldMarkerCycler: click edge FORCED to UP.")
+        if keyIsMouseBtn and boundKey ~= "" then
+            print("|cffff4444Warning: your bound key '" .. boundKey .. "' is a mouse button. Forcing UP will break it. Type /wmcclickedge auto to restore.|r")
+        end
+    elseif mode == "auto" then
+        -- Clear the manual override and let auto-detect take over
+        EnsureSV()
+        SV().useClickDown = nil
+        ApplyCycleClickEdge()
+        local edge = keyIsMouseBtn and "DOWN" or "UP"
+        print("WorldMarkerCycler: click edge reset to AUTO (currently " .. edge .. " for key '" .. boundKey .. "').")
+    else
+        local forced = sv and sv.useClickDown
+        local autoEdge = keyIsMouseBtn and "DOWN" or "UP"
+        local status
+        if forced == nil then
+            status = "AUTO (" .. autoEdge .. ") — key '" .. boundKey .. "'"
+        elseif forced then
+            status = "FORCED DOWN (manual override)"
+        else
+            status = "FORCED UP (manual override)"
+        end
+        print("WorldMarkerCycler: click edge = " .. status)
+        print("  Usage: /wmcclickedge auto|up|down")
+        print("  'auto' is recommended — detects keyboard vs mouse button automatically.")
     end
 end
 
@@ -278,6 +384,39 @@ SlashCmdList["WMCBIND"] = function(msg)
         self:SetScript("OnKeyDown", nil)
     end)
     f:Show()
+end
+
+-- One-line status report — easy to copy and paste when reporting issues
+SLASH_WMCSTATUS1 = "/wmcstatus"
+SlashCmdList["WMCSTATUS"] = function()
+    local sv = SV()
+    local cycleKey  = sv and ((sv.placeModifier or "") .. (sv.placeKey or "")) or "(none)"
+    local clearKey  = sv and ((sv.clearModifier or "") .. (sv.clearKey or "")) or "(none)"
+    local rawKey    = sv and (sv.placeKey or ""):upper() or ""
+    local isBtn     = rawKey:find("^BUTTON%d") ~= nil
+    local forced    = sv and sv.useClickDown
+    local edgeMode
+    if forced == true then
+        edgeMode = "FORCED-DOWN"
+    elseif forced == false then
+        edgeMode = "FORCED-UP"
+    else
+        edgeMode = "AUTO(" .. (isBtn and "AnyDown" or "AnyUp") .. ")"
+    end
+    local orderStr = ""
+    if sv and sv.orderList then
+        orderStr = table.concat(sv.orderList, ",")
+    end
+    local customStr = ""
+    if sv and sv.customCycleEnabled and sv.customCycleMarkers then
+        customStr = " CUSTOM={" .. table.concat(sv.customCycleMarkers, ",") .. "}"
+    end
+    local line = string.format(
+        "[WMC] WoW=%s Locale=%s | CycleKey=%s | ClearKey=%s | Edge=%s | Order=%s%s",
+        select(4, GetBuildInfo()), GetLocale(), cycleKey, clearKey, edgeMode, orderStr, customStr
+    )
+    print(line)
+    print("|cffaaaaaa(Copy the line above and send it when reporting an issue)|r")
 end
 
 -- Debug: dump saved values and active binding state

@@ -55,7 +55,7 @@ end
         GetFFD(tt).bg:Show()
     end
 
-    local function _ttFonts(tt)
+    local function _ttFonts(tt, startFrom)
         if not tt or tt:IsForbidden() or not _enabled() then return end
         local fp = EllesmereUI.GetFontPath and EllesmereUI.GetFontPath("blizzardSkin") or STANDARD_TEXT_FONT
         local ol = EllesmereUI.GetFontOutlineFlag and EllesmereUI.GetFontOutlineFlag("blizzardSkin") or ""
@@ -65,7 +65,7 @@ end
         local name = tt.GetName and tt:GetName()
         if not name then return end
         local nLines = tt.NumLines and tt:NumLines() or 30
-        for i = 1, nLines do
+        for i = (startFrom or 1), nLines do
             local left = _G[name .. "TextLeft" .. i]
             if not left then break end
             left:SetFont(fp, (i == 1) and titleSize or bodySize, ol)
@@ -86,8 +86,67 @@ end
         return EllesmereUIDB and EllesmereUIDB.accentReskinElements
     end
 
+    -- Unified inspect system: one NotifyInspect per GUID, one INSPECT_READY
+    -- handler that feeds both tooltip ilvl cache and inspect sheet reskin.
+    local _ilvlCache = {}       -- guid -> { ilvl = number, time = GetTime() }
+    local _ilvlCacheTTL = 120
+    local _inspectPendingGUID = nil
+    local _userInspectUntil = 0
+    hooksecurefunc("InspectUnit", function()
+        _userInspectUntil = GetTime() + 2
+    end)
+    local _inspectFrame = CreateFrame("Frame")
+    _inspectFrame:SetScript("OnEvent", function(self, _, guid)
+        self:UnregisterEvent("INSPECT_READY")
+        if not guid or (_isSecret and _isSecret(guid)) then return end
+        -- Cache ilvl for tooltip
+        if C_PaperDollInfo and C_PaperDollInfo.GetInspectItemLevel then
+            local unit
+            if UnitExists("mouseover") then
+                local moGUID = UnitGUID("mouseover")
+                if moGUID and not (_isSecret and _isSecret(moGUID)) and moGUID == guid then
+                    unit = "mouseover"
+                end
+            end
+            if unit then
+                local val = C_PaperDollInfo.GetInspectItemLevel(unit)
+                if val and val > 0 then
+                    _ilvlCache[guid] = { ilvl = math.floor(val), time = GetTime() }
+                end
+            end
+        end
+        -- Update tooltip if still showing for this GUID (and ilvl not already shown)
+        if _GameTooltip:IsShown() and not _GameTooltip._euiIlvlShown and EllesmereUIDB and EllesmereUIDB.tooltipItemLevel ~= false then
+            local ok2, _, ttUnit = pcall(_GameTooltip.GetUnit, _GameTooltip)
+            if not ok2 or not ttUnit or (_isSecret and _isSecret(ttUnit)) then
+                ttUnit = nil
+                if UnitExists("mouseover") then ttUnit = "mouseover" end
+            end
+            if ttUnit then
+                local ttGUID = UnitGUID(ttUnit)
+                if ttGUID and not (_isSecret and _isSecret(ttGUID)) and ttGUID == guid then
+                    local cached = _ilvlCache[guid]
+                    if cached then
+                        local nBefore = _GameTooltip:NumLines() or 0
+                        _GameTooltip:AddDoubleLine("Item Level:", cached.ilvl, 1, 1, 1, 1, 1, 1)
+                        _ttFonts(_GameTooltip, nBefore + 1)
+                        _GameTooltip:Show()
+                        _GameTooltip._euiIlvlShown = true
+                    end
+                end
+            end
+        end
+        _inspectPendingGUID = nil
+    end)
+    -- Guard InspectGuildFrame_Update against nil guildName (our NotifyInspect
+    -- can trigger LOD load before guild data is available from server).
+
+    -- Expose for inspect sheet to use
+    EllesmereUI._inspectCache = _ilvlCache
+
     local function _ttUnitColor(tt)
         if tt ~= _GameTooltip or tt:IsForbidden() then return end
+        local nLinesBefore = tt.NumLines and tt:NumLines() or 0
         local ok, _, unit = pcall(tt.GetUnit, tt)
         if not ok then return end
         if not unit then
@@ -130,6 +189,47 @@ end
                 tt:AddDoubleLine("M+ Score:", score, 1, 1, 1, r, g, b)
             end
         end
+        -- Item Level (single-shot inspect, cached)
+        tt._euiIlvlShown = false
+        if EllesmereUIDB and EllesmereUIDB.tooltipItemLevel ~= false then
+            local ilvl
+            if UnitIsUnit(unit, "player") then
+                local _, equipped = GetAverageItemLevel()
+                if equipped and equipped > 0 then ilvl = math.floor(equipped) end
+            else
+                local guid = UnitGUID(unit)
+                if guid and not (_isSecret and _isSecret(guid)) then
+                    local cached = _ilvlCache[guid]
+                    if cached and (GetTime() - cached.time) < _ilvlCacheTTL then
+                        ilvl = cached.ilvl
+                    else
+                        -- Try already-available inspect data
+                        if C_PaperDollInfo and C_PaperDollInfo.GetInspectItemLevel then
+                            local val = C_PaperDollInfo.GetInspectItemLevel(unit)
+                            if val and val > 0 then
+                                ilvl = math.floor(val)
+                                _ilvlCache[guid] = { ilvl = ilvl, time = GetTime() }
+                            end
+                        end
+                        -- Request inspect if no cached data, not already pending,
+                        -- inspect frame not open, and no user-initiated inspect in flight
+                        local inspOpen = InspectFrame and InspectFrame:IsShown()
+                        if not ilvl and not inspOpen and GetTime() > _userInspectUntil and guid ~= _inspectPendingGUID and CanInspect(unit) and not InCombatLockdown() then
+                            _inspectPendingGUID = guid
+                            ClearInspectPlayer()
+                            _inspectFrame:RegisterEvent("INSPECT_READY")
+                            NotifyInspect(unit)
+                        end
+                    end
+                end
+            end
+            if ilvl then
+                tt:AddDoubleLine("Item Level:", ilvl, 1, 1, 1, 1, 1, 1)
+                tt._euiIlvlShown = true
+            end
+        end
+        -- Apply our font to lines added after the OnShow pass
+        _ttFonts(tt, nLinesBefore)
     end
 
     local function _ttInit()

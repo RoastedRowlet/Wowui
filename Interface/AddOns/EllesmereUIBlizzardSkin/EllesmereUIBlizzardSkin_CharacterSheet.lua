@@ -302,13 +302,44 @@ local function PreSkinCharacterSheet()
             region:SetAlpha(0)
         end
     end
-    GetFFD(frame).bg = frame:CreateTexture(nil, "BACKGROUND", nil, -8)
-    GetFFD(frame).bg:SetAtlas("housing-basic-panel--stone-background")
-    GetFFD(frame).bg:SetAllPoints(frame)
-    GetFFD(frame).bg:SetAlpha(1)
+    -- Background scales proportionally to fill the frame without distorting.
+    -- Native aspect ratio: 561x433. On resize, compute the size that covers
+    -- the full frame (like CSS "cover") and center it, clipping overflow via
+    -- adjusted tex coords.
+    local BG_ASPECT = 561 / 433
+    local bg = frame:CreateTexture(nil, "BACKGROUND", nil, -8)
+    bg:SetTexture("Interface\\AddOns\\EllesmereUI\\media\\modern_blizz.png")
+    bg:SetAllPoints(frame)
+    GetFFD(frame).bg = bg
+    bg:SetAlpha(1)
     GetFFD(frame).bgOverlay = frame:CreateTexture(nil, "BACKGROUND", nil, -7)
-    GetFFD(frame).bgOverlay:SetColorTexture(0, 0, 0, 0.7)
+    GetFFD(frame).bgOverlay:SetColorTexture(0, 0, 0, 0.55)
     GetFFD(frame).bgOverlay:SetAllPoints(frame)
+
+    -- Recompute tex coords on resize to maintain aspect ratio (cover mode)
+    local BASE_L, BASE_R, BASE_T, BASE_B = 0.25, 1, 0, 0.75
+    local BASE_U = BASE_R - BASE_L  -- 0.75
+    local BASE_V = BASE_B - BASE_T  -- 0.75
+    local function UpdateBgTexCoords()
+        local fw, fh = frame:GetSize()
+        if fw == 0 or fh == 0 then return end
+        local frameAspect = fw / fh
+        if frameAspect > BG_ASPECT then
+            -- Frame is wider: crop top/bottom
+            local visV = BASE_V * (BG_ASPECT / frameAspect)
+            local trimV = (BASE_V - visV) / 2
+            bg:SetTexCoord(BASE_L, BASE_R, BASE_T + trimV, BASE_B - trimV)
+        else
+            -- Frame is taller: crop left/right
+            local visU = BASE_U * (frameAspect / BG_ASPECT)
+            local trimU = (BASE_U - visU) / 2
+            bg:SetTexCoord(BASE_L + trimU, BASE_R - trimU, BASE_T, BASE_B)
+        end
+    end
+    hooksecurefunc(frame, "SetSize", UpdateBgTexCoords)
+    hooksecurefunc(frame, "SetWidth", UpdateBgTexCoords)
+    hooksecurefunc(frame, "SetHeight", UpdateBgTexCoords)
+    UpdateBgTexCoords()
     if EllesmereUI and EllesmereUI.PanelPP then
         EllesmereUI.PanelPP.CreateBorder(frame, 0.2, 0.2, 0.2, 1, 1, "OVERLAY", 7)
     end
@@ -333,41 +364,18 @@ local function PreSkinCharacterSheet()
         myModel:EnableMouse(true)
         myModel:EnableMouseWheel(true)
 
+        -- Custom model background (our frame, no taint risk)
         local bgFrame = CreateFrame("Frame", nil, frame)
         bgFrame:SetFrameLevel(math.max(1, myModel:GetFrameLevel() - 1))
-        bgFrame:SetAllPoints(myModel)
+        bgFrame:SetPoint("TOPLEFT", CharacterHeadSlot, "TOPLEFT", -8, 10)
+        bgFrame:SetPoint("BOTTOMRIGHT", myModel, "BOTTOMRIGHT", 0, -18)
         local bgTex = bgFrame:CreateTexture(nil, "BACKGROUND")
         bgTex:SetAllPoints(bgFrame)
-        bgTex:SetAtlas("transmog-locationBG")
-        bgTex:SetAlpha(0.5)
-
-        local GLOW_HEIGHT_RATIO = 386 / 860
-        local bgGlowTex = bgFrame:CreateTexture(nil, "BORDER")
-        bgGlowTex:SetAtlas("transmog-locationBG-glow")
-        bgGlowTex:SetPoint("BOTTOMLEFT",  bgFrame, "BOTTOMLEFT",  0, 0)
-        bgGlowTex:SetPoint("BOTTOMRIGHT", bgFrame, "BOTTOMRIGHT", 0, 0)
-        bgGlowTex:SetHeight(math.max(1, (bgFrame:GetHeight() or 0) * GLOW_HEIGHT_RATIO))
-        bgGlowTex:SetAlpha(0.5)
-        bgFrame:HookScript("OnSizeChanged", function(_, _, h)
-            bgGlowTex:SetHeight(math.max(1, (h or 0) * GLOW_HEIGHT_RATIO))
-        end)
-
-        -- Top fade: gradient overlay ABOVE the model that blends into the frame bg
-        local fadeFrame = CreateFrame("Frame", nil, frame)
-        fadeFrame:SetFrameLevel(myModel:GetFrameLevel() + 1)
-        fadeFrame:SetAllPoints(myModel)
-        local topFade = fadeFrame:CreateTexture(nil, "ARTWORK")
-        topFade:SetTexture("Interface\\AddOns\\EllesmereUIBlizzardSkin\\Media\\top-gradient-mask.tga")
-        topFade:SetPoint("TOPLEFT", fadeFrame, "TOPLEFT", 0, 0)
-        topFade:SetPoint("TOPRIGHT", fadeFrame, "TOPRIGHT", 0, 0)
-        topFade:SetHeight(60)
-        topFade:SetAlpha(0.5)
-        fadeFrame:EnableMouse(false)
+        bgTex:SetTexture("Interface\\AddOns\\EllesmereUIBlizzardSkin\\Media\\character-bg.png")
+        bgTex:SetAlpha(1)
 
         GetFFD(frame).modelBg      = bgTex
-        GetFFD(frame).modelBgGlow  = bgGlowTex
         GetFFD(frame).modelBgFrame = bgFrame
-        GetFFD(frame).modelTopFade = fadeFrame
 
         myModel:SetUnit("player")
         local zoomLevel = 0  -- 0 = full body, 1 = tight portrait
@@ -445,34 +453,6 @@ local function PreSkinCharacterSheet()
             myModel:SetPortraitZoom(zoomLevel)
         end)
 
-        -- Hover glow fades between 0.5 (idle) and 1.0 (hover).
-        local GLOW_FADE_DURATION = 1.0
-        local GLOW_IDLE, GLOW_HOVER = 0.5, 1.0
-        local glowTarget = GLOW_IDLE
-        local glowFader = CreateFrame("Frame")
-        glowFader:Hide()
-        glowFader:SetScript("OnUpdate", function(self, elapsed)
-            local tex = GetFFD(frame).modelBgGlow
-            if not tex then self:Hide(); return end
-            local cur = tex:GetAlpha() or GLOW_IDLE
-            local diff = glowTarget - cur
-            if math.abs(diff) < 0.005 then
-                tex:SetAlpha(glowTarget); self:Hide(); return
-            end
-            local step = (GLOW_HOVER - GLOW_IDLE) * (elapsed / GLOW_FADE_DURATION)
-            if diff > 0 then
-                tex:SetAlpha(math.min(glowTarget, cur + step))
-            else
-                tex:SetAlpha(math.max(glowTarget, cur - step))
-            end
-        end)
-
-        mouseOverlay:SetScript("OnEnter", function()
-            glowTarget = GLOW_HOVER; glowFader:Show()
-        end)
-        mouseOverlay:SetScript("OnLeave", function()
-            glowTarget = GLOW_IDLE; glowFader:Show()
-        end)
 
         -- SetUnit handles form transitions natively; re-bind on equipment
         -- changes so newly-equipped gear shows up on the model.
@@ -784,7 +764,7 @@ local function SkinCharacterSheet()
             if not GetFFD(tab).bg then
                 GetFFD(tab).bg = tab:CreateTexture(nil, "BACKGROUND")
                 GetFFD(tab).bg:SetAllPoints()
-                GetFFD(tab).bg:SetColorTexture(0.043, 0.031, 0.027, 1)
+                GetFFD(tab).bg:SetColorTexture(0.068, 0.056, 0.052, 1)
             end
 
             if not GetFFD(tab).activeHL then
@@ -934,10 +914,10 @@ local function SkinCharacterSheet()
             if btn then btn:SetShown(isCharacterTab) end
         end
 
-        if GetFFD(frame).modelTopFade     then GetFFD(frame).modelTopFade:SetShown(isCharacterTab)     end
+        if GetFFD(frame).modelBgFrame     then GetFFD(frame).modelBgFrame:SetShown(isCharacterTab)     end
         if GetFFD(frame).statsPanel       then GetFFD(frame).statsPanel:SetShown(isCharacterTab)       end
         if GetFFD(frame).iLvlText         then GetFFD(frame).iLvlText:SetShown(isCharacterTab)         end
-        if GetFFD(frame).statsBg          then GetFFD(frame).statsBg:SetShown(isCharacterTab)          end
+        if GetFFD(frame).sidebarBgFrame   then GetFFD(frame).sidebarBgFrame:SetShown(isCharacterTab)   end
         if GetFFD(frame).scrollFrame      then GetFFD(frame).scrollFrame:SetShown(isCharacterTab)      end
         if GetFFD(frame).scrollBar        then GetFFD(frame).scrollBar:SetShown(isCharacterTab)        end
         if GetFFD(frame).socketContainer  then GetFFD(frame).socketContainer:SetShown(isCharacterTab)  end
@@ -982,11 +962,17 @@ local function SkinCharacterSheet()
     statsPanel:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", 345,  40)
     statsPanel:SetFrameLevel(50)
 
-    -- Stats panel background: fills the whole panel.
-    local statsBg = statsPanel:CreateTexture(nil, "BACKGROUND")
-    statsBg:SetColorTexture(0, 0, 0, 0)
-    statsBg:SetAllPoints(statsPanel)
+    -- Sidebar background: lives on frame (not statsPanel) so it stays visible
+    -- when switching between Character / Titles / Equipment panels.
+    local sidebarBgFrame = CreateFrame("Frame", nil, frame)
+    sidebarBgFrame:SetFrameLevel(statsPanel:GetFrameLevel() - 1)
+    sidebarBgFrame:SetPoint("TOPLEFT", statsPanel, "TOPLEFT", -51, 10)
+    sidebarBgFrame:SetPoint("BOTTOMRIGHT", statsPanel, "BOTTOMRIGHT", 0, -10)
+    local statsBg = sidebarBgFrame:CreateTexture(nil, "BACKGROUND")
+    statsBg:SetColorTexture(0, 0, 0, 0.2)
+    statsBg:SetAllPoints()
     GetFFD(frame).statsBg = statsBg
+    GetFFD(frame).sidebarBgFrame = sidebarBgFrame
 
     -- Map INVTYPE to inventory slot numbers and display names
     local INVTYPE_TO_SLOT = {
@@ -1152,20 +1138,14 @@ local function SkinCharacterSheet()
         return true
     end
 
-    -- This data is only consumed by the iLvl text and its hover tooltip --
-    -- both are invisible unless CharacterFrame is open. So: zero event
-    -- listeners while closed. On panel open, mark dirty. First call after
-    -- that recomputes; subsequent calls hit the cache. Combat-guarded so
-    -- we never scan during a pull.
+    -- Cached scan of bag items that are upgrades over equipped gear.
+    -- Invalidated by gear/bag changes while the character sheet is open.
     local _betterCache = nil
     local _betterDirty = true
 
     local _ComputeBetterInventoryItems  -- defined below
 
     local function GetBetterInventoryItems()
-        if InCombatLockdown() then
-            return _betterCache or {}
-        end
         if _betterDirty or not _betterCache then
             _betterCache = _ComputeBetterInventoryItems()
             _betterDirty = false
@@ -1173,15 +1153,9 @@ local function SkinCharacterSheet()
         return _betterCache
     end
 
-    -- Mark dirty on every sheet open so the bag contents are re-scanned
-    -- once when the user actually looks at it.
-    if CharacterFrame then
-        CharacterFrame:HookScript("OnShow", function()
-            _betterDirty = true
-        end)
-    end
+    -- Cache is invalidated by the iLvlUpdateFrame event handler below
+    -- (PLAYER_EQUIPMENT_CHANGED, BAG_UPDATE) and on CharacterFrame OnShow.
 
-    -- Function to get better items from inventory (equipment only)
     _ComputeBetterInventoryItems = function()
         local betterItems = {}
 
@@ -1297,8 +1271,16 @@ local function SkinCharacterSheet()
     iLvlText:SetTextColor(0.6, 0.2, 1, 1)
     GetFFD(frame).iLvlText = iLvlText  -- Store for tab visibility control
 
-    -- M+ Score sits directly below the iLvl text, also centered.
-    mythicRatingLabel:SetPoint("TOP", iLvlText, "BOTTOM", 0, -4)
+    -- PvP Item Level: sits directly below the iLvl text when enabled.
+    local pvpIlvlText = statsPanel:CreateFontString(nil, "OVERLAY")
+    pvpIlvlText:SetFont(fontPath, 12, "")
+    pvpIlvlText:SetTextColor(0.8, 0.8, 0.8, 1)
+    pvpIlvlText:SetPoint("TOP", iLvlText, "BOTTOM", 0, -4)
+    pvpIlvlText:Hide()
+    GetFFD(frame).pvpIlvlText = pvpIlvlText
+
+    -- M+ Score sits below PvP ilvl (or iLvl if PvP is hidden).
+    mythicRatingLabel:SetPoint("TOP", pvpIlvlText, "BOTTOM", 0, -4)
 
     -- Button overlay for itemlevel tooltip
     local iLvlButton = CreateFrame("Button", nil, statsPanel)
@@ -1360,10 +1342,9 @@ local function SkinCharacterSheet()
         GameTooltip:Hide()
     end)
 
-    -- Function to update itemlevel and mythic+ rating
+    -- Function to update itemlevel, PvP ilvl, and mythic+ rating
     local function UpdateItemLevelDisplay()
-        local avgItemLevel, avgItemLevelEquipped = GetAverageItemLevel()
-
+        local avgItemLevel, avgItemLevelEquipped, avgItemLevelPvP = GetAverageItemLevel()
         -- Format with two decimals
         local avgFormatted = format("%.2f", avgItemLevel)
         local avgEquippedFormatted = format("%.2f", avgItemLevelEquipped)
@@ -1379,11 +1360,29 @@ local function SkinCharacterSheet()
             iLvlText:SetText(avgEquippedFormatted)
         end
 
+        -- Update PvP Item Level if option is enabled
+        local isCharTab = PaperDollFrame and PaperDollFrame:IsShown()
+        local showPvP = EllesmereUIDB and EllesmereUIDB.showPvpItemLevel
+        local pvpVisible = false
+        if showPvP and avgItemLevelPvP and avgItemLevelPvP > 0 and GetFFD(frame).pvpIlvlText then
+            GetFFD(frame).pvpIlvlText:SetText(format("PvP iLvl: |cff00cc66%d|r", math.floor(avgItemLevelPvP)))
+            GetFFD(frame).pvpIlvlText:SetShown(isCharTab)
+            pvpVisible = isCharTab
+        elseif GetFFD(frame).pvpIlvlText then
+            GetFFD(frame).pvpIlvlText:Hide()
+        end
+
+        -- Re-anchor M+ Score: below PvP ilvl when visible, below iLvl when not
+        if GetFFD(frame).mythicRatingLabel then
+            GetFFD(frame).mythicRatingLabel:ClearAllPoints()
+            local anchor = pvpVisible and pvpIlvlText or iLvlText
+            GetFFD(frame).mythicRatingLabel:SetPoint("TOP", anchor, "BOTTOM", 0, -4)
+        end
+
         -- Update M+ Score if option is enabled. Tab guard mirrors the slot-
         -- label fix: PaperDollFrame:IsShown() is the truth-source for whether
         -- the Character sub-pane is active (selectedTab is unreliable on the
         -- initial open path).
-        local isCharTab = PaperDollFrame and PaperDollFrame:IsShown()
         if EllesmereUIDB and EllesmereUIDB.showMythicRating and GetFFD(frame).mythicRatingLabel then
             local mythicRating = C_ChallengeMode.GetOverallDungeonScore()
             if mythicRating and mythicRating > 0 then
@@ -1405,28 +1404,30 @@ local function SkinCharacterSheet()
     local iLvlUpdateFrame = CreateFrame("Frame")
     iLvlUpdateFrame:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
     iLvlUpdateFrame:RegisterEvent("UNIT_INVENTORY_CHANGED")
-    -- BAG_UPDATE_DELAYED removed: the "avg / max" upgrade-suffix now
-    -- derives from a cache that refreshes on CharacterFrame OnShow, so no
-    -- need to re-display on every bag change while the sheet is closed.
+    iLvlUpdateFrame:RegisterEvent("BAG_UPDATE")
     iLvlUpdateFrame:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
     iLvlUpdateFrame:RegisterEvent("CHALLENGE_MODE_COMPLETED")
+    iLvlUpdateFrame:RegisterEvent("PLAYER_AVG_ITEM_LEVEL_UPDATE")
     iLvlUpdateFrame:SetScript("OnEvent", function(_, event, unit)
         if event == "UNIT_INVENTORY_CHANGED" and unit ~= "player" then return end
-        -- Skip work when the character sheet is closed; OnShow refresh
-        -- below covers the next-open case.
         if not (frame and frame:IsShown()) then return end
+        _betterDirty = true
         UpdateItemLevelDisplay()
     end)
-    frame:HookScript("OnShow", UpdateItemLevelDisplay)
+    frame:HookScript("OnShow", function()
+        _betterDirty = true
+        UpdateItemLevelDisplay()
+    end)
     UpdateItemLevelDisplay()
 
-    -- Store callback for option changes
+    -- Store callback for option changes (M+ rating and PvP ilvl)
     EllesmereUI._updateMythicRatingDisplay = function()
         UpdateItemLevelDisplay()
         if EllesmereUI._updateScrollHeaderOffset then
             EllesmereUI._updateScrollHeaderOffset()
         end
     end
+    EllesmereUI._updatePvpIlvlDisplay = EllesmereUI._updateMythicRatingDisplay
 
     --[[ Stats panel border
     if EllesmereUI and EllesmereUI.PanelPP then
@@ -1576,15 +1577,24 @@ local function SkinCharacterSheet()
     GetFFD(frame).updateScrollThumb = scrollTrack._update
 
     -- Re-anchor the scroll frame + track top edge based on whether the
-    -- M+ Score line is visible. When hidden, collapse 16px of dead space
-    -- so the stat sections start higher.
+    -- PvP iLvl and M+ Score lines are visible. Each hidden line collapses
+    -- 16px of dead space so the stat sections start higher.
     EllesmereUI._updateScrollHeaderOffset = function()
         local showMP = EllesmereUIDB and EllesmereUIDB.showMythicRating
         if showMP and C_ChallengeMode and C_ChallengeMode.GetOverallDungeonScore then
             local score = C_ChallengeMode.GetOverallDungeonScore()
             if not score or score <= 0 then showMP = false end
         end
-        local h = showMP and HEADER_H or (HEADER_H - 16)
+        local showPvP = EllesmereUIDB and EllesmereUIDB.showPvpItemLevel
+        if showPvP and GetAverageItemLevel then
+            local _, _, pvp = GetAverageItemLevel()
+            if not pvp or pvp <= 0 then showPvP = false end
+        end
+        -- HEADER_H includes space for M+ (one extra line). Each hidden
+        -- line collapses 16px; each additional line beyond M+ adds 16px.
+        local h = HEADER_H
+        if not showMP then h = h - 16 end
+        if showPvP then h = h + 16 end
         scrollFrame:ClearAllPoints()
         scrollFrame:SetPoint("TOPLEFT",     statsPanel, "TOPLEFT",     0,  -h)
         scrollFrame:SetPoint("BOTTOMRIGHT", statsPanel, "BOTTOMRIGHT", -12, 2)
@@ -2249,12 +2259,11 @@ local function SkinCharacterSheet()
                 -- the row and physical-pixel-perfect.
                 do
                     local divider = sectionContainer:CreateTexture(nil, "OVERLAY")
-                    divider:SetColorTexture(0.1, 0.1, 0.1, 0.5)
-                    if EllesmereUI and EllesmereUI.PanelPP then
-                        if EllesmereUI.PanelPP.DisablePixelSnap then
-                            EllesmereUI.PanelPP.DisablePixelSnap(divider)
-                        end
-                        divider:SetHeight(EllesmereUI.PanelPP.mult or 1)
+                    divider:SetColorTexture(1, 1, 1, 0.06)
+                    local PP = EllesmereUI and EllesmereUI.PP
+                    if PP then
+                        if PP.DisablePixelSnap then PP.DisablePixelSnap(divider) end
+                        divider:SetHeight(PP.mult or 1)
                     else
                         divider:SetHeight(1)
                     end
@@ -2624,10 +2633,7 @@ local function SkinCharacterSheet()
     titlesPanel:Hide()
     GetFFD(frame).titlesPanel = titlesPanel  -- Store reference on frame
 
-    -- Titles panel background
-    local titlesBg = titlesPanel:CreateTexture(nil, "BACKGROUND")
-    titlesBg:SetColorTexture(0.03, 0.045, 0.05, 0.95)
-    titlesBg:SetAllPoints()
+    -- Titles panel background (removed -- uses shared statsBg backdrop)
 
     -- Search box for titles
     local titlesSearchBox = CreateFrame("EditBox", "EUI_CharSheet_TitlesSearchBox", titlesPanel)
@@ -2637,7 +2643,7 @@ local function SkinCharacterSheet()
     titlesSearchBox:SetMaxLetters(20)
 
     local searchBg = titlesSearchBox:CreateTexture(nil, "BACKGROUND")
-    searchBg:SetColorTexture(0.1, 0.12, 0.14, 0.9)
+    searchBg:SetColorTexture(0, 0, 0, 0.5)
     searchBg:SetAllPoints()
 
     titlesSearchBox:SetTextColor(1, 1, 1, 1)
@@ -2700,7 +2706,7 @@ local function SkinCharacterSheet()
         if prev ~= nil then
             local oldData = titleButtons[prev]
             if oldData and oldData.bg then
-                oldData.bg:SetColorTexture(0.05, 0.07, 0.08, 0.8)
+                oldData.bg:SetColorTexture(1, 1, 1, 0.04)
             end
             local newData = titleButtons[newIndex]
             if newData and newData.bg then
@@ -2711,7 +2717,7 @@ local function SkinCharacterSheet()
                 if idx == newIndex then
                     btnData.bg:SetColorTexture(EG.r, EG.g, EG.b, 0.5)
                 else
-                    btnData.bg:SetColorTexture(0.05, 0.07, 0.08, 0.8)
+                    btnData.bg:SetColorTexture(1, 1, 1, 0.04)
                 end
             end
         end
@@ -2734,11 +2740,11 @@ local function SkinCharacterSheet()
         btn:SetHeight(TILES_TILE_H)
 
         btn._bg = btn:CreateTexture(nil, "BACKGROUND")
-        btn._bg:SetColorTexture(0.05, 0.07, 0.08, 0.8)
+        btn._bg:SetColorTexture(1, 1, 1, 0.05)
         btn._bg:SetAllPoints()
 
         btn._hover = btn:CreateTexture(nil, "ARTWORK")
-        btn._hover:SetColorTexture(1, 1, 1, 0.15)
+        btn._hover:SetColorTexture(1, 1, 1, 0.1)
         btn._hover:SetAllPoints()
         btn._hover:Hide()
 
@@ -2907,9 +2913,7 @@ local function SkinCharacterSheet()
     GetFFD(frame).equipPanel = equipPanel
 
     -- Equipment panel background
-    local equipBg = equipPanel:CreateTexture(nil, "BACKGROUND")
-    equipBg:SetColorTexture(0.03, 0.045, 0.05, 0.95)
-    equipBg:SetAllPoints()
+    -- Equipment panel background (removed -- uses shared statsBg backdrop)
 
     -- Create scroll frame for equipment (flush-left to match titles sidebar)
     local equipScrollFrame = CreateFrame("ScrollFrame", "EUI_CharSheet_EquipScrollFrame", equipPanel)
@@ -3345,7 +3349,7 @@ local function SkinCharacterSheet()
             if activeEquipmentSetID == setData.id then
                 tile._bg:SetColorTexture(EG_EQ.r, EG_EQ.g, EG_EQ.b, 0.5)
             else
-                tile._bg:SetColorTexture(0.05, 0.07, 0.08, 0.8)
+                tile._bg:SetColorTexture(1, 1, 1, 0.05)
             end
             if tile._selection then
                 if selectedSetID == setData.id then
@@ -3416,7 +3420,7 @@ local function SkinCharacterSheet()
                     if tile._setID and tile._setID == newActiveID then
                         tile._bg:SetColorTexture(EG_EQ.r, EG_EQ.g, EG_EQ.b, 0.5)
                     else
-                        tile._bg:SetColorTexture(0.05, 0.07, 0.08, 0.8)
+                        tile._bg:SetColorTexture(1, 1, 1, 0.05)
                     end
                 end
                 if tile._selection then
@@ -3516,6 +3520,101 @@ local function SkinCharacterSheet()
 
     -- Character tab is the default active view
     SetActiveTopButton(characterBtn)
+
+    -- Calc toggle tab: fake bottom tab on the right side of the character
+    -- sheet, visually identical to the Blizzard Character/Rep/Currency tabs.
+    do
+        local calcDb = EUIUpgCalc and EUIUpgCalc.GetOptsDB and EUIUpgCalc.GetOptsDB()
+        if calcDb and calcDb.showCalcButton then
+            -- Match Blizzard tab dimensions from CharacterFrameTab1
+            local refTab = _G["CharacterFrameTab1"]
+            local tabW = refTab and refTab:GetWidth() or 80
+            local tabH = refTab and refTab:GetHeight() or 32
+
+            local calcTab = CreateFrame("Button", "EUI_CharSheet_CalcTab", frame)
+            calcTab:SetSize(tabW, tabH)
+            calcTab:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -10, -30)
+            calcTab:SetFrameLevel(frame:GetFrameLevel() + 5)
+            calcTab:EnableMouse(true)
+
+            -- Dark background (matches skinned Blizzard tabs)
+            local bg = calcTab:CreateTexture(nil, "BACKGROUND")
+            bg:SetAllPoints()
+            bg:SetColorTexture(0.068, 0.056, 0.052, 1)
+
+            -- Active highlight overlay
+            local activeHL = calcTab:CreateTexture(nil, "ARTWORK", nil, -6)
+            activeHL:SetAllPoints()
+            activeHL:SetColorTexture(1, 1, 1, 0.02)
+            activeHL:SetBlendMode("ADD")
+            activeHL:Hide()
+
+            -- Label
+            local label = calcTab:CreateFontString(nil, "OVERLAY")
+            label:SetFont(fontPath, 9, "")
+            label:SetPoint("CENTER", calcTab, "CENTER", 0, 0)
+            label:SetJustifyH("CENTER")
+            label:SetText("Upgrades")
+
+            -- Accent underline (matches Blizzard tab underline)
+            local EG = EllesmereUI.ELLESMERE_GREEN or { r = 0.05, g = 0.82, b = 0.62 }
+            local underline = calcTab:CreateTexture(nil, "OVERLAY", nil, 6)
+            if PP and PP.DisablePixelSnap then
+                PP.DisablePixelSnap(underline)
+                underline:SetHeight(PP.mult or 1)
+            else
+                underline:SetHeight(1)
+            end
+            underline:SetPoint("BOTTOMLEFT", calcTab, "BOTTOMLEFT", 0, 0)
+            underline:SetPoint("BOTTOMRIGHT", calcTab, "BOTTOMRIGHT", 0, 0)
+            underline:SetColorTexture(EG.r, EG.g, EG.b, 1)
+            underline:Hide()
+            if EllesmereUI.RegAccent then
+                EllesmereUI.RegAccent({ type = "solid", obj = underline, a = 1 })
+            end
+
+            local function RefreshCalcTab()
+                local fr = _G["EUIUpgCalcFrame"]
+                local isOpen = fr and fr:IsShown()
+                label:SetTextColor(1, 1, 1, isOpen and 1 or 0.5)
+                underline:SetShown(isOpen)
+                activeHL:SetShown(isOpen)
+            end
+            RefreshCalcTab()
+
+            calcTab:SetScript("OnEnter", function()
+                label:SetTextColor(1, 1, 1, 1)
+            end)
+            calcTab:SetScript("OnLeave", function()
+                RefreshCalcTab()
+            end)
+            calcTab:SetScript("OnClick", function()
+                local fr = _G["EUIUpgCalcFrame"]
+                if fr then
+                    if fr:IsShown() then fr:Hide() else fr:Show() end
+                    RefreshCalcTab()
+                end
+            end)
+
+            frame:HookScript("OnShow", RefreshCalcTab)
+            -- Hook the calc frame itself so the tab updates when it's
+            -- opened/closed by any means (slash cmd, NPC hook, etc.)
+            local function HookCalcFrame()
+                local fr = _G["EUIUpgCalcFrame"]
+                if not fr or GetFFD(calcTab)._calcHooked then return end
+                GetFFD(calcTab)._calcHooked = true
+                fr:HookScript("OnShow", RefreshCalcTab)
+                fr:HookScript("OnHide", RefreshCalcTab)
+            end
+            HookCalcFrame()
+            -- Deferred: calc frame may not exist yet at skin time
+            if not _G["EUIUpgCalcFrame"] then
+                C_Timer.After(1, HookCalcFrame)
+            end
+            GetFFD(frame).calcToggleBtn = calcTab
+            GetFFD(frame).updateCalcBtnColor = RefreshCalcTab
+        end
+    end
 
     -- Left column slots (show itemlevel on right)
     local leftColumnSlots = {
@@ -3968,6 +4067,27 @@ local function SkinCharacterSheet()
         end
     end
 
+    local function CharSheetGemsActive()
+        if EllesmereUIDB and EllesmereUIDB.themedCharacterSheet == false then return false end
+        if EllesmereUIDB and EllesmereUIDB.showGems == false then return false end
+        return true
+    end
+
+    local _equippedItemIDs = {}
+    local function RefreshEquippedItemIDs()
+        wipe(_equippedItemIDs)
+        for _, slotName in ipairs(itemSlots) do
+            local sl = _G[slotName]
+            if sl and sl.GetID then
+                local iid = GetInventoryItemID("player", sl:GetID())
+                if iid and iid > 0 then
+                    _equippedItemIDs[iid] = true
+                end
+            end
+        end
+    end
+    RefreshEquippedItemIDs()
+
     -- Equipment / item-load hooks: trailing debounce so bursts of
     -- GET_ITEM_INFO_RECEIVED schedule one refresh after data settles (a
     -- leading debounce can fire once on stale links right after /reload).
@@ -3986,15 +4106,23 @@ local function SkinCharacterSheet()
     end
 
     local socketWatcher = CreateFrame("Frame")
-    -- Low-frequency events: always registered (equip changes, login).
     socketWatcher:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
     socketWatcher:RegisterEvent("PLAYER_ENTERING_WORLD")
-    -- High-frequency events (TOOLTIP_DATA_UPDATE, GET_ITEM_INFO_RECEIVED,
-    -- UNIT_INVENTORY_CHANGED, SOCKET_INFO_UPDATE) are registered in OnShow
-    -- and unregistered in OnHide so they cost zero when the sheet is closed.
+    -- Hydration (2 global): must hear item load while Character is closed after
+    -- /reload. UNIT_INVENTORY_CHANGED + SOCKET_INFO_UPDATE (2 OnShow-only) below.
+    if CharSheetGemsActive() then
+        socketWatcher:RegisterEvent("TOOLTIP_DATA_UPDATE")
+        socketWatcher:RegisterEvent("GET_ITEM_INFO_RECEIVED")
+    end
     socketWatcher:SetScript("OnEvent", function(_, event, arg1)
-        if EllesmereUIDB and EllesmereUIDB.themedCharacterSheet == false then return end
+        if not CharSheetGemsActive() then return end
         if event == "UNIT_INVENTORY_CHANGED" and arg1 ~= "player" then return end
+        if event == "PLAYER_EQUIPMENT_CHANGED" or event == "PLAYER_ENTERING_WORLD" then
+            RefreshEquippedItemIDs()
+        end
+        if event == "GET_ITEM_INFO_RECEIVED" and (not arg1 or not _equippedItemIDs[arg1]) then
+            return
+        end
         -- Clear stale gem art for the slot that just changed BEFORE the
         -- debounced refresh runs. Without this, the old item's gem icons
         -- can remain visible until /reload if the refresh path somehow
@@ -4003,21 +4131,23 @@ local function SkinCharacterSheet()
             local slotName = _invSlotToName[arg1]
             if slotName then ClearSlotGems(_G[slotName]) end
         end
-        if frame:IsShown() and (frame.selectedTab or 1) == 1 then
-            QueueSocketRefresh()
+        -- No refresh work while the sheet is closed (handler still runs for
+        -- equipped-item cache / clear-slot above).
+        if not frame:IsShown() or (frame.selectedTab or 1) ~= 1 then
+            return
         end
+        QueueSocketRefresh()
     end)
 
     -- Hook frame show/hide
     frame:HookScript("OnShow", function()
-        -- Register high-frequency events only while the sheet is visible.
-        socketWatcher:RegisterEvent("TOOLTIP_DATA_UPDATE")
-        socketWatcher:RegisterEvent("GET_ITEM_INFO_RECEIVED")
+        -- Non-hydration high-frequency events: only while the sheet is visible.
         socketWatcher:RegisterEvent("UNIT_INVENTORY_CHANGED")
         socketWatcher:RegisterEvent("SOCKET_INFO_UPDATE")
         -- Only refresh sockets and show container if on character tab
         local isCharacterTab = (frame.selectedTab or 1) == 1
         if isCharacterTab then
+            RefreshEquippedItemIDs()
             RefreshAllSocketIcons()
             QueueSocketRefresh()
             globalSocketContainer:Show()
@@ -4041,9 +4171,6 @@ local function SkinCharacterSheet()
     end)
 
     frame:HookScript("OnHide", function()
-        -- Unregister high-frequency events so they cost zero while closed.
-        socketWatcher:UnregisterEvent("TOOLTIP_DATA_UPDATE")
-        socketWatcher:UnregisterEvent("GET_ITEM_INFO_RECEIVED")
         socketWatcher:UnregisterEvent("UNIT_INVENTORY_CHANGED")
         socketWatcher:UnregisterEvent("SOCKET_INFO_UPDATE")
         if _socketRefreshTimer then

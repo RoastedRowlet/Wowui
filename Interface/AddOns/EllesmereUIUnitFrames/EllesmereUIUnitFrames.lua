@@ -6,6 +6,47 @@ local string_format = string.format
 
 local oUF = ns.oUF or oUF
 local PP = EllesmereUI.PP
+
+-- Per-addon border texture defaults (size key = borderSize 0-4)
+do
+    local ALL_SIZES = { [0] = true, [1] = true, [2] = true, [3] = true, [4] = true }
+    local function AllSizes(ox, oy, sx, sy)
+        local t = {}
+        for k in pairs(ALL_SIZES) do t[k] = { offsetX = ox, offsetY = oy, shiftX = sx, shiftY = sy } end
+        return t
+    end
+    EllesmereUI.RegisterBorderDefaults("unitframes", {
+        ["glow"] = {
+            defaultSize = 1,
+            sizes = AllSizes(0, 0, 0, 0),
+        },
+        ["blizz"] = {
+            defaultSize = 4,
+            sizes = {
+                [0] = { offsetX = 0, offsetY = 0, shiftX = 0, shiftY = 0 },
+                [1] = { offsetX = 2, offsetY = 1, shiftX = 0, shiftY = 0 },
+                [2] = { offsetX = 3, offsetY = 1, shiftX = 1, shiftY = 0 },
+                [3] = { offsetX = 4, offsetY = 2, shiftX = 2, shiftY = 0 },
+                [4] = { offsetX = 5, offsetY = 3, shiftX = 2, shiftY = 0 },
+            },
+        },
+        ["dialog"] = {
+            defaultSize = 2,
+            sizes = {
+                [0] = { offsetX = 0, offsetY = 0, shiftX = 0, shiftY = 0 },
+                [1] = { offsetX = 2, offsetY = 2, shiftX = 0, shiftY = 0 },
+                [2] = { offsetX = 2, offsetY = 2, shiftX = 0, shiftY = 0 },
+                [3] = { offsetX = 4, offsetY = 4, shiftX = 0, shiftY = 0 },
+                [4] = { offsetX = 8, offsetY = 8, shiftX = 0, shiftY = 0 },
+            },
+        },
+        ["sm:Blizzard Achievement Wood"] = {
+            defaultSize = 1,
+            sizes = AllSizes(1, 1, 0, 0),
+        },
+    })
+end
+
 if not oUF then
     error("EllesmereUIUnitFrames: oUF library not found! Please install oUF to Libraries\\oUF\\ folder.")
     return
@@ -23,6 +64,15 @@ EllesmereUI._ufPortraitSide = EllesmereUI._ufPortraitSide or setmetatable({}, { 
 local db
 local defaults = {
     profile = {
+        playerAuras = {
+            enabled       = false,
+            iconSize      = 32,
+            showText      = true,
+            textSize      = 11,
+            borderSize    = 1,
+            borderR       = 0, borderG = 0, borderB = 0, borderA = 1,
+            noBorderDebuffs = true,
+        },
         castbarOpacity = 1.0,
         castbarColor = { r = 0.114, g = 0.655, b = 0.514 },
         portraitMode = "2d",
@@ -55,12 +105,16 @@ local defaults = {
             buffSize = 22,
             buffOffsetX = 0,
             buffOffsetY = 0,
+            buffShowCooldownText = false,
+            buffCooldownTextSize = 10,
             debuffAnchor = "none",
             debuffGrowth = "auto",
             maxDebuffs = 10,
             debuffSize = 22,
             debuffOffsetX = 0,
             debuffOffsetY = 0,
+            debuffShowCooldownText = false,
+            debuffCooldownTextSize = 10,
             namePosition = "left",
             healthTextPosition = "right",
             leftTextContent = "name",
@@ -166,6 +220,7 @@ local defaults = {
             classPowerEmptyColor = { r = 0.2, g = 0.2, b = 0.2, a = 1.0 },
             borderSize = 1,
             borderColor = { r = 0, g = 0, b = 0 },
+            borderTexture = "solid",
             highlightColor = { r = 1, g = 1, b = 1 },
             textSize = 12,
             combatIndicatorStyle = "class",
@@ -249,9 +304,13 @@ local defaults = {
             buffSize = 22,
             buffOffsetX = 0,
             buffOffsetY = 0,
+            buffShowCooldownText = false,
+            buffCooldownTextSize = 10,
             debuffSize = 22,
             debuffOffsetX = 0,
             debuffOffsetY = 0,
+            debuffShowCooldownText = false,
+            debuffCooldownTextSize = 10,
             namePosition = "left",
             healthTextPosition = "right",
             leftTextContent = "name",
@@ -318,6 +377,7 @@ local defaults = {
             powerBarOpacity = 100,
             borderSize = 1,
             borderColor = { r = 0, g = 0, b = 0 },
+            borderTexture = "solid",
             highlightColor = { r = 1, g = 1, b = 1 },
             textSize = 12,
             showInRaid = true,
@@ -362,9 +422,13 @@ local defaults = {
             buffSize = 22,
             buffOffsetX = 0,
             buffOffsetY = 0,
+            buffShowCooldownText = false,
+            buffCooldownTextSize = 10,
             debuffSize = 22,
             debuffOffsetX = 0,
             debuffOffsetY = 0,
+            debuffShowCooldownText = false,
+            debuffCooldownTextSize = 10,
             healthDisplay = "both",
             showBuffs = true,
             onlyPlayerDebuffs = false,
@@ -405,6 +469,7 @@ local defaults = {
             centerTextX = 0, centerTextY = 0,
             borderSize = 1,
             borderColor = { r = 0, g = 0, b = 0 },
+            borderTexture = "solid",
             highlightColor = { r = 1, g = 1, b = 1 },
             powerPosition = "none",
             healthReverseFill = false,
@@ -433,6 +498,7 @@ local defaults = {
             centerTextX = 0, centerTextY = 0,
             borderSize = 1,
             borderColor = { r = 0, g = 0, b = 0 },
+            borderTexture = "solid",
             highlightColor = { r = 1, g = 1, b = 1 },
             powerPosition = "none",
             healthReverseFill = false,
@@ -559,6 +625,7 @@ local defaults = {
             textSize = 12,
             borderSize = 1,
             borderColor = { r = 0, g = 0, b = 0 },
+            borderTexture = "solid",
             highlightColor = { r = 1, g = 1, b = 1 },
             showInRaid = true,
             showInParty = true,
@@ -636,6 +703,12 @@ local defaults = {
             debuffSize = 22,
             debuffOffsetX = 0,
             debuffOffsetY = 0,
+            buffShowCooldownText = false,
+            buffCooldownTextSize = 10,
+            debuffShowCooldownText = false,
+            debuffCooldownTextSize = 10,
+            simpleDebuffShowCooldownText = false,
+            simpleDebuffCooldownTextSize = 14,
             simpleDebuffs = true,  -- forces Left anchor + frame-height-matched debuff size
             textSize = 12,
             leftTextContent = "name",
@@ -652,6 +725,7 @@ local defaults = {
             centerTextX = 0, centerTextY = 0,
             borderSize = 1,
             borderColor = { r = 0, g = 0, b = 0 },
+            borderTexture = "solid",
             highlightColor = { r = 1, g = 1, b = 1 },
             raidMarkerEnabled = true,
             raidMarkerSize = 28,
@@ -1057,6 +1131,13 @@ oUF.Tags.Methods["eui-curpp"] = [[function(u)
 end]]
 oUF.Tags.Events["eui-curpp"] = "UNIT_POWER_UPDATE UNIT_MAXPOWER UNIT_DISPLAYPOWER"
 
+-- eui-absorb: abbreviated absorb amount, blank when zero
+oUF.Tags.Methods["eui-absorb"] = [[function(u)
+    if not u or not UnitExists(u) then return "" end
+    return string.format("%s", C_StringUtil.TruncateWhenZero(UnitGetTotalAbsorbs(u) or 0))
+end]]
+oUF.Tags.Events["eui-absorb"] = "UNIT_ABSORB_AMOUNT_CHANGED"
+
 local optionsFrame
 local optionsCategoryID
 _G.EllesmereUF_StylesRegistered = _G.EllesmereUF_StylesRegistered or false
@@ -1210,6 +1291,7 @@ local function ContentToTag(content)
     elseif content == "curpp" then return "[curpp]"
     elseif content == "curhp_curpp" then return "[curhpshort] | [curpp]"
     elseif content == "perhp_perpp" then return "[perhp]% | [perpp]%"
+    elseif content == "absorb" then return "[eui-absorb]"
     else return nil end
 end
 
@@ -1226,6 +1308,7 @@ local ufTextWidths = {
     curpp       = 38,  -- "132"
     curhp_curpp = 75,  -- "132 K | 132"
     perhp_perpp = 75,  -- "86% | 86%"
+    absorb      = 38,  -- "12.3 K"
 }
 local function EstimateUFTextWidth(content)
     return (ufTextWidths[content] or 0) + UF_TEXT_PADDING
@@ -1731,7 +1814,9 @@ local function UpdateBordersForScale(frame, unit)
 
     -- 1) Main frame border textures
     if frame.unifiedBorder then
-        PP.SetBorderSize(frame.unifiedBorder, borderSize)
+        local bc = settings.borderColor or { r = 0, g = 0, b = 0 }
+        local textureKey = settings.borderTexture or "solid"
+        EllesmereUI.ApplyBorderStyle(frame.unifiedBorder, borderSize, bc.r, bc.g, bc.b, settings.borderAlpha or 1, textureKey, settings.borderTextureOffset, settings.borderTextureOffsetY, settings.borderTextureShiftX, settings.borderTextureShiftY, "unitframes", borderSize)
     end
 
     -- 2) Gather layout info
@@ -2129,6 +2214,20 @@ local function UpdateAbsorbBarReverseFill(frame, isReversed)
         fw:SetPoint("TOPLEFT",    hpTex, "TOPRIGHT",    0, 0)
         fw:SetPoint("BOTTOMLEFT", hpTex, "BOTTOMRIGHT", 0, 0)
     end
+
+    -- Heal absorb bar follows the same reverse-fill logic as the backfill bar
+    local ha = ab._healAbsorb
+    if ha then
+        ha:ClearAllPoints()
+        ha:SetReverseFill(not isReversed)
+        if isReversed then
+            ha:SetPoint("TOPLEFT",    hpBar, "TOPLEFT",    0, 0)
+            ha:SetPoint("BOTTOMLEFT", hpBar, "BOTTOMLEFT", 0, 0)
+        else
+            ha:SetPoint("TOPRIGHT",    hpBar, "TOPRIGHT",    0, 0)
+            ha:SetPoint("BOTTOMRIGHT", hpBar, "BOTTOMRIGHT", 0, 0)
+        end
+    end
 end
 
 local function CreateAbsorbBar(frame, unit, settings)
@@ -2217,9 +2316,31 @@ local function CreateAbsorbBar(frame, unit, settings)
         end
     end
 
+    -- Heal absorb bar: overlays the filled-health area in red.
+    -- Uses curClip so it's clipped to the filled portion of the health bar.
+    -- Reverse-fills from the health texture edge inward (eats into green).
+    local healAbsorbBar = CreateFrame("StatusBar", nil, curClip)
+    healAbsorbBar:SetStatusBarTexture("Interface\\Buttons\\WHITE8X8")
+    local haFill = healAbsorbBar:GetStatusBarTexture()
+    if haFill then haFill:SetDrawLayer("ARTWORK", 2); haFill:AddMaskTexture(absorbMask) end
+    healAbsorbBar:SetStatusBarColor(0.8, 0.15, 0.15, 0.65)
+    healAbsorbBar:SetReverseFill(not isReversed)
+    if isReversed then
+        healAbsorbBar:SetPoint("TOPLEFT",    hpBar, "TOPLEFT",    0, 0)
+        healAbsorbBar:SetPoint("BOTTOMLEFT", hpBar, "BOTTOMLEFT", 0, 0)
+    else
+        healAbsorbBar:SetPoint("TOPRIGHT",    hpBar, "TOPRIGHT",    0, 0)
+        healAbsorbBar:SetPoint("BOTTOMRIGHT", hpBar, "BOTTOMRIGHT", 0, 0)
+    end
+    healAbsorbBar:SetWidth(hpBar:GetWidth())
+    healAbsorbBar:SetHeight(hpBar:GetHeight())
+    healAbsorbBar:SetFrameLevel(hpBar:GetFrameLevel() + 1)
+    healAbsorbBar:Hide()
+
     -- Attach extras to the main bar (backfill) so anything that references
     -- HealthPrediction.damageAbsorb can hide/show both segments together.
     backfillBar._forward      = forwardBar
+    backfillBar._healAbsorb   = healAbsorbBar
     backfillBar._hpBar        = hpBar
     backfillBar._hpCalculator = hpCalc
     backfillBar._curClip      = curClip
@@ -2234,6 +2355,7 @@ local function CreateAbsorbBar(frame, unit, settings)
 
     backfillBar:HookScript("OnHide", function()
         forwardBar:Hide()
+        healAbsorbBar:Hide()
     end)
 
     frame.HealthPrediction = {
@@ -2253,9 +2375,11 @@ local function CreateAbsorbBar(frame, unit, settings)
             -- and skip the update when absorbs are "none". Without this,
             -- every unit event would re-Show() them after ReloadFrames hid them.
             local s = GetSettingsForUnit(updUnit)
+            local ha = ab._healAbsorb
             if s and (not s.showPlayerAbsorb or s.showPlayerAbsorb == "none") then
                 ab:Hide()
                 if fw then fw:Hide() end
+                if ha then ha:Hide() end
                 return
             end
 
@@ -2297,6 +2421,18 @@ local function CreateAbsorbBar(frame, unit, settings)
                 fw:SetValue(absorbAmt)
                 fw:Show()
             end
+
+            -- Heal absorb: red overlay eating into filled health.
+            -- The value can be a secret number in 12.0+, so never compare
+            -- it in Lua. Feed it directly to StatusBar:SetValue and let the
+            -- bar render zero width when the value is 0.
+            if ha then
+                local healAbsorbAmt = UnitGetTotalHealAbsorbs and UnitGetTotalHealAbsorbs(updUnit) or 0
+                ha:SetWidth(hpW); ha:SetHeight(hpH)
+                ha:SetMinMaxValues(0, maxHealth)
+                ha:SetValue(healAbsorbAmt)
+                ha:Show()
+            end
         end,
     }
 
@@ -2307,10 +2443,17 @@ local function CreatePowerBar(frame, unit, settings)
     local powerPos = settings.powerPosition or "below"
 
     local power = CreateFrame("StatusBar", nil, frame)
-    power:SetFrameStrata(frame:GetFrameStrata())
-    power:SetFrameLevel(frame:GetFrameLevel() + 3)
-    local pw = settings.frameWidth
     local isDetached = (powerPos == "detached_top" or powerPos == "detached_bottom")
+    if isDetached then
+        -- Bump strata so the detached power bar renders above the border
+        -- regardless of frame level. Frame level within the same strata is
+        -- fragile (oUF and absorb bar code can reset it).
+        power:SetFrameStrata("MEDIUM")
+    else
+        power:SetFrameStrata(frame:GetFrameStrata())
+    end
+    power:SetFrameLevel(frame:GetFrameLevel() + (isDetached and 12 or 3))
+    local pw = settings.frameWidth
     if isDetached and (settings.powerWidth or 0) > 0 then
         pw = settings.powerWidth
     end
@@ -2786,7 +2929,12 @@ local function CreateCastBar(frame, unit, settings)
     -- Three-zone cast bar text layout matching nameplates:
     -- [spell name LEFT 42%] [target RIGHT-of-center 42%] [timer RIGHT]
     -- All zones truncate with ellipsis (WordWrap off, MaxLines 1).
-    local text = castbar:CreateFontString(nil, "OVERLAY")
+    -- Text overlay must sit above the unified border (frame +10).
+    local textOverlay = CreateFrame("Frame", nil, castbar)
+    textOverlay:SetAllPoints(castbar)
+    textOverlay:SetFrameLevel(frame:GetFrameLevel() + 11)
+
+    local text = textOverlay:CreateFontString(nil, "OVERLAY")
     SetFSFont(text, settings.castSpellNameSize or 11)
     text:SetJustifyH("LEFT")
     text:SetWordWrap(false)
@@ -2794,7 +2942,7 @@ local function CreateCastBar(frame, unit, settings)
     text:SetTextColor(1, 1, 1)
     castbar.Text = text
 
-    local time = castbar:CreateFontString(nil, "OVERLAY")
+    local time = textOverlay:CreateFontString(nil, "OVERLAY")
     SetFSFont(time, settings.castDurationSize or 10)
     time:SetJustifyH("RIGHT")
     time:SetWordWrap(false)
@@ -2802,7 +2950,7 @@ local function CreateCastBar(frame, unit, settings)
     time:SetTextColor(1, 1, 1)
     castbar.Time = time
 
-    local target = castbar:CreateFontString(nil, "OVERLAY")
+    local target = textOverlay:CreateFontString(nil, "OVERLAY")
     SetFSFont(target, settings.castSpellTargetSize or 11)
     target:SetJustifyH("RIGHT")
     target:SetWordWrap(false)
@@ -3092,24 +3240,22 @@ end
 
 
 local function FrameBorderEnter(self)
-    if self.unifiedBorder and PP.GetBorders(self.unifiedBorder) then
-        local unit = self.unit or "player"
-        local isMini = (unit == "pet" or unit == "targettarget" or unit == "focustarget" or (unit and unit:match("^boss%d$")))
-        local settings = isMini and GetMiniDonorSettings() or GetSettingsForUnit(unit)
-        local hc = settings.highlightColor or { r = 1, g = 1, b = 1 }
-        local ha = settings.highlightAlpha or 1
-        PP.SetBorderColor(self.unifiedBorder, hc.r, hc.g, hc.b, ha)
-    end
+    if not self.unifiedBorder then return end
+    local unit = self.unit or "player"
+    local isMini = (unit == "pet" or unit == "targettarget" or unit == "focustarget" or (unit and unit:match("^boss%d$")))
+    local settings = isMini and GetMiniDonorSettings() or GetSettingsForUnit(unit)
+    local hc = settings.highlightColor or { r = 1, g = 1, b = 1 }
+    local ha = settings.highlightAlpha or 1
+    EllesmereUI.SetBorderStyleColor(self.unifiedBorder, hc.r, hc.g, hc.b, ha)
 end
 local function FrameBorderLeave(self)
-    if self.unifiedBorder and PP.GetBorders(self.unifiedBorder) then
-        local unit = self.unit or "player"
-        local isMini = (unit == "pet" or unit == "targettarget" or unit == "focustarget" or (unit and unit:match("^boss%d$")))
-        local settings = isMini and GetMiniDonorSettings() or GetSettingsForUnit(unit)
-        local bc = settings.borderColor or { r = 0, g = 0, b = 0 }
-        local ba = settings.borderAlpha or 1
-        PP.SetBorderColor(self.unifiedBorder, bc.r, bc.g, bc.b, ba)
-    end
+    if not self.unifiedBorder then return end
+    local unit = self.unit or "player"
+    local isMini = (unit == "pet" or unit == "targettarget" or unit == "focustarget" or (unit and unit:match("^boss%d$")))
+    local settings = isMini and GetMiniDonorSettings() or GetSettingsForUnit(unit)
+    local bc = settings.borderColor or { r = 0, g = 0, b = 0 }
+    local ba = settings.borderAlpha or 1
+    EllesmereUI.SetBorderStyleColor(self.unifiedBorder, bc.r, bc.g, bc.b, ba)
 end
 
 -- Unified border for unit frames using the PP border system
@@ -3117,13 +3263,14 @@ local function CreateUnifiedBorder(frame, unit)
     local settings = GetSettingsForUnit(unit or "player")
     local size = settings.borderSize or 1
     local bc = settings.borderColor or { r = 0, g = 0, b = 0 }
+    local textureKey = settings.borderTexture or "solid"
 
     local border = CreateFrame("Frame", nil, frame)
     PP.Point(border, "TOPLEFT", frame, "TOPLEFT", 0, 0)
     PP.Point(border, "BOTTOMRIGHT", frame, "BOTTOMRIGHT", 0, 0)
     border:SetFrameLevel(frame:GetFrameLevel() + 10)
 
-    PP.CreateBorder(border, bc.r, bc.g, bc.b, 1, size)
+    EllesmereUI.ApplyBorderStyle(border, size, bc.r, bc.g, bc.b, settings.borderAlpha or 1, textureKey, settings.borderTextureOffset, settings.borderTextureOffsetY, settings.borderTextureShiftX, settings.borderTextureShiftY, "unitframes", size)
 
     frame.unifiedBorder = border
 
@@ -3138,8 +3285,26 @@ local function CreateUnifiedBorder(frame, unit)
 end
 
 
+-- Apply cooldown text settings to all existing buttons in an aura container.
+-- Called from ReloadFrames to live-update without /reload.
+local function ApplyAuraCooldownText(container, showCD, cdSize)
+    if not container then return end
+    for i = 1, (container.createdButtons or 0) do
+        local btn = container[i]
+        if btn and btn.Cooldown then
+            btn.Cooldown:SetHideCountdownNumbers(not showCD)
+            if showCD then
+                local cdText = btn.Cooldown:GetRegions()
+                if cdText and cdText.SetFont then
+                    cdText:SetFont(cachedFontPath, cdSize, "OUTLINE")
+                end
+            end
+        end
+    end
+end
+
 local function CreateTargetAuras(frame, unit)
-    local function SetupAuraIcon(_, button)
+    local function SetupAuraIcon(container, button)
         if not button then return end
 
         if button.Icon then
@@ -3149,7 +3314,28 @@ local function CreateTargetAuras(frame, unit)
         if button.Cooldown then
             button.Cooldown:SetDrawEdge(false)
             button.Cooldown:SetReverse(true)
-            button.Cooldown:SetHideCountdownNumbers(true)
+            -- Read settings fresh (the `settings` local is declared below this
+            -- closure in the function body, so it's not captured as an upvalue).
+            local isBuff = container and container.filter == "HELPFUL"
+            local s = GetSettingsForUnit(unit or "target")
+            local showText, textSize
+            if isBuff then
+                showText = s and s.buffShowCooldownText
+                textSize = s and s.buffCooldownTextSize or 10
+            elseif s and s.simpleDebuffs ~= false and unit and unit:match("^boss") then
+                showText = s and s.simpleDebuffShowCooldownText
+                textSize = s and s.simpleDebuffCooldownTextSize or 14
+            else
+                showText = s and s.debuffShowCooldownText
+                textSize = s and s.debuffCooldownTextSize or 10
+            end
+            button.Cooldown:SetHideCountdownNumbers(not showText)
+            if showText then
+                local cdText = button.Cooldown:GetRegions()
+                if cdText and cdText.SetFont then
+                    cdText:SetFont(cachedFontPath, textSize, "OUTLINE")
+                end
+            end
         end
 
         if not button.Border then
@@ -3665,10 +3851,12 @@ local function StyleFocusFrame(frame, unit)
         end
     end
 
-    -- Text overlay frame -- sits above the StatusBar for clean text rendering.
-    local textOverlay = CreateFrame("Frame", nil, frame.Health)
+    -- Text overlay frame -- sits above the StatusBar and unified border.
+    -- Parented to frame (not Health) so text is not clipped by the health bar.
+    local textOverlay = CreateFrame("Frame", nil, frame)
     textOverlay:SetAllPoints(frame.Health)
-    textOverlay:SetFrameLevel(frame.Health:GetFrameLevel() + 12)
+    textOverlay:SetFrameStrata(frame:GetFrameStrata())
+    textOverlay:SetFrameLevel(math.max(frame:GetFrameLevel() + 20, frame.Health:GetFrameLevel() + 12))
     frame._textOverlay = textOverlay
 
     local leftContent = settings.leftTextContent or "name"
@@ -4504,7 +4692,9 @@ end
 -------------------------------------------------------------------------------
 local CLASS_POWER_TYPES = {
     ROGUE       = Enum.PowerType.ComboPoints,
-    DRUID       = { [103] = Enum.PowerType.ComboPoints },  -- Feral only
+    DRUID       = { [103] = Enum.PowerType.ComboPoints,     -- Feral
+                    [104] = Enum.PowerType.ComboPoints,     -- Guardian (cat form)
+                    [105] = Enum.PowerType.ComboPoints },   -- Restoration (cat form)
     MAGE        = {
         [62] = { Enum.PowerType.ArcaneCharges, 4 }, -- Arcane
         [64] = { "ICICLES", 5 },                    -- Frost: aura-based pip stacks
@@ -4979,12 +5169,36 @@ local function CreateCustomClassPower(playerFrame, style)
         if powerType == Enum.PowerType.Runes then
             eventFrame:RegisterEvent("RUNE_POWER_UPDATE")
         end
+        -- Guardian/Resto druids: show combo points only in cat form
+        local druidFormToggle = false
+        if playerClass == "DRUID" and powerType == Enum.PowerType.ComboPoints then
+            local spec = C_SpecializationInfo and C_SpecializationInfo.GetSpecialization()
+            local specID = spec and C_SpecializationInfo.GetSpecializationInfo(spec)
+            if specID == 104 or specID == 105 then
+                druidFormToggle = true
+                eventFrame:RegisterEvent("UPDATE_SHAPESHIFT_FORM")
+            end
+        end
         eventFrame:SetScript("OnEvent", function(_, event, unit)
+            if druidFormToggle and (event == "UPDATE_SHAPESHIFT_FORM" or event == "PLAYER_ENTERING_WORLD") then
+                local form = GetShapeshiftFormID and GetShapeshiftFormID() or 0
+                container:SetShown(form == 1)
+            end
             if event == "PLAYER_ENTERING_WORLD" or event == "RUNE_POWER_UPDATE"
                or (unit == "player") then
                 UpdatePips()
             end
         end)
+    end
+
+    -- For druid form-toggle specs, start hidden if not in cat form
+    if playerClass == "DRUID" and powerType == Enum.PowerType.ComboPoints then
+        local spec = C_SpecializationInfo and C_SpecializationInfo.GetSpecialization()
+        local specID = spec and C_SpecializationInfo.GetSpecializationInfo(spec)
+        if specID == 104 or specID == 105 then
+            local form = GetShapeshiftFormID and GetShapeshiftFormID() or 0
+            if form ~= 1 then container:Hide() end
+        end
     end
 
     UpdatePips()
@@ -5060,6 +5274,14 @@ local function ReloadFrames()
     local castbarColor = GetCastbarColor()
     local castbarOpacity = profile.castbarOpacity
     local enabled = profile.enabledFrames
+
+    -- Apply frame strata to all spawned unit frames
+    local ufStrata = profile.frameStrata or "MEDIUM"
+    for _, frame in pairs(frames) do
+        if type(frame) == "table" and frame.SetFrameStrata then
+            frame:SetFrameStrata(ufStrata)
+        end
+    end
 
     -- Uses global font
     local donorFontPath = EllesmereUI and EllesmereUI.GetFontPath and EllesmereUI.GetFontPath("unitFrames")
@@ -5525,6 +5747,7 @@ local function ReloadFrames()
                                     frame.Buffs:ForceUpdate()
                                 end
                             end
+                            ApplyAuraCooldownText(frame.Buffs, settings.buffShowCooldownText, settings.buffCooldownTextSize or 10)
                         else
                             if frame:IsElementEnabled("Buffs") then
                                 frame:DisableElement("Buffs")
@@ -5570,6 +5793,7 @@ local function ReloadFrames()
                                     frame.Debuffs:ForceUpdate()
                                 end
                             end
+                            ApplyAuraCooldownText(frame.Debuffs, settings.debuffShowCooldownText, settings.debuffCooldownTextSize or 10)
                         end
                     end
 
@@ -5932,6 +6156,7 @@ local function ReloadFrames()
                             frame.Buffs:Hide()
                             frame.Buffs.num = 0
                         end
+                        ApplyAuraCooldownText(frame.Buffs, settings.buffShowCooldownText, settings.buffCooldownTextSize or 10)
                     end
 
                     -- Debuffs
@@ -5974,6 +6199,7 @@ local function ReloadFrames()
                                 end
                             end
                         end
+                        ApplyAuraCooldownText(frame.Debuffs, settings.debuffShowCooldownText, settings.debuffCooldownTextSize or 10)
                     end
 
                     UpdateBordersForScale(frame, unit)
@@ -6273,6 +6499,7 @@ local function ReloadFrames()
                                 frame.Debuffs:ForceUpdate()
                             end
                         end
+                        ApplyAuraCooldownText(frame.Debuffs, settings.debuffShowCooldownText, settings.debuffCooldownTextSize or 10)
                     end
                 end
 
@@ -6318,6 +6545,7 @@ local function ReloadFrames()
                         frame.Buffs:Hide()
                         frame.Buffs.num = 0
                     end
+                    ApplyAuraCooldownText(frame.Buffs, settings.buffShowCooldownText, settings.buffCooldownTextSize or 10)
                 end
 
                 UpdateBordersForScale(frame, unit)
@@ -6602,6 +6830,13 @@ local function ReloadFrames()
                             end
                         end
                     end
+                    -- Use simple debuff cooldown text settings when simple display
+                    -- is active, regular debuff settings otherwise.
+                    if settings.simpleDebuffs ~= false then
+                        ApplyAuraCooldownText(frame.Debuffs, settings.simpleDebuffShowCooldownText, settings.simpleDebuffCooldownTextSize or 14)
+                    else
+                        ApplyAuraCooldownText(frame.Debuffs, settings.debuffShowCooldownText, settings.debuffCooldownTextSize or 10)
+                    end
                 end
 
                 -- Buffs (boss)
@@ -6646,6 +6881,7 @@ local function ReloadFrames()
                         frame.Buffs:Hide()
                         frame.Buffs.num = 0
                     end
+                    ApplyAuraCooldownText(frame.Buffs, settings.buffShowCooldownText, settings.buffCooldownTextSize or 10)
                 end
 
                 UpdateBordersForScale(frame, unit)
@@ -6721,14 +6957,10 @@ local function ReloadFrames()
                 frame.unifiedBorder:ClearAllPoints()
                 local bs = donorSettings.borderSize or 1
                 local bc = donorSettings.borderColor or { r = 0, g = 0, b = 0 }
-                if bs == 0 then
-                    frame.unifiedBorder:Hide()
-                else
-                    PP.Point(frame.unifiedBorder, "TOPLEFT", frame, "TOPLEFT", 0, 0)
-                    PP.Point(frame.unifiedBorder, "BOTTOMRIGHT", frame, "BOTTOMRIGHT", 0, 0)
-                    PP.UpdateBorder(frame.unifiedBorder, bs, bc.r, bc.g, bc.b, 1)
-                    frame.unifiedBorder:Show()
-                end
+                local btex = donorSettings.borderTexture or "solid"
+                PP.Point(frame.unifiedBorder, "TOPLEFT", frame, "TOPLEFT", 0, 0)
+                PP.Point(frame.unifiedBorder, "BOTTOMRIGHT", frame, "BOTTOMRIGHT", 0, 0)
+                EllesmereUI.ApplyBorderStyle(frame.unifiedBorder, bs, bc.r, bc.g, bc.b, donorSettings.borderAlpha or 1, btex, donorSettings.borderTextureOffset, donorSettings.borderTextureOffsetY, donorSettings.borderTextureShiftX, donorSettings.borderTextureShiftY, "unitframes", bs)
             end
 
             -- Helper: set font on a FontString, using donor font for mini frames
@@ -7669,6 +7901,14 @@ function InitializeFrames()
         if blizzBoss then
             blizzBoss:UnregisterAllEvents()
             blizzBoss:Hide()
+        end
+    end
+
+    -- Apply user-selected frame strata to all unit frames
+    local ufStrata = db.profile.frameStrata or "MEDIUM"
+    for _, frame in pairs(frames) do
+        if type(frame) == "table" and frame.SetFrameStrata then
+            frame:SetFrameStrata(ufStrata)
         end
     end
 

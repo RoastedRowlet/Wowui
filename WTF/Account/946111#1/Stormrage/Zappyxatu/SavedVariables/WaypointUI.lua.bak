@@ -1,5 +1,8 @@
 
 WaypointDB_Local = {
+["mapPinSessionData"] = {
+["pinSequence"] = 0,
+},
 ["slashWayCache"] = {
 },
 }

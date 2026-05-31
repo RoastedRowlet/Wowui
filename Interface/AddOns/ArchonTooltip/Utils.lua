@@ -365,7 +365,13 @@ function Private.LoadAddOn(databaseKey, realmName)
 	local loaded, reason = Private.AddOnUtils.LoadAddOn(addonToLoad, select(1, UnitName("player")))
 
 	if not loaded then
-		print(string.format(Private.L.DBLoadError, Private.GetAddOnNameWithIcon(), databaseKey, reason or Private.L.Unknown))
+		local warning = string.format(Private.L.DBLoadError, Private.GetAddOnNameWithIcon(), databaseKey, reason or Private.L.Unknown)
+
+		if not warnings[warning] then
+			warnings[warning] = true
+			print(warning)
+		end
+
 		return false
 	end
 

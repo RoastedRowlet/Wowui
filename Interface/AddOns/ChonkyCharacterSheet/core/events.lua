@@ -269,7 +269,7 @@ local eventHandlers = {
     ["ITEM_CHANGED"] = {
         { fn = WrapHandler("ITEM_CHANGED", CCS.MythicPlusEventHandler, "MythicPlusEventHandler"), versions = { CCS.RETAIL } },
     },
-    
+   
     ["LIFESTEAL_UPDATE"] = {
         { fn = WrapHandler("LIFESTEAL_UPDATE", CCS.CharacterStatsEventHandler, "CharacterStatsEventHandler"), versions = { CCS.RETAIL } },
     },
@@ -529,6 +529,9 @@ local eventHandlers = {
     },
     ["UNIT_MAXPOWER"] = {
         { fn = WrapHandler("UNIT_MAXPOWER", CCS.CharacterStatsEventHandler, "CharacterStatsEventHandler"), versions = { CCS.RETAIL } },
+    },
+    ["UNIT_NAME_UPDATE"] = {
+        { fn = WrapHandler("UNIT_NAME_UPDATE", CCS.CharacterSheetEventHandler, "CharacterSheetEventHandler"), versions = { CCS.RETAIL } },
     },
     ["UNIT_RANGED_ATTACK_POWER"] = {
         { fn = WrapHandler("UNIT_RANGED_ATTACK_POWER", CCS.CharacterStatsEventHandler, "CharacterStatsEventHandler"), versions = { CCS.RETAIL } },

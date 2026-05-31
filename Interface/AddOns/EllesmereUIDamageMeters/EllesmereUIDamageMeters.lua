@@ -117,12 +117,60 @@ local DM_DEFAULTS = {
             hdrMouseoverIcons = false,
             hdrTextUseAccent = true,
             hdrTextColor    = { r = 1, g = 1, b = 1 },
+            borderTexture   = "solid",
+            borderSize      = 0,
+            borderR = 0, borderG = 0, borderB = 0, borderA = 1,
             -- Per-window settings
             windowCount = 1,
             windows = nil,  -- populated at init
         },
     },
 }
+
+-- Per-addon border texture defaults (same as resourcebars/cdm)
+do
+    local function AllSizes(ox, oy, sx, sy)
+        local t = {}
+        for k = 0, 4 do t[k] = { offsetX = ox, offsetY = oy, shiftX = sx, shiftY = sy } end
+        return t
+    end
+    EllesmereUI.RegisterBorderDefaults("damagemeters", {
+        ["glow"] = {
+            defaultSize = 1,
+            sizes = AllSizes(0, 0, 0, 0),
+        },
+        ["blizz"] = {
+            defaultSize = 3,
+            sizes = {
+                [0] = { offsetX = 0, offsetY = 0, shiftX = 0, shiftY = 0 },
+                [1] = { offsetX = 2, offsetY = 1, shiftX = 0, shiftY = 0 },
+                [2] = { offsetX = 3, offsetY = 2, shiftX = 1, shiftY = 0 },
+                [3] = { offsetX = 4, offsetY = 2, shiftX = 1, shiftY = 0 },
+                [4] = { offsetX = 4, offsetY = 2, shiftX = 1, shiftY = 0 },
+            },
+        },
+        ["dialog"] = {
+            defaultSize = 1,
+            sizes = {
+                [0] = { offsetX = 0, offsetY = 0, shiftX = 0, shiftY = 0 },
+                [1] = { offsetX = 3, offsetY = 3, shiftX = 0, shiftY = 0 },
+                [2] = { offsetX = 3, offsetY = 5, shiftX = 0, shiftY = 0 },
+                [3] = { offsetX = 3, offsetY = 5, shiftX = 0, shiftY = 0 },
+                [4] = { offsetX = 5, offsetY = 10, shiftX = 0, shiftY = 0 },
+            },
+        },
+        ["sm:Blizzard Achievement Wood"] = {
+            defaultSize = 1,
+            sizes = {
+                [0] = { offsetX = 0, offsetY = 0, shiftX = 0, shiftY = 0 },
+                [1] = { offsetX = 1, offsetY = 1, shiftX = 0, shiftY = 0 },
+                [2] = { offsetX = 1, offsetY = 1, shiftX = 0, shiftY = 0 },
+                [3] = { offsetX = 1, offsetY = 6, shiftX = 0, shiftY = 0 },
+                [4] = { offsetX = 1, offsetY = 8, shiftX = 0, shiftY = 0 },
+            },
+        },
+    })
+end
 
 local _dmDB
 local function EnsureDB()
@@ -226,6 +274,8 @@ end
 --  Shared state
 -------------------------------------------------------------------------------
 local _inCombat = false
+local _inEncounter = false       -- true between ENCOUNTER_START and ENCOUNTER_END
+local _encounterStartTime = 0    -- GetTime() at ENCOUNTER_START
 local _playerGUID
 local _windows = {}  -- array of active window tables
 ns._windows = _windows
@@ -264,6 +314,8 @@ local function IsGroupInCombat()
     end
     return false
 end
+
+local StopSharedTicker  -- forward declaration (defined in refresh section)
 
 -- Keystone start: wipe data so Overall = this dungeon run
 -- Keystone end: auto-swap windows from Current to Overall (if enabled)
@@ -330,14 +382,19 @@ instanceFrame:SetScript("OnEvent", function(_, event)
             w.Refresh()
         end
     elseif event == "PLAYER_ENTERING_WORLD" then
-        -- Zone transition (hearth, teleport, etc.): if player is out of combat,
-        -- force-end the combat state. Covers the case where the player leaves
-        -- an instance mid-combat (hearthing out of a dungeon).
-        if not InCombatLockdown() and (_inCombat or _needsFinalRefresh) then
+        -- Zone transition (load screen): force-end all timers unconditionally.
+        -- Covers hearthing out mid-combat, instance teleports, etc.
+        _inEncounter = false
+        _encounterStartTime = 0
+        if _inCombat or _needsFinalRefresh then
             _combatEndTime = GetTime()
             _inCombat = false
             _needsFinalRefresh = false
             StopSharedTicker()
+        end
+        -- Hide standalone timer immediately on zone change
+        if _saTimer and _saTimer:IsShown() and not _saTimerPreview then
+            _saTimer:Hide()
         end
         -- Refresh after zone-in to pick up visibility/data changes
         for _, w in ipairs(_windows) do
@@ -392,10 +449,8 @@ end
 --  Accent color helper
 -------------------------------------------------------------------------------
 local function GetAccentRGB()
-    if EUI.ResolveThemeColor then
-        local db = EllesmereUIDB or {}
-        return EUI.ResolveThemeColor(db.activeTheme or "EllesmereUI")
-    end
+    local EG = EUI.ELLESMERE_GREEN
+    if EG then return EG.r, EG.g, EG.b end
     return EUI.DEFAULT_ACCENT_R or 12/255,
            EUI.DEFAULT_ACCENT_G or 210/255,
            EUI.DEFAULT_ACCENT_B or 157/255
@@ -839,7 +894,7 @@ local TT_BAR_SP = 1
 local TT_WIDTH = 275
 local function TT_MAX()
     local cfg = DB and DB()
-    return (cfg and cfg.showAllBreakdownSpells == false) and TT_DEFAULT_MAX or 50
+    return (cfg and cfg.showAllBreakdownSpells == false) and TT_DEFAULT_MAX or 15
 end
 
 local _ttFrame, _ttBars, _ttVisible = nil, {}, false
@@ -1218,60 +1273,36 @@ local function PopulatePreview(bar, curSession, curSessionID, curDMType)
     return true
 end
 
-local _ttLastGUID, _ttLastSession, _ttLastSessionID, _ttLastDMType
-local _ttLastScale, _ttLastAnchor
+local _ttLastScale
+
+local function HideBarTooltip()
+    if _ttFrame then _ttFrame:Hide() end
+end
 
 local function ShowBarTooltip(bar, curSession, curSessionID, curDMType)
-
     local cfg = DB()
     if cfg.showHoverTooltip == false then return end
     EnsureTooltipFrame()
-    local barRow = bar.row
-    local anchorMode = cfg.breakdownAnchorPoint
-    local desiredAnchor = (anchorMode == "center") and "CENTER" or barRow
-    -- Skip full rebuild if tooltip is already populated for this exact player + session
-    local barGUID = bar._srcGUID
-    if barGUID == _ttLastGUID and curSession == _ttLastSession and curSessionID == _ttLastSessionID and curDMType == _ttLastDMType then
-        if _ttLastAnchor ~= desiredAnchor then
-            _ttFrame:ClearAllPoints()
-            if desiredAnchor == "CENTER" then
-                _ttFrame:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
-                _ttLastAnchor = "CENTER"
-            else
-                _ttFrame:SetPoint("BOTTOMRIGHT", barRow, "TOPRIGHT", 0, 0)
-                _ttLastAnchor = barRow
-            end
-        end
-        _ttFrame:Show()
-    
-        return
-    end
+
+    -- Always rebuild from fresh data (no GUID cache).
+    -- PopulatePreview costs ~0.5ms which is fine for a hover action.
     if PopulatePreview(bar, curSession, curSessionID, curDMType) then
-        _ttLastGUID = barGUID; _ttLastSession = curSession; _ttLastSessionID = curSessionID; _ttLastDMType = curDMType
         local scale = (cfg.hoverTooltipScale or 100) / 100
         if scale ~= _ttLastScale then
             _ttFrame:SetScale(scale)
             _ttLastScale = scale
         end
         _ttFrame:ClearAllPoints()
+        local anchorMode = cfg.breakdownAnchorPoint
         if anchorMode == "center" then
             _ttFrame:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
-            _ttLastAnchor = "CENTER"
         else
-            _ttFrame:SetPoint("BOTTOMRIGHT", barRow, "TOPRIGHT", 0, 0)
-            _ttLastAnchor = barRow
+            _ttFrame:SetPoint("BOTTOMRIGHT", bar.row, "TOPRIGHT", 0, 0)
         end
         _ttFrame:Show()
     else
         HideBarTooltip()
     end
-
-end
-
-local function HideBarTooltip()
-    if _ttFrame then _ttFrame:Hide() end
-    _ttLastGUID = nil; _ttLastAnchor = nil
-
 end
 
 local _hoverPollFrame = CreateFrame("Frame")
@@ -1548,6 +1579,27 @@ local function CreateDMWindow(winIdx)
         bar.classIcon = bar.fill:CreateTexture(nil, "OVERLAY")
         bar.classIcon:SetSize(18, 18); bar.classIcon:SetPoint("LEFT", bar.row, "LEFT", 0, 0)
         bar.classIcon:SetTexCoord(0.08, 0.92, 0.08, 0.92); bar.classIcon:Hide()
+        -- Per-bar border (lazy-created, only when borderSize > 0)
+        function bar.ApplyBorder()
+            local c = DB()
+            local sz = c.borderSize or 0
+            if sz <= 0 then
+                if bar._borderFrame then bar._borderFrame:Hide() end
+                return
+            end
+            if not bar._borderFrame then
+                bar._borderFrame = CreateFrame("Frame", nil, bar.row)
+                bar._borderFrame:SetAllPoints(bar.row)
+                bar._borderFrame:SetFrameLevel(bar.row:GetFrameLevel() + 3)
+            end
+            bar._borderFrame:Show()
+            local tex = c.borderTexture or "solid"
+            EllesmereUI.ApplyBorderStyle(bar._borderFrame, sz,
+                c.borderR or 0, c.borderG or 0, c.borderB or 0, c.borderA or 1,
+                tex, c.borderTextureOffset, c.borderTextureOffsetY,
+                c.borderTextureShiftX, c.borderTextureShiftY, "damagemeters", sz)
+        end
+        bar.ApplyBorder()
         local tf = CreateFrame("Frame", nil, bar.fill)
         tf:SetAllPoints(bar.fill); tf:SetFrameLevel(bar.fill:GetFrameLevel() + 2)
         bar.pos = tf:CreateFontString(nil, "OVERLAY"); bar.pos:SetPoint("LEFT", tf, "LEFT", 3, 0); SetDMFont(bar.pos, 11)
@@ -2127,7 +2179,7 @@ local function CreateDMWindow(winIdx)
 
     header:SetScript("OnMouseDown", function(_, button)
         if button ~= "LeftButton" or W.windowLocked then return end
-        if IsInProtectedInstance and IsInProtectedInstance() then return end
+        if EUI.InProtectedInstance and EUI.InProtectedInstance() then return end
         local cx, cy = GetCursorPosition(); local es = frame:GetEffectiveScale()
         dragStartCX = cx/es; dragStartCY = cy/es
         dragStartLeft = frame:GetLeft(); dragStartTop = frame:GetTop()
@@ -2361,7 +2413,7 @@ local function CreateDMWindow(winIdx)
 
     W.resizeGrip:SetScript("OnMouseDown", function(_, button)
         if button ~= "LeftButton" or W.windowLocked then return end
-        if IsInProtectedInstance and IsInProtectedInstance() then return end
+        if EUI.InProtectedInstance and EUI.InProtectedInstance() then return end
         local left, top = frame:GetLeft(), frame:GetTop()
         if left and top then frame:ClearAllPoints(); frame:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", left, top) end
         resizeAnchorLeft = left; resizeAnchorTop = top
@@ -2872,7 +2924,8 @@ local function CreateDMWindow(winIdx)
             end
         end
         local isOverall = (not W.curSessionID and W.curSession == Enum.DamageMeterSessionType.Overall)
-        if not isOverall and dur and type(dur) == "number" and dur > 0 then
+        -- Hide timer when segment has no data (count == 0) or is Overall
+        if not isOverall and dur and type(dur) == "number" and dur > 0 and count > 0 then
             W.timerText:SetText("(" .. FormatTimer(dur) .. ")")
         else
             W.timerText:SetText("")
@@ -3563,6 +3616,19 @@ ns.RefreshMeter = function()
     for _, w in ipairs(_windows) do w.Refresh() end
 end
 
+ns.ApplyBorder = function()
+    for _, w in ipairs(_windows) do
+        if w.rowPool then
+            for _, bar in ipairs(w.rowPool) do
+                if bar.ApplyBorder then bar.ApplyBorder() end
+            end
+        end
+        if w.stickyPlayer and w.stickyPlayer.ApplyBorder then
+            w.stickyPlayer.ApplyBorder()
+        end
+    end
+end
+
 ns.ApplyBackground = function()
     local cfg = DB()
     local r, g, b, a = cfg.bgR or 0, cfg.bgG or 0, cfg.bgB or 0, cfg.bgAlpha or 0.75
@@ -3693,14 +3759,22 @@ UpdateSATimerText = function()
     if not _saTimer or not _saTimerFS then return end
     local cfg = DB()
     if not cfg.standaloneTimer then return end
-    -- Only visible during group combat (or options preview)
-    if not _inCombat then
-        if not _saTimerPreview and _saTimer:IsShown() then _saTimer:Hide() end
-        return
+    -- In encounter: show encounter timer. In combat (no encounter): show
+    -- player combat timer. Out of combat: hide and clear.
+    if _inEncounter then
+        if not _saTimer:IsShown() and not _saTimerPreview then _saTimer:Show() end
+        local elapsed = GetTime() - _encounterStartTime
+        _saTimerFS:SetText(FormatTimer(elapsed > 0 and elapsed or 0))
+    elseif _inCombat then
+        if not _saTimer:IsShown() and not _saTimerPreview then _saTimer:Show() end
+        local elapsed = GetCombatElapsed()
+        _saTimerFS:SetText(FormatTimer(elapsed > 0 and elapsed or 0))
+    else
+        if not _saTimerPreview then
+            if _saTimer:IsShown() then _saTimer:Hide() end
+            _saTimerFS:SetText("")
+        end
     end
-    if not _saTimer:IsShown() then _saTimer:Show() end
-    local elapsed = GetCombatElapsed()
-    _saTimerFS:SetText(FormatTimer(elapsed > 0 and elapsed or 0))
 end
 
 local function RepositionSATimer()
@@ -3892,7 +3966,7 @@ local function StartSharedTicker()
     _sharedTicker = C_Timer.NewTicker(rate, SharedRefreshTick)
 end
 
-local function StopSharedTicker()
+StopSharedTicker = function()
     if _sharedTicker then _sharedTicker:Cancel(); _sharedTicker = nil end
 end
 
@@ -3903,7 +3977,9 @@ local combatFrame = CreateFrame("Frame")
 combatFrame:RegisterEvent("PLAYER_REGEN_DISABLED")
 combatFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
 combatFrame:RegisterEvent("UNIT_FLAGS")
-combatFrame:SetScript("OnEvent", function(_, event)
+combatFrame:RegisterEvent("ENCOUNTER_START")
+combatFrame:RegisterEvent("ENCOUNTER_END")
+combatFrame:SetScript("OnEvent", function(_, event, ...)
     if event == "UNIT_FLAGS" then
         -- Group member entered combat before us: start polling so bars populate
         if not _inCombat and not _sharedTicker and IsGroupInCombat() then
@@ -3917,7 +3993,32 @@ combatFrame:SetScript("OnEvent", function(_, event)
         end
         return
     end
+    if event == "ENCOUNTER_START" then
+        _inEncounter = true
+        _encounterStartTime = GetTime()
+        return
+    end
+    if event == "ENCOUNTER_END" then
+        _inEncounter = false
+        -- Boss kill/wipe: immediately end combat like Details does.
+        -- PLAYER_REGEN_ENABLED may lag several seconds behind ENCOUNTER_END,
+        -- leaving the timer running after the boss is dead.
+        if _inCombat or _needsFinalRefresh then
+            -- Short delay: let Blizzard finalize the session data first
+            C_Timer.After(0.5, function()
+                if _combatEndTime > 0 then return end  -- already ended
+                _combatEndTime = GetTime()
+                _inCombat = false
+                _needsFinalRefresh = false
+                for _, w in ipairs(_windows) do w.Refresh() end
+                C_Timer.After(0.5, function() StopSharedTicker() end)
+            end)
+        end
+        return
+    end
     if event == "PLAYER_REGEN_DISABLED" then
+        -- Ignore post-match cleanup combat after a PvP match ends
+        if _G._EUIDM_PvpBlocked and _G._EUIDM_PvpBlocked() then return end
         _inCombat = true
         _combatEndTime = 0
         _needsFinalRefresh = false
@@ -3960,6 +4061,47 @@ combatFrame:SetScript("OnEvent", function(_, event)
     end
 end)
 
+
+-------------------------------------------------------------------------------
+--  PvP match end detection
+--  Arenas and solo shuffle don't reliably fire PLAYER_REGEN_ENABLED when the
+--  match ends (IsGroupInCombat() stays true between rounds). Track the match
+--  active state via C_PvP and force-end the segment when the match finishes.
+-------------------------------------------------------------------------------
+do
+    local _pvpMatchActive = false
+    local _pvpBlockUntil = 0
+
+    local pvpFrame = CreateFrame("Frame")
+    pvpFrame:RegisterEvent("PVP_MATCH_COMPLETE")
+    pvpFrame:RegisterEvent("PVP_MATCH_STATE_CHANGED")
+    pvpFrame:RegisterEvent("ZONE_CHANGED_NEW_AREA")
+    pvpFrame:SetScript("OnEvent", function()
+        if not C_PvP or not C_PvP.IsMatchActive then return end
+        local active = C_PvP.IsMatchActive()
+        if active and not _pvpMatchActive then
+            _pvpMatchActive = true
+        elseif not active and _pvpMatchActive then
+            _pvpMatchActive = false
+            C_Timer.After(1.5, function()
+                if _pvpMatchActive then return end
+                if _combatEndTime > 0 then return end
+                _combatEndTime = GetTime()
+                _inCombat = false
+                _needsFinalRefresh = false
+                for _, w in ipairs(_windows) do w.Refresh() end
+                C_Timer.After(0.5, function() StopSharedTicker() end)
+                -- Block new segments from post-match cleanup damage
+                _pvpBlockUntil = GetTime() + 20
+            end)
+        end
+    end)
+
+    -- Expose the block check so combat start can respect it
+    _G._EUIDM_PvpBlocked = function()
+        return GetTime() < _pvpBlockUntil
+    end
+end
 
 -------------------------------------------------------------------------------
 --  Reset Data keybind button (hidden, receives override binding click)
@@ -4033,5 +4175,47 @@ initFrame:SetScript("OnEvent", function(self)
     end
     _G._EDM_UnlockModeClose = function()
         for _, w in ipairs(_windows) do if w._unlockClose then w._unlockClose() end end
+    end
+
+    -- Profile swap rebuild: tear down all windows and recreate from new profile
+    _G._EDM_Apply = function()
+        -- Destroy existing windows (frame cleanup only, don't touch DB)
+        for i = #_windows, 1, -1 do
+            local w = _windows[i]
+            if w._hoverTicker then w._hoverTicker:Cancel() end
+            if EUI.UnregisterVisibilityUpdater and w.UpdateVisibility then
+                EUI.UnregisterVisibilityUpdater(w.UpdateVisibility)
+            end
+            if w.frame then w.frame:Hide(); w.frame:SetParent(nil) end
+        end
+        wipe(_windows)
+        -- Destroy standalone timer if present
+        if _saTimer then _saTimer:Hide(); _saTimer:SetParent(nil); _saTimer = nil; _saTimerFS = nil end
+        -- Hide tooltip
+        if _ttFrame then _ttFrame:Hide() end
+        _activeRow = nil
+        -- Re-apply keybind from new profile
+        local c = DB()
+        if _G.EllesmereUIDMResetBindBtn then
+            ClearOverrideBindings(_G.EllesmereUIDMResetBindBtn)
+            if c.resetDataKey then
+                SetOverrideBindingClick(_G.EllesmereUIDMResetBindBtn, true, c.resetDataKey, "EllesmereUIDMResetBindBtn")
+            end
+        end
+        -- Recreate windows from new profile
+        if not c.windows then c.windows = {} end
+        local wc = math.max(1, c.windowCount or 1)
+        c.windowCount = wc
+        for i = wc + 1, MAX_WINDOWS do c.windows[i] = nil end
+        for i = 1, wc do
+            _windows[i] = CreateDMWindow(i)
+        end
+        -- Recreate standalone timer if enabled
+        if c.standaloneTimer then CreateSATimer() end
+        -- Update tooltip scale
+        if _ttFrame then
+            local sc = (c.hoverTooltipScale or 100) / 100
+            _ttFrame:SetScale(sc)
+        end
     end
 end)

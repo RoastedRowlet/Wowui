@@ -310,14 +310,75 @@ local function updateRaidStatusFrame()
 	if _G["ccsr_btnfs1"] then _G["ccsr_btnfs1"]:SetText(textstring) end
 
 end
+
+local function ApplyStyle(self)
+    local f = self.frames
+    if not f then return end
+
+    -------------------------------------------------
+    -- Button 1 font
+    -------------------------------------------------
+    if f.btnfont1 then
+        f.btnfont1:SetFont(option("fontname_raid") or CCS.fontname,
+                           option("fontsize_raid") or 11,
+                           CCS.textoutline)
+
+        if option("showfontshadow") then
+            f.btnfont1:SetShadowColor(unpack(option("fontshadowcolor") or {0,0,0,1}))
+            f.btnfont1:SetShadowOffset(option("fontshadowx") or 0, option("fontshadowy") or 0)
+        else
+            f.btnfont1:SetShadowColor(0,0,0,0)
+        end
+    end
+
+    -------------------------------------------------
+    -- Button 2 icon style
+    -------------------------------------------------
+    if f.ccsr_btn2 then
+        if option("showr_altbtn") then
+            CCS:ApplyIconStyle(f.ccsr_btn2, "ightarrow", 20)
+            if f.ccsr_btn2_bg then
+                f.ccsr_btn2_bg:SetTexture("Interface\\AddOns\\ChonkyCharacterSheet\\Media\\Textures\\raid.png")
+            end
+        else
+            CCS:ApplyIconStyle(f.ccsr_btn2, "rightarrow", 17)
+            if f.ccsr_btn2_tex then
+                f.ccsr_btn2_tex:Hide()
+            end
+        end
+    end
+
+    -------------------------------------------------
+    -- Raid Frame background colors
+    -------------------------------------------------
+    local bg = option("bgcolor_raid")
+    if f.rf_bg then
+        f.rf_bg:SetColorTexture(bg[1], bg[2], bg[3], bg[4])
+    end
+
+    -------------------------------------------------
+    -- Scale
+    -------------------------------------------------
+    if f.ccsrf_sf then
+        f.ccsrf_sf:SetScale(option("raid_sp_scale"))
+    end
+end
 	
-function module:Initialize()
+function module:Initialize(onlyStyle)
+	self.frames = self.frames or {}
     if CCS.AreSecretsDisabled() then 
         CCS.initall = true
         return 
     end
+
     if option("showraidprogress") ~= true then return end
 	if InCombatLockdown() then CCS.incombat = true return end
+
+	if onlyStyle and _G["ccsrf_sf"] ~= nil then
+		ApplyStyle(self)
+		return
+	end
+
     local ccsr_btn = _G["ccsr_btn1"] or CreateFrame("Frame", "ccsr_btn1", CharacterHandsSlot)
     local btnfont1 = _G["ccsr_btnfs1"] or ccsr_btn:CreateFontString("ccsr_btnfs1")
     local textstring = ""
@@ -385,9 +446,13 @@ function module:Initialize()
 	-- Click behavior
 	ccsr_btn2:SetScript("OnClick", function(self, button)
 		PlaySound(SOUNDKIT.GS_LOGIN_CHANGE_REALM_OK)
+		if C_AddOns.IsAddOnLoaded("ClassCodex") == true then
+			if ClassCodexPanel and ClassCodexPanel:IsVisible() then ClassCodexPanel:Hide() end
+		end
+
 		if not InCombatLockdown() then
 			if _G["ccsm_sf"] and _G["ccsm_sf"]:IsShown() then _G["ccsm_sf"]:Hide() end
-			if _G["ccssg_sf"] and _G["ccssg_sf"]:IsShown() then _G["ccssg_sf"]:Hide() end
+			if _G["ccsgf_sf"] and _G["ccsgf_sf"]:IsShown() then _G["ccsgf_sf"]:Hide() end
 			
 			if _G["ccsrf_sf"]:IsShown() then
 				_G["ccsrf_sf"]:Hide()
@@ -517,6 +582,19 @@ function module:Initialize()
             frame:SetPoint("TOPLEFT", prev, "BOTTOMLEFT", 0, -2)
         end
     end
+
+	self.frames.ccsr_btn = ccsr_btn
+	self.frames.btnfont1 = btnfont1
+
+	self.frames.ccsr_btn2 = ccsr_btn2
+	self.frames.ccsr_btn2_tex = ccsr_btn2.tex
+	self.frames.ccsr_btn2_bg = ccsr_btn2.bg
+
+	self.frames.ccsrf_sf = ccsrf_sf
+	self.frames.rf_bg = rf_bg
+	self.frames.rf_topbar = rf_topbar
+	self.frames.rf_topstreaks = rf_topstreaks
+	self.frames.rf_bottombar = rf_bottombar
 
 	updateRaidStatusFrame()
 

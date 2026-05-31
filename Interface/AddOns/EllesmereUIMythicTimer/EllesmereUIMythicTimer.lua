@@ -127,6 +127,58 @@ local currentRun = {
     objectives    = {},
 }
 
+-- Per-player death tracking (reset each key).
+-- Midnight removed CLEU, so we detect deaths by comparing the API death
+-- count each tick and scanning the party for who is newly dead.
+local playerDeaths = {}
+local _prevDeathCount = 0
+local _partyAlive = {}  -- [name] = true while alive, removed on death detection
+
+local function ScanPartyAlive()
+    wipe(_partyAlive)
+    local prefix = IsInRaid() and "raid" or "party"
+    local count = GetNumGroupMembers()
+    for i = 1, count do
+        local unit = (prefix == "party" and i == count) and "player" or (prefix .. i)
+        local name = UnitName(unit)
+        if name and not UnitIsDeadOrGhost(unit) then
+            _partyAlive[name] = true
+        end
+    end
+    if prefix == "party" then
+        local name = UnitName("player")
+        if name and not UnitIsDeadOrGhost("player") then
+            _partyAlive[name] = true
+        end
+    end
+end
+
+local function CheckForNewDeaths(newDeathCount)
+    if newDeathCount <= _prevDeathCount then
+        _prevDeathCount = newDeathCount
+        return
+    end
+    -- Death count went up -- find who is now dead that was alive last tick
+    local prefix = IsInRaid() and "raid" or "party"
+    local count = GetNumGroupMembers()
+    for i = 1, count do
+        local unit = (prefix == "party" and i == count) and "player" or (prefix .. i)
+        local name = UnitName(unit)
+        if name and _partyAlive[name] and UnitIsDeadOrGhost(unit) then
+            playerDeaths[name] = (playerDeaths[name] or 0) + 1
+            _partyAlive[name] = nil
+        end
+    end
+    if prefix == "party" then
+        local name = UnitName("player")
+        if name and _partyAlive[name] and UnitIsDeadOrGhost("player") then
+            playerDeaths[name] = (playerDeaths[name] or 0) + 1
+            _partyAlive[name] = nil
+        end
+    end
+    _prevDeathCount = newDeathCount
+end
+
 -- Helpers
 local function FormatTime(seconds, withMilliseconds)
     if not seconds or seconds < 0 then seconds = 0 end
@@ -435,6 +487,10 @@ local function OnTimerTick()
     currentRun.deaths = deathCount or 0
     currentRun.deathTimeLost = timeLost or 0
 
+    -- Detect per-player deaths, then refresh alive snapshot for next tick
+    CheckForNewDeaths(deathCount or 0)
+    ScanPartyAlive()
+
     UpdateObjectives()
     NotifyRefresh()
 end
@@ -546,6 +602,9 @@ local function StartRun()
     currentRun.elapsed       = 0
     currentRun.deaths        = 0
     currentRun.deathTimeLost = 0
+    wipe(playerDeaths)
+    _prevDeathCount = 0
+    ScanPartyAlive()
     currentRun.affixes       = affixes or {}
     -- Cache affix names ONCE at run start. They never change mid-run, but
     -- RenderStandalone was previously calling C_ChallengeMode.GetAffixInfo
@@ -606,6 +665,9 @@ local function ResetRun()
     currentRun.elapsed   = 0
     currentRun.deaths    = 0
     currentRun.deathTimeLost = 0
+    wipe(playerDeaths)
+    _prevDeathCount = 0
+    wipe(_partyAlive)
     currentRun.preciseStart = nil
     currentRun.preciseCompletedElapsed = nil
     currentRun._lastDungeonComplete = false
@@ -762,13 +824,24 @@ local function GetAccentColor()
     return 0.05, 0.83, 0.62
 end
 
+local function StripDefeated(name)
+    if not name then return name end
+    name = name:gsub("[Dd]efeated", "")
+    return name:match("^%s*(.-)%s*$") or name
+end
+
 local objRows = {}
 local function GetObjRow(parent, idx)
     if objRows[idx] then return objRows[idx] end
-    local fs = parent:CreateFontString(nil, "OVERLAY")
-    fs:SetWordWrap(false)
-    objRows[idx] = fs
-    return fs
+    local nameFS = parent:CreateFontString(nil, "OVERLAY")
+    nameFS:SetWordWrap(false)
+    nameFS:SetNonSpaceWrap(false)
+    local timeFS = parent:CreateFontString(nil, "OVERLAY")
+    timeFS:SetWordWrap(false)
+    timeFS:SetNonSpaceWrap(false)
+    local entry = { name = nameFS, time = timeFS }
+    objRows[idx] = entry
+    return entry
 end
 
 local function CreateStandaloneFrame()
@@ -825,6 +898,111 @@ local function CreateStandaloneFrame()
     f._threshFS2:SetWordWrap(false)
     f._deathFS = f:CreateFontString(nil, "OVERLAY")
     f._deathFS:SetWordWrap(false)
+    f._deathHit = CreateFrame("Frame", nil, f)
+    f._deathHit:SetFrameLevel(f:GetFrameLevel() + 5)
+    f._deathHit:EnableMouse(true)
+
+    -- Custom two-column death tooltip
+    local deathTT = CreateFrame("Frame", nil, UIParent)
+    deathTT:SetFrameStrata("TOOLTIP")
+    deathTT:SetFrameLevel(200)
+    deathTT:Hide()
+    local ttBg = deathTT:CreateTexture(nil, "BACKGROUND")
+    ttBg:SetAllPoints()
+    ttBg:SetColorTexture(0.067, 0.067, 0.067, 0.90)
+    EllesmereUI.MakeBorder(deathTT, 1, 1, 1, 0.15, EllesmereUI.PanelPP)
+    deathTT._rows = {}
+
+    local TT_PAD   = 8
+    local TT_ROW_H = 14
+    local TT_GAP   = 3
+    local TT_FONT  = EllesmereUI.EXPRESSWAY or "Fonts\\FRIZQT__.TTF"
+
+    local function EnsureRows(n)
+        for i = #deathTT._rows + 1, n do
+            local nameFS = deathTT:CreateFontString(nil, "OVERLAY")
+            nameFS:SetFont(TT_FONT, 10, "")
+            nameFS:SetJustifyH("LEFT")
+            local countFS = deathTT:CreateFontString(nil, "OVERLAY")
+            countFS:SetFont(TT_FONT, 10, "")
+            countFS:SetJustifyH("RIGHT")
+            deathTT._rows[i] = { name = nameFS, count = countFS }
+        end
+    end
+
+    f._deathHit:SetScript("OnEnter", function(self)
+        local deaths = playerDeaths
+        if not next(deaths) and currentRun.deaths and currentRun.deaths > 0 then
+            deaths = { [UnitName("player") or "You"] = currentRun.deaths }
+        end
+        if not next(deaths) then return end
+
+        local list = {}
+        for name, count in pairs(deaths) do
+            list[#list + 1] = { name = name, count = count }
+        end
+        table.sort(list, function(a, b)
+            if a.count ~= b.count then return a.count > b.count end
+            return a.name < b.name
+        end)
+
+        EnsureRows(#list)
+
+        -- Hide all rows first
+        for i = 1, #deathTT._rows do
+            deathTT._rows[i].name:Hide()
+            deathTT._rows[i].count:Hide()
+        end
+
+        -- Measure max name width for tooltip sizing
+        local maxNameW = 0
+        local maxCountW = 0
+        for i, entry in ipairs(list) do
+            local row = deathTT._rows[i]
+            local classFile = select(2, UnitClass(entry.name))
+            local color = classFile and (RAID_CLASS_COLORS[classFile] or RAID_CLASS_COLORS["PRIEST"])
+            local short = Ambiguate and Ambiguate(entry.name, "short") or entry.name
+            local colored = color and color:WrapTextInColorCode(short) or short
+            row.name:SetText(colored)
+            row.name:SetTextColor(1, 1, 1, 0.80)
+            row.count:SetText(entry.count)
+            row.count:SetTextColor(1, 1, 1, 0.80)
+            local nw = row.name:GetStringWidth() or 0
+            local cw = row.count:GetStringWidth() or 0
+            if nw > maxNameW then maxNameW = nw end
+            if cw > maxCountW then maxCountW = cw end
+        end
+
+        local ttW = TT_PAD + maxNameW + 12 + maxCountW + TT_PAD
+        local ttH = TT_PAD + #list * TT_ROW_H + (#list - 1) * TT_GAP + TT_PAD
+
+        deathTT:SetSize(ttW, ttH)
+
+        -- Position rows
+        for i, entry in ipairs(list) do
+            local row = deathTT._rows[i]
+            local yOff = -TT_PAD - (i - 1) * (TT_ROW_H + TT_GAP)
+            row.name:ClearAllPoints()
+            row.name:SetPoint("TOPLEFT", deathTT, "TOPLEFT", TT_PAD, yOff)
+            row.count:ClearAllPoints()
+            row.count:SetPoint("TOPRIGHT", deathTT, "TOPRIGHT", -TT_PAD, yOff)
+            row.name:Show()
+            row.count:Show()
+        end
+
+        -- Anchor tooltip above the death text
+        local right = (self._align or "LEFT") == "RIGHT"
+        deathTT:ClearAllPoints()
+        if right then
+            deathTT:SetPoint("BOTTOMRIGHT", self, "TOPRIGHT", 0, 4)
+        else
+            deathTT:SetPoint("BOTTOMLEFT", self, "TOPLEFT", 0, 4)
+        end
+        deathTT:Show()
+    end)
+    f._deathHit:SetScript("OnLeave", function()
+        deathTT:Hide()
+    end)
     f._enemyFS = f:CreateFontString(nil, "OVERLAY")
     f._enemyFS:SetWordWrap(false)
     f._enemyBarBg = f:CreateTexture(nil, "BACKGROUND", nil, 1)
@@ -1007,9 +1185,22 @@ local function RenderStandalone()
         f._deathFS:SetPoint("TOPRIGHT", f, "TOPRIGHT", -dPad, y - 5)
         f._deathFS:SetJustifyH(deathAlign)
         f._deathFS:Show()
+        -- Position hit frame over the actual text, not the full row
+        local textW = f._deathFS:GetStringWidth() or 0
+        local textH = f._deathFS:GetStringHeight() or 12
+        f._deathHit:ClearAllPoints()
+        f._deathHit:SetSize(textW, textH)
+        if deathAlign == "RIGHT" then
+            f._deathHit:SetPoint("TOPRIGHT", f._deathFS, "TOPRIGHT", 0, 0)
+        else
+            f._deathHit:SetPoint("TOPLEFT", f._deathFS, "TOPLEFT", 0, 0)
+        end
+        f._deathHit._align = deathAlign
+        f._deathHit:Show()
         y = y - (f._deathFS:GetStringHeight() or 12) - ROW_GAP - 5
     else
         f._deathFS:Hide()
+        f._deathHit:Hide()
     end
 
     -- Timer colours
@@ -1273,7 +1464,7 @@ local function RenderStandalone()
     -- Timer text (with optional inline detail rendered as one combined block)
     if not p.timerInBar then
         local timerAlign = _ra(p.timerAlign or "CENTER")
-        SetFS(f._timerFS, 20)
+        SetFS(f._timerFS, p.timerTextSize or 20)
         ApplyShadow(f._timerFS)
         f._timerFS:SetTextColor(tR, tG, tB)
         SetTextDiff(f._timerFS, timerText)
@@ -1285,9 +1476,11 @@ local function RenderStandalone()
         f._timerFS:ClearAllPoints()
         -- Fixed-width once per format change: MM:SS is always 5 chars, so
         -- width only re-measures when the string length changes (e.g. mode swap).
-        local _mainLen = #(timerText or "")
-        if f._timerFS._lastLen ~= _mainLen then
-            f._timerFS._lastLen = _mainLen
+        local _timerSz = p.timerTextSize or 20
+        local _fScale = f:GetEffectiveScale() or 1
+        local _mainKey = #(timerText or "") .. "|" .. _timerSz .. "|" .. string.format("%.3f", _fScale)
+        if f._timerFS._lastLen ~= _mainKey then
+            f._timerFS._lastLen = _mainKey
             -- Measure with worst-case digits so SetWidth never clips the live text.
             local templ = (timerText or ""):gsub("%d", "9")
             f._timerFS:SetText(templ)
@@ -1470,18 +1663,22 @@ local function RenderStandalone()
         for i, obj in ipairs(run.objectives) do
             if not obj.isWeighted then
                 objIdx = objIdx + 1
-                local row = GetObjRow(f, objIdx)
-                SetFS(row, p.objectivesSize or 12)
-                ApplyShadow(row)
+                local entry = GetObjRow(f, objIdx)
+                local nameFS, timeFS = entry.name, entry.time
+                local objSize = p.objectivesSize or 12
+                SetFS(nameFS, objSize)
+                ApplyShadow(nameFS)
+                SetFS(timeFS, objSize)
+                ApplyShadow(timeFS)
 
-                local displayName = obj.name or ("Objective " .. i)
+                local displayName = StripDefeated(obj.name) or ("Objective " .. i)
                 if obj.totalQuantity and obj.totalQuantity > 1 then
                     displayName = format("%d/%d %s", obj.quantity or 0, obj.totalQuantity, displayName)
                 end
                 if obj.completed then
-                    row:SetTextColor(GetColor(p.objectiveCompletedColor, 0.3, 0.8, 0.3))
+                    nameFS:SetTextColor(GetColor(p.objectiveCompletedColor, 0.3, 0.8, 0.3))
                 else
-                    row:SetTextColor(GetColor(p.objectiveTextColor, 0.9, 0.9, 0.9))
+                    nameFS:SetTextColor(GetColor(p.objectiveTextColor, 0.9, 0.9, 0.9))
                 end
                 local timeStr = ""
                 if p.showObjectiveTimes ~= false and obj.completed and obj.elapsed and obj.elapsed > 0 then
@@ -1498,27 +1695,53 @@ local function RenderStandalone()
                         compareSuffix = "  |cff888888PB " .. FormatTime(target) .. "|r"
                     end
                 end
-                row:SetText(displayName .. (timeStr ~= "" and ("  " .. timeStr) or "") .. compareSuffix)
-                row:SetJustifyH(objAlign)
-                row:ClearAllPoints()
+                -- Timer/split text on the right FontString (never truncated).
+                -- Boss name on the left FontString (truncated with "..." by
+                -- WoW's engine if it exceeds the remaining width). No string
+                -- reads required -- SetWidth + SetWordWrap(false) handles
+                -- truncation at the C++ level, safe for secret values.
+                local rightText = (timeStr ~= "" and ("  " .. timeStr) or "") .. compareSuffix
                 local oInnerW = frameW - oPad * 2
-                local objBlockW = oInnerW
-                if objAlign == "RIGHT" then
-                    row:SetPoint("TOPRIGHT", f, "TOPRIGHT", -oPad, y)
-                elseif objAlign == "CENTER" then
-                    row:SetPoint("TOP", f, "TOP", 0, y)
+                nameFS:ClearAllPoints()
+                timeFS:ClearAllPoints()
+                if rightText ~= "" then
+                    timeFS:SetText(rightText)
+                    timeFS:SetTextColor(1, 1, 1, 1)
+                    timeFS:SetWidth(0)
+                    local timeW = timeFS:GetStringWidth() or 0
+                    if objAlign == "RIGHT" then
+                        timeFS:SetPoint("TOPRIGHT", f, "TOPRIGHT", -oPad, y)
+                        nameFS:SetPoint("TOPRIGHT", timeFS, "TOPLEFT", 0, 0)
+                    else
+                        timeFS:SetPoint("TOPRIGHT", f, "TOPRIGHT", -oPad, y)
+                        nameFS:SetPoint("TOPLEFT", f, "TOPLEFT", oPad, y)
+                    end
+                    local nameMaxW = oInnerW - timeW
+                    if nameMaxW < 20 then nameMaxW = 20 end
+                    nameFS:SetWidth(nameMaxW)
+                    timeFS:Show()
                 else
-                    row:SetPoint("TOPLEFT", f, "TOPLEFT", oPad, y)
+                    timeFS:Hide()
+                    if objAlign == "RIGHT" then
+                        nameFS:SetPoint("TOPRIGHT", f, "TOPRIGHT", -oPad, y)
+                    elseif objAlign == "CENTER" then
+                        nameFS:SetPoint("TOP", f, "TOP", 0, y)
+                    else
+                        nameFS:SetPoint("TOPLEFT", f, "TOPLEFT", oPad, y)
+                    end
+                    nameFS:SetWidth(oInnerW)
                 end
-                row:SetWidth(objBlockW)
-                row:Show()
-                y = y - (row:GetStringHeight() or 12) - OBJ_GAP
+                nameFS:SetText(displayName)
+                nameFS:SetJustifyH(objAlign)
+                nameFS:Show()
+                y = y - (nameFS:GetStringHeight() or 12) - OBJ_GAP
             end
         end
     end
 
     for i = objIdx + 1, #objRows do
-        objRows[i]:Hide()
+        local e = objRows[i]
+        if e then e.name:Hide(); e.time:Hide() end
     end
 
     if not underBarMode then

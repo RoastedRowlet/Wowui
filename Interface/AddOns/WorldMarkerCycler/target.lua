@@ -58,7 +58,7 @@ local cycleBtn = CreateFrame(
     "SecureActionButtonTemplate"
 )
 cycleBtn:SetAttribute("type", "macro")
-cycleBtn:RegisterForClicks("AnyDown")
+cycleBtn:RegisterForClicks("AnyUp", "AnyDown")
 
 -- Clear target marker
 local clearBtn = CreateFrame(
@@ -69,7 +69,7 @@ local clearBtn = CreateFrame(
 )
 clearBtn:SetAttribute("type", "macro")
 clearBtn:SetAttribute("macrotext", "/tm 0")
-clearBtn:RegisterForClicks("AnyDown")
+clearBtn:RegisterForClicks("AnyUp", "AnyDown")
 
 -- =========================
 -- Secure Order Table
@@ -91,7 +91,7 @@ end
 -- Secure Click Handler
 -- =========================
 SecureHandlerWrapScript(cycleBtn, "PreClick", cycleBtn, [=[
-    if not down or not order or #order == 0 then return end
+    if not order or #order == 0 then return end
     i = (i % #order) + 1
     local marker = order[i] or 1
     self:SetAttribute(

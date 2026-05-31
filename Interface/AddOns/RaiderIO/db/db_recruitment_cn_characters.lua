@@ -2,7 +2,7 @@
 -- Copyright (c) 2026 by RaiderIO, Inc.
 -- All rights reserved.
 --
-local provider={name=...,data=3,region="cn",date="2026-05-17T08:28:16Z",numCharacters=35805,db={}}
+local provider={name=...,data=3,region="cn",date="2026-05-29T08:30:16Z",numCharacters=35346,db={}}
 local F
 
 F = function() provider.db["藏宝海湾"]={0,"守护者乌瑟尔","射色有未来","小狼妮","左手的左边","抓小德做宝宝","无尽的迷惘","爱上吸血鬼","直男不信圣光","脏艺术家"} end F()
@@ -19,18 +19,18 @@ F = function() provider.db["国王之谷"]={78,"Alexciel","马西西"} end F()
 F = function() provider.db["影之哀伤"]={82,"佩盈","吃麻瓜冷静芐"} end F()
 F = function() provider.db["冬泉谷"]={86,"白首如新"} end F()
 F = function() provider.db["黑暗虚空"]={88,"羊蹄翘起来"} end F()
-F = function() provider.db["凤凰之神"]={90,"丶圣雅典娜","百分百小号","银色地平线"} end F()
+F = function() provider.db["凤凰之神"]={90,"丶圣雅典娜","像雾又像风","银色地平线"} end F()
 F = function() provider.db["回音山"]={96,"南归北游","网友黄嘉琪"} end F()
-F = function() provider.db["洛肯"]={100,"历劫祓恶","留云借风"} end F()
-F = function() provider.db["轻风之语"]={104,"布洛芬"} end F()
-F = function() provider.db["艾露恩"]={106,"龙皇"} end F()
-F = function() provider.db["月光林地"]={108,"一色彩羽","霜月冷冰"} end F()
-F = function() provider.db["奎尔萨拉斯"]={112,"Amakusashino","下半蛆职业"} end F()
-F = function() provider.db["暗影迷宫"]={116,"阿斗七号"} end F()
-F = function() provider.db["白银之手"]={118,"南宫灬问雅"} end F()
-F = function() provider.db["古尔丹"]={120,"龙娘"} end F()
-F = function() provider.db["死亡之翼"]={122,"午夜忧伤蟑螂","午夜忧郁蟑螂"} end F()
-F = function() provider.db["罗宁"]={126,"吃麻瓜冷静瑕","吃麻瓜冷静瞎"} end F()
+F = function() provider.db["洛肯"]={100,"历劫祓恶"} end F()
+F = function() provider.db["轻风之语"]={102,"布洛芬"} end F()
+F = function() provider.db["艾露恩"]={104,"龙皇"} end F()
+F = function() provider.db["月光林地"]={106,"一色彩羽","霜月冷冰"} end F()
+F = function() provider.db["奎尔萨拉斯"]={110,"Amakusashino","下半蛆职业"} end F()
+F = function() provider.db["暗影迷宫"]={114,"阿斗七号"} end F()
+F = function() provider.db["白银之手"]={116,"南宫灬问雅"} end F()
+F = function() provider.db["古尔丹"]={118,"龙娘"} end F()
+F = function() provider.db["死亡之翼"]={120,"午夜忧伤蟑螂","午夜忧郁蟑螂"} end F()
+F = function() provider.db["罗宁"]={124,"吃麻瓜冷静瑕","吃麻瓜冷静瞎"} end F()
 
 F = nil
 RaiderIO.AddProvider(provider)

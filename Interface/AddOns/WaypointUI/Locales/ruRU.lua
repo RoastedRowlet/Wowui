@@ -6,15 +6,25 @@ if GetLocale() ~= "ruRU" then return end
 local env = select(2, ...)
 local L = env.L
 
+L["PASTE"] = "Paste"
+L["REPLACE"] = "Replace"
+L["CANCEL"] = "Cancel"
+L["WAY_PASTE_PROMPT"] = "Enter /way commands"
+
 -- Font
-L["FONT_FLAGS"] = "Font Flags"
-L["NONE"] = "None"
-L["OUTLINE"] = "Outline"
-L["THICKOUTLINE"] = "Thick Outline"
-L["MONOCHROME"] = "Monochrome"
+L["FONT_FLAGS"] = "Флаги шрифта"
+L["NONE"] = "Нет"
+L["OUTLINE"] = "Контур"
+L["THICKOUTLINE"] = "Толстый контур"
+L["MONOCHROME"] = "Монохромный"
+
+-- Path Providers
+L["FARSTRIDERLIB"] = "FarstriderLib"
+L["MAPZEROTH"] = "Mapzeroth"
 
 -- Waypoint System
 L["WAYPOINTSYSTEM_PINPOINT_QUEST_COMPLETE"] = "Готов к сдаче"
+L["WAYPOINTSYSTEM_COORDINATE_FORMAT"] = "%0.1f, %0.1f"
 
 -- Config
 L["CONFIG_GENERAL"] = "Общие"
@@ -59,6 +69,23 @@ L["CONFIG_WAYPOINTSYSTEM_PINPOINT_SHOWINQUESTAREA_DESCRIPTION"] = "Разреш�
 L["CONFIG_WAYPOINTSYSTEM_NAVIGATOR"] = "Навигатор"
 L["CONFIG_WAYPOINTSYSTEM_NAVIGATOR_ENABLE"] = "Показать"
 L["CONFIG_WAYPOINTSYSTEM_NAVIGATOR_ENABLE_DESCRIPTION"] = "Если точка маршрута или точка привязки находятся за пределами экрана, навигатор укажет направление."
+
+L["CONFIG_MAP"] = "Map"
+L["CONFIG_MAP_PINS"] = "Map Pins"
+L["CONFIG_MAP_PINS_ENABLE"] = "Use Waypoint UI Map Pins"
+L["CONFIG_MAP_PINS_ENABLE_DESCRIPTION"] = "Replaces the default map pins with Waypoint UI's minimap and world map pins, and enables /way paste."
+L["CONFIG_MAP_PINS_AUTOTRACKPLACEDPIN"] = "Автоотслеживание поставленной метки"
+L["CONFIG_MAP_PINS_AUTOTRACKPLACEDPIN_DESCRIPTION"] = "Автоматически начинать отслеживание метки сразу после её установки на карте мира."
+L["CONFIG_MAP_PINS_AUTOTRACKCHATLINKPIN"] = "Автоотслеживание метки из ссылки"
+L["CONFIG_MAP_PINS_AUTOTRACKCHATLINKPIN_DESCRIPTION"] = "Автоматически начинать отслеживание метки при клике на ссылку с координатами в чате."
+L["CONFIG_MAP_PINS_GUIDEPINASSISTANT"] = "Отслеживание меток городских стражников"
+L["CONFIG_MAP_PINS_GUIDEPINASSISTANT_DESCRIPTION"] = "Включить навигацию через интерфейс путевых точек для меток, которые ставят стражники в городах (гиды)."
+
+L["CONFIG_NAVIGATION"] = "Navigation"
+L["CONFIG_NAVIGATION_PATHFINDING"] = "Pathfinding"
+L["CONFIG_NAVIGATION_PATHFINDING_ENABLE"] = "Enable Pathfinding"
+L["CONFIG_NAVIGATION_PATHFINDING_ENABLE_DESCRIPTION"] = "May cause performance and navigation issues."
+L["CONFIG_NAVIGATION_PATHFINDING_PROVIDER"] = "Provider"
 
 L["CONFIG_APPEARANCE"] = "Появление"
 L["CONFIG_APPEARANCE_WAYPOINT"] = "Точка маршрута"
@@ -109,13 +136,6 @@ L["CONFIG_AUDIO_CUSTOMIZE_USECUSTOMAUDIO_PINPOINTSHOW"] = "Показать то
 L["CONFIG_AUDIO_CUSTOMIZE_USECUSTOMAUDIO_NEWUSERNAVIGATION"] = "При начале /way навигации..."
 
 L["CONFIG_EXTENSIONS"] = "Extensions"
-L["CONFIG_EXTENSIONS_PIN"] = "Метки на карте"
-L["CONFIG_EXTENSIONS_PIN_AUTOTRACKPLACEDPIN"] = "Автоотслеживание поставленной метки"
-L["CONFIG_EXTENSIONS_PIN_AUTOTRACKPLACEDPIN_DESCRIPTION"] = "Автоматически начинать отслеживание метки сразу после её установки на карте мира."
-L["CONFIG_EXTENSIONS_PIN_AUTOTRACKCHATLINKPIN"] = "Автоотслеживание метки из ссылки"
-L["CONFIG_EXTENSIONS_PIN_AUTOTRACKCHATLINKPIN_DESCRIPTION"] = "Автоматически начинать отслеживание метки при клике на ссылку с координатами в чате."
-L["CONFIG_EXTENSIONS_PIN_GUIDEPINASSISTANT"] = "Отслеживание меток городских стражников"
-L["CONFIG_EXTENSIONS_PIN_GUIDEPINASSISTANT_DESCRIPTION"] = "Включить навигацию через интерфейс путевых точек для меток, которые ставят стражники в городах (гиды)."
 L["CONFIG_EXTENSIONS_TOMTOMSUPPORT"] = "TomTom"
 L["CONFIG_EXTENSIONS_TOMTOMSUPPORT_ENABLE"] = "Отслеживание точек TomTom"
 L["CONFIG_EXTENSIONS_TOMTOMSUPPORT_ENABLE_DESCRIPTION"] = "Включает поддержку отслеживания точек TomTom с помощью интерфейса Waypoint. Чтобы начать отслеживание точки TomTom, ПКМ по любой точке TomTom на карте мира и выберите Установить как стрелку путевой точки в контекстном меню."
@@ -130,14 +150,16 @@ L["CONFIG_EXTENSIONS_SILVERDRAGONSUPPORT"] = "Поддержка SilverDragon"
 L["CONFIG_EXTENSIONS_SILVERDRAGONSUPPORT_ENABLE"] = "Улучшить путевой точки Silver Dragon"
 L["CONFIG_EXTENSIONS_SILVERDRAGONSUPPORT_ENABLE_DESCRIPTION"] = "Для этого необходимо включить встроенную в SilverDragon опцию установки путевых точек."
 L["CONFIG_EXTENSIONS_APRSUPPORT"] = "Azeroth Pilot Reloaded"
-L["CONFIG_EXTENSIONS_APRSUPPORT_ENABLE"] = "Track APR Waypoints"
-L["CONFIG_EXTENSIONS_APRSUPPORT_ENABLE_DESCRIPTION"] = "Enables Azeroth Pilot Reloaded waypoint tracking."
-L["CONFIG_EXTENSIONS_APRSUPPORT_AUTOREPLACEWAYPOINT"] = "Auto-Replace Waypoint"
-L["CONFIG_EXTENSIONS_APRSUPPORT_AUTOREPLACEWAYPOINT_DESCRIPTION"] = "Automatically replaces the active waypoint with the incoming APR waypoint."
+L["CONFIG_EXTENSIONS_APRSUPPORT_ENABLE"] = "Отслеживать точки APR"
+L["CONFIG_EXTENSIONS_APRSUPPORT_ENABLE_DESCRIPTION"] = "Включает отслеживание путевых точек аддона Azeroth Pilot Reloaded."
+L["CONFIG_EXTENSIONS_APRSUPPORT_AUTOREPLACEWAYPOINT"] = "Автозамена путевой точки"
+L["CONFIG_EXTENSIONS_APRSUPPORT_AUTOREPLACEWAYPOINT_DESCRIPTION"] = "Автоматически заменяет текущую путевую точку на новую, поступающую от APR."
 
 L["CONFIG_ABOUT"] = "О нас"
 L["CONFIG_ABOUT_CONTRIBUTORS"] = "Участники"
+L["CONFIG_ABOUT_LIBRARIES"] = "Libraries"
 L["CONFIG_ABOUT_DEVELOPER"] = "Разработчик"
+L["CONFIG_ABOUT_DEVELOPER_ADAPTIVEX"] = "AdaptiveX"
 
 -- Contributors
 L["CONTRIBUTORS_ZAMESTOTV"] = "ZamestoTV"
@@ -173,12 +195,14 @@ L["CONTRIBUTORS_HECTORZAGA_DESCRIPTION"] = "Код — Исправление о
 L["CONTRIBUTORS_SYVERGISWOLD"] = "SyverGiswold"
 L["CONTRIBUTORS_SYVERGISWOLD_DESCRIPTION"] = "Код - Особенность"
 
--- Extra Feature
+-- Libraries
+L["LIBRARIES_HEREBEDRAGONS"] = "HereBeDragons"
+L["LIBRARIES_HEREBEDRAGONS_DESCRIPTION"] = "nevcairiel - https://www.curseforge.com/wow/addons/herebedragons"
+
+-- Extensions
 L["GUIDE_PIN_ASSISTANT_REPLACEPROMPT"] = "Заменить текущую путевую точку на \"%s\"?"
 
 -- Supported Add-ons
 L["TOMTOM_REPLACEPROMPT"] = "Хотите ли вы заменить текущую путевую точку на путевую точку TomTom \"%s\"?"
 L["DUGISGUIDEVIEWERZ_REPLACEPROMPT"] = "Хотите ли вы заменить текущую путевую точку на путевую точку Dugi \"%s\"?"
 L["APR_REPLACEPROMPT"] = "Хотите ли вы заменить текущую путевую точку на путевую точку APR \"%s\"?"
-L["REPLACE"] = "Замена"
-L["CANCEL"] = "Отмена"

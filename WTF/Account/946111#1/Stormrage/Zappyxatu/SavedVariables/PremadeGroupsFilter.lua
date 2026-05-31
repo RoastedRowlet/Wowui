@@ -32,6 +32,9 @@ PremadeGroupsFilterState = {
 ["min"] = "",
 ["act"] = false,
 },
+["dungeon7"] = false,
+["dungeon6"] = false,
+["dungeon1"] = false,
 ["dps"] = {
 ["max"] = "",
 ["min"] = "",
@@ -45,13 +48,13 @@ PremadeGroupsFilterState = {
 ["expression"] = "",
 ["difficulty"] = {
 },
-["dungeon4"] = false,
-["dungeon2"] = false,
+["dungeon4"] = true,
+["dungeon2"] = true,
 ["dungeon3"] = false,
 ["dungeon8"] = false,
 ["tanks"] = {
-["max"] = "1",
-["min"] = "1",
+["max"] = "",
+["min"] = "",
 ["act"] = false,
 },
 ["dungeon5"] = false,

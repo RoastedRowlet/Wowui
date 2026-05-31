@@ -12,6 +12,7 @@ local TRIGGER_DEFAULTS = {
     log5pp      = true,
     logArena    = true,
     logScenario = false,
+    delaystop   = true,
 }
 
 local TRIGGER_ITEMS = {
@@ -34,6 +35,12 @@ local function Recheck()
     if _G._EUI_AutoLogging_Check then _G._EUI_AutoLogging_Check() end
 end
 
+local function KeysCfg()
+    if not EllesmereUIDB then return {} end
+    EllesmereUIDB.keystonePopup = EllesmereUIDB.keystonePopup or {}
+    return EllesmereUIDB.keystonePopup
+end
+
 local function BuildAutoLoggingPage(pageName, parent, yOffset)
     local W  = EllesmereUI.Widgets
     local PP = EllesmereUI.PanelPP
@@ -43,6 +50,57 @@ local function BuildAutoLoggingPage(pageName, parent, yOffset)
     if EllesmereUI.ClearContentHeader then EllesmereUI:ClearContentHeader() end
     parent._showRowDivider = true
 
+    ---------------------------------------------------------------------------
+    --  KEYSTONE CHECK POPUP
+    ---------------------------------------------------------------------------
+    _, h = W:SectionHeader(parent, "KEYSTONE CHECK POPUP", y); y = y - h
+
+    _, h = W:DualRow(parent, y,
+        { type    = "toggle",
+          text    = "Enable /keys Popup (or /ekeys)",
+          tooltip = "Shows a popup with party and guild keystones when typing /keys.",
+          getValue = function() return KeysCfg().enabled ~= false end,
+          setValue = function(v)
+              KeysCfg().enabled = v
+              EllesmereUI:RefreshPage()
+              EllesmereUI:ShowConfirmPopup({
+                  title = "Reload Required",
+                  message = "Changing the /keys popup requires a reload to update slash command registration.",
+                  confirmText = "Reload",
+                  cancelText = "Later",
+                  onConfirm = function() ReloadUI() end,
+              })
+          end },
+        { type    = "slider",
+          text    = "Text Size",
+          min     = 8, max = 16, step = 1,
+          tooltip = "Font size for keystone entries in the popup (does not affect the header).",
+          getValue = function() return KeysCfg().textSize or 11 end,
+          setValue = function(v)
+              KeysCfg().textSize = v
+              if _G._EUI_RefreshKeystonePopup then _G._EUI_RefreshKeystonePopup() end
+          end }
+    ); y = y - h
+
+    _, h = W:DualRow(parent, y,
+        { type    = "slider",
+          text    = "Window Scale",
+          min     = 50, max = 150, step = 5,
+          tooltip = "Scale of the /keys popup window.",
+          getValue = function() return math.floor((KeysCfg().scale or 1.05) * 100 + 0.5) end,
+          setValue = function(v)
+              KeysCfg().scale = v / 100
+              local popup = _G.EUIKeysPopup
+              if popup then popup:SetScale(v / 100) end
+          end },
+        { type = "label", text = "" }
+    ); y = y - h
+
+    _, h = W:Spacer(parent, y, 20); y = y - h
+
+    ---------------------------------------------------------------------------
+    --  AUTO COMBAT LOGGING
+    ---------------------------------------------------------------------------
     _, h = W:SectionHeader(parent, "AUTO COMBAT LOGGING", y); y = y - h
 
     local trigRow, trigH = W:DualRow(parent, y,
@@ -85,7 +143,30 @@ local function BuildAutoLoggingPage(pageName, parent, yOffset)
         EllesmereUI.RegisterWidgetRefresh(cbDDRefresh)
     end
 
+    _, h = W:DualRow(parent, y,
+        { type    = "toggle",
+          text    = "Warcraft Recorder Compatibility",
+          tooltip = "Delays stopping combat logging by 30 seconds after leaving an instance. Recommended for Warcraft Recorder compatibility.",
+          getValue = function()
+              local v = Cfg().delaystop
+              if v == nil then return TRIGGER_DEFAULTS.delaystop end
+              return v
+          end,
+          setValue = function(v)
+              Cfg().delaystop = v
+          end },
+        { type = "label", text = "" }
+    ); y = y - h
+
     _, h = W:Spacer(parent, y, 20); y = y - h
+
+    ---------------------------------------------------------------------------
+    --  BATTLE RES
+    ---------------------------------------------------------------------------
+    if _G._EUI_BuildBattleResSection then
+        local brezH = _G._EUI_BuildBattleResSection(parent, y, W, EllesmereUI.PP)
+        y = y - brezH
+    end
 
     parent:SetHeight(math.abs(y - yOffset))
 end

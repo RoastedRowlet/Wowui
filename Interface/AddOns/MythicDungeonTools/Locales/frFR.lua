@@ -479,9 +479,43 @@ L["Coldmist Stalker"] = "Traqueuse de Froidebrume"
 L["Coldmist Widow"] = "Veuve de Froidebrume"
 L["Color Blind Friendly"] = "Mode daltonien"
 L["Colorpicker"] = "Palette de couleurs"
+--[[Translation missing --]]
+L["Colors"] = "Colors"
 L["Colossal Tentacle"] = "Tentacule colossal"
 --[[Translation missing --]]
+L["Combat Logging"] = "Combat Logging"
+--[[Translation missing --]]
 L["Combat Transparency"] = "Combat Transparency"
+--[[Translation missing --]]
+L["combatLoggingAdvancedNote"] = "Advanced combat logging is enabled automatically while combat logging is enabled."
+--[[Translation missing --]]
+L["combatLoggingDungeons"] = "Dungeons"
+--[[Translation missing --]]
+L["combatLoggingEnable"] = "Enable combat logging"
+--[[Translation missing --]]
+L["combatLoggingHeroic"] = "Heroic"
+--[[Translation missing --]]
+L["combatLoggingLFR"] = "LFR"
+--[[Translation missing --]]
+L["combatLoggingMythic"] = "Mythic"
+--[[Translation missing --]]
+L["combatLoggingMythicDungeon"] = "Mythic Dungeon"
+--[[Translation missing --]]
+L["combatLoggingMythicPlus"] = "Mythic+"
+--[[Translation missing --]]
+L["combatLoggingNormal"] = "Normal"
+--[[Translation missing --]]
+L["combatLoggingOverview"] = "Automatically toggles combat logging in raids and dungeons based on selected difficulties."
+--[[Translation missing --]]
+L["combatLoggingRaid"] = "Raid"
+--[[Translation missing --]]
+L["combatLoggingStarted"] = "Started combat logging."
+--[[Translation missing --]]
+L["combatLoggingStatusActive"] = "Current status: logging."
+--[[Translation missing --]]
+L["combatLoggingStatusInactive"] = "Current status: not logging."
+--[[Translation missing --]]
+L["combatLoggingStopped"] = "Ended combat logging."
 L["Commander Durand"] = "Commandant Durand"
 L["Commander Kolurg"] = "Commandant Kolurg"
 L["Commander Kroluk"] = "Commandant Kroluk"
@@ -759,6 +793,8 @@ L["Does not delete your drawings"] = "Ne supprime pas vos dessins"
 L["Dokigg the Brutalizer"] = "Dokigg le Brutalisateur"
 L["Domatrax"] = "Domatrax"
 L["Domina Venomblade"] = "Domina Lamevenin"
+--[[Translation missing --]]
+L["Don't set target marker while in a raid group"] = "Don't set target marker while in a raid group"
 L["Don't show again"] = "Ne plus afficher"
 --[[Translation missing --]]
 L["dotiLowerSublevel1"] = "Sublevel 1"
@@ -926,6 +962,8 @@ L["encounteredErrors"] = [=[MDT has encountered errors.
 Click to view them.]=]
 L["Encrypted"] = "Codé"
 L["Enemies related to seasonal affixes are currently hidden"] = "Les ennemis liés aux affixes saisonniers sont actuellement masqués"
+--[[Translation missing --]]
+L["Enemy forces in tooltips"] = "Enemy forces in tooltips"
 L["Enemy Info"] = "Informations sur l'ennemi "
 L["Enemy Info NPC Creature Type"] = "Type de créature "
 L["Enemy Info NPC Enemy Forces"] = "Forces ennemies "
@@ -1169,6 +1207,8 @@ L["Geezle Gigazap"] = "Geezle Gigazap"
 --[[Translation missing --]]
 L["Gekkan"] = "Gekkan"
 L["Gemellus"] = "Gémellus"
+--[[Translation missing --]]
+L["General"] = "General"
 L["General Bjarngrim"] = "Général Bjarngrim"
 L["General Kaal"] = "Général Kaal"
 --[[Translation missing --]]
@@ -1726,6 +1766,10 @@ L["Ludwig Von Tortollan"] = "Ludwig Von Tortollan"
 L["Lumbering Plaguehorror"] = "Pestehorreur chancelant"
 L["L'ura"] = "L'ura"
 L["Lurking Tempest"] = "Tempête en maraude"
+--[[Translation missing --]]
+L["Macro Preview:"] = "Macro Preview:"
+--[[Translation missing --]]
+L["Macros"] = "Macros"
 L["Mad Scientist"] = "Savant fou"
 L["Maddened Survivalist"] = "Survivaliste affolé"
 L["Maexxna"] = "Maexxna"
@@ -1771,6 +1815,8 @@ L["Maniacal Soulbinder"] = "Lieur d'âme dément"
 L["Manifestation of Envy"] = "Manifestation de l'envie"
 L["Manifested Shadow"] = "Ombre manifestée"
 L["Manifested Timeways"] = "Voies temporelles matérialisées"
+--[[Translation missing --]]
+L["Maps"] = "Maps"
 L["Marauding Geist"] = "Geist maraudeur"
 L["Margrave Stradama"] = "Margrave Stradama"
 --[[Translation missing --]]
@@ -2515,6 +2561,8 @@ L["seatItemA"] = "Most enemies gain this buff when stepping into the Void area"
 L["seatOfTheTriumvirateShortName"] = "SEAT"
 L["Select all"] = "Tout sélectionner"
 L["Select the dungeon level"] = "Sélectionnez le niveau du donjon "
+--[[Translation missing --]]
+L["Send versions to party chat"] = "Send versions to party chat"
 L["Sending: %.1f"] = "Envoi : %.1f "
 L["Seneschal M'bara"] = "Sénéchal M'bara"
 L["Sentient Oil"] = "Huile intelligente"

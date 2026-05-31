@@ -1,10 +1,28 @@
-lightweight tag a43169ae0fda6ac7026ff42332d3fd09e256b735 12.0.0-01
+lightweight tag b6b08b5523786236fbca27d123c56791c92ecaf6 12.0.5-01
 Author:	Alex <alex@cornellier.com>
-Date:	Sat Jan 24 13:03:08 2026 -0500
+Date:	Fri May 22 23:08:30 2026 -0400
 
-commit a43169ae0fda6ac7026ff42332d3fd09e256b735
+commit b6b08b5523786236fbca27d123c56791c92ecaf6
 Author: Alex <alex@cornellier.com>
-Date:   Sat Jan 24 13:03:08 2026 -0500
+Date:   Fri May 22 23:08:30 2026 -0400
 
-    bump version 12.0.0
+    v12.0.5-01
+
+commit 498be55b40bb294eacc68efcb1b498b39b8d6204
+Author: Inkounter <inkounter@gmail.com>
+Date:   Wed Apr 22 20:17:59 2026 -0400
+
+    Bump TOC.
+
+commit 498be55b40bb294eacc68efcb1b498b39b8d6204
+Author: Inkounter <inkounter@gmail.com>
+Date:   Wed Apr 22 20:17:59 2026 -0400
+
+    Bump TOC.
+
+commit 5363d8237d148dc0a536fa7d20752f9123e280cb
+Author: Inkounter <inkounter@gmail.com>
+Date:   Wed Apr 22 02:30:08 2026 -0400
+
+    Add spec ID for Devourer.
 

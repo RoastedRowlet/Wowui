@@ -3,9 +3,9 @@ CompassHUDDB = {
 ["profileKeys"] = {
 ["Lonelylitten - Stormrage"] = "Default",
 ["Angryabsol - Stormrage"] = "Default",
-["Zappyxatu - Stormrage"] = "Default",
-["Barelynoer - Area 52"] = "Default",
 ["Madmareep - Stormrage"] = "Default",
+["Barelynoer - Area 52"] = "Default",
+["Zappyxatu - Stormrage"] = "Default",
 },
 ["profiles"] = {
 ["Default"] = {

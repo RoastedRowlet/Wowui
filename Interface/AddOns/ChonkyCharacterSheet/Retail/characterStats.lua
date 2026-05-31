@@ -489,7 +489,6 @@ local function BuildDRTooltip(DRtable)
     return table.concat(out)
 end
 
-
 -------------------------------------------------
 -- ATTRIBUTE STAT FUNCTIONS
 -------------------------------------------------
@@ -2024,6 +2023,9 @@ local function CreateAndUpdateiLvlframe(parent)
 	local tt_name = ""
 	local tt_desc = ""
 
+	btn.fontString = btnfontilvl
+	btn.texture = btntex
+	
 	btn:SetParent(parent)
 	btn:ClearAllPoints()
 	btn:SetSize(rowWidth, rowHeight*(option("fontsize_cilvl") or 20) /20)
@@ -2074,6 +2076,7 @@ local function CreateAndUpdateiLvlframe(parent)
 		btn:SetScript("OnLeave", function() CCS.tooltip:Hide() end)
 
 	end)
+	return btn
 end
 
 local function TruncateToWidth(fs, text, maxWidth)
@@ -2474,107 +2477,239 @@ local function CreateStatsScrollBar(scrollFrame)
     return sb
 end
 
-function module:Initialize()
+local function ApplyStyle(self)
+    -------------------------------------------------
+    -- iLvl Frame
+    -------------------------------------------------
+
+    local btn = self.iLvlFrame
+    if btn and btn.fontString then
+        local fs = btn.fontString
+        fs:SetFont(option("fontname_cilvl") or CCS.fontname,
+                   option("fontsize_cilvl") or 20,
+                   CCS.textoutline)
+
+        if option("showfontshadow") then
+            fs:SetShadowColor(unpack(option("fontshadowcolor") or {0,0,0,1}))
+            fs:SetShadowOffset(option("fontshadowx") or 0, option("fontshadowy") or 0)
+        else
+            fs:SetShadowColor(0,0,0,0)
+        end
+    end
+
+    -------------------------------------------------
+    -- Sections
+    -------------------------------------------------
+    for key, section in pairs(self.sections or {}) do
+        local frame  = section.frame
+        local header = section.header
+        local rows   = section.rows
+
+        -------------------------------------------------
+        -- Section background
+        -------------------------------------------------
+        local secColor = option(section.colorKey)
+        if frame and frame.bg and secColor then
+            frame.bg:SetColorTexture(secColor[1], secColor[2], secColor[3], 0.2)
+        end
+
+        -------------------------------------------------
+        -- Header styling
+        -------------------------------------------------
+        if header then
+            local headerFont = option("fontname_statheaders") or "Fonts\\FRIZQT__.TTF"
+            local headerSize = option("fontsize_statheaders") or 14
+            local headerColor = option("fontcolor_statheaders")
+
+            header.headerText:SetFont(headerFont, headerSize, CCS.textoutline)
+            header.headerText:SetTextColor(headerColor[1], headerColor[2], headerColor[3], headerColor[4])
+
+            -- Gradient bars
+            local r = secColor[1]
+            local g = secColor[2]
+            local b = secColor[3]
+
+            local leftStart  = CreateColor(r, g, b, 0.20)
+            local leftEnd    = CreateColor(r, g, b, 1.00)
+            local rightStart = CreateColor(r, g, b, 1.00)
+            local rightEnd   = CreateColor(r, g, b, 0.20)
+
+            if header.leftTex then
+                header.leftTex:SetGradient("HORIZONTAL", leftStart, leftEnd)
+            end
+            if header.rightTex then
+                header.rightTex:SetGradient("HORIZONTAL", rightStart, rightEnd)
+            end
+        end
+
+        -------------------------------------------------
+        -- Content rows
+        -------------------------------------------------
+        for _, row in pairs(rows or {}) do
+            -- Left text
+            local lf = option("fontname_statname")
+            local ls = option("fontsize_statname")
+            local lc = option("fontcolor_statname")
+
+            row.leftText:SetFont(lf, ls, CCS.textoutline)
+            row.leftText:SetTextColor(lc[1], lc[2], lc[3], lc[4])
+
+            -- Right text
+            local rf = option("fontname_stats")
+            local rs = option("fontsize_stats")
+            local rc = option("fontcolor_stats")
+
+            row.rightText:SetFont(rf, rs, CCS.textoutline)
+            row.rightText:SetTextColor(rc[1], rc[2], rc[3], rc[4])
+
+            -- Background
+            row.bg:SetColorTexture(.05, .05, .05, 0.6)
+
+            -- Highlight color (based on section color)
+            if row.highlight then
+                row.highlight:SetColorTexture(secColor[1], secColor[2], secColor[3], 0.3)
+            end
+        end
+    end
+end
+
+function module:Initialize(onlyStyle)
 
     if CCS.AreSecretsDisabled() then 
         CCS.initall = true
         return 
     end
-	
     if UnitLevel("player") < 10 then return end
-    
+
+    -------------------------------------------------
+    -- STYLE-ONLY UPDATE
+    -------------------------------------------------
+    if onlyStyle == true and _G["CCS_stat_sf"] ~= nil then
+        ApplyStyle(self)
+        UpdateLayout()
+        return
+    end
+
+    -------------------------------------------------
+    -- FULL INITIALIZATION
+    -------------------------------------------------
     if option("showcharacterstats") then
+
+        -- Prepare cache tables
+        self.sections = self.sections or {}
+        self.iLvlFrame = self.iLvlFrame or nil
+
         CharacterStatsPane.ItemLevelCategory:SetPoint("TOP", CharacterStatsPane, "TOP", -3, -7000)
         CharacterStatsPane.ClassBackground:SetAlpha(0)
         CharacterStatsPane:UnregisterAllEvents()
 
-        -- Just a little code to create a scrolling frame to house the stats.  That way we can scroll if we resize the character frame.
+        -------------------------------------------------
+        -- Scroll Frame
+        -------------------------------------------------
+        local scrollFrame, scrollChild = CreateStatsScrollFrame(rowWidth)
+        local sb = CreateStatsScrollBar(scrollFrame)
 
-		local scrollFrame, scrollChild = CreateStatsScrollFrame(rowWidth)
-		local sb = CreateStatsScrollBar(scrollFrame)
+        self.scrollFrame = scrollFrame
+        self.scrollChild = scrollChild
 
-		-------------------------------------------------
-		-- Build iLvl Frame
-		-------------------------------------------------
-		CreateAndUpdateiLvlframe(scrollChild)
+        -------------------------------------------------
+        -- iLvl Frame
+        -------------------------------------------------
+        local btn = CreateAndUpdateiLvlframe(scrollChild)
+        self.iLvlFrame = btn
+        self.iLvlFrame.fontString = btn.fontString
 
-		-------------------------------------------------
-		-- Build Sections
-		-------------------------------------------------
-		local previousSection = nil
-		local sectionSpacing = 7
-		--local contentHeight = 0  -- total height of all sections
+        -------------------------------------------------
+        -- Build Sections
+        -------------------------------------------------
+        local previousSection = nil
+        local sectionSpacing = 7
 
-		for _, section in ipairs(STAT_SECTIONS) do
-			-------------------------------------------------
-			-- Section Frame
-			-------------------------------------------------
-			local sectionFrameName = "CCS_Section_" .. section.key
-			local sectionFrame = _G[sectionFrameName] or CreateFrame("Frame", sectionFrameName, scrollChild, "BackdropTemplate")
-			local secColor_r, secColor_g, secColor_b, secColor_a = unpack(option(section.colorKey))
-			sectionFrame:SetWidth(rowWidth + 4)
-						
-			if not previousSection then
-				sectionFrame:SetPoint("TOPLEFT", _G["CSPilvl"], "BOTTOMLEFT", 0, -sectionSpacing)
-			else
-				sectionFrame:SetPoint("TOPLEFT", previousSection, "BOTTOMLEFT", 0, -sectionSpacing)
-			end
+        for _, section in ipairs(STAT_SECTIONS) do
 
-			sectionFrame:SetBackdrop({
-				edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
-				edgeSize = 6,
-				insets = { left = 2, right = 2, top = 2, bottom = 2 }
-			})
-			sectionFrame:SetBackdropBorderColor(.6, .6, .6, 1)
+            -------------------------------------------------
+            -- Section Frame
+            -------------------------------------------------
+            local sectionFrameName = "CCS_Section_" .. section.key
+            local sectionFrame = _G[sectionFrameName] or CreateFrame("Frame", sectionFrameName, scrollChild, "BackdropTemplate")
 
-			if not sectionFrame.bg then
-				sectionFrame.bg = sectionFrame:CreateTexture(nil, "BACKGROUND")
-			end
-			sectionFrame.bg:SetAllPoints()
-			sectionFrame.bg:SetColorTexture(secColor_r or section.color.r, secColor_g or section.color.g, secColor_b or section.color.b, 0.2)
-			-------------------------------------------------
-			-- Header Row
-			-------------------------------------------------
-			local headerName = "CCS_Header_" .. section.key
-			local header = CreateHeaderRow(sectionFrame, headerName, section)
-			header:SetPoint("TOPLEFT", sectionFrame, "TOPLEFT", 0, 0)
+            -- Cache section entry
+            self.sections[section.key] = self.sections[section.key] or {}
+            self.sections[section.key].frame = sectionFrame
+            self.sections[section.key].rows = self.sections[section.key].rows or {}
+            self.sections[section.key].colorKey = section.colorKey
 
-			-------------------------------------------------
-			-- Content Rows (Chained)
-			-------------------------------------------------
-			local previousRow = header
-			local totalHeight = header:GetHeight()
+            local secColor_r, secColor_g, secColor_b = unpack(option(section.colorKey))
+            sectionFrame:SetWidth(rowWidth + 4)
 
-			for _, rowData in ipairs(section.rows) do
-				local rowFrameName = "CCS_Row_" .. rowData.key
-				local row = CreateContentRow(
-					sectionFrame,
-					rowFrameName,
-					rowData.name,
-					rowData.icon,
-					{
-						r = secColor_r or section.color.r,
-						g = secColor_g or section.color.g,
-						b = secColor_b or section.color.b,
-					}
-				)
-								
-				row:SetPoint("TOPLEFT", previousRow, "BOTTOMLEFT", 0, -rowSpacing)
-				previousRow = row
-				totalHeight = totalHeight + row:GetHeight() + rowSpacing
-			end
+            if not previousSection then
+                sectionFrame:SetPoint("TOPLEFT", _G["CSPilvl"], "BOTTOMLEFT", 0, -sectionSpacing)
+            else
+                sectionFrame:SetPoint("TOPLEFT", previousSection, "BOTTOMLEFT", 0, -sectionSpacing)
+            end
 
-			-------------------------------------------------
-			-- Resize section frame to fit rows
-			-------------------------------------------------
-			sectionFrame:SetHeight(totalHeight + 3)
-			previousSection = sectionFrame
-		end
+            if not sectionFrame.bg then
+                sectionFrame.bg = sectionFrame:CreateTexture(nil, "BACKGROUND")
+                sectionFrame.bg:SetAllPoints()
+            end
 
-		scrollChild:Show()
-		UpdateAllStats(scrollChild)
-		UpdateLayout()
-	end
+            sectionFrame:SetBackdrop({
+                edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
+                edgeSize = 6,
+                insets = { left = 2, right = 2, top = 2, bottom = 2 }
+            })
+            sectionFrame:SetBackdropBorderColor(.6, .6, .6, 1)
+
+            -------------------------------------------------
+            -- Header Row
+            -------------------------------------------------
+            local headerName = "CCS_Header_" .. section.key
+            local header = CreateHeaderRow(sectionFrame, headerName, section)
+            header:SetPoint("TOPLEFT", sectionFrame, "TOPLEFT", 0, 0)
+
+            -- Cache header
+            self.sections[section.key].header = header
+
+            -------------------------------------------------
+            -- Content Rows
+            -------------------------------------------------
+            local previousRow = header
+            local totalHeight = header:GetHeight()
+
+            for _, rowData in ipairs(section.rows) do
+                local rowFrameName = "CCS_Row_" .. rowData.key
+                local row = CreateContentRow(
+                    sectionFrame,
+                    rowFrameName,
+                    rowData.name,
+                    rowData.icon,
+                    {
+                        r = secColor_r or section.color.r,
+                        g = secColor_g or section.color.g,
+                        b = secColor_b or section.color.b,
+                    }
+                )
+
+                row:SetPoint("TOPLEFT", previousRow, "BOTTOMLEFT", 0, -rowSpacing)
+                previousRow = row
+                totalHeight = totalHeight + row:GetHeight() + rowSpacing
+
+                -- Cache row
+                self.sections[section.key].rows[rowData.key] = row
+            end
+
+            sectionFrame:SetHeight(totalHeight + 3)
+            previousSection = sectionFrame
+        end
+
+        -------------------------------------------------
+        -- Data + Layout
+        -------------------------------------------------
+        scrollChild:Show()
+        UpdateAllStats(scrollChild)
+        ApplyStyle(self)
+        UpdateLayout()
+    end
 end
 
 -- Event handler for character stats

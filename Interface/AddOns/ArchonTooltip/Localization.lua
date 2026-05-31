@@ -617,7 +617,7 @@ elseif locale == "itIT" then
         L["Encounter-100733"] = [[Kael'thas Solealto]]
     end
 elseif locale == "koKO" then
-    L["Difficulty-1"] = "L"
+    L["Difficulty-1"] = "공찾"
     L["Difficulty-3"] = "일반"
     L["Difficulty-4"] = "영웅"
     L["Difficulty-5"] = "신화"
@@ -627,37 +627,37 @@ elseif locale == "koKO" then
     L["DifficultyName-5"] = "신화"
     L["AllStars"] = "올스타"
     L["Rank"] = "등급"
-    L["Kills"] = "Kills"
-    L["Unknown"] = [[Unknown]]
-    L["UnknownRealm"] = [[[%s] Realm '%s' (id %d) not in database. Please report to the Warcraft Logs team.]]
-    L["CopyProfileURL"] = [[Copy WCL URL]]
-    L["Subscriber"] = [[Subscriber]]
-    L["ShiftToExpand"] = [[<Shift> to Expand]]
-    L["SubAddonMissing"] = [[[%s] Database for '%s' (%s) is missing. It may be that you logged in to the game while the addon was in the middle of an update. Check the desktop app to see if the update has finished, and then run '/reload' to try again.]]
-    L["DBLoadError"] = [[[%s] Could not load database for '%s'. Reason: %s]]
-    L["Main"] = [[Main]]
-    L["ClickToOpenSettings"] = [[Click to open Settings]]
-    L["ShowTooltipInCombat"] = [[Show Tooltip in Combat]]
-    L["ShowTooltipInCombatDescription"] = [[Whether to extend the tooltip in combat too. Disabled by default as performance measure.]]
-    L["AllowShiftExpansionInCombat"] = [[Allow Shift Expansion in Combat]]
-    L["AllowShiftExpansionInCombatDescription"] = [[Whether to render extended data in combat too. Enables the setting above.]]
-    L["ShowRank"] = [[Show Rank]]
-    L["ShowRankDescription"] = [[Toggles adding the rank to the tooltip.]]
-    L["ShowAsp"] = [[Show All Stars]]
-    L["ShowAspDescription"] = [[Toggles adding All Stars Points to the tooltip.]]
-    L["ShowShiftHint"] = [[Show Shift Hint]]
-    L["ShowShiftHintDescription"] = [[Toggles appending the hint to expand the info when holding Shift.]]
-    L["MenuIntegration"] = [[Extend Menu Options]]
-    L["MenuIntegrationDescription"] = [[Whether to extend menus with an option to copy the characters profile URL.]]
-    L["SettingsLookupUsage"] = [[Usage: /%s lookup <name> <realm>]]
-    L["SettingsLookupNoData"] = [[No data found.]]
-    L["SettingsLookupDataFor"] = [[%s for %s - %s]]
-    L["SettingsAvailableCommands"] = [[Available commands:]]
-    L["SettingsOpenSettingsLabel"] = [[opens the settings]]
-    L["SettingsLookupLabel"] = [[lookup a profile by name and realm]]
+    L["Kills"] = "처치"
+    L["Unknown"] = [[알 수 없음]]
+    L["UnknownRealm"] = [[[%s] 서버 '%s'(ID %d)가 데이터베이스에 없습니다. Warcraft Logs 팀에 제보해 주세요.]]
+    L["CopyProfileURL"] = [[WCL URL 복사]]
+    L["Subscriber"] = [[구독자]]
+    L["ShiftToExpand"] = [[<Shift> 로 확장하기]]
+    L["SubAddonMissing"] = [[[%s] '%s'(%s)의 데이터베이스가 누락되었습니다. 애드온 업데이트가 진행 중일 때 게임에 로그인했을 수 있습니다. 데스크톱 앱에서 업데이트가 완료되었는지 확인한 다음, '/reload'를 실행하여 다시 시도하세요.]]
+    L["DBLoadError"] = [[[%s] '%s'의 데이터베이스를 불러올 수 없습니다. 사유: %s]]
+    L["Main"] = [[주캐릭터]]
+    L["ClickToOpenSettings"] = [[클릭하여 설정 열기]]
+    L["ShowTooltipInCombat"] = [[전투 중 툴팁 표시]]
+    L["ShowTooltipInCombatDescription"] = [[전투 중에도 툴팁을 확장할지 여부입니다. 성능을 고려하여 기본적으로 비활성화되어 있습니다.]]
+    L["AllowShiftExpansionInCombat"] = [[전투 중 Shift 확장 허용]]
+    L["AllowShiftExpansionInCombatDescription"] = [[전투 중에도 확장 데이터를 표시할지 여부입니다. 위 설정을 활성화합니다.]]
+    L["ShowRank"] = [[순위 표시]]
+    L["ShowRankDescription"] = [[툴팁에 순위를 추가할지 여부를 전환합니다.]]
+    L["ShowAsp"] = [[올스타 표시]]
+    L["ShowAspDescription"] = [[툴팁에 올스타 점수를 추가할지 여부를 전환합니다.]]
+    L["ShowShiftHint"] = [[Shift 힌트 표시]]
+    L["ShowShiftHintDescription"] = [[Shift를 누르고 있을 때 정보를 확장하는 힌트를 추가할지 여부를 전환합니다.]]
+    L["MenuIntegration"] = [[메뉴 옵션 확장]]
+    L["MenuIntegrationDescription"] = [[캐릭터 프로필 URL을 복사하는 옵션을 메뉴에 추가할지 여부입니다.]]
+    L["SettingsLookupUsage"] = [[사용법: /%s lookup <이름> <서버>]]
+    L["SettingsLookupNoData"] = [[데이터를 찾을 수 없습니다.]]
+    L["SettingsLookupDataFor"] = [[%s의 %s - %s]]
+    L["SettingsAvailableCommands"] = [[사용 가능한 명령어:]]
+    L["SettingsOpenSettingsLabel"] = [[설정 열기]]
+    L["SettingsLookupLabel"] = [[이름과 서버로 프로필 조회]]
 
     if Private.IsRetail then
-        L["addon.parse-gate-description"] = "Parses shown after 20H or 5M kills"
+        L["addon.parse-gate-description"] = "영웅 20회 또는 신화 5회 처치 후 로그 점수 표시"
         L["Encounter-3176"] = [[전제군주 아베르지안]]
         L["Encounter-3177"] = [[보라시우스]]
         L["Encounter-3179"] = [[몰락한 왕 살라다르]]
@@ -668,7 +668,7 @@ elseif locale == "koKO" then
         L["Encounter-3182"] = [[알라르의 자손 벨로렌]]
         L["Encounter-3183"] = [[한밤의 도래]]
     elseif Private.IsMists then
-        L["addon.parse-gate-description"] = "Parses shown after 10H kills"
+        L["addon.parse-gate-description"] = "10H회 처치 후 로그 점수 표시"
         L["Encounter-51577"] = [[파괴자 진로크]]
         L["Encounter-51575"] = [[호리돈]]
         L["Encounter-51570"] = [[장로회]]
@@ -682,7 +682,7 @@ elseif locale == "koKO" then
         L["Encounter-51560"] = [[쌍둥이 왕비]]
         L["Encounter-51579"] = [[레이 션]]
         L["Encounter-51580"] = [[라덴]]
-        L["addon.parse-gate-description"] = "Parses shown after 10H kills"
+        L["addon.parse-gate-description"] = "10H회 처치 후 로그 점수 표시"
         L["Encounter-101577"] = [[파괴자 진로크]]
         L["Encounter-101575"] = [[호리돈]]
         L["Encounter-101570"] = [[장로회]]
@@ -707,7 +707,7 @@ elseif locale == "koKO" then
         L["Encounter-3190"] = [[릴리안 보스]]
         L["Encounter-3189"] = [[칼도란]]
     elseif C_Seasons.GetActiveSeason() == 109 then
-        L["addon.parse-gate-description"] = "Parses shown after 10H kills"
+        L["addon.parse-gate-description"] = "10H회 처치 후 로그 점수 표시"
         L["Encounter-301118"] = [[패치워크]]
         L["Encounter-301111"] = [[그라불루스]]
         L["Encounter-301108"] = [[글루스]]
@@ -726,7 +726,7 @@ elseif locale == "koKO" then
         L["Encounter-100742"] = [[살타리온]]
         L["Encounter-100734"] = [[말리고스]]
     elseif Private.IsClassicEra and (C_Seasons.GetActiveSeason() == Enum.SeasonID.Fresh or C_Seasons.GetActiveSeason() == 125) then
-        L["addon.parse-gate-description"] = "Parses shown after 10H kills"
+        L["addon.parse-gate-description"] = "10H회 처치 후 로그 점수 표시"
         L["Encounter-100623"] = [[불안정한 히드로스]]
         L["Encounter-100624"] = [[심연의 잠복꾼]]
         L["Encounter-100625"] = [[눈먼 레오테라스]]

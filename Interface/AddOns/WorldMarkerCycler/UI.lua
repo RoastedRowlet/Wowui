@@ -420,7 +420,47 @@ local function BuildUI()
             if api and api.UpdateBindings then api.UpdateBindings() end
         end
     )
-    curY = curY - 30
+    curY = curY - 26
+
+    -- Click edge selector row
+    local clickEdgeLbl = scrollChild:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    clickEdgeLbl:SetPoint("TOPLEFT", 16, curY)
+    clickEdgeLbl:SetText("|cffffff00Click edge:|r")
+
+    local function makeEdgeBtn(label, xOff, clickFn)
+        local btn = CreateFrame("Button", nil, scrollChild, "UIPanelButtonTemplate")
+        btn:SetSize(64, 22)
+        btn:SetPoint("TOPLEFT", clickEdgeLbl, "TOPRIGHT", xOff, 2)
+        btn:SetText(label)
+        btn:SetScript("OnClick", clickFn)
+        return btn
+    end
+
+    local edgeBtnAuto = makeEdgeBtn("Auto",  8,  function()
+        if SlashCmdList and SlashCmdList["WMCCLICKEDGE"] then
+            SlashCmdList["WMCCLICKEDGE"]("auto")
+        end
+    end)
+    local edgeBtnUp   = makeEdgeBtn("Up",    76, function()
+        if WorldMarkerCyclerAPI and WorldMarkerCyclerAPI.SetUseClickDown then
+            WorldMarkerCyclerAPI.SetUseClickDown(false)
+            print("WorldMarkerCycler: click edge set to UP (keyboard).")
+        end
+    end)
+    local edgeBtnDown = makeEdgeBtn("Down",  144, function()
+        if WorldMarkerCyclerAPI and WorldMarkerCyclerAPI.SetUseClickDown then
+            WorldMarkerCyclerAPI.SetUseClickDown(true)
+            print("WorldMarkerCycler: click edge set to DOWN (mouse button).")
+        end
+    end)
+
+    -- Description sits below the button row
+    local clickEdgeDesc = scrollChild:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    clickEdgeDesc:SetPoint("TOPLEFT", 16, curY - 28)
+    clickEdgeDesc:SetWidth(520)
+    clickEdgeDesc:SetText("|cffaaaaaa Auto = detects keyboard vs mouse button.  Up = keyboard.  Down = MMO mouse / extra buttons.|r")
+
+    curY = curY - 52
 
     CreateKeyEditBoxes(L["World Clear Key:"], 16, curY,
         function() return ((WMC_Saved and WMC_Saved.clearModifier) or "") .. ((WMC_Saved and WMC_Saved.clearKey) or "") end,

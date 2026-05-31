@@ -139,6 +139,7 @@ local defaults = {
     friendlyHealthBarHeight = 17,
     friendlyHealthBarWidth = 150,
     showFriendlyNPCs = false,
+    showNPCTitles = true,
     showFriendlyPlayers = true,
     friendlyShowDefaultNames = false,
     classColorFriendly = true,
@@ -215,6 +216,7 @@ local defaults = {
     castTimerOffsetY = 0,
     targetScale = 100,
     showAllDebuffs = false,
+    maxDebuffs = 5,
     showBorder = true,
     borderSize = 1,
     borderColor = { r = 0.067, g = 0.067, b = 0.067 },
@@ -1678,12 +1680,13 @@ local frameCache = CreateFramePool("Frame", UIParent, nil, nil, false, function(
     end)
     plate.cast._timerPlate = plate
     plate.debuffs = {}
-    for i = 1, 4 do
+    local maxDbf = (p and p.maxDebuffs) or defaults.maxDebuffs
+    for i = 1, maxDbf do
         local d = CreateFrame("Frame", nil, plate)
         d:SetFrameStrata("MEDIUM")
         d:SetFrameLevel(800)
         PP.Size(d, 26, 26)
-        PP.Point(d, "BOTTOM", plate.name, "TOP", (i - 2.5) * 30, 2)
+        PP.Point(d, "BOTTOM", plate.name, "TOP", (i - (maxDbf + 1) / 2) * 30, 2)
         AddBorder(d)
         d.icon = d:CreateTexture(nil, "ARTWORK")
         PP.Point(d.icon, "TOPLEFT", d, "TOPLEFT", 1, -1)
@@ -2902,6 +2905,7 @@ questCacheWatcher:SetScript("OnEvent", function()
             ns._questDirty = false
             for _, plate in pairs(ns.plates) do
                 plate:UpdateHealthColor()
+                plate:UpdateClassification()
             end
         end)
     end
@@ -3416,7 +3420,7 @@ function NameplateFrame:ApplyAppearance()
             durText:SetJustifyH("LEFT")
         end
     end
-    for i = 1, 4 do
+    for i = 1, #self.debuffs do
         if self.debuffs[i] and self.debuffs[i].cd and self.debuffs[i].cd.text then
             SetFSFont(self.debuffs[i].cd.text, auraDurSize, "OUTLINE")
             self.debuffs[i].cd.text:SetTextColor(auraDurColor.r, auraDurColor.g, auraDurColor.b, 1)
@@ -3431,7 +3435,7 @@ function NameplateFrame:ApplyAppearance()
     local buffSz = GetBuffIconSize()
     local ccSz = GetCCIconSize()
     local debuffSlot, buffSlot, ccSlot = GetAuraSlots()
-    for i = 1, 4 do
+    for i = 1, #self.debuffs do
         PP.Size(self.debuffs[i], debuffSz, debuffSz)
     end
     for i = 1, 4 do
@@ -3699,7 +3703,7 @@ function NameplateFrame:ClearUnit()
         slot.icon:SetTexture(nil)
         slot:Hide()
     end
-    for i = 1, 4 do
+    for i = 1, #self.debuffs do
         local dSlot = self.debuffs[i]
         if dSlot.cd then
             if dSlot.cd.SetDrawSwipe then dSlot.cd:SetDrawSwipe(false) end
@@ -3710,6 +3714,8 @@ function NameplateFrame:ClearUnit()
         dSlot:Hide()
         ns.StopPandemicGlow(dSlot)
         dSlot._durationObj = nil
+    end
+    for i = 1, 4 do
         local bSlot = self.buffs[i]
         if bSlot.cd then
             if bSlot.cd.SetDrawSwipe then bSlot.cd:SetDrawSwipe(false) end
@@ -4009,24 +4015,28 @@ function NameplateFrame:UpdateClassification()
     if not self.unit then return end
     local slot = GetClassificationSlot()
     local _, iType = GetInstanceInfo()
-    local inMPlusOrRaid = (iType == "raid")
-        or (iType == "party" and C_ChallengeMode and C_ChallengeMode.IsChallengeModeActive and C_ChallengeMode.IsChallengeModeActive())
-    if slot == "none" or inMPlusOrRaid then
+    local inInstance = (iType == "party" or iType == "raid" or iType == "pvp" or iType == "arena")
+    if slot == "none" or inInstance then
         self.classFrame:Hide()
         self:UpdateNameWidth()
         return
     end
-    local c = UnitClassification(self.unit)
-    if c == "elite" or c == "worldboss" then
-        self.class:SetAtlas("nameplates-icon-elite-gold")
-    elseif c == "rareelite" then
-        self.class:SetAtlas("nameplates-icon-elite-silver")
-    elseif c == "rare" then
-        self.class:SetAtlas("nameplates-icon-rareelite")
+    -- Quest mob indicator takes priority over elite/rare
+    if ns.IsQuestMob and ns.IsQuestMob(self.unit) then
+        self.class:SetAtlas("Crosshair_Quest_64")
     else
-        self.classFrame:Hide()
-        self:UpdateNameWidth()
-        return
+        local c = UnitClassification(self.unit)
+        if c == "elite" or c == "worldboss" then
+            self.class:SetAtlas("nameplates-icon-elite-gold")
+        elseif c == "rareelite" then
+            self.class:SetAtlas("nameplates-icon-elite-silver")
+        elseif c == "rare" then
+            self.class:SetAtlas("nameplates-icon-rareelite")
+        else
+            self.classFrame:Hide()
+            self:UpdateNameWidth()
+            return
+        end
     end
     local cpPush = GetClassPowerTopPush(self)
     local cxOff, cyOff = GetAuraSlotOffsets("classification")
@@ -4310,7 +4320,7 @@ function NameplateFrame:UpdateAuras(updateInfo)
     end
 
     -- Only reset slots that were previously active (tracked via _prevCounts).
-    local prevD = self._prevDebuffCount or 4
+    local prevD = self._prevDebuffCount or #self.debuffs
     local prevB = self._prevBuffCount or 4
     local prevCC = self._prevCCCount or 2
     for i = 1, prevD do ClearAuraSlot(self.debuffs[i]) end
@@ -4327,6 +4337,7 @@ function NameplateFrame:UpdateAuras(updateInfo)
     --  GetUnitAuras table alloc). showAll mode falls back to GetUnitAuras.
     -----------------------------------------------------------------------
     if debuffSlotVal ~= "none" then
+    local maxDbfSlots = #self.debuffs
     local showAll = p and p.showAllDebuffs
     if showAll then
         -- showAll mode: must scan all player debuffs
@@ -4334,7 +4345,7 @@ function NameplateFrame:UpdateAuras(updateInfo)
             local allDebuffs = C_UnitAuras.GetUnitAuras(unit, "HARMFUL|PLAYER")
             if allDebuffs then
                 for _, aura in ipairs(allDebuffs) do
-                    if dIdx > 4 then break end
+                    if dIdx > maxDbfSlots then break end
                     local id = aura and aura.auraInstanceID
                     if id and aura.icon then
                         local slot = self.debuffs[dIdx]
@@ -4382,7 +4393,7 @@ function NameplateFrame:UpdateAuras(updateInfo)
                 local allPlayerDebuffs = C_UnitAuras.GetUnitAuras(unit, "HARMFUL|PLAYER")
                 if allPlayerDebuffs then
                     for _, aura in ipairs(allPlayerDebuffs) do
-                        if dIdx > 4 then break end
+                        if dIdx > maxDbfSlots then break end
                         local id = aura and aura.auraInstanceID
                         if id and aura.icon and importantSet[id] then
                             local slot = self.debuffs[dIdx]

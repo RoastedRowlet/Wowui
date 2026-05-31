@@ -710,6 +710,27 @@ initFrame:SetScript("OnEvent", function(self)
             if dmgOff() then dmgCogBlock:Show() else dmgCogBlock:Hide() end
         end
 
+        -- Swiftmend Brightness Fix (Druid only)
+        local _, playerClass = UnitClass("player")
+        if playerClass == "DRUID" then
+            _, h = W:DualRow(parent, y,
+                { type="toggle", text="Prevent Swiftmend Icon Dim",
+                  tooltip="Prevents Blizzard from dimming Swiftmend on action bars and CDM based on Efflorescence state.",
+                  getValue=function()
+                      return not EllesmereUIDB or EllesmereUIDB.brightenSwiftmend ~= false
+                  end,
+                  setValue=function(v)
+                      if not EllesmereUIDB then EllesmereUIDB = {} end
+                      EllesmereUIDB.brightenSwiftmend = v
+                      if v then
+                          if _G._EAB_ScanSwiftmend then _G._EAB_ScanSwiftmend() end
+                          if _G._ECDM_ScanSwiftmend then _G._ECDM_ScanSwiftmend() end
+                      end
+                  end },
+                { type="label", text="" }
+            ); y = y - h
+        end
+
         _, h = W:Spacer(parent, y, 20);  y = y - h
 
         -------------------------------------------------------------------
@@ -1009,7 +1030,7 @@ initFrame:SetScript("OnEvent", function(self)
         MANA = "Mana", RAGE = "Rage", FOCUS = "Focus", ENERGY = "Energy",
         RUNIC_POWER = "Runic Power", LUNAR_POWER = "Astral Power",
         INSANITY = "Insanity", MAELSTROM = "Maelstrom", FURY = "Fury",
-        PAIN = "Pain",
+        PAIN = "Pain", EBON_MIGHT = "Ebon Might",
     }
     local RESOURCE_LABELS = {
         ComboPoints = "Combo Points", HolyPower = "Holy Power",
@@ -1813,7 +1834,7 @@ initFrame:SetScript("OnEvent", function(self)
 
         local POWER_ORDER = {
             "MANA", "RAGE", "FOCUS", "ENERGY", "RUNIC_POWER", "FURY",
-            "LUNAR_POWER", "INSANITY", "MAELSTROM",
+            "LUNAR_POWER", "INSANITY", "MAELSTROM", "EBON_MIGHT",
         }
         local powerItems = {}
         for _, pk in ipairs(POWER_ORDER) do

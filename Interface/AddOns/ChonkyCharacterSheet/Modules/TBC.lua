@@ -200,67 +200,184 @@ local function ChangeInspectModelBg()
     -- end of dynamic background
 end
 
+local function clamp(val, min, max)
+    if val < min then return min end
+    if val > max then return max end
+    return val
+end
+
+local function StopBGAnimation()
+    if modbg.swirl then
+        modbg.swirl:Hide()
+        modbg.swirl.swirlAnim:Stop()
+        modbg.donut:Hide()
+        modbg.donutFrame.donutAnim:Stop()
+    end
+end
+
 local function ChangeModelBg()
     local _, _, classID = UnitClass("player")
     local _, _, raceID = UnitRace("player")
-    local specID = GetPrimaryTalentTree()
-    local entry = nil
-    
+    local specID = 1 --GetSpecialization()
+    local entry
+
+    StopBGAnimation()
+
     if option("bgtype") == "Hide" then
         modtex:Hide()
         return
     end
     modtex:Show()
-    if option("bgtype") == "Class" then 
-        -- Class/Specialization background
-        entry = CCS.Class_Bg[classID] and CCS.Class_Bg[classID][specID]        
+
+    if option("bgtype") == "Class" then
+        entry = CCS.Class_Bg[classID] and CCS.Class_Bg[classID][specID]
         modtex:SetVertexColor(0.8, 0.8, 0.8, 1)
-    elseif option("bgtype") == "Race" then 
-        -- Race background
+    elseif option("bgtype") == "Race" then
         if classID == 6 then raceID = 998 -- Death Knight
         elseif classID == 12 then raceID = 999 -- Demon Hunter
         end
-        entry = CCS.Race_Bg[raceID] 
+        entry = CCS.Race_Bg[raceID]
         modtex:SetVertexColor(0.7, 0.7, 0.7, 1)
     end
-    
+
     modtex:ClearAllPoints()
     modtex:SetAllPoints()
-    
+
     if entry then
         local texWidth, texHeight, uMin, uMax, vMin, vMax = unpack(entry.map)
         local frameWidth, frameHeight = modtex:GetWidth(), modtex:GetHeight()
-        
+
         modtex:SetTexture(entry.texture)
-        
+
         if option("bgtype") == "Class" then
             -- Class/Specialization: right-aligned
-            modtex:SetTexCoord(
-                uMin + ((texWidth - (frameWidth / (frameHeight / texHeight))) / texWidth) * (uMax - uMin),
-                uMax,
-                vMin,
-                vMax
-            )
+            local visibleWidth = frameWidth / (frameHeight / texHeight)
+            local left = uMin + ((texWidth - visibleWidth) / texWidth) * (uMax - uMin)
+            left = clamp(left, uMin, uMax) -- ensure valid range
+
+            modtex:SetTexCoord(left, uMax, vMin, vMax)
         else
             -- Race: horizontally centered
-            local visibleWidth = frameWidth / (frameHeight / texHeight) -- width in texture space
+            local visibleWidth = frameWidth / (frameHeight / texHeight)
             local uRange = uMax - uMin
             local uOffset = (uRange - (visibleWidth / texWidth) * uRange) / 2
-            
-            modtex:SetTexCoord(
-                uMin + uOffset,
-                uMax - uOffset,
-                vMin,
-                vMax
-            )
+
+            local left = clamp(uMin + uOffset, uMin, uMax)
+            local right = clamp(uMax - uOffset, uMin, uMax)
+
+            modtex:SetTexCoord(left, right, vMin, vMax)
         end
     else
-        -- Default background
-        modtex:SetTexture("Interface\\AddOns\\ChonkyCharacterSheet\\Media\\Textures\\MOTHERtalenttree.BLP")
-        modtex:SetTexCoord(0, 0.69, 0, 0.87)
-        modtex:SetVertexColor(0.4, 0, 0.4, 0.9)
+        if option("bgtype") ==  "Midnight"  then    
+            local texWidth, texHeight, uMin, uMax, vMin, vMax = 408,374, 0, 1, .35, 1
+            local frameWidth, frameHeight = modtex:GetWidth(), modtex:GetHeight()
+            local visibleWidth = frameWidth / (frameHeight / texHeight)
+            local uRange = uMax - uMin
+            local uOffset = (uRange - (visibleWidth / texWidth) * uRange) / 2
+            local origW, origH = 569, 520
+            local newW, newH = modbg:GetSize()
+            local scale = math.max(newH / origH, 0.1)
+            if (newW == 0 or newH == 0) and modbg.retries < 5 then
+                C_Timer.After(0, ChangeModelBg)
+                modbg.retries = modbg.retries+1
+                return
+            elseif (newW == 0 or newH == 0) then
+                scale = 1
+            end
+            modbg.retries = 0
+
+            local offsetY = 80 * scale
+            local left = clamp(uMin + uOffset, uMin, uMax)
+            local right = clamp(uMax - uOffset, uMin, uMax)
+            modtex:SetTexture("Interface\\AddOns\\ChonkyCharacterSheet\\Media\\Textures\\bgmidnight.png")
+            modtex:SetVertexColor(0.1, 0, 0.75, 0.95)            
+            modtex:SetTexCoord(left, right, vMin, vMax)    
+            if option("showbganimations") == true then
+                -- VOID SWIRL LAYER (rotating)
+                local swirl = modbg.swirl or modbg:CreateTexture(nil, "ARTWORK", nil, 1)
+                modbg.swirl = swirl
+                swirl:SetTexture("Interface\\GLUES\\Models\\UI_VoidElf\\7XP_Pandemonium_VoidFXSwirl01")
+                swirl:SetVertexColor(1, 1, 1, 1)
+                swirl:SetScale(scale * 0.85)
+                swirl:ClearAllPoints()
+                swirl:SetPoint("CENTER", modtex, "CENTER", 0, offsetY)
+                swirl:Show()
+
+                local swirlAnim = modbg.swirl.swirlAnim or swirl:CreateAnimationGroup()
+                modbg.swirl.swirlAnim = swirlAnim
+
+                local rotate = modbg.swirl.swirlAnim.rotate or swirlAnim:CreateAnimation("Rotation")
+                modbg.swirl.swirlAnim.rotate = rotate
+                rotate:SetDegrees(360)
+                rotate:SetDuration(120)
+                rotate:SetOrder(1)
+
+                swirlAnim:SetLooping("REPEAT")
+                swirlAnim:Play()
+
+                -- PULSING VOID DONUT MASK (mmm, donuts...)
+                local donutFrame = modbg.donutFrame or CreateFrame("Frame", nil, modbg)
+                modbg.donutFrame = donutFrame
+                donutFrame:ClearAllPoints()
+                donutFrame:SetPoint("CENTER", modtex, "CENTER", 0, offsetY)
+                donutFrame:SetSize(240 * scale, 350 * scale)
+                donutFrame:SetScale(1) -- important: neutral base
+                donutFrame:Show()
+
+                local donut = modbg.donut or donutFrame:CreateTexture(nil, "ARTWORK", nil, 2)
+                modbg.donut = donut
+                donut:SetAllPoints(donutFrame)
+                donut:SetTexture("Interface\\GLUES\\Models\\UI_MAINMENU_MIDNIGHT\\UI_MainMenu_Midnight_DonutMask")
+                donut:SetVertexColor(.292, .457, .902, 1)
+                donut:SetAlpha(1)
+                donut:SetBlendMode("ADD")
+                donut:Show()
+
+                local donutAnim = modbg.donutFrame.donutAnim or donutFrame:CreateAnimationGroup()
+                modbg.donutFrame.donutAnim = donutAnim
+                donutAnim:Stop() -- reset if it already existed
+
+                local alphaUp = donutAnim.alphaUp or donutAnim:CreateAnimation("Alpha")
+                donutAnim.alphaUp = alphaUp
+                alphaUp:SetFromAlpha(0.6)
+                alphaUp:SetToAlpha(1.0)
+                alphaUp:SetDuration(3)
+                alphaUp:SetSmoothing("IN_OUT")
+                alphaUp:SetOrder(1)
+
+                local alphaDown = donutAnim.alphaDown or donutAnim:CreateAnimation("Alpha")
+                donutAnim.alphaDown = alphaDown
+                alphaDown:SetFromAlpha(1.0)
+                alphaDown:SetToAlpha(0.6)
+                alphaDown:SetDuration(3)
+                alphaDown:SetSmoothing("IN_OUT")
+                alphaDown:SetOrder(2)
+
+                local scaleUp = donutAnim.scaleUp or donutAnim:CreateAnimation("Scale")
+                donutAnim.scaleUp = scaleUp
+                scaleUp:SetScale(1.05, 1.05)
+                scaleUp:SetDuration(3)
+                scaleUp:SetSmoothing("IN_OUT")
+                scaleUp:SetOrder(1)
+
+                local scaleDown = donutAnim.scaleDown or donutAnim:CreateAnimation("Scale")
+                donutAnim.scaleDown = scaleDown
+                scaleDown:SetScale(1 / 1.05, 1 / 1.05) -- back to 1.0
+                scaleDown:SetDuration(3)
+                scaleDown:SetSmoothing("IN_OUT")
+                scaleDown:SetOrder(2)
+
+                donutAnim:SetLooping("REPEAT")
+                donutAnim:Play()                
+                
+            end
+        else        
+            -- Default background
+            modtex:SetTexture("Interface\\AddOns\\ChonkyCharacterSheet\\Media\\Textures\\MOTHERtalenttree.BLP")
+            modtex:SetTexCoord(0, 0.69, 0, 0.87)
+            modtex:SetVertexColor(0.6, 0, 0.6, 0.95)
+        end
     end
-    -- end of dynamic background
 end
 
 local function Clicky(endstate)
@@ -597,7 +714,7 @@ local function TBCupdateLocationInfo(unit, slotIndex, framename)
 
         -- Only build enchant/reforge patterns if locale is enUS/enGB
         local locale = GetLocale()
-        local enchantDetectionEnabled = (locale == "enUS" or locale == "enGB")
+        local enchantDetectionEnabled = (locale == "enUS" or locale == "enGB" or locale == "esES" or locale == "esMX")
 
         local REFORGE_PATTERN, REFORGED_LINE
         if enchantDetectionEnabled then
@@ -668,7 +785,7 @@ local function TBCupdateLocationInfo(unit, slotIndex, framename)
         local itemLink = GetInventoryItemLink(unit, slotIndex)
         if itemLink then
             --------------------------------------------------------------------
-            -- 1. Always check for upgrade line and item level
+            -- Always check for upgrade line and item level
             --------------------------------------------------------------------
             local lastLineWasTransmogHeader = false
 
@@ -701,14 +818,14 @@ local function TBCupdateLocationInfo(unit, slotIndex, framename)
             end
 
             --------------------------------------------------------------------
-            -- 2. Enchant detection
+            -- Enchant detection
             --------------------------------------------------------------------
             if enchantDetectionEnabled then
                 local enchantId = itemLink:match("item:%d+:(%d+)")
                 if enchantId and enchantId ~= "0" then
 
                     ----------------------------------------------------------------
-                    -- 2a. Build base tooltip lines (unenchanted version)
+                    -- Build base tooltip lines (unenchanted version)
                     ----------------------------------------------------------------
                     local baseLines = {}
                     local baseStatsSeen = {}
@@ -749,7 +866,7 @@ local function TBCupdateLocationInfo(unit, slotIndex, framename)
                     end
 
                     ----------------------------------------------------------------
-                    -- 2b. Compare equipped tooltip to base tooltip
+                    -- Compare equipped tooltip to base tooltip
                     ----------------------------------------------------------------
                     local equippedStatsConsumed = {}
                     local lastLineWasTransmogHeader = false
@@ -976,27 +1093,36 @@ local function TBCupdateLocationInfo(unit, slotIndex, framename)
                 gemIconframe3:Show()
             end
             local GemToolTip = CCS:CreateTooltip("CCSGemTooltip")
-            gemIconframe1:SetScript("OnEnter", function() 
+            gemIconframe1:SetScript("OnEnter", function(self) 
                     if gem1Link then
-                         CCS.RenderSafeTooltip(GemToolTip, gem1Link, "player")
+                            GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+                            GameTooltip:SetHyperlink(gem1Link)
+                            GameTooltip:Show()
+                            --CCS.RenderSafeTooltip(GemToolTip, gem1Link, "player")
                     end
             end)
-            gemIconframe1:SetScript("OnLeave", function() GemToolTip:Hide() end)
-            gemIconframe2:SetScript("OnEnter", function() 
+            gemIconframe1:SetScript("OnLeave", function() GameTooltip:Hide() end)
+            gemIconframe2:SetScript("OnEnter", function(self) 
                     if gem2Link then
-                         CCS.RenderSafeTooltip(GemToolTip, gem2Link, "player")
+                        GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+                        GameTooltip:SetHyperlink(gem2Link)
+                        GameTooltip:Show()
+                        --CCS.RenderSafeTooltip(GemToolTip, gem2Link, "player")
                     end
             end)
-            gemIconframe2:SetScript("OnLeave", function()  GemToolTip:Hide() end)
+            gemIconframe2:SetScript("OnLeave", function()  GameTooltip:Hide() end)
             gemIconframe2:SetScript("OnClick", function()  end)
             
-            gemIconframe3:SetScript("OnEnter", function() 
+            gemIconframe3:SetScript("OnEnter", function(self) 
                     if gem3Link then
-                         CCS.RenderSafeTooltip(GemToolTip, gem3Link, "player")
+                        GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+                        GameTooltip:SetHyperlink(gem3Link)
+                        GameTooltip:Show()
+                        --CCS.RenderSafeTooltip(GemToolTip, gem3Link, "player")
                     end
 
             end)
-            gemIconframe3:SetScript("OnLeave", function() GemToolTip:Hide() end)
+            gemIconframe3:SetScript("OnLeave", function() GameTooltip:Hide() end)
             gemIconframe3:SetScript("OnClick", function()  end) 
         end
         
@@ -1457,19 +1583,22 @@ function TBCinitializeinspectframe()
     InspectTalentFrameScrollFrame:ClearAllPoints()
     InspectTalentFrameScrollFrame:SetPoint("TOPLEFT", InspectTalentFrame, "TOPLEFT", 170, -52)
     InspectTalentFrameScrollFrame:SetPoint("TOPRIGHT", InspectTalentFrame, "TOPRIGHT", -65, -52)
-    InspectTalentFrameScrollFrame:SetPoint("BOTTOM", InspectTalentFramePointsBar, "TOP", 0, -10)
+    InspectTalentFrameScrollFrame:SetPoint("BOTTOM", InspectTalentFramePointsBar, "TOP", 0, 3)
     InspectTalentFrameScrollChildFrame:ClearAllPoints()
     InspectTalentFrameScrollChildFrame:SetPoint("TOPLEFT", InspectTalentFrameScrollFrame, "TOPLEFT", 0, 0)
     InspectTalentFrameBackgroundTopLeft:ClearAllPoints()
     InspectTalentFrameBackgroundTopLeft:SetPoint("TOPLEFT", InspectTalentFrame, "TOPLEFT", 50, -52)
-    InspectTalentFrameBackgroundTopLeft:SetWidth(256*1.7265625)
-    InspectTalentFrameBackgroundTopLeft:SetHeight(256*1.7265625)
-    InspectTalentFrameBackgroundTopRight:SetWidth(64*1.7265625)
-    InspectTalentFrameBackgroundTopRight:SetHeight(256*1.7265625)
-    InspectTalentFrameBackgroundBottomLeft:SetWidth(256*1.7265625)
-    InspectTalentFrameBackgroundBottomLeft:SetHeight(128*1.7265625)
-    InspectTalentFrameBackgroundBottomRight:SetWidth(64*1.7265625)
-    InspectTalentFrameBackgroundBottomRight:SetHeight(128*1.7265625)
+    local inspectW, inspectH = InspectTalentFrame:GetSize() -- 663W x 732H
+    inspectW = inspectW / 663
+    inspectH = inspectH / 732
+    InspectTalentFrameBackgroundTopLeft:SetWidth(256*1.7265625*inspectW)
+    InspectTalentFrameBackgroundTopLeft:SetHeight(256*1.7265625*inspectH)  
+    InspectTalentFrameBackgroundTopRight:SetWidth(64*1.7265625*inspectW)
+    InspectTalentFrameBackgroundTopRight:SetHeight(256*1.7265625*inspectH)
+    InspectTalentFrameBackgroundBottomLeft:SetWidth(256*1.7265625*inspectW)
+    InspectTalentFrameBackgroundBottomLeft:SetHeight(128*1.7265625*inspectH)
+    InspectTalentFrameBackgroundBottomRight:SetWidth(64*1.7265625*inspectW)
+    InspectTalentFrameBackgroundBottomRight:SetHeight(128*1.7265625*inspectH)
     InspectTalentFrameScrollFrameScrollBar:SetPoint("BOTTOMLEFT", InspectTalentFrameScrollFrame, "BOTTOMRIGHT", 6, 26)
     local upperTex, lowerTex = InspectTalentFrameScrollFrame:GetRegions()
     if upperTex then
@@ -1653,7 +1782,7 @@ function TBCinitializeinspectframe()
 end
 
 -- Module Initialization
-function module:Initialize()
+function module:Initialize(onlyStyle)
     -- Set up the character sheet for the current player
     local scaling = option("sheetscale") or 1
     local Bgoffset = option("hpad")

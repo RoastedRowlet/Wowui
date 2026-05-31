@@ -387,7 +387,8 @@ initFrame:SetScript("OnEvent", function(self)
         end
 
         -- Free Move Buttons | Button Backgrounds
-        _, h = W:DualRow(parent, y,
+        local fmRow
+        fmRow, h = W:DualRow(parent, y,
             { type="toggle", text="Free Move Buttons",
               tooltip="When enabled, Shift+Click any minimap button (mail, calendar, tracking, addon buttons) to drag it to a custom position.",
               getValue=function() local m = MinimapDB(); return m and m.freeMoveBtns end,
@@ -398,6 +399,7 @@ initFrame:SetScript("OnEvent", function(self)
                     m.btnPositions = {}
                 end
                 RefreshMinimap()
+                EllesmereUI:RefreshPage()
               end },
             { type="toggle", text="Button Backgrounds",
               tooltip="Show black backgrounds behind minimap indicator buttons (tracking, calendar, mail, crafting, addon buttons, flyout toggle).",
@@ -409,104 +411,239 @@ initFrame:SetScript("OnEvent", function(self)
               end }
         );  y = y - h
 
-        -- Hide Great Vault Button | Great Vault Extra Info
-        _, h = W:DualRow(parent, y,
-            { type="toggle", text="Hide Great Vault Button",
-              tooltip="Hides the Great Vault shortcut button from the minimap button stack.",
-              getValue=function() local m = MinimapDB(); return m and m.hideGreatVault end,
-              setValue=function(v)
+        -- "Reset" label next to the Free Move toggle (only visible when enabled)
+        do
+            local rgn = fmRow._leftRegion
+            local resetFS = rgn:CreateFontString(nil, "OVERLAY")
+            resetFS:SetFont(EllesmereUI.EXPRESSWAY or "Fonts\\FRIZQT__.TTF", 12, "")
+            resetFS:SetTextColor(1, 1, 1, 0.8)
+            resetFS:SetText("Reset")
+            resetFS:SetPoint("RIGHT", rgn._control, "LEFT", -8, 0)
+            local hitBtn = CreateFrame("Button", nil, rgn)
+            hitBtn:SetAllPoints(resetFS)
+            hitBtn:SetFrameLevel(rgn:GetFrameLevel() + 5)
+            hitBtn:SetScript("OnEnter", function() resetFS:SetTextColor(1, 0.3, 0.3, 1) end)
+            hitBtn:SetScript("OnLeave", function() resetFS:SetTextColor(1, 1, 1, 0.8) end)
+            hitBtn:SetScript("OnClick", function()
                 local m = MinimapDB(); if not m then return end
-                m.hideGreatVault = v
+                m.btnPositions = {}
                 RefreshMinimap()
-              end },
-            { type="toggle", text="Great Vault Extra Info",
-              tooltip="Shows a compact weekly progress summary in the Great Vault minimap button tooltip.",
-              getValue=function()
+            end)
+            local function UpdateResetVis()
                 local m = MinimapDB()
-                return not m or m.greatVaultExtraInfo ~= false
-              end,
-              setValue=function(v)
-                local m = MinimapDB(); if not m then return end
-                m.greatVaultExtraInfo = v
-                EllesmereUI:RefreshPage()
-              end }
-        );  y = y - h
+                local on = m and m.freeMoveBtns
+                resetFS:SetShown(on)
+                hitBtn:SetShown(on)
+            end
+            UpdateResetVis()
+            EllesmereUI.RegisterWidgetRefresh(UpdateResetVis)
+        end
 
-        -- Hide M+ Portals Button
-        _, h = W:DualRow(parent, y,
-            { type="toggle", text="Hide M+ Portals Button",
-              tooltip="Hides the M+ Portals shortcut button from the minimap button stack.",
-              getValue=function() local m = MinimapDB(); return m and m.hidePortals end,
-              setValue=function(v)
-                local m = MinimapDB(); if not m then return end
-                m.hidePortals = v
-                RefreshMinimap()
-              end },
+        -- Hide Extra Buttons (checkbox dropdown)
+        local extraBtnRow
+        extraBtnRow, h = W:DualRow(parent, y,
+            { type="dropdown", text="Hide Extra Buttons",
+              values = { __placeholder = "..." }, order = { "__placeholder" },
+              getValue = function() return "__placeholder" end,
+              setValue = function() end },
             { type="label", text="" }
         );  y = y - h
+
+        -- Replace placeholder with checkbox dropdown
+        do
+            local leftRgn = extraBtnRow._leftRegion
+            if leftRgn._control then leftRgn._control:Hide() end
+
+            local EXTRA_BTN_ITEMS = {
+                { key = "greatVault",    label = "Great Vault" },
+                { key = "portals",       label = "M+ Portals" },
+                { key = "friendsOnline", label = "Friends Online" },
+                { key = "groupButton",   label = "Group Button" },
+            }
+
+            local cbDD, cbDDRefresh = EllesmereUI.BuildVisOptsCBDropdown(
+                leftRgn, 210, leftRgn:GetFrameLevel() + 2,
+                EXTRA_BTN_ITEMS,
+                function(k)
+                    local m = MinimapDB(); if not m then return false end
+                    local heb = m.hideExtraBtns
+                    return heb and heb[k] and true or false
+                end,
+                function(k, v)
+                    local m = MinimapDB(); if not m then return end
+                    if not m.hideExtraBtns then m.hideExtraBtns = {} end
+                    m.hideExtraBtns[k] = v
+                    RefreshMinimap()
+                end)
+            local PP = EllesmereUI.PP
+            PP.Point(cbDD, "RIGHT", leftRgn, "RIGHT", -20, 0)
+            leftRgn._control = cbDD
+            leftRgn._lastInline = nil
+            EllesmereUI.RegisterWidgetRefresh(cbDDRefresh)
+        end
 
         y = y - 10
 
         -- EXTRAS section header
         _, h = W:SectionHeader(parent, "EXTRAS", y);  y = y - h
 
-        -- Show Zone | Show Clock
-        _, h = W:DualRow(parent, y,
-            { type="toggle", text="Show Zone",
-              getValue=function() local m = MinimapDB(); return not (m and m.hideZoneText) end,
-              setValue=function(v)
-                local m = MinimapDB(); if not m then return end
-                m.hideZoneText = not v
-                RefreshMinimap()
-                EllesmereUI:RefreshPage()
-              end },
-            { type="toggle", text="Show Clock",
-              getValue=function() local m = MinimapDB(); return m and m.showClock end,
-              setValue=function(v)
-                local m = MinimapDB(); if not m then return end
-                m.showClock = v
-                RefreshMinimap()
-                EllesmereUI:RefreshPage()
-              end }
-        );  y = y - h
-
-        -- Zone Inside | Clock Inside
-        _, h = W:DualRow(parent, y,
-            { type="toggle", text="Zone Inside",
-              tooltip="Display the zone text inside the minimap instead of below it",
-              disabled=function() local m = MinimapDB(); return m and (m.hideZoneText) end,
-              disabledTooltip="Enable Show Zone first",
-              getValue=function() local m = MinimapDB(); return m and m.zoneInside end,
-              setValue=function(v)
-                local m = MinimapDB(); if not m then return end
-                m.zoneInside = v
-                RefreshMinimap()
-              end },
-            { type="toggle", text="Clock Inside",
-              tooltip="Display the clock inside the minimap instead of above it",
-              disabled=function() local m = MinimapDB(); return m and (not m.showClock) end,
-              disabledTooltip="Enable Show Clock first",
-              getValue=function() local m = MinimapDB(); return m and m.clockInside end,
-              setValue=function(v)
-                local m = MinimapDB(); if not m then return end
-                m.clockInside = v
-                RefreshMinimap()
-              end }
-        );  y = y - h
-
-        -- Scroll to Zoom | Clock Scale (with cog: X/Y offset)
-        local clockScaleRow
-        clockScaleRow, h = W:DualRow(parent, y,
+        -- Row 1: Show Blizzard Elements | Scroll to Zoom
+        local blizzElements = {
+            { key = "zone",       label = "Zone",           hideKey = "hideZoneText" },
+            { key = "clock",      label = "Clock",          hideKey = "showClock", direct = true },
+            { key = "calendar",   label = "Calendar",       hideKey = "hideGameTime" },
+            { key = "mail",       label = "Mail",           hideKey = "hideMail" },
+            { key = "tracking",   label = "Tracking",       hideKey = "hideTrackingButton" },
+            { key = "crafting",   label = "Crafting Order", hideKey = "hideCraftingOrder" },
+            { key = "difficulty", label = "Difficulty",      hideKey = "hideRaidDifficulty" },
+        }
+        local blizzRow
+        blizzRow, h = W:DualRow(parent, y,
+            { type="dropdown", text="Show Blizzard Elements",
+              values={ ["_placeholder"]="..." }, order={ "_placeholder" },
+              getValue=function() return "_placeholder" end,
+              setValue=function() end },
             { type="toggle", text="Scroll to Zoom",
               getValue=function() local m = MinimapDB(); return m and m.scrollZoom end,
               setValue=function(v)
                 local m = MinimapDB(); if not m then return end
                 m.scrollZoom = v
                 RefreshMinimap()
+              end }); y = y - h
+        do
+            local rgn = blizzRow._leftRegion
+            if rgn._control then rgn._control:Hide() end
+            local cbDD, cbDDRefresh = EllesmereUI.BuildVisOptsCBDropdown(
+                rgn, 210, rgn:GetFrameLevel() + 2,
+                blizzElements,
+                function(k)
+                    local m = MinimapDB(); if not m then return false end
+                    for _, el in ipairs(blizzElements) do
+                        if el.key == k then
+                            if el.direct then return m[el.hideKey] or false
+                            else return not m[el.hideKey] end
+                        end
+                    end
+                    return false
+                end,
+                function(k, v)
+                    local m = MinimapDB(); if not m then return end
+                    for _, el in ipairs(blizzElements) do
+                        if el.key == k then
+                            if el.direct then m[el.hideKey] = v
+                            else m[el.hideKey] = not v end
+                            break
+                        end
+                    end
+                    RefreshMinimap()
+                    EllesmereUI:RefreshPage()
+                end)
+            PP.Point(cbDD, "RIGHT", rgn, "RIGHT", -20, 0)
+            rgn._control = cbDD
+            rgn._lastInline = nil
+            EllesmereUI.RegisterWidgetRefresh(cbDDRefresh)
+        end
+
+        -- Row 2: Zone Inside | Location Scale (with cog: X/Y offset)
+        local locScaleRow
+        locScaleRow, h = W:DualRow(parent, y,
+            { type="toggle", text="Zone Inside",
+              tooltip="Display the zone text inside the minimap instead of below it",
+              disabled=function() local m = MinimapDB(); return m and (m.hideZoneText) end,
+              disabledTooltip="Enable Zone in Show Blizzard Elements",
+              getValue=function() local m = MinimapDB(); return m and m.zoneInside end,
+              setValue=function(v)
+                local m = MinimapDB(); if not m then return end
+                m.zoneInside = v
+                RefreshMinimap()
+              end },
+            { type="slider", text="Location Scale", min=0.5, max=2.0, step=0.01,
+              disabled=function() local m = MinimapDB(); return m and (m.hideZoneText) end,
+              disabledTooltip="Enable Zone in Show Blizzard Elements",
+              getValue=function() local m = MinimapDB(); return m and m.locationScale or 1.15 end,
+              setValue=function(v)
+                local m = MinimapDB(); if not m then return end
+                m.locationScale = v
+                local bg = _G._EBS_LocationBg
+                if bg then bg:SetScale(v) end
+              end }
+        );  y = y - h
+        -- Inline cog on Location Scale for X/Y offset
+        do
+            local rgn = locScaleRow._rightRegion
+            local function locOff()
+                local m = MinimapDB(); return m and (m.hideZoneText)
+            end
+            local _, cogShow = EllesmereUI.BuildCogPopup({
+                title = "Location Position",
+                rows = {
+                    { type = "slider", label = "X Offset", min = -500, max = 500, step = 1,
+                      get = function() local m = MinimapDB(); return m and m.locationOffsetX or 0 end,
+                      set = function(v)
+                          local m = MinimapDB(); if not m then return end
+                          m.locationOffsetX = v
+                          local bg = _G._EBS_LocationBg
+                          if bg then
+                              bg:ClearAllPoints()
+                              local ly = m.locationOffsetY or 0
+                              local baseY = m.zoneInside and 4 or (m.shape == "circle" or m.shape == "textured_circle") and 3 or -7
+                              bg:SetPoint("BOTTOM", _G.Minimap, "BOTTOM", v, baseY + ly)
+                          end
+                      end },
+                    { type = "slider", label = "Y Offset", min = -500, max = 500, step = 1,
+                      get = function() local m = MinimapDB(); return m and m.locationOffsetY or 0 end,
+                      set = function(v)
+                          local m = MinimapDB(); if not m then return end
+                          m.locationOffsetY = v
+                          local bg = _G._EBS_LocationBg
+                          if bg then
+                              bg:ClearAllPoints()
+                              local lx = m.locationOffsetX or 0
+                              local baseY = m.zoneInside and 4 or (m.shape == "circle" or m.shape == "textured_circle") and 3 or -7
+                              bg:SetPoint("BOTTOM", _G.Minimap, "BOTTOM", lx, baseY + v)
+                          end
+                      end },
+                },
+            })
+            local cogBtn = CreateFrame("Button", nil, rgn)
+            cogBtn:SetSize(26, 26)
+            cogBtn:SetPoint("RIGHT", rgn._control, "LEFT", -8, 0)
+            cogBtn:SetFrameLevel(rgn:GetFrameLevel() + 5)
+            cogBtn:SetAlpha(locOff() and 0.15 or 0.4)
+            local cogTex = cogBtn:CreateTexture(nil, "OVERLAY")
+            cogTex:SetAllPoints()
+            cogTex:SetTexture(EllesmereUI.COGS_ICON)
+            cogBtn:SetScript("OnEnter", function(self) self:SetAlpha(0.7) end)
+            cogBtn:SetScript("OnLeave", function(self) self:SetAlpha(locOff() and 0.15 or 0.4) end)
+            cogBtn:SetScript("OnClick", function(self) cogShow(self) end)
+            local cogBlock = CreateFrame("Frame", nil, cogBtn)
+            cogBlock:SetAllPoints(); cogBlock:SetFrameLevel(cogBtn:GetFrameLevel() + 10); cogBlock:EnableMouse(true)
+            cogBlock:SetScript("OnEnter", function() EllesmereUI.ShowWidgetTooltip(cogBtn, EllesmereUI.DisabledTooltip("Zone in Show Blizzard Elements")) end)
+            cogBlock:SetScript("OnLeave", function() EllesmereUI.HideWidgetTooltip() end)
+            EllesmereUI.RegisterWidgetRefresh(function()
+                local off = locOff()
+                cogBtn:SetAlpha(off and 0.15 or 0.4)
+                if off then cogBlock:Show() else cogBlock:Hide() end
+            end)
+            if locOff() then cogBlock:Show() else cogBlock:Hide() end
+        end
+
+        -- Row 3: Clock Inside | Clock Scale (with cog: X/Y offset)
+        local clockScaleRow
+        clockScaleRow, h = W:DualRow(parent, y,
+            { type="toggle", text="Clock Inside",
+              tooltip="Display the clock inside the minimap instead of above it",
+              disabled=function() local m = MinimapDB(); return m and (not m.showClock) end,
+              disabledTooltip="Enable Clock in Show Blizzard Elements",
+              getValue=function() local m = MinimapDB(); return m and m.clockInside end,
+              setValue=function(v)
+                local m = MinimapDB(); if not m then return end
+                m.clockInside = v
+                RefreshMinimap()
               end },
             { type="slider", text="Clock Scale", min=0.5, max=2.0, step=0.01,
               disabled=function() local m = MinimapDB(); return m and (not m.showClock) end,
-              disabledTooltip="Enable Show Clock first",
+              disabledTooltip="Enable Clock in Show Blizzard Elements",
               getValue=function() local m = MinimapDB(); return m and m.clockScale or 1.15 end,
               setValue=function(v)
                 local m = MinimapDB(); if not m then return end
@@ -515,7 +652,6 @@ initFrame:SetScript("OnEvent", function(self)
                 if bg then bg:SetScale(v) end
               end }
         );  y = y - h
-
         -- Inline cog on Clock Scale for X/Y offset
         do
             local rgn = clockScaleRow._rightRegion
@@ -566,7 +702,7 @@ initFrame:SetScript("OnEvent", function(self)
             cogBtn:SetScript("OnClick", function(self) cogShow(self) end)
             local cogBlock = CreateFrame("Frame", nil, cogBtn)
             cogBlock:SetAllPoints(); cogBlock:SetFrameLevel(cogBtn:GetFrameLevel() + 10); cogBlock:EnableMouse(true)
-            cogBlock:SetScript("OnEnter", function() EllesmereUI.ShowWidgetTooltip(cogBtn, EllesmereUI.DisabledTooltip("Show Clock")) end)
+            cogBlock:SetScript("OnEnter", function() EllesmereUI.ShowWidgetTooltip(cogBtn, EllesmereUI.DisabledTooltip("Clock in Show Blizzard Elements")) end)
             cogBlock:SetScript("OnLeave", function() EllesmereUI.HideWidgetTooltip() end)
             EllesmereUI.RegisterWidgetRefresh(function()
                 local off = clockOff()
@@ -576,80 +712,67 @@ initFrame:SetScript("OnEvent", function(self)
             if clockOff() then cogBlock:Show() else cogBlock:Hide() end
         end
 
-        -- Location Scale (with cog: X/Y offset) | (spacer)
-        local locScaleRow
-        locScaleRow, h = W:DualRow(parent, y,
-            { type="slider", text="Location Scale", min=0.5, max=2.0, step=0.01,
-              disabled=function() local m = MinimapDB(); return m and (m.hideZoneText) end,
-              disabledTooltip="Enable Show Zone first",
-              getValue=function() local m = MinimapDB(); return m and m.locationScale or 1.15 end,
+        -- Row 4: Show Coordinates Below Map | (empty)
+        local coordsRow
+        coordsRow, h = W:DualRow(parent, y,
+            { type="toggle", text="Show Coordinates Below Map",
+              tooltip="Always display player coordinates centered below the minimap instead of only on hover.",
+              getValue=function() local m = MinimapDB(); return m and m.coordsBelow end,
               setValue=function(v)
                 local m = MinimapDB(); if not m then return end
-                m.locationScale = v
-                local bg = _G._EBS_LocationBg
-                if bg then bg:SetScale(v) end
+                m.coordsBelow = v
+                RefreshMinimap()
+                EllesmereUI:RefreshPage()
               end },
             { type="label", text="" }
         );  y = y - h
-
-        -- Inline cog on Location Scale for X/Y offset
+        -- Inline cog on Coordinates for X/Y offset
         do
-            local rgn = locScaleRow._leftRegion
-            local function locOff()
-                local m = MinimapDB(); return m and (m.hideZoneText)
+            local rgn = coordsRow._leftRegion
+            local function coordsOff()
+                local m = MinimapDB(); return not (m and m.coordsBelow)
             end
             local _, cogShow = EllesmereUI.BuildCogPopup({
-                title = "Location Position",
+                title = "Coordinates Position",
                 rows = {
                     { type = "slider", label = "X Offset", min = -500, max = 500, step = 1,
-                      get = function() local m = MinimapDB(); return m and m.locationOffsetX or 0 end,
+                      get = function() local m = MinimapDB(); return m and m.coordsBelowOffsetX or 0 end,
                       set = function(v)
                           local m = MinimapDB(); if not m then return end
-                          m.locationOffsetX = v
-                          local bg = _G._EBS_LocationBg
-                          if bg then
-                              bg:ClearAllPoints()
-                              local ly = m.locationOffsetY or 0
-                              local baseY = m.zoneInside and 4 or (m.shape == "circle" or m.shape == "textured_circle") and 3 or -7
-                              bg:SetPoint("BOTTOM", _G.Minimap, "BOTTOM", v, baseY + ly)
-                          end
+                          m.coordsBelowOffsetX = v
+                          RefreshMinimap()
                       end },
                     { type = "slider", label = "Y Offset", min = -500, max = 500, step = 1,
-                      get = function() local m = MinimapDB(); return m and m.locationOffsetY or 0 end,
+                      get = function() local m = MinimapDB(); return m and m.coordsBelowOffsetY or 0 end,
                       set = function(v)
                           local m = MinimapDB(); if not m then return end
-                          m.locationOffsetY = v
-                          local bg = _G._EBS_LocationBg
-                          if bg then
-                              bg:ClearAllPoints()
-                              local lx = m.locationOffsetX or 0
-                              local baseY = m.zoneInside and 4 or (m.shape == "circle" or m.shape == "textured_circle") and 3 or -7
-                              bg:SetPoint("BOTTOM", _G.Minimap, "BOTTOM", lx, baseY + v)
-                          end
+                          m.coordsBelowOffsetY = v
+                          RefreshMinimap()
                       end },
                 },
             })
             local cogBtn = CreateFrame("Button", nil, rgn)
             cogBtn:SetSize(26, 26)
-            cogBtn:SetPoint("RIGHT", rgn._control, "LEFT", -8, 0)
+            cogBtn:SetPoint("RIGHT", rgn._lastInline or rgn._control, "LEFT", -9, 0)
+            rgn._lastInline = cogBtn
             cogBtn:SetFrameLevel(rgn:GetFrameLevel() + 5)
-            cogBtn:SetAlpha(locOff() and 0.15 or 0.4)
+            cogBtn:SetAlpha(coordsOff() and 0.15 or 0.4)
             local cogTex = cogBtn:CreateTexture(nil, "OVERLAY")
             cogTex:SetAllPoints()
-            cogTex:SetTexture(EllesmereUI.COGS_ICON)
+            cogTex:SetTexture(EllesmereUI.DIRECTIONS_ICON)
             cogBtn:SetScript("OnEnter", function(self) self:SetAlpha(0.7) end)
-            cogBtn:SetScript("OnLeave", function(self) self:SetAlpha(locOff() and 0.15 or 0.4) end)
+            cogBtn:SetScript("OnLeave", function(self) self:SetAlpha(coordsOff() and 0.15 or 0.4) end)
             cogBtn:SetScript("OnClick", function(self) cogShow(self) end)
             local cogBlock = CreateFrame("Frame", nil, cogBtn)
             cogBlock:SetAllPoints(); cogBlock:SetFrameLevel(cogBtn:GetFrameLevel() + 10); cogBlock:EnableMouse(true)
-            cogBlock:SetScript("OnEnter", function() EllesmereUI.ShowWidgetTooltip(cogBtn, EllesmereUI.DisabledTooltip("Show Zone")) end)
+            cogBlock:SetScript("OnEnter", function() EllesmereUI.ShowWidgetTooltip(cogBtn, EllesmereUI.DisabledTooltip("Show Coordinates Below Map")) end)
             cogBlock:SetScript("OnLeave", function() EllesmereUI.HideWidgetTooltip() end)
             EllesmereUI.RegisterWidgetRefresh(function()
-                local off = locOff()
+                local off = coordsOff()
                 cogBtn:SetAlpha(off and 0.15 or 0.4)
                 if off then cogBlock:Show() else cogBlock:Hide() end
             end)
-            if locOff() then cogBlock:Show() else cogBlock:Hide() end
+            if coordsOff() then cogBlock:Show() else cogBlock:Hide() end
         end
 
 

@@ -7,7 +7,9 @@
 local PAGE_QOL      = "Quality of Life"
 local PAGE_CURSOR   = "Cursor"
 local PAGE_BREZ     = "BattleRes"
-local PAGE_AUTOLOG  = "Auto Logging"
+local PAGE_AUTOLOG  = "Keys, Logs & Brez"
+local PAGE_UPGCALC  = "Upgrade Calc"
+local PAGE_SHIFTER  = "Shifter"
 
 local initFrame = CreateFrame("Frame")
 initFrame:RegisterEvent("PLAYER_LOGIN")
@@ -236,6 +238,76 @@ initFrame:SetScript("OnEvent", function(self)
                   EllesmereUIDB.hideTalkingHead = v
               end }
         );  y = y - h
+
+        -- Row 5: Show Coordinates on Map (left, with cog) | empty
+        local coordRow
+        coordRow, h = W:DualRow(parent, y,
+            { type="toggle", text="Show Coordinates on Map",
+              tooltip="Displays cursor and player coordinates at the bottom of the world map.",
+              getValue=function()
+                  return EllesmereUIDB and EllesmereUIDB.mapCoords or false
+              end,
+              setValue=function(v)
+                  if not EllesmereUIDB then EllesmereUIDB = {} end
+                  EllesmereUIDB.mapCoords = v
+                  if EllesmereUI._applyMapCoords then EllesmereUI._applyMapCoords() end
+                  EllesmereUI:RefreshPage()
+              end },
+            { type="label", text="" }
+        );  y = y - h
+
+        -- Cog on Show Coordinates on Map (left region)
+        do
+            local leftRgn = coordRow._leftRegion
+            local function coordsOff()
+                return EllesmereUIDB and EllesmereUIDB.mapCoords == false
+            end
+
+            local _, coordCogShow = EllesmereUI.BuildCogPopup({
+                title = "Map Coordinates Settings",
+                rows = {
+                    { type = "slider", label = "Text Size", min = 8, max = 24, step = 1,
+                      get = function()
+                          return (EllesmereUIDB and EllesmereUIDB.mapCoordsTextSize) or 12
+                      end,
+                      set = function(v)
+                          if not EllesmereUIDB then EllesmereUIDB = {} end
+                          EllesmereUIDB.mapCoordsTextSize = v
+                          if EllesmereUI._applyMapCoords then EllesmereUI._applyMapCoords() end
+                      end },
+                },
+            })
+            local coordCogBtn = CreateFrame("Button", nil, leftRgn)
+            coordCogBtn:SetSize(26, 26)
+            coordCogBtn:SetPoint("RIGHT", leftRgn._lastInline or leftRgn._control, "LEFT", -9, 0)
+            leftRgn._lastInline = coordCogBtn
+            coordCogBtn:SetFrameLevel(leftRgn:GetFrameLevel() + 5)
+            coordCogBtn:SetAlpha(coordsOff() and 0.15 or 0.4)
+            local coordCogTex = coordCogBtn:CreateTexture(nil, "OVERLAY")
+            coordCogTex:SetAllPoints()
+            coordCogTex:SetTexture(EllesmereUI.COGS_ICON)
+            coordCogBtn:SetScript("OnEnter", function(self) self:SetAlpha(0.7) end)
+            coordCogBtn:SetScript("OnLeave", function(self) self:SetAlpha(coordsOff() and 0.15 or 0.4) end)
+            coordCogBtn:SetScript("OnClick", function(self) coordCogShow(self) end)
+
+            local coordCogBlock = CreateFrame("Frame", nil, coordCogBtn)
+            coordCogBlock:SetAllPoints()
+            coordCogBlock:SetFrameLevel(coordCogBtn:GetFrameLevel() + 10)
+            coordCogBlock:EnableMouse(true)
+            coordCogBlock:SetScript("OnEnter", function()
+                EllesmereUI.ShowWidgetTooltip(coordCogBtn, EllesmereUI.DisabledTooltip("Show Coordinates on Map"))
+            end)
+            coordCogBlock:SetScript("OnLeave", function() EllesmereUI.HideWidgetTooltip() end)
+
+            EllesmereUI.RegisterWidgetRefresh(function()
+                local off = coordsOff()
+                coordCogBtn:SetAlpha(off and 0.15 or 0.4)
+                if off then coordCogBlock:Show() else coordCogBlock:Hide() end
+            end)
+            local coordInitOff = coordsOff()
+            coordCogBtn:SetAlpha(coordInitOff and 0.15 or 0.4)
+            if coordInitOff then coordCogBlock:Show() else coordCogBlock:Hide() end
+        end
 
         _, h = W:Spacer(parent, y, 20);  y = y - h
 
@@ -1123,8 +1195,8 @@ initFrame:SetScript("OnEvent", function(self)
             { type="toggle", text="Auto Open Containers",
               tooltip="Automatically opens bags, boxes and parcels in your inventory when they are added to your bags.",
               getValue=function()
-                  if not EllesmereUIDB then return true end
-                  return EllesmereUIDB.autoOpenContainers ~= false
+                  if not EllesmereUIDB then return false end
+                  return EllesmereUIDB.autoOpenContainers == true
               end,
               setValue=function(v)
                   if not EllesmereUIDB then EllesmereUIDB = {} end
@@ -1138,8 +1210,8 @@ initFrame:SetScript("OnEvent", function(self)
     EllesmereUI:RegisterModule("EllesmereUIQoL", {
         title       = "Quality of Life",
         description = "Quality of life features and custom cursor.",
-        pages       = { PAGE_QOL, PAGE_CURSOR, PAGE_BREZ, PAGE_AUTOLOG },
-        searchTerms = { "brez", "bres", "battle res", "combat res", "cursor", "macro", "fps", "logging", "combat log", "warcraft logs" },
+        pages       = { PAGE_QOL, PAGE_CURSOR, PAGE_AUTOLOG, PAGE_UPGCALC, PAGE_SHIFTER },
+        searchTerms = { "brez", "bres", "battle res", "combat res", "cursor", "macro", "fps", "logging", "combat log", "warcraft logs", "upgrade", "ilvl", "item level", "crest", "upgrade calculator", "shifter", "move", "drag", "position", "demodal", "drift" },
         buildPage   = function(pageName, parent, yOffset)
             if pageName == PAGE_QOL then
                 return BuildQoLPage(pageName, parent, yOffset)
@@ -1147,11 +1219,14 @@ initFrame:SetScript("OnEvent", function(self)
             if pageName == PAGE_CURSOR and _G._EBS_BuildCursorPage then
                 return _G._EBS_BuildCursorPage(pageName, parent, yOffset)
             end
-            if pageName == PAGE_BREZ and _G._EUI_BuildBattleResPage then
-                return _G._EUI_BuildBattleResPage(pageName, parent, yOffset)
-            end
             if pageName == PAGE_AUTOLOG and _G._EUI_BuildAutoLoggingPage then
                 return _G._EUI_BuildAutoLoggingPage(pageName, parent, yOffset)
+            end
+            if pageName == PAGE_UPGCALC and _G._EUI_BuildUpgradeCalcPage then
+                return _G._EUI_BuildUpgradeCalcPage(pageName, parent, yOffset)
+            end
+            if pageName == PAGE_SHIFTER and _G._EUI_BuildShifterPage then
+                return _G._EUI_BuildShifterPage(pageName, parent, yOffset)
             end
         end,
         onReset = function()
@@ -1178,8 +1253,11 @@ initFrame:SetScript("OnEvent", function(self)
                 EllesmereUIDB.autoUnwrapCollections = false
                 EllesmereUIDB.autoOpenContainers = false
                 EllesmereUIDB.autoRepairGuild = false
+                EllesmereUIDB.shifterEnabled = false
+                EllesmereUIDB.shifterPositions = nil
             end
             EllesmereUIDB.autoLogging = nil
+            if _G._EUI_ResetUpgradeCalc then _G._EUI_ResetUpgradeCalc() end
             if _G._EBS_ResetCursor then _G._EBS_ResetCursor() end
             if EllesmereUI._applyHideBlizzardPartyFrame then EllesmereUI._applyHideBlizzardPartyFrame() end
             EllesmereUI:InvalidatePageCache()

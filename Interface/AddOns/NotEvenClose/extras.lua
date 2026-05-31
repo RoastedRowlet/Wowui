@@ -8,6 +8,7 @@ NotEvenClose.RoleTable = {
   -- Demon Hunter
   [577] = 'attack',
   [581] = 'tank',
+  [1480] = 'spell',
   -- Druid
   [102] = 'spell',
   [103] = 'attack',
@@ -92,6 +93,7 @@ NotEvenClose.SpecNames = {
 -- Demon Hunter
   [577] = 'Havoc',
   [581] = 'Vengeance',
+  [1480] = 'Devourer',
 -- Druid 
   [102] = 'Balance',
   [103] = 'Feral',

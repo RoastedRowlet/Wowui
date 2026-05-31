@@ -42,9 +42,8 @@ local defaults = {
             hideMail             = false,
             hideRaidDifficulty   = false,
             hideCraftingOrder    = false,
-            hideGreatVault       = false,
+            hideExtraBtns        = { greatVault = false, portals = false, friendsOnline = false, groupButton = false },
             greatVaultExtraInfo  = true,
-            hidePortals          = false,
             hideAddonCompartment = false,
             hideAddonButtons     = false,
             addonBtnSize         = 24,
@@ -277,6 +276,11 @@ local function IsUngrouped(btn)
     return name and mp.ungroupedButtons[name]
 end
 
+local function GetMinimapButtonLabel(btn)
+    local name = btn:GetName() or ""
+    return name:gsub("^LibDBIcon10_", ""):gsub("^Lib_GPI_Minimap_", ""):gsub("MinimapButton$", ""):gsub("_MinimapButton$", "")
+end
+
 local function CollectFlyoutButtons()
     -- Return only buttons the addon wants visible and not ungrouped
     local collected = {}
@@ -285,6 +289,9 @@ local function CollectFlyoutButtons()
             collected[#collected + 1] = btn
         end
     end
+    table.sort(collected, function(a, b)
+        return GetMinimapButtonLabel(a):lower() < GetMinimapButtonLabel(b):lower()
+    end)
     return collected
 end
 
@@ -1319,14 +1326,7 @@ local function CreateGreatVaultBtn(parent)
 
     btn:SetScript("OnEnter", function(self)
         self._whole:SetVertexColor(1, 1, 1, 1)
-        local minimapCfg = EBS and EBS.db and EBS.db.profile and EBS.db.profile.minimap
-        if minimapCfg and minimapCfg.greatVaultExtraInfo == false then
-            if EllesmereUI.ShowWidgetTooltip then
-                EllesmereUI.ShowWidgetTooltip(self, "Great Vault", { anchor = "left" })
-            end
-        else
-            ShowVaultTooltip(self)
-        end
+        ShowVaultTooltip(self)
     end)
     btn:SetScript("OnLeave", function(self)
         self._whole:SetVertexColor(0.85, 0.85, 0.85, 1)
@@ -1753,6 +1753,311 @@ local function CreatePortalBtn(parent)
     return btn
 end
 
+-------------------------------------------------------------------------------
+--  Friends Online indicator
+--  Gathers guild, BNet favorites, and BNet/character friends on hover.
+--  Zero background work -- all data is read live when the tooltip opens.
+-------------------------------------------------------------------------------
+local FRIENDS_ATLAS = "housefinder_neighborhood-friends-icon"
+
+local function GatherOnlineFriends()
+    local guild, favorites, friends = {}, {}, {}
+    local seenBNet = {}
+    local myName = UnitName("player")
+
+    -- Guild members (exclude self)
+    if IsInGuild and IsInGuild() then
+        local total = GetNumGuildMembers() or 0
+        for i = 1, total do
+            local name, _, _, level, _, zone, _, _, online, _, classFile = GetGuildRosterInfo(i)
+            if online and name then
+                local short = name:match("^([^%-]+)") or name
+                if short ~= myName then
+                    guild[#guild + 1] = { name = short, class = classFile, zone = zone or "", level = level }
+                end
+            end
+        end
+    end
+
+    -- BNet friends (favorites first, then others)
+    local numBNet = BNGetNumFriends and BNGetNumFriends() or 0
+    for i = 1, numBNet do
+        local acct = C_BattleNet and C_BattleNet.GetFriendAccountInfo and C_BattleNet.GetFriendAccountInfo(i)
+        if acct then
+            local gameInfo = acct.gameAccountInfo
+            if gameInfo and gameInfo.isOnline and gameInfo.clientProgram == "WoW" then
+                local charName = gameInfo.characterName
+                local classFile = gameInfo.className and gameInfo.className:upper():gsub(" ", "")
+                -- Resolve classFile from class ID if available
+                if gameInfo.classID and C_CreatureInfo and C_CreatureInfo.GetClassInfo then
+                    local ci = C_CreatureInfo.GetClassInfo(gameInfo.classID)
+                    if ci and ci.classFile then classFile = ci.classFile end
+                end
+                local zone = gameInfo.areaName or ""
+                local entry = {
+                    name = charName or acct.accountName or "???",
+                    class = classFile,
+                    zone = zone,
+                    level = gameInfo.characterLevel,
+                    bnetTag = acct.accountName,
+                }
+                if charName then seenBNet[charName] = true end
+                if acct.isFavorite then
+                    favorites[#favorites + 1] = entry
+                else
+                    friends[#friends + 1] = entry
+                end
+            end
+        end
+    end
+
+    -- Character-level friends (skip if already in BNet list)
+    local numChar = C_FriendList and C_FriendList.GetNumFriends and C_FriendList.GetNumFriends() or 0
+    for i = 1, numChar do
+        local info = C_FriendList.GetFriendInfoByIndex(i)
+        if info and info.connected then
+            local charName = info.name
+            if charName and not seenBNet[charName] then
+                friends[#friends + 1] = {
+                    name = charName:match("^([^%-]+)") or charName,
+                    class = info.className and info.className:upper():gsub(" ", ""),
+                    zone = info.area or "",
+                    level = info.level,
+                }
+            end
+        end
+    end
+
+    -- Remove guild members from friends list to avoid duplicates
+    local guildSet = {}
+    for _, g in ipairs(guild) do guildSet[g.name] = true end
+    for i = #friends, 1, -1 do
+        if guildSet[friends[i].name] then table.remove(friends, i) end
+    end
+    for i = #favorites, 1, -1 do
+        if guildSet[favorites[i].name] then table.remove(favorites, i) end
+    end
+
+    return guild, favorites, friends
+end
+
+-- Custom two-column friends tooltip (same pattern as M+ death tooltip)
+local _friendsTT
+local _friendsTTRows = {}
+local _friendsTTHeaders = {}
+local _friendsTTDividers = {}
+local FTT_PAD     = 8
+local FTT_ROW_H   = 14
+local FTT_HDR_H   = 16
+local FTT_GAP     = 2
+local FTT_DIV_PAD = 5   -- padding above and below the divider line
+local FTT_MAX_FAV = 20
+local FTT_MAX_GLD = 20
+local FTT_MAX_FRD = 15
+local function FTT_FONT()
+    return (EllesmereUI.GetFontPath and EllesmereUI.GetFontPath()) or EllesmereUI.EXPRESSWAY or "Fonts\\FRIZQT__.TTF"
+end
+
+local function GetFriendsTT()
+    if _friendsTT then return _friendsTT end
+    local f = CreateFrame("Frame", nil, UIParent)
+    f:SetFrameStrata("TOOLTIP")
+    f:SetFrameLevel(200)
+    f:Hide()
+    local bg = f:CreateTexture(nil, "BACKGROUND")
+    bg:SetAllPoints()
+    bg:SetColorTexture(0.067, 0.067, 0.067, 0.92)
+    EllesmereUI.MakeBorder(f, 1, 1, 1, 0.15, EllesmereUI.PanelPP)
+    _friendsTT = f
+    return f
+end
+
+local function EnsureFTTRow(idx)
+    if _friendsTTRows[idx] then return _friendsTTRows[idx] end
+    local tt = GetFriendsTT()
+    local nameFS = tt:CreateFontString(nil, "OVERLAY")
+    nameFS:SetFont(FTT_FONT(), 10, "")
+    nameFS:SetJustifyH("LEFT")
+    local zoneFS = tt:CreateFontString(nil, "OVERLAY")
+    zoneFS:SetFont(FTT_FONT(), 10, "")
+    zoneFS:SetJustifyH("RIGHT")
+    _friendsTTRows[idx] = { name = nameFS, zone = zoneFS }
+    return _friendsTTRows[idx]
+end
+
+local function EnsureFTTHeader(idx)
+    if _friendsTTHeaders[idx] then return _friendsTTHeaders[idx] end
+    local tt = GetFriendsTT()
+    local fs = tt:CreateFontString(nil, "OVERLAY")
+    fs:SetFont(FTT_FONT(), 12, "")
+    fs:SetJustifyH("CENTER")
+    fs:SetTextColor(1, 1, 1, 0.9)
+    _friendsTTHeaders[idx] = fs
+    return fs
+end
+
+local function EnsureFTTDivider(idx)
+    if _friendsTTDividers[idx] then return _friendsTTDividers[idx] end
+    local tt = GetFriendsTT()
+    local tex = tt:CreateTexture(nil, "ARTWORK")
+    tex:SetColorTexture(1, 1, 1, 0.12)
+    local PP = EllesmereUI.PP
+    if PP and PP.Snap then
+        tex:SetHeight(PP.Snap(1))
+    else
+        tex:SetHeight(1)
+    end
+    _friendsTTDividers[idx] = tex
+    return tex
+end
+
+local function ShowFriendsTooltip(anchor)
+    local guild, favorites, friends = GatherOnlineFriends()
+    local tt = GetFriendsTT()
+    local total = #guild + #favorites + #friends
+
+    -- Refresh fonts to match current global font setting
+    local font = FTT_FONT()
+    for i = 1, #_friendsTTRows do
+        _friendsTTRows[i].name:SetFont(font, 10, "")
+        _friendsTTRows[i].zone:SetFont(font, 10, "")
+    end
+    for i = 1, #_friendsTTHeaders do
+        _friendsTTHeaders[i]:SetFont(font, 12, "")
+    end
+
+    -- Hide all pooled elements
+    for i = 1, #_friendsTTRows do
+        _friendsTTRows[i].name:Hide()
+        _friendsTTRows[i].zone:Hide()
+    end
+    for i = 1, #_friendsTTHeaders do _friendsTTHeaders[i]:Hide() end
+    for i = 1, #_friendsTTDividers do _friendsTTDividers[i]:Hide() end
+
+    if total == 0 then
+        local row = EnsureFTTRow(1)
+        row.name:SetFont(font, 10, "")
+        row.name:SetText("|cff888888No friends online|r")
+        row.zone:SetText("")
+        tt:SetSize(FTT_PAD * 2 + 140, FTT_PAD + FTT_ROW_H + FTT_PAD)
+        row.name:ClearAllPoints()
+        row.name:SetPoint("TOPLEFT", tt, "TOPLEFT", FTT_PAD, -FTT_PAD)
+        row.name:Show()
+        tt:ClearAllPoints()
+        tt:SetPoint("TOPRIGHT", anchor, "TOPLEFT", -4, 0)
+        tt:Show()
+        return total
+    end
+
+    local sections = {}
+    if #favorites > 0 then sections[#sections + 1] = { title = "Favorites", list = favorites, max = FTT_MAX_FAV } end
+    if #guild > 0 then sections[#sections + 1] = { title = "Guild", list = guild, max = FTT_MAX_GLD } end
+    if #friends > 0 then sections[#sections + 1] = { title = "Friends", list = friends, max = FTT_MAX_FRD } end
+
+    local rowIdx = 0
+    local hdrIdx = 0
+    local divIdx = 0
+    local maxNameW, maxZoneW = 0, 0
+    local curY = -FTT_PAD
+
+    for si, sec in ipairs(sections) do
+        -- Divider line between sections (not before the first)
+        if si > 1 then
+            curY = curY - FTT_DIV_PAD
+            divIdx = divIdx + 1
+            local div = EnsureFTTDivider(divIdx)
+            div:ClearAllPoints()
+            div:SetPoint("TOPLEFT", tt, "TOPLEFT", FTT_PAD, curY)
+            div:SetPoint("TOPRIGHT", tt, "TOPRIGHT", -FTT_PAD, curY)
+            div:Show()
+            curY = curY - div:GetHeight() - FTT_DIV_PAD
+        end
+
+        -- Section header (centered, white title, accent count, 12px)
+        curY = curY - 5  -- spacing above header
+        hdrIdx = hdrIdx + 1
+        local hdr = EnsureFTTHeader(hdrIdx)
+        hdr:SetFont(font, 12, "")
+        local ac = EllesmereUI.ELLESMERE_GREEN or EllesmereUI._accentColor
+        local acHex = ac and format("%02x%02x%02x", (ac.r or 0.05) * 255, (ac.g or 0.82) * 255, (ac.b or 0.62) * 255) or "0cd29f"
+        hdr:SetText(sec.title .. " (|cff" .. acHex .. #sec.list .. "|r)")
+        hdr:ClearAllPoints()
+        hdr:SetPoint("TOP", tt, "TOP", 0, curY)
+        hdr:Show()
+        curY = curY - FTT_HDR_H - 5  -- spacing below header
+
+        local shown = math.min(#sec.list, sec.max)
+        for i = 1, shown do
+            local e = sec.list[i]
+            rowIdx = rowIdx + 1
+            local row = EnsureFTTRow(rowIdx)
+            row.name:SetFont(font, 10, "")
+            row.zone:SetFont(font, 10, "")
+
+            local cc = e.class and RAID_CLASS_COLORS and RAID_CLASS_COLORS[e.class]
+            local colored = cc and cc:WrapTextInColorCode(e.name) or e.name
+            row.name:SetText(colored)
+            row.name:SetTextColor(1, 1, 1, 0.85)
+
+            local zone = e.zone or ""
+            if zone ~= "" then
+                row.zone:SetText("|cff888888" .. zone .. "|r")
+            else
+                row.zone:SetText("")
+            end
+
+            row.name:ClearAllPoints()
+            row.name:SetPoint("TOPLEFT", tt, "TOPLEFT", FTT_PAD, curY)
+            row.zone:ClearAllPoints()
+            row.zone:SetPoint("TOPRIGHT", tt, "TOPRIGHT", -FTT_PAD, curY)
+            row.name:Show()
+            row.zone:Show()
+
+            local nw = row.name:GetStringWidth() or 0
+            local zw = row.zone:GetStringWidth() or 0
+            if nw > maxNameW then maxNameW = nw end
+            if zw > maxZoneW then maxZoneW = zw end
+
+            curY = curY - (FTT_ROW_H + FTT_GAP)
+        end
+
+        if #sec.list > sec.max then
+            rowIdx = rowIdx + 1
+            local row = EnsureFTTRow(rowIdx)
+            row.name:SetFont(font, 10, "")
+            row.name:SetText("|cff888888...and " .. (#sec.list - sec.max) .. " more|r")
+            row.zone:SetText("")
+            row.name:ClearAllPoints()
+            row.name:SetPoint("TOPLEFT", tt, "TOPLEFT", FTT_PAD, curY)
+            row.name:Show()
+            curY = curY - (FTT_ROW_H + FTT_GAP)
+        end
+    end
+
+    local contentW = FTT_PAD + maxNameW + 16 + maxZoneW + FTT_PAD
+    local ttW = math.max(contentW, 160)
+    local ttH = -curY + FTT_PAD
+
+    tt:SetSize(ttW, ttH)
+    tt:ClearAllPoints()
+    tt:SetPoint("TOPRIGHT", anchor, "TOPLEFT", -4, 0)
+    tt:Show()
+    -- Clamp to screen: if the bottom edge goes off-screen, shift up
+    local bottom = tt:GetBottom()
+    if bottom and bottom < 0 then
+        local top = tt:GetTop()
+        if top then
+            tt:ClearAllPoints()
+            tt:SetPoint("TOPRIGHT", anchor, "TOPLEFT", -4, -bottom)
+        end
+    end
+    return total
+end
+
+local function HideFriendsTooltip()
+    if _friendsTT then _friendsTT:Hide() end
+end
+
 local function BuildCustomIndicators(minimap)
     if _customIndicators.tracking then return end
 
@@ -1864,6 +2169,42 @@ local function BuildCustomIndicators(minimap)
     _customIndicators.crafting:SetScript("OnLeave", function(self)
         if craftBaseLeave then craftBaseLeave(self) end
         if EllesmereUI.HideWidgetTooltip then EllesmereUI.HideWidgetTooltip() end
+    end)
+
+    -- Friends Online button
+    _customIndicators.friends = CreateIndicatorBtn("_friends", minimap,
+        FRIENDS_ATLAS, FRIENDS_ATLAS, nil,
+        function()
+            if InCombatLockdown() then
+                UIErrorsFrame:AddMessage(ERR_NOT_IN_COMBAT, 1.0, 0.3, 0.3, 1.0)
+                return
+            end
+            ToggleFriendsFrame()
+        end)
+    -- Atlas is not in INDICATOR_ATLAS_RATIO so icon uses inset anchoring
+    -- (TOPLEFT/BOTTOMRIGHT). Desaturate slightly for idle state.
+    if _customIndicators.friends._icon then
+        _customIndicators.friends._icon:SetDesaturated(true)
+        EllesmereUI.RegAccent({ type = "vertex", obj = _customIndicators.friends._icon })
+        -- Apply current accent immediately (initial accent pass already ran)
+        local g = EllesmereUI.ELLESMERE_GREEN
+        if g then
+            _customIndicators.friends._icon:SetVertexColor(g.r, g.g, g.b, 1)
+        end
+        _customIndicators.friends._icon:SetAlpha(0.85)
+    end
+    local friendsBtnEnter = _customIndicators.friends:GetScript("OnEnter")
+    local friendsBtnLeave = _customIndicators.friends:GetScript("OnLeave")
+    _customIndicators.friends:SetScript("OnEnter", function(self)
+        if friendsBtnEnter then friendsBtnEnter(self) end
+        if self._icon then self._icon:SetAlpha(1) end
+        if GetFFD(self).freeMoveJustDragged then return end
+        ShowFriendsTooltip(self)
+    end)
+    _customIndicators.friends:SetScript("OnLeave", function(self)
+        if friendsBtnLeave then friendsBtnLeave(self) end
+        if self._icon then self._icon:SetAlpha(0.85) end
+        HideFriendsTooltip()
     end)
 
     -- Great Vault button (built once, anchored later in LayoutIndicatorFrames)
@@ -1980,7 +2321,7 @@ local function LayoutIndicatorFrames(minimap, p, circleMode)
 
     if circleMode then
         -- Circle layout: horizontal row around the clock
-        if ci.tracking then
+        if ci.tracking and not p.hideTrackingButton then
             ci.tracking:ClearAllPoints()
             if clockBg and p.showClock then
                 ci.tracking:SetPoint("RIGHT", clockBg, "LEFT", 0, 0)
@@ -1988,6 +2329,8 @@ local function LayoutIndicatorFrames(minimap, p, circleMode)
                 ci.tracking:SetPoint("TOP", minimap, "TOP", -20, -3)
             end
             ci.tracking:Show()
+        elseif ci.tracking then
+            ci.tracking:Hide()
         end
 
         if ci.calendar and not p.hideGameTime then
@@ -2016,11 +2359,13 @@ local function LayoutIndicatorFrames(minimap, p, circleMode)
         -- Square layout: vertical stack on the left side
         local y = 0
 
-        if ci.tracking then
+        if ci.tracking and not p.hideTrackingButton then
             ci.tracking:ClearAllPoints()
             ci.tracking:SetPoint("TOPRIGHT", minimap, "TOPLEFT", 0, y)
             ci.tracking:Show()
             y = y - sz
+        elseif ci.tracking then
+            ci.tracking:Hide()
         end
 
         if ci.calendar and not p.hideGameTime then
@@ -2146,9 +2491,13 @@ local function LayoutIndicatorFrames(minimap, p, circleMode)
             anchor = btn
         end
 
-        -- Great Vault button: always sits at the top of the ungrouped stack.
+        -- Extra buttons: Great Vault, M+ Portals, Friends Online
+        -- Visibility controlled by hideExtraBtns table
+        local heb = p.hideExtraBtns or {}
+
+        -- Great Vault button: top of the ungrouped stack
         if _greatVaultBtn then
-            if p.hideGreatVault then
+            if heb.greatVault then
                 _greatVaultBtn:Hide()
             else
                 SizeGreatVaultBtn(_greatVaultBtn, showBg)
@@ -2169,9 +2518,34 @@ local function LayoutIndicatorFrames(minimap, p, circleMode)
             end
         end
 
-        -- M+ Portal button: sits above the Great Vault button.
+        -- Friends Online button: sits above the Great Vault button
+        if ci.friends then
+            if heb.friendsOnline then
+                ci.friends:Hide()
+            else
+                ci.friends:SetSize(sz, sz)
+                if ci.friends._bg then ci.friends._bg:SetShown(showBg) end
+                ci.friends:SetParent(minimap)
+                ci.friends:SetFrameLevel(minimap:GetFrameLevel() + 11)
+                ci.friends:ClearAllPoints()
+                if freeMove then
+                    local idx = #ungrouped + (flyoutVisible and 1 or 0)
+                        + ((_greatVaultBtn and not heb.greatVault) and 1 or 0)
+                    local yOff = idx * ungroupBtnSize
+                    ci.friends:SetPoint("BOTTOMRIGHT", minimap, "BOTTOMLEFT", 0, yOff)
+                elseif anchor then
+                    ci.friends:SetPoint("BOTTOM", anchor, "TOP", 0, 0)
+                else
+                    ci.friends:SetPoint("BOTTOMRIGHT", minimap, "BOTTOMLEFT", 0, 0)
+                end
+                ci.friends:Show()
+                anchor = ci.friends
+            end
+        end
+
+        -- M+ Portal button: sits above the Friends Online button
         if _portalBtn then
-            if p.hidePortals then
+            if heb.portals then
                 _portalBtn:Hide()
             else
                 SizePortalBtn(_portalBtn, showBg)
@@ -2180,7 +2554,8 @@ local function LayoutIndicatorFrames(minimap, p, circleMode)
                 _portalBtn:ClearAllPoints()
                 if freeMove then
                     local idx = #ungrouped + (flyoutVisible and 1 or 0)
-                        + ((_greatVaultBtn and not p.hideGreatVault) and 1 or 0)
+                        + ((_greatVaultBtn and not heb.greatVault) and 1 or 0)
+                        + ((ci.friends and not heb.friendsOnline) and 1 or 0)
                     local yOff = idx * ungroupBtnSize
                     _portalBtn:SetPoint("BOTTOMRIGHT", minimap, "BOTTOMLEFT", 0, yOff)
                 elseif anchor then
@@ -2192,18 +2567,25 @@ local function LayoutIndicatorFrames(minimap, p, circleMode)
                 anchor = _portalBtn
             end
         end
+
+        -- Flyout toggle (EUI group button for addon icons)
+        if flyoutToggle and heb.groupButton then
+            flyoutToggle:Hide()
+        end
     end
 
     -- Free Move: hook shift+drag on all indicator buttons and apply saved offsets
+    local heb = p.hideExtraBtns or {}
     local freeMove = p.freeMoveBtns
     local fmTargets = {}
-    if ci.tracking then fmTargets[#fmTargets + 1] = ci.tracking end
+    if ci.tracking and not p.hideTrackingButton then fmTargets[#fmTargets + 1] = ci.tracking end
     if ci.calendar and not p.hideGameTime then fmTargets[#fmTargets + 1] = ci.calendar end
     if ci.mail then fmTargets[#fmTargets + 1] = ci.mail end
     if ci.crafting then fmTargets[#fmTargets + 1] = ci.crafting end
     if flyoutToggle then fmTargets[#fmTargets + 1] = flyoutToggle end
-    if _greatVaultBtn and not p.hideGreatVault then fmTargets[#fmTargets + 1] = _greatVaultBtn end
-    if _portalBtn and not p.hidePortals then fmTargets[#fmTargets + 1] = _portalBtn end
+    if _greatVaultBtn and not heb.greatVault then fmTargets[#fmTargets + 1] = _greatVaultBtn end
+    if _portalBtn and not heb.portals then fmTargets[#fmTargets + 1] = _portalBtn end
+    if ci.friends and not heb.friendsOnline then fmTargets[#fmTargets + 1] = ci.friends end
     -- Include ungrouped addon buttons
     for _, btn in ipairs(cachedAddonButtons) do
         if _addonVisible[btn] ~= false and IsUngrouped(btn) then
@@ -2336,6 +2718,24 @@ local function ApplyMinimap()
         if minimap.SetFixedFrameLevel then minimap:SetFixedFrameLevel(true) end
     end
     minimap:Show()
+
+    -- Middle-click interceptor: prevent minimap ping on middle-click,
+    -- route middle-click to our micro menu instead.
+    -- Transparent frame on top of minimap that passes left/right clicks through
+    -- but intercepts middle-click. Zero taint risk.
+    if not GetFFD(minimap).pingBlocker then
+        local blocker = CreateFrame("Frame", nil, minimap)
+        blocker:SetAllPoints()
+        blocker:SetFrameLevel(minimap:GetFrameLevel() + 10)
+        blocker:SetPassThroughButtons("LeftButton", "RightButton")
+        blocker:SetPropagateMouseMotion(true)
+        blocker:SetScript("OnMouseUp", function(_, btn)
+            if btn == "MiddleButton" and EBS._ToggleMicroMenu then
+                EBS._ToggleMicroMenu()
+            end
+        end)
+        GetFFD(minimap).pingBlocker = blocker
+    end
 
     -- Hide default decorations
     for _, name in ipairs(minimapDecorations) do
@@ -2596,7 +2996,9 @@ local function ApplyMinimap()
 
     -- Show/hide flyout toggle based on whether any grouped buttons exist
     local groupedButtons = CollectFlyoutButtons()
-    if #groupedButtons > 0 then
+    local mp2 = EBS.db and EBS.db.profile and EBS.db.profile.minimap
+    local hideGroupBtn = mp2 and mp2.hideExtraBtns and mp2.hideExtraBtns.groupButton
+    if #groupedButtons > 0 and not hideGroupBtn then
         flyoutToggle:Show()
     else
         flyoutToggle:Hide()
@@ -2787,14 +3189,21 @@ local function ApplyMinimap()
         if locationFrame then locationFrame:Hide() end
     end
 
-    -- Coordinates -- top-right, always visible on hover
+    -- Coordinates -- hover mode (inside minimap) or always-on below minimap
     if not coordFrame then
         coordFrame = minimap:CreateFontString(nil, "OVERLAY")
         ApplyMinimapFont(coordFrame, 11)
-        coordFrame:SetPoint("TOPLEFT", minimap, "TOPLEFT", 4, -4)
         coordFrame:SetTextColor(1, 1, 1, 0.9)
     end
-    coordFrame:Hide()  -- hidden by default, shown on hover
+    local coordsBelow = p and p.coordsBelow
+    coordFrame:ClearAllPoints()
+    if coordsBelow then
+        local cx = p and p.coordsBelowOffsetX or 0
+        local cy = p and p.coordsBelowOffsetY or 0
+        coordFrame:SetPoint("TOP", minimap, "BOTTOM", cx, -5 + cy)
+    else
+        coordFrame:SetPoint("TOPLEFT", minimap, "TOPLEFT", 4, -4)
+    end
     if not coordTicker then
         coordTicker = CreateFrame("Frame")  -- kept for Show/Hide API
         coordTicker._ticker = nil
@@ -2808,16 +3217,28 @@ local function ApplyMinimap()
             if self._ticker then self._ticker:Cancel(); self._ticker = nil end
         end
     end
-    -- Coords ticker only runs while hovering the minimap
+    if coordsBelow then
+        coordFrame:Show()
+        coordTicker:Show()
+        UpdateCoords()
+    else
+        coordFrame:Hide()
+        coordTicker:Hide()
+    end
+    -- Coords ticker only runs while hovering the minimap (when not in below mode)
     if not GetFFD(minimap).coordsHooked then
         minimap:HookScript("OnEnter", function(self)
             if not GetFFD(self).active then return end
+            local mp = EBS.db and EBS.db.profile.minimap
+            if mp and mp.coordsBelow then return end
             if coordFrame then coordFrame:Show() end
             coordTicker:Show()
             UpdateCoords()
         end)
         minimap:HookScript("OnLeave", function(self)
             if not GetFFD(self).active then return end
+            local mp = EBS.db and EBS.db.profile.minimap
+            if mp and mp.coordsBelow then return end
             if coordFrame and not self:IsMouseOver() then coordFrame:Hide() end
             coordTicker:Hide()
         end)
@@ -2916,8 +3337,200 @@ end
 -------------------------------------------------------------------------------
 --  Lifecycle
 -------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+--  Minimap Micro Menu (middle-click popup, taint-free)
+--  SecureActionButtonTemplate buttons with click passthrough to Blizzard
+--  MicroButtons via RegisterStateDriver (secure environment activation).
+--  NEVER call EnableMouse/SetAlpha on the secure buttons from addon code
+--  after creation -- that breaks the secure trust chain.
+--  Show/hide is done by moving the parent frame offscreen.
+-------------------------------------------------------------------------------
+do
+    local menuFrame
+    local menuOpen    = false
+    local MENU_WIDTH  = 160
+    local BUTTON_H    = 20
+    local PADDING     = 6
+    local DIVIDER_H   = 9
+
+    local menuItems = {
+        { text = "Character",       microButton = "CharacterMicroButton" },
+        { text = "Talents",         microButton = "PlayerSpellsMicroButton" },
+        { text = "Professions",     microButton = "ProfessionMicroButton" },
+        { divider = true },
+        { text = "Group Finder",    microButton = "LFDMicroButton" },
+        { text = "Adventure Guide", microButton = "EJMicroButton" },
+        { text = "Achievements",    microButton = "AchievementMicroButton" },
+        { text = "Collections",     microButton = "CollectionsMicroButton" },
+        { text = "Quest Log",       microButton = "QuestLogMicroButton" },
+        { divider = true },
+        { text = "Friends",         microButton = "QuickJoinToastButton" },
+        { text = "Guild",           microButton = "GuildMicroButton" },
+        { text = "Housing",         microButton = "HousingMicroButton" },
+        { text = "Calendar",        fn = function() if ToggleCalendar then ToggleCalendar() end end },
+        { divider = true },
+        { text = "Game Menu",       fn = function() ToggleFrame(GameMenuFrame) end },
+        { text = "Shop",            microButton = "StoreMicroButton" },
+        { text = "Support",         microButton = "HelpMicroButton" },
+    }
+
+    local function SetMenuVisible(visible)
+        if not menuFrame then return end
+        menuOpen = visible
+        menuFrame:ClearAllPoints()
+        if visible then
+            menuFrame:SetClampedToScreen(true)
+            menuFrame:SetPoint("TOPRIGHT", Minimap, "TOPLEFT", -4, 0)
+        else
+            menuFrame:SetClampedToScreen(false)
+            menuFrame:SetPoint("TOPLEFT", UIParent, "TOPRIGHT", 10000, 0)
+        end
+    end
+
+    local function CreateMenuFrame()
+        menuFrame = CreateFrame("Frame", "EllesmereUIMicroMenu", UIParent, "BackdropTemplate")
+        menuFrame:SetFrameStrata("TOOLTIP")
+        menuFrame:SetBackdrop({
+            bgFile   = "Interface\\Buttons\\WHITE8X8",
+            edgeFile = "Interface\\Buttons\\WHITE8X8",
+            edgeSize = 1,
+        })
+        menuFrame:SetBackdropColor(0.05, 0.05, 0.05, 0.97)
+        menuFrame:SetBackdropBorderColor(0.3, 0.3, 0.3, 1)
+        menuFrame:EnableMouse(true)
+
+        -- Close when clicking elsewhere
+        menuFrame:RegisterEvent("GLOBAL_MOUSE_DOWN")
+        menuFrame:SetScript("OnEvent", function(self, event)
+            if event == "GLOBAL_MOUSE_DOWN" and menuOpen then
+                if not self:IsMouseOver() then SetMenuVisible(false) end
+            end
+        end)
+
+        local y = -PADDING
+        for _, item in ipairs(menuItems) do
+            if item.divider then
+                local div = menuFrame:CreateTexture(nil, "ARTWORK")
+                div:SetPoint("TOPLEFT", menuFrame, "TOPLEFT", 8, y - 4)
+                div:SetPoint("TOPRIGHT", menuFrame, "TOPRIGHT", -8, y - 4)
+                div:SetHeight(1)
+                div:SetColorTexture(0.3, 0.3, 0.3, 0.6)
+                y = y - DIVIDER_H
+            elseif item.fn then
+                -- Plain button (no secure template needed)
+                local btn = CreateFrame("Button", nil, menuFrame)
+                btn:SetPoint("TOPLEFT", menuFrame, "TOPLEFT", 1, y)
+                btn:SetPoint("TOPRIGHT", menuFrame, "TOPRIGHT", -1, y)
+                btn:SetHeight(BUTTON_H)
+
+                local hl = btn:CreateTexture(nil, "HIGHLIGHT")
+                hl:SetAllPoints()
+                hl:SetColorTexture(1, 1, 1, 0.08)
+
+                local label = btn:CreateFontString(nil, "OVERLAY")
+                label:SetFont("Fonts\\FRIZQT__.TTF", 11, "")
+                label:SetShadowOffset(1, -1)
+                label:SetShadowColor(0, 0, 0, 1)
+                label:SetPoint("LEFT", btn, "LEFT", 10, 0)
+                label:SetTextColor(0.9, 0.9, 0.9)
+                label:SetText(item.text)
+
+                local itemFn = item.fn
+                btn:SetScript("OnClick", function()
+                    SetMenuVisible(false)
+                    itemFn()
+                end)
+
+                y = y - BUTTON_H
+            else
+                -- Secure click passthrough to a Blizzard MicroButton
+                local microRef = item.microButton and _G[item.microButton]
+                local btnName = "EUI_MicroMenu_" .. item.text:gsub("%s", "")
+                local btn = CreateFrame("Button", btnName, menuFrame, "SecureActionButtonTemplate,SecureHandlerStateTemplate")
+                btn:SetPoint("TOPLEFT", menuFrame, "TOPLEFT", 1, y)
+                btn:SetPoint("TOPRIGHT", menuFrame, "TOPRIGHT", -1, y)
+                btn:SetHeight(BUTTON_H)
+
+                if microRef then
+                    btn:SetAttribute("*clickbutton1", microRef)
+                end
+                btn:SetAttribute("useOnKeyDown", false)
+                btn:SetAttribute("*type1", "click")
+                btn:EnableMouse(true)
+                btn:RegisterForClicks("AnyUp")
+
+                -- Activate secure click from the restricted secure environment.
+                -- Without this, addon-set attributes are not trusted.
+                RegisterStateDriver(btn, "combatlock", "[combat] combat; nocombat")
+                btn:SetAttribute("_onstate-combatlock", [[
+                    if newstate == 'combat' then
+                        self:SetAttribute('*type1', nil)
+                        self:EnableMouse(false)
+                    else
+                        self:SetAttribute('*type1', 'click')
+                        self:EnableMouse(true)
+                    end
+                ]])
+
+                local hl = btn:CreateTexture(nil, "HIGHLIGHT")
+                hl:SetAllPoints()
+                hl:SetColorTexture(1, 1, 1, 0.08)
+
+                local label = btn:CreateFontString(nil, "OVERLAY")
+                label:SetFont("Fonts\\FRIZQT__.TTF", 11, "")
+                label:SetShadowOffset(1, -1)
+                label:SetShadowColor(0, 0, 0, 1)
+                label:SetPoint("LEFT", btn, "LEFT", 10, 0)
+                label:SetTextColor(0.9, 0.9, 0.9)
+                label:SetText(item.text)
+
+                btn:HookScript("OnClick", function() C_Timer.After(0, function() SetMenuVisible(false) end) end)
+
+                y = y - BUTTON_H
+            end
+        end
+
+        menuFrame:SetSize(MENU_WIDTH, -y + PADDING)
+        menuFrame:Show()
+        SetMenuVisible(false)
+    end
+
+    local function ToggleMicroMenu()
+        if InCombatLockdown() then
+            UIErrorsFrame:AddMessage(ERR_NOT_IN_COMBAT, 1.0, 0.3, 0.3, 1.0)
+            return
+        end
+        if not menuFrame then CreateMenuFrame() end
+        SetMenuVisible(not menuOpen)
+    end
+    EBS._ToggleMicroMenu = ToggleMicroMenu
+
+    local hookFrame = CreateFrame("Frame")
+    hookFrame:RegisterEvent("PLAYER_LOGIN")
+    hookFrame:SetScript("OnEvent", function(self)
+        self:UnregisterEvent("PLAYER_LOGIN")
+        CreateMenuFrame()
+    end)
+end
+
 function EBS:OnInitialize()
     EBS.db = EllesmereUI.Lite.NewDB("EllesmereUIMinimapDB", defaults)
+
+    -- Migrate legacy hideGreatVault/hidePortals into hideExtraBtns table
+    local mp = EBS.db and EBS.db.profile and EBS.db.profile.minimap
+    if mp then
+        if mp.hideGreatVault ~= nil or mp.hidePortals ~= nil then
+            if not mp.hideExtraBtns then mp.hideExtraBtns = {} end
+            if mp.hideGreatVault ~= nil then
+                mp.hideExtraBtns.greatVault = mp.hideGreatVault
+                mp.hideGreatVault = nil
+            end
+            if mp.hidePortals ~= nil then
+                mp.hideExtraBtns.portals = mp.hidePortals
+                mp.hidePortals = nil
+            end
+        end
+    end
 
     -- Full rebuild: wipes cached button state so the next ApplyMinimap
     -- re-snapshots native button sizes/textures from scratch (as if /reload).

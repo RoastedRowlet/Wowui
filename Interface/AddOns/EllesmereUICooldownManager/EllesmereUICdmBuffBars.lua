@@ -374,8 +374,9 @@ local function CreateTrackedBuffBarFrame(parent, idx)
     wrapFrame._gradClip = nil
     wrapFrame._gradTex  = nil
 
-    -- Text overlay (above fill + gradient)
-    local textOverlay = CreateFrame("Frame", nil, bar)
+    -- Text overlay: parented to wrapFrame (not bar) so bar's SetClipsChildren
+    -- doesn't chop text when font size exceeds bar height.
+    local textOverlay = CreateFrame("Frame", nil, wrapFrame)
     textOverlay:SetAllPoints(bar)
     textOverlay:SetFrameLevel(bar:GetFrameLevel() + 3)
     wrapFrame._textOverlay = textOverlay
@@ -771,22 +772,16 @@ local function ApplyTrackedBuffBarSettings(bar, cfg)
         end
     end
 
-    -- Border
+    -- Border (PP or textured via ApplyBorderStyle)
     if bar._barBorder then
+        bar._barBorder:SetAllPoints(bar)
         local bSz = cfg.borderSize or 0
-        if bSz > 0 then
-            local PP = EllesmereUI and EllesmereUI.PP
-            if PP then
-                if not PP.GetBorders(bar._barBorder) then
-                    PP.CreateBorder(bar._barBorder, cfg.borderR or 0, cfg.borderG or 0, cfg.borderB or 0, 1, bSz)
-                else
-                    PP.UpdateBorder(bar._barBorder, bSz, cfg.borderR or 0, cfg.borderG or 0, cfg.borderB or 0, 1)
-                end
-                bar._barBorder:Show()
-            end
-        else
-            bar._barBorder:Hide()
-        end
+        local textureKey = cfg.borderTexture or "solid"
+        EllesmereUI.ApplyBorderStyle(bar._barBorder, bSz,
+            cfg.borderR or 0, cfg.borderG or 0, cfg.borderB or 0, 1,
+            textureKey, cfg.borderTextureOffset, cfg.borderTextureOffsetY,
+            cfg.borderTextureShiftX, cfg.borderTextureShiftY,
+            "resourcebars", bSz)
     end
 
     -- Threshold overlay + tick marks

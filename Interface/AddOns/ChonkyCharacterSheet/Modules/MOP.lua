@@ -749,7 +749,7 @@ if itemLink then
         end
     end
 
-    -- Only run enchant detection if enabled and enchantId is non‑zero
+    -- Only run enchant detection if enabled and enchantId is non-zero
     if enchantDetectionEnabled then
         local enchantId = itemLink:match("item:%d+:(%d+)")
         if enchantId and enchantId ~= "0" then
@@ -1558,7 +1558,7 @@ function MOPinitializeinspectframe()
 end
 
 -- Module Initialization
-function module:Initialize()
+function module:Initialize(onlyStyle)
     -- Set up the character sheet for the current player
     local scaling = option("sheetscale") or 1
 

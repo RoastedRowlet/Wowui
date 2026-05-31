@@ -1,4 +1,4 @@
-## Interface: 120000,120001,120005
+## Interface: 120000,120001,120005,120007
 ## Title: World Marker Cycler
 ## Notes: Cycle world markers and clear all markers with optional modifiers
 ## Author: CKRAIGFRIEND

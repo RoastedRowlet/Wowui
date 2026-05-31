@@ -1,6 +1,9 @@
 VER 3 0100000000000007 "Cursor WRT" "134400"
 /cast [@cursor] Wind Rush Totem
 END
+VER 3 0100000000000008 "cursorslow" "134400"
+/cast [@cursor] Earthbind Totem
+END
 VER 3 0100000000000006 "CursorSLT" "134400"
 /cast [@cursor] Spirit Link Totem
 END

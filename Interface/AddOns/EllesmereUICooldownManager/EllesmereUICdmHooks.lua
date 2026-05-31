@@ -28,6 +28,8 @@ local GetCDMFont          = ns.GetCDMFont
 
 local floor   = math.floor
 local GetTime = GetTime
+local _, _playerClass = UnitClass("player")
+local _isDruid = (_playerClass == "DRUID")
 
 -------------------------------------------------------------------------------
 --  Memory Profiling (temporary)
@@ -433,6 +435,25 @@ local function DecorateFrame(frame, barData)
     fd.tex = iconWidget
     fd.cooldown = frame.Cooldown
 
+    -- Swiftmend brightness: Blizzard dims the icon via SetVertexColor when
+    -- Efflorescence / HoTs drop. Hook the texture once per frame to force
+    -- bright. Recursion guard only -- never compare incoming args (secret values).
+    -- Class check is cached at file scope so non-Druids skip entirely.
+    if iconWidget and not fd._smVCHooked and _isDruid then
+        local _, baseSID = ResolveFrameSpellID(frame)
+        if baseSID == 18562 then
+            fd._smVCHooked = true
+            local smGuard = false
+            hooksecurefunc(iconWidget, "SetVertexColor", function()
+                if smGuard then return end
+                smGuard = true
+                iconWidget:SetVertexColor(1, 1, 1)
+                smGuard = false
+            end)
+            iconWidget:SetVertexColor(1, 1, 1)
+        end
+    end
+
     HideBlizzardDecorations(frame)
 
     -- Hook SetPoint: when Blizzard repositions this frame (via Layout,
@@ -442,7 +463,15 @@ local function DecorateFrame(frame, barData)
         fd._setPointHooked = true
         hooksecurefunc(frame, "SetPoint", function(_, point, relativeTo)
             local anchor = fd._cdmAnchor
-            if not anchor then return end
+            if not anchor then
+                -- Icon not yet claimed by our bar system. If Blizzard's layout
+                -- is positioning it (post-acquire), re-blank it so it doesn't
+                -- flash at the viewer's position before CollectAndReanchor claims it.
+                if fd.decorated then
+                    frame:SetAlpha(0)
+                end
+                return
+            end
             -- If relativeTo is already our bar container, this is our own
             -- SetPoint call from LayoutCDMBar. Don't intercept.
             if relativeTo == anchor[2] then return end
@@ -522,10 +551,14 @@ local function DecorateFrame(frame, barData)
         local bf = CreateFrame("Frame", nil, frame)
         bf:SetAllPoints(frame)
         fd.borderFrame = bf
-        EllesmereUI.PP.CreateBorder(bf,
+        local textureKey = barData.borderTexture or "solid"
+        EllesmereUI.ApplyBorderStyle(bf,
+            barData.borderSize or 1,
             barData.borderR or 0, barData.borderG or 0,
             barData.borderB or 0, barData.borderA or 1,
-            barData.borderSize or 1, "OVERLAY", 7)
+            textureKey, barData.borderTextureOffset, barData.borderTextureOffsetY,
+            barData.borderTextureShiftX, barData.borderTextureShiftY,
+            "cdm", barData.borderThickness or "thin")
     end
     fd.borderFrame:SetFrameLevel(baseLvl + 13)
 
@@ -670,7 +703,7 @@ local function DecorateFrame(frame, barData)
                 if isActive and hasGlow2 then
                     if fd.glowOverlay and not fd._activeGlowOn then
                         -- Unified glow color takes priority
-                        local gr, gg, gb = ns.ResolveGlowColor and ns.ResolveGlowColor(ss2)
+                        local gr, gg, gb = ns.ResolveGlowColor(ss2)
                         if not gr then
                             if ss2.activeGlowClassColor then
                                 local _, ct = UnitClass("player")
@@ -873,7 +906,7 @@ local function DecorateFrame(frame, barData)
                     if not onCD then
                         if fd.glowOverlay and not fd._cdStateGlowOn then
                             local style = cse == "pixelGlowReady" and 1 or 3
-                            local gr, gg, gb = ns.ResolveGlowColor and ns.ResolveGlowColor(ss2)
+                            local gr, gg, gb = ns.ResolveGlowColor(ss2)
                             ns.StartNativeGlow(fd.glowOverlay, style, gr or 1, gg or 1, gb or 1)
                             fd._cdStateGlowOn = true
                         end
@@ -1166,7 +1199,32 @@ local function ProcessPresetCooldowns()
                     if durObj and f._cooldown and f._cooldown.SetCooldownFromDurationObject then
                         f._cooldown:SetCooldownFromDurationObject(durObj, true)
                     end
-                    ApplySpellDesaturation(f, durObj)
+                    -- Skip desaturation when the spell is only on GCD
+                    local cdInfo = C_Spell.GetSpellCooldown and C_Spell.GetSpellCooldown(sid)
+                    local onRealCD = cdInfo and cdInfo.isActive and not cdInfo.isOnGCD
+                    if cdInfo and cdInfo.isOnGCD and not onRealCD then
+                        if f._tex then f._tex:SetDesaturation(0) end
+                    else
+                        ApplySpellDesaturation(f, durObj)
+                    end
+                    -- Resource check: dim vertex color when not enough resources
+                    -- Only for custom spells (not racials -- racials don't cost resources)
+                    if f._isCustomSpellFrame and f._tex then
+                        if not onRealCD then
+                            local isUsable, notEnoughMana = C_Spell.IsSpellUsable(sid)
+                            if notEnoughMana then
+                                f._tex:SetVertexColor(0.5, 0.5, 1.0)
+                            elseif not isUsable then
+                                f._tex:SetVertexColor(0.4, 0.4, 0.4)
+                            elseif f._lastVertexDim then
+                                f._tex:SetVertexColor(1, 1, 1)
+                            end
+                            f._lastVertexDim = (not isUsable) or nil
+                        elseif f._lastVertexDim then
+                            f._tex:SetVertexColor(1, 1, 1)
+                            f._lastVertexDim = nil
+                        end
+                    end
                 end
             elseif f._isItemPresetFrame and f._presetItemID and now >= _encounterResetUntil then
                 local itemID = f._presetItemID
@@ -1428,19 +1486,8 @@ local function CollectAndReanchor()
                         -------------------------------------------------------
                         -- When the EUI options panel is open, treat hidden
                         -- buff frames as shown so icons populate the bar
-                        -- for preview. Blizzard's "hide when inactive"
-                        -- hides frames for buffs the player doesn't
-                        -- currently have, but we still want them visible
-                        -- while configuring.
-                        if frame:IsShown() or ns._cdmBarsPageOpen then
+                        if frame:IsShown() then
                             local targetBar, displaySID, baseSID = CategorizeFrame(frame, defaultBarKey)
-                            -- When panel is open, hidden frames are included for
-                            -- preview. But only allow them on the default buff
-                            -- bar -- extra bars get wrong/default icons from
-                            -- hidden untalented frames.
-                            if not frame:IsShown() and targetBar ~= "buffs" then
-                                targetBar = nil
-                            end
                             if targetBar and displaySID and displaySID > 0 then
                                 local barSeen = seenSpell[targetBar]
                                 if not barSeen then barSeen = {}; seenSpell[targetBar] = barSeen end
@@ -2628,6 +2675,14 @@ function ns.SetupViewerHooks()
                         local pp = ECME.db and ECME.db.profile
                         if pp and pp.cdmBars and pp.cdmBars.useBlizzardBuffBars then return end
                     end
+                    -- CD/utility viewers: spell set is static (rebuilt only by
+                    -- FullCDMRebuild on spec/talent/equip). Pool churn from
+                    -- spell transforms (e.g. Monk Empty Barrel -> Keg Smash)
+                    -- re-acquires frames but does NOT queue a reanchor, so
+                    -- blanking here leaves icons invisible with nothing to
+                    -- restore them. The SetPoint hook already handles
+                    -- repositioning for these viewers.
+                    if not isBuff then return end
                     if itemFrame then
                         -- Only blank frames we haven't seen before. During
                         -- pool churn (e.g. Lightsmith Holy Armaments transform
@@ -2637,7 +2692,14 @@ function ns.SetupViewerHooks()
                         -- every cycle. Previously-decorated frames keep their
                         -- current alpha; our SetPoint hook handles positioning.
                         local fd = hookFrameData[itemFrame]
-                        if fd and fd.decorated then return end
+                        if fd and fd.decorated then
+                            -- Recycled frame: briefly hide at Blizzard's position
+                            -- until CollectAndReanchor repositions it into our bar.
+                            -- Without this, the frame flashes at the wrong spot
+                            -- for 1 frame before snapping into place.
+                            itemFrame:SetAlpha(0)
+                            return
+                        end
                         itemFrame:SetAlpha(0)
                         if itemFrame.Cooldown and itemFrame.Cooldown.SetDrawSwipe then
                             itemFrame.Cooldown:SetDrawSwipe(false)
@@ -3066,3 +3128,7 @@ function ns.SetupEditModeLock()
         end)
     end
 end
+
+-- Swiftmend Brightness Fix (CDM): handled inside DecorateFrame via
+-- ResolveFrameSpellID. No external scan needed.
+_G._ECDM_ScanSwiftmend = nil

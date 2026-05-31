@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'Warlock-Destruction','DeathKnight-Unholy','Evoker-Augmentation',}
-local provider = {region='US',realm='Alexstrasza',name='US',type='subscribers',zone=46,date='2026-05-25',data={Ji='Jinrop:BAEALgADCgcJBwABLgAECgcJFgABACMUAA==.',Ke='Kerm:BAEALgAECgEJAgAAAA==.',Ki='Kippo:BAEALgAECgEJAQABLgAFFAUJDwACAGgRAA==.',Mo='Moltres:BAEALgAFFAUJAQABLgAFFAkJIQADAJckAA==.',},}
+local lookup = {'Warlock-Destruction','Mage-Frost','Evoker-Augmentation',}
+local provider = {region='US',realm='Alexstrasza',name='US',type='subscribers',zone=46,date='2026-05-31',data={Ji='Jinrop:BAEALgADCgcJBwABLgAECgcJFgABACMUAA==.',Ke='Kerm:BAEALgAECgEJAgAAAA==.',Ki='Kippo:BAEALgAECgEJAQABLgAFFAUJCAACACYFAA==.',Mo='Moltres:BAEALgAFFAUJBAABLgAFFAkJIQADAJckAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

@@ -67,7 +67,7 @@ local cycleBtn = CreateFrame(
 )
 cycleBtn:SetAttribute("type", "macro")
 cycleBtn:SetAttribute("macrotext", "")
-cycleBtn:RegisterForClicks("AnyDown")
+cycleBtn:RegisterForClicks("AnyUp", "AnyDown")
 
 -- Clear mouseover marker
 local clearBtn = CreateFrame(
@@ -78,7 +78,7 @@ local clearBtn = CreateFrame(
 )
 clearBtn:SetAttribute("type", "macro")
 clearBtn:SetAttribute("macrotext", "")
-clearBtn:RegisterForClicks("AnyDown")
+clearBtn:RegisterForClicks("AnyUp", "AnyDown")
 
 -- =========================
 -- Secure Order Table
@@ -100,7 +100,6 @@ end
 -- Secure Click Handler
 -- =========================
 SecureHandlerWrapScript(cycleBtn, "PreClick", cycleBtn, [=[
-    if not down then return end
     local marker = 1
     if type(order) == "table" and #order > 0 then
         i = (i % #order) + 1

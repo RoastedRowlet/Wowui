@@ -29,6 +29,18 @@ local defaultStrings = {
     ------------------------------------------------------------
     -- General / Common
     ------------------------------------------------------------
+	["Source"] = "Source",  -- enUS/ enGB
+	["SHOW_GEAR_FINDER"] = "Enable Gear Finder Module", -- enUS/ enGB
+	["SCALE"] = "Scale", -- enUS/ enGB
+	["BG_COLOR"] = "Background Color", -- enUS/ enGB
+	["FOOTER_COLOR"] = "Footer Color", -- enUS/ enGB
+	["TITLE_FONT"] = "Title Font", -- enUS/ enGB
+	["HEADER_FONT"] = "Header Font", -- enUS/ enGB
+	["FONT_NAME_GF_ITEMSLOT"] = "Item Slot Font", -- enUS/ enGB
+	["FONT_NAME_GF_DRAID"] = "Dungeon/Raid Name Font", -- enUS/ enGB
+	["FONT_NAME_GF_BOSS"] = "Boss Name Font", -- enUS/ enGB
+	["CATEGORY_GEAR-FINDER"] = "Gear Finder", -- enUS / enGB	["Class Sets"] = "Class Sets", -- enUS/ enGB
+	["Slot"] = "Slot", -- enUS / enGB
 	["Movement"] = "Movement", -- enUS / enGB
 	["Explorer"]             = "Explorer",             -- enUS / enGB
 	["Adventurer"]           = "Adventurer",           -- enUS / enGB
@@ -422,6 +434,23 @@ if locale == "enGB" then
     }
 elseif locale == "deDE" then
     localizedStrings = {
+		["Source"] = "Quelle", -- deDE
+		["SHOW_GEAR_FINDER"]      = "Ausrüstungsfinder-Modul aktivieren", -- deDE
+		["SCALE"]                 = "Skalierung", -- deDE
+		["BG_COLOR"]              = "Hintergrundfarbe", -- deDE
+		["FOOTER_COLOR"]          = "Fußzeilenfarbe", -- deDE
+		["TITLE_FONT"]            = "Titelschriftart", -- deDE
+		["HEADER_FONT"]           = "Kopfzeilenschriftart", -- deDE
+		["FONT_NAME_GF_ITEMSLOT"] = "Schriftart für Ausrüstungsplätze", -- deDE
+		["FONT_NAME_GF_DRAID"]    = "Schriftart für Dungeon/Raid-Namen", -- deDE
+		["FONT_NAME_GF_BOSS"]     = "Schriftart für Boss-Namen", -- deDE
+		["CATEGORY_GEAR-FINDER"]  = "Ausrüstungsfinder", -- deDE
+        ["Class Sets"] = "Klassensets", -- deDE
+        ["Cloth"]   = "Stoff",   -- deDE
+        ["Leather"] = "Leder",   -- deDE
+        ["Mail"]    = "Kette",   -- deDE
+        ["Plate"]   = "Platte",  -- deDE
+        ["Slot"] = "Platz", -- deDE
         ["Movement"] = "Bewegung",        -- deDE
 		["Explorer"]             = "Forscher",    -- deDE
 		["Adventurer"]           = "Abenteurer",  -- deDE
@@ -457,7 +486,7 @@ elseif locale == "deDE" then
 		["Full Text"] = "Vollständiger Text", -- deDE
 		["Truncate"] = "Abschneiden", -- deDE
 		["Wrap Text"] = "Textumbruch", -- deDE
-		["SHOW_MYTHIC_SP"] = "Mythic+ Seitenleisten‑Modul aktivieren", -- deDE
+		["SHOW_MYTHIC_SP"] = "Mythic+ Seitenleisten-Modul aktivieren", -- deDE
 		["SHOW_MYTHIC_SP_ONOPEN"] = "Mythic+ Seitenleiste beim Öffnen des Charakterfensters anzeigen", -- deDE
 		["Versatility Display"] = "Vielseitigkeitsanzeige", -- deDE
 		["Catalyst"] = "Katalysator", -- deDE
@@ -781,6 +810,23 @@ elseif locale == "deDE" then
     }	
 elseif locale == "frFR" then
     localizedStrings = {
+		["Source"] = "Source", -- frFR
+		["SHOW_GEAR_FINDER"]      = "Activer le module Chercheur d’équipement", -- frFR
+		["SCALE"]                 = "Échelle", -- frFR
+		["BG_COLOR"]              = "Couleur d’arrière-plan", -- frFR
+		["FOOTER_COLOR"]          = "Couleur du pied de page", -- frFR
+		["TITLE_FONT"]            = "Police du titre", -- frFR
+		["HEADER_FONT"]           = "Police de l’en-tête", -- frFR
+		["FONT_NAME_GF_ITEMSLOT"] = "Police des emplacements d’objet", -- frFR
+		["FONT_NAME_GF_DRAID"]    = "Police des noms de donjons/raids", -- frFR
+		["FONT_NAME_GF_BOSS"]     = "Police des noms de boss", -- frFR
+		["CATEGORY_GEAR-FINDER"]  = "Chercheur d’équipement", -- frFR
+        ["Class Sets"] = "Ensembles de classe", -- frFR
+        ["Cloth"]   = "Tissu",   -- frFR
+        ["Leather"] = "Cuir",    -- frFR
+        ["Mail"]    = "Mailles", -- frFR
+        ["Plate"]   = "Plaques", -- frFR
+        ["Slot"] = "Emplacement", -- frFR
         ["Movement"] = "Déplacement",     -- frFR
 		["Explorer"]             = "Explorateur", -- frFR
 		["Adventurer"]           = "Aventurier",  -- frFR
@@ -1140,6 +1186,23 @@ elseif locale == "frFR" then
     }
 elseif locale == "esES" then
     localizedStrings = {
+		["Source"] = "Fuente", -- esES
+		["SHOW_GEAR_FINDER"]      = "Activar el módulo Buscador de equipo", -- esES
+		["SCALE"]                 = "Escala", -- esES
+		["BG_COLOR"]              = "Color de fondo", -- esES
+		["FOOTER_COLOR"]          = "Color del pie", -- esES
+		["TITLE_FONT"]            = "Fuente del título", -- esES
+		["HEADER_FONT"]           = "Fuente del encabezado", -- esES
+		["FONT_NAME_GF_ITEMSLOT"] = "Fuente de los espacios de objeto", -- esES
+		["FONT_NAME_GF_DRAID"]    = "Fuente de nombres de mazmorras/bandas", -- esES
+		["FONT_NAME_GF_BOSS"]     = "Fuente de nombres de jefes", -- esES
+		["CATEGORY_GEAR-FINDER"]  = "Buscador de equipo", -- esES
+        ["Class Sets"] = "Conjuntos de clase", -- esES/esMX
+        ["Cloth"]   = "Tela",    -- esES / esMX
+        ["Leather"] = "Cuero",   -- esES / esMX
+        ["Mail"]    = "Malla",   -- esES / esMX
+        ["Plate"]   = "Placas",  -- esES / esMX
+        ["Slot"] = "Ranura", -- esES
         ["Movement"] = "Movimiento",      -- esES / esMX
 		["Explorer"]             = "Expedicionario", -- esES
 		["Adventurer"]           = "Aventurero",     -- esES
@@ -1499,6 +1562,23 @@ elseif locale == "esES" then
     }
 elseif locale == "esMX" then
     localizedStrings = {
+		["Source"] = "Fuente", -- esMX
+		["SHOW_GEAR_FINDER"]      = "Activar el módulo Buscador de equipo", -- esMX
+		["SCALE"]                 = "Escala", -- esMX
+		["BG_COLOR"]              = "Color de fondo", -- esMX
+		["FOOTER_COLOR"]          = "Color del pie", -- esMX
+		["TITLE_FONT"]            = "Fuente del título", -- esMX
+		["HEADER_FONT"]           = "Fuente del encabezado", -- esMX
+		["FONT_NAME_GF_ITEMSLOT"] = "Fuente de los espacios de objeto", -- esMX
+		["FONT_NAME_GF_DRAID"]    = "Fuente de nombres de mazmorras/bandas", -- esMX
+		["FONT_NAME_GF_BOSS"]     = "Fuente de nombres de jefes", -- esMX
+		["CATEGORY_GEAR-FINDER"]  = "Buscador de equipo", -- esMX
+        ["Class Sets"] = "Conjuntos de clase", -- esES/esMX
+        ["Cloth"]   = "Tela",    -- esES / esMX
+        ["Leather"] = "Cuero",   -- esES / esMX
+        ["Mail"]    = "Malla",   -- esES / esMX
+        ["Plate"]   = "Placas",  -- esES / esMX
+        ["Slot"] = "Ranura", -- esMX
         ["Movement"] = "Movimiento",      -- esES / esMX
 		["Explorer"]             = "Expedicionario", -- esMX
 		["Adventurer"]           = "Aventurero",     -- esMX
@@ -1858,6 +1938,24 @@ elseif locale == "esMX" then
     }
 elseif locale == "ruRU" then
     localizedStrings = {
+		["Source"] = "Источник", -- ruRU
+		["SHOW_GEAR_FINDER"]      = "Включить модуль Поиска экипировки", -- ruRU
+		["SCALE"]                 = "Масштаб", -- ruRU
+		["BG_COLOR"]              = "Цвет фона", -- ruRU
+		["FOOTER_COLOR"]          = "Цвет нижней панели", -- ruRU
+		["TITLE_FONT"]            = "Шрифт заголовка", -- ruRU
+		["HEADER_FONT"]           = "Шрифт заголовков", -- ruRU
+		["FONT_NAME_GF_ITEMSLOT"] = "Шрифт слотов предметов", -- ruRU
+		["FONT_NAME_GF_DRAID"]    = "Шрифт названий подземелий/рейдов", -- ruRU
+		["FONT_NAME_GF_BOSS"]     = "Шрифт названий боссов", -- ruRU
+		["CATEGORY_GEAR-FINDER"]  = "Поиск экипировки", -- ruRU
+        ["CATEGORY_GEAR-FINDER"] = "Поиск экипировки", -- ruRU
+        ["Class Sets"] = "Комплекты для класса", -- ruRU
+        ["Cloth"]   = "Ткань",   -- ruRU
+        ["Leather"] = "Кожа",    -- ruRU
+        ["Mail"]    = "Кольчуга",-- ruRU
+        ["Plate"]   = "Латы",    -- ruRU
+        ["Slot"] = "Слот", -- ruRU
         ["Movement"] = "Передвижение",    -- ruRU
 		["Explorer"]             = "Исследователь",        -- ruRU
 		["Adventurer"]           = "Искатель приключений", -- ruRU
@@ -1877,10 +1975,10 @@ elseif locale == "ruRU" then
 		["Slot"] = "Ячейка",  -- ruRU
 		["Custom Priority Profiles"] = "Пользовательские профили приоритетов",  -- ruRU
 		["Add Priority Slot"] = "Добавить ячейку приоритета", -- ruRU
-		["1st Priority"] = "1‑й", -- ruRU
-		["2nd Priority"] = "2‑й", -- ruRU
-		["3rd Priority"] = "3‑й", -- ruRU
-		["4th Priority"] = "4‑й", -- ruRU
+		["1st Priority"] = "1-й", -- ruRU
+		["2nd Priority"] = "2-й", -- ruRU
+		["3rd Priority"] = "3-й", -- ruRU
+		["4th Priority"] = "4-й", -- ruRU
 		["SHOW_MISSING_SOCKETS"] = "Показать отсутствующие гнёзда",  -- ruRU
         ["ADDON COLORS"] = "Цвета аддона", -- ruRU
         ["Button Foreground Color"] = "Цвет переднего плана кнопки", -- ruRU
@@ -2217,6 +2315,23 @@ elseif locale == "ruRU" then
     }
 elseif locale == "koKR" then
     localizedStrings = {
+		["Source"] = "출처", -- koKR
+		["SHOW_GEAR_FINDER"]      = "장비 찾기 모듈 활성화", -- koKR
+		["SCALE"]                 = "크기", -- koKR
+		["BG_COLOR"]              = "배경 색상", -- koKR
+		["FOOTER_COLOR"]          = "하단 색상", -- koKR
+		["TITLE_FONT"]            = "제목 글꼴", -- koKR
+		["HEADER_FONT"]           = "헤더 글꼴", -- koKR
+		["FONT_NAME_GF_ITEMSLOT"] = "아이템 슬롯 글꼴", -- koKR
+		["FONT_NAME_GF_DRAID"]    = "던전/공격대 이름 글꼴", -- koKR
+		["FONT_NAME_GF_BOSS"]     = "보스 이름 글꼴", -- koKR
+		["CATEGORY_GEAR-FINDER"]  = "장비 찾기", -- koKR
+        ["Class Sets"] = "직업 세트", -- koKR
+        ["Cloth"]   = "천",       -- koKR
+        ["Leather"] = "가죽",     -- koKR
+        ["Mail"]    = "사슬",     -- koKR
+        ["Plate"]   = "판금",     -- koKR
+        ["Slot"] = "슬롯", -- koKR
         ["Movement"] = "이동",            -- koKR
 		["Explorer"]             = "탐험가", -- koKR
 		["Adventurer"]           = "모험가", -- koKR
@@ -2576,6 +2691,23 @@ elseif locale == "koKR" then
     }
 elseif locale == "zhCN" then
     localizedStrings = {
+		["Source"] = "来源", -- zhCN
+		["SHOW_GEAR_FINDER"]      = "启用装备查找器模块", -- zhCN
+		["SCALE"]                 = "缩放", -- zhCN
+		["BG_COLOR"]              = "背景颜色", -- zhCN
+		["FOOTER_COLOR"]          = "底部颜色", -- zhCN
+		["TITLE_FONT"]            = "标题字体", -- zhCN
+		["HEADER_FONT"]           = "标题栏字体", -- zhCN
+		["FONT_NAME_GF_ITEMSLOT"] = "物品栏字体", -- zhCN
+		["FONT_NAME_GF_DRAID"]    = "地下城/团队字体", -- zhCN
+		["FONT_NAME_GF_BOSS"]     = "首领名称字体", -- zhCN
+		["CATEGORY_GEAR-FINDER"]  = "装备查找器", -- zhCN
+        ["Class Sets"] = "职业套装", -- zhCN
+        ["Cloth"]   = "布甲",     -- zhCN
+        ["Leather"] = "皮甲",     -- zhCN
+        ["Mail"]    = "锁甲",     -- zhCN
+        ["Plate"]   = "板甲",     -- zhCN
+        ["Slot"] = "插槽", -- zhCN
         ["Movement"] = "移动",            -- zhCN
 		["Explorer"]             = "探索者", -- zhCN
 		["Adventurer"]           = "冒险者", -- zhCN
@@ -2935,6 +3067,23 @@ elseif locale == "zhCN" then
     }
 elseif locale == "zhTW" then
     localizedStrings = {
+		["Source"] = "來源", -- zhTW
+		["SHOW_GEAR_FINDER"]      = "啟用裝備搜尋器模組", -- zhTW
+		["SCALE"]                 = "縮放", -- zhTW
+		["BG_COLOR"]              = "背景顏色", -- zhTW
+		["FOOTER_COLOR"]          = "底部顏色", -- zhTW
+		["TITLE_FONT"]            = "標題字體", -- zhTW
+		["HEADER_FONT"]           = "標頭字體", -- zhTW
+		["FONT_NAME_GF_ITEMSLOT"] = "物品欄位字體", -- zhTW
+		["FONT_NAME_GF_DRAID"]    = "地城/團隊字體", -- zhTW
+		["FONT_NAME_GF_BOSS"]     = "首領名稱字體", -- zhTW
+		["CATEGORY_GEAR-FINDER"]  = "裝備搜尋器", -- zhTW
+        ["Class Sets"] = "職業套裝", -- zhTW
+        ["Cloth"]   = "布甲",     -- zhTW
+        ["Leather"] = "皮甲",     -- zhTW
+        ["Mail"]    = "鎖甲",     -- zhTW
+        ["Plate"]   = "鎧甲",     -- zhTW
+        ["Slot"] = "插槽", -- zhTW
         ["Movement"] = "移動",            -- zhTW
 		["Explorer"]             = "探險者", -- zhTW
 		["Adventurer"]           = "冒險者", -- zhTW
@@ -3293,6 +3442,23 @@ elseif locale == "zhTW" then
     }
 elseif locale == "ptBR" then
     localizedStrings = {
+		["Source"] = "Fonte", -- ptBR
+		["SHOW_GEAR_FINDER"]      = "Ativar módulo Localizador de Equipamentos", -- ptBR
+		["SCALE"]                 = "Escala", -- ptBR
+		["BG_COLOR"]              = "Cor de fundo", -- ptBR
+		["FOOTER_COLOR"]          = "Cor do rodapé", -- ptBR
+		["TITLE_FONT"]            = "Fonte do título", -- ptBR
+		["HEADER_FONT"]           = "Fonte do cabeçalho", -- ptBR
+		["FONT_NAME_GF_ITEMSLOT"] = "Fonte dos espaços de itens", -- ptBR
+		["FONT_NAME_GF_DRAID"]    = "Fonte de masmorras/raides", -- ptBR
+		["FONT_NAME_GF_BOSS"]     = "Fonte dos chefes", -- ptBR
+		["CATEGORY_GEAR-FINDER"]  = "Localizador de Equipamentos", -- ptBR
+        ["Class Sets"] = "Conjuntos de classe", -- ptBR
+        ["Cloth"]   = "Tecido",  -- ptBR
+        ["Leather"] = "Couro",   -- ptBR
+        ["Mail"]    = "Malha",   -- ptBR
+        ["Plate"]   = "Placas",  -- ptBR
+        ["Slot"] = "Vaga", -- ptBR
         ["Movement"] = "Movimento",       -- ptBR
 		["Explorer"]             = "Explorador",   -- ptBR
 		["Adventurer"]           = "Aventureiro",  -- ptBR
@@ -3652,6 +3818,23 @@ elseif locale == "ptBR" then
     }
 elseif locale == "itIT" then
     localizedStrings = {
+		["Source"] = "Fonte", -- itIT
+		["SHOW_GEAR_FINDER"]      = "Abilita il modulo Ricerca Equipaggiamento", -- itIT
+		["SCALE"]                 = "Scala", -- itIT
+		["BG_COLOR"]              = "Colore di sfondo", -- itIT
+		["FOOTER_COLOR"]          = "Colore del piè di pagina", -- itIT
+		["TITLE_FONT"]            = "Carattere del titolo", -- itIT
+		["HEADER_FONT"]           = "Carattere dell’intestazione", -- itIT
+		["FONT_NAME_GF_ITEMSLOT"] = "Carattere degli slot oggetto", -- itIT
+		["FONT_NAME_GF_DRAID"]    = "Carattere di spedizioni/incursioni", -- itIT
+		["FONT_NAME_GF_BOSS"]     = "Carattere dei boss", -- itIT
+		["CATEGORY_GEAR-FINDER"]  = "Ricerca Equipaggiamento", -- itIT
+        ["Class Sets"] = "Set di classe", -- itIT
+        ["Cloth"]   = "Stoffa",  -- itIT
+        ["Leather"] = "Pelle",   -- itIT
+        ["Mail"]    = "Maglia",  -- itIT
+        ["Plate"]   = "Piastre", -- itIT
+        ["Slot"] = "Slot", -- itIT
         ["Movement"] = "Movimento",       -- itIT
 		["Explorer"]             = "Esploratore",  -- itIT
 		["Adventurer"]           = "Avventuriero", -- itIT
@@ -4009,6 +4192,58 @@ elseif locale == "itIT" then
 		["FONT_NAME_INSPECT_ITEMNAME"] = "Font per nome oggetto ispezionato",
     }
 end
+
+CCS.PRIMARY_KEYWORDS = {
+    -- English
+    ["Strength"]      = "STR",
+    ["Agility"]       = "AGI",
+    ["Intellect"]     = "INT",
+
+    -- German (deDE)
+    ["Stärke"]        = "STR",
+    ["Beweglichkeit"] = "AGI",
+    ["Intelligenz"]   = "INT",
+
+    -- French (frFR)
+    ["Force"]         = "STR",
+    ["Agilité"]       = "AGI",
+    ["Intelligence"]  = "INT",
+
+    -- Spanish (esES / esMX)
+    ["Fuerza"]        = "STR",
+    ["Agilidad"]      = "AGI",
+    ["Intelecto"]     = "INT",
+
+    -- Italian (itIT)
+    ["Forza"]         = "STR",
+    ["Agilità"]       = "AGI",
+    ["Intelletto"]    = "INT",
+
+    -- Portuguese (ptBR)
+    ["Força"]         = "STR",
+    ["Agilidade"]     = "AGI",
+    ["Intelecto"]     = "INT",
+
+    -- Russian (ruRU)
+    ["Сила"]          = "STR",
+    ["Ловкость"]      = "AGI",
+    ["Интеллект"]     = "INT",
+
+    -- Korean (koKR)
+    ["힘"]            = "STR",
+    ["민첩성"]        = "AGI",
+    ["지능"]          = "INT",
+
+    -- Chinese Simplified (zhCN)
+    ["力量"]          = "STR",
+    ["敏捷"]          = "AGI",
+    ["智力"]          = "INT",
+
+    -- Chinese Traditional (zhTW)
+    ["力量"]          = "STR",
+    ["敏捷"]          = "AGI",
+    ["智力"]          = "INT",
+}
 
 ------------------------------------------------------------
 -- Merge localized strings with defaults

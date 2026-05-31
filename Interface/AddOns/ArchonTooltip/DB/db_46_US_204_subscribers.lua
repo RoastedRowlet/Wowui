@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'Paladin-Retribution','Paladin-Protection','Hunter-BeastMastery',}
-local provider = {region='US',realm='SteamwheedleCartel',name='US',type='subscribers',zone=46,date='2026-05-25',data={Li='Liminara:BAEBLgAFFH8IAAMBAAUJrRDvNAAkAQVoDAAAAgBAAGkMAAACABAAawwAAAIANABqDAAAAQAvAOoMAAABACUAAQAFCYgO7zQAJAEFaAwAAAEAKgBpDAAAAQAQAGsMAAABADQAagwAAAEALwDqDAAAAQAlAAIAAwl9C0cDALgAA2gMAAABAEAAaQwAAAEABwBrDAAAAQAQAAEuAAUUBwkbAAMA+RkA.',},}
+local lookup = {'Paladin-Protection','Paladin-Retribution','Hunter-BeastMastery',}
+local provider = {region='US',realm='SteamwheedleCartel',name='US',type='subscribers',zone=46,date='2026-05-31',data={Li='Liminara:BAEBLgAFFH8IAAMBAAUJrRBHAwC4AAVoDAAAAgBAAGkMAAACABAAawwAAAIANABqDAAAAQAvAOoMAAABACUAAgAFCYgOwj0AGwEFaAwAAAEAKgBpDAAAAQAQAGsMAAABADQAagwAAAEALwDqDAAAAQAlAAEAAwl9C0cDALgAA2gMAAABAEAAaQwAAAEABwBrDAAAAQAQAAEuAAUUBwkbAAMA+RkA.',},}
 provider.parse = parse
 
 local rawData = provider.data

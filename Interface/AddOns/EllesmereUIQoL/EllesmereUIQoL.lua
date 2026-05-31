@@ -132,7 +132,7 @@ qolFrame:SetScript("OnEvent", function(self)
         local _failedItems = {}   -- itemID -> true (items that failed to open, skip forever)
         local _cacheBuilt = false
         local function IsEnabled()
-            return EllesmereUIDB and EllesmereUIDB.autoOpenContainers ~= false
+            return EllesmereUIDB and EllesmereUIDB.autoOpenContainers == true
         end
         local SLOTS_PER_FRAME = 3  -- check 3 slots per OnUpdate tick
 
@@ -181,17 +181,18 @@ qolFrame:SetScript("OnEvent", function(self)
                                 local info = C_Container.GetContainerItemInfo(item.bag, item.slot)
                                 if info and info.itemID and _openableCache[info.itemID] and not _failedItems[info.itemID] then
                                     local prevID = info.itemID
+                                    local prevCount = info.stackCount or 1
                                     C_Container.UseContainerItem(item.bag, item.slot)
-                                    C_Timer.After(0.15, function()
+                                    C_Timer.After(0.5, function()
                                         local after = C_Container.GetContainerItemInfo(item.bag, item.slot)
-                                        if after and after.itemID == prevID then
+                                        if after and after.itemID == prevID and (after.stackCount or 1) >= prevCount then
                                             _failedItems[prevID] = true
                                         end
                                         OpenNext(idx + 1)
                                     end)
                                     return
                                 end
-                                C_Timer.After(0.15, function() OpenNext(idx + 1) end)
+                                C_Timer.After(0.5, function() OpenNext(idx + 1) end)
                             end
                             OpenNext(1)
                         end
@@ -221,7 +222,7 @@ qolFrame:SetScript("OnEvent", function(self)
 
         -- After cache is built, BAG_UPDATE_DELAYED only checks changed slots
         local containerFrame = CreateFrame("Frame")
-        if not (EllesmereUIDB and EllesmereUIDB.autoOpenContainers == false) then
+        if EllesmereUIDB and EllesmereUIDB.autoOpenContainers == true then
             containerFrame:RegisterEvent("BAG_UPDATE_DELAYED")
         end
         containerFrame:SetScript("OnEvent", function()
@@ -251,19 +252,20 @@ qolFrame:SetScript("OnEvent", function(self)
                 local info2 = C_Container.GetContainerItemInfo(item.bag, item.slot)
                 if info2 and info2.itemID and _openableCache[info2.itemID] and not _failedItems[info2.itemID] then
                     local prevID = info2.itemID
+                    local prevCount = info2.stackCount or 1
                     C_Container.UseContainerItem(item.bag, item.slot)
-                    C_Timer.After(0.15, function()
+                    C_Timer.After(0.5, function()
                         local after = C_Container.GetContainerItemInfo(item.bag, item.slot)
-                        if after and after.itemID == prevID then
+                        if after and after.itemID == prevID and (after.stackCount or 1) >= prevCount then
                             _failedItems[prevID] = true
                         end
                         OpenNext(idx + 1)
                     end)
                     return
                 end
-                C_Timer.After(0.15, function() OpenNext(idx + 1) end)
+                C_Timer.After(0.5, function() OpenNext(idx + 1) end)
             end
-            C_Timer.After(0.3, function() OpenNext(1) end)
+            C_Timer.After(0.5, function() OpenNext(1) end)
         end)
     end
 
@@ -902,6 +904,51 @@ qolFrame:SetScript("OnEvent", function(self)
         end)
     end
 
+    ---------------------------------------------------------------------------
+    --  24-Hour Clock Fix (Blizzard bug: CVar resets to 12h on every login)
+    --  We save the user's preference when they toggle the checkbox, then
+    --  restore it on login if Blizzard's bug reset it.
+    ---------------------------------------------------------------------------
+    do
+        local saved = EllesmereUIDB and EllesmereUIDB.clockFormat24h
+        -- Restore: only if user previously chose 24h and the CVar got reset
+        if saved and GetCVar("timeMgrUseMilitaryTime") ~= "1" then
+            C_Timer.After(0.5, function()
+                if not TimeManagerFrame then
+                    if TimeManager_LoadUI then TimeManager_LoadUI() end
+                end
+                local cb = TimeManagerMilitaryTimeCheck
+                if cb then
+                    cb:SetChecked(true)
+                    local fn = cb:GetScript("OnClick")
+                    if fn then fn(cb) end
+                end
+            end)
+        end
+        -- Track: hook the checkbox so we remember whenever the user changes it
+        local function HookClockCheckbox()
+            local cb = TimeManagerMilitaryTimeCheck
+            if not cb then return end
+            cb:HookScript("OnClick", function(self)
+                if not EllesmereUIDB then EllesmereUIDB = {} end
+                EllesmereUIDB.clockFormat24h = self:GetChecked() and true or nil
+            end)
+        end
+        -- The TimeManager may not be loaded yet; hook when it appears
+        if TimeManagerMilitaryTimeCheck then
+            HookClockCheckbox()
+        else
+            local hookFrame = CreateFrame("Frame")
+            hookFrame:RegisterEvent("ADDON_LOADED")
+            hookFrame:SetScript("OnEvent", function(self, _, addon)
+                if addon == "Blizzard_TimeManager" then
+                    self:UnregisterEvent("ADDON_LOADED")
+                    HookClockCheckbox()
+                end
+            end)
+        end
+    end
+
 end)
 
 -------------------------------------------------------------------------------
@@ -1415,11 +1462,12 @@ do
     local function CreateDurabilityWarning()
         if durWarnOverlay then return end
 
-        durWarnOverlay = CreateFrame("Frame", "EUI_DurabilityWarning", UIParent)
+        durWarnOverlay = CreateFrame("Frame", nil, UIParent)
         durWarnOverlay:SetSize(400, 40)
-        durWarnOverlay:SetFrameStrata("DIALOG")
-        durWarnOverlay:SetFrameLevel(99)
+        durWarnOverlay:SetFrameStrata("HIGH")
+        durWarnOverlay:SetFrameLevel(50)
         durWarnOverlay:EnableMouse(false)
+        durWarnOverlay:SetMouseClickEnabled(false)
 
         local fs = durWarnOverlay:CreateFontString(nil, "OVERLAY")
         fs:SetFont(EllesmereUI.EXPRESSWAY or "Fonts\\FRIZQT__.TTF", 18, EllesmereUI.GetFontOutlineFlag("extras"))
@@ -1494,7 +1542,7 @@ do
         if durWarnOverlay then durWarnOverlay:Hide() end
     end
 
-    local repairWarnFrame = CreateFrame("Frame", "EUI_RepairWarnHandler", UIParent)
+    local repairWarnFrame = CreateFrame("Frame", nil, UIParent)
     if not (EllesmereUIDB and EllesmereUIDB.repairWarning == false) then
         repairWarnFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
         repairWarnFrame:RegisterEvent("PLAYER_REGEN_DISABLED")
@@ -1679,4 +1727,140 @@ do
             EllesmereUI._applyCrosshair()
         end
     end)
+
+    ---------------------------------------------------------------------------
+    --  Map Coordinates
+    ---------------------------------------------------------------------------
+    do
+        local coordFrame
+        local coordText
+
+        local function CreateCoordFrame()
+            if coordFrame then return end
+            local mapLoaded = C_AddOns.IsAddOnLoaded("Blizzard_WorldMap")
+            if not mapLoaded or not WorldMapFrame then return end
+
+            coordFrame = CreateFrame("Frame", nil, WorldMapFrame.ScrollContainer)
+            coordFrame:SetFrameStrata("HIGH")
+            coordFrame:SetSize(1, 1)
+            coordFrame:SetPoint("BOTTOM", WorldMapFrame.ScrollContainer, "BOTTOM", 0, 10)
+
+            local PP = EllesmereUI.PanelPP
+            local fp = EllesmereUI.GetFontPath()
+            local outF = EllesmereUI.GetFontOutlineFlag()
+            local sz = (EllesmereUIDB and EllesmereUIDB.mapCoordsTextSize) or 12
+
+            local divider = coordFrame:CreateTexture(nil, "OVERLAY")
+            divider:SetColorTexture(1, 1, 1, 0.9)
+            PP.Size(divider, 2, sz)
+            divider:SetPoint("BOTTOM", coordFrame, "BOTTOM", 0, 0)
+
+            local useShadow = EllesmereUI.GetFontUseShadow()
+
+            local cursorFS = coordFrame:CreateFontString(nil, "OVERLAY")
+            cursorFS:SetFont(fp, sz, outF)
+            cursorFS:SetTextColor(1, 1, 1, 0.9)
+            cursorFS:SetShadowOffset(useShadow and 1 or 0, useShadow and -1 or 0)
+            cursorFS:SetJustifyH("RIGHT")
+            cursorFS:SetPoint("RIGHT", divider, "LEFT", -10, 0)
+
+            local playerFS = coordFrame:CreateFontString(nil, "OVERLAY")
+            playerFS:SetFont(fp, sz, outF)
+            playerFS:SetTextColor(1, 1, 1, 0.9)
+            playerFS:SetShadowOffset(useShadow and 1 or 0, useShadow and -1 or 0)
+            playerFS:SetJustifyH("LEFT")
+            playerFS:SetPoint("LEFT", divider, "RIGHT", 10, 0)
+
+            coordText = { cursor = cursorFS, player = playerFS, divider = divider }
+
+            local elapsed = 0
+            coordFrame:SetScript("OnUpdate", function(_, dt)
+                elapsed = elapsed + dt
+                if elapsed < 0.05 then return end
+                elapsed = 0
+                local mapID = WorldMapFrame:GetMapID()
+                if not mapID then
+                    cursorFS:SetText("")
+                    playerFS:SetText("")
+                    divider:Hide()
+                    return
+                end
+                -- Player position (hidden in instances)
+                local playerPos = C_Map.GetPlayerMapPosition(mapID, "player")
+                local hasPlayer = false
+                if playerPos then
+                    local px, py = playerPos:GetXY()
+                    if px and py and px > 0 and py > 0 then
+                        playerFS:SetText("P: " .. format("%.0f, %.0f", px * 100, py * 100))
+                        hasPlayer = true
+                    end
+                end
+                if hasPlayer then
+                    divider:Show()
+                    playerFS:Show()
+                else
+                    divider:Hide()
+                    playerFS:Hide()
+                end
+
+                -- Cursor position
+                local cText = "0, 0"
+                local child = WorldMapFrame.ScrollContainer.Child
+                if child and child:IsMouseOver() then
+                    local cx, cy = child:GetSize()
+                    if cx and cx > 0 and cy and cy > 0 then
+                        local scale = child:GetEffectiveScale()
+                        local left = child:GetLeft()
+                        local top = child:GetTop()
+                        if scale and left and top then
+                            local curX, curY = GetCursorPosition()
+                            local nx = (curX / scale - left) / cx
+                            local ny = (top - curY / scale) / cy
+                            if nx >= 0 and nx <= 1 and ny >= 0 and ny <= 1 then
+                                cText = format("%.0f, %.0f", nx * 100, ny * 100)
+                            end
+                        end
+                    end
+                end
+
+                cursorFS:SetText("C: " .. cText)
+            end)
+        end
+
+        EllesmereUI._applyMapCoords = function()
+            local enabled = EllesmereUIDB and EllesmereUIDB.mapCoords
+            if enabled then
+                CreateCoordFrame()
+                if coordFrame then
+                    local PP = EllesmereUI.PanelPP
+                    local fp = EllesmereUI.GetFontPath()
+                    local outF = EllesmereUI.GetFontOutlineFlag()
+                    local useShadow = EllesmereUI.GetFontUseShadow()
+                    local sz = (EllesmereUIDB and EllesmereUIDB.mapCoordsTextSize) or 12
+                    coordText.cursor:SetFont(fp, sz, outF)
+                    coordText.cursor:SetShadowOffset(useShadow and 1 or 0, useShadow and -1 or 0)
+                    coordText.player:SetFont(fp, sz, outF)
+                    coordText.player:SetShadowOffset(useShadow and 1 or 0, useShadow and -1 or 0)
+                    PP.Size(coordText.divider, 2, sz)
+                    coordFrame:Show()
+                end
+            elseif coordFrame then
+                coordFrame:Hide()
+            end
+        end
+
+        -- WorldMapFrame is load-on-demand; hook when it loads
+        if C_AddOns.IsAddOnLoaded("Blizzard_WorldMap") then
+            EllesmereUI._applyMapCoords()
+        else
+            local loader = CreateFrame("Frame")
+            loader:RegisterEvent("ADDON_LOADED")
+            loader:SetScript("OnEvent", function(self, _, addonName)
+                if addonName == "Blizzard_WorldMap" then
+                    self:UnregisterEvent("ADDON_LOADED")
+                    EllesmereUI._applyMapCoords()
+                end
+            end)
+        end
+    end
 end

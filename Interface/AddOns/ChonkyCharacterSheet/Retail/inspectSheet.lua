@@ -20,12 +20,11 @@ local modtex = _G["InspectModelFramebgtex"] or modbg:CreateTexture("InspectModel
 ---------------------------
 -- Module methods
 ---------------------------
-function module:Initialize()
+function module:Initialize(onlyStyle)
     -- Optional setup for the inspect sheet
     -- print("[CCS] inspectSheet initialized")
     -- Nothing to set up yet in this.  This will be future creation code.
 end
-
 
 function CCS.getraiderioscoreinspect()
     if option("showmythicplusscore_inspect") ~= true or InspectFrame == nil or InspectFrame.unit == nil then return "" end    
@@ -455,6 +454,11 @@ function CCS:inspect()
 								[103] = 2,   -- Feral
 								[104] = 2,   -- Guardian
 								[105] = 4, -- Restoration
+
+								-- DEMON HUNTER
+								[577] = 2, -- Havoc
+								[581] = 2, -- Vengeance
+								[1480] = 4, -- Devourer
 
 								-- SHAMAN
 								[262] = 4, -- Elemental

@@ -4,23 +4,139 @@
 --  Called by BuildQoLPage via EllesmereUI.BuildMacroFactory(parent, y, PP)
 -------------------------------------------------------------------------------
 
--- One-time migration: update EUI_Health macro body to use spell name instead of ID.
--- Runs once per account (v2 flag).
+-------------------------------------------------------------------------------
+--  Dynamic Health Recovery (disabled -- kept for future use)
+-------------------------------------------------------------------------------
+--[[ DYNAMIC_HEALTH_RECOVERY
+local EUI_HEALTH_MACRO_NAME = "EUI_Health"
+
+local HEALTH_RECOVERY_STONES = { 5512, 224464 }
+local HEALTH_RECOVERY_POTS = {
+    241304, 241305,
+}
+
+local function HealthMacroItemCount(itemID)
+    return GetItemCount(itemID, false) or 0
+end
+
+local function CollectHealthRecoveryItems()
+    local items = {}
+    for _, itemID in ipairs(HEALTH_RECOVERY_STONES) do
+        if HealthMacroItemCount(itemID) > 0 then
+            items[#items + 1] = itemID
+            if #items >= #HEALTH_RECOVERY_STONES then
+                break
+            end
+        end
+    end
+    for _, itemID in ipairs(HEALTH_RECOVERY_POTS) do
+        if HealthMacroItemCount(itemID) > 0 then
+            items[#items + 1] = itemID
+            break
+        end
+    end
+    return items
+end
+
+local function HealthRecoverySequenceKey(items)
+    return table.concat(items, ",")
+end
+
+local function GetHealthMacroDB()
+    if not EllesmereUIDB then EllesmereUIDB = {} end
+    if not EllesmereUIDB.macroFactory then EllesmereUIDB.macroFactory = {} end
+    if not EllesmereUIDB.macroFactory[EUI_HEALTH_MACRO_NAME] then
+        EllesmereUIDB.macroFactory[EUI_HEALTH_MACRO_NAME] = {}
+    end
+    return EllesmereUIDB.macroFactory[EUI_HEALTH_MACRO_NAME]
+end
+
+local lastHealthRecoveryKey = nil
+local healthMacroPendingUpdate = false
+
+local function ApplyHealthRecoveryMacro(items)
+    items = items or CollectHealthRecoveryItems()
+    local key = HealthRecoverySequenceKey(items)
+
+    local idx = GetMacroIndexByName(EUI_HEALTH_MACRO_NAME)
+    if idx == 0 then
+        lastHealthRecoveryKey = key
+        healthMacroPendingUpdate = false
+        return
+    end
+
+    if InCombatLockdown() then
+        if key ~= lastHealthRecoveryKey then
+            healthMacroPendingUpdate = true
+        end
+        return
+    end
+
+    if key == lastHealthRecoveryKey then
+        healthMacroPendingUpdate = false
+        return
+    end
+
+    EditMacro(idx, nil, nil, EllesmereUI.BuildHealthRecoveryMacroBody(GetHealthMacroDB(), items))
+    lastHealthRecoveryKey = key
+    healthMacroPendingUpdate = false
+end
+
+function EllesmereUI.BuildHealthRecoveryMacroBody(db, items)
+    db = db or {}
+    items = items or CollectHealthRecoveryItems()
+    local lines = {}
+
+    if db.showTooltip ~= false then
+        local tip = (items[1] and ("item:" .. items[1])) or "Recuperate"
+        lines[#lines + 1] = "#showtooltip " .. tip
+    end
+
+    lines[#lines + 1] = "/stopcasting"
+    lines[#lines + 1] = "/cast [nocombat] Recuperate"
+
+    if #items > 0 then
+        local seqParts = {}
+        for _, itemID in ipairs(items) do
+            seqParts[#seqParts + 1] = "item:" .. itemID
+        end
+        lines[#lines + 1] = "/castsequence [@player,combat] reset=combat "
+            .. table.concat(seqParts, ", ")
+    end
+
+    if #lines == 0 then return "" end
+    return table.concat(lines, "\n")
+end
+
 do
     local f = CreateFrame("Frame")
+    local bagPending = false
     f:RegisterEvent("PLAYER_LOGIN")
-    f:SetScript("OnEvent", function(self)
-        self:UnregisterAllEvents()
-        if not EllesmereUIDB then EllesmereUIDB = {} end
-        if EllesmereUIDB._healthMacroMigratedV2 then return end
-        local idx = GetMacroIndexByName("EUI_Health")
-        if idx == 0 then EllesmereUIDB._healthMacroMigratedV2 = true; return end
-        if InCombatLockdown() then return end
-        local body = "#showtooltip item:241304\n/cast [nocombat] Recuperate\n/use [combat] item:241304\n/use [combat] item:241305"
-        EditMacro(idx, nil, nil, body)
-        EllesmereUIDB._healthMacroMigratedV2 = true
+    f:RegisterEvent("PLAYER_ENTERING_WORLD")
+    f:RegisterEvent("PLAYER_REGEN_ENABLED")
+    f:RegisterEvent("BAG_UPDATE")
+    f:SetScript("OnEvent", function(_, event)
+        if event == "PLAYER_REGEN_ENABLED" then
+            if healthMacroPendingUpdate then
+                healthMacroPendingUpdate = false
+                ApplyHealthRecoveryMacro()
+            end
+            return
+        end
+        if event == "PLAYER_LOGIN" or event == "PLAYER_ENTERING_WORLD" then
+            C_Timer.After(1, ApplyHealthRecoveryMacro)
+            return
+        end
+        if bagPending then return end
+        bagPending = true
+        C_Timer.After(0.5, function()
+            bagPending = false
+            ApplyHealthRecoveryMacro()
+        end)
     end)
 end
+DYNAMIC_HEALTH_RECOVERY]]
+
 
 function EllesmereUI.BuildMacroFactory(parent, startY, PP)
     local ICON_SIZE = 40
@@ -53,7 +169,7 @@ function EllesmereUI.BuildMacroFactory(parent, startY, PP)
             name = "EUI_Health",
             icon = "Interface\\Icons\\inv_potion_131",
             label = "Health / Recuperate (Combat Based)",
-            fixedBody = "/cast [nocombat] Recuperate\n/use [combat] item:241304\n/use [combat] item:241305",
+            fixedBody = "/stopcasting\n/cast [nocombat] Recuperate\n/use [combat] item:241304\n/use [combat] item:241305",
             fixedTooltip = "item:241304",
         },
         {
@@ -114,25 +230,19 @@ function EllesmereUI.BuildMacroFactory(parent, startY, PP)
     -- Death Knight (250=Blood, 251=Frost, 252=Unholy)
     local DK_GEN = {
         { name="EUI_MindFreeze", icon="Interface\\Icons\\spell_deathknight_mindfreeze", label="Mind Freeze\n(Focus)", fixedBody="/cast [@focus,harm,nodead][] Mind Freeze", fixedTooltip="Mind Freeze" },
-        { name="EUI_DeathGrip", icon="Interface\\Icons\\spell_deathknight_strangulate", label="Death Grip\n(Focus)", fixedBody="/cast [@focus,harm,nodead][] Death Grip", fixedTooltip="Death Grip" },
         { name="EUI_Asphyxiate", icon="Interface\\Icons\\ability_deathknight_asphixiate", label="Asphyxiate\n(Focus)", fixedBody="/cast [@focus,harm,nodead][] Asphyxiate", fixedTooltip="Asphyxiate" },
-        { name="EUI_RaiseAllied", icon="Interface\\Icons\\spell_shadow_deadofnight", label="Raise Allied\n(Focus)", fixedBody="/cast [@focus,help,dead][] Raise Allied", fixedTooltip="Raise Allied" },
     }
     local DK_BLOOD = {
         { name="EUI_DnDCursor", icon="Interface\\Icons\\spell_shadow_deathanddecay", label="Death and Decay\n(Cursor)", fixedBody="/cast [@cursor] Death and Decay", fixedTooltip="Death and Decay" },
         { name="EUI_GorefiendCursor", icon="Interface\\Icons\\ability_deathknight_aoedeathgrip", label="Gorefiend's Grasp\n(Cursor)", fixedBody="/cast [@cursor] Gorefiend's Grasp", fixedTooltip="Gorefiend's Grasp" },
         { name="EUI_AbomLimb", icon="Interface\\Icons\\ability_deathknight_intovoidtentacles", label="Abomination Limb\n(Focus)", fixedBody="/cast [@focus,harm,nodead][] Abomination Limb", fixedTooltip="Abomination Limb" },
-        { name="EUI_ControlUndead", icon="Interface\\Icons\\inv_misc_bone_skull_01", label="Control Undead\nManagement", fixedBody="/target pet\n/run PetDismiss()\n/use Control Undead\n/petassist" },
     }
     local DK_FROST = {
-        { name="EUI_BlindSleet", icon="Interface\\Icons\\spell_frost_chillingblast", label="Blinding Sleet\n(Focus)", fixedBody="/cast [@focus,harm,nodead][] Blinding Sleet", fixedTooltip="Blinding Sleet" },
         { name="EUI_PFObliterate", icon="Interface\\Icons\\spell_deathknight_pillaroffrost", label="PF Obliterate", fixedBody="/cast Pillar of Frost\n/cast Obliterate\n/cast Raise Dead" },
         { name="EUI_PFReapersMark", icon="Interface\\Icons\\spell_deathknight_pillaroffrost", label="PF Reaper's Mark", fixedBody="/cast Pillar of Frost\n/cast Reaper's Mark\n/cast Raise Dead" },
     }
     local DK_UNHOLY = {
         { name="EUI_DarkTransform", icon="Interface\\Icons\\achievement_boss_festergutrotface", label="Dark Transform\n(Focus)", fixedBody="/cast [@focus,harm,nodead][] Dark Transformation", fixedTooltip="Dark Transformation" },
-        { name="EUI_UHOpener1", icon="Interface\\Icons\\spell_deathknight_armyofthedead", label="Opener\n(Trinket 1)", fixedBody="/cast Army of the Dead\n/use Tempered Potion\n/use 13\n/cast Dark Transformation" },
-        { name="EUI_UHOpener2", icon="Interface\\Icons\\spell_deathknight_armyofthedead", label="Opener\n(Trinket 2)", fixedBody="/cast Army of the Dead\n/use Tempered Potion\n/use 14\n/cast Dark Transformation" },
         { name="EUI_PetSwap", icon="Interface\\Icons\\ability_devour", label="Pet Target\nSwap", fixedBody="/cast Leap\n/petattack\n/startattack" },
         { name="EUI_PetMove", icon="Interface\\Icons\\achievement_boss_festergutrotface", label="Pet Move", fixedBody="/petmoveto", fixedTooltip="dark transformation" },
         { name="EUI_PetResummon", icon="Interface\\Icons\\spell_shadow_animatedead", label="Pet Resummon", fixedBody="/script PetDismiss()\n/cast [nopet] Raise Dead" },
@@ -141,14 +251,13 @@ function EllesmereUI.BuildMacroFactory(parent, startY, PP)
     -- Demon Hunter (577=Havoc, 581=Vengeance)
     local DH_GEN = {
         { name="EUI_Disrupt", icon="Interface\\Icons\\ability_demonhunter_consumemagic", label="Disrupt\n(Focus)", fixedBody="/cast [@focus,harm,nodead][] Disrupt", fixedTooltip="Disrupt" },
-        { name="EUI_Imprison", icon="Interface\\Icons\\ability_demonhunter_imprison", label="Imprison\n(Focus)", fixedBody="/cast [@focus,harm,nodead][] Imprison", fixedTooltip="Imprison" },
         { name="EUI_ConsumeMagic", icon="Interface\\Icons\\spell_shadow_manaburn", label="Consume Magic\n(Focus)", fixedBody="/cast [@focus,harm,nodead][] Consume Magic", fixedTooltip="Consume Magic" },
         { name="EUI_MetaCursor", icon="Interface\\Icons\\ability_demonhunter_metamorphasisdps", label="Metamorphosis\n(Cursor)", fixedBody="/cast [@cursor] Metamorphosis", fixedTooltip="Metamorphosis" },
-        { name="EUI_Torment", icon="Interface\\Icons\\ability_demonhunter_torment", label="Torment\n(Focus)", fixedBody="/cast [@focus,harm][] Torment", fixedTooltip="Torment" },
         { name="EUI_SigilFlame", icon="Interface\\Icons\\ability_demonhunter_sigilofinquisition", label="Sigil of Flame\n(Cursor)", fixedBody="/cast [@cursor] Sigil of Flame", fixedTooltip="Sigil of Flame" },
         { name="EUI_SigilMisery", icon="Interface\\Icons\\ability_demonhunter_sigilofmisery", label="Sigil of Misery\n(Cursor)", fixedBody="/cast [@cursor] Sigil of Misery", fixedTooltip="Sigil of Misery" },
     }
     local DH_DEVOURER = {
+        { name="EUI_VoidMeta", icon="Interface\\Icons\\ability_demonhunter_metamorphasisdps", label="Void Metamorphosis\n+ Trinket 1", fixedBody="/cast Void Metamorphosis\n/use 13", fixedTooltip="Void Metamorphosis" },
         { name="EUI_ShiftCursor", icon="Interface\\Icons\\inv_12_dh_void_ability_shift", label="Shift\n(Cursor)", fixedBody="/cast [@cursor] Shift", fixedTooltip="Shift" },
     }
     local DH_HAVOC = {
@@ -163,12 +272,8 @@ function EllesmereUI.BuildMacroFactory(parent, startY, PP)
 
     -- Druid (102=Balance, 103=Feral, 104=Guardian, 105=Restoration)
     local DRUID_GEN = {
-        { name="EUI_Cyclone", icon="Interface\\Icons\\spell_nature_cyclone", label="Cyclone\n(Focus)", fixedBody="/cast [@focus,harm,nodead][] Cyclone", fixedTooltip="Cyclone" },
         { name="EUI_UrsolVortex", icon="Interface\\Icons\\spell_nature_stoneclawtotem", label="Ursol's Vortex\n(Cursor)", fixedBody="/cast [@cursor] Ursol's Vortex" },
         { name="EUI_Innervate", icon="Interface\\Icons\\spell_nature_lightning", label="Innervate\n(Focus)", fixedBody="/cast [@focus,help,nodead][] Innervate", fixedTooltip="Innervate" },
-        { name="EUI_Soothe", icon="Interface\\Icons\\ability_hunter_beastsoothe", label="Soothe\n(Focus)", fixedBody="/cast [@focus,harm,nodead][] Soothe", fixedTooltip="Soothe" },
-        { name="EUI_StopBear", icon="Interface\\Icons\\ability_racial_bearform", label="Stop Cast\nBear Form", fixedBody="/stopcasting\n/cast Bear Form" },
-        { name="EUI_StopWildCharge", icon="Interface\\Icons\\spell_druid_wildcharge", label="Stop Cast\nWild Charge", fixedBody="/stopcasting\n/cast Wild Charge" },
         { name="EUI_RemoveCorrupt", icon="Interface\\Icons\\spell_holy_removecurse", label="Remove Corruption\n(Focus)", fixedBody="/cast [@focus,help,nodead][] Remove Corruption", fixedTooltip="Remove Corruption" },
     }
     local DRUID_BAL = {
@@ -178,11 +283,9 @@ function EllesmereUI.BuildMacroFactory(parent, startY, PP)
     }
     local DRUID_FERAL = {
         { name="EUI_SkullBash", icon="Interface\\Icons\\inv_bone_skull_04", label="Skull Bash\n(Focus)", fixedBody="/cast [@focus,harm,nodead][] Skull Bash", fixedTooltip="Skull Bash" },
-        { name="EUI_SurvInstCombo", icon="Interface\\Icons\\ability_druid_tigersroar", label="Survival Instincts\nCombo", fixedBody="/cast Survival Instincts\n/cast Barkskin", fixedTooltip="Survival Instincts" },
     }
     local DRUID_GUARD = {
         { name="EUI_SkullBash", icon="Interface\\Icons\\inv_bone_skull_04", label="Skull Bash\n(Focus)", fixedBody="/cast [@focus,harm,nodead][] Skull Bash", fixedTooltip="Skull Bash" },
-        { name="EUI_Growl", icon="Interface\\Icons\\ability_physical_taunt", label="Growl\n(Focus)", fixedBody="/cast [@focus,harm,nodead][] Growl", fixedTooltip="Growl" },
     }
     local DRUID_RESTO = {
         { name="EUI_Ironbark", icon="Interface\\Icons\\spell_druid_ironbark", label="Ironbark\n(Focus)", fixedBody="/cast [@focus,help,nodead][] Ironbark", fixedTooltip="Ironbark" },
@@ -203,10 +306,11 @@ function EllesmereUI.BuildMacroFactory(parent, startY, PP)
     }
     local EVOKER_DEV = {
         { name="EUI_Quell", icon="Interface\\Icons\\ability_evoker_quell", label="Quell\n(Focus)", fixedBody="/cast [@focus,harm,nodead][] Quell", fixedTooltip="Quell" },
-        { name="EUI_DragonrageBurst", icon="Interface\\Icons\\ability_evoker_dragonrage2", label="Dragonrage\nBurst", fixedBody="/cast Dragonrage\n/use 13\n/use 14", fixedTooltip="Dragonrage" },
+        { name="EUI_DragonrageBurst", icon="Interface\\Icons\\ability_evoker_dragonrage2", label="Dragonrage\nBurst", fixedBody="/cast Dragonrage\n/use 13", fixedTooltip="Dragonrage" },
     }
     local EVOKER_PRES = {
         { name="EUI_DreamBreath", icon="Interface\\Icons\\ability_evoker_dreambreath", label="Dream Breath\n(Cursor)", fixedBody="/cast [@cursor] Dream Breath", fixedTooltip="Dream Breath" },
+        { name="EUI_Spiritbloom", icon="Interface\\Icons\\ability_evoker_spiritbloom2", label="Spiritbloom\n(Cursor)", fixedBody="/cast [@cursor] Spiritbloom", fixedTooltip="Spiritbloom" },
     }
 
     -- Hunter (253=BeastMastery, 254=Marksmanship, 255=Survival)
@@ -218,15 +322,12 @@ function EllesmereUI.BuildMacroFactory(parent, startY, PP)
         { name="EUI_FlareCursor", icon="Interface\\Icons\\spell_frost_stun", label="Flare\n(Cursor)", fixedBody="/cast [@cursor] Flare", fixedTooltip="Flare" },
         { name="EUI_TarTrap", icon="Interface\\Icons\\spell_nature_stranglevines", label="Tar Trap\n(Cursor)", fixedBody="/cast [@cursor] Tar Trap", fixedTooltip="Tar Trap" },
         { name="EUI_BindingShot", icon="Interface\\Icons\\spell_shaman_bindelemental", label="Binding Shot\n(Cursor)", fixedBody="/cast [@cursor] Binding Shot", fixedTooltip="Binding Shot" },
-        { name="EUI_PetTaunt", icon="Interface\\Icons\\ability_devour", label="Pet Taunt", fixedBody="/use [@focus,exists,harm]Growl\n/use Scale Shield\n/use Harden Carapace\n/use Bristle\n/use Bulwark\n/use Obsidian Skin\n/use Defense Matrix\n/use Solid Shell\n/use Shell Shield" },
     }
     local HUNTER_BM = {
-        { name="EUI_Intimidation", icon="Interface\\Icons\\ability_devour", label="Intimidation\n(Focus)", fixedBody="/cast [@focus,harm,nodead][] Intimidation", fixedTooltip="Intimidation" },
         { name="EUI_RoarSacrifice", icon="Interface\\Icons\\ability_hunter_ferociouswild", label="Roar of\nSacrifice", fixedBody="/target[@focus, help, nodead]\n/cast Roar of Sacrifice\n/targetlasttarget\n/cast [@pet] Misdirection", fixedTooltip="Roar of Sacrifice" },
         { name="EUI_SpiritMend", icon="Interface\\Icons\\ability_hunter_spiritmend", label="Spirit Mend", fixedBody="/cast [@target,help,nodead][@mouseover,help,nodead][@player] Spirit Mend", fixedTooltip="Spirit Mend" },
     }
     local HUNTER_MM = {
-        { name="EUI_TrueshotBurst", icon="Interface\\Icons\\ability_trueshot", label="Trueshot\nBurst", fixedBody="/cast Trueshot\n/use 13\n/use 14", fixedTooltip="Trueshot" },
     }
     local HUNTER_SURV = {
         { name="EUI_Harpoon", icon="Interface\\Icons\\ability_hunter_harpoon", label="Harpoon\n(Focus)", fixedBody="/cast [@focus,harm,nodead][] Harpoon", fixedTooltip="Harpoon" },
@@ -237,16 +338,11 @@ function EllesmereUI.BuildMacroFactory(parent, startY, PP)
         { name="EUI_Counterspell", icon="Interface\\Icons\\spell_frost_iceshock", label="Counterspell\n(Focus)", fixedBody="/cast [@focus,harm,nodead][] Counterspell", fixedTooltip="Counterspell" },
         { name="EUI_Spellsteal", icon="Interface\\Icons\\spell_arcane_arcane02", label="Spellsteal\n(Focus)", fixedBody="/cast [@focus,harm,nodead][] Spellsteal", fixedTooltip="Spellsteal" },
         { name="EUI_RemoveCurse", icon="Interface\\Icons\\spell_holy_removecurse", label="Remove Curse\n(Focus)", fixedBody="/cast [@focus,help,nodead][] Remove Curse", fixedTooltip="Remove Curse" },
-        { name="EUI_Polymorph", icon="Interface\\Icons\\spell_nature_polymorph", label="Polymorph\n(Focus)", fixedBody="/cast [@focus,harm,nodead][] Polymorph", fixedTooltip="Polymorph" },
-        { name="EUI_StopBlink", icon="Interface\\Icons\\spell_arcane_blink", label="Stop Cast\nBlink", fixedBody="/stopcasting [known:Improved Blink]\n/cast Blink" },
-        { name="EUI_IceBlock", icon="Interface\\Icons\\spell_frost_frost", label="Ice Block\nCancel/Cast", fixedBody="/cancelaura Ice Block\n/stopcasting [noknown:Ice Cold]\n/cast Ice Block" },
     }
     local MAGE_ARCANE = {
-        { name="EUI_ArcanePower", icon="Interface\\Icons\\spell_nature_lightning", label="Arcane Power\n+ Trinket 1", fixedBody="/cast Arcane Power\n/use 13", fixedTooltip="Arcane Power" },
         { name="EUI_PoMBlast", icon="Interface\\Icons\\spell_nature_enchantarmor", label="Presence of Mind\nArcane Blast", fixedBody="/cast Presence of Mind\n/cast Arcane Blast\n/cqs" },
     }
     local MAGE_FIRE = {
-        { name="EUI_CombustBurst", icon="Interface\\Icons\\spell_fire_sealoffire", label="Combustion\nBurst", fixedBody="/cast Combustion\n/cast Fire Blast\n/use 13", fixedTooltip="Combustion" },
         { name="EUI_Flamestrike", icon="Interface\\Icons\\spell_fire_selfdestruct", label="Flamestrike\n(Cursor)", fixedBody="/cast [@cursor] Flamestrike" },
         { name="EUI_MeteorCursor", icon="Interface\\Icons\\spell_mage_meteor", label="Meteor\n(Cursor)", fixedBody="/cast [@cursor] Meteor" },
     }
@@ -257,14 +353,11 @@ function EllesmereUI.BuildMacroFactory(parent, startY, PP)
     -- Monk (268=Brewmaster, 270=Mistweaver, 269=Windwalker)
     local MONK_GEN = {
         { name="EUI_Detox", icon="Interface\\Icons\\ability_rogue_imrovedrecuperate", label="Detox\n(Focus)", fixedBody="/cast [@focus,help,nodead][] Detox", fixedTooltip="Detox" },
-        { name="EUI_Paralysis", icon="Interface\\Icons\\ability_monk_paralysis", label="Paralysis\n(Focus)", fixedBody="/cast [@focus,harm,nodead][] Paralysis", fixedTooltip="Paralysis" },
         { name="EUI_TigersLust", icon="Interface\\Icons\\ability_monk_tigerslust", label="Tiger's Lust\n(Focus)", fixedBody="/cast [@focus,help,nodead][] Tiger's Lust", fixedTooltip="Tiger's Lust" },
         { name="EUI_RingOfPeace", icon="Interface\\Icons\\spell_monk_ringofpeace", label="Ring of Peace\n(Cursor)", fixedBody="/cast [@cursor] Ring of Peace" },
-        { name="EUI_TouchOfDeath", icon="Interface\\Icons\\ability_monk_touchofdeath", label="Touch of Death\n(Focus)", fixedBody="/cast [@focus,harm,nodead][] Touch of Death", fixedTooltip="Touch of Death" },
     }
     local MONK_BREW = {
         { name="EUI_SpearHand", icon="Interface\\Icons\\ability_monk_spearhand", label="Spear Hand Strike\n(Focus)", fixedBody="/cast [@focus,harm,nodead][] Spear Hand Strike", fixedTooltip="Spear Hand Strike" },
-        { name="EUI_Provoke", icon="Interface\\Icons\\ability_monk_provoke", label="Provoke\n(Focus)", fixedBody="/cast [@focus,harm,nodead][] Provoke", fixedTooltip="Provoke" },
         { name="EUI_BlackOxStatue", icon="Interface\\Icons\\monk_ability_summonoxstatue", label="Black Ox Statue\n(Cursor)", fixedBody="/cast [@cursor] Summon Black Ox Statue" },
     }
     local MONK_WW = {
@@ -279,25 +372,18 @@ function EllesmereUI.BuildMacroFactory(parent, startY, PP)
     local PALA_GEN = {
         { name="EUI_BoFreedom", icon="Interface\\Icons\\spell_holy_sealofvalor", label="Blessing of\nFreedom (Focus)", fixedBody="/cast [@focus,help,nodead][] Blessing of Freedom", fixedTooltip="Blessing of Freedom" },
         { name="EUI_BoProtection", icon="Interface\\Icons\\spell_holy_sealofprotection", label="Blessing of\nProtection (Focus)", fixedBody="/cast [@focus,help,nodead][] Blessing of Protection", fixedTooltip="Blessing of Protection" },
-        { name="EUI_HammerJustice", icon="Interface\\Icons\\spell_holy_sealofmight", label="Hammer of Justice\n(Focus)", fixedBody="/cast [@focus,exists] Hammer of Justice" },
         { name="EUI_DivineShield", icon="Interface\\Icons\\spell_holy_divineshield", label="Divine Shield\nCancel/Cast", fixedBody="/stopcasting\n/cancelaura Divine Shield\n/cast Divine Shield", fixedTooltip="Divine Shield" },
         { name="EUI_ToTLayOnHands", icon="Interface\\Icons\\spell_holy_layonhands", label="Lay on Hands\n(Target of Target)", fixedBody="/cast [@targettarget] Lay on Hands" },
         { name="EUI_Cleanse", icon="Interface\\Icons\\spell_holy_purify", label="Cleanse\n(Focus)", fixedBody="/cast [@focus,help,nodead][] Cleanse", fixedTooltip="Cleanse" },
         { name="EUI_LayOnHands", icon="Interface\\Icons\\spell_holy_layonhands", label="Lay on Hands\n(Focus)", fixedBody="/cast [@focus,help,nodead][] Lay on Hands", fixedTooltip="Lay on Hands" },
-        { name="EUI_Intercession", icon="Interface\\Icons\\spell_holy_resurrection", label="Intercession\n(Focus)", fixedBody="/cast [@focus,help,dead][] Intercession", fixedTooltip="Intercession" },
     }
     local PALA_HOLY = {
-        { name="EUI_DevoJudge", icon="Interface\\Icons\\spell_holy_devotionaura", label="Devo Aura\nJudgment", tooltip="Casts Devotion Aura if it's not active\nwhen pressing Judgment", fixedBody="/startattack\n/cast [nostance:2] Devotion Aura; Judgment", fixedTooltip="Judgment" },
-        { name="EUI_AutoRites", icon="Interface\\Icons\\inv_mace_2h_oribosquestholy_d_01", macroIcon=237172, label="Auto Apply\nRites", tooltip="Automatically applies Rite of Sanctification\nor Adjuration depending on talents", fixedBody="/cast [known:433568] Rite of Sanctification\n/cast [known:433583] Rite of Adjuration\n/use 16" },
-        { name="EUI_BeaconLight", icon="Interface\\Icons\\ability_paladin_beaconoflight", label="Beacon of Light\n(Focus)", fixedBody="/cast [@focus,help,nodead][] Beacon of Light", fixedTooltip="Beacon of Light" },
     }
     local PALA_PROT = {
         { name="EUI_Rebuke", icon="Interface\\Icons\\spell_holy_rebuke", label="Rebuke\n(Focus)", fixedBody="/cast [@focus,harm,nodead][] Rebuke", fixedTooltip="Rebuke" },
-        { name="EUI_HandReckoning", icon="Interface\\Icons\\spell_holy_unyieldingfaith", label="Hand of Reckoning\n(Focus)", fixedBody="/cast [@focus,harm,nodead][] Hand of Reckoning", fixedTooltip="Hand of Reckoning" },
     }
     local PALA_RET = {
         { name="EUI_Rebuke", icon="Interface\\Icons\\spell_holy_rebuke", label="Rebuke\n(Focus)", fixedBody="/cast [@focus,harm,nodead][] Rebuke", fixedTooltip="Rebuke" },
-        { name="EUI_ExecSentence", icon="Interface\\Icons\\spell_paladin_executionsentence", label="Execution Sentence\n(Focus)", fixedBody="/cast [@focus,harm,nodead][] Execution Sentence", fixedTooltip="Execution Sentence" },
     }
 
     -- Priest (256=Discipline, 257=Holy, 258=Shadow)
@@ -326,18 +412,15 @@ function EllesmereUI.BuildMacroFactory(parent, startY, PP)
     -- Rogue (259=Assassination, 260=Outlaw, 261=Subtlety)
     local ROGUE_GEN = {
         { name="EUI_Kick", icon="Interface\\Icons\\ability_kick", label="Kick\n(Focus)", fixedBody="/cast [@focus,harm,nodead][] Kick", fixedTooltip="Kick" },
-        { name="EUI_Blind", icon="Interface\\Icons\\spell_shadow_mindsteal", label="Blind\n(Focus)", fixedBody="/cast [@focus,harm,nodead][] Blind", fixedTooltip="Blind" },
         { name="EUI_TricksOfTrade", icon="Interface\\Icons\\ability_rogue_tricksofthetrade", label="Tricks of Trade\n(Focus)", fixedBody="/cast [@focus,help,nodead][] Tricks of the Trade", fixedTooltip="Tricks of the Trade" },
         { name="EUI_DistractCursor", icon="Interface\\Icons\\ability_rogue_distract", label="Distract\n(Cursor)", fixedBody="/cast [@cursor] Distract", fixedTooltip="Distract" },
     }
     local ROGUE_ASS = {
-        { name="EUI_DeathmarkBurst", icon="Interface\\Icons\\ability_rogue_deathmark", label="Deathmark\nBurst", fixedBody="/cast Deathmark\n/use 13", fixedTooltip="Deathmark" },
     }
     local ROGUE_OUTLAW = {
         { name="EUI_GrapplingHook", icon="Interface\\Icons\\ability_rogue_grapplinghook", label="Grappling Hook\n(Cursor)", fixedBody="/cast [@cursor] Grappling Hook", fixedTooltip="Grappling Hook" },
     }
     local ROGUE_SUB = {
-        { name="EUI_ShadowBlades", icon="Interface\\Icons\\inv_knife_1h_grimbatolraid_d_03", label="Shadow Blades\nBurst", fixedBody="/cast Shadow Blades\n/use 13", fixedTooltip="Shadow Blades" },
         { name="EUI_CoupDeGrace", icon="Interface\\Icons\\ability_rogue_coupdetat", label="Coup de Grace\n+ Black Powder", fixedBody="/cast Coup de Grace\n/cast Black Powder" },
         { name="EUI_EasyStealth", icon="Interface\\Icons\\ability_stealth", label="Easy Stealth", fixedBody="/cancelaura [nocombat] Shadow Dance\n/cast !Stealth", fixedTooltip="Stealth" },
     }
@@ -346,13 +429,11 @@ function EllesmereUI.BuildMacroFactory(parent, startY, PP)
     local SHAMAN_GEN = {
         { name="EUI_WindShear", icon="Interface\\Icons\\spell_nature_cyclonestrikes", label="Wind Shear\n(Focus)", fixedBody="/cast [@focus,harm,nodead][] Wind Shear", fixedTooltip="Wind Shear" },
         { name="EUI_Purge", icon="Interface\\Icons\\spell_nature_purge", label="Purge\n(Focus)", fixedBody="/cast [@focus,harm,nodead][] Purge", fixedTooltip="Purge" },
-        { name="EUI_Hex", icon="Interface\\Icons\\spell_shaman_hex", label="Hex\n(Focus)", fixedBody="/cast [@focus,harm,nodead][] Hex", fixedTooltip="Hex" },
         { name="EUI_CleanseSpirit", icon="Interface\\Icons\\ability_shaman_cleansespirit", label="Cleanse Spirit\n(Focus)", fixedBody="/cast [@focus,help,nodead][] Cleanse Spirit", fixedTooltip="Cleanse Spirit" },
         { name="EUI_WindrushTotem", icon="Interface\\Icons\\ability_shaman_windwalktotem", label="Windrush Totem\n(Cursor)", fixedBody="/cast [@cursor] Wind Rush Totem", fixedTooltip="Wind Rush Totem" },
         { name="EUI_CapacitorTotem", icon="Interface\\Icons\\spell_nature_brilliance", label="Capacitor Totem\n(Cursor)", fixedBody="/cast [@cursor] Capacitor Totem", fixedTooltip="Capacitor Totem" },
     }
     local SHAMAN_ELE = {
-        { name="EUI_EleBurstOpener", icon="Interface\\Icons\\spell_fire_elementaldevastation", label="Burst Opener", fixedBody="/use Ascendance\n/use 13\n/use Ancestral Swiftness\n/use Natures Swiftness\n/use Tempered Potion" },
         { name="EUI_EarthquakeCursor", icon="Interface\\Icons\\spell_shaman_earthquake", label="Earthquake\n(Cursor)", fixedBody="/cast [@cursor] Earthquake", fixedTooltip="Earthquake" },
     }
     local SHAMAN_ENH = {
@@ -365,9 +446,6 @@ function EllesmereUI.BuildMacroFactory(parent, startY, PP)
 
     -- Warlock (265=Affliction, 266=Demonology, 267=Destruction)
     local LOCK_GEN = {
-        { name="EUI_Fear", icon="Interface\\Icons\\spell_shadow_possession", label="Fear\n(Focus)", fixedBody="/cast [@focus,harm,nodead][] Fear", fixedTooltip="Fear" },
-        { name="EUI_Banish", icon="Interface\\Icons\\spell_shadow_cripple", label="Banish\n(Focus)", fixedBody="/cast [@focus,harm,nodead][] Banish", fixedTooltip="Banish" },
-        { name="EUI_MortalCoil", icon="Interface\\Icons\\ability_warlock_mortalcoil", label="Mortal Coil\n(Focus)", fixedBody="/cast [@focus,harm,nodead][] Mortal Coil", fixedTooltip="Mortal Coil" },
         { name="EUI_Shadowfury", icon="Interface\\Icons\\spell_shadow_shadowfury", label="Shadowfury\n(Cursor)", fixedBody="/cast [@cursor] Shadowfury" },
         { name="EUI_DemonicGateway", icon="Interface\\Icons\\spell_warlock_demonicportal_green", label="Demonic Gateway\n(Cursor)", fixedBody="/cast [@cursor] Demonic Gateway" },
         { name="EUI_SoulburnHS", icon="Interface\\Icons\\spell_warlock_soulburn", label="Soulburn\nHealthstone", fixedBody="/cast [known:Soulburn] Soulburn\n/use [known:Pact of Gluttony] Demonic Healthstone; Healthstone", fixedTooltip="[known:Pact of Gluttony] Demonic Healthstone; Healthstone" },
@@ -385,20 +463,14 @@ function EllesmereUI.BuildMacroFactory(parent, startY, PP)
     -- Warrior (71=Arms, 72=Fury, 73=Protection)
     local WARRIOR_GEN = {
         { name="EUI_Pummel", icon="Interface\\Icons\\inv_gauntlets_04", label="Pummel\n(Focus)", fixedBody="/cast [@focus,harm,nodead][] Pummel", fixedTooltip="Pummel" },
-        { name="EUI_StormBolt", icon="Interface\\Icons\\warrior_talent_icon_stormbolt", label="Storm Bolt\n(Focus)", fixedBody="/cast [@focus,harm,nodead][] Storm Bolt", fixedTooltip="Storm Bolt" },
         { name="EUI_Intervene", icon="Interface\\Icons\\ability_warrior_safeguard", label="Intervene\n(Focus)", fixedBody="/cast [@focus,help,nodead][] Intervene", fixedTooltip="Intervene" },
         { name="EUI_HeroicLeap", icon="Interface\\Icons\\ability_heroicleap", label="Heroic Leap\n(Cursor)", fixedBody="/cast [@cursor] Heroic Leap", fixedTooltip="Heroic Leap" },
-        { name="EUI_OneButtonStance", icon="Interface\\Icons\\ability_warrior_defensivestance", label="One Button\nStance", fixedBody="/cast [stance:2]!Defensive Stance;[known:386164]!Battle Stance;[known:386196]!Berserker Stance" },
     }
     local WARRIOR_ARMS = {
-        { name="EUI_AvatarBurst", icon="Interface\\Icons\\warrior_talent_icon_avatar", label="Avatar\nBurst", fixedBody="/cast Avatar\n/cast Warbreaker\n/use 13", fixedTooltip="Avatar" },
     }
     local WARRIOR_FURY = {
-        { name="EUI_ReckBurst", icon="Interface\\Icons\\warrior_talent_icon_innerrage", label="Recklessness\nBurst", fixedBody="/cast Recklessness\n/cast Avatar\n/use 13", fixedTooltip="Recklessness" },
     }
     local WARRIOR_PROT = {
-        { name="EUI_Taunt", icon="Interface\\Icons\\spell_nature_reincarnation", label="Taunt\n(Focus)", fixedBody="/cast [@focus,harm,nodead][] Taunt", fixedTooltip="Taunt" },
-        { name="EUI_RavagerCursor", icon="Interface\\Icons\\warrior_talent_icon_ravager", label="Ravager\n(Cursor)", fixedBody="/cast [@cursor] Ravager", fixedTooltip="Ravager" },
     }
 
     local SPEC_DEFS = {
@@ -500,6 +572,13 @@ function EllesmereUI.BuildMacroFactory(parent, startY, PP)
         return nil
     end
 
+    local function GetMacroInventoryKey(def, db)
+        if def.healthRecovery then
+            return lastHealthRecoveryKey or HealthRecoverySequenceKey(CollectHealthRecoveryItems())
+        end
+        return GetFirstAvailableItemID(def, db)
+    end
+
     local function BuildMacroBody(def, db)
         if def.checkboxes then
             local cbs = def.checkboxes
@@ -535,6 +614,8 @@ function EllesmereUI.BuildMacroFactory(parent, startY, PP)
             end
             if #lines == 0 then return "" end
             return body .. table.concat(lines, "\n")
+        elseif def.healthRecovery then
+            return EllesmereUI.BuildHealthRecoveryMacroBody(db, nil)
         elseif def.fixedBody then
             local body = ""
             if db.showTooltip ~= false and def.fixedTooltip then
@@ -550,6 +631,10 @@ function EllesmereUI.BuildMacroFactory(parent, startY, PP)
     local pendingMacroUpdates = {}
 
     local function UpdateMacro(def, db)
+        if def.healthRecovery then
+            ApplyHealthRecoveryMacro()
+            return
+        end
         local idx = GetMacroIndexByName(def.name)
         if idx ~= 0 then
             if InCombatLockdown() then
@@ -849,6 +934,11 @@ function EllesmereUI.BuildMacroFactory(parent, startY, PP)
                             if icon then break end
                         end
                     end
+                elseif def.healthRecovery then
+                    local tipID = tonumber((lastHealthRecoveryKey or ""):match("^(%d+)"))
+                    if tipID and C_Item.GetItemIconByID then
+                        icon = C_Item.GetItemIconByID(tipID)
+                    end
                 elseif def.fixedTooltip then
                     local slot = tonumber(def.fixedTooltip)
                     if slot then
@@ -904,10 +994,15 @@ function EllesmereUI.BuildMacroFactory(parent, startY, PP)
                     if InCombatLockdown() then return end
                     if MacroExists() then
                         DeleteMacro(def.name)
+                        if def.healthRecovery then lastHealthRecoveryKey = nil end
                     else
                         local db = GetDB()
                         CreateMacro(def.name, def.macroIcon or "INV_MISC_QUESTIONMARK", BuildMacroBody(def, db), nil)
-                        lastAvailableItems[def.name] = GetFirstAvailableItemID(def, db)
+                        if def.healthRecovery then
+                            lastHealthRecoveryKey = nil
+                            ApplyHealthRecoveryMacro()
+                        end
+                        lastAvailableItems[def.name] = GetMacroInventoryKey(def, db)
                         PlayFlash()
                         C_Timer.After(0.15, function()
                             if not InCombatLockdown() then ShowMacroFrame() end
@@ -1138,7 +1233,11 @@ function EllesmereUI.BuildMacroFactory(parent, startY, PP)
                 if InCombatLockdown() then return end
                 local db = GetDB()
                 CreateMacro(def.name, def.macroIcon or "INV_MISC_QUESTIONMARK", BuildMacroBody(def, db), nil)
-                lastAvailableItems[def.name] = GetFirstAvailableItemID(def, db)
+                if def.healthRecovery then
+                    lastHealthRecoveryKey = nil
+                    ApplyHealthRecoveryMacro()
+                end
+                lastAvailableItems[def.name] = GetMacroInventoryKey(def, db)
                 self._playFlash()
                 C_Timer.After(0.1, RefreshState)
                 C_Timer.After(0.15, function()
@@ -1175,16 +1274,21 @@ function EllesmereUI.BuildMacroFactory(parent, startY, PP)
     local function UpdateInventoryDependentMacros()
         for _, btn in ipairs(allMacroButtons) do
             local mdef = btn._def
-            if mdef and mdef.checkboxes and btn._tex then
+            if mdef and btn._tex and mdef.checkboxes then
                 local idx = GetMacroIndexByName(mdef.name)
                 if idx ~= 0 then
                     local db = GetMacroDB(mdef.name)
-                    local newAvailableItemID = GetFirstAvailableItemID(mdef, db)
-                    local oldAvailableItemID = lastAvailableItems[mdef.name]
-                    if newAvailableItemID ~= oldAvailableItemID then
-                        lastAvailableItems[mdef.name] = newAvailableItemID
+                    local newKey = GetMacroInventoryKey(mdef, db)
+                    if newKey ~= lastAvailableItems[mdef.name] then
+                        lastAvailableItems[mdef.name] = newKey
                         UpdateMacro(mdef, db)
                     end
+                end
+            elseif mdef and btn._tex and mdef.healthRecovery then
+                local newKey = lastHealthRecoveryKey or GetMacroInventoryKey(mdef, GetMacroDB(mdef.name))
+                if newKey ~= lastAvailableItems[mdef.name] then
+                    lastAvailableItems[mdef.name] = newKey
+                    if btn._refreshIcon then btn._refreshIcon() end
                 end
             end
         end
@@ -1201,9 +1305,16 @@ function EllesmereUI.BuildMacroFactory(parent, startY, PP)
             local mdef = btn._def
             if mdef and btn._tex then
                 local ex = GetMacroIndexByName(mdef.name) ~= 0
-                if btn._isGray and not ex then btn._tex:SetDesaturated(false); btn._isGray = false
-                elseif not btn._isGray and ex then btn._tex:SetDesaturated(true); btn._isGray = true end
-                if btn._refreshIcon then btn._refreshIcon() end
+                local wasCreated = btn._isGray
+                if wasCreated and not ex then
+                    btn._tex:SetDesaturated(false)
+                    btn._isGray = false
+                    if btn._refreshIcon then btn._refreshIcon() end
+                elseif not wasCreated and ex then
+                    btn._tex:SetDesaturated(true)
+                    btn._isGray = true
+                    if btn._refreshIcon then btn._refreshIcon() end
+                end
                 if btn._cogPopup and btn._cogPopup:IsShown() and btn._cogPopup._refreshAction then
                     btn._cogPopup._refreshAction()
                 end

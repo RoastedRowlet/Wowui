@@ -4,6 +4,7 @@ local Grid2 = Grid2
 local Tooltip = Grid2.indicatorPrototype:new("tooltip")
 local next = next
 local InCombatLockDown = InCombatLockDown
+local issecretvalue = Grid2.issecretvalue
 
 Tooltip.Create = Grid2.Dummy
 Tooltip.Layout = Grid2.Dummy
@@ -96,11 +97,11 @@ function OnFrameEnter(frame)
 		local unit = frame.unit
 		if unit then
 			if tooltipOOC and not InCombatLockdown() then
-				Tooltip:Display(unit, Tooltip)
+				Tooltip:Display(unit, Tooltip, nil, frame)
 			elseif tooltipCheck() then
 				local status = Tooltip:GetCurrentStatus(unit, frame)
 				if status or tooltipDefault then
-					Tooltip:Display(unit, status or Tooltip)
+					Tooltip:Display(unit, status or Tooltip,nil, frame)
 				end
 			end
 		end
@@ -115,25 +116,39 @@ function OnFrameLeave()
 	end
 end
 
+-- workaround for raiderio for possible secret units (due to SecureGroupHeaders usage)
+local function FixSecretUnit(self, tip, unit)
+	if tip:IsTooltipType(Enum.TooltipDataType.Unit) then
+		local _, sunit = tip:GetUnit()
+		if sunit and issecretvalue(sunit) then
+			RaiderIO.ShowProfile(tip, unit)
+		end
+	end
+end
+
 -- Tooltip indicator methods
 function Tooltip:GetTooltip(unit, tip)
-	tip:SetUnit(unit) -- Special case to get unit info without linking "name" status to the indicator
+	tip:SetUnit(unit) -- special case to display unit info without linking "name" status to the indicator
 end
 
 function Tooltip:Display(unit, status, extraID, owner, anchor)
+	local GameTooltip = GameTooltip
 	if anchor then
 		GameTooltip:SetOwner(owner, anchor)
 	elseif self.dbx.tooltipAnchor then
+		tooltipOwner.unit = unit -- needed by addons that customize the unit tooltip.
 		GameTooltip:SetOwner(tooltipOwner, self.dbx.tooltipAnchor)
 	else
-		GameTooltip_SetDefaultAnchor(GameTooltip, UIParent)
+		GameTooltip_SetDefaultAnchor(GameTooltip, owner or UIParent)
 	end
 	status:GetTooltip(unit, GameTooltip, extraID)
+	self:FixSecretUnit(GameTooltip, unit)
 	GameTooltip:Show()
 	tooltipDisplayed = true
 end
 
 function Tooltip:Hide()
+	tooltipOwner.unit = nil
 	GameTooltip:Hide()
 	tooltipDisplayed = nil
 end
@@ -166,6 +181,7 @@ function Tooltip:UpdateDB()
 	tooltipDefault = dbx.showDefault
 	tooltipCheck = TooltipCheck[dbx.showTooltip or 4]
 	tooltipOwner = Grid2Layout.frame.frameBack
+	self.FixSecretUnit = (RaiderIO and RaiderIO.ShowProfile and FixSecretUnit) or Grid2.Dummy
 	self:SetMouseHooks(dbx.showTooltip~=1)
 end
 

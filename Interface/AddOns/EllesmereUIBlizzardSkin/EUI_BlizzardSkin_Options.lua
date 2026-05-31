@@ -100,6 +100,19 @@ initFrame:SetScript("OnEvent", function(self)
               end }
         );  y = y - h
 
+        _, h = W:DualRow(parent, y,
+            { type="toggle", text="Show Item Level",
+              tooltip="Displays a player's equipped item level on their unit tooltip.",
+              getValue=function()
+                  return not EllesmereUIDB or EllesmereUIDB.tooltipItemLevel ~= false
+              end,
+              setValue=function(v)
+                  if not EllesmereUIDB then EllesmereUIDB = {} end
+                  EllesmereUIDB.tooltipItemLevel = v
+              end },
+            { type="label", text="" }
+        );  y = y - h
+
         _, h = W:Spacer(parent, y, 20);  y = y - h
 
         _, h = W:SectionHeader(parent, "GROUP FINDER QUEUE", y);  y = y - h
@@ -354,6 +367,7 @@ initFrame:SetScript("OnEvent", function(self)
               setValue=function(v)
                   if not EllesmereUIDB then EllesmereUIDB = {} end
                   EllesmereUIDB.themedCharacterSheet = v
+                  EllesmereUIDB.themedInspectSheet = v
                   -- Individual feature toggles retain their values.
                   -- The disabled overlay handles the visual disable state.
                   if EllesmereUI.ShowConfirmPopup then
@@ -376,7 +390,6 @@ initFrame:SetScript("OnEvent", function(self)
                   if EllesmereUI._updateMythicRatingDisplay then EllesmereUI._updateMythicRatingDisplay() end
               end }
         );  y = y - h
-
 
         AttachDisabledOverlay(enableRow._rightRegion)
 
@@ -421,6 +434,20 @@ initFrame:SetScript("OnEvent", function(self)
               end }
         );  y = y - h
         AttachDisabledOverlay(enchGemRow)
+
+        local pvpRow
+        pvpRow, h = W:DualRow(parent, y,
+            { type="toggle", text="Show PvP Item Level",
+              tooltip="Display your PvP item level above the Mythic+ rating on the character sheet.",
+              getValue=function() return EllesmereUIDB and EllesmereUIDB.showPvpItemLevel or false end,
+              setValue=function(v)
+                  if not EllesmereUIDB then EllesmereUIDB = {} end
+                  EllesmereUIDB.showPvpItemLevel = v
+                  if EllesmereUI._updatePvpIlvlDisplay then EllesmereUI._updatePvpIlvlDisplay() end
+              end },
+            { type="label", text="" }
+        );  y = y - h
+        AttachDisabledOverlay(pvpRow)
 
         _, h = W:Spacer(parent, y, 10);  y = y - h
 
@@ -931,6 +958,7 @@ initFrame:SetScript("OnEvent", function(self)
                 EllesmereUIDB.reskinGameMenu = nil
                 EllesmereUIDB.showQueueTimer = nil
                 EllesmereUIDB.showMythicRating = nil
+                EllesmereUIDB.showPvpItemLevel = nil
                 EllesmereUIDB.statCategoryColors = nil
                 EllesmereUIDB.statSectionsOrder = nil
                 EllesmereUIDB.charSheetCollapsedSections = nil

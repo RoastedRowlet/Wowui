@@ -167,7 +167,6 @@ END
 VER 3 000000000000001D "focus skullbash" "134400"
 #024
 #showtooltip Skull Bash
-/cast [nostance:2] cat form
 /cast [@focus, exists, harm] Skull Bash
 END
 VER 3 000000000000003C "Focus Target" "132177"
@@ -179,7 +178,7 @@ VER 3 000000000000006B "FocusMark" "132160"
 #showtooltip
 /focus [exists,nodead][]
 /stopmacro [@focus,noexists]
-/tm [@focus] 5
+/tm [@focus] 4
 END
 VER 3 000000000000006C "FocusTargetMarker" "132219"
 /focus [@mouseover, harm, nodead][]

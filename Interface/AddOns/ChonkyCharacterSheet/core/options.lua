@@ -35,7 +35,7 @@ chktex:SetSize(96,96)
 chktex:SetPoint("TOPLEFT", frame, "TOPLEFT", 5, -5)
 chktex:SetTexture("Interface\\AddOns\\ChonkyCharacterSheet\\Media\\Textures\\chonky.png")
 
-local chonkfont = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+local chonkfont = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
 chonkfont:SetFont(CCS:GetDefaultFontForLocale(), 12, CCS.textoutline)
 if option("showfontshadow") == true then
     chonkfont:SetShadowColor(unpack(option("fontshadowcolor") or {0,0,0,1}))
@@ -85,7 +85,7 @@ frame:SetBackdrop({
 frame:SetBackdropColor(0.1, 0.1, 0.1, 0.7)  -- match dark grey background
 frame:SetBackdropBorderColor(0.4, .1, 0.6, .6)   -- purple border
 
-local fontests = _G["CCS_FONT_TEST"] or frame:CreateFontString("CCS_FONT_TEST", "OVERLAY", "GameFontNormal")
+local fontests = _G["CCS_FONT_TEST"] or frame:CreateFontString("CCS_FONT_TEST", "OVERLAY", "GameFontNormalSmall")
 
 local categoryScrollChildren = {}
 
@@ -102,6 +102,7 @@ local categoryList = {
     { name = "CHAR-RAID",       ver = CCS.RETAIL },
     { name = "INSPECT-SHEET",   ver=CCS.ALL },
     { name = "INSPECT-FONT",    ver=CCS.ALL },
+    { name = "GEAR-FINDER",    ver=CCS.RETAIL },  
 }
 
 -- Create scroll frame
@@ -144,7 +145,7 @@ for i, cat in ipairs(visibleCategories) do
     btn:SetSize(190, 20)
     btn:SetPoint("TOPLEFT", 5, -((i - 1) * 23) - 150)
 
-    btn.text = btn:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    btn.text = btn:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     btn.text:SetFont(CCS:GetDefaultFontForLocale(), 12, CCS.textoutline)
     if option("showfontshadow") == true then
         btn.text:SetShadowColor(unpack(option("fontshadowcolor") or {0,0,0,1}))
@@ -210,15 +211,24 @@ end
 -------------------------
 -- End of Basic Frame Creation
 -------------------------
+function CCS.GetSortedModules()
+    local sorted = {}
+
+    for name, module in pairs(CCS.Modules) do
+        table.insert(sorted, { name = name, module = module })
+    end
+
+    table.sort(sorted, function(a, b)
+        return a.name < b.name
+    end)
+
+    return sorted
+end
 function CCS.InitializeModules()
     if CCS.AreSecretsDisabled() then 
         CCS.initall = true
         return 
     end
-
-    local throttle = 0
-
-    if CCS.Throttles then throttle = CCS.Throttles.Init end
     
     if CCS:GetOptionValue("textoutline") == "Thin Outline" then
         CCS.textoutline = "OUTLINE"
@@ -236,17 +246,35 @@ function CCS.InitializeModules()
     end
 
     CCS.RefreshStyleColors()
-    --if (GetTime() - throttle) >= .02 then -- throttle to 1 update every 0.03s
-        for _, module in pairs(CCS.Modules) do
-            if type(module.Initialize) == "function" then
-                module:Initialize()
-            end
+
+---------------------------
+-- Test code for isolating module updates
+---------------------------
+--local sorted = CCS.GetSortedModules()
+--if type(sorted[1].module.Initialize) == "function" then sorted[1].module:Initialize(true) end -- Classic
+--if type(sorted[2].module.Initialize) == "function" then sorted[2].module:Initialize(true) end -- Character Sheet
+--if type(sorted[3].module.Initialize) == "function" then sorted[3].module:Initialize(true) end -- Character Stats
+--if type(sorted[4].module.Initialize) == "function" then sorted[7].module:Initialize(true) end -- gearfinder
+--if type(sorted[5].module.Initialize) == "function" then sorted[4].module:Initialize(true) end -- Inspect Sheet
+--if type(sorted[6].module.Initialize) == "function" then sorted[5].module:Initialize(true) end -- M+
+--if type(sorted[7].module.Initialize) == "function" then sorted[6].module:Initialize(true) end -- Raid
+
+    for _, module in pairs(CCS.Modules) do
+        if type(module.Initialize) == "function" then
+            module:Initialize(true)
         end
-        CCS:FireEvent("CCS_EVENT_OPTIONS")        
+    end
+    CCS:FireEvent("CCS_EVENT_OPTIONS")       
+    
+    if CCS.lastChangedOption == "optionsheetscale" or
+       CCS.lastChangedOption == "button_color" or
+       CCS.lastChangedOption == "hightlight_color" or
+       CCS.lastChangedOption == "border_color" or
+       CCS.lastChangedOption == "style_class_color" 
+    then
         frame:SetScale(option("optionsheetscale") or 1)
-    --end
-    CCS.UpdateOptionsFrame()
-    if CCS.Throttles then CCS.Throttles.Init = GetTime() end
+        CCS.UpdateOptionsFrame()
+    end
 end
 
 -------------------------------
@@ -288,7 +316,7 @@ defaultsBtn:SetScript("OnClick", function()
 end)
 
 if CCS.GetCurrentVersion() == CCS.TBC or CCS.GetCurrentVersion() == CCS.CLASSIC or CCS.GetCurrentVersion() == CCS.MOP then
-    defaultsBtn:Hide()
+--    defaultsBtn:Hide()
 end
 
 
@@ -501,7 +529,9 @@ function CCS:RefreshOptionsUI()
 
     for _, def in ipairs(ns.optionDefs) do
         local value = profile[def.key]
-        if value == nil then value = def.default end
+        if value == nil then
+            value = def.default or def.value or (def.values and def.values[1])
+        end
 
         if def.frame then
             if def.type == "slider" and def.frame.updateThumbPosition then
@@ -514,7 +544,7 @@ function CCS:RefreshOptionsUI()
             elseif def.type == "dropdown" or def.type == "font" then
                 -- normalize empty values
                 if value == nil or value == "" then
-                    value = def.default
+                    value = def.default or def.value or (def.values and def.values[1])
                 end
 
                 if def.frame.isCCSScrollDropdown and def.frame.SetSelectedValue then
@@ -610,7 +640,7 @@ local function newButton(def, parent, rowHeight)
     btn:SetSize(slotWidth-4, 22)
     CCS.SkinButton(btn)
     -- Label
-    local label = btn:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    local label = btn:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     label:SetText(def.label or "")
     label:SetAllPoints(btn) -- checkboxWidth + padding
     label:SetWordWrap(true)
@@ -628,10 +658,19 @@ local function newCheckbox(def, parent, rowHeight)
     local slotWidth = (def.slots or 1) * GlobalSlotWidth
     local key = def.key or def.label
 
-    -- Create checkbox frame
-    local check = CreateFrame("CheckButton", "CCScb" .. key, parent, "BackdropTemplate")
+    -- Row container (this becomes ctrl.container)
+    local container = CreateFrame("Frame", nil, parent)
+    container:SetSize(slotWidth, rowHeight)
+
+    -- Checkbox inside the row
+    local check = CreateFrame("CheckButton", "CCScb" .. key, container, "BackdropTemplate")
     check:SetSize(24, 24)
-    CCS.SkinCheckbox(check) -- applies backdrop and optional textures
+    CCS.SkinCheckbox(check)
+
+    -- Vertically center checkbox in the row
+    check:ClearAllPoints()
+    check:SetPoint("LEFT", container, "LEFT", 0, 0)
+    check:SetPoint("CENTER", container, "CENTER", 0, 0)
 
     -- Initialize or retrieve value
     local value = CCS.CurrentProfile[key]
@@ -641,15 +680,14 @@ local function newCheckbox(def, parent, rowHeight)
     end
     check:SetChecked(value)
 
-    -- Create label manually
-    local label = check:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    -- Label anchored to checkbox, constrained to row width
+    local label = container:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     label:SetText(def.label)
-    label:SetWidth(slotWidth - 16 - 16) -- checkboxWidth + padding
     label:SetWordWrap(true)
     label:SetJustifyH("LEFT")
-    label:SetPoint("LEFT", check, "RIGHT", 6, -3)
+    label:SetPoint("LEFT", check, "RIGHT", 6, 0)
+    label:SetPoint("RIGHT", container, "RIGHT", -4, 0)
 
-    -- Store reference for external access if needed
     check.Text = label
 
     -- Click handler
@@ -660,7 +698,6 @@ local function newCheckbox(def, parent, rowHeight)
             CCS.CurrentProfile[key] = newVal
         end
 
-        -- Special case: globalprofile toggle
         if key == "globalprofile" then
             CCS:OnGlobalProfileToggle(newVal)
         end
@@ -668,11 +705,13 @@ local function newCheckbox(def, parent, rowHeight)
         if def.onChange then
             def.onChange(newVal)
         end
+        CCS.lastChangedOption = def.key
         CCS.InitializeModules()
     end)
 
-    return check
+    return container, check
 end
+
 
 local function newDropdown(def, parent, rowHeight)
     local slotWidth = (def.slots or 2) * GlobalSlotWidth
@@ -682,7 +721,7 @@ local function newDropdown(def, parent, rowHeight)
     frame:SetSize(slotWidth, rowHeight)
 
     -- Label
-    local lbl = frame:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+    local lbl = frame:CreateFontString(nil, "ARTWORK", "GameFontNormalSmall")
     lbl:SetText(def.label)
     lbl:SetPoint("TOPLEFT", frame, "TOPLEFT", 10, 3)
 
@@ -692,11 +731,15 @@ local function newDropdown(def, parent, rowHeight)
     -- Ensure CurrentProfile value exists
     local currentValue = CCS.CurrentProfile[key]
     if currentValue == nil then
-        currentValue = def.value or def.values[1]
+        currentValue = def.default or def.value or (def.values and def.values[1])
         CCS.CurrentProfile[key] = currentValue
     end
 
-    local dd = CreateFrame("Frame", "CCSdd"..def.key, parent, "UIDropDownMenuTemplate, BackdropTemplate")
+
+    --local dd = CreateFrame("Frame", "CCSdd"..def.key, parent, "UIDropDownMenuTemplate, BackdropTemplate")
+    local dd = CreateFrame("Frame", "CCSdd"..def.key, parent, "UIDropDownMenuTemplate")
+    Mixin(dd, BackdropTemplateMixin)
+
 
     CCS.SkinDropdown(dd, "CCSdd"..def.key)
 
@@ -709,25 +752,25 @@ local function newDropdown(def, parent, rowHeight)
         _G[dd:GetName().."Text"]:SetShadowOffset(option("fontshadowx") or 0, option("fontshadowy") or 0)
     end	                                                
     
-    UIDropDownMenu_Initialize(dd, function(self)
+    UIDropDownMenu_Initialize(dd, function(self, level)
+        local selected = CCS.CurrentProfile[key]
+
         for _, v in ipairs(def.values) do
             local info = UIDropDownMenu_CreateInfo()
             info.text = L[v]
             info.value = v
+            info.checked = (v == selected)   -- REQUIRED for radio dot
             info.func = function()
                 CCS.CurrentProfile[key] = v
                 UIDropDownMenu_SetSelectedValue(dd, v)
-                if def.onChange then
-                    def.onChange(v)
-                end
+                if def.onChange then def.onChange(v) end
+                CCS.lastChangedOption = def.key
                 CCS.InitializeModules()
             end
-            UIDropDownMenu_AddButton(info)
-
+            UIDropDownMenu_AddButton(info, level)
         end
-    
-    
     end)
+
 
     -- Set initial selected value
     UIDropDownMenu_SetSelectedValue(dd, currentValue)
@@ -757,7 +800,7 @@ local function newFontSelector(def, parent, rowHeight)
     frame:SetSize(slotWidth, rowHeight)
 
     -- Label
-    local lbl = frame:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+    local lbl = frame:CreateFontString(nil, "ARTWORK", "GameFontNormalSmall")
     lbl:SetPoint("TOPLEFT", frame, "TOPLEFT", 10, 0)
     lbl:SetFont(CCS:GetDefaultFontForLocale(), 11, "OUTLINE")
     if option("showfontshadow") == true then
@@ -1034,6 +1077,7 @@ local function newFontSelector(def, parent, rowHeight)
                     menu:Hide()
                     if def.onChange then def.onChange(fontPath) end
                     CCS.fontname = CCS:GetDefaultFontForLocale() or CCS:GetOptionValue("default_font") or "Fonts\\FRIZQT__.TTF"
+                    CCS.lastChangedOption = def.key
                     CCS.InitializeModules()
                 end)
             end
@@ -1131,11 +1175,12 @@ local function newColorPicker(def, parent, rowHeight)
     swatch:SetBackdropBorderColor(1, 1, 1, 1)
 
     -- Label
-    local lbl = frame:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+    local lbl = frame:CreateFontString(nil, "ARTWORK", "GameFontNormalSmall")
     lbl:SetPoint("LEFT", swatch, "RIGHT", 8, 0)
     lbl:SetPoint("RIGHT", frame, "RIGHT", -10, 0) -- constrain to frame width
     lbl:SetJustifyH("LEFT")
     lbl:SetJustifyV("MIDDLE")
+    lbl:SetWidth(slotWidth - 24 - 16)
     lbl:SetWordWrap(true)
     lbl:SetText(def.label)
 
@@ -1153,6 +1198,7 @@ local function newColorPicker(def, parent, rowHeight)
             CCS.CurrentProfile[key] = {nr, ng, nb, na}
             tex:SetColorTexture(nr, ng, nb, na)
             if def.onChange then def.onChange(nr, ng, nb, na) end
+            CCS.lastChangedOption = def.key
             CCS.InitializeModules()
         end
 
@@ -1162,6 +1208,7 @@ local function newColorPicker(def, parent, rowHeight)
             CCS.CurrentProfile[key] = {pr, pg, pb, pa}
             tex:SetColorTexture(pr, pg, pb, pa)
             if def.onChange then def.onChange(pr, pg, pb, pa) end
+            CCS.lastChangedOption = def.key
             CCS.InitializeModules()
         end
 
@@ -1225,12 +1272,12 @@ local function newSlider(def, parent, rowHeight)
     thumb:RegisterForClicks("LeftButtonDown", "LeftButtonUp")
 
     -- Label
-    local label = frame:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+    local label = frame:CreateFontString(nil, "ARTWORK", "GameFontNormalSmall")
     label:SetText(def.label)
     label:SetPoint("BOTTOMLEFT", track, "TOPLEFT", 0, 4)
 
     -- Value display
-    local valueText = frame:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+    local valueText = frame:CreateFontString(nil, "ARTWORK", "GameFontNormalSmall")
     --valueText:SetPoint("BOTTOM", track, "TOP", 0, 20)
     valueText:SetText(initialVal)
 
@@ -1306,6 +1353,7 @@ local function newSlider(def, parent, rowHeight)
         updateThumbPosition(val)
         CCS:UpdateOption(def, val)
         if def.onChange then def.onChange(val) end
+        CCS.lastChangedOption = def.key
         CCS.InitializeModules()
     end
 
@@ -1599,7 +1647,7 @@ local function newPrioritySlotsSection(def, parent)
 
             -- "Slot N:" label
             if not w.lbl then
-                w.lbl = container:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+                w.lbl = container:CreateFontString(nil, "ARTWORK", "GameFontNormalSmall")
             end
             w.lbl:ClearAllPoints()
             w.lbl:SetPoint("LEFT", w.cb, "RIGHT", 4, 0)
@@ -1672,7 +1720,7 @@ local function newPrioritySlotsSection(def, parent)
 
                 -- Priority label: positioned absolutely at yLbl within the container
                 if not w.dlbls[i] then
-                    w.dlbls[i] = container:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+                    w.dlbls[i] = container:CreateFontString(nil, "ARTWORK", "GameFontNormalSmall")
                 end
                 w.dlbls[i]:ClearAllPoints()
                 w.dlbls[i]:SetPoint("TOPLEFT", container, "TOPLEFT", (i - 1) * slotW + 10, yLbl)

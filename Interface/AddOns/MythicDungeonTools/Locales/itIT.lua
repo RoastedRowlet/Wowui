@@ -602,9 +602,43 @@ L["Coldmist Stalker"] = "Inseguitore Gelobruma"
 L["Coldmist Widow"] = "Vedova Gelobruma"
 L["Color Blind Friendly"] = "Modalità daltonici"
 L["Colorpicker"] = "Scegli colore"
+--[[Translation missing --]]
+L["Colors"] = "Colors"
 L["Colossal Tentacle"] = "Tentacolo Colossale"
 --[[Translation missing --]]
+L["Combat Logging"] = "Combat Logging"
+--[[Translation missing --]]
 L["Combat Transparency"] = "Combat Transparency"
+--[[Translation missing --]]
+L["combatLoggingAdvancedNote"] = "Advanced combat logging is enabled automatically while combat logging is enabled."
+--[[Translation missing --]]
+L["combatLoggingDungeons"] = "Dungeons"
+--[[Translation missing --]]
+L["combatLoggingEnable"] = "Enable combat logging"
+--[[Translation missing --]]
+L["combatLoggingHeroic"] = "Heroic"
+--[[Translation missing --]]
+L["combatLoggingLFR"] = "LFR"
+--[[Translation missing --]]
+L["combatLoggingMythic"] = "Mythic"
+--[[Translation missing --]]
+L["combatLoggingMythicDungeon"] = "Mythic Dungeon"
+--[[Translation missing --]]
+L["combatLoggingMythicPlus"] = "Mythic+"
+--[[Translation missing --]]
+L["combatLoggingNormal"] = "Normal"
+--[[Translation missing --]]
+L["combatLoggingOverview"] = "Automatically toggles combat logging in raids and dungeons based on selected difficulties."
+--[[Translation missing --]]
+L["combatLoggingRaid"] = "Raid"
+--[[Translation missing --]]
+L["combatLoggingStarted"] = "Started combat logging."
+--[[Translation missing --]]
+L["combatLoggingStatusActive"] = "Current status: logging."
+--[[Translation missing --]]
+L["combatLoggingStatusInactive"] = "Current status: not logging."
+--[[Translation missing --]]
+L["combatLoggingStopped"] = "Ended combat logging."
 --[[Translation missing --]]
 L["Commander Durand"] = "Commander Durand"
 L["Commander Kolurg"] = "Comandante Kolurg"
@@ -945,6 +979,8 @@ L["Dokigg the Brutalizer"] = "Dokigg il Brutalizzatore"
 L["Domatrax"] = "Domatrax"
 L["Domina Venomblade"] = "Domina Lamatossica"
 --[[Translation missing --]]
+L["Don't set target marker while in a raid group"] = "Don't set target marker while in a raid group"
+--[[Translation missing --]]
 L["Don't show again"] = "Don't show again"
 --[[Translation missing --]]
 L["dotiLowerSublevel1"] = "Sublevel 1"
@@ -1136,6 +1172,8 @@ Click to view them.]=]
 --[[Translation missing --]]
 L["Encrypted"] = "Encrypted"
 L["Enemies related to seasonal affixes are currently hidden"] = "I nemici relativi agli affissi stagionali sono attualmente nascosti"
+--[[Translation missing --]]
+L["Enemy forces in tooltips"] = "Enemy forces in tooltips"
 L["Enemy Info"] = "Informazioni nemici"
 L["Enemy Info NPC Creature Type"] = "Tipo creatura"
 L["Enemy Info NPC Enemy Forces"] = "Forze nemiche"
@@ -1301,7 +1339,7 @@ L["Focused Ritualist"] = "Ritualista Concentrato"
 --[[Translation missing --]]
 L["focusMarkerAssignmentQueuedToast"] = "Focus marker will update to %s after combat from %s."
 --[[Translation missing --]]
-L["focusMarkerAssignmentsTooltip"] = "Assign focus markers to group members and sync them to MDT users."
+L["focusMarkerAssignmentsTooltip"] = "MDT provides a keybind or macro to set your focus target and mark it with a target marker. You can coordinate marks with your group and make sure everyone has their own personal target marker that they use."
 --[[Translation missing --]]
 L["focusMarkerAssignmentToast"] = "Focus marker set to %s. (Sent by %s)"
 --[[Translation missing --]]
@@ -1418,6 +1456,8 @@ L["Geezle Gigazap"] = "Geezle Gigazap"
 L["Gekkan"] = "Gekkan"
 --[[Translation missing --]]
 L["Gemellus"] = "Gemellus"
+--[[Translation missing --]]
+L["General"] = "General"
 L["General Bjarngrim"] = "Generale Bjarngrim"
 L["General Kaal"] = "Generale Kaal"
 --[[Translation missing --]]
@@ -2073,6 +2113,10 @@ L["Ludwig Von Tortollan"] = "Ludwig Von Tortollen"
 L["Lumbering Plaguehorror"] = "Lumbering Plaguehorror"
 L["L'ura"] = "L'ura"
 L["Lurking Tempest"] = "Tempesta Ascosa"
+--[[Translation missing --]]
+L["Macro Preview:"] = "Macro Preview:"
+--[[Translation missing --]]
+L["Macros"] = "Macros"
 L["Mad Scientist"] = "Scienziato Pazzo"
 L["Maddened Survivalist"] = "Survivalista Impazzito"
 L["Maexxna"] = "Maexxna"
@@ -2124,6 +2168,8 @@ L["Manifestation of Envy"] = "Manifestazione dell'Invidia"
 --[[Translation missing --]]
 L["Manifested Shadow"] = "Manifested Shadow"
 L["Manifested Timeways"] = "Manifested Timeways"
+--[[Translation missing --]]
+L["Maps"] = "Maps"
 L["Marauding Geist"] = "Geist Assalitore"
 L["Margrave Stradama"] = "Margravio Stradama"
 --[[Translation missing --]]
@@ -3012,6 +3058,8 @@ L["seatOfTheTriumvirateShortName"] = "SEAT"
 --[[Translation missing --]]
 L["Select all"] = "Select all"
 L["Select the dungeon level"] = "Seleziona il livello della spedizione"
+--[[Translation missing --]]
+L["Send versions to party chat"] = "Send versions to party chat"
 L["Sending: %.1f"] = "In invio: %.1f"
 L["Seneschal M'bara"] = "Siniscalco M'bara"
 L["Sentient Oil"] = "Olio Senziente"
@@ -4022,7 +4070,7 @@ L["Void Flayer"] = "Scorticatore del Vuoto"
 --[[Translation missing --]]
 L["Void Fragment"] = "Void Fragment"
 --[[Translation missing --]]
-L["Void Infuser"] = "Void Infuser"
+L["Void Infuser"] = "Void Terror"
 L["Void Spawn"] = "Creatura del Vuoto"
 --[[Translation missing --]]
 L["Void Speaker Eirich"] = "Void Speaker Eirich"

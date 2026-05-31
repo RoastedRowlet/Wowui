@@ -9,6 +9,7 @@ local EUI = EllesmereUI
 --  Constants
 -------------------------------------------------------------------------------
 local SLOT_SIZE, SPACING = 34, 4
+local _canUseCache = {}  -- [itemID] = true (usable) | false (unusable), via tooltip red-text scan
 local HEADER_H    = 35
 local FOOTER_H    = 32
 local SIDEBAR_W   = 160
@@ -193,7 +194,7 @@ EUI_Bank:Hide()
 -- Background: atlas matching bags module (full alpha, covers entire window)
 local bgAtlas = EUI_Bank:CreateTexture(nil, "BACKGROUND")
 bgAtlas:SetAllPoints()
-bgAtlas:SetAtlas("housing-basic-panel--stone-background")
+bgAtlas:SetTexture("Interface\\AddOns\\EllesmereUI\\media\\modern_blizz.png")
 local bgOverlay = EUI_Bank:CreateTexture(nil, "BACKGROUND", nil, 1)
 bgOverlay:SetAllPoints()
 bgOverlay:SetColorTexture(0, 0, 0, 0.25)
@@ -455,6 +456,7 @@ do
             placeholder = "1137",
             confirmText = ACCEPT,
             cancelText = CANCEL,
+            modernBlizz = true,
             onConfirm = function(text)
                 local gold = tonumber(text)
                 if gold and gold > 0 then
@@ -469,6 +471,7 @@ do
         if not C_Bank.CanWithdrawMoney(Enum.BankType.Account) then return end
         ShowMoneyPopup("Withdraw from Warbank", function(copper)
             C_Bank.WithdrawMoney(Enum.BankType.Account, copper)
+            if EUI_Bags and EUI_Bags.CaptureWarbandGold then EUI_Bags.CaptureWarbandGold() end
         end)
     end)
     depositMoneyBtn:SetScript("OnClick", function()
@@ -476,6 +479,7 @@ do
         if not C_Bank.CanDepositMoney(Enum.BankType.Account) then return end
         ShowMoneyPopup("Deposit to Warbank", function(copper)
             C_Bank.DepositMoney(Enum.BankType.Account, copper)
+            if EUI_Bags and EUI_Bags.CaptureWarbandGold then EUI_Bags.CaptureWarbandGold() end
         end)
     end)
 
@@ -1184,7 +1188,11 @@ function EUI_Bank:RefreshBank()
     -- BANKFRAME_OPENED; BAG_UPDATE fires shortly after with real slot counts).
     if #_allTabs == 0 then
         DiscoverBankTabs()
-        if #_allTabs == 0 then return end
+        if #_allTabs == 0 then
+            -- Still build sidebar so purchase buttons are visible
+            BuildBankSidebar()
+            return
+        end
     end
 
 
@@ -1456,6 +1464,39 @@ function EUI_Bank:RefreshBank()
                     btn.IconOverlay:SetAlpha(1)
                     if btn._textOverlay then btn.IconOverlay:SetParent(btn._textOverlay) end
                 else btn.IconOverlay:SetAlpha(0) end
+            end
+            if btn.icon and info and info.itemID then
+                local id = info.itemID
+                local canUse = _canUseCache[id]
+                if canUse == nil then
+                    canUse = true
+                    if IsEquippableItem(id) or C_Item.GetItemSpell(id) then
+                        local tip = C_TooltipInfo.GetItemByID(id)
+                        if tip and tip.lines then
+                            for _, row in ipairs(tip.lines) do
+                                local lc = row.leftColor
+                                if lc and lc.r == 1 and lc.g < 0.2 and lc.b < 0.2
+                                   and row.leftText ~= ITEM_SCRAPABLE_NOT
+                                   and row.leftText ~= CANNOT_UNEQUIP_COMBAT
+                                   and row.leftText ~= ITEM_DISENCHANT_NOT_DISENCHANTABLE then
+                                    canUse = false
+                                    break
+                                end
+                                local rc = row.rightColor
+                                if rc and rc.r == 1 and rc.g < 0.2 and rc.b < 0.2 then
+                                    canUse = false
+                                    break
+                                end
+                            end
+                        end
+                    end
+                    _canUseCache[id] = canUse
+                end
+                if canUse == false then
+                    btn.icon:SetVertexColor(1, 0.1, 0.1)
+                else
+                    btn.icon:SetVertexColor(1, 1, 1)
+                end
             end
             if btn.IconOverlay2 then
                 if btn.IconOverlay2:IsShown() then
@@ -1927,6 +1968,7 @@ eventFrame:SetScript("OnEvent", function(_, event)
             DiscoverBankTabs()
             EUI_Bank:RefreshBank()
             EUI_Bank:UpdateFooterGold()
+            if EUI_Bags and EUI_Bags.CaptureWarbandGold then EUI_Bags.CaptureWarbandGold() end
         end)
 
     elseif event == "BANKFRAME_CLOSED" then
@@ -2019,5 +2061,26 @@ loader:SetScript("OnEvent", function(self)
     -- Register for Escape close
     if EUI and EUI.RegisterEscapeClose then
         EUI.RegisterEscapeClose(EUI_Bank)
+    end
+
+    -- Auto-shift DressUpFrame to the right of the bank when both are open
+    local dressUp = _G.DressUpFrame
+    if dressUp then
+        local _duIgnoreSP = false
+        local function ShiftDressUp()
+            if not EUI_Bank:IsVisible() or InCombatLockdown() then return end
+            _duIgnoreSP = true
+            dressUp:ClearAllPoints()
+            dressUp:SetPoint("TOPLEFT", EUI_Bank, "TOPRIGHT", 4, 0)
+            _duIgnoreSP = false
+        end
+        dressUp:HookScript("OnShow", ShiftDressUp)
+        hooksecurefunc(dressUp, "SetPoint", function()
+            if _duIgnoreSP then return end
+            ShiftDressUp()
+        end)
+        EUI_Bank:HookScript("OnShow", function()
+            if dressUp:IsVisible() then ShiftDressUp() end
+        end)
     end
 end)

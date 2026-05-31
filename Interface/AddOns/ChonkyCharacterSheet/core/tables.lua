@@ -136,7 +136,7 @@ ns.optionDefs = {
     { type="checkbox", cat="GENERAL", ver=bit.bor(CCS.RETAIL, CCS.TBC), key="showcharacterstats", label=L["SHOW_CHARACTER_STATS"], value=true, default=true, slots=1 },
     { type="checkbox", cat="GENERAL", ver=bit.bor(CCS.ALL), key="show_inspect", label=L["SHOW_INSPECT"], value=true, default=true, slots=1 },
     { type="checkbox", cat="GENERAL", ver=bit.bor(CCS.RETAIL), key="showraidprogress", label=L["SHOW_RAID_PROGRESS"], value=true, default=true, slots=1 },
-    { type="header", cat="GENERAL", ver=bit.bor(CCS.ALL), key=nil, label="", slots=1, color={1, 1, 1}, fontSize=20, fontOutline="THICKOUTLINE" },
+    { type="checkbox", cat="GENERAL", ver=bit.bor(CCS.RETAIL), key="showgearfinder", label=L["SHOW_GEAR_FINDER"], value=true, default=true, slots=1 },
     { type="checkbox", cat="GENERAL", ver=bit.bor(CCS.RETAIL), key="showm_sp", label=L["SHOW_MYTHIC_SP"], value=true, default=true, slots=1 },
     { type="checkbox", cat="GENERAL", ver=bit.bor(CCS.RETAIL), key="showm_sp_btn", label=L["SHOW_MYTHIC_SP_BTN"], value=true, default=true, slots=1 },    
     { type="checkbox", cat="GENERAL", ver=bit.bor(CCS.RETAIL), key="showm_sp_onopen", label=L["SHOW_MYTHIC_SP_ONOPEN"], value=false, default=false, slots=2 },    
@@ -148,6 +148,7 @@ ns.optionDefs = {
     { type="slider", cat="GENERAL", ver=bit.bor(CCS.ALL), key="sheetscale_inspect", label=L["SHEET_SCALE_INSPECT"], value=1, default=1, min=0.5, max=1.25, step=0.1, slots=2 },
     { type="slider", cat="GENERAL", ver=bit.bor(CCS.ALL), key="vpad_inspect", label=L["V_PAD_INSPECT"], value=23, default=23, min=0, max=40, step=1, slots=2 },
     { type="slider", cat="GENERAL", ver=bit.bor(CCS.RETAIL), key="raid_sp_scale", label=L["RAID_SP_SCALE"], value=1, default=1, min=0.5, max=1.5, step=0.1, slots=2 },
+    { type="slider", cat="GENERAL", ver=bit.bor(CCS.RETAIL), key="gear_gf_scale", label=L["GEAR_GF_SCALE"], value=1, default=1, min=0.5, max=1.5, step=0.1, slots=2 },
     { type="divider", cat="GENERAL", ver=bit.bor(CCS.ALL), slots=4 },
     { type="font", cat="GENERAL", ver=bit.bor(CCS.ALL), key="default_font", label=L["DEFAULT_FONT_NAME"], value="Fonts\\FRIZQT__.TTF", default="Fonts\\FRIZQT__.TTF", slots=2},
     { type="button", cat="GENERAL", ver=bit.bor(CCS.ALL), key=nil, label=L["Apply Font to All"],  slots = 2, 
@@ -192,6 +193,7 @@ ns.optionDefs = {
     { type="divider", cat="CHAR-SHEET", ver=bit.bor(CCS.ALL), slots=4 },
     { type="color", cat="CHAR-SHEET", ver=bit.bor(CCS.ALL), key="bgcolor", label=L["CCS_BG_COLOR"], value={0,0,0,0.89}, default={0,0,0,0.89}, slots=1 },
     { type="dropdown", cat="CHAR-SHEET", ver=bit.bor(CCS.RETAIL), key="bgtype", label=L["BG_TYPE"], value="Midnight", default="Midnight", values={"Default", "Class", "Race", "Midnight", "Hide"}, slots=2 },
+    { type="dropdown", cat="CHAR-SHEET", ver=bit.bor(CCS.TBC), key="bgtype", label=L["BG_TYPE"], value="Midnight", default="Midnight", values={"Default", "Midnight", "Hide"}, slots=2 },
     { type="checkbox", cat="CHAR-SHEET", ver=bit.bor(CCS.RETAIL), key="showbganimations", label=ANIMATION, value=true, default=true, slots=1 },
     { type="checkbox", cat="CHAR-SHEET", ver=bit.bor(CCS.RETAIL), key="showparagonmax", label=L["PARAGON_MAX_BAR"], value=false, default=false, slots=1 },
     { type="divider", cat="CHAR-SHEET", ver=bit.bor(CCS.RETAIL), slots=4 },
@@ -426,8 +428,8 @@ ns.optionDefs = {
     { type="checkbox", cat="CHAR-MPLUS", ver=bit.bor(CCS.RETAIL), key="showmythicplusscore", label=L["SHOW_MYTHIC_SCORE"], value=true, default=true, slots=1 },
     { type="checkbox", cat="CHAR-MPLUS", ver=bit.bor(CCS.RETAIL), key="showm_overundertime", label=L["SHOW_M_OVERUNDER"], value=true, default=true, slots=1 },
     { type="checkbox", cat="CHAR-MPLUS", ver=bit.bor(CCS.RETAIL), key="showm_altbtn", label=L["ALTERNATE_SIDE_BUTTON"], value=false, default=false, slots=2 },
-    { type="color", cat="CHAR-MPLUS", ver=bit.bor(CCS.RETAIL), key="ccsmbgcolor", label=L["CCS_M_BG_COLOR"], value={0,0,0,0.85}, default={0,0,0,0.85}, slots=4 },
-    { type="dropdown", cat="CHAR-MPLUS", ver=bit.bor(CCS.RETAIL), key="mplus_sortby", label=RAID_FRAME_SORT_LABELccccc, value="Name", default="Name", values={"Name", "Level", "Rating", "Time"}, slots=2 },
+    { type="color", cat="CHAR-MPLUS", ver=bit.bor(CCS.RETAIL), key="ccsmbgcolor", label=L["CCS_M_BG_COLOR"], value={0,0,0,.85}, default={0,0,0,.85}, slots=4 },
+    { type="dropdown", cat="CHAR-MPLUS", ver=bit.bor(CCS.RETAIL), key="mplus_sortby", label=RAID_FRAME_SORT_LABEL, value="Name", default="Name", values={"Name", "Level", "Rating", "Time"}, slots=2 },
     { type="dropdown", cat="CHAR-MPLUS", ver=bit.bor(CCS.RETAIL), key="mplus_direction", label=L["Sort Direction"], value="Ascending", default="Ascending", values={"Ascending", "Descending"}, slots=2 },
 
     { type="divider", cat="CHAR-MPLUS", ver=bit.bor(CCS.RETAIL), slots=4 },
@@ -494,7 +496,7 @@ ns.optionDefs = {
     { type="divider", cat="CHAR-RAID", ver=bit.bor(CCS.RETAIL), slots=4 },
     { type="header", cat="CHAR-RAID", ver=bit.bor(CCS.RETAIL), key=nil, label=L["HEADER_RAID_PROGRESS"], slots=4, color={1,1,1}, fontSize=20, fontOutline="THICKOUTLINE" },
     { type="divider", cat="CHAR-RAID", ver=bit.bor(CCS.RETAIL), slots=4 },
-    { type="color", cat="CHAR-RAID", ver=bit.bor(CCS.RETAIL), key="bgcolor_raid", label=L["RAID_BG_COLOR"], value={.12,.12,.12,1}, default={.12,.12,.12,1}, slots=2 },
+    { type="color", cat="CHAR-RAID", ver=bit.bor(CCS.RETAIL), key="bgcolor_raid", label=L["RAID_BG_COLOR"], value={0.0039, 0.0, 0.1451,1}, default={0.0039, 0.0, 0.1451,1}, slots=2 },
     { type="checkbox", cat="CHAR-RAID", ver=bit.bor(CCS.RETAIL), key="showr_altbtn", label=L["ALTERNATE_SIDE_BUTTON"], value=false, default=false, slots=2 },
 
     { type="font",   cat="CHAR-RAID", ver=bit.bor(CCS.RETAIL), key="fontname_raidtitle", label=L["FONT_NAME_RAID_TITLE"], value="Fonts\\FRIZQT__.TTF", default="Fonts\\FRIZQT__.TTF", slots=2 },
@@ -570,6 +572,45 @@ ns.optionDefs = {
 
     { type="font", cat="INSPECT-FONT", ver=bit.bor(CCS.ALL), key="fontname_iname_inspect", label=L["FONT_NAME_INSPECT_ITEMNAME"], value="Fonts\\FRIZQT__.TTF", default="Fonts\\FRIZQT__.TTF", slots=2},
     { type="slider", cat="INSPECT-FONT", ver=bit.bor(CCS.ALL), key="fontsize_iname_inspect", label=FONT_SIZE, value=12, default=12, min=3, max=36, step=1, slots=1 },
+
+    ------------------
+    -- Gear Finder
+    ------------------
+    { type="divider", cat="GEAR-FINDER", ver=bit.bor(CCS.RETAIL), slots=4 },
+    { type="header", cat="GEAR-FINDER", ver=bit.bor(CCS.RETAIL), key=nil, label=L["CATEGORY_GEAR-FINDER"], slots=4, color={1,1,1}, fontSize=20, fontOutline="THICKOUTLINE" },
+    { type="divider", cat="GEAR-FINDER", ver=bit.bor(CCS.RETAIL), slots=4 },
+    { type="color", cat="GEAR-FINDER", ver=bit.bor(CCS.RETAIL), key="bgcolor_gearfinder", label=L["BG_COLOR"], value={0,0,0,.85}, default={0,0,0,.85}, slots=1 },
+    { type="color", cat="GEAR-FINDER", ver=bit.bor(CCS.RETAIL), key="bgcolor_gearfinderfooter", label=L["FOOTER_COLOR"], value={0.0039, 0.0, 0.1451, 0.85}, default={0, 0, 0, 0.85}, slots=1 },
+    { type="checkbox", cat="GEAR-FINDER", ver=bit.bor(CCS.RETAIL), key="showgf_altbtn", label=L["ALTERNATE_SIDE_BUTTON"], value=false, default=false, slots=1 },
+    { type="divider", cat="GEAR-FINDER", ver=bit.bor(CCS.RETAIL), slots=4 },
+
+    { type="font",   cat="GEAR-FINDER", ver=bit.bor(CCS.RETAIL), key="fontname_gf_title", label=L["TITLE_FONT"], value="Fonts\\FRIZQT__.TTF", default="Fonts\\FRIZQT__.TTF", slots=2 },
+    { type="slider", cat="GEAR-FINDER", ver=bit.bor(CCS.RETAIL), key="fontsize_gf_title", label=FONT_SIZE, value=18, default=18, min=3, max=34, step=1, slots=1 },
+    { type="color",  cat="GEAR-FINDER", ver=bit.bor(CCS.RETAIL), key="fontcolor_gf_title", label=COLOR, value={1,1,1,1}, default={1,1,1,1}, slots=1 },
+
+    { type="font",   cat="GEAR-FINDER", ver=bit.bor(CCS.RETAIL), key="fontname_gf_header", label=L["HEADER_FONT"], value="Fonts\\FRIZQT__.TTF", default="Fonts\\FRIZQT__.TTF", slots=2 },
+    { type="slider", cat="GEAR-FINDER", ver=bit.bor(CCS.RETAIL), key="fontsize_gf_header", label=FONT_SIZE, value=14, default=14, min=3, max=34, step=1, slots=1 },
+    { type="color",  cat="GEAR-FINDER", ver=bit.bor(CCS.RETAIL), key="fontcolor_gf_header", label=COLOR, value={0.1647, 0.9804, 0.7098, 1}, default={0.1647, 0.9804, 0.7098, 1}, slots=1 },
+
+    { type="font",   cat="GEAR-FINDER", ver=bit.bor(CCS.RETAIL), key="fontname_gf_itemname", label=L["FONT_NAME_INAME"], value="Fonts\\FRIZQT__.TTF", default="Fonts\\FRIZQT__.TTF", slots=2 },
+    { type="slider", cat="GEAR-FINDER", ver=bit.bor(CCS.RETAIL), key="fontsize_gf_itemname", label=FONT_SIZE, value=11, default=11, min=3, max=34, step=1, slots=1 },
+    { type="header", cat="GEAR-FINDER", ver=bit.bor(CCS.RETAIL), key=nil, label="", slots=1, color={1,1,1}, fontSize=20, fontOutline="THICKOUTLINE" },
+
+    { type="font",   cat="GEAR-FINDER", ver=bit.bor(CCS.RETAIL), key="fontname_gf_itemslot", label=L["FONT_NAME_GF_ITEMSLOT"], value="Fonts\\FRIZQT__.TTF", default="Fonts\\FRIZQT__.TTF", slots=2 },
+    { type="slider", cat="GEAR-FINDER", ver=bit.bor(CCS.RETAIL), key="fontsize_gf_itemslot", label=FONT_SIZE, value=10, default=10, min=3, max=34, step=1, slots=1 },
+    { type="color",  cat="GEAR-FINDER", ver=bit.bor(CCS.RETAIL), key="fontcolor_gf_itemslot", label=COLOR, value={1,1,1,1}, default={1,1,1,1}, slots=1 },
+
+    { type="font",   cat="GEAR-FINDER", ver=bit.bor(CCS.RETAIL), key="fontname_gf_stats", label=L["FONT_NAME_STATS"], value="Fonts\\FRIZQT__.TTF", default="Fonts\\FRIZQT__.TTF", slots=2 },
+    { type="slider", cat="GEAR-FINDER", ver=bit.bor(CCS.RETAIL), key="fontsize_gf_stats", label=FONT_SIZE, value=11, default=11, min=3, max=34, step=1, slots=1 },
+    { type="header", cat="GEAR-FINDER", ver=bit.bor(CCS.RETAIL), key=nil, label="", slots=1, color={1,1,1}, fontSize=20, fontOutline="THICKOUTLINE" },
+
+    { type="font",   cat="GEAR-FINDER", ver=bit.bor(CCS.RETAIL), key="fontname_gf_dungeon", label=L["FONT_NAME_GF_DRAID"], value="Fonts\\FRIZQT__.TTF", default="Fonts\\FRIZQT__.TTF", slots=2 },
+    { type="slider", cat="GEAR-FINDER", ver=bit.bor(CCS.RETAIL), key="fontsize_gf_dungeon", label=FONT_SIZE, value=11, default=11, min=3, max=34, step=1, slots=1 },
+    { type="color",  cat="GEAR-FINDER", ver=bit.bor(CCS.RETAIL), key="fontcolor_gf_dungeon", label=COLOR, value={.6,.85,1,1}, default={.6,.85,1,1}, slots=1 },
+
+    { type="font",   cat="GEAR-FINDER", ver=bit.bor(CCS.RETAIL), key="fontname_gf_boss", label=L["FONT_NAME_GF_BOSS"], value="Fonts\\FRIZQT__.TTF", default="Fonts\\FRIZQT__.TTF", slots=2 },
+    { type="slider", cat="GEAR-FINDER", ver=bit.bor(CCS.RETAIL), key="fontsize_gf_boss", label=FONT_SIZE, value=11, default=11, min=3, max=34, step=1, slots=1 },
+    { type="color",  cat="GEAR-FINDER", ver=bit.bor(CCS.RETAIL), key="fontcolor_gf_boss", label=COLOR, value={1,1,1,1}, default={1,1,1,1}, slots=1 },
 
 }
 
@@ -1992,6 +2033,32 @@ CCS.rarityHexColors = {
     [8] = "00e6e6", -- WoW Token
 }
 
+CCS.AllSlots = {
+    { id = 1,  name = INVTYPE_HEAD },
+    { id = 2,  name = INVTYPE_NECK },
+    { id = 3,  name = INVTYPE_SHOULDER },
+    { id = 5,  name = INVTYPE_CHEST },
+    { id = 6,  name = INVTYPE_WAIST },
+    { id = 7,  name = INVTYPE_LEGS },
+    { id = 8,  name = INVTYPE_FEET },
+    { id = 9,  name = INVTYPE_WRIST },
+    { id = 10, name = INVTYPE_HAND },
+
+    -- Grouped as Finger
+    { id = 11, name = INVTYPE_FINGER, group = INVTYPE_FINGER },
+    { id = 12, name = INVTYPE_FINGER, group = INVTYPE_FINGER },
+
+    -- Grouped as Trinket
+    { id = 13, name = INVTYPE_TRINKET, group = INVTYPE_TRINKET },
+    { id = 14, name = INVTYPE_TRINKET, group = INVTYPE_TRINKET },
+
+    { id = 15, name = INVTYPE_CLOAK },
+
+    -- Weapon group
+    { id = 16, name = INVTYPE_WEAPONMAINHAND, group = WEAPON },
+    { id = 17, name = INVTYPE_WEAPONOFFHAND,  group = WEAPON },
+}
+
 CCS.slotNames = {
     [1] = "Head",
     [2] = "Neck",
@@ -2010,6 +2077,24 @@ CCS.slotNames = {
     [16] = "MainHand",
     [17] = "SecondaryHand",
 }
+
+CCS.SlotNameToID = {
+    Helm     = 1,
+    Neck     = 2,
+    Shoulder = 3,
+    Chest    = 5,
+    Waist    = 6,
+    Legs     = 7,
+    Feet     = 8,
+    Wrist    = 9,
+    Hands    = 10,
+    Ring1    = 11,
+    Ring2    = 12,
+    Cloak    = 15,
+    Mainhand = 16,
+    Offhand  = 17,
+}
+
 
 CCS.embellishmentBonus = {
     [222868] = { stat = "CRIT_RATING", value = 756 },
@@ -2639,4 +2724,380 @@ CCS.CustomTrackOptions = {
     [CCS.Champion]   = "custom_color_champion",
     [CCS.Hero]       = "custom_color_hero",
     [CCS.Myth]       = "custom_color_myth",
+}
+
+CCS.EQUIPLOC_TO_SLOTID = {
+    INVTYPE_HEAD         = 1,
+    INVTYPE_NECK         = 2,
+    INVTYPE_SHOULDER     = 3,
+    INVTYPE_CHEST        = 5,
+    INVTYPE_ROBE         = 5,
+    INVTYPE_WAIST        = 6,
+    INVTYPE_LEGS         = 7,
+    INVTYPE_FEET         = 8,
+    INVTYPE_WRIST        = 9,
+    INVTYPE_HAND         = 10,
+    INVTYPE_FINGER       = 11,
+    INVTYPE_TRINKET      = 13,
+    INVTYPE_CLOAK        = 15,
+    INVTYPE_WEAPON       = 16,
+    INVTYPE_WEAPONMAINHAND = 16,
+    INVTYPE_WEAPONOFFHAND  = 17,
+    INVTYPE_2HWEAPON     = 16,
+    INVTYPE_SHIELD       = 17,
+    INVTYPE_HOLDABLE     = 17,
+    INVTYPE_RANGED       = 18,
+    INVTYPE_RANGEDRIGHT  = 18,
+    INVTYPE_THROWN       = 18,
+    INVTYPE_RELIC        = 18,
+}
+
+CCS.Classes = {
+    --------------------------------------------------------------------
+    -- 1. WARRIOR
+    --------------------------------------------------------------------
+    [1] = {
+        name = "Warrior",
+        file = "WARRIOR",
+        armor = { "Plate" },
+        weapons = {
+            [2] = {  -- WEAPON class
+                [0]  = true,  -- 1H Axe
+                [1]  = true,  -- 2H Axe
+                [4]  = true,  -- 1H Mace
+                [5]  = true,  -- 2H Mace
+                [7]  = true,  -- 1H Sword
+                [8]  = true,  -- 2H Sword
+                [6]  = true,  -- Polearm
+                [10] = true,  -- Staff
+                [15] = true,  -- Dagger
+                [13] = true,  -- Fist Weapon
+                [2]  = true,  -- Bow
+                [3]  = true,  -- Gun
+                [18] = true,  -- Crossbow
+            },
+            shields  = true,
+            offhands = false,
+        },
+        specs = {
+            { id = 71, name = "Arms",       primary = "STRENGTH", role = "MELEE" },
+            { id = 72, name = "Fury",       primary = "STRENGTH", role = "MELEE" },
+            { id = 73, name = "Protection", primary = "STRENGTH", role = "TANK"  },
+        }
+    },
+
+    --------------------------------------------------------------------
+    -- 2. PALADIN
+    --------------------------------------------------------------------
+    [2] = {
+        name = "Paladin",
+        file = "PALADIN",
+        armor = { "Plate" },
+        weapons = {
+            [2] = {
+                [0]  = true,  -- 1H Axe
+                [1]  = true,  -- 2H Axe
+                [4]  = true,  -- 1H Mace
+                [5]  = true,  -- 2H Mace
+                [7]  = true,  -- 1H Sword
+                [8]  = true,  -- 2H Sword
+                [6]  = true,  -- Polearm
+            },
+            shields  = true,
+            offhands = true,
+        },
+        specs = {
+            { id = 65, name = "Holy",       primary = "INTELLECT", role = "HEALER" },
+            { id = 66, name = "Protection", primary = "STRENGTH",  role = "TANK"   },
+            { id = 70, name = "Retribution",primary = "STRENGTH",  role = "MELEE"  },
+        }
+    },
+
+    --------------------------------------------------------------------
+    -- 3. HUNTER
+    --------------------------------------------------------------------
+    [3] = {
+        name = "Hunter",
+        file = "HUNTER",
+        armor = { "Mail" },
+        weapons = {
+            [2] = {
+                [2]  = true,  -- Bow
+                [3]  = true,  -- Gun
+                [18] = true,  -- Crossbow
+                [0]  = true,  -- 1H Axe
+                [1]  = true,  -- 2H Axe
+                [7]  = true,  -- 1H Sword
+                [8]  = true,  -- 2H Sword
+                [6]  = true,  -- Polearm
+                [10] = true,  -- Staff
+            },
+            shields  = false,
+            offhands = false,
+        },
+        specs = {
+            { id = 253, name = "Beast Mastery", primary = "AGILITY", role = "RANGED" },
+            { id = 254, name = "Marksmanship",  primary = "AGILITY", role = "RANGED" },
+            { id = 255, name = "Survival",      primary = "AGILITY", role = "MELEE"  },
+        }
+    },
+
+    --------------------------------------------------------------------
+    -- 4. ROGUE
+    --------------------------------------------------------------------
+    [4] = {
+        name = "Rogue",
+        file = "ROGUE",
+        armor = { "Leather" },
+        weapons = {
+            [2] = {
+                [15] = true,  -- Dagger
+                [7]  = true,  -- 1H Sword
+                [4]  = true,  -- 1H Mace
+                [0]  = true,  -- 1H Axe
+                [13] = true,  -- Fist Weapon
+                [2]  = true,  -- Bow
+                [18] = true,  -- Crossbow
+            },
+            shields  = false,
+            offhands = false,
+        },
+        specs = {
+            { id = 259, name = "Assassination", primary = "AGILITY", role = "MELEE" },
+            { id = 260, name = "Outlaw",        primary = "AGILITY", role = "MELEE" },
+            { id = 261, name = "Subtlety",      primary = "AGILITY", role = "MELEE" },
+        }
+    },
+
+    --------------------------------------------------------------------
+    -- 5. PRIEST
+    --------------------------------------------------------------------
+    [5] = {
+        name = "Priest",
+        file = "PRIEST",
+        armor = { "Cloth" },
+        weapons = {
+            [2] = {
+                [15] = true,  -- Dagger
+                [4]  = true,  -- 1H Mace
+                [10] = true,  -- Staff
+                [19] = true,  -- Wand
+            },
+            shields  = false,
+            offhands = true,
+        },
+        specs = {
+            { id = 256, name = "Discipline", primary = "INTELLECT", role = "HEALER" },
+            { id = 257, name = "Holy",       primary = "INTELLECT", role = "HEALER" },
+            { id = 258, name = "Shadow",     primary = "INTELLECT", role = "RANGED" },
+        }
+    },
+
+    --------------------------------------------------------------------
+    -- 6. DEATH KNIGHT
+    --------------------------------------------------------------------
+    [6] = {
+        name = "Death Knight",
+        file = "DEATHKNIGHT",
+        armor = { "Plate" },
+        weapons = {
+            [2] = {
+                [0]  = true,  -- 1H Axe
+                [1]  = true,  -- 2H Axe
+                [4]  = true,  -- 1H Mace
+                [5]  = true,  -- 2H Mace
+                [7]  = true,  -- 1H Sword
+                [8]  = true,  -- 2H Sword
+                [6]  = true,  -- Polearm
+            },
+            shields  = false,
+            offhands = false,
+        },
+        specs = {
+            { id = 250, name = "Blood",  primary = "STRENGTH", role = "TANK"  },
+            { id = 251, name = "Frost",  primary = "STRENGTH", role = "MELEE" },
+            { id = 252, name = "Unholy", primary = "STRENGTH", role = "MELEE" },
+        }
+    },
+
+    --------------------------------------------------------------------
+    -- 7. SHAMAN
+    --------------------------------------------------------------------
+    [7] = {
+        name = "Shaman",
+        file = "SHAMAN",
+        armor = { "Mail" },
+        weapons = {
+            [2] = {
+                [15] = true,  -- Dagger
+                [13] = true,  -- Fist Weapon
+                [4]  = true,  -- 1H Mace
+                [5]  = true,  -- 2H Mace
+                [0]  = true,  -- 1H Axe
+                [1]  = true,  -- 2H Axe
+                [10] = true,  -- Staff
+            },
+            shields  = true,
+            offhands = true,
+        },
+        specs = {
+            { id = 262, name = "Elemental",   primary = "INTELLECT", role = "RANGED" },
+            { id = 263, name = "Enhancement", primary = "AGILITY",   role = "MELEE"  },
+            { id = 264, name = "Restoration", primary = "INTELLECT", role = "HEALER" },
+        }
+    },
+
+    --------------------------------------------------------------------
+    -- 8. MAGE
+    --------------------------------------------------------------------
+    [8] = {
+        name = "Mage",
+        file = "MAGE",
+        armor = { "Cloth" },
+        weapons = {
+            [2] = {
+                [15] = true,  -- Dagger
+                [7]  = true,  -- 1H Sword
+                [10] = true,  -- Staff
+                [19] = true,  -- Wand
+            },
+            shields  = false,
+            offhands = true,
+        },
+        specs = {
+            { id = 62, name = "Arcane", primary = "INTELLECT", role = "RANGED" },
+            { id = 63, name = "Fire",   primary = "INTELLECT", role = "RANGED" },
+            { id = 64, name = "Frost",  primary = "INTELLECT", role = "RANGED" },
+        }
+    },
+
+    --------------------------------------------------------------------
+    -- 9. WARLOCK
+    --------------------------------------------------------------------
+    [9] = {
+        name = "Warlock",
+        file = "WARLOCK",
+        armor = { "Cloth" },
+        weapons = {
+            [2] = {
+                [15] = true,  -- Dagger
+                [7]  = true,  -- 1H Sword
+                [10] = true,  -- Staff
+                [19] = true,  -- Wand
+            },
+            shields  = false,
+            offhands = true,
+        },
+        specs = {
+            { id = 265, name = "Affliction", primary = "INTELLECT", role = "RANGED" },
+            { id = 266, name = "Demonology", primary = "INTELLECT", role = "RANGED" },
+            { id = 267, name = "Destruction",primary = "INTELLECT", role = "RANGED" },
+        }
+    },
+
+    --------------------------------------------------------------------
+    -- 10. MONK
+    --------------------------------------------------------------------
+    [10] = {
+        name = "Monk",
+        file = "MONK",
+        armor = { "Leather" },
+        weapons = {
+            [2] = {
+                [13] = true,  -- Fist Weapon
+                [10] = true,  -- Staff
+                [7]  = true,  -- 1H Sword
+                [4]  = true,  -- 1H Mace
+                [0]  = true,  -- 1H Axe
+                [6]  = true,  -- Polearm
+            },
+            shields  = false,
+            offhands = true,
+        },
+        specs = {
+            { id = 268, name = "Brewmaster", primary = "AGILITY",   role = "TANK"   },
+            { id = 270, name = "Mistweaver", primary = "INTELLECT", role = "HEALER" },
+            { id = 269, name = "Windwalker", primary = "AGILITY",   role = "MELEE"  },
+        }
+    },
+
+    --------------------------------------------------------------------
+    -- 11. DRUID
+    --------------------------------------------------------------------
+    [11] = {
+        name = "Druid",
+        file = "DRUID",
+        armor = { "Leather" },
+        weapons = {
+            [2] = {
+                [10] = true,  -- Staff
+                [15] = true,  -- Dagger
+                [4]  = true,  -- 1H Mace
+                [5]  = true,  -- 2H Mace
+                [13] = true,  -- Fist Weapon
+                [6]  = true,  -- Polearm
+            },
+            shields  = false,
+            offhands = true,
+        },
+        specs = {
+            { id = 102, name = "Balance",     primary = "INTELLECT", role = "RANGED" },
+            { id = 103, name = "Feral",       primary = "AGILITY",   role = "MELEE"  },
+            { id = 104, name = "Guardian",    primary = "AGILITY",   role = "TANK"   },
+            { id = 105, name = "Restoration", primary = "INTELLECT", role = "HEALER" },
+        }
+    },
+
+    --------------------------------------------------------------------
+    -- 12. DEMON HUNTER
+    --------------------------------------------------------------------
+    [12] = {
+        name = "Demon Hunter",
+        file = "DEMONHUNTER",
+        armor = { "Leather" },
+        weapons = {
+            [2] = {
+                [9]  = true,  -- Warglaive
+                [13] = true,  -- Fist Weapon
+                [0]  = true,  -- 1H Axe
+                [7]  = true,  -- 1H Sword
+            },
+            shields  = false,
+            offhands = false,
+        },
+        specs = {
+            { id = 577, name = "Havoc",    primary = "AGILITY",   role = "MELEE"  },
+            { id = 581, name = "Vengeance",primary = "AGILITY",   role = "TANK"   },
+            { id = 1480, name = "Devourer",primary = "INTELLECT", role = "RANGED" },
+        }
+    },
+
+    --------------------------------------------------------------------
+    -- 13. EVOKER
+    --------------------------------------------------------------------
+    [13] = {
+        name = "Evoker",
+        file = "EVOKER",
+        armor = { "Mail" },
+        weapons = {
+            [2] = {
+                [15] = true,  -- Dagger
+                [13] = true,  -- Fist Weapon
+                [4]  = true,  -- 1H Mace
+                [5]  = true,  -- 2H Mace
+                [0]  = true,  -- 1H Axe
+                [1]  = true,  -- 2H Axe
+                [7]  = true,  -- 1H Sword
+                [8]  = true,  -- 2H Sword
+                [10] = true,  -- Staff
+            },
+            shields  = false,
+            offhands = true,
+        },
+        specs = {
+            { id = 1467, name = "Devastation", primary = "INTELLECT", role = "RANGED" },
+            { id = 1468, name = "Preservation",primary = "INTELLECT", role = "HEALER" },
+            { id = 1473, name = "Augmentation",primary = "INTELLECT", role = "RANGED" },
+        }
+    },
 }
