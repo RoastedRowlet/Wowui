@@ -27,7 +27,7 @@ PremadeGroupsFilterState = {
 ["act"] = false,
 },
 ["notdeclined"] = false,
-["dungeon3"] = false,
+["dungeon3"] = true,
 ["members"] = {
 ["max"] = "",
 ["min"] = "",

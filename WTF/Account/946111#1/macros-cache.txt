@@ -178,7 +178,7 @@ VER 3 000000000000006B "FocusMark" "132160"
 #showtooltip
 /focus [exists,nodead][]
 /stopmacro [@focus,noexists]
-/tm [@focus] 6
+/tm [@focus] 4
 END
 VER 3 000000000000006C "FocusTargetMarker" "132219"
 /focus [@mouseover, harm, nodead][]
