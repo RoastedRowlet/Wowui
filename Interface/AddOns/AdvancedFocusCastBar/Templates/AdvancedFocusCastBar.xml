@@ -70,27 +70,7 @@
                                 <Anchor point="BOTTOMRIGHT" x="0" y="-8" />
                             </Anchors>
                         </FontString>
-                        <FontString parentKey="TargetNameText1" inherits="GameFontHighlightSmall" justifyH="CENTER" text="">
-                            <Anchors>
-                                <Anchor point="BOTTOMRIGHT" x="0" y="-8" />
-                            </Anchors>
-                        </FontString>
-                        <FontString parentKey="TargetNameText2" inherits="GameFontHighlightSmall" justifyH="CENTER" text="">
-                            <Anchors>
-                                <Anchor point="BOTTOMRIGHT" x="0" y="-8" />
-                            </Anchors>
-                        </FontString>
-                        <FontString parentKey="TargetNameText3" inherits="GameFontHighlightSmall" justifyH="CENTER" text="">
-                            <Anchors>
-                                <Anchor point="BOTTOMRIGHT" x="0" y="-8" />
-                            </Anchors>
-                        </FontString>
-                        <FontString parentKey="TargetNameText4" inherits="GameFontHighlightSmall" justifyH="CENTER" text="">
-                            <Anchors>
-                                <Anchor point="BOTTOMRIGHT" x="0" y="-8" />
-                            </Anchors>
-                        </FontString>
-                        <FontString parentKey="TargetNameText5" inherits="GameFontHighlightSmall" justifyH="CENTER" text="">
+                        <FontString parentKey="TargetNameText" inherits="GameFontHighlightSmall" justifyH="CENTER" text="">
                             <Anchors>
                                 <Anchor point="BOTTOMRIGHT" x="0" y="-8" />
                             </Anchors>

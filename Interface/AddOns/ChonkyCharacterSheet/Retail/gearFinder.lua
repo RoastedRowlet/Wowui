@@ -23,7 +23,6 @@ CCS.Modules[module.Name] = module
 CCS.AscendantVoidforgedBonusIDs = {
     [13653] = {tier = "Hero", icon = "Interface\\ICONS\\INV_1205_Voidforge_SovereignVoidcores_CosmicVoid.blp",},
     [13654] = {tier = "Myth", icon = "Interface\\ICONS\\INV_1205_Voidforge_SovereignVoidcores_CosmicVoid.blp",},
-    [13656] = {tier = "Myth", icon = "Interface\\ICONS\\inv_raid_aberrantspellforge_blue.blp", },
 }
 
 function CCS.GetAscendantVoidforgedTag(link)
@@ -71,67 +70,96 @@ CCS.iLvlDeltaBonusIDs = {
 -- Explicitly not adding "Heroic", "Mythic", "LFR", "Mythic+" to the link.
 -----------------------------------------
 
-function CCS.BuilditemString(itemID, trackName, targetIlvl)
-	-- Just in case, return with "pocket lint" if we are not passed the correct information.
-	--print("TEST:", itemID, trackName, targetIlvl)
-
-	if itemID == nil or trackName == nil or targetIlvl == nil then return "item:5263" end
+function CCS.BuilditemString(itemID, trackName, targetIlvl, bossID)
+    if not itemID or not trackName or not targetIlvl or not bossID then
+        return "item:5263"
+    end
 
     local track = CCS.Season_upgradeTracks[trackName]
-
-	--print("TEST:", itemID, trackName, targetIlvl, track)
-	
     if not track then
-        return "item:" .. itemID -- bails with the base item
+        return "item:" .. itemID
     end
 
     local bonusIds = {}
     local _, _, baseIlvl = C_Item.GetDetailedItemLevelInfo(itemID)
 
-    -- Item not cached yet
     if not baseIlvl then
         C_Item.RequestLoadItemDataByID(itemID)
         return nil
     end
-	
+
+    ---------------------------------------------------------
+    -- Determine item class/subclass and equip location
+    ---------------------------------------------------------
+    local name, link, quality, ilvl, req, classStr, subclassStr, stack, equipLoc =
+        C_Item.GetItemInfo(itemID)
+
+    local itemClassID, itemSubClassID = select(12, GetItemInfo(itemID))
+
+    -- Void-Ascended eligibility:
+    -- Weapons OR Trinkets only
+    local isVoidAscendedEligible =
+        (itemClassID == 2) or (equipLoc == "INVTYPE_TRINKET")
+
+    ---------------------------------------------------------
+    -- Rotmire special rule: +9 ilvl bump
+    ---------------------------------------------------------
+    local originalTarget = targetIlvl
+
+    if bossID == 2711 then
+        targetIlvl = targetIlvl + 9
+    end
+
+    ---------------------------------------------------------
+    -- If this ilvl corresponds to Void-Ascended tier
+    -- but the item is NOT eligible → downgrade by 9
+    ---------------------------------------------------------
+    local isVoidAscendedTier = false
+    if trackName == "Hero" and targetIlvl == 285 then
+        isVoidAscendedTier = true
+    elseif trackName == "Myth" and targetIlvl == 298 then
+        isVoidAscendedTier = true
+    end
+
+    if isVoidAscendedTier and not isVoidAscendedEligible then
+        targetIlvl = targetIlvl - 9
+    end
+
+    ---------------------------------------------------------
+    -- Compute bonus IDs
+    ---------------------------------------------------------
     local diff = targetIlvl - baseIlvl
     local levelBonus = CCS.iLvlDeltaBonusIDs[diff]
     local trackBonus = track.bonusByIlvl[targetIlvl]
 
-    -- Base ilvl from the item itself
-    if not baseIlvl then
-        return "item:" .. itemID
-    end
+    if levelBonus then table.insert(bonusIds, levelBonus) end
+    if trackBonus then table.insert(bonusIds, trackBonus) end
 
--- Adding bonusIDs in a specific order.
-
-    ---------------------------------------------------------
-    -- Item-level delta bonus
-    ---------------------------------------------------------
-    if levelBonus then
-        table.insert(bonusIds, levelBonus)
-    end
-
-    ---------------------------------------------------------
-    -- Track bonus
-    ---------------------------------------------------------
-    if trackBonus then
-        table.insert(bonusIds, trackBonus)
-    end
-
-    ---------------------------------------------------------
-    -- Apparently we need to add this to make it an epic item.
-	-- Learned that the hard way.
-    ---------------------------------------------------------
+    -- Epic quality bonus
     table.insert(bonusIds, 1674)
+
+    ---------------------------------------------------------
+    -- Rotmire Sporefused override (AFTER eligibility logic)
+    ---------------------------------------------------------
+    if bossID == 2711 then
+        if trackName == "Myth" then
+            table.insert(bonusIds, 13786)
+        elseif trackName == "Hero" then
+            table.insert(bonusIds, 13787)
+        else
+            table.insert(bonusIds, 13788)
+        end
+    end
 
     ---------------------------------------------------------
     -- Build final item string
     ---------------------------------------------------------
     local bonusString = table.concat(bonusIds, ":")
     local specID = GetSpecializationInfo(GetSpecialization())
-	local itemstring = string.format("item:%d::::::::%d:%d:::%d:%s", itemID, UnitLevel("player"), specID, #bonusIds, bonusString)
-
+    local itemstring = string.format(
+        "item:%d:0:0:0:0:0:0:0:%d:%d:0:0:%d:%s:0",
+        itemID, UnitLevel("player"), specID, #bonusIds, bonusString
+    )
     return itemstring
 end
 
@@ -443,6 +471,23 @@ function CCS:CreateLootRow(index, parent, rowWidth, rowHeight)
 		GameTooltip:Hide()
 	end)
 
+	row.iconFrame:SetScript("OnMouseDown", function(self, button)
+		local link = self:GetParent().hyperlink
+		if not link then return end
+		local _, itemLink = C_Item.GetItemInfo(link)
+
+		if not itemLink then
+			C_Item.RequestLoadItemDataByID(self:GetParent().itemID)
+			return
+		end
+		if IsModifiedClick("CHATLINK") then
+			ChatEdit_InsertLink(itemLink)
+		elseif IsModifiedClick("DRESSUP") then
+			DressUpItemLink(link)
+		end
+	end)
+
+
     -------------------------------------------------
     -- BIS Crown
     -------------------------------------------------
@@ -548,6 +593,7 @@ function CCS:CreateLootRow(index, parent, rowWidth, rowHeight)
         self:Show()
 
         self.icon:SetTexture(data.icon or 134400)
+		self.itemID = data.itemID or 0
         self.name:SetText(data.name or "")
         self.type:SetText(data.type or "")
         self.primary:SetText("" or data.primary or "")
@@ -665,6 +711,7 @@ function CCS.UpdateLootScroll(results)
 
             local rowData = {
                 icon = C_Item.GetItemIconByID(entry.itemID),
+				itemID = entry.itemID,
                 name = coloredName,
 				type = CCS:GetDisplayType(entry),
 
@@ -820,7 +867,7 @@ function CCS:ApplyLootFilters(sortBy, sortDir)
         -----------------------------------------------------
         local itemString
         if not skip then
-            itemString = CCS.BuilditemString(itemID, trackName, targetIlvl)
+            itemString = CCS.BuilditemString(itemID, trackName, targetIlvl, entry.source.bossID)
             if not itemString then
                 allReady = false
                 skip = true
@@ -831,8 +878,8 @@ function CCS:ApplyLootFilters(sortBy, sortDir)
 
         if not skip then
             itemName  = C_Item.GetItemNameByID(itemID) or ("Item "..itemID)
-            hyperlink = string.format("|cffFFFFFF|H%s|h[%s]|h|r", itemString, itemName)
-
+            hyperlink = string.format("|cffa335ee|H%s|h[%s]|h|r", itemString, itemName)
+			
             -------------------------------------------------
             -- Extract runtime stats
             -------------------------------------------------
@@ -1400,24 +1447,27 @@ function CCS:CreateLootFooter(parent)
 	-- Get player's class and spec
 	local _, playerClassFile, playerClassID = UnitClass("player")
 	local currentSpecIndex = GetSpecialization()
+	local className = GetClassInfo(playerClassID)
 
 	if currentSpecIndex then
 		local specID, specName = GetSpecializationInfo(currentSpecIndex)
 
-		parent.selectedClassID = playerClassID
-		parent.selectedSpecID  = specID
+		-- Detect "Initial" spec (no spec chosen)
+		local noRealSpec = (specID == 0) or (specID >= 1400) or (specName == nil)
 
-		-- Localized class name
-		local className = GetClassInfo(playerClassID)
-
-		-- Set dropdown text to "Class – Spec"
-		UIDropDownMenu_SetText(parent.classSpecDrop, className .. " – " .. specName)
+		if noRealSpec then
+			parent.selectedClassID = playerClassID
+			parent.selectedSpecID  = nil
+			UIDropDownMenu_SetText(parent.classSpecDrop, className)
+		else
+			parent.selectedClassID = playerClassID
+			parent.selectedSpecID  = specID
+			UIDropDownMenu_SetText(parent.classSpecDrop, className .. " – " .. (specName or ""))
+		end
 	else
-		-- No spec selected (leveling characters)
+		-- No spec index at all
 		parent.selectedClassID = playerClassID
 		parent.selectedSpecID  = nil
-
-		local className = GetClassInfo(playerClassID)
 		UIDropDownMenu_SetText(parent.classSpecDrop, className)
 	end
 
@@ -1512,7 +1562,7 @@ function CCS:CreateLootFooter(parent)
 				info.func = function()
 					parent.selectedClassID = classID
 					parent.selectedSpecID = spec.id
-					UIDropDownMenu_SetText(parent.classSpecDrop, className .. " – " .. spec.name)
+					UIDropDownMenu_SetText(parent.classSpecDrop, className .. " – " .. (spec.name or ""))
 					UpdateArmorTypeForClass(parent, classID)
 					CCS:ApplyLootFilters()
 					-- FORCE REFRESH SO CLASS GETS ITS DOT
@@ -1832,7 +1882,7 @@ function CCS:CreateLootFooter(parent)
 				if not btn then break end
 
 				if btn.menuList == raidID then
-					-- Level‑1 checkmark mirrors ANY boss selection (Weapon‑style)
+					-- Level-1 checkmark mirrors ANY boss selection (Weapon-style)
 					btn.checked = anySelected
 					if btn.SetChecked then
 						btn:SetChecked(anySelected)
@@ -1958,11 +2008,18 @@ function CCS:CreateLootFooter(parent)
 			UIDropDownMenu_AddButton(info, level)
 
 			-------------------------------------------------
-			-- Sorted Raids (Weapon‑style: checkbox + flyout)
+			-- Sorted Raids (Weapon-style: checkbox + flyout)
 			-------------------------------------------------
 			local raidList = {}
 			for raidID in pairs(CCS.Season.raids) do
-				table.insert(raidList, { id = raidID, name = EJ_GetInstanceInfo(raidID) })
+				local name = EJ_GetInstanceInfo(raidID)
+
+				if name then
+					table.insert(raidList, { id = raidID, name = name })
+				else
+					-- Skip it until EJ data exists
+					-- print("Skipping raid", raidID, "(EJ not available yet)")
+				end
 			end
 			table.sort(raidList, function(a, b) return a.name < b.name end)
 
@@ -1978,11 +2035,11 @@ function CCS:CreateLootFooter(parent)
 				info.hasArrow = true
 				info.menuList = raidID
 
-				-- Level‑1 checkmark if ANY boss is selected (Weapon‑style)
+				-- Level-1 checkmark if ANY boss is selected (Weapon-style)
 				info.checked = anySelected
 
 				info.func = function()
-					-- Toggle all bosses in this raid (Weapon‑style "toggle all")
+					-- Toggle all bosses in this raid (Weapon-style "toggle all")
 					local newState = not allSelected
 
 					for _, boss in ipairs(raid.bosses) do
@@ -2039,7 +2096,7 @@ function CCS:CreateLootFooter(parent)
 			end
 
 		-------------------------------------------------
-		-- LEVEL 2 MENU (Bosses, Weapon‑subtype‑style)
+		-- LEVEL 2 MENU (Bosses, Weapon-subtype-style)
 		-------------------------------------------------
 		elseif level == 2 then
 			local raidID = menuList
@@ -2055,14 +2112,14 @@ function CCS:CreateLootFooter(parent)
 				info.checked = CCS.FooterFilters.selectedBosses[boss.id] == true
 
 				info.func = function()
-					-- Toggle this boss (Weapon‑subtype‑style)
+					-- Toggle this boss (Weapon-subtype-style)
 					CCS.FooterFilters.selectedBosses[boss.id] =
 						not CCS.FooterFilters.selectedBosses[boss.id] or nil
 
 					-- Recompute any/all for this raid
 					local allSelected, anySelected = RaidBossSelectionState(raidID)
 
-					-- Update Level‑1 raid checkmark + partial indicator (Weapon‑style)
+					-- Update Level-1 raid checkmark + partial indicator (Weapon-style)
 					local dropName = parent.instanceDrop:GetName()
 					local i = 1
 					while true do
@@ -2253,8 +2310,11 @@ function CCS:CreateLootFooter(parent)
 				local info = UIDropDownMenu_CreateInfo()
 
 				-- Display text: "259 (1/6)"
-				info.text = string.format("%d (%d/%d)", ilvl, index, total)
-
+				if index <= 6 then -- A hack for the craziness of Midnight Season 1 (to handle Void Ascended, Sporefused, etc.)
+					info.text = string.format("%d (%d/%d)", ilvl, index, math.min(6,total))
+				else
+					info.text = string.format("%d", ilvl)
+				end
 				-- Actual value: 259
 				info.value = ilvl
 
@@ -2384,18 +2444,36 @@ function CCS:CreateLootFooter(parent)
 
 	-- Click: Reset all filters
 	parent.resetFilters:SetScript("OnClick", function()
-		PlaySound(SOUNDKIT.GS_LOGIN_CHANGE_REALM_OK)
-		-------------------------------------------------
-		-- Reset Class/Spec
-		-------------------------------------------------
-		local _, _, playerClassID = UnitClass("player")
-		local currentSpecIndex = GetSpecialization()
-		local specID, specName = GetSpecializationInfo(currentSpecIndex)
-		local className = GetClassInfo(playerClassID)
+	PlaySound(SOUNDKIT.GS_LOGIN_CHANGE_REALM_OK)
 
-		parent.selectedClassID = playerClassID
-		parent.selectedSpecID  = specID
-		UIDropDownMenu_SetText(parent.classSpecDrop, className .. " – " .. specName)
+	-------------------------------------------------
+	-- Reset Class/Spec
+	-------------------------------------------------
+	local _, _, playerClassID = UnitClass("player")
+	local currentSpecIndex = GetSpecialization()
+	local className = GetClassInfo(playerClassID)
+
+	local specID, specName = nil, nil
+
+	if currentSpecIndex then
+		local id, name = GetSpecializationInfo(currentSpecIndex)
+
+		-- Detect invalid/Initial spec
+		if id and name and id < 1400 then
+			specID = id
+			specName = name
+		end
+	end
+
+	parent.selectedClassID = playerClassID
+	parent.selectedSpecID  = specID   -- nil if no real spec
+
+	if specName then
+		UIDropDownMenu_SetText(parent.classSpecDrop, className .. " – " .. (specName or ""))
+	else
+		UIDropDownMenu_SetText(parent.classSpecDrop, className)
+	end
+
 
 		-------------------------------------------------
 		-- Reset Slot

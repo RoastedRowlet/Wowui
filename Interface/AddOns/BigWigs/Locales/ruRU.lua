@@ -2,12 +2,17 @@ local _, addonTbl = ...
 local L = addonTbl.API:NewLocale("BigWigs", "ruRU")
 if not L then return end
 
+--L.tempRenameFeat = "You can now |cFF436EEErename|r any boss ability by opening its advanced settings (>>) and clicking the renames tab."
+
 -- API.lua
 L.showAddonBar = "Аддон '|cFF436EEE%s|r' создал '%s' полосу длительности."
 L.requestAddonProfile = "Аддон '|cFF436EEE%s|r' только что создал копию строки экспорта вашего профиля."
 L.shortMinutesAndSeconds = "%d мин %d сек" -- 1 Minute 2 Seconds
 L.shortSecondsOnly = "%d сек" -- 28 Seconds
 L.shortSubTenSeconds = "%.1f сек" -- 3.2 Seconds
+L.accept = "Принять"
+L.cancel = "Отмена"
+--L.confirm_profile_swap = "The addon |cFF436EEE\"%s\"|r wants to automatically swap your BigWigs profile to a different profile called:\n\n|cFF33FF99\"%s\"|r\n\nAre you sure you want to do this?"
 
 -- Core.lua
 L.berserk = "Берсерк"
@@ -61,7 +66,6 @@ L.outOfDateAddOnPopup = "Аддон |cFF436EEE%s|r устарел!"
 L.outOfDateAddOnRaidWarning = "Аддон |cFF436EEE%s|r устарел! Текущая версия: v%d.%d.%d последняя: v%d.%d.%d!"
 L.disabledAddOn = "У вас выключена модификация |cFF436EEE%s|r, таймеры не будут показываться."
 L.removeAddOn = "Пожалуйста, удалите '|cFF436EEE%s|r', ему на смену пришло '|cFF436EEE%s|r'."
-L.alternativeName = "%s (|cFF436EEE%s|r)"
 L.outOfDateContentPopup = "ВНИМАНИЕ!\nВы обновили |cFF436EEE%s|r но необходимо также обновить основную модификацию |cFF436EEEBigWigs|r .\nИгнорирование приведёт к ошибочному функционированию."
 L.outOfDateContentRaidWarning = "|cFF436EEE%s|r требует %d версию основной модификации |cFF436EEEBigWigs|r для грамотного функционирования. Текущая версия - %d."
 L.addOnLoadFailedWithReason = "BigWigs не смог загрузить аддон |cFF436EEE%s|r по причине: %q. Сообщи разрабу BigWigs!"
@@ -145,7 +149,7 @@ L.configure = "Настройка"
 L.resetPositions = "Сброс позиции"
 L.selectEncounter = "Выберите схватку"
 L.privateAuraSounds = "Приватные Ауры - Звуки"
-L.privateAuraSounds_desc = "Приватные ауры нельзя отслеживать стандартным методом, но есть возможность настроить звук, если вы цель заклинания."
+--L.privateAuraSounds_desc = "Private auras can't be tracked normally, but you can set a sound to be played when the ability debuff is applied to you."
 L.listAbilities = "Вывести способности в групповой чат"
 
 L.dbmFaker = "Маскировка под DBM"
@@ -223,6 +227,13 @@ L.healer = "|cFFFF0000Только для лекарей.|r "
 L.tankhealer = "|cFFFF0000Только для танков и лекарей.|r "
 L.dispeller = "|cFFFF0000Только для рассеивателей.|r "
 
+--L.renames = "Renames"
+--L.noteLabel = "%s (|cFFFFFF99%s|r)"
+--L.renameLabel = "%s (|cFF3366FF%s|r)"
+--L.renameHeader = "Set a custom name for the ability. This text will be used instead of the spell name in all messages and bars.\n\n"
+--L.spellName = "Spell Name"
+--L.spellNameResetDesc = "This ability has a custom name by default, click this button to use the original name (usually a spell name)."
+
 -- Sharing.lua
 L.import = "Импорт"
 L.import_info = "После ввода строки, выберите, какие настройки вы хотите импортировать.\nЕсли настройки не доступны в строке импорта, их нельзя будет выбрать.\n\n|cffff4411Копируются только общие настройки, не затрагивая конкретных боссов.|r"
@@ -292,6 +303,8 @@ L.sharing_window_title = "Поделиться настройками босса
 L.sharing_flags = "Общие настройки"
 L.sharing_flags_desc = "Импортировать настройки, которые управляют такими параметрами, как 'показывать полосу', 'проигрывать звук', 'показывать сообщение' и т.д.\nОни охватывают большинство флажков в настройках способностей."
 L.sharing_export_flags_desc = "Экспортировать настройки, которые управляют такими параметрами, как 'показывать полосу', 'проигрывать звук', 'показывать сообщение' и т.д.\nОни охватывают большинство флажков в настройках способностей."
+--L.sharing_renames_desc = "Import the custom renames that are configured."
+--L.sharing_export_renames_desc = "Export the custom renames that are configured."
 L.sharing_sounds_desc = "Импортировать звуки, которые будут проигрываться для способностей."
 L.sharing_export_sounds_desc = "Экспортировать звуки, которые будут проигрываться для способностей."
 L.sharing_private_auras = "Приватные ауры"
@@ -352,6 +365,7 @@ L.toolsDesc = "BigWigs предоставляет различные инстр�
 
 L.reloadUIWarning = "Изменение этой функции перезагрузит интерфейс и на мгновение покажет экран загрузки. Вы уверены?"
 L.qualityOfLife = "Улучшения удобства"
+--L.notYetImplemented = "Not Yet Implemented" -- When a feature hasn't been implemented yet
 
 -----------------------------------------------------------------------
 -- AutoInvite.lua
@@ -609,7 +623,6 @@ L.progressPercentTooltipText = {
 L.progressPercentNameplate = "Показывать прогресс % на полосах здоровья вражеских NPC"
 L.progressCurrentPull = "Текущий пулл"
 L.progressCurrentPullDesc = "Показывать общий прогресс, который вы получите за текущую группу NPC, с которой находитесь в бою.\n\nПОКА НЕ РАБОТАЕТ!"
-L.tempProgressAnnounce = "Теперь вы можете видеть, сколько прогресса % даст каждый NPC, при наведении на него и на его полосе здоровья.\n\nНастроить можно в |cFF436EEEИнструменты|r > |cFF436EEEЭпохальные+|r > |cFF436EEEПрогресс %|r."
 L.settingsForCurrentTarget = "Настройки для текущей цели"
 L.settingsForOtherTargets = "Настройки для всех остальных целей"
 

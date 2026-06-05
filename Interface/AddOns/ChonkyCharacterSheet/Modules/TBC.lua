@@ -34,6 +34,7 @@ end
 -- Module Definitions
 ---------------------------
 local modbg = _G["CharacterModelFramebg"] or CreateFrame("Frame", "CharacterModelFramebg", CharacterModelFrame)
+modbg.retries = 0
 local modtex = _G["CharacterModelFramebgtex"] or modbg:CreateTexture("CharacterModelFramebgtex", "BACKGROUND")    
 
 local inspectmodbg = _G["InspectModelFramebg"] or CreateFrame("Frame", "InspectModelFramebg")
@@ -277,7 +278,8 @@ local function ChangeModelBg()
             local origW, origH = 569, 520
             local newW, newH = modbg:GetSize()
             local scale = math.max(newH / origH, 0.1)
-            if (newW == 0 or newH == 0) and modbg.retries < 5 then
+            
+            if (newW == 0 or newH == 0) and (modbg.retries and modbg.retries < 5) then
                 C_Timer.After(0, ChangeModelBg)
                 modbg.retries = modbg.retries+1
                 return
@@ -1399,6 +1401,27 @@ function CCS.HookSetup()
     if CCS.Hooked then return end
 
         --== Frame Hooks
+
+    if C_AddOns.IsAddOnLoaded("Outfitter") == true then
+        if OutfitterButton and OutfitterButtonFrame then
+            OutfitterButton:SetPoint("TOPRIGHT", CharacterFrameCloseButton, "BOTTOMRIGHT", 9, 0)
+            OutfitterButton:SetScale(.8)
+            OutfitterFrame:SetPoint("TOPLEFT", CharacterFrameBg, "TOPRIGHT",0,-2)
+        end
+    end
+    
+    if C_AddOns.IsAddOnLoaded("Gears") == true then
+        if Gears_ToggleButton and Gears_MainFrame then
+            Gears_ToggleButton:SetScale(.6)
+            Gears_ToggleButton:ClearAllPoints()
+            Gears_ToggleButton:SetPoint("TOPRIGHT", CharacterFrameCloseButton, "BOTTOMRIGHT", 0, 0 )
+            Gears_MainFrame:SetPoint("TOPLEFT",CharacterFrameBg, "TOPRIGHT",5,0)
+            Gears_ToggleButton:HookScript("OnClick", function(self, button)
+                Gears_MainFrame:SetPoint("TOPLEFT",CharacterFrameBg, "TOPRIGHT",-1,0)
+            end)
+        end
+
+    end    
 
     if C_AddOns.IsAddOnLoaded("PrettyReps") == false then
         hooksecurefunc(ReputationFrame, "Hide", function() ReputationDetailFrame:Hide(); end )

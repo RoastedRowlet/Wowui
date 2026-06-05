@@ -101,15 +101,16 @@ mod:SetRenames({
 		notes = {CL.intermission, CL.stage:format(2), CL.stage:format(3), CL.stage:format(4)}
 	}, -- Stages
 	[1253915] = {L.heavens_glaives}, -- Heaven's Glaives (Glaives)
-	[1279420] = {CL.beams}, -- Dark Quasar (Beams)
+	[1279420] = {CL.beams}, -- Dark Quasar (Beams) [Stage 1 Only]
 	[1249620] = {L.deaths_dirge}, -- Death's Dirge (Memory Game)
-	[1249609] = {CL.mark}, -- Dark Rune (Mark)
+	[1249609] = {CL.you:format(CL.mark), notes = {CL.messageOnYouNote}, original = CL.you:format(mod:SpellName(1249609))}, -- Dark Rune (Mark)
 	[1251386] = {L.prism_kicks}, -- Safeguard Prism (Kicks)
 	[1267049] = {L.heavens_lance}, -- Heaven's Lance (Lance)
 	[1284980] = {L.deaths_dirge}, -- Grim Symphony (Memory Game)
 	[1284931] = {L.prism_kicks}, -- Termination Prism (Kicks)
-	[1282441] = {1282441}, -- Starsplinter
-	[1284525] = {CL.beams, CL.beam, notes = {CL.plural, CL.singular}}, -- Galvanize (Beams)
+	[1282441] = {1282441, CL.you:format(mod:SpellName(1282441)), notes = {CL.generalNote, CL.messageOnYouNote}, original = false}, -- Starsplinter
+	[1282469] = {CL.beams}, -- Dark Quasar (Beams) [Intermission Only]
+	[1284525] = {CL.beams, CL.you:format(CL.beam), notes = {CL.generalNote, CL.messageOnYouNote}, original = {1284525, CL.you:format(mod:SpellName(1284525))}}, -- Galvanize (Beams)
 	[1282412] = {CL.dodge}, -- Core Harvest (Dodge)
 	[1281194] = {CL.knockback}, -- Dark Meltdown (Knockback)
 	[1250898] = {L.the_dark_archangel}, -- The Dark Archangel (Big Boom)
@@ -130,7 +131,7 @@ function mod:GetOptions()
 
 		-- Stage 1
 		1253915, -- Heaven's Glaives
-		1279420, -- Dark Quasar
+		1279420, -- Dark Quasar [Stage 1 Only]
 		1249620, -- Death's Dirge
 			{1249609, "ME_ONLY_EMPHASIZE"}, -- Dark Rune
 		1251386, -- Safeguard Prism
@@ -141,9 +142,10 @@ function mod:GetOptions()
 
 		-- Intermission
 		1282441, -- Starsplinter
+		1282469, -- Dark Quasar [Intermission Only]
 
 		-- Stage 2
-		1284525, -- Galvanize
+		{1284525, "ME_ONLY_EMPHASIZE"}, -- Galvanize
 		1282412, -- Core Harvest
 		1281194, -- Dark Meltdown
 
@@ -157,12 +159,15 @@ function mod:GetOptions()
 		1276525, -- Heaven & Hell
 	},{
 		{ tabName = CL.stage:format(1), { "stages", 1253915, 1279420, 1249620, 1249609, 1251386, 1267049, 1284980, 1284931, } },
-		{ tabName = CL.intermission,    { "stages", 1282441, 1279420, } },
+		{ tabName = CL.intermission,    { "stages", 1282441, 1282469 } },
 		{ tabName = CL.stage:format(2), { "stages", 1284525, 1282412, 1267049, 1281194, } },
-		{ tabName = CL.stage:format(3), { "stages", "berserk", 1250898, 1266388, 1266897, 1267049, 1273158, 1276525, 1282441, } },
+		{ tabName = CL.stage:format(3), { "custom_select_limit_warnings", "stages", "berserk", 1250898, 1266388, 1266897, 1267049, 1273158, 1276525, 1282441, } },
 		[1253915] = -32197, -- Stage One: Final Tolls
 		[1284525] = -33638, -- Stage Two: The Dark Reactor
 		[1250898] = -33639, -- Stage Three: Midnight Falls
+	},{
+		[1279420] = CL.stage1Only,
+		[1282469] = CL.intermissionOnly,
 	}
 end
 
@@ -361,7 +366,7 @@ function mod:TimersMythic(_, eventInfo)
 		barInfo.duration = barInfo.duration or eventInfo.duration
 		activeBars[eventInfo.id] = barInfo
 		if self:ShouldShowBars() then
-			self:Bar(barInfo.key, barInfo.duration, barInfo.msg, barInfo.icon, eventInfo.id)
+			self:CDBar(barInfo.key, barInfo.duration, barInfo.msg, barInfo.icon, eventInfo.id)
 		end
 	elseif barInfo == nil and self:ShouldShowBars() then
 		self:ErrorForTimelineEvent(eventInfo)
@@ -485,7 +490,7 @@ function mod:TimersOther(_, eventInfo)
 		barInfo.duration = barInfo.duration or eventInfo.duration
 		activeBars[eventInfo.id] = barInfo
 		if self:ShouldShowBars() then
-			self:Bar(barInfo.key, barInfo.duration, barInfo.msg, barInfo.icon, eventInfo.id)
+			self:CDBar(barInfo.key, barInfo.duration, barInfo.msg, barInfo.icon, eventInfo.id)
 		end
 	elseif barInfo == nil and self:ShouldShowBars() then
 		self:ErrorForTimelineEvent(eventInfo)
@@ -542,14 +547,14 @@ function mod:ENCOUNTER_WARNING(_, info)
 	local stage = self:GetStage()
 	if stage == 1 or stage == 3 then
 		if info.severity == 2 then -- Dark Rune (when the memory game is on you)
-			self:PersonalMessage(1249609, nil, self:GetRename(1249609)) -- Mark
+			self:PersonalMessage(1249609, false) -- Mark
 		end
 	elseif stage == 2 or stage == 4 then
 		if info.severity == 2 then -- Galvanize
-			self:PersonalMessage(1284525, nil, self:GetRename(1284525, 2)) -- Beam
+			self:PersonalMessage(1284525, false, self:GetRename(1284525, 2)) -- Beam
 		elseif info.severity == 1 then -- Starsplinter
 			-- (p2 is set on intermission start)
-			self:PersonalMessage(1282441, nil, self:GetRename(1282441))
+			self:PersonalMessage(1282441, false, self:GetRename(1282441, 2))
 		end
 	end
 end
@@ -679,7 +684,7 @@ function mod:IntoTheDarkwell(duration)
 	self:ResetCounts()
 
 	if self:ShouldShowBars() then
-		self:Bar(1279420, 10.5, CL.count:format(self:GetRename(1279420), quasarCount)) -- Dark Quasar
+		self:Bar(1282469, 10.5, CL.count:format(self:GetRename(1282469), quasarCount)) -- Dark Quasar
 		self:ScheduleTimer("IntermissionDarkQuasar", 10.5)
 		if self:Mythic() then
 			self:Bar(1282441, 38, self:GetRename(1282441)) -- Starsplinter
@@ -697,14 +702,15 @@ function mod:IntermissionDarkQuasar()
 	local info = INTERMISSION_DARK_QUASAR_INFO[self:Difficulty()]
 	if not info then return end
 
-	self:Message(1279420, "yellow", CL.count_amount:format(self:GetRename(1279420), quasarCount, info.count))
-	self:PlaySound(1279420, "alert")
+	self:Message(1282469, "yellow", CL.count_amount:format(self:GetRename(1282469), quasarCount, info.count))
 	quasarCount = quasarCount + 1
 
 	if quasarCount <= info.count then
-		self:Bar(1279420, info.duration, CL.count_amount:format(self:GetRename(1279420), quasarCount, info.count))
+		self:Bar(1282469, info.duration, CL.count_amount:format(self:GetRename(1282469), quasarCount, info.count))
 		self:ScheduleTimer("IntermissionDarkQuasar", info.duration)
 	end
+
+	self:PlaySound(1282469, "alert")
 end
 
 -- Phase 2
@@ -721,12 +727,11 @@ function mod:DarkMeltdown(duration)
 		icon = 1281194,
 		onFinished = function()
 			self:SetStage(3)
-			self:Message("stages", "cyan", self:GetRename("stages", 3), false) -- Stage 3
-			self:PlaySound("stages", "long")
-
 			self:ResetCounts()
 
 			self:Bar(1281194, 8, self:GetRename(1281194)) -- Dark Meltdown
+			self:Message("stages", "cyan", self:GetRename("stages", 3), false) -- Stage 3
+			self:PlaySound("stages", "long")
 		end
 	}
 end
@@ -898,9 +903,6 @@ function mod:CheckForPhaseFour()
 		self:StopBar(1249796) -- Shattered Sky
 
 		self:SetStage(4)
-		self:Message("stages", "cyan", self:GetRename("stages", 4), false) -- Stage 4
-		self:PlaySound("stages", "long")
-
 		starsplinterCount = 1
 		heavenHellCount = 1
 
@@ -916,6 +918,9 @@ function mod:CheckForPhaseFour()
 			self:Message("berserk", "red", CL.casting:format(self:SpellName(1287447)), 1287447) -- Midnight Perpetual
 			self:PlaySound("berserk", "alarm")
 		end, 79-4)
+
+		self:Message("stages", "cyan", self:GetRename("stages", 4), false) -- Stage 4
+		self:PlaySound("stages", "long")
 	end
 end
 
@@ -928,8 +933,8 @@ end
 
 function mod:HeavenHellRepeater()
 	self:Message(1276525, "red", CL.count:format(self:GetRename(1276525), heavenHellCount))
-	self:PlaySound(1276525, "alert")
 	heavenHellCount = heavenHellCount + 1
 	self:Bar(1276525, 20, CL.count:format(self:GetRename(1276525), heavenHellCount))
 	self:ScheduleTimer("HeavenHellRepeater", 20)
+	self:PlaySound(1276525, "alert")
 end

@@ -2,12 +2,17 @@ local _, addonTbl = ...
 local L = addonTbl.API:NewLocale("BigWigs", "zhTW")
 if not L then return end
 
+L.tempRenameFeat = "現在，首領技能的進階設定 (>>) 可以為技能|cFF436EEE重新命名|r。"
+
 -- API.lua
 L.showAddonBar = "插件「|cFF436EEE%s|r」創建了「%s」計時器。"
 L.requestAddonProfile = "插件「|cFF436EEE%s|r」剛剛複製了你的設定檔匯出字串。"
 L.shortMinutesAndSeconds = "%d 分 %d 秒" -- 1 Minute 2 Seconds
 L.shortSecondsOnly = "%d 秒" -- 28 Seconds
 L.shortSubTenSeconds = "%.1f 秒" -- 3.2 Seconds
+L.accept = "接受"
+L.cancel = "取消"
+L.confirm_profile_swap = "插件 |cFF436EEE「%s」|r 想要將你的 BigWigs 設定檔自動切換為以下設定檔：\n\n|cFF33FF99「%s」|r\n\n你確定要切换嗎？"
 
 -- Core.lua
 L.berserk = "狂暴"
@@ -61,7 +66,6 @@ L.outOfDateAddOnPopup = "|cFF436EEE%s|r 模組已過期！"
 L.outOfDateAddOnRaidWarning = "|cFF436EEE%s|r 模組已過期！你使用的版本是 v%d.%d.%d，但最新版是 v%d.%d.%d。"
 L.disabledAddOn = "模組 |cFF436EEE%s|r 已被禁用，無法顯示計時器。"
 L.removeAddOn = "請移除「|cFF436EEE%s|r」，其已被「|cFF436EEE%s|r」所取代。"
-L.alternativeName = "%s（|cFF436EEE%s|r）"
 L.outOfDateContentPopup = "警告！\n更新 |cFF436EEE%s|r 模組後必需同步更新 |cFF436EEEBigWigs|r 核心，\n如果不更新，將會導致插件功能異常或無法運作。。"
 L.outOfDateContentRaidWarning = "需要安裝版本 %2$d 的|cFF436EEEBigWigs|r 核心，才能使用 |cFF436EEE%1$s|r，但你目前使用的版本是 %3$d。"
 L.addOnLoadFailedWithReason = "BigWigs 無法載入模組 |cFF436EEE%s|r，原因是 %q；請將此問題回報給 BigWigs 開發團隊！"
@@ -145,7 +149,7 @@ L.configure = "配置"
 L.resetPositions = "重置位置"
 L.selectEncounter = "選擇戰鬥"
 L.privateAuraSounds = "私有光環音效"
-L.privateAuraSounds_desc = "插件無法用一般的方式追蹤私有光環，但可以指定一個音效，在你被光環鎖定時播放。"
+L.privateAuraSounds_desc = "插件無法追蹤私有光環的具體內容，但你可以設定獲得私有光環的減益效果時播放指定音效。"
 L.listAbilities = "將技能列表發送到團隊聊天頻道"
 
 L.dbmFaker = "假裝我是 DBM 用戶"
@@ -223,6 +227,13 @@ L.healer = "|cFFFF0000只警報治療。|r"
 L.tankhealer = "|cFFFF0000只警報坦克和治療。|r"
 L.dispeller = "|cFFFF0000只警報驅散。|r"
 
+L.renames = "重新命名"
+L.noteLabel = "%s（|cFFFFFF99%s|r）"
+L.renameLabel = "%s（|cFF3366FF%s|r）"
+L.renameHeader = "為技能設定別名，取代原本的技能名稱，並套用至所有的訊息與計時條。\n\n"
+L.spellName = "技能別名"
+L.spellNameResetDesc = "此技能已預設了一個別名，點擊此按鈕可還原為原本的技能名稱。"
+
 -- Sharing.lua
 L.import = "匯入"
 L.import_info = "輸入字串後，可以勾選要分別匯入哪些設定。\n如果字串中不包含某些設定，該選項將無法勾選。\n\n|cffff4411導入的字串只會更改一般設定，不會更改針對特定首領技能調整的單獨設定。|r"
@@ -292,6 +303,8 @@ L.sharing_window_title = "分享首領設定"
 L.sharing_flags = "通用設定"
 L.sharing_flags_desc = "匯入控制各項功能的設定，例如「顯示計時條」、「播放音效」、「顯示訊息」等。\n這涵蓋了技能設置中大部分勾選選項。"
 L.sharing_export_flags_desc = "匯出控制各項功能的設定，例如「顯示計時條」、「播放音效」、「顯示訊息」等。\n這涵蓋了技能設置中大部分勾選選項。"
+L.sharing_renames_desc = "匯出技能的別名設定。"
+L.sharing_export_renames_desc = "匯出技能的別名設定。"
 L.sharing_sounds_desc = "匯入技能對應的音效設定。"
 L.sharing_export_sounds_desc = "匯出技能對應的音效設定。"
 L.sharing_private_auras = "私有光環"
@@ -352,6 +365,7 @@ L.toolsDesc = "BigWigs 提供了多種實用工具或便捷功能，讓你可以
 
 L.reloadUIWarning = "變更此功能需要重載介面，系統將會出現短暫的載入畫面。你確定要繼續嗎？"
 L.qualityOfLife = "便捷功能"
+L.notYetImplemented = "尚未實裝"
 
 -----------------------------------------------------------------------
 -- AutoInvite.lua
@@ -431,8 +445,8 @@ L.startingMythicKeystone = "啟動傳奇鑰石 (M+)"
 L.historyTimeFormat = "紀錄：時間格式"
 L.twelveHour = "12 小時制"
 L.twentyFourHour = "24 小時制"
---L.hideTooltipInCombat = "Hide Tooltip in Combat"
---L.customText = "Custom Text (Must Contain %s)"
+L.hideTooltipInCombat = "戰鬥中隱藏浮動提示"
+L.customText = "自訂文字（必須包含 %s）"
 
 -----------------------------------------------------------------------
 -- Keystones.lua
@@ -592,9 +606,9 @@ L.instanceKeysHideTitle = "隱藏標題"
 L.instanceKeysHideTitleDesc = "隱藏「誰有鑰石？」標題。"
 
 -- Challenges UI Decoration
---L.partyRatingHeader = "|TInterface\\AddOns\\BigWigs\\Media\\Icons\\minimap_raid:0:0|tParty Rating"
+L.partyRatingHeader = "|TInterface\\AddOns\\BigWigs\\Media\\Icons\\minimap_raid:0:0|t隊伍分數"
 L.dungeonScoreString = "|c%s%03d|r |cFFFFFFFF+%02d|r |cFF%s%02d:%02d|r |c%s（%s）|r"
---L.dungeonScoreNoDataString = "|cFFFFFFFFNo data|r |c%s(%s)|r"
+L.dungeonScoreNoDataString = "|cFFFFFFFF無資料|r |c%s(%s)|r"
 L.dungeonTeleportHeader = "|TInterface\\AddOns\\BigWigs\\Media\\Icons\\minimap_raid:0:0|t傳送"
 
 -- Progress %
@@ -609,9 +623,8 @@ L.progressPercentTooltipText = {
 L.progressPercentNameplate = "在敵方名條顯示進度百分比"
 L.progressCurrentPull = "當前拉怪進度"
 L.progressCurrentPullDesc = "顯示當前這波戰鬥能提供多少進度。\n\n此功能尚未實裝！"
-L.tempProgressAnnounce = "現在，可以在浮動資訊提示和名條上顯示進度。\n\n請至 |cFF436EEE工具|r > |cFF436EEE傳奇鑰石+|r > |cFF436EEE進度 %|r 設定。"
---L.settingsForCurrentTarget = "Settings for your current target"
---L.settingsForOtherTargets = "Settings for all other targets"
+L.settingsForCurrentTarget = "當前目標設定"
+L.settingsForOtherTargets = "其他目標設定"
 
 -----------------------------------------------------------------------
 -- LFGTimer.lua
@@ -1207,8 +1220,8 @@ L.bigwigsEnhancedTimers = "BigWigs 風格的計時條 + BigWigs 的增強計時 
 L.blizzBasicAsBars = "BigWigs 風格的計時條 + 暴雪的內建計時"
 L.blizzBasicAsBlizzTimeline = "暴雪的「首領技能」時間軸 + 暴雪的內建計時（完全使用暴雪原生）"
 L.developerMode = "開發者模式"
-L.enhancedModeWarning = "警告！\n\n停用 BigWigs 的增強計時會同步關閉 BigWigs 的其他首領戰功能，包含：\n\n計時條顏色、技能別名、技能計數、自訂音效和語音、倒數計時、計時條開關、額外訊息等等。"
---L.blizzTimelineEnhancedWarning = "WARNING!\n\nThe Blizzard timeline doesn't support BigWigs enhanced features. You will NOT get renamed spells and you will see inaccurate timers.\n\nAre you sure you want to enable it?"
+L.enhancedModeWarning = "注意！\n\n停用 BigWigs 的增強計時會同步關閉 BigWigs 的其他首領戰功能，包含：\n\n計時條顏色、技能別名、技能計數、自訂音效和語音、倒數計時、計時條開關、額外訊息等等。"
+L.blizzTimelineEnhancedWarning = "注意！\n\nBigWigs 增強功能不支援暴雪的「首領技能」時間軸。無法使用技能別名，而且計時可能不準確。\n\n確定要啟用它嗎？"
 
 -----------------------------------------------------------------------
 -- Victory.lua

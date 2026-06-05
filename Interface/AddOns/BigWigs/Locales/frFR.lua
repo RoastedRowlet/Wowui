@@ -2,12 +2,17 @@ local _, addonTbl = ...
 local L = addonTbl.API:NewLocale("BigWigs", "frFR")
 if not L then return end
 
+L.tempRenameFeat = "Vous pouvez maintenant |cFF436EEErenommer|r n'importe quelle technique de boss en ouvrant ses paramètres avancés (>>) et cliquer sur l'onglet Renommer."
+
 -- API.lua
 L.showAddonBar = "L'addon '|cFF436EEE%s|r' a créé la barre '%s'."
 L.requestAddonProfile = "L'addon '|cFF436EEE%s|r' vient de faire une copie de votre chaîne d'export de profil."
 L.shortMinutesAndSeconds = "%d min %d sec" -- 1 Minute 2 Seconds
 L.shortSecondsOnly = "%d sec" -- 28 Seconds
 L.shortSubTenSeconds = "%.1f sec" -- 3.2 Seconds
+L.accept = "Accepter"
+L.cancel = "Annuler"
+L.confirm_profile_swap = "L'addon |cFF436EEE\"%s\"|r souhaite changer automatiquement votre profil BigWigs vers un profil nommé :\n\n|cFF33FF99\"%s\"|r\n\nÊtes-vous sûr(e) de le vouloir ?"
 
 -- Core.lua
 L.berserk = "Berserk"
@@ -61,7 +66,6 @@ L.outOfDateAddOnPopup = "L'addon |cFF436EEE%s|r n'est pas à jour !"
 L.outOfDateAddOnRaidWarning = "L'addon |cFF436EEE%s|r n'est pas à jour ! Vous avez la v%d.%d.%d mais la dernière est v%d.%d.%d !"
 L.disabledAddOn = "L'addon |cFF436EEE%s|r est désactivé, les délais ne seront pas affichés."
 L.removeAddOn = "Veuillez enlever '|cFF436EEE%s|r' étant donné qu'il a été remplacé par '|cFF436EEE%s|r'."
-L.alternativeName = "%s (|cFF436EEE%s|r)"
 L.outOfDateContentPopup = "ATTENTION !\nVous avez mis à jour |cFF436EEE%s|r mais vous avez également besoin de mettre à jour l'addon principal |cFF436EEEBigWigs|r.\nIgnorer cela empêchera le fonctionnement de certaines fonctionnalités."
 L.outOfDateContentRaidWarning = "|cFF436EEE%s|r a besoin de la version %d de l'addon principal |cFF436EEEBigWigs|r afin de fonctionner correctement, mais vous êtes en version %d."
 L.addOnLoadFailedWithReason = "BigWigs a échoué à charger l'addon |cFF436EEE%s|r avec comme raison %q. Avertissez les développeurs de BigWigs !"
@@ -145,7 +149,7 @@ L.configure = "Configuration"
 L.resetPositions = "Réinitialiser les positions"
 L.selectEncounter = "Sélectionnez une rencontre"
 L.privateAuraSounds = "Sons privés d'aura"
-L.privateAuraSounds_desc = "Les auras privées ne peuvent être trackées normalement, mais vous pouvez enregistrer un son qui sera joué lorsque vous serez ciblé par la compétence."
+L.privateAuraSounds_desc = "Les auras privées ne peuvent être traquées normalement, mais vous pouvez paramétrer un son à jouer lorsque l'affaiblissement vous est appliqué."
 L.listAbilities = "Lister les techniques dans la discussion de groupe"
 
 L.dbmFaker = "Prétendre d'utiliser DBM"
@@ -223,6 +227,13 @@ L.healer = "|cFFFF0000Alertes pour soigneur uniquement.|r "
 L.tankhealer = "|cFFFF0000Alertes pour tank & soigneur uniquement.|r "
 L.dispeller = "|cFFFF0000Alertes pour dispeller uniquement.|r "
 
+L.renames = "Renommer"
+L.noteLabel = "%s (|cFFFFFF99%s|r)"
+L.renameLabel = "%s (|cFF3366FF%s|r)"
+L.renameHeader = "Paramètre un nom personnalisé pour la technique. Ce texte sera utilisé à la place du nom du sorts dans tous les messages et barres.\n\n"
+L.spellName = "Nom du sort"
+L.spellNameResetDesc = "Cette technique a un nom personnalisé par défaut, cliquez sur ce bouton pour utiliser le nom original (normallement, le nom du sort)."
+
 -- Sharing.lua
 L.import = "Importer"
 L.import_info = "Après avoir entré une chaîne, vous pouvez sélectionner quels paramètres vous souhaitez importer.\nSi les paramètres ne sont pas disponibles dans la chaîne d'import, ils ne seront pas sélectionnables.\n\n|cffff4411Cet import n'affectera que les paramètres généraux et non les paramètres spécifiques à chaque boss.|r"
@@ -292,6 +303,8 @@ L.sharing_window_title = "Partage des paramètres de Boss"
 L.sharing_flags = "Paramètres généraux"
 L.sharing_flags_desc = "Paramètres d'import contrôlant des menus comme 'affiche une barre', 'joue un son', 'affiche un message' etc.\nCes paramètres couvrent la plupart des cases à cocher des paramètres d'une technique."
 L.sharing_export_flags_desc = "Paramètres d'export contrôlant des menus comme 'affiche une barre', 'joue un son', 'affiche un message' etc.\nCes paramètres couvrent la plupart des cases à cocher des paramètres d'une technique."
+L.sharing_renames_desc = "Importer les renommages personnalisés configurés."
+L.sharing_export_renames_desc = "Exporter les renommages personnalisés configurés."
 L.sharing_sounds_desc = "Importe des sons à jouer pour les techniques."
 L.sharing_export_sounds_desc = "Export des sons à jouer pour les techniques."
 L.sharing_private_auras = "Auras Privées"
@@ -341,7 +354,7 @@ L.N25 = "25 joueurs"
 L.H10 = "Héroïque 10"
 L.H25 = "Héroïque 25"
 L.titan = "Titan" -- Chinese-only "Titan Reforged" servers
---L.mythic_flex = "Mythic (Flex)" -- Mythic (Flexible 15-25 player raids)
+L.mythic_flex = "Mythique (Flexible)" -- Mythic (Flexible 15-25 player raids)
 
 -----------------------------------------------------------------------
 -- TOOLS
@@ -352,6 +365,7 @@ L.toolsDesc = "BigWigs propose divers outils ou des fonctionnalités \"qualité 
 
 L.reloadUIWarning = "Changer cette fonctionnalité va recharger votre IU, affichant l'écran de chargement pendant un moment. Êtes-vous sûr(e) ?"
 L.qualityOfLife = "Qualité de vie"
+L.notYetImplemented = "Pas encore implémentée" -- When a feature hasn't been implemented yet
 
 -----------------------------------------------------------------------
 -- AutoInvite.lua
@@ -609,7 +623,6 @@ L.progressPercentTooltipText = {
 L.progressPercentNameplate = "Affiche le progrès en % sur les barres d'infos des PNJ ennemis"
 L.progressCurrentPull = "Combat actuel"
 L.progressCurrentPullDesc = "Affiche le progrès total que vous gagnerez sur le groupe de PNJ ennemis que vous combattez actuellement.\n\nPAS ENCORE IMPLÉMENTÉ !"
-L.tempProgressAnnounce = "Vous pouvez maintenant voir le progrès en % que chaque PNJ ennemi vous rapportera lorsque vous les survolez avec votre souris et sur leur barre d'info.\n\nÀ configurer dans |cFF436EEEOutils|r > |cFF436EEEMythique +|r > |cFF436EEEProgrès %|r."
 L.settingsForCurrentTarget = "Paramètres pour votre cible actuelle"
 L.settingsForOtherTargets = "Paramètres pour les autres cibles"
 
@@ -666,7 +679,7 @@ L.TOPLEFT = "En haut à gauche"
 L.BOTTOMRIGHT = "En bas à droite"
 L.BOTTOMLEFT = "En bas à gauche"
 L.CENTER = "Centre"
-L.customAnchorPoint = "Avancé : point d'ancrage personnalisé"
+L.customAnchorPoint = "Avancé : point d'ancrage personnalisé"
 L.sourcePoint = "Point source"
 L.destinationPoint = "Point destination"
 L.drawStrata = "Couches"
@@ -1072,7 +1085,7 @@ L.growthDirection = "Direction des icônes"
 L.aurasOnYou = "Auras sur vous"
 L.aurasOnYouDesc = "Customise les icônes des auras qui s'appliquent à vous.\n\n"
 L.aurasOnAnother = "Auras sur les autres"
-L.aurasOnAnotherDesc = "Choisissez un joueur spécifique et customisez les icônes des auras s'appliquant à lui.\n\n"
+L.aurasOnAnotherDesc = "Choisissez un joueur spécifique et personnalisez les icônes des auras s'appliquant à lui.\n\n"
 L.chooseAPlayer = "Choisissez un joueur"
 L.theOtherTank = "Cherche automatiquement un tank"
 L.theOtherTankDesc = "Afficher les auras privées sur le premier tank de votre groupe n'étant pas vous. (Actuel : %s)"

@@ -193,7 +193,7 @@ ns.optionDefs = {
     { type="divider", cat="CHAR-SHEET", ver=bit.bor(CCS.ALL), slots=4 },
     { type="color", cat="CHAR-SHEET", ver=bit.bor(CCS.ALL), key="bgcolor", label=L["CCS_BG_COLOR"], value={0,0,0,0.89}, default={0,0,0,0.89}, slots=1 },
     { type="dropdown", cat="CHAR-SHEET", ver=bit.bor(CCS.RETAIL), key="bgtype", label=L["BG_TYPE"], value="Midnight", default="Midnight", values={"Default", "Class", "Race", "Midnight", "Hide"}, slots=2 },
-    { type="dropdown", cat="CHAR-SHEET", ver=bit.bor(CCS.TBC), key="bgtype", label=L["BG_TYPE"], value="Midnight", default="Midnight", values={"Default", "Midnight", "Hide"}, slots=2 },
+    { type="dropdown", cat="CHAR-SHEET", ver=bit.bor(CCS.TBC, CCS.MOP), key="bgtype", label=L["BG_TYPE"], value="Midnight", default="Midnight", values={"Default", "Race", "Midnight", "Hide"}, slots=2 },
     { type="checkbox", cat="CHAR-SHEET", ver=bit.bor(CCS.RETAIL), key="showbganimations", label=ANIMATION, value=true, default=true, slots=1 },
     { type="checkbox", cat="CHAR-SHEET", ver=bit.bor(CCS.RETAIL), key="showparagonmax", label=L["PARAGON_MAX_BAR"], value=false, default=false, slots=1 },
     { type="divider", cat="CHAR-SHEET", ver=bit.bor(CCS.RETAIL), slots=4 },
@@ -1675,132 +1675,132 @@ CCS.Class_Bg = {
 
 CCS.Race_Bg = {
     [1] = { -- Human
-        texture = "Interface\\Glues\\CharacterCreate\\CharacterCreateStartingZones2",
+        texture = "Interface\\AddOns\\ChonkyCharacterSheet\\Media\\Textures\\Race\\CharacterCreateStartingZones2",
         map     = {1022, 664, 0.000488281, 0.499512, 0.650879, 0.975098},
     },
     [2] = { -- Orc
-        texture = "Interface\\Glues\\CharacterCreate\\CharacterCreateStartingZones3",
+        texture = "Interface\\AddOns\\ChonkyCharacterSheet\\Media\\Textures\\Race\\CharacterCreateStartingZones3",
         map     = {1022, 664, 0.500488, 0.999512, 0.650879, 0.975098},
     },
     [3] = { -- Dwarf
-        texture = "Interface\\Glues\\CharacterCreate\\CharacterCreateStartingZones2",
+        texture = "Interface\\AddOns\\ChonkyCharacterSheet\\Media\\Textures\\Race\\CharacterCreateStartingZones2",
         map     = {1022, 664, 0.000488281, 0.499512, 0.000488281, 0.324707},
     },
     [4] = { -- Night Elf
-        texture = "Interface\\Glues\\CharacterCreate\\CharacterCreateStartingZones3",
+        texture = "Interface\\AddOns\\ChonkyCharacterSheet\\Media\\Textures\\Race\\CharacterCreateStartingZones3",
         map     = {1022, 664, 0.000488281, 0.499512, 0.650879, 0.975098},
     },
     [5] = { -- Undead (Scourge)
-        texture = "Interface\\Glues\\CharacterCreate\\CharacterCreateStartingZones4",
+        texture = "Interface\\AddOns\\ChonkyCharacterSheet\\Media\\Textures\\Race\\CharacterCreateStartingZones4",
         map     = {1022, 664, 0.500488, 0.999512, 0.325684, 0.649902},
     },
     [6] = { -- Tauren
-        texture = "Interface\\Glues\\CharacterCreate\\CharacterCreateStartingZones4",
+        texture = "Interface\\AddOns\\ChonkyCharacterSheet\\Media\\Textures\\Race\\CharacterCreateStartingZones4",
         map     = {1022, 664, 0.500488, 0.999512, 0.000488281, 0.324707},
     },
     [7] = { -- Gnome
-        texture = "Interface\\Glues\\CharacterCreate\\CharacterCreateStartingZones2",
+        texture = "Interface\\AddOns\\ChonkyCharacterSheet\\Media\\Textures\\Race\\CharacterCreateStartingZones2",
         map     = {1022, 664, 0.500488, 0.999512, 0.000488281, 0.324707},
     },
     [8] = { -- Troll
-        texture = "Interface\\Glues\\CharacterCreate\\CharacterCreateStartingZones4",
+        texture = "Interface\\AddOns\\ChonkyCharacterSheet\\Media\\Textures\\Race\\CharacterCreateStartingZones4",
         map     = {1022, 664, 0.000488281, 0.499512, 0.325684, 0.649902},
     },
     [9] = { -- Goblin
-        texture = "Interface\\Glues\\CharacterCreate\\CharacterCreateStartingZones2",
+        texture = "Interface\\AddOns\\ChonkyCharacterSheet\\Media\\Textures\\Race\\CharacterCreateStartingZones2",
         map     = {1022, 664, 0.000488281, 0.499512, 0.325684, 0.649902},
     },
     [10] = { -- Blood Elf
-        texture = "Interface\\Glues\\CharacterCreate\\CharacterCreateStartingZones1",
+        texture = "Interface\\AddOns\\ChonkyCharacterSheet\\Media\\Textures\\Race\\CharacterCreateStartingZones1",
         map     = {1022, 664, 0.000488281, 0.499512, 0.000488281, 0.324707},
     },
     [11] = { -- Draenei
-        texture = "Interface\\Glues\\CharacterCreate\\CharacterCreateStartingZones1",
+        texture = "Interface\\AddOns\\ChonkyCharacterSheet\\Media\\Textures\\Race\\CharacterCreateStartingZones1",
         map     = {1022, 664, 0.500488, 0.999512, 0.650879, 0.975098},
     },
     [22] = { -- Worgen
-        texture = "Interface\\Glues\\CharacterCreate\\CharacterCreateStartingZones5",
+        texture = "Interface\\AddOns\\ChonkyCharacterSheet\\Media\\Textures\\Race\\CharacterCreateStartingZones5",
         map     = {1022, 664, 0.5, 0.999512, 0.000488281, 0.324707},
     },
     [24] = { -- Pandaren
-        texture = "Interface\\Glues\\CharacterCreate\\CharacterCreateStartingZones4",
+        texture = "Interface\\AddOns\\ChonkyCharacterSheet\\Media\\Textures\\Race\\CharacterCreateStartingZones4",
         map     = {1022, 664, 0.000488281, 0.499512, 0.000488281, 0.324707},
     },
     [26] = { -- Pandaren
-        texture = "Interface\\Glues\\CharacterCreate\\CharacterCreateStartingZones4",
+        texture = "Interface\\AddOns\\ChonkyCharacterSheet\\Media\\Textures\\Race\\CharacterCreateStartingZones4",
         map     = {1022, 664, 0.000488281, 0.499512, 0.000488281, 0.324707},
     },    
     [27] = { -- Nightborne
-        texture = "Interface\\Glues\\CharacterCreate\\CharacterCreateStartingZones3",
+        texture = "Interface\\AddOns\\ChonkyCharacterSheet\\Media\\Textures\\Race\\CharacterCreateStartingZones3",
         map     = {1022, 664, 0.500488, 0.999512, 0.325684, 0.649902},
     },
     [28] = { -- Highmountain Tauren
-        texture = "Interface\\Glues\\CharacterCreate\\CharacterCreateStartingZones2",
+        texture = "Interface\\AddOns\\ChonkyCharacterSheet\\Media\\Textures\\Race\\CharacterCreateStartingZones2",
         map     = {1022, 664, 0.500488, 0.999512, 0.325684, 0.649902},
     },
     [29] = { -- Void Elf
-        texture = "Interface\\Glues\\CharacterCreate\\CharacterCreateStartingZones4",
+        texture = "Interface\\AddOns\\ChonkyCharacterSheet\\Media\\Textures\\Race\\CharacterCreateStartingZones4",
         map     = {1022, 664, 0.000488281, 0.499512, 0.650879, 0.975098},
     },
     [30] = { -- Lightforged Draenei
-        texture = "Interface\\Glues\\CharacterCreate\\CharacterCreateStartingZones3",
+        texture = "Interface\\AddOns\\ChonkyCharacterSheet\\Media\\Textures\\Race\\CharacterCreateStartingZones3",
         map     = {1022, 664, 0.000488281, 0.499512, 0.000488281, 0.324707},
     },
     [31] = { -- Zandalari Troll
-        texture = "Interface\\Glues\\CharacterCreate\\CharacterCreateStartingZones5",
+        texture = "Interface\\AddOns\\ChonkyCharacterSheet\\Media\\Textures\\Race\\CharacterCreateStartingZones5",
         map     = {1022, 664, 0, 0.5, 0.325684, 0.649902},
     },
     [32] = { -- Kul Tiran
-        texture = "Interface\\Glues\\CharacterCreate\\CharacterCreateStartingZones2",
+        texture = "Interface\\AddOns\\ChonkyCharacterSheet\\Media\\Textures\\Race\\CharacterCreateStartingZones2",
         map     = {1022, 664, 0.500488, 0.999512, 0.650879, 0.975098},
     },
     [34] = { -- Dark Iron Dwarf
-        texture = "Interface\\Glues\\CharacterCreate\\CharacterCreateStartingZones1",
+        texture = "Interface\\AddOns\\ChonkyCharacterSheet\\Media\\Textures\\Race\\CharacterCreateStartingZones1",
         map     = {1022, 664, 0.500488, 0.999512, 0.000488281, 0.324707},
     },
     [35] = { -- Vulpera
-        texture = "Interface\\Glues\\CharacterCreate\\CharacterCreateStartingZones4",
+        texture = "Interface\\AddOns\\ChonkyCharacterSheet\\Media\\Textures\\Race\\CharacterCreateStartingZones4",
         map     = {1022, 664, 0.500488, 0.999512, 0.650879, 0.975098},
     },
     [36] = { -- Mag'har Orc
-        texture = "Interface\\Glues\\CharacterCreate\\CharacterCreateStartingZones3",
+        texture = "Interface\\AddOns\\ChonkyCharacterSheet\\Media\\Textures\\Race\\CharacterCreateStartingZones3",
         map     = {1022, 664, 0.500488, 0.999512, 0.000488281, 0.324707},
     },
     [37] = { -- Mechagnome
-        texture = "Interface\\Glues\\CharacterCreate\\CharacterCreateStartingZones3",
+        texture = "Interface\\AddOns\\ChonkyCharacterSheet\\Media\\Textures\\Race\\CharacterCreateStartingZones3",
         map     = {1022, 664, 0.000488281, 0.499512, 0.325684, 0.649902},
     },
     [52] = { -- Dracthyr (Alliance) [Placeholder]
-        texture = "Interface\\DRESSUPFRAME\\DressUpBackground-Dracthyr1",
+        texture = "Interface\\AddOns\\ChonkyCharacterSheet\\Media\\Textures\\Race\\DressUpBackground-Dracthyr1",
         map     = {512, 512, 0, 1, 0, 1},
     },
     [70] = { -- Dracthyr (Horde) [Placeholder]
-        texture = "Interface\\DRESSUPFRAME\\DressUpBackground-Dracthyr1",
+        texture = "Interface\\AddOns\\ChonkyCharacterSheet\\Media\\Textures\\Race\\DressUpBackground-Dracthyr1",
         map     = {512, 512, 0, 1, 0, 1},
     },
     
     [84] = { -- Earthen (Horde) 
-        texture = "Interface\\Glues\\CharacterCreate\\CharacterCreateStartingZones5",
+        texture = "Interface\\AddOns\\ChonkyCharacterSheet\\Media\\Textures\\Race\\CharacterCreateStartingZones5",
         map     = {1022, 664, 0.000488281, 0.5, 0, 0.325684},
     },
     [85] = { -- Earthen (Alliance) 
-        texture = "Interface\\Glues\\CharacterCreate\\CharacterCreateStartingZones5",
+        texture = "Interface\\AddOns\\ChonkyCharacterSheet\\Media\\Textures\\Race\\CharacterCreateStartingZones5",
         map     = {1022, 664, 0.000488281, 0.5, 0, 0.325684},
     },
     [86] = { -- Haranir
-        texture = "Interface\\Glues\\CharacterCreate\\CharacterCreateStartingZones5",
+        texture = "Interface\\AddOns\\ChonkyCharacterSheet\\Media\\Textures\\Race\\CharacterCreateStartingZones5",
         map     = {1022, 664, 0.500488, 0.999512, 0.325684, 0.649902},
     },    
     [91] = { -- Haranir
-        texture = "Interface\\Glues\\CharacterCreate\\CharacterCreateStartingZones5",
+        texture = "Interface\\AddOns\\ChonkyCharacterSheet\\Media\\Textures\\Race\\CharacterCreateStartingZones5",
         map     = {1022, 664, 0.500488, 0.999512, 0.325684, 0.649902},
     },        
     [998] = { -- Death Knight
-        texture = "Interface\\Glues\\Models\\UI_DeathKnight\\UI_Deathknight_LowRes",
+        texture = "Interface\\AddOns\\ChonkyCharacterSheet\\Media\\Textures\\Race\\UI_Deathknight_LowRes",
         map     = {2048, 2048, 0, 1, 0, 1},
     },
     [999] = { -- Demon Hunter
-        texture = "Interface\\Glues\\Models\\UI_DemonHunter\\UI_DemonHunter_LowRes",
+        texture = "Interface\\AddOns\\ChonkyCharacterSheet\\Media\\Textures\\Race\\UI_DemonHunter_LowRes",
         map     = {2048, 2048, 0, 1, 0, 1},
     },
 }
@@ -1937,19 +1937,23 @@ CCS.SRI = {
     [18] = { boss=2691, raid=2460, name = select(1, EJ_GetEncounterInfo(2691)), icon = select(5, EJ_GetCreatureInfo(1, 2691)), normal=41662, heroic=41663, mythic=41664}, -- Dimensiue, the All-Devouring
 
   -- Midnight Season 1 Raids
-  -- The Dreamrift C_Map.GetMapInfo(2531).name
+    -- The Dreamrift C_Map.GetMapInfo(2531).name
     [21] = { boss=2795, raid=2531, name = select(1, EJ_GetEncounterInfo(2795)), icon = select(5, EJ_GetCreatureInfo(1, 2795)), normal=61475, heroic=61476, mythic=61477 }, -- Chimaerus the Undreamt God
-  -- The VoidSpire C_Map.GetMapInfo(2529).name
+    -- The VoidSpire C_Map.GetMapInfo(2529).name
     [22] = { boss=2733, raid=2529, name = select(1, EJ_GetEncounterInfo(2733)), icon = select(5, EJ_GetCreatureInfo(1, 2733)), normal=61277, heroic=61278, mythic=61279 }, -- Imperator Averzian
     [23] = { boss=2734, raid=2529, name = select(1, EJ_GetEncounterInfo(2734)), icon = select(5, EJ_GetCreatureInfo(1, 2734)), normal=61281, heroic=61282, mythic=61283 }, -- Vorasius
     [24] = { boss=2736, raid=2529, name = select(1, EJ_GetEncounterInfo(2736)), icon = select(5, EJ_GetCreatureInfo(1, 2736)), normal=61285, heroic=61286, mythic=61287 }, -- Fallen-King Salhadaar
     [25] = { boss=2735, raid=2529, name = select(1, EJ_GetEncounterInfo(2735)), icon = select(5, EJ_GetCreatureInfo(1, 2735)), normal=61289, heroic=61290, mythic=61291 }, -- Vaelgor & Ezzorak
     [26] = { boss=2737, raid=2529, name = select(1, EJ_GetEncounterInfo(2737)), icon = select(5, EJ_GetCreatureInfo(1, 2737)), normal=61293, heroic=61294, mythic=61295 }, -- Lightblinded Vanguard
     [27] = { boss=2738, raid=2529, name = select(1, EJ_GetEncounterInfo(2738)), icon = select(5, EJ_GetCreatureInfo(1, 2738)), normal=61297, heroic=61298, mythic=61299 }, -- Crown of the Cosmos
-  -- March on Quel'Danas C_Map.GetMapInfo(2533).name
+    -- March on Quel'Danas C_Map.GetMapInfo(2533).name
     [28] = { boss=2739, raid=2533, name = select(1, EJ_GetEncounterInfo(2739)), icon = select(5, EJ_GetCreatureInfo(1, 2739)), normal=61301, heroic=61302, mythic=61303 }, -- Belo'ren, Child of Al'ar
     [29] = { boss=2740, raid=2533, name = select(1, EJ_GetEncounterInfo(2740)), icon = select(5, EJ_GetCreatureInfo(1, 2740)), normal=61305, heroic=61306, mythic=61307 }, -- Midnight Falls
-    
+    -- The Sporefall C_Map.GetMapInfo(2427).name
+    [30] = { boss=2711, raid=2427, name = select(1, EJ_GetEncounterInfo(2711)), icon = select(5, EJ_GetCreatureInfo(1, 2711)), normal=63234, heroic=63235, mythic=63236 }, -- Rotmire
+  
+  -- Midnight Season 2 Raids
+    -- Upcoming
 }
 
 CCS.RaidLayout = {
@@ -1993,6 +1997,14 @@ CCS.RaidLayout = {
     title = (C_Map.GetMapInfo(2533) and C_Map.GetMapInfo(2533).name) or "Unknown",
     bosses = { 28, 29 }
   },
+  {
+    raid = 2427, -- The Sporefall
+    num_bosses = 1,
+    tocinfo = {120007, 120100},
+    shortname = "SF",
+    title = (C_Map.GetMapInfo(2427) and C_Map.GetMapInfo(2427).name) or "",
+    bosses = { 30 }
+  },  
 }
 
 end
@@ -2172,22 +2184,22 @@ CCS.enchantLookup = {
     [8018] = { { stat="STAMINA" , value=186 } }, --Enchant Boots - Farstrider's Hunt |A:Professions-ChatIcon-Quality-12-Tier1:20:20|a
     [8019] = { { stat="STAMINA" , value=232 } }, --Enchant Boots - Farstrider's Hunt |A:Professions-ChatIcon-Quality-12-Tier2:20:20|a
     -- Midnight Rings
-    [7964] = { { stat="MASTERY_RATING" , value=9 } }, --Enchant Ring - Amani Mastery |A:Professions-ChatIcon-Quality-12-Tier1:20:20|a
-    [7965] = { { stat="MASTERY_RATING" , value=13 } }, --Enchant Ring - Amani Mastery |A:Professions-ChatIcon-Quality-12-Tier2:20:20|a
-    [7968] = { { stat="MASTERY_RATING" , value=17 } }, --Enchant Ring - Zul'jins Mastery |A:Professions-ChatIcon-Quality-12-Tier1:20:20|a
-    [7969] = { { stat="MASTERY_RATING" , value=22 } }, --Enchant Ring - Zul'jins Mastery |A:Professions-ChatIcon-Quality-12-Tier2:20:20|a
-    [7994] = { { stat="CRIT_RATING" , value=9 } }, --Enchant Ring - Nature's Wrath |A:Professions-ChatIcon-Quality-12-Tier1:20:20|a
-    [7995] = { { stat="CRIT_RATING" , value=13 } }, --Enchant Ring - Nature's Wrath |A:Professions-ChatIcon-Quality-12-Tier2:20:20|a
-    [7996] = { { stat="CRIT_RATING" , value=17 } }, --Enchant Ring - Nature's Fury |A:Professions-ChatIcon-Quality-12-Tier1:20:20|a
-    [7997] = { { stat="CRIT_RATING" , value=22 } }, --Enchant Ring - Nature's Fury |A:Professions-ChatIcon-Quality-12-Tier2:20:20|a
-    [8020] = { { stat="HASTE_RATING" , value=9 } }, --Enchant Ring - Thalassian Haste |A:Professions-ChatIcon-Quality-12-Tier1:20:20|a
-    [8021] = { { stat="HASTE_RATING" , value=13 } }, --Enchant Ring - Thalassian Haste |A:Professions-ChatIcon-Quality-12-Tier2:20:20|a
-    [8022] = { { stat="VERSATILITY" , value=9 } }, --Enchant Ring - Thalassian Versatility |A:Professions-ChatIcon-Quality-12-Tier1:20:20|a
-    [8023] = { { stat="VERSATILITY" , value=13 } }, --Enchant Ring - Thalassian Versatility |A:Professions-ChatIcon-Quality-12-Tier2:20:20|a
-    [8024] = { { stat="HASTE_RATING" , value=17 } }, --Enchant Ring - Silvermoon's Alacrity |A:Professions-ChatIcon-Quality-12-Tier1:20:20|a
-    [8025] = { { stat="HASTE_RATING" , value=22 } }, --Enchant Ring - Silvermoon's Alacrity |A:Professions-ChatIcon-Quality-12-Tier2:20:20|a
-    [8026] = { { stat="VERSATILITY" , value=17 } }, --Enchant Ring - Silvermoon's Tenacity |A:Professions-ChatIcon-Quality-12-Tier1:20:20|a
-    [8027] = { { stat="VERSATILITY" , value=22 } }, --Enchant Ring - Silvermoon's Tenacity |A:Professions-ChatIcon-Quality-12-Tier2:20:20|a
+    [7964] = { { stat="MASTERY_RATING" , value=22 } }, --Enchant Ring - Amani Mastery |A:Professions-ChatIcon-Quality-12-Tier1:20:20|a
+    [7965] = { { stat="MASTERY_RATING" , value=24 } }, --Enchant Ring - Amani Mastery |A:Professions-ChatIcon-Quality-12-Tier2:20:20|a
+    [7968] = { { stat="MASTERY_RATING" , value=27 } }, --Enchant Ring - Zul'jins Mastery |A:Professions-ChatIcon-Quality-12-Tier1:20:20|a
+    [7969] = { { stat="MASTERY_RATING" , value=29 } }, --Enchant Ring - Zul'jins Mastery |A:Professions-ChatIcon-Quality-12-Tier2:20:20|a
+    [7994] = { { stat="CRIT_RATING" , value=22 } }, --Enchant Ring - Nature's Wrath |A:Professions-ChatIcon-Quality-12-Tier1:20:20|a
+    [7995] = { { stat="CRIT_RATING" , value=24 } }, --Enchant Ring - Nature's Wrath |A:Professions-ChatIcon-Quality-12-Tier2:20:20|a
+    [7996] = { { stat="CRIT_RATING" , value=27 } }, --Enchant Ring - Nature's Fury |A:Professions-ChatIcon-Quality-12-Tier1:20:20|a
+    [7997] = { { stat="CRIT_RATING" , value=29 } }, --Enchant Ring - Nature's Fury |A:Professions-ChatIcon-Quality-12-Tier2:20:20|a
+    [8020] = { { stat="HASTE_RATING" , value=22 } }, --Enchant Ring - Thalassian Haste |A:Professions-ChatIcon-Quality-12-Tier1:20:20|a
+    [8021] = { { stat="HASTE_RATING" , value=24 } }, --Enchant Ring - Thalassian Haste |A:Professions-ChatIcon-Quality-12-Tier2:20:20|a
+    [8022] = { { stat="VERSATILITY" , value=22 } }, --Enchant Ring - Thalassian Versatility |A:Professions-ChatIcon-Quality-12-Tier1:20:20|a
+    [8023] = { { stat="VERSATILITY" , value=24 } }, --Enchant Ring - Thalassian Versatility |A:Professions-ChatIcon-Quality-12-Tier2:20:20|a
+    [8024] = { { stat="HASTE_RATING" , value=27 } }, --Enchant Ring - Silvermoon's Alacrity |A:Professions-ChatIcon-Quality-12-Tier1:20:20|a
+    [8025] = { { stat="HASTE_RATING" , value=29 } }, --Enchant Ring - Silvermoon's Alacrity |A:Professions-ChatIcon-Quality-12-Tier2:20:20|a
+    [8026] = { { stat="VERSATILITY" , value=27 } }, --Enchant Ring - Silvermoon's Tenacity |A:Professions-ChatIcon-Quality-12-Tier1:20:20|a
+    [8027] = { { stat="VERSATILITY" , value=29 } }, --Enchant Ring - Silvermoon's Tenacity |A:Professions-ChatIcon-Quality-12-Tier2:20:20|a
 }
 
 -- /dump UnitClass("player")

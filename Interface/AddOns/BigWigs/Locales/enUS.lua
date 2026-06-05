@@ -1,12 +1,17 @@
 local _, addonTbl = ...
 local L = addonTbl.API:NewLocale("BigWigs", "enUS")
 
+L.tempRenameFeat = "You can now |cFF436EEErename|r any boss ability by opening its advanced settings (>>) and clicking the renames tab."
+
 -- API.lua
 L.showAddonBar = "The addon '|cFF436EEE%s|r' created the '%s' bar."
 L.requestAddonProfile = "The addon '|cFF436EEE%s|r' just made a copy of your profile export string."
 L.shortMinutesAndSeconds = "%d Min %d Sec" -- 1 Minute 2 Seconds
 L.shortSecondsOnly = "%d Sec" -- 28 Seconds
 L.shortSubTenSeconds = "%.1f Sec" -- 3.2 Seconds
+L.accept = "Accept"
+L.cancel = "Cancel"
+L.confirm_profile_swap = "The addon |cFF436EEE\"%s\"|r wants to automatically swap your BigWigs profile to a different profile called:\n\n|cFF33FF99\"%s\"|r\n\nAre you sure you want to do this?"
 
 -- Core.lua
 L.berserk = "Berserk"
@@ -60,7 +65,6 @@ L.outOfDateAddOnPopup = "The |cFF436EEE%s|r addon is out of date!"
 L.outOfDateAddOnRaidWarning = "The |cFF436EEE%s|r addon is out of date! You have v%d.%d.%d but the latest is v%d.%d.%d!"
 L.disabledAddOn = "You have the |cFF436EEE%s|r addon disabled, timers will not be shown."
 L.removeAddOn = "Please remove '|cFF436EEE%s|r' as it's been replaced by '|cFF436EEE%s|r'."
-L.alternativeName = "%s (|cFF436EEE%s|r)"
 L.outOfDateContentPopup = "WARNING!\nYou updated |cFF436EEE%s|r but you also need to update the main |cFF436EEEBigWigs|r addon.\nIgnoring this will result in broken functionality."
 L.outOfDateContentRaidWarning = "|cFF436EEE%s|r requires version %d of the main |cFF436EEEBigWigs|r addon to function correctly, but you're on version %d."
 L.addOnLoadFailedWithReason = "BigWigs failed to load the addon |cFF436EEE%s|r with reason %q. Tell the BigWigs devs!"
@@ -144,7 +148,7 @@ L.configure = "Configure"
 L.resetPositions = "Reset positions"
 L.selectEncounter = "Select encounter"
 L.privateAuraSounds = "Private Aura Sounds"
-L.privateAuraSounds_desc = "Private auras can't be tracked normally, but you can set a sound to be played when you are targeted with the ability."
+L.privateAuraSounds_desc = "Private auras can't be tracked normally, but you can set a sound to be played when the ability debuff is applied to you."
 L.listAbilities = "List abilities in group chat"
 
 L.dbmFaker = "Pretend I'm using DBM"
@@ -222,6 +226,13 @@ L.healer = "|cFFFF0000Healer alerts only.|r "
 L.tankhealer = "|cFFFF0000Tank & Healer alerts only.|r "
 L.dispeller = "|cFFFF0000Dispeller alerts only.|r "
 
+L.renames = "Renames"
+L.noteLabel = "%s (|cFFFFFF99%s|r)"
+L.renameLabel = "%s (|cFF3366FF%s|r)"
+L.renameHeader = "Set a custom name for the ability. This text will be used instead of the spell name in all messages and bars.\n\n"
+L.spellName = "Spell Name"
+L.spellNameResetDesc = "This ability has a custom name by default, click this button to use the original name (usually a spell name)."
+
 -- Sharing.lua
 L.import = "Import"
 L.import_info = "After entering a string you can select what settings you would like to import.\nIf settings are not available in the import string they will not be selectable.\n\n|cffff4411This import will only affect the general settings and does not affect boss specific settings.|r"
@@ -291,6 +302,8 @@ L.sharing_window_title = "Share Boss Settings"
 L.sharing_flags = "General Settings"
 L.sharing_flags_desc = "Import settings which control things like 'show bar', 'play sound', 'show message' etc.\nThese cover most checkboxes in an abilities settings."
 L.sharing_export_flags_desc = "Export settings which control things like 'show bar', 'play sound', 'show message' etc.\nThese cover most checkboxes in an abilities settings."
+L.sharing_renames_desc = "Import the custom renames that are configured."
+L.sharing_export_renames_desc = "Export the custom renames that are configured."
 L.sharing_sounds_desc = "Import which sounds to play for abilities."
 L.sharing_export_sounds_desc = "Export which sounds to play for abilities."
 L.sharing_private_auras = "Private Auras"
@@ -351,6 +364,7 @@ L.toolsDesc = "BigWigs provides various tools or \"quality of life\" features to
 
 L.reloadUIWarning = "Changing this feature will reload your UI, showing the loading screen for a moment. Are you sure?"
 L.qualityOfLife = "Quality of Life"
+L.notYetImplemented = "Not Yet Implemented" -- When a feature hasn't been implemented yet
 
 -----------------------------------------------------------------------
 -- AutoInvite.lua
@@ -608,7 +622,6 @@ L.progressPercentTooltipText = {
 L.progressPercentNameplate = "Show progress % on nameplates of enemy NPCs"
 L.progressCurrentPull = "Current Pull"
 L.progressCurrentPullDesc = "Show total progress you will gain from the current group of NPCs you are in combat with.\n\nNOT YET FUNCTIONAL!"
-L.tempProgressAnnounce = "You can now see progress % each NPC will give you when mousing over them and on their nameplates.\n\nConfigure in |cFF436EEETools|r > |cFF436EEEMythic+|r > |cFF436EEEProgress %|r."
 L.settingsForCurrentTarget = "Settings for your current target"
 L.settingsForOtherTargets = "Settings for all other targets"
 

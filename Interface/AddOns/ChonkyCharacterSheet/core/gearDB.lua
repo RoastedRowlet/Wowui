@@ -470,6 +470,29 @@ CCS.Raid.Dreamrift = {
     },
 }
 
+-- The Sporefall (EJ ID 1305)
+CCS.Raid.Sporefall = {
+    ejID = 1305,
+    bosses = {
+        {
+            id = 2711, -- Rotmire
+            loot = {
+                { itemID = 268283 },
+                { itemID = 268291 },
+                { itemID = 268284 },
+                { itemID = 268285 },
+                { itemID = 268289 },
+                { itemID = 268286 },
+                { itemID = 268288 },
+                { itemID = 268287 },
+                { itemID = 268282 },
+                { itemID = 268292 },
+                { itemID = 268290 },
+            },
+        },
+    },
+}
+
 -- The Voidspire (EJ ID 1307)
 CCS.Raid.Voidspire = {
     ejID = 1307,
@@ -678,6 +701,7 @@ CCS.Season_upgradeTracks = {
             [269] = 12796,
             [272] = 12797,
             [276] = 12798,
+            [285] = 13653, -- default to void ascended           
         },
     },
 
@@ -691,6 +715,7 @@ CCS.Season_upgradeTracks = {
             [282] = 12804,
             [285] = 12805,
             [289] = 12806,
+            [298] = 13654, -- default to void ascended
         },
     },
 }
@@ -713,6 +738,7 @@ CCS.Season = {
         [1314] = CCS.Raid.Dreamrift,
         [1307] = CCS.Raid.Voidspire,
         [1308] = CCS.Raid.MarchOnQueldanas,
+        [1305] = CCS.Raid.Sporefall,
     },
     -- Class sets for Midnight Season 1
     classSets = CCS.ClassSets,
@@ -844,12 +870,23 @@ function CCS.BuildMasterLoot()
             end
         end
 
-        -- Raids
+        ---------------------------------------------------------
+        -- Raids (skip ones not yet in EJ so we can pre-load stuff from the PTR)
+        ---------------------------------------------------------
         for ejID, raid in pairs(season.raids) do
-            raid.type = "raid"
-            for _, boss in ipairs(raid.bosses) do
-                for _, item in ipairs(boss.loot) do
-                    AddItemToMaster(item.itemID, raid, boss, seasonName)
+            -- Skip future raids
+            if not EJ_GetInstanceInfo(ejID) then
+                -- print("Skipping raid", ejID, "(EJ data not available yet)")
+            else
+                raid.type = "raid"
+
+                for _, boss in ipairs(raid.bosses) do
+                    -- Skip bosses not yet in EJ
+                    if EJ_GetEncounterInfo(boss.id) then
+                        for _, item in ipairs(boss.loot) do
+                            AddItemToMaster(item.itemID, raid, boss, seasonName)
+                        end
+                    end
                 end
             end
         end

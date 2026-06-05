@@ -1,7 +1,6 @@
 # Auctionator
 
-## [322](https://github.com/TheMouseNest/Auctionator/tree/322) (2026-04-23)
-[Full Changelog](https://github.com/TheMouseNest/Auctionator/compare/321...322) 
+## [325](https://github.com/TheMouseNest/Auctionator/tree/325) (2026-06-03)
+[Full Changelog](https://github.com/TheMouseNest/Auctionator/compare/324...325) 
 
-- [Fixes #1811] Prioritise vendor price warning over low-price warning  
-- [Fixes #1805] Fix tier 3 not applying to a search term  
+- Update toc for MoP 5.5.4  

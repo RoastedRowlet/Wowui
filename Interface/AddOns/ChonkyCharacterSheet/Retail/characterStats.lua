@@ -1267,9 +1267,14 @@ local function GetStatCurrency(rowData)
 		currencyData = GetCurrencyInfo(rowData.id) 
 		link = GetCurrencyLink(rowData.id)				
 	end
-	
+
 	if currencyData ~= nil then
-		leftText = rowData.name -- currencyData.name
+		if rowData.id == 1586 or rowData.id == 1792 or rowData.id == 1602 then
+			leftText = currencyData.name
+		else
+			leftText = rowData.name -- currencyData.name
+		end
+
 		--isZero = (currencyData.quantity == 0)
 		--if currencyData.useTotalEarnedForMaxQty == true or 
 		if rowData.id == 1586 or

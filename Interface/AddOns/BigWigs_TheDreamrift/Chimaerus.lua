@@ -41,14 +41,23 @@ local consumeCount = 1
 local corruptedDevastationCount = 1
 
 --------------------------------------------------------------------------------
--- Localization
+-- Renames
 --
 
-local L = mod:GetLocale()
-if L then
-	L.rift_madness = "Madness" -- Short for Rift Madness
-	L.consuming_miasma = "Dispels" -- Move to common?
-end
+mod:SetRenames({
+	["stages"] = {CL.stage:format(1), CL.stage:format(2), original = false, notes = {CL.stage:format(1), CL.stage:format(2)}}, -- Stages
+	[1262289] = {CL.soak}, -- Alndust Upheaval (Soak)
+	[1258610] = {CL.adds}, -- Rift Emergence (Adds)
+	[1257087] = {CL.dispels}, -- Consuming Miasma (Dispels) [Stage 1 Only]
+	[1246653] = {CL.raid_damage}, -- Caustic Phlegm (Raid Damage) [Stage 1 Only]
+	[1272726] = {CL.frontal_cone}, -- Rending Tear (Frontal Cone)
+	[1245396] = {1245396}, -- Consume
+	[1245486] = {CL.breath}, -- Corrupted Devastation (Breath)
+	[1245406] = {CL.landing, CL.cast:format(CL.landing), notes = {CL.generalNote, CL.castTimerNote}, original = {1245406, CL.cast:format(mod:SpellName(1245406))}}, -- Ravenous Dive (Landing)
+	[1246621] = {CL.raid_damage}, -- Caustic Phlegm (Raid Damage) [Stage 2 Only]
+	[1257085] = {CL.dispels}, -- Consuming Miasma (Dispels) [Stage 2 Only]
+	[1264756] = {CL.madness}, -- Rift Madness (Madness)
+})
 
 --------------------------------------------------------------------------------
 -- Initialization
@@ -66,7 +75,7 @@ function mod:GetOptions()
 		1245396, -- Consume
 		-- Stage Two: To The Skies
 		1245486, -- Corrupted Devastation
-		1245406, -- Ravenous Dive
+		{1245406, "CASTBAR", "CASTBAR_COUNTDOWN"}, -- Ravenous Dive
 		{1246621, "HEALER"}, -- Caustic Phlegm
 		1257085, -- Consuming Miasma
 		-- Mythic
@@ -76,16 +85,10 @@ function mod:GetOptions()
 		[1245486] = CL.stage:format(2),
 		[1264756] = CL.mythic,
 	},{
-		[1262289] = CL.soak, -- Alndust Upheaval (Soak)
-		[1258610] = CL.adds, -- Rift Emergence (Adds)
-		[1264756] = L.rift_madness, -- Rift Madness (Madness)
-		[1257087] = L.consuming_miasma, -- Consuming Miasma (Dispels)
-		[1246653] = CL.raid_damage, -- Caustic Phlegm (Raid Damage)
-		[1272726] = CL.frontal_cone, -- Rending Tear (Frontal Cone)
-		[1245486] = CL.breath, -- Corrupted Devastation (Breath)
-		[1245406] = CL.stage:format(1), -- Ravenous Dive (Stage 1)
-		[1246621] = CL.raid_damage, -- Caustic Phlegm (Raid Damage)
-		[1257085] = L.consuming_miasma, -- Consuming Miasma (Dispels)
+		[1257087] = CL.stage1Only,
+		[1246653] = CL.stage1Only,
+		[1246621] = CL.stage2Only,
+		[1257085] = CL.stage2Only,
 	}
 end
 
@@ -162,14 +165,11 @@ function mod:TimersMythic(_, eventInfo)
 		elseif durationRounded == 32 or durationRounded == 51 or durationRounded == 37 then -- Consuming Miasma
 			barInfo = self:ConsumingMiasma(eventInfo)
 			elseif durationRounded == 148 then -- Stage 2
-			self:Bar("stages", eventInfo.duration, CL.stage:format(2), "spell_holy_borrowedtime", eventInfo.id)
+			self:Bar("stages", eventInfo.duration, self:GetRename("stages", 2), "spell_holy_borrowedtime", eventInfo.id)
 			return -- no need to stop this, it gets corrected later 10s before the end.
 		elseif durationRounded == 10 then -- Stage 2 (Updated)
-			self:Bar("stages", {eventInfo.duration, 151}, CL.stage:format(2), "spell_holy_borrowedtime", eventInfo.id)
+			self:Bar("stages", {eventInfo.duration, 151}, self:GetRename("stages", 2), "spell_holy_borrowedtime", eventInfo.id)
 			self:ScheduleTimer(function()
-				self:Message("stages", "cyan", CL.stage:format(2), false)
-				self:PlaySound("stages", "long")
-				self:SetStage(2)
 				almdustUpheavalCount = 1
 				riftEmergenceCount = 1
 				riftMadnessCount = 1
@@ -178,9 +178,12 @@ function mod:TimersMythic(_, eventInfo)
 				rendingTearCount = 1
 				corruptedDevastationCount = 1
 				durationCount = {}
+				self:SetStage(2)
+				self:Message("stages", "cyan", self:GetRename("stages", 2), false)
+				self:PlaySound("stages", "long")
 			end, eventInfo.duration)
 			self:ScheduleTimer(function() -- Schedule an Alndust Upheaval warning for Mythic
-				local barText = CL.count:format(CL.soak, almdustUpheavalCount)
+				local barText = CL.count:format(self:GetRename(1262289), almdustUpheavalCount)
 				self:TargetMessageFromBlizzMessage(1262289, 1, "orange", barText)
 				self:PlaySound(1262289, "warning") -- soak if assigned
 			end, eventInfo.duration + 0.5)
@@ -194,7 +197,7 @@ function mod:TimersMythic(_, eventInfo)
 		elseif durationRounded == 8 or durationRounded == 14 or durationRounded == 2 then -- Corrupted Devastation
 			barInfo = self:CorruptedDevastation(eventInfo, durationRounded)
 		elseif durationRounded == 20 or durationRounded == 1 then -- Ravenous Dive
-			barInfo = self:RavenousDive(eventInfo, durationRounded == 1)
+			barInfo = self:RavenousDive(eventInfo)
 		elseif durationRounded == 12 then
 			-- Corrupted Devastation > Caustic Phlegm > Corrupted Devastation > Caustic Phlegm
 			durationCount[durationRounded] = (durationCount[durationRounded] or 0) + 1
@@ -258,14 +261,11 @@ function mod:TimersHeroic(_, eventInfo)
 		elseif durationRounded == 32 or durationRounded == 50  or durationRounded == 35 then -- Consuming Miasma
 			barInfo = self:ConsumingMiasma(eventInfo)
 		elseif durationRounded == 151 then -- Stage 2
-			self:Bar("stages", eventInfo.duration, CL.stage:format(2), "spell_holy_borrowedtime", eventInfo.id)
+			self:Bar("stages", eventInfo.duration, self:GetRename("stages", 2), "spell_holy_borrowedtime", eventInfo.id)
 			return -- no need to stop this, it gets corrected later 10s before the end.
 		elseif durationRounded == 10 then -- Stage 2 (Updated)
-			self:Bar("stages", {eventInfo.duration, 151}, CL.stage:format(2), "spell_holy_borrowedtime", eventInfo.id)
+			self:Bar("stages", {eventInfo.duration, 151}, self:GetRename("stages", 2), "spell_holy_borrowedtime", eventInfo.id)
 			self:ScheduleTimer(function()
-				self:Message("stages", "cyan", CL.stage:format(2), false)
-				self:PlaySound("stages", "long")
-				self:SetStage(2)
 				almdustUpheavalCount = 1
 				riftEmergenceCount = 1
 				riftMadnessCount = 1
@@ -274,6 +274,9 @@ function mod:TimersHeroic(_, eventInfo)
 				rendingTearCount = 1
 				corruptedDevastationCount = 1
 				durationCount = {}
+				self:SetStage(2)
+				self:Message("stages", "cyan", self:GetRename("stages", 2), false)
+				self:PlaySound("stages", "long")
 			end, eventInfo.duration)
 			return
 		end
@@ -285,7 +288,7 @@ function mod:TimersHeroic(_, eventInfo)
 		elseif durationRounded == 8 or durationRounded == 2 then -- Corrupted Devastation
 			barInfo = self:CorruptedDevastation(eventInfo, durationRounded)
 		elseif durationRounded == 30 or durationRounded == 1 then -- Ravenous Dive
-			barInfo = self:RavenousDive(eventInfo, durationRounded == 1)
+			barInfo = self:RavenousDive(eventInfo)
 		elseif durationRounded == 12 then
 			-- Corrupted Devastation > Caustic Phlegm > Corrupted Devastation > Caustic Phlegm
 			durationCount[durationRounded] = (durationCount[durationRounded] or 0) + 1
@@ -339,14 +342,11 @@ function mod:TimersEasy(_, eventInfo)
 				barInfo = self:Consume(eventInfo)
 			end
 		elseif durationRounded == 165 then -- Stage 2
-			self:Bar("stages", eventInfo.duration, CL.stage:format(2), "spell_holy_borrowedtime", eventInfo.id)
+			self:Bar("stages", eventInfo.duration, self:GetRename("stages", 2), "spell_holy_borrowedtime", eventInfo.id)
 			return -- no need to stop this, it gets corrected later 10s before the end.
 		elseif durationRounded == 10 then -- Stage 2 (Updated)
-			self:Bar("stages", {eventInfo.duration, 165}, CL.stage:format(2), "spell_holy_borrowedtime", eventInfo.id)
+			self:Bar("stages", {eventInfo.duration, 165}, self:GetRename("stages", 2), "spell_holy_borrowedtime", eventInfo.id)
 			self:ScheduleTimer(function()
-				self:Message("stages", "cyan", CL.stage:format(2), false)
-				self:PlaySound("stages", "long")
-				self:SetStage(2)
 				almdustUpheavalCount = 1
 				riftEmergenceCount = 1
 				riftMadnessCount = 1
@@ -355,6 +355,9 @@ function mod:TimersEasy(_, eventInfo)
 				rendingTearCount = 1
 				corruptedDevastationCount = 1
 				durationCount = {}
+				self:SetStage(2)
+				self:Message("stages", "cyan", self:GetRename("stages", 2), false)
+				self:PlaySound("stages", "long")
 			end, eventInfo.duration)
 			return
 		end
@@ -437,7 +440,7 @@ end
 -- Stage One: Insatiable Hunger
 -- Alndust Upheaval
 function mod:AlndustUpheaval(eventInfo)
-	local barText = CL.count:format(CL.soak, almdustUpheavalCount)
+	local barText = CL.count:format(self:GetRename(1262289), almdustUpheavalCount)
 	if self:ShouldShowBars() then
 		self:Bar(1262289, eventInfo.duration, barText, nil, eventInfo.id)
 	end
@@ -454,7 +457,7 @@ end
 
 -- Rift Emergence
 function mod:RiftEmergence(eventInfo)
-	local barText = CL.count:format(CL.adds, riftEmergenceCount)
+	local barText = CL.count:format(self:GetRename(1258610), riftEmergenceCount)
 	if self:ShouldShowBars() then
 		self:Bar(1258610, eventInfo.duration, barText, nil, eventInfo.id)
 	end
@@ -470,7 +473,7 @@ end
 
 -- Rift Madness
 function mod:RiftMadness(eventInfo)
-	local barText = CL.count:format(L.rift_madness, riftMadnessCount)
+	local barText = CL.count:format(self:GetRename(1264756), riftMadnessCount)
 	if self:ShouldShowBars() then
 		self:Bar(1264756, eventInfo.duration, barText, nil, eventInfo.id)
 	end
@@ -486,7 +489,7 @@ end
 
 -- Consuming Miasma
 function mod:ConsumingMiasma(eventInfo)
-	local barText = CL.count:format(L.consuming_miasma, consumingMiasmaCount)
+	local barText = CL.count:format(self:GetRename(1257087), consumingMiasmaCount)
 	if self:ShouldShowBars() then
 		self:Bar(1257087, eventInfo.duration, barText, nil, eventInfo.id)
 	end
@@ -502,7 +505,7 @@ end
 
 -- Caustic Phlegm
 function mod:CausticPhlegm(eventInfo)
-	local barText = CL.count:format(CL.raid_damage, causticPhlegmCount)
+	local barText = CL.count:format(self:GetRename(1246653), causticPhlegmCount)
 	if self:ShouldShowBars() then
 		self:Bar(1246653, eventInfo.duration, barText, nil, eventInfo.id)
 	end
@@ -518,7 +521,7 @@ end
 
 -- Rending Tear
 function mod:RendingTear(eventInfo)
-	local barText = CL.count:format(CL.frontal_cone, rendingTearCount)
+	local barText = CL.count:format(self:GetRename(1272726), rendingTearCount)
 	if self:ShouldShowBars() then
 		self:Bar(1272726, eventInfo.duration, barText, nil, eventInfo.id)
 	end
@@ -534,7 +537,7 @@ end
 
 -- Consume
 function mod:Consume(eventInfo)
-	local barText = CL.count:format(self:SpellName(1245396), consumeCount)
+	local barText = CL.count:format(self:GetRename(1245396), consumeCount)
 	if self:ShouldShowBars() then
 		self:Bar(1245396, eventInfo.duration, barText, nil, eventInfo.id)
 	end
@@ -543,8 +546,8 @@ function mod:Consume(eventInfo)
 		msg = barText,
 		onFinished = function()
 			self:Message(1245396, "red", barText)
-			self:PlaySound(1245396, "warning") -- finish adds
 			self:StopBlizzMessages(0.2)
+			self:PlaySound(1245396, "warning") -- finish adds
 		end
 	}
 end
@@ -564,7 +567,7 @@ do
 		end
 		prevEventID = eventInfo.id
 
-		local barText = CL.count:format(CL.breath, durationRounded == 2 and corruptedDevastationCount-1 or corruptedDevastationCount)
+		local barText = CL.count:format(self:GetRename(1245486), durationRounded == 2 and corruptedDevastationCount-1 or corruptedDevastationCount)
 		if self:ShouldShowBars() then
 			self:CDBar(1245486, eventInfo.duration, barText, nil, eventInfo.id)
 		end
@@ -575,8 +578,8 @@ do
 			msg = barText,
 			onFinished = function()
 				self:Message(1245486, "red", barText)
-				self:PlaySound(1245486, "warning") -- dodge
 				self:StopBlizzMessages(0.4)
+				self:PlaySound(1245486, "warning") -- dodge
 			end
 		}
 	end
@@ -591,12 +594,8 @@ do
 			scheduledEnd = nil
 		end
 		scheduledEnd = self:ScheduleTimer(function()
-				if self:ShouldShowBars() then
-					self:Message(1245406, "cyan", CL.stage:format(1), false)
-					self:PlaySound(1245406, "long") -- next stage
-					self:StopBlizzMessages(1.5)
-				end
-				self:SetStage(1)
+			scheduledEnd = nil
+			self:ScheduleTimer(function()
 				almdustUpheavalCount = 1
 				riftEmergenceCount = 1
 				riftMadnessCount = 1
@@ -606,9 +605,19 @@ do
 				corruptedDevastationCount = 1
 				durationCount = {}
 				scheduledEnd = nil
-			end, eventInfo.duration)
+				self:SetStage(1)
+				if self:ShouldShowBars() then
+					self:Message("stages", "cyan", self:GetRename("stages", 1), false)
+					self:PlaySound("stages", "long")
+				end
+			end, 3.5)
+			self:StopBlizzMessages(1.5)
+			self:Message(1245406, "red")
+			self:CastBar(1245406, 3.5, 2, nil, eventInfo.id)
+			self:PlaySound(1245406, "warning")
+		end, eventInfo.duration)
 
-		local barText = CL.stage:format(1) -- Do we want a count here?
+		local barText = self:GetRename(1245406)
 		if self:ShouldShowBars() then
 			self:Bar(1245406, eventInfo.duration, barText, nil, eventInfo.id)
 		end
@@ -620,7 +629,7 @@ end
 
 -- Caustic Phlegm (Stage 2)
 function mod:CausticPhlegmStage2(eventInfo)
-	local barText = CL.count:format(CL.raid_damage, causticPhlegmCount)
+	local barText = CL.count:format(self:GetRename(1246621), causticPhlegmCount)
 	if self:ShouldShowBars() then
 		self:Bar(1246621, eventInfo.duration, barText, nil, eventInfo.id)
 	end
@@ -636,7 +645,7 @@ end
 
 -- Consuming Miasma (Stage 2)
 function mod:ConsumingMiasmaStage2(eventInfo)
-	local barText = CL.count:format(L.consuming_miasma, consumingMiasmaCount)
+	local barText = CL.count:format(self:GetRename(1257085), consumingMiasmaCount)
 	if self:ShouldShowBars() then
 		self:Bar(1257085, eventInfo.duration, barText, nil, eventInfo.id)
 	end

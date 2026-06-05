@@ -55,11 +55,11 @@ WMC_MouseoverSaved = {
 ["placeModifier"] = "",
 }
 WMC_RaidPickerSaved = {
-["openKey"] = "",
-["openModifier"] = "",
 ["posX"] = 0,
-["locked"] = true,
+["openModifier"] = "",
+["openKey"] = "",
+["shown"] = false,
 ["posY"] = 200,
 ["posAnchor"] = "CENTER",
-["shown"] = false,
+["locked"] = true,
 }

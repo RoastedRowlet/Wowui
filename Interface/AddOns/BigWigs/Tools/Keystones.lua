@@ -1737,6 +1737,19 @@ do
 		end
 	end
 
+	local RequestGuildSpecializationThrottled
+	do
+		local prev = 0
+		function RequestGuildSpecializationThrottled()
+			-- LibSpec already implements a small throttle
+			-- But since we're only doing this for badly coded 3rd party addons that don't request LibSpec guild prior to LibKeystone guild, we use a big throttle, for safety
+			if GetTime()-prev > 10 then
+				prev = GetTime()
+				LibSpec.RequestGuildSpecialization()
+			end
+		end
+	end
+
 	local function LibKeystoneFunction(keyLevel, keyMap, playerRating, playerName, channel)
 		if channel == "PARTY" then
 			if not partyList[playerName] or playerName == BigWigsLoader.UnitName("player") or partyList[playerName][1] ~= keyLevel or partyList[playerName][2] ~= keyMap or partyList[playerName][3] ~= playerRating then
@@ -1750,6 +1763,10 @@ do
 				end
 			end
 		elseif channel == "GUILD" then
+			if not BigWigsAPI.GetSpecializationID(playerName) then
+				-- We received guild key info, but we don't have spec info? Likely some other addon requested key info and not spec info, so we now request spec info.
+				RequestGuildSpecializationThrottled()
+			end
 			if not guildList[playerName] or guildList[playerName][1] ~= keyLevel or guildList[playerName][2] ~= keyMap or guildList[playerName][3] ~= playerRating then
 				guildList[playerName] = {keyLevel, keyMap, playerRating}
 
@@ -1773,10 +1790,11 @@ do
 	challengesTeleportButton:RegisterForClicks("AnyDown", "AnyUp")
 	challengesTeleportButton:SetPropagateMouseMotion(true)
 	challengesTeleportButton:SetAttribute("type", "spell")
+	local backupRatings = {}
+	local unitTbl = {"party1", "party2", "party3", "party4"}
 	local OnEnter
 	do
 		local CL = BigWigsAPI:GetLocale("BigWigs: Common")
-		local unitTbl = {"party1", "party2", "party3", "party4"}
 		local function SortTableByScoreThenName(a, b)
 			if a[1] > b[1] then -- Dungeon score
 				return true
@@ -1793,6 +1811,7 @@ do
 				for partyIterator = 1, 4 do
 					local unit = unitTbl[partyIterator]
 					if UnitExists(unit) then
+						local pName = BigWigsLoader.UnitName(unit) or "?"
 						local ratingTbl = C_PlayerInfo.GetPlayerMythicPlusRatingSummary(unit)
 						local classColorHex = "FF808080"
 						local _, classFile = UnitClass(unit)
@@ -1803,9 +1822,13 @@ do
 							end
 						end
 						if not ratingTbl then
+							ratingTbl = backupRatings[pName]
+						else
+							backupRatings[pName] = ratingTbl
+						end
+						if not ratingTbl then
 							local scoreColorHex = HIGHLIGHT_FONT_COLOR:GenerateHexColor()
 							GameTooltip:AddLine()
-							local pName = BigWigsLoader.UnitName(unit) or "?"
 							linesToAdd[#linesToAdd+1] = {-1, pName, L.dungeonScoreNoDataString:format(classColorHex, pName)}
 						else
 							for runsIterator = 1, 8 do
@@ -1816,7 +1839,6 @@ do
 									local seconds = math.floor(duration - (minutes*60))
 									local scoreColorTable = C_ChallengeMode.GetSpecificDungeonOverallScoreRarityColor(run.mapScore or 0) or HIGHLIGHT_FONT_COLOR
 									local scoreColorHex = scoreColorTable:GenerateHexColor()
-									local pName = BigWigsLoader.UnitName(unit) or "?"
 									linesToAdd[#linesToAdd+1] = {run.mapScore, pName, L.dungeonScoreString:format(
 										scoreColorHex, run.mapScore, -- Dungeon score
 										run.bestRunLevel, -- Dungeon level
@@ -1827,7 +1849,6 @@ do
 								elseif runsIterator == 8 then
 									local scoreColorTable = C_ChallengeMode.GetSpecificDungeonOverallScoreRarityColor(0)
 									local scoreColorHex = scoreColorTable:GenerateHexColor()
-									local pName = BigWigsLoader.UnitName(unit) or "?"
 									linesToAdd[#linesToAdd+1] = {0, pName, L.dungeonScoreString:format(
 										scoreColorHex, 0, -- Dungeon score
 										0, -- Dungeon level
@@ -1888,9 +1909,24 @@ do
 		end
 	end
 
+
+	local function UpdateRatings()
+		for partyIterator = 1, 4 do
+			local unit = unitTbl[partyIterator]
+			if UnitExists(unit) then
+				local pName = BigWigsLoader.UnitName(unit)
+				if pName then
+					local ratingTbl = C_PlayerInfo.GetPlayerMythicPlusRatingSummary(unit)
+					if ratingTbl then
+						backupRatings[pName] = ratingTbl
+					end
+				end
+			end
+		end
+	end
 	local hookedIcons = {}
-	local frame = CreateFrame("Frame")
 	local function OnShow(self)
+		UpdateRatings()
 		if self.DungeonIcons then
 			for i = 1, #self.DungeonIcons do
 				local icon = self.DungeonIcons[i]
@@ -1943,17 +1979,21 @@ do
 			self.WeeklyInfo.Child.SeasonBest:Hide()
 		end
 	end
+	local frame = CreateFrame("Frame")
 	frame:SetScript("OnEvent", function(self, event, addonName)
 		if event == "ADDON_LOADED" and addonName == "Blizzard_ChallengesUI" then
 			self:UnregisterEvent(event)
-			self:SetScript("OnEvent", nil)
+			self:SetScript("OnEvent", function() BigWigsLoader.CTimerAfter(8, UpdateRatings) end)
 			self.HookScript(ChallengesFrame, "OnShow", function(f)
 				OnShow(f)
 				BigWigsLoader.CTimerAfter(1, function() OnShow(f) end) -- Compensate for any data updates (that would move the icons) happening after the panel opens
 			end)
+		elseif event == "CHALLENGE_MODE_COMPLETED" then
+			BigWigsLoader.CTimerAfter(8, UpdateRatings)
 		end
 	end)
 	frame:RegisterEvent("ADDON_LOADED")
+	frame:RegisterEvent("CHALLENGE_MODE_COMPLETED")
 end
 
 --------------------------------------------------------------------------------
@@ -3356,25 +3396,23 @@ do
 					},
 				},
 			},
-			QoL = {
+			qol = {
 				type = "group",
 				name = L.qualityOfLife,
 				order = 4,
 				args = {
-					args = {
-						autoSlotKeystone = {
-							type = "toggle",
-							name = L.keystoneAutoSlot,
-							desc = L.keystoneAutoSlotDesc,
-							order = 1,
-							width = "full",
-						},
-						spacer = {
-							type = "description",
-							name = "\n\n",
-							order = 2,
-							width = "full",
-						},
+					autoSlotKeystone = {
+						type = "toggle",
+						name = L.keystoneAutoSlot,
+						desc = L.keystoneAutoSlotDesc,
+						order = 1,
+						width = "full",
+					},
+					spacer = {
+						type = "description",
+						name = "\n\n",
+						order = 2,
+						width = "full",
 					},
 				},
 			},

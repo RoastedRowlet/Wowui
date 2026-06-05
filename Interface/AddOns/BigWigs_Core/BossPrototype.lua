@@ -752,6 +752,7 @@ function boss:Disable(isWipe)
 		self.isWinning = nil
 		self.bossTargetChecks = nil
 		self.stageTime = nil
+		self.blizzMessageTimer = nil
 
 		if not isWiping then
 			self:SendMessage("BigWigs_OnBossDisable", self)
@@ -794,7 +795,7 @@ function boss:Disable(isWipe)
 			self.errorChatPrints = nil
 			core:Print(("Extra info: %s, %s (%d#%s)"):format(self.moduleName, self:DifficultyName(), BigWigsAPI.GetVersion(), BigWigsAPI.GetVersionHash()))
 			if not self.noAfterBossError and self:ShouldShowBars() then
-				core:Error(("BigWigs: %q had issues reading the timeline. Show the devs a screenshot of the messages in your chat, NOT this error message."):format(self.moduleName), true)
+				core:Error(("%q had issues reading the timeline. Show the devs a screenshot of the messages in your chat, NOT this error message."):format(self.moduleName), true)
 			end
 		end
 	end
@@ -876,6 +877,7 @@ end
 
 do
 	local moduleRenamesList = {}
+
 	--- Get the current rename for this key and position.
 	-- @return string
 	function boss:GetRename(key, position)
@@ -883,21 +885,19 @@ do
 		if not moduleRenamesList[self][key] or not moduleRenamesList[self][key][position] then
 			error(("Module %q has no rename for key %q at position %q."):format(self.moduleName, tostring(key), tostring(position)))
 			return
-		else
-			local db = self.db.profile.renames
-			local name = db[key] and db[key][position]
-			if not name then
-				error(("Module %q has no stored rename for key %q at position %q."):format(self.moduleName, tostring(key), tostring(position)))
-				return
-			else
-				local nameType = type(name)
-				if nameType == "number" then
-					return spells[name]
-				else
-					return name
-				end
-			end
 		end
+
+		local db = self.db.profile.renames
+		local name = db[key] and db[key][position]
+		if not name then
+			error(("Module %q has no stored rename for key %q at position %q."):format(self.moduleName, tostring(key), tostring(position)))
+			return
+		end
+		local nameType = type(name)
+		if nameType == "number" then
+			return spells[name]
+		end
+		return name
 	end
 
 	--- Get the default rename for this key and position.
@@ -907,9 +907,26 @@ do
 		if not moduleRenamesList[self][key] or not moduleRenamesList[self][key][position] then
 			error(("Module %q has no rename for key %q at position %q."):format(self.moduleName, tostring(key), tostring(position)))
 			return
-		else
-			return moduleRenamesList[self][key][position]
 		end
+		return moduleRenamesList[self][key][position]
+	end
+
+	--- Check if the rename for this key and position is currently set to default.
+	-- @return boolean
+	function boss:IsRenameDefault(key, position)
+		if not position then position = 1 end
+		if not moduleRenamesList[self][key] or not moduleRenamesList[self][key][position] then
+			error(("Module %q has no rename for key %q at position %q."):format(self.moduleName, tostring(key), tostring(position)))
+			return
+		end
+
+		local db = self.db.profile.renames
+		local name = db[key] and db[key][position]
+		if not name then
+			error(("Module %q has no stored rename for key %q at position %q."):format(self.moduleName, tostring(key), tostring(position)))
+			return
+		end
+		return moduleRenamesList[self][key][position] == name
 	end
 
 	--- Get the note associated with this rename using its key and position.
@@ -919,9 +936,10 @@ do
 		if not moduleRenamesList[self][key] or not moduleRenamesList[self][key][position] then
 			error(("Module %q has no rename for key %q at position %q."):format(self.moduleName, tostring(key), tostring(position)))
 			return
-		elseif moduleRenamesList[self][key].notes then
-			return moduleRenamesList[self][key].notes[position]
 		end
+
+		local notes = moduleRenamesList[self][key].notes
+		return notes and notes[position]
 	end
 
 	--- Get the amount of renames for this key.
@@ -930,25 +948,50 @@ do
 		if not moduleRenamesList[self][key] then
 			error(("Module %q has no rename for key %q."):format(self.moduleName, tostring(key)))
 			return
-		else
-			return #moduleRenamesList[self][key]
 		end
+		return #moduleRenamesList[self][key]
 	end
 
 	--- Get the original name associated with this rename using its key
 	-- @return string or number (spell ID)
-	function boss:GetRenameOriginal(key)
+	function boss:GetRenameOriginal(key, position)
+		if not position then position = 1 end
 		if not moduleRenamesList[self][key] then
 			error(("Module %q has no rename for key %q."):format(self.moduleName, tostring(key)))
 			return
-		else
-			local original = moduleRenamesList[self][key].original
-			if original or original == false then
-				return original
-			else
-				return key
-			end
 		end
+
+		local original = moduleRenamesList[self][key].original
+		if original == false then
+			return original
+		elseif type(original) == "table" then
+			return original[position]
+		end
+		return original or key
+	end
+
+	--- Check if the rename for this key and position is currently set to the original.
+	-- @return boolean
+	function boss:IsRenameOriginal(key, position)
+		if not position then position = 1 end
+		if not moduleRenamesList[self][key] or not moduleRenamesList[self][key][position] then
+			error(("Module %q has no rename for key %q at position %q."):format(self.moduleName, tostring(key), tostring(position)))
+			return
+		end
+
+		local db = self.db.profile.renames
+		local name = db[key] and db[key][position]
+		if not name then
+			error(("Module %q has no stored rename for key %q at position %q."):format(self.moduleName, tostring(key), tostring(position)))
+			return
+		end
+		local original = moduleRenamesList[self][key].original
+		if original == false then
+			return original
+		elseif type(original) == "table" then
+			return original[position] == name
+		end
+		return (original or key) == name
 	end
 
 	--- Check if this module has a rename set for this key
@@ -977,6 +1020,7 @@ do
 		moduleRenamesList[self] = renamesTable
 	end
 end
+
 
 --- Create a custom marking option
 -- @bool state Boolean value to represent default state
@@ -1282,13 +1326,11 @@ do
 
 	local frameTbl = {}
 	local eventFunc = function(_, event, unit, ...)
-		if not hasanysecretvalues(unit, ...) then
-			for i = #enabledModules, 1, -1 do
-				local self = enabledModules[i]
-				local m = unitEventMap[self] and unitEventMap[self][event]
-				if m and m[unit] then
-					self[m[unit]](self, event, unit, ...)
-				end
+		for i = #enabledModules, 1, -1 do
+			local self = enabledModules[i]
+			local m = unitEventMap[self] and unitEventMap[self][event]
+			if m and m[unit] and (self.OnEncounterStart or not hasanysecretvalues(unit, ...)) then -- XXX Temp way to allow modern modules for now
+				self[m[unit]](self, event, unit, ...)
 			end
 		end
 	end
@@ -3482,7 +3524,13 @@ function boss:Message(key, color, text, icon, disableEmphasize, customDisplayTim
 	if self:CanPassRoleRestrictions(key) then
 		local isEmphasized = not disableEmphasize and self:CheckFlag(key, C.EMPHASIZE)
 		if self:CheckFlag(key, C.MESSAGE) or isEmphasized then
-			self:SendMessage("BigWigs_Message", self, key, type(text) == "string" and text or spells[text or key], color, icon ~= false and icons[icon or key], isEmphasized, customDisplayTime)
+			local msg
+			if not text and self:IsRenameAvailable(key) then
+				msg = self:GetRename(key, 1)
+			else
+				msg = type(text) == "string" and text or spells[text or key]
+			end
+			self:SendMessage("BigWigs_Message", self, key, msg, color, icon ~= false and icons[icon or key], isEmphasized, customDisplayTime)
 		end
 	end
 end
@@ -3497,7 +3545,12 @@ function boss:PersonalMessage(key, localeString, text, icon)
 		local isEmphasized = self:CheckFlag(key, C.EMPHASIZE) or self:CheckFlag(key, C.ME_ONLY_EMPHASIZE)
 		if self:CheckFlag(key, C.MESSAGE) or isEmphasized then
 			local str = localeString and CL[localeString] or CL.you
-			local msg = localeString == false and text or format(str, type(text) == "string" and text or spells[text or key])
+			local msg
+			if not text and self:IsRenameAvailable(key) then
+				msg = localeString == false and self:GetRename(key, 1) or format(str, self:GetRename(key, 1))
+			else
+				msg = localeString == false and text or format(str, type(text) == "string" and text or spells[text or key])
+			end
 			self:SendMessage("BigWigs_Message", self, key, msg, "blue", icon ~= false and icons[icon or key], isEmphasized)
 		end
 	end
@@ -3529,17 +3582,22 @@ end
 -- @param[opt] icon the message icon (spell id or texture name)
 function boss:StackMessage(key, color, player, stack, noEmphUntil, text, icon)
 	if self:CanPassRoleRestrictions(key) then
-		local textType = type(text)
+		local msg
+		if not text and self:IsRenameAvailable(key) then
+			msg = self:GetRename(key, 1)
+		else
+			msg = type(text) == "string" and text or spells[text or key]
+		end
 		local amount = stack or 1
 		if player == myName then
 			local isEmphasized = (self:CheckFlag(key, C.EMPHASIZE) or self:CheckFlag(key, C.ME_ONLY_EMPHASIZE)) and amount >= noEmphUntil
 			if self:CheckFlag(key, C.MESSAGE) or isEmphasized then
-				self:SendMessage("BigWigs_Message", self, key, format(CL.stackyou, amount, textType == "string" and text or spells[text or key]), "blue", icon ~= false and icons[icon or key], isEmphasized)
+				self:SendMessage("BigWigs_Message", self, key, format(CL.stackyou, amount, msg), "blue", icon ~= false and icons[icon or key], isEmphasized)
 			end
 		elseif not self:CheckFlag(key, C.ME_ONLY) then
 			local isEmphasized = self:CheckFlag(key, C.EMPHASIZE) and amount >= noEmphUntil
 			if self:CheckFlag(key, C.MESSAGE) or isEmphasized then
-				self:SendMessage("BigWigs_Message", self, key, format(CL.stack, amount, textType == "string" and text or spells[text or key], self:ColorName(player)), color, icon ~= false and icons[icon or key], isEmphasized)
+				self:SendMessage("BigWigs_Message", self, key, format(CL.stack, amount, msg, self:ColorName(player)), color, icon ~= false and icons[icon or key], isEmphasized)
 			end
 		end
 	end
@@ -3682,8 +3740,6 @@ do
 	local function printTargets(self, key, playerTable, color, text, icon)
 		local playersInTable = #playerTable
 		if playersInTable > 0 and (not playerTable.prevPlayersInTable or playerTable.prevPlayersInTable < playersInTable) then
-			local textType = type(text)
-			local msg = textType == "string" and text or spells[text or key]
 			local texture = icon ~= false and icons[icon or key]
 			local previousAmount = playerTable.prevPlayersInTable or 0
 			if playersInTable-previousAmount == 1 and playerTable[playersInTable] == myName then
@@ -3692,6 +3748,12 @@ do
 					local emphasized = self:CheckFlag(key, C.EMPHASIZE)
 					local marker = playerTable[myName]
 					if self:CheckFlag(key, C.MESSAGE) or emphasized then
+						local msg
+						if self:IsRenameAvailable(key) then
+							msg = self:GetRename(key, 1)
+						else
+							msg = type(text) == "string" and text or spells[text or key]
+						end
 						if marker then
 							self:SendMessage("BigWigs_Message", self, key, format(CL.you_icon, msg, marker), "blue", texture, emphasized)
 						else
@@ -3720,6 +3782,7 @@ do
 				local list = self:TableToString(tbl, #tbl)
 				-- Don't Emphasize if it's on other people when both EMPHASIZE and ME_ONLY_EMPHASIZE are enabled.
 				local isEmphasized = self:CheckFlag(key, C.EMPHASIZE) and not self:CheckFlag(key, C.ME_ONLY_EMPHASIZE)
+				local msg = self:IsRenameAvailable(key) and self:GetRename(key, text[1]) or type(text) == "string" and text or spells[text or key]
 				if self:CheckFlag(key, C.MESSAGE) or isEmphasized then
 					self:SendMessage("BigWigs_Message", self, key, format(CL.other, msg, list), color, texture, isEmphasized)
 				end
@@ -3744,26 +3807,43 @@ do
 					local isEmphasized = self:CheckFlag(key, C.EMPHASIZE) or self:CheckFlag(key, C.ME_ONLY_EMPHASIZE)
 					if self:CheckFlag(key, C.MESSAGE) or isEmphasized then
 						local textType = type(text)
-						local msg = textType == "string" and text or spells[text or key]
 						local texture = icon ~= false and icons[icon or key]
 						local marker = playerTable[myName]
-						if marker then
-							self:SendMessage("BigWigs_Message", self, key, format(CL.you_icon, msg, marker), "blue", texture, isEmphasized)
+						if self:IsRenameAvailable(key) then
+							local msg = self:GetRename(key, text[2])
+							if marker then
+								self:SendMessage("BigWigs_Message", self, key, msg .. "|T13700" .. marker .. ":0|t", "blue", texture, isEmphasized)
+							else
+								self:SendMessage("BigWigs_Message", self, key, msg, "blue", texture, isEmphasized)
+							end
 						else
-							self:SendMessage("BigWigs_Message", self, key, format(CL.you, msg), "blue", texture, isEmphasized)
+							local msg = textType == "string" and text or spells[text or key]
+							if marker then
+								self:SendMessage("BigWigs_Message", self, key, format(CL.you_icon, msg, marker), "blue", texture, isEmphasized)
+							else
+								self:SendMessage("BigWigs_Message", self, key, format(CL.you, msg), "blue", texture, isEmphasized)
+							end
 						end
 					end
 				end
 			else
 				if playerTable[playersInTable] == myName and self:CheckFlag(key, C.ME_ONLY_EMPHASIZE) then
-					local textType = type(text)
-					local msg = textType == "string" and text or spells[text or key]
 					local texture = icon ~= false and icons[icon or key]
 					local marker = playerTable[myName]
-					if marker then
-						self:SendMessage("BigWigs_Message", self, key, format(CL.you_icon, msg, marker), "blue", texture, true)
+					if self:IsRenameAvailable(key) then
+						local msg = self:GetRename(key, text[2])
+						if marker then
+							self:SendMessage("BigWigs_Message", self, key, msg .. "|T13700" .. marker .. ":0|t", "blue", texture, true)
+						else
+							self:SendMessage("BigWigs_Message", self, key, msg, "blue", texture, true)
+						end
 					else
-						self:SendMessage("BigWigs_Message", self, key, format(CL.you, msg), "blue", texture, true)
+						local msg = type(text) == "string" and text or spells[text or key]
+						if marker then
+							self:SendMessage("BigWigs_Message", self, key, format(CL.you_icon, msg, marker), "blue", texture, true)
+						else
+							self:SendMessage("BigWigs_Message", self, key, format(CL.you, msg), "blue", texture, true)
+						end
 					end
 				end
 				local playersAddedSinceLastPrint = playersInTable - (playerTable.prevPlayersInTable or 0)
@@ -3787,23 +3867,29 @@ end
 -- @param[opt] icon the message icon (spell id or texture name, key is used if nil)
 function boss:TargetMessage(key, color, player, text, icon)
 	if self:CanPassRoleRestrictions(key) then
-		local textType = type(text)
-		local msg = textType == "string" and text or spells[text or key]
 		local texture = icon ~= false and icons[icon or key]
 		if not player then
 			local isEmphasized = self:CheckFlag(key, C.EMPHASIZE)
 			if self:CheckFlag(key, C.MESSAGE) or isEmphasized then
+				local msg = self:IsRenameAvailable(key) and self:GetRename(key, text[1]) or type(text) == "string" and text or spells[text or key]
 				self:SendMessage("BigWigs_Message", self, key, format(CL.other, msg, "???"), color, texture, isEmphasized)
 			end
 		elseif player == myName then
 			local isEmphasized = self:CheckFlag(key, C.EMPHASIZE) or self:CheckFlag(key, C.ME_ONLY_EMPHASIZE)
 			if self:CheckFlag(key, C.MESSAGE) or isEmphasized then
-				self:SendMessage("BigWigs_Message", self, key, format(CL.you, msg), "blue", texture, isEmphasized)
+				if self:IsRenameAvailable(key) then
+					local msg = self:GetRename(key, text[2])
+					self:SendMessage("BigWigs_Message", self, key, msg, "blue", texture, isEmphasized)
+				else
+					local msg = type(text) == "string" and text or spells[text or key]
+					self:SendMessage("BigWigs_Message", self, key, format(CL.you, msg), "blue", texture, isEmphasized)
+				end
 			end
 		else
 			-- Don't Emphasize if it's on other people when both EMPHASIZE and ME_ONLY_EMPHASIZE are enabled.
 			local isEmphasized = self:CheckFlag(key, C.EMPHASIZE) and not self:CheckFlag(key, C.ME_ONLY_EMPHASIZE)
 			if not self:CheckFlag(key, C.ME_ONLY) and (self:CheckFlag(key, C.MESSAGE) or isEmphasized) then
+				local msg = self:IsRenameAvailable(key) and self:GetRename(key, text[1]) or type(text) == "string" and text or spells[text or key]
 				self:SendMessage("BigWigs_Message", self, key, format(CL.other, msg, self:ColorName(player)), color, texture, isEmphasized)
 			end
 		end
@@ -3846,14 +3932,18 @@ do
 	function boss:TargetMessageFromBlizzMessage(key, duration, color, text, icon)
 		self:StopBlizzMessages(duration)
 
-		local timer = self:ScheduleTimer(function()
+		if self.blizzMessageTimer then
+			self:CancelTimer(self.blizzMessageTimer)
+		end
+		self.blizzMessageTimer = self:ScheduleTimer(function()
 			self:UnregisterEvent("ENCOUNTER_WARNING")
 		end, duration)
 
 		self:RegisterEvent("ENCOUNTER_WARNING", function(event, info)
 			if info.targetGUID == nil then return end
 
-			self:CancelTimer(timer)
+			self:CancelTimer(self.blizzMessageTimer)
+			self.blizzMessageTimer = nil
 			self:UnregisterEvent(event)
 
 			local player = info.targetName
@@ -3864,7 +3954,13 @@ do
 					player = classColor:WrapTextInColorCode(player)
 				end
 			end
-			self:Message(key, color, CL.other:format(text or self:SpellName(key), player), icon)
+			local msg
+			if not text and self:IsRenameAvailable(key) then
+				msg = self:GetRename(key, 1)
+			else
+				msg = text or self:SpellName(key)
+			end
+			self:Message(key, color, CL.other:format(msg, player), icon)
 		end)
 	end
 end
@@ -3875,18 +3971,26 @@ end
 -- @param[opt] localeString if nil then the "%s on YOU" string will be used, if false then the text field will be printed directly, otherwise the common locale will be referenced via CL[localeString]
 -- @param[opt] text the message text (if nil, key is used, if true, the raw Blizzard message is used)
 -- @param[opt] icon the message icon (spell id or texture name or true to use the Blizzard provided icon)
-function boss:PersonalMessageFromBlizzMessage(key, duration, localeString, text, icon)
+-- @bool[opt] mustDefineTarget if true, a message will only be shown if Blizzard defines a player target in the boss message
+-- @param[opt] callbackIfOnMe an optional function to run
+function boss:PersonalMessageFromBlizzMessage(key, duration, localeString, text, icon, mustDefineTarget, callbackIfOnMe)
 	self:StopBlizzMessages(duration)
 
 	if self:CanPassRoleRestrictions(key) then
 		local isEmphasized = self:CheckFlag(key, C.EMPHASIZE) or self:CheckFlag(key, C.ME_ONLY_EMPHASIZE)
 		if self:CheckFlag(key, C.MESSAGE) or isEmphasized then
-			local timer = self:ScheduleTimer(function()
+			if self.blizzMessageTimer then
+				self:CancelTimer(self.blizzMessageTimer)
+			end
+			self.blizzMessageTimer = self:ScheduleTimer(function()
 				self:UnregisterEvent("ENCOUNTER_WARNING")
 			end, duration)
 
 			self:RegisterEvent("ENCOUNTER_WARNING", function(event, infoTable)
-				self:CancelTimer(timer)
+				if infoTable.targetGUID == nil and mustDefineTarget then return end
+
+				self:CancelTimer(self.blizzMessageTimer)
+				self.blizzMessageTimer = nil
 				self:UnregisterEvent(event)
 
 				if text == true then
@@ -3899,8 +4003,16 @@ function boss:PersonalMessageFromBlizzMessage(key, duration, localeString, text,
 					self:SendMessage("BigWigs_Message", self, key, infoTable.text, "blue", iconToUse, isEmphasized)
 				else
 					local str = localeString and CL[localeString] or CL.you
-					local msg = localeString == false and text or format(str, type(text) == "string" and text or spells[text or key])
+					local msg
+					if not text and self:IsRenameAvailable(key) then
+						msg = localeString == false and self:GetRename(key, 1) or format(str, self:GetRename(key, 1))
+					else
+						msg = localeString == false and text or format(str, type(text) == "string" and text or spells[text or key])
+					end
 					self:SendMessage("BigWigs_Message", self, key, msg, "blue", icon ~= false and icons[icon or key], isEmphasized)
+				end
+				if callbackIfOnMe then
+					callbackIfOnMe(self)
 				end
 			end)
 		end
@@ -4110,17 +4222,25 @@ do
 			time = length
 		end
 		local textType = type(text)
-		local rawText = textType == "string" and text or spells[text or key]
-		local msg = format(CL.cast, rawText)
+		local msg, rawText, texture
+		if textType == "number" and text < 10 and self:IsRenameAvailable(key) then
+			rawText = self:GetRename(key, text)
+			msg = rawText
+			texture = icons[icon or key]
+		else
+			rawText = textType == "string" and text or spells[text or key]
+			msg = format(CL.cast, rawText)
+			texture = icons[icon or textType == "number" and text or key]
+		end
 		local isBarEnabled = checkFlag(self, key, C.CASTBAR)
 		if isBarEnabled then
-			self:SendMessage("BigWigs_StartBar", self, key, msg, time, icons[icon or textType == "number" and text or key], false, maxTime, nil, eventId)
+			self:SendMessage("BigWigs_StartBar", self, key, msg, time, texture, false, maxTime, nil, eventId)
 		end
 		if checkFlag(self, key, C.CASTBAR_COUNTDOWN) then
 			self:SendMessage("BigWigs_StartCountdown", self, key, msg, time)
 		end
 		local counter = msg:match(countString)
-		self:SendMessage("BigWigs_CastTimer", self, key, time, maxTime, msg, counter and tonumber(counter) or 0, icons[icon or textType == "number" and text or key], rawText, isBarEnabled)
+		self:SendMessage("BigWigs_CastTimer", self, key, time, maxTime, msg, counter and tonumber(counter) or 0, texture, rawText, isBarEnabled)
 	end
 end
 
@@ -4141,6 +4261,7 @@ function boss:StopBar(text, player)
 		self:SendMessage("BigWigs_StopBar", self, msg)
 		self:SendMessage("BigWigs_StopCountdown", self, msg)
 	end
+	self:Debug(":StopBar", msg, player)
 end
 
 --- Stop a cast bar.

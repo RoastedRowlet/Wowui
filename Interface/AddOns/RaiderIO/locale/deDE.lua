@@ -188,6 +188,8 @@ L["MINIMAP_SHORTCUT_MINIMAP_ENABLE_DESC"] = "Aktiviert die Anzeige des Symbols a
 L["MINIMAP_SHORTCUT_MINIMAP_LOCK"] = "Minimap Button sperren"
 L["MISC_SETTINGS"] = "Verschiedenes"
 L["MODULE_AMERICAS"] = "Amerika"
+--[[Translation missing --]]
+--[[ L["MODULE_CHINA"] = ""--]] 
 L["MODULE_EUROPE"] = "Europa"
 L["MODULE_KOREA"] = "Korea"
 L["MODULE_TAIWAN"] = "Taiwan"
@@ -406,6 +408,34 @@ L["RAID_BOSS_SOD_6"] = "Leidensschmied Raznal"
 L["RAID_BOSS_SOD_7"] = "Wächter der Ersten"
 L["RAID_BOSS_SOD_8"] = "Schicksalsschreiber Roh-Kalo"
 L["RAID_BOSS_SOD_9"] = "Kel'Thuzad"
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_SOO_1"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_SOO_10"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_SOO_11"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_SOO_12"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_SOO_13"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_SOO_14"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_SOO_2"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_SOO_3"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_SOO_4"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_SOO_5"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_SOO_6"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_SOO_7"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_SOO_8"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_SOO_9"] = ""--]] 
 L["RAID_BOSS_ToES_1"] = "Beschützer des Endlosen"
 L["RAID_BOSS_TOES_1"] = "Beschützer des Endlosen"
 L["RAID_BOSS_TOES_2"] = "Tsulong"
@@ -480,6 +510,8 @@ L["RAID_MQD"] = "Marsch auf Quel'Danas"
 L["RAID_MSV"] = "Mogu'shangewölbe"
 L["RAID_NP"] = "Palast der Nerub'ar"
 L["RAID_RS"] = "Das Rubinsanktum"
+--[[Translation missing --]]
+--[[ L["RAID_SOO"] = ""--]] 
 L["RAID_ToES"] = "Terrasse des Endlosen Frühlings"
 L["RAID_TOES"] = "Terrasse des Endlosen Frühlings"
 L["RAID_TOT"] = "Der Thron des Donners"

@@ -2,7 +2,7 @@
 
 BigWigs:AddColors("Chimaerus the Undreamt God", {
 	[1245396] = "red",
-	[1245406] = "cyan",
+	[1245406] = "red",
 	[1245486] = "red",
 	[1246621] = "red",
 	[1246653] = "yellow",
@@ -18,7 +18,7 @@ BigWigs:AddColors("Chimaerus the Undreamt God", {
 
 BigWigs:AddSounds("Chimaerus the Undreamt God", {
 	[1245396] = "warning",
-	[1245406] = "long",
+	[1245406] = "warning",
 	[1245486] = "warning",
 	[1246621] = "alert",
 	[1246653] = "alert",

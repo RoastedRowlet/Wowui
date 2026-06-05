@@ -2,12 +2,17 @@ local _, addonTbl = ...
 local L = addonTbl.API:NewLocale("BigWigs", "koKR")
 if not L then return end
 
+L.tempRenameFeat = "이제 고급 설정(>>)을 열고 |cFF436EEE이름 변경|r 탭을 클릭하여 모든 보스 능력의 이름을 바꿀 수 있습니다."
+
 -- API.lua
 L.showAddonBar = "'|cFF436EEE%s|r' 애드온이 '%s' 바를 생성했습니다."
 L.requestAddonProfile = "애드온 '|cFF436EEE%s|r'이 방금 프로필 내보내기 문자열을 복사했습니다."
 L.shortMinutesAndSeconds = "%d 분 %d 초" -- 1 Minute 2 Seconds
 L.shortSecondsOnly = "%d 초" -- 28 Seconds
 L.shortSubTenSeconds = "%.1f 초" -- 3.2 Seconds
+L.accept = "수락"
+L.cancel = "취소"
+L.confirm_profile_swap = "|cFF436EEE\"%s\"|r 애드온이 BigWigs 프로필을 다음 이름의 다른 프로필로 자동 교체하려고 합니다::\n\n|cFF33FF99\"%s\"|r\n\n정말 이 작업을 진행하시겠습니까?"
 
 -- Core.lua
 L.berserk = "광폭화"
@@ -61,7 +66,6 @@ L.outOfDateAddOnPopup = "|cFF436EEE%s|r 애드온이 오래되었습니다!"
 L.outOfDateAddOnRaidWarning = "|cFF436EEE%s|r 애드온이 오래되었습니다! v%d.%d.%d가 있지만 최신 버전은 v%d.%d.%d입니다!"
 L.disabledAddOn = "|cFF436EEE%s|r 애드온이 비활성화 중이므로 타이머를 표시할 수 없습니다."
 L.removeAddOn = "'|cFF436EEE%s|r'|1이;가; '|cFF436EEE%s|r'|1으로;로; 대체되었으므로 제거해주세요."
-L.alternativeName = "%s (|cFF436EEE%s|r)"
 L.outOfDateContentPopup = "경고!\n |cFF436EEE%s|r을 업데이트했지만 기본 |cFF436EEEBigWigs|r 애드온도 업데이트해야 합니다.\n이를 무시하면 기능이 손상될 수 있습니다."
 L.outOfDateContentRaidWarning = "|cFF436EEE%s|r이 올바르게 작동하려면 기본 |cFF436EEEBigWigs|r 애드온의 %d 버전이 필요하지만 %d 버전을 사용 중입니다."
 L.addOnLoadFailedWithReason = "BigWigs에서 애드온 |cFF436EEE%s|r을 로드하는 데 실패했습니다. 이유는 %q입니다. BigWigs 개발팀에 알려주세요!"
@@ -145,7 +149,7 @@ L.configure = "구성"
 L.resetPositions = "위치 초기화"
 L.selectEncounter = "보스 전투 선택"
 L.privateAuraSounds = "비공개 오라 소리"
-L.privateAuraSounds_desc = "비공개 오라는 일반적으로 추적할 수 없지만, 능력으로 타깃이 되었을 때 재생되도록 사운드를 설정할 수 있습니다."
+L.privateAuraSounds_desc = "비공개 오라는 일반적으로 추적할 수 없지만, 해당 능력의 디버프가 자신에게 적용될 때 소리가 재생되도록 설정할 수 있습니다."
 L.listAbilities = "파티/공격대 대화에 능력 나열하기"
 
 L.dbmFaker = "DBM을 사용 중인 것처럼 위장하기"
@@ -223,6 +227,13 @@ L.healer = "|cFFFF0000치유 전담만 경보합니다.|r "
 L.tankhealer = "|cFFFF0000방어 & 치유 전담만 경보합니다.|r "
 L.dispeller = "|cFFFF0000무효화 시전자만 경보합니다.|r "
 
+L.renames = "이름 변경"
+L.noteLabel = "%s (|cFFFFFF99%s|r)"
+L.renameLabel = "%s (|cFF3366FF%s|r)"
+L.renameHeader = "능력에 사용자 지정 이름을 설정합니다. 이 텍스트는 모든 메시지와 바에서 주문 이름 대신 사용됩니다.\n\n"
+L.spellName = "주문 이름"
+L.spellNameResetDesc = "이 능력은 기본적으로 사용자 지정 이름이 설정되어 있습니다. 이 버튼을 클릭하면 원래 이름(일반적으로 주문 이름)을 사용합니다."
+
 -- Sharing.lua
 L.import = "가져오기"
 L.import_info = "문자열을 입력한 후 가져올 설정을 선택할 수 있습니다.\n가져오기 문자열에 설정이 포함되어 있지 않으면 선택할 수 없습니다.\n\n|cffff4411이 가져오기는 일반 설정에만 영향을 미치며 보스별 설정에는 영향을 미치지 않습니다.|r"
@@ -292,6 +303,8 @@ L.sharing_window_title = "보스 설정 공유"
 L.sharing_flags = "일반 설정"
 L.sharing_flags_desc = "바 표시, 사운드 재생, 메시지 표시 등의 설정을 가져옵니다.\n이것은 능력 설정의 대부분 체크박스를 포함합니다."
 L.sharing_export_flags_desc = "바 표시, 사운드 재생, 메시지 표시 등의 설정을 내보냅니다.\n이것은 능력 설정의 대부분 체크박스를 포함합니다."
+L.sharing_renames_desc = "구성된 사용자 지정 이름 변경 규칙을 가져옵니다."
+L.sharing_export_renames_desc = "구성된 사용자 지정 이름 변경 규칙을 내보냅니다."
 L.sharing_sounds_desc = "능력에 재생할 사운드를 가져옵니다."
 L.sharing_export_sounds_desc = "능력에 재생할 사운드를 내보냅니다."
 L.sharing_private_auras = "비공개 오라"
@@ -352,6 +365,7 @@ L.toolsDesc = "BigWigs은 보스와의 전투를 더욱 빠르고 간편하게 �
 
 L.reloadUIWarning = "이 기능을 변경하면 UI가 재시작되며 잠시 로딩 화면이 표시됩니다. 정말로 변경하시겠습니까?"
 L.qualityOfLife = "편의성(QoL)"
+L.notYetImplemented = "아직 구현되지 않음" -- When a feature hasn't been implemented yet
 
 -----------------------------------------------------------------------
 -- AutoInvite.lua
@@ -609,7 +623,6 @@ L.progressPercentTooltipText = {
 L.progressPercentNameplate = "적 NPC의 이름표에 진행률 % 표시"
 L.progressCurrentPull = "현재 전투"
 L.progressCurrentPullDesc = "현재 전투 중인 NPC 무리에서 얻을 수 있는 총 진행률을 표시합니다.\n\n아직 작동하지 않습니다!"
-L.tempProgressAnnounce = "이제 NPC 위에 마우스를 올리거나 이름표에서 각 NPC가 제공하는 진행률 %를 확인할 수 있습니다.\n\n|cFF436EEE도구|r > |cFF436EEE신화+|r > |cFF436EEE진행률 %|r에서 설정하세요."
 L.settingsForCurrentTarget = "현재 대상에 대한 설정"
 L.settingsForOtherTargets = "다른 모든 대상에 대한 설정"
 

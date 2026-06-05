@@ -9,13 +9,14 @@ if not mod then return end
 mod:RegisterEnableMob(254176)
 mod:SetEncounterID(3159)
 mod:SetRespawnTime(30)
-mod:UseCustomTimers(true, true)
+mod:UseCustomTimers(true)
 
 --------------------------------------------------------------------------------
 -- Locals
 
 local activeBars = {}
 local backupBars = {}
+local countForDuration = {}
 
 local fungalBloomCount = 1
 local awakenFungiCount = 1
@@ -76,6 +77,7 @@ end
 
 function mod:OnEncounterStart()
 	activeBars = {}
+	countForDuration = {}
 
 	fungalBloomCount = 1
 	awakenFungiCount = 1
@@ -95,6 +97,33 @@ function mod:ENCOUNTER_TIMELINE_EVENT_ADDED(_, eventInfo)
 	local duration = eventInfo.duration
 	local durationRounded = self:RoundNumber(duration, 0)
 
+
+	if durationRounded == 8 or durationRounded == 21 then -- Bursting Pustules
+		barInfo = self:BurstingPustules(duration)
+	elseif durationRounded == 13 then
+		countForDuration[durationRounded] = (countForDuration[durationRounded] or 0) + 1
+		if countForDuration[durationRounded] % 2 == 1 then -- Awaken Fungi -> Putred Fist
+			barInfo = self:AwakenFungi(duration)
+		else
+			barInfo = self:PutridFist(duration)
+		end
+	elseif durationRounded == 24 or durationRounded == 12 then -- Putrid Fist
+		barInfo = self:PutridFist(duration)
+	elseif durationRounded == 41 then -- Festering Vines
+		barInfo = self:FesteringVines(duration)
+	elseif durationRounded == 114 then -- Fungal Bloom
+		barInfo = self:FungalBloom(duration)
+	elseif durationRounded == 49 then
+		countForDuration[durationRounded] = (countForDuration[durationRounded] or 0) + 1
+		if countForDuration[durationRounded] % 3 == 1 then -- Awaken Fungi -> Bursting Pustules -> Festering Vines
+			barInfo = self:AwakenFungi(duration)
+		elseif countForDuration[durationRounded] % 3 == 2 then
+			barInfo = self:BurstingPustules(duration)
+		else
+			barInfo = self:FesteringVines(duration)
+		end
+	end
+
 	if barInfo then
 		barInfo.eventID = eventInfo.id
 		barInfo.duration = barInfo.duration or eventInfo.duration
@@ -103,7 +132,7 @@ function mod:ENCOUNTER_TIMELINE_EVENT_ADDED(_, eventInfo)
 			self:Bar(barInfo.key, barInfo.duration, barInfo.msg, barInfo.icon, eventInfo.id)
 		end
 	elseif barInfo == nil and self:ShouldShowBars() then
-		--self:ErrorForTimelineEvent(eventInfo)
+		self:ErrorForTimelineEvent(eventInfo)
 		backupBars[eventInfo.id] = true
 		self:SendMessage("BigWigs_StartBar", nil, nil, ("[B] %s"):format(eventInfo.spellName), eventInfo.duration, eventInfo.iconFileID, eventInfo.maxQueueDuration, nil, eventInfo.id, eventInfo.id)
 
@@ -159,6 +188,7 @@ function mod:AwakenFungi(duration)
 		key = 1221622,
 		onFinished = function()
 			self:Message(1221622, "cyan", barText)
+			self:StopBlizzMessages(1)
 			self:PlaySound(1221622, "info", "adds")
 		end
 	}
@@ -172,6 +202,7 @@ function mod:FungalBloom(duration)
 		key = 1221637,
 		onFinished = function()
 			self:Message(1221637, "yellow", barText)
+			self:StopBlizzMessages(1)
 			-- self:PlaySound(1221637, "alert")
 		end
 	}
@@ -185,6 +216,7 @@ function mod:FesteringVines(duration)
 		key = 1222088,
 		onFinished = function()
 			self:Message(1222088, "yellow", barText)
+			self:PersonalMessageFromBlizzMessage(1222088, 0.5, nil, self:SpellName(1222088))
 			-- self:PlaySound(1222088, "alert")
 		end
 	}

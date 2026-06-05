@@ -7,14 +7,13 @@ if not mod then return end
 mod:SetEncounterID(3057)
 mod:SetRespawnTime(30)
 mod:SetPrivateAuraSounds({
-	{472777, sound = "underyou"}, -- Gunk Splatter
+	{472777, sound = "underyou", note = CL.debuffUnderYouNote}, -- Gunk Splatter
 	{472793, sound = "warning"}, -- Heaving Yank
-	{472888, sound = "none"}, -- Bone Hack
-	{474129, sound = "none"}, -- Splattering Spew
-	{1253834, sound = "info"}, -- Curse of Darkness
-	{1215803, sound = "alarm"}, -- Curse of Darkness
-	{1219491, sound = "long"}, -- Debilitating Shriek
-	{1282272, sound = "alert"}, -- Splattered
+	{472888, sound = "none", note = CL.tank_hit}, -- Bone Hack
+	{474129, sound = "alarm", note = CL.spread}, -- Splattering Spew
+	{1253834, sound = "info", note = CL.preDebuffNote}, -- Curse of Darkness
+	{1215803, sound = "alarm", note = CL.mainDebuffNote}, -- Curse of Darkness
+	{1282272, sound = "none", note = CL.postDebuffNote:format(CL.extra:format(mod:SpellName(474129), CL.spread))}, -- Splattered
 })
 
 --------------------------------------------------------------------------------
@@ -28,6 +27,18 @@ local debilitatingShriekCount = 1
 local activeBars = {}
 
 --------------------------------------------------------------------------------
+-- Renames
+--
+
+mod:SetRenames({
+	[472745] = {CL.spread}, -- Splattering Spew (Spread)
+	[472888] = {CL.tank_hit}, -- Bone Hack (Tank Hit)
+	[474105] = {CL.curse, CL.you:format(CL.curse), notes = {CL.generalNote, CL.messageOnYouNote}, original = {474105, CL.you:format(mod:SpellName(474105))}}, -- Curse of Darkness (Curse)
+	[472736] = {CL.group_damage}, -- Debilitating Shriek (Group Damage)
+	[472793] = {CL.you:format(mod:SpellName(472793)), notes = {CL.messageOnYouNote}, original = CL.you:format(mod:SpellName(472793))}, -- Heaving Yank
+})
+
+--------------------------------------------------------------------------------
 -- Initialization
 --
 
@@ -35,16 +46,9 @@ function mod:GetOptions()
 	return {
 		472745, -- Splattering Spew
 		{472888, "TANK_HEALER"}, -- Bone Hack
-		474105, -- Curse of Darkness
+		{474105, "ME_ONLY_EMPHASIZE"}, -- Curse of Darkness
 		472736, -- Debilitating Shriek
-		{472777, "PRIVATE"}, -- Gunk Splatter
-		{472793, "PRIVATE"}, -- Heaving Yank
-		--{472888, "PRIVATE"}, -- Bone Hack
-		{474129, "PRIVATE"}, -- Splattering Spew
-		{1215803, "PRIVATE"}, -- Curse of Darkness
-		{1219491, "PRIVATE"}, -- Debilitating Shriek
-		{1253834, "PRIVATE"}, -- Curse of Darkness
-		{1282272, "PRIVATE"}, -- Splattered
+		{472793, "ME_ONLY_EMPHASIZE"}, -- Heaving Yank
 	}
 end
 
@@ -126,23 +130,23 @@ end
 -- Timeline Ability Handlers
 --
 
-function mod:SplatteringSpewTimeline(eventInfo)
-	local barText = CL.count:format(self:SpellName(472745), splatteringSpewCount)
+function mod:SplatteringSpewTimeline(eventInfo) -- Spread
+	local barText = CL.count:format(self:GetRename(472745), splatteringSpewCount)
 	self:CDBar(472745, eventInfo.duration, barText, nil, eventInfo.id)
 	splatteringSpewCount = splatteringSpewCount + 1
 	return {
 		msg = barText,
 		key = 472745,
 		callback = function()
-			self:PersonalMessageFromBlizzMessage(472745, 1)
-			self:Message(472745, "orange", barText)
-			self:PlaySound(472745, "alarm")
+			self:StopBlizzMessages(1)
+			self:Message(472745, "orange", barText) -- Everyone gets it
+			--self:PlaySound(472745, "alarm") -- PA sound
 		end
 	}
 end
 
-function mod:BoneHackTimeline(eventInfo)
-	local barText = CL.count:format(self:SpellName(472888), boneHackCount)
+function mod:BoneHackTimeline(eventInfo) -- Tank Hit
+	local barText = CL.count:format(self:GetRename(472888), boneHackCount)
 	self:CDBar(472888, eventInfo.duration, barText, nil, eventInfo.id)
 	boneHackCount = boneHackCount + 1
 	return {
@@ -155,29 +159,30 @@ function mod:BoneHackTimeline(eventInfo)
 	}
 end
 
-function mod:CurseofDarknessTimeline(eventInfo)
-	local barText = CL.count:format(self:SpellName(474105), curseofDarknessCount)
+function mod:CurseofDarknessTimeline(eventInfo) -- Curse
+	local barText = CL.count:format(self:GetRename(474105), curseofDarknessCount)
 	self:CDBar(474105, eventInfo.duration, barText, nil, eventInfo.id)
 	curseofDarknessCount = curseofDarknessCount + 1
 	return {
 		msg = barText,
 		key = 474105,
 		callback = function()
+			self:PersonalMessageFromBlizzMessage(474105, 1, false, self:GetRename(474105, 2))
 			self:Message(474105, "red", barText)
 			self:PlaySound(474105, "alert")
 		end
 	}
 end
 
-function mod:DebilitatingShriekTimeline(eventInfo)
-	local barText = CL.count:format(self:SpellName(472736), debilitatingShriekCount)
+function mod:DebilitatingShriekTimeline(eventInfo) -- Group Damage
+	local barText = CL.count:format(self:GetRename(472736), debilitatingShriekCount)
 	self:CDBar(472736, eventInfo.duration, barText, nil, eventInfo.id)
 	debilitatingShriekCount = debilitatingShriekCount + 1
 	return {
 		msg = barText,
 		key = 472736,
 		cancelCallback = function()
-			self:PersonalMessageFromBlizzMessage(472793, 1) -- Heaving Yank
+			self:PersonalMessageFromBlizzMessage(472793, 1, false) -- Heaving Yank
 			self:Message(472736, "yellow", barText)
 			self:PlaySound(472736, "long")
 		end

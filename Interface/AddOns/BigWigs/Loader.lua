@@ -12,14 +12,14 @@ local strfind = string.find
 -- Generate our version variables
 --
 
-local BIGWIGS_VERSION = 415
+local BIGWIGS_VERSION = 416
 local CONTENT_PACK_VERSIONS = {
-	["LittleWigs"] = {12, 0, 48},
-	["BigWigs_Classic"] = {12, 0, 16},
-	["BigWigs_BurningCrusade"] = {12, 0, 12},
-	["BigWigs_WrathOfTheLichKing"] = {12, 0, 7},
+	["LittleWigs"] = {12, 0, 52},
+	["BigWigs_Classic"] = {12, 0, 17},
+	["BigWigs_BurningCrusade"] = {12, 0, 14},
+	["BigWigs_WrathOfTheLichKing"] = {12, 0, 8},
 	["BigWigs_Cataclysm"] = {12, 0, 3},
-	["BigWigs_MistsOfPandaria"] = {12, 0, 5},
+	["BigWigs_MistsOfPandaria"] = {12, 0, 7},
 	["BigWigs_WarlordsOfDraenor"] = {12, 0, 1},
 	["BigWigs_Legion"] = {12, 0, 1},
 	["BigWigs_BattleForAzeroth"] = {12, 0, 3},
@@ -57,7 +57,7 @@ do
 	local ALPHA = "ALPHA"
 
 	local releaseType
-	local myGitHash = "8b9290c" -- The ZIP packager will replace this with the Git hash.
+	local myGitHash = "10ad9fb" -- The ZIP packager will replace this with the Git hash.
 	local releaseString
 	--[=[@alpha@
 	-- The following code will only be present in alpha ZIPs.
@@ -348,7 +348,7 @@ do
 				[2939] = "BigWigs_TheDreamrift",
 				[2912] = "BigWigs_TheVoidspire",
 				[2913] = "BigWigs_MarchOnQuelDanas",
-				[1592] = "BigWigs_Sporefall",
+				[1592] = public.isNext and "BigWigs_Sporefall" or nil,
 			}
 		}
 	end
@@ -1141,13 +1141,13 @@ do
 	end
 end
 
--- XXX 12.0.1 s1
---if public.isRetail and not BW_FEAT_ENHANCE then
---	BW_FEAT_ENHANCE = true
---	if BigWigs3DB then -- No popup for fresh users
---		Popup(L.enhancedModeWelcome, true, 250)
---	end
---end
+-- XXX 12.0.5
+if public.isRetail and not BW_FEAT_RENAMES then
+	BW_FEAT_RENAMES = true
+	if BigWigs3DB then -- No popup for fresh users
+		Popup(L.tempRenameFeat, true, 180)
+	end
+end
 
 -- XXX 12.0.0
 --if (public.isRetail or public.isMists or public.isWrath) and not BW_FEAT_SHARE2 then
@@ -1505,21 +1505,21 @@ do
 	end
 
 	local locales = {
-		--ruRU = "Russian (ruRU)",
+		ruRU = "Russian (ruRU)",
 		--zhCN = "Simplified Chinese (zhCN)",
 		--zhTW = "Traditional Chinese (zhTW)",
 		itIT = "Italian (itIT)",
 		--koKR = "Korean (koKR)",
 		esES = "Spanish (esES)",
-		esMX = "Spanish (esMX)",
+		--esMX = "Spanish (esMX)",
 		--deDE = "German (deDE)",
-		ptBR = "Portuguese (ptBR)",
+		--ptBR = "Portuguese (ptBR)",
 		--frFR = "French (frFR)",
 	}
 	local realms = {
 		--[542] = locales.frFR, -- frFR
-		[3207] = locales.ptBR, [3208] = locales.ptBR, [3209] = locales.ptBR, [3210] = locales.ptBR, [3234] = locales.ptBR, -- ptBR
-		[1425] = locales.esMX, [1427] = locales.esMX, [1428] = locales.esMX, -- esMX
+		--[3207] = locales.ptBR, [3208] = locales.ptBR, [3209] = locales.ptBR, [3210] = locales.ptBR, [3234] = locales.ptBR, -- ptBR
+		--[1425] = locales.esMX, [1427] = locales.esMX, [1428] = locales.esMX, -- esMX
 		[1309] = locales.itIT, [1316] = locales.itIT, -- itIT
 		[1378] = locales.esES, [1379] = locales.esES, [1380] = locales.esES, [1381] = locales.esES, [1382] = locales.esES, [1383] = locales.esES, -- esES
 		[1384] = locales.esES, [1385] = locales.esES, [1386] = locales.esES, [1387] = locales.esES, [1395] = locales.esES, -- esES
@@ -1641,12 +1641,12 @@ end
 --
 
 do
-	local DBMdotRevision = "20260514074436" -- The changing version of the local client, changes with every new zip using the project-date-integer packager replacement.
-	local DBMdotDisplayVersion = "12.0.46" -- "N.N.N" for a release and "N.N.N alpha" for the alpha duration.
-	local DBMdotReleaseRevision = "20260513000000" -- Hardcoded time, manually changed every release, they use it to track the highest release version, a new DBM release is the only time it will change.
+	local DBMdotRevision = "20260527072144" -- The changing version of the local client, changes with every new zip using the project-date-integer packager replacement.
+	local DBMdotDisplayVersion = "12.0.52" -- "N.N.N" for a release and "N.N.N alpha" for the alpha duration.
+	local DBMdotReleaseRevision = "20260526000000" -- Hardcoded time, manually changed every release, they use it to track the highest release version, a new DBM release is the only time it will change.
 	local protocol = 3
 	local versionPrefix = "V"
-	local PForceDisable = 24
+	local PForceDisable = 26
 
 	local timer = nil
 	local function sendDBMMsg()
@@ -1959,10 +1959,10 @@ do
 			bwFrame:UnregisterEvent("ZONE_CHANGED_NEW_AREA")
 
 			-- XXX 12.0.5
-			if public.isRetail and C_ScenarioInfo.GetUnitCriteriaProgressValues and public.currentExpansion.currentSeason[instanceID] and not BW_FEAT_M_PERCENT then
-				BW_FEAT_M_PERCENT = true
-				Popup(L.tempProgressAnnounce, true, 220)
-			end
+			--if public.isRetail and C_ScenarioInfo.GetUnitCriteriaProgressValues and public.currentExpansion.currentSeason[instanceID] and not BW_FEAT_M_PERCENT then
+			--	BW_FEAT_M_PERCENT = true
+			--	Popup(L.tempProgressAnnounce, true, 220)
+			--end
 		else
 			if disabledZones[instanceID] then -- We have a content addon for the this zone but it is disabled in the addons menu
 				local msg = L.disabledAddOn:format(disabledZones[instanceID])

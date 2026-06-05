@@ -5,7 +5,7 @@ BigWigs:AddColors("Rotmire", {
 	[1221637] = "yellow",
 	[1221781] = "purple",
 	[1221787] = "yellow",
-	[1222088] = "yellow",
+	[1222088] = {"blue","yellow"},
 })
 
 BigWigs:AddSounds("Rotmire", {

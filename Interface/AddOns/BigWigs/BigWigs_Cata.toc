@@ -14,7 +14,7 @@
 ## Notes-ptBR: Abordagem modular, leve e não intrusiva para avisos em encontros com chefes.
 ## IconTexture: Interface\AddOns\BigWigs\Media\Icons\minimap_raid.tga
 ## Author: Funkeh, Nebula, Justwait, Delk
-## Version: v415.3
+## Version: v416.1
 ## LoadSavedVariablesFirst: 1
 
 ## X-Credits: Ammo, Elvador, Vhaarr
@@ -31,8 +31,15 @@
 Libs\LibStub\LibStub.lua
 Libs\CallbackHandler-1.0\CallbackHandler-1.0.lua
 Libs\LibDataBroker-1.1\LibDataBroker-1.1.lua
+Libs\AceDB-3.0\AceDB-3.0.lua
+Libs\LibDualSpec-1.0\LibDualSpec-1.0.lua
+Libs\LibSpecialization\LibSpecialization.lua
+Libs\LibKeystone\LibKeystone.lua
+Libs\LibLatency\LibLatency.lua
+Libs\LibDurability\LibDurability.lua
+Libs\LibSharedMedia-3.0\LibSharedMedia-3.0.lua
+Libs\LibDBIcon-1.0\LibDBIcon-1.0.lua
 
-embeds.xml
 Init_Cata.lua
 API.lua
 
@@ -52,4 +59,4 @@ Tools\CombatTimer.lua
 Tools\AutoInvite.lua
 Tools\LFGTimer.lua
 Tools\AutoRole.lua
-modules.xml
+

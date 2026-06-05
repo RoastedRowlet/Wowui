@@ -5,15 +5,15 @@ CliqueDB3 = {
 ["Barelynoer - Area 52"] = {
 ["spec3_profileKey"] = "Barelynoer - Area 52",
 ["spec1_profileKey"] = "Barelynoer - Area 52",
-["spec2_profileKey"] = "Barelynoer - Area 52",
 ["specswap"] = false,
+["spec2_profileKey"] = "Barelynoer - Area 52",
 },
 ["Angryabsol - Stormrage"] = {
 ["spec1_profileKey"] = "Angryabsol - Stormrage",
-["spec3_profileKey"] = "Angryabsol - Stormrage",
 ["specswap"] = false,
 ["spec2_profileKey"] = "Angryabsol - Stormrage",
 ["stopcastingfix"] = true,
+["spec3_profileKey"] = "Angryabsol - Stormrage",
 },
 ["Zappyxatu - Stormrage"] = {
 ["spec1_profileKey"] = "Zappyxatu - Stormrage",
@@ -23,18 +23,18 @@ CliqueDB3 = {
 },
 ["Lonelylitten - Stormrage"] = {
 ["spec1_profileKey"] = "Lonelylitten - Stormrage",
-["spec2_profileKey"] = "Lonelylitten - Stormrage",
+["specswap"] = false,
 ["downclick"] = false,
 ["fastooc"] = false,
-["spec3_profileKey"] = "Lonelylitten - Stormrage",
-["specswap"] = false,
 ["spec4_profileKey"] = "Lonelylitten - Stormrage",
+["spec2_profileKey"] = "Lonelylitten - Stormrage",
+["spec3_profileKey"] = "Lonelylitten - Stormrage",
 },
 ["Madmareep - Stormrage"] = {
 ["spec1_profileKey"] = "Madmareep - Stormrage",
 ["spec3_profileKey"] = "Madmareep - Stormrage",
-["specswap"] = false,
 ["spec2_profileKey"] = "Madmareep - Stormrage",
+["specswap"] = false,
 },
 },
 ["profileKeys"] = {
@@ -255,6 +255,23 @@ CliqueDB3 = {
 ["unit"] = "mouseover",
 },
 {
+["type"] = "menu",
+["key"] = "CTRL-BUTTON2",
+["sets"] = {
+["default"] = true,
+},
+},
+{
+["spell"] = "Verdant Embrace",
+["key"] = "ALT-BUTTON1",
+["type"] = "spell",
+["sets"] = {
+["default"] = true,
+},
+["icon"] = 4622471,
+["spellSubName"] = "Green",
+},
+{
 ["spell"] = "Cauterizing Flame",
 ["key"] = "ALT-BUTTON3",
 ["spellSubName"] = "Red",
@@ -275,23 +292,6 @@ CliqueDB3 = {
 ["spellSubName"] = "Red",
 },
 {
-["type"] = "menu",
-["key"] = "CTRL-BUTTON2",
-["sets"] = {
-["default"] = true,
-},
-},
-{
-["spell"] = "Verdant Embrace",
-["key"] = "ALT-BUTTON1",
-["type"] = "spell",
-["sets"] = {
-["default"] = true,
-},
-["icon"] = 4622471,
-["spellSubName"] = "Green",
-},
-{
 ["spell"] = "Expunge",
 ["key"] = "BUTTON3",
 ["spellSubName"] = "Green",
@@ -302,13 +302,14 @@ CliqueDB3 = {
 ["type"] = "spell",
 },
 {
-["type"] = "target",
-["key"] = "CTRL-BUTTON1",
+["spell"] = "Emerald Blossom",
+["key"] = "ALT-BUTTON2",
+["type"] = "spell",
 ["sets"] = {
 ["default"] = true,
 },
-["icon"] = 132331,
-["unit"] = "mouseover",
+["icon"] = 4622457,
+["spellSubName"] = "Green",
 },
 {
 ["spell"] = "Return",
@@ -321,14 +322,13 @@ CliqueDB3 = {
 ["spellSubName"] = "Bronze",
 },
 {
-["spell"] = "Emerald Blossom",
-["key"] = "ALT-BUTTON2",
-["type"] = "spell",
+["type"] = "target",
+["key"] = "CTRL-BUTTON1",
 ["sets"] = {
 ["default"] = true,
 },
-["icon"] = 4622457,
-["spellSubName"] = "Green",
+["icon"] = 132331,
+["unit"] = "mouseover",
 },
 {
 ["spell"] = "Return",
@@ -363,21 +363,6 @@ CliqueDB3 = {
 ["unit"] = "mouseover",
 },
 {
-["icon"] = 132212,
-["type"] = "menu",
-["key"] = "SHIFT-BUTTON2",
-["sets"] = {
-["default"] = true,
-},
-},
-{
-["type"] = "menu",
-["key"] = "CTRL-BUTTON2",
-["sets"] = {
-["default"] = true,
-},
-},
-{
 ["spell"] = "Healing Wave",
 ["key"] = "BUTTON2",
 ["sets"] = {
@@ -387,6 +372,21 @@ CliqueDB3 = {
 ["type"] = "spell",
 },
 {
+["key"] = "SHIFT-BUTTON2",
+["sets"] = {
+["default"] = true,
+},
+["icon"] = 132212,
+["type"] = "menu",
+},
+{
+["type"] = "menu",
+["key"] = "CTRL-BUTTON2",
+["sets"] = {
+["default"] = true,
+},
+},
+{
 ["type"] = "target",
 ["key"] = "CTRL-BUTTON1",
 ["sets"] = {
@@ -394,6 +394,15 @@ CliqueDB3 = {
 },
 ["icon"] = 132331,
 ["unit"] = "mouseover",
+},
+{
+["spell"] = "Ancestral Spirit",
+["key"] = "CTRL-BUTTON1",
+["sets"] = {
+["default"] = true,
+},
+["icon"] = 136077,
+["type"] = "spell",
 },
 {
 ["spell"] = "Riptide",
@@ -411,15 +420,6 @@ CliqueDB3 = {
 ["default"] = true,
 },
 ["icon"] = 236288,
-["type"] = "spell",
-},
-{
-["spell"] = "Ancestral Spirit",
-["key"] = "CTRL-BUTTON1",
-["sets"] = {
-["default"] = true,
-},
-["icon"] = 136077,
 ["type"] = "spell",
 },
 {

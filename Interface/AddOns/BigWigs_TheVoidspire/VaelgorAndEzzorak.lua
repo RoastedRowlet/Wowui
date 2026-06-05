@@ -54,13 +54,22 @@ local radiantBarrierCount = 1
 local grapplingMawCount = 1
 
 --------------------------------------------------------------------------------
--- Localization
+-- Renames
 --
 
-local L = mod:GetLocale()
-if L then
-	L.grappling_maw = "Tank Grip"
-end
+mod:SetRenames({
+	["stages"] = {CL.intermission, CL.stage:format(2), CL.stage:format(3), original = false, notes = {CL.intermission, CL.stage:format(2), CL.stage:format(3)}}, -- Stages
+	[1249748] = {CL.raid_damage}, -- Midnight Flames (Raid Damage)
+	[1280458] = {CL.tank_grip}, -- Grappling Maw (Tank Grip)
+	-- Vaelgor
+	[1262623] = {1262623}, -- Nullbeam
+	[1244221] = {CL.breath}, -- Dread Breath (Breath)
+	[1265131] = {1265131}, -- Vaelwing
+	-- Ezzorak
+	[1245391] = {1245391}, -- Gloom
+	[1244917] = {CL.orbs}, -- Void Howl (Orbs)
+	[1245645] = {1245645}, -- Rakfang
+})
 
 --------------------------------------------------------------------------------
 -- Initialization
@@ -82,11 +91,6 @@ function mod:GetOptions()
 		["stages"] = "general",
 		[1262623] = -33241, -- Vaelgor
 		[1245391] = -33255, -- Ezzorak
-	},{
-		[1249748] = CL.raid_damage,
-		[1280458] = L.grappling_maw,
-		[1244221] = CL.breath,
-		[1244917] = CL.orbs,
 	}
 end
 
@@ -109,6 +113,7 @@ function mod:OnEncounterStart()
 	timelineEventCount = 0
 	activeBars = {}
 	storedTimelineEvents = {}
+	scheduleBackups = nil
 
 	midnightFlamesCount = 1
 	nullbeamCount = 1
@@ -132,7 +137,8 @@ end
 --
 
 function mod:IsIntermission()
-	return self:GetStage() % 1 == 0.5
+	local stage = self:GetStage()
+	return stage ~= self:RoundNumber(stage, 0)
 end
 
 function mod:StartBackupBar(eventInfo, timerAdjustment)
@@ -172,22 +178,22 @@ function mod:TimersMythic(_, eventInfo)
 	local stage = self:GetStage()
 	local time = GetTime()
 
-	if durationRounded == 8 and time - 5 > lastStaged and not self:IsIntermission()  then -- Midnight Flames Cast
-		stage = stage + 0.5
-		self:SetStage(stage)
+	if durationRounded == 8 and time - 5 > lastStaged and not self:IsIntermission() and stage < 3 then -- Midnight Flames Cast
 		lastStaged = time
 		if self:ShouldShowBars() then
-			self:Message("stages", "cyan", CL.intermission, false)
+			self:Message("stages", "cyan", self:GetRename("stages", 1), false) -- Intermission
 			self:PlaySound("stages", "long")
-			self:Bar("stages", 40, CL.stage:format(stage + 0.5), 1249748)
+			self:Bar("stages", 40, self:GetRename("stages", stage + 1), 1249748)
 			self:StopBlizzMessages(1) -- Radiant Barrier Message
 		end
-	elseif time - 5 > lastStaged and self:IsIntermission() then
 		stage = stage + 0.5
+		self:SetStage(stage)
+	elseif time - 5 > lastStaged and self:IsIntermission() then
+		stage = math.floor(stage) + 1
 		self:SetStage(stage)
 		lastStaged = time
 		if self:ShouldShowBars() then
-			self:Message("stages", "cyan", CL.stage:format(stage), false)
+			self:Message("stages", "cyan", self:GetRename("stages", stage), false)
 			self:PlaySound("stages", "long")
 		end
 		timelineEventCount = 1
@@ -277,19 +283,30 @@ function mod:TimersMythic(_, eventInfo)
 				end
 			else
 				eventInfo.timestamp = GetTime()
-				table.insert(storedTimelineEvents, eventInfo)
+				storedTimelineEvents[#storedTimelineEvents+1] = eventInfo
 				if scheduleBackups then
 					self:CancelTimer(scheduleBackups)
 					scheduleBackups = nil
 				end
-				scheduleBackups = self:ScheduleTimer(function ()
-					for _, event in next, storedTimelineEvents do
-						if self:ShouldShowBars() and not self:IsWiping() then
-							self:StartBackupBar(event, true)
+				local delayedTimer = 0.5
+				scheduleBackups = self:ScheduleTimer(function()
+					scheduleBackups = nil
+					if self:ShouldShowBars() and not self:IsWiping() then
+						for i = 1, #storedTimelineEvents do
+							local storedEventInfo = storedTimelineEvents[i]
+							local adjustedDuration = storedEventInfo.duration - delayedTimer -- adjust for scheduled timer
+							local isPossibleVaelwingBackup = storedEventInfo.durationRounded >= 15 and storedEventInfo.durationRounded <= 25
+							if self:IsBeforeRadiantBarrier(adjustedDuration) and isPossibleVaelwingBackup then
+								storedEventInfo.duration = adjustedDuration
+								barInfo = self:Vaelwing(storedEventInfo)
+								activeBars[storedEventInfo.id] = barInfo
+							else
+								self:StartBackupBar(storedEventInfo, true)
+							end
 						end
 					end
-					table.wipe(storedTimelineEvents)
-				end, 0.5)
+					storedTimelineEvents = {}
+				end, delayedTimer)
 				return
 			end
 		end
@@ -297,9 +314,11 @@ function mod:TimersMythic(_, eventInfo)
 		if durationRounded == 8 then -- Midnight Flames
 			barInfo = self:MidnightFlames(eventInfo)
 			-- this bar is the last one started so we can start all our own now.
-			for _, event in next, storedTimelineEvents do
-				if self:ShouldShowBars() and not self:IsWiping() then
-					if stage == 1.5 then -- start our own timers
+			if self:ShouldShowBars() and not self:IsWiping() then
+				local stageFloor = math.floor(stage)
+				for i = 1, #storedTimelineEvents do
+					local event = storedTimelineEvents[i]
+					if stageFloor == 1 then -- Stage 1.5, start our own timers
 						if event.durationRounded == 13 or event.durationRounded == 23 then -- Dread Breath
 							if event.durationRounded == 23 then
 								event.duration = 25 -- Correct blizzard timer
@@ -310,7 +329,7 @@ function mod:TimersMythic(_, eventInfo)
 						else
 							self:StartBackupBar(event, true)
 						end
-					elseif stage == 2.5 then
+					elseif stageFloor == 2 then -- Stage 2.5
 						if event.durationRounded == 13 then -- Void Howl
 							activeBars[event.id] = self:VoidHowl(event)
 						elseif event.durationRounded == 18 then -- Gloom
@@ -324,7 +343,7 @@ function mod:TimersMythic(_, eventInfo)
 					end
 				end
 			end
-			table.wipe(storedTimelineEvents)
+			storedTimelineEvents = {}
 		end
 	end
 
@@ -345,22 +364,22 @@ function mod:TimersHeroic(_, eventInfo)
 	local stage = self:GetStage()
 	local time = GetTime()
 
-	if not self:IsIntermission() and durationRounded == 8 and time - 5 > lastStaged then -- Midnight Flames Cast
-		stage = stage + 0.5
-		self:SetStage(stage)
+	if not self:IsIntermission() and durationRounded == 8 and time - 5 > lastStaged and stage < 3 then -- Midnight Flames Cast
 		lastStaged = time
 		if self:ShouldShowBars() then
-			self:Message("stages", "cyan", CL.intermission, false)
+			self:Message("stages", "cyan", self:GetRename("stages", 1), false) -- Intermission
 			self:PlaySound("stages", "long")
-			self:Bar("stages", 25, CL.stage:format(stage + 0.5), 1249748)
+			self:Bar("stages", 25, self:GetRename("stages", stage + 1), 1249748)
 			self:StopBlizzMessages(1) -- Radiant Barrier Message
 		end
-	elseif self:IsIntermission() and time - 5 > lastStaged then
 		stage = stage + 0.5
+		self:SetStage(stage)
+	elseif time - 5 > lastStaged and self:IsIntermission() then
+		stage = math.floor(stage) + 1
 		self:SetStage(stage)
 		lastStaged = time
 		if self:ShouldShowBars() then
-			self:Message("stages", "cyan", CL.stage:format(stage), false)
+			self:Message("stages", "cyan", self:GetRename("stages", stage), false)
 			self:PlaySound("stages", "long")
 		end
 		timelineEventCount = 1
@@ -433,19 +452,30 @@ function mod:TimersHeroic(_, eventInfo)
 			end
 		else -- handle next events
 			eventInfo.timestamp = GetTime()
-			table.insert(storedTimelineEvents, eventInfo)
+			storedTimelineEvents[#storedTimelineEvents+1] = eventInfo
 			if scheduleBackups then
 				self:CancelTimer(scheduleBackups)
 				scheduleBackups = nil
 			end
-			scheduleBackups = self:ScheduleTimer(function ()
-				for _, event in next, storedTimelineEvents do
-					if self:ShouldShowBars() and not self:IsWiping() then
-						self:StartBackupBar(event, true)
+			local delayedTimer = 1.5 -- Long capture to grab delayed cancels. Still fails sometimes.
+			scheduleBackups = self:ScheduleTimer(function()
+				scheduleBackups = nil
+				if self:ShouldShowBars() and not self:IsWiping() then
+					for i = 1, #storedTimelineEvents do
+						local storedEventInfo = storedTimelineEvents[i]
+						local adjustedDuration = storedEventInfo.duration - delayedTimer -- adjust for scheduled timer
+						local isPossibleRakfangBackup = storedEventInfo.durationRounded == 25 or storedEventInfo.durationRounded == 31
+						if self:IsBeforeRadiantBarrier(adjustedDuration) and isPossibleRakfangBackup then -- Rakfang backup
+							storedEventInfo.duration = adjustedDuration
+							barInfo = self:Rakfang(storedEventInfo)
+							activeBars[storedEventInfo.id] = barInfo
+						else
+							self:StartBackupBar(storedEventInfo, true)
+						end
 					end
 				end
-				table.wipe(storedTimelineEvents)
-			end, 1.5) -- Long capture to grab delayed cancels. Still happens sometimes.
+				storedTimelineEvents = {}
+			end, delayedTimer)
 			return
 		end
 	else -- Intermissions
@@ -471,22 +501,22 @@ function mod:TimerOther(_, eventInfo)
 	local stage = self:GetStage()
 	local time = GetTime()
 
-	if not self:IsIntermission() and durationRounded == 8 and time - 5 > lastStaged then -- Midnight Flames Cast
-		stage = stage + 0.5
-		self:SetStage(stage)
+	if not self:IsIntermission() and durationRounded == 8 and time - 5 > lastStaged and stage < 3 then -- Midnight Flames Cast
 		lastStaged = time
 		if self:ShouldShowBars() then
-			self:Message("stages", "cyan", CL.intermission, false)
+			self:Message("stages", "cyan", self:GetRename("stages", 1), false) -- Intermission
 			self:PlaySound("stages", "long")
-			self:Bar("stages", 26.5, CL.stage:format(stage + 0.5), 1249748)
+			self:Bar("stages", 26.5, self:GetRename("stages", stage + 1), 1249748)
 			self:StopBlizzMessages(1) -- Radiant Barrier Message
 		end
-	elseif self:IsIntermission() and time - 5 > lastStaged then
 		stage = stage + 0.5
+		self:SetStage(stage)
+	elseif time - 5 > lastStaged and self:IsIntermission() then
+		stage = math.floor(stage) + 1
 		self:SetStage(stage)
 		lastStaged = time
 		if self:ShouldShowBars() then
-			self:Message("stages", "cyan", CL.stage:format(stage), false)
+			self:Message("stages", "cyan", self:GetRename("stages", stage), false)
 			self:PlaySound("stages", "long")
 		end
 		timelineEventCount = 1
@@ -559,18 +589,19 @@ function mod:TimerOther(_, eventInfo)
 			end
 		else
 			eventInfo.timestamp = GetTime()
-			table.insert(storedTimelineEvents, eventInfo)
+			storedTimelineEvents[#storedTimelineEvents+1] = eventInfo
 			if scheduleBackups then
 				self:CancelTimer(scheduleBackups)
 				scheduleBackups = nil
 			end
-			scheduleBackups = self:ScheduleTimer(function ()
-				for _, event in next, storedTimelineEvents do
-					if self:ShouldShowBars() and not self:IsWiping() then
-						self:StartBackupBar(event, true)
+			scheduleBackups = self:ScheduleTimer(function()
+				scheduleBackups = nil
+				if self:ShouldShowBars() and not self:IsWiping() then
+					for i = 1, #storedTimelineEvents do
+						self:StartBackupBar(storedTimelineEvents[i], true)
 					end
 				end
-				table.wipe(storedTimelineEvents)
+				storedTimelineEvents = {}
 			end, 3) -- breaths can take a while to trigger.
 			return
 		end
@@ -647,7 +678,7 @@ end
 --
 
 function mod:MidnightFlames(eventInfo)
-	local barText = CL.count:format(CL.raid_damage, midnightFlamesCount)
+	local barText = CL.count:format(self:GetRename(1249748), midnightFlamesCount)
 	if self:ShouldShowBars() then
 		self:CDBar(1249748, eventInfo.duration, barText, nil, eventInfo.id)
 	end
@@ -656,15 +687,15 @@ function mod:MidnightFlames(eventInfo)
 		msg = barText,
 		onFinished = function()
 			self:Message(1249748, "yellow", barText)
-			self:PlaySound(1249748, "alert")
 			self:StopBlizzMessages(0.2)
+			self:PlaySound(1249748, "alert")
 		end,
 		this = self.MidnightFlames
 	}
 end
 
 function mod:GrapplingMaw(eventInfo)
-	local barText = CL.count:format(L.grappling_maw, grapplingMawCount)
+	local barText = CL.count:format(self:GetRename(1280458), grapplingMawCount)
 	if self:ShouldShowBars() then
 		self:CDBar(1280458, eventInfo.duration, barText, nil, eventInfo.id)
 	end
@@ -681,7 +712,7 @@ end
 
 -- Vaelgor
 function mod:Nullbeam(eventInfo)
-	local barText = CL.count:format(self:SpellName(1262623), nullbeamCount)
+	local barText = CL.count:format(self:GetRename(1262623), nullbeamCount)
 	if self:ShouldShowBars() then
 		self:CDBar(1262623, eventInfo.duration, barText, nil, eventInfo.id)
 	end
@@ -690,15 +721,15 @@ function mod:Nullbeam(eventInfo)
 		msg = barText,
 		onFinished = function()
 			self:Message(1262623, "yellow", barText)
-			self:PlaySound(1262623, "alert")
 			self:StopBlizzMessages(0.2)
+			self:PlaySound(1262623, "alert")
 		end,
 		this = self.Nullbeam
 	}
 end
 
 function mod:DreadBreath(eventInfo)
-	local barText = CL.count:format(CL.breath, dreadBreathCount)
+	local barText = CL.count:format(self:GetRename(1244221), dreadBreathCount)
 	if self:ShouldShowBars() then
 		self:CDBar(1244221, eventInfo.duration, barText, nil, eventInfo.id)
 	end
@@ -715,7 +746,7 @@ function mod:DreadBreath(eventInfo)
 end
 
 function mod:Vaelwing(eventInfo)
-	local barText = CL.count:format(self:SpellName(1265131), vaelwingCount)
+	local barText = CL.count:format(self:GetRename(1265131), vaelwingCount)
 	if self:ShouldShowBars() then
 		self:CDBar(1265131, eventInfo.duration, barText, nil, eventInfo.id)
 	end
@@ -734,24 +765,25 @@ end
 
 -- Ezzorak
 function mod:Gloom(eventInfo)
-	local barText = CL.count:format(self:SpellName(1245391), gloomCount)
+	local barText = CL.count:format(self:GetRename(1245391), gloomCount)
 	if self:ShouldShowBars() then
 		self:CDBar(1245391, eventInfo.duration, barText, nil, eventInfo.id)
 	end
 	gloomCount = gloomCount + 1
+	if gloomCount == 3 then gloomCount = 1 end -- 1, 2, 1, 2...
 	return {
 		msg = barText,
 		onFinished = function()
 			self:Message(1245391, "orange", barText)
-			self:PlaySound(1245391, "alert") -- possibly soak
 			self:StopBlizzMessages(0.2)
+			self:PlaySound(1245391, "alert") -- possibly soak
 		end,
 		this = self.Gloom
 	}
 end
 
 function mod:VoidHowl(eventInfo)
-	local barText = CL.count:format(CL.orbs, voidHowlCount)
+	local barText = CL.count:format(self:GetRename(1244917), voidHowlCount)
 	if self:ShouldShowBars() then
 		self:CDBar(1244917, eventInfo.duration, barText, nil, eventInfo.id)
 	end
@@ -767,7 +799,7 @@ function mod:VoidHowl(eventInfo)
 end
 
 function mod:Rakfang(eventInfo)
-	local barText = CL.count:format(self:SpellName(1245645), rakfangCount)
+	local barText = CL.count:format(self:GetRename(1245645), rakfangCount)
 	if self:ShouldShowBars() then
 		self:CDBar(1245645, eventInfo.duration, barText, nil, eventInfo.id)
 	end
@@ -786,7 +818,7 @@ end
 
 -- Lightbound Vanguard
 function mod:RadiantBarrier(eventInfo)
-	local barText = CL.count:format(CL.intermission, radiantBarrierCount)
+	local barText = CL.count:format(self:GetRename("stages", 1), radiantBarrierCount)
 	if self:ShouldShowBars() then
 		self:CDBar("stages", eventInfo.duration, barText, 1248847, eventInfo.id) -- Radiant Barrier icon
 	end

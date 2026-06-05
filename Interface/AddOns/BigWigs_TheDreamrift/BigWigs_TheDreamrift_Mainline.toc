@@ -17,13 +17,13 @@
 ## Notes-esMX: BigWigs The Dreamrift Modules
 ## Notes-frFR: BigWigs The Dreamrift Modules
 ## Notes-itIT: BigWigs The Dreamrift Modules
-## Notes-koKR: BigWigs The Dreamrift Modules
+## Notes-koKR: BigWigs 꿈의 균열 모듈
 ## Notes-ptBR: BigWigs The Dreamrift Modules
 ## Notes-ruRU: BigWigs The Dreamrift Modules
 ## Notes-zhCN: BigWigs 梦境裂隙模块
 ## Notes-zhTW: BigWigs 夢境裂隙模組
 ## IconTexture: Interface\AddOns\BigWigs\Media\Icons\minimap_raid.tga
-## Version: v415.3
+## Version: v416.1
 
 ## LoadOnDemand: 1
 ## Dependencies: BigWigs
@@ -32,6 +32,4 @@
 ## X-BigWigs-LoadOn-InstanceId: 2939
 
 Chimaerus.lua
-
-Locales\[TextLocale].lua [AllowLoadTextLocale deDE, esES, esMX, frFR, itIT, koKR, ptBR, ruRU, zhCN, zhTW]
 !Options.lua

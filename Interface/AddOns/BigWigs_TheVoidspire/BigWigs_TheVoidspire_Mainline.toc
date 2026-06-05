@@ -17,19 +17,21 @@
 ## Notes-esMX: BigWigs The Voidspire Modules
 ## Notes-frFR: BigWigs The Voidspire Modules
 ## Notes-itIT: BigWigs The Voidspire Modules
-## Notes-koKR: BigWigs The Voidspire Modules
+## Notes-koKR: BigWigs The 공허첨탑 모듈
 ## Notes-ptBR: BigWigs The Voidspire Modules
 ## Notes-ruRU: BigWigs The Voidspire Modules
 ## Notes-zhCN: BigWigs 虚影尖塔模块
 ## Notes-zhTW: BigWigs 虛無之尖模組
 ## IconTexture: Interface\AddOns\BigWigs\Media\Icons\minimap_raid.tga
-## Version: v415.3
+## Version: v416.1
 
 ## LoadOnDemand: 1
 ## Dependencies: BigWigs
 
 ## X-Category: Raid
 ## X-BigWigs-LoadOn-InstanceId: 2912
+
+Locales\[TextLocale].lua [AllowLoadTextLocale deDE, esES, esMX, frFR, itIT, koKR, ptBR, ruRU, zhCN, zhTW]
 
 Averzian.lua
 Vorasius.lua
@@ -38,5 +40,4 @@ VaelgorAndEzzorak.lua
 Vanguard.lua
 Crown.lua
 
-Locales\[TextLocale].lua [AllowLoadTextLocale deDE, esES, esMX, frFR, itIT, koKR, ptBR, ruRU, zhCN, zhTW]
 !Options.lua

@@ -656,6 +656,28 @@ do
 							break
 						end
 					end
+					-- Option validation for renames
+					for renamesKey, renamesTable in next, module.db.profile.renames do
+						if not module:IsRenameAvailable(renamesKey) then
+							module.db.profile.renames[renamesKey] = nil
+						elseif type(renamesTable) ~= "table" or #renamesTable ~= module:GetRenameCount(renamesKey) then
+							module.db.profile.renames[renamesKey] = {}
+							for renameCount = 1, module:GetRenameCount(renamesKey) do
+								module.db.profile.renames[renamesKey][renameCount] = module:GetRenameDefault(renamesKey, renameCount)
+							end
+						else
+							for entryCount = 1, #renamesTable do
+								local renameType = type(renamesTable[entryCount])
+								if renameType ~= "string" and renameType ~= "number" then
+									module.db.profile.renames[renamesKey] = {}
+									for renameCount = 1, module:GetRenameCount(renamesKey) do
+										module.db.profile.renames[renamesKey][renameCount] = module:GetRenameDefault(renamesKey, renameCount)
+									end
+									break
+								end
+							end
+						end
+					end
 					-- Option validation for toggles
 					for toggleName, toggleValue in next, module.db.profile.toggles do
 						local defaultType = type(module.toggleDefaults[toggleName])
@@ -750,6 +772,18 @@ function core:GetBossModule(moduleName, silent)
 		error(("No boss module named '%s' found."):format(moduleName))
 	else
 		return bosses[moduleName]
+	end
+end
+
+function core:GetBossModulesForInstanceID(instanceID)
+	local tbl = {}
+	for _, module in next, bosses do
+		if module:IsZoneID(instanceID) then
+			tbl[#tbl+1] = module
+		end
+	end
+	if tbl[1] then
+		return tbl
 	end
 end
 

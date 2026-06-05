@@ -18,6 +18,7 @@ local module = {
 CCS.Modules[module.Name] = module
 
 local modbg = _G["CharacterModelFramebg"] or CreateFrame("Frame", "CharacterModelFramebg", CharacterModelScene)
+modbg.retries = 0
 local modtex = _G["CharacterModelFramebgtex"] or modbg:CreateTexture("CharacterModelFramebgtex", "BACKGROUND")    
 
 local inspectmodbg = _G["InspectModelFramebg"] or CreateFrame("Frame", "InspectModelFramebg")
@@ -148,67 +149,185 @@ local function ChangeInspectModelBg()
     -- end of dynamic background
 end
 
+local function clamp(val, min, max)
+    if val < min then return min end
+    if val > max then return max end
+    return val
+end
+
+local function StopBGAnimation()
+    if modbg.swirl then
+        modbg.swirl:Hide()
+        modbg.swirl.swirlAnim:Stop()
+        modbg.donut:Hide()
+        modbg.donutFrame.donutAnim:Stop()
+    end
+end
+
 local function ChangeModelBg()
     local _, _, classID = UnitClass("player")
     local _, _, raceID = UnitRace("player")
-    local specID = GetPrimaryTalentTree()
-    local entry = nil
-    
+    local specID = 1 --GetSpecialization()
+    local entry
+
+    StopBGAnimation()
+
     if option("bgtype") == "Hide" then
         modtex:Hide()
         return
     end
     modtex:Show()
-    if option("bgtype") == "Class" then 
-        -- Class/Specialization background
-        entry = CCS.Class_Bg[classID] and CCS.Class_Bg[classID][specID]        
+
+    if option("bgtype") == "Class" then
+        entry = CCS.Class_Bg[classID] and CCS.Class_Bg[classID][specID]
         modtex:SetVertexColor(0.8, 0.8, 0.8, 1)
-    elseif option("bgtype") == "Race" then 
-        -- Race background
+    elseif option("bgtype") == "Race" then
         if classID == 6 then raceID = 998 -- Death Knight
         elseif classID == 12 then raceID = 999 -- Demon Hunter
         end
-        entry = CCS.Race_Bg[raceID] 
+        entry = CCS.Race_Bg[raceID]
         modtex:SetVertexColor(0.7, 0.7, 0.7, 1)
     end
-    
+
     modtex:ClearAllPoints()
     modtex:SetAllPoints()
-    
+
     if entry then
         local texWidth, texHeight, uMin, uMax, vMin, vMax = unpack(entry.map)
         local frameWidth, frameHeight = modtex:GetWidth(), modtex:GetHeight()
-        
+
         modtex:SetTexture(entry.texture)
-        
+
         if option("bgtype") == "Class" then
             -- Class/Specialization: right-aligned
-            modtex:SetTexCoord(
-                uMin + ((texWidth - (frameWidth / (frameHeight / texHeight))) / texWidth) * (uMax - uMin),
-                uMax,
-                vMin,
-                vMax
-            )
+            local visibleWidth = frameWidth / (frameHeight / texHeight)
+            local left = uMin + ((texWidth - visibleWidth) / texWidth) * (uMax - uMin)
+            left = clamp(left, uMin, uMax) -- ensure valid range
+
+            modtex:SetTexCoord(left, uMax, vMin, vMax)
         else
             -- Race: horizontally centered
-            local visibleWidth = frameWidth / (frameHeight / texHeight) -- width in texture space
+            local visibleWidth = frameWidth / (frameHeight / texHeight)
             local uRange = uMax - uMin
             local uOffset = (uRange - (visibleWidth / texWidth) * uRange) / 2
-            
-            modtex:SetTexCoord(
-                uMin + uOffset,
-                uMax - uOffset,
-                vMin,
-                vMax
-            )
+
+            local left = clamp(uMin + uOffset, uMin, uMax)
+            local right = clamp(uMax - uOffset, uMin, uMax)
+
+            modtex:SetTexCoord(left, right, vMin, vMax)
         end
     else
-        -- Default background
-        modtex:SetTexture("Interface\\AddOns\\ChonkyCharacterSheet\\Media\\Textures\\MOTHERtalenttree.BLP")
-        modtex:SetTexCoord(0, 0.69, 0, 0.87)
-        modtex:SetVertexColor(0.4, 0, 0.4, 0.9)
+        if option("bgtype") ==  "Midnight"  then    
+            local texWidth, texHeight, uMin, uMax, vMin, vMax = 408,374, 0, 1, .35, 1
+            local frameWidth, frameHeight = modtex:GetWidth(), modtex:GetHeight()
+            local visibleWidth = frameWidth / (frameHeight / texHeight)
+            local uRange = uMax - uMin
+            local uOffset = (uRange - (visibleWidth / texWidth) * uRange) / 2
+            local origW, origH = 569, 520
+            local newW, newH = modbg:GetSize()
+            local scale = math.max(newH / origH, 0.1)
+
+            if (newW == 0 or newH == 0) and (modbg.retries and modbg.retries < 5) then
+                C_Timer.After(0, ChangeModelBg)
+                modbg.retries = modbg.retries+1
+                return
+            elseif (newW == 0 or newH == 0) then
+                scale = 1
+            end
+            modbg.retries = 0
+
+            local offsetY = 80 * scale
+            local left = clamp(uMin + uOffset, uMin, uMax)
+            local right = clamp(uMax - uOffset, uMin, uMax)
+            modtex:SetTexture("Interface\\AddOns\\ChonkyCharacterSheet\\Media\\Textures\\bgmidnight.png")
+            modtex:SetVertexColor(0.1, 0, 0.75, 0.95)            
+            modtex:SetTexCoord(left, right, vMin, vMax)    
+            if option("showbganimations") == true then
+                -- VOID SWIRL LAYER (rotating)
+                local swirl = modbg.swirl or modbg:CreateTexture(nil, "ARTWORK", nil, 1)
+                modbg.swirl = swirl
+                swirl:SetTexture("Interface\\GLUES\\Models\\UI_VoidElf\\7XP_Pandemonium_VoidFXSwirl01")
+                swirl:SetVertexColor(1, 1, 1, 1)
+                swirl:SetScale(scale * 0.85)
+                swirl:ClearAllPoints()
+                swirl:SetPoint("CENTER", modtex, "CENTER", 0, offsetY)
+                swirl:Show()
+
+                local swirlAnim = modbg.swirl.swirlAnim or swirl:CreateAnimationGroup()
+                modbg.swirl.swirlAnim = swirlAnim
+
+                local rotate = modbg.swirl.swirlAnim.rotate or swirlAnim:CreateAnimation("Rotation")
+                modbg.swirl.swirlAnim.rotate = rotate
+                rotate:SetDegrees(360)
+                rotate:SetDuration(120)
+                rotate:SetOrder(1)
+
+                swirlAnim:SetLooping("REPEAT")
+                swirlAnim:Play()
+
+                -- PULSING VOID DONUT MASK (mmm, donuts...)
+                local donutFrame = modbg.donutFrame or CreateFrame("Frame", nil, modbg)
+                modbg.donutFrame = donutFrame
+                donutFrame:ClearAllPoints()
+                donutFrame:SetPoint("CENTER", modtex, "CENTER", 0, offsetY)
+                donutFrame:SetSize(240 * scale, 350 * scale)
+                donutFrame:SetScale(1) -- important: neutral base
+                donutFrame:Show()
+
+                local donut = modbg.donut or donutFrame:CreateTexture(nil, "ARTWORK", nil, 2)
+                modbg.donut = donut
+                donut:SetAllPoints(donutFrame)
+                donut:SetTexture("Interface\\GLUES\\Models\\UI_MAINMENU_MIDNIGHT\\UI_MainMenu_Midnight_DonutMask")
+                donut:SetVertexColor(.292, .457, .902, 1)
+                donut:SetAlpha(1)
+                donut:SetBlendMode("ADD")
+                donut:Show()
+
+                local donutAnim = modbg.donutFrame.donutAnim or donutFrame:CreateAnimationGroup()
+                modbg.donutFrame.donutAnim = donutAnim
+                donutAnim:Stop() -- reset if it already existed
+
+                local alphaUp = donutAnim.alphaUp or donutAnim:CreateAnimation("Alpha")
+                donutAnim.alphaUp = alphaUp
+                alphaUp:SetFromAlpha(0.6)
+                alphaUp:SetToAlpha(1.0)
+                alphaUp:SetDuration(3)
+                alphaUp:SetSmoothing("IN_OUT")
+                alphaUp:SetOrder(1)
+
+                local alphaDown = donutAnim.alphaDown or donutAnim:CreateAnimation("Alpha")
+                donutAnim.alphaDown = alphaDown
+                alphaDown:SetFromAlpha(1.0)
+                alphaDown:SetToAlpha(0.6)
+                alphaDown:SetDuration(3)
+                alphaDown:SetSmoothing("IN_OUT")
+                alphaDown:SetOrder(2)
+
+                local scaleUp = donutAnim.scaleUp or donutAnim:CreateAnimation("Scale")
+                donutAnim.scaleUp = scaleUp
+                scaleUp:SetScale(1.05, 1.05)
+                scaleUp:SetDuration(3)
+                scaleUp:SetSmoothing("IN_OUT")
+                scaleUp:SetOrder(1)
+
+                local scaleDown = donutAnim.scaleDown or donutAnim:CreateAnimation("Scale")
+                donutAnim.scaleDown = scaleDown
+                scaleDown:SetScale(1 / 1.05, 1 / 1.05) -- back to 1.0
+                scaleDown:SetDuration(3)
+                scaleDown:SetSmoothing("IN_OUT")
+                scaleDown:SetOrder(2)
+
+                donutAnim:SetLooping("REPEAT")
+                donutAnim:Play()                
+                
+            end
+        else        
+            -- Default background
+            modtex:SetTexture("Interface\\AddOns\\ChonkyCharacterSheet\\Media\\Textures\\MOTHERtalenttree.BLP")
+            modtex:SetTexCoord(0, 0.69, 0, 0.87)
+            modtex:SetVertexColor(0.6, 0, 0.6, 0.95)
+        end
     end
-    -- end of dynamic background
 end
 
 local function Clicky(endstate)

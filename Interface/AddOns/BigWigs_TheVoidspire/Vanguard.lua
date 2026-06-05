@@ -54,34 +54,56 @@ local zealousSpiritCount = 1
 -- Localization
 --
 
-local L = mod:GetLocale()
-if L then
-	L.aura_of_wrath = "Wrath" -- Short for Aura of Wrath
-	L.execution_sentence = "Executes" -- Short for Execution Sentence
-	L.executes_mythic = "Executes + Dodge"
-	L.judgement_red = "Judgement [R]" -- Red for the red icon.
-	L.aura_of_devotion = "Devotion" -- Short for Aura of Devotion
-	L.judgement_blue = "Judgement [B]" -- Blue for the blue icon.
-	L.aura_of_peace = "Peace" -- Short for Aura of Peace
-	L.tyrs_wrath_mythic = "Absorbs + Executes"
-	L.divine_toll_mythic = "Dodge + Absorbs"
-	L.zealous_spirit = "Spirit" -- Short for Zealous Spirit
+local L = mod:SetDefaultLocale({ -- SetOption:skip-locale
+	aura_of_wrath = "Wrath", -- Short for Aura of Wrath
+	execution_sentence = "Executes", -- Short for Execution Sentence
+	executes_mythic = "Executes + Dodge",
+	judgement_red = "Judgement [R]", -- Red for the red icon.
+	aura_of_devotion = "Devotion", -- Short for Aura of Devotion
+	judgement_blue = "Judgement [B]", -- Blue for the blue icon.
+	aura_of_peace = "Peace", -- Short for Aura of Peace
+	tyrs_wrath_mythic = "Absorbs + Executes",
+	divine_toll_mythic = "Dodge + Absorbs",
 
-	L.empowered_searing_radiance = "Empowered Searing Radiance"
-	L.empowered_searing_radiance_desc = "Show the timer for the empowered Searing Radiance"
-	L.empowered_searing_radiance_icon = 1255738
+	empowered_searing_radiance = "Empowered Searing Radiance",
+	empowered_searing_radiance_desc = "Show the timer for the empowered Searing Radiance.",
+	empowered_searing_radiance_icon = 1255738,
 
-	L.empowered_avengers_shield = "Empowered Avenger's Shield"
-	L.empowered_avengers_shield_desc = "Show the timer for the empowered Avenger's Shield"
-	L.empowered_avengers_shield_icon = 1246485
+	empowered_avengers_shield = "Empowered Avenger's Shield",
+	empowered_avengers_shield_desc = "Show the timer for the empowered Avenger's Shield.",
+	empowered_avengers_shield_icon = 1246485,
 
-	L.empowered_divine_storm = "Empowered Divine Storm"
-	L.empowered_divine_storm_desc = "Show the timer for the empowered Divine Storm"
-	L.empowered_divine_storm_icon = 1246765
-	L.tornadoes = "Tornadoes"
+	empowered_divine_storm = "Empowered Divine Storm",
+	empowered_divine_storm_desc = "Show the timer for the empowered Divine Storm.",
+	empowered_divine_storm_icon = 1246765,
+	tornadoes = "Tornadoes",
 
-	L.empowered = "[E] %s" -- Empowered version of an ability, %s for the spell name.
-end
+	empowered = "[E] %s", -- Empowered version of an ability, %s for the spell name.
+})
+
+--------------------------------------------------------------------------------
+-- Renames
+--
+
+mod:SetRenames({
+	[1248449] = {L.aura_of_wrath}, -- Aura of Wrath (Wrath)
+	[1248983] = {L.executes_mythic, L.execution_sentence, notes={CL.mythicOnlyNote, CL.otherDifficultiesNote}}, -- Execution Sentence (Executes)
+	[1246765] = {1246765}, -- Divine Storm
+	[1246749] = {CL.raid_damage}, -- Sacred Toll (Raid Damage)
+	[1246736] = {L.judgement_red}, -- Judgement (Judgement [R])
+	[1246162] = {L.aura_of_devotion}, -- Aura of Devotion (Devotion)
+	[1248644] = {L.divine_toll_mythic, CL.dodge, notes={CL.mythicOnlyNote, CL.otherDifficultiesNote}}, -- Divine Toll (Dodge)
+	[1246485] = {1246485}, -- Avenger's Shield
+	[1251857] = {L.judgement_blue}, -- Judgement (Judgement [B])
+	[1248451] = {L.aura_of_peace}, -- Aura of Peace (Peace)
+	[1248710] = {L.tyrs_wrath_mythic, CL.heal_absorbs, notes={CL.mythicOnlyNote, CL.otherDifficultiesNote}}, -- Tyr's Wrath (Heal Absorbs)
+	[1255738] = {1255738}, -- Searing Radiance
+	[1248674] = {CL.shield}, -- Sacred Shield (Shield)
+	[1276243] = {CL.spirit}, -- Zealous Spirit (Spirit)
+	["empowered_divine_storm"] = {L.empowered:format(L.tornadoes), original = 1246765}, -- Empowered Divine Storm ([E] Tornadoes)
+	["empowered_avengers_shield"] = {L.empowered:format(mod:SpellName(1246485)), original = 1246485}, -- Empowered Avenger's Shield ([E] Avenger's Shield)
+	["empowered_searing_radiance"] = {L.empowered:format(mod:SpellName(1255738)), original = 1255738}, -- Empowered Searing Radiance ([E] Searing Radiance)
+})
 
 --------------------------------------------------------------------------------
 -- Initialization
@@ -115,19 +137,6 @@ function mod:GetOptions()
 		[1246162] = -32195, -- General Amias Bellamy
 		[1248451] = -33681, -- War Chaplain Senn
 		[1276243] = "mythic",
-	},{
-		[1248449] = L.aura_of_wrath,
-		[1248983] = L.execution_sentence,
-		["empowered_divine_storm"] = L.tornadoes,
-		[1246749] = CL.raid_damage,
-		[1246736] = L.judgement_red,
-		[1246162] = L.aura_of_devotion,
-		[1248644] = CL.dodge,
-		[1251857] = L.judgement_blue,
-		[1248451] = L.aura_of_peace,
-		[1248710] = CL.heal_absorbs,
-		[1248674] = CL.shield,
-		[1276243] = L.zealous_spirit,
 	}
 end
 
@@ -464,7 +473,7 @@ end
 --
 
 function mod:JudgementBlue(eventInfo)
-	local barText = CL.count:format(L.judgement_blue, judgementBlueCount)
+	local barText = CL.count:format(self:GetRename(1251857), judgementBlueCount)
 	if self:ShouldShowBars() then
 		self:CDBar(1251857, eventInfo.duration, barText, nil, eventInfo.id)
 	end
@@ -482,7 +491,7 @@ function mod:JudgementBlue(eventInfo)
 end
 
 function mod:JudgementRed(eventInfo)
-	local barText = CL.count:format(L.judgement_red, judgementRedCount)
+	local barText = CL.count:format(self:GetRename(1246736), judgementRedCount)
 	if self:ShouldShowBars() then
 		self:CDBar(1246736, eventInfo.duration, barText, nil, eventInfo.id)
 	end
@@ -500,7 +509,7 @@ function mod:JudgementRed(eventInfo)
 end
 
 function mod:SacredToll(eventInfo)
-	local barText = CL.count:format(CL.raid_damage, sacredTollCount)
+	local barText = CL.count:format(self:GetRename(1246749), sacredTollCount)
 	if self:ShouldShowBars() then
 		self:CDBar(1246749, eventInfo.duration, barText, nil, eventInfo.id)
 	end
@@ -518,9 +527,9 @@ function mod:SacredToll(eventInfo)
 end
 
 function mod:AvengersShield(eventInfo, empowered)
-	local barText = self:SpellName(1246485)
+	local barText = self:GetRename(1246485)
 	if empowered then
-		barText = L.empowered:format(self:SpellName(1246485))
+		barText = self:GetRename("empowered_avengers_shield")
 	end
 	if self:ShouldShowBars() then
 		if empowered then
@@ -547,9 +556,9 @@ function mod:AvengersShield(eventInfo, empowered)
 end
 
 function mod:DivineStorm(eventInfo, empowered)
-	local barText = self:SpellName(1246765)
+	local barText = self:GetRename(1246765)
 	if empowered then
-		barText = L.empowered:format(L.tornadoes)
+		barText = self:GetRename("empowered_divine_storm")
 	end
 	if self:ShouldShowBars() then
 		if empowered then
@@ -572,9 +581,9 @@ function mod:DivineStorm(eventInfo, empowered)
 end
 
 function mod:SearingRadiance(eventInfo, empowered)
-	local barText = self:SpellName(1255738)
+	local barText = self:GetRename(1255738)
 	if empowered then
-		barText = L.empowered:format(self:SpellName(1255738))
+		barText = self:GetRename("empowered_searing_radiance")
 	end
 	if self:ShouldShowBars() then
 		if empowered then
@@ -602,7 +611,7 @@ function mod:SearingRadiance(eventInfo, empowered)
 end
 
 function mod:SacredShield(eventInfo)
-	local barText = CL.count:format(CL.shield, sacredShieldCount)
+	local barText = CL.count:format(self:GetRename(1248674), sacredShieldCount)
 	if self:ShouldShowBars() then
 		self:CDBar(1248674, eventInfo.duration, barText, nil, eventInfo.id)
 	end
@@ -624,7 +633,7 @@ function mod:ZealousSpirit(eventInfo)
 	if zealousSpiritCount <= 3 then -- it spawns 3 timers on pull (lol)
 		barCount = eventInfo.durationRounded == 4 and 1 or eventInfo.durationRounded == 57 and 2 or 3
 	end
-	local barText = CL.count:format(L.zealous_spirit, barCount)
+	local barText = CL.count:format(self:GetRename(1276243), barCount)
 	if self:ShouldShowBars() then
 		self:CDBar(1276243, eventInfo.duration, barText, nil, eventInfo.id)
 	end
@@ -642,7 +651,7 @@ function mod:ZealousSpirit(eventInfo)
 end
 
 function mod:AuraOfWrath(eventInfo)
-	local barText = CL.count:format(L.aura_of_wrath, auraWrathCount)
+	local barText = CL.count:format(self:GetRename(1248449), auraWrathCount)
 	if self:ShouldShowBars() then
 		self:CDBar(1248449, eventInfo.duration, barText, nil, eventInfo.id)
 	end
@@ -652,8 +661,8 @@ function mod:AuraOfWrath(eventInfo)
 		onFinished = function()
 			if self:ShouldShowBars() then
 				self:Message(1248449, "cyan", barText)
-				self:PlaySound(1248449, "long") -- Aura enabled
 				self:StopBlizzMessages(0.5)
+				self:PlaySound(1248449, "long") -- Aura enabled
 			end
 		end,
 		this = self.AuraOfWrath
@@ -661,7 +670,7 @@ function mod:AuraOfWrath(eventInfo)
 end
 
 function mod:ExecutionSentence(eventInfo)
-	local spellName = self:Mythic() and L.executes_mythic or L.execution_sentence
+	local spellName = self:Mythic() and self:GetRename(1248983, 1) or self:GetRename(1248983, 2)
 	local barText = CL.count:format(spellName, executionCount)
 	if self:ShouldShowBars() then
 		self:CDBar(1248983, eventInfo.duration, barText, nil, eventInfo.id)
@@ -680,7 +689,7 @@ function mod:ExecutionSentence(eventInfo)
 end
 
 function mod:AuraOfDevotion(eventInfo)
-	local barText = CL.count:format(L.aura_of_devotion, auraDevotionCount)
+	local barText = CL.count:format(self:GetRename(1246162), auraDevotionCount)
 	if self:ShouldShowBars() then
 		self:CDBar(1246162, eventInfo.duration, barText, nil, eventInfo.id)
 	end
@@ -690,8 +699,8 @@ function mod:AuraOfDevotion(eventInfo)
 		onFinished = function()
 			if self:ShouldShowBars() then
 				self:Message(1246162, "cyan", barText)
-				self:PlaySound(1246162, "long") -- Aura enabled
 				self:StopBlizzMessages(0.5)
+				self:PlaySound(1246162, "long") -- Aura enabled
 			end
 		end,
 		this = self.AuraOfDevotion
@@ -699,7 +708,7 @@ function mod:AuraOfDevotion(eventInfo)
 end
 
 function mod:DivineToll(eventInfo)
-	local spellName = self:Mythic() and L.divine_toll_mythic or CL.dodge
+	local spellName = self:Mythic() and self:GetRename(1248644, 1) or self:GetRename(1248644, 2)
 	local barText = CL.count:format(spellName, divineTollCount)
 	if self:ShouldShowBars() then
 		self:CDBar(1248644, eventInfo.duration, barText, nil, eventInfo.id)
@@ -718,7 +727,7 @@ function mod:DivineToll(eventInfo)
 end
 
 function mod:AuraOfPeace(eventInfo)
-	local barText = CL.count:format(L.aura_of_peace, auraPeaceCount)
+	local barText = CL.count:format(self:GetRename(1248451), auraPeaceCount)
 	if self:ShouldShowBars() then
 		self:CDBar(1248451, eventInfo.duration, barText, nil, eventInfo.id)
 	end
@@ -733,19 +742,19 @@ function mod:AuraOfPeace(eventInfo)
 	return {
 		msg = barText,
 		onFinished = function()
-			if self:ShouldShowBars() then
-				self:Message(1248451, "cyan", barText)
-				self:PlaySound(1248451, "long")
-				self:StopBlizzMessages(0.5)
-			end
 			if not self:Mythic() then
 				if self:ShouldShowBars() then
 					-- as this cast can be delayed, update the remaining time and cancel it in 5s
-					self:CDBar(1248710, {5, tyrsCD}, CL.count:format(CL.heal_absorbs, tyrsWrathCount - 1))
+					self:CDBar(1248710, {5, tyrsCD}, CL.count:format(self:GetRename(1248710, 2), tyrsWrathCount - 1))
 				end
 				self:ScheduleTimer(function()
 					self:ENCOUNTER_TIMELINE_EVENT_REMOVED(nil, -eventInfo.id)
 				end, 0.5)
+			end
+			if self:ShouldShowBars() then
+				self:Message(1248451, "cyan", barText)
+				self:StopBlizzMessages(0.5)
+				self:PlaySound(1248451, "long")
 			end
 		end,
 		onCanceled = function()
@@ -759,7 +768,7 @@ function mod:AuraOfPeace(eventInfo)
 end
 
 function mod:TyrsWrath(eventInfo)
-	local spellName = self:Mythic() and L.tyrs_wrath_mythic or CL.heal_absorbs
+	local spellName = self:Mythic() and self:GetRename(1248710, 1) or self:GetRename(1248710, 2)
 	local barText = CL.count:format(spellName, tyrsWrathCount)
 	if self:ShouldShowBars() then
 		self:CDBar(1248710, eventInfo.duration, barText, nil, eventInfo.id)

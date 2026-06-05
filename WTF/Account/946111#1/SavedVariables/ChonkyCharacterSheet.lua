@@ -507,12 +507,7 @@ ChonkyCharacterSheetDB = {
 ["pvp_honor"] = true,
 ["show_inbag_ilvl"] = true,
 ["secondary_mastery"] = true,
-["itemupgradecolor"] = {
-0.98,
-0.6,
-0.35,
-1,
-},
+["fontname_gf_dungeon"] = "Fonts\\FRIZQT__.TTF",
 ["showitemupgrade"] = true,
 ["fontsize_repstanding"] = 10,
 ["ccs_spell_stats_color"] = {
@@ -573,7 +568,12 @@ ChonkyCharacterSheetDB = {
 0,
 1,
 },
-["customupgradecolor"] = true,
+["fontcolor_enchant"] = {
+0.1647,
+0.9804,
+0.7098,
+1,
+},
 ["defense_dodge"] = true,
 ["setitemcolor"] = {
 0.8588235974311829,
@@ -586,12 +586,7 @@ ChonkyCharacterSheetDB = {
 ["spec_4_priority_slots"] = {
 },
 ["showgearfinder"] = true,
-["fontcolor_enchant"] = {
-0.1647,
-0.9804,
-0.7098,
-1,
-},
+["customupgradecolor"] = true,
 ["fontsize_mplus_key"] = 10,
 ["fontname_mplus_row"] = "Fonts\\FRIZQT__.TTF",
 ["showitemcolor"] = true,
@@ -612,7 +607,12 @@ ChonkyCharacterSheetDB = {
 ["fontname_specs"] = "Fonts\\FRIZQT__.TTF",
 ["crests_catalyst"] = true,
 ["fontsize_inspect_ilvl"] = 20,
-["fontname_gf_dungeon"] = "Fonts\\FRIZQT__.TTF",
+["itemupgradecolor"] = {
+0.98,
+0.6,
+0.35,
+1,
+},
 ["showgf_altbtn"] = false,
 ["fontsize_raidtitle"] = 20,
 ["fontname_mplus_key"] = "Fonts\\FRIZQT__.TTF",

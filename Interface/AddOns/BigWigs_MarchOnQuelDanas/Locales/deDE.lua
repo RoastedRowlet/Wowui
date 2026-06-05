@@ -1,8 +1,7 @@
 if not BigWigsAPI.IsLocale("deDE") then return end
 BigWigsAPI.SetBossModuleLocale("Belo'ren, Child of Al'ar", {
-	infused_quills = "Federkiele",
-	voidlight_convergence = "Farbwechsel",
-	light_void_dive = "Licht/Leerensturz",
+	color_swaps = "Farbwechsel",
+	["1241292"] = "Licht/Leerensturz",
 })
 
 BigWigsAPI.SetBossModuleLocale("Midnight Falls", {

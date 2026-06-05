@@ -1,9 +1,7 @@
-local L = BigWigs:NewBossLocale("Thorm'belan", "ptBR")
-if not L then return end
-if L then
-	--L.ball = "Ball"
-	--L.ball_incoming = "Ball Incoming - Don't let it touch the ground"
-	--L.ball_fail = "FAIL - Ball touched the ground"
-	--L.tendrils = "Tendrils"
-	--L.tendrils_incoming = "RUN AWAY to snap tendrils"
-end
+if not BigWigsAPI.IsLocale("ptBR") then return end
+BigWigsAPI.SetBossModuleLocale("Thorm'belan", {
+	ball_incoming = "Bola Chegando - Não deixe tocar no chão",
+	ball_fail = "FALHA - A bola tocou no chão",
+	tendrils = "Gavinhas",
+	tendrils_incoming = "CORRA para romper as gavinhas",
+})

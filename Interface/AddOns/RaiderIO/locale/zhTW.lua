@@ -186,6 +186,8 @@ L["MINIMAP_SHORTCUT_MINIMAP_ENABLE_DESC"] = "啟用以在小地圖周圍顯示�
 L["MINIMAP_SHORTCUT_MINIMAP_LOCK"] = "鎖定小地圖按鈕"
 L["MISC_SETTINGS"] = "雜項"
 L["MODULE_AMERICAS"] = "美洲"
+--[[Translation missing --]]
+--[[ L["MODULE_CHINA"] = ""--]] 
 L["MODULE_EUROPE"] = "歐洲"
 L["MODULE_KOREA"] = "韓國"
 L["MODULE_TAIWAN"] = "台灣"
@@ -404,6 +406,34 @@ L["RAID_BOSS_SOD_6"] = "痛苦工匠拉茲內爾"
 L["RAID_BOSS_SOD_7"] = "首創者的守護者"
 L["RAID_BOSS_SOD_8"] = "述命者羅卡洛"
 L["RAID_BOSS_SOD_9"] = "科爾蘇加德"
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_SOO_1"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_SOO_10"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_SOO_11"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_SOO_12"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_SOO_13"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_SOO_14"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_SOO_2"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_SOO_3"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_SOO_4"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_SOO_5"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_SOO_6"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_SOO_7"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_SOO_8"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_SOO_9"] = ""--]] 
 L["RAID_BOSS_ToES_1"] = "豐泉守衛者"
 L["RAID_BOSS_TOES_1"] = "豐泉守衛者"
 L["RAID_BOSS_TOES_2"] = "楚龍"
@@ -478,6 +508,8 @@ L["RAID_MQD"] = "進軍奎爾達納斯"
 L["RAID_MSV"] = "魔古山寶庫"
 L["RAID_NP"] = "奈幽巴宮殿"
 L["RAID_RS"] = "晶紅聖所"
+--[[Translation missing --]]
+--[[ L["RAID_SOO"] = ""--]] 
 L["RAID_ToES"] = "豐泉臺"
 L["RAID_TOES"] = "豐泉台"
 L["RAID_TOT"] = "雷霆王座"

@@ -40,17 +40,22 @@ local despoticCommandCount = 1
 local twistingObscurityCount = 1
 
 --------------------------------------------------------------------------------
--- Localization
+-- Renames
 --
 
-local L = mod:GetLocale()
-if L then
-	L.fractured_projection = "Kicks" -- Move this to common?
-end
+mod:SetRenames({
+	[1247738] = {CL.orbs}, -- Void Convergence (Orbs)
+	[1246175] = {CL.full_energy}, -- Entropic Unraveling (Full Energy)
+	[1250803] = {CL.spikes}, -- Shattering Twilight (Spikes)
+	[1254081] = {CL.kicks}, -- Fractured Projection (Kicks)
+	[1248697] = {CL.pools}, -- Despotic Command (Pools)
+	[1250686] = {CL.raid_damage}, -- Twisting Obscurity (Raid Damage)
+})
 
 --------------------------------------------------------------------------------
 -- Initialization
 --
+
 function mod:GetOptions()
 	return {
 		"berserk",
@@ -60,15 +65,6 @@ function mod:GetOptions()
 		1254081, -- Fractured Projection
 		1248697, -- Despotic Command
 		1250686, -- Twisting Obscurity
-	},{
-
-	},{
-		[1247738] = CL.orbs, -- Void Convergence (Orbs)
-		[1246175] = CL.full_energy, -- Entropic Unraveling (Full Energy)
-		[1250803] = CL.spikes, -- Shattering Twilight (Spikes)
-		[1254081] = L.fractured_projection, -- Fractured Projection (Kicks)
-		[1248697] = CL.pools, -- Despotic Command (Pools)
-		[1250686] = CL.raid_damage, -- Twisting Obscurity (Raid Damage)
 	}
 end
 
@@ -133,8 +129,8 @@ do
 			barInfo = self:DespoticCommand(eventInfo)
 		elseif durationRoundedOne == 27 then -- Fractured Projection
 			barInfo = self:FracturedProjection(eventInfo)
-		elseif durationRoundedOne == 44 or durationRoundedZero == 35 or durationRoundedZero == 34 then -- Shattering Twilight
-			if durationRoundedZero == 35 or durationRoundedZero == 34 then return end -- These ones always get instantly canceled, ignore them.
+		elseif durationRoundedOne == 44 or durationRoundedZero == 36 or durationRoundedZero == 35 or durationRoundedZero == 34 then -- Shattering Twilight
+			if durationRoundedZero == 36 or durationRoundedZero == 35 or durationRoundedZero == 34 then return end -- These ones always get instantly canceled, ignore them.
 			barInfo = self:ShatteringTwilight(eventInfo)
 		elseif durationRoundedOne == 100 then -- Entropic Unraveling
 			local time = GetTime()
@@ -199,8 +195,8 @@ do
 			barInfo = self:DespoticCommand(eventInfo)
 		elseif durationRoundedOne == 18 then -- Fractured Projection
 			barInfo = self:FracturedProjection(eventInfo)
-		elseif durationRoundedOne == 42 or durationRoundedZero == 34 then -- Shattering Twilight
-			if durationRoundedZero == 34 then return end -- These ones always get instantly canceled, ignore them.
+		elseif durationRoundedOne == 42 or durationRoundedZero == 36 or durationRoundedZero == 35 or durationRoundedZero == 34 then -- Shattering Twilight
+			if durationRoundedZero == 36 or durationRoundedZero == 35 or durationRoundedZero == 34 then return end -- These ones always get instantly canceled, ignore them.
 			barInfo = self:ShatteringTwilight(eventInfo)
 		elseif durationRoundedOne == 100 then -- Entropic Unraveling
 			local time = GetTime()
@@ -294,7 +290,7 @@ end
 --
 
 function mod:VoidConvergence(eventInfo)
-	local barText = CL.count:format(CL.orbs, voidConvergenceCount)
+	local barText = CL.count:format(self:GetRename(1247738), voidConvergenceCount)
 	if self:ShouldShowBars() then
 		self:Bar(1247738, eventInfo.duration, barText, nil, eventInfo.id)
 	end
@@ -310,7 +306,7 @@ function mod:VoidConvergence(eventInfo)
 end
 
 function mod:EntropicUnraveling(eventInfo)
-	local barText = CL.count:format(CL.full_energy, entropicUnravelingCount)
+	local barText = CL.count:format(self:GetRename(1246175), entropicUnravelingCount)
 	if self:ShouldShowBars() then
 		self:Bar(1246175, eventInfo.duration, barText, nil, eventInfo.id)
 		-- Scheduling since these were getting started and canceled right away
@@ -324,7 +320,7 @@ function mod:EntropicUnraveling(eventInfo)
 end
 
 function mod:ShatteringTwilight(eventInfo)
-	local barText = CL.count:format(CL.spikes, shatteringTwilightCount)
+	local barText = CL.count:format(self:GetRename(1250803), shatteringTwilightCount)
 	if self:ShouldShowBars() then
 		self:Bar(1250803, eventInfo.duration, barText, nil, eventInfo.id)
 	end
@@ -340,7 +336,7 @@ function mod:ShatteringTwilight(eventInfo)
 end
 
 function mod:FracturedProjection(eventInfo)
-	local barText = CL.count:format(L.fractured_projection, fracturedProjectionCount)
+	local barText = CL.count:format(self:GetRename(1254081), fracturedProjectionCount)
 	if self:ShouldShowBars() then
 		self:Bar(1254081, eventInfo.duration, barText, nil, eventInfo.id)
 	end
@@ -356,7 +352,7 @@ function mod:FracturedProjection(eventInfo)
 end
 
 function mod:DespoticCommand(eventInfo)
-	local barText = CL.count:format(CL.pools, despoticCommandCount)
+	local barText = CL.count:format(self:GetRename(1248697), despoticCommandCount)
 	if self:ShouldShowBars() then
 		self:Bar(1248697, eventInfo.duration, barText, nil, eventInfo.id)
 	end
@@ -372,7 +368,7 @@ function mod:DespoticCommand(eventInfo)
 end
 
 function mod:TwistingObscurity(eventInfo)
-	local barText = CL.count:format(CL.raid_damage, twistingObscurityCount)
+	local barText = CL.count:format(self:GetRename(1250686), twistingObscurityCount)
 	if self:ShouldShowBars() then
 		self:Bar(1250686, eventInfo.duration, barText, nil, eventInfo.id)
 	end

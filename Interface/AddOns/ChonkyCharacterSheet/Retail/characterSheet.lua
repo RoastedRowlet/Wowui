@@ -19,7 +19,7 @@ modbg.retries = 0
 local modtex = _G["CharacterModelFramebgtex"] or modbg:CreateTexture("CharacterModelFramebgtex", "BACKGROUND")    
 local modelbtn = _G["CCS_clk_Btn"] or CreateFrame("Button", "CCS_clk_Btn", PaperDollFrame, "UIPanelButtonTemplate")
 local bg_texture = "Interface\\AddOns\\ChonkyCharacterSheet\\Media\\Textures\\bgmidnight.png"
-
+local ccs_cshow
 local function hookfix() 
 
     if C_AddOns.IsAddOnLoaded("ClassCodex") == true and option("showm_sp_onopen") == true then
@@ -69,7 +69,7 @@ local function hookfix()
             CharacterFrame.Background:Hide()
         end
     end
-
+    ccs_cshow()
     if C_AddOns.IsAddOnLoaded("ZygorGuidesVIewer") then
 
 	CharacterFrameInset:Hide()
@@ -334,12 +334,13 @@ local function Clicky(endstate)
     PlaySound(SOUNDKIT.GS_LOGIN_CHANGE_REALM_OK);
 end
 
-local function ccs_cshow()
+ccs_cshow = function()
     MoveModelLeft()
     if C_AddOns.IsAddOnLoaded("Narcissus") then -- Just relocate the mini talent tree so it isn't hidden behind the character frame.
     C_Timer.NewTicker(.1, function() NarciMiniTalentTree:ClearAllPoints(); 
             NarciMiniTalentTree:SetPoint("TOPLEFT", CharacterFrameBg, "TOPRIGHT", 0, 0) end, 1)
     end
+    if option("hideshowchbtn") == true then modelbtn:Hide() else modelbtn:Show() end
 
     if C_AddOns.IsAddOnLoaded("Leatrix_Plus") then -- relocate the volume slider
             C_Timer.After(0, function()
@@ -349,12 +350,11 @@ local function ccs_cshow()
                     local n=c:GetName(); 
                     if c and not n and c.Thumb then 
                         c:ClearAllPoints()
-                        c:SetPoint("LEFT", CCS_clk_Btn, "RIGHT", 60, 0)
+                        c:SetPoint("BOTTOMRIGHT", CharacterFrameInsetRight, "BOTTOMLEFT", -40, 3)
                     end 
                 end
             end)
     end
-
 
     ChangeModelBg()
     CharacterModelScene.ControlFrame:Hide()
@@ -1203,8 +1203,26 @@ function CCS.HookSetup()
         end
     end
     
+    -- I really like this addon and want its functionality to blend well with Chonky.
     if C_AddOns.IsAddOnLoaded("ClassCodex") == true then
-        if ClassCodexWidgetButton then ClassCodexWidgetButton:SetScale(.7) end
+        local btn = _G.ClassCodexWidgetButton
+        
+        if btn then
+            btn:SetScale(.7)
+            btn:HookScript("OnClick", function(self, button)
+
+            local sm  = _G.ccsm_sf
+            local rf  = _G.ccsrf_sf
+            local gf  = _G.ccsgf_sf
+
+            -- Hide Chonky Side panels to allow Class Codex to open without anything being in the way.
+            if sm and sm:IsShown() then sm:Hide() end
+            if rf and rf:IsShown() then rf:Hide() end
+            if gf and gf:IsShown() then gf:Hide() end
+
+            end)
+        end
+       
     end
     
     if C_AddOns.IsAddOnLoaded("PrettyReps") == false then
@@ -1254,7 +1272,7 @@ function CCS.HookSetup()
             _G["ccsm_sf"].currentDir = option("mplus_direction") or "Ascending"
             CCS.updatemplussideframe()
         end
-
+        ccs_cshow()
         InitializeFrameUpdates()
         CCS:FireEvent("CCS_EVENT_CSHOW")
         GameTooltip:Hide()
@@ -1742,7 +1760,7 @@ function module:SetupBlizzardFrameOverrides()
 
     -- Create the character model button
     modelbtn:SetSize(23, 23)
-    modelbtn:SetPoint("BOTTOMRIGHT", _G["CCS_loot_Btn1"], "BOTTOMRIGHT", 180, 0)    
+    modelbtn:SetPoint("BOTTOMRIGHT", CharacterFrameInsetRight, "BOTTOMLEFT", -120, 5)    
     modelbtn:SetFrameStrata("HIGH")
     local modelbtnfont1 = _G["CCS_clk_Btnfs1"] or modelbtn:CreateFontString("CCS_clk_Btnfs1")
     modelbtnfont1:SetFont(option("fontname_showchar") or CCS.fontname, (option("fontsize_showchar") or 10), CCS.textoutline)
@@ -1763,7 +1781,8 @@ function module:SetupBlizzardFrameOverrides()
                 RaidNotice_AddMessage(RaidBossEmoteFrame, format("%s", ERR_AFFECTING_COMBAT), ChatTypeInfo["SYSTEM"])
             end 
     end)
-
+    if option("hideshowchbtn") == true then modelbtn:Hide() else modelbtn:Show() end
+    
     modbg:ClearAllPoints()
     modbg:SetPoint("TOPLEFT", CharacterHeadSlot, "TOPLEFT", 0, 0)
     modbg:SetPoint("RIGHT", CharacterHandsSlot, "RIGHT", 0, 0)    

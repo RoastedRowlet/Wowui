@@ -9,6 +9,16 @@ mod.otherMenu = -2443
 mod:SetWorldModule(true)
 
 --------------------------------------------------------------------------------
+-- Renames
+--
+
+mod:SetRenames({
+	[1235131] = {CL.dodge, CL.extra:format(mod:SpellName(1235131), CL.dodge), notes = {CL.timerNote, CL.messageNote}}, -- Rootquake (Dodge)
+	[1243594] = {CL.you:format(CL.fixate), notes = {CL.messageOnYouNote}, original = CL.you:format(mod:SpellName(1243594))}, -- Fixate (Fixate)
+	[1235144] = {1235144}, -- War Club
+})
+
+--------------------------------------------------------------------------------
 -- Initialization
 --
 
@@ -17,8 +27,6 @@ function mod:GetOptions()
 		1235131, -- Rootquake
 		{1243594, "ME_ONLY_EMPHASIZE"}, -- Fixate
 		1235144, -- War Club
-	},nil,{
-		[1235131] = CL.dodge, -- Rootquake (Dodge)
 	}
 end
 
@@ -50,7 +58,7 @@ function mod:BOSS_KILL(_, id)
 end
 
 function mod:RAID_BOSS_WHISPER()
-	self:PersonalMessage(1243594)
+	self:PersonalMessage(1243594, false)
 	self:PlaySound(1243594, "warning")
 end
 
@@ -61,7 +69,7 @@ do
 		if t - prev > 2 and self:MobId(self:UnitGUID(unit)) == 244424 then
 			prev = t
 			if self:UnitGUID(unit.."target") then
-				self:Message(1235131, "yellow", CL.extra:format(self:SpellName(1235131), CL.dodge))
+				self:Message(1235131, "yellow", self:GetRename(1235131, 2))
 				self:CDBar(1235131, 35.6)
 				self:PlaySound(1235131, "long")
 			else

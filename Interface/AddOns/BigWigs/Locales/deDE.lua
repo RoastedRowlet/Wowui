@@ -2,12 +2,17 @@ local _, addonTbl = ...
 local L = addonTbl.API:NewLocale("BigWigs", "deDE")
 if not L then return end
 
+L.tempRenameFeat = "Du kannst alle Bossfähigkeiten nun |cFF436EEEUmbenennen|r in den erweiterten Einstellungen (>>) in der Umbenennen Registerkarte."
+
 -- API.lua
 L.showAddonBar = "Das Addon '|cFF436EEE%s|r' hat die Leiste '%s' erstellt."
 L.requestAddonProfile = "Das Addon '|cFF436EEE%s|r' hat gerade eine Kopie des Profil Export-Strings erstellt."
 L.shortMinutesAndSeconds = "%d Min %d Sek" -- 1 Minute 2 Seconds
 L.shortSecondsOnly = "%d Sek" -- 28 Seconds
 L.shortSubTenSeconds = "%.1f Sek" -- 3.2 Seconds
+L.accept = "Annehmen"
+L.cancel = "Abbrechen"
+L.confirm_profile_swap = "Das Addon |cFF436EEE\"%s\"|r möchte das BigWigs Profil automatisch wechseln zu:\n\n|cFF33FF99\"%s\"|r\n\nBist Du sicher, dass dies geschehen soll?"
 
 -- Core.lua
 L.berserk = "Berserker"
@@ -61,7 +66,6 @@ L.outOfDateAddOnPopup = "Das |cFF436EEE%s|r Addon ist veraltet!"
 L.outOfDateAddOnRaidWarning = "Das |cFF436EEE%s|r Addon ist veraltet! Du nutzt v%d.%d.%d doch aktuell ist v%d.%d.%d!"
 L.disabledAddOn = "Du hast das Addon |cFF436EEE%s|r deaktiviert, Timer werden nicht angezeigt."
 L.removeAddOn = "Bitte entferne '|cFF436EEE%s|r', da es durch '|cFF436EEE%s|r' ersetzt wurde."
-L.alternativeName = "%s (|cFF436EEE%s|r)"
 L.outOfDateContentPopup = "WARNUNG!\nDu hast |cFF436EEE%s|r aktualisiert, aber Du musst auch das Haupt |cFF436EEEBigWigs|r Addon aktualisieren.\nAndernfalls wird die Funktionalität eingeschränkt sein."
 L.outOfDateContentRaidWarning = "|cFF436EEE%s|r benötigt Version %d des Haupt |cFF436EEEBigWigs|r Addons zur korrekten Funktion, allerdings hast Du Version %d."
 L.addOnLoadFailedWithReason = "BigWigs konnte das Addon |cFF436EEE%s|r nicht laden wegen %q. Bitte den Entwicklern melden!"
@@ -145,7 +149,7 @@ L.configure = "Einstellungen"
 L.resetPositions = "Positionen zurücksetzen"
 L.selectEncounter = "Wähle Begegnung"
 L.privateAuraSounds = "Private Aurasounds"
-L.privateAuraSounds_desc = "Private Auren können nicht normal verfolgt werden, aber es kann ein wiederzugebender Sound festgelegt werden, wenn Du von der Fähigkeit betroffen bist."
+L.privateAuraSounds_desc = "Private Auren können nicht normal verfolgt werden, aber es kann ein wiederzugebender Sound festgelegt werden, wenn der Debuff der Fähigkeit auf Dich angewandt wird."
 L.listAbilities = "Fähigkeiten im Chat auflisten"
 
 L.dbmFaker = "Täusche DBM Nutzung vor"
@@ -223,6 +227,13 @@ L.healer = "|cFFFF0000Warnungen nur für Heiler.|r "
 L.tankhealer = "|cFFFF0000Warnungen nur für Tanks und Heiler.|r "
 L.dispeller = "|cFFFF0000Warnungen nur für Banner.|r "
 
+L.renames = "Umbenennen"
+L.noteLabel = "%s (|cFFFFFF99%s|r)"
+L.renameLabel = "%s (|cFF3366FF%s|r)"
+L.renameHeader = "Einen benutzerdefinierten Namen für die Fähigkeit festlegen. Dieser Text wird an Stelle des Zaubernamens in allen Nachrichten und Leisten genutzt.\n\n"
+L.spellName = "Zaubername"
+L.spellNameResetDesc = "Diese Fähigkeit hat standardmäßig einen benutzerdefinierten Namen, auf die Schaltfläche klicken um den Originalnamen zu verwenden (normalerweise ein Zaubername)."
+
 -- Sharing.lua
 L.import = "Importieren"
 L.import_info = "Nach der Eingabe eines Strings kann gewählt werden welche Einstellungen importiert werden sollen.\nWenn Einstellungen im Import-String nicht verfügbar sind, sind diese nicht wählbar.\n\n|cffff4411Dieser Import betrifft nur allgemeine Einstellungen und keine Boss-spezifischen Einstellungen.|r"
@@ -292,6 +303,8 @@ L.sharing_window_title = "Boss Einstellungen teilen"
 L.sharing_flags = "Allgemeine Einstellungen"
 L.sharing_flags_desc = "Einstellungen wie 'Leiste anzeigen', 'Sound abspielen', 'Nachricht anzeigen' etc. importieren.\nDiese Decken die meisten Kontrollkästchen der Fähigkeiten ab."
 L.sharing_export_flags_desc = "Einstellungen wie 'Leiste anzeigen', 'Sound abspielen', 'Nachricht anzeigen' etc. exportieren.\nDiese Decken die meisten Kontrollkästchen der Fähigkeiten ab."
+L.sharing_renames_desc = "Importiert die benutzerdefinierten Umbenennungen."
+L.sharing_export_renames_desc = "Exportiert die benutzerdefinierten Umbenennungen."
 L.sharing_sounds_desc = "Importiert, welche Sounds für Fähigkeiten abgespielt werden."
 L.sharing_export_sounds_desc = "Exportiert, welche Sounds für Fähigkeiten abgespielt werden."
 L.sharing_private_auras = "Private Auren"
@@ -352,6 +365,7 @@ L.toolsDesc = "BigWigs bietet verschiedene Werkzeuge oder Features der \"Lebensq
 
 L.reloadUIWarning = "Die Änderung dieser Funktion lädt das Interface neu und zeigt kurz den Ladebildschirm an. Bist Du sicher?"
 L.qualityOfLife = "Lebensqualität"
+L.notYetImplemented = "Noch nicht implementiert" -- When a feature hasn't been implemented yet
 
 -----------------------------------------------------------------------
 -- AutoInvite.lua
@@ -609,7 +623,6 @@ L.progressPercentTooltipText = {
 L.progressPercentNameplate = "Fortschritt in % an Namensplaketten von Gegnern anzeigen"
 L.progressCurrentPull = "Aktueller Pull"
 L.progressCurrentPullDesc = "Gesamtfortschritt, der durch die im Kampf befindlichen Gegner erhalten wird, anzeigen.\n\nNOCH NICHT FUNKTIONSTÜCHTIG!"
-L.tempProgressAnnounce = "Es kann jetzt der Fortschrittsbeitrag in % eines Gegners beim Überfahren mit der Maus und an den Namensplaketten angezeigt werden.\n\nKonfigurieren in |cFF436EEEWerkzeuge|r > |cFF436EEEMythisch+|r > |cFF436EEEFortschritt %|r."
 L.settingsForCurrentTarget = "Einstellungen für das aktuelle Ziel"
 L.settingsForOtherTargets = "Einstellungen für alle anderen Ziele"
 

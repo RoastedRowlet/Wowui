@@ -27,7 +27,7 @@ PremadeGroupsFilterState = {
 ["act"] = false,
 },
 ["notdeclined"] = false,
-["dungeon3"] = true,
+["dungeon3"] = false,
 ["members"] = {
 ["max"] = "",
 ["min"] = "",
@@ -38,69 +38,32 @@ PremadeGroupsFilterState = {
 ["act"] = false,
 },
 ["dungeon1"] = false,
-["heals"] = {
-["max"] = "",
-["min"] = "",
-["act"] = false,
-},
-["dps"] = {
-["max"] = "",
-["min"] = "",
-["act"] = false,
-},
-["blfit"] = false,
 ["needsbl"] = false,
-},
-},
-["c3f5"] = {
-["enabled"] = true,
-["raid"] = {
-["difficulty"] = {
-["val"] = 2,
-["act"] = true,
+["blfit"] = false,
+["dps"] = {
+["max"] = "",
+["min"] = "",
+["act"] = false,
 },
 ["heals"] = {
 ["max"] = "",
 ["min"] = "",
 ["act"] = false,
 },
-["tanks"] = {
-["max"] = "",
-["min"] = "",
-["act"] = false,
 },
-["members"] = {
-["max"] = "",
-["min"] = "",
-["act"] = false,
 },
-["dps"] = {
-["max"] = "",
-["min"] = "",
-["act"] = false,
-},
-["defeated"] = {
-["max"] = "",
-["min"] = "",
-["act"] = false,
-},
-["expression"] = "",
-},
+["c9f8"] = {
+["enabled"] = true,
 },
 ["c121f4"] = {
 ["enabled"] = true,
 },
 ["version"] = 8,
-["c3f6"] = {
-["enabled"] = true,
-["raid"] = {
-["difficulty"] = {
-},
+["c6f4"] = {
+["role"] = {
 ["heals"] = {
 },
 ["tanks"] = {
-},
-["defeated"] = {
 },
 ["dps"] = {
 },
@@ -115,20 +78,57 @@ PremadeGroupsFilterState = {
 ["c114f5"] = {
 ["enabled"] = true,
 },
-["c6f4"] = {
-["role"] = {
+["c3f6"] = {
+["enabled"] = true,
+["raid"] = {
+["difficulty"] = {
+},
 ["heals"] = {
 },
 ["tanks"] = {
 },
+["members"] = {
+},
 ["dps"] = {
 },
-["members"] = {
+["defeated"] = {
 },
 ["expression"] = "",
 },
 },
-["c9f8"] = {
+["c3f5"] = {
 ["enabled"] = true,
+["raid"] = {
+["difficulty"] = {
+["act"] = true,
+["val"] = 2,
+},
+["heals"] = {
+["max"] = "",
+["min"] = "",
+["act"] = false,
+},
+["tanks"] = {
+["max"] = "",
+["min"] = "",
+["act"] = false,
+},
+["defeated"] = {
+["max"] = "",
+["min"] = "",
+["act"] = false,
+},
+["dps"] = {
+["max"] = "",
+["min"] = "",
+["act"] = false,
+},
+["members"] = {
+["max"] = "",
+["min"] = "",
+["act"] = false,
+},
+["expression"] = "",
+},
 },
 }

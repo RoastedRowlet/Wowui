@@ -2223,13 +2223,13 @@ frame:SetScript("OnShow", function(self)
     UpdateScrollbarVisibility(scrollFrame)
 end)
 
-
 frame:SetScript("OnHide", function(self)
     if not ns.optionDefs or not CCS.CurrentProfile then return end
+    local CURRENT_VERSION = CCS.GetCurrentVersion() 
 
     for _, def in ipairs(ns.optionDefs) do
-        if not def.key then
-            -- skip options without a key
+        if not def.key or (def.ver and bit.band(def.ver, CURRENT_VERSION) == 0) then
+            -- skip options without a key or not for this version of wow.
         else
             local currentValue
 

@@ -1048,6 +1048,7 @@ end
 ---------------------------
 function CCS:UpdateOption(def, newValue)
     if not def or not def.key then return end
+
     CCS.CurrentProfile[def.key] = newValue
     def.value = newValue
 
@@ -1435,7 +1436,7 @@ function CCS:ParseItemStats(unit, slot)
         keyword = keyword:gsub("^%s+", ""):gsub("%s+$", "")
         keyword = keyword:gsub("%s+", " ")
 
-        -- 1) Exact match
+        -- Exact match
         local mapped = statKeywords[keyword]
         if mapped then
             statTotals[mapped] = (statTotals[mapped] or 0) + tonumber(value)
@@ -1443,7 +1444,7 @@ function CCS:ParseItemStats(unit, slot)
             return
         end
 
-        -- 2) Case-insensitive substring match, longest keys first
+        -- Case-insensitive substring match, longest keys first
         local normalized = keyword:lower()
         local keys = {}
         for k, v in pairs(statKeywords) do
@@ -1614,11 +1615,12 @@ function CCS:ParseItemStats(unit, slot)
                     -- Multi-stat gem pre-checks
                     local hasTwoPlus = text:match("%+%d+") and text:match("^.*%+%d+.*%+%d+.*$")
                     local hasSlash   = text:find("/", 1, true) or text:find("／", 1, true) or text:find("、", 1, true)
+                    local hasAmp     = text:find("&", 1, true)
                     local hasConj    = andWord and text:find(andWord, 1, true)
 
                     CCS.dprint("[DEBUG] hasTwoPlus:", hasTwoPlus, "hasSlash:", hasSlash, "hasConj:", hasConj, "locale:", locale)
 
-                    if not matched and not enchant and hasTwoPlus and (hasSlash or hasConj) then
+                    if not matched and not enchant and hasTwoPlus and (hasSlash or hasConj or hasAmp) then
                         CCS.dprint("    Gem line detected (multi-stat):", text)
 
                         local token1, token2
@@ -1626,6 +1628,9 @@ function CCS:ParseItemStats(unit, slot)
                         if hasSlash then
                             CCS.dprint("[DEBUG] splitting on slash")
                             token1, token2 = text:match("^(.-%+%d+.-)%s*[/／、]%s*(.-%+%d+.-)$")
+                        elseif text:find("&", 1, true) then
+                            CCS.dprint("[DEBUG] splitting on &")
+                            token1, token2 = text:match("^(.-%+%d+.-)%s*&%s*(.-%+%d+.-)$")
                         elseif locale == "ruRU" then
                             CCS.dprint("[DEBUG] splitting Russian on 'и'")
                             token1, token2 = text:match("^(%+%d+.-)%s+и%s+(%+%d+.-)$")
@@ -2250,9 +2255,8 @@ function CCS.updateLocationInfo(unit, slotIndex, framename)
             local label = ascTier or ""
 
             -- Display icon + tier text
-            ItemUpgradeTrack = label
+            ItemUpgradeTrack = L[label]
             ItemUpgradeLevel = L[label] .. " " .. tex
-            
         end
 
         if option("showitemupgrade"..suffix) then 
@@ -2659,6 +2663,7 @@ function CCS.AreSecretsDisabled()
 end
 
 function CCS:HideAllStatHighlights()
+    --print("HideAllStatHighlights", CCS.activeClickedRow == true)
     for slot = 1, 17 do
         local slotFrameName = CCS.slotNames[slot] and ("Character"..CCS.slotNames[slot].."Slot")
         local slotFrame = slotFrameName and _G[slotFrameName]
@@ -2671,7 +2676,7 @@ end
 function CCS:ShowStatHighlights(statRowData)
     local statKey = CCS.statKeyMap[statRowData.key]
     if not statKey then return end
-
+    --print("Show", statRowData.key)
     -- Loop through all equipment slots
     for slot = 1, 17 do
         local slotFrameName = CCS.slotNames[slot] and ("Character"..CCS.slotNames[slot].."Slot")

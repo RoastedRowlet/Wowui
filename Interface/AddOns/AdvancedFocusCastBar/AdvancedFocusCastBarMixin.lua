@@ -575,8 +575,10 @@ function AdvancedFocusCastBarMixin:OnLoad()
 					multiple = false,
 					generator = Generator,
 					set = Set,
-					disabled = not AdvancedFocusCastBarSaved.Settings.FeatureFlags[Private.Enum.FeatureFlag.ShowTargetName]
-						and not AdvancedFocusCastBarSaved.Settings.FeatureFlags[Private.Enum.FeatureFlag.ShowInterruptSource],
+					disabled = not AdvancedFocusCastBarSaved.Settings.FeatureFlags
+						[Private.Enum.FeatureFlag.ShowTargetName]
+						and not AdvancedFocusCastBarSaved.Settings.FeatureFlags
+						[Private.Enum.FeatureFlag.ShowInterruptSource],
 				}
 			end
 
@@ -911,7 +913,7 @@ function AdvancedFocusCastBarMixin:OnLoad()
 								local thisState = AdvancedFocusCastBarSaved.Settings.FeatureFlags[id]
 
 								local otherId = id == Private.Enum.FeatureFlag.ShowInterruptSource
-										and Private.Enum.FeatureFlag.ShowTargetName
+									and Private.Enum.FeatureFlag.ShowTargetName
 									or Private.Enum.FeatureFlag.ShowInterruptSource
 								local otherState = AdvancedFocusCastBarSaved.Settings.FeatureFlags[otherId]
 
@@ -1444,10 +1446,10 @@ end
 
 function AdvancedFocusCastBarMixin:AdjustSpellNameTextWidth()
 	local iconSize = AdvancedFocusCastBarSaved.Settings.FeatureFlags[Private.Enum.FeatureFlag.ShowIcon]
-			and AdvancedFocusCastBarSaved.Settings.Height
+		and AdvancedFocusCastBarSaved.Settings.Height
 		or 0
 	local castTimeSize = AdvancedFocusCastBarSaved.Settings.FeatureFlags[Private.Enum.FeatureFlag.ShowCastTime]
-			and 2 * AdvancedFocusCastBarSaved.Settings.Height
+		and 2 * AdvancedFocusCastBarSaved.Settings.Height
 		or 0
 	local maxWidth = AdvancedFocusCastBarSaved.Settings.Width - 4 - iconSize - castTimeSize
 
@@ -1647,22 +1649,18 @@ end
 
 function AdvancedFocusCastBarMixin:AdjustCustomTextsPosition()
 	local point = AdvancedFocusCastBarSaved.Settings.CustomTextsPosition
-				== Private.Enum.CustomTextsPosition.BOTTOMCENTER
-			and "BOTTOM"
+		== Private.Enum.CustomTextsPosition.BOTTOMCENTER
+		and "BOTTOM"
 		or AdvancedFocusCastBarSaved.Settings.CustomTextsPosition
 
 	local factor = (
-		point == Private.Enum.CustomTextsPosition.TOPLEFT or point == Private.Enum.CustomTextsPosition.TOPRIGHT
-	)
-			and 1
+			point == Private.Enum.CustomTextsPosition.TOPLEFT or point == Private.Enum.CustomTextsPosition.TOPRIGHT
+		)
+		and 1
 		or -1
 
-	for i = 1, 5 do
-		local CustomElementsFrame = self.CustomElementsFrame["TargetNameText" .. i]
-
-		CustomElementsFrame:ClearAllPoints()
-		CustomElementsFrame:SetPoint(point, self, point, 0, 8 * factor)
-	end
+	self.CustomElementsFrame.TargetNameText:ClearAllPoints()
+	self.CustomElementsFrame.TargetNameText:SetPoint(point, self, point, 0, 8 * factor)
 end
 
 function AdvancedFocusCastBarMixin:ToggleTargetNameVisibility()
@@ -1676,10 +1674,7 @@ function AdvancedFocusCastBarMixin:AdjustBackgroundOpacity()
 end
 
 function AdvancedFocusCastBarMixin:SetTargetNameVisibility(bool)
-	for i = 1, 5 do
-		local targetNameFrame = self.CustomElementsFrame["TargetNameText" .. i]
-		targetNameFrame:SetShown(bool)
-	end
+	self.CustomElementsFrame.TargetNameText:SetShown(bool)
 end
 
 function AdvancedFocusCastBarMixin:SetFontAndFontSize()
@@ -1689,11 +1684,7 @@ function AdvancedFocusCastBarMixin:SetFontAndFontSize()
 	local fontStrings = {
 		[self.CastBar.CastTimeText] = AdvancedFocusCastBarSaved.Settings.FontSize,
 		[self.CastBar.SpellNameText] = AdvancedFocusCastBarSaved.Settings.FontSize,
-		[self.CustomElementsFrame.TargetNameText1] = otherSize,
-		[self.CustomElementsFrame.TargetNameText2] = otherSize,
-		[self.CustomElementsFrame.TargetNameText3] = otherSize,
-		[self.CustomElementsFrame.TargetNameText4] = otherSize,
-		[self.CustomElementsFrame.TargetNameText5] = otherSize,
+		[self.CustomElementsFrame.TargetNameText] = otherSize,
 		[self.CustomElementsFrame.InterruptSourceText] = otherSize,
 	}
 
@@ -1721,7 +1712,7 @@ end
 function AdvancedFocusCastBarMixin:RestoreEditModePosition()
 	self:ClearAllPoints()
 	self:SetPoint(
-		---@diagnostic disable-next-line: param-type-mismatch
+	---@diagnostic disable-next-line: param-type-mismatch
 		AdvancedFocusCastBarSaved.Settings.Point,
 		AdvancedFocusCastBarSaved.Settings.OffsetX,
 		AdvancedFocusCastBarSaved.Settings.OffsetY
@@ -1806,6 +1797,7 @@ function AdvancedFocusCastBarMixin:OnEditModeExit()
 	self:SetScript("OnEvent", self.OnEvent)
 	self:Hide()
 end
+
 function AdvancedFocusCastBarMixin:GetOpacityWithRangeCheck(theOpacity)
 	if AdvancedFocusCastBarSaved.Settings.OutOfRangeOpacity < 1 then
 		local inRange = C_Spell.IsSpellInRange(self.interruptId, AdvancedFocusCastBarSaved.Settings.Unit)
@@ -1817,6 +1809,7 @@ function AdvancedFocusCastBarMixin:GetOpacityWithRangeCheck(theOpacity)
 
 	return theOpacity
 end
+
 function AdvancedFocusCastBarMixin:SetAlphaFromFeatureFlag(interruptDuration, opacity)
 	if AdvancedFocusCastBarSaved.Settings.FeatureFlags[Private.Enum.FeatureFlag.HideWhenUninterruptible] then
 		self:SetAlphaFromBoolean(
@@ -2039,24 +2032,6 @@ function AdvancedFocusCastBarMixin:QueryCastInformation()
 	}
 end
 
-function AdvancedFocusCastBarMixin:GetMaybeColoredUnitName(unit)
-	local name = UnitName(unit)
-
-	if AdvancedFocusCastBarSaved.Settings.FeatureFlags[Private.Enum.FeatureFlag.UseTargetClassColor] then
-		local class = select(2, UnitClass(unit))
-
-		if class == nil then
-			return name
-		end
-
-		local color = C_ClassColor.GetClassColor(class)
-
-		return color:WrapTextInColorCode(name)
-	end
-
-	return name
-end
-
 function AdvancedFocusCastBarMixin:ProcessCastInformation()
 	local totalDuration = self.castInformation.duration:GetTotalDuration()
 	self.CastBar:SetMinMaxValues(0, totalDuration)
@@ -2117,31 +2092,22 @@ function AdvancedFocusCastBarMixin:ProcessCastInformation()
 		then
 			self:SetTargetNameVisibility(true)
 
-			if IsInGroup() then
-				local partyMembers = GetNumGroupMembers()
+			local spellTargetName = UnitSpellTargetName(AdvancedFocusCastBarSaved.Settings.Unit)
 
-				for i = 1, partyMembers do
-					local unit = i == partyMembers and "player" or "party" .. i
+			if spellTargetName ~= nil then
+				if AdvancedFocusCastBarSaved.Settings.FeatureFlags[Private.Enum.FeatureFlag.UseTargetClassColor] then
+					local class = UnitSpellTargetClass(AdvancedFocusCastBarSaved.Settings.Unit)
 
-					---@type FontString
-					local frame = self.CustomElementsFrame["TargetNameText" .. i]
-					-- MDI spectators can be in the party
-					if frame then
-						frame:SetText(self:GetMaybeColoredUnitName(unit))
-						frame:SetAlphaFromBoolean(
-							UnitIsSpellTarget(AdvancedFocusCastBarSaved.Settings.Unit, unit),
-							1,
-							0
-						)
+					if class then
+						local color = C_ClassColor.GetClassColor(class)
+						spellTargetName = color:WrapTextInColorCode(spellTargetName)
 					end
 				end
+
+				self.CustomElementsFrame.TargetNameText:SetText(spellTargetName)
+				self.CustomElementsFrame.TargetNameText:SetAlpha(1)
 			else
-				self.CustomElementsFrame.TargetNameText1:SetText(self:GetMaybeColoredUnitName("player"))
-				self.CustomElementsFrame.TargetNameText1:SetAlphaFromBoolean(
-					UnitIsSpellTarget(AdvancedFocusCastBarSaved.Settings.Unit, "player"),
-					1,
-					0
-				)
+				self.CustomElementsFrame.TargetNameText:SetAlpha(0)
 			end
 		else
 			self:SetTargetNameVisibility(false)
@@ -2159,7 +2125,17 @@ function AdvancedFocusCastBarMixin:ProcessCastInformation()
 			self.CustomElementsFrame.TargetMarker:Hide()
 		end
 
-		self.CustomElementsFrame.TargetNameText1:SetText(self:GetMaybeColoredUnitName("player"))
+		local name = UnitName("player")
+		if AdvancedFocusCastBarSaved.Settings.FeatureFlags[Private.Enum.FeatureFlag.UseTargetClassColor] then
+			local class = select(2, UnitClass("player"))
+
+			if class then
+				local color = C_ClassColor.GetClassColor(class)
+				name = color:WrapTextInColorCode(name)
+			end
+		end
+
+		self.CustomElementsFrame.TargetNameText:SetText(name)
 		self:SetTargetNameVisibility(true)
 	end
 end
@@ -2502,7 +2478,7 @@ function AdvancedFocusCastBarMixin:OnEvent(event, ...)
 	elseif event == Private.Enum.Events.EDIT_MODE_POSITION_CHANGED then
 		self:ClearAllPoints()
 		self:SetPoint(
-			---@diagnostic disable-next-line: param-type-mismatch
+		---@diagnostic disable-next-line: param-type-mismatch
 			AdvancedFocusCastBarSaved.Settings.Point,
 			AdvancedFocusCastBarSaved.Settings.OffsetX,
 			AdvancedFocusCastBarSaved.Settings.OffsetY

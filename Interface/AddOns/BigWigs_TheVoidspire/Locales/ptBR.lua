@@ -1,55 +1,39 @@
-local L = BigWigs:NewBossLocale("Vorasius", "ptBR")
-if not L then return end
-if L then
-	--L.shadowclaw_slam = "Slams"
-end
+if not BigWigsAPI.IsLocale("ptBR") then return end
+BigWigsAPI.SetBossModuleLocale("Vorasius", {
+	shadowclaw_slam = "Golpes",
+})
 
-L = BigWigs:NewBossLocale("Fallen-King Salhadaar", "ptBR")
-if L then
-	--L.fractured_projection = "Kicks"
-end
+BigWigsAPI.SetBossModuleLocale("Lightblinded Vanguard", {
+	aura_of_wrath = "Fúria", -- Short for Aura of Wrath
+	execution_sentence = "Execuções", -- Short for Execution Sentence
+	executes_mythic = "Execuções + Esquiva",
+	judgement_red = "Julgamento [V]", -- R for the Red icon.
+	aura_of_devotion = "Devoção", -- Short for Aura of Devotion
+	judgement_blue = "Julgamento [A]", -- B for the Blue icon.
+	aura_of_peace = "Paz", -- Short for Aura of Peace
+	tyrs_wrath_mythic = "Absorções + Execuções",
+	divine_toll_mythic = "Esquiva + Absorções",
 
-L = BigWigs:NewBossLocale("Vaelgor & Ezzorak", "ptBR")
-if L then
-	--L.grappling_maw = "Tank Grip"
-end
+	empowered_searing_radiance = "Resplendor Calcinante Potencializado",
+	empowered_searing_radiance_desc = "Mostra o temporizador para o Resplendor Calcinante potencializado.",
 
-L = BigWigs:NewBossLocale("Lightblinded Vanguard", "ptBR")
-if L then
-	--L.aura_of_wrath = "Wrath" -- Short for Aura of Wrath
-	--L.execution_sentence = "Executes" -- Short for Execution Sentence
-	--L.executes_mythic = "Executes + Dodge"
-	--L.judgement_red = "Judgement [R]" -- R for the Red icon.
-	--L.aura_of_devotion = "Devotion" -- Short for Aura of Devotion
-	--L.judgement_blue = "Judgement [B]" -- B for the Blue icon.
-	--L.aura_of_peace = "Peace" -- Short for Aura of Peace
-	--L.tyrs_wrath_mythic = "Absorbs + Executes"
-	--L.divine_toll_mythic = "Dodge + Absorbs"
-	--L.zealous_spirit = "Spirit" -- Short for Zealous Spirit
+	empowered_avengers_shield = "Escudo do Vingador Potencializado",
+	empowered_avengers_shield_desc = "Mostra o temporizador para o Escudo do Vingador potencializado.",
 
-	--L.empowered_searing_radiance = "Empowered Searing Radiance"
-	--L.empowered_searing_radiance_desc = "Show the timer for the empowered Searing Radiance"
+	empowered_divine_storm = "Tempestade Divina Potencializada",
+	empowered_divine_storm_desc = "Mostra o temporizador para a Tempestade Divina potencializada.",
+	tornadoes = "Tornados", -- The renamed empowered Divine Storm
 
-	--L.empowered_avengers_shield = "Empowered Avenger's Shield"
-	--L.empowered_avengers_shield_desc = "Show the timer for the empowered Avenger's Shield"
+	empowered = "[P] %s", -- Empowered version of an ability, [E] Avengers Shield
+})
 
-	--L.empowered_divine_storm = "Empowered Divine Storm"
-	--L.empowered_divine_storm_desc = "Show the timer for the empowered Divine Storm"
-	--L.tornadoes = "Tornadoes" -- The renamed empowered Divine Storm
-
-	--L.empowered = "[E] %s" -- Empowered version of an ability, [E] Avengers Shield
-end
-
-L = BigWigs:NewBossLocale("Crown of the Cosmos", "ptBR")
-if L then
-	--L.silverstrike_arrow = "Arrows"
-	--L.grasp_of_emptiness = "Obelisks"
-	--L.interrupting_tremor = "Interrupt"
-	--L.ravenous_abyss = "Move Out"
-	--L.silverstrike_barrage = "Lines"
-	--L.cosmic_barrier = "Barrier"
-	--L.rangers_captains_mark = "Arrows"
-	--L.voidstalker_sting = "Stings"
-	--L.aspect_of_the_end = "Tethers"
-	--L.devouring_cosmos = "Next Platform"
-end
+BigWigsAPI.SetBossModuleLocale("Crown of the Cosmos", {
+	grasp_of_emptiness = "Obeliscos",
+	interrupting_tremor = "Corte",
+	ravenous_abyss = "Afaste-se",
+	silverstrike_barrage = "Linhas",
+	cosmic_barrier = "Barreira",
+	voidstalker_sting = "Ferroadas",
+	aspect_of_the_end = "Correntes",
+	devouring_cosmos = "Próxima Plataforma",
+})
