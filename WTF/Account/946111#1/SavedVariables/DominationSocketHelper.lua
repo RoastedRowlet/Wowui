@@ -3,18 +3,18 @@ DSHDB = {
 ["profileKeys"] = {
 ["Zappyxatu - Stormrage"] = "Zappyxatu - Stormrage",
 ["Angryabsol - Stormrage"] = "Angryabsol - Stormrage",
-["Lonelylitten - Stormrage"] = "Lonelylitten - Stormrage",
-["Barelynoer - Area 52"] = "Barelynoer - Area 52",
 ["Madmareep - Stormrage"] = "Madmareep - Stormrage",
+["Barelynoer - Area 52"] = "Barelynoer - Area 52",
+["Lonelylitten - Stormrage"] = "Lonelylitten - Stormrage",
 },
 ["profiles"] = {
 ["Angryabsol - Stormrage"] = {
 },
+["Lonelylitten - Stormrage"] = {
+},
 ["Zappyxatu - Stormrage"] = {
 },
 ["Barelynoer - Area 52"] = {
-},
-["Lonelylitten - Stormrage"] = {
 },
 },
 }

@@ -1,11 +1,4 @@
 Version: 1
-Frame: CraftScanScannerMenuButton
-FrameLevel: 437
-Anchor: LEFT
-X: 119
-Y: -247
-W: 53
-H: 53
 Frame: GroupLootHistoryFrame
 FrameLevel: 1
 Anchor: TOP
@@ -20,13 +13,6 @@ X: -251
 Y: -50
 W: 1105
 H: 658
-Frame: MDTPullButton15
-FrameLevel: 8
-Anchor: RIGHT
-X: -367
-Y: 70
-W: 248
-H: 32
 Frame: InstanceAbandonPopup
 FrameLevel: 1
 Anchor: BOTTOMRIGHT
@@ -34,3 +20,10 @@ X: -110
 Y: 138
 W: 384
 H: 165
+Frame: CraftScanScannerMenuButton
+FrameLevel: 438
+Anchor: LEFT
+X: 119
+Y: -247
+W: 53
+H: 53
