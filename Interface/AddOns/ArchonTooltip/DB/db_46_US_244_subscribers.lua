@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'Hunter-BeastMastery',}
-local provider = {region='US',realm='Zangarmarsh',name='US',type='subscribers',zone=46,date='2026-06-01',data={Em='Emila:BAEBLgAECn8WAAIBAAYJuh72TwCeAQZoDAAABABPAGkMAAAEAFEAawwAAAQASQBqDAAABABiAGwMAAADAF8A6gwAAAMAPwABAAYJuh72TwCeAQZoDAAABABPAGkMAAAEAFEAawwAAAQASQBqDAAABABiAGwMAAADAF8A6gwAAAMAPwABLgAECggJIAABACwgAA==.',},}
+local lookup = {'Hunter-BeastMastery','Paladin-Retribution',}
+local provider = {region='US',realm='Zangarmarsh',name='US',type='subscribers',zone=46,date='2026-06-07',data={Em='Emila:BAEBLgAECn8bAAIBAAYJqyFKOQDwAQZoDAAABQBdAGkMAAAFAFQAawwAAAUAUgBqDAAABQBiAGwMAAADAF8A6gwAAAQASwABAAYJqyFKOQDwAQZoDAAABQBdAGkMAAAFAFQAawwAAAUAUgBqDAAABQBiAGwMAAADAF8A6gwAAAQASwABLgAECggJKAABANMgAA==.',So='Solidgen:BAEALgAECgEJAgABLgAFFAYJGAACACsRAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

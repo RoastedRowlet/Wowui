@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'Monk-Windwalker',}
-local provider = {region='US',realm='AlteracMountains',name='US',type='subscribers',zone=46,date='2026-06-01',data={Mk='Mk:BAEALgAECgUJBgABLgAECggJPQABAGsjAA==.',},}
+local lookup = {'Paladin-Protection','Monk-Windwalker',}
+local provider = {region='US',realm='AlteracMountains',name='US',type='subscribers',zone=46,date='2026-06-07',data={Ka='Kain:BAECLgAFFH8jAAIBAAcJzR86AAClAgdoDAAACABbAGkMAAAHAGAAawwAAAcASwBsDAAAAQAzAG0MAAABAF8A6gwAAAoAYwBuDAAAAQA7AAEABwnNHzoAAKUCB2gMAAAIAFsAaQwAAAcAYABrDAAABwBLAGwMAAABADMAbQwAAAEAXwDqDAAACgBjAG4MAAABADsALgAECn8vAAIBAAgJaCbdAABoAwABAAgJaCbdAABoAwAAAA==.',Mk='Mk:BAEALgAECgYJDgABLgAECgkJQQACAIAgAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

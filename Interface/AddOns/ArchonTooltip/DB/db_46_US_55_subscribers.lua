@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'Priest-Holy','Shaman-Elemental','Shaman-Restoration','DeathKnight-Frost','Paladin-Retribution','DeathKnight-Blood','DeathKnight-Unholy',}
-local provider = {region='US',realm='Crushridge',name='US',type='subscribers',zone=46,date='2026-06-01',data={Al='Aliyah:BAEALgADCgIJAgABLgAECgkJJgABAMoZAA==.',Ig='Iglooshocker:BAECLgAFFH8FAAICAAMJfAbVEQDXAANoDAAAAgAhAGkMAAACAAUA6gwAAAEACQACAAMJfAbVEQDXAANoDAAAAgAhAGkMAAACAAUA6gwAAAEACQAuAAQKfxYAAwIACAkqGQUXAGACAAIACAkqGQUXAGACAAMAAQkBDIvJACoAAAEuAAUUBAkFAAQAzg4A.',La='Lanas:BAEALgAECgkJAwABLgAFFAQJCwAFAO8PAA==.',Sh='Shamshielder:BAECLgAFFH8FAAMEAAQJzg4KDQAIAQRoDAAAAgBaAGkMAAABABMAawwAAAEAEADqDAAAAQAYAAQABAlyCAoNAAgBBGgMAAABABkAaQwAAAEAEwBrDAAAAQAQAOoMAAABABgABgABCYYjuy8AVQABaAwAAAEAWgAuAAQKfy0ABAYACQmZI7EEANgCAAYACQmZI7EEANgCAAQABgmlG7sLAJYBAAcAAQm5CQZpASkAAAAA.',},}
+local lookup = {'Priest-Holy','Paladin-Retribution','DeathKnight-Frost','DeathKnight-Blood','DeathKnight-Unholy',}
+local provider = {region='US',realm='Crushridge',name='US',type='subscribers',zone=46,date='2026-06-07',data={Al='Aliyah:BAEALgADCgIJAgABLgAECgkJJgABAMoZAA==.',La='Lanas:BAEALgAECgkJAwABLgAFFAQJDwACAO8PAA==.',Sh='Shamshielder:BAECLgAFFH8KAAQDAAUJFA8lDwAEAQVoDAAAAwBaAGkMAAACABYAawwAAAIAEABqDAAAAQA9AOoMAAACABgAAwAECbgIJQ8ABAEEaAwAAAIAGQBpDAAAAgAWAGsMAAABABAA6gwAAAIAGAAEAAIJhiNwNABTAAJoDAAAAQBaAGoMAAABAD0ABQABCekDmQEBQAABawwAAAEACgAuAAQKfy0ABAQACQmZIyIFANMCAAQACQmZIyIFANMCAAMABgmlGzENAJYBAAUAAQm5CbZ4ASkAAAAA.',},}
 provider.parse = parse
 
 local rawData = provider.data

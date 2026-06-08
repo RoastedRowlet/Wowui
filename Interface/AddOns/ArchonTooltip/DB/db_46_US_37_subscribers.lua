@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'Hunter-BeastMastery','Hunter-Marksmanship',}
-local provider = {region='US',realm='Bladefist',name='US',type='subscribers',zone=46,date='2026-06-01',data={Ni='Nicked:BAECLgAFFH8TAAIBAAUJFxuHDQDwAAVoDAAABgBJAGkMAAACAFUAawwAAAMANgBqDAAAAQARAOoMAAAHAEAAAQAFCRcbhw0A8AAFaAwAAAYASQBpDAAAAgBVAGsMAAADADYAagwAAAEAEQDqDAAABwBAAC4ABAp/IwADAQAJCa0fmw4AxgIAAQAJCa0fmw4AxgIAAgAECXQGVGkAmQAAAAA=.',},}
+local lookup = {'Hunter-BeastMastery','Hunter-Marksmanship','Rogue-Subtlety','Rogue-Assassination','Rogue-Outlaw',}
+local provider = {region='US',realm='Bladefist',name='US',type='subscribers',zone=46,date='2026-06-07',data={Ni='Nicked:BAECLgAFFH8VAAIBAAYJuhf7GACLAQZoDAAABgBJAGkMAAACAFUAawwAAAMANgBqDAAAAQARAG0MAAABABQA6gwAAAgARQABAAYJuhf7GACLAQZoDAAABgBJAGkMAAACAFUAawwAAAMANgBqDAAAAQARAG0MAAABABQA6gwAAAgARQAuAAQKfyMAAwEACQmtH5sOAMYCAAEACQmtH5sOAMYCAAIABAl0BlRpAJkAAAAA.',Sa='Samwield:BAECLgAFFH8eAAIDAAUJDiI5EgBnAQVoDAAACABZAGkMAAAHAFkAawwAAAUAUgBqDAAABABGAOoMAAAGAFYAAwAFCQ4iORIAZwEFaAwAAAgAWQBpDAAABwBZAGsMAAAFAFIAagwAAAQARgDqDAAABgBWAC4ABAp/PgAEAwAJCcchUAUA1wIAAwAJCcchUAUA1wIABAADCUIYSxMAzQAABQABCdQKaiMALwAAAAA=.',Un='Unholysam:BAEALgAECgcJDwABLgAFFAUJHgADAA4iAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data
