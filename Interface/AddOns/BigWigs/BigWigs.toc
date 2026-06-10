@@ -14,7 +14,7 @@
 ## Notes-ptBR: Abordagem modular, leve e não intrusiva para avisos em encontros com chefes.
 ## IconTexture: Interface\AddOns\BigWigs\Media\Icons\minimap_raid.tga
 ## Author: Funkeh, Nebula, Justwait, Delk
-## Version: v416.1
+## Version: v416.3
 ## LoadSavedVariablesFirst: 1
 
 ## X-Credits: Ammo, Elvador, Vhaarr
@@ -47,6 +47,7 @@ Locales\enUS.lua
 Locales\enUS_common.lua
 Locales\[TextLocale].lua [AllowLoadTextLocale deDE, esES, esMX, frFR, itIT, koKR, ptBR, ruRU, zhCN, zhTW]
 Locales\[TextLocale]_common.lua [AllowLoadTextLocale deDE, esES, esMX, frFR, itIT, koKR, ptBR, ruRU, zhCN, zhTW]
+Locales\[TextLocale]_bosses.lua [AllowLoadTextLocale deDE, esES, esMX, frFR, itIT, koKR, ptBR, ruRU, zhCN, zhTW]
 
 Media\Media.lua
 GuildVersion.lua

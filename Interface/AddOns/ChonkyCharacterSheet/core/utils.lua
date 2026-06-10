@@ -450,14 +450,15 @@ function CCS:PrimeFontsAndTextures()
     preloadFrame:SetSize(1, 1)
     preloadFrame:Show()
     
-    for _, path in pairs(CCS.fonts) do
+    for key, path in pairs(CCS.fonts) do
         local fs = preloadFrame:CreateFontString(nil, "OVERLAY")
-        fs:SetFont(path, 1)
-        fs:SetPoint("CENTER", preloadFrame, "CENTER")
-        fs:SetText(".") -- force render
-        fs:Show()
+        if pcall(fs.SetFont, fs, path, 1) then
+            fs:SetPoint("CENTER", preloadFrame, "CENTER")
+            fs:SetText(".")
+            fs:Show()
+        end
     end
-       -- Optional cleanup
+    
     C_Timer.After(1, function()
         preloadFrame:Hide()
     end)
@@ -1011,6 +1012,18 @@ function CCS:InitSavedVariables()
     
     local savedProfile = CCS.CurrentProfile
 
+    if not savedProfile.sectionOrder then
+        savedProfile.sectionOrder = {
+            "ATTRIBUTES",
+            "SECONDARY",
+            "ATTACK",
+            "DEFENSE",
+            "GENERAL",
+            "CRESTS",
+            "PVP",
+        }
+    end
+
     for _, def in ipairs(ns.optionDefs or {}) do
         if def.key then
             local saved = savedProfile[def.key]
@@ -1041,6 +1054,58 @@ function CCS:InitSavedVariables()
             end
         end
     end
+end
+
+function CCS:GetOrderedSections(defaultSections)
+    local saved = CCS.CurrentProfile.sectionOrder or {}
+    local defaultKeys = {}
+    local ordered = {}
+
+    -- Build lookup of default keys
+    for _, sec in ipairs(defaultSections) do
+        defaultKeys[sec.key] = true
+    end
+
+    -- Add saved keys that still exist
+    for _, key in ipairs(saved) do
+        if defaultKeys[key] then
+            ordered[#ordered+1] = key
+            defaultKeys[key] = nil
+        end
+    end
+
+    -- Add any new sections not in saved order
+    for _, sec in ipairs(defaultSections) do
+        if defaultKeys[sec.key] then
+            ordered[#ordered+1] = sec.key
+        end
+    end
+
+    return ordered
+end
+
+function CCS:ReorderSections(dragKey, dropKey)
+    local order = CCS.CurrentProfile.sectionOrder
+    if not order then return end
+
+    -- Remove dragKey
+    for i, key in ipairs(order) do
+        if key == dragKey then
+            table.remove(order, i)
+            break
+        end
+    end
+
+    -- Insert before dropKey
+    for i, key in ipairs(order) do
+        if key == dropKey then
+            table.insert(order, i, dragKey)
+            return
+        end
+    end
+
+    -- If dropKey not found, append
+    table.insert(order, dragKey)
 end
 
 ---------------------------

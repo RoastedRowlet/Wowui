@@ -134,9 +134,9 @@ BigWigs3DB = {
 ["BigWigs_Plugins_Bars"] = {
 ["profiles"] = {
 ["Default"] = {
-["normalWidth"] = 120,
-["visibleBarLimit"] = 1,
 ["emphasize"] = false,
+["visibleBarLimit"] = 1,
+["normalWidth"] = 120,
 ["expPosition"] = {
 "BOTTOMLEFT",
 "BOTTOMLEFT",
@@ -161,6 +161,15 @@ BigWigs3DB = {
 },
 },
 },
+["BigWigs_Bosses_Zuraal"] = {
+["profiles"] = {
+["Default"] = {
+["toggles"] = {
+[1263399] = 3129591,
+},
+},
+},
+},
 ["MythicPlus"] = {
 ["global"] = {
 ["showViewerTeleportTip"] = false,
@@ -176,51 +185,18 @@ BigWigs3DB = {
 },
 },
 },
-["BigWigs_Bosses_Zuraal"] = {
-["profiles"] = {
-["Default"] = {
-["toggles"] = {
-[1263399] = 3129591,
-},
-},
-},
-},
 },
 ["myKeystones"] = {
-["Player-60-0C9E885E"] = {
-["playerRating"] = 2064,
-["specId"] = 1480,
-["keyMap"] = 0,
-["name"] = "Angryabsol",
-["keyLevel"] = 0,
-["realm"] = "Stormrage",
-},
-["Player-60-0F7B141D"] = {
-["playerRating"] = 3907,
-["specId"] = 264,
-["keyMap"] = 556,
-["name"] = "Zappyxatu",
-["keyLevel"] = 20,
-["realm"] = "Stormrage",
-},
 ["Player-3676-0DF7D3EF"] = {
-["playerRating"] = 4060,
+["playerRating"] = 4074,
 ["specId"] = 1473,
 ["keyMap"] = 560,
 ["name"] = "Barelynoer",
-["keyLevel"] = 21,
+["keyLevel"] = 22,
 ["realm"] = "Area 52",
 },
-["Player-60-0F85ABEF"] = {
-["playerRating"] = 3929,
-["specId"] = 105,
-["keyMap"] = 557,
-["name"] = "Lonelylitten",
-["keyLevel"] = 20,
-["realm"] = "Stormrage",
 },
-},
-["prevWeeklyReset"] = 1780412400,
+["prevWeeklyReset"] = 1781017200,
 ["profiles"] = {
 ["Default"] = {
 },

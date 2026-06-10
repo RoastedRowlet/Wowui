@@ -58,6 +58,10 @@ L["DB_MODULES_HEADER_MYTHIC_PLUS"] = "Mythique+"
 L["DB_MODULES_HEADER_RAIDING"] = "Raids"
 L["DB_MODULES_HEADER_RECRUITMENT"] = "Recrutement"
 L["DISABLE_DEBUG_MODE_RELOAD"] = "Vous désactivez le mode débogage. En cliquant sur Confirmer, vous rechargerez votre interface."
+--[[Translation missing --]]
+--[[ L["DISABLE_DROPDOWN_MENU_BUTTON"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["DISABLE_DROPDOWN_MENU_BUTTON_DESC"] = ""--]] 
 L["DISABLE_RWF_MODE_BUTTON"] = "Désactiver"
 L["DISABLE_RWF_MODE_BUTTON_TOOLTIP"] = "Cliquez pour désactiver le mode « Course au World First ». Cela entraînera le rechargement de votre interface."
 L["DISABLE_RWF_MODE_RELOAD"] = "Vous désactivez le mode « Course au World First ». En cliquant sur Confirmer, vous rechargerez votre interface."
@@ -417,6 +421,8 @@ L["RAID_BOSS_NP_6"] = "Princesse-nexus Ky'veza"
 L["RAID_BOSS_NP_7"] = "Anub'arash"
 L["RAID_BOSS_NP_8"] = "Reine Ansurek"
 L["RAID_BOSS_RS_1"] = "Halion"
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_SF_1"] = ""--]] 
 L["RAID_BOSS_SFO_1"] = "Gardien vigilant"
 L["RAID_BOSS_SFO_10"] = "Rygelon"
 L["RAID_BOSS_SFO_11"] = "Le Geôlier"
@@ -556,6 +562,8 @@ L["RAID_MFO"] = "Manaforge Oméga"
 L["RAID_MSV"] = "Caveaux Mogu’shan"
 L["RAID_NP"] = "Palais des Nérub’ar"
 L["RAID_RS"] = "Le sanctum Rubis"
+--[[Translation missing --]]
+--[[ L["RAID_SF"] = ""--]] 
 --[[Translation missing --]]
 --[[ L["RAID_SOO"] = ""--]] 
 L["RAID_ToES"] = "Terrasse Printanière"

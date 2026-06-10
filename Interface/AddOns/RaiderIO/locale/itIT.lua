@@ -65,6 +65,10 @@ L["DB_MODULES_HEADER_MYTHIC_PLUS"] = "Mitica+"
 L["DB_MODULES_HEADER_RAIDING"] = "Raid"
 L["DB_MODULES_HEADER_RECRUITMENT"] = "Reclutamento"
 L["DISABLE_DEBUG_MODE_RELOAD"] = "Stai disabilitando Debug Mode. Premere Conferma ricaricherà l'interfaccia"
+--[[Translation missing --]]
+--[[ L["DISABLE_DROPDOWN_MENU_BUTTON"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["DISABLE_DROPDOWN_MENU_BUTTON_DESC"] = ""--]] 
 L["DISABLE_RWF_MODE_BUTTON"] = "Disabilita "
 L["DISABLE_RWF_MODE_BUTTON_TOOLTIP"] = "Fai clic per disattivare la modalità Race World First. Ciò causerà il ricaricamento dell'interfaccia."
 L["DISABLE_RWF_MODE_RELOAD"] = "Stai disabilitando la modalità Race World First. Facendo clic su Conferma si ricaricherà l'interfaccia."
@@ -520,6 +524,8 @@ L["RAID_BOSS_NP_8"] = "Regina Ansurek"
 --[[Translation missing --]]
 --[[ L["RAID_BOSS_RS_1"] = ""--]] 
 --[[Translation missing --]]
+--[[ L["RAID_BOSS_SF_1"] = ""--]] 
+--[[Translation missing --]]
 --[[ L["RAID_BOSS_SFO_1"] = ""--]] 
 --[[Translation missing --]]
 --[[ L["RAID_BOSS_SFO_10"] = ""--]] 
@@ -697,6 +703,8 @@ L["RAID_MQD"] = "Marcia su Quel'Danas"
 --[[ L["RAID_MSV"] = ""--]] 
 L["RAID_NP"] = "Palazzo dei Nerub'ar"
 L["RAID_RS"] = "Santuario di Rubino"
+--[[Translation missing --]]
+--[[ L["RAID_SF"] = ""--]] 
 --[[Translation missing --]]
 --[[ L["RAID_SOO"] = ""--]] 
 --[[Translation missing --]]

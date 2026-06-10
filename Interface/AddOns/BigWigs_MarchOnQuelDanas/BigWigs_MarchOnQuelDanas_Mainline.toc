@@ -23,15 +23,13 @@
 ## Notes-zhCN: BigWigs 进军奎尔丹纳斯模块
 ## Notes-zhTW: BigWigs 進軍奎爾達納斯模組
 ## IconTexture: Interface\AddOns\BigWigs\Media\Icons\minimap_raid.tga
-## Version: v416.1
+## Version: v416.3
 
 ## LoadOnDemand: 1
 ## Dependencies: BigWigs
 
 ## X-Category: Raid
 ## X-BigWigs-LoadOn-InstanceId: 2913
-
-Locales\[TextLocale].lua [AllowLoadTextLocale deDE, esES, esMX, frFR, itIT, koKR, ptBR, ruRU, zhCN, zhTW]
 
 Beloren.lua
 MidnightFalls.lua

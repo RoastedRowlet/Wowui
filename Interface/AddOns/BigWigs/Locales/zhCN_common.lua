@@ -136,6 +136,13 @@ L.focus_only = "|cffff0000仅焦点目标。|r "
 L.trash = "小怪"
 L.affixes = "词缀" -- Seasonal affixes for raids and mythic+ dungeons
 
+-- GUI boss dropdown for cast counters (Usually a dropdown menu in the boss options that lets you choose when a spell counter should reset back to 1)
+--L.counter_reset_name = "%s cast counter" -- SPELL_NAME cast counter
+--L.counter_reset_desc = "Choose when to reset the counter."
+--L.reset_casts = "Reset after every %d casts." -- Reset after every 3 casts.
+--L.reset_stages = "Only reset on stage change."
+--L.reset_casts_and_stages = "Reset after every %d casts and every stage change."
+
 -- Common raid marking locale
 L.marker = "%s标记"
 L.marker_player_desc = "将受到%s影响的玩家标记为%s，需要权限。" -- Mark players affected by 'SPELL_NAME' with SKULL_ICON
@@ -224,6 +231,7 @@ L.otherDifficultiesNote = "非史诗难度下显示文本"
 -- GUI notes for debuffs
 L.debuffFailureNote = "失误时获得此减益效果"
 L.debuffFailureMoveFromExplosionNote = "未能躲开爆炸时，你会受到此减益效果"
+L.debuffFailureInterruptNote = "打断|cFFFFFFFF%s|r失败时，你将受到此减益效果" -- This debuff will apply to you if you fail to interrupt the cast of SPELL_NAME
 L.preDebuffNote = "此为预警减益，出现后主减益即将生效"
 L.mainDebuffNote = "该减益为主要效果"
 L.postDebuffNote = "|cFFFFFFFF%s|r结束后，该减益会施加于你" -- This debuff will apply to you after OTHER_DEBUFF expires
@@ -232,6 +240,7 @@ L.debuffDotAfterCastNote = "首领施放|cFFFFFFFF%s|r后，你会受到持续�
 L.debuffPossibleAfterCastNote = "首领施放|cFFFFFFFF%s|r后，你可能会受到此减益效果" -- This debuff might apply to you after the boss finishes casting SPELL_NAME
 L.debuffTankAfterCastNote = "首领施放|cFFFFFFFF%s|r后，坦克会受到此减益效果" -- This debuff will apply to the tank after the boss finishes casting SPELL_NAME
 L.debuffWalkIntoObjectNote = "主动触碰|cFFFFFFFF%s|r，你会受到此减益效果" -- This debuff will apply to you if you purposely walk into the OBJECT_NAME (e.g. trap, mine, bomb)
+L.debuffHitByCastNote = "被|cFFFFFFFF%s|r的施法击中时，你将受到此减益效果" -- This debuff will apply to you if you are hit by the the SPELL_NAME cast
 L.debuffAddsCast = "该减益由|cFFFFFFFF%s|r对你施加" -- This debuff is applied to you by NPC_NAME
 
 -- Common ability name replacements
@@ -299,6 +308,7 @@ L.grips = "拉拽" -- Plural of L.grip
 L.group_damage = "群体伤害" -- Any ability that causes damage to every player in the 5 player group 也可以称“AOE”
 L.health_drain = "吸血" -- Any ability that drains health from the player
 L.madness = "疯狂" -- Any ability that contains the word "Madness" in it e.g. "Rift Madness" (1264756) or "Burning Madness" (307013)
+L.miasma = "瘴气" -- Any ability that contains the word "Miasma" in it e.g. "Consuming Miasma" (1257087) or "Black Miasma" (1275059)
 L.missile = "飞弹" -- Short for any ability with the name "Missile" in it e.g. "Fey Missile" (188046) or "Water Missile" (68250)
 L.missiles = "飞弹" -- Plural of L.missile
 L.parasite = "寄生" -- Any ability where a parasite is involved e.g. "Parasitic Infection", "Parasitic Growth", etc

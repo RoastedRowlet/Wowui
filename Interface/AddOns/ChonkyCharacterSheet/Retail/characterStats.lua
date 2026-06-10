@@ -1442,6 +1442,11 @@ local STAT_SECTIONS = {
     },
 }
 
+STAT_SECTIONS_BY_KEY = {}
+for _, sec in ipairs(STAT_SECTIONS) do
+    STAT_SECTIONS_BY_KEY[sec.key] = sec
+end
+
 local SecondaryKeyToStat = {
     secondary_crit        = "CriticalStrike",
     secondary_haste       = "Haste",
@@ -1521,8 +1526,11 @@ local function UpdateLayout()
     -------------------------------------------------
     local contentHeight = 0
     local firstVisible = true
+	local orderedKeys = CCS:GetOrderedSections(STAT_SECTIONS)
 
-    for _, section in ipairs(STAT_SECTIONS) do
+    --for _, section in ipairs(STAT_SECTIONS) do
+	for _, key in ipairs(orderedKeys) do
+		local section = STAT_SECTIONS_BY_KEY[key]
         local sectionFrame = _G["CCS_Section_" .. section.key]
         local header       = _G["CCS_Header_" .. section.key]
 
@@ -1706,37 +1714,181 @@ local function CreateHeaderRow(parent, frameName, section)
 
     row:EnableMouse(true)
 
+	-- Drag state.  Dress in Drag and do the Hula! Pumba style!
+	row.isDragging = false
+	row.dragGhost = nil
+	row.dragTarget = nil
+	row.dragInsertIndex = nil
+
     if not row.initializedClick then
-        row:SetScript("OnMouseDown", function(self, button)
+		row:SetScript("OnMouseDown", function(self, button)
+
+			-------------------------------------------------
+			-- SHIFT + LEFT = begin drag
+			-------------------------------------------------
+			if IsShiftKeyDown() and button == "LeftButton" then
+				self.isDragging = true
+
+				-- Create ghost frame (outline only)
+				if not self.dragGhost then
+					local ghost = CreateFrame("Frame", nil, UIParent, "BackdropTemplate")
+					ghost:SetSize(self:GetWidth(), self:GetHeight())
+					ghost:SetBackdrop({
+						edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+						edgeSize = 12,
+					})
+					ghost:SetBackdropBorderColor(1, 1, 0, 1) -- yellow outline
+					ghost:SetFrameStrata("TOOLTIP")
+					ghost:SetAlpha(0.8)
+					self.dragGhost = ghost
+				end
+
+				-- Position ghost at cursor
+				local x, y = GetCursorPosition()
+				local scale = UIParent:GetEffectiveScale()
+				self.dragGhost:SetPoint("CENTER", UIParent, "BOTTOMLEFT", x/scale, y/scale)
+				self.dragGhost:Show()
+
+				-- Start tracking movement
+				self:SetScript("OnUpdate", function(header)
+					if not header.isDragging then return end
+
+					-- Move ghost
+					local cx, cy = GetCursorPosition()
+					local scale = UIParent:GetEffectiveScale()
+					header.dragGhost:SetPoint("CENTER", UIParent, "BOTTOMLEFT", cx/scale, cy/scale)
+
+					-------------------------------------------------
+					-- Determine insertion index based on Y position
+					-------------------------------------------------
+					local orderedKeys = CCS:GetOrderedSections(STAT_SECTIONS)
+					local headerList = {}
+
+					for _, key in ipairs(orderedKeys) do
+						local h = _G["CCS_Header_" .. key]
+						if h then
+							table.insert(headerList, { key = key, frame = h })
+						end
+					end
+
+					-- Clear all highlights
+					for _, info in ipairs(headerList) do
+						info.frame.highlight:Hide()
+					end
+
+					-- Ghost Y
+					local gx, gy = header.dragGhost:GetCenter()
+
+					-- Default: insert at bottom
+					local insertIndex = #headerList + 1
+
+					-- Find first header below ghost
+					for i, info in ipairs(headerList) do
+						local hx, hy = info.frame:GetCenter()
+						if gy > hy then
+							insertIndex = i
+							break
+						end
+					end
+
+					header.dragInsertIndex = insertIndex
+
+					-- Highlight the target header
+					if headerList[insertIndex] then
+						headerList[insertIndex].frame.highlight:Show()
+					end
+				end)
+
+				return
+			end
+
+			-------------------------------------------------
+			-- CTRL + LEFT = save collapse state
+			-------------------------------------------------
 			if IsControlKeyDown() and button == "LeftButton" then
 				local def = CCS:GetOptionDefByKey(section.collapseKey)
 				if def then
 					CCS:UpdateOption(def, self.isCollapsed)
 					C_Timer.After(.1, function() CCS:LoadOptions() end)
 				end
+				PlaySound(SOUNDKIT.GS_LOGIN_CHANGE_REALM_OK)
+				UpdateLayout()
+				return
+			end
 
-			else
-				-- Toggle collapse state
-				self.isCollapsed = not self.isCollapsed
+			-------------------------------------------------
+			-- NORMAL CLICK = collapse/expand
+			-------------------------------------------------
+			self.isCollapsed = not self.isCollapsed
 
-				-- Update expand/collapse +
-				if self.chevron then
-					if self.isCollapsed then
-						-- collapsed
-						self.chevron:SetTexCoord(0, 0.5, 0, 0.5)
-						self.chevron:SetAlpha(1)					
-					else
-						-- expanded
-						self.chevron:SetTexCoord(0.5, 1, 0, 0.5)
-						self.chevron:SetAlpha(.3)
+			if self.chevron then
+				if self.isCollapsed then
+					self.chevron:SetTexCoord(0, 0.5, 0, 0.5)
+					self.chevron:SetAlpha(1)
+				else
+					self.chevron:SetTexCoord(0.5, 1, 0, 0.5)
+					self.chevron:SetAlpha(.3)
+				end
+			end
+
+			PlaySound(SOUNDKIT.GS_LOGIN_CHANGE_REALM_OK)
+			UpdateLayout()
+		end)
+
+		row:SetScript("OnMouseUp", function(self, button)
+			if self.isDragging then
+				self.isDragging = false
+
+				-- Hide ghost
+				if self.dragGhost then
+					self.dragGhost:Hide()
+				end
+
+				-- Clear highlights
+				local orderedKeys = CCS:GetOrderedSections(STAT_SECTIONS)
+				for _, key in ipairs(orderedKeys) do
+					local h = _G["CCS_Header_" .. key]
+					if h and h.highlight then
+						h.highlight:Hide()
 					end
 				end
-				
+
+				-- Perform reorder
+				if self.dragInsertIndex then
+					local headerList = {}
+					for _, key in ipairs(orderedKeys) do
+						table.insert(headerList, key)
+					end
+
+					local dropKey = headerList[self.dragInsertIndex]
+					CCS:ReorderSections(self.sectionKey, dropKey)
+					UpdateLayout()
+				end
+
+				-- Stop tracking movement
+				self:SetScript("OnUpdate", nil)
+				return
 			end
-			PlaySound(SOUNDKIT.GS_LOGIN_CHANGE_REALM_OK)
-            -- Rebuild layout
-            UpdateLayout()
-        end)
+		end)
+
+		-------------------------------------------------
+		-- Tooltip Instructions
+		-------------------------------------------------
+		row:SetScript("OnEnter", function(self)
+			GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+			GameTooltip_SetTitle(GameTooltip, L["INSTRUCTIONS"]) -- don't really need a title
+
+			-- Instructional lines
+			GameTooltip_AddNormalLine(GameTooltip, "1) ".. L["CLICK_COL_EXP"].."\n\n")
+			GameTooltip_AddNormalLine(GameTooltip, "2) "..L["CTRL_CLICK_COL_EXP"].."\n\n")
+			GameTooltip_AddNormalLine(GameTooltip, "3) "..L["SHIFT_DRAG"])
+
+			GameTooltip:Show()
+		end)
+
+		row:SetScript("OnLeave", function(self)
+			GameTooltip:Hide()
+		end)
 
         row.initializedClick = true
     end
@@ -1897,6 +2049,14 @@ local function CreateHeaderRow(parent, frameName, section)
         row.bg:SetAllPoints()
     end
     row.bg:SetColorTexture(0.1, 0.1, 0.1, 0.4)
+
+	-- Highlight overlay (for drag target)
+	if not row.highlight then
+		row.highlight = row:CreateTexture(nil, "OVERLAY")
+		row.highlight:SetColorTexture(1, 1, 0, 0.25) -- yellow tint
+		row.highlight:SetAllPoints()
+		row.highlight:Hide()
+	end
 
     return row
 end
@@ -2117,8 +2277,11 @@ UpdateAllStats = function(parent)
     end
 
     local mode = option("long_text_handling")  -- "Full Text", "Truncate", "Wrap Text"
+	local orderedKeys = CCS:GetOrderedSections(STAT_SECTIONS)
 
-    for _, sectionData in ipairs(STAT_SECTIONS) do
+	for _, key in ipairs(orderedKeys) do
+	--for _, sectionData in ipairs(STAT_SECTIONS) do
+		local sectionData = STAT_SECTIONS_BY_KEY[key]
         local sectionFrame = _G["CCS_Section_" .. sectionData.key]
 
         if sectionFrame ~= nil then
@@ -2630,8 +2793,11 @@ function module:Initialize(onlyStyle)
         local previousSection = nil
         local sectionSpacing = 7
 
-        for _, section in ipairs(STAT_SECTIONS) do
+		local orderedKeys = CCS:GetOrderedSections(STAT_SECTIONS)
 
+		for _, key in ipairs(orderedKeys) do
+        --for _, section in ipairs(STAT_SECTIONS) do
+			local section = STAT_SECTIONS_BY_KEY[key]
             -------------------------------------------------
             -- Section Frame
             -------------------------------------------------

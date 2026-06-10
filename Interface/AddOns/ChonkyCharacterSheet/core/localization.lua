@@ -29,6 +29,10 @@ local defaultStrings = {
     ------------------------------------------------------------
     -- General / Common
     ------------------------------------------------------------
+	["INSTRUCTIONS"] = "Instructions",  -- enUS / enGB
+	["CLICK_COL_EXP"] = "Click to Collapse or Expand", -- enUS / enGB
+	["CTRL_CLICK_COL_EXP"] = "Control + Click to Save Collapse State", -- enUS / enGB
+	["SHIFT_DRAG"] = "Shift + Drag to Move Section", -- enUS / enGB
 	["Source"] = "Source",  -- enUS/ enGB
 	["SHOW_GEAR_FINDER"] = "Enable Gear Finder Module", -- enUS/ enGB
 	["SCALE"] = "Scale", -- enUS/ enGB
@@ -434,6 +438,10 @@ if locale == "enGB" then
     }
 elseif locale == "deDE" then
     localizedStrings = {
+        ["INSTRUCTIONS"] = "Anweisungen", -- deDE
+        ["CLICK_COL_EXP"] = "Klicken zum Ein- oder Ausklappen", -- deDE
+        ["CTRL_CLICK_COL_EXP"] = "Strg + Klicken, um den Einklappstatus zu speichern", -- deDE
+        ["SHIFT_DRAG"] = "Umschalt + Ziehen, um den Abschnitt zu verschieben", -- deDE
 		["Source"] = "Quelle", -- deDE
 		["SHOW_GEAR_FINDER"]      = "Ausrüstungsfinder-Modul aktivieren", -- deDE
 		["SCALE"]                 = "Skalierung", -- deDE
@@ -810,6 +818,10 @@ elseif locale == "deDE" then
     }	
 elseif locale == "frFR" then
     localizedStrings = {
+        ["INSTRUCTIONS"] = "Instructions", -- frFR
+        ["CLICK_COL_EXP"] = "Cliquez pour réduire ou développer", -- frFR
+        ["CTRL_CLICK_COL_EXP"] = "Ctrl + Clic pour enregistrer l’état de réduction", -- frFR
+        ["SHIFT_DRAG"] = "Maj + Glisser pour déplacer la section", -- frFR
 		["Source"] = "Source", -- frFR
 		["SHOW_GEAR_FINDER"]      = "Activer le module Chercheur d’équipement", -- frFR
 		["SCALE"]                 = "Échelle", -- frFR
@@ -1186,6 +1198,10 @@ elseif locale == "frFR" then
     }
 elseif locale == "esES" then
     localizedStrings = {
+        ["INSTRUCTIONS"] = "Instrucciones", -- esES
+        ["CLICK_COL_EXP"] = "Clic para contraer o expandir", -- esES
+        ["CTRL_CLICK_COL_EXP"] = "Ctrl + Clic para guardar el estado de contracción", -- esES
+        ["SHIFT_DRAG"] = "Mayús + Arrastrar para mover la sección", -- esES
 		["Source"] = "Fuente", -- esES
 		["SHOW_GEAR_FINDER"]      = "Activar el módulo Buscador de equipo", -- esES
 		["SCALE"]                 = "Escala", -- esES
@@ -1562,6 +1578,10 @@ elseif locale == "esES" then
     }
 elseif locale == "esMX" then
     localizedStrings = {
+        ["INSTRUCTIONS"] = "Instrucciones", -- esMX
+        ["CLICK_COL_EXP"] = "Clic para contraer o expandir", -- esMX
+        ["CTRL_CLICK_COL_EXP"] = "Ctrl + Clic para guardar el estado de contracción", -- esMX
+        ["SHIFT_DRAG"] = "Mayús + Arrastrar para mover la sección", -- esMX
 		["Source"] = "Fuente", -- esMX
 		["SHOW_GEAR_FINDER"]      = "Activar el módulo Buscador de equipo", -- esMX
 		["SCALE"]                 = "Escala", -- esMX
@@ -1938,6 +1958,10 @@ elseif locale == "esMX" then
     }
 elseif locale == "ruRU" then
     localizedStrings = {
+        ["INSTRUCTIONS"] = "Инструкции", -- ruRU
+        ["CLICK_COL_EXP"] = "Щёлкните, чтобы свернуть или развернуть", -- ruRU
+        ["CTRL_CLICK_COL_EXP"] = "Ctrl + Щелчок, чтобы сохранить состояние сворачивания", -- ruRU
+        ["SHIFT_DRAG"] = "Shift + Перетащить, чтобы переместить раздел", -- ruRU
 		["Source"] = "Источник", -- ruRU
 		["SHOW_GEAR_FINDER"]      = "Включить модуль Поиска экипировки", -- ruRU
 		["SCALE"]                 = "Масштаб", -- ruRU
@@ -2315,6 +2339,10 @@ elseif locale == "ruRU" then
     }
 elseif locale == "koKR" then
     localizedStrings = {
+        ["INSTRUCTIONS"] = "안내", -- koKR
+        ["CLICK_COL_EXP"] = "클릭하여 접거나 펼치기", -- koKR
+        ["CTRL_CLICK_COL_EXP"] = "Ctrl + 클릭으로 접힘 상태 저장", -- koKR
+        ["SHIFT_DRAG"] = "Shift + 드래그하여 섹션 이동", -- koKR
 		["Source"] = "출처", -- koKR
 		["SHOW_GEAR_FINDER"]      = "장비 찾기 모듈 활성화", -- koKR
 		["SCALE"]                 = "크기", -- koKR
@@ -2691,6 +2719,10 @@ elseif locale == "koKR" then
     }
 elseif locale == "zhCN" then
     localizedStrings = {
+        ["INSTRUCTIONS"] = "说明", -- zhCN
+        ["CLICK_COL_EXP"] = "点击以折叠或展开", -- zhCN
+        ["CTRL_CLICK_COL_EXP"] = "Ctrl + 点击以保存折叠状态", -- zhCN
+        ["SHIFT_DRAG"] = "Shift + 拖动以移动部分", -- zhCN
 		["Source"] = "来源", -- zhCN
 		["SHOW_GEAR_FINDER"]      = "启用装备查找器模块", -- zhCN
 		["SCALE"]                 = "缩放", -- zhCN
@@ -3067,6 +3099,10 @@ elseif locale == "zhCN" then
     }
 elseif locale == "zhTW" then
     localizedStrings = {
+        ["INSTRUCTIONS"] = "說明", -- zhTW
+        ["CLICK_COL_EXP"] = "點擊以收合或展開", -- zhTW
+        ["CTRL_CLICK_COL_EXP"] = "Ctrl + 點擊以儲存收合狀態", -- zhTW
+        ["SHIFT_DRAG"] = "Shift + 拖曳以移動區段", -- zhTW
 		["Source"] = "來源", -- zhTW
 		["SHOW_GEAR_FINDER"]      = "啟用裝備搜尋器模組", -- zhTW
 		["SCALE"]                 = "縮放", -- zhTW
@@ -3442,6 +3478,10 @@ elseif locale == "zhTW" then
     }
 elseif locale == "ptBR" then
     localizedStrings = {
+        ["INSTRUCTIONS"] = "Instruções", -- ptBR
+        ["CLICK_COL_EXP"] = "Clique para recolher ou expandir", -- ptBR
+        ["CTRL_CLICK_COL_EXP"] = "Ctrl + Clique para salvar o estado de recolhimento", -- ptBR
+        ["SHIFT_DRAG"] = "Shift + Arrastar para mover a seção", -- ptBR
 		["Source"] = "Fonte", -- ptBR
 		["SHOW_GEAR_FINDER"]      = "Ativar módulo Localizador de Equipamentos", -- ptBR
 		["SCALE"]                 = "Escala", -- ptBR
@@ -3818,6 +3858,10 @@ elseif locale == "ptBR" then
     }
 elseif locale == "itIT" then
     localizedStrings = {
+        ["INSTRUCTIONS"] = "Istruzioni", -- itIT
+        ["CLICK_COL_EXP"] = "Clic per comprimere o espandere", -- itIT
+        ["CTRL_CLICK_COL_EXP"] = "Ctrl + Clic per salvare lo stato di compressione", -- itIT
+        ["SHIFT_DRAG"] = "Maiusc + Trascina per spostare la sezione", -- itIT
 		["Source"] = "Fonte", -- itIT
 		["SHOW_GEAR_FINDER"]      = "Abilita il modulo Ricerca Equipaggiamento", -- itIT
 		["SCALE"]                 = "Scala", -- itIT

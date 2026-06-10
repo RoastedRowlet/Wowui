@@ -2198,6 +2198,11 @@ function AdvancedFocusCastBarMixin:QueueDelayedHide()
 		end
 
 		self.CustomElementsFrame.InterruptSourceText:Hide()
+
+		if not self.interruptHidingDelayTimer:IsCancelled() then
+			self.interruptHidingDelayTimer:Cancel()
+		end
+
 		self.interruptHidingDelayTimer = nil
 		self:Hide()
 	end)
@@ -2224,7 +2229,6 @@ function AdvancedFocusCastBarMixin:OnEvent(event, ...)
 
 		if self.interruptHidingDelayTimer ~= nil then
 			self.interruptHidingDelayTimer:Invoke()
-			self.interruptHidingDelayTimer = nil
 		end
 
 		if
@@ -2277,33 +2281,31 @@ function AdvancedFocusCastBarMixin:OnEvent(event, ...)
 			AdvancedFocusCastBarSaved.Settings.FeatureFlags[Private.Enum.FeatureFlag.ShowInterruptSource]
 			and interruptedBy ~= nil
 		then
-			if interruptedBy ~= nil then
-				delayHiding = true
+			delayHiding = true
 
-				local interruptName = UnitNameFromGUID(interruptedBy)
-				local interruptColor = nil
+			local interruptName = UnitNameFromGUID(interruptedBy)
+			local interruptColor = nil
 
-				if
-					AdvancedFocusCastBarSaved.Settings.FeatureFlags[Private.Enum.FeatureFlag.UseInterruptSourceClassColor]
-					and interruptedBy ~= nil
-				then
-					local className = select(2, UnitClassFromGUID(interruptedBy))
-					if className ~= nil then
-						interruptColor = C_ClassColor.GetClassColor(className)
-					end
+			if
+				AdvancedFocusCastBarSaved.Settings.FeatureFlags[Private.Enum.FeatureFlag.UseInterruptSourceClassColor]
+				and interruptedBy ~= nil
+			then
+				local className = select(2, UnitClassFromGUID(interruptedBy))
+				if className ~= nil then
+					interruptColor = C_ClassColor.GetClassColor(className)
 				end
-
-				if interruptColor == nil then
-					interruptColor = CreateColor(1, 1, 1)
-				end
-
-				self.CustomElementsFrame.InterruptSourceText:SetFormattedText(
-					Private.L.Settings.InterruptSourceText,
-					interruptColor == nil and interruptName or interruptColor:WrapTextInColorCode(interruptName)
-				)
-
-				self.CustomElementsFrame.InterruptSourceText:Show()
 			end
+
+			if interruptColor == nil then
+				interruptColor = CreateColor(1, 1, 1)
+			end
+
+			self.CustomElementsFrame.InterruptSourceText:SetFormattedText(
+				Private.L.Settings.InterruptSourceText,
+				interruptColor == nil and interruptName or interruptColor:WrapTextInColorCode(interruptName)
+			)
+
+			self.CustomElementsFrame.InterruptSourceText:Show()
 		end
 
 		if delayHiding then

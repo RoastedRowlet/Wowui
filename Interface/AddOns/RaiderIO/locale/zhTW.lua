@@ -55,6 +55,10 @@ L["DB_MODULES_HEADER_MYTHIC_PLUS"] = "傳奇+"
 L["DB_MODULES_HEADER_RAIDING"] = "團隊"
 L["DB_MODULES_HEADER_RECRUITMENT"] = "招募"
 L["DISABLE_DEBUG_MODE_RELOAD"] = "您正在停用偵錯模式。單擊確認將重新載入您的介面。"
+--[[Translation missing --]]
+--[[ L["DISABLE_DROPDOWN_MENU_BUTTON"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["DISABLE_DROPDOWN_MENU_BUTTON_DESC"] = ""--]] 
 L["DISABLE_RWF_MODE_BUTTON"] = "停用"
 L["DISABLE_RWF_MODE_BUTTON_TOOLTIP"] = "單擊以停用世界首推競賽模式。這將重新載入您的介面。"
 L["DISABLE_RWF_MODE_RELOAD"] = "您正在停用世界首推競賽模式。單擊確認將重新載入您的介面。"
@@ -385,6 +389,8 @@ L["RAID_BOSS_NP_6"] = "奧核公主"
 L["RAID_BOSS_NP_7"] = "絲綢宮廷"
 L["RAID_BOSS_NP_8"] = "安蘇芮克女王"
 L["RAID_BOSS_RS_1"] = "海萊恩"
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_SF_1"] = ""--]] 
 L["RAID_BOSS_SFO_1"] = "戒備守護者"
 L["RAID_BOSS_SFO_10"] = "雷吉隆"
 L["RAID_BOSS_SFO_11"] = "閻獄之主"
@@ -508,6 +514,8 @@ L["RAID_MQD"] = "進軍奎爾達納斯"
 L["RAID_MSV"] = "魔古山寶庫"
 L["RAID_NP"] = "奈幽巴宮殿"
 L["RAID_RS"] = "晶紅聖所"
+--[[Translation missing --]]
+--[[ L["RAID_SF"] = ""--]] 
 --[[Translation missing --]]
 --[[ L["RAID_SOO"] = ""--]] 
 L["RAID_ToES"] = "豐泉臺"

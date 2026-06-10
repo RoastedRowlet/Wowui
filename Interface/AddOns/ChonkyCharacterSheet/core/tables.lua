@@ -621,7 +621,6 @@ CCS.fonts = {
     ["Anonymous Pro"] = "Interface\\AddOns\\ChonkyCharacterSheet\\Media\\Fonts\\AnonymousPro-Bold.ttf",
     ["Arial Narrow"] = "Fonts\\ARIALN.TTF", -- BLIZ
     ["AR Hei"] = "Fonts\\ARHei.TTF", -- Blizz zhCN
-    ["AR Hei UHK Bold"] = "Fonts\\ARHEIUHK_BD.TTF", -- Blizz zhTW
     ["ARKai_C (Simplified Chinese)"] = "Fonts\\ARKai_C.ttf", -- BLIZ zhCN
     ["ARKai_T (Traditional Chinese)"] = "Fonts\\ARKai_T.ttf", -- BLIZ zhCN
     ["Avengeance"] = "Interface\\AddOns\\ChonkyCharacterSheet\\Media\\Fonts\\Avengeance.ttf",
@@ -678,7 +677,6 @@ CCS.fontFiles = {
     ["AnonymousPro-Bold.ttf"] = "Anonymous Pro",
     ["ARIALN.TTF"] = "Arial Narrow",
     ["ARHei.TTF"] = "AR Hei",
-    ["ARHEIUHK_BD.TTF"] = "AR Hei UHK Bold",
     ["ARKai_C.ttf"] = "ARKai_C (Simplified Chinese)",
     ["ARKai_T.ttf"] = "ARKai_T (Traditional Chinese)",
     ["Avengeance.ttf"] = "Avengeance",
@@ -783,19 +781,6 @@ CCS.fontLabels = {
         itIT = "AR Hei",
     },
 
-    ["AR Hei UHK Bold"] = {
-        enUS = "AR Hei UHK Bold",
-        koKR = "AR 헤이 UHK 볼드",
-        frFR = "AR Hei UHK Gras",
-        deDE = "AR Hei UHK Fett",
-        zhCN = "雅黑加粗",
-        esES = "AR Hei UHK Negrita",
-        zhTW = "雅黑加粗",
-        esMX = "AR Hei UHK Negrita",
-        ruRU = "AR Хэй UHK Полужирный",
-        ptBR = "AR Hei UHK Negrito",
-        itIT = "AR Hei UHK Grassetto",
-    },
     ["Arial Narrow"] = {
         enUS = "Arial Narrow",
         koKR = "에리얼 내로우",

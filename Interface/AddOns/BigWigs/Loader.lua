@@ -57,7 +57,7 @@ do
 	local ALPHA = "ALPHA"
 
 	local releaseType
-	local myGitHash = "10ad9fb" -- The ZIP packager will replace this with the Git hash.
+	local myGitHash = "603119e" -- The ZIP packager will replace this with the Git hash.
 	local releaseString
 	--[=[@alpha@
 	-- The following code will only be present in alpha ZIPs.
@@ -445,7 +445,7 @@ do
 		[2912] = mn, -- The Voidspire
 		[2913] = mn, -- March on Quel'Danas
 		[2939] = mn, -- The Dreamrift
-		[1592] = mn, -- Sporefall
+		[1592] = public.isNext and mn or nil, -- Sporefall
 
 
 		--[[ LittleWigs: Classic ]]--

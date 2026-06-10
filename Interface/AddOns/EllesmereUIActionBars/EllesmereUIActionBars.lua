@@ -360,6 +360,7 @@ for _, info in ipairs(BAR_CONFIG) do
         borderClassColor = false,
         borderTexture = "solid",
         borderThickness = "thin",
+        borderBehind = false,
         buttonPadding = 2,
         buttonWidth = 0,
         buttonHeight = 0,
@@ -768,15 +769,24 @@ do
             if frameName ~= "MainActionBar" then
                 frame:SetParent(hiddenParent)
             else
-                -- Prevent Blizzard from re-showing MainActionBar (spec/zone change)
+                -- Keep MainActionBar invisible when Blizzard re-shows it on
+                -- spec / zone / vehicle / bonus-bar transitions WITHOUT touching
+                -- its protected shown state. Calling Hide() (or any *Base shown
+                -- setter) from this insecure hook taints MainActionBar, and
+                -- Blizzard's ValidateActionBarTransition then hits
+                -- ADDON_ACTION_BLOCKED on MainActionBar:SetShownBase the next time
+                -- it shows the bar in combat. (Repro: a quest bonus bar in Azshara
+                -- shows the frame out of combat -> the old Hide() tainted it ->
+                -- one-shotting a mob triggered a brief combat transition that then
+                -- blocked SetShownBase.) SetAlpha is unprotected, inherits to all
+                -- children, and works in combat, so the bar stays hidden taint-free.
                 hooksecurefunc(frame, "Show", function(self)
-                    if not InCombatLockdown() then self:Hide() end
+                    self:SetAlpha(0)
                 end)
                 -- Disable mouse on MainActionBar so it never eats clicks.
                 -- During combat, Blizzard can Show() this frame (mount/dismount
-                -- transitions) and our hook can't re-hide it. At alpha 0 and
-                -- frame level 50 it would invisibly intercept all clicks above
-                -- our EABButtons.
+                -- transitions). At alpha 0 and frame level 50 it would invisibly
+                -- intercept all clicks above our EABButtons.
                 frame:EnableMouse(false)
                 if frame.EnableMouseClicks then frame:EnableMouseClicks(false) end
                 if frame.EnableMouseMotion then frame:EnableMouseMotion(false) end
@@ -3557,7 +3567,7 @@ local function EnsureBorders(btn)
     return fd.borders
 end
 
-local function ApplyButtonBorders(btn, on, cr, cg, cb, ca, sz, zoom, textureKey, texOffset, texOffsetY, shiftX, shiftY, addonKey, sizeKey)
+local function ApplyButtonBorders(btn, on, cr, cg, cb, ca, sz, zoom, textureKey, texOffset, texOffsetY, shiftX, shiftY, addonKey, sizeKey, behind)
     MakeButtonSquare(btn)
     local PP = EllesmereUI and EllesmereUI.PP
     local fd = EFD(btn)
@@ -3598,6 +3608,15 @@ local function ApplyButtonBorders(btn, on, cr, cg, cb, ca, sz, zoom, textureKey,
             end
         end
         EllesmereUI.ApplyBorderStyle(btn, sz, cr, cg, cb, ca, textureKey, texOffset, texOffsetY, shiftX, shiftY, addonKey, sizeKey)
+        -- "Show Behind": textured border frame is a child of btn; equal level draws
+        -- in front of the icon, level-1 draws behind it. Solid borders unaffected.
+        if texKey ~= "solid" and EllesmereUI._bdBorderData then
+            local bdFrame = EllesmereUI._bdBorderData[btn]
+            if bdFrame then
+                local lvl = btn:GetFrameLevel()
+                bdFrame:SetFrameLevel(behind and math.max(0, lvl - 1) or lvl)
+            end
+        end
         if fd.borders and fd.shapeMask and fd.shapeMask:IsShown() then
             PP.HideBorder(btn)
             if EllesmereUI._bdBorderData then
@@ -3757,6 +3776,13 @@ local function ApplyShapeToButton(btn, shape, brdOn, brdR, brdG, brdB, brdA, brd
                 local sz = ResolveBorderThickness(s)
                 local thKey = s.borderThickness or "thin"
                 EllesmereUI.ApplyBorderStyle(btn, sz, c.r, c.g, c.b, c.a or 1, texKey, s.borderTextureOffset, s.borderTextureOffsetY, s.borderTextureShiftX, s.borderTextureShiftY, "actionbars", thKey)
+                if EllesmereUI._bdBorderData then
+                    local bdFrame = EllesmereUI._bdBorderData[btn]
+                    if bdFrame then
+                        local lvl = btn:GetFrameLevel()
+                        bdFrame:SetFrameLevel(s.borderBehind and math.max(0, lvl - 1) or lvl)
+                    end
+                end
             else
                 PP.ShowBorder(btn)
             end
@@ -4029,13 +4055,14 @@ function EAB:ApplyBordersForBar(barKey)
     local texShiftX = s.borderTextureShiftX
     local texShiftY = s.borderTextureShiftY
     local thicknessKey = s.borderThickness or "thin"
+    local behind = s.borderBehind
     local buttons = barButtons[barKey]
     if not buttons then return end
     for i = 1, #buttons do
         local btn = buttons[i]
         if btn then
             EFD(btn).barKey = barKey
-            ApplyButtonBorders(btn, on, cr, cg, cb, ca, sz, zoom, textureKey, texOffset, texOffsetY, texShiftX, texShiftY, "actionbars", thicknessKey)
+            ApplyButtonBorders(btn, on, cr, cg, cb, ca, sz, zoom, textureKey, texOffset, texOffsetY, texShiftX, texShiftY, "actionbars", thicknessKey, behind)
         end
     end
 end
@@ -7453,7 +7480,7 @@ local function RegisterWithUnlockMode()
     end
 
 
-    EllesmereUI:RegisterUnlockElements(elements)
+    EllesmereUI:RegisterUnlockElements(elements, "EllesmereUIActionBars")
 
     -- Reapply anchors now that elements are registered. RestoreBarPositions
     -- ran before registration (too early for ReapplyOwnAnchor to resolve
@@ -9146,7 +9173,7 @@ local function RegisterDataBarsWithUnlockMode()
             })
         end
     end
-    EllesmereUI:RegisterUnlockElements(elements)
+    EllesmereUI:RegisterUnlockElements(elements, "EllesmereUIActionBars")
 end
 
 function EAB_VTABLE.ExtraBars.CreateManagedDataBarFrames()
@@ -10155,7 +10182,7 @@ local function RegisterExtraBarsWithUnlockMode()
             end -- else (not MicroBar/BagBar)
         end
     end
-    EllesmereUI:RegisterUnlockElements(elements)
+    EllesmereUI:RegisterUnlockElements(elements, "EllesmereUIActionBars")
 end
 
 

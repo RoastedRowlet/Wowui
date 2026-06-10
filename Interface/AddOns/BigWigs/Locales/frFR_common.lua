@@ -137,6 +137,13 @@ L.focus_only = "|cffff0000Alertes de la cible de focalisation uniquement.|r "
 L.trash = "Trash"
 L.affixes = "Affixes" -- Seasonal affixes for raids and mythic+ dungeons
 
+-- GUI boss dropdown for cast counters (Usually a dropdown menu in the boss options that lets you choose when a spell counter should reset back to 1)
+--L.counter_reset_name = "%s cast counter" -- SPELL_NAME cast counter
+--L.counter_reset_desc = "Choose when to reset the counter."
+--L.reset_casts = "Reset after every %d casts." -- Reset after every 3 casts.
+--L.reset_stages = "Only reset on stage change."
+--L.reset_casts_and_stages = "Reset after every %d casts and every stage change."
+
 -- Common raid marking locale
 L.marker = "Marquage %s"
 L.marker_player_desc = "Marque les joueurs affectés par %s avec %s. Nécessite d'être assistant ou chef de raid." -- Mark players affected by 'SPELL_NAME' with SKULL_ICON
@@ -225,6 +232,7 @@ L.otherDifficultiesNote = "Ce texte sera utilisé pour toutes les autres difficu
 -- GUI notes for debuffs
 L.debuffFailureNote = "Cet affaiblissement vous sera appliqué si vous échouez"
 L.debuffFailureMoveFromExplosionNote = "Cet affaiblissement vous sera appliqué si vous ne vous écartez pas de l'explosion"
+--L.debuffFailureInterruptNote = "This debuff will apply to you if you fail to interrupt the cast of |cFFFFFFFF%s|r" -- This debuff will apply to you if you fail to interrupt the cast of SPELL_NAME
 L.preDebuffNote = "Ceci est le pré-affaiblissement, avant que le principal ne s'applique à vous"
 L.mainDebuffNote = "Ceci est l'affaiblissement principal qui s'applique à vous"
 L.postDebuffNote = "Cet affaiblissement vous sera appliqué après que |cFFFFFFFF%s|r expire" -- This debuff will apply to you after OTHER_DEBUFF expires
@@ -233,6 +241,7 @@ L.debuffDotAfterCastNote = "Cet affaiblissement est un DoT qui prend effet aprè
 L.debuffPossibleAfterCastNote = "Cet affaiblissement pourrait s'appliquer à vous après que le boss incante |cFFFFFFFF%s|r" -- This debuff might apply to you after the boss finishes casting SPELL_NAME
 L.debuffTankAfterCastNote = "Cet affaiblissement va s'appliquer sur le tank après que le boss incante |cFFFFFFFF%s|r" -- This debuff will apply to the tank after the boss finishes casting SPELL_NAME
 L.debuffWalkIntoObjectNote = "Cet affaiblissement vous sera appliqué si vous marchez dans le sort |cFFFFFFFF%s|r" -- This debuff will apply to you if you purposely walk into the OBJECT_NAME (e.g. trap, mine, bomb)
+--L.debuffHitByCastNote = "This debuff will apply to you if you are hit by the the |cFFFFFFFF%s|r cast" -- This debuff will apply to you if you are hit by the the SPELL_NAME cast
 L.debuffAddsCast = "Cet affaiblissement vous sera appliqué par |cFFFFFFFF%s|r" -- This debuff is applied to you by NPC_NAME
 
 -- Common ability name replacements
@@ -300,6 +309,7 @@ L.grips = "Poignes" -- Plural of L.grip
 L.group_damage = "Dégâts sur le groupe" -- Any ability that causes damage to every player in the 5 player group
 L.health_drain = "Drain de santé" -- Any ability that drains health from the player
 L.madness = "Folie" -- Any ability that contains the word "Madness" in it e.g. "Rift Madness" (1264756) or "Burning Madness" (307013)
+L.miasma = "Miasme" -- Any ability that contains the word "Miasma" in it e.g. "Consuming Miasma" (1257087) or "Black Miasma" (1275059)
 L.missile = "Missile" -- Short for any ability with the name "Missile" in it e.g. "Fey Missile" (188046) or "Water Missile" (68250)
 L.missiles = "Missiles" -- Plural of L.missile
 L.parasite = "Parasite" -- Any ability where a parasite is involved e.g. "Parasitic Infection", "Parasitic Growth", etc

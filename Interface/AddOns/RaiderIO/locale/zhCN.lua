@@ -57,6 +57,10 @@ L["DB_MODULES_HEADER_MYTHIC_PLUS"] = "大秘境"
 L["DB_MODULES_HEADER_RAIDING"] = "团本进行中"
 L["DB_MODULES_HEADER_RECRUITMENT"] = "招募"
 L["DISABLE_DEBUG_MODE_RELOAD"] = "你正在关闭Debug模式。点击确认会重新加载你的界面。"
+--[[Translation missing --]]
+--[[ L["DISABLE_DROPDOWN_MENU_BUTTON"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["DISABLE_DROPDOWN_MENU_BUTTON_DESC"] = ""--]] 
 L["DISABLE_RWF_MODE_BUTTON"] = "禁用"
 L["DISABLE_RWF_MODE_BUTTON_TOOLTIP"] = "点击禁用冲击世界首杀模式。你的界面将会重新加载。"
 L["DISABLE_RWF_MODE_RELOAD"] = "你正在禁用冲击世界首杀模式。点击确定将会重新加载你的界面。"
@@ -387,6 +391,8 @@ L["RAID_BOSS_NP_6"] = "节点女亲王"
 L["RAID_BOSS_NP_7"] = "流丝之庭"
 L["RAID_BOSS_NP_8"] = "安苏雷克女王"
 L["RAID_BOSS_RS_1"] = "海里昂"
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_SF_1"] = ""--]] 
 L["RAID_BOSS_SFO_1"] = "警戒卫士"
 L["RAID_BOSS_SFO_10"] = "莱葛隆"
 L["RAID_BOSS_SFO_11"] = "典狱长"
@@ -510,6 +516,8 @@ L["RAID_MQD"] = "进军奎尔丹纳斯"
 L["RAID_MSV"] = "魔古山宝库"
 L["RAID_NP"] = "尼鲁巴尔王宫"
 L["RAID_RS"] = "红玉圣所"
+--[[Translation missing --]]
+--[[ L["RAID_SF"] = ""--]] 
 --[[Translation missing --]]
 --[[ L["RAID_SOO"] = ""--]] 
 L["RAID_ToES"] = "永春台"

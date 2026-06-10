@@ -1,2 +1,3 @@
 
-EllesmereUIBagsDB = nil
+EllesmereUIBagsDB = {
+}

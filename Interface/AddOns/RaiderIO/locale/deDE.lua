@@ -57,6 +57,10 @@ L["DB_MODULES_HEADER_MYTHIC_PLUS"] = "Mythisch+"
 L["DB_MODULES_HEADER_RAIDING"] = "Schlachtzug"
 L["DB_MODULES_HEADER_RECRUITMENT"] = "Rekrutierung"
 L["DISABLE_DEBUG_MODE_RELOAD"] = "Du deaktivierst den Debug-Modus. Klicke auf Bestätigen, um das Interface neu zu laden."
+--[[Translation missing --]]
+--[[ L["DISABLE_DROPDOWN_MENU_BUTTON"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["DISABLE_DROPDOWN_MENU_BUTTON_DESC"] = ""--]] 
 L["DISABLE_RWF_MODE_BUTTON"] = "Deaktivieren"
 L["DISABLE_RWF_MODE_BUTTON_TOOLTIP"] = "Klicke hier, um den Wettrennen Welt 1.-Modus zu deaktivieren. Dadurch wird deine Benutzeroberfläche neu geladen."
 L["DISABLE_RWF_MODE_RELOAD"] = "Du deaktivierst den Wettrennen Welt 1.-Modus. Durch Klicken auf Bestätigung wird deine Benutzeroberfläche neu geladen."
@@ -387,6 +391,8 @@ L["RAID_BOSS_NP_6"] = "Nexusprinzessin"
 L["RAID_BOSS_NP_7"] = "Seidenhof"
 L["RAID_BOSS_NP_8"] = "Königin Ansurek"
 L["RAID_BOSS_RS_1"] = "Halion"
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_SF_1"] = ""--]] 
 L["RAID_BOSS_SFO_1"] = "Aufmerksamer Wächter"
 L["RAID_BOSS_SFO_10"] = "Rygelon"
 L["RAID_BOSS_SFO_11"] = "Der Kerkermeister"
@@ -510,6 +516,8 @@ L["RAID_MQD"] = "Marsch auf Quel'Danas"
 L["RAID_MSV"] = "Mogu'shangewölbe"
 L["RAID_NP"] = "Palast der Nerub'ar"
 L["RAID_RS"] = "Das Rubinsanktum"
+--[[Translation missing --]]
+--[[ L["RAID_SF"] = ""--]] 
 --[[Translation missing --]]
 --[[ L["RAID_SOO"] = ""--]] 
 L["RAID_ToES"] = "Terrasse des Endlosen Frühlings"

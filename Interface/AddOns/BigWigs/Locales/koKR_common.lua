@@ -136,6 +136,13 @@ L.focus_only = "|cffff0000주시 대상만 경고합니다.|r "
 L.trash = "일반 몹"
 L.affixes = "어픽스" -- Seasonal affixes for raids and mythic+ dungeons
 
+-- GUI boss dropdown for cast counters (Usually a dropdown menu in the boss options that lets you choose when a spell counter should reset back to 1)
+--L.counter_reset_name = "%s cast counter" -- SPELL_NAME cast counter
+--L.counter_reset_desc = "Choose when to reset the counter."
+--L.reset_casts = "Reset after every %d casts." -- Reset after every 3 casts.
+--L.reset_stages = "Only reset on stage change."
+--L.reset_casts_and_stages = "Reset after every %d casts and every stage change."
+
 -- Common raid marking locale
 L.marker = "%s 징표 설정"
 L.marker_player_desc = "'%s' 영향을 받는 플레이어를 %s|1으로;로; 징표 설정합니다. (부공대장 이상 권한 필요)" -- Mark players affected by 'SPELL_NAME' with SKULL_ICON
@@ -224,6 +231,7 @@ L.otherDifficultiesNote = "이 텍스트는 다른 모든 난이도에서 사용
 -- GUI notes for debuffs
 L.debuffFailureNote = "실패할 경우 이 디버프가 적용됨"
 L.debuffFailureMoveFromExplosionNote = "폭발 지점에서 벗어나지 못하면 이 디버프가 적용됨"
+--L.debuffFailureInterruptNote = "This debuff will apply to you if you fail to interrupt the cast of |cFFFFFFFF%s|r" -- This debuff will apply to you if you fail to interrupt the cast of SPELL_NAME
 L.preDebuffNote = "이것은 주요 디버프가 적용되기 전의 사전 디버프"
 L.mainDebuffNote = "이것은 당신에게 적용되는 주요 디버프"
 L.postDebuffNote = "|cFFFFFFFF%s|r 효과가 종료되면 이 디버프가 적용됨" -- This debuff will apply to you after OTHER_DEBUFF expires
@@ -232,6 +240,7 @@ L.debuffDotAfterCastNote = "이 디버프는 보스가 |cFFFFFFFF%s|r 시전을 
 L.debuffPossibleAfterCastNote = "이 디버프는 보스가 |cFFFFFFFF%s|r 시전을 마친 후에 적용될 수 있음" -- This debuff might apply to you after the boss finishes casting SPELL_NAME
 L.debuffTankAfterCastNote = "보스가 |cFFFFFFFF%s|r 시전을 완료하면 탱커에게 이 디버프가 적용됩" -- This debuff will apply to the tank after the boss finishes casting SPELL_NAME
 L.debuffWalkIntoObjectNote = "|cFFFFFFFF%s|r 범위 안으로 의도적으로 걸어 들어갈 때 이 디버프가 적용됨" -- This debuff will apply to you if you purposely walk into the OBJECT_NAME (e.g. trap, mine, bomb)
+--L.debuffHitByCastNote = "This debuff will apply to you if you are hit by the the |cFFFFFFFF%s|r cast" -- This debuff will apply to you if you are hit by the the SPELL_NAME cast
 L.debuffAddsCast = "이 디버프는 |cFFFFFFFF%s|r 의해 적용됨" -- This debuff is applied to you by NPC_NAME
 
 -- Common ability name replacements
@@ -299,6 +308,7 @@ L.grips = "당기기" -- Plural of L.grip
 L.group_damage = "파티 피해" -- Any ability that causes damage to every player in the 5 player group
 L.health_drain = "생명력 흡수" -- Any ability that drains health from the player
 L.madness = "광기" -- Any ability that contains the word "Madness" in it e.g. "Rift Madness" (1264756) or "Burning Madness" (307013)
+L.miasma = "독기" -- Any ability that contains the word "Miasma" in it e.g. "Consuming Miasma" (1257087) or "Black Miasma" (1275059)
 L.missile = "탄막" -- Short for any ability with the name "Missile" in it e.g. "Fey Missile" (188046) or "Water Missile" (68250)
 L.missiles = "탄막" -- Plural of L.missile
 L.parasite = "기생충" -- Any ability where a parasite is involved e.g. "Parasitic Infection", "Parasitic Growth", etc

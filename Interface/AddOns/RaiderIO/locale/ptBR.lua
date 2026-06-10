@@ -55,6 +55,10 @@ L["DB_MODULES_HEADER_MYTHIC_PLUS"] = "Mítica+"
 L["DB_MODULES_HEADER_RAIDING"] = "Raidando"
 L["DB_MODULES_HEADER_RECRUITMENT"] = "Recrutamento"
 L["DISABLE_DEBUG_MODE_RELOAD"] = "Você está desabilitando o Modo de Depuração. Clicar em Confirmar irá Recarregar sua Interface."
+--[[Translation missing --]]
+--[[ L["DISABLE_DROPDOWN_MENU_BUTTON"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["DISABLE_DROPDOWN_MENU_BUTTON_DESC"] = ""--]] 
 L["DISABLE_RWF_MODE_BUTTON"] = "Desabilitar"
 L["DISABLE_RWF_MODE_BUTTON_TOOLTIP"] = "Clique para desativar o modo Race World First. Isso fará com que sua interface seja recarregada."
 L["DISABLE_RWF_MODE_RELOAD"] = "Você está desabilitando o modo Race World First. Clicar em Confirmar irá recarregar sua interface."
@@ -386,6 +390,8 @@ L["RAID_BOSS_NP_6"] = "Princesa do Nexus Ky'veza"
 L["RAID_BOSS_NP_7"] = "A Corte Sedosa"
 L["RAID_BOSS_NP_8"] = "Rainha Ansurek"
 L["RAID_BOSS_RS_1"] = "Halion"
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_SF_1"] = ""--]] 
 L["RAID_BOSS_SFO_1"] = "Guardião Vigilante"
 L["RAID_BOSS_SFO_10"] = "Rygelon"
 L["RAID_BOSS_SFO_11"] = "O Carcereiro"
@@ -509,6 +515,8 @@ L["RAID_MQD"] = "Marcha em Quel'Danas"
 L["RAID_MSV"] = "Galerias Mogu'shan"
 L["RAID_NP"] = "Palácio Nerub-ar"
 L["RAID_RS"] = "Santuário Rubi"
+--[[Translation missing --]]
+--[[ L["RAID_SF"] = ""--]] 
 --[[Translation missing --]]
 --[[ L["RAID_SOO"] = ""--]] 
 L["RAID_ToES"] = "Terraço da Primavera Eterna"

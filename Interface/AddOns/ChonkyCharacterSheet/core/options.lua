@@ -611,7 +611,6 @@ local function newHeader(def, parent, rowHeight)
     fs:SetTextColor(unpack(def.color or {1,1,1}))
 
     local fontSize = def.fontSize or 20
-    --fs:SetFont(CCS:GetDefaultFontForLocale(), fontSize, CCS.textoutline)
 
     local outline = def.fontOutline or "NONE"  -- "NONE", "THIN", or "THICK"
     fs:SetFont(CCS:GetDefaultFontForLocale(), fontSize, outline)
@@ -712,7 +711,6 @@ local function newCheckbox(def, parent, rowHeight)
     return container, check
 end
 
-
 local function newDropdown(def, parent, rowHeight)
     local slotWidth = (def.slots or 2) * GlobalSlotWidth
     
@@ -735,11 +733,8 @@ local function newDropdown(def, parent, rowHeight)
         CCS.CurrentProfile[key] = currentValue
     end
 
-
-    --local dd = CreateFrame("Frame", "CCSdd"..def.key, parent, "UIDropDownMenuTemplate, BackdropTemplate")
     local dd = CreateFrame("Frame", "CCSdd"..def.key, parent, "UIDropDownMenuTemplate")
     Mixin(dd, BackdropTemplateMixin)
-
 
     CCS.SkinDropdown(dd, "CCSdd"..def.key)
 
@@ -770,7 +765,6 @@ local function newDropdown(def, parent, rowHeight)
             UIDropDownMenu_AddButton(info, level)
         end
     end)
-
 
     -- Set initial selected value
     UIDropDownMenu_SetSelectedValue(dd, currentValue)
@@ -818,6 +812,35 @@ local function newFontSelector(def, parent, rowHeight)
     for name, path in pairs(CCS.fonts or {}) do
         if type(path) == "string" then
             pathToName[path] = name
+        end
+    end
+
+    -- Remove invalid fonts from CCS.fonts
+    do
+        local testFS = frame:CreateFontString(nil, "OVERLAY")
+        for name, path in pairs(CCS.fonts or {}) do
+            if type(path) ~= "string" or not pcall(testFS.SetFont, testFS, path, 12) then
+                -- Remove invalid font
+                CCS.fonts[name] = nil
+                pathToName[path] = nil
+                -- Optional debug:
+                -- print("Removed invalid font:", name, path)
+            end
+        end
+    end
+
+    -- Remove invalid LSM fonts too
+    if LSM and LSM.List then
+        local testFS = frame:CreateFontString(nil, "OVERLAY")
+        for _, fontName in ipairs(LSM:List("font")) do
+            local p = LSM:Fetch("font", fontName, true)
+            if type(p) ~= "string" or not pcall(testFS.SetFont, testFS, p, 12) then
+                -- Mark as invalid
+                pathToName[p] = nil
+                CCS.invalidLSMFonts = CCS.invalidLSMFonts or {}
+                CCS.invalidLSMFonts[fontName] = true
+                --print("Removed invalid LSM font:", fontName, p)
+            end
         end
     end
 
@@ -1017,9 +1040,10 @@ local function newFontSelector(def, parent, rowHeight)
             seen[fontName] = true
         end
     end
+
     if LSM and LSM.List then
         for _, fontName in ipairs(LSM:List("font")) do
-            if not seen[fontName] then
+            if not seen[fontName] and not (CCS.invalidLSMFonts and CCS.invalidLSMFonts[fontName]) then
                 sortedNames[#sortedNames+1] = fontName
                 seen[fontName] = true
             end

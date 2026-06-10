@@ -136,6 +136,13 @@ L.focus_only = "|cffff0000只限專注目標。|r "
 L.trash = "小怪"
 L.affixes = "詞綴" -- Seasonal affixes for raids and mythic+ dungeons
 
+-- GUI boss dropdown for cast counters (Usually a dropdown menu in the boss options that lets you choose when a spell counter should reset back to 1)
+--L.counter_reset_name = "%s cast counter" -- SPELL_NAME cast counter
+--L.counter_reset_desc = "Choose when to reset the counter."
+--L.reset_casts = "Reset after every %d casts." -- Reset after every 3 casts.
+--L.reset_stages = "Only reset on stage change."
+--L.reset_casts_and_stages = "Reset after every %d casts and every stage change."
+
 -- Common raid marking locale
 L.marker = "%s標記"
 L.marker_player_desc = "將受到%s影響的玩家標記為%s，需要權限。" -- Mark players affected by 'SPELL_NAME' with SKULL_ICON
@@ -224,6 +231,7 @@ L.otherDifficultiesNote = "其他難度使用的文本"
 -- GUI notes for debuffs
 L.debuffFailureNote = "失誤時受到的減益效果"
 L.debuffFailureMoveFromExplosionNote = "未遠離爆炸時，受到的減益效果"
+--L.debuffFailureInterruptNote = "This debuff will apply to you if you fail to interrupt the cast of |cFFFFFFFF%s|r" -- This debuff will apply to you if you fail to interrupt the cast of SPELL_NAME
 L.preDebuffNote = "主要效果生效前的前置減益效果"
 L.mainDebuffNote = "產生實際作用的主要減益效果"
 L.postDebuffNote = "|cFFFFFFFF%s|r消失後，受到的減益效果" -- This debuff will apply to you after OTHER_DEBUFF expires
@@ -232,6 +240,7 @@ L.debuffDotAfterCastNote = "首領施放|cFFFFFFFF%s|r後，受到的週期性�
 L.debuffPossibleAfterCastNote = "首領施放|cFFFFFFFF%s|r後，可能得到的減益效果" -- This debuff might apply to you after the boss finishes casting SPELL_NAME
 --L.debuffTankAfterCastNote = "This debuff will apply to the tank after the boss finishes casting |cFFFFFFFF%s|r" -- This debuff will apply to the tank after the boss finishes casting SPELL_NAME
 L.debuffWalkIntoObjectNote = "踩到|cFFFFFFFF%s|r會受到的減益效果" -- This debuff will apply to you if you purposely walk into the OBJECT_NAME (e.g. trap, mine, bomb)
+--L.debuffHitByCastNote = "This debuff will apply to you if you are hit by the the |cFFFFFFFF%s|r cast" -- This debuff will apply to you if you are hit by the the SPELL_NAME cast
 L.debuffAddsCast = "這是|cFFFFFFFF%s|r對你施加的減益效果" -- This debuff is applied to you by NPC_NAME
 
 -- Common ability name replacements
@@ -299,6 +308,7 @@ L.frontal_cone = "正面技能" -- 正面衝擊 Usually a bad Area-of-Effect abi
 L.group_damage = "團隊傷害" -- Any ability that causes damage to every player in the 5 player group 五人本中每個人都會受到的傷害，那還是團隊傷害啊？
 L.health_drain = "吸血" -- Any ability that drains health from the player 吸血類的技能，就是術士的吸取生命那種直接吸血的法術
 L.madness = "瘋狂" -- Any ability that contains the word "Madness" in it e.g. "Rift Madness" (1264756) or "Burning Madness" (307013)
+L.miasma = "瘴氣" -- Any ability that contains the word "Miasma" in it e.g. "Consuming Miasma" (1257087) or "Black Miasma" (1275059)
 --L.missile = "Missile" -- Short for any ability with the name "Missile" in it e.g. "Fey Missile" (188046) or "Water Missile" (68250)
 --L.missiles = "Missiles" -- Plural of L.missile
 L.parasite = "寄生" -- Any ability where a parasite is involved e.g. "Parasitic Infection", "Parasitic Growth", etc
