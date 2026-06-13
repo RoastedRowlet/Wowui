@@ -31,6 +31,16 @@ SilvermoonLapCounterDB = {
 ["bestLapDate"] = "2026-03-12 00:52",
 ["realm"] = "Stormrage",
 },
+["Klutzykubfu-Stormrage"] = {
+["bestLapTime"] = 9.663000000000466,
+["lastLapDate"] = "2026-06-12 00:51",
+["realm"] = "Stormrage",
+["lastLapTime"] = 61.5679999999993,
+["firstLapDate"] = "2026-06-11 18:01",
+["class"] = "MONK",
+["bestLapDate"] = "2026-06-11 18:01",
+["lapCount"] = 2,
+},
 ["Zappyxatu-Stormrage"] = {
 ["bestLapTime"] = 6.986000000004424,
 ["lastLapDate"] = "2026-05-19 14:39",

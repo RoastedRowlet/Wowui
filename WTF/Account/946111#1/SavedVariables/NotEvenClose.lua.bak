@@ -2,10 +2,13 @@
 NotEvenCloseDB = {
 ["profileKeys"] = {
 ["Barelynoer - Area 52"] = "Barelynoer - Area 52",
-["Angryabsol - Stormrage"] = "Angryabsol - Stormrage",
+["Dankmankeys - Stormrage"] = "Dankmankeys - Stormrage",
 ["Zappyxatu - Stormrage"] = "Zappyxatu - Stormrage",
-["Madmareep - Stormrage"] = "Madmareep - Stormrage",
 ["Lonelylitten - Stormrage"] = "Lonelylitten - Stormrage",
+["Angryabsol - Stormrage"] = "Angryabsol - Stormrage",
+["Madmareep - Stormrage"] = "Madmareep - Stormrage",
+["Klutzykubfu - Stormrage"] = "Klutzykubfu - Stormrage",
+["Minimeditite - Area 52"] = "Minimeditite - Area 52",
 },
 ["profiles"] = {
 ["Barelynoer - Area 52"] = {
@@ -14,13 +17,19 @@ NotEvenCloseDB = {
 ["ofsy"] = 35.83341979980469,
 },
 },
-["Angryabsol - Stormrage"] = {
+["Dankmankeys - Stormrage"] = {
 },
 ["Zappyxatu - Stormrage"] = {
 },
+["Lonelylitten - Stormrage"] = {
+},
+["Angryabsol - Stormrage"] = {
+},
 ["Madmareep - Stormrage"] = {
 },
-["Lonelylitten - Stormrage"] = {
+["Klutzykubfu - Stormrage"] = {
+},
+["Minimeditite - Area 52"] = {
 },
 },
 }

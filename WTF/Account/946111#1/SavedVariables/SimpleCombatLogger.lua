@@ -4,6 +4,7 @@ SimpleCombatLoggerDB = {
 ["Taurostotem - Area 52"] = "Default",
 ["Zappyxatu - Stormrage"] = "Default",
 ["Angryabsol - Stormrage"] = "Default",
+["Klutzykubfu - Stormrage"] = "Default",
 ["Evileevee - Area 52"] = "Default",
 ["Dankmankeys - Stormrage"] = "Default",
 ["Barelynoer - Area 52"] = "Default",

@@ -132,3 +132,8 @@ M33kAurasModelPaths: enabled
 M33kAurasOptions: enabled
 NotEvenClose: enabled
 EllesmereUIBags: enabled
+ArchonTooltip: disabled
+ArchonTooltipDB_US: disabled
+BigWigs_Sporefall: enabled
+CompassHUD: enabled
+EllesmereUIRaidFrames: disabled

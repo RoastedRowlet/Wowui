@@ -7,13 +7,13 @@ QuickQuestDB3 = {
 ["pausekeyreverse"] = false,
 ["pausekey"] = "SHIFT",
 ["completereward"] = 1,
-["skipgossip"] = true,
-["selectreward"] = true,
 ["autoquestgossip"] = true,
-["skipcinematics"] = 1,
+["skipgossip"] = true,
 ["paydarkmoonfaire"] = true,
+["skipcinematics"] = 3,
+["selectreward"] = true,
 ["skipgossipwhen"] = 2,
-["skipmovies"] = 1,
+["skipmovies"] = 3,
 }
 QuickQuestBlocklistDB = {
 ["items"] = {

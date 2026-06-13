@@ -3,11 +3,14 @@ RangeDisplayDB3 = {
 ["namespaces"] = {
 },
 ["profileKeys"] = {
-["Zappyxatu - Stormrage"] = "Default",
-["Angryabsol - Stormrage"] = "Default",
-["Lonelylitten - Stormrage"] = "Default",
-["Barelynoer - Area 52"] = "Default",
 ["Madmareep - Stormrage"] = "Default",
+["Dankmankeys - Stormrage"] = "Default",
+["Zappyxatu - Stormrage"] = "Default",
+["Lonelylitten - Stormrage"] = "Default",
+["Angryabsol - Stormrage"] = "Default",
+["Barelynoer - Area 52"] = "Default",
+["Klutzykubfu - Stormrage"] = "Default",
+["Minimeditite - Area 52"] = "Default",
 },
 ["profiles"] = {
 ["Default"] = {

@@ -4,6 +4,7 @@ SimulationCraftDB = {
 ["Taurostotem - Area 52"] = "Taurostotem - Area 52",
 ["Zappyxatu - Stormrage"] = "Zappyxatu - Stormrage",
 ["Angryabsol - Stormrage"] = "Angryabsol - Stormrage",
+["Klutzykubfu - Stormrage"] = "Klutzykubfu - Stormrage",
 ["Evileevee - Area 52"] = "Evileevee - Area 52",
 ["Dankmankeys - Stormrage"] = "Dankmankeys - Stormrage",
 ["Barelynoer - Area 52"] = "Barelynoer - Area 52",
@@ -20,6 +21,8 @@ SimulationCraftDB = {
 ["minimap"] = {
 ["minimapPos"] = 199.5413629657888,
 },
+},
+["Klutzykubfu - Stormrage"] = {
 },
 ["Evileevee - Area 52"] = {
 },

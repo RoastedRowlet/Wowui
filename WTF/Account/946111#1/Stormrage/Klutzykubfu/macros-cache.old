@@ -1,0 +1,25 @@
+VER 3 0100000000000002 "EnvMist" "134400"
+#showtooltip Enveloping Mist
+/cast [@mouseover,help,nodead] Enveloping Mist
+/cast Enveloping Mist
+END
+VER 3 0100000000000003 "Life Cocoon" "134400"
+#showtooltip Life Cocoon
+/cast [@mouseover,help,nodead] Life Cocoon
+END
+VER 3 0100000000000001 "RenMist" "134400"
+#showtooltip Renewing Mist
+/cast [@mouseover,help,nodead] Renewing Mist
+END
+VER 3 0100000000000005 "SoothingMist" "134400"
+#showtooltip Soothing Mist
+/cast [@mouseover,help,nodead] Soothing Mist
+END
+VER 3 0100000000000004 "TigersLust" "134400"
+#showtooltip Tiger's Lust
+/cast [@mouseover,help,nodead] Tiger's Lust
+END
+VER 3 0100000000000006 "Vivify" "134400"
+#showtooltip Vivify
+/cast [@mouseover,help,nodead] Vivify
+END

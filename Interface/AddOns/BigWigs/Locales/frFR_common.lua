@@ -140,9 +140,10 @@ L.affixes = "Affixes" -- Seasonal affixes for raids and mythic+ dungeons
 -- GUI boss dropdown for cast counters (Usually a dropdown menu in the boss options that lets you choose when a spell counter should reset back to 1)
 --L.counter_reset_name = "%s cast counter" -- SPELL_NAME cast counter
 --L.counter_reset_desc = "Choose when to reset the counter."
---L.reset_casts = "Reset after every %d casts." -- Reset after every 3 casts.
---L.reset_stages = "Only reset on stage change."
---L.reset_casts_and_stages = "Reset after every %d casts and every stage change."
+--L.reset_casts = "Reset every %d casts" -- Reset every 3 casts
+--L.reset_stages = "Reset on stage change"
+--L.reset_casts_and_stages = "Reset every %d casts and on stage change"
+--L.reset_never = "Never reset"
 
 -- Common raid marking locale
 L.marker = "Marquage %s"
@@ -222,6 +223,7 @@ L.castTimerNote = "Ce texte ne sera utilisé que pour les CàR d'incantation"
 L.messageCastOverNote = "Ce texte sera utilisé pour afficher un message à la fin de l'incantation"
 L.messageCastStartNote = "Ce texte sera utilisé pour afficher un message au début de l'incantation"
 L.messageBeforeCastStartNote = "Ce texte sera utilisé pour afficher un message avant le début de l'incantation"
+--L.messageDuringCastNote = "This text will be used for showing messages during the cast"
 L.messageNote = "Ce texte sera utilisé pour les messages"
 L.messageOnYouNote = "Le message affiché lorsque la technique vous cible"
 L.messageSpecificHealth = "Le message affiché lorsque le boss est à %d%% de vie"

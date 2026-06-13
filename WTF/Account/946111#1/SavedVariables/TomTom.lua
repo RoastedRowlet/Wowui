@@ -4,6 +4,7 @@ TomTomDB = {
 ["Taurostotem - Area 52"] = "Default",
 ["Lonelylitten - Stormrage"] = "Default",
 ["Angryabsol - Stormrage"] = "Default",
+["Klutzykubfu - Stormrage"] = "Default",
 ["Evileevee - Area 52"] = "Default",
 ["Dankmankeys - Stormrage"] = "Default",
 ["Madmareep - Stormrage"] = "Default",
@@ -18,13 +19,8 @@ TomTomDB = {
 "CENTER",
 nil,
 "CENTER",
--6.666716575622559,
--11.66664409637451,
-},
-},
-["paste"] = {
-["button"] = {
-["showInCompartment"] = true,
+-115.8328170776367,
+65.83320617675781,
 },
 },
 ["block"] = {
@@ -36,6 +32,11 @@ nil,
 -127.5000762939453,
 },
 },
+["paste"] = {
+["button"] = {
+["showInCompartment"] = true,
+},
+},
 },
 },
 }
@@ -45,6 +46,7 @@ TomTomWaypointsM = {
 ["Taurostotem - Area 52"] = "Taurostotem - Area 52",
 ["Lonelylitten - Stormrage"] = "Lonelylitten - Stormrage",
 ["Angryabsol - Stormrage"] = "Angryabsol - Stormrage",
+["Klutzykubfu - Stormrage"] = "Klutzykubfu - Stormrage",
 ["Evileevee - Area 52"] = "Evileevee - Area 52",
 ["Dankmankeys - Stormrage"] = "Dankmankeys - Stormrage",
 ["Madmareep - Stormrage"] = "Madmareep - Stormrage",
@@ -58,6 +60,8 @@ TomTomWaypointsM = {
 ["Lonelylitten - Stormrage"] = {
 },
 ["Angryabsol - Stormrage"] = {
+},
+["Klutzykubfu - Stormrage"] = {
 },
 ["Evileevee - Area 52"] = {
 },

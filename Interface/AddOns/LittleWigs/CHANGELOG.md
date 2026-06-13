@@ -1,6 +1,6 @@
 # LittleWigs
 
-## [v12.0.53](https://github.com/BigWigsMods/LittleWigs/tree/v12.0.53) (2026-06-08)
-[Full Changelog](https://github.com/BigWigsMods/LittleWigs/compare/v12.0.52...v12.0.53) [Previous Releases](https://github.com/BigWigsMods/LittleWigs/releases)
+## [v12.0.55](https://github.com/BigWigsMods/LittleWigs/tree/v12.0.55) (2026-06-09)
+[Full Changelog](https://github.com/BigWigsMods/LittleWigs/compare/v12.0.54...v12.0.55) [Previous Releases](https://github.com/BigWigsMods/LittleWigs/releases)
 
-- Midnight/NexusPointXenas/Nysarra: Fix treating a potential cast of Null Vanguard as cancelled  
+- WoD/Skyreach/Rukhran: Better method for counting Quills  

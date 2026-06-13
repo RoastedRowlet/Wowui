@@ -139,9 +139,10 @@ L.affixes = "詞綴" -- Seasonal affixes for raids and mythic+ dungeons
 -- GUI boss dropdown for cast counters (Usually a dropdown menu in the boss options that lets you choose when a spell counter should reset back to 1)
 --L.counter_reset_name = "%s cast counter" -- SPELL_NAME cast counter
 --L.counter_reset_desc = "Choose when to reset the counter."
---L.reset_casts = "Reset after every %d casts." -- Reset after every 3 casts.
---L.reset_stages = "Only reset on stage change."
---L.reset_casts_and_stages = "Reset after every %d casts and every stage change."
+--L.reset_casts = "Reset every %d casts" -- Reset every 3 casts
+--L.reset_stages = "Reset on stage change"
+--L.reset_casts_and_stages = "Reset every %d casts and on stage change"
+--L.reset_never = "Never reset"
 
 -- Common raid marking locale
 L.marker = "%s標記"
@@ -221,6 +222,7 @@ L.castTimerNote = "施法計時文本"
 L.messageCastOverNote = "施法結束的訊息文本"
 L.messageCastStartNote = "施法開始的訊息文本"
 --L.messageBeforeCastStartNote = "This text will be used for showing a message before a cast starts"
+--L.messageDuringCastNote = "This text will be used for showing messages during the cast"
 L.messageNote = "訊息文本"
 L.messageOnYouNote = "中了技能的訊息文本"
 --L.messageSpecificHealth = "The message shown when the boss is at %d%% health"

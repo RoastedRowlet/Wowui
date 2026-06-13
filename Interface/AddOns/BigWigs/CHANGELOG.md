@@ -1,11 +1,14 @@
 # BigWigs
 
-## [v416.3](https://github.com/BigWigsMods/BigWigs/tree/v416.3) (2026-06-08)
-[Full Changelog](https://github.com/BigWigsMods/BigWigs/compare/v416.2...v416.3) [Previous Releases](https://github.com/BigWigsMods/BigWigs/releases)
+## [v416.4](https://github.com/BigWigsMods/BigWigs/tree/v416.4) (2026-06-09)
+[Full Changelog](https://github.com/BigWigsMods/BigWigs/compare/v416.3...v416.4) [Previous Releases](https://github.com/BigWigsMods/BigWigs/releases)
 
-- TheVoidspire/VaelgorAndEzzorak: Fix locale  
-- TheVoidspire/VaelgorAndEzzorak: Add option to choose when the Gloom counter resets  
+- Update koKR (#2626)  
 - Locales: Add more common locale  
-- Update deDE (#2620)  
-- Consolidate Midnight locale (#2605)  
-- Loader: Don't add Sporefall to the menu on live  
+- Locales: Add more common locale  
+- Update zhCN (#2624)  
+- Update koKR (#2623)  
+- Update deDE (#2622)  
+- Locales: Tweaks  
+- TheVoidspire/VaelgorAndEzzorak: Add a "never reset" option for the gloom counter  
+- Locales: Add more common locale  

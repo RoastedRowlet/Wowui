@@ -5,7 +5,7 @@ MKPT_Config = {
 ["firstTimeLoaded"] = false,
 },
 ["position"] = {
-["y"] = -156.66650390625,
+["y"] = -113.333251953125,
 ["x"] = 0,
 },
 ["ui"] = {
@@ -19,6 +19,7 @@ MKPT_Config = {
 ["Taurostotem - Area 52"] = "Taurostotem - Area 52",
 ["Lonelylitten - Stormrage"] = "Lonelylitten - Stormrage",
 ["Angryabsol - Stormrage"] = "Angryabsol - Stormrage",
+["Klutzykubfu - Stormrage"] = "Klutzykubfu - Stormrage",
 ["Evileevee - Area 52"] = "Evileevee - Area 52",
 ["Dankmankeys - Stormrage"] = "Dankmankeys - Stormrage",
 ["Madmareep - Stormrage"] = "Madmareep - Stormrage",

@@ -47,3 +47,5 @@ M33Auras: disabled
 WeakAuras: disabled
 EllesmereUIBags: disabled
 BigWigs_MidnightWorld: enabled
+EllesmereUIResourceBars: disabled
+LittleWigs_BattleForAzeroth: enabled

@@ -137,11 +137,12 @@ L.trash = "Trash"
 L.affixes = "Affixe" -- Seasonal affixes for raids and mythic+ dungeons
 
 -- GUI boss dropdown for cast counters (Usually a dropdown menu in the boss options that lets you choose when a spell counter should reset back to 1)
---L.counter_reset_name = "%s cast counter" -- SPELL_NAME cast counter
---L.counter_reset_desc = "Choose when to reset the counter."
---L.reset_casts = "Reset after every %d casts." -- Reset after every 3 casts.
---L.reset_stages = "Only reset on stage change."
---L.reset_casts_and_stages = "Reset after every %d casts and every stage change."
+L.counter_reset_name = "%s Zauber-Zähler" -- SPELL_NAME cast counter
+L.counter_reset_desc = "Wähle wann der Zähler zurückgesetzt werden soll."
+L.reset_casts = "Nach %d Zaubern zurücksetzen" -- Reset every 3 casts
+L.reset_stages = "Beim Phasenwechsel zurücksetzen"
+L.reset_casts_and_stages = "Nach %d Zaubern und beim Phasenwechsel zurücksetzen"
+L.reset_never = "Nie zurücksetzen"
 
 -- Common raid marking locale
 L.marker = "%s markieren"
@@ -221,6 +222,7 @@ L.castTimerNote = "Dieser Text wird nur für Zauber Timer genutzt"
 L.messageCastOverNote = "Dieser Text wird zur Anzeige einer Nachricht am Ende des Zaubers genutzt"
 L.messageCastStartNote = "Dieser Text wird zur Anzeige einer Nachricht zu Beginn des Zaubers genutzt"
 L.messageBeforeCastStartNote = "Dieser Text wird zur Anzeige einer Nachricht bevor ein Zauber startet genutzt"
+--L.messageDuringCastNote = "This text will be used for showing messages during the cast"
 L.messageNote = "Dieser Text wird für Nachrichten genutzt"
 L.messageOnYouNote = "Die anzuzeigende Nachricht wenn diese Fähigkeit auf Dir ist"
 L.messageSpecificHealth = "Die anzuzeigende Nachricht wenn der Boss bei %d%% Gesundheit ist"

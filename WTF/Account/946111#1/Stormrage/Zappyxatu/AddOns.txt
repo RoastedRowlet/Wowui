@@ -71,7 +71,7 @@ EllesmereUIDamageMeters: enabled
 EllesmereUIMinimap: enabled
 EllesmereUINameplates: enabled
 EllesmereUIQoL: enabled
-EllesmereUIResourceBars: enabled
+EllesmereUIResourceBars: disabled
 EllesmereUIUnitFrames: enabled
 FocusMarker: enabled
 GroupfinderFlags: enabled

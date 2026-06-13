@@ -90,3 +90,4 @@ M33Auras: disabled
 WeakAuras: disabled
 EllesmereUIBags: disabled
 BigWigs_MidnightWorld: enabled
+LittleWigs_BattleForAzeroth: enabled
