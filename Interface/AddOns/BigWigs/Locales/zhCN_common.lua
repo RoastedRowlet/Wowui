@@ -136,7 +136,9 @@ L.focus_only = "|cffff0000仅焦点目标。|r "
 L.trash = "小怪"
 L.affixes = "词缀" -- Seasonal affixes for raids and mythic+ dungeons
 
--- GUI boss dropdown for cast counters (Usually a dropdown menu in the boss options that lets you choose when a spell counter should reset back to 1)
+-- GUI boss dropdown for cast counters
+-- Cast counters are the numbers you see next to spell names that keep increasing e.g. "Bad Spell (3)" <-- that number
+-- This dropdown option will let you choose when that number should reset back to 1
 L.counter_reset_name = "%s 施法次数" -- SPELL_NAME cast counter
 L.counter_reset_desc = "选择施法次数的重置条件。"
 L.reset_casts = "每 %d 次施法后重置" -- Reset every 3 casts
@@ -216,19 +218,19 @@ L.stage2Only = "仅第二阶段"
 L.stage3Only = "仅第三阶段"
 
 -- GUI notes for renames
-L.generalNote = "通用说明文本"
-L.timerNote = "计时条显示文本"
-L.castTimerNote = "施法计时条显示文本"
-L.messageCastOverNote = "施法结束时的信息文本"
-L.messageCastStartNote = "施法开始时的信息文本"
-L.messageBeforeCastStartNote = "施法开始前的信息文本"
---L.messageDuringCastNote = "This text will be used for showing messages during the cast"
-L.messageNote = "消息中显示的文本"
+L.generalNote = "通用信息"
+L.timerNote = "计时条信息"
+L.castTimerNote = "施法计时条信息"
+L.messageCastOverNote = "施法结束时显示的信息"
+L.messageCastStartNote = "施法开始时显示的信息"
+L.messageBeforeCastStartNote = "施法开始前显示的信息"
+L.messageDuringCastNote = "施法期间显示的信息"
+L.messageNote = "信息文本"
 L.messageOnYouNote = "点名你时显示的信息"
 L.messageSpecificHealth = "首领生命值%d%%时显示的信息"
-L.timerOnYouNote = "点名你时计时条显示文本"
-L.mythicOnlyNote = "史诗难度下显示文本"
-L.otherDifficultiesNote = "非史诗难度下显示文本"
+L.timerOnYouNote = "点名你时计时条显示的信息"
+L.mythicOnlyNote = "史诗难度下显示的信息"
+L.otherDifficultiesNote = "非史诗难度下显示的信息"
 
 -- GUI notes for debuffs
 L.debuffFailureNote = "失误时获得此减益效果"

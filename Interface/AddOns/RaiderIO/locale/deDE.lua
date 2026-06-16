@@ -57,10 +57,8 @@ L["DB_MODULES_HEADER_MYTHIC_PLUS"] = "Mythisch+"
 L["DB_MODULES_HEADER_RAIDING"] = "Schlachtzug"
 L["DB_MODULES_HEADER_RECRUITMENT"] = "Rekrutierung"
 L["DISABLE_DEBUG_MODE_RELOAD"] = "Du deaktivierst den Debug-Modus. Klicke auf Bestätigen, um das Interface neu zu laden."
---[[Translation missing --]]
---[[ L["DISABLE_DROPDOWN_MENU_BUTTON"] = ""--]] 
---[[Translation missing --]]
---[[ L["DISABLE_DROPDOWN_MENU_BUTTON_DESC"] = ""--]] 
+L["DISABLE_DROPDOWN_MENU_BUTTON"] = "Deaktiviert das Einheits-Dropdown-Menü (vorübergehender Hotfix)"
+L["DISABLE_DROPDOWN_MENU_BUTTON_DESC"] = "Dies ist als vorübergehender Hotfix für ein anhaltendes Problem mit dem Dropdown-Menüsystem gedacht. Du musst dieses Kontrollkästchen nur aktivieren, wenn bei der Verwendung des Dropdown-Menüs zum Festlegen des Fokus oder des Schlachtzugsziels oder bei der Verwendung des Community-Fenster während des Begegnungskampfs Fehler auftreten. Diese Option wird in Zukunft entfernt, sobald Blizzard die zugrunde liegenden Probleme gelöst hat."
 L["DISABLE_RWF_MODE_BUTTON"] = "Deaktivieren"
 L["DISABLE_RWF_MODE_BUTTON_TOOLTIP"] = "Klicke hier, um den Wettrennen Welt 1.-Modus zu deaktivieren. Dadurch wird deine Benutzeroberfläche neu geladen."
 L["DISABLE_RWF_MODE_RELOAD"] = "Du deaktivierst den Wettrennen Welt 1.-Modus. Durch Klicken auf Bestätigung wird deine Benutzeroberfläche neu geladen."
@@ -192,8 +190,7 @@ L["MINIMAP_SHORTCUT_MINIMAP_ENABLE_DESC"] = "Aktiviert die Anzeige des Symbols a
 L["MINIMAP_SHORTCUT_MINIMAP_LOCK"] = "Minimap Button sperren"
 L["MISC_SETTINGS"] = "Verschiedenes"
 L["MODULE_AMERICAS"] = "Amerika"
---[[Translation missing --]]
---[[ L["MODULE_CHINA"] = ""--]] 
+L["MODULE_CHINA"] = "China"
 L["MODULE_EUROPE"] = "Europa"
 L["MODULE_KOREA"] = "Korea"
 L["MODULE_TAIWAN"] = "Taiwan"
@@ -391,8 +388,7 @@ L["RAID_BOSS_NP_6"] = "Nexusprinzessin"
 L["RAID_BOSS_NP_7"] = "Seidenhof"
 L["RAID_BOSS_NP_8"] = "Königin Ansurek"
 L["RAID_BOSS_RS_1"] = "Halion"
---[[Translation missing --]]
---[[ L["RAID_BOSS_SF_1"] = ""--]] 
+L["RAID_BOSS_SF_1"] = "Rottmoor"
 L["RAID_BOSS_SFO_1"] = "Aufmerksamer Wächter"
 L["RAID_BOSS_SFO_10"] = "Rygelon"
 L["RAID_BOSS_SFO_11"] = "Der Kerkermeister"
@@ -414,34 +410,20 @@ L["RAID_BOSS_SOD_6"] = "Leidensschmied Raznal"
 L["RAID_BOSS_SOD_7"] = "Wächter der Ersten"
 L["RAID_BOSS_SOD_8"] = "Schicksalsschreiber Roh-Kalo"
 L["RAID_BOSS_SOD_9"] = "Kel'Thuzad"
---[[Translation missing --]]
---[[ L["RAID_BOSS_SOO_1"] = ""--]] 
---[[Translation missing --]]
---[[ L["RAID_BOSS_SOO_10"] = ""--]] 
---[[Translation missing --]]
---[[ L["RAID_BOSS_SOO_11"] = ""--]] 
---[[Translation missing --]]
---[[ L["RAID_BOSS_SOO_12"] = ""--]] 
---[[Translation missing --]]
---[[ L["RAID_BOSS_SOO_13"] = ""--]] 
---[[Translation missing --]]
---[[ L["RAID_BOSS_SOO_14"] = ""--]] 
---[[Translation missing --]]
---[[ L["RAID_BOSS_SOO_2"] = ""--]] 
---[[Translation missing --]]
---[[ L["RAID_BOSS_SOO_3"] = ""--]] 
---[[Translation missing --]]
---[[ L["RAID_BOSS_SOO_4"] = ""--]] 
---[[Translation missing --]]
---[[ L["RAID_BOSS_SOO_5"] = ""--]] 
---[[Translation missing --]]
---[[ L["RAID_BOSS_SOO_6"] = ""--]] 
---[[Translation missing --]]
---[[ L["RAID_BOSS_SOO_7"] = ""--]] 
---[[Translation missing --]]
---[[ L["RAID_BOSS_SOO_8"] = ""--]] 
---[[Translation missing --]]
---[[ L["RAID_BOSS_SOO_9"] = ""--]] 
+L["RAID_BOSS_SOO_1"] = "Immerseus"
+L["RAID_BOSS_SOO_10"] = "Die Schätze Pandarias"
+L["RAID_BOSS_SOO_11"] = "Thok der Blutrünstige"
+L["RAID_BOSS_SOO_12"] = "Belagerungsingenieur Rußschmied"
+L["RAID_BOSS_SOO_13"] = "Die Getreuen der Klaxxi"
+L["RAID_BOSS_SOO_14"] = "Garrosh Höllschrei"
+L["RAID_BOSS_SOO_2"] = "Die gefallenen Beschützer"
+L["RAID_BOSS_SOO_3"] = "Norushen"
+L["RAID_BOSS_SOO_4"] = "Sha des Stolzes"
+L["RAID_BOSS_SOO_5"] = "Galakras"
+L["RAID_BOSS_SOO_6"] = "Eiserner Koloss"
+L["RAID_BOSS_SOO_7"] = "Dunkelschamanen der Kor'kron"
+L["RAID_BOSS_SOO_8"] = "General Nazgrim"
+L["RAID_BOSS_SOO_9"] = "Malkorok"
 L["RAID_BOSS_ToES_1"] = "Beschützer des Endlosen"
 L["RAID_BOSS_TOES_1"] = "Beschützer des Endlosen"
 L["RAID_BOSS_TOES_2"] = "Tsulong"
@@ -516,10 +498,8 @@ L["RAID_MQD"] = "Marsch auf Quel'Danas"
 L["RAID_MSV"] = "Mogu'shangewölbe"
 L["RAID_NP"] = "Palast der Nerub'ar"
 L["RAID_RS"] = "Das Rubinsanktum"
---[[Translation missing --]]
---[[ L["RAID_SF"] = ""--]] 
---[[Translation missing --]]
---[[ L["RAID_SOO"] = ""--]] 
+L["RAID_SF"] = "Sporenfall"
+L["RAID_SOO"] = "Schlacht um Orgrimmar"
 L["RAID_ToES"] = "Terrasse des Endlosen Frühlings"
 L["RAID_TOES"] = "Terrasse des Endlosen Frühlings"
 L["RAID_TOT"] = "Der Thron des Donners"

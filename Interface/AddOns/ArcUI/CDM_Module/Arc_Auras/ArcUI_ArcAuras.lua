@@ -30,6 +30,28 @@ local Track = _G.ArcUIProfiler_Track
 local Shared = ns.CDMShared
 
 -- ═══════════════════════════════════════════════════════════════════════════
+-- CLICK-THROUGH REFRESH (debounced)
+-- Frames created AFTER the post-enable sweep — custom timers / custom icons
+-- added live, or spell frames (re)created on talent changes — would otherwise
+-- keep the default clickable state until the user opens and closes the options
+-- panel. Coalesce a single RefreshIconSettings sweep (the same one the panel
+-- triggers) so these frames inherit the saved click-through / tooltip state.
+-- Debounced so bulk creation collapses into one sweep.
+-- ═══════════════════════════════════════════════════════════════════════════
+local clickThroughRefreshPending = false
+local function RequestClickThroughRefresh()
+    if clickThroughRefreshPending then return end
+    if not (ns.CDMGroups and ns.CDMGroups.RefreshIconSettings) then return end
+    clickThroughRefreshPending = true
+    C_Timer.After(0.2, function()
+        clickThroughRefreshPending = false
+        if ns.CDMGroups and ns.CDMGroups.RefreshIconSettings then
+            ns.CDMGroups.RefreshIconSettings()
+        end
+    end)
+end
+
+-- ═══════════════════════════════════════════════════════════════════════════
 -- CONSTANTS
 -- ═══════════════════════════════════════════════════════════════════════════
 
@@ -1146,6 +1168,12 @@ function ArcAuras.CreateFrame(arcID, config)
     
     -- Initialize stack cache for this frame
     InvalidateStackCache(arcID)
+    
+    -- Apply current click-through / tooltip state to this frame. Covers frames
+    -- created outside the post-enable sweep (live-added custom timers/icons,
+    -- talent-change spell frames). Debounced — Enable's bulk creation collapses
+    -- to one sweep and is also covered explicitly by the post-enable sweep.
+    RequestClickThroughRefresh()
     
     return frame
 end
@@ -3783,6 +3811,18 @@ function ArcAuras.Enable()
                     if group.Layout then group:Layout() end
                 end
             end
+        end
+        
+        -- ═══════════════════════════════════════════════════════════════════════
+        -- APPLY CLICK-THROUGH / TOOLTIP STATE
+        -- All Arc Aura frames (items, trinkets, spells, timers, custom icons) are
+        -- now created and registered with CDMGroups. Run the same RefreshIconSettings
+        -- sweep that opening the options panel triggers, so the saved click-through
+        -- and tooltip settings actually apply at login/enable instead of only after
+        -- the user opens and closes the panel.
+        -- ═══════════════════════════════════════════════════════════════════════
+        if ns.CDMGroups.RefreshIconSettings then
+            ns.CDMGroups.RefreshIconSettings()
         end
     end)
 end

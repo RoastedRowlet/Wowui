@@ -1,54 +1,97 @@
 
 Blizzard_Console_SavedVars = {
 ["version"] = 3,
-["height"] = 300,
 ["messageHistory"] = {
 {
-"Skill 333 increased from 43 to 46",
+"Got new connection 3",
 0,
 },
 {
-"Skill 2909 increased from 43 to 46",
+"Proficiency in item class 2 set to 0x0000000100",
 0,
 },
 {
-"Skill 333 increased from 46 to 49",
+"Proficiency in item class 2 set to 0x0000000101",
 0,
 },
 {
-"Skill 2909 increased from 46 to 49",
+"Proficiency in item class 2 set to 0x0000008101",
 0,
 },
 {
-"Skill 333 increased from 49 to 52",
+"Proficiency in item class 4 set to 0x0000000021",
 0,
 },
 {
-"Skill 2909 increased from 49 to 52",
+"Proficiency in item class 2 set to 0x000000c101",
 0,
 },
 {
-"Skill 333 increased from 52 to 53",
+"Proficiency in item class 2 set to 0x000000c103",
 0,
 },
 {
-"Skill 2909 increased from 52 to 53",
+"Proficiency in item class 2 set to 0x000000c503",
 0,
 },
 {
-"Skill 333 increased from 53 to 54",
+"Proficiency in item class 4 set to 0x0000000029",
 0,
 },
 {
-"Skill 2909 increased from 53 to 54",
+"Proficiency in item class 4 set to 0x000000002d",
 0,
 },
 {
-"Skill 333 increased from 54 to 55",
+"Proficiency in item class 2 set to 0x000000c523",
 0,
 },
 {
-"Skill 2909 increased from 54 to 55",
+"Proficiency in item class 2 set to 0x000000e523",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x000010e523",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x000010e533",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x000010e5b3",
+0,
+},
+{
+"Proficiency in item class 4 set to 0x000000002f",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x000010e5b3",
+0,
+},
+{
+"Proficiency in item class 4 set to 0x000000002f",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Time set to 6/14/2026 (Sun) 16:40",
+0,
+},
+{
+"Gamespeed set from 0.017 to 0.017",
+0,
+},
+{
+"Got new connection 3",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
 0,
 },
 {
@@ -56,6 +99,154 @@ Blizzard_Console_SavedVars = {
 0,
 },
 {
+"Disconnecting for reason 12",
+0,
+},
+{
+"NetClient::HandleDisconnect()\n",
+0,
+},
+{
+"NetClient::HandleConnect()\n",
+0,
+},
+{
+"-------------------------------------------------- Previous Session --------------------------------------------------",
+0,
+},
+{
+"Attempted to register existing command: SetDifficulty",
+0,
+},
+{
+"Got new connection 3",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x0000000001",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x0000000041",
+0,
+},
+{
+"Proficiency in item class 4 set to 0x0000000021",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x0000004041",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x0000004441",
+0,
+},
+{
+"Proficiency in item class 4 set to 0x0000000025",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x0000006441",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x0000006451",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x00000064d1",
+0,
+},
+{
+"Proficiency in item class 4 set to 0x0000000027",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x00000064d1",
+0,
+},
+{
+"Proficiency in item class 4 set to 0x0000000027",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Time set to 6/14/2026 (Sun) 16:41",
+0,
+},
+{
+"Gamespeed set from 0.017 to 0.017",
+0,
+},
+{
+"World transfer pending...",
+0,
+},
+{
+"Got new connection 3",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Got new connection 3",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"World transfer pending...",
+0,
+},
+{
+"Got new connection 3",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Time set to 6/14/2026 (Sun) 16:42",
+0,
+},
+{
+"Time set to 6/14/2026 (Sun) 16:42",
+0,
+},
+{
+"Time set to 6/14/2026 (Sun) 16:43",
+0,
+},
+{
+"Time set to 6/14/2026 (Sun) 16:43",
+0,
+},
+{
+"Time set to 6/14/2026 (Sun) 16:44",
+0,
+},
+{
+"Time set to 6/14/2026 (Sun) 16:44",
+0,
+},
+{
+"Changed difficulty successfully",
+0,
+},
+{
+"Completed challenge mode mapID 1753, level 10, time 1643921",
+0,
+},
+{
 "World transfer pending...",
 0,
 },
@@ -80,46 +271,6 @@ Blizzard_Console_SavedVars = {
 0,
 },
 {
-"Got new connection 3",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"Got new connection 3",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"Got new connection 3",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"Got new connection 3",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"Got new connection 3",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
 "World transfer pending...",
 0,
 },
@@ -156,6 +307,22 @@ Blizzard_Console_SavedVars = {
 0,
 },
 {
+"Time set to 6/14/2026 (Sun) 17:17",
+0,
+},
+{
+"Time set to 6/14/2026 (Sun) 17:17",
+0,
+},
+{
+"Changed difficulty successfully",
+0,
+},
+{
+"Completed challenge mode mapID 1753, level 12, time 1738630",
+0,
+},
+{
 "World transfer pending...",
 0,
 },
@@ -165,6 +332,14 @@ Blizzard_Console_SavedVars = {
 },
 {
 "Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Time set to 6/14/2026 (Sun) 17:52",
+0,
+},
+{
+"Time set to 6/14/2026 (Sun) 17:52",
 0,
 },
 {
@@ -172,371 +347,15 @@ Blizzard_Console_SavedVars = {
 0,
 },
 {
-"Total: 0d 4h 0m 11s",
+"Total: 0d 22h 0m 7s",
 0,
 },
 {
-"Level: 0d 0h 34m 47s",
-0,
-},
-{
-"Got new connection 3",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"Got new connection 3",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"Got new connection 3",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"Got new connection 3",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"Skill 183 increased from 445 to 450",
-0,
-},
-{
-"Skill 829 increased from 445 to 450",
-0,
-},
-{
-"Skill 2895 increased from 445 to 450",
-0,
-},
-{
-"World transfer pending...",
-0,
-},
-{
-"Got new connection 3",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
+"Level: 0d 17h 55m 42s",
 0,
 },
 {
 "-------------------------------------------------- Previous Session --------------------------------------------------",
-0,
-},
-{
-"-------------------------------------------------- Previous Session --------------------------------------------------",
-0,
-},
-{
-"Shadow mode changed to 1 - 1 band dynamic shadows on units, 1024",
-0,
-},
-{
-"Shadow texture size changed to 1024.",
-0,
-},
-{
-"Soft shadows changed to 0.",
-0,
-},
-{
-"Shadow cascade blending changed to 0",
-0,
-},
-{
-"Number of shadow cascades changed to 1",
-0,
-},
-{
-"Water detail changed to 0",
-0,
-},
-{
-"Reflection mode changed to 0",
-0,
-},
-{
-"Ripple detail changed to 0",
-0,
-},
-{
-"SSAO mode set to 0",
-0,
-},
-{
-"Sunshafts quality changed to 0",
-0,
-},
-{
-"Refraction mode changed to 0",
-0,
-},
-{
-"Depth Based Opacity Disabled",
-0,
-},
-{
-"Volume fog disabled.",
-0,
-},
-{
-"Particulate volumes disabled.",
-0,
-},
-{
-"Clustered shading disabled.",
-0,
-},
-{
-"Outline mode changed to 0",
-0,
-},
-{
-"Terrain mip level changed to 0.",
-0,
-},
-{
-"Projected textures enabled.",
-0,
-},
-{
-"Shadow mode changed to 1 - 1 band dynamic shadows on units, 1024",
-0,
-},
-{
-"Shadow texture size changed to 1024.",
-0,
-},
-{
-"Soft shadows changed to 0.",
-0,
-},
-{
-"Shadow cascade blending changed to 0",
-0,
-},
-{
-"Number of shadow cascades changed to 1",
-0,
-},
-{
-"Water detail changed to 0",
-0,
-},
-{
-"Reflection mode changed to 0",
-0,
-},
-{
-"Ripple detail changed to 0",
-0,
-},
-{
-"SSAO mode set to 0",
-0,
-},
-{
-"Sunshafts quality changed to 0",
-0,
-},
-{
-"Refraction mode changed to 0",
-0,
-},
-{
-"Depth Based Opacity Disabled",
-0,
-},
-{
-"Volume fog disabled.",
-0,
-},
-{
-"Particulate volumes disabled.",
-0,
-},
-{
-"Clustered shading disabled.",
-0,
-},
-{
-"Outline mode changed to 0",
-0,
-},
-{
-"Terrain mip level changed to 0.",
-0,
-},
-{
-"Projected textures enabled.",
-0,
-},
-{
-"Shadow mode changed to 1 - 1 band dynamic shadows on units, 1024",
-0,
-},
-{
-"Shadow texture size changed to 1024.",
-0,
-},
-{
-"Soft shadows changed to 0.",
-0,
-},
-{
-"Shadow cascade blending changed to 0",
-0,
-},
-{
-"Number of shadow cascades changed to 1",
-0,
-},
-{
-"Water detail changed to 0",
-0,
-},
-{
-"Reflection mode changed to 0",
-0,
-},
-{
-"Ripple detail changed to 0",
-0,
-},
-{
-"SSAO mode set to 0",
-0,
-},
-{
-"Sunshafts quality changed to 0",
-0,
-},
-{
-"Refraction mode changed to 0",
-0,
-},
-{
-"Depth Based Opacity Disabled",
-0,
-},
-{
-"Volume fog disabled.",
-0,
-},
-{
-"Particulate volumes disabled.",
-0,
-},
-{
-"Clustered shading disabled.",
-0,
-},
-{
-"Outline mode changed to 0",
-0,
-},
-{
-"Terrain mip level changed to 0.",
-0,
-},
-{
-"Projected textures enabled.",
-0,
-},
-{
-"Shadow mode changed to 1 - 1 band dynamic shadows on units, 1024",
-0,
-},
-{
-"Shadow texture size changed to 1024.",
-0,
-},
-{
-"Soft shadows changed to 0.",
-0,
-},
-{
-"Shadow cascade blending changed to 0",
-0,
-},
-{
-"Number of shadow cascades changed to 1",
-0,
-},
-{
-"Water detail changed to 0",
-0,
-},
-{
-"Reflection mode changed to 0",
-0,
-},
-{
-"Ripple detail changed to 0",
-0,
-},
-{
-"SSAO mode set to 0",
-0,
-},
-{
-"Sunshafts quality changed to 0",
-0,
-},
-{
-"Refraction mode changed to 0",
-0,
-},
-{
-"Depth Based Opacity Disabled",
-0,
-},
-{
-"Volume fog disabled.",
-0,
-},
-{
-"Particulate volumes disabled.",
-0,
-},
-{
-"Clustered shading disabled.",
-0,
-},
-{
-"Outline mode changed to 0",
-0,
-},
-{
-"Terrain mip level changed to 0.",
-0,
-},
-{
-"Projected textures enabled.",
-0,
-},
-{
-"Time set to 6/11/2026 (Thu) 16:00",
-0,
-},
-{
-"Time set to 6/11/2026 (Thu) 16:00",
 0,
 },
 {
@@ -840,423 +659,7 @@ Blizzard_Console_SavedVars = {
 0,
 },
 {
-"[WowEntitlements] [BNetAccount-0-0000000E6FBF] [WowAccount-0-00000401C2D6] Initialized with 70 entitlements.",
-0,
-},
-{
-"-------------------------------------------------- Previous Session --------------------------------------------------",
-0,
-},
-{
-"Got new connection 3",
-0,
-},
-{
-"Proficiency in item class 2 set to 0x0000000001",
-0,
-},
-{
-"Proficiency in item class 2 set to 0x0000000041",
-0,
-},
-{
-"Proficiency in item class 4 set to 0x0000000021",
-0,
-},
-{
-"Proficiency in item class 2 set to 0x0000004041",
-0,
-},
-{
-"Proficiency in item class 2 set to 0x0000004441",
-0,
-},
-{
-"Proficiency in item class 4 set to 0x0000000025",
-0,
-},
-{
-"Proficiency in item class 2 set to 0x0000006441",
-0,
-},
-{
-"Proficiency in item class 2 set to 0x0000006451",
-0,
-},
-{
-"Proficiency in item class 2 set to 0x00000064d1",
-0,
-},
-{
-"Proficiency in item class 4 set to 0x0000000027",
-0,
-},
-{
-"Proficiency in item class 2 set to 0x00000064d1",
-0,
-},
-{
-"Proficiency in item class 4 set to 0x0000000027",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"Time set to 6/11/2026 (Thu) 16:14",
-0,
-},
-{
-"Gamespeed set from 0.017 to 0.017",
-0,
-},
-{
-"Got new connection 3",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"Time set to 6/11/2026 (Thu) 16:15",
-0,
-},
-{
-"Time set to 6/11/2026 (Thu) 16:15",
-0,
-},
-{
-"Time set to 6/11/2026 (Thu) 16:19",
-0,
-},
-{
-"Time set to 6/11/2026 (Thu) 16:19",
-0,
-},
-{
-"Time set to 6/11/2026 (Thu) 16:21",
-0,
-},
-{
-"Time set to 6/11/2026 (Thu) 16:21",
-0,
-},
-{
-"Time set to 6/11/2026 (Thu) 16:23",
-0,
-},
-{
-"Time set to 6/11/2026 (Thu) 16:23",
-0,
-},
-{
-"Time set to 6/11/2026 (Thu) 16:24",
-0,
-},
-{
-"Time set to 6/11/2026 (Thu) 16:24",
-0,
-},
-{
-"-------------------------------------------------- Previous Session --------------------------------------------------",
-0,
-},
-{
-"Sorting particles normally.",
-0,
-},
-{
-"Multithreaded rendering enabled.",
-0,
-},
-{
-"Multithreaded BeginDraw enabled.",
-0,
-},
-{
-"Multithread shadows changed to 1.",
-0,
-},
-{
-"Multithreaded prepass enabled.",
-0,
-},
-{
-"Multithreaded opaque pass enabled.",
-0,
-},
-{
-"Multithreaded opaque pass enabled.",
-0,
-},
-{
-"Multithreaded alpha M2 pass enabled.",
-0,
-},
-{
-"Multithreaded opaque WMO pass enabled.",
-0,
-},
-{
-"Multithreaded terrain pass enabled.",
-0,
-},
-{
-"Multithreaded volumetric fog enabled.",
-0,
-},
-{
-"Multithreaded Refraction Pass enabled.",
-0,
-},
-{
-"Multithreaded miscellaneous passes enabled.",
-0,
-},
-{
-"Multithreaded decal passes disabled.",
-0,
-},
-{
-"Multithreaded outline passes enabled.",
-0,
-},
-{
-"Multithreaded lightshaft passes enabled.",
-0,
-},
-{
-"|cFFffff00Use trigger on BeginDrawComplete enabled.|r",
-0,
-},
-{
-"Multithreaded alpha pass enabled.",
-0,
-},
-{
-"Multithreaded daynight update enabled.",
-0,
-},
-{
-"Water detail changed to 0",
-0,
-},
-{
-"Ripple detail changed to 0",
-0,
-},
-{
-"Reflection mode changed to 0",
-0,
-},
-{
-"Reflection downscale changed to 0",
-0,
-},
-{
-"Sunshafts quality changed to 0",
-0,
-},
-{
-"Refraction mode changed to 0",
-0,
-},
-{
-"Volume fog disabled.",
-0,
-},
-{
-"Particulate volumes disabled.",
-0,
-},
-{
-"Projected textures enabled.",
-0,
-},
-{
-"Shadow mode changed to 1 - 1 band dynamic shadows on units, 1024",
-0,
-},
-{
-"Shadow texture size changed to 1024.",
-0,
-},
-{
-"Soft shadows changed to 0.",
-0,
-},
-{
-"Shadow cascade blending changed to 0",
-0,
-},
-{
-"Number of shadow cascades changed to 1",
-0,
-},
-{
-"Shadow RT mode changed to 0 (Disabled)",
-0,
-},
-{
-"maxLightCount must be in range 0 to 32.",
-0,
-},
-{
-"CVar 'maxLightCount' failed validation for its initial value.",
-0,
-},
-{
-"Clustered shading disabled.",
-0,
-},
-{
-"Not forcing clustered shading.",
-0,
-},
-{
-"SSAO mode set to 0",
-0,
-},
-{
-"SSAO type set to 0",
-0,
-},
-{
-"Depth Based Opacity Disabled",
-0,
-},
-{
-"SkyCloudLOD set to 0",
-0,
-},
-{
-"Texture filtering mode updated.",
-0,
-},
-{
-"Terrain mip level changed to 0.",
-0,
-},
-{
-"Outline mode changed to 0",
-0,
-},
-{
-"Physics interaction level changed to 2",
-0,
-},
-{
-"Render scale changed to 1",
-0,
-},
-{
-"Resample quality changed to 3",
-0,
-},
-{
-"MSAA set to 2 color samples, 2 coverage samples",
-0,
-},
-{
-"MSAA for alpha-test enabled.",
-0,
-},
-{
-"Variable Rate Shading not supported on this hardware",
-0,
-},
-{
-"CVar 'vrsWorldGeo' failed validation for its initial value.",
-0,
-},
-{
-"Variable Rate Shading not supported on this hardware",
-0,
-},
-{
-"CVar 'vrsParticles' failed validation for its initial value.",
-0,
-},
-{
-"VALAR mode changed to 0",
-0,
-},
-{
-"lodObjectSizeScale cannot be changed.",
-0,
-},
-{
-"Volume fog enabled.",
-0,
-},
-{
-"dynamicLod enabled",
-0,
-},
-{
-"World preload object sort enabled.",
-0,
-},
-{
-"World load object sort enabled.",
-0,
-},
-{
-"World preload non critical enabled.",
-0,
-},
-{
-"World preload high res textures enabled.",
-0,
-},
-{
-"FFX: Color Blind Test Mode Disabled",
-0,
-},
-{
-"Error display disabled",
-0,
-},
-{
-"Error display shown",
-0,
-},
-{
-"Displaying errors through fatal errors",
-0,
-},
-{
-"Displaying errors through fatal errors",
-0,
-},
-{
-"Now filtering: all messages",
-0,
-},
-{
-"CVar 'Sound_AmbienceHighpassDSPCutoff' failed validation for its initial value.",
-0,
-},
-{
-"CVar 'Sound_AllyPlayerHighpassDSPCutoff' failed validation for its initial value.",
-0,
-},
-{
-"CVar 'Sound_EnemyPlayerHighpassDSPCutoff' failed validation for its initial value.",
-0,
-},
-{
-"CVar 'Sound_NPCHighpassDSPCutoff' failed validation for its initial value.",
-0,
-},
-{
-"ChromaEffects disabled",
-0,
-},
-{
-"NetClient::HandleConnect()\n",
+"Got new connection 2",
 0,
 },
 {
@@ -1324,7 +727,7 @@ Blizzard_Console_SavedVars = {
 0,
 },
 {
-"Time set to 6/11/2026 (Thu) 21:09",
+"Time set to 6/14/2026 (Sun) 17:55",
 0,
 },
 {
@@ -1340,6 +743,34 @@ Blizzard_Console_SavedVars = {
 0,
 },
 {
+"Got new connection 3",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"World transfer pending...",
+0,
+},
+{
+"Got new connection 3",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Time set to 6/14/2026 (Sun) 17:56",
+0,
+},
+{
+"Time set to 6/14/2026 (Sun) 17:56",
+0,
+},
+{
 "World transfer pending...",
 0,
 },
@@ -1361,46 +792,6 @@ Blizzard_Console_SavedVars = {
 },
 {
 "Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"World transfer pending...",
-0,
-},
-{
-"Got new connection 3",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"World transfer pending...",
-0,
-},
-{
-"Got new connection 3",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"Time set to 6/11/2026 (Thu) 21:25",
-0,
-},
-{
-"Time set to 6/11/2026 (Thu) 21:25",
-0,
-},
-{
-"Time set to 6/11/2026 (Thu) 21:25",
-0,
-},
-{
-"Time set to 6/11/2026 (Thu) 21:25",
 0,
 },
 {
@@ -1408,11 +799,7 @@ Blizzard_Console_SavedVars = {
 0,
 },
 {
-"Completed challenge mode mapID 2811, level 2, time 1277855",
-0,
-},
-{
-"-------------------------------------------------- Previous Session --------------------------------------------------",
+"Completed challenge mode mapID 1753, level 10, time 1946307",
 0,
 },
 {
@@ -1428,7 +815,15 @@ Blizzard_Console_SavedVars = {
 0,
 },
 {
+"Got new connection 3",
+0,
+},
+{
 "Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"World transfer pending...",
 0,
 },
 {
@@ -1452,27 +847,11 @@ Blizzard_Console_SavedVars = {
 0,
 },
 {
-"Time set to 6/11/2026 (Thu) 21:53",
+"Time set to 6/14/2026 (Sun) 18:34",
 0,
 },
 {
-"Time set to 6/11/2026 (Thu) 21:53",
-0,
-},
-{
-"Time set to 6/11/2026 (Thu) 21:53",
-0,
-},
-{
-"Time set to 6/11/2026 (Thu) 21:53",
-0,
-},
-{
-"Time set to 6/11/2026 (Thu) 21:53",
-0,
-},
-{
-"Time set to 6/11/2026 (Thu) 21:53",
+"Time set to 6/14/2026 (Sun) 18:34",
 0,
 },
 {
@@ -1480,251 +859,11 @@ Blizzard_Console_SavedVars = {
 0,
 },
 {
-"Weather changed to 5, intensity 1.000000\n",
-0,
-},
-{
-"Weather changed to 5, intensity 1.000000\n",
-0,
-},
-{
-"Weather changed to 5, intensity 1.000000\n",
-0,
-},
-{
-"Weather changed to 5, intensity 1.000000\n",
-0,
-},
-{
-"Weather changed to 5, intensity 1.000000\n",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"Weather changed to 5, intensity 1.000000\n",
-0,
-},
-{
-"Weather changed to 5, intensity 1.000000\n",
-0,
-},
-{
-"Weather changed to 5, intensity 1.000000\n",
-0,
-},
-{
-"Weather changed to 5, intensity 1.000000\n",
-0,
-},
-{
-"Weather changed to 5, intensity 1.000000\n",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"Completed challenge mode mapID 2805, level 4, time 1157490",
+"Completed challenge mode mapID 1753, level 10, time 1685859",
 0,
 },
 {
 "World transfer pending...",
-0,
-},
-{
-"Got new connection 3",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"World transfer pending...",
-0,
-},
-{
-"Got new connection 3",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"World transfer pending...",
-0,
-},
-{
-"Got new connection 3",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"World transfer pending...",
-0,
-},
-{
-"Got new connection 3",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"World transfer pending...",
-0,
-},
-{
-"Got new connection 3",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"Time set to 6/11/2026 (Thu) 22:18",
-0,
-},
-{
-"Time set to 6/11/2026 (Thu) 22:18",
-0,
-},
-{
-"Time set to 6/11/2026 (Thu) 22:19",
-0,
-},
-{
-"Time set to 6/11/2026 (Thu) 22:19",
-0,
-},
-{
-"Time set to 6/11/2026 (Thu) 22:20",
-0,
-},
-{
-"Time set to 6/11/2026 (Thu) 22:20",
-0,
-},
-{
-"Changed difficulty successfully",
-0,
-},
-{
-"Completed challenge mode mapID 2526, level 7, time 1360565",
-0,
-},
-{
-"World transfer pending...",
-0,
-},
-{
-"Got new connection 3",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"Got new connection 3",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"Got new connection 3",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"Got new connection 3",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"Got new connection 3",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
 0,
 },
 {
@@ -2100,7 +1239,7 @@ Blizzard_Console_SavedVars = {
 0,
 },
 {
-"Time set to 6/11/2026 (Thu) 22:57",
+"Time set to 6/15/2026 (Mon) 8:53",
 0,
 },
 {
@@ -2116,7 +1255,199 @@ Blizzard_Console_SavedVars = {
 0,
 },
 {
+"Time set to 6/15/2026 (Mon) 9:07",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 9:07",
+0,
+},
+{
+"World transfer pending...",
+0,
+},
+{
+"Got new connection 3",
+0,
+},
+{
 "Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"World transfer pending...",
+0,
+},
+{
+"Got new connection 3",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 9:12",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 9:12",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 9:12",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 9:12",
+0,
+},
+{
+"-------------------------------------------------- Previous Session --------------------------------------------------",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 9:14",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 9:14",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 9:15",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 9:15",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 9:15",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 9:15",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 9:15",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 9:15",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 9:16",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 9:16",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 9:18",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 9:18",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 9:18",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 9:18",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 9:18",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 9:18",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 9:19",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 9:19",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 9:21",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 9:21",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 9:22",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 9:22",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 9:23",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 9:23",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 9:23",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 9:23",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 9:35",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 9:35",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 9:47",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 9:47",
+0,
+},
+{
+"World transfer pending...",
+0,
+},
+{
+"Got new connection 3",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 9:57",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 9:57",
+0,
+},
+{
+"World transfer pending...",
 0,
 },
 {
@@ -2132,307 +1463,11 @@ Blizzard_Console_SavedVars = {
 0,
 },
 {
-"Sorting particles normally.",
-0,
-},
-{
-"Multithreaded rendering enabled.",
-0,
-},
-{
-"Multithreaded BeginDraw enabled.",
-0,
-},
-{
-"Multithread shadows changed to 1.",
-0,
-},
-{
-"Multithreaded prepass enabled.",
-0,
-},
-{
-"Multithreaded opaque pass enabled.",
-0,
-},
-{
-"Multithreaded opaque pass enabled.",
-0,
-},
-{
-"Multithreaded alpha M2 pass enabled.",
-0,
-},
-{
-"Multithreaded opaque WMO pass enabled.",
-0,
-},
-{
-"Multithreaded terrain pass enabled.",
-0,
-},
-{
-"Multithreaded volumetric fog enabled.",
-0,
-},
-{
-"Multithreaded Refraction Pass enabled.",
-0,
-},
-{
-"Multithreaded miscellaneous passes enabled.",
-0,
-},
-{
-"Multithreaded decal passes disabled.",
-0,
-},
-{
-"Multithreaded outline passes enabled.",
-0,
-},
-{
-"Multithreaded lightshaft passes enabled.",
-0,
-},
-{
-"|cFFffff00Use trigger on BeginDrawComplete enabled.|r",
-0,
-},
-{
-"Multithreaded alpha pass enabled.",
-0,
-},
-{
-"Multithreaded daynight update enabled.",
-0,
-},
-{
-"Water detail changed to 0",
-0,
-},
-{
-"Ripple detail changed to 0",
-0,
-},
-{
-"Reflection mode changed to 0",
-0,
-},
-{
-"Reflection downscale changed to 0",
-0,
-},
-{
-"Sunshafts quality changed to 0",
-0,
-},
-{
-"Refraction mode changed to 0",
-0,
-},
-{
-"Volume fog disabled.",
-0,
-},
-{
-"Particulate volumes disabled.",
-0,
-},
-{
-"Projected textures enabled.",
-0,
-},
-{
-"Shadow mode changed to 1 - 1 band dynamic shadows on units, 1024",
-0,
-},
-{
-"Shadow texture size changed to 1024.",
-0,
-},
-{
-"Soft shadows changed to 0.",
-0,
-},
-{
-"Shadow cascade blending changed to 0",
-0,
-},
-{
-"Number of shadow cascades changed to 1",
-0,
-},
-{
-"Shadow RT mode changed to 0 (Disabled)",
-0,
-},
-{
-"maxLightCount must be in range 0 to 32.",
-0,
-},
-{
-"CVar 'maxLightCount' failed validation for its initial value.",
-0,
-},
-{
-"Clustered shading disabled.",
-0,
-},
-{
-"Not forcing clustered shading.",
-0,
-},
-{
-"SSAO mode set to 0",
-0,
-},
-{
-"SSAO type set to 0",
-0,
-},
-{
-"Depth Based Opacity Disabled",
-0,
-},
-{
-"SkyCloudLOD set to 0",
-0,
-},
-{
-"Texture filtering mode updated.",
-0,
-},
-{
-"Terrain mip level changed to 0.",
-0,
-},
-{
-"Outline mode changed to 0",
-0,
-},
-{
-"Physics interaction level changed to 2",
-0,
-},
-{
-"Render scale changed to 1",
-0,
-},
-{
-"Resample quality changed to 3",
-0,
-},
-{
-"MSAA set to 2 color samples, 2 coverage samples",
-0,
-},
-{
-"MSAA for alpha-test enabled.",
-0,
-},
-{
-"Variable Rate Shading not supported on this hardware",
-0,
-},
-{
-"CVar 'vrsWorldGeo' failed validation for its initial value.",
-0,
-},
-{
-"Variable Rate Shading not supported on this hardware",
-0,
-},
-{
-"CVar 'vrsParticles' failed validation for its initial value.",
-0,
-},
-{
-"VALAR mode changed to 0",
-0,
-},
-{
-"lodObjectSizeScale cannot be changed.",
-0,
-},
-{
-"Volume fog enabled.",
-0,
-},
-{
-"dynamicLod enabled",
-0,
-},
-{
-"World preload object sort enabled.",
-0,
-},
-{
-"World load object sort enabled.",
-0,
-},
-{
-"World preload non critical enabled.",
-0,
-},
-{
-"World preload high res textures enabled.",
-0,
-},
-{
-"FFX: Color Blind Test Mode Disabled",
-0,
-},
-{
-"Error display disabled",
-0,
-},
-{
-"Error display shown",
-0,
-},
-{
-"Displaying errors through fatal errors",
-0,
-},
-{
-"Displaying errors through fatal errors",
-0,
-},
-{
-"Now filtering: all messages",
-0,
-},
-{
-"CVar 'Sound_AmbienceHighpassDSPCutoff' failed validation for its initial value.",
-0,
-},
-{
-"CVar 'Sound_AllyPlayerHighpassDSPCutoff' failed validation for its initial value.",
-0,
-},
-{
-"CVar 'Sound_EnemyPlayerHighpassDSPCutoff' failed validation for its initial value.",
-0,
-},
-{
-"CVar 'Sound_NPCHighpassDSPCutoff' failed validation for its initial value.",
-0,
-},
-{
-"ChromaEffects disabled",
-0,
-},
-{
-"NetClient::HandleConnect()\n",
-0,
-},
-{
-"[WowEntitlements] [BNetAccount-0-0000000E6FBF] [WowAccount-0-00000401C2D6] Initialized with 70 entitlements.",
-0,
-},
-{
 "-------------------------------------------------- Previous Session --------------------------------------------------",
+0,
+},
+{
+"Attempted to register existing command: SetDifficulty",
 0,
 },
 {
@@ -2492,7 +1527,7 @@ Blizzard_Console_SavedVars = {
 0,
 },
 {
-"Time set to 6/12/2026 (Fri) 8:12",
+"Time set to 6/15/2026 (Mon) 11:26",
 0,
 },
 {
@@ -2508,847 +1543,311 @@ Blizzard_Console_SavedVars = {
 0,
 },
 {
+"Got new connection 3",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 11:27",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 11:27",
+0,
+},
+{
+"World transfer pending...",
+0,
+},
+{
+"Got new connection 3",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"World transfer pending...",
+0,
+},
+{
+"Got new connection 3",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 11:29",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 11:29",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 11:30",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 11:30",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 11:30",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 11:30",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 11:30",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 11:30",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 11:31",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 11:31",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 11:37",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 11:37",
+0,
+},
+{
+"Weather changed to 4, intensity 1.000000\n",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Weather changed to 4, intensity 1.000000\n",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"World transfer pending...",
+0,
+},
+{
+"Got new connection 3",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"World transfer pending...",
+0,
+},
+{
+"Got new connection 3",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"World transfer pending...",
+0,
+},
+{
+"Got new connection 3",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"World transfer pending...",
+0,
+},
+{
+"Got new connection 3",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"World transfer pending...",
+0,
+},
+{
+"Got new connection 3",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"World transfer pending...",
+0,
+},
+{
+"Got new connection 3",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 11:49",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 11:49",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 11:50",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 11:50",
+0,
+},
+{
+"World transfer pending...",
+0,
+},
+{
+"Got new connection 3",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"World transfer pending...",
+0,
+},
+{
+"Got new connection 3",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 11:53",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 11:53",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 11:53",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 11:53",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 11:55",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 11:55",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 11:58",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 11:58",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 12:01",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 12:01",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 12:01",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 12:01",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 12:03",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 12:03",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 12:06",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 12:06",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 12:07",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 12:07",
+0,
+},
+{
 "-------------------------------------------------- Previous Session --------------------------------------------------",
 0,
 },
 {
-"-------------------------------------------------- Previous Session --------------------------------------------------",
+"Time set to 6/15/2026 (Mon) 12:14",
 0,
 },
 {
-"-------------------------------------------------- Previous Session --------------------------------------------------",
+"Time set to 6/15/2026 (Mon) 12:14",
 0,
 },
 {
-"GameTimeSync: skipping forwards 2 game minutes, (current = 6/12/2026 (Fri) 8:18, newtime = 6/12/2026 (Fri) 8:20)",
+"Time set to 6/15/2026 (Mon) 12:26",
 0,
 },
 {
-"World transfer pending...",
-0,
-},
-{
-"Got new connection 3",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"World transfer pending...",
-0,
-},
-{
-"Got new connection 3",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"Time set to 6/12/2026 (Fri) 8:22",
-0,
-},
-{
-"Time set to 6/12/2026 (Fri) 8:22",
-0,
-},
-{
-"Time set to 6/12/2026 (Fri) 8:22",
-0,
-},
-{
-"Time set to 6/12/2026 (Fri) 8:22",
-0,
-},
-{
-"World transfer pending...",
-0,
-},
-{
-"Got new connection 3",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"World transfer pending...",
-0,
-},
-{
-"Got new connection 3",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"Time set to 6/12/2026 (Fri) 8:23",
-0,
-},
-{
-"Time set to 6/12/2026 (Fri) 8:23",
-0,
-},
-{
-"Changed difficulty successfully",
-0,
-},
-{
-"World transfer pending...",
-0,
-},
-{
-"Got new connection 3",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"World transfer pending...",
-0,
-},
-{
-"Got new connection 3",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"Time set to 6/12/2026 (Fri) 8:28",
-0,
-},
-{
-"Time set to 6/12/2026 (Fri) 8:28",
-0,
-},
-{
-"Time set to 6/12/2026 (Fri) 8:28",
-0,
-},
-{
-"Time set to 6/12/2026 (Fri) 8:28",
-0,
-},
-{
-"Time set to 6/12/2026 (Fri) 8:28",
-0,
-},
-{
-"Time set to 6/12/2026 (Fri) 8:28",
-0,
-},
-{
-"Time set to 6/12/2026 (Fri) 8:28",
-0,
-},
-{
-"Time set to 6/12/2026 (Fri) 8:28",
-0,
-},
-{
-"Changed difficulty successfully",
-0,
-},
-{
-"Completed challenge mode mapID 1209, level 8, time 1231105",
-0,
-},
-{
-"World transfer pending...",
-0,
-},
-{
-"Got new connection 3",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"Time set to 6/12/2026 (Fri) 8:50",
-0,
-},
-{
-"Time set to 6/12/2026 (Fri) 8:50",
-0,
-},
-{
-"DBCache::CancelCallback ignored",
-0,
-},
-{
-"World transfer pending...",
-0,
-},
-{
-"Got new connection 3",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"DBCache::CancelCallback ignored",
-0,
-},
-{
-"Dissolve Effect ID 2167 has invalid fade out time. This will result in the record beign ignore and a regular fade out being applied to the creature.",
-0,
-},
-{
-"World transfer pending...",
-0,
-},
-{
-"Got new connection 3",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"World transfer pending...",
-0,
-},
-{
-"Got new connection 3",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"World transfer pending...",
-0,
-},
-{
-"Got new connection 3",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"Time set to 6/12/2026 (Fri) 9:19",
-0,
-},
-{
-"Time set to 6/12/2026 (Fri) 9:19",
-0,
-},
-{
-"Time set to 6/12/2026 (Fri) 9:19",
-0,
-},
-{
-"Time set to 6/12/2026 (Fri) 9:19",
-0,
-},
-{
-"Changed difficulty successfully",
-0,
-},
-{
-"Completed challenge mode mapID 2915, level 10, time 1142421",
-0,
-},
-{
-"World transfer pending...",
-0,
-},
-{
-"Got new connection 3",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"World transfer pending...",
-0,
-},
-{
-"Got new connection 3",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"World transfer pending...",
-0,
-},
-{
-"Got new connection 3",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"World transfer pending...",
-0,
-},
-{
-"Got new connection 3",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"Time set to 6/12/2026 (Fri) 9:42",
-0,
-},
-{
-"Time set to 6/12/2026 (Fri) 9:42",
-0,
-},
-{
-"Time set to 6/12/2026 (Fri) 9:43",
-0,
-},
-{
-"Time set to 6/12/2026 (Fri) 9:43",
-0,
-},
-{
-"Changed difficulty successfully",
-0,
-},
-{
-"Completed challenge mode mapID 2526, level 11, time 1005494",
-0,
-},
-{
-"World transfer pending...",
-0,
-},
-{
-"Got new connection 3",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"World transfer pending...",
-0,
-},
-{
-"Got new connection 3",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"World transfer pending...",
-0,
-},
-{
-"Got new connection 3",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"Time set to 6/12/2026 (Fri) 10:03",
-0,
-},
-{
-"Time set to 6/12/2026 (Fri) 10:03",
-0,
-},
-{
-"World transfer pending...",
-0,
-},
-{
-"Got new connection 3",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"World transfer pending...",
-0,
-},
-{
-"Got new connection 3",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"Time set to 6/12/2026 (Fri) 10:05",
-0,
-},
-{
-"Time set to 6/12/2026 (Fri) 10:05",
-0,
-},
-{
-"Changed difficulty successfully",
-0,
-},
-{
-"Completed challenge mode mapID 1209, level 12, time 879469",
-0,
-},
-{
-"World transfer pending...",
-0,
-},
-{
-"Got new connection 3",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"World transfer pending...",
-0,
-},
-{
-"Got new connection 3",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"World transfer pending...",
-0,
-},
-{
-"Got new connection 3",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"World transfer pending...",
-0,
-},
-{
-"Got new connection 3",
-0,
-},
-{
-"Weather changed to 2, intensity 0.280000\n",
-0,
-},
-{
-"Weather changed to 2, intensity 0.280000\n",
-0,
-},
-{
-"Changed difficulty successfully",
-0,
-},
-{
-"Weather changed to 2, intensity 1.000000\n",
-0,
-},
-{
-"Weather changed to 2, intensity 0.280000\n",
-0,
-},
-{
-"Weather changed to 2, intensity 1.000000\n",
-0,
-},
-{
-"Weather changed to 2, intensity 0.280000\n",
-0,
-},
-{
-"Weather changed to 2, intensity 1.000000\n",
-0,
-},
-{
-"Weather changed to 2, intensity 0.280000\n",
-0,
-},
-{
-"Weather changed to 2, intensity 1.000000\n",
-0,
-},
-{
-"Weather changed to 2, intensity 0.280000\n",
-0,
-},
-{
-"Weather changed to 2, intensity 1.000000\n",
-0,
-},
-{
-"Weather changed to 2, intensity 0.280000\n",
-0,
-},
-{
-"Weather changed to 2, intensity 1.000000\n",
-0,
-},
-{
-"Weather changed to 2, intensity 0.280000\n",
-0,
-},
-{
-"Weather changed to 2, intensity 1.000000\n",
-0,
-},
-{
-"Completed challenge mode mapID 658, level 12, time 927955",
-0,
-},
-{
-"Weather changed to 2, intensity 0.280000\n",
-0,
-},
-{
-"World transfer pending...",
-0,
-},
-{
-"Got new connection 3",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"World transfer pending...",
-0,
-},
-{
-"Got new connection 3",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"Got new connection 3",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"Got new connection 3",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"Got new connection 3",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"Got new connection 3",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"World transfer pending...",
-0,
-},
-{
-"Got new connection 3",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"Time set to 6/12/2026 (Fri) 10:51",
-0,
-},
-{
-"Time set to 6/12/2026 (Fri) 10:51",
-0,
-},
-{
-"Time set to 6/12/2026 (Fri) 10:51",
-0,
-},
-{
-"Time set to 6/12/2026 (Fri) 10:51",
-0,
-},
-{
-"Time set to 6/12/2026 (Fri) 10:51",
-0,
-},
-{
-"Time set to 6/12/2026 (Fri) 10:51",
-0,
-},
-{
-"Changed difficulty successfully",
-0,
-},
-{
-"World transfer pending...",
-0,
-},
-{
-"Got new connection 3",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"Time set to 6/12/2026 (Fri) 10:56",
-0,
-},
-{
-"Time set to 6/12/2026 (Fri) 10:56",
-0,
-},
-{
-"Time set to 6/12/2026 (Fri) 10:57",
-0,
-},
-{
-"Time set to 6/12/2026 (Fri) 10:57",
-0,
-},
-{
-"World transfer pending...",
-0,
-},
-{
-"Got new connection 3",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"Time set to 6/12/2026 (Fri) 10:57",
-0,
-},
-{
-"Time set to 6/12/2026 (Fri) 10:57",
-0,
-},
-{
-"Time set to 6/12/2026 (Fri) 10:57",
-0,
-},
-{
-"Time set to 6/12/2026 (Fri) 10:57",
-0,
-},
-{
-"Time set to 6/12/2026 (Fri) 10:57",
-0,
-},
-{
-"Time set to 6/12/2026 (Fri) 10:57",
-0,
-},
-{
-"Changed difficulty successfully",
-0,
-},
-{
-"Completed challenge mode mapID 2811, level 10, time 1251383",
-0,
-},
-{
-"World transfer pending...",
-0,
-},
-{
-"Got new connection 3",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"World transfer pending...",
-0,
-},
-{
-"Got new connection 3",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"World transfer pending...",
-0,
-},
-{
-"Got new connection 3",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"World transfer pending...",
-0,
-},
-{
-"Got new connection 3",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"World transfer pending...",
-0,
-},
-{
-"Got new connection 3",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"World transfer pending...",
-0,
-},
-{
-"Got new connection 3",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"World transfer pending...",
-0,
-},
-{
-"Got new connection 3",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"World transfer pending...",
-0,
-},
-{
-"Got new connection 3",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"Time set to 6/12/2026 (Fri) 11:45",
-0,
-},
-{
-"Time set to 6/12/2026 (Fri) 11:45",
-0,
-},
-{
-"Time set to 6/12/2026 (Fri) 11:45",
-0,
-},
-{
-"Time set to 6/12/2026 (Fri) 11:45",
-0,
-},
-{
-"Changed difficulty successfully",
-0,
-},
-{
-"Completed challenge mode mapID 1209, level 11, time 1203784",
-0,
-},
-{
-"World transfer pending...",
-0,
-},
-{
-"Got new connection 3",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
+"Time set to 6/15/2026 (Mon) 12:26",
 0,
 },
 {
@@ -3732,7 +2231,1687 @@ Blizzard_Console_SavedVars = {
 0,
 },
 {
-"Time set to 6/12/2026 (Fri) 14:54",
+"Time set to 6/15/2026 (Mon) 12:49",
+0,
+},
+{
+"Gamespeed set from 0.017 to 0.017",
+0,
+},
+{
+"Got new connection 3",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Got new connection 3",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"World transfer pending...",
+0,
+},
+{
+"Got new connection 3",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 12:51",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 12:51",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 13:07",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 13:07",
+0,
+},
+{
+"World transfer pending...",
+0,
+},
+{
+"Got new connection 3",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"-------------------------------------------------- Previous Session --------------------------------------------------",
+0,
+},
+{
+"Got new connection 3",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"World transfer pending...",
+0,
+},
+{
+"Got new connection 3",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 13:35",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 13:35",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 13:42",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 13:42",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 13:43",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 13:43",
+0,
+},
+{
+"World transfer pending...",
+0,
+},
+{
+"Got new connection 3",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"World transfer pending...",
+0,
+},
+{
+"Got new connection 3",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 13:58",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 13:58",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 14:00",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 14:00",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 14:07",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 14:07",
+0,
+},
+{
+"-------------------------------------------------- Previous Session --------------------------------------------------",
+0,
+},
+{
+"Disconnecting for reason 12",
+0,
+},
+{
+"NetClient::HandleDisconnect()\n",
+0,
+},
+{
+"Got new connection 2",
+0,
+},
+{
+"NetClient::HandleConnect()\n",
+0,
+},
+{
+"-------------------------------------------------- Previous Session --------------------------------------------------",
+0,
+},
+{
+"Attempted to register existing command: SetDifficulty",
+0,
+},
+{
+"Got new connection 3",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x0000000100",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x0000000101",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x0000008101",
+0,
+},
+{
+"Proficiency in item class 4 set to 0x0000000021",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x000000c101",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x000000c103",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x000000c503",
+0,
+},
+{
+"Proficiency in item class 4 set to 0x0000000029",
+0,
+},
+{
+"Proficiency in item class 4 set to 0x000000002d",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x000000c523",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x000000e523",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x000010e523",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x000010e533",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x000010e5b3",
+0,
+},
+{
+"Proficiency in item class 4 set to 0x000000002f",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x000010e5b3",
+0,
+},
+{
+"Proficiency in item class 4 set to 0x000000002f",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 14:16",
+0,
+},
+{
+"Gamespeed set from 0.017 to 0.017",
+0,
+},
+{
+"Got new connection 3",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 14:20",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 14:20",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 14:20",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 14:20",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 14:24",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 14:24",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 14:28",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 14:28",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 14:29",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 14:29",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 14:30",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 14:30",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 14:32",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 14:32",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 14:32",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 14:32",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 14:33",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 14:33",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 14:34",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 14:34",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 14:35",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 14:35",
+0,
+},
+{
+"-------------------------------------------------- Previous Session --------------------------------------------------",
+0,
+},
+{
+"Disconnecting for reason 12",
+0,
+},
+{
+"NetClient::HandleDisconnect()\n",
+0,
+},
+{
+"Got new connection 2",
+0,
+},
+{
+"NetClient::HandleConnect()\n",
+0,
+},
+{
+"-------------------------------------------------- Previous Session --------------------------------------------------",
+0,
+},
+{
+"Attempted to register existing command: SetDifficulty",
+0,
+},
+{
+"Got new connection 3",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x0000000001",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x0000000041",
+0,
+},
+{
+"Proficiency in item class 4 set to 0x0000000021",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x0000004041",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x0000004441",
+0,
+},
+{
+"Proficiency in item class 4 set to 0x0000000025",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x0000006441",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x0000006451",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x00000064d1",
+0,
+},
+{
+"Proficiency in item class 4 set to 0x0000000027",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x00000064d1",
+0,
+},
+{
+"Proficiency in item class 4 set to 0x0000000027",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 14:36",
+0,
+},
+{
+"Gamespeed set from 0.017 to 0.017",
+0,
+},
+{
+"World transfer pending...",
+0,
+},
+{
+"Got new connection 3",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"World transfer pending...",
+0,
+},
+{
+"Got new connection 3",
+0,
+},
+{
+"Weather changed to 1, intensity 1.000000\n",
+0,
+},
+{
+"Weather changed to 1, intensity 1.000000\n",
+0,
+},
+{
+"World transfer pending...",
+0,
+},
+{
+"Got new connection 3",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 14:39",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 14:39",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 14:39",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 14:39",
+0,
+},
+{
+"Changed difficulty successfully",
+0,
+},
+{
+"Completed challenge mode mapID 2874, level 12, time 1448993",
+0,
+},
+{
+"World transfer pending...",
+0,
+},
+{
+"Got new connection 3",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"-------------------------------------------------- Previous Session --------------------------------------------------",
+0,
+},
+{
+"-------------------------------------------------- Previous Session --------------------------------------------------",
+0,
+},
+{
+"World transfer pending...",
+0,
+},
+{
+"Got new connection 3",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"World transfer pending...",
+0,
+},
+{
+"Got new connection 3",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"World transfer pending...",
+0,
+},
+{
+"Got new connection 3",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 15:09",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 15:09",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 15:09",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 15:09",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 15:10",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 15:10",
+0,
+},
+{
+"Changed difficulty successfully",
+0,
+},
+{
+"Weather changed to 5, intensity 1.000000\n",
+0,
+},
+{
+"Weather changed to 5, intensity 1.000000\n",
+0,
+},
+{
+"Weather changed to 5, intensity 1.000000\n",
+0,
+},
+{
+"Weather changed to 5, intensity 1.000000\n",
+0,
+},
+{
+"Weather changed to 5, intensity 1.000000\n",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Weather changed to 5, intensity 1.000000\n",
+0,
+},
+{
+"Weather changed to 5, intensity 1.000000\n",
+0,
+},
+{
+"Weather changed to 5, intensity 1.000000\n",
+0,
+},
+{
+"Weather changed to 5, intensity 1.000000\n",
+0,
+},
+{
+"Weather changed to 5, intensity 1.000000\n",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Weather changed to 5, intensity 1.000000\n",
+0,
+},
+{
+"Weather changed to 5, intensity 1.000000\n",
+0,
+},
+{
+"Weather changed to 5, intensity 1.000000\n",
+0,
+},
+{
+"Weather changed to 5, intensity 1.000000\n",
+0,
+},
+{
+"Weather changed to 5, intensity 1.000000\n",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Completed challenge mode mapID 2805, level 14, time 1639820",
+0,
+},
+{
+"-------------------------------------------------- Previous Session --------------------------------------------------",
+0,
+},
+{
+"Sorting particles normally.",
+0,
+},
+{
+"Multithreaded rendering enabled.",
+0,
+},
+{
+"Multithreaded BeginDraw enabled.",
+0,
+},
+{
+"Multithread shadows changed to 1.",
+0,
+},
+{
+"Multithreaded prepass enabled.",
+0,
+},
+{
+"Multithreaded opaque pass enabled.",
+0,
+},
+{
+"Multithreaded opaque pass enabled.",
+0,
+},
+{
+"Multithreaded alpha M2 pass enabled.",
+0,
+},
+{
+"Multithreaded opaque WMO pass enabled.",
+0,
+},
+{
+"Multithreaded terrain pass enabled.",
+0,
+},
+{
+"Multithreaded volumetric fog enabled.",
+0,
+},
+{
+"Multithreaded Refraction Pass enabled.",
+0,
+},
+{
+"Multithreaded miscellaneous passes enabled.",
+0,
+},
+{
+"Multithreaded decal passes disabled.",
+0,
+},
+{
+"Multithreaded outline passes enabled.",
+0,
+},
+{
+"Multithreaded lightshaft passes enabled.",
+0,
+},
+{
+"|cFFffff00Use trigger on BeginDrawComplete enabled.|r",
+0,
+},
+{
+"Multithreaded alpha pass enabled.",
+0,
+},
+{
+"Multithreaded daynight update enabled.",
+0,
+},
+{
+"Water detail changed to 0",
+0,
+},
+{
+"Ripple detail changed to 0",
+0,
+},
+{
+"Reflection mode changed to 0",
+0,
+},
+{
+"Reflection downscale changed to 0",
+0,
+},
+{
+"Sunshafts quality changed to 0",
+0,
+},
+{
+"Refraction mode changed to 0",
+0,
+},
+{
+"Volume fog disabled.",
+0,
+},
+{
+"Particulate volumes disabled.",
+0,
+},
+{
+"Projected textures enabled.",
+0,
+},
+{
+"Shadow mode changed to 1 - 1 band dynamic shadows on units, 1024",
+0,
+},
+{
+"Shadow texture size changed to 1024.",
+0,
+},
+{
+"Soft shadows changed to 0.",
+0,
+},
+{
+"Shadow cascade blending changed to 0",
+0,
+},
+{
+"Number of shadow cascades changed to 1",
+0,
+},
+{
+"Shadow RT mode changed to 0 (Disabled)",
+0,
+},
+{
+"maxLightCount must be in range 0 to 32.",
+0,
+},
+{
+"CVar 'maxLightCount' failed validation for its initial value.",
+0,
+},
+{
+"Clustered shading disabled.",
+0,
+},
+{
+"Not forcing clustered shading.",
+0,
+},
+{
+"SSAO mode set to 0",
+0,
+},
+{
+"SSAO type set to 0",
+0,
+},
+{
+"Depth Based Opacity Disabled",
+0,
+},
+{
+"SkyCloudLOD set to 0",
+0,
+},
+{
+"Texture filtering mode updated.",
+0,
+},
+{
+"Terrain mip level changed to 0.",
+0,
+},
+{
+"Outline mode changed to 0",
+0,
+},
+{
+"Physics interaction level changed to 2",
+0,
+},
+{
+"Render scale changed to 1",
+0,
+},
+{
+"Resample quality changed to 3",
+0,
+},
+{
+"MSAA set to 2 color samples, 2 coverage samples",
+0,
+},
+{
+"MSAA for alpha-test enabled.",
+0,
+},
+{
+"Variable Rate Shading not supported on this hardware",
+0,
+},
+{
+"CVar 'vrsWorldGeo' failed validation for its initial value.",
+0,
+},
+{
+"Variable Rate Shading not supported on this hardware",
+0,
+},
+{
+"CVar 'vrsParticles' failed validation for its initial value.",
+0,
+},
+{
+"VALAR mode changed to 0",
+0,
+},
+{
+"lodObjectSizeScale cannot be changed.",
+0,
+},
+{
+"Volume fog enabled.",
+0,
+},
+{
+"dynamicLod enabled",
+0,
+},
+{
+"World preload object sort enabled.",
+0,
+},
+{
+"World load object sort enabled.",
+0,
+},
+{
+"World preload non critical enabled.",
+0,
+},
+{
+"World preload high res textures enabled.",
+0,
+},
+{
+"FFX: Color Blind Test Mode Disabled",
+0,
+},
+{
+"Error display disabled",
+0,
+},
+{
+"Error display shown",
+0,
+},
+{
+"Displaying errors through fatal errors",
+0,
+},
+{
+"Displaying errors through fatal errors",
+0,
+},
+{
+"Now filtering: all messages",
+0,
+},
+{
+"CVar 'Sound_AmbienceHighpassDSPCutoff' failed validation for its initial value.",
+0,
+},
+{
+"CVar 'Sound_AllyPlayerHighpassDSPCutoff' failed validation for its initial value.",
+0,
+},
+{
+"CVar 'Sound_EnemyPlayerHighpassDSPCutoff' failed validation for its initial value.",
+0,
+},
+{
+"CVar 'Sound_NPCHighpassDSPCutoff' failed validation for its initial value.",
+0,
+},
+{
+"ChromaEffects disabled",
+0,
+},
+{
+"NetClient::HandleConnect()\n",
+0,
+},
+{
+"Got new connection 2",
+0,
+},
+{
+"[WowEntitlements] [BNetAccount-0-0000000E6FBF] [WowAccount-0-00000401C2D6] Initialized with 70 entitlements.",
+0,
+},
+{
+"Disconnecting for reason 12",
+0,
+},
+{
+"NetClient::HandleDisconnect()\n",
+0,
+},
+{
+"Got new connection 2",
+0,
+},
+{
+"NetClient::HandleConnect()\n",
+0,
+},
+{
+"-------------------------------------------------- Previous Session --------------------------------------------------",
+0,
+},
+{
+"Got new connection 3",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x0000000100",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x0000000101",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x0000008101",
+0,
+},
+{
+"Proficiency in item class 4 set to 0x0000000021",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x000000c101",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x000000c103",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x000000c503",
+0,
+},
+{
+"Proficiency in item class 4 set to 0x0000000029",
+0,
+},
+{
+"Proficiency in item class 4 set to 0x000000002d",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x000000c523",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x000000e523",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x000010e523",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x000010e533",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x000010e5b3",
+0,
+},
+{
+"Proficiency in item class 4 set to 0x000000002f",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x000010e5b3",
+0,
+},
+{
+"Proficiency in item class 4 set to 0x000000002f",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 15:52",
+0,
+},
+{
+"Gamespeed set from 0.017 to 0.017",
+0,
+},
+{
+"Got new connection 3",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 15:56",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 15:56",
+0,
+},
+{
+"Got new connection 3",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"World transfer pending...",
+0,
+},
+{
+"Got new connection 3",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"World transfer pending...",
+0,
+},
+{
+"Got new connection 3",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 16:23",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 16:23",
+0,
+},
+{
+"Changed difficulty successfully",
+0,
+},
+{
+"World transfer pending...",
+0,
+},
+{
+"Got new connection 3",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Got new connection 3",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 16:42",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 16:42",
+0,
+},
+{
+"Got new connection 3",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 16:49",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 16:49",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 16:49",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 16:49",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 16:49",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 16:49",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 16:49",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 16:49",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 16:53",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 16:53",
+0,
+},
+{
+"-------------------------------------------------- Previous Session --------------------------------------------------",
+0,
+},
+{
+"Sorting particles normally.",
+0,
+},
+{
+"Multithreaded rendering enabled.",
+0,
+},
+{
+"Multithreaded BeginDraw enabled.",
+0,
+},
+{
+"Multithread shadows changed to 1.",
+0,
+},
+{
+"Multithreaded prepass enabled.",
+0,
+},
+{
+"Multithreaded opaque pass enabled.",
+0,
+},
+{
+"Multithreaded opaque pass enabled.",
+0,
+},
+{
+"Multithreaded alpha M2 pass enabled.",
+0,
+},
+{
+"Multithreaded opaque WMO pass enabled.",
+0,
+},
+{
+"Multithreaded terrain pass enabled.",
+0,
+},
+{
+"Multithreaded volumetric fog enabled.",
+0,
+},
+{
+"Multithreaded Refraction Pass enabled.",
+0,
+},
+{
+"Multithreaded miscellaneous passes enabled.",
+0,
+},
+{
+"Multithreaded decal passes disabled.",
+0,
+},
+{
+"Multithreaded outline passes enabled.",
+0,
+},
+{
+"Multithreaded lightshaft passes enabled.",
+0,
+},
+{
+"|cFFffff00Use trigger on BeginDrawComplete enabled.|r",
+0,
+},
+{
+"Multithreaded alpha pass enabled.",
+0,
+},
+{
+"Multithreaded daynight update enabled.",
+0,
+},
+{
+"Water detail changed to 0",
+0,
+},
+{
+"Ripple detail changed to 0",
+0,
+},
+{
+"Reflection mode changed to 0",
+0,
+},
+{
+"Reflection downscale changed to 0",
+0,
+},
+{
+"Sunshafts quality changed to 0",
+0,
+},
+{
+"Refraction mode changed to 0",
+0,
+},
+{
+"Volume fog disabled.",
+0,
+},
+{
+"Particulate volumes disabled.",
+0,
+},
+{
+"Projected textures enabled.",
+0,
+},
+{
+"Shadow mode changed to 1 - 1 band dynamic shadows on units, 1024",
+0,
+},
+{
+"Shadow texture size changed to 1024.",
+0,
+},
+{
+"Soft shadows changed to 0.",
+0,
+},
+{
+"Shadow cascade blending changed to 0",
+0,
+},
+{
+"Number of shadow cascades changed to 1",
+0,
+},
+{
+"Shadow RT mode changed to 0 (Disabled)",
+0,
+},
+{
+"maxLightCount must be in range 0 to 32.",
+0,
+},
+{
+"CVar 'maxLightCount' failed validation for its initial value.",
+0,
+},
+{
+"Clustered shading disabled.",
+0,
+},
+{
+"Not forcing clustered shading.",
+0,
+},
+{
+"SSAO mode set to 0",
+0,
+},
+{
+"SSAO type set to 0",
+0,
+},
+{
+"Depth Based Opacity Disabled",
+0,
+},
+{
+"SkyCloudLOD set to 0",
+0,
+},
+{
+"Texture filtering mode updated.",
+0,
+},
+{
+"Terrain mip level changed to 0.",
+0,
+},
+{
+"Outline mode changed to 0",
+0,
+},
+{
+"Physics interaction level changed to 2",
+0,
+},
+{
+"Render scale changed to 1",
+0,
+},
+{
+"Resample quality changed to 3",
+0,
+},
+{
+"MSAA set to 2 color samples, 2 coverage samples",
+0,
+},
+{
+"MSAA for alpha-test enabled.",
+0,
+},
+{
+"Variable Rate Shading not supported on this hardware",
+0,
+},
+{
+"CVar 'vrsWorldGeo' failed validation for its initial value.",
+0,
+},
+{
+"Variable Rate Shading not supported on this hardware",
+0,
+},
+{
+"CVar 'vrsParticles' failed validation for its initial value.",
+0,
+},
+{
+"VALAR mode changed to 0",
+0,
+},
+{
+"lodObjectSizeScale cannot be changed.",
+0,
+},
+{
+"Volume fog enabled.",
+0,
+},
+{
+"dynamicLod enabled",
+0,
+},
+{
+"World preload object sort enabled.",
+0,
+},
+{
+"World load object sort enabled.",
+0,
+},
+{
+"World preload non critical enabled.",
+0,
+},
+{
+"World preload high res textures enabled.",
+0,
+},
+{
+"FFX: Color Blind Test Mode Disabled",
+0,
+},
+{
+"Error display disabled",
+0,
+},
+{
+"Error display shown",
+0,
+},
+{
+"Displaying errors through fatal errors",
+0,
+},
+{
+"Displaying errors through fatal errors",
+0,
+},
+{
+"Now filtering: all messages",
+0,
+},
+{
+"CVar 'Sound_AmbienceHighpassDSPCutoff' failed validation for its initial value.",
+0,
+},
+{
+"CVar 'Sound_AllyPlayerHighpassDSPCutoff' failed validation for its initial value.",
+0,
+},
+{
+"CVar 'Sound_EnemyPlayerHighpassDSPCutoff' failed validation for its initial value.",
+0,
+},
+{
+"CVar 'Sound_NPCHighpassDSPCutoff' failed validation for its initial value.",
+0,
+},
+{
+"ChromaEffects disabled",
+0,
+},
+{
+"NetClient::HandleConnect()\n",
+0,
+},
+{
+"Got new connection 2",
+0,
+},
+{
+"[WowEntitlements] [BNetAccount-0-0000000E6FBF] [WowAccount-0-00000401C2D6] Initialized with 70 entitlements.",
+0,
+},
+{
+"-------------------------------------------------- Previous Session --------------------------------------------------",
+0,
+},
+{
+"Got new connection 3",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x0000000100",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x0000000101",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x0000008101",
+0,
+},
+{
+"Proficiency in item class 4 set to 0x0000000021",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x000000c101",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x000000c103",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x000000c503",
+0,
+},
+{
+"Proficiency in item class 4 set to 0x0000000029",
+0,
+},
+{
+"Proficiency in item class 4 set to 0x000000002d",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x000000c523",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x000000e523",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x000010e523",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x000010e533",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x000010e5b3",
+0,
+},
+{
+"Proficiency in item class 4 set to 0x000000002f",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x000010e5b3",
+0,
+},
+{
+"Proficiency in item class 4 set to 0x000000002f",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Time set to 6/15/2026 (Mon) 17:20",
 0,
 },
 {
@@ -3760,107 +3939,11 @@ Blizzard_Console_SavedVars = {
 0,
 },
 {
-"Time set to 6/12/2026 (Fri) 14:58",
+"Time set to 6/15/2026 (Mon) 17:21",
 0,
 },
 {
-"Time set to 6/12/2026 (Fri) 14:58",
-0,
-},
-{
-"Time set to 6/12/2026 (Fri) 14:58",
-0,
-},
-{
-"Time set to 6/12/2026 (Fri) 14:58",
-0,
-},
-{
-"Time set to 6/12/2026 (Fri) 14:59",
-0,
-},
-{
-"Time set to 6/12/2026 (Fri) 14:59",
-0,
-},
-{
-"Time set to 6/12/2026 (Fri) 15:00",
-0,
-},
-{
-"Time set to 6/12/2026 (Fri) 15:00",
-0,
-},
-{
-"Time set to 6/12/2026 (Fri) 15:00",
-0,
-},
-{
-"Time set to 6/12/2026 (Fri) 15:00",
-0,
-},
-{
-"Time set to 6/12/2026 (Fri) 15:00",
-0,
-},
-{
-"Time set to 6/12/2026 (Fri) 15:00",
-0,
-},
-{
-"Time set to 6/12/2026 (Fri) 15:02",
-0,
-},
-{
-"Time set to 6/12/2026 (Fri) 15:02",
-0,
-},
-{
-"Time set to 6/12/2026 (Fri) 15:02",
-0,
-},
-{
-"Time set to 6/12/2026 (Fri) 15:02",
-0,
-},
-{
-"Time set to 6/12/2026 (Fri) 15:03",
-0,
-},
-{
-"Time set to 6/12/2026 (Fri) 15:03",
-0,
-},
-{
-"Time set to 6/12/2026 (Fri) 15:04",
-0,
-},
-{
-"Time set to 6/12/2026 (Fri) 15:04",
-0,
-},
-{
-"Time set to 6/12/2026 (Fri) 15:04",
-0,
-},
-{
-"Time set to 6/12/2026 (Fri) 15:04",
-0,
-},
-{
-"Time set to 6/12/2026 (Fri) 15:04",
-0,
-},
-{
-"Time set to 6/12/2026 (Fri) 15:04",
-0,
-},
-{
-"Time set to 6/12/2026 (Fri) 15:04",
-0,
-},
-{
-"Time set to 6/12/2026 (Fri) 15:04",
+"Time set to 6/15/2026 (Mon) 17:21",
 0,
 },
 {
@@ -3900,67 +3983,7 @@ Blizzard_Console_SavedVars = {
 0,
 },
 {
-"World transfer pending...",
-0,
-},
-{
-"Got new connection 3",
-0,
-},
-{
 "Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"World transfer pending...",
-0,
-},
-{
-"Got new connection 3",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"World transfer pending...",
-0,
-},
-{
-"Got new connection 3",
-0,
-},
-{
-"Weather changed to 2, intensity 0.280000\n",
-0,
-},
-{
-"Weather changed to 2, intensity 0.280000\n",
-0,
-},
-{
-"Time set to 6/12/2026 (Fri) 15:14",
-0,
-},
-{
-"Time set to 6/12/2026 (Fri) 15:14",
-0,
-},
-{
-"Time set to 6/12/2026 (Fri) 15:16",
-0,
-},
-{
-"Time set to 6/12/2026 (Fri) 15:16",
-0,
-},
-{
-"Time set to 6/12/2026 (Fri) 15:16",
-0,
-},
-{
-"Time set to 6/12/2026 (Fri) 15:16",
 0,
 },
 {
@@ -3968,39 +3991,15 @@ Blizzard_Console_SavedVars = {
 0,
 },
 {
-"Weather changed to 2, intensity 1.000000\n",
+"World transfer pending...",
 0,
 },
 {
-"Weather changed to 2, intensity 0.280000\n",
+"Got new connection 3",
 0,
 },
 {
-"Weather changed to 2, intensity 1.000000\n",
-0,
-},
-{
-"Weather changed to 2, intensity 0.280000\n",
-0,
-},
-{
-"Weather changed to 2, intensity 1.000000\n",
-0,
-},
-{
-"Weather changed to 2, intensity 0.280000\n",
-0,
-},
-{
-"Weather changed to 2, intensity 1.000000\n",
-0,
-},
-{
-"Completed challenge mode mapID 658, level 11, time 1461070",
-0,
-},
-{
-"Weather changed to 2, intensity 0.280000\n",
+"Weather changed to 0, intensity 0.000000\n",
 0,
 },
 {
@@ -4008,12 +4007,309 @@ Blizzard_Console_SavedVars = {
 0,
 },
 {
-"NetClient::HandleDisconnect()\n",
+"Sorting particles normally.",
+0,
+},
+{
+"Multithreaded rendering enabled.",
+0,
+},
+{
+"Multithreaded BeginDraw enabled.",
+0,
+},
+{
+"Multithread shadows changed to 1.",
+0,
+},
+{
+"Multithreaded prepass enabled.",
+0,
+},
+{
+"Multithreaded opaque pass enabled.",
+0,
+},
+{
+"Multithreaded opaque pass enabled.",
+0,
+},
+{
+"Multithreaded alpha M2 pass enabled.",
+0,
+},
+{
+"Multithreaded opaque WMO pass enabled.",
+0,
+},
+{
+"Multithreaded terrain pass enabled.",
+0,
+},
+{
+"Multithreaded volumetric fog enabled.",
+0,
+},
+{
+"Multithreaded Refraction Pass enabled.",
+0,
+},
+{
+"Multithreaded miscellaneous passes enabled.",
+0,
+},
+{
+"Multithreaded decal passes disabled.",
+0,
+},
+{
+"Multithreaded outline passes enabled.",
+0,
+},
+{
+"Multithreaded lightshaft passes enabled.",
+0,
+},
+{
+"|cFFffff00Use trigger on BeginDrawComplete enabled.|r",
+0,
+},
+{
+"Multithreaded alpha pass enabled.",
+0,
+},
+{
+"Multithreaded daynight update enabled.",
+0,
+},
+{
+"Water detail changed to 0",
+0,
+},
+{
+"Ripple detail changed to 0",
+0,
+},
+{
+"Reflection mode changed to 0",
+0,
+},
+{
+"Reflection downscale changed to 0",
+0,
+},
+{
+"Sunshafts quality changed to 0",
+0,
+},
+{
+"Refraction mode changed to 0",
+0,
+},
+{
+"Volume fog disabled.",
+0,
+},
+{
+"Particulate volumes disabled.",
+0,
+},
+{
+"Projected textures enabled.",
+0,
+},
+{
+"Shadow mode changed to 1 - 1 band dynamic shadows on units, 1024",
+0,
+},
+{
+"Shadow texture size changed to 1024.",
+0,
+},
+{
+"Soft shadows changed to 0.",
+0,
+},
+{
+"Shadow cascade blending changed to 0",
+0,
+},
+{
+"Number of shadow cascades changed to 1",
+0,
+},
+{
+"Shadow RT mode changed to 0 (Disabled)",
+0,
+},
+{
+"maxLightCount must be in range 0 to 32.",
+0,
+},
+{
+"CVar 'maxLightCount' failed validation for its initial value.",
+0,
+},
+{
+"Clustered shading disabled.",
+0,
+},
+{
+"Not forcing clustered shading.",
+0,
+},
+{
+"SSAO mode set to 0",
+0,
+},
+{
+"SSAO type set to 0",
+0,
+},
+{
+"Depth Based Opacity Disabled",
+0,
+},
+{
+"SkyCloudLOD set to 0",
+0,
+},
+{
+"Texture filtering mode updated.",
+0,
+},
+{
+"Terrain mip level changed to 0.",
+0,
+},
+{
+"Outline mode changed to 0",
+0,
+},
+{
+"Physics interaction level changed to 2",
+0,
+},
+{
+"Render scale changed to 1",
+0,
+},
+{
+"Resample quality changed to 3",
+0,
+},
+{
+"MSAA set to 2 color samples, 2 coverage samples",
+0,
+},
+{
+"MSAA for alpha-test enabled.",
+0,
+},
+{
+"Variable Rate Shading not supported on this hardware",
+0,
+},
+{
+"CVar 'vrsWorldGeo' failed validation for its initial value.",
+0,
+},
+{
+"Variable Rate Shading not supported on this hardware",
+0,
+},
+{
+"CVar 'vrsParticles' failed validation for its initial value.",
+0,
+},
+{
+"VALAR mode changed to 0",
+0,
+},
+{
+"lodObjectSizeScale cannot be changed.",
+0,
+},
+{
+"Volume fog enabled.",
+0,
+},
+{
+"dynamicLod enabled",
+0,
+},
+{
+"World preload object sort enabled.",
+0,
+},
+{
+"World load object sort enabled.",
+0,
+},
+{
+"World preload non critical enabled.",
+0,
+},
+{
+"World preload high res textures enabled.",
+0,
+},
+{
+"FFX: Color Blind Test Mode Disabled",
+0,
+},
+{
+"Error display disabled",
+0,
+},
+{
+"Error display shown",
+0,
+},
+{
+"Displaying errors through fatal errors",
+0,
+},
+{
+"Displaying errors through fatal errors",
+0,
+},
+{
+"Now filtering: all messages",
+0,
+},
+{
+"CVar 'Sound_AmbienceHighpassDSPCutoff' failed validation for its initial value.",
+0,
+},
+{
+"CVar 'Sound_AllyPlayerHighpassDSPCutoff' failed validation for its initial value.",
+0,
+},
+{
+"CVar 'Sound_EnemyPlayerHighpassDSPCutoff' failed validation for its initial value.",
+0,
+},
+{
+"CVar 'Sound_NPCHighpassDSPCutoff' failed validation for its initial value.",
+0,
+},
+{
+"ChromaEffects disabled",
+0,
+},
+{
+"NetClient::HandleConnect()\n",
+0,
+},
+{
+"[WowEntitlements] [BNetAccount-0-0000000E6FBF] [WowAccount-0-00000401C2D6] Initialized with 70 entitlements.",
 0,
 },
 },
-["isShown"] = false,
+["height"] = 300,
 ["fontHeight"] = 14,
+["isShown"] = false,
 ["commandHistory"] = {
 },
 }

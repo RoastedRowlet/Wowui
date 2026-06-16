@@ -1,8 +1,16 @@
 # WarpDeplete
 
-## [v5.3.0](https://github.com/happenslol/WarpDeplete/tree/v5.3.0) (2026-05-17)
-[Full Changelog](https://github.com/happenslol/WarpDeplete/commits/v5.3.0) [Previous Releases](https://github.com/happenslol/WarpDeplete/releases)
+## [v5.4.1](https://github.com/happenslol/WarpDeplete/tree/v5.4.1) (2026-06-12)
+[Full Changelog](https://github.com/happenslol/WarpDeplete/commits/v5.4.1) [Previous Releases](https://github.com/happenslol/WarpDeplete/releases)
 
+- chore: Bump version  
+- chore: Update ruRU.lua (#155)  
+- chore: Bump version  
+- feat: Add bar backdrop customization and slug font option (#154)  
+    * Add OUTLINE SLUG  
+    * add Backdrop Colour Options  
+    * Rename `OUTLINE SLUG` to `OUTLINE, SLUG`  
+- chore: Update ruRU.lua (#153)  
 - chore: Bump version  
 - feat: Add UI option to clear recorded splits per dungeon and level (#152)  
     * feat: add UI option to clear recorded splits per dungeon and level  
@@ -56,8 +64,3 @@
     * UNIT\_DIED is now its own event instead of a subevent of CLEU  
     * C\_ChallengeMode.GetCompletionInfo has been removed, using C\_ChallengeMode.GetChallengeCompletionInfo instead  
 - fix: Use category id to open addon settings (#136)  
-- chore: Update interface version russian description  (#134)  
-- chore: Bump version  
-- feat: Add checks for midnight expansion (#133)  
-- chore: Add interface version for midnight (#132)  
-- chore: update gitignore (#131)  

@@ -257,11 +257,22 @@ end
 -- indicator placements (source) but only ever display the listed spells. Earth
 -- Shield is castable by every Shaman spec, so Enhancement and Elemental borrow
 -- Restoration's setup and show only Earth Shield -- exactly where the player
--- positioned Restoration's Earth Shield indicator. Keyed by spec ID; spells is a
--- set keyed by the primary spell ID indicators reference (974).
+-- positioned Restoration's Earth Shield indicator. Blessing of Freedom works
+-- the same way for Protection/Retribution Paladins (this also lets the
+-- defensives display's externals fingerprint resolve Freedom on every Paladin
+-- spec, since BM_IdentifySecretAura keys off the resolved spec). Keyed by spec
+-- ID; spells is a set keyed by the primary spell ID indicators reference.
 local BORROW_SPECS = {
-    [262] = { source = "SHAMAN_RESTORATION", spells = { [974] = true } }, -- Elemental
-    [263] = { source = "SHAMAN_RESTORATION", spells = { [974] = true } }, -- Enhancement
+    [262] = { source = "SHAMAN_RESTORATION", spells = { [974] = true } },  -- Elemental
+    [263] = { source = "SHAMAN_RESTORATION", spells = { [974] = true } },  -- Enhancement
+    -- sigs: fingerprints can differ from the source spec because the
+    -- RAID_PLAYER_DISPELLABLE probe reflects the PLAYER's dispel capability.
+    -- Freedom reads 1:0:0:1 on Holy (magic dispel) but 1:0:0:0 on Prot/Ret
+    -- (no magic dispel), so the borrow entries register their own variant.
+    [66]  = { source = "PALADIN_HOLY", spells = { [1044] = true },
+              sigs = { ["1:0:0:0"] = 1044 } }, -- Protection
+    [70]  = { source = "PALADIN_HOLY", spells = { [1044] = true },
+              sigs = { ["1:0:0:0"] = 1044 } }, -- Retribution
 }
 
 -- Resolve the player's CURRENT spec to a BM spec key. This MUST be done by spec
@@ -355,6 +366,18 @@ end
 -- Per-spec signature -> spellID lookup (built lazily)
 local specSignatures = {}  -- [specKey] = { ["1:1:1:0"] = spellID }
 
+-- Try to match a secret aura against the player's own spec signatures.
+-- Only track indicators for the player's active spec. Checking all specs of the
+-- same class causes cross-spec bleed (e.g. Disc seeing Holy indicators).
+-- Also prevents cross-class signature collisions for secret aura fingerprinting.
+-- Declared BEFORE GetSpecSignatures so its borrow-variant merge captures these
+-- as upvalues (a later declaration would resolve to nil globals inside it).
+local activeSpecKey_BM = nil
+-- When the active spec borrows another's indicators (Enh/Ele -> Resto, Prot/Ret
+-- -> Holy), this holds that borrow config so tracking can be restricted to the
+-- borrowed spells and the borrow's signature variants can merge in.
+local activeBorrow_BM = nil
+
 local function GetSpecSignatures(specKey)
     if specSignatures[specKey] then return specSignatures[specKey] end
     local sigs = {}
@@ -371,18 +394,19 @@ local function GetSpecSignatures(specKey)
             end
         end
     end
+    -- Borrow specs can fingerprint a spell differently than the source spec
+    -- (the dispellable probe tracks the player's own dispel kit), so merge the
+    -- active borrow entry's signature variants in. Safe with the lazy cache:
+    -- specSignatures is wiped on every RebuildLookup (login + spec change),
+    -- so the merged table always reflects the current spec context.
+    if activeBorrow_BM and activeBorrow_BM.source == specKey and activeBorrow_BM.sigs then
+        for sig, sid in pairs(activeBorrow_BM.sigs) do
+            if not sigs[sig] then sigs[sig] = sid end
+        end
+    end
     specSignatures[specKey] = sigs
     return sigs
 end
-
--- Try to match a secret aura against the player's own spec signatures.
--- Only track indicators for the player's active spec. Checking all specs of the
--- same class causes cross-spec bleed (e.g. Disc seeing Holy indicators).
--- Also prevents cross-class signature collisions for secret aura fingerprinting.
-local activeSpecKey_BM = nil
--- When the active spec borrows another's indicators (Enh/Ele -> Resto), this
--- holds that borrow config so tracking can be restricted to the borrowed spells.
-local activeBorrow_BM = nil
 
 local function DetectActiveSpecKey()
     -- Locale-independent: resolve by spec ID. nil for any non-tracked spec, which
@@ -451,7 +475,7 @@ local SECRET_SPELL_ICONS = {
     [10060]  = 135939,   -- Power Infusion
     [47788]  = 237542,   -- Guardian Spirit
     [116849] = 636288,   -- Life Cocoon
-    [443113] = 135995,   -- Strength of the Black Ox
+    [443113] = 615340,   -- Strength of the Black Ox
     [1022]   = 135964,   -- Blessing of Protection
     [432502] = 5927636,  -- Holy Armaments (bulwark icon)
     [6940]   = 135966,   -- Blessing of Sacrifice
@@ -900,7 +924,7 @@ function ns.BM_AnchorIndicators(d, health, s)
     if d.bmSimpleIcons and health and ns.db and ns.db.profile and ns.db.profile.bmDisplayMode == "simple" then
         local bs = ns.db.profile.bmSimple
         if bs then
-            local iscale = (d._isParty and ns._partyIndicatorScale or ns._indicatorScale) or 1
+            local iscale = (d._isParty and ns._partyBmScale or (d._isExtra and ns._xfBmScale) or ns._bmScale) or 1
             local sz = (bs.size or 22) * iscale
             for _, f in ipairs(d.bmSimpleIcons) do f:SetSize(sz, sz) end
             ns.BM_AnchorSimpleGrid(d, health, bs, iscale, nil)
@@ -1046,6 +1070,22 @@ local function GetThresholdColorCurve(thresholdSec, ncR, ncG, ncB, ncA, tcR, tcG
     return curve
 end
 
+-- Scalar step curve for the Icon Glow gate: 1 below the threshold, 0 at/above,
+-- evaluated against the aura's DurationObject (seconds remaining). Cached per
+-- threshold value. Secret-safe -- the result only ever flows into widget APIs.
+local _thresholdAlphaCurves = {}
+local function GetThresholdAlphaCurve(thresholdSec)
+    if not (C_CurveUtil and C_CurveUtil.CreateCurve and Enum and Enum.LuaCurveType) then return nil end
+    local curve = _thresholdAlphaCurves[thresholdSec]
+    if curve then return curve end
+    curve = C_CurveUtil.CreateCurve()
+    curve:SetType(Enum.LuaCurveType.Step)
+    curve:AddPoint(0, 1)              -- remaining below threshold -> glow on
+    curve:AddPoint(thresholdSec, 0)   -- remaining at/above threshold -> glow off
+    _thresholdAlphaCurves[thresholdSec] = curve
+    return curve
+end
+
 -- [element] = { unit, iid, curve, apply }; apply(element, colorResult)
 local thresholdRegistry = {}
 local thresholdTicker = CreateFrame("Frame")
@@ -1099,6 +1139,14 @@ end
 local function ApplyTexThresholdColor(f, colorResult)
     if f._tex then f._tex:SetVertexColor(colorResult:GetRGBA()) end
 end
+-- Duration text: recolor the cooldown's countdown font string. Used when an
+-- icon indicator has "Hide Icons" on, so the expiring color lands on the
+-- visible duration text instead of the hidden icon texture.
+local function ApplyDurTextThresholdColor(f, colorResult)
+    local cd = f._cooldown
+    local cdText = cd and cd.GetCountdownFontString and cd:GetCountdownFontString()
+    if cdText then cdText:SetTextColor(colorResult:GetRGBA()) end
+end
 -- Health-color overlay: the overlay texture itself is the element.
 local function ApplyOverlayThresholdColor(overlay, colorResult)
     overlay:SetVertexColor(colorResult:GetRGBA())
@@ -1108,6 +1156,61 @@ end
 local function ApplyBorderThresholdColor(borderFrame, colorResult)
     local PP2 = EllesmereUI.PanelPP or EllesmereUI.PP
     if PP2 and PP2.SetBorderColor then PP2.SetBorderColor(borderFrame, colorResult:GetRGBA()) end
+end
+
+-------------------------------------------------------------------------------
+--  Icon Glow -- threshold-gated glow for icon indicators. The shared glow
+--  engine runs continuously while the buff is active; its overlay ALPHA is
+--  driven by the DurationObject so the glow only shows once remaining drops
+--  below the threshold. Fully secret-safe: the (possibly secret) curve value
+--  and IsZero boolean flow straight into Blizzard widget APIs
+--  (EvaluateColorValueFromBoolean, SetAlpha) and are never compared in Lua.
+--  Mirrors the recolor ticker above; the ticker also stops the animation on
+--  recycled/hidden pool frames so an inactive icon never leaks a running glow.
+-------------------------------------------------------------------------------
+local glowRegistry = {}  -- [overlay] = { unit, iid, curve }
+local glowTicker = CreateFrame("Frame")
+glowTicker:Hide()
+local glowElapsed = 0
+local function EvalGlow(overlay, e)
+    if not (C_UnitAuras_GetAuraDuration and C_CurveUtil and C_CurveUtil.EvaluateColorValueFromBoolean) then return end
+    local durObj = C_UnitAuras_GetAuraDuration(e.unit, e.iid)
+    if not (durObj and durObj.EvaluateRemainingDuration and durObj.IsZero) then return end
+    -- pcall (method form, no closure): a recycled duration object can throw.
+    local ok, val = pcall(durObj.EvaluateRemainingDuration, durObj, e.curve, 0)
+    if not ok then return end
+    local okz, isZero = pcall(durObj.IsZero, durObj)
+    if not okz then return end
+    -- val + isZero may be secret; they only ever flow into Blizzard widget APIs.
+    overlay:SetAlpha(C_CurveUtil.EvaluateColorValueFromBoolean(isZero, 0, val))
+end
+glowTicker:SetScript("OnUpdate", function(_, dt)
+    glowElapsed = glowElapsed + dt
+    if glowElapsed < 0.2 then return end
+    glowElapsed = 0
+    local any = false
+    for overlay, e in pairs(glowRegistry) do
+        if overlay.IsShown and not overlay:IsShown() then
+            glowRegistry[overlay] = nil
+            if overlay._euiGlowActive and EllesmereUI.Glows and EllesmereUI.Glows.StopGlow then
+                EllesmereUI.Glows.StopGlow(overlay)
+            end
+        else
+            any = true
+            EvalGlow(overlay, e)
+        end
+    end
+    if not any then glowTicker:Hide() end
+end)
+local function RegisterGlow(overlay, unit, iid, curve)
+    local e = glowRegistry[overlay]
+    if not e then e = {}; glowRegistry[overlay] = e end
+    e.unit, e.iid, e.curve = unit, iid, curve
+    glowTicker:Show()
+    EvalGlow(overlay, e)   -- immediate, so the gate is correct on the first frame
+end
+local function UnregisterGlow(overlay)
+    glowRegistry[overlay] = nil
 end
 
 -------------------------------------------------------------------------------
@@ -1325,7 +1428,7 @@ function ns.BM_UpdateSimpleGrid(button, unit, db, updateInfo)
         if not needScan then return end
     end
 
-    local iscale = (d._isParty and ns._partyIndicatorScale or ns._indicatorScale) or 1
+    local iscale = (d._isParty and ns._partyBmScale or (d._isExtra and ns._xfBmScale) or ns._bmScale) or 1
     local PP = EllesmereUI.PanelPP or EllesmereUI.PP
     local sz = (bs.size or 22) * iscale
     local bdrSz = bs.borderSize or 1
@@ -1474,7 +1577,7 @@ function ns.BM_UpdateIndicators(button, unit, db, updateInfo)
     end
 
     -- Party buttons use the party scale (Auto Resize); raid buttons use theirs.
-    local iscale = (d._isParty and ns._partyIndicatorScale or ns._indicatorScale) or 1
+    local iscale = (d._isParty and ns._partyBmScale or (d._isExtra and ns._xfBmScale) or ns._bmScale) or 1
     -- Base level for the Frame Level setting (re-applied per indicator below).
     local buttonLvl = button:GetFrameLevel()
 
@@ -1793,10 +1896,20 @@ function ns.BM_UpdateIndicators(button, unit, db, updateInfo)
                                 f._tex:SetTexCoord(0, 1, 0, 1)
                                 ncR, ncG, ncB, ncA = c.r, c.g, c.b, iconAlpha
                             end
-                            -- Threshold expiring recolor (secret-safe curve + ticker)
+                            -- Threshold expiring recolor (secret-safe curve + ticker).
+                            -- For the "icon" indicator type the expiring color ALWAYS
+                            -- targets the duration text (never the icon texture), whether
+                            -- or not Hide Icons is on. That registration is deferred to the
+                            -- duration-text block below (so the countdown font string
+                            -- already exists). The "square" type still recolors its texture.
+                            local textThresholdMode = (indType == "icon")
                             do
                                 local tiid = aura.auraInstanceID
-                                if ind.thresholdEnabled and tiid and not issecretvalue(tiid) then
+                                if textThresholdMode then
+                                    -- Clear any prior texture registration; the text block
+                                    -- below re-registers against the duration text.
+                                    UnregisterThreshold(f)
+                                elseif ind.thresholdEnabled and tiid and not issecretvalue(tiid) then
                                     local tc = ind.thresholdColor or { r=1, g=0.2, b=0.2 }
                                     local curve = GetThresholdColorCurve(
                                         ind.threshold or 3, ncR, ncG, ncB, ncA,
@@ -1808,6 +1921,50 @@ function ns.BM_UpdateIndicators(button, unit, db, updateInfo)
                                     end
                                 else
                                     UnregisterThreshold(f)
+                                end
+                            end
+
+                            -- Icon Glow (icon type only): a glow that plays while
+                            -- the buff is within the threshold window. The engine
+                            -- glow runs while the icon is shown; the glow ticker
+                            -- drives its overlay alpha so it only appears below the
+                            -- threshold. Restart the animation only when style/
+                            -- size/color changed so a steady glow never resets on a
+                            -- rescan. Secret-safe (see the glow ticker above).
+                            do
+                                local gType = (indType == "icon") and (ind.iconGlowType or 0) or 0
+                                local giid = aura.auraInstanceID
+                                local Glows = EllesmereUI.Glows
+                                if gType > 0 and ind.thresholdEnabled and giid
+                                   and not issecretvalue(giid) and Glows and Glows.StartGlow then
+                                    local gov = f._bmGlowOverlay
+                                    if not gov then
+                                        gov = CreateFrame("Frame", nil, f)
+                                        gov:SetAllPoints(f)
+                                        gov:SetFrameLevel(f:GetFrameLevel() + 6)
+                                        gov:EnableMouse(false)
+                                        f._bmGlowOverlay = gov
+                                    end
+                                    local cr, cg, cb = ind.iconGlowR or 1.0, ind.iconGlowG or 0.776, ind.iconGlowB or 0.376
+                                    if ind.iconGlowClassColor then
+                                        local _, classFile = UnitClass("player")
+                                        local cc = classFile and RAID_CLASS_COLORS and RAID_CLASS_COLORS[classFile]
+                                        if cc then cr, cg, cb = cc.r, cc.g, cc.b end
+                                    end
+                                    if (not gov._euiGlowActive) or gov._bmGlowStyle ~= gType
+                                       or gov._bmGlowW ~= iconSz or gov._bmGlowCR ~= cr
+                                       or gov._bmGlowCG ~= cg or gov._bmGlowCB ~= cb then
+                                        Glows.StartGlow(gov, gType, iconSz, cr, cg, cb)
+                                        gov._bmGlowStyle, gov._bmGlowW = gType, iconSz
+                                        gov._bmGlowCR, gov._bmGlowCG, gov._bmGlowCB = cr, cg, cb
+                                    end
+                                    local gcurve = GetThresholdAlphaCurve(ind.threshold or 3)
+                                    if gcurve then RegisterGlow(gov, unit, giid, gcurve) end
+                                elseif f._bmGlowOverlay then
+                                    UnregisterGlow(f._bmGlowOverlay)
+                                    if f._bmGlowOverlay._euiGlowActive and Glows and Glows.StopGlow then
+                                        Glows.StopGlow(f._bmGlowOverlay)
+                                    end
                                 end
                             end
 
@@ -1896,6 +2053,24 @@ function ns.BM_UpdateIndicators(button, unit, db, updateInfo)
                                             cdText:SetTextColor(tc.r, tc.g, tc.b)
                                             cdText:ClearAllPoints()
                                             cdText:SetPoint("CENTER", f, "CENTER", ind.durationTextOffsetX or 0, ind.durationTextOffsetY or 0)
+                                            -- Icon indicator threshold: drive the expiring color
+                                            -- onto the duration text (always, for the icon type).
+                                            -- The curve reverts to the duration text color above
+                                            -- the threshold, so the static color set just above is
+                                            -- the baseline and the immediate eval here overrides it
+                                            -- without a flash.
+                                            if textThresholdMode then
+                                                local tiid = aura.auraInstanceID
+                                                if ind.thresholdEnabled and tiid and not issecretvalue(tiid) then
+                                                    local thc = ind.thresholdColor or { r=1, g=0.2, b=0.2 }
+                                                    local curve = GetThresholdColorCurve(
+                                                        ind.threshold or 3, tc.r, tc.g, tc.b, 1,
+                                                        thc.r, thc.g, thc.b, (ind.thresholdColorOpacity or 100) / 100)
+                                                    if curve then
+                                                        RegisterThreshold(f, unit, tiid, curve, ApplyDurTextThresholdColor)
+                                                    end
+                                                end
+                                            end
                                         end
                                     end
                                 else
@@ -2226,7 +2401,7 @@ function ns.BM_ApplyPreviewIndicators(f, index, s)
     local barPool  = f._bmBarPool
     if not iconPool then return end
     -- Party preview passes the party proxy as `s`; use the party scale then.
-    local iscale = ((s == ns._scaledPartyProxy) and ns._partyIndicatorScale or ns._indicatorScale) or 1
+    local iscale = ((s == ns._scaledPartyProxy) and ns._partyBmScale or ns._bmScale) or 1
 
     -- Hide all first (reset cooldowns so they re-apply fresh)
     for _, fr in ipairs(iconPool) do
@@ -4398,7 +4573,9 @@ function ns.BM_BuildPage(pageName, parent, yOffset)
                     { type="label", text="" })
             else
                 SettingsRow(
-                    { type="colorpicker", text="Color", hasAlpha=false,
+                    -- Icon indicators recolor the duration text (not the icon), so
+                    -- the label reads "Text Color" for that type specifically.
+                    { type="colorpicker", text=(indType == "icon") and "Text Color" or "Color", hasAlpha=false,
                       disabled=thOff, disabledTooltip="Enable Threshold",
                       getValue=function()
                           local c = ind.thresholdColor or { r=1, g=0.2, b=0.2 }
@@ -4412,6 +4589,91 @@ function ns.BM_BuildPage(pageName, parent, yOffset)
                       disabled=thOff, disabledTooltip="Enable Threshold",
                       getValue=function() return ind.thresholdColorOpacity or 100 end,
                       setValue=function(v) ind.thresholdColorOpacity = v; ReloadAndUpdate() end })
+            end
+
+            -- Icon Glow (icon indicator only): a glow that plays while the buff
+            -- is within the threshold window. Replicates CDM's Buff Glow control
+            -- (style dropdown + inline class/custom color swatches).
+            if indType == "icon" then
+                local GLOW_VALUES = { [0] = "None" }
+                local GLOW_ORDER = { 0 }
+                local Styles = EllesmereUI.Glows and EllesmereUI.Glows.STYLES
+                if Styles then
+                    for i, entry in ipairs(Styles) do
+                        if not entry.shapeGlow then
+                            GLOW_VALUES[i] = entry.name
+                            GLOW_ORDER[#GLOW_ORDER + 1] = i
+                        end
+                    end
+                end
+                local glowRow = SettingsRow(
+                    { type="dropdown", text="Icon Glow",
+                      values=GLOW_VALUES, order=GLOW_ORDER,
+                      disabled=thOff, disabledTooltip="Enable Threshold",
+                      getValue=function() return ind.iconGlowType or 0 end,
+                      setValue=function(v) ind.iconGlowType = v; ReloadAndUpdate(); EllesmereUI:RefreshPage() end },
+                    { type="label", text="" })
+                -- Inline class + custom color swatches, left of the dropdown.
+                do
+                    local PP = EllesmereUI.PanelPP or EllesmereUI.PP
+                    local leftRgn = glowRow._leftRegion
+                    local ctrl = leftRgn._control
+
+                    local classSwatch, updateClassSwatch = EllesmereUI.BuildColorSwatch(
+                        leftRgn, glowRow:GetFrameLevel() + 3,
+                        function()
+                            local _, classFile = UnitClass("player")
+                            local cc = classFile and RAID_CLASS_COLORS and RAID_CLASS_COLORS[classFile]
+                            if cc then return cc.r, cc.g, cc.b end
+                            return 1, 0.82, 0
+                        end,
+                        function() end,
+                        false, 20)
+                    PP.Point(classSwatch, "RIGHT", ctrl, "LEFT", -8, 0)
+                    classSwatch:SetScript("OnClick", function()
+                        if not ind.thresholdEnabled then return end
+                        ind.iconGlowClassColor = true; ReloadAndUpdate(); EllesmereUI:RefreshPage()
+                    end)
+                    classSwatch:SetScript("OnEnter", function()
+                        EllesmereUI.ShowWidgetTooltip(classSwatch, "Class Colored")
+                    end)
+                    classSwatch:SetScript("OnLeave", function() EllesmereUI.HideWidgetTooltip() end)
+
+                    local glowSwatch, updateGlowSwatch = EllesmereUI.BuildColorSwatch(
+                        leftRgn, glowRow:GetFrameLevel() + 3,
+                        function() return ind.iconGlowR or 1.0, ind.iconGlowG or 0.776, ind.iconGlowB or 0.376 end,
+                        function(r, g, b)
+                            ind.iconGlowR, ind.iconGlowG, ind.iconGlowB = r, g, b
+                            ReloadAndUpdate()
+                        end,
+                        false, 20)
+                    PP.Point(glowSwatch, "RIGHT", classSwatch, "LEFT", -8, 0)
+                    glowSwatch:SetScript("OnEnter", function()
+                        EllesmereUI.ShowWidgetTooltip(glowSwatch, "Custom Colored")
+                    end)
+                    glowSwatch:SetScript("OnLeave", function() EllesmereUI.HideWidgetTooltip() end)
+                    -- Click the dimmed custom swatch to switch back from class color.
+                    local origGlowClick = glowSwatch:GetScript("OnClick")
+                    glowSwatch:SetScript("OnClick", function(self, ...)
+                        if not ind.thresholdEnabled then return end
+                        if ind.iconGlowClassColor then
+                            ind.iconGlowClassColor = false; ReloadAndUpdate(); EllesmereUI:RefreshPage()
+                            return
+                        end
+                        if (ind.iconGlowType or 0) == 0 then return end
+                        if origGlowClick then origGlowClick(self, ...) end
+                    end)
+
+                    local function UpdateGlowState()
+                        local gt = ind.iconGlowType or 0
+                        local noGlow = gt == 0 or not ind.thresholdEnabled
+                        local isClassColored = ind.iconGlowClassColor
+                        glowSwatch:SetAlpha((isClassColored or noGlow) and 0.3 or 1)
+                        classSwatch:SetAlpha((isClassColored and not noGlow) and 1 or 0.3)
+                    end
+                    EllesmereUI.RegisterWidgetRefresh(function() updateGlowSwatch(); updateClassSwatch(); UpdateGlowState() end)
+                    UpdateGlowState()
+                end
             end
         end
 
@@ -5362,4 +5624,46 @@ function ns.BM_BuildPage(pageName, parent, yOffset)
     -- Return exactly the visible height so the outer scroll frame has no scroll range
     -- Return 0: content lives on scrollFrame directly, not scroll child
     return 0
+end
+
+-------------------------------------------------------------------------------
+--  TEMP DEBUG: /euifreedom [unit]  (default target, falls back to player)
+--  Prints every HELPFUL aura's id/name (SECRET when hidden), its four-filter
+--  fingerprint, what BM_IdentifySecretAura resolves it to, and whether the
+--  EXTERNAL_DEFENSIVE filter passes -- plus the active spec key and its
+--  registered signature table. Remove after the Freedom investigation.
+-------------------------------------------------------------------------------
+do
+    local function SafeStr(v)
+        if v == nil then return "nil" end
+        if issecretvalue and issecretvalue(v) then return "SECRET" end
+        return tostring(v)
+    end
+    SLASH_EUIFREEDOM1 = "/euifreedom"
+    SlashCmdList["EUIFREEDOM"] = function(msg)
+        local unit = (msg and msg ~= "" and msg) or "target"
+        if not UnitExists(unit) then unit = "player" end
+        print("|cff0cd29fEUI Freedom debug|r unit=" .. unit
+            .. "  specKey=" .. tostring(activeSpecKey_BM)
+            .. "  borrow=" .. tostring(activeBorrow_BM and "yes" or "no"))
+        if activeSpecKey_BM then
+            local sigs = GetSpecSignatures(activeSpecKey_BM)
+            local parts = {}
+            for k, v in pairs(sigs) do parts[#parts + 1] = k .. "->" .. tostring(v) end
+            print("  registered sigs: " .. (next(parts) and table.concat(parts, "  ") or "none"))
+        end
+        local i = 1
+        while true do
+            local ad = C_UnitAuras.GetAuraDataByIndex(unit, i, "HELPFUL")
+            if not ad then break end
+            local iid = ad.auraInstanceID
+            local sig = iid and MakeSignature(unit, iid) or "noIID"
+            local ident = iid and ns.BM_IdentifySecretAura and ns.BM_IdentifySecretAura(unit, iid)
+            local ext = iid and not C_UnitAuras_IsAuraFilteredOutByInstanceID(unit, iid, "HELPFUL|EXTERNAL_DEFENSIVE")
+            print(("  #%d id=%s name=%s sig=%s ident=%s extFilter=%s"):format(
+                i, SafeStr(ad.spellId), SafeStr(ad.name), tostring(sig),
+                tostring(ident), tostring(ext)))
+            i = i + 1
+        end
+    end
 end

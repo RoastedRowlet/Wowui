@@ -1836,6 +1836,14 @@ local function Reconcile()
             if ns.Keybinds and ns.Keybinds.IsEnabled and ns.Keybinds.IsEnabled() then
                 ns.Keybinds.RefreshAll()
             end
+            
+            -- Restore click-through / tooltip state on newly assigned/reassigned
+            -- frames, which Reconcile left clickable. Skip while editing.
+            local editing = (ns.CDMGroups.IsOptionsPanelOpen and ns.CDMGroups.IsOptionsPanelOpen())
+                or ns.CDMGroups.dragModeEnabled
+            if not editing and ns.CDMGroups.RefreshIconSettings then
+                ns.CDMGroups.RefreshIconSettings()
+            end
         end)
     end
     
@@ -2572,6 +2580,21 @@ local function Reconcile()
                     ns.Display.RefreshAllBars()
                     TimelineAdd("ACTION", "BAR_REANCHOR_FINAL", "Display bars re-laid out against settled containers")
                 end
+            end
+            
+            -- ═══════════════════════════════════════════════════════════════════════════
+            -- CLICK-THROUGH RE-APPLY: Reconcile re-enables mouse on repooled/reassigned
+            -- frames (and CDM re-enables it on its own frames during spec/talent rebuilds).
+            -- Nothing restores the saved click-through / tooltip state afterward unless the
+            -- user opens the options panel. Run the same RefreshIconSettings sweep the panel
+            -- triggers so click-through survives spec and talent changes. Skip while editing
+            -- (panel open / drag mode) so it doesn't fight active dragging.
+            -- ═══════════════════════════════════════════════════════════════════════════
+            local editing = (ns.CDMGroups.IsOptionsPanelOpen and ns.CDMGroups.IsOptionsPanelOpen())
+                or ns.CDMGroups.dragModeEnabled
+            if not editing and ns.CDMGroups.RefreshIconSettings then
+                ns.CDMGroups.RefreshIconSettings()
+                TimelineAdd("ACTION", "CLICKTHROUGH_REAPPLY", "RefreshIconSettings after spec/talent settle")
             end
         end)
     end

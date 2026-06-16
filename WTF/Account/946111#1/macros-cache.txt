@@ -155,6 +155,14 @@ VER 3 0000000000000070 "EUI_CapacitorTotem" "INV_MISC_QUESTIONMARK"
 #showtooltip Capacitor Totem
 /cast [@cursor] Capacitor Totem
 END
+VER 3 0000000000000073 "EUI_Trinket1" "INV_MISC_QUESTIONMARK"
+#showtooltip 13
+/use 13
+END
+VER 3 0000000000000074 "EUI_Trinket2" "INV_MISC_QUESTIONMARK"
+#showtooltip 14
+/use 14
+END
 VER 3 000000000000006F "EUI_WindrushTotem" "INV_MISC_QUESTIONMARK"
 #showtooltip Wind Rush Totem
 /cast [@cursor] Wind Rush Totem

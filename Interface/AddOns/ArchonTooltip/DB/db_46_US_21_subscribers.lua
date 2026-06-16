@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'DemonHunter-Vengeance','Monk-Mistweaver',}
-local provider = {region='US',realm='Arygos',name='US',type='subscribers',zone=46,date='2026-06-08',data={At='Athleta:BAEBLgAFFH8HAAIBAAcJdAjMAwA0AQdoDAAAAQAeAGkMAAABABAAawwAAAEAKQBqDAAAAQAFAGwMAAABAAYAbQwAAAEAEwDqDAAAAQAPAAEABwl0CMwDADQBB2gMAAABAB4AaQwAAAEAEABrDAAAAQApAGoMAAABAAUAbAwAAAEABgBtDAAAAQATAOoMAAABAA8AAS4ABRQHCSkAAgD4EAA=.',},}
+local lookup = {'DemonHunter-Vengeance','DemonHunter-Devourer','Monk-Mistweaver',}
+local provider = {region='US',realm='Arygos',name='US',type='subscribers',zone=46,date='2026-06-15',data={At='Athleta:BAEBLgAFFH8OAAMBAAcJdAhcBAAyAQdoDAAAAgAeAGkMAAACABAAawwAAAIAKQBqDAAAAgAIAGwMAAACAAYAbQwAAAIAEwDqDAAAAgAPAAEABwl0CFwEADIBB2gMAAACAB4AaQwAAAIAEABrDAAAAgApAGoMAAACAAgAbAwAAAIABgBtDAAAAgATAOoMAAABAA8AAgABCUQD5aYAMAAB6gwAAAEACAABLgAFFAcJKQADAPgQAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

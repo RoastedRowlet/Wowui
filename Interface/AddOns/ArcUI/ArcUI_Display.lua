@@ -424,9 +424,9 @@ end
 -- ===================================================================
 local function IsNumericAndPositive(value)
   if value == nil then return false end
-  -- Use pcall to safely check if value can be compared
-  local ok, result = pcall(function() return type(value) == "number" and value > 0 end)
-  return ok and result
+  -- Secret values can't be compared — treat as non-numeric (use issecretvalue, not pcall)
+  if issecretvalue and issecretvalue(value) then return false end
+  return type(value) == "number" and value > 0
 end
 
 -- ===================================================================
@@ -2489,11 +2489,13 @@ function ns.Display.UpdateBar(barNumber, stacks, maxStacks, active, durationFont
                 -- Has GetAuraInfo - use C_UnitAuras.GetAuraDurationRemaining for secret-safe text
                 local auraID, unit = durationFontString:GetAuraInfo()
                 if auraID and unit then
-                  local textOK = pcall(function()
-                    local remaining = C_UnitAuras.GetAuraDurationRemaining(unit, auraID)
-                    mFrame.duration:SetFormattedText(DURATION_FMT[decimals] or "%.1f", remaining)
-                  end)
-                  if not textOK then
+                  -- Validate the aura still exists before GetAuraDurationRemaining
+                  -- (calling with a stale auraID is the crash risk, not the call itself).
+                  local auraData = C_UnitAuras.GetAuraDataByAuraInstanceID(unit, auraID)
+                  if auraData then
+                    mFrame.duration:SetFormattedText(DURATION_FMT[decimals] or "%.1f",
+                      C_UnitAuras.GetAuraDurationRemaining(unit, auraID))
+                  else
                     mFrame.duration:SetFormattedText(DURATION_FMT[decimals] or "%.1f", durationFontString:GetValue())
                   end
                 else
@@ -3592,8 +3594,7 @@ function ns.Display.UpdateBar(barNumber, stacks, maxStacks, active, durationFont
       -- Check if the source is visible (non-secret check)
       local sourceShown = false  -- Default to false (hidden)
       if durationFontString.IsShown then
-        local ok, result = pcall(function() return durationFontString:IsShown() end)
-        if ok then sourceShown = result end
+        sourceShown = durationFontString:IsShown()
       end
       
       if sourceShown then
@@ -4289,11 +4290,11 @@ function ns.Display.UpdateDurationBar(barNumber, stacks, maxStacks, active, sour
         -- Has GetAuraInfo - use C_UnitAuras.GetAuraDurationRemaining for secret-safe text
         local auraID, unit = sourceBar:GetAuraInfo()
         if auraID and unit then
-          local textOK = pcall(function()
-            local remaining = C_UnitAuras.GetAuraDurationRemaining(unit, auraID)
-            iconFrame.duration:SetText(remaining)  -- Secret passes directly to SetText
-          end)
-          if not textOK and sourceBar.GetValue then
+          -- Validate aura exists before GetAuraDurationRemaining (stale id is the crash risk)
+          local auraData = C_UnitAuras.GetAuraDataByAuraInstanceID(unit, auraID)
+          if auraData then
+            iconFrame.duration:SetText(C_UnitAuras.GetAuraDurationRemaining(unit, auraID))  -- Secret passes directly to SetText
+          elseif sourceBar.GetValue then
             iconFrame.duration:SetText(sourceBar:GetValue())
           end
         elseif sourceBar.GetValue then
@@ -4474,14 +4475,12 @@ function ns.Display.UpdateDurationBar(barNumber, stacks, maxStacks, active, sour
       local barTexture = barFrame.bar:GetStatusBarTexture()
       if barTexture then barTexture:SetVertexColor(1, 1, 1, 1) end
       
-      -- Preview mode: SetStatusBarColor with curve result (handles alpha correctly)
-      local colorOK = pcall(function()
-        local colorResult = colorCurve:Evaluate(pct)
-        if colorResult then
-          barFrame.bar:SetStatusBarColor(colorResult:GetRGBA())
-        end
-      end)
-      if not colorOK then
+      -- Preview mode: SetStatusBarColor with curve result (handles alpha correctly).
+      -- pct is a non-secret preview number, so curve evaluation can't error here.
+      local colorResult = colorCurve and colorCurve:Evaluate(pct)
+      if colorResult then
+        barFrame.bar:SetStatusBarColor(colorResult:GetRGBA())
+      else
         barFrame.bar:SetStatusBarColor(baseColor.r, baseColor.g, baseColor.b, baseColor.a or 1)
       end
       -- Note: Gradient skipped when using ColorCurve (SetGradient doesn't accept secrets)
@@ -4611,16 +4610,15 @@ function ns.Display.UpdateDurationBar(barNumber, stacks, maxStacks, active, sour
       local useDynamicMax = barConfig.tracking.dynamicMaxDuration
       
       if useDynamicMax then
-        -- AUTO MODE: Use SetTimerDuration for auto-animation (normalized 0-1)
-        local timerOK = pcall(function()
-          local durObj = C_UnitAuras.GetAuraDuration(unit, auraID)
-          if durObj then
-            barFrame.bar:SetMinMaxValues(0, 1)
-            barFrame.bar:SetTimerDuration(durObj, Enum.StatusBarInterpolation.ExponentialEaseOut, timerDirection)
-          end
-        end)
-        
-        if not timerOK then
+        -- AUTO MODE: Use SetTimerDuration for auto-animation (normalized 0-1).
+        -- GetAuraDuration returns nil for gone auras and does not throw; validate the
+        -- instance first so a stale id (the real crash risk) falls back cleanly.
+        local durObj = C_UnitAuras.GetAuraDataByAuraInstanceID(unit, auraID)
+          and C_UnitAuras.GetAuraDuration(unit, auraID)
+        if durObj then
+          barFrame.bar:SetMinMaxValues(0, 1)
+          barFrame.bar:SetTimerDuration(durObj, Enum.StatusBarInterpolation.ExponentialEaseOut, timerDirection)
+        else
           barFrame.bar:SetMinMaxValues(0, maxValue)
           barFrame.bar:SetValue(sourceBar:GetValue(), durationInterp)
         end
@@ -4647,17 +4645,15 @@ function ns.Display.UpdateDurationBar(barNumber, stacks, maxStacks, active, sour
             local barTexture = barFrame.bar:GetStatusBarTexture()
             if barTexture then barTexture:SetVertexColor(1, 1, 1, 1) end  -- Reset any previous VertexColor
             
-            local colorOK = pcall(function()
-              local durObj = C_UnitAuras.GetAuraDuration(unit, auraID)
-              if durObj then
-                local colorResult = durObj:EvaluateRemainingPercent(colorCurve)
-                if colorResult then
-                  -- SetStatusBarColor handles alpha directly - base color alpha 0 = invisible
-                  barFrame.bar:SetStatusBarColor(colorResult:GetRGBA())
-                end
-              end
-            end)
-            if not colorOK then
+            -- GetAuraDuration returns nil for gone auras and does not throw; validate
+            -- the instance first, then evaluate the curve directly (no pcall).
+            local durObj = C_UnitAuras.GetAuraDataByAuraInstanceID(unit, auraID)
+              and C_UnitAuras.GetAuraDuration(unit, auraID)
+            local colorResult = durObj and durObj:EvaluateRemainingPercent(colorCurve)
+            if colorResult then
+              -- SetStatusBarColor handles alpha directly - base color alpha 0 = invisible
+              barFrame.bar:SetStatusBarColor(colorResult:GetRGBA())
+            else
               barFrame.bar:SetStatusBarColor(baseColor.r, baseColor.g, baseColor.b, baseColor.a or 1)
             end
             
@@ -4851,14 +4847,12 @@ function ns.Display.UpdateDurationBar(barNumber, stacks, maxStacks, active, sour
       local barTexture = barFrame.bar:GetStatusBarTexture()
       if barTexture then barTexture:SetVertexColor(1, 1, 1, 1) end
       
-      -- Preview mode: SetStatusBarColor with curve result (handles alpha correctly)
-      local colorOK = pcall(function()
-        local colorResult = colorCurve:Evaluate(pct)
-        if colorResult then
-          barFrame.bar:SetStatusBarColor(colorResult:GetRGBA())
-        end
-      end)
-      if not colorOK then
+      -- Preview mode: SetStatusBarColor with curve result (handles alpha correctly).
+      -- pct is a non-secret preview number, so curve evaluation can't error here.
+      local colorResult = colorCurve and colorCurve:Evaluate(pct)
+      if colorResult then
+        barFrame.bar:SetStatusBarColor(colorResult:GetRGBA())
+      else
         barFrame.bar:SetStatusBarColor(baseColor.r, baseColor.g, baseColor.b, baseColor.a or 1)
       end
       -- Note: Gradient skipped when using ColorCurve (SetGradient doesn't accept secrets)
@@ -5338,13 +5332,13 @@ function ns.Display.ApplyAppearance(barNumber)
     end
     local stackOutline = GetOutlineFlag(cfg.iconStackOutline)
     
-    -- Apply fonts with pcall protection
-    pcall(function()
+    -- Apply fonts (regions are ArcUI-created; stackFont is a resolved path)
+    if iconFrame.stacks then
       iconFrame.stacks:SetFont(stackFont, stackFontSize, stackOutline)
-    end)
-    pcall(function()
+    end
+    if iconFrame.stacksFrame and iconFrame.stacksFrame.text then
       iconFrame.stacksFrame.text:SetFont(stackFont, stackFontSize, stackOutline)
-    end)
+    end
     ApplyTextShadow(iconFrame.stacks, cfg.iconStackShadow)
     ApplyTextShadow(iconFrame.stacksFrame.text, cfg.iconStackShadow)
     
@@ -5429,10 +5423,10 @@ function ns.Display.ApplyAppearance(barNumber)
       end
     end
     
-    -- Apply font with pcall protection
-    pcall(function()
+    -- Apply font (region is ArcUI-created; durationFont is a resolved path)
+    if iconFrame.duration then
       iconFrame.duration:SetFont(durationFont, durationFontSize, durationOutline)
-    end)
+    end
     ApplyTextShadow(iconFrame.duration, cfg.iconDurationShadow)
     
     -- Border
@@ -5639,10 +5633,10 @@ function ns.Display.ApplyAppearance(barNumber)
   local fontSize = cfg.fontSize or 14
   local outlineFlag = GetOutlineFlag(cfg.textOutline)
   
-  -- Apply font with pcall protection
-  pcall(function()
+  -- Apply font (region is ArcUI-created; fontPath is a resolved path)
+  if textFrame.text then
     textFrame.text:SetFont(fontPath, fontSize, outlineFlag)
-  end)
+  end
   ApplyTextShadow(textFrame.text, cfg.textShadow)
   
   -- Fixed generous frame size — FontStrings render independently of parent size.
@@ -5730,10 +5724,10 @@ function ns.Display.ApplyAppearance(barNumber)
       end
     end
     
-    -- Apply font with pcall protection
-    pcall(function()
+    -- Apply font (region is ArcUI-created; fontPath is a resolved path)
+    if durationFrame.text then
       durationFrame.text:SetFont(fontPath, durationFontSize, durationOutline)
-    end)
+    end
     
     ApplyTextShadow(durationFrame.text, cfg.durationShadow)
     

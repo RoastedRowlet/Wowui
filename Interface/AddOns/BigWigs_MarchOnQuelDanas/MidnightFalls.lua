@@ -31,6 +31,7 @@ mod:UseCustomTimers(true)
 local activeBars = {}
 local backupBars = {}
 local durationEventCount = {}
+local tankList = {}
 
 local quasarCount = 1
 local glaivesCount = 1
@@ -95,11 +96,11 @@ local L = mod:SetDefaultLocale({ -- SetOption:skip-locale
 --
 
 mod:SetRenames({
-	["stages"] = {
+	["stages"] = { -- Stages
 		CL.intermission, CL.stage:format(2), CL.stage:format(3), CL.stage:format(4),
 		original = false,
 		notes = {CL.intermission, CL.stage:format(2), CL.stage:format(3), CL.stage:format(4)}
-	}, -- Stages
+	},
 	[1253915] = {L.heavens_glaives}, -- Heaven's Glaives (Glaives)
 	[1279420] = {CL.beams}, -- Dark Quasar (Beams) [Stage 1 Only]
 	[1249620] = {L.deaths_dirge}, -- Death's Dirge (Memory Game)
@@ -185,6 +186,9 @@ end
 function mod:OnEncounterStart()
 	self:SetStage(1)
 	self:ResetCounts()
+
+	self:RegisterEvent("GROUP_ROSTER_UPDATE")
+	self:GROUP_ROSTER_UPDATE()
 
 	local num = self:GetOption("custom_select_limit_warnings")
 	local raidIndex = UnitInRaid("player")
@@ -543,6 +547,16 @@ end
 -- Event Handlers
 --
 
+function mod:GROUP_ROSTER_UPDATE() -- Compensate for quitters (LFR)
+	tankList = {}
+	for unit in self:IterateGroup() do
+		local name = self:UnitName(unit)
+		if self:Tank(name, unit) then
+			tankList[#tankList+1] = unit
+		end
+	end
+end
+
 function mod:ENCOUNTER_WARNING(_, info)
 	local stage = self:GetStage()
 	if stage == 1 or stage == 3 then
@@ -621,9 +635,22 @@ function mod:HeavensLance(duration)
 		msg = barText,
 		key = 1267049,
 		onFinished = function()
-			self:Message(1267049, "purple", barText)
-			if self:Tank() then
+			if self:Mythic() and self:GetStage() == 3 then
+				self:Message(1267049, "purple", barText)
 				self:PlaySound(1267049, "alert")
+			else
+				for i = 1, #tankList do
+					local unit = tankList[i]
+					if self:ThreatTarget(unit, "boss1") then
+						local name = self:UnitName(unit)
+						self:TargetMessage(1267049, "purple", name, barText)
+						self:PlaySound(1267049, "alert", nil, name)
+						return
+					elseif i == #tankList then
+						self:Message(1267049, "purple", barText)
+						self:PlaySound(1267049, "alert")
+					end
+				end
 			end
 		end
 	}

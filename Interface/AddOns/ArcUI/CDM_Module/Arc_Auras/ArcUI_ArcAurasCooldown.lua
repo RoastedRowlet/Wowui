@@ -904,6 +904,50 @@ FeedCooldown = Track and Track("ArcAurasCooldown.FeedCooldown", _FeedCooldownFn)
 ArcAurasCooldown.FeedCooldown = FeedCooldown
 
 -- ═══════════════════════════════════════════════════════════════════════════
+-- ALPHA ENFORCEMENT HOOK (shared: arc_spell frames AND custom timer frames)
+--
+-- Arc Aura frames call ApplyIconStyle (not EnhanceFrame), so CDMEnhance's
+-- _arcFrameAlphaHooked SetAlpha hook is never installed. Without it, anything
+-- calling SetAlpha after ApplySpellStateVisuals applies readyAlpha=0 silently
+-- overrides it (FrameController, Show hooks, group layouts) — AND, just as
+-- important, external SetAlpha calls desync the frame's REAL alpha from
+-- _lastAppliedAlpha. A stale _lastAppliedAlpha makes ApplySpellStateVisuals
+-- skip its SetAlpha ("value unchanged") and strand the icon in the wrong
+-- state. The hook keeps _lastAppliedAlpha truthful on every external write.
+--
+-- Idempotent — guarded by _arcFrameAlphaHooked.
+-- ═══════════════════════════════════════════════════════════════════════════
+function ArcAurasCooldown.InstallAlphaEnforcementHook(frame)
+    if not frame or frame._arcFrameAlphaHooked then return end
+    frame._arcFrameAlphaHooked = true
+    hooksecurefunc(frame, "SetAlpha", function(self, alpha)
+        if self._arcBypassFrameAlphaHook then return end
+        -- Enforce ready-state alpha (e.g. readyAlpha=0 when spell is ready)
+        if self._arcEnforceReadyAlpha and self._arcReadyAlphaValue then
+            self._arcBypassFrameAlphaHook = true
+            self:SetAlpha(self._arcReadyAlphaValue)
+            self._arcBypassFrameAlphaHook = false
+            self._lastAppliedAlpha = self._arcReadyAlphaValue
+            return
+        end
+        -- Enforce cooldown-state alpha
+        if self._arcTargetAlpha ~= nil then
+            self._arcBypassFrameAlphaHook = true
+            self:SetAlpha(self._arcTargetAlpha)
+            self._arcBypassFrameAlphaHook = false
+            self._lastAppliedAlpha = self._arcTargetAlpha
+            return
+        end
+        -- Fallback: preserve whatever we last applied
+        if self._arcEnhanced and self._lastAppliedAlpha then
+            self._arcBypassFrameAlphaHook = true
+            self:SetAlpha(self._lastAppliedAlpha)
+            self._arcBypassFrameAlphaHook = false
+        end
+    end)
+end
+
+-- ═══════════════════════════════════════════════════════════════════════════
 -- CHARGE TEXT (non-secret, safe to read directly)
 -- ═══════════════════════════════════════════════════════════════════════════
 
@@ -1135,40 +1179,9 @@ function ArcAurasCooldown.InitializeSpellFrame(arcID, frame, config)
 
     -- ═══════════════════════════════════════════════════════════════════
     -- ALPHA ENFORCEMENT HOOK for arc_spell frames.
-    -- Arc Aura spell frames call ApplyIconStyle (not EnhanceFrame), so
-    -- CDMEnhance's _arcFrameAlphaHooked SetAlpha hook is never installed.
-    -- Without it, anything calling SetAlpha(1) after ApplySpellStateVisuals
-    -- applies readyAlpha=0 silently overrides it (FrameController, Show
-    -- hooks, group layouts). We install the same logic here directly.
+    -- (Shared installer — custom timer frames need the identical hook.)
     -- ═══════════════════════════════════════════════════════════════════
-    if not frame._arcFrameAlphaHooked then
-        frame._arcFrameAlphaHooked = true
-        hooksecurefunc(frame, "SetAlpha", function(self, alpha)
-            if self._arcBypassFrameAlphaHook then return end
-            -- Enforce ready-state alpha (e.g. readyAlpha=0 when spell is ready)
-            if self._arcEnforceReadyAlpha and self._arcReadyAlphaValue then
-                self._arcBypassFrameAlphaHook = true
-                self:SetAlpha(self._arcReadyAlphaValue)
-                self._arcBypassFrameAlphaHook = false
-                self._lastAppliedAlpha = self._arcReadyAlphaValue
-                return
-            end
-            -- Enforce cooldown-state alpha
-            if self._arcTargetAlpha ~= nil then
-                self._arcBypassFrameAlphaHook = true
-                self:SetAlpha(self._arcTargetAlpha)
-                self._arcBypassFrameAlphaHook = false
-                self._lastAppliedAlpha = self._arcTargetAlpha
-                return
-            end
-            -- Fallback: preserve whatever we last applied
-            if self._arcEnhanced and self._lastAppliedAlpha then
-                self._arcBypassFrameAlphaHook = true
-                self:SetAlpha(self._lastAppliedAlpha)
-                self._arcBypassFrameAlphaHook = false
-            end
-        end)
-    end
+    ArcAurasCooldown.InstallAlphaEnforcementHook(frame)
 
     -- Apply structural settings from CDMEnhance (size, borders, swipe config)
     if ArcAuras.ApplySettingsToFrame then

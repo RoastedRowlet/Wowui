@@ -38,11 +38,11 @@ EllesmereUIMythicTimer: disabled
 EllesmereUINameplates: enabled
 EllesmereUIQoL: enabled
 EllesmereUIQuestTracker: enabled
-EllesmereUIRaidFrames: disabled
+EllesmereUIRaidFrames: enabled
 EllesmereUIResourceBars: enabled
 EllesmereUIUnitFrames: enabled
 FocusMarker: enabled
-Grid2: enabled
+Grid2: disabled
 Grid2LDB: enabled
 Grid2Options: enabled
 GroupfinderFlags: enabled

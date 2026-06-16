@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'Warlock-Destruction','Mage-Frost','Evoker-Augmentation',}
-local provider = {region='US',realm='Alexstrasza',name='US',type='subscribers',zone=46,date='2026-06-08',data={Ji='Jinrop:BAEALgADCgcJBwABLgAECgcJFgABACMUAA==.',Ke='Kerm:BAEALgAECgEJAgAAAA==.',Ki='Kippo:BAEALgAECgEJAQABLgAFFAUJCAACACYFAA==.',Mo='Moltres:BAEALgAFFAUJBAABLgAFFAkJCgADAJIlAA==.',},}
+local lookup = {'Warlock-Destruction','DeathKnight-Unholy','Evoker-Augmentation',}
+local provider = {region='US',realm='Alexstrasza',name='US',type='subscribers',zone=46,date='2026-06-15',data={Ji='Jinrop:BAEALgADCgcJBwABLgAECgcJFgABACMUAA==.',Ke='Kerm:BAEALgAECgEJAgAAAA==.',Ki='Kippo:BAEALgAECgEJAQABLgAFFAYJFAACAMYTAA==.',Mo='Moltres:BAEBLgAFFH8IAAIDAAUJBiWdFgCvAQVoDAAAAgBjAGkMAAACAGAAawwAAAIAYQBqDAAAAQBhAOoMAAABAFYAAwAFCQYlnRYArwEFaAwAAAIAYwBpDAAAAgBgAGsMAAACAGEAagwAAAEAYQDqDAAAAQBWAAEuAAUUCQkQAAMAmyYA.',},}
 provider.parse = parse
 
 local rawData = provider.data

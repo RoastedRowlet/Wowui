@@ -34,14 +34,14 @@ SimulationCraftDB = {
 },
 },
 ["Lonelylitten - Stormrage"] = {
+["minimap"] = {
+["minimapPos"] = 225.6023459701718,
+},
 ["frame"] = {
 ["ofsx"] = -276.667724609375,
 ["ofsy"] = 12.50020217895508,
 ["point"] = "RIGHT",
 ["relativePoint"] = "RIGHT",
-},
-["minimap"] = {
-["minimapPos"] = 225.6023459701718,
 },
 },
 ["Madmareep - Stormrage"] = {

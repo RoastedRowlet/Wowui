@@ -991,3 +991,70 @@ if ns.FrameController and ns.FrameController.OnFrameRebind then
     frame._arcPandemicGlowActive     = nil
   end)
 end
+
+-- ═══════════════════════════════════════════════════════════════════════════
+-- FULL-UPDATE VISUAL SWEEP (RefreshLayout hook)
+--
+-- Beta 4 / WoW 12.0: when CDM does a full RefreshLayout (zone change,
+-- vehicle exit, mind control, taxi, post-spec settle, login, spell-override
+-- chain etc.) it does ReleaseAll → reacquire → RefreshData. The per-frame
+-- AII Set/Cleared hooks DO fire during the churn — but a race window can
+-- leave the glow eligibility stale: SetAuraInstanceInfo early-returns when
+-- auraInstanceID is unchanged, so OnAuraInstanceInfoSet doesn't dispatch,
+-- and a previously-shown glow can stay visible against a now-inactive
+-- aura (or vice versa).
+--
+-- Belt-and-suspenders: after CDM finishes RefreshLayout, walk every hooked
+-- aura frame, re-seed throttle caches, and re-evaluate the auraActiveState
+-- glow against live state. Deferred one frame so RefreshData (and any
+-- AII hooks it dispatches) finishes settling before we re-evaluate.
+-- Coalesces multiple viewers calling RefreshLayout in the same tick.
+-- ═══════════════════════════════════════════════════════════════════════════
+
+local _refreshLayoutVisualSweepPending = false
+
+local function RunPostRefreshLayoutVisualSweep()
+  _refreshLayoutVisualSweepPending = false
+  if not IsCDMEnabled() then return end
+
+  for frame in pairs(hookedAuraFrames) do
+    -- Clear UpdateAuraFrame throttle so it actually re-evaluates
+    frame._arcLastOptimizedCall = nil
+    frame._arcLastAuraActive    = nil
+
+    -- Re-apply alpha/desat/glow based on live aura state.
+    -- UpdateAuraFrame guards against missing config / disabled CDM internally.
+    AF.UpdateAuraFrame(frame)
+
+    -- Re-evaluate auraActiveState glow directly — UpdateAuraFrame's glow
+    -- path depends on cfg presence and several routing branches; this
+    -- catches the case where a prior Cleared hook left a glow visible
+    -- or a missed Set hook left it hidden.
+    local cfg = GetEffectiveIconSettingsForFrame(frame)
+    local aaCfg = cfg and cfg.auraActiveState
+    if aaCfg and (aaCfg.glow or aaCfg.glowWhenMissing) then
+      local hasAura = ns.FrameActive and ns.FrameActive.IsActive(frame)
+                   or HasAuraInstanceID(frame.auraInstanceID)
+      if AF.ShouldShowAuraActiveGlow(aaCfg, frame, hasAura) then
+        AF.ShowAuraActiveGlow(frame, aaCfg)
+      else
+        AF.HideAuraActiveGlow(frame)
+      end
+    end
+  end
+end
+
+if CooldownViewerMixin and CooldownViewerMixin.RefreshLayout then
+  hooksecurefunc(CooldownViewerMixin, "RefreshLayout", function(self)
+    if _refreshLayoutVisualSweepPending then return end
+    _refreshLayoutVisualSweepPending = true
+    C_Timer.After(0, RunPostRefreshLayoutVisualSweep)
+  end)
+end
+
+-- Expose for manual triggering (debug / spec change settlement, etc.)
+AF.RunPostRefreshLayoutVisualSweep = function()
+  if _refreshLayoutVisualSweepPending then return end
+  _refreshLayoutVisualSweepPending = true
+  C_Timer.After(0, RunPostRefreshLayoutVisualSweep)
+end

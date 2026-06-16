@@ -296,6 +296,12 @@ local function HookCDMFrameForAuraMap(frame, barNumber)
         local hookData = hookedAuraFrames[self]
         if not hookData or not next(hookData.barNumbers) then return end
         self._arcAuraActive = true
+        -- Bump the aura token. A Set arriving after a Cleared (same UNIT_AURA
+        -- batch: removed pass fires Cleared, added pass fires Set, OR a full CDM
+        -- layout refresh re-populates auraInstanceID) means the buff is present
+        -- again — so any deferred "cleared" hide that captured an older token
+        -- must abort instead of hiding a still-active aura.
+        self._arcAuraToken = (self._arcAuraToken or 0) + 1
         for barNum in pairs(hookData.barNumbers) do
           UpdateBarBuffInfo(barNum)
         end
@@ -309,9 +315,15 @@ local function HookCDMFrameForAuraMap(frame, barNumber)
         local hookData = hookedAuraFrames[self]
         if not hookData or not next(hookData.barNumbers) then return end
         self._arcAuraActive = false
+        -- Capture the token at schedule time. If OnAuraInstanceInfoSet fires
+        -- before this deferred update runs (same-batch remove+add, or a CDM full
+        -- layout refresh re-setting the aura), the token will have advanced and
+        -- we abort — the buff is back, so the bar should NOT process a hide.
+        local tokenAtSchedule = self._arcAuraToken or 0
         local bars = {}
         for barNum in pairs(hookData.barNumbers) do bars[barNum] = true end
         C_Timer.After(0, function()
+          if (self._arcAuraToken or 0) ~= tokenAtSchedule then return end
           for barNum in pairs(bars) do
             UpdateBarBuffInfo(barNum)
           end
@@ -337,18 +349,45 @@ local function HookCDMFrameForAuraMap(frame, barNumber)
 
     -- OnUnitAuraUpdatedEvent: player buff stack changes (updatedAuraInstanceIDs path).
     -- PERF: CDM dispatches this multiple times per UNIT_AURA batch (one per stack in the
-    -- same tick). Coalesce with a pending flag — only the first fire schedules a deferred
-    -- UpdateBarBuffInfo; subsequent fires in the same tick are a single boolean check.
+    -- same tick). Coalesce with the SHARED _arcRefreshPending flag (this internally calls
+    -- RefreshData too, so the RefreshData hook below would otherwise schedule a second
+    -- redundant update in the same tick) — only the first fire schedules a deferred update.
     if frame.OnUnitAuraUpdatedEvent then
       hooksecurefunc(frame, "OnUnitAuraUpdatedEvent", function(self)
         local hookData = hookedAuraFrames[self]
         if not hookData or not next(hookData.barNumbers) then return end
-        if self._arcUpdatePending then return end
-        self._arcUpdatePending = true
+        if self._arcRefreshPending then return end
+        self._arcRefreshPending = true
         local bars = {}
         for barNum in pairs(hookData.barNumbers) do bars[barNum] = true end
         C_Timer.After(0, function()
-          self._arcUpdatePending = false
+          self._arcRefreshPending = false
+          for barNum in pairs(bars) do
+            UpdateBarBuffInfo(barNum)
+          end
+        end)
+      end)
+    end
+
+    -- RefreshData: the ONE signal that fires on a same-instance-ID aura refresh.
+    -- CDM's SetAuraInstanceInfo only fires OnAuraInstanceInfoSet when the auraInstanceID
+    -- or spellID CHANGES (CooldownViewerItemData.lua:230). A buff reapplied with the same
+    -- instance ID (duration extended, ID unchanged) fires NEITHER Set NOR a guaranteed
+    -- UpdatedEvent — so the bar never re-pushes the new duration and drains to the old
+    -- expiration. RefreshData runs on every refresh including this case. Coalesce per tick
+    -- (CDM calls RefreshData several times per UNIT_AURA batch) and only act when the frame
+    -- currently holds a valid aura instance, so this is a no-op on inactive frames.
+    if frame.RefreshData then
+      hooksecurefunc(frame, "RefreshData", function(self)
+        local hookData = hookedAuraFrames[self]
+        if not hookData or not next(hookData.barNumbers) then return end
+        if not HasAuraInstanceID(self.auraInstanceID) then return end
+        if self._arcRefreshPending then return end
+        self._arcRefreshPending = true
+        local bars = {}
+        for barNum in pairs(hookData.barNumbers) do bars[barNum] = true end
+        C_Timer.After(0, function()
+          self._arcRefreshPending = false
           for barNum in pairs(bars) do
             UpdateBarBuffInfo(barNum)
           end
@@ -2118,6 +2157,13 @@ UpdateBarBuffInfo = function(barNumber)
     state.cooldownID = barConfig.tracking.cooldownID
     state.cachedFrame = nil
     state.cachedBarFrame = nil
+    -- Clear cached aura instance IDs too — a stale aiid from a previous spell/spec
+    -- must not resurrect this bar after the tracked cooldownID changes.
+    state.buffAuraInstanceID = nil
+    state.buffAuraUnit = nil
+    state.trackedAuraInstanceID = nil
+    state.trackedAuraUnit = nil
+    state.debuffAuraInstanceID = nil
   end
   
   -- For buff/debuff tracking, validate cached frames (O(1) check)
@@ -2191,12 +2237,18 @@ UpdateBarBuffInfo = function(barNumber)
   -- Skip during spec change grace period to allow CDM frames time to load
   if not state.trackingOK and not IsOptionsOpen() and not inGracePeriod then
     -- Don't hide if the aura is still active — CDM may have just reassigned its frame
-    -- (e.g. pressing a spell that changes what CDM shows). The aura is still up,
-    -- the cached frame just became stale. Let the next hook fire to re-discover it.
+    -- (e.g. pressing a spell that changes what CDM shows, or a full layout refresh).
+    -- The aura is still up, the cached frame just became stale. Verify the cached
+    -- auraInstanceID against the live API: only keep showing if the API confirms it.
     local auraStillActive = false
     local checkID = state.trackedAuraInstanceID or state.buffAuraInstanceID or state.debuffAuraInstanceID
     if HasAuraInstanceID(checkID) then
-      auraStillActive = true
+      local checkUnit = state.trackedAuraUnit or state.buffAuraUnit or state.detectedUnit or "player"
+      if C_UnitAuras.GetAuraDataByAuraInstanceID(checkUnit, checkID) then
+        auraStillActive = true
+      elseif C_UnitAuras.GetAuraDataByAuraInstanceID("target", checkID) then
+        auraStillActive = true
+      end
     end
     if not auraStillActive then
       if ns.Display and ns.Display.HideBar then ns.Display.HideBar(barNumber) end
@@ -2518,11 +2570,38 @@ UpdateBarBuffInfo = function(barNumber)
           stacks = auraData.applications or 0
           auraIconFromData = auraData.icon
           buffAuraID = auraInstanceID
+          -- Cache the resolved aura instance ID + unit. CDM blanks frame.auraInstanceID
+          -- transiently during a full layout refresh (and during same-batch remove+add).
+          -- Holding the last-known-good aiid lets us verify against the live API below
+          -- instead of hiding a buff that is still genuinely on the unit.
+          state.buffAuraInstanceID = auraInstanceID
+          state.buffAuraUnit = detectedUnit
           if ns.debugMode then
             print(string.format("|cff00ff00[ArcUI Debug]|r Bar %d BUFF: auraInstID=%s, unit=%s, stacks=%s", 
               barNumber, tostring(auraInstanceID), tostring(detectedUnit), tostring(auraData.applications)))
           end
         else
+          active = false
+          stacks = 0
+        end
+      elseif HasAuraInstanceID(state.buffAuraInstanceID) then
+        -- Frame's auraInstanceID read nil, but we have a cached one. This happens
+        -- when CDM is mid-rebuild (full layout refresh / spec change / override
+        -- swap) — the frame state is torn down for a few frames while the buff is
+        -- still up. VERIFY against the live API before trusting the nil frame read.
+        local unit = state.buffAuraUnit or "player"
+        local auraData = C_UnitAuras.GetAuraDataByAuraInstanceID(unit, state.buffAuraInstanceID)
+        if auraData then
+          -- Live API confirms the aura is still present — the frame was just stale.
+          active = true
+          stacks = auraData.applications or 0
+          auraIconFromData = auraData.icon
+          buffAuraID = state.buffAuraInstanceID
+          detectedUnit = unit
+        else
+          -- Live API agrees the aura is gone — now it's safe to clear + hide.
+          state.buffAuraInstanceID = nil
+          state.buffAuraUnit = nil
           active = false
           stacks = 0
         end
@@ -2725,21 +2804,34 @@ UpdateBarBuffInfo = function(barNumber)
     elseif not useBaseSpell and cdmFrame and HasAuraInstanceID(cdmFrame.auraInstanceID) then
       auraInstIDToUse = cdmFrame.auraInstanceID
       unitToUse = cdmFrame.auraDataUnit or state.detectedUnit or "player"
+    elseif not useBaseSpell and HasAuraInstanceID(state.buffAuraInstanceID) then
+      -- CDM frame id transiently nil during a rebuild — use cached id for stack text.
+      auraInstIDToUse = state.buffAuraInstanceID
+      unitToUse = state.buffAuraUnit or state.detectedUnit or "player"
     end
     
     if HasAuraInstanceID(auraInstIDToUse) then
       local cachedAuraInstanceID = auraInstIDToUse
       local cachedUnit = unitToUse
+      local liveFrame = (not useBaseSpell) and cdmFrame or nil
+      local function resolve()
+        if liveFrame and HasAuraInstanceID(liveFrame.auraInstanceID) then
+          return liveFrame.auraInstanceID, (liveFrame.auraDataUnit or cachedUnit)
+        end
+        return cachedAuraInstanceID, cachedUnit
+      end
       durationStacksRef = {
         GetText = function()
-          local auraData = C_UnitAuras.GetAuraDataByAuraInstanceID(cachedUnit, cachedAuraInstanceID)
+          local id, unit = resolve()
+          local auraData = C_UnitAuras.GetAuraDataByAuraInstanceID(unit, id)
           if auraData then
             return auraData.applications
           end
           return 0
         end,
         GetDuration = function()
-          local auraData = C_UnitAuras.GetAuraDataByAuraInstanceID(cachedUnit, cachedAuraInstanceID)
+          local id, unit = resolve()
+          local auraData = C_UnitAuras.GetAuraDataByAuraInstanceID(unit, id)
           if auraData then
             return auraData.duration, auraData.expirationTime
           end
@@ -2809,6 +2901,10 @@ UpdateBarBuffInfo = function(barNumber)
         -- Default: use CDM's current ID
         auraInstIDToUse = cdmFrame.auraInstanceID
         unitToUse = cdmFrame.auraDataUnit or "target"
+      elseif not useBaseSpell and HasAuraInstanceID(state.debuffAuraInstanceID) then
+        -- CDM frame id transiently nil during a rebuild — use the cached id so the
+        -- duration sweep stays in sync with the active path. Verified live below.
+        auraInstIDToUse = state.debuffAuraInstanceID
       end
       
       if HasAuraInstanceID(auraInstIDToUse) then
@@ -2858,16 +2954,31 @@ UpdateBarBuffInfo = function(barNumber)
         -- Default: use CDM's current ID
         auraInstIDToUse = cdmFrame.auraInstanceID
         unitToUse = cdmFrame.auraDataUnit or state.detectedUnit or "player"
+      elseif not useBaseSpell and HasAuraInstanceID(state.buffAuraInstanceID) then
+        -- CDM frame's auraInstanceID is transiently nil (full layout refresh /
+        -- same-batch remove+add). The active path keeps the bar shown using this
+        -- cached id; the duration wrapper must use the SAME cache or the bar shows
+        -- active with no sweep. Verified live in GetValue before use.
+        auraInstIDToUse = state.buffAuraInstanceID
+        unitToUse = state.buffAuraUnit or state.detectedUnit or "player"
       end
       
       if HasAuraInstanceID(auraInstIDToUse) then
         local cachedAuraInstanceID = auraInstIDToUse
         local cachedUnit = unitToUse
         local liveFrame = (not useBaseSpell) and cdmFrame or nil
+        -- Resolve id/unit each call: prefer the live CDM frame id when present
+        -- (aura refresh reassigns auraInstanceID), fall back to the cached id+unit
+        -- when the frame is transiently nil during a CDM rebuild.
+        local function resolve()
+          if liveFrame and HasAuraInstanceID(liveFrame.auraInstanceID) then
+            return liveFrame.auraInstanceID, (liveFrame.auraDataUnit or cachedUnit)
+          end
+          return cachedAuraInstanceID, cachedUnit
+        end
         effectiveDurationRef = {
           GetValue = function()
-            local id = liveFrame and liveFrame.auraInstanceID or cachedAuraInstanceID
-            local unit = (liveFrame and liveFrame.auraDataUnit) or cachedUnit
+            local id, unit = resolve()
             local auraData = C_UnitAuras.GetAuraDataByAuraInstanceID(unit, id)
             if not auraData then return 0 end
             if C_UnitAuras.GetAuraDurationRemaining then
@@ -2876,8 +2987,7 @@ UpdateBarBuffInfo = function(barNumber)
             return 0
           end,
           GetMinMaxValues = function()
-            local id = liveFrame and liveFrame.auraInstanceID or cachedAuraInstanceID
-            local unit = (liveFrame and liveFrame.auraDataUnit) or cachedUnit
+            local id, unit = resolve()
             local auraData = C_UnitAuras.GetAuraDataByAuraInstanceID(unit, id)
             if auraData and auraData.duration then
               return 0, auraData.duration
@@ -2885,10 +2995,7 @@ UpdateBarBuffInfo = function(barNumber)
             return 0, 30
           end,
           GetAuraInfo = function()
-            if liveFrame and HasAuraInstanceID(liveFrame.auraInstanceID) then
-              return liveFrame.auraInstanceID, (liveFrame.auraDataUnit or cachedUnit)
-            end
-            return cachedAuraInstanceID, cachedUnit
+            return resolve()
           end
         }
       end
@@ -2907,8 +3014,7 @@ UpdateBarBuffInfo = function(barNumber)
           if totemCdmFrame.totemData == nil then return nil end
           local slot = totemCdmFrame.preferredTotemUpdateSlot
           if not slot and totemCdmFrame.totemData then
-            local ok, val = pcall(function() return totemCdmFrame.totemData.slot end)
-            if ok then slot = val end
+            slot = totemCdmFrame.totemData.slot
           end
           if not slot then return nil end
           if not issecretvalue(slot) and slot <= 0 then return nil end

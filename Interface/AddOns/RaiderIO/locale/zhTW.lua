@@ -55,10 +55,8 @@ L["DB_MODULES_HEADER_MYTHIC_PLUS"] = "傳奇+"
 L["DB_MODULES_HEADER_RAIDING"] = "團隊"
 L["DB_MODULES_HEADER_RECRUITMENT"] = "招募"
 L["DISABLE_DEBUG_MODE_RELOAD"] = "您正在停用偵錯模式。單擊確認將重新載入您的介面。"
---[[Translation missing --]]
---[[ L["DISABLE_DROPDOWN_MENU_BUTTON"] = ""--]] 
---[[Translation missing --]]
---[[ L["DISABLE_DROPDOWN_MENU_BUTTON_DESC"] = ""--]] 
+L["DISABLE_DROPDOWN_MENU_BUTTON"] = "停用單位下拉選單 (暫時性修正)"
+L["DISABLE_DROPDOWN_MENU_BUTTON_DESC"] = "這是針對下拉選單系統持續出現的問題的臨時熱修復。只有當你在使用下拉選單設定焦點、團隊目標或在首領戰鬥中使用社群框架時出現錯誤時，才需要勾選此選項。這個選項將在暴雪解決根本問題後移除。"
 L["DISABLE_RWF_MODE_BUTTON"] = "停用"
 L["DISABLE_RWF_MODE_BUTTON_TOOLTIP"] = "單擊以停用世界首推競賽模式。這將重新載入您的介面。"
 L["DISABLE_RWF_MODE_RELOAD"] = "您正在停用世界首推競賽模式。單擊確認將重新載入您的介面。"
@@ -190,8 +188,7 @@ L["MINIMAP_SHORTCUT_MINIMAP_ENABLE_DESC"] = "啟用以在小地圖周圍顯示�
 L["MINIMAP_SHORTCUT_MINIMAP_LOCK"] = "鎖定小地圖按鈕"
 L["MISC_SETTINGS"] = "雜項"
 L["MODULE_AMERICAS"] = "美洲"
---[[Translation missing --]]
---[[ L["MODULE_CHINA"] = ""--]] 
+L["MODULE_CHINA"] = "中國"
 L["MODULE_EUROPE"] = "歐洲"
 L["MODULE_KOREA"] = "韓國"
 L["MODULE_TAIWAN"] = "台灣"
@@ -389,8 +386,7 @@ L["RAID_BOSS_NP_6"] = "奧核公主"
 L["RAID_BOSS_NP_7"] = "絲綢宮廷"
 L["RAID_BOSS_NP_8"] = "安蘇芮克女王"
 L["RAID_BOSS_RS_1"] = "海萊恩"
---[[Translation missing --]]
---[[ L["RAID_BOSS_SF_1"] = ""--]] 
+L["RAID_BOSS_SF_1"] = "腐沼"
 L["RAID_BOSS_SFO_1"] = "戒備守護者"
 L["RAID_BOSS_SFO_10"] = "雷吉隆"
 L["RAID_BOSS_SFO_11"] = "閻獄之主"
@@ -514,8 +510,7 @@ L["RAID_MQD"] = "進軍奎爾達納斯"
 L["RAID_MSV"] = "魔古山寶庫"
 L["RAID_NP"] = "奈幽巴宮殿"
 L["RAID_RS"] = "晶紅聖所"
---[[Translation missing --]]
---[[ L["RAID_SF"] = ""--]] 
+L["RAID_SF"] = "孢子之殞"
 --[[Translation missing --]]
 --[[ L["RAID_SOO"] = ""--]] 
 L["RAID_ToES"] = "豐泉臺"

@@ -298,6 +298,21 @@ local function ApplyVisuals(td)
     local fd = td.fd
     if not fd then return end
     local isOnCD = IsTimerActive(td)
+    -- On a real active/inactive TRANSITION, force a full re-application by
+    -- nilling the visual-state cache and the alpha dedup memo. External code
+    -- (group visibility, layouts, CDM maintenance) can change the frame's
+    -- real alpha without updating _lastAppliedAlpha; a stale memo makes
+    -- ApplySpellStateVisuals skip its SetAlpha ("value unchanged") and the
+    -- icon stays invisible while the timer is active until something else
+    -- (reload, options panel cycle) clears the caches. Transitions are rare,
+    -- so the forced re-application costs nothing at idle.
+    if fd._arcLastTimerActive ~= isOnCD then
+        fd._arcLastTimerActive = isOnCD
+        if fd.frame then
+            fd.frame._arcLastSpellState = nil
+            fd.frame._lastAppliedAlpha  = nil
+        end
+    end
     if ns.ArcAurasCooldown and ns.ArcAurasCooldown.ApplySpellStateVisuals then
         ns.ArcAurasCooldown.ApplySpellStateVisuals(fd, isOnCD, nil, false)
     end
@@ -741,6 +756,15 @@ function ArcAurasTimer.CreateTimer(arcID, config)
     -- Masque + CDMEnhance stack treats it the same way it would a real spell.
     frame._arcIsSpellCooldown = true
     frame._arcIsCustomTimer   = true
+
+    -- Alpha enforcement hook — same one InitializeSpellFrame installs for
+    -- regular spell frames. Timer frames bypass InitializeSpellFrame, so
+    -- without this the frame's real alpha and _lastAppliedAlpha drift apart
+    -- whenever external code touches SetAlpha, and the active/inactive alpha
+    -- from the options panel stops applying until a reload/panel cycle.
+    if ns.ArcAurasCooldown and ns.ArcAurasCooldown.InstallAlphaEnforcementHook then
+        ns.ArcAurasCooldown.InstallAlphaEnforcementHook(frame)
+    end
 
     if not frame._durationObj and C_DurationUtil and C_DurationUtil.CreateDuration then
         frame._durationObj = C_DurationUtil.CreateDuration()

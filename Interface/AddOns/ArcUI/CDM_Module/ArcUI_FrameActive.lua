@@ -226,12 +226,19 @@ local function OnAII_Cleared(frame)
     if entry.pendingClearDispatch then return end  -- already scheduled
     entry.pendingClearDispatch = true
 
-    C_Timer_After(0, function()
+    -- 50ms coalesce window. CDM's rebuild churn (spell override / refresh /
+    -- data swap) can span multiple render frames within a few ms — using
+    -- C_Timer.After(0) (= next frame only) was missing some of these and
+    -- causing momentary false inactive→active flips that showed as layout
+    -- reflows. 50ms is well below human perception (~100ms) and well above
+    -- CDM's longest observed rebuild duration. Matches the probe window
+    -- which proved reliable in testing.
+    C_Timer_After(0.05, function()
         if not entries[frame] then return end
         if not entry.pendingClearDispatch then return end  -- cancelled by AII-Set
         entry.pendingClearDispatch = false
 
-        -- Re-check: are we still inactive after the tick?
+        -- Re-check: are we still inactive after the window?
         local cd2 = frame.Cooldown
         local recheck = (cd2 and cd2:IsShown())
                      or HasAID(frame.auraInstanceID)
