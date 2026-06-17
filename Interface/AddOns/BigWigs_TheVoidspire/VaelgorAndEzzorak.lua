@@ -15,8 +15,8 @@ mod:SetStage(1)
 mod:SetPrivateAuraSounds({
 	{1262656, 1262676, 1262999, sound = "alarm"}, -- Nullbeam
 	{1244672, sound = "underyou"}, -- Nullzone
-	{1252157, sound = "alert"}, -- Nullzone Implosion
-	1255612, -- Dread Breath (Targetted)
+	{1252157, sound = "none"}, -- Nullzone Implosion
+	{1255612, sound = "warning"}, -- Dread Breath (Targetted)
 	{1264467, sound = "underyou"}, -- Tail Lash
 	{1245554, sound = "alert"},-- Gloomtouched
 	{1270852, sound = "none"}, -- Diminish
@@ -24,9 +24,9 @@ mod:SetPrivateAuraSounds({
 	{1245059, sound = "alarm"}, -- Void Howl
 	{1245175, sound = "none"}, -- Voidbolt
 	-- {1280355, sound = "none"}, -- Rakfang
-	1265152, -- Impale
+	{1265152, sound = "warning"}, -- Impale
 	{1249595, sound = "none"}, -- Radiant Barrier
-	1270497, -- Shadowmark
+	{1270497, sound = "warning"}, -- Shadowmark
 })
 mod:UseCustomTimers(true)
 
@@ -42,6 +42,8 @@ local backupBars = {}
 local countForDuration = {}
 local lastStaged = 0
 local nextRadiantBarrier = 0
+local mythicBreathOrRakfang = {}
+local mythicRakfangHasPassed = false
 
 local midnightFlamesCount = 1
 local nullbeamCount = 1
@@ -52,12 +54,15 @@ local voidHowlCount = 1
 local rakfangCount = 1
 local radiantBarrierCount = 1
 local grapplingMawCount = 1
+local mythicMessageCounter = 0
+local breathAboutToCast = false
 
 --------------------------------------------------------------------------------
 -- Localization
 --
 
-mod:SetDefaultLocale({ -- SetOption:skip-locale
+local L = mod:SetDefaultLocale({ -- SetOption:skip-locale
+	nullzone = "Tethers",
 	custom_select_gloom_reset = CL.counter_reset_name:format(mod:SpellName(1245391)),
 	custom_select_gloom_reset_desc = CL.counter_reset_desc,
 	custom_select_gloom_reset_icon = 1245391,
@@ -76,7 +81,8 @@ mod:SetRenames({
 	[1280458] = {CL.tank_grip}, -- Grappling Maw (Tank Grip)
 	-- Vaelgor
 	[1262623] = {1262623}, -- Nullbeam
-	[1244221] = {CL.breath}, -- Dread Breath (Breath)
+	[1244672] = {L.nullzone}, -- Nullzone
+	[1244221] = {CL.breath, CL.you:format(CL.breath), notes = {CL.generalNote, CL.messageOnYouNote}, original = {1244221, CL.you:format(mod:SpellName(1244221))}}, -- Dread Breath (Breath)
 	[1265131] = {1265131}, -- Vaelwing
 	-- Ezzorak
 	[1245391] = {1245391}, -- Gloom
@@ -93,8 +99,9 @@ function mod:GetOptions()
 		1249748, -- Midnight Flames
 		{1280458, "TANK"}, -- Grappling Maw
 		-- Vaelgor
-		1262623, -- Nullbeam
-		1244221, -- Dread Breath
+		{1262623, "TANK"}, -- Nullbeam
+		1244672, -- Nullzone
+		{1244221, "ME_ONLY_EMPHASIZE"}, -- Dread Breath
 		{1265131, "TANK"}, -- Vaelwing
 		-- Ezzorak
 		1245391, -- Gloom
@@ -138,9 +145,27 @@ function mod:OnEncounterStart()
 	rakfangCount = 1
 	radiantBarrierCount = 1
 	grapplingMawCount = 1
+	mythicBreathOrRakfang = {}
+	mythicRakfangHasPassed = false
+	mythicMessageCounter = 0
+	breathAboutToCast = false
+
+	-- Radiant barrier didnt always start on pull, we start this as fallback which will get overwritten if a real one starts.
+	local firstRadiantBarrierCD = self:Mythic() and 120 or self:Heroic() and 105 or 111
+	nextRadiantBarrier = GetTime() + firstRadiantBarrierCD
+	if self:ShouldShowBars() then
+		self:Bar("stages", firstRadiantBarrierCD, CL.count:format(self:GetRename("stages", 1), radiantBarrierCount), 1248847) -- Radiant Barrier icon
+		if self:Mythic() then
+			self:SendMessage("BigWigs_BlockBlizzMessages")
+			self:RegisterEvent("ENCOUNTER_WARNING")
+		end
+	end
 end
 
 function mod:OnBossDisable()
+	if self:Mythic() then
+		self:SendMessage("BigWigs_AllowBlizzMessages")
+	end
 	for eventID in next, backupBars do
 		self:SendMessage("BigWigs_StopBar", nil, nil, eventID)
 	end
@@ -194,14 +219,20 @@ function mod:TimersMythic(_, eventInfo)
 
 	if durationRounded == 8 and time - 5 > lastStaged and not self:IsIntermission() and stage < 3 then -- Midnight Flames Cast
 		lastStaged = time
+		mythicMessageCounter = 0
 		if self:ShouldShowBars() then
 			self:Message("stages", "cyan", self:GetRename("stages", 1), false) -- Intermission
 			self:PlaySound("stages", "long")
 			self:Bar("stages", 40, self:GetRename("stages", stage + 1), 1249748)
-			self:StopBlizzMessages(1) -- Radiant Barrier Message
+			--self:StopBlizzMessages(1) -- Radiant Barrier Message (Already blocked on Mythic)
 		end
 		stage = stage + 0.5
 		self:SetStage(stage)
+		dreadBreathCount = 1
+		nullbeamCount = 1
+		if self:GetOption("custom_select_gloom_reset") < 3 then
+			gloomCount = 1
+		end
 	elseif time - 5 > lastStaged and self:IsIntermission() then
 		stage = math.floor(stage) + 1
 		self:SetStage(stage)
@@ -219,9 +250,6 @@ function mod:TimersMythic(_, eventInfo)
 		voidHowlCount = 1
 		rakfangCount = 1
 		grapplingMawCount = 1
-		if self:GetOption("custom_select_gloom_reset") < 3 then
-			gloomCount = 1
-		end
 	end
 
 	if not self:IsIntermission() then -- 1, 2, 3+
@@ -256,7 +284,8 @@ function mod:TimersMythic(_, eventInfo)
 					elseif countForDuration[durationRounded] == 2 then
 						barInfo = self:Rakfang(eventInfo)
 					end
-					barInfo.BreathOfRakfang = true
+					mythicBreathOrRakfang[eventInfo.id] = barInfo
+					mythicRakfangHasPassed = false
 				elseif durationRounded == 48 then -- Gloom
 					barInfo = self:Gloom(eventInfo)
 				elseif durationRounded == 43 or durationRounded == 8 then -- Void Howl (2x timers)
@@ -342,6 +371,8 @@ function mod:TimersMythic(_, eventInfo)
 							activeBars[event.id] = self:DreadBreath(event)
 						elseif event.durationRounded == 18 then -- Nullbeam
 							activeBars[event.id] = self:Nullbeam(event)
+							-- Start our own timer
+							self:Bar(1244672, event.duration + 9.5, CL.count:format(self:GetRename(1244672), 1), nil, event.id) -- Nullzone icon(s)
 						else
 							self:StartBackupBar(event, true)
 						end
@@ -643,6 +674,22 @@ function mod:ENCOUNTER_TIMELINE_EVENT_STATE_CHANGED(_, eventID)
 	local barInfo = activeBars[eventID]
 	if barInfo then
 		if newState == 2 or newState == 3 then
+			-- START: After entering stage 2 on mythic, Blizz wrongly starts a Rakfang and Breath timer with the same durations. Rakfang is correct, but the Breath happens later.
+			if mythicBreathOrRakfang[eventID] then
+				if not mythicRakfangHasPassed then -- When Rakfang is cast we stop the bar like normal, when the Breath is cast we return, as we stop that in the :DreadBreath function
+					mythicRakfangHasPassed = true
+					for id, info in next, mythicBreathOrRakfang do
+						activeBars[id] = nil
+						if info.this == self.Rakfang then
+							self:StopBar(info.msg)
+							info.onFinished()
+						end
+					end
+				end
+				return
+			end
+			-- END
+
 			self:StopBar(barInfo.msg)
 			if newState == 2 then -- Finished
 				if barInfo.onFinished then
@@ -651,15 +698,7 @@ function mod:ENCOUNTER_TIMELINE_EVENT_STATE_CHANGED(_, eventID)
 				local storedEventInfo = table.remove(storedTimelineEvents, 1)
 				if storedEventInfo and storedEventInfo.duration then
 					if self:IsBeforeRadiantBarrier(storedEventInfo.duration, storedEventInfo.customBuffer) then
-						if barInfo.BreathOfRakfang then -- Decide which it is.
-							if storedEventInfo.durationRounded > 30 then -- Dread Breath
-								activeBars[storedEventInfo.id] = self:DreadBreath(storedEventInfo)
-							else -- Rakfang
-								activeBars[storedEventInfo.id] = self:Rakfang(storedEventInfo)
-							end
-						else
-							activeBars[storedEventInfo.id] = barInfo.this(self, storedEventInfo)
-						end
+						activeBars[storedEventInfo.id] = barInfo.this(self, storedEventInfo)
 					end
 				end
 			elseif newState == 3 then -- Canceled
@@ -697,6 +736,43 @@ end
 -- Event Handlers
 --
 
+function mod:ENCOUNTER_WARNING(_, info)
+	if info.duration == 3.5 then
+		if info.shouldPlaySound then
+			if self:IsIntermission() or breathAboutToCast then
+				self:PersonalMessage(1244221, false, self:GetRename(1244221, 2)) -- Breath
+			end
+		else
+			if info.targetGUID == nil then return end
+			breathAboutToCast = false
+			self:SecretTargetMessage(1244221, "orange", info)
+		end
+	else
+		mythicMessageCounter = mythicMessageCounter + 1
+		local stage = self:GetStage()
+		if stage > 1 and stage < 2 then -- Intermission 1
+			-- 1: Radiant Barrier
+			-- 2: Midnight Flames
+			-- Breath handled above
+			-- 3: Nullbeam
+			-- Breath handled above
+			if mythicMessageCounter == 3 then -- Nullbeam
+				self:Message(1262623, "yellow", CL.count:format(self:GetRename(1262623), nullbeamCount))
+				self:PlaySound(1262623, "alert")
+			end
+		elseif stage > 2 and stage < 3 then -- Intermission 2
+			-- 1: Radiant Barrier
+			-- 2: Midnight Flames
+			-- 3: Gloom
+			-- Breath handled above
+			if mythicMessageCounter == 3 then -- Gloom
+				self:Message(1245391, "orange", CL.count:format(self:GetRename(1245391), gloomCount))
+				self:PlaySound(1245391, "alert") -- possibly soak
+			end
+		end
+	end
+end
+
 function mod:MidnightFlames(eventInfo)
 	local barText = CL.count:format(self:GetRename(1249748), midnightFlamesCount)
 	if self:ShouldShowBars() then
@@ -707,7 +783,9 @@ function mod:MidnightFlames(eventInfo)
 		msg = barText,
 		onFinished = function()
 			self:Message(1249748, "yellow", barText)
-			self:StopBlizzMessages(0.2)
+			if not self:Mythic() then
+				self:StopBlizzMessages(0.5)
+			end
 			self:PlaySound(1249748, "alert")
 		end,
 		this = self.MidnightFlames
@@ -731,38 +809,76 @@ function mod:GrapplingMaw(eventInfo)
 end
 
 -- Vaelgor
-function mod:Nullbeam(eventInfo)
-	local barText = CL.count:format(self:GetRename(1262623), nullbeamCount)
-	if self:ShouldShowBars() then
-		self:CDBar(1262623, eventInfo.duration, barText, nil, eventInfo.id)
+do
+	local nullzoneAfter = 9.5
+	function mod:Nullbeam(eventInfo)
+		local barText = CL.count:format(self:GetRename(1262623), self:IsIntermission() and 1 or nullbeamCount)
+		if self:ShouldShowBars() then
+			self:CDBar(1262623, eventInfo.duration, barText, nil, eventInfo.id)
+			if not self:IsIntermission() then -- Timer in the intermission is unreliable
+				self:Bar(1244672, eventInfo.duration + nullzoneAfter, CL.count:format(self:GetRename(1244672), nullbeamCount), nil, eventInfo.id) -- Nullzone
+			end
+		end
+		if not self:IsIntermission() then -- only increment outside of intermissions
+			nullbeamCount = nullbeamCount + 1
+		end
+		return {
+			msg = barText,
+			onFinished = function()
+				self:Message(1262623, "yellow", barText)
+				if not self:Mythic() then
+					self:StopBlizzMessages(0.5)
+				end
+				if not self:IsIntermission() then -- Timers arn't that trustworthy, let's not give fake info
+					self:Bar(1244672, {nullzoneAfter, eventInfo.duration + nullzoneAfter}, CL.count:format(self:GetRename(1244672), nullbeamCount - 1), nil, eventInfo.id) -- Nullzone
+				end
+				self:PlaySound(1262623, "alert")
+			end,
+			this = self.Nullbeam,
+			onCanceled = function()
+				local count = nullbeamCount - 1
+				self:StopBar(CL.count:format(self:GetRename(1244672), count)) -- Nullzone
+			end
+		}
 	end
-	nullbeamCount = nullbeamCount + 1
-	return {
-		msg = barText,
-		onFinished = function()
-			self:Message(1262623, "yellow", barText)
-			self:StopBlizzMessages(0.2)
-			self:PlaySound(1262623, "alert")
-		end,
-		this = self.Nullbeam
-	}
 end
 
-function mod:DreadBreath(eventInfo)
-	local barText = CL.count:format(self:GetRename(1244221), dreadBreathCount)
-	if self:ShouldShowBars() then
-		self:CDBar(1244221, eventInfo.duration, barText, nil, eventInfo.id)
+do
+	local function EnableBreathCheck()
+		breathAboutToCast = true
 	end
-	dreadBreathCount = dreadBreathCount + 1
-	return {
-		customBuffer = 5,
-		msg = barText,
-		onFinished = function()
-			self:TargetMessageFromBlizzMessage(1244221, 1, "orange", barText)
-			-- PA Sounds
-		end,
-		this = self.DreadBreath
-	}
+	function mod:DreadBreath(eventInfo)
+		local count = dreadBreathCount
+		if self:IsIntermission() then -- It starts multiple breath bars at the same time, so we have to tweak the counts a bit incase of a wrong event order
+			count = 1
+			if math.floor(self:GetStage()) == 1 and eventInfo.durationRounded == 23 then -- Adjust this one
+				count = 2
+			end
+		elseif mythicRakfangHasPassed then -- We need to manually cancel the first Breath after the first Intermission on Mythic
+			mythicRakfangHasPassed = false
+			mythicBreathOrRakfang = {}
+			self:StopBar(CL.count:format(self:GetRename(1244221), count-1))
+		end
+		local barText = CL.count:format(self:GetRename(1244221), count)
+		if self:ShouldShowBars() then
+			self:CDBar(1244221, eventInfo.duration, barText, nil, eventInfo.id)
+			if self:Mythic() and not self:IsIntermission() then
+				self:ScheduleTimer(EnableBreathCheck, eventInfo.duration-3)
+			end
+		end
+		dreadBreathCount = dreadBreathCount + 1
+		return {
+			customBuffer = 5,
+			msg = barText,
+			onFinished = function()
+				if not self:Mythic() then
+					self:TargetMessageFromBlizzMessage(1244221, 1, "orange", barText)
+					-- PA Sounds
+				end
+			end,
+			this = self.DreadBreath
+		}
+	end
 end
 
 function mod:Vaelwing(eventInfo)
@@ -795,7 +911,9 @@ function mod:Gloom(eventInfo)
 		msg = barText,
 		onFinished = function()
 			self:Message(1245391, "orange", barText)
-			self:StopBlizzMessages(0.2)
+			if not self:Mythic() then
+				self:StopBlizzMessages(0.5)
+			end
 			self:PlaySound(1245391, "alert") -- possibly soak
 		end,
 		this = self.Gloom
@@ -803,12 +921,19 @@ function mod:Gloom(eventInfo)
 end
 
 function mod:VoidHowl(eventInfo)
-	local barText = CL.count:format(self:GetRename(1244917), voidHowlCount)
-	if self:ShouldShowBars() then
-		self:CDBar(1244917, eventInfo.duration, barText, nil, eventInfo.id)
+	local count = voidHowlCount
+	local stage = self:GetStage()
+	if count <= 2 and stage == 2 then -- tweak some counts as it starts multibars at the same time
+		if eventInfo.durationRounded == 43 then
+			count = 2
+		elseif eventInfo.durationRounded == 8 then
+			count = 1
+		end
+	elseif stage == 1 and count == 3 then
+		return -- this one never happens.
 	end
-	voidHowlCount = voidHowlCount + 1
-	return {
+	local barText = CL.count:format(self:GetRename(1244917), count)
+	local tbl = {
 		msg = barText,
 		onFinished = function()
 			self:Message(1244917, "orange", barText)
@@ -816,6 +941,14 @@ function mod:VoidHowl(eventInfo)
 		end,
 		this = self.VoidHowl
 	}
+	if self:ShouldShowBars() then
+		self:CDBar(1244917, eventInfo.duration, barText, nil, eventInfo.id)
+		if self:Mythic() and self:IsIntermission() then -- 2nd Intermission, OnFinished never triggers
+			self:ScheduleTimer(tbl.onFinished, eventInfo.duration)
+		end
+	end
+	voidHowlCount = voidHowlCount + 1
+	return tbl
 end
 
 function mod:Rakfang(eventInfo)

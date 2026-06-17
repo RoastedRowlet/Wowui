@@ -33,9 +33,9 @@ SilvermoonLapCounterDB = {
 },
 ["Klutzykubfu-Stormrage"] = {
 ["bestLapTime"] = 9.663000000000466,
-["lastLapDate"] = "2026-06-12 00:51",
-["lapCount"] = 2,
-["lastLapTime"] = 61.5679999999993,
+["lastLapDate"] = "2026-06-16 21:51",
+["lapCount"] = 3,
+["lastLapTime"] = 9.728000000000065,
 ["firstLapDate"] = "2026-06-11 18:01",
 ["class"] = "MONK",
 ["bestLapDate"] = "2026-06-11 18:01",

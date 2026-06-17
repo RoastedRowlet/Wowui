@@ -182,7 +182,7 @@ local function ExtractProfileForCharacter(name, realm)
 end
 
 ---@param name string
----@param maybeRealm string
+---@param maybeRealm string?
 ---@return ProviderProfileV2|nil
 function Private.GetProviderProfile(name, maybeRealm)
 	local realm = Private.GetRealmOrDefault(maybeRealm)
@@ -377,4 +377,10 @@ function ArchonTooltip.AddProviderV2(lookup, provider)
 	else
 		DoProviderAddition()
 	end
+end
+
+---@param name string
+---@param maybeRealm string?
+function ArchonTooltip.GetProfile(name, maybeRealm)
+	return Private.GetProviderProfile(name, maybeRealm)
 end

@@ -591,9 +591,9 @@ else
 end
 
 table.insert(Private.LoginFnQueue, function()
-	local usesBlizzardCommunities = Private.IsRetail or Private.IsCata
+	local usesBlizzardCommunities = Private.IsRetail or Private.IsCata or (Private.IsWrath and Private.CurrentRealm.region == "CN")
 
-	if Private.IsClassicEra or (Private.IsWrath and Private.CurrentRealm.region == "CN") then
+	if Private.IsClassicEra then
 		if C_AddOns and C_AddOns.DoesAddOnExist then
 			usesBlizzardCommunities = C_AddOns.DoesAddOnExist("Blizzard_Communities") and not C_CVar.GetCVarBool("useClassicGuildUI")
 		else
@@ -864,7 +864,7 @@ table.insert(Private.LoginFnQueue, function()
 					-- 	GameTooltip_AddHighlightLine(GameTooltip, UNIT_TYPE_LEVEL_FACTION_TEMPLATE:format(level, localizedClass, FACTION_STRINGS[factionGroup]))
 					-- else
 					GameTooltip_AddHighlightLine(GameTooltip, UNIT_TYPE_LEVEL_TEMPLATE:format(level, localizedClass))
-				-- end
+					-- end
 				else
 					GameTooltip:SetText(" ") --Just make it empty until we get the name update
 				end
@@ -1407,26 +1407,33 @@ table.insert(Private.LoginFnQueue, function()
 
 		local addonName = "MeetingHorn"
 
-		if not Private.AddOnUtils.IsAddOnLoaded(addonName) or LibStub == nil then
+		if not Private.AddOnUtils.DoesAddOnExist(addonName) or LibStub == nil then
 			return
 		end
 
-		local MeetingHorn = LibStub("AceAddon-3.0"):GetAddon(addonName)
-		local L = LibStub("AceLocale-3.0"):GetLocale(addonName, true)
-		local Browser = MeetingHorn.MainPanel.Browser
-		local ActivityList = Browser.ActivityList
+		local MeetingHorn = nil
+		local MeetingHornL = nil
 
 		MeetingHornOnItemEnter = function(_, button, item)
+			if not MeetingHorn or not MeetingHornL then
+				return
+			end
+
+			local Browser = MeetingHorn.MainPanel.Browser
 			local r, g, b = GetClassColor(item:GetLeaderClass())
+
 			GameTooltip:SetOwner(Browser, "ANCHOR_NONE")
 			GameTooltip:SetPoint("TOPLEFT", Browser, "TOPRIGHT", 8, 60)
 			GameTooltip:SetText(item:GetTitle())
 			GameTooltip:AddLine(item:GetLeader(), r, g, b)
+
 			local level = item:GetLeaderLevel()
 			if level then
 				local color = GetQuestDifficultyColor(level)
-				GameTooltip:AddLine(string.format("%s |cff%02x%02x%02x%s|r", LEVEL, color.r * 255, color.g * 255, color.b * 255, item:GetLeaderLevel()), 1, 1, 1)
+
+				GameTooltip:AddLine(string.format("%s |cff%02x%02x%02x%s|r", LEVEL, color.r * 255, color.g * 255, color.b * 255, level), 1, 1, 1)
 			end
+
 			GameTooltip:AddLine(item:GetComment(), 0.6, 0.6, 0.6, true)
 			GameTooltip_AddBlankLineToTooltip(GameTooltip)
 
@@ -1437,17 +1444,47 @@ table.insert(Private.LoginFnQueue, function()
 			GameTooltip_AddBlankLineToTooltip(GameTooltip)
 
 			if not item:IsActivity() then
-				GameTooltip:AddLine(L["<Double-Click> Whisper to player"], 1, 1, 1)
+				GameTooltip:AddLine(MeetingHornL["<Double-Click> Whisper to player"], 1, 1, 1)
 			end
-			GameTooltip:AddLine(L["<Right-Click> Open activity menu"], 1, 1, 1)
+			GameTooltip:AddLine(MeetingHornL["<Right-Click> Open activity menu"], 1, 1, 1)
 			GameTooltip:Show()
 
 			meetingHornItem = item
 		end
 
-		ActivityList:SetCallback("OnItemEnter", MeetingHornOnItemEnter)
-		ActivityList:SetCallback("OnItemLeave", function()
-			meetingHornItem = nil
-		end)
+		local function OnMeetingHornLoaded()
+			MeetingHorn = LibStub("AceAddon-3.0"):GetAddon(addonName)
+
+			if not MeetingHorn or not MeetingHorn.MainPanel then
+				return
+			end
+
+			MeetingHornL = LibStub("AceLocale-3.0"):GetLocale(addonName, true)
+
+			local Browser = MeetingHorn.MainPanel.Browser
+			local ActivityList = Browser.ActivityList
+
+			ActivityList:SetCallback("OnItemEnter", MeetingHornOnItemEnter)
+			ActivityList:SetCallback("OnItemLeave", function()
+				meetingHornItem = nil
+				GameTooltip_Hide()
+			end)
+		end
+
+		if EventUtil and EventUtil.ContinueOnAddOnLoaded then
+			EventUtil.ContinueOnAddOnLoaded(addonName, OnMeetingHornLoaded)
+		else
+			EventRegistry:RegisterFrameEventAndCallback(
+				"ADDON_LOADED",
+				---@param ownerId number
+				---@param loadedAddonName string
+				function(ownerId, loadedAddonName)
+					if loadedAddonName == addonName then
+						EventRegistry:UnregisterFrameEventAndCallback("ADDON_LOADED", ownerId)
+						OnMeetingHornLoaded()
+					end
+				end
+			)
+		end
 	end
 end)

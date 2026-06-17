@@ -1,22 +1,10 @@
-lightweight tag e6f9ced06f8f9c81f850163d91e0b17e5efce438 12.0.5-04
+lightweight tag 473f22e06c677a7be2e1682b6a9b316dadf2b4f9 12.0.7-01
 Author:	Dave Hendler <sollaires@gmail.com>
-Date:	Tue May 12 21:02:49 2026 -0700
+Date:	Mon May 18 08:44:31 2026 -0700
 
-commit e6f9ced06f8f9c81f850163d91e0b17e5efce438
+commit 473f22e06c677a7be2e1682b6a9b316dadf2b4f9
 Author: Dave Hendler <sollaires@gmail.com>
-Date:   Tue May 12 21:02:49 2026 -0700
+Date:   Mon May 18 08:44:31 2026 -0700
 
-    Bump version
-
-commit 56b539479ece25b8a782c5acdd262ed12fc8a77c
-Author: Dave Hendler <sollaires@gmail.com>
-Date:   Tue May 12 21:02:34 2026 -0700
-
-    Ensure pipes are un-doubled to match the checksum to what goes into the clipboard
-
-commit 559422dfe30b49d2464c37fc94645d0a1fab9d3e
-Author: Dave Hendler <sollaires@gmail.com>
-Date:   Tue May 12 20:33:30 2026 -0700
-
-    Bump version
+    Remove experimental void_talents data
 

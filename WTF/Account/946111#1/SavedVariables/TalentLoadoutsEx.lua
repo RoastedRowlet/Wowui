@@ -64,7 +64,7 @@ TalentLoadoutEx = {
 ["pvp2"] = 5615,
 ["pvp3"] = 5619,
 ["isInGroup"] = false,
-["text"] = "CEcBPJc41CfcseY0baneJ1IHrxMzMbzMzgBzMLzYMMzGAAAAAMAAYmhHwAjpGzMzAAAAgZmZMmZWGzMwMbzYwCsMGGLDgZiYDzMDmZAM",
+["text"] = "CEcBPJc41CfcseY0baneJ1IHrxMzMbzMzgBzMLzYMMzGAAAAAMAAYmhHwAjpGzMzAAAAgZmZMmZ2GzMwMbzYwCsMGGLDgZiYDzMDmZAM",
 ["icon"] = 134400,
 ["pvp1"] = 5564,
 },
@@ -102,9 +102,9 @@ TalentLoadoutEx = {
 ["icon"] = 134400,
 },
 {
+["isExpanded"] = true,
 ["icon"] = 6025441,
 ["name"] = "Dungeons",
-["isExpanded"] = true,
 },
 {
 ["isInGroup"] = true,

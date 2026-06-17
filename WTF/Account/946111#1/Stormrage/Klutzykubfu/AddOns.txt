@@ -19,7 +19,7 @@ BlizzMove_Debug: enabled
 !BugGrabber: enabled
 BugSack: enabled
 ChonkyCharacterSheet: enabled
-Clique: enabled
+Clique: disabled
 CompassHUD: enabled
 CraftScan: enabled
 CraftSim: enabled

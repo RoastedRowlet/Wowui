@@ -111,3 +111,4 @@ WarpDeplete: enabled
 WaypointUI: enabled
 WorldMarkerCycler: enabled
 EllesmereUIBags: enabled
+BigWigs_Sporefall: enabled

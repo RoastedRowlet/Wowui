@@ -24,5 +24,5 @@ OPie_SavedData = {
 },
 },
 },
-["_GameVersion"] = "12.0.5",
+["_GameVersion"] = "12.0.7",
 }

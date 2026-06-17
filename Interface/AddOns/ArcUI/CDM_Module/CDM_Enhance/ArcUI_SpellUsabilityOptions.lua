@@ -49,6 +49,8 @@ local function HideCooldownUsability()
   local h = H()
   if h.HideIfNoCooldownSelection() then return true end
   if h.IsEditingMixedTypes() then return true end
+  -- Totem-slot frames have no spell, so spell usability tinting is irrelevant.
+  if h.IsCurrentCooldownSelectionAllTotem and h.IsCurrentCooldownSelectionAllTotem() then return true end
   return h.collapsedSections.spellUsability
 end
 
@@ -705,6 +707,8 @@ function ns.SpellUsabilityOptions.GetCooldownArgs()
       local h = H()
       if h.HideIfNoCooldownSelection() then return true end
       if h.IsEditingMixedTypes() then return true end
+      -- Totem-slot frames have no spell, so spell usability is irrelevant.
+      if h.IsCurrentCooldownSelectionAllTotem and h.IsCurrentCooldownSelectionAllTotem() then return true end
       return false
     end,
   }

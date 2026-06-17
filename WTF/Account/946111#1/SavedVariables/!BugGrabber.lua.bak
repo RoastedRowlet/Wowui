@@ -1,6 +1,6 @@
 
 BugGrabberDB = {
-["session"] = 710,
+["session"] = 726,
 ["lastSanitation"] = 3,
 ["errors"] = {
 {
@@ -1158,14 +1158,6 @@ BugGrabberDB = {
 ["counter"] = 1,
 },
 {
-["message"] = "bad argument #1 to '?' (Usage: local skillLineInfo = C_SpellBook.GetSpellBookSkillLineInfo(skillLineIndex))",
-["time"] = 1781373450,
-["locals"] = "(*temporary)=\"bad argument #1 to '?' (Usage: local skillLineInfo = C_SpellBook.GetSpellBookSkillLineInfo(skillLineIndex))\"\n",
-["stack"] = "[C]: in function 'GetSpellBookSkillLineInfo'\n[Interface/AddOns/CraftScan/Customer/ChatScanner.lua]:1013: in function <Interface/AddOns/CraftScan/Customer/ChatScanner.lua:1011>\n[Interface/AddOns/CraftScan/Customer/ChatScanner.lua]:1026: in function <Interface/AddOns/CraftScan/Customer/ChatScanner.lua:976>\n[Interface/AddOns/CraftScan/Customer/ChatScanner.lua]:1246: in function <Interface/AddOns/CraftScan/Customer/ChatScanner.lua:1245>\n[C]: in function 'xpcall'\n[Interface/AddOns/Blizzard_ObjectAPI/Mainline/AsyncCallbackSystem.lua]:76: in function 'FireCallbacks'\n[Interface/AddOns/Blizzard_ObjectAPI/Mainline/AsyncCallbackSystem.lua]:35: in function <.../Blizzard_ObjectAPI/Mainline/AsyncCallbackSystem.lua:31>\n[C]: ?\n[C]: in function 'accessor'\n[Interface/AddOns/Blizzard_ObjectAPI/Mainline/AsyncCallbackSystem.lua]:52: in function 'AddCallback'\n[Interface/AddOns/Blizzard_ObjectAPI/Mainline/Item.lua]:332: in function 'ContinueOnItemLoad'\n[Interface/AddOns/CraftScan/Customer/ChatScanner.lua]:1245: in function 'OnMessage'\n[Interface/AddOns/CraftScan/Customer/ChatScanner.lua]:1263: in function <Interface/AddOns/CraftScan/Customer/ChatScanner.lua:1257>\n",
-["session"] = 686,
-["counter"] = 10,
-},
-{
 ["message"] = "[ADDON_ACTION_BLOCKED] AddOn 'EllesmereUIBlizzardSkin' tried to call the protected function 'InspectFrame:SetFrameStrata()'.",
 ["time"] = 1781373925,
 ["locals"] = "self=<table>\nevent=\"ADDON_ACTION_BLOCKED\"\naddonName=\"EllesmereUIBlizzardSkin\"\naddonFunc=\"InspectFrame:SetFrameStrata()\"\nname=\"EllesmereUIBlizzardSkin\"\nbadAddons=<table>{\n EllesmereUIBlizzardSkin=true\n}\nL=<table>{\n NO_DISPLAY_2=\"|cffffff00The standard display is called BugSack, and can probably be found on the same site where you found !BugGrabber.|r\"\n ERROR_DETECTED=\"%s |cffffff00captured, click the link for more information.|r\"\n BUGGRABBER_STOPPED=\"|cffffff00There are too many errors in your UI. As a result, your game experience may be degraded. Disable or update the failing addons if you don't want to see this message again.|r\"\n USAGE=\"|cffffff00Usage: /buggrabber <1-%d>.|r\"\n STOP_NAG=\"|cffffff00!BugGrabber will not nag about missing a display addon again until next patch.|r\"\n NO_DISPLAY_STOP=\"|cffffff00If you don't want to be reminded about this again, run /stopnag.|r\"\n NO_DISPLAY_1=\"|cffffff00You seem to be running !BugGrabber with no display addon to go along with it. Although a slash command is provided for accessing error reports, a display can help you manage these errors in a more convenient way.|r\"\n ERROR_UNABLE=\"|cffffff00!BugGrabber is unable to retrieve errors from other players by itself. Please install BugSack or a similar display addon that might give you this functionality.|r\"\n ADDON_CALL_PROTECTED=\"[%s] AddOn '%s' tried to call the protected function '%s'.\"\n}\n",
@@ -1230,10 +1222,18 @@ BugGrabberDB = {
 ["counter"] = 292,
 },
 {
+["message"] = "bad argument #1 to '?' (Usage: local skillLineInfo = C_SpellBook.GetSpellBookSkillLineInfo(skillLineIndex))",
+["time"] = 1781652317,
+["locals"] = "(*temporary)=\"bad argument #1 to '?' (Usage: local skillLineInfo = C_SpellBook.GetSpellBookSkillLineInfo(skillLineIndex))\"\n",
+["stack"] = "[C]: in function 'GetSpellBookSkillLineInfo'\n[Interface/AddOns/CraftScan/Customer/ChatScanner.lua]:1013: in function <Interface/AddOns/CraftScan/Customer/ChatScanner.lua:1011>\n[Interface/AddOns/CraftScan/Customer/ChatScanner.lua]:1026: in function <Interface/AddOns/CraftScan/Customer/ChatScanner.lua:976>\n[Interface/AddOns/CraftScan/Customer/ChatScanner.lua]:1246: in function <Interface/AddOns/CraftScan/Customer/ChatScanner.lua:1245>\n[C]: in function 'xpcall'\n[Interface/AddOns/Blizzard_ObjectAPI/Mainline/AsyncCallbackSystem.lua]:76: in function 'FireCallbacks'\n[Interface/AddOns/Blizzard_ObjectAPI/Mainline/AsyncCallbackSystem.lua]:35: in function <.../Blizzard_ObjectAPI/Mainline/AsyncCallbackSystem.lua:31>\n[C]: ?\n[C]: in function 'accessor'\n[Interface/AddOns/Blizzard_ObjectAPI/Mainline/AsyncCallbackSystem.lua]:52: in function 'AddCallback'\n[Interface/AddOns/Blizzard_ObjectAPI/Mainline/Item.lua]:332: in function 'ContinueOnItemLoad'\n[Interface/AddOns/CraftScan/Customer/ChatScanner.lua]:1245: in function 'OnMessage'\n[Interface/AddOns/CraftScan/Customer/ChatScanner.lua]:1263: in function <Interface/AddOns/CraftScan/Customer/ChatScanner.lua:1257>\n",
+["session"] = 722,
+["counter"] = 11,
+},
+{
 ["message"] = "LUA_WARNING: Interface/AddOns/NoAutoClose/libs/LibVersionCheck-1.0/LibVersionCheck-1.0.xml:3 Error loading Interface/AddOns/NoAutoClose/Dependencies/LibStub.lua",
-["time"] = 1781563989,
-["session"] = 710,
-["counter"] = 147,
+["time"] = 1781658368,
+["session"] = 726,
+["counter"] = 163,
 },
 },
 }

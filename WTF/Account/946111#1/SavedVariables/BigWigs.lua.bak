@@ -155,6 +155,15 @@ BigWigs3DB = {
 },
 },
 },
+["BigWigs_Bosses_Muro'jin and Nekraxx"] = {
+["profiles"] = {
+["Default"] = {
+["toggles"] = {
+[1243900] = 3129591,
+},
+},
+},
+},
 ["MythicPlus"] = {
 ["global"] = {
 ["showViewerTeleportTip"] = false,
@@ -170,67 +179,75 @@ BigWigs3DB = {
 },
 },
 },
-["BigWigs_Bosses_Muro'jin and Nekraxx"] = {
-["profiles"] = {
-["Default"] = {
-["toggles"] = {
-[1243900] = 3129591,
-},
-},
-},
-},
 },
 ["myKeystones"] = {
 ["Player-60-0FF5005C"] = {
-["playerRating"] = 2737,
+["playerRating"] = 2939,
 ["specId"] = 270,
-["keyMap"] = 557,
+["keyMap"] = 239,
 ["name"] = "Klutzykubfu",
 ["keyLevel"] = 14,
-["realm"] = "Stormrage",
-},
-["Player-60-0C9E885E"] = {
-["playerRating"] = 2064,
-["specId"] = 1480,
-["keyMap"] = 0,
-["name"] = "Angryabsol",
-["keyLevel"] = 0,
-["realm"] = "Stormrage",
-},
-["Player-60-0F7B141D"] = {
-["playerRating"] = 3907,
-["specId"] = 264,
-["keyMap"] = 560,
-["name"] = "Zappyxatu",
-["keyLevel"] = 20,
 ["realm"] = "Stormrage",
 },
 ["Player-3676-0DF7D3EF"] = {
 ["playerRating"] = 4104,
 ["specId"] = 1473,
-["keyMap"] = 560,
+["keyMap"] = 0,
 ["name"] = "Barelynoer",
-["keyLevel"] = 22,
+["keyLevel"] = 0,
 ["realm"] = "Area 52",
 },
-["Player-60-0F85ABEF"] = {
-["playerRating"] = 3929,
-["specId"] = 102,
-["keyMap"] = 0,
-["name"] = "Lonelylitten",
-["keyLevel"] = 0,
-["realm"] = "Stormrage",
 },
-},
-["prevWeeklyReset"] = 1781017200,
+["prevWeeklyReset"] = 1781622000,
 ["profiles"] = {
 ["Default"] = {
 },
 },
 }
 BigWigsIconDB = {
+["minimapPos"] = 202.9080136447459,
 }
 BigWigsStatsDB = {
+[2966] = {
+[-3372] = {
+["solotier8"] = {
+["kills"] = 1,
+["fkDate"] = "2026/04/11",
+["bestDate"] = "2026/04/11",
+["best"] = 208.5349999999162,
+["fkDuration"] = 208.5349999999162,
+},
+},
+},
+[2939] = {
+[2795] = {
+["heroic"] = {
+["kills"] = 8,
+["fkDuration"] = 495.9110000000801,
+["wipes"] = 10,
+["fkWipes"] = 6,
+["best"] = 327.752000000095,
+["bestDate"] = "2026/04/07",
+["fkDate"] = "2026/04/01",
+},
+["mythic"] = {
+["kills"] = 3,
+["fkDuration"] = 400.1720000000059,
+["wipes"] = 32,
+["fkWipes"] = 18,
+["best"] = 389.2179999999935,
+["bestDate"] = "2026/04/29",
+["fkDate"] = "2026/04/22",
+},
+["normal"] = {
+["kills"] = 1,
+["fkDuration"] = 313.8260000000009,
+["best"] = 313.8260000000009,
+["bestDate"] = "2026/03/25",
+["fkDate"] = "2026/03/25",
+},
+},
+},
 [2912] = {
 [2735] = {
 ["normal"] = {
@@ -462,43 +479,16 @@ BigWigsStatsDB = {
 },
 },
 },
-[2966] = {
-[-3372] = {
-["solotier8"] = {
+[1592] = {
+[2711] = {
+["mythic_flex"] = {
 ["kills"] = 1,
-["fkDate"] = "2026/04/11",
-["bestDate"] = "2026/04/11",
-["best"] = 208.5349999999162,
-["fkDuration"] = 208.5349999999162,
-},
-},
-},
-[2939] = {
-[2795] = {
-["heroic"] = {
-["kills"] = 8,
-["fkDuration"] = 495.9110000000801,
-["wipes"] = 10,
-["fkWipes"] = 6,
-["best"] = 327.752000000095,
-["bestDate"] = "2026/04/07",
-["fkDate"] = "2026/04/01",
-},
-["mythic"] = {
-["kills"] = 3,
-["fkDuration"] = 400.1720000000059,
-["wipes"] = 32,
-["fkWipes"] = 18,
-["best"] = 389.2179999999935,
-["bestDate"] = "2026/04/29",
-["fkDate"] = "2026/04/22",
-},
-["normal"] = {
-["kills"] = 1,
-["fkDuration"] = 313.8260000000009,
-["best"] = 313.8260000000009,
-["bestDate"] = "2026/03/25",
-["fkDate"] = "2026/03/25",
+["fkDate"] = "2026/06/16",
+["bestDate"] = "2026/06/16",
+["fkWipes"] = 5,
+["best"] = 420.3029999999562,
+["wipes"] = 5,
+["fkDuration"] = 420.3029999999562,
 },
 },
 },

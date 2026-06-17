@@ -127,10 +127,11 @@ Vigil: disabled
 AdvancedFocusCastBar: enabled
 EllesmereUIBlizzardSkin: enabled
 EllesmereUIDamageMeters: enabled
-EllesmereUIMinimap: enabled
+EllesmereUIMinimap: disabled
 EllesmereUIQoL: enabled
 FocusMarker: enabled
 LightDamage: enabled
 NotEvenClose: enabled
 EllesmereUIBags: enabled
 EllesmereUIRaidFrames: enabled
+BigWigs_Sporefall: enabled

@@ -16,6 +16,9 @@ NotEvenCloseDB = {
 ["ofsx"] = 199.9999542236328,
 ["ofsy"] = 35.83341979980469,
 },
+["minimap"] = {
+["minimapPos"] = 137.7113466763582,
+},
 },
 ["Dankmankeys - Stormrage"] = {
 },

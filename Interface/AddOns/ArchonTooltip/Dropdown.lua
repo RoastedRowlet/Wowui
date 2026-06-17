@@ -222,10 +222,18 @@ if Menu and Menu.ModifyMenu then
 	end
 
 	for tagName in pairs(validTypes) do
-		local tag = string.format("MENU_UNIT_%s", tagName)
+		local enabled = true
 
-		---@see https://github.com/Gethe/wow-ui-source/blob/5076663b5454de9e7522320994ea7cc15b2a961c/Interface/AddOns/Blizzard_Menu/11_0_0_MenuImplementationGuide.lua#L409-L414
-		Menu.ModifyMenu(tag, ModifyMenuCallback)
+		if tagName == "COMMUNITIES_GUILD_MEMBER" and (C_GuildInfo.IsGuildOfficer() or IsGuildLeader()) then
+			enabled = false
+		end
+
+		if enabled then
+			local tag = string.format("MENU_UNIT_%s", tagName)
+
+			---@see https://github.com/Gethe/wow-ui-source/blob/5076663b5454de9e7522320994ea7cc15b2a961c/Interface/AddOns/Blizzard_Menu/11_0_0_MenuImplementationGuide.lua#L409-L414
+			Menu.ModifyMenu(tag, ModifyMenuCallback)
+		end
 	end
 
 	Menu.ModifyMenu("MENU_LFG_FRAME_SEARCH_ENTRY", function(owner, rootDescription, contextData)
