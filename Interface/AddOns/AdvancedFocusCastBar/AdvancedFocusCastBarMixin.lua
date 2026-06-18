@@ -1649,9 +1649,6 @@ end
 
 function AdvancedFocusCastBarMixin:AdjustCustomTextsPosition()
 	local point = AdvancedFocusCastBarSaved.Settings.CustomTextsPosition
-		== Private.Enum.CustomTextsPosition.BOTTOMCENTER
-		and "BOTTOM"
-		or AdvancedFocusCastBarSaved.Settings.CustomTextsPosition
 
 	local factor = (
 			point == Private.Enum.CustomTextsPosition.TOPLEFT or point == Private.Enum.CustomTextsPosition.TOPRIGHT

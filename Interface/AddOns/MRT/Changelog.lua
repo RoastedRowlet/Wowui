@@ -1,6 +1,9 @@
 local GlobalAddonName, ExRT = ...
 
 ExRT.Options.Changelog = [=[
+v.5310
+* 12.0.7 update
+
 v.5300
 * Invite tools: you can set any custom guild rank for autopromote
 

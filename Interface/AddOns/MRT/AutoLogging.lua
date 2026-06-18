@@ -172,7 +172,7 @@ local function GetCurrentMapForLogging()
 			return true 
 		elseif ExRT.isClassic and (zoneType == 'raid' or (C_Engraving and C_Engraving.IsEngravingEnabled() and module.db.mapsSoD[mapID]) or difficulty == 198) then
 			return true 
-		elseif zoneType == 'raid' and (tonumber(mapID) and mapID >= module.db.minRaidMapID) and ((difficulty == 16 and not VMRT.Logging.disableMythic) or (difficulty == 15 and not VMRT.Logging.disableHeroic) or (difficulty == 14 and not VMRT.Logging.disableNormal) or (difficulty ~= 14 and difficulty ~= 15 and difficulty ~= 16)) then
+		elseif zoneType == 'raid' and (tonumber(mapID) and mapID >= module.db.minRaidMapID) and (((difficulty == 16 or difficulty == 233) and not VMRT.Logging.disableMythic) or (difficulty == 15 and not VMRT.Logging.disableHeroic) or (difficulty == 14 and not VMRT.Logging.disableNormal) or (difficulty ~= 14 and difficulty ~= 15 and difficulty ~= 16)) then
 			return true
 		elseif VMRT.Logging.enable5ppLegion and (difficulty == 8 or difficulty == 23) and (tonumber(mapID) and (mapID >= module.db.minPartyMapID or module.db.mapsToLog_5ppl[mapID])) then
 			return true

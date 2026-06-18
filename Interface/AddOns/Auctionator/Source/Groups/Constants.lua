@@ -145,8 +145,8 @@ local seenNames = {}
 for _, classID in ipairs(Auctionator.Groups.Constants.ValidItemClassIDs) do
   local name = C_Item.GetItemClassInfo(classID)
   if seenNames[name] then
-    name = name .. (seenNames[name] + 1)
     seenNames[name] = seenNames[name] + 1
+    name = name .. (seenNames[name] + 1)
   else
     seenNames[name] = 1
   end

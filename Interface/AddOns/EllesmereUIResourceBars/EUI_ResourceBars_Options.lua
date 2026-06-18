@@ -126,9 +126,8 @@ initFrame:SetScript("OnEvent", function(self)
     local function SetPVFont(fs, font, size)
         if not (fs and fs.SetFont) then return end
         local f = GetRBOptOutline()
+        if EllesmereUI and EllesmereUI.PrimeFontShadow then EllesmereUI.PrimeFontShadow(fs, f == "") end
         fs:SetFont(font, size, f)
-        if f == "" then fs:SetShadowOffset(1, -1); fs:SetShadowColor(0, 0, 0, 1)
-        else fs:SetShadowOffset(0, 0) end
     end
     local CONTENT_PAD = 45
     local SIDE_PAD = 20
@@ -1930,6 +1929,25 @@ initFrame:SetScript("OnEvent", function(self)
               end }
         );  y = y - h
 
+        -- Row 5: Shift Elements if No Power | (blank)
+        _, h = W:DualRow(parent, y,
+            { type = "dropdown", text = "Shift Elements if No Power",
+              tooltip = "Shifts any elements anchored to the power bar up or down to offset the missing power bar. Applies both when the Power Bar is disabled and for specs that have no power (for example, Beast Mastery and Marksmanship Hunters, whose Focus shows as the class resource bar).",
+              -- Intentionally NOT disabled when the Power Bar is off: this setting
+              -- is meant to fire precisely when the bar is disabled, so it must
+              -- stay configurable in that state.
+              values = { None = "None", Up = "Up", Down = "Down" },
+              order = { "None", "Up", "Down" },
+              getValue = function() local p = DB(); return (p and p.primary.shiftElementsIfNoPower) or "None" end,
+              setValue = function(v)
+                  local p = DB(); if not p then return end
+                  p.primary.shiftElementsIfNoPower = v
+                  RebuildPower()
+                  EllesmereUI:RefreshPage()
+              end },
+            { type = "label", text = "" }
+        );  y = y - h
+
         _, h = W:Spacer(parent, y, 16);  y = y - h
 
         -----------------------------------------------------------------------
@@ -3605,7 +3623,7 @@ initFrame:SetScript("OnEvent", function(self)
                   EllesmereUI:RefreshPage()
               end },
             { type = "slider", text = "Width",
-              min = 50, max = 350, step = 1,
+              min = 50, max = 500, step = 1,
               disabled = pwDis, disabledTooltip = pwTip, rawTooltip = pwRaw,
               getValue = function() local p = DB(); return p and p.primary.width or 220 end,
               setValue = function(v)
@@ -4337,7 +4355,7 @@ initFrame:SetScript("OnEvent", function(self)
                   EllesmereUI:RefreshPage()
               end },
             { type = "slider", text = "Width",
-              min = 50, max = 350, step = 1,
+              min = 50, max = 500, step = 1,
               disabled = hwDis, disabledTooltip = hwTip, rawTooltip = hwRaw,
               getValue = function() local p = DB(); return p and p.health.width or 220 end,
               setValue = function(v)
@@ -5341,7 +5359,11 @@ initFrame:SetScript("OnEvent", function(self)
         local castSection
         castSection, h = W:SectionHeader(parent, "LAYOUT", y);  y = y - h
 
-        -- Row 1: Enable Player Cast Bar | Show Spell Icon
+        -- Strata dropdown values for the Cast Bar Frame Strata control.
+        local cbStrataValues = { BACKGROUND = "Background", LOW = "Low", MEDIUM = "Medium", HIGH = "High", DIALOG = "Dialog" }
+        local cbStrataOrder = { "BACKGROUND", "LOW", "MEDIUM", "HIGH", "DIALOG" }
+
+        -- Row 1: Enable Player Cast Bar | Frame Strata
         local castEnableRow
         castEnableRow, h = W:DualRow(parent, y,
             { type = "toggle", text = "Enable Player Cast Bar",
@@ -5351,14 +5373,17 @@ initFrame:SetScript("OnEvent", function(self)
                   p.castBar.enabled = v; RefreshCast()
                   EllesmereUI:RefreshPage()
               end },
-            { type = "toggle", text = "Show Spell Icon",
+            { type = "dropdown", text = "Frame Strata",
+              tooltip = "Controls the order that overlapping elements display in. Set higher to show above other elements.",
               disabled = castOff,
               disabledTooltip = "Player Cast Bar",
-              getValue = function() local p = DB(); return p and p.castBar.showIcon ~= false end,
+              values = cbStrataValues, order = cbStrataOrder,
+              getValue = function()
+                  local p = DB(); return p and p.castBar.frameStrata or "MEDIUM"
+              end,
               setValue = function(v)
                   local p = DB(); if not p then return end
-                  p.castBar.showIcon = v; RefreshCast()
-                  EllesmereUI:RefreshPage()
+                  p.castBar.frameStrata = v; RefreshCast()
               end }
         );  y = y - h
         -- Inline cog (DIRECTIONS) on Enable for x/y position
@@ -5423,23 +5448,25 @@ initFrame:SetScript("OnEvent", function(self)
               end }
         );  y = y - h
 
-        -- Row 3: Frame Strata | (empty)
-        local cbStrataValues = { BACKGROUND = "Background", LOW = "Low", MEDIUM = "Medium", HIGH = "High", DIALOG = "Dialog" }
-        local cbStrataOrder = { "BACKGROUND", "LOW", "MEDIUM", "HIGH", "DIALOG" }
+        -- Row 3: Show Spell Icon | Show Spark
         _, h = W:DualRow(parent, y,
-            { type = "dropdown", text = "Frame Strata",
-              tooltip = "Controls the order that overlapping elements display in. Set higher to show above other elements.",
+            { type = "toggle", text = "Show Spell Icon",
               disabled = castOff,
               disabledTooltip = "Player Cast Bar",
-              values = cbStrataValues, order = cbStrataOrder,
-              getValue = function()
-                  local p = DB(); return p and p.castBar.frameStrata or "MEDIUM"
-              end,
+              getValue = function() local p = DB(); return p and p.castBar.showIcon ~= false end,
               setValue = function(v)
                   local p = DB(); if not p then return end
-                  p.castBar.frameStrata = v; RefreshCast()
+                  p.castBar.showIcon = v; RefreshCast()
+                  EllesmereUI:RefreshPage()
               end },
-            { type = "label", text = "" }
+            { type = "toggle", text = "Show Spark",
+              disabled = castOff,
+              disabledTooltip = "Player Cast Bar",
+              getValue = function() local p = DB(); return p and p.castBar.showSpark end,
+              setValue = function(v)
+                  local p = DB(); if not p then return end
+                  p.castBar.showSpark = v; RefreshCast()
+              end }
         );  y = y - h
 
         _, h = W:Spacer(parent, y, 16);  y = y - h
@@ -5587,17 +5614,9 @@ initFrame:SetScript("OnEvent", function(self)
             end
         end
 
-        -- Row 2: Show Spark | Color (multiSwatch + cog: gradient)
+        -- Row 2: Color (multiSwatch + cog: gradient) | (empty)
         local castColorRow
         castColorRow, h = W:DualRow(parent, y,
-            { type = "toggle", text = "Show Spark",
-              disabled = castOff,
-              disabledTooltip = "Player Cast Bar",
-              getValue = function() local p = DB(); return p and p.castBar.showSpark end,
-              setValue = function(v)
-                  local p = DB(); if not p then return end
-                  p.castBar.showSpark = v; RefreshCast()
-              end },
             { type = "multiSwatch", text = "Color",
               disabled = castOff,
               disabledTooltip = "Player Cast Bar",
@@ -5659,11 +5678,21 @@ initFrame:SetScript("OnEvent", function(self)
                         local p = DB()
                         return (not p or p.castBar.classColored == true) and 1 or 0.3
                     end },
-              } }
+              } },
+            { type = "slider", text = "Background", min = 0, max = 100, step = 1,
+              disabled = castOff,
+              disabledTooltip = "Player Cast Bar",
+              getValue = function()
+                  local p = DB(); return math.floor(((p and p.castBar.bgA or 0.7) * 100) + 0.5)
+              end,
+              setValue = function(v)
+                  local p = DB(); if not p then return end
+                  p.castBar.bgA = v / 100; RefreshCast()
+              end }
         );  y = y - h
         -- Inline cog on Color for gradient settings
         do
-            local rgn = castColorRow._rightRegion
+            local rgn = castColorRow._leftRegion
             local _, cogShow = EllesmereUI.BuildCogPopup({
                 title = "Gradient Settings",
                 rows = {
@@ -5704,7 +5733,7 @@ initFrame:SetScript("OnEvent", function(self)
 
         -- Manual gradient swatch enable/disable (cursor addon pattern)
         do
-            local swatch = castColorRow._rightRegion._control
+            local swatch = castColorRow._leftRegion._control
             local function UpdateGradientSwatch()
                 local p = DB()
                 if not p or not p.castBar.enabled then
@@ -5720,6 +5749,37 @@ initFrame:SetScript("OnEvent", function(self)
             end
             UpdateGradientSwatch()
             EllesmereUI.RegisterWidgetRefresh(UpdateGradientSwatch)
+        end
+        -- Inline color swatch on Background (right region)
+        do
+            local rgn = castColorRow._rightRegion
+            local ctrl = rgn._control
+            local bgSwatch, bgUpdateSwatch = EllesmereUI.BuildColorSwatch(
+                rgn, castColorRow:GetFrameLevel() + 3,
+                function()
+                    local p = DB()
+                    return (p and p.castBar.bgR or 0), (p and p.castBar.bgG or 0), (p and p.castBar.bgB or 0)
+                end,
+                function(r, g, b)
+                    local p = DB(); if not p then return end
+                    p.castBar.bgR, p.castBar.bgG, p.castBar.bgB = r, g, b
+                    RefreshCast()
+                end,
+                nil, 20)
+            PP.Point(bgSwatch, "RIGHT", ctrl, "LEFT", -8, 0)
+            local function UpdateBgSwatch()
+                local p = DB()
+                if not p or not p.castBar.enabled then
+                    bgSwatch:SetAlpha(0.15); bgSwatch:Disable()
+                    bgSwatch._disabledTooltip = "Player Cast Bar"
+                else
+                    bgSwatch:SetAlpha(1); bgSwatch:Enable()
+                    bgSwatch._disabledTooltip = nil
+                end
+                bgUpdateSwatch()
+            end
+            UpdateBgSwatch()
+            EllesmereUI.RegisterWidgetRefresh(UpdateBgSwatch)
         end
 
         -- Row 3: Bar Texture | Spell Text (cog RESIZE: text size + x/y)

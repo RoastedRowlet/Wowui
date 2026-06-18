@@ -66,13 +66,8 @@ initFrame:SetScript("OnEvent", function(self)
     end
     local function SetPVFont(fs, font, size)
         if not (fs and fs.SetFont) then return end
+        if EllesmereUI and EllesmereUI.PrimeFontShadow then EllesmereUI.PrimeFontShadow(fs, GetCDMOptUseShadow()) end
         fs:SetFont(font, size, GetCDMOptOutline())
-        if GetCDMOptUseShadow() then
-            fs:SetShadowColor(0, 0, 0, 1)
-            fs:SetShadowOffset(1, -1)
-        else
-            fs:SetShadowOffset(0, 0)
-        end
     end
     local function MakeTextInput(parent, label, yOffset, getValue, setValue)
         local ROW_H = 50
@@ -1698,6 +1693,18 @@ initFrame:SetScript("OnEvent", function(self)
     ns.HideTBBPlaceholders = HideTBBPlaceholder
     ns.ShowTBBPlaceholders = UpdateTBBPlaceholder
     EllesmereUI:RegisterOnHide(HideTBBPlaceholder)
+    -- Re-show placeholders when the panel re-opens onto the Tracking Bars page.
+    -- Exiting unlock mode back to the SAME page it was opened from skips
+    -- SelectPage (currentPage == restorePage in EUI_UnlockMode close), so the
+    -- page-restore hook that normally calls ShowTBBPlaceholders never fires --
+    -- the panel just re-Shows. This OnShow re-asserts the placeholders then.
+    EllesmereUI:RegisterOnShow(function()
+        local am = EllesmereUI.GetActiveModule and EllesmereUI:GetActiveModule()
+        local ap = EllesmereUI.GetActivePage and EllesmereUI:GetActivePage()
+        if am == "EllesmereUICooldownManager" and ap == PAGE_BUFF_BARS then
+            UpdateTBBPlaceholder()
+        end
+    end)
 
     -- Buff spell picker for tracked buff bars (reuses CDM buff spell list)
     local _tbbSpellPickerMenu
@@ -2881,24 +2888,20 @@ initFrame:SetScript("OnEvent", function(self)
         -------------------------------------------------------------------
         _, h = W:SectionHeader(parent, "Bar Grouping", y);  y = y - h
 
-        -- Group Tracking Bars toggle | Grouped Grow Direction dropdown
-        _, h = W:DualRow(parent, y,
-            { type = "toggle", text = "Group Tracking Bars",
-              getValue = function()
-                  local t = ns.GetTrackedBuffBars()
-                  return t and t.groupEnabled
-              end,
-              setValue = function(v)
-                  local t = ns.GetTrackedBuffBars()
-                  if t then t.groupEnabled = v end
-                  ns.BuildTrackedBuffBars()
-                  EllesmereUI:RefreshPage()
-              end },
+        -- Group Tracking Bars (per-bar checkbox dropdown) | Grouped Grow Direction
+        -- The checkbox dropdown lists every bar; checked bars chain together and
+        -- share width/height, unchecked bars are independent. Grow/spacing apply
+        -- to the chain and only matter once 2+ bars are checked.
+        local grpRow
+        grpRow, h = W:DualRow(parent, y,
+            { type = "dropdown", text = "Group Tracking Bars",
+              values = { __placeholder = "..." }, order = { "__placeholder" },
+              getValue = function() return "__placeholder" end, setValue = function() end },
             { type = "dropdown", text = "Grouped Grow Direction",
               values = { DOWN = "Down", UP = "Up", LEFT = "Left", RIGHT = "Right" },
               order = { "DOWN", "UP", "LEFT", "RIGHT" },
-              disabled = function() return not ns.GetTrackedBuffBars().groupEnabled end,
-              disabledTooltip = "Group Tracking Bars",
+              disabled = function() return ns.TBBGroupedCount() < 2 end,
+              disabledTooltip = "Group 2 or more Tracking Bars",
               getValue = function()
                   local t = ns.GetTrackedBuffBars()
                   return t and t.groupGrowDirection or "DOWN"
@@ -2911,11 +2914,45 @@ initFrame:SetScript("OnEvent", function(self)
               end }
         );  y = y - h
 
+        -- Replace the dummy left dropdown with the per-bar grouped checkbox dropdown
+        do
+            local leftRgn = grpRow._leftRegion
+            if leftRgn._control then leftRgn._control:Hide() end
+            local t = ns.GetTrackedBuffBars()
+            local grpItems = {}
+            for idx, b in ipairs(t.bars or {}) do
+                local nm = b.name or ("Bar " .. idx)
+                if not b.popularKey and b.spellID and b.spellID > 0 then
+                    local info = C_Spell and C_Spell.GetSpellInfo and C_Spell.GetSpellInfo(b.spellID)
+                    if info and info.name then nm = info.name end
+                end
+                grpItems[#grpItems + 1] = { key = tostring(idx), label = nm }
+            end
+            local cbDD, cbRefresh = EllesmereUI.BuildVisOptsCBDropdown(
+                leftRgn, 210, leftRgn:GetFrameLevel() + 2,
+                grpItems,
+                function(k)
+                    local tt = ns.GetTrackedBuffBars()
+                    return ns.TBBBarGrouped(tt.bars and tt.bars[tonumber(k)])
+                end,
+                function(k, v)
+                    local tt = ns.GetTrackedBuffBars()
+                    local b = tt.bars and tt.bars[tonumber(k)]
+                    if b then b.grouped = v and true or false end
+                    ns.BuildTrackedBuffBars()
+                    EllesmereUI:RefreshPage()
+                end)
+            PP.Point(cbDD, "RIGHT", leftRgn, "RIGHT", -20, 0)
+            leftRgn._control = cbDD
+            leftRgn._lastInline = nil
+            EllesmereUI.RegisterWidgetRefresh(cbRefresh)
+        end
+
         -- Bar Spacing slider | empty label
         _, h = W:DualRow(parent, y,
             { type = "slider", text = "Bar Spacing", min = -2, max = 20, step = 1,
-              disabled = function() return not ns.GetTrackedBuffBars().groupEnabled end,
-              disabledTooltip = "Group Tracking Bars",
+              disabled = function() return ns.TBBGroupedCount() < 2 end,
+              disabledTooltip = "Group 2 or more Tracking Bars",
               getValue = function()
                   local t = ns.GetTrackedBuffBars()
                   return t and t.groupSpacing or 2
@@ -2935,7 +2972,17 @@ initFrame:SetScript("OnEvent", function(self)
         _, h = W:SectionHeader(parent, "Bar Layout", y);  y = y - h
 
         -- Height | Width
+        -- The whole group shares one width/height, so a grouped member inherits
+        -- the group ANCHOR's match-lock: if the anchor is size-matched, every
+        -- member's slider is disabled (match wins) instead of silently fighting it.
         local tbbKey = "TBB_" .. _tbbSelectedBar
+        do
+            local selBd = SelectedTBB()
+            if selBd and ns.TBBBarGrouped(selBd) then
+                local ai = ns.TBBGroupAnchorIndex()
+                if ai then tbbKey = "TBB_" .. ai end
+            end
+        end
         local thDis, thTip, thRaw = EllesmereUI.MatchGuard(tbbKey, "Height")
         local twDis, twTip, twRaw = EllesmereUI.MatchGuard(tbbKey, "Width")
         local hwRow
@@ -2947,6 +2994,13 @@ initFrame:SetScript("OnEvent", function(self)
               setValue = function(v)
                   local bd = SelectedTBB(); if not bd then return end
                   bd.height = v
+                  -- Grouped bars share height: write every other checked bar too.
+                  if ns.TBBBarGrouped(bd) then
+                      local t = ns.GetTrackedBuffBars()
+                      for _, b in ipairs(t.bars or {}) do
+                          if b ~= bd and ns.TBBBarGrouped(b) then b.height = v end
+                      end
+                  end
                   ns.BuildTrackedBuffBars()
                   EllesmereUI:RefreshPage()
               end },
@@ -2957,6 +3011,13 @@ initFrame:SetScript("OnEvent", function(self)
               setValue = function(v)
                   local bd = SelectedTBB(); if not bd then return end
                   bd.width = v
+                  -- Grouped bars share width: write every other checked bar too.
+                  if ns.TBBBarGrouped(bd) then
+                      local t = ns.GetTrackedBuffBars()
+                      for _, b in ipairs(t.bars or {}) do
+                          if b ~= bd and ns.TBBBarGrouped(b) then b.width = v end
+                      end
+                  end
                   ns.BuildTrackedBuffBars()
                   EllesmereUI:RefreshPage()
               end }
@@ -5708,79 +5769,62 @@ initFrame:SetScript("OnEvent", function(self)
                 mH = mH + ITEM_H
             end
 
-            -- Racial abilities
-            local _pRace = ns._playerRace
-            local _pClass = ns._playerClass
-            local racialList = _pRace and ns.RACE_RACIALS and ns.RACE_RACIALS[_pRace]
-            if racialList then
-                for _, rEntry in ipairs(racialList) do
-                    local rSid = type(rEntry) == "table" and rEntry[1] or rEntry
-                    local reqClass = type(rEntry) == "table" and rEntry.class or nil
-                    local excludeClass = type(rEntry) == "table" and rEntry.notClass or nil
-                    local classOk = (not reqClass or reqClass == _pClass)
-                        and (not excludeClass or excludeClass ~= _pClass)
-                    if classOk then
-                        local inBook = C_SpellBook and C_SpellBook.IsSpellInSpellBook and C_SpellBook.IsSpellInSpellBook(rSid)
-                        if not inBook then rSid = nil end
-                    else
-                        rSid = nil
-                    end
-                    if rSid then
-                        local rName = C_Spell.GetSpellName(rSid)
-                        local rTex = C_Spell.GetSpellTexture(rSid)
-                        if rName then
-                            local isAdded = alreadyOnBar[rSid]
-                            local rOtherBar = not isAdded and usedOnOtherBar[rSid]
-                            local rIsDisabled = isAdded or rOtherBar
-                            local ri = CreateFrame("Button", nil, inner)
-                            ri:SetHeight(ITEM_H)
-                            ri:SetPoint("TOPLEFT", inner, "TOPLEFT", 1, -mH)
-                            ri:SetPoint("TOPRIGHT", inner, "TOPRIGHT", -1, -mH)
-                            ri:SetFrameLevel(menu:GetFrameLevel() + 2)
-                            local riLbl = ri:CreateFontString(nil, "OVERLAY")
-                            riLbl:SetFont(FONT_PATH, 11, GetCDMOptOutline())
-                            riLbl:SetPoint("LEFT", 10, 0)
-                            riLbl:SetJustifyH("LEFT")
-                            riLbl:SetText(rName)
-                            if rTex then
-                                local riIco = ri:CreateTexture(nil, "ARTWORK")
-                                riIco:SetSize(ITEM_H - 2, ITEM_H - 2)
-                                riIco:SetPoint("RIGHT", ri, "RIGHT", -6, 0)
-                                riIco:SetTexture(rTex)
-                                riIco:SetTexCoord(0.08, 0.92, 0.08, 0.92)
-                                if rIsDisabled then riIco:SetDesaturated(true); riIco:SetAlpha(0.4) end
-                            end
-                            local riHl = ri:CreateTexture(nil, "ARTWORK")
-                            riHl:SetAllPoints(); riHl:SetColorTexture(1, 1, 1, 0); riHl:SetAlpha(0)
-                            if rIsDisabled then
-                                riLbl:SetTextColor(tDimR, tDimG, tDimB, tDimA * 0.4)
-                                local rTooltipName = isAdded and (bd and (bd.name or bd.key) or barKey) or rOtherBar
-                                ri:SetScript("OnEnter", function()
-                                    EllesmereUI.ShowWidgetTooltip(ri, "Already on " .. rTooltipName)
-                                end)
-                                ri:SetScript("OnLeave", function() EllesmereUI.HideWidgetTooltip() end)
-                            else
-                                riLbl:SetTextColor(tDimR, tDimG, tDimB, tDimA)
-                                ri:SetScript("OnEnter", function()
-                                    riLbl:SetTextColor(1, 1, 1, 1)
-                                    riHl:SetColorTexture(1, 1, 1, hlA); riHl:SetAlpha(1)
-                                end)
-                                ri:SetScript("OnLeave", function()
-                                    riLbl:SetTextColor(tDimR, tDimG, tDimB, tDimA)
-                                    riHl:SetAlpha(0)
-                                end)
-                                ri:SetScript("OnClick", function()
-                                    menu:Hide()
-                                    EnsureAssignedSpells(barKey)
-                                    ns.AddTrackedSpell(barKey, rSid)
-                                    RefreshCDPreview()
-                                end)
-                            end
-                            allItems[#allItems + 1] = ri
-                            mH = mH + ITEM_H
-                        end
-                    end
+            -- Racial ability: one generic "Racial" entry that follows the
+            -- character's race. Adds this character's active racial spell ID;
+            -- ns.NormalizeRacialAssignments rewrites it on every other race so
+            -- a shared profile only needs the racial added once.
+            local rSid = ns._activeRacialSpellID
+            if rSid then
+                local rTex = C_Spell.GetSpellTexture(rSid)
+                local isAdded = alreadyOnBar[rSid]
+                local rOtherBar = not isAdded and usedOnOtherBar[rSid]
+                local rIsDisabled = isAdded or rOtherBar
+                local ri = CreateFrame("Button", nil, inner)
+                ri:SetHeight(ITEM_H)
+                ri:SetPoint("TOPLEFT", inner, "TOPLEFT", 1, -mH)
+                ri:SetPoint("TOPRIGHT", inner, "TOPRIGHT", -1, -mH)
+                ri:SetFrameLevel(menu:GetFrameLevel() + 2)
+                local riLbl = ri:CreateFontString(nil, "OVERLAY")
+                riLbl:SetFont(FONT_PATH, 11, GetCDMOptOutline())
+                riLbl:SetPoint("LEFT", 10, 0)
+                riLbl:SetJustifyH("LEFT")
+                riLbl:SetText(EllesmereUI.L("Racial"))
+                if rTex then
+                    local riIco = ri:CreateTexture(nil, "ARTWORK")
+                    riIco:SetSize(ITEM_H - 2, ITEM_H - 2)
+                    riIco:SetPoint("RIGHT", ri, "RIGHT", -6, 0)
+                    riIco:SetTexture(rTex)
+                    riIco:SetTexCoord(0.08, 0.92, 0.08, 0.92)
+                    if rIsDisabled then riIco:SetDesaturated(true); riIco:SetAlpha(0.4) end
                 end
+                local riHl = ri:CreateTexture(nil, "ARTWORK")
+                riHl:SetAllPoints(); riHl:SetColorTexture(1, 1, 1, 0); riHl:SetAlpha(0)
+                if rIsDisabled then
+                    riLbl:SetTextColor(tDimR, tDimG, tDimB, tDimA * 0.4)
+                    local rTooltipName = isAdded and (bd and (bd.name or bd.key) or barKey) or rOtherBar
+                    ri:SetScript("OnEnter", function()
+                        EllesmereUI.ShowWidgetTooltip(ri, "Already on " .. rTooltipName)
+                    end)
+                    ri:SetScript("OnLeave", function() EllesmereUI.HideWidgetTooltip() end)
+                else
+                    riLbl:SetTextColor(tDimR, tDimG, tDimB, tDimA)
+                    ri:SetScript("OnEnter", function()
+                        riLbl:SetTextColor(1, 1, 1, 1)
+                        riHl:SetColorTexture(1, 1, 1, hlA); riHl:SetAlpha(1)
+                    end)
+                    ri:SetScript("OnLeave", function()
+                        riLbl:SetTextColor(tDimR, tDimG, tDimB, tDimA)
+                        riHl:SetAlpha(0)
+                    end)
+                    ri:SetScript("OnClick", function()
+                        menu:Hide()
+                        EnsureAssignedSpells(barKey)
+                        ns.AddTrackedSpell(barKey, rSid)
+                        RefreshCDPreview()
+                    end)
+                end
+                allItems[#allItems + 1] = ri
+                mH = mH + ITEM_H
             end
 
             -- "Potions & Healthstone" flyout subnav
@@ -5964,9 +6008,11 @@ initFrame:SetScript("OnEvent", function(self)
 
             local _, _pClass = UnitClass("player")
             for _, preset in ipairs(ns.BUFF_BAR_PRESETS) do
-                -- tbbOnly presets (e.g. debuff-driven Bloodlust) are not
-                -- cooldown-trackable, so they are excluded from this picker.
-                if (not preset.class or preset.class == _pClass) and not preset.tbbOnly then
+                -- tbbOnly presets are excluded here UNLESS they opt in via
+                -- customAuraToo (debuff-driven Bloodlust: rendered as a 40s
+                -- self-timed icon, armed off the Sated edge instead of a cast).
+                if (not preset.class or preset.class == _pClass)
+                    and (not preset.tbbOnly or preset.customAuraToo) then
                     local primaryID = preset.spellIDs and preset.spellIDs[1]
                     local isAdded = primaryID and alreadyTracked[primaryID]
 
@@ -6011,6 +6057,9 @@ initFrame:SetScript("OnEvent", function(self)
                             menu:Hide()
                             EnsureAssignedSpells(barKey)
                             ns.AddPresetToBar(barKey, preset)
+                            -- Arm the shared Sated listener now (debuff-driven
+                            -- presets like Bloodlust); no-op for cooldown presets.
+                            if ns.UpdateLustListener then ns.UpdateLustListener() end
                             RefreshCDPreview()
                         end)
                     end
@@ -7493,8 +7542,7 @@ initFrame:SetScript("OnEvent", function(self)
                         local scB = bd.stackCountB or 1
                         local scX = bd.stackCountX or 0
                         local scY = (bd.stackCountY or 0) + 2
-                        slot._stackText:SetFont(scFont, scSize, "OUTLINE, SLUG")
-                        slot._stackText:SetShadowOffset(0, 0)
+                        EllesmereUI.ApplyIconTextFont(slot._stackText, scFont, scSize, "cdm")
                         slot._stackText:SetTextColor(scR, scG, scB)
                         slot._stackText:ClearAllPoints()
                         slot._stackText:SetPoint("BOTTOMRIGHT", slot, "BOTTOMRIGHT", scX, scY)
@@ -7514,8 +7562,7 @@ initFrame:SetScript("OnEvent", function(self)
 
                 -- Keybind text preview (mirror live: our CDM font + outline,slug)
                 if slot._keybindText then
-                    slot._keybindText:SetFont(FONT_PATH, bd.keybindSize or 10, "OUTLINE, SLUG")
-                    slot._keybindText:SetShadowOffset(0, 0)
+                    EllesmereUI.ApplyIconTextFont(slot._keybindText, FONT_PATH, bd.keybindSize or 10, "cdm")
                     slot._keybindText:ClearAllPoints()
                     local kx = bd.keybindOffsetX or 2
                     local ky = bd.keybindOffsetY or -2
@@ -10089,6 +10136,17 @@ initFrame:SetScript("OnEvent", function(self)
                   end
               end });  y = y - h
 
+        -- Hide Items if Missing
+        _, h = W:DualRow(parent, y,
+            { type="toggle", text="Hide Items if Missing",
+              tooltip = "Hide consumable items (potions, healthstone) from the bar when you have none in your bags, instead of showing them dimmed. They reappear automatically once you have the item again.",
+              getValue=function() return BD().hideItemsIfMissing == true end,
+              setValue=function(v)
+                  BD().hideItemsIfMissing = v
+                  if ns.FullCDMRebuild then ns.FullCDMRebuild("hide_missing_toggle") end
+              end },
+            { type="label", text="" });  y = y - h
+
         end -- custom_buff extras guard
 
         return math.abs(y)
@@ -10231,9 +10289,8 @@ initFrame:SetScript("OnEvent", function(self)
             local fontPath = EllesmereUI.GetFontPath and EllesmereUI.GetFontPath("extras")
                              or "Fonts\\FRIZQT__.TTF"
             local label = _buffBarOverlay:CreateFontString(nil, "OVERLAY")
+            if EllesmereUI and EllesmereUI.PrimeFontShadow then EllesmereUI.PrimeFontShadow(label, true) end
             label:SetFont(fontPath, 10, "")
-            label:SetShadowOffset(1, -1)
-            label:SetShadowColor(0, 0, 0, 0.8)
             label:SetText(EllesmereUI.L("Buff Bar"))
             label:SetTextColor(1, 1, 1, 0.75)
             label:SetPoint("CENTER")

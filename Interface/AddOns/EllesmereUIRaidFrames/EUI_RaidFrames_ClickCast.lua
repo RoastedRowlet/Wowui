@@ -765,6 +765,24 @@ end
 local function SetClickAttr(frame, parsed, actionType, spellOrMacro, macrotext)
     local prefix = ModPrefixForAttr(parsed.modifiers)
     local suffix = tostring(parsed.buttonNum)
+    -- 12.0.7 gates a raw "togglemenu" on unit buttons (and an insecure reopen
+    -- taints its protected items). Route the menu through the secure proxy via
+    -- the ungated "click" action instead.
+    if actionType == "togglemenu" and EllesmereUI.GetSecureMenuProxy then
+        frame:SetAttribute(prefix .. "type" .. suffix, "click")
+        frame:SetAttribute(prefix .. "clickbutton" .. suffix, EllesmereUI.GetSecureMenuProxy(frame))
+        return
+    end
+    -- 12.0.7 also gates a raw "target" on unit buttons. Plain unmodified
+    -- left-click (button 1) still targets natively via Blizzard's default
+    -- Interaction click-binding, so leave that one direct; route every OTHER
+    -- target binding (other buttons / modifiers) through the ungated "click"
+    -- proxy. Keeps the change scoped to users who rebound target off left-click.
+    if actionType == "target" and (suffix ~= "1" or prefix ~= "") and EllesmereUI.GetSecureTargetProxy then
+        frame:SetAttribute(prefix .. "type" .. suffix, "click")
+        frame:SetAttribute(prefix .. "clickbutton" .. suffix, EllesmereUI.GetSecureTargetProxy(frame))
+        return
+    end
     frame:SetAttribute(prefix .. "type" .. suffix, actionType)
     if actionType == "spell" then
         frame:SetAttribute(prefix .. "spell" .. suffix, spellOrMacro or "")
@@ -779,11 +797,25 @@ local function ClearClickAttr(frame, parsed)
     frame:SetAttribute(prefix .. "type" .. suffix, nil)
     frame:SetAttribute(prefix .. "spell" .. suffix, nil)
     frame:SetAttribute(prefix .. "macrotext" .. suffix, nil)
+    frame:SetAttribute(prefix .. "clickbutton" .. suffix, nil)
 end
 
 -- Apply keyboard binding attributes on a frame (virtual button suffix).
 local function SetKeyAttr(frame, idx, actionType, spellOrMacro, macrotext)
     local suffix = "eui_" .. idx
+    -- Route a "menu" keybind through the secure proxy (see SetClickAttr).
+    if actionType == "togglemenu" and EllesmereUI.GetSecureMenuProxy then
+        frame:SetAttribute("type-" .. suffix, "click")
+        frame:SetAttribute("clickbutton-" .. suffix, EllesmereUI.GetSecureMenuProxy(frame))
+        return
+    end
+    -- A "target" keybind is never plain left-click, so it always hits the 12.0.7
+    -- gate -- route it through the ungated "click" proxy (see SetClickAttr).
+    if actionType == "target" and EllesmereUI.GetSecureTargetProxy then
+        frame:SetAttribute("type-" .. suffix, "click")
+        frame:SetAttribute("clickbutton-" .. suffix, EllesmereUI.GetSecureTargetProxy(frame))
+        return
+    end
     frame:SetAttribute("type-" .. suffix, actionType)
     if actionType == "spell" then
         frame:SetAttribute("spell-" .. suffix, spellOrMacro or "")
@@ -798,6 +830,7 @@ local function ClearKeyAttrs(frame, count)
         frame:SetAttribute("type-" .. suffix, nil)
         frame:SetAttribute("spell-" .. suffix, nil)
         frame:SetAttribute("macrotext-" .. suffix, nil)
+        frame:SetAttribute("clickbutton-" .. suffix, nil)
     end
 end
 
@@ -985,9 +1018,15 @@ local function DoUnregisterFrame(frame)
     end
     ClearKeyAttrs(frame, lastBindingCount)
 
-    -- Restore default click behavior (target + menu)
+    -- Restore default click behavior (target + menu). The menu goes through the
+    -- secure SecureActionButton proxy (12.0.7 gates a raw togglemenu on unit
+    -- buttons, and an insecure reopen taints the menu's protected items).
     frame:SetAttribute("type1", "target")
-    frame:SetAttribute("type2", "togglemenu")
+    if EllesmereUI.AttachSecureUnitMenu then
+        EllesmereUI.AttachSecureUnitMenu(frame)
+    else
+        frame:SetAttribute("type2", "togglemenu")
+    end
     -- Fully revert the click registration and remove our secure OnEnter/OnLeave
     -- wraps so the frame behaves exactly as it did before click-casting touched
     -- it. Right-click must never be left broken after a disable.
@@ -1238,15 +1277,21 @@ function ns.CC_ApplyBindings()
             if mt then
                 globalBtn:SetAttribute("type-" .. suffix, "macro")
                 globalBtn:SetAttribute("macrotext-" .. suffix, mt)
-                hoverSetLines[#hoverSetLines + 1] = string.format(
-                    [[self:SetBindingClick(true, %q, %q, %q)]],
-                    hb.b.key, gbName, suffix)
-                hoverClearLines[#hoverClearLines + 1] = string.format(
-                    [[self:ClearBinding(%q)]], hb.b.key)
             else
                 globalBtn:SetAttribute("type-" .. suffix, aType)
             end
             globalBtn:SetAttribute("unit-" .. suffix, "mouseover")
+            -- Route the key/button to the global button for EVERY action type, not
+            -- just spell/macro. Hovercast "Context Menu" (togglemenu) and "Target"
+            -- bindings previously set their attributes but were never bound to a
+            -- click, so the keypress did nothing. The global button is a
+            -- SecureActionButton, which the 12.0.7 SecureUnitButton menu gate does
+            -- NOT touch, so togglemenu opens the menu here once the click is routed.
+            hoverSetLines[#hoverSetLines + 1] = string.format(
+                [[self:SetBindingClick(true, %q, %q, %q)]],
+                hb.b.key, gbName, suffix)
+            hoverClearLines[#hoverClearLines + 1] = string.format(
+                [[self:ClearBinding(%q)]], hb.b.key)
         end
     end
 
@@ -1585,9 +1630,9 @@ function ns.CC_BuildPage(pageName, parent, yOffset)
     local cc = GetClickCastDB()
     if not cc then return 0 end
 
-    local fontPath = (EllesmereUI.GetFontPath and EllesmereUI.GetFontPath()) or "Fonts\\FRIZQT__.TTF"
-    local outlineFlag = (EllesmereUI.GetFontOutlineFlag and EllesmereUI.GetFontOutlineFlag()) or ""
-    local useShadow = not EllesmereUI.GetFontUseShadow or EllesmereUI.GetFontUseShadow()
+    local fontPath = (EllesmereUI.GetFontPath and EllesmereUI.GetFontPath("raidFrames")) or "Fonts\\FRIZQT__.TTF"
+    local outlineFlag = (EllesmereUI.GetFontOutlineFlag and EllesmereUI.GetFontOutlineFlag("raidFrames")) or ""
+    local useShadow = not EllesmereUI.GetFontUseShadow or EllesmereUI.GetFontUseShadow("raidFrames")
     local accentColor = EllesmereUI.ACCENT_COLOR or { r = 0.05, g = 0.82, b = 0.62 }
 
     -- The page root bypasses the scroll system (like BM does)
@@ -1620,10 +1665,8 @@ function ns.CC_BuildPage(pageName, parent, yOffset)
 
     local function MakeFont(p, size, r, g, b, a)
         local fs = p:CreateFontString(nil, "OVERLAY")
+        if EllesmereUI and EllesmereUI.PrimeFontShadow then EllesmereUI.PrimeFontShadow(fs, outlineFlag == "" and useShadow) end
         fs:SetFont(fontPath, size, outlineFlag)
-        if outlineFlag == "" and useShadow then
-            fs:SetShadowOffset(1, -1); fs:SetShadowColor(0, 0, 0, 1)
-        end
         fs:SetTextColor(r or 1, g or 1, b or 1, a or 1)
         return fs
     end

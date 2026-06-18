@@ -1,8 +1,8 @@
 # Myu's Knowledge Points Tracker
 
-## [0.8.3](https://github.com/myu-westfall/MyusKnowledgePointsTracker/tree/0.8.3) (2026-05-21)
-[Full Changelog](https://github.com/myu-westfall/MyusKnowledgePointsTracker/compare/0.8.2...0.8.3) [Previous Releases](https://github.com/myu-westfall/MyusKnowledgePointsTracker/releases)
+## [0.8.4](https://github.com/myu-westfall/MyusKnowledgePointsTracker/tree/0.8.4) (2026-06-16)
+[Full Changelog](https://github.com/myu-westfall/MyusKnowledgePointsTracker/compare/0.8.3...0.8.4) [Previous Releases](https://github.com/myu-westfall/MyusKnowledgePointsTracker/releases)
 
-- Adds "Start expanded" config  
-    Adds Start expanded config  
-- Adds Start expanded config  
+- Merge pull request #15 from myu-westfall/Midnight-12.0.7  
+    Updated toc file for 12.0.7 patch  
+- Updated toc file for 12.0.7 patch  

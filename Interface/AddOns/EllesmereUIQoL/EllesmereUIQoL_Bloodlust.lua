@@ -106,6 +106,7 @@ local buffOverlay, buffTex, buffCooldown, buffDurationFS  -- the 40s active-lust
 local _satedActive = false
 local _satedWasPresent = false  -- rising-edge baseline so only a FRESH debuff arms the buff window
 local _buffExpiry = 0           -- GetTime() when the 40s active-buff window ends
+local _buffZoneGuard = 0        -- suppress rising edges until this time (set on zone-in)
 local UpdateVisibility  -- forward declaration (referenced by PollSated below)
 local FormatTime        -- forward declaration (shared by the debuff text and the buff overlay)
 
@@ -138,7 +139,7 @@ local function _applyBuffShape()
     buffCooldown:SetAllPoints(buffOverlay)
 
     -- Match the debuff icon's duration text exactly (font, size, position).
-    buffDurationFS:SetFont((EllesmereUI.GetFontPath and EllesmereUI.GetFontPath()) or STANDARD_TEXT_FONT, EP("durationSize") or 12, "OUTLINE")
+    buffDurationFS:SetFont((EllesmereUI.GetFontPath and EllesmereUI.GetFontPath("extras")) or STANDARD_TEXT_FONT, EP("durationSize") or 12, "OUTLINE, SLUG")
     buffDurationFS:ClearAllPoints()
     buffDurationFS:SetPoint("CENTER", frame, "CENTER", EP("durationOffsetX") or 0, EP("durationOffsetY") or 0)
 
@@ -203,12 +204,12 @@ local function ApplyShape()
     -- Duration text (centered) and count text (bottom-right). Sated debuffs
     -- have no stacks so the count string stays empty, but we keep the field for
     -- 1:1 parity with the BattleRes icon layout.
-    durationFS:SetFont((EllesmereUI.GetFontPath and EllesmereUI.GetFontPath()) or STANDARD_TEXT_FONT, EP("durationSize") or 12, "OUTLINE")
+    durationFS:SetFont((EllesmereUI.GetFontPath and EllesmereUI.GetFontPath("extras")) or STANDARD_TEXT_FONT, EP("durationSize") or 12, "OUTLINE, SLUG")
     durationFS:ClearAllPoints()
     durationFS:SetPoint("CENTER", frame, "CENTER",
         EP("durationOffsetX") or 0, EP("durationOffsetY") or 0)
 
-    countFS:SetFont((EllesmereUI.GetFontPath and EllesmereUI.GetFontPath()) or STANDARD_TEXT_FONT, EP("countSize") or 11, "OUTLINE")
+    countFS:SetFont((EllesmereUI.GetFontPath and EllesmereUI.GetFontPath("extras")) or STANDARD_TEXT_FONT, EP("countSize") or 11, "OUTLINE, SLUG")
     countFS:ClearAllPoints()
     countFS:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT",
         -2 + (EP("countOffsetX") or 0), 2 + (EP("countOffsetY") or 0))
@@ -577,13 +578,20 @@ end
 --  is registered solely while the tracker is enabled.
 -------------------------------------------------------------------------------
 local _eventFrame
-local function _onEvent(_, event)
+local function _onEvent(_, event, _, updateInfo)
     if event == "UNIT_AURA" then
         local was = _satedWasPresent
         local present = _refreshSated()
         _satedWasPresent = present
-        -- Rising edge = lust was just cast. Arm the 40s active-buff overlay.
-        if present and not was then _showBuffOverlay() end
+        -- Rising edge = lust was just cast. Arm the 40s active-buff overlay ONLY
+        -- on a genuine incremental application: never on a full aura refresh
+        -- (zone/login resends every aura) and never inside the post-zone grace
+        -- window, so a Sated debuff we already carry when zoning out of a dungeon
+        -- can't re-pop the overlay.
+        local isFull = updateInfo and updateInfo.isFullUpdate
+        if present and not was and not isFull and GetTime() >= _buffZoneGuard then
+            _showBuffOverlay()
+        end
     elseif event == "PLAYER_DEAD" then
         -- Buffs drop on death; hide the active-lust overlay even if 40s remain.
         _hideBuffOverlay()
@@ -603,8 +611,10 @@ local function _onEvent(_, event)
     elseif event == "PLAYER_ENTERING_WORLD" then
         _refreshSated()
         -- Baseline the edge tracker so a debuff already present on login/zone-in
-        -- is NOT mistaken for a fresh cast (no buff overlay reconstruction).
+        -- is NOT mistaken for a fresh cast (no buff overlay reconstruction), and
+        -- suppress edges briefly while the zone's aura table settles.
         _satedWasPresent = _satedActive
+        _buffZoneGuard = GetTime() + 1.5
         _refreshEncounterState()
         _refreshKeystoneState()
     end
@@ -661,11 +671,11 @@ local function CreateBloodlustFrame()
     cooldownFrame:SetFrameLevel(frame:GetFrameLevel() + 1)
 
     durationFS = cooldownFrame:CreateFontString(nil, "OVERLAY")
-    durationFS:SetFont((EllesmereUI.GetFontPath and EllesmereUI.GetFontPath()) or STANDARD_TEXT_FONT, 14, "OUTLINE")
+    durationFS:SetFont((EllesmereUI.GetFontPath and EllesmereUI.GetFontPath("extras")) or STANDARD_TEXT_FONT, 14, "OUTLINE, SLUG")
     durationFS:SetText("")
 
     countFS = cooldownFrame:CreateFontString(nil, "OVERLAY")
-    countFS:SetFont((EllesmereUI.GetFontPath and EllesmereUI.GetFontPath()) or STANDARD_TEXT_FONT, 12, "OUTLINE")
+    countFS:SetFont((EllesmereUI.GetFontPath and EllesmereUI.GetFontPath("extras")) or STANDARD_TEXT_FONT, 12, "OUTLINE, SLUG")
     countFS:SetText("")
 
     -- 40s active-lust overlay. Sits ABOVE the debuff icon and its swipe; shown
@@ -686,7 +696,7 @@ local function CreateBloodlustFrame()
     buffCooldown:SetFrameLevel(buffOverlay:GetFrameLevel() + 1)
 
     buffDurationFS = buffCooldown:CreateFontString(nil, "OVERLAY")
-    buffDurationFS:SetFont((EllesmereUI.GetFontPath and EllesmereUI.GetFontPath()) or STANDARD_TEXT_FONT, 12, "OUTLINE")
+    buffDurationFS:SetFont((EllesmereUI.GetFontPath and EllesmereUI.GetFontPath("extras")) or STANDARD_TEXT_FONT, 12, "OUTLINE, SLUG")
     buffDurationFS:SetText("")
 
     return frame

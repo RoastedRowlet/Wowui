@@ -34,6 +34,12 @@ EventUtil.ContinueOnAddOnLoaded(addonName, function()
 		end
 	end
 
+
+	-- migration after 1.0.17 to fix incorrect point
+	if AdvancedFocusCastBarSaved.Settings.CustomTextsPosition == "BOTTOMCENTER" then
+		AdvancedFocusCastBarSaved.Settings.CustomTextsPosition = Private.Enum.CustomTextsPosition.BOTTOM
+	end
+
 	for i = 1, #Private.LoginFnQueue do
 		local fn = Private.LoginFnQueue[i]
 		fn()

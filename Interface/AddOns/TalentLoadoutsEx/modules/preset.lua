@@ -48,6 +48,7 @@ local peaversTalentsDataIcons = {
 		["Chimaerus"] = 7448202,
 		["Beloren"] = 7448203,
 		["Midnight Falls"] = 7448204,
+		["Rotmire"] = 7852823,
 	},
 };
 

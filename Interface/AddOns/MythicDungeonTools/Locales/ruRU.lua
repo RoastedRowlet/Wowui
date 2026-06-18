@@ -718,6 +718,8 @@ L["Does not delete your drawings"] = "Не удаляет Ваши рисунк�
 L["Dokigg the Brutalizer"] = "Докигг Изверг"
 L["Domatrax"] = "Доматракс"
 L["Domina Venomblade"] = "Домина Отравленный Клинок"
+--[[Translation missing --]]
+L["Don't overwrite existing target markers"] = "Don't overwrite existing target markers"
 L["Don't set target marker while in a raid group"] = "Не устанавливать метку цели, находясь в рейдовой группе"
 L["Don't show again"] = "Больше не показывать"
 L["dotiLowerSublevel1"] = "Подуровень 1"

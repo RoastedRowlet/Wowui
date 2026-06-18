@@ -38,7 +38,7 @@ Private.Enum.Point = {
 
 ---@enum CustomTextsPosition
 Private.Enum.CustomTextsPosition = {
-	BOTTOMCENTER = "BOTTOMCENTER",
+	BOTTOM = "BOTTOM",
 	BOTTOMLEFT = "BOTTOMLEFT",
 	BOTTOMRIGHT = "BOTTOMRIGHT",
 	TOPLEFT = "TOPLEFT",

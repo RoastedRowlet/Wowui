@@ -229,7 +229,7 @@ Addon.icons = {
 	-- #endregion
 	-- #region Raid: Midnight
 	{
-		-- Raid: Midnight Season 1
+		-- Raid: Midnight Season 1-1
 		{7490911, "The Voidspire"},
 		{7448209, "Imperator Averzian"},
 		{7448210, "Vorasius"},
@@ -238,8 +238,13 @@ Addon.icons = {
 		{7448211, "Lightblinded Vanguard"},
 		{7448205, "Crown of the Cosmos"},
 		{7448202, "Chimaerus the Undreamt God"},
+	},
+	{
+		-- Raid: Midnight Season 1-2
+		{7454100, "March on Quel'Danas"},
 		{7448203, "Belo'ren, Child of Al'ar"},
 		{7448204, "Midnight Falls"},
+		{7852823, "Rotmire"},
 	};
 	-- #endregion
 };

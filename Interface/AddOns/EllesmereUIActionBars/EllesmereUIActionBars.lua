@@ -208,7 +208,7 @@ local MEDIA_DIR = "Interface\\AddOns\\EllesmereUIActionBars\\Media\\"
 local FONT_PATH = (EllesmereUI and EllesmereUI.GetFontPath and EllesmereUI.GetFontPath("actionBars"))
     or "Interface\\AddOns\\EllesmereUI\\media\\fonts\\Expressway.TTF"
 local function GetEABOutline()
-    return (EllesmereUI and EllesmereUI.GetFontOutlineFlag and EllesmereUI.GetFontOutlineFlag("actionBars")) or "OUTLINE"
+    return (EllesmereUI and EllesmereUI.GetFontOutlineFlag and EllesmereUI.GetFontOutlineFlag("actionBars")) or "OUTLINE, SLUG"
 end
 local function GetEABUseShadow()
     return not EllesmereUI or not EllesmereUI.GetFontUseShadow or EllesmereUI.GetFontUseShadow("actionBars")
@@ -1798,7 +1798,7 @@ local function SetupPagingFrame()
 
     -- Page number text
     local pageText = f:CreateFontString(nil, "OVERLAY")
-    pageText:SetFont(STANDARD_TEXT_FONT, 12, "OUTLINE")
+    pageText:SetFont(STANDARD_TEXT_FONT, 12, "OUTLINE, SLUG")
     pageText:SetTextColor(1, 1, 1, 0.9)
     pageText:SetText("1")
     f._pageText = pageText
@@ -1904,7 +1904,7 @@ LayoutPagingFrame = function()
 
     f._upBtn:SetSize(arrowSize, arrowSize)
     f._downBtn:SetSize(arrowSize, arrowSize)
-    f._pageText:SetFont(STANDARD_TEXT_FONT, textSize, "OUTLINE")
+    f._pageText:SetFont(STANDARD_TEXT_FONT, textSize, "OUTLINE, SLUG")
 
     f._upBtn:ClearAllPoints()
     f._downBtn:ClearAllPoints()
@@ -2333,6 +2333,24 @@ do
         if _dispatcherSetup then return end
         _dispatcherSetup = true
         local dispatcher = CreateFrame("Frame")
+        -- Desaturation curves: secret-safe duration -> 0/1 via EvaluateRemainingDuration,
+        -- so we never compare secret cooldown/charge numbers ourselves.
+        --   desatCurveAny  : 1 for any active cooldown (normal spells; GCD filtered via isOnGCD)
+        --   desatCurveReal : 1 only when the cooldown is longer than the GCD. Used for charge
+        --                    spells -- a banked charge shows only a GCD-length cooldown on the
+        --                    main cooldown so it stays colored; at 0 charges the longer recharge
+        --                    drives the main cooldown and it desaturates.
+        local desatCurveAny, desatCurveReal
+        if C_CurveUtil and C_CurveUtil.CreateCurve then
+            desatCurveAny = C_CurveUtil.CreateCurve()
+            desatCurveAny:SetType(Enum.LuaCurveType.Step)
+            desatCurveAny:AddPoint(0, 0)
+            desatCurveAny:AddPoint(0.001, 1)
+            desatCurveReal = C_CurveUtil.CreateCurve()
+            desatCurveReal:SetType(Enum.LuaCurveType.Step)
+            desatCurveReal:AddPoint(0, 0)
+            desatCurveReal:AddPoint(1.6, 1)
+        end
         dispatcher:RegisterEvent("ACTIONBAR_UPDATE_COOLDOWN")
         dispatcher:RegisterEvent("ACTIONBAR_UPDATE_STATE")
         dispatcher:RegisterEvent("ACTIONBAR_UPDATE_USABLE")
@@ -2369,22 +2387,48 @@ do
                                 local action = btn:GetAttribute("action")
                                 if action and HasAction(action) then
                                     local cd = btn.cooldown
-                                    local cdInfo
+                                    local cdInfo, durObj
                                     if cd then
                                         cdInfo = C_ActionBar.GetActionCooldown(action)
                                         if cdInfo and cdInfo.isActive then
-                                            local dur = C_ActionBar.GetActionCooldownDuration(action)
-                                            if dur then cd:SetCooldownFromDurationObject(dur) end
+                                            durObj = C_ActionBar.GetActionCooldownDuration(action)
+                                            if durObj then cd:SetCooldownFromDurationObject(durObj) end
                                         else
                                             cd:Clear()
                                         end
                                     end
-                                    -- Desaturate icons on real cooldown (not GCD)
+                                    -- Charges fetched once here and reused by both the
+                                    -- desaturation and charge-cooldown updates below, so the
+                                    -- desaturation fix adds no redundant per-button API calls.
+                                    local chargeInfo = C_ActionBar.GetActionCharges(action)
+                                    -- Desaturate on a real cooldown, but NOT on the GCD (and NOT
+                                    -- while a charge spell still has a charge banked). isOnGCD is
+                                    -- reliable for plain spells but reads FALSE during the GCD for
+                                    -- charge spells AND items (on-use trinkets/consumables), so for
+                                    -- those we classify by the main-cooldown DURATION instead --
+                                    -- secret-safe via curves, and a GCD-length cooldown reads as 0:
+                                    --  * charge spells (maxCharges > 1) and items use the "real CD"
+                                    --    curve (a banked charge / a ready trinket only shows the GCD
+                                    --    on the main cooldown so it stays colored; the real recharge
+                                    --    or trinket cooldown is longer and desaturates).
+                                    --  * plain spells keep the original isOnGCD gate so they
+                                    --    desaturate for the whole cooldown, not just past the GCD.
                                     if EAB.db.profile.desaturateOnCooldown then
                                         local icon = btn.icon
                                         if icon then
-                                            local onRealCD = cdInfo and cdInfo.isActive and not cdInfo.isOnGCD
-                                            icon:SetDesaturated(onRealCD or false)
+                                            local val = 0
+                                            if cdInfo and cdInfo.isActive and durObj and durObj.EvaluateRemainingDuration then
+                                                local useRealCurve = chargeInfo and chargeInfo.maxCharges and chargeInfo.maxCharges > 1
+                                                if not useRealCurve and GetActionInfo(action) == "item" then
+                                                    useRealCurve = true
+                                                end
+                                                if useRealCurve then
+                                                    if desatCurveReal then val = durObj:EvaluateRemainingDuration(desatCurveReal, 0) end
+                                                elseif not cdInfo.isOnGCD then
+                                                    if desatCurveAny then val = durObj:EvaluateRemainingDuration(desatCurveAny, 0) end
+                                                end
+                                            end
+                                            icon:SetDesaturation(val or 0)
                                         end
                                     end
                                     -- Update count text (charges, item stacks, etc.)
@@ -2394,8 +2438,7 @@ do
                                         local display = C_ActionBar.GetActionDisplayCount(action)
                                         btn.Count:SetText(display or "")
                                     end
-                                    -- Update charge cooldown
-                                    local chargeInfo = C_ActionBar.GetActionCharges(action)
+                                    -- Update charge cooldown (chargeInfo fetched once above)
                                     if chargeInfo and chargeInfo.maxCharges and chargeInfo.maxCharges > 1 then
                                         local chargeCd = btn.chargeCooldown
                                         if chargeCd then
@@ -4273,8 +4316,7 @@ function EAB:ApplyFontsForBar(barKey)
                 if text == RANGE_INDICATOR or text == "\226\128\162" then text = "" end
                 hk:SetText(text)
                 hk:Show()
-                hk:SetFont(fontPath, kbSize, "OUTLINE")
-                hk:SetShadowOffset(0, 0)
+                EllesmereUI.ApplyIconTextFont(hk, fontPath, kbSize, "actionBars")
                 hk:SetTextColor(kbColor.r, kbColor.g, kbColor.b)
                 hk:ClearAllPoints()
                 hk:SetPoint("TOPRIGHT", btn, "TOPRIGHT", -1 + kbOX, -3 + kbOY)
@@ -4286,8 +4328,7 @@ function EAB:ApplyFontsForBar(barKey)
         -- Count / charges text
         local ct = btn.Count
         if ct then
-            ct:SetFont(fontPath, ctSize, "OUTLINE")
-            ct:SetShadowOffset(0, 0)
+            EllesmereUI.ApplyIconTextFont(ct, fontPath, ctSize, "actionBars")
             ct:SetTextColor(ctColor.r, ctColor.g, ctColor.b)
             ct:ClearAllPoints()
             ct:SetPoint("BOTTOMRIGHT", btn, "BOTTOMRIGHT", -1 + ctOX, 4 + ctOY)
@@ -4300,8 +4341,8 @@ function EAB:ApplyFontsForBar(barKey)
                 nm:SetAlpha(0)
             else
                 nm:SetAlpha(1)
-                nm:SetFont(fontPath, macroSize, "OUTLINE")
-                nm:SetShadowOffset(0, 0)
+                if EllesmereUI and EllesmereUI.PrimeFontShadow then EllesmereUI.PrimeFontShadow(nm, false) end
+                nm:SetFont(fontPath, macroSize, "OUTLINE, SLUG")
                 nm:SetTextColor(macroColor.r, macroColor.g, macroColor.b)
                 nm:ClearAllPoints()
                 nm:SetPoint("BOTTOMLEFT", btn, "BOTTOMLEFT", 1 + macroOX, 4 + macroOY)
@@ -4346,8 +4387,7 @@ function EAB_VTABLE.CooldownFonts.ApplyToFrame(cdFrame, fontPath, cdSize, cdOX, 
     for ri = 1, cdFrame:GetNumRegions() do
         local region = select(ri, cdFrame:GetRegions())
         if region and region.GetObjectType and region:GetObjectType() == "FontString" then
-            region:SetFont(fontPath, cdSize, "OUTLINE")
-            region:SetShadowOffset(0, 0)
+            EllesmereUI.ApplyIconTextFont(region, fontPath, cdSize, "actionBars")
             region:SetTextColor(cr, cg, cb)
             region:ClearAllPoints()
             region:SetPoint("CENTER", cdFrame, "CENTER", cdOX, cdOY)
@@ -8817,8 +8857,8 @@ local function CreateDataBarFrame(barKey, updateFunc)
     bar:GetStatusBarTexture():SetDrawLayer("ARTWORK", 4)
 
     local text = bar:CreateFontString(nil, "OVERLAY")
+    if EllesmereUI and EllesmereUI.PrimeFontShadow then EllesmereUI.PrimeFontShadow(text, GetEABUseShadow()) end
     text:SetFont(FONT_PATH, 9, GetEABOutline())
-    if GetEABUseShadow() then text:SetShadowOffset(1, -1) end
     text:SetPoint("CENTER")
     text:SetTextColor(1, 1, 1, 1)
 
@@ -9482,9 +9522,14 @@ local function SetupBlizzardMovableFrame(barKey)
                 if relFrame ~= holder then
                     RepositionExtraContainer()
                 end
-                if UIParentBottomManagedFrameContainer then
-                    UIParentBottomManagedFrameContainer.showingFrames[ExtraAbilityContainer] = nil
-                end
+                -- Do NOT write to UIParentBottomManagedFrameContainer.showingFrames here.
+                -- Writing into that Blizzard-owned table from this insecure hook taints the
+                -- managed-frame-position system; a later in-combat layout pass (e.g. leaving
+                -- a queued/follower instance while in combat) then blocks the protected
+                -- ClearAllPoints on the managed containers (ADDON_ACTION_BLOCKED naming this
+                -- addon). ExtraAbilityContainer already carries ignoreFramePositionManager and
+                -- ignoreInLayout, so Blizzard excludes it from layout without us touching
+                -- showingFrames.
             end)
         end
 

@@ -719,6 +719,8 @@ L["Does not delete your drawings"] = "Löscht nicht deine Zeichnungen"
 L["Dokigg the Brutalizer"] = "Dokigg der Metzler"
 L["Domatrax"] = "Domatrax"
 L["Domina Venomblade"] = "Domina Giftklinge"
+--[[Translation missing --]]
+L["Don't overwrite existing target markers"] = "Don't overwrite existing target markers"
 L["Don't set target marker while in a raid group"] = "Zielmarkierung nicht in Schlachtzügen setzen"
 L["Don't show again"] = "Nicht erneut anzeigen"
 L["dotiLowerSublevel1"] = "Ebene 1"

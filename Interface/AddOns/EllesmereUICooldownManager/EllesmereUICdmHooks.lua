@@ -519,8 +519,7 @@ local function DecorateFrame(frame, barData)
         local kt = fd.textOverlay:CreateFontString(nil, "OVERLAY")
         local kbScale = frame:GetScale() or 1
         if kbScale < 0.01 then kbScale = 1 end
-        kt:SetFont(GetCDMFont(), (barData.keybindSize or 10) / kbScale, "OUTLINE")
-        kt:SetShadowOffset(0, 0)
+        EllesmereUI.ApplyIconTextFont(kt, GetCDMFont(), (barData.keybindSize or 10) / kbScale, "cdm")
         kt:SetPoint("TOPLEFT", fd.textOverlay, "TOPLEFT",
             barData.keybindOffsetX or 2, barData.keybindOffsetY or -2)
         kt:SetJustifyH("LEFT")
@@ -1292,8 +1291,37 @@ end
 ns._ProcessPresetCooldowns = ProcessPresetCooldowns
 ns._isPresetCdDirty = function() return _presetCdDirty end
 
+-- "Hide Items if Missing": detect when a tracked consumable's bag presence
+-- flips (acquired or fully used up) for any bar that opted in, and queue a
+-- reanchor so the injection pass re-evaluates and shows/hides it. Cheap: only
+-- iterates the handful of injected preset frames, and only counts items for
+-- frames whose owning bar has the setting on.
+local function CheckItemPresenceForHide()
+    local changed = false
+    for _, f in pairs(_presetFrames) do
+        if f._isItemPresetFrame and f._presetItemID then
+            local bd = f._ownerBarKey and barDataByKey[f._ownerBarKey]
+            if bd and bd.hideItemsIfMissing then
+                local total = C_Item.GetItemCount(f._presetItemID, false, true) or 0
+                if total == 0 and f._presetData and f._presetData.altItemIDs then
+                    for _, altID in ipairs(f._presetData.altItemIDs) do
+                        total = total + (C_Item.GetItemCount(altID, false, true) or 0)
+                    end
+                end
+                if (total > 0) ~= f._hidePresenceCached then changed = true end
+            end
+        end
+    end
+    if changed and ns.QueueReanchor then ns.QueueReanchor() end
+end
+
 _racialCdListener:SetScript("OnEvent", function(_, event, unit, _, spellID)
     -- Infrequent events: handle immediately and return
+    if event == "BAG_UPDATE_DELAYED" then
+        CheckItemPresenceForHide()
+        _presetCdDirty = true
+        return
+    end
     if event == "ENCOUNTER_END" or event == "CHALLENGE_MODE_START" then
         if event == "CHALLENGE_MODE_START" or select(2, GetInstanceInfo()) == "raid" then
             for _, f in pairs(_presetFrames) do
@@ -1354,6 +1382,42 @@ end)
 local function QueueCustomBuffUpdate()
     _customBuffDirty = true
     _customBuffFrame:Show()
+end
+ns.QueueCustomBuffUpdate = QueueCustomBuffUpdate
+
+-- Bloodlust on a Custom Auras (icon) bar reuses the potion-preset machinery:
+-- the Sated-debuff rising edge (detected in CdmBuffBars) emulates a "cast" of
+-- the lust buff, so the existing self-timed icon + reverse swipe renders it with
+-- no duplicate display code. Both faction IDs are flagged so a profile shared
+-- across factions still resolves (only the bar's own ID is actually tracked).
+local LUST_PRESET_SPELLS = { [2825] = true, [32182] = true }
+ns.IsLustPresetSpell = function(sid) return LUST_PRESET_SPELLS[sid] == true end
+
+-- Called from the lust listener's rising edge: mark the lust buff as "just cast"
+-- so UpdateCustomBuffBars starts its 40s self-timed icon. A no-op for any bar not
+-- tracking it (the pending flag is wiped each pass).
+function ns.SignalLustCast()
+    _pendingCastIDs[2825]  = true
+    _pendingCastIDs[32182] = true
+    QueueCustomBuffUpdate()
+end
+
+-- True if any enabled Custom Auras (custom_buff) bar tracks the lust buff, so the
+-- shared Sated listener stays armed even with no Tracking Bar lust bar present.
+function ns.AnyCustomAuraLust()
+    local p = ECME and ECME.db and ECME.db.profile
+    if not (p and p.cdmBars and p.cdmBars.bars) then return false end
+    for _, bd in ipairs(p.cdmBars.bars) do
+        if bd.enabled and bd.barType == "custom_buff" then
+            local sd = ns.GetBarSpellData and ns.GetBarSpellData(bd.key)
+            if sd and sd.assignedSpells then
+                for _, sid in ipairs(sd.assignedSpells) do
+                    if LUST_PRESET_SPELLS[sid] then return true end
+                end
+            end
+        end
+    end
+    return false
 end
 
 local _spellCastListener = CreateFrame("Frame")
@@ -1801,8 +1865,7 @@ local function CollectAndReanchor()
                                     f.cooldownID = nil; f.cooldownInfo = nil
                                     f.layoutIndex = 99999
                                     local countFS = f:CreateFontString(nil, "OVERLAY")
-                                    countFS:SetFont(GetCDMFont(), 11, "OUTLINE")
-                                    countFS:SetShadowOffset(0, 0)
+                                    EllesmereUI.ApplyIconTextFont(countFS, GetCDMFont(), 11, "cdm")
                                     countFS:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", 0, 2)
                                     f._itemCountText = countFS
                                     f:SetScript("OnEnter", function(self)
@@ -1819,18 +1882,43 @@ local function CollectAndReanchor()
                                 end
                             end
                             if f then
-                                -- CD state is maintained by ProcessPresetCooldowns
-                                -- at 10Hz. Here we just re-apply cached visuals
-                                -- (no API queries needed per reanchor).
-                                if f._cdStart and f._cdDur and (GetTime() < f._cdStart + f._cdDur) then
-                                    f._cooldown:SetCooldown(f._cdStart, f._cdDur)
+                                -- Remember the bar that owns this frame so bag
+                                -- events can re-evaluate it even while hidden.
+                                f._ownerBarKey = barKey
+                                -- "Hide Items if Missing": when the bar opts in
+                                -- and the item (plus its alts) isn't in bags,
+                                -- skip injection entirely so it drops out of the
+                                -- layout instead of showing dimmed. A bag update
+                                -- queues a reanchor, so it reappears on acquire.
+                                local skipMissing = false
+                                if barData and barData.hideItemsIfMissing then
+                                    local total = C_Item.GetItemCount(itemID, false, true) or 0
+                                    if total == 0 and f._presetData and f._presetData.altItemIDs then
+                                        for _, altID in ipairs(f._presetData.altItemIDs) do
+                                            total = total + (C_Item.GetItemCount(altID, false, true) or 0)
+                                        end
+                                    end
+                                    f._hidePresenceCached = (total > 0)
+                                    skipMissing = (total == 0)
+                                else
+                                    f._hidePresenceCached = nil
                                 end
-                                if f._lastDesat ~= nil and f._tex then
-                                    f._tex:SetDesaturated(f._lastDesat)
+                                if skipMissing then
+                                    f:Hide()
+                                else
+                                    -- CD state is maintained by ProcessPresetCooldowns
+                                    -- at 10Hz. Here we just re-apply cached visuals
+                                    -- (no API queries needed per reanchor).
+                                    if f._cdStart and f._cdDur and (GetTime() < f._cdStart + f._cdDur) then
+                                        f._cooldown:SetCooldown(f._cdStart, f._cdDur)
+                                    end
+                                    if f._lastDesat ~= nil and f._tex then
+                                        f._tex:SetDesaturated(f._lastDesat)
+                                    end
+                                    frames[#frames + 1] = f
+                                    local fc = FC(f)
+                                    fc.barKey = barKey; fc.spellID = sid
                                 end
-                                frames[#frames + 1] = f
-                                local fc = FC(f)
-                                fc.barKey = barKey; fc.spellID = sid
                             end
                         elseif sid and sid > 0 then
                             -- Racial / custom spell (only if no Blizzard frame claimed it)

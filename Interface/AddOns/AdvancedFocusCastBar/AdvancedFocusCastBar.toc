@@ -5,7 +5,7 @@
 ## IconTexture: Interface\Icons\spell_hunter_focusingshot
 ## Category: Archon
 ## Notes: A focus cast bar with bells and whistles.
-## Version: 1.0.16
+## Version: 1.0.17
 ## Author: Xephyris-Blackrock-EU
 
 ## X-Curse-Project-ID: 1441078
@@ -22,7 +22,7 @@ Enum.lua
 Init.lua
 
 Localization\enUS.lua
-Localization\[TextLocale].lua [AllowLoadTextLocale deDE]
+Localization\[TextLocale].lua [AllowLoadTextLocale deDE frFR zhCN esES esMX koKR ruRU itIT ptBR zhTW]
 
 Settings.lua
 AdvancedFocusCastBarMixin.lua

@@ -32,8 +32,9 @@ module.db.diffNames = {
 	[185] = GetDifficultyInfo and GetDifficultyInfo(185) or "20 ppl",
 	[193] = GetDifficultyInfo and GetDifficultyInfo(193) or "10 ppl hc",
 	[194] = GetDifficultyInfo and GetDifficultyInfo(194) or "25 ppl hc",
+	[233] = L.sencounterWODMythic,	-- Mythic,	PLAYER_DIFFICULTY6
 }
-module.db.diffPos = ExRT.isLK and {1,148,9,3,4,175,176,193,194} or ExRT.isBC and {1,148,9,3,4,175,176} or ExRT.isClassic and {1,148,9,185,186} or {24,1,2,23,8,9,3,4,5,6,7,14,15,16}
+module.db.diffPos = ExRT.isLK and {1,148,9,3,4,175,176,193,194} or ExRT.isBC and {1,148,9,3,4,175,176} or ExRT.isClassic and {1,148,9,185,186} or {24,1,2,23,8,9,3,4,5,6,7,14,15,233,16}
 module.db.dropDownNow = nil
 module.db.onlyMy = nil
 module.db.scrollPos = 1
