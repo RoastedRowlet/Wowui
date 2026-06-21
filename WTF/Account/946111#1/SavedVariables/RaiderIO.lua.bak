@@ -12,16 +12,27 @@ RaiderIO_Config = {
 ["hide"] = false,
 },
 }
-RaiderIO_LastCharacter = "us-Klutzykubfu-stormrage"
+RaiderIO_LastCharacter = "us-Barelynoer-area-52"
 RaiderIO_MissingCharacters = {
-["us-Lomeo-area-52"] = true,
-["us-Stuny-stormrage"] = true,
-["us-Olev-stormrage"] = true,
-["us-Psiche-stormrage"] = true,
-["us-Zeelos-korgath"] = true,
-["us-Parywinkle-stormrage"] = true,
-["us-Dibasco-proudmoore"] = true,
-["us-Copperfield-area-52"] = true,
+["us-Karriana-illidan"] = true,
+["us-Nitá-ragnaros"] = true,
+["us-Darksoldierx-sargeras"] = true,
+["us-Kriegsaxer-dalaran"] = true,
+["us-Streetjimmy-malganis"] = true,
+["us-Monkpint-area-52"] = true,
+["us-Oakwoods-area-52"] = true,
+["us-Elcocho-ragnaros"] = true,
+["us-Sauf-sargeras"] = true,
+["us-Brookspupper-thrall"] = true,
+["us-Thündering-stormrage"] = true,
+["us-Preyonem-kelthuzad"] = true,
+["us-Mahnpri-frostmourne"] = true,
+["us-Pâkãs-area-52"] = true,
+["us-Vanityw-area-52"] = true,
+["us-Keheo-frostmourne"] = true,
+["us-Baconsfist-frostmourne"] = true,
+["us-Thottyp-proudmoore"] = true,
+["us-Bigdaddyv-frostmourne"] = true,
 }
 RaiderIO_MissingServers = {
 }

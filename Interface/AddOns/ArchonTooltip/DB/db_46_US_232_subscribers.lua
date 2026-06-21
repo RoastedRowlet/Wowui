@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'Unknown-Unknown',}
-local provider = {region='US',realm='Uther',name='US',type='subscribers',zone=46,date='2026-06-15',data={Fo='Foxling:BAEALgAECgUJCwAAAA==.',Go='Gorlokk:BAEALgADCgMJAwABLgADCgYJBgABAAAAAA==.',Ha='Haziel:BAEALgADCgYJBgAAAA==.',Re='Reeses:BAEALgAECgkJEQABLgADCgYJBgABAAAAAA==.',},}
+local lookup = {'Mage-Frost','Unknown-Unknown',}
+local provider = {region='US',realm='Uther',name='US',type='subscribers',zone=46,date='2026-06-20',data={Fo='Foxling:BAEALgAECgUJCwAAAA==.',Ga='Galvanize:BAECLgAFFH8YAAIBAAUJNwyLBgAeAQVoDAAABwAoAGkMAAAFABwAawwAAAQAEQBqDAAAAQAVAOoMAAAHACYAAQAFCTcMiwYAHgEFaAwAAAcAKABpDAAABQAcAGsMAAAEABEAagwAAAEAFQDqDAAABwAmAC4ABAp/QwACAQAJCcYbiikAdAIAAQAJCcYbiikAdAIAAAA=.',Go='Gorlokk:BAEALgADCgkJDAABLgADCgYJBgACAAAAAA==.',Ha='Haziel:BAEALgADCgYJBgAAAA==.',Ma='Mattdeamon:BAEALgADCgUJBwABLgAFFAUJGAABADcMAA==.',Re='Reeses:BAEALgAECgkJEQABLgADCgYJBgACAAAAAA==.',Ta='Taproot:BAEALgADCgEJAQABLgAFFAUJGAABADcMAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

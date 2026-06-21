@@ -30,7 +30,7 @@ SimulationCraftDB = {
 },
 ["Barelynoer - Area 52"] = {
 ["minimap"] = {
-["minimapPos"] = 291.0375836744235,
+["minimapPos"] = 255.1925553190392,
 },
 },
 ["Lonelylitten - Stormrage"] = {

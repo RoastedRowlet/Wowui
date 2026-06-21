@@ -1,0 +1,7 @@
+## Interface: 120005
+## Title: LFGInspect
+## Author: Twicks
+## Version: 1.2
+## IconTexture: Interface\AddOns\LFGInspect\Icon\LFGEye32
+## SavedVariables: TwicksLFGInspect_SavedVariables
+LFGInspect.lua

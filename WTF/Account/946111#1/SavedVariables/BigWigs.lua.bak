@@ -57,11 +57,11 @@ BigWigs3DB = {
 ["Default"] = {
 ["player"] = {
 ["maxIcons"] = 5,
-["growthDirection"] = "RIGHT",
-["anchorPoint"] = "TOP",
 ["anchorYOffset"] = -216,
+["anchorPoint"] = "TOP",
 ["anchorRelPoint"] = "TOP",
 ["anchorXOffset"] = 426,
+["growthDirection"] = "RIGHT",
 },
 },
 },
@@ -129,14 +129,14 @@ BigWigs3DB = {
 ["profiles"] = {
 ["Default"] = {
 ["normalWidth"] = 120,
+["visibleBarLimit"] = 1,
+["emphasize"] = false,
 ["expPosition"] = {
 "BOTTOMLEFT",
 "BOTTOMLEFT",
 330,
 21,
 },
-["visibleBarLimit"] = 1,
-["emphasize"] = false,
 ["normalPosition"] = {
 "BOTTOMLEFT",
 "BOTTOMLEFT",
@@ -164,8 +164,8 @@ BigWigs3DB = {
 ["viewerPosition"] = {
 "TOPLEFT",
 "TOPLEFT",
-230,
--178,
+213,
+-182,
 },
 },
 },
@@ -182,15 +182,15 @@ BigWigs3DB = {
 },
 ["myKeystones"] = {
 ["Player-60-0FF5005C"] = {
-["playerRating"] = 2939,
+["playerRating"] = 3039,
 ["specId"] = 270,
-["keyMap"] = 239,
+["keyMap"] = 557,
 ["name"] = "Klutzykubfu",
-["keyLevel"] = 14,
+["keyLevel"] = 16,
 ["realm"] = "Stormrage",
 },
 ["Player-3676-0DF7D3EF"] = {
-["playerRating"] = 4104,
+["playerRating"] = 4132,
 ["specId"] = 1473,
 ["keyMap"] = 0,
 ["name"] = "Barelynoer",
@@ -260,12 +260,12 @@ BigWigsStatsDB = {
 ["fkDate"] = "2026/03/25",
 },
 ["heroic"] = {
-["kills"] = 7,
+["kills"] = 8,
 ["fkDate"] = "2026/04/01",
 ["bestDate"] = "2026/05/12",
 ["fkWipes"] = 6,
 ["best"] = 286.5540000000037,
-["wipes"] = 13,
+["wipes"] = 16,
 ["fkDuration"] = 523.4150000000373,
 },
 ["LFR"] = {
@@ -317,12 +317,12 @@ BigWigsStatsDB = {
 ["fkDate"] = "2026/03/25",
 },
 ["heroic"] = {
-["kills"] = 10,
+["kills"] = 12,
 ["fkDate"] = "2026/04/01",
 ["bestDate"] = "2026/05/12",
 ["fkWipes"] = 8,
 ["best"] = 193.8640000000014,
-["wipes"] = 20,
+["wipes"] = 21,
 ["fkDuration"] = 381.5979999999981,
 },
 ["LFR"] = {
@@ -368,9 +368,9 @@ BigWigsStatsDB = {
 ["fkDuration"] = 372.625,
 },
 ["heroic"] = {
-["kills"] = 8,
+["kills"] = 9,
 ["fkDuration"] = 287.4700000000303,
-["wipes"] = 5,
+["wipes"] = 6,
 ["fkWipes"] = 2,
 ["best"] = 118.0889999999927,
 ["bestDate"] = "2026/05/12",
@@ -404,7 +404,7 @@ BigWigsStatsDB = {
 ["fkDate"] = "2026/04/30",
 },
 ["heroic"] = {
-["kills"] = 8,
+["kills"] = 9,
 ["fkDuration"] = 340.2859999999637,
 ["wipes"] = 8,
 ["fkWipes"] = 6,

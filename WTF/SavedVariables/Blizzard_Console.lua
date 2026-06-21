@@ -1,9 +1,54 @@
 
 Blizzard_Console_SavedVars = {
 ["version"] = 3,
+["height"] = 300,
 ["messageHistory"] = {
 {
-"Time set to 6/16/2026 (Tue) 15:48",
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"World transfer pending...",
+0,
+},
+{
+"Connecting conn=\"(enum)3\" connPtr=\"0000019502af4700\" protocol=\"(enum)0\"",
+0,
+},
+{
+"KillConnection conn=\"0000019502d927f0\" state=\"(enum)6\"",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"World transfer pending...",
+0,
+},
+{
+"Connecting conn=\"(enum)3\" connPtr=\"00000194ff007c80\" protocol=\"(enum)0\"",
+0,
+},
+{
+"KillConnection conn=\"0000019502af4700\" state=\"(enum)6\"",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
 0,
 },
 {
@@ -15,31 +60,171 @@ Blizzard_Console_SavedVars = {
 0,
 },
 {
-"Weather changed to 2, intensity 1.000000\n",
+"Weather changed to 5, intensity 1.000000\n",
 0,
 },
 {
-"Weather changed to 2, intensity 0.280000\n",
+"Weather changed to 5, intensity 1.000000\n",
 0,
 },
 {
-"Weather changed to 2, intensity 1.000000\n",
+"Weather changed to 5, intensity 1.000000\n",
 0,
 },
 {
-"Sending ping results from timeout timeoutNs=\"612061980535300\" nowNs=\"612061980893900\"",
+"Weather changed to 5, intensity 1.000000\n",
 0,
 },
 {
-"Completed challenge mode mapID 658, level 22, time 1747584",
+"Weather changed to 5, intensity 1.000000\n",
 0,
 },
 {
-"Successfully instantiated mirrored storage object",
+"Weather changed to 0, intensity 0.000000\n",
 0,
 },
 {
-"Weather changed to 2, intensity 0.280000\n",
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Weather changed to 5, intensity 1.000000\n",
+0,
+},
+{
+"Weather changed to 5, intensity 1.000000\n",
+0,
+},
+{
+"Weather changed to 5, intensity 1.000000\n",
+0,
+},
+{
+"Weather changed to 5, intensity 1.000000\n",
+0,
+},
+{
+"Weather changed to 5, intensity 1.000000\n",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Weather changed to 5, intensity 1.000000\n",
+0,
+},
+{
+"Weather changed to 5, intensity 1.000000\n",
+0,
+},
+{
+"Weather changed to 5, intensity 1.000000\n",
+0,
+},
+{
+"Weather changed to 5, intensity 1.000000\n",
+0,
+},
+{
+"Weather changed to 5, intensity 1.000000\n",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Weather changed to 5, intensity 1.000000\n",
+0,
+},
+{
+"Weather changed to 5, intensity 1.000000\n",
+0,
+},
+{
+"Weather changed to 5, intensity 1.000000\n",
+0,
+},
+{
+"Weather changed to 5, intensity 1.000000\n",
+0,
+},
+{
+"Weather changed to 5, intensity 1.000000\n",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Completed challenge mode mapID 2805, level 22, time 1748733",
+0,
+},
+{
+"Sending ping results from timeout timeoutNs=\"235411458665400\" nowNs=\"235411462506800\"",
 0,
 },
 {
@@ -47,27 +232,11 @@ Blizzard_Console_SavedVars = {
 0,
 },
 {
-"Connecting conn=\"(enum)3\" connPtr=\"000002329118cbb0\" protocol=\"(enum)0\"",
+"Connecting conn=\"(enum)3\" connPtr=\"000001928b71fbb0\" protocol=\"(enum)0\"",
 0,
 },
 {
-"KillConnection conn=\"00000232910885a0\" state=\"(enum)6\"",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"World transfer pending...",
-0,
-},
-{
-"Connecting conn=\"(enum)3\" connPtr=\"000002329226e200\" protocol=\"(enum)0\"",
-0,
-},
-{
-"KillConnection conn=\"000002329118cbb0\" state=\"(enum)6\"",
+"KillConnection conn=\"00000194ff007c80\" state=\"(enum)6\"",
 0,
 },
 {
@@ -79,19 +248,19 @@ Blizzard_Console_SavedVars = {
 0,
 },
 {
-"Connecting conn=\"(enum)3\" connPtr=\"000002328ec26bb0\" protocol=\"(enum)0\"",
+"Connecting conn=\"(enum)3\" connPtr=\"00000194d155cb40\" protocol=\"(enum)0\"",
 0,
 },
 {
-"KillConnection conn=\"000002329226e200\" state=\"(enum)6\"",
+"KillConnection conn=\"000001928b71fbb0\" state=\"(enum)6\"",
 0,
 },
 {
-"Weather changed to 0, intensity 0.000000\n",
+"Weather changed to 1, intensity 0.800000\n",
 0,
 },
 {
-"Weather changed to 0, intensity 0.000000\n",
+"Weather changed to 1, intensity 0.800000\n",
 0,
 },
 {
@@ -99,31 +268,15 @@ Blizzard_Console_SavedVars = {
 0,
 },
 {
-"Connecting conn=\"(enum)3\" connPtr=\"0000023270e9b590\" protocol=\"(enum)0\"",
+"Connecting conn=\"(enum)3\" connPtr=\"00000194fedbab50\" protocol=\"(enum)0\"",
 0,
 },
 {
-"KillConnection conn=\"000002328ec26bb0\" state=\"(enum)6\"",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
+"KillConnection conn=\"00000194d155cb40\" state=\"(enum)6\"",
 0,
 },
 {
 "Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"Time set to 6/16/2026 (Tue) 16:27",
-0,
-},
-{
-"Time set to 6/16/2026 (Tue) 16:27",
-0,
-},
-{
-"Successfully instantiated mirrored storage object",
 0,
 },
 {
@@ -135,71 +288,19 @@ Blizzard_Console_SavedVars = {
 0,
 },
 {
-"Connecting conn=\"(enum)3\" connPtr=\"0000023289c89210\" protocol=\"(enum)0\"",
+"Connecting conn=\"(enum)3\" connPtr=\"00000194feb13770\" protocol=\"(enum)0\"",
 0,
 },
 {
-"KillConnection conn=\"0000023270e9b590\" state=\"(enum)6\"",
+"KillConnection conn=\"00000194fedbab50\" state=\"(enum)6\"",
 0,
 },
 {
-"Weather changed to 0, intensity 0.000000\n",
+"Weather changed to 1, intensity 1.000000\n",
 0,
 },
 {
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"World transfer pending...",
-0,
-},
-{
-"Connecting conn=\"(enum)3\" connPtr=\"00000232922649c0\" protocol=\"(enum)0\"",
-0,
-},
-{
-"KillConnection conn=\"0000023289c89210\" state=\"(enum)6\"",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"Time set to 6/16/2026 (Tue) 16:29",
-0,
-},
-{
-"Time set to 6/16/2026 (Tue) 16:29",
-0,
-},
-{
-"Time set to 6/16/2026 (Tue) 16:29",
-0,
-},
-{
-"Time set to 6/16/2026 (Tue) 16:29",
-0,
-},
-{
-"Changed difficulty successfully",
-0,
-},
-{
-"All pings from all pongs received",
-0,
-},
-{
-"Completed challenge mode mapID 2526, level 22, time 1911016",
-0,
-},
-{
-"Sending ping results from timeout timeoutNs=\"615662020688500\" nowNs=\"615662053822900\"",
+"Weather changed to 1, intensity 1.000000\n",
 0,
 },
 {
@@ -475,14 +576,6 @@ Blizzard_Console_SavedVars = {
 0,
 },
 {
-"LimitedLuaResources: Addon capacity for FontString changed to 5000",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for FontString changed to 5000",
-0,
-},
-{
 "LimitedLuaResources: Addon capacity for Font changed to 300",
 0,
 },
@@ -491,19 +584,11 @@ Blizzard_Console_SavedVars = {
 0,
 },
 {
-"LimitedLuaResources: Global capacity for FontString changed to 50000",
+"LimitedLuaResources: Addon capacity for FontString changed to 5000",
 0,
 },
 {
-"LimitedLuaResources: Global capacity for FontString changed to 50000",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for AnimGroup changed to 2000",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for AnimGroup changed to 2000",
+"LimitedLuaResources: Addon capacity for FontString changed to 5000",
 0,
 },
 {
@@ -515,19 +600,11 @@ Blizzard_Console_SavedVars = {
 0,
 },
 {
-"LimitedLuaResources: Addon capacity for Texture changed to 40000",
+"LimitedLuaResources: Global capacity for FontString changed to 50000",
 0,
 },
 {
-"LimitedLuaResources: Addon capacity for Texture changed to 40000",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for Font changed to 3000",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for Font changed to 3000",
+"LimitedLuaResources: Global capacity for FontString changed to 50000",
 0,
 },
 {
@@ -536,14 +613,6 @@ Blizzard_Console_SavedVars = {
 },
 {
 "LimitedLuaResources: Global capacity for Animation changed to 50000",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for Animation changed to 5000",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for Animation changed to 5000",
 0,
 },
 {
@@ -563,19 +632,19 @@ Blizzard_Console_SavedVars = {
 0,
 },
 {
-"LimitedLuaResources: Global capacity for AnimGroup changed to 20000",
+"LimitedLuaResources: Addon capacity for Texture changed to 40000",
 0,
 },
 {
-"LimitedLuaResources: Global capacity for AnimGroup changed to 20000",
+"LimitedLuaResources: Addon capacity for Texture changed to 40000",
 0,
 },
 {
-"LimitedLuaResources: Global capacity for Frame changed to 100000",
+"LimitedLuaResources: Addon capacity for Animation changed to 5000",
 0,
 },
 {
-"LimitedLuaResources: Global capacity for Frame changed to 100000",
+"LimitedLuaResources: Addon capacity for Animation changed to 5000",
 0,
 },
 {
@@ -592,6 +661,818 @@ Blizzard_Console_SavedVars = {
 },
 {
 "LimitedLuaResources: Addon capacity for Frame changed to 10000",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for Frame changed to 100000",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for Frame changed to 100000",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for AnimGroup changed to 20000",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for AnimGroup changed to 20000",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for AnimGroup changed to 2000",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for AnimGroup changed to 2000",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for Font changed to 3000",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for Font changed to 3000",
+0,
+},
+{
+"Startup()",
+0,
+},
+{
+"Resume()",
+0,
+},
+{
+"Screen invalid. Changing from=\"none\" to=\"login\"",
+0,
+},
+{
+"Switching to screen=\"AccountLogin\" (from \"none\")",
+0,
+},
+{
+"From EnsureValidScreen",
+0,
+},
+{
+"Starting login launcherPortal=\"us.actual.battle.net\" loginPortal=\"us.actual.battle.net:1119\"",
+0,
+},
+{
+"Resetting",
+0,
+},
+{
+"Initializing",
+0,
+},
+{
+"Attempting logon host=\"us.actual.battle.net\" port=\"1119\"",
+0,
+},
+{
+"Waiting for server response.",
+0,
+},
+{
+"Front connected connectionId=\"1\" title_id=\"5730135\" platform=\"Wn64\" locale=\"enUS\" usedToken=\"true\"",
+0,
+},
+{
+"Waiting for server response.",
+0,
+},
+{
+"OnSendLogon result=\"0\"",
+0,
+},
+{
+"Logon complete result=\"0\" numGameAccounts=\"1\"",
+0,
+},
+{
+"Waiting for server response.",
+0,
+},
+{
+"B code=\"ERROR_OK (0)\"",
+0,
+},
+{
+"Received auth token  code=\"ERROR_OK (0)\" gotCredentials=\"true\"",
+0,
+},
+{
+"BGS_ code=\"ERROR_OK (0)\" name=\"WoW1\" numGameAccounts=\"1\" numGameAccountNames=\"0\"",
+0,
+},
+{
+"BG code=\"ERROR_OK (0)\"",
+0,
+},
+{
+"BGS_ACCO code=\"ERROR_OK (0)\"",
+0,
+},
+{
+"Updated game account list. accountList=\"!WoW1||\"",
+0,
+},
+{
+"Logon complete.",
+0,
+},
+{
+"Reconnect token saved;  creationTime=\"1781993042\" expirationTime=\"1782007442\"",
+0,
+},
+{
+"Waiting for realm list.",
+0,
+},
+{
+"Requesting realm list ticket",
+0,
+},
+{
+"Received realm list ticket code=\"ERROR_OK (0)\"",
+0,
+},
+{
+"Waiting for realm list.",
+0,
+},
+{
+"Received sub region list code=\"ERROR_OK (0)\"",
+0,
+},
+{
+"Requesting last played chars numSubRegions=\"5\"",
+0,
+},
+{
+"Received last played char code=\" (309)\" subRegion=\"71-1-59\" lastPlayedTime=\"0\" numRegions=\"5\" numRegionsWithData=\"0\" realmPermissions=\"0\" entitlementsCount=\"0\" realmEntry=\"{\"wowRealmAddress\":0,\"useBleepChance\":0.0,\"cfgTimezonesID\":0,\"populationState\":0,\"cfgCategoriesID\":0,\"version\":{\"versionMajor\":0,\"versionBuild\":0,\"versionMinor\":0,\"versionRevision\":0},\"cfgRealmsID\":0,\"gameServiceRegionId\":0,\"flags\":0,\"name\":\"\",\"cfgConfigsID\":0,\"cfgContentSetID\":0,\"cfgLanguagesID\":0}\"",
+0,
+},
+{
+"Received last played char code=\" (309)\" subRegion=\"34-2-89\" lastPlayedTime=\"0\" numRegions=\"5\" numRegionsWithData=\"1\" realmPermissions=\"0\" entitlementsCount=\"0\" realmEntry=\"{\"wowRealmAddress\":0,\"useBleepChance\":0.0,\"cfgTimezonesID\":0,\"populationState\":0,\"cfgCategoriesID\":0,\"version\":{\"versionMajor\":0,\"versionBuild\":0,\"versionMinor\":0,\"versionRevision\":0},\"cfgRealmsID\":0,\"gameServiceRegionId\":0,\"flags\":0,\"name\":\"\",\"cfgConfigsID\":0,\"cfgContentSetID\":0,\"cfgLanguagesID\":0}\"",
+0,
+},
+{
+"Received last played char code=\" (309)\" subRegion=\"21-1-50\" lastPlayedTime=\"0\" numRegions=\"5\" numRegionsWithData=\"2\" realmPermissions=\"0\" entitlementsCount=\"0\" realmEntry=\"{\"wowRealmAddress\":0,\"useBleepChance\":0.0,\"cfgTimezonesID\":0,\"populationState\":0,\"cfgCategoriesID\":0,\"version\":{\"versionMajor\":0,\"versionBuild\":0,\"versionMinor\":0,\"versionRevision\":0},\"cfgRealmsID\":0,\"gameServiceRegionId\":0,\"flags\":0,\"name\":\"\",\"cfgConfigsID\":0,\"cfgContentSetID\":0,\"cfgLanguagesID\":0}\"",
+0,
+},
+{
+"Received last played char code=\"ERROR_OK (0)\" subRegion=\"1-1-89\" lastPlayedTime=\"1781992396\" numRegions=\"5\" numRegionsWithData=\"3\" realmPermissions=\"3\" entitlementsCount=\"92\" realmEntry=\"{\"wowRealmAddress\":17235996,\"useBleepChance\":0.0,\"cfgTimezonesID\":4,\"populationState\":6,\"cfgCategoriesID\":2,\"version\":{\"versionMajor\":12,\"versionBuild\":67808,\"versionMinor\":0,\"versionRevision\":7},\"cfgRealmsID\":1566,\"gameServiceRegionId\":1,\"flags\":0,\"name\":\"Area 52\",\"cfgConfigsID\":1,\"cfgContentSetID\":0,\"cfgLanguagesID\":1}\"",
+0,
+},
+{
+"Received last played char code=\" (309)\" subRegion=\"76-1-59\" lastPlayedTime=\"0\" numRegions=\"5\" numRegionsWithData=\"4\" realmPermissions=\"0\" entitlementsCount=\"0\" realmEntry=\"{\"wowRealmAddress\":0,\"useBleepChance\":0.0,\"cfgTimezonesID\":0,\"populationState\":0,\"cfgCategoriesID\":0,\"version\":{\"versionMajor\":0,\"versionBuild\":0,\"versionMinor\":0,\"versionRevision\":0},\"cfgRealmsID\":0,\"gameServiceRegionId\":0,\"flags\":0,\"name\":\"\",\"cfgConfigsID\":0,\"cfgContentSetID\":0,\"cfgLanguagesID\":0}\"",
+0,
+},
+{
+"Realm list ready.",
+0,
+},
+{
+"Found most recently played char. Joining realm. lastPlayedRegion=\"1-1-89\" realmAddress=\"17235996\" lastActiveTime=\"1781992396\"",
+0,
+},
+{
+"Joining realm subRegion=\"1-1-89\" realmAddress=\"1-7-28\"",
+0,
+},
+{
+"OnRealmJoin code=\"ERROR_OK (0)\"",
+0,
+},
+{
+"Connecting conn=\"(enum)0\" connPtr=\"0000020d6e4df120\" protocol=\"(enum)0\"",
+0,
+},
+{
+"Received AuthedToWoW result=\"ERROR_OK (0)\"",
+0,
+},
+{
+"Connecting conn=\"(enum)2\" connPtr=\"0000020da3b216a0\" protocol=\"(enum)0\"",
+0,
+},
+{
+"Screen invalid. Changing from=\"login\" to=\"charselect\"",
+0,
+},
+{
+"KillConnection conn=\"0000020d6e4df120\" state=\"(enum)6\"",
+0,
+},
+{
+"Switching to screen=\"CharacterSelect\" (from \"login\")",
+0,
+},
+{
+"From EnsureValidScreen",
+0,
+},
+{
+"Connected to Back. Disconnecting from Front.",
+0,
+},
+{
+"Front disconnecting connectionId=\"1\"",
+0,
+},
+{
+"Disconnecting from authentication server.",
+0,
+},
+{
+"LimitedLuaResources: Enabled = false",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for Frame changed to 10000",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for Animation changed to 5000",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for AnimGroup changed to 20000",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for AnimGroup changed to 2000",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for Texture changed to 40000",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for Font changed to 3000",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for Texture changed to 400000",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for Animation changed to 50000",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for Font changed to 300",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for Timer changed to 500",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for FontString changed to 50000",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for Frame changed to 100000",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for Timer changed to 500",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for FontString changed to 5000",
+0,
+},
+{
+"Session with Battle.net established.",
+0,
+},
+{
+"[WowEntitlements] [BNetAccount-0-0000000E6FBF] [WowAccount-0-00000401C2D6] Initialized with 70 entitlements.",
+0,
+},
+{
+"Front disconnected connectionId=\"1\" result=\"1016\"",
+0,
+},
+{
+"Disconnected from authentication server.",
+0,
+},
+{
+"Sending ping results from timeout timeoutNs=\"237718298981300\" nowNs=\"237718381099500\"",
+0,
+},
+{
+"-------------------------------------------------- Previous Session --------------------------------------------------",
+0,
+},
+{
+"Suspend()",
+0,
+},
+{
+"LimitedLuaResources: Reset Timer",
+0,
+},
+{
+"Connecting conn=\"(enum)3\" connPtr=\"0000020d6e630910\" protocol=\"(enum)0\"",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x0000000100",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x0000000101",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x0000008101",
+0,
+},
+{
+"Proficiency in item class 4 set to 0x0000000021",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x000000c101",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x000000c103",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x000000c503",
+0,
+},
+{
+"Proficiency in item class 4 set to 0x0000000029",
+0,
+},
+{
+"Proficiency in item class 4 set to 0x000000002d",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x000000c523",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x000000e523",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x000010e523",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x000010e533",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x000010e5b3",
+0,
+},
+{
+"Proficiency in item class 4 set to 0x000000002f",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x000010e5b3",
+0,
+},
+{
+"Proficiency in item class 4 set to 0x000000002f",
+0,
+},
+{
+"Weather changed to 1, intensity 1.000000\n",
+0,
+},
+{
+"Time set to 6/20/2026 (Sat) 15:04",
+0,
+},
+{
+"Gamespeed set from 0.017 to 0.017",
+0,
+},
+{
+"Connecting conn=\"(enum)3\" connPtr=\"0000020d88ee1e40\" protocol=\"(enum)0\"",
+0,
+},
+{
+"KillConnection conn=\"0000020d6e630910\" state=\"(enum)6\"",
+0,
+},
+{
+"Weather changed to 1, intensity 0.800000\n",
+0,
+},
+{
+"Interface/AddOns/NoAutoClose/libs/LibVersionCheck-1.0/LibVersionCheck-1.0.xml:3 Error loading Interface/AddOns/NoAutoClose/Dependencies/LibStub.lua",
+3,
+},
+{
+"Successfully instantiated mirrored storage object",
+0,
+},
+{
+"-------------------------------------------------- Previous Session --------------------------------------------------",
+0,
+},
+{
+"Multithreaded rendering enabled.",
+0,
+},
+{
+"Multithreaded BeginDraw enabled.",
+0,
+},
+{
+"Multithread shadows changed to 1.",
+0,
+},
+{
+"Multithreaded prepass enabled.",
+0,
+},
+{
+"Multithreaded opaque pass enabled.",
+0,
+},
+{
+"Multithreaded opaque pass enabled.",
+0,
+},
+{
+"Multithreaded alpha M2 pass enabled.",
+0,
+},
+{
+"Multithreaded opaque WMO pass enabled.",
+0,
+},
+{
+"Multithreaded terrain pass enabled.",
+0,
+},
+{
+"Multithreaded volumetric fog enabled.",
+0,
+},
+{
+"Multithreaded Refraction Pass enabled.",
+0,
+},
+{
+"Multithreaded miscellaneous passes enabled.",
+0,
+},
+{
+"Multithreaded decal passes disabled.",
+0,
+},
+{
+"Multithreaded outline passes enabled.",
+0,
+},
+{
+"Multithreaded lightshaft passes enabled.",
+0,
+},
+{
+"Use trigger on BeginDrawComplete enabled.",
+4,
+},
+{
+"Multithreaded alpha pass enabled.",
+0,
+},
+{
+"Multithreaded daynight update enabled.",
+0,
+},
+{
+"Water detail changed to 0",
+0,
+},
+{
+"Ripple detail changed to 0",
+0,
+},
+{
+"Reflection mode changed to 0",
+0,
+},
+{
+"Reflection downscale changed to 0",
+0,
+},
+{
+"Sunshafts quality changed to 0",
+0,
+},
+{
+"Refraction mode changed to 0",
+0,
+},
+{
+"Volume fog disabled.",
+0,
+},
+{
+"Particulate volumes disabled.",
+0,
+},
+{
+"Projected textures enabled.",
+0,
+},
+{
+"Shadow mode changed to 1 - 1 band dynamic shadows on units, 1024",
+0,
+},
+{
+"Shadow texture size changed to 1024.",
+0,
+},
+{
+"Soft shadows changed to 0.",
+0,
+},
+{
+"Shadow cascade blending changed to 0",
+0,
+},
+{
+"Number of shadow cascades changed to 1",
+0,
+},
+{
+"Shadow RT mode changed to 0 (Disabled)",
+0,
+},
+{
+"maxLightCount must be in range 0 to 32.",
+0,
+},
+{
+"CVar 'maxLightCount' failed validation for its initial value.",
+0,
+},
+{
+"Clustered shading disabled.",
+0,
+},
+{
+"Not forcing clustered shading.",
+0,
+},
+{
+"SSAO mode set to 0",
+0,
+},
+{
+"SSAO type set to 0",
+0,
+},
+{
+"Depth Based Opacity Disabled",
+0,
+},
+{
+"SkyCloudLOD set to 0",
+0,
+},
+{
+"Texture filtering mode updated.",
+0,
+},
+{
+"Terrain mip level changed to 0.",
+0,
+},
+{
+"Outline mode changed to 0",
+0,
+},
+{
+"Physics interaction level changed to 2",
+0,
+},
+{
+"Render scale changed to 1",
+0,
+},
+{
+"Resample quality changed to 3",
+0,
+},
+{
+"MSAA set to 2 color samples, 2 coverage samples",
+0,
+},
+{
+"MSAA for alpha-test enabled.",
+0,
+},
+{
+"Variable Rate Shading not supported on this hardware",
+0,
+},
+{
+"CVar 'vrsWorldGeo' failed validation for its initial value.",
+0,
+},
+{
+"Variable Rate Shading not supported on this hardware",
+0,
+},
+{
+"CVar 'vrsParticles' failed validation for its initial value.",
+0,
+},
+{
+"VALAR mode changed to 0",
+0,
+},
+{
+"lodObjectSizeScale cannot be changed.",
+0,
+},
+{
+"Volume fog enabled.",
+0,
+},
+{
+"dynamicLod enabled",
+0,
+},
+{
+"World preload object sort enabled.",
+0,
+},
+{
+"World load object sort enabled.",
+0,
+},
+{
+"World preload non critical enabled.",
+0,
+},
+{
+"World preload high res textures enabled.",
+0,
+},
+{
+"FFX: Color Blind Test Mode Disabled",
+0,
+},
+{
+"CVar 'Sound_AmbienceHighpassDSPCutoff' failed validation for its initial value.",
+0,
+},
+{
+"CVar 'Sound_AllyPlayerHighpassDSPCutoff' failed validation for its initial value.",
+0,
+},
+{
+"CVar 'Sound_EnemyPlayerHighpassDSPCutoff' failed validation for its initial value.",
+0,
+},
+{
+"CVar 'Sound_NPCHighpassDSPCutoff' failed validation for its initial value.",
+0,
+},
+{
+"ChromaEffects disabled",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for Font changed to 300",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for Font changed to 300",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for FontString changed to 5000",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for FontString changed to 5000",
+0,
+},
+{
+"LimitedLuaResources: Enabled = false",
+0,
+},
+{
+"LimitedLuaResources: Enabled = false",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for FontString changed to 50000",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for FontString changed to 50000",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for Animation changed to 50000",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for Animation changed to 50000",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for Texture changed to 400000",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for Texture changed to 400000",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for Timer changed to 500",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for Timer changed to 500",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for Texture changed to 40000",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for Texture changed to 40000",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for Animation changed to 5000",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for Animation changed to 5000",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for Timer changed to 500",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for Timer changed to 500",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for Frame changed to 10000",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for Frame changed to 10000",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for Frame changed to 100000",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for Frame changed to 100000",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for AnimGroup changed to 20000",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for AnimGroup changed to 20000",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for AnimGroup changed to 2000",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for AnimGroup changed to 2000",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for Font changed to 3000",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for Font changed to 3000",
 0,
 },
 {
@@ -683,7 +1564,7 @@ Blizzard_Console_SavedVars = {
 0,
 },
 {
-"Reconnect token saved;  creationTime=\"1781658187\" expirationTime=\"1781672587\"",
+"Reconnect token saved;  creationTime=\"1782007521\" expirationTime=\"1782021921\"",
 0,
 },
 {
@@ -715,19 +1596,19 @@ Blizzard_Console_SavedVars = {
 0,
 },
 {
-"Received last played char code=\" (309)\" subRegion=\"71-1-59\" lastPlayedTime=\"0\" numRegions=\"5\" numRegionsWithData=\"0\" realmPermissions=\"0\" entitlementsCount=\"0\" realmEntry=\"{\"wowRealmAddress\":0,\"useBleepChance\":0.0,\"cfgTimezonesID\":0,\"populationState\":0,\"cfgCategoriesID\":0,\"version\":{\"versionMajor\":0,\"versionBuild\":0,\"versionMinor\":0,\"versionRevision\":0},\"cfgRealmsID\":0,\"gameServiceRegionId\":0,\"flags\":0,\"name\":\"\",\"cfgConfigsID\":0,\"cfgContentSetID\":0,\"cfgLanguagesID\":0}\"",
+"Received last played char code=\" (309)\" subRegion=\"21-1-50\" lastPlayedTime=\"0\" numRegions=\"5\" numRegionsWithData=\"0\" realmPermissions=\"0\" entitlementsCount=\"0\" realmEntry=\"{\"wowRealmAddress\":0,\"useBleepChance\":0.0,\"cfgTimezonesID\":0,\"populationState\":0,\"cfgCategoriesID\":0,\"version\":{\"versionMajor\":0,\"versionBuild\":0,\"versionMinor\":0,\"versionRevision\":0},\"cfgRealmsID\":0,\"gameServiceRegionId\":0,\"flags\":0,\"name\":\"\",\"cfgConfigsID\":0,\"cfgContentSetID\":0,\"cfgLanguagesID\":0}\"",
 0,
 },
 {
-"Received last played char code=\" (309)\" subRegion=\"34-2-89\" lastPlayedTime=\"0\" numRegions=\"5\" numRegionsWithData=\"1\" realmPermissions=\"0\" entitlementsCount=\"0\" realmEntry=\"{\"wowRealmAddress\":0,\"useBleepChance\":0.0,\"cfgTimezonesID\":0,\"populationState\":0,\"cfgCategoriesID\":0,\"version\":{\"versionMajor\":0,\"versionBuild\":0,\"versionMinor\":0,\"versionRevision\":0},\"cfgRealmsID\":0,\"gameServiceRegionId\":0,\"flags\":0,\"name\":\"\",\"cfgConfigsID\":0,\"cfgContentSetID\":0,\"cfgLanguagesID\":0}\"",
+"Received last played char code=\"ERROR_OK (0)\" subRegion=\"1-1-89\" lastPlayedTime=\"1781993173\" numRegions=\"5\" numRegionsWithData=\"1\" realmPermissions=\"3\" entitlementsCount=\"92\" realmEntry=\"{\"wowRealmAddress\":17235996,\"useBleepChance\":0.0,\"cfgTimezonesID\":4,\"populationState\":6,\"cfgCategoriesID\":2,\"version\":{\"versionMajor\":12,\"versionBuild\":67808,\"versionMinor\":0,\"versionRevision\":7},\"cfgRealmsID\":1566,\"gameServiceRegionId\":1,\"flags\":0,\"name\":\"Area 52\",\"cfgConfigsID\":1,\"cfgContentSetID\":0,\"cfgLanguagesID\":1}\"",
 0,
 },
 {
-"Received last played char code=\" (309)\" subRegion=\"21-1-50\" lastPlayedTime=\"0\" numRegions=\"5\" numRegionsWithData=\"2\" realmPermissions=\"0\" entitlementsCount=\"0\" realmEntry=\"{\"wowRealmAddress\":0,\"useBleepChance\":0.0,\"cfgTimezonesID\":0,\"populationState\":0,\"cfgCategoriesID\":0,\"version\":{\"versionMajor\":0,\"versionBuild\":0,\"versionMinor\":0,\"versionRevision\":0},\"cfgRealmsID\":0,\"gameServiceRegionId\":0,\"flags\":0,\"name\":\"\",\"cfgConfigsID\":0,\"cfgContentSetID\":0,\"cfgLanguagesID\":0}\"",
+"Received last played char code=\" (309)\" subRegion=\"71-1-59\" lastPlayedTime=\"0\" numRegions=\"5\" numRegionsWithData=\"2\" realmPermissions=\"0\" entitlementsCount=\"0\" realmEntry=\"{\"wowRealmAddress\":0,\"useBleepChance\":0.0,\"cfgTimezonesID\":0,\"populationState\":0,\"cfgCategoriesID\":0,\"version\":{\"versionMajor\":0,\"versionBuild\":0,\"versionMinor\":0,\"versionRevision\":0},\"cfgRealmsID\":0,\"gameServiceRegionId\":0,\"flags\":0,\"name\":\"\",\"cfgConfigsID\":0,\"cfgContentSetID\":0,\"cfgLanguagesID\":0}\"",
 0,
 },
 {
-"Received last played char code=\"ERROR_OK (0)\" subRegion=\"1-1-89\" lastPlayedTime=\"1781656767\" numRegions=\"5\" numRegionsWithData=\"3\" realmPermissions=\"3\" entitlementsCount=\"92\" realmEntry=\"{\"wowRealmAddress\":17235996,\"useBleepChance\":0.0,\"cfgTimezonesID\":4,\"populationState\":6,\"cfgCategoriesID\":2,\"version\":{\"versionMajor\":12,\"versionBuild\":67808,\"versionMinor\":0,\"versionRevision\":7},\"cfgRealmsID\":1566,\"gameServiceRegionId\":1,\"flags\":0,\"name\":\"Area 52\",\"cfgConfigsID\":1,\"cfgContentSetID\":0,\"cfgLanguagesID\":1}\"",
+"Received last played char code=\" (309)\" subRegion=\"34-2-89\" lastPlayedTime=\"0\" numRegions=\"5\" numRegionsWithData=\"3\" realmPermissions=\"0\" entitlementsCount=\"0\" realmEntry=\"{\"wowRealmAddress\":0,\"useBleepChance\":0.0,\"cfgTimezonesID\":0,\"populationState\":0,\"cfgCategoriesID\":0,\"version\":{\"versionMajor\":0,\"versionBuild\":0,\"versionMinor\":0,\"versionRevision\":0},\"cfgRealmsID\":0,\"gameServiceRegionId\":0,\"flags\":0,\"name\":\"\",\"cfgConfigsID\":0,\"cfgContentSetID\":0,\"cfgLanguagesID\":0}\"",
 0,
 },
 {
@@ -739,7 +1620,7 @@ Blizzard_Console_SavedVars = {
 0,
 },
 {
-"Found most recently played char. Joining realm. lastPlayedRegion=\"1-1-89\" realmAddress=\"17235996\" lastActiveTime=\"1781656767\"",
+"Found most recently played char. Joining realm. lastPlayedRegion=\"1-1-89\" realmAddress=\"17235996\" lastActiveTime=\"1781993173\"",
 0,
 },
 {
@@ -751,7 +1632,7 @@ Blizzard_Console_SavedVars = {
 0,
 },
 {
-"Connecting conn=\"(enum)0\" connPtr=\"000002e42c298580\" protocol=\"(enum)0\"",
+"Connecting conn=\"(enum)0\" connPtr=\"00000240e0b905e0\" protocol=\"(enum)0\"",
 0,
 },
 {
@@ -760,14 +1641,6 @@ Blizzard_Console_SavedVars = {
 },
 {
 "Screen invalid. Changing from=\"login\" to=\"charselect\"",
-0,
-},
-{
-"Connecting conn=\"(enum)2\" connPtr=\"000002e484a86960\" protocol=\"(enum)0\"",
-0,
-},
-{
-"KillConnection conn=\"000002e42c298580\" state=\"(enum)6\"",
 0,
 },
 {
@@ -791,15 +1664,47 @@ Blizzard_Console_SavedVars = {
 0,
 },
 {
+"LimitedLuaResources: Global capacity for Font changed to 3000",
+0,
+},
+{
 "LimitedLuaResources: Addon capacity for Frame changed to 10000",
 0,
 },
 {
-"LimitedLuaResources: Addon capacity for Texture changed to 40000",
+"LimitedLuaResources: Global capacity for Frame changed to 100000",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for FontString changed to 5000",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for Timer changed to 500",
 0,
 },
 {
 "LimitedLuaResources: Global capacity for Timer changed to 500",
+0,
+},
+{
+"LimitedLuaResources: Enabled = false",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for Animation changed to 50000",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for FontString changed to 50000",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for AnimGroup changed to 2000",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for Texture changed to 400000",
 0,
 },
 {
@@ -811,43 +1716,11 @@ Blizzard_Console_SavedVars = {
 0,
 },
 {
-"LimitedLuaResources: Global capacity for Font changed to 3000",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for AnimGroup changed to 2000",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for FontString changed to 50000",
+"LimitedLuaResources: Addon capacity for Texture changed to 40000",
 0,
 },
 {
 "LimitedLuaResources: Addon capacity for Font changed to 300",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for Frame changed to 100000",
-0,
-},
-{
-"LimitedLuaResources: Enabled = false",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for Timer changed to 500",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for Texture changed to 400000",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for FontString changed to 5000",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for Animation changed to 50000",
 0,
 },
 {
@@ -867,110 +1740,6 @@ Blizzard_Console_SavedVars = {
 0,
 },
 {
-"Requesting change realm list",
-0,
-},
-{
-"Waiting for realm list.",
-0,
-},
-{
-"Received realm list ticket code=\"ERROR_OK (0)\"",
-0,
-},
-{
-"Waiting for realm list.",
-0,
-},
-{
-"Received sub region list code=\"ERROR_OK (0)\"",
-0,
-},
-{
-"Requesting realm lists numSubRegions=\"5\"",
-0,
-},
-{
-"Received a realm list code=\"ERROR_OK (0)\" subRegion=\"21-1-50\" totalSubRegions=\"5\" subRegionsHasData=\"1\" realmPermissions=\"3\" entitlementsCount=\"92\" numRealms=\"0\"",
-0,
-},
-{
-"Received a realm list code=\"ERROR_OK (0)\" subRegion=\"71-1-59\" totalSubRegions=\"5\" subRegionsHasData=\"2\" realmPermissions=\"3\" entitlementsCount=\"92\" numRealms=\"0\"",
-0,
-},
-{
-"Received a realm list code=\"ERROR_OK (0)\" subRegion=\"34-2-89\" totalSubRegions=\"5\" subRegionsHasData=\"3\" realmPermissions=\"3\" entitlementsCount=\"92\" numRealms=\"0\"",
-0,
-},
-{
-"Received a realm list code=\"ERROR_OK (0)\" subRegion=\"1-1-89\" totalSubRegions=\"5\" subRegionsHasData=\"4\" realmPermissions=\"3\" entitlementsCount=\"92\" numRealms=\"246\"",
-0,
-},
-{
-"Received a realm list code=\"ERROR_OK (0)\" subRegion=\"76-1-59\" totalSubRegions=\"5\" subRegionsHasData=\"5\" realmPermissions=\"3\" entitlementsCount=\"92\" numRealms=\"0\"",
-0,
-},
-{
-"Realm list ready.",
-0,
-},
-{
-"Joining realm subRegion=\"1-1-89\" realmAddress=\"1-2-10\"",
-0,
-},
-{
-"Screen invalid. Changing from=\"charselect\" to=\"realmlist\"",
-0,
-},
-{
-"Switching to screen=\"RealmListUI\" (from \"charselect\")",
-0,
-},
-{
-"From EnsureValidScreen",
-0,
-},
-{
-"Screen invalid. Changing from=\"realmlist\" to=\"charselect\"",
-0,
-},
-{
-"Switching to screen=\"CharacterSelect\" (from \"realmlist\")",
-0,
-},
-{
-"From EnsureValidScreen",
-0,
-},
-{
-"OnRealmJoin code=\"ERROR_OK (0)\"",
-0,
-},
-{
-"Session with Battle.net destroyed.",
-0,
-},
-{
-"KillConnection conn=\"000002e484a86960\" state=\"(enum)7\"",
-0,
-},
-{
-"Connecting conn=\"(enum)0\" connPtr=\"000002e4960dd6d0\" protocol=\"(enum)0\"",
-0,
-},
-{
-"Received AuthedToWoW result=\"ERROR_OK (0)\"",
-0,
-},
-{
-"Connected to Back. Disconnecting from Front.",
-0,
-},
-{
-"Session with Battle.net established.",
-0,
-},
-{
 "-------------------------------------------------- Previous Session --------------------------------------------------",
 0,
 },
@@ -983,247 +1752,7 @@ Blizzard_Console_SavedVars = {
 0,
 },
 {
-"Connecting conn=\"(enum)3\" connPtr=\"000002e41cbe0ef0\" protocol=\"(enum)0\"",
-0,
-},
-{
-"Proficiency in item class 2 set to 0x0000000001",
-0,
-},
-{
-"Proficiency in item class 2 set to 0x0000000041",
-0,
-},
-{
-"Proficiency in item class 4 set to 0x0000000021",
-0,
-},
-{
-"Proficiency in item class 2 set to 0x0000004041",
-0,
-},
-{
-"Proficiency in item class 2 set to 0x0000004441",
-0,
-},
-{
-"Proficiency in item class 4 set to 0x0000000025",
-0,
-},
-{
-"Proficiency in item class 2 set to 0x0000006441",
-0,
-},
-{
-"Proficiency in item class 2 set to 0x0000006451",
-0,
-},
-{
-"Proficiency in item class 2 set to 0x00000064d1",
-0,
-},
-{
-"Proficiency in item class 4 set to 0x0000000027",
-0,
-},
-{
-"Proficiency in item class 2 set to 0x00000064d1",
-0,
-},
-{
-"Proficiency in item class 4 set to 0x0000000027",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"Time set to 6/16/2026 (Tue) 18:03",
-0,
-},
-{
-"Gamespeed set from 0.017 to 0.017",
-0,
-},
-{
-"Connecting conn=\"(enum)3\" connPtr=\"000002e4961ab480\" protocol=\"(enum)0\"",
-0,
-},
-{
-"KillConnection conn=\"000002e41cbe0ef0\" state=\"(enum)6\"",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"Interface/AddOns/NoAutoClose/libs/LibVersionCheck-1.0/LibVersionCheck-1.0.xml:3 Error loading Interface/AddOns/NoAutoClose/Dependencies/LibStub.lua",
-3,
-},
-{
-"Successfully instantiated mirrored storage object",
-0,
-},
-{
-"KillConnection conn=\"000002e4961ab480\" state=\"(enum)7\"",
-0,
-},
-{
-"-------------------------------------------------- Previous Session --------------------------------------------------",
-0,
-},
-{
-"LimitedLuaResources: Reset Timer",
-0,
-},
-{
-"Resume()",
-0,
-},
-{
-"Screen invalid. Changing from=\"none\" to=\"charselect\"",
-0,
-},
-{
-"Switching to screen=\"CharacterSelect\" (from \"none\")",
-0,
-},
-{
-"From EnsureValidScreen",
-0,
-},
-{
-"Requesting change realm list",
-0,
-},
-{
-"Waiting for realm list.",
-0,
-},
-{
-"Received realm list ticket code=\"ERROR_OK (0)\"",
-0,
-},
-{
-"Waiting for realm list.",
-0,
-},
-{
-"Received sub region list code=\"ERROR_OK (0)\"",
-0,
-},
-{
-"Requesting realm lists numSubRegions=\"5\"",
-0,
-},
-{
-"Received a realm list code=\"ERROR_OK (0)\" subRegion=\"34-2-89\" totalSubRegions=\"5\" subRegionsHasData=\"1\" realmPermissions=\"3\" entitlementsCount=\"92\" numRealms=\"0\"",
-0,
-},
-{
-"Received a realm list code=\"ERROR_OK (0)\" subRegion=\"21-1-50\" totalSubRegions=\"5\" subRegionsHasData=\"2\" realmPermissions=\"3\" entitlementsCount=\"92\" numRealms=\"0\"",
-0,
-},
-{
-"Received a realm list code=\"ERROR_OK (0)\" subRegion=\"71-1-59\" totalSubRegions=\"5\" subRegionsHasData=\"3\" realmPermissions=\"3\" entitlementsCount=\"92\" numRealms=\"0\"",
-0,
-},
-{
-"Received a realm list code=\"ERROR_OK (0)\" subRegion=\"1-1-89\" totalSubRegions=\"5\" subRegionsHasData=\"4\" realmPermissions=\"3\" entitlementsCount=\"92\" numRealms=\"246\"",
-0,
-},
-{
-"Received a realm list code=\"ERROR_OK (0)\" subRegion=\"76-1-59\" totalSubRegions=\"5\" subRegionsHasData=\"5\" realmPermissions=\"3\" entitlementsCount=\"92\" numRealms=\"0\"",
-0,
-},
-{
-"Realm list ready.",
-0,
-},
-{
-"Joining realm subRegion=\"1-1-89\" realmAddress=\"1-7-28\"",
-0,
-},
-{
-"Screen invalid. Changing from=\"charselect\" to=\"realmlist\"",
-0,
-},
-{
-"Switching to screen=\"RealmListUI\" (from \"charselect\")",
-0,
-},
-{
-"From EnsureValidScreen",
-0,
-},
-{
-"Screen invalid. Changing from=\"realmlist\" to=\"charselect\"",
-0,
-},
-{
-"Switching to screen=\"CharacterSelect\" (from \"realmlist\")",
-0,
-},
-{
-"From EnsureValidScreen",
-0,
-},
-{
-"OnRealmJoin code=\"ERROR_OK (0)\"",
-0,
-},
-{
-"Session with Battle.net destroyed.",
-0,
-},
-{
-"KillConnection conn=\"000002e4960dd6d0\" state=\"(enum)7\"",
-0,
-},
-{
-"Connecting conn=\"(enum)0\" connPtr=\"000002e5a32fe820\" protocol=\"(enum)0\"",
-0,
-},
-{
-"Connecting conn=\"(enum)2\" connPtr=\"000002e480764dc0\" protocol=\"(enum)0\"",
-0,
-},
-{
-"KillConnection conn=\"000002e5a32fe820\" state=\"(enum)6\"",
-0,
-},
-{
-"Received AuthedToWoW result=\"ERROR_OK (0)\"",
-0,
-},
-{
-"Connected to Back. Disconnecting from Front.",
-0,
-},
-{
-"Session with Battle.net established.",
-0,
-},
-{
-"-------------------------------------------------- Previous Session --------------------------------------------------",
-0,
-},
-{
-"Suspend()",
-0,
-},
-{
-"LimitedLuaResources: Reset Timer",
-0,
-},
-{
-"Attempted to register existing command: SetDifficulty",
-0,
-},
-{
-"Connecting conn=\"(enum)3\" connPtr=\"000002e448c4b4f0\" protocol=\"(enum)0\"",
+"Connecting conn=\"(enum)3\" connPtr=\"0000024105b60ca0\" protocol=\"(enum)0\"",
 0,
 },
 {
@@ -1299,11 +1828,23 @@ Blizzard_Console_SavedVars = {
 0,
 },
 {
-"Time set to 6/16/2026 (Tue) 18:03",
+"Time set to 6/20/2026 (Sat) 19:04",
 0,
 },
 {
 "Gamespeed set from 0.017 to 0.017",
+0,
+},
+{
+"Connecting conn=\"(enum)3\" connPtr=\"0000024108a18d90\" protocol=\"(enum)0\"",
+0,
+},
+{
+"KillConnection conn=\"0000024105b60ca0\" state=\"(enum)6\"",
+0,
+},
+{
+"Weather changed to 1, intensity 1.000000\n",
 0,
 },
 {
@@ -1315,7 +1856,147 @@ Blizzard_Console_SavedVars = {
 0,
 },
 {
-"KillConnection conn=\"000002e448c4b4f0\" state=\"(enum)7\"",
+"Time set to 6/20/2026 (Sat) 19:05",
+0,
+},
+{
+"Time set to 6/20/2026 (Sat) 19:05",
+0,
+},
+{
+"Time set to 6/20/2026 (Sat) 19:05",
+0,
+},
+{
+"Time set to 6/20/2026 (Sat) 19:05",
+0,
+},
+{
+"Time set to 6/20/2026 (Sat) 19:06",
+0,
+},
+{
+"Time set to 6/20/2026 (Sat) 19:06",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Time set to 6/20/2026 (Sat) 19:07",
+0,
+},
+{
+"Time set to 6/20/2026 (Sat) 19:07",
+0,
+},
+{
+"Connecting conn=\"(enum)3\" connPtr=\"0000024105b65830\" protocol=\"(enum)0\"",
+0,
+},
+{
+"KillConnection conn=\"0000024108a18d90\" state=\"(enum)6\"",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"World transfer pending...",
+0,
+},
+{
+"Connecting conn=\"(enum)3\" connPtr=\"0000024116828630\" protocol=\"(enum)0\"",
+0,
+},
+{
+"KillConnection conn=\"0000024105b65830\" state=\"(enum)6\"",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"World transfer pending...",
+0,
+},
+{
+"Connecting conn=\"(enum)3\" connPtr=\"0000024100dea650\" protocol=\"(enum)0\"",
+0,
+},
+{
+"KillConnection conn=\"0000024116828630\" state=\"(enum)6\"",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"World transfer pending...",
+0,
+},
+{
+"Connecting conn=\"(enum)3\" connPtr=\"000002437eba23a0\" protocol=\"(enum)0\"",
+0,
+},
+{
+"KillConnection conn=\"0000024100dea650\" state=\"(enum)6\"",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"World transfer pending...",
+0,
+},
+{
+"Connecting conn=\"(enum)3\" connPtr=\"0000024102c5f340\" protocol=\"(enum)0\"",
+0,
+},
+{
+"KillConnection conn=\"000002437eba23a0\" state=\"(enum)6\"",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Time set to 6/20/2026 (Sat) 19:10",
+0,
+},
+{
+"Time set to 6/20/2026 (Sat) 19:10",
+0,
+},
+{
+"Changed difficulty successfully",
+0,
+},
+{
+"World transfer pending...",
+0,
+},
+{
+"Connecting conn=\"(enum)3\" connPtr=\"000002437eb8d1f0\" protocol=\"(enum)0\"",
+0,
+},
+{
+"KillConnection conn=\"0000024102c5f340\" state=\"(enum)6\"",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
 0,
 },
 {
@@ -1327,223 +2008,7 @@ Blizzard_Console_SavedVars = {
 0,
 },
 {
-"Resume()",
-0,
-},
-{
-"Screen invalid. Changing from=\"none\" to=\"charselect\"",
-0,
-},
-{
-"Switching to screen=\"CharacterSelect\" (from \"none\")",
-0,
-},
-{
-"From EnsureValidScreen",
-0,
-},
-{
-"Requesting change realm list",
-0,
-},
-{
-"Waiting for realm list.",
-0,
-},
-{
-"Received realm list ticket code=\"ERROR_OK (0)\"",
-0,
-},
-{
-"Waiting for realm list.",
-0,
-},
-{
-"Received sub region list code=\"ERROR_OK (0)\"",
-0,
-},
-{
-"Requesting realm lists numSubRegions=\"5\"",
-0,
-},
-{
-"Received a realm list code=\"ERROR_OK (0)\" subRegion=\"21-1-50\" totalSubRegions=\"5\" subRegionsHasData=\"1\" realmPermissions=\"3\" entitlementsCount=\"92\" numRealms=\"0\"",
-0,
-},
-{
-"Received a realm list code=\"ERROR_OK (0)\" subRegion=\"71-1-59\" totalSubRegions=\"5\" subRegionsHasData=\"2\" realmPermissions=\"3\" entitlementsCount=\"92\" numRealms=\"0\"",
-0,
-},
-{
-"Received a realm list code=\"ERROR_OK (0)\" subRegion=\"34-2-89\" totalSubRegions=\"5\" subRegionsHasData=\"3\" realmPermissions=\"3\" entitlementsCount=\"92\" numRealms=\"0\"",
-0,
-},
-{
-"Received a realm list code=\"ERROR_OK (0)\" subRegion=\"1-1-89\" totalSubRegions=\"5\" subRegionsHasData=\"4\" realmPermissions=\"3\" entitlementsCount=\"92\" numRealms=\"246\"",
-0,
-},
-{
-"Received a realm list code=\"ERROR_OK (0)\" subRegion=\"76-1-59\" totalSubRegions=\"5\" subRegionsHasData=\"5\" realmPermissions=\"3\" entitlementsCount=\"92\" numRealms=\"0\"",
-0,
-},
-{
-"Realm list ready.",
-0,
-},
-{
-"Joining realm subRegion=\"1-1-89\" realmAddress=\"1-2-10\"",
-0,
-},
-{
-"Screen invalid. Changing from=\"charselect\" to=\"realmlist\"",
-0,
-},
-{
-"Switching to screen=\"RealmListUI\" (from \"charselect\")",
-0,
-},
-{
-"From EnsureValidScreen",
-0,
-},
-{
-"Screen invalid. Changing from=\"realmlist\" to=\"charselect\"",
-0,
-},
-{
-"Switching to screen=\"CharacterSelect\" (from \"realmlist\")",
-0,
-},
-{
-"From EnsureValidScreen",
-0,
-},
-{
-"OnRealmJoin code=\"ERROR_OK (0)\"",
-0,
-},
-{
-"Session with Battle.net destroyed.",
-0,
-},
-{
-"KillConnection conn=\"000002e480764dc0\" state=\"(enum)7\"",
-0,
-},
-{
-"Connecting conn=\"(enum)0\" connPtr=\"000002e496645e00\" protocol=\"(enum)0\"",
-0,
-},
-{
-"Connecting conn=\"(enum)2\" connPtr=\"000002e484a706a0\" protocol=\"(enum)0\"",
-0,
-},
-{
-"KillConnection conn=\"000002e496645e00\" state=\"(enum)6\"",
-0,
-},
-{
-"Received AuthedToWoW result=\"ERROR_OK (0)\"",
-0,
-},
-{
-"Connected to Back. Disconnecting from Front.",
-0,
-},
-{
-"Session with Battle.net established.",
-0,
-},
-{
-"-------------------------------------------------- Previous Session --------------------------------------------------",
-0,
-},
-{
-"Suspend()",
-0,
-},
-{
-"LimitedLuaResources: Reset Timer",
-0,
-},
-{
-"Attempted to register existing command: SetDifficulty",
-0,
-},
-{
-"Connecting conn=\"(enum)3\" connPtr=\"000002e59ea82a20\" protocol=\"(enum)0\"",
-0,
-},
-{
-"Proficiency in item class 2 set to 0x0000000001",
-0,
-},
-{
-"Proficiency in item class 2 set to 0x0000000041",
-0,
-},
-{
-"Proficiency in item class 4 set to 0x0000000021",
-0,
-},
-{
-"Proficiency in item class 2 set to 0x0000004041",
-0,
-},
-{
-"Proficiency in item class 2 set to 0x0000004441",
-0,
-},
-{
-"Proficiency in item class 4 set to 0x0000000025",
-0,
-},
-{
-"Proficiency in item class 2 set to 0x0000006441",
-0,
-},
-{
-"Proficiency in item class 2 set to 0x0000006451",
-0,
-},
-{
-"Proficiency in item class 2 set to 0x00000064d1",
-0,
-},
-{
-"Proficiency in item class 4 set to 0x0000000027",
-0,
-},
-{
-"Proficiency in item class 2 set to 0x00000064d1",
-0,
-},
-{
-"Proficiency in item class 4 set to 0x0000000027",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"Time set to 6/16/2026 (Tue) 18:04",
-0,
-},
-{
-"Gamespeed set from 0.017 to 0.017",
-0,
-},
-{
-"Connecting conn=\"(enum)3\" connPtr=\"000002e480740460\" protocol=\"(enum)0\"",
-0,
-},
-{
-"KillConnection conn=\"000002e59ea82a20\" state=\"(enum)6\"",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
+"LimitedLuaResources: Reset All",
 0,
 },
 {
@@ -1575,27 +2040,11 @@ Blizzard_Console_SavedVars = {
 0,
 },
 {
-"Connecting conn=\"(enum)3\" connPtr=\"000002e488d1cb90\" protocol=\"(enum)0\"",
+"Connecting conn=\"(enum)3\" connPtr=\"0000024104ad3d30\" protocol=\"(enum)0\"",
 0,
 },
 {
-"KillConnection conn=\"000002e480740460\" state=\"(enum)6\"",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"World transfer pending...",
-0,
-},
-{
-"Connecting conn=\"(enum)3\" connPtr=\"000002e42430a8e0\" protocol=\"(enum)0\"",
-0,
-},
-{
-"KillConnection conn=\"000002e488d1cb90\" state=\"(enum)6\"",
+"KillConnection conn=\"000002437eb8d1f0\" state=\"(enum)6\"",
 0,
 },
 {
@@ -1603,779 +2052,107 @@ Blizzard_Console_SavedVars = {
 0,
 },
 {
-"World transfer pending...",
+"Changed difficulty successfully",
 0,
 },
 {
-"Connecting conn=\"(enum)3\" connPtr=\"000002e481ceba10\" protocol=\"(enum)0\"",
-0,
-},
-{
-"KillConnection conn=\"000002e42430a8e0\" state=\"(enum)6\"",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"World transfer pending...",
-0,
-},
-{
-"Connecting conn=\"(enum)3\" connPtr=\"000002e484a69dd0\" protocol=\"(enum)0\"",
-0,
-},
-{
-"KillConnection conn=\"000002e481ceba10\" state=\"(enum)6\"",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"-------------------------------------------------- Previous Session --------------------------------------------------",
-0,
-},
-{
-"Multithreaded rendering enabled.",
-0,
-},
-{
-"Multithreaded BeginDraw enabled.",
-0,
-},
-{
-"Multithread shadows changed to 1.",
-0,
-},
-{
-"Multithreaded prepass enabled.",
-0,
-},
-{
-"Multithreaded opaque pass enabled.",
-0,
-},
-{
-"Multithreaded opaque pass enabled.",
-0,
-},
-{
-"Multithreaded alpha M2 pass enabled.",
-0,
-},
-{
-"Multithreaded opaque WMO pass enabled.",
-0,
-},
-{
-"Multithreaded terrain pass enabled.",
-0,
-},
-{
-"Multithreaded volumetric fog enabled.",
-0,
-},
-{
-"Multithreaded Refraction Pass enabled.",
-0,
-},
-{
-"Multithreaded miscellaneous passes enabled.",
-0,
-},
-{
-"Multithreaded decal passes disabled.",
-0,
-},
-{
-"Multithreaded outline passes enabled.",
-0,
-},
-{
-"Multithreaded lightshaft passes enabled.",
-0,
-},
-{
-"Use trigger on BeginDrawComplete enabled.",
-4,
-},
-{
-"Multithreaded alpha pass enabled.",
-0,
-},
-{
-"Multithreaded daynight update enabled.",
-0,
-},
-{
-"Water detail changed to 0",
-0,
-},
-{
-"Ripple detail changed to 0",
-0,
-},
-{
-"Reflection mode changed to 0",
-0,
-},
-{
-"Reflection downscale changed to 0",
-0,
-},
-{
-"Sunshafts quality changed to 0",
-0,
-},
-{
-"Refraction mode changed to 0",
-0,
-},
-{
-"Volume fog disabled.",
-0,
-},
-{
-"Particulate volumes disabled.",
-0,
-},
-{
-"Projected textures enabled.",
-0,
-},
-{
-"Shadow mode changed to 1 - 1 band dynamic shadows on units, 1024",
-0,
-},
-{
-"Shadow texture size changed to 1024.",
-0,
-},
-{
-"Soft shadows changed to 0.",
-0,
-},
-{
-"Shadow cascade blending changed to 0",
-0,
-},
-{
-"Number of shadow cascades changed to 1",
-0,
-},
-{
-"Shadow RT mode changed to 0 (Disabled)",
-0,
-},
-{
-"maxLightCount must be in range 0 to 32.",
-0,
-},
-{
-"CVar 'maxLightCount' failed validation for its initial value.",
-0,
-},
-{
-"Clustered shading disabled.",
-0,
-},
-{
-"Not forcing clustered shading.",
-0,
-},
-{
-"SSAO mode set to 0",
-0,
-},
-{
-"SSAO type set to 0",
-0,
-},
-{
-"Depth Based Opacity Disabled",
-0,
-},
-{
-"SkyCloudLOD set to 0",
-0,
-},
-{
-"Texture filtering mode updated.",
-0,
-},
-{
-"Terrain mip level changed to 0.",
-0,
-},
-{
-"Outline mode changed to 0",
-0,
-},
-{
-"Physics interaction level changed to 2",
-0,
-},
-{
-"Render scale changed to 1",
-0,
-},
-{
-"Resample quality changed to 3",
-0,
-},
-{
-"MSAA set to 2 color samples, 2 coverage samples",
-0,
-},
-{
-"MSAA for alpha-test enabled.",
-0,
-},
-{
-"Variable Rate Shading not supported on this hardware",
-0,
-},
-{
-"CVar 'vrsWorldGeo' failed validation for its initial value.",
-0,
-},
-{
-"Variable Rate Shading not supported on this hardware",
-0,
-},
-{
-"CVar 'vrsParticles' failed validation for its initial value.",
-0,
-},
-{
-"VALAR mode changed to 0",
-0,
-},
-{
-"lodObjectSizeScale cannot be changed.",
-0,
-},
-{
-"Volume fog enabled.",
-0,
-},
-{
-"dynamicLod enabled",
-0,
-},
-{
-"World preload object sort enabled.",
-0,
-},
-{
-"World load object sort enabled.",
-0,
-},
-{
-"World preload non critical enabled.",
-0,
-},
-{
-"World preload high res textures enabled.",
-0,
-},
-{
-"FFX: Color Blind Test Mode Disabled",
-0,
-},
-{
-"CVar 'Sound_AmbienceHighpassDSPCutoff' failed validation for its initial value.",
-0,
-},
-{
-"CVar 'Sound_AllyPlayerHighpassDSPCutoff' failed validation for its initial value.",
-0,
-},
-{
-"CVar 'Sound_EnemyPlayerHighpassDSPCutoff' failed validation for its initial value.",
-0,
-},
-{
-"CVar 'Sound_NPCHighpassDSPCutoff' failed validation for its initial value.",
-0,
-},
-{
-"ChromaEffects disabled",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for Animation changed to 5000",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for Animation changed to 5000",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for FontString changed to 50000",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for FontString changed to 50000",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for Texture changed to 400000",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for Texture changed to 400000",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for Timer changed to 500",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for Timer changed to 500",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for FontString changed to 5000",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for FontString changed to 5000",
-0,
-},
-{
-"LimitedLuaResources: Enabled = false",
-0,
-},
-{
-"LimitedLuaResources: Enabled = false",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for Font changed to 3000",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for Font changed to 3000",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for Texture changed to 40000",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for Texture changed to 40000",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for Frame changed to 10000",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for Frame changed to 10000",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for Animation changed to 50000",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for Animation changed to 50000",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for AnimGroup changed to 2000",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for AnimGroup changed to 2000",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for Frame changed to 100000",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for Frame changed to 100000",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for Font changed to 300",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for Font changed to 300",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for AnimGroup changed to 20000",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for AnimGroup changed to 20000",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for Timer changed to 500",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for Timer changed to 500",
-0,
-},
-{
-"Startup()",
-0,
-},
-{
-"Resume()",
-0,
-},
-{
-"Screen invalid. Changing from=\"none\" to=\"login\"",
-0,
-},
-{
-"Switching to screen=\"AccountLogin\" (from \"none\")",
-0,
-},
-{
-"From EnsureValidScreen",
-0,
-},
-{
-"Starting login launcherPortal=\"us.actual.battle.net\" loginPortal=\"us.actual.battle.net:1119\"",
-0,
-},
-{
-"Resetting",
-0,
-},
-{
-"Initializing",
-0,
-},
-{
-"Attempting logon host=\"us.actual.battle.net\" port=\"1119\"",
-0,
-},
-{
-"Waiting for server response.",
-0,
-},
-{
-"Front connected connectionId=\"1\" title_id=\"5730135\" platform=\"Wn64\" locale=\"enUS\" usedToken=\"true\"",
-0,
-},
-{
-"Waiting for server response.",
-0,
-},
-{
-"OnSendLogon result=\"0\"",
-0,
-},
-{
-"Logon complete result=\"0\" numGameAccounts=\"1\"",
-0,
-},
-{
-"Waiting for server response.",
-0,
-},
-{
-"Received auth token  code=\"ERROR_OK (0)\" gotCredentials=\"true\"",
-0,
-},
-{
-"B code=\"ERROR_OK (0)\"",
-0,
-},
-{
-"BGS_ code=\"ERROR_OK (0)\" name=\"WoW1\" numGameAccounts=\"1\" numGameAccountNames=\"0\"",
-0,
-},
-{
-"BGS_ACCO code=\"ERROR_OK (0)\"",
-0,
-},
-{
-"BG code=\"ERROR_OK (0)\"",
-0,
-},
-{
-"Updated game account list. accountList=\"!WoW1||\"",
-0,
-},
-{
-"Logon complete.",
-0,
-},
-{
-"Reconnect token saved;  creationTime=\"1781658675\" expirationTime=\"1781673075\"",
-0,
-},
-{
-"Waiting for realm list.",
-0,
-},
-{
-"Requesting realm list ticket",
-0,
-},
-{
-"Received realm list ticket code=\"ERROR_OK (0)\"",
-0,
-},
-{
-"Waiting for realm list.",
-0,
-},
-{
-"Received sub region list code=\"ERROR_OK (0)\"",
-0,
-},
-{
-"Requesting last played chars numSubRegions=\"5\"",
-0,
-},
-{
-"Received last played char code=\" (309)\" subRegion=\"71-1-59\" lastPlayedTime=\"0\" numRegions=\"5\" numRegionsWithData=\"0\" realmPermissions=\"0\" entitlementsCount=\"0\" realmEntry=\"{\"wowRealmAddress\":0,\"useBleepChance\":0.0,\"cfgTimezonesID\":0,\"populationState\":0,\"cfgCategoriesID\":0,\"version\":{\"versionMajor\":0,\"versionBuild\":0,\"versionMinor\":0,\"versionRevision\":0},\"cfgRealmsID\":0,\"gameServiceRegionId\":0,\"flags\":0,\"name\":\"\",\"cfgConfigsID\":0,\"cfgContentSetID\":0,\"cfgLanguagesID\":0}\"",
-0,
-},
-{
-"Received last played char code=\" (309)\" subRegion=\"34-2-89\" lastPlayedTime=\"0\" numRegions=\"5\" numRegionsWithData=\"1\" realmPermissions=\"0\" entitlementsCount=\"0\" realmEntry=\"{\"wowRealmAddress\":0,\"useBleepChance\":0.0,\"cfgTimezonesID\":0,\"populationState\":0,\"cfgCategoriesID\":0,\"version\":{\"versionMajor\":0,\"versionBuild\":0,\"versionMinor\":0,\"versionRevision\":0},\"cfgRealmsID\":0,\"gameServiceRegionId\":0,\"flags\":0,\"name\":\"\",\"cfgConfigsID\":0,\"cfgContentSetID\":0,\"cfgLanguagesID\":0}\"",
-0,
-},
-{
-"Received last played char code=\" (309)\" subRegion=\"21-1-50\" lastPlayedTime=\"0\" numRegions=\"5\" numRegionsWithData=\"2\" realmPermissions=\"0\" entitlementsCount=\"0\" realmEntry=\"{\"wowRealmAddress\":0,\"useBleepChance\":0.0,\"cfgTimezonesID\":0,\"populationState\":0,\"cfgCategoriesID\":0,\"version\":{\"versionMajor\":0,\"versionBuild\":0,\"versionMinor\":0,\"versionRevision\":0},\"cfgRealmsID\":0,\"gameServiceRegionId\":0,\"flags\":0,\"name\":\"\",\"cfgConfigsID\":0,\"cfgContentSetID\":0,\"cfgLanguagesID\":0}\"",
-0,
-},
-{
-"Received last played char code=\"ERROR_OK (0)\" subRegion=\"1-1-89\" lastPlayedTime=\"1781658592\" numRegions=\"5\" numRegionsWithData=\"3\" realmPermissions=\"3\" entitlementsCount=\"92\" realmEntry=\"{\"wowRealmAddress\":16908298,\"useBleepChance\":0.0,\"cfgTimezonesID\":4,\"populationState\":6,\"cfgCategoriesID\":2,\"version\":{\"versionMajor\":12,\"versionBuild\":67808,\"versionMinor\":0,\"versionRevision\":7},\"cfgRealmsID\":60,\"gameServiceRegionId\":1,\"flags\":0,\"name\":\"Stormrage\",\"cfgConfigsID\":1,\"cfgContentSetID\":0,\"cfgLanguagesID\":1}\"",
-0,
-},
-{
-"Received last played char code=\" (309)\" subRegion=\"76-1-59\" lastPlayedTime=\"0\" numRegions=\"5\" numRegionsWithData=\"4\" realmPermissions=\"0\" entitlementsCount=\"0\" realmEntry=\"{\"wowRealmAddress\":0,\"useBleepChance\":0.0,\"cfgTimezonesID\":0,\"populationState\":0,\"cfgCategoriesID\":0,\"version\":{\"versionMajor\":0,\"versionBuild\":0,\"versionMinor\":0,\"versionRevision\":0},\"cfgRealmsID\":0,\"gameServiceRegionId\":0,\"flags\":0,\"name\":\"\",\"cfgConfigsID\":0,\"cfgContentSetID\":0,\"cfgLanguagesID\":0}\"",
-0,
-},
-{
-"Realm list ready.",
-0,
-},
-{
-"Found most recently played char. Joining realm. lastPlayedRegion=\"1-1-89\" realmAddress=\"16908298\" lastActiveTime=\"1781658592\"",
-0,
-},
-{
-"Joining realm subRegion=\"1-1-89\" realmAddress=\"1-2-10\"",
-0,
-},
-{
-"OnRealmJoin code=\"ERROR_OK (0)\"",
-0,
-},
-{
-"Connecting conn=\"(enum)0\" connPtr=\"000001e4c3635d40\" protocol=\"(enum)0\"",
-0,
-},
-{
-"Received AuthedToWoW result=\"ERROR_OK (0)\"",
-0,
-},
-{
-"Screen invalid. Changing from=\"login\" to=\"charselect\"",
-0,
-},
-{
-"Connecting conn=\"(enum)2\" connPtr=\"000001e50853f910\" protocol=\"(enum)0\"",
-0,
-},
-{
-"KillConnection conn=\"000001e4c3635d40\" state=\"(enum)6\"",
-0,
-},
-{
-"Switching to screen=\"CharacterSelect\" (from \"login\")",
-0,
-},
-{
-"From EnsureValidScreen",
-0,
-},
-{
-"Connected to Back. Disconnecting from Front.",
-0,
-},
-{
-"Front disconnecting connectionId=\"1\"",
-0,
-},
-{
-"Disconnecting from authentication server.",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for Timer changed to 500",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for Texture changed to 40000",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for FontString changed to 50000",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for FontString changed to 5000",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for AnimGroup changed to 2000",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for Frame changed to 10000",
-0,
-},
-{
-"LimitedLuaResources: Enabled = false",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for AnimGroup changed to 20000",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for Font changed to 3000",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for Frame changed to 100000",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for Font changed to 300",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for Animation changed to 50000",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for Animation changed to 5000",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for Timer changed to 500",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for Texture changed to 400000",
-0,
+"...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:3187: attempt to index field 'activityIDs' (a secret table value, while execution tainted by 'PremadeGroupsFilter')\n|cffffd200Stack:|r\n[C]: in function 'secureexecuterange'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:407: in function 'InvokeInitializers'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:790: in function 'Update'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:317: in function 'SetScrollPercentageInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:181: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:758: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:136: in function 'FullUpdate'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:725: in function <...ddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua:724>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:210: in function <...e/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua:209>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:213: in function 'TriggerEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:336: in function 'SignalDataChangeEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:306: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:709: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2753: in function 'LFGListSearchPanel_UpdateResults'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2683: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:2679>\n[C]: in function 'LFGListSearchPanel_UpdateResultList'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2231: in function 'onEvent'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:277: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:185>\n",
+3,
 },
 {
-"Session with Battle.net established.",
-0,
-},
-{
-"[WowEntitlements] [BNetAccount-0-0000000E6FBF] [WowAccount-0-00000401C2D6] Initialized with 70 entitlements.",
-0,
+"...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:3187: attempt to index field 'activityIDs' (a secret table value, while execution tainted by 'PremadeGroupsFilter')\n|cffffd200Stack:|r\n[C]: in function 'secureexecuterange'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:407: in function 'InvokeInitializers'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:790: in function 'Update'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:317: in function 'SetScrollPercentageInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:181: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:758: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:136: in function 'FullUpdate'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:725: in function <...ddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua:724>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:210: in function <...e/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua:209>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:213: in function 'TriggerEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:336: in function 'SignalDataChangeEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:306: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:709: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2753: in function 'LFGListSearchPanel_UpdateResults'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2683: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:2679>\n[C]: in function 'LFGListSearchPanel_UpdateResultList'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2231: in function 'onEvent'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:277: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:185>\n",
+3,
 },
 {
-"Front disconnected connectionId=\"1\" result=\"1016\"",
-0,
+"...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:3187: attempt to index field 'activityIDs' (a secret table value, while execution tainted by 'PremadeGroupsFilter')\n|cffffd200Stack:|r\n[C]: in function 'secureexecuterange'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:407: in function 'InvokeInitializers'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:790: in function 'Update'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:317: in function 'SetScrollPercentageInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:181: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:758: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:136: in function 'FullUpdate'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:725: in function <...ddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua:724>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:210: in function <...e/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua:209>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:213: in function 'TriggerEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:336: in function 'SignalDataChangeEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:306: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:709: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2753: in function 'LFGListSearchPanel_UpdateResults'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2683: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:2679>\n[C]: in function 'LFGListSearchPanel_UpdateResultList'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2231: in function 'onEvent'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:277: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:185>\n",
+3,
 },
 {
-"Disconnected from authentication server.",
-0,
+"...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:3187: attempt to index field 'activityIDs' (a secret table value, while execution tainted by 'PremadeGroupsFilter')\n|cffffd200Stack:|r\n[C]: in function 'secureexecuterange'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:407: in function 'InvokeInitializers'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:790: in function 'Update'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:317: in function 'SetScrollPercentageInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:181: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:758: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:136: in function 'FullUpdate'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:725: in function <...ddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua:724>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:210: in function <...e/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua:209>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:213: in function 'TriggerEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:336: in function 'SignalDataChangeEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:306: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:709: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2753: in function 'LFGListSearchPanel_UpdateResults'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2683: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:2679>\n[C]: in function 'LFGListSearchPanel_UpdateResultList'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2231: in function 'onEvent'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:277: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:185>\n",
+3,
 },
 {
-"Sending ping results from timeout timeoutNs=\"77057397500\" nowNs=\"77141357800\"",
-0,
+"...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:3187: attempt to index field 'activityIDs' (a secret table value, while execution tainted by 'PremadeGroupsFilter')\n|cffffd200Stack:|r\n[C]: in function 'secureexecuterange'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:407: in function 'InvokeInitializers'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:790: in function 'Update'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:317: in function 'SetScrollPercentageInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:181: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:758: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:136: in function 'FullUpdate'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:725: in function <...ddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua:724>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:210: in function <...e/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua:209>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:213: in function 'TriggerEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:336: in function 'SignalDataChangeEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:306: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:709: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2753: in function 'LFGListSearchPanel_UpdateResults'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2683: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:2679>\n[C]: in function 'LFGListSearchPanel_UpdateResultList'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2231: in function 'onEvent'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:277: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:185>\n",
+3,
 },
 {
-"-------------------------------------------------- Previous Session --------------------------------------------------",
-0,
+"...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:3187: attempt to index field 'activityIDs' (a secret table value, while execution tainted by 'PremadeGroupsFilter')\n|cffffd200Stack:|r\n[C]: in function 'secureexecuterange'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:407: in function 'InvokeInitializers'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:790: in function 'Update'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:317: in function 'SetScrollPercentageInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:181: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:758: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:136: in function 'FullUpdate'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:725: in function <...ddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua:724>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:210: in function <...e/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua:209>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:213: in function 'TriggerEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:336: in function 'SignalDataChangeEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:306: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:709: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2753: in function 'LFGListSearchPanel_UpdateResults'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2683: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:2679>\n[C]: in function 'LFGListSearchPanel_UpdateResultList'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2231: in function 'onEvent'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:277: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:185>\n",
+3,
 },
 {
-"Suspend()",
-0,
+"...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:3187: attempt to index field 'activityIDs' (a secret table value, while execution tainted by 'PremadeGroupsFilter')\n|cffffd200Stack:|r\n[C]: in function 'secureexecuterange'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:407: in function 'InvokeInitializers'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:790: in function 'Update'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:317: in function 'SetScrollPercentageInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:181: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:758: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:136: in function 'FullUpdate'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:725: in function <...ddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua:724>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:210: in function <...e/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua:209>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:213: in function 'TriggerEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:336: in function 'SignalDataChangeEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:306: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:709: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2753: in function 'LFGListSearchPanel_UpdateResults'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2683: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:2679>\n[C]: in function 'LFGListSearchPanel_UpdateResultList'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2231: in function 'onEvent'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:277: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:185>\n",
+3,
 },
 {
-"LimitedLuaResources: Reset Timer",
-0,
+"...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:3187: attempt to index field 'activityIDs' (a secret table value, while execution tainted by 'PremadeGroupsFilter')\n|cffffd200Stack:|r\n[C]: in function 'secureexecuterange'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:407: in function 'InvokeInitializers'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:790: in function 'Update'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:317: in function 'SetScrollPercentageInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:181: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:758: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:136: in function 'FullUpdate'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:725: in function <...ddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua:724>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:210: in function <...e/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua:209>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:213: in function 'TriggerEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:336: in function 'SignalDataChangeEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:306: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:709: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2753: in function 'LFGListSearchPanel_UpdateResults'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2683: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:2679>\n[C]: in function 'LFGListSearchPanel_UpdateResultList'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2231: in function 'onEvent'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:277: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:185>\n",
+3,
 },
 {
-"Connecting conn=\"(enum)3\" connPtr=\"000001e508530f10\" protocol=\"(enum)0\"",
-0,
+"...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:3187: attempt to index field 'activityIDs' (a secret table value, while execution tainted by 'PremadeGroupsFilter')\n|cffffd200Stack:|r\n[C]: in function 'secureexecuterange'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:407: in function 'InvokeInitializers'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:790: in function 'Update'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:317: in function 'SetScrollPercentageInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:181: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:758: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:136: in function 'FullUpdate'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:725: in function <...ddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua:724>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:210: in function <...e/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua:209>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:213: in function 'TriggerEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:336: in function 'SignalDataChangeEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:306: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:709: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2753: in function 'LFGListSearchPanel_UpdateResults'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2683: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:2679>\n[C]: in function 'LFGListSearchPanel_UpdateResultList'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2231: in function 'onEvent'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:277: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:185>\n",
+3,
 },
 {
-"Proficiency in item class 2 set to 0x0000000001",
-0,
+"...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:3187: attempt to index field 'activityIDs' (a secret table value, while execution tainted by 'PremadeGroupsFilter')\n|cffffd200Stack:|r\n[C]: in function 'secureexecuterange'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:407: in function 'InvokeInitializers'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:790: in function 'Update'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:317: in function 'SetScrollPercentageInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:181: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:758: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:136: in function 'FullUpdate'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:725: in function <...ddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua:724>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:210: in function <...e/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua:209>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:213: in function 'TriggerEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:336: in function 'SignalDataChangeEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:306: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:709: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2753: in function 'LFGListSearchPanel_UpdateResults'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2683: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:2679>\n[C]: in function 'LFGListSearchPanel_UpdateResultList'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2231: in function 'onEvent'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:277: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:185>\n",
+3,
 },
 {
-"Proficiency in item class 2 set to 0x0000000041",
-0,
+"...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:3187: attempt to index field 'activityIDs' (a secret table value, while execution tainted by 'PremadeGroupsFilter')\n|cffffd200Stack:|r\n[C]: in function 'secureexecuterange'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:407: in function 'InvokeInitializers'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:790: in function 'Update'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:317: in function 'SetScrollPercentageInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:181: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:758: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:136: in function 'FullUpdate'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:725: in function <...ddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua:724>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:210: in function <...e/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua:209>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:213: in function 'TriggerEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:336: in function 'SignalDataChangeEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:306: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:709: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2753: in function 'LFGListSearchPanel_UpdateResults'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2683: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:2679>\n[C]: in function 'LFGListSearchPanel_UpdateResultList'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2231: in function 'onEvent'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:277: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:185>\n",
+3,
 },
 {
-"Proficiency in item class 4 set to 0x0000000021",
-0,
+"...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:3187: attempt to index field 'activityIDs' (a secret table value, while execution tainted by 'PremadeGroupsFilter')\n|cffffd200Stack:|r\n[C]: in function 'secureexecuterange'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:407: in function 'InvokeInitializers'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:790: in function 'Update'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:317: in function 'SetScrollPercentageInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:181: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:758: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:136: in function 'FullUpdate'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:725: in function <...ddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua:724>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:210: in function <...e/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua:209>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:213: in function 'TriggerEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:336: in function 'SignalDataChangeEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:306: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:709: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2753: in function 'LFGListSearchPanel_UpdateResults'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2683: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:2679>\n[C]: in function 'LFGListSearchPanel_UpdateResultList'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2231: in function 'onEvent'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:277: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:185>\n",
+3,
 },
 {
-"Proficiency in item class 2 set to 0x0000004041",
-0,
+"...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:3187: attempt to index field 'activityIDs' (a secret table value, while execution tainted by 'PremadeGroupsFilter')\n|cffffd200Stack:|r\n[C]: in function 'secureexecuterange'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:407: in function 'InvokeInitializers'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:790: in function 'Update'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:317: in function 'SetScrollPercentageInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:181: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:758: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:136: in function 'FullUpdate'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:725: in function <...ddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua:724>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:210: in function <...e/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua:209>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:213: in function 'TriggerEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:336: in function 'SignalDataChangeEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:306: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:709: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2753: in function 'LFGListSearchPanel_UpdateResults'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2683: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:2679>\n[C]: in function 'LFGListSearchPanel_UpdateResultList'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2231: in function 'onEvent'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:277: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:185>\n",
+3,
 },
 {
-"Proficiency in item class 2 set to 0x0000004441",
-0,
+"...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:3187: attempt to index field 'activityIDs' (a secret table value, while execution tainted by 'PremadeGroupsFilter')\n|cffffd200Stack:|r\n[C]: in function 'secureexecuterange'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:407: in function 'InvokeInitializers'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:790: in function 'Update'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:317: in function 'SetScrollPercentageInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:181: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:758: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:136: in function 'FullUpdate'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:725: in function <...ddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua:724>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:210: in function <...e/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua:209>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:213: in function 'TriggerEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:336: in function 'SignalDataChangeEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:306: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:709: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2753: in function 'LFGListSearchPanel_UpdateResults'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2683: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:2679>\n[C]: in function 'LFGListSearchPanel_UpdateResultList'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2231: in function 'onEvent'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:277: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:185>\n",
+3,
 },
 {
-"Proficiency in item class 4 set to 0x0000000025",
-0,
+"...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:3187: attempt to index field 'activityIDs' (a secret table value, while execution tainted by 'PremadeGroupsFilter')\n|cffffd200Stack:|r\n[C]: in function 'secureexecuterange'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:407: in function 'InvokeInitializers'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:790: in function 'Update'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:317: in function 'SetScrollPercentageInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:181: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:758: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:136: in function 'FullUpdate'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:725: in function <...ddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua:724>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:210: in function <...e/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua:209>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:213: in function 'TriggerEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:336: in function 'SignalDataChangeEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:306: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:709: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2753: in function 'LFGListSearchPanel_UpdateResults'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2683: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:2679>\n[C]: in function 'LFGListSearchPanel_UpdateResultList'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2231: in function 'onEvent'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:277: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:185>\n",
+3,
 },
 {
-"Proficiency in item class 2 set to 0x0000006441",
-0,
+"...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:3187: attempt to index field 'activityIDs' (a secret table value, while execution tainted by 'PremadeGroupsFilter')\n|cffffd200Stack:|r\n[C]: in function 'secureexecuterange'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:407: in function 'InvokeInitializers'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:790: in function 'Update'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:317: in function 'SetScrollPercentageInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:181: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:758: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:136: in function 'FullUpdate'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:725: in function <...ddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua:724>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:210: in function <...e/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua:209>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:213: in function 'TriggerEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:336: in function 'SignalDataChangeEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:306: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:709: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2753: in function 'LFGListSearchPanel_UpdateResults'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2683: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:2679>\n[C]: in function 'LFGListSearchPanel_UpdateResultList'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2231: in function 'onEvent'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:277: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:185>\n",
+3,
 },
 {
-"Proficiency in item class 2 set to 0x0000006451",
-0,
+"...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:3187: attempt to index field 'activityIDs' (a secret table value, while execution tainted by 'PremadeGroupsFilter')\n|cffffd200Stack:|r\n[C]: in function 'secureexecuterange'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:407: in function 'InvokeInitializers'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:790: in function 'Update'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:317: in function 'SetScrollPercentageInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:181: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:758: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:136: in function 'FullUpdate'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:725: in function <...ddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua:724>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:210: in function <...e/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua:209>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:213: in function 'TriggerEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:336: in function 'SignalDataChangeEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:306: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:709: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2753: in function 'LFGListSearchPanel_UpdateResults'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2683: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:2679>\n[C]: in function 'LFGListSearchPanel_UpdateResultList'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2231: in function 'onEvent'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:277: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:185>\n",
+3,
 },
 {
-"Proficiency in item class 2 set to 0x00000064d1",
-0,
+"...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:3187: attempt to index field 'activityIDs' (a secret table value, while execution tainted by 'PremadeGroupsFilter')\n|cffffd200Stack:|r\n[C]: in function 'secureexecuterange'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:407: in function 'InvokeInitializers'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:790: in function 'Update'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:317: in function 'SetScrollPercentageInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:181: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:758: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:136: in function 'FullUpdate'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:725: in function <...ddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua:724>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:210: in function <...e/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua:209>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:213: in function 'TriggerEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:336: in function 'SignalDataChangeEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:306: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:709: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2753: in function 'LFGListSearchPanel_UpdateResults'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2683: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:2679>\n[C]: in function 'LFGListSearchPanel_UpdateResultList'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2231: in function 'onEvent'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:277: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:185>\n",
+3,
 },
 {
-"Proficiency in item class 4 set to 0x0000000027",
+"All pings from all pongs received",
 0,
 },
 {
-"Proficiency in item class 2 set to 0x00000064d1",
-0,
+"...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:3187: attempt to index field 'activityIDs' (a secret table value, while execution tainted by 'PremadeGroupsFilter')\n|cffffd200Stack:|r\n[C]: in function 'secureexecuterange'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:407: in function 'InvokeInitializers'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:790: in function 'Update'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:317: in function 'SetScrollPercentageInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:181: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:758: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:136: in function 'FullUpdate'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:725: in function <...ddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua:724>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:210: in function <...e/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua:209>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:213: in function 'TriggerEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:336: in function 'SignalDataChangeEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:306: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:709: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2753: in function 'LFGListSearchPanel_UpdateResults'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2683: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:2679>\n[C]: in function 'LFGListSearchPanel_UpdateResultList'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2231: in function 'onEvent'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:277: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:185>\n",
+3,
 },
 {
-"Proficiency in item class 4 set to 0x0000000027",
-0,
+"...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:3187: attempt to index field 'activityIDs' (a secret table value, while execution tainted by 'PremadeGroupsFilter')\n|cffffd200Stack:|r\n[C]: in function 'secureexecuterange'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:407: in function 'InvokeInitializers'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:790: in function 'Update'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:317: in function 'SetScrollPercentageInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:181: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:758: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:136: in function 'FullUpdate'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:725: in function <...ddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua:724>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:210: in function <...e/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua:209>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:213: in function 'TriggerEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:336: in function 'SignalDataChangeEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:306: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:709: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2753: in function 'LFGListSearchPanel_UpdateResults'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2683: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:2679>\n[C]: in function 'LFGListSearchPanel_UpdateResultList'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2231: in function 'onEvent'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:277: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:185>\n",
+3,
 },
 {
-"Weather changed to 0, intensity 0.000000\n",
-0,
+"...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:3187: attempt to index field 'activityIDs' (a secret table value, while execution tainted by 'PremadeGroupsFilter')\n|cffffd200Stack:|r\n[C]: in function 'secureexecuterange'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:407: in function 'InvokeInitializers'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:790: in function 'Update'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:317: in function 'SetScrollPercentageInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:181: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:758: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:136: in function 'FullUpdate'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:725: in function <...ddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua:724>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:210: in function <...e/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua:209>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:213: in function 'TriggerEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:336: in function 'SignalDataChangeEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:306: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:709: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2753: in function 'LFGListSearchPanel_UpdateResults'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2683: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:2679>\n[C]: in function 'LFGListSearchPanel_UpdateResultList'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2231: in function 'onEvent'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:277: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:185>\n",
+3,
 },
 {
-"Time set to 6/16/2026 (Tue) 18:11",
-0,
+"...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:3187: attempt to index field 'activityIDs' (a secret table value, while execution tainted by 'PremadeGroupsFilter')\n|cffffd200Stack:|r\n[C]: in function 'secureexecuterange'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:407: in function 'InvokeInitializers'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:790: in function 'Update'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:317: in function 'SetScrollPercentageInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:181: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:758: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:136: in function 'FullUpdate'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:725: in function <...ddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua:724>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:210: in function <...e/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua:209>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:213: in function 'TriggerEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:336: in function 'SignalDataChangeEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:306: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:709: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2753: in function 'LFGListSearchPanel_UpdateResults'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2683: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:2679>\n[C]: in function 'LFGListSearchPanel_UpdateResultList'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2231: in function 'onEvent'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:277: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:185>\n",
+3,
 },
 {
-"Gamespeed set from 0.017 to 0.017",
-0,
+"...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:3187: attempt to index field 'activityIDs' (a secret table value, while execution tainted by 'PremadeGroupsFilter')\n|cffffd200Stack:|r\n[C]: in function 'secureexecuterange'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:407: in function 'InvokeInitializers'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:790: in function 'Update'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:317: in function 'SetScrollPercentageInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:181: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:758: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:136: in function 'FullUpdate'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:725: in function <...ddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua:724>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:210: in function <...e/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua:209>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:213: in function 'TriggerEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:336: in function 'SignalDataChangeEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:306: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:709: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2753: in function 'LFGListSearchPanel_UpdateResults'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2683: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:2679>\n[C]: in function 'LFGListSearchPanel_UpdateResultList'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2231: in function 'onEvent'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:277: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:185>\n",
+3,
 },
 {
-"Interface/AddOns/NoAutoClose/libs/LibVersionCheck-1.0/LibVersionCheck-1.0.xml:3 Error loading Interface/AddOns/NoAutoClose/Dependencies/LibStub.lua",
+"...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:3187: attempt to index field 'activityIDs' (a secret table value, while execution tainted by 'PremadeGroupsFilter')\n|cffffd200Stack:|r\n[C]: in function 'secureexecuterange'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:407: in function 'InvokeInitializers'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:790: in function 'Update'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:317: in function 'SetScrollPercentageInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:181: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:758: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:136: in function 'FullUpdate'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:725: in function <...ddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua:724>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:210: in function <...e/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua:209>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:213: in function 'TriggerEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:336: in function 'SignalDataChangeEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:306: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:709: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2753: in function 'LFGListSearchPanel_UpdateResults'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2683: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:2679>\n[C]: in function 'LFGListSearchPanel_UpdateResultList'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2231: in function 'onEvent'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:277: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:185>\n",
 3,
 },
 {
@@ -2383,15 +2160,67 @@ Blizzard_Console_SavedVars = {
 0,
 },
 {
+"...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:3187: attempt to index field 'activityIDs' (a secret table value, while execution tainted by 'PremadeGroupsFilter')\n|cffffd200Stack:|r\n[C]: in function 'secureexecuterange'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:407: in function 'InvokeInitializers'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:790: in function 'Update'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:317: in function 'SetScrollPercentageInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:181: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:758: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:136: in function 'FullUpdate'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:725: in function <...ddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua:724>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:210: in function <...e/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua:209>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:213: in function 'TriggerEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:336: in function 'SignalDataChangeEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:306: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:709: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2753: in function 'LFGListSearchPanel_UpdateResults'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2683: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:2679>\n[C]: in function 'LFGListSearchPanel_UpdateResultList'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2231: in function 'onEvent'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:277: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:185>\n",
+3,
+},
+{
+"...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:3187: attempt to index field 'activityIDs' (a secret table value, while execution tainted by 'PremadeGroupsFilter')\n|cffffd200Stack:|r\n[C]: in function 'secureexecuterange'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:407: in function 'InvokeInitializers'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:790: in function 'Update'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:317: in function 'SetScrollPercentageInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:181: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:758: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:136: in function 'FullUpdate'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:725: in function <...ddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua:724>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:210: in function <...e/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua:209>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:213: in function 'TriggerEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:336: in function 'SignalDataChangeEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:306: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:709: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2753: in function 'LFGListSearchPanel_UpdateResults'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2683: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:2679>\n[C]: in function 'LFGListSearchPanel_UpdateResultList'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2231: in function 'onEvent'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:277: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:185>\n",
+3,
+},
+{
+"...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:3187: attempt to index field 'activityIDs' (a secret table value, while execution tainted by 'PremadeGroupsFilter')\n|cffffd200Stack:|r\n[C]: in function 'secureexecuterange'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:407: in function 'InvokeInitializers'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:790: in function 'Update'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:317: in function 'SetScrollPercentageInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:181: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:758: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:136: in function 'FullUpdate'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:725: in function <...ddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua:724>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:210: in function <...e/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua:209>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:213: in function 'TriggerEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:336: in function 'SignalDataChangeEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:306: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:709: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2753: in function 'LFGListSearchPanel_UpdateResults'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2683: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:2679>\n[C]: in function 'LFGListSearchPanel_UpdateResultList'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2231: in function 'onEvent'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:277: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:185>\n",
+3,
+},
+{
+"...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:3187: attempt to index field 'activityIDs' (a secret table value, while execution tainted by 'PremadeGroupsFilter')\n|cffffd200Stack:|r\n[C]: in function 'secureexecuterange'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:407: in function 'InvokeInitializers'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:790: in function 'Update'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:317: in function 'SetScrollPercentageInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:181: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:758: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:136: in function 'FullUpdate'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:725: in function <...ddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua:724>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:210: in function <...e/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua:209>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:213: in function 'TriggerEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:336: in function 'SignalDataChangeEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:306: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:709: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2753: in function 'LFGListSearchPanel_UpdateResults'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2683: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:2679>\n[C]: in function 'LFGListSearchPanel_UpdateResultList'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2231: in function 'onEvent'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:277: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:185>\n",
+3,
+},
+{
+"...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:3187: attempt to index field 'activityIDs' (a secret table value, while execution tainted by 'PremadeGroupsFilter')\n|cffffd200Stack:|r\n[C]: in function 'secureexecuterange'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:407: in function 'InvokeInitializers'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:790: in function 'Update'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:317: in function 'SetScrollPercentageInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:181: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:758: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:136: in function 'FullUpdate'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:725: in function <...ddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua:724>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:210: in function <...e/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua:209>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:213: in function 'TriggerEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:336: in function 'SignalDataChangeEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:306: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:709: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2753: in function 'LFGListSearchPanel_UpdateResults'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2683: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:2679>\n[C]: in function 'LFGListSearchPanel_UpdateResultList'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2231: in function 'onEvent'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:277: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:185>\n",
+3,
+},
+{
+"...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:3187: attempt to index field 'activityIDs' (a secret table value, while execution tainted by 'PremadeGroupsFilter')\n|cffffd200Stack:|r\n[C]: in function 'secureexecuterange'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:407: in function 'InvokeInitializers'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:790: in function 'Update'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:317: in function 'SetScrollPercentageInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:181: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:758: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:136: in function 'FullUpdate'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:725: in function <...ddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua:724>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:210: in function <...e/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua:209>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:213: in function 'TriggerEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:336: in function 'SignalDataChangeEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:306: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:709: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2753: in function 'LFGListSearchPanel_UpdateResults'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2683: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:2679>\n[C]: in function 'LFGListSearchPanel_UpdateResultList'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2231: in function 'onEvent'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:277: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:185>\n",
+3,
+},
+{
+"...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:3187: attempt to index field 'activityIDs' (a secret table value, while execution tainted by 'PremadeGroupsFilter')\n|cffffd200Stack:|r\n[C]: in function 'secureexecuterange'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:407: in function 'InvokeInitializers'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:790: in function 'Update'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:317: in function 'SetScrollPercentageInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:181: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:758: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:136: in function 'FullUpdate'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:725: in function <...ddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua:724>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:210: in function <...e/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua:209>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:213: in function 'TriggerEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:336: in function 'SignalDataChangeEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:306: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:709: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2753: in function 'LFGListSearchPanel_UpdateResults'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2683: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:2679>\n[C]: in function 'LFGListSearchPanel_UpdateResultList'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2231: in function 'onEvent'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:277: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:185>\n",
+3,
+},
+{
+"...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:3187: attempt to index field 'activityIDs' (a secret table value, while execution tainted by 'PremadeGroupsFilter')\n|cffffd200Stack:|r\n[C]: in function 'secureexecuterange'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:407: in function 'InvokeInitializers'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:790: in function 'Update'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:317: in function 'SetScrollPercentageInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:181: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:758: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:136: in function 'FullUpdate'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:725: in function <...ddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua:724>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:210: in function <...e/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua:209>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:213: in function 'TriggerEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:336: in function 'SignalDataChangeEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:306: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:709: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2753: in function 'LFGListSearchPanel_UpdateResults'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2683: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:2679>\n[C]: in function 'LFGListSearchPanel_UpdateResultList'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2231: in function 'onEvent'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:277: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:185>\n",
+3,
+},
+{
+"...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:3187: attempt to index field 'activityIDs' (a secret table value, while execution tainted by 'PremadeGroupsFilter')\n|cffffd200Stack:|r\n[C]: in function 'secureexecuterange'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:407: in function 'InvokeInitializers'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:790: in function 'Update'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:317: in function 'SetScrollPercentageInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:181: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:758: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:136: in function 'FullUpdate'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:725: in function <...ddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua:724>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:210: in function <...e/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua:209>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:213: in function 'TriggerEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:336: in function 'SignalDataChangeEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:306: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:709: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2753: in function 'LFGListSearchPanel_UpdateResults'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2683: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:2679>\n[C]: in function 'LFGListSearchPanel_UpdateResultList'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2231: in function 'onEvent'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:277: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:185>\n",
+3,
+},
+{
+"...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:3187: attempt to index field 'activityIDs' (a secret table value, while execution tainted by 'PremadeGroupsFilter')\n|cffffd200Stack:|r\n[C]: in function 'secureexecuterange'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:407: in function 'InvokeInitializers'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:790: in function 'Update'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:317: in function 'SetScrollPercentageInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:181: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:758: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:136: in function 'FullUpdate'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:725: in function <...ddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua:724>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:210: in function <...e/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua:209>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:213: in function 'TriggerEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:336: in function 'SignalDataChangeEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:306: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:709: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2753: in function 'LFGListSearchPanel_UpdateResults'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2683: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:2679>\n[C]: in function 'LFGListSearchPanel_UpdateResultList'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2231: in function 'onEvent'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:277: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:185>\n",
+3,
+},
+{
+"...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:3187: attempt to index field 'activityIDs' (a secret table value, while execution tainted by 'PremadeGroupsFilter')\n|cffffd200Stack:|r\n[C]: in function 'secureexecuterange'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:407: in function 'InvokeInitializers'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:790: in function 'Update'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:317: in function 'SetScrollPercentageInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:181: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:758: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:136: in function 'FullUpdate'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:725: in function <...ddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua:724>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:210: in function <...e/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua:209>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:213: in function 'TriggerEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:336: in function 'SignalDataChangeEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:306: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:709: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2753: in function 'LFGListSearchPanel_UpdateResults'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2683: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:2679>\n[C]: in function 'LFGListSearchPanel_UpdateResultList'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2231: in function 'onEvent'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:277: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:185>\n",
+3,
+},
+{
+"...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:3187: attempt to index field 'activityIDs' (a secret table value, while execution tainted by 'PremadeGroupsFilter')\n|cffffd200Stack:|r\n[C]: in function 'secureexecuterange'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:407: in function 'InvokeInitializers'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:790: in function 'Update'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:317: in function 'SetScrollPercentageInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:181: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:758: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:136: in function 'FullUpdate'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:725: in function <...ddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua:724>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:210: in function <...e/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua:209>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:213: in function 'TriggerEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:336: in function 'SignalDataChangeEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:306: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:709: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2753: in function 'LFGListSearchPanel_UpdateResults'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2683: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:2679>\n[C]: in function 'LFGListSearchPanel_UpdateResultList'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2231: in function 'onEvent'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:277: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:185>\n",
+3,
+},
+{
+"Completed challenge mode mapID 1753, level 21, time 1815359",
+0,
+},
+{
 "World transfer pending...",
 0,
 },
 {
-"Connecting conn=\"(enum)3\" connPtr=\"000001e50b33f1d0\" protocol=\"(enum)0\"",
+"Connecting conn=\"(enum)3\" connPtr=\"0000024106a60990\" protocol=\"(enum)0\"",
 0,
 },
 {
-"KillConnection conn=\"000001e508530f10\" state=\"(enum)6\"",
+"KillConnection conn=\"0000024104ad3d30\" state=\"(enum)6\"",
 0,
 },
 {
@@ -2403,31 +2232,19 @@ Blizzard_Console_SavedVars = {
 0,
 },
 {
-"Connecting conn=\"(enum)3\" connPtr=\"000001e69c10ca90\" protocol=\"(enum)0\"",
+"Connecting conn=\"(enum)3\" connPtr=\"000002427743d2e0\" protocol=\"(enum)0\"",
 0,
 },
 {
-"KillConnection conn=\"000001e50b33f1d0\" state=\"(enum)6\"",
+"KillConnection conn=\"0000024106a60990\" state=\"(enum)6\"",
 0,
 },
 {
-"Weather changed to 0, intensity 0.000000\n",
+"Weather changed to 1, intensity 1.000000\n",
 0,
 },
 {
-"World transfer pending...",
-0,
-},
-{
-"Connecting conn=\"(enum)3\" connPtr=\"000001e634da8a70\" protocol=\"(enum)0\"",
-0,
-},
-{
-"KillConnection conn=\"000001e69c10ca90\" state=\"(enum)6\"",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
+"Weather changed to 1, intensity 1.000000\n",
 0,
 },
 {
@@ -2435,111 +2252,107 @@ Blizzard_Console_SavedVars = {
 0,
 },
 {
-"Connecting conn=\"(enum)3\" connPtr=\"000001e50b374870\" protocol=\"(enum)0\"",
+"Connecting conn=\"(enum)3\" connPtr=\"000002437ae943a0\" protocol=\"(enum)0\"",
 0,
 },
 {
-"KillConnection conn=\"000001e634da8a70\" state=\"(enum)6\"",
+"KillConnection conn=\"000002427743d2e0\" state=\"(enum)6\"",
 0,
 },
 {
 "Weather changed to 0, intensity 0.000000\n",
 0,
+},
+{
+"Changed difficulty successfully",
+0,
+},
+{
+"All pings from all pongs received",
+0,
+},
+{
+"...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:3187: attempt to index field 'activityIDs' (a secret table value, while execution tainted by 'PremadeGroupsFilter')\n|cffffd200Stack:|r\n[C]: in function 'secureexecuterange'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:407: in function 'InvokeInitializers'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:790: in function 'Update'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:317: in function 'SetScrollPercentageInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:181: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:758: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:136: in function 'FullUpdate'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:725: in function <...ddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua:724>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:210: in function <...e/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua:209>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:213: in function 'TriggerEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:336: in function 'SignalDataChangeEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:306: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:709: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2753: in function 'LFGListSearchPanel_UpdateResults'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2683: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:2679>\n[C]: in function 'LFGListSearchPanel_UpdateResultList'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2231: in function 'onEvent'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:277: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:185>\n",
+3,
+},
+{
+"...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:3187: attempt to index field 'activityIDs' (a secret table value, while execution tainted by 'PremadeGroupsFilter')\n|cffffd200Stack:|r\n[C]: in function 'secureexecuterange'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:407: in function 'InvokeInitializers'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:790: in function 'Update'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:317: in function 'SetScrollPercentageInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:181: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:758: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:136: in function 'FullUpdate'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:725: in function <...ddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua:724>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:210: in function <...e/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua:209>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:213: in function 'TriggerEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:336: in function 'SignalDataChangeEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:306: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:709: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2753: in function 'LFGListSearchPanel_UpdateResults'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2683: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:2679>\n[C]: in function 'LFGListSearchPanel_UpdateResultList'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2231: in function 'onEvent'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:277: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:185>\n",
+3,
+},
+{
+"...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:3187: attempt to index field 'activityIDs' (a secret table value, while execution tainted by 'PremadeGroupsFilter')\n|cffffd200Stack:|r\n[C]: in function 'secureexecuterange'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:407: in function 'InvokeInitializers'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:790: in function 'Update'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:317: in function 'SetScrollPercentageInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:181: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:758: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:136: in function 'FullUpdate'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:725: in function <...ddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua:724>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:210: in function <...e/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua:209>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:213: in function 'TriggerEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:336: in function 'SignalDataChangeEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:306: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:709: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2753: in function 'LFGListSearchPanel_UpdateResults'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2683: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:2679>\n[C]: in function 'LFGListSearchPanel_UpdateResultList'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2231: in function 'onEvent'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:277: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:185>\n",
+3,
+},
+{
+"...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:3187: attempt to index field 'activityIDs' (a secret table value, while execution tainted by 'PremadeGroupsFilter')\n|cffffd200Stack:|r\n[C]: in function 'secureexecuterange'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:407: in function 'InvokeInitializers'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:790: in function 'Update'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:317: in function 'SetScrollPercentageInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:181: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:758: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:136: in function 'FullUpdate'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:725: in function <...ddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua:724>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:210: in function <...e/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua:209>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:213: in function 'TriggerEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:336: in function 'SignalDataChangeEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:306: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:709: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2753: in function 'LFGListSearchPanel_UpdateResults'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2683: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:2679>\n[C]: in function 'LFGListSearchPanel_UpdateResultList'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2231: in function 'onEvent'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:277: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:185>\n",
+3,
+},
+{
+"...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:3187: attempt to index field 'activityIDs' (a secret table value, while execution tainted by 'PremadeGroupsFilter')\n|cffffd200Stack:|r\n[C]: in function 'secureexecuterange'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:407: in function 'InvokeInitializers'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:790: in function 'Update'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:317: in function 'SetScrollPercentageInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:181: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:758: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:136: in function 'FullUpdate'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:725: in function <...ddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua:724>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:210: in function <...e/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua:209>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:213: in function 'TriggerEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:336: in function 'SignalDataChangeEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:306: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:709: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2753: in function 'LFGListSearchPanel_UpdateResults'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2683: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:2679>\n[C]: in function 'LFGListSearchPanel_UpdateResultList'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2231: in function 'onEvent'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:277: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:185>\n",
+3,
+},
+{
+"...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:3187: attempt to index field 'activityIDs' (a secret table value, while execution tainted by 'PremadeGroupsFilter')\n|cffffd200Stack:|r\n[C]: in function 'secureexecuterange'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:407: in function 'InvokeInitializers'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:790: in function 'Update'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:317: in function 'SetScrollPercentageInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:181: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:758: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:136: in function 'FullUpdate'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:725: in function <...ddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua:724>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:210: in function <...e/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua:209>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:213: in function 'TriggerEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:336: in function 'SignalDataChangeEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:306: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:709: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2753: in function 'LFGListSearchPanel_UpdateResults'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2683: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:2679>\n[C]: in function 'LFGListSearchPanel_UpdateResultList'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2231: in function 'onEvent'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:277: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:185>\n",
+3,
+},
+{
+"...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:3187: attempt to index field 'activityIDs' (a secret table value, while execution tainted by 'PremadeGroupsFilter')\n|cffffd200Stack:|r\n[C]: in function 'secureexecuterange'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:407: in function 'InvokeInitializers'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:790: in function 'Update'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:317: in function 'SetScrollPercentageInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:181: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:758: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:136: in function 'FullUpdate'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:725: in function <...ddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua:724>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:210: in function <...e/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua:209>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:213: in function 'TriggerEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:336: in function 'SignalDataChangeEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:306: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:709: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2753: in function 'LFGListSearchPanel_UpdateResults'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2683: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:2679>\n[C]: in function 'LFGListSearchPanel_UpdateResultList'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2231: in function 'onEvent'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:277: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:185>\n",
+3,
+},
+{
+"...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:3187: attempt to index field 'activityIDs' (a secret table value, while execution tainted by 'PremadeGroupsFilter')\n|cffffd200Stack:|r\n[C]: in function 'secureexecuterange'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:407: in function 'InvokeInitializers'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:790: in function 'Update'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:317: in function 'SetScrollPercentageInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:181: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:758: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:136: in function 'FullUpdate'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:725: in function <...ddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua:724>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:210: in function <...e/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua:209>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:213: in function 'TriggerEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:336: in function 'SignalDataChangeEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:306: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:709: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2753: in function 'LFGListSearchPanel_UpdateResults'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2683: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:2679>\n[C]: in function 'LFGListSearchPanel_UpdateResultList'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2231: in function 'onEvent'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:277: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:185>\n",
+3,
+},
+{
+"...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:3187: attempt to index field 'activityIDs' (a secret table value, while execution tainted by 'PremadeGroupsFilter')\n|cffffd200Stack:|r\n[C]: in function 'secureexecuterange'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:407: in function 'InvokeInitializers'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:790: in function 'Update'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:317: in function 'SetScrollPercentageInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:181: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:758: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:136: in function 'FullUpdate'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:725: in function <...ddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua:724>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:210: in function <...e/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua:209>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:213: in function 'TriggerEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:336: in function 'SignalDataChangeEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:306: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:709: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2753: in function 'LFGListSearchPanel_UpdateResults'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2683: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:2679>\n[C]: in function 'LFGListSearchPanel_UpdateResultList'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2231: in function 'onEvent'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:277: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:185>\n",
+3,
+},
+{
+"...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:3187: attempt to index field 'activityIDs' (a secret table value, while execution tainted by 'PremadeGroupsFilter')\n|cffffd200Stack:|r\n[C]: in function 'secureexecuterange'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:407: in function 'InvokeInitializers'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:790: in function 'Update'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:317: in function 'SetScrollPercentageInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:181: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:758: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:136: in function 'FullUpdate'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:725: in function <...ddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua:724>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:210: in function <...e/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua:209>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:213: in function 'TriggerEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:336: in function 'SignalDataChangeEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:306: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:709: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2753: in function 'LFGListSearchPanel_UpdateResults'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2683: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:2679>\n[C]: in function 'LFGListSearchPanel_UpdateResultList'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2231: in function 'onEvent'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:277: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:185>\n",
+3,
+},
+{
+"...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:3187: attempt to index field 'activityIDs' (a secret table value, while execution tainted by 'PremadeGroupsFilter')\n|cffffd200Stack:|r\n[C]: in function 'secureexecuterange'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:407: in function 'InvokeInitializers'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:790: in function 'Update'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:317: in function 'SetScrollPercentageInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:181: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:758: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:136: in function 'FullUpdate'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:725: in function <...ddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua:724>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:210: in function <...e/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua:209>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:213: in function 'TriggerEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:336: in function 'SignalDataChangeEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:306: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:709: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2753: in function 'LFGListSearchPanel_UpdateResults'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2683: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:2679>\n[C]: in function 'LFGListSearchPanel_UpdateResultList'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2231: in function 'onEvent'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:277: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:185>\n",
+3,
+},
+{
+"...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:3187: attempt to index field 'activityIDs' (a secret table value, while execution tainted by 'PremadeGroupsFilter')\n|cffffd200Stack:|r\n[C]: in function 'secureexecuterange'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:407: in function 'InvokeInitializers'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:790: in function 'Update'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:317: in function 'SetScrollPercentageInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:181: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:758: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:136: in function 'FullUpdate'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:725: in function <...ddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua:724>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:210: in function <...e/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua:209>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:213: in function 'TriggerEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:336: in function 'SignalDataChangeEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:306: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:709: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2753: in function 'LFGListSearchPanel_UpdateResults'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2683: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:2679>\n[C]: in function 'LFGListSearchPanel_UpdateResultList'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2231: in function 'onEvent'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:277: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:185>\n",
+3,
+},
+{
+"...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:3187: attempt to index field 'activityIDs' (a secret table value, while execution tainted by 'PremadeGroupsFilter')\n|cffffd200Stack:|r\n[C]: in function 'secureexecuterange'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:407: in function 'InvokeInitializers'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:790: in function 'Update'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:317: in function 'SetScrollPercentageInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:181: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:758: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:136: in function 'FullUpdate'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:725: in function <...ddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua:724>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:210: in function <...e/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua:209>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:213: in function 'TriggerEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:336: in function 'SignalDataChangeEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:306: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:709: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2753: in function 'LFGListSearchPanel_UpdateResults'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2683: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:2679>\n[C]: in function 'LFGListSearchPanel_UpdateResultList'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2231: in function 'onEvent'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:277: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:185>\n",
+3,
+},
+{
+"...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:3187: attempt to index field 'activityIDs' (a secret table value, while execution tainted by 'PremadeGroupsFilter')\n|cffffd200Stack:|r\n[C]: in function 'secureexecuterange'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:407: in function 'InvokeInitializers'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:790: in function 'Update'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:317: in function 'SetScrollPercentageInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:181: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:758: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:136: in function 'FullUpdate'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:725: in function <...ddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua:724>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:210: in function <...e/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua:209>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:213: in function 'TriggerEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:336: in function 'SignalDataChangeEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:306: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:709: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2753: in function 'LFGListSearchPanel_UpdateResults'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2683: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:2679>\n[C]: in function 'LFGListSearchPanel_UpdateResultList'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2231: in function 'onEvent'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:277: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:185>\n",
+3,
+},
+{
+"...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:3187: attempt to index field 'activityIDs' (a secret table value, while execution tainted by 'PremadeGroupsFilter')\n|cffffd200Stack:|r\n[C]: in function 'secureexecuterange'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:407: in function 'InvokeInitializers'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:790: in function 'Update'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:317: in function 'SetScrollPercentageInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:181: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:758: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:136: in function 'FullUpdate'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:725: in function <...ddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua:724>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:210: in function <...e/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua:209>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:213: in function 'TriggerEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:336: in function 'SignalDataChangeEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:306: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:709: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2753: in function 'LFGListSearchPanel_UpdateResults'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2683: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:2679>\n[C]: in function 'LFGListSearchPanel_UpdateResultList'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2231: in function 'onEvent'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:277: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:185>\n",
+3,
+},
+{
+"...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:3187: attempt to index field 'activityIDs' (a secret table value, while execution tainted by 'PremadeGroupsFilter')\n|cffffd200Stack:|r\n[C]: in function 'secureexecuterange'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:407: in function 'InvokeInitializers'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:790: in function 'Update'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:317: in function 'SetScrollPercentageInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:181: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:758: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:136: in function 'FullUpdate'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:725: in function <...ddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua:724>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:210: in function <...e/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua:209>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:213: in function 'TriggerEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:336: in function 'SignalDataChangeEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:306: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:709: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2753: in function 'LFGListSearchPanel_UpdateResults'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2683: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:2679>\n[C]: in function 'LFGListSearchPanel_UpdateResultList'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2231: in function 'onEvent'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:277: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:185>\n",
+3,
+},
+{
+"...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:3187: attempt to index field 'activityIDs' (a secret table value, while execution tainted by 'PremadeGroupsFilter')\n|cffffd200Stack:|r\n[C]: in function 'secureexecuterange'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:407: in function 'InvokeInitializers'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:790: in function 'Update'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:317: in function 'SetScrollPercentageInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:181: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:758: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:136: in function 'FullUpdate'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:725: in function <...ddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua:724>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:210: in function <...e/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua:209>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:213: in function 'TriggerEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:336: in function 'SignalDataChangeEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:306: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:709: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2753: in function 'LFGListSearchPanel_UpdateResults'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2683: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:2679>\n[C]: in function 'LFGListSearchPanel_UpdateResultList'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2231: in function 'onEvent'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:277: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:185>\n",
+3,
+},
+{
+"...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:3187: attempt to index field 'activityIDs' (a secret table value, while execution tainted by 'PremadeGroupsFilter')\n|cffffd200Stack:|r\n[C]: in function 'secureexecuterange'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:407: in function 'InvokeInitializers'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:790: in function 'Update'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:317: in function 'SetScrollPercentageInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:181: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:758: in function 'FullUpdateInternal'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:136: in function 'FullUpdate'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:725: in function <...ddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua:724>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:210: in function <...e/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua:209>\n[C]: ?\n[Interface/AddOns/Blizzard_SharedXMLBase/CallbackRegistry.lua]:213: in function 'TriggerEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:336: in function 'SignalDataChangeEvent'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBoxListView.lua]:306: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_SharedXML/Shared/Scroll/ScrollBox.lua]:709: in function 'SetDataProvider'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2753: in function 'LFGListSearchPanel_UpdateResults'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2683: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:2679>\n[C]: in function 'LFGListSearchPanel_UpdateResultList'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:2231: in function 'onEvent'\n[Interface/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua]:277: in function <...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:185>\n",
+3,
 },
 {
 "World transfer pending...",
 0,
 },
 {
-"Connecting conn=\"(enum)3\" connPtr=\"000001e5085398e0\" protocol=\"(enum)0\"",
+"Connecting conn=\"(enum)3\" connPtr=\"0000024370cd29a0\" protocol=\"(enum)0\"",
 0,
 },
 {
-"KillConnection conn=\"000001e50b374870\" state=\"(enum)6\"",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
-0,
-},
-{
-"Time set to 6/16/2026 (Tue) 18:15",
-0,
-},
-{
-"Time set to 6/16/2026 (Tue) 18:15",
-0,
-},
-{
-"Time set to 6/16/2026 (Tue) 18:17",
-0,
-},
-{
-"Time set to 6/16/2026 (Tue) 18:17",
-0,
-},
-{
-"Time set to 6/16/2026 (Tue) 18:18",
-0,
-},
-{
-"Time set to 6/16/2026 (Tue) 18:18",
-0,
-},
-{
-"Time set to 6/16/2026 (Tue) 18:18",
-0,
-},
-{
-"Time set to 6/16/2026 (Tue) 18:18",
-0,
-},
-{
-"Time set to 6/16/2026 (Tue) 18:18",
-0,
-},
-{
-"Time set to 6/16/2026 (Tue) 18:18",
-0,
-},
-{
-"Time set to 6/16/2026 (Tue) 18:19",
-0,
-},
-{
-"Time set to 6/16/2026 (Tue) 18:19",
-0,
-},
-{
-"Time set to 6/16/2026 (Tue) 18:19",
-0,
-},
-{
-"Time set to 6/16/2026 (Tue) 18:19",
-0,
-},
-{
-"Successfully instantiated mirrored storage object",
-0,
-},
-{
-"Sending ping results from timeout timeoutNs=\"1876979730300\" nowNs=\"1876984746100\"",
-0,
-},
-{
-"Added house xp xp=\"50\"",
-0,
-},
-{
-"World transfer pending...",
-0,
-},
-{
-"Connecting conn=\"(enum)3\" connPtr=\"000001e508549540\" protocol=\"(enum)0\"",
-0,
-},
-{
-"KillConnection conn=\"000001e5085398e0\" state=\"(enum)6\"",
+"KillConnection conn=\"000002437ae943a0\" state=\"(enum)6\"",
 0,
 },
 {
@@ -2547,15 +2360,19 @@ Blizzard_Console_SavedVars = {
 0,
 },
 {
-"World transfer pending...",
+"Weather changed to 0, intensity 0.000000\n",
 0,
 },
 {
-"Connecting conn=\"(enum)3\" connPtr=\"000001e634da0ac0\" protocol=\"(enum)0\"",
+"All pings from all pongs received",
 0,
 },
 {
-"KillConnection conn=\"000001e508549540\" state=\"(enum)6\"",
+"Time set to 6/20/2026 (Sat) 20:36",
+0,
+},
+{
+"Time set to 6/20/2026 (Sat) 20:36",
 0,
 },
 {
@@ -2563,11 +2380,111 @@ Blizzard_Console_SavedVars = {
 0,
 },
 {
-"Time set to 6/16/2026 (Tue) 18:47",
+"Weather changed to 1, intensity 0.800000\n",
 0,
 },
 {
-"Time set to 6/16/2026 (Tue) 18:47",
+"Weather changed to 1, intensity 1.000000\n",
+0,
+},
+{
+"Weather changed to 1, intensity 1.000000\n",
+0,
+},
+{
+"Only one lightning storm at a time is supported (including storms from weather).",
+0,
+},
+{
+"Changing lightning storm from previous lightning ID:0 to new lightning ID: 131.",
+0,
+},
+{
+"Weather changed to 1, intensity 0.750000\n",
+0,
+},
+{
+"Only one lightning storm at a time is supported (including storms from weather).",
+0,
+},
+{
+"Changing lightning storm from previous lightning ID:131 to new lightning ID: 132.",
+0,
+},
+{
+"Weather changed to 1, intensity 0.800000\n",
+0,
+},
+{
+"End lightning storm.",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Weather changed to 0, intensity 0.150000\n",
+0,
+},
+{
+"Only one lightning storm at a time is supported (including storms from weather).",
+0,
+},
+{
+"Changing lightning storm from previous lightning ID:0 to new lightning ID: 129.",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"End lightning storm.",
+0,
+},
+{
+"Weather changed to 1, intensity 0.800000\n",
+0,
+},
+{
+"Weather changed to 1, intensity 0.800000\n",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Sending ping results from timeout timeoutNs=\"259397453420200\" nowNs=\"259397486171300\"",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Weather changed to 1, intensity 0.800000\n",
+0,
+},
+{
+"Weather changed to 1, intensity 1.000000\n",
+0,
+},
+{
+"Weather changed to 1, intensity 1.000000\n",
+0,
+},
+{
+"Time set to 6/20/2026 (Sat) 21:13",
+0,
+},
+{
+"Time set to 6/20/2026 (Sat) 21:13",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
 0,
 },
 {
@@ -2843,6 +2760,78 @@ Blizzard_Console_SavedVars = {
 0,
 },
 {
+"LimitedLuaResources: Addon capacity for Font changed to 300",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for Font changed to 300",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for FontString changed to 5000",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for FontString changed to 5000",
+0,
+},
+{
+"LimitedLuaResources: Enabled = false",
+0,
+},
+{
+"LimitedLuaResources: Enabled = false",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for FontString changed to 50000",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for FontString changed to 50000",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for Animation changed to 50000",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for Animation changed to 50000",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for Texture changed to 400000",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for Texture changed to 400000",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for Timer changed to 500",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for Timer changed to 500",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for Texture changed to 40000",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for Texture changed to 40000",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for Animation changed to 5000",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for Animation changed to 5000",
+0,
+},
+{
 "LimitedLuaResources: Addon capacity for Timer changed to 500",
 0,
 },
@@ -2859,11 +2848,19 @@ Blizzard_Console_SavedVars = {
 0,
 },
 {
-"LimitedLuaResources: Addon capacity for Font changed to 300",
+"LimitedLuaResources: Global capacity for Frame changed to 100000",
 0,
 },
 {
-"LimitedLuaResources: Addon capacity for Font changed to 300",
+"LimitedLuaResources: Global capacity for Frame changed to 100000",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for AnimGroup changed to 20000",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for AnimGroup changed to 20000",
 0,
 },
 {
@@ -2875,91 +2872,11 @@ Blizzard_Console_SavedVars = {
 0,
 },
 {
-"LimitedLuaResources: Addon capacity for Texture changed to 40000",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for Texture changed to 40000",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for Frame changed to 100000",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for Frame changed to 100000",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for Animation changed to 50000",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for Animation changed to 50000",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for Timer changed to 500",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for Timer changed to 500",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for Texture changed to 400000",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for Texture changed to 400000",
-0,
-},
-{
-"LimitedLuaResources: Enabled = false",
-0,
-},
-{
-"LimitedLuaResources: Enabled = false",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for FontString changed to 5000",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for FontString changed to 5000",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for FontString changed to 50000",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for FontString changed to 50000",
-0,
-},
-{
 "LimitedLuaResources: Global capacity for Font changed to 3000",
 0,
 },
 {
 "LimitedLuaResources: Global capacity for Font changed to 3000",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for Animation changed to 5000",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for Animation changed to 5000",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for AnimGroup changed to 20000",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for AnimGroup changed to 20000",
 0,
 },
 {
@@ -3023,15 +2940,15 @@ Blizzard_Console_SavedVars = {
 0,
 },
 {
-"Received auth token  code=\"ERROR_OK (0)\" gotCredentials=\"true\"",
-0,
-},
-{
 "B code=\"ERROR_OK (0)\"",
 0,
 },
 {
 "BG code=\"ERROR_OK (0)\"",
+0,
+},
+{
+"Received auth token  code=\"ERROR_OK (0)\" gotCredentials=\"true\"",
 0,
 },
 {
@@ -3051,7 +2968,7 @@ Blizzard_Console_SavedVars = {
 0,
 },
 {
-"Reconnect token saved;  creationTime=\"1781730026\" expirationTime=\"1781744426\"",
+"Reconnect token saved;  creationTime=\"1782015521\" expirationTime=\"1782029921\"",
 0,
 },
 {
@@ -3095,7 +3012,7 @@ Blizzard_Console_SavedVars = {
 0,
 },
 {
-"Received last played char code=\"ERROR_OK (0)\" subRegion=\"1-1-89\" lastPlayedTime=\"1781661177\" numRegions=\"5\" numRegionsWithData=\"3\" realmPermissions=\"3\" entitlementsCount=\"92\" realmEntry=\"{\"wowRealmAddress\":16908298,\"useBleepChance\":0.0,\"cfgTimezonesID\":4,\"populationState\":6,\"cfgCategoriesID\":2,\"version\":{\"versionMajor\":12,\"versionBuild\":67808,\"versionMinor\":0,\"versionRevision\":7},\"cfgRealmsID\":60,\"gameServiceRegionId\":1,\"flags\":0,\"name\":\"Stormrage\",\"cfgConfigsID\":1,\"cfgContentSetID\":0,\"cfgLanguagesID\":1}\"",
+"Received last played char code=\"ERROR_OK (0)\" subRegion=\"1-1-89\" lastPlayedTime=\"1782015496\" numRegions=\"5\" numRegionsWithData=\"3\" realmPermissions=\"3\" entitlementsCount=\"92\" realmEntry=\"{\"wowRealmAddress\":17235996,\"useBleepChance\":0.0,\"cfgTimezonesID\":4,\"populationState\":6,\"cfgCategoriesID\":2,\"version\":{\"versionMajor\":12,\"versionBuild\":67808,\"versionMinor\":0,\"versionRevision\":7},\"cfgRealmsID\":1566,\"gameServiceRegionId\":1,\"flags\":0,\"name\":\"Area 52\",\"cfgConfigsID\":1,\"cfgContentSetID\":0,\"cfgLanguagesID\":1}\"",
 0,
 },
 {
@@ -3107,11 +3024,11 @@ Blizzard_Console_SavedVars = {
 0,
 },
 {
-"Found most recently played char. Joining realm. lastPlayedRegion=\"1-1-89\" realmAddress=\"16908298\" lastActiveTime=\"1781661177\"",
+"Found most recently played char. Joining realm. lastPlayedRegion=\"1-1-89\" realmAddress=\"17235996\" lastActiveTime=\"1782015496\"",
 0,
 },
 {
-"Joining realm subRegion=\"1-1-89\" realmAddress=\"1-2-10\"",
+"Joining realm subRegion=\"1-1-89\" realmAddress=\"1-7-28\"",
 0,
 },
 {
@@ -3119,7 +3036,7 @@ Blizzard_Console_SavedVars = {
 0,
 },
 {
-"Connecting conn=\"(enum)0\" connPtr=\"00000185f7a7e210\" protocol=\"(enum)0\"",
+"Connecting conn=\"(enum)0\" connPtr=\"0000027794e28bd0\" protocol=\"(enum)0\"",
 0,
 },
 {
@@ -3128,6 +3045,14 @@ Blizzard_Console_SavedVars = {
 },
 {
 "Screen invalid. Changing from=\"login\" to=\"charselect\"",
+0,
+},
+{
+"Connecting conn=\"(enum)2\" connPtr=\"0000027805bc84b0\" protocol=\"(enum)0\"",
+0,
+},
+{
+"KillConnection conn=\"0000027794e28bd0\" state=\"(enum)6\"",
 0,
 },
 {
@@ -3151,11 +3076,11 @@ Blizzard_Console_SavedVars = {
 0,
 },
 {
-"LimitedLuaResources: Addon capacity for FontString changed to 5000",
+"LimitedLuaResources: Global capacity for Font changed to 3000",
 0,
 },
 {
-"LimitedLuaResources: Enabled = false",
+"LimitedLuaResources: Addon capacity for Frame changed to 10000",
 0,
 },
 {
@@ -3163,491 +3088,11 @@ Blizzard_Console_SavedVars = {
 0,
 },
 {
-"LimitedLuaResources: Global capacity for Texture changed to 400000",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for Timer changed to 500",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for Timer changed to 500",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for Font changed to 300",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for FontString changed to 50000",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for Animation changed to 50000",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for Texture changed to 40000",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for AnimGroup changed to 2000",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for Font changed to 3000",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for AnimGroup changed to 20000",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for Animation changed to 5000",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for Frame changed to 10000",
-0,
-},
-{
-"Session with Battle.net established.",
-0,
-},
-{
-"[WowEntitlements] [BNetAccount-0-0000000E6FBF] [WowAccount-0-00000401C2D6] Initialized with 70 entitlements.",
-0,
-},
-{
-"Front disconnected connectionId=\"1\" result=\"0\"",
-0,
-},
-{
-"Disconnected from authentication server.",
-0,
-},
-{
-"Requesting change realm list",
-0,
-},
-{
-"Waiting for realm list.",
-0,
-},
-{
-"Received realm list ticket code=\"ERROR_OK (0)\"",
-0,
-},
-{
-"Waiting for realm list.",
-0,
-},
-{
-"Received sub region list code=\"ERROR_OK (0)\"",
-0,
-},
-{
-"Requesting realm lists numSubRegions=\"5\"",
-0,
-},
-{
-"Received a realm list code=\"ERROR_OK (0)\" subRegion=\"1-1-89\" totalSubRegions=\"5\" subRegionsHasData=\"1\" realmPermissions=\"3\" entitlementsCount=\"92\" numRealms=\"246\"",
-0,
-},
-{
-"Received a realm list code=\"ERROR_OK (0)\" subRegion=\"71-1-59\" totalSubRegions=\"5\" subRegionsHasData=\"2\" realmPermissions=\"3\" entitlementsCount=\"92\" numRealms=\"0\"",
-0,
-},
-{
-"Received a realm list code=\"ERROR_OK (0)\" subRegion=\"34-2-89\" totalSubRegions=\"5\" subRegionsHasData=\"3\" realmPermissions=\"3\" entitlementsCount=\"92\" numRealms=\"0\"",
-0,
-},
-{
-"Received a realm list code=\"ERROR_OK (0)\" subRegion=\"21-1-50\" totalSubRegions=\"5\" subRegionsHasData=\"4\" realmPermissions=\"3\" entitlementsCount=\"92\" numRealms=\"0\"",
-0,
-},
-{
-"Received a realm list code=\"ERROR_OK (0)\" subRegion=\"76-1-59\" totalSubRegions=\"5\" subRegionsHasData=\"5\" realmPermissions=\"3\" entitlementsCount=\"92\" numRealms=\"0\"",
-0,
-},
-{
-"Realm list ready.",
-0,
-},
-{
-"Joining realm subRegion=\"1-1-89\" realmAddress=\"1-7-28\"",
-0,
-},
-{
-"Screen invalid. Changing from=\"charselect\" to=\"realmlist\"",
-0,
-},
-{
-"Switching to screen=\"RealmListUI\" (from \"charselect\")",
-0,
-},
-{
-"From EnsureValidScreen",
-0,
-},
-{
-"Screen invalid. Changing from=\"realmlist\" to=\"charselect\"",
-0,
-},
-{
-"Switching to screen=\"CharacterSelect\" (from \"realmlist\")",
-0,
-},
-{
-"From EnsureValidScreen",
-0,
-},
-{
-"OnRealmJoin code=\"ERROR_OK (0)\"",
-0,
-},
-{
-"Session with Battle.net destroyed.",
-0,
-},
-{
-"KillConnection conn=\"00000185f7a7e210\" state=\"(enum)7\"",
-0,
-},
-{
-"Connecting conn=\"(enum)0\" connPtr=\"00000185feb59480\" protocol=\"(enum)0\"",
-0,
-},
-{
-"Connecting conn=\"(enum)2\" connPtr=\"000001860235cae0\" protocol=\"(enum)0\"",
-0,
-},
-{
-"KillConnection conn=\"00000185feb59480\" state=\"(enum)6\"",
-0,
-},
-{
-"Received AuthedToWoW result=\"ERROR_OK (0)\"",
-0,
-},
-{
-"Connected to Back. Disconnecting from Front.",
-0,
-},
-{
-"Session with Battle.net established.",
-0,
-},
-{
-"-------------------------------------------------- Previous Session --------------------------------------------------",
-0,
-},
-{
-"Multithreaded rendering enabled.",
-0,
-},
-{
-"Multithreaded BeginDraw enabled.",
-0,
-},
-{
-"Multithread shadows changed to 1.",
-0,
-},
-{
-"Multithreaded prepass enabled.",
-0,
-},
-{
-"Multithreaded opaque pass enabled.",
-0,
-},
-{
-"Multithreaded opaque pass enabled.",
-0,
-},
-{
-"Multithreaded alpha M2 pass enabled.",
-0,
-},
-{
-"Multithreaded opaque WMO pass enabled.",
-0,
-},
-{
-"Multithreaded terrain pass enabled.",
-0,
-},
-{
-"Multithreaded volumetric fog enabled.",
-0,
-},
-{
-"Multithreaded Refraction Pass enabled.",
-0,
-},
-{
-"Multithreaded miscellaneous passes enabled.",
-0,
-},
-{
-"Multithreaded decal passes disabled.",
-0,
-},
-{
-"Multithreaded outline passes enabled.",
-0,
-},
-{
-"Multithreaded lightshaft passes enabled.",
-0,
-},
-{
-"Use trigger on BeginDrawComplete enabled.",
-4,
-},
-{
-"Multithreaded alpha pass enabled.",
-0,
-},
-{
-"Multithreaded daynight update enabled.",
-0,
-},
-{
-"Water detail changed to 0",
-0,
-},
-{
-"Ripple detail changed to 0",
-0,
-},
-{
-"Reflection mode changed to 0",
-0,
-},
-{
-"Reflection downscale changed to 0",
-0,
-},
-{
-"Sunshafts quality changed to 0",
-0,
-},
-{
-"Refraction mode changed to 0",
-0,
-},
-{
-"Volume fog disabled.",
-0,
-},
-{
-"Particulate volumes disabled.",
-0,
-},
-{
-"Projected textures enabled.",
-0,
-},
-{
-"Shadow mode changed to 1 - 1 band dynamic shadows on units, 1024",
-0,
-},
-{
-"Shadow texture size changed to 1024.",
-0,
-},
-{
-"Soft shadows changed to 0.",
-0,
-},
-{
-"Shadow cascade blending changed to 0",
-0,
-},
-{
-"Number of shadow cascades changed to 1",
-0,
-},
-{
-"Shadow RT mode changed to 0 (Disabled)",
-0,
-},
-{
-"maxLightCount must be in range 0 to 32.",
-0,
-},
-{
-"CVar 'maxLightCount' failed validation for its initial value.",
-0,
-},
-{
-"Clustered shading disabled.",
-0,
-},
-{
-"Not forcing clustered shading.",
-0,
-},
-{
-"SSAO mode set to 0",
-0,
-},
-{
-"SSAO type set to 0",
-0,
-},
-{
-"Depth Based Opacity Disabled",
-0,
-},
-{
-"SkyCloudLOD set to 0",
-0,
-},
-{
-"Texture filtering mode updated.",
-0,
-},
-{
-"Terrain mip level changed to 0.",
-0,
-},
-{
-"Outline mode changed to 0",
-0,
-},
-{
-"Physics interaction level changed to 2",
-0,
-},
-{
-"Render scale changed to 1",
-0,
-},
-{
-"Resample quality changed to 3",
-0,
-},
-{
-"MSAA set to 2 color samples, 2 coverage samples",
-0,
-},
-{
-"MSAA for alpha-test enabled.",
-0,
-},
-{
-"Variable Rate Shading not supported on this hardware",
-0,
-},
-{
-"CVar 'vrsWorldGeo' failed validation for its initial value.",
-0,
-},
-{
-"Variable Rate Shading not supported on this hardware",
-0,
-},
-{
-"CVar 'vrsParticles' failed validation for its initial value.",
-0,
-},
-{
-"VALAR mode changed to 0",
-0,
-},
-{
-"lodObjectSizeScale cannot be changed.",
-0,
-},
-{
-"Volume fog enabled.",
-0,
-},
-{
-"dynamicLod enabled",
-0,
-},
-{
-"World preload object sort enabled.",
-0,
-},
-{
-"World load object sort enabled.",
-0,
-},
-{
-"World preload non critical enabled.",
-0,
-},
-{
-"World preload high res textures enabled.",
-0,
-},
-{
-"FFX: Color Blind Test Mode Disabled",
-0,
-},
-{
-"CVar 'Sound_AmbienceHighpassDSPCutoff' failed validation for its initial value.",
-0,
-},
-{
-"CVar 'Sound_AllyPlayerHighpassDSPCutoff' failed validation for its initial value.",
-0,
-},
-{
-"CVar 'Sound_EnemyPlayerHighpassDSPCutoff' failed validation for its initial value.",
-0,
-},
-{
-"CVar 'Sound_NPCHighpassDSPCutoff' failed validation for its initial value.",
-0,
-},
-{
-"ChromaEffects disabled",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for Animation changed to 5000",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for Animation changed to 5000",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for Animation changed to 50000",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for Animation changed to 50000",
-0,
-},
-{
 "LimitedLuaResources: Addon capacity for FontString changed to 5000",
 0,
 },
 {
-"LimitedLuaResources: Addon capacity for FontString changed to 5000",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for Font changed to 300",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for Font changed to 300",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for FontString changed to 50000",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for FontString changed to 50000",
+"LimitedLuaResources: Addon capacity for Timer changed to 500",
 0,
 },
 {
@@ -3655,63 +3100,15 @@ Blizzard_Console_SavedVars = {
 0,
 },
 {
-"LimitedLuaResources: Global capacity for Timer changed to 500",
+"LimitedLuaResources: Enabled = false",
 0,
 },
 {
-"LimitedLuaResources: Global capacity for Texture changed to 400000",
+"LimitedLuaResources: Global capacity for Animation changed to 50000",
 0,
 },
 {
-"LimitedLuaResources: Global capacity for Texture changed to 400000",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for Font changed to 3000",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for Font changed to 3000",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for Timer changed to 500",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for Timer changed to 500",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for AnimGroup changed to 20000",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for AnimGroup changed to 20000",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for Texture changed to 40000",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for Texture changed to 40000",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for Frame changed to 100000",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for Frame changed to 100000",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for Frame changed to 10000",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for Frame changed to 10000",
+"LimitedLuaResources: Global capacity for FontString changed to 50000",
 0,
 },
 {
@@ -3719,215 +3116,7 @@ Blizzard_Console_SavedVars = {
 0,
 },
 {
-"LimitedLuaResources: Addon capacity for AnimGroup changed to 2000",
-0,
-},
-{
-"LimitedLuaResources: Enabled = false",
-0,
-},
-{
-"LimitedLuaResources: Enabled = false",
-0,
-},
-{
-"Startup()",
-0,
-},
-{
-"Resume()",
-0,
-},
-{
-"Screen invalid. Changing from=\"none\" to=\"login\"",
-0,
-},
-{
-"Switching to screen=\"AccountLogin\" (from \"none\")",
-0,
-},
-{
-"From EnsureValidScreen",
-0,
-},
-{
-"Starting login launcherPortal=\"us.actual.battle.net\" loginPortal=\"us.actual.battle.net:1119\"",
-0,
-},
-{
-"Resetting",
-0,
-},
-{
-"Initializing",
-0,
-},
-{
-"Attempting logon host=\"us.actual.battle.net\" port=\"1119\"",
-0,
-},
-{
-"Waiting for server response.",
-0,
-},
-{
-"Front connected connectionId=\"1\" title_id=\"5730135\" platform=\"Wn64\" locale=\"enUS\" usedToken=\"true\"",
-0,
-},
-{
-"Waiting for server response.",
-0,
-},
-{
-"OnSendLogon result=\"0\"",
-0,
-},
-{
-"Logon complete result=\"0\" numGameAccounts=\"1\"",
-0,
-},
-{
-"Waiting for server response.",
-0,
-},
-{
-"Received auth token  code=\"ERROR_OK (0)\" gotCredentials=\"true\"",
-0,
-},
-{
-"BGS_ code=\"ERROR_OK (0)\" name=\"WoW1\" numGameAccounts=\"1\" numGameAccountNames=\"0\"",
-0,
-},
-{
-"BGS_ACCO code=\"ERROR_OK (0)\"",
-0,
-},
-{
-"B code=\"ERROR_OK (0)\"",
-0,
-},
-{
-"BG code=\"ERROR_OK (0)\"",
-0,
-},
-{
-"Updated game account list. accountList=\"!WoW1||\"",
-0,
-},
-{
-"Logon complete.",
-0,
-},
-{
-"Reconnect token saved;  creationTime=\"1781755427\" expirationTime=\"1781769827\"",
-0,
-},
-{
-"Waiting for realm list.",
-0,
-},
-{
-"Requesting realm list ticket",
-0,
-},
-{
-"Received realm list ticket code=\"ERROR_OK (0)\"",
-0,
-},
-{
-"Waiting for realm list.",
-0,
-},
-{
-"Received sub region list code=\"ERROR_OK (0)\"",
-0,
-},
-{
-"Requesting last played chars numSubRegions=\"5\"",
-0,
-},
-{
-"Received last played char code=\" (309)\" subRegion=\"71-1-59\" lastPlayedTime=\"0\" numRegions=\"5\" numRegionsWithData=\"0\" realmPermissions=\"0\" entitlementsCount=\"0\" realmEntry=\"{\"wowRealmAddress\":0,\"useBleepChance\":0.0,\"cfgTimezonesID\":0,\"populationState\":0,\"cfgCategoriesID\":0,\"version\":{\"versionMajor\":0,\"versionBuild\":0,\"versionMinor\":0,\"versionRevision\":0},\"cfgRealmsID\":0,\"gameServiceRegionId\":0,\"flags\":0,\"name\":\"\",\"cfgConfigsID\":0,\"cfgContentSetID\":0,\"cfgLanguagesID\":0}\"",
-0,
-},
-{
-"Received last played char code=\" (309)\" subRegion=\"21-1-50\" lastPlayedTime=\"0\" numRegions=\"5\" numRegionsWithData=\"1\" realmPermissions=\"0\" entitlementsCount=\"0\" realmEntry=\"{\"wowRealmAddress\":0,\"useBleepChance\":0.0,\"cfgTimezonesID\":0,\"populationState\":0,\"cfgCategoriesID\":0,\"version\":{\"versionMajor\":0,\"versionBuild\":0,\"versionMinor\":0,\"versionRevision\":0},\"cfgRealmsID\":0,\"gameServiceRegionId\":0,\"flags\":0,\"name\":\"\",\"cfgConfigsID\":0,\"cfgContentSetID\":0,\"cfgLanguagesID\":0}\"",
-0,
-},
-{
-"Received last played char code=\" (309)\" subRegion=\"34-2-89\" lastPlayedTime=\"0\" numRegions=\"5\" numRegionsWithData=\"2\" realmPermissions=\"0\" entitlementsCount=\"0\" realmEntry=\"{\"wowRealmAddress\":0,\"useBleepChance\":0.0,\"cfgTimezonesID\":0,\"populationState\":0,\"cfgCategoriesID\":0,\"version\":{\"versionMajor\":0,\"versionBuild\":0,\"versionMinor\":0,\"versionRevision\":0},\"cfgRealmsID\":0,\"gameServiceRegionId\":0,\"flags\":0,\"name\":\"\",\"cfgConfigsID\":0,\"cfgContentSetID\":0,\"cfgLanguagesID\":0}\"",
-0,
-},
-{
-"Received last played char code=\"ERROR_OK (0)\" subRegion=\"1-1-89\" lastPlayedTime=\"1781755366\" numRegions=\"5\" numRegionsWithData=\"3\" realmPermissions=\"3\" entitlementsCount=\"92\" realmEntry=\"{\"wowRealmAddress\":17235996,\"useBleepChance\":0.0,\"cfgTimezonesID\":4,\"populationState\":6,\"cfgCategoriesID\":2,\"version\":{\"versionMajor\":12,\"versionBuild\":67808,\"versionMinor\":0,\"versionRevision\":7},\"cfgRealmsID\":1566,\"gameServiceRegionId\":1,\"flags\":0,\"name\":\"Area 52\",\"cfgConfigsID\":1,\"cfgContentSetID\":0,\"cfgLanguagesID\":1}\"",
-0,
-},
-{
-"Received last played char code=\" (309)\" subRegion=\"76-1-59\" lastPlayedTime=\"0\" numRegions=\"5\" numRegionsWithData=\"4\" realmPermissions=\"0\" entitlementsCount=\"0\" realmEntry=\"{\"wowRealmAddress\":0,\"useBleepChance\":0.0,\"cfgTimezonesID\":0,\"populationState\":0,\"cfgCategoriesID\":0,\"version\":{\"versionMajor\":0,\"versionBuild\":0,\"versionMinor\":0,\"versionRevision\":0},\"cfgRealmsID\":0,\"gameServiceRegionId\":0,\"flags\":0,\"name\":\"\",\"cfgConfigsID\":0,\"cfgContentSetID\":0,\"cfgLanguagesID\":0}\"",
-0,
-},
-{
-"Realm list ready.",
-0,
-},
-{
-"Found most recently played char. Joining realm. lastPlayedRegion=\"1-1-89\" realmAddress=\"17235996\" lastActiveTime=\"1781755366\"",
-0,
-},
-{
-"Joining realm subRegion=\"1-1-89\" realmAddress=\"1-7-28\"",
-0,
-},
-{
-"OnRealmJoin code=\"ERROR_OK (0)\"",
-0,
-},
-{
-"Connecting conn=\"(enum)0\" connPtr=\"000001df69ea6380\" protocol=\"(enum)0\"",
-0,
-},
-{
-"Received AuthedToWoW result=\"ERROR_OK (0)\"",
-0,
-},
-{
-"Connecting conn=\"(enum)2\" connPtr=\"000001df6a617750\" protocol=\"(enum)0\"",
-0,
-},
-{
-"Screen invalid. Changing from=\"login\" to=\"charselect\"",
-0,
-},
-{
-"KillConnection conn=\"000001df69ea6380\" state=\"(enum)6\"",
-0,
-},
-{
-"Switching to screen=\"CharacterSelect\" (from \"login\")",
-0,
-},
-{
-"From EnsureValidScreen",
-0,
-},
-{
-"Connected to Back. Disconnecting from Front.",
-0,
-},
-{
-"Front disconnecting connectionId=\"1\"",
-0,
-},
-{
-"Disconnecting from authentication server.",
-0,
-},
-{
-"LimitedLuaResources: Enabled = false",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for Frame changed to 10000",
+"LimitedLuaResources: Global capacity for Texture changed to 400000",
 0,
 },
 {
@@ -3939,47 +3128,11 @@ Blizzard_Console_SavedVars = {
 0,
 },
 {
-"LimitedLuaResources: Addon capacity for AnimGroup changed to 2000",
-0,
-},
-{
 "LimitedLuaResources: Addon capacity for Texture changed to 40000",
 0,
 },
 {
-"LimitedLuaResources: Global capacity for Font changed to 3000",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for Texture changed to 400000",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for Animation changed to 50000",
-0,
-},
-{
 "LimitedLuaResources: Addon capacity for Font changed to 300",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for Timer changed to 500",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for FontString changed to 50000",
-0,
-},
-{
-"LimitedLuaResources: Global capacity for Frame changed to 100000",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for Timer changed to 500",
-0,
-},
-{
-"LimitedLuaResources: Addon capacity for FontString changed to 5000",
 0,
 },
 {
@@ -3999,10 +3152,6 @@ Blizzard_Console_SavedVars = {
 0,
 },
 {
-"Sending ping results from timeout timeoutNs=\"98842751700\" nowNs=\"99671378700\"",
-0,
-},
-{
 "-------------------------------------------------- Previous Session --------------------------------------------------",
 0,
 },
@@ -4015,7 +3164,7 @@ Blizzard_Console_SavedVars = {
 0,
 },
 {
-"Connecting conn=\"(enum)3\" connPtr=\"000001df6bf58110\" protocol=\"(enum)0\"",
+"Connecting conn=\"(enum)3\" connPtr=\"0000027794e391c0\" protocol=\"(enum)0\"",
 0,
 },
 {
@@ -4091,7 +3240,7 @@ Blizzard_Console_SavedVars = {
 0,
 },
 {
-"Time set to 6/17/2026 (Wed) 21:03",
+"Time set to 6/20/2026 (Sat) 21:19",
 0,
 },
 {
@@ -4099,27 +3248,39 @@ Blizzard_Console_SavedVars = {
 0,
 },
 {
+"Connecting conn=\"(enum)3\" connPtr=\"00000277e6c99ac0\" protocol=\"(enum)0\"",
+0,
+},
+{
+"KillConnection conn=\"0000027794e391c0\" state=\"(enum)6\"",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
 "Interface/AddOns/NoAutoClose/libs/LibVersionCheck-1.0/LibVersionCheck-1.0.xml:3 Error loading Interface/AddOns/NoAutoClose/Dependencies/LibStub.lua",
 3,
 },
 {
-"Completed challenge mode mapID 2805, level 22, time 1926825",
-0,
-},
-{
 "Successfully instantiated mirrored storage object",
 0,
 },
 {
-"World transfer pending...",
+"Weather changed to 0, intensity 0.000000\n",
 0,
 },
 {
-"Connecting conn=\"(enum)3\" connPtr=\"000001df6d4ac150\" protocol=\"(enum)0\"",
+"Weather changed to 0, intensity 0.150000\n",
 0,
 },
 {
-"KillConnection conn=\"000001df6bf58110\" state=\"(enum)6\"",
+"Only one lightning storm at a time is supported (including storms from weather).",
+0,
+},
+{
+"Changing lightning storm from previous lightning ID:0 to new lightning ID: 129.",
 0,
 },
 {
@@ -4127,23 +3288,19 @@ Blizzard_Console_SavedVars = {
 0,
 },
 {
-"Weather changed to 0, intensity 0.000000\n",
+"End lightning storm.",
 0,
 },
 {
-"World transfer pending...",
+"Weather changed to 0, intensity 0.150000\n",
 0,
 },
 {
-"Connecting conn=\"(enum)3\" connPtr=\"000001df86c4faf0\" protocol=\"(enum)0\"",
+"Only one lightning storm at a time is supported (including storms from weather).",
 0,
 },
 {
-"KillConnection conn=\"000001df6d4ac150\" state=\"(enum)6\"",
-0,
-},
-{
-"Weather changed to 0, intensity 0.000000\n",
+"Changing lightning storm from previous lightning ID:0 to new lightning ID: 129.",
 0,
 },
 {
@@ -4151,19 +3308,7 @@ Blizzard_Console_SavedVars = {
 0,
 },
 {
-"Weather changed to 1, intensity 0.800000\n",
-0,
-},
-{
-"World transfer pending...",
-0,
-},
-{
-"Connecting conn=\"(enum)3\" connPtr=\"000001df6d4aa5c0\" protocol=\"(enum)0\"",
-0,
-},
-{
-"KillConnection conn=\"000001df86c4faf0\" state=\"(enum)6\"",
+"End lightning storm.",
 0,
 },
 {
@@ -4171,19 +3316,23 @@ Blizzard_Console_SavedVars = {
 0,
 },
 {
-"Time set to 6/17/2026 (Wed) 21:06",
+"Weather changed to 0, intensity 0.150000\n",
 0,
 },
 {
-"Time set to 6/17/2026 (Wed) 21:06",
+"Only one lightning storm at a time is supported (including storms from weather).",
 0,
 },
 {
-"Changed difficulty successfully",
+"Changing lightning storm from previous lightning ID:0 to new lightning ID: 129.",
 0,
 },
 {
-"Successfully instantiated mirrored storage object",
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"End lightning storm.",
 0,
 },
 {
@@ -4191,13 +3340,1116 @@ Blizzard_Console_SavedVars = {
 0,
 },
 {
-"Completed challenge mode mapID 2874, level 23, time 1976490",
+"-------------------------------------------------- Previous Session --------------------------------------------------",
+0,
+},
+{
+"Multithreaded rendering enabled.",
+0,
+},
+{
+"Multithreaded BeginDraw enabled.",
+0,
+},
+{
+"Multithread shadows changed to 1.",
+0,
+},
+{
+"Multithreaded prepass enabled.",
+0,
+},
+{
+"Multithreaded opaque pass enabled.",
+0,
+},
+{
+"Multithreaded opaque pass enabled.",
+0,
+},
+{
+"Multithreaded alpha M2 pass enabled.",
+0,
+},
+{
+"Multithreaded opaque WMO pass enabled.",
+0,
+},
+{
+"Multithreaded terrain pass enabled.",
+0,
+},
+{
+"Multithreaded volumetric fog enabled.",
+0,
+},
+{
+"Multithreaded Refraction Pass enabled.",
+0,
+},
+{
+"Multithreaded miscellaneous passes enabled.",
+0,
+},
+{
+"Multithreaded decal passes disabled.",
+0,
+},
+{
+"Multithreaded outline passes enabled.",
+0,
+},
+{
+"Multithreaded lightshaft passes enabled.",
+0,
+},
+{
+"Use trigger on BeginDrawComplete enabled.",
+4,
+},
+{
+"Multithreaded alpha pass enabled.",
+0,
+},
+{
+"Multithreaded daynight update enabled.",
+0,
+},
+{
+"Water detail changed to 0",
+0,
+},
+{
+"Ripple detail changed to 0",
+0,
+},
+{
+"Reflection mode changed to 0",
+0,
+},
+{
+"Reflection downscale changed to 0",
+0,
+},
+{
+"Sunshafts quality changed to 0",
+0,
+},
+{
+"Refraction mode changed to 0",
+0,
+},
+{
+"Volume fog disabled.",
+0,
+},
+{
+"Particulate volumes disabled.",
+0,
+},
+{
+"Projected textures enabled.",
+0,
+},
+{
+"Shadow mode changed to 1 - 1 band dynamic shadows on units, 1024",
+0,
+},
+{
+"Shadow texture size changed to 1024.",
+0,
+},
+{
+"Soft shadows changed to 0.",
+0,
+},
+{
+"Shadow cascade blending changed to 0",
+0,
+},
+{
+"Number of shadow cascades changed to 1",
+0,
+},
+{
+"Shadow RT mode changed to 0 (Disabled)",
+0,
+},
+{
+"maxLightCount must be in range 0 to 32.",
+0,
+},
+{
+"CVar 'maxLightCount' failed validation for its initial value.",
+0,
+},
+{
+"Clustered shading disabled.",
+0,
+},
+{
+"Not forcing clustered shading.",
+0,
+},
+{
+"SSAO mode set to 0",
+0,
+},
+{
+"SSAO type set to 0",
+0,
+},
+{
+"Depth Based Opacity Disabled",
+0,
+},
+{
+"SkyCloudLOD set to 0",
+0,
+},
+{
+"Texture filtering mode updated.",
+0,
+},
+{
+"Terrain mip level changed to 0.",
+0,
+},
+{
+"Outline mode changed to 0",
+0,
+},
+{
+"Physics interaction level changed to 2",
+0,
+},
+{
+"Render scale changed to 1",
+0,
+},
+{
+"Resample quality changed to 3",
+0,
+},
+{
+"MSAA set to 2 color samples, 2 coverage samples",
+0,
+},
+{
+"MSAA for alpha-test enabled.",
+0,
+},
+{
+"Variable Rate Shading not supported on this hardware",
+0,
+},
+{
+"CVar 'vrsWorldGeo' failed validation for its initial value.",
+0,
+},
+{
+"Variable Rate Shading not supported on this hardware",
+0,
+},
+{
+"CVar 'vrsParticles' failed validation for its initial value.",
+0,
+},
+{
+"VALAR mode changed to 0",
+0,
+},
+{
+"lodObjectSizeScale cannot be changed.",
+0,
+},
+{
+"Volume fog enabled.",
+0,
+},
+{
+"dynamicLod enabled",
+0,
+},
+{
+"World preload object sort enabled.",
+0,
+},
+{
+"World load object sort enabled.",
+0,
+},
+{
+"World preload non critical enabled.",
+0,
+},
+{
+"World preload high res textures enabled.",
+0,
+},
+{
+"FFX: Color Blind Test Mode Disabled",
+0,
+},
+{
+"CVar 'Sound_AmbienceHighpassDSPCutoff' failed validation for its initial value.",
+0,
+},
+{
+"CVar 'Sound_AllyPlayerHighpassDSPCutoff' failed validation for its initial value.",
+0,
+},
+{
+"CVar 'Sound_EnemyPlayerHighpassDSPCutoff' failed validation for its initial value.",
+0,
+},
+{
+"CVar 'Sound_NPCHighpassDSPCutoff' failed validation for its initial value.",
+0,
+},
+{
+"ChromaEffects disabled",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for Font changed to 300",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for Font changed to 300",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for FontString changed to 5000",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for FontString changed to 5000",
+0,
+},
+{
+"LimitedLuaResources: Enabled = false",
+0,
+},
+{
+"LimitedLuaResources: Enabled = false",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for FontString changed to 50000",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for FontString changed to 50000",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for Animation changed to 50000",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for Animation changed to 50000",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for Texture changed to 400000",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for Texture changed to 400000",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for Timer changed to 500",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for Timer changed to 500",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for Texture changed to 40000",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for Texture changed to 40000",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for Animation changed to 5000",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for Animation changed to 5000",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for Timer changed to 500",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for Timer changed to 500",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for Frame changed to 10000",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for Frame changed to 10000",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for Frame changed to 100000",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for Frame changed to 100000",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for AnimGroup changed to 20000",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for AnimGroup changed to 20000",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for AnimGroup changed to 2000",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for AnimGroup changed to 2000",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for Font changed to 3000",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for Font changed to 3000",
+0,
+},
+{
+"Startup()",
+0,
+},
+{
+"Resume()",
+0,
+},
+{
+"Screen invalid. Changing from=\"none\" to=\"login\"",
+0,
+},
+{
+"Switching to screen=\"AccountLogin\" (from \"none\")",
+0,
+},
+{
+"From EnsureValidScreen",
+0,
+},
+{
+"Starting login launcherPortal=\"us.actual.battle.net\" loginPortal=\"us.actual.battle.net:1119\"",
+0,
+},
+{
+"Resetting",
+0,
+},
+{
+"Initializing",
+0,
+},
+{
+"Attempting logon host=\"us.actual.battle.net\" port=\"1119\"",
+0,
+},
+{
+"Waiting for server response.",
+0,
+},
+{
+"Front connected connectionId=\"1\" title_id=\"5730135\" platform=\"Wn64\" locale=\"enUS\" usedToken=\"true\"",
+0,
+},
+{
+"Waiting for server response.",
+0,
+},
+{
+"OnSendLogon result=\"0\"",
+0,
+},
+{
+"Logon complete result=\"0\" numGameAccounts=\"1\"",
+0,
+},
+{
+"Waiting for server response.",
+0,
+},
+{
+"Received auth token  code=\"ERROR_OK (0)\" gotCredentials=\"true\"",
+0,
+},
+{
+"B code=\"ERROR_OK (0)\"",
+0,
+},
+{
+"BGS_ code=\"ERROR_OK (0)\" name=\"WoW1\" numGameAccounts=\"1\" numGameAccountNames=\"0\"",
+0,
+},
+{
+"BGS_ACCO code=\"ERROR_OK (0)\"",
+0,
+},
+{
+"BG code=\"ERROR_OK (0)\"",
+0,
+},
+{
+"Updated game account list. accountList=\"!WoW1||\"",
+0,
+},
+{
+"Logon complete.",
+0,
+},
+{
+"Reconnect token saved;  creationTime=\"1782017883\" expirationTime=\"1782032283\"",
+0,
+},
+{
+"Waiting for realm list.",
+0,
+},
+{
+"Requesting realm list ticket",
+0,
+},
+{
+"Received realm list ticket code=\"ERROR_OK (0)\"",
+0,
+},
+{
+"Waiting for realm list.",
+0,
+},
+{
+"Received sub region list code=\"ERROR_OK (0)\"",
+0,
+},
+{
+"Requesting last played chars numSubRegions=\"5\"",
+0,
+},
+{
+"Received last played char code=\" (309)\" subRegion=\"21-1-50\" lastPlayedTime=\"0\" numRegions=\"5\" numRegionsWithData=\"0\" realmPermissions=\"0\" entitlementsCount=\"0\" realmEntry=\"{\"wowRealmAddress\":0,\"useBleepChance\":0.0,\"cfgTimezonesID\":0,\"populationState\":0,\"cfgCategoriesID\":0,\"version\":{\"versionMajor\":0,\"versionBuild\":0,\"versionMinor\":0,\"versionRevision\":0},\"cfgRealmsID\":0,\"gameServiceRegionId\":0,\"flags\":0,\"name\":\"\",\"cfgConfigsID\":0,\"cfgContentSetID\":0,\"cfgLanguagesID\":0}\"",
+0,
+},
+{
+"Received last played char code=\" (309)\" subRegion=\"71-1-59\" lastPlayedTime=\"0\" numRegions=\"5\" numRegionsWithData=\"1\" realmPermissions=\"0\" entitlementsCount=\"0\" realmEntry=\"{\"wowRealmAddress\":0,\"useBleepChance\":0.0,\"cfgTimezonesID\":0,\"populationState\":0,\"cfgCategoriesID\":0,\"version\":{\"versionMajor\":0,\"versionBuild\":0,\"versionMinor\":0,\"versionRevision\":0},\"cfgRealmsID\":0,\"gameServiceRegionId\":0,\"flags\":0,\"name\":\"\",\"cfgConfigsID\":0,\"cfgContentSetID\":0,\"cfgLanguagesID\":0}\"",
+0,
+},
+{
+"Received last played char code=\" (309)\" subRegion=\"34-2-89\" lastPlayedTime=\"0\" numRegions=\"5\" numRegionsWithData=\"2\" realmPermissions=\"0\" entitlementsCount=\"0\" realmEntry=\"{\"wowRealmAddress\":0,\"useBleepChance\":0.0,\"cfgTimezonesID\":0,\"populationState\":0,\"cfgCategoriesID\":0,\"version\":{\"versionMajor\":0,\"versionBuild\":0,\"versionMinor\":0,\"versionRevision\":0},\"cfgRealmsID\":0,\"gameServiceRegionId\":0,\"flags\":0,\"name\":\"\",\"cfgConfigsID\":0,\"cfgContentSetID\":0,\"cfgLanguagesID\":0}\"",
+0,
+},
+{
+"Received last played char code=\"ERROR_OK (0)\" subRegion=\"1-1-89\" lastPlayedTime=\"1782017472\" numRegions=\"5\" numRegionsWithData=\"3\" realmPermissions=\"3\" entitlementsCount=\"92\" realmEntry=\"{\"wowRealmAddress\":17235996,\"useBleepChance\":0.0,\"cfgTimezonesID\":4,\"populationState\":6,\"cfgCategoriesID\":2,\"version\":{\"versionMajor\":12,\"versionBuild\":67808,\"versionMinor\":0,\"versionRevision\":7},\"cfgRealmsID\":1566,\"gameServiceRegionId\":1,\"flags\":0,\"name\":\"Area 52\",\"cfgConfigsID\":1,\"cfgContentSetID\":0,\"cfgLanguagesID\":1}\"",
+0,
+},
+{
+"Received last played char code=\" (309)\" subRegion=\"76-1-59\" lastPlayedTime=\"0\" numRegions=\"5\" numRegionsWithData=\"4\" realmPermissions=\"0\" entitlementsCount=\"0\" realmEntry=\"{\"wowRealmAddress\":0,\"useBleepChance\":0.0,\"cfgTimezonesID\":0,\"populationState\":0,\"cfgCategoriesID\":0,\"version\":{\"versionMajor\":0,\"versionBuild\":0,\"versionMinor\":0,\"versionRevision\":0},\"cfgRealmsID\":0,\"gameServiceRegionId\":0,\"flags\":0,\"name\":\"\",\"cfgConfigsID\":0,\"cfgContentSetID\":0,\"cfgLanguagesID\":0}\"",
+0,
+},
+{
+"Realm list ready.",
+0,
+},
+{
+"Found most recently played char. Joining realm. lastPlayedRegion=\"1-1-89\" realmAddress=\"17235996\" lastActiveTime=\"1782017472\"",
+0,
+},
+{
+"Joining realm subRegion=\"1-1-89\" realmAddress=\"1-7-28\"",
+0,
+},
+{
+"OnRealmJoin code=\"ERROR_OK (0)\"",
+0,
+},
+{
+"Connecting conn=\"(enum)0\" connPtr=\"0000019224fe3250\" protocol=\"(enum)0\"",
+0,
+},
+{
+"Received AuthedToWoW result=\"ERROR_OK (0)\"",
+0,
+},
+{
+"Screen invalid. Changing from=\"login\" to=\"charselect\"",
+0,
+},
+{
+"Connecting conn=\"(enum)2\" connPtr=\"00000192a4810fa0\" protocol=\"(enum)0\"",
+0,
+},
+{
+"KillConnection conn=\"0000019224fe3250\" state=\"(enum)6\"",
+0,
+},
+{
+"Switching to screen=\"CharacterSelect\" (from \"login\")",
+0,
+},
+{
+"From EnsureValidScreen",
+0,
+},
+{
+"Connected to Back. Disconnecting from Front.",
+0,
+},
+{
+"Front disconnecting connectionId=\"1\"",
+0,
+},
+{
+"Disconnecting from authentication server.",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for Font changed to 3000",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for Frame changed to 10000",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for Frame changed to 100000",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for FontString changed to 5000",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for Timer changed to 500",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for Timer changed to 500",
+0,
+},
+{
+"LimitedLuaResources: Enabled = false",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for Animation changed to 50000",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for FontString changed to 50000",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for AnimGroup changed to 2000",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for Texture changed to 400000",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for Animation changed to 5000",
+0,
+},
+{
+"LimitedLuaResources: Global capacity for AnimGroup changed to 20000",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for Texture changed to 40000",
+0,
+},
+{
+"LimitedLuaResources: Addon capacity for Font changed to 300",
+0,
+},
+{
+"Session with Battle.net established.",
+0,
+},
+{
+"[WowEntitlements] [BNetAccount-0-0000000E6FBF] [WowAccount-0-00000401C2D6] Initialized with 70 entitlements.",
+0,
+},
+{
+"Front disconnected connectionId=\"1\" result=\"1016\"",
+0,
+},
+{
+"Disconnected from authentication server.",
+0,
+},
+{
+"Sending ping results from timeout timeoutNs=\"262559888513700\" nowNs=\"262559932028300\"",
+0,
+},
+{
+"-------------------------------------------------- Previous Session --------------------------------------------------",
+0,
+},
+{
+"Suspend()",
+0,
+},
+{
+"LimitedLuaResources: Reset Timer",
+0,
+},
+{
+"Connecting conn=\"(enum)3\" connPtr=\"00000192888dbdf0\" protocol=\"(enum)0\"",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x0000000100",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x0000000101",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x0000008101",
+0,
+},
+{
+"Proficiency in item class 4 set to 0x0000000021",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x000000c101",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x000000c103",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x000000c503",
+0,
+},
+{
+"Proficiency in item class 4 set to 0x0000000029",
+0,
+},
+{
+"Proficiency in item class 4 set to 0x000000002d",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x000000c523",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x000000e523",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x000010e523",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x000010e533",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x000010e5b3",
+0,
+},
+{
+"Proficiency in item class 4 set to 0x000000002f",
+0,
+},
+{
+"Proficiency in item class 2 set to 0x000010e5b3",
+0,
+},
+{
+"Proficiency in item class 4 set to 0x000000002f",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Time set to 6/20/2026 (Sat) 21:58",
+0,
+},
+{
+"Gamespeed set from 0.017 to 0.017",
+0,
+},
+{
+"Connecting conn=\"(enum)3\" connPtr=\"00000192888dbf10\" protocol=\"(enum)0\"",
+0,
+},
+{
+"KillConnection conn=\"00000192888dbdf0\" state=\"(enum)6\"",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Interface/AddOns/NoAutoClose/libs/LibVersionCheck-1.0/LibVersionCheck-1.0.xml:3 Error loading Interface/AddOns/NoAutoClose/Dependencies/LibStub.lua",
+3,
+},
+{
+"Successfully instantiated mirrored storage object",
+0,
+},
+{
+"World transfer pending...",
+0,
+},
+{
+"Connecting conn=\"(enum)3\" connPtr=\"00000192865baea0\" protocol=\"(enum)0\"",
+0,
+},
+{
+"KillConnection conn=\"00000192888dbf10\" state=\"(enum)6\"",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"World transfer pending...",
+0,
+},
+{
+"Connecting conn=\"(enum)3\" connPtr=\"0000019287b501f0\" protocol=\"(enum)0\"",
+0,
+},
+{
+"KillConnection conn=\"00000192865baea0\" state=\"(enum)6\"",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"World transfer pending...",
+0,
+},
+{
+"Connecting conn=\"(enum)3\" connPtr=\"000001928c12fc20\" protocol=\"(enum)0\"",
+0,
+},
+{
+"KillConnection conn=\"0000019287b501f0\" state=\"(enum)6\"",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"World transfer pending...",
+0,
+},
+{
+"Connecting conn=\"(enum)3\" connPtr=\"000001923fb11dc0\" protocol=\"(enum)0\"",
+0,
+},
+{
+"KillConnection conn=\"000001928c12fc20\" state=\"(enum)6\"",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Time set to 6/20/2026 (Sat) 22:02",
+0,
+},
+{
+"Time set to 6/20/2026 (Sat) 22:02",
+0,
+},
+{
+"Changed difficulty successfully",
+0,
+},
+{
+"World transfer pending...",
+0,
+},
+{
+"Connecting conn=\"(enum)3\" connPtr=\"000001923fbaa570\" protocol=\"(enum)0\"",
+0,
+},
+{
+"KillConnection conn=\"000001923fb11dc0\" state=\"(enum)6\"",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Connecting conn=\"(enum)3\" connPtr=\"000001923fa50740\" protocol=\"(enum)0\"",
+0,
+},
+{
+"KillConnection conn=\"000001923fbaa570\" state=\"(enum)6\"",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Time set to 6/20/2026 (Sat) 22:26",
+0,
+},
+{
+"Time set to 6/20/2026 (Sat) 22:26",
+0,
+},
+{
+"Time set to 6/20/2026 (Sat) 22:27",
+0,
+},
+{
+"Time set to 6/20/2026 (Sat) 22:27",
+0,
+},
+{
+"Sending ping results from timeout timeoutNs=\"264359750507100\" nowNs=\"264359784252400\"",
+0,
+},
+{
+"Time set to 6/20/2026 (Sat) 22:28",
+0,
+},
+{
+"Time set to 6/20/2026 (Sat) 22:28",
+0,
+},
+{
+"Time set to 6/20/2026 (Sat) 22:29",
+0,
+},
+{
+"Time set to 6/20/2026 (Sat) 22:29",
+0,
+},
+{
+"Time set to 6/20/2026 (Sat) 22:29",
+0,
+},
+{
+"Time set to 6/20/2026 (Sat) 22:29",
+0,
+},
+{
+"Time set to 6/20/2026 (Sat) 22:29",
+0,
+},
+{
+"Time set to 6/20/2026 (Sat) 22:29",
+0,
+},
+{
+"Time set to 6/20/2026 (Sat) 22:32",
+0,
+},
+{
+"Time set to 6/20/2026 (Sat) 22:32",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Time set to 6/20/2026 (Sat) 22:34",
+0,
+},
+{
+"Time set to 6/20/2026 (Sat) 22:34",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Time set to 6/20/2026 (Sat) 22:38",
+0,
+},
+{
+"Time set to 6/20/2026 (Sat) 22:38",
+0,
+},
+{
+"Time set to 6/20/2026 (Sat) 22:38",
+0,
+},
+{
+"Time set to 6/20/2026 (Sat) 22:38",
+0,
+},
+{
+"Time set to 6/20/2026 (Sat) 22:39",
+0,
+},
+{
+"Time set to 6/20/2026 (Sat) 22:39",
+0,
+},
+{
+"Time set to 6/20/2026 (Sat) 22:39",
+0,
+},
+{
+"Time set to 6/20/2026 (Sat) 22:39",
+0,
+},
+{
+"Time set to 6/20/2026 (Sat) 22:40",
+0,
+},
+{
+"Time set to 6/20/2026 (Sat) 22:40",
+0,
+},
+{
+"Time set to 6/20/2026 (Sat) 22:42",
+0,
+},
+{
+"Time set to 6/20/2026 (Sat) 22:42",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Time set to 6/20/2026 (Sat) 22:43",
+0,
+},
+{
+"Time set to 6/20/2026 (Sat) 22:43",
+0,
+},
+{
+"Time set to 6/20/2026 (Sat) 22:45",
+0,
+},
+{
+"Time set to 6/20/2026 (Sat) 22:45",
+0,
+},
+{
+"Time set to 6/20/2026 (Sat) 22:45",
+0,
+},
+{
+"Time set to 6/20/2026 (Sat) 22:45",
+0,
+},
+{
+"Time set to 6/20/2026 (Sat) 22:49",
+0,
+},
+{
+"Time set to 6/20/2026 (Sat) 22:49",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Time set to 6/20/2026 (Sat) 22:51",
+0,
+},
+{
+"Time set to 6/20/2026 (Sat) 22:51",
+0,
+},
+{
+"Weather changed to 0, intensity 0.000000\n",
+0,
+},
+{
+"Time set to 6/20/2026 (Sat) 22:56",
+0,
+},
+{
+"Time set to 6/20/2026 (Sat) 22:56",
+0,
+},
+{
+"Time set to 6/20/2026 (Sat) 22:56",
+0,
+},
+{
+"Time set to 6/20/2026 (Sat) 22:56",
+0,
+},
+{
+"Time set to 6/20/2026 (Sat) 22:56",
+0,
+},
+{
+"Time set to 6/20/2026 (Sat) 22:56",
+0,
+},
+{
+"Time set to 6/20/2026 (Sat) 22:56",
+0,
+},
+{
+"Time set to 6/20/2026 (Sat) 22:56",
+0,
+},
+{
+"Sending ping results from timeout timeoutNs=\"266159843745200\" nowNs=\"266159843765300\"",
 0,
 },
 },
-["height"] = 300,
-["fontHeight"] = 14,
 ["isShown"] = false,
+["fontHeight"] = 14,
 ["commandHistory"] = {
 },
 }
