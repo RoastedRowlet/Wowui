@@ -523,8 +523,7 @@ L["RAID_BOSS_NP_7"] = "Corte della Seta"
 L["RAID_BOSS_NP_8"] = "Regina Ansurek"
 --[[Translation missing --]]
 --[[ L["RAID_BOSS_RS_1"] = ""--]] 
---[[Translation missing --]]
---[[ L["RAID_BOSS_SF_1"] = ""--]] 
+L["RAID_BOSS_SF_1"] = "Fangorrido"
 --[[Translation missing --]]
 --[[ L["RAID_BOSS_SFO_1"] = ""--]] 
 --[[Translation missing --]]
@@ -703,8 +702,7 @@ L["RAID_MQD"] = "Marcia su Quel'Danas"
 --[[ L["RAID_MSV"] = ""--]] 
 L["RAID_NP"] = "Palazzo dei Nerub'ar"
 L["RAID_RS"] = "Santuario di Rubino"
---[[Translation missing --]]
---[[ L["RAID_SF"] = ""--]] 
+L["RAID_SF"] = "Sporandia"
 --[[Translation missing --]]
 --[[ L["RAID_SOO"] = ""--]] 
 --[[Translation missing --]]

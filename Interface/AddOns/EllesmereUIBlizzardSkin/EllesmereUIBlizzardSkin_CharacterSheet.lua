@@ -230,6 +230,7 @@ do
             showStatCategory_Tertiary    = true,
             showStatCategory_Crests      = true,
             showStatCategory_PvP         = true,
+            showAdjustedStats            = false,
         }
         for k, v in pairs(defaults) do
             if EllesmereUIDB[k] == nil then
@@ -2148,10 +2149,13 @@ local function SkinCharacterSheet()
                 value:SetJustifyH("RIGHT")
                 value:SetText("0")
 
-                -- Create button overlay for all stats with tooltips
+                -- Create button overlay for all stats with tooltips. Span the
+                -- full row width (label edge to value edge) so the tooltip fires
+                -- when hovering anywhere on the line, not just the right half.
                 local valueButton = CreateFrame("Button", nil, sectionContainer)
+                valueButton:SetPoint("TOPLEFT", sectionContainer, "TOPLEFT", 0, statYOffset)
                 valueButton:SetPoint("TOPRIGHT", sectionContainer, "TOPRIGHT", 0, statYOffset)
-                valueButton:SetSize(90, 16)
+                valueButton:SetHeight(16)
                 valueButton:EnableMouse(true)
 
                 valueButton:SetScript("OnEnter", function()
@@ -2194,7 +2198,25 @@ local function SkinCharacterSheet()
                         elseif stat.name == "Haste" then
                             description = string.format("Increases attack and casting speed by %.2f%%.", percentValue)
                         elseif stat.name == "Mastery" then
-                            description = string.format("Increases the effectiveness of your Mastery by %.2f%%.", percentValue)
+                            -- Pull the actual spec mastery spell description (e.g.
+                            -- "Mastery: Razor Claws") so the tooltip explains what
+                            -- the mastery does, not just a generic line.
+                            local specIndex = GetSpecialization and GetSpecialization()
+                            if specIndex and GetSpecializationMasterySpells and C_Spell and C_Spell.GetSpellDescription then
+                                local masterySpell, masterySpell2 = GetSpecializationMasterySpells(specIndex)
+                                if masterySpell then
+                                    description = C_Spell.GetSpellDescription(masterySpell) or ""
+                                    if masterySpell2 then
+                                        local d2 = C_Spell.GetSpellDescription(masterySpell2)
+                                        if d2 and d2 ~= "" then
+                                            description = description .. "\n" .. d2
+                                        end
+                                    end
+                                end
+                            end
+                            if description == "" then
+                                description = string.format("Increases the effectiveness of your Mastery by %.2f%%.", percentValue)
+                            end
                         elseif stat.name == "Versatility" then
                             description = string.format("Increases damage and healing done by %.2f%% and reduces damage taken by %.2f%%.", percentValue, percentValue / 2)
                         elseif stat.name == "Leech" then
@@ -2205,6 +2227,33 @@ local function SkinCharacterSheet()
                             description = string.format("Increases movement speed by %.2f%%.", percentValue)
                         end
                         GameTooltip:AddLine(description, 1, 1, 1, true)
+
+                        -- Diminishing returns breakdown (opt-in via Stat Display)
+                        if EllesmereUIDB and EllesmereUIDB.showAdjustedStats
+                           and not issecretvalue(rawValue) and EllesmereUI.GetStatDR then
+                            local adjusted, wasted, penalty, nextPenalty, nextThreshold =
+                                EllesmereUI.GetStatDR(stat.name, rawValue)
+                            if adjusted then
+                                GameTooltip:AddLine(" ")
+                                GameTooltip:AddLine(string.format("Adjusted Rating: %s",
+                                    BreakUpLargeNumbers(math.floor(adjusted + 0.5))),
+                                    section.color.r, section.color.g, section.color.b, 1)
+                                GameTooltip:AddLine(string.format("Wasted Rating: %s",
+                                    BreakUpLargeNumbers(math.floor(wasted + 0.5))),
+                                    section.color.r, section.color.g, section.color.b, 1)
+                                GameTooltip:AddLine(string.format("Penalty Percentage: %d%%", penalty),
+                                    section.color.r, section.color.g, section.color.b, 1)
+                                if nextThreshold then
+                                    local nextRating = math.floor(nextThreshold + 0.5)
+                                    local needed = nextRating - math.floor(rawValue + 0.5)
+                                    if needed < 0 then needed = 0 end
+                                    GameTooltip:AddLine(string.format("Next %d%% Penalty At: %s (+%s)",
+                                        nextPenalty, BreakUpLargeNumbers(nextRating),
+                                        BreakUpLargeNumbers(needed)),
+                                        section.color.r, section.color.g, section.color.b, 1)
+                                end
+                            end
+                        end
                     -- Attributes
                     elseif stat.statIndex then
                         local base, _, posBuff, negBuff = UnitStat("player", stat.statIndex)
@@ -3265,7 +3314,7 @@ local function SkinCharacterSheet()
             del:SetPoint("RIGHT", cog, "LEFT", -5, 0)
             local delTxt = del:CreateFontString(nil, "OVERLAY")
             delTxt:SetFont(fontPath, 22, "")
-            delTxt:SetText("×")
+            delTxt:SetText("x")
             delTxt:SetTextColor(1, 1, 1, 0.8)
             delTxt:SetPoint("CENTER", del, "CENTER", 0, 0)
             del:SetScript("OnEnter", function() delTxt:SetTextColor(1, 0.2, 0.2, 1) end)

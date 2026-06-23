@@ -59,6 +59,8 @@ local function GetFont()
     return (p and p.font) or defaults.font
 end
 local function GetNPOutline()
+    -- Already slug-gated at the source (GetFontOutlineFlag); SetFSFont also
+    -- gates the explicit-flag path, so aura literals are covered too.
     return (EllesmereUI and EllesmereUI.GetFontOutlineFlag and EllesmereUI.GetFontOutlineFlag("nameplates")) or "OUTLINE, SLUG"
 end
 local function GetNPUseShadow()
@@ -67,6 +69,9 @@ end
 local function SetFSFont(fs, size, flags)
   if not (fs and fs.SetFont) then return end
   local f = flags or GetNPOutline()
+  -- "Never Show Slug": gate the explicit-flag path here so hardcoded aura
+  -- "OUTLINE, SLUG" literals drop the slug too (body text is already gated).
+  if EllesmereUI and EllesmereUI.SlugFlag then f = EllesmereUI.SlugFlag(f) end
   -- 12.0.7: drop shadows only render from a FontObject; prime before SetFont.
   if EllesmereUI and EllesmereUI.PrimeFontShadow then
     EllesmereUI.PrimeFontShadow(fs, f == "")
@@ -127,6 +132,8 @@ function ns._appendDisplayPresetKeys(t)
         "buffTextSize", "buffTextColor", "ccTextSize", "ccTextColor",
         "raidMarkerPos", "classificationSlot",
         "debuffCropIcons", "buffCropIcons", "ccCropIcons",
+        "showCastLockoutAsCrowdControl",
+        "targetGlowEllesmereUI", "targetGlowBorderColor", "targetGlowHighlight", "targetBorderColor",
     }) do t[#t + 1] = k end
 end
 
@@ -139,13 +146,19 @@ local defaults = {
     focus = { r = 0.051, g = 0.820, b = 0.620 },
     focusColorEnabled = true,
     focusOverlayTexture = "striped-v2",
-    focusOverlayAlpha = 0.40,
+    focusOverlayAlpha = 1.0,
     focusOverlayColor = { r = 1.0, g = 1.0, b = 1.0 },
+    focusLetterEnabled = false,
+    focusLetterAnchor = "CENTER",
+    focusLetterX = 0,
+    focusLetterY = 0,
+    focusLetterSize = 18,
     target = { r = 0.459, g = 0.890, b = 0.580 },
     targetColorEnabled = false,
     targetOverlayTexture = "none",
-    targetOverlayAlpha = 0.40,
+    targetOverlayAlpha = 1.0,
     targetOverlayColor = { r = 1.0, g = 1.0, b = 1.0 },
+    hoverOverlayTexture = "none",
     caster  = { r = 0.231, g = 0.510, b = 0.965 },
     miniboss = { r = 0.518, g = 0.243, b = 0.984 },
     boss = { r = 0.518, g = 0.243, b = 0.984 },
@@ -172,9 +185,11 @@ local defaults = {
     castBarShieldEnabled = true,
     interruptedFlashEnabled = true,
     interruptedFlashColor = { r = 0.8, g = 0.0, b = 0.0 },
+    showCastLockoutAsCrowdControl = false,
     healthBarHeight = 17,
     friendlyNameOnly = true,
     friendlyNameOnlyYOffset = -20,
+    friendlyNameSize = 15,
     friendlyPlateYOffset = 0,
     friendlyHealthBarHeight = 17,
     friendlyHealthBarWidth = 150,
@@ -185,6 +200,9 @@ local defaults = {
     friendlyShowDefaultNames = false,
     classColorFriendly = true,
     friendlyBarColor = { r = 0.314, g = 0.800, b = 0.408 },
+    friendlyNPCColor = { r = 0, g = 1, b = 0 },
+    friendlyNPCNameSize = 13,
+    friendlyNameTextSize = 12,
     showEnemyPets = false,
     font = "Interface\\AddOns\\EllesmereUI\\media\\fonts\\Expressway.TTF",
     textSlotTop = "enemyName",
@@ -254,12 +272,18 @@ local defaults = {
     ccTextSize = 12,
     ccTextColor = { r = 1, g = 1, b = 1 },
     targetGlowStyle = "ellesmereui",
+    -- Customizable target "Border Color" glow color (default white). The three
+    -- multi-toggle keys (targetGlowEllesmereUI / targetGlowBorderColor /
+    -- targetGlowHighlight) are intentionally NOT defaulted here: they stay nil
+    -- so the getters can live-convert from the legacy targetGlowStyle string.
+    targetBorderColor = { r = 1, g = 1, b = 1 },
     raidMarkerPos = "topright",
     raidMarkerSize = 24,
     classificationSlot = "topleft",
     rareEliteIconSize = 20,
     castBarHeight = 17,
     castOverlayEnabled = false,
+    hideEnemyNameWhileCasting = false,
     castNameSize = 10,
     castNameColor = { r = 1, g = 1, b = 1 },
     castNameOffsetX = 0,
@@ -670,6 +694,10 @@ function ns.GetCastIconFullSize()
     if p and p.castIconFullSize ~= nil then return p.castIconFullSize end
     return defaults.castIconFullSize
 end
+local function GetHideEnemyNameWhileCasting()
+    if p and p.hideEnemyNameWhileCasting ~= nil then return p.hideEnemyNameWhileCasting end
+    return defaults.hideEnemyNameWhileCasting
+end
 
 -- Position + size the cast bar within `footprintW`, accounting for the
 -- icon-in-width setting. A full-size icon spans the health band too (which the
@@ -737,11 +765,21 @@ end
 -- they never land under the icon. Returns 0 for the legacy default (left,
 -- normal) and for in-width-tucked icons, so existing layouts are unchanged.
 -- All inputs are clean profile numbers, safe to add.
-function ns.GetCastIconReserve()
+-- The optional `plate` only matters for the full-size icon: that icon is a child
+-- of the cast bar and only renders during a cast, so its (large) reserve is
+-- gated on the plate's cast bar being shown. A settings-only query (no plate)
+-- assumes the space is reserved.
+function ns.GetCastIconReserve(plate)
     if not GetShowCastIcon() then return 0, nil end
     local onRight = ns.GetCastIconOnRight()
     local side = onRight and "right" or "left"
     if ns.GetCastIconFullSize() then
+        -- Only reserve the full-size icon's footprint while it is actually
+        -- visible (cast bar up), so side elements sit flush against the bar
+        -- when nothing is casting instead of being shoved out by a phantom gap.
+        if plate and plate.cast and not plate.cast:IsShown() then
+            return 0, side
+        end
         return GetHealthBarHeight() + GetCastBarHeight(), side
     end
     if onRight and not ns.GetCastIconInWidth() then
@@ -857,14 +895,15 @@ local function GetHealthBarWidth()
 end
 ns.GetHealthBarWidth = GetHealthBarWidth
 
--- Returns the Y offset to apply to plate content when hitbox Y scale != 100%.
--- SetNamePlateSize grows/shrinks the frame from its base anchor, so we shift
--- content to keep the visual bar in the same screen position.
+-- Y offset for plate content relative to the nameplate frame. Always 0: the
+-- Blizzard nameplate frame grows from its CENTER (not its base), so a taller
+-- SetNamePlateSize enlarges the clickable hitbox evenly above AND below the
+-- unit. Anchoring our content at the frame center therefore keeps the bar in
+-- place AND keeps the hitbox centered on it -- no compensation needed.
+-- (An earlier base-anchor assumption shifted content down by half the extra
+-- height, which made the hitbox extend only above the bar.)
 local function GetHitboxYShift()
-    local db = p or defaults
-    local sy = (db.hitboxScaleY or 100) / 100
-    if sy == 1 then return 0 end
-    return -((GetHealthBarHeight() * sy) - GetHealthBarHeight()) / 2
+    return 0
 end
 ns.GetHitboxYShift = GetHitboxYShift
 -- Slot-based size/offset getters. Key strings are memoized per posKey
@@ -965,8 +1004,32 @@ local function GetTargetGlowStyle()
     return defaults.targetGlowStyle
 end
 ns.GetTargetGlowStyle = GetTargetGlowStyle
+-- Multi-toggle target glow model (EllesmereUI / Border Color / Highlight).
+-- Live conversion, NO migration: each toggle returns its own stored key when
+-- the user has set it, otherwise derives from the legacy targetGlowStyle
+-- string. targetGlowStyle stays in defaults ("ellesmereui") so the fallback
+-- source is always present. Legacy mapping: ellesmereui -> EllesmereUI;
+-- vibrant -> EllesmereUI + Border Color; none -> nothing. Defined on ns (not
+-- file-scope locals) to respect this file's near-cap local budget.
+function ns.GetTargetGlowEllesmereUI()
+    if p and p.targetGlowEllesmereUI ~= nil then return p.targetGlowEllesmereUI end
+    local style = (p and p.targetGlowStyle) or defaults.targetGlowStyle
+    return style == "ellesmereui" or style == "vibrant"
+end
+function ns.GetTargetGlowBorderColor()
+    if p and p.targetGlowBorderColor ~= nil then return p.targetGlowBorderColor end
+    local style = (p and p.targetGlowStyle) or defaults.targetGlowStyle
+    return style == "vibrant"
+end
+function ns.GetTargetGlowHighlight()
+    if p and p.targetGlowHighlight ~= nil then return p.targetGlowHighlight end
+    return false  -- no legacy equivalent
+end
+function ns.GetTargetBorderColor()
+    return (p and p.targetBorderColor) or defaults.targetBorderColor
+end
 local function GetShowTargetGlow()
-    return GetTargetGlowStyle() ~= "none"
+    return ns.GetTargetGlowEllesmereUI() or ns.GetTargetGlowBorderColor() or ns.GetTargetGlowHighlight()
 end
 ns.GetShowTargetGlow = GetShowTargetGlow
 local function GetShowClassPower()
@@ -1385,8 +1448,10 @@ local function PositionAuraSlot(frames, count, slot, plate, sizeW, sizeH, gap, x
         local cpPush = GetClassPowerTopPush(plate)
         local growth = (p and p.topleftSlotGrowth) or defaults.topleftSlotGrowth
         -- Icon 1 is always flush with the top-left corner of the health bar.
-        -- Growth direction only affects where icons 2+ go from there.
-        local baseX = -2 + xOff
+        -- Growth direction only affects where icons 2+ go from there. (PP borders
+        -- are inset, so the bar's corner IS the nameplate's outer edge -- anchor
+        -- at offset 0 for true flush; xOff lets the user nudge.)
+        local baseX = xOff
         local baseY = debuffY + cpPush + yOff
         for i = 1, count do
             frames[i]:ClearAllPoints()
@@ -1408,8 +1473,9 @@ local function PositionAuraSlot(frames, count, slot, plate, sizeW, sizeH, gap, x
         local cpPush = GetClassPowerTopPush(plate)
         local growth = (p and p.toprightSlotGrowth) or defaults.toprightSlotGrowth
         -- Icon 1 is always flush with the top-right corner of the health bar.
-        -- Growth direction only affects where icons 2+ go from there.
-        local baseX = 2 + xOff
+        -- Growth direction only affects where icons 2+ go from there. (Offset 0 =
+        -- flush; PP borders are inset so the bar corner is the outer edge.)
+        local baseX = xOff
         local baseY = debuffY + cpPush + yOff
         for i = 1, count do
             frames[i]:ClearAllPoints()
@@ -1499,6 +1565,43 @@ local function ClearAuraSlot(slot)
     end
 end
 
+ns.CAST_LOCKOUT_SLOT_ID = "__EUI_CAST_LOCKOUT__"
+ns.DEFAULT_CAST_LOCKOUT_DURATION = 4
+ns.CAST_LOCKOUT_ICON = "Interface\\Icons\\Ability_Kick"
+
+function ns.ShowCastLockoutAsCrowdControl()
+    if p and p.showCastLockoutAsCrowdControl ~= nil then return p.showCastLockoutAsCrowdControl end
+    return defaults.showCastLockoutAsCrowdControl
+end
+
+function ns.GetActiveCastLockout(plate)
+    local lockout = plate._castLockout
+    if not lockout then return nil end
+    if not ns.ShowCastLockoutAsCrowdControl() or lockout.expires <= GetTime() then
+        plate._castLockout = nil
+        return nil
+    end
+    return lockout
+end
+
+function ns.ArmCastLockoutCooldown(cd, lockout)
+    if cd then
+        if cd.SetDrawSwipe then cd:SetDrawSwipe(true) end
+        if cd.SetAlpha then cd:SetAlpha(1) end
+        cd:SetCooldown(lockout.start, lockout.duration)
+        cd:Show()
+    end
+end
+
+function ns.ArmCastLockoutSlot(slot, lockout)
+    RawSetTex(slot.icon, lockout.icon)
+    slot.icon:Show()
+    ns.ArmCastLockoutCooldown(slot.cd, lockout)
+    slot:Show()
+    slot._durationObj = nil
+    slot._auraId = ns.CAST_LOCKOUT_SLOT_ID
+end
+
 -- Position target arrows OUTSIDE the outermost side auras (if arrows are shown).
 -- Called after all aura positioning is complete.
 local PositionArrowsOutsideAuras
@@ -1534,9 +1637,11 @@ PositionArrowsOutsideAuras = function(plate)
     -- Track the furthest pixel extent on each side (accounts for per-slot X offsets)
     local leftExtent, rightExtent = 0, 0
     -- Cast spell icon: reserve on its side so the arrow + the (pushed) side-slot
-    -- core icons all clear it. Settings-driven (not icon:IsShown) so the arrow
-    -- holds steady across cast start/stop. Clean profile numbers, never secrets.
-    local iconRes, iconSide = ns.GetCastIconReserve()
+    -- core icons all clear it. Normal-size icons reserve at all times (the small
+    -- gap holds steady across cast start/stop); the full-size icon only renders
+    -- during a cast, so passing the plate gates its (large) reserve on the cast
+    -- bar being shown. Clean profile numbers, never secrets.
+    local iconRes, iconSide = ns.GetCastIconReserve(plate)
     local leftPush = (iconRes > 0 and iconSide == "left") and iconRes or 0
     local rightPush = (iconRes > 0 and iconSide == "right") and iconRes or 0
     if leftPush > 0 then leftExtent = math.max(leftExtent, leftPush) end
@@ -1623,6 +1728,19 @@ local function EnsureGlow(plate)
     plate.glowFrame:Hide()
 end
 
+-- Highlight target style: a fixed translucent white wash across the target's
+-- health bar. Lazily created (only the target ever shows it) and kept SEPARATE
+-- from plate.highlight (the mouseover highlight) so the two never fight over
+-- show/hide state when a unit is both targeted and moused over.
+local function EnsureTargetHighlight(plate)
+    if plate.targetHighlight then return end
+    local t = plate.health:CreateTexture(nil, "OVERLAY", nil, 5)
+    t:SetAllPoints(plate.health)
+    t:SetColorTexture(1, 1, 1, 0.30)
+    t:Hide()
+    plate.targetHighlight = t
+end
+
 -- Target arrow styles: key -> { l=left texture, r=right texture, w=drawn width at
 -- height 16 (scale 1), label }. All source art is 66px tall; width preserves the
 -- original 36px art = 11px drawn, i.e. w = round(nativeWidth * 11/36): 36->11,
@@ -1688,6 +1806,44 @@ local function EnsureArrows(plate)
     plate.rightArrow:Hide()
 end
 
+-- Target/Focus overlay textures: the special stripe overlays live in the
+-- nameplates Media folder (resolved by name); everything else is a regular bar
+-- texture resolved through the shared health-bar texture lookup (EUI textures +
+-- SharedMedia), so the overlay dropdowns can offer the full bar texture set.
+ns.OVERLAY_STRIPE_KEYS = {
+    ["striped-v2"] = true, ["striped-wide-v2"] = true, ["stripes-medium"] = true,
+    ["stripes-small-close"] = true, ["stripes-small-spread"] = true, ["striped-tiny"] = true,
+}
+function ns.ResolveOverlayTexPath(key)
+    if not key or key == "none" then return nil end
+    if ns.OVERLAY_STRIPE_KEYS[key] then
+        return "Interface\\AddOns\\EllesmereUINameplates\\Media\\" .. key .. ".png"
+    end
+    if EllesmereUI.ResolveTexturePath then
+        return EllesmereUI.ResolveTexturePath(ns.healthBarTextures, key, "Interface\\Buttons\\WHITE8x8")
+    end
+    return nil
+end
+
+-- Stripe overlays keep their fixed 200px, left-anchored pattern (continuous
+-- diagonal across the fill/background split). Bar textures instead fill the full
+-- bar width so they render like a normal bar fill; the clip frames still window
+-- the filled vs empty portions.
+local function ApplyOverlayGeometry(fillT, bgT, health, isStripe)
+    fillT:ClearAllPoints(); bgT:ClearAllPoints()
+    fillT:SetPoint("TOPLEFT", health, "TOPLEFT", 0, 0)
+    fillT:SetPoint("BOTTOMLEFT", health, "BOTTOMLEFT", 0, 0)
+    bgT:SetPoint("TOPLEFT", health, "TOPLEFT", 0, 0)
+    bgT:SetPoint("BOTTOMLEFT", health, "BOTTOMLEFT", 0, 0)
+    if isStripe then
+        fillT:SetWidth(200)
+        bgT:SetWidth(200)
+    else
+        fillT:SetPoint("RIGHT", health, "RIGHT", 0, 0)
+        bgT:SetPoint("RIGHT", health, "RIGHT", 0, 0)
+    end
+end
+
 local function EnsureFocusOverlay(plate)
     if plate.focusClipFill then return end
     local overlayAlpha = (p and p.focusOverlayAlpha) or defaults.focusOverlayAlpha
@@ -1696,28 +1852,136 @@ local function EnsureFocusOverlay(plate)
     local fillTex = plate.health:GetStatusBarTexture()
     plate.focusClipFill = CreateFrame("Frame", nil, plate.health)
     plate.focusClipFill:SetClipsChildren(true)
-    plate.focusClipFill:SetPoint("TOPLEFT", fillTex, "TOPLEFT", 0, -1)
-    plate.focusClipFill:SetPoint("BOTTOMRIGHT", fillTex, "BOTTOMRIGHT", 0, 1)
+    -- Vertical bounds come from the health bar itself (full nameplate height)
+    -- so the overlay can never pixel-snap 1px short on the top or bottom edge
+    -- as the plate floats at sub-pixel screen positions. Only the RIGHT edge
+    -- tracks the fill so the stripes window the filled portion.
+    plate.focusClipFill:SetPoint("TOPLEFT", plate.health, "TOPLEFT", 0, 0)
+    plate.focusClipFill:SetPoint("BOTTOMLEFT", plate.health, "BOTTOMLEFT", 0, 0)
+    plate.focusClipFill:SetPoint("RIGHT", fillTex, "RIGHT", 0, 0)
     plate.focusClipFill:SetFrameLevel(plate.health:GetFrameLevel() + 1)
     plate.focusOverlayFill = plate.focusClipFill:CreateTexture(nil, "ARTWORK", nil, 2)
+    -- Texture: full bar height, fixed width, anchored to the health LEFT so the
+    -- diagonal pattern stays continuous across the fill/background split (both
+    -- overlays share the same origin) and snaps with the clip's vertical edges.
     plate.focusOverlayFill:SetPoint("TOPLEFT", plate.health, "TOPLEFT", 0, 0)
-    plate.focusOverlayFill:SetSize(200, 24)
+    plate.focusOverlayFill:SetPoint("BOTTOMLEFT", plate.health, "BOTTOMLEFT", 0, 0)
+    plate.focusOverlayFill:SetWidth(200)
     plate.focusOverlayFill:SetTexture(STRIPE_TEX)
     plate.focusOverlayFill:SetAlpha(overlayAlpha)
     plate.focusOverlayFill:SetVertexColor(overlayColor.r, overlayColor.g, overlayColor.b)
     plate.focusClipFill:Hide()
     plate.focusClipBg = CreateFrame("Frame", nil, plate.health)
     plate.focusClipBg:SetClipsChildren(true)
-    plate.focusClipBg:SetPoint("TOPLEFT", fillTex, "TOPRIGHT", 0, -1)
-    plate.focusClipBg:SetPoint("BOTTOMRIGHT", plate.health, "BOTTOMRIGHT", 0, 1)
+    plate.focusClipBg:SetPoint("TOPRIGHT", plate.health, "TOPRIGHT", 0, 0)
+    plate.focusClipBg:SetPoint("BOTTOMRIGHT", plate.health, "BOTTOMRIGHT", 0, 0)
+    plate.focusClipBg:SetPoint("LEFT", fillTex, "RIGHT", 0, 0)
     plate.focusClipBg:SetFrameLevel(plate.health:GetFrameLevel() + 1)
     plate.focusOverlayBg = plate.focusClipBg:CreateTexture(nil, "ARTWORK", nil, 1)
     plate.focusOverlayBg:SetPoint("TOPLEFT", plate.health, "TOPLEFT", 0, 0)
-    plate.focusOverlayBg:SetSize(200, 24)
+    plate.focusOverlayBg:SetPoint("BOTTOMLEFT", plate.health, "BOTTOMLEFT", 0, 0)
+    plate.focusOverlayBg:SetWidth(200)
     plate.focusOverlayBg:SetTexture(STRIPE_TEX)
     plate.focusOverlayBg:SetAlpha(overlayAlpha * 0.3)
     plate.focusOverlayBg:SetVertexColor(overlayColor.r, overlayColor.g, overlayColor.b)
     plate.focusClipBg:Hide()
+end
+
+ns.FOCUS_LETTER_ANCHORS = {
+    CENTER = true,
+    LEFT = true,
+    RIGHT = true,
+    TOP = true,
+    BOTTOM = true,
+    TOPLEFT = true,
+    TOPRIGHT = true,
+    BOTTOMLEFT = true,
+    BOTTOMRIGHT = true,
+}
+
+function ns.GetFocusLetterAnchor(db)
+    local anchor = (db and db.focusLetterAnchor) or defaults.focusLetterAnchor
+    return ns.FOCUS_LETTER_ANCHORS[anchor] and anchor or defaults.focusLetterAnchor
+end
+
+function ns.EnsureFocusLetter(plate)
+    if plate.focusLetter then return end
+    plate.focusLetter = plate.healthTextFrame:CreateFontString(nil, "OVERLAY")
+    plate.focusLetter:SetJustifyH("CENTER")
+    plate.focusLetter:SetJustifyV("MIDDLE")
+    plate.focusLetter:Hide()
+end
+
+function ns.ApplyFocusLetter(plate, unit, db)
+    if db.focusLetterEnabled == true and UnitIsUnit(unit, "focus") then
+        ns.EnsureFocusLetter(plate)
+        local size = db.focusLetterSize or defaults.focusLetterSize
+        local anchor = ns.GetFocusLetterAnchor(db)
+        local x = db.focusLetterX or defaults.focusLetterX
+        local y = db.focusLetterY or defaults.focusLetterY
+        local font = GetFont()
+        local outline = GetNPOutline()
+        if not plate._focusLetterShown
+            or plate._focusLetterSize ~= size
+            or plate._focusLetterAnchor ~= anchor
+            or plate._focusLetterX ~= x
+            or plate._focusLetterY ~= y
+            or plate._focusLetterFont ~= font
+            or plate._focusLetterOutline ~= outline then
+            plate._focusLetterShown = true
+            plate._focusLetterSize = size
+            plate._focusLetterAnchor = anchor
+            plate._focusLetterX = x
+            plate._focusLetterY = y
+            plate._focusLetterFont = font
+            plate._focusLetterOutline = outline
+            SetFSFont(plate.focusLetter, size, outline)
+            plate.focusLetter:SetText("F")
+            plate.focusLetter:ClearAllPoints()
+            plate.focusLetter:SetPoint(anchor, plate.health, anchor, x, y)
+            plate.focusLetter:SetTextColor(1, 1, 1, 1)
+        end
+        plate.focusLetter:Show()
+    elseif plate.focusLetter then
+        plate._focusLetterShown = nil
+        plate.focusLetter:Hide()
+    end
+end
+
+ns.EnsureHoverOverlay = function(plate)
+    if plate.hoverClipFill then return end
+    local overlayAlpha = (p and p.hoverAlpha) or defaults.hoverAlpha
+    local overlayColor = (p and p.hoverColor) or defaults.hoverColor
+    local STRIPE_TEX = "Interface\\AddOns\\EllesmereUINameplates\\Media\\striped-v2.png"
+    local fillTex = plate.health:GetStatusBarTexture()
+    plate.hoverClipFill = CreateFrame("Frame", nil, plate.health)
+    plate.hoverClipFill:SetClipsChildren(true)
+    plate.hoverClipFill:SetPoint("TOPLEFT", plate.health, "TOPLEFT", 0, 0)
+    plate.hoverClipFill:SetPoint("BOTTOMLEFT", plate.health, "BOTTOMLEFT", 0, 0)
+    plate.hoverClipFill:SetPoint("RIGHT", fillTex, "RIGHT", 0, 0)
+    plate.hoverClipFill:SetFrameLevel(plate.health:GetFrameLevel() + 1)
+    plate.hoverOverlayFill = plate.hoverClipFill:CreateTexture(nil, "ARTWORK", nil, 2)
+    plate.hoverOverlayFill:SetPoint("TOPLEFT", plate.health, "TOPLEFT", 0, 0)
+    plate.hoverOverlayFill:SetPoint("BOTTOMLEFT", plate.health, "BOTTOMLEFT", 0, 0)
+    plate.hoverOverlayFill:SetWidth(200)
+    plate.hoverOverlayFill:SetTexture(STRIPE_TEX)
+    plate.hoverOverlayFill:SetAlpha(overlayAlpha)
+    plate.hoverOverlayFill:SetVertexColor(overlayColor.r, overlayColor.g, overlayColor.b)
+    plate.hoverClipFill:Hide()
+    plate.hoverClipBg = CreateFrame("Frame", nil, plate.health)
+    plate.hoverClipBg:SetClipsChildren(true)
+    plate.hoverClipBg:SetPoint("TOPRIGHT", plate.health, "TOPRIGHT", 0, 0)
+    plate.hoverClipBg:SetPoint("BOTTOMRIGHT", plate.health, "BOTTOMRIGHT", 0, 0)
+    plate.hoverClipBg:SetPoint("LEFT", fillTex, "RIGHT", 0, 0)
+    plate.hoverClipBg:SetFrameLevel(plate.health:GetFrameLevel() + 1)
+    plate.hoverOverlayBg = plate.hoverClipBg:CreateTexture(nil, "ARTWORK", nil, 1)
+    plate.hoverOverlayBg:SetPoint("TOPLEFT", plate.health, "TOPLEFT", 0, 0)
+    plate.hoverOverlayBg:SetPoint("BOTTOMLEFT", plate.health, "BOTTOMLEFT", 0, 0)
+    plate.hoverOverlayBg:SetWidth(200)
+    plate.hoverOverlayBg:SetTexture(STRIPE_TEX)
+    plate.hoverOverlayBg:SetAlpha(overlayAlpha * 0.3)
+    plate.hoverOverlayBg:SetVertexColor(overlayColor.r, overlayColor.g, overlayColor.b)
+    plate.hoverClipBg:Hide()
 end
 
 ns.EnsureTargetOverlay = function(plate)
@@ -1728,24 +1992,35 @@ ns.EnsureTargetOverlay = function(plate)
     local fillTex = plate.health:GetStatusBarTexture()
     plate.targetClipFill = CreateFrame("Frame", nil, plate.health)
     plate.targetClipFill:SetClipsChildren(true)
-    plate.targetClipFill:SetPoint("TOPLEFT", fillTex, "TOPLEFT", 0, -1)
-    plate.targetClipFill:SetPoint("BOTTOMRIGHT", fillTex, "BOTTOMRIGHT", 0, 1)
+    -- Vertical bounds come from the health bar itself (full nameplate height)
+    -- so the overlay can never pixel-snap 1px short on the top or bottom edge
+    -- as the plate floats at sub-pixel screen positions. Only the RIGHT edge
+    -- tracks the fill so the stripes window the filled portion.
+    plate.targetClipFill:SetPoint("TOPLEFT", plate.health, "TOPLEFT", 0, 0)
+    plate.targetClipFill:SetPoint("BOTTOMLEFT", plate.health, "BOTTOMLEFT", 0, 0)
+    plate.targetClipFill:SetPoint("RIGHT", fillTex, "RIGHT", 0, 0)
     plate.targetClipFill:SetFrameLevel(plate.health:GetFrameLevel() + 1)
     plate.targetOverlayFill = plate.targetClipFill:CreateTexture(nil, "ARTWORK", nil, 2)
+    -- Texture: full bar height, fixed width, anchored to the health LEFT so the
+    -- diagonal pattern stays continuous across the fill/background split (both
+    -- overlays share the same origin) and snaps with the clip's vertical edges.
     plate.targetOverlayFill:SetPoint("TOPLEFT", plate.health, "TOPLEFT", 0, 0)
-    plate.targetOverlayFill:SetSize(200, 24)
+    plate.targetOverlayFill:SetPoint("BOTTOMLEFT", plate.health, "BOTTOMLEFT", 0, 0)
+    plate.targetOverlayFill:SetWidth(200)
     plate.targetOverlayFill:SetTexture(STRIPE_TEX)
     plate.targetOverlayFill:SetAlpha(overlayAlpha)
     plate.targetOverlayFill:SetVertexColor(overlayColor.r, overlayColor.g, overlayColor.b)
     plate.targetClipFill:Hide()
     plate.targetClipBg = CreateFrame("Frame", nil, plate.health)
     plate.targetClipBg:SetClipsChildren(true)
-    plate.targetClipBg:SetPoint("TOPLEFT", fillTex, "TOPRIGHT", 0, -1)
-    plate.targetClipBg:SetPoint("BOTTOMRIGHT", plate.health, "BOTTOMRIGHT", 0, 1)
+    plate.targetClipBg:SetPoint("TOPRIGHT", plate.health, "TOPRIGHT", 0, 0)
+    plate.targetClipBg:SetPoint("BOTTOMRIGHT", plate.health, "BOTTOMRIGHT", 0, 0)
+    plate.targetClipBg:SetPoint("LEFT", fillTex, "RIGHT", 0, 0)
     plate.targetClipBg:SetFrameLevel(plate.health:GetFrameLevel() + 1)
     plate.targetOverlayBg = plate.targetClipBg:CreateTexture(nil, "ARTWORK", nil, 1)
     plate.targetOverlayBg:SetPoint("TOPLEFT", plate.health, "TOPLEFT", 0, 0)
-    plate.targetOverlayBg:SetSize(200, 24)
+    plate.targetOverlayBg:SetPoint("BOTTOMLEFT", plate.health, "BOTTOMLEFT", 0, 0)
+    plate.targetOverlayBg:SetWidth(200)
     plate.targetOverlayBg:SetTexture(STRIPE_TEX)
     plate.targetOverlayBg:SetAlpha(overlayAlpha * 0.3)
     plate.targetOverlayBg:SetVertexColor(overlayColor.r, overlayColor.g, overlayColor.b)
@@ -1858,7 +2133,14 @@ local frameCache = CreateFramePool("Frame", UIParent, nil, nil, false, function(
     -- Text overlay frame: renders above focus stripe overlay (level +1)
     plate.healthTextFrame = CreateFrame("Frame", nil, plate)
     plate.healthTextFrame:SetAllPoints(plate.health)
-    plate.healthTextFrame:SetFrameLevel(plate.health:GetFrameLevel() + 7)
+    -- TEXT TIER (top of the hierarchy). All three layered groups -- text (900),
+    -- aura icons (800) and indicators (raid marker / classification, ~13-18) --
+    -- use an explicit MEDIUM strata so they are pulled out of the plate's
+    -- flattened render layer together and ordered purely by frame level. Without
+    -- the explicit strata this frame would stay in the flattened pass and render
+    -- BELOW the (strata-promoted) aura icons. Text > Auras > Indicators.
+    plate.healthTextFrame:SetFrameStrata("MEDIUM")
+    plate.healthTextFrame:SetFrameLevel(900)
     plate.hpText = plate.healthTextFrame:CreateFontString(nil, "OVERLAY")
     SetFSFont(plate.hpText, 10, GetNPOutline())
     PP.Point(plate.hpText, "RIGHT", plate.health, "RIGHT", -2, 0)
@@ -1878,7 +2160,11 @@ local frameCache = CreateFramePool("Frame", UIParent, nil, nil, false, function(
     -- Top text overlay: renders above health bar + borders so top-slot text is never hidden
     plate.topTextFrame = CreateFrame("Frame", nil, plate)
     plate.topTextFrame:SetAllPoints(plate.health)
-    plate.topTextFrame:SetFrameLevel(plate.health:GetFrameLevel() + 6)
+    -- TEXT TIER (see healthTextFrame). MEDIUM + level 900 so name text renders
+    -- above the aura icons (the name/health fontstrings are reparented between
+    -- this frame and healthTextFrame depending on the chosen text slot).
+    plate.topTextFrame:SetFrameStrata("MEDIUM")
+    plate.topTextFrame:SetFrameLevel(900)
     plate.name = plate:CreateFontString(nil, "OVERLAY")
     SetFSFont(plate.name, GetEnemyNameTextSize(), GetNPOutline())
     PP.Point(plate.name, "BOTTOM", plate.health, "TOP", 0, 4)
@@ -1888,13 +2174,12 @@ local frameCache = CreateFramePool("Frame", UIParent, nil, nil, false, function(
     plate.raidFrame = CreateFrame("Frame", nil, plate)
     local rmSize = GetRaidMarkerSize()
     PP.Size(plate.raidFrame, rmSize, rmSize)
-    -- Match the aura icons' strata (MEDIUM) so the two render in the SAME group
-    -- and frame level decides ordering: the marker (health+8 = 18) sits below
-    -- the aura icons (level 800) and is guaranteed to render BEHIND them.
-    -- Without an explicit strata the marker stays in the plate's flattened
-    -- render layer (SetFlattensRenderLayers) and composites ON TOP of the
-    -- strata-promoted aura icons regardless of frame level. The +8 still keeps
-    -- it above the name/health text frames (those are at health+6/+7).
+    -- INDICATOR TIER (bottom of the three layered groups). Explicit MEDIUM strata
+    -- like the aura icons and text, so frame level alone decides order within the
+    -- pulled-out group: the marker (health+8 = 18) sits BELOW the aura icons (800)
+    -- and the text (900) but above the flattened health bar. Sharing MEDIUM across
+    -- all three tiers is what keeps the order predictable -- a no-strata frame
+    -- would drop into the plate's flattened render layer instead.
     plate.raidFrame:SetFrameStrata("MEDIUM")
     plate.raidFrame:SetFrameLevel(plate.health:GetFrameLevel() + 8)
     plate.raidFrame:Hide()
@@ -1905,6 +2190,10 @@ local frameCache = CreateFramePool("Frame", UIParent, nil, nil, false, function(
     local _reIconSz = GetRareEliteIconSize()
     PP.Size(plate.classFrame, _reIconSz, _reIconSz)
     PP.Point(plate.classFrame, "LEFT", plate.health, "LEFT", 2, 0)
+    -- INDICATOR TIER (see raidFrame). MEDIUM strata + low level (health+3 = 13)
+    -- so the classification/elite/rare/quest indicator sits below the aura icons
+    -- (800) and text (900) but above the flattened health bar.
+    plate.classFrame:SetFrameStrata("MEDIUM")
     plate.classFrame:SetFrameLevel(plate.health:GetFrameLevel() + 3)
     plate.classFrame:Hide()
     plate.class = plate.classFrame:CreateTexture(nil, "ARTWORK")
@@ -2046,19 +2335,26 @@ local frameCache = CreateFramePool("Frame", UIParent, nil, nil, false, function(
     plate.kickReadyFill:Hide()
     -- Cast bar text: three independent fixed zones
     -- [castName LEFT 50%] [castTarget CENTER-RIGHT 25%] [castTimer RIGHT 15%]
-    plate.castName = plate.cast:CreateFontString(nil, "OVERLAY")
+    -- Hosted on an explicit MEDIUM frame so the cast text is pulled out of the
+    -- plate's flattened render layer and renders ABOVE the cast bar border (the
+    -- border sits in the flattened pass and would otherwise cover the text).
+    plate.castTextFrame = CreateFrame("Frame", nil, plate.cast)
+    plate.castTextFrame:SetAllPoints(plate.cast)
+    plate.castTextFrame:SetFrameStrata("MEDIUM")
+    plate.castTextFrame:SetFrameLevel(900)
+    plate.castName = plate.castTextFrame:CreateFontString(nil, "OVERLAY")
     SetFSFont(plate.castName, 10, GetNPOutline())
     plate.castName:SetPoint("LEFT", plate.cast, "LEFT", 5, 0)
     plate.castName:SetJustifyH("LEFT")
     plate.castName:SetWordWrap(false)
     plate.castName:SetMaxLines(1)
-    plate.castTarget = plate.cast:CreateFontString(nil, "OVERLAY")
+    plate.castTarget = plate.castTextFrame:CreateFontString(nil, "OVERLAY")
     SetFSFont(plate.castTarget, 10, GetNPOutline())
     plate.castTarget:SetJustifyH("RIGHT")
     plate.castTarget:SetWordWrap(false)
     plate.castTarget:SetNonSpaceWrap(false)
     plate.castTarget:SetMaxLines(1)
-    plate.castTimer = plate.cast:CreateFontString(nil, "OVERLAY")
+    plate.castTimer = plate.castTextFrame:CreateFontString(nil, "OVERLAY")
     SetFSFont(plate.castTimer, 10, GetNPOutline())
     plate.castTimer:SetPoint("RIGHT", plate.cast, "RIGHT", -3, 0)
     plate.castTimer:SetJustifyH("RIGHT")
@@ -2106,6 +2402,19 @@ local frameCache = CreateFramePool("Frame", UIParent, nil, nil, false, function(
         end
     end)
     plate.cast._timerPlate = plate
+    -- Full-size cast icon: its side-slot reserve is only valid while the cast bar
+    -- is shown, so re-anchor the reserving side elements on every cast show/hide.
+    -- One chokepoint catches all show/hide paths (start, stop, channel stop,
+    -- interrupt flash + its timer). RefreshCastIconSideReserve early-outs unless
+    -- the full-size icon is enabled, so these scripts are ~free in the common case.
+    local function OnCastVisibilityChanged(self)
+        local owner = self._timerPlate
+        if owner and owner.RefreshCastIconSideReserve then
+            owner:RefreshCastIconSideReserve()
+        end
+    end
+    plate.cast:HookScript("OnShow", OnCastVisibilityChanged)
+    plate.cast:HookScript("OnHide", OnCastVisibilityChanged)
     plate.debuffs = {}
     local maxDbf = (p and p.maxDebuffs) or defaults.maxDebuffs
     for i = 1, maxDbf do
@@ -2301,6 +2610,12 @@ function ns.RefreshBorder()
     for _, plate in pairs(ns.plates) do
         if plate.ApplyBorder then plate:ApplyBorder() end
     end
+    -- Friendly plates mirror the enemy border settings 1:1.
+    if ns.friendlyPlates then
+        for _, plate in pairs(ns.friendlyPlates) do
+            if plate.ApplyBorder then plate:ApplyBorder() end
+        end
+    end
 end
 ns.RefreshBorderStyle = ns.RefreshBorder
 ns.RefreshSimpleBorderSize = ns.RefreshBorder
@@ -2308,6 +2623,12 @@ function ns.RefreshBorderColor()
     ns._npAppearanceGen = (ns._npAppearanceGen or 0) + 1
     for _, plate in pairs(ns.plates) do
         if plate.ApplyBorderColor then plate:ApplyBorderColor() end
+    end
+    -- Friendly plates mirror the enemy border settings 1:1.
+    if ns.friendlyPlates then
+        for _, plate in pairs(ns.friendlyPlates) do
+            if plate.ApplyBorderColor then plate:ApplyBorderColor() end
+        end
     end
 end
 function ns.RefreshCastBorder()
@@ -2366,18 +2687,70 @@ function ns.RefreshHitboxSize()
     local baseH = GetHealthBarHeight()
     local newH  = baseH * sy
     C_NamePlate.SetNamePlateSize(baseW * sx, newH)
-    -- The frame grows upward from its base, so the extra height is all on top.
-    -- Shift the hit area down by half the extra so it's centered on the bar.
+    -- The frame grows from its CENTER, so a taller size enlarges the clickable
+    -- hitbox evenly above and below the unit. -10000 insets let the hit rect
+    -- fill the full (centered) frame.
     if C_NamePlateManager and C_NamePlateManager.SetNamePlateHitTestInsets
        and Enum and Enum.NamePlateType then
         C_NamePlateManager.SetNamePlateHitTestInsets(Enum.NamePlateType.Enemy, -10000, -10000, -10000, -10000)
         C_NamePlateManager.SetNamePlateHitTestInsets(Enum.NamePlateType.Friendly, -10000, -10000, -10000, -10000)
     end
-    -- Shift plate content to compensate for the upward frame growth
+    -- Anchor content at the frame center (GetHitboxYShift is 0): the frame grows
+    -- centered, so the bar stays put and the hitbox stays centered on it.
     local yShift = GetHitboxYShift()
     for _, plate in pairs(ns.plates) do
         plate:ClearAllPoints()
         plate:SetPoint("CENTER", plate.nameplate, "CENTER", 0, yShift)
+    end
+end
+
+-- Hitbox visualizer: a translucent overlay matching each enemy nameplate's
+-- clickable bounds (the frame sized by SetNamePlateSize above), so the Hitbox
+-- Size sliders can be dialled in visually. Toggled by the eyeball next to the
+-- sliders. Runtime-only (resets on reload); the overlay is created lazily the
+-- first time a plate actually needs it, so this costs nothing when off.
+-- Defined on ns (not a file-scope local) to stay under the Lua 5.1 200-local
+-- cap on this file's main chunk.
+function ns._ApplyHitboxOverlay(plate)
+    local np = plate and plate.nameplate
+    if not np then return end
+    if ns._hitboxOverlayShown then
+        local ov = plate.hitboxOverlay
+        if not ov then
+            ov = CreateFrame("Frame", nil, np)
+            local fill = ov:CreateTexture(nil, "BACKGROUND")
+            fill:SetAllPoints()
+            fill:SetColorTexture(0.047, 0.824, 0.624, 0.18)
+            local function Edge()
+                local t = ov:CreateTexture(nil, "BORDER")
+                t:SetColorTexture(0.047, 0.824, 0.624, 0.85)
+                return t
+            end
+            local top, bottom, left, right = Edge(), Edge(), Edge(), Edge()
+            top:SetPoint("TOPLEFT");    top:SetPoint("TOPRIGHT");    top:SetHeight(1)
+            bottom:SetPoint("BOTTOMLEFT"); bottom:SetPoint("BOTTOMRIGHT"); bottom:SetHeight(1)
+            left:SetPoint("TOPLEFT");   left:SetPoint("BOTTOMLEFT");  left:SetWidth(1)
+            right:SetPoint("TOPRIGHT"); right:SetPoint("BOTTOMRIGHT"); right:SetWidth(1)
+            plate.hitboxOverlay = ov
+        end
+        -- Re-parent + re-anchor each apply, since pooled plates get reused on a
+        -- fresh Blizzard nameplate (mirrors the _stackBounds handling).
+        ov:SetParent(np)
+        ov:SetFrameLevel(np:GetFrameLevel() + 10)
+        ov:ClearAllPoints()
+        ov:SetAllPoints(np)
+        ov:Show()
+    elseif plate.hitboxOverlay then
+        plate.hitboxOverlay:Hide()
+    end
+end
+
+-- Toggle the hitbox visualizer across every active enemy plate. Driven by the
+-- eyeball button beside the Hitbox Size sliders in options.
+function ns.SetHitboxOverlayShown(show)
+    ns._hitboxOverlayShown = show and true or false
+    for _, plate in pairs(ns.plates) do
+        ns._ApplyHitboxOverlay(plate)
     end
 end
 
@@ -2401,6 +2774,55 @@ function ns.RefreshAllSettings()
     if ns.ApplyClassPowerSetting then ns.ApplyClassPowerSetting() end
 end
 
+function ns.HideHoverEffect(plate)
+    if not plate then return end
+    if plate.highlight then plate.highlight:Hide() end
+    if plate.hoverClipFill then plate.hoverClipFill:Hide() end
+    if plate.hoverClipBg then plate.hoverClipBg:Hide() end
+    plate._ovHoverShown = nil
+end
+
+function ns.ShowHoverEffect(plate)
+    if not plate or not plate.health then return end
+    local db2 = p or defaults
+    local hoverTex = db2.hoverOverlayTexture or defaults.hoverOverlayTexture
+    local hc = db2.hoverColor or defaults.hoverColor
+    local ha = db2.hoverAlpha or defaults.hoverAlpha
+    if hoverTex ~= "none" then
+        if ns._hoverOverlayTexName ~= hoverTex then
+            ns._hoverOverlayTexName = hoverTex
+            ns._hoverOverlayTexPath = ns.ResolveOverlayTexPath(hoverTex)
+        end
+        local texPath = ns._hoverOverlayTexPath
+        ns.EnsureHoverOverlay(plate)
+        if not plate._ovHoverShown or plate._ovHoverTex ~= texPath
+            or plate._ovHoverAlpha ~= ha
+            or plate._ovHoverR ~= hc.r or plate._ovHoverG ~= hc.g or plate._ovHoverB ~= hc.b then
+            plate._ovHoverShown = true
+            plate._ovHoverTex, plate._ovHoverAlpha = texPath, ha
+            plate._ovHoverR, plate._ovHoverG, plate._ovHoverB = hc.r, hc.g, hc.b
+            ApplyOverlayGeometry(plate.hoverOverlayFill, plate.hoverOverlayBg, plate.health, ns.OVERLAY_STRIPE_KEYS[hoverTex] == true)
+            plate.hoverOverlayFill:SetTexture(texPath)
+            plate.hoverOverlayFill:SetAlpha(ha)
+            plate.hoverOverlayFill:SetVertexColor(hc.r, hc.g, hc.b)
+            plate.hoverOverlayBg:SetTexture(texPath)
+            plate.hoverOverlayBg:SetAlpha(ha * 0.3)
+            plate.hoverOverlayBg:SetVertexColor(hc.r, hc.g, hc.b)
+        end
+        if plate.highlight then plate.highlight:Hide() end
+        plate.hoverClipFill:Show()
+        plate.hoverClipBg:Show()
+        return
+    end
+    if plate.hoverClipFill then plate.hoverClipFill:Hide() end
+    if plate.hoverClipBg then plate.hoverClipBg:Hide() end
+    plate._ovHoverShown = nil
+    if plate.highlight then
+        plate.highlight:SetColorTexture(hc.r, hc.g, hc.b, ha)
+        plate.highlight:Show()
+    end
+end
+
 -- Recolor the mouseover highlight on every live plate (enemy + friendly).
 function ns.RefreshHoverEffect()
     local c = (p and p.hoverColor) or defaults.hoverColor
@@ -2409,10 +2831,20 @@ function ns.RefreshHoverEffect()
         if plate.highlight then
             plate.highlight:SetColorTexture(c.r, c.g, c.b, a)
         end
+        if plate == ns._currentMouseoverPlate then
+            ns.ShowHoverEffect(plate)
+        else
+            ns.HideHoverEffect(plate)
+        end
     end
     for _, plate in pairs(ns.friendlyPlates or {}) do
         if plate.highlight then
             plate.highlight:SetColorTexture(c.r, c.g, c.b, a)
+        end
+        if plate == ns._currentMouseoverPlate then
+            ns.ShowHoverEffect(plate)
+        else
+            ns.HideHoverEffect(plate)
         end
     end
 end
@@ -3953,11 +4385,21 @@ function NameplateFrame:ApplyAppearance()
         self.castTimer:SetPoint("RIGHT", self.cast, "RIGHT", -3 + tmOX, tmOY)
     end
     self.castName:SetTextColor(cnc.r, cnc.g, cnc.b, 1)
-    -- Aura duration/stack text settings (unified across debuffs, buffs, CCs)
-    local auraDurSize = (p and p.auraDurationTextSize) or defaults.auraDurationTextSize
-    local auraDurColor = (p and p.auraDurationTextColor) or defaults.auraDurationTextColor
-    local auraDurX = (p and p.auraDurationTextX) or defaults.auraDurationTextX
-    local auraDurY = (p and p.auraDurationTextY) or defaults.auraDurationTextY
+    local function GetAuraDurationCfg(kind)
+        local sizeKey = kind .. "DurationTextSize"
+        local xKey = kind .. "DurationTextX"
+        local yKey = kind .. "DurationTextY"
+        local colorKey = kind .. "DurationTextColor"
+        return {
+            size = (p and p[sizeKey]) or (p and p.auraDurationTextSize) or defaults.auraDurationTextSize,
+            x = (p and p[xKey]) or (p and p.auraDurationTextX) or defaults.auraDurationTextX,
+            y = (p and p[yKey]) or (p and p.auraDurationTextY) or defaults.auraDurationTextY,
+            color = (p and p[colorKey]) or (p and p.auraDurationTextColor) or defaults.auraDurationTextColor,
+        }
+    end
+    local debuffDur = GetAuraDurationCfg("debuff")
+    local buffDur = GetAuraDurationCfg("buff")
+    local ccDur = GetAuraDurationCfg("cc")
     local auraStackSize = (p and p.auraStackTextSize) or defaults.auraStackTextSize
     local auraStackColor = (p and p.auraStackTextColor) or defaults.auraStackTextColor
     local auraStackX = (p and p.auraStackTextX) or defaults.auraStackTextX
@@ -3966,7 +4408,7 @@ function NameplateFrame:ApplyAppearance()
     local debuffTPos = (p and p.debuffTimerPosition) or (p and p.auraTextPosition) or defaults.debuffTimerPosition
     local buffTPos   = (p and p.buffTimerPosition)   or (p and p.auraTextPosition) or defaults.buffTimerPosition
     local ccTPos     = (p and p.ccTimerPosition)     or (p and p.auraTextPosition) or defaults.ccTimerPosition
-    local function ApplyTimerPosition(durText, auraFrame, pos)
+    local function ApplyTimerPosition(durText, auraFrame, pos, cfg)
         local cd = auraFrame.cd
         if pos == "none" then
             if cd and cd.SetHideCountdownNumbers then
@@ -3977,23 +4419,23 @@ function NameplateFrame:ApplyAppearance()
         if cd and cd.SetHideCountdownNumbers then
             cd:SetHideCountdownNumbers(false)
         end
-        SetFSFont(durText, auraDurSize, "OUTLINE, SLUG")
-        durText:SetTextColor(auraDurColor.r, auraDurColor.g, auraDurColor.b, 1)
+        SetFSFont(durText, cfg.size, "OUTLINE, SLUG")
+        durText:SetTextColor(cfg.color.r, cfg.color.g, cfg.color.b, 1)
         durText:ClearAllPoints()
         if pos == "center" then
-            durText:SetPoint("CENTER", auraFrame, "CENTER", auraDurX, auraDurY)
+            durText:SetPoint("CENTER", auraFrame, "CENTER", cfg.x, cfg.y)
             durText:SetJustifyH("CENTER")
         elseif pos == "topright" then
-            PP.Point(durText, "TOPRIGHT", auraFrame, "TOPRIGHT", 3 + auraDurX, 4 + auraDurY)
+            PP.Point(durText, "TOPRIGHT", auraFrame, "TOPRIGHT", 3 + cfg.x, 4 + cfg.y)
             durText:SetJustifyH("RIGHT")
         elseif pos == "bottomleft" then
-            PP.Point(durText, "BOTTOMLEFT", auraFrame, "BOTTOMLEFT", -3 + auraDurX, -4 + auraDurY)
+            PP.Point(durText, "BOTTOMLEFT", auraFrame, "BOTTOMLEFT", -3 + cfg.x, -4 + cfg.y)
             durText:SetJustifyH("LEFT")
         elseif pos == "bottomright" then
-            PP.Point(durText, "BOTTOMRIGHT", auraFrame, "BOTTOMRIGHT", 3 + auraDurX, -4 + auraDurY)
+            PP.Point(durText, "BOTTOMRIGHT", auraFrame, "BOTTOMRIGHT", 3 + cfg.x, -4 + cfg.y)
             durText:SetJustifyH("RIGHT")
         else
-            PP.Point(durText, "TOPLEFT", auraFrame, "TOPLEFT", -3 + auraDurX, 4 + auraDurY)
+            PP.Point(durText, "TOPLEFT", auraFrame, "TOPLEFT", -3 + cfg.x, 4 + cfg.y)
             durText:SetJustifyH("LEFT")
         end
     end
@@ -4023,9 +4465,9 @@ function NameplateFrame:ApplyAppearance()
     end
     for i = 1, #self.debuffs do
         if self.debuffs[i] and self.debuffs[i].cd and self.debuffs[i].cd.text then
-            SetFSFont(self.debuffs[i].cd.text, auraDurSize, "OUTLINE, SLUG")
-            self.debuffs[i].cd.text:SetTextColor(auraDurColor.r, auraDurColor.g, auraDurColor.b, 1)
-            ApplyTimerPosition(self.debuffs[i].cd.text, self.debuffs[i], debuffTPos)
+            SetFSFont(self.debuffs[i].cd.text, debuffDur.size, "OUTLINE, SLUG")
+            self.debuffs[i].cd.text:SetTextColor(debuffDur.color.r, debuffDur.color.g, debuffDur.color.b, 1)
+            ApplyTimerPosition(self.debuffs[i].cd.text, self.debuffs[i], debuffTPos, debuffDur)
         end
         if self.debuffs[i] and self.debuffs[i].count then
             SetFSFont(self.debuffs[i].count, auraStackSize, "OUTLINE, SLUG")
@@ -4049,9 +4491,9 @@ function NameplateFrame:ApplyAppearance()
     for i = 1, 4 do
         ns.ApplyAuraSlotCrop(self.buffs[i], buffCrop, buffSz)
         if self.buffs[i].cd and self.buffs[i].cd.text then
-            SetFSFont(self.buffs[i].cd.text, auraDurSize, "OUTLINE, SLUG")
-            self.buffs[i].cd.text:SetTextColor(auraDurColor.r, auraDurColor.g, auraDurColor.b, 1)
-            ApplyTimerPosition(self.buffs[i].cd.text, self.buffs[i], buffTPos)
+            SetFSFont(self.buffs[i].cd.text, buffDur.size, "OUTLINE, SLUG")
+            self.buffs[i].cd.text:SetTextColor(buffDur.color.r, buffDur.color.g, buffDur.color.b, 1)
+            ApplyTimerPosition(self.buffs[i].cd.text, self.buffs[i], buffTPos, buffDur)
         end
         if self.buffs[i].count then
             SetFSFont(self.buffs[i].count, auraStackSize, "OUTLINE, SLUG")
@@ -4063,9 +4505,9 @@ function NameplateFrame:ApplyAppearance()
     for i = 1, 2 do
         ns.ApplyAuraSlotCrop(self.cc[i], ccCrop, ccSz)
         if self.cc[i].cd and self.cc[i].cd.text then
-            SetFSFont(self.cc[i].cd.text, auraDurSize, "OUTLINE, SLUG")
-            self.cc[i].cd.text:SetTextColor(auraDurColor.r, auraDurColor.g, auraDurColor.b, 1)
-            ApplyTimerPosition(self.cc[i].cd.text, self.cc[i], ccTPos)
+            SetFSFont(self.cc[i].cd.text, ccDur.size, "OUTLINE, SLUG")
+            self.cc[i].cd.text:SetTextColor(ccDur.color.r, ccDur.color.g, ccDur.color.b, 1)
+            ApplyTimerPosition(self.cc[i].cd.text, self.cc[i], ccTPos, ccDur)
         end
     end
     PositionAuraSlot(self.cc, 2, ccSlot, self, ccSz, ccH, GetAuraSpacing("ccs"), GetAuraSlotOffsets("ccSlot"))
@@ -4216,6 +4658,7 @@ function NameplateFrame:SetUnit(unit, nameplate)
     self:SetPoint("CENTER", nameplate, "CENTER", 0, GetHitboxYShift())
     self:SetFrameLevel(nameplate:GetFrameLevel() + 1)
     self:Show()
+    if ns._hitboxOverlayShown or self.hitboxOverlay then ns._ApplyHitboxOverlay(self) end
     -- Apply static appearance only when stale (settings changed or fresh
     -- pool plate). Cache-hit re-spawns skip this entirely.
     if self._appearanceGen ~= ns._npAppearanceGen then
@@ -4377,10 +4820,12 @@ function NameplateFrame:ClearUnit()
     self._buffsBuiltAttackable = nil
     self._lastHCr, self._lastHCg, self._lastHCb = nil, nil, nil
     self._ovFocShown, self._ovTgtShown = nil, nil
+    self._focusLetterShown = nil
     self._kickIsChannel = nil
     self._kickIsEmpowered = nil
     self._kickGeoDirty = nil
     self._castTex = nil
+    self._castLockout = nil
     if ns._npDequeueAuraWork then ns._npDequeueAuraWork(self) end
     self.cast:Hide()
     self.castShieldFrame:Hide()
@@ -4398,10 +4843,12 @@ function NameplateFrame:ClearUnit()
     end
     self._interrupted = nil
     if self.glow then self.glow:Hide() end
-    self.highlight:Hide()
+    if self.targetHighlight then self.targetHighlight:Hide() end
+    ns.HideHoverEffect(self)
     self.raidFrame:Hide()
     self.classFrame:Hide()
     if self.classText then self.classText:Hide() end
+    if self.focusLetter then self.focusLetter:Hide() end
     if self.leftArrow then self.leftArrow:Hide() end
     if self.rightArrow then self.rightArrow:Hide() end
     HideClassPowerOnPlate(self)
@@ -4456,6 +4903,9 @@ function NameplateFrame:UpdateHealthValues()
             end
             self.unit = actualUnit
             unit = actualUnit
+            -- Only refresh auras for the lockout when one was actually active
+            -- (zero cost when the Cast Lockout feature is off / no lockout).
+            if self._castLockout then self._castLockout = nil; self:UpdateAuras() end
             self:UpdateName()
             self._castDirtyFull = true
             self:UpdateCast()
@@ -4650,7 +5100,7 @@ function NameplateFrame:UpdateHealthColor()
         -- live dropdown changes rebuild it via the name compare)
         if ns._focusOverlayTexName ~= focusTex then
             ns._focusOverlayTexName = focusTex
-            ns._focusOverlayTexPath = "Interface\\AddOns\\EllesmereUINameplates\\Media\\" .. focusTex .. ".png"
+            ns._focusOverlayTexPath = ns.ResolveOverlayTexPath(focusTex)
         end
         local texPath = ns._focusOverlayTexPath
         local overlayAlpha = db2.focusOverlayAlpha or defaults.focusOverlayAlpha
@@ -4662,6 +5112,7 @@ function NameplateFrame:UpdateHealthColor()
             self._ovFocShown = true
             self._ovFocTex, self._ovFocAlpha = texPath, overlayAlpha
             self._ovFocR, self._ovFocG, self._ovFocB = oc.r, oc.g, oc.b
+            ApplyOverlayGeometry(self.focusOverlayFill, self.focusOverlayBg, self.health, ns.OVERLAY_STRIPE_KEYS[focusTex] == true)
             self.focusOverlayFill:SetTexture(texPath)
             self.focusOverlayFill:SetAlpha(overlayAlpha)
             self.focusOverlayFill:SetVertexColor(oc.r, oc.g, oc.b)
@@ -4676,12 +5127,19 @@ function NameplateFrame:UpdateHealthColor()
         self.focusClipFill:Hide()
         self.focusClipBg:Hide()
     end
+    -- Focus letter: zero-cost when off. Gate the call so a disabled plate pays
+    -- only two field reads here (no function call, no UnitIsUnit, no allocation).
+    -- The _focusLetterShown term lets a letter that is currently up hide itself on
+    -- the refresh that turns the feature off, after which this gate stays cold.
+    if db2.focusLetterEnabled or self._focusLetterShown then
+        ns.ApplyFocusLetter(self, unit, db2)
+    end
     -- Target overlay: identical to focus overlay but for current target
     local targetTex = db2.targetOverlayTexture or defaults.targetOverlayTexture
     if targetTex ~= "none" and UnitIsUnit(unit, "target") then
         if ns._targetOverlayTexName ~= targetTex then
             ns._targetOverlayTexName = targetTex
-            ns._targetOverlayTexPath = "Interface\\AddOns\\EllesmereUINameplates\\Media\\" .. targetTex .. ".png"
+            ns._targetOverlayTexPath = ns.ResolveOverlayTexPath(targetTex)
         end
         local texPath = ns._targetOverlayTexPath
         local overlayAlpha = db2.targetOverlayAlpha or defaults.targetOverlayAlpha
@@ -4693,6 +5151,7 @@ function NameplateFrame:UpdateHealthColor()
             self._ovTgtShown = true
             self._ovTgtTex, self._ovTgtAlpha = texPath, overlayAlpha
             self._ovTgtR, self._ovTgtG, self._ovTgtB = oc.r, oc.g, oc.b
+            ApplyOverlayGeometry(self.targetOverlayFill, self.targetOverlayBg, self.health, ns.OVERLAY_STRIPE_KEYS[targetTex] == true)
             self.targetOverlayFill:SetTexture(texPath)
             self.targetOverlayFill:SetAlpha(overlayAlpha)
             self.targetOverlayFill:SetVertexColor(oc.r, oc.g, oc.b)
@@ -4792,20 +5251,20 @@ function NameplateFrame:UpdateClassification()
             cxOff, debuffY + cpPush + cyOff)
     elseif slot == "left" then
         local sideOff = GetSideAuraXOffset()
-        local iconRes, iconSide = ns.GetCastIconReserve()
+        local iconRes, iconSide = ns.GetCastIconReserve(self)
         local iconPush = (iconSide == "left") and iconRes or 0
         PP.Point(self.classFrame, "RIGHT", self.health, "LEFT",
             -sideOff - iconPush + cxOff, cyOff)
     elseif slot == "right" then
         local sideOff = GetSideAuraXOffset()
-        local iconRes, iconSide = ns.GetCastIconReserve()
+        local iconRes, iconSide = ns.GetCastIconReserve(self)
         local iconPush = (iconSide == "right") and iconRes or 0
         PP.Point(self.classFrame, "LEFT", self.health, "RIGHT",
             sideOff + iconPush + cxOff, cyOff)
     elseif slot == "topleft" then
-        PP.Point(self.classFrame, "BOTTOMLEFT", self.health, "TOPLEFT", -2 + cxOff, 2 + cpPush + cyOff)
+        PP.Point(self.classFrame, "BOTTOMLEFT", self.health, "TOPLEFT", cxOff, 2 + cpPush + cyOff)
     elseif slot == "topright" then
-        PP.Point(self.classFrame, "BOTTOMRIGHT", self.health, "TOPRIGHT", 2 + cxOff, 2 + cpPush + cyOff)
+        PP.Point(self.classFrame, "BOTTOMRIGHT", self.health, "TOPRIGHT", cxOff, 2 + cpPush + cyOff)
     end
     self.classFrame:Show()
     self:UpdateNameWidth()
@@ -4845,6 +5304,26 @@ function NameplateFrame:UpdateNameWidth()
         PP.Width(self.name, math.max(barW, 20))
     end
 end
+function NameplateFrame:ApplyNameVisibility()
+    -- Zero cost when off: the name's shown state is owned by RefreshNamePosition;
+    -- only override it (hide while the cast bar is up) when the feature is on.
+    if not GetHideEnemyNameWhileCasting() then return end
+    local hasNameSlot = FindSlotForElement("enemyName") ~= nil
+    self.name:SetShown(hasNameSlot and not self.cast:IsShown())
+end
+-- The full-size cast icon (a child of the cast bar) only occupies its side-slot
+-- space while a cast is up, so its reserve is gated on the cast bar being shown
+-- (see GetCastIconReserve). Whenever the cast bar shows or hides, re-anchor the
+-- side elements that reserve that space -- the target arrow, classification
+-- icon, and raid marker -- so they track the icon instead of sitting shoved out
+-- by a phantom gap. Zero cost unless the full-size icon is actually enabled;
+-- each re-anchor helper no-ops on plates that don't show that element.
+function NameplateFrame:RefreshCastIconSideReserve()
+    if not (GetShowCastIcon() and ns.GetCastIconFullSize()) then return end
+    self:UpdateClassification()
+    self:UpdateRaidIcon()
+    PositionArrowsOutsideAuras(self)
+end
 function NameplateFrame:RefreshNamePosition()
     local nameSlot = FindSlotForElement("enemyName")
     local nameYOff = GetNameYOffset()
@@ -4883,6 +5362,7 @@ function NameplateFrame:RefreshNamePosition()
         -- Name not assigned to any slot
         self.name:Hide()
     end
+    self:ApplyNameVisibility()
     self:UpdateAuras()
     self:UpdateClassification()
 end
@@ -4913,20 +5393,20 @@ function NameplateFrame:UpdateRaidIcon()
             rxOff, debuffY + cpPush + ryOff)
     elseif pos == "left" then
         local sideOff = GetSideAuraXOffset()
-        local iconRes, iconSide = ns.GetCastIconReserve()
+        local iconRes, iconSide = ns.GetCastIconReserve(self)
         local iconPush = (iconSide == "left") and iconRes or 0
         PP.Point(self.raidFrame, "RIGHT", self.health, "LEFT",
             -sideOff - iconPush + rxOff, ryOff)
     elseif pos == "right" then
         local sideOff = GetSideAuraXOffset()
-        local iconRes, iconSide = ns.GetCastIconReserve()
+        local iconRes, iconSide = ns.GetCastIconReserve(self)
         local iconPush = (iconSide == "right") and iconRes or 0
         PP.Point(self.raidFrame, "LEFT", self.health, "RIGHT",
             sideOff + iconPush + rxOff, ryOff)
     elseif pos == "topleft" then
-        PP.Point(self.raidFrame, "BOTTOMLEFT", self.health, "TOPLEFT", -2 + rxOff, cpPush + ryOff)
+        PP.Point(self.raidFrame, "BOTTOMLEFT", self.health, "TOPLEFT", rxOff, cpPush + ryOff)
     elseif pos == "topright" then
-        PP.Point(self.raidFrame, "BOTTOMRIGHT", self.health, "TOPRIGHT", 2 + rxOff, cpPush + ryOff)
+        PP.Point(self.raidFrame, "BOTTOMRIGHT", self.health, "TOPRIGHT", rxOff, cpPush + ryOff)
     elseif pos == "bottom" then
         -- Below the cast bar, centered (matches PositionAuraSlot "bottom" convention).
         PP.Point(self.raidFrame, "TOP", self.cast, "BOTTOM", rxOff, -2 + ryOff)
@@ -4938,18 +5418,28 @@ function NameplateFrame:ApplyTarget()
     if not self.unit then return end
     local isTarget = UnitIsUnit(self.unit, "target")
     self._isTarget = isTarget  -- cached for hot-path hash line check
-    local style = GetTargetGlowStyle()
-    if isTarget and style ~= "none" then
+    -- EllesmereUI: background glow around the plate
+    if isTarget and ns.GetTargetGlowEllesmereUI() then
         EnsureGlow(self)
         self.glow:Show()
     elseif self.glow then
         self.glow:Hide()
     end
-    -- Vibrant: override health bar border to white on selected target
-    if isTarget and style == "vibrant" then
-        if PP then PP.SetBorderColor(self.health, 1, 1, 1, 1) end
+    -- Border Color: recolor the health bar border with the custom target color
+    if isTarget and ns.GetTargetGlowBorderColor() then
+        if PP then
+            local bc = ns.GetTargetBorderColor()
+            PP.SetBorderColor(self.health, bc.r, bc.g, bc.b, 1)
+        end
     else
         self:ApplyBorderColor()
+    end
+    -- Highlight: fixed translucent white wash across the health bar
+    if isTarget and ns.GetTargetGlowHighlight() then
+        EnsureTargetHighlight(self)
+        self.targetHighlight:Show()
+    elseif self.targetHighlight then
+        self.targetHighlight:Hide()
     end
     if p and p.showTargetArrows then
         if isTarget then
@@ -4989,10 +5479,11 @@ end
 function NameplateFrame:ApplyMouseover()
     if not self.unit then return end
     if UnitExists("mouseover") and UnitIsUnit(self.unit, "mouseover") then
-        self.highlight:Show()
-        currentMouseoverPlate = self
+        ns.ShowHoverEffect(self)
+        ns._currentMouseoverPlate = self
+        if ns._EnsureMouseoverTicker then ns._EnsureMouseoverTicker() end
     else
-        self.highlight:Hide()
+        ns.HideHoverEffect(self)
     end
 end
 -- Per-category rebuild support: id -> group-membership bitmask
@@ -5543,19 +6034,27 @@ function NameplateFrame:UpdateAuras(updateInfo)
     wipe(skipIDs); wipe(skipAuras)
     local ccSel = 0
     if ccSlotVal ~= "none" then
-    if C_UnitAuras and C_UnitAuras.GetUnitAuras then
-        local ccAuras = C_UnitAuras.GetUnitAuras(unit, "HARMFUL|CROWD_CONTROL")
-        if ccAuras then
-            for _, aura in ipairs(ccAuras) do
-                if ccSel >= 2 then break end
-                if aura and aura.auraInstanceID and aura.icon then
-                    ccSel = ccSel + 1
-                    skipIDs[ccSel] = aura.auraInstanceID
-                    skipAuras[ccSel] = aura
+        -- Short-circuit on the plain field so there's no call when no lockout is
+        -- pending (i.e. always, when the feature is off).
+        local lockout = self._castLockout and ns.GetActiveCastLockout(self)
+        if lockout then
+            ccSel = 1
+            skipIDs[1] = ns.CAST_LOCKOUT_SLOT_ID
+            skipAuras[1] = lockout
+        end
+        if C_UnitAuras and C_UnitAuras.GetUnitAuras then
+            local ccAuras = C_UnitAuras.GetUnitAuras(unit, "HARMFUL|CROWD_CONTROL")
+            if ccAuras then
+                for _, aura in ipairs(ccAuras) do
+                    if ccSel >= 2 then break end
+                    if aura and aura.auraInstanceID and aura.icon then
+                        ccSel = ccSel + 1
+                        skipIDs[ccSel] = aura.auraInstanceID
+                        skipAuras[ccSel] = aura
+                    end
                 end
             end
         end
-    end
     end -- ccSlotVal ~= "none" (phase 1)
     -- PHASE 2 (P3): skip on identical membership, else rebuild from scratch
     if not needsFullRefresh
@@ -5573,13 +6072,15 @@ function NameplateFrame:UpdateAuras(updateInfo)
         for i = 1, #skipIDs do
             local slot = self.cc[i]
             local id = skipIDs[i]
-            if slot.cd and C_UnitAuras_GetAuraDuration then
+            if id == ns.CAST_LOCKOUT_SLOT_ID then
+                ns.ArmCastLockoutCooldown(slot.cd, skipAuras[i])
+            elseif slot.cd and C_UnitAuras_GetAuraDuration then
                 local durObj = C_UnitAuras_GetAuraDuration(unit, id)
                 if durObj and slot.cd.SetCooldownFromDurationObject then
                     NP_ArmAuraCooldown(slot.cd, durObj)
                 end
             end
-            if updated then
+            if updated and id ~= ns.CAST_LOCKOUT_SLOT_ID then
                 for j = 1, #updated do
                     if updated[j] == id then
                         RawSetTex(slot.icon, skipAuras[i].icon)
@@ -5601,23 +6102,27 @@ function NameplateFrame:UpdateAuras(updateInfo)
             local aura = skipAuras[i]
             local id = skipIDs[i]
             local slot = self.cc[i]
-            RawSetTex(slot.icon, aura.icon)
-            -- Texcoord (square or cropped) is applied in the size loop below.
-            slot.icon:Show()
-            local cd = slot.cd
-            if cd and C_UnitAuras_GetAuraDuration then
-                local durObj = C_UnitAuras_GetAuraDuration(unit, id)
-                if durObj and cd.SetCooldownFromDurationObject then
-                    if cd.SetDrawSwipe then cd:SetDrawSwipe(true) end
-                    NP_ArmAuraCooldown(cd, durObj)
-                    cd:Show()
+            if id == ns.CAST_LOCKOUT_SLOT_ID then
+                ns.ArmCastLockoutSlot(slot, aura)
+            else
+                RawSetTex(slot.icon, aura.icon)
+                -- Texcoord (square or cropped) is applied in the size loop below.
+                slot.icon:Show()
+                local cd = slot.cd
+                if cd and C_UnitAuras_GetAuraDuration then
+                    local durObj = C_UnitAuras_GetAuraDuration(unit, id)
+                    if durObj and cd.SetCooldownFromDurationObject then
+                        if cd.SetDrawSwipe then cd:SetDrawSwipe(true) end
+                        NP_ArmAuraCooldown(cd, durObj)
+                        cd:Show()
+                    end
                 end
+                slot:Show()
+                slot._auraId = id
+                self._shownAuras[id] = slot
+                local m = groupMask[id] or 0
+                if m < 4 then groupMask[id] = m + 4 end
             end
-            slot:Show()
-            slot._auraId = id
-            self._shownAuras[id] = slot
-            local m = groupMask[id] or 0
-            if m < 4 then groupMask[id] = m + 4 end
         end
         self._prevCCCount = ccShown
         -- Reposition CC based on actual shown count
@@ -5712,6 +6217,7 @@ end
 function NameplateFrame:UpdateCast()
     if not self.unit then
         self.cast:Hide()
+        self:ApplyNameVisibility()
         return
     end
     local name, _, texture, _, _, _, _, kickProtected, castSpellID = UnitCastingInfo(self.unit)
@@ -5725,6 +6231,7 @@ function NameplateFrame:UpdateCast()
         if not self._interrupted then
             self.cast:Hide()
         end
+        self:ApplyNameVisibility()
         self.castTimer:SetText("")
         if self.isCasting then
             if self._castFallback then
@@ -5763,6 +6270,9 @@ function NameplateFrame:UpdateCast()
 
     if isFullSetup then
         self.cast:Show()
+        self:ApplyNameVisibility()
+        local castW = self.cast:GetWidth()
+        if castW and castW > 0 then self.castName:SetWidth(castW * 0.42) end
         local _isv = issecretvalue
         local texClean = texture ~= nil and not (_isv and _isv(texture))
         if texClean then
@@ -6228,6 +6738,7 @@ function NameplateFrame:ShowInterrupted(interrupterGUID)
     if p and p.interruptedFlashEnabled ~= nil then flashOn = p.interruptedFlashEnabled end
     if not flashOn then
         self.cast:Hide()
+        self:ApplyNameVisibility()
         return
     end
 
@@ -6237,9 +6748,11 @@ function NameplateFrame:ShowInterrupted(interrupterGUID)
     self.cast:SetValue(1)
     local fc = (p and p.interruptedFlashColor) or defaults.interruptedFlashColor
     self.cast:GetStatusBarTexture():SetVertexColor(fc.r, fc.g, fc.b)
-    self.castName:SetText("Interrupted")
 
-    -- Show interrupter name (class-colored) in cast target position
+    -- Resolve the interrupter's name + class from the GUID, exactly as PR #398
+    -- does. Class-color is applied via an embedded hex code when the class
+    -- resolves; if it doesn't (e.g. a secret GUID), the `if interrupterClass`
+    -- check simply skips coloring and the name shows uncolored.
     local interrupterName
     local interrupterClass
     if interrupterGUID then
@@ -6255,41 +6768,40 @@ function NameplateFrame:ShowInterrupted(interrupterGUID)
             end
         end
     end
-    if interrupterName then
-        self.castTarget:SetText(interrupterName)
-        local cfg = p or defaults
-        local useClassColor = defaults.castTargetClassColor
-        if cfg.castTargetClassColor ~= nil then useClassColor = cfg.castTargetClassColor end
-        if useClassColor then
-            if interrupterClass and C_ClassColor then
-                local c = C_ClassColor.GetClassColor(interrupterClass)
-                if c then
-                    self.castTarget:SetTextColor(c:GetRGB())
-                else
-                    self.castTarget:SetTextColor(1, 1, 1, 1)
-                end
-            else
-                self.castTarget:SetTextColor(1, 1, 1, 1)
-            end
-        else
-            local ctc = (cfg and cfg.castTargetColor) or defaults.castTargetColor
-            self.castTarget:SetTextColor(ctc.r, ctc.g, ctc.b, 1)
-        end
-    else
-        self.castTarget:SetText("")
-    end
+    local cfg = p or defaults
+    local useClassColor = defaults.castTargetClassColor
+    if cfg.castTargetClassColor ~= nil then useClassColor = cfg.castTargetClassColor end
 
-    -- Show interrupter name in target slot, hide timer
-    self.castTimer:Hide()
-    if interrupterName then
-        self.castTarget:Show()
-    else
-        self.castTarget:Hide()
+    -- Show the interrupter inline as "Interrupted (Name)" in the single cast-name
+    -- FontString; the cast-target / timer slots are cleared during the flash.
+    local castW = self.cast:GetWidth()
+    if castW and castW > 0 then
+        self.castName:SetWidth(interrupterName and math.max(castW - 8, 20) or castW * 0.42)
     end
+    if interrupterName then
+        local sourceText = interrupterName
+        if useClassColor and interrupterClass and C_ClassColor then
+            local c = C_ClassColor.GetClassColor(interrupterClass)
+            if c then
+                local hex = (c.GenerateHexColor and c:GenerateHexColor()) or c.colorStr
+                if not hex and c.r and c.g and c.b then
+                    hex = string.format("ff%02x%02x%02x", math.floor(c.r * 255 + 0.5), math.floor(c.g * 255 + 0.5), math.floor(c.b * 255 + 0.5))
+                end
+                if hex then sourceText = "|c" .. hex .. interrupterName .. "|r" end
+            end
+        end
+        self.castName:SetText("Interrupted (" .. sourceText .. ")")
+    else
+        self.castName:SetText("Interrupted")
+    end
+    self.castTarget:SetText("")
+    self.castTarget:Hide()
+    self.castTimer:Hide()
     self.castShieldFrame:Hide()
     self.castShieldFrame:SetAlpha(1)
     self.castBarOverlay:SetAlpha(0)
     self.cast:Show()
+    self:ApplyNameVisibility()
 
     if self._interruptTimer then
         self._interruptTimer:Cancel()
@@ -6301,7 +6813,25 @@ function NameplateFrame:ShowInterrupted(interrupterGUID)
             self._interrupted = nil
             self._interruptTimer = nil
             self.cast:Hide()
+            self:ApplyNameVisibility()
         end
+    end)
+end
+function NameplateFrame:ShowCastLockout()
+    if not ns.ShowCastLockoutAsCrowdControl() or not self.unit then return end
+    local now = GetTime()
+    local lockout = {
+        icon = ns.CAST_LOCKOUT_ICON,
+        start = now,
+        duration = ns.DEFAULT_CAST_LOCKOUT_DURATION,
+        expires = now + ns.DEFAULT_CAST_LOCKOUT_DURATION,
+    }
+    self._castLockout = lockout
+    self:UpdateAuras()
+    C_Timer.After(ns.DEFAULT_CAST_LOCKOUT_DURATION, function()
+        if self._castLockout ~= lockout or GetTime() < lockout.expires then return end
+        self._castLockout = nil
+        self:UpdateAuras()
     end)
 end
 function NameplateFrame:UNIT_HEALTH()
@@ -6501,6 +7031,7 @@ function NameplateFrame:UNIT_SPELLCAST_CHANNEL_STOP()
     if not self._interrupted then
         self.cast:Hide()
     end
+    self:ApplyNameVisibility()
     self.castTimer:SetText("")
     if GetShowClassPower() and classPowerType and self._cpPips and self.unit and UnitIsUnit(self.unit, "target") then
         UpdateClassPowerOnPlate(self)
@@ -6510,6 +7041,10 @@ function NameplateFrame:UNIT_SPELLCAST_FAILED()
     self:UpdateCast()
 end
 function NameplateFrame:UNIT_SPELLCAST_INTERRUPTED(_, _, _, interrupterGUID)
+    local protected = self._kickProtected
+    if interrupterGUID and ((issecretvalue and issecretvalue(protected)) or not protected) then
+        self:ShowCastLockout()
+    end
     self:ShowInterrupted(interrupterGUID)
 end
 -- Mid-cast interruptibility flips: re-read protection once, store it,
@@ -6609,8 +7144,7 @@ manager:RegisterEvent("UI_SCALE_CHANGED")
 
 local pendingUnits = {}
 ns.pendingUnits = pendingUnits
-local currentMouseoverPlate = nil
-local mouseoverTicker = nil
+-- Mouseover-highlight state lives on ns (unified enemy+friendly monitor below).
 
 -- Per-unit event watchers for pending friendly units.
 -- Using per-unit frames avoids the global UNIT_FLAGS firehose.
@@ -6663,13 +7197,7 @@ CreateEnemyWatcher = function(unit)
         enemyWatchers[u] = nil
         local plate = ns.plates[u]
         if plate then
-            if currentMouseoverPlate == plate then
-                currentMouseoverPlate = nil
-                if mouseoverTicker then
-                    mouseoverTicker:Cancel()
-                    mouseoverTicker = nil
-                end
-            end
+            if ns._ClearMouseoverPlate then ns._ClearMouseoverPlate(plate) end
             plate:ClearUnit()
             frameCache:Release(plate)
             ns.plates[u] = nil
@@ -6749,31 +7277,52 @@ factionFrame:SetScript("OnEvent", function(_, event, unit)
         w:GetScript("OnEvent")(w, "UNIT_FACTION", unit)
     end
 end)
-local function UpdateMouseover()
-    if currentMouseoverPlate then
-        currentMouseoverPlate.highlight:Hide()
-        currentMouseoverPlate = nil
-    end
-    if UnitExists("mouseover") then
-        for _, plate in pairs(ns.plates) do
-            if plate.unit and UnitIsUnit(plate.unit, "mouseover") then
-                plate.highlight:Show()
-                currentMouseoverPlate = plate
-                break
-            end
+-- Unified mouseover monitor (enemy + friendly). UPDATE_MOUSEOVER_UNIT fires when
+-- a mouseover STARTS but never when it clears, so a single shared 0.1s ticker
+-- (alive only while a mouseover exists) watches for the mouse leaving. A held
+-- mouse button transiently drops the mouseover unit, so in that case we wait for
+-- GLOBAL_MOUSE_UP (handled on `manager`) and re-check.
+function ns._EnsureMouseoverTicker()
+    if ns._mouseoverTicker then return end
+    ns._mouseoverTicker = C_Timer.NewTicker(0.1, function()
+        if not UnitExists("mouseover") then
+            if ns._mouseoverTicker then ns._mouseoverTicker:Cancel(); ns._mouseoverTicker = nil end
+            ns._UpdateMouseover()
+            if IsMouseButtonDown() then manager:RegisterEvent("GLOBAL_MOUSE_UP") end
         end
-        if not mouseoverTicker then
-            mouseoverTicker = C_Timer.NewTicker(0.1, function()
-                if not UnitExists("mouseover") then
-                    if mouseoverTicker then
-                        mouseoverTicker:Cancel()
-                        mouseoverTicker = nil
-                    end
-                    UpdateMouseover()
-                end
-            end)
+    end)
+end
+
+-- Drop the highlight tracking if `plate` is the one currently highlighted.
+-- Called from both enemy and friendly plate removal.
+function ns._ClearMouseoverPlate(plate)
+    if ns._currentMouseoverPlate == plate then
+        ns._currentMouseoverPlate = nil
+        if ns._mouseoverTicker then ns._mouseoverTicker:Cancel(); ns._mouseoverTicker = nil end
+    end
+end
+
+function ns._UpdateMouseover()
+    local cur = ns._currentMouseoverPlate
+    if cur then
+        ns.HideHoverEffect(cur)
+        ns._currentMouseoverPlate = nil
+    end
+    if not UnitExists("mouseover") then return end
+    local found
+    for _, plate in pairs(ns.plates) do
+        if plate.unit and UnitIsUnit(plate.unit, "mouseover") then found = plate; break end
+    end
+    if not found and ns.friendlyPlates then
+        for _, plate in pairs(ns.friendlyPlates) do
+            if plate.unit and UnitIsUnit(plate.unit, "mouseover") then found = plate; break end
         end
     end
+    if found then
+        ns.ShowHoverEffect(found)
+        ns._currentMouseoverPlate = found
+    end
+    ns._EnsureMouseoverTicker()
 end
 -- Refresh Y-offset on all visible friendly name-only plates
 function ns.RefreshFriendlyNameOnlyOffset()
@@ -6860,6 +7409,9 @@ manager:SetScript("OnEvent", function(self, event, unit)
         if UnitIsUnit(unit, "target") then
             ns._cachedTargetPlate = plate
         end
+        if UnitIsUnit(unit, "focus") then
+            ns._cachedFocusPlate = plate
+        end
     elseif event == "NAME_PLATE_UNIT_REMOVED" then
         questMobCache[unit] = nil
         ns._questObjText[unit] = nil
@@ -6896,13 +7448,7 @@ manager:SetScript("OnEvent", function(self, event, unit)
         end
         local plate = ns.plates[unit]
         if plate then
-            if currentMouseoverPlate == plate then
-                currentMouseoverPlate = nil
-                if mouseoverTicker then
-                    mouseoverTicker:Cancel()
-                    mouseoverTicker = nil
-                end
-            end
+            if ns._ClearMouseoverPlate then ns._ClearMouseoverPlate(plate) end
             -- Clear cached refs before release
             if ns._cachedTargetPlate == plate then ns._cachedTargetPlate = nil end
             if ns._cachedFocusPlate  == plate then ns._cachedFocusPlate  = nil end
@@ -6961,7 +7507,10 @@ manager:SetScript("OnEvent", function(self, event, unit)
             UpdateFocusPlate(ns._cachedFocusPlate)
         end
     elseif event == "UPDATE_MOUSEOVER_UNIT" then
-        UpdateMouseover()
+        ns._UpdateMouseover()
+    elseif event == "GLOBAL_MOUSE_UP" then
+        self:UnregisterEvent("GLOBAL_MOUSE_UP")
+        ns._UpdateMouseover()
     elseif event == "RAID_TARGET_UPDATE" then
         for _, plate in pairs(ns.plates) do
             plate:UpdateRaidIcon()
@@ -7091,6 +7640,20 @@ do
         "debuffTimerPosition", "buffTimerPosition", "ccTimerPosition",
         "auraDurationTextSize", "auraDurationTextColor",
     }
+    ns._displayPresetKeys[#ns._displayPresetKeys + 1] = "auraDurationTextX"
+    ns._displayPresetKeys[#ns._displayPresetKeys + 1] = "auraDurationTextY"
+    ns._displayPresetKeys[#ns._displayPresetKeys + 1] = "debuffDurationTextSize"
+    ns._displayPresetKeys[#ns._displayPresetKeys + 1] = "debuffDurationTextX"
+    ns._displayPresetKeys[#ns._displayPresetKeys + 1] = "debuffDurationTextY"
+    ns._displayPresetKeys[#ns._displayPresetKeys + 1] = "debuffDurationTextColor"
+    ns._displayPresetKeys[#ns._displayPresetKeys + 1] = "buffDurationTextSize"
+    ns._displayPresetKeys[#ns._displayPresetKeys + 1] = "buffDurationTextX"
+    ns._displayPresetKeys[#ns._displayPresetKeys + 1] = "buffDurationTextY"
+    ns._displayPresetKeys[#ns._displayPresetKeys + 1] = "buffDurationTextColor"
+    ns._displayPresetKeys[#ns._displayPresetKeys + 1] = "ccDurationTextSize"
+    ns._displayPresetKeys[#ns._displayPresetKeys + 1] = "ccDurationTextX"
+    ns._displayPresetKeys[#ns._displayPresetKeys + 1] = "ccDurationTextY"
+    ns._displayPresetKeys[#ns._displayPresetKeys + 1] = "ccDurationTextColor"
     ns._appendDisplayPresetKeys(ns._displayPresetKeys)
 
     -- Also handle spec changes that happen before the UI is ever opened

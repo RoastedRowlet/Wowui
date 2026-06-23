@@ -1,7 +1,7 @@
 local addonName, ns = ...
 local CCS = ns.CCS
 
-if CCS.GetCurrentVersion() ~= CCS.RETAIL then
+if CCS.CurrentVersion ~= CCS.RETAIL then
     return
 end
 
@@ -371,14 +371,18 @@ function module:Initialize(onlyStyle)
         return 
     end
 
-    if option("showraidprogress") ~= true then return end
+    if option("showraidprogress") ~= true then 
+		if _G["ccsr_btn1"] then _G["ccsr_btn1"]:Hide() end
+		if _G["ccsr_btn2"] then _G["ccsr_btn2"]:Hide() end
+		return 
+	end
 	if InCombatLockdown() then CCS.incombat = true return end
-
+--[[
 	if onlyStyle and _G["ccsrf_sf"] ~= nil then
 		ApplyStyle(self)
 		return
 	end
-
+--]]
     local ccsr_btn = _G["ccsr_btn1"] or CreateFrame("Frame", "ccsr_btn1", CharacterHandsSlot)
     local btnfont1 = _G["ccsr_btnfs1"] or ccsr_btn:CreateFontString("ccsr_btnfs1")
     local textstring = ""
@@ -399,8 +403,7 @@ function module:Initialize(onlyStyle)
 	ccsr_btn:SetSize(150, 30)
     ccsr_btn:SetPoint("BOTTOMRIGHT", CharacterHandsSlot, "TOPRIGHT", 8, 20)
     ccsr_btn:SetFrameStrata("HIGH")
-    ccsr_btn:Show()
-    
+    ccsr_btn:SetShown(option("showraidprogress"))
     btnfont1:SetPoint("RIGHT", ccsr_btn, "RIGHT", -3 ,0)
     btnfont1:SetFont(option("fontname_raid") or CCS.fontname, (option("fontsize_raid") or 11), CCS.textoutline)
 	if option("showfontshadow") == true then
@@ -465,20 +468,14 @@ function module:Initialize(onlyStyle)
 		end
 	end)
 
-		ccsr_btn2:Show()
-
+	ccsr_btn2:SetShown(option("showraidprogress"))
     ccsrf_sf:ClearAllPoints()
 	
 	local hpad = option("hpad") or 279
 	local offsetX = (60 + hpad)
 
-    if C_AddOns.IsAddOnLoaded("DejaCharacterStats") then
-		ccsrf_af:SetPoint("TOPLEFT", CharacterFrame, "TOPRIGHT", offsetX-63, 0)
-		ccsrf_af:SetPoint("BOTTOMLEFT", CharacterFrame, "BOTTOMRIGHT", offsetX-63, 0)
-	else
-		ccsrf_af:SetPoint("TOPLEFT", CharacterFrame, "TOPRIGHT", offsetX, 0)
-		ccsrf_af:SetPoint("BOTTOMLEFT", CharacterFrame, "BOTTOMRIGHT", offsetX, 0)
-	end
+	ccsrf_af:SetPoint("TOPLEFT", CharacterFrame, "TOPRIGHT", offsetX, 0)
+	ccsrf_af:SetPoint("BOTTOMLEFT", CharacterFrame, "BOTTOMRIGHT", offsetX, 0)
 
 	ccsrf_sf:SetPoint("TOPLEFT", ccsrf_af, "TOPRIGHT", 0, 0); 
 	ccsrf_sf:SetSize(660, 640)  
@@ -548,6 +545,7 @@ function module:Initialize(onlyStyle)
 
 	local totalSpacing = (totalRows - 1) * rowSpacing
 	local availableHeight = maxHeight - totalSpacing
+	totalRows = math.max(1, totalRows)
 	local rowHeight = math.min(math.floor(availableHeight / totalRows), 50)
 	local anchor = ccsrf_sf
 	local layoutChain = {}  -- Ordered list of frames to anchor
@@ -604,7 +602,7 @@ function CCS.RaidProgressEventHandler(event, ...)
     local arg1, arg2, arg3 = ...
 	if option("showraidprogress") == false then return end
 
-	if CCS.GetCurrentVersion() ~= CCS.RETAIL then return end
+	if CCS.CurrentVersion ~= CCS.RETAIL then return end
    
 	if CCS.initall == true then return end
 

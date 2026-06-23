@@ -126,8 +126,7 @@ local function IsFrameValid(frame)
     if not frame then return false end
     local getType = frame.GetObjectType
     if not getType then return false end
-    local ok, objType = pcall(getType, frame)
-    return ok and objType ~= nil
+    return getType(frame) ~= nil
 end
 
 -- Check if frame is hidden by bar tracking (with cooldownID verification)
@@ -354,7 +353,7 @@ local function TimelineAdd(category, action, details)
     
     -- Always call external callback if set (for debugger integration)
     if externalTimelineCallback then
-        pcall(externalTimelineCallback, category, action, details, source)
+        externalTimelineCallback(category, action, details, source)
     end
     
     if not _G.ARCUI_FC_TIMELINE then return end
@@ -817,21 +816,39 @@ local function AssignFrameToGroup(cdID, frame, groupName, row, col, viewerType, 
         local profileFullyLoaded = not ns.CDMGroups.initialLoadInProgress and 
                                    not ns.CDMGroups._profileNotLoaded
         if profileFullyLoaded and savedPositions then
-            local positionData = {
-                type = "group",
-                target = groupName,
-                row = member.row,
-                col = member.col,
-                viewerType = viewerType or member.viewerType,
-            }
-            -- Write to verified profile table
-            savedPositions[cdID] = positionData
-            
-            -- Also call SavePositionToSpec for any additional processing
-            if ns.CDMGroups.SavePositionToSpec then
-                ns.CDMGroups.SavePositionToSpec(cdID, positionData)
+            -- COLLISION GUARD (same intent as the post-reconcile save pass): never mint a
+            -- duplicate saved slot. If another saved icon in this group already owns
+            -- (member.row, member.col), skip persisting now - it resolves on the next clean
+            -- reconcile/reload. Recognized slot partners always already HAVE a saved position
+            -- (hadSavedPosition is true above, so we never reach here), so this cannot break them.
+            local r, c = member.row or 0, member.col or 0
+            local slotTaken = false
+            for ocdID, osaved in pairs(savedPositions) do
+                if ocdID ~= cdID and type(osaved) == "table" and osaved.type == "group"
+                   and osaved.target == groupName and (osaved.row or 0) == r and (osaved.col or 0) == c then
+                    slotTaken = true
+                    break
+                end
             end
-            Debug("AssignFrameToGroup: Saved NEW position for", cdID)
+            if slotTaken then
+                Debug("AssignFrameToGroup: SKIP duplicate slot for", cdID, "->", groupName)
+            else
+                local positionData = {
+                    type = "group",
+                    target = groupName,
+                    row = member.row,
+                    col = member.col,
+                    viewerType = viewerType or member.viewerType,
+                }
+                -- Write to verified profile table
+                savedPositions[cdID] = positionData
+
+                -- Also call SavePositionToSpec for any additional processing
+                if ns.CDMGroups.SavePositionToSpec then
+                    ns.CDMGroups.SavePositionToSpec(cdID, positionData)
+                end
+                Debug("AssignFrameToGroup: Saved NEW position for", cdID)
+            end
         end
     end
     
@@ -1303,17 +1320,17 @@ local function Reconcile()
                     local row = saved.row or 0
                     local col = saved.col or 0
                     
-                    -- Check bounds (for placeholders, expand grid)
+                    -- Check bounds (for placeholders, clamp into the existing grid)
                     local withinBounds = group.layout and row < group.layout.gridRows and col < group.layout.gridCols
-                    
+
                     if isPlaceholderEntry and not withinBounds and group.layout then
-                        -- Expand grid to accommodate placeholder
-                        if row >= group.layout.gridRows then
-                            group.layout.gridRows = row + 1
-                        end
-                        if col >= group.layout.gridCols then
-                            group.layout.gridCols = col + 1
-                        end
+                        -- A FRAMELESS placeholder must NOT grow the grid. Doing so resurrects
+                        -- rows/columns the user removed and renders a phantom empty row/column at
+                        -- login (the grid is never auto-shrunk). Clamp the placeholder into the
+                        -- current grid instead; if a real frame later appears for this cdID it
+                        -- claims/expands the grid legitimately (matches CreatePlaceholder's contract).
+                        row = math.min(row, group.layout.gridRows - 1)
+                        col = math.min(col, group.layout.gridCols - 1)
                         withinBounds = true
                     end
                     
@@ -1543,7 +1560,7 @@ local function Reconcile()
                     -- Return frame to CDM if it still exists
                     if member.frame then
                         if ns.CDMGroups.ReturnFrameToCDM then
-                            pcall(ns.CDMGroups.ReturnFrameToCDM, member.frame, member.entry)
+                            ns.CDMGroups.ReturnFrameToCDM(member.frame, member.entry)
                         end
                     end
                     
@@ -1609,7 +1626,7 @@ local function Reconcile()
                     -- Return frame to CDM if it still exists
                     if member.frame then
                         if ns.CDMGroups.ReturnFrameToCDM then
-                            pcall(ns.CDMGroups.ReturnFrameToCDM, member.frame, member.entry)
+                            ns.CDMGroups.ReturnFrameToCDM(member.frame, member.entry)
                         end
                     end
                     -- Remove from grid
@@ -1636,7 +1653,7 @@ local function Reconcile()
                 
                 if freeData.frame then
                     if ns.CDMGroups.ReturnFrameToCDM then
-                        pcall(ns.CDMGroups.ReturnFrameToCDM, freeData.frame, freeData.entry)
+                        ns.CDMGroups.ReturnFrameToCDM(freeData.frame, freeData.entry)
                     end
                 end
                 
@@ -1659,7 +1676,7 @@ local function Reconcile()
                 -- No saved position - remove completely
                 if freeData.frame then
                     if ns.CDMGroups.ReturnFrameToCDM then
-                        pcall(ns.CDMGroups.ReturnFrameToCDM, freeData.frame, freeData.entry)
+                        ns.CDMGroups.ReturnFrameToCDM(freeData.frame, freeData.entry)
                     end
                 end
                 ns.CDMGroups.freeIcons[cdID] = nil
@@ -1721,26 +1738,54 @@ local function Reconcile()
     
     if profileFullyLoaded and savedPositions then
         local savedCount = 0
-        
+
+        -- COLLISION GUARD: build a per-group set of (row,col) already claimed by an
+        -- existing saved position. The auto-save below must NEVER mint a DUPLICATE
+        -- saved slot: during a talent change an existing icon can be displaced off its
+        -- saved slot (its savedPositions left intact) while a newly-talented icon lands
+        -- on that same slot. Persisting the newcomer there would create two saved entries
+        -- at one (row,col) -> overlapping icons that survive reload. We only persist a new
+        -- position into a slot no other saved icon in that group already owns; collisions
+        -- stay unsaved and resolve on the next clean reconcile/reload.
+        local groupOccupied = {}
+        for ocdID, osaved in pairs(savedPositions) do
+            if type(osaved) == "table" and osaved.type == "group" and osaved.target then
+                local occ = groupOccupied[osaved.target]
+                if not occ then occ = {}; groupOccupied[osaved.target] = occ end
+                occ[(osaved.row or 0) .. "," .. (osaved.col or 0)] = true
+            end
+        end
+
         -- Check group members
         for groupName, group in pairs(ns.CDMGroups.groups or {}) do
             if group.members then
+                local occ = groupOccupied[groupName]
+                if not occ then occ = {}; groupOccupied[groupName] = occ end
                 for cdID, member in pairs(group.members) do
                     -- Has frame but no saved position?
                     if member.frame and not savedPositions[cdID] then
-                        local positionData = {
-                            type = "group",
-                            target = groupName,
-                            row = member.row or 0,
-                            col = member.col or 0,
-                            viewerType = member.viewerType,
-                        }
-                        savedPositions[cdID] = positionData
-                        if ns.CDMGroups.SavePositionToSpec then
-                            ns.CDMGroups.SavePositionToSpec(cdID, positionData)
+                        local row = member.row or 0
+                        local col = member.col or 0
+                        local slotKey = row .. "," .. col
+                        if occ[slotKey] then
+                            -- Slot already owned by another saved icon - don't create a duplicate
+                            Debug("PostReconcile: SKIP duplicate slot for", cdID, "->", groupName, slotKey)
+                        else
+                            local positionData = {
+                                type = "group",
+                                target = groupName,
+                                row = row,
+                                col = col,
+                                viewerType = member.viewerType,
+                            }
+                            savedPositions[cdID] = positionData
+                            occ[slotKey] = true
+                            if ns.CDMGroups.SavePositionToSpec then
+                                ns.CDMGroups.SavePositionToSpec(cdID, positionData)
+                            end
+                            savedCount = savedCount + 1
+                            Debug("PostReconcile: Saved unsaved position for", cdID, "->", groupName)
                         end
-                        savedCount = savedCount + 1
-                        Debug("PostReconcile: Saved unsaved position for", cdID, "->", groupName)
                     end
                 end
             end
@@ -2053,7 +2098,7 @@ local function Reconcile()
                     local member = entry.member
                     if member.frame then
                         if ns.CDMGroups.ReturnFrameToCDM then
-                            pcall(ns.CDMGroups.ReturnFrameToCDM, member.frame, member.entry)
+                            ns.CDMGroups.ReturnFrameToCDM(member.frame, member.entry)
                         end
                     end
                     if group.grid and member.row and member.col then
@@ -2069,7 +2114,7 @@ local function Reconcile()
                 local freeData = entry.freeData
                 if freeData.frame then
                     if ns.CDMGroups.ReturnFrameToCDM then
-                        pcall(ns.CDMGroups.ReturnFrameToCDM, freeData.frame, freeData.entry)
+                        ns.CDMGroups.ReturnFrameToCDM(freeData.frame, freeData.entry)
                     end
                 end
                 ns.CDMGroups.freeIcons[entry.cdID] = nil
@@ -2694,7 +2739,17 @@ local function OnTalentUpdate(configID)
     TimelineAdd("EVENT", "TALENT_CHANGED", string.format("configID=%s", tostring(configID)))
     DebugEvent("TRAIT_CONFIG_UPDATED", configID)
     state.talentChangeDetected = true
-    
+
+    -- CRITICAL: Protect saved positions through the talent transition. Unlike the spec
+    -- path, the talent path set NO IsRestoring-visible protection, so position saves
+    -- (SavePositionToSpec only gates on IsRestoring(), NOT _blockPositionSaves) ran
+    -- mid-reconcile and persisted TRANSIENT/compacted positions - moving an existing
+    -- icon's saved slot onto another icon's (duplicate saved positions in dynamic
+    -- groups). A time-boxed window makes IsRestoring() true so non-forced saves and
+    -- reflows skip until frames settle. Self-expires; the +1.5s follow-up's
+    -- ForceRepositionAllFrames clears it before its own reflow runs.
+    ns.CDMGroups._talentRestorationEnd = GetTime() + 3.0
+
     -- Notify DynamicLayout to clear stale visibility state
     local DL = ns.CDMGroups.DynamicLayout
     if DL and DL.OnTalentChangeStart then
@@ -3191,9 +3246,8 @@ local _vmOnUpdateFn = function(self, elapsed)
     for cdID, data in pairs(ns.CDMGroups.freeIcons or {}) do
         if data.frame then
             local frame = data.frame
-            local ok = pcall(function()
-                if not frame:IsObjectType("Frame") then return end
-                
+            if frame:IsObjectType("Frame") then
+
                 -- Call EnhanceFrame if not yet applied
                 if frame._arcShowPandemic == nil and ns.CDMEnhance.EnhanceFrame then
                     ns.CDMEnhance.EnhanceFrame(frame, cdID, data.viewerType, data.originalViewerName)
@@ -3280,7 +3334,7 @@ local _vmOnUpdateFn = function(self, elapsed)
                         frame:SetPoint("CENTER", UIParent, "CENTER", data.x, data.y)
                     end
                 end
-            end)
+            end
         else
             -- Free icon has no frame - check if we should show placeholder
             if ns.CDMGroups.Placeholders and ns.CDMGroups.Placeholders.IsEditingMode and
@@ -3478,24 +3532,55 @@ local function InstallCDMHooks()
                 -- When options panel is OPEN, _arcHiddenByBar is nil (cleared by ShowAllHiddenByBarOverlays)
                 -- so we also check ns._arcUIOptionsOpen to catch overlay-bearing frames.
                 if itemFrame._arcHiddenByBar or ns._arcUIOptionsOpen then
-                    -- Clear flags if set
-                    itemFrame._arcHiddenByBar = nil
-                    itemFrame._arcHiddenByBarCdID = nil
-                    -- Immediately hide overlay on this frame so it doesn't linger on wrong icon
-                    if ns.API and ns.API.HideOverlayOnFrame then
-                        ns.API.HideOverlayOnFrame(itemFrame)
+                    -- CDM's RefreshData re-calls SetCooldownID with each active frame's
+                    -- CURRENT cooldownID every refresh cycle (CooldownViewer.lua:
+                    -- RefreshData → itemFrame:SetCooldownID(cooldownID)). SetCooldownID's
+                    -- body no-ops on an unchanged id, but hooksecurefunc still fires THIS
+                    -- post-hook on every refresh (combat enter/leave, aura gain/loss,
+                    -- reload). If we simply cleared the bar-hide here, those routine
+                    -- refreshes would force-show the Blizzard frame (or drop its options
+                    -- overlay) until the next bar update re-hid it.
+                    --
+                    -- Distinguish via the hidden cooldownID Core tracks (mode-independent;
+                    -- works while options are open, where _arcHiddenByBar is nil):
+                    --   • SAME id  → no-op refresh of a still-hidden frame: RE-ASSERT the
+                    --     hide (Core restores hide vs show+overlay for the current mode).
+                    --   • DIFFERENT → genuine reshuffle onto a new cooldownID: release the
+                    --     hide and let RefreshHiddenCDMFrames re-find the frame now showing
+                    --     the hidden cooldownID. (cooldownIDs are non-secret CDM ids.)
+                    local hiddenCdID = ns.API and ns.API.GetCDMHiddenCooldownID
+                        and ns.API.GetCDMHiddenCooldownID(itemFrame)
+                    if hiddenCdID and cooldownID == hiddenCdID then
+                        if ns.API and ns.API.ReassertCDMHideForFrame then
+                            ns.API.ReassertCDMHideForFrame(itemFrame, cooldownID)
+                        end
+                    else
+                        -- Clear flags if set
+                        itemFrame._arcHiddenByBar = nil
+                        itemFrame._arcHiddenByBarCdID = nil
+                        -- Immediately hide overlay on this frame so it doesn't linger on wrong icon
+                        if ns.API and ns.API.HideOverlayOnFrame then
+                            ns.API.HideOverlayOnFrame(itemFrame)
+                        end
+                        -- Defer refresh: CDM assigns cooldownIDs sequentially during reshuffle,
+                        -- the new frame for the hidden cdID may not exist yet.
+                        if not state._pendingHiddenRefresh then
+                            state._pendingHiddenRefresh = true
+                            C_Timer.After(0.2, function()
+                                state._pendingHiddenRefresh = nil
+                                if ns.API and ns.API.RefreshHiddenCDMFrames then
+                                    ns.API.RefreshHiddenCDMFrames()
+                                end
+                            end)
+                        end
                     end
-                    -- Defer refresh: CDM assigns cooldownIDs sequentially during reshuffle,
-                    -- the new frame for the hidden cdID may not exist yet.
-                    if not state._pendingHiddenRefresh then
-                        state._pendingHiddenRefresh = true
-                        C_Timer.After(0.2, function()
-                            state._pendingHiddenRefresh = nil
-                            if ns.API and ns.API.RefreshHiddenCDMFrames then
-                                ns.API.RefreshHiddenCDMFrames()
-                            end
-                        end)
-                    end
+                elseif cooldownID and ns.API and ns.API.HideCDMFrameIfRequested then
+                    -- Fresh / never-hidden frame (e.g. CDM building buff icons at login or
+                    -- a buff reappearing on a new pool frame). If a bar has requested this
+                    -- cooldownID hidden, hide it in this same tick instead of waiting for
+                    -- the next bar update (combat/target) — the "not hidden until I
+                    -- right-clicked a mob" case. O(1) registry lookup, no-op otherwise.
+                    ns.API.HideCDMFrameIfRequested(itemFrame, cooldownID)
                 end
                 
                 -- ─── FAST-PATH PLACEMENT ─────────────────────────────────

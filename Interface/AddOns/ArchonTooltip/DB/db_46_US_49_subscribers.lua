@@ -234,7 +234,7 @@ local function getChunkLookup(table, length)
 end
 
 local lookup = {'DeathKnight-Blood','DeathKnight-Unholy',}
-local provider = {region='US',realm='Cairne',name='US',type='subscribers',zone=46,date='2026-06-20',data={Ip='Iplayleague:BAEALgAECgUJCgABLgAECgkJGQABAAkjAA==.',Na='Naleen:BAEALgAECgMJAwABLgAECgkJGQABAAkjAA==.',Za='Zaaren:BAEALgAECgEJAQABLgAECgkJGQABAAkjAA==.Zarrgon:BAEBLgAECn8ZAAMBAAkJCSNrDwAVAgloDAAAAgBfAGkMAAADAF8AawwAAAMAYABqDAAAAwBiAGwMAAAFAGMAbQwAAAEAPQDqDAAAAwBfAG4MAAAEAGMAbwwAAAEASQABAAkJCSNrDwAVAgloDAAAAgBfAGkMAAACAF8AawwAAAIAYABqDAAAAwBiAGwMAAAFAGMAbQwAAAEAPQDqDAAAAgBfAG4MAAAEAGMAbwwAAAEASQACAAMJUwaiKAF4AANpDAAAAQASAGsMAAABABAA6gwAAAEADQAAAA==.',},}
+local provider = {region='US',realm='Cairne',name='US',type='subscribers',zone=46,date='2026-06-22',data={Ip='Iplayleague:BAEALgAECgUJCgABLgAFFAMJBQABAJMjAA==.',Na='Naleen:BAEALgAECgQJBQABLgAFFAMJBQABAJMjAA==.',Za='Zaaren:BAEALgAECgEJAQABLgAFFAMJBQABAJMjAA==.Zarrgon:BAECLgAFFH8FAAIBAAMJkyO7BQC4AANoDAAAAwBhAGkMAAABAF8A6gwAAAEATwABAAMJkyO7BQC4AANoDAAAAwBhAGkMAAABAF8A6gwAAAEATwAuAAQKfxkAAwEACQkJI2sPABUCAAEACQkJI2sPABUCAAIAAwlTBqkoAXgAAAAA.',},}
 provider.parse = parse
 
 local rawData = provider.data

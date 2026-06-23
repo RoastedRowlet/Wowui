@@ -1509,7 +1509,7 @@ local function RowBg(frame, parent)
     local bgParent = splitParent or frame
     local bg = bgParent:CreateTexture(nil, "BACKGROUND")
     bg:SetColorTexture(0, 0, 0, alpha)
-    -- RowBg is always panel context â€” use PanelPP (resolved lazily since
+    -- RowBg is always panel context -- use PanelPP (resolved lazily since
     -- PanelPP is defined after this function in the file)
     local ppp = EllesmereUI.PanelPP or PP
     ppp.DisablePixelSnap(bg)
@@ -1810,7 +1810,7 @@ do
     end
 
     ---------------------------------------------------------------------------
-    --  Scale(x)  â€” snap a value to the nearest physical-pixel boundary.
+    --  Scale(x)  -- snap a value to the nearest physical-pixel boundary.
     --  Used for frame sizes, positions, and offsets.
     --
     --  Divides x into whole-pixel chunks of size `mult`, then truncates
@@ -1914,7 +1914,7 @@ do
     end
 
     ---------------------------------------------------------------------------
-    --  Convenience wrappers â€” pixel-snapped frame geometry
+    --  Convenience wrappers -- pixel-snapped frame geometry
     ---------------------------------------------------------------------------
     function PP.Size(frame, w, h)
         frame:SetSize(PP.Scale(w), h and PP.Scale(h) or PP.Scale(w))
@@ -1958,7 +1958,7 @@ do
     end
 
     ---------------------------------------------------------------------------
-    --  DisablePixelSnap â€” prevent WoW's engine from rounding texture
+    --  DisablePixelSnap -- prevent WoW's engine from rounding texture
     --  coordinates to the nearest pixel, which causes blurry edges on
     --  sub-pixel-sized elements.
     ---------------------------------------------------------------------------
@@ -2163,7 +2163,7 @@ do
     end
 
     ---------------------------------------------------------------------------
-    --  Border registry â€” tracks all border containers for centralized re-snap
+    --  Border registry -- tracks all border containers for centralized re-snap
     --  when UI scale or resolution changes. Avoids per-border OnUpdate overhead.
     ---------------------------------------------------------------------------
     local allBorders = {}
@@ -2315,7 +2315,7 @@ do
     scaleWatcher:RegisterEvent("PLAYER_ENTERING_WORLD")
     scaleWatcher:SetScript("OnEvent", function(_, event)
         if event == "DISPLAY_SIZE_CHANGED" then
-            -- Resolution changed â€” recalculate perfect and re-apply scale
+            -- Resolution changed -- recalculate perfect and re-apply scale
             PP.physicalWidth, PP.physicalHeight = GetPhysicalScreenSize()
             PP.perfect = 768 / PP.physicalHeight
             -- Only auto-update if user explicitly opted into auto scale
@@ -2351,7 +2351,7 @@ PP = EllesmereUI.PP
 --  Panel Pixel Perfect (PanelPP)
 --  The options panel runs at effective scale = baseScale * userScale.
 --  At userScale 1.0, 1 unit = 1 physical pixel and integer rounding suffices.
---  At other scales (e.g. 101%), 1 unit â‰  1 pixel, so PanelPP computes its
+--  At other scales (e.g. 101%), 1 unit ~ 1 pixel, so PanelPP computes its
 --  own mult (size of 1 physical pixel in panel units) and snaps to that grid,
 --  exactly like PP does for UIParent but using the panel's own scale.
 -------------------------------------------------------------------------------
@@ -2425,7 +2425,7 @@ do
         obj:SetPoint("BOTTOMRIGHT", anchor, "BOTTOMRIGHT", x, -y)
     end
 
-    -- DisablePixelSnap is scale-independent â€” just reuse PP's version
+    -- DisablePixelSnap is scale-independent -- just reuse PP's version
     PanelPP.DisablePixelSnap = PP.DisablePixelSnap
 
     -- Panel borders delegate to the unified PP border system
@@ -2849,7 +2849,7 @@ end
 -------------------------------------------------------------------------------
 --  Global Font System
 -------------------------------------------------------------------------------
--- Canonical font name â†’ filename mapping (shared across all addons)
+-- Canonical font name -> filename mapping (shared across all addons)
 EllesmereUI.FONT_FILES = {
     ["Expressway"]          = "Expressway.TTF",
     ["Avant Garde"]         = "Avant Garde Naowh.ttf",
@@ -3081,9 +3081,34 @@ function EllesmereUI.GetFontOutlineFlag(addonKey)
     else
         mode = db.outlineMode or "none"
     end
-    if mode == "outline" then return "OUTLINE, SLUG"
-    elseif mode == "thick" then return "THICKOUTLINE, SLUG"
-    else return "" end
+    local flag
+    if mode == "outline" then flag = "OUTLINE, SLUG"
+    elseif mode == "thick" then flag = "THICKOUTLINE, SLUG"
+    else flag = "" end
+    return EllesmereUI.SlugFlag(flag)
+end
+
+-- Global "Never Show Slug" toggle. When ON, the SLUG token is stripped from
+-- every outline flag the UI produces -- body text and icon/aura text across all
+-- modules, plus the global Outline Mode itself. Stored centrally in
+-- EllesmereUIDB.neverShowSlug; OFF by default (slug outlines render as normal).
+function EllesmereUI.IsSlugDisabled()
+    return (EllesmereUIDB and EllesmereUIDB.neverShowSlug == true) or false
+end
+
+-- Strip the SLUG token from a font outline flag:
+-- "OUTLINE, SLUG" -> "OUTLINE", "THICKOUTLINE, SLUG" -> "THICKOUTLINE", "" -> "".
+function EllesmereUI.StripSlugFlag(flag)
+    if not flag or flag == "" then return flag or "" end
+    return (flag:gsub("%s*,%s*SLUG", ""))
+end
+
+-- Central gate: returns `flag` with SLUG removed when "Never Show Slug" is on,
+-- otherwise unchanged. Use this at every point a slug outline flag is produced
+-- (the outline helpers above and any hardcoded icon-text literal).
+function EllesmereUI.SlugFlag(flag)
+    if EllesmereUI.IsSlugDisabled() then return EllesmereUI.StripSlugFlag(flag) end
+    return flag
 end
 
 -- Returns true when the outline mode uses drop shadow instead of outline.
@@ -3165,9 +3190,11 @@ end
 function EllesmereUI.GetIconTextOutlineFlag(moduleKey)
     local t = EllesmereUIDB and EllesmereUIDB.outlineIconText
     if t and t[moduleKey] == false then
+        -- Follows the outline mode, which is already slug-gated at the source.
         return (EllesmereUI.GetFontOutlineFlag and EllesmereUI.GetFontOutlineFlag(moduleKey)) or ""
     end
-    return "OUTLINE, SLUG"
+    -- Forced crisp outline; "Never Show Slug" still drops the slug token.
+    return EllesmereUI.SlugFlag("OUTLINE, SLUG")
 end
 
 -- Applies the icon-text outline flag AND the matching shadow in one call.
@@ -3349,6 +3376,10 @@ function EllesmereUI.ApplyColorsToOUF()
     if ok and EAB and EAB.ApplyBorders and not InCombatLockdown() then
         EAB:ApplyBorders()
         if EAB.ApplyShapes then EAB:ApplyShapes() end
+    end
+    -- 6. Refresh damage meters (bars/text class colors)
+    if EllesmereUI._DM_RefreshColors then
+        EllesmereUI._DM_RefreshColors()
     end
 end
 
@@ -3554,9 +3585,9 @@ do
 end
 
 -- Get DH Soul Fragment count (current, max)
--- Vengeance: C_Spell.GetSpellCastCount(228477) â€” returns a SECRET value
+-- Vengeance: C_Spell.GetSpellCastCount(228477) -- returns a SECRET value
 -- in 12.0+.  The caller must handle it via StatusBar or similar.
--- Devourer (hero spec 1480): aura 1225789/1227702 â€” WHITELISTED, safe to read.
+-- Devourer (hero spec 1480): aura 1225789/1227702 -- WHITELISTED, safe to read.
 function EllesmereUI.GetSoulFragments()
     local spec = C_SpecializationInfo and C_SpecializationInfo.GetSpecialization()
     local specID = spec and C_SpecializationInfo.GetSpecializationInfo(spec)
@@ -3584,7 +3615,7 @@ function EllesmereUI.GetSoulFragments()
 end
 
 -- Get Enhancement Shaman Maelstrom Weapon stacks (current, max)
--- Buff spell 344179 â€” WHITELISTED by Blizzard, safe to read in combat.
+-- Buff spell 344179 -- WHITELISTED by Blizzard, safe to read in combat.
 -- Base max 5 stacks (10 with Raging Maelstrom talent 384143)
 function EllesmereUI.GetMaelstromWeapon()
     local aura = C_UnitAuras and C_UnitAuras.GetPlayerAuraBySpellID(344179)
@@ -4044,9 +4075,9 @@ end
 -- Resolve a texture key to a file path. Handles "sm:" prefixed keys by
 -- falling back to LSM:Fetch when the key isn't in the local lookup table.
 -- This covers the case where a SharedMedia addon loads after our init.
---   texTable  â€“ the addon's local texture lookup (e.g. TBB_TEXTURES)
---   key       â€“ the saved texture key (e.g. "sm:ElvUI Gloss" or "beautiful")
---   fallback  â€“ path to use if nothing resolves (optional)
+--   texTable  - the addon's local texture lookup (e.g. TBB_TEXTURES)
+--   key       - the saved texture key (e.g. "sm:ElvUI Gloss" or "beautiful")
+--   fallback  - path to use if nothing resolves (optional)
 function EllesmereUI.ResolveTexturePath(texTable, key, fallback)
     if not key then return fallback end
     local path = texTable and texTable[key]
@@ -4070,10 +4101,10 @@ end
 -------------------------------------------------------------------------------
 --  Append LibSharedMedia-3.0 statusbar textures into a runtime texture table.
 --  Signature: AppendSharedMediaTextures(names, order, castBarNames, textures)
---    names        â€“ key â†’ display-name string table
---    order        â€“ ordered array of keys (receives "---" + SM keys appended)
---    castBarNames â€“ optional secondary names table (may be nil)
---    textures     â€“ key â†’ texture-path table
+--    names        - key -> display-name string table
+--    order        - ordered array of keys (receives "---" + SM keys appended)
+--    castBarNames - optional secondary names table (may be nil)
+--    textures     - key -> texture-path table
 --  Safe to call multiple times; duplicate keys are skipped via the textures
 --  table guard.
 --
@@ -4164,9 +4195,9 @@ end
 -------------------------------------------------------------------------------
 --  Append LibSharedMedia-3.0 sounds into a runtime sound dropdown table.
 --  Signature: AppendSharedMediaSounds(paths, names, order)
---    paths   â€“ key â†’ sound file path table
---    names   â€“ key â†’ display name string table
---    order   â€“ ordered array of keys (receives "---" + SM keys appended)
+--    paths   - key -> sound file path table
+--    names   - key -> display name string table
+--    order   - ordered array of keys (receives "---" + SM keys appended)
 --  Safe to call multiple times; duplicate keys are skipped via the paths
 --  table guard.
 -------------------------------------------------------------------------------
@@ -4198,9 +4229,9 @@ end
 -------------------------------------------------------------------------------
 --  Append LibSharedMedia-3.0 fonts into a runtime font dropdown table.
 --  Signature: AppendSharedMediaFonts(values, order, opts)
---    values  â€“ key â†’ { text, font } table (or key â†’ path when keyByName=true)
---    order   â€“ ordered array of keys
---    opts    â€“ optional { keyByName = true } â€” use display name as key
+--    values  - key -> { text, font } table (or key -> path when keyByName=true)
+--    order   - ordered array of keys
+--    opts    - optional { keyByName = true } -- use display name as key
 --  Safe to call multiple times; duplicate keys are skipped.
 -------------------------------------------------------------------------------
 function EllesmereUI.AppendSharedMediaFonts(values, order, opts)
@@ -4366,7 +4397,7 @@ local function CreateConfirmPopup()
     popup:SetFrameLevel(dimmer:GetFrameLevel() + 10)
 
     -- Pixel-perfect scale (match main frame, including user panel scale)
-    -- Popups render at default UI scale â€” no custom scaling needed.
+    -- Popups render at default UI scale -- no custom scaling needed.
     -- (Dimmer stays at scale 1 so it covers the full screen.)
 
     -- Background: flat dark default, optional stone atlas for modern style
@@ -5290,6 +5321,9 @@ local function CreateMainFrame()
         for _, fn in ipairs(_onShowCallbacks) do fn() end
     end)
     mainFrame:SetScript("OnHide", function()
+        -- Close the sidebar sync popup so it never lingers after the options
+        -- window is dismissed (Hide button, Escape, etc.).
+        if EllesmereUI.CloseSyncPopup then EllesmereUI.CloseSyncPopup() end
         if _onHideCallbacks then
             for _, fn in ipairs(_onHideCallbacks) do fn() end
         end
@@ -5477,12 +5511,12 @@ local function CreateMainFrame()
     EllesmereUI._sidebar = sidebar
 
     -- Nav buttons -- start below the logo area with proper spacing
-    local NAV_TOP     = -128   -- distance from sidebar top to first nav item
-    local NAV_ROW_H   = 50    -- height per nav row (Unlock / Global Settings)
-    local NAV_ICON_W  = 52    -- exact pixel width
-    local NAV_ICON_H  = 37    -- exact pixel height
+    local NAV_TOP     = -114   -- distance from sidebar top to first nav item
+    local NAV_ROW_H   = 40    -- height per nav row (Unlock / Global / Patch Notes / Profiles)
+    local NAV_ICON_W  = 46    -- exact pixel width
+    local NAV_ICON_H  = 31    -- exact pixel height
     local NAV_LEFT    = 20    -- left padding for icon
-    local NAV_TXT_GAP = 14    -- gap between icon and label
+    local NAV_TXT_GAP = 10    -- gap between icon and label
 
     -- Helper: create a 1px horizontal glow line on a sidebar button (TOP or BOTTOM edge)
     local function MakeNavEdgeLine(btn, edge)
@@ -5536,7 +5570,7 @@ local function CreateMainFrame()
     end
 
     -------------------------------------------------------------------
-    --  Unlock Mode button  (always top, not a module â€” just triggers unlock)
+    --  Unlock Mode button  (always top, not a module -- just triggers unlock)
     -------------------------------------------------------------------
     do
         local btn = CreateFrame("Button", nil, sidebar)
@@ -5566,7 +5600,7 @@ local function CreateMainFrame()
         btn._iconOn  = ICONS_PATH .. "sidebar\\unlockmode-ig-on.png"
         btn._iconOff = ICONS_PATH .. "sidebar\\unlockmode-ig.png"
 
-        local label = MakeFont(btn, 15, nil, TEXT_DIM.r, TEXT_DIM.g, TEXT_DIM.b, TEXT_DIM.a)
+        local label = MakeFont(btn, 14, nil, TEXT_DIM.r, TEXT_DIM.g, TEXT_DIM.b, TEXT_DIM.a)
         label:SetPoint("LEFT", icon, "RIGHT", NAV_TXT_GAP, 0)
         label:SetText("Unlock Mode")
         btn._label = label
@@ -5633,7 +5667,7 @@ local function CreateMainFrame()
         btn._iconOn  = ICONS_PATH .. "sidebar\\settings-ig-on-2.png"
         btn._iconOff = ICONS_PATH .. "sidebar\\settings-ig-2.png"
 
-        local label = MakeFont(btn, 15, nil, TEXT_DIM.r, TEXT_DIM.g, TEXT_DIM.b, TEXT_DIM.a)
+        local label = MakeFont(btn, 14, nil, TEXT_DIM.r, TEXT_DIM.g, TEXT_DIM.b, TEXT_DIM.a)
         label:SetPoint("LEFT", icon, "RIGHT", NAV_TXT_GAP, 0)
         label:SetText("Global Settings")
         btn._label = label
@@ -5679,13 +5713,156 @@ local function CreateMainFrame()
         sidebarButtons[GLOBAL_KEY] = btn
     end
 
-    -- Addon offset: first addon starts two rows below (Unlock Mode + Global Settings)
-    local ORIG_ADDON_NAV_TOP = NAV_TOP - NAV_ROW_H * 2
+    -------------------------------------------------------------------
+    --  Patch Notes button  (own page -- selects the _EUIPatchNotes module)
+    -------------------------------------------------------------------
+    do
+        local btn = CreateFrame("Button", nil, sidebar)
+        btn:SetSize(SIDEBAR_W, NAV_ROW_H)
+        btn:SetPoint("TOPLEFT", sidebar, "TOPLEFT", 0, NAV_TOP - NAV_ROW_H * 2)
+        btn:SetFrameLevel(sidebar:GetFrameLevel() + 1)
+
+        DecorateSidebarButton(btn)
+
+        -- Glow layer (behind icon): tinted version of the -on texture
+        local iconGlow = btn:CreateTexture(nil, "ARTWORK", nil, 0)
+        iconGlow:SetTexture(ICONS_PATH .. "sidebar\\notes-on.png")
+        iconGlow:SetSize(NAV_ICON_W, NAV_ICON_H)
+        iconGlow:SetPoint("LEFT", btn, "LEFT", NAV_LEFT, 0)
+        iconGlow:SetDesaturated(true)
+        iconGlow:SetVertexColor(ELLESMERE_GREEN.r, ELLESMERE_GREEN.g, ELLESMERE_GREEN.b, 1)
+        iconGlow:Hide()
+        btn._iconGlow = iconGlow
+        RegAccent({ type="vertex", obj=iconGlow })
+
+        -- Icon layer (on top of glow): always the white off texture
+        local icon = btn:CreateTexture(nil, "ARTWORK", nil, 1)
+        icon:SetTexture(ICONS_PATH .. "sidebar\\notes-off.png")
+        icon:SetSize(NAV_ICON_W, NAV_ICON_H)
+        icon:SetPoint("LEFT", btn, "LEFT", NAV_LEFT, 0)
+        btn._icon    = icon
+        btn._iconOn  = ICONS_PATH .. "sidebar\\notes-on.png"
+        btn._iconOff = ICONS_PATH .. "sidebar\\notes-off.png"
+
+        local label = MakeFont(btn, 14, nil, TEXT_DIM.r, TEXT_DIM.g, TEXT_DIM.b, TEXT_DIM.a)
+        label:SetPoint("LEFT", icon, "RIGHT", NAV_TXT_GAP, 0)
+        label:SetText("Patch Notes")
+        btn._label = label
+
+        label:SetTextColor(NAV_ENABLED_TEXT.r, NAV_ENABLED_TEXT.g, NAV_ENABLED_TEXT.b, NAV_ENABLED_TEXT.a)
+        icon:SetDesaturated(false)
+        icon:SetAlpha(NAV_ENABLED_ICON_A)
+
+        btn._folder = "_EUIPatchNotes"
+        btn._loaded = true
+
+        local hlTex = SolidTex(btn, "HIGHLIGHT", 1, 1, 1, 0)
+        hlTex:SetAllPoints()
+        btn:SetScript("OnEnter", function(self)
+            hlTex:SetAlpha(0.06)
+            if activeModule ~= self._folder then
+                self._hoverGlow:Show()
+                self._hoverIndicator:Show()
+                self._label:SetTextColor(NAV_HOVER_ENABLED_TEXT.r, NAV_HOVER_ENABLED_TEXT.g, NAV_HOVER_ENABLED_TEXT.b, NAV_HOVER_ENABLED_TEXT.a)
+            end
+        end)
+        btn:SetScript("OnLeave", function(self)
+            hlTex:SetAlpha(0)
+            self._hoverGlow:Hide()
+            self._hoverIndicator:Hide()
+            if activeModule ~= self._folder then
+                self._label:SetTextColor(NAV_ENABLED_TEXT.r, NAV_ENABLED_TEXT.g, NAV_ENABLED_TEXT.b, NAV_ENABLED_TEXT.a)
+            end
+        end)
+        btn:SetScript("OnClick", function(self)
+            if modules[self._folder] then
+                EllesmereUI:SelectModule(self._folder)
+            end
+        end)
+
+        sidebarButtons["_EUIPatchNotes"] = btn
+        EllesmereUI._patchNotesSidebarBtn = btn
+    end
+
+    -------------------------------------------------------------------
+    --  Profiles & Presets button  (own page -- selects the _EUIProfiles module)
+    -------------------------------------------------------------------
+    do
+        local btn = CreateFrame("Button", nil, sidebar)
+        btn:SetSize(SIDEBAR_W, NAV_ROW_H)
+        btn:SetPoint("TOPLEFT", sidebar, "TOPLEFT", 0, NAV_TOP - NAV_ROW_H * 3)
+        btn:SetFrameLevel(sidebar:GetFrameLevel() + 1)
+
+        DecorateSidebarButton(btn)
+
+        -- Glow layer (behind icon): tinted version of the -on texture
+        local iconGlow = btn:CreateTexture(nil, "ARTWORK", nil, 0)
+        iconGlow:SetTexture(ICONS_PATH .. "sidebar\\profiles-on.png")
+        iconGlow:SetSize(NAV_ICON_W, NAV_ICON_H)
+        iconGlow:SetPoint("LEFT", btn, "LEFT", NAV_LEFT, 0)
+        iconGlow:SetDesaturated(true)
+        iconGlow:SetVertexColor(ELLESMERE_GREEN.r, ELLESMERE_GREEN.g, ELLESMERE_GREEN.b, 1)
+        iconGlow:Hide()
+        btn._iconGlow = iconGlow
+        RegAccent({ type="vertex", obj=iconGlow })
+
+        -- Icon layer (on top of glow): always the white off texture
+        local icon = btn:CreateTexture(nil, "ARTWORK", nil, 1)
+        icon:SetTexture(ICONS_PATH .. "sidebar\\profiles-off.png")
+        icon:SetSize(NAV_ICON_W, NAV_ICON_H)
+        icon:SetPoint("LEFT", btn, "LEFT", NAV_LEFT, 0)
+        btn._icon    = icon
+        btn._iconOn  = ICONS_PATH .. "sidebar\\profiles-on.png"
+        btn._iconOff = ICONS_PATH .. "sidebar\\profiles-off.png"
+
+        local label = MakeFont(btn, 14, nil, TEXT_DIM.r, TEXT_DIM.g, TEXT_DIM.b, TEXT_DIM.a)
+        label:SetPoint("LEFT", icon, "RIGHT", NAV_TXT_GAP, 0)
+        label:SetText("Profiles & Presets")
+        btn._label = label
+
+        label:SetTextColor(NAV_ENABLED_TEXT.r, NAV_ENABLED_TEXT.g, NAV_ENABLED_TEXT.b, NAV_ENABLED_TEXT.a)
+        icon:SetDesaturated(false)
+        icon:SetAlpha(NAV_ENABLED_ICON_A)
+
+        btn._folder = "_EUIProfiles"
+        btn._loaded = true
+
+        local hlTex = SolidTex(btn, "HIGHLIGHT", 1, 1, 1, 0)
+        hlTex:SetAllPoints()
+        btn:SetScript("OnEnter", function(self)
+            hlTex:SetAlpha(0.06)
+            if activeModule ~= self._folder then
+                self._hoverGlow:Show()
+                self._hoverIndicator:Show()
+                self._label:SetTextColor(NAV_HOVER_ENABLED_TEXT.r, NAV_HOVER_ENABLED_TEXT.g, NAV_HOVER_ENABLED_TEXT.b, NAV_HOVER_ENABLED_TEXT.a)
+            end
+        end)
+        btn:SetScript("OnLeave", function(self)
+            hlTex:SetAlpha(0)
+            self._hoverGlow:Hide()
+            self._hoverIndicator:Hide()
+            if activeModule ~= self._folder then
+                self._label:SetTextColor(NAV_ENABLED_TEXT.r, NAV_ENABLED_TEXT.g, NAV_ENABLED_TEXT.b, NAV_ENABLED_TEXT.a)
+            end
+        end)
+        btn:SetScript("OnClick", function(self)
+            if modules[self._folder] then
+                EllesmereUI:SelectModule(self._folder)
+            end
+        end)
+
+        sidebarButtons["_EUIProfiles"] = btn
+        EllesmereUI._profilesSidebarBtn = btn
+    end
+
+    -- Addon offset: first addon starts four rows below
+    -- (Unlock Mode + Global Settings + Patch Notes + Profiles & Presets)
+    local ORIG_ADDON_NAV_TOP = NAV_TOP - NAV_ROW_H * 4
 
     -----------------------------------------------------------------------
     --  Sidebar search bar (filters addon list by display name or page name)
     -----------------------------------------------------------------------
-    local SB_TOP_PAD     = 18   -- gap between Global Settings and the search bar
+    local SB_TOP_PAD     = 13   -- gap between Profiles & Presets and the search bar
     local SB_H           = 28
     local SB_BOT_PAD     = 6
     local SB_SIDE_INSET  = 20
@@ -5719,9 +5896,9 @@ local function CreateMainFrame()
     sbClearBtn:SetPoint("RIGHT", sidebarSearchFrame, "RIGHT", -4, 0)
     sbClearBtn:SetFrameLevel(sbEdit:GetFrameLevel() + 2)
     sbClearBtn:Hide()
-    local sbClearLabel = MakeFont(sbClearBtn, 20, nil, TEXT_DIM.r, TEXT_DIM.g, TEXT_DIM.b, 0.35)
+    local sbClearLabel = MakeFont(sbClearBtn, 15, nil, TEXT_DIM.r, TEXT_DIM.g, TEXT_DIM.b, 0.35)
     sbClearLabel:SetPoint("CENTER")
-    sbClearLabel:SetText("Ã—")
+    sbClearLabel:SetText("x")
     sbClearBtn:SetScript("OnEnter", function() sbClearLabel:SetTextColor(1, 1, 1, 1) end)
     sbClearBtn:SetScript("OnLeave", function() sbClearLabel:SetTextColor(TEXT_DIM.r, TEXT_DIM.g, TEXT_DIM.b, 0.35) end)
     sbClearBtn:SetScript("OnClick", function()
@@ -5764,10 +5941,12 @@ local function CreateMainFrame()
     --  class art, so addon buttons live inside a ScrollFrame with smooth
     --  mouse-wheel scrolling and a thin thumb on the right edge.
     -----------------------------------------------------------------------
-    local ADDON_VISIBLE_ROWS    = 10.5
+    local ADDON_VISIBLE_ROWS    = 12   -- nav rows shrank to 40px; bump count so the addon viewport still fills to the bottom
     -- +30 = 20px viewport bonus plus 10px offsetting the SB_TOP_PAD bump above,
     -- so growing the search-bar padding doesn't silently shrink the viewport.
-    local ADDON_SCROLL_H        = ADDON_VISIBLE_ROWS * NAV_ROW_H - SB_TOTAL + 30
+    -- Reserve a strip below the viewport for the scroll-to-bottom arrow button.
+    local ADDON_ARROW_RESERVE   = 24
+    local ADDON_SCROLL_H        = ADDON_VISIBLE_ROWS * NAV_ROW_H - SB_TOTAL + 30 - ADDON_ARROW_RESERVE
     local ADDON_SCROLL_STEP     = 60   -- match the main content scroll
     local ADDON_SMOOTH_SPEED    = 12   -- match the main content scroll
 
@@ -5804,8 +5983,47 @@ local function CreateMainFrame()
     addonThumb:SetWidth(3)
     addonThumb:SetHeight(40)
 
+    -- Scroll-to-bottom arrow, centered just below the viewport. Dims when the
+    -- list is at the bottom (or doesn't scroll at all); click animates the list
+    -- to the bottom. OnClick is wired further below, once the smooth-scroll
+    -- state locals exist. Alpha tiers are stored on the frame (it's ours).
+    local arrowBtn = CreateFrame("Button", nil, sidebar)
+    arrowBtn:SetSize(22, 19)
+    arrowBtn:SetPoint("TOP", addonScrollFrame, "BOTTOM", 0, -5)
+    arrowBtn:SetFrameLevel(sidebar:GetFrameLevel() + 5)
+    arrowBtn:SetHitRectInsets(-12, -12, -6, -8)
+    arrowBtn._aEnabled, arrowBtn._aDisabled, arrowBtn._aHover = 0.7, 0.2, 1.0
+    arrowBtn._atBottom = false
+    do
+        local t = arrowBtn:CreateTexture(nil, "ARTWORK")
+        t:SetTexture(ICONS_PATH .. "eui-arrow-down3.png")
+        t:SetAllPoints()
+    end
+    arrowBtn:SetAlpha(arrowBtn._aEnabled)
+    arrowBtn:SetScript("OnEnter", function(self)
+        if not self._atBottom then self:SetAlpha(self._aHover) end
+    end)
+    arrowBtn:SetScript("OnLeave", function(self)
+        self:SetAlpha(self._atBottom and self._aDisabled or self._aEnabled)
+    end)
+    EllesmereUI._addonScrollArrow = arrowBtn
+
     local function UpdateAddonThumb()
         local maxScroll = EllesmereUI.SafeScrollRange and EllesmereUI.SafeScrollRange(addonScrollFrame) or 0
+        -- Scroll-to-bottom arrow state: disabled (dimmed) when there's nothing
+        -- below, enabled otherwise. Runs before the no-scroll early return.
+        do
+            local cur = tonumber(addonScrollFrame:GetVerticalScroll()) or 0
+            local atBottom = (maxScroll <= 0.5) or (cur >= maxScroll - 0.5)
+            arrowBtn._atBottom = atBottom
+            if atBottom then
+                arrowBtn:SetAlpha(arrowBtn._aDisabled)
+            elseif arrowBtn:IsMouseOver() then
+                arrowBtn:SetAlpha(arrowBtn._aHover)
+            else
+                arrowBtn:SetAlpha(arrowBtn._aEnabled)
+            end
+        end
         if maxScroll <= 0 then
             addonTrack:Hide()
             return
@@ -5877,6 +6095,20 @@ local function CreateMainFrame()
     end)
     addonScrollFrame:SetScript("OnScrollRangeChanged", UpdateAddonThumb)
     addonScrollFrame:HookScript("OnSizeChanged", UpdateAddonThumb)
+
+    -- Scroll-to-bottom arrow click: smooth-animate to the bottom (no-op when
+    -- already there). Reuses the same smooth-scroll state as the mouse wheel.
+    arrowBtn:SetScript("OnClick", function()
+        local maxScroll = EllesmereUI.SafeScrollRange and EllesmereUI.SafeScrollRange(addonScrollFrame) or 0
+        if maxScroll <= 0 then return end
+        local scale = addonScrollFrame:GetEffectiveScale()
+        maxScroll = math.floor(maxScroll * scale) / scale
+        addonScrollTarget = maxScroll
+        if not addonIsSmoothing then
+            addonIsSmoothing = true
+            addonSmoothFrame:Show()
+        end
+    end)
 
     -- Click / drag on the scrollbar track. Clicking anywhere on the track
     -- jumps the scroll to that position; holding the button drags.
@@ -7055,11 +7287,28 @@ local function CreateMainFrame()
     footerFrame._resetBtn = resetBtn
 
     -- Reload UI  (next to Reset, 40px gap, same white/muted style)
-    MakeFooterBtn(footerFrame, FOOTER_BTN_W, FOOTER_BTN_H,
+    local reloadBtn = MakeFooterBtn(footerFrame, FOOTER_BTN_W, FOOTER_BTN_H,
         "BOTTOMLEFT", resetBtn, "BOTTOMRIGHT", FOOTER_BTN_GAP, 0,
         RS_TEXT_R, RS_TEXT_G, RS_TEXT_B, RS_TEXT_A, RS_TEXT_HR, RS_TEXT_HG, RS_TEXT_HB, RS_TEXT_HA,
         RS_BRD_R, RS_BRD_G, RS_BRD_B, RS_BRD_A, RS_BRD_HR, RS_BRD_HG, RS_BRD_HB, RS_BRD_HA,
         "Reload UI", function() ReloadUI() end)
+    footerFrame._reloadBtn = reloadBtn
+
+    -- Show/hide the Reset button per module. Modules without an onReset (Patch
+    -- Notes, Profiles) have nothing to reset, so Reset is hidden and Reload UI
+    -- slides left into its slot to avoid a gap. Called from SelectModule.
+    EllesmereUI._UpdateResetButtonVisible = function(hasReset)
+        local rb, rl = footerFrame._resetBtn, footerFrame._reloadBtn
+        if not rb or not rl then return end
+        rl:ClearAllPoints()
+        if hasReset then
+            rb:Show()
+            rl:SetPoint("BOTTOMLEFT", rb, "BOTTOMRIGHT", FOOTER_BTN_GAP, 0)
+        else
+            rb:Hide()
+            rl:SetPoint("BOTTOMLEFT", footerFrame, "BOTTOMLEFT", FOOTER_PAD, FOOTER_Y)
+        end
+    end
 
     -- Social icons  (to the left of Done button)
     do
@@ -7330,15 +7579,15 @@ BuildTabs = function(pageNames, disabledPages, disabledTooltips)
         placeholder:SetPoint("LEFT", searchFrame, "LEFT", 10, 0)
         placeholder:SetText(EllesmereUI.L("Search Module Settings..."))
 
-        -- Clear button (X) on right side â€” frame level above editBox so clicks register
+        -- Clear button (X) on right side -- frame level above editBox so clicks register
         local clearBtn = CreateFrame("Button", nil, searchFrame)
         clearBtn:SetSize(20, 20)
         clearBtn:SetPoint("RIGHT", searchFrame, "RIGHT", -4, 0)
         clearBtn:SetFrameLevel(editBox:GetFrameLevel() + 2)
         clearBtn:Hide()
-        local clearLabel = MakeFont(clearBtn, 20, nil, TEXT_DIM_R, TEXT_DIM_G, TEXT_DIM_B, 0.35)
+        local clearLabel = MakeFont(clearBtn, 15, nil, TEXT_DIM_R, TEXT_DIM_G, TEXT_DIM_B, 0.35)
         clearLabel:SetPoint("CENTER")
-        clearLabel:SetText("Ã—")
+        clearLabel:SetText("x")
         clearBtn:SetScript("OnEnter", function() clearLabel:SetTextColor(1, 1, 1, 1) end)
         clearBtn:SetScript("OnLeave", function() clearLabel:SetTextColor(TEXT_DIM_R, TEXT_DIM_G, TEXT_DIM_B, 0.35) end)
         clearBtn:SetScript("OnClick", function()
@@ -7764,7 +8013,7 @@ function EllesmereUI:ApplyInlineSearch(query, skipHighlights)
 
     for _, vs in ipairs(visibleSections) do
         for _, m in ipairs(vs.sec.members) do
-            -- Skip spacer frames â€” they have no content to highlight
+            -- Skip spacer frames -- they have no content to highlight
             if m._isSpacer then
                 -- still counts as nothing
             else
@@ -7833,7 +8082,7 @@ function EllesmereUI:ApplyInlineSearch(query, skipHighlights)
         y = y - sec.header:GetHeight()
 
         for _, m in ipairs(sec.members) do
-            -- Hide spacers during search â€” they're just empty gaps
+            -- Hide spacers during search -- they're just empty gaps
             if m._isSpacer then
                 m:Hide()
             else
@@ -8097,7 +8346,7 @@ function EllesmereUI:SelectPage(pageName)
     if not activeModule or not modules[activeModule] then return end
     if pageName == activePage then return end
 
-    -- "Unlock Mode" is a fake nav item â€” fire unlock mode without changing page state.
+    -- "Unlock Mode" is a fake nav item -- fire unlock mode without changing page state.
     -- Capture the current module + page so DoClose can restore them exactly.
     if pageName == "Unlock Mode" then
         if EllesmereUI._openUnlockMode then
@@ -8108,7 +8357,7 @@ function EllesmereUI:SelectPage(pageName)
         return
     end
 
-    -- "Disable Addons" is a fake nav item â€” close EUI and open the Blizzard addon list.
+    -- "Disable Addons" is a fake nav item -- close EUI and open the Blizzard addon list.
     if pageName == "Disable Addons" then
         if EllesmereUI._mainFrame then EllesmereUI._mainFrame:Hide() end
         C_Timer.After(0, function()
@@ -8409,6 +8658,9 @@ function EllesmereUI:SelectModule(folderName)
         rb._label:SetWidth(rb:GetWidth() * 0.85)
         rb._label:SetWordWrap(false)
         rb._label:SetMaxLines(1)
+    end
+    if EllesmereUI._UpdateResetButtonVisible then
+        EllesmereUI._UpdateResetButtonVisible(config.onReset ~= nil)
     end
     headerFrame._desc:SetText(EllesmereUI.L(config.description or ""))
     BuildTabs(config.pages, config.disabledPages, config.disabledPageTooltips)
@@ -8765,7 +9017,7 @@ function EllesmereUI:GetScrollFrame() return scrollFrame end
 function EllesmereUI:GetActivePage() return activePage end
 
 --- Apply a user-defined panel scale on top of the pixel-perfect base scale.
---- @param userScale number  multiplier (1.0 = default, 0.5â€“1.5 range)
+--- @param userScale number  multiplier (1.0 = default, 0.5-1.5 range)
 do
     local scaleAnimFrame = CreateFrame("Frame")
     local scaleFrom, scaleTo, scaleElapsed
@@ -8812,7 +9064,7 @@ end
 -------------------------------------------------------------------------------
 --  Slash commands
 -------------------------------------------------------------------------------
-EllesmereUI.VERSION = "8.2.0"
+EllesmereUI.VERSION = "8.2.6"
 
 -- Register this addon's version into a shared global table (taint-free at load time)
 if not _G._EUI_AddonVersions then _G._EUI_AddonVersions = {} end
@@ -8992,6 +9244,7 @@ EllesmereUI._RunConflictCheck = function()
             { addon = "TellMeWhen",               label = "TellMeWhen",                 targets = "all",                              message = "TellMeWhen overlaps with EllesmereUI's core positional architecture. If you ONLY use for sound alerts it should be okay but may still cause issues." },
             { addon = "Bartender4",               label = "Bartender4",                 targets = { "EllesmereUIActionBars" } },
             { addon = "Dominos",                  label = "Dominos",                    targets = { "EllesmereUIActionBars" } },
+            { addon = "ImprovedTalentLoadouts",   label = "Improved Talent Loadouts",   targets = { "EllesmereUIActionBars" } },
             { addon = "UnhaltedUnitFrames",       label = "Unhalted Unit Frames",       targets = { "EllesmereUIUnitFrames" } },
             { addon = "Platynator",               label = "Platynator",                 targets = { "EllesmereUINameplates" } },
             { addon = "Plater",                   label = "Plater Nameplates",          targets = { "EllesmereUINameplates" } },
@@ -9331,6 +9584,101 @@ SlashCmdList.EUIDEV = function()
     end
     local state = newVal == "1" and "ON" or "OFF"
     EllesmereUI.Print("|cff00ff00[EllesmereUI]|r Dev mode: all addon restriction CVars " .. state .. ".")
+    if EllesmereUI.UpdateDevModeIndicator then EllesmereUI.UpdateDevModeIndicator() end
+end
+
+-------------------------------------------------------------------------------
+--  Dev Mode badge: a small top-left indicator shown while /euidev is active
+--  (the addon-restriction-forced CVars are on, so the restricted / secret-value
+--  environment is being forced for testing). Toggled by /euidev and re-checked
+--  on login, since the CVars persist across sessions.
+-------------------------------------------------------------------------------
+do
+    local DEV_CVAR = "addonChallengeModeRestrictionsForced"
+
+    function EllesmereUI.IsDevModeActive()
+        return GetCVar(DEV_CVAR) == "1"
+    end
+
+    local badge
+
+    local function CreateDevBadge()
+        if badge then return badge end
+        local PP = EllesmereUI.PP
+        local accent = EllesmereUI.ELLESMERE_GREEN or { r = 0.05, g = 0.82, b = 0.62 }
+
+        local f = CreateFrame("Frame", "EllesmereUIDevModeBadge", UIParent)
+        f:SetFrameStrata("HIGH")
+        f:SetHeight(26)
+        f:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 16, -16)
+        f:EnableMouse(false)
+        f:Hide()
+
+        -- Dark base + faint accent wash for an on-brand tint
+        local bg = f:CreateTexture(nil, "BACKGROUND")
+        bg:SetAllPoints()
+        bg:SetColorTexture(0.02, 0.02, 0.03, 0.62)
+        local wash = f:CreateTexture(nil, "BORDER")
+        wash:SetAllPoints()
+        wash:SetColorTexture(accent.r, accent.g, accent.b, 0.06)
+
+        -- Accent 1px border (our own frame, safe)
+        if PP and PP.CreateBorder then
+            PP.CreateBorder(f, accent.r, accent.g, accent.b, 0.9, 1, "OVERLAY", 7)
+        end
+
+        -- Pulsing accent "LED" dot (recording-indicator vibe)
+        local dot = f:CreateTexture(nil, "ARTWORK")
+        dot:SetTexture("Interface\\Buttons\\WHITE8x8")
+        dot:SetVertexColor(accent.r, accent.g, accent.b, 1)
+        dot:SetSize(7, 7)
+        dot:SetPoint("LEFT", f, "LEFT", 9, 0)
+        if dot.SetSnapToPixelGrid then dot:SetSnapToPixelGrid(false); dot:SetTexelSnappingBias(0) end
+        local ag = dot:CreateAnimationGroup()
+        ag:SetLooping("BOUNCE")
+        local pulse = ag:CreateAnimation("Alpha")
+        pulse:SetFromAlpha(1); pulse:SetToAlpha(0.1)
+        pulse:SetDuration(0.7); pulse:SetSmoothing("IN_OUT")
+        f._pulse = ag
+
+        -- Label
+        local label = f:CreateFontString(nil, "OVERLAY")
+        label:SetFont(EllesmereUI.EXPRESSWAY, 11,
+            (EllesmereUI.SlugFlag and EllesmereUI.SlugFlag("OUTLINE, SLUG")) or "OUTLINE")
+        label:SetText("DEV MODE ACTIVE")
+        label:SetTextColor(accent.r, accent.g, accent.b, 1)
+        label:SetPoint("LEFT", dot, "RIGHT", 8, 0)
+
+        -- Size to content: dotPad(9) + dot(7) + gap(8) + text + rightPad(12)
+        f:SetWidth(9 + 7 + 8 + label:GetStringWidth() + 12)
+
+        badge = f
+        return f
+    end
+
+    function EllesmereUI.UpdateDevModeIndicator()
+        if not EllesmereUI.IsDevModeActive() then
+            if badge then
+                if badge._pulse then badge._pulse:Stop() end
+                badge:Hide()
+            end
+            return
+        end
+        local f = CreateDevBadge()
+        f:Show()
+        if f._pulse then f._pulse:Play() end
+    end
+
+    -- CVars persist across sessions: check on login (deferred so the theme accent
+    -- is fully resolved). PLAYER_LOGIN re-fires on /reload, so this covers both.
+    local ev = CreateFrame("Frame")
+    ev:RegisterEvent("PLAYER_LOGIN")
+    ev:SetScript("OnEvent", function(self)
+        self:UnregisterAllEvents()
+        C_Timer.After(2, function()
+            if EllesmereUI.UpdateDevModeIndicator then EllesmereUI.UpdateDevModeIndicator() end
+        end)
+    end)
 end
 
 -- Open the panel with a specific addon's tab selected
@@ -9851,7 +10199,7 @@ initFrame:SetScript("OnEvent", function(self, event)
     local demoConfigs = {
         -- Only list addons that do NOT have their own EUI_*_Options.lua yet.
         -- Addons with real options files register via PLAYER_LOGIN and must NOT
-        -- appear here â€” the demo would race and win due to page caching.
+        -- appear here -- the demo would race and win due to page caching.
         { folder = "EllesmereBeaconReminder",     title = "Beacon Reminders", desc = "Configure alerts for missing Beacon of Light or Faith.",  pages = { "General", "Alerts" } },
         { folder = "EllesmereConsumablesTracker", title = "Consumables",      desc = "Track consumables and raid buffs for instanced content.", pages = { "General", "Tracking" } },
     }

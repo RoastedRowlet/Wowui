@@ -1322,43 +1322,68 @@ function ns.GetCustomIconsOptionsTable()
             NotifyRefresh()
         end,
     }
-    args.editorOnEmpty = {
-        type = "select",
-        name = "On Empty",
-        desc = "What happens when stacks are consumed down to 0:\n\n"
-            .. "|cff88ccffKeep|r — timer keeps running until its duration expires.\n\n"
-            .. "|cff88ccffStop|r — stop the timer immediately (clears the swipe and "
-            .. "returns the icon to its ready state).\n\n"
-            .. "|cff88ccffHide|r — hide the icon while empty; show again on the next "
-            .. "generator gain or when the timer ends.",
-        order = 222.5,
-        width = 0.8,
+    args.editorStartFull = {
+        type = "toggle",
+        name = "Start full (show stacks before first cast)",
+        desc = "Show the pool full (Initial Stacks, e.g. 2/2) while the timer is "
+            .. "idle — before the first trigger — instead of 0. Casting then "
+            .. "consumes from it (the start cast also spends a stack if the start "
+            .. "spell is itself a spender). When the timer's duration ends, the "
+            .. "icon returns to full. Consume mode only. Off by default.",
+        order = 222.45,
+        width = "full",
         hidden = ConsumeHidden,
-        values = {
-            keep = "Keep timer running",
-            stop = "Stop timer",
-            hide = "Hide icon",
-        },
-        sorting = { "keep", "stop", "hide" },
         get = function()
             local e = GetSelectedTimer()
-            local v = e and e.config and e.config.startTrigger
-                      and e.config.startTrigger.onEmptyAction
-            if v == "stop" or v == "hide" then return v end
-            return "keep"
+            return e and e.config and e.config.startTrigger
+               and e.config.startTrigger.startFull == true or false
         end,
         set = function(_, v)
-            if v ~= "keep" and v ~= "stop" and v ~= "hide" then v = "keep" end
             local e = GetSelectedTimer()
             if not e or not e.config then return end
             e.config.startTrigger = e.config.startTrigger or {}
-            e.config.startTrigger.onEmptyAction = v
+            e.config.startTrigger.startFull = v and true or false
             if ns.ArcAurasTimer and ns.ArcAurasTimer.UpdateTimerConfig then
                 ns.ArcAurasTimer.UpdateTimerConfig(e.arcID)
             end
             NotifyRefresh()
         end,
     }
+    args.editorRechargeUntilFull = {
+        type = "toggle",
+        name = "Recharge until full (re-run while below Max)",
+        desc = "When the timer's duration completes, if the pool is still below "
+            .. "Max Stacks the timer runs again automatically (recharging another "
+            .. "cycle) and stops once it reaches Max — spell-charges style. Pair "
+            .. "with a generator set to the |cffffd700Timer Complete|r event (e.g. "
+            .. "'+1 on Timer Complete'). Requires a Max (not 'No max'). Off by default.",
+        order = 222.46,
+        width = "full",
+        hidden = ConsumeHidden,
+        disabled = function()
+            local e = GetSelectedTimer()
+            return e and e.config and e.config.startTrigger
+                   and e.config.startTrigger.noMaxStacks == true or false
+        end,
+        get = function()
+            local e = GetSelectedTimer()
+            return e and e.config and e.config.startTrigger
+               and e.config.startTrigger.rechargeUntilFull == true or false
+        end,
+        set = function(_, v)
+            local e = GetSelectedTimer()
+            if not e or not e.config then return end
+            e.config.startTrigger = e.config.startTrigger or {}
+            e.config.startTrigger.rechargeUntilFull = v and true or false
+            if ns.ArcAurasTimer and ns.ArcAurasTimer.UpdateTimerConfig then
+                ns.ArcAurasTimer.UpdateTimerConfig(e.arcID)
+            end
+            NotifyRefresh()
+        end,
+    }
+    -- "On Empty" behavior is fixed to "keep timer running" (the engine default
+    -- when onEmptyAction is unset), so no option is shown — when a consume pool
+    -- hits 0 the timer simply keeps running until its duration ends.
 
     -- ── Generators / Spenders lists ──
     -- Each list is rendered as: header → per-entry block (3 event toggles +
@@ -1431,13 +1456,13 @@ function ns.GetCustomIconsOptionsTable()
             -- Event checkboxes (cast / cooldown / proc) — only one at a time
             -- in practice but stored as a set for consistency with start/end
             -- trigger shape.
-            local function eventToggle(eventKey, eventLabel, eventDesc, subOrder)
+            local function eventToggle(eventKey, eventLabel, eventDesc, subOrder, width)
                 args[string.format("editor_%s_%d_ev_%s", listKey, idx, eventKey)] = {
                     type = "toggle",
                     name = eventLabel,
                     desc = eventDesc,
                     order = entryOrder + subOrder,
-                    width = 0.6,
+                    width = width or 0.6,
                     hidden = hideEntry,
                     get = function()
                         local entry = getEntry(listKey, idx)
@@ -1459,6 +1484,10 @@ function ns.GetCustomIconsOptionsTable()
             eventToggle("cast",     "Cast",     "Trigger on UNIT_SPELLCAST_SUCCEEDED for this spell.", 0.002)
             eventToggle("cooldown", "Cooldown", "Trigger on SPELL_UPDATE_COOLDOWN for this spell.",     0.003)
             eventToggle("proc",     "Proc",     "Trigger on SPELL_ACTIVATION_OVERLAY_GLOW_SHOW for this spell.", 0.004)
+            eventToggle("expire",   "Timer Complete",
+                "Fire when THIS timer's duration finishes (no Spell ID needed). "
+                .. "Use a generator '+1 on Timer Complete' together with 'Recharge "
+                .. "until full' to recharge the pool like spell charges.", 0.0045, 0.95)
 
             -- SpellID input
             args[string.format("editor_%s_%d_spellID", listKey, idx)] = {

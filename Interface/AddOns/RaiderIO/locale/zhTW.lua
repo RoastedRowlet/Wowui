@@ -511,8 +511,7 @@ L["RAID_MSV"] = "魔古山寶庫"
 L["RAID_NP"] = "奈幽巴宮殿"
 L["RAID_RS"] = "晶紅聖所"
 L["RAID_SF"] = "孢子之殞"
---[[Translation missing --]]
---[[ L["RAID_SOO"] = ""--]] 
+L["RAID_SOO"] = "圍攻奧格瑪"
 L["RAID_ToES"] = "豐泉臺"
 L["RAID_TOES"] = "豐泉台"
 L["RAID_TOT"] = "雷霆王座"

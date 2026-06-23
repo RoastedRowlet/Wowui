@@ -267,7 +267,13 @@ local UpdateProcGlow    -- Proc glow state
 -- ═══════════════════════════════════════════════════════════════════════════
 
 local _GUS = function(fd, settings)
-    if not fd or not fd.spellID then return "usable", USABLE_COLOR, nil, false end
+    -- Custom timers are duration displays, not castable spells. Like totems
+    -- (which hit the nil-spellID guard), they skip usability + range entirely
+    -- so the watched spell's mana / range / usable state can NEVER override the
+    -- timer's configured Active / Not-Active alpha, tint, or desaturation.
+    -- This is the fix for the intermittent "fighting" where a running timer's
+    -- look changed as the underlying spell became unusable / out of range.
+    if not fd or not fd.spellID or fd.isCustomTimer then return "usable", USABLE_COLOR, nil, false end
 
     local su = settings and settings.spellUsability
     local suEnabled = not su or su.enabled ~= false  -- default: enabled
@@ -393,10 +399,20 @@ local _ASV = function(fd, isOnCD, passedSettings, passedIsRecharging)
     local rs = csv.readyState or {}
     local cs = csv.cooldownState or {}
 
-    -- Get effective state visuals from CDMEnhance (handles cascade properly)
+    -- Get effective state visuals from CDMEnhance (handles cascade properly).
+    -- Reuse the cached result while `settings` is the same table — Arc's settings
+    -- cache returns a stable object until TTL/invalidation rebuilds it (all setters
+    -- call InvalidateSettingsCache), so an identity match is staleness-proof and
+    -- skips re-allocating the ~40-field state-visuals table on every state change.
     local stateVisuals = nil
     if ns.CDMEnhance and ns.CDMEnhance.GetEffectiveStateVisuals then
-        stateVisuals = ns.CDMEnhance.GetEffectiveStateVisuals(settings)
+        if settings ~= nil and fd._arcSVSettings == settings then
+            stateVisuals = fd._arcSV
+        else
+            stateVisuals = ns.CDMEnhance.GetEffectiveStateVisuals(settings)
+            fd._arcSVSettings = settings
+            fd._arcSV = stateVisuals
+        end
     end
 
     -- ── waitForNoCharges controls alpha/desat/tint during recharge ──
@@ -546,8 +562,29 @@ local _ASV = function(fd, isOnCD, passedSettings, passedIsRecharging)
         iconTex:SetDesaturated(readyDesat)
         frame._arcBypassDesatHook = false
 
-        -- Reset preserve duration text (was set during cooldown state)
-        if frame._arcPreservingDurationText then
+        -- Preserve duration/stack text at full opacity while ACTIVE and dimmed,
+        -- mirroring the Not-Active branch. Lets custom-timer / totem users keep
+        -- the countdown + stack number readable when Active Alpha is reduced.
+        local readyPreserve = (stateVisuals and stateVisuals.readyPreserveDurationText)
+                           or rs.preserveDurationText
+        local rParent = frame:GetParent()
+        local rGroupHidden = frame._arcGroupHidden or (rParent and rParent._arcGroupHidden)
+        if readyPreserve and not rGroupHidden then
+            if frame.Cooldown and frame.Cooldown.Text and frame.Cooldown.Text.SetIgnoreParentAlpha then
+                frame.Cooldown.Text:SetIgnoreParentAlpha(true)
+                frame.Cooldown.Text:SetAlpha(1)
+            end
+            if frame._arcCooldownText and frame._arcCooldownText.SetIgnoreParentAlpha then
+                frame._arcCooldownText:SetIgnoreParentAlpha(true)
+                frame._arcCooldownText:SetAlpha(1)
+            end
+            if frame._arcStackText and frame._arcStackText.SetIgnoreParentAlpha then
+                frame._arcStackText:SetIgnoreParentAlpha(true)
+                frame._arcStackText:SetAlpha(1)
+            end
+            frame._arcPreservingDurationText = true
+        elseif frame._arcPreservingDurationText then
+            -- No longer preserving (or was set during cooldown state) — restore.
             if frame.Cooldown and frame.Cooldown.Text and frame.Cooldown.Text.SetIgnoreParentAlpha then
                 frame.Cooldown.Text:SetIgnoreParentAlpha(false)
             end
@@ -699,7 +736,7 @@ local _ASV = function(fd, isOnCD, passedSettings, passedIsRecharging)
     if isUsableGlowPreview then
         -- Preview always shows (regardless of CD state or usability)
         shouldShowUsableGlow = true
-    elseif not isOnCD and su and su.usableGlow then
+    elseif not isOnCD and not fd.isCustomTimer and su and su.usableGlow then
         if usabilityState == "usable" then
             local combatOnly = su.usableGlowCombatOnly
             shouldShowUsableGlow = not combatOnly or InCombatLockdown()
@@ -778,6 +815,17 @@ local _ASV = function(fd, isOnCD, passedSettings, passedIsRecharging)
         
         if ArcAuras.NotifyStateChanged then
             ArcAuras.NotifyStateChanged(arcID, isOnCD, 0, 0)
+        end
+        -- Dynamic Cooldowns: a charge spell crosses its collapse boundary (last
+        -- charge spent / first charge restored) without the visible Cooldown's
+        -- IsShown() flipping — the recharge swipe stays up — so ns.FrameActive
+        -- misses it. Notify the layout directly (it dedupes on the rendered-alpha
+        -- bucket and only acts for frames in a Dynamic Cooldowns group).
+        if fd.isChargeSpell then
+            local DL = ns.CDMGroups and ns.CDMGroups.DynamicLayout
+            if DL and DL.NotifyCooldownCollapseChanged then
+                DL.NotifyCooldownCollapseChanged(frame)
+            end
         end
     end
 end
@@ -1051,12 +1099,13 @@ UpdateProcGlow = function(fd, forceShow)
     local spellID = fd.spellID
     local isOverlayed = forceShow
 
-    if isOverlayed == nil then
-        if C_SpellActivationOverlay and C_SpellActivationOverlay.IsSpellOverlayed then
-            local ok, result = pcall(C_SpellActivationOverlay.IsSpellOverlayed, spellID)
-            if not ok then return end  -- pcall failed, don't change state
-            isOverlayed = result
-        end
+    -- When we weren't told the state (forceShow == nil), query it directly.
+    -- spellID is non-secret (player spell), so guard the input and call the API
+    -- straight — pcall is banned in ArcUI. No spellID = nothing to query; leave
+    -- the current proc-glow state unchanged (matches the old early-return).
+    if isOverlayed == nil and C_SpellActivationOverlay and C_SpellActivationOverlay.IsSpellOverlayed then
+        if not spellID then return end
+        isOverlayed = C_SpellActivationOverlay.IsSpellOverlayed(spellID)
     end
 
     -- Read proc glow settings from CDMEnhance per-icon config
@@ -1813,11 +1862,19 @@ local _onEventFn = function(self, event, arg1, arg2, arg3, arg4)
         -- ApplySpellStateVisuals which re-installs all enforcement
         -- flags. Covers both spell-icon frames and timer frames since
         -- both are registered in spellData.
-        C_Timer.After(0.3, function()
-            if ArcAurasCooldown.initialized then
-                ArcAurasCooldown.RefreshAllSpellVisuals()
-            end
-        end)
+        -- COALESCE: joining a raid fires GROUP_ROSTER_UPDATE 10-20× in under a
+        -- second. Without a guard each one queued its own 0.3s timer → 10-20 full
+        -- RefreshAllSpellVisuals sweeps (each O(spell frames) × the full visual
+        -- pipeline) landing together — a real CPU spike. One pending timer suffices.
+        if not ArcAurasCooldown._rosterRefreshPending then
+            ArcAurasCooldown._rosterRefreshPending = true
+            C_Timer.After(0.3, function()
+                ArcAurasCooldown._rosterRefreshPending = false
+                if ArcAurasCooldown.initialized then
+                    ArcAurasCooldown.RefreshAllSpellVisuals()
+                end
+            end)
+        end
 
     elseif event == "SPELLS_CHANGED" or event == "PLAYER_TALENT_UPDATE" or event == "TRAIT_CONFIG_UPDATED" then
         if ArcAurasCooldown.initialized and not specChangePending then

@@ -184,22 +184,25 @@ Shared.GROUP_COLORS = {
 -- CATEGORY HELPERS
 -- ═══════════════════════════════════════════════════════════════════════════
 
--- Check if a CDM category is an aura (buff/debuff)
--- Categories 2 and 3 are tracked buffs and debuffs
+-- Check if a CDM category is an aura (buff/debuff/tracked)
+-- 2/3 = TrackedBuff/Bar. 12.1-forward adds aura-type categories: 4 GroupBuff,
+-- 6 SpecAgnosticTracked, 8 EquipSlotTracked (trinket buffs). Inert on 12.0.7
+-- (those categories don't exist there).
 function Shared.IsAuraCategory(category)
-    return category == 2 or category == 3
+    return category == 2 or category == 3 or category == 4 or category == 6 or category == 8
 end
 
 -- Check if a CDM category is a cooldown (not an aura)
+-- 0 Essential, 1 Utility. 12.1-forward adds 5 SpecAgnosticEssential, 7 EquipSlotEssential.
 function Shared.IsCooldownCategory(category)
-    return category == 0 or category == 1
+    return category == 0 or category == 1 or category == 5 or category == 7
 end
 
 -- Get viewerType from category number
 function Shared.GetViewerTypeFromCategory(category)
-    if category == 0 then return "cooldown"
+    if category == 0 or category == 5 or category == 7 then return "cooldown"
     elseif category == 1 then return "utility"
-    elseif category == 2 or category == 3 then return "aura"
+    elseif category == 2 or category == 3 or category == 4 or category == 6 or category == 8 then return "aura"
     end
     return nil
 end

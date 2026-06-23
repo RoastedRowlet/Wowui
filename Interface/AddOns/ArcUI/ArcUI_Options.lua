@@ -345,7 +345,7 @@ local function GetOptionsTable()
     args = {
       icons = {
         type = "group",
-        name = "Icons (CDM)",
+        name = "Icons",
         order = 1,
         childGroups = "tab",
         args = {
@@ -363,10 +363,10 @@ local function GetOptionsTable()
           cdmIcons = (function()
             local tbl = ns.GetCDMIconsOptionsTable and ns.GetCDMIconsOptionsTable() or {
               type = "group",
-              name = "CDM Icons",
+              name = "Icon Catalog",
               args = { loading = { type = "description", name = "Loading...", order = 1 } }
             }
-            tbl.name = "CDM Icons"
+            tbl.name = "Icon Catalog"
             tbl.order = 2
             return tbl
           end)(),
@@ -374,7 +374,7 @@ local function GetOptionsTable()
           defaults = {
             type = "group",
             name = "Globals",
-            order = 3,
+            order = 5,
             childGroups = "tab",
             args = {
               auraDefaults = (function()
@@ -409,19 +409,41 @@ local function GetOptionsTable()
               args = { loading = { type = "description", name = "Loading...", order = 1 } }
             }
             tbl.name = "Extras"
-            tbl.order = 4
+            tbl.order = 6
             return tbl
           end)(),
           
-          -- Arc Auras tab (Custom Item Tracking)
+          -- Arc Icons tab (tracked trinkets / items / spells)
           arcAuras = (function()
             local tbl = ns.GetArcAurasOptionsTable and ns.GetArcAurasOptionsTable() or {
               type = "group",
-              name = "Arc Auras",
+              name = "Arc Icons",
               args = { loading = { type = "description", name = "Loading...", order = 1 } }
             }
-            tbl.name = "Arc Auras"
-            tbl.order = 5
+            -- Custom Icons is now its OWN top-level tab (below). Strip the nested
+            -- copy, and flatten the lone "Main" child so Arc Icons shows its
+            -- catalog directly instead of behind a redundant sub-tab.
+            if tbl.args then
+              tbl.args.customIcons = nil
+              if tbl.args.main and tbl.args.main.args then
+                tbl.args = tbl.args.main.args
+                tbl.childGroups = nil
+              end
+            end
+            tbl.name = "Arc Icons"
+            tbl.order = 3
+            return tbl
+          end)(),
+
+          -- Custom Icons tab (timers) — pulled up out of Arc Icons for visibility
+          customIcons = (function()
+            local tbl = ns.GetCustomIconsOptionsTable and ns.GetCustomIconsOptionsTable() or {
+              type = "group",
+              name = "Custom Icons",
+              args = { loading = { type = "description", name = "Loading...", order = 1 } }
+            }
+            tbl.name = "Custom Icons"
+            tbl.order = 4
             return tbl
           end)(),
           
@@ -478,7 +500,7 @@ local function GetOptionsTable()
             return {
               type = "group",
               name = "Profiles",
-              order = 6,
+              order = 7,
               args = mergedArgs,
             }
           end)(),
@@ -487,13 +509,13 @@ local function GetOptionsTable()
             if ns.CDMSharedProfiles and ns.CDMSharedProfiles.GetOptionsTable then
               local tbl = ns.CDMSharedProfiles.GetOptionsTable()
               tbl.name = "Account Sharing"
-              tbl.order = 7
+              tbl.order = 8
               return tbl
             end
             return {
               type = "group",
               name = "Account Sharing",
-              order = 7,
+              order = 8,
               args = { loading = { type = "description", name = "Loading...", order = 1 } },
             }
           end)(),
@@ -534,7 +556,18 @@ local function GetOptionsTable()
             tbl.order = 2.5
             return tbl
           end)(),
-          
+
+          castbar = (function()
+            local tbl = ns.CastbarOptions and ns.CastbarOptions.GetOptionsTable() or {
+              type = "group",
+              name = "Castbar",
+              args = { loading = { type = "description", name = "Loading...", order = 1 } }
+            }
+            tbl.name = "Castbar"
+            tbl.order = 2.8
+            return tbl
+          end)(),
+
           appearance = (function()
             local tbl = ns.AppearanceOptions and ns.AppearanceOptions.GetOptionsTable() or {
               type = "group",
@@ -632,6 +665,17 @@ local function GetOptionsTable()
             return tbl
           end)(),
 
+          castbarExport = (function()
+            local tbl = ns.GetCastbarExportOnlyOptionsTable and ns.GetCastbarExportOnlyOptionsTable() or {
+              type = "group",
+              name = "Castbar Export",
+              args = { loading = { type = "description", name = "Loading...", order = 1 } }
+            }
+            tbl.name = "Castbar Export"
+            tbl.order = 3.7
+            return tbl
+          end)(),
+
           unifiedImport = (function()
             local tbl = ns.GetUnifiedImportExportOptionsTable and ns.GetUnifiedImportExportOptionsTable() or {
               type = "group",
@@ -664,6 +708,17 @@ local function GetOptionsTable()
         }
         tbl.name  = "Cooldown Reminder"
         tbl.order = 3.5
+        return tbl
+      end)(),
+
+      setMyKick = (function()
+        local tbl = ns.GetSetMyKickOptionsTable and ns.GetSetMyKickOptionsTable() or {
+          type = "group",
+          name = "Kick Assist",
+          args = { loading = { type = "description", name = "Loading...", order = 1 } }
+        }
+        tbl.name  = "Kick Assist"
+        tbl.order = 3.6
         return tbl
       end)(),
 
@@ -731,6 +786,40 @@ local function GetOptionsTable()
             end,
           },
           
+          changelogHeader = {
+            type = "header",
+            name = "Changelog",
+            order = 20
+          },
+          changelogShow = {
+            type = "toggle",
+            name = "Show Changelog on Update",
+            desc = "Automatically pop up the 'What's New' window once after each ArcUI update.",
+            order = 21,
+            width = 1.8,
+            get = function()
+              local g = ns.API.GetGlobalDB and ns.API.GetGlobalDB()
+              return not (g and g.changelog and g.changelog.disabled)
+            end,
+            set = function(_, val)
+              local g = ns.API.GetGlobalDB and ns.API.GetGlobalDB()
+              if g then
+                g.changelog = g.changelog or {}
+                g.changelog.disabled = not val
+              end
+            end,
+          },
+          changelogView = {
+            type = "execute",
+            name = "View Changelog",
+            desc = "Open the 'What's New' window now.",
+            order = 22,
+            width = 1.2,
+            func = function()
+              if ns.Changelog and ns.Changelog.Show then ns.Changelog.Show() end
+            end,
+          },
+
           aboutHeader = {
             type = "header",
             name = "About",
@@ -947,6 +1036,130 @@ SlashCmdList["ARCBARS"] = function(msg)
 end
 
 -- ===================================================================
+-- /arcdebug  — full system overview
+-- ===================================================================
+SLASH_ARCDEBUG1 = "/arcdebug"
+SlashCmdList["ARCDEBUG"] = function()
+  local ver = C_AddOns.GetAddOnMetadata(ADDON, "Version") or "?"
+  local db  = ns.db and ns.db.char
+
+  local sep = "|cff444444" .. string.rep("-", 44) .. "|r"
+  local function yn(v)  return v and "|cff00ff00yes|r" or "|cffff5555no|r" end
+  local function hi(s)  return "|cffffd100" .. tostring(s) .. "|r" end
+  local function dim(s) return "|cff888888" .. tostring(s) .. "|r" end
+
+  print(sep)
+  print("|cff00ccffArcUI|r v" .. hi(ver) .. "   " .. dim(date("%H:%M:%S")) .. "   combat=" .. yn(InCombatLockdown()))
+  print(sep)
+
+  -- Castbar
+  if ns.Castbar and ns.Castbar.GetStatus then
+    local s = ns.Castbar.GetStatus()
+    local detail = ""
+    if s.enabled and s.castActive then
+      local stages = s.castEmpowerStages > 0 and (" x" .. s.castEmpowerStages) or ""
+      detail = "  " .. dim("[" .. s.castKind .. stages .. "]")
+    end
+    print("  Castbar       " .. yn(s.enabled) .. detail)
+    if s.enabled then
+      local flags = {}
+      if s.hideChannels    then flags[#flags+1] = "hide-channels" end
+      if s.hideOutOfCombat then flags[#flags+1] = "hide-ooc"      end
+      if #flags > 0 then print("    " .. dim(table.concat(flags, "  "))) end
+    end
+  else
+    print("  Castbar       " .. dim("module not loaded"))
+  end
+
+  -- Aura bars — tracking.enabled is the active flag (same logic as GetActiveBars)
+  do
+    local activeCount = ns.API.GetActiveBars and #ns.API.GetActiveBars() or 0
+    local total = 0
+    if db and db.bars then
+      for i = 1, 500 do if db.bars[i] then total = total + 1 end end
+    end
+    print("  Aura Bars     " .. hi(activeCount) .. " enabled / " .. dim(total .. " configured"))
+  end
+
+  -- Resource bars — tracking.enabled (same logic as GetActiveResourceBars)
+  do
+    local activeCount = ns.API.GetActiveResourceBars and #ns.API.GetActiveResourceBars() or 0
+    local total = 0
+    if db and db.resourceBars then
+      for i = 1, 50 do if db.resourceBars[i] then total = total + 1 end end
+    end
+    print("  Resource Bars " .. hi(activeCount) .. " enabled / " .. dim(total .. " configured"))
+  end
+
+  -- Cooldown bars (nested: cooldownBarConfigs[spellID][barType])
+  do
+    local cdTotal = 0
+    if db and db.cooldownBarConfigs then
+      for _, configs in pairs(db.cooldownBarConfigs) do
+        for _, cfg in pairs(configs) do
+          if type(cfg) == "table" then cdTotal = cdTotal + 1 end
+        end
+      end
+    end
+    print("  Cooldown Bars " .. hi(cdTotal) .. " configured")
+  end
+
+  -- Timer bars
+  do
+    local total = 0
+    if db and db.timerBarConfigs then
+      for _, cfg in pairs(db.timerBarConfigs) do
+        if type(cfg) == "table" then total = total + 1 end
+      end
+    end
+    print("  Timer Bars    " .. hi(total) .. " configured")
+  end
+
+  -- Cooldown Reminder
+  do
+    local crDB = db and db.cooldownReminder
+    print("  CD Reminder   " .. yn(crDB and crDB.enabled))
+  end
+
+  print(sep)
+
+  -- CDM Enhancement
+  if ns.CDMShared then
+    print("  CDM Enhance   " .. yn(ns.CDMShared.IsCDMStylingEnabled()))
+  else
+    print("  CDM Enhance   " .. dim("module not loaded"))
+  end
+
+  -- CDM Groups
+  if ns.CDMGroups then
+    local groupCount, freeCount = 0, 0
+    if ns.CDMGroups.groups then
+      for _ in pairs(ns.CDMGroups.groups) do groupCount = groupCount + 1 end
+    end
+    if ns.CDMGroups.freeIcons then
+      for _ in pairs(ns.CDMGroups.freeIcons) do freeCount = freeCount + 1 end
+    end
+    print("  CDM Groups    " .. hi(groupCount) .. " groups / " .. hi(freeCount) .. " free icons")
+  else
+    print("  CDM Groups    " .. dim("module not loaded"))
+  end
+
+  -- Arc Auras
+  if ns.ArcAuras then
+    local arcCount = 0
+    local frames = ns.ArcAuras.frames or {}
+    for _ in pairs(frames) do arcCount = arcCount + 1 end
+    print("  Arc Auras     " .. hi(arcCount) .. " tracked")
+  else
+    print("  Arc Auras     " .. dim("module not loaded"))
+  end
+
+  print(sep)
+  print(dim("  /arcui  /arccastdebug  /arcmasque  /arcrepair"))
+  print(sep)
+end
+
+-- ===================================================================
 -- MAIN INITIALIZATION
 -- ===================================================================
 local initFrame = CreateFrame("Frame")
@@ -1033,7 +1246,13 @@ initFrame:SetScript("OnEvent", function(self, event)
       if ns.CustomTracking and ns.CustomTracking.Init then
         ns.CustomTracking.Init()
       end
-      
+      if ns.Castbar and ns.Castbar.Init then
+        ns.Castbar.Init()
+      end
+      if ns.SetMyKick and ns.SetMyKick.Init then
+        ns.SetMyKick.Init()
+      end
+
       print("|cff00ccffArc UI|r v" .. ns.AddonInfo.Version .. " loaded. Type /arcui for options, /cdm for CDM settings, /arcui recenter to move panel back to screen.")
     end)
   end

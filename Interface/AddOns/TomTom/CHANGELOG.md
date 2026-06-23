@@ -1,8 +1,11 @@
 # TomTom
 
-## [v4.3.4-release](https://github.com/jnwhiteh/TomTom/tree/v4.3.4-release) (2026-06-05)
-[Full Changelog](https://github.com/jnwhiteh/TomTom/commits/v4.3.4-release) [Previous Releases](https://github.com/jnwhiteh/TomTom/releases)
+## [v4.3.5-release](https://github.com/jnwhiteh/TomTom/tree/v4.3.5-release) (2026-06-19)
+[Full Changelog](https://github.com/jnwhiteh/TomTom/commits/v4.3.5-release) [Previous Releases](https://github.com/jnwhiteh/TomTom/releases)
 
+- Update TomTom for 12.0.7  
+- Add new localization strings for TomTom (#16)  
+    * Update Localization.frFR.lua  
 - Update for MOP-Classic  
 - Update for retail  
 - Update TOC  
@@ -692,6 +695,3 @@
 - Added an option to disable the right-click menu on the crazy-arrow  
 - Added an option to clear a waypoint from the crazy arrow, shown on the crazy arrow context menu  
 - * Added a public API to allow for custom callbacks that work with the frontend  
-- * Bugfixes for certain reported bugs  
-    * Callbacks will now properly be fired when the minimap icon isn't enabled  
-- * Changed code for GetCursorPosition() thanks to ckknight  

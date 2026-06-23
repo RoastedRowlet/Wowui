@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'Evoker-Augmentation','Druid-Guardian',}
-local provider = {region='US',realm='Misha',name='US',type='subscribers',zone=46,date='2026-06-20',data={Ma='Math:BAEALgAFFAEJAQABLgAFFAYJCwABAAYPAA==.Matheney:BAEBLgAFFH8QAAICAAcJCA5HBgCWAQdoDAAAAwBJAGkMAAADAD0AawwAAAIAKABsDAAAAwAKAG0MAAABAA8A6gwAAAMAJwBuDAAAAQALAAIABwkIDkcGAJYBB2gMAAADAEkAaQwAAAMAPQBrDAAAAgAoAGwMAAADAAoAbQwAAAEADwDqDAAAAwAnAG4MAAABAAsAAS4ABRQGCQsAAQAGDwA=.',Me='Menöpaws:BAEALgAFFAMJAwAAAA==.',},}
+local lookup = {'Warlock-Demonology','Evoker-Augmentation','Druid-Guardian',}
+local provider = {region='US',realm='Misha',name='US',type='subscribers',zone=46,date='2026-06-22',data={Dr='Driver:BAEALgAFFAIJAwABLgAFFAUJDwABALYLAA==.',Ma='Math:BAEALgAFFAEJAQABLgAFFAYJCwACAAYPAA==.Matheney:BAEBLgAFFH8QAAIDAAcJCA5HBgCWAQdoDAAAAwBJAGkMAAADAD0AawwAAAIAKABsDAAAAwAKAG0MAAABAA8A6gwAAAMAJwBuDAAAAQALAAMABwkIDkcGAJYBB2gMAAADAEkAaQwAAAMAPQBrDAAAAgAoAGwMAAADAAoAbQwAAAEADwDqDAAAAwAnAG4MAAABAAsAAS4ABRQGCQsAAgAGDwA=.',Me='Menöpaws:BAEALgAFFAMJAwAAAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

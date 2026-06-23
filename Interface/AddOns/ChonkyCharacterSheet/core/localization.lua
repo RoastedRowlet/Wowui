@@ -29,6 +29,7 @@ local defaultStrings = {
     ------------------------------------------------------------
     -- General / Common
     ------------------------------------------------------------
+		["Class Crest"] = "Class Crest", -- enUS / enGB
 	["INSTRUCTIONS"] = "Instructions",  -- enUS / enGB
 	["CLICK_COL_EXP"] = "Click to Collapse or Expand", -- enUS / enGB
 	["CTRL_CLICK_COL_EXP"] = "Control + Click to Save Collapse State", -- enUS / enGB
@@ -438,6 +439,7 @@ if locale == "enGB" then
     }
 elseif locale == "deDE" then
     localizedStrings = {
+        ["Class Crest"] = "Klassenwappen", -- deDE
         ["INSTRUCTIONS"] = "Anweisungen", -- deDE
         ["CLICK_COL_EXP"] = "Klicken zum Ein- oder Ausklappen", -- deDE
         ["CTRL_CLICK_COL_EXP"] = "Strg + Klicken, um den Einklappstatus zu speichern", -- deDE
@@ -818,6 +820,7 @@ elseif locale == "deDE" then
     }	
 elseif locale == "frFR" then
     localizedStrings = {
+        ["Class Crest"] = "Emblème de classe", -- frFR
         ["INSTRUCTIONS"] = "Instructions", -- frFR
         ["CLICK_COL_EXP"] = "Cliquez pour réduire ou développer", -- frFR
         ["CTRL_CLICK_COL_EXP"] = "Ctrl + Clic pour enregistrer l’état de réduction", -- frFR
@@ -1198,6 +1201,7 @@ elseif locale == "frFR" then
     }
 elseif locale == "esES" then
     localizedStrings = {
+        ["Class Crest"] = "Emblema de clase", -- esES
         ["INSTRUCTIONS"] = "Instrucciones", -- esES
         ["CLICK_COL_EXP"] = "Clic para contraer o expandir", -- esES
         ["CTRL_CLICK_COL_EXP"] = "Ctrl + Clic para guardar el estado de contracción", -- esES
@@ -1578,6 +1582,7 @@ elseif locale == "esES" then
     }
 elseif locale == "esMX" then
     localizedStrings = {
+        ["Class Crest"] = "Emblema de clase", -- esMX
         ["INSTRUCTIONS"] = "Instrucciones", -- esMX
         ["CLICK_COL_EXP"] = "Clic para contraer o expandir", -- esMX
         ["CTRL_CLICK_COL_EXP"] = "Ctrl + Clic para guardar el estado de contracción", -- esMX
@@ -1958,6 +1963,7 @@ elseif locale == "esMX" then
     }
 elseif locale == "ruRU" then
     localizedStrings = {
+        ["Class Crest"] = "Герб класса", -- ruRU
         ["INSTRUCTIONS"] = "Инструкции", -- ruRU
         ["CLICK_COL_EXP"] = "Щёлкните, чтобы свернуть или развернуть", -- ruRU
         ["CTRL_CLICK_COL_EXP"] = "Ctrl + Щелчок, чтобы сохранить состояние сворачивания", -- ruRU
@@ -2339,6 +2345,7 @@ elseif locale == "ruRU" then
     }
 elseif locale == "koKR" then
     localizedStrings = {
+        ["Class Crest"] = "직업 문장", -- koKR
         ["INSTRUCTIONS"] = "안내", -- koKR
         ["CLICK_COL_EXP"] = "클릭하여 접거나 펼치기", -- koKR
         ["CTRL_CLICK_COL_EXP"] = "Ctrl + 클릭으로 접힘 상태 저장", -- koKR
@@ -2719,6 +2726,7 @@ elseif locale == "koKR" then
     }
 elseif locale == "zhCN" then
     localizedStrings = {
+        ["Class Crest"] = "职业徽章", -- zhCN
         ["INSTRUCTIONS"] = "说明", -- zhCN
         ["CLICK_COL_EXP"] = "点击以折叠或展开", -- zhCN
         ["CTRL_CLICK_COL_EXP"] = "Ctrl + 点击以保存折叠状态", -- zhCN
@@ -3099,6 +3107,7 @@ elseif locale == "zhCN" then
     }
 elseif locale == "zhTW" then
     localizedStrings = {
+        ["Class Crest"] = "職業徽章", -- zhTW
         ["INSTRUCTIONS"] = "說明", -- zhTW
         ["CLICK_COL_EXP"] = "點擊以收合或展開", -- zhTW
         ["CTRL_CLICK_COL_EXP"] = "Ctrl + 點擊以儲存收合狀態", -- zhTW
@@ -3478,6 +3487,7 @@ elseif locale == "zhTW" then
     }
 elseif locale == "ptBR" then
     localizedStrings = {
+        ["Class Crest"] = "Brasão da classe", -- ptBR
         ["INSTRUCTIONS"] = "Instruções", -- ptBR
         ["CLICK_COL_EXP"] = "Clique para recolher ou expandir", -- ptBR
         ["CTRL_CLICK_COL_EXP"] = "Ctrl + Clique para salvar o estado de recolhimento", -- ptBR
@@ -3858,6 +3868,7 @@ elseif locale == "ptBR" then
     }
 elseif locale == "itIT" then
     localizedStrings = {
+        ["Class Crest"] = "Stemma di classe", -- itIT
         ["INSTRUCTIONS"] = "Istruzioni", -- itIT
         ["CLICK_COL_EXP"] = "Clic per comprimere o espandere", -- itIT
         ["CTRL_CLICK_COL_EXP"] = "Ctrl + Clic per salvare lo stato di compressione", -- itIT

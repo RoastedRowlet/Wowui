@@ -234,7 +234,7 @@ local function getChunkLookup(table, length)
 end
 
 local lookup = {'Druid-Guardian','Paladin-Retribution','Priest-Discipline',}
-local provider = {region='US',realm='Dalvengyr',name='US',type='subscribers',zone=46,date='2026-06-20',data={Ad='Addiegate:BAEALgAECgYJCgABLgAFFAkJPQABAIAmAA==.',Ra='Ratribution:BAECLgAFFH8GAAICAAIJqx62sABWAAJqDAAAAgA6AOoMAAAEAE4AAgACCasetrAAVgACagwAAAIAOgDqDAAABABOAC4ABAp/JgACAgAJCToiQRAA5AIAAgAJCToiQRAA5AIAAS4ABRQICSEAAwAUGwA=.',},}
+local provider = {region='US',realm='Dalvengyr',name='US',type='subscribers',zone=46,date='2026-06-22',data={Ad='Addiegate:BAEALgAECgYJCgABLgAFFAkJPQABAIAmAA==.',Ra='Ratribution:BAECLgAFFH8GAAICAAIJqx6zsABWAAJqDAAAAgA6AOoMAAAEAE4AAgACCases7AAVgACagwAAAIAOgDqDAAABABOAC4ABAp/JgACAgAJCToiQBAA5AIAAgAJCToiQBAA5AIAAS4ABRQICSEAAwAUGwA=.',},}
 provider.parse = parse
 
 local rawData = provider.data

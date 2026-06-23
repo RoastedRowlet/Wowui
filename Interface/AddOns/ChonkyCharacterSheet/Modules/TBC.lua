@@ -1,6 +1,6 @@
 local addonName, ns = ...
 local CCS = ns.CCS
-if CCS.GetCurrentVersion() ~= CCS.TBC then
+if CCS.CurrentVersion ~= CCS.TBC then
     return
 end
 
@@ -34,21 +34,17 @@ end
 -- Module Definitions
 ---------------------------
 local modbg = _G["CharacterModelFramebg"] or CreateFrame("Frame", "CharacterModelFramebg", CharacterModelFrame)
-modbg.retries = 0
 local modtex = _G["CharacterModelFramebgtex"] or modbg:CreateTexture("CharacterModelFramebgtex", "BACKGROUND")    
+local modtex2 = _G["CharacterModelFramebgtex2"] or modbg:CreateTexture("CharacterModelFramebgtex2", "ARTWORK")    
 
 local inspectmodbg = _G["InspectModelFramebg"] or CreateFrame("Frame", "InspectModelFramebg")
 local inspectmodtex = _G["InspectModelFramebgtex"] or inspectmodbg:CreateTexture("InspectModelFramebgtex", "BACKGROUND")    
+local inspectmodtex2 = _G["InspectModelFramebgtex2"] or inspectmodbg:CreateTexture("InspectModelFramebgtex2", "ARTWORK")    
 
 local modelbtn = _G["CCS_clk_Btn"] or CreateFrame("Button", "CCS_clk_Btn", PaperDollFrame, "UIPanelButtonTemplate")
-local bg_texture = "Interface\\AddOns\\ChonkyCharacterSheet\\Media\\Textures\\MOTHERtalenttree.BLP"
 
 ---------------------------------
----------------------------------
----------------------------------
 --- On with the show!
----------------------------------
----------------------------------
 ---------------------------------
 function CCS.GetAverageItemLevel(unit)
     local total, count = 0, 0
@@ -122,266 +118,6 @@ local function MoveModelRight()
     _G["CharacterModelFramebg"]:SetAllPoints(CharacterModelScene)    
 end
 
-local function ChangeInspectModelBg()
- if InspectFrame == nil or InspectFrame.unit == nil then return end
-
-    local _, _, classID = UnitClass(InspectFrame.unit)
-    local _, _, raceID = UnitRace(InspectFrame.unit)
-    local specID = GetPrimaryTalentTree()
-    local entry = nil
-
-    inspectmodbg:ClearAllPoints()
-    if inspectmodbg:GetParent() == nil then
-        inspectmodbg:SetParent(InspectModelFrame)
-    end
-    inspectmodbg:SetPoint("TOPLEFT", InspectHeadSlot, "TOPLEFT", 0, 0)
-    inspectmodbg:SetPoint("RIGHT", InspectHandsSlot, "RIGHT", 0, 0)    
-    inspectmodbg:SetPoint("BOTTOM", InspectMainHandSlot, "BOTTOM", 0, 0)    
-    inspectmodbg:SetFrameStrata("BACKGROUND")
-    inspectmodbg:SetFrameLevel(100)    
-
-    if inspectmodbg:GetParent() == nil then
-        inspectmodbg:SetParent(InspectModelFrame)
-    end
-
-    if option("bgtype_inspect") == "Hide" then
-        inspectmodtex:Hide()
-        return
-    end
-    inspectmodtex:Show()
-    if option("bgtype_inspect") == "Class" then 
-        -- Class/Specialization background
-        entry = CCS.Class_Bg[classID] and CCS.Class_Bg[classID][specID]        
-        inspectmodtex:SetVertexColor(0.8, 0.8, 0.8, 1)
-    elseif option("bgtype_inspect") == "Race" then 
-        -- Race background
-        if classID == 6 then raceID = 998 -- Death Knight
-        elseif classID == 12 then raceID = 999 -- Demon Hunter
-        end
-        entry = CCS.Race_Bg[raceID] 
-        inspectmodtex:SetVertexColor(0.7, 0.7, 0.7, 1)
-    end
-    
-    inspectmodtex:ClearAllPoints()
-    inspectmodtex:SetAllPoints()
-    
-    if entry then
-        local texWidth, texHeight, uMin, uMax, vMin, vMax = unpack(entry.map)
-        local frameWidth, frameHeight = inspectmodtex:GetWidth(), inspectmodtex:GetHeight()
-        
-        inspectmodtex:SetTexture(entry.texture)
-        
-        if option("bgtype_inspect") == "Class" then
-            -- Class/Specialization: right-aligned
-            inspectmodtex:SetTexCoord(
-                uMin + ((texWidth - (frameWidth / (frameHeight / texHeight))) / texWidth) * (uMax - uMin),
-                uMax,
-                vMin,
-                vMax
-            )
-        else
-            -- Race: horizontally centered
-            local visibleWidth = frameWidth / (frameHeight / texHeight) -- width in texture space
-            local uRange = uMax - uMin
-            local uOffset = (uRange - (visibleWidth / texWidth) * uRange) / 2
-            
-            inspectmodtex:SetTexCoord(
-                uMin + uOffset,
-                uMax - uOffset,
-                vMin,
-                vMax
-            )
-        end
-    else
-        -- Default background
-        inspectmodtex:SetTexture("Interface\\AddOns\\ChonkyCharacterSheet\\Media\\Textures\\MOTHERtalenttree.BLP")
-        inspectmodtex:SetTexCoord(0, 0.69, 0, 0.87)
-        inspectmodtex:SetVertexColor(0.4, 0, 0.4, 0.9)
-    end
-    -- end of dynamic background
-end
-
-local function clamp(val, min, max)
-    if val < min then return min end
-    if val > max then return max end
-    return val
-end
-
-local function StopBGAnimation()
-    if modbg.swirl then
-        modbg.swirl:Hide()
-        modbg.swirl.swirlAnim:Stop()
-        modbg.donut:Hide()
-        modbg.donutFrame.donutAnim:Stop()
-    end
-end
-
-local function ChangeModelBg()
-    local _, _, classID = UnitClass("player")
-    local _, _, raceID = UnitRace("player")
-    local specID = 1 --GetSpecialization()
-    local entry
-
-    StopBGAnimation()
-
-    if option("bgtype") == "Hide" then
-        modtex:Hide()
-        return
-    end
-    modtex:Show()
-
-    if option("bgtype") == "Class" then
-        entry = CCS.Class_Bg[classID] and CCS.Class_Bg[classID][specID]
-        modtex:SetVertexColor(0.8, 0.8, 0.8, 1)
-    elseif option("bgtype") == "Race" then
-        if classID == 6 then raceID = 998 -- Death Knight
-        elseif classID == 12 then raceID = 999 -- Demon Hunter
-        end
-        entry = CCS.Race_Bg[raceID]
-        modtex:SetVertexColor(0.7, 0.7, 0.7, 1)
-    end
-
-    modtex:ClearAllPoints()
-    modtex:SetAllPoints()
-
-    if entry then
-        local texWidth, texHeight, uMin, uMax, vMin, vMax = unpack(entry.map)
-        local frameWidth, frameHeight = modtex:GetWidth(), modtex:GetHeight()
-
-        modtex:SetTexture(entry.texture)
-
-        if option("bgtype") == "Class" then
-            -- Class/Specialization: right-aligned
-            local visibleWidth = frameWidth / (frameHeight / texHeight)
-            local left = uMin + ((texWidth - visibleWidth) / texWidth) * (uMax - uMin)
-            left = clamp(left, uMin, uMax) -- ensure valid range
-
-            modtex:SetTexCoord(left, uMax, vMin, vMax)
-        else
-            -- Race: horizontally centered
-            local visibleWidth = frameWidth / (frameHeight / texHeight)
-            local uRange = uMax - uMin
-            local uOffset = (uRange - (visibleWidth / texWidth) * uRange) / 2
-
-            local left = clamp(uMin + uOffset, uMin, uMax)
-            local right = clamp(uMax - uOffset, uMin, uMax)
-
-            modtex:SetTexCoord(left, right, vMin, vMax)
-        end
-    else
-        if option("bgtype") ==  "Midnight"  then    
-            local texWidth, texHeight, uMin, uMax, vMin, vMax = 408,374, 0, 1, .35, 1
-            local frameWidth, frameHeight = modtex:GetWidth(), modtex:GetHeight()
-            local visibleWidth = frameWidth / (frameHeight / texHeight)
-            local uRange = uMax - uMin
-            local uOffset = (uRange - (visibleWidth / texWidth) * uRange) / 2
-            local origW, origH = 569, 520
-            local newW, newH = modbg:GetSize()
-            local scale = math.max(newH / origH, 0.1)
-            
-            if (newW == 0 or newH == 0) and (modbg.retries and modbg.retries < 5) then
-                C_Timer.After(0, ChangeModelBg)
-                modbg.retries = modbg.retries+1
-                return
-            elseif (newW == 0 or newH == 0) then
-                scale = 1
-            end
-            modbg.retries = 0
-
-            local offsetY = 80 * scale
-            local left = clamp(uMin + uOffset, uMin, uMax)
-            local right = clamp(uMax - uOffset, uMin, uMax)
-            modtex:SetTexture("Interface\\AddOns\\ChonkyCharacterSheet\\Media\\Textures\\bgmidnight.png")
-            modtex:SetVertexColor(0.1, 0, 0.75, 0.95)            
-            modtex:SetTexCoord(left, right, vMin, vMax)    
-            if option("showbganimations") == true then
-                -- VOID SWIRL LAYER (rotating)
-                local swirl = modbg.swirl or modbg:CreateTexture(nil, "ARTWORK", nil, 1)
-                modbg.swirl = swirl
-                swirl:SetTexture("Interface\\GLUES\\Models\\UI_VoidElf\\7XP_Pandemonium_VoidFXSwirl01")
-                swirl:SetVertexColor(1, 1, 1, 1)
-                swirl:SetScale(scale * 0.85)
-                swirl:ClearAllPoints()
-                swirl:SetPoint("CENTER", modtex, "CENTER", 0, offsetY)
-                swirl:Show()
-
-                local swirlAnim = modbg.swirl.swirlAnim or swirl:CreateAnimationGroup()
-                modbg.swirl.swirlAnim = swirlAnim
-
-                local rotate = modbg.swirl.swirlAnim.rotate or swirlAnim:CreateAnimation("Rotation")
-                modbg.swirl.swirlAnim.rotate = rotate
-                rotate:SetDegrees(360)
-                rotate:SetDuration(120)
-                rotate:SetOrder(1)
-
-                swirlAnim:SetLooping("REPEAT")
-                swirlAnim:Play()
-
-                -- PULSING VOID DONUT MASK (mmm, donuts...)
-                local donutFrame = modbg.donutFrame or CreateFrame("Frame", nil, modbg)
-                modbg.donutFrame = donutFrame
-                donutFrame:ClearAllPoints()
-                donutFrame:SetPoint("CENTER", modtex, "CENTER", 0, offsetY)
-                donutFrame:SetSize(240 * scale, 350 * scale)
-                donutFrame:SetScale(1) -- important: neutral base
-                donutFrame:Show()
-
-                local donut = modbg.donut or donutFrame:CreateTexture(nil, "ARTWORK", nil, 2)
-                modbg.donut = donut
-                donut:SetAllPoints(donutFrame)
-                donut:SetTexture("Interface\\GLUES\\Models\\UI_MAINMENU_MIDNIGHT\\UI_MainMenu_Midnight_DonutMask")
-                donut:SetVertexColor(.292, .457, .902, 1)
-                donut:SetAlpha(1)
-                donut:SetBlendMode("ADD")
-                donut:Show()
-
-                local donutAnim = modbg.donutFrame.donutAnim or donutFrame:CreateAnimationGroup()
-                modbg.donutFrame.donutAnim = donutAnim
-                donutAnim:Stop() -- reset if it already existed
-
-                local alphaUp = donutAnim.alphaUp or donutAnim:CreateAnimation("Alpha")
-                donutAnim.alphaUp = alphaUp
-                alphaUp:SetFromAlpha(0.6)
-                alphaUp:SetToAlpha(1.0)
-                alphaUp:SetDuration(3)
-                alphaUp:SetSmoothing("IN_OUT")
-                alphaUp:SetOrder(1)
-
-                local alphaDown = donutAnim.alphaDown or donutAnim:CreateAnimation("Alpha")
-                donutAnim.alphaDown = alphaDown
-                alphaDown:SetFromAlpha(1.0)
-                alphaDown:SetToAlpha(0.6)
-                alphaDown:SetDuration(3)
-                alphaDown:SetSmoothing("IN_OUT")
-                alphaDown:SetOrder(2)
-
-                local scaleUp = donutAnim.scaleUp or donutAnim:CreateAnimation("Scale")
-                donutAnim.scaleUp = scaleUp
-                scaleUp:SetScale(1.05, 1.05)
-                scaleUp:SetDuration(3)
-                scaleUp:SetSmoothing("IN_OUT")
-                scaleUp:SetOrder(1)
-
-                local scaleDown = donutAnim.scaleDown or donutAnim:CreateAnimation("Scale")
-                donutAnim.scaleDown = scaleDown
-                scaleDown:SetScale(1 / 1.05, 1 / 1.05) -- back to 1.0
-                scaleDown:SetDuration(3)
-                scaleDown:SetSmoothing("IN_OUT")
-                scaleDown:SetOrder(2)
-
-                donutAnim:SetLooping("REPEAT")
-                donutAnim:Play()                
-                
-            end
-        else        
-            -- Default background
-            modtex:SetTexture("Interface\\AddOns\\ChonkyCharacterSheet\\Media\\Textures\\MOTHERtalenttree.BLP")
-            modtex:SetTexCoord(0, 0.69, 0, 0.87)
-            modtex:SetVertexColor(0.6, 0, 0.6, 0.95)
-        end
-    end
-end
-
 local function Clicky(endstate)
     if CharacterModelScene:GetHeight() > 600 then -- This is to move model under the character equipment
         MoveModelLeft()
@@ -389,7 +125,7 @@ local function Clicky(endstate)
         MoveModelRight()
     end
 
-    ChangeModelBg()
+    CCS.ChangeModelBg(false)
     PlaySound(SOUNDKIT.GS_LOGIN_CHANGE_REALM_OK);
 end
 
@@ -405,7 +141,6 @@ local function InitStats()
     CharacterStatsPane.ScrollBox:ClearAllPoints()
     CharacterStatsPane.ScrollBox:SetPoint("TOPLEFT", CharacterStatsPane, "TOPLEFT", 14, -25)
     CharacterStatsPane.ScrollBox:SetPoint("BOTTOMRIGHT", CharacterStatsPane, "BOTTOMRIGHT", -4, 0)
-
 
     for i = 1, 7 do
         local category = _G["CharacterStatsPaneCategory"..i]
@@ -1782,7 +1517,6 @@ function TBCinitializeinspectframe()
     InspectModelFrameBackgroundOverlay:SetPoint("BOTTOMRIGHT", InspectModelFrameBackgroundBotRight, "BOTTOMRIGHT", 0, 70)
     InspectModelFrameBackgroundOverlay:Hide()
 
-
     InspectModelFrame:SetPoint("LEFT", InspectFrameBg, "LEFT", Left+(Bgoffset-277)/2, -20);
     InspectModelFrame:SetFrameLevel(2)
     InspectModelFrame:Show();
@@ -1800,8 +1534,7 @@ function TBCinitializeinspectframe()
     inspectmodbg:SetPoint("BOTTOM", InspectMainHandSlot, "BOTTOM", 0, 0)        
     inspectmodbg:SetFrameStrata("BACKGROUND")
     inspectmodbg:SetFrameLevel(100)
-    ChangeInspectModelBg()
-
+    CCS.ChangeModelBg(true)
 end
 
 -- Module Initialization
@@ -2295,7 +2028,7 @@ function module:Initialize(onlyStyle)
     modbg:SetPoint("BOTTOM", CharacterRangedSlot, "BOTTOM", 0, 0)        
     modbg:SetFrameStrata("LOW")
     modbg:SetFrameLevel(50)
-    ChangeModelBg()
+    CCS.ChangeModelBg(false)
     
     if option("hidemodelbg") then
         modbg:Hide()
@@ -2389,18 +2122,18 @@ local function TBCloopinspectitems()
     
     color = CCS:GetAverageEquippedRarityHex(unit) or "ffffff"
     
-    ilvlTxt:SetPoint("TOP", _G["InspectLevelText"], "BOTTOM", 0, -10) 
+    ilvlTxt:SetPoint("TOP", _G["InspectLevelText"], "BOTTOM", 0, -7) 
     ilvlTxt:SetFont(option("fontname_inspect_ilvl") or CCS.fontname, option("fontsize_inspect_ilvl") or 20, "OUTLINE")
     
     ilvlTxt:SetText("|cFF".. color .. format("%.2f", iLvl or "") .. "|r")
-    ilvlTxt:SetShown(option("showilvl_inspect"))
+    ilvlTxt:SetShown(option("showilvlinspect"))
 end 
 
 -- Define the event handler function for this module
 function CCS.TBCCharacterSheetEventHandler(event, ...)
     local arg1 = ...
 
-    if CCS.GetCurrentVersion() ~= CCS.TBC then return end 
+    if CCS.CurrentVersion ~= CCS.TBC then return end 
 
     if event == "PLAYER_ENTERING_WORLD" then
         for slot = 1, 19 do
@@ -2437,7 +2170,7 @@ function CCS.TBCCharacterSheetEventHandler(event, ...)
         return true
     elseif event == "CCS_EVENT_OPTIONS" then
         TryLoopItems()
-        ChangeModelBg()
+        CCS.ChangeModelBg(false)
         CCS_ReputationFrame_Update()
         if PaperDollFrame and PaperDollFrame:IsVisible() then 
             CharacterFrameBg:SetPoint("BOTTOMRIGHT", CharacterFrame, "BOTTOMRIGHT", option("hpad")+221, 0);
@@ -3107,7 +2840,7 @@ function InitializeStats()
                 local baseInt = min(20, effectiveStat);
                 local moreInt = effectiveStat - baseInt
 
-                if ( UnitHasMana("player") ) then
+                if ( CCS.UnitHasMana("player") ) then
                     tt_desc = format(_G["DEFAULT_STAT"..statIndex.."_TOOLTIP"], baseInt + moreInt*MANA_PER_INTELLECT, GetSpellCritChanceFromIntellect("player"));
                 else
                     tt_desc = nil;
@@ -3134,7 +2867,7 @@ function InitializeStats()
             -- Tooltip description
                 tt_desc = format(_G["DEFAULT_STAT"..statIndex.."_TOOLTIP"], GetUnitHealthRegenRateFromSpirit("player"));
                 
-                if ( UnitHasMana("player") ) then
+                if ( CCS.UnitHasMana("player") ) then
                     local regen = GetUnitManaRegenRateFromSpirit("player");
                     regen = floor( regen * 5.0 );
                     tt_desc = tt_desc.."\n"..format(MANA_REGEN_FROM_SPIRIT, regen);
@@ -3620,7 +3353,7 @@ function InitializeStats()
             elseif    row == 27 then -- Mana Regen
                 btnfont1:SetText(format("%s", MANA_REGEN)..":")
 
-                if ( not UnitHasMana("player") ) then
+                if ( not CCS.UnitHasMana("player") ) then
                     btnfont2:SetText(NOT_APPLICABLE);
                     tooltip = false
                 else
@@ -3738,7 +3471,7 @@ end
 function CCS.TBCCharacterStatsEventHandler(event, ...)
     local arg1 = ...
 
-    if CCS.GetCurrentVersion() ~= CCS.TBC then return end
+    if CCS.CurrentVersion ~= CCS.TBC then return end
     if CharacterFrame and not CharacterFrame:IsVisible() then return end
 
     if C_AddOns.IsAddOnLoaded("DejaClassicStats") == true then 

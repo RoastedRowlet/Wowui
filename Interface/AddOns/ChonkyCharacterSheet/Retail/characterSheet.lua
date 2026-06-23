@@ -1,7 +1,7 @@
 local addonName, ns = ...
 local CCS = ns.CCS
 
-if CCS.GetCurrentVersion() ~= CCS.RETAIL then
+if CCS.CurrentVersion ~= CCS.RETAIL then
     return
 end
 
@@ -15,10 +15,10 @@ local module = {
 CCS.Modules[module.Name] = module
 
 local modbg = _G["CharacterModelFramebg"] or CreateFrame("Frame", "CharacterModelFramebg", CharacterModelScene)
-modbg.retries = 0
 local modtex = _G["CharacterModelFramebgtex"] or modbg:CreateTexture("CharacterModelFramebgtex", "BACKGROUND")    
+local modtex2 = _G["CharacterModelFramebgtex2"] or modbg:CreateTexture("CharacterModelFramebgtex2", "ARTWORK")    
 local modelbtn = _G["CCS_clk_Btn"] or CreateFrame("Button", "CCS_clk_Btn", PaperDollFrame, "UIPanelButtonTemplate")
-local bg_texture = "Interface\\AddOns\\ChonkyCharacterSheet\\Media\\Textures\\bgmidnight.png"
+local modelbtnfont1 = _G["CCS_clk_Btnfs1"] or modelbtn:CreateFontString("CCS_clk_Btnfs1")
 local ccs_cshow
 local function hookfix() 
 
@@ -67,6 +67,23 @@ local function hookfix()
         CharacterFrame.PortraitContainer:Hide()
         if CharacterFrame.Background ~= nil then
             CharacterFrame.Background:Hide()
+        end
+        if PaperDollSidebarTabs ~= nil then -- Need to hack around their code.
+        
+            local point, relativeTo, relativePoint, xOfs, yOfs = PaperDollSidebarTabs:GetPoint(1)
+
+            if relativeTo and relativeTo:GetName() ~= "CharacterFrameInsetRight" then
+                print("TEST")
+                PaperDollSidebarTabs:ClearAllPoints()
+                PaperDollSidebarTab1:ClearAllPoints()        
+                PaperDollSidebarTab2:ClearAllPoints()        
+                PaperDollSidebarTab3:ClearAllPoints()        
+                PaperDollSidebarTabs:SetPoint("LEFT", CharacterFrameInsetRight, "LEFT",0,0)
+                PaperDollSidebarTabs:SetPoint("BOTTOMRIGHT", CharacterFrameInsetRight, "TOPRIGHT",0,4)                
+                PaperDollSidebarTab1:SetPoint("RIGHT", PaperDollSidebarTab2, "LEFT",-4,0)        
+                PaperDollSidebarTab2:SetPoint("RIGHT", PaperDollSidebarTab3, "LEFT",-4,0)        
+                PaperDollSidebarTab3:SetPoint("BOTTOMRIGHT", PaperDollSidebarTabs, "BOTTOMRIGHT",-67.5,0)        
+            end
         end
     end
     ccs_cshow()
@@ -133,187 +150,6 @@ local function MoveModelRight()
     _G["CharacterModelFramebg"]:SetAllPoints(CharacterModelScene)    
 end
 
-local function clamp(val, min, max)
-    if val < min then return min end
-    if val > max then return max end
-    return val
-end
-
-local function StopBGAnimation()
-    if modbg.swirl then
-        modbg.swirl:Hide()
-        modbg.swirl.swirlAnim:Stop()
-        modbg.donut:Hide()
-        modbg.donutFrame.donutAnim:Stop()
-    end
-end
-
-local function ChangeModelBg()
-    local _, _, classID = UnitClass("player")
-    local _, _, raceID = UnitRace("player")
-    local specID = GetSpecialization()
-    local entry
-
-    StopBGAnimation()
-
-    if option("bgtype") == "Hide" then
-        modtex:Hide()
-        return
-    end
-    modtex:Show()
-
-    if option("bgtype") == "Class" then
-        entry = CCS.Class_Bg[classID] and CCS.Class_Bg[classID][specID]
-        modtex:SetVertexColor(0.8, 0.8, 0.8, 1)
-    elseif option("bgtype") == "Race" then
-        if classID == 6 then raceID = 998 -- Death Knight
-        elseif classID == 12 then raceID = 999 -- Demon Hunter
-        end
-        entry = CCS.Race_Bg[raceID]
-        modtex:SetVertexColor(0.7, 0.7, 0.7, 1)
-    end
-
-    modtex:ClearAllPoints()
-    modtex:SetAllPoints()
-
-    if entry then
-        local texWidth, texHeight, uMin, uMax, vMin, vMax = unpack(entry.map)
-        local frameWidth, frameHeight = modtex:GetWidth(), modtex:GetHeight()
-
-        modtex:SetTexture(entry.texture)
-
-        if option("bgtype") == "Class" then
-            -- Class/Specialization: right-aligned
-            local visibleWidth = frameWidth / (frameHeight / texHeight)
-            local left = uMin + ((texWidth - visibleWidth) / texWidth) * (uMax - uMin)
-            left = clamp(left, uMin, uMax) -- ensure valid range
-
-            modtex:SetTexCoord(left, uMax, vMin, vMax)
-        else
-            -- Race: horizontally centered
-            local visibleWidth = frameWidth / (frameHeight / texHeight)
-            local uRange = uMax - uMin
-            local uOffset = (uRange - (visibleWidth / texWidth) * uRange) / 2
-
-            local left = clamp(uMin + uOffset, uMin, uMax)
-            local right = clamp(uMax - uOffset, uMin, uMax)
-
-            modtex:SetTexCoord(left, right, vMin, vMax)
-        end
-    else
-        if option("bgtype") ==  "Midnight"  then    
-            local texWidth, texHeight, uMin, uMax, vMin, vMax = 408,374, 0, 1, .35, 1
-            local frameWidth, frameHeight = modtex:GetWidth(), modtex:GetHeight()
-            local visibleWidth = frameWidth / (frameHeight / texHeight)
-            local uRange = uMax - uMin
-            local uOffset = (uRange - (visibleWidth / texWidth) * uRange) / 2
-            local origW, origH = 569, 520
-            local newW, newH = modbg:GetSize()
-            local scale = math.max(newH / origH, 0.1)
-            if (newW == 0 or newH == 0) and modbg.retries < 5 then
-                C_Timer.After(0, ChangeModelBg)
-                modbg.retries = modbg.retries+1
-                return
-            elseif (newW == 0 or newH == 0) then
-                scale = 1
-            end
-            modbg.retries = 0
-
-            local offsetY = 80 * scale
-            local left = clamp(uMin + uOffset, uMin, uMax)
-            local right = clamp(uMax - uOffset, uMin, uMax)
-            modtex:SetTexture("Interface\\AddOns\\ChonkyCharacterSheet\\Media\\Textures\\bgmidnight.png")
-            modtex:SetVertexColor(0.1, 0, 0.75, 0.95)            
-            modtex:SetTexCoord(left, right, vMin, vMax)    
-            if option("showbganimations") == true then
-                -- VOID SWIRL LAYER (rotating)
-                local swirl = modbg.swirl or modbg:CreateTexture(nil, "ARTWORK", nil, 1)
-                modbg.swirl = swirl
-                swirl:SetTexture("Interface\\GLUES\\Models\\UI_VoidElf\\7XP_Pandemonium_VoidFXSwirl01")
-                swirl:SetVertexColor(1, 1, 1, 1)
-                swirl:SetScale(scale * 0.85)
-                swirl:ClearAllPoints()
-                swirl:SetPoint("CENTER", modtex, "CENTER", 0, offsetY)
-                swirl:Show()
-
-                local swirlAnim = modbg.swirl.swirlAnim or swirl:CreateAnimationGroup()
-                modbg.swirl.swirlAnim = swirlAnim
-
-                local rotate = modbg.swirl.swirlAnim.rotate or swirlAnim:CreateAnimation("Rotation")
-                modbg.swirl.swirlAnim.rotate = rotate
-                rotate:SetDegrees(360)
-                rotate:SetDuration(120)
-                rotate:SetOrder(1)
-
-                swirlAnim:SetLooping("REPEAT")
-                swirlAnim:Play()
-
-                -- PULSING VOID DONUT MASK (mmm, donuts...)
-                local donutFrame = modbg.donutFrame or CreateFrame("Frame", nil, modbg)
-                modbg.donutFrame = donutFrame
-                donutFrame:ClearAllPoints()
-                donutFrame:SetPoint("CENTER", modtex, "CENTER", 0, offsetY)
-                donutFrame:SetSize(240 * scale, 350 * scale)
-                donutFrame:SetScale(1) -- important: neutral base
-                donutFrame:Show()
-
-                local donut = modbg.donut or donutFrame:CreateTexture(nil, "ARTWORK", nil, 2)
-                modbg.donut = donut
-                donut:SetAllPoints(donutFrame)
-                donut:SetTexture("Interface\\GLUES\\Models\\UI_MAINMENU_MIDNIGHT\\UI_MainMenu_Midnight_DonutMask")
-                donut:SetVertexColor(.292, .457, .902, 1)
-                donut:SetAlpha(1)
-                donut:SetBlendMode("ADD")
-                donut:Show()
-
-                local donutAnim = modbg.donutFrame.donutAnim or donutFrame:CreateAnimationGroup()
-                modbg.donutFrame.donutAnim = donutAnim
-                donutAnim:Stop() -- reset if it already existed
-
-                local alphaUp = donutAnim.alphaUp or donutAnim:CreateAnimation("Alpha")
-                donutAnim.alphaUp = alphaUp
-                alphaUp:SetFromAlpha(0.6)
-                alphaUp:SetToAlpha(1.0)
-                alphaUp:SetDuration(3)
-                alphaUp:SetSmoothing("IN_OUT")
-                alphaUp:SetOrder(1)
-
-                local alphaDown = donutAnim.alphaDown or donutAnim:CreateAnimation("Alpha")
-                donutAnim.alphaDown = alphaDown
-                alphaDown:SetFromAlpha(1.0)
-                alphaDown:SetToAlpha(0.6)
-                alphaDown:SetDuration(3)
-                alphaDown:SetSmoothing("IN_OUT")
-                alphaDown:SetOrder(2)
-
-                local scaleUp = donutAnim.scaleUp or donutAnim:CreateAnimation("Scale")
-                donutAnim.scaleUp = scaleUp
-                scaleUp:SetScale(1.05, 1.05)
-                scaleUp:SetDuration(3)
-                scaleUp:SetSmoothing("IN_OUT")
-                scaleUp:SetOrder(1)
-
-                local scaleDown = donutAnim.scaleDown or donutAnim:CreateAnimation("Scale")
-                donutAnim.scaleDown = scaleDown
-                scaleDown:SetScale(1 / 1.05, 1 / 1.05) -- back to 1.0
-                scaleDown:SetDuration(3)
-                scaleDown:SetSmoothing("IN_OUT")
-                scaleDown:SetOrder(2)
-
-                donutAnim:SetLooping("REPEAT")
-                donutAnim:Play()                
-                
-            end
-        else        
-            -- Default background
-            modtex:SetTexture("Interface\\AddOns\\ChonkyCharacterSheet\\Media\\Textures\\MOTHERtalenttree.BLP")
-            modtex:SetTexCoord(0, 0.69, 0, 0.87)
-            modtex:SetVertexColor(0.6, 0, 0.6, 0.95)
-        end
-    end
-end
-
-
 local function Clicky(endstate)
     if _G["CCSf"] then _G["CCSf"]:Hide() end
     if _G["ccs_sf"] then _G["ccs_sf"]:Hide() end
@@ -330,7 +166,7 @@ local function Clicky(endstate)
         MoveModelRight()
     end
 
-    ChangeModelBg()
+    CCS.ChangeModelBg(false)
     PlaySound(SOUNDKIT.GS_LOGIN_CHANGE_REALM_OK);
 end
 
@@ -340,7 +176,7 @@ ccs_cshow = function()
     C_Timer.NewTicker(.1, function() NarciMiniTalentTree:ClearAllPoints(); 
             NarciMiniTalentTree:SetPoint("TOPLEFT", CharacterFrameBg, "TOPRIGHT", 0, 0) end, 1)
     end
-    if option("hideshowchbtn") == true then modelbtn:Hide() else modelbtn:Show() end
+    --if option("hideshowchbtn") == true then modelbtn:Hide() else modelbtn:Show() end
 
     if C_AddOns.IsAddOnLoaded("Leatrix_Plus") then -- relocate the volume slider
             C_Timer.After(0, function()
@@ -356,7 +192,7 @@ ccs_cshow = function()
             end)
     end
 
-    ChangeModelBg()
+    CCS.ChangeModelBg(false)
     CharacterModelScene.ControlFrame:Hide()
 end
 
@@ -1169,39 +1005,6 @@ function CCS.HookSetup()
 
         --== Frame Hooks
     CreateTransmogButton()
-
-    -- This is an insane hack to get around the taint issue for Armory
-    if C_AddOns.IsAddOnLoaded("Armory") == true then
-        local EXPANDED_WIDTH  = 540  
-        local COLLAPSED_WIDTH = 384 
-        local CURRENT_STATE   = "collapsed"
-        CharacterFrame:SetWidth(EXPANDED_WIDTH)
-        if PaperDollSidebarTabs then
-        PaperDollSidebarTabs:SetParent(PaperDollFrame)
-        PaperDollSidebarTabs:ClearAllPoints()
-        PaperDollSidebarTabs:SetPoint("LEFT", CharacterHandsSlot, "RIGHT", 15, -35)
-        PaperDollSidebarTabs:SetPoint("BOTTOMRIGHT", CharacterHandsSlot, "TOPRIGHT", 280, 4)
-        end
-        
-        CharacterFrame.Expand = function()
-            if CURRENT_STATE == "expanded" then return end
-            CURRENT_STATE = "expanded"
-
-            -- show the stats/sidebar pane:
-            if CharacterStatsPane then CharacterStatsPane:Show() end
-            if PaperDollSidebarTabs then PaperDollSidebarTabs:Show() end
-
-        end
-
-        CharacterFrame.Collapse = function()
-            if CURRENT_STATE == "collapsed" then return end
-            CURRENT_STATE = "collapsed"
-
-            -- Hide the stats/sidebar pane:
-            if CharacterStatsPane then CharacterStatsPane:Hide() end
-            if PaperDollSidebarTabs then PaperDollSidebarTabs:Hide() end
-        end
-    end
     
     -- I really like this addon and want its functionality to blend well with Chonky.
     if C_AddOns.IsAddOnLoaded("ClassCodex") == true then
@@ -1241,10 +1044,6 @@ function CCS.HookSetup()
     hooksecurefunc(TokenFrame.ScrollBox, "Update", function() CurrencyFrame_Update() end)
    
     hooksecurefunc(PaperDollFrame, "Show", function() hookfix(); 
-        if C_AddOns.IsAddOnLoaded("Armory") == true then
-            CharacterFrame.Expand() 
-        end
-
         C_Timer.After(0, function() CharacterFrameTitleText:SetTextColor(
         option("fontcolor_nametitle")[1] or 1,
         option("fontcolor_nametitle")[2] or 1,
@@ -1451,7 +1250,7 @@ function CCS.HookSetup()
     hooksecurefunc(CharacterFrame, "Hide", function() 
         GameTooltip:Hide(); 
         CCS.tooltip:Hide(); 
-        StopBGAnimation();
+        CCS.StopBGAnimation(modbg);
         if _G["ccsgf_sf"] ~= nil and not InCombatLockdown() then
             _G["ccsgf_sf"]:Hide()
         end
@@ -1718,7 +1517,7 @@ function module:SetupBlizzardFrameOverrides()
     TokenFramePopup:SetFrameStrata("HIGH")
     TokenFramePopup.Border.Bg:SetColorTexture(0, 0, 0, 1)
     CurrencyTransferLog:SetFrameStrata("HIGH")
-    --TokenFrame:SetScale(scaling); 
+
     if not TokenFrame.CCS_Init and not TokenFrame:IsProtected() then
         TokenFrame:ClearAllPoints()
         TokenFrame:SetPoint("TOPLEFT", CharacterFrame, "TOPLEFT", 0, 0)
@@ -1746,8 +1545,6 @@ function module:SetupBlizzardFrameOverrides()
         CCSf:SetSize(900, 640)
         CCSf:Hide()
         
-        --CharacterFrameCloseButton:SetScale(.7)
-        
         local sf = _G["ccs_sf"] or CreateFrame("Frame", "ccs_sf", CharacterFrame);
         local sf_bg = _G["ccs_sf_bg"] or sf:CreateTexture("ccs_sf_bg", "BACKGROUND", nil, 1)        
         local sf_topbar = _G["ccs_sf_tb"] or sf:CreateTexture("ccs_sf_tb", "BACKGROUND", nil, 2)
@@ -1762,7 +1559,6 @@ function module:SetupBlizzardFrameOverrides()
     modelbtn:SetSize(23, 23)
     modelbtn:SetPoint("BOTTOMRIGHT", CharacterFrameInsetRight, "BOTTOMLEFT", -120, 5)    
     modelbtn:SetFrameStrata("HIGH")
-    local modelbtnfont1 = _G["CCS_clk_Btnfs1"] or modelbtn:CreateFontString("CCS_clk_Btnfs1")
     modelbtnfont1:SetFont(option("fontname_showchar") or CCS.fontname, (option("fontsize_showchar") or 10), CCS.textoutline)
     modelbtnfont1:SetPoint("BOTTOM", modelbtn, "TOP", -3 , 2)
     modelbtnfont1:SetText(MOUNT_JOURNAL_PLAYER)
@@ -1781,7 +1577,6 @@ function module:SetupBlizzardFrameOverrides()
                 RaidNotice_AddMessage(RaidBossEmoteFrame, format("%s", ERR_AFFECTING_COMBAT), ChatTypeInfo["SYSTEM"])
             end 
     end)
-    if option("hideshowchbtn") == true then modelbtn:Hide() else modelbtn:Show() end
     
     modbg:ClearAllPoints()
     modbg:SetPoint("TOPLEFT", CharacterHeadSlot, "TOPLEFT", 0, 0)
@@ -1822,9 +1617,6 @@ function module:UpdateStyle()
         CharacterLevelText:SetShadowOffset(option("fontshadowx") or 0, option("fontshadowy") or 0)
     end	    
 
-    if option("hideshowchbtn") == true then modelbtn:Hide() else modelbtn:Show() end
-    
-    local modelbtnfont1 = _G["CCS_clk_Btnfs1"] or modelbtn:CreateFontString("CCS_clk_Btnfs1")
     modelbtnfont1:SetFont(option("fontname_showchar") or CCS.fontname, (option("fontsize_showchar") or 10), CCS.textoutline)
     if option("showfontshadow") == true then
         modelbtnfont1:SetShadowColor(unpack(option("fontshadowcolor") or {0,0,0,1}))
@@ -1844,18 +1636,12 @@ function module:ApplyDynamicLayout()
 	if CCS.lastChangedOption == nil or CCS.lastChangedOption == "vpad" or CCS.lastChangedOption == "hpad" then
 		CharacterFrame:SetHeight(479+(7*option("vpad"))) -- Do not allow the frame to get any smaller than the default bliz frame
 		CharacterFrameInset.Bg:SetPoint("BOTTOMRIGHT", CharacterFrame, "BOTTOMLEFT", 330+option("hpad"), 30)
-
-		if C_AddOns.IsAddOnLoaded("DejaCharacterStats") then
-			CharacterFrameBg:SetPoint("BOTTOMRIGHT", CharacterFrame, "BOTTOMRIGHT",Bgoffset, 0); 
-		else
-			CharacterFrameBg:SetPoint("BOTTOMRIGHT", CharacterFrame, "BOTTOMRIGHT", Bgoffset+65, 0); --279  .449
-		end   
+		CharacterFrameBg:SetPoint("BOTTOMRIGHT", CharacterFrame, "BOTTOMRIGHT", Bgoffset+65, 0); --279  .449
 		
 		CharacterFrame.Background:SetPoint("BOTTOMRIGHT", CharacterFrame, "BOTTOMRIGHT", Bgoffset+50, 0); --275  .449
 
 		CharacterFrameCloseButton:ClearAllPoints();
 		CharacterFrameCloseButton:SetPoint("TOPRIGHT", CharacterFrameBg, "TOPRIGHT", -10, -10)
-		CharacterFrameCloseButton:SetSize(32, 32)
 		CharacterFrameCloseButton:SetSize(32, 32)
 		CharacterFrameCloseButton:SetScale(.5)
 		---------------
@@ -1908,12 +1694,14 @@ function module:ApplyDynamicLayout()
 		end
 		if ccs_sf then ccs_sf:SetScale(.69); end
 	end
+    
+    if option("hideshowchbtn") == true then modelbtn:Hide() else modelbtn:Show() end
+    
 	--------------------------------
 	-- Only process hide icon borders
 	--------------------------------
     if CCS.lastChangedOption == nil or CCS.lastChangedOption == "hideiconborders" then
         if (option("hideiconborders")) then
-            CharacterBackSlot.IconBorder:SetTexCoord(.8,.8,.8,.8,.8,.8,.8,.8)
             CharacterBackSlot.IconBorder:SetTexCoord(.8,.8,.8,.8,.8,.8,.8,.8)
             CharacterChestSlot.IconBorder:SetTexCoord(.8,.8,.8,.8,.8,.8,.8,.8)
             CharacterFeetSlot.IconBorder:SetTexCoord(.8,.8,.8,.8,.8,.8,.8,.8)
@@ -1972,7 +1760,6 @@ function module:ApplyDynamicLayout()
             CharacterWristSlotNormalTexture:Hide()
             
         else
-            CharacterBackSlot.IconBorder:SetTexCoord(1,1,1,1,1,1,1,1)
             CharacterBackSlot.IconBorder:SetTexCoord(1,1,1,1,1,1,1,1)
             CharacterChestSlot.IconBorder:SetTexCoord(1,1,1,1,1,1,1,1)
             CharacterFeetSlot.IconBorder:SetTexCoord(1,1,1,1,1,1,1,1)
@@ -2053,11 +1840,11 @@ function module:Initialize(onlyStyle)
     end
 
     ----------------------------------
-    -- Change everything over to a 3 pass initiate
-    -- One time Bliz cleanup, Layout setup, & Styles
+    -- Bliz cleanup, Layout setup, & Styles
     ----------------------------------
     if not self.BlizzardCleanup then
         self:SetupBlizzardFrameOverrides()
+        CCS.HookSetup()
         self.BlizzardCleanup = true
     end
 
@@ -2073,8 +1860,6 @@ function module:Initialize(onlyStyle)
 
     LootSpecInit()
     SpecChangeInit()
-    CCS.HookSetup()
-    
 end
 
 -- Show the Paragon Toast if a Paragon Reward Quest is accepted.
@@ -2116,7 +1901,7 @@ end
 function CCS.CharacterSheetEventHandler(event, ...)
     local arg1 = ...
 
-    if CCS.GetCurrentVersion() ~= CCS.RETAIL then return end
+    if CCS.CurrentVersion ~= CCS.RETAIL then return end
 
     if CCS.initall == true then return end
    
@@ -2161,7 +1946,7 @@ function CCS.CharacterSheetEventHandler(event, ...)
         return true
     elseif event == "CCS_EVENT_OPTIONS" then
         TryLoopItems()
-        ChangeModelBg()
+        CCS.ChangeModelBg(false)
         ReputationFrame_Update()
         CurrencyFrame_Update()
         LootSpecInit()
@@ -2184,7 +1969,7 @@ function CCS.CharacterSheetEventHandler(event, ...)
     elseif event == "PLAYER_LOOT_SPEC_UPDATED" or event == "PLAYER_SPECIALIZATION_CHANGED" then
         LootSpecInit()
         SpecChangeInit()
-        ChangeModelBg()
+        CCS.ChangeModelBg(false)
     elseif event == "QUEST_ACCEPTED" and arg1 and CCS.Paragon_Factions[arg1] and C_Reputation.GetFactionDataByID(CCS.Paragon_Factions[arg1].factionID) then
         local name = C_Reputation.GetFactionDataByID(CCS.Paragon_Factions[arg1].factionID).name
         local text = GetQuestLogCompletionText(C_QuestLog.GetLogIndexForQuestID(arg1))

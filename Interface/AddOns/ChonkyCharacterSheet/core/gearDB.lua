@@ -5,20 +5,41 @@ local addonName, ns = ...
 local L = ns.L  -- grab the localization table
 local CCS = ns.CCS
 
-if CCS.GetCurrentVersion() ~= CCS.RETAIL then
+if CCS.CurrentVersion ~= CCS.RETAIL then
     return
 end
 
 local locale = GetLocale()
 local _, _, _, tocversion = GetBuildInfo()
 local playerLevel = UnitLevel("player")
+CCS.SeasonRanges = {
+    { season = 1, expansion = 11, toc = {120000, 120009}, ilvlCap = 289 },     -- Midnight Season 1
+    { season = 2, expansion = 11, toc = {120100, 120199}, ilvlCap = 328 },     -- Midnight Season 2
+    -- Future seasons
+    -- { season = 3, expansion = 11, toc = {120200, 120299} },
+}
+
+CCS.CurrentSeasonNumber = 0
+
+for _, s in ipairs(CCS.SeasonRanges) do
+    if tocversion >= s.toc[1] and tocversion <= s.toc[2] then
+        CCS.CurrentSeasonNumber = s.season
+        CCS.expansionID = s.expansion
+        CCS.seasonCap = s.ilvlCap
+        break
+    end
+end
 
 CCS.Dungeon = CCS.Dungeon or {}
 CCS.Raid = CCS.Raid or {}
 CCS.Season = CCS.Season or {}
 CCS.MasterLoot = {}
-CCS.CurrenSeasonNumber = 1
-CCS.bisIlvl = 289
+
+-- Initialize the version data container for each xpac and season
+CCS.Data = CCS.Data or {}
+CCS.Data[11] = CCS.Data[11] or {}   -- Midnight expansion
+CCS.Data[11][1] = CCS.Data[11][1] or {}  -- Season 1
+CCS.Data[11][2] = CCS.Data[11][2] or {}  -- Season 2 (placeholder)
 
 CCS.FooterFilters = {
     slot = "ALL",
@@ -34,7 +55,7 @@ CCS.FooterFilters = {
     instance = "ALL",
     includeDungeons = true,
     includeRaids = true,
-    ilvl = 289,
+    ilvl = CCS.seasonCap,
     track = "Myth",
 }
 
@@ -647,7 +668,10 @@ CCS.Raid.MarchOnQueldanas = {
     },
 }
 
-CCS.ClassSets = {
+---------------------------------------------------
+-- Class Sets per xpac and season
+---------------------------------------------------
+CCS.Data[11][1].classSets = { -- Midnight Season 1
     [1]  = { setID = 1990, items = { {itemID=249955},{itemID=249953},{itemID=249952},{itemID=249951},{itemID=249950} } }, -- Warrior
     [2]  = { setID = 1985, items = { {itemID=249964},{itemID=249962},{itemID=249961},{itemID=249960},{itemID=249959} } }, -- Paladin
     [3]  = { setID = 1982, items = { {itemID=249991},{itemID=249989},{itemID=249988},{itemID=249987},{itemID=249986} } }, -- Hunter
@@ -663,21 +687,26 @@ CCS.ClassSets = {
     [13] = { setID = 1981, items = { {itemID=250000},{itemID=249998},{itemID=249997},{itemID=249996},{itemID=249995} } }, -- Evoker
 }
 
-function CCS:BuildClassSetLookup()
-    CCS.ClassSetLookup = {}
+CCS.Data[11][2].classSets = { -- Midnight Season 2
+    [1]  = { setID = 1990, items = { {itemID=249955},{itemID=249953},{itemID=249952},{itemID=249951},{itemID=249950} } }, -- Warrior
+    [2]  = { setID = 1985, items = { {itemID=249964},{itemID=249962},{itemID=249961},{itemID=249960},{itemID=249959} } }, -- Paladin
+    [3]  = { setID = 1982, items = { {itemID=249991},{itemID=249989},{itemID=249988},{itemID=249987},{itemID=249986} } }, -- Hunter
+    [4]  = { setID = 1987, items = { {itemID=250009},{itemID=250007},{itemID=250006},{itemID=250005},{itemID=250004} } }, -- Rogue
+    [5]  = { setID = 1986, items = { {itemID=250052},{itemID=250051},{itemID=250050},{itemID=250054},{itemID=250049} } }, -- Priest
+    [6]  = { setID = 1978, items = { {itemID=249973},{itemID=249971},{itemID=249970},{itemID=249969},{itemID=249968} } }, -- Death Knight
+    [7]  = { setID = 1988, items = { {itemID=249982},{itemID=249980},{itemID=249979},{itemID=249978},{itemID=249977} } }, -- Shaman
+    [8]  = { setID = 1983, items = { {itemID=250063},{itemID=250061},{itemID=250060},{itemID=250059},{itemID=250058} } }, -- Mage
+    [9]  = { setID = 1989, items = { {itemID=250043},{itemID=250042},{itemID=250041},{itemID=250045},{itemID=250040} } }, -- Warlock
+    [10] = { setID = 1984, items = { {itemID=250018},{itemID=250016},{itemID=250015},{itemID=250014},{itemID=250013} } }, -- Monk
+    [11] = { setID = 1980, items = { {itemID=250027},{itemID=250025},{itemID=250024},{itemID=250023},{itemID=250022} } }, -- Druid
+    [12] = { setID = 1979, items = { {itemID=250036},{itemID=250034},{itemID=250033},{itemID=250032},{itemID=250031} } }, -- Demon Hunter
+    [13] = { setID = 1981, items = { {itemID=250000},{itemID=249998},{itemID=249997},{itemID=249996},{itemID=249995} } }, -- Evoker
+}
 
-    for classID, data in pairs(CCS.ClassSets) do
-        CCS.ClassSetLookup[classID] = {}
-
-        for _, entry in ipairs(data.items) do
-            CCS.ClassSetLookup[classID][entry.itemID] = true
-        end
-    end
-end
-
-CCS:BuildClassSetLookup()
-
-CCS.Season_upgradeTracks = {
+---------------------------------------------------
+-- UpgradeTracks per xpac and season
+---------------------------------------------------
+CCS.Data[11][1].upgradeTracks = { -- Midnight Season 1
     Champion = {
         id    = CCS.Champion,
         label = L["Champion"],
@@ -701,7 +730,7 @@ CCS.Season_upgradeTracks = {
             [269] = 12796,
             [272] = 12797,
             [276] = 12798,
-            [285] = 13653, -- default to void ascended           
+            [285] = 13653,
         },
     },
 
@@ -715,14 +744,58 @@ CCS.Season_upgradeTracks = {
             [282] = 12804,
             [285] = 12805,
             [289] = 12806,
-            [298] = 13654, -- default to void ascended
+            [298] = 13654,
         },
     },
 }
 
-CCS.Season = {
-    seasonName = string.format(EXPANSION_SEASON_NAME, EXPANSION_NAME11, CCS.CurrenSeasonNumber),
-    
+CCS.Data[11][2].upgradeTracks = { -- Midnight Season 2
+    Champion = {
+        id    = CCS.Champion,
+        label = L["Champion"],
+        bonusByIlvl = {
+        [285] = 12833,
+        [289] = 12834,
+        [292] = 12835,
+        [295] = 12836,
+        [298] = 12837,
+        [302] = 12838,
+        },
+    },
+
+    Hero = {
+        id    = CCS.Hero,
+        label = L["Hero"],
+        bonusByIlvl = {
+        [298] = 12841,
+        [302] = 12842,
+        [305] = 12843,
+        [308] = 12844,
+        [311] = 12845,
+        [315] = 12846,
+        },
+    },
+
+    Myth = {
+        id    = CCS.Myth,
+        label = L["Myth"],
+        bonusByIlvl = {
+        [311] = 12849,
+        [315] = 12850,
+        [318] = 12851,
+        [321] = 12852,
+        [324] = 12853,
+        [328] = 12854,
+        },
+    },
+}
+
+---------------------------------------------------
+-- Dungeons/Raids per xpac and season
+---------------------------------------------------
+CCS.Data[11][1].season = { -- Midnight Season 1
+    seasonName = string.format(EXPANSION_SEASON_NAME, EXPANSION_NAME11, 1),
+
     dungeons = {
         [249]  = CCS.Dungeon.MagistersTerrace,
         [1315] = CCS.Dungeon.MaisaraCaverns,
@@ -740,9 +813,52 @@ CCS.Season = {
         [1308] = CCS.Raid.MarchOnQueldanas,
         [1305] = CCS.Raid.Sporefall,
     },
-    -- Class sets for Midnight Season 1
-    classSets = CCS.ClassSets,
+
+    classSets = CCS.Data[11][1].classSets,
+    upgradeTracks = CCS.Data[11][1].upgradeTracks,
 }
+
+CCS.Data[11][2].season = { -- Midnight Season 2
+    seasonName = string.format(EXPANSION_SEASON_NAME, EXPANSION_NAME11, 2),
+
+    dungeons = {
+        [249]  = CCS.Dungeon.MagistersTerrace,
+        [1315] = CCS.Dungeon.MaisaraCaverns,
+        [1316] = CCS.Dungeon.NexusPointXenas,
+        [1299] = CCS.Dungeon.WindrunnerSpire,
+        [1201] = CCS.Dungeon.AlgetharAcademy,
+        [278]  = CCS.Dungeon.PitOfSaron,
+        [945]  = CCS.Dungeon.SeatOfTheTriumvirate,
+        [476]  = CCS.Dungeon.Skyreach,
+    },
+
+    raids = {
+        [1314] = CCS.Raid.Dreamrift,
+        [1307] = CCS.Raid.Voidspire,
+        [1308] = CCS.Raid.MarchOnQueldanas,
+        [1305] = CCS.Raid.Sporefall,
+    },
+
+    classSets = CCS.Data[11][1].classSets,
+    upgradeTracks = CCS.Data[11][2].upgradeTracks,
+}
+
+function CCS:BuildClassSetLookup()
+    CCS.ClassSetLookup = {}
+
+    local classSets = CCS.Data[CCS.expansionID][CCS.CurrentSeasonNumber].classSets
+    if not classSets then return end
+
+    for classID, data in pairs(classSets) do
+        CCS.ClassSetLookup[classID] = {}
+
+        for _, entry in ipairs(data.items) do
+            CCS.ClassSetLookup[classID][entry.itemID] = true
+        end
+    end
+end
+
+CCS:BuildClassSetLookup()
 
 local function AddItemToMaster(itemID, container, boss, seasonName)
     local entry = CCS.MasterLoot[itemID] or {}
@@ -854,61 +970,72 @@ local function AddItemToMaster(itemID, container, boss, seasonName)
 end
 
 function CCS.BuildMasterLoot()
-    local season =  CCS.Season
+    -- Pull the correct season dynamically
+    local seasonData = CCS.Data[CCS.expansionID]
+        and CCS.Data[CCS.expansionID][CCS.CurrentSeasonNumber]
+        and CCS.Data[CCS.expansionID][CCS.CurrentSeasonNumber].season
 
-    if season == nil then return end -- Bail if season doesn't exist.
-    
-    local seasonName = season.seasonName
+    if not seasonData then
+        print("CCS: No season data for expansion", CCS.expansionID, "season", CCS.CurrentSeasonNumber)
+        return
+    end
 
-        -- Dungeons
-        for ejID, dungeon in pairs(season.dungeons) do
-            dungeon.type = "dungeon"
-            for _, boss in ipairs(dungeon.bosses) do
-                for _, item in ipairs(boss.loot) do
-                    AddItemToMaster(item.itemID, dungeon, boss, seasonName)
-                end
+    local seasonName = seasonData.seasonName
+
+    ---------------------------------------------------------
+    -- Dungeons
+    ---------------------------------------------------------
+    for ejID, dungeon in pairs(seasonData.dungeons or {}) do
+        dungeon.type = "dungeon"
+
+        for _, boss in ipairs(dungeon.bosses or {}) do
+            for _, item in ipairs(boss.loot or {}) do
+                AddItemToMaster(item.itemID, dungeon, boss, seasonName)
             end
         end
+    end
 
-        ---------------------------------------------------------
-        -- Raids (skip ones not yet in EJ so we can pre-load stuff from the PTR)
-        ---------------------------------------------------------
-        for ejID, raid in pairs(season.raids) do
-            -- Skip future raids
-            if not EJ_GetInstanceInfo(ejID) then
-                -- print("Skipping raid", ejID, "(EJ data not available yet)")
-            else
-                raid.type = "raid"
+    ---------------------------------------------------------
+    -- Raids
+    ---------------------------------------------------------
+    for ejID, raid in pairs(seasonData.raids or {}) do
+        if EJ_GetInstanceInfo(ejID) then
+            raid.type = "raid"
 
-                for _, boss in ipairs(raid.bosses) do
-                    -- Skip bosses not yet in EJ
-                    if EJ_GetEncounterInfo(boss.id) then
-                        for _, item in ipairs(boss.loot) do
-                            AddItemToMaster(item.itemID, raid, boss, seasonName)
-                        end
+            for _, boss in ipairs(raid.bosses or {}) do
+                if EJ_GetEncounterInfo(boss.id) then
+                    for _, item in ipairs(boss.loot or {}) do
+                        AddItemToMaster(item.itemID, raid, boss, seasonName)
                     end
                 end
             end
         end
+    end
 
-        -- Class Sets
-        if season.classSets then
-            for classID, classSet in pairs(season.classSets) do
-                if classSet.items then
-                    classSet.type = "classset"
-                    classSet.ejID = classID       -- used for uniqueness
-                    classSet.classID = classID    -- ⭐ store class ID explicitly
-                    classSet.instanceName = "Class Sets"
+    ---------------------------------------------------------
+    -- Class Sets
+    ---------------------------------------------------------
+    local classSets = seasonData.classSets
+    if classSets then
+        for classID, classSet in pairs(classSets) do
+            if classSet.items then
+                classSet.type = "classset"
+                classSet.ejID = classID
+                classSet.classID = classID
+                classSet.instanceName = "Class Sets"
 
-                    local classInfo = { id = 0, name = select(1, GetClassInfo(classID)) or " "}
+                local classInfo = {
+                    id = 0,
+                    name = select(1, GetClassInfo(classID)) or " "
+                }
 
-                    for _, entry in ipairs(classSet.items) do
-                        AddItemToMaster(entry.itemID, classSet, classInfo, seasonName)
-                    end
+                for _, entry in ipairs(classSet.items) do
+                    AddItemToMaster(entry.itemID, classSet, classInfo, seasonName)
                 end
             end
         end
-        
+    end
 end
-
+-- This is just for an easier lookup.
+CCS.Season = CCS.Data[CCS.expansionID][CCS.CurrentSeasonNumber].season
 CCS.BuildMasterLoot()

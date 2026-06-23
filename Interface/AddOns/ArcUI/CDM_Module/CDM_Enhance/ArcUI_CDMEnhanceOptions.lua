@@ -1419,6 +1419,7 @@ local function HideCooldownRangeIndicator()
   if HideIfNoCooldownSelection() then return true end
   if IsEditingMixedTypes() then return true end
   if IsCurrentCooldownSelectionAllTotem() then return true end  -- totems have no spell range
+  if IsCurrentCooldownSelectionAllCustomTimer() then return true end  -- timers are duration displays, not castable spells
   return collapsedSections.rangeIndicator
 end
 
@@ -1426,6 +1427,7 @@ local function HideCooldownProcGlow()
   if HideIfNoCooldownSelection() then return true end
   if IsEditingMixedTypes() then return true end
   if IsCurrentCooldownSelectionAllTotem() then return true end  -- totems don't proc
+  if IsCurrentCooldownSelectionAllCustomTimer() then return true end  -- timers: proc glow not used
   return collapsedSections.procGlow
 end
 
@@ -1445,6 +1447,8 @@ end
 
 local function HideCooldownAuraActiveState()
   if IsCurrentCooldownSelectionAllTotem() then return true end  -- totems aren't auras
+  if IsCurrentCooldownSelectionAllCustomTimer() then return true end  -- timers don't use the CDM aura-active path
+
   -- Show for both cooldown AND aura icon selections - aura active glow applies to both
   local hasAura = next(selectedAuraIcons) ~= nil or selectedAuraIcon ~= nil
   local hasCooldown = not HideIfNoCooldownSelection()
@@ -1841,6 +1845,7 @@ ns.OptionsHelpers = {
   HideIfNoCooldownSelection = HideIfNoCooldownSelection,
   IsEditingMixedTypes     = IsEditingMixedTypes,
   IsCurrentCooldownSelectionAllTotem = IsCurrentCooldownSelectionAllTotem,
+  IsCurrentCooldownSelectionAllCustomTimer = IsCurrentCooldownSelectionAllCustomTimer,
   GetAuraHeaderName       = GetAuraHeaderName,
   GetCooldownHeaderName   = GetCooldownHeaderName,
   ResetAuraSectionSettings   = ResetAuraSectionSettings,
@@ -6726,14 +6731,27 @@ function ns.GetCDMCooldownIconsOptionsTable()
     },
     readyStateDesc = {
       type = "description",
-      name = "|cff888888Configure how the icon appears when the ability is READY to use.|r",
+      name = function()
+        if IsCurrentCooldownSelectionAllCustomTimer() or IsCurrentCooldownSelectionAllTotem() then
+          return "|cff888888Configure how the icon appears while it is ACTIVE (timer running / totem up).|r"
+        end
+        return "|cff888888Configure how the icon appears when the ability is READY to use.|r"
+      end,
       order = 107.82, width = "full",
       hidden = function() return HideIfNoCooldownSelection() or collapsedSections.readyState end,
     },
     readyStateAlpha = {
       type = "range",
-      name = "Ready Alpha",
-      desc = "Icon opacity when the ability is ready (0 = hidden, 1 = fully visible)",
+      name = function()
+        return (IsCurrentCooldownSelectionAllCustomTimer() or IsCurrentCooldownSelectionAllTotem())
+               and "Active Alpha" or "Ready Alpha"
+      end,
+      desc = function()
+        if IsCurrentCooldownSelectionAllCustomTimer() or IsCurrentCooldownSelectionAllTotem() then
+          return "Icon opacity while ACTIVE (timer running / totem up). 0 = hidden, 1 = fully visible."
+        end
+        return "Icon opacity when the ability is ready (0 = hidden, 1 = fully visible)"
+      end,
       min = 0, max = 1.0, step = 0.05,
       get = function()
         local c = GetCooldownCfg()
@@ -6784,6 +6802,40 @@ function ns.GetCDMCooldownIconsOptionsTable()
       hidden = function()
         if HideIfNoCooldownSelection() or collapsedSections.readyState then return true end
         return not (IsCurrentCooldownSelectionAllCustomTimer() or IsCurrentCooldownSelectionAllTotem())
+      end,
+    },
+    readyStatePreserveDurationText = {
+      type = "toggle",
+      name = "Preserve Duration Text",
+      desc = "Keep the duration / stack text at full opacity even when the Active alpha is reduced. Useful for reading the countdown on a dimmed running timer.",
+      get = function()
+        return GetCooldownBoolSetting(
+          function(c) return c and c.cooldownStateVisuals and c.cooldownStateVisuals.readyState and c.cooldownStateVisuals.readyState.preserveDurationText end,
+          function()
+            local c = GetCooldownCfg()
+            if c and c.cooldownStateVisuals and c.cooldownStateVisuals.readyState then
+              return c.cooldownStateVisuals.readyState.preserveDurationText or false
+            end
+            return false
+          end
+        )
+      end,
+      set = function(_, v)
+        ApplyCooldownSetting(function(c)
+          if not c.cooldownStateVisuals then c.cooldownStateVisuals = {} end
+          if not c.cooldownStateVisuals.readyState then c.cooldownStateVisuals.readyState = {} end
+          c.cooldownStateVisuals.readyState.preserveDurationText = v
+        end)
+        if ns.CDMEnhance and ns.CDMEnhance.RefreshIconType then
+          ns.CDMEnhance.RefreshIconType("cooldown")
+        end
+      end,
+      order = 107.8306, width = 1.2,
+      -- The readyState bucket is the ACTIVE state only for timers/totems, so this
+      -- only makes sense there (normal cooldowns use the Not-Active preserve toggle).
+      hidden = function()
+        if not (IsCurrentCooldownSelectionAllCustomTimer() or IsCurrentCooldownSelectionAllTotem()) then return true end
+        return HideIfNoCooldownSelection() or collapsedSections.readyState
       end,
     },
     readyStateProcOverride = {
@@ -6886,7 +6938,13 @@ function ns.GetCDMCooldownIconsOptionsTable()
         end
       end,
       order = 107.833, width = 0.6,
-      hidden = function() return HideIfNoCooldownSelection() or collapsedSections.readyState end,
+      hidden = function()
+        -- Timers/totems use the positive "Desaturate" toggle (readyState.desaturate)
+        -- above; this usability-driven one is dead for them (engine ignores it),
+        -- so hide it to avoid two identical "Desaturate" toggles.
+        if IsCurrentCooldownSelectionAllCustomTimer() or IsCurrentCooldownSelectionAllTotem() then return true end
+        return HideIfNoCooldownSelection() or collapsedSections.readyState
+      end,
     },
     readyStateGlow = {
       type = "toggle",
@@ -7000,6 +7058,8 @@ function ns.GetCDMCooldownIconsOptionsTable()
       end,
       order = 107.8406, width = 1.2,
       hidden = function()
+        -- Timers/totems are never charge spells — this charge-only control does nothing for them.
+        if IsCurrentCooldownSelectionAllCustomTimer() or IsCurrentCooldownSelectionAllTotem() then return true end
         if HideIfNoCooldownSelection() or collapsedSections.readyState then return true end
         local c = GetCooldownCfg()
         return not (c and c.cooldownStateVisuals and c.cooldownStateVisuals.readyState and c.cooldownStateVisuals.readyState.glow)
@@ -7380,14 +7440,27 @@ function ns.GetCDMCooldownIconsOptionsTable()
     },
     cooldownStateDesc = {
       type = "description",
-      name = "|cff888888Configure how the icon appears when on cooldown. GCD is ignored (GCD-only shows as ready).|r",
+      name = function()
+        if IsCurrentCooldownSelectionAllCustomTimer() or IsCurrentCooldownSelectionAllTotem() then
+          return "|cff888888Configure how the icon appears while it is NOT ACTIVE (timer idle / totem slot empty).|r"
+        end
+        return "|cff888888Configure how the icon appears when on cooldown. GCD is ignored (GCD-only shows as ready).|r"
+      end,
       order = 107.92, width = "full",
       hidden = function() return HideIfNoCooldownSelection() or collapsedSections.cooldownState end,
     },
     cooldownStateAlpha = {
       type = "range",
-      name = "Cooldown Alpha",
-      desc = "Icon opacity when on cooldown (0 = hidden, 1 = fully visible)",
+      name = function()
+        return (IsCurrentCooldownSelectionAllCustomTimer() or IsCurrentCooldownSelectionAllTotem())
+               and "Inactive Alpha" or "Cooldown Alpha"
+      end,
+      desc = function()
+        if IsCurrentCooldownSelectionAllCustomTimer() or IsCurrentCooldownSelectionAllTotem() then
+          return "Icon opacity while NOT ACTIVE (timer idle / totem slot empty). 0 = hidden, 1 = fully visible."
+        end
+        return "Icon opacity when on cooldown (0 = hidden, 1 = fully visible)"
+      end,
       min = 0, max = 1.0, step = 0.05,
       get = function()
         local c = GetCooldownCfg()
@@ -7584,7 +7657,11 @@ function ns.GetCDMCooldownIconsOptionsTable()
         end
       end,
       order = 107.946, width = 1.2,
-      hidden = function() return HideIfNoCooldownSelection() or collapsedSections.cooldownState end,
+      hidden = function()
+        -- Timers/totems are never charge spells — this charge-only control does nothing for them.
+        if IsCurrentCooldownSelectionAllCustomTimer() or IsCurrentCooldownSelectionAllTotem() then return true end
+        return HideIfNoCooldownSelection() or collapsedSections.cooldownState
+      end,
     },
     cooldownStateDimWhenEmpty = {
       type = "toggle",
@@ -7698,6 +7775,7 @@ function ns.GetCDMCooldownIconsOptionsTable()
       width = "full",
       hidden = function()
         if IsCurrentCooldownSelectionAllTotem() then return true end  -- totems aren't auras
+        if IsCurrentCooldownSelectionAllCustomTimer() then return true end  -- timers don't use the CDM aura-active path
         return HideIfNoCooldownSelection()
       end,
     },
@@ -8328,6 +8406,7 @@ function ns.GetCDMCooldownIconsOptionsTable()
         if HideIfNoCooldownSelection() then return true end
         if IsEditingMixedTypes() then return true end
         if IsCurrentCooldownSelectionAllTotem() then return true end  -- totems have no range
+        if IsCurrentCooldownSelectionAllCustomTimer() then return true end  -- timers don't use range
         return false
       end,
     },
@@ -8364,6 +8443,7 @@ function ns.GetCDMCooldownIconsOptionsTable()
         if HideIfNoCooldownSelection() then return true end
         if IsEditingMixedTypes() then return true end
         if IsCurrentCooldownSelectionAllTotem() then return true end  -- totems don't proc
+        if IsCurrentCooldownSelectionAllCustomTimer() then return true end  -- timers: proc glow not used
         return false
       end,
     },
@@ -9174,14 +9254,14 @@ function ns.GetCDMCooldownIconsOptionsTable()
       desc = "For charge spells: Only show swipe when ALL charges are consumed. On CDM frames this hides the full cooldown animation during recharge.",
       get = function() return GetCooldownBoolSetting(function(c) return c and c.cooldownSwipe and c.cooldownSwipe.swipeWaitForNoCharges end, function() local c = GetCooldownCfg(); return c and c.cooldownSwipe and c.cooldownSwipe.swipeWaitForNoCharges or false end) end,
       set = function(_, v) ApplySharedCooldownSetting(function(c) if not c.cooldownSwipe then c.cooldownSwipe = {} end; c.cooldownSwipe.swipeWaitForNoCharges = v end) end,
-      order = 120.4, width = 0.55, hidden = HideCooldownCooldownSwipe, disabled = DisableCooldownCooldownSwipe,
+      order = 120.4, width = 0.55, hidden = function() if IsCurrentCooldownSelectionAllCustomTimer() or IsCurrentCooldownSelectionAllTotem() then return true end return HideCooldownCooldownSwipe() end, disabled = DisableCooldownCooldownSwipe,
     },
     edgeWaitForNoCharges = {
       type = "toggle", name = "Edge Wait",
       desc = "For charge spells: Only show edge when ALL charges are consumed. Only affects custom cooldown frames (Arc Auras).",
       get = function() return GetCooldownBoolSetting(function(c) return c and c.cooldownSwipe and c.cooldownSwipe.edgeWaitForNoCharges end, function() local c = GetCooldownCfg(); return c and c.cooldownSwipe and c.cooldownSwipe.edgeWaitForNoCharges or false end) end,
       set = function(_, v) ApplySharedCooldownSetting(function(c) if not c.cooldownSwipe then c.cooldownSwipe = {} end; c.cooldownSwipe.edgeWaitForNoCharges = v end) end,
-      order = 120.5, width = 0.55, hidden = HideCooldownCooldownSwipe, disabled = DisableCooldownCooldownSwipe,
+      order = 120.5, width = 0.55, hidden = function() if IsCurrentCooldownSelectionAllCustomTimer() or IsCurrentCooldownSelectionAllTotem() then return true end return HideCooldownCooldownSwipe() end, disabled = DisableCooldownCooldownSwipe,
     },
     
     -- ═══════════════════════════════════════════════════════════════════

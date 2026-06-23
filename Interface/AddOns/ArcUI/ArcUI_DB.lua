@@ -8,6 +8,18 @@
 local ADDON, ns = ...
 ns.API = ns.API or {}  -- Initialize API table
 
+-- 12.1-forward compat: the global SetDesaturation(region, bool) helper was REMOVED in
+-- 12.1 (the texture methods SetDesaturated/SetDesaturation still exist). AceGUI's
+-- CheckBox (and other libs) call the global -> "attempt to call a nil value" when the
+-- options panel opens. Polyfill it once. Inert on 12.0.7 where the global still exists.
+if not SetDesaturation then
+  function SetDesaturation(region, desaturation)
+    if region and region.SetDesaturated then
+      region:SetDesaturated(desaturation)
+    end
+  end
+end
+
 -- ===================================================================
 -- DEFAULT THRESHOLD PRESETS
 -- ===================================================================
@@ -393,6 +405,22 @@ ns.DB_DEFAULTS = {
           -- Frame strata settings
           barFrameStrata = "MEDIUM",
           barFrameLevel = 10,
+          -- Text color thresholds (resource bars only; all off by default)
+          textColorThresholdEnabled = false,
+          textColorThresholdFill = false,
+          textColorThresholdBaseColor = {r=1, g=1, b=1, a=1},
+          textColorThresholdT1Enabled = false,
+          textColorThresholdT1Value = 15,
+          textColorThresholdT1Color = {r=1, g=0.6, b=0.8, a=1},
+          textColorThresholdT2Enabled = false,
+          textColorThresholdT2Value = 30,
+          textColorThresholdT2Color = {r=0.5, g=1, b=0.5, a=1},
+          textColorThresholdT3Enabled = false,
+          textColorThresholdT3Value = 90,
+          textColorThresholdT3Color = {r=1, g=0.3, b=0.3, a=1},
+          textColorThresholdT4Enabled = false,
+          textColorThresholdT4Value = 100,
+          textColorThresholdT4Color = {r=1, g=1, b=0.3, a=1},
         },
         behavior = {
           hideOutOfCombat = false,
@@ -553,6 +581,117 @@ ns.DB_DEFAULTS = {
       }
     },
     
+    -- ===============================================================
+    -- CASTBAR
+    -- Multi-instance player castbars (resource-bar style). ["*"] gives every index full
+    -- defaults; instance 1 is the default bar. castType filters which casts an instance shows.
+    -- ===============================================================
+    castbars = {
+      ["*"] = {
+      enabled = false,
+      castType = "all",   -- "all" | "hardcast" | "channel" | "empower"
+      width = 250,
+      height = 20,
+      barColor = {r=0.2, g=0.8, b=1, a=1},  -- base/fallback; per-type colors live in profiles
+      -- Conditional (threshold) coloring: bar color changes as the cast nears completion,
+      -- based on how much is REMAINING (percent by default, or seconds when AsSec).
+      conditionalColorEnabled = false,
+      conditionalColorAsSec = false,
+      colorThresholds = {},  -- array of { enabled, percent (= remaining value), color }
+      texture = "Blizzard",
+      opacity = 1.0,
+      showBackground = true,
+      backgroundColor = {r=0.1, g=0.1, b=0.1, a=0.9},
+      showBorder = true,
+      borderColor = {r=0, g=0, b=0, a=1},
+      drawnBorderThickness = 2,
+      showIcon = true,
+      iconSize = 20,
+      showText = true,
+      showTimer = true,
+      timerFormat = "remaining",  -- "remaining" | "elapsed" | "both" (elapsed/total)
+      font = "2002 Bold",
+      fontSize = 14,
+      textColor = {r=1, g=1, b=1, a=1},
+      textOutline = "THICKOUTLINE",
+      barMovable = true,
+      barPosition = {point="CENTER", relPoint="CENTER", x=0, y=0},
+      barFrameStrata = "MEDIUM",
+      barFrameLevel = 10,
+      hideOutOfCombat = false,
+      hideChannels = false,
+      empowerSegmentColorsEnabled = false,
+      empowerStageDividers = true,   -- dividers at each empowered stage boundary
+      empowerDividerPerColor = false, -- color each stage divider with its stage's segment color
+      empowerMaxStages = 4,
+      empowerSegmentColors = {
+        [1] = {r=0.6, g=0.2, b=1.0, a=1},
+        [2] = {r=0.9, g=0.1, b=0.6, a=1},
+        [3] = {r=1.0, g=0.3, b=0.1, a=1},
+        [4] = {r=1.0, g=0.7, b=0.1, a=1},
+        [5] = {r=0.1, g=0.9, b=0.3, a=1},
+        [6] = {r=0.1, g=0.7, b=1.0, a=1},
+        [7] = {r=1.0, g=1.0, b=0.2, a=1},
+        [8] = {r=0.8, g=0.8, b=0.8, a=1},
+      },
+      -- Uninterruptible cast styling
+      uninterruptibleEnabled = false,
+      uninterruptibleColor = {r=0.5, g=0.5, b=0.5, a=1},
+      uninterruptibleBorderColor = {r=0.3, g=0.3, b=0.5, a=1},
+      -- Channel tick marks (aura-bar style: Per % interval or Custom positions)
+      tickMarksEnabled = false,
+      tickShowOn = "channels",         -- "channels" | "all" (empowered always uses stage segments)
+      tickMode = "percent",            -- "percent" | "custom"
+      tickPercent = 10,                -- Per % mode: a divider every N%
+      tickCustom = "",                 -- Custom mode: comma-separated %s, e.g. "20, 40, 55"
+      tickMarksColor = {r=1, g=1, b=1, a=0.6},
+      tickMarksThickness = 2,
+      tickMarksHeightFraction = 1.0,
+      tickHeightAnchor = "center",     -- center | top | bottom
+      tickThicknessAnchor = "center",  -- center | start | end
+      -- Per-spell appearance overrides: array of {spellID, barColorEnabled, barColor, textureOverrideEnabled, texture, tickCount}
+      spellOverrides = {},
+      -- Anchor to CDM group
+      anchorToGroup = false,
+      anchorGroupName = "",
+      anchorPoint = "BOTTOM",
+      anchorOffsetX = 0,
+      anchorOffsetY = -2,
+      matchGroupWidth = false,
+      matchSlotsOnly = false,
+      matchWidthAdjust = 0,
+      -- Reverse fill direction: channels fill instead of drain; casts drain instead of fill
+      reverseFill = false,
+      -- Latency "safe zone" overlay at the finishing edge (auto = world latency, or manual ms)
+      latencyEnabled = false,
+      latencyManual = false,
+      latencyManualMs = 100,
+      latencyColor = {r=1, g=0, b=0, a=0.4},
+      -- Interrupt / cancel feedback: flash the bar red with a label, then fade out
+      interruptFeedbackEnabled = false,
+      interruptColor = {r=1, g=0.15, b=0.15, a=1},
+      interruptFadeDuration = 1.0,
+      -- Hide the default Blizzard castbar (PlayerCastingBarFrame)
+      hideCastBar = false,
+      -- Spell name shortening (display only; off by default)
+      spellShortenEnabled = false,
+      spellShortenLength = 20,
+      -- Movable spell icon (off = default left-of-bar position)
+      iconMovable = false,
+      iconPosition = nil,
+      -- Cast-type appearance profiles + Auto Share. Checked category = shared across all
+      -- cast types; unchecked = customised per type. All categories default OFF (per-type),
+      -- so each cast type has its own colors/border/text/etc. out of the box.
+      autoShareCategories = {},
+      profiles = {
+        hardcast = { barColor = {r=0.2, g=0.8, b=1,   a=1} },
+        channel  = { barColor = {r=0.2, g=1,   b=0.4, a=1} },
+        empower  = { barColor = {r=0.6, g=0.2, b=1,   a=1} },
+      },
+      presets = {},
+      },  -- end ["*"] per-instance template
+    },
+
     -- LEGACY: CDM Enhancement settings were moved to profile storage
     -- This stub exists only for migration purposes (CDMEnhance.lua migrates to profile)
     -- DO NOT add new fields here - use profile.cdmEnhance instead
@@ -577,6 +716,18 @@ ns.DB_DEFAULTS = {
 
 -- Store presets for easy access
 ns.ThresholdPresets = DEFAULT_THRESHOLDS
+
+-- ===================================================================
+-- ACCOUNT-WIDE SHARED CASTBAR (opt-in, default OFF)
+-- When ns.db.global.castbarShared is true, the castbar accessors (ns.API.GetCastbarStore)
+-- return global.castbars instead of the per-character char.castbars, so ONE castbar config
+-- applies to every character. global.castbars is its OWN deep copy of the per-instance
+-- template, so it never aliases the per-character store and the two stay independent.
+-- ===================================================================
+ns.DB_DEFAULTS.global.castbarShared        = false
+ns.DB_DEFAULTS.global.castbarShareLocation = false  -- when sharing, keep the bar POSITION per-character unless opted in
+ns.DB_DEFAULTS.global.castbarSharedInit    = false
+ns.DB_DEFAULTS.global.castbars             = { ["*"] = CopyTable(ns.DB_DEFAULTS.char.castbars["*"]) }
 
 -- ===================================================================
 -- HELPER: Get Bar Config (Buff/Debuff bars)

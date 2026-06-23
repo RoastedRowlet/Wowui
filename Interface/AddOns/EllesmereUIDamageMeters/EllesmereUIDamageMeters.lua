@@ -205,6 +205,7 @@ local DM_DEFAULTS = {
             rightTextColor  = { r = 1, g = 1, b = 1 },
             bgR = 0, bgG = 0, bgB = 0, bgAlpha = 0.75,
             barBgR = 0, barBgG = 0, barBgB = 0, barBgAlpha = 0,
+            barBgUseClassColor = false,
             standaloneTimer       = false,
             standaloneTimerSize   = 26,
             standaloneTimerUseAccent = false,
@@ -480,6 +481,10 @@ instanceFrame:SetScript("OnEvent", function(_, event)
                 w.curSession = Enum.DamageMeterSessionType.Current
                 wdb2.curSession = Enum.DamageMeterSessionType.Current
                 w.curSessionID = nil
+            end
+            -- Default on M+ Start: switch this window to its configured meter type
+            if wdb2.mythicStartDMType and w.SetDMType then
+                w.SetDMType(wdb2.mythicStartDMType)
             end
             w.Refresh()
         end
@@ -845,6 +850,31 @@ local function FormatTimer(seconds)
     return format("%d:%02d", math.floor(seconds / 60), math.floor(seconds % 60))
 end
 
+local function GetBreakdownDuration(session, sessionID)
+    if sessionID then
+        if C_DamageMeter and C_DamageMeter.GetAvailableCombatSessions then
+            local sess = C_DamageMeter.GetAvailableCombatSessions()
+            if sess then
+                for _, s in ipairs(sess) do
+                    if s.sessionID == sessionID and type(s.durationSeconds) == "number" and not (issecretvalue and issecretvalue(s.durationSeconds)) then
+                        return s.durationSeconds
+                    end
+                end
+            end
+        end
+    elseif session == Enum.DamageMeterSessionType.Current then
+        return GetCurrentViewDuration()
+    elseif C_DamageMeter and C_DamageMeter.GetSessionDurationSeconds then
+        local d = C_DamageMeter.GetSessionDurationSeconds(session)
+        if type(d) == "number" and not (issecretvalue and issecretvalue(d)) then return d end
+    end
+end
+
+local function AmountPerSecond(total, duration)
+    if type(total) ~= "number" or not duration or duration <= 0 then return nil end
+    return total / duration
+end
+
 -------------------------------------------------------------------------------
 --  Class icon sprite system
 -------------------------------------------------------------------------------
@@ -932,9 +962,9 @@ end
 
 -------------------------------------------------------------------------------
 --  Enemy Damage Taken: aggregate combatSpellDetails into per-player totals
---  Returns sorted array of { name, class, specIcon, total } or nil on failure.
+--  Returns sorted array of { name, class, specIcon, total, amountPerSecond } or nil on failure.
 -------------------------------------------------------------------------------
-local function AggregateEnemyPlayers(srcData)
+local function AggregateEnemyPlayers(srcData, duration)
     if not srcData or not srcData.combatSpells or #srcData.combatSpells == 0 then return nil end
     local byName = {}
     local list = {}
@@ -956,6 +986,9 @@ local function AggregateEnemyPlayers(srcData)
         end
     end
     if #list == 0 then return nil end
+    for _, p in ipairs(list) do
+        p.amountPerSecond = AmountPerSecond(p.total, duration)
+    end
     table.sort(list, function(a, b) return a.total > b.total end)
     return list
 end
@@ -1024,11 +1057,12 @@ local function BuildAllPlayerTargets(session, sessionID)
     end
 
     -- Convert each player's enemy map to a sorted array
+    local duration = GetBreakdownDuration(session, sessionID)
     local map = {}
     for pName, enemies in pairs(byPlayer) do
         local list = {}
         for eKey, total in pairs(enemies) do
-            list[#list + 1] = { name = enemyNames[eKey], total = total }
+            list[#list + 1] = { name = enemyNames[eKey], total = total, amountPerSecond = AmountPerSecond(total, duration) }
         end
         table.sort(list, function(a, b) return a.total > b.total end)
         map[pName] = list
@@ -1267,7 +1301,7 @@ local function PopulatePreview(bar, curSession, curSessionID, curDMType)
         elseif C_DamageMeter.GetCombatSessionSourceFromType then
             srcData = C_DamageMeter.GetCombatSessionSourceFromType(curSession, curDMType, guid, cid)
         end
-        local players = AggregateEnemyPlayers(srcData)
+        local players = AggregateEnemyPlayers(srcData, GetBreakdownDuration(curSession, curSessionID))
         if not players then return false end
 
         ApplyTTHeader(StripRealm(bar._src.name) or "Unknown", "Damage Taken")
@@ -1275,6 +1309,7 @@ local function PopulatePreview(bar, curSession, curSessionID, curDMType)
         local maxAmt = players[1].total
         local ttMax = TT_MAX()
         local count = math.min(ttMax, #players)
+        local numFmt = DB().numberFormat or 2
         for i = 1, math.max(ttMax, #_ttBars) do
             local b = EnsureTTBar(i)
             if i <= count then
@@ -1298,12 +1333,12 @@ local function PopulatePreview(bar, curSession, curSessionID, curDMType)
                     b.fill:ClearAllPoints(); b.fill:SetAllPoints(b.row)
                 end
                 ApplyBarTexture(b.fill, texPath, texKey); b.fill:SetMinMaxValues(0, maxAmt); b.fill:SetValue(p.total)
-                local cc = p.class and RAID_CLASS_COLORS[p.class]
+                local cc = p.class and RAID_CLASS_COLORS[p.class] and EUI.GetClassColor(p.class)
                 if cc then b.fill:SetStatusBarColor(cc.r, cc.g, cc.b)
                 else b.fill:SetStatusBarColor(0x33/255, 0x33/255, 0x33/255) end
                 b.label:SetTextColor(1, 1, 1); b.amount:SetTextColor(1, 1, 1)
                 b.label:SetText(StripRealm(p.name))
-                b.amount:SetText(AbbrevNumber(p.total))
+                b.amount:SetText(FormatBarValue(p.total, p.amountPerSecond, numFmt))
                 b.row:Show()
             else b.row:Hide() end
         end
@@ -1428,7 +1463,7 @@ local function PopulatePreview(bar, curSession, curSessionID, curDMType)
                     tb.fill:SetStatusBarColor(0xDD/255, 0x31/255, 0x31/255)
                     tb.label:SetTextColor(1, 1, 1); tb.amount:SetTextColor(1, 1, 1)
                     tb.label:SetText(t.name)
-                    tb.amount:SetText(AbbrevNumber(t.total))
+                    tb.amount:SetText(FormatBarValue(t.total, t.amountPerSecond, DB().numberFormat or 2))
                     tb.row:Show()
                     ttTargetCount = ttTargetCount + 1
                 else tb.row:Hide() end
@@ -1638,6 +1673,7 @@ local function LayoutMenu(menu, items, onDismiss, isChild)
                 row:SetScript("OnEnter", function(self)
                     self._hl:SetColorTexture(1, 1, 1, hlAlpha)
                     if EG then self._lbl:SetTextColor(EG.r, EG.g, EG.b, 1) end
+                    if itemRef.tooltip and EUI.ShowWidgetTooltip then EUI.ShowWidgetTooltip(self, itemRef.tooltip) end
                     if itemRef.children then
                         if not _edmSub then _edmSub = MakeMenuPanel(1) end
                         LayoutMenu(_edmSub, itemRef.children, onDismiss, true)
@@ -1650,6 +1686,7 @@ local function LayoutMenu(menu, items, onDismiss, isChild)
                     elseif not isChild and _edmSub then _edmSub:Hide() end
                 end)
                 row:SetScript("OnLeave", function(self)
+                    if EUI.HideWidgetTooltip then EUI.HideWidgetTooltip() end
                     self._hl:SetColorTexture(1, 1, 1, active and hlAlpha or 0)
                     if active and EG then self._lbl:SetTextColor(EG.r, EG.g, EG.b, 1) else self._lbl:SetTextColor(1, 1, 1, 1) end
                     if isChild then return end
@@ -1686,6 +1723,7 @@ local function ShowEDMMenu(items, anchorBtn)
         _edmMenu:HookScript("OnHide", function()
             if _edmSub then _edmSub:Hide() end
             _edmMenuAnchor = nil
+            if EUI.HideWidgetTooltip then EUI.HideWidgetTooltip() end
         end)
     end
 
@@ -1783,7 +1821,20 @@ local function CreateDMWindow(winIdx)
         bar._bg:SetAllPoints(bar.row)
         function bar.ApplyBg()
             local c = DB()
-            bar._bg:SetColorTexture(c.barBgR or 0, c.barBgG or 0, c.barBgB or 0, c.barBgAlpha or 0)
+            local a = c.barBgAlpha or 0
+            -- Class-colored track when enabled: tint the per-bar background with
+            -- this bar's player class color (x the bg alpha), else the custom bg
+            -- color. classFile can be a secret value, so guard before indexing
+            -- (RAID_CLASS_COLORS[secret] throws); EUI.GetClassColor honors global
+            -- custom class color overrides. Mirrors the fill/text class coloring.
+            if c.barBgUseClassColor then
+                local cf = bar._class
+                if cf and (not issecretvalue or not issecretvalue(cf)) and RAID_CLASS_COLORS[cf] then
+                    local cc = EUI.GetClassColor(cf)
+                    if cc then bar._bg:SetColorTexture(cc.r, cc.g, cc.b, a); return end
+                end
+            end
+            bar._bg:SetColorTexture(c.barBgR or 0, c.barBgG or 0, c.barBgB or 0, a)
         end
         bar.ApplyBg()
         local tf = CreateFrame("Frame", nil, bar.fill)
@@ -2007,6 +2058,25 @@ local function CreateDMWindow(winIdx)
     end
 
     W.settingsBtn = MakeHeaderBtn("dm_settings.png", -(btnPad + 2), "Settings", function()
+        -- "Default on M+ Start" submenu: the meter type this window switches to
+        -- when a Mythic+ key starts. "Off" (default) leaves the current type alone.
+        local function mStartEntry(label, dmType)
+            return { text = label, isActive = (wdb.mythicStartDMType == dmType),
+                     onClick = function() wdb.mythicStartDMType = dmType end }
+        end
+        local mStartChildren = {
+            { text = "Off", isActive = (not wdb.mythicStartDMType),
+              onClick = function() wdb.mythicStartDMType = false end },
+            "---",
+            mStartEntry("Damage Done", Enum.DamageMeterType.DamageDone),
+            mStartEntry("Healing", Enum.DamageMeterType.HealingDone),
+            mStartEntry("Damage Taken", Enum.DamageMeterType.DamageTaken),
+            mStartEntry("Avoidable Damage Taken", Enum.DamageMeterType.AvoidableDamageTaken),
+            mStartEntry("Enemy Damage Taken", Enum.DamageMeterType.EnemyDamageTaken),
+            mStartEntry("Interrupts", Enum.DamageMeterType.Interrupts),
+            mStartEntry("Dispels", Enum.DamageMeterType.Dispels),
+            mStartEntry("Deaths", Enum.DamageMeterType.Deaths),
+        }
         ShowEDMMenu({
             { text = "Hide in Dungeons", isActive = wdb.hideInDungeon, onClick = function()
                 wdb.hideInDungeon = not wdb.hideInDungeon
@@ -2046,9 +2116,14 @@ local function CreateDMWindow(winIdx)
                 wdb.hideTimer = not wdb.hideTimer
                 W.timerText:SetShown(not wdb.hideTimer)
             end },
-            { text = "Auto Swap Current/Overall", isActive = wdb.autoSwapMythic, onClick = function()
+            { text = "Auto Swap Current/Overall",
+              tooltip = "Auto switch your window to overall at the end of an M+ run, and current at the start",
+              isActive = wdb.autoSwapMythic, onClick = function()
                 wdb.autoSwapMythic = not wdb.autoSwapMythic
             end },
+            { text = "Default on M+ Start",
+              tooltip = "Set your window to this Meter Type on dungeon start",
+              children = mStartChildren },
             { text = "Settings", onClick = function()
                 if EUI.ShowModule then EUI:ShowModule("EllesmereUIDamageMeters") end
             end },
@@ -2087,11 +2162,19 @@ local function CreateDMWindow(winIdx)
         ShowEDMMenu(items, W.segmentBtn)
     end)
 
-    W.modeBtn = MakeHeaderBtn("dm_arrow.png", -(btnSize * 2 + btnPad * 3 + 2), "Switch Meter Type", function()
-        local function sel(dmType) return function()
-            W.curDMType = dmType; wdb.curDMType = dmType; W.CloseSource(); W.Refresh()
+    -- Switch this window to a meter type (data + icon + refresh). Shared by the
+    -- mode button and the "Default on M+ Start" key-start hook so both stay in sync.
+    function W.SetDMType(dmType)
+        W.curDMType = dmType; wdb.curDMType = dmType
+        if W.CloseSource then W.CloseSource() end
+        W.Refresh()
+        if W._modeIcon then
             W._modeIcon:SetTexture(DM_TYPE_ICONS[dmType] or DM_TYPE_ICONS[Enum.DamageMeterType.DamageDone])
-        end end
+        end
+    end
+
+    W.modeBtn = MakeHeaderBtn("dm_arrow.png", -(btnSize * 2 + btnPad * 3 + 2), "Switch Meter Type", function()
+        local function sel(dmType) return function() W.SetDMType(dmType) end end
         local function entry(label, dmType) return { text = label, onClick = sel(dmType), isActive = (dmType == W.curDMType) } end
         local cur = W.curDMType
         local dmActive = (cur == Enum.DamageMeterType.DamageDone or cur == Enum.DamageMeterType.DamageTaken or cur == Enum.DamageMeterType.AvoidableDamageTaken or cur == Enum.DamageMeterType.EnemyDamageTaken)
@@ -2891,7 +2974,7 @@ local function CreateDMWindow(winIdx)
             bar.fill:SetPoint("TOPLEFT", bar.row, "TOPLEFT", iconOffset, 0)
             bar.fill:SetPoint("TOPRIGHT", bar.row, "TOPRIGHT", 0, 0)
             if showClassColor then
-                local cc = classFile and RAID_CLASS_COLORS[classFile]
+                local cc = classFile and RAID_CLASS_COLORS[classFile] and EUI.GetClassColor(classFile)
                 if cc then bar.fill:SetStatusBarColor(cc.r, cc.g, cc.b)
                 elseif W.curDMType == Enum.DamageMeterType.EnemyDamageTaken then bar.fill:SetStatusBarColor(0xDD/255, 0x31/255, 0x31/255)
                 else bar.fill:SetStatusBarColor(0.5, 0.5, 0.5) end
@@ -2899,6 +2982,10 @@ local function CreateDMWindow(winIdx)
                 if c.barColorUseAccent ~= false then local ar2, ag2, ab2 = GetAccentRGB(); bar.fill:SetStatusBarColor(ar2, ag2, ab2)
                 else local bc = c.barColor; bar.fill:SetStatusBarColor(bc and bc.r or 0.35, bc and bc.g or 0.55, bc and bc.b or 0.8) end
             end
+            -- Repaint the class-colored background for the new class (no-op cost
+            -- when off). bar._class is set here so ApplyBg reads the current class.
+            bar._class = classFile
+            if c.barBgUseClassColor then bar.ApplyBg() end
         end
         -- Per-tick: value + text only
         if isDeaths then
@@ -3027,6 +3114,11 @@ local function CreateDMWindow(winIdx)
                             bar.fill:SetPoint("TOPLEFT", bar.row, "TOPLEFT", iconOffset, 0)
                             bar.fill:SetPoint("TOPRIGHT", bar.row, "TOPRIGHT", 0, 0)
                             bar._cachedColorClass = nil
+                            -- Repaint the class-colored background for the new class
+                            -- (no-op cost when the feature is off). bar._class is set
+                            -- here so ApplyBg reads the current class.
+                            bar._class = classFile
+                            if c.barBgUseClassColor then bar.ApplyBg() end
                         end
 
                         -- Fill value
@@ -3042,7 +3134,7 @@ local function CreateDMWindow(winIdx)
                         if showClassColor then
                             if classFile ~= bar._cachedColorClass then
                                 bar._cachedColorClass = classFile
-                                local cc = classFile and RAID_CLASS_COLORS[classFile]
+                                local cc = classFile and RAID_CLASS_COLORS[classFile] and EUI.GetClassColor(classFile)
                                 if cc then bar.fill:SetStatusBarColor(cc.r, cc.g, cc.b)
                                 elseif W.curDMType == Enum.DamageMeterType.EnemyDamageTaken then bar.fill:SetStatusBarColor(0xDD/255, 0x31/255, 0x31/255)
                                 else bar.fill:SetStatusBarColor(0.5, 0.5, 0.5) end
@@ -3055,7 +3147,7 @@ local function CreateDMWindow(winIdx)
 
                         -- Left text color (pos + label)
                         if c.leftTextUseClassColor then
-                            local cc = classFile and RAID_CLASS_COLORS[classFile]
+                            local cc = classFile and RAID_CLASS_COLORS[classFile] and EUI.GetClassColor(classFile)
                             local lr, lg, lb = cc and cc.r or 1, cc and cc.g or 1, cc and cc.b or 1
                             bar.label:SetTextColor(lr, lg, lb)
                             bar.pos:SetTextColor(lr, lg, lb)
@@ -3067,7 +3159,7 @@ local function CreateDMWindow(winIdx)
                         end
                         -- Right text color (amount)
                         if c.rightTextUseClassColor then
-                            local cc = classFile and RAID_CLASS_COLORS[classFile]
+                            local cc = classFile and RAID_CLASS_COLORS[classFile] and EUI.GetClassColor(classFile)
                             local rr, rg, rb = cc and cc.r or 1, cc and cc.g or 1, cc and cc.b or 1
                             bar.amount:SetTextColor(rr, rg, rb)
                         elseif fullRebuild then
@@ -3308,12 +3400,12 @@ local function CreateDMWindow(winIdx)
                 local ok, sd = pcall(C_DamageMeter.GetCombatSessionSourceFromType, W.curSession, W.curDMType, guid, cid)
                 if ok then srcData = sd end
             end
-            local players = AggregateEnemyPlayers(srcData)
+            local c = DB(); local barH = PhysicalPixels(c.barHeight or 18)
+            local players = AggregateEnemyPlayers(srcData, GetBreakdownDuration(W.curSession, W.curSessionID))
             if not players then
                 if W.spellPool then for i = 1, BAR_POOL_SIZE do W.spellPool[i].row:Hide() end end
                 return
             end
-            local c = DB(); local barH = PhysicalPixels(c.barHeight or 18)
             local barSp = PhysicalPixels(c.barSpacing); local stride = barH + barSp
             local leftFS = c.leftFontSize or c.fontSize or 11; local rightFS = c.rightFontSize or c.fontSize or 11
             local texPath, texKey = GetBarTexturePath()
@@ -3333,13 +3425,13 @@ local function CreateDMWindow(winIdx)
                     bar.fill:ClearAllPoints(); bar.fill:SetPoint("TOPLEFT", bar.row, "TOPLEFT", iconOffset, 0)
                     bar.fill:SetPoint("TOPRIGHT", bar.row, "TOPRIGHT", 0, 0); bar.fill:SetHeight(barH)
                     ApplyBarTexture(bar.fill, texPath, texKey); bar.fill:SetMinMaxValues(0, maxAmt); bar.fill:SetValue(p.total)
-                    local cc = p.class and RAID_CLASS_COLORS[p.class]
+                    local cc = p.class and RAID_CLASS_COLORS[p.class] and EUI.GetClassColor(p.class)
                     if cc then bar.fill:SetStatusBarColor(cc.r, cc.g, cc.b)
                     else local ar2, ag2, ab2 = GetAccentRGB(); bar.fill:SetStatusBarColor(ar2, ag2, ab2) end
                     SetDMFont(bar.label, leftFS); SetDMFont(bar.amount, rightFS)
                     bar.label:SetTextColor(1, 1, 1); bar.amount:SetTextColor(1, 1, 1)
                     bar.label:SetText(StripRealm(p.name))
-                    bar.amount:SetText(AbbrevNumber(p.total)); bar._spellID = nil
+                    bar.amount:SetText(FormatBarValue(p.total, p.amountPerSecond, c.numberFormat or 2)); bar._spellID = nil
                 else bar.row:Hide(); bar._spellID = nil end
             end
             local srcTotalH = pCount * stride
@@ -3395,7 +3487,7 @@ local function CreateDMWindow(winIdx)
                 bar.fill:SetPoint("TOPRIGHT", bar.row, "TOPRIGHT", 0, 0); bar.fill:SetHeight(barH)
                 ApplyBarTexture(bar.fill, texPath, texKey); bar.fill:SetMinMaxValues(0, maxAmt); bar.fill:SetValue(entry.amount)
                 if W.sourceClass and RAID_CLASS_COLORS[W.sourceClass] then
-                    local cc = RAID_CLASS_COLORS[W.sourceClass]; bar.fill:SetStatusBarColor(cc.r, cc.g, cc.b)
+                    local cc = EUI.GetClassColor(W.sourceClass); bar.fill:SetStatusBarColor(cc.r, cc.g, cc.b)
                 else local ar2, ag2, ab2 = GetAccentRGB(); bar.fill:SetStatusBarColor(ar2, ag2, ab2) end
                 SetDMFont(bar.label, leftFS); SetDMFont(bar.amount, rightFS)
                 local spellName
@@ -3456,7 +3548,7 @@ local function CreateDMWindow(winIdx)
                     SetDMFont(bar.label, leftFS); SetDMFont(bar.amount, rightFS)
                     bar.label:SetTextColor(1, 1, 1); bar.amount:SetTextColor(1, 1, 1)
                     bar.label:SetText(t.name)
-                    bar.amount:SetText(AbbrevNumber(t.total)); bar._spellID = nil
+                    bar.amount:SetText(FormatBarValue(t.total, t.amountPerSecond, c.numberFormat or 2)); bar._spellID = nil
                     targetsRendered = targetsRendered + 1
                 end
             end
@@ -3843,6 +3935,24 @@ end
 ns.RefreshMeter = function()
     for _, w in ipairs(_windows) do w.Refresh() end
 end
+
+-- Bust the per-class color caches and repaint. Called when global custom class
+-- colors change so bars/text recolor live without a /reload (bars cache color
+-- keyed only on classFile, which does not change when the palette is edited).
+ns.RefreshColors = function()
+    for _, w in ipairs(_windows) do
+        w._stickyClassCache = nil
+        w._barCacheKey = nil
+        if w.rowPool then
+            for _, bar in ipairs(w.rowPool) do bar._cachedColorClass = nil end
+        end
+        if w.stickyPlayer then w.stickyPlayer._cachedColorClass = nil end
+        w.Refresh()
+    end
+end
+-- Exposed on the shared table so the parent addon's ApplyColorsToOUF can repaint
+-- damage meters when global custom class colors change.
+EllesmereUI._DM_RefreshColors = ns.RefreshColors
 
 ns.ApplyBorder = function()
     for _, w in ipairs(_windows) do

@@ -43,6 +43,12 @@ local ADDON, ns = ...
 ns.GCDFilter = ns.GCDFilter or {}
 local GCDFilter = ns.GCDFilter
 
+-- 12.1: item cooldown APIs (GetInventoryItemCooldown) return the RAW cooldown — no
+-- ignoreGCD — so during a GCD they report the ~1.5s GCD as the item's cooldown. Any
+-- reported duration <= this is GCD/windup noise; real item CDs are >>1.5s (trinkets
+-- >=20s). Filter it, matching Arc Auras' ITEM_GCD_THRESHOLD.
+local ITEM_GCD_THRESHOLD = 1.5
+
 -- ═══════════════════════════════════════════════════════════════════
 -- ShouldSuppressGCD (compat shim)
 -- Old callers may still reference this. Always returns false now —
@@ -97,6 +103,25 @@ function GCDFilter.Install(frame, cdID)
     -- Skip non-cooldown viewers (aura trackers etc).
     if pf._arcViewerType == "aura" then return end
 
+    -- 12.1: item (trinket) cooldowns — CDM bundles the GCD into the item frame's swipe,
+    -- and the spell API returns zero-span (the CD is on the item, not the spell). This
+    -- hook only runs when No-GCD swipe is on (_arcNoGCDSwipeEnabled gate above), so for
+    -- item frames re-push the RAW item cooldown (GetInventoryItemCooldown is inherently
+    -- GCD-free) to strip the GCD and show the real item cooldown. Effectively a fix for
+    -- Blizzard's CDM showing the GCD on item frames.
+    local eqSlot = pf.cooldownInfo and pf.cooldownInfo.equipSlot
+    if eqSlot then
+      local istart, idur = GetInventoryItemCooldown("player", eqSlot)
+      pf._arcBypassCDHook = true
+      if istart and idur and istart > 0 and idur > ITEM_GCD_THRESHOLD then
+        self:SetCooldown(istart, idur)
+      else
+        self:Clear()
+      end
+      pf._arcBypassCDHook = false
+      return
+    end
+
     local ci = pf.cooldownInfo
     local spellID = ci and (ci.overrideSpellID or ci.spellID)
     if not spellID then return end
@@ -119,6 +144,32 @@ function GCDFilter.Install(frame, cdID)
     self:SetCooldownFromDurationObject(durObj)
     pf._arcBypassCDHook = false
   end)
+
+  -- 12.1: item (trinket) cooldowns may be pushed via SetCooldownFromDurationObject
+  -- (the durObj model), which the SetCooldown hook above does NOT catch — so a GCD
+  -- durObj CDM pushes onto a READY trinket slips through and draws the GCD swipe/edge.
+  -- Mirror the item branch here: strip it (Clear) when ready, show the real item CD
+  -- via the numeric API when on cooldown. Only acts on item frames; spells are no-ops.
+  if cd.SetCooldownFromDurationObject then
+    hooksecurefunc(cd, "SetCooldownFromDurationObject", function(self)
+      local pf = self._arcParentFrame
+      if not pf then return end
+      if not pf._arcNoGCDSwipeEnabled then return end
+      if pf._arcBypassCDHook then return end
+      if pf.wasSetFromAura == true then return end
+      if pf._arcViewerType == "aura" then return end
+      local eqSlot = pf.cooldownInfo and pf.cooldownInfo.equipSlot
+      if not eqSlot then return end
+      local istart, idur = GetInventoryItemCooldown("player", eqSlot)
+      pf._arcBypassCDHook = true
+      if istart and idur and istart > 0 and idur > ITEM_GCD_THRESHOLD then
+        self:SetCooldown(istart, idur)
+      else
+        self:Clear()
+      end
+      pf._arcBypassCDHook = false
+    end)
+  end
 
   -- SetDrawSwipe / SetDrawEdge hooks REMOVED (Q1):
   --   The ignoreGCD=true durObj is zero-span during pure GCD, so the

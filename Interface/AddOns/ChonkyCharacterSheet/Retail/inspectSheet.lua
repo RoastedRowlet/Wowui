@@ -1,7 +1,7 @@
 local addonName, ns = ...
 local CCS = ns.CCS
 local loopitems
-if CCS.GetCurrentVersion() ~= CCS.RETAIL then
+if CCS.CurrentVersion ~= CCS.RETAIL then
     return
 end
 
@@ -16,6 +16,7 @@ CCS.Modules[module.Name] = module
 
 local modbg = _G["InspectModelFramebg"] or CreateFrame("Frame", "InspectModelFramebg")
 local modtex = _G["InspectModelFramebgtex"] or modbg:CreateTexture("InspectModelFramebgtex", "BACKGROUND")    
+local modtex2 = _G["InspectModelFramebgtex2"] or modbg:CreateTexture("InspectModelFramebgtex2", "ARTWORK")    
 
 ---------------------------
 -- Module methods
@@ -1255,90 +1256,7 @@ local function MoveInspectModelLeft()
     modbg:SetPoint("TOPLEFT", InspectHeadSlot, "TOPLEFT", 0, 0)
     modbg:SetPoint("RIGHT", InspectHandsSlot, "RIGHT", 0, 0)    
     modbg:SetPoint("BOTTOM", InspectMainHandSlot, "BOTTOM", 0, 0)            
-
     
-end
-
-local function clamp(val, min, max)
-    if val < min then return min end
-    if val > max then return max end
-    return val
-end
-
-local function ChangeModelBg()
- if InspectFrame == nil or InspectFrame.unit == nil then return end
-
-    if option("bgtype_inspect") == "Hide" then
-        modtex:Hide()
-        return
---[[    else
-        -- Default background
-		modtex:SetAllPoints()		
-        modtex:SetTexture("Interface\\AddOns\\ChonkyCharacterSheet\\Media\\Textures\\MOTHERtalenttree.BLP")
-        modtex:SetTexCoord(0, 0.69, 0, 0.87)
-        modtex:SetVertexColor(0.4, 0, 0.4, 0.9)
-		modtex:Show()
-		return--]]
-    end
-
-    local _, _, classID = UnitClass(InspectFrame.unit)
-    local _, _, raceID = UnitRace(InspectFrame.unit)
-    local specID = GetInspectSpecialization(InspectFrame.unit)
-	specID = CCS.GetSpecIndexFromSpecID(specID)
-    local entry = nil
-
-    if modbg:GetParent() == nil then
-        modbg:SetParent(InspectModelFrame)
-    end
-    
-    modtex:Show()
-	
-    if option("bgtype_inspect") == "Class" then 
-        -- Class/Specialization background
-        entry = CCS.Class_Bg[classID] and CCS.Class_Bg[classID][specID]        
-        modtex:SetVertexColor(0.8, 0.8, 0.8, 1)
-    elseif option("bgtype_inspect") == "Race" then 
-        -- Race background
-        if classID == 6 then raceID = 998 -- Death Knight
-        elseif classID == 12 then raceID = 999 -- Demon Hunter
-        end
-        entry = CCS.Race_Bg[raceID] 
-        modtex:SetVertexColor(0.7, 0.7, 0.7, 1)
-    end
-    
-    modtex:ClearAllPoints()
-    modtex:SetAllPoints()
-    
-    if entry then
-        local texWidth, texHeight, uMin, uMax, vMin, vMax = unpack(entry.map)
-        local frameWidth, frameHeight = modtex:GetWidth(), modtex:GetHeight()
-        
-        modtex:SetTexture(entry.texture)
-        
-        if option("bgtype_inspect") == "Class" then
-			local visibleWidth = frameWidth / (frameHeight / texHeight)
-			local left = uMin + ((texWidth - visibleWidth) / texWidth) * (uMax - uMin)
-			left = clamp(left, uMin, uMax)
-
-			modtex:SetTexCoord(left, uMax, vMin, vMax)
-        else
-			-- Race: horizontally centered
-			local visibleWidth = frameWidth / (frameHeight / texHeight)
-			local uRange = uMax - uMin
-			local uOffset = (uRange - (visibleWidth / texWidth) * uRange) / 2
-
-			local left  = clamp(uMin + uOffset, uMin, uMax)
-			local right = clamp(uMax - uOffset, uMin, uMax)
-
-			modtex:SetTexCoord(left, right, vMin, vMax)
-        end
-    else
-        -- Default background
-        modtex:SetTexture("Interface\\AddOns\\ChonkyCharacterSheet\\Media\\Textures\\MOTHERtalenttree.BLP")
-        modtex:SetTexCoord(0, 0.69, 0, 0.87)
-        modtex:SetVertexColor(0.4, 0, 0.4, 0.9)
-    end
-    -- end of dynamic background
 end
 
 local function InspectClicky(endstate)
@@ -1351,7 +1269,7 @@ local function InspectClicky(endstate)
             MoveInspectModelRight()
         end
     end
-    ChangeModelBg()
+	CCS.ChangeModelBg(true)
     PlaySound(SOUNDKIT.GS_LOGIN_CHANGE_REALM_OK); -- just puts a sound in when clicking on the button for more feedback
 end
 
@@ -1616,7 +1534,7 @@ function CCS.initializeinspectframe()
     modbg:SetFrameStrata("BACKGROUND")
     modbg:SetFrameLevel(100)
 
-    C_Timer.After(.1, function() ChangeModelBg() end)
+    C_Timer.After(.1, function() CCS.ChangeModelBg(true) end)
 
     if InspectPaperDollFrame.ViewButton ~= nil then
         InspectPaperDollFrame.ViewButton.Left:Hide()
@@ -1705,7 +1623,7 @@ loopitems = function()
 		ilvlTxt:Show()
 	else
 		ilvlTxt:SetText("|cFF".. color .. format("%.2f", iLvl or "") .. "|r")
-		ilvlTxt:SetShown(option("showilvl_inspect"))
+		ilvlTxt:SetShown(option("showilvlinspect"))
     end
     initmplusframe()
     initclickframe()
@@ -1715,7 +1633,7 @@ end
 function CCS.InspectSheetEventHandler(event, ...)
 
     -- Retail-only inspect frame updates
-    if CCS.GetCurrentVersion() ~= CCS.RETAIL then return end
+    if CCS.CurrentVersion ~= CCS.RETAIL then return end
     if not InspectFrame or not InspectFrame.unit or not option("show_inspect") then return end
 
 	if not InspectFrame.loaded then
@@ -1729,6 +1647,13 @@ function CCS.InspectSheetEventHandler(event, ...)
             RaidNotice_AddMessage(RaidBossEmoteFrame, msg, ChatTypeInfo["SYSTEM"])
             ReloadUI()
         end
+		
+		if InspectFrame:IsVisible() == true then
+			CCS.initializeinspectframe()
+			initializemplusplanelframe()
+			loopitems()			
+        end
+
 		InspectFrame.loaded = false
         return true
 	elseif event == "INSPECT_READY" then
@@ -1741,7 +1666,7 @@ function CCS.InspectSheetEventHandler(event, ...)
 					return
 				end
 
-				ChangeModelBg()
+				CCS.ChangeModelBg(true)
 				CCS.inspectUpdatePending = false 
 				initializemplusplanelframe()
 				loopitems()

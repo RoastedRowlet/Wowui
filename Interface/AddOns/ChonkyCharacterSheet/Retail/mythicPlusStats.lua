@@ -1,7 +1,7 @@
 local addonName, ns = ...
 local CCS = ns.CCS
 
-if CCS.GetCurrentVersion() ~= CCS.RETAIL then
+if CCS.CurrentVersion ~= CCS.RETAIL then
     return
 end
 
@@ -1935,7 +1935,7 @@ end
 function CCS.MythicPlusEventHandler(event, ...)
     local arg1 = ...
 
-	if CCS.GetCurrentVersion() ~= CCS.RETAIL then return end
+	if CCS.CurrentVersion ~= CCS.RETAIL then return end
 
     if CCS.initall == true then return end
 	

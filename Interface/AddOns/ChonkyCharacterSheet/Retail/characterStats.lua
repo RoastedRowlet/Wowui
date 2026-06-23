@@ -1,7 +1,7 @@
 local addonName, ns = ...
 local CCS = ns.CCS
 
-if CCS.GetCurrentVersion() ~= CCS.RETAIL then
+if CCS.CurrentVersion ~= CCS.RETAIL then
     return
 end
 
@@ -570,7 +570,7 @@ local function GetStatPrimary(rowData)
 		tt_name = HIGHLIGHT_FONT_COLOR_CODE..format(PAPERDOLLFRAME_TOOLTIP_FORMAT, tmp_stat_name[primaryStat]).." "..tt_name;
 	-- Intellect
 	elseif ( statIndex == LE_UNIT_STAT_INTELLECT ) then
-		if ( UnitHasMana("player") ) then
+		if ( CCS.UnitHasMana("player") ) then
 			if (HasAPEffectsSpellPower()) then
 				tt_desc = STAT_NO_BENEFIT_TOOLTIP;
 			else
@@ -1255,49 +1255,136 @@ end
 -------------------------------------------------
 -- CURRENCY STAT FUNCTION (CRESTS + PVP)
 -------------------------------------------------
-local function GetStatCurrency(rowData)  
-	local leftText, rightText, tt_name, tt_desc, isZero = "","|cffffd100<" .. L["Secret"] .. ">|r","","",false
-	local link = nil
-	local currencyData = nil
-	
-	if C_CurrencyInfo then 
-		currencyData = C_CurrencyInfo.GetCurrencyInfo(rowData.id) 
-		link = C_CurrencyInfo.GetCurrencyLink(rowData.id)		
-	else
-		currencyData = GetCurrencyInfo(rowData.id) 
-		link = GetCurrencyLink(rowData.id)				
-	end
+CCS.CRESTS = {
+    crests_myth = {
+        { id = 3347, tocinfo = {120000, 120009} },
+        { id = 3446, tocinfo = {120100, 120199} },
+    },
 
-	if currencyData ~= nil then
-		if rowData.id == 1586 or rowData.id == 1792 or rowData.id == 1602 then
-			leftText = currencyData.name
-		else
-			leftText = rowData.name -- currencyData.name
-		end
+    crests_hero = {
+        { id = 3345, tocinfo = {120000, 120009} },
+        { id = 3445, tocinfo = {120100, 120199} },
+    },
 
-		--isZero = (currencyData.quantity == 0)
-		--if currencyData.useTotalEarnedForMaxQty == true or 
-		if rowData.id == 1586 or
-			rowData.id == 1602 or
-			rowData.id == 2123 or
-			rowData.id == 2797
-		then
-				rightText = format("%8.8s", BreakUpLargeNumbers(currencyData.quantity))
-		else
-			if rowData.id == 3008 or rowData.id == 1792 or rowData.id == 3378 then
-				rightText = format("%s/%s", BreakUpLargeNumbers(currencyData.quantity), BreakUpLargeNumbers(currencyData.maxQuantity))			
-			elseif currencyData.maxQuantity == 0 then
-				rightText = format("%s", BreakUpLargeNumbers(currencyData.quantity))
-			else
-				rightText = format("%s (%s/%s)", BreakUpLargeNumbers(currencyData.quantity), BreakUpLargeNumbers(currencyData.totalEarned), BreakUpLargeNumbers(currencyData.maxQuantity))			
-			end
-			
-		end
-	end
+    crests_champion = {
+        { id = 3343, tocinfo = {120000, 120009} },
+        { id = 3444, tocinfo = {120100, 120199} },
+    },
 
-	return leftText, rightText, tt_name, tt_desc, link, isZero
+    crests_veteran = {
+        { id = 3341, tocinfo = {120000, 120009} },
+        { id = 3443, tocinfo = {120100, 120199} },
+    },
+
+    crests_adventurer = {
+        { id = 3383, tocinfo = {120000, 120009} },
+        { id = 3442, tocinfo = {120100, 120199} },
+    },
+
+    crests_catalyst = {
+        { id = 3378, tocinfo = {120000, 120009} },
+        { id = 3465, tocinfo = {120100, 120199} },
+    },
+
+    crests_voidcore = {
+        { id = 3418, tocinfo = {120000, 120009} },
+        { id = 3418, tocinfo = {120100, 120199} }, -- same ID, new icon? adjust as needed
+    },
+}
+
+local function GetCrestIDForRow(rowKey)
+    local versions = CCS.CRESTS and CCS.CRESTS[rowKey]
+    if not versions then
+        return nil
+    end
+
+    local currentTOC = select(4, GetBuildInfo())
+    local bestID = nil
+    local bestMin = -1
+
+    for idx, v in ipairs(versions) do
+        local minTOC, maxTOC = v.tocinfo[1], v.tocinfo[2]
+        minTOC = tonumber(minTOC)
+        maxTOC = tonumber(maxTOC)
+
+        if currentTOC >= minTOC and currentTOC <= maxTOC then
+            if minTOC > bestMin then
+                bestMin = minTOC
+                bestID = v.id
+            end
+        end
+    end
+
+    return bestID
 end
 
+
+local function GetStatCurrency(rowData)
+    local leftText, rightText, tt_name, tt_desc, isZero =
+        "", "|cffffd100<" .. L["Secret"] .. ">|r", "", "", false
+    local link = nil
+
+    ---------------------------------------------------------
+    -- Determine the correct currency ID
+    ---------------------------------------------------------
+    local id = rowData.id
+
+    if id == -1 then
+        id = GetCrestIDForRow(rowData.key)
+        if not id then
+            return rowData.name, "0", tt_name, tt_desc, nil, true
+        end
+    end
+
+    ---------------------------------------------------------
+    -- Fetch currency info
+    ---------------------------------------------------------
+    local currencyData
+    if C_CurrencyInfo then
+        currencyData = C_CurrencyInfo.GetCurrencyInfo(id)
+        link = C_CurrencyInfo.GetCurrencyLink(id)
+    else
+        currencyData = GetCurrencyInfo(id)
+        link = GetCurrencyLink(id)
+    end
+
+    if not currencyData then
+        return rowData.name, "0", tt_name, tt_desc, nil, true
+    end
+
+    ---------------------------------------------------------
+    -- Left text (label)
+    ---------------------------------------------------------
+    if id == 1586 or id == 1792 or id == 1602 then
+        leftText = currencyData.name
+    else
+        leftText = rowData.name
+    end
+
+    ---------------------------------------------------------
+    -- Right text (value formatting)
+    ---------------------------------------------------------
+    local qty = currencyData.quantity or 0
+    local maxQty = currencyData.maxQuantity or 0
+    local totalEarned = currencyData.totalEarned or 0
+
+    if id == 1586 or id == 1602 or id == 2123 or id == 2797 then
+        rightText = format("%8.8s", BreakUpLargeNumbers(qty))
+    elseif id == 3008 or id == 1792 or id == 3378 then
+        rightText = format("%s/%s",
+            BreakUpLargeNumbers(qty),
+            BreakUpLargeNumbers(maxQty))
+    elseif maxQty == 0 then
+        rightText = BreakUpLargeNumbers(qty)
+    else
+        rightText = format("%s (%s/%s)",
+            BreakUpLargeNumbers(qty),
+            BreakUpLargeNumbers(totalEarned),
+            BreakUpLargeNumbers(maxQty))
+    end
+
+    return leftText, rightText, tt_name, tt_desc, link, isZero
+end
 
 local STAT_SECTIONS = {
 
@@ -1411,13 +1498,13 @@ local STAT_SECTIONS = {
 
         rows = {
          -- { key="crests_valorstone", name=L["Valorstones"] or "Valorstones", id=3008, statFunc=GetStatCurrency, icon="Interface\\Icons\\inv_valorstone_base" },
-            { key="crests_myth",       name=L["Myth"]        or "Myth",        id=3347, statFunc=GetStatCurrency, icon="Interface\\Icons\\inv_120_crest_myth" },
-            { key="crests_hero",       name=L["Hero"]        or "Hero",        id=3345, statFunc=GetStatCurrency, icon="Interface\\Icons\\inv_120_crest_hero" },
-            { key="crests_champion",   name=L["Champion"]    or "Champion",    id=3343, statFunc=GetStatCurrency, icon="Interface\\Icons\\inv_120_crest_champion" },
-            { key="crests_veteran",    name=L["Veteran"]     or "Veteran",     id=3341, statFunc=GetStatCurrency, icon="Interface\\Icons\\inv_120_crest_veteran" },
-            { key="crests_adventurer", name=L["Adventurer"]  or "Adventurer",  id=3383, statFunc=GetStatCurrency, icon="Interface\\Icons\\inv_120_crest_adventurer" },
-            { key="crests_catalyst", name=L["Catalyst"]  or "Catalyst",  id=3378, statFunc=GetStatCurrency, icon="Interface\\Icons\\inv_120_crest_adventurer" },
-            { key="crests_voidcore", name=BONUS_LOOT_LABEL  or "Bonus Loot",  id=3418, statFunc=GetStatCurrency, icon="Interface\\Icons\\inv_120_crest_adventurer" },
+            { key="crests_myth",       name=L["Myth"]        or "Myth",        id=-1, statFunc=GetStatCurrency, icon="Interface\\Icons\\inv_120_crest_myth" },
+            { key="crests_hero",       name=L["Hero"]        or "Hero",        id=-1, statFunc=GetStatCurrency, icon="Interface\\Icons\\inv_120_crest_hero" },
+            { key="crests_champion",   name=L["Champion"]    or "Champion",    id=-1, statFunc=GetStatCurrency, icon="Interface\\Icons\\inv_120_crest_champion" },
+            { key="crests_veteran",    name=L["Veteran"]     or "Veteran",     id=-1, statFunc=GetStatCurrency, icon="Interface\\Icons\\inv_120_crest_veteran" },
+            { key="crests_adventurer", name=L["Adventurer"]  or "Adventurer",  id=-1, statFunc=GetStatCurrency, icon="Interface\\Icons\\inv_120_crest_adventurer" },
+            { key="crests_catalyst", name=L["Catalyst"]  or "Catalyst",  id=-1, statFunc=GetStatCurrency, icon="Interface\\Icons\\inv_120_crest_adventurer" },
+            { key="crests_voidcore", name=BONUS_LOOT_LABEL  or "Bonus Loot",  id=-1, statFunc=GetStatCurrency, icon="Interface\\Icons\\inv_120_crest_adventurer" },
         },
     },
 
@@ -2302,19 +2389,26 @@ UpdateAllStats = function(parent)
                     -------------------------------------------------
                     -- Update icon for currencies
                     -------------------------------------------------
-                    if rowData.statFunc == GetStatCurrency then
-                        local currencyData
-                        if C_CurrencyInfo then
-                            currencyData = C_CurrencyInfo.GetCurrencyInfo(rowData.id)
-                            link = C_CurrencyInfo.GetCurrencyLink(rowData.id)
-                        else
-                            currencyData = GetCurrencyInfo(rowData.id)
-                            link = GetCurrencyLink(rowData.id)
-                        end
-                        if currencyData and currencyData.iconFileID then
-                            rowFrame.icon:SetTexture(currencyData.iconFileID)
-                        end
-                    end
+					if rowData.statFunc == GetStatCurrency then
+						-- Resolve crest ID if needed
+						local id = rowData.id
+						if id == -1 then
+							id = GetCrestIDForRow(rowData.key)
+						end
+
+						local currencyData
+						if id and C_CurrencyInfo then
+							currencyData = C_CurrencyInfo.GetCurrencyInfo(id)
+							link = C_CurrencyInfo.GetCurrencyLink(id)
+						elseif id then
+							currencyData = GetCurrencyInfo(id)
+							link = GetCurrencyLink(id)
+						end
+
+						if currencyData and currencyData.iconFileID then
+							rowFrame.icon:SetTexture(currencyData.iconFileID)
+						end
+					end
 
                     -------------------------------------------------
                     -- Update power color for attributes
@@ -2887,7 +2981,7 @@ end
 function CCS.CharacterStatsEventHandler(event, ...)
     local arg1 = ...
 
-    if CCS.GetCurrentVersion() ~= CCS.RETAIL then return end
+    if CCS.CurrentVersion ~= CCS.RETAIL then return end
 
     if CCS.initall == true then return end
 

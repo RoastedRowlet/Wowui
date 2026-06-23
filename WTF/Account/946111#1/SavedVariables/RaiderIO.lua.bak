@@ -1,38 +1,32 @@
 
 RaiderIO_Config = {
+["minimapIcon"] = {
+["minimapPos"] = 180,
+["showInCompartment"] = true,
+["hide"] = false,
+["lock"] = false,
+},
 ["profilePoint"] = {
 ["y"] = 0,
 ["x"] = -16,
 ["point"] = "TOPLEFT",
 },
-["minimapIcon"] = {
-["minimapPos"] = 180,
-["showInCompartment"] = true,
-["lock"] = false,
-["hide"] = false,
-},
 }
 RaiderIO_LastCharacter = "us-Barelynoer-area-52"
 RaiderIO_MissingCharacters = {
-["us-Karriana-illidan"] = true,
-["us-Nitá-ragnaros"] = true,
-["us-Darksoldierx-sargeras"] = true,
-["us-Kriegsaxer-dalaran"] = true,
-["us-Streetjimmy-malganis"] = true,
-["us-Monkpint-area-52"] = true,
-["us-Oakwoods-area-52"] = true,
-["us-Elcocho-ragnaros"] = true,
-["us-Sauf-sargeras"] = true,
-["us-Brookspupper-thrall"] = true,
-["us-Thündering-stormrage"] = true,
-["us-Preyonem-kelthuzad"] = true,
-["us-Mahnpri-frostmourne"] = true,
-["us-Pâkãs-area-52"] = true,
-["us-Vanityw-area-52"] = true,
-["us-Keheo-frostmourne"] = true,
-["us-Baconsfist-frostmourne"] = true,
-["us-Thottyp-proudmoore"] = true,
-["us-Bigdaddyv-frostmourne"] = true,
+["us-Rememberful-andorhal"] = true,
+["us-Chinchón-ragnaros"] = true,
+["us-Sleazyorc-tichondrius"] = true,
+["us-Jeesoo-tichondrius"] = true,
+["us-Ensetral-korialstrasz"] = true,
+["us-Trommash-cenarius"] = true,
+["us-Samaeldox-stormrage"] = true,
+["us-Raeg-thrall"] = true,
+["us-Khronver-quelthalas"] = true,
+["us-Spectralith-stormrage"] = true,
+["us-Misalchichon-tichondrius"] = true,
+["us-Atulkastan-zuljin"] = true,
+["us-Sushhi-gallywix"] = true,
 }
 RaiderIO_MissingServers = {
 }

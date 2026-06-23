@@ -265,7 +265,7 @@ function CCS.InitializeModules()
         end
     end
     CCS:FireEvent("CCS_EVENT_OPTIONS")       
-    
+
     if CCS.lastChangedOption == "optionsheetscale" or
        CCS.lastChangedOption == "button_color" or
        CCS.lastChangedOption == "hightlight_color" or
@@ -957,7 +957,7 @@ local function newFontSelector(def, parent, rowHeight)
     menu:Hide()
    
     local function HandleLeave()
-        if not MouseIsOver(dd) and not MouseIsOver(menu) and not MouseIsOver(arrowFrame) then
+        if not dd:IsMouseOver() and not menu:IsMouseOver() and not arrowFrame:IsMouseOver() then
             menu:Hide()
             if CCS.ActiveFontMenu == menu then
                 CCS.ActiveFontMenu = nil

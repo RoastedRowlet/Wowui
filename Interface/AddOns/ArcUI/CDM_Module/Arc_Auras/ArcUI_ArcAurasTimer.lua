@@ -64,6 +64,10 @@ local function safeDuration(d) local n = tonumber(d); return (n and n > 0) and n
 -- ═══════════════════════════════════════════════════════════════════════════
 
 local START_EVENTS = { cast = true, cooldown = true, proc = true }
+-- Generator/spender entries additionally accept the synthetic "expire" event
+-- ("Timer Complete" — the timer's own duration finishing). Start triggers do
+-- NOT — only real spell events can START a timer.
+local ECONOMY_EVENTS = { cast = true, cooldown = true, proc = true, expire = true }
 local END_EVENTS   = { cast = true, proc = true, procEnd = true, death = true }
 
 local function NormalizeEventSet(raw, allowed)
@@ -139,7 +143,7 @@ local function NormalizeConfigTriggers(config)
                 local events = {}
                 if type(e.events) == "table" then
                     for k, v in pairs(e.events) do
-                        if v and START_EVENTS[k] then events[k] = true end
+                        if v and ECONOMY_EVENTS[k] then events[k] = true end
                     end
                 end
                 local sid = tonumber(e.spellID)
@@ -212,6 +216,17 @@ local function NormalizeConfigTriggers(config)
         restartOnRefire = restartOnRefire,
         trackStacks     = trackStacks,
         stackMode       = stackMode,
+        -- "Start full": while the consume timer is idle, the icon shows
+        -- initialStacks (e.g. 2/2) instead of 0; casting then consumes from it
+        -- (the start cast also spends if the start spell is a spender), and the
+        -- icon returns to full when the duration ends. Consume mode only.
+        startFull       = (type(config.startTrigger) == "table"
+                           and config.startTrigger.startFull == true) or false,
+        -- "Recharge until full": on each duration completion, if still below
+        -- Max the timer runs again (recharging another cycle) and stops at Max.
+        -- Pair with a "Timer Complete" generator to make spell-charges recharge.
+        rechargeUntilFull = (type(config.startTrigger) == "table"
+                           and config.startTrigger.rechargeUntilFull == true) or false,
         -- consume-mode config (always present; only consulted when
         -- stackMode == "consume" so other modes are unaffected)
         maxStacks       = maxStacks,
@@ -516,6 +531,9 @@ end
 local function GenSpenderMatches(entry, evEvent, evSpellID)
     if not entry or type(entry.events) ~= "table" then return false end
     if not entry.events[evEvent] then return false end
+    -- "expire" = the timer's own Timer Complete event. It has no spell, so it
+    -- matches on the event flag alone (the entry's spellID is ignored).
+    if evEvent == "expire" then return true end
     if not evSpellID or not entry.spellID then return false end
     return evSpellID == entry.spellID
 end
@@ -635,11 +653,80 @@ local function ClearAllStacks(td)
     RefreshStackDisplay(td)
 end
 
+-- Returns true if any generator/spender has the "Timer Complete" (expire)
+-- event checked — used to decide whether a duration completion should recharge
+-- the pool (keep + maybe re-run) instead of wiping it.
+local function HasTimerCompleteEntry(st)
+    if not st then return false end
+    local lists = { st.generators, st.spenders }
+    for li = 1, #lists do
+        local list = lists[li]
+        if type(list) == "table" then
+            for i = 1, #list do
+                if list[i].events and list[i].events.expire then return true end
+            end
+        end
+    end
+    return false
+end
+
+-- Apply the "Timer Complete" (expire) generators/spenders when the duration
+-- finishes. Spenders checked first (matches the live dispatcher's "spend wins");
+-- one entry applies.
+local function FireTimerCompleteEconomy(td)
+    local st = td.startTrigger
+    if not st then return end
+    if st.spenders then
+        for i = 1, #st.spenders do
+            if GenSpenderMatches(st.spenders[i], "expire", nil) then
+                ConsumeStack(td, st.spenders[i].amount or 1)
+                return
+            end
+        end
+    end
+    if st.generators then
+        for i = 1, #st.generators do
+            if GenSpenderMatches(st.generators[i], "expire", nil) then
+                GainStacks(td, st.generators[i].amount or 1)
+                return
+            end
+        end
+    end
+end
+
 -- Called when the visible cooldown's OnCooldownDone fires. Our authoritative
 -- "ready" transition point — flips state and re-applies visuals. Also the
 -- natural point where "refresh"-mode stacks all die at once.
 local function OnCooldownDone(td)
     td.active = false
+    local st = td.startTrigger
+    -- Consume mode with a "Timer Complete" generator/spender and/or the
+    -- "Recharge until full" toggle: the duration completing is a recharge tick,
+    -- NOT the end of the pool. Apply the Timer-Complete entries, then re-run
+    -- while still below Max — but only when this tick actually GAINED a stack,
+    -- so it always terminates at Max (never a perpetual run). Otherwise stop
+    -- but KEEP the current pool (so it reads full/at-its-count when idle).
+    if st and st.trackStacks and st.stackMode == "consume"
+       and (st.rechargeUntilFull or HasTimerCompleteEntry(st)) then
+        local before = td.stacks or 0
+        FireTimerCompleteEconomy(td)
+        local after = td.stacks or 0
+        local maxS = tonumber(st.maxStacks) or 5
+        if st.rechargeUntilFull and not st.noMaxStacks
+           and after > before and after < maxS then
+            td.active    = true
+            td.startTime = GetTime()
+            RecordActive(td.arcID, td, td.duration)
+            RefreshTimer(td)
+            RefreshStackDisplay(td)
+            return
+        end
+        -- Reached Max, single cycle, or no gain → stop, keep the current pool.
+        ClearActive(td.arcID)
+        RefreshStackDisplay(td)
+        ApplyVisuals(td)
+        return
+    end
     -- In refresh mode the main duration ending kills all stacks at once.
     -- In independent mode, stacks fall off on their own schedule and may
     -- have already cleared to 0; if any are still alive here, the main
@@ -1524,6 +1611,20 @@ evFrame:SetScript("OnEvent", function(self, event, arg1, arg2, arg3)
                and td.startTrigger and TriggerMatches(td.startTrigger, td, evEvent, evSpellID) then
             if not td.active or td.startTrigger.restartOnRefire then
                 ArcAurasTimer.StartTimer(arcID)
+                -- "Start full": the starting cast also consumes if it is itself
+                -- a spender, so a pre-seeded pool decrements from the very first
+                -- cast (e.g. Stormstrike both starts the window and spends a
+                -- stack). Without this the first cast would only seed the pool.
+                if td.startTrigger.startFull
+                   and td.startTrigger.stackMode == "consume"
+                   and td.startTrigger.spenders then
+                    for i = 1, #td.startTrigger.spenders do
+                        if GenSpenderMatches(td.startTrigger.spenders[i], evEvent, evSpellID) then
+                            ConsumeStack(td, td.startTrigger.spenders[i].amount or 1)
+                            break
+                        end
+                    end
+                end
             elseif td.startTrigger.trackStacks
                    and td.startTrigger.stackMode ~= "consume" then
                 -- Timer is already running AND restartOnRefire is off —

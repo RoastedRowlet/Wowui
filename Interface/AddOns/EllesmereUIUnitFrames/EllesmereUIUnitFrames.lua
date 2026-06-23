@@ -100,6 +100,7 @@ local defaults = {
             powerPercentTextPowerColor = false,
             healthClassColored = true,
             customBgColor = { r = 0.067, g = 0.067, b = 0.067 },
+            bgClassColored = false,
             healthDisplay = "both",
             showBuffs = false,
             maxBuffs = 4,
@@ -184,6 +185,13 @@ local defaults = {
             powerBarOpacity = 100,
             showPlayerAbsorb = "none",
             absorbCleanAlpha = 30,
+            -- Absorb Bar / Heal Absorb Bar: separate strips (see Raid Frames)
+            absorbBarPosition     = "none",
+            absorbBarHeight       = 4,
+            absorbBarColor        = { r = 1, g = 1, b = 1 },
+            healAbsorbBarPosition = "none",
+            healAbsorbBarHeight   = 4,
+            healAbsorbBarColor    = { r = 200/255, g = 29/255, b = 29/255 },
             showPlayerCastbar = false,
             showPlayerCastIcon = true,
             playerCastbarIconInWidth = true,
@@ -254,6 +262,7 @@ local defaults = {
             leaderIndicatorX = 0,
             leaderIndicatorY = 0,
             healthReverseFill = false,
+            smoothBars = false,
             powerReverseFill = false,
         },
         target = {
@@ -274,6 +283,7 @@ local defaults = {
             powerPercentTextPowerColor = false,
             healthClassColored = true,
             customBgColor = { r = 0.067, g = 0.067, b = 0.067 },
+            bgClassColored = false,
             castbarHeight = 14,
             castbarWidth = 181,
             showCastbar = true,
@@ -409,6 +419,7 @@ local defaults = {
             leaderIndicatorX = 0,
             leaderIndicatorY = 0,
             healthReverseFill = false,
+            smoothBars = false,
             powerReverseFill = false,
         },
         playerTarget = {
@@ -443,6 +454,13 @@ local defaults = {
             onlyPlayerDebuffs = false,
             showPlayerAbsorb = "none",
             absorbCleanAlpha = 30,
+            -- Absorb Bar / Heal Absorb Bar: separate strips (see Raid Frames)
+            absorbBarPosition     = "none",
+            absorbBarHeight       = 4,
+            absorbBarColor        = { r = 1, g = 1, b = 1 },
+            healAbsorbBarPosition = "none",
+            healAbsorbBarHeight   = 4,
+            healAbsorbBarColor    = { r = 200/255, g = 29/255, b = 29/255 },
             showPlayerCastbar = false,
             showClassPowerBar = false,
             classPowerBarX = 0,
@@ -452,6 +470,7 @@ local defaults = {
             playerCastbarWidth = 181,
             playerCastbarHeight = 14,
             healthReverseFill = false,
+            smoothBars = false,
             powerReverseFill = false,
         },
         targettarget = {
@@ -459,6 +478,7 @@ local defaults = {
             healthHeight = 25,
             healthClassColored = false,
             customBgColor = { r = 0.067, g = 0.067, b = 0.067 },
+            bgClassColored = false,
             showPortrait = false,
             portraitSide = "left",
             portraitMode = "2d",
@@ -482,6 +502,7 @@ local defaults = {
             highlightColor = { r = 1, g = 1, b = 1 },
             powerPosition = "none",
             healthReverseFill = false,
+            smoothBars = false,
         },
         -- Focus Target: independent clone of Target of Target defaults.
         -- MUST stay byte-identical to the targettarget block above so existing
@@ -492,6 +513,7 @@ local defaults = {
             healthHeight = 25,
             healthClassColored = false,
             customBgColor = { r = 0.067, g = 0.067, b = 0.067 },
+            bgClassColored = false,
             showPortrait = false,
             portraitSide = "left",
             portraitMode = "2d",
@@ -515,12 +537,14 @@ local defaults = {
             highlightColor = { r = 1, g = 1, b = 1 },
             powerPosition = "none",
             healthReverseFill = false,
+            smoothBars = false,
         },
         pet = {
             frameWidth = 101,
             healthHeight = 25,
             healthClassColored = false,
             customBgColor = { r = 0.067, g = 0.067, b = 0.067 },
+            bgClassColored = false,
             showPortrait = false,
             portraitSide = "left",
             portraitMode = "2d",
@@ -544,6 +568,7 @@ local defaults = {
             highlightColor = { r = 1, g = 1, b = 1 },
             powerPosition = "none",
             healthReverseFill = false,
+            smoothBars = false,
         },
         focus = {
             frameWidth = 160,
@@ -563,6 +588,7 @@ local defaults = {
             powerPercentTextPowerColor = false,
             healthClassColored = true,
             customBgColor = { r = 0.067, g = 0.067, b = 0.067 },
+            bgClassColored = false,
             castbarHeight = 14,
             castbarWidth = 160,
             showCastbar = true,
@@ -655,6 +681,13 @@ local defaults = {
             powerBarOpacity = 100,
             showPlayerAbsorb = "none",
             absorbCleanAlpha = 30,
+            -- Absorb Bar / Heal Absorb Bar: separate strips (see Raid Frames)
+            absorbBarPosition     = "none",
+            absorbBarHeight       = 4,
+            absorbBarColor        = { r = 1, g = 1, b = 1 },
+            healAbsorbBarPosition = "none",
+            healAbsorbBarHeight   = 4,
+            healAbsorbBarColor    = { r = 200/255, g = 29/255, b = 29/255 },
             onlyPlayerDebuffs = true,
             debuffAnchor = "bottomleft",
             debuffGrowth = "auto",
@@ -689,6 +722,7 @@ local defaults = {
             raidMarkerX = 0,
             raidMarkerY = 0,
             healthReverseFill = false,
+            smoothBars = false,
             powerReverseFill = false,
         },
         boss = {
@@ -710,6 +744,7 @@ local defaults = {
             powerPercentTextPowerColor = false,
             healthClassColored = true,
             customBgColor = { r = 0.067, g = 0.067, b = 0.067 },
+            bgClassColored = false,
             castbarHeight = 14,
             showCastbar = true,
             showCastIcon = true,
@@ -759,6 +794,13 @@ local defaults = {
             simpleDebuffShowCooldownText = false,
             simpleDebuffCooldownTextSize = 14,
             simpleDebuffs = "left",  -- "none"/"left"/"right": simple display forces that-side anchor + frame-height-matched debuff size (legacy boolean true=left / false=none honored at read time)
+            simpleBuffs = "none",  -- "none"/"left"/"right": simple BUFF display (mirrors simpleDebuffs but defaults off)
+            simpleBuffShowCooldownText = false,
+            simpleBuffCooldownTextSize = 14,
+            buffSpacing = 1,
+            debuffSpacing = 1,
+            simpleBuffSpacing = 1,
+            simpleDebuffSpacing = 1,
             textSize = 12,
             leftTextContent = "name",
             leftTextClassColor = false,
@@ -783,6 +825,7 @@ local defaults = {
             raidMarkerY = 0,
             bossStackDirection = "down",
             healthReverseFill = false,
+            smoothBars = false,
         },
         enabledFrames = {
             player = true,
@@ -882,6 +925,7 @@ end
 
 local function SetFSFont(fs, size, flags)
   if not (fs and fs.SetFont) then return end
+  -- Outline flag is already slug-gated at the source (GetFontOutlineFlag).
   local f = flags or (EllesmereUI and EllesmereUI.GetFontOutlineFlag and EllesmereUI.GetFontOutlineFlag("unitFrames")) or ""
   -- 12.0.7: drop shadows only render from a FontObject; prime before SetFont.
   if EllesmereUI and EllesmereUI.PrimeFontShadow then
@@ -1043,6 +1087,26 @@ end
 local DARK_HEALTH_R, DARK_HEALTH_G, DARK_HEALTH_B = 0x11/255, 0x11/255, 0x11/255  -- #111111
 local DARK_BG_R, DARK_BG_G, DARK_BG_B = 0x4f/255, 0x4f/255, 0x4f/255  -- #4f4f4f
 
+-- Anchor the health bg to cover ONLY the empty (missing-health) portion so a
+-- reduced fill opacity never reveals the bg behind the filled section. The empty
+-- side flips with reverse fill: a normal bar empties on the RIGHT, a reverse-fill
+-- bar empties on the LEFT. Anchoring to the wrong side collapses the bg to zero
+-- width whenever the bar is not full -- the reverse-fill "transparent background"
+-- bug. The anchor is relational, so the edge tracks the fill as health changes.
+local function AnchorHealthBg(health)
+    local bg = health and health.bg
+    local tex = health and health.GetStatusBarTexture and health:GetStatusBarTexture()
+    if not bg or not tex then return end
+    bg:ClearAllPoints()
+    if health.GetReverseFill and health:GetReverseFill() then
+        bg:SetPoint("TOPLEFT", health, "TOPLEFT", 0, 0)
+        bg:SetPoint("BOTTOMRIGHT", tex, "BOTTOMLEFT", 0, 0)
+    else
+        bg:SetPoint("TOPLEFT", tex, "TOPRIGHT", 0, 0)
+        bg:SetPoint("BOTTOMRIGHT", health, "BOTTOMRIGHT", 0, 0)
+    end
+end
+
 local function ApplyDarkTheme(health)
     if not health then return end
     local isDark = db and db.profile and db.profile.darkTheme
@@ -1057,9 +1121,7 @@ local function ApplyDarkTheme(health)
         if health.bg then
             -- Anchor bg to only cover the empty (missing-health) portion so the
             -- bar opacity fill shows the world behind it, not the bg color.
-            health.bg:ClearAllPoints()
-            health.bg:SetPoint("TOPLEFT", health:GetStatusBarTexture(), "TOPRIGHT", 0, 0)
-            health.bg:SetPoint("BOTTOMRIGHT", health, "BOTTOMRIGHT", 0, 0)
+            AnchorHealthBg(health)
             health.bg:SetColorTexture(DARK_BG_R, DARK_BG_G, DARK_BG_B, 1)
             health.bg:SetAlpha(1)
         end
@@ -1071,9 +1133,7 @@ local function ApplyDarkTheme(health)
         health.PostUpdateColor = function(self)
             self:SetStatusBarColor(DARK_HEALTH_R, DARK_HEALTH_G, DARK_HEALTH_B)
             if self.bg then
-                self.bg:ClearAllPoints()
-                self.bg:SetPoint("TOPLEFT", self:GetStatusBarTexture(), "TOPRIGHT", 0, 0)
-                self.bg:SetPoint("BOTTOMRIGHT", self, "BOTTOMRIGHT", 0, 0)
+                AnchorHealthBg(self)
             end
         end
     else
@@ -1099,12 +1159,13 @@ local function ApplyDarkTheme(health)
         -- Tint bg to 20% of the class/reaction color, or use custom bg color.
         -- Alpha is NOT re-applied ? SetStatusBarColor(r,g,b) preserves
         -- existing texture alpha through oUF recolors.
-        health.PostUpdateColor = function(self, _, color)
+        health.PostUpdateColor = function(self, unit, color)
             local uKey = self._euiUnitKey
             local uSettings = uKey and db.profile[uKey]
             local cFill = uSettings and uSettings.customFillColor
             local cBg   = uSettings and uSettings.customBgColor
             local classColored = uSettings and uSettings.healthClassColored
+            local bgClassColored = uSettings and uSettings.bgClassColored
             -- Resolve base fill color (custom, or oUF's class/reaction color), then apply
             -- gradient additively when enabled; otherwise the existing flat behavior.
             local bR, bG, bB
@@ -1126,7 +1187,24 @@ local function ApplyDarkTheme(health)
                 self:SetStatusBarColor(cFill.r, cFill.g, cFill.b)
             end
             if self.bg then
-                if cBg then
+                -- Keep bg covering only the empty (missing-health) portion as
+                -- health changes, so a reduced fill opacity never reveals the bg
+                -- behind the filled section. Matches the dark-mode path.
+                AnchorHealthBg(self)
+                local bgClassR, bgClassG, bgClassB
+                if bgClassColored then
+                    local u = unit or self.unit or uKey
+                    if u then
+                        local _, ct = UnitClass(u)
+                        -- ct can be a secret value (out-of-range/uninspectable units); skip if so.
+                        local cc = ct and not issecretvalue(ct) and EllesmereUI.GetClassColor(ct)
+                        if cc then bgClassR, bgClassG, bgClassB = cc.r, cc.g, cc.b end
+                    end
+                end
+                if bgClassR then
+                    -- Full class color; opacity is controlled by customBgAlpha (SetAlpha).
+                    self.bg:SetColorTexture(bgClassR, bgClassG, bgClassB, 1)
+                elseif cBg then
                     self.bg:SetColorTexture(cBg.r, cBg.g, cBg.b, 1)
                 elseif cFill and not classColored then
                     self.bg:SetColorTexture(cFill.r * 0.2, cFill.g * 0.2, cFill.b * 0.2, 1)
@@ -1140,11 +1218,26 @@ local function ApplyDarkTheme(health)
             end
         end
         if health.bg then
-            -- Restore bg to cover the full bar area
-            health.bg:ClearAllPoints()
-            PP.Point(health.bg, "TOPLEFT", health, "TOPLEFT", 0, 0)
-            PP.Point(health.bg, "BOTTOMRIGHT", health, "BOTTOMRIGHT", 0, 0)
-            if customBg then
+            -- Anchor bg to only cover the empty (missing-health) portion so the
+            -- bar opacity fill shows the world behind it, not the bg color. The
+            -- anchor is relational, so the left edge tracks the fill as health
+            -- changes; PostUpdateColor re-applies it to survive texture swaps.
+            AnchorHealthBg(health)
+            local bgClassColored = unitSettings and unitSettings.bgClassColored
+            local bgClassR, bgClassG, bgClassB
+            if bgClassColored then
+                local u = unitKey or (health.__owner and health.__owner.unit)
+                if u then
+                    local _, ct = UnitClass(u)
+                    -- ct can be a secret value (out-of-range/uninspectable units); skip if so.
+                    local cc = ct and not issecretvalue(ct) and EllesmereUI.GetClassColor(ct)
+                    if cc then bgClassR, bgClassG, bgClassB = cc.r, cc.g, cc.b end
+                end
+            end
+            if bgClassR then
+                -- Full class color; PostUpdateColor keeps it correct on updates.
+                health.bg:SetColorTexture(bgClassR, bgClassG, bgClassB, 1)
+            elseif customBg then
                 health.bg:SetColorTexture(customBg.r, customBg.g, customBg.b, 1)
             elseif customFill then
                 health.bg:SetColorTexture(customFill.r * 0.2, customFill.g * 0.2, customFill.b * 0.2, 1)
@@ -1159,20 +1252,25 @@ ns.ApplyDarkTheme = ApplyDarkTheme
 
 -- Smart power text: percent for healers/prot pally/arcane mage, numeric for everyone else.
 -- Shared helper used by both the oUF tag and the resource bars renderer.
-local function EUI_IsSmartPowerPercent()
+-- `displayedPowerType` (optional, an Enum.PowerType value) is the power the
+-- caller's bar is actually showing. For form/spec-shifting classes (Druid,
+-- Monk) the decision must follow the displayed power, NOT UnitPowerType: a
+-- Balance druid's UnitPowerType is Astral Power even while the power bar shows
+-- Mana, so without this the mana number would render raw instead of percent.
+local function EUI_IsSmartPowerPercent(displayedPowerType)
     local _, cls = UnitClass("player")
     if not cls then return false end
-    -- Druids: Restoration always uses percent (mana healer, % is always
-    -- what matters -- including Incarnation: Tree of Life, which lands on
-    -- a form index that varies by spec/talent loadout). Other specs use
-    -- percent in caster/travel form and raw value in cat/bear.
-    if cls == "DRUID" then
-        local spec = GetSpecialization()
-        if spec == 4 then return true end
-        local form = GetShapeshiftForm()
-        return form == nil or form == 0 or form == 3
+    -- Druid / Monk both shift their displayed power with form/spec. Percent
+    -- only while the bar shows Mana (Druid caster/Tree/travel + Mistweaver),
+    -- raw value otherwise (Cat=Energy, Bear=Rage, Moonkin=Astral, WW/BRM=Energy).
+    -- This is consistent across every spec, including Restoration weaving
+    -- Cat/Bear where the bar is really Energy/Rage. Prefer the caller-supplied
+    -- displayed power; fall back to the live primary power type.
+    if cls == "DRUID" or cls == "MONK" then
+        local pt = displayedPowerType or UnitPowerType("player")
+        return pt == Enum.PowerType.Mana
     end
-    if cls == "PRIEST" or cls == "SHAMAN" or cls == "MONK" then
+    if cls == "PRIEST" or cls == "SHAMAN" then
         return true
     end
     -- Paladin: Holy and Protection (mana-based specs)
@@ -1370,14 +1468,17 @@ local function ResolveBuffLayout(anchor, growth)
     anchor = anchor or "topleft"
     growth = growth or "auto"
 
-    -- initialAnchor: first icon always starts at the anchor corner
+    -- initialAnchor: first icon always starts at the anchor corner. Left/Right
+    -- use the vertical-CENTER side point (not a bottom corner) so the row stays
+    -- centered on the frame's side and grows up/down evenly when the icon size
+    -- changes -- matching the in-game boss preview.
     local iaMap = {
         topleft     = "BOTTOMLEFT",
         topright    = "BOTTOMRIGHT",
         bottomleft  = "TOPLEFT",
         bottomright = "TOPRIGHT",
-        left        = "BOTTOMRIGHT",
-        right       = "BOTTOMLEFT",
+        left        = "RIGHT",
+        right       = "LEFT",
     }
     local ia = iaMap[anchor] or "BOTTOMLEFT"
 
@@ -1430,6 +1531,60 @@ function ns.GetBossSimpleDebuffMode(s)
     if v == "none" or v == "left" or v == "right" then return v end
     if v == false then return "none" end
     return "left"  -- nil or legacy true
+end
+
+-- Boss Simple Debuff Display X/Y offsets. Returns the dedicated
+-- simpleDebuffOffsetX/Y if set, otherwise falls back to the regular debuff
+-- offsets so existing users' debuff offsets carry over as the defaults for
+-- simple mode (zero-migration view; import-safe -- no migration flag to skip).
+-- Once the user edits the Simple Debuff Display cog, the dedicated keys take
+-- over and the two offsets are fully independent.
+function ns.GetBossSimpleDebuffOffset(s)
+    if not s then return 0, 0 end
+    local x = s.simpleDebuffOffsetX
+    if x == nil then x = s.debuffOffsetX or 0 end
+    local y = s.simpleDebuffOffsetY
+    if y == nil then y = s.debuffOffsetY or 0 end
+    return x, y
+end
+
+-- Boss "Simple Buff Display" mode: "none" | "left" | "right". Brand-new feature
+-- so it defaults OFF (nil/false/unknown -> "none"); a stray legacy boolean true
+-- is tolerated as "left" for symmetry with the debuff resolver.
+function ns.GetBossSimpleBuffMode(s)
+    local v = s and s.simpleBuffs
+    if v == "none" or v == "left" or v == "right" then return v end
+    if v == true then return "left" end
+    return "none"
+end
+
+-- Boss Simple Buff Display X/Y offsets. Mirrors ns.GetBossSimpleDebuffOffset:
+-- returns simpleBuffOffsetX/Y if set, otherwise falls back to the regular buff
+-- offsets so existing users' buff offsets carry over as the simple defaults
+-- (zero-migration view; import-safe). Independent once the user edits the cog.
+function ns.GetBossSimpleBuffOffset(s)
+    if not s then return 0, 0 end
+    local x = s.simpleBuffOffsetX
+    if x == nil then x = s.buffOffsetX or 0 end
+    local y = s.simpleBuffOffsetY
+    if y == nil then y = s.buffOffsetY or 0 end
+    return x, y
+end
+
+-- Boss aura icon spacing, in PHYSICAL pixels. Simple display modes use their
+-- own dedicated keys (simpleBuffSpacing/simpleDebuffSpacing); regular buffs and
+-- debuffs use buffSpacing/debuffSpacing. A brand-new setting with no legacy
+-- equivalent, so every variant defaults to 1 independently (no offset-style
+-- fallback). Callers convert the returned pixel count to coordinate space with
+-- PP.FromPixels so the gap between icons is physical-pixel-perfect at any scale.
+-- (0 and negative values are truthy in Lua, so `or 1` only fills nil.)
+function ns.GetBossBuffSpacing(s, simpleOn)
+    if simpleOn then return (s and s.simpleBuffSpacing) or 1 end
+    return (s and s.buffSpacing) or 1
+end
+function ns.GetBossDebuffSpacing(s, simpleOn)
+    if simpleOn then return (s and s.simpleDebuffSpacing) or 1 end
+    return (s and s.debuffSpacing) or 1
 end
 
 local function GetPlayerTargetHealthTag(unit)
@@ -2340,8 +2495,14 @@ local function CreateHealthBar(frame, unit, height, xOffset, settings, rightInse
 
     ApplyHealthBarTexture(health, UnitToSettingsKey(unit))
     ApplyHealthBarAlpha(health, UnitToSettingsKey(unit))
-    ApplyDarkTheme(health)
     health:SetReverseFill(settings.healthReverseFill and true or false)
+    ApplyDarkTheme(health)
+
+    -- Smooth bar interpolation (opt-in; defaults off)
+    if settings.smoothBars then
+        health.smoothing = Enum and Enum.StatusBarInterpolation
+            and Enum.StatusBarInterpolation.ExponentialEaseOut
+    end
 
     return health
 end
@@ -2357,6 +2518,10 @@ local ABSORB_STYLE_TEX = {
     stripedReversed = "Interface\\AddOns\\EllesmereUI\\media\\textures\\shields\\striped-5-reversed.png",
     clean           = "Interface\\Buttons\\WHITE8X8",
     blizzard        = "Interface\\AddOns\\EllesmereUI\\media\\textures\\shields\\blizzard.tga",
+    largeOutlinedStripes  = "Interface\\AddOns\\EllesmereUI\\media\\textures\\shields\\large-habsorb-left.png",
+    largeOutlinedStripesR = "Interface\\AddOns\\EllesmereUI\\media\\textures\\shields\\large-habsorb-right.png",
+    largeStripes          = "Interface\\AddOns\\EllesmereUI\\media\\textures\\shields\\large-absorb-left.png",
+    largeStripesR         = "Interface\\AddOns\\EllesmereUI\\media\\textures\\shields\\large-absorb-right.png",
 }
 local ABSORB_STYLE_ALPHA = {
     striped         = 0.8,
@@ -2386,7 +2551,7 @@ local function ApplyAbsorbStyle(absorbBar, style, settings)
     local ac = (settings and settings.absorbColor) or { r = 1, g = 1, b = 1 }
     -- striped-5-reversed.png is a repeating tile (the striped3 shield texture
     -- is a stretch texture; do not change how it renders)
-    local tiled = (style == "stripedReversed")
+    local tiled = (style == "stripedReversed" or style == "largeStripes" or style == "largeStripesR" or style == "largeOutlinedStripes" or style == "largeOutlinedStripesR")
     local mask = absorbBar._absorbMask
     absorbBar:SetStatusBarTexture(tex)
     absorbBar:SetStatusBarColor(ac.r, ac.g, ac.b, alpha)
@@ -2418,7 +2583,9 @@ local function ApplyHealAbsorbStyle(haBar, style, settings)
     local tex = ABSORB_STYLE_TEX[style] or "Interface\\Buttons\\WHITE8X8"
     local alpha = ((settings and settings.healAbsorbOpacity) or 65) / 100
     local hc = (settings and settings.healAbsorbColor) or { r = 0.8, g = 0.15, b = 0.15 }
-    local tiled = (style == "stripedReversed")
+    -- The "Large Outlined Stripes" styles are pre-colored; render them untinted.
+    if style == "largeOutlinedStripes" or style == "largeOutlinedStripesR" then hc = { r = 1, g = 1, b = 1 } end
+    local tiled = (style == "stripedReversed" or style == "largeStripes" or style == "largeStripesR" or style == "largeOutlinedStripes" or style == "largeOutlinedStripesR")
     local mask = haBar._absorbMask
     haBar:SetStatusBarTexture(tex)
     haBar:SetStatusBarColor(hc.r, hc.g, hc.b, alpha)
@@ -2535,8 +2702,24 @@ local function UpdateAbsorbBarReverseFill(frame, isReversed)
         ab:SetPoint("BOTTOMRIGHT", hpBar, "BOTTOMRIGHT", 0, 0)
     end
 
-    -- Heal absorb placement (independent of shield absorb)
+    -- Heal absorb placement (independent of shield absorb). The heal absorb
+    -- has its OWN clip frame (ab._healClip) so right/left span the full bar
+    -- (filled + missing health) while overlay stays clipped to filled health.
     local ha = ab._healAbsorb
+    local healClip = ab._healClip
+    if healClip then
+        healClip:ClearAllPoints()
+        if healMode == "right" or healMode == "left" then
+            healClip:SetPoint("TOPLEFT",     hpBar, "TOPLEFT",     0, 0)
+            healClip:SetPoint("BOTTOMRIGHT", hpBar, "BOTTOMRIGHT", 0, 0)
+        elseif isReversed then
+            healClip:SetPoint("TOPRIGHT",   hpBar, "TOPRIGHT",   0, 0)
+            healClip:SetPoint("BOTTOMLEFT", hpTex, "BOTTOMLEFT", 0, 0)
+        else
+            healClip:SetPoint("TOPLEFT",     hpBar, "TOPLEFT",     0, 0)
+            healClip:SetPoint("BOTTOMRIGHT", hpTex, "BOTTOMRIGHT", 0, 0)
+        end
+    end
     if ha then
         ha:ClearAllPoints()
         if healMode == "right" then
@@ -2559,6 +2742,45 @@ local function UpdateAbsorbBarReverseFill(frame, isReversed)
                 ha:SetPoint("BOTTOMRIGHT", hpTex, "BOTTOMRIGHT", 0, 0)
             end
         end
+    end
+end
+
+-- Absorb / Heal Absorb strip-bar position resolvers + layout (mirrors Raid
+-- Frames). On ns so the options-panel preview can reuse the layout.
+ns.UF_GetAbsorbBarPos     = function(s) return (s and s.absorbBarPosition)     or "none" end
+ns.UF_GetHealAbsorbBarPos = function(s) return (s and s.healAbsorbBarPosition) or "none" end
+
+-- Anchor/orient a strip bar (Absorb Bar or Heal Absorb Bar). "above*" sit on top
+-- of the health bar; "top*" sit inside at its top, drawn just above the absorb
+-- texture; "belowAbsorb" (heal bar only) sits flush below the Absorb Bar's bottom
+-- edge, derived from the Absorb Bar's POSITION (not its live visibility, so it
+-- never shifts up). "*Right" fills from the right edge. `absorbLevel` is the
+-- absorb-overlay frame level (inside strips render at +1 above it).
+ns.UF_ApplyStripBarLayout = function(stripBar, hp, position, height, absorbLevel, absorbPos, absorbHeight)
+    if not stripBar or not hp then return end
+    stripBar:ClearAllPoints()
+    stripBar:SetHeight(PP.Scale(height or 4))
+    local insideLevel = (absorbLevel or (hp:GetFrameLevel() + 1)) + 1
+    if position == "belowAbsorb" then
+        absorbPos = absorbPos or "none"
+        local yOff = 0
+        if absorbPos == "topRight" or absorbPos == "topLeft" then
+            yOff = -PP.Scale(absorbHeight or 4)
+        end
+        stripBar:SetReverseFill(absorbPos ~= "aboveLeft" and absorbPos ~= "topLeft")
+        stripBar:SetPoint("TOPLEFT",  hp, "TOPLEFT",  0, yOff)
+        stripBar:SetPoint("TOPRIGHT", hp, "TOPRIGHT", 0, yOff)
+        stripBar:SetFrameLevel(insideLevel)
+    elseif position == "topRight" or position == "topLeft" then
+        stripBar:SetReverseFill(position == "topRight")
+        stripBar:SetPoint("TOPLEFT",  hp, "TOPLEFT",  0, 0)
+        stripBar:SetPoint("TOPRIGHT", hp, "TOPRIGHT", 0, 0)
+        stripBar:SetFrameLevel(insideLevel)
+    else
+        stripBar:SetReverseFill(position == "aboveRight")
+        stripBar:SetPoint("BOTTOMLEFT",  hp, "TOPLEFT",  0, 0)
+        stripBar:SetPoint("BOTTOMRIGHT", hp, "TOPRIGHT", 0, 0)
+        stripBar:SetFrameLevel(hp:GetFrameLevel() + 3)
     end
 end
 
@@ -2649,9 +2871,21 @@ local function CreateAbsorbBar(frame, unit, settings)
     end
 
     -- Heal absorb bar: overlays the filled-health area in red.
-    -- Uses curClip so it's clipped to the filled portion of the health bar.
     -- Reverse-fills from the health texture edge inward (eats into green).
-    local healAbsorbBar = CreateFrame("StatusBar", nil, curClip)
+    -- Heal absorb has its OWN clip frame (not the shield's curClip) so its
+    -- placement is independent: overlay clips to the filled health, while
+    -- right/left span the FULL bar (filled + missing health). Bounds are set
+    -- per healAbsorbEdgeMode in UpdateAbsorbBarReverseFill.
+    local healClip = CreateFrame("Frame", nil, hpBar)
+    if isReversed then
+        healClip:SetPoint("TOPRIGHT",   hpBar, "TOPRIGHT", 0, 0)
+        healClip:SetPoint("BOTTOMLEFT", hpBar:GetStatusBarTexture(), "BOTTOMLEFT", 0, 0)
+    else
+        healClip:SetPoint("TOPLEFT",     hpBar, "TOPLEFT", 0, 0)
+        healClip:SetPoint("BOTTOMRIGHT", hpBar:GetStatusBarTexture(), "BOTTOMRIGHT", 0, 0)
+    end
+    healClip:SetClipsChildren(true)
+    local healAbsorbBar = CreateFrame("StatusBar", nil, healClip)
     healAbsorbBar:SetStatusBarTexture("Interface\\Buttons\\WHITE8X8")
     healAbsorbBar._absorbMask = absorbMask
     local haFill = healAbsorbBar:GetStatusBarTexture()
@@ -2670,13 +2904,50 @@ local function CreateAbsorbBar(frame, unit, settings)
     healAbsorbBar:SetFrameLevel(hpBar:GetFrameLevel() + 1)
     healAbsorbBar:Hide()
 
+    -- Black backing behind the heal-absorb texture (all styles; opacity user-set
+    -- via healAbsorbBgOpacity). Drawn UNDER the fill (ARTWORK sublevel 1 < the
+    -- fill's 2), masked + SetAllPoints'd to the fill rect each update so it
+    -- tracks the secret heal-absorb amount and collapses when there is none.
+    local haBg = healAbsorbBar:CreateTexture(nil, "ARTWORK", nil, 1)
+    haBg:SetColorTexture(0, 0, 0, 0.15)
+    if absorbMask then haBg:AddMaskTexture(absorbMask) end
+    haBg:Hide()
+    healAbsorbBar._bg = haBg
+
+    -- Absorb Bar + Heal Absorb Bar: separate strips (mirrors Raid Frames), each
+    -- showing the shield / heal-absorb amount at a configurable position.
+    -- Parented to the frame so "above" positions can sit outside the health bar.
+    -- Always created hidden; the Override drives them.
+    local absorbTopBar = CreateFrame("StatusBar", nil, frame)
+    absorbTopBar:SetStatusBarTexture("Interface\\Buttons\\WHITE8X8")
+    absorbTopBar:SetStatusBarColor(1, 1, 1, 1)
+    absorbTopBar:SetReverseFill(true)
+    absorbTopBar:SetPoint("BOTTOMLEFT",  hpBar, "TOPLEFT",  0, 0)
+    absorbTopBar:SetPoint("BOTTOMRIGHT", hpBar, "TOPRIGHT", 0, 0)
+    absorbTopBar:SetHeight(4)
+    absorbTopBar:SetFrameLevel(hpBar:GetFrameLevel() + 3)
+    absorbTopBar:Hide()
+
+    local healAbsorbTopBar = CreateFrame("StatusBar", nil, frame)
+    healAbsorbTopBar:SetStatusBarTexture("Interface\\Buttons\\WHITE8X8")
+    healAbsorbTopBar:SetStatusBarColor(200/255, 29/255, 29/255, 1)
+    healAbsorbTopBar:SetReverseFill(true)
+    healAbsorbTopBar:SetPoint("BOTTOMLEFT",  hpBar, "TOPLEFT",  0, 0)
+    healAbsorbTopBar:SetPoint("BOTTOMRIGHT", hpBar, "TOPRIGHT", 0, 0)
+    healAbsorbTopBar:SetHeight(4)
+    healAbsorbTopBar:SetFrameLevel(hpBar:GetFrameLevel() + 3)
+    healAbsorbTopBar:Hide()
+
     -- Attach extras to the main bar (backfill) so anything that references
     -- HealthPrediction.damageAbsorb can hide/show both segments together.
     backfillBar._forward      = forwardBar
     backfillBar._healAbsorb   = healAbsorbBar
+    backfillBar._topBar       = absorbTopBar
+    backfillBar._healTopBar   = healAbsorbTopBar
     backfillBar._hpBar        = hpBar
     backfillBar._hpCalculator = hpCalc
     backfillBar._curClip      = curClip
+    backfillBar._healClip     = healClip
     backfillBar._missClip     = missClip
     backfillBar._absorbMask   = absorbMask
     backfillBar._isReversed   = isReversed
@@ -2726,15 +2997,28 @@ local function CreateAbsorbBar(frame, unit, settings)
             local calc = ab._hpCalculator
             if not hp then return end
 
-            -- Respect the user's absorb style setting: hide both segments
-            -- and skip the update when absorbs are "none". Without this,
-            -- every unit event would re-Show() them after ReloadFrames hid them.
+            -- Heal absorb renders independently of the shield absorb. The
+            -- shield "none" setting hides only the shield segments below; we
+            -- skip the whole update only when BOTH the shield and the heal
+            -- absorb are off, so unit events don't re-Show() bars ReloadFrames
+            -- hid. (Heal Absorb Style defaults to "clean", so it shows even
+            -- when the shield Absorb Style is "none".)
             local s = GetSettingsForUnit(updUnit)
             local ha = ab._healAbsorb
-            if s and (not s.showPlayerAbsorb or s.showPlayerAbsorb == "none") then
+            local topBar = ab._topBar
+            local healTopBar = ab._healTopBar
+            local barPos = ns.UF_GetAbsorbBarPos(s)
+            local barOn = topBar and barPos ~= "none"
+            local healBarPos = ns.UF_GetHealAbsorbBarPos(s)
+            local healBarOn = healTopBar and healBarPos ~= "none"
+            local shieldOff = s and (not s.showPlayerAbsorb or s.showPlayerAbsorb == "none")
+            local healOff = (((s and s.healAbsorbStyle) or "clean") == "none")
+            if shieldOff and healOff and not barOn and not healBarOn then
                 ab:Hide()
                 if fw then fw:Hide() end
                 if ha then ha:Hide() end
+                if topBar then topBar:Hide() end
+                if healTopBar then healTopBar:Hide() end
                 return
             end
 
@@ -2754,6 +3038,45 @@ local function CreateAbsorbBar(frame, unit, settings)
             ab:SetWidth(hpW); ab:SetHeight(hpH)
             if fw then fw:SetWidth(hpW); fw:SetHeight(hpH) end
 
+            -- Strip bars (mirrors Raid Frames): independent of the overlay styles.
+            if topBar then
+                if barOn then
+                    local bc = (s and s.absorbBarColor) or { r = 1, g = 1, b = 1 }
+                    local bh = (s and s.absorbBarHeight) or 4
+                    -- Re-layout only when position/height changes (no per-update SetPoint churn).
+                    if topBar._lpPos ~= barPos or topBar._lpH ~= bh then
+                        topBar._lpPos = barPos; topBar._lpH = bh
+                        ns.UF_ApplyStripBarLayout(topBar, hp, barPos, bh, ab:GetFrameLevel())
+                    end
+                    topBar:SetStatusBarColor(bc.r, bc.g, bc.b, bc.a or 1)
+                    topBar:SetMinMaxValues(0, maxHealth)
+                    topBar:SetValue(absorbAmt)
+                    topBar:Show()
+                else
+                    topBar:Hide()
+                end
+            end
+            if healTopBar then
+                if healBarOn then
+                    local hbc = (s and s.healAbsorbBarColor) or { r = 200/255, g = 29/255, b = 29/255 }
+                    local hbh = (s and s.healAbsorbBarHeight) or 4
+                    local abh = (s and s.absorbBarHeight) or 4
+                    -- Re-layout only when its or the Absorb Bar's position/height changes.
+                    if healTopBar._lpPos ~= healBarPos or healTopBar._lpH ~= hbh
+                       or healTopBar._lpAP ~= barPos or healTopBar._lpAH ~= abh then
+                        healTopBar._lpPos = healBarPos; healTopBar._lpH = hbh
+                        healTopBar._lpAP = barPos; healTopBar._lpAH = abh
+                        ns.UF_ApplyStripBarLayout(healTopBar, hp, healBarPos, hbh, ab:GetFrameLevel(), barPos, abh)
+                    end
+                    healTopBar:SetStatusBarColor(hbc.r, hbc.g, hbc.b, hbc.a or 1)
+                    healTopBar:SetMinMaxValues(0, maxHealth)
+                    healTopBar:SetValue((UnitGetTotalHealAbsorbs and UnitGetTotalHealAbsorbs(updUnit)) or 0)
+                    healTopBar:Show()
+                else
+                    healTopBar:Hide()
+                end
+            end
+
             -- Re-anchor when the placement settings change. The key starts
             -- nil, so this also applies the saved placement on first update.
             local absorbMode = (s and s.absorbEdgeMode) or "overlay"
@@ -2763,31 +3086,39 @@ local function CreateAbsorbBar(frame, unit, settings)
                 UpdateAbsorbBarReverseFill(self, ab._isReversed)
             end
 
-            -- Re-apply absorb style only when the style setting changes
-            -- (not on every health event). Calling SetStatusBarTexture on
-            -- every update causes the bar to flash visible even at zero absorb.
-            -- Opacity/color edits re-apply via ReloadFrames' direct call.
-            local absStyle = s and s.showPlayerAbsorb
-            if absStyle and absStyle ~= "none" and ab._lastAbsStyle ~= absStyle then
-                ab._lastAbsStyle = absStyle
-                ApplyAbsorbStyle(ab, absStyle, s)
-            end
+            -- Shield (damage) absorb segments render only when enabled. When
+            -- the shield style is "none" we hide them and fall through to the
+            -- heal absorb below (which is independent of the shield).
+            if shieldOff then
+                ab:Hide()
+                if fw then fw:Hide() end
+            else
+                -- Re-apply absorb style only when the style setting changes
+                -- (not on every health event). Calling SetStatusBarTexture on
+                -- every update causes the bar to flash visible even at zero absorb.
+                -- Opacity/color edits re-apply via ReloadFrames' direct call.
+                local absStyle = s and s.showPlayerAbsorb
+                if absStyle and absStyle ~= "none" and ab._lastAbsStyle ~= absStyle then
+                    ab._lastAbsStyle = absStyle
+                    ApplyAbsorbStyle(ab, absStyle, s)
+                end
 
-            -- Both bars get the raw absorb value and the normal maxHealth.
-            -- The clip frames do the "min(absorb, curHealth)" and
-            -- "max(0, absorb - curHealth)" math visually so we never need
-            -- Lua arithmetic on the (possibly secret) absorb value.
-            ab:SetMinMaxValues(0, maxHealth)
-            ab:SetValue(absorbAmt)
-            ab:Show()
+                -- Both bars get the raw absorb value and the normal maxHealth.
+                -- The clip frames do the "min(absorb, curHealth)" and
+                -- "max(0, absorb - curHealth)" math visually so we never need
+                -- Lua arithmetic on the (possibly secret) absorb value.
+                ab:SetMinMaxValues(0, maxHealth)
+                ab:SetValue(absorbAmt)
+                ab:Show()
 
-            if fw then
-                fw:SetMinMaxValues(0, maxHealth)
-                fw:SetValue(absorbAmt)
-                fw:Show()
-                -- Edge modes: the full-bar backfill shows the whole absorb,
-                -- so the overlay-only forward bar is not needed.
-                if absorbMode ~= "overlay" then fw:Hide() end
+                if fw then
+                    fw:SetMinMaxValues(0, maxHealth)
+                    fw:SetValue(absorbAmt)
+                    fw:Show()
+                    -- Edge modes: the full-bar backfill shows the whole absorb,
+                    -- so the overlay-only forward bar is not needed.
+                    if absorbMode ~= "overlay" then fw:Hide() end
+                end
             end
 
             -- Heal absorb: overlay eating into filled health.
@@ -2810,6 +3141,13 @@ local function CreateAbsorbBar(frame, unit, settings)
                     ha:SetMinMaxValues(0, maxHealth)
                     ha:SetValue(healAbsorbAmt)
                     ha:Show()
+                    -- Black backing: track the heal-absorb fill rect, opacity from settings.
+                    local hbg = ha._bg
+                    if hbg then
+                        hbg:SetColorTexture(0, 0, 0, ((s and s.healAbsorbBgOpacity) or 15) / 100)
+                        hbg:SetAllPoints(ha:GetStatusBarTexture())
+                        hbg:Show()
+                    end
                 end
             end
         end,
@@ -4223,16 +4561,32 @@ local function ApplyAuraCooldownText(container, showCD, cdSize, stackSize, cdOff
     end
 end
 
--- Build a SIGNATURE string from the per-unit filter toggles (Own Only = PLAYER,
--- Raid Frames = RAID, Important = IMPORTANT). This is no longer the actual fetch
--- filter -- it's only used as part of each element's change-detection key so a
--- ForceUpdate fires when a toggle flips. The real fetch uses the broad base
--- filter + the per-aura OR FilterAura below. On ns (not a local) to stay clear
--- of the main-chunk 200-local cap.
-function ns.ComposeAuraFilter(base, ownOnly, raidFrames, important)
-    if ownOnly    then base = base .. "|PLAYER" end
-    if raidFrames then base = base .. "|RAID" end
-    if important  then base = base .. "|IMPORTANT" end
+-- Resolve the per-unit classification toggles for an aura element's base
+-- ("HELPFUL" buffs / "HARMFUL" debuffs) from its unit settings table. Returns
+-- five flags in order: ownOnly, raidFrames, crowdControl, bigDefensive,
+-- externalDefensive. Shared by ComposeAuraFilter (signature) and the runtime
+-- FilterAura so new classifications only need adding in one place. On ns (not a
+-- local) to stay clear of the main-chunk 200-local cap.
+function ns.ResolveAuraFlags(base, settings)
+    if base == "HELPFUL" then
+        return settings.onlyPlayerBuffs, settings.buffRaid,
+               settings.buffCrowdControl, settings.buffBigDefensive, settings.buffExternalDefensive
+    end
+    return settings.onlyPlayerDebuffs, settings.debuffRaid,
+           settings.debuffCrowdControl, settings.debuffBigDefensive, settings.debuffExternalDefensive
+end
+
+-- Build a SIGNATURE string from the per-unit filter toggles. This is no longer
+-- the actual fetch filter -- it's only used as part of each element's change-
+-- detection key so a ForceUpdate fires when a toggle flips. The real fetch uses
+-- the broad base filter + the per-aura OR FilterAura below.
+function ns.ComposeAuraFilter(base, settings)
+    local own, raid, cc, bigDef, extDef = ns.ResolveAuraFlags(base, settings)
+    if own    then base = base .. "|PLAYER" end
+    if raid   then base = base .. "|RAID" end
+    if cc     then base = base .. "|CROWD_CONTROL" end
+    if bigDef then base = base .. "|BIG_DEFENSIVE" end
+    if extDef then base = base .. "|EXTERNAL_DEFENSIVE" end
     return base
 end
 
@@ -4278,26 +4632,30 @@ function ns.EUIAuraFilter(element, unit, data, filter)
     -- flag for player + HARMFUL so a stale onlyPlayerDebuffs value has no effect.
     local usePlayer = f and f.player
     if usePlayer and unit == "player" and filter == "HARMFUL" then usePlayer = false end
-    if not f or not (usePlayer or f.raid or f.important) then return true end
+    if not f or not (usePlayer or f.raid or f.cc or f.bigDef or f.extDef) then return true end
     local iid = data.auraInstanceID
     if not iid then return true end
     if usePlayer and data.isPlayerAura then return true end
     local base = filter or "HELPFUL"
     if IsAuraFilteredOut then
-        if f.raid and not IsAuraFilteredOut(unit, iid, base .. "|RAID") then return true end
-        if f.important and not IsAuraFilteredOut(unit, iid, base .. "|IMPORTANT") then return true end
+        if f.raid   and not IsAuraFilteredOut(unit, iid, base .. "|RAID") then return true end
+        if f.cc     and not IsAuraFilteredOut(unit, iid, base .. "|CROWD_CONTROL") then return true end
+        if f.bigDef and not IsAuraFilteredOut(unit, iid, base .. "|BIG_DEFENSIVE") then return true end
+        if f.extDef and not IsAuraFilteredOut(unit, iid, base .. "|EXTERNAL_DEFENSIVE") then return true end
     end
     return false
 end
 
 -- Point an aura element at the broad base filter + our OR FilterAura, recording
--- the current classification toggles (and the lust-debuff override) for it to read.
-function ns.ApplyEUIAuraFilter(element, base, ownOnly, raidFrames, important, showLust)
+-- the current classification toggles (and the lust-debuff override) for it to
+-- read. Flags are resolved from the unit settings table by base (buff/debuff).
+function ns.ApplyEUIAuraFilter(element, base, settings)
     element.filter = base
     element.FilterAura = ns.EUIAuraFilter
     local f = element._euiAuraFlags
     if not f then f = {}; element._euiAuraFlags = f end
-    f.player, f.raid, f.important, f.showLust = ownOnly, raidFrames, important, showLust
+    f.player, f.raid, f.cc, f.bigDef, f.extDef = ns.ResolveAuraFlags(base, settings)
+    f.showLust = (base == "HARMFUL") and settings.showLustDebuff
 end
 
 local function CreateTargetAuras(frame, unit)
@@ -4322,10 +4680,17 @@ local function CreateTargetAuras(frame, unit)
             button.Cooldown:SetReverse(true)
             local showText, textSize, cdOffX, cdOffY
             if isBuff then
-                showText = s and s.buffShowCooldownText
-                textSize = s and s.buffCooldownTextSize or 10
-                cdOffX = (s and s.buffCooldownTextOffsetX) or 0
-                cdOffY = (s and s.buffCooldownTextOffsetY) or 0
+                if s and unit and unit:match("^boss") and ns.GetBossSimpleBuffMode(s) ~= "none" then
+                    showText = s and s.simpleBuffShowCooldownText
+                    textSize = s and s.simpleBuffCooldownTextSize or 14
+                    cdOffX = (s and s.buffCooldownTextOffsetX) or 0
+                    cdOffY = (s and s.buffCooldownTextOffsetY) or 0
+                else
+                    showText = s and s.buffShowCooldownText
+                    textSize = s and s.buffCooldownTextSize or 10
+                    cdOffX = (s and s.buffCooldownTextOffsetX) or 0
+                    cdOffY = (s and s.buffCooldownTextOffsetY) or 0
+                end
             elseif s and unit and unit:match("^boss") and ns.GetBossSimpleDebuffMode(s) ~= "none" then
                 showText = s and s.simpleDebuffShowCooldownText
                 textSize = s and s.simpleDebuffCooldownTextSize or 14
@@ -4405,28 +4770,69 @@ local function CreateTargetAuras(frame, unit)
         cbOffset = -cbH
     end
 
+    local unitIsBoss = unit and unit:match("^boss%d+$")
+
+    -- Boss Simple Buff Display: force Left/Right anchor + frame-height-matched
+    -- buff size when enabled (default None). Mirrors the Simple Debuff Display
+    -- logic below. "left"/"right" pick the side; size matches the frame height.
+    local simpleBuffMode = (unitIsBoss and settings and ns.GetBossSimpleBuffMode(settings)) or "none"
+    local simpleBuffOn = simpleBuffMode ~= "none"
+    if simpleBuffOn then
+        local powerPos = settings.powerPosition or "below"
+        local powerIsAtt = (powerPos == "below" or powerPos == "above")
+        local powerH = powerIsAtt and (settings.powerHeight or 0) or 0
+        auraSize = PP.Scale(settings.healthHeight + powerH)
+    end
+
     local buffs = CreateFrame("Frame", nil, frame)
+    local buffGrowthEff = simpleBuffOn and "auto" or (settings and settings.buffGrowth)
     local bfp, bia, bgx, bgy, box, boy = ResolveBuffLayout(
-        settings and settings.buffAnchor,
-        settings and settings.buffGrowth
+        simpleBuffOn and simpleBuffMode or (settings and settings.buffAnchor),
+        buffGrowthEff
     )
     local buffCbOff = 0
     local bAnc = settings.buffAnchor or "topleft"
-    if bAnc == "bottomleft" or bAnc == "bottomright" then
+    if not simpleBuffOn and (bAnc == "bottomleft" or bAnc == "bottomright") then
         buffCbOff = cbOffset
     end
-    buffs:SetPoint(bia, frame, bfp, box * gap + (settings and settings.buffOffsetX or 0), boy * gap + buffCbOff + (settings and settings.buffOffsetY or 0))
+    -- Simple Buff Display anchors the column to the top of the health bar,
+    -- side-based (Left grows off the left edge, Right off the right edge).
+    local buffAnchorParent = frame
+    if simpleBuffOn then
+        if simpleBuffMode == "right" then
+            bia = "TOPLEFT"
+            bfp = "TOPRIGHT"
+        else
+            bia = "TOPRIGHT"
+            bfp = "TOPLEFT"
+        end
+        box = 0
+        boy = 0
+        buffCbOff = 0
+        -- Anchor to the pixel-snapped frame (not frame.Health, which is
+        -- reparented into the half-pixel-inset bar clip) so the icon top is
+        -- pixel-perfect flush with the frame's top edge / health bar top.
+        buffAnchorParent = frame
+    end
+    -- Simple mode uses its own X/Y offsets (falling back to the regular buff
+    -- offsets for existing users); normal mode keeps the regular ones.
+    local bfOffX = settings and settings.buffOffsetX or 0
+    local bfOffY = settings and settings.buffOffsetY or 0
+    if simpleBuffOn then bfOffX, bfOffY = ns.GetBossSimpleBuffOffset(settings) end
+    buffs:SetPoint(bia, buffAnchorParent, bfp, box * gap + bfOffX, boy * gap + buffCbOff + bfOffY)
     buffs:SetSize(containerWidth, auraSize)
     buffs.size = auraSize
-    buffs.spacing = gap
+    -- Boss buffs: physical-pixel-perfect icon spacing from the configured slider
+    -- (simple display uses its own key). Other units keep the legacy 1px gap.
+    buffs.spacing = unitIsBoss and PP.FromPixels(ns.GetBossBuffSpacing(settings, simpleBuffOn)) or gap
     buffs.num = 4
-    buffs.maxCols = AuraMaxCols(settings and settings.buffGrowth, settings and settings.maxBuffs or 4, settings and settings.buffMaxPerRow)
+    buffs.maxCols = AuraMaxCols(buffGrowthEff, settings and settings.maxBuffs or 4, settings and settings.buffMaxPerRow)
     buffs.initialAnchor = bia
     buffs.growthX = bgx
     buffs.growthY = bgy
-    ns.ApplyEUIAuraFilter(buffs, "HELPFUL", settings.onlyPlayerBuffs, settings.buffRaid, settings.buffImportant)
+    ns.ApplyEUIAuraFilter(buffs, "HELPFUL", settings)
     buffs.PostCreateButton = SetupAuraIcon
-    if not showBuffs then
+    if not showBuffs and not simpleBuffOn then
         buffs:Hide()
         buffs.num = 0
     end
@@ -4436,14 +4842,16 @@ local function CreateTargetAuras(frame, unit)
 
     -- Boss Simple Debuff Display: force Left/Right anchor and frame-height-matched
     -- debuff size when enabled (default Left). "left"/"right" pick the side.
-    local unitIsBoss = unit and unit:match("^boss%d+$")
     local simpleMode = (unitIsBoss and settings and ns.GetBossSimpleDebuffMode(settings)) or "none"
     local simpleOn = simpleMode ~= "none"
     if simpleOn then
         local powerPos = settings.powerPosition or "below"
         local powerIsAtt = (powerPos == "below" or powerPos == "above")
         local powerH = powerIsAtt and (settings.powerHeight or 0) or 0
-        debuffAuraSize = settings.healthHeight + powerH
+        -- Snap to the frame's pixel grid so the icon height equals the frame's
+        -- snapped height exactly (PP.Scale(healthHeight + powerH) == frame:GetHeight());
+        -- the raw sum is up to ~1px taller than the snapped bar stack.
+        debuffAuraSize = PP.Scale(settings.healthHeight + powerH)
     end
 
     local dAnc = settings and settings.debuffAnchor or "bottomleft"
@@ -4474,18 +4882,28 @@ local function CreateTargetAuras(frame, unit)
             dox = 0
             doy = 0
             debuffCbOff = 0
-            simpleAnchorParent = frame.Health or frame
+            -- Anchor to the pixel-snapped frame (not frame.Health, which is
+            -- reparented into the half-pixel-inset bar clip) so the icon top is
+            -- pixel-perfect flush with the frame's top edge / health bar top.
+            simpleAnchorParent = frame
         end
-        debuffs:SetPoint(dia, simpleAnchorParent, dfp, dox * gap + (settings and settings.debuffOffsetX or 0), doy * gap + debuffCbOff + (settings and settings.debuffOffsetY or 0))
+        -- Simple mode uses its own X/Y offsets (falling back to the regular
+        -- debuff offsets for existing users); normal mode keeps the regular ones.
+        local dbOffX = settings and settings.debuffOffsetX or 0
+        local dbOffY = settings and settings.debuffOffsetY or 0
+        if simpleOn then dbOffX, dbOffY = ns.GetBossSimpleDebuffOffset(settings) end
+        debuffs:SetPoint(dia, simpleAnchorParent, dfp, dox * gap + dbOffX, doy * gap + debuffCbOff + dbOffY)
         debuffs:SetSize(containerWidth, debuffAuraSize)
         debuffs.size = debuffAuraSize
-        debuffs.spacing = gap
+        -- Boss debuffs: physical-pixel-perfect icon spacing from the configured
+        -- slider (simple display uses its own key). Other units keep 1px.
+        debuffs.spacing = unitIsBoss and PP.FromPixels(ns.GetBossDebuffSpacing(settings, simpleOn)) or gap
         debuffs.num = (dAnc ~= "none") and maxDebuffs or 0
         debuffs.maxCols = AuraMaxCols(effectiveGrowth, maxDebuffs, settings and settings.debuffMaxPerRow)
         debuffs.initialAnchor = dia
         debuffs.growthX = dgx
         debuffs.growthY = dgy
-        ns.ApplyEUIAuraFilter(debuffs, "HARMFUL", settings.onlyPlayerDebuffs, settings.debuffRaid, settings.debuffImportant, settings.showLustDebuff)
+        ns.ApplyEUIAuraFilter(debuffs, "HARMFUL", settings)
         debuffs.PostCreateButton = SetupAuraIcon
         if settings and settings.onlyPlayerDebuffs then
             debuffs.onlyShowPlayer = true
@@ -5155,8 +5573,8 @@ local function StyleSimpleFrame(frame, unit)
     ApplyHealthBarTexture(health, unitKey)
     settings.healthBarTexture = origTex
     ApplyHealthBarAlpha(health, unitKey)
-    ApplyDarkTheme(health)
     health:SetReverseFill(settings.healthReverseFill and true or false)
+    ApplyDarkTheme(health)
 
     frame.Health = health
 
@@ -5390,8 +5808,8 @@ local function StylePetFrame(frame, unit)
     ApplyHealthBarTexture(health, unitKey)
     settings.healthBarTexture = origTex
     ApplyHealthBarAlpha(health, unitKey)
-    ApplyDarkTheme(health)
     health:SetReverseFill(settings.healthReverseFill and true or false)
+    ApplyDarkTheme(health)
 
     frame.Health = health
 
@@ -6999,7 +7417,7 @@ local function ReloadFrames()
                             if castbarBg then
                                 local cbW = db.profile.player.playerCastbarWidth or 181
                                 local cbH = db.profile.player.playerCastbarHeight or 14
-                                castbarBg:SetSize(cbW, cbH)
+                                PP.Size(castbarBg, cbW, cbH)
                                 if castbarBg._bgTex then
                                     local cbg = settings.castBgColor
                                     castbarBg._bgTex:SetColorTexture(cbg and cbg.r or 0, cbg and cbg.g or 0, cbg and cbg.b or 0, settings.castBgAlpha or 0.5)
@@ -7007,7 +7425,7 @@ local function ReloadFrames()
                                 LayoutCastbarIcon(frame.Castbar, CastIconInWidth("player", settings))
                                 -- Resize cast icon to match castbar height
                                 if frame.Castbar._iconFrame then
-                                    frame.Castbar._iconFrame:SetSize(cbH, cbH)
+                                    PP.Size(frame.Castbar._iconFrame, cbH, cbH)
                                     if not frame.Castbar:IsShown() or settings.showPlayerCastIcon == false then
                                         frame.Castbar._iconFrame:Hide()
                                     end
@@ -7097,6 +7515,15 @@ local function ReloadFrames()
                             end
                         else
                             frame.HealthPrediction.damageAbsorb:Hide()
+                            -- Decoupled heal absorb: hiding the shield bar above
+                            -- cascades (via the backfill OnHide hook) into hiding
+                            -- the heal-absorb bar too. Re-run the prediction so the
+                            -- heal absorb re-shows immediately after a reload even
+                            -- with the shield absorb off, instead of staying hidden
+                            -- until the next UNIT_ABSORB_AMOUNT_CHANGED event.
+                            if frame.HealthPrediction.Override then
+                                frame.HealthPrediction.Override(frame, "UNIT_ABSORB_AMOUNT_CHANGED", unit)
+                            end
                         end
                     end
 
@@ -7122,11 +7549,11 @@ local function ReloadFrames()
                                 buffCbOff = -cbH
                             end
                             -- Only reanchor + ForceUpdate when layout actually changed
-                            local buffFilter = ns.ComposeAuraFilter("HELPFUL", settings.onlyPlayerBuffs, settings.buffRaid, settings.buffImportant)
+                            local buffFilter = ns.ComposeAuraFilter("HELPFUL", settings)
                             local buffKey = string.format("%s%s%d%d%d%s%d%d%d%d", bia or "", bfp or "", box or 0, boy or 0, buffCbOff, settings.buffGrowth or "auto", settings.maxBuffs or 4, settings.buffSize or 22, settings.buffOffsetX or 0, settings.buffOffsetY or 0) .. "p" .. (settings.buffMaxPerRow or 0) .. buffFilter
                             if frame.Buffs._lastBuffKey ~= buffKey then
                                 frame.Buffs._lastBuffKey = buffKey
-                                ns.ApplyEUIAuraFilter(frame.Buffs, "HELPFUL", settings.onlyPlayerBuffs, settings.buffRaid, settings.buffImportant)
+                                ns.ApplyEUIAuraFilter(frame.Buffs, "HELPFUL", settings)
                                 frame.Buffs.size = settings.buffSize or 22
                                 frame.Buffs:ClearAllPoints()
                                 frame.Buffs:SetPoint(bia, frame, bfp, box * 1 + (settings.buffOffsetX or 0), boy * 1 + buffCbOff + (settings.buffOffsetY or 0))
@@ -7170,11 +7597,11 @@ local function ReloadFrames()
                                 if cbH <= 0 then cbH = 14 end
                                 debuffCbOff = -cbH
                             end
-                            local debuffFilter = ns.ComposeAuraFilter("HARMFUL", settings.onlyPlayerDebuffs, settings.debuffRaid, settings.debuffImportant) .. (settings.showLustDebuff and "|LUST" or "")
+                            local debuffFilter = ns.ComposeAuraFilter("HARMFUL", settings) .. (settings.showLustDebuff and "|LUST" or "")
                             local debuffKey = string.format("%s%s%d%d%d%s%d%d%d%d", dia or "", dfp or "", dox or 0, doy or 0, debuffCbOff, settings.debuffGrowth or "auto", settings.maxDebuffs or 10, settings.debuffSize or 22, settings.debuffOffsetX or 0, settings.debuffOffsetY or 0) .. "p" .. (settings.debuffMaxPerRow or 0) .. debuffFilter
                             if frame.Debuffs._lastDebuffKey ~= debuffKey then
                                 frame.Debuffs._lastDebuffKey = debuffKey
-                                ns.ApplyEUIAuraFilter(frame.Debuffs, "HARMFUL", settings.onlyPlayerDebuffs, settings.debuffRaid, settings.debuffImportant, settings.showLustDebuff)
+                                ns.ApplyEUIAuraFilter(frame.Debuffs, "HARMFUL", settings)
                                 frame.Debuffs.onlyShowPlayer = nil
                                 frame.Debuffs.size = settings.debuffSize or 22
                                 frame.Debuffs:ClearAllPoints()
@@ -7458,14 +7885,14 @@ local function ReloadFrames()
                                 end
                                 local cbW2 = settings.castbarWidth or 181
                                 local cbH2 = settings.castbarHeight or 14
-                                castbarBg:SetSize(cbW2, cbH2)
+                                PP.Size(castbarBg, cbW2, cbH2)
                                 if castbarBg._bgTex then
                                     local cbg = settings.castBgColor
                                     castbarBg._bgTex:SetColorTexture(cbg and cbg.r or 0, cbg and cbg.g or 0, cbg and cbg.b or 0, settings.castBgAlpha or 0.5)
                                 end
                                 LayoutCastbarIcon(frame.Castbar, CastIconInWidth("target", settings))
                                 if frame.Castbar._iconFrame then
-                                    frame.Castbar._iconFrame:SetSize(cbH2, cbH2)
+                                    PP.Size(frame.Castbar._iconFrame, cbH2, cbH2)
                                     if not frame.Castbar:IsShown() then
                                         frame.Castbar._iconFrame:Hide()
                                     elseif settings.showCastIcon == false then
@@ -7557,11 +7984,11 @@ local function ReloadFrames()
                                     liveCbOff = -cbH
                                 end
                             end
-                            local buffFilter = ns.ComposeAuraFilter("HELPFUL", settings.onlyPlayerBuffs, settings.buffRaid, settings.buffImportant)
+                            local buffFilter = ns.ComposeAuraFilter("HELPFUL", settings)
                             local buffKey = string.format("%s%s%d%d%s%d%d%d%d%d", bia or "", bfp or "", box or 0, boy or 0, settings.buffGrowth or "auto", settings.maxBuffs or 20, liveCbOff, settings.buffSize or 22, settings.buffOffsetX or 0, settings.buffOffsetY or 0) .. "p" .. (settings.buffMaxPerRow or 0) .. buffFilter
                             if frame.Buffs._lastBuffKey ~= buffKey then
                                 frame.Buffs._lastBuffKey = buffKey
-                                ns.ApplyEUIAuraFilter(frame.Buffs, "HELPFUL", settings.onlyPlayerBuffs, settings.buffRaid, settings.buffImportant)
+                                ns.ApplyEUIAuraFilter(frame.Buffs, "HELPFUL", settings)
                                 frame.Buffs.size = settings.buffSize or 22
                                 frame.Buffs:ClearAllPoints()
                                 frame.Buffs:SetPoint(bia, frame, bfp, box * 1 + (settings.buffOffsetX or 0), boy * 1 + liveCbOff + (settings.buffOffsetY or 0))
@@ -7607,11 +8034,11 @@ local function ReloadFrames()
                                     liveDbCbOff = -cbH
                                 end
                             end
-                            local debuffFilter = ns.ComposeAuraFilter("HARMFUL", settings.onlyPlayerDebuffs, settings.debuffRaid, settings.debuffImportant) .. (settings.showLustDebuff and "|LUST" or "")
+                            local debuffFilter = ns.ComposeAuraFilter("HARMFUL", settings) .. (settings.showLustDebuff and "|LUST" or "")
                             local debuffKey = string.format("%s%s%d%d%s%d%d%d%d%d%d", dia or "", dfp or "", dox or 0, doy or 0, settings.debuffGrowth or "auto", settings.maxDebuffs or 20, liveDbCbOff, settings.debuffSize or 22, settings.debuffOffsetX or 0, settings.debuffOffsetY or 0, settings.onlyPlayerDebuffs and 1 or 0) .. "p" .. (settings.debuffMaxPerRow or 0) .. debuffFilter
                             if frame.Debuffs._lastDebuffKey ~= debuffKey then
                                 frame.Debuffs._lastDebuffKey = debuffKey
-                                ns.ApplyEUIAuraFilter(frame.Debuffs, "HARMFUL", settings.onlyPlayerDebuffs, settings.debuffRaid, settings.debuffImportant, settings.showLustDebuff)
+                                ns.ApplyEUIAuraFilter(frame.Debuffs, "HARMFUL", settings)
                                 frame.Debuffs.onlyShowPlayer = nil
                                 frame.Debuffs.size = settings.debuffSize or 22
                                 frame.Debuffs:ClearAllPoints()
@@ -7817,14 +8244,14 @@ local function ReloadFrames()
                             end
                             local cbW3 = settings.castbarWidth or 181
                             local cbH3 = settings.castbarHeight or 14
-                            castbarBg:SetSize(cbW3, cbH3)
+                            PP.Size(castbarBg, cbW3, cbH3)
                             if castbarBg._bgTex then
                                 local cbg = settings.castBgColor
                                 castbarBg._bgTex:SetColorTexture(cbg and cbg.r or 0, cbg and cbg.g or 0, cbg and cbg.b or 0, settings.castBgAlpha or 0.5)
                             end
                             LayoutCastbarIcon(frame.Castbar, CastIconInWidth("focus", settings))
                             if frame.Castbar._iconFrame then
-                                frame.Castbar._iconFrame:SetSize(cbH3, cbH3)
+                                PP.Size(frame.Castbar._iconFrame, cbH3, cbH3)
                                 if not frame.Castbar:IsShown() then
                                     frame.Castbar._iconFrame:Hide()
                                 elseif settings.showCastIcon == false then
@@ -7919,11 +8346,11 @@ local function ReloadFrames()
                                 focusDbCbOff = -cbH
                             end
                         end
-                        local debuffFilter = ns.ComposeAuraFilter("HARMFUL", settings.onlyPlayerDebuffs, settings.debuffRaid, settings.debuffImportant) .. (settings.showLustDebuff and "|LUST" or "")
+                        local debuffFilter = ns.ComposeAuraFilter("HARMFUL", settings) .. (settings.showLustDebuff and "|LUST" or "")
                         local debuffKey = string.format("%s%s%d%d%s%d%d%d%d%d%d", dia or "", dfp or "", dox or 0, doy or 0, settings.debuffGrowth or "auto", settings.maxDebuffs or 10, focusDbCbOff, settings.debuffSize or 22, settings.debuffOffsetX or 0, settings.debuffOffsetY or 0, settings.onlyPlayerDebuffs and 1 or 0) .. "p" .. (settings.debuffMaxPerRow or 0) .. debuffFilter
                         if frame.Debuffs._lastDebuffKey ~= debuffKey then
                             frame.Debuffs._lastDebuffKey = debuffKey
-                            ns.ApplyEUIAuraFilter(frame.Debuffs, "HARMFUL", settings.onlyPlayerDebuffs, settings.debuffRaid, settings.debuffImportant, settings.showLustDebuff)
+                            ns.ApplyEUIAuraFilter(frame.Debuffs, "HARMFUL", settings)
                             frame.Debuffs.onlyShowPlayer = nil
                             frame.Debuffs.size = settings.debuffSize or 22
                             frame.Debuffs:ClearAllPoints()
@@ -7961,11 +8388,11 @@ local function ReloadFrames()
                                 focusBfCbOff = -cbH
                             end
                         end
-                        local buffFilter = ns.ComposeAuraFilter("HELPFUL", settings.onlyPlayerBuffs, settings.buffRaid, settings.buffImportant)
+                        local buffFilter = ns.ComposeAuraFilter("HELPFUL", settings)
                         local buffKey = string.format("%s%s%d%d%s%d%d%d%d%d", bia or "", bfp or "", box or 0, boy or 0, settings.buffGrowth or "auto", settings.maxBuffs or 4, focusBfCbOff, settings.buffSize or 22, settings.buffOffsetX or 0, settings.buffOffsetY or 0) .. "p" .. (settings.buffMaxPerRow or 0) .. buffFilter
                         if frame.Buffs._lastBuffKey ~= buffKey then
                             frame.Buffs._lastBuffKey = buffKey
-                            ns.ApplyEUIAuraFilter(frame.Buffs, "HELPFUL", settings.onlyPlayerBuffs, settings.buffRaid, settings.buffImportant)
+                            ns.ApplyEUIAuraFilter(frame.Buffs, "HELPFUL", settings)
                             frame.Buffs.size = settings.buffSize or 22
                             frame.Buffs:ClearAllPoints()
                             frame.Buffs:SetPoint(bia, frame, bfp, box * 1 + (settings.buffOffsetX or 0), boy * 1 + focusBfCbOff + (settings.buffOffsetY or 0))
@@ -8136,15 +8563,11 @@ local function ReloadFrames()
                             if not frame:IsElementEnabled("Castbar") then
                                 frame:EnableElement("Castbar")
                             end
-                            local castBarOffset = 0
-                            if showPortrait then
-                                castBarOffset = (bossBarHeight / 2)
-                            end
-                            castbarBg:SetSize(totalWidth, settings.castbarHeight or 14)
+                            PP.Size(castbarBg, totalWidth, settings.castbarHeight or 14)
                             LayoutCastbarIcon(frame.Castbar, CastIconInWidth("boss1", settings))
                             if frame.Castbar._iconFrame then
                                 local cbH = settings.castbarHeight or 14
-                                frame.Castbar._iconFrame:SetSize(cbH, cbH)
+                                PP.Size(frame.Castbar._iconFrame, cbH, cbH)
                                 if not frame.Castbar:IsShown() then
                                     frame.Castbar._iconFrame:Hide()
                                 elseif settings.showCastIcon == false then
@@ -8154,9 +8577,11 @@ local function ReloadFrames()
                                 end
                             end
                             castbarBg:ClearAllPoints()
-                            local bPpIsAtt2 = (bPpPos == "below" or bPpPos == "above")
-                            local cbAnchor = (bPpIsAtt2 and frame.Power) or frame.Health
-                            castbarBg:SetPoint("TOP", cbAnchor, "BOTTOM", castBarOffset, 0)
+                            -- Anchor to the frame's own (pixel-snapped) bottom edge, not the
+                            -- bar's bottom: the health/power bars live in the half-pixel-inset
+                            -- bar clip, which left a ~1px gap below the frame. The cast bar is
+                            -- full frame width, so frame bottom-center keeps it centered + flush.
+                            castbarBg:SetPoint("TOP", frame, "BOTTOM", 0, 0)
                             if settings.castbarHideWhenInactive and not frame.Castbar:IsShown() then
                                 castbarBg:Hide()
                             else
@@ -8222,7 +8647,9 @@ local function ReloadFrames()
                         local powerPos = settings.powerPosition or "below"
                         local powerIsAtt = (powerPos == "below" or powerPos == "above")
                         local powerH = powerIsAtt and (settings.powerHeight or 0) or 0
-                        effectiveDebuffSize = settings.healthHeight + powerH
+                        -- Pixel-snap to match the frame's snapped height exactly
+                        -- (== frame:GetHeight()); the raw sum overhangs ~1px.
+                        effectiveDebuffSize = PP.Scale(settings.healthHeight + powerH)
                     end
                     -- Boss preview: the fake debuff overlay handles display, so
                     -- suppress the real (player-unit) debuffs to keep the preview
@@ -8269,17 +8696,31 @@ local function ReloadFrames()
                             dox = 0
                             doy = 0
                             liveDbCbOff = 0
-                            simpleAnchorParent = frame.Health or frame
+                            -- Anchor to the pixel-snapped frame (not frame.Health, which is
+                            -- reparented into the half-pixel-inset bar clip) so the icon top
+                            -- is pixel-perfect flush with the frame's top edge / health top.
+                            simpleAnchorParent = frame
                         end
-                        local debuffFilter = ns.ComposeAuraFilter("HARMFUL", settings.onlyPlayerDebuffs, settings.debuffRaid, settings.debuffImportant) .. (settings.showLustDebuff and "|LUST" or "")
-                        local debuffKey = string.format("%s%s%d%d%s%d%d%d%d%d%d", dia or "", dfp or "", dox or 0, doy or 0, effGrowth, settings.maxDebuffs or 10, liveDbCbOff, effectiveDebuffSize, settings.debuffOffsetX or 0, settings.debuffOffsetY or 0, settings.onlyPlayerDebuffs and 1 or 0) .. "p" .. (settings.debuffMaxPerRow or 0) .. debuffFilter
+                        local debuffFilter = ns.ComposeAuraFilter("HARMFUL", settings) .. (settings.showLustDebuff and "|LUST" or "")
+                        -- Simple mode uses its own X/Y offsets (falling back to the
+                        -- regular debuff offsets for existing users); normal mode
+                        -- keeps the regular ones. Folded into the key so a change
+                        -- re-anchors the stack.
+                        local dbOffX = settings.debuffOffsetX or 0
+                        local dbOffY = settings.debuffOffsetY or 0
+                        if simpleOn then dbOffX, dbOffY = ns.GetBossSimpleDebuffOffset(settings) end
+                        -- Physical-pixel icon spacing (folded into the key so a
+                        -- spacing change re-anchors the stack on the next refresh).
+                        local debuffSpacingVal = ns.GetBossDebuffSpacing(settings, simpleOn)
+                        local debuffKey = string.format("%s%s%d%d%s%d%d%d%d%d%d", dia or "", dfp or "", dox or 0, doy or 0, effGrowth, settings.maxDebuffs or 10, liveDbCbOff, effectiveDebuffSize, dbOffX, dbOffY, settings.onlyPlayerDebuffs and 1 or 0) .. "p" .. (settings.debuffMaxPerRow or 0) .. "sp" .. debuffSpacingVal .. debuffFilter
                         if frame.Debuffs._lastDebuffKey ~= debuffKey then
                             frame.Debuffs._lastDebuffKey = debuffKey
-                            ns.ApplyEUIAuraFilter(frame.Debuffs, "HARMFUL", settings.onlyPlayerDebuffs, settings.debuffRaid, settings.debuffImportant, settings.showLustDebuff)
+                            ns.ApplyEUIAuraFilter(frame.Debuffs, "HARMFUL", settings)
                             frame.Debuffs.onlyShowPlayer = nil
                             frame.Debuffs.size = effectiveDebuffSize
+                            frame.Debuffs.spacing = PP.FromPixels(debuffSpacingVal)
                             frame.Debuffs:ClearAllPoints()
-                            frame.Debuffs:SetPoint(dia, simpleAnchorParent, dfp, dox * 1 + (settings.debuffOffsetX or 0), doy * 1 + liveDbCbOff + (settings.debuffOffsetY or 0))
+                            frame.Debuffs:SetPoint(dia, simpleAnchorParent, dfp, dox * 1 + dbOffX, doy * 1 + liveDbCbOff + dbOffY)
                             frame.Debuffs.initialAnchor = dia
                             frame.Debuffs.growthX = dgx
                             frame.Debuffs.growthY = dgy
@@ -8300,7 +8741,18 @@ local function ReloadFrames()
 
                 -- Buffs (boss)
                 if frame.Buffs then
+                    local simpleBuffMode = ns.GetBossSimpleBuffMode(settings)
+                    local simpleBuffOn = simpleBuffMode ~= "none"
+                    local effectiveBuffSize = settings.buffSize or 22
+                    if simpleBuffOn then
+                        local powerPos = settings.powerPosition or "below"
+                        local powerIsAtt = (powerPos == "below" or powerPos == "above")
+                        local powerH = powerIsAtt and (settings.powerHeight or 0) or 0
+                        effectiveBuffSize = PP.Scale(settings.healthHeight + powerH)
+                    end
                     local showBuffs = settings.showBuffs ~= false
+                    -- Simple Buff Display forces buffs on regardless of Buffs Location.
+                    if simpleBuffOn then showBuffs = true end
                     -- Boss preview: the fake buff overlay handles display, so
                     -- suppress the real (player-unit) buffs during preview.
                     if ns._bossPreviewActive then showBuffs = false end
@@ -8310,11 +8762,12 @@ local function ReloadFrames()
                         end
                         frame.Buffs:Show()
                         frame.Buffs.num = settings.maxBuffs or 4
+                        local bGrowthEff = simpleBuffOn and "auto" or (settings.buffGrowth or "auto")
                         local bfp, bia, bgx, bgy, box, boy = ResolveBuffLayout(
-                            settings.buffAnchor, settings.buffGrowth
+                            simpleBuffOn and simpleBuffMode or settings.buffAnchor, bGrowthEff
                         )
                         local bossBfCbOff = 0
-                        if settings.showCastbar ~= false then
+                        if not simpleBuffOn and settings.showCastbar ~= false then
                             local bAnc = settings.buffAnchor or "topleft"
                             if bAnc == "bottomleft" or bAnc == "bottomright" then
                                 local cbH = settings.castbarHeight or 14
@@ -8322,19 +8775,47 @@ local function ReloadFrames()
                                 bossBfCbOff = -cbH
                             end
                         end
+                        -- Simple Buff Display: anchor the column to the TOP of the
+                        -- health bar, side-based, mirroring Simple Debuff Display.
+                        local buffAnchorParent = frame
+                        if simpleBuffOn then
+                            if simpleBuffMode == "right" then
+                                bia = "TOPLEFT"
+                                bfp = "TOPRIGHT"
+                            else
+                                bia = "TOPRIGHT"
+                                bfp = "TOPLEFT"
+                            end
+                            box = 0
+                            boy = 0
+                            bossBfCbOff = 0
+                            -- Anchor to the pixel-snapped frame (not frame.Health, which is
+                            -- reparented into the half-pixel-inset bar clip) so the icon top
+                            -- is pixel-perfect flush with the frame's top edge / health top.
+                            buffAnchorParent = frame
+                        end
                         -- Boss buffs are NEVER filtered -- always show all HELPFUL auras.
                         local buffFilter = "HELPFUL"
-                        local buffKey = string.format("%s%s%d%d%s%d%d%d%d%d", bia or "", bfp or "", box or 0, boy or 0, settings.buffGrowth or "auto", settings.maxBuffs or 4, bossBfCbOff, settings.buffSize or 22, settings.buffOffsetX or 0, settings.buffOffsetY or 0) .. "p" .. (settings.buffMaxPerRow or 0) .. buffFilter
+                        -- Simple mode uses its own X/Y offsets (fallback to the regular
+                        -- buff offsets for existing users). Folded into the key.
+                        local bfOffX = settings.buffOffsetX or 0
+                        local bfOffY = settings.buffOffsetY or 0
+                        if simpleBuffOn then bfOffX, bfOffY = ns.GetBossSimpleBuffOffset(settings) end
+                        -- Physical-pixel icon spacing (folded into the key so a
+                        -- spacing change re-anchors the column on the next refresh).
+                        local buffSpacingVal = ns.GetBossBuffSpacing(settings, simpleBuffOn)
+                        local buffKey = string.format("%s%s%d%d%s%d%d%d%d%d", bia or "", bfp or "", box or 0, boy or 0, bGrowthEff, settings.maxBuffs or 4, bossBfCbOff, effectiveBuffSize, bfOffX, bfOffY) .. "p" .. (settings.buffMaxPerRow or 0) .. "sp" .. buffSpacingVal .. buffFilter
                         if frame.Buffs._lastBuffKey ~= buffKey then
                             frame.Buffs._lastBuffKey = buffKey
-                            ns.ApplyEUIAuraFilter(frame.Buffs, "HELPFUL", false, false, false)
-                            frame.Buffs.size = settings.buffSize or 22
+                            ns.ApplyEUIAuraFilter(frame.Buffs, "HELPFUL", {})  -- boss buffs: no filtering
+                            frame.Buffs.size = effectiveBuffSize
+                            frame.Buffs.spacing = PP.FromPixels(buffSpacingVal)
                             frame.Buffs:ClearAllPoints()
-                            frame.Buffs:SetPoint(bia, frame, bfp, box * 1 + (settings.buffOffsetX or 0), boy * 1 + bossBfCbOff + (settings.buffOffsetY or 0))
+                            frame.Buffs:SetPoint(bia, buffAnchorParent, bfp, box * 1 + bfOffX, boy * 1 + bossBfCbOff + bfOffY)
                             frame.Buffs.initialAnchor = bia
                             frame.Buffs.growthX = bgx
                             frame.Buffs.growthY = bgy
-                            frame.Buffs.maxCols = AuraMaxCols(settings.buffGrowth, settings.maxBuffs or 4, settings.buffMaxPerRow)
+                            frame.Buffs.maxCols = AuraMaxCols(bGrowthEff, settings.maxBuffs or 4, settings.buffMaxPerRow)
                             if frame.Buffs.ForceUpdate then
                                 frame.Buffs:ForceUpdate()
                             end
@@ -8346,7 +8827,13 @@ local function ReloadFrames()
                         frame.Buffs:Hide()
                         frame.Buffs.num = 0
                     end
-                    ApplyAuraCooldownText(frame.Buffs, settings.buffShowCooldownText, settings.buffCooldownTextSize or 10, settings.buffStackTextSize, settings.buffCooldownTextOffsetX, settings.buffCooldownTextOffsetY, settings.buffStackTextOffsetX, settings.buffStackTextOffsetY, settings.buffSize or 22, settings.buffCropIcons, settings.buffStackTextPosition)
+                    -- Cooldown/stack text: simple uses the simpleBuff* keys (sharing the
+                    -- regular buff stack settings), regular buff keys otherwise.
+                    if simpleBuffOn then
+                        ApplyAuraCooldownText(frame.Buffs, settings.simpleBuffShowCooldownText, settings.simpleBuffCooldownTextSize or 14, settings.buffStackTextSize, settings.simpleBuffCooldownTextOffsetX, settings.simpleBuffCooldownTextOffsetY, settings.buffStackTextOffsetX, settings.buffStackTextOffsetY, nil, nil, settings.buffStackTextPosition)
+                    else
+                        ApplyAuraCooldownText(frame.Buffs, settings.buffShowCooldownText, settings.buffCooldownTextSize or 10, settings.buffStackTextSize, settings.buffCooldownTextOffsetX, settings.buffCooldownTextOffsetY, settings.buffStackTextOffsetX, settings.buffStackTextOffsetY, settings.buffSize or 22, settings.buffCropIcons, settings.buffStackTextPosition)
+                    end
                 end
 
                 UpdateBordersForScale(frame, unit)
@@ -8375,9 +8862,17 @@ local function ReloadFrames()
                 local cbTexKey = (isMiniFrame and donorSettings.healthBarTexture) or settings.healthBarTexture or db.profile.healthBarTexture or "none"
                 ns.ApplyCastBarTexture(frame.Castbar, cbTexKey)
             end
-            ApplyDarkTheme(frame.Health)
             frame.Health:SetReverseFill(settings.healthReverseFill and true or false)
+            ApplyDarkTheme(frame.Health)
             UpdateAbsorbBarReverseFill(frame, settings.healthReverseFill and true or false)
+            -- Smooth bar interpolation (live toggle without /reload)
+            if settings.smoothBars then
+                frame.Health.smoothing = Enum and Enum.StatusBarInterpolation
+                    and Enum.StatusBarInterpolation.ExponentialEaseOut
+            else
+                frame.Health.smoothing = Enum and Enum.StatusBarInterpolation
+                    and Enum.StatusBarInterpolation.Immediate
+            end
             if frame.Health.ForceUpdate then
                 frame.Health:ForceUpdate()
             end
@@ -9766,6 +10261,44 @@ function InitializeFrames()
         end
     end)
 
+    -- Target-of-target / focus-target text class colors must re-apply when their
+    -- unit changes or first becomes available (login/reload). Unlike target/focus,
+    -- the mini frames have no PLAYER_*_CHANGED of their own, so a class color set at
+    -- style time -- when "targettarget"/"focustarget" was not yet a resolvable
+    -- player -- falls back to white and never recovers (the reported ToT center
+    -- text bug). Re-apply on the parent's target change and on its UNIT_TARGET.
+    local function ReapplyFrameTextClassColors(unitKey)
+        local frame = frames[unitKey]
+        local s = frame and db.profile[unitKey]
+        if not s then return end
+        if frame.LeftText and s.leftTextClassColor ~= nil then
+            ApplyClassColor(frame.LeftText, unitKey, s.leftTextClassColor, s.leftTextColorR, s.leftTextColorG, s.leftTextColorB)
+        end
+        if frame.RightText and s.rightTextClassColor ~= nil then
+            ApplyClassColor(frame.RightText, unitKey, s.rightTextClassColor, s.rightTextColorR, s.rightTextColorG, s.rightTextColorB)
+        end
+        if frame.CenterText and s.centerTextClassColor ~= nil then
+            ApplyClassColor(frame.CenterText, unitKey, s.centerTextClassColor, s.centerTextColorR, s.centerTextColorG, s.centerTextColorB)
+        end
+    end
+    if not frames._miniTextClassUpdater then
+        frames._miniTextClassUpdater = CreateFrame("Frame")
+        frames._miniTextClassUpdater:RegisterEvent("PLAYER_TARGET_CHANGED")
+        frames._miniTextClassUpdater:RegisterEvent("PLAYER_FOCUS_CHANGED")
+        frames._miniTextClassUpdater:RegisterUnitEvent("UNIT_TARGET", "target", "focus")
+    end
+    frames._miniTextClassUpdater:SetScript("OnEvent", function(_, event, arg1)
+        if event == "PLAYER_TARGET_CHANGED" then
+            ReapplyFrameTextClassColors("targettarget")
+        elseif event == "PLAYER_FOCUS_CHANGED" then
+            ReapplyFrameTextClassColors("focustarget")
+        elseif arg1 == "target" then
+            ReapplyFrameTextClassColors("targettarget")
+        elseif arg1 == "focus" then
+            ReapplyFrameTextClassColors("focustarget")
+        end
+    end)
+
     -- Deferred class portrait fix: at frame creation time UnitClass() may return nil
     -- for dynamic units (target, focus) because no unit is selected yet on login/reload.
     -- This causes the WARRIOR fallback. Re-apply the correct class icon once the
@@ -9898,19 +10431,27 @@ function SetupOptionsPanel()
         if not simple and (settings.debuffAnchor or "bottomleft") == "none" then return end
         local dOffX = settings.debuffOffsetX or 0
         local dOffY = settings.debuffOffsetY or 0
+        -- Simple mode uses its own X/Y offsets (falling back to the regular
+        -- debuff offsets for existing users) so the preview matches live.
+        if simple then dOffX, dOffY = ns.GetBossSimpleDebuffOffset(settings) end
         local powerPos = settings.powerPosition or "below"
         local powerIsAtt = (powerPos == "below" or powerPos == "above")
         local powerH = powerIsAtt and (settings.powerHeight or 0) or 0
         local iconSize
         if simple then
-            iconSize = (settings.healthHeight or 34) + powerH
+            -- Pixel-snap so the preview icon matches the frame's snapped height
+            -- exactly (== frame:GetHeight()), same as the live boss debuffs.
+            iconSize = PP.Scale((settings.healthHeight or 34) + powerH)
         else
             iconSize = settings.debuffSize or 22
         end
         local count = #FAKE_DEBUFF_SPELLS
         local gap = 1
+        -- Inter-icon spacing from the configured slider (physical pixels). `gap`
+        -- stays at 1 for the holder-to-frame edge offset (matches the runtime).
+        local iconGap = PP.FromPixels(ns.GetBossDebuffSpacing(settings, simple))
         local holder = CreateFrame("Frame", nil, frame)
-        holder:SetSize(iconSize * count + gap * (count - 1), iconSize)
+        holder:SetSize(iconSize * count + iconGap * (count - 1), iconSize)
         holder:SetFrameLevel(frame:GetFrameLevel() + 5)
         holder:ClearAllPoints()
         -- The boss cast bar lives as a sibling parented to the frame but
@@ -9925,9 +10466,9 @@ function SetupOptionsPanel()
             -- they never encroach on the cast bar area. Left grows off the
             -- frame's left edge; Right grows off the right edge.
             if simpleMode == "right" then
-                holder:SetPoint("TOPLEFT", frame.Health or frame, "TOPRIGHT", 1 + dOffX, dOffY)
+                holder:SetPoint("TOPLEFT", frame, "TOPRIGHT", 1 + dOffX, dOffY)
             else
-                holder:SetPoint("TOPRIGHT", frame.Health or frame, "TOPLEFT", -1 + dOffX, dOffY)
+                holder:SetPoint("TOPRIGHT", frame, "TOPLEFT", -1 + dOffX, dOffY)
             end
         else
             local dAnc = settings.debuffAnchor or "bottomleft"
@@ -9970,9 +10511,9 @@ function SetupOptionsPanel()
             local iconFrame = CreateFrame("Frame", nil, holder)
             iconFrame:SetSize(iconSize, iconSize)
             if simpleMode == "right" then
-                iconFrame:SetPoint("LEFT", holder, "LEFT", (idx - 1) * (iconSize + gap), 0)
+                iconFrame:SetPoint("LEFT", holder, "LEFT", (idx - 1) * (iconSize + iconGap), 0)
             else
-                iconFrame:SetPoint("RIGHT", holder, "RIGHT", -(idx - 1) * (iconSize + gap), 0)
+                iconFrame:SetPoint("RIGHT", holder, "RIGHT", -(idx - 1) * (iconSize + iconGap), 0)
             end
             iconFrame:SetFrameLevel(holder:GetFrameLevel())
             local icon = iconFrame:CreateTexture(nil, "ARTWORK")
@@ -10044,22 +10585,49 @@ function SetupOptionsPanel()
             frame.Buffs.num = 0
         end
         local settings = db.profile.boss or {}
-        if settings.showBuffs == false then return end
+        local simpleMode = ns.GetBossSimpleBuffMode(settings)
+        local simple = simpleMode ~= "none"
+        -- Simple Buff Display overrides Buffs Location, so only bail on the
+        -- location/visibility guards when simple mode is off.
+        if not simple and (settings.showBuffs == false or (settings.buffAnchor or "topleft") == "none") then return end
         local anchor = settings.buffAnchor or "topleft"
-        if anchor == "none" then return end
-        local iconSize = settings.buffSize or 22
         local bOffX = settings.buffOffsetX or 0
         local bOffY = settings.buffOffsetY or 0
+        -- Simple mode uses its own X/Y offsets (falling back to the regular buff
+        -- offsets for existing users) so the preview matches live.
+        if simple then bOffX, bOffY = ns.GetBossSimpleBuffOffset(settings) end
+        local powerPos = settings.powerPosition or "below"
+        local powerIsAtt = (powerPos == "below" or powerPos == "above")
+        local powerH = powerIsAtt and (settings.powerHeight or 0) or 0
+        local iconSize
+        if simple then
+            -- Pixel-snap so the preview icon matches the frame's snapped height
+            -- exactly (== frame:GetHeight()), same as the live boss buffs.
+            iconSize = PP.Scale((settings.healthHeight or 34) + powerH)
+        else
+            iconSize = settings.buffSize or 22
+        end
         local count = #FAKE_BUFF_SPELLS
         local gap = 1
+        -- Inter-icon spacing from the configured slider (physical pixels). `gap`
+        -- stays at 1 for the holder-to-frame edge offset (matches the runtime).
+        local iconGap = PP.FromPixels(ns.GetBossBuffSpacing(settings, simple))
         local holder = CreateFrame("Frame", nil, frame)
-        holder:SetSize(iconSize * count + gap * (count - 1), iconSize)
+        holder:SetSize(iconSize * count + iconGap * (count - 1), iconSize)
         holder:SetFrameLevel(frame:GetFrameLevel() + 5)
         holder:ClearAllPoints()
         local castBg = frame.Castbar and frame.Castbar:GetParent()
         local castbarH = (settings.showCastbar ~= false and castBg)
                          and castBg:GetHeight() or 0
-        if anchor == "topleft" then
+        if simple then
+            -- Align the column with the health bar top, side-based (matches the
+            -- live runtime + Simple Debuff Display).
+            if simpleMode == "right" then
+                holder:SetPoint("TOPLEFT", frame, "TOPRIGHT", 1 + bOffX, bOffY)
+            else
+                holder:SetPoint("TOPRIGHT", frame, "TOPLEFT", -1 + bOffX, bOffY)
+            end
+        elseif anchor == "topleft" then
             holder:SetPoint("BOTTOMLEFT", frame, "TOPLEFT", 0 + bOffX, gap + bOffY)
         elseif anchor == "topright" then
             holder:SetPoint("BOTTOMRIGHT", frame, "TOPRIGHT", 0 + bOffX, gap + bOffY)
@@ -10075,7 +10643,12 @@ function SetupOptionsPanel()
         for idx, spellID in ipairs(FAKE_BUFF_SPELLS) do
             local iconFrame = CreateFrame("Frame", nil, holder)
             iconFrame:SetSize(iconSize, iconSize)
-            iconFrame:SetPoint("LEFT", holder, "LEFT", (idx - 1) * (iconSize + gap), 0)
+            if simple and simpleMode == "left" then
+                -- Left mode grows leftward from the right edge of the holder.
+                iconFrame:SetPoint("RIGHT", holder, "RIGHT", -(idx - 1) * (iconSize + iconGap), 0)
+            else
+                iconFrame:SetPoint("LEFT", holder, "LEFT", (idx - 1) * (iconSize + iconGap), 0)
+            end
             iconFrame:SetFrameLevel(holder:GetFrameLevel())
             local icon = iconFrame:CreateTexture(nil, "ARTWORK")
             icon:SetAllPoints()
@@ -10094,6 +10667,69 @@ function SetupOptionsPanel()
         if frame._previewBuffs then frame._previewBuffs:Hide() end
     end
 
+    -- Fake static cast bar for the boss preview (boss2 only). This drives the
+    -- REAL cast bar so it is 100% identical to a live cast: it disables the oUF
+    -- Castbar element (so oUF never resets our frozen state), then shows the bar
+    -- with a fixed mid-cast fill + spell name / timer / icon and the active-cast
+    -- tint -- the same state OnCastbarCastActive produces during a real cast.
+    local FAKE_CAST_SPELL_NAME = "Shadow Bolt"
+    local FAKE_CAST_SPELL_ICON = 136197
+    local function DetachFakeCastBar(frame)
+        if not frame._fakeCastActive then return end
+        frame._fakeCastActive = nil
+        local castbar = frame.Castbar
+        local castbarBg = castbar and castbar:GetParent()
+        if castbar then
+            if castbar.castTintLayer then castbar.castTintLayer:SetAlpha(0) end
+            castbar:Hide()
+        end
+        if castbarBg then castbarBg:Hide() end
+        -- The real Castbar element is re-enabled by ReloadFrames when the preview
+        -- is turned off, so no manual re-enable is needed here.
+    end
+    local function AttachFakeCastBar(frame)
+        local castbar = frame.Castbar
+        local castbarBg = castbar and castbar:GetParent()
+        if not castbar or not castbarBg then return end
+        local settings = db.profile.boss or {}
+        if settings.showCastbar == false then
+            castbarBg:Hide()
+            return
+        end
+        -- Suppress the real Castbar element so oUF can't reset the frozen cast.
+        if frame:IsElementEnabled("Castbar") then frame:DisableElement("Castbar") end
+        castbar._eufSettings = settings
+        -- Frozen mid-cast fill (respects the configured reverse-fill direction).
+        castbar:SetMinMaxValues(0, 1)
+        castbar:SetValue(0.65)
+        if castbar.Text then castbar.Text:SetText(FAKE_CAST_SPELL_NAME) end
+        if castbar.Time then
+            if settings.showCastDuration == false then
+                castbar.Time:SetText(""); castbar.Time:Hide()
+            else
+                castbar.Time:Show(); castbar.Time:SetText("1.8")
+            end
+        end
+        if castbar.Icon then
+            castbar.Icon:SetTexture(FAKE_CAST_SPELL_ICON)
+            -- SetTexture resets the crop; re-apply the cast icon's fixed zoom.
+            castbar.Icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
+        end
+        -- Active-cast tint -- same path a real cast uses.
+        if castbar.castTintLayer then
+            castbar.castTintLayer:SetAlpha(1)
+            ApplyUnitFrameCastColor(castbar)
+        end
+        castbarBg:Show()
+        castbar:Show()
+        if castbar._iconFrame then
+            if settings.showCastIcon == false then castbar._iconFrame:Hide()
+            else castbar._iconFrame:Show() end
+        end
+        if castbar._layoutTextZones then castbar:_layoutTextZones() end
+        frame._fakeCastActive = true
+    end
+
     -- Refresh the in-game boss preview's fake auras when boss settings that
     -- affect them (simpleDebuffs, debuffAnchor, debuffSize, buffAnchor, etc.)
     -- change.
@@ -10101,7 +10737,11 @@ function SetupOptionsPanel()
         if not ns._bossPreviewActive then return end
         for i = 1, 3 do
             local f = frames["boss" .. i]
-            if f then AttachFakeDebuffs(f); AttachFakeBuffs(f) end
+            if f then
+                AttachFakeDebuffs(f); AttachFakeBuffs(f)
+                -- Only the 2nd boss frame shows a sample cast bar.
+                if i == 2 then AttachFakeCastBar(f) end
+            end
         end
     end
 
@@ -10211,6 +10851,8 @@ function SetupOptionsPanel()
                     ApplyBossPreviewName(f, (ns._bossPreviewNames and ns._bossPreviewNames[i]) or PREVIEW_BOSS_NAMES[i] or "Boss")
                     AttachFakeDebuffs(f)
                     AttachFakeBuffs(f)
+                    -- Only the 2nd boss frame shows a sample cast bar.
+                    if i == 2 then AttachFakeCastBar(f) end
                 else
                     ClearBossPreviewColor(f)
                     ClearBossPreviewName(f)
@@ -10219,6 +10861,7 @@ function SetupOptionsPanel()
                     if f.UpdateAllElements then f:UpdateAllElements("BossPreview") end
                     DetachFakeDebuffs(f)
                     DetachFakeBuffs(f)
+                    DetachFakeCastBar(f)
                 end
             end
         end

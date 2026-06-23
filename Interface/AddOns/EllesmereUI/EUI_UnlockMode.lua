@@ -359,7 +359,7 @@ local MOVER_ALPHA  = 0.55        -- resting alpha for mover overlays
 local MOVER_HOVER  = 0.85        -- hover alpha
 local MOVER_DRAG   = 0.95        -- dragging alpha
 local TRANSITION_DUR = 0.35      -- seconds for the open/close fade-in
-local GEAR_ROTATION  = math.pi / 4  -- 45° rotation for gear effect
+local GEAR_ROTATION  = math.pi / 4  -- 45 deg rotation for gear effect
 
 -- Bar keys that can be moved (action bars + stance + micro + bag)
 -- These are populated by EAB if it's loaded; otherwise empty.
@@ -471,10 +471,10 @@ local SELECT_ELEMENT_FADE  = 0.50  -- seconds for the fade transition
 -- Stored on EllesmereUI to avoid adding an upvalue to CreateMover (Lua 5.1 limit: 60).
 local function SelectActionBar(key)
     return function()
-        local EAB = EllesmereUI.Lite.GetAddon("EllesmereUIActionBars", true)
-        if EAB and EAB.db then
-            EAB.db.profile.selectedBar = key
-        end
+        -- Direct setter (if the options module already built) + pending flag
+        -- (consumed when the Bar Display page builds). Mirrors the unit-frame path.
+        if EllesmereUI._setActionBarKey then EllesmereUI._setActionBarKey(key) end
+        EllesmereUI._pendingActionBarSelect = key
     end
 end
 local function SelectUnitFrame(unit)
@@ -1889,22 +1889,84 @@ ApplyAnchorPosition = function(childKey, targetKey, side, noMark, noMove, fromCa
                     if sp then savedEdge = sp end
                 end
                 -- Phase 2 follow: shift the absolute saved growth edge by how far
-                -- the anchor target's center has moved SINCE this bar was saved
-                -- (savedEdge.tgtx/.tgty, captured by savePos in the same UIParent
-                -- space as tCX/tCY). Both terms are UIParent space, added straight
-                -- to the UIParent-space center -- no ratio. Gated on
-                -- _anchorFollowReady (false until the post-settle flip, so the
-                -- whole login is a pure absolute pin) and on a saved baseline
-                -- existing (only bars re-saved since this shipped). CDM growth bars
-                -- only; StanceBar, ERB-shift bars, and unlock mode keep the pure
-                -- absolute pin (delta 0).
+                -- the anchor target has moved/resized SINCE this bar was saved.
+                -- When the anchor side aligns with this bar's own growth direction
+                -- (e.g. anchored to the target's RIGHT side while itself growing
+                -- RIGHT), the saved growth edge IS the near edge facing the target,
+                -- so the saved target edge can be recovered as
+                -- (savedNearEdge - ai.offsetX/Y) and diffed against the target's
+                -- CURRENT edge. This tracks the target both moving AND resizing --
+                -- e.g. a different character's main CDM bar having a different
+                -- icon count/width, which a center-delta can't detect (the center
+                -- doesn't move when a CENTER-anchored bar only changes width).
+                -- Misaligned anchors (or no ai.offsetX/Y yet) fall back to the
+                -- original center-delta, which is correct for non-resizing targets
+                -- (unit frames, ERB bars). Gated on _anchorFollowReady (false until
+                -- the post-settle flip, so the whole login is a pure absolute pin)
+                -- and on a saved baseline existing (only bars re-saved since this
+                -- shipped). CDM growth bars only; StanceBar, ERB-shift bars, and
+                -- unlock mode keep the pure absolute pin (delta 0).
+                local uw, uh = UIParent:GetSize()
                 local dTX, dTY = 0, 0
                 if isCDM and childKey ~= "StanceBar" and not shiftActive
                    and not isUnlocked and EllesmereUI._anchorFollowReady and savedEdge then
-                    if savedEdge.tgtx then dTX = tCX - savedEdge.tgtx end
-                    if savedEdge.tgty then dTY = tCY - savedEdge.tgty end
+                    -- Corner-follow is scoped to CDM bars anchored to ANOTHER CDM
+                    -- bar (the only target that resizes by icon count). Any other
+                    -- target keeps the original center-delta path untouched.
+                    local targetIsCDM = targetKey and targetKey:sub(1, 4) == "CDM_"
+                    if ai and ai.offsetX ~= nil and savedEdge.x then
+                        local childEdgeX = (uw / 2 + savedEdge.x) * ratio
+                        if side == "RIGHT" and growDir == "RIGHT" then
+                            dTX = tR - (childEdgeX - ai.offsetX)
+                        elseif side == "LEFT" and growDir == "LEFT" then
+                            dTX = tL - (childEdgeX - ai.offsetX)
+                        elseif targetIsCDM and (side == "TOP" or side == "BOTTOM")
+                               and (growDir == "RIGHT" or growDir == "LEFT")
+                               and savedEdge.tgtL and savedEdge.tgtR and savedEdge.tgtx then
+                            -- Corner case: anchored to the target's TOP/BOTTOM edge
+                            -- while growing horizontally. Hold the bar against the
+                            -- target's NEAR horizontal edge (chosen by which side of
+                            -- the target center the bar sits) so it keeps its corner
+                            -- when the target's WIDTH changes -- a center delta is 0
+                            -- for a center-anchored resize. Idempotent: reads only
+                            -- saved data + the target's live edge, never the child's
+                            -- own position, so it cannot drift.
+                            if childEdgeX < savedEdge.tgtx then
+                                dTX = tL - savedEdge.tgtL
+                            else
+                                dTX = tR - savedEdge.tgtR
+                            end
+                        elseif savedEdge.tgtx then
+                            dTX = tCX - savedEdge.tgtx
+                        end
+                    elseif savedEdge.tgtx then
+                        dTX = tCX - savedEdge.tgtx
+                    end
+                    if ai and ai.offsetY ~= nil and savedEdge.y then
+                        local childEdgeY = (uh / 2 + savedEdge.y) * ratio
+                        if side == "TOP" and growDir == "UP" then
+                            dTY = tT - (childEdgeY - ai.offsetY)
+                        elseif side == "BOTTOM" and growDir == "DOWN" then
+                            dTY = tB - (childEdgeY - ai.offsetY)
+                        elseif targetIsCDM and (side == "LEFT" or side == "RIGHT")
+                               and (growDir == "UP" or growDir == "DOWN")
+                               and savedEdge.tgtT and savedEdge.tgtB and savedEdge.tgty then
+                            -- Corner case: anchored to the target's LEFT/RIGHT edge
+                            -- while growing vertically. Hold the bar against the
+                            -- target's NEAR vertical edge so it keeps its corner when
+                            -- the target's HEIGHT changes. Same idempotent guarantee.
+                            if childEdgeY < savedEdge.tgty then
+                                dTY = tB - savedEdge.tgtB
+                            else
+                                dTY = tT - savedEdge.tgtT
+                            end
+                        elseif savedEdge.tgty then
+                            dTY = tCY - savedEdge.tgty
+                        end
+                    elseif savedEdge.tgty then
+                        dTY = tCY - savedEdge.tgty
+                    end
                 end
-                local uw, uh = UIParent:GetSize()
                 if growDir == "RIGHT" then
                     if savedEdge and savedEdge.point == "LEFT" and savedEdge.x then
                         cx = (uw / 2 + savedEdge.x) * ratio + cW / 2 + dTX
@@ -1945,8 +2007,10 @@ ApplyAnchorPosition = function(childKey, targetKey, side, noMark, noMove, fromCa
     -- correct. The provider returns 0 while unlock mode is active, so this is a
     -- no-op when unlocked (and stays nil/0 until a feature opts in).
     if not isUnlocked and EllesmereUI._GetAnchorTargetShiftDir then
-        local dir = EllesmereUI._GetAnchorTargetShiftDir(targetKey, childKey)
-        if dir ~= 0 then cy = cy + dir * (tT - tB) end
+        -- extraY (optional 2nd return) tunes the shift magnitude by N pixels in
+        -- the shift direction. nil/0 keeps the bar-height-only behavior.
+        local dir, extraY = EllesmereUI._GetAnchorTargetShiftDir(targetKey, childKey)
+        if dir ~= 0 then cy = cy + dir * ((tT - tB) + (extraY or 0)) end
     end
 
     -- Convert child center to CENTER-relative offset for centralized positioning
@@ -2340,6 +2404,28 @@ function EllesmereUI.GetAnchorTargetCenterUI(childKey)
     return (tL + tR) / 2, (tT + tB) / 2
 end
 
+-- UIParent-space edges (left, right, top, bottom) of childKey's anchor target,
+-- computed identically to ApplyAnchorPosition's tL/tR/tT/tB. Returned ONLY when
+-- the target is ANOTHER CDM bar -- this baseline exists purely for the corner-
+-- follow of CDM-anchored-to-CDM bars; nothing else reads it. CDM savePos stores
+-- these as sp.tgtL/.tgtR/.tgtT/.tgtB. Returns nil if there is no CDM anchor
+-- target or it has no screen bounds yet.
+function EllesmereUI.GetAnchorTargetEdgesUI(childKey)
+    local adb = GetAnchorDB()
+    local info = adb and adb[childKey]
+    if not info or not info.target then return nil end
+    if info.target:sub(1, 4) ~= "CDM_" then return nil end
+    local targetBar = GetBarFrame(info.target)
+    if not targetBar or not targetBar:GetLeft() then return nil end
+    local uiS = UIParent:GetEffectiveScale()
+    local tS = targetBar:GetEffectiveScale()
+    local tL = (targetBar:GetLeft() or 0) * tS / uiS
+    local tR = (targetBar:GetRight() or 0) * tS / uiS
+    local tT = (targetBar:GetTop() or 0) * tS / uiS
+    local tB = (targetBar:GetBottom() or 0) * tS / uiS
+    return tL, tR, tT, tB
+end
+
 -- Resync anchor offsets from actual frame positions. Called AFTER a profile
 -- import/switch once all frames are at their correct absolute positions
 -- (from db.profile.positions). This does NOT move any frames -- it reads
@@ -2502,7 +2588,7 @@ ApplyCenterPosition = function(barKey, pos)
     else
         -- No anchor relationship -- use grow direction to pick fixed edge.
         -- Prefer growEdge (width-independent absolute edge offset) when
-        -- available. Fall back to CENTER ± width/2 (width-dependent) only
+        -- available. Fall back to CENTER +/- width/2 (width-dependent) only
         -- for legacy positions that predate growEdge.
         local ge = pos.growEdge
         if ge and ge.anchor and ge.x and ge.y then
@@ -2590,7 +2676,7 @@ SaveBarPosition = function(barKey, point, relPoint, x, y)
     -- exact center value: for odd-pixel-height frames the edges are integer
     -- pixels and the center is integer + 0.5 (e.g. 540.5). We DELIBERATELY
     -- do not snap that .5 away here -- the apply path uses raw fh/2 (also
-    -- ending in .5 for odd heights) so the round-trip cy ± fh/2 lands back
+    -- ending in .5 for odd heights) so the round-trip cy +/- fh/2 lands back
     -- on integer pixels. Snapping cy to integer here would force the apply
     -- path to compute a half-pixel edge, causing a 1px drift on save & exit.
     local cp, crp, cx, cy = ConvertToCenterPos(barKey, point, relPoint, x, y)
@@ -3719,11 +3805,31 @@ end
 -------------------------------------------------------------------------------
 --  Selection + Arrow Key Nudge System
 -------------------------------------------------------------------------------
+-- Selection highlight: a low-opacity white fill over the selected element's
+-- overlay background, so the currently-selected element (the one arrow keys
+-- move) is clearly marked, like the snap-target highlight shown during drag.
+local function SetSelectionHighlight(m, on)
+    if not m then return end
+    if on then
+        if not m._selHl then
+            local hl = m:CreateTexture(nil, "ARTWORK")
+            hl:SetAllPoints()
+            hl:SetColorTexture(1, 1, 1, 1)
+            m._selHl = hl
+        end
+        m._selHl:SetAlpha(0.10)
+        m._selHl:Show()
+    elseif m._selHl then
+        m._selHl:Hide()
+    end
+end
+
 local function SelectMover(m)
     local ar, ag, ab = GetAccent()
     -- Deselect previous
     if selectedMover and selectedMover ~= m then
         selectedMover._selected = false
+        SetSelectionHighlight(selectedMover, false)
         if not selectedMover._dragging and not selectedMover:IsMouseOver() then
             selectedMover:SetFrameLevel(selectedMover._baseLevel)
             if not darkOverlaysEnabled then selectedMover:SetAlpha(MOVER_ALPHA) end
@@ -3739,6 +3845,7 @@ local function SelectMover(m)
     selectedMover = m
     if m then
         m._selected = true
+        SetSelectionHighlight(m, true)
         m:SetFrameLevel(m._raisedLevel)
         if not darkOverlaysEnabled then m:SetAlpha(MOVER_HOVER) end
         m._brd:SetColor(1, 1, 1, 0.9)
@@ -3760,6 +3867,7 @@ local function DeselectMover()
     if selectedMover then
         local ar, ag, ab = GetAccent()
         selectedMover._selected = false
+        SetSelectionHighlight(selectedMover, false)
         if not selectedMover._dragging then
             if not selectedMover:IsMouseOver() then
                 selectedMover:SetFrameLevel(selectedMover._baseLevel)
@@ -3818,8 +3926,8 @@ local function ApplyDarkOverlays()
         end
     end
 end
-local function NudgeMover(dx, dy)
-    local m = selectedMover
+local function NudgeMover(dx, dy, targetMover, skipCollapse)
+    local m = targetMover or selectedMover
     if not m or InCombatLockdown() then return end
 
     -- Read bar's current position, add dx/dy, reposition.
@@ -3883,10 +3991,19 @@ local function NudgeMover(dx, dy)
     -- Update coordinate readout
     if m.UpdateCoordText then m:UpdateCoordText() end
 
-    -- Collapse the mover while nudging
-    if m._forceCollapse then m._forceCollapse() end
-    m._nudgeCollapsed = true
+    -- Collapse the mover while nudging (arrow keys only). Typed cog edits pass
+    -- skipCollapse so the open cog menu, which is anchored to the mover, does
+    -- not jump or shrink while the user is typing in it.
+    if not skipCollapse then
+        if m._forceCollapse then m._forceCollapse() end
+        m._nudgeCollapsed = true
+    end
 end
+
+-- Exposed so the cog X/Y edit boxes can drive the SAME pixel-exact move the
+-- arrow keys use. Calling through the namespace table (already an upvalue in
+-- CreateMover) avoids adding NudgeMover as a new upvalue to that large closure.
+EllesmereUI._unlockNudge = NudgeMover
 
 -- Arrow key nudge: single press only, no hold-to-repeat
 local function SetupArrowKeyFrame()
@@ -3913,10 +4030,16 @@ local function SetupArrowKeyFrame()
         -- Scale by physical pixel size so each press moves exactly 1px
         local PPn = EllesmereUI and EllesmereUI.PP
         local pxStep = PPn and PPn.mult or 1
-        if IsShiftKeyDown() then
-            NudgeMover(dir[1] * 100 * pxStep, dir[2] * 100 * pxStep)
-        else
-            NudgeMover(dir[1] * pxStep, dir[2] * pxStep)
+        local step = IsShiftKeyDown() and (100 * pxStep) or pxStep
+        -- When this element's cog/snap menu is open, keep the mover expanded
+        -- (skipCollapse) so the open menu does not jump, then reanchor to the bar
+        -- and refresh the cog X/Y boxes so they track the nudge.
+        local m = selectedMover
+        local menuOpen = m._menuOpen
+        NudgeMover(dir[1] * step, dir[2] * step, nil, menuOpen)
+        if menuOpen then
+            if m.ReanchorToBar then m:ReanchorToBar() end
+            if m._syncCogPos then m._syncCogPos() end
         end
     end)
 
@@ -5231,27 +5354,46 @@ local function CreateMover(barKey)
     function mover:UpdateCoordText()
         local fs = self._coordFS
         if not fs then return end
-        -- Read stored position (already pixel-snapped) rather than deriving
-        -- from live bounds, which uses a different rounding grid and drifts.
         local bk = self._barKey
+        local PPi = EllesmereUI and EllesmereUI.PP
+        local toPx = (PPi and PPi.ToPixels) or round
+        -- Derive from the bar's LIVE geometry using the exact same formula and
+        -- physical-pixel units as the cog X/Y boxes, so the overlay always agrees
+        -- with the cog and updates immediately (no waiting for a commit).
+        local b = GetBarFrame(bk)
+        if b then
+            local bL, bR = b:GetLeft(), b:GetRight()
+            local bT, bB = b:GetTop(), b:GetBottom()
+            if bL and bR and bT and bB then
+                local ratio = b:GetEffectiveScale() / UIParent:GetEffectiveScale()
+                local sw = UIParent:GetWidth()
+                local sh = UIParent:GetHeight()
+                fs:SetText(format("%.0f, %.0f",
+                    toPx(((bL + bR) * 0.5 * ratio) - sw * 0.5),
+                    toPx(((bT + bB) * 0.5 * ratio) - sh * 0.5)))
+                fs:Show()
+                return
+            end
+        end
+        -- Fallback (frameless elements): saved CENTER position, same pixel units.
         local elem = registeredElements[bk]
         local pos = elem and elem.loadPosition and elem.loadPosition(bk)
         if not pos then
             pos = LoadBarPosition(bk)
         end
         if pos and pos.x and pos.y then
-            fs:SetText(format("%.0f, %.0f", round(pos.x), round(pos.y)))
+            fs:SetText(format("%.0f, %.0f", toPx(pos.x), toPx(pos.y)))
             fs:Show()
             return
         end
-        -- Fallback: derive from mover bounds (legacy path)
+        -- Last resort: derive from mover bounds.
         local l, r, t, b2 = self:GetLeft(), self:GetRight(), self:GetTop(), self:GetBottom()
         if not l or not t then fs:Hide(); return end
-        local cx = round((l + r) / 2)
-        local cy = round((t + b2) / 2)
         local screenW = UIParent:GetWidth()
         local screenH = UIParent:GetHeight()
-        fs:SetText(format("%.0f, %.0f", cx - screenW * 0.5, cy - screenH * 0.5))
+        fs:SetText(format("%.0f, %.0f",
+            toPx(((l + r) * 0.5) - screenW * 0.5),
+            toPx(((t + b2) * 0.5) - screenH * 0.5)))
         fs:Show()
     end
 
@@ -5590,9 +5732,12 @@ local function CreateMover(barKey)
                 s:SetPoint("TOPLEFT", UIParent, "TOPLEFT", finalX, finalY)
             end
 
-            -- Show live coordinates during drag (only on elements >= 20px tall)
+            -- Show live coordinates during drag (only on elements >= 20px tall).
+            -- Physical-pixel counts, matching the cog X/Y boxes and the overlay.
             if s._coordFS and s:GetHeight() >= 12 then
-                s._coordFS:SetText(format("%.0f, %.0f", round(snapCX - screenW * 0.5), round(snapCY - screenH * 0.5)))
+                local PPc = EllesmereUI and EllesmereUI.PP
+                local toPx = (PPc and PPc.ToPixels) or round
+                s._coordFS:SetText(format("%.0f, %.0f", toPx(snapCX - screenW * 0.5), toPx(snapCY - screenH * 0.5)))
                 s._coordFS:Show()
             end
 
@@ -6748,6 +6893,7 @@ local function CreateMover(barKey)
         if cogMenu then cogMenu:Hide() end
         if cogClickCatcher then cogClickCatcher:Hide() end
         mover._menuOpen = false
+        mover._syncCogPos = nil
     end
 
     local function BuildCogMenu()
@@ -6770,6 +6916,33 @@ local function CreateMover(barKey)
 
         local ITEM_H = 24
         local yOff = -4
+
+        -- Arrow-key hint at the very top (centered). Shown for every element since
+        -- arrow keys nudge the selected element 1px in any direction.
+        do
+            local hintFS = cogMenu:CreateFontString(nil, "OVERLAY")
+            if EllesmereUI and EllesmereUI.PrimeFontShadow then EllesmereUI.PrimeFontShadow(hintFS, true) end
+            hintFS:SetFont(FONT_PATH, 10, "")
+            hintFS:SetTextColor(0.7, 0.7, 0.7, 0.85)
+            hintFS:SetJustifyH("CENTER")
+            hintFS:SetWordWrap(true)
+            hintFS:SetPoint("TOPLEFT", cogMenu, "TOPLEFT", 8, yOff - 4)
+            hintFS:SetPoint("TOPRIGHT", cogMenu, "TOPRIGHT", -8, yOff - 4)
+            hintFS:SetText(EllesmereUI.L("Use arrow keys to move selected element 1px any direction"))
+            local hintH = hintFS:GetStringHeight()
+            if not hintH or hintH < 1 then hintH = 28 end
+            yOff = yOff - (hintH + 10)
+
+            -- Divider below the hint
+            local hintDiv = cogMenu:CreateTexture(nil, "ARTWORK")
+            local hintDivPx = PP and PP.mult or 1
+            hintDiv:SetHeight(hintDivPx)
+            if hintDiv.SetSnapToPixelGrid then hintDiv:SetSnapToPixelGrid(false); hintDiv:SetTexelSnappingBias(0) end
+            hintDiv:SetColorTexture(1, 1, 1, 0.10)
+            hintDiv:SetPoint("TOPLEFT", cogMenu, "TOPLEFT", 1, yOff - 4)
+            hintDiv:SetPoint("TOPRIGHT", cogMenu, "TOPRIGHT", -1, yOff - 4)
+            yOff = yOff - 9
+        end
 
         -- "Element Options" — navigate to this element's settings page (top of menu)
         local settingsMapping = EllesmereUI._ELEMENT_SETTINGS_MAP[barKey]
@@ -6968,16 +7141,22 @@ local function CreateMover(barKey)
             do
                 local sw = UIParent:GetWidth()
                 local sh = UIParent:GetHeight()
-                local initX, initY = 0, 0
-                local b0 = GetBarFrame(barKey)
-                if b0 then
-                    local bL, bR = b0:GetLeft(), b0:GetRight()
-                    local bT, bB = b0:GetTop(), b0:GetBottom()
-                    if bL and bR and bT and bB then
-                        local ratio0 = b0:GetEffectiveScale() / UIParent:GetEffectiveScale()
-                        initX = round(((bL + bR) * 0.5 * ratio0) - sw * 0.5)
-                        initY = round(((bT + bB) * 0.5 * ratio0) - sh * 0.5)
+                -- Current value of an axis as a physical-pixel COUNT, read from the
+                -- bar's LIVE geometry. Displaying pixel counts (not raw UIParent
+                -- units) makes +1 in the box equal exactly one physical pixel, i.e.
+                -- one arrow-key nudge; PP.mult is only 1 at pixel-perfect UI scale.
+                local function AxisToPx(ax)
+                    local b = GetBarFrame(barKey)
+                    local PPi = EllesmereUI and EllesmereUI.PP
+                    if not b or not PPi or not PPi.ToPixels then return nil end
+                    local bL, bR = b:GetLeft(), b:GetRight()
+                    local bT, bB = b:GetTop(), b:GetBottom()
+                    if not (bL and bR and bT and bB) then return nil end
+                    local ratio = b:GetEffectiveScale() / UIParent:GetEffectiveScale()
+                    if ax == "X" then
+                        return PPi.ToPixels(((bL + bR) * 0.5 * ratio) - sw * 0.5)
                     end
+                    return PPi.ToPixels(((bT + bB) * 0.5 * ratio) - sh * 0.5)
                 end
 
                 local function MakePosRow(axis, initVal)
@@ -7011,82 +7190,52 @@ local function CreateMover(barKey)
                     box:SetText(tostring(initVal))
 
                     box:SetScript("OnEnterPressed", function(self)
-                        local val = tonumber(self:GetText()) or 0
+                        local val = tonumber(self:GetText())
                         self:ClearFocus()
-                        local screenW = UIParent:GetWidth()
-                        local screenH = UIParent:GetHeight()
-                        -- moverCX/moverCY are UIParent-TOPLEFT; convert to screen-center
-                        local curSX = moverCX - screenW * 0.5
-                        local curSY = moverCY + screenH * 0.5
-                        local newSX = (axis == "X") and val or curSX
-                        local newSY = (axis == "Y") and val or curSY
-                        -- Back to UIParent-TOPLEFT center
-                        local newCX = newSX + screenW * 0.5
-                        local newCY = newSY - screenH * 0.5
-                        -- Compute delta from current position
-                        local dx = newCX - moverCX
-                        local dy = newCY - moverCY
-                        -- Move bar (anchored vs unanchored)
-                        local b = GetBarFrame(barKey)
-                        if b and not InCombatLockdown() then
-                            local ai = GetAnchorInfo(barKey)
-                            if ai and ai.target then
-                                -- Anchored: update anchor offsets (same as drag)
-                                ai.offsetX = (ai.offsetX or 0) + dx
-                                ai.offsetY = (ai.offsetY or 0) + dy
-                                ApplyAnchorPosition(barKey, ai.target, ai.side)
-                                -- Store the bar's resulting position (not a
-                                -- coordless marker) so CommitPositions saves the
-                                -- real location instead of falling back to the
-                                -- pre-edit snapshot and reverting the bar.
-                                local bpt, brelTo, brp, bx, by = b:GetPoint(1)
-                                if bpt and brelTo == UIParent and bx ~= nil and by ~= nil then
-                                    pendingPositions[barKey] = { point = bpt, relPoint = brp, x = bx, y = by }
-                                else
-                                    pendingPositions[barKey] = { _anchored = true }
-                                end
+                        if not val then return end
+                        local PPi = EllesmereUI and EllesmereUI.PP
+                        if InCombatLockdown() or not PPi then return end
+                        -- Current value from LIVE geometry (never the stale moverCX).
+                        local curPx = AxisToPx(axis)
+                        if not curPx then return end
+                        local deltaPx = val - curPx
+                        if deltaPx ~= 0 then
+                            -- One physical pixel == PP.mult UIParent units. Apply an
+                            -- exact integer-pixel delta through the SAME primitive the
+                            -- arrow keys use, so anchored/unanchored handling, the
+                            -- pending-save capture, and the mover-center re-sync all
+                            -- match the proven path: no second snap, no lost move.
+                            local stepUnits = PPi.FromPixels(deltaPx)
+                            if axis == "X" then
+                                EllesmereUI._unlockNudge(stepUnits, 0, mover, true)
                             else
-                                -- Unanchored: absolute position
-                                local bS = b:GetEffectiveScale()
-                                local ratio = UIParent:GetEffectiveScale() / bS
-                                local barHW = (b:GetWidth() or 0) * 0.5
-                                local barHH = (b:GetHeight() or 0) * 0.5
-                                local barX = newCX * ratio - barHW
-                                local barY = newCY * ratio + barHH
-                                local PPi = EllesmereUI and EllesmereUI.PP
-                                if PPi and PPi.SnapForES then
-                                    barX = PPi.SnapForES(barX, bS)
-                                    barY = PPi.SnapForES(barY, bS)
-                                end
-                                pcall(function()
-                                    b:ClearAllPoints()
-                                    b:SetPoint("TOPLEFT", UIParent, "TOPLEFT", barX, barY)
-                                end)
-                                pendingPositions[barKey] = {
-                                    point = "TOPLEFT", relPoint = "TOPLEFT",
-                                    x = barX, y = barY,
-                                }
+                                EllesmereUI._unlockNudge(0, stepUnits, mover, true)
                             end
                         end
-                        -- Update mover
-                        moverCX, moverCY = newCX, newCY
-                        local hw = (baseW > 0 and baseW or mover:GetWidth()) * 0.5
-                        local hh = (baseH > 0 and baseH or mover:GetHeight()) * 0.5
-                        mover:ClearAllPoints()
-                        mover:SetPoint("TOPLEFT", UIParent, "TOPLEFT", newCX - hw, newCY + hh)
-                        hasChanges = true
-                        PropagateAnchorChain(barKey)
-                        mover:ReanchorToBar()
+                        if mover.ReanchorToBar then mover:ReanchorToBar() end
+                        -- Re-sync the text to where the bar ACTUALLY landed so it can
+                        -- never snap back to the old number.
+                        local landed = AxisToPx(axis)
+                        if landed then self:SetText(tostring(landed)) end
                     end)
                     box:SetScript("OnEscapePressed", function(self)
                         self:ClearFocus()
-                        self:SetText(tostring(initVal))
+                        -- Discard typed text; show the bar's actual current value.
+                        local cur = AxisToPx(axis)
+                        self:SetText(tostring(cur or initVal))
                     end)
                     yOff = yOff - ROW_H
+                    return box
                 end
 
-                MakePosRow("X", initX)
-                MakePosRow("Y", initY)
+                local xBox = MakePosRow("X", AxisToPx("X") or 0)
+                local yBox = MakePosRow("Y", AxisToPx("Y") or 0)
+                -- Let arrow-key nudges (while the cog is open) refresh these boxes
+                -- so they stay in lockstep with the element and the floating overlay.
+                mover._syncCogPos = function()
+                    if xBox then local px = AxisToPx("X"); if px then xBox:SetText(tostring(px)) end end
+                    if yBox then local py = AxisToPx("Y"); if py then yBox:SetText(tostring(py)) end end
+                end
             end
 
             -- Divider after size/position inputs
@@ -7283,6 +7432,7 @@ local function CreateMover(barKey)
         if cogMenu and cogMenu:IsShown() then
             CloseCogMenu()
         else
+            SelectMover(mover)
             mover._menuOpen = true
             BuildCogMenu()
             ShowCogClickCatcher()
@@ -7295,6 +7445,7 @@ local function CreateMover(barKey)
         if cogMenu and cogMenu:IsShown() then
             CloseCogMenu()
         else
+            SelectMover(mover)
             mover._menuOpen = true
             BuildCogMenu()
             ShowCogClickCatcher()

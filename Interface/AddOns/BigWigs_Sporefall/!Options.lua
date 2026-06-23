@@ -3,7 +3,7 @@
 BigWigs:AddColors("Rotmire", {
 	[1221622] = "cyan",
 	[1221637] = "red",
-	[1221781] = "purple",
+	[1221781] = {"blue","purple"},
 	[1221787] = "orange",
 	[1222088] = {"blue","yellow"},
 })
@@ -11,6 +11,6 @@ BigWigs:AddColors("Rotmire", {
 BigWigs:AddSounds("Rotmire", {
 	[1221622] = "info",
 	[1221637] = "long",
-	[1221781] = "alert",
+	[1221781] = {"alert","warning"},
 	[1221787] = "alarm",
 })

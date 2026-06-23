@@ -2,13 +2,18 @@
 --  Clique - Copyright 2006-2026 - James N. Whitehead II
 -------------------------------------------------------------------]]--
 
---- @class CliqueAddon
+---@class CliqueAddon: AddonCore
 local addon = select(2, ...)
 
 local L = addon.L
 
 local strconcat = strconcat
 local strsplit = string.split
+
+local inventorySlotNames = {
+    ["13"] = L["Primary Trinket"],
+    ["14"] = L["Secondary Trinket"],
+}
 
 function addon.tcontains(arr, value)
     for _, key in ipairs(arr) do
@@ -198,6 +203,9 @@ function addon:GetBindingActionText(btype, binding, skipSubName)
         return L["Run custom macro '%s'"]:format(tostring(binding.macrotext))
     elseif btype == "macro" then
         return L["Run custom macro"]
+    elseif btype == "item" then
+        local slotName = inventorySlotNames[binding.item]
+        return L["Use item: %s"]:format(slotName or tostring(binding.item))
     else
         return L["Unknown binding type '%s'"]:format(tostring(btype))
     end
@@ -360,23 +368,6 @@ function addon:GetBindingPrefixSuffix(binding, global)
     return prefix, suffix
 end
 
-function addon:BindingConflictsWithSelfCast(binding)
-    local selfCastKey = GetModifiedClick("SELFCAST")
-    if not selfCastKey then return end
-
-    selfCastKey = selfCastKey:upper()
-    if binding.key and binding.key:match(selfCastKey) then
-        return true
-    end
-end
-
-function addon:GetSelfCastKeyText()
-    local selfCastKey = GetModifiedClick("SELFCAST")
-    if not selfCastKey then return "Undefined" end
-
-    return selfCastKey:upper()
-end
-
 local buttonSortValues = {
     BUTTON1 = 1,
     BUTTON2 = 2,
@@ -435,4 +426,185 @@ end
 
 function addon:SortBindingsByName(bindings)
     table.sort(bindings, compareFunctions.name)
+end
+
+-- Detects when Blizzard's in-game click-casting has Target or Open Context Menu
+-- moved off Left/Right click, which collides with Clique's routing (retail only).
+-- See B6 in BUGS.md.
+local function buttonIsOneOf(button, ...)
+    for i = 1, select("#", ...) do
+        if button == select(i, ...) then
+            return true
+        end
+    end
+    return false
+end
+
+local function clickBindingsConflict()
+    if not C_ClickBindings then
+        return false
+    end
+
+    local info = C_ClickBindings.GetProfileInfo()
+    if not info then
+        return false
+    end
+
+    local Interaction = Enum.ClickBindingType.Interaction
+    local Target = Enum.ClickBindingInteraction.Target
+    local OpenContextMenu = Enum.ClickBindingInteraction.OpenContextMenu
+
+    for _, entry in ipairs(info) do
+        if entry.type == Interaction then
+            if entry.actionID == Target and not buttonIsOneOf(entry.button, "LeftButton", "Button1") then
+                return true
+            elseif entry.actionID == OpenContextMenu and not buttonIsOneOf(entry.button, "RightButton", "Button2") then
+                return true
+            end
+        end
+    end
+
+    return false
+end
+
+local function bindingUsesModifier(key, modifier)
+    local mods = {}
+    local parts = {strsplit("-", key)}
+    for i = 1, #parts - 1 do
+        mods[parts[i]:upper()] = true
+    end
+    for _, token in ipairs({strsplit("-", modifier)}) do
+        if not mods[token] then
+            return false
+        end
+    end
+    return true
+end
+
+-- The Self Cast Key (Options > Combat) casts on the player while held, so any
+-- binding sharing that modifier never runs its action.
+local function conflictingSelfCastModifier(bindings)
+    local modifier = GetModifiedClick("SELFCAST")
+    if not modifier or modifier == "NONE" then
+        return nil
+    end
+    modifier = modifier:upper()
+
+    for _, binding in pairs(bindings) do
+        if binding.key and bindingUsesModifier(binding.key, modifier) then
+            return modifier
+        end
+    end
+end
+
+function addon:GetBlizzardClickCastWarning()
+    if not clickBindingsConflict() then
+        return nil
+    end
+
+    return {
+        title = L["Non-default Blizzard Clickcast Settings Detected"],
+        lines = {
+            L["Since 12.0.7 Blizzard has made changes to the default UI that conflict with addons that overwrite actions on unit frames. For things to work properly, the in-game click-casting needs Target Unit Frame set to LeftButton and Open Context Menu set to RightButton."],
+        },
+        actionText = L["Click to open the in-game Click-Casting settings."],
+        onClick = function()
+            if ToggleClickBindingFrame then
+                ToggleClickBindingFrame()
+            end
+        end,
+    }
+end
+
+function addon:GetSelfCastWarning()
+    local modifier = conflictingSelfCastModifier(self.bindings)
+    if not modifier then
+        return nil
+    end
+
+    return {
+        title = L["Self Cast Key Conflicts With Your Bindings"],
+        lines = {
+            L["Your Self Cast Key is set to %s, which is shared by one or more of your bindings. While that key is held the game casts on you instead of running the binding."]:format(modifier),
+            " ",
+            L["Change your Self Cast Key under Options > Combat, or edit the binding to use a different modifier."],
+        },
+    }
+end
+
+-- Blizzard no longer provides Target/Show Menu as a fallback on unit frames, so
+-- warn when neither action is bound in Clique.
+function addon:GetMissingTargetMenuWarning()
+    if self.settings.dismissTargetMenuWarning then
+        return nil
+    end
+
+    local hasTarget, hasMenu = false, false
+    for _, binding in pairs(self.bindings) do
+        if binding.type == "target" then
+            hasTarget = true
+        elseif binding.type == "menu" then
+            hasMenu = true
+        end
+    end
+
+    if hasTarget and hasMenu then
+        return nil
+    end
+
+    local missing
+    if not hasTarget and not hasMenu then
+        missing = L["Target Unit and Show Menu"]
+    elseif not hasTarget then
+        missing = L["Target Unit"]
+    else
+        missing = L["Show Menu"]
+    end
+
+    return {
+        title = L["No %s binding set"]:format(missing),
+        lines = {
+            L["World of Warcraft used to have fallback options for targeting a unit and opening the context menu, but these no longer play well with unit frames and click-casting addons like Clique."],
+            " ",
+            L["If you want to target or open the unit menu by clicking a frame, add a binding for those actions in Clique with the clicks or keypresses you prefer."],
+        },
+    }
+end
+
+-- Highest-priority active warning wins; nil when nothing needs attention.
+function addon:GetActiveBindConfigWarning()
+    if not self.bindings then
+        return nil
+    end
+
+    return self:GetBlizzardClickCastWarning()
+        or self:GetMissingTargetMenuWarning()
+        or self:GetSelfCastWarning()
+end
+
+-- The click-cast profile has no change event, so hook its two mutation points to
+-- refresh the warning. BrowsePage also recomputes it on every update.
+function addon:SetupBindConfigWarningWatch()
+    if not C_ClickBindings or self.bindConfigWarningWatchInstalled then
+        return
+    end
+    self.bindConfigWarningWatchInstalled = true
+
+    local function refresh()
+        self:RefreshBindConfigWarning()
+    end
+
+    hooksecurefunc(C_ClickBindings, "SetProfileByInfo", refresh)
+    hooksecurefunc(C_ClickBindings, "ResetCurrentProfile", refresh)
+end
+
+function addon:RefreshBindConfigWarning()
+    if not CliqueUIBindingFrame then
+        return
+    end
+
+    local config = self:GetBindingConfig()
+    if config.BrowsePage and config:BrowsePageShown() then
+        config:GetBrowsePage():UpdateBindConfigWarning()
+    end
 end

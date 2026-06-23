@@ -723,6 +723,7 @@ local DEFAULTS = {
             thresholdEnabled = false,
             thresholdCount   = 3,
             thresholdPartialOnly = false,
+            thresholdReverse = false,  -- bar-type only: threshold color below the value (spenders)
             thresholdR = 0x0c/255, thresholdG = 0xd2/255, thresholdB = 0x9d/255, thresholdA = 1,
             tickValues  = "",   -- comma-separated absolute resource values for tick marks (bar-type only)
             thresholdSpecs = {},  -- per-spec threshold/hash entries: { specIDs={0}, hashValues="", thresholdCount=3, thresholdPartialOnly=false }
@@ -2857,7 +2858,7 @@ local function UpdatePrimaryBar()
         local percentText = format("%d", pctRaw) .. percentSuffix
         local txt
         if fmt == "smart" then
-            local isPercent = EllesmereUI.IsSmartPowerPercent and EllesmereUI.IsSmartPowerPercent()
+            local isPercent = EllesmereUI.IsSmartPowerPercent and EllesmereUI.IsSmartPowerPercent(cachedPrimary)
             txt = isPercent and percentText or AbbreviateNumbers(cur)
         elseif fmt == "both" then
             txt = AbbreviateNumbers(cur) .. " | " .. percentText
@@ -3209,6 +3210,10 @@ local function UpdateSecondaryResource()
     local _tsThreshCount = _tsEntry and _tsEntry.thresholdCount or sp.thresholdCount
     local _tsPartialOnly = _tsEntry and _tsEntry.thresholdPartialOnly
     if _tsPartialOnly == nil then _tsPartialOnly = sp.thresholdPartialOnly end
+    -- Bar-type only: reverse the threshold direction so the threshold color shows
+    -- below the value
+    local _tsReverse = _tsEntry and _tsEntry.thresholdReverse
+    if _tsReverse == nil then _tsReverse = sp.thresholdReverse end
     -- Per-entry threshold color (falls back to global sp.thresholdR/G/B/A)
     local _tsR = _tsEntry and _tsEntry.thresholdR or sp.thresholdR
     local _tsG = _tsEntry and _tsEntry.thresholdG or sp.thresholdG
@@ -3356,7 +3361,8 @@ local function UpdateSecondaryResource()
                     end
 
                     if _runeReady[runeIdx] then
-                        -- Ready rune: full brightness, hide recharge overlay
+                        -- Ready rune: full brightness + restore background, hide recharge overlay
+                        rf._bg:SetAlpha(1)
                         if runeUseThresh then
                             if _tsPartialOnly and pos < _tsThreshCount then
                                 rf:SetActive(true, r, g, b, a)
@@ -3369,8 +3375,9 @@ local function UpdateSecondaryResource()
                         if rf._rechargeBar then rf._rechargeBar:Hide() end
                         if rf._cdText then rf._cdText:SetText("") end
                     else
-                        -- Cooling-down rune: hide normal fill, show recharge bar
+                        -- Cooling-down rune: hide normal fill + background, show recharge bar
                         rf:SetActive(false, r, g, b, a)
+                        rf._bg:SetAlpha(0)
 
                         -- Lazily create a StatusBar overlay for recharge progress
                         if not rf._rechargeBar then
@@ -3519,10 +3526,23 @@ local function UpdateSecondaryResource()
                     if _tsEntry and pType and UnitPowerPercent then
                         -- Use ColorCurve + UnitPowerPercent: WoW evaluates the secret
                         -- value against the curve on the C side, returns a Color object.
-                        local curve = GetBarThresholdCurve(
-                            r, g, b,
-                            _tsR or 1, _tsG or 0.2, _tsB or 0.2,
-                            _tsThreshCount or 30)
+                        -- Default: threshold color above the value, fill below it
+                        -- (builders -- warn when high). "Reverse Threshold Fill Color"
+                        -- (thresholdReverse) flips it to threshold color below
+                        -- for spender resources like Hunter Focus where you
+                        -- want to warn when low.
+                        local curve
+                        if _tsReverse then
+                            curve = GetBarThresholdCurve(
+                                r, g, b,                                -- fill color (above)
+                                _tsR or 1, _tsG or 0.2, _tsB or 0.2,   -- threshold color (below)
+                                _tsThreshCount or 30)
+                        else
+                            curve = GetBarThresholdCurve(
+                                _tsR or 1, _tsG or 0.2, _tsB or 0.2,   -- threshold color (above)
+                                r, g, b,                                -- fill color (below)
+                                _tsThreshCount or 30)
+                        end
                         if curve then
                             local ok, colorResult = pcall(UnitPowerPercent, "player", pType, false, curve)
                             if ok and colorResult and colorResult.GetRGBA then
@@ -3666,6 +3686,9 @@ local function UpdateSecondaryResource()
             -- The StatusBar accepts the secret number natively; when the
             -- value falls within [i-1, i] the bar fills proportionally,
             -- giving us a binary active/inactive look for integer counts.
+            -- Threshold coloring via a second, threshold-colored
+            -- StatusBar overlay per pip.
+            local _useThresh = _tsEntry and _tsThreshCount and _tsThreshCount > 0
             for i = 1, maxC do
                 local pip = pips[i]
                 if pip and pip:IsShown() then
@@ -3686,6 +3709,31 @@ local function UpdateSecondaryResource()
                     pip._secretBar:SetValue(cur)
                     pip._secretBar:SetStatusBarColor(r, g, b, a)
                     pip._secretBar:Show()
+
+                    -- Threshold overlay (drawn on top of the base fill)
+                    -- Partial-only: pips below the threshold index never recolor.
+                    local showThresh = _useThresh and not (_tsPartialOnly and i < _tsThreshCount)
+                    if showThresh then
+                        if not pip._secretThreshBar then
+                            local tb = CreateFrame("StatusBar", nil, pip)
+                            tb:SetAllPoints(pip._fill)
+                            tb:SetStatusBarTexture(texPath)
+                            tb:SetFrameLevel(pip:GetFrameLevel() + 1)
+                            pip._secretThreshBar = tb
+                        else
+                            pip._secretThreshBar:SetStatusBarTexture(texPath)
+                        end
+                        -- Fills only when cur >= max(i, threshCount): the pip is
+                        -- active AND the threshold has been reached.
+                        local tlo = (i > _tsThreshCount) and i or _tsThreshCount
+                        pip._secretThreshBar:SetMinMaxValues(tlo - 1, tlo)
+                        pip._secretThreshBar:SetValue(cur)
+                        pip._secretThreshBar:SetStatusBarColor(_tsR or 1, _tsG or 0.2, _tsB or 0.2, a)
+                        pip._secretThreshBar:Show()
+                    elseif pip._secretThreshBar then
+                        pip._secretThreshBar:Hide()
+                    end
+
                     -- Hide the normal fill; the StatusBar replaces it
                     pip._fill:Hide()
                 end
@@ -5728,10 +5776,22 @@ function ERB:OnInitialize()
     end
     -- Consulted inside ApplyAnchorPosition. Returns 0 while unlock mode is
     -- active so the layout shows normal (and movers capture true positions).
+    -- Returns dir (+1/-1/0) and an optional extra-pixel offset added to the shift
+    -- magnitude ("Extra Y Offset"). The extra is only meaningful when dir ~= 0.
     EllesmereUI._GetAnchorTargetShiftDir = function(targetKey, childKey)
         if EllesmereUI._unlockActive then return 0 end
-        if targetKey == "ERB_ClassResource" then return ResolveShiftDir() end
-        if targetKey == "ERB_Power" then return ResolveShiftDirPower() end
+        if targetKey == "ERB_ClassResource" then
+            local dir = ResolveShiftDir()
+            if dir == 0 then return 0 end
+            local sp = ERB.db and ERB.db.profile and ERB.db.profile.secondary
+            return dir, (sp and sp.shiftElementsIfNoResourceExtraY) or 0
+        end
+        if targetKey == "ERB_Power" then
+            local dir = ResolveShiftDirPower()
+            if dir == 0 then return 0 end
+            local pp = ERB.db and ERB.db.profile and ERB.db.profile.primary
+            return dir, (pp and pp.shiftElementsIfNoPowerExtraY) or 0
+        end
         return 0
     end
     -- Whether a shift WOULD apply outside unlock mode (unlock entry uses this to

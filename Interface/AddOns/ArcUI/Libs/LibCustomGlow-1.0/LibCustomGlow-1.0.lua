@@ -563,6 +563,11 @@ local function bgHide(self)
     end
 end
 
+-- ArcUI 12.1-forward fix: the AnimateTexCoords global was removed in 12.1 and moved
+-- to TextureUtil.AnimateTexCoords. Resolve whichever exists so the ants glow works on
+-- BOTH 12.0.7 (global) and 12.1 (TextureUtil). No behavior change on current live.
+local AnimateTexCoords = AnimateTexCoords or (TextureUtil and TextureUtil.AnimateTexCoords)
+
 local function bgUpdate(self, elapsed)
     AnimateTexCoords(self.ants, 256, 256, 48, 48, 22, elapsed, self.throttle);
     -- ArcUI: skip alpha override when external forced alpha is active (secret-safe threshold curves)

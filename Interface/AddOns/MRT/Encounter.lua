@@ -35,6 +35,9 @@ module.db.diffNames = {
 	[233] = L.sencounterWODMythic,	-- Mythic,	PLAYER_DIFFICULTY6
 }
 module.db.diffPos = ExRT.isLK and {1,148,9,3,4,175,176,193,194} or ExRT.isBC and {1,148,9,3,4,175,176} or ExRT.isClassic and {1,148,9,185,186} or {24,1,2,23,8,9,3,4,5,6,7,14,15,233,16}
+module.db.subDiff = {
+	[233] = 16,
+}
 module.db.dropDownNow = nil
 module.db.onlyMy = nil
 module.db.scrollPos = 1
@@ -131,7 +134,7 @@ function module.options:Load()
 						else
 							diffID = tonumber( string.sub(data,4,4),16 ) + 1
 						end
-						if diffID == newDiff then
+						if diffID == newDiff or (diffID and module.db.subDiff[diffID] == newDiff) then
 							local encounterID, pull, pullTime, isKill, groupSize, firstBloodName, raidIlvl, _
 						
 							if isNewFormat then
@@ -350,7 +353,7 @@ function module.options:Load()
 		return module.db.prevCor and coroutine.status(module.db.prevCor) ~= "dead"
 	end
 	
-	self.dropDown = ELib:DropDown(self,220,#module.db.diffPos):Size(235):Point(445+2,-31)
+	self.dropDown = ELib:DropDown(self,220,-1):Size(235):Point(445+2,-31)
 	function self.dropDown:SetValue(newValue,resetDB)
 		if module.options:IsLocked() then return end
 		module.db.prevCor = ExRT.F:AddCoroutine(function()
@@ -360,7 +363,9 @@ function module.options:Load()
 
 	for i=1,#module.db.diffPos do
 		local diffID = module.db.diffPos[i]
-		self.dropDown.List[i] = {text = module.db.diffNames[diffID] or GetDifficultyInfo(diffID), justifyH = "CENTER", arg1 = i, arg2 = true, func = self.dropDown.SetValue}
+		if not module.db.subDiff[diffID] then
+			self.dropDown.List[#self.dropDown.List+1] = {text = module.db.diffNames[diffID] or GetDifficultyInfo(diffID), justifyH = "CENTER", arg1 = i, arg2 = true, func = self.dropDown.SetValue}
+		end
 	end
 	
 	self.borderList = CreateFrame("Frame",nil,self)

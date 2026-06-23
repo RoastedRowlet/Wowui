@@ -1,7 +1,7 @@
 local addonName, ns = ...
 local CCS = ns.CCS
 
-if CCS.GetCurrentVersion() ~= CCS.RETAIL then
+if CCS.CurrentVersion ~= CCS.RETAIL then
     return
 end
 
@@ -18,6 +18,7 @@ CCS.Modules[module.Name] = module
 -----------------------------------------
 -- ITEM LEVEL DELTA BONUS IDS (so I don't lose them)
 -- https://www.raidbots.com/static/data/live/bonuses.json
+-- https://www.raidbots.com/static/data/ptr/bonuses.json
 -----------------------------------------
 
 CCS.AscendantVoidforgedBonusIDs = {
@@ -75,7 +76,8 @@ function CCS.BuilditemString(itemID, trackName, targetIlvl, bossID)
         return "item:5263"
     end
 
-    local track = CCS.Season_upgradeTracks[trackName]
+	local track = CCS.Season.upgradeTracks[trackName]
+
     if not track then
         return "item:" .. itemID
     end
@@ -359,7 +361,7 @@ function CCS:CreateLootHeader(parent, rowWidth, rowHeight, primaryStatText)
     -------------------------------------------------
     -- Header Title
     -------------------------------------------------
-    header.title = CreateLabel(string.format(EXPANSION_SEASON_NAME, EXPANSION_NAME11, CCS.CurrenSeasonNumber), header, 0, 20*rowHeight, "NAME")
+    header.title = CreateLabel(string.format(EXPANSION_SEASON_NAME, EXPANSION_NAME11, CCS.CurrentSeasonNumber), header, 0, 20*rowHeight, "NAME")
 	header.title:SetParent(ccsgf_sf)  -- move it to the shared side panel
 	header.title:SetPoint("TOP", header, "TOP", 0, -20)
 	header.title:SetJustifyH("CENTER")
@@ -1177,8 +1179,7 @@ function CCS:UpdateFooterFiltersFromControls(parent)
     CCS.FooterFilters.includeDungeons = parent.includeDungeons:GetChecked()
     CCS.FooterFilters.includeRaids    = parent.includeRaids:GetChecked()
 
-    CCS.FooterFilters.ilvl  = parent.selectedIlvl or 289
-    -- If you have a track dropdown elsewhere, wire it here later:
+    CCS.FooterFilters.ilvl  = parent.selectedIlvl or CCS.seasonCap
     CCS.FooterFilters.track = parent.selectedTrack or "Myth"
 
     -- Secondary stats from the icon buttons
@@ -2237,12 +2238,12 @@ function CCS:CreateLootFooter(parent)
 	-------------------------------------------------
 	-- Item Level Menu
 	-------------------------------------------------
-	UIDropDownMenu_SetText(parent.ilvlDrop, ITEM_LEVEL_ABBR..": "..tostring(289))
+	UIDropDownMenu_SetText(parent.ilvlDrop, ITEM_LEVEL_ABBR..": "..tostring(CCS.seasonCap))
 	parent.ilvlDrop.selectedIlvl = CCS.FooterFilters.ilvl
 	parent.ilvlDrop.selectedTrack = CCS.FooterFilters.track
 
 	UIDropDownMenu_Initialize(parent.ilvlDrop, function(self, level, menuList)
-	local tracks = CCS.Season_upgradeTracks
+	local tracks = CCS.Season.upgradeTracks
 
 	-------------------------------------------------
 	-- LEVEL 1 menu list: Track List (sorted by track.id)
@@ -2575,8 +2576,8 @@ function CCS:CreateLootFooter(parent)
 		-------------------------------------------------
 		-- Reset Item Level
 		-------------------------------------------------
-		parent.selectedIlvl = 289
-		UIDropDownMenu_SetText(parent.ilvlDrop, ITEM_LEVEL_ABBR..": 289")
+		parent.selectedIlvl = CCS.seasonCap
+		UIDropDownMenu_SetText(parent.ilvlDrop, ITEM_LEVEL_ABBR..": "..CCS.seasonCap)
 
 		-------------------------------------------------
 		-- Reset Armor Type
@@ -3116,7 +3117,7 @@ function CCS.gearfinderEventHandler(event, ...)
     local arg1, arg2, arg3 = ...
 	if option("showgearfinder") == false then return end
 
-	if CCS.GetCurrentVersion() ~= CCS.RETAIL then return end
+	if CCS.CurrentVersion ~= CCS.RETAIL then return end
 
     if event == "CCS_EVENT_OPTIONS" and option("showgearfinder") == false then
         if _G["ccsgf_btn1"] ~= nil then _G["ccsgf_btn1"]:Hide() end

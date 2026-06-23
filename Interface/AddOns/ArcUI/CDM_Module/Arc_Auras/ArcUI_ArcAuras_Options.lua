@@ -1307,7 +1307,8 @@ function ns.GetArcAurasOptionsTable()
             C_Timer.After(0, function()
                 local ACD = LibStub and LibStub("AceConfigDialog-3.0", true)
                 if ACD and ACD.SelectGroup then
-                    ACD:SelectGroup("ArcUI", "icons", "arcAuras", "customIcons")
+                    -- Custom Icons is now its own top-level tab (was nested under Arc Icons).
+                    ACD:SelectGroup("ArcUI", "icons", "customIcons")
                 end
             end)
         end,

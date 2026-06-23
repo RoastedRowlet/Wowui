@@ -1952,6 +1952,146 @@ local function GetOptionsTable()
                     end
                 end,
             },
+            dynamicCooldowns = {
+                type = "toggle",
+                name = "Dynamic Cooldowns",
+                desc = "Dynamically repositions cooldown icons as they become ready or go on cooldown — hidden ones drop out and the rest compact to fill the gap. Works alongside Dynamic Auras.",
+                order = 36.75,
+                width = 1.15,
+                hidden = function()
+                    local g = GetSelectedGroup()
+                    return HideIfNoGroup() or collapsedSections.grid or not (g and g.autoReflow)
+                end,
+                get = function()
+                    local g = GetSelectedGroup()
+                    if not g then return false end
+                    return g.dynamicCooldowns == true
+                end,
+                set = function(_, val)
+                    local g = GetSelectedGroup()
+                    if not g then return end
+                    g.dynamicCooldowns = val and true or false
+                    -- Persist to the group's DB record (per-spec profile).
+                    local db = g.getDB and g.getDB()
+                    if db then db.dynamicCooldowns = g.dynamicCooldowns end
+                    -- Give the group an explicit alignment when enabling so the
+                    -- compaction has a defined anchor (mirrors Dynamic Auras).
+                    if g.dynamicCooldowns and g.layout and not g.layout.alignment then
+                        local rows = g.layout.gridRows or 1
+                        local cols = g.layout.gridCols or 1
+                        local gridShape = ns.CDMGroups.DetectGridShape and ns.CDMGroups.DetectGridShape(rows, cols) or "horizontal"
+                        local defaultAlignment = ns.CDMGroups.GetDefaultAlignment and ns.CDMGroups.GetDefaultAlignment(gridShape) or "center"
+                        g.layout.alignment = defaultAlignment
+                        if db then db.alignment = defaultAlignment end
+                    end
+                    -- Apply immediately if the panel is closed; otherwise the
+                    -- panel-close re-layout applies it.
+                    local DL = ns.CDMGroups.DynamicLayout
+                    local panelOpen = DL and DL.IsOptionsPanelOpen and DL.IsOptionsPanelOpen()
+                    if not panelOpen then
+                        if g.autoReflow and g.ReflowIcons then
+                            g:ReflowIcons()
+                        elseif g.Layout then
+                            g:Layout()
+                        end
+                    end
+                    if ns.CDMGroups.TriggerTemplateAutoSave then
+                        ns.CDMGroups.TriggerTemplateAutoSave()
+                    end
+                    local reg = LibStub("AceConfigRegistry-3.0", true)
+                    if reg then reg:NotifyChange("ArcUI") end
+                end,
+            },
+            smoothMovement = {
+                type = "toggle",
+                name = "Smooth Movement",
+                desc = "Icons slide smoothly to their new position when the layout shifts, instead of snapping instantly. Applies to both Dynamic Auras and Dynamic Cooldowns.",
+                order = 36.76,
+                width = 1.15,
+                hidden = function()
+                    local g = GetSelectedGroup()
+                    return HideIfNoGroup() or collapsedSections.grid or not (g and g.autoReflow and (g.dynamicLayout or g.dynamicCooldowns))
+                end,
+                get = function()
+                    local g = GetSelectedGroup()
+                    return g and g.smoothMovement == true
+                end,
+                set = function(_, val)
+                    local g = GetSelectedGroup()
+                    if not g then return end
+                    g.smoothMovement = val and true or false
+                    local db = g.getDB and g.getDB()
+                    if db then db.smoothMovement = g.smoothMovement end
+                    if ns.CDMGroups.TriggerTemplateAutoSave then ns.CDMGroups.TriggerTemplateAutoSave() end
+                    local reg = LibStub("AceConfigRegistry-3.0", true)
+                    if reg then reg:NotifyChange("ArcUI") end
+                end,
+            },
+            smoothMoveDuration = {
+                type = "range",
+                name = "Movement Duration",
+                desc = "How long the slide takes, in seconds. Lower = snappier, higher = slower glide.",
+                order = 36.77,
+                width = 1.5,
+                min = 0.05, max = 0.40, step = 0.01,
+                hidden = function()
+                    local g = GetSelectedGroup()
+                    return HideIfNoGroup() or collapsedSections.grid or not (g and g.autoReflow and (g.dynamicLayout or g.dynamicCooldowns) and g.smoothMovement)
+                end,
+                get = function()
+                    local g = GetSelectedGroup()
+                    return g and (g.smoothMoveDuration or 0.18) or 0.18
+                end,
+                set = function(_, val)
+                    local g = GetSelectedGroup()
+                    if not g then return end
+                    g.smoothMoveDuration = val
+                    local db = g.getDB and g.getDB()
+                    if db then db.smoothMoveDuration = val end
+                    if ns.CDMGroups.TriggerTemplateAutoSave then ns.CDMGroups.TriggerTemplateAutoSave() end
+                end,
+            },
+            dynamicOrderMode = {
+                type = "select",
+                name = "Icon Order",
+                desc = "How active icons are ordered when the layout compacts.\n\n|cffffd100Priority|r — icons keep their configured left-to-right order; a higher-priority icon taking its slot can push others over.\n\n|cffffd100First Come, First Served|r — the icon that became active first stays leftmost; new icons append after it and nothing reshuffles.",
+                order = 36.78,
+                width = 1.75,
+                values = {
+                    priority = "Priority",
+                    fcfs = "First Come, First Served",
+                },
+                sorting = { "priority", "fcfs" },
+                hidden = function()
+                    local g = GetSelectedGroup()
+                    return HideIfNoGroup() or collapsedSections.grid or not (g and g.autoReflow and (g.dynamicLayout or g.dynamicCooldowns))
+                end,
+                get = function()
+                    local g = GetSelectedGroup()
+                    return (g and g.dynamicOrderMode) or "priority"
+                end,
+                set = function(_, val)
+                    local g = GetSelectedGroup()
+                    if not g then return end
+                    g.dynamicOrderMode = val
+                    local db = g.getDB and g.getDB()
+                    if db then db.dynamicOrderMode = val end
+                    -- Reset the runtime activation order so the new mode starts clean.
+                    g._fcfsOrder = nil
+                    local DL = ns.CDMGroups.DynamicLayout
+                    local panelOpen = DL and DL.IsOptionsPanelOpen and DL.IsOptionsPanelOpen()
+                    if not panelOpen then
+                        if g.autoReflow and g.ReflowIcons then
+                            g:ReflowIcons()
+                        elseif g.Layout then
+                            g:Layout()
+                        end
+                    end
+                    if ns.CDMGroups.TriggerTemplateAutoSave then ns.CDMGroups.TriggerTemplateAutoSave() end
+                    local reg = LibStub("AceConfigRegistry-3.0", true)
+                    if reg then reg:NotifyChange("ArcUI") end
+                end,
+            },
             dynamicContainerSize = {
                 type = "toggle",
                 name = "Dynamic Container",

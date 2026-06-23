@@ -1,9 +1,10 @@
-## Interface: 120000, 120001, 120005
+## Interface: 120000, 120001, 120005, 120007, 120100
 ## Title: Arc UI
 ## Notes: Buff/Debuff stack tracking bars, icons, resource bars, cooldown bars, and timer bars with CD Manager integration
 ## Author: Arc
-## Version: 3.7.1
+## Version: 3.7.4
 ## X-Wago-ID:mNw7Q2No
+## X-Curse-Project-ID: 1391614
 ## SavedVariables: ArcUIDB, ArcUI_CDMEnhance_Debug
 
 
@@ -34,35 +35,47 @@ Libs\LibEQOL\LibEQOL.xml
 
 # Core Files
 ArcUI_DB.lua
-ArcUI_BarGroupAlign.lua
+Bars\ArcUI_BarGroupAlign.lua
 ArcUI_Core.lua
-ArcUI_Display.lua
-ArcUI_Resources.lua
-ArcUI_Catalog.lua
+Bars\ArcUI_DurationText.lua
+Bars\ArcUI_Display.lua
+Bars\ArcUI_Resources.lua
+Bars\ArcUI_Catalog.lua
 ArcUI_Minimap.lua
-ArcUI_CooldownBars.lua
-ArcUI_CustomTracking.lua
-ArcUI_TalentPicker.lua
-ArcUI_DataRepair.lua
+Bars\ArcUI_CooldownBars.lua
+Bars\ArcUI_CustomTracking.lua
+Presets\ArcUI_TalentPicker.lua
+Utilities\ArcUI_DataRepair.lua
+
+# Castbar
+Castbar\ArcUI_Castbar.lua
 
 # Main Options (creates AceDB)
 ArcUI_Options.lua
 
+# Changelog ("What's New" window)
+ArcUI_Changelog.lua
+
 # Cooldown Reminder
-ArcUI_CooldownReminder.lua
-ArcUI_CooldownReminder_Options.lua
+Cooldown_Reminder\ArcUI_CooldownReminder.lua
+Cooldown_Reminder\ArcUI_CooldownReminder_Options.lua
+
+# Set My Kick (built-in; dormant if the standalone SetMyKick addon is loaded)
+SetMyKick\ArcUI_SetMyKick.lua
 
 # Options Panels
-ArcUI_TrackingOptions.lua
-ArcUI_Presets.lua
-ArcUI_AppearanceOptions.lua
-ArcUI_CooldownBarOptions.lua
-ArcUI_TimerBarOptions.lua
-ArcUI_CustomOptions.lua
+Bars\ArcUI_TrackingOptions.lua
+Presets\ArcUI_Presets.lua
+Bars\ArcUI_AppearanceOptions.lua
+Bars\ArcUI_CooldownBarOptions.lua
+Bars\ArcUI_TimerBarOptions.lua
+Bars\ArcUI_CustomOptions.lua
+Castbar\ArcUI_Castbar_Options.lua
 
 # Import/Export
-ArcUI_Bars_ImportExport.lua
-ArcUI_CR_ImportExport.lua
+Import_Export\ArcUI_Bars_ImportExport.lua
+Import_Export\ArcUI_Castbar_ImportExport.lua
+Cooldown_Reminder\ArcUI_CR_ImportExport.lua
 
 # CDM Module - Cooldown Manager Integration
 CDM_Module\ArcUI_CDM_Shared.lua
@@ -118,7 +131,7 @@ CDM_Module\ArcUI_CDMSetup.lua
 CDM_Module\ArcUI_CDM_ImportExport.lua
 CDM_Module\ArcUI_CDM_MasterExport.lua
 CDM_Module\ArcUI_CDM_SharedProfiles.lua
-ArcUI_UnifiedImportExport.lua
+Import_Export\ArcUI_UnifiedImportExport.lua
 
 # CDM Options Panels
 CDM_Module\CDM_Groups\ArcUI_CDMGroupsOptions.lua

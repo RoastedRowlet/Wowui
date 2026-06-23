@@ -342,6 +342,17 @@ local function DispatchAfterShadowUpdate(frame)
   if frame._arcCLHasText and ns.CustomLabel and ns.CustomLabel.UpdateVisibility then
     ns.CustomLabel.UpdateVisibility(frame)
   end
+  -- Dynamic Cooldowns: a charge spell changes its collapse alpha at the depleted
+  -- boundary (last charge spent / first charge restored) WITHOUT frame.Cooldown:
+  -- IsShown() flipping — the recharge swipe stays up across it — so ns.FrameActive
+  -- never fires the layout reflow there. Notify the layout directly (it dedupes on
+  -- the rendered-alpha bucket and only acts for frames in a Dynamic Cooldowns group).
+  if frame._arcIsChargeSpellCached then
+    local DL = ns.CDMGroups and ns.CDMGroups.DynamicLayout
+    if DL and DL.NotifyCooldownCollapseChanged then
+      DL.NotifyCooldownCollapseChanged(frame)
+    end
+  end
 end
 
 local function EnsureShadowCooldown(frame)
@@ -556,7 +567,30 @@ end
 --     mainShown=true,  chargeShown=true  → DEPLETED (all charges gone)
 --   For normal spells GetSpellChargeDuration returns zero-span, so the
 --   charge shadow stays hidden automatically — same code path as charge spells.
+-- 12.1: item cooldown APIs report the ~1.5s GCD as the item CD during a GCD; anything
+-- <= this is GCD/windup noise (real item CDs are >>1.5s). Mirrors Arc Auras' threshold.
+local ITEM_GCD_THRESHOLD = 1.5
 FeedShadowCooldown = function(frame, spellID)
+  -- 12.1 item branch: equip-slot (trinket) cooldowns are ITEM cooldowns. The spell
+  -- APIs return zero-span for them; feed the shadow from GetInventoryItemCooldown
+  -- (non-secret, in-combat-safe) via SetCooldown. Runs even with a nil spellID.
+  local eqSlot = frame.cooldownInfo and frame.cooldownInfo.equipSlot
+  if eqSlot then
+    if frame._arcFeedingShadow and frame._arcFeedingShadow > 0 then return end
+    frame._arcFeedingShadow = (frame._arcFeedingShadow or 0) + 1
+    frame._arcLastIsOnGCD = false
+    frame._arcIsChargeSpellCached = false
+    local shadowCD = EnsureShadowCooldown(frame)
+    local start, dur = GetInventoryItemCooldown("player", eqSlot)
+    if shadowCD and start and dur and start > 0 and dur > ITEM_GCD_THRESHOLD then
+      shadowCD:SetCooldown(start, dur)
+    elseif shadowCD then
+      shadowCD:Clear()
+    end
+    frame._arcFeedingShadow = frame._arcFeedingShadow - 1
+    return
+  end
+
   if not spellID then return end
   if frame._arcFeedingShadow and frame._arcFeedingShadow > 0 then return end
   frame._arcFeedingShadow = (frame._arcFeedingShadow or 0) + 1
@@ -819,6 +853,33 @@ local function ApplyReadyGlow(frame, stateVisuals)
   else
     HideReadyGlow(frame)
   end
+end
+
+-- ═══════════════════════════════════════════════════════════════════
+-- 12.1 ITEM COOLDOWN STATE (equip-slot / trinket cooldowns)
+-- Spell cooldown APIs return zero-span for item cooldowns, so we feed the shadow from
+-- GetInventoryItemCooldown (non-secret, in-combat-safe) and apply ICON-only state
+-- visuals (alpha/desat/ready-glow). We deliberately do NOT call DecideAndApplySwipeEdge
+-- — CDM owns the visible swipe for item cooldowns.
+-- ═══════════════════════════════════════════════════════════════════
+local function HandleItemCooldownState(frame, iconTex, cfg, stateVisuals)
+  if not stateVisuals then return end
+  iconTex = iconTex or frame.Icon
+  FeedShadowCooldown(frame, nil)
+  local isOnCooldown = GetBinaryCooldownState(frame)
+  if isOnCooldown then
+    ApplyCooldownAlpha(frame, stateVisuals)
+    ApplyCooldownDesat(frame, iconTex, stateVisuals, false, false)
+  else
+    ApplyReadyState(frame, iconTex, stateVisuals, nil, false)
+    -- 12.1: item frames — CDM desaturates the icon when the on-use spell is on the GCD.
+    -- ApplyReadyState clears _arcForceDesatValue (passthrough), so CDM's GCD desat leaks
+    -- through and the trinket flickers desaturated on every GCD. FORCE saturation here so
+    -- the desat hook blocks it — the item cooldown (0/ready right now) is the only thing
+    -- that should desaturate a trinket. Cleared again the moment it goes on real CD.
+    frame._arcForceDesatValue = 0
+  end
+  ApplyReadyGlow(frame, stateVisuals)
 end
 
 -- ═══════════════════════════════════════════════════════════════════
@@ -1406,7 +1467,18 @@ local function NewApplyCooldownStateVisuals(frame, cfg, normalAlpha, stateVisual
   if not iconTex then return end
 
   if not stateVisuals then
-    stateVisuals = GetEffectiveStateVisuals(cfg)
+    -- Reuse the frame's already-cached state-visuals when cfg is the frame's own
+    -- cached cfg (identical table ⇒ the cache was computed from it, see
+    -- GetEffectiveIconSettingsForFrame). This is the hot cooldown-event path
+    -- (DispatchAfterShadowUpdate passes frame._arcCfg), so it avoids re-allocating
+    -- the ~40-field state-visuals table on every cooldown state change. Any other
+    -- cfg falls back to a fresh compute. Identity match makes this staleness-proof:
+    -- the cached value is, by construction, exactly GetEffectiveStateVisuals(cfg).
+    if cfg ~= nil and cfg == frame._arcCfg then
+      stateVisuals = frame._arcCachedStateVisuals
+    else
+      stateVisuals = GetEffectiveStateVisuals(cfg)
+    end
   end
 
   local cdID = frame.cooldownID
@@ -1497,6 +1569,14 @@ local function NewApplyCooldownStateVisuals(frame, cfg, normalAlpha, stateVisual
     useAuraLogic = false
   end
 
+  -- 12.1: equip-slot (trinket) cooldowns are ITEM cooldowns. Feed the shadow from
+  -- GetInventoryItemCooldown (non-secret) and apply ICON-only state visuals; never
+  -- touch the visible Cooldown (CDM owns the item swipe).
+  if frame.cooldownInfo and frame.cooldownInfo.equipSlot then
+    HandleItemCooldownState(frame, frame.Icon, cfg, stateVisuals)
+    return
+  end
+
   -- DISPATCH
   if ignoreAuraOverride then
     -- wasSetFromAura: CDM actively displaying aura duration on the swipe (authoritative).
@@ -1548,6 +1628,8 @@ end
 -- ═══════════════════════════════════════════════════════════════════
 EnforceCooldownReadyGlow = function(frame, stateVisuals)
   if not frame then return end
+  -- 12.1: item (equip-slot) cooldowns — CDM owns the display; don't enforce a ready glow.
+  if frame.cooldownInfo and frame.cooldownInfo.equipSlot then return end
   if not resolved then
     if not ResolveDependencies() then return end
   end
@@ -1645,6 +1727,8 @@ function ns.CooldownState.FeedShadow(frame, cfg)
   if not frame then return end
   if frame._arcConfig or frame._arcAuraID then return end
   if frame._arcViewerType == "aura" then return end
+  -- 12.1: item (equip-slot) cooldowns — feed the shadow from the item cooldown API.
+  if frame.cooldownInfo and frame.cooldownInfo.equipSlot then FeedShadowCooldown(frame, nil); return end
   local spellID
   if frame.cooldownInfo then
     spellID = frame.cooldownInfo.overrideSpellID or frame.cooldownInfo.spellID

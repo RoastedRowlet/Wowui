@@ -6,7 +6,7 @@ if not BigWigsLoader.isNext then return end
 
 local mod, CL = BigWigs:NewBoss("Rotmire", 1592, 2711)
 if not mod then return end
-mod:RegisterEnableMob(254176)
+mod:RegisterEnableMob(238693)
 mod:SetEncounterID(3159)
 mod:SetRespawnTime(30)
 mod:UseCustomTimers(true)
@@ -18,12 +18,26 @@ mod:UseCustomTimers(true)
 local activeBars = {}
 local backupBars = {}
 local countForDuration = {}
+local tankList = {}
 
 local fungalBloomCount = 1
 local awakenFungiCount = 1
 local burstingPustulesCount = 1
 local putridFistCount = 1
 local festeringVinesCount = 1
+
+--------------------------------------------------------------------------------
+-- Localization
+--
+
+local L = mod:SetDefaultLocale({ -- SetOption:skip-locale
+	custom_select_tank_counter_reset = CL.counter_reset_name:format(mod:SpellName(1221781)),
+	custom_select_tank_counter_reset_desc = CL.counter_reset_desc,
+	custom_select_tank_counter_reset_icon = 1221781,
+	custom_select_tank_counter_reset_value1 = CL.reset_casts:format(2),
+	custom_select_tank_counter_reset_value2 = CL.reset_casts:format(3),
+	custom_select_tank_counter_reset_value3 = CL.reset_never,
+})
 
 --------------------------------------------------------------------------------
 -- Renames
@@ -34,7 +48,11 @@ mod:SetRenames({
 	[1221637] = {CL.full_energy}, -- Fungal Bloom (Full Energy)
 	[1222088] = {CL.debuffs, CL.you:format(CL.vines), notes = {CL.generalNote, CL.messageOnYouNote}, original = {1222088, CL.you:format(mod:SpellName(1222088))}}, -- Festering Vines (Debuffs)
 	[1221787] = {CL.raid_damage}, -- Bursting Pustules (Raid Damage)
-	[1221781] = {CL.tank_hit}, -- Putrid Fist (Tank Hit)
+	[1221781] = { -- Putrid Fist (Tank Hit)
+		CL.tank_hit, CL.you:format(CL.tank_hit), CL.tank_hit,
+		notes = {CL.generalNote, CL.messageOnYouNote, CL.messageTauntNowNote},
+		original = {1221781, CL.you:format(mod:SpellName(1221781)), 1221781}
+	},
 })
 
 --------------------------------------------------------------------------------
@@ -54,9 +72,10 @@ function mod:GetOptions()
 	return {
 		1221622, -- Awaken Fungi
 		1221637, -- Fungal Bloom
-		1222088, -- Festering Vines
+		{1222088, "ME_ONLY_EMPHASIZE"}, -- Festering Vines
 		1221787, -- Bursting Pustules
-		1221781, -- Putrid Fist
+		{1221781, "TANK"}, -- Putrid Fist
+		"custom_select_tank_counter_reset",
 	}
 end
 
@@ -80,6 +99,9 @@ function mod:OnEncounterStart()
 	burstingPustulesCount = 1
 	putridFistCount = 1
 	festeringVinesCount = 1
+
+	self:RegisterEvent("GROUP_ROSTER_UPDATE")
+	self:GROUP_ROSTER_UPDATE()
 end
 
 --------------------------------------------------------------------------------
@@ -180,6 +202,16 @@ end
 -- Event Handlers
 --
 
+function mod:GROUP_ROSTER_UPDATE() -- Compensate for quitters (LFR)
+	tankList = {}
+	for unit in self:IterateGroup() do
+		local name = self:UnitName(unit)
+		if self:Tank(name, unit) then
+			tankList[#tankList+1] = unit
+		end
+	end
+end
+
 function mod:AwakenFungi() -- Adds
 	local barText = CL.count:format(self:GetRename(1221622), awakenFungiCount)
 	awakenFungiCount = awakenFungiCount + 1
@@ -239,13 +271,32 @@ end
 function mod:PutridFist() -- Tank Hit
 	local barText = CL.count:format(self:GetRename(1221781), putridFistCount)
 	putridFistCount = putridFistCount + 1
+	if putridFistCount == 3 and self:GetOption("custom_select_tank_counter_reset") == 1 then putridFistCount = 1 end -- 1, 2, 1, 2...
+	if putridFistCount == 4 and self:GetOption("custom_select_tank_counter_reset") == 2 then putridFistCount = 1 end -- 1, 2, 3, 1, 2, 3...
 	return {
 		msg = barText,
 		key = 1221781,
 		onFinished = function()
-			self:Message(1221781, "purple", barText)
-			if self:Tank() then
-				self:PlaySound(1221781, "alert")
+			for i = 1, #tankList do
+				local unit = tankList[i]
+				if self:ThreatTarget(unit, "boss1") then
+					local name = self:UnitName(unit)
+					if UnitIsUnit("player", unit) then
+						self:PersonalMessage(1221781, false, self:GetRename(1221781, 2))
+						self:PlaySound(1221781, "alert", nil, name) -- Use CD
+					else
+						if self:Tank() then
+							self:TargetMessage(1221781, "purple", name, self:GetRename(1221781, 3))
+							self:PlaySound(1221781, "warning", nil, name) -- Taunt now
+						else
+							self:TargetMessage(1221781, "purple", name, barText)
+						end
+					end
+					return
+				elseif i == #tankList then
+					self:Message(1221781, "purple", barText)
+					self:PlaySound(1221781, "alert")
+				end
 			end
 		end
 	}

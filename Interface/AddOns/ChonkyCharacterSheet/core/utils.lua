@@ -15,6 +15,15 @@ end
 
 local LSM = LibStub("LibSharedMedia-3.0")
 
+local modbg_parent = CharacterModelScene or CharacterModelFrame
+local modbg = _G["CharacterModelFramebg"] or CreateFrame("Frame", "CharacterModelFramebg", modbg_parent)
+local modtex = _G["CharacterModelFramebgtex"] or modbg:CreateTexture("CharacterModelFramebgtex", "BACKGROUND")    
+local modtex2 = _G["CharacterModelFramebgtex2"] or modbg:CreateTexture("CharacterModelFramebgtex2", "ARTWORK")    
+
+local inspectmodbg = _G["InspectModelFramebg"] or CreateFrame("Frame", "InspectModelFramebg")
+local inspectmodtex = _G["InspectModelFramebgtex"] or inspectmodbg:CreateTexture("InspectModelFramebgtex", "BACKGROUND")    
+local inspectmodtex2 = _G["InspectModelFramebgtex2"] or inspectmodbg:CreateTexture("InspectModelFramebgtex2", "ARTWORK")    
+
 function CCS.GetFontKeyByPath(path)
     if not path then return nil end
     for key, fontPath in pairs(LSM.MediaTable.font) do
@@ -1129,6 +1138,7 @@ function CCS:GetOptionValue(key)
     end
     return ChonkyCharacterSheetDB.default[key]
 end
+
 local option = function(key) return CCS:GetOptionValue(key) end
 
 function CCS:GetOptionDefByKey(key)
@@ -2712,7 +2722,7 @@ end
 
 
 function CCS.AreSecretsDisabled()
-    if CCS.GetCurrentVersion() ~= CCS.RETAIL then return false end   
+    if CCS.CurrentVersion ~= CCS.RETAIL then return false end   
 
     local inInstance, instanceType = IsInInstance()
     
@@ -2834,3 +2844,267 @@ function CCS:LoadBlizzardAddOns()
     self.BlizzardLoaded = true
 end
 
+function CCS.clamp(val, min, max)
+    if val < min then return min end
+    if val > max then return max end
+    return val
+end
+
+function CCS.StopBGAnimation(modbg)
+    if modbg and modbg.swirl then
+        modbg.swirl:Hide()
+        modbg.swirl.swirlAnim:Stop()
+        modbg.donut:Hide()
+        modbg.donutFrame.donutAnim:Stop()
+    end
+end
+
+function CCS.ChangeModelBg(isInspect)
+    local unit = "player"
+    local classID,raceID, specID
+    local prefix = isInspect and "Inspect" or "Character"
+    local parent  = isInspect and InspectModelScene or CharacterModelScene
+    local bgtype_lookup = isInspect and "bgtype_inspect" or "bgtype"
+    modbg  = _G[prefix.."ModelFramebg"]  or CreateFrame("Frame", prefix.."ModelFramebg", parent)
+    modtex = _G[prefix.."ModelFramebgtex"]  or modbg:CreateTexture(prefix.."ModelFramebgtex", "BACKGROUND")
+    modtex2 = _G[prefix.."ModelFramebgtex2"] or modbg:CreateTexture(prefix.."ModelFramebgtex2", "ARTWORK")
+    
+    local entry = nil
+
+    -----------------------------------------
+    -- Handle Inspect and Character Backgrounds (for retail, MOP, and TBC)
+    -----------------------------------------
+    if isInspect then
+        if InspectFrame == nil or InspectFrame.unit == nil then return end
+
+        if isInspect and option(bgtype_lookup) and option(bgtype_lookup) == "Hide" then
+            modtex:Hide()
+            CCS.StopBGAnimation(modbg)
+            return
+        end
+        
+        unit = InspectFrame.unit
+        -- MOP and TBC don't have true specs for classes
+        if CCS.CurrentVersion ~= CCS.RETAIL then
+            specID = 1
+        else
+            specID = CCS.GetSpecIndexFromSpecID(GetInspectSpecialization(unit))
+        end
+        
+    else
+        if option(bgtype_lookup) == "Hide" then
+            modtex:Hide()
+            CCS.StopBGAnimation(modbg)
+            return
+        end
+        -- MOP and TBC don't have true specs for classes
+        if CCS.CurrentVersion ~= CCS.RETAIL then
+            specID = 1
+        else
+            specID = GetSpecialization()
+        end
+    end
+
+    classID = select(3, UnitClass(unit))
+    raceID = select(3, UnitRace(unit))
+    --print("ChangeModel", unit, isInspect, classID, raceID, bgtype_lookup, option(bgtype_lookup))    
+    CCS.StopBGAnimation(modbg)
+    modtex:Show()
+    -- Set some basic info
+    local frameWidth, frameHeight = modtex:GetWidth(), modtex:GetHeight()
+
+    if not frameWidth or frameWidth == 0 or not frameHeight or frameHeight == 0 then
+        -- fallback to baseline
+        frameWidth = 569 
+        frameHeight = 520 
+    end
+
+    -- Determine which type of background to display.
+    if option(bgtype_lookup) == "Class Crest" then
+        entry = CCS.Class_Bg[classID] and CCS.Class_Bg[classID][0]
+        modtex:SetVertexColor(1, 1, 1, 1)
+    elseif option(bgtype_lookup) == "Class" then
+        entry = CCS.Class_Bg[classID] and CCS.Class_Bg[classID][specID]
+        modtex:SetVertexColor(0.8, 0.8, 0.8, 1)
+    elseif option(bgtype_lookup) == "Race" then
+        if classID == 6 then raceID = 998 -- Death Knight
+        elseif classID == 12 then raceID = 999 -- Demon Hunter
+        end
+        entry = CCS.Race_Bg[raceID]
+        modtex:SetVertexColor(0.7, 0.7, 0.7, 1)
+    end
+    -- Clear and reset the current texture
+    modtex:ClearAllPoints()
+    modtex:SetAllPoints()
+    modtex2:Hide()
+
+    if entry then
+        local texWidth, texHeight, uMin, uMax, vMin, vMax = unpack(entry.map)
+
+        modtex:SetTexture(entry.texture)
+        
+        if option(bgtype_lookup) == "Class Crest" then
+            local crestWidth, crestHeight, crestuMin, crestuMax, crestvMin, crestvMax = unpack(entry.crestmap)
+            local visibleWidth = frameWidth / (frameHeight / texHeight)
+            local left = uMin + ((texWidth - visibleWidth) / texWidth) * (uMax - uMin)
+            left = CCS.clamp(left, uMin, uMax) -- ensure valid range
+            modtex:SetTexCoord(left, uMax, vMin, vMax)
+
+            if (classID ~= 13) then
+                modtex2:SetAlpha(1)
+                modtex2:SetTexture(entry.texture)
+                modtex2:SetTexCoord(crestuMin, crestuMax, crestvMin, crestvMax)
+                modtex2:SetPoint("CENTER", modtex, "CENTER")
+                modtex2:SetSize(crestWidth, crestHeight)
+            else -- Evoker's didn't have artifact weapons/textures. So, we are gonna hack one in.
+                modtex:SetVertexColor(math.min(1, 0.20*1.4), math.min(1, 0.576*1.4), math.min(1, 0.498*1.4), 1)
+                modtex2:SetAlpha(.4)
+                modtex2:SetTexture("Interface\\AddOns\\ChonkyCharacterSheet\\Media\\Textures\\Race\\Evoker_Crest.png") -- From https://warcraft.wiki.gg/wiki/Evoker (plus a little photoshop magic)
+                modtex2:SetPoint("CENTER", modtex, "CENTER")
+                modtex2:SetSize(300, 300)
+            end
+            
+            modtex2:SetScale(math.min(1.7, 1.7*(frameWidth or 569)/569))
+            modtex2:Show()
+       
+        elseif option(bgtype_lookup) == "Class" then
+            -- Class/Specialization: right-aligned
+            local visibleWidth = frameWidth / (frameHeight / texHeight)
+            local left = uMin + ((texWidth - visibleWidth) / texWidth) * (uMax - uMin)
+            left = CCS.clamp(left, uMin, uMax) -- ensure valid range
+            modtex:SetTexCoord(left, uMax, vMin, vMax)
+      
+        else
+            -- Race: horizontally centered
+            local visibleWidth = frameWidth / (frameHeight / texHeight)
+            local uRange = uMax - uMin
+            local uOffset = (uRange - (visibleWidth / texWidth) * uRange) / 2
+
+            local left = CCS.clamp(uMin + uOffset, uMin, uMax)
+            local right = CCS.clamp(uMax - uOffset, uMin, uMax)
+
+            modtex:SetTexCoord(left, right, vMin, vMax)
+        end
+    else
+        if option(bgtype_lookup) ==  "Midnight"  then    
+            local texWidth, texHeight, uMin, uMax, vMin, vMax = 408,374, 0, 1, .35, 1
+            local visibleWidth = frameWidth / (frameHeight / texHeight)
+            local uRange = uMax - uMin
+            local uOffset = (uRange - (visibleWidth / texWidth) * uRange) / 2
+            local origW, origH = 569, 520
+            local newW, newH = modbg:GetSize()
+
+            if not newW or newW == 0 then newW = frameWidth end
+            if not newH or newH == 0 then newH = frameHeight end
+
+            local scale = math.max(newH / origH, 0.1)
+--[[
+            if (newW == 0 or newH == 0) and CCS.modbg_retries < 5 then
+                C_Timer.After(0, CCS.ChangeModelBg(isInspect))
+                CCS.modbg_retries = CCS.modbg_retries+1
+                return
+            elseif (newW == 0 or newH == 0) then
+                scale = 1
+            end --]]
+            CCS.modbg_retries = 0
+
+            local offsetY = 80 * scale
+            local left = CCS.clamp(uMin + uOffset, uMin, uMax)
+            local right = CCS.clamp(uMax - uOffset, uMin, uMax)
+            modtex:SetTexture("Interface\\AddOns\\ChonkyCharacterSheet\\Media\\Textures\\bgmidnight.png")
+            modtex:SetVertexColor(0.1, 0, 0.75, 0.95)            
+            modtex:SetTexCoord(left, right, vMin, vMax)    
+            if option("showbganimations") == true then
+                -- VOID SWIRL LAYER (rotating)
+                local swirl = modbg.swirl or modbg:CreateTexture(nil, "ARTWORK", nil, 1)
+                modbg.swirl = swirl
+                swirl:SetTexture("Interface\\GLUES\\Models\\UI_VoidElf\\7XP_Pandemonium_VoidFXSwirl01")
+                swirl:SetVertexColor(1, 1, 1, 1)
+                swirl:SetScale(scale * 0.85)
+                swirl:ClearAllPoints()
+                swirl:SetPoint("CENTER", modtex, "CENTER", 0, offsetY)
+                swirl:Show()
+
+                local swirlAnim = modbg.swirl.swirlAnim or swirl:CreateAnimationGroup()
+                modbg.swirl.swirlAnim = swirlAnim
+
+                local rotate = modbg.swirl.swirlAnim.rotate or swirlAnim:CreateAnimation("Rotation")
+                modbg.swirl.swirlAnim.rotate = rotate
+                rotate:SetDegrees(360)
+                rotate:SetDuration(120)
+                rotate:SetOrder(1)
+
+                swirlAnim:SetLooping("REPEAT")
+                swirlAnim:Play()
+
+                -- PULSING VOID DONUT MASK (mmm, donuts...)
+                local donutFrame = modbg.donutFrame or CreateFrame("Frame", nil, modbg)
+                modbg.donutFrame = donutFrame
+                donutFrame:ClearAllPoints()
+                donutFrame:SetPoint("CENTER", modtex, "CENTER", 0, offsetY)
+                donutFrame:SetSize(240 * scale, 350 * scale)
+                donutFrame:SetScale(1) -- important: neutral base
+                donutFrame:Show()
+
+                local donut = modbg.donut or donutFrame:CreateTexture(nil, "ARTWORK", nil, 2)
+                modbg.donut = donut
+                donut:SetAllPoints(donutFrame)
+                donut:SetTexture("Interface\\GLUES\\Models\\UI_MAINMENU_MIDNIGHT\\UI_MainMenu_Midnight_DonutMask")
+                donut:SetVertexColor(.292, .457, .902, 1)
+                donut:SetAlpha(1)
+                donut:SetBlendMode("ADD")
+                donut:Show()
+
+                local donutAnim = modbg.donutFrame.donutAnim or donutFrame:CreateAnimationGroup()
+                modbg.donutFrame.donutAnim = donutAnim
+                donutAnim:Stop() -- reset if it already existed
+
+                local alphaUp = donutAnim.alphaUp or donutAnim:CreateAnimation("Alpha")
+                donutAnim.alphaUp = alphaUp
+                alphaUp:SetFromAlpha(0.6)
+                alphaUp:SetToAlpha(1.0)
+                alphaUp:SetDuration(3)
+                alphaUp:SetSmoothing("IN_OUT")
+                alphaUp:SetOrder(1)
+
+                local alphaDown = donutAnim.alphaDown or donutAnim:CreateAnimation("Alpha")
+                donutAnim.alphaDown = alphaDown
+                alphaDown:SetFromAlpha(1.0)
+                alphaDown:SetToAlpha(0.6)
+                alphaDown:SetDuration(3)
+                alphaDown:SetSmoothing("IN_OUT")
+                alphaDown:SetOrder(2)
+
+                local scaleUp = donutAnim.scaleUp or donutAnim:CreateAnimation("Scale")
+                donutAnim.scaleUp = scaleUp
+                scaleUp:SetScale(1.05, 1.05)
+                scaleUp:SetDuration(3)
+                scaleUp:SetSmoothing("IN_OUT")
+                scaleUp:SetOrder(1)
+
+                local scaleDown = donutAnim.scaleDown or donutAnim:CreateAnimation("Scale")
+                donutAnim.scaleDown = scaleDown
+                scaleDown:SetScale(1 / 1.05, 1 / 1.05) -- back to 1.0
+                scaleDown:SetDuration(3)
+                scaleDown:SetSmoothing("IN_OUT")
+                scaleDown:SetOrder(2)
+
+                donutAnim:SetLooping("REPEAT")
+                donutAnim:Play()                
+                
+            end
+        else        
+            -- Default background
+            modtex:SetTexture("Interface\\AddOns\\ChonkyCharacterSheet\\Media\\Textures\\MOTHERtalenttree.BLP")
+            modtex:SetTexCoord(0, 0.69, 0, 0.87)
+            modtex:SetVertexColor(0.6, 0, 0.6, 0.95)
+        end
+    end
+end
+
+function CCS.UnitHasMana(unit)
+	if ( UnitPowerMax(unit, Enum.PowerType.Mana) > 0 ) then
+		return 1;
+	end
+	return nil;
+end

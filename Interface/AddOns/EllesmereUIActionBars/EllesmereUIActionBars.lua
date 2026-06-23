@@ -78,6 +78,18 @@ local BAR_CONFIG = {
     { key = "Bar6",      label = "Action Bar 6",        barID = 6,  count = 12, blizzBtnPrefix = "MultiBar5Button",          blizzFrame = "MultiBar5",           nativeActionPage = 13 },
     { key = "Bar7",      label = "Action Bar 7",        barID = 7,  count = 12, blizzBtnPrefix = "MultiBar6Button",          blizzFrame = "MultiBar6",           nativeActionPage = 14 },
     { key = "Bar8",      label = "Action Bar 8",        barID = 8,  count = 12, blizzBtnPrefix = "MultiBar7Button",          blizzFrame = "MultiBar7",           nativeActionPage = 15 },
+    -- Bar9 / Bar10: extra bars with NO native Blizzard frame. They use our own
+    -- EABButton<slot> buttons and page identically to Bars 2-8 via the
+    -- explicit-action + _childupdate-eab-page system. Bar9 maps to action page 2
+    -- (slots 13-24) so converts see those spells appear (already
+    -- in the per-character action slots, no re-placing) once Bar9 is enabled.
+    -- Bar10 maps to action page 10 (slots 109-120). The only native-specific
+    -- difference is keybinds: these pages have no Blizzard binding commands, so
+    -- their keys route through SetOverrideBindingClick using the EUI_BAR9/10_BUTTON
+    -- commands defined in Bindings.xml. customPage = the action page these slots
+    -- live on.
+    { key = "Bar9",      label = "Action Bar 9",        barID = 0,  count = 12, customPage = 2 },
+    { key = "Bar10",     label = "Action Bar 10",       barID = 0,  count = 12, customPage = 10 },
     { key = "StanceBar", label = "Stance Bar",          barID = 0,  count = 10, blizzBtnPrefix = "StanceButton",               blizzFrame = "StanceBar", isStance = true },
     { key = "PetBar",    label = "Pet Bar",             barID = 0,  count = 10, blizzBtnPrefix = "PetActionButton",            blizzFrame = "PetActionBar", isPetBar = true },
 }
@@ -422,6 +434,18 @@ for _, info in ipairs(BAR_CONFIG) do
         targetWidth = 0,
         targetHeight = 0,
     }
+end
+
+-- Bar9/Bar10 are optional extra bars -- default to the "Hidden" visibility mode
+-- (barVisibility = "never" + alwaysHidden, exactly what the Visibility dropdown's
+-- Hidden option sets) so they never show for users who don't use them. The user
+-- switches Visibility to "Always" (or any mode) to surface them.
+for _, k in ipairs({ "Bar9", "Bar10" }) do
+    local b = defaults.profile.bars[k]
+    if b then
+        b.barVisibility = "never"
+        b.alwaysHidden  = true
+    end
 end
 
 for _, info in ipairs(EXTRA_BARS) do
@@ -1427,6 +1451,8 @@ local BAR_SLOT_OFFSETS = {
     Bar6 = 144,     -- slots 145-156 (MultiBar5)
     Bar7 = 156,     -- slots 157-168 (MultiBar6)
     Bar8 = 168,     -- slots 169-180 (MultiBar7)
+    Bar9 = 12,      -- slots 13-24   (action page 2 -- custom bar)
+    Bar10 = 108,    -- slots 109-120 (action page 10 -- custom bar, no native frame)
 }
 
 -- Keybind binding name prefixes per bar
@@ -1441,9 +1467,24 @@ local BINDING_MAP = {
     Bar6 = "MULTIACTIONBAR5BUTTON",
     Bar7 = "MULTIACTIONBAR6BUTTON",
     Bar8 = "MULTIACTIONBAR7BUTTON",
+    -- Bar9/Bar10 have no native binding commands; these custom commands are
+    -- defined in Bindings.xml and routed via SetOverrideBindingClick (the keypress
+    -- clicks our button, which reads the paged "action" attr).
+    Bar9 = "EUI_BAR9_BUTTON",
+    Bar10 = "EUI_BAR10_BUTTON",
     StanceBar = "SHAPESHIFTBUTTON",
     PetBar = "BONUSACTIONBUTTON",
 }
+
+-- Readable labels for the custom Bar9/Bar10 binding commands declared in
+-- Bindings.xml. Global writes only (no file-scope locals). The keybind UI reads
+-- BINDING_HEADER_<header> for the section title and BINDING_NAME_<command> per row.
+_G.BINDING_HEADER_EUI_BAR9  = "EllesmereUI Action Bar 9"
+_G.BINDING_HEADER_EUI_BAR10 = "EllesmereUI Action Bar 10"
+for i = 1, 12 do
+    _G["BINDING_NAME_EUI_BAR9_BUTTON"  .. i] = "Action Bar 9 Button "  .. i
+    _G["BINDING_NAME_EUI_BAR10_BUTTON" .. i] = "Action Bar 10 Button " .. i
+end
 
 -- Flyout system lives in EUI_ActionBars_Flyout.lua (loaded after this file).
 -- All usage is event-driven, so we resolve the reference lazily.
@@ -1612,12 +1653,17 @@ end
 EAB_VTABLE.BAR_KEY_TO_PAGE = {
     MainBar = 1,  Bar2 = 6,  Bar3 = 5,  Bar4 = 3,
     Bar5 = 4,     Bar6 = 13, Bar7 = 14, Bar8 = 15,
+    Bar9 = 2,     Bar10 = 10,
 }
 EAB_VTABLE.PAGING_STATES = {
     modifier = {
         { id = "alt",   macro = "[mod:alt]",   label = "Alt" },
         { id = "shift", macro = "[mod:shift]", label = "Shift" },
         { id = "ctrl",  macro = "[mod:ctrl]",  label = "Ctrl" },
+    },
+    target = {
+        { id = "help",  macro = "[help]",      label = "Friendly Target" },
+        { id = "harm",  macro = "[harm]",      label = "Hostile Target" },
     },
     class = {
         DRUID = {
@@ -1685,6 +1731,16 @@ function EAB_VTABLE.BuildPagingConditions(barKey, pagingConfig, defaultPage)
             parts[#parts + 1] = "[bar:" .. i .. "] " .. i
         end
     end
+    -- Target conditions come after bonusbar/bar so dragonriding and manual
+    -- page switches always take priority over target-based switching.
+    if PG.target then
+        for _, state in ipairs(PG.target) do
+            local page = pagingConfig[state.id]
+            if page then
+                parts[#parts + 1] = state.macro .. " " .. page
+            end
+        end
+    end
     parts[#parts + 1] = tostring(defaultPage or 1)
     return table.concat(parts, "; ")
 end
@@ -1737,10 +1793,12 @@ end
 local _pagingFrame    -- forward ref
 local LayoutPagingFrame  -- forward ref (used inside SetupPagingFrame closure)
 
--- Sync the paging frame alpha with the MainBar frame.
--- Called from mouseover, drag, combat, and refresh code paths.
-local function SyncPagingAlpha(alpha)
-    if _pagingFrame then _pagingFrame:SetAlpha(alpha) end
+-- The paging frame is parented to the MainBar frame (see LayoutPagingFrame), so
+-- it inherits the bar's mouseover-fade alpha AND its secure show/hide visibility
+-- automatically. Keep its own alpha at 1 so the parent governs it solely (no
+-- double-fade). Kept as a function so the many existing call sites stay valid.
+local function SyncPagingAlpha()
+    if _pagingFrame then _pagingFrame:SetAlpha(1) end
 end
 
 -- Paging arrows and keybind buttons use SecureActionButtonTemplate with
@@ -1798,7 +1856,7 @@ local function SetupPagingFrame()
 
     -- Page number text
     local pageText = f:CreateFontString(nil, "OVERLAY")
-    pageText:SetFont(STANDARD_TEXT_FONT, 12, "OUTLINE, SLUG")
+    pageText:SetFont(STANDARD_TEXT_FONT, 12, (EllesmereUI and EllesmereUI.SlugFlag and EllesmereUI.SlugFlag("OUTLINE, SLUG")) or "OUTLINE, SLUG")
     pageText:SetTextColor(1, 1, 1, 0.9)
     pageText:SetText("1")
     f._pageText = pageText
@@ -1883,6 +1941,19 @@ LayoutPagingFrame = function()
     local s = EAB and EAB.db and EAB.db.profile and EAB.db.profile.bars and EAB.db.profile.bars["MainBar"]
     if not s then f:Hide(); return end
 
+    -- Parent the paging frame to the MainBar frame so it inherits the bar's
+    -- secure show/hide (visibility settings like combat-only, hide-no-target,
+    -- etc.) and mouseover-fade alpha. Reparenting secure children is blocked in
+    -- combat, so this is gated by the InCombatLockdown check above; once parented
+    -- the secure visibility driver on the MainBar propagates to these arrows
+    -- automatically, including in combat.
+    if f:GetParent() ~= mainFrame then
+        f:SetParent(mainFrame)
+        f:SetFrameStrata("MEDIUM")
+        f:SetFrameLevel((mainFrame:GetFrameLevel() or 1) + 5)
+        f:SetAlpha(1)
+    end
+
     if s.alwaysHidden or s.enabled == false or not s.showPagingArrows then
         f:Hide()
         return
@@ -1904,7 +1975,7 @@ LayoutPagingFrame = function()
 
     f._upBtn:SetSize(arrowSize, arrowSize)
     f._downBtn:SetSize(arrowSize, arrowSize)
-    f._pageText:SetFont(STANDARD_TEXT_FONT, textSize, "OUTLINE, SLUG")
+    f._pageText:SetFont(STANDARD_TEXT_FONT, textSize, (EllesmereUI and EllesmereUI.SlugFlag and EllesmereUI.SlugFlag("OUTLINE, SLUG")) or "OUTLINE, SLUG")
 
     f._upBtn:ClearAllPoints()
     f._downBtn:ClearAllPoints()
@@ -2048,16 +2119,19 @@ local function CreateBarFrame(info)
         RegisterStateDriver(frame, "page", pagingConditions)
     end
 
-    -- Bars 2-8: buttons have static action attributes set in SetupBar.
-    -- When custom paging is configured, a state driver + ChildUpdate
-    -- recalculates each button's action attr on page change.
-    if info.nativeActionPage then
-        frame:Execute(("self:SetAttribute('actionpage', %d)"):format(info.nativeActionPage))
+    -- Bars 2-8 (nativeActionPage) and Bars 9-10 (customPage): buttons have static
+    -- action attributes set in SetupBar that already point at the bar's default
+    -- page. When custom paging is configured, a state driver + ChildUpdate
+    -- recalculates each button's action attr on page change -- identical machinery
+    -- for native and custom bars (the only difference is the default page source).
+    local defaultPage = info.nativeActionPage or info.customPage
+    if defaultPage then
+        frame:Execute(("self:SetAttribute('actionpage', %d)"):format(defaultPage))
 
-        -- Configurable paging for Bars 2-8: when the user has set up paging
-        -- conditions (modifier keys, form swaps), install a state driver on
-        -- top of the default page. When no conditions match, the fallback is
-        -- the bar's native page (identical to current behavior).
+        -- Configurable paging: when the user has set up paging conditions
+        -- (modifier keys, form swaps), install a state driver on top of the
+        -- default page. When no conditions match, the fallback is the bar's
+        -- default page (identical to current behavior).
         local barSettings = EAB and EAB.db and EAB.db.profile and EAB.db.profile.bars[key]
         local customPaging = barSettings and barSettings.paging
         if customPaging and next(customPaging) then
@@ -2067,7 +2141,7 @@ local function CreateBarFrame(info)
                 self:ChildUpdate("eab-page", page)
             ]])
             frame._eabPagingInstalled = true
-            local conditions = EAB_VTABLE.BuildPagingConditions(key, customPaging, info.nativeActionPage)
+            local conditions = EAB_VTABLE.BuildPagingConditions(key, customPaging, defaultPage)
             if conditions then
                 RegisterStateDriver(frame, "page", conditions)
             end
@@ -2135,7 +2209,8 @@ function ns.RebuildBarPaging(barKey)
         -- Force re-evaluation by unregistering first
         UnregisterStateDriver(frame, "page")
         RegisterStateDriver(frame, "page", pagingConditions)
-    elseif info.nativeActionPage then
+    elseif info.nativeActionPage or info.customPage then
+        local defaultPage = info.nativeActionPage or info.customPage
         if customPaging and next(customPaging) then
             -- Install handler if not already present
             if not frame._eabPagingInstalled then
@@ -2159,7 +2234,7 @@ function ns.RebuildBarPaging(barKey)
                     end
                 end
             end
-            local conditions = EAB_VTABLE.BuildPagingConditions(barKey, customPaging, info.nativeActionPage)
+            local conditions = EAB_VTABLE.BuildPagingConditions(barKey, customPaging, defaultPage)
             if conditions then
                 UnregisterStateDriver(frame, "page")
                 RegisterStateDriver(frame, "page", conditions)
@@ -2167,7 +2242,7 @@ function ns.RebuildBarPaging(barKey)
         else
             -- No paging configured: remove state driver, restore fixed page
             UnregisterStateDriver(frame, "page")
-            frame:Execute(("self:SetAttribute('actionpage', %d)"):format(info.nativeActionPage))
+            frame:Execute(("self:SetAttribute('actionpage', %d)"):format(defaultPage))
         end
     end
     -- Update modifier event registration
@@ -3555,6 +3630,14 @@ local function MakeButtonSquare(btn)
             local bfd = EFD(btn)
             if not prof.hideCastingAnimations and not bfd.shapeApplied and not bfd.cropped then return end
             self:SetAlpha(0)
+            -- Synchronously hide the ANIMATED cast frame. Its animation group
+            -- re-drives the frame alpha on the next render tick, so SetAlpha(0)
+            -- plus a one-frame-deferred Hide leaks a one-frame "blink" of the
+            -- cast sweep. A hidden frame renders no animations, so this kills the
+            -- blink; the deferred Hide stays as a belt-and-suspenders reset. Runs
+            -- in the insecure UNIT_SPELLCAST/OnShow context (no secure code to
+            -- taint) and is IsForbidden-guarded like HideRegionDeferred itself.
+            if not self:IsForbidden() then self:Hide() end
             EAB_VTABLE.HideRegionDeferred(self, 1)
         end)
         fd.castHooked = true
@@ -3566,6 +3649,14 @@ local function MakeButtonSquare(btn)
             local bfd = EFD(btn)
             if not prof.hideCastingAnimations and not bfd.shapeApplied and not bfd.cropped then return end
             self:SetAlpha(0)
+            -- Synchronously hide the ANIMATED cast frame. Its animation group
+            -- re-drives the frame alpha on the next render tick, so SetAlpha(0)
+            -- plus a one-frame-deferred Hide leaks a one-frame "blink" of the
+            -- cast sweep. A hidden frame renders no animations, so this kills the
+            -- blink; the deferred Hide stays as a belt-and-suspenders reset. Runs
+            -- in the insecure UNIT_SPELLCAST/OnShow context (no secure code to
+            -- taint) and is IsForbidden-guarded like HideRegionDeferred itself.
+            if not self:IsForbidden() then self:Hide() end
             EAB_VTABLE.HideRegionDeferred(self, 1)
         end)
         fd.intHooked = true
@@ -4342,7 +4433,7 @@ function EAB:ApplyFontsForBar(barKey)
             else
                 nm:SetAlpha(1)
                 if EllesmereUI and EllesmereUI.PrimeFontShadow then EllesmereUI.PrimeFontShadow(nm, false) end
-                nm:SetFont(fontPath, macroSize, "OUTLINE, SLUG")
+                nm:SetFont(fontPath, macroSize, (EllesmereUI and EllesmereUI.SlugFlag and EllesmereUI.SlugFlag("OUTLINE, SLUG")) or "OUTLINE, SLUG")
                 nm:SetTextColor(macroColor.r, macroColor.g, macroColor.b)
                 nm:ClearAllPoints()
                 nm:SetPoint("BOTTOMLEFT", btn, "BOTTOMLEFT", 1 + macroOX, 4 + macroOY)
@@ -5293,9 +5384,9 @@ end
 --    PetBar:           Hide during pet battle.  Only show when the player has
 --                      a pet and is not in a vehicle/override/possess state.
 -------------------------------------------------------------------------------
-local function BuildVisibilityString(info, s)
+local function BuildVisibilityString(info, s, visOverride)
     local key = info.key
-    local vis = s.barVisibility or "always"
+    local vis = visOverride or s.barVisibility or "always"
 
     -- Build visibility-option hide clauses that can be expressed as macro
     -- conditionals. These run inside the secure state driver so they work
@@ -5626,9 +5717,20 @@ function EAB:RefreshRuntimeVisibility()
         if frame then
             local vis = s.barVisibility or "always"
             local isHidden = (vis == "never") or s.alwaysHidden
+            -- Runtime "Toggle Action Bar" override (keybind-driven, NOT persisted):
+            -- flips a bar between always-shown and hidden without touching the saved
+            -- barVisibility. Only ever set for bars whose saved mode is always/never.
+            local _visToggleOv = EAB._visOverride and EAB._visOverride[key]
+            if _visToggleOv then
+                vis = _visToggleOv
+                isHidden = (_visToggleOv == "never")
+            end
             if ShouldQuickKeybindSurfaceBar(s) and barFrames[key] and frame == barFrames[key] then
                 if not InCombatLockdown() then
                     RegisterAttributeDriver(frame, "state-visibility", "show")
+                    -- Keep the cache in sync (see EAB_UpdateQuickKeybindVisibility):
+                    -- a stale cache makes QKB exit skip restoring the real driver.
+                    frame._eabLastVisStr = "show"
                     frame:Show()
                     SafeEnableMouseMotionOnly(frame, true)
                 end
@@ -5655,7 +5757,11 @@ function EAB:RefreshRuntimeVisibility()
             else
                 if not info.visibilityOnly and not InCombatLockdown() then
                     local newStr
-                    if EllesmereUI.CheckVisibilityOptionsNonMacro and EllesmereUI.CheckVisibilityOptionsNonMacro(s) then
+                    if _visToggleOv == "always" then
+                        -- Forced-show via the toggle keybind: ignore the saved mode
+                        -- (which may be "never") and any non-macro hide options.
+                        newStr = BuildVisibilityString(info, s, "always")
+                    elseif EllesmereUI.CheckVisibilityOptionsNonMacro and EllesmereUI.CheckVisibilityOptionsNonMacro(s) then
                         newStr = "hide"
                     else
                         newStr = BuildVisibilityString(info, s)
@@ -5693,6 +5799,101 @@ function EAB:RefreshRuntimeVisibility()
     end
 end
 
+
+-------------------------------------------------------------------------------
+--  "Toggle Action Bar" visibility keybind
+--  A per-bar keybind that flips a bar between always-shown and hidden at RUNTIME
+--  only -- the saved barVisibility is never written, so the toggle does not
+--  persist across sessions (a /reload restores the saved state). Only meaningful
+--  when the bar's saved visibility is "always" or "never", and only out of combat
+--  (changing a secure frame's state-visibility driver is combat-blocked).
+--  The keybind itself IS saved per-bar (s.toggleVisKey) and re-applied on login.
+--
+--  Bindings are keyed by the PRESSED KEY, not the bar, so a single key assigned
+--  to several bars toggles them all as a synced group: one press hides every
+--  bound bar that is currently shown, the next press shows them all.
+-------------------------------------------------------------------------------
+
+-- Toggle every bar bound to `key` as a group. If any participant is currently
+-- shown, hide them all; otherwise show them all. Only bars whose saved mode is
+-- "always"/"never" participate. Runtime-only -- never writes barVisibility.
+function EAB:ToggleVisKey(key)
+    if InCombatLockdown() or not key then return end
+    local participants, anyShown = {}, false
+    for _, info in ipairs(ALL_BARS) do
+        local s = self.db.profile.bars[info.key]
+        if s and s.toggleVisKey == key then
+            local saved = s.barVisibility or "always"
+            if saved == "always" or saved == "never" then
+                participants[#participants + 1] = info.key
+                local eff = (self._visOverride and self._visOverride[info.key]) or saved
+                if eff == "always" then anyShown = true end
+            end
+        end
+    end
+    if #participants == 0 then return end
+    local target = anyShown and "never" or "always"
+    self._visOverride = self._visOverride or {}
+    for _, bk in ipairs(participants) do
+        self._visOverride[bk] = target
+    end
+    self:RefreshRuntimeVisibility()
+end
+
+-- Drop a bar's runtime toggle override so its saved visibility takes effect
+-- again (called when the visibility dropdown changes in options).
+function EAB:ClearVisToggleOverride(barKey)
+    if self._visOverride then self._visOverride[barKey] = nil end
+end
+
+-- Rebuild override bindings from the saved per-bar keys: one pooled button per
+-- UNIQUE key (so a key shared by several bars drives all of them). A key is only
+-- bound if at least one bar using it has a saved always/never mode, so a shared
+-- key never dead-overrides the player's normal binding. Binding APIs are
+-- combat-protected, so defer to PLAYER_REGEN_ENABLED in combat.
+function EAB:RebuildVisToggleBindings()
+    if InCombatLockdown() then
+        if not self._visToggleCombatFrame then
+            local f = CreateFrame("Frame")
+            f:SetScript("OnEvent", function(self2)
+                self2:UnregisterEvent("PLAYER_REGEN_ENABLED")
+                EAB:RebuildVisToggleBindings()
+            end)
+            self._visToggleCombatFrame = f
+        end
+        self._visToggleCombatFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
+        return
+    end
+    -- Unique keys that have at least one participating (always/never) bar.
+    local keys, seen = {}, {}
+    for _, info in ipairs(ALL_BARS) do
+        local s = self.db.profile.bars[info.key]
+        local k = s and s.toggleVisKey
+        if k and k ~= "" and not seen[k] then
+            local saved = s.barVisibility or "always"
+            if saved == "always" or saved == "never" then
+                seen[k] = true
+                keys[#keys + 1] = k
+            end
+        end
+    end
+    -- Clear every pooled button's binding, then (re)assign one per unique key.
+    self._visToggleBtnPool = self._visToggleBtnPool or {}
+    for _, btn in ipairs(self._visToggleBtnPool) do
+        ClearOverrideBindings(btn)
+    end
+    for i, k in ipairs(keys) do
+        local btn = self._visToggleBtnPool[i]
+        if not btn then
+            btn = CreateFrame("Button", "EUIVisToggleKeyBtn" .. i, UIParent)
+            btn:Hide()
+            self._visToggleBtnPool[i] = btn
+        end
+        local thisKey = k
+        btn:SetScript("OnClick", function() EAB:ToggleVisKey(thisKey) end)
+        SetOverrideBindingClick(btn, true, k, btn:GetName())
+    end
+end
 
 function EAB:ApplySmartNumIcons(barKey)
     -- No-op: bar frame size is always determined by the user's numIcons
@@ -5824,7 +6025,25 @@ function EAB:UpdateHousingVisibility()
                     -- need the full check since they have no state driver.
                     local isSecure = not info.visibilityOnly and not info.isDataBar and not info.isBlizzardMovable and barFrames[key]
                     local shouldHide = isSecure and ShouldHideNonMacro(s) or (not isSecure and EllesmereUI.CheckVisibilityOptions(s))
-                    if shouldHide then
+                    -- Runtime "Toggle Action Bar" keybind override wins over the saved
+                    -- mode and the non-macro hide checks, exactly as RefreshRuntimeVisibility
+                    -- does. Without these two branches any event routed through here
+                    -- (target change, group/mount/housing) re-applies the saved visibility
+                    -- and re-shows a bar the player toggled off with its keybind. Secure
+                    -- managed bars only (the override is never set for other frame types).
+                    local _visToggleOv = isSecure and self._visOverride and self._visOverride[key]
+                    if _visToggleOv == "never" then
+                        if frame._eabLastVisStr ~= "hide" then
+                            frame._eabLastVisStr = "hide"
+                            RegisterAttributeDriver(frame, "state-visibility", "hide")
+                        end
+                    elseif _visToggleOv == "always" then
+                        local ovStr = BuildVisibilityString(info, s, "always")
+                        if frame._eabLastVisStr ~= ovStr then
+                            frame._eabLastVisStr = ovStr
+                            RegisterAttributeDriver(frame, "state-visibility", ovStr)
+                        end
+                    elseif shouldHide then
                         if isSecure then
                             if frame._eabLastVisStr ~= "hide" then
 
@@ -6822,7 +7041,10 @@ local function UpdateKeybinds()
                     -- EXCEPT on custom-paged bars (see above), which must also
                     -- route through the button so the keybind tracks the page.
                     local slot = btn:GetAttribute("action")
-                    local useClick = barHasCustomPaging
+                    -- Custom bars (Bar9/Bar10) have no native binding command, so
+                    -- their keys MUST route through the button (SetOverrideBindingClick);
+                    -- SetOverrideBinding to a non-existent command would do nothing.
+                    local useClick = barHasCustomPaging or (info.customPage ~= nil)
                     if slot and HasAction(slot) then
                         local actionType, id, subType = GetActionInfo(slot)
                         if actionType == "flyout" then
@@ -8028,6 +8250,9 @@ function EAB:FinishSetup()
     -- state is restored. This ensures keybinds work on /reload in combat.
     UpdateKeybinds()
 
+    -- Re-apply saved "Toggle Action Bar" visibility keybinds.
+    EAB:RebuildVisToggleBindings()
+
     -- Initialize the showgrid monitor on ActionButton1 so that when
     -- Blizzard changes its showgrid attribute (e.g. during combat spell
     -- drag), the change propagates to all our managed buttons.
@@ -8054,8 +8279,21 @@ function EAB:FinishSetup()
                     RegisterAttributeDriver(frame, "state-visibility", BuildVisibilityString(info, s))
                 end
                 if s.mouseoverEnabled then
+                    -- The drag has fully ended (cursor cleared, checked above). If
+                    -- the cursor is still over this bar, the spell was dropped here
+                    -- (or you're just hovering it), so keep it shown and let the
+                    -- normal OnLeave fade it on real exit. Otherwise hide as before.
+                    local state = hoverStates[key]
                     StopFade(frame)
-                    frame:SetAlpha(0)
+                    if MouseIsOver(frame) then
+                        if state then state.isHovered = true; state.fadeDir = "in" end
+                        frame:SetAlpha(s._savedBarAlpha or 1)
+                        if key == "MainBar" then SyncPagingAlpha(s._savedBarAlpha or 1) end
+                    else
+                        if state then state.isHovered = false; state.fadeDir = "out" end
+                        frame:SetAlpha(0)
+                        if key == "MainBar" then SyncPagingAlpha(0) end
+                    end
                 end
             end
         end
@@ -8452,7 +8690,7 @@ function EAB:FinishSetup()
         local softOnly = (hasSoftInteract or hasSoftEnemy or hasSoftFriend) and not hasHardTarget
         for _, info in ipairs(ALL_BARS) do
             local s = self.db.profile.bars[info.key]
-            if s and s.visHideNoTarget then
+            if s and s.visHideNoTarget and not (self._visOverride and self._visOverride[info.key]) then
                 local frame = barFrames[info.key]
                 if frame then
                     if softOnly then
@@ -8494,7 +8732,7 @@ function EAB:FinishSetup()
         regenFrame:SetScript("OnEvent", function()
             for _, info in ipairs(ALL_BARS) do
                 local s = self.db.profile.bars[info.key]
-                if s and s.visHideNoTarget then
+                if s and s.visHideNoTarget and not (self._visOverride and self._visOverride[info.key]) then
                     local frame = barFrames[info.key]
                     if frame then
                         local newStr = BuildVisibilityString(info, s)
@@ -10389,6 +10627,12 @@ local function EAB_UpdateQuickKeybindVisibility(show)
 
         if show and frame and ShouldQuickKeybindSurfaceBar(s) then
             RegisterAttributeDriver(frame, "state-visibility", "show")
+            -- Keep the visibility cache in sync with the driver we just set.
+            -- Otherwise RefreshRuntimeVisibility on QKB exit sees the stale
+            -- pre-QKB string still equal to the recomputed real string and skips
+            -- re-registering, leaving conditionally-hidden bars (notably the Pet
+            -- Bar on non-pet classes) stuck on "show" until reload.
+            frame._eabLastVisStr = "show"
             frame:Show()
             SafeEnableMouseMotionOnly(frame, true)
         end

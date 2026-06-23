@@ -1,4 +1,4 @@
-## Interface: 120001, 120005, 120007
+## Interface: 120100, 120005, 120007
 
 ## Title: BigWigs [|cffeda55fMarch on Quel'Danas|r]
 ## Title-deDE: BigWigs [|cffeda55fMarsch auf Quel'Danas|r]
@@ -23,7 +23,7 @@
 ## Notes-zhCN: BigWigs 进军奎尔丹纳斯模块
 ## Notes-zhTW: BigWigs 進軍奎爾達納斯模組
 ## IconTexture: Interface\AddOns\BigWigs\Media\Icons\minimap_raid.tga
-## Version: v417
+## Version: v417.3
 
 ## LoadOnDemand: 1
 ## Dependencies: BigWigs
