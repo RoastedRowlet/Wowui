@@ -16,7 +16,7 @@ BetterBags: enabled
 !BugGrabber: enabled
 BugSack: enabled
 ChonkyCharacterSheet: enabled
-Clique: enabled
+Clique: disabled
 CraftScan: enabled
 CraftSim: enabled
 Details: enabled

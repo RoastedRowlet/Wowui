@@ -1,6 +1,6 @@
 
 BugGrabberDB = {
-["session"] = 754,
+["session"] = 758,
 ["lastSanitation"] = 3,
 ["errors"] = {
 {
@@ -1166,14 +1166,6 @@ BugGrabberDB = {
 ["counter"] = 16,
 },
 {
-["message"] = "bad argument #1 to '?' (Usage: local skillLineInfo = C_SpellBook.GetSpellBookSkillLineInfo(skillLineIndex))",
-["time"] = 1781652317,
-["locals"] = "(*temporary)=\"bad argument #1 to '?' (Usage: local skillLineInfo = C_SpellBook.GetSpellBookSkillLineInfo(skillLineIndex))\"\n",
-["stack"] = "[C]: in function 'GetSpellBookSkillLineInfo'\n[Interface/AddOns/CraftScan/Customer/ChatScanner.lua]:1013: in function <Interface/AddOns/CraftScan/Customer/ChatScanner.lua:1011>\n[Interface/AddOns/CraftScan/Customer/ChatScanner.lua]:1026: in function <Interface/AddOns/CraftScan/Customer/ChatScanner.lua:976>\n[Interface/AddOns/CraftScan/Customer/ChatScanner.lua]:1246: in function <Interface/AddOns/CraftScan/Customer/ChatScanner.lua:1245>\n[C]: in function 'xpcall'\n[Interface/AddOns/Blizzard_ObjectAPI/Mainline/AsyncCallbackSystem.lua]:76: in function 'FireCallbacks'\n[Interface/AddOns/Blizzard_ObjectAPI/Mainline/AsyncCallbackSystem.lua]:35: in function <.../Blizzard_ObjectAPI/Mainline/AsyncCallbackSystem.lua:31>\n[C]: ?\n[C]: in function 'accessor'\n[Interface/AddOns/Blizzard_ObjectAPI/Mainline/AsyncCallbackSystem.lua]:52: in function 'AddCallback'\n[Interface/AddOns/Blizzard_ObjectAPI/Mainline/Item.lua]:332: in function 'ContinueOnItemLoad'\n[Interface/AddOns/CraftScan/Customer/ChatScanner.lua]:1245: in function 'OnMessage'\n[Interface/AddOns/CraftScan/Customer/ChatScanner.lua]:1263: in function <Interface/AddOns/CraftScan/Customer/ChatScanner.lua:1257>\n",
-["session"] = 722,
-["counter"] = 11,
-},
-{
 ["message"] = "...ace/AddOns/Blizzard_GroupFinder/Mainline/LFGList.lua:2117: attempt to index local 'applicantInfo' (a nil value)",
 ["time"] = 1781794534,
 ["locals"] = "self=Button <LFGList.xml:322>{\n ItemLevel=FontString <LFGList.xml:275>\n RoleIcon1=Button <LFGList.xml:211>\n GFF_text_flag=LFGListFrameFlag <main.lua:479>\n LeaverIcon=Frame <LFGList.xml:180>\n Name=FontString <LFGList.xml:268>\n memberIdx=1\n Rating=FontString <LFGList.xml:280>\n FriendIcon=Frame <LFGList.xml:196>\n RoleIcon2=Button <LFGList.xml:229>\n RoleIcon3=Button <LFGList.xml:247>\n}\napplicantID=1\nmemberIdx=1\nactiveEntryInfo=<table>{\n comment=\"\"\n privateGroup=false\n requiredItemLevel=0\n duration=1789\n voiceChat=\"\"\n generalPlaystyle=3\n newPlayerFriendly=false\n isCrossFactionListing=true\n name=\"|Kl1|k\"\n activityIDs=<table>\n autoAccept=false\n requiredHonorLevel=0\n}\nactivityInfo=<table>{\n groupFinderActivityGroupID=402\n mapID=2912\n isHeroicActivity=false\n isMythicPlusActivity=false\n maxNumPlayers=30\n showQuickJoinToast=true\n isRatedPvpActivity=false\n minLevelSuggestion=0\n categoryID=3\n shortName=\"Heroic\"\n orderIndex=2\n filters=165\n fullName=\"The Voidspire (Heroic)\"\n useDungeonRoleExpectations=false\n redirectedDifficultyID=15\n isPvpActivity=false\n allowCrossFaction=true\n isNormalActivity=false\n isMythicActivity=false\n difficultyID=15\n minLevel=90\n isCurrentRaidActivity=true\n useHonorLevel=false\n ilvlSuggestion=246\n maxLevelSuggestion=0\n displayType=0\n}\napplicantInfo=nil\nname=nil\nclass=nil\nlocalizedClass=nil\nlevel=nil\nitemLevel=nil\nhonorLevel=nil\ntank=nil\nhealer=nil\ndamage=nil\nassignedRole=nil\nrelationship=nil\ndungeonScore=nil\npvpItemLevel=nil\nfactionGroup=nil\nraceID=nil\nspecID=nil\nisLeaver=nil\nbestDungeonScoreForEntry=nil\nbestOverallScore=nil\npvpRatingForEntry=nil\n(*temporary)=false\n(*temporary)=GameTooltip <GameTooltip.xml:249>{\n ItemTooltip=Frame <GameTooltip.xml:254>\n BottomOverlay=Texture <SharedTooltipTemplates.xml:28>\n NineSlice=Frame <SharedTooltipTemplates.xml:19>\n suppressAutomaticCompareItem=false\n textLeft1Font=\"GameTooltipHeaderText\"\n TopOverlay=Texture <SharedTooltipTemplates.xml:23>\n TextLeft1=GameTooltipTextLeft1 <SharedTooltipTemplates.xml:35>\n supportsDataRefresh=true\n shouldRefreshData=false\n waitingForData=false\n shoppingTooltips=<table>\n StatusBar=GameTooltipStatusBar <GameTooltip.xml:9>\n TextRight1=GameTooltipTextRight1 <SharedTooltipTemplates.xml:36>\n supportsItemComparison=true\n updateTooltipTimer=0.033000\n textLeft2Font=\"GameTooltipText\"\n layoutType=\"TooltipDefaultLayout\"\n textRight1Font=\"GameTooltipHeaderText\"\n textRight2Font=\"GameTooltipText\"\n TextRight2=GameTooltipTextRight2 <SharedTooltipTemplates.xml:42>\n TextLeft2=GameTooltipTextLeft2 <SharedTooltipTemplates.xml:41>\n}\n(*temporary)=\"Item Level: |cffffffff0|r\"\n(*temporary)=nil\n(*temporary)=nil\n(*temporary)=GameTooltip <GameTooltip.xml:249>{\n ItemTooltip=Frame <GameTooltip.xml:254>\n BottomOverlay=Texture <SharedTooltipTemplates.xml:28>\n NineSlice=Frame <SharedTooltipTemplates.xml:19>\n suppressAutomaticCompareItem=false\n textLeft1Font=\"GameTooltipHeaderText\"\n TopOverlay=Texture <SharedTooltipTemplates.xml:23>\n TextLeft1=GameTooltipTextLeft1 <SharedTooltipTemplates.xml:35>\n supportsDataRefresh=true\n shouldRefreshData=false\n waitingForData=false\n shoppingTooltips=<table>\n StatusBar=GameTooltipStatusBar <GameTooltip.xml:9>\n TextRight1=GameTooltipTextRight1 <SharedTooltipTemplates.xml:36>\n supportsItemComparison=true\n updateTooltipTimer=0.033000\n textLeft2Font=\"GameTooltipText\"\n layoutType=\"TooltipDefaultLayout\"\n textRight1Font=\"GameTooltipHeaderText\"\n textRight2Font=\"GameTooltipText\"\n TextRight2=GameTooltipTextRight2 <SharedTooltipTemplates.xml:42>\n TextLeft2=GameTooltipTextLeft2 <SharedTooltipTemplates.xml:41>\n}\n(*temporary)=\"Item Level: |cffffffff0|r\"\n(*temporary)=<table>{\n a=1\n b=0\n g=0.823529\n r=1\n}\n(*temporary)=\"attempt to index local 'applicantInfo' (a nil value)\"\nFACTION_STRINGS=<table>{\n 0=\"Horde\"\n 1=\"Alliance\"\n}\n",
@@ -1256,6 +1248,14 @@ BugGrabberDB = {
 ["time"] = 1782133529,
 ["session"] = 753,
 ["counter"] = 190,
+},
+{
+["message"] = "bad argument #1 to '?' (Usage: local skillLineInfo = C_SpellBook.GetSpellBookSkillLineInfo(skillLineIndex))",
+["time"] = 1782268073,
+["locals"] = "(*temporary)=\"bad argument #1 to '?' (Usage: local skillLineInfo = C_SpellBook.GetSpellBookSkillLineInfo(skillLineIndex))\"\n",
+["stack"] = "[C]: in function 'GetSpellBookSkillLineInfo'\n[Interface/AddOns/CraftScan/Customer/ChatScanner.lua]:1013: in function <Interface/AddOns/CraftScan/Customer/ChatScanner.lua:1011>\n[Interface/AddOns/CraftScan/Customer/ChatScanner.lua]:1026: in function <Interface/AddOns/CraftScan/Customer/ChatScanner.lua:976>\n[Interface/AddOns/CraftScan/Customer/ChatScanner.lua]:1246: in function <Interface/AddOns/CraftScan/Customer/ChatScanner.lua:1245>\n[C]: in function 'xpcall'\n[Interface/AddOns/Blizzard_ObjectAPI/Mainline/AsyncCallbackSystem.lua]:76: in function 'FireCallbacks'\n[Interface/AddOns/Blizzard_ObjectAPI/Mainline/AsyncCallbackSystem.lua]:35: in function <.../Blizzard_ObjectAPI/Mainline/AsyncCallbackSystem.lua:31>\n[C]: ?\n[C]: in function 'accessor'\n[Interface/AddOns/Blizzard_ObjectAPI/Mainline/AsyncCallbackSystem.lua]:52: in function 'AddCallback'\n[Interface/AddOns/Blizzard_ObjectAPI/Mainline/Item.lua]:332: in function 'ContinueOnItemLoad'\n[Interface/AddOns/CraftScan/Customer/ChatScanner.lua]:1245: in function 'OnMessage'\n[Interface/AddOns/CraftScan/Customer/ChatScanner.lua]:1263: in function <Interface/AddOns/CraftScan/Customer/ChatScanner.lua:1257>\n",
+["session"] = 758,
+["counter"] = 13,
 },
 },
 }

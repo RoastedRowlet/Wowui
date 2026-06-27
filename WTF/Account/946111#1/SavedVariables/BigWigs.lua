@@ -128,9 +128,9 @@ BigWigs3DB = {
 ["BigWigs_Plugins_Bars"] = {
 ["profiles"] = {
 ["Default"] = {
-["emphasize"] = false,
-["visibleBarLimit"] = 1,
 ["normalWidth"] = 120,
+["visibleBarLimit"] = 1,
+["emphasize"] = false,
 ["expPosition"] = {
 "BOTTOMLEFT",
 "BOTTOMLEFT",
@@ -184,9 +184,9 @@ BigWigs3DB = {
 ["Player-3676-0DF7D3EF"] = {
 ["playerRating"] = 4132,
 ["specId"] = 1473,
-["keyMap"] = 560,
+["keyMap"] = 0,
 ["name"] = "Barelynoer",
-["keyLevel"] = 23,
+["keyLevel"] = 0,
 ["realm"] = "Area 52",
 },
 },
@@ -474,9 +474,9 @@ BigWigsStatsDB = {
 [1592] = {
 [2711] = {
 ["mythic_flex"] = {
-["kills"] = 2,
+["kills"] = 3,
 ["fkDuration"] = 420.3029999999562,
-["wipes"] = 9,
+["wipes"] = 11,
 ["fkWipes"] = 5,
 ["best"] = 420.3029999999562,
 ["bestDate"] = "2026/06/16",

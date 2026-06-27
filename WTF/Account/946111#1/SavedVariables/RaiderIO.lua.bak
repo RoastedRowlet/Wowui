@@ -14,19 +14,22 @@ RaiderIO_Config = {
 }
 RaiderIO_LastCharacter = "us-Barelynoer-area-52"
 RaiderIO_MissingCharacters = {
-["us-Rememberful-andorhal"] = true,
-["us-Chinchón-ragnaros"] = true,
-["us-Sleazyorc-tichondrius"] = true,
-["us-Jeesoo-tichondrius"] = true,
-["us-Ensetral-korialstrasz"] = true,
-["us-Trommash-cenarius"] = true,
-["us-Samaeldox-stormrage"] = true,
-["us-Raeg-thrall"] = true,
-["us-Khronver-quelthalas"] = true,
-["us-Spectralith-stormrage"] = true,
-["us-Misalchichon-tichondrius"] = true,
-["us-Atulkastan-zuljin"] = true,
-["us-Sushhi-gallywix"] = true,
+["us-Malgari-area-52"] = true,
+["us-party3-area-52"] = true,
+["us-Necrolightt-area-52"] = true,
+["us-Solarstyle-area-52"] = true,
+["us-Zaharin-area-52"] = true,
+["us-Drc-area-52"] = true,
+["us-Astato-area-52"] = true,
+["us-Bwomzandi-area-52"] = true,
+["us-Sanerous-area-52"] = true,
+["us-Mokujinn-area-52"] = true,
+["us-Auspicia-area-52"] = true,
+["us-Cuddlejob-area-52"] = true,
+["us-party2-area-52"] = true,
+["us-Thalkarash-area-52"] = true,
+["us-Pshaxx-area-52"] = true,
+["us-party1-area-52"] = true,
 }
 RaiderIO_MissingServers = {
 }

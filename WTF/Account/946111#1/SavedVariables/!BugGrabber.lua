@@ -1,7 +1,7 @@
 
 BugGrabberDB = {
 ["lastSanitation"] = 3,
-["session"] = 755,
+["session"] = 759,
 ["errors"] = {
 {
 ["message"] = "...s/AdvancedFocusCastBar/AdvancedFocusCastBarMixin.lua:1861: bad argument #1 to 'SetAlpha' (Usage: self:SetAlpha(alpha))",
@@ -1251,11 +1251,11 @@ BugGrabberDB = {
 },
 {
 ["message"] = "bad argument #1 to '?' (Usage: local skillLineInfo = C_SpellBook.GetSpellBookSkillLineInfo(skillLineIndex))",
-["time"] = 1782230996,
+["time"] = 1782268073,
 ["locals"] = "(*temporary)=\"bad argument #1 to '?' (Usage: local skillLineInfo = C_SpellBook.GetSpellBookSkillLineInfo(skillLineIndex))\"\n",
 ["stack"] = "[C]: in function 'GetSpellBookSkillLineInfo'\n[Interface/AddOns/CraftScan/Customer/ChatScanner.lua]:1013: in function <Interface/AddOns/CraftScan/Customer/ChatScanner.lua:1011>\n[Interface/AddOns/CraftScan/Customer/ChatScanner.lua]:1026: in function <Interface/AddOns/CraftScan/Customer/ChatScanner.lua:976>\n[Interface/AddOns/CraftScan/Customer/ChatScanner.lua]:1246: in function <Interface/AddOns/CraftScan/Customer/ChatScanner.lua:1245>\n[C]: in function 'xpcall'\n[Interface/AddOns/Blizzard_ObjectAPI/Mainline/AsyncCallbackSystem.lua]:76: in function 'FireCallbacks'\n[Interface/AddOns/Blizzard_ObjectAPI/Mainline/AsyncCallbackSystem.lua]:35: in function <.../Blizzard_ObjectAPI/Mainline/AsyncCallbackSystem.lua:31>\n[C]: ?\n[C]: in function 'accessor'\n[Interface/AddOns/Blizzard_ObjectAPI/Mainline/AsyncCallbackSystem.lua]:52: in function 'AddCallback'\n[Interface/AddOns/Blizzard_ObjectAPI/Mainline/Item.lua]:332: in function 'ContinueOnItemLoad'\n[Interface/AddOns/CraftScan/Customer/ChatScanner.lua]:1245: in function 'OnMessage'\n[Interface/AddOns/CraftScan/Customer/ChatScanner.lua]:1263: in function <Interface/AddOns/CraftScan/Customer/ChatScanner.lua:1257>\n",
-["session"] = 755,
-["counter"] = 12,
+["session"] = 758,
+["counter"] = 13,
 },
 },
 }

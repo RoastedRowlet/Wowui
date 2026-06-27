@@ -359,12 +359,12 @@ CliqueDB3 = {
 ["type"] = "spell",
 },
 {
+["type"] = "menu",
 ["sets"] = {
 ["default"] = true,
 },
-["type"] = "menu",
-["icon"] = 132212,
 ["key"] = "SHIFT-BUTTON2",
+["icon"] = 132212,
 },
 {
 ["type"] = "target",

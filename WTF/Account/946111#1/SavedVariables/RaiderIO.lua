@@ -14,8 +14,30 @@ RaiderIO_Config = {
 }
 RaiderIO_LastCharacter = "us-Barelynoer-area-52"
 RaiderIO_MissingCharacters = {
-["us-Xghostt-kelthuzad"] = true,
-["us-Madtrol-area-52"] = true,
+["us-Murdokc-bleeding-hollow"] = true,
+["us-Foghorn-azuremyst"] = true,
+["us-Oblïbion-ragnaros"] = true,
+["us-Rhylo-kelthuzad"] = true,
+["us-Hatchetman-darkspear"] = true,
+["us-Dermogo-azralon"] = true,
+["us-Trenabuser-illidan"] = true,
+["us-Hamburgmer-stormrage"] = true,
+["us-Pumpstich-quelthalas"] = true,
+["us-Butterstrike-stormrage"] = true,
+["us-Ghanjamanirl-area-52"] = true,
+["us-Nascia-saurfang"] = true,
+["us-Gzzy-zuljin"] = true,
+["us-Zaragos-kelthuzad"] = true,
+["us-Martanda-azralon"] = true,
+["us-Carus-moon-guard"] = true,
+["us-Vorteks-amanthul"] = true,
+["us-Nihomy-agamaggan"] = true,
+["us-Grimmpact-zuljin"] = true,
+["us-Anowen-malganis"] = true,
+["us-Ikovian-turalyon"] = true,
+["us-Kallogas-stormrage"] = true,
+["us-Rammeta-frostmourne"] = true,
+["us-Tocoglacial-azralon"] = true,
 }
 RaiderIO_MissingServers = {
 }
