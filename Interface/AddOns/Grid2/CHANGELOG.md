@@ -1,11 +1,10 @@
 # Grid2
 
-## [3.4.0](https://github.com/michaelnpsp/Grid2/tree/3.4.0) (2026-06-17)
-[Full Changelog](https://github.com/michaelnpsp/Grid2/compare/3.3.38...3.4.0) [Previous Releases](https://github.com/michaelnpsp/Grid2/releases)
+## [3.4.2](https://github.com/michaelnpsp/Grid2/tree/3.4.2) (2026-06-23)
+[Full Changelog](https://github.com/michaelnpsp/Grid2/compare/3.4.0...3.4.2) [Previous Releases](https://github.com/michaelnpsp/Grid2/releases)
 
-- Removed unused classic references in TOC files.  
-- Merge branch 'main' of https://github.com/michaelnpsp/grid2  
-- TOC Updated  
-- Merge pull request #423 from KogasaPls/main  
-    Fix typo in IndicatorText.lua  
-- Fix typo in IndicatorText.lua  
+- Fixing shadow not displayed in text indicators (CF issue #1505)  
+    Added shadow offset setting to text indicators.  
+- Merge pull request #424 from DaleHuntGB/main  
+    Add support for OUTLINE SLUG  
+- Add support for OUTLINE SLUG  

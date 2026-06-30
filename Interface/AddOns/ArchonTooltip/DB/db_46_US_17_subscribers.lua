@@ -234,7 +234,7 @@ local function getChunkLookup(table, length)
 end
 
 local lookup = {'DeathKnight-Frost','Unknown-Unknown','Mage-Frost',}
-local provider = {region='US',realm='Archimonde',name='US',type='subscribers',zone=46,date='2026-06-22',data={As='Aspir:BAEALgAECggJCAABLgAFFAcJGAABABwWAA==.',Da='Daddio:BAEALgADCgIJAwABLgADCgcJBwACAAAAAA==.',Li='Linthori:BAEALgADCgMJAwABLgAECgcJDQACAAAAAA==.',Ne='Nelson:BAEALgAECgYJCAABLgAECgkJLQADAFEeAA==.',Or='Ori:BAEALgADCgcJCwABLgAECgcJDQACAAAAAA==.',Ph='Philsner:BAEALgAECgcJDQAAAA==.',},}
+local provider = {region='US',realm='Archimonde',name='US',type='subscribers',zone=46,date='2026-06-29',data={As='Aspir:BAEALgAECggJCAABLgAFFAcJGAABABwWAA==.',Da='Daddio:BAEALgAECgQJBAABLgADCgcJBwACAAAAAA==.',Li='Linthori:BAEALgADCgMJAwABLgAECgcJDQACAAAAAA==.',Ne='Nelson:BAEALgAECgYJCAABLgAECgkJLQADAFEeAA==.',Or='Ori:BAEALgADCgcJCwABLgAECgcJDQACAAAAAA==.',Ph='Philsner:BAEALgAECgcJDQAAAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

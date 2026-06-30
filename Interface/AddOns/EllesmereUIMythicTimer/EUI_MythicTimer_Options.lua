@@ -480,6 +480,9 @@ initFrame:SetScript("OnEvent", function(self)
                 local _, cogShow = EllesmereUI.BuildCogPopup({
                     title = "+2 / +3 Threshold Size",
                     rows = {
+                        { type="toggle", label="Show Time Remaining",
+                          get=function() return Cfg("showThreshRemaining") == true end,
+                          set=function(v) Set("showThreshRemaining", v); Refresh() end },
                         { type="slider", label="Size", min=6, max=20, step=1,
                           get=function() return Cfg("thresholdSize") or 12 end,
                           set=function(v) Set("thresholdSize", v); Refresh() end },
@@ -707,8 +710,6 @@ initFrame:SetScript("OnEvent", function(self)
     EllesmereUI:RegisterModule("EllesmereUIMythicTimer", {
         title       = "Mythic+ Timer",
         description = "Track Mythic+ run time, key thresholds, and dungeon objectives.",
-        icon_on  = "Interface\\AddOns\\EllesmereUI\\media\\icons\\sidebar\\mplus-ig-on.png",
-        icon_off = "Interface\\AddOns\\EllesmereUI\\media\\icons\\sidebar\\mplus-ig.png",
         pages    = { PAGE_DISPLAY },
         buildPage = BuildPage,
         onReset  = function()

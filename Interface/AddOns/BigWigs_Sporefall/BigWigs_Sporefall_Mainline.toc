@@ -23,7 +23,7 @@
 ## Notes-zhCN: BigWigs 孢陨幽境模块
 ## Notes-zhTW: BigWigs Sporefall Modules
 ## IconTexture: Interface\AddOns\BigWigs\Media\Icons\minimap_raid.tga
-## Version: v417.3
+## Version: v417.7
 
 ## LoadOnDemand: 1
 ## Dependencies: BigWigs
@@ -32,5 +32,4 @@
 ## X-BigWigs-LoadOn-InstanceId: 1592
 
 Rotmire.lua
-
 !Options.lua

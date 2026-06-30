@@ -1,11 +1,11 @@
-## Interface: 120005, 120007
+## Interface: 120007, 120100
 ## Title: Advanced Focus Cast Bar
 ## DefaultState: Enabled
 ## SavedVariables: AdvancedFocusCastBarSaved
 ## IconTexture: Interface\Icons\spell_hunter_focusingshot
 ## Category: Archon
 ## Notes: A focus cast bar with bells and whistles.
-## Version: 1.0.17
+## Version: 1.0.18
 ## Author: Xephyris-Blackrock-EU
 
 ## X-Curse-Project-ID: 1441078

@@ -41,8 +41,7 @@ function addon:RegisterUnitFrame(frame)
     -- Apply the binding set via the secure header. For blacklisted frames the
     -- target is the frame itself; the snippet's blacklist guard no-ops it.
     local target = proxy or frame
-    self.header:SetFrameRef("cliquesetup_button", target)
-    self.header:Execute(self.header:GetAttribute("setup_clicks"), target)
+    self:StampProxySetup(frame, target)
 end
 
 function addon:UnregisterUnitFrame(frame)
@@ -61,8 +60,7 @@ function addon:UnregisterUnitFrame(frame)
     -- Blacklisted frames never got a proxy or routing, so there's nothing to clear.
     local proxy = self.proxies[frame]
     if proxy then
-        self.header:SetFrameRef("cliquesetup_button", proxy)
-        self.header:Execute(self.header:GetAttribute("remove_clicks"), proxy)
+        self:RemoveProxySetup(frame, proxy)
         self:TeardownFrameClickRouting(frame)
     end
 
@@ -188,6 +186,13 @@ function addon:GetButtonDirections()
     end
 end
 
+-- useOnKeyDown is what selects press vs. release for key binds on the key proxy.
+function addon:RefreshKeyProxyClicks(keyProxy, directions, enableGamePad)
+    keyProxy:SetAttribute("useOnKeyDown", self:UseActionOnKeyDown())
+    keyProxy:RegisterForClicks(unpack(directions))
+    if enableGamePad then keyProxy:EnableGamePadButton(true) end
+end
+
 -- Update both registered clicks, and ensure that mousewheel events are enabled
 -- on the frame.
 function addon:UpdateRegisteredClicks(button)
@@ -212,6 +217,8 @@ function addon:UpdateRegisteredClicks(button)
             button:RegisterForClicks(unpack(directions))
             proxy:RegisterForClicks("AnyUp")
             if enableGamePad then proxy:EnableGamePadButton(true) end
+            local keyProxy = self.keyProxies[button]
+            if keyProxy then self:RefreshKeyProxyClicks(keyProxy, directions, enableGamePad) end
         else
             button:RegisterForClicks(unpack(directions))
         end
@@ -229,6 +236,8 @@ function addon:UpdateRegisteredClicks(button)
                 frame:RegisterForClicks(unpack(directions))
                 proxy:RegisterForClicks("AnyUp")
                 if enableGamePad then proxy:EnableGamePadButton(true) end
+                local keyProxy = self.keyProxies[frame]
+                if keyProxy then self:RefreshKeyProxyClicks(keyProxy, directions, enableGamePad) end
             else
                 frame:RegisterForClicks(unpack(directions))
             end
@@ -267,8 +276,7 @@ function addon:ReconcileFrameDenylist()
             -- Clear the proxy's dispatch here rather than trusting a prior
             -- ClearAttributes, then restore the frame's original attributes and
             -- drop the proxy so the frame is left untouched.
-            self.header:SetFrameRef("cliquesetup_button", proxy)
-            self.header:Execute(self.header:GetAttribute("remove_clicks"), proxy)
+            self:RemoveProxySetup(frame, proxy)
             self:TeardownFrameClickRouting(frame)
         elseif not denylisted and not proxy then
             proxy = self:GetOrCreateProxy(frame)

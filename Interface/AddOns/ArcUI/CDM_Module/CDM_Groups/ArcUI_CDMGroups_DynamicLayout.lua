@@ -1935,7 +1935,10 @@ end
 -- No visibility polling needed.
 local function CheckGroupForChanges(group)
     if not group or not group.members then return false end
-    if not group.dynamicLayout then return false end
+    -- Restore-path gate: include Dynamic Cooldowns groups too, not just Dynamic
+    -- Auras. A dynamicCooldowns-only group must be reprocessed by the dirty tick so
+    -- collapsed cooldowns get restored after a profile-load/import settle.
+    if not group.dynamicLayout and not group.dynamicCooldowns then return false end
     local groupName = group.name or "unknown"
     for cdID, member in pairs(group.members) do
         if member.isPlaceholder and member.frame and member.frame.cooldownID == cdID then
@@ -1993,7 +1996,7 @@ function DL.OnTalentChangeStart()
     -- Mark all groups dirty so the tick re-evaluates everyone after reconcile
     if ns.CDMGroups and ns.CDMGroups.groups then
         for groupName, group in pairs(ns.CDMGroups.groups) do
-            if group.autoReflow and group.dynamicLayout then
+            if group.autoReflow and (group.dynamicLayout or group.dynamicCooldowns) then
                 _dlDirtyGroups[groupName] = true
             end
         end
@@ -2024,11 +2027,11 @@ function DL.OnReconcileComplete()
         wipe(state.iconVisibility)
         
         -- Force reflow all dynamic groups
-        -- CRITICAL: Check BOTH autoReflow (master toggle) AND dynamicLayout (aura behavior)
-        -- dynamicLayout is meaningless without autoReflow - it's a sub-feature
+        -- CRITICAL: Check autoReflow (master toggle) AND at least one dynamic mode
+        -- (Dynamic Auras or Dynamic Cooldowns) -- both are meaningless without autoReflow.
         if ns.CDMGroups.groups then
             for groupName, group in pairs(ns.CDMGroups.groups) do
-                if group.autoReflow and group.dynamicLayout and group.ReflowIcons then
+                if group.autoReflow and (group.dynamicLayout or group.dynamicCooldowns) and group.ReflowIcons then
                     -- Re-initialize visibility tracking for this group
                     if group.members then
                         for cdID, member in pairs(group.members) do
@@ -2080,7 +2083,7 @@ local function RunDirtyTick()
     wipe(state.tickAuraFrameCache)
 
     for groupName, group in pairs(ns.CDMGroups.groups) do
-        if group.autoReflow and group.dynamicLayout and _dlDirtyGroups[groupName] then
+        if group.autoReflow and (group.dynamicLayout or group.dynamicCooldowns) and _dlDirtyGroups[groupName] then
             local changed = CheckGroupForChanges(group)
             ClearGroupDirty(groupName)
             if changed then
@@ -2135,7 +2138,7 @@ local function RunPostRefreshLayoutSweep()
     -- it yet (e.g. a frame that hasn't been Register'd with FrameActive).
     if ns.FrameActive and ns.FrameActive.RequestRecompute then
         for groupName, group in pairs(ns.CDMGroups.groups) do
-            if group.autoReflow and group.dynamicLayout and group.members then
+            if group.autoReflow and (group.dynamicLayout or group.dynamicCooldowns) and group.members then
                 for cdID, member in pairs(group.members) do
                     local frame = member and member.frame
                     if frame and not member.isPlaceholder then
@@ -2858,9 +2861,9 @@ function DL.RefreshAll()
     wipe(state.iconVisibility)
     
     for groupName, group in pairs(ns.CDMGroups.groups) do
-        -- CRITICAL: Check BOTH autoReflow (master toggle) AND dynamicLayout (aura behavior)
-        -- dynamicLayout is meaningless without autoReflow - it's a sub-feature
-        if group.autoReflow and group.dynamicLayout then
+        -- CRITICAL: Check autoReflow (master toggle) AND at least one dynamic mode
+        -- (Dynamic Auras or Dynamic Cooldowns) -- both are meaningless without autoReflow.
+        if group.autoReflow and (group.dynamicLayout or group.dynamicCooldowns) then
             -- Re-initialize visibility tracking
             if group.members then
                 for cdID, member in pairs(group.members) do

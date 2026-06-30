@@ -408,34 +408,20 @@ L["RAID_BOSS_SOD_6"] = "痛苦工匠拉茲內爾"
 L["RAID_BOSS_SOD_7"] = "首創者的守護者"
 L["RAID_BOSS_SOD_8"] = "述命者羅卡洛"
 L["RAID_BOSS_SOD_9"] = "科爾蘇加德"
---[[Translation missing --]]
---[[ L["RAID_BOSS_SOO_1"] = ""--]] 
---[[Translation missing --]]
---[[ L["RAID_BOSS_SOO_10"] = ""--]] 
---[[Translation missing --]]
---[[ L["RAID_BOSS_SOO_11"] = ""--]] 
---[[Translation missing --]]
---[[ L["RAID_BOSS_SOO_12"] = ""--]] 
---[[Translation missing --]]
---[[ L["RAID_BOSS_SOO_13"] = ""--]] 
---[[Translation missing --]]
---[[ L["RAID_BOSS_SOO_14"] = ""--]] 
---[[Translation missing --]]
---[[ L["RAID_BOSS_SOO_2"] = ""--]] 
---[[Translation missing --]]
---[[ L["RAID_BOSS_SOO_3"] = ""--]] 
---[[Translation missing --]]
---[[ L["RAID_BOSS_SOO_4"] = ""--]] 
---[[Translation missing --]]
---[[ L["RAID_BOSS_SOO_5"] = ""--]] 
---[[Translation missing --]]
---[[ L["RAID_BOSS_SOO_6"] = ""--]] 
---[[Translation missing --]]
---[[ L["RAID_BOSS_SOO_7"] = ""--]] 
---[[Translation missing --]]
---[[ L["RAID_BOSS_SOO_8"] = ""--]] 
---[[Translation missing --]]
---[[ L["RAID_BOSS_SOO_9"] = ""--]] 
+L["RAID_BOSS_SOO_1"] = "伊莫爾西斯"
+L["RAID_BOSS_SOO_10"] = "潘達利亞之寶"
+L["RAID_BOSS_SOO_11"] = "『嗜血巨龍』梭克"
+L["RAID_BOSS_SOO_12"] = "攻城機匠黑引信"
+L["RAID_BOSS_SOO_13"] = "卡拉西聖螳"
+L["RAID_BOSS_SOO_14"] = "卡爾洛斯‧地獄吼"
+L["RAID_BOSS_SOO_2"] = "墮落的保衛者"
+L["RAID_BOSS_SOO_3"] = "諾努衫"
+L["RAID_BOSS_SOO_4"] = "傲慢之煞"
+L["RAID_BOSS_SOO_5"] = "葛拉卡斯"
+L["RAID_BOSS_SOO_6"] = "鋼鐵破滅邪神"
+L["RAID_BOSS_SOO_7"] = "柯爾克隆黑暗薩滿"
+L["RAID_BOSS_SOO_8"] = "納茲格寧姆將軍"
+L["RAID_BOSS_SOO_9"] = "馬可羅克"
 L["RAID_BOSS_ToES_1"] = "豐泉守衛者"
 L["RAID_BOSS_TOES_1"] = "豐泉守衛者"
 L["RAID_BOSS_TOES_2"] = "楚龍"

@@ -14,18 +14,18 @@ local strfind = string.find
 
 local BIGWIGS_VERSION = 417
 local CONTENT_PACK_VERSIONS = {
-	["LittleWigs"] = {12, 0, 55},
-	["BigWigs_Classic"] = {12, 0, 18},
-	["BigWigs_BurningCrusade"] = {12, 0, 14},
-	["BigWigs_WrathOfTheLichKing"] = {12, 0, 9},
-	["BigWigs_Cataclysm"] = {12, 0, 4},
-	["BigWigs_MistsOfPandaria"] = {12, 0, 7},
-	["BigWigs_WarlordsOfDraenor"] = {12, 0, 2},
-	["BigWigs_Legion"] = {12, 0, 2},
-	["BigWigs_BattleForAzeroth"] = {12, 0, 4},
-	["BigWigs_Shadowlands"] = {12, 0, 3},
-	["BigWigs_Dragonflight"] = {12, 0, 5},
-	["BigWigs_TheWarWithin"] = {12, 0, 3},
+	["LittleWigs"] = {12, 0, 58},
+	["BigWigs_Classic"] = {12, 0, 19},
+	["BigWigs_BurningCrusade"] = {12, 0, 15},
+	["BigWigs_WrathOfTheLichKing"] = {12, 0, 10},
+	["BigWigs_Cataclysm"] = {12, 0, 5},
+	["BigWigs_MistsOfPandaria"] = {12, 0, 8},
+	["BigWigs_WarlordsOfDraenor"] = {12, 0, 3},
+	["BigWigs_Legion"] = {12, 0, 3},
+	["BigWigs_BattleForAzeroth"] = {12, 0, 5},
+	["BigWigs_Shadowlands"] = {12, 0, 4},
+	["BigWigs_Dragonflight"] = {12, 0, 6},
+	["BigWigs_TheWarWithin"] = {12, 0, 4},
 }
 local BIGWIGS_RELEASE_STRING
 local versionQueryString, versionResponseString = "Q^%d^%s^%d^%s", "V^%d^%s^%d^%s"
@@ -57,7 +57,7 @@ do
 	local ALPHA = "ALPHA"
 
 	local releaseType
-	local myGitHash = "ab17972" -- The ZIP packager will replace this with the Git hash.
+	local myGitHash = "19da28c" -- The ZIP packager will replace this with the Git hash.
 	local releaseString
 	--[=[@alpha@
 	-- The following code will only be present in alpha ZIPs.
@@ -179,7 +179,7 @@ public.isTestBuild = IsPublicTestClient() -- PTR/beta
 do
 	local _, _, _, build = GetBuildInfo()
 	public.isBeta = public.isTestBuild and build >= 130000
-	public.isNext = build >= 120007
+	public.isNext = build >= 120100
 end
 
 -- Version
@@ -316,6 +316,7 @@ do
 				[2912] = "BigWigs_TheVoidspire",
 				[2913] = "BigWigs_MarchOnQuelDanas",
 				[1592] = "BigWigs_Sporefall",
+				[3004] = "BigWigs_TheVenomousAbyss",
 			}
 		}
 	else -- Retail
@@ -335,20 +336,29 @@ do
 				lw_cs,
 			},
 			currentSeason = {
-				[2805] = lw_cs, -- Windrunner Spire
-				[2811] = lw_cs, -- Magisters' Terrace
-				[2874] = lw_cs, -- Maisara Caverns
-				[2915] = lw_cs, -- Nexus-Point Xenas
-				[2526] = lw_cs, -- Algeth'ar Academy
-				[1753] = lw_cs, -- Seat of the Triumvirate
-				[1209] = lw_cs, -- Skyreach
-				[658] = lw_cs, -- Pit of Saron
+				[2805] = not public.isNext and lw_cs or nil, -- Windrunner Spire
+				[2811] = not public.isNext and lw_cs or nil, -- Magisters' Terrace
+				[2874] = not public.isNext and lw_cs or nil, -- Maisara Caverns
+				[2915] = not public.isNext and lw_cs or nil, -- Nexus-Point Xenas
+				[2526] = not public.isNext and lw_cs or nil, -- Algeth'ar Academy
+				[1753] = not public.isNext and lw_cs or nil, -- Seat of the Triumvirate
+				[1209] = not public.isNext and lw_cs or nil, -- Skyreach
+				[658] = not public.isNext and lw_cs or nil, -- Pit of Saron
+				[2813] = public.isNext and lw_cs or nil, -- Murder Row
+				[2825] = public.isNext and lw_cs or nil, -- Den of Nalorakk
+				[2859] = public.isNext and lw_cs or nil, -- The Blinding Vale
+				[2923] = public.isNext and lw_cs or nil, -- Voidscar Arena
+				[2993] = public.isNext and lw_cs or nil, -- Altar of Fangs
+				[2521] = public.isNext and lw_cs or nil, -- Ruby Life Pools
+				[1877] = public.isNext and lw_cs or nil, -- Temple of Sethraliss
+				[1762] = public.isNext and lw_cs or nil, -- Kings' Rest
 			},
 			zones = {
 				[2939] = "BigWigs_TheDreamrift",
 				[2912] = "BigWigs_TheVoidspire",
 				[2913] = "BigWigs_MarchOnQuelDanas",
-				[1592] = public.isNext and "BigWigs_Sporefall" or nil,
+				[1592] = "BigWigs_Sporefall",
+				[3004] = public.isNext and "BigWigs_TheVenomousAbyss" or nil,
 			}
 		}
 	end
@@ -445,7 +455,8 @@ do
 		[2912] = mn, -- The Voidspire
 		[2913] = mn, -- March on Quel'Danas
 		[2939] = mn, -- The Dreamrift
-		[1592] = public.isNext and mn or nil, -- Sporefall
+		[1592] = mn, -- Sporefall
+		[3004] = public.isNext and mn or nil, -- The Venomous Abyss
 
 
 		--[[ LittleWigs: Classic ]]--
@@ -554,7 +565,7 @@ do
 		--[[ LittleWigs: Battle for Azeroth ]]--
 		[1763] = lw_bfa, -- Atal'Dazar
 		[1754] = lw_bfa, -- Freehold
-		[1762] = lw_bfa, -- King's Rest
+		[1762] = lw_bfa, -- Kings' Rest
 		[1864] = lw_bfa, -- Shrine of the Storm
 		[1822] = lw_bfa, -- Siege of Boralus
 		[1877] = lw_bfa, -- Temple of Sethraliss
@@ -630,6 +641,7 @@ do
 		[2874] = lw_mn, -- Maisara Caverns
 		[2915] = lw_mn, -- Nexus-Point Xenas
 		[2923] = lw_mn, -- Voidscar Arena
+		[2993] = public.isNext and lw_mn or nil, -- Altar of Fangs
 		--[[ LittleWigs: Midnight Delves ]]--
 		[2933] = lw_delves, -- Collegiate Calamity
 		[2952] = lw_delves, -- The Shadow Enclave
@@ -692,8 +704,13 @@ local reqFuncAddons = {
 local RaidWarningMessage
 do
 	local RaidNotice_AddMessage = RaidNotice_AddMessage
+	local RaidWarningUtilAddMessage = RaidWarningUtil and RaidWarningUtil.AddMessage
 	function RaidWarningMessage(msg, duration)
-		RaidNotice_AddMessage(RaidWarningFrame, msg, {r=1,g=1,b=1}, duration)
+		if RaidWarningUtilAddMessage then
+			RaidWarningUtilAddMessage(msg, {r=1,g=1,b=1}, duration)
+		else
+			RaidNotice_AddMessage(RaidWarningFrame, msg, {r=1,g=1,b=1}, duration)
+		end
 	end
 end
 
@@ -1418,6 +1435,7 @@ do
 		BigWigs_TheDreamrift = true,
 		BigWigs_MarchOnQuelDanas = true,
 		BigWigs_Sporefall = true,
+		BigWigs_TheVenomousAbyss = true,
 	}
 	-- Try to teach people not to force load our modules.
 	for i = 1, GetNumAddOns() do
@@ -1505,7 +1523,7 @@ do
 	end
 
 	local locales = {
-		ruRU = "Russian (ruRU)",
+		--ruRU = "Russian (ruRU)",
 		--zhCN = "Simplified Chinese (zhCN)",
 		--zhTW = "Traditional Chinese (zhTW)",
 		itIT = "Italian (itIT)",
@@ -1641,9 +1659,9 @@ end
 --
 
 do
-	local DBMdotRevision = "20260617051838" -- The changing version of the local client, changes with every new zip using the project-date-integer packager replacement.
-	local DBMdotDisplayVersion = "12.0.53" -- "N.N.N" for a release and "N.N.N alpha" for the alpha duration.
-	local DBMdotReleaseRevision = "20260616000000" -- Hardcoded time, manually changed every release, they use it to track the highest release version, a new DBM release is the only time it will change.
+	local DBMdotRevision = "20260626163357" -- The changing version of the local client, changes with every new zip using the project-date-integer packager replacement.
+	local DBMdotDisplayVersion = "12.0.54" -- "N.N.N" for a release and "N.N.N alpha" for the alpha duration.
+	local DBMdotReleaseRevision = "20260626000000" -- Hardcoded time, manually changed every release, they use it to track the highest release version, a new DBM release is the only time it will change.
 	local protocol = 3
 	local versionPrefix = "V"
 	local PForceDisable = 26

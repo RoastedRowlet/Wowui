@@ -48,6 +48,10 @@ addon.databaseDefaults = {
         bindings = {
         },
     },
+    global = {
+        changelogDoNotShow       = false,
+        lastSeenChangelogVersion = nil,
+    },
 }
 
 -- A new profile is being created in the db, called 'profile'

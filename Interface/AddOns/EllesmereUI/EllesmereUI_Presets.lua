@@ -253,7 +253,7 @@ do
             title:SetFont(FONT, 22, "")
             title:SetTextColor(1, 1, 1, 1)
             PP.Point(title, "TOP", popup, "TOP", 0, -32)
-            title:SetText("Assign Preset to Specs")
+            title:SetText(EllesmereUI.L("Assign Preset to Specs"))
             popup._title = title
 
             -- Subtitle
@@ -274,7 +274,7 @@ do
             checkAllBtn:SetFrameLevel(popup:GetFrameLevel() + 2)
             local checkAllLbl = checkAllBtn:CreateFontString(nil, "OVERLAY")
             checkAllLbl:SetFont(FONT, 14, "")
-            checkAllLbl:SetText("Check All")
+            checkAllLbl:SetText(EllesmereUI.L("Check All"))
             checkAllLbl:SetTextColor(1, 1, 1, 0.45)
             checkAllLbl:SetPoint("CENTER")
             checkAllBtn:SetSize(checkAllLbl:GetStringWidth() + 4, 20)
@@ -294,7 +294,7 @@ do
             uncheckAllBtn:SetFrameLevel(popup:GetFrameLevel() + 2)
             local uncheckAllLbl = uncheckAllBtn:CreateFontString(nil, "OVERLAY")
             uncheckAllLbl:SetFont(FONT, 14, "")
-            uncheckAllLbl:SetText("Uncheck All")
+            uncheckAllLbl:SetText(EllesmereUI.L("Uncheck All"))
             uncheckAllLbl:SetTextColor(1, 1, 1, 0.45)
             uncheckAllLbl:SetPoint("CENTER")
             uncheckAllBtn:SetSize(uncheckAllLbl:GetStringWidth() + 4, 20)
@@ -332,7 +332,7 @@ do
             defDDLabel:SetFont(FONT, 14, "")
             defDDLabel:SetTextColor(1, 1, 1, 0.45)
             PP.Point(defDDLabel, "BOTTOM", defDDContainer, "CENTER", 0, 7)
-            defDDLabel:SetText("Default Profile (for non-assigned specs)")
+            defDDLabel:SetText(EllesmereUI.L("Default Profile (for non-assigned specs)"))
             popup._defDDLabel = defDDLabel
 
             local defDDBtn = CreateFrame("Button", nil, defDDContainer)
@@ -479,7 +479,7 @@ do
             local closeLbl = closeBtn:CreateFontString(nil, "OVERLAY")
             closeLbl:SetFont(FONT, 16, "")
             PP.Point(closeLbl, "CENTER", closeBtn, "CENTER", 0, 0)
-            closeLbl:SetText("Done")
+            closeLbl:SetText(EllesmereUI.L("Done"))
             closeLbl:SetTextColor(EG.r, EG.g, EG.b, 0.9)
             closeBtn:SetScript("OnEnter", function()
                 closeLbl:SetTextColor(EG.r, EG.g, EG.b, 1)
@@ -504,7 +504,7 @@ do
             local cancelLbl = cancelBtn:CreateFontString(nil, "OVERLAY")
             cancelLbl:SetFont(FONT, 16, "")
             PP.Point(cancelLbl, "CENTER", cancelBtn, "CENTER", 0, 0)
-            cancelLbl:SetText("Cancel")
+            cancelLbl:SetText(EllesmereUI.L("Cancel"))
             cancelLbl:SetTextColor(1, 1, 1, 0.50)
             cancelBtn:SetScript("OnEnter", function()
                 cancelLbl:SetTextColor(1, 1, 1, 0.75)
@@ -548,6 +548,8 @@ do
             popup._COL_W   = COL_W
             popup._CLASS_GAP = CLASS_GAP
             popup._dimmer = dimmer
+            popup._POPUP_W = POPUP_W
+            popup._POPUP_H = POPUP_H
             specPopup = popup
         end
 
@@ -555,22 +557,46 @@ do
         if opts.title then
             specPopup._title:SetText(opts.title)
         else
-            specPopup._title:SetText("Assign Preset to Specs")
+            specPopup._title:SetText(EllesmereUI.L("Assign Preset to Specs"))
         end
         if opts.subtitle then
             specPopup._subtitle:SetText(opts.subtitle)
         else
             local presetName
-            if presetKey == "custom" then presetName = "Custom"
+            if presetKey == "custom" then presetName = EllesmereUI.L("Custom")
             elseif presetKey == "ellesmereui" then presetName = "EllesmereUI"
             elseif presetKey and type(presetKey) == "string" and presetKey:sub(1, 5) == "user:" then presetName = presetKey:sub(6)
             else presetName = presetKey or "" end
-            specPopup._subtitle:SetText("Select which specs you want " .. presetName .. " to be assigned to")
+            specPopup._subtitle:SetText(EllesmereUI.Lf("Select which specs you want %1$s to be assigned to", presetName))
+        end
+        -- Per-call subtitle color (default dim white). Lets a caller render a red
+        -- overwrite warning in the subtitle slot. Reset every call (popup is cached).
+        if opts.subtitleColor then
+            local c = opts.subtitleColor
+            specPopup._subtitle:SetTextColor(c.r or c[1] or 1, c.g or c[2] or 1, c.b or c[3] or 1, c.a or 1)
+        else
+            specPopup._subtitle:SetTextColor(1, 1, 1, 0.45)
+        end
+        -- Placement: a bottom warning (CDM export/import) drops into the blank
+        -- space above the buttons -- the spec grid never fills the full height,
+        -- so no resize is needed (the popup stays the same height as every other
+        -- spec picker). Normal callers keep the subtitle under the title. The
+        -- warning also renders 2px larger for emphasis.
+        specPopup._subtitle:ClearAllPoints()
+        PP.Size(specPopup, specPopup._POPUP_W, specPopup._POPUP_H)
+        local subFont = specPopup._subtitle:GetFont()
+        if opts.subtitleAtBottom then
+            specPopup._subtitle:SetFont(subFont, 16, "")
+            -- Buttons sit 38px up at 39px tall (top edge ~77px); ~30px gap above.
+            PP.Point(specPopup._subtitle, "BOTTOM", specPopup, "BOTTOM", 0, 107)
+        else
+            specPopup._subtitle:SetFont(subFont, 14, "")
+            PP.Point(specPopup._subtitle, "TOP", specPopup._title, "BOTTOM", 0, -8)
         end
 
         -- Update Done button text
         if specPopup._closeLbl then
-            specPopup._closeLbl:SetText(opts.buttonText or "Done")
+            specPopup._closeLbl:SetText(opts.buttonText or EllesmereUI.L("Done"))
         end
 
         -- Populate columns
@@ -588,6 +614,7 @@ do
         -- Build lookup: specID -> presetKey for specs assigned to OTHER presets
         local lockedSpecs = {}
         local disabledSpecs = opts.disabledSpecs or {}
+        local lockedOnSpecs = opts.lockedOnSpecs or {}
         local preCheckedSpecs = opts.preCheckedSpecs
         do
             local fullMap = db and db[dbKey]
@@ -596,7 +623,7 @@ do
                     if pKey ~= presetKey and type(specList) == "table" then
                         for sID in pairs(specList) do
                             local dName
-                            if pKey == "custom" then dName = "Custom"
+                            if pKey == "custom" then dName = EllesmereUI.L("Custom")
                             elseif pKey == "ellesmereui" then dName = "EllesmereUI"
                             elseif pKey:sub(1, 5) == "user:" then dName = pKey:sub(6)
                             else dName = pKey end
@@ -612,6 +639,10 @@ do
             for sID in pairs(preCheckedSpecs) do
                 assignments[sID] = true
             end
+        end
+        -- Locked-on specs are always checked and cannot be toggled off.
+        for sID in pairs(lockedOnSpecs) do
+            assignments[sID] = true
         end
 
         for colIdx = 1, NUM_COLS do
@@ -655,7 +686,7 @@ do
                 else
                     hdr._label:SetTextColor(1, 1, 1, 0.7)
                 end
-                hdr._label:SetText(cls.name)
+                hdr._label:SetText((LOCALIZED_CLASS_NAMES_MALE and LOCALIZED_CLASS_NAMES_MALE[cls.class]) or cls.name)
                 yOff = yOff + CLASS_H + CLASS_PAD_BOT
 
                 -- Spec checkboxes
@@ -694,19 +725,32 @@ do
                     PP.Point(row, "TOPLEFT", col, "TOPLEFT", 0, -yOff)
                     row:Show()
 
-                    row._lbl:SetText(spec.name)
+                    local locSpecName = spec.name
+                    if GetSpecializationInfoByID then
+                        local sn = select(2, GetSpecializationInfoByID(spec.id))
+                        if sn and sn ~= "" then locSpecName = sn end
+                    end
+                    row._lbl:SetText(locSpecName)
                     row._specID = spec.id
 
                     local lockedBy = lockedSpecs[spec.id]
                     local disabledTip = disabledSpecs[spec.id]
+                    local lockedOnTip = lockedOnSpecs[spec.id]
                     row._locked = lockedBy ~= nil
                     row._disabled = disabledTip ~= nil
+                    row._lockedOn = lockedOnTip ~= nil and lockedOnTip ~= false
 
                     local checked = assignments[spec.id] == true
                     row._checked = checked
                     local EG = ELLESMERE_GREEN
                     local function UpdateVisual(r)
-                        if r._locked or r._disabled then
+                        if r._lockedOn then
+                            -- Always-on (e.g. the sync source): checked but locked/grayed.
+                            r._check:Show()
+                            r._boxBorder:SetColor(EG.r, EG.g, EG.b, CB_ACT_BRD_A * 0.5)
+                            r._boxBg:SetColorTexture(CB_BOX_R, CB_BOX_G, CB_BOX_B, 0.5)
+                            r._lbl:SetTextColor(1, 1, 1, 0.4)
+                        elseif r._locked or r._disabled then
                             r._check:Hide()
                             r._boxBorder:SetColor(BORDER_R, BORDER_G, BORDER_B, CB_BRD_A * 0.4)
                             r._boxBg:SetColorTexture(CB_BOX_R, CB_BOX_G, CB_BOX_B, 0.35)
@@ -727,7 +771,7 @@ do
                     allCheckboxes[#allCheckboxes + 1] = row
 
                     row:SetScript("OnClick", function(self)
-                        if self._locked or self._disabled then return end
+                        if self._lockedOn or self._locked or self._disabled then return end
                         self._checked = not self._checked
                         assignments[spec.id] = self._checked or nil
                         UpdateVisual(self)
@@ -736,13 +780,16 @@ do
                         if self._disabled and disabledTip then
                             EllesmereUI.ShowWidgetTooltip(self._box,
                                 EllesmereUI.DisabledTooltip(disabledTip))
+                        elseif self._lockedOn and type(lockedOnTip) == "string" then
+                            EllesmereUI.ShowWidgetTooltip(self._box,
+                                EllesmereUI.DisabledTooltip(lockedOnTip))
                         end
-                        if self._locked or self._disabled then return end
+                        if self._lockedOn or self._locked or self._disabled then return end
                         self._lbl:SetTextColor(1, 1, 1, 0.90)
                     end)
                     row:SetScript("OnLeave", function(self)
                         EllesmereUI.HideWidgetTooltip()
-                        if self._locked or self._disabled then return end
+                        if self._lockedOn or self._locked or self._disabled then return end
                         self._lbl:SetTextColor(1, 1, 1, 0.65)
                     end)
 
@@ -755,7 +802,7 @@ do
         specPopup._checkAll:SetScript("OnClick", function()
             local EG2 = ELLESMERE_GREEN
             for _, row in ipairs(allCheckboxes) do
-                if not row._locked and not row._disabled then
+                if not row._locked and not row._disabled and not row._lockedOn then
                     row._checked = true
                     assignments[row._specID] = true
                     row._check:Show()
@@ -765,7 +812,7 @@ do
         end)
         specPopup._uncheckAll:SetScript("OnClick", function()
             for _, row in ipairs(allCheckboxes) do
-                if not row._locked and not row._disabled then
+                if not row._locked and not row._disabled and not row._lockedOn then
                     row._checked = false
                     assignments[row._specID] = nil
                     row._check:Hide()
@@ -782,7 +829,7 @@ do
 
             local function DefPresetDisplayName(key)
                 if not key then return "" end
-                if key == "custom" then return "Custom" end
+                if key == "custom" then return EllesmereUI.L("Custom") end
                 if key == "ellesmereui" then return "EllesmereUI" end
                 if key:sub(1, 5) == "user:" then return key:sub(6) end
                 return key

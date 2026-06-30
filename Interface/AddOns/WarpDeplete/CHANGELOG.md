@@ -1,8 +1,11 @@
 # WarpDeplete
 
-## [v5.4.1](https://github.com/happenslol/WarpDeplete/tree/v5.4.1) (2026-06-12)
-[Full Changelog](https://github.com/happenslol/WarpDeplete/commits/v5.4.1) [Previous Releases](https://github.com/happenslol/WarpDeplete/releases)
+## [v5.4.2](https://github.com/happenslol/WarpDeplete/tree/v5.4.2) (2026-06-22)
+[Full Changelog](https://github.com/happenslol/WarpDeplete/commits/v5.4.2) [Previous Releases](https://github.com/happenslol/WarpDeplete/releases)
 
+- chore: Bump version  
+- fix: Avoid comparing secret value UnitHealth (#156)  
+    UnitHealth can be secret, which causes a lua error. Previously, feign death caused UnitIsDead to return 'true', but this seems to no longer be the case.  
 - chore: Bump version  
 - chore: Update ruRU.lua (#155)  
 - chore: Bump version  
@@ -59,8 +62,3 @@
 - chore: Bump version  
 - fix: Check for secret values in UNIT\_DIED event (#141)  
 - chore: Bump version  
-- fix: Update addon for Midnight pre-patch (#138)  
-    * Added support for Midnight pre-patch  
-    * UNIT\_DIED is now its own event instead of a subevent of CLEU  
-    * C\_ChallengeMode.GetCompletionInfo has been removed, using C\_ChallengeMode.GetChallengeCompletionInfo instead  
-- fix: Use category id to open addon settings (#136)  

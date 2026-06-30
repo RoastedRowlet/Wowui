@@ -1,35 +1,29 @@
 
 RaiderIO_Config = {
-["minimapIcon"] = {
-["minimapPos"] = 180,
-["showInCompartment"] = true,
-["hide"] = false,
-["lock"] = false,
-},
 ["profilePoint"] = {
 ["y"] = 0,
 ["x"] = -16,
 ["point"] = "TOPLEFT",
 },
+["minimapIcon"] = {
+["minimapPos"] = 180,
+["showInCompartment"] = true,
+["lock"] = false,
+["hide"] = false,
+},
 }
 RaiderIO_LastCharacter = "us-Barelynoer-area-52"
 RaiderIO_MissingCharacters = {
-["us-Malgari-area-52"] = true,
-["us-party3-area-52"] = true,
-["us-Necrolightt-area-52"] = true,
-["us-Solarstyle-area-52"] = true,
-["us-Zaharin-area-52"] = true,
-["us-Drc-area-52"] = true,
-["us-Astato-area-52"] = true,
-["us-Bwomzandi-area-52"] = true,
-["us-Sanerous-area-52"] = true,
-["us-Mokujinn-area-52"] = true,
-["us-Auspicia-area-52"] = true,
-["us-Cuddlejob-area-52"] = true,
-["us-party2-area-52"] = true,
-["us-Thalkarash-area-52"] = true,
-["us-Pshaxx-area-52"] = true,
-["us-party1-area-52"] = true,
+["us-Miguee-area-52"] = true,
+["us-Jiokyonim-thrall"] = true,
+["us-Metaiion-proudmoore"] = true,
+["us-Fiodness-area-52"] = true,
+["us-Strífe-zuljin"] = true,
+["us-Arîsê-tichondrius"] = true,
+["us-Arthós-ragnaros"] = true,
+["us-Hardh-area-52"] = true,
+["us-Malek-emerald-dream"] = true,
+["us-Solvdh-stormrage"] = true,
 }
 RaiderIO_MissingServers = {
 }

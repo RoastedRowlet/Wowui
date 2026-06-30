@@ -560,59 +560,57 @@ local function ReturnFrameToCDM(frame, entry)
         return
     end
     
-    pcall(function()
-        -- CRITICAL: Clean up all drag state and custom properties
-        -- These can cause issues if CDM reuses this frame for a different cooldownID
-        frame:SetMovable(false)
-        frame:EnableMouse(false)
-        frame:RegisterForDrag()  -- Unregister drag
-        frame:SetScript("OnDragStart", nil)
-        frame:SetScript("OnDragStop", nil)
-        frame:SetScript("OnUpdate", nil)
-        
-        -- Clean up visual elements (borders, overlays, glows)
-        -- Border edges extend outside frame bounds, must hide explicitly
-        if frame._arcBorderEdges then
-            if frame._arcBorderEdges.top then frame._arcBorderEdges.top:Hide() end
-            if frame._arcBorderEdges.bottom then frame._arcBorderEdges.bottom:Hide() end
-            if frame._arcBorderEdges.left then frame._arcBorderEdges.left:Hide() end
-            if frame._arcBorderEdges.right then frame._arcBorderEdges.right:Hide() end
-        end
-        
-        -- Hide text overlay
-        if frame._arcTextOverlay then
-            frame._arcTextOverlay:Hide()
-        end
-        
-        -- Stop any glow effects
-        if ns.CDMEnhance and ns.CDMEnhance.StopAllGlows then
-            ns.CDMEnhance.StopAllGlows(frame)
-        end
-        
-        -- Clear all our custom properties
-        frame._groupDragging = nil
-        frame._sourceGroup = nil
-        frame._sourceCdID = nil
-        frame._cdmgTargetPoint = nil
-        frame._cdmgTargetRelPoint = nil
-        frame._cdmgTargetX = nil
-        frame._cdmgTargetY = nil
-        frame._cdmgTargetSize = nil
-        frame._cdmgSlotW = nil  -- Clear GROUP's slot dimensions
-        frame._cdmgSlotH = nil
-        frame._cdmgSettingPosition = nil
-        frame._cdmgSettingScale = nil
-        frame._cdmgSettingSize = nil
-        frame._cdmgSettingParent = nil
-        frame._cdmgIsFreeIcon = nil  -- CRITICAL: Clear free icon flag so hooks don't fight
-        frame._cdmgTargetContainer = nil  -- Clear target so SetParent hook doesn't fight
-        frame.frameLostAt = nil
-        
-        -- Return to original parent
-        frame:SetParent(entry and entry.originalParent or UIParent)
-        frame:ClearAllPoints()
-        frame:Hide()
-    end)
+    -- CRITICAL: Clean up all drag state and custom properties
+    -- These can cause issues if CDM reuses this frame for a different cooldownID
+    frame:SetMovable(false)
+    frame:EnableMouse(false)
+    frame:RegisterForDrag()  -- Unregister drag
+    frame:SetScript("OnDragStart", nil)
+    frame:SetScript("OnDragStop", nil)
+    frame:SetScript("OnUpdate", nil)
+
+    -- Clean up visual elements (borders, overlays, glows)
+    -- Border edges extend outside frame bounds, must hide explicitly
+    if frame._arcBorderEdges then
+        if frame._arcBorderEdges.top then frame._arcBorderEdges.top:Hide() end
+        if frame._arcBorderEdges.bottom then frame._arcBorderEdges.bottom:Hide() end
+        if frame._arcBorderEdges.left then frame._arcBorderEdges.left:Hide() end
+        if frame._arcBorderEdges.right then frame._arcBorderEdges.right:Hide() end
+    end
+
+    -- Hide text overlay
+    if frame._arcTextOverlay then
+        frame._arcTextOverlay:Hide()
+    end
+
+    -- Stop any glow effects
+    if ns.CDMEnhance and ns.CDMEnhance.StopAllGlows then
+        ns.CDMEnhance.StopAllGlows(frame)
+    end
+
+    -- Clear all our custom properties
+    frame._groupDragging = nil
+    frame._sourceGroup = nil
+    frame._sourceCdID = nil
+    frame._cdmgTargetPoint = nil
+    frame._cdmgTargetRelPoint = nil
+    frame._cdmgTargetX = nil
+    frame._cdmgTargetY = nil
+    frame._cdmgTargetSize = nil
+    frame._cdmgSlotW = nil  -- Clear GROUP's slot dimensions
+    frame._cdmgSlotH = nil
+    frame._cdmgSettingPosition = nil
+    frame._cdmgSettingScale = nil
+    frame._cdmgSettingSize = nil
+    frame._cdmgSettingParent = nil
+    frame._cdmgIsFreeIcon = nil  -- CRITICAL: Clear free icon flag so hooks don't fight
+    frame._cdmgTargetContainer = nil  -- Clear target so SetParent hook doesn't fight
+    frame.frameLostAt = nil
+
+    -- Return to original parent
+    frame:SetParent(entry and entry.originalParent or UIParent)
+    frame:ClearAllPoints()
+    frame:Hide()
     if entry then
         entry.manipulated = false
         entry.group = nil
@@ -4284,7 +4282,47 @@ function ns.CDMGroups.LoadProfile(profileName, skipActivation)
             profile.groupLayouts[groupName] = SerializeDefaultGroupToLayoutData(groupData)
         end
     end
-    
+
+    -- ═══════════════════════════════════════════════════════════════════════════
+    -- SAFETY NET: materialize groups that saved icons reference but the layout
+    -- source is missing. Group creation is driven by the layout source
+    -- (groupLayouts / linked layout / DEFAULT_GROUPS), while icon-to-group
+    -- membership lives separately in savedPositions[cdID].target. Nothing
+    -- guarantees every referenced target exists. When it doesn't, the icon falls
+    -- through to the orphan branch in the placement loop below and is scattered
+    -- loose above screen center ("the addon didn't know where to put them") -- the
+    -- import symptom when an exported profile's groupLayouts didn't carry a group
+    -- its savedPositions still point at. Recreating the referenced group honors the
+    -- saved intent (icons stay grouped) instead of orphaning them. Runs on every
+    -- load but only acts on the bug condition, so it is self-healing and a no-op
+    -- in the normal case. DeleteGroup clears savedPositions for its members, so a
+    -- normally-deleted group leaves no reference here and is not resurrected.
+    if profile.savedPositions then
+        local isLinked = profile.groupLayoutName ~= nil
+        local recovered = 0
+        for _cdID, saved in pairs(profile.savedPositions) do
+            local target = saved and saved.type == "group" and saved.target
+            if target and target ~= "" and not profileGroups[target] then
+                profileGroups[target] = true
+                -- Persist for non-linked profiles so the recovered group survives
+                -- future loads. Linked profiles read groups from the SHARED global
+                -- layout, which we must not mutate; the net re-runs each load and
+                -- stays self-healing for them.
+                if not isLinked then
+                    if not profile.groupLayouts then profile.groupLayouts = {} end
+                    if not profile.groupLayouts[target] then
+                        profile.groupLayouts[target] = {
+                            position = { x = 0, y = -100 - (recovered * 60) },
+                            gridRows = 2, gridCols = 4, iconSize = 36, spacing = 2,
+                        }
+                    end
+                end
+                recovered = recovered + 1
+                PrintMsg("|cff00ff00[LoadProfile]|r Recreated missing group '" .. tostring(target) .. "' referenced by saved icons (import safety net)")
+            end
+        end
+    end
+
     -- Destroy groups NOT in the profile
     local groupsToDestroy = {}
     for groupName, group in pairs(ns.CDMGroups.groups) do
@@ -4407,9 +4445,26 @@ function ns.CDMGroups.LoadProfile(profileName, skipActivation)
                     newGroup.container:SetPoint("CENTER", UIParent, "CENTER", layoutData.position.x, layoutData.position.y)
                 end
             end
+        else
+            -- EXISTING group: re-apply its container POSITION from the layout source
+            -- so a re-import / re-load of a LINKED layout updates groups that already
+            -- exist. Previously only NEW groups were positioned, so a re-import left
+            -- the OLD container position (the "Strikes group position didn't load"
+            -- symptom). Skip anchor-positioned groups: the anchor system owns their
+            -- placement and re-runs right after this (ResetAllHookState below).
+            local existGroup = ns.CDMGroups.groups[groupName]
+            local _exDB = profile.groupLayoutName and ns.CDMShared and ns.CDMShared.GetGroupLayoutsDB and ns.CDMShared.GetGroupLayoutsDB()
+            local _exSrc = (_exDB and _exDB[profile.groupLayoutName]) or profile.groupLayouts
+            local _exData = _exSrc and _exSrc[groupName]
+            local _exAnchored = _exData and _exData.anchor and _exData.anchor.enabled
+            if _exData and _exData.position and existGroup and existGroup.container and not _exAnchored then
+                existGroup.position = { x = _exData.position.x, y = _exData.position.y }
+                existGroup.container:ClearAllPoints()
+                existGroup.container:SetPoint("CENTER", UIParent, "CENTER", _exData.position.x, _exData.position.y)
+            end
         end
     end
-    
+
     local destroyedCount = #groupsToDestroy
     if destroyedCount > 0 or createdCount > 0 then
     end
@@ -4954,12 +5009,16 @@ function ns.CDMGroups.LoadProfile(profileName, skipActivation)
             if group.Layout then group:Layout() end
         end
         
-        -- CRITICAL: Setup dynamic layout hooks for ALL groups with Dynamic Auras enabled
-        -- This ensures instant layout works for ALL alignments after profile load
+        -- CRITICAL: Setup dynamic layout hooks for ALL groups with a dynamic mode
+        -- (Dynamic Auras OR Dynamic Cooldowns) enabled. This ensures instant layout
+        -- works for ALL alignments after profile load. A dynamicCooldowns-only group
+        -- that was skipped here had its cooldowns collapsed on load (by the ReflowIcons
+        -- pass below) with no hooks to ever restore them -- the "group with dynamic
+        -- cooldowns didn't load after import" bug, only fixed by a /reload.
         local DL = ns.CDMGroups.DynamicLayout
         if DL and DL.SetupDynamicLayoutHooks then
             for groupName, group in pairs(ns.CDMGroups.groups) do
-                if group.dynamicLayout then
+                if group.dynamicLayout or group.dynamicCooldowns then
                     DL.SetupDynamicLayoutHooks(group)
                 end
             end

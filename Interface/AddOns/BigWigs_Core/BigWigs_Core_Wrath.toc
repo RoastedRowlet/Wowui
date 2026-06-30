@@ -23,12 +23,10 @@
 ## Notes-esES: Núcleo de BigWigs.
 ## Notes-esMX: Núcleo de BigWigs.
 ## IconTexture: Interface\AddOns\BigWigs\Media\Icons\minimap_raid.tga
-## Version: v417.3
+## Version: v417.7
 
 ## LoadOnDemand: 1
 ## Dependencies: BigWigs
-
-Libs\LibChatAnims\LibChatAnims.lua
 
 Constants.lua
 BossPrototype_Classic.lua

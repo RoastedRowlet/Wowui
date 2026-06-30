@@ -2,7 +2,7 @@ local _, addonTbl = ...
 local L = addonTbl.API:NewLocale("BigWigs", "ruRU")
 if not L then return end
 
---L.tempRenameFeat = "You can now |cFF436EEErename|r any boss ability by opening its advanced settings (>>) and clicking the renames tab."
+L.tempRenameFeat = "Вы теперь можете |cFF436EEEпереименовать|r любые способности боссов открыв их дополнительные настройки (>>) и нажав на вкладку Переименовать."
 
 -- API.lua
 L.showAddonBar = "Аддон '|cFF436EEE%s|r' создал '%s' полосу длительности."
@@ -12,7 +12,7 @@ L.shortSecondsOnly = "%d сек" -- 28 Seconds
 L.shortSubTenSeconds = "%.1f сек" -- 3.2 Seconds
 L.accept = "Принять"
 L.cancel = "Отмена"
---L.confirm_profile_swap = "The addon |cFF436EEE\"%s\"|r wants to automatically swap your BigWigs profile to a different profile called:\n\n|cFF33FF99\"%s\"|r\n\nAre you sure you want to do this?"
+L.confirm_profile_swap = "Аддон |cFF436EEE\"%s\"|r хочет автоматически поменять ваш BigWigs профиль на :\n\n|cFF33FF99\"%s\"|r\n\nВы уверены что хотите этого?"
 
 -- Core.lua
 L.berserk = "Берсерк"
@@ -149,7 +149,7 @@ L.configure = "Настройка"
 L.resetPositions = "Сброс позиции"
 L.selectEncounter = "Выберите схватку"
 L.privateAuraSounds = "Приватные Ауры - Звуки"
---L.privateAuraSounds_desc = "Private auras can't be tracked normally, but you can set a sound to be played when the ability debuff is applied to you."
+L.privateAuraSounds_desc = "Приватные ауры нельзя отслеживать обычным способом, но вы можете установить звук который будет воспроизводиться при наложении на вас дебаффа от этой способности."
 L.listAbilities = "Вывести способности в групповой чат"
 
 L.dbmFaker = "Маскировка под DBM"
@@ -227,12 +227,12 @@ L.healer = "|cFFFF0000Только для лекарей.|r "
 L.tankhealer = "|cFFFF0000Только для танков и лекарей.|r "
 L.dispeller = "|cFFFF0000Только для рассеивателей.|r "
 
---L.renames = "Renames"
---L.noteLabel = "%s (|cFFFFFF99%s|r)"
---L.renameLabel = "%s (|cFF3366FF%s|r)"
---L.renameHeader = "Set a custom name for the ability. This text will be used instead of the spell name in all messages and bars.\n\n"
---L.spellName = "Spell Name"
---L.spellNameResetDesc = "This ability has a custom name by default, click this button to use the original name (usually a spell name)."
+L.renames = "Переименовать"
+L.noteLabel = "%s (|cFFFFFF99%s|r)"
+L.renameLabel = "%s (|cFF3366FF%s|r)"
+L.renameHeader = "Установить собственное название для способности. Этот текст будет использован вместо названия способности во всех сообщениях и полосах.\n\n"
+L.spellName = "Название способности"
+L.spellNameResetDesc = "Эта способность имеет специальное название по умолчанию, нажмите на эту кнопку что-бы использовать изначальное название (обычно название способности)."
 
 -- Sharing.lua
 L.import = "Импорт"
@@ -303,8 +303,8 @@ L.sharing_window_title = "Поделиться настройками босса
 L.sharing_flags = "Общие настройки"
 L.sharing_flags_desc = "Импортировать настройки, которые управляют такими параметрами, как 'показывать полосу', 'проигрывать звук', 'показывать сообщение' и т.д.\nОни охватывают большинство флажков в настройках способностей."
 L.sharing_export_flags_desc = "Экспортировать настройки, которые управляют такими параметрами, как 'показывать полосу', 'проигрывать звук', 'показывать сообщение' и т.д.\nОни охватывают большинство флажков в настройках способностей."
---L.sharing_renames_desc = "Import the custom renames that are configured."
---L.sharing_export_renames_desc = "Export the custom renames that are configured."
+L.sharing_renames_desc = "Импортировать настроенные переименования."
+L.sharing_export_renames_desc = "Экспортировать настроенные переименования."
 L.sharing_sounds_desc = "Импортировать звуки, которые будут проигрываться для способностей."
 L.sharing_export_sounds_desc = "Экспортировать звуки, которые будут проигрываться для способностей."
 L.sharing_private_auras = "Приватные ауры"
@@ -354,7 +354,7 @@ L.N25 = "Нормал 25"
 L.H10 = "Героик 10"
 L.H25 = "Героик 25"
 L.titan = "Титан" -- Chinese-only "Titan Reforged" servers
---L.mythic_flex = "Mythic (Flex)" -- Mythic (Flexible 15-25 player raids)
+L.mythic_flex = "Эпохальный (Гибкий)" -- Mythic (Flexible 15-25 player raids)
 
 -----------------------------------------------------------------------
 -- TOOLS
@@ -365,7 +365,7 @@ L.toolsDesc = "BigWigs предоставляет различные инстр�
 
 L.reloadUIWarning = "Изменение этой функции перезагрузит интерфейс и на мгновение покажет экран загрузки. Вы уверены?"
 L.qualityOfLife = "Улучшения удобства"
---L.notYetImplemented = "Not Yet Implemented" -- When a feature hasn't been implemented yet
+L.notYetImplemented = "Функция еще не реализована" -- When a feature hasn't been implemented yet
 
 -----------------------------------------------------------------------
 -- AutoInvite.lua
@@ -552,6 +552,14 @@ L.keystoneShortName_NexusPointXenas = "XENAS"
 L.keystoneShortName_AlgetharAcademy = "AA"
 L.keystoneShortName_Skyreach = "SKY"
 L.keystoneShortName_PitOfSaron = "PIT"
+--L.keystoneShortName_KingsRest = "REST"
+--L.keystoneShortName_TempleOfSethraliss = "TEMPLE"
+--L.keystoneShortName_RubyLifePools = "POOLS"
+--L.keystoneShortName_TheBlindingVale = "VALE"
+--L.keystoneShortName_VoidscarArena = "ARENA"
+--L.keystoneShortName_DenOfNalorakk = "DEN"
+--L.keystoneShortName_MurderRow = "MURDER"
+--L.keystoneShortName_AltarOfFangs = "ALTAR"
 
 -- These short names are for the bar that shows during the Mythic+ countdown
 -- Use the real dungeon names but make them shorter to fit on the bar better
@@ -585,10 +593,18 @@ L.keystoneShortName_SeatOfTheTriumvirate_Bar = "Престол"
 L.keystoneShortName_WindrunnerSpire_Bar = "Шпиль"
 L.keystoneShortName_MagistersTerrace_Bar = "Терраса"
 L.keystoneShortName_MaisaraCaverns_Bar = "Пещеры"
-L.keystoneShortName_NexusPointXenas_Bar = "Ксенас"
+L.keystoneShortName_NexusPointXenas_Bar = "Зенас"
 L.keystoneShortName_AlgetharAcademy_Bar = "Академия"
 L.keystoneShortName_Skyreach_Bar = "Небесный Путь"
 L.keystoneShortName_PitOfSaron_Bar = "Яма"
+--L.keystoneShortName_KingsRest_Bar = "Rest"
+--L.keystoneShortName_TempleOfSethraliss_Bar = "Temple"
+--L.keystoneShortName_RubyLifePools_Bar = "Pools"
+--L.keystoneShortName_TheBlindingVale_Bar = "Vale"
+--L.keystoneShortName_VoidscarArena_Bar = "Arena"
+--L.keystoneShortName_DenOfNalorakk_Bar = "Den"
+--L.keystoneShortName_MurderRow_Bar = "Murder"
+--L.keystoneShortName_AltarOfFangs_Bar = "Altar"
 
 -- Instance Keys "Who has a key?"
 L.instanceKeysTitle = "У кого есть ключ?"

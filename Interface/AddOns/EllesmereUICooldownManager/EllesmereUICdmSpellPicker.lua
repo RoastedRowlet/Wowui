@@ -325,6 +325,12 @@ function ns.AddSpellToBar(barKey, spellID)
     if FindVariantIndex(sd.assignedSpells, spellID) then return false end
     sd.assignedSpells[#sd.assignedSpells + 1] = spellID
     ns._spellOrderDirty = true
+    -- Mutual exclusivity with the ghost bar: putting a spell on a VISIBLE bar
+    -- un-hides it. The route map gives the ghost the highest priority, so a spell
+    -- left in both would stay hidden; remove it from __ghost_cd so it shows.
+    if barKey ~= ns.GHOST_CD_BAR_KEY and ns.RemoveSpellFromBar then
+        ns.RemoveSpellFromBar(ns.GHOST_CD_BAR_KEY, spellID)
+    end
     local frame = cdmBarFrames[barKey]
     if frame then frame._blizzCache = nil; frame._prevVisibleCount = nil end
     return true
@@ -442,17 +448,31 @@ function ns.IsSpellDisplayedInCDM(barKey, cdID)
     return false
 end
 
---- One-time migration: convert pre-refactor "assignedSpells as content
---- filter" data on default CD/utility bars into the new "ghost-bar diversion"
---- model. Spells from the Essential and Utility viewer categories that are
---- NOT in any bar's assignedSpells (and NOT already ghosted) are added to
---- __ghost_cd so they remain hidden -- preserving the user's original
---- visual state across the refactor.
+--- One-time per-spec pass that serves TWO purposes with the same logic:
+---
+---   1. Legacy migration: convert pre-refactor "assignedSpells as content
+---      filter" data on default CD/utility bars into the new "ghost-bar
+---      diversion" model, preserving the user's original visual state.
+---
+---   2. Import-authoritative ghosting (_importGhostMode, set on every imported
+---      spec): make a freshly imported layout the single source of truth. The
+---      import strips all ghost data, so the ghost starts EMPTY -- this pass then
+---      ghosts EVERY spell the importer tracks in Blizzard CDM and leaves only
+---      the ones the layout assigns to a visible bar (those aren't ghosted), so a
+---      cooldown the importer tracks but the layout doesn't place gets hidden
+---      instead of spilling onto the default bar.
+---
+--- Both reduce to the same operation: ghost (tracked spells) MINUS (spells
+--- assigned to any visible bar) MINUS (already ghosted). Spells from the
+--- Essential and Utility viewer categories that are NOT in any bar's
+--- assignedSpells (and NOT already ghosted) are added to __ghost_cd.
 ---
 --- Per-spec lazy because the spell category APIs are spec-dependent. Runs
 --- once per spec via the prof._barFilterModelV6 flag, stamped after a
 --- successful pass. Skipped if the user has no populated assignedSpells on
---- default CD/utility bars (clean install -- nothing to preserve).
+--- default CD/utility bars (clean install -- nothing to preserve) UNLESS
+--- _importGhostMode is set (an imported layout must run even with empty
+--- default bars, e.g. a custom-bar-only layout).
 ---
 --- Buff bars are NOT migrated: under the OLD model, the buff path's
 --- viewerBarKey fallback already showed everything from BuffIconCooldownViewer
@@ -490,11 +510,14 @@ function ns.MigrateSpecToBarFilterModelV6()
     end
 
     -- Skip if both default CD/util bars are empty: nothing to preserve.
+    -- EXCEPTION: imported layouts (_importGhostMode) always run. A layout that
+    -- intentionally leaves the default bars empty (custom-only) still needs every
+    -- tracked spell it doesn't place ghosted, not spilled onto the default bar.
     local cdBs = prof.barSpells.cooldowns
     local utBs = prof.barSpells.utility
     local hasCDList = cdBs and cdBs.assignedSpells and #cdBs.assignedSpells > 0
     local hasUTList = utBs and utBs.assignedSpells and #utBs.assignedSpells > 0
-    if not hasCDList and not hasUTList then
+    if not hasCDList and not hasUTList and not prof._importGhostMode then
         prof._barFilterModelV6 = true
         return
     end
@@ -606,6 +629,7 @@ function ns.MigrateSpecToBarFilterModelV6()
     end
 
     prof._barFilterModelV6 = true
+    prof._importGhostMode = nil  -- import-authoritative ghosting done for this spec
     return addedCount
 end
 
@@ -674,11 +698,22 @@ local function EnsureBarOrderSeeded(barKey, sd)
     local icons = cdmBarIcons and cdmBarIcons[barKey]
     if not icons then return end
     local fcCache = ns._ecmeFC
+    -- Buff-family bars seed by the DISPLAYED / canonical id (the same id the
+    -- per-icon settings and options preview key off), not fc.spellID -- which for
+    -- buffs is the cooldownInfo base / a shared ability id. CD/utility keep
+    -- fc.spellID (their icon IS the ability, so the two ids coincide).
+    local isBuff = ns.IsBarBuffFamily and ns.IsBarBuffFamily(barKey)
     for i = 1, #icons do
         local icon = icons[i]
         if icon then
             local fc = fcCache and fcCache[icon]
-            local sid = fc and fc.spellID
+            local sid
+            if isBuff then
+                sid = (ns.GetCanonicalSpellIDForFrame and ns.GetCanonicalSpellIDForFrame(icon))
+                    or (fc and fc.spellID)
+            else
+                sid = fc and fc.spellID
+            end
             if type(sid) == "number" and sid > 0 then
                 sd.assignedSpells[#sd.assignedSpells + 1] = sid
             end
@@ -719,6 +754,48 @@ function ns.MoveTrackedSpell(barKey, fromIdx, toIdx)
     while #t > 0 and (t[#t] == 0 or t[#t] == nil) do t[#t] = nil end
     ns._spellOrderDirty = true
     local frame = cdmBarFrames[barKey]
+    if frame then frame._blizzCache = nil end
+    if ns.QueueReanchor then ns.QueueReanchor() end
+    return true
+end
+
+--- Default buffs bar DISPLAY-ORDER reorder helpers.
+---
+--- The default "buffs" bar's assignedSpells is shared with routing + custom
+--- injection (RebuildSpellRouteMap Pass 4 diverts it at highest priority), so it
+--- CANNOT carry the full buff order without clobbering buffs the user diverted to
+--- other bars. Instead the display order lives in a dedicated buffDisplayOrder
+--- array of STABLE keys ("c"..cooldownID for Blizzard buffs, "s"..spellID for
+--- customs) that only the sort + preview + drag read -- routing never touches it.
+--- cooldownID is used (not the canonical spellID) because a buff's canonical id
+--- flips between ability/aura form across active<->inactive. The array is always
+--- the full visible set (seeded + reconciled by the options preview build), so
+--- reorders are plain index ops with no zero-padding and no route-map rebuild.
+function ns.SwapBuffDisplayOrder(idx1, idx2)
+    local sd = ns.GetBarSpellData("buffs")
+    local t = sd and sd.buffDisplayOrder
+    if not t then return false end
+    if idx1 < 1 or idx2 < 1 or idx1 > #t or idx2 > #t then return false end
+    t[idx1], t[idx2] = t[idx2], t[idx1]
+    ns._spellOrderDirty = true
+    local frame = cdmBarFrames["buffs"]
+    if frame then frame._blizzCache = nil end
+    if ns.QueueReanchor then ns.QueueReanchor() end
+    return true
+end
+
+function ns.MoveBuffDisplayOrder(fromIdx, toIdx)
+    if fromIdx == toIdx then return false end
+    local sd = ns.GetBarSpellData("buffs")
+    local t = sd and sd.buffDisplayOrder
+    if not t then return false end
+    if fromIdx < 1 or fromIdx > #t then return false end
+    if toIdx < 1 then toIdx = 1 end
+    if toIdx > #t then toIdx = #t end
+    local val = table.remove(t, fromIdx)
+    table.insert(t, toIdx, val)
+    ns._spellOrderDirty = true
+    local frame = cdmBarFrames["buffs"]
     if frame then frame._blizzCache = nil end
     if ns.QueueReanchor then ns.QueueReanchor() end
     return true
@@ -979,8 +1056,10 @@ function ns.AddTrackedSpell(barKey, id)
     -- elsewhere). Family classification handled by ns.IsBarBuffFamily.
     -- custom_buff bars are a separate system and are never swept.
     --
-    -- Negative IDs only auto-move within the non-buff family (trinkets and
-    -- items only belong on CD/util bars).
+    -- Negative IDs auto-move within whichever family the target bar belongs to
+    -- (the sweep keys off IsBarBuffFamily, no positivity gate): trinkets stay on
+    -- CD/util bars, while custom items can live on either family and sweep only
+    -- their own.
     local targetBd = barDataByKey[barKey]
     local p = ECME.db.profile
     local targetIsBuff = IsBarBuffFamily(barKey)

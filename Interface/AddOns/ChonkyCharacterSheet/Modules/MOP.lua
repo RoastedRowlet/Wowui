@@ -1056,14 +1056,14 @@ function CCS.StyleReputationRow(row)
         bar.Background:SetColorTexture(.05, .05, .05, 1)
         bar.Background:SetAllPoints()
 
-        bar:SetWidth(150)
+        bar:SetWidth(200)
         bar:SetHeight(20)
         -- LeftTexture recolor only
         local left = _G[barName.."LeftTexture"]
         if left then
             left:SetTexture("Interface\\Masks\\SquareMask.BLP")
             left:SetAlpha(1)
-            left:SetWidth(150)
+            left:SetWidth(200)
             left:SetDrawLayer("ARTWORK", 2)
         end
 
@@ -1121,7 +1121,7 @@ function CCSReputationFrame_Update()
     if not CCS.RepRowDetected then
         CCS_DetectReputationRowStructure()
     end
-
+    
     local gender = UnitSex("player")
 
     for i = 1, NUM_FACTIONS_DISPLAYED do
@@ -1142,7 +1142,6 @@ function CCSReputationFrame_Update()
         if row.index then
             local name, _, standingID, barMin, barMax, barValue =
                 GetFactionInfo(row.index)
-
             if name ~= "Inactive" and name ~= "Other" then
                 local isCapped = (standingID == MAX_REPUTATION_REACTION)
                 local barColor = FACTION_BAR_COLORS[standingID]
@@ -1162,24 +1161,33 @@ function CCSReputationFrame_Update()
                         BreakUpLargeNumbers(barValue),
                         BreakUpLargeNumbers(barMax))
                 )
-
+               
                 for _, bar in ipairs(row.CCS_SubBars) do
                     local barName = bar:GetName()
                     local left = _G[barName.."LeftTexture"]
-                    bar:SetWidth(150)
+                    local FactionStanding = _G[barName.."FactionStanding"]
                     
-                    local atwar1 = _G[barName.."AtWarHighlight1"]
-                    if atwar1 then
-                        atwar1:SetPoint("RIGHT", bar, "LEFT",0,0)
+                    if row.hasRep == true then
+                        bar:SetWidth(200)
+                    else
+                        bar:SetWidth(25)
                     end
+                    
+                    if not bar.setatwar then -- Only process this once since SetPoint creates a ton of frame lag.
+                        local atwar1 = _G[barName.."AtWarHighlight1"]
+                        if atwar1 then
+                            atwar1:SetPoint("RIGHT", bar, "LEFT",0,0)
+                        end
 
-                    local atwar2 = _G[barName.."AtWarHighlight2"]
-                    if atwar2 then
-                        atwar2:Hide()
+                        local atwar2 = _G[barName.."AtWarHighlight2"]
+                        if atwar2 then
+                            atwar2:SetTexture("")
+                        end
+                        bar.setatwar = true
                     end
 
                     if left then
-                        left:SetWidth(150)  -- base width
+                        left:SetWidth(200)  -- base width
 
                         left:SetGradient(
                             "Vertical",
@@ -1188,17 +1196,15 @@ function CCSReputationFrame_Update()
                         )
 
                         -- Only adjust fill width
-                        --local baseWidth = left:GetWidth()
-                        local baseWidth = 150
+                        local baseWidth = 200
                         if barMax > 0 then
                             left:SetWidth(math.max(1, baseWidth * barValue / barMax))
                         end
                     end
 
-                    if bar.FactionStanding then
-                        bar.FactionStanding:SetText(text)
+                    if FactionStanding then
+                        FactionStanding:SetText(text)
                     end
-
                     if bar.StandingText then
                         bar.StandingText:SetText(text)
                         bar.tooltip:SetText(text)
@@ -1206,6 +1212,7 @@ function CCSReputationFrame_Update()
                 end
             end
         end
+
     end
 end
 

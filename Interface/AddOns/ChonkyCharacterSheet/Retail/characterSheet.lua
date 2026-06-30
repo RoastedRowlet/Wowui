@@ -1636,9 +1636,14 @@ function module:ApplyDynamicLayout()
 	if CCS.lastChangedOption == nil or CCS.lastChangedOption == "vpad" or CCS.lastChangedOption == "hpad" then
 		CharacterFrame:SetHeight(479+(7*option("vpad"))) -- Do not allow the frame to get any smaller than the default bliz frame
 		CharacterFrameInset.Bg:SetPoint("BOTTOMRIGHT", CharacterFrame, "BOTTOMLEFT", 330+option("hpad"), 30)
-		CharacterFrameBg:SetPoint("BOTTOMRIGHT", CharacterFrame, "BOTTOMRIGHT", Bgoffset+65, 0); --279  .449
-		
-		CharacterFrame.Background:SetPoint("BOTTOMRIGHT", CharacterFrame, "BOTTOMRIGHT", Bgoffset+50, 0); --275  .449
+	
+        if C_AddOns.IsAddOnLoaded("DejaCharacterStats") then
+			CharacterFrameBg:SetPoint("BOTTOMRIGHT", CharacterFrame, "BOTTOMRIGHT",Bgoffset, 0); 
+		else
+			CharacterFrameBg:SetPoint("BOTTOMRIGHT", CharacterFrame, "BOTTOMRIGHT", Bgoffset+65, 0); --279  .449
+		end   
+        
+        CharacterFrame.Background:SetPoint("BOTTOMRIGHT", CharacterFrame, "BOTTOMRIGHT", Bgoffset+50, 0); --275  .449
 
 		CharacterFrameCloseButton:ClearAllPoints();
 		CharacterFrameCloseButton:SetPoint("TOPRIGHT", CharacterFrameBg, "TOPRIGHT", -10, -10)
@@ -1689,7 +1694,7 @@ function module:ApplyDynamicLayout()
 	-- Only process character sheet scale
 	--------------------------------
     if CCS.lastChangedOption == nil or CCS.lastChangedOption == "sheetscale" then
-		if scaling ~= 1 or (scaling == 1 and CharacterFrame:GetScale() ~= 1) then
+		if scaling ~= 1 or (scaling == 1 and CharacterFrame:GetScale() ~= 1) then -- If scaling is 1, then we can let other addons adjust the sheet scale.
 			CharacterFrame:SetScale(scaling); 
 		end
 		if ccs_sf then ccs_sf:SetScale(.69); end

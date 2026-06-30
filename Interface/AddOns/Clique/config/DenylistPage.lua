@@ -82,7 +82,7 @@ function page:Initialize()
     frame.intro:SetJustifyV("TOP")
     frame.intro:SetNonSpaceWrap(true)
     frame.intro:SetHeight(52)
-    frame.intro:SetText(L["This panel allows you to deny certain frames from being included for Clique bindings. Any frames that are selected in this list will not be registered, although you may have to reload your user interface to have them return to their original bindings."])
+    frame.intro:SetText(L["This panel allows you to deny certain frames from being included for Clique bindings. Any frames that are selected in this list will not be registered. A UI reload is required for denied frames to return to their original bindings."])
 
     frame.dataProvider, frame.listContainer = config:CreateCheckboxScrollList(frame,
         { frame, "TOPLEFT", 10, -130 },

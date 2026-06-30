@@ -718,8 +718,7 @@ L["Does not delete your drawings"] = "Не удаляет Ваши рисунк�
 L["Dokigg the Brutalizer"] = "Докигг Изверг"
 L["Domatrax"] = "Доматракс"
 L["Domina Venomblade"] = "Домина Отравленный Клинок"
---[[Translation missing --]]
-L["Don't overwrite existing target markers"] = "Don't overwrite existing target markers"
+L["Don't overwrite existing target markers"] = "Не перезаписывать существующие метки цели"
 L["Don't set target marker while in a raid group"] = "Не устанавливать метку цели, находясь в рейдовой группе"
 L["Don't show again"] = "Больше не показывать"
 L["dotiLowerSublevel1"] = "Подуровень 1"
@@ -997,6 +996,8 @@ L["Focused Ritualist"] = "Настойчивый ритуалист"
 L["focusMarkerAssignmentQueuedToast"] = "Метка фокуса обновится до %s после боя от %s."
 L["focusMarkerAssignmentsTooltip"] = "Назначает метки фокуса участникам группы и синхронизирует их с пользователями MDT."
 L["focusMarkerAssignmentToast"] = "Метка фокуса установлен на %s. (Отправлено %s)"
+--[[Translation missing --]]
+L["focusMarkerChatAnnouncement"] = "My Focus Marker is {rt%d}"
 L["focusMarkerKeybindMissingToast"] = "Назначение клавиш не задано. Задайте его сейчас или отключите эти уведомления."
 L["focusMarkerMacroDragTooltip"] = "Перетащите этот макрос на панель действий."
 L["focusMarkerMacroQueued"] = "Действие с меткой фокуса обновится после боя."

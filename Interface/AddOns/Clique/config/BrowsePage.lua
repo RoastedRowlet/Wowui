@@ -233,6 +233,10 @@ function page:Initialize()
         rootDescription:CreateButton(self:LabelWithGearPrefix(L["Profile Management"]), function()
             config:SwitchToProfilePage()
         end)
+        rootDescription:CreateDivider()
+        rootDescription:CreateButton(self:ChangelogMenuLabel(L["What's New"]), function()
+            config:SwitchToChangelogPage()
+        end)
     end)
 
     frame.SearchBox = CreateFrame("EditBox", "CliqueConfigUIBrowseSearch", frame, "SearchBoxTemplate")
@@ -265,6 +269,17 @@ function page:LabelWithGearPrefix(str)
     else
         return str
     end
+end
+
+-- Differentiate the changelog entry from the gear-prefixed options pages:
+-- a news icon + gold label.
+function page:ChangelogMenuLabel(str)
+    local label = ("|cffffd200%s|r"):format(str)
+    local prefix = page:GetAtlasString("CreditsScreen-Assets-Buttons-Play", 16, 16)
+    if prefix then
+        return prefix .. " " .. label
+    end
+    return label
 end
 
 function page:GetAtlasString(atlas, w, h)

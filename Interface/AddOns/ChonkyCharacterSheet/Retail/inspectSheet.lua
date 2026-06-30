@@ -1657,21 +1657,9 @@ function CCS.InspectSheetEventHandler(event, ...)
 		InspectFrame.loaded = false
         return true
 	elseif event == "INSPECT_READY" then
-		--print(date("%H:%M:%S") .. format(".%03d", (GetTime() * 1000) % 1000), "INSPECT TEST")
-        if not CCS.inspectUpdatePending then
-            CCS.inspectUpdatePending = true
-			C_Timer.After(0.25, function() 
-				if not InspectFrame or not InspectFrame.unit then
-					CCS.inspectUpdatePending = false
-					return
-				end
-
 				CCS.ChangeModelBg(true)
-				CCS.inspectUpdatePending = false 
 				initializemplusplanelframe()
 				loopitems()
-				end)
-		end
 	end
 end
 

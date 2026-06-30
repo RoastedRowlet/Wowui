@@ -2,12 +2,11 @@
 -- Copyright (c) 2025 by RaiderIO, Inc.
 -- All rights reserved.
 --
-local provider={name=...,data=3,region="eu",date="2026-06-22T08:07:03Z",numCharacters=4,db={}}
+local provider={name=...,data=3,region="eu",date="2026-06-29T08:04:01Z",numCharacters=3,db={}}
 local F
 
-F = function() provider.db["Norushen"]={0,"Xentare"} end F()
-F = function() provider.db["Everlook"]={2,"Captntobi"} end F()
-F = function() provider.db["PyrewoodVillage"]={4,"Lanaes","Shaymary"} end F()
+F = function() provider.db["PyrewoodVillage"]={0,"Shaymary"} end F()
+F = function() provider.db["Norushen"]={2,"Jebasznikov","Jebasznikow"} end F()
 
 F = nil
 RaiderIO.AddProvider(provider)

@@ -94,6 +94,7 @@ function addon:SetupDatabase()
     self.db.RegisterCallback(self, "OnProfileChanged", "OnProfileChanged")
 
     self.settings = self.db.char
+    self.globalSettings = self.db.global
     self.bindings = self.db.profile.bindings
 
 end
@@ -112,6 +113,11 @@ function addon:SetupUnitFrameRegistry()
     self.proxyCount = 0
     -- Original frame attributes, restored on unregister
     self.proxyBackup = {}
+
+    -- Per-frame SetBindingClick targets for key binds; see docs/attributes.md
+    self.keyProxies = {}
+    self.keyProxyPool = {}
+    self.keyProxyCount = 0
 
     -- Queue for frame registration
     self.regqueue = {}
@@ -258,8 +264,7 @@ function addon:SetupSecureHeader()
                 if not InCombatLockdown() and not self:IsFrameBlacklisted(button) then
                     local proxy = self:GetOrCreateProxy(button)
                     self:SetupFrameClickRouting(button, proxy)
-                    self.header:SetFrameRef("cliquesetup_button", proxy)
-                    self.header:Execute(self.header:GetAttribute("setup_clicks"), proxy)
+                    self:StampProxySetup(button, proxy)
                 end
             end
         elseif name == "export_unregister" and type(value) ~= nil then
@@ -269,8 +274,7 @@ function addon:SetupSecureHeader()
                 if button then
                     local proxy = self.proxies[button]
                     if proxy then
-                        self.header:SetFrameRef("cliquesetup_button", proxy)
-                        self.header:Execute(self.header:GetAttribute("remove_clicks"), proxy)
+                        self:RemoveProxySetup(button, proxy)
                         self:TeardownFrameClickRouting(button)
                     end
                 end
@@ -358,8 +362,7 @@ function addon:LeavingCombat()
         if not self.proxies[frame] and not self:IsFrameBlacklisted(frame) then
             local proxy = self:GetOrCreateProxy(frame)
             self:SetupFrameClickRouting(frame, proxy)
-            self.header:SetFrameRef("cliquesetup_button", proxy)
-            self.header:Execute(self.header:GetAttribute("setup_clicks"), proxy)
+            self:StampProxySetup(frame, proxy)
         end
     end
 

@@ -1494,6 +1494,25 @@ function AdvancedFocusCastBarMixin:ToggleTargetMarkerIntegration()
 	end
 end
 
+function AdvancedFocusCastBarMixin:UpdateTargetMarker()
+	if not AdvancedFocusCastBarSaved.Settings.FeatureFlags[Private.Enum.FeatureFlag.ShowTargetMarker] then
+		self.CustomElementsFrame.TargetMarker:Hide()
+		return
+	end
+
+	-- RAID_TARGET_UPDATE only fires when a marker is (un)assigned, not when the
+	-- watched unit itself changes. Re-query the live marker so a focus/target
+	-- swap between casts can't leave a stale icon from the previous unit.
+	local index = GetRaidTargetIndex(AdvancedFocusCastBarSaved.Settings.Unit)
+
+	if index == nil then
+		self.CustomElementsFrame.TargetMarker:Hide()
+	else
+		SetRaidTargetIconTexture(self.CustomElementsFrame.TargetMarker, index)
+		self.CustomElementsFrame.TargetMarker:Show()
+	end
+end
+
 function AdvancedFocusCastBarMixin:MaybePlayCastStartTTS()
 	if
 		AdvancedFocusCastBarSaved.Settings.FeatureFlags[Private.Enum.FeatureFlag.PlayTTSOnCastStart]
@@ -2071,6 +2090,8 @@ function AdvancedFocusCastBarMixin:ProcessCastInformation()
 
 	-- presence means we're in edit mode
 	if self.demoInterval == nil then
+		self:UpdateTargetMarker()
+
 		if self.interruptId ~= nil then
 			local interruptDuration = C_Spell.GetSpellCooldownDuration(self.interruptId)
 
@@ -2389,14 +2410,7 @@ function AdvancedFocusCastBarMixin:OnEvent(event, ...)
 
 		self:DeriveAndSetNextColor()
 	elseif event == "RAID_TARGET_UPDATE" then
-		local index = GetRaidTargetIndex(AdvancedFocusCastBarSaved.Settings.Unit)
-
-		if index == nil then
-			self.CustomElementsFrame.TargetMarker:Hide()
-		else
-			SetRaidTargetIconTexture(self.CustomElementsFrame.TargetMarker, index)
-			self.CustomElementsFrame.TargetMarker:Show()
-		end
+		self:UpdateTargetMarker()
 	elseif
 		event == "ZONE_CHANGED_NEW_AREA"
 		or event == "LOADING_SCREEN_DISABLED"

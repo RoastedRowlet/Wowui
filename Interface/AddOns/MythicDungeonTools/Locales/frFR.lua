@@ -1112,6 +1112,8 @@ L["Focused Ritualist"] = "Ritualiste concentré"
 L["focusMarkerAssignmentQueuedToast"] = "Le marqueur de focus sera mis à jour vers %s après le combat depuis %s."
 L["focusMarkerAssignmentsTooltip"] = "Assigne des marqueurs de focus aux membres du groupe et les synchronise avec les utilisateurs de MDT."
 L["focusMarkerAssignmentToast"] = "Marqueur de focus défini sur %s. (Envoyé par %s)"
+--[[Translation missing --]]
+L["focusMarkerChatAnnouncement"] = "My Focus Marker is {rt%d}"
 L["focusMarkerKeybindMissingToast"] = "Aucune touche de raccourci n’est définie. Configurez-en une maintenant ou désactivez ces notifications"
 L["focusMarkerMacroDragTooltip"] = "Faites glisser cette macro dans votre barre d’actions."
 L["focusMarkerMacroQueued"] = "L’action du marqueur de focus sera mise à jour après le combat."

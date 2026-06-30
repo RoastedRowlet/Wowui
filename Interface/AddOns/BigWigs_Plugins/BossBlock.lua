@@ -740,12 +740,20 @@ do
 	do
 		local function EditEmotesOnPTR(event, msg, playerName, _, ...)
 			msg = "BigWigs PTR [E]: ".. msg
-			RaidBossEmoteFrame_OnEvent(RaidBossEmoteFrame, event, msg, playerName, 3, ...) -- We don't need emotes lasting 10 sec, reduce to 3
+			if RaidBossEmoteFrame_OnEvent then
+				RaidBossEmoteFrame_OnEvent(RaidBossEmoteFrame, event, msg, playerName, 3, ...) -- We don't need emotes lasting 10 sec, reduce to 3
+			else
+				RaidWarningFrame:OnEvent(event, msg, playerName, 3, ...) -- We don't need emotes lasting 10 sec, reduce to 3
+			end
 		end
 
 		local function EditWhispersOnPTR(event, msg, playerName, _, ...)
 			msg = "BigWigs PTR [W]: ".. msg
-			RaidBossEmoteFrame_OnEvent(RaidBossEmoteFrame, event, msg, playerName, 3, ...)
+			if RaidBossEmoteFrame_OnEvent then
+				RaidBossEmoteFrame_OnEvent(RaidBossEmoteFrame, event, msg, playerName, 3, ...) -- We don't need emotes lasting 10 sec, reduce to 3
+			else
+				RaidWarningFrame:OnEvent(event, msg, playerName, 3, ...) -- We don't need emotes lasting 10 sec, reduce to 3
+			end
 		end
 
 		local riskyAchievementCategories = {
@@ -765,13 +773,23 @@ do
 			end
 
 			if isTestBuild then -- Don't block emotes on WoW PTR
-				KillEvent(RaidBossEmoteFrame, "RAID_BOSS_EMOTE")
-				KillEvent(RaidBossEmoteFrame, "RAID_BOSS_WHISPER")
+				if RaidBossEmoteFrame then
+					KillEvent(RaidBossEmoteFrame, "RAID_BOSS_EMOTE")
+					KillEvent(RaidBossEmoteFrame, "RAID_BOSS_WHISPER")
+				else
+					KillEvent(RaidWarningFrame, "RAID_BOSS_EMOTE")
+					KillEvent(RaidWarningFrame, "RAID_BOSS_WHISPER")
+				end
 				self:RegisterEvent("RAID_BOSS_EMOTE", EditEmotesOnPTR)
 				self:RegisterEvent("RAID_BOSS_WHISPER", EditWhispersOnPTR)
 			elseif self.db.profile.blockEmotes then
-				KillEvent(RaidBossEmoteFrame, "RAID_BOSS_EMOTE")
-				KillEvent(RaidBossEmoteFrame, "RAID_BOSS_WHISPER")
+				if RaidBossEmoteFrame then
+					KillEvent(RaidBossEmoteFrame, "RAID_BOSS_EMOTE")
+					KillEvent(RaidBossEmoteFrame, "RAID_BOSS_WHISPER")
+				else
+					KillEvent(RaidWarningFrame, "RAID_BOSS_EMOTE")
+					KillEvent(RaidWarningFrame, "RAID_BOSS_WHISPER")
+				end
 			end
 			if self.db.profile.blockGarrison and not isClassic then
 				KillEvent(AlertFrame, "GARRISON_MISSION_FINISHED")
@@ -857,8 +875,13 @@ do
 
 	function RestoreAll(self)
 		-- blockEmotes
-		RestoreEvent(RaidBossEmoteFrame, "RAID_BOSS_EMOTE")
-		RestoreEvent(RaidBossEmoteFrame, "RAID_BOSS_WHISPER")
+		if RaidBossEmoteFrame then
+			RestoreEvent(RaidBossEmoteFrame, "RAID_BOSS_EMOTE")
+			RestoreEvent(RaidBossEmoteFrame, "RAID_BOSS_WHISPER")
+		else
+			RestoreEvent(RaidWarningFrame, "RAID_BOSS_EMOTE")
+			RestoreEvent(RaidWarningFrame, "RAID_BOSS_WHISPER")
+		end
 		if isTestBuild then
 			self:UnregisterEvent("RAID_BOSS_EMOTE")
 			self:UnregisterEvent("RAID_BOSS_WHISPER")
@@ -909,8 +932,13 @@ do
 	function plugin:BlockEmotes(_, module)
 		if self.db.profile.blockEmotes and (module:IsWorldModule() or module:IsTrashModule()) and not next(activatedModules) then
 			if not next(modulesBlockingEmotes) then
-				KillEvent(RaidBossEmoteFrame, "RAID_BOSS_EMOTE")
-				KillEvent(RaidBossEmoteFrame, "RAID_BOSS_WHISPER")
+				if RaidBossEmoteFrame then
+					KillEvent(RaidBossEmoteFrame, "RAID_BOSS_EMOTE")
+					KillEvent(RaidBossEmoteFrame, "RAID_BOSS_WHISPER")
+				else
+					KillEvent(RaidWarningFrame, "RAID_BOSS_EMOTE")
+					KillEvent(RaidWarningFrame, "RAID_BOSS_WHISPER")
+				end
 			end
 			modulesBlockingEmotes[module] = true
 		end
@@ -920,8 +948,13 @@ do
 		if modulesBlockingEmotes[module] and (module:IsWorldModule() or module:IsTrashModule()) and not next(activatedModules) then
 			modulesBlockingEmotes[module] = nil
 			if not next(modulesBlockingEmotes) then
-				RestoreEvent(RaidBossEmoteFrame, "RAID_BOSS_EMOTE")
-				RestoreEvent(RaidBossEmoteFrame, "RAID_BOSS_WHISPER")
+				if RaidBossEmoteFrame then
+					RestoreEvent(RaidBossEmoteFrame, "RAID_BOSS_EMOTE")
+					RestoreEvent(RaidBossEmoteFrame, "RAID_BOSS_WHISPER")
+				else
+					RestoreEvent(RaidWarningFrame, "RAID_BOSS_EMOTE")
+					RestoreEvent(RaidWarningFrame, "RAID_BOSS_WHISPER")
+				end
 			end
 		end
 	end
@@ -1068,6 +1101,9 @@ do
 		[308122]=true,[308123]=true,
 		-- Midnight/Voidscar Arena [Dungeon]
 		[308433]=true,[308351]=true,
+		-- Midnight/Altar of Fangs [Dungeon]
+		[345108]=true,[344783]=true,[345112]=true,[344971]=true,[344862]=true,[344910]=true,[344908]=true,[344609]=true,[344660]=true,
+		[344969]=true,[345031]=true,[344973]=true,[344615]=true,[344896]=true,[345003]=true,[344719]=true,[344808]=true,
 		-- Midnight/The Voidspire [Raid]
 		[316005]=true,[316006]=true,[316007]=true,[316008]=true,[316009]=true,[316010]=true,[303419]=true,[303420]=true,[303421]=true,
 		-- Midnight/The Dreamrift [Raid]

@@ -368,6 +368,31 @@ function addon:GetBindingPrefixSuffix(binding, global)
     return prefix, suffix
 end
 
+-- The mouse button number for a binding (e.g. "2" for SHIFT-BUTTON2), or nil for
+-- keyboard bindings.
+function addon:GetMouseButtonNumber(binding)
+    if type(binding) ~= "table" or not binding.key then
+        return nil
+    end
+    return binding.key:match("BUTTON(%d+)$")
+end
+
+-- Build a (possibly modified) secure attribute name from its parts, e.g.
+-- "shift-type2" or "type1". prefix is the modifier prefix ("shift", ""), suffix the
+-- button suffix ("2", ""). The separators mirror attributes.lua's snippet builders.
+function addon:AttributeName(prefix, attr, suffix)
+    local modSep = #prefix > 0 and "-" or ""
+    local suffixSep = tonumber(suffix) and "" or "-"
+    return prefix .. modSep .. attr .. suffixSep .. suffix
+end
+
+-- The modified attribute name a binding resolves to, e.g. "shift-type2" for
+-- attribute "type" on SHIFT-BUTTON2.
+function addon:AttributeFromEntry(binding, attribute, global)
+    local prefix, suffix = self:GetBindingPrefixSuffix(binding, global)
+    return self:AttributeName(prefix, attribute, suffix)
+end
+
 local buttonSortValues = {
     BUTTON1 = 1,
     BUTTON2 = 2,
@@ -523,11 +548,11 @@ function addon:GetSelfCastWarning()
     end
 
     return {
-        title = L["Self Cast Key Conflicts With Your Bindings"],
+        title = L["Conflict with your 'self cast' key"],
         lines = {
-            L["Your Self Cast Key is set to %s, which is shared by one or more of your bindings. While that key is held the game casts on you instead of running the binding."]:format(modifier),
+            L["The 'self cast' key is enabled and set to %s, which is also used by one or more of your bindings. This conflict may cause those spells to be cast on you instead of your desired target."]:format(modifier),
             " ",
-            L["Change your Self Cast Key under Options > Combat, or edit the binding to use a different modifier."],
+            L["Change the 'self cast' key under Options > Combat, or edit the binding to use a different modifier."],
         },
     }
 end
@@ -552,19 +577,19 @@ function addon:GetMissingTargetMenuWarning()
         return nil
     end
 
-    local missing
+    local title
     if not hasTarget and not hasMenu then
-        missing = L["Target Unit and Show Menu"]
+        title = L["Missing 'Target unit' and 'Show unit menu' bindings"]
     elseif not hasTarget then
-        missing = L["Target Unit"]
+        title = L["Missing 'Target unit' binding"]
     else
-        missing = L["Show Menu"]
+        title = L["Missing 'Show unit menu' binding"]
     end
 
     return {
-        title = L["No %s binding set"]:format(missing),
+        title = title,
         lines = {
-            L["World of Warcraft used to have fallback options for targeting a unit and opening the context menu, but these no longer play well with unit frames and click-casting addons like Clique."],
+            L["Clique now requires you to explicitly bind 'Target unit' and 'Show unit menu' actions, due to a change made by Blizzard that is breaking unit frames and click-casting addons."],
             " ",
             L["If you want to target or open the unit menu by clicking a frame, add a binding for those actions in Clique with the clicks or keypresses you prefer."],
         },

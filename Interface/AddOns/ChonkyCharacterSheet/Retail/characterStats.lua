@@ -1288,7 +1288,7 @@ CCS.CRESTS = {
 
     crests_voidcore = {
         { id = 3418, tocinfo = {120000, 120009} },
-        { id = 3418, tocinfo = {120100, 120199} }, -- same ID, new icon? adjust as needed
+        { id = 3418, tocinfo = {120100, 120199} }, -- same ID, new icon?
     },
 }
 

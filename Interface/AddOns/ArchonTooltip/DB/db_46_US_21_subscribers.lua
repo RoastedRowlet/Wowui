@@ -234,7 +234,7 @@ local function getChunkLookup(table, length)
 end
 
 local lookup = {'DemonHunter-Vengeance','DemonHunter-Devourer','Monk-Mistweaver',}
-local provider = {region='US',realm='Arygos',name='US',type='subscribers',zone=46,date='2026-06-22',data={At='Athleta:BAEBLgAFFH8TAAMBAAcJGgl2BAAyAQdoDAAAAwAlAGkMAAADABAAawwAAAMAKQBqDAAAAwAdAGwMAAACAAYAbQwAAAIAEwDqDAAAAwASAAEABwl0CHYEADIBB2gMAAACAB4AaQwAAAIAEABrDAAAAgApAGoMAAACAAgAbAwAAAIABgBtDAAAAgATAOoMAAABAA8AAgAFCZMJJwoAAAEFaAwAAAEAJQBpDAAAAQAQAGsMAAABABoAagwAAAEAHQDqDAAAAgASAAEuAAUUBwkpAAMA+BAA.',},}
+local provider = {region='US',realm='Arygos',name='US',type='subscribers',zone=46,date='2026-06-29',data={At='Athleta:BAEBLgAFFH8TAAMBAAcJGgl2BAAyAQdoDAAAAwAlAGkMAAADABAAawwAAAMAKQBqDAAAAwAdAGwMAAACAAYAbQwAAAIAEwDqDAAAAwASAAEABwl0CHYEADIBB2gMAAACAB4AaQwAAAIAEABrDAAAAgApAGoMAAACAAgAbAwAAAIABgBtDAAAAgATAOoMAAABAA8AAgAFCZMJkhYA9AAFaAwAAAEAJQBpDAAAAQAQAGsMAAABABoAagwAAAEAHQDqDAAAAgASAAEuAAUUBwkpAAMA+BAA.',},}
 provider.parse = parse
 
 local rawData = provider.data

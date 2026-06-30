@@ -607,7 +607,13 @@ function CCS.RaidProgressEventHandler(event, ...)
 	if CCS.initall == true then return end
 
 	if event == "PLAYER_LEVEL_UP" then
-       C_Timer.After(.2, function() if UnitLevel("player") == CCS.MaxLevel then  _G["ccsr_btn"]:Show() end end)
+       C_Timer.After(.2, function() 
+				if UnitLevel("player") == CCS.MaxLevel then  
+					if _G["ccsr_btn1"] then _G["ccsr_btn1"]:Show() end
+					if _G["ccsr_btn2"] then _G["ccsr_btn2"]:Show() end
+				end 
+				
+			end)
     end
 
     if event == "CCS_EVENT_OPTIONS" and option("showraidprogress") == false then

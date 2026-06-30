@@ -1,4 +1,4 @@
-## Interface: 20505
+## Interface: 20505, 20506
 
 ## Title: BigWigs [|cffeda55fCore|r]
 ## Title-zhCN: BigWigs [|cffeda55f核心|r]
@@ -23,12 +23,10 @@
 ## Notes-esES: Núcleo de BigWigs.
 ## Notes-esMX: Núcleo de BigWigs.
 ## IconTexture: Interface\AddOns\BigWigs\Media\Icons\minimap_raid.tga
-## Version: v417.3
+## Version: v417.7
 
 ## LoadOnDemand: 1
 ## Dependencies: BigWigs
-
-Libs\LibChatAnims\LibChatAnims.lua
 
 Constants.lua
 BossPrototype_Classic.lua

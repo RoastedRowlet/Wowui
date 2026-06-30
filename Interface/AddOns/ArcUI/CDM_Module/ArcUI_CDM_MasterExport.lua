@@ -456,6 +456,7 @@ function ME.Export(selectedKeys)
                 autoTrackEquippedTrinkets = myArcAuras and myArcAuras.autoTrackEquippedTrinkets or false,
                 onlyOnUseTrinkets = myArcAuras and myArcAuras.onlyOnUseTrinkets or false,
                 autoTrackSlots = (myArcAuras and myArcAuras.autoTrackSlots) and DeepCopy(myArcAuras.autoTrackSlots) or {[13] = false, [14] = false},
+                totemSlots = (myArcAuras and myArcAuras.totemSlots) and DeepCopy(myArcAuras.totemSlots) or nil,
             }
             if myArcAuras then
                 if myArcAuras.trackedSpells then
@@ -495,6 +496,42 @@ function ME.Export(selectedKeys)
     local specCount = 0
     for _ in pairs(exportPayload.specs) do specCount = specCount + 1 end
     exportPayload.specCount = specCount
+
+    -- ─────────────────────────────────────────────────────────────────────────
+    -- GLOBAL GROUP LAYOUTS: embed any global layout referenced by an exported
+    -- profile (profile.groupLayoutName). Linked profiles store their groups in
+    -- the account-wide global layouts DB, NOT in the profile, so without this the
+    -- importer can never recreate those groups and every icon orphans. Mirrors
+    -- the per-spec exporter (IE.Export). Runtime-only fields are stripped.
+    -- ─────────────────────────────────────────────────────────────────────────
+    do
+        local _glDB = ns.CDMShared and ns.CDMShared.GetGroupLayoutsDB and ns.CDMShared.GetGroupLayoutsDB()
+        if _glDB then
+            local embedded = {}
+            for _specKey, specData in pairs(exportPayload.specs) do
+                if specData.profiles then
+                    for _pName, pData in pairs(specData.profiles) do
+                        local linkedName = pData.groupLayoutName
+                        if linkedName and _glDB[linkedName] and not embedded[linkedName] then
+                            local layoutCopy = DeepCopy(_glDB[linkedName])
+                            for _, groupData in pairs(layoutCopy) do
+                                if type(groupData) == "table" then
+                                    groupData.members = nil
+                                    groupData.grid = nil
+                                    groupData.container = nil
+                                    groupData.dragBar = nil
+                                end
+                            end
+                            embedded[linkedName] = layoutCopy
+                        end
+                    end
+                end
+            end
+            if next(embedded) then
+                exportPayload.globalGroupLayouts = embedded
+            end
+        end
+    end
 
     -- Cooldown Reminder bundle: include the current character's CR
     -- settings (globals + per-spell triggers + tracked spells/items)
@@ -899,7 +936,27 @@ function ME.Import(data, importMode, activeOverrides, selectedProfiles)
     local cdmGroupsDB = Shared.GetCDMGroupsDB()
     if not cdmGroupsDB then return false, "CDMGroups database not available" end
     if not cdmGroupsDB.specData then cdmGroupsDB.specData = {} end
-    
+
+    -- ─────────────────────────────────────────────────────────────────────────
+    -- GLOBAL GROUP LAYOUTS: write embedded layouts into the importer's
+    -- account-wide global DB so linked profiles can recreate their groups.
+    -- Write-if-absent (don't clobber a same-named layout the importer already
+    -- has; LoadProfile's safety net backstops anything still missing). The global
+    -- DB is account-wide, so this ALSO covers other-class specs queued into
+    -- masterCDMPending and applied on the alt's later login.
+    -- ─────────────────────────────────────────────────────────────────────────
+    if data.globalGroupLayouts then
+        local _glDB = Shared.GetGroupLayoutsDB and Shared.GetGroupLayoutsDB()
+        if _glDB then
+            for layoutName, layoutData in pairs(data.globalGroupLayouts) do
+                if _glDB[layoutName] == nil then
+                    _glDB[layoutName] = DeepCopy(layoutData)
+                    print(MSG_PREFIX .. "|cff00ccffImported group layout '" .. tostring(layoutName) .. "'|r")
+                end
+            end
+        end
+    end
+
     local _, _, myClassID = UnitClass("player")
     local importedProfiles = 0
     local storedForLater = 0
@@ -1005,7 +1062,12 @@ function ME.Import(data, importMode, activeOverrides, selectedProfiles)
                 if specEntry.arcAuras.onlyOnUseTrinkets ~= nil then
                     arcAuras.onlyOnUseTrinkets = specEntry.arcAuras.onlyOnUseTrinkets
                 end
-                
+                -- Totem-slot tracking (per-spec enable + per-slot toggles): the totem
+                -- enable, previously dropped from the master export/import too.
+                if specEntry.arcAuras.totemSlots ~= nil then
+                    arcAuras.totemSlots = DeepCopy(specEntry.arcAuras.totemSlots)
+                end
+
                 -- Invalidate ArcAuras DB cache so next GetDB() reads fresh data
                 if ns.ArcAuras and ns.ArcAuras.ClearDBCache then
                     ns.ArcAuras.ClearDBCache()

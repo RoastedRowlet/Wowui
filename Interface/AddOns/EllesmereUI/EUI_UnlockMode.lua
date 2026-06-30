@@ -1699,6 +1699,11 @@ ApplyAnchorPosition = function(childKey, targetKey, side, noMark, noMove, fromCa
     -- target bounds is safe even if the target is protected (e.g. oUF
     -- unit frames) -- we only call SetPoint on the child, not the target.
     if InCombatLockdown() and childBar:IsProtected() then return end
+    -- Addon owns this element's position (e.g. a grouped Tracking Bar member
+    -- chained to its group anchor) -- never generically reposition it, so its
+    -- relative SetPoint to the anchor is never clobbered (in or out of combat).
+    local cElem = registeredElements[childKey]
+    if cElem and cElem.isAnchored and cElem.isAnchored(childKey) then return end
 
 
     -- If the target frame has no valid screen bounds (hidden / not yet laid out),
@@ -2360,8 +2365,10 @@ EllesmereUI.ReapplyAllUnlockAnchorsForced = function()
         if info and info.target then
             local childBar = GetBarFrame(childKey)
             local targetBar = GetBarFrame(info.target)
+            local rcElem = registeredElements[childKey]
             if childBar and targetBar
-               and not (inCombat and childBar:IsProtected()) then
+               and not (inCombat and childBar:IsProtected())
+               and not (rcElem and rcElem.isAnchored and rcElem.isAnchored(childKey)) then
                 -- AB bars with growth direction: skip entirely. Their position
                 -- is set authoritatively by applyPos from barPositions (edge
                 -- format, width-independent, updated on every LayoutBar).
@@ -4180,6 +4187,15 @@ local BLIZZ_OWNED_OVERLAY_DEFS = {
     { label = "Encounter Bar", frame = function() return _G.PlayerPowerBarAlt end, showAlways = true, fallbackW = 240, fallbackH = 36, yOffset = 44 },
     { label = "Buffs",         frame = function() return _G.BuffFrame end },
     { label = "Debuffs",       frame = function() return _G.DebuffFrame end },
+    -- Blizzard Edit Mode's default tooltip anchor. The container is small/idle
+    -- when no tooltip is up, so use the showAlways fallback (read its saved
+    -- Edit Mode position) like the Encounter Bar.
+    { label = "Tooltip",       frame = function()
+          -- Hidden while Anchor to Cursor is active: the tooltip follows the
+          -- mouse, so its Edit Mode location no longer applies.
+          if EllesmereUIDB and EllesmereUIDB.tooltipAnchorCursor then return nil end
+          return _G.GameTooltipDefaultContainer
+      end, showAlways = true, fallbackW = 280, fallbackH = 165 },
 }
 
 local function CreateBlizzOwnedOverlay(def, parent)
@@ -7593,7 +7609,7 @@ local function CreateHUD(parent)
     gridLabel:SetJustifyH("RIGHT")
     gridLabel:SetPoint("RIGHT", gridTex, "LEFT", -5, 0)
     gridLabel:SetTextColor(1, 1, 1, GridHudAlpha())
-    gridLabel:SetText(GridLabelText())
+    gridLabel:SetText(EllesmereUI.L(GridLabelText()))
     gridBtn._label = gridLabel
 
     -- Size wrapper to fit label + gap + icon
@@ -7607,7 +7623,7 @@ local function CreateHUD(parent)
         local a = GridHudAlpha()
         gridTex:SetAlpha(a)
         gridLabel:SetTextColor(1, 1, 1, a)
-        gridLabel:SetText(GridLabelText())
+        gridLabel:SetText(EllesmereUI.L(GridLabelText()))
         if gridFrame then
             if gridMode ~= "disabled" then
                 gridFrame:Rebuild()

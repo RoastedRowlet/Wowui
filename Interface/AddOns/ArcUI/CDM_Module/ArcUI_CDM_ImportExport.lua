@@ -479,6 +479,10 @@ local function BuildExportData(options)
                 autoTrackEquippedTrinkets = arcAuras.autoTrackEquippedTrinkets,
                 autoTrackSlots = arcAuras.autoTrackSlots and DeepCopy(arcAuras.autoTrackSlots) or nil,
                 onlyOnUseTrinkets = arcAuras.onlyOnUseTrinkets,
+                -- Totem-slot tracking: per-spec enable + per-slot toggles. This is
+                -- the "totem enable" that turns the Arc Auras totem-slot icons on;
+                -- it was previously dropped from export so it never transferred.
+                totemSlots = arcAuras.totemSlots and DeepCopy(arcAuras.totemSlots) or nil,
                 -- Custom Icons (Arc Auras timer-driven icons): user-defined
                 -- timers with start/end triggers. DeepCopy so importers get
                 -- their own mutable copy. Empty table is intentional — lets
@@ -595,9 +599,22 @@ function IE.GetExportStats()
             local profile = specData.layoutProfiles and specData.layoutProfiles[activeProfileName]
             
             if profile then
-                -- Count groups from profile.groupLayouts
-                if profile.groupLayouts then
-                    for _ in pairs(profile.groupLayouts) do
+                -- Count groups from the LINKED global layout if the profile is
+                -- linked, else from the profile's own groupLayouts. A linked
+                -- profile keeps its groups in the shared layout DB (NOT in
+                -- profile.groupLayouts), so counting the latter under-reports --
+                -- e.g. shows 6 when the linked layout actually has 8. Mirrors
+                -- LoadProfile's group-source resolution.
+                local _statGroupSrc = profile.groupLayouts
+                if profile.groupLayoutName then
+                    local _glDB = Shared.GetGroupLayoutsDB and Shared.GetGroupLayoutsDB()
+                    local _linked = _glDB and _glDB[profile.groupLayoutName]
+                    if _linked and next(_linked) then
+                        _statGroupSrc = _linked
+                    end
+                end
+                if _statGroupSrc then
+                    for _ in pairs(_statGroupSrc) do
                         stats.groups = stats.groups + 1
                     end
                 end
@@ -765,11 +782,21 @@ function IE.GetImportStats(data)
     }
     
     if data.cdmGroups then
-        -- Count groups from layoutProfiles.groupLayouts (groups field is deprecated)
+        -- Count groups from layoutProfiles.groupLayouts (groups field is deprecated).
+        -- For a LINKED profile the groups live in the embedded global layout
+        -- (data.cdmGroups.globalGroupLayouts), not in profile.groupLayouts, so count
+        -- those instead -- otherwise a linked export reports 0/under-counts.
         if data.cdmGroups.layoutProfiles then
             for profileName, profileData in pairs(data.cdmGroups.layoutProfiles) do
-                if profileData.groupLayouts then
-                    for _ in pairs(profileData.groupLayouts) do
+                local _statSrc = profileData.groupLayouts
+                if profileData.groupLayoutName and data.cdmGroups.globalGroupLayouts then
+                    local _linked = data.cdmGroups.globalGroupLayouts[profileData.groupLayoutName]
+                    if _linked and next(_linked) then
+                        _statSrc = _linked
+                    end
+                end
+                if _statSrc and next(_statSrc) then
+                    for _ in pairs(_statSrc) do
                         stats.groups = stats.groups + 1
                     end
                     break  -- Only count first profile (the exported active profile)
@@ -1365,6 +1392,13 @@ function IE.Import(importString, options)
             arcAuras.onlyOnUseTrinkets = data.arcAuras.onlyOnUseTrinkets
         end
 
+        -- Restore totem-slot tracking (per-spec enable + per-slot toggles). This is
+        -- the "totem enable"; previously dropped on import so totems never turned on
+        -- for the importer even when the exporter had them enabled.
+        if data.arcAuras.totemSlots then
+            arcAuras.totemSlots = DeepCopy(data.arcAuras.totemSlots)
+        end
+
         -- Custom Icons (Arc Auras timer-driven icons). Mirror the
         -- trackedSpells pattern: wipe existing then replace. Each config
         -- may carry the new-shape startTrigger/endTrigger fields or the
@@ -1402,6 +1436,7 @@ function IE.Import(importString, options)
                     autoTrackEquippedTrinkets = arcAuras.autoTrackEquippedTrinkets,
                     autoTrackSlots = arcAuras.autoTrackSlots and DeepCopy(arcAuras.autoTrackSlots) or nil,
                     onlyOnUseTrinkets = arcAuras.onlyOnUseTrinkets,
+                    totemSlots = arcAuras.totemSlots and DeepCopy(arcAuras.totemSlots) or nil,
                     customTimers = arcAuras.customTimers and DeepCopy(arcAuras.customTimers) or nil,
                 }
             end
@@ -1861,9 +1896,19 @@ function IE.ImportLayoutFromAccount(importKey)
     local activeProfileName = currentSpecData.activeProfile or "Default"
     local profile = currentSpecData.layoutProfiles and currentSpecData.layoutProfiles[activeProfileName]
     if profile then
-        -- Clear savedPositions and freeIcons (these are cooldownID specific)
-        profile.savedPositions = {}
-        profile.freeIcons = {}
+        -- savedPositions/freeIcons are keyed by spec-specific cooldownIDs, so the
+        -- icon-to-group membership only transfers when the source is the SAME spec.
+        -- Same-spec: PRESERVE the source profile's membership so custom (non-default)
+        -- groups keep their icons -- otherwise every custom group imports empty and the
+        -- icons fall to default-group auto-assign. Cross-spec: cooldownIDs don't map, so
+        -- clear and let auto-assign place by default group (best available).
+        if specKey == currentSpec then
+            profile.savedPositions = (profileData.savedPositions and DeepCopy(profileData.savedPositions)) or {}
+            profile.freeIcons = (profileData.freeIcons and DeepCopy(profileData.freeIcons)) or {}
+        else
+            profile.savedPositions = {}
+            profile.freeIcons = {}
+        end
         
         -- CRITICAL: Update runtime savedPositions to point to profile's table
         ns.CDMGroups.savedPositions = profile.savedPositions
@@ -2014,6 +2059,10 @@ local uiState = {
     importFlattenGlobals = false,
     importGroupSettings = true,
     importProfiles = true,
+    -- Skip the native Blizzard CDM layout on import (default off = import it, as before).
+    -- Opt-in to leave Blizzard's CooldownViewer layout untouched -- useful across game
+    -- versions (e.g. live -> PTR) where the native layout format can differ.
+    importSkipCDMLayout = false,
     -- Global Group Layout conflict resolution
     -- { [layoutName] = "overwrite" | "copy", copyName = "..." }
     layoutConflictResolutions = {},
@@ -3703,7 +3752,11 @@ local function GetOptionsTable()
                     table.insert(lines, "")
                     if p.hasCDMNativeLayout then
                         local name = p.cdmNativeLayoutName or "Unknown"
-                        table.insert(lines, "|cff00ccffCDM Layout:|r      |cff00ff00" .. name .. "|r")
+                        if uiState.importSkipCDMLayout then
+                            table.insert(lines, "|cff00ccffCDM Layout:|r      |cff888888" .. name .. " (will be skipped)|r")
+                        else
+                            table.insert(lines, "|cff00ccffCDM Layout:|r      |cff00ff00" .. name .. "|r")
+                        end
                     else
                         table.insert(lines, "|cff00ccffCDM Layout:|r      |cff666666Not included|r")
                     end
@@ -3796,6 +3849,22 @@ local function GetOptionsTable()
                 hidden = function() return collapsedSections.externalExport or collapsedSections.importOptions end,
                 get = function() return uiState.importProfiles end,
                 set = function(_, v) uiState.importProfiles = v end,
+            },
+            importSkipCDMLayout = {
+                type = "toggle",
+                name = "Skip Blizzard CDM Layout",
+                desc = "Do NOT import the native Blizzard CooldownViewer layout (which cooldowns Blizzard tracks and the active layout). " ..
+                       "Your ArcUI groups, icon styling and positions still import normally. " ..
+                       "Recommended when importing between game versions (e.g. live to PTR), where the Blizzard layout format can differ and cause icons to misbehave.",
+                order = 70.3,
+                width = 1.5,
+                hidden = function() return collapsedSections.externalExport or collapsedSections.importOptions end,
+                disabled = function()
+                    local p = uiState.importPreview
+                    return not (p and p.hasCDMNativeLayout)
+                end,
+                get = function() return uiState.importSkipCDMLayout end,
+                set = function(_, v) uiState.importSkipCDMLayout = v end,
             },
             importSpacer = {
                 type = "description",
@@ -3981,7 +4050,11 @@ local function GetOptionsTable()
                 func = function()
                     -- Pre-check: does this import include a CDM layout and are we at the cap?
                     local preview = uiState.importPreview
-                    local hasCDMLayout = preview and preview.hasCDMNativeLayout
+                    -- If the user opted to skip the Blizzard CDM layout, treat it as absent:
+                    -- no cap check (which also skips the CDM data-provider/layout-manager calls
+                    -- below) and DoImport forces cdmAction = "ignore".
+                    local skipCDM = uiState.importSkipCDMLayout and true or false
+                    local hasCDMLayout = (not skipCDM) and preview and preview.hasCDMNativeLayout
                     local cdmMaxed = false
                     if hasCDMLayout then
                         local dp = CooldownViewerSettings and CooldownViewerSettings:GetDataProvider()
@@ -3990,6 +4063,8 @@ local function GetOptionsTable()
                     end
 
                     local function DoImport(cdmAction)
+                        -- Honor the "Skip Blizzard CDM Layout" toggle regardless of caller.
+                        if skipCDM then cdmAction = "ignore" end
                         local success, result = IE.Import(uiState.importString, {
                             mergeMode = "replace",
                             importGroupLayouts = uiState.importGroupLayouts,
@@ -4050,7 +4125,7 @@ local function GetOptionsTable()
                             popup:SetFrameLevel(100)
                         end
                     else
-                        DoImport(nil)
+                        DoImport(skipCDM and "ignore" or nil)
                     end
                 end,
             },

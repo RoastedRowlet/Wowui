@@ -1120,6 +1120,8 @@ L["focusMarkerAssignmentsTooltip"] = "MDT provides a keybind or macro to set you
 --[[Translation missing --]]
 L["focusMarkerAssignmentToast"] = "Focus marker set to %s. (Sent by %s)"
 --[[Translation missing --]]
+L["focusMarkerChatAnnouncement"] = "My Focus Marker is {rt%d}"
+--[[Translation missing --]]
 L["focusMarkerKeybindMissingToast"] = "No key bind is set. Set one now or disable these notifications."
 --[[Translation missing --]]
 L["focusMarkerMacroDragTooltip"] = "Drag this macro to your action bar."

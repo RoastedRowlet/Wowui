@@ -10,13 +10,11 @@ function addon:ShouldRemoveSelfCast()
 end
 
 local function ATTR(indent, prefix, attr, suffix, value)
-    local fmt = [[%sbutton:SetAttribute("%s%s%s%s%s", %q)]]
-    return fmt:format(indent, prefix, #prefix > 0 and "-" or "", attr, tonumber(suffix) and "" or "-", suffix, value)
+    return ([[%sbutton:SetAttribute("%s", %q)]]):format(indent, addon:AttributeName(prefix, attr, suffix), value)
 end
 
-local function REMATTR(prefix, attr, suffix, value)
-    local fmt = [[button:SetAttribute("%s%s%s%s%s", nil)]]
-    return fmt:format(prefix, #prefix > 0 and "-" or "", attr, tonumber(suffix) and "" or "-", suffix)
+local function REMATTR(prefix, attr, suffix)
+    return ([[button:SetAttribute("%s", nil)]]):format(addon:AttributeName(prefix, attr, suffix))
 end
 
 local B_SET = [[self:SetBindingClick(true, %q, clickableButton, %q);]]
@@ -64,6 +62,28 @@ local function shouldApply(global, entry)
         end
         return false
     end
+end
+
+-- The type/clickbutton attribute pairs that route each click combo we bind to the
+-- proxy. A frame's own specific attribute (e.g. shift-type2="togglemenu") outranks
+-- our *type* wildcard, so we stamp the specific attributes too. Keyboard bindings
+-- route via SetBindingClick and are excluded.
+function addon:GetClickRoutingCombos()
+    local combos, seen = {}, {}
+    for _, entry in ipairs(self.bindings) do
+        if entry.key and shouldApply(false, entry) and self:IsBindingCorrectSpec(entry)
+                and self:GetMouseButtonNumber(entry) then
+            local typeName = self:AttributeFromEntry(entry, "type")
+            if not seen[typeName] then
+                seen[typeName] = true
+                combos[#combos + 1] = {
+                    type = typeName,
+                    click = self:AttributeFromEntry(entry, "clickbutton"),
+                }
+            end
+        end
+    end
+    return combos
 end
 
 -- This function takes a single argument indicating if the attributes being
@@ -305,9 +325,9 @@ function addon:GetBindingAttributes(global)
             "if danglingButton then ",
             "  control:RunFor(danglingButton, control:GetAttribute('setup_onleave'))",
             "end",
-            -- SetBindingClick needs the proxy's name string, not its handle (a
-            -- handle silently no-ops). No proxy yet means registered in combat.
-            "local clickableButton = button:GetAttribute('clique_proxyname')",
+            -- Keys target the key proxy by name (its useOnKeyDown carries the
+            -- direction); a handle silently no-ops, nil means registered in combat.
+            "local clickableButton = button:GetAttribute('clique_keyproxyname')",
             "if not clickableButton then return end",
             "danglingButton = button",
         }
@@ -344,7 +364,7 @@ function addon:GetBindingAttributes(global)
                         end
                     end
                 else
-                    local buttonNum = entry.key:match("BUTTON(%d+)$")
+                    local buttonNum = self:GetMouseButtonNumber(entry)
                     if not buttonNum then
                         -- Only apply key-based binding clicks, let the raw
                         -- attributes handle the others
@@ -364,6 +384,19 @@ function addon:GetBindingAttributes(global)
     end
 
     return table.concat(set, "\n"), table.concat(clr, "\n")
+end
+
+-- Teardown counterpart to StampProxySetup: clear the binding set off both proxies
+-- before they're unregistered, so a pooled key proxy retains no stale dispatch.
+function addon:RemoveProxySetup(frame, target)
+    self.header:SetFrameRef("cliquesetup_button", target)
+    self.header:Execute(self.header:GetAttribute("remove_clicks"), target)
+
+    local keyProxy = self.keyProxies[frame]
+    if keyProxy and keyProxy ~= target then
+        self.header:SetFrameRef("cliquesetup_button", keyProxy)
+        self.header:Execute(self.header:GetAttribute("remove_clicks"), keyProxy)
+    end
 end
 
 function addon:ClearAttributes()
@@ -421,6 +454,19 @@ function addon:WrapOnEnterOnLeave(button)
         control:RunFor(self, control:GetAttribute('setup_onleave'))
     ]])
     self.wrapped[button] = true
+end
+
+-- Stamp setup_clicks on a freshly acquired proxy immediately, before the next
+-- ApplyAttributes. The key proxy needs the same binding set as the click proxy.
+function addon:StampProxySetup(frame, target)
+    self.header:SetFrameRef("cliquesetup_button", target)
+    self.header:Execute(self.header:GetAttribute("setup_clicks"), target)
+
+    local keyProxy = self.keyProxies[frame]
+    if keyProxy and keyProxy ~= target then
+        self.header:SetFrameRef("cliquesetup_button", keyProxy)
+        self.header:Execute(self.header:GetAttribute("setup_clicks"), keyProxy)
+    end
 end
 
 function addon:ApplyAttributes()

@@ -63,6 +63,7 @@ CCS.Throttles = {
     PlayerLootSpec = 0,
     RaidProgress = 0,
     Init = 0,
+    CharacterRep = 0,
 }
 
 -- Item Upgrade Tracks
@@ -1928,98 +1929,129 @@ CCS.RAID_DIFFICULTY_NAMES = {
 if CCS.GetCurrentVersion() == CCS.RETAIL then
 
 CCS.SRI = { 
-    -- Liberation of Undermine C_Map.GetMapInfo(2406).name
-    [1] = { boss=2639, raid=2406, name = select(1, EJ_GetEncounterInfo(2639)), icon = select(5, EJ_GetCreatureInfo(1, 2639)), normal=41300, heroic=41301, mythic=41302}, -- Vexie and the Geargrinders
-    [2] = { boss=2640, raid=2406, name = select(1, EJ_GetEncounterInfo(2640)), icon = select(5, EJ_GetCreatureInfo(1, 2640)), normal=41304, heroic=41305, mythic=41306}, -- Cauldrons of Carnage
-    [3] = { boss=2641, raid=2406, name = select(1, EJ_GetEncounterInfo(2641)), icon = select(5, EJ_GetCreatureInfo(1, 2641)), normal=41308, heroic=41309, mythic=41310}, -- Rik Reverb
-    [4] = { boss=2642, raid=2406, name = select(1, EJ_GetEncounterInfo(2642)), icon = select(5, EJ_GetCreatureInfo(1, 2642)), normal=41312, heroic=41313, mythic=41314}, -- Stix Bunkjunker
-    [5] = { boss=2643, raid=2406, name = select(1, EJ_GetEncounterInfo(2653)), icon = select(5, EJ_GetCreatureInfo(1, 2653)), normal=41316, heroic=41317, mythic=41318}, -- Sprocketmonger Lockenstock
-    [6] = { boss=2644, raid=2406, name = select(1, EJ_GetEncounterInfo(2644)), icon = select(5, EJ_GetCreatureInfo(1, 2644)), normal=41320, heroic=41321, mythic=41322}, -- The One-Armed Bandit
-    [7] = { boss=2645, raid=2406, name = select(1, EJ_GetEncounterInfo(2645)), icon = select(5, EJ_GetCreatureInfo(1, 2645)), normal=41324, heroic=41325, mythic=41326}, -- Mug'Zee, Heads of Security
-    [8] = { boss=2646, raid=2406, name = select(1, EJ_GetEncounterInfo(2646)), icon = select(5, EJ_GetCreatureInfo(1, 2646)), normal=41328, heroic=41329, mythic=41330}, -- Chrome King Gallywix
+    -- Liberation of Undermine select(1,EJ_GetInstanceInfo(1296))
+    [1] = { boss=2639, raid=1296, name = select(1, EJ_GetEncounterInfo(2639)), icon = select(5, EJ_GetCreatureInfo(1, 2639)), normal=41300, heroic=41301, mythic=41302}, -- Vexie and the Geargrinders
+    [2] = { boss=2640, raid=1296, name = select(1, EJ_GetEncounterInfo(2640)), icon = select(5, EJ_GetCreatureInfo(1, 2640)), normal=41304, heroic=41305, mythic=41306}, -- Cauldrons of Carnage
+    [3] = { boss=2641, raid=1296, name = select(1, EJ_GetEncounterInfo(2641)), icon = select(5, EJ_GetCreatureInfo(1, 2641)), normal=41308, heroic=41309, mythic=41310}, -- Rik Reverb
+    [4] = { boss=2642, raid=1296, name = select(1, EJ_GetEncounterInfo(2642)), icon = select(5, EJ_GetCreatureInfo(1, 2642)), normal=41312, heroic=41313, mythic=41314}, -- Stix Bunkjunker
+    [5] = { boss=2643, raid=1296, name = select(1, EJ_GetEncounterInfo(2653)), icon = select(5, EJ_GetCreatureInfo(1, 2653)), normal=41316, heroic=41317, mythic=41318}, -- Sprocketmonger Lockenstock
+    [6] = { boss=2644, raid=1296, name = select(1, EJ_GetEncounterInfo(2644)), icon = select(5, EJ_GetCreatureInfo(1, 2644)), normal=41320, heroic=41321, mythic=41322}, -- The One-Armed Bandit
+    [7] = { boss=2645, raid=1296, name = select(1, EJ_GetEncounterInfo(2645)), icon = select(5, EJ_GetCreatureInfo(1, 2645)), normal=41324, heroic=41325, mythic=41326}, -- Mug'Zee, Heads of Security
+    [8] = { boss=2646, raid=1296, name = select(1, EJ_GetEncounterInfo(2646)), icon = select(5, EJ_GetCreatureInfo(1, 2646)), normal=41328, heroic=41329, mythic=41330}, -- Chrome King Gallywix
     
-    -- Manaforge Omega C_Map.GetMapInfo(2460).name
-    [11] = { boss=2684, raid=2460, name = select(1, EJ_GetEncounterInfo(2684)), icon = select(5, EJ_GetCreatureInfo(1, 2684)), normal=41634, heroic=41635, mythic=41636}, -- Plexus Sentinel
-    [12] = { boss=2686, raid=2460, name = select(1, EJ_GetEncounterInfo(2686)), icon = select(5, EJ_GetCreatureInfo(1, 2686)), normal=41638, heroic=41639, mythic=41640}, -- Loom'ithar 
-    [13] = { boss=2685, raid=2460, name = select(1, EJ_GetEncounterInfo(2685)), icon = select(5, EJ_GetCreatureInfo(1, 2685)), normal=41642, heroic=41643, mythic=41644}, -- Soulbinder Naazindhri
-    [14] = { boss=2687, raid=2460, name = select(1, EJ_GetEncounterInfo(2687)), icon = select(5, EJ_GetCreatureInfo(1, 2687)), normal=41646, heroic=41647, mythic=41648}, -- Forgeweaver Araz
-    [15] = { boss=2688, raid=2460, name = select(1, EJ_GetEncounterInfo(2688)), icon = select(5, EJ_GetCreatureInfo(1, 2688)), normal=41650, heroic=41651, mythic=41652}, -- The Soul Hunters
-    [16] = { boss=2747, raid=2460, name = select(1, EJ_GetEncounterInfo(2747)), icon = select(5, EJ_GetCreatureInfo(1, 2747)), normal=41654, heroic=41655, mythic=41656}, -- Fractillus
-    [17] = { boss=2690, raid=2460, name = select(1, EJ_GetEncounterInfo(2690)), icon = select(5, EJ_GetCreatureInfo(1, 2690)), normal=41658, heroic=41659, mythic=41660}, -- Nexus-King Salhadaar
-    [18] = { boss=2691, raid=2460, name = select(1, EJ_GetEncounterInfo(2691)), icon = select(5, EJ_GetCreatureInfo(1, 2691)), normal=41662, heroic=41663, mythic=41664}, -- Dimensiue, the All-Devouring
+    -- Manaforge Omega select(1,EJ_GetInstanceInfo(1302))
+    [11] = { boss=2684, raid=1302, name = select(1, EJ_GetEncounterInfo(2684)), icon = select(5, EJ_GetCreatureInfo(1, 2684)), normal=41634, heroic=41635, mythic=41636}, -- Plexus Sentinel
+    [12] = { boss=2686, raid=1302, name = select(1, EJ_GetEncounterInfo(2686)), icon = select(5, EJ_GetCreatureInfo(1, 2686)), normal=41638, heroic=41639, mythic=41640}, -- Loom'ithar 
+    [13] = { boss=2685, raid=1302, name = select(1, EJ_GetEncounterInfo(2685)), icon = select(5, EJ_GetCreatureInfo(1, 2685)), normal=41642, heroic=41643, mythic=41644}, -- Soulbinder Naazindhri
+    [14] = { boss=2687, raid=1302, name = select(1, EJ_GetEncounterInfo(2687)), icon = select(5, EJ_GetCreatureInfo(1, 2687)), normal=41646, heroic=41647, mythic=41648}, -- Forgeweaver Araz
+    [15] = { boss=2688, raid=1302, name = select(1, EJ_GetEncounterInfo(2688)), icon = select(5, EJ_GetCreatureInfo(1, 2688)), normal=41650, heroic=41651, mythic=41652}, -- The Soul Hunters
+    [16] = { boss=2747, raid=1302, name = select(1, EJ_GetEncounterInfo(2747)), icon = select(5, EJ_GetCreatureInfo(1, 2747)), normal=41654, heroic=41655, mythic=41656}, -- Fractillus
+    [17] = { boss=2690, raid=1302, name = select(1, EJ_GetEncounterInfo(2690)), icon = select(5, EJ_GetCreatureInfo(1, 2690)), normal=41658, heroic=41659, mythic=41660}, -- Nexus-King Salhadaar
+    [18] = { boss=2691, raid=1302, name = select(1, EJ_GetEncounterInfo(2691)), icon = select(5, EJ_GetCreatureInfo(1, 2691)), normal=41662, heroic=41663, mythic=41664}, -- Dimensiue, the All-Devouring
 
   -- Midnight Season 1 Raids
-    -- The Dreamrift C_Map.GetMapInfo(2531).name
-    [21] = { boss=2795, raid=2531, name = select(1, EJ_GetEncounterInfo(2795)), icon = select(5, EJ_GetCreatureInfo(1, 2795)), normal=61475, heroic=61476, mythic=61477 }, -- Chimaerus the Undreamt God
-    -- The VoidSpire C_Map.GetMapInfo(2529).name
-    [22] = { boss=2733, raid=2529, name = select(1, EJ_GetEncounterInfo(2733)), icon = select(5, EJ_GetCreatureInfo(1, 2733)), normal=61277, heroic=61278, mythic=61279 }, -- Imperator Averzian
-    [23] = { boss=2734, raid=2529, name = select(1, EJ_GetEncounterInfo(2734)), icon = select(5, EJ_GetCreatureInfo(1, 2734)), normal=61281, heroic=61282, mythic=61283 }, -- Vorasius
-    [24] = { boss=2736, raid=2529, name = select(1, EJ_GetEncounterInfo(2736)), icon = select(5, EJ_GetCreatureInfo(1, 2736)), normal=61285, heroic=61286, mythic=61287 }, -- Fallen-King Salhadaar
-    [25] = { boss=2735, raid=2529, name = select(1, EJ_GetEncounterInfo(2735)), icon = select(5, EJ_GetCreatureInfo(1, 2735)), normal=61289, heroic=61290, mythic=61291 }, -- Vaelgor & Ezzorak
-    [26] = { boss=2737, raid=2529, name = select(1, EJ_GetEncounterInfo(2737)), icon = select(5, EJ_GetCreatureInfo(1, 2737)), normal=61293, heroic=61294, mythic=61295 }, -- Lightblinded Vanguard
-    [27] = { boss=2738, raid=2529, name = select(1, EJ_GetEncounterInfo(2738)), icon = select(5, EJ_GetCreatureInfo(1, 2738)), normal=61297, heroic=61298, mythic=61299 }, -- Crown of the Cosmos
-    -- March on Quel'Danas C_Map.GetMapInfo(2533).name
-    [28] = { boss=2739, raid=2533, name = select(1, EJ_GetEncounterInfo(2739)), icon = select(5, EJ_GetCreatureInfo(1, 2739)), normal=61301, heroic=61302, mythic=61303 }, -- Belo'ren, Child of Al'ar
-    [29] = { boss=2740, raid=2533, name = select(1, EJ_GetEncounterInfo(2740)), icon = select(5, EJ_GetCreatureInfo(1, 2740)), normal=61305, heroic=61306, mythic=61307 }, -- Midnight Falls
-    -- The Sporefall C_Map.GetMapInfo(2427).name
-    [30] = { boss=2711, raid=2427, name = select(1, EJ_GetEncounterInfo(2711)), icon = select(5, EJ_GetCreatureInfo(1, 2711)), normal=63234, heroic=63235, mythic=63236 }, -- Rotmire
-  
+    -- The Dreamrift select(1,EJ_GetInstanceInfo(1314))
+    [21] = { boss=2795, raid=1314, name = select(1, EJ_GetEncounterInfo(2795)), icon = select(5, EJ_GetCreatureInfo(1, 2795)), normal=61475, heroic=61476, mythic=61477 }, -- Chimaerus the Undreamt God
+    -- The VoidSpire select(1,EJ_GetInstanceInfo(1307))
+    [22] = { boss=2733, raid=1307, name = select(1, EJ_GetEncounterInfo(2733)), icon = select(5, EJ_GetCreatureInfo(1, 2733)), normal=61277, heroic=61278, mythic=61279 }, -- Imperator Averzian
+    [23] = { boss=2734, raid=1307, name = select(1, EJ_GetEncounterInfo(2734)), icon = select(5, EJ_GetCreatureInfo(1, 2734)), normal=61281, heroic=61282, mythic=61283 }, -- Vorasius
+    [24] = { boss=2736, raid=1307, name = select(1, EJ_GetEncounterInfo(2736)), icon = select(5, EJ_GetCreatureInfo(1, 2736)), normal=61285, heroic=61286, mythic=61287 }, -- Fallen-King Salhadaar
+    [25] = { boss=2735, raid=1307, name = select(1, EJ_GetEncounterInfo(2735)), icon = select(5, EJ_GetCreatureInfo(1, 2735)), normal=61289, heroic=61290, mythic=61291 }, -- Vaelgor & Ezzorak
+    [26] = { boss=2737, raid=1307, name = select(1, EJ_GetEncounterInfo(2737)), icon = select(5, EJ_GetCreatureInfo(1, 2737)), normal=61293, heroic=61294, mythic=61295 }, -- Lightblinded Vanguard
+    [27] = { boss=2738, raid=1307, name = select(1, EJ_GetEncounterInfo(2738)), icon = select(5, EJ_GetCreatureInfo(1, 2738)), normal=61297, heroic=61298, mythic=61299 }, -- Crown of the Cosmos
+    -- March on Quel'Danas select(1,EJ_GetInstanceInfo(1308))
+    [28] = { boss=2739, raid=1308, name = select(1, EJ_GetEncounterInfo(2739)), icon = select(5, EJ_GetCreatureInfo(1, 2739)), normal=61301, heroic=61302, mythic=61303 }, -- Belo'ren, Child of Al'ar
+    [29] = { boss=2740, raid=1308, name = select(1, EJ_GetEncounterInfo(2740)), icon = select(5, EJ_GetCreatureInfo(1, 2740)), normal=61305, heroic=61306, mythic=61307 }, -- Midnight Falls
+    -- The Sporefall select(1,EJ_GetInstanceInfo(1305))
+    [30] = { boss=2711, raid=1305, name = select(1, EJ_GetEncounterInfo(2711)), icon = select(5, EJ_GetCreatureInfo(1, 2711)), normal=63234, heroic=63235, mythic=63236 }, -- Rotmire
   -- Midnight Season 2 Raids
-    -- The Sporefall C_Map.GetMapInfo(2427).name
-    --[31] = { boss=2711, raid=2427, name = select(1, EJ_GetEncounterInfo(2711)), icon = select(5, EJ_GetCreatureInfo(1, 2711)), normal=63234, heroic=63235, mythic=63236 }, -- Rotmire  
+    -- The Venomous Abyss select(1,EJ_GetInstanceInfo(1320))
+    [31] = { boss=2888, raid=1320, name=select(1,EJ_GetEncounterInfo(2888)), icon=select(5,EJ_GetCreatureInfo(1,2888)), normal=63534, heroic=63535, mythic=63536 }, -- Nek'zali
+    [32] = { boss=2874, raid=1320, name=select(1,EJ_GetEncounterInfo(2874)), icon=select(5,EJ_GetCreatureInfo(1,2874)), normal=63538, heroic=63539, mythic=63540 }, -- Entombed Sentinels
+    [33] = { boss=2882, raid=1320, name=select(1,EJ_GetEncounterInfo(2882)), icon=select(5,EJ_GetCreatureInfo(1,2882)), normal=63555, heroic=63556, mythic=63557 }, -- Vashnik the Malignant
+    [34] = { boss=2894, raid=1320, name=select(1,EJ_GetEncounterInfo(2894)), icon=select(5,EJ_GetCreatureInfo(1,2894)), normal=63552, heroic=63553, mythic=63554 }, -- The Lost Explorers
+    [35] = { boss=2871, raid=1320, name=select(1,EJ_GetEncounterInfo(2871)), icon=select(5,EJ_GetCreatureInfo(1,2871)), normal=63558, heroic=63559, mythic=63560 }, -- Sszorak
+    [36] = { boss=2887, raid=1320, name=select(1,EJ_GetEncounterInfo(2887)), icon=select(5,EJ_GetCreatureInfo(1,2887)), normal=63561, heroic=63562, mythic=63563 }, -- The Twin Fangs
+    [37] = { boss=2883, raid=1320, name=select(1,EJ_GetEncounterInfo(2883)), icon=select(5,EJ_GetCreatureInfo(1,2883)), normal=63564, heroic=63565, mythic=63566 }, -- The Coiled Altar
+    [38] = { boss=2895, raid=1320, name=select(1,EJ_GetEncounterInfo(2895)), icon=select(5,EJ_GetCreatureInfo(1,2895)), normal=63567, heroic=63568, mythic=63569 }, -- Ula'tek
+    -- The Tidebound Grotto select(1,EJ_GetInstanceInfo(1317))
+    [39] = { boss=2849, raid=1317, name=select(1,EJ_GetEncounterInfo(2849)), icon=select(5,EJ_GetCreatureInfo(1,2849)), normal=63614, heroic=63615, mythic=63616 }, -- Nymrissa Wavecaller
+  
 
-    -- Upcoming
 }
 
 CCS.RaidLayout = {
   {
-    raid = 2406, -- Liberation of Undermine
+    raid = 1296, -- Liberation of Undermine
     num_bosses = 8,
     tocinfo = {110100, 110200},
     shortname = "LoU",
-    title = C_Map.GetMapInfo(2406).name,
+    title = select(1,EJ_GetInstanceInfo(1296)),
     bosses = { 1, 2, 3, 4, 5, 6, 7, 8 }
   },
   {
-    raid = 2460, -- Manaforge Omega
+    raid = 1302, -- Manaforge Omega
     num_bosses = 8,
     tocinfo = {110200, 110300},
     shortname = "MFO",
-    title = C_Map.GetMapInfo(2460).name,
+    title = select(1,EJ_GetInstanceInfo(1302)),
     bosses = { 11, 12, 13, 14, 15, 16, 17, 18 }
   },
+------------------------------
+-- Midnight Season 1
+------------------------------  
   {
-    raid = 2531, -- The Dreamrift C_Map.GetMapInfo(2531).name
+    raid = 1314, -- The Dreamrift 
     num_bosses = 1,
     tocinfo = {120000, 120009},
     shortname = "DR",
-    title = (C_Map.GetMapInfo(2531) and C_Map.GetMapInfo(2531).name) or "Unknown",
+    title = select(1,EJ_GetInstanceInfo(1314)) or "Unknown",
     bosses = { 21 }
   },
   {
-    raid = 2529, -- The VoidSpire C_Map.GetMapInfo(2529).name
+    raid = 1307, -- The VoidSpire
     num_bosses = 6,
     tocinfo = {120000, 120009},
     shortname = "VS",
-    title = (C_Map.GetMapInfo(2529) and C_Map.GetMapInfo(2529).name) or "Unknown",
+    title = select(1,EJ_GetInstanceInfo(1307)) or "Unknown",
     bosses = { 22, 23, 24, 25, 26, 27 }
   },
   {
-    raid = 2533,-- March on Quel'Danas C_Map.GetMapInfo(2533).name
+    raid = 1308,-- March on Quel'Danas
     num_bosses = 2,
     tocinfo = {120000, 120009},
     shortname = "MOQD",    
-    title = (C_Map.GetMapInfo(2533) and C_Map.GetMapInfo(2533).name) or "Unknown",
+    title = select(1,EJ_GetInstanceInfo(1308)) or "Unknown",
     bosses = { 28, 29 }
   },
   {
-    raid = 2427, -- The Sporefall
+    raid = 1305, -- The Sporefall
     num_bosses = 1,
     tocinfo = {120007, 120009},
     shortname = "SF",
-    title = (C_Map.GetMapInfo(2427) and C_Map.GetMapInfo(2427).name) or "",
+    title = select(1,EJ_GetInstanceInfo(1305)) or "",
     bosses = { 30 }
   },  
+------------------------------
+-- Midnight Season 2
+------------------------------
+  {
+    raid = 1320, -- The Venomous Abyss
+    num_bosses = 8,
+    tocinfo = {120100, 120109},
+    shortname = "VA",
+    title = select(1,EJ_GetInstanceInfo(1320)) or "",
+    bosses = { 31, 32, 33, 34, 35, 36, 37, 38 }
+  },  
+
+  {
+    raid = 1317, -- The Tidebound Grotto
+    num_bosses = 1,
+    tocinfo = {120100, 120109},
+    shortname = "TG",
+    title = select(1,EJ_GetInstanceInfo(1317)) or "",
+    bosses = { 39 }
+  },
 }
 
 end

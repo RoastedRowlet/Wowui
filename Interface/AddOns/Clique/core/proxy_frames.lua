@@ -5,6 +5,34 @@
 --- @class CliqueAddon
 local addon = select(2, ...)
 
+-- Stored in proxyBackup when the clobbered attribute was originally nil, so we can
+-- distinguish "captured, was nil" from "not captured yet" and clear our value on
+-- teardown rather than leaving stale routing behind.
+local NO_VALUE = {}
+
+-- Write a routing attribute, snapshotting the frame's original value the first time
+-- we clobber it so TeardownFrameClickRouting can restore it. Backup is keyed by
+-- attribute name and shared by the static set and the per-binding combos.
+local function setRouting(frame, attr, value)
+    local backup = addon.proxyBackup[frame]
+    if backup[attr] == nil then
+        local original = frame:GetAttribute(attr)
+        backup[attr] = original == nil and NO_VALUE or original
+    end
+    frame:SetAttribute(attr, value)
+end
+
+-- Restore an attribute Clique clobbered to its pre-clobber value and forget the
+-- backup, so a later re-bind captures a fresh original. NO_VALUE means it was unset
+-- before we touched it, so clear our value back to nil.
+local function clearRouting(frame, attr)
+    local backup = addon.proxyBackup[frame]
+    local original = backup[attr]
+    if original == nil then return end
+    frame:SetAttribute(attr, original ~= NO_VALUE and original or nil)
+    backup[attr] = nil
+end
+
 -- A Clique-owned proxy button isolates our dispatch from Blizzard's
 -- SecureUnitButton_OnClick. Proxies are pooled (frames can't be destroyed) and
 -- named, since key bindings target them by name via SetBindingClick. See
@@ -27,26 +55,41 @@ function addon:GetOrCreateProxy(frame)
     proxy:SetAttribute("useOnKeyDown", false)
     proxy:RegisterForClicks("AnyUp")
 
-    -- First touch of the frame, before any routing write, so the backup always holds
-    -- the original un-routed values.
-    self.proxyBackup[frame] = {
-        ["*type1"]        = frame:GetAttribute("*type1"),
-        ["*type2"]        = frame:GetAttribute("*type2"),
-        ["type1"]         = frame:GetAttribute("type1"),
-        ["type2"]         = frame:GetAttribute("type2"),
-        ["type"]          = frame:GetAttribute("type"),
-        ["*type*"]        = frame:GetAttribute("*type*"),
-        ["clickbutton"]   = frame:GetAttribute("clickbutton"),
-        ["*clickbutton*"] = frame:GetAttribute("*clickbutton*"),
-        ["clickbutton1"]  = frame:GetAttribute("clickbutton1"),
-        ["clickbutton2"]  = frame:GetAttribute("clickbutton2"),
-        ["*clickbutton1"] = frame:GetAttribute("*clickbutton1"),
-        ["*clickbutton2"] = frame:GetAttribute("*clickbutton2"),
-    }
+    -- Backup is populated lazily by setRouting the first time each attribute is
+    -- clobbered (the first writeRouting runs immediately after this, before anything
+    -- else touches these attributes), so it always holds the original un-routed value.
+    self.proxyBackup[frame] = {}
 
     self.proxies[frame] = proxy
     self:RegisterProxySecure(proxy)
+    self:GetOrCreateKeyProxy(frame)
     return proxy
+end
+
+-- Separate SetBindingClick target so key binds can honor the direction setting via
+-- useOnKeyDown without disturbing the up-pinned click proxy. See docs/attributes.md.
+function addon:GetOrCreateKeyProxy(frame)
+    if self.keyProxies[frame] then return self.keyProxies[frame] end
+
+    local keyProxy = self.keyProxyPool[frame]
+    if not keyProxy then
+        self.keyProxyCount = self.keyProxyCount + 1
+        local keyProxyName = "CliqueKeyProxy" .. self.keyProxyCount
+        keyProxy = CreateFrame("Button", keyProxyName, frame, "SecureActionButtonTemplate")
+        keyProxy.parentName = frame:GetName()
+        self.keyProxyPool[frame] = keyProxy
+    end
+
+    keyProxy:SetAttribute("useparent-unit", true)
+    keyProxy:SetAttribute("useOnKeyDown", self:UseActionOnKeyDown())
+    keyProxy:RegisterForClicks(self:GetButtonDirections())
+    if self:IsGamePadEnabled() then
+        keyProxy:EnableGamePadButton(true)
+    end
+
+    self.keyProxies[frame] = keyProxy
+    self:RegisterProxySecure(keyProxy)
+    return keyProxy
 end
 
 -- Tracks the proxy in the header's secure `proxies` table so setup_clicks/
@@ -66,37 +109,71 @@ function addon:UnregisterProxySecure(proxy)
     ]])
 end
 
--- The full set of routing state Clique owns on a source frame. Centralized so
--- the register-time writer and the reassert path can't drift apart.
+-- The routing attributes Clique owns on every routed frame regardless of the
+-- binding set. Written on every setup/reassert and restored only on teardown
+-- (unregister or denylist) -- never on a binding change. PROXY marks the attributes
+-- whose value is the frame's proxy; the rest take the literal "click".
+--
+-- We take over the specific type1/type2 because some frames (e.g. Dander's) set
+-- them directly, beating the *type wildcards, and the whole clickbutton family
+-- because a bare clickbutton loses to any *clickbutton<N> a unit frame writes
+-- (e.g. EllesmereUI's *clickbutton2).
+local PROXY = {}
+local staticRouting = {
+    ["*type1"]        = "click",
+    ["*type2"]        = "click",
+    ["type"]          = "click",
+    ["*type*"]        = "click",
+    ["type1"]         = "click",
+    ["type2"]         = "click",
+    ["clickbutton"]   = PROXY,
+    ["*clickbutton*"] = PROXY,
+    ["clickbutton1"]  = PROXY,
+    ["clickbutton2"]  = PROXY,
+    ["*clickbutton1"] = PROXY,
+    ["*clickbutton2"] = PROXY,
+}
+
+-- Centralized writer for the register-time and reassert paths, so they can't drift.
+-- Stamps the static set, reconciles the per-binding modified-click combos (writing
+-- the bound ones, restoring any we previously wrote that are no longer bound), and
+-- leaves clique_proxyname -- which Clique owns outright -- in place.
 local function writeRouting(frame, proxy)
-    frame:SetAttribute("*type1", "click")
-    frame:SetAttribute("*type2", "click")
-    frame:SetAttribute("type", "click")
-    frame:SetAttribute("*type*", "click")
-    -- Some unit frames (e.g. Dander's) set the specific type1/type2 directly.
-    -- Those win over the *type wildcards in attribute resolution, so the click
-    -- never reaches the proxy unless we override them too.
-    frame:SetAttribute("type1", "click")
-    frame:SetAttribute("type2", "click")
-    -- A modified-click resolves clickbutton via *clickbutton<N>, clickbutton<N>,
-    -- *clickbutton*, clickbutton -- most-specific first. A bare clickbutton loses
-    -- to any variant a unit frame addon writes (e.g. EllesmereUI's *clickbutton2),
-    -- so take over the whole set to keep the click on our proxy.
-    frame:SetAttribute("clickbutton", proxy)
-    frame:SetAttribute("*clickbutton*", proxy)
-    frame:SetAttribute("clickbutton1", proxy)
-    frame:SetAttribute("clickbutton2", proxy)
-    frame:SetAttribute("*clickbutton1", proxy)
-    frame:SetAttribute("*clickbutton2", proxy)
-    -- Plain-string name for the OnEnter snippet to pass to SetBindingClick.
+    for attr, value in pairs(staticRouting) do
+        setRouting(frame, attr, value == PROXY and proxy or value)
+    end
     frame:SetAttribute("clique_proxyname", proxy:GetName())
+
+    local keyProxy = addon.keyProxies[frame]
+    if keyProxy then
+        frame:SetAttribute("clique_keyproxyname", keyProxy:GetName())
+    end
+
+    -- A frame's own shift-type2="togglemenu" outranks our *type* wildcard, so stamp
+    -- the specific attribute for every modified click we bind.
+    local desired = {}
+    for _, combo in ipairs(addon:GetClickRoutingCombos()) do
+        desired[combo.type] = true
+        desired[combo.click] = true
+        setRouting(frame, combo.type, "click")
+        setRouting(frame, combo.click, proxy)
+    end
+
+    -- Hand back any non-static combo attribute we previously wrote but no longer
+    -- bind, so unbinding a modified click restores the frame's original action.
+    for attr in pairs(addon.proxyBackup[frame]) do
+        if not staticRouting[attr] and not desired[attr] then
+            clearRouting(frame, attr)
+        end
+    end
+
     -- The source ignores useOnKeyDown, so its RegisterForClicks is the only lever
     -- that selects press vs. release.
     frame:RegisterForClicks(addon:GetButtonDirections())
 end
 
--- Routes the frame's clicks to the proxy. The original attributes were already
--- snapshotted in GetOrCreateProxy, so this is a pure writer.
+-- Routes the frame's clicks to the proxy. writeRouting snapshots each original
+-- attribute the first time it clobbers it, so this also seeds proxyBackup.
 function addon:SetupFrameClickRouting(frame, proxy)
     writeRouting(frame, proxy)
 end
@@ -132,22 +209,14 @@ function addon:ReassertAllFrameClickRouting()
     end
 end
 
--- Removes click routing from a frame and restores its original attribute values.
+-- Removes all click routing from a frame, restoring every attribute we clobbered
+-- (static set and combos) to its captured original.
 function addon:TeardownFrameClickRouting(frame)
     local backup = self.proxyBackup[frame]
     if backup then
-        frame:SetAttribute("*type1", backup["*type1"])
-        frame:SetAttribute("*type2", backup["*type2"])
-        frame:SetAttribute("type1", backup["type1"])
-        frame:SetAttribute("type2", backup["type2"])
-        frame:SetAttribute("type", backup["type"])
-        frame:SetAttribute("*type*", backup["*type*"])
-        frame:SetAttribute("clickbutton", backup["clickbutton"])
-        frame:SetAttribute("*clickbutton*", backup["*clickbutton*"])
-        frame:SetAttribute("clickbutton1", backup["clickbutton1"])
-        frame:SetAttribute("clickbutton2", backup["clickbutton2"])
-        frame:SetAttribute("*clickbutton1", backup["*clickbutton1"])
-        frame:SetAttribute("*clickbutton2", backup["*clickbutton2"])
+        for attr in pairs(backup) do
+            clearRouting(frame, attr)
+        end
         self.proxyBackup[frame] = nil
     end
 
@@ -156,4 +225,10 @@ function addon:TeardownFrameClickRouting(frame)
         self:UnregisterProxySecure(proxy)
     end
     self.proxies[frame] = nil
+
+    local keyProxy = self.keyProxies[frame]
+    if keyProxy then
+        self:UnregisterProxySecure(keyProxy)
+    end
+    self.keyProxies[frame] = nil
 end

@@ -76,7 +76,8 @@ local DISPEL_SPELLS = {
     { id = 51886,  name = "Cleanse Spirit", class = "SHAMAN" }, -- Ele & Enh
     { id = 360823, name = "Naturalize",    class = "EVOKER" },  -- Pres
     { id = 365585, name = "Expunge",       class = "EVOKER" },  -- Aug & Dev
-    { id = 89808,  name = "Singe Magic",   class = "WARLOCK" },
+    { id = 89808,  name = "Singe Magic",   class = "WARLOCK" }, -- Warlock
+    { id = 475,    name = "Remove Curse",  class = "MAGE" },  -- All specs (Curse only)
 }
 
 -- External defensive spells by class
@@ -147,6 +148,12 @@ local bindProxy          = nil   -- SecureActionButtonTemplate (unnamed frame fa
 local globalBtn        = nil   -- SecureActionButtonTemplate (hovercast bindings)
 local registeredFrames = {}
 local ownedFrames      = {}
+-- Native left-click target attrs (type1 / *type1) captured the first time a frame
+-- is registered, so DoUnregisterFrame restores EXACTLY what the frame had: raid
+-- frames target on left-click, EUI unit frames don't. Without this, disabling
+-- click-cast would force the raid default (left-click targets) onto unit frames.
+-- Weak-keyed so dead frames drop out.
+local originalTargetAttrs = setmetatable({}, { __mode = "k" })
 local regQueue         = {}
 local unregQueue       = {}
 local pendingApply     = false
@@ -589,13 +596,13 @@ function ns.CC_GetBindingIcon(b)
 end
 
 function ns.CC_GetBindingName(b)
-    if b.type == "target" then return "Target Unit" end
-    if b.type == "menu" then return "Context Menu" end
-    if b.type == "trinket1" then return "Trinket 1" end
-    if b.type == "trinket2" then return "Trinket 2" end
-    if b.type == "dynamicrez" then return "Dynamic Rez" end
-    if b.type == "spell" then return b.spell or "Unknown Spell" end
-    if b.type == "macro" then return b.macroName or "Unknown Macro" end
+    if b.type == "target" then return EllesmereUI.L("Target Unit") end
+    if b.type == "menu" then return EllesmereUI.L("Context Menu") end
+    if b.type == "trinket1" then return EllesmereUI.L("Trinket 1") end
+    if b.type == "trinket2" then return EllesmereUI.L("Trinket 2") end
+    if b.type == "dynamicrez" then return EllesmereUI.L("Dynamic Rez") end
+    if b.type == "spell" then return b.spell or EllesmereUI.L("Unknown Spell") end
+    if b.type == "macro" then return b.macroName or EllesmereUI.L("Unknown Macro") end
     if b.type == "item" then
         if b.itemSlot then
             local itemID = GetInventoryItemID("player", b.itemSlot)
@@ -604,11 +611,11 @@ function ns.CC_GetBindingName(b)
                 if name then return name end
             end
         end
-        return b.itemName or "Unknown Item"
+        return b.itemName or EllesmereUI.L("Unknown Item")
     end
-    if b.type == "dispel" then return "Dispels" end
-    if b.type == "external" then return "Externals" end
-    return "Unknown"
+    if b.type == "dispel" then return EllesmereUI.L("Dispels") end
+    if b.type == "external" then return EllesmereUI.L("Externals") end
+    return EllesmereUI.L("Unknown")
 end
 
 -------------------------------------------------------------------------------
@@ -985,6 +992,37 @@ local function GetClickDirection()
     return (cc and cc.enabled and cc.downClick) and "AnyDown" or "AnyUp"
 end
 
+-- After a frame's click-cast bindings are applied, neutralize the no-click-cast
+-- defaults so an UNBOUND left/right click does nothing. A unit button is created
+-- with type1/*type1 = "target" and the menu wildcard *type2 = "click" (+
+-- *clickbutton2). Clearing the wildcards is not enough on its own:
+--   * The creation-time SPECIFIC type1 = "target" survives, and even if it were
+--     cleared, plain left-click still targets via Blizzard's native ClickBindings
+--     interaction -- which a nil type1 falls through to. So when nothing is bound
+--     to plain left-click we write an inert type1 = "none": a non-nil,
+--     unrecognized action the secure handler performs (i.e. nothing), which also
+--     suppresses the wildcard / native-interaction fallback.
+--   * Same idea for the menu on type2.
+-- A button the user DID bind already wrote its own type<N> via SetClickAttr, so
+-- we leave those alone. Own secure frame, only ever reached out of combat -> no taint.
+local function NeutralizeDefaultClicks(frame, bindings)
+    local b1, b2 = false, false
+    for _, b in ipairs(bindings) do
+        if not b.hovercast and b.key then
+            local parsed = ParseKeyString(b.key)
+            if parsed.isMouseButton and parsed.modifiers == "" then
+                if parsed.buttonNum == 1 then b1 = true
+                elseif parsed.buttonNum == 2 then b2 = true end
+            end
+        end
+    end
+    frame:SetAttribute("*type1", nil)
+    frame:SetAttribute("*type2", nil)
+    frame:SetAttribute("*clickbutton2", nil)
+    if not b1 then frame:SetAttribute("type1", "none") end
+    if not b2 then frame:SetAttribute("type2", "none") end
+end
+
 local function DoRegisterFrame(frame)
     if registeredFrames[frame] then return end
     if not frame or not frame.RegisterForClicks then return end
@@ -996,6 +1034,15 @@ local function DoRegisterFrame(frame)
     local cc = GetClickCastDB()
     if not (cc and cc.enabled) then return end
     registeredFrames[frame] = true
+    -- Capture the frame's native left-click target attrs once, before we touch
+    -- anything, so DoUnregisterFrame restores them exactly (raid -> target, EUI
+    -- unit frames -> none). Kept across register/unregister cycles.
+    if originalTargetAttrs[frame] == nil then
+        originalTargetAttrs[frame] = {
+            type1     = frame:GetAttribute("type1"),
+            starType1 = frame:GetAttribute("*type1"),
+        }
+    end
     frame:RegisterForClicks(GetClickDirection())
     if frame.EnableMouseWheel then frame:EnableMouseWheel(true) end
     if not wrappedFrames[frame] then
@@ -1037,6 +1084,11 @@ local function DoRegisterFrame(frame)
         end
     end
 
+    -- Neutralize the default left-click target / right-click menu for any button
+    -- the user did not bind (see NeutralizeDefaultClicks). Restored in
+    -- DoUnregisterFrame on disable.
+    NeutralizeDefaultClicks(frame, bindings)
+
 end
 
 local function DoUnregisterFrame(frame)
@@ -1055,10 +1107,19 @@ local function DoUnregisterFrame(frame)
     end
     ClearKeyAttrs(frame, lastBindingCount)
 
-    -- Restore default click behavior (target + menu). The menu goes through the
-    -- secure SecureActionButton proxy (12.0.7 gates a raw togglemenu on unit
-    -- buttons, and an insecure reopen taints the menu's protected items).
-    frame:SetAttribute("type1", "target")
+    -- Restore the frame's NATIVE left-click target attrs captured at register
+    -- time: raid frames revert to type1/*type1 = "target", EUI unit frames revert
+    -- to NO left-click target (their native state) rather than being forced to
+    -- target. The menu's *type2 / *clickbutton2 are restored by AttachSecureUnitMenu.
+    local o = originalTargetAttrs[frame]
+    if o then
+        frame:SetAttribute("type1", o.type1)
+        frame:SetAttribute("*type1", o.starType1)
+    else
+        -- Never captured (shouldn't happen): fall back to the historical raid default.
+        frame:SetAttribute("type1", "target")
+        frame:SetAttribute("*type1", "target")
+    end
     if EllesmereUI.AttachSecureUnitMenu then
         EllesmereUI.AttachSecureUnitMenu(frame)
     else
@@ -1246,6 +1307,9 @@ function ns.CC_ApplyBindings()
             else
             end
         end
+        -- Re-neutralize the unbound left/right defaults after the rebuild (the
+        -- clear pass above may have stripped a previous binding's type<N>).
+        NeutralizeDefaultClicks(frame, bindings)
     end
     -- Bind proxy gets keyboard attrs too (unnamed frame fallback)
     for _, fb in ipairs(frameBindings) do
@@ -1341,13 +1405,17 @@ function ns.CC_ApplyBindings()
     header:SetAttribute("eui_hover_set", table.concat(hoverSetLines, "\n"))
     header:SetAttribute("eui_hover_clear", table.concat(hoverClearLines, "\n"))
 
-    -- Teardown executed on the NEXT rebuild: drop every override binding this
-    -- build owns (hover keys + frame-based keys) and reset the active flag.
-    local teardown = {}
-    for _, line in ipairs(hoverClearLines) do teardown[#teardown + 1] = line end
-    for _, line in ipairs(kbClearLines) do teardown[#teardown + 1] = line end
-    teardown[#teardown + 1] = "eui_hoveractive = false"
-    header._ccClearScript = table.concat(teardown, "\n")
+    -- Teardown executed on the NEXT rebuild (line ~1311): drop every override
+    -- binding this header owns and reset the active flag. self:ClearBindings()
+    -- wipes them ALL in one shot rather than replaying a per-key ClearBinding
+    -- list. The per-key list was fragile: when the LAST hover/keyboard binding is
+    -- unbound, the state driver is not re-registered (the gate just below), so any
+    -- override the per-key teardown missed -- e.g. one still active because the
+    -- user was hovering a frame when they unbound -- had nothing left to clear it
+    -- and kept firing until /reload (the unbind-doesn't-take-effect bug). The
+    -- header owns only click-cast overrides and they re-establish on the next
+    -- hover, so a full wipe is always safe.
+    header._ccClearScript = "self:ClearBindings()\neui_hoveractive = false"
 
     if #hoverSetLines > 0 or #kbClearLines > 0 then
         local fbFailsafe = table.concat(kbClearLines, "\n")
@@ -1793,7 +1861,7 @@ function ns.CC_BuildPage(pageName, parent, yOffset)
         local listening = false
         local function RefreshLabel()
             local key = getCurrentKey and getCurrentKey()
-            kbLbl:SetText(key and ns.CC_FormatKey(key) or "Not Bound")
+            kbLbl:SetText(key and ns.CC_FormatKey(key) or EllesmereUI.L("Not Bound"))
         end
         RefreshLabel()
 
@@ -1810,7 +1878,7 @@ function ns.CC_BuildPage(pageName, parent, yOffset)
             if not listening then
                 if button == "LeftButton" then
                     listening = true
-                    kbLbl:SetText("Press a key, click, or scroll...")
+                    kbLbl:SetText(EllesmereUI.L("Press a key, click, or scroll..."))
                     kbBtn:EnableKeyboard(true)
                     kbBtn:EnableMouseWheel(true)
                 elseif button == "RightButton" then
@@ -1856,7 +1924,7 @@ function ns.CC_BuildPage(pageName, parent, yOffset)
         kbBtn:SetScript("OnEnter", function(self)
             kbBg:SetColorTexture(EllesmereUI.DD_BG_R, EllesmereUI.DD_BG_G, EllesmereUI.DD_BG_B, EllesmereUI.DD_BG_HA)
             if kbBtn._border and kbBtn._border.SetColor then kbBtn._border:SetColor(1, 1, 1, 0.3) end
-            EllesmereUI.ShowWidgetTooltip(self, "Left-click to set keybind.\nRight-click to clear.")
+            EllesmereUI.ShowWidgetTooltip(self, EllesmereUI.L("Left-click to set keybind.\nRight-click to clear."))
         end)
         kbBtn:SetScript("OnLeave", function()
             if listening then return end
@@ -1913,14 +1981,14 @@ function ns.CC_BuildPage(pageName, parent, yOffset)
         title:SetPoint("TOPLEFT", tile, "TOPLEFT", textX, -8)
         title:SetPoint("RIGHT", tile, "RIGHT", -30, 0)
         title:SetJustifyH("LEFT"); title:SetWordWrap(false)
-        title:SetText(ns.CC_GetBindingName(binding))
+        title:SetText(EllesmereUI.L(ns.CC_GetBindingName(binding)))
 
         -- Keybind subtitle
         local keySub = MakeFont(tile, 11, 0.75, 0.75, 0.75, 0.65)
         keySub:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -2)
         keySub:SetPoint("RIGHT", tile, "RIGHT", -30, 0)
         keySub:SetJustifyH("LEFT"); keySub:SetWordWrap(false)
-        keySub:SetText(binding.key and ns.CC_FormatKey(binding.key) or "Not Bound")
+        keySub:SetText(binding.key and ns.CC_FormatKey(binding.key) or EllesmereUI.L("Not Bound"))
 
         -- Delete button (top-right, where toggle used to be)
         if onDelete then
@@ -2154,7 +2222,7 @@ function ns.CC_BuildPage(pageName, parent, yOffset)
     -- Header label
     local leftHeader = MakeFont(leftOuter, 13, 1, 1, 1, 0.75)
     leftHeader:SetPoint("TOP", leftOuter, "TOP", 0, -18)
-    leftHeader:SetText("Global Bindings")
+    leftHeader:SetText(EllesmereUI.L("Global Bindings"))
 
     local leftScroll = CreateFrame("ScrollFrame", nil, leftOuter)
     leftScroll:SetPoint("TOPLEFT", leftOuter, "TOPLEFT", 0, -38)
@@ -2193,7 +2261,7 @@ function ns.CC_BuildPage(pageName, parent, yOffset)
     local agBg = addGlobalBtn:CreateTexture(nil, "BACKGROUND")
     agBg:SetAllPoints(); agBg:SetColorTexture(0.05, 0.52, 0.39, 0.8)
     local agLbl = MakeFont(addGlobalBtn, 12, 1, 1, 1, 1)
-    agLbl:SetPoint("CENTER"); agLbl:SetText("Add Global Binding")
+    agLbl:SetPoint("CENTER"); agLbl:SetText(EllesmereUI.L("Add Global Binding"))
     addGlobalBtn:SetScript("OnEnter", function() agBg:SetColorTexture(0.07, 0.62, 0.49, 1) end)
     addGlobalBtn:SetScript("OnLeave", function() agBg:SetColorTexture(0.05, 0.52, 0.39, 0.8) end)
 
@@ -2233,14 +2301,14 @@ function ns.CC_BuildPage(pageName, parent, yOffset)
         macroToggleG:SetPoint("TOPLEFT", popup, "TOPLEFT", INSETG, -INSETG)
         local mtBgG = macroToggleG:CreateTexture(nil, "BACKGROUND"); mtBgG:SetAllPoints()
         local mtHlG = macroToggleG:CreateTexture(nil, "HIGHLIGHT"); mtHlG:SetAllPoints(); mtHlG:SetColorTexture(1, 1, 1, 0.1)
-        local mtLblG = MakeFont(macroToggleG, 12, 1, 1, 1, 0.9); mtLblG:SetPoint("CENTER"); mtLblG:SetText("Macros")
+        local mtLblG = MakeFont(macroToggleG, 12, 1, 1, 1, 0.9); mtLblG:SetPoint("CENTER"); mtLblG:SetText(EllesmereUI.L("Macros"))
 
         local itemToggleG = CreateFrame("Button", nil, popup)
         itemToggleG:SetSize((popupWG - INSETG * 2) / 2 - 2, 26)
         itemToggleG:SetPoint("TOPRIGHT", popup, "TOPRIGHT", -INSETG, -INSETG)
         local itBgG = itemToggleG:CreateTexture(nil, "BACKGROUND"); itBgG:SetAllPoints()
         local itHlG = itemToggleG:CreateTexture(nil, "HIGHLIGHT"); itHlG:SetAllPoints(); itHlG:SetColorTexture(1, 1, 1, 0.1)
-        local itLblG = MakeFont(itemToggleG, 12, 1, 1, 1, 0.9); itLblG:SetPoint("CENTER"); itLblG:SetText("Items")
+        local itLblG = MakeFont(itemToggleG, 12, 1, 1, 1, 0.9); itLblG:SetPoint("CENTER"); itLblG:SetText(EllesmereUI.L("Items"))
 
         local gridScrollG = CreateFrame("ScrollFrame", nil, popup)
         gridScrollG:SetPoint("TOPLEFT", popup, "TOPLEFT", INSETG, -(INSETG + 40))
@@ -2376,7 +2444,7 @@ function ns.CC_BuildPage(pageName, parent, yOffset)
     local sgBg = stickyGlobalBtn:CreateTexture(nil, "BACKGROUND")
     sgBg:SetAllPoints(); sgBg:SetColorTexture(0.05, 0.52, 0.39, 0.8)
     local sgLbl = MakeFont(stickyGlobalBtn, 12, 1, 1, 1, 1)
-    sgLbl:SetPoint("CENTER"); sgLbl:SetText("Add Global Binding")
+    sgLbl:SetPoint("CENTER"); sgLbl:SetText(EllesmereUI.L("Add Global Binding"))
     stickyGlobalBtn:SetScript("OnEnter", function() sgBg:SetColorTexture(0.07, 0.62, 0.49, 1) end)
     stickyGlobalBtn:SetScript("OnLeave", function() sgBg:SetColorTexture(0.05, 0.52, 0.39, 0.8) end)
     stickyGlobalBtn:SetScript("OnClick", function()
@@ -2417,7 +2485,7 @@ function ns.CC_BuildPage(pageName, parent, yOffset)
 
     local rightHeader = MakeFont(rightOuter, 13, 1, 1, 1, 0.75)
     rightHeader:SetPoint("TOP", rightOuter, "TOP", 0, -18)
-    rightHeader:SetText("Spec Bindings")
+    rightHeader:SetText(EllesmereUI.L("Spec Bindings"))
 
     local rightScroll = CreateFrame("ScrollFrame", nil, rightOuter)
     rightScroll:SetPoint("TOPLEFT", rightOuter, "TOPLEFT", 0, -38)
@@ -2456,7 +2524,7 @@ function ns.CC_BuildPage(pageName, parent, yOffset)
     local asBg = addSpecBtn:CreateTexture(nil, "BACKGROUND")
     asBg:SetAllPoints(); asBg:SetColorTexture(0.05, 0.52, 0.39, 0.8)
     local asLbl = MakeFont(addSpecBtn, 11, 1, 1, 1, 1)
-    asLbl:SetPoint("CENTER"); asLbl:SetText("Add New")
+    asLbl:SetPoint("CENTER"); asLbl:SetText(EllesmereUI.L("Add New"))
     addSpecBtn:SetScript("OnEnter", function() asBg:SetColorTexture(0.07, 0.62, 0.49, 1) end)
     addSpecBtn:SetScript("OnLeave", function() asBg:SetColorTexture(0.05, 0.52, 0.39, 0.8) end)
 
@@ -2467,7 +2535,7 @@ function ns.CC_BuildPage(pageName, parent, yOffset)
     local qbBg = qbBtn:CreateTexture(nil, "BACKGROUND")
     qbBg:SetAllPoints(); qbBg:SetColorTexture(0.25, 0.25, 0.25, 0.6)
     local qbLbl = MakeFont(qbBtn, 11, 1, 1, 1, 0.5)
-    qbLbl:SetPoint("CENTER"); qbLbl:SetText("Quickbind")
+    qbLbl:SetPoint("CENTER"); qbLbl:SetText(EllesmereUI.L("Quickbind"))
     qbBtn:SetScript("OnEnter", function() qbBg:SetColorTexture(0.35, 0.35, 0.35, 0.8); qbLbl:SetAlpha(0.9) end)
     qbBtn:SetScript("OnLeave", function() qbBg:SetColorTexture(0.25, 0.25, 0.25, 0.6); qbLbl:SetAlpha(0.5) end)
 
@@ -2510,7 +2578,7 @@ function ns.CC_BuildPage(pageName, parent, yOffset)
         -- Title
         local titleLbl = MakeFont(popup, 13, 1, 1, 1, 0.9)
         titleLbl:SetPoint("TOP", popup, "TOP", 0, -QB_INSET)
-        titleLbl:SetText("Quickbind: hover a spell, press a key")
+        titleLbl:SetText(EllesmereUI.L("Quickbind: hover a spell, press a key"))
 
         -- Spells / Macros / Items toggle
         local toggleModeQB = "spell"
@@ -2523,21 +2591,21 @@ function ns.CC_BuildPage(pageName, parent, yOffset)
         spellTglQB:SetPoint("TOPLEFT", popup, "TOPLEFT", QB_INSET, toggleTopQB)
         local stBgQB = spellTglQB:CreateTexture(nil, "BACKGROUND"); stBgQB:SetAllPoints()
         local stHlQB = spellTglQB:CreateTexture(nil, "HIGHLIGHT"); stHlQB:SetAllPoints(); stHlQB:SetColorTexture(1, 1, 1, 0.1)
-        local stLblQB = MakeFont(spellTglQB, 12, 1, 1, 1, 0.9); stLblQB:SetPoint("CENTER"); stLblQB:SetText("Spells")
+        local stLblQB = MakeFont(spellTglQB, 12, 1, 1, 1, 0.9); stLblQB:SetPoint("CENTER"); stLblQB:SetText(EllesmereUI.L("Spells"))
 
         local macroTglQB = CreateFrame("Button", nil, popup)
         macroTglQB:SetSize(toggleBtnWQB, 26)
         macroTglQB:SetPoint("LEFT", spellTglQB, "RIGHT", 3, 0)
         local mtBgQB = macroTglQB:CreateTexture(nil, "BACKGROUND"); mtBgQB:SetAllPoints()
         local mtHlQB = macroTglQB:CreateTexture(nil, "HIGHLIGHT"); mtHlQB:SetAllPoints(); mtHlQB:SetColorTexture(1, 1, 1, 0.1)
-        local mtLblQB = MakeFont(macroTglQB, 12, 1, 1, 1, 0.9); mtLblQB:SetPoint("CENTER"); mtLblQB:SetText("Macros")
+        local mtLblQB = MakeFont(macroTglQB, 12, 1, 1, 1, 0.9); mtLblQB:SetPoint("CENTER"); mtLblQB:SetText(EllesmereUI.L("Macros"))
 
         local itemTglQB = CreateFrame("Button", nil, popup)
         itemTglQB:SetSize(toggleBtnWQB, 26)
         itemTglQB:SetPoint("LEFT", macroTglQB, "RIGHT", 3, 0)
         local itBgQB = itemTglQB:CreateTexture(nil, "BACKGROUND"); itBgQB:SetAllPoints()
         local itHlQB = itemTglQB:CreateTexture(nil, "HIGHLIGHT"); itHlQB:SetAllPoints(); itHlQB:SetColorTexture(1, 1, 1, 0.1)
-        local itLblQB = MakeFont(itemTglQB, 12, 1, 1, 1, 0.9); itLblQB:SetPoint("CENTER"); itLblQB:SetText("Items")
+        local itLblQB = MakeFont(itemTglQB, 12, 1, 1, 1, 0.9); itLblQB:SetPoint("CENTER"); itLblQB:SetText(EllesmereUI.L("Items"))
 
         -- Grid scroll area
         local gridScrollQB = CreateFrame("ScrollFrame", nil, popup)
@@ -2719,7 +2787,7 @@ function ns.CC_BuildPage(pageName, parent, yOffset)
         local doneBg = doneBtn:CreateTexture(nil, "BACKGROUND")
         doneBg:SetAllPoints(); doneBg:SetColorTexture(0.25, 0.25, 0.25, 0.6)
         local doneLbl = MakeFont(doneBtn, 11, 1, 1, 1, 0.5)
-        doneLbl:SetPoint("CENTER"); doneLbl:SetText("Done")
+        doneLbl:SetPoint("CENTER"); doneLbl:SetText(EllesmereUI.L("Done"))
         doneBtn:SetScript("OnEnter", function() doneBg:SetColorTexture(0.35, 0.35, 0.35, 0.8); doneLbl:SetAlpha(0.9) end)
         doneBtn:SetScript("OnLeave", function() doneBg:SetColorTexture(0.25, 0.25, 0.25, 0.6); doneLbl:SetAlpha(0.5) end)
         doneBtn:SetScript("OnClick", function() dimmer:Hide() end)
@@ -2780,21 +2848,21 @@ function ns.CC_BuildPage(pageName, parent, yOffset)
         spellToggle:SetPoint("TOPLEFT", popup, "TOPLEFT", INSET2, -INSET2)
         local stBg = spellToggle:CreateTexture(nil, "BACKGROUND"); stBg:SetAllPoints()
         local stHl = spellToggle:CreateTexture(nil, "HIGHLIGHT"); stHl:SetAllPoints(); stHl:SetColorTexture(1, 1, 1, 0.1)
-        local stLbl = MakeFont(spellToggle, 12, 1, 1, 1, 0.9); stLbl:SetPoint("CENTER"); stLbl:SetText("Spells")
+        local stLbl = MakeFont(spellToggle, 12, 1, 1, 1, 0.9); stLbl:SetPoint("CENTER"); stLbl:SetText(EllesmereUI.L("Spells"))
 
         local macroToggle = CreateFrame("Button", nil, popup)
         macroToggle:SetSize(toggleBtnW, 26)
         macroToggle:SetPoint("LEFT", spellToggle, "RIGHT", 3, 0)
         local mtBg = macroToggle:CreateTexture(nil, "BACKGROUND"); mtBg:SetAllPoints()
         local mtHl = macroToggle:CreateTexture(nil, "HIGHLIGHT"); mtHl:SetAllPoints(); mtHl:SetColorTexture(1, 1, 1, 0.1)
-        local mtLbl = MakeFont(macroToggle, 12, 1, 1, 1, 0.9); mtLbl:SetPoint("CENTER"); mtLbl:SetText("Macros")
+        local mtLbl = MakeFont(macroToggle, 12, 1, 1, 1, 0.9); mtLbl:SetPoint("CENTER"); mtLbl:SetText(EllesmereUI.L("Macros"))
 
         local itemToggle = CreateFrame("Button", nil, popup)
         itemToggle:SetSize(toggleBtnW, 26)
         itemToggle:SetPoint("LEFT", macroToggle, "RIGHT", 3, 0)
         local itBg = itemToggle:CreateTexture(nil, "BACKGROUND"); itBg:SetAllPoints()
         local itHl = itemToggle:CreateTexture(nil, "HIGHLIGHT"); itHl:SetAllPoints(); itHl:SetColorTexture(1, 1, 1, 0.1)
-        local itLbl = MakeFont(itemToggle, 12, 1, 1, 1, 0.9); itLbl:SetPoint("CENTER"); itLbl:SetText("Items")
+        local itLbl = MakeFont(itemToggle, 12, 1, 1, 1, 0.9); itLbl:SetPoint("CENTER"); itLbl:SetText(EllesmereUI.L("Items"))
 
         -- Grid scroll area (inset on all sides, below toggle row)
         local gridScroll = CreateFrame("ScrollFrame", nil, popup)
@@ -2999,7 +3067,7 @@ function ns.CC_BuildPage(pageName, parent, yOffset)
     local ssBg = stickySpecBtn:CreateTexture(nil, "BACKGROUND")
     ssBg:SetAllPoints(); ssBg:SetColorTexture(0.05, 0.52, 0.39, 0.8)
     local ssLbl = MakeFont(stickySpecBtn, 11, 1, 1, 1, 1)
-    ssLbl:SetPoint("CENTER"); ssLbl:SetText("Add New")
+    ssLbl:SetPoint("CENTER"); ssLbl:SetText(EllesmereUI.L("Add New"))
     stickySpecBtn:SetScript("OnEnter", function() ssBg:SetColorTexture(0.07, 0.62, 0.49, 1) end)
     stickySpecBtn:SetScript("OnLeave", function() ssBg:SetColorTexture(0.05, 0.52, 0.39, 0.8) end)
     stickySpecBtn:SetScript("OnClick", function()
@@ -3014,7 +3082,7 @@ function ns.CC_BuildPage(pageName, parent, yOffset)
     local sqBg = stickyQBBtn:CreateTexture(nil, "BACKGROUND")
     sqBg:SetAllPoints(); sqBg:SetColorTexture(0.25, 0.25, 0.25, 0.6)
     local sqLbl = MakeFont(stickyQBBtn, 11, 1, 1, 1, 0.5)
-    sqLbl:SetPoint("CENTER"); sqLbl:SetText("Quickbind")
+    sqLbl:SetPoint("CENTER"); sqLbl:SetText(EllesmereUI.L("Quickbind"))
     stickyQBBtn:SetScript("OnEnter", function() sqBg:SetColorTexture(0.35, 0.35, 0.35, 0.8); sqLbl:SetAlpha(0.9) end)
     stickyQBBtn:SetScript("OnLeave", function() sqBg:SetColorTexture(0.25, 0.25, 0.25, 0.6); sqLbl:SetAlpha(0.5) end)
     stickyQBBtn:SetScript("OnClick", function() qbBtn:Click() end)
@@ -3074,7 +3142,7 @@ function ns.CC_BuildPage(pageName, parent, yOffset)
         local lbl = EllesmereUI.MakeFont(row, 14, nil,
             EllesmereUI.TEXT_WHITE_R, EllesmereUI.TEXT_WHITE_G, EllesmereUI.TEXT_WHITE_B)
         PP.Point(lbl, "LEFT", row, "LEFT", SIDE_PAD, 0)
-        lbl:SetText(text)
+        lbl:SetText(EllesmereUI.L(text))
         return lbl
     end
 
@@ -3116,7 +3184,7 @@ function ns.CC_BuildPage(pageName, parent, yOffset)
         local secH = 33
         local secLabel = MakeFont(centerFrame, 11, 1, 1, 1, 0.75)
         secLabel:SetPoint("TOPLEFT", centerFrame, "TOPLEFT", C_PAD, centerY - 14)
-        secLabel:SetText("GLOBAL OPTIONS")
+        secLabel:SetText(EllesmereUI.L("GLOBAL OPTIONS"))
         local secLine = centerFrame:CreateTexture(nil, "ARTWORK")
         secLine:SetHeight(1)
         secLine:SetPoint("LEFT", secLabel, "RIGHT", 8, 0)
@@ -3141,7 +3209,7 @@ function ns.CC_BuildPage(pageName, parent, yOffset)
             pill:SetAlpha(0.3)
             pill:SetScript("OnClick", nil)  -- non-interactive while Clique owns clicks
             pill:SetScript("OnEnter", function(self)
-                EllesmereUI.ShowWidgetTooltip(self, 'Please disable the addon "Clique" to use this feature.')
+                EllesmereUI.ShowWidgetTooltip(self, EllesmereUI.L('Please disable the addon "Clique" to use this feature.'))
             end)
             pill:SetScript("OnLeave", function() EllesmereUI.HideWidgetTooltip() end)
         end
@@ -3189,7 +3257,7 @@ function ns.CC_BuildPage(pageName, parent, yOffset)
         local secH = 33
         local secLabel = MakeFont(bodyHost, 11, 1, 1, 1, 0.75)
         secLabel:SetPoint("TOPLEFT", bodyHost, "TOPLEFT", C_PAD, centerY - 14)
-        secLabel:SetText("PER-SPELL OPTIONS")
+        secLabel:SetText(EllesmereUI.L("PER-SPELL OPTIONS"))
         local secLine = bodyHost:CreateTexture(nil, "ARTWORK")
         secLine:SetHeight(1)
         secLine:SetPoint("LEFT", secLabel, "RIGHT", 8, 0)
@@ -3216,11 +3284,11 @@ function ns.CC_BuildPage(pageName, parent, yOffset)
             elseif selectedBinding.type == "external" then typeStr = "Preset"
             end
             local tType = MakeFont(titleRow, 11, 1, 1, 1, 0.4)
-            tType:SetText(typeStr)
+            tType:SetText(EllesmereUI.L(typeStr))
 
             -- Name label (larger, brighter)
             local tName = MakeFont(titleRow, 15, 1, 1, 1, 0.9)
-            tName:SetText(ns.CC_GetBindingName(selectedBinding))
+            tName:SetText(EllesmereUI.L(ns.CC_GetBindingName(selectedBinding)))
 
             -- Measure widths for centering
             local typeW = tType:GetStringWidth()
@@ -3262,10 +3330,10 @@ function ns.CC_BuildPage(pageName, parent, yOffset)
                     local conflicts = FindKeyConflicts(newKey, selectedBinding)
                     if #conflicts == 0 then ApplyKey(newKey); return end
                     EllesmereUI:ShowConfirmPopup({
-                        title = "Duplicate Keybind",
-                        message = ns.CC_FormatKey(newKey) .. " is already assigned to:\n" .. table.concat(conflicts, ", "),
-                        confirmText = "Okay",
-                        cancelText = "Don't Show Again",
+                        title = EllesmereUI.L("Duplicate Keybind"),
+                        message = EllesmereUI.Lf("%s is already assigned to:\n%s", ns.CC_FormatKey(newKey), table.concat(conflicts, ", ")),
+                        confirmText = EllesmereUI.L("Okay"),
+                        cancelText = EllesmereUI.L("Don't Show Again"),
                         onConfirm = function() ApplyKey(newKey) end,
                         onCancel = function() cc.hideKeyWarning = true; ApplyKey(newKey) end,
                     })
@@ -3343,7 +3411,7 @@ function ns.CC_BuildPage(pageName, parent, yOffset)
                     pill:EnableMouse(false)
                     if EllesmereUI.ShowWidgetTooltip then
                         row:SetScript("OnEnter", function(self)
-                            EllesmereUI.ShowWidgetTooltip(self, "Hovercast is not available for unmodified left/right click")
+                            EllesmereUI.ShowWidgetTooltip(self, EllesmereUI.L("Hovercast is not available for unmodified left/right click"))
                         end)
                         row:SetScript("OnLeave", function() EllesmereUI.HideWidgetTooltip() end)
                     end
@@ -3392,7 +3460,7 @@ function ns.CC_BuildPage(pageName, parent, yOffset)
         local hint = MakeFont(bodyHost, 12, 1, 1, 1, 0.25)
         hint:SetPoint("TOP", bodyHost, "TOP", 0, centerY - 50)
         hint:SetJustifyH("CENTER")
-        hint:SetText("Select a binding from either sidebar to edit its options")
+        hint:SetText(EllesmereUI.L("Select a binding from either sidebar to edit its options"))
     end
 
     ---------------------------------------------------------------------------

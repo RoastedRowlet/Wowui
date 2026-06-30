@@ -48,7 +48,11 @@ function addon:ShowBindingConfig()
     config:Initialize()
     config:InitializeLayout()
 
-    config:SwitchToBrowsePage()
+    if addon:ShouldAutoShowChangelog() then
+        config:SwitchToChangelogPage()
+    else
+        config:SwitchToBrowsePage()
+    end
     ShowUIPanel(CliqueUIBindingFrame)
 end
 
@@ -134,6 +138,7 @@ function config:InitializeLayout()
     config.DenylistPage = config:GetDenylistPage()
     config.GeneralOptionsPage = config:GetGeneralOptionsPage()
     config.ProfilePage = config:GetProfilePage()
+    config.ChangelogPage = config:GetChangelogPage()
 
     -- Initialize their layouts
     config.BrowsePage:Initialize()
@@ -144,6 +149,7 @@ function config:InitializeLayout()
     config.DenylistPage:Initialize()
     config.GeneralOptionsPage:Initialize()
     config.ProfilePage:Initialize()
+    config.ChangelogPage:Initialize()
 
     exclusivePages = {
         config.BrowsePage,
@@ -153,6 +159,7 @@ function config:InitializeLayout()
         config.DenylistPage,
         config.GeneralOptionsPage,
         config.ProfilePage,
+        config.ChangelogPage,
     }
 end
 
@@ -175,6 +182,10 @@ end
 
 function config:SwitchToProfilePage()
     config:SwitchToPage(config.ProfilePage)
+end
+
+function config:SwitchToChangelogPage()
+    config:SwitchToPage(config.ChangelogPage)
 end
 
 -- Open the edit page either with a selected binding, or a blank binding
