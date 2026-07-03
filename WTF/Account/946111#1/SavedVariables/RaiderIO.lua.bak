@@ -1,29 +1,35 @@
 
 RaiderIO_Config = {
+["minimapIcon"] = {
+["minimapPos"] = 180,
+["showInCompartment"] = true,
+["hide"] = false,
+["lock"] = false,
+},
 ["profilePoint"] = {
 ["y"] = 0,
 ["x"] = -16,
 ["point"] = "TOPLEFT",
 },
-["minimapIcon"] = {
-["minimapPos"] = 180,
-["showInCompartment"] = true,
-["lock"] = false,
-["hide"] = false,
-},
 }
 RaiderIO_LastCharacter = "us-Barelynoer-area-52"
 RaiderIO_MissingCharacters = {
-["us-Miguee-area-52"] = true,
-["us-Jiokyonim-thrall"] = true,
-["us-Metaiion-proudmoore"] = true,
-["us-Fiodness-area-52"] = true,
-["us-Strífe-zuljin"] = true,
-["us-Arîsê-tichondrius"] = true,
-["us-Arthós-ragnaros"] = true,
-["us-Hardh-area-52"] = true,
-["us-Malek-emerald-dream"] = true,
-["us-Solvdh-stormrage"] = true,
+["us-Bluebolts-destromath"] = true,
+["us-Eliè-ragnaros"] = true,
+["us-Kalixdh-zuljin"] = true,
+["us-Arcenidas-sargeras"] = true,
+["us-Lightzedge-chogall"] = true,
+["us-Redefinedx-illidan"] = true,
+["us-Phemera-suramar"] = true,
+["us-Theath-aegwynn"] = true,
+["us-Skedsdead-emerald-dream"] = true,
+["us-Turkeyfister-kelthuzad"] = true,
+["us-Kycenor-sargeras"] = true,
+["us-Mistmistress-gurubashi"] = true,
+["us-Runathir-earthen-ring"] = true,
+["us-Elyissiå-tichondrius"] = true,
+["us-Diminish-proudmoore"] = true,
+["us-Terisnap-area-52"] = true,
 }
 RaiderIO_MissingServers = {
 }

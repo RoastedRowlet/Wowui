@@ -108,3 +108,4 @@ Blizzard_EncounterJournal: enabled
 Blizzard_Transmog: enabled
 Dystinct_EarthenSkyriding: enabled
 Blizzard_CombatText: enabled
+Blizzard_WeeklyRewards: enabled
