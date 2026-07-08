@@ -1,6 +1,6 @@
 Version: 1
 Frame: CraftScanScannerMenuButton
-FrameLevel: 5
+FrameLevel: 6
 Anchor: LEFT
 X: 26
 Y: -244
@@ -27,10 +27,3 @@ X: 0
 Y: 0
 W: 1105
 H: 658
-Frame: DysES_Frame
-FrameLevel: 1
-Anchor: TOPLEFT
-X: -3
-Y: -8
-W: 600
-H: 314
