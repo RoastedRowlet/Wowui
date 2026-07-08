@@ -285,11 +285,16 @@ ArcUIDB = {
 ["backgroundTexture"] = "Dragonflight",
 ["textMovable"] = false,
 ["fontSize"] = 16,
-["colorCurveThreshold4Enabled"] = true,
+["colorCurveThreshold5Enabled"] = false,
 ["anchorToGroup"] = true,
 ["thresholdAsPercent"] = false,
 ["thresholdMode"] = "colorCurve",
-["colorCurveThreshold5Enabled"] = false,
+["textPosition"] = {
+["y"] = -105,
+["relPoint"] = "CENTER",
+["point"] = "CENTER",
+["x"] = 0,
+},
 ["colorCurveDirection"] = "fill",
 ["texture"] = "Grid2 Flat",
 ["enabled"] = true,
@@ -315,12 +320,7 @@ ArcUIDB = {
 ["x"] = -0.3334379494190216,
 },
 ["height"] = 15,
-["textPosition"] = {
-["y"] = -105,
-["relPoint"] = "CENTER",
-["point"] = "CENTER",
-["x"] = 0,
-},
+["colorCurveThreshold4Enabled"] = true,
 ["colorCurveThreshold2Color"] = {
 ["a"] = 1,
 ["b"] = 0,
@@ -375,6 +375,54 @@ ArcUIDB = {
 },
 },
 {
+["display"] = {
+["anchorToGroup"] = true,
+["textAnchor"] = "CENTER",
+["tickPercent"] = 10,
+["barPosition"] = {
+["y"] = 0,
+["relPoint"] = "BOTTOMLEFT",
+["point"] = "BOTTOMLEFT",
+["x"] = 0,
+},
+["matchGroupWidth"] = true,
+["textMovable"] = false,
+["anchorGroupName"] = "Essential",
+["width"] = 236,
+["tickMode"] = "custom",
+["enabled"] = true,
+["textAnchorOffsetY"] = -1.5,
+["textPosition"] = {
+["y"] = -140,
+["relPoint"] = "CENTER",
+["point"] = "CENTER",
+["x"] = 0,
+},
+["showTickMarks"] = true,
+["texture"] = "Grid2 Flat",
+},
+["behavior"] = {
+["showOnSpecs"] = {
+1,
+},
+["showOnSpec"] = 0,
+},
+["abilityThresholds"] = {
+{
+["enabled"] = true,
+["name"] = "Tick",
+["cost"] = 40,
+},
+},
+["tracking"] = {
+["enabled"] = true,
+["powerType"] = 8,
+["resourceCategory"] = "primary",
+["overrideMax"] = false,
+["showRuneTimer"] = false,
+["maxValue"] = 120,
+["powerName"] = "Astral Power",
+},
 ["thresholds"] = {
 {
 ["color"] = {
@@ -409,54 +457,6 @@ ArcUIDB = {
 ["minValue"] = 80,
 ["maxValue"] = 100,
 },
-},
-["display"] = {
-["anchorToGroup"] = true,
-["textAnchor"] = "CENTER",
-["tickPercent"] = 10,
-["barPosition"] = {
-["y"] = 0,
-["relPoint"] = "BOTTOMLEFT",
-["point"] = "BOTTOMLEFT",
-["x"] = 0,
-},
-["matchGroupWidth"] = true,
-["textMovable"] = false,
-["anchorGroupName"] = "Essential",
-["width"] = 236,
-["tickMode"] = "custom",
-["enabled"] = true,
-["textAnchorOffsetY"] = -1.5,
-["textPosition"] = {
-["y"] = -140,
-["relPoint"] = "CENTER",
-["point"] = "CENTER",
-["x"] = 0,
-},
-["showTickMarks"] = true,
-["texture"] = "Grid2 Flat",
-},
-["abilityThresholds"] = {
-{
-["enabled"] = true,
-["name"] = "Tick",
-["cost"] = 40,
-},
-},
-["tracking"] = {
-["enabled"] = true,
-["powerType"] = 8,
-["resourceCategory"] = "primary",
-["overrideMax"] = false,
-["showRuneTimer"] = false,
-["maxValue"] = 120,
-["powerName"] = "Astral Power",
-},
-["behavior"] = {
-["showOnSpecs"] = {
-1,
-},
-["showOnSpec"] = 0,
 },
 },
 {
@@ -662,44 +662,6 @@ nil,
 {
 ["_configVersion"] = 15,
 ["_migrated"] = 3,
-["display"] = {
-["showDuration"] = true,
-["durationFontSize"] = 15,
-["durationFont"] = "Friz Quadrata TT",
-["anchorPoint"] = "BOTTOM",
-["durationAnchorOffsetX"] = -14,
-["textPosition"] = {
-["y"] = 170,
-["relPoint"] = "CENTER",
-["point"] = "CENTER",
-["x"] = 0,
-},
-["anchorOffsetY"] = -27,
-["texture"] = "Grid2 Flat",
-["enabled"] = true,
-["durationAnchor"] = "CENTERRIGHT",
-["iconMultiPositions"] = {
-},
-["barMovable"] = false,
-["width"] = 118,
-["anchorGroupName"] = "Essential",
-["showText"] = false,
-["barColor"] = {
-["a"] = 1,
-["r"] = 0.01568627543747425,
-["g"] = 0,
-["b"] = 0.6000000238418579,
-},
-["anchorToGroup"] = true,
-["barReverseFill"] = true,
-["durationAnchorOffsetY"] = -1,
-["barPosition"] = {
-["y"] = 0,
-["relPoint"] = "CENTER",
-["point"] = "CENTER",
-["x"] = 0,
-},
-},
 ["thresholds"] = {
 {
 ["color"] = {
@@ -734,6 +696,12 @@ nil,
 ["minValue"] = 8,
 ["maxValue"] = 10,
 },
+},
+["behavior"] = {
+["showOnSpecs"] = {
+1,
+},
+["showOnSpec"] = 0,
 },
 ["colorRanges"] = {
 {
@@ -794,24 +762,14 @@ nil,
 ["customMaxStacks"] = 10,
 ["spellID"] = 1239669,
 },
-["behavior"] = {
-["showOnSpecs"] = {
-1,
-},
-["showOnSpec"] = 0,
-},
-},
-{
-["_configVersion"] = 39,
-["_migrated"] = 3,
 ["display"] = {
-["anchorOffsetX"] = 127,
 ["showDuration"] = true,
 ["durationFontSize"] = 15,
 ["durationFont"] = "Friz Quadrata TT",
-["durationAnchorOffsetX"] = 17,
+["anchorPoint"] = "BOTTOM",
+["durationAnchorOffsetX"] = -14,
 ["textPosition"] = {
-["y"] = 140,
+["y"] = 170,
 ["relPoint"] = "CENTER",
 ["point"] = "CENTER",
 ["x"] = 0,
@@ -819,27 +777,33 @@ nil,
 ["anchorOffsetY"] = -27,
 ["texture"] = "Grid2 Flat",
 ["enabled"] = true,
-["durationAnchor"] = "CENTERLEFT",
+["durationAnchor"] = "CENTERRIGHT",
 ["iconMultiPositions"] = {
 },
-["barColor"] = {
-["a"] = 1,
-["r"] = 0.7372549176216125,
-["g"] = 0.5176470875740051,
-["b"] = 0,
-},
+["barMovable"] = false,
 ["width"] = 118,
 ["anchorGroupName"] = "Essential",
 ["showText"] = false,
+["barColor"] = {
+["a"] = 1,
+["r"] = 0.01568627543747425,
+["g"] = 0,
+["b"] = 0.6000000238418579,
+},
 ["anchorToGroup"] = true,
+["barReverseFill"] = true,
 ["durationAnchorOffsetY"] = -1,
 ["barPosition"] = {
-["y"] = -243.3333387722573,
+["y"] = 0,
 ["relPoint"] = "CENTER",
 ["point"] = "CENTER",
-["x"] = 35.00000078231098,
+["x"] = 0,
 },
 },
+},
+{
+["_configVersion"] = 39,
+["_migrated"] = 3,
 ["thresholds"] = {
 {
 ["color"] = {
@@ -874,6 +838,12 @@ nil,
 ["minValue"] = 8,
 ["maxValue"] = 10,
 },
+},
+["behavior"] = {
+["showOnSpecs"] = {
+1,
+},
+["showOnSpec"] = 0,
 },
 ["colorRanges"] = {
 {
@@ -935,11 +905,41 @@ nil,
 ["customMaxStacks"] = 10,
 ["spellID"] = 1239669,
 },
-["behavior"] = {
-["showOnSpecs"] = {
-1,
+["display"] = {
+["anchorOffsetX"] = 127,
+["showDuration"] = true,
+["durationFontSize"] = 15,
+["durationFont"] = "Friz Quadrata TT",
+["durationAnchorOffsetX"] = 17,
+["textPosition"] = {
+["y"] = 140,
+["relPoint"] = "CENTER",
+["point"] = "CENTER",
+["x"] = 0,
 },
-["showOnSpec"] = 0,
+["anchorOffsetY"] = -27,
+["texture"] = "Grid2 Flat",
+["enabled"] = true,
+["durationAnchor"] = "CENTERLEFT",
+["iconMultiPositions"] = {
+},
+["barColor"] = {
+["a"] = 1,
+["r"] = 0.7372549176216125,
+["g"] = 0.5176470875740051,
+["b"] = 0,
+},
+["width"] = 118,
+["anchorGroupName"] = "Essential",
+["showText"] = false,
+["anchorToGroup"] = true,
+["durationAnchorOffsetY"] = -1,
+["barPosition"] = {
+["y"] = -243.3333387722573,
+["relPoint"] = "CENTER",
+["point"] = "CENTER",
+["x"] = 35.00000078231098,
+},
 },
 },
 },
@@ -1951,19 +1951,19 @@ nil,
 },
 ["hideShadow"] = false,
 ["keepBright"] = false,
+["pandemicBorder"] = {
+["enabled"] = false,
+},
 ["position"] = {
+},
+["chargeText"] = {
 },
 ["debuffBorder"] = {
 ["enabled"] = false,
 },
-["pandemicBorder"] = {
-["enabled"] = false,
-},
-["procGlow"] = {
-},
 ["height"] = 36,
 ["padding"] = 0,
-["chargeText"] = {
+["procGlow"] = {
 },
 ["auraActiveState"] = {
 },
@@ -2586,19 +2586,19 @@ nil,
 ["hideShadow"] = false,
 ["rangeIndicator"] = {
 },
+["procGlow"] = {
+},
 ["pandemicBorder"] = {
 ["enabled"] = false,
+},
+["position"] = {
 },
 ["debuffBorder"] = {
 ["enabled"] = false,
 },
-["procGlow"] = {
-},
-["chargeText"] = {
-},
 ["height"] = 36,
 ["padding"] = 0,
-["position"] = {
+["chargeText"] = {
 },
 ["auraActiveState"] = {
 },
@@ -3514,13 +3514,12 @@ nil,
 ["row"] = 0,
 ["sortIndex"] = 1,
 },
-[123704] = {
+[71314] = {
 ["type"] = "group",
-["col"] = 3,
+["col"] = 2,
 ["target"] = "Essential",
+["row"] = 0,
 ["viewerType"] = "cooldown",
-["row"] = 1,
-["sortIndex"] = 7,
 },
 [152137] = {
 ["type"] = "group",
@@ -3529,12 +3528,12 @@ nil,
 ["row"] = 0,
 ["viewerType"] = "aura",
 },
-[71314] = {
+[1160] = {
 ["type"] = "group",
-["col"] = 2,
-["target"] = "Essential",
+["col"] = 6,
+["target"] = "Utility",
 ["row"] = 0,
-["viewerType"] = "cooldown",
+["viewerType"] = "utility",
 },
 [71316] = {
 ["type"] = "group",
@@ -3571,12 +3570,13 @@ nil,
 ["row"] = 0,
 ["viewerType"] = "utility",
 },
-[1160] = {
+[123704] = {
 ["type"] = "group",
-["col"] = 6,
-["target"] = "Utility",
-["row"] = 0,
-["viewerType"] = "utility",
+["col"] = 3,
+["target"] = "Essential",
+["viewerType"] = "cooldown",
+["row"] = 1,
+["sortIndex"] = 7,
 },
 [1159] = {
 ["type"] = "group",

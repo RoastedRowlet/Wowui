@@ -334,12 +334,7 @@ ArcUIDB = {
 ["g"] = 0.4274510145187378,
 ["b"] = 0,
 },
-["textPosition"] = {
-["y"] = -105,
-["relPoint"] = "CENTER",
-["point"] = "CENTER",
-["x"] = 0,
-},
+["colorCurveThreshold4Enabled"] = true,
 ["enabled"] = true,
 ["barPosition"] = {
 ["y"] = -260.7499694824219,
@@ -348,7 +343,7 @@ ArcUIDB = {
 ["x"] = -0.3334379494190216,
 },
 ["thresholdMode"] = "colorCurve",
-["colorCurveThreshold4Enabled"] = true,
+["colorCurveThreshold5Enabled"] = false,
 ["colorCurveDirection"] = "fill",
 ["texture"] = "Grid2 Flat",
 ["anchorToGroup"] = true,
@@ -369,18 +364,17 @@ ArcUIDB = {
 ["colorCurveThreshold2Enabled"] = true,
 ["colorCurveThreshold4Value"] = 0,
 ["height"] = 15,
-["colorCurveThreshold5Enabled"] = false,
+["textPosition"] = {
+["y"] = -105,
+["relPoint"] = "CENTER",
+["point"] = "CENTER",
+["x"] = 0,
+},
 ["fontSize"] = 16,
 ["backgroundTexture"] = "Dragonflight",
 },
 },
 {
-["behavior"] = {
-["showOnSpec"] = 0,
-["showOnSpecs"] = {
-1,
-},
-},
 ["thresholds"] = {
 {
 ["color"] = {
@@ -416,22 +410,6 @@ ArcUIDB = {
 ["maxValue"] = 100,
 },
 },
-["abilityThresholds"] = {
-{
-["enabled"] = true,
-["name"] = "Tick",
-["cost"] = 40,
-},
-},
-["tracking"] = {
-["enabled"] = true,
-["powerType"] = 8,
-["resourceCategory"] = "primary",
-["overrideMax"] = false,
-["powerName"] = "Astral Power",
-["maxValue"] = 120,
-["showRuneTimer"] = false,
-},
 ["display"] = {
 ["anchorToGroup"] = true,
 ["textAnchor"] = "CENTER",
@@ -457,6 +435,28 @@ ArcUIDB = {
 },
 ["width"] = 236,
 ["texture"] = "Grid2 Flat",
+},
+["abilityThresholds"] = {
+{
+["enabled"] = true,
+["name"] = "Tick",
+["cost"] = 40,
+},
+},
+["tracking"] = {
+["enabled"] = true,
+["powerType"] = 8,
+["resourceCategory"] = "primary",
+["overrideMax"] = false,
+["powerName"] = "Astral Power",
+["maxValue"] = 120,
+["showRuneTimer"] = false,
+},
+["behavior"] = {
+["showOnSpec"] = 0,
+["showOnSpecs"] = {
+1,
+},
 },
 },
 {
@@ -705,12 +705,6 @@ nil,
 {
 ["_configVersion"] = 15,
 ["_migrated"] = 3,
-["behavior"] = {
-["showOnSpec"] = 0,
-["showOnSpecs"] = {
-1,
-},
-},
 ["display"] = {
 ["showDuration"] = true,
 ["durationFontSize"] = 15,
@@ -747,6 +741,41 @@ nil,
 ["b"] = 0.6000000238418579,
 ["g"] = 0,
 ["r"] = 0.01568627543747425,
+},
+},
+["thresholds"] = {
+{
+["color"] = {
+["a"] = 1,
+["b"] = 0.6000000238418579,
+["g"] = 0,
+["r"] = 0.01568627543747425,
+},
+["enabled"] = true,
+["minValue"] = 0,
+["maxValue"] = 10,
+},
+{
+["color"] = {
+["a"] = 1,
+["b"] = 0,
+["g"] = 1,
+["r"] = 1,
+},
+["enabled"] = false,
+["minValue"] = 5,
+["maxValue"] = 10,
+},
+{
+["color"] = {
+["a"] = 1,
+["b"] = 0,
+["g"] = 1,
+["r"] = 0,
+},
+["enabled"] = false,
+["minValue"] = 8,
+["maxValue"] = 10,
 },
 },
 ["colorRanges"] = {
@@ -808,51 +837,16 @@ nil,
 ["maxDuration"] = 0,
 ["spellID"] = 1239669,
 },
-["thresholds"] = {
-{
-["color"] = {
-["a"] = 1,
-["b"] = 0.6000000238418579,
-["g"] = 0,
-["r"] = 0.01568627543747425,
-},
-["enabled"] = true,
-["minValue"] = 0,
-["maxValue"] = 10,
-},
-{
-["color"] = {
-["a"] = 1,
-["b"] = 0,
-["g"] = 1,
-["r"] = 1,
-},
-["enabled"] = false,
-["minValue"] = 5,
-["maxValue"] = 10,
-},
-{
-["color"] = {
-["a"] = 1,
-["b"] = 0,
-["g"] = 1,
-["r"] = 0,
-},
-["enabled"] = false,
-["minValue"] = 8,
-["maxValue"] = 10,
-},
-},
-},
-{
-["_configVersion"] = 39,
-["_migrated"] = 3,
 ["behavior"] = {
 ["showOnSpec"] = 0,
 ["showOnSpecs"] = {
 1,
 },
 },
+},
+{
+["_configVersion"] = 39,
+["_migrated"] = 3,
 ["display"] = {
 ["anchorOffsetX"] = 127,
 ["showDuration"] = true,
@@ -888,6 +882,41 @@ nil,
 },
 ["durationAnchorOffsetY"] = -1,
 ["anchorToGroup"] = true,
+},
+["thresholds"] = {
+{
+["color"] = {
+["a"] = 1,
+["b"] = 0,
+["g"] = 0.5176470875740051,
+["r"] = 0.7372549176216125,
+},
+["enabled"] = true,
+["minValue"] = 0,
+["maxValue"] = 10,
+},
+{
+["color"] = {
+["a"] = 1,
+["b"] = 0,
+["g"] = 1,
+["r"] = 1,
+},
+["enabled"] = false,
+["minValue"] = 5,
+["maxValue"] = 10,
+},
+{
+["color"] = {
+["a"] = 1,
+["b"] = 0,
+["g"] = 1,
+["r"] = 0,
+},
+["enabled"] = false,
+["minValue"] = 8,
+["maxValue"] = 10,
+},
 },
 ["colorRanges"] = {
 {
@@ -949,39 +978,10 @@ nil,
 ["maxDuration"] = 0,
 ["spellID"] = 1239669,
 },
-["thresholds"] = {
-{
-["color"] = {
-["a"] = 1,
-["b"] = 0,
-["g"] = 0.5176470875740051,
-["r"] = 0.7372549176216125,
-},
-["enabled"] = true,
-["minValue"] = 0,
-["maxValue"] = 10,
-},
-{
-["color"] = {
-["a"] = 1,
-["b"] = 0,
-["g"] = 1,
-["r"] = 1,
-},
-["enabled"] = false,
-["minValue"] = 5,
-["maxValue"] = 10,
-},
-{
-["color"] = {
-["a"] = 1,
-["b"] = 0,
-["g"] = 1,
-["r"] = 0,
-},
-["enabled"] = false,
-["minValue"] = 8,
-["maxValue"] = 10,
+["behavior"] = {
+["showOnSpec"] = 0,
+["showOnSpecs"] = {
+1,
 },
 },
 },
@@ -1946,19 +1946,19 @@ nil,
 },
 ["hideShadow"] = false,
 ["keepBright"] = false,
+["procGlow"] = {
+},
 ["chargeText"] = {
+},
+["debuffBorder"] = {
+["enabled"] = false,
 },
 ["pandemicBorder"] = {
 ["enabled"] = false,
 },
-["procGlow"] = {
-},
-["position"] = {
-},
 ["height"] = 36,
 ["padding"] = 0,
-["debuffBorder"] = {
-["enabled"] = false,
+["position"] = {
 },
 ["auraActiveState"] = {
 },
@@ -2628,18 +2628,18 @@ nil,
 ["hideShadow"] = false,
 ["rangeIndicator"] = {
 },
+["chargeText"] = {
+},
 ["position"] = {
+},
+["debuffBorder"] = {
+["enabled"] = false,
 },
 ["procGlow"] = {
 },
-["chargeText"] = {
-},
-["pandemicBorder"] = {
-["enabled"] = false,
-},
 ["height"] = 36,
 ["padding"] = 0,
-["debuffBorder"] = {
+["pandemicBorder"] = {
 ["enabled"] = false,
 },
 ["auraActiveState"] = {
@@ -3555,12 +3555,13 @@ nil,
 ["row"] = 1,
 ["viewerType"] = "utility",
 },
-[1160] = {
+[123704] = {
 ["type"] = "group",
-["col"] = 6,
-["target"] = "Utility",
-["row"] = 0,
-["viewerType"] = "utility",
+["col"] = 3,
+["target"] = "Essential",
+["sortIndex"] = 7,
+["row"] = 1,
+["viewerType"] = "cooldown",
 },
 [152137] = {
 ["type"] = "group",
@@ -3569,12 +3570,11 @@ nil,
 ["row"] = 0,
 ["viewerType"] = "aura",
 },
-[123704] = {
+[71314] = {
 ["type"] = "group",
-["col"] = 3,
+["col"] = 2,
 ["target"] = "Essential",
-["sortIndex"] = 7,
-["row"] = 1,
+["row"] = 0,
 ["viewerType"] = "cooldown",
 },
 [71316] = {
@@ -3612,12 +3612,12 @@ nil,
 ["row"] = 0,
 ["viewerType"] = "utility",
 },
-[71314] = {
+[1160] = {
 ["type"] = "group",
-["col"] = 2,
-["target"] = "Essential",
+["col"] = 6,
+["target"] = "Utility",
 ["row"] = 0,
-["viewerType"] = "cooldown",
+["viewerType"] = "utility",
 },
 [32258] = {
 ["type"] = "group",

@@ -234,7 +234,7 @@ local function getChunkLookup(table, length)
 end
 
 local lookup = {'Paladin-Retribution',}
-local provider = {region='US',realm='Nazjatar',name='US',type='subscribers',zone=46,date='2026-06-29',data={Al='Alphadog:BAEALgAECgUJBQABLgAFFAUJDgABALkMAA==.',Ob='Oborax:BAECLgAFFH8OAAIBAAUJuQwJUgALAQVoDAAABAAvAGkMAAAEAC8AawwAAAMADQBqDAAAAQAeAOoMAAACABUAAQAFCbkMCVIACwEFaAwAAAQALwBpDAAABAAvAGsMAAADAA0AagwAAAEAHgDqDAAAAgAVAC4ABAp/KAACAQAHCZwXDXAAjgEAAQAHCZwXDXAAjgEAAAA=.',Sk='Skjolvarn:BAEALgAECgMJBwAAAA==.',},}
+local provider = {region='US',realm='Nazjatar',name='US',type='subscribers',zone=46,date='2026-07-06',data={Al='Alphadog:BAEALgAFFAIJAgABLgAFFAUJDgABALkMAA==.',Ob='Oborax:BAECLgAFFH8OAAIBAAUJuQwJUgALAQVoDAAABAAvAGkMAAAEAC8AawwAAAMADQBqDAAAAQAeAOoMAAACABUAAQAFCbkMCVIACwEFaAwAAAQALwBpDAAABAAvAGsMAAADAA0AagwAAAEAHgDqDAAAAgAVAC4ABAp/KAACAQAHCZwXDXAAjgEAAQAHCZwXDXAAjgEAAAA=.',Sk='Skjolvarn:BAEALgAECgMJBwAAAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

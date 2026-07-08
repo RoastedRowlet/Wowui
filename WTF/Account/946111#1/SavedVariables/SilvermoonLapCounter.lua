@@ -58,13 +58,13 @@ SilvermoonLapCounterDB = {
 },
 ["Barelynoer-Area 52"] = {
 ["bestLapTime"] = 4.764999999999418,
-["lastLapDate"] = "2026-06-27 12:51",
+["lastLapDate"] = "2026-07-08 11:35",
 ["realm"] = "Area 52",
-["lastLapTime"] = 19.38000000000466,
+["lastLapTime"] = 45.13900000008289,
 ["firstLapDate"] = "2026-03-05 20:10",
 ["class"] = "EVOKER",
 ["bestLapDate"] = "2026-03-12 13:40",
-["lapCount"] = 155,
+["lapCount"] = 158,
 },
 ["Madmareep-Stormrage"] = {
 ["class"] = "PRIEST",

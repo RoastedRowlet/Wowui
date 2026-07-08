@@ -58,9 +58,9 @@ SilvermoonLapCounterDB = {
 },
 ["Barelynoer-Area 52"] = {
 ["bestLapTime"] = 4.764999999999418,
-["lastLapDate"] = "2026-06-27 12:51",
-["lapCount"] = 155,
-["lastLapTime"] = 19.38000000000466,
+["lastLapDate"] = "2026-07-03 16:10",
+["lapCount"] = 156,
+["lastLapTime"] = 9.004000000015367,
 ["firstLapDate"] = "2026-03-05 20:10",
 ["class"] = "EVOKER",
 ["bestLapDate"] = "2026-03-12 13:40",

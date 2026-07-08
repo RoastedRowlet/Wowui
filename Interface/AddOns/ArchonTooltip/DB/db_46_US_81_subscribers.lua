@@ -234,7 +234,7 @@ local function getChunkLookup(table, length)
 end
 
 local lookup = {'Hunter-BeastMastery','Hunter-Marksmanship',}
-local provider = {region='US',realm='Durotan',name='US',type='subscribers',zone=46,date='2026-06-29',data={Ba='Babnik:BAEBLgAECn8YAAMBAAkJWxMMCABXAQloDAAABQAtAGkMAAAEAC0AawwAAAQAMgBqDAAAAgA8AGwMAAACAEgAbQwAAAEALQDqDAAABAArAG4MAAABADoAbwwAAAEAIwABAAkJWxMMCABXAQloDAAAAgAtAGkMAAAEAC0AawwAAAIAMgBqDAAAAgA8AGwMAAACAEgAbQwAAAEALQDqDAAABAArAG4MAAABADoAbwwAAAEAIwACAAIJPw0IMABYAAJoDAAAAwAoAGsMAAACABoAAAA=.',},}
+local provider = {region='US',realm='Durotan',name='US',type='subscribers',zone=46,date='2026-07-07',data={Ba='Babnik:BAEBLgAECn8YAAMBAAkJZBNLCwBJAQloDAAABQAtAGkMAAAEAC0AawwAAAQAMgBqDAAAAgA8AGwMAAACAEgAbQwAAAEALQDqDAAABAArAG4MAAABADoAbwwAAAEAIwABAAkJZBNLCwBJAQloDAAAAgAtAGkMAAAEAC0AawwAAAIAMgBqDAAAAgA8AGwMAAACAEgAbQwAAAEALQDqDAAABAArAG4MAAABADoAbwwAAAEAIwACAAIJPw0IMABYAAJoDAAAAwAoAGsMAAACABoAAAA=.',Za='Zanasi:BAEALgAECgcJBwABLgAFFAMJEwABAKUkAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

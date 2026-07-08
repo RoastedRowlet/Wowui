@@ -128,9 +128,9 @@ BigWigs3DB = {
 ["BigWigs_Plugins_Bars"] = {
 ["profiles"] = {
 ["Default"] = {
-["normalWidth"] = 120,
-["visibleBarLimit"] = 1,
 ["emphasize"] = false,
+["visibleBarLimit"] = 1,
+["normalWidth"] = 120,
 ["expPosition"] = {
 "BOTTOMLEFT",
 "BOTTOMLEFT",
@@ -155,15 +155,6 @@ BigWigs3DB = {
 },
 },
 },
-["BigWigs_Bosses_Muro'jin and Nekraxx"] = {
-["profiles"] = {
-["Default"] = {
-["toggles"] = {
-[1243900] = 3129591,
-},
-},
-},
-},
 ["MythicPlus"] = {
 ["global"] = {
 ["showViewerTeleportTip"] = false,
@@ -179,18 +170,27 @@ BigWigs3DB = {
 },
 },
 },
+["BigWigs_Bosses_Muro'jin and Nekraxx"] = {
+["profiles"] = {
+["Default"] = {
+["toggles"] = {
+[1243900] = 3129591,
+},
+},
+},
+},
 },
 ["myKeystones"] = {
 ["Player-3676-0DF7D3EF"] = {
-["playerRating"] = 4132,
+["playerRating"] = 4147,
 ["specId"] = 1473,
-["keyMap"] = 559,
+["keyMap"] = 0,
 ["name"] = "Barelynoer",
-["keyLevel"] = 22,
+["keyLevel"] = 0,
 ["realm"] = "Area 52",
 },
 },
-["prevWeeklyReset"] = 1782831600,
+["prevWeeklyReset"] = 1783436400,
 ["profiles"] = {
 ["Default"] = {
 },
@@ -474,13 +474,20 @@ BigWigsStatsDB = {
 [1592] = {
 [2711] = {
 ["mythic_flex"] = {
-["kills"] = 3,
+["kills"] = 4,
 ["fkDuration"] = 420.3029999999562,
-["wipes"] = 11,
+["wipes"] = 17,
 ["fkWipes"] = 5,
 ["best"] = 420.3029999999562,
 ["bestDate"] = "2026/06/16",
 ["fkDate"] = "2026/06/16",
+},
+["LFR"] = {
+["kills"] = 1,
+["fkDuration"] = 149.9250000000466,
+["best"] = 149.9250000000466,
+["bestDate"] = "2026/07/07",
+["fkDate"] = "2026/07/07",
 },
 },
 },
