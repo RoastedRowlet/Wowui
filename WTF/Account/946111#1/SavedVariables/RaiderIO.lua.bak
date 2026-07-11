@@ -1,43 +1,22 @@
 
 RaiderIO_Config = {
+["minimapIcon"] = {
+["minimapPos"] = 180,
+["showInCompartment"] = true,
+["hide"] = false,
+["lock"] = false,
+},
 ["profilePoint"] = {
 ["y"] = 0,
 ["x"] = -16,
 ["point"] = "TOPLEFT",
 },
-["minimapIcon"] = {
-["minimapPos"] = 180,
-["showInCompartment"] = true,
-["lock"] = false,
-["hide"] = false,
-},
 }
 RaiderIO_LastCharacter = "us-Barelynoer-area-52"
 RaiderIO_MissingCharacters = {
-["us-Twelvesteps-sargeras"] = true,
-["us-Chrysas-area-52"] = true,
-["us-Asharissa-area-52"] = true,
-["us-Beebopz-doomhammer"] = true,
-["us-Dalffy-area-52"] = true,
-["us-Cowopatra-area-52"] = true,
-["us-Jesterb-proudmoore"] = true,
-["us-Morgannå-area-52"] = true,
-["us-Holyuwu-area-52"] = true,
-["us-Iknowrite-area-52"] = true,
-["us-Suelim-area-52"] = true,
-["us-Swollenutter-area-52"] = true,
-["us-Gilaunis-area-52"] = true,
-["us-Paladev-area-52"] = true,
-["us-Todatank-area-52"] = true,
-["us-Twoop-area-52"] = true,
-["us-Antifragile-thrall"] = true,
-["us-Demonleap-sargeras"] = true,
-["us-Oakstone-area-52"] = true,
-["us-Foro-area-52"] = true,
-["us-Astarid-proudmoore"] = true,
-["us-Fabro-area-52"] = true,
-["us-Deusvült-elune"] = true,
-["us-Müz-stormrage"] = true,
+["us-party5-area-52"] = true,
+["us-Asmodea-grizzly-hills"] = true,
+["us-Torinanda-area-52"] = true,
 }
 RaiderIO_MissingServers = {
 }

@@ -1,50 +1,7 @@
 
 SpellOverlayEnhancedDB = {
-["profileKeys"] = {
-["Klutzykubfu - Stormrage"] = "Default",
-["Lonelylitten - Stormrage"] = "Default",
-["Barelynoer - Area 52"] = "Default",
-},
 ["global"] = {
 ["snapshots"] = {
-["Zen Pulse"] = {
-["right"] = {
-["isAtlas"] = false,
-["texture"] = 623951,
-["height"] = 204.7999667080973,
-["width"] = 102.400018033114,
-["scale"] = 1,
-["texCoords"] = {
-1,
-0,
-1,
-1,
-0,
-0,
-0,
-1,
-},
-},
-},
-["Strength of the Black Ox"] = {
-["left"] = {
-["isAtlas"] = false,
-["texture"] = 623950,
-["height"] = 204.8,
-["width"] = 102.4000063578285,
-["scale"] = 1,
-["texCoords"] = {
-0,
-0,
-0,
-1,
-1,
-0,
-1,
-1,
-},
-},
-},
 ["Essence Burst"] = {
 ["left"] = {
 ["isAtlas"] = false,
@@ -81,7 +38,50 @@ SpellOverlayEnhancedDB = {
 ["texture"] = 4699056,
 },
 },
+["Strength of the Black Ox"] = {
+["left"] = {
+["isAtlas"] = false,
+["texCoords"] = {
+0,
+0,
+0,
+1,
+1,
+0,
+1,
+1,
 },
+["height"] = 204.8,
+["scale"] = 1,
+["width"] = 102.4000063578285,
+["texture"] = 623950,
+},
+},
+["Zen Pulse"] = {
+["right"] = {
+["isAtlas"] = false,
+["texCoords"] = {
+1,
+0,
+1,
+1,
+0,
+0,
+0,
+1,
+},
+["height"] = 204.7999667080973,
+["scale"] = 1,
+["width"] = 102.400018033114,
+["texture"] = 623951,
+},
+},
+},
+},
+["profileKeys"] = {
+["Barelynoer - Area 52"] = "Default",
+["Klutzykubfu - Stormrage"] = "Default",
+["Lonelylitten - Stormrage"] = "Default",
 },
 ["profiles"] = {
 ["Default"] = {

@@ -2,9 +2,9 @@
 OPie_SavedData = {
 ["CharProfiles"] = {
 },
-["_OPieVersion"] = "8.6.1 (4.142)",
+["_OPieVersion"] = "8.6.3 (4.143)",
 ["_StoreVersion"] = 122,
-["_GameVersion"] = "12.0.7",
+["_GameLocale"] = "enUS",
 ["_StoreVersion2"] = 122,
 ["ProfileStorage"] = {
 ["default"] = {
@@ -24,5 +24,5 @@ OPie_SavedData = {
 },
 },
 },
-["_GameLocale"] = "enUS",
+["_GameVersion"] = "12.0.7",
 }
