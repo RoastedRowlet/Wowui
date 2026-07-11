@@ -283,9 +283,10 @@ R:AddDefaultRing("CommonHearth", {
 	{"toy", 257736, _u="lc"},
 	{"toy", 263489, _u="na"},
 	{"toy", 263933, _u="ps"},
+	{"toy", 264367, _u="mc"},
 	{"toy", 265100, _u="cw"},
 	{"item", 250411, _u="lx"},
-	name=L"Hearthstones", internal=true, _u="OPCHS", v=11
+	name=L"Hearthstones", internal=true, _u="OPCHS", v=12
 })
 R:AddDefaultRing("HousePort", {
 	{"housing", "match", _u="o"},

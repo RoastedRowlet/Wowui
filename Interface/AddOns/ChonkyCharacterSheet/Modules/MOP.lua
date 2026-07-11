@@ -2157,11 +2157,6 @@ function CCS.MOPCharacterSheetEventHandler(event, ...)
         end
         
         return true
-    elseif event == "QUEST_ACCEPTED" and arg1 and CCS.Paragon_Factions[arg1] and C_Reputation.GetFactionDataByID(CCS.Paragon_Factions[arg1].factionID) then
-        local name = C_Reputation.GetFactionDataByID(CCS.Paragon_Factions[arg1].factionID).name
-        local text = GetQuestLogCompletionText(C_QuestLog.GetLogIndexForQuestID(arg1))
-        ShowToast(name, text)
-
     elseif event == "INSPECT_READY" and InspectFrame ~= nil and InspectFrame.unit ~= nil then
         if not CCS.inspectUpdatePending then
             CCS.inspectUpdatePending = true

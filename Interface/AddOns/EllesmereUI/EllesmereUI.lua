@@ -767,6 +767,7 @@ EllesmereUI.RegisterSyncExclusions("EllesmereUICooldownManager", {
     "cdmBarPositions",
     "cdmBars.bars.*.iconSize",
     "cdmBars.bars.*.numRows",
+    "cdmBars.bars.*.anchorFirstRow",
     "cdmBars.bars.*.spacing",
     "cdmBars.bars.*.verticalOrientation",
     "cdmBars.bars.*.anchorTo",
@@ -1665,6 +1666,21 @@ function EllesmereUI.GetTooltipBg()
     local a = (db and db.tooltipBgOpacity) or R.TT_ALPHA
     return r, g, b, a
 end
+-- Tooltip border: size + colour/opacity for the Blizzard tooltip reskin.
+-- Customizable in Blizz UI Enhanced > Blizzard Tooltip > Border. Defaults to the
+-- historical hardcoded look (white @ BRD_ALPHA, 1px) so unset = current look.
+-- Returns r, g, b, a, size. (0 is a valid size/component/opacity -- relies on
+-- Lua treating 0 as truthy, so the `or` fallbacks only fire on nil.)
+function EllesmereUI.GetTooltipBorder()
+    local db = EllesmereUIDB
+    local c = db and db.tooltipBorderColor
+    local r = (c and c.r) or 1
+    local g = (c and c.g) or 1
+    local b = (c and c.b) or 1
+    local a = (db and db.tooltipBorderOpacity) or EllesmereUI.RESKIN.BRD_ALPHA
+    local size = (db and db.tooltipBorderSize) or 1
+    return r, g, b, a, size
+end
 -- Layout
 EllesmereUI.DUAL_ITEM_W  = DUAL_ITEM_W
 EllesmereUI.DUAL_GAP     = DUAL_GAP
@@ -1745,6 +1761,26 @@ do
             local text = (cur and maxL and maxL > 0) and (cur .. "/" .. maxL) or ""
             local color = map[info.trackString or ""] or W
             return text, color
+        end
+
+        -- Resolve the item-level text color using the exact same precedence as
+        -- the character-sheet slot labels: custom override > upgrade-track hue >
+        -- item rarity > white. Shared by the character sheet, inspect sheet and
+        -- the equipment-flyout item levels so they always stay in sync.
+        function EllesmereUI.GetItemLevelColor(itemLink, itemQuality)
+            if EllesmereUIDB and EllesmereUIDB.charSheetItemLevelUseColor
+                and EllesmereUIDB.charSheetItemLevelColor then
+                return EllesmereUIDB.charSheetItemLevelColor
+            end
+            local upgradeText, upgradeColor = EllesmereUI.GetUpgradeTrack(itemLink)
+            if upgradeText and upgradeText ~= "" and upgradeColor then
+                return upgradeColor
+            end
+            if (not EllesmereUIDB or EllesmereUIDB.charSheetColorItemLevel ~= false) and itemQuality then
+                local r, g, b = GetItemQualityColor(itemQuality)
+                return { r = r, g = g, b = b }
+            end
+            return { r = 1, g = 1, b = 1 }
         end
     end
 end
@@ -1866,9 +1902,13 @@ do
     end
 
     --- Convert a coord-space value to its physical pixel count (for display).
+    --- Epsilon-guarded round: a value sitting a hair off a half-pixel boundary
+    --- (float dust from a uiScale CVar that isn't exactly 768/screenHeight)
+    --- must round the same way on every call and every reload, or displayed
+    --- coordinates flip by 1 between sessions. Ties break toward +infinity.
     function PP.ToPixels(coord)
         if coord == 0 then return 0 end
-        return math.floor(coord / PP.mult + 0.5)
+        return math.floor(coord / PP.mult + 0.5 + 0.001)
     end
 
     --- Convert a physical pixel count to a grid-aligned coord value (for storage).
@@ -1892,7 +1932,10 @@ do
     function PP.SnapForES(x, es)
         if x == 0 then return 0 end
         local onePixel = PP.perfect / es
-        local physPixels = math.floor(x / onePixel + 0.5)
+        -- Epsilon-guarded round: inputs a hair below a half-pixel boundary
+        -- (float dust from imperfect uiScale CVars) must snap the same way on
+        -- every call, or frames shift 1px between reloads. Ties break up.
+        local physPixels = math.floor(x / onePixel + 0.5 + 0.001)
         local result = physPixels * onePixel
         local rounded = math.floor(result + 0.5)
         if math.abs(result - rounded) < 0.001 then result = rounded end
@@ -1918,9 +1961,16 @@ do
         es = es or (UIParent and UIParent:GetEffectiveScale() or 1)
         local onePixel = PP.perfect / es
         local valuePx = value / onePixel
+        -- Clean float dust BEFORE any floor: a stored whole-pixel value that
+        -- arrives as N +/- 1e-9 (imperfect uiScale CVars) must not flip which
+        -- half-pixel (odd dims) or whole pixel (even dims) it lands on between
+        -- reloads -- that flip is a visible 1px jump. After cleaning, an exact
+        -- integer deterministically takes the +0.5 side in the odd branch.
+        local vClean = math.floor(valuePx + 0.5)
+        if math.abs(valuePx - vClean) < 0.001 then valuePx = vClean end
         local result
         if dim and dim > 0 then
-            local dimPx = math.floor(dim / onePixel + 0.5)
+            local dimPx = math.floor(dim / onePixel + 0.5 + 0.001)
             if dimPx % 2 == 1 then
                 -- Odd dimension: snap center to nearest half-pixel grid point
                 -- (integer + 0.5) so edges land on whole pixels.
@@ -1932,7 +1982,7 @@ do
             end
         end
         -- Even dimension (or unknown): snap center to nearest whole pixel.
-        result = math.floor(valuePx + 0.5) * onePixel
+        result = math.floor(valuePx + 0.5 + 0.001) * onePixel
         local rounded = math.floor(result + 0.5)
         if math.abs(result - rounded) < 0.001 then result = rounded end
         return result
@@ -2149,6 +2199,17 @@ do
         if not container.GetEffectiveScale then return end
         local ok, es = pcall(container.GetEffectiveScale, container)
         if not ok or not es then return end
+        -- Degenerate effective scale guard -- OPT-IN, only for borders that set
+        -- container._scaleGuard (nameplate frames; see PP.CreateBorder). onePixel
+        -- below is perfect/es, so a near-zero es makes onePixel (and the edge-strip
+        -- thickness) explode -- a 1px border becomes a frame-spanning black box that
+        -- then STICKS until the next valid re-snap. Nameplate frames are WorldFrame
+        -- children that transiently hit near-zero scale during recycle/hide/
+        -- PLAYER_ENTERING_WORLD (e.g. the SetScale(0.001) hide path); UIParent-based
+        -- borders never do, so they leave this unset and are completely unaffected.
+        -- Skip the snap so the strips keep their last-good size; the next valid snap
+        -- restores 1px.
+        if container._scaleGuard and es < 0.1 then return end
         local onePixel = es > 0 and (PP.perfect / es) or PP.mult
         local bs = borderSize or 1
         local edgeSize = bs > 0 and math.max(onePixel, math.floor(bs + 0.5) * onePixel) or 0
@@ -2161,21 +2222,38 @@ do
             return
         end
 
-        t:ClearAllPoints()
-        t:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, 0)
-        t:SetPoint("TOPRIGHT", frame, "TOPRIGHT", 0, 0)
-        t:SetHeight(edgeSize); t:Show()
-        b:ClearAllPoints()
-        b:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", 0, 0)
-        b:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", 0, 0)
-        b:SetHeight(edgeSize); b:Show()
+        -- Seam suppression for the cast-bar wrap border: a container can flag its
+        -- TOP or BOTTOM edge to stay hidden AND have the side strips run all the way
+        -- to that corner (no inset), so two stacked borders fuse into one outline
+        -- with no edge line and no corner notch. The flags live on the container, so
+        -- they survive every re-snap (the 2-tick OnUpdate, PP.SetBorderSize,
+        -- ResnapAllBorders) -- a one-shot :Hide() gets clobbered by the next snap.
+        local topInset, botInset = -edgeSize, edgeSize
+        if container._hideTop then topInset = 0 end
+        if container._hideBottom then botInset = 0 end
+        if container._hideTop then
+            t:Hide()
+        else
+            t:ClearAllPoints()
+            t:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, 0)
+            t:SetPoint("TOPRIGHT", frame, "TOPRIGHT", 0, 0)
+            t:SetHeight(edgeSize); t:Show()
+        end
+        if container._hideBottom then
+            b:Hide()
+        else
+            b:ClearAllPoints()
+            b:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", 0, 0)
+            b:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", 0, 0)
+            b:SetHeight(edgeSize); b:Show()
+        end
         l:ClearAllPoints()
-        l:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, -edgeSize)
-        l:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", 0, edgeSize)
+        l:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, topInset)
+        l:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", 0, botInset)
         l:SetWidth(edgeSize); l:Show()
         r:ClearAllPoints()
-        r:SetPoint("TOPRIGHT", frame, "TOPRIGHT", 0, -edgeSize)
-        r:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", 0, edgeSize)
+        r:SetPoint("TOPRIGHT", frame, "TOPRIGHT", 0, topInset)
+        r:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", 0, botInset)
         r:SetWidth(edgeSize); r:Show()
 
         local bc = container._bdColor
@@ -2246,9 +2324,18 @@ do
         end
     end
 
-    function PP.CreateBorder(frame, r, g, b, a, borderSize, drawLayer, subLevel)
+    -- scaleGuard (opt-in): when true, SnapBorderTextures skips this border's snap
+    -- while the frame's effective scale is degenerately small (< 0.1). Only
+    -- nameplate frames pass it -- they are WorldFrame children that transiently hit
+    -- near-zero scale and would otherwise explode a 1px strip into a black box.
+    -- Every other caller leaves it nil and is unaffected.
+    function PP.CreateBorder(frame, r, g, b, a, borderSize, drawLayer, subLevel, scaleGuard)
         local bd = _ppBorderData[frame]
-        if bd then return bd.container end
+        if bd then
+            -- Let a later call opt an already-created border into the guard.
+            if scaleGuard then bd.container._scaleGuard = true end
+            return bd.container
+        end
         r = r or 0; g = g or 0; b = b or 0; a = a or 1
         borderSize = borderSize or 1
         drawLayer = drawLayer or "OVERLAY"
@@ -2264,6 +2351,12 @@ do
         local function MakeTex()
             local tx = container:CreateTexture(nil, drawLayer, nil, subLevel)
             tx:SetTexture(WHITE)
+            -- Disable pixel-grid snapping so a 1px edge strip never rounds to 0 and
+            -- VANISHES at fractional scales / positions (e.g. a nameplate sliding with
+            -- the camera). Without this it snaps to the grid and drops out per-side at
+            -- certain angles. Same treatment every other EUI 1px element gets; the
+            -- strips are our own textures, so it is taint-safe.
+            PP.DisablePixelSnap(tx)
             return tx
         end
         container._top    = MakeTex()
@@ -2272,6 +2365,7 @@ do
         container._right  = MakeTex()
 
         container._bdColor = { r, g, b, a }
+        container._scaleGuard = scaleGuard or nil
         bd = { container = container, borderSize = borderSize, borderColor = { r, g, b, a } }
         _ppBorderData[frame] = bd
 
@@ -2540,6 +2634,7 @@ do
         -- in the per-addon default lookups below.
         { key = "shadow",  name = "Shadow",          path = "Interface\\AddOns\\EllesmereUI\\media\\borders\\glow-border",  defaultOffset = 0, defaultOffsetY = 0, scaleOffset = true, defaultThickness = "normal" },
         { key = "blizz",   name = "Blizzard",        path = "Interface\\AddOns\\EllesmereUI\\media\\borders\\blizz-border", defaultOffset = 3, defaultOffsetY = 2, scaleOffset = true, defaultThickness = "heavy" },
+        { key = "lightspark", name = "Lightspark Border", path = "Interface\\AddOns\\EllesmereUI\\media\\borders\\lightspark-border", defaultOffset = 0, defaultOffsetY = 0, scaleOffset = true, defaultThickness = "normal" },
         { key = "dialog",  name = "Blizzard Dialog",  path = "Interface\\DialogFrame\\UI-DialogBox-Border",                 defaultOffset = 4, defaultOffsetY = 4, defaultThickness = "normal" },
     }
     local DEFAULT_LSM_OFFSET = 0
@@ -2851,6 +2946,7 @@ EllesmereUI.DEFAULT_CLASS_RESOURCE_COLORS = {
     MaelstromWeapon = { r = 0.0,    g = 0.4392, b = 0.8706 },
     TipOfTheSpear   = { r = 0.6667, g = 0.8275, b = 0.4471 },
     WhirlwindStacks = { r = 0.7765, g = 0.6078, b = 0.4275 },
+    SweepingStrikes = { r = 0.8510, g = 0.4157, b = 0.3373 },
 }
 
 -- Get a class-resource color (custom override or default), keyed by resource.
@@ -3056,12 +3152,59 @@ function EllesmereUI.RefreshDarkMode()
     if EllesmereUI.ApplyColorsToOUF then EllesmereUI.ApplyColorsToOUF() end
 end
 
+-- Global Dark Mode master toggle.
+-- Each module stores its own Dark Mode flag in its own DB in its own shape (Unit
+-- Frames: darkTheme bool; Resource Bars: secondary.darkTheme bool; Raid Frames:
+-- healthColorMode == "dark"). Rather than teach the parent addon each module's
+-- storage, every module registers a provider that knows how to read and flip its
+-- own flag AND repaint its own frames. The master toggle in the options page is a
+-- pure view over these providers -- it reads "are they all on" and writes "set
+-- them all". No new stored key, so it can never desync from the per-module toggles.
+EllesmereUI._darkModeToggles = EllesmereUI._darkModeToggles or {}
+function EllesmereUI.RegisterDarkModeToggle(provider)
+    if type(provider) == "table" and type(provider.isOn) == "function"
+        and type(provider.setOn) == "function" then
+        EllesmereUI._darkModeToggles[#EllesmereUI._darkModeToggles + 1] = provider
+    end
+end
+
+-- True only when every registered module currently has Dark Mode on (and at least
+-- one is registered). `filter`, if given, is a function(provider) -> boolean that
+-- narrows which providers count, so a single checkbox can view just one group
+-- (e.g. only the resource bar, or everything except it). The checkbox reflects
+-- this, so it reads as "on" only when its whole group is dark.
+function EllesmereUI.IsDarkModeAllOn(filter)
+    local matched = false
+    for _, p in ipairs(EllesmereUI._darkModeToggles) do
+        if not filter or filter(p) then
+            matched = true
+            local ok, on = pcall(p.isOn)
+            if not ok or not on then return false end
+        end
+    end
+    return matched
+end
+
+-- Flip every module's Dark Mode to `on`, then refresh the shared palette so any
+-- module that only listens for palette changes repaints too. `filter` narrows the
+-- affected providers exactly as in IsDarkModeAllOn.
+function EllesmereUI.SetDarkModeAll(on, filter)
+    on = on and true or false
+    for _, p in ipairs(EllesmereUI._darkModeToggles) do
+        if not filter or filter(p) then
+            pcall(p.setOn, on)
+        end
+    end
+    EllesmereUI.RefreshDarkMode()
+end
+
 -------------------------------------------------------------------------------
 --  Global Font System
 -------------------------------------------------------------------------------
 -- Canonical font name -> filename mapping (shared across all addons)
 EllesmereUI.FONT_FILES = {
     ["Expressway"]          = "Expressway.TTF",
+    ["Expressway Bold"]     = "Expressway Bold.ttf",
     ["Avant Garde"]         = "Avant Garde Naowh.ttf",
     ["Arial Bold"]          = "Arial Bold.TTF",
     ["Poppins"]             = "Poppins.ttf",
@@ -3078,6 +3221,8 @@ EllesmereUI.FONT_FILES = {
     ["Russo One"]           = "Russo One.ttf",
     ["Ubuntu"]              = "Ubuntu.ttf",
     ["Homespun"]            = "Homespun.ttf",
+    ["KMT Kimberley"]       = "KMT Kimberley.otf",
+    ["KMT Ninja Naruto"]    = "KMT Ninja Naruto.ttf",
     ["Friz Quadrata"]       = nil,  -- Blizzard font
     ["Arial"]               = nil,  -- Blizzard font
     ["Morpheus"]            = nil,  -- Blizzard font
@@ -3091,11 +3236,12 @@ EllesmereUI.FONT_BLIZZARD = {
     ["Skurri"]        = "Fonts\\skurri.ttf",
 }
 EllesmereUI.FONT_ORDER = {
-    "Expressway", "Avant Garde", "Arial Bold", "Poppins", "Fira Sans Medium",
+    "Expressway", "Expressway Bold", "Avant Garde", "Arial Bold", "Poppins", "Fira Sans Medium",
     "---",
     "Arial Narrow", "Changa", "Cinzel Decorative", "Exo",
     "Fira Sans Bold", "Fira Sans Light", "Future X Black",
     "Gotham Narrow Ultra", "Gotham Narrow", "Russo One", "Ubuntu", "Homespun",
+    "KMT Kimberley", "KMT Ninja Naruto",
     "Friz Quadrata", "Arial", "Morpheus", "Skurri",
 }
 -- Display name overrides for the font dropdown (key = FONT_ORDER name)
@@ -3298,12 +3444,17 @@ function EllesmereUI.GetFontOutlineFlag(addonKey)
     return EllesmereUI.SlugFlag(flag)
 end
 
--- Global "Never Show Slug" toggle. When ON, the SLUG token is stripped from
+-- Per-profile "Never Show Slug" toggle. When ON, the SLUG token is stripped from
 -- every outline flag the UI produces -- body text and icon/aura text across all
--- modules, plus the global Outline Mode itself. Stored centrally in
--- EllesmereUIDB.neverShowSlug; OFF by default (slug outlines render as normal).
+-- modules, plus the global Outline Mode itself. Stored in the per-profile fonts
+-- DB so it travels with profile export/import. Falls back to the legacy
+-- account-global EllesmereUIDB.neverShowSlug key for installs that set it before
+-- the move. OFF by default (slug outlines render as normal).
 function EllesmereUI.IsSlugDisabled()
-    return (EllesmereUIDB and EllesmereUIDB.neverShowSlug == true) or false
+    local f = EllesmereUI.GetFontsDB()
+    local v = f and f.neverShowSlug
+    if v == nil then v = EllesmereUIDB and EllesmereUIDB.neverShowSlug end
+    return v == true
 end
 
 -- Strip the SLUG token from a font outline flag:
@@ -3391,6 +3542,78 @@ function EllesmereUI.ApplyGlobalFontToGameText()
     end
 end
 
+-- Module-scoped font failsafe (always on, independent of "Apply to All Game
+-- Text"). Three enhanced areas style their text per-frame -- Chat, the Quest
+-- Tracker, and the Blizzard-UI-Enhanced tooltips -- but some sub-elements draw
+-- their font from Blizzard's SHARED font OBJECTS rather than a fontstring we
+-- explicitly touch, so per-frame styling leaves those stragglers on the default
+-- face. Swapping the area's font objects to the module's resolved font at login
+-- catches them. Each area is gated on its module being loaded/enabled and uses
+-- that module's own font key, so a per-module font override is honoured (a
+-- missing override falls back to the global font). Only the typeface + outline
+-- change; native size is preserved (tooltips also honour their font-scale).
+-- Same taint-safe basis as ApplyGlobalFontToGameText: SetFont on font objects
+-- only, never a write onto a Blizzard frame table. Runs after the global pass
+-- so the module-specific face wins in these three areas.
+function EllesmereUI.ApplyModuleFontFailsafe()
+    local IsLoaded = C_AddOns and C_AddOns.IsAddOnLoaded
+    local GetPath = EllesmereUI.GetFontPath
+    local GetOutline = EllesmereUI.GetFontOutlineFlag
+    if not IsLoaded or not GetPath then return end
+
+    -- Face + outline swap: change the typeface AND apply the module's resolved
+    -- outline, preserving each object's native SIZE (per-frame styling owns size,
+    -- and tooltips honour their own font-scale). The outline matches what each
+    -- area's per-frame styling already applies (chat "chat", tracker
+    -- "questTracker", tooltips "blizzardSkin"), so straggler text that only these
+    -- shared objects reach stops looking un-styled beside it. Passing the outline
+    -- is safe for the chat input box: SkinEditBox styles it explicitly with its
+    -- own SetFont(GetOutlineFlag()), so its face/outline never inherit from
+    -- ChatFontNormal. `outline` may be "" (the user's Drop Shadow / None modes),
+    -- which correctly clears a native outline rather than imposing one; pass nil
+    -- to keep the object's native flags. Guards a nil/non-object, a missing size,
+    -- and a SetFont that rejects the args, so an absent/renamed object is a no-op.
+    local function swap(obj, path, outline)
+        if not obj or type(obj) ~= "table" or not obj.GetFont or not obj.SetFont then return end
+        local _, size, flags = obj:GetFont()
+        if not size or size <= 0 then return end
+        if outline ~= nil then flags = outline end
+        pcall(obj.SetFont, obj, path or _G.STANDARD_TEXT_FONT, size, flags)
+    end
+
+    -- Chat: the module fonts the frames + edit boxes directly; ChatFontNormal
+    -- backstops the rest (menus, copy/URL windows, channel buttons, etc.).
+    if IsLoaded("EllesmereUIChat") then
+        swap(_G.ChatFontNormal, GetPath("chat"), GetOutline and GetOutline("chat"))
+    end
+
+    -- Quest Tracker: the skin region-walks the live blocks; these shared
+    -- objects catch fontstrings Blizzard (re)templates after the walk. ONLY the
+    -- ObjectiveTracker*-prefixed objects, so the world-map quest log (QuestFont*)
+    -- stays untouched -- the tracker, not the map sidebar.
+    if IsLoaded("EllesmereUIQuestTracker") then
+        local p = GetPath("questTracker")
+        local po = GetOutline and GetOutline("questTracker")
+        swap(_G.ObjectiveTrackerHeaderFont, p, po)
+        swap(_G.ObjectiveTrackerLineFont, p, po)
+        for i = 12, 22 do
+            swap(_G["ObjectiveTrackerFont" .. i], p, po)
+        end
+    end
+
+    -- Tooltips (Blizzard UI Enhanced): only when the tooltip skin is on
+    -- (customTooltips). _ttFonts already styles each visible line (size +
+    -- outline + scale) on show; these objects only backstop the typeface for
+    -- tooltips/lines it never reaches.
+    if IsLoaded("EllesmereUIBlizzardSkin") and (not EllesmereUIDB or EllesmereUIDB.customTooltips ~= false) then
+        local p = GetPath("blizzardSkin")
+        local po = GetOutline and GetOutline("blizzardSkin")
+        swap(_G.GameTooltipText, p, po)
+        swap(_G.GameTooltipHeaderText, p, po)
+        swap(_G.GameTooltipTextSmall, p, po)
+    end
+end
+
 -- Returns the outline flag for icon-overlay text (stack counts, durations,
 -- keybinds) on action buttons, unit/raid auras, CDM icons and bags. When the
 -- module's box in the "Outline Icon Text" control is checked (the default) the
@@ -3398,7 +3621,10 @@ end
 -- user's global/per-module outline choice (each of the five modules has its
 -- own per-module font key registered in _addonKeyToFolder).
 function EllesmereUI.GetIconTextOutlineFlag(moduleKey)
-    local t = EllesmereUIDB and EllesmereUIDB.outlineIconText
+    -- Per-profile now (rides profile export); the legacy account-global table is
+    -- the read-time fallback for installs that set it before the move.
+    local f = EllesmereUI.GetFontsDB()
+    local t = (f and f.outlineIconText) or (EllesmereUIDB and EllesmereUIDB.outlineIconText)
     if t and t[moduleKey] == false then
         -- Follows the outline mode, which is already slug-gated at the source.
         return (EllesmereUI.GetFontOutlineFlag and EllesmereUI.GetFontOutlineFlag(moduleKey)) or ""
@@ -3738,6 +3964,35 @@ do
 
     local CRACKLING = 203201  -- Crackling Thunder: widens Thunder Clap / Thunder Blast
 
+    -- Cached IsSpellKnown flags. GetWhirlwindStacks is polled every 0.1 s by
+    -- the resource bar, unit frame and nameplate readouts, and
+    -- HandleWhirlwindStacks runs on every player cast for every class;
+    -- C_SpellBook.IsSpellKnown is a C call and talents cannot change in
+    -- combat, so resolve the flags once per login/spec/talent event instead
+    -- (same pattern as the Sweeping Strikes tracker below). Non-warriors
+    -- never register the watcher: the flags stay false and both entry
+    -- points early-out on a plain upvalue read.
+    local requiredKnown, crashingKnown, unhingedKnown, cracklingKnown = false, false, false, false
+    do
+        local _, cls = UnitClass("player")
+        if cls == "WARRIOR" then
+            local function RefreshKnown()
+                local sb = C_SpellBook
+                requiredKnown  = (sb and sb.IsSpellKnown(REQUIRED)) or false
+                crashingKnown  = (sb and sb.IsSpellKnown(CRASHING)) or false
+                unhingedKnown  = (sb and sb.IsSpellKnown(UNHINGED)) or false
+                cracklingKnown = (sb and sb.IsSpellKnown(CRACKLING)) or false
+            end
+            local watcher = CreateFrame("Frame")
+            watcher:RegisterEvent("PLAYER_LOGIN")
+            watcher:RegisterEvent("PLAYER_ENTERING_WORLD")
+            watcher:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
+            watcher:RegisterEvent("TRAIT_CONFIG_UPDATED")
+            watcher:RegisterEvent("PLAYER_TALENT_UPDATE")
+            watcher:SetScript("OnEvent", RefreshKnown)
+        end
+    end
+
     -- Improved Whirlwind grants stacks only when the swing connects with an enemy,
     -- but UNIT_SPELLCAST_SUCCEEDED fires even when it hits nothing (swung at empty
     -- air, no target, out of combat). Gate the award on an attackable, living enemy
@@ -3747,17 +4002,19 @@ do
     -- Resolved synchronously at cast time, so a kill that ends combat is still
     -- counted (the victim is present the instant the cast succeeds).
     -- NOTE: when no hostile target is set this relies on enemy nameplates showing.
-    local function EnemyInStrikeRange(spellID)
-        local wide = (spellID == 6343 or spellID == 435222) and C_SpellBook.IsSpellKnown(CRACKLING)
-        local function InReach(u)
-            if not (UnitExists(u) and UnitCanAttack("player", u) and not UnitIsDead(u)) then
-                return false
-            end
-            return CheckInteractDistance(u, 2) or (wide and CheckInteractDistance(u, 1)) or false
+    -- InReach is block-scoped (wide passed as a parameter, no upvalues from
+    -- the call) so EnemyInStrikeRange allocates no closure per cast.
+    local function InReach(u, wide)
+        if not (UnitExists(u) and UnitCanAttack("player", u) and not UnitIsDead(u)) then
+            return false
         end
-        if InReach("target") then return true end
+        return CheckInteractDistance(u, 2) or (wide and CheckInteractDistance(u, 1)) or false
+    end
+    local function EnemyInStrikeRange(spellID)
+        local wide = (spellID == 6343 or spellID == 435222) and cracklingKnown
+        if InReach("target", wide) then return true end
         for i = 1, 40 do
-            if InReach("nameplate" .. i) then return true end
+            if InReach("nameplate" .. i, wide) then return true end
         end
         return false
     end
@@ -3777,7 +4034,7 @@ do
             return
         end
         if event ~= "UNIT_SPELLCAST_SUCCEEDED" or unit ~= "player" then return end
-        if not (C_SpellBook and C_SpellBook.IsSpellKnown(REQUIRED)) then return end
+        if not requiredKnown then return end
 
         if castGUID and seenGUID[castGUID] then return end
         if castGUID then
@@ -3795,8 +4052,7 @@ do
 
         if GENERATORS[spellID] then
             -- Thunder Clap / Thunder Blast only count with Crashing Thunder
-            if (spellID == 6343 or spellID == 435222)
-               and not C_SpellBook.IsSpellKnown(CRASHING) then
+            if (spellID == 6343 or spellID == 435222) and not crashingKnown then
                 return
             end
             -- Only award if the swing actually had an enemy to land on.
@@ -3805,8 +4061,7 @@ do
             expiresAt = GetTime() + DURATION
         elseif SPENDERS[spellID] and stacks > 0 then
             -- Unhinged: Bloodthirst/Bloodbath don't consume during Bladestorm
-            if UNHINGED_EXEMPT[spellID]
-               and C_SpellBook.IsSpellKnown(UNHINGED)
+            if UNHINGED_EXEMPT[spellID] and unhingedKnown
                and GetTime() < bladestormEndsAt then
                 return
             end
@@ -3816,9 +4071,7 @@ do
     end
 
     function EllesmereUI.GetWhirlwindStacks()
-        if not (C_SpellBook and C_SpellBook.IsSpellKnown(REQUIRED)) then
-            return 0, 0
-        end
+        if not requiredKnown then return 0, 0 end
         if expiresAt and GetTime() >= expiresAt then
             stacks, expiresAt = 0, nil
         end
@@ -3826,13 +4079,211 @@ do
     end
 end
 
+-- Sweeping Strikes tracker (Arms Warrior, Midnight charge rework)
+-- Sweeping Strikes (260708) grants 12 charges (18 with Improved Sweeping
+-- Strikes 383155). Single-target damaging abilities consume charges to
+-- strike an additional enemy within ~8 yd; a charge is only consumed when a
+-- sweep partner is actually in range ("less waste" rework design).
+-- Broad Strokes (1261049): Colossus Smash / Warbreaker also activate
+-- Sweeping Strikes. Buff duration: 30 seconds, cooldown: 30 seconds.
+-- 12.1: charges from the ability and Broad Strokes stack; we track only up
+-- to the visual cap, so either source simply refreshes to max.
+-- Fervor of Battle (202316): Cleave/Whirlwind hitting 3+ targets also Slam
+-- the primary target -- that Slam sweeps and consumes a charge.
+do
+    local stacks, expiresAt = 0, nil
+    local BASE_MAX     = 12
+    local IMPROVED_MAX = 18
+    local DURATION = 30
+    local SWEEP    = 260708
+    local IMPROVED = 383155   -- Improved Sweeping Strikes: 12 -> 18 charges
+    local BROAD    = 1261049  -- Broad Strokes: Colossus Smash activates Sweep
+    local FERVOR   = 202316   -- Fervor of Battle: Cleave/WW on 3+ targets Slams
+
+    -- Cached IsSpellKnown flags. GetSweepingStrikes is polled every 0.1 s by
+    -- the resource bar, unit frame and nameplate readouts, and
+    -- HandleSweepingStrikes runs on every player cast for every class;
+    -- C_SpellBook.IsSpellKnown is a C call and talents cannot change in
+    -- combat, so resolve once per login/spec/talent event instead (same
+    -- rationale as the cached spec ID above GetSoulFragments). Non-warriors
+    -- never register the watcher: the flags stay false and both entry
+    -- points early-out on a plain upvalue read.
+    local sweepKnown, improvedKnown, broadKnown, fervorKnown = false, false, false, false
+    do
+        local _, cls = UnitClass("player")
+        if cls == "WARRIOR" then
+            local function RefreshKnown()
+                local sb = C_SpellBook
+                sweepKnown    = (sb and sb.IsSpellKnown(SWEEP)) or false
+                improvedKnown = (sb and sb.IsSpellKnown(IMPROVED)) or false
+                broadKnown    = (sb and sb.IsSpellKnown(BROAD)) or false
+                fervorKnown   = (sb and sb.IsSpellKnown(FERVOR)) or false
+            end
+            local watcher = CreateFrame("Frame")
+            watcher:RegisterEvent("PLAYER_LOGIN")
+            watcher:RegisterEvent("PLAYER_ENTERING_WORLD")
+            watcher:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
+            watcher:RegisterEvent("TRAIT_CONFIG_UPDATED")
+            watcher:RegisterEvent("PLAYER_TALENT_UPDATE")
+            watcher:SetScript("OnEvent", RefreshKnown)
+        end
+    end
+
+    local function MaxStacks()
+        return improvedKnown and IMPROVED_MAX or BASE_MAX
+    end
+
+    -- Broad Strokes generators (only count with the talent known)
+    local CS_GENERATORS = {
+        [167105] = true,  -- Colossus Smash
+        [262161] = true,  -- Warbreaker (replaces Colossus Smash)
+    }
+
+    -- Single-target damaging cast IDs whose damage effects sit in the
+    -- Sweeping Strikes affected-spells list (wowhead spell=260708), mapped
+    -- to how many charges each cast consumes.
+    -- Rend and Storm Bolt do NOT sweep and are deliberately absent.
+    local SPENDERS = {
+        [12294]   = 1,  -- Mortal Strike
+        [7384]    = 1,  -- Overpower
+        [1464]    = 1,  -- Slam
+        [163201]  = 1,  -- Execute (Arms)
+        [5308]    = 1,  -- Execute (base)
+        [260643]  = 1,  -- Skullsplitter
+        [34428]   = 1,  -- Victory Rush
+        [202168]  = 1,  -- Impending Victory
+        [1715]    = 1,  -- Hamstring
+        [1269383] = 1,  -- Heroic Strike (replaces Slam via Master of Warfare)
+        [436358]  = 2,  -- Demolish: the channel sweeps twice (damage IDs
+                        -- 440884/440886) -- confirmed in-game, 2 per cast
+    }
+
+    -- Fervor of Battle: the triggered Slam happens on Cleave/Whirlwind casts
+    local FOB_TRIGGERS = {
+        [1680] = true,  -- Whirlwind (Arms)
+        [845]  = true,  -- Cleave
+    }
+    local fobWindow = 0  -- suppress a possibly-echoed Slam cast event
+
+    -- Deduplicate cast events via GUID
+    local seenGUID = {}
+    local guidCount = 0
+
+    -- A charge is only consumed when the strike can sweep onto a second
+    -- enemy (~8 yd). Count the hostile target plus enemy nameplates inside
+    -- the index-2 interact probe (~11 yd, slightly generous; same probe as
+    -- the Whirlwind tracker above). `need` = how many enemies must be in
+    -- reach (2 for a sweep partner, 3 for a Fervor of Battle trigger).
+    -- NOTE: relies on enemy nameplates showing for off-target enemies.
+    -- InReach is block-scoped (no upvalues from the call) so EnemiesInReach
+    -- allocates nothing -- it runs on every tracked spender cast in combat.
+    local function InReach(u)
+        if not (UnitExists(u) and UnitCanAttack("player", u) and not UnitIsDead(u)) then
+            return false
+        end
+        return CheckInteractDistance(u, 2) or false
+    end
+    local function EnemiesInReach(need)
+        local count, targetPlated = 0, false
+        for i = 1, 40 do
+            local u = "nameplate" .. i
+            if InReach(u) then
+                count = count + 1
+                if UnitIsUnit(u, "target") then targetPlated = true end
+                if count >= need then return true end
+            end
+        end
+        -- Target without a visible nameplate still counts as one body
+        if not targetPlated and InReach("target") then count = count + 1 end
+        return count >= need
+    end
+
+    function EllesmereUI.HandleSweepingStrikes(event, unit, castGUID, spellID)
+        if event == "PLAYER_DEAD" or event == "PLAYER_ALIVE" then
+            stacks, expiresAt = 0, nil
+            fobWindow = 0
+            wipe(seenGUID)
+            guidCount = 0
+            return
+        end
+        if event == "PLAYER_REGEN_ENABLED" then
+            -- Clean up GUID cache on combat end to prevent unbounded growth
+            wipe(seenGUID)
+            guidCount = 0
+            return
+        end
+        if event ~= "UNIT_SPELLCAST_SUCCEEDED" or unit ~= "player" then return end
+        if not sweepKnown then return end
+
+        if castGUID and seenGUID[castGUID] then return end
+        if castGUID then
+            seenGUID[castGUID] = true
+            guidCount = guidCount + 1
+            -- Safety: flush if table grows too large (shouldn't happen normally)
+            if guidCount > 200 then wipe(seenGUID); guidCount = 0 end
+        end
+
+        if spellID == SWEEP
+           or (CS_GENERATORS[spellID] and broadKnown) then
+            stacks = MaxStacks()
+            expiresAt = GetTime() + DURATION
+        elseif FOB_TRIGGERS[spellID] and stacks > 0 and fervorKnown then
+            -- Fervor of Battle: Cleave/Whirlwind hitting 3+ targets also
+            -- Slams the primary target; that Slam sweeps and consumes a
+            -- charge. The trigger itself is not a player cast event, so it
+            -- is counted here off the Cleave/WW cast, gated on 3 enemies in
+            -- reach (with 3+ up, a sweep partner necessarily exists).
+            if not EnemiesInReach(3) then return end
+            fobWindow = GetTime() + 0.3
+            stacks = max(0, stacks - 1)
+            if stacks == 0 then expiresAt = nil end
+        elseif SPENDERS[spellID] and stacks > 0 then
+            -- If the game echoes the Fervor-of-Battle Slam as a real cast
+            -- event, skip it -- the charge was already counted above. A
+            -- player-pressed Slam can't land inside the 0.3 s window (GCD).
+            if spellID == 1464 and GetTime() < fobWindow then return end
+            -- No sweep partner in range -> the game doesn't consume a charge
+            if not EnemiesInReach(2) then return end
+            stacks = max(0, stacks - SPENDERS[spellID])
+            if stacks == 0 then expiresAt = nil end
+        end
+    end
+
+    function EllesmereUI.GetSweepingStrikes()
+        if not sweepKnown then return 0, 0 end
+        if expiresAt and GetTime() >= expiresAt then
+            stacks, expiresAt = 0, nil
+        end
+        return stacks, MaxStacks()
+    end
+end
+
 -- Get DH Soul Fragment count (current, max)
 -- Vengeance: C_Spell.GetSpellCastCount(228477) -- returns a SECRET value
 -- in 12.0+.  The caller must handle it via StatusBar or similar.
 -- Devourer (hero spec 1480): aura 1225789/1227702 -- WHITELISTED, safe to read.
-function EllesmereUI.GetSoulFragments()
+-- Cached player spec ID. GetSoulFragments is polled EVERY FRAME by the soul
+-- fragment resource bar, unit frame, and nameplate readouts, and
+-- GetSpecialization + GetSpecializationInfo allocate fresh strings (spec
+-- name/description) on every call -- ~1.9 kb of garbage per call, the dominant
+-- source of the parent addon's runtime memory churn. Spec only changes on a
+-- spec swap, so cache the id and refresh on the spec-change events instead.
+EllesmereUI._RefreshSpecID = function()
     local spec = C_SpecializationInfo and C_SpecializationInfo.GetSpecialization()
-    local specID = spec and C_SpecializationInfo.GetSpecializationInfo(spec)
+    EllesmereUI._specID = (spec and C_SpecializationInfo.GetSpecializationInfo(spec)) or 0
+end
+EllesmereUI._specWatcher = EllesmereUI._specWatcher or CreateFrame("Frame")
+EllesmereUI._specWatcher:RegisterEvent("PLAYER_LOGIN")
+EllesmereUI._specWatcher:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
+EllesmereUI._specWatcher:RegisterEvent("PLAYER_ENTERING_WORLD")
+EllesmereUI._specWatcher:SetScript("OnEvent", EllesmereUI._RefreshSpecID)
+
+function EllesmereUI.GetSoulFragments()
+    local specID = EllesmereUI._specID
+    if not specID then           -- pre-login / not resolved yet: resolve once
+        EllesmereUI._RefreshSpecID()
+        specID = EllesmereUI._specID
+    end
     if specID == 581 then -- Vengeance
         local cur = C_Spell and C_Spell.GetSpellCastCount and C_Spell.GetSpellCastCount(228477) or 0
         return cur, 6
@@ -8886,6 +9337,19 @@ function EllesmereUI:RefreshPage(force)
     end
 end
 
+-- Public: snap the settings scroll back to the top
+-- (e.g. in resource bars clicking on a simple section
+-- to the Advanced page)
+function EllesmereUI:ScrollToTop()
+    if scrollFrame and scrollFrame.SetVerticalScroll then
+        scrollTarget = 0
+        isSmoothing = false
+        if smoothFrame then smoothFrame:Hide() end
+        scrollFrame:SetVerticalScroll(0)
+        UpdateScrollThumb()
+    end
+end
+
 function EllesmereUI:GetActiveModule()
     return activeModule
 end
@@ -9291,6 +9755,9 @@ function EllesmereUI:Toggle()
 end
 function EllesmereUI:IsShown() return mainFrame and mainFrame:IsShown() end
 function EllesmereUI:GetScrollFrame() return scrollFrame end
+-- The main settings window frame. Used e.g. to scope popup click-catchers to the
+-- panel instead of UIParent, so an open popup doesn't block world mouse/mouselook.
+function EllesmereUI:GetMainFrame() return mainFrame end
 function EllesmereUI:GetActivePage() return activePage end
 
 --- Apply a user-defined panel scale on top of the pixel-perfect base scale.
@@ -9341,7 +9808,7 @@ end
 -------------------------------------------------------------------------------
 --  Slash commands
 -------------------------------------------------------------------------------
-EllesmereUI.VERSION = "8.3.3"
+EllesmereUI.VERSION = "8.4.1"
 
 -- Register this addon's version into a shared global table (taint-free at load time)
 if not _G._EUI_AddonVersions then _G._EUI_AddonVersions = {} end
@@ -9385,78 +9852,6 @@ do
                 })
             end
         end)
-    end)
-end
-
--- Combat reload warning: if the UI was reloaded while in combat, show a
--- red warning in the center of the screen. Fades after 5s or on combat drop.
-do
-    local cf = CreateFrame("Frame")
-    cf:RegisterEvent("PLAYER_ENTERING_WORLD")
-    cf:SetScript("OnEvent", function(self, event)
-        if event == "PLAYER_ENTERING_WORLD" then
-            self:UnregisterEvent("PLAYER_ENTERING_WORLD")
-            local function HasAnchoredActionBars()
-                local adb = EllesmereUIDB and EllesmereUIDB.unlockAnchors
-                if not adb then return false end
-                for key, info in pairs(adb) do
-                    if info.target then
-                        -- Check if an action bar itself is anchored to something
-                        local isBar = (key == "MainBar" or key == "StanceBar" or key == "PetBar"
-                            or key == "MicroBar" or key == "BagBar" or key == "XPBar" or key == "RepBar"
-                            or (key:sub(1, 3) == "Bar" and tonumber(key:sub(4))))
-                        if isBar then return true end
-                    end
-                end
-                return false
-            end
-            local function ShowWarning()
-                if self._warn then return end
-                if not HasAnchoredActionBars() then return end
-                local warn = UIParent:CreateFontString(nil, "OVERLAY")
-                if EllesmereUI and EllesmereUI.PrimeFontShadow then EllesmereUI.PrimeFontShadow(warn, true) end
-                warn:SetFont("Interface\\AddOns\\EllesmereUI\\media\\fonts\\Expressway.TTF", 24, "")
-                warn:SetTextColor(0.878, 0.247, 0.247, 1)
-                warn:SetPoint("CENTER", UIParent, "CENTER", 0, 50)
-                warn:SetJustifyH("CENTER")
-                warn:SetText("EUI: Combat Reload UI Warning:\nDrop combat to fix any layout issues")
-                warn:Show()
-                self:RegisterEvent("PLAYER_REGEN_ENABLED")
-                self._warn = warn
-                local elapsed = 0
-                local fadeFrame = CreateFrame("Frame")
-                fadeFrame:SetScript("OnUpdate", function(ff, dt)
-                    elapsed = elapsed + dt
-                    if elapsed >= 10 then
-                        warn:Hide()
-                        ff:SetScript("OnUpdate", nil)
-                    elseif elapsed >= 9 then
-                        warn:SetAlpha(1 - (elapsed - 9))
-                    end
-                end)
-                self._fadeFrame = fadeFrame
-            end
-            if InCombatLockdown() then
-                ShowWarning()
-            else
-                -- Brief delay: combat state may not be set yet at PEW
-                C_Timer.After(0.5, function()
-                    if InCombatLockdown() and not self._warn then
-                        ShowWarning()
-                    end
-                end)
-            end
-        elseif event == "PLAYER_REGEN_ENABLED" then
-            self:UnregisterEvent("PLAYER_REGEN_ENABLED")
-            if self._warn then
-                self._warn:Hide()
-                self._warn = nil
-            end
-            if self._fadeFrame then
-                self._fadeFrame:SetScript("OnUpdate", nil)
-                self._fadeFrame = nil
-            end
-        end
     end)
 end
 
@@ -9531,7 +9926,6 @@ EllesmereUI._RunConflictCheck = function()
             { addon = "Healers-Have-To-Die",      label = "Healers Have To Die",        targets = { "EllesmereUINameplates" } },
             { addon = "Aloft",                    label = "Aloft",                      targets = { "EllesmereUINameplates" } },
             { addon = "SenseiClassResourceBar",   label = "Sensei Class Resource Bar",  targets = { "EllesmereUIResourceBars" } },
-            { addon = "FriendGroups",             label = "FriendGroups",               targets = { "EllesmereUIFriends" }, },
             { addon = "AccWideUILayoutSelection", label = "Account Wide Interface Settings", targets = { "EllesmereUIQuestTracker" }, },
             { addon = "EditModeExpanded",     label = "Edit Mode Expanded",         targets = { "EllesmereUIQuestTracker", "EllesmereUIChat" } },
             { addon = "SexyMap",                  label = "SexyMap",                    targets = { "EllesmereUIMinimap" }, },
@@ -10091,9 +10485,9 @@ do
             GameTooltip:SetOwner(self, "ANCHOR_NONE")
             GameTooltip:SetPoint("TOPRIGHT", self, "TOPLEFT", -2, 0)
             GameTooltip:AddLine("|cff0cd29fEllesmereUI|r")
-            GameTooltip:AddLine("|cff0cd29dLeft-click:|r |cffE0E0E0Toggle EllesmereUI|r")
-            GameTooltip:AddLine("|cff0cd29dRight-click:|r |cffE0E0E0Enter Unlock Mode|r")
-            GameTooltip:AddLine("|cff0cd29dMiddle-click:|r |cffE0E0E0Hide Minimap Button|r")
+            GameTooltip:AddLine(EllesmereUI.L("|cff0cd29dLeft-click:|r |cffE0E0E0Toggle EllesmereUI|r"))
+            GameTooltip:AddLine(EllesmereUI.L("|cff0cd29dRight-click:|r |cffE0E0E0Enter Unlock Mode|r"))
+            GameTooltip:AddLine(EllesmereUI.L("|cff0cd29dMiddle-click:|r |cffE0E0E0Hide Minimap Button|r"))
             GameTooltip:Show()
         end)
         btn:SetScript("OnLeave", function() GameTooltip:Hide() end)
@@ -10141,6 +10535,11 @@ initFrame:SetScript("OnEvent", function(self, event)
     -- Apply the global font to Blizzard's default game text (opt-in, reload-gated).
     -- Done here at login, out of combat, so it runs once before the UI renders.
     EllesmereUI.ApplyGlobalFontToGameText()
+    -- Always-on failsafe: swap the shared font objects behind Chat, the Quest
+    -- Tracker, and Blizzard-UI-Enhanced tooltips to each module's font, so the
+    -- sub-elements our per-frame styling misses pick up the right face. Runs
+    -- after the global pass so the per-module face wins in those three areas.
+    EllesmereUI.ApplyModuleFontFailsafe()
 
     ---------------------------------------------------------------------------
     --  Escape proxy: single UISpecialFrames entry for all EUI frames.
@@ -10382,7 +10781,7 @@ initFrame:SetScript("OnEvent", function(self, event)
         ELLESMERE_GREEN.r, ELLESMERE_GREEN.g, ELLESMERE_GREEN.b = EllesmereUI.ResolveActiveAccent()
     end
 
-    -- Spell ID / Item ID + Icon ID on Tooltip (developer option)
+    -- Spell ID / Item ID + Icon ID / Max Item Stack on Tooltip (developer option)
     if TooltipDataProcessor and TooltipDataProcessor.AddTooltipPostCall then
         -- Register per-type callbacks instead of AllTypes to avoid firing on
         -- every unit/currency tooltip in the game (major CPU savings).
@@ -10400,10 +10799,22 @@ initFrame:SetScript("OnEvent", function(self, event)
             return IsShiftKeyDown()
         end
 
-        -- Shared dedup check: only scan last 4 lines (we add at most 2)
+        -- The Max Item Stack lines can be gated behind a held modifier (the
+        -- "Use Modifier" cog: none | shift | control | alt, default none). "none"
+        -- shows them whenever Show Max Stack for items is on (the original
+        -- behavior); the others only surface the lines while that key is held.
+        local function IsItemStackModifierHeld()
+            local mod = (EllesmereUIDB and EllesmereUIDB.itemStackModifier) or "none"
+            if mod == "none" then return true end
+            if mod == "control" then return IsControlKeyDown() end
+            if mod == "alt" then return IsAltKeyDown() end
+            return IsShiftKeyDown()
+        end
+
+        -- Shared dedup check: only scan last 5 lines (we add at most 3)
         local function hasDupLine(tooltip, name, tag)
             local n = tooltip:NumLines()
-            local start = n - 3
+            local start = n - 4
             if start < 1 then start = 1 end
             for i = n, start, -1 do
                 local fs = _G[name .. "TextLeft" .. i]
@@ -10444,6 +10855,9 @@ initFrame:SetScript("OnEvent", function(self, event)
             if not tooltip or not tooltip.GetName then return end
             local ok, name = pcall(tooltip.GetName, tooltip)
             if not ok or not name then return end
+            -- The gem-socketing window's item text is a tooltip-data frame;
+            -- ID lines do not belong inside that window.
+            if name == "ItemSocketingDescription" then return end
             if hasDupLine(tooltip, name, "ItemID") then return end
             tooltip:AddDoubleLine("ItemID", tostring(data.id), 1, 1, 1, 1, 1, 1)
             local iconID = C_Item.GetItemIconByID and C_Item.GetItemIconByID(data.id)
@@ -10452,6 +10866,26 @@ initFrame:SetScript("OnEvent", function(self, event)
                 tooltip:AddDoubleLine("IconID", tostring(iconID), 1, 1, 1, 1, 1, 1)
             end
             tooltip:Show()
+        end
+
+        local function ItemIdMaxStackHook(tooltip, data)
+            if not (EllesmereUIDB and EllesmereUIDB.showItemMaxStacks) then return end
+            if not IsItemStackModifierHeld() then return end
+            if not data or not data.id then return end
+            if _isSecret and _isSecret(data.id) then return end
+            if not tooltip or not tooltip.GetName then return end
+            local ok, name = pcall(tooltip.GetName, tooltip)
+            if not ok or not name then return end
+            if name == "ItemSocketingDescription" then return end
+            if hasDupLine(tooltip, name, "Max Stack") then return end
+
+            -- 8th return of GetItemInfo is the native max stack size; nil while
+            -- the item is uncached (the line then appears on the next hover).
+            local _, _, _, _, _, _, _, maxStack = C_Item.GetItemInfo(data.id)
+            if maxStack and maxStack > 1 then
+                tooltip:AddDoubleLine("Max Stack", tostring(maxStack), 1, 1, 1, 1, 1, 1)
+                tooltip:Show()
+            end
         end
 
         -- Macros surface as their own tooltip type, so the Spell hook above never
@@ -10489,21 +10923,27 @@ initFrame:SetScript("OnEvent", function(self, event)
         if Enum.TooltipDataType.Macro then
             TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Macro, MacroSpellIDTooltipHook)
         end
+        TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Item, ItemIdMaxStackHook)
 
-        -- Live toggle: when the selected modifier is pressed/released while a
-        -- tooltip is hovered, re-process the shown GameTooltip so the ID lines
-        -- appear/disappear without re-hovering. RefreshData re-runs the post-calls
-        -- above (which then add or skip the lines per IsSpellIDModifierHeld). Only
-        -- fires when the feature is on and the relevant modifier actually changed.
+        -- Live toggle: when a selected modifier is pressed/released while a
+        -- tooltip is hovered, re-process the shown GameTooltip so the ID and
+        -- Max Stack lines appear/disappear without re-hovering. RefreshData
+        -- re-runs the post-calls above (which then add or skip their lines per
+        -- their own modifier checks). Only fires when a feature is on and its
+        -- chosen modifier actually changed.
+        local function KeyMatchesModifier(key, mod)
+            return (mod == "shift"   and (key == "LSHIFT" or key == "RSHIFT"))
+                or (mod == "control" and (key == "LCTRL"  or key == "RCTRL"))
+                or (mod == "alt"     and (key == "LALT"   or key == "RALT"))
+        end
         local modWatcher = CreateFrame("Frame")
         modWatcher:RegisterEvent("MODIFIER_STATE_CHANGED")
         modWatcher:SetScript("OnEvent", function(_, key)
-            if not (EllesmereUIDB and EllesmereUIDB.showSpellID) then return end
-            local mod = EllesmereUIDB.spellIDModifier or "none"
+            local db = EllesmereUIDB
+            if not db then return end
             local relevant =
-                (mod == "shift"   and (key == "LSHIFT" or key == "RSHIFT")) or
-                (mod == "control" and (key == "LCTRL"  or key == "RCTRL"))  or
-                (mod == "alt"     and (key == "LALT"   or key == "RALT"))
+                (db.showSpellID and KeyMatchesModifier(key, db.spellIDModifier or "none"))
+                or (db.showItemMaxStacks and KeyMatchesModifier(key, db.itemStackModifier or "none"))
             if not relevant then return end
             if GameTooltip and GameTooltip:IsShown() and GameTooltip.RefreshData then
                 GameTooltip:RefreshData()
@@ -11024,4 +11464,3 @@ do
     EllesmereUI._SWIFTMEND_SPELL = 18562
     EllesmereUI._SWIFTMEND_ICON  = 134914
 end
-

@@ -206,7 +206,7 @@ ns.optionDefs = {
     { type="slider", cat="CHAR-SHEET", ver=bit.bor(CCS.ALL), key="itemnamelength", label=L["ITEM_NAME_LENGTH"], value=75, default=75, min=1, max=75, step=1, slots=2 },
     { type="checkbox", cat="CHAR-SHEET", ver=bit.bor(CCS.ALL), key="showdurability", label=L["SHOW_DURABILITY"], value=false, default=false, slots=1 },
     { type="checkbox", cat="CHAR-SHEET", ver=bit.bor(CCS.ALL), key="showdurabilitybar", label=L["SHOW_DURABILITY_BAR"], value=true, default=true, slots=1 },
-    { type="checkbox", cat="CHAR-SHEET", ver=bit.bor(CCS.RETAIL, CCS.MOP), key="hideshowchbtn", label=L["HIDE_SHOW_CHAR_BTN"], value=false, default=false, slots=1 },
+    { type="checkbox", cat="CHAR-SHEET", ver=bit.bor(CCS.ALL), key="hideshowchbtn", label=L["HIDE_SHOW_CHAR_BTN"], value=false, default=false, slots=1 },
     { type="checkbox", cat="CHAR-SHEET", ver=bit.bor(CCS.ALL), key="hideiconborders", label=L["HIDE_ICON_BORDERS"], value=true, default=true, slots=1 },
     { type="checkbox", cat="CHAR-SHEET", ver=bit.bor(CCS.ALL), key="showenchants", label=L["SHOW_ENCHANTS"], value=true, default=true, slots=1 },
     { type="checkbox", cat="CHAR-SHEET", ver=bit.bor(CCS.RETAIL), key="showtempenchants", label=L["SHOW_TEMP_ENCHANTS"], value=true, default=true, slots=1 },

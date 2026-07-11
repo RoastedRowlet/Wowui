@@ -91,6 +91,8 @@ L["Animated Shadow"] = "Ombre animée"
 L["Animated Storm"] = "Tempête animée"
 L["Animated Weapon"] = "Arme animée"
 L["Announce focus marker on ready check"] = "Annoncer mon marqueur de focus lors du ready check."
+--[[Translation missing --]]
+L["announceDungeonReset"] = "Announce dungeon resets to group"
 L["Anodized Coilbearer"] = "Porte-bobine anodisé"
 L["Anomalus"] = "Anomalus"
 L["Anub'ar Champion"] = "Champion anub'ar"
@@ -896,6 +898,8 @@ L["Dungeon Data Missing"] = "Données manquantes pour le donjon"
 --[[Translation missing --]]
 L["Dungeon Entrance"] = "Dungeon Entrance"
 L["Dungeon Level"] = "Niveau du donjon "
+--[[Translation missing --]]
+L["dungeonResetAnnouncement"] = "<Dungeons have been reset!>"
 L["Duskfright Herald"] = "Héraut crépusculeffroi"
 L["Duskwatch Arcanist"] = "Arcaniste de la Garde crépusculaire"
 L["Duskwatch Guard"] = "Vigile de la Garde crépusculaire"

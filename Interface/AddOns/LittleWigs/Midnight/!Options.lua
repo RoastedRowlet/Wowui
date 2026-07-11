@@ -3,7 +3,7 @@
 BigWigs:AddColors("Rav'i", {
 	[1296050] = "orange",
 	[1296216] = "cyan",
-	[1296220] = "yellow",
+	[1296220] = {"blue","yellow"},
 	[1307703] = "purple",
 	[1307894] = "red",
 })
@@ -11,18 +11,20 @@ BigWigs:AddColors("Rav'i", {
 BigWigs:AddSounds("Rav'i", {
 	[1296050] = "alarm",
 	[1296216] = "long",
-	[1296220] = "alert",
+	[1296220] = {"alert","warning"},
 	[1307703] = "info",
 	[1307894] = "alarm",
 })
 
 BigWigs:AddColors("The Writhing Coil", {
 	[1298949] = "purple",
-	[1299053] = "red",
+	[1299053] = "yellow",
 	[1299130] = "orange",
 	[1299154] = "yellow",
-	[1300044] = "red",
+	[1300044] = "yellow",
 	[1300686] = "cyan",
+	[1310358] = "red",
+	[1310547] = "red",
 })
 
 BigWigs:AddSounds("The Writhing Coil", {
@@ -32,13 +34,15 @@ BigWigs:AddSounds("The Writhing Coil", {
 	[1299154] = "alert",
 	[1300044] = "alarm",
 	[1300686] = "info",
+	[1310358] = "alert",
+	[1310547] = "alert",
 })
 
 BigWigs:AddColors("Zul'jan", {
 	[1300876] = "cyan",
 	[1301111] = "orange",
 	[1301350] = "purple",
-	[1301413] = "red",
+	[1301413] = {"blue","red"},
 })
 
 BigWigs:AddSounds("Zul'jan", {
@@ -158,6 +162,12 @@ BigWigs:AddColors("Blademaster Darza", {
 BigWigs:AddSounds("Blademaster Darza", {
 })
 
+BigWigs:AddColors("Azta'rec", {
+})
+
+BigWigs:AddSounds("Azta'rec", {
+})
+
 BigWigs:AddColors("Midnight Delve Trash", {
 })
 
@@ -179,25 +189,29 @@ BigWigs:AddSounds("The Hoardmonger", {
 BigWigs:AddColors("Sentinel of Winter", {
 	[1235548] = "red",
 	[1235623] = "cyan",
+	[1235656] = "yellow",
 	[1235783] = "orange",
 })
 
 BigWigs:AddSounds("Sentinel of Winter", {
 	[1235548] = "alert",
 	[1235623] = "info",
+	[1235656] = "long",
 	[1235783] = "alarm",
 })
 
 BigWigs:AddColors("Nalorakk Den", {
 	[1242860] = "red",
-	[1243569] = "purple",
+	[1243011] = "yellow",
+	[1243569] = "orange",
 	[1255385] = "orange",
 })
 
 BigWigs:AddSounds("Nalorakk Den", {
 	[1242860] = "info",
-	[1243569] = "alert",
-	[1255385] = "alarm",
+	[1243011] = "long",
+	[1243569] = "alarm",
+	[1255385] = "alert",
 })
 
 BigWigs:AddColors("Den of Nalorakk Trash", {
@@ -314,15 +328,22 @@ BigWigs:AddSounds("Maisara Caverns Trash", {
 })
 
 BigWigs:AddColors("Kystia Manaheart", {
+	[474240] = "orange",
+	[1253811] = "red",
+	[1264095] = "cyan",
 })
 
 BigWigs:AddSounds("Kystia Manaheart", {
+	[474240] = "alarm",
+	[1253811] = "alarm",
+	[1264095] = "info",
 })
 
 BigWigs:AddColors("Zaen Bladesorrow", {
 	[474478] = "red",
 	[474765] = "yellow",
-	[1214357] = "orange",
+	[1214357] = {"blue","orange"},
+	[1218347] = "cyan",
 	[1222795] = "purple",
 })
 
@@ -334,15 +355,29 @@ BigWigs:AddSounds("Zaen Bladesorrow", {
 })
 
 BigWigs:AddColors("Xathuux the Annihilator", {
+	[473898] = "purple",
+	[474197] = "yellow",
+	[1214637] = {"blue","red"},
+	[1295453] = "orange",
 })
 
 BigWigs:AddSounds("Xathuux the Annihilator", {
+	[473898] = "alert",
+	[474197] = "long",
+	[1214637] = "alarm",
+	[1295453] = "alarm",
 })
 
 BigWigs:AddColors("Lithiel Cinderfury", {
+	[474408] = "cyan",
+	[1218203] = "orange",
+	[1224478] = "red",
 })
 
 BigWigs:AddSounds("Lithiel Cinderfury", {
+	[474408] = "info",
+	[1218203] = "alarm",
+	[1224478] = "warning",
 })
 
 BigWigs:AddColors("Murder Row Trash", {
@@ -401,45 +436,113 @@ BigWigs:AddSounds("Nexus-Point Xenas Trash", {
 })
 
 BigWigs:AddColors("Lightblossom Trinity", {
+	[1234753] = "purple",
+	[1234850] = "red",
+	[1235564] = "cyan",
+	[1235640] = "yellow",
 })
 
 BigWigs:AddSounds("Lightblossom Trinity", {
+	[1234753] = "alert",
+	[1234850] = "alarm",
+	[1235564] = "long",
+	[1235640] = "alert",
 })
 
 BigWigs:AddColors("Ikuzz the Light Hunter", {
+	[1236709] = "yellow",
+	[1236746] = "orange",
+	[1237090] = {"blue","red"},
 })
 
 BigWigs:AddSounds("Ikuzz the Light Hunter", {
+	[1236709] = "long",
+	[1236746] = "alert",
+	[1237090] = "warning",
 })
 
 BigWigs:AddColors("Lightwarden Ruia", {
+	[1239824] = {"blue","yellow"},
+	[1239882] = "cyan",
+	[1239883] = "cyan",
+	[1239885] = "cyan",
+	[1240098] = "orange",
+	[1240210] = {"orange","yellow"},
+	[1241058] = "red",
 })
 
 BigWigs:AddSounds("Lightwarden Ruia", {
+	[1239824] = "warning",
+	[1239882] = "info",
+	[1239883] = "info",
+	[1239885] = "info",
+	[1240098] = "alarm",
+	[1240210] = "alarm",
+	[1241058] = "alert",
 })
 
 BigWigs:AddColors("Ziekket", {
+	[1246372] = "cyan",
+	[1246607] = {"blue","orange"},
+	[1246858] = "yellow",
+	[1247685] = "purple",
 })
 
 BigWigs:AddSounds("Ziekket", {
+	[1246372] = "long",
+	[1246607] = "alarm",
+	[1246858] = "info",
+	[1247685] = "alert",
 })
 
 BigWigs:AddColors("Taz'Rah", {
+	[1222085] = "purple",
+	[1222098] = {"blue","red"},
+	[1222274] = "yellow",
+	[1262901] = "cyan",
+	[1296963] = "orange",
+	[1297017] = "purple",
+	[1300259] = "yellow",
 })
 
 BigWigs:AddSounds("Taz'Rah", {
+	[1222085] = "alert",
+	[1222098] = {"alarm","info"},
+	[1222274] = "long",
+	[1262901] = "info",
+	[1296963] = "alarm",
+	[1297017] = "alert",
+	[1300259] = "long",
 })
 
 BigWigs:AddColors("Atroxus", {
+	[1222371] = "cyan",
+	[1222642] = "purple",
+	[1222721] = "red",
+	[1226120] = "yellow",
+	[1262497] = "orange",
 })
 
 BigWigs:AddSounds("Atroxus", {
+	[1222371] = "info",
+	[1222642] = "alert",
+	[1222721] = "alarm",
+	[1226120] = "long",
+	[1262497] = "alarm",
 })
 
 BigWigs:AddColors("Charonus", {
+	[1222755] = "yellow",
+	[1227264] = "red",
+	[1263982] = "cyan",
+	[1282770] = "orange",
 })
 
 BigWigs:AddSounds("Charonus", {
+	[1222755] = "warning",
+	[1227264] = "alarm",
+	[1263982] = "info",
+	[1282770] = "alert",
 })
 
 BigWigs:AddColors("Emberdawn", {

@@ -93,6 +93,8 @@ L["Animated Storm"] = "살아난 폭풍"
 L["Animated Weapon"] = "살아 움직이는 무기"
 --[[Translation missing --]]
 L["Announce focus marker on ready check"] = "Announce my Focus Marker on ready check."
+--[[Translation missing --]]
+L["announceDungeonReset"] = "Announce dungeon resets to group"
 L["Anodized Coilbearer"] = "양극산화 코일지기"
 L["Anomalus"] = "아노말루스"
 L["Anub'ar Champion"] = "아눕아르 용사"
@@ -928,6 +930,8 @@ L["Dul'zak"] = "둘자크"
 L["Dungeon Data Missing"] = "던전 데이터 없음"
 L["Dungeon Entrance"] = "던전 입구"
 L["Dungeon Level"] = "던전 레벨"
+--[[Translation missing --]]
+L["dungeonResetAnnouncement"] = "<Dungeons have been reset!>"
 --[[Translation missing --]]
 L["Duskfright Herald"] = "Duskfright Herald"
 L["Duskwatch Arcanist"] = "황혼감시대 비전술사"

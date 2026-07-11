@@ -90,8 +90,8 @@ local ORIENT_VALUES = { HORIZONTAL = "Horizontal", VERTICAL = "Vertical" }
 local ORIENT_ORDER = { "HORIZONTAL", "VERTICAL" }
 
 -- Show when mode (for frame effects)
-local SHOW_WHEN_VALUES = { present = "When Present", missing = "When Missing" }
-local SHOW_WHEN_ORDER = { "present", "missing" }
+local SHOW_WHEN_VALUES = { present = "When Any Present", allPresent = "When All Present", anyMissing = "When Any Missing", missing = "When All Missing" }
+local SHOW_WHEN_ORDER = { "present", "allPresent", "anyMissing", "missing" }
 
 -- Indicator frame level (layering relative to the unit button). For Icon/Square
 -- the indicator's own border sits at base + 1 and its count/duration text carrier
@@ -296,15 +296,27 @@ local function CurrentSpecKey()
 end
 ns.BM_CurrentSpecKey = CurrentSpecKey
 
--- Flat spell name lookup
-local SPELL_NAME_BY_ID = {}
+-- Curated display names by spell ID (from the spec lists above)
+local STORED_NAME_BY_ID = {}
 for _, spec in ipairs(HEALER_SPECS) do
     for _, spell in ipairs(spec.spells) do
         if not spell.hide then
-            SPELL_NAME_BY_ID[spell.id] = spell.name
+            STORED_NAME_BY_ID[spell.id] = spell.name
         end
     end
 end
+-- Display-name lookup. Curated names win: they distinguish variants the
+-- client API cannot (e.g. "Echo Reversion" vs plain "Reversion") and
+-- localize through L(). The client-localized spell name is the fallback
+-- for IDs outside the curated lists. No caching: L() must stay live so a
+-- language switch is honoured.
+local SPELL_NAME_BY_ID = setmetatable({}, {
+    __index = function(_, id)
+        local nm = STORED_NAME_BY_ID[id]
+        if nm then return EllesmereUI.L(nm) end
+        return C_Spell and C_Spell.GetSpellName and C_Spell.GetSpellName(id)
+    end,
+})
 
 -- Spec dropdown values/order
 local SPEC_DD_VALUES = {}
@@ -947,7 +959,63 @@ local C_DurationUtil = C_DurationUtil
 
 local C_UnitAuras_GetAuraDuration = C_UnitAuras.GetAuraDuration
 
-local function ApplyBarDrain(bar, unit, auraInstanceID, duration, expirationTime)
+-- Max Duration override (per-indicator): rescale the buff's swipe / bar fill to a
+-- fixed baseline instead of its actual duration. Active only when the toggle is on
+-- AND a positive number was entered (blank = off). Returns M (seconds) or nil.
+local function BM_EffectiveMaxDur(ind)
+    if not ind or not ind.maxDurationEnabled then return nil end
+    local m = tonumber(ind.maxDuration)
+    if not m or m <= 0 then return nil end
+    return m
+end
+ns.BM_EffectiveMaxDur = BM_EffectiveMaxDur
+
+-- Bar Max-Duration self-drain. Blizzard's GPU-smooth SetTimerDuration takes no
+-- custom max, so an overridden bar is drained here instead: one shared OnUpdate
+-- (hidden when idle) sets each registered bar's fill to clamp(remaining / M, 0, 1).
+-- Only overridden bars register, so it costs nothing for everyone else.
+local barMaxDurActive = setmetatable({}, { __mode = "k" })  -- [bar] = { exp, m }
+local barMaxDurTicker = CreateFrame("Frame")
+barMaxDurTicker:Hide()
+barMaxDurTicker:SetScript("OnUpdate", function()
+    local now = GetTime()
+    local anyActive = false
+    for bar, st in pairs(barMaxDurActive) do
+        if not bar:IsShown() then
+            barMaxDurActive[bar] = nil
+        else
+            anyActive = true
+            local frac = (st.exp - now) / st.m
+            if frac < 0 then frac = 0 elseif frac > 1 then frac = 1 end
+            bar:SetValue(frac)
+        end
+    end
+    if not anyActive then barMaxDurTicker:Hide() end
+end)
+local function RegisterBarMaxDur(bar, exp, m)
+    local st = barMaxDurActive[bar]
+    if not st then st = {}; barMaxDurActive[bar] = st end
+    st.exp, st.m = exp, m
+    barMaxDurTicker:Show()
+end
+local function UnregisterBarMaxDur(bar)
+    barMaxDurActive[bar] = nil
+end
+
+local function ApplyBarDrain(bar, unit, auraInstanceID, duration, expirationTime, maxDur)
+    -- Max Duration override: scale the fill to the fixed baseline (still ends at
+    -- the real expiration). Needs a clean expirationTime; self-drained via the
+    -- ticker above. A buff applied at < M starts partly drained; one longer than
+    -- M shows full until it drops below M (the clamp).
+    if maxDur and expirationTime and not issecretvalue(expirationTime) and expirationTime > 0 then
+        bar:SetMinMaxValues(0, 1)
+        local frac = (expirationTime - GetTime()) / maxDur
+        if frac < 0 then frac = 0 elseif frac > 1 then frac = 1 end
+        bar:SetValue(frac)
+        RegisterBarMaxDur(bar, expirationTime, maxDur)
+        return
+    end
+    UnregisterBarMaxDur(bar)
     -- Preferred: native Duration object from C_UnitAuras (GPU-side smooth drain)
     if auraInstanceID and not issecretvalue(auraInstanceID) and C_UnitAuras_GetAuraDuration and bar.SetTimerDuration then
         local durObj = C_UnitAuras_GetAuraDuration(unit, auraInstanceID)
@@ -1479,6 +1547,8 @@ function ns.BM_UpdateSimpleGrid(button, unit, db, updateInfo)
             local icon = d.bmSimpleIcons[shown]
             icon:SetSize(sz, sz)
             icon._tex:SetTexture(tex or 136243)
+            local _z = bs.iconZoom or 0.08
+            icon._tex:SetTexCoord(_z, 1 - _z, _z, 1 - _z)
 
             local cd = icon._cooldown
             if cd then
@@ -1759,14 +1829,16 @@ function ns.BM_UpdateIndicators(button, unit, db, updateInfo)
                             local bgc = ind.barBgColor or { r=0, g=0, b=0 }
                             bar._bg:SetColorTexture(bgc.r, bgc.g, bgc.b, (ind.barBgOpacity or 50) / 100)
                         end
-                        -- Duration fill (smooth drain via native SetTimerDuration)
+                        -- Duration fill (smooth drain via native SetTimerDuration,
+                        -- or a fixed-baseline self-drain when Max Duration is set)
                         local dur = aura.duration
                         local exp = aura.expirationTime
                         local iid = aura.auraInstanceID
+                        local maxDur = BM_EffectiveMaxDur(ind)
                         if dur and exp and not issecretvalue(dur) and not issecretvalue(exp) and dur > 0 then
-                            ApplyBarDrain(bar, unit, iid, dur, exp)
+                            ApplyBarDrain(bar, unit, iid, dur, exp, maxDur)
                         else
-                            ApplyBarDrain(bar, unit, iid, nil, nil)
+                            ApplyBarDrain(bar, unit, iid, nil, nil, maxDur)
                         end
                         -- Threshold "expiring" recolor (secret-safe curve + ticker).
                         -- While enabled the ticker owns the bar color and reverts to
@@ -1880,7 +1952,8 @@ function ns.BM_UpdateIndicators(button, unit, db, updateInfo)
                                 else
                                     f._tex:SetTexture(136243)
                                 end
-                                f._tex:SetTexCoord(0.08, 0.92, 0.08, 0.92)
+                                local _z = db.profile.bmIconZoom or 0.08
+                                f._tex:SetTexCoord(_z, 1 - _z, _z, 1 - _z)
                                 f._tex:SetVertexColor(1, 1, 1, iconAlpha)
                                 ncR, ncG, ncB, ncA = 1, 1, 1, iconAlpha
                             else -- square
@@ -2015,7 +2088,18 @@ function ns.BM_UpdateIndicators(button, unit, db, updateInfo)
                                     local applied = false
                                     local iid = aura.auraInstanceID
                                     local cdBaseA = hideIcon and 1 or iconAlpha
-                                    if iid and not issecretvalue(iid) and C_UnitAuras.GetAuraDuration then
+                                    local mdMax = BM_EffectiveMaxDur(ind)
+                                    local mdExp = aura.expirationTime
+                                    if mdMax and mdExp and not issecretvalue(mdExp) and mdExp > 0 then
+                                        -- Max Duration override: scale the swipe to the fixed
+                                        -- baseline (still ends at the real expiration). A buff
+                                        -- applied at < M shows a partly-drained swipe from the
+                                        -- start; one longer than M shows full until it drops
+                                        -- below M.
+                                        f._cooldown:SetCooldown(mdExp - mdMax, mdMax)
+                                        f._cooldown:SetAlpha(cdBaseA)
+                                        applied = true
+                                    elseif iid and not issecretvalue(iid) and C_UnitAuras.GetAuraDuration then
                                         local durObj = C_UnitAuras.GetAuraDuration(unit, iid)
                                         if durObj then
                                             f._cooldown:SetCooldownFromDurationObject(durObj)
@@ -2087,15 +2171,19 @@ function ns.BM_UpdateIndicators(button, unit, db, updateInfo)
         else
             -- Frame effects
             local anyPresent = false
+            local allPresent = #ind.spells > 0
             local presentAura = nil
             for _, sid in ipairs(ind.spells) do
                 local a = GetAura(sid)
-                if a then anyPresent = true; presentAura = a; break end
+                if a then anyPresent = true; presentAura = presentAura or a
+                else allPresent = false end
             end
 
             local showWhen = ind.showWhen or "present"
             local shouldShow = (showWhen == "present" and anyPresent)
                             or (showWhen == "missing" and not anyPresent)
+                            or (showWhen == "allPresent" and allPresent)
+                            or (showWhen == "anyMissing" and not allPresent)
 
             -- Threshold drives off the first present tracked aura (present mode
             -- only -- a missing aura has no remaining time to watch). Secret-safe.
@@ -2554,7 +2642,8 @@ function ns.BM_ApplyPreviewIndicators(f, index, s)
                                     fr:SetAlpha(pvAlpha)
                                     if indType == "icon" then
                                         fr._tex:SetTexture(GetSpellIcon(sid))
-                                        fr._tex:SetTexCoord(0.08, 0.92, 0.08, 0.92)
+                                        local _z = s.bmIconZoom or 0.08
+                                        fr._tex:SetTexCoord(_z, 1 - _z, _z, 1 - _z)
                                         fr._tex:SetVertexColor(1, 1, 1, pvHideIcon and 0 or 1)
                                     else
                                         -- Per-ability color (preview): this spell's
@@ -2847,7 +2936,7 @@ function ns.BM_BuildSimplePreview(parent, s, fontPath, PP, centerX, topY)
     nameFS:SetText(playerName)
     local nameMode = s.nameColorMode or "class"
     if nameMode == "accent" then
-        local ar, ag, ab = EllesmereUI.ResolveThemeColor(EllesmereUI.GetActiveTheme())
+        local ar, ag, ab = EllesmereUI.ResolveActiveAccent()
         if ar then nameFS:SetTextColor(ar, ag, ab) else nameFS:SetTextColor(1, 1, 1) end
     elseif nameMode == "custom" then
         local c = s.nameCustomColor or { r=1, g=1, b=1 }
@@ -2971,6 +3060,8 @@ function ns.BM_BuildSimplePreview(parent, s, fontPath, PP, centerX, topY)
             end
             icon:SetSize(sz, sz)
             icon._tex:SetTexture(exampleIcons[i] or 136243)
+            local _z = bs.iconZoom or 0.08
+            icon._tex:SetTexCoord(_z, 1 - _z, _z, 1 - _z)
             if icon._borderFrame and PP then
                 local bdrSz = bs.borderSize or 1
                 local bc = bs.borderColor or { r=0, g=0, b=0 }
@@ -3274,8 +3365,9 @@ function ns.BM_BuildPage(pageName, parent, yOffset)
             UpdCog(); EllesmereUI.RegisterWidgetRefresh(UpdCog)
         end
 
-        -- Row 2: Growth Direction | Size
-        _, hh = W:DualRow(optsFrame, sy,
+        -- Row 2: Growth Direction | Size (+ icon zoom cog)
+        local row2
+        row2, hh = W:DualRow(optsFrame, sy,
             { type="dropdown", text="Growth Direction", values=GROW_VALUES, order=GROW_ORDER,
               disabled=BuffsOff, disabledTooltip="Show Buffs",
               getValue=function() return BVal("growDirection", "LEFT") end,
@@ -3284,6 +3376,29 @@ function ns.BM_BuildPage(pageName, parent, yOffset)
               disabled=BuffsOff, disabledTooltip="Show Buffs",
               getValue=function() return BVal("size", 22) end,
               setValue=function(v) BSet("size", v) end });  sy = sy - hh
+        do
+            local rgn = row2._rightRegion
+            local _, cogShow = EllesmereUI.BuildCogPopup({
+                title = "Icon Zoom",
+                rows = {
+                    { type="slider", label="Zoom", min=0, max=0.20, step=0.01,
+                      get=function() return BVal("iconZoom", 0.08) end,
+                      set=function(v) BSet("iconZoom", v) end },
+                },
+            })
+            local cogBtn = CreateFrame("Button", nil, rgn)
+            cogBtn:SetSize(26, 26)
+            cogBtn:SetPoint("RIGHT", rgn._lastInline or rgn._control, "LEFT", -8, 0)
+            rgn._lastInline = cogBtn
+            cogBtn:SetFrameLevel(rgn:GetFrameLevel() + 5)
+            local cogTex = cogBtn:CreateTexture(nil, "OVERLAY")
+            cogTex:SetAllPoints(); cogTex:SetTexture(EllesmereUI.COGS_ICON)
+            local function UpdCog() local off = BuffsOff(); cogBtn:SetAlpha(off and 0.15 or 0.4); cogBtn:EnableMouse(not off) end
+            cogBtn:SetScript("OnEnter", function(self) if not BuffsOff() then self:SetAlpha(0.7) end end)
+            cogBtn:SetScript("OnLeave", function(self) UpdCog() end)
+            cogBtn:SetScript("OnClick", function(self) if not BuffsOff() then cogShow(self) end end)
+            UpdCog(); EllesmereUI.RegisterWidgetRefresh(UpdCog)
+        end
 
         -- Row 3: Spacing | Border Size (+ swatch)
         local row3
@@ -3410,7 +3525,7 @@ function ns.BM_BuildPage(pageName, parent, yOffset)
             local accent = tile:CreateTexture(nil, "ARTWORK", nil, 2)
             accent:SetSize(2, TILE_H)
             accent:SetPoint("TOPLEFT", tile, "TOPLEFT", 0, 0)
-            local ac = EllesmereUI.ACCENT_COLOR
+            local ac = EllesmereUI.ELLESMERE_GREEN
             if ac then
                 accent:SetColorTexture(ac.r, ac.g, ac.b, 1)
             else
@@ -3452,7 +3567,7 @@ function ns.BM_BuildPage(pageName, parent, yOffset)
         titleFS:SetFont(fontPath, 13, "")
         titleFS:SetJustifyH("LEFT")
         titleFS:SetWordWrap(false)
-        titleFS:SetText(typeName)
+        titleFS:SetText(EllesmereUI.L(typeName))
         titleFS:SetTextColor(1, 1, 1)
 
         -- Position subtitle (smaller, grayer, inline after type name)
@@ -3465,7 +3580,7 @@ function ns.BM_BuildPage(pageName, parent, yOffset)
             posFS:SetFont(fontPath, 11, "")
             posFS:SetJustifyH("LEFT")
             posFS:SetWordWrap(false)
-            posFS:SetText("(" .. posText .. ")")
+            posFS:SetText("(" .. EllesmereUI.L(posText) .. ")")
             posFS:SetTextColor(0.75, 0.75, 0.75, 0.65)
         end
 
@@ -3483,7 +3598,7 @@ function ns.BM_BuildPage(pageName, parent, yOffset)
             end
             spellFS:SetText(table.concat(names, ", "))
         else
-            spellFS:SetText("(no spells)")
+            spellFS:SetText(EllesmereUI.L("(no spells)"))
         end
         spellFS:SetTextColor(0.4, 0.4, 0.4)
 
@@ -3505,7 +3620,8 @@ function ns.BM_BuildPage(pageName, parent, yOffset)
         local function UpdateToggleVisual()
             toggleKnob:ClearAllPoints()
             if ind.enabled then
-                toggleBg:SetColorTexture(0.05, 0.65, 0.45, 1)
+                local acr, acg, acb = EllesmereUI.ResolveActiveAccent()
+                toggleBg:SetColorTexture(acr, acg, acb, 1)
                 toggleKnob:SetPoint("RIGHT", toggleBtn, "RIGHT", -2, 0)
                 toggleKnob:SetColorTexture(1, 1, 1, 1)
             else
@@ -3597,21 +3713,22 @@ function ns.BM_BuildPage(pageName, parent, yOffset)
         addBtn:SetPoint("TOP", sidebarFrame, "TOPLEFT", floor(sidebarW / 2), tileY - ADD_BTN_PAD)
         addBtn:SetFrameLevel(sidebarFrame:GetFrameLevel() + 1)
 
+        local accentColor = EllesmereUI.ELLESMERE_GREEN
         local addBg = addBtn:CreateTexture(nil, "BACKGROUND")
         addBg:SetAllPoints()
-        addBg:SetColorTexture(0.05, 0.52, 0.39, 0.8)
+        addBg:SetColorTexture(accentColor.r, accentColor.g, accentColor.b, 0.8)
 
         local addLabel = addBtn:CreateFontString(nil, "OVERLAY")
         addLabel:SetFont(fontPath, 12, "")
         addLabel:SetPoint("CENTER")
-        addLabel:SetText("Add New")
+        addLabel:SetText(EllesmereUI.L("Add New"))
         addLabel:SetTextColor(1, 1, 1)
 
         addBtn:SetScript("OnEnter", function()
-            addBg:SetColorTexture(0.07, 0.62, 0.49, 1)
+            addBg:SetColorTexture(accentColor.r, accentColor.g, accentColor.b, 1)
         end)
         addBtn:SetScript("OnLeave", function()
-            addBg:SetColorTexture(0.05, 0.52, 0.39, 0.8)
+            addBg:SetColorTexture(accentColor.r, accentColor.g, accentColor.b, 0.8)
         end)
 
         addBtn:SetScript("OnClick", function(self)
@@ -3677,7 +3794,7 @@ function ns.BM_BuildPage(pageName, parent, yOffset)
                 local abLbl = popup:CreateFontString(nil, "OVERLAY")
                 abLbl:SetFont(fontPath, 11, "")
                 abLbl:SetPoint("TOPLEFT", popup, "TOPLEFT", POPUP_PAD, py)
-                abLbl:SetText("Abilities")
+                abLbl:SetText(EllesmereUI.L("Abilities"))
                 abLbl:SetTextColor(1, 1, 1, 0.6)
                 py = py - LABEL_H - LBL_GAP
 
@@ -3689,7 +3806,7 @@ function ns.BM_BuildPage(pageName, parent, yOffset)
                         if spec then
                             for _, spell in ipairs(spec.spells) do
                                 if not spell.hide then
-                                    items[#items + 1] = { key = tostring(spell.id), label = spell.name, icon = GetSpellIcon(spell.id), iconSize = DD_SPELL_ICON_SIZE }
+                                    items[#items + 1] = { key = tostring(spell.id), label = SPELL_NAME_BY_ID[spell.id] or spell.name, icon = GetSpellIcon(spell.id), iconSize = DD_SPELL_ICON_SIZE }
                                 end
                             end
                             table.sort(items, function(a, b) return a.label < b.label end)
@@ -3782,14 +3899,14 @@ function ns.BM_BuildPage(pageName, parent, yOffset)
                 cBtn:SetFrameLevel(popup:GetFrameLevel() + 1)
                 local cBg = cBtn:CreateTexture(nil, "BACKGROUND")
                 cBg:SetAllPoints()
-                cBg:SetColorTexture(0.05, 0.52, 0.39, 0.8)
+                cBg:SetColorTexture(accentColor.r, accentColor.g, accentColor.b, 0.8)
                 local cTx = cBtn:CreateFontString(nil, "OVERLAY")
                 cTx:SetPoint("CENTER")
                 cTx:SetFont(fontPath, 12, "")
                 cTx:SetText(EllesmereUI.L("Create"))
                 cTx:SetTextColor(1, 1, 1)
-                cBtn:SetScript("OnEnter", function() cBg:SetColorTexture(0.07, 0.62, 0.49, 1) end)
-                cBtn:SetScript("OnLeave", function() cBg:SetColorTexture(0.05, 0.52, 0.39, 0.8) end)
+                cBtn:SetScript("OnEnter", function() cBg:SetColorTexture(accentColor.r, accentColor.g, accentColor.b, 1) end)
+                cBtn:SetScript("OnLeave", function() cBg:SetColorTexture(accentColor.r, accentColor.g, accentColor.b, 0.8) end)
                 cBtn:SetScript("OnClick", function()
                     if not selectedSpecKey then return end
                     if CountSpecIndicators(db, selectedSpecKey) >= MAX_PER_SPEC then return end
@@ -4139,7 +4256,7 @@ function ns.BM_BuildPage(pageName, parent, yOffset)
         nameFS:SetText(playerName)
         local nameMode = s.nameColorMode or "class"
         if nameMode == "accent" then
-            local ar, ag, ab = EllesmereUI.ResolveThemeColor(EllesmereUI.GetActiveTheme())
+            local ar, ag, ab = EllesmereUI.ResolveActiveAccent()
             if ar then nameFS:SetTextColor(ar, ag, ab)
             else nameFS:SetTextColor(1, 1, 1) end
         elseif nameMode == "custom" then
@@ -4449,7 +4566,7 @@ function ns.BM_BuildPage(pageName, parent, yOffset)
 
         -- Build title: accent "Icon Indicator: " + white "Rejuvenation, Lifebloom"
         local typeName = INDICATOR_TYPE_MAP[indType] and INDICATOR_TYPE_MAP[indType].name or indType
-        local ac2 = EllesmereUI.ACCENT_COLOR
+        local ac2 = EllesmereUI.ELLESMERE_GREEN
         if ac2 then
             settingsTitle:SetTextColor(ac2.r, ac2.g, ac2.b)
         else
@@ -4679,7 +4796,7 @@ function ns.BM_BuildPage(pageName, parent, yOffset)
                     if not spell.hide then
                         abItems[#abItems + 1] = {
                             key = tostring(spell.id),
-                            label = spell.name,
+                            label = SPELL_NAME_BY_ID[spell.id] or spell.name,
                             icon = GetSpellIcon(spell.id), iconSize = DD_SPELL_ICON_SIZE,
                         }
                     end
@@ -4910,8 +5027,9 @@ function ns.BM_BuildPage(pageName, parent, yOffset)
             -----------------------------------------------------------
             _, h = W:SectionHeader(leftFrame, "DISPLAY", sy); sy = sy - h
 
-            -- Row 1: Size | Spacing
-            SettingsRow(
+            -- Row 1: Size (+ icon zoom cog) | Spacing
+            local IconHidden = function() return indType == "icon" and ind.hideIcon == true end
+            local sizeRow = SettingsRow(
                 { type="slider", text="Size", min=4, max=40, step=1,
                   getValue=function() return ind.size or 12 end,
                   setValue=function(v) ind.size = v; ReloadAndUpdate() end },
@@ -4919,8 +5037,33 @@ function ns.BM_BuildPage(pageName, parent, yOffset)
                   getValue=function() return ind.spacing or 1 end,
                   setValue=function(v) ind.spacing = v; ReloadAndUpdate() end })
 
+            -- Inline cog on Size: Icon Zoom (icon type only). One
+            -- profile-wide value shared by all icon indicators.
+            if indType == "icon" then
+                local rgn = sizeRow._leftRegion
+                local _, cogShow = EllesmereUI.BuildCogPopup({
+                    title = "Icon Zoom",
+                    rows = {
+                        { type="slider", label="Zoom", min=0, max=0.20, step=0.01,
+                          get=function() return ns.db.profile.bmIconZoom or 0.08 end,
+                          set=function(v) ns.db.profile.bmIconZoom = v; ReloadAndUpdate() end },
+                    },
+                })
+                local cogBtn = CreateFrame("Button", nil, rgn)
+                cogBtn:SetSize(26, 26)
+                cogBtn:SetPoint("RIGHT", rgn._lastInline or rgn._control, "LEFT", -8, 0)
+                rgn._lastInline = cogBtn
+                cogBtn:SetFrameLevel(rgn:GetFrameLevel() + 5)
+                local cogTex = cogBtn:CreateTexture(nil, "OVERLAY")
+                cogTex:SetAllPoints(); cogTex:SetTexture(EllesmereUI.COGS_ICON)
+                local function UpdCog() local off = IconHidden(); cogBtn:SetAlpha(off and 0.15 or 0.4); cogBtn:EnableMouse(not off) end
+                cogBtn:SetScript("OnEnter", function(self) if not IconHidden() then self:SetAlpha(0.7) end end)
+                cogBtn:SetScript("OnLeave", function(self) UpdCog() end)
+                cogBtn:SetScript("OnClick", function(self) if not IconHidden() then cogShow(self) end end)
+                UpdCog(); EllesmereUI.RegisterWidgetRefresh(UpdCog)
+            end
+
             -- Row 2: Opacity | Border (+ inline color swatch)
-            local IconHidden = function() return indType == "icon" and ind.hideIcon == true end
             local bdrRow = SettingsRow(
                 { type="slider", text="Opacity", min=0, max=100, step=1,
                   disabled=IconHidden, disabledTooltip="Hide Icons",
@@ -5100,6 +5243,25 @@ function ns.BM_BuildPage(pageName, parent, yOffset)
                 end
                 rgn._lastInline = prev
             end
+
+            -- Max Duration: rescale the cooldown swipe to a fixed baseline (input =
+            -- seconds) so buffs applied at varying durations are comparable. Inline
+            -- toggle enables it; off by default, and off until a number is entered.
+            local mdRow = SettingsRow(
+                { type="input", text="Max Duration", inputWidth=56,
+                  getValue=function() return ind.maxDuration and tostring(ind.maxDuration) or "" end,
+                  setValue=function(txt)
+                      local n = tonumber(txt)
+                      ind.maxDuration = (n and n > 0) and n or nil
+                      ReloadAndUpdate()
+                  end },
+                { type="label", text="" })
+            EllesmereUI.BuildInlineToggle({
+                region = mdRow._leftRegion,
+                getValue = function() return ind.maxDurationEnabled == true end,
+                setValue = function(v) ind.maxDurationEnabled = v end,
+                onToggle = function() ReloadAndUpdate() end,
+            })
 
             -- THRESHOLD section (Enable, seconds, color, opacity)
             BuildThresholdRow(false)
@@ -5285,6 +5447,25 @@ function ns.BM_BuildPage(pageName, parent, yOffset)
                     bgSwatch:SetPoint("RIGHT", rgn._lastInline or rgn._control, "LEFT", -8, 0)
                     rgn._lastInline = bgSwatch
                 end
+
+                -- Max Duration: rescale the bar fill to a fixed baseline (input =
+                -- seconds) so buffs applied at varying durations are comparable.
+                -- Inline toggle enables it; off by default, off until a number is set.
+                local mdRow = SettingsRow(
+                    { type="input", text="Max Duration", inputWidth=56,
+                      getValue=function() return ind.maxDuration and tostring(ind.maxDuration) or "" end,
+                      setValue=function(txt)
+                          local n = tonumber(txt)
+                          ind.maxDuration = (n and n > 0) and n or nil
+                          ReloadAndUpdate()
+                      end },
+                    { type="label", text="" })
+                EllesmereUI.BuildInlineToggle({
+                    region = mdRow._leftRegion,
+                    getValue = function() return ind.maxDurationEnabled == true end,
+                    setValue = function(v) ind.maxDurationEnabled = v end,
+                    onToggle = function() ReloadAndUpdate() end,
+                })
 
                 -- THRESHOLD section (Enable, seconds, color, opacity)
                 BuildThresholdRow(false)

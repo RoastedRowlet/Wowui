@@ -1,6 +1,6 @@
 Version: 1
 Frame: CraftScanScannerMenuButton
-FrameLevel: 588
+FrameLevel: 594
 Anchor: LEFT
 X: 119
 Y: -247
@@ -26,4 +26,4 @@ Anchor: BOTTOMRIGHT
 X: -110
 Y: 138
 W: 384
-H: 165
+H: 177

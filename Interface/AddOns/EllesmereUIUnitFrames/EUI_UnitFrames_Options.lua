@@ -1442,7 +1442,15 @@ initFrame:SetScript("OnEvent", function(self)
                 pvCastIconInWidth = settings.showCastIcon ~= false and settings.castbarIconInWidth ~= false
                 pvCastIconOnRight = settings.castbarIconRight == true
             end
-            local pvBarW = pvCastIconInWidth and math.max(1, totalW - pvCastIconW) or totalW
+            -- Boss: castbarWidth > 0 overrides the frame-matched width (0 = match frame).
+            -- Display-clamped to the frame width + 120 so an extreme custom width
+            -- can't spill across the options panel (pf doesn't clip children);
+            -- the real frames + in-game boss preview show the true width.
+            local pvCbBaseW = totalW
+            if unitKey == "boss" and (settings.castbarWidth or 0) > 0 then
+                pvCbBaseW = math.min(math.max(settings.castbarWidth, 30), totalW + 120)
+            end
+            local pvBarW = pvCastIconInWidth and math.max(1, pvCbBaseW - pvCastIconW) or pvCbBaseW
             castbar = CreateFrame("Frame", nil, pf)
             PP.Size(castbar, pvBarW, initCH)
             local cbAnchor = power or health
@@ -1943,7 +1951,10 @@ initFrame:SetScript("OnEvent", function(self)
                 PP.Size(bf, buffSize, buffSize)
                 bf:SetBackdrop(SOLID_BACKDROP)
                 bf:SetBackdropColor(0, 0, 0, 1)
-                bf:SetFrameLevel(pf:GetFrameLevel() + 3)
+                -- Above the preview border so it renders BEHIND the buff icons.
+                -- The border frame is barArea+5 and its solid PP border textures
+                -- sit on a sub-container at barArea+6, so clear barArea+6.
+                bf:SetFrameLevel(barArea:GetFrameLevel() + 7)
                 PP.Point(bf, "BOTTOMLEFT", pf, "TOPLEFT", (i - 1) * (buffSize + buffGap), buffGap)
                 local tex = bf:CreateTexture(nil, "ARTWORK")
                 PP.Point(tex, "TOPLEFT", bf, "TOPLEFT", 1, -1)
@@ -1972,8 +1983,13 @@ initFrame:SetScript("OnEvent", function(self)
                 local df = CreateFrame("Frame", nil, pf, "BackdropTemplate")
                 PP.Size(df, debuffSize, debuffSize)
                 df:SetBackdrop(SOLID_BACKDROP)
-                df:SetBackdropColor(0.55, 0, 0, 1)
-                df:SetFrameLevel(pf:GetFrameLevel() + 3)
+                -- Black 1px edge (backdrop fill showing through the icon's 1px
+                -- inset) to match the buff icons and the live frames' black border.
+                df:SetBackdropColor(0, 0, 0, 1)
+                -- Above the preview border so it renders BEHIND the debuff icons.
+                -- Border frame is barArea+5, its solid PP container barArea+6, so
+                -- clear barArea+6; df's cd (+1) and text host (+2) ride up too.
+                df:SetFrameLevel(barArea:GetFrameLevel() + 7)
                 PP.Point(df, "TOPLEFT", pf, "BOTTOMLEFT", (i - 1) * (debuffSize + debuffGap), -debuffGap)
                 local tex = df:CreateTexture(nil, "ARTWORK")
                 PP.Point(tex, "TOPLEFT", df, "TOPLEFT", 1, -1)
@@ -2570,7 +2586,13 @@ initFrame:SetScript("OnEvent", function(self)
                         ciOnRight = s.castbarIconRight == true
                     end
                     local ciIconW = ch
-                    local ciBarW = ciInWidth and math.max(1, tw - ciIconW) or tw
+                    -- Boss: castbarWidth > 0 overrides the frame-matched width (0 = match frame).
+                    -- Display-clamped (frame width + 120) -- see the creation-time note.
+                    local cbBaseW = tw
+                    if unitKey == "boss" and (s.castbarWidth or 0) > 0 then
+                        cbBaseW = math.min(math.max(s.castbarWidth, 30), tw + 120)
+                    end
+                    local ciBarW = ciInWidth and math.max(1, cbBaseW - ciIconW) or cbBaseW
                     castbar:SetSize(ciBarW, ch)
                     -- Anchoring is applied once below (the authoritative anchor
                     -- that accounts for bottom-text-bar / attached-power cases),
@@ -3258,7 +3280,7 @@ initFrame:SetScript("OnEvent", function(self)
             -- Show Cooldown Text / Stack controls live-update here.
             do
                 local showExtras = (unitKey == "boss") and not noDebuffPreview
-                local showCDText, cdTextSize, cdTOffX, cdTOffY, stackTextSize, stackTOffX, stackTOffY
+                local showCDText, cdTextSize, cdTOffX, cdTOffY, stackTextSize, stackTextPosition, stackTOffX, stackTOffY, cdTextColor, stackTextColor
                 if showExtras then
                     if ns.GetBossSimpleDebuffMode(s) ~= "none" then
                         showCDText = s.simpleDebuffShowCooldownText
@@ -3272,8 +3294,11 @@ initFrame:SetScript("OnEvent", function(self)
                         cdTOffY = s.debuffCooldownTextOffsetY or 0
                     end
                     stackTextSize = s.debuffStackTextSize or 14
+                    stackTextPosition = s.debuffStackTextPosition or "bottomright"
                     stackTOffX = s.debuffStackTextOffsetX or 0
                     stackTOffY = s.debuffStackTextOffsetY or 0
+                    cdTextColor = s.debuffCooldownTextColor or {r=1, g=1, b=1}
+                    stackTextColor = s.debuffStackTextColor or {r=1, g=1, b=1}
                 end
                 local fontP = (EllesmereUI.GetFontPath and EllesmereUI.GetFontPath("unitFrames")) or "Fonts\\FRIZQT__.TTF"
                 for i = 1, #debuffIcons do
@@ -3286,6 +3311,7 @@ initFrame:SetScript("OnEvent", function(self)
                                 EllesmereUI.ApplyIconTextFont(dt, fontP, cdTextSize, "unitFrames")
                                 dt:ClearAllPoints()
                                 dt:SetPoint("CENTER", df, "CENTER", cdTOffX, cdTOffY)
+                                dt:SetTextColor(cdTextColor.r, cdTextColor.g, cdTextColor.b)
                                 dt:Show()
                             else
                                 dt:Hide()
@@ -3297,8 +3323,8 @@ initFrame:SetScript("OnEvent", function(self)
                             if i == 2 then
                                 EllesmereUI.ApplyIconTextFont(st, fontP, stackTextSize, "unitFrames")
                                 st:SetText(3)
-                                st:ClearAllPoints()
-                                st:SetPoint("BOTTOMRIGHT", df, "BOTTOMRIGHT", -1 + stackTOffX, stackTOffY)
+                                ns.ApplyStackAnchor(st, df, stackTextPosition, stackTOffX, stackTOffY)
+                                st:SetTextColor(stackTextColor.r, stackTextColor.g, stackTextColor.b)
                                 st:Show()
                             else
                                 st:Hide()
@@ -3425,10 +3451,14 @@ initFrame:SetScript("OnEvent", function(self)
                 end
             end
 
-            -- Re-snap castbar background width
+            -- Re-snap castbar background width. Boss custom widths (castbarWidth
+            -- > 0) are intentionally wider/narrower than the frame and already
+            -- display-clamped at sizing time -- trimming here would silently
+            -- revert them to frame width.
             if castbar then
+                local pvCbCustom = unitKey == "boss" and (s.castbarWidth or 0) > 0
                 local cbW = castbar:GetWidth()
-                if cbW > snappedFrameW + 0.01 then
+                if not pvCbCustom and cbW > snappedFrameW + 0.01 then
                     castbar:SetWidth(snappedFrameW)
                 end
             end
@@ -4480,6 +4510,13 @@ initFrame:SetScript("OnEvent", function(self)
             local _, cogShow = EllesmereUI.BuildCogPopup({
                 title = "Health Text Decimals",
                 rows = {
+                    { type="toggle", label="Only Show for % Health",
+                      get=function() return db.profile.showDecimalPercentOnly == true end,
+                      set=function(v)
+                          db.profile.showDecimalPercentOnly = v
+                          if ns.ApplyTextDecimalGlobals then ns.ApplyTextDecimalGlobals() end
+                          ReloadAndUpdate(); UpdatePreview()
+                      end },
                     { type="toggle", label="Show 2 for Boss",
                       get=function() return db.profile.showDecimalBoss2 ~= false end,
                       set=function(v)
@@ -4605,6 +4642,20 @@ initFrame:SetScript("OnEvent", function(self)
             end)
             UpdateHBSwatchVis()
         end
+
+        -- Show Nicknames: global master toggle for ALL main frames (player /
+        -- target / focus), default OFF. Gates ns.ResolveUnitNickname -- off shows
+        -- raw unit names, on shows nicknames from supported providers. Not
+        -- per-frame: one switch drives every main frame.
+        _, h = W:DualRow(parent, y,
+            { type="toggle", text="Show Nicknames",
+              tooltip="Show player nicknames from supported addons instead of character names on your main frames.",
+              getValue=function() return db.profile.showNicknames or false end,
+              setValue=function(v)
+                  db.profile.showNicknames = v
+                  if ns.RefreshAllUnitNames then ns.RefreshAllUnitNames() end
+              end },
+            { type="label", text="" });  y = y - h
 
         _, h = W:Spacer(parent, y, 20); y = y - h
 
@@ -7178,6 +7229,16 @@ initFrame:SetScript("OnEvent", function(self)
                       UNIT_DB_MAP[selectedUnit]().castbarHideWhenInactive = v
                       ReloadAndUpdate(); UpdatePreview()
                   end },
+                -- Global (not per-frame, not synced): lift the player/target/focus
+                -- cast bars to HIGH strata. Default on = existing behavior; off leaves
+                -- them at the frame's strata. A single db.profile key drives all three.
+                { type = "toggle", label = "Raise Cast Bar Strata (All)",
+                  tooltip = "Lifts the player, target, and focus cast bars above other frames so they are never hidden behind them.",
+                  get = function() return db.profile.raiseCastbarStrata ~= false end,
+                  set = function(v)
+                      db.profile.raiseCastbarStrata = v
+                      ReloadAndUpdate()
+                  end },
             }
             if selectedUnit == "target" or selectedUnit == "focus" then
                 cogRows[#cogRows + 1] = { type = "toggle", label = "Show Kick Ready Mid-Cast Tick",
@@ -8646,6 +8707,14 @@ initFrame:SetScript("OnEvent", function(self)
             local emptySwatch = EllesmereUI.BuildColorSwatch(ccRgn, ccRgn:GetFrameLevel() + 5,
                 function()
                     local c = SGetSupported("classPowerEmptyColor")
+                    c = c or { r = 0.2, g = 0.2, b = 0.2, a = 1.0 }
+                    return c.r, c.g, c.b, c.a or 1
+                end,
+                function(r, g, b, a)
+                    UNIT_DB_MAP[selectedUnit]().classPowerEmptyColor = { r = r, g = g, b = b, a = a or 1 }
+                    if ns.frames and ns.frames._toggleClassPower then
+                        ns.frames._toggleClassPower()
+                    end
                     ReloadAndUpdate(); UpdatePreview()
                 end, true, 20)
             emptySwatch:SetPoint("RIGHT", ccRgn._lastInline or ccRgn._control, "LEFT", -6, 0)
@@ -9073,10 +9142,10 @@ initFrame:SetScript("OnEvent", function(self)
                     { type="dropdown", label="Growth Direction", values=buffGrowthValues, order=buffGrowthOrder,
                       get=function() return SValSupported("buffGrowth", "auto") end,
                       set=function(v) SSetSupported("buffGrowth", v) end },
-                    { type="slider", label="Max Count", min=1, max=20, step=1,
+                    { type="slider", label="Max Count", min=1, max=40, step=1,
                       get=function() return SValSupported("maxBuffs", 4) end,
                       set=function(v) SSetSupported("maxBuffs", v) end },
-                    { type="slider", label="Max Per Row", min=1, max=20, step=1,
+                    { type="slider", label="Max Per Row", min=1, max=40, step=1,
                       get=function() return SValSupported("buffMaxPerRow", nil) or SValSupported("maxBuffs", 4) end,
                       set=function(v) SSetSupported("buffMaxPerRow", v) end },
                     { type="toggle", label="Cropped Icons",
@@ -11819,7 +11888,7 @@ initFrame:SetScript("OnEvent", function(self)
         -- disabled) boss frames and renders broken, so it must not be activatable.
         local activateBtnFrame, activateBtnLbl, activateBtn
         local function PreviewLabel()
-            return ns._bossPreviewActive and "Deactivate Boss Preview" or "Activate Boss Preview"
+            return ns._bossPreviewActive and EllesmereUI.L("Deactivate Boss Preview") or EllesmereUI.L("Activate Boss Preview")
         end
         local function BossFramesDisabled()
             return db.profile.enabledFrames.boss == false
@@ -11920,14 +11989,153 @@ initFrame:SetScript("OnEvent", function(self)
             -- BUFFS AND DEBUFFS section (below DISPLAY)
             bossAuraHeader, hh = Ww:SectionHeader(pp, "Buffs and Debuffs", yy);  yy = yy - hh
 
+            -- Simple Buff Display: identical to Simple Debuff Display above but for
+            -- buffs. Defaults to None. Forces a single Left/Right column matched to
+            -- the frame height, overriding Buffs Location + Buff Size while active.
+            local simpleBuffTextOff = function()
+                return ns.db.profile.boss.showBuffs
+                or db.profile.boss.simpleBuffs == "none"
+                or not db.profile.boss.simpleBuffShowCooldownText
+            end
+            simpleBuffRow, hh = Ww:DualRow(pp, yy,
+                { type="dropdown", text="Simple Buff Display",
+                  disabled = function()
+                      return ns.db.profile.boss.showBuffs
+                  end,
+                  disabledTooltip="Buffs Location", requireState="disabled",
+                  tooltip = "Force boss buffs into a single large column matched to the frame height.",
+                  values = { none = "None", left = "Left", right = "Right" },
+                  order = { "none", "left", "right" },
+                  getValue=function() return ns.GetBossSimpleBuffMode(db.profile.boss) end,
+                  setValue=function(v)
+                      db.profile.boss.simpleBuffs = v
+                      if v ~= "none" then
+                          -- Same-side collision: if Simple Debuff Display occupies this
+                          -- side, push it off (set to None) so they never overlap.
+                          if ns.GetBossSimpleDebuffMode(db.profile.boss) == v then
+                              db.profile.boss.simpleDebuffs = "none"
+                          end
+                          -- Selecting a side takes over from the normal Buffs
+                          -- Location, so force that setting to None.
+                          db.profile.boss.showBuffs = false
+                      end
+                      ReloadAndUpdate()
+                      if ns.RefreshBossPreviewDebuffs then ns.RefreshBossPreviewDebuffs() end
+                      EllesmereUI:RefreshPage()
+                  end },
+                { type="slider", text="Buff Text Size", min=6, max=30, step=1, trackWidth=120,
+                  disabled=simpleBuffTextOff, disabledTooltip="Show Duration (Inside Cog)",
+                  getValue=function() return db.profile.boss.simpleBuffCooldownTextSize or 14 end,
+                  setValue=function(v) db.profile.boss.simpleBuffCooldownTextSize = v; ReloadAndUpdate() end });  yy = yy - hh
+
+            -- Directions cog on Simple Buff Display: the simple column's own X/Y
+            -- offset (defaults to the regular buff offsets via ns.GetBossSimpleBuffOffset);
+            -- writing here makes the simple offset independent. Disabled while None.
+            do
+                local leftRgn = simpleBuffRow._leftRegion
+                local _, simpleBuffPosCogShow = EllesmereUI.BuildCogPopup({
+                    title = "Simple Buff Position",
+                    rows = {
+                        -- Max buffs shown in simple mode. Shares the boss maxBuffs key
+                        -- with Buffs Location (the two modes are mutually exclusive);
+                        -- the runtime caps frame.Buffs.num to it.
+                        { type="slider", label="Max Count", min=1, max=20, step=1,
+                          get=function() return db.profile.boss.maxBuffs or 4 end,
+                          set=function(v) db.profile.boss.maxBuffs = v; ReloadAndUpdate(); if ns.RefreshBossPreviewDebuffs then ns.RefreshBossPreviewDebuffs() end end },
+                        { type="slider", label="Offset X", min=-200, max=200, step=1,
+                          get=function() local x = ns.GetBossSimpleBuffOffset(db.profile.boss); return x end,
+                          set=function(v) db.profile.boss.simpleBuffOffsetX = v; ReloadAndUpdate(); if ns.RefreshBossPreviewDebuffs then ns.RefreshBossPreviewDebuffs() end end },
+                        { type="slider", label="Offset Y", min=-200, max=200, step=1,
+                          get=function() local _, y = ns.GetBossSimpleBuffOffset(db.profile.boss); return y end,
+                          set=function(v) db.profile.boss.simpleBuffOffsetY = v; ReloadAndUpdate(); if ns.RefreshBossPreviewDebuffs then ns.RefreshBossPreviewDebuffs() end end },
+                        -- Physical-pixel-perfect gap between the simple buff icons.
+                        { type="slider", label="Spacing", min=-1, max=10, step=1,
+                          get=function() return db.profile.boss.simpleBuffSpacing or 1 end,
+                          set=function(v) db.profile.boss.simpleBuffSpacing = v; ReloadAndUpdate(); if ns.RefreshBossPreviewDebuffs then ns.RefreshBossPreviewDebuffs() end end },
+                    },
+                })
+                BossCogBtn(leftRgn, simpleBuffPosCogShow, EllesmereUI.DIRECTIONS_ICON,
+                    function() return ns.GetBossSimpleBuffMode(db.profile.boss) == "none" end)
+            end
+
+            -- Inline cog on Simple Text Size: duration X/Y + stack size / X/Y.
+            do
+                local rightRgn = simpleBuffRow._rightRegion
+                -- Inline Duration + Stack swatches mirroring the regular Buff Text
+                -- Size swatches (same keys); greyed + disabled on this row cog's
+                -- condition.
+                local buffOff = function() return ns.db.profile.boss.showBuffs or db.profile.boss.simpleBuffs == "none" end
+                do
+                    local sw, upd = EllesmereUI.BuildColorSwatch(rightRgn, rightRgn:GetFrameLevel() + 5,
+                        function() local c = db.profile.boss.buffCooldownTextColor; if c then return c.r, c.g, c.b end; return 1, 1, 1 end,
+                        function(r, g, b) db.profile.boss.buffCooldownTextColor = { r=r, g=g, b=b }; ReloadAndUpdate() end, false, 20)
+                    sw:HookScript("OnEnter", function() EllesmereUI.ShowWidgetTooltip(sw, "Duration Text Color") end)
+                    sw:HookScript("OnLeave", function() EllesmereUI.HideWidgetTooltip() end)
+                    PP.Point(sw, "RIGHT", rightRgn._lastInline or rightRgn._control, "LEFT", -8, 0)
+                    rightRgn._lastInline = sw
+                    local function apply() upd(); local o = buffOff(); sw:SetAlpha(o and 0.3 or 1); sw:EnableMouse(not o) end
+                    apply(); EllesmereUI.RegisterWidgetRefresh(apply)
+                end
+                do
+                    local sw, upd = EllesmereUI.BuildColorSwatch(rightRgn, rightRgn:GetFrameLevel() + 5,
+                        function() local c = db.profile.boss.buffStackTextColor; if c then return c.r, c.g, c.b end; return 1, 1, 1 end,
+                        function(r, g, b) db.profile.boss.buffStackTextColor = { r=r, g=g, b=b }; ReloadAndUpdate() end, false, 20)
+                    sw:HookScript("OnEnter", function() EllesmereUI.ShowWidgetTooltip(sw, "Stack Text Color") end)
+                    sw:HookScript("OnLeave", function() EllesmereUI.HideWidgetTooltip() end)
+                    PP.Point(sw, "RIGHT", rightRgn._lastInline or rightRgn._control, "LEFT", -8, 0)
+                    rightRgn._lastInline = sw
+                    local function apply() upd(); local o = buffOff(); sw:SetAlpha(o and 0.3 or 1); sw:EnableMouse(not o) end
+                    apply(); EllesmereUI.RegisterWidgetRefresh(apply)
+                end
+                local _, simpleBuffStackCogShow = EllesmereUI.BuildCogPopup({
+                    title = "Duration & Stack",
+                    rows = {
+                        { type="toggle", label="Show Duration",
+                          get=function() return db.profile.boss.simpleBuffShowCooldownText end,
+                          set=function(v) db.profile.boss.simpleBuffShowCooldownText = v; ReloadAndUpdate(); EllesmereUI:RefreshPage() end },
+                        { type="slider", label="Duration X", min=-100, max=100, step=1,
+                          get=function() return db.profile.boss.simpleBuffCooldownTextOffsetX or 0 end,
+                          set=function(v) db.profile.boss.simpleBuffCooldownTextOffsetX = v; ReloadAndUpdate() end },
+                        { type="slider", label="Duration Y", min=-100, max=100, step=1,
+                          get=function() return db.profile.boss.simpleBuffCooldownTextOffsetY or 0 end,
+                          set=function(v) db.profile.boss.simpleBuffCooldownTextOffsetY = v; ReloadAndUpdate() end },
+                        { type="slider", label="Stack Size", min=6, max=30, step=1,
+                          get=function() return db.profile.boss.buffStackTextSize or 14 end,
+                          set=function(v) db.profile.boss.buffStackTextSize = v; ReloadAndUpdate() end },
+                        { type="dropdown", label="Stack Position",
+                          values={ bottomright="Bottom Right", bottomleft="Bottom Left", topright="Top Right", topleft="Top Left", center="Center" },
+                          order={ "bottomright", "bottomleft", "topright", "topleft", "center" },
+                          get=function() return db.profile.boss.buffStackTextPosition or "bottomright" end,
+                          set=function(v) db.profile.boss.buffStackTextPosition = v; ReloadAndUpdate() end },
+                        { type="slider", label="Stack X", min=-100, max=100, step=1,
+                          get=function() return db.profile.boss.buffStackTextOffsetX or 0 end,
+                          set=function(v) db.profile.boss.buffStackTextOffsetX = v; ReloadAndUpdate() end },
+                        { type="slider", label="Stack Y", min=-100, max=100, step=1,
+                          get=function() return db.profile.boss.buffStackTextOffsetY or 0 end,
+                          set=function(v) db.profile.boss.buffStackTextOffsetY = v; ReloadAndUpdate() end },
+                    },
+                })
+                BossCogBtn(rightRgn, simpleBuffStackCogShow, nil, buffOff)
+            end
+            -- (Show Duration toggle lives inside the Duration & Stack cog above.)
+
             -- Simple Debuff Display: forces Left anchor + debuff height =
             -- frame bar height so boss debuffs render as one large column.
             -- Row 1 slot 2 is "Simple Text Size": the cooldown-text size slider,
             -- gated by an inline Show-Cooldown-Text toggle, with an inline cog
             -- holding the stack size and stack X/Y position controls.
-            local simpleTextOff = function() return not db.profile.boss.simpleDebuffShowCooldownText end
+            
+            local simpleTextOff = function()
+                return ns.db.profile.boss.debuffAnchor ~= "none"
+                or db.profile.boss.simpleDebuffs == "none"
+                or not db.profile.boss.simpleDebuffShowCooldownText
+            end
             simpleRow, hh = Ww:DualRow(pp, yy,
                 { type="dropdown", text="Simple Debuff Display",
+                  disabled = function()
+                      return ns.db.profile.boss.debuffAnchor ~= "none"
+                  end,
+                  disabledTooltip="Debuffs Location", requireState="disabled",
                   tooltip = "Force boss debuffs into a single large column matched to the frame height.",
                   values = { none = "None", left = "Left", right = "Right" },
                   order = { "none", "left", "right" },
@@ -11948,7 +12156,7 @@ initFrame:SetScript("OnEvent", function(self)
                       if ns.RefreshBossPreviewDebuffs then ns.RefreshBossPreviewDebuffs() end
                       EllesmereUI:RefreshPage()
                   end },
-                { type="slider", text="Debuff Text Size", min=6, max=30, step=1,
+                { type="slider", text="Debuff Text Size", min=6, max=30, step=1, trackWidth=120,
                   disabled=simpleTextOff, disabledTooltip="Show Duration (Inside Cog)",
                   getValue=function() return db.profile.boss.simpleDebuffCooldownTextSize or 14 end,
                   setValue=function(v) db.profile.boss.simpleDebuffCooldownTextSize = v; ReloadAndUpdate() end });  yy = yy - hh
@@ -11987,6 +12195,32 @@ initFrame:SetScript("OnEvent", function(self)
             -- Inline cog on Simple Text Size: duration X/Y + stack size / X/Y.
             do
                 local rightRgn = simpleRow._rightRegion
+                -- Inline Duration + Stack swatches mirroring the regular Debuff Text
+                -- Size swatches (same keys); greyed + disabled on this row cog's
+                -- condition.
+                local debuffOff = function() return ns.db.profile.boss.debuffAnchor ~= "none" or db.profile.boss.simpleDebuffs == "none" end
+                do
+                    local sw, upd = EllesmereUI.BuildColorSwatch(rightRgn, rightRgn:GetFrameLevel() + 5,
+                        function() local c = db.profile.boss.debuffCooldownTextColor; if c then return c.r, c.g, c.b end; return 1, 1, 1 end,
+                        function(r, g, b) db.profile.boss.debuffCooldownTextColor = { r=r, g=g, b=b }; ReloadAndUpdate() end, false, 20)
+                    sw:HookScript("OnEnter", function() EllesmereUI.ShowWidgetTooltip(sw, "Duration Text Color") end)
+                    sw:HookScript("OnLeave", function() EllesmereUI.HideWidgetTooltip() end)
+                    PP.Point(sw, "RIGHT", rightRgn._lastInline or rightRgn._control, "LEFT", -8, 0)
+                    rightRgn._lastInline = sw
+                    local function apply() upd(); local o = debuffOff(); sw:SetAlpha(o and 0.3 or 1); sw:EnableMouse(not o) end
+                    apply(); EllesmereUI.RegisterWidgetRefresh(apply)
+                end
+                do
+                    local sw, upd = EllesmereUI.BuildColorSwatch(rightRgn, rightRgn:GetFrameLevel() + 5,
+                        function() local c = db.profile.boss.debuffStackTextColor; if c then return c.r, c.g, c.b end; return 1, 1, 1 end,
+                        function(r, g, b) db.profile.boss.debuffStackTextColor = { r=r, g=g, b=b }; ReloadAndUpdate() end, false, 20)
+                    sw:HookScript("OnEnter", function() EllesmereUI.ShowWidgetTooltip(sw, "Stack Text Color") end)
+                    sw:HookScript("OnLeave", function() EllesmereUI.HideWidgetTooltip() end)
+                    PP.Point(sw, "RIGHT", rightRgn._lastInline or rightRgn._control, "LEFT", -8, 0)
+                    rightRgn._lastInline = sw
+                    local function apply() upd(); local o = debuffOff(); sw:SetAlpha(o and 0.3 or 1); sw:EnableMouse(not o) end
+                    apply(); EllesmereUI.RegisterWidgetRefresh(apply)
+                end
                 local _, simpleStackCogShow = EllesmereUI.BuildCogPopup({
                     title = "Duration & Stack",
                     rows = {
@@ -12015,104 +12249,7 @@ initFrame:SetScript("OnEvent", function(self)
                           set=function(v) db.profile.boss.debuffStackTextOffsetY = v; ReloadAndUpdate() end },
                     },
                 })
-                BossCogBtn(rightRgn, simpleStackCogShow)
-            end
-
-            -- (Show Duration toggle lives inside the Duration & Stack cog above.)
-
-            -- Simple Buff Display: identical to Simple Debuff Display above but for
-            -- buffs. Defaults to None. Forces a single Left/Right column matched to
-            -- the frame height, overriding Buffs Location + Buff Size while active.
-            local simpleBuffTextOff = function() return not db.profile.boss.simpleBuffShowCooldownText end
-            simpleBuffRow, hh = Ww:DualRow(pp, yy,
-                { type="dropdown", text="Simple Buff Display",
-                  tooltip = "Force boss buffs into a single large column matched to the frame height.",
-                  values = { none = "None", left = "Left", right = "Right" },
-                  order = { "none", "left", "right" },
-                  getValue=function() return ns.GetBossSimpleBuffMode(db.profile.boss) end,
-                  setValue=function(v)
-                      db.profile.boss.simpleBuffs = v
-                      if v ~= "none" then
-                          -- Same-side collision: if Simple Debuff Display occupies this
-                          -- side, push it off (set to None) so they never overlap.
-                          if ns.GetBossSimpleDebuffMode(db.profile.boss) == v then
-                              db.profile.boss.simpleDebuffs = "none"
-                          end
-                          -- Selecting a side takes over from the normal Buffs
-                          -- Location, so force that setting to None.
-                          db.profile.boss.showBuffs = false
-                      end
-                      ReloadAndUpdate()
-                      if ns.RefreshBossPreviewDebuffs then ns.RefreshBossPreviewDebuffs() end
-                      EllesmereUI:RefreshPage()
-                  end },
-                { type="slider", text="Buff Text Size", min=6, max=30, step=1,
-                  disabled=simpleBuffTextOff, disabledTooltip="Show Duration (Inside Cog)",
-                  getValue=function() return db.profile.boss.simpleBuffCooldownTextSize or 14 end,
-                  setValue=function(v) db.profile.boss.simpleBuffCooldownTextSize = v; ReloadAndUpdate() end });  yy = yy - hh
-
-            -- Directions cog on Simple Buff Display: the simple column's own X/Y
-            -- offset (defaults to the regular buff offsets via ns.GetBossSimpleBuffOffset);
-            -- writing here makes the simple offset independent. Disabled while None.
-            do
-                local leftRgn = simpleBuffRow._leftRegion
-                local _, simpleBuffPosCogShow = EllesmereUI.BuildCogPopup({
-                    title = "Simple Buff Position",
-                    rows = {
-                        -- Max buffs shown in simple mode. Shares the boss maxBuffs key
-                        -- with Buffs Location (the two modes are mutually exclusive);
-                        -- the runtime caps frame.Buffs.num to it.
-                        { type="slider", label="Max Count", min=1, max=20, step=1,
-                          get=function() return db.profile.boss.maxBuffs or 4 end,
-                          set=function(v) db.profile.boss.maxBuffs = v; ReloadAndUpdate(); if ns.RefreshBossPreviewDebuffs then ns.RefreshBossPreviewDebuffs() end end },
-                        { type="slider", label="Offset X", min=-200, max=200, step=1,
-                          get=function() local x = ns.GetBossSimpleBuffOffset(db.profile.boss); return x end,
-                          set=function(v) db.profile.boss.simpleBuffOffsetX = v; ReloadAndUpdate(); if ns.RefreshBossPreviewDebuffs then ns.RefreshBossPreviewDebuffs() end end },
-                        { type="slider", label="Offset Y", min=-200, max=200, step=1,
-                          get=function() local _, y = ns.GetBossSimpleBuffOffset(db.profile.boss); return y end,
-                          set=function(v) db.profile.boss.simpleBuffOffsetY = v; ReloadAndUpdate(); if ns.RefreshBossPreviewDebuffs then ns.RefreshBossPreviewDebuffs() end end },
-                        -- Physical-pixel-perfect gap between the simple buff icons.
-                        { type="slider", label="Spacing", min=-1, max=10, step=1,
-                          get=function() return db.profile.boss.simpleBuffSpacing or 1 end,
-                          set=function(v) db.profile.boss.simpleBuffSpacing = v; ReloadAndUpdate(); if ns.RefreshBossPreviewDebuffs then ns.RefreshBossPreviewDebuffs() end end },
-                    },
-                })
-                BossCogBtn(leftRgn, simpleBuffPosCogShow, EllesmereUI.DIRECTIONS_ICON,
-                    function() return ns.GetBossSimpleBuffMode(db.profile.boss) == "none" end)
-            end
-
-            -- Inline cog on Simple Text Size: duration X/Y + stack size / X/Y.
-            do
-                local rightRgn = simpleBuffRow._rightRegion
-                local _, simpleBuffStackCogShow = EllesmereUI.BuildCogPopup({
-                    title = "Duration & Stack",
-                    rows = {
-                        { type="toggle", label="Show Duration",
-                          get=function() return db.profile.boss.simpleBuffShowCooldownText end,
-                          set=function(v) db.profile.boss.simpleBuffShowCooldownText = v; ReloadAndUpdate(); EllesmereUI:RefreshPage() end },
-                        { type="slider", label="Duration X", min=-100, max=100, step=1,
-                          get=function() return db.profile.boss.simpleBuffCooldownTextOffsetX or 0 end,
-                          set=function(v) db.profile.boss.simpleBuffCooldownTextOffsetX = v; ReloadAndUpdate() end },
-                        { type="slider", label="Duration Y", min=-100, max=100, step=1,
-                          get=function() return db.profile.boss.simpleBuffCooldownTextOffsetY or 0 end,
-                          set=function(v) db.profile.boss.simpleBuffCooldownTextOffsetY = v; ReloadAndUpdate() end },
-                        { type="slider", label="Stack Size", min=6, max=30, step=1,
-                          get=function() return db.profile.boss.buffStackTextSize or 14 end,
-                          set=function(v) db.profile.boss.buffStackTextSize = v; ReloadAndUpdate() end },
-                        { type="dropdown", label="Stack Position",
-                          values={ bottomright="Bottom Right", bottomleft="Bottom Left", topright="Top Right", topleft="Top Left", center="Center" },
-                          order={ "bottomright", "bottomleft", "topright", "topleft", "center" },
-                          get=function() return db.profile.boss.buffStackTextPosition or "bottomright" end,
-                          set=function(v) db.profile.boss.buffStackTextPosition = v; ReloadAndUpdate() end },
-                        { type="slider", label="Stack X", min=-100, max=100, step=1,
-                          get=function() return db.profile.boss.buffStackTextOffsetX or 0 end,
-                          set=function(v) db.profile.boss.buffStackTextOffsetX = v; ReloadAndUpdate() end },
-                        { type="slider", label="Stack Y", min=-100, max=100, step=1,
-                          get=function() return db.profile.boss.buffStackTextOffsetY or 0 end,
-                          set=function(v) db.profile.boss.buffStackTextOffsetY = v; ReloadAndUpdate() end },
-                    },
-                })
-                BossCogBtn(rightRgn, simpleBuffStackCogShow)
+                BossCogBtn(rightRgn, simpleStackCogShow, nil, debuffOff)
             end
             -- (Show Duration toggle lives inside the Duration & Stack cog above.)
 
@@ -12151,6 +12288,9 @@ initFrame:SetScript("OnEvent", function(self)
                   end,
                   setValue=function(v)
                       SwapAuraSlot(db.profile.boss, "debuffAnchor", v)
+                      if db.profile.boss.buffAnchor == "none" then
+                          db.profile.boss.showBuffs = false
+                      end
                       ReloadAndUpdate()
                       if ns.RefreshBossPreviewDebuffs then ns.RefreshBossPreviewDebuffs() end
                       -- Refresh so dependent disabled states (Debuff Size, Boss
@@ -12257,15 +12397,24 @@ initFrame:SetScript("OnEvent", function(self)
                 -- the "Show Duration" toggle at the top of its own Duration & Stack
                 -- cog (which also holds Duration X/Y + Stack size/position/X/Y).
                 -- Buff Text Size is a 1:1 mirror of Debuff Text Size.
-                local debuffTextOff = function() return not db.profile.boss.debuffShowCooldownText end
-                local buffTextOff = function() return not db.profile.boss.buffShowCooldownText end
+
+                local buffTextOff = function()
+                    return not ns.db.profile.boss.showBuffs
+                    or db.profile.boss.simpleBuffs ~= "none"
+                    or not db.profile.boss.buffShowCooldownText
+                end
+                local debuffTextOff = function()
+                    return ns.db.profile.boss.debuffAnchor == "none"
+                    or db.profile.boss.simpleDebuffs ~= "none" or
+                    not db.profile.boss.debuffShowCooldownText
+                end
                 local textSizeRow
                 textSizeRow, hh = Ww:DualRow(pp, yy,
-                    { type="slider", text="Buff Text Size", min=6, max=30, step=1,
-                      disabled=buffTextOff, disabledTooltip="Show Duration",
+                    { type="slider", text="Buff Text Size", min=6, max=30, step=1, trackWidth=120,
+                      disabled=buffTextOff, disabledTooltip="Show Duration (Inside Cog)",
                       getValue=function() return db.profile.boss.buffCooldownTextSize or 10 end,
                       setValue=function(v) db.profile.boss.buffCooldownTextSize = v; ReloadAndUpdate() end },
-                    { type="slider", text="Debuff Text Size", min=6, max=30, step=1,
+                    { type="slider", text="Debuff Text Size", min=6, max=30, step=1, trackWidth=120,
                       disabled=debuffTextOff, disabledTooltip="Show Duration (Inside Cog)",
                       getValue=function() return db.profile.boss.debuffCooldownTextSize or 10 end,
                       setValue=function(v) db.profile.boss.debuffCooldownTextSize = v; ReloadAndUpdate() end });  yy = yy - hh
@@ -12273,6 +12422,32 @@ initFrame:SetScript("OnEvent", function(self)
                 -- Disabled while Simple Buff Display is active (it uses its own text).
                 do
                     local leftRgn = textSizeRow._leftRegion
+                    -- Inline Duration + Stack text-color swatches on the Buff Text
+                    -- Size slider; greyed + mouse-disabled on the same condition as
+                    -- the row's cog.
+                    local buffOff = function() return ns.GetBossSimpleBuffMode(db.profile.boss) ~= "none" or not ns.db.profile.boss.showBuffs end
+                    do
+                        local sw, upd = EllesmereUI.BuildColorSwatch(leftRgn, leftRgn:GetFrameLevel() + 5,
+                            function() local c = db.profile.boss.buffCooldownTextColor; if c then return c.r, c.g, c.b end; return 1, 1, 1 end,
+                            function(r, g, b) db.profile.boss.buffCooldownTextColor = { r=r, g=g, b=b }; ReloadAndUpdate() end, false, 20)
+                        sw:HookScript("OnEnter", function() EllesmereUI.ShowWidgetTooltip(sw, "Duration Text Color") end)
+                        sw:HookScript("OnLeave", function() EllesmereUI.HideWidgetTooltip() end)
+                        PP.Point(sw, "RIGHT", leftRgn._lastInline or leftRgn._control, "LEFT", -8, 0)
+                        leftRgn._lastInline = sw
+                        local function apply() upd(); local o = buffOff(); sw:SetAlpha(o and 0.3 or 1); sw:EnableMouse(not o) end
+                        apply(); EllesmereUI.RegisterWidgetRefresh(apply)
+                    end
+                    do
+                        local sw, upd = EllesmereUI.BuildColorSwatch(leftRgn, leftRgn:GetFrameLevel() + 5,
+                            function() local c = db.profile.boss.buffStackTextColor; if c then return c.r, c.g, c.b end; return 1, 1, 1 end,
+                            function(r, g, b) db.profile.boss.buffStackTextColor = { r=r, g=g, b=b }; ReloadAndUpdate() end, false, 20)
+                        sw:HookScript("OnEnter", function() EllesmereUI.ShowWidgetTooltip(sw, "Stack Text Color") end)
+                        sw:HookScript("OnLeave", function() EllesmereUI.HideWidgetTooltip() end)
+                        PP.Point(sw, "RIGHT", leftRgn._lastInline or leftRgn._control, "LEFT", -8, 0)
+                        leftRgn._lastInline = sw
+                        local function apply() upd(); local o = buffOff(); sw:SetAlpha(o and 0.3 or 1); sw:EnableMouse(not o) end
+                        apply(); EllesmereUI.RegisterWidgetRefresh(apply)
+                    end
                     local _, buffStackCogShow = EllesmereUI.BuildCogPopup({
                         title = "Duration & Stack",
                         rows = {
@@ -12301,13 +12476,38 @@ initFrame:SetScript("OnEvent", function(self)
                               set=function(v) db.profile.boss.buffStackTextOffsetY = v; ReloadAndUpdate() end },
                         },
                     })
-                    BossCogBtn(leftRgn, buffStackCogShow, nil,
-                        function() return ns.GetBossSimpleBuffMode(db.profile.boss) ~= "none" end)
+                    BossCogBtn(leftRgn, buffStackCogShow, nil, buffOff)
                 end
                 -- Debuff Text Size cog (right): Show Duration + Duration X/Y + Stack.
                 -- Disabled while Simple Debuff Display is active.
                 do
                     local rightRgn = textSizeRow._rightRegion
+                    -- Inline Duration + Stack text-color swatches on the Debuff Text
+                    -- Size slider; greyed + mouse-disabled on the same condition as
+                    -- the row's cog.
+                    local debuffOff = function() return ns.GetBossSimpleDebuffMode(db.profile.boss) ~= "none" or ns.db.profile.boss.debuffAnchor == "none" end
+                    do
+                        local sw, upd = EllesmereUI.BuildColorSwatch(rightRgn, rightRgn:GetFrameLevel() + 5,
+                            function() local c = db.profile.boss.debuffCooldownTextColor; if c then return c.r, c.g, c.b end; return 1, 1, 1 end,
+                            function(r, g, b) db.profile.boss.debuffCooldownTextColor = { r=r, g=g, b=b }; ReloadAndUpdate() end, false, 20)
+                        sw:HookScript("OnEnter", function() EllesmereUI.ShowWidgetTooltip(sw, "Duration Text Color") end)
+                        sw:HookScript("OnLeave", function() EllesmereUI.HideWidgetTooltip() end)
+                        PP.Point(sw, "RIGHT", rightRgn._lastInline or rightRgn._control, "LEFT", -8, 0)
+                        rightRgn._lastInline = sw
+                        local function apply() upd(); local o = debuffOff(); sw:SetAlpha(o and 0.3 or 1); sw:EnableMouse(not o) end
+                        apply(); EllesmereUI.RegisterWidgetRefresh(apply)
+                    end
+                    do
+                        local sw, upd = EllesmereUI.BuildColorSwatch(rightRgn, rightRgn:GetFrameLevel() + 5,
+                            function() local c = db.profile.boss.debuffStackTextColor; if c then return c.r, c.g, c.b end; return 1, 1, 1 end,
+                            function(r, g, b) db.profile.boss.debuffStackTextColor = { r=r, g=g, b=b }; ReloadAndUpdate() end, false, 20)
+                        sw:HookScript("OnEnter", function() EllesmereUI.ShowWidgetTooltip(sw, "Stack Text Color") end)
+                        sw:HookScript("OnLeave", function() EllesmereUI.HideWidgetTooltip() end)
+                        PP.Point(sw, "RIGHT", rightRgn._lastInline or rightRgn._control, "LEFT", -8, 0)
+                        rightRgn._lastInline = sw
+                        local function apply() upd(); local o = debuffOff(); sw:SetAlpha(o and 0.3 or 1); sw:EnableMouse(not o) end
+                        apply(); EllesmereUI.RegisterWidgetRefresh(apply)
+                    end
                     local _, debuffStackCogShow = EllesmereUI.BuildCogPopup({
                         title = "Duration & Stack",
                         rows = {
@@ -12339,16 +12539,19 @@ initFrame:SetScript("OnEvent", function(self)
                     -- Disabled while Simple Debuff Display is active: simple mode
                     -- uses its own (simpleDebuff*) cooldown text, so the regular
                     -- debuff Duration & Stack controls do not apply.
-                    BossCogBtn(rightRgn, debuffStackCogShow, nil,
-                        function() return ns.GetBossSimpleDebuffMode(db.profile.boss) ~= "none" end)
+                    BossCogBtn(rightRgn, debuffStackCogShow, nil, debuffOff)
                 end
-                -- Boss Debuff Filter on its own row, below the text-size row (boss
-                -- buffs are never filtered, so the right slot is intentionally
-                -- blank). The multi-select checkbox dropdown is injected into the
-                -- left slot, replacing the placeholder.
+                -- Boss Debuff Filter in slot 1 (boss buffs are never filtered, so
+                -- the right slot is intentionally blank). The multi-select checkbox
+                -- dropdown is injected into the left slot, replacing the placeholder.
                 local filterRow
+                local filterOff = function()
+                    local p = db.profile.boss
+                    return ns.GetBossSimpleDebuffMode(p) == "none" and (p.debuffAnchor or "bottomleft") == "none"
+                end
                 filterRow, hh = Ww:DualRow(pp, yy,
                     { type="dropdown", text="Boss Debuff Filter",
+                      disabled=filterOff, disabledTooltip="Debuffs", requireState="displayed",
                       values={ __placeholder="..." }, order={ "__placeholder" },
                       getValue=function() return "__placeholder" end, setValue=function() end },
                     { type="label", text="" });  yy = yy - hh
@@ -12371,12 +12574,11 @@ initFrame:SetScript("OnEvent", function(self)
                     filterBlock:SetFrameLevel(cbDD:GetFrameLevel() + 10)
                     filterBlock:EnableMouse(true)
                     filterBlock:SetScript("OnEnter", function()
-                        EllesmereUI.ShowWidgetTooltip(cbDD, EllesmereUI.DisabledTooltip("Debuffs Location"))
+                        EllesmereUI.ShowWidgetTooltip(cbDD, EllesmereUI.DisabledTooltip("Debuffs", "displayed"))
                     end)
                     filterBlock:SetScript("OnLeave", function() EllesmereUI.HideWidgetTooltip() end)
                     local function UpdateFilterDisabled()
-                        local p = db.profile.boss
-                        local off = ns.GetBossSimpleDebuffMode(p) == "none" and (p.debuffAnchor or "bottomleft") == "none"
+                        local off = filterOff()
                         if off then
                             cbDD:SetAlpha(0.3); filterBlock:Show()
                         else
@@ -12418,8 +12620,7 @@ initFrame:SetScript("OnEvent", function(self)
                     end)
                     cogBlock:SetScript("OnLeave", function() EllesmereUI.HideWidgetTooltip() end)
                     local function UpdateBuffCogDisabled()
-                        local p = db.profile.boss
-                        local off = ns.GetBossSimpleBuffMode(p) ~= "none" or p.showBuffs == false
+                        local off = bossBuffSizeOff()
                         if off then
                             cogBtn:SetAlpha(0.15)
                             cogBlock:Show()
@@ -12476,6 +12677,9 @@ initFrame:SetScript("OnEvent", function(self)
                     EllesmereUI.RegisterWidgetRefresh(UpdateDebuffCogDisabled)
                 end
             end
+
+            -- Buff/Debuff text colors now live as inline swatches on the Buff Text
+            -- Size / Debuff Text Size sliders above (Duration + Stack per side).
 
             return yy
         end
@@ -12633,13 +12837,16 @@ initFrame:SetScript("OnEvent", function(self)
                 rgn._lastInline = sw
                 castFillSwatch = sw
             end
-            -- Inline cog on Show Cast Bar (left region): Offset Y nudges the whole
-            -- cast bar vertically (positive = up). Updates the live frames + both
+            -- Inline cog on Show Cast Bar (left region): Offset X/Y nudge the whole
+            -- cast bar (positive = right/up). Updates the live frames + both
             -- previews via ReloadAndUpdate + the boss preview refresh.
             do
                 local _, offCogShow = EllesmereUI.BuildCogPopup({
                     title = "Cast Bar Position",
                     rows = {
+                        { type="slider", label="Offset X", min=-500, max=500, step=1,
+                          get=function() return B.castbarOffsetX or 0 end,
+                          set=function(v) B.castbarOffsetX = v; ReloadAndUpdate(); if ns.RefreshBossPreviewDebuffs then ns.RefreshBossPreviewDebuffs() end end },
                         { type="slider", label="Offset Y", min=-200, max=200, step=1,
                           get=function() return B.castbarOffsetY or 0 end,
                           set=function(v) B.castbarOffsetY = v; ReloadAndUpdate(); if ns.RefreshBossPreviewDebuffs then ns.RefreshBossPreviewDebuffs() end end },
@@ -12648,14 +12855,18 @@ initFrame:SetScript("OnEvent", function(self)
                 AddCastBlock(CCogBtn(castMainRow._leftRegion, offCogShow, EllesmereUI.DIRECTIONS_ICON))
             end
 
-            -- Row 2: Show Cast Icon (+ icon cog) | Bar Background (opacity slider + color swatch)
+            -- Row 2: Show Cast Icon (+ icon cog) | Cast Bar Width (right under Cast
+            -- Bar Height so the two dimensions sit stacked in the same column)
             growthRow, hh = Ww:DualRow(pp, yy,
                 { type="toggle", text="Show Cast Icon",
                   getValue=function() return B.showCastIcon ~= false end,
                   setValue=function(v) B.showCastIcon = v; ReloadAndUpdate() end },
-                { type="slider", text="Bar Background", min=0, max=100, step=1,
-                  getValue=function() return math.floor((B.castBgAlpha or 0.5) * 100 + 0.5) end,
-                  setValue=function(v) B.castBgAlpha = v / 100; ReloadAndUpdate() end });  yy = yy - hh
+                { type="slider", text="Cast Bar Width", min=0, max=500, step=1,
+                  tooltip="Sets a custom width for the cast bar. Set to 0 to match the boss frame width.",
+                  getValue=function() return B.castbarWidth or 0 end,
+                  -- Custom widths floor at 30 (matches the unlock-mode resize
+                  -- minimum): below the cast icon size the bar layout inverts.
+                  setValue=function(v) if v > 0 and v < 30 then v = 30 end; B.castbarWidth = v; ReloadAndUpdate(); if ns.RefreshBossPreviewDebuffs then ns.RefreshBossPreviewDebuffs() end end });  yy = yy - hh
             -- Icon cog (left): "Make Icon Part of the Bar" / "Show Icon on Right".
             do
                 local _, cogShow = EllesmereUI.BuildCogPopup({
@@ -12673,9 +12884,20 @@ initFrame:SetScript("OnEvent", function(self)
                 })
                 CCogBtn(growthRow._leftRegion, cogShow)
             end
+            -- Row 3: Reverse Fill | Bar Background (opacity slider + color swatch).
+            -- Bar Background sits right below the size sliders (mirrors the main
+            -- frames' cast bar section, where it follows the Height row).
+            local reverseRow
+            reverseRow, hh = Ww:DualRow(pp, yy,
+                { type="toggle", text="Reverse Fill",
+                  getValue=function() return B.castReverseFill == true end,
+                  setValue=function(v) B.castReverseFill = v; ReloadAndUpdate() end },
+                { type="slider", text="Bar Background", min=0, max=100, step=1,
+                  getValue=function() return math.floor((B.castBgAlpha or 0.5) * 100 + 0.5) end,
+                  setValue=function(v) B.castBgAlpha = v / 100; ReloadAndUpdate() end });  yy = yy - hh
             -- Inline color swatch on Bar Background (right region).
             do
-                local rgn = growthRow._rightRegion
+                local rgn = reverseRow._rightRegion
                 local sw = EllesmereUI.BuildColorSwatch(rgn, rgn:GetFrameLevel() + 5,
                     function()
                         local c = B.castBgColor
@@ -12689,7 +12911,7 @@ initFrame:SetScript("OnEvent", function(self)
                 rgn._lastInline = sw
             end
 
-            -- Row 3: Spell Name (dropdown + swatch + Size/X/Y cog) | Duration (same)
+            -- Row 4: Spell Name (dropdown + swatch + Size/X/Y cog) | Duration (same)
             local castTextRow
             castTextRow, hh = Ww:DualRow(pp, yy,
                 { type="dropdown", text="Spell Name",
@@ -12771,14 +12993,6 @@ initFrame:SetScript("OnEvent", function(self)
                 CCogBtn(rgn, cogShow)
             end
 
-            -- Row 4: Reverse Fill | (blank)
-            local reverseRow
-            reverseRow, hh = Ww:DualRow(pp, yy,
-                { type="toggle", text="Reverse Fill",
-                  getValue=function() return B.castReverseFill == true end,
-                  setValue=function(v) B.castReverseFill = v; ReloadAndUpdate() end },
-                { type="label", text="" });  yy = yy - hh
-
             -- Gate the whole section on the Show Cast Bar toggle: when off, grey +
             -- block the height slider, the icon row, the background row, the spell
             -- name / duration row, reverse fill, and the inline fill swatch.
@@ -12789,6 +13003,7 @@ initFrame:SetScript("OnEvent", function(self)
             AddCastBlock(castTextRow._leftRegion)
             AddCastBlock(castTextRow._rightRegion)
             AddCastBlock(reverseRow._leftRegion)
+            AddCastBlock(reverseRow._rightRegion)
             return yy
         end
 
@@ -13272,7 +13487,7 @@ initFrame:SetScript("OnEvent", function(self)
     local ufSearchTerms = {}
     for _, label in pairs(unitLabels) do ufSearchTerms[#ufSearchTerms + 1] = label end
     for _, label in pairs(miniUnitLabels) do ufSearchTerms[#ufSearchTerms + 1] = label end
-    local _paTerms = { "buff", "debuff", "aura", "player buffs", "player debuffs" }
+    local _paTerms = { "buff", "debuff", "aura", "player buffs", "player debuffs", "icon zoom" }
     for _, t in ipairs(_paTerms) do ufSearchTerms[#ufSearchTerms + 1] = t end
 
     -- Rebuild preview when spec changes (class resource pips may appear/disappear)
@@ -13317,7 +13532,8 @@ initFrame:SetScript("OnEvent", function(self)
         parent._showRowDivider = true
 
         -- Row 1: Enable Styled Buffs & Debuffs | Icon Size
-        _, h = W:DualRow(parent, y,
+        local paRow1
+        paRow1, h = W:DualRow(parent, y,
             { type = "toggle", text = "Enable Styled Buffs & Debuffs",
               getValue = function() return PAGet("enabled") or false end,
               setValue = function(v)
@@ -13334,6 +13550,35 @@ initFrame:SetScript("OnEvent", function(self)
               getValue = function() return PAGet("iconSize") or 32 end,
               setValue = function(v) PASet("iconSize", v) end }
         );  y = y - h
+
+        -- Inline cog: Icon Zoom (next to "Icon Size"). Buffs and debuffs
+        -- crop independently.
+        do
+            local rgn = paRow1._rightRegion
+            local _, cogShow = EllesmereUI.BuildCogPopup({
+                title = "Icon Zoom",
+                rows = {
+                    { type = "slider", label = "Buff Zoom", min = 0, max = 0.20, step = 0.01,
+                      get = function() return PAGet("buffIconZoom") or 0.055 end,
+                      set = function(v) PASet("buffIconZoom", v) end },
+                    { type = "slider", label = "Debuff Zoom", min = 0, max = 0.20, step = 0.01,
+                      get = function() return PAGet("debuffIconZoom") or 0.055 end,
+                      set = function(v) PASet("debuffIconZoom", v) end },
+                },
+            })
+            local cogBtn = CreateFrame("Button", nil, rgn)
+            cogBtn:SetSize(26, 26)
+            cogBtn:SetPoint("RIGHT", rgn._lastInline or rgn._control, "LEFT", -8, 0)
+            rgn._lastInline = cogBtn
+            cogBtn:SetFrameLevel(rgn:GetFrameLevel() + 5)
+            cogBtn:SetAlpha(0.4)
+            local cogTex = cogBtn:CreateTexture(nil, "OVERLAY")
+            cogTex:SetAllPoints()
+            cogTex:SetTexture(EllesmereUI.COGS_ICON)
+            cogBtn:SetScript("OnEnter", function(self) self:SetAlpha(0.7) end)
+            cogBtn:SetScript("OnLeave", function(self) self:SetAlpha(0.4) end)
+            cogBtn:SetScript("OnClick", function(self) cogShow(self) end)
+        end
 
         -- Row 2: Show Text | Text Size
         _, h = W:DualRow(parent, y,

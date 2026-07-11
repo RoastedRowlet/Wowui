@@ -12,9 +12,9 @@ local strfind = string.find
 -- Generate our version variables
 --
 
-local BIGWIGS_VERSION = 417
+local BIGWIGS_VERSION = 418
 local CONTENT_PACK_VERSIONS = {
-	["LittleWigs"] = {12, 0, 58},
+	["LittleWigs"] = {12, 0, 61},
 	["BigWigs_Classic"] = {12, 0, 19},
 	["BigWigs_BurningCrusade"] = {12, 0, 15},
 	["BigWigs_WrathOfTheLichKing"] = {12, 0, 10},
@@ -57,7 +57,7 @@ do
 	local ALPHA = "ALPHA"
 
 	local releaseType
-	local myGitHash = "19da28c" -- The ZIP packager will replace this with the Git hash.
+	local myGitHash = "23290fc" -- The ZIP packager will replace this with the Git hash.
 	local releaseString
 	--[=[@alpha@
 	-- The following code will only be present in alpha ZIPs.
@@ -244,7 +244,8 @@ do
 		public.currentExpansion = {
 			name = c,
 			bigWigsBundled = {},
-			littlewigsDefault = lw_c,
+			littleWigsName = lw_c,
+			littleWigsDefault = lw_c,
 			littleWigsBundled = {},
 			currentSeason = {},
 			zones = {},
@@ -253,7 +254,8 @@ do
 		public.currentExpansion = {
 			name = bc,
 			bigWigsBundled = {},
-			littlewigsDefault = lw_bc,
+			littleWigsName = lw_bc,
+			littleWigsDefault = lw_bc,
 			littleWigsBundled = {},
 			currentSeason = {},
 			zones = {},
@@ -262,7 +264,8 @@ do
 		public.currentExpansion = {
 			name = wotlk,
 			bigWigsBundled = {},
-			littlewigsDefault = lw_wotlk,
+			littleWigsName = lw_wotlk,
+			littleWigsDefault = lw_wotlk,
 			littleWigsBundled = {},
 			currentSeason = {},
 			zones = {},
@@ -271,7 +274,8 @@ do
 		public.currentExpansion = {
 			name = cata,
 			bigWigsBundled = {},
-			littlewigsDefault = lw_cata,
+			littleWigsName = lw_cata,
+			littleWigsDefault = lw_cata,
 			littleWigsBundled = {},
 			currentSeason = {},
 			zones = {},
@@ -280,7 +284,8 @@ do
 		public.currentExpansion = {
 			name = mists,
 			bigWigsBundled = {},
-			littlewigsDefault = lw_mists,
+			littleWigsName = lw_mists,
+			littleWigsDefault = lw_mists,
 			littleWigsBundled = {},
 			currentSeason = {},
 			zones = {},
@@ -291,7 +296,8 @@ do
 			bigWigsBundled = {
 				[mn] = true,
 			},
-			littlewigsDefault = lw_cs,
+			littleWigsName = lw_mn,
+			littleWigsDefault = lw_cs,
 			littleWigsBundled = {
 				[lw_mn] = true,
 				[lw_delves] = true,
@@ -325,7 +331,8 @@ do
 			bigWigsBundled = {
 				[mn] = true,
 			},
-			littlewigsDefault = lw_cs,
+			littleWigsName = lw_mn,
+			littleWigsDefault = lw_cs,
 			littleWigsBundled = {
 				[lw_mn] = true,
 				[lw_delves] = true,
@@ -654,6 +661,9 @@ do
 		[2966] = lw_delves, -- Torment's Rise
 		[2979] = lw_delves, -- Shadowguard Point
 		[3003] = lw_delves, -- The Darkway
+		[3038] = public.isNext and lw_delves or nil, -- Gnarldor Isle
+		[3077] = public.isNext and lw_delves or nil, -- The Ring of Glory
+		[3079] = public.isNext and lw_delves or nil, -- Venomfall Deeps
 	}
 	public.remappedZones = {
 		[2827] = 2213, -- Horrific Vision of Stormwind (Revisited) -> Horrific Vision of Stormwind

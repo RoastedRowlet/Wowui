@@ -14,14 +14,9 @@ RaiderIO_Config = {
 }
 RaiderIO_LastCharacter = "us-Barelynoer-area-52"
 RaiderIO_MissingCharacters = {
-["us-Critcommändr-stormrage"] = true,
-["us-Mfoxxmg-thrall"] = true,
-["us-Papapotato-illidan"] = true,
-["us-Cruelmonk-tichondrius"] = true,
-["us-Sangrial-thrall"] = true,
-["us-Bushidoo-area-52"] = true,
-["us-Chadwik-zuljin"] = true,
-["us-Wra-arthas"] = true,
+["us-party5-area-52"] = true,
+["us-Asmodea-grizzly-hills"] = true,
+["us-Torinanda-area-52"] = true,
 }
 RaiderIO_MissingServers = {
 }

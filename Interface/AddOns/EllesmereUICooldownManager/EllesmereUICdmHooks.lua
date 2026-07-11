@@ -106,6 +106,92 @@ end
 ns.FD = FD
 
 -------------------------------------------------------------------------------
+--  Resource verification for the CD Ready Glow.
+--
+--  C_Spell.IsSpellUsable() can briefly report a resource-gated spell as
+--  usable right after login/reload (observed with Void Ray on Devourer
+--  Demon Hunter) before Blizzard's internal power data has fully settled.
+--  Rather than guess at a timing window, HasEnoughResources re-derives the
+--  answer from live UnitPower()/UnitPowerMax() values, which are always
+--  accurate -- including immediately after login. Callers AND this with
+--  IsSpellUsable so cooldown/form/lockout gating is unaffected; only the
+--  resource portion gets a deterministic second opinion.
+--
+--  Declared early in the file (before FD/ResolveSpellSettings usage further
+--  down) since Lua locals are only visible after their textual declaration --
+--  defining it later but using it earlier produced a nil-call error.
+--
+--  Optimization: GetSpellPowerCost() allocates a new Lua table on every call
+--  and is a C-API call. A spell's power cost only changes on talent/spec swap,
+--  not during combat, so the result is cached and invalidated on
+--  PLAYER_SPECIALIZATION_CHANGED and PLAYER_ENTERING_WORLD. The hot path (every
+--  UNIT_POWER_UPDATE) then does only a table lookup.
+-------------------------------------------------------------------------------
+local _spellPowerCostCache = {}
+
+local function InvalidateSpellPowerCostCache()
+    wipe(_spellPowerCostCache)
+end
+ns.InvalidateSpellPowerCostCache = InvalidateSpellPowerCostCache
+
+do
+    local _pccInvalidateFrame = CreateFrame("Frame")
+    _pccInvalidateFrame:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
+    _pccInvalidateFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
+    _pccInvalidateFrame:SetScript("OnEvent", InvalidateSpellPowerCostCache)
+end
+
+local function HasEnoughResources(spellID)
+    if not (C_Spell and C_Spell.GetSpellPowerCost) then return true end
+    -- Cache lookup: sentinel nil = not yet checked, false = no cost
+    -- (=> always enough), table = cached cost list.
+    local cached = _spellPowerCostCache[spellID]
+    if cached == nil then
+        local costs = C_Spell.GetSpellPowerCost(spellID)
+        if not costs or #costs == 0 then
+            _spellPowerCostCache[spellID] = false  -- no resource gate
+            return true
+        end
+        _spellPowerCostCache[spellID] = costs
+        cached = costs
+    elseif cached == false then
+        return true  -- no resource gate, cached
+    end
+    for _, c in ipairs(cached) do
+        local powerType = c.type
+        if powerType then
+            local cost = c.cost or 0
+            if c.costPercent and c.costPercent > 0 then
+                -- Power can be a SECRET number in tainted combat; can't compare it,
+                -- so default to castable rather than throw.
+                local maxP = UnitPowerMax("player", powerType)
+                if issecretvalue and issecretvalue(maxP) then return true end
+                cost = math.max(cost, (c.costPercent / 100) * maxP)
+            end
+            if cost > 0 then
+                local cur = UnitPower("player", powerType)
+                if issecretvalue and issecretvalue(cur) then return true end
+                if cur < cost then return false end
+            end
+        end
+    end
+    return true
+end
+ns.HasEnoughResources = HasEnoughResources
+
+-- True once we've received at least one genuine UNIT_POWER_FREQUENT for the
+-- player since the last PLAYER_ENTERING_WORLD. Both C_Spell.IsSpellUsable()
+-- and C_Spell.GetSpellPowerCost() can briefly return stale/empty data right
+-- at login/reload (observed: GetSpellPowerCost reporting 0 cost for a 100-Fury
+-- spell, making HasEnoughResources default to "enough" when it should not).
+-- Rather than guess a delay, we simply don't trust resource-gated glow
+-- decisions until the client has actually pushed us a real power value.
+-- This is event-driven, not polled: setting it costs one boolean write, and
+-- it naturally self-corrects via the already-registered UNIT_POWER_FREQUENT
+-- listener below, which re-triggers QueueCDGlowUpdate on every change.
+ns._cdGlowPowerConfirmed = true
+
+-------------------------------------------------------------------------------
 --  Constants
 -------------------------------------------------------------------------------
 local VIEWER_NAMES = {
@@ -114,6 +200,21 @@ local VIEWER_NAMES = {
     "BuffIconCooldownViewer",
     "BuffBarCooldownViewer",
 }
+
+-- Blizzard creates these 4 viewer frames once and never replaces the frame
+-- object for the rest of the session, so a global-table lookup (_G[name])
+-- is wasted work once we've found it -- cache the resolved frame reference.
+-- Used from both the 10Hz active-aura ticker and the CD Ready Glow update,
+-- both of which loop over all 4 viewers frequently.
+local _viewerFrameCache = {}
+local function GetViewerFrame(vi)
+    local f = _viewerFrameCache[vi]
+    if not f then
+        f = _G[VIEWER_NAMES[vi]]
+        if f then _viewerFrameCache[vi] = f end
+    end
+    return f
+end
 
 local VIEWER_TO_BAR = {
     EssentialCooldownViewer = "cooldowns",
@@ -192,20 +293,62 @@ ns.ResolveFrameSpellID = ResolveFrameSpellID
 -- spell may be the base whose active override is one of the identity ids -- e.g.
 -- assigned Corruption 172, frame shows Wither 445468 = FindSpellOverrideByID(172)
 -- -- or an identity id may be the base whose override is the assigned spell).
-local function ResolveSpellSettings(frame, sid2, sd2)
-    local settings = sd2 and sd2.spellSettings
-    if not settings or not sid2 then return nil end
-    -- No per-spell settings on this bar -> nothing to resolve. Skips the identity
-    -- set + GetBaseSpell work for the common case (keeps the swipe hot path light).
-    if next(settings) == nil then return nil end
+local function ResolveSpellSettings(frame, sid2, sd2, barKey)
+    if not sid2 then return nil end
+    -- Bar identity: explicit barKey wins (nil-frame callers like the preset
+    -- gain-sound path), else the frame's decorated context.
+    local fc0 = frame and _ecmeFC[frame]
+    local bk = barKey or (fc0 and fc0.barKey)
+    -- Bar tiers: barSettings ("Apply to Bar", per spec) chained to the
+    -- profile-level bd.barSpellSettings ("Apply to Bar (All Specs)"). nil when
+    -- neither exists -- the common case costs two table lookups.
+    local tier = ns.GetBarTierSettings and ns.GetBarTierSettings(sd2, bk)
+    -- HOSTED-BUFF frame detection: a real buff frame (or its inactive
+    -- placeholder) rendered on a CD/util bar. FRAME-based, not flag-based --
+    -- the same spellID can ALSO be this bar's cooldown entry, and that icon
+    -- must keep the normal CD-family resolution. A buff frame only reaches a
+    -- non-buff bar through an explicit host, so the frame identity is exact.
+    -- Cheap: sd2.hostedBuffSpellIDs is nil on bars with no host.
+    local hostedFrame = false
+    if frame and bk and sd2 and sd2.hostedBuffSpellIDs then
+        local fdH = ns._hookFrameData and ns._hookFrameData[frame]
+        if (fdH and fdH._isBuffViewerFrame) or frame._isPlaceholderFrame then
+            local bdH = ns.barDataByKey and ns.barDataByKey[bk]
+            if bdH and bdH.barType ~= "buffs" and bdH.barType ~= "custom_buff" then
+                hostedFrame = true
+            end
+        end
+    end
+    -- HOSTED BUFFS are fully removed from the Apply-to-Bar tier system: a buff on a
+    -- CD/util bar must never inherit that bar's applied (cd/util) values -- notably
+    -- for keys shared between families (Duration Text, Border). Resolve ONLY its own
+    -- per-spell entry. Nil-frame callers fall back to the flag test (they have no
+    -- frame identity, and a nil-frame lookup for a hosted id is always the buff).
+    if tier and (hostedFrame
+       or (not frame and sd2 and sd2.hostedBuffSpellIDs and sd2.hostedBuffSpellIDs[sid2])) then
+        tier = nil
+    end
+    -- Per-spell entries live in the spec's FAMILY store (they travel with the
+    -- spell across bars), not on the bar. A hosted buff reads the BUFF store --
+    -- the same entry it had on the buffs bar -- keyed off the FRAME, so a
+    -- cooldown icon of the same spellID on this bar keeps the CD store.
+    local settings = bk and ns.GetSpellSettingsStore
+        and ns.GetSpellSettingsStore(hostedFrame and "buffs" or bk)
+    if not settings or next(settings) == nil then return tier end
+
+    local ChainSettings = ns.ChainSettings
 
     -- Fast path: direct hit on the primary id (the common, non-override case).
     -- Returns before building the identity set / addId closure below, so the hot
     -- SetSwipeColor path stays allocation-free for spells without an override.
+    -- The chain re-assert is self-healing: every resolve re-points the entry's
+    -- __index at the CURRENT bar's tier, so moves / spec swaps / profile swaps
+    -- never leave a stale link (metatables are not serialized; this also
+    -- restores them after a fresh login).
     local direct = settings[sid2]
-    if direct then return direct end
+    if direct then ChainSettings(direct, tier); return direct end
 
-    local fc2 = _ecmeFC[frame]
+    local fc2 = fc0
 
     -- Build the frame's identity-id set (deduped).
     local ids = { sid2 }
@@ -214,7 +357,7 @@ local function ResolveSpellSettings(frame, sid2, sd2)
         for i = 1, #ids do if ids[i] == id then return end end
         ids[#ids + 1] = id
     end
-    local canon2 = ns.GetCanonicalSpellIDForFrame and ns.GetCanonicalSpellIDForFrame(frame)
+    local canon2 = frame and ns.GetCanonicalSpellIDForFrame and ns.GetCanonicalSpellIDForFrame(frame)
     if canon2 then addId(canon2) end
     if fc2 then
         addId(fc2.resolvedSid)
@@ -235,20 +378,21 @@ local function ResolveSpellSettings(frame, sid2, sd2)
     -- 1. Direct hit on any identity id.
     for i = 1, #ids do
         local s = settings[ids[i]]
-        if s then return s end
+        if s then ChainSettings(s, tier); return s end
     end
 
     -- 2. linkedSpellIDs reported by the cooldown info.
     if fc2 and fc2.linkedSpellIDs then
         for _, lid in ipairs(fc2.linkedSpellIDs) do
-            if settings[lid] then return settings[lid] end
+            local s = settings[lid]
+            if s then ChainSettings(s, tier); return s end
         end
     end
 
     -- 3. Override resolution across assignedSpells, both directions, against the
     --    full identity set.
     local FindOvr = C_SpellBook and C_SpellBook.FindSpellOverrideByID
-    if FindOvr and sd2.assignedSpells then
+    if FindOvr and sd2 and sd2.assignedSpells then
         local idOvr = {}
         for i = 1, #ids do idOvr[i] = FindOvr(ids[i]) end
         for _, asid in ipairs(sd2.assignedSpells) do
@@ -256,14 +400,18 @@ local function ResolveSpellSettings(frame, sid2, sd2)
                 local asidOvr = FindOvr(asid)
                 for i = 1, #ids do
                     if asidOvr == ids[i] or idOvr[i] == asid then
-                        return settings[asid]
+                        local s = settings[asid]
+                        ChainSettings(s, tier)
+                        return s
                     end
                 end
             end
         end
     end
 
-    return nil
+    -- No per-spell entry anywhere in the identity set: the bar tiers (if any)
+    -- are the effective settings.
+    return tier
 end
 ns.ResolveSpellSettings = ResolveSpellSettings
 
@@ -474,6 +622,31 @@ function ns.RebuildSpellRouteMap()
            and bd.key ~= "cooldowns" and bd.key ~= "utility" and bd.key ~= "buffs"
            and bd.barType ~= "buffs" and bd.barType ~= "custom_buff" then
             CollectDiversionsFor(bd)
+        end
+    end
+    -- Pass 3b: HOSTED BUFFS. A buff placed on a CD/utility bar
+    -- (sd.hostedBuffSpellIDs) must ALSO divert in the BUFF-family map to that
+    -- CD/util bar -- a buff frame comes from the BuffIcon viewer, so
+    -- ResolveCDIDToBar only reads _divertedSpellsBuff for it. Runs after the
+    -- buff-bar passes (1-2) so an explicit host outranks a stray buff-bar copy of
+    -- the same spell. (The bar's normal CD diversion in _divertedSpellsCD from
+    -- Pass 3 is untouched; these are separate family maps.)
+    for _, bd in ipairs(p.cdmBars.bars) do
+        if bd.enabled and not bd.isGhostBar
+           and bd.barType ~= "buffs" and bd.barType ~= "custom_buff" then
+            local sd = ns.GetBarSpellData(bd.key)
+            if sd and sd.hostedBuffSpellIDs then
+                -- Keyed off hostedBuffSpellIDs directly (not assignedSpells): the
+                -- CD/util drop pass can transiently strip a buff from assignedSpells
+                -- (a buff never appears in the Essential/Utility viewer), but the
+                -- diversion must survive that so the buff still renders here. SVV
+                -- expands variants so any live talent/override form resolves.
+                for sid in pairs(sd.hostedBuffSpellIDs) do
+                    if type(sid) == "number" and sid > 0 then
+                        SVV(_divertedSpellsBuff, sid, bd.key, false)
+                    end
+                end
+            end
         end
     end
     -- Pass 4: ghost bars LAST = HIGHEST priority. A spell the user HID stays
@@ -725,6 +898,23 @@ local function ApplyCdmChargeStyle(frame, cd)
     return true
 end
 
+-- Immediately re-assert the charge style (Hide Recharge Edge + Hide Swipe) on one
+-- icon, instead of waiting for Blizzard's next cooldown re-push to fire the
+-- reactive SetDrawEdge / SetDrawSwipe hooks. Called from RefreshCDMIconAppearance
+-- so toggling Hide Recharge Edge / Hide Swipe -- per-icon OR via Apply to Bar --
+-- updates a CURRENTLY recharging charge spell right away rather than only on its
+-- next recharge (the "it didn't apply to every icon" report). No-op for non-charge
+-- frames (ApplyCdmChargeStyle self-skips) and reentry-guarded so the sibling hooks
+-- do not recurse.
+function ns.ReapplyChargeStyle(frame)
+    local fd = frame and hookFrameData[frame]
+    local cd = fd and fd.cooldown
+    if not cd or fd._isProcessingOverride then return end
+    fd._isProcessingOverride = true
+    ApplyCdmChargeStyle(frame, cd)
+    fd._isProcessingOverride = false
+end
+
 -- Max Stacks Glow (per-spell): glow a charge spell when it is at max charges.
 -- 1:1 with Active State Glow but on its own overlay (so the two never fight) and
 -- driven by charge state instead of the active swipe. ss2.maxStacksGlow is the
@@ -855,15 +1045,66 @@ end
 --  fires on login (already ready -> never armed), on a GCD ending (a GCD never
 --  makes a spell "not ready" here), or per render tick.
 --
---  Charge spells fire ONLY at MAX charges: ready = GetSpellCharges().isActive ==
---  false (recharge not running), the SAME clean at-max signal Max Stacks Glow uses
---  -- NOT GetSpellCooldown().isActive, which goes false at the FIRST castable charge.
---  The cooldown-widget hooks (SetDesaturated) do NOT fire when the last charge
---  refills to max, so charge spells are ALSO driven by SPELL_UPDATE_CHARGES (the
---  WatchCdReadySoundIfEnabled set, mirroring Max Stacks Glow). Non-charge spells
---  ride the per-frame SetDesaturated edge alone (fires at CD end).
+--  Driven ENTIRELY by the authoritative cooldown/charge events
+--  (SPELL_UPDATE_COOLDOWN + SPELL_UPDATE_CHARGES) via the WatchCdReadySoundIfEnabled
+--  set -- NOT by the SetDesaturated visual hook. That hook fires at moments unrelated
+--  to the real cooldown (rage/range/GCD repaint) where C_Spell.GetSpellCooldown can
+--  report a transient isActive=true / isOnGCD=false GCD race; sampling there
+--  false-armed non-charge spells that were never on cooldown (Odyn's Fury etc.),
+--  firing at random while another button was spammed. Reading isActive+isOnGCD AT the
+--  event (the moment state actually settled) is consistent -- this is exactly how
+--  Ayije drives its ready glow. Charge readiness = GetSpellCharges().isActive == false
+--  (at max, the clean signal Max Stacks Glow uses); non-charge readiness =
+--  not (GetSpellCooldown().isActive and not isOnGCD). No duration/magnitude math
+--  (those values are secret in protected instances) -- only the clean bool flags.
 -------------------------------------------------------------------------------
 ns._cdReadySoundWatch = ns._cdReadySoundWatch or setmetatable({}, { __mode = "k" })
+
+-- Loading-screen / login-settle gate, shared by every CDM notification sound
+-- (CD-ready, buff gain/loss, preset buff gain). Zone changes, flights, and login
+-- re-render the CDM icons and re-fire aura/charge alerts while the cooldown,
+-- charge, and aura APIs briefly report transient states across the boundary --
+-- which false-fires the edges on spells/buffs that were mid-cooldown or still
+-- present (heard as random sounds when just zoning/flying). Mirrors Ayije, which
+-- gates every notification sound behind loginFinished + loadingScreenActive.
+-- Cheap: one boolean + one timestamp compare, consulted only on a sound edge
+-- (never per tick). Edges that land while suppressed are dropped silently.
+do
+    local loadingActive = true   -- suppressed until the first PLAYER_ENTERING_WORLD
+    local settleUntil = 0
+    local SETTLE_SECONDS = 2      -- brief window after a load for re-renders to settle
+
+    function ns._cdmSoundSuppressed()
+        return loadingActive or GetTime() < settleUntil
+    end
+
+    local gate = CreateFrame("Frame")
+    gate:RegisterEvent("LOADING_SCREEN_ENABLED")
+    gate:RegisterEvent("LOADING_SCREEN_DISABLED")
+    gate:RegisterEvent("PLAYER_ENTERING_WORLD")
+    gate:SetScript("OnEvent", function(_, event)
+        if event == "LOADING_SCREEN_ENABLED" then
+            loadingActive = true
+        else
+            -- World is up (LOADING_SCREEN_DISABLED / PLAYER_ENTERING_WORLD): clear
+            -- the load flag and start a short settle so the post-load icon
+            -- re-render can't false-fire the edge.
+            loadingActive = false
+            settleUntil = GetTime() + SETTLE_SECONDS
+        end
+    end)
+end
+
+-- Diagnostic: /cdmreadydbg toggles a one-line print at each CD-ready sound FIRE
+-- (live spellID, name, base id, bar, charge state) so a "fires while spamming"
+-- report can be traced to the exact spell and reason. Off by default; the print
+-- is gated on the flag so it is zero cost unless toggled on.
+ns._cdReadySoundDebug = false
+SLASH_CDMREADYDBG1 = "/cdmreadydbg"
+SlashCmdList.CDMREADYDBG = function()
+    ns._cdReadySoundDebug = not ns._cdReadySoundDebug
+    print("|cff0cd29f[CDReady]|r debug " .. (ns._cdReadySoundDebug and "ON" or "OFF"))
+end
 
 -- Is the spell READY right now? Charge spells: only at MAX charges (recharge not
 -- running). Non-charge: not on a real (non-GCD) cooldown. liveSid = resolved override.
@@ -876,10 +1117,10 @@ local function CdReadyIsReady(liveSid)
     return not (cd and cd.isActive and not cd.isOnGCD)
 end
 
--- Shared evaluator (driven by SetDesaturated for non-charge spells and by
--- SPELL_UPDATE_CHARGES for charge spells). Arms while not ready, plays + disarms on
--- the ready edge. Deferred one frame and re-confirmed so a charge/GCD-tail race that
--- momentarily reads ready can't false-fire. Self-gates zero-cost on the feature flag.
+-- Shared evaluator (driven by SPELL_UPDATE_COOLDOWN + SPELL_UPDATE_CHARGES via the
+-- WatchCdReadySoundIfEnabled set). Arms while not ready, plays + disarms on the ready
+-- edge. Deferred one frame and re-confirmed so a charge/GCD-tail race that momentarily
+-- reads ready can't false-fire. Self-gates zero-cost on the feature flag.
 local function EvalCdReadySound(frame, fd)
     if not ns._cdmAnyCdReadySound then return end
     if not fd then return end
@@ -907,6 +1148,13 @@ local function EvalCdReadySound(frame, fd)
             fd._cdReadyArmed = false
             return
         end
+        if ns._cdmSoundSuppressed() then
+            -- Loading screen / login settle: this ready edge is almost always a
+            -- zone-transition artifact, not a real cooldown finishing. Drop it
+            -- silently so it fires neither now nor when the window ends.
+            fd._cdReadyArmed = false
+            return
+        end
         -- Became ready. Confirm one frame later (let the API settle) before playing.
         if not fd._cdReadyPending then
             fd._cdReadyPending = CreateFrame("Frame")
@@ -927,7 +1175,17 @@ local function EvalCdReadySound(frame, fd)
                     livep = C_SpellBook.FindSpellOverrideByID(sidp) or sidp
                 end
                 if not CdReadyIsReady(livep) then return end  -- not ready (race) -> stay armed
+                if ns._cdmSoundSuppressed() then fd._cdReadyArmed = false; return end  -- a load began mid-defer
                 fd._cdReadyArmed = false
+                if ns._cdReadySoundDebug then
+                    local nm = (C_Spell.GetSpellName and C_Spell.GetSpellName(livep)) or "?"
+                    local ci = C_Spell.GetSpellCharges and C_Spell.GetSpellCharges(livep)
+                    print(string.format(
+                        "|cff0cd29f[CDReady]|r FIRE live=%s '%s' base=%s bar=%s maxCharges=%s chargeRecharging=%s",
+                        tostring(livep), tostring(nm), tostring(sidp), tostring(bkp),
+                        ci and tostring(ci.maxCharges) or "-",
+                        ci and tostring(ci.isActive) or "-"))
+                end
                 local path = ns.FOCUSKICK_SOUND_PATHS and ns.FOCUSKICK_SOUND_PATHS[kp]
                 if path then PlaySoundFile(path, "Master") end
             end)
@@ -936,11 +1194,12 @@ local function EvalCdReadySound(frame, fd)
     end
 end
 
--- Register a CHARGE spell that has a CD-ready sound into the SPELL_UPDATE_CHARGES
--- watch set -- the only edge that catches the last charge refilling to max (the
--- per-frame SetDesaturated hook never fires there). Non-charge spells are handled
--- entirely by that hook, so they are NOT added here. Mirrors WatchMaxStacksIfEnabled:
--- one cheap charge-capability check, then a settings lookup only for charge spells.
+-- Register a spell that has a CD-ready sound into the event-driven watch set. The
+-- set is evaluated on SPELL_UPDATE_COOLDOWN (non-charge CD end) and
+-- SPELL_UPDATE_CHARGES (charge refill to max) -- the authoritative moments the state
+-- actually settles, so isActive/isOnGCD read consistently (no GCD race). BOTH charge
+-- and non-charge spells are watched here; there is no SetDesaturated driver anymore.
+-- Called from DecorateFrame for every cd/utility icon.
 function ns.WatchCdReadySoundIfEnabled(frame)
     if not frame then return end
     local fd = hookFrameData[frame]
@@ -949,16 +1208,13 @@ function ns.WatchCdReadySoundIfEnabled(frame)
     local sidw = fcw and fcw.spellID
     local bkw = fcw and fcw.barKey
     if not (sidw and bkw) then return end
-    local liveSid = sidw
-    if C_SpellBook and C_SpellBook.FindSpellOverrideByID then liveSid = C_SpellBook.FindSpellOverrideByID(sidw) or sidw end
-    local ci = C_Spell.GetSpellCharges and C_Spell.GetSpellCharges(liveSid)
-    local isCharge = ci ~= nil and (ci.maxCharges or 0) > 1
-    local ssw = isCharge and ResolveSpellSettings(frame, sidw, ns.GetBarSpellData(bkw)) or nil
+    local ssw = ResolveSpellSettings(frame, sidw, ns.GetBarSpellData(bkw))
     if ssw and ssw.cdReadySoundKey and ssw.cdReadySoundKey ~= "none" then
         ns._cdmAnyCdReadySound = true
         ns._cdReadySoundWatch[frame] = fd
         if not ns._cdReadySoundEventFrame then
             local ef = CreateFrame("Frame")
+            ef:RegisterEvent("SPELL_UPDATE_COOLDOWN")
             ef:RegisterEvent("SPELL_UPDATE_CHARGES")
             ef:SetScript("OnEvent", function()
                 for f, d in pairs(ns._cdReadySoundWatch) do
@@ -1110,6 +1366,14 @@ local function DecorateFrame(frame, barData)
     if fd and fd.decorated then return fd end
     if not fd then fd = {}; hookFrameData[frame] = fd end
     fd.decorated = true
+
+    -- A HOSTED buff's frame is a Blizzard buff-viewer frame reparented onto a
+    -- CD/util bar. Its cooldown swipe is the AURA DURATION (Blizzard-driven), not a
+    -- spell cooldown -- so the cd-style swipe hooks below (Suppress-GCD, active-state
+    -- override, charge logic) must never touch it, or they'd blank the duration
+    -- swipe on every GCD. viewerFrame is stable per pooled frame, so flag it once.
+    fd._isBuffViewerFrame = (frame.viewerFrame == _G.BuffIconCooldownViewer
+        or frame.viewerFrame == _G.BuffBarCooldownViewer) or nil
 
     local iconWidget = frame.Icon
     if iconWidget and not iconWidget.GetTexture then
@@ -1277,6 +1541,37 @@ local function DecorateFrame(frame, barData)
             local cd = fd.cooldown
             hooksecurefunc(cd, "SetSwipeColor", function()
                 if fd._isProcessingOverride then return end
+                -- Buff-viewer frame (buff bar or hosted on a CD/util bar): the swipe
+                -- is the aura DURATION, so skip all cd-style logic (Suppress-GCD,
+                -- active-state). Apply only the per-spell "Cooldown Swipe Color":
+                -- Default = the bar's swipe colour (black), Class / Custom per settings.
+                if fd._isBuffViewerFrame then
+                    fd._isProcessingOverride = true
+                    local fcB = _ecmeFC[frame]
+                    local sidB = fcB and fcB.spellID
+                    local bkB = fcB and fcB.barKey
+                    local ssB = (sidB and bkB and ns.ResolveSpellSettings)
+                        and ns.ResolveSpellSettings(frame, sidB, ns.GetBarSpellData(bkB), bkB) or nil
+                    local sr, sg, sb
+                    -- CURRENT bar's swipe alpha, not the decorate-time closure
+                    -- barData: pooled frames decorate once, so the closure holds
+                    -- whichever bar first decorated this frame.
+                    local bdB = bkB and barDataByKey and barDataByKey[bkB]
+                    local alpha = (bdB and bdB.swipeAlpha) or barData.swipeAlpha or 0.7
+                    local mode = ssB and ssB.cdSwipeColor
+                    if mode == "class" then
+                        local _, ct = UnitClass("player")
+                        local cc = ct and RAID_CLASS_COLORS[ct]
+                        if cc then sr, sg, sb = cc.r, cc.g, cc.b end
+                    elseif mode == "custom" then
+                        sr, sg, sb = ssB.cdSwipeColorR, ssB.cdSwipeColorG, ssB.cdSwipeColorB
+                    elseif mode == "none" then
+                        alpha = 0  -- fully hide the swipe (alpha 0, geometry still valid)
+                    end
+                    cd:SetSwipeColor(sr or 0, sg or 0, sb or 0, alpha)
+                    fd._isProcessingOverride = false
+                    return
+                end
                 fd._isProcessingOverride = true
                 local fc2 = _ecmeFC[frame]
                 local sid2 = fc2 and fc2.spellID
@@ -1354,6 +1649,8 @@ local function DecorateFrame(frame, barData)
                 if ss2 and (ss2.chargeHideSwipe or ss2.hideRechargeEdge) then ns._cdmAnyChargeStyle = true end
                 if ss2 and ss2.maxStacksGlow and ss2.maxStacksGlow > 0 then ns._cdmAnyMaxStacksGlow = true end
                 if ss2 and ss2.chargeHideCdText then ns._cdmAnyChargeHideCdText = true end
+                if ss2 and ss2.reverseSwipe then ns._cdmAnyReverseSwipe = true end
+                if ss2 and ss2.hideCDSwipe then ns._cdmAnyHideCDSwipe = true end
 
                 if ss2 and ss2.activeSwipeMode == "none" then
                     -- Hide Active State: force black swipe, track active flag.
@@ -1415,17 +1712,26 @@ local function DecorateFrame(frame, barData)
                     cb = cb or (ss2 and ss2.activeSwipeB) or 0.376
                     ca = (ss2 and ss2.activeSwipeA) or 0.7
                     cd:SetSwipeColor(cr, cg, cb, ca)
-                    if fd.tex then fd.tex:SetDesaturated(false) end
+                    if fd.tex then fd.tex:SetDesaturated(false); fd._desatNA = nil end
                     fd._wasActive = true
                 else
                     -- Not active: black swipe.
                     if not _gcdSuppressed then
                         cd:SetSwipeColor(0, 0, 0, barData.swipeAlpha or 0.7)
                     end
-                    -- Desaturate When Not Active (per-spell): symmetric mirror of
-                    -- the active branch's SetDesaturated(false) above.
-                    if ss2 and ss2.desatNotActive and fd.tex then
-                        fd.tex:SetDesaturated(true)
+                    -- Desaturate When Not Active (per-spell). Symmetric: desaturate
+                    -- while the setting is on, and RE-saturate when it's turned off --
+                    -- but only for icons WE desaturated (fd._desatNA), so turning it off
+                    -- never fights cdState / buff desaturation on other icons and doesn't
+                    -- have to wait for the next cooldown event to un-grey.
+                    if fd.tex then
+                        if ss2 and ss2.desatNotActive then
+                            fd.tex:SetDesaturated(true)
+                            fd._desatNA = true
+                        elseif fd._desatNA then
+                            fd.tex:SetDesaturated(false)
+                            fd._desatNA = nil
+                        end
                     end
                     -- Transition: buff just ended, CD starting. Re-apply the
                     -- cooldown duration so the swipe shows immediately
@@ -1483,6 +1789,8 @@ local function DecorateFrame(frame, barData)
             end)
             hooksecurefunc(cd, "SetDrawSwipe", function(_, show)
                 if fd._isProcessingOverride then return end
+                -- Hosted buff: never toggle its duration swipe from our cd logic.
+                if fd._isBuffViewerFrame then return end
                 -- Charge spells get the baseline edge (+ per-spell Hide Swipe).
                 -- ApplyCdmChargeStyle returns true and fully owns the swipe + edge
                 -- only for charge spells, so non-charge frames fall through to the
@@ -1491,6 +1799,31 @@ local function DecorateFrame(frame, barData)
                 local handled = ApplyCdmChargeStyle(frame, cd)
                 fd._isProcessingOverride = false
                 if handled then return end
+                -- Per-spell Hide CD Swipe (non-charge): keep the swipe suppressed even
+                -- when Blizzard re-pushes the cooldown. Gated so it costs nothing until
+                -- someone enables it. Resolved from our own flags (secret-safe) in both
+                -- stores -- per-bar spellSettings and preset customActiveStates.
+                if ns._cdmAnyHideCDSwipe then
+                    local ssH = ns._ResolveCdmSS(frame)
+                    local hideSw = ssH and ssH.hideCDSwipe
+                    if not hideSw and ns.GetCustomActiveState then
+                        local fcH = _ecmeFC[frame]
+                        local sidH = fcH and fcH.spellID
+                        if sidH then
+                            local casKey = (ns.ResolveCustomActiveKey and ns.ResolveCustomActiveKey(sidH)) or sidH
+                            local casH = ns.GetCustomActiveState(casKey)
+                            hideSw = casH and casH.hideCDSwipe
+                        end
+                    end
+                    if hideSw then
+                        if show then
+                            fd._isProcessingOverride = true
+                            cd:SetDrawSwipe(false)
+                            fd._isProcessingOverride = false
+                        end
+                        return
+                    end
+                end
                 if show then return end
                 fd._isProcessingOverride = true
                 cd:SetDrawSwipe(true)
@@ -1782,8 +2115,19 @@ local function DecorateFrame(frame, barData)
                 hooksecurefunc(fd.tex, "SetDesaturation", onDesatChange)
             end
         end
-        local isBuff = (barData.barType == "buffs" or barData.key == "buffs" or barData.barType == "custom_buff")
+        -- Swipe direction baseline by FRAME kind, not just bar kind: a buff
+        -- frame (or a hosted-buff placeholder) fills like a buff even when it
+        -- renders on a CD/utility bar. Decoration is once-per-frame while
+        -- Blizzard POOLS these frames across uses, so the kind is recorded in
+        -- fd._revKind and the claim loops re-assert the direction whenever the
+        -- kind changes -- a frame first decorated for the wrong bar family
+        -- otherwise kept that direction for the whole session (buffs randomly
+        -- rendering with a reversed swipe depending on pool history).
+        local isBuff = (barData.barType == "buffs" or barData.key == "buffs"
+            or barData.barType == "custom_buff"
+            or fd._isBuffViewerFrame or frame._isPlaceholderFrame) and true or false
         fd.cooldown:SetReverse(isBuff)
+        fd._revKind = isBuff
 
         -- NOTE: Clear IS hooked above (in the _swipeColorHooked block) to restore
         -- the recharge swipe on charge spells, and SetCooldown is hooked there too
@@ -1817,6 +2161,12 @@ local function DecorateFrame(frame, barData)
                 if bk2 == ns.FOCUSKICK_BAR_KEY then return end
                 local ss2 = ResolveSpellSettings(frame, sid2, ns.GetBarSpellData(bk2))
                 local cse = ss2 and ss2.cdStateEffect
+                -- Shift-Icons variants behave exactly like their base hidden
+                -- mode plus a bar-relayout flag; normalize here so every
+                -- comparison below stays unchanged.
+                local cseShift = (cse == "hiddenOnCDShift" or cse == "hiddenReadyShift")
+                if cse == "hiddenOnCDShift" then cse = "hiddenOnCD"
+                elseif cse == "hiddenReadyShift" then cse = "hiddenReady" end
                 if not cse then
                     if fd._cdStateGlowOn then
                         if fd.glowOverlay then ns.StopNativeGlow(fd.glowOverlay) end
@@ -1829,14 +2179,24 @@ local function DecorateFrame(frame, barData)
                        and not (ns.PresetHasCdState and ns.PresetHasCdState(frame)) then
                         fc2._cdStateHidden = false
                     end
+                    if fc2 and fc2._cdStateShiftHidden
+                       and not (ns.PresetHasCdState and ns.PresetHasCdState(frame))
+                       and ns.SetCdStateShiftHidden then
+                        ns.SetCdStateShiftHidden(fc2, false)
+                    end
                     return
                 end
                 -- Clear stale hidden state when switching to a non-hidden effect
-                if cse ~= "hiddenOnCD" and cse ~= "hiddenReady" then
+                -- (lowerAlphaOnCD is alpha-owning like the hidden modes, so exclude it).
+                if cse ~= "hiddenOnCD" and cse ~= "hiddenReady" and cse ~= "lowerAlphaOnCD" then
                     if fc2 and fc2._cdStateHidden then
                         fc2._cdStateHidden = false
                         local bd2 = barDataByKey and barDataByKey[bk2]
-                        frame:SetAlpha(bd2 and bd2.barOpacity or 1)
+                        frame:SetAlpha(ns.EffectiveBarAlpha(bd2))
+                    end
+                    -- (cse is already normalized, so Shift variants never land here.)
+                    if fc2 and ns.SetCdStateShiftHidden then
+                        ns.SetCdStateShiftHidden(fc2, false)
                     end
                 end
                 -- For hidden cdState modes, defer the evaluation by one
@@ -1845,12 +2205,17 @@ local function DecorateFrame(frame, barData)
                 -- disagree with Blizzard's own evaluation (charge spells
                 -- report isActive while charges remain, GCD tail races).
                 -- Deferring lets the API settle before we query it.
-                if cse == "hiddenOnCD" or cse == "hiddenReady" then
+                if cse == "hiddenOnCD" or cse == "hiddenReady" or cse == "lowerAlphaOnCD" then
                     if not fd._cdStatePending then
                         fd._cdStatePending = CreateFrame("Frame")
                         fd._cdStatePending:Hide()
                     end
                     fd._cdStatePending.cse = cse
+                    -- Captured at arm time (a setting, not volatile); only lowerAlphaOnCD reads it.
+                    fd._cdStatePending.lowAlpha = (ss2 and ss2.cdStateLowerAlpha) or 0.5
+                    -- Shift-Icons variant: the evaluator also maintains the
+                    -- bar-relayout flag (cleared for the non-shift modes).
+                    fd._cdStatePending.shift = cseShift
                     fd._cdStatePending:SetScript("OnUpdate", function(self)
                         self:Hide()
                         local fc3 = _ecmeFC[frame]
@@ -1864,15 +2229,34 @@ local function DecorateFrame(frame, barData)
                         local cseInfo = C_Spell.GetSpellCooldown(liveSid)
                         local onCD = cseInfo and cseInfo.isActive and not cseInfo.isOnGCD
                         local myCse = self.cse
-                        local hide
-                        if myCse == "hiddenOnCD" then
-                            hide = onCD
-                        else
-                            hide = not onCD
-                        end
                         local bd3 = barDataByKey and barDataByKey[bk3]
-                        frame:SetAlpha(hide and 0 or (bd3 and bd3.barOpacity or 1))
-                        if fc3 then fc3._cdStateHidden = hide or false end
+                        local baseA = ns.EffectiveBarAlpha(bd3)
+                        if myCse == "lowerAlphaOnCD" then
+                            -- Lowered (not hidden): reuse _cdStateHidden as the
+                            -- "cd-state owns this alpha" flag so the opacity appliers
+                            -- leave the lowered value in place, exactly like hiddenOnCD.
+                            frame:SetAlpha(onCD and (self.lowAlpha or 0.5) or baseA)
+                            if fc3 then
+                                fc3._cdStateHidden = onCD or false
+                                if ns.SetCdStateShiftHidden then
+                                    ns.SetCdStateShiftHidden(fc3, false)
+                                end
+                            end
+                        else
+                            local hide
+                            if myCse == "hiddenOnCD" then
+                                hide = onCD
+                            else
+                                hide = not onCD
+                            end
+                            frame:SetAlpha(hide and 0 or baseA)
+                            if fc3 then
+                                fc3._cdStateHidden = hide or false
+                                if ns.SetCdStateShiftHidden then
+                                    ns.SetCdStateShiftHidden(fc3, self.shift and hide or false)
+                                end
+                            end
+                        end
                     end)
                     fd._cdStatePending:Show()
                     return
@@ -1886,6 +2270,19 @@ local function DecorateFrame(frame, barData)
                 local cseInfo = C_Spell.GetSpellCooldown(liveSid)
                 local onCD = cseInfo and cseInfo.isActive and not cseInfo.isOnGCD
                 if cse == "pixelGlowReady" or cse == "buttonGlowReady" then
+                    -- Plain CD Ready Glow: cooldown state only, decided right
+                    -- here -- no usability reads, no deferral, no events. The
+                    -- Resource Aware variants below carry those costs; these
+                    -- deliberately do not.
+                    -- Pool reassignment: glow state inherited from a previous
+                    -- spell on this frame belongs to that spell -- reset now.
+                    if fd._cdGlowBoundSid ~= sid2 then
+                        fd._cdGlowBoundSid = sid2
+                        if fd._cdStateGlowOn then
+                            ns.StopNativeGlow(fd.glowOverlay)
+                            fd._cdStateGlowOn = false
+                        end
+                    end
                     if not onCD then
                         if fd.glowOverlay and not fd._cdStateGlowOn then
                             local style = cse == "pixelGlowReady" and 1 or 3
@@ -1897,6 +2294,71 @@ local function DecorateFrame(frame, barData)
                         if fd.glowOverlay then ns.StopNativeGlow(fd.glowOverlay) end
                         fd._cdStateGlowOn = false
                     end
+                elseif cse == "pixelGlowReadyUsable" or cse == "buttonGlowReadyUsable" then
+                    -- Resource Aware CD Ready Glow: also requires the spell to
+                    -- be castable (resources/form/lockout).
+                    -- Pool reassignment reset, same as the plain variants.
+                    if fd._cdGlowBoundSid ~= sid2 then
+                        fd._cdGlowBoundSid = sid2
+                        if fd._cdStateGlowOn then
+                            ns.StopNativeGlow(fd.glowOverlay)
+                            fd._cdStateGlowOn = false
+                        end
+                    end
+                    -- Track this frame for the event-driven re-evaluation loop.
+                    -- The loop's events stay unregistered until the first watch,
+                    -- so the whole system is inert unless a Resource Aware glow
+                    -- is actually configured somewhere.
+                    if ns.CDGlowWatch then ns.CDGlowWatch(frame) end
+                    -- Defer the actual decision by one frame, same as
+                    -- hiddenOnCD/hiddenReady above: SetDesaturated fires inside
+                    -- Blizzard's secure CDM chain where C_Spell.IsSpellUsable can
+                    -- return stale values. The OnUpdate script is installed ONCE
+                    -- per frame object -- this hook fires on every repaint
+                    -- (range/resource tints), so the per-fire work must stay at
+                    -- plain field writes, never closure creation.
+                    local pending = fd._cdStateGlowPending
+                    if not pending then
+                        pending = CreateFrame("Frame")
+                        pending:Hide()
+                        fd._cdStateGlowPending = pending
+                        pending:SetScript("OnUpdate", function(self)
+                            self:Hide()
+                            -- Re-read the cooldown now instead of trusting a value
+                            -- sampled inside the secure chain a frame ago (GCD
+                            -- transients misreport isActive there).
+                            local ci = C_Spell.GetSpellCooldown(self.sid)
+                            local pOnCD = ci and ci.isActive and not ci.isOnGCD
+                            local isUsable
+                            if ns._cdmSoundSuppressed and ns._cdmSoundSuppressed() then
+                                -- Loading-screen settle window: IsSpellUsable is not
+                                -- trustworthy yet. Glow from cooldown state alone
+                                -- (pre-usability behavior); the queued post-settle
+                                -- pass re-evaluates with real data.
+                                isUsable = true
+                            else
+                                -- nil = API has no data for this spell -> treat as
+                                -- not usable; a later event re-evaluates.
+                                isUsable = C_Spell.IsSpellUsable and C_Spell.IsSpellUsable(self.sid)
+                            end
+                            local shouldGlow = (not pOnCD) and (isUsable == true)
+                            if shouldGlow then
+                                if fd.glowOverlay and not fd._cdStateGlowOn then
+                                    local style = self.cse == "pixelGlowReadyUsable" and 1 or 3
+                                    local gr, gg, gb = ns.ResolveGlowColor(self.ss2)
+                                    ns.StartNativeGlow(fd.glowOverlay, style, gr or 1, gg or 1, gb or 1)
+                                    fd._cdStateGlowOn = true
+                                end
+                            elseif fd._cdStateGlowOn then
+                                if fd.glowOverlay then ns.StopNativeGlow(fd.glowOverlay) end
+                                fd._cdStateGlowOn = false
+                            end
+                        end)
+                    end
+                    pending.cse = cse
+                    pending.sid = liveSid
+                    pending.ss2 = ss2
+                    pending:Show()
                 end
             end)
         end
@@ -1924,7 +2386,17 @@ local function DecorateFrame(frame, barData)
                 local bk2 = fc2 and fc2.barKey
                 if not sid2 or not bk2 then return end
                 local ss2 = ResolveSpellSettings(frame, sid2, ns.GetBarSpellData(bk2))
-                if not (ss2 and ss2.desatNotActive) then return end
+                if not (ss2 and ss2.desatNotActive) then
+                    -- Setting turned off: re-saturate if WE greyed this icon, so it
+                    -- doesn't stay desaturated until the next cooldown event.
+                    if fd._desatNA then
+                        fd._isProcessingOverride = true
+                        fd.tex:SetDesaturated(false)
+                        fd._isProcessingOverride = false
+                        fd._desatNA = nil
+                    end
+                    return
+                end
                 local isAct = false
                 local sc = frame.cooldownSwipeColor
                 if sc and type(sc) ~= "number" and sc.GetRGBA then
@@ -1934,6 +2406,7 @@ local function DecorateFrame(frame, barData)
                 if isAct then return end
                 fd._isProcessingOverride = true
                 fd.tex:SetDesaturated(true)
+                fd._desatNA = true
                 fd._isProcessingOverride = false
             end
             hooksecurefunc(fd.tex, "SetDesaturated", _maintainDesat)
@@ -1942,21 +2415,12 @@ local function DecorateFrame(frame, barData)
             end
         end
 
-        -- Audio Effect on CD Ready (cd/utility per-icon): non-charge spells ride this
-        -- per-frame SetDesaturated edge (fires at CD end). Charge spells fire ONLY at
-        -- MAX charges, which SetDesaturated does NOT signal (the icon is already
-        -- saturated with a charge in hand); those are driven by SPELL_UPDATE_CHARGES
-        -- via WatchCdReadySoundIfEnabled instead, though this hook still arms them on
-        -- the 0-charge / partial edges. The single shared evaluator EvalCdReadySound
-        -- computes readiness (at-max for charge spells, cooldown for others), edge-
-        -- detects with an arm flag, and self-gates zero-cost on ns._cdmAnyCdReadySound.
-        if fd.tex and not fd._cdReadySoundHooked then
-            fd._cdReadySoundHooked = true
-            hooksecurefunc(fd.tex, "SetDesaturated", function() EvalCdReadySound(frame, fd) end)
-            if fd.tex.SetDesaturation then
-                hooksecurefunc(fd.tex, "SetDesaturation", function() EvalCdReadySound(frame, fd) end)
-            end
-        end
+        -- Audio Effect on CD Ready (cd/utility per-icon) is driven purely by the
+        -- authoritative SPELL_UPDATE_COOLDOWN / SPELL_UPDATE_CHARGES events via
+        -- WatchCdReadySoundIfEnabled (called from DecorateFrame) -- deliberately NOT
+        -- off a SetDesaturated visual hook. That hook fires at repaint moments
+        -- unrelated to the real cooldown and sampled a transient GCD race
+        -- (isActive=true / isOnGCD=false) that false-fired the sound.
     end
 
     hookFrameData[frame] = fd
@@ -1981,13 +2445,18 @@ local function CategorizeFrame(frame, viewerBarKey)
         local claimType = claimBD and claimBD.barType or claimBarKey
         local viewerIsBuff = (viewerBarKey == "buffs")
         local claimIsBuff  = (claimType == "buffs" or claimType == "custom_buff")
-        if viewerIsBuff == claimIsBuff then
+        -- Same family always routes. A BUFF viewer resolving to a CD/util bar is
+        -- also honored: that only happens for an explicit HOSTED buff (the sole
+        -- writer of a CD/util bar key into _divertedSpellsBuff is the hosted-buff
+        -- pass in RebuildSpellRouteMap), so the buff's real frame reparents onto
+        -- the CD/util bar just like on a buff bar. A CD viewer -> buff bar is still
+        -- rejected (falls through) -- that direction is never wanted.
+        if viewerIsBuff == claimIsBuff or viewerIsBuff then
             return claimBarKey, displaySID, baseSID
         end
-        -- Type mismatch (buff viewer routing to CD bar, or vice versa).
-        -- Under the 1-spell-per-bar rule this can't happen via picker
-        -- claims, but legacy data could trigger it. Fall through to the
-        -- viewer's default bar so the frame still renders somewhere.
+        -- Type mismatch (CD viewer routing to a buff bar). Under the 1-spell-per-bar
+        -- rule this can't happen via picker claims, but legacy data could trigger
+        -- it. Fall through to the viewer's default bar so the frame still renders.
     end
     return viewerBarKey, displaySID, baseSID
 end
@@ -2022,6 +2491,13 @@ local function GetOrCreateTrinketFrame(slotID)
     cd:EnableMouse(false)
     if cd.SetMouseClickEnabled then cd:SetMouseClickEnabled(false) end
     if cd.SetMouseMotionEnabled then cd:SetMouseMotionEnabled(false) end
+    -- On-use trinket cooldowns fire no event at natural expiry, so the CD-driven
+    -- re-saturate (UpdateTrinketCooldown) would not run at the ready edge while
+    -- the CD-ready glow lit up immediately -- same lag as the item preset frames.
+    -- Re-run the trinket CD check at the expiry edge to clear the desaturation.
+    cd:SetScript("OnCooldownDone", function()
+        if ns.UpdateTrinketCooldown then ns.UpdateTrinketCooldown(slotID) end
+    end)
     f.Cooldown = cd
     f._cooldown = cd
 
@@ -2039,10 +2515,38 @@ local function GetOrCreateTrinketFrame(slotID)
         local ffc = _ecmeFC[self]
         local bd2 = ffc and ffc.barKey and barDataByKey[ffc.barKey]
         if not bd2 or not bd2.showTooltip then return end
+        -- Honor the global "Show Tooltips" visibility mode (Blizzard Skin); a
+        -- custom frame's explicit content population would otherwise re-show the
+        -- tip after the global suppression hook hid it.
+        if EllesmereUI and EllesmereUI._tooltipSuppressedByMode
+           and EllesmereUI._tooltipSuppressedByMode(GameTooltip) then return end
         local itemID = GetInventoryItemID("player", self._trinketSlot)
         if itemID then
             GameTooltip_SetDefaultAnchor(GameTooltip, self)
-            GameTooltip:SetInventoryItem("player", self._trinketSlot)
+            -- Prefer the equipped item's link so the tooltip reflects the actual
+            -- upgrade/bonus IDs (real item level + stats) rather than the base item.
+            -- SetItemByID is only a fallback if no link is available.
+            local link = GetInventoryItemLink("player", self._trinketSlot)
+            if link then
+                GameTooltip:SetHyperlink(link)
+            else
+                GameTooltip:SetItemByID(itemID)
+            end
+            -- Re-assert the cursor anchor after content is set (see helper notes):
+            -- the item content-setter can drop the tip's cursor anchor, so without
+            -- this it never appears while "Anchor to Cursor" is on. No-op otherwise.
+            if EllesmereUI and EllesmereUI._repointTooltipAtCursor then
+                EllesmereUI._repointTooltipAtCursor(GameTooltip)
+            end
+            GameTooltip:Show()
+            -- This is our own already-equipped trinket, so the side-by-side
+            -- comparison (shopping) tooltips are just noise -- hide them after the
+            -- tip is shown. Done here rather than by toggling the alwaysCompareItems
+            -- CVar: mutating a user setting on every combat-time hover is wasteful
+            -- and leaks the "off" state if anything errors mid-build.
+            if GameTooltip_HideShoppingTooltips then
+                GameTooltip_HideShoppingTooltips(GameTooltip)
+            end
         end
     end)
     f:SetScript("OnLeave", GameTooltip_Hide)
@@ -2113,6 +2617,7 @@ local function UpdateTrinketCooldown(slotID)
         return false
     end
 end
+ns.UpdateTrinketCooldown = UpdateTrinketCooldown
 
 local _trinketEventFrame = CreateFrame("Frame")
 _trinketEventFrame:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
@@ -2160,6 +2665,174 @@ _trinketEventFrame:SetScript("OnEvent", function(_, event, arg1)
         end
     end
 end)
+
+-------------------------------------------------------------------------------
+--  CD Ready Glow: event-driven usability re-evaluation
+--
+--  Frames whose resolved cdStateEffect is a Resource Aware ready-glow
+--  (pixelGlowReadyUsable / buttonGlowReadyUsable) are registered in a
+--  watched set (ns.CDGlowWatch, called from the decoration paths). While the
+--  set is non-empty, SPELL_UPDATE_COOLDOWN + UNIT_POWER_FREQUENT (player)
+--  drive a dirty flag; a hidden frame re-evaluates ONLY the watched frames on
+--  the next OnUpdate, then hides again. While the set is empty, no events are
+--  registered and nothing runs -- the whole system is zero-cost unless a
+--  ready-glow effect is actually configured somewhere.
+--
+--  SPELL_UPDATE_USABLE alone is not reliable for all resource types (e.g.
+--  Fury), so cooldown + power events stand in for it. UNIT_POWER_FREQUENT
+--  (not UNIT_POWER_UPDATE) is needed so continuous regen (energy ticking up
+--  toward a spell's cost) re-evaluates the glow without waiting for a
+--  discrete spend/gain event; the dirty flag caps the work at once per frame.
+--
+--  During the loading-screen settle window (ns._cdmSoundSuppressed, shared
+--  with the CDM sound system) API answers are not trustworthy: the flush
+--  keeps current state and retries shortly, and the first post-window pass
+--  is authoritative. That pass is what clears a glow that came up stale
+--  across a /reload (started by a decoration path before usability could be
+--  read).
+-------------------------------------------------------------------------------
+do
+    local _cdGlowWatched = setmetatable({}, { __mode = "k" })  -- frame -> true
+    local _cdGlowDirty = false
+    local _cdGlowEventsOn = false
+    local _cdGlowRetryPending = false
+
+    local _cdGlowUpdateFrame = CreateFrame("Frame")
+    _cdGlowUpdateFrame:Hide()
+    local _cdGlowEventFrame = CreateFrame("Frame")
+
+    local function SetGlowEventsRegistered(on)
+        if on == _cdGlowEventsOn then return end
+        _cdGlowEventsOn = on
+        if on then
+            _cdGlowEventFrame:RegisterEvent("SPELL_UPDATE_COOLDOWN")
+            _cdGlowEventFrame:RegisterUnitEvent("UNIT_POWER_FREQUENT", "player")
+        else
+            _cdGlowEventFrame:UnregisterEvent("SPELL_UPDATE_COOLDOWN")
+            _cdGlowEventFrame:UnregisterEvent("UNIT_POWER_FREQUENT")
+        end
+    end
+
+    local function QueueCDGlowUpdate()
+        if _cdGlowDirty then return end
+        _cdGlowDirty = true
+        _cdGlowUpdateFrame:Show()
+    end
+
+    -- Register a frame whose resolved cdStateEffect is a Resource Aware
+    -- ready-glow. Called
+    -- from the decoration paths (DecorateFrame's SetDesaturated hook and
+    -- RefreshCDMIconAppearance). The flush below prunes entries whose effect
+    -- or claim went away and unregisters the events once nothing is watched.
+    function ns.CDGlowWatch(frame)
+        if not _cdGlowWatched[frame] then
+            _cdGlowWatched[frame] = true
+            SetGlowEventsRegistered(true)
+        end
+    end
+
+    _cdGlowUpdateFrame:SetScript("OnUpdate", function(self)
+        self:Hide()
+        _cdGlowDirty = false
+        if not next(_cdGlowWatched) then
+            SetGlowEventsRegistered(false)
+            return
+        end
+        local hfd = ns._hookFrameData
+        local efc = ns._ecmeFC
+        local RSP = ns.ResolveSpellSettings
+        if not hfd or not efc or not RSP then return end
+        -- Settle window: keep current state, retry until the window ends;
+        -- the first post-window pass is the authoritative one.
+        if ns._cdmSoundSuppressed and ns._cdmSoundSuppressed() then
+            if not _cdGlowRetryPending then
+                _cdGlowRetryPending = true
+                C_Timer.After(1, function()
+                    _cdGlowRetryPending = false
+                    QueueCDGlowUpdate()
+                end)
+            end
+            return
+        end
+        for frame in pairs(_cdGlowWatched) do
+            local fd = hfd[frame]
+            local fc2 = efc[frame]
+            local sid2 = fc2 and fc2.spellID
+            local bk2 = fc2 and fc2.barKey
+            local keep = false
+            if fd and fd.glowOverlay and sid2 and bk2 then
+                local ss2 = RSP(frame, sid2, ns.GetBarSpellData(bk2))
+                local cse2 = ss2 and ss2.cdStateEffect
+                if cse2 == "pixelGlowReadyUsable" or cse2 == "buttonGlowReadyUsable" then
+                    keep = true
+                    -- Pool reassignment: glow state inherited from a previous
+                    -- spell on this frame belongs to that spell -- reset now.
+                    if fd._cdGlowBoundSid ~= sid2 then
+                        fd._cdGlowBoundSid = sid2
+                        if fd._cdStateGlowOn then
+                            ns.StopNativeGlow(fd.glowOverlay)
+                            fd._cdStateGlowOn = false
+                        end
+                    end
+                    local liveSid = sid2
+                    if C_SpellBook and C_SpellBook.FindSpellOverrideByID then
+                        liveSid = C_SpellBook.FindSpellOverrideByID(sid2) or sid2
+                    end
+                    local ci = C_Spell.GetSpellCooldown(liveSid)
+                    local onCD = ci and ci.isActive and not ci.isOnGCD
+                    if onCD then
+                        -- On cooldown always stops the glow -- a safety net
+                        -- independent of the SetDesaturated hook, in case that
+                        -- hook doesn't fire for a given transition.
+                        if fd._cdStateGlowOn then
+                            ns.StopNativeGlow(fd.glowOverlay)
+                            fd._cdStateGlowOn = false
+                        end
+                    else
+                        -- IsSpellUsable is the complete castability signal
+                        -- (resources, form, lockout). nil = no data yet ->
+                        -- treat as not usable; a later event re-evaluates.
+                        local isUsable = C_Spell.IsSpellUsable and C_Spell.IsSpellUsable(liveSid)
+                        if isUsable == true then
+                            if not fd._cdStateGlowOn then
+                                local style = cse2 == "pixelGlowReadyUsable" and 1 or 3
+                                local gr, gg, gb = ns.ResolveGlowColor(ss2)
+                                ns.StartNativeGlow(fd.glowOverlay, style, gr or 1, gg or 1, gb or 1)
+                                fd._cdStateGlowOn = true
+                            end
+                        elseif fd._cdStateGlowOn then
+                            ns.StopNativeGlow(fd.glowOverlay)
+                            fd._cdStateGlowOn = false
+                        end
+                    end
+                end
+            end
+            if not keep then
+                -- Effect removed, spell unassigned, or frame released back to
+                -- the pool: stop any leftover glow and drop the watch. Events
+                -- unregister once the set drains (checked below and on the
+                -- next queued flush).
+                _cdGlowWatched[frame] = nil
+                if fd and fd._cdStateGlowOn then
+                    if fd.glowOverlay then ns.StopNativeGlow(fd.glowOverlay) end
+                    fd._cdStateGlowOn = false
+                end
+            end
+        end
+        if not next(_cdGlowWatched) then
+            SetGlowEventsRegistered(false)
+        end
+    end)
+
+    -- One re-evaluation pass on the next frame. Called after rebuilds
+    -- (FullCDMRebuild) and by the event listeners; no-ops instantly when
+    -- nothing is watched.
+    ns.QueueCDGlowResourceCheck = QueueCDGlowUpdate
+
+    _cdGlowEventFrame:SetScript("OnEvent", function()
+        QueueCDGlowUpdate()
+    end)
+end
 
 -------------------------------------------------------------------------------
 --  Desaturation curve for custom frames (taint-safe).
@@ -2253,8 +2926,14 @@ local function GetOrCreatePlaceholderFrame(barKey, spellID, iconID)
             local bd2 = ffc and ffc.barKey and barDataByKey[ffc.barKey]
             if not bd2 or not bd2.showTooltip then return end
             if not self._phSpellID then return end
+            -- Honor the global "Show Tooltips" visibility mode (Blizzard Skin).
+            if EllesmereUI and EllesmereUI._tooltipSuppressedByMode
+               and EllesmereUI._tooltipSuppressedByMode(GameTooltip) then return end
             GameTooltip_SetDefaultAnchor(GameTooltip, self)
             GameTooltip:SetSpellByID(self._phSpellID)
+            if EllesmereUI and EllesmereUI._repointTooltipAtCursor then
+                EllesmereUI._repointTooltipAtCursor(GameTooltip)
+            end
             GameTooltip:Show()
         end)
         f:SetScript("OnLeave", GameTooltip_Hide)
@@ -2340,6 +3019,17 @@ local function GetOrCreateItemPresetFrame(barKey, itemID)
     cd:EnableMouse(false)
     if cd.SetMouseClickEnabled then cd:SetMouseClickEnabled(false) end
     if cd.SetMouseMotionEnabled then cd:SetMouseMotionEnabled(false) end
+    -- Item cooldowns fire no event when they naturally expire, so the
+    -- desaturation pass (ProcessPresetCooldowns) would not re-run at the ready
+    -- edge and the icon would stay greyed until some unrelated event marked the
+    -- processor dirty. The CD-ready glow polls readiness continuously and lights
+    -- up the instant the CD ends, so without this the pot glows while still
+    -- desaturated. Poke the processor at the expiry edge so the next tick
+    -- re-evaluates count/CD/lockout (a plain re-saturate would be wrong when the
+    -- last charge was just used -- total==0 must keep it greyed).
+    cd:SetScript("OnCooldownDone", function()
+        if ns._MarkPresetCdDirty then ns._MarkPresetCdDirty() end
+    end)
     f.Cooldown = cd; f._cooldown = cd
     f._isItemPresetFrame = true
     f._presetItemID = itemID; f._presetData = preset
@@ -2354,8 +3044,16 @@ local function GetOrCreateItemPresetFrame(barKey, itemID)
         local ffc = _ecmeFC[self]
         local bd2 = ffc and ffc.barKey and barDataByKey[ffc.barKey]
         if not bd2 or not bd2.showTooltip then return end
+        -- Honor the global "Show Tooltips" visibility mode (Blizzard Skin).
+        if EllesmereUI and EllesmereUI._tooltipSuppressedByMode
+           and EllesmereUI._tooltipSuppressedByMode(GameTooltip) then return end
         GameTooltip_SetDefaultAnchor(GameTooltip, self)
         GameTooltip:SetItemByID(self._presetItemID)
+        -- Re-assert the cursor anchor after content is set (item setters can drop
+        -- it under "Anchor to Cursor", leaving the tip invisible). No-op otherwise.
+        if EllesmereUI and EllesmereUI._repointTooltipAtCursor then
+            EllesmereUI._repointTooltipAtCursor(GameTooltip)
+        end
         GameTooltip:Show()
     end)
     f:SetScript("OnLeave", GameTooltip_Hide)
@@ -2438,6 +3136,50 @@ local function ProcessPresetCooldowns()
                             f._lastVertexDim = nil
                         end
                     end
+                    -- "Show Charges" (opt-in, CD/utility custom spells only):
+                    -- Blizzard reports no charge frame for a manually-added spell,
+                    -- so on request show its count -- the display charge count when
+                    -- the spell actually has charges, else the cast/usable count.
+                    -- Gated by ns._cdmAnyCustomForceCount + a lazy fontstring, so it
+                    -- costs nothing unless a custom spell opts in. Rides this same
+                    -- 10Hz-when-dirty pass -- no extra OnUpdate.
+                    if ns._cdmAnyCustomForceCount and f._isCustomSpellFrame then
+                        local fcF = _ecmeFC[f]
+                        local bkF = fcF and fcF.barKey
+                        local sdF = bkF and ns.GetBarSpellData and ns.GetBarSpellData(bkF)
+                        local forceCount = sdF and sdF.customSpellForceCount and sdF.customSpellForceCount[sid]
+                        if forceCount then
+                            if not f._castCountText then
+                                local ccf = f:CreateFontString(nil, "OVERLAY")
+                                EllesmereUI.ApplyIconTextFont(ccf, GetCDMFont(), 11, "cdm")
+                                ccf:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", 0, 2)
+                                f._castCountText = ccf
+                            end
+                            local chargeInfo = C_Spell.GetSpellCharges and C_Spell.GetSpellCharges(sid)
+                            local n = (chargeInfo and C_Spell.GetSpellDisplayCount and C_Spell.GetSpellDisplayCount(sid))
+                                or (C_Spell.GetSpellCastCount and C_Spell.GetSpellCastCount(sid))
+                            -- The count is a SECRET value in Midnight (cannot be read or
+                            -- compared -- issecretvalue was making the old code bail), so
+                            -- render it Blizzard's way: TruncateWhenZero turns it into a
+                            -- display-safe string and drops it at zero, without reading
+                            -- the value. pcall because it can throw; failure -> hide.
+                            local ok, str
+                            if C_StringUtil and C_StringUtil.TruncateWhenZero then
+                                ok, str = pcall(C_StringUtil.TruncateWhenZero, n)
+                            end
+                            if ok and str then
+                                f._castCountText:SetText(str)
+                                if not f._castCountText:IsShown() then f._castCountText:Show() end
+                            elseif f._castCountText:IsShown() then
+                                f._castCountText:SetText("")
+                                f._castCountText:Hide()
+                            end
+                        elseif f._castCountText and f._castCountText:IsShown() then
+                            f._castCountText:SetText("")
+                            f._castCountText:Hide()
+                            f._lastCastCount = nil
+                        end
+                    end
                 end
             elseif f._isItemPresetFrame and f._presetItemID and now >= _encounterResetUntil then
                 local itemID = f._presetItemID
@@ -2508,6 +3250,53 @@ ns._isPresetCdDirty = function() return _presetCdDirty end
 -- no game event (bag/cooldown/combat) follows -- e.g. an in-panel sync/import --
 -- ProcessPresetCooldowns would never run and an unowned item would stay saturated.
 ns._MarkPresetCdDirty = function() _presetCdDirty = true end
+
+-- TEMP DEBUG: /cdmcc -- dumps why the "Show Charges" custom-spell count is / is
+-- not displaying. Remove once diagnosed.
+SLASH_EUICDMCC1 = "/cdmcc"
+SlashCmdList["EUICDMCC"] = function()
+    local function p(...) print("|cff66ccff[EUICC]|r", ...) end
+    local function safe(v)
+        if issecretvalue and issecretvalue(v) then return "<secret>" end
+        return tostring(v)
+    end
+    p("gate _cdmAnyCustomForceCount =", tostring(ns._cdmAnyCustomForceCount),
+      "| dirty =", tostring(_presetCdDirty))
+    p("APIs: GetSpellCharges=", tostring(C_Spell and C_Spell.GetSpellCharges ~= nil),
+      "GetSpellDisplayCount=", tostring(C_Spell and C_Spell.GetSpellDisplayCount ~= nil),
+      "GetSpellCastCount=", tostring(C_Spell and C_Spell.GetSpellCastCount ~= nil))
+    local count = 0
+    for fkey, f in pairs(_presetFrames) do
+        if f._isCustomSpellFrame and not f._isCustomBuffFrame then
+            count = count + 1
+            local sid = f._cachedPresetSID
+            if not sid then local m = fkey:match(":(%d+)$"); sid = m and tonumber(m) end
+            local fc = _ecmeFC[f]
+            local bk = fc and fc.barKey
+            local sd = bk and ns.GetBarSpellData and ns.GetBarSpellData(bk)
+            local flag = sd and sd.customSpellForceCount and sd.customSpellForceCount[sid]
+            local ci = sid and C_Spell.GetSpellCharges and C_Spell.GetSpellCharges(sid)
+            local disp = sid and C_Spell.GetSpellDisplayCount and C_Spell.GetSpellDisplayCount(sid)
+            local cast = sid and C_Spell.GetSpellCastCount and C_Spell.GetSpellCastCount(sid)
+            p(string.format("[%s] %s | bk=%s shown=%s flag=%s",
+                tostring(sid), tostring(sid and C_Spell.GetSpellName(sid)),
+                tostring(bk), tostring(f:IsShown()), tostring(flag)))
+            local nEff = (ci and disp) or cast
+            local tok, tstr
+            if C_StringUtil and C_StringUtil.TruncateWhenZero then
+                tok, tstr = pcall(C_StringUtil.TruncateWhenZero, nEff)
+            end
+            p(string.format("   forceCountTbl=%s charges=%s displayCount=%s castCount=%s",
+                tostring(sd and sd.customSpellForceCount ~= nil),
+                tostring(ci ~= nil), safe(disp), safe(cast)))
+            p(string.format("   TruncateWhenZero: ok=%s -> %s | text=%s textShown=%s",
+                tostring(tok), safe(tstr),
+                tostring(f._castCountText ~= nil),
+                tostring(f._castCountText and f._castCountText:IsShown())))
+        end
+    end
+    if count == 0 then p("NO custom spell frames present (add one to a CD/utility bar first)") end
+end
 
 -- "Hide Items if Missing": detect when a tracked consumable's bag presence
 -- flips (acquired or fully used up) for any bar that opted in, and queue a
@@ -2635,6 +3424,55 @@ function ns.AnyCustomAuraLust()
             if sd and sd.assignedSpells then
                 for _, sid in ipairs(sd.assignedSpells) do
                     if LUST_PRESET_SPELLS[sid] then return true end
+                end
+            end
+        end
+    end
+    return false
+end
+
+-- Time Spiral "Free Move" preset: same emulated-cast trick as Bloodlust. The
+-- glow-armed rising edge (CdmBuffBars _ensureTimeSpiralListener) calls this to
+-- mark spell 374968 as "just cast" so the existing self-timed-icon path renders
+-- a 10s Custom Auras (icon) display. A no-op for any bar not tracking it.
+function ns.SignalTimeSpiralCast()
+    _pendingCastIDs[374968] = true
+    QueueCustomBuffUpdate()
+end
+
+-- Called from the Time Spiral glow-HIDE edge (proc consumed): expire any active
+-- 374968 Custom Auras (icon) window now so the icon disappears with the glow
+-- instead of riding out the full 10s. Clears every "barKey:374968" timer (the
+-- suffix uniquely identifies the spell on any bar), then queues a refresh:
+-- custom_buff bars hide their own-frame on the update, buff bars drop the
+-- injected frame on the reanchor.
+function ns.SignalTimeSpiralEnd()
+    local suffix = ":374968"
+    local n = #suffix
+    local any = false
+    for k in pairs(_customAuraTimers) do
+        if type(k) == "string" and k:sub(-n) == suffix then
+            _customAuraTimers[k] = nil
+            any = true
+        end
+    end
+    if any then
+        QueueCustomBuffUpdate()
+        if ns.QueueReanchor then ns.QueueReanchor() end
+    end
+end
+
+-- True if any enabled Custom Auras (custom_buff) / buff bar tracks Time Spiral,
+-- so the shared glow listener stays armed even with no Tracking Bar present.
+function ns.AnyCustomAuraTimeSpiral()
+    local p = ECME and ECME.db and ECME.db.profile
+    if not (p and p.cdmBars and p.cdmBars.bars) then return false end
+    for _, bd in ipairs(p.cdmBars.bars) do
+        if bd.enabled and (bd.barType == "custom_buff" or bd.barType == "buffs") then
+            local sd = ns.GetBarSpellData and ns.GetBarSpellData(bd.key)
+            if sd and sd.assignedSpells then
+                for _, sid in ipairs(sd.assignedSpells) do
+                    if sid == 374968 then return true end
                 end
             end
         end
@@ -2798,9 +3636,29 @@ local function CollectAndReanchor()
                             if dedupKey and not barSeen[dedupKey] then
                                 if frame:IsShown() then
                                     -- Active buff: route Blizzard's real frame.
-                                    if not barLists[targetBar] then barLists[targetBar] = {} end
-                                    barLists[targetBar][#barLists[targetBar] + 1] =
-                                        AcquireEntry(frame, displaySID, baseSID or displaySID, frame.layoutIndex or 0)
+                                    local tbd = barDataByKey[targetBar]
+                                    if tbd and tbd.barType ~= "buffs" and tbd.barType ~= "custom_buff" then
+                                        -- HOSTED buff on a CD/util bar: push the real frame into the
+                                        -- CD pipeline (cdFrames) so Phase 3 sorts it with cooldowns by
+                                        -- assignedSpells position and draws its native swipe. FC.spellID
+                                        -- is set here (the buff path doesn't otherwise); it then enters
+                                        -- _globalClaimSet (built from cdFrames) so Phase 3 never injects
+                                        -- a duplicate. Phase 4 still treats it hands-off (viewerFrame).
+                                        if not cdFrames[targetBar] then cdFrames[targetBar] = {} end
+                                        local cf = cdFrames[targetBar]
+                                        cf[#cf + 1] = frame
+                                        local fc = FC(frame)
+                                        fc.barKey = targetBar
+                                        fc.spellID = baseSID or displaySID
+                                        -- Hosted buff: Phase 3 ranks it by its hosted
+                                        -- MARKER slot, independent of the same spell's
+                                        -- cooldown entry on this bar.
+                                        fc.isHostedBuff = true
+                                    else
+                                        if not barLists[targetBar] then barLists[targetBar] = {} end
+                                        barLists[targetBar][#barLists[targetBar] + 1] =
+                                            AcquireEntry(frame, displaySID, baseSID or displaySID, frame.layoutIndex or 0)
+                                    end
                                     barSeen[dedupKey] = true
                                 else
                                     -- This buff is DISPLAYED in the viewer but currently OFF
@@ -2841,7 +3699,13 @@ local function CollectAndReanchor()
                                     -- Always-Show internally (the two are mutually exclusive
                                     -- in the options). The placeholders it injects are then
                                     -- rendered invisible by the alpha-0 opacity passes.
+                                    -- A HOSTED buff on a CD/util bar (CategorizeFrame only sends a
+                                    -- buff frame to a non-buff bar for an explicit host) is treated
+                                    -- as a CD/util icon: it ALWAYS reserves its slot, and its
+                                    -- placeholder routes through the CD pipeline (Phase 3), not barLists.
+                                    local hostCD = bd and bd.barType ~= "buffs" and bd.barType ~= "custom_buff"
                                     local showInactive = bd and (bd.showInactiveBuffIcons or bd.hidePlaceholderIcon) and true or false
+                                    if hostCD then showInactive = true end
                                     -- Per-icon Always-Show override (on/off) applies only in
                                     -- Always-Show mode. "Keep Buffs in Same Place" reserves
                                     -- EVERY tracked buff's slot, so a per-icon "off" must not
@@ -2850,20 +3714,17 @@ local function CollectAndReanchor()
                                     -- byte-identical to the original `if bd then`.)
                                     if bd and not bd.hidePlaceholderIcon then
                                         local sdAS = ns.GetBarSpellData(targetBar)
-                                        if sdAS and sdAS.spellSettings then
-                                            -- Shared resolver: matches the stored key
-                                            -- against the frame's full identity set
-                                            -- (incl. GetCanonicalSpellIDForFrame, the
-                                            -- id the picker keys settings by).
-                                            local ssAS = ns.ResolveSpellSettings(frame, realSID, sdAS)
-                                                or sdAS.spellSettings[realSID]
-                                            if ssAS then
-                                                if ssAS.alwaysShow == "on" then showInactive = true
-                                                elseif ssAS.alwaysShow == "off" then showInactive = false end
-                                            end
+                                        -- Shared resolver: matches the stored key
+                                        -- against the frame's full identity set
+                                        -- (incl. GetCanonicalSpellIDForFrame, the
+                                        -- id the picker keys settings by).
+                                        local ssAS = ns.ResolveSpellSettings(frame, realSID, sdAS, targetBar)
+                                        if ssAS then
+                                            if ssAS.alwaysShow == "on" then showInactive = true
+                                            elseif ssAS.alwaysShow == "off" then showInactive = false end
                                         end
                                     end
-                                    if bd and bd.enabled and bd.barType == "buffs"
+                                    if bd and bd.enabled and (bd.barType == "buffs" or hostCD)
                                        and showInactive and targetBar ~= ns.FOCUSKICK_BAR_KEY
                                        and not ns._cdmSpecRebuildStale then
                                         -- Two displayed-but-inactive viewer items can resolve to the
@@ -2885,13 +3746,26 @@ local function CollectAndReanchor()
                                             -- active<->inactive; cooldownID does not).
                                             ph.cooldownID = dedupKey
                                             ph:Show()
-                                            if not barLists[targetBar] then barLists[targetBar] = {} end
                                             -- realSID is the displayed/clean buff id (== the active
                                             -- frame's canonical id and the per-icon settings key the
                                             -- options menu writes), so the placeholder resolves the
                                             -- same per-icon settings as the live buff.
-                                            barLists[targetBar][#barLists[targetBar] + 1] =
-                                                AcquireEntry(ph, realSID, realSID, frame.layoutIndex or 0)
+                                            if hostCD then
+                                                -- Hosted-buff placeholder -> CD pipeline (Phase 3);
+                                                -- FC.spellID lets Phase 3 slot it by assignedSpells
+                                                -- (via the hosted MARKER rank, like the live frame).
+                                                if not cdFrames[targetBar] then cdFrames[targetBar] = {} end
+                                                local cf = cdFrames[targetBar]
+                                                cf[#cf + 1] = ph
+                                                local fc = FC(ph)
+                                                fc.barKey = targetBar
+                                                fc.spellID = realSID
+                                                fc.isHostedBuff = true
+                                            else
+                                                if not barLists[targetBar] then barLists[targetBar] = {} end
+                                                barLists[targetBar][#barLists[targetBar] + 1] =
+                                                    AcquireEntry(ph, realSID, realSID, frame.layoutIndex or 0)
+                                            end
                                         end
                                         barSeen[dedupKey] = true
                                     end
@@ -2916,6 +3790,7 @@ local function CollectAndReanchor()
                                     local fc = FC(frame)
                                     fc.barKey = barKey
                                     fc.spellID = baseSID or displaySID
+                                    fc.isHostedBuff = nil
                                 end
                             end
                         end
@@ -2967,6 +3842,43 @@ local function CollectAndReanchor()
                                     f._cooldown:SetCooldown(timer.start, timer.duration)
                                 else
                                     f._cooldown:Clear()
+                                end
+                                -- Custom Active State Decimals (buff bars): the
+                                -- custom buff's own cast-timer duration is hardcoded
+                                -- (sd.spellDurations), so decimals apply to ITS
+                                -- countdown -- buffs have no active-state overlay.
+                                -- OFF BY DEFAULT = zero cost: the faDecimals gate is
+                                -- checked FIRST, so the ResolveSpellSettings + showCD
+                                -- work is skipped entirely when disabled; the else's
+                                -- Detach no-ops unless we previously attached.
+                                if ns.DecimalCountdown then
+                                    if isActive and bd.faDecimals then
+                                        -- nil frame: the frame's CDM context isn't set
+                                        -- up yet here, and a custom buff is an exact id
+                                        -- (no variant), so the direct family-store hit
+                                        -- resolves without it (matches PlayPresetBuffGainSound).
+                                        local ssB = ns.ResolveSpellSettings
+                                            and ns.ResolveSpellSettings(nil, sid, sdInj, injKey)
+                                        local showCDb = bd.showCooldownText
+                                        if ssB and ssB.showCooldownText ~= nil then showCDb = ssB.showCooldownText end
+                                        if showCDb then
+                                            ns.DecimalCountdown.Attach(f._cooldown, timer.start, timer.duration,
+                                                bd.faDecimalsThreshold or 5,
+                                                function(fs)
+                                                    if ns.StyleOverlayDecimalText then
+                                                        ns.StyleOverlayDecimalText(fs, bd, ssB, f:GetScale())
+                                                    end
+                                                end,
+                                                { on = bd.faDecimalsColorEnabled, r = bd.faDecimalsColorR,
+                                                  g = bd.faDecimalsColorG, b = bd.faDecimalsColorB })
+                                        else
+                                            ns.DecimalCountdown.Detach(f._cooldown, false)
+                                        end
+                                    else
+                                        -- Nothing to resolve; only restores Blizzard's
+                                        -- numbers if this frame was previously attached.
+                                        ns.DecimalCountdown.Detach(f._cooldown, true)
+                                    end
                                 end
                                 f:Show()
                                 f.layoutIndex = 5000 + idx
@@ -3231,7 +4143,7 @@ local function CollectAndReanchor()
                             if barData.hidePlaceholderIcon and frame._isPlaceholderFrame then
                                 frame:SetAlpha(0)
                             else
-                                frame:SetAlpha(barHidden and 0 or (barData.barOpacity or 1))
+                                frame:SetAlpha(barHidden and 0 or ns.EffectiveBarAlpha(barData))
                             end
                         end
                     end
@@ -3247,14 +4159,41 @@ local function CollectAndReanchor()
                         if frame.Cooldown.SetDrawSwipe then
                             frame.Cooldown:SetDrawSwipe(true)
                         end
+                        -- Everything claimed here renders as a buff: re-assert the
+                        -- fill direction when the frame's recorded kind differs
+                        -- (once-per-frame decoration + pooled frames can leave a
+                        -- CD-direction stamp from a previous life on another bar).
+                        -- Kind-gated so the per-spell Reverse Swipe pass, which
+                        -- runs after, is never stomped on unchanged passes.
+                        local efdR = hookFrameData[frame]
+                        if efdR and efdR._revKind ~= true then
+                            efdR._revKind = true
+                            frame.Cooldown:SetReverse(true)
+                        end
                         frame.Cooldown:SetHideCountdownNumbers(hideCD)
                     end
                 end
 
-                -- Clear excess buff icons (Blizzard owns lifecycle, only disable swipe)
+                -- Mark this bar's frames as used BEFORE the excess-clear below,
+                -- so the clear can tell a stale tail slot from a still-claimed
+                -- frame.
+                for _, entry in ipairs(list) do
+                    if entry.frame and not usedFrames[entry.frame] then
+                        usedFrames[entry.frame] = true
+                    end
+                end
+
+                -- Clear excess buff icons (Blizzard owns lifecycle, only disable
+                -- swipe). Skip frames still in the active set: when a buff
+                -- expires, every icon after it shifts one slot left, so the old
+                -- tail slot holds a frame that is STILL CLAIMED (old slot N+1 ==
+                -- new slot N). Disabling its swipe blanked the aura swipe on a
+                -- surviving buff -- and the SetDrawSwipe hook deliberately never
+                -- force-restores buff frames, so it stayed blank until the next
+                -- buff event. Mirrors the Phase 3 excess-clear guard.
                 for i = count + 1, #icons do
                     local icon = icons[i]
-                    if icon then
+                    if icon and not usedFrames[icon] then
                         local efd = hookFrameData[icon]
                         if efd then efd._cdmAnchor = nil end
                         if icon.Cooldown and icon.Cooldown.SetDrawSwipe then
@@ -3262,13 +4201,6 @@ local function CollectAndReanchor()
                         end
                     end
                     icons[i] = nil
-                end
-
-                -- Mark unclaimed buff frames as used
-                for _, entry in ipairs(list) do
-                    if entry.frame and not usedFrames[entry.frame] then
-                        usedFrames[entry.frame] = true
-                    end
                 end
 
                 -- Conditional layout for buffs (existing iconsChanged detection)
@@ -3298,8 +4230,8 @@ local function CollectAndReanchor()
                     -- against the fresh identity. Without this a per-icon glow stays
                     -- on the frame it was first stashed on until the next add/remove.
                     local sdRef = ns.GetBarSpellData and ns.GetBarSpellData(barKey)
-                    if sdRef and sdRef.spellSettings and next(sdRef.spellSettings) ~= nil
-                       and RefreshCDMIconAppearance then
+                    if RefreshCDMIconAppearance and ns.BarHasAnySpellSettings
+                       and ns.BarHasAnySpellSettings(barKey, sdRef) then
                         RefreshCDMIconAppearance(barKey)
                     end
                 end
@@ -3315,7 +4247,10 @@ local function CollectAndReanchor()
             local icons = cdmBarIcons[bd.key]
             if icons then
                 for i = 1, #icons do
-                    if icons[i] then
+                    -- Skip frames another bar claimed this pass (a buff moved off
+                    -- this bar is still live elsewhere -- disabling its swipe here
+                    -- would blank it there).
+                    if icons[i] and not usedFrames[icons[i]] then
                         local efd = hookFrameData[icons[i]]
                         if efd then efd._cdmAnchor = nil end
                         if icons[i].Cooldown and icons[i].Cooldown.SetDrawSwipe then
@@ -3384,29 +4319,53 @@ local function CollectAndReanchor()
                 -- change (spec swap, talent change, user edits). During
                 -- combat rotation, the assigned list is static so the cache
                 -- hit rate is ~100%.
-                local spellOrder
+                local spellOrder, hostedOrder
                 if not ns._spellOrderDirty and container._cachedSpellOrder then
                     spellOrder = container._cachedSpellOrder
+                    hostedOrder = container._cachedHostedOrder
                 else
                     if not container._cachedSpellOrder then container._cachedSpellOrder = {} end
+                    if not container._cachedHostedOrder then container._cachedHostedOrder = {} end
                     spellOrder = container._cachedSpellOrder
+                    hostedOrder = container._cachedHostedOrder
                     wipe(spellOrder)
+                    wipe(hostedOrder)
                     if spellList then
                         local idx = 0
                         for _, sid in ipairs(spellList) do
                             if sid and sid ~= 0 then
                                 idx = idx + 1
-                                if not spellOrder[sid] then spellOrder[sid] = idx end
-                                if _FindOverride then
-                                    local ovr = _FindOverride(sid)
-                                    if ovr and ovr > 0 and ovr ~= sid and not spellOrder[ovr] then
-                                        spellOrder[ovr] = idx
+                                -- Hosted-buff marker: rank the BUFF frame of the
+                                -- decoded spell at this slot. Kept in its own map so
+                                -- the same spell's cooldown entry ranks independently.
+                                local hSid = ns.HostedBuffMarkerToSpell and ns.HostedBuffMarkerToSpell(sid)
+                                if hSid then
+                                    if not hostedOrder[hSid] then hostedOrder[hSid] = idx end
+                                    if _FindOverride then
+                                        local hOvr = _FindOverride(hSid)
+                                        if hOvr and hOvr > 0 and hOvr ~= hSid and not hostedOrder[hOvr] then
+                                            hostedOrder[hOvr] = idx
+                                        end
                                     end
-                                end
-                                if C_Spell and C_Spell.GetBaseSpell then
-                                    local base = C_Spell.GetBaseSpell(sid)
-                                    if base and base > 0 and base ~= sid and not spellOrder[base] then
-                                        spellOrder[base] = idx
+                                    if C_Spell and C_Spell.GetBaseSpell then
+                                        local hBase = C_Spell.GetBaseSpell(hSid)
+                                        if hBase and hBase > 0 and hBase ~= hSid and not hostedOrder[hBase] then
+                                            hostedOrder[hBase] = idx
+                                        end
+                                    end
+                                else
+                                    if not spellOrder[sid] then spellOrder[sid] = idx end
+                                    if _FindOverride then
+                                        local ovr = _FindOverride(sid)
+                                        if ovr and ovr > 0 and ovr ~= sid and not spellOrder[ovr] then
+                                            spellOrder[ovr] = idx
+                                        end
+                                    end
+                                    if C_Spell and C_Spell.GetBaseSpell then
+                                        local base = C_Spell.GetBaseSpell(sid)
+                                        if base and base > 0 and base ~= sid and not spellOrder[base] then
+                                            spellOrder[base] = idx
+                                        end
                                     end
                                 end
                             end
@@ -3417,7 +4376,12 @@ local function CollectAndReanchor()
                 -- Inject custom frames (trinkets, items, racials)
                 if spellList then
                     for _, sid in ipairs(spellList) do
-                        if sid and (sid == -13 or sid == -14) then
+                        if sid and ns.HostedBuffMarkerToSpell and ns.HostedBuffMarkerToSpell(sid) then
+                            -- Hosted-buff marker: the buff renders via the reparent
+                            -- path (route map -> cdFrames), never as an injected
+                            -- custom frame. Must be tested before the item-preset
+                            -- branch (markers are also <= -100).
+                        elseif sid and (sid == -13 or sid == -14) then
                             -- Trinket
                             local slot = -sid
                             local tf = _trinketFrames[slot]
@@ -3553,9 +4517,18 @@ local function CollectAndReanchor()
                                             local spid = ffc and ffc.spellID
                                             local bd2 = ffc and ffc.barKey and barDataByKey[ffc.barKey]
                                             if not bd2 or not bd2.showTooltip then return end
+                                            -- Honor the global "Show Tooltips" mode (Blizzard Skin).
+                                            if EllesmereUI and EllesmereUI._tooltipSuppressedByMode
+                                               and EllesmereUI._tooltipSuppressedByMode(GameTooltip) then return end
                                             if spid and spid > 0 then
                                                 GameTooltip_SetDefaultAnchor(GameTooltip, self)
                                                 GameTooltip:SetSpellByID(spid)
+                                                if EllesmereUI and EllesmereUI._repointTooltipAtCursor then
+                                                    EllesmereUI._repointTooltipAtCursor(GameTooltip)
+                                                end
+                                                -- Explicit Show(): needed when "Anchor to Cursor"
+                                                -- re-owns the tooltip to ANCHOR_NONE (see trinket).
+                                                GameTooltip:Show()
                                             end
                                         end)
                                         f:SetScript("OnLeave", GameTooltip_Hide)
@@ -3580,24 +4553,171 @@ local function CollectAndReanchor()
                     end
                 end
 
-                -- Assign sort keys from spellOrder (transform-aware)
-                for _, frame in ipairs(frames) do
-                    local fc = _ecmeFC[frame]
-                    local sid = fc and fc.spellID
-                    local key = sid and spellOrder[sid]
+                -- Assign sort keys from spellOrder (transform-aware). A frame whose
+                -- spell is in assignedSpells gets its integer slot index. A frame
+                -- that is NOT (spillover -- e.g. a cooldown a talent swap just added
+                -- that the user has never ordered) is marked here and positioned in
+                -- the second pass below by Blizzard's native layoutIndex, ADJACENT to
+                -- the assigned Blizzard spells around it, instead of being dumped at
+                -- the end of the bar. This keeps a re-talented cooldown in its
+                -- Blizzard CDM position rather than piling new spells after a
+                -- trinket/racial slot.
+                local hasSpill = false
+                -- Identity probe shared by both member kinds. The first 4 probes
+                -- key off fc.spellID = cooldownInfo.spellID (the base) and bridge
+                -- base<->override. For some hero-talent slots that base is an
+                -- UNRELATED spell to the DISPLAYED/castable form the picker
+                -- actually stored (documented: a Wither slot whose cooldownInfo
+                -- base is Immolate), so the frame's displayed identity -- the same
+                -- GetCanonicalSpellIDForFrame id the add path wrote -- is matched
+                -- too, and a placed cooldown finds its saved rank on return
+                -- instead of being mistaken for a brand-new spillover.
+                local function OrderKeyFor(frame, fc, sid, map)
+                    if not map then return nil end
+                    local key = sid and map[sid]
                     -- Check cached baseSpellID (stable across transforms)
                     if not key and fc and fc.baseSpellID then
-                        key = spellOrder[fc.baseSpellID]
+                        key = map[fc.baseSpellID]
                     end
                     if not key and sid and sid > 0 and _FindOverride then
                         local ovr = _FindOverride(sid)
-                        if ovr and ovr > 0 then key = spellOrder[ovr] end
+                        if ovr and ovr > 0 then key = map[ovr] end
                     end
                     if not key and sid and sid > 0 and C_Spell and C_Spell.GetBaseSpell then
                         local base = C_Spell.GetBaseSpell(sid)
-                        if base and base > 0 and base ~= sid then key = spellOrder[base] end
+                        if base and base > 0 and base ~= sid then key = map[base] end
                     end
-                    if fc then fc.sortOrder = key or 99999 end
+                    if not key and fc and fc.resolvedSid then
+                        key = map[fc.resolvedSid]
+                    end
+                    if not key and ns.GetCanonicalSpellIDForFrame then
+                        local canon = ns.GetCanonicalSpellIDForFrame(frame)
+                        if canon and canon > 0 then key = map[canon] end
+                    end
+                    if not key and fc and fc.linkedSpellIDs then
+                        for _, lid in ipairs(fc.linkedSpellIDs) do
+                            if lid and lid > 0 and map[lid] then key = map[lid]; break end
+                        end
+                    end
+                    return key
+                end
+                for _, frame in ipairs(frames) do
+                    local fc = _ecmeFC[frame]
+                    local sid = fc and fc.spellID
+                    local key
+                    if fc and fc.isHostedBuff then
+                        -- Hosted buff: rank by its MARKER slot. Legacy fallback to
+                        -- the plain map covers hosted buffs stored before the
+                        -- marker model (plain entry + flag) -- they keep rendering
+                        -- at their old position until the options pass normalizes.
+                        key = OrderKeyFor(frame, fc, sid, hostedOrder)
+                        if not key then key = OrderKeyFor(frame, fc, sid, spellOrder) end
+                    else
+                        key = OrderKeyFor(frame, fc, sid, spellOrder)
+                    end
+                    if fc then
+                        if key then
+                            fc.sortOrder = key
+                        else
+                            fc.sortOrder = false  -- spillover marker, resolved below
+                            hasSpill = true
+                        end
+                    end
+                end
+
+                -- Second pass (only when a spillover exists -- steady state skips
+                -- this entirely). Give each spillover a fractional key that lands it
+                -- between its neighbours by Blizzard layoutIndex.
+                --
+                -- Anchors are the present, assigned frames. A real viewer frame
+                -- (cooldownID set) anchors at its OWN layoutIndex. A preset we inject
+                -- (trinket/pot/racial -- cooldownID nil, no real layoutIndex) anchors
+                -- at an INTERPOLATED layoutIndex derived from its nearest present
+                -- Blizzard neighbour in slot order. Without the preset anchors the
+                -- sort can't see them, so a re-talented cooldown the user parked to
+                -- the LEFT of a preset could hop to its RIGHT (and vice versa). With
+                -- them, the spillover lands on the correct side of the preset.
+                if hasSpill then
+                    -- Blizzard viewer anchors: real layoutIndex, keyed by slot index.
+                    local blizzKeys, blizzLIs
+                    for _, frame in ipairs(frames) do
+                        local fc = _ecmeFC[frame]
+                        local k = fc and fc.sortOrder
+                        if type(k) == "number" and frame.cooldownID ~= nil then
+                            blizzKeys = blizzKeys or {}; blizzLIs = blizzLIs or {}
+                            blizzKeys[#blizzKeys + 1] = k
+                            blizzLIs[#blizzKeys] = frame.layoutIndex or 0
+                        end
+                    end
+                    -- Full anchor set = Blizzard anchors + preset anchors (interpolated
+                    -- layoutIndex). minAnchorIdx (over ALL anchors) is where a spillover
+                    -- that sorts before everything lands. Skipped entirely when the bar
+                    -- has no present Blizzard spell to interpolate against (no anchors ->
+                    -- spillovers fall to the tail by layoutIndex, as before).
+                    local anchorKeys, anchorLIs, minAnchorIdx
+                    if blizzKeys then
+                        anchorKeys, anchorLIs = {}, {}
+                        for i = 1, #blizzKeys do
+                            anchorKeys[i] = blizzKeys[i]; anchorLIs[i] = blizzLIs[i]
+                            if not minAnchorIdx or blizzKeys[i] < minAnchorIdx then
+                                minAnchorIdx = blizzKeys[i]
+                            end
+                        end
+                        for _, frame in ipairs(frames) do
+                            local fc = _ecmeFC[frame]
+                            local k = fc and fc.sortOrder
+                            if type(k) == "number" and frame.cooldownID == nil then
+                                -- Nearest present Blizzard anchor on each side (slot order).
+                                local leftLI, leftSlot, rightLI, rightSlot
+                                for i = 1, #blizzKeys do
+                                    local bslot = blizzKeys[i]
+                                    if bslot < k then
+                                        if not leftSlot or bslot > leftSlot then leftSlot = bslot; leftLI = blizzLIs[i] end
+                                    elseif bslot > k then
+                                        if not rightSlot or bslot < rightSlot then rightSlot = bslot; rightLI = blizzLIs[i] end
+                                    end
+                                end
+                                -- Ride just after the left neighbour (or just before the
+                                -- right when there is none). 0.001*distance keeps it
+                                -- inside the neighbour's integer-layoutIndex gap and
+                                -- monotonic for multiple presets in the same gap.
+                                local effLI
+                                if leftLI then
+                                    effLI = leftLI + 0.001 * (k - leftSlot)
+                                elseif rightLI then
+                                    effLI = rightLI - 0.001 * (rightSlot - k)
+                                end
+                                if effLI then
+                                    anchorKeys[#anchorKeys + 1] = k
+                                    anchorLIs[#anchorKeys] = effLI
+                                    if not minAnchorIdx or k < minAnchorIdx then minAnchorIdx = k end
+                                end
+                            end
+                        end
+                    end
+                    for _, frame in ipairs(frames) do
+                        local fc = _ecmeFC[frame]
+                        if fc and fc.sortOrder == false then
+                            if anchorKeys and frame.cooldownID ~= nil then
+                                local L = frame.layoutIndex or 0
+                                local predIdx, predLI
+                                for i = 1, #anchorKeys do
+                                    local li = anchorLIs[i]
+                                    if li < L and (not predLI or li > predLI) then
+                                        predLI = li; predIdx = anchorKeys[i]
+                                    end
+                                end
+                                -- Insert after the predecessor slot (or before the first
+                                -- anchor when below all). (L+1)/1e6 < 1 keeps the
+                                -- spillover strictly between its neighbouring integer
+                                -- slots and never ties its predecessor.
+                                local baseIdx = predIdx or ((minAnchorIdx or 1) - 1)
+                                fc.sortOrder = baseIdx + ((L + 1) / 1e6)
+                            else
+                                fc.sortOrder = 99999
+                            end
+                        end
+                    end
                 end
 
                 -- Sort by user-defined order
@@ -3617,7 +4737,7 @@ local function CollectAndReanchor()
                     if not isFKBar then
                     local fcH = _ecmeFC[frame]
                     if not (fcH and fcH._cdStateHidden) then
-                        frame:SetAlpha(barHidden and 0 or (barData.barOpacity or 1))
+                        frame:SetAlpha(barHidden and 0 or ns.EffectiveBarAlpha(barData))
                     end
                     end
                     frame:Show()
@@ -3627,6 +4747,21 @@ local function CollectAndReanchor()
                     if frame.Cooldown then
                         if frame.Cooldown.SetDrawSwipe then
                             frame.Cooldown:SetDrawSwipe(true)
+                        end
+                        -- Re-assert the swipe direction when the frame's recorded
+                        -- kind differs: hosted buffs / placeholders fill like buffs,
+                        -- everything else depletes. Once-per-frame decoration +
+                        -- pooled frames can leave the other family's stamp from a
+                        -- previous life. Kind-gated so the per-spell Reverse Swipe
+                        -- pass (runs after) is never stomped on unchanged passes.
+                        local fdRv = hookFrameData[frame]
+                        local fcRv = _ecmeFC[frame]
+                        local wantRev = ((fcRv and fcRv.isHostedBuff)
+                            or (fdRv and fdRv._isBuffViewerFrame)
+                            or frame._isPlaceholderFrame) and true or false
+                        if fdRv and fdRv._revKind ~= wantRev then
+                            fdRv._revKind = wantRev
+                            frame.Cooldown:SetReverse(wantRev)
                         end
                         local hcd = hideCDText
                         if ns.CdmShouldHideCountdown then hcd = ns.CdmShouldHideCountdown(frame, hcd) end
@@ -3752,7 +4887,10 @@ local function CollectAndReanchor()
             local icons = cdmBarIcons[bd.key]
             if icons then
                 for i = 1, #icons do
-                    if icons[i] then
+                    -- Skip frames another bar claimed this pass: a spell moved off
+                    -- this (now empty) bar is still live elsewhere -- alpha-0 /
+                    -- swipe-off here would blank it there.
+                    if icons[i] and not usedFrames[icons[i]] then
                         local efd = hookFrameData[icons[i]]
                         if efd then efd._cdmAnchor = nil end
                         local isCustom2 = icons[i]._isRacialFrame or icons[i]._isTrinketFrame
@@ -3994,6 +5132,53 @@ ns.CollectAndReanchor = CollectAndReanchor
 --  CollectAndReanchor can read the same live timers.)
 -------------------------------------------------------------------------------
 
+-- Per-icon "Audio on Buff Gain" for self-timed preset/custom buffs (potions,
+-- Bloodlust/Heroism, Light's Potential, user-added custom buff IDs). These never
+-- fire Blizzard's TriggerAuraAppliedAlert -- they appear on a cast/edge for a
+-- fixed window -- so the regular-buff apply-edge hook can't reach them. We play
+-- the SAME stored key (ss.buffActiveSoundKey) here, off the cast edge that
+-- (re)starts the icon's timer. No loss sound: the real aura is secret/other-cast,
+-- so only the gain edge is knowable. The id comes straight from the bar's
+-- assignedSpells (clean, never secret), so the lookup is a direct spellSettings
+-- hit -- no GetCanonicalSpellIDForFrame dance. Gated 0-cost on ns._cdmAnyBuffSound
+-- (the same flag RescanBuffSoundFlag sets from these very spellSettings) and
+-- throttled so a refresh-cast a few frames apart can't double-fire.
+local _presetGainSoundAt = {}
+local _presetLossSoundAt = {}
+local PRESET_GAIN_SOUND_GAP = 0.3
+local function PlayPresetBuffGainSound(sd, barKey, sid, now)
+    if not ns._cdmAnyBuffSound then return end
+    -- Loading screen / login settle: cast/edge timers restart across a zone/login,
+    -- which would false-fire the gain sound. Drop while suppressed.
+    if ns._cdmSoundSuppressed and ns._cdmSoundSuppressed() then return end
+    -- Family store direct hit + bar-tier fallback (no frame: id from assignedSpells).
+    local ss = ResolveSpellSettings(nil, sid, sd, barKey)
+    local key = ss and ss.buffActiveSoundKey
+    if not key or key == "none" then return end
+    local last = _presetGainSoundAt[sid]
+    if last and (now - last) < PRESET_GAIN_SOUND_GAP then return end
+    _presetGainSoundAt[sid] = now
+    local paths = ns.FOCUSKICK_SOUND_PATHS
+    local path = paths and paths[key]
+    if path then PlaySoundFile(path, "Master") end
+end
+-- Loss counterpart to PlayPresetBuffGainSound for self-timed preset/custom buffs
+-- (no real aura-removed alert): fired when the displayed timer runs out. Separate
+-- throttle table so gain/loss never suppress each other.
+local function PlayPresetBuffLossSound(sd, sid, now)
+    if not ns._cdmAnyBuffSound then return end
+    if ns._cdmSoundSuppressed and ns._cdmSoundSuppressed() then return end
+    local ss = sd and sd.spellSettings and sd.spellSettings[sid]
+    local key = ss and ss.buffLostSoundKey
+    if not key or key == "none" then return end
+    local last = _presetLossSoundAt[sid]
+    if last and (now - last) < PRESET_GAIN_SOUND_GAP then return end
+    _presetLossSoundAt[sid] = now
+    local paths = ns.FOCUSKICK_SOUND_PATHS
+    local path = paths and paths[key]
+    if path then PlaySoundFile(path, "Master") end
+end
+
 local function UpdateCustomBuffBars()
     -- if CooldownViewerSettings and CooldownViewerSettings:IsShown() then return end
     local p = ECME.db and ECME.db.profile
@@ -4027,6 +5212,14 @@ local function UpdateCustomBuffBars()
                                     duration = duration,
                                 }
                                 timer = _customAuraTimers[timerKey]
+                                PlayPresetBuffGainSound(sd, barKey, sid, now)
+                            end
+
+                            -- Loss edge: displayed timer ran out -> fire once, drop it.
+                            if timer and (now - timer.start) >= timer.duration then
+                                PlayPresetBuffLossSound(sd, sid, now)
+                                _customAuraTimers[timerKey] = nil
+                                timer = nil
                             end
 
                             local isActive = timer and duration > 0
@@ -4058,7 +5251,7 @@ local function UpdateCustomBuffBars()
                                     local spInfo = C_Spell and C_Spell.GetSpellInfo and C_Spell.GetSpellInfo(sid)
                                     if spInfo and spInfo.iconID and f._tex then f._tex:SetTexture(spInfo.iconID) end
                                 end
-                                if isActive then
+                                if isActive and timer then
                                     f._cooldown:SetCooldown(timer.start, timer.duration)
                                 else
                                     f._cooldown:Clear()
@@ -4115,12 +5308,23 @@ local function UpdateCustomBuffBars()
             local durs = sd and sd.spellDurations
             if spellList and durs then
                 for _, sid in ipairs(spellList) do
-                    if type(sid) == "number" and sid > 0
-                       and (durs[sid] or 0) > 0 and _pendingCastIDs[sid] then
-                        _customAuraTimers[barData.key .. ":" .. sid] = {
-                            start = now, duration = durs[sid],
-                        }
-                        needBuffReanchor = true
+                    if type(sid) == "number" and sid > 0 and (durs[sid] or 0) > 0 then
+                        local tkey = barData.key .. ":" .. sid
+                        if _pendingCastIDs[sid] then
+                            _customAuraTimers[tkey] = {
+                                start = now, duration = durs[sid],
+                            }
+                            needBuffReanchor = true
+                            PlayPresetBuffGainSound(sd, barData.key, sid, now)
+                        else
+                            -- Loss edge: displayed window ran out -> fire once, drop timer.
+                            local t = _customAuraTimers[tkey]
+                            if t and (now - t.start) >= t.duration then
+                                PlayPresetBuffLossSound(sd, sid, now)
+                                _customAuraTimers[tkey] = nil
+                                needBuffReanchor = true
+                            end
+                        end
                     end
                 end
             end
@@ -4194,68 +5398,29 @@ end
 -------------------------------------------------------------------------------
 --  Sync extra buff bars with Blizzard CDM viewer
 --
---  When the user removes a buff from Blizzard CDM settings, the viewer stops
---  creating frames for it. The default buff bar self-heals (reads from live
---  cdmBarIcons), but extra buff bars store their own assignedSpells which
---  become orphans -- visible in the preview but never active in-game.
---  This function enumerates the buff viewer's pool to build a set of all
---  spell IDs Blizzard currently tracks, then removes any positive (Blizzard-
---  sourced) assignedSpells entries from extra buff bars that aren't in it.
+--  Reanchor extra buff bars shortly after the Blizzard CDM settings panel
+--  closes, once Blizzard has finished rebuilding its viewer pools.
+--
+--  HISTORY -- do NOT reintroduce frame-pool-based orphan pruning here.
+--  This used to ALSO strip "orphan" spells from each extra buff bar: any
+--  positive assignedSpells entry whose spellID wasn't found in the BuffIcon
+--  pool (or, later, the CDM category set) was deleted. That caused data loss
+--  on DUAL-TRACKED spells that carry more than one variant spell ID:
+--    * Vengeance DH stores Metamorphosis on a custom buff bar as 191427, but
+--      every live Vengeance frame reports 187827. 191427 is surfaced ONLY by
+--      the buff frame's linkedSpellIDs, and ONLY while the buff is active.
+--    * This sync runs ~0.3s after the panel closes, when Meta is down -- so
+--      191427 matched neither the (empty) buff pool nor the category set, and
+--      got deleted. Worse, deleting it destroyed the route-map diversion, so
+--      re-tracking Meta spilled it onto the DEFAULT buffs bar.
+--  No state-independent check (pool / category / IsPlayerSpell / variant
+--  family) can recognize 191427 while Meta is inactive, so the prune is
+--  unfixable for this class of spell. An untracked buff now simply lingers as
+--  a harmless non-rendering preview entry (removable by hand) -- consistent
+--  with how the CD/utility side already behaves.
 -------------------------------------------------------------------------------
 function ns.SyncExtraBuffBarsWithViewer()
-    local p = ECME.db and ECME.db.profile
-    if not p or not p.cdmBars then return end
-
-    -- Build set of spell IDs Blizzard's buff viewer currently has frames for.
-    -- EnumerateActive includes tracked-but-inactive buffs (they have cooldownInfo
-    -- even when hidden), but excludes spells the user removed from CDM settings
-    -- (those frames are released from the pool).
-    local trackedSet = {}
-    local buffViewer = _G["BuffIconCooldownViewer"]
-    if buffViewer and buffViewer.itemFramePool and buffViewer.itemFramePool.EnumerateActive then
-        for frame in buffViewer.itemFramePool:EnumerateActive() do
-            local displaySID, baseSID = ResolveFrameSpellID(frame)
-            if displaySID and displaySID > 0 then trackedSet[displaySID] = true end
-            if baseSID and baseSID > 0 then trackedSet[baseSID] = true end
-            -- Also grab linked spell IDs so override variants match
-            local fc = _ecmeFC[frame]
-            if fc and fc.linkedSpellIDs then
-                for _, lid in ipairs(fc.linkedSpellIDs) do
-                    if lid and lid > 0 then trackedSet[lid] = true end
-                end
-            end
-        end
-    end
-
-    -- Filter orphaned entries from each extra buff bar
-    local changed = false
-    for _, bd in ipairs(p.cdmBars.bars) do
-        if bd.enabled and bd.barType == "buffs" and bd.key ~= "buffs"
-           and not bd.isGhostBar then
-            local sd = ns.GetBarSpellData(bd.key)
-            if sd and sd.assignedSpells then
-                local writeIdx = 1
-                for readIdx = 1, #sd.assignedSpells do
-                    local id = sd.assignedSpells[readIdx]
-                    -- Keep: negative IDs (presets), custom spells, and tracked spells
-                    if type(id) ~= "number" or id <= 0
-                       or (sd.customSpellIDs and sd.customSpellIDs[id])
-                       or trackedSet[id] then
-                        sd.assignedSpells[writeIdx] = id
-                        writeIdx = writeIdx + 1
-                    else
-                        changed = true
-                    end
-                end
-                for i = writeIdx, #sd.assignedSpells do sd.assignedSpells[i] = nil end
-            end
-        end
-    end
-
-    if changed then
-        if ns.RebuildSpellRouteMap then ns.RebuildSpellRouteMap() end
-        QueueReanchor()
-    end
+    QueueReanchor()
 end
 
 -------------------------------------------------------------------------------
@@ -4328,7 +5493,15 @@ function ns.SetupViewerHooks()
 
     local function InstallBuffFrameHooks(viewer)
         if not viewer or not viewer.itemFramePool then return end
+        -- Attach the buff gain/loss sound hook here -- at pool-acquire time, BEFORE
+        -- Blizzard finishes setting the frame up and fires its first
+        -- TriggerAuraAppliedAlert. Installing it lazily in DecorateFrame ran one step
+        -- too late on a frame's FIRST activation, so the very first "buff gained" cue
+        -- was missed (loss + later gains worked because the hook then persisted).
+        -- EnsureBuffSoundHook self-guards (hooks once), gated 0-cost on the feature.
+        local ensureSound = ns._cdmAnyBuffSound and ns.EnsureBuffSoundHook
         for frame in viewer.itemFramePool:EnumerateActive() do
+            if ensureSound then ns.EnsureBuffSoundHook(frame) end
             if not _activeStateHooked[frame] then
                 _activeStateHooked[frame] = true
                 -- Hook OnActiveStateChanged: Blizzard calls this when a buff
@@ -4367,6 +5540,12 @@ function ns.SetupViewerHooks()
                 if isBuff then InstallBuffFrameHooks(v) end
                 if isBarViewer and ns.InvalidateTBBFrameCache then
                     ns.InvalidateTBBFrameCache()
+                end
+                -- A new tracked-bar spell acquires a pool frame here: let the
+                -- Tracking Bars auto-add pass pick it up (debounced, no-op
+                -- unless a never-seen spell appeared).
+                if isBarViewer and ns.QueueTBBAutoAdd then
+                    ns.QueueTBBAutoAdd()
                 end
                 -- Only buff viewers need real-time reanchors on Acquire.
                 -- CD/utility spell sets are static (rebuilt by FullCDMRebuild).
@@ -4536,6 +5715,12 @@ function ns.SetupViewerHooks()
                                 local fc = _ecmeFC[frame]
                                 local sid = fc and fc.resolvedSid
                                 local fd = hookFrameData[frame]
+                                -- A buff ICON (whether on a buffs bar, or a real Blizzard
+                                -- buff frame hosted on a CD/util bar, or a placeholder for
+                                -- an inactive hosted buff) gets the buff glow/desat logic
+                                -- below regardless of the hosting bar's family.
+                                local isBuffIcon = isBuff or (fd and fd._isBuffViewerFrame)
+                                    or frame._isPlaceholderFrame or false
 
                                 local isActiveBuff = (frame.wasSetFromAura == true
                                     or frame.auraInstanceID ~= nil)
@@ -4549,7 +5734,7 @@ function ns.SetupViewerHooks()
                                 -- frame that is NOT a placeholder is active regardless of
                                 -- aura props -- this is what catches totems and presets
                                 -- (for both the glow and the desaturate-inactive logic).
-                                if not isActiveBuff and isBuff
+                                if not isActiveBuff and isBuffIcon
                                    and not frame._isPlaceholderFrame then
                                     isActiveBuff = true
                                 end
@@ -4563,12 +5748,15 @@ function ns.SetupViewerHooks()
                                 -- greyed when this bar's Always Show Buffs +
                                 -- Desaturate Off CD are on. Per-bar now -- not a
                                 -- global. Active real auras stay full color.
-                                if isBuff and bd.barType ~= "custom_buff" and fd and fd.tex then
+                                if isBuffIcon and bd.barType ~= "custom_buff" and fd and fd.tex then
                                     -- A shown, inactive buff icon is present only because
                                     -- Always Show Buffs resolved true for it (bar-level OR
                                     -- per-icon -> placeholder frame). Per-icon Desaturate
                                     -- Inactive (fd._desatOverride) beats the bar's
                                     -- Desaturate Off CD. Active auras stay full color.
+                                    -- A HOSTED buff (on a CD/util bar) has no bar toggle, so
+                                    -- it defaults ON (desaturate the inactive placeholder --
+                                    -- the baked-in "cd ability" look), with no per-icon row.
                                     local desatOn = (bd.desaturateInactiveBuffs ~= false)
                                     if fd._desatOverride == "on" then desatOn = true
                                     elseif fd._desatOverride == "off" then desatOn = false end
@@ -4591,14 +5779,21 @@ function ns.SetupViewerHooks()
                                 local effGlowType = buffGlowType
                                 if fd and fd._bgT ~= nil then effGlowType = fd._bgT end
                                 if effGlowType > 0 and fd and glowActive then
+                                    if not fd.buffGlowOverlay then
+                                        local ov = CreateFrame("Frame", nil, frame)
+                                        ov:SetAllPoints(frame)
+                                        ov:EnableMouse(false)
+                                        fd.buffGlowOverlay = ov
+                                    end
+                                    -- Keep the glow above Blizzard's cooldown swipe on
+                                    -- every icon. Blizzard increments each viewer icon's
+                                    -- base frame level by +1, so an absolute level lands
+                                    -- BEHIND the swipe on later icons (and the swipe then
+                                    -- clips the inner edge of the ring, making it look
+                                    -- thinner). Track the icon's base level and re-apply
+                                    -- each pass, matching the primary glowOverlay (+16).
+                                    fd.buffGlowOverlay:SetFrameLevel(frame:GetFrameLevel() + 16)
                                     if not fd.buffGlowActive then
-                                        if not fd.buffGlowOverlay then
-                                            local ov = CreateFrame("Frame", nil, frame)
-                                            ov:SetAllPoints(frame)
-                                            ov:SetFrameLevel(22)
-                                            ov:EnableMouse(false)
-                                            fd.buffGlowOverlay = ov
-                                        end
                                         local cr, cg, cb = bd.buffGlowR or 1.0, bd.buffGlowG or 0.776, bd.buffGlowB or 0.376
                                         local classColor = bd.buffGlowClassColor
                                         if fd._bgColor == "class" then
@@ -4616,6 +5811,11 @@ function ns.SetupViewerHooks()
                                             N      = bd.buffGlowLines or 8,
                                             th     = bd.buffGlowThickness or 2,
                                             period = bd.buffGlowSpeed or 4,
+                                            bg     = bd.buffGlowBackground and {
+                                                r = bd.buffGlowBackgroundR or 0,
+                                                g = bd.buffGlowBackgroundG or 0,
+                                                b = bd.buffGlowBackgroundB or 0,
+                                            } or nil,
                                         })
                                         fd.buffGlowActive = true
                                     end
@@ -4634,20 +5834,27 @@ function ns.SetupViewerHooks()
                                     local pStyle = bd.pandemicGlowStyle or 1
                                     if pStyle == -1 then inPandemic = false end
                                     if inPandemic then
+                                        if not fd.pandemicOverlay then
+                                            local ov = CreateFrame("Frame", nil, frame)
+                                            ov:SetAllPoints(frame)
+                                            ov:EnableMouse(false)
+                                            fd.pandemicOverlay = ov
+                                        end
+                                        -- Same base-level tracking as the buff glow, one
+                                        -- level higher so pandemic sits above buff glow.
+                                        fd.pandemicOverlay:SetFrameLevel(frame:GetFrameLevel() + 17)
                                         if not fd.pandemicGlowActive then
-                                            if not fd.pandemicOverlay then
-                                                local ov = CreateFrame("Frame", nil, frame)
-                                                ov:SetAllPoints(frame)
-                                                ov:SetFrameLevel(23)
-                                                ov:EnableMouse(false)
-                                                fd.pandemicOverlay = ov
-                                            end
                                             local c = bd.pandemicGlowColor or { r = 1, g = 1, b = 0 }
                                             local style = bd.pandemicGlowStyle or 1
                                             local glowOpts = (style == 1) and {
                                                 N      = bd.pandemicGlowLines or 8,
                                                 th     = bd.pandemicGlowThickness or 2,
                                                 period = bd.pandemicGlowSpeed or 4,
+                                                bg     = bd.pandemicGlowBackground and {
+                                                    r = (bd.pandemicGlowBackgroundColor and bd.pandemicGlowBackgroundColor.r) or 0,
+                                                    g = (bd.pandemicGlowBackgroundColor and bd.pandemicGlowBackgroundColor.g) or 0,
+                                                    b = (bd.pandemicGlowBackgroundColor and bd.pandemicGlowBackgroundColor.b) or 0,
+                                                } or nil,
                                             } or nil
                                             fd.pandemicOverlay:SetAlpha(1)
                                             ns.StartNativeGlow(fd.pandemicOverlay, style, c.r or 1, c.g or 1, c.b or 0, glowOpts)
@@ -4694,10 +5901,23 @@ function ns.SetupViewerHooks()
                 local ac = _activeCache
                 wipe(ac)
                 for vi = 1, 4 do
-                    local vf = _G[VIEWER_NAMES[vi]]
+                    local vf = GetViewerFrame(vi)
+                    -- BuffIcon (3) / BuffBar (4) viewers SHOW a frame only while its
+                    -- buff/effect is active; the cooldown viewers (1,2) always show
+                    -- their icons, so "shown" is meaningless there. So in the buff
+                    -- viewers a shown, non-placeholder frame counts as active even
+                    -- without aura props -- this catches totems and pet-summon
+                    -- "buffs" (e.g. Mindbender) that Blizzard never gives an
+                    -- auraInstanceID. Mirrors the buff-bar glow logic in BuffTicker.
+                    local isBuffViewer = (vi >= 3)
                     if vf and vf.itemFramePool and vf.itemFramePool.EnumerateActive then
                         for frame in vf.itemFramePool:EnumerateActive() do
-                            if frame.wasSetFromAura == true or frame.auraInstanceID ~= nil then
+                            local active = frame.wasSetFromAura == true or frame.auraInstanceID ~= nil
+                            if not active and isBuffViewer and frame:IsShown()
+                               and not frame._isPlaceholderFrame then
+                                active = true
+                            end
+                            if active then
                                 local sid, baseSID = ResolveFrameSpellID(frame)
                                 if sid and sid > 0 then
                                     ac[sid] = true
@@ -4887,3 +6107,292 @@ end
 -- Swiftmend Brightness Fix (CDM): handled inside DecorateFrame via
 -- ResolveFrameSpellID. No external scan needed.
 _G._ECDM_ScanSwiftmend = nil
+
+-------------------------------------------------------------------------------
+--  Mirror Key Presses  (per-bar: barData.pressMirror -- set in CDM Bars > Extras)
+--
+--  Show the action-button "pushed down" look on a CDM bar icon whenever you
+--  press that ability's keybind -- even while it's on cooldown. Hooks the
+--  action-button key-down path (ActionButtonDown / MultiActionButtonDown),
+--  which fires on the physical press regardless of cooldown or the cast-on-
+--  key-down/up CVar. The pushed texture + colour are read live from the
+--  EllesmereUI action bars settings, so the CDM press matches real buttons
+--  (falling back to a border-cropped Blizzard depress texture if that module
+--  isn't present). Per-frame data lives in an external weak-keyed table.
+-------------------------------------------------------------------------------
+do
+    local AB_MEDIA      = "Interface\\AddOns\\EllesmereUIActionBars\\Media\\"
+    local AB_HIGHLIGHT  = { AB_MEDIA .. "highlight-2.png", AB_MEDIA .. "highlight-3.png", AB_MEDIA .. "highlight-4.png" }
+    local DEPRESS_TEX   = "Interface\\Buttons\\UI-Quickslot-Depress"
+    local DEPRESS_INSET = 0.14   -- crop the beveled border off the fallback texture
+    local MIN_VISIBLE   = 0.05   -- floor so ultra-fast taps still show a press
+    local MAX_HOLD      = 2.0    -- safety: never leave an icon stuck "pressed"
+
+    local _pushOverlay = setmetatable({}, { __mode = "k" })  -- [icon] = overlay frame
+    local _held  = {}   -- [buttonFrame] = { overlays = {..}, keys = {..}, t = GetTime() }
+    local _heldN = 0
+    local _poll  = CreateFrame("Frame")
+    _poll:Hide()
+
+    -- Read the action bars' pushed settings live so the CDM press matches them.
+    local function GetABProfile()
+        local L = EllesmereUI and EllesmereUI.Lite
+        if not (L and L.GetAddon) then return nil end
+        local ok, eab = pcall(L.GetAddon, "EllesmereUIActionBars", true)
+        if ok and eab and eab.db then return eab.db.profile end
+        return nil
+    end
+
+    -- Style tex to match the bars' pushed look. Returns false when pushed is set
+    -- to "None" (so the CDM press mirrors that), true otherwise.
+    local function StylePush(tex)
+        local p = GetABProfile()
+        if p then
+            local pType = p.pushedTextureType or 2
+            local c = p.pushedCustomColor or { r = 0.973, g = 0.839, b = 0.604 }
+            local cr, cg, cb = c.r, c.g, c.b
+            if p.pushedUseClassColor then
+                local _, ct = UnitClass("player")
+                if ct then local cc = RAID_CLASS_COLORS[ct]; if cc then cr, cg, cb = cc.r, cc.g, cc.b end end
+            end
+            tex:SetTexCoord(0, 1, 0, 1)
+            if p.useBlizzardStyle then
+                tex:SetAtlas("UI-HUD-ActionBar-IconFrame-Down", false)
+                tex:SetVertexColor(1, 1, 1, 1); tex:SetAlpha(1)
+                return true
+            elseif pType == 6 then
+                tex:SetAlpha(0); return false
+            end
+            tex:SetAlpha(1)
+            if pType <= 3 then
+                tex:SetAtlas(nil); tex:SetTexture(AB_HIGHLIGHT[pType] or AB_HIGHLIGHT[2]); tex:SetVertexColor(cr, cg, cb, 1)
+            elseif pType == 4 then
+                tex:SetColorTexture(cr, cg, cb, 0.35)
+            elseif pType == 5 then
+                tex:SetAtlas(nil); tex:SetTexture(AB_HIGHLIGHT[1]); tex:SetVertexColor(cr, cg, cb, 1)
+            end
+            return true
+        end
+        -- Fallback: interior of the Blizzard depress texture (border cropped off).
+        tex:SetAtlas(nil)
+        tex:SetTexture(DEPRESS_TEX)
+        tex:SetTexCoord(DEPRESS_INSET, 1 - DEPRESS_INSET, DEPRESS_INSET, 1 - DEPRESS_INSET)
+        tex:SetVertexColor(1, 1, 1, 1); tex:SetAlpha(1)
+        return true
+    end
+
+    local function ShowPush(icon)
+        local ov = _pushOverlay[icon]
+        if not ov then
+            ov = CreateFrame("Frame", nil, icon)
+            ov:SetFrameLevel(icon:GetFrameLevel() + 15)  -- above icon + cooldown swipe
+            ov:Hide()
+            local tex = ov:CreateTexture(nil, "OVERLAY")
+            tex:SetAllPoints(ov)
+            ov._tex = tex
+            _pushOverlay[icon] = ov
+        end
+        if not StylePush(ov._tex) then ov:Hide(); return nil end
+        local region = icon.Icon or icon
+        ov:ClearAllPoints()
+        ov:SetPoint("TOPLEFT", region, "TOPLEFT", 0, 0)
+        ov:SetPoint("BOTTOMRIGHT", region, "BOTTOMRIGHT", 0, 0)
+        ov:Show()
+        return ov
+    end
+
+    ---------------------------------------------------------------------------
+    --  Spell matching (pressed button's spell vs. a CDM icon's spell)
+    ---------------------------------------------------------------------------
+    local GetOverrideSpell      = C_Spell and C_Spell.GetOverrideSpell
+    local GetBaseSpell          = C_Spell and C_Spell.GetBaseSpell
+    local FindSpellOverrideByID = C_SpellBook and C_SpellBook.FindSpellOverrideByID
+
+    local function safeNum(fn, arg)
+        if type(fn) ~= "function" then return nil end
+        local ok, res = pcall(fn, arg)
+        if ok and type(res) == "number" and res > 0 then return res end
+    end
+
+    local function SpellIdSet(id)
+        local t = { [id] = true }
+        local a = safeNum(GetOverrideSpell, id);      if a then t[a] = true end
+        local b = safeNum(GetBaseSpell, id);          if b then t[b] = true end
+        local c = safeNum(FindBaseSpellByID, id);     if c then t[c] = true end
+        local d = safeNum(FindSpellOverrideByID, id); if d then t[d] = true end
+        return t
+    end
+
+    local function IconMatches(pressedSet, iconSid)
+        if pressedSet[iconSid] then return true end
+        local a = safeNum(GetOverrideSpell, iconSid); if a and pressedSet[a] then return true end
+        local b = safeNum(GetBaseSpell, iconSid);     if b and pressedSet[b] then return true end
+        return false
+    end
+
+    local function IconSpellID(icon)
+        local fc = _ecmeFC and _ecmeFC[icon]
+        local sid = fc and fc.spellID
+        if sid then return sid end
+        local cdID = icon.cooldownID
+        if cdID and C_CooldownViewer and C_CooldownViewer.GetCooldownViewerCooldownInfo then
+            local info = C_CooldownViewer.GetCooldownViewerCooldownInfo(cdID)
+            if info then return info.overrideSpellID or info.spellID end
+        end
+        return nil
+    end
+
+    ---------------------------------------------------------------------------
+    --  Press / hold / release. Release is driven by polling IsKeyDown on the
+    --  button's binding keys, floored by MIN_VISIBLE and capped by MAX_HOLD.
+    ---------------------------------------------------------------------------
+    local function ReleaseEntry(btn, entry)
+        local ovs = entry.overlays
+        for i = 1, #ovs do ovs[i]:Hide() end
+        _held[btn] = nil
+        _heldN = _heldN - 1
+        if _heldN <= 0 then _heldN = 0; _poll:Hide() end
+    end
+
+    _poll:SetScript("OnUpdate", function()
+        if _heldN == 0 then _poll:Hide(); return end
+        local now = GetTime()
+        for btn, entry in pairs(_held) do
+            local elapsed = now - entry.t
+            local done = false
+            if elapsed >= MAX_HOLD then
+                done = true
+            elseif elapsed >= MIN_VISIBLE then
+                local anyDown = false
+                local keys = entry.keys
+                if keys then
+                    for i = 1, #keys do
+                        if keys[i] and IsKeyDown(keys[i]) then anyDown = true; break end
+                    end
+                end
+                if not anyDown then done = true end
+            end
+            if done then ReleaseEntry(btn, entry) end
+        end
+    end)
+
+    -- Cached enable-flag so OnPress can gate in O(1) instead of looping every
+    -- bar on each key press (the ActionButtonDown hook fires for all users).
+    -- Recomputed only when the bar list is rebuilt (RefreshCdmPressMirrorFlag,
+    -- called from the CDM bar-rebuild pass) or when the toggle changes.
+    local _anyPressMirror = false
+    local function RefreshCdmPressMirrorFlag()
+        _anyPressMirror = false
+        if not barDataByKey then return end
+        for _, bd in pairs(barDataByKey) do
+            -- Buff-family bars never mirror presses (auto-tracked auras, not
+            -- keybind-pressed), so ignore a stale/imported pressMirror on them.
+            if bd and bd.pressMirror and not ns.IsBarBuffFamily(bd) then _anyPressMirror = true; return end
+        end
+    end
+    ns.RefreshCdmPressMirrorFlag = RefreshCdmPressMirrorFlag
+    RefreshCdmPressMirrorFlag()
+
+    local function SlotSpellID(slot)
+        if not slot then return nil end
+        if HasAction and not HasAction(slot) then return nil end
+        -- NOTE (Midnight): GetActionInfo is documented as usable only in the
+        -- secure restricted environment. This runs from an insecure post-hook,
+        -- so a future build could hand back nil/secret here and silently no-op
+        -- the press mirror. Revisit via a secure route if that ever regresses.
+        local actionType, id, subType = GetActionInfo(slot)
+        if actionType == "spell" then
+            return id
+        elseif actionType == "macro" and id then
+            if subType == "spell" then return id else return GetMacroSpell(id) end
+        end
+        return nil
+    end
+
+    -- Base key of a (possibly modified) binding, e.g. "SHIFT-1" -> "1".
+    local function BaseKey(binding)
+        return binding and binding:match("[^%-]+$") or nil
+    end
+
+    local function OnPress(btn, bindCmd)
+        if not btn or not _anyPressMirror then return end
+        local slot = btn.action or (btn.GetAttribute and btn:GetAttribute("action"))
+        local sid = SlotSpellID(slot)
+        if not sid then return end
+
+        local pressedSet = SpellIdSet(sid)
+        local overlays
+        if cdmBarIcons then
+            for barKey, list in pairs(cdmBarIcons) do
+                local bd = barDataByKey and barDataByKey[barKey]
+                if bd and bd.pressMirror and not ns.IsBarBuffFamily(bd) then
+                    for i = 1, #list do
+                        local icon = list[i]
+                        if icon and icon:IsShown() then
+                            local isid = IconSpellID(icon)
+                            if isid and IconMatches(pressedSet, isid) then
+                                local ov = ShowPush(icon)
+                                if ov then overlays = overlays or {}; overlays[#overlays + 1] = ov end
+                            end
+                        end
+                    end
+                end
+            end
+        end
+        if not overlays then return end
+
+        local keys
+        if bindCmd then
+            local k1, k2 = GetBindingKey(bindCmd)
+            keys = { BaseKey(k1), BaseKey(k2) }
+        end
+        local entry = _held[btn]
+        if entry then
+            entry.overlays = overlays; entry.keys = keys; entry.t = GetTime()
+        else
+            _held[btn] = { overlays = overlays, keys = keys, t = GetTime() }
+            _heldN = _heldN + 1
+        end
+        _poll:Show()
+    end
+
+    -- Public: clear active overlays (called from the CDM Bars > Extras toggle).
+    function ns.ClearCdmPressPush()
+        for _, entry in pairs(_held) do
+            local ovs = entry.overlays
+            for i = 1, #ovs do ovs[i]:Hide() end
+        end
+        wipe(_held); _heldN = 0; _poll:Hide()
+        RefreshCdmPressMirrorFlag()
+    end
+
+    ---------------------------------------------------------------------------
+    --  Hook the action-button key-down path (fires on press, even on cooldown)
+    ---------------------------------------------------------------------------
+    local MULTIBAR_BINDING = {
+        MultiBarBottomLeft  = "MULTIACTIONBAR1BUTTON",
+        MultiBarBottomRight = "MULTIACTIONBAR2BUTTON",
+        MultiBarRight       = "MULTIACTIONBAR3BUTTON",
+        MultiBarLeft        = "MULTIACTIONBAR4BUTTON",
+        MultiBar5           = "MULTIACTIONBAR5BUTTON",
+        MultiBar6           = "MULTIACTIONBAR6BUTTON",
+        MultiBar7           = "MULTIACTIONBAR7BUTTON",
+    }
+
+    local ev = CreateFrame("Frame")
+    ev:RegisterEvent("PLAYER_LOGIN")
+    ev:SetScript("OnEvent", function()
+        if type(ActionButtonDown) == "function" then
+            hooksecurefunc("ActionButtonDown", function(id)
+                local btn = (GetActionButtonForID and GetActionButtonForID(id)) or _G["ActionButton" .. id]
+                OnPress(btn, "ACTIONBUTTON" .. id)
+            end)
+        end
+        if type(MultiActionButtonDown) == "function" then
+            hooksecurefunc("MultiActionButtonDown", function(barName, id)
+                local prefix = MULTIBAR_BINDING[barName]
+                OnPress(_G[barName .. "Button" .. id], prefix and (prefix .. id) or nil)
+            end)
+        end
+    end)
+end

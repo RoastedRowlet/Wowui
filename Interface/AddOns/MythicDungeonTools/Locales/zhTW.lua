@@ -97,6 +97,8 @@ L["Animated Storm"] = "活化風暴"
 L["Animated Weapon"] = "Animated Weapon"
 --[[Translation missing --]]
 L["Announce focus marker on ready check"] = "Announce my Focus Marker on ready check."
+--[[Translation missing --]]
+L["announceDungeonReset"] = "Announce dungeon resets to group"
 L["Anodized Coilbearer"] = "電鍍線圈機器人"
 L["Anomalus"] = "Anomalus"
 L["Anub'ar Champion"] = "Anub'ar Champion"
@@ -909,6 +911,8 @@ L["Dul'zak"] = "杜爾札克"
 L["Dungeon Data Missing"] = "缺少地城資料"
 L["Dungeon Entrance"] = "地城入口"
 L["Dungeon Level"] = "地城層數"
+--[[Translation missing --]]
+L["dungeonResetAnnouncement"] = "<Dungeons have been reset!>"
 --[[Translation missing --]]
 L["Duskfright Herald"] = "Duskfright Herald"
 L["Duskwatch Arcanist"] = "暮衛秘法師"

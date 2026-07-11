@@ -4,7 +4,7 @@ if T.SkipLocalActionBook then return end
 local AB = T.ActionBook:compatible(2, 36)
 assert(AB and 1, "Incompatible library bundle")
 local L = T.ActionBook.L
-local MODERN = select(4,GetBuildInfo()) >= 8e4
+local MODERN = select(4,GetBuildInfo()) >= 12e4
 
 local RegisterSimpleOptionsPanel do
 	local optionsForHandle, curHandle, curHandleID = {}
@@ -107,33 +107,35 @@ local RegisterSimpleOptionsPanel do
 	end
 end
 
+AB.HUM.CreateSimpleEditorPanel = RegisterSimpleOptionsPanel
+
 local forceShowFlag = {forceShow=1}
-RegisterSimpleOptionsPanel("item", {"byName", "forceShow", "onlyEquipped",
+securecall(RegisterSimpleOptionsPanel, "item", {"byName", "forceShow", "onlyEquipped",
 	byName=L"Also use items with the same name",
 	forceShow=L"Show a placeholder when unavailable",
 	onlyEquipped=L"Only show when equipped",
 	flagValues={byName=2, forceShow=1, onlyEquipped=4},
 })
-RegisterSimpleOptionsPanel("macro", {"forceShow",
+securecall(RegisterSimpleOptionsPanel, "macro", {"forceShow",
 	forceShow=L"Show a placeholder when unavailable",
 	flagValues=forceShowFlag,
 })
 if MODERN then
-	RegisterSimpleOptionsPanel("extrabutton", {"forceShow",
+	securecall(RegisterSimpleOptionsPanel, "extrabutton", {"forceShow",
 		forceShow=L"Show a placeholder when unavailable",
 		flagValues=forceShowFlag,
 	})
-	RegisterSimpleOptionsPanel("toy", {"forceShow",
+	securecall(RegisterSimpleOptionsPanel, "toy", {"forceShow",
 		forceShow=L"Show a placeholder when unavailable",
 		flagValues=forceShowFlag,
 	})
-	RegisterSimpleOptionsPanel("outfit", {"noInitialLock",
+	securecall(RegisterSimpleOptionsPanel, "outfit", {"noInitialLock",
 		noInitialLock=L"Unlock appearance when switching",
 		flagValues={noInitialLock=1},
 		skipID=0,
 	})
 else
-	RegisterSimpleOptionsPanel("spell", {"upRank",
+	securecall(RegisterSimpleOptionsPanel, "spell", {"upRank",
 		upRank=L"Use the highest known rank",
 		getOptionState=function(actionTable, _optKey)
 			return actionTable[3] ~= 16
@@ -143,5 +145,3 @@ else
 		end,
 	})
 end
-
-AB.HUM.CreateSimpleEditorPanel = RegisterSimpleOptionsPanel

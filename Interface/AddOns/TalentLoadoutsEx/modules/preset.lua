@@ -117,7 +117,10 @@ local function GetPeaversTalentsDataByCategory(category)
 
 			local prefix = option.isCombineGroups and peaversTalentsDataPrefixes[category] or "";
 			for _, build in ipairs(API.GetBuilds(classID, specID, "archon")) do
-				if build.category == category then
+				local buildCategory = build.category;
+				buildCategory = buildCategory == "sporefall_heroic" and "heroic_raid" or buildCategory;
+				buildCategory = buildCategory == "sporefall_mythic" and "mythic_raid" or buildCategory;
+				if buildCategory == category then
 					table.insert(
 						presetData,
 						{

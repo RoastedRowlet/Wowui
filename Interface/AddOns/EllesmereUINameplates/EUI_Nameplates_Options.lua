@@ -19,7 +19,7 @@ local PAGE_DISPLAY   = "Display"
 local PAGE_COLORS    = "Colors"
 
 local SECTION_FRIENDLY  = "OTHER NAMEPLATES"
-local SECTION_ENEMY_NP  = "ENEMY NAMEPLATE SPACING"
+local SECTION_ENEMY_NP  = "NAMEPLATE SPACING"
 local SECTION_MISC      = "EXTRAS"
 local SECTION_AURA      = "EXTRA AURA OPTIONS"
 
@@ -59,6 +59,7 @@ initFrame:SetScript("OnEvent", function(self)
         fs:SetFont(fontPath, size, flags)
     end
     local floor = math.floor
+    local NAME_RAID_MARKER_GAP = 3
 
     ---------------------------------------------------------------------------
     --  DB helper reads from the centralized profile via ns.db
@@ -189,7 +190,6 @@ initFrame:SetScript("OnEvent", function(self)
     local activePreview
     local _displayHeaderBuilder   -- stored for page cache re-use
     local _colorPreviewRefreshAll -- refresh all color preview bars on cache restore
-    local _colorPreviewRandomizeAll -- randomize all color preview fills/icons on tab switch
     local RefreshCoreEyes          -- forward-declared; defined in BuildDisplayPage
     local _previewHintFS                 -- the hint FontString
     local _headerBaseH = 0               -- header height WITHOUT hint (for cache restore)
@@ -497,12 +497,18 @@ initFrame:SetScript("OnEvent", function(self)
             local gf = CreateFrame("Frame", nil, pf)
             gf:SetFrameLevel(pf:GetFrameLevel() + 1)
             previewGlow.frame = gf
+            -- Collected so Update() can re-tint the preview glow with the target
+            -- Glow Color/Opacity alongside the live nameplates.
+            previewGlow.texs = {}
+            local gc0 = ns.GetTargetGlowColor()
+            local ga0 = ns.GetTargetGlowAlpha()
             local function Mk(coords)
                 local t = gf:CreateTexture(nil, "BACKGROUND")
                 t:SetTexture(GLOW_TEX)
-                t:SetVertexColor(0.4117, 0.6667, 1.0, 1.0)
+                t:SetVertexColor(gc0.r, gc0.g, gc0.b, ga0)
                 t:SetBlendMode("ADD")
                 t:SetTexCoord(unpack(coords))
+                previewGlow.texs[#previewGlow.texs + 1] = t
                 return t
             end
             local tl = Mk({0,GM,0,GM}); PP.Size(tl,GC,GC); tl:SetPoint("TOPLEFT")
@@ -529,6 +535,8 @@ initFrame:SetScript("OnEvent", function(self)
         previewGlow.getBorderOn       = ns.GetTargetGlowBorderColor
         previewGlow.getHighlight      = ns.GetTargetGlowHighlight
         previewGlow.getBorderCol      = ns.GetTargetBorderColor
+        previewGlow.getGlowCol        = ns.GetTargetGlowColor
+        previewGlow.getGlowAlpha      = ns.GetTargetGlowAlpha
         previewGlow.getHighlightCol   = ns.GetTargetHighlightColor
         previewGlow.getHighlightAlpha = ns.GetTargetHighlightAlpha
 
@@ -550,6 +558,14 @@ initFrame:SetScript("OnEvent", function(self)
         nameFS:SetMaxLines(1)
         nameFS:SetText(EllesmereUI.L("Enemy Name Text"))
         nameFS:SetTextColor(1, 1, 1, 1)
+
+        local nameRaidFrame = CreateFrame("Frame", nil, pf)
+        nameRaidFrame:SetFrameLevel(health:GetFrameLevel() + 8)
+        nameRaidFrame:Hide()
+        local nameRaidIcon = nameRaidFrame:CreateTexture(nil, "ARTWORK")
+        nameRaidIcon:SetAllPoints()
+        nameRaidIcon:SetTexture("Interface\\TargetingFrame\\UI-RaidTargetingIcons")
+        if SetRaidTargetIconTexture then SetRaidTargetIconTexture(nameRaidIcon, 1) end
 
         -- Health percentage text (right-aligned inside health bar)
         local hpText = healthTextFrame:CreateFontString(nil, "OVERLAY")
@@ -635,8 +651,16 @@ initFrame:SetScript("OnEvent", function(self)
         castParts.spark:SetPoint("CENTER", cast:GetStatusBarTexture(), "RIGHT", 0, 0)
         castParts.spark:SetBlendMode("ADD")
 
+        -- Cast text frame: a dedicated child ABOVE the cast border so the
+        -- name/target/timer render in front of it (mirrors the live nameplate's
+        -- castTextFrame). The PP border is a child of `cast` at cast+1, which
+        -- would otherwise draw over text placed on `cast`'s own OVERLAY layer.
+        castParts.textFrame = CreateFrame("Frame", nil, cast)
+        castParts.textFrame:SetAllPoints(cast)
+        castParts.textFrame:SetFrameLevel(cast:GetFrameLevel() + 5)
+
         -- Cast name (left, width 70)
-        castParts.nameFS = cast:CreateFontString(nil, "OVERLAY")
+        castParts.nameFS = castParts.textFrame:CreateFontString(nil, "OVERLAY")
         SetPVFont(castParts.nameFS, FONT_PATH, 10, GetNPOptOutline())
         castParts.nameFS:SetPoint("LEFT", cast, 5, 0)
         castParts.nameFS:SetJustifyH("LEFT")
@@ -645,7 +669,7 @@ initFrame:SetScript("OnEvent", function(self)
         castParts.nameFS:SetText(EllesmereUI.L("Spell Name"))
 
         -- Cast timer (far right)
-        castParts.timerFS = cast:CreateFontString(nil, "OVERLAY")
+        castParts.timerFS = castParts.textFrame:CreateFontString(nil, "OVERLAY")
         SetPVFont(castParts.timerFS, FONT_PATH, 10, GetNPOptOutline())
         castParts.timerFS:SetPoint("RIGHT", cast, -3, 0)
         castParts.timerFS:SetJustifyH("RIGHT")
@@ -655,7 +679,7 @@ initFrame:SetScript("OnEvent", function(self)
         castParts.timerFS:SetText("2.3")
 
         -- Cast target (right, anchored left of timer)
-        castParts.targetFS = cast:CreateFontString(nil, "OVERLAY")
+        castParts.targetFS = castParts.textFrame:CreateFontString(nil, "OVERLAY")
         SetPVFont(castParts.targetFS, FONT_PATH, 10, GetNPOptOutline())
         castParts.targetFS:SetPoint("RIGHT", castParts.timerFS, "LEFT", -4, 0)
         castParts.targetFS:SetJustifyH("RIGHT")
@@ -702,14 +726,18 @@ initFrame:SetScript("OnEvent", function(self)
                                 [251] = { Enum.PowerType.Runes, 6 },
                                 [252] = { Enum.PowerType.Runes, 6 } },
             },
+            WHITE = "Interface\\Buttons\\WHITE8X8",
+            SQUARE_SHAPE = { square = true, circle = true, diamond = true, hexagon = true, shield = true },
         }
         CP.pips = {}
         for i = 1, CP.MAX_POSSIBLE do
             local bg = pf:CreateTexture(nil, "OVERLAY", nil, 2)
-            bg:SetColorTexture(0.082, 0.082, 0.082, 1)
+            bg:SetTexture(CP.WHITE)
+            bg:SetVertexColor(0.082, 0.082, 0.082, 1)
             bg:Hide()
             local pip = pf:CreateTexture(nil, "OVERLAY", nil, 3)
-            pip:SetColorTexture(1, 1, 1, 1)
+            pip:SetTexture(CP.WHITE)
+            pip:SetVertexColor(1, 1, 1, 1)
             pip:SetSize(CP.PIP_W, CP.PIP_H)
             pip:Hide()
             pip._bg = bg
@@ -968,6 +996,52 @@ initFrame:SetScript("OnEvent", function(self)
             for _, tex in ipairs(simpleBorderFrame._texs) do tex:SetVertexColor(bc.r, bc.g, bc.b) end
             for _, e in ipairs(_solidEdges) do e:SetColorTexture(bc.r, bc.g, bc.b, 1); if e.SetSnapToPixelGrid then e:SetSnapToPixelGrid(false); e:SetTexelSnappingBias(0) end end
 
+            -- "Wrap Around Castbar" preview. Fully additive: this block is skipped
+            -- entirely while the feature has never been enabled (so the border
+            -- frames keep their original full-points anchoring and look exactly as
+            -- before). It only extends the border down to the preview cast bar
+            -- when the toggle is on, and restores the anchors once on toggle-off.
+            -- The preview border frames already sit above the cast bar in frame
+            -- level, so no re-leveling is needed.
+            local wrapOn = DBVal("wrapBorderCastbar")
+            if wrapOn == nil then wrapOn = defaults.wrapBorderCastbar end
+            local borderVisible
+            if customOn then
+                borderVisible = true
+            else
+                local b = DBVal("showBorder")
+                if b == nil then b = defaults.showBorder end
+                borderVisible = b
+            end
+            local wrapActive = wrapOn and borderVisible
+            if wrapActive or self._wrapPrev then
+                local bottomF = healthWrapper
+                if wrapActive then bottomF = cast end
+                simpleBorderFrame:ClearAllPoints()
+                simpleBorderFrame:SetPoint("TOPLEFT", healthWrapper, "TOPLEFT", 0, 0)
+                simpleBorderFrame:SetPoint("TOPRIGHT", healthWrapper, "TOPRIGHT", 0, 0)
+                simpleBorderFrame:SetPoint("BOTTOMLEFT", bottomF, "BOTTOMLEFT", 0, 0)
+                simpleBorderFrame:SetPoint("BOTTOMRIGHT", bottomF, "BOTTOMRIGHT", 0, 0)
+                pcb:ClearAllPoints()
+                pcb:SetPoint("TOPLEFT", healthWrapper, "TOPLEFT", 0, 0)
+                pcb:SetPoint("TOPRIGHT", healthWrapper, "TOPRIGHT", 0, 0)
+                pcb:SetPoint("BOTTOMLEFT", bottomF, "BOTTOMLEFT", 0, 0)
+                pcb:SetPoint("BOTTOMRIGHT", bottomF, "BOTTOMRIGHT", 0, 0)
+                -- Solid 1px fallback edges: extend the bottom + side bottoms too
+                -- (_solidEdges = { top, bottom, left, right }; top is untouched).
+                local sB, sL, sR = _solidEdges[2], _solidEdges[3], _solidEdges[4]
+                sB:ClearAllPoints()
+                sB:SetPoint("BOTTOMLEFT", bottomF, "BOTTOMLEFT", 0, 0)
+                sB:SetPoint("BOTTOMRIGHT", bottomF, "BOTTOMRIGHT", 0, 0)
+                sL:ClearAllPoints()
+                sL:SetPoint("TOPLEFT", healthWrapper, "TOPLEFT", 0, 0)
+                sL:SetPoint("BOTTOMLEFT", bottomF, "BOTTOMLEFT", 0, 0)
+                sR:ClearAllPoints()
+                sR:SetPoint("TOPRIGHT", healthWrapper, "TOPRIGHT", 0, 0)
+                sR:SetPoint("BOTTOMRIGHT", bottomF, "BOTTOMRIGHT", 0, 0)
+                self._wrapPrev = wrapActive
+            end
+
             -- Icon sizes from slot-based system
             local debuffSlotVal = DBVal("debuffSlot") or defaults.debuffSlot
             local buffSlotVal   = DBVal("buffSlot")   or defaults.buffSlot
@@ -1028,6 +1102,8 @@ initFrame:SetScript("OnEvent", function(self)
             local onRight = (icdb and icdb.castIconOnRight) or false
             local fullSize = (icdb and icdb.castIconFullSize) or false
             local iconScale = (icdb and icdb.castIconScale) or defaults.castIconScale
+            local iconXOff = (icdb and icdb.castIconOffsetX) or defaults.castIconOffsetX or 0
+            local iconYOff = (icdb and icdb.castIconOffsetY) or defaults.castIconOffsetY or 0
             local castIconLeftPush, castIconRightPush = 0, 0
             if showIcon then
                 if fullSize then
@@ -1109,7 +1185,7 @@ initFrame:SetScript("OnEvent", function(self)
             end
             cast:ClearAllPoints()
             cast:SetSize(math.max(1, barW - pIconW), castH)
-            cast:SetPoint("TOPLEFT", health, "BOTTOMLEFT", pShiftX, 0)
+            cast:SetPoint("TOPLEFT", health, "BOTTOMLEFT", pShiftX, (DBVal("castBarOffsetY") or defaults.castBarOffsetY))
             do
                 local cTexKey = DBVal("castBarTexture") or "none"
                 local cTexPath = EllesmereUI.ResolveTexturePath(ns.healthBarTextures, cTexKey, "Interface\\Buttons\\WHITE8x8")
@@ -1128,17 +1204,17 @@ initFrame:SetScript("OnEvent", function(self)
                     local fs = barH + castH
                     castParts.iconFrame:SetSize(fs, fs)
                     if onRight then
-                        castParts.iconFrame:SetPoint("BOTTOMLEFT", cast, "BOTTOMRIGHT", 0, 0)
+                        castParts.iconFrame:SetPoint("BOTTOMLEFT", cast, "BOTTOMRIGHT", iconXOff, iconYOff)
                     else
-                        castParts.iconFrame:SetPoint("BOTTOMRIGHT", cast, "BOTTOMLEFT", 0, 0)
+                        castParts.iconFrame:SetPoint("BOTTOMRIGHT", cast, "BOTTOMLEFT", iconXOff, iconYOff)
                     end
                 else
                     local scaledH = castH * iconScale
                     castParts.iconFrame:SetSize(scaledH, scaledH)
                     if onRight then
-                        castParts.iconFrame:SetPoint("TOPLEFT", cast, "TOPRIGHT", 0, 0)
+                        castParts.iconFrame:SetPoint("TOPLEFT", cast, "TOPRIGHT", iconXOff, iconYOff)
                     else
-                        castParts.iconFrame:SetPoint("TOPRIGHT", cast, "TOPLEFT", 0, 0)
+                        castParts.iconFrame:SetPoint("TOPRIGHT", cast, "TOPLEFT", iconXOff, iconYOff)
                     end
                 end
                 castParts.iconFrame:Show()
@@ -1185,21 +1261,29 @@ initFrame:SetScript("OnEvent", function(self)
                     hpNumber:SetPoint(point, health, anchor, xOff, yOff)
                     hpNumber:SetTextColor(cr, cg, cb, 1)
                     hpNumber:Show()
-                elseif element == "healthPctNum" then
+                elseif ns.IsComboHealthText(element) then
                     SetPVFont(hpText, fontPath, fontSize, npOutline)
                     hpText:SetParent(healthTextFrame)
-                    hpText:SetText((dec and pctStrDec or pctStr) .. " | " .. hpNumStr)
-                    hpText:SetPoint(point, health, anchor, xOff, yOff)
-                    hpText:SetTextColor(cr, cg, cb, 1)
-                    hpText:Show()
-                elseif element == "healthNumPct" then
-                    SetPVFont(hpText, fontPath, fontSize, npOutline)
-                    hpText:SetParent(healthTextFrame)
-                    hpText:SetText(hpNumStr .. " | " .. (dec and pctStrDec or pctStr))
+                    ns.SetCombinedHealthText(hpText, element, dec and pctStrDec or pctStr, hpNumStr)
                     hpText:SetPoint(point, health, anchor, xOff, yOff)
                     hpText:SetTextColor(cr, cg, cb, 1)
                     hpText:Show()
                 end
+                -- Per-slot Width % (of the health bar) + Wrap, mirroring runtime.
+                -- At the default 100% leave the FontString UNCONSTRAINED (SetWidth 0 =
+                -- auto-size). A width box on a single-point-anchored FontString does NOT
+                -- honour SetJustifyH, so a right/left-slot value would drift to centre;
+                -- only impose a box when the user actually narrows it (< 100%).
+                local hfs = (element == "healthNumber") and hpNumber or hpText
+                hfs:SetJustifyH(point)
+                local hwpct = (slotKey and DBVal(slotKey .. "WidthPct")) or 100
+                local hw = 0
+                if hwpct < 100 then hw = barW * hwpct / 100 end
+                hfs:SetWidth(hw)
+                local hwrap = false
+                if slotKey and DBVal(slotKey .. "Wrap") == true then hwrap = true end
+                hfs:SetWordWrap(hwrap)
+                hfs:SetMaxLines(hwrap and 2 or 1)
             end
 
             -- Helper: position a health-related element in the top slot
@@ -1221,30 +1305,83 @@ initFrame:SetScript("OnEvent", function(self)
                     hpNumber:SetPoint("BOTTOM", health, "TOP", txOff, 4 + nameYOff + cpPush + tyOff)
                     hpNumber:SetTextColor(cr, cg, cb, 1)
                     hpNumber:Show()
-                elseif element == "healthPctNum" then
+                elseif ns.IsComboHealthText(element) then
                     SetPVFont(hpText, fontPath, fontSize, npOutline)
-                    hpText:SetText((dec and pctStrDec or pctStr) .. " | " .. hpNumStr)
-                    hpText:SetParent(topTextFrame)
-                    hpText:SetPoint("BOTTOM", health, "TOP", txOff, 4 + nameYOff + cpPush + tyOff)
-                    hpText:SetTextColor(cr, cg, cb, 1)
-                    hpText:Show()
-                elseif element == "healthNumPct" then
-                    SetPVFont(hpText, fontPath, fontSize, npOutline)
-                    hpText:SetText(hpNumStr .. " | " .. (dec and pctStrDec or pctStr))
+                    ns.SetCombinedHealthText(hpText, element, dec and pctStrDec or pctStr, hpNumStr)
                     hpText:SetParent(topTextFrame)
                     hpText:SetPoint("BOTTOM", health, "TOP", txOff, 4 + nameYOff + cpPush + tyOff)
                     hpText:SetTextColor(cr, cg, cb, 1)
                     hpText:Show()
                 end
+                -- Per-slot Width % (of the health bar) + Wrap, mirroring runtime. Top
+                -- slot is centered; leave it unconstrained at the default 100% (see
+                -- PlaceHealthInBar for why a width box would mis-position the text).
+                local hfs = (element == "healthNumber") and hpNumber or hpText
+                hfs:SetJustifyH("CENTER")
+                local hwpct = (slotKey and DBVal(slotKey .. "WidthPct")) or 100
+                local hw = 0
+                if hwpct < 100 then hw = barW * hwpct / 100 end
+                hfs:SetWidth(hw)
+                local hwrap = false
+                if slotKey and DBVal(slotKey .. "Wrap") == true then hwrap = true end
+                hfs:SetWordWrap(hwrap)
+                hfs:SetMaxLines(hwrap and 2 or 1)
+            end
+
+            -- Enemy name truncation, mirroring runtime: width % of the bar-derived
+            -- width + wrap toggle. Applied to the shared preview name FontString.
+            local pvNameWPct = DBVal("enemyNameWidthPct") or defaults.enemyNameWidthPct
+            local pvNameWrap = DBVal("enemyNameWrap") == true
+            nameFS:SetWordWrap(pvNameWrap)
+            nameFS:SetNonSpaceWrap(false)
+            nameFS:SetMaxLines(pvNameWrap and 2 or 1)
+            local pvNameMarkerEnabled = DBVal("nameRaidMarkerEnabled") == true
+            local pvNameMarkerSize = DBVal("nameRaidMarkerSize") or defaults.nameRaidMarkerSize or 14
+            local pvNameMarkerReserve = pvNameMarkerEnabled and (pvNameMarkerSize + NAME_RAID_MARKER_GAP) or 0
+            local pvNameSlotKey
+
+            local function PreviewNameTextWidth()
+                local fallback = nameFS:GetWidth() or 0
+                local ok, w = pcall(nameFS.GetStringWidth, nameFS)
+                if ok and type(w) == "number" then
+                    return math.min(w, fallback > 0 and fallback or w)
+                end
+                return fallback
+            end
+
+            local function LayoutPreviewNameRaidMarker()
+                if not (pvNameMarkerEnabled and pvNameSlotKey and nameFS:IsShown()) then
+                    nameRaidFrame:Hide()
+                    return
+                end
+                nameRaidFrame:SetParent((pvNameSlotKey == "textSlotTop") and topTextFrame or healthTextFrame)
+                nameRaidFrame:SetFrameLevel(health:GetFrameLevel() + 8)
+                nameRaidFrame:SetSize(pvNameMarkerSize, pvNameMarkerSize)
+                nameRaidFrame:ClearAllPoints()
+                local textW = PreviewNameTextWidth()
+                if pvNameSlotKey == "textSlotLeft" then
+                    nameRaidFrame:SetPoint("RIGHT", nameFS, "LEFT", -NAME_RAID_MARKER_GAP, 0)
+                elseif pvNameSlotKey == "textSlotRight" then
+                    nameRaidFrame:SetPoint("RIGHT", nameFS, "RIGHT", -textW - NAME_RAID_MARKER_GAP, 0)
+                else
+                    nameRaidFrame:SetPoint("RIGHT", nameFS, "CENTER", -(textW * 0.5) - NAME_RAID_MARKER_GAP, 0)
+                end
+                if SetRaidTargetIconTexture then SetRaidTargetIconTexture(nameRaidIcon, 1) end
+                nameRaidFrame:Show()
             end
 
             -- Helper: position the name in a bar slot
             local function PlaceNameInBar(anchor, point, xOff, justify, txOff, tyOff, fontSize, cr, cg, cb, nameSlotKey)
                 txOff = txOff or 0
                 tyOff = tyOff or 0
+                pvNameSlotKey = nameSlotKey
+                local markerShift = 0
+                if pvNameMarkerEnabled then
+                    markerShift = (justify == "LEFT") and pvNameMarkerReserve or ((justify == "CENTER") and (pvNameMarkerReserve * 0.5) or 0)
+                end
                 SetPVFont(nameFS, fontPath, fontSize, npOutline)
                 nameFS:SetParent(healthTextFrame)
-                nameFS:SetPoint(point, health, anchor, xOff + txOff, tyOff)
+                nameFS:SetPoint(point, health, anchor, xOff + txOff + markerShift, tyOff)
                 nameFS:SetJustifyH(justify)
                 -- Estimate health text width in opposing bar slots
                 local usedWidth = 0
@@ -1261,7 +1398,7 @@ initFrame:SetScript("OnEvent", function(self)
                         end
                     end
                 end
-                nameFS:SetWidth(math.max(barW - usedWidth, 20))
+                nameFS:SetWidth(math.max((barW - usedWidth - pvNameMarkerReserve) * pvNameWPct / 100, 20))
                 nameFS:SetTextColor(cr, cg, cb, 1)
                 nameFS:Show()
             end
@@ -1272,18 +1409,19 @@ initFrame:SetScript("OnEvent", function(self)
             local topFontSz = DBVal("textSlotTopSize") or defaults.textSlotTopSize
             local topC = (DB() and DB().textSlotTopColor) or defaults.textSlotTopColor
             if slotTop == "enemyName" then
+                pvNameSlotKey = "textSlotTop"
                 SetPVFont(nameFS, fontPath, topFontSz, npOutline)
                 nameFS:SetParent(topTextFrame)
-                nameFS:SetPoint("BOTTOM", health, "TOP", topXOff, 4 + nameYOff + cpPush + topYOff)
+                nameFS:SetPoint("BOTTOM", health, "TOP", topXOff + (pvNameMarkerReserve * 0.5), 4 + nameYOff + cpPush + topYOff)
                 nameFS:SetJustifyH("CENTER")
-                local nameW = barW
+                local nameW = barW - pvNameMarkerReserve
                 if rmPos ~= "none" and showRM then
-                    nameW = barW - 2 * (rmSize - 2) - 7
+                    nameW = nameW - 2 * (rmSize - 2) - 7
                 end
                 if showCL and clPos ~= "none" then
                     nameW = nameW - (reIconSz + 4)
                 end
-                nameFS:SetWidth(math.max(nameW, 20))
+                nameFS:SetWidth(math.max(nameW * pvNameWPct / 100, 20))
                 nameFS:SetTextColor(topC.r, topC.g, topC.b, 1)
                 nameFS:Show()
             else
@@ -1323,6 +1461,7 @@ initFrame:SetScript("OnEvent", function(self)
                 PlaceHealthInBar(slotCenter, "CENTER", "CENTER", centerXOff, centerYOff, centerFontSz, centerC.r, centerC.g, centerC.b, "textSlotCenter")
             end
             if DBVal("hideEnemyNameWhileCasting") == true then nameFS:Hide() end
+            LayoutPreviewNameRaidMarker()
 
             -- Health bar color: always uses "enemies in combat" color
             local eic = (DB() and DB().enemyInCombat) or defaults.enemyInCombat
@@ -1352,14 +1491,23 @@ initFrame:SetScript("OnEvent", function(self)
             local pvTargetSide = (dbRef and dbRef.castTargetSide) or defaults.castTargetSide
             local pvTimerSide  = (dbRef and dbRef.castTimerSide)  or defaults.castTimerSide
             local pvTimerW = ctmSz * 2.2
-            local pvTextW = barW * 0.42
+            -- Per-element cast text truncation (% of cast bar width + wrap), mirroring runtime.
+            local pvNameTextW = barW * (DBVal("castNameWidthPct") or defaults.castNameWidthPct) / 100
+            local pvTgtTextW  = barW * (DBVal("castTargetWidthPct") or defaults.castTargetWidthPct) / 100
+            local pvCNameWrap = DBVal("castNameWrap") == true
+            local pvCTgtWrap  = DBVal("castTargetWrap") == true
+            castParts.nameFS:SetWordWrap(pvCNameWrap)
+            castParts.nameFS:SetMaxLines(pvCNameWrap and 2 or 1)
+            castParts.targetFS:SetWordWrap(pvCTgtWrap)
+            castParts.targetFS:SetNonSpaceWrap(false)
+            castParts.targetFS:SetMaxLines(pvCTgtWrap and 2 or 1)
             -- Spell name
             castParts.nameFS:ClearAllPoints()
             if pvNameSide == "none" then
                 castParts.nameFS:Hide()
             else
                 local pt, xb, jh = ns.GetCastTextAnchor(pvNameSide, pvShowTimer and pvTimerSide == pvNameSide, pvTimerW, false)
-                castParts.nameFS:SetWidth(pvTextW)
+                castParts.nameFS:SetWidth(pvNameTextW)
                 castParts.nameFS:SetJustifyH(jh)
                 castParts.nameFS:SetPoint(pt, cast, pt, xb + cnOX, cnOY)
                 castParts.nameFS:Show()
@@ -1370,7 +1518,7 @@ initFrame:SetScript("OnEvent", function(self)
                 castParts.targetFS:Hide()
             else
                 local pt, xb, jh = ns.GetCastTextAnchor(pvTargetSide, pvShowTimer and pvTimerSide == pvTargetSide, pvTimerW, false)
-                castParts.targetFS:SetWidth(pvTextW)
+                castParts.targetFS:SetWidth(pvTgtTextW)
                 castParts.targetFS:SetJustifyH(jh)
                 castParts.targetFS:SetPoint(pt, cast, pt, xb + ctOX, ctOY)
                 castParts.targetFS:Show()
@@ -1406,8 +1554,9 @@ initFrame:SetScript("OnEvent", function(self)
                 castParts.targetFS:SetTextColor(ctc.r, ctc.g, ctc.b, 1)
             end
 
-            -- Name/target/timer widths are set per-element above (barW * 0.42 for
-            -- text, the reserved slot for the timer) to mirror the in-game layout.
+            -- Name/target/timer widths are set per-element above (each text uses its
+            -- configured % of the bar width, the timer its reserved slot) to mirror
+            -- the in-game layout.
 
             -- Helper: position a single preview frame into a slot
             local function PlaceInSlot(frame, slotName, index, count, iconW, iconH, slotSpacing, sxOff, syOff)
@@ -1750,7 +1899,10 @@ initFrame:SetScript("OnEvent", function(self)
                 UnsnapTex(health:GetStatusBarTexture())
             end
 
-            -- Class power pips (preview uses live class/spec resource count, ~70% filled)
+            -- Class power pips (preview). The renderer is a nested function, defined
+            -- and called once right here, so its ~38 locals live in their own scope --
+            -- pf.Update was over Lua 5.1's 200-local-per-function cap.
+            pf.UpdateCP = function()
             local showCP = DBVal("showClassPower") == true
             local cpExtraH = 0
             local cpIsBarType = false
@@ -1809,6 +1961,7 @@ initFrame:SetScript("OnEvent", function(self)
                     for i = 1, CP.MAX_POSSIBLE do
                         CP.pips[i]:Hide()
                         if CP.pips[i]._bg then CP.pips[i]._bg:Hide() end
+                        ns.HidePipDecor(CP.pips[i])
                     end
                     local cpScale = DBVal("classPowerScale") or defaults.classPowerScale
                     local cpYOff  = DBVal("classPowerYOffset") or defaults.classPowerYOffset
@@ -1848,6 +2001,7 @@ initFrame:SetScript("OnEvent", function(self)
                     for i = 1, CP.MAX_POSSIBLE do
                         CP.pips[i]:Hide()
                         if CP.pips[i]._bg then CP.pips[i]._bg:Hide() end
+                        ns.HidePipDecor(CP.pips[i])
                     end
                     CP.bar:Hide()
                 else
@@ -1857,8 +2011,14 @@ initFrame:SetScript("OnEvent", function(self)
                     local cpXOff  = DBVal("classPowerXOffset") or defaults.classPowerXOffset
                     local cpPos   = DBVal("classPowerPos") or defaults.classPowerPos
                     local cpGap   = DBVal("classPowerGap") or defaults.classPowerGap
+                    local cpShape     = DBVal("classPowerShape") or defaults.classPowerShape
+                    local cpBorderOn  = DBVal("classPowerBorder") == true
+                    local cpBorderCol = (DB() and DB().classPowerBorderColor) or defaults.classPowerBorderColor
+                    local cpBorderPx  = cpBorderOn and Snap(DBVal("classPowerBorderSize") or defaults.classPowerBorderSize) or 0
+                    local cpIconKind  = ns.GetPipIconKind(cpShape)
+                    local cpSquare    = CP.SQUARE_SHAPE[cpShape] or (cpIconKind ~= nil)
                     local scaledW   = Snap(CP.PIP_W * cpScale)
-                    local scaledH   = Snap(CP.PIP_H * cpScale)
+                    local scaledH   = cpSquare and scaledW or Snap(CP.PIP_H * cpScale)
                     local scaledGap = Snap(cpGap * cpScale)
                     local totalPipW = cpMax * scaledW + (cpMax - 1) * scaledGap
 
@@ -1904,20 +2064,60 @@ initFrame:SetScript("OnEvent", function(self)
                             if bg then
                                 bg:ClearAllPoints()
                                 bg:SetAllPoints(pip)
-                                bg:SetColorTexture(cpBgCol.r, cpBgCol.g, cpBgCol.b, cpBgCol.a)
+                                bg:SetTexture(CP.WHITE)
+                                bg:SetTexCoord(0, 1, 0, 1)
+                                bg:SetDesaturated(false)
+                                bg:SetVertexColor(cpBgCol.r, cpBgCol.g, cpBgCol.b, cpBgCol.a)
                                 bg:Show()
                             end
 
-                            if i <= cpCur then
-                                pip:SetColorTexture(cpColor[1], cpColor[2], cpColor[3], 1)
+                            ns.ApplyPipShape(pf, pip, cpShape, cpBorderOn, cpBorderCol, cpBorderPx)
+
+                            if cpIconKind == "holypower" then
+                                local n = (i - 1) % 5 + 1
+                                local flip = (n == 5)
+                                local idx = flip and 4 or n
+                                if bg then
+                                    bg:SetAtlas("nameplates-holypower" .. idx .. "-off")
+                                    bg:SetDesaturated(true)
+                                    if flip then bg:SetTexCoord(1, 0, 0, 1) end
+                                    bg:SetVertexColor(1, 1, 1, cpBgCol.a)
+                                    bg:Show()
+                                end
+                                if i <= cpCur then
+                                    pip:SetAtlas("nameplates-holypower" .. idx .. "-on")
+                                    if flip then pip:SetTexCoord(1, 0, 0, 1) end
+                                    pip:SetVertexColor(1, 1, 1, 1)
+                                    UnsnapTex(pip)
+                                    pip:Show()
+                                else
+                                    pip:Hide()
+                                end
+                            elseif cpIconKind then
+                                pip:SetAtlas(ns.GetPipIconAtlas(cpIconKind, i <= cpCur, i))
+                                if (i > cpCur) and ns.CP_ICON_DIM_EMPTY[cpIconKind] then
+                                    pip:SetVertexColor(0.35, 0.35, 0.35, 1)
+                                else
+                                    pip:SetVertexColor(1, 1, 1, 1)
+                                end
+                                UnsnapTex(pip)
+                                pip:Show()
                             else
-                                pip:SetColorTexture(cpEmptyCol.r, cpEmptyCol.g, cpEmptyCol.b, cpEmptyCol.a)
+                                pip:SetTexture(CP.WHITE)
+                                pip:SetTexCoord(0, 1, 0, 1)
+                                if i <= cpCur then
+                                    pip:SetVertexColor(cpColor[1], cpColor[2], cpColor[3], 1)
+                                else
+                                    pip:SetVertexColor(cpEmptyCol.r, cpEmptyCol.g, cpEmptyCol.b, cpEmptyCol.a)
+                                end
+                                UnsnapTex(pip)
+                                pip:Show()
                             end
-                            UnsnapTex(pip)
-                            pip:Show()
                         else
                             pip:Hide()
                             if pip._bg then pip._bg:Hide() end
+                            if pip._border then pip._border:Hide() end
+                            if pip._borderBox then pip._borderBox:Hide() end
                         end
                     end
                     -- Extra height only when pips are below the cast bar
@@ -1929,9 +2129,13 @@ initFrame:SetScript("OnEvent", function(self)
                 for i = 1, CP.MAX_POSSIBLE do
                     CP.pips[i]:Hide()
                     if CP.pips[i]._bg then CP.pips[i]._bg:Hide() end
+                    ns.HidePipDecor(CP.pips[i])
                 end
                 CP.bar:Hide()
             end
+            return cpExtraH
+            end
+            local cpExtraH = pf.UpdateCP()
 
             local totalH = Snap(healthFromTop + barH + castH + cpExtraH + 15)
             -- Add extra height for auras in the "bottom" slot (below cast bar)
@@ -1954,8 +2158,11 @@ initFrame:SetScript("OnEvent", function(self)
             local glowEUI       = previewGlow.getEUI()
             local glowBorder    = previewGlow.getBorderOn()
             local glowHighlight = previewGlow.getHighlight()
-            -- EllesmereUI: background glow
+            -- EllesmereUI: background glow, tinted + faded with the Glow Color/Opacity
             if showTargetGlowPreview and glowEUI then
+                local gc = previewGlow.getGlowCol()
+                local ga = previewGlow.getGlowAlpha()
+                for _, t in ipairs(previewGlow.texs) do t:SetVertexColor(gc.r, gc.g, gc.b, ga) end
                 pgf:Show()
             else
                 pgf:Hide()
@@ -2110,7 +2317,9 @@ initFrame:SetScript("OnEvent", function(self)
             local lineLen = math.floor((iconSize + iconSize) * (2 / N - 0.1))
             lineLen = math.min(lineLen, iconSize)
             if lineLen < 1 then lineLen = 1 end
-            ns.StartProceduralAnts(f, N, th, period, lineLen, cr, cg, cb, iconSize)
+            local bgc = DB().pandemicGlowBackgroundColor or defaults.pandemicGlowBackgroundColor or { r = 0, g = 0, b = 0 }
+            ns.StartProceduralAnts(f, N, th, period, lineLen, cr, cg, cb, iconSize, nil,
+                DBVal("pandemicGlowBackground") == true and (bgc.r or 0) or nil, bgc.g or 0, bgc.b or 0)
         elseif entry.buttonGlow then
             -- Action Button Glow preview
             ns.StartButtonGlow(f, iconSize, cr, cg, cb, entry.previewScale or 1.28)
@@ -2532,14 +2741,12 @@ initFrame:SetScript("OnEvent", function(self)
         -----------------------------------------------------------------------
         _, h = W:SectionHeader(parent, SECTION_ENEMY_NP, y);  y = y - h
 
-        _, h = W:DualRow(parent, y,
-            { type="toggle", text="Enable Stacking Nameplates",
-              getValue=function() return DBVal("stackingEnabled") ~= false end,
-              setValue=function(v)
-                DB().stackingEnabled = v
-                ns.RefreshStackingMotion()
-              end,
-              tooltip="When enabled, nameplates stack vertically instead of overlapping." },
+        local stackingRow
+        stackingRow, h = W:DualRow(parent, y,
+            { type="dropdown", text="Stacking Nameplates",
+              values={ __placeholder = "..." }, order={ "__placeholder" },
+              getValue=function() return "__placeholder" end,
+              setValue=function() end },
             { type="slider", text="Stacked Nameplate Spacing",
               trackWidth=130,
               min=50, max=200, step=5,
@@ -2549,6 +2756,40 @@ initFrame:SetScript("OnEvent", function(self)
                 ns.RefreshStackingBounds()
               end,
               tooltip="Adjusts the vertical spacing between stacked nameplates. 100% = default, lower = tighter, higher = more spread." });  y = y - h
+
+        -- Replace the placeholder dropdown with a multi-select checkbox dropdown.
+        -- Enemy and Friendly stacking are independent toggles over the Midnight
+        -- stacking bitfield. Friendly is locked out while EUI is not managing
+        -- friendly player nameplates, since Blizzard owns that stacking bit then.
+        do
+            local leftRgn = stackingRow._leftRegion
+            if leftRgn._control then leftRgn._control:Hide() end
+            local stackItems = {
+                { key = "enemy",    label = "Enemy Nameplates" },
+                { key = "friendly", label = "Friendly Nameplates",
+                  lockedFn = function() return DBVal("showFriendlyPlayers") == false end },
+            }
+            local cbDD, cbDDRefresh = EllesmereUI.BuildVisOptsCBDropdown(
+                leftRgn, 170, leftRgn:GetFrameLevel() + 2,
+                stackItems,
+                function(k)
+                    if k == "enemy" then return DBVal("stackingEnabled") ~= false end
+                    if k == "friendly" then return DBVal("stackingFriendly") == true end
+                    return false
+                end,
+                function(k, v)
+                    if k == "enemy" then DB().stackingEnabled = v
+                    elseif k == "friendly" then DB().stackingFriendly = v end
+                    ns.RefreshStackingMotion()
+                end)
+            PP.Point(cbDD, "RIGHT", leftRgn, "RIGHT", -20, 0)
+            leftRgn._control = cbDD
+            cbDD:HookScript("OnEnter", function()
+                EllesmereUI.ShowWidgetTooltip(cbDD, "Choose which nameplates stack vertically instead of overlapping.")
+            end)
+            cbDD:HookScript("OnLeave", function() EllesmereUI.HideWidgetTooltip() end)
+            EllesmereUI.RegisterWidgetRefresh(cbDDRefresh)
+        end
 
         local hitboxRow
         hitboxRow, h = W:DualRow(parent, y,
@@ -2812,7 +3053,7 @@ initFrame:SetScript("OnEvent", function(self)
             return raw ~= 1
         end
 
-        -- Cog popup for Pixel Glow settings (Lines, Thickness, Speed)
+        -- Cog popup for Pixel Glow settings.
         do
             local pgPopup, pgPopupOwner
             local function ShowPixelGlowPopup(anchorBtn)
@@ -2821,6 +3062,8 @@ initFrame:SetScript("OnEvent", function(self)
                     local MakeBorder = EllesmereUI.MakeBorder
                     local MakeFont   = EllesmereUI.MakeFont
                     local BuildSliderCore = EllesmereUI.BuildSliderCore
+                    local BuildToggleControl = EllesmereUI.BuildToggleControl
+                    local BuildColorSwatch = EllesmereUI.BuildColorSwatch
                     local BORDER_COLOR   = EllesmereUI.BORDER_COLOR
                     local SL_INPUT_A     = EllesmereUI.SL_INPUT_A
 
@@ -2833,7 +3076,7 @@ initFrame:SetScript("OnEvent", function(self)
                     local MIN_POPUP_W = 180
 
                     local totalH = TOP_PAD + TITLE_H + TITLE_GAP + GAP
-                                 + ROW_H + GAP + ROW_H + GAP + ROW_H
+                                 + ROW_H + GAP + ROW_H + GAP + ROW_H + GAP + ROW_H + GAP + ROW_H
                                  + TOP_PAD
 
                     local pf = CreateFrame("Frame", nil, UIParent)
@@ -2858,7 +3101,7 @@ initFrame:SetScript("OnEvent", function(self)
                     -- Measure label widths to compute layout BEFORE creating sliders
                     local tmpFS = pf:CreateFontString(nil, "OVERLAY")
                     tmpFS:SetFont(EllesmereUI.EXPRESSWAY or "Fonts\\FRIZQT__.TTF", 11, GetNPOptOutline())
-                    local labelTexts = {"Lines", "Thickness", "Speed"}
+                    local labelTexts = {"Lines", "Thickness", "Speed", "Background", "Background Color"}
                     local maxLblW = 0
                     for _, txt in ipairs(labelTexts) do
                         tmpFS:SetText(txt)
@@ -2909,6 +3152,51 @@ initFrame:SetScript("OnEvent", function(self)
                     t3:SetPoint("TOPLEFT", pf, "TOPLEFT", SLIDER_LEFT, r3Y - 2)
                     v3:ClearAllPoints(); v3:SetPoint("TOPRIGHT", pf, "TOPRIGHT", -SIDE_PAD, r3Y)
 
+                    -- Row 4: Background
+                    local r4Y = r3Y - ROW_H - GAP
+                    local lbl4 = MakeFont(pf, 11, nil, 1, 1, 1); lbl4:SetAlpha(0.6)
+                    lbl4:SetText(EllesmereUI.L("Background")); lbl4:SetPoint("TOPLEFT", pf, "TOPLEFT", SIDE_PAD, r4Y)
+                    local bgToggle, _, bgSnap = BuildToggleControl(pf, pf:GetFrameLevel() + 2,
+                        function() return DBVal("pandemicGlowBackground") == true end,
+                        function(v)
+                            DB().pandemicGlowBackground = v and true or nil
+                            RefreshAllAuras(); RefreshPandemicPreview()
+                        end, { sizeRatio = 0.8, noAnim = true })
+                    bgToggle:SetPoint("RIGHT", pf, "TOPRIGHT", -SIDE_PAD, r4Y - ROW_H / 2)
+
+                    -- Row 5: Background Color
+                    local r5Y = r4Y - ROW_H - GAP
+                    local lbl5 = MakeFont(pf, 11, nil, 1, 1, 1); lbl5:SetAlpha(0.6)
+                    lbl5:SetText(EllesmereUI.L("Background Color")); lbl5:SetPoint("TOPLEFT", pf, "TOPLEFT", SIDE_PAD, r5Y)
+                    local bgSwatch, bgUpdate = BuildColorSwatch(pf, pf:GetFrameLevel() + 2,
+                        function()
+                            local c = DB().pandemicGlowBackgroundColor or defaults.pandemicGlowBackgroundColor or { r = 0, g = 0, b = 0 }
+                            return c.r or 0, c.g or 0, c.b or 0
+                        end,
+                        function(r, g, b)
+                            DB().pandemicGlowBackgroundColor = { r = r, g = g, b = b }
+                            RefreshAllAuras(); RefreshPandemicPreview()
+                        end, false, 20)
+                    bgSwatch:ClearAllPoints()
+                    bgSwatch:SetPoint("RIGHT", pf, "TOPRIGHT", -SIDE_PAD, r5Y - ROW_H / 2)
+                    local bgBlock = CreateFrame("Frame", nil, bgSwatch)
+                    bgBlock:SetAllPoints(); bgBlock:SetFrameLevel(bgSwatch:GetFrameLevel() + 10); bgBlock:EnableMouse(true)
+                    bgBlock:SetScript("OnEnter", function()
+                        EllesmereUI.ShowWidgetTooltip(bgSwatch, EllesmereUI.DisabledTooltip("Pixel Glow Background"))
+                    end)
+                    bgBlock:SetScript("OnLeave", function() EllesmereUI.HideWidgetTooltip() end)
+
+                    local function RefreshBgControls()
+                        if bgSnap then bgSnap() end
+                        if bgUpdate then bgUpdate() end
+                        local on = DBVal("pandemicGlowBackground") == true
+                        bgSwatch:SetAlpha(on and 1 or 0.3)
+                        if on then bgBlock:Hide() else bgBlock:Show() end
+                    end
+                    bgToggle:HookScript("OnClick", RefreshBgControls)
+                    pf._refreshBgControls = RefreshBgControls
+                    RefreshBgControls()
+
                     -- Close on click outside
                     local wasDown = false
                     pf:SetScript("OnHide", function(self)
@@ -2940,6 +3228,7 @@ initFrame:SetScript("OnEvent", function(self)
                 end
                 pgPopupOwner = anchorBtn
 
+                if pgPopup._refreshBgControls then pgPopup._refreshBgControls() end
                 pgPopup:ClearAllPoints()
                 pgPopup:SetPoint("BOTTOM", anchorBtn, "TOP", 0, 6)
                 pgPopup:SetAlpha(0)
@@ -3417,13 +3706,67 @@ initFrame:SetScript("OnEvent", function(self)
             cogBtn:SetScript("OnLeave", function(self) UpdateCogAlpha() end)
         end
 
+        -- Name Raid Marker: the target raid marker shown directly before the enemy
+        -- name. Sits at the bottom of this section in slot 1 (left); the right slot
+        -- is intentionally blank so the rest of the section keeps its layout. Size
+        -- lives on the inline cog.
+        local nameRaidMarkerRow
+        nameRaidMarkerRow, h = W:DualRow(parent, y,
+            { type="toggle", text="Name Raid Marker",
+              tooltip="Shows the target marker directly before the enemy name text. Uses its own size and does not use the Core Positions raid marker slot.",
+              getValue=function() return DBVal("nameRaidMarkerEnabled") == true end,
+              setValue=function(v)
+                DB().nameRaidMarkerEnabled = v
+                ns.RefreshAllSettings()
+                UpdatePreview()
+                EllesmereUI:RefreshPage()
+              end },
+            { type="label", text="" });  y = y - h
+
+        do
+            local function nameRaidMarkerOff() return DBVal("nameRaidMarkerEnabled") ~= true end
+            local rgn = nameRaidMarkerRow._leftRegion
+            local _, nameRaidMarkerCogShow = EllesmereUI.BuildCogPopup({
+                title = "Name Raid Marker",
+                rows = {
+                    { type="slider", label="Size", min=6, max=32, step=1,
+                      get=function() return DBVal("nameRaidMarkerSize") or defaults.nameRaidMarkerSize end,
+                      set=function(v)
+                        DB().nameRaidMarkerSize = v
+                        ns.RefreshAllSettings()
+                        UpdatePreview()
+                      end },
+                },
+            })
+            local cogBtn = CreateFrame("Button", nil, rgn)
+            cogBtn:SetSize(26, 26)
+            cogBtn:SetPoint("RIGHT", rgn._lastInline or rgn._control, "LEFT", -8, 0)
+            rgn._lastInline = cogBtn
+            cogBtn:SetFrameLevel(rgn:GetFrameLevel() + 5)
+            local cogTex = cogBtn:CreateTexture(nil, "OVERLAY")
+            cogTex:SetAllPoints()
+            cogTex:SetTexture(EllesmereUI.RESIZE_ICON)
+            if cogTex.SetSnapToPixelGrid then cogTex:SetSnapToPixelGrid(false); cogTex:SetTexelSnappingBias(0) end
+            local function UpdateCogAlpha()
+                cogBtn:SetAlpha(nameRaidMarkerOff() and 0.15 or 0.4)
+            end
+            EllesmereUI.RegisterWidgetRefresh(UpdateCogAlpha)
+            UpdateCogAlpha()
+            cogBtn:SetScript("OnClick", function(self)
+                if not nameRaidMarkerOff() then nameRaidMarkerCogShow(self) end
+            end)
+            cogBtn:SetScript("OnEnter", function(self)
+                if not nameRaidMarkerOff() then self:SetAlpha(0.75) end
+            end)
+            cogBtn:SetScript("OnLeave", function() UpdateCogAlpha() end)
+        end
+
         return math.abs(y)
     end
 
     ---------------------------------------------------------------------------
     --  Display page  (preview in content header + settings in scroll area)
     ---------------------------------------------------------------------------
-    local _updatePreviewHooked = false
     local LazyColorPreviewBar -- forward declaration; defined after MakeColorPreviewBar
 
     local function BuildDisplayPage(pageName, parent, yOffset)
@@ -3484,19 +3827,6 @@ initFrame:SetScript("OnEvent", function(self)
             return _headerBaseH + (hintShown and 29 or 0)
         end
         EllesmereUI:SetContentHeader(_displayHeaderBuilder)
-
-        -- Hook UpdatePreview so every widget setValue callback that calls it
-        -- automatically triggers drift detection (auto-creates "Custom" when editing a built-in).
-        -- Only hook once: the original UpdatePreview is a simple wrapper around activePreview:Update().
-        -- After hooking, subsequent BuildDisplayPage calls reuse the already-hooked version.
-        if not _updatePreviewHooked then
-            _updatePreviewHooked = true
-            local _origUpdatePreview = UpdatePreview
-            UpdatePreview = function()
-                _origUpdatePreview()
-                if onPresetSettingChanged then onPresetSettingChanged() end
-            end
-        end
 
         -- Enable per-row center divider for the dual-column layout
         parent._showRowDivider = true
@@ -3585,6 +3915,7 @@ initFrame:SetScript("OnEvent", function(self)
                 end
                 plate:UpdateRaidIcon()
                 plate:UpdateClassification()
+                if ns.ApplySlotStrata then ns.ApplySlotStrata(plate) end
             end
             UpdatePreview()
             EllesmereUI:RefreshPage()
@@ -3813,6 +4144,55 @@ initFrame:SetScript("OnEvent", function(self)
             local off = isBorderOff()
             swatch:SetAlpha(off and 0.15 or 1)
             swatch:EnableMouse(not off)
+        end
+
+        -- Inline cog on the Border region: opt-in "Wrap Around Castbar". Placed
+        -- to the left of the colour swatch. Dimmed only for the "None" mode
+        -- (the wrap applies to both Basic and Custom borders).
+        do
+            local leftRgn = borderStyleRow._leftRegion
+            local _, wrapCogShow = EllesmereUI.BuildCogPopup({
+                title = "Castbar Border",
+                rows = {
+                    { type="toggle", label="Wrap Around Castbar",
+                      get=function()
+                        local v = DBVal("wrapBorderCastbar")
+                        if v == nil then return defaults.wrapBorderCastbar end
+                        return v
+                      end,
+                      set=function(v)
+                        DB().wrapBorderCastbar = v
+                        -- Unconditional re-apply so toggling OFF also unwraps any
+                        -- plate that is currently mid-cast and wrapped.
+                        if ns.ApplyBorderWrapToAll then ns.ApplyBorderWrapToAll() end
+                        UpdatePreview()
+                      end },
+                },
+            })
+            local wrapCogBtn = CreateFrame("Button", nil, leftRgn)
+            wrapCogBtn:SetSize(26, 26)
+            wrapCogBtn:SetPoint("RIGHT", leftRgn._lastInline or leftRgn._control, "LEFT", -8, 0)
+            leftRgn._lastInline = wrapCogBtn
+            wrapCogBtn:SetFrameLevel(leftRgn:GetFrameLevel() + 5)
+            local wrapCogTex = wrapCogBtn:CreateTexture(nil, "OVERLAY")
+            wrapCogTex:SetAllPoints(); wrapCogTex:SetTexture(EllesmereUI.COGS_ICON)
+            local function wrapCogOff()
+                -- Only "None" disables it; Basic and Custom both support the wrap.
+                if DBVal("customBorderEnabled") then return false end
+                local v = DBVal("showBorder")
+                if v == nil then v = defaults.showBorder end
+                return not v
+            end
+            wrapCogBtn:SetScript("OnEnter", function(s) if not wrapCogOff() then s:SetAlpha(0.7) end end)
+            wrapCogBtn:SetScript("OnLeave", function(s) if not wrapCogOff() then s:SetAlpha(0.4) end end)
+            wrapCogBtn:SetScript("OnClick", function(s) if not wrapCogOff() then wrapCogShow(s) end end)
+            local function wrapCogState()
+                local off = wrapCogOff()
+                wrapCogBtn:SetAlpha(off and 0.15 or 0.4)
+                wrapCogBtn:EnableMouse(not off)
+            end
+            EllesmereUI.RegisterWidgetRefresh(wrapCogState)
+            wrapCogState()
         end
 
         -- Custom Border row -- only built when the Border dropdown above is set
@@ -4289,7 +4669,7 @@ initFrame:SetScript("OnEvent", function(self)
                 -- Measure label widths to compute layout BEFORE creating sliders
                 local tmpFS = pf:CreateFontString(nil, "OVERLAY")
                 tmpFS:SetFont(EllesmereUI.EXPRESSWAY or "Fonts\\FRIZQT__.TTF", 12, GetNPOptOutline())
-                local labelTexts = {"X Offset", "Y Offset", "Size"}
+                local labelTexts = {"X Offset", "Y Offset", "Size", "Width %"}
                 local maxLblW = 0
                 for _, txt in ipairs(labelTexts) do
                     tmpFS:SetText(txt)
@@ -4357,6 +4737,37 @@ initFrame:SetScript("OnEvent", function(self)
                 spTrack:Hide(); spValBox:Hide()
                 pf._spTrack = spTrack; pf._spValBox = spValBox
 
+                -- Width % slider row (hidden unless a width-fit text element: enemy
+                -- name, cast spell name, cast target). Fixed range, built once; the
+                -- row is reordered/repositioned per show via the seq block below.
+                local W_ROW_Y = SP_ROW_Y - SLIDER_H - GAP
+                local wLabel = MakeFont(pf, 12, nil, 1, 1, 1)
+                wLabel:SetAlpha(0.6); wLabel:SetText(EllesmereUI.L("Width %"))
+                wLabel:SetPoint("LEFT", pf, "TOPLEFT", SIDE_PAD, W_ROW_Y - SLIDER_H / 2)
+                wLabel:Hide()
+                pf._wLabel = wLabel
+                -- Invisible hover region over the label for its tooltip (FontStrings
+                -- are not mouse-interactive). SetAllPoints tracks the label, so it
+                -- follows the row wherever it is repositioned; shown/hidden with the row.
+                local wHover = CreateFrame("Frame", nil, pf)
+                wHover:SetFrameLevel(pf:GetFrameLevel() + 10)
+                wHover:SetAllPoints(wLabel)
+                wHover:EnableMouse(true)
+                wHover:Hide()
+                wHover:SetScript("OnEnter", function(self)
+                    EllesmereUI.ShowWidgetTooltip(self, EllesmereUI.L("Maximum width the text can fill before it truncates, as a percentage of the bar."), { width = 230 })
+                end)
+                wHover:SetScript("OnLeave", function() EllesmereUI.HideWidgetTooltip() end)
+                pf._wHover = wHover
+                local wTrack, wValBox = BuildSliderCore(pf, SLIDER_W, 4, 12, INPUT_W, SLIDER_H, 11, SL_INPUT_A,
+                    10, 150, 1,
+                    function() return pf._wGet and pf._wGet() or 0 end,
+                    function(v) if pf._wSet then pf._wSet(v) end end, true)
+                wTrack:SetPoint("TOPLEFT", pf, "TOPLEFT", SLIDER_LEFT, W_ROW_Y - 2)
+                wValBox:ClearAllPoints(); wValBox:SetPoint("TOPRIGHT", pf, "TOPRIGHT", -SIDE_PAD, W_ROW_Y)
+                wTrack:Hide(); wValBox:Hide()
+                pf._wTrack = wTrack; pf._wValBox = wValBox
+
                 -- Store layout values for dynamic size slider rebuild + reorder
                 pf._SLIDER_LEFT = SLIDER_LEFT
                 pf._SLIDER_W = SLIDER_W
@@ -4378,46 +4789,21 @@ initFrame:SetScript("OnEvent", function(self)
                 gLabel:SetPoint("LEFT", pf, "TOPLEFT", SIDE_PAD, G_ROW_Y - GROWTH_ROW_H / 2)
                 pf._gLabel = gLabel
 
-                -- Three small radio buttons: values filled in at show time
-                local gBtns = {}
-                local BTN_W, BTN_H, BTN_GAP = 52, 20, 4
-                pf._BTN_W = BTN_W; pf._BTN_GAP = BTN_GAP
-                for bi = 1, 3 do
-                    local b = CreateFrame("Button", nil, pf)
-                    b:SetSize(BTN_W, BTN_H)
-                    b:SetPoint("TOPLEFT", pf, "TOPLEFT",
-                        SLIDER_LEFT + (bi - 1) * (BTN_W + BTN_GAP),
-                        G_ROW_Y - 1)
-                    local bg = b:CreateTexture(nil, "BACKGROUND")
-                    bg:SetAllPoints()
-                    bg:SetColorTexture(0.15, 0.15, 0.15, 0.8)
-                    b._bg = bg
-                    local hl = b:CreateTexture(nil, "HIGHLIGHT")
-                    hl:SetAllPoints()
-                    hl:SetColorTexture(1, 1, 1, 0.06)
-                    local lbl = b:CreateFontString(nil, "OVERLAY")
-                    lbl:SetFont(EllesmereUI.EXPRESSWAY or "Fonts\\FRIZQT__.TTF", 11, GetNPOptOutline())
-                    lbl:SetAllPoints()
-                    lbl:SetJustifyH("CENTER")
-                    lbl:SetJustifyV("MIDDLE")
-                    b._lbl = lbl
-                    b:SetScript("OnClick", function(self)
-                        if pf._growthSet then pf._growthSet(self._value) end
-                        -- Refresh button states
-                        local cur = pf._growthGet and pf._growthGet() or ""
-                        for _, gb in ipairs(gBtns) do
-                            local active = (gb._value == cur)
-                            gb._bg:SetColorTexture(
-                                active and 0.973 or 0.15,
-                                active and 0.839 or 0.15,
-                                active and 0.604 or 0.15,
-                                active and 0.25  or 0.8)
-                            gb._lbl:SetTextColor(active and 1 or 0.7, active and 1 or 0.7, active and 1 or 0.7)
-                        end
-                    end)
-                    gBtns[bi] = b
-                end
-                pf._gBtns = gBtns
+                -- Grow direction is a standard dropdown. Its option list + order vary
+                -- per cog (topleft vs topright), so they are filled into these mutable
+                -- tables at show time and the menu is invalidated to rebuild from them.
+                -- getValue/setValue delegate to the per-show growth getter/setter, so
+                -- the backend keys and behaviour are identical to the old buttons.
+                pf._growthValues = {}   -- key -> label
+                pf._growthOrder  = {}   -- ordered keys
+                local GROW_DD_W = POPUP_W - SLIDER_LEFT - SIDE_PAD
+                local gDD = EllesmereUI.BuildDropdownControl(pf, GROW_DD_W, pf:GetFrameLevel() + 6,
+                    pf._growthValues, pf._growthOrder,
+                    function() return pf._growthGet and pf._growthGet() or "" end,
+                    function(v) if pf._growthSet then pf._growthSet(v) end end)
+                gDD:SetHeight(GROWTH_ROW_H)
+                gDD:Hide()
+                pf._gDD = gDD
 
                 -- Optional toggle row. Shares the 4th-row slot (G_ROW_Y) with the
                 -- Grow row; the two are mutually exclusive in current usage (Grow
@@ -4436,6 +4822,35 @@ initFrame:SetScript("OnEvent", function(self)
                 tToggle:Hide()
                 pf._tToggle = tToggle
                 pf._toggleSnap = tToggleSnap
+
+                -- Optional "Raise Strata" toggle row (own row, below Grow /
+                -- Cropped Icons / Wrap so it can coexist with any of them on a
+                -- Core Position slot). Wired via pf._rsGet / pf._rsSet.
+                local rsLabel = MakeFont(pf, 12, nil, 1, 1, 1)
+                rsLabel:SetAlpha(0.6)
+                rsLabel:SetText(EllesmereUI.L("Raise Strata"))
+                rsLabel:SetPoint("LEFT", pf, "TOPLEFT", SIDE_PAD, G_ROW_Y - GROWTH_ROW_H / 2)
+                rsLabel:Hide()
+                pf._rsLabel = rsLabel
+                -- Invisible hover region over the label for its tooltip.
+                local rsHover = CreateFrame("Frame", nil, pf)
+                rsHover:SetFrameLevel(pf:GetFrameLevel() + 10)
+                rsHover:SetAllPoints(rsLabel)
+                rsHover:EnableMouse(true)
+                rsHover:Hide()
+                rsHover:SetScript("OnEnter", function(self)
+                    EllesmereUI.ShowWidgetTooltip(self, EllesmereUI.L("Renders this slot's element above the rest of the nameplate."), { width = 230 })
+                end)
+                rsHover:SetScript("OnLeave", function() EllesmereUI.HideWidgetTooltip() end)
+                pf._rsHover = rsHover
+                local rsToggle, _, rsToggleSnap = EllesmereUI.BuildToggleControl(pf, pf:GetFrameLevel() + 5,
+                    function() return pf._rsGet and pf._rsGet() or false end,
+                    function(v) if pf._rsSet then pf._rsSet(v) end end,
+                    { sizeRatio = 0.8, noAnim = true })
+                rsToggle:SetPoint("RIGHT", pf, "TOPRIGHT", -SIDE_PAD, G_ROW_Y - GROWTH_ROW_H / 2)
+                rsToggle:Hide()
+                pf._rsToggle = rsToggle
+                pf._rsToggleSnap = rsToggleSnap
 
                 -- Optional "Cropped Icons" toggle row. Unlike the generic toggle
                 -- above, this gets its OWN row below the data/grow rows so it can
@@ -4456,6 +4871,38 @@ initFrame:SetScript("OnEvent", function(self)
                 pf._cropToggle = cropToggle
                 pf._cropToggleSnap = cropToggleSnap
 
+                -- Optional "Wrap" toggle row (own row, like Cropped Icons). Used by
+                -- the truncating text elements (enemy name, cast name/target, health
+                -- text) so it can coexist with the generic toggle -- e.g. health
+                -- text keeps "Show % Decimal" on the generic toggle and "Wrap" here.
+                -- Wired via pf._wrapGet / pf._wrapSet; repositioned per show.
+                local wrapLabel = MakeFont(pf, 12, nil, 1, 1, 1)
+                wrapLabel:SetAlpha(0.6)
+                wrapLabel:SetText(EllesmereUI.L("Wrap"))
+                wrapLabel:SetPoint("LEFT", pf, "TOPLEFT", SIDE_PAD, G_ROW_Y - GROWTH_ROW_H / 2)
+                wrapLabel:Hide()
+                pf._wrapLabel = wrapLabel
+                -- Invisible hover region over the Wrap label for its tooltip (see the
+                -- Width % hover above). Tracks the label and is shown/hidden with the row.
+                local wrapHover = CreateFrame("Frame", nil, pf)
+                wrapHover:SetFrameLevel(pf:GetFrameLevel() + 10)
+                wrapHover:SetAllPoints(wrapLabel)
+                wrapHover:EnableMouse(true)
+                wrapHover:Hide()
+                wrapHover:SetScript("OnEnter", function(self)
+                    EllesmereUI.ShowWidgetTooltip(self, EllesmereUI.L("Lets long text wrap onto a second line instead of being cut off."), { width = 230 })
+                end)
+                wrapHover:SetScript("OnLeave", function() EllesmereUI.HideWidgetTooltip() end)
+                pf._wrapHover = wrapHover
+                local wrapToggle, _, wrapToggleSnap = EllesmereUI.BuildToggleControl(pf, pf:GetFrameLevel() + 5,
+                    function() return pf._wrapGet and pf._wrapGet() or false end,
+                    function(v) if pf._wrapSet then pf._wrapSet(v) end end,
+                    { sizeRatio = 0.8, noAnim = true })
+                wrapToggle:SetPoint("RIGHT", pf, "TOPRIGHT", -SIDE_PAD, G_ROW_Y - GROWTH_ROW_H / 2)
+                wrapToggle:Hide()
+                pf._wrapToggle = wrapToggle
+                pf._wrapToggleSnap = wrapToggleSnap
+
                 -- Layout constants stored for height calc
                 pf._TOP_PAD = TOP_PAD; pf._TITLE_H = TITLE_H; pf._TITLE_GAP = TITLE_GAP
                 pf._GAP = GAP; pf._SLIDER_H = SLIDER_H; pf._SIDE_PAD = SIDE_PAD
@@ -4466,7 +4913,11 @@ initFrame:SetScript("OnEvent", function(self)
                 pf._clickOutside = function(self, dt)
                     local down = IsMouseButtonDown("LeftButton")
                     if down and not wasDown then
-                        if not self:IsMouseOver() and not (cogPopupOwner and cogPopupOwner:IsMouseOver()) then
+                        -- The Grow dropdown's menu floats outside this popup's rect;
+                        -- a click on it must not be treated as a click-outside.
+                        local m = self._gDD and self._gDD._ddMenu
+                        local overMenu = m and m:IsShown() and m:IsMouseOver()
+                        if not self:IsMouseOver() and not (cogPopupOwner and cogPopupOwner:IsMouseOver()) and not overMenu then
                             self:Hide()
                         end
                     end
@@ -4497,15 +4948,18 @@ initFrame:SetScript("OnEvent", function(self)
             -- Wire getters/setters
             cogPopup._xGet = opts.xGet; cogPopup._xSet = opts.xSet
             cogPopup._yGet = opts.yGet; cogPopup._ySet = opts.ySet
-            cogPopup._titleFS:SetText(opts.title)
+            cogPopup._titleFS:SetText(EllesmereUI.L(opts.title))
             cogPopupOwner = anchorBtn
 
             -- Show/hide size row and adjust height
             local hasSize = opts.sizeGet ~= nil
+            local hasWidth = opts.widthGet ~= nil
             local hasSpacing = opts.spacingGet ~= nil
             local hasGrowth = opts.growthGet ~= nil
             local hasToggle = opts.toggleGet ~= nil
             local hasCrop = opts.cropGet ~= nil
+            local hasWrap = opts.wrapGet ~= nil
+            local hasRaiseStrata = opts.raiseStrataGet ~= nil
             if hasSize then
                 -- Rebuild size slider if range changed
                 local sStep = opts.sizeStep or 1
@@ -4547,35 +5001,50 @@ initFrame:SetScript("OnEvent", function(self)
                 cogPopup._spValBox:Hide()
             end
 
-            -- Show/hide growth row
+            -- Show/hide width % row
+            if hasWidth then
+                cogPopup._wGet = opts.widthGet
+                cogPopup._wSet = opts.widthSet
+                cogPopup._wLabel:SetText(EllesmereUI.L(opts.widthLabel or "Width %"))
+                cogPopup._wLabel:Show()
+                cogPopup._wTrack:Show()
+                cogPopup._wValBox:Show()
+                if cogPopup._wHover then cogPopup._wHover:Show() end
+            else
+                cogPopup._wGet = nil
+                cogPopup._wSet = nil
+                cogPopup._wLabel:Hide()
+                cogPopup._wTrack:Hide()
+                cogPopup._wValBox:Hide()
+                if cogPopup._wHover then cogPopup._wHover:Hide() end
+            end
+
+            -- Show/hide growth row (a dropdown)
             if hasGrowth then
                 cogPopup._growthGet = opts.growthGet
                 cogPopup._growthSet = opts.growthSet
+                -- Refill the dropdown's option map + order from this cog's values
+                -- (mutated in place so the dropdown's captured tables stay current).
                 local vals = opts.growthValues  -- { { value, label }, ... }
-                local cur = opts.growthGet()
-                for bi, btn in ipairs(cogPopup._gBtns) do
-                    local entry = vals and vals[bi]
-                    if entry then
-                        btn._value = entry.value
-                        btn._lbl:SetText(EllesmereUI.L(entry.label))
-                        local active = (entry.value == cur)
-                        btn._bg:SetColorTexture(
-                            active and 0.973 or 0.15,
-                            active and 0.839 or 0.15,
-                            active and 0.604 or 0.15,
-                            active and 0.25  or 0.8)
-                        btn._lbl:SetTextColor(active and 1 or 0.7, active and 1 or 0.7, active and 1 or 0.7)
-                        btn:Show()
-                    else
-                        btn:Hide()
+                wipe(cogPopup._growthValues)
+                wipe(cogPopup._growthOrder)
+                if vals then
+                    for _, entry in ipairs(vals) do
+                        cogPopup._growthValues[entry.value] = entry.label
+                        cogPopup._growthOrder[#cogPopup._growthOrder + 1] = entry.value
                     end
+                end
+                if cogPopup._gDD then
+                    -- Rebuild the menu from the refilled tables and refresh the label.
+                    if cogPopup._gDD._invalidateMenu then cogPopup._gDD._invalidateMenu() end
+                    cogPopup._gDD:Show()
                 end
                 cogPopup._gLabel:Show()
             else
                 cogPopup._growthGet = nil
                 cogPopup._growthSet = nil
                 cogPopup._gLabel:Hide()
-                for _, btn in ipairs(cogPopup._gBtns) do btn:Hide() end
+                if cogPopup._gDD then cogPopup._gDD:Hide() end
             end
 
             -- Show/hide toggle row (shares the G_ROW_Y slot with Grow)
@@ -4607,6 +5076,38 @@ initFrame:SetScript("OnEvent", function(self)
                 cogPopup._cropToggle:Hide()
             end
 
+            -- Show/hide Wrap row (its own row, like Cropped Icons)
+            if hasWrap then
+                cogPopup._wrapGet = opts.wrapGet
+                cogPopup._wrapSet = opts.wrapSet
+                cogPopup._wrapLabel:Show()
+                cogPopup._wrapToggle:Show()
+                if cogPopup._wrapToggleSnap then cogPopup._wrapToggleSnap() end
+                if cogPopup._wrapHover then cogPopup._wrapHover:Show() end
+            else
+                cogPopup._wrapGet = nil
+                cogPopup._wrapSet = nil
+                cogPopup._wrapLabel:Hide()
+                cogPopup._wrapToggle:Hide()
+                if cogPopup._wrapHover then cogPopup._wrapHover:Hide() end
+            end
+
+            -- Show/hide Raise Strata row (its own row, below all other toggles)
+            if hasRaiseStrata then
+                cogPopup._rsGet = opts.raiseStrataGet
+                cogPopup._rsSet = opts.raiseStrataSet
+                cogPopup._rsLabel:Show()
+                cogPopup._rsToggle:Show()
+                if cogPopup._rsToggleSnap then cogPopup._rsToggleSnap() end
+                if cogPopup._rsHover then cogPopup._rsHover:Show() end
+            else
+                cogPopup._rsGet = nil
+                cogPopup._rsSet = nil
+                cogPopup._rsLabel:Hide()
+                cogPopup._rsToggle:Hide()
+                if cogPopup._rsHover then cogPopup._rsHover:Hide() end
+            end
+
             -- Row order: cogs that pass sizeFirst (core position / core text
             -- position) put Size at the top; everyone else keeps X, Y, Size.
             -- Spacing (when present) follows Size. Grow / toggle always sit in
@@ -4622,6 +5123,9 @@ initFrame:SetScript("OnEvent", function(self)
                     if track  then track:ClearAllPoints();  track:SetPoint("TOPLEFT", p, "TOPLEFT", SLEFT, ry - 2) end
                     if valBox then valBox:ClearAllPoints(); valBox:SetPoint("TOPRIGHT", p, "TOPRIGHT", -SPAD, ry) end
                 end
+                -- Width % is intentionally NOT in this data-row sequence: it is
+                -- repositioned to the very bottom (below Wrap) further down, so it
+                -- never sits between Size and X/Y.
                 local seq = {}
                 if hasSize and opts.sizeFirst then
                     seq[#seq + 1] = { p._sLabel, p._sTrack, p._sValBox }
@@ -4641,9 +5145,9 @@ initFrame:SetScript("OnEvent", function(self)
                 local nextY = rowY(#seq + 1)
                 p._gLabel:ClearAllPoints()
                 p._gLabel:SetPoint("LEFT", p, "TOPLEFT", SPAD, nextY - GRH / 2)
-                for bi, gb in ipairs(p._gBtns) do
-                    gb:ClearAllPoints()
-                    gb:SetPoint("TOPLEFT", p, "TOPLEFT", SLEFT + (bi - 1) * (p._BTN_W + p._BTN_GAP), nextY - 1)
+                if p._gDD then
+                    p._gDD:ClearAllPoints()
+                    p._gDD:SetPoint("LEFT", p, "TOPLEFT", SLEFT, nextY - GRH / 2)
                 end
                 p._tLabel:ClearAllPoints()
                 p._tLabel:SetPoint("LEFT", p, "TOPLEFT", SPAD, nextY - GRH / 2)
@@ -4658,6 +5162,38 @@ initFrame:SetScript("OnEvent", function(self)
                 p._cropLabel:SetPoint("LEFT", p, "TOPLEFT", SPAD, cropY - GRH / 2)
                 p._cropToggle:ClearAllPoints()
                 p._cropToggle:SetPoint("RIGHT", p, "TOPRIGHT", -SPAD, cropY - GRH / 2)
+                -- Wrap sits in its own row, like Cropped Icons: below the generic
+                -- toggle / Grow row when one is present, else after the data rows.
+                -- (No cog uses both Wrap and Cropped Icons, so they never collide.)
+                local wrapRowIndex = #seq + 1
+                if hasGrowth or hasToggle then wrapRowIndex = #seq + 2 end
+                local wrapY = rowY(wrapRowIndex)
+                p._wrapLabel:ClearAllPoints()
+                p._wrapLabel:SetPoint("LEFT", p, "TOPLEFT", SPAD, wrapY - GRH / 2)
+                p._wrapToggle:ClearAllPoints()
+                p._wrapToggle:SetPoint("RIGHT", p, "TOPRIGHT", -SPAD, wrapY - GRH / 2)
+                -- Raise Strata sits in its own row, below Grow/toggle and below
+                -- Cropped Icons when those are present. Core Position cogs never
+                -- use Wrap or Width %, so it never collides with those.
+                if hasRaiseStrata then
+                    local rsRowIndex = #seq + 1
+                    if hasGrowth or hasToggle then rsRowIndex = rsRowIndex + 1 end
+                    if hasCrop or hasWrap then rsRowIndex = rsRowIndex + 1 end
+                    local rsY = rowY(rsRowIndex)
+                    p._rsLabel:ClearAllPoints()
+                    p._rsLabel:SetPoint("LEFT", p, "TOPLEFT", SPAD, rsY - GRH / 2)
+                    p._rsToggle:ClearAllPoints()
+                    p._rsToggle:SetPoint("RIGHT", p, "TOPRIGHT", -SPAD, rsY - GRH / 2)
+                end
+                -- Width % is the very last row, one below Wrap (and below Grow /
+                -- toggle / Cropped Icons when those are present). It stays a slider
+                -- row, so anchorRow handles its label + track + value box.
+                if hasWidth then
+                    local widthRowIndex = #seq + 1
+                    if hasGrowth or hasToggle then widthRowIndex = widthRowIndex + 1 end
+                    if hasCrop or hasWrap then widthRowIndex = widthRowIndex + 1 end
+                    anchorRow(p._wLabel, p._wTrack, p._wValBox, rowY(widthRowIndex))
+                end
             end
 
             -- Compute height based on visible rows
@@ -4678,12 +5214,17 @@ initFrame:SetScript("OnEvent", function(self)
                     + gap + rowH   -- X
                     + gap + rowH   -- Y
                 if hasSize    then h = h + gap + rowH end
+                if hasWidth   then h = h + gap + rowH end
                 if hasSpacing then h = h + gap + rowH end
                 if hasGrowth then h = h + gap + p._GROWTH_ROW_H end
                 -- Grow and toggle are mutually exclusive and share the same slot.
                 if hasToggle then h = h + gap + p._GROWTH_ROW_H end
                 -- Cropped Icons always occupies its own extra row.
                 if hasCrop then h = h + gap + p._GROWTH_ROW_H end
+                -- Wrap occupies its own extra row.
+                if hasWrap then h = h + gap + p._GROWTH_ROW_H end
+                -- Raise Strata occupies its own extra row.
+                if hasRaiseStrata then h = h + gap + p._GROWTH_ROW_H end
                 h = h + p._TOP_PAD
                 cogPopup:SetHeight(h)
             end
@@ -4789,6 +5330,11 @@ initFrame:SetScript("OnEvent", function(self)
                     opts.cropGet = function() return DBVal(cropKey) or defaults[cropKey] end
                     opts.cropSet = function(v) DB()[cropKey] = v; RefreshAllSlots(); UpdatePreview() end
                 end
+                -- Raise Strata: bumps whatever element occupies this slot one
+                -- strata level up so it renders above the rest of the plate.
+                local rsKey = posKey .. "SlotRaiseStrata"
+                opts.raiseStrataGet = function() return DBVal(rsKey) and true or false end
+                opts.raiseStrataSet = function(v) DB()[rsKey] = v and true or false; RefreshAllSlots(); UpdatePreview() end
                 ShowCogPopup(self, opts)
             end)
             EllesmereUI.RegisterWidgetRefresh(function()
@@ -4988,9 +5534,11 @@ initFrame:SetScript("OnEvent", function(self)
             healthNumber         = "Health #",
             healthPctNum         = "Health % | #",
             healthNumPct         = "Health # | %",
+            healthPctNumDash     = "Health % - #",
+            healthNumPctDash     = "Health # - %",
             none                 = "None",
         }
-        local textElementOrder = { "none", "---", "enemyName", "healthPercent", "healthPercentNoSign", "healthNumber", "healthPctNum", "healthNumPct" }
+        local textElementOrder = { "none", "---", "enemyName", "healthPercent", "healthPercentNoSign", "healthNumber", "healthPctNum", "healthNumPct", "healthPctNumDash", "healthNumPctDash" }
 
         local function TextSlotSetValue(slotKey, v)
             SetTextElementAtSlot(slotKey, v)
@@ -5047,7 +5595,7 @@ initFrame:SetScript("OnEvent", function(self)
             btn:SetScript("OnClick", function(self)
                 if TextPosDisabled(slotKey) then return end
                 local sizeKey = slotKey .. "Size"
-                ShowCogPopup(self, {
+                local cogOpts = {
                     title = EllesmereUI.Lf("%1$s Settings", EllesmereUI.L(slotLabel)),
                     xGet = function() return TextPosXGet(slotKey) end,
                     xSet = function(v) TextPosXSet(slotKey, v) end,
@@ -5058,14 +5606,33 @@ initFrame:SetScript("OnEvent", function(self)
                     sizeMin = 6, sizeMax = 30,
                     sizeLabel = "Size",
                     sizeFirst = true,
-                    toggleLabel = "Show % Decimal",
-                    toggleGet = function() return DBVal(slotKey .. "PctDecimal") == true end,
-                    toggleSet = function(v)
+                }
+                -- Both name and health text in this slot get Width % + Wrap (on the
+                -- dedicated Wrap row). Enemy name uses the GLOBAL enemyName keys (one
+                -- slot holds the name at a time) and its width % scales the computed
+                -- width. Health text uses PER-SLOT keys, width % is of the health bar
+                -- (default 100 = no clip), and it keeps the "Show % Decimal" toggle.
+                if DBVal(slotKey) == "enemyName" then
+                    cogOpts.widthGet = function() return DBVal("enemyNameWidthPct") or defaults.enemyNameWidthPct end
+                    cogOpts.widthSet = function(v) DB().enemyNameWidthPct = v; ns.RefreshAllSettings(); UpdatePreview() end
+                    cogOpts.wrapGet = function() return DBVal("enemyNameWrap") == true end
+                    cogOpts.wrapSet = function(v) DB().enemyNameWrap = v; ns.RefreshAllSettings(); UpdatePreview() end
+                else
+                    local widthKey = slotKey .. "WidthPct"
+                    local wrapKey = slotKey .. "Wrap"
+                    cogOpts.widthGet = function() return DBVal(widthKey) or 100 end
+                    cogOpts.widthSet = function(v) DB()[widthKey] = v; ns.RefreshAllSettings(); UpdatePreview() end
+                    cogOpts.wrapGet = function() return DBVal(wrapKey) == true end
+                    cogOpts.wrapSet = function(v) DB()[wrapKey] = v; ns.RefreshAllSettings(); UpdatePreview() end
+                    cogOpts.toggleLabel = "Show % Decimal"
+                    cogOpts.toggleGet = function() return DBVal(slotKey .. "PctDecimal") == true end
+                    cogOpts.toggleSet = function(v)
                         DB()[slotKey .. "PctDecimal"] = v
                         ns.RefreshAllSettings()
                         UpdatePreview()
-                    end,
-                })
+                    end
+                end
+                ShowCogPopup(self, cogOpts)
             end)
             EllesmereUI.RegisterWidgetRefresh(function()
                 local off = TextPosDisabled(slotKey)
@@ -5122,7 +5689,7 @@ initFrame:SetScript("OnEvent", function(self)
               disabled=function() return DBVal("textSlotRight") == "none" end,
               disabledTooltip="This option requires a text to be assigned", rawTooltip=true,
               labelOnlyDisabled=true,
-              disabledValues=function(k) if (k == "healthPctNum" or k == "healthNumPct") and DBVal("textSlotCenter") == "enemyName" then return "Disabled when Enemy Name is centered on the health bar due to overlapping text" end end });  y = y - h
+              disabledValues=function(k) if ns.IsComboHealthText(k) and DBVal("textSlotCenter") == "enemyName" then return "Disabled when Enemy Name is centered on the health bar due to overlapping text" end end });  y = y - h
         MakeTextColorSwatch(textRow1, "_leftRegion",  "textSlotTop")
         MakeTextCogIcon(textRow1, "_leftRegion",  "textSlotTop",   "Top Text")
         MakeTextColorSwatch(textRow1, "_rightRegion", "textSlotRight")
@@ -5137,7 +5704,7 @@ initFrame:SetScript("OnEvent", function(self)
               disabled=function() return DBVal("textSlotLeft") == "none" end,
               disabledTooltip="This option requires a text to be assigned", rawTooltip=true,
               labelOnlyDisabled=true,
-              disabledValues=function(k) if (k == "healthPctNum" or k == "healthNumPct") and DBVal("textSlotCenter") == "enemyName" then return "Disabled when Enemy Name is centered on the health bar due to overlapping text" end end },
+              disabledValues=function(k) if ns.IsComboHealthText(k) and DBVal("textSlotCenter") == "enemyName" then return "Disabled when Enemy Name is centered on the health bar due to overlapping text" end end },
             { type="dropdown", text="Center Text", values=textElementValues,
               getValue=function() return DBVal("textSlotCenter") end,
               setValue=function(v) TextSlotSetValue("textSlotCenter", v) end,
@@ -5230,6 +5797,20 @@ initFrame:SetScript("OnEvent", function(self)
                         end
                         UpdatePreview()
                       end },
+                    { type="slider", label="X Offset", min=-50, max=50, step=1,
+                      get=function() return DBVal("castIconOffsetX") or defaults.castIconOffsetX or 0 end,
+                      set=function(v)
+                        DB().castIconOffsetX = v
+                        ns.RefreshAllSettings()
+                        UpdatePreview()
+                      end },
+                    { type="slider", label="Y Offset", min=-50, max=50, step=1,
+                      get=function() return DBVal("castIconOffsetY") or defaults.castIconOffsetY or 0 end,
+                      set=function(v)
+                        DB().castIconOffsetY = v
+                        ns.RefreshAllSettings()
+                        UpdatePreview()
+                      end },
                     { type="toggle", label="Make Icon Part of the Bar",
                       tooltip="This makes it so the width of the cast bar includes the icon, rather than placing it to the left of the cast bars width.",
                       get=function()
@@ -5264,6 +5845,18 @@ initFrame:SetScript("OnEvent", function(self)
                       set=function(v)
                         DB().castIconFullSize = v
                         ns.RefreshAllSettings()
+                        UpdatePreview()
+                      end },
+                    { type="toggle", label="Use Target Border Color",
+                      tooltip="Colors the full-size spell icon border with your target border color while the cast bar wrap border is active.",
+                      get=function()
+                        local db = DB()
+                        if db and db.castIconTargetBorder ~= nil then return db.castIconTargetBorder end
+                        return defaults.castIconTargetBorder
+                      end,
+                      set=function(v)
+                        DB().castIconTargetBorder = v
+                        if ns.ApplyBorderWrapToAll then ns.ApplyBorderWrapToAll() end
                         UpdatePreview()
                       end },
                 },
@@ -5384,7 +5977,18 @@ initFrame:SetScript("OnEvent", function(self)
                 UpdatePreview()
                 EllesmereUI:RefreshPage()
               end },
-            { type="label", text="" });  y = y - h
+            { type="slider", text="Cast Bar Y Offset", min=-25, max=75, step=1,
+              tooltip="Nudge the cast bar up or down from its default spot under the health bar.",
+              getValue=function() return DBVal("castBarOffsetY") or defaults.castBarOffsetY end,
+              setValue=function(v)
+                DB().castBarOffsetY = v
+                local barW = ns.GetHealthBarWidth()
+                local castH = ns.GetCastBarHeight()
+                for _, plate in pairs(plates) do
+                    ns.LayoutCastBar(plate, barW, castH)
+                end
+                UpdatePreview()
+              end });  y = y - h
         do
             local leftRgn = castTimerRow._leftRegion
             local ctColorGet = function()
@@ -5469,7 +6073,7 @@ initFrame:SetScript("OnEvent", function(self)
             end,
         }
         targetGlowRow, h = W:DualRow(parent, y,
-            { type="dropdown", text="Target Glow Style",
+            { type="dropdown", text="Target Effect",
               values={ __placeholder = "..." }, order={ "__placeholder" },
               getValue=function() return "__placeholder" end,
               setValue=function() end },
@@ -5493,11 +6097,12 @@ initFrame:SetScript("OnEvent", function(self)
                 UpdatePreview()
               end });  y = y - h
 
-        -- Target Glow Style: multi-select checkbox dropdown (EllesmereUI / Border
+        -- Target Effect: multi-select checkbox dropdown (EllesmereUI / Border
         -- Color / Highlight), replacing the placeholder control above. The toggles
         -- are independent; the data model live-converts from the legacy
         -- targetGlowStyle string (see ns.GetTargetGlow* in the core file).
         local refreshTargetBorderSwatch  -- fwd decl; assigned when the swatch builds
+        local refreshTargetGlowSwatch    -- fwd decl; assigned when the glow swatch builds
         local refreshTargetHighlightCog  -- fwd decl; assigned when the cog builds
         do
             local leftRgn = targetGlowRow._leftRegion
@@ -5523,6 +6128,7 @@ initFrame:SetScript("OnEvent", function(self)
                     for _, plate in pairs(plates) do plate:ApplyTarget() end
                     UpdatePreview()
                     if refreshTargetBorderSwatch then refreshTargetBorderSwatch() end
+                    if refreshTargetGlowSwatch then refreshTargetGlowSwatch() end
                     if refreshTargetHighlightCog then refreshTargetHighlightCog() end
                 end)
             PP.Point(cbDD, "RIGHT", leftRgn, "RIGHT", -20, 0)
@@ -5530,8 +6136,9 @@ initFrame:SetScript("OnEvent", function(self)
             leftRgn._lastInline = nil
             EllesmereUI.RegisterWidgetRefresh(cbDDRefresh)
 
-            -- Inline Border Color swatch: edits targetBorderColor (default white).
-            -- Dimmed + non-interactive unless the Border Color toggle is checked.
+            -- Inline Border Color swatch: edits targetBorderColor (default white),
+            -- which tints the custom border. Dimmed + non-interactive unless the
+            -- Border Color toggle is checked.
             local swatch, updateSwatch = EllesmereUI.BuildColorSwatch(leftRgn, leftRgn:GetFrameLevel() + 5,
                 function() local c = ns.GetTargetBorderColor(); return c.r, c.g, c.b end,
                 function(r, g, b)
@@ -5554,23 +6161,54 @@ initFrame:SetScript("OnEvent", function(self)
             EllesmereUI.RegisterWidgetRefresh(refreshTargetBorderSwatch)
             refreshTargetBorderSwatch()
 
-            -- Inline cog: Target Highlight color + opacity. Gated on the
-            -- Highlight toggle (the highlight only renders when it is enabled).
+            -- Inline Glow Color swatch: edits targetGlowColor (default the
+            -- signature blue), which tints the EUI background glow. Dimmed +
+            -- non-interactive unless the EUI Glow toggle is checked.
+            local glowSwatch, updateGlowSwatch = EllesmereUI.BuildColorSwatch(leftRgn, leftRgn:GetFrameLevel() + 5,
+                function() local c = ns.GetTargetGlowColor(); return c.r, c.g, c.b end,
+                function(r, g, b)
+                    DB().targetGlowColor = { r = r, g = g, b = b }
+                    for _, plate in pairs(plates) do plate:ApplyTarget() end
+                    UpdatePreview()
+                end, nil, 20)
+            PP.Point(glowSwatch, "RIGHT", leftRgn._lastInline or leftRgn._control, "LEFT", -8, 0)
+            leftRgn._lastInline = glowSwatch
+            glowSwatch:SetScript("OnEnter", function() if EllesmereUI.ShowWidgetTooltip then EllesmereUI.ShowWidgetTooltip(glowSwatch, "Glow Color") end end)
+            glowSwatch:SetScript("OnLeave", function() if EllesmereUI.HideWidgetTooltip then EllesmereUI.HideWidgetTooltip() end end)
+            refreshTargetGlowSwatch = function()
+                local off = not ns.GetTargetGlowEllesmereUI()
+                glowSwatch:SetAlpha(off and 0.15 or 1)
+                glowSwatch:EnableMouse(not off)
+                updateGlowSwatch()
+            end
+            EllesmereUI.RegisterWidgetRefresh(refreshTargetGlowSwatch)
+            refreshTargetGlowSwatch()
+
+            -- Inline cog: "More Effects" -- Highlight color/opacity + Glow
+            -- opacity. Enabled when either the Highlight OR EUI Glow toggle is on
+            -- (so Glow Opacity is reachable whenever the glow is active).
             do
                 local _, highlightCogShow = EllesmereUI.BuildCogPopup({
-                    title = "Target Highlight",
+                    title = "More Effects",
                     rows = {
-                        { type="colorpicker", label="Color", hasAlpha=false,
+                        { type="colorpicker", label="Highlight Color", hasAlpha=false,
                           get=function() local c = ns.GetTargetHighlightColor(); return c.r, c.g, c.b end,
                           set=function(r, g, b)
                             DB().targetHighlightColor = { r = r, g = g, b = b }
                             for _, plate in pairs(plates) do plate:ApplyTarget() end
                             UpdatePreview()
                           end },
-                        { type="slider", label="Opacity", min=0, max=100, step=1,
+                        { type="slider", label="Highlight Opacity", min=0, max=100, step=1,
                           get=function() return math.floor((ns.GetTargetHighlightAlpha() * 100) + 0.5) end,
                           set=function(v)
                             DB().targetHighlightAlpha = v / 100
+                            for _, plate in pairs(plates) do plate:ApplyTarget() end
+                            UpdatePreview()
+                          end },
+                        { type="slider", label="Glow Opacity", min=0, max=100, step=1,
+                          get=function() return math.floor((ns.GetTargetGlowAlpha() * 100) + 0.5) end,
+                          set=function(v)
+                            DB().targetGlowAlpha = v / 100
                             for _, plate in pairs(plates) do plate:ApplyTarget() end
                             UpdatePreview()
                           end },
@@ -5583,7 +6221,7 @@ initFrame:SetScript("OnEvent", function(self)
                 highlightCogBtn:SetFrameLevel(leftRgn:GetFrameLevel() + 5)
                 local highlightCogTex = highlightCogBtn:CreateTexture(nil, "OVERLAY")
                 highlightCogTex:SetAllPoints(); highlightCogTex:SetTexture(EllesmereUI.COGS_ICON)
-                local function highlightCogOff() return not ns.GetTargetGlowHighlight() end
+                local function highlightCogOff() return not (ns.GetTargetGlowHighlight() or ns.GetTargetGlowEllesmereUI()) end
                 highlightCogBtn:SetScript("OnEnter", function(s) if not highlightCogOff() then s:SetAlpha(0.7) end end)
                 highlightCogBtn:SetScript("OnLeave", function(s) if not highlightCogOff() then s:SetAlpha(0.4) end end)
                 highlightCogBtn:SetScript("OnClick", function(s) if not highlightCogOff() then highlightCogShow(s) end end)
@@ -5931,6 +6569,17 @@ initFrame:SetScript("OnEvent", function(self)
                         RefreshAllPlates()
                         if targetPrev and targetPrev.UpdateOverlay then targetPrev.UpdateOverlay() end
                       end },
+                    { type="toggle", label="Full alpha on empty part of bar",
+                      get=function()
+                        local v = DBVal("targetOverlayFullBgAlpha")
+                        if v == nil then return defaults.targetOverlayFullBgAlpha end
+                        return v
+                      end,
+                      set=function(v)
+                        DB().targetOverlayFullBgAlpha = v
+                        RefreshAllPlates()
+                        if targetPrev and targetPrev.UpdateOverlay then targetPrev.UpdateOverlay() end
+                      end },
                 },
             })
             local cogBtn = CreateFrame("Button", nil, leftRgn)
@@ -5991,6 +6640,16 @@ initFrame:SetScript("OnEvent", function(self)
                       get=function() return math.floor(((DBVal("focusOverlayAlpha") or defaults.focusOverlayAlpha) * 100) + 0.5) end,
                       set=function(v)
                         DB().focusOverlayAlpha = v / 100
+                        RefreshFocusPreview()
+                      end },
+                    { type="toggle", label="Full alpha on empty part of bar",
+                      get=function()
+                        local v = DBVal("focusOverlayFullBgAlpha")
+                        if v == nil then return defaults.focusOverlayFullBgAlpha end
+                        return v
+                      end,
+                      set=function(v)
+                        DB().focusOverlayFullBgAlpha = v
                         RefreshFocusPreview()
                       end },
                 },
@@ -6117,6 +6776,7 @@ initFrame:SetScript("OnEvent", function(self)
                     DB().hoverOverlayTexture = v
                     ns.RefreshHoverEffect()
                     UpdatePreview()
+                    EllesmereUI:RefreshPage()
                   end },
                 { type="slider", text="Hover Effect", min=0, max=100, step=1,
                   tooltip="Controls the highlight shown over a nameplate when you mouse over it. Set to 0 to disable.",
@@ -6143,6 +6803,49 @@ initFrame:SetScript("OnEvent", function(self)
             PP.Point(hvSwatch, "RIGHT", rightRgn._control, "LEFT", -12, 0)
             rightRgn._lastInline = hvSwatch
             EllesmereUI.RegisterWidgetRefresh(function() hvUpdateSwatch() end)
+
+            -- Inline Hover Texture cog (Full alpha on empty part of bar), to the
+            -- left of the Hover Texture dropdown. Disabled while it is set to None.
+            local leftRgn = hoverRow._leftRegion
+            local isHoverTextureNone = function()
+                return (DBVal("hoverOverlayTexture") or defaults.hoverOverlayTexture) == "none"
+            end
+            local _, hoverTexCogShow = EllesmereUI.BuildCogPopup({
+                title = "Hover Texture",
+                rows = {
+                    { type="toggle", label="Full alpha on empty part of bar",
+                      get=function()
+                        local v = DBVal("hoverOverlayFullBgAlpha")
+                        if v == nil then return defaults.hoverOverlayFullBgAlpha end
+                        return v
+                      end,
+                      set=function(v)
+                        DB().hoverOverlayFullBgAlpha = v
+                        ns.RefreshHoverEffect()
+                        UpdatePreview()
+                      end },
+                },
+            })
+            local hvCogBtn = CreateFrame("Button", nil, leftRgn)
+            hvCogBtn:SetSize(26, 26)
+            hvCogBtn:SetPoint("RIGHT", leftRgn._lastInline or leftRgn._control, "LEFT", -8, 0)
+            leftRgn._lastInline = hvCogBtn
+            hvCogBtn:SetFrameLevel(leftRgn:GetFrameLevel() + 5)
+            local hvCogTex = hvCogBtn:CreateTexture(nil, "OVERLAY")
+            hvCogTex:SetAllPoints()
+            hvCogTex:SetTexture(EllesmereUI.COGS_ICON)
+            local function UpdateHvCogAlpha()
+                hvCogBtn:SetAlpha(isHoverTextureNone() and 0.15 or 0.4)
+            end
+            EllesmereUI.RegisterWidgetRefresh(UpdateHvCogAlpha)
+            UpdateHvCogAlpha()
+            hvCogBtn:SetScript("OnClick", function(self)
+                if not isHoverTextureNone() then hoverTexCogShow(self) end
+            end)
+            hvCogBtn:SetScript("OnEnter", function(self)
+                if not isHoverTextureNone() then self:SetAlpha(0.75) end
+            end)
+            hvCogBtn:SetScript("OnLeave", function(self) UpdateHvCogAlpha() end)
         end
 
         -----------------------------------------------------------------------
@@ -6195,7 +6898,7 @@ initFrame:SetScript("OnEvent", function(self)
                       if v == nil then v = defaults.classPowerClassColors end
                       return v and 0.3 or 1
                   end },
-                { tooltip = "Dynamic Colored",
+                { tooltip = "Class Color",
                   disabled = classPowerDisabled,
                   disabledTooltip = "Show Class Resource",
                   getValue = function()
@@ -6231,7 +6934,7 @@ initFrame:SetScript("OnEvent", function(self)
                 DB().classPowerPos = v
                 ns.RefreshClassPower(); UpdatePreview()
               end, order={ "top", "bottom" } },
-            { type="slider", text="Size", min=0.5, max=3.0, step=0.1,
+            { type="slider", text="Size", min=0.5, max=4.0, step=0.1,
               disabled=classPowerDisabled,
               disabledTooltip="Show Class Resource",
               getValue=function() return DBVal("classPowerScale") or defaults.classPowerScale end,
@@ -6300,6 +7003,86 @@ initFrame:SetScript("OnEvent", function(self)
                 DB().classPowerBgColor = { r=r, g=g, b=b, a=a }
                 ns.RefreshClassPower(); UpdatePreview()
               end });  y = y - h
+
+        -- Row 4: Shape | Border (inline color swatch + thickness cog on Border)
+        local classResourceRow4
+        classResourceRow4, h = W:DualRow(parent, y,
+            { type="dropdown", text="Shape",
+              disabled=classPowerDisabled,
+              disabledTooltip="Show Class Resource",
+              values={ rectangle="Rectangle", square="Square", circle="Circle",
+                       diamond="Diamond", hexagon="Hexagon", shield="Shield",
+                       rune="Rune", holypower="Holy Power", shard="Soul Shard",
+                       combo="Combo Points", chi="Chi", arcane="Arcane Charges",
+                       essence="Essence" },
+              order={ "rectangle", "square", "circle", "diamond", "hexagon", "shield",
+                      "rune", "holypower", "shard", "combo", "chi", "arcane", "essence" },
+              getValue=function() return DBVal("classPowerShape") or defaults.classPowerShape end,
+              setValue=function(v)
+                DB().classPowerShape = v
+                ns.RefreshClassPower(); UpdatePreview()
+              end },
+            { type="toggle", text="Border",
+              disabled=classPowerDisabled,
+              disabledTooltip="Show Class Resource",
+              getValue=function() return DBVal("classPowerBorder") == true end,
+              setValue=function(v)
+                DB().classPowerBorder = v
+                ns.RefreshClassPower(); UpdatePreview()
+                EllesmereUI:RefreshPage()
+              end });  y = y - h
+
+        -- Inline border color swatch + thickness cog on the Border toggle
+        do
+            local rgn = classResourceRow4._rightRegion
+            local function borderOff()
+                return classPowerDisabled() or DBVal("classPowerBorder") ~= true
+            end
+            local colorGet = function()
+                local c = (DB() and DB().classPowerBorderColor) or defaults.classPowerBorderColor
+                return c.r, c.g, c.b
+            end
+            local colorSet = function(r, g, b)
+                DB().classPowerBorderColor = { r = r, g = g, b = b, a = 1 }
+                ns.RefreshClassPower(); UpdatePreview()
+            end
+            local swatch, updateSwatch = EllesmereUI.BuildColorSwatch(rgn, rgn:GetFrameLevel() + 5, colorGet, colorSet, nil, 20)
+            PP.Point(swatch, "RIGHT", rgn._control, "LEFT", -12, 0)
+            rgn._lastInline = swatch
+            EllesmereUI.RegisterWidgetRefresh(function()
+                local off = borderOff()
+                swatch:SetAlpha(off and 0.15 or 1)
+                swatch:EnableMouse(not off)
+                updateSwatch()
+            end)
+            local off = borderOff()
+            swatch:SetAlpha(off and 0.15 or 1)
+            swatch:EnableMouse(not off)
+
+            local _, showCog = EllesmereUI.BuildCogPopup({
+                title = "Border Settings",
+                rows = {
+                    { type="slider", label="Thickness", min=1, max=4, step=1,
+                      get=function() return DBVal("classPowerBorderSize") or defaults.classPowerBorderSize end,
+                      set=function(v) DB().classPowerBorderSize = v; ns.RefreshClassPower(); UpdatePreview() end },
+                },
+            })
+            local cogBtn = CreateFrame("Button", nil, rgn)
+            cogBtn:SetSize(26, 26)
+            cogBtn:SetPoint("RIGHT", rgn._lastInline or rgn._control, "LEFT", -9, 0)
+            rgn._lastInline = cogBtn
+            cogBtn:SetFrameLevel(rgn:GetFrameLevel() + 5)
+            cogBtn:SetAlpha(borderOff() and 0.15 or 0.4)
+            local cogTex = cogBtn:CreateTexture(nil, "OVERLAY")
+            cogTex:SetAllPoints()
+            cogTex:SetTexture(EllesmereUI.RESIZE_ICON)
+            cogBtn:SetScript("OnEnter", function(self) if not borderOff() then self:SetAlpha(0.7) end end)
+            cogBtn:SetScript("OnLeave", function(self) self:SetAlpha(borderOff() and 0.15 or 0.4) end)
+            cogBtn:SetScript("OnClick", function(self) if not borderOff() then showCog(self) end end)
+            EllesmereUI.RegisterWidgetRefresh(function()
+                cogBtn:SetAlpha(borderOff() and 0.15 or 0.4)
+            end)
+        end
 
         -- Invisible frame spanning the entire CLASS RESOURCE section for glow targeting
         local classResourceSection = CreateFrame("Frame", nil, parent)
@@ -6557,6 +7340,10 @@ initFrame:SetScript("OnEvent", function(self)
                         sizeSet = function(v) DB().castNameSize = v; ns.RefreshAllSettings(); UpdatePreview() end,
                         sizeMin = 6, sizeMax = 20, sizeLabel = EllesmereUI.L("Size"),
                         sizeFirst = true,
+                        widthGet = function() return DBVal("castNameWidthPct") or defaults.castNameWidthPct end,
+                        widthSet = function(v) DB().castNameWidthPct = v; ns.RefreshAllSettings(); UpdatePreview() end,
+                        wrapGet = function() return DBVal("castNameWrap") == true end,
+                        wrapSet = function(v) DB().castNameWrap = v; ns.RefreshAllSettings(); UpdatePreview() end,
                     })
                 end)
                 EllesmereUI.RegisterWidgetRefresh(function()
@@ -6585,6 +7372,8 @@ initFrame:SetScript("OnEvent", function(self)
                 UpdatePreview()
                 EllesmereUI:RefreshPage()
             end)
+            ccSwatch:SetScript("OnEnter", function() if EllesmereUI.ShowWidgetTooltip then EllesmereUI.ShowWidgetTooltip(ccSwatch, "Class Color") end end)
+            ccSwatch:SetScript("OnLeave", function() if EllesmereUI.HideWidgetTooltip then EllesmereUI.HideWidgetTooltip() end end)
 
             -- Custom color swatch (to the left of class swatch)
             local stColorGet = function() return DBColor("castTargetColor") end
@@ -6595,6 +7384,7 @@ initFrame:SetScript("OnEvent", function(self)
             end
             local stSwatch, stUpdate = EllesmereUI.BuildColorSwatch(rightRgn, rightRgn:GetFrameLevel() + 5, stColorGet, stColorSet, nil, 20)
             PP.Point(stSwatch, "RIGHT", ccSwatch, "LEFT", -9, 0)
+            stSwatch._eabOrigClick = stSwatch:GetScript("OnClick")
             stSwatch:SetScript("OnClick", function(self)
                 local db = DB()
                 local cc = db and db.castTargetClassColor
@@ -6608,6 +7398,8 @@ initFrame:SetScript("OnEvent", function(self)
                 end
                 if self._eabOrigClick then self._eabOrigClick(self) end
             end)
+            stSwatch:SetScript("OnEnter", function() if EllesmereUI.ShowWidgetTooltip then EllesmereUI.ShowWidgetTooltip(stSwatch, "Custom Color") end end)
+            stSwatch:SetScript("OnLeave", function() if EllesmereUI.HideWidgetTooltip then EllesmereUI.HideWidgetTooltip() end end)
 
             EllesmereUI.RegisterWidgetRefresh(function()
                 local db = DB()
@@ -6649,6 +7441,10 @@ initFrame:SetScript("OnEvent", function(self)
                         sizeSet = function(v) DB().castTargetSize = v; ns.RefreshAllSettings(); UpdatePreview() end,
                         sizeMin = 6, sizeMax = 20, sizeLabel = EllesmereUI.L("Size"),
                         sizeFirst = true,
+                        widthGet = function() return DBVal("castTargetWidthPct") or defaults.castTargetWidthPct end,
+                        widthSet = function(v) DB().castTargetWidthPct = v; ns.RefreshAllSettings(); UpdatePreview() end,
+                        wrapGet = function() return DBVal("castTargetWrap") == true end,
+                        wrapSet = function(v) DB().castTargetWrap = v; ns.RefreshAllSettings(); UpdatePreview() end,
                     })
                 end)
                 EllesmereUI.RegisterWidgetRefresh(function()
@@ -6782,7 +7578,7 @@ initFrame:SetScript("OnEvent", function(self)
             classIcon    = function() return ResolveCoreMapping("classification") end,
             enemyName    = function() return ResolveTextMapping("enemyName") end,
             healthText   = function()
-                local slot = FindTextSlotForElement("healthPercent") or FindTextSlotForElement("healthPercentNoSign") or FindTextSlotForElement("healthNumber") or FindTextSlotForElement("healthPctNum") or FindTextSlotForElement("healthNumPct")
+                local slot = FindTextSlotForElement("healthPercent") or FindTextSlotForElement("healthPercentNoSign") or FindTextSlotForElement("healthNumber") or FindTextSlotForElement("healthPctNum") or FindTextSlotForElement("healthNumPct") or FindTextSlotForElement("healthPctNumDash") or FindTextSlotForElement("healthNumPctDash")
                 if not slot then return { section = coreTextHeader, target = textRow1 } end
                 local info = textSlotToRow[slot]
                 if not info then return { section = coreTextHeader, target = textRow1 } end
@@ -7322,16 +8118,10 @@ initFrame:SetScript("OnEvent", function(self)
                         numFS:SetText(valStr)
                         numFS:SetPoint(slot.anchor, health, slot.anchor, slot.xOff, 0)
                         numFS:Show()
-                    elseif element == "healthPctNum" then
+                    elseif ns.IsComboHealthText(element) then
                         local valStr = tostring(healthVal):reverse():gsub("(%d%d%d)", "%1,"):reverse():gsub("^,", "")
                         pctFS:SetTextColor(sc.r, sc.g, sc.b, 1)
-                        pctFS:SetText(healthPct .. "% | " .. valStr)
-                        pctFS:SetPoint(slot.anchor, health, slot.anchor, slot.xOff, 0)
-                        pctFS:Show()
-                    elseif element == "healthNumPct" then
-                        local valStr = tostring(healthVal):reverse():gsub("(%d%d%d)", "%1,"):reverse():gsub("^,", "")
-                        pctFS:SetTextColor(sc.r, sc.g, sc.b, 1)
-                        pctFS:SetText(valStr .. " | " .. healthPct .. "%")
+                        ns.SetCombinedHealthText(pctFS, element, healthPct .. "%", valStr)
                         pctFS:SetPoint(slot.anchor, health, slot.anchor, slot.xOff, 0)
                         pctFS:Show()
                     end
@@ -7370,6 +8160,15 @@ initFrame:SetScript("OnEvent", function(self)
             local _overlayTexKey   = (colorKey == "target") and "targetOverlayTexture"  or "focusOverlayTexture"
             local _overlayAlphaKey = (colorKey == "target") and "targetOverlayAlpha"   or "focusOverlayAlpha"
             local _overlayColorKey = (colorKey == "target") and "targetOverlayColor"   or "focusOverlayColor"
+            local _overlayFullBgKey = (colorKey == "target") and "targetOverlayFullBgAlpha" or "focusOverlayFullBgAlpha"
+            -- Empty-portion (bg) opacity: full when the "Full alpha on empty part
+            -- of bar" toggle is on, otherwise dimmed to 30% (matches live plates).
+            local function _overlayBgAlpha(oAlpha)
+                local full = DBVal(_overlayFullBgKey)
+                if full == nil then full = defaults[_overlayFullBgKey] end
+                if full then return oAlpha end
+                return oAlpha * 0.3
+            end
             if colorKey == "focus" or colorKey == "target" then
                 local tex = DBVal(_overlayTexKey) or defaults[_overlayTexKey]
                 if tex ~= "none" then
@@ -7382,7 +8181,7 @@ initFrame:SetScript("OnEvent", function(self)
                     overlayFillTex:SetVertexColor(oc.r, oc.g, oc.b)
                     overlayBgClip, overlayBgTex = MakeOverlayClip(fillRef, "TOPRIGHT", health, "BOTTOMRIGHT", 1)
                     overlayBgTex:SetTexture(ns.ResolveOverlayTexPath and ns.ResolveOverlayTexPath(tex) or (MEDIA .. tex .. ".png"))
-                    overlayBgTex:SetAlpha(oAlpha * 0.3)
+                    overlayBgTex:SetAlpha(_overlayBgAlpha(oAlpha))
                     overlayBgTex:SetVertexColor(oc.r, oc.g, oc.b)
                 end
             end
@@ -7440,7 +8239,7 @@ initFrame:SetScript("OnEvent", function(self)
                         overlayBgClip, overlayBgTex = MakeOverlayClip(fillRef, "TOPRIGHT", health, "BOTTOMRIGHT", 1)
                     end
                     overlayBgTex:SetTexture(ns.ResolveOverlayTexPath and ns.ResolveOverlayTexPath(tex) or (MEDIA .. tex .. ".png"))
-                    overlayBgTex:SetAlpha(oAlpha * 0.3)
+                    overlayBgTex:SetAlpha(_overlayBgAlpha(oAlpha))
                     overlayBgTex:SetVertexColor(oc.r, oc.g, oc.b)
                     overlayBgClip:Show()
                 end
@@ -7507,20 +8306,24 @@ initFrame:SetScript("OnEvent", function(self)
             local colTargetSide = (dbRef and dbRef.castTargetSide) or defaults.castTargetSide
             local colTimerSide  = (dbRef and dbRef.castTimerSide)  or defaults.castTimerSide
             local colTimerW = colCtmSz * 2.2
-            local colTextW = BAR_W * 0.42
+            -- Per-element cast text truncation (% of bar width + wrap), mirroring runtime.
+            local colNameW = BAR_W * ((dbRef and dbRef.castNameWidthPct) or defaults.castNameWidthPct) / 100
+            local colTgtW  = BAR_W * ((dbRef and dbRef.castTargetWidthPct) or defaults.castTargetWidthPct) / 100
+            local colNameWrap = (dbRef and dbRef.castNameWrap) == true
+            local colTgtWrap  = (dbRef and dbRef.castTargetWrap) == true
 
             -- Spell name
             local nameFS = cast:CreateFontString(nil, "OVERLAY")
             SetPVFont(nameFS, fontPath, cns, GetNPOptOutline())
-            nameFS:SetWordWrap(false)
-            nameFS:SetMaxLines(1)
+            nameFS:SetWordWrap(colNameWrap)
+            nameFS:SetMaxLines(colNameWrap and 2 or 1)
             nameFS:SetText(EllesmereUI.L("Spell Name"))
             nameFS:SetTextColor(cnc.r, cnc.g, cnc.b, 1)
             if colNameSide == "none" then
                 nameFS:Hide()
             else
                 local pt, xb, jh = ns.GetCastTextAnchor(colNameSide, colShowTimer and colTimerSide == colNameSide, colTimerW, false)
-                nameFS:SetWidth(colTextW)
+                nameFS:SetWidth(colNameW)
                 nameFS:SetJustifyH(jh)
                 nameFS:SetPoint(pt, cast, pt, xb, 0)
             end
@@ -7544,8 +8347,9 @@ initFrame:SetScript("OnEvent", function(self)
             -- Spell target
             local targetFS = cast:CreateFontString(nil, "OVERLAY")
             SetPVFont(targetFS, fontPath, cts, GetNPOptOutline())
-            targetFS:SetWordWrap(false)
-            targetFS:SetMaxLines(1)
+            targetFS:SetWordWrap(colTgtWrap)
+            targetFS:SetNonSpaceWrap(false)
+            targetFS:SetMaxLines(colTgtWrap and 2 or 1)
             targetFS:SetText(isHalf and (UnitName("player") or EllesmereUI.L("Target")) or (UnitName("player") or EllesmereUI.L("Spell Target")))
             local useClassColor = defaults.castTargetClassColor
             if dbRef and dbRef.castTargetClassColor ~= nil then useClassColor = dbRef.castTargetClassColor end
@@ -7565,7 +8369,7 @@ initFrame:SetScript("OnEvent", function(self)
                 targetFS:Hide()
             else
                 local pt, xb, jh = ns.GetCastTextAnchor(colTargetSide, colShowTimer and colTimerSide == colTargetSide, colTimerW, false)
-                targetFS:SetWidth(colTextW)
+                targetFS:SetWidth(colTgtW)
                 targetFS:SetJustifyH(jh)
                 targetFS:SetPoint(pt, cast, pt, xb, 0)
             end
@@ -7682,9 +8486,6 @@ initFrame:SetScript("OnEvent", function(self)
         -- No content header on Colors tab (presets are inline in scroll area)
         EllesmereUI:ClearContentHeader()
 
-        -- Clear display preset hook (only active on Display page)
-        onPresetSettingChanged = nil
-
         -- Enable per-row center divider for the dual-column layout (same as Display tab)
         parent._showRowDivider = true
 
@@ -7712,12 +8513,6 @@ initFrame:SetScript("OnEvent", function(self)
                   getValue = function() return DBColor("enemyInCombat") end,
                   setValue = function(r, g, b)
                     DB().enemyInCombat = { r = r, g = g, b = b }
-                    RefreshAllPlates()
-                  end },
-                { tooltip = "Neutral",
-                  getValue = function() return DBColor("neutral") end,
-                  setValue = function(r, g, b)
-                    DB().neutral = { r = r, g = g, b = b }
                     RefreshAllPlates()
                   end },
                 { tooltip = "Spell Casters",
@@ -7775,8 +8570,30 @@ initFrame:SetScript("OnEvent", function(self)
             swatch:EnableMouse(not off)
         end
 
-        -- Darken Enemies Out of Combat | (empty)
-        _, h = W:DualRow(parent, y,
+        -- Neutral & Mini Enemies | Darken Enemies Out of Combat
+        local neutralMiniRow
+        neutralMiniRow, h = W:DualRow(parent, y,
+            { type="multiSwatch", text="Neutral & Mini Enemies",
+              swatches = {
+                { tooltip = "Neutral",
+                  getValue = function() return DBColor("neutral") end,
+                  setValue = function(r, g, b)
+                    DB().neutral = { r = r, g = g, b = b }
+                    RefreshAllPlates()
+                  end },
+                { tooltip = "Mini Enemies",
+                  -- Until explicitly set, views the user's "Enemies" color so the
+                  -- swatch starts matching enemyInCombat (see GetReactionColor).
+                  getValue = function()
+                    local db = DB()
+                    local c = (db and db.miniEnemy) or (db and db.enemyInCombat) or defaults.enemyInCombat
+                    return c.r, c.g, c.b
+                  end,
+                  setValue = function(r, g, b)
+                    DB().miniEnemy = { r = r, g = g, b = b }
+                    RefreshAllPlates()
+                  end },
+              } },
             { type="toggle", text="Darken Enemies Out of Combat",
               getValue=function()
                 local db = DB()
@@ -7789,8 +8606,40 @@ initFrame:SetScript("OnEvent", function(self)
                     plate:UpdateHealthColor()
                 end
               end,
-              tooltip="Dims enemy nameplate colours while the enemy is out of combat. Turn off to keep enemies at full colour whether or not they are fighting." },
-            { type="label", text="" });  y = y - h
+              tooltip="Dims enemy nameplate colours while the enemy is out of combat. Turn off to keep enemies at full colour whether or not they are fighting." });  y = y - h
+
+        -- Inline cog on the "Neutral & Mini Enemies" region: "Mini Coloring M+
+        -- Only" toggle. On (default) restricts the Mini Enemies color to 5-man
+        -- dungeons; off applies it everywhere.
+        do
+            local leftRgn = neutralMiniRow._leftRegion
+            local _, miniCogShow = EllesmereUI.BuildCogPopup({
+                title = "Mini Enemies",
+                rows = {
+                    { type="toggle", label="Mini Coloring M+ Only",
+                      get=function()
+                        local v = DBVal("miniColoringMPlusOnly")
+                        if v == nil then return defaults.miniColoringMPlusOnly end
+                        return v
+                      end,
+                      set=function(v)
+                        DB().miniColoringMPlusOnly = v
+                        RefreshAllPlates()
+                      end },
+                },
+            })
+            local miniCogBtn = CreateFrame("Button", nil, leftRgn)
+            miniCogBtn:SetSize(26, 26)
+            miniCogBtn:SetPoint("RIGHT", leftRgn._lastInline or leftRgn._control, "LEFT", -8, 0)
+            leftRgn._lastInline = miniCogBtn
+            miniCogBtn:SetFrameLevel(leftRgn:GetFrameLevel() + 5)
+            miniCogBtn:SetAlpha(0.4)
+            local miniCogTex = miniCogBtn:CreateTexture(nil, "OVERLAY")
+            miniCogTex:SetAllPoints(); miniCogTex:SetTexture(EllesmereUI.COGS_ICON)
+            miniCogBtn:SetScript("OnEnter", function(s) s:SetAlpha(0.7) end)
+            miniCogBtn:SetScript("OnLeave", function(s) s:SetAlpha(0.4) end)
+            miniCogBtn:SetScript("OnClick", function(s) miniCogShow(s) end)
+        end
 
         _, h = W:Spacer(parent, y, 20);  y = y - h
 
@@ -8033,7 +8882,7 @@ initFrame:SetScript("OnEvent", function(self)
                 end
             end
 
-            -- Cog popup for Pixel Glow settings (Lines, Thickness, Speed)
+            -- Cog popup for Pixel Glow settings.
             do
                 local _, ShowImpCastGlowPopup = EllesmereUI.BuildCogPopup({
                     title = "Pixel Glow Settings",
@@ -8047,6 +8896,17 @@ initFrame:SetScript("OnEvent", function(self)
                         { type = "slider", label = "Speed", min = 1, max = 8, step = 1,
                           get = function() local s = DB().importantCastGlowSpeed or defaults.importantCastGlowSpeed or 4; return 9 - s end,
                           set = function(v) DB().importantCastGlowSpeed = 9 - v; RefreshAllPlates() end },
+                        { type = "toggle", label = "Background",
+                          get = function() return DB().importantCastGlowBackground == true end,
+                          set = function(v) DB().importantCastGlowBackground = v and true or nil; RefreshAllPlates() end },
+                        { type = "colorpicker", label = "Background Color",
+                          get = function()
+                              local c = DB().importantCastGlowBackgroundColor or defaults.importantCastGlowBackgroundColor or { r = 0, g = 0, b = 0 }
+                              return c.r or 0, c.g or 0, c.b or 0
+                          end,
+                          set = function(r, g, b) DB().importantCastGlowBackgroundColor = { r = r, g = g, b = b }; RefreshAllPlates() end,
+                          disabled = function() return DB().importantCastGlowBackground ~= true end,
+                          disabledTooltip = EllesmereUI.DisabledTooltip("Pixel Glow Background") },
                     },
                 })
 
@@ -8292,6 +9152,49 @@ initFrame:SetScript("OnEvent", function(self)
             local off = isDpsNoAggroDisabled()
             swatch:SetAlpha(off and 0.15 or 1)
             swatch:EnableMouse(not off)
+
+            -- Inline cog: independent "Override Mini-Boss colors" and "Override
+            -- Caster colors". Each promotes the DPS No Aggro color above that
+            -- single mob-type color. Kept separate so Casters can stay their own
+            -- color for contrast. Dimmed + non-interactive while the toggle is off.
+            local _, dpsNoAggroCogShow = EllesmereUI.BuildCogPopup({
+                title = "No Aggro",
+                rows = {
+                    { type="toggle", label="Override Mini-Boss colors",
+                      get=function()
+                        local db = DB()
+                        if db and db.dpsNoAggroOverrideMiniBoss ~= nil then return db.dpsNoAggroOverrideMiniBoss end
+                        return defaults.dpsNoAggroOverrideMiniBoss
+                      end,
+                      set=function(v) DB().dpsNoAggroOverrideMiniBoss = v; RefreshAllPlates() end },
+                    { type="toggle", label="Override Caster colors",
+                      get=function()
+                        local db = DB()
+                        if db and db.dpsNoAggroOverrideCaster ~= nil then return db.dpsNoAggroOverrideCaster end
+                        return defaults.dpsNoAggroOverrideCaster
+                      end,
+                      set=function(v) DB().dpsNoAggroOverrideCaster = v; RefreshAllPlates() end },
+                },
+            })
+            local dpsNoAggroCogBtn = CreateFrame("Button", nil, leftRgn)
+            dpsNoAggroCogBtn:SetSize(26, 26)
+            dpsNoAggroCogBtn:SetPoint("RIGHT", swatch, "LEFT", -8, 0)
+            dpsNoAggroCogBtn:SetFrameLevel(leftRgn:GetFrameLevel() + 5)
+            local dpsNoAggroCogTex = dpsNoAggroCogBtn:CreateTexture(nil, "OVERLAY")
+            dpsNoAggroCogTex:SetAllPoints(); dpsNoAggroCogTex:SetTexture(EllesmereUI.COGS_ICON)
+            dpsNoAggroCogBtn:SetScript("OnEnter", function(s) if not isDpsNoAggroDisabled() then s:SetAlpha(0.7) end end)
+            dpsNoAggroCogBtn:SetScript("OnLeave", function(s) if not isDpsNoAggroDisabled() then s:SetAlpha(0.4) end end)
+            dpsNoAggroCogBtn:SetScript("OnClick", function(s) if not isDpsNoAggroDisabled() then dpsNoAggroCogShow(s) end end)
+            EllesmereUI.RegisterWidgetRefresh(function()
+                local cogOff = isDpsNoAggroDisabled()
+                dpsNoAggroCogBtn:SetAlpha(cogOff and 0.15 or 0.4)
+                dpsNoAggroCogBtn:EnableMouse(not cogOff)
+            end)
+            do
+                local cogOff = isDpsNoAggroDisabled()
+                dpsNoAggroCogBtn:SetAlpha(cogOff and 0.15 or 0.4)
+                dpsNoAggroCogBtn:EnableMouse(not cogOff)
+            end
         end
 
         -- Inline "Has Aggro" color swatch next to Classic Tank Aggro toggle
@@ -8376,6 +9279,13 @@ initFrame:SetScript("OnEvent", function(self)
                         return defaults.tankHasAggroOverrideMobType
                       end,
                       set=function(v) DB().tankHasAggroOverrideMobType = v; RefreshAllPlates() end },
+                    { type="toggle", label="Override Boss colors",
+                      get=function()
+                        local db = DB()
+                        if db and db.tankHasAggroOverrideBoss ~= nil then return db.tankHasAggroOverrideBoss end
+                        return defaults.tankHasAggroOverrideBoss
+                      end,
+                      set=function(v) DB().tankHasAggroOverrideBoss = v; RefreshAllPlates() end },
                 },
             })
             local hasAggroCogBtn = CreateFrame("Button", nil, leftRgn)
@@ -8437,7 +9347,6 @@ initFrame:SetScript("OnEvent", function(self)
                 if prev.RefreshHealthText then prev.RefreshHealthText() end
             end
         end
-        _colorPreviewRandomizeAll = nil
         for _, prev in ipairs(_colorPagePreviews) do
             if prev.UpdateColor then
                 EllesmereUI.RegisterWidgetRefresh(prev.UpdateColor)
@@ -8490,8 +9399,6 @@ initFrame:SetScript("OnEvent", function(self)
         end,
         onPageCacheRestore = function(pageName)
             if pageName == PAGE_DISPLAY then
-                -- Restore display preset drift hook (cleared when Colors page builds)
-                onPresetSettingChanged = _displayPresetCheckDrift
                 -- Re-evaluate Set as Default button visibility (cache restore
                 -- blanket-shows all children, which can ghost the button)
                 local pState = EllesmereUI._presetState and EllesmereUI._presetState[""]
@@ -8515,8 +9422,6 @@ initFrame:SetScript("OnEvent", function(self)
                     EllesmereUI:SetContentHeaderHeightSilent(_headerBaseH + (dismissed and 0 or 29))
                 end
             elseif pageName == PAGE_COLORS then
-                -- Randomize preview fills/icons when switching TO this tab
-                if _colorPreviewRandomizeAll then _colorPreviewRandomizeAll() end
                 -- Refresh all color preview bars (colors from DB)
                 if _colorPreviewRefreshAll then _colorPreviewRefreshAll() end
             end

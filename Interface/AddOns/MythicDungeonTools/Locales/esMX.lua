@@ -111,6 +111,8 @@ L["Animated Storm"] = "Tormenta animada"
 L["Animated Weapon"] = "Arma animada"
 --[[Translation missing --]]
 L["Announce focus marker on ready check"] = "Announce my Focus Marker on ready check."
+--[[Translation missing --]]
+L["announceDungeonReset"] = "Announce dungeon resets to group"
 L["Anodized Coilbearer"] = "Portabobina anodizado"
 L["Anomalus"] = "Anomalus"
 L["Anub'ar Champion"] = "Campeón Anub'ar"
@@ -1096,6 +1098,8 @@ L["Dungeon Data Missing"] = "Dungeon Data Missing"
 --[[Translation missing --]]
 L["Dungeon Entrance"] = "Dungeon Entrance"
 L["Dungeon Level"] = "Nivel de Mazmorra"
+--[[Translation missing --]]
+L["dungeonResetAnnouncement"] = "<Dungeons have been reset!>"
 --[[Translation missing --]]
 L["Duskfright Herald"] = "Duskfright Herald"
 L["Duskwatch Arcanist"] = "Arcanista Vigía del ocaso"

@@ -2,8 +2,9 @@ local COMPAT, _, T = select(4,GetBuildInfo()), ...
 if T.SkipLocalActionBook then return end
 if T.TenEnv then T.TenEnv() end
 
-local MODERN, CF_CLASSIC, CI_ERA = COMPAT >= 10e4 or nil, COMPAT < 10e4 or nil, COMPAT < 2e4 or nil
-local CF_WRATH, CF_CATA, CF_MISTS = COMPAT < 10e4 and COMPAT > 3e4 or nil, COMPAT < 10e4 and COMPAT > 4e4 or nil, COMPAT < 10e4 and COMPAT > 5e4 or nil
+local MODERN, CI_ERA = COMPAT >= 10e4 or nil, COMPAT < 2e4 or nil
+local CF_CLASSIC = not MODERN or nil
+local CF_WRATH, CF_CATA, CF_MISTS = CF_CLASSIC and COMPAT > 3e4 or nil, CF_CLASSIC and COMPAT > 4e4 or nil, CF_CLASSIC and COMPAT > 5e4 or nil
 local MODERN_MOUNTS, MODERN_BATTLEPETS = MODERN or CF_WRATH, MODERN or CF_MISTS
 local EV = T.Evie
 local AB = T.ActionBook:compatible(2,43)
@@ -776,7 +777,7 @@ securecall(function() -- macro: name
 					notify, sm[k] = RW:SetNamedMacroText(k, nil, owner, true) or notify, nil
 				end
 			end
-			local ofs = MAX_ACCOUNT_MACROS - numGlobal
+			local ofs = (MAX_ACCOUNT_MACROS or 120) - numGlobal
 			for i=1,numGlobal + numChar do
 				local k, _, text = GetMacroInfo((i > numGlobal and ofs or 0)+i)
 				if k and text ~= sm[k] then
@@ -982,7 +983,7 @@ securecall(function() -- equipmentset: equipment sets by name
 end)
 securecall(function() -- raidmark
 	local map, waitingToClearSelf = {}
-	local SABT_RAIDMARK = MODERN
+	local SABT_RAIDMARK = not CI_ERA
 	local function CanChangeRaidTargets(unit)
 		return not not ((not IsInRaid() or UnitIsGroupLeader("player") or UnitIsGroupAssistant("player")) and not (unit and UnitIsPlayer(unit) and UnitIsEnemy("player", unit)))
 	end
@@ -1294,7 +1295,7 @@ securecall(function() -- toy: item ID, flags[FORCE_SHOW]
 		[89222]=1, [63141]="[alliance]", [64997]="[horde]", [66888]=1, [89869]=1, [90175]=1,
 		[103685]=1, [115468]="[horde]", [115472]="[alliance]", [119160]="[horde]", [119182]="[alliance]",
 		[122283]=1, [142531]=1, [142532]=1, [163211]=1,
-		[85500]=MODERN and "[fish5]",
+		[85500]=MODERN and "[fish5]" or CF_MISTS and "[fish:525]",
 		[182773]="[coven:necro][acoven80:necro]", [184353]="[coven:kyrian][acoven80:kyrian]", [180290]="[coven:fae][acoven80:fae]", [183716]="[coven:venthyr][acoven80:venthyr]", [190237] = 1,
 	}
 	local function playerHasToy(id)

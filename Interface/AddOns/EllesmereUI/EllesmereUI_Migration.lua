@@ -292,7 +292,10 @@ local function MakeSnappers()
 
     local function snap(v)
         if type(v) ~= "number" or v == 0 then return v end
-        local result = floor(v / onePixel + 0.5) * onePixel
+        -- Epsilon-guarded round (matches PP.SnapForES): position values sitting
+        -- a hair off a half-pixel boundary must snap the same way here as at
+        -- runtime, or the one-time migration shifts frames 1px.
+        local result = floor(v / onePixel + 0.5 + 0.001) * onePixel
         -- Clean floating point dust
         local rounded = floor(result + 0.5)
         if math.abs(result - rounded) < 0.001 then result = rounded end
@@ -928,6 +931,32 @@ EllesmereUI.RegisterMigration({
         if type(np) ~= "table" then return end
         if np.boss == nil and type(np.miniboss) == "table" then
             np.boss = { r = np.miniboss.r, g = np.miniboss.g, b = np.miniboss.b }
+        end
+    end,
+})
+
+EllesmereUI.RegisterMigration({
+    id          = "uf_power_border_size_zero_v1",
+    scope       = "profile",
+    description = "Zero out Unit Frames per-unit powerBorderSize. The detached power bar border size only became functional this build; older non-zero values were set while the control did nothing, so clear them so each UI stays visually identical. Users can re-enable a border afterward.",
+    body = function(ctx)
+        -- Self-gating: once a unit's powerBorderSize is 0 (or absent) it is
+        -- skipped, so the body is naturally idempotent on top of the runner's
+        -- per-profile flag. Runs once per profile ever; any border the user
+        -- sets AFTER the flag is stamped is never touched.
+        --
+        -- Scoped STRICTLY to EllesmereUIUnitFrames. The RaidFrames addon has its
+        -- own, unrelated powerBorderSize (its power border already worked) which
+        -- lives at ctx.profile.addons.EllesmereUIRaidFrames and must NOT be
+        -- zeroed here.
+        local uf = ctx.profile.addons and ctx.profile.addons.EllesmereUIUnitFrames
+        if type(uf) ~= "table" then return end
+        local UNIT_KEYS = { "player", "target", "focus", "targettarget", "focustarget", "pet", "boss" }
+        for _, unitKey in ipairs(UNIT_KEYS) do
+            local u = uf[unitKey]
+            if type(u) == "table" and type(u.powerBorderSize) == "number" and u.powerBorderSize ~= 0 then
+                u.powerBorderSize = 0
+            end
         end
     end,
 })
@@ -2185,6 +2214,29 @@ EllesmereUI.RegisterMigration({
 })
 
 EllesmereUI.RegisterMigration({
+    id          = "ab_queuestatus_reset_visibility_v1",
+    scope       = "profile",
+    description = "Reset stale QueueStatus (LFG eye) visibility/mouseover settings to neutral. EUI used to control the eye's visibility but now only controls its position; old saved values (e.g. barVisibility 'mouseover' with mouseoverAlpha 0) could leave the eye permanently invisible with no UI left to restore it.",
+    body = function(ctx)
+        local ab = ctx.profile.addons and ctx.profile.addons.EllesmereUIActionBars
+        local qs = ab and ab.bars and ab.bars.QueueStatus
+        if type(qs) ~= "table" then return end
+        -- Neutral defaults (matches the EXTRA_BARS defaults): always-visible, no
+        -- mouseover fade, no combat/housing/instance hiding.
+        qs.barVisibility      = "always"
+        qs.alwaysHidden       = false
+        qs.mouseoverEnabled   = false
+        qs.mouseoverAlpha     = 1
+        qs._savedBarAlpha     = nil
+        qs.combatHideEnabled  = false
+        qs.combatShowEnabled  = false
+        qs.housingHideEnabled = false
+        qs.visHideHousing     = false
+        qs.visOnlyInstances   = false
+    end,
+})
+
+EllesmereUI.RegisterMigration({
     id          = "uf_per_unit_portrait_style_v1",
     scope       = "profile",
     description = "Copy global portraitStyle into player/target/focus per-unit tables.",
@@ -2778,6 +2830,48 @@ EllesmereUI.RegisterMigration({
     end,
 })
 
+-- "Disable Slug Outline" (neverShowSlug) and "Outline Icon Text" (outlineIconText)
+-- moved off the account-wide EllesmereUIDB root into the per-profile fonts DB so
+-- they travel with profile export/import and module sync. Seed the live working
+-- fonts table (active profile) AND every EXISTING profile fonts snapshot from the
+-- old account-wide values so nobody's look changes on any profile. Profiles with
+-- no fonts snapshot are left untouched -- creating a partial one would reset their
+-- global font / outline mode on the next switch; their getter fallback covers the
+-- read side. The root keys stay in place as the read-time fallback (getters in
+-- EllesmereUI.lua) and a dormant backup. Per-key nil guard keeps it safe to re-run.
+EllesmereUI.RegisterMigration({
+    id          = "fonts_slug_iconoutline_per_profile_v1",
+    scope       = "global",
+    description = "Seed every profile's fonts DB with the formerly account-wide Disable Slug Outline + Outline Icon Text settings.",
+    body        = function(ctx)
+        local db = ctx.db
+        if not db then return end
+        local slug = db.neverShowSlug
+        local oit  = db.outlineIconText
+        if slug == nil and type(oit) ~= "table" then return end
+        local function seed(fonts)
+            if type(fonts) ~= "table" then return end
+            if fonts.neverShowSlug == nil and slug ~= nil then
+                fonts.neverShowSlug = slug and true or false
+            end
+            if fonts.outlineIconText == nil and type(oit) == "table" then
+                local t = {}
+                for k, v in pairs(oit) do t[k] = v end
+                fonts.outlineIconText = t
+            end
+        end
+        -- Live working copy = what a full export of the active profile snapshots
+        -- via DeepCopy(GetFontsDB()).
+        seed(db.fonts)
+        -- Existing stored snapshots = so exporting a non-active profile carries it.
+        if type(db.profiles) == "table" then
+            for _, pd in pairs(db.profiles) do
+                if type(pd) == "table" then seed(pd.fonts) end
+            end
+        end
+    end,
+})
+
 EllesmereUI.RegisterMigration({
     id          = "blizzskin_reskin_master_split_v1",
     scope       = "global",
@@ -2796,6 +2890,392 @@ EllesmereUI.RegisterMigration({
         if db.reskinGreatVault  == nil then db.reskinGreatVault  = master end
         if db.reskinGameMenu    == nil then db.reskinGameMenu    = master and queueNotFalse end
         if db.reskinLFGMenu     == nil then db.reskinLFGMenu     = master and queueNotFalse end
+    end,
+})
+
+EllesmereUI.RegisterMigration({
+    id          = "texture_kringel_diamonds_to_blinkii_v1",
+    scope       = "profile",
+    description = "Rename the saved 'kringel-diamonds' bar texture value to its replacement 'blinkii-diamonds' across Unit Frames, Raid Frames, Nameplates, Resource Bars, and Damage Meters.",
+    body = function(ctx)
+        -- The kringel-diamonds texture was replaced by blinkii-diamonds (same slot,
+        -- new art). The dropdown value is the texture KEY string, stored under
+        -- different fields per module (healthBarTexture, general.barTexture,
+        -- castBar.texture, per-unit overrides, dm.barTexture). "kringel-diamonds"
+        -- only ever appears as a texture-selection value, so a recursive value swap
+        -- over each module's saved data catches every storage location and is
+        -- idempotent (nothing left to match on a second pass).
+        local addons = ctx.profile.addons
+        if type(addons) ~= "table" then return end
+
+        local function swap(t, depth)
+            if type(t) ~= "table" or depth > 8 then return end
+            for k, v in pairs(t) do
+                if v == "kringel-diamonds" then
+                    t[k] = "blinkii-diamonds"
+                elseif type(v) == "table" then
+                    swap(v, depth + 1)
+                end
+            end
+        end
+
+        local MODULES = {
+            "EllesmereUIUnitFrames", "EllesmereUIRaidFrames", "EllesmereUINameplates",
+            "EllesmereUIResourceBars", "EllesmereUIDamageMeters",
+        }
+        for _, name in ipairs(MODULES) do
+            swap(addons[name], 1)
+        end
+    end,
+})
+
+EllesmereUI.RegisterMigration({
+    id          = "purge_anchor_debug_log_v1",
+    scope       = "global",
+    description = "Remove the temporary _anchorDebugLog table left in the central DB by the combat-reload anchor diagnostics.",
+    body = function()
+        if EllesmereUIDB then
+            EllesmereUIDB._anchorDebugLog = nil
+        end
+    end,
+})
+
+EllesmereUI.RegisterMigration({
+    id          = "minimap_coords_mode_position_v1",
+    scope       = "profile",
+    description = "Convert the minimap 'Show Coordinates Below Map' toggle into coordsMode/coordsPosition dropdown values, preserving each user's current coordinate behavior.",
+    body = function(ctx)
+        -- Only profiles that have used the Minimap module are migrated; fresh
+        -- installs take the new defaults (always / topLeft). The addons key
+        -- survives the logout default-strip even when every minimap setting is
+        -- default (empty table), so an all-default existing user still lands
+        -- on hover -- their old effective behavior. Runs AFTER
+        -- v66_basics_split_data (registration order), so pre-split Basics
+        -- minimap data has already been moved to this path.
+        local emm = ctx.profile.addons and ctx.profile.addons.EllesmereUIMinimap
+        if type(emm) ~= "table" then return end
+        local mm = emm.minimap
+        if type(mm) ~= "table" then
+            mm = {}
+            emm.minimap = mm
+        end
+        if mm.coordsMode ~= nil then return end  -- already on the new keys
+        if mm.coordsBelow then
+            mm.coordsMode = "always"
+            mm.coordsPosition = "belowMap"
+        else
+            mm.coordsMode = "hover"
+            mm.coordsPosition = "topLeft"
+            -- The X/Y nudge only applied in below-map mode; clear leftovers so
+            -- they don't shift the newly position-aware hover coordinates.
+            mm.coordsBelowOffsetX = nil
+            mm.coordsBelowOffsetY = nil
+        end
+    end,
+})
+
+EllesmereUI.RegisterMigration({
+    id          = "minimap_clock_location_mode_v2",
+    scope       = "profile",
+    description = "Convert the minimap Clock Inside / Zone Inside toggles into clockMode/locationMode dropdown values (none/inside/edge). Elements hidden via the removed Show Blizzard Elements Zone/Clock checkboxes become 'none'. Replaces the never-shipped _v1 (deleted).",
+    body = function(ctx)
+        -- Same gate as minimap_coords_mode_position_v1: only profiles that have
+        -- used the Minimap module migrate; fresh installs take the new defaults
+        -- (inside / inside). Stored data is default-stripped, so absent keys
+        -- mean the old defaults: showClock defaulted ON (only false is ever
+        -- stored), hideZoneText defaulted OFF (only true is ever stored),
+        -- clockInside defaulted ON, zoneInside defaulted OFF.
+        local emm = ctx.profile.addons and ctx.profile.addons.EllesmereUIMinimap
+        if type(emm) ~= "table" then return end
+        local mm = emm.minimap
+        if type(mm) ~= "table" then
+            mm = {}
+            emm.minimap = mm
+        end
+        -- Hidden via the removed Show Blizzard Elements checkboxes wins, even
+        -- over a mode already stamped by the unshipped v1 pass (dev/testers).
+        if mm.showClock == false then
+            mm.clockMode = "none"
+        elseif mm.clockMode == nil then
+            mm.clockMode = (mm.clockInside == false) and "edge" or "inside"
+        end
+        if mm.hideZoneText == true then
+            mm.locationMode = "none"
+        elseif mm.locationMode == nil then
+            mm.locationMode = mm.zoneInside and "inside" or "edge"
+        end
+    end,
+})
+
+EllesmereUI.RegisterMigration({
+    id          = "minimap_omnium_folio_mode_v1",
+    scope       = "profile",
+    description = "Convert the minimap Show Omnium Folio toggle into the omniumFolioMode dropdown (never/hover/always), preserving each user's current visibility.",
+    body = function(ctx)
+        -- Same gate as the other minimap mode migrations: only profiles that
+        -- have used the module migrate; fresh installs take the new default
+        -- (always). Stored data is default-stripped, so only an explicit
+        -- showOmniumFolio == false is ever present (default was ON).
+        local emm = ctx.profile.addons and ctx.profile.addons.EllesmereUIMinimap
+        if type(emm) ~= "table" then return end
+        local mm = emm.minimap
+        if type(mm) ~= "table" then
+            mm = {}
+            emm.minimap = mm
+        end
+        if mm.omniumFolioMode == nil then
+            mm.omniumFolioMode = (mm.showOmniumFolio == false) and "never" or "always"
+        end
+    end,
+})
+
+-------------------------------------------------------------------------------
+--  CDM per-spell settings: tiered-store shape transform
+--
+--  OLD shape: barSpells[barKey].spellSettings[sid] = { ... } (bar-scoped; a
+--  spell moved to another bar lost its settings and left an orphan behind) plus
+--  barSpells[barKey]._syncIconSettings (Sync All Bar Buttons: stamped one
+--  spell's whole block onto every other spell on the bar).
+--
+--  NEW shape:
+--    specProf.spellSettingsCD[sid] / specProf.spellSettingsBuff[sid]
+--        per-spell entries, family-scoped, travel with the spell across bars
+--    barSpells[barKey].barSettings
+--        "Apply to Bar" tier (per spec); seeded from synced bars
+--    bd.barSpellSettings (profile-level bar definition; NOT written here)
+--        "Apply to Bar (All Specs)" tier, starts empty
+--
+--  Faithfulness rules (nothing changes visually):
+--    * Entries move only when the spell is CURRENTLY assigned to the bar the
+--      entry lives on (authoritative), or is not visibly assigned anywhere
+--      (hidden/removed spells keep their styling for when they return).
+--    * Stale orphans for spells now owned by a DIFFERENT bar are dropped --
+--      that spell renders default today; adopting the orphan would change it.
+--    * Synced bars promote their uniform stamped block to barSettings and drop
+--      the per-spell copies that match it. A divergent copy is kept as a
+--      per-spell override, with explicit `false` fillers for any seed key it
+--      lacks (false is render-equivalent to nil for every settings key) so the
+--      new bar tier cannot bleed through a key the spell never had.
+--
+--  Shared with the profile-import path so old-format strings imported after
+--  this update are transformed immediately (the registered migration also
+--  covers them on the next reload -- both are idempotent).
+-------------------------------------------------------------------------------
+local function CdmFlatSettingsEqual(a, b)
+    if type(a) ~= "table" or type(b) ~= "table" then return false end
+    for k, v in pairs(a) do if b[k] ~= v then return false end end
+    for k, v in pairs(b) do if a[k] ~= v then return false end end
+    return true
+end
+
+-- Classify a barSpells bucket key into its settings-family store key.
+-- Mirrors the runtime rule (ns.SettingsFamilyKey): only barType "buffs" (and
+-- the default "buffs" bar) are buff-family; custom_buff and the ghost bar are
+-- not. Stale buckets for deleted bars fall back to a key heuristic -- their
+-- entries are orphan candidates at most, so a miss is inert.
+local function CdmBarFamilyKey(barKey, barsCfg)
+    if barKey == "buffs" then return "spellSettingsBuff" end
+    if barKey == "__ghost_cd" then return "spellSettingsCD" end
+    if type(barsCfg) == "table" then
+        for _, b in ipairs(barsCfg) do
+            if type(b) == "table" and b.key == barKey then
+                return (b.barType == "buffs") and "spellSettingsBuff" or "spellSettingsCD"
+            end
+        end
+    end
+    if type(barKey) == "string" and barKey:find("buff", 1, true) then
+        return "spellSettingsBuff"
+    end
+    return "spellSettingsCD"
+end
+
+function EllesmereUI.MigrateCdmSpellSettingsShape(specProf, barsCfg)
+    if type(specProf) ~= "table" then return end
+    local barSpells = specProf.barSpells
+    if type(barSpells) ~= "table" then return end
+
+    -- Pass 0: visible assignment map per family. Ghost-bar assignments do NOT
+    -- count as visible, so a hidden spell's orphaned entry still migrates and
+    -- un-hiding restores its styling on any bar.
+    local visibleAssign = { spellSettingsCD = {}, spellSettingsBuff = {} }
+    for barKey, bs in pairs(barSpells) do
+        if barKey ~= "__ghost_cd" and type(bs) == "table"
+           and type(bs.assignedSpells) == "table" then
+            local famKey = CdmBarFamilyKey(barKey, barsCfg)
+            for _, sid in ipairs(bs.assignedSpells) do
+                if type(sid) == "number" and sid ~= 0 then
+                    visibleAssign[famKey][sid] = barKey
+                end
+            end
+        end
+    end
+
+    -- Pass 1: relocate entries whose spell is assigned to the bar the entry
+    -- lives on. Pass 2: adopt entries for spells not visibly assigned anywhere.
+    for pass = 1, 2 do
+        for barKey, bs in pairs(barSpells) do
+            local old = type(bs) == "table" and bs.spellSettings
+            if type(old) == "table" then
+                local famKey = CdmBarFamilyKey(barKey, barsCfg)
+                local assign = visibleAssign[famKey]
+                for sid, entry in pairs(old) do
+                    if type(entry) ~= "table" or next(entry) == nil then
+                        old[sid] = nil
+                    else
+                        local takeIt
+                        if pass == 1 then
+                            takeIt = (assign[sid] == barKey)
+                        else
+                            takeIt = (assign[sid] == nil)
+                        end
+                        if takeIt then
+                            local store = specProf[famKey]
+                            if not store then store = {}; specProf[famKey] = store end
+                            if store[sid] == nil then store[sid] = entry end
+                            old[sid] = nil
+                        end
+                    end
+                end
+            end
+        end
+    end
+
+    -- Pass 3: promote synced bars to the bar tier, then clear the flag and
+    -- drop whatever old-shape residue remains (stale different-bar orphans).
+    for barKey, bs in pairs(barSpells) do
+        if type(bs) == "table" then
+            if bs._syncIconSettings == true and type(bs.assignedSpells) == "table"
+               and type(bs.barSettings) ~= "table" then
+                local famKey = CdmBarFamilyKey(barKey, barsCfg)
+                local store = specProf[famKey]
+                local seed
+                if store then
+                    for _, sid in ipairs(bs.assignedSpells) do
+                        local e = store[sid]
+                        if type(e) == "table" and next(e) ~= nil then seed = e; break end
+                    end
+                end
+                if seed then
+                    local copy = {}
+                    for k, v in pairs(seed) do copy[k] = v end
+                    bs.barSettings = copy
+                    for _, sid in ipairs(bs.assignedSpells) do
+                        local e = store[sid]
+                        if type(e) == "table" then
+                            if CdmFlatSettingsEqual(e, copy) then
+                                store[sid] = nil
+                            else
+                                -- Divergent override: block seed keys it lacks
+                                -- so the new bar tier can't bleed through.
+                                for k in pairs(copy) do
+                                    if e[k] == nil then e[k] = false end
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+            bs._syncIconSettings = nil
+            if type(bs.spellSettings) == "table" then
+                bs.spellSettings = nil
+            end
+        end
+    end
+end
+
+EllesmereUI.RegisterMigration({
+    id          = "cdm_spell_settings_tiers_v1",
+    scope       = "specProfile",
+    description = "Move CDM per-spell icon settings from per-bar spellSettings into per-spec family stores (settings now travel with the spell across bars), and promote Sync All Bar Buttons bars into bar-level Apply-to-Bar settings.",
+    body = function(ctx)
+        local prof = EllesmereUIDB.profiles and EllesmereUIDB.profiles[ctx.profileName]
+        local cdm = prof and prof.addons and prof.addons.EllesmereUICooldownManager
+        local barsCfg = cdm and cdm.cdmBars and cdm.cdmBars.bars
+        EllesmereUI.MigrateCdmSpellSettingsShape(ctx.specProfile, barsCfg)
+    end,
+})
+
+-- Relocate HOSTED-buff per-spell settings from the CD family store into the
+-- BUFF family store, for every bar that hosts the buff. Hosted buffs (a buff
+-- placed on a CD/utility bar) originally resolved per-spell settings through
+-- the host bar's family key (CD); they now resolve the BUFF store, frame-keyed,
+-- so the same spellID's cooldown icon can hold independent settings. Without
+-- the move, pre-existing hosted-buff settings would silently stop applying.
+-- Idempotent: moves only while a CD-store entry exists for a flagged id, and
+-- never overwrites keys already present in the BUFF-store entry. (A cooldown
+-- twin's own settings under the same id move too -- unsplittable in the old
+-- shared-entry shape, and that state was already rendering wrong.)
+-- assignedSpells conversion (plain id -> hosted marker) is NOT done here: it
+-- needs the live viewer/catalog data to tell the buff and cooldown forms
+-- apart, so the options panel normalizes it lazily (EnsureAssignedSpells);
+-- rendering handles both shapes in the meantime.
+function EllesmereUI.MigrateCdmHostedBuffSettings(specProf)
+    if type(specProf) ~= "table" or type(specProf.barSpells) ~= "table" then return end
+    local stCD = specProf.spellSettingsCD
+    if type(stCD) ~= "table" then return end
+    for _, sd in pairs(specProf.barSpells) do
+        local hosted = type(sd) == "table" and sd.hostedBuffSpellIDs
+        if type(hosted) == "table" then
+            for hsid in pairs(hosted) do
+                local e = stCD[hsid]
+                if type(e) == "table" then
+                    local stBuff = specProf.spellSettingsBuff
+                    if type(stBuff) ~= "table" then
+                        stBuff = {}
+                        specProf.spellSettingsBuff = stBuff
+                    end
+                    local tgt = stBuff[hsid]
+                    if type(tgt) ~= "table" then
+                        stBuff[hsid] = e
+                    else
+                        for k, v in pairs(e) do
+                            if tgt[k] == nil then tgt[k] = v end
+                        end
+                    end
+                    stCD[hsid] = nil
+                end
+            end
+        end
+    end
+end
+
+EllesmereUI.RegisterMigration({
+    id          = "cdm_hosted_buff_settings_v1",
+    scope       = "specProfile",
+    description = "Move hosted-buff per-spell icon settings from the CD family store to the BUFF family store (hosted buffs now share the buff-family settings entry with the buffs bar, independent of the same spell's cooldown icon).",
+    body = function(ctx)
+        EllesmereUI.MigrateCdmHostedBuffSettings(ctx.specProfile)
+    end,
+})
+
+-- The Mythic+ Timer's Enemy Forces bar historically shared one bar texture with
+-- the main timer bar (both read barTexture / barBgTexture). The Forces bar now
+-- has its own enemyBarTexture / enemyBarBgTexture so the two can be styled
+-- independently. Seed the new keys from the old shared ones on every existing
+-- profile so an existing user's Forces bar looks exactly as before; fresh
+-- installs have no profiles here yet and inherit the new "none" default for
+-- both. Global scope runs once, and it only seeds when the new key is unset, so
+-- a later reset of the Forces texture is respected (not re-seeded each login).
+EllesmereUI.RegisterMigration({
+    id          = "mythictimer_split_forces_bar_texture_v1",
+    scope       = "global",
+    description = "Give the M+ Timer Forces bar its own texture keys, seeded from the shared bar texture so existing users' Forces bar is unchanged.",
+    body = function(ctx)
+        local db = ctx.db
+        if not db or not db.profiles then return end
+        for _, profData in pairs(db.profiles) do
+            if type(profData) == "table" and type(profData.addons) == "table" then
+                local mt = profData.addons.EllesmereUIMythicTimer
+                if type(mt) == "table" then
+                    if mt.enemyBarTexture == nil and mt.barTexture ~= nil then
+                        mt.enemyBarTexture = mt.barTexture
+                    end
+                    if mt.enemyBarBgTexture == nil and mt.barBgTexture ~= nil then
+                        mt.enemyBarBgTexture = mt.barBgTexture
+                    end
+                end
+            end
+        end
     end,
 })
 

@@ -146,20 +146,20 @@ BigWigs3DB = {
 },
 },
 },
-["BigWigs_Bosses_Muro'jin and Nekraxx"] = {
-["profiles"] = {
-["Default"] = {
-["toggles"] = {
-[1243900] = 3129591,
-},
-},
-},
-},
 ["BigWigs_Bosses_Zuraal"] = {
 ["profiles"] = {
 ["Default"] = {
 ["toggles"] = {
 [1263399] = 3129591,
+},
+},
+},
+},
+["BigWigs_Bosses_Muro'jin and Nekraxx"] = {
+["profiles"] = {
+["Default"] = {
+["toggles"] = {
+[1243900] = 3129591,
 },
 },
 },
@@ -184,7 +184,7 @@ BigWigs3DB = {
 ["Player-3676-0DF7D3EF"] = {
 ["playerRating"] = 4147,
 ["specId"] = 1473,
-["keyMap"] = 559,
+["keyMap"] = 560,
 ["name"] = "Barelynoer",
 ["keyLevel"] = 22,
 ["realm"] = "Area 52",

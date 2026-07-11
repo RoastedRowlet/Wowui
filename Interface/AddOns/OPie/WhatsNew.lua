@@ -1,6 +1,10 @@
 local _, T = ...
 
 function T.WhatsNewData(vh, uv, li)
+	vh("v8.6.3")
+	uv("In Classic Mists, <b>Anglers Fishing Raft</b> is now considered usable by characters with a fishing skill of 525 or more.")
+	uv("Fixed an issue causing profession extended conditionals such as <tt>[fish]</tt> to be unreliable in Classic WoW.")
+	li("Quest Items ring now includes quest-starting items in Classic Anniversary.")
 	vh("v8.6")
 	uv("<b>Teleport Home</b> and <b>Return from Home</b> slices can now be added to OPie rings.")
 	uv("The Mounts action category now also includes mounts you have acquired but your current character cannot use.")

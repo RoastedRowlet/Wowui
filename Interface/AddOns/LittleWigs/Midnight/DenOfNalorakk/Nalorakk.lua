@@ -20,27 +20,45 @@ mod:SetPrivateAuraSounds({
 
 local echoingMaulCount = 1
 local overwhemlingOnslaughtCount = 1
-local forcefulRoarCount = 1
+local forcefulRoarCount = 1 -- XXX remove in 12.1
 local furyOfTheWarGodCount = 1
+local count25 = 1
 local activeBars = {}
 local activeBarBySpellId = {}
+local backupBars = {}
+
+--------------------------------------------------------------------------------
+-- Renames
+--
+
+mod:SetRenames({
+	[1242860] = {1242860}, -- Echoing Maul
+	[1243569] = {1243569}, -- Overwhelming Onslaught
+	[1243011] = {1243011}, -- Fury of the War God
+})
 
 --------------------------------------------------------------------------------
 -- Initialization
 --
 
-function mod:GetOptions()
-	return {
-		1242860, -- Echoing Maul
-		1243569, -- Overwhelming Onslaught
-		1255385, -- Forceful Roar
-		1243011, -- Fury of the War God
-		--{1242869, "PRIVATE"}, -- Echoing Maul
-		--{1243590, "PRIVATE"}, -- Overwhelming Onslaught
-		{1255577, "PRIVATE"}, -- Spectral Slash
-		{1262253, "PRIVATE"}, -- Demoralizing Scream
-		{1261781, "PRIVATE"}, -- Defensive Stance
-	}
+if BigWigsLoader.isNext then
+	function mod:GetOptions()
+		return {
+			1242860, -- Echoing Maul
+			1243569, -- Overwhelming Onslaught
+			-- TODO does Forceful Slam have timeline events?
+			1243011, -- Fury of the War God
+		}
+	end
+else -- XXX remove in 12.1
+	function mod:GetOptions()
+		return {
+			1242860, -- Echoing Maul
+			1243569, -- Overwhelming Onslaught
+			1255385, -- Forceful Roar
+			1243011, -- Fury of the War God
+		}
+	end
 end
 
 mod:UseCustomTimers(true)
@@ -49,8 +67,10 @@ function mod:OnEncounterStart()
 	overwhemlingOnslaughtCount = 1
 	forcefulRoarCount = 1
 	furyOfTheWarGodCount = 1
+	count25 = 1
 	activeBars = {}
 	activeBarBySpellId = {}
+	backupBars = {}
 	if self:ShouldShowBars() then
 		self:RegisterEvent("ENCOUNTER_TIMELINE_EVENT_ADDED")
 		self:RegisterEvent("ENCOUNTER_TIMELINE_EVENT_STATE_CHANGED")
@@ -61,6 +81,12 @@ end
 function mod:OnWin()
 	activeBars = {}
 	activeBarBySpellId = {}
+end
+
+function mod:OnBossDisable()
+	for eventID in next, backupBars do
+		self:SendMessage("BigWigs_StopBar", nil, nil, eventID)
+	end
 end
 
 --------------------------------------------------------------------------------
@@ -86,21 +112,51 @@ function mod:ENCOUNTER_TIMELINE_EVENT_ADDED(_, eventInfo)
 	if eventInfo.source ~= 0 then return end -- Enum.EncounterTimelineEventSource.Encounter
 	local duration = self:RoundNumber(eventInfo.duration, 0)
 	local barInfo
-	if duration > 90 then return end -- filter placeholder bars
-	if duration == 5 or duration == 33 then -- Echoing Maul
-		self:CancelBarForSpell(1242860)
-		barInfo = self:EchoingMaulTimeline(eventInfo)
-	elseif duration == 15 then -- Overwhelming Onslaught
-		self:CancelBarForSpell(1243569)
-		barInfo = self:OverwhemlingOnslaughtTimeline(eventInfo)
-	elseif duration == 27 then -- Forceful Roar
-		self:CancelBarForSpell(1255385)
-		barInfo = self:ForcefulRoarTimeline(eventInfo)
-	elseif duration == 48 then -- Fury of the War God
-		self:CancelBarForSpell(1243011)
-		barInfo = self:FuryOfTheWarGodTimeline(eventInfo)
-	elseif not self:IsWiping() then
-		self:ErrorForTimelineEvent(eventInfo)
+	if duration > 90 then return end -- filter placeholder bars XXX not needed in 12.1?
+	if BigWigsLoader.isNext then
+		if duration == 5 or (count25 % 2 == 1 and duration == 25) then -- Echoing Maul
+			self:CancelBarForSpell(1242860)
+			barInfo = self:EchoingMaulTimeline(eventInfo)
+		elseif duration == 13 or (count25 % 2 == 0 and duration == 25) then -- Overwhelming Onslaught
+			self:CancelBarForSpell(1243569)
+			barInfo = self:OverwhemlingOnslaughtTimeline(eventInfo)
+		elseif duration == 54 then -- Fury of the War God
+			self:CancelBarForSpell(1243011)
+			barInfo = self:FuryOfTheWarGodTimeline(eventInfo)
+		elseif not self:IsWiping() then
+			self:ErrorForTimelineEvent(eventInfo)
+			backupBars[eventInfo.id] = true
+			self:SendMessage("BigWigs_StartBar", nil, nil, ("[B] %s"):format(eventInfo.spellName), eventInfo.duration, eventInfo.iconFileID, eventInfo.maxQueueDuration, nil, eventInfo.id, eventInfo.id)
+			local state = C_EncounterTimeline.GetEventState(eventInfo.id)
+			if state == 1 then -- Enum.EncounterTimelineEventState.Paused = 1
+				self:SendMessage("BigWigs_PauseBar", nil, nil, eventInfo.id)
+			end
+		end
+		if duration == 25 then
+			count25 = count25 + 1
+		end
+	else -- XXX remove in 12.1
+		if duration == 5 or duration == 33 then -- Echoing Maul
+			self:CancelBarForSpell(1242860)
+			barInfo = self:EchoingMaulTimeline(eventInfo)
+		elseif duration == 15 then -- Overwhelming Onslaught
+			self:CancelBarForSpell(1243569)
+			barInfo = self:OverwhemlingOnslaughtTimeline(eventInfo)
+		elseif duration == 27 then -- Forceful Roar
+			self:CancelBarForSpell(1255385)
+			barInfo = self:ForcefulRoarTimeline(eventInfo)
+		elseif duration == 48 then -- Fury of the War God
+			self:CancelBarForSpell(1243011)
+			barInfo = self:FuryOfTheWarGodTimeline(eventInfo)
+		elseif not self:IsWiping() then
+			self:ErrorForTimelineEvent(eventInfo)
+			backupBars[eventInfo.id] = true
+			self:SendMessage("BigWigs_StartBar", nil, nil, ("[B] %s"):format(eventInfo.spellName), eventInfo.duration, eventInfo.iconFileID, eventInfo.maxQueueDuration, nil, eventInfo.id, eventInfo.id)
+			local state = C_EncounterTimeline.GetEventState(eventInfo.id)
+			if state == 1 then -- Enum.EncounterTimelineEventState.Paused = 1
+				self:SendMessage("BigWigs_PauseBar", nil, nil, eventInfo.id)
+			end
+		end
 	end
 	if barInfo then
 		barInfo.createdAt = GetTime()
@@ -136,6 +192,15 @@ function mod:ENCOUNTER_TIMELINE_EVENT_STATE_CHANGED(_, eventID)
 				activeBarBySpellId[barInfo.key] = nil
 			end
 		end
+	elseif backupBars[eventID] then
+		local newState = C_EncounterTimeline.GetEventState(eventID)
+		if newState == 0 then -- Enum.EncounterTimelineEventState.Active
+			self:SendMessage("BigWigs_ResumeBar", nil, nil, eventID)
+		elseif newState == 1 then -- Enum.EncounterTimelineEventState.Paused
+			self:SendMessage("BigWigs_PauseBar", nil, nil, eventID)
+		else -- Canceled / Finished
+			self:SendMessage("BigWigs_StopBar", nil, nil, eventID)
+		end
 	end
 end
 
@@ -147,6 +212,9 @@ function mod:ENCOUNTER_TIMELINE_EVENT_REMOVED(_, eventID)
 		if activeBarBySpellId[barInfo.key] == eventID then
 			activeBarBySpellId[barInfo.key] = nil
 		end
+	elseif backupBars[eventID] then
+		backupBars[eventID] = nil
+		self:SendMessage("BigWigs_StopBar", nil, nil, eventID)
 	end
 end
 
@@ -154,8 +222,8 @@ end
 -- Timeline Ability Handlers
 --
 
-function mod:EchoingMaulTimeline(eventInfo)
-	local barText = CL.count:format(self:SpellName(1242860), echoingMaulCount)
+function mod:EchoingMaulTimeline(eventInfo) -- Echoing Maul
+	local barText = CL.count:format(self:GetRename(1242860), echoingMaulCount)
 	self:CDBar(1242860, eventInfo.duration, barText, nil, eventInfo.id)
 	echoingMaulCount = echoingMaulCount + 1
 	return {
@@ -171,16 +239,17 @@ function mod:EchoingMaulTimeline(eventInfo)
 	}
 end
 
-function mod:OverwhemlingOnslaughtTimeline(eventInfo)
-	local barText = CL.count:format(self:SpellName(1243569), overwhemlingOnslaughtCount)
+function mod:OverwhemlingOnslaughtTimeline(eventInfo) -- Overwhelming Onslaught
+	local barText = CL.count:format(self:GetRename(1243569), overwhemlingOnslaughtCount)
 	self:CDBar(1243569, eventInfo.duration, barText, nil, eventInfo.id)
 	overwhemlingOnslaughtCount = overwhemlingOnslaughtCount + 1
 	return {
 		msg = barText,
 		key = 1243569,
 		callback = function()
-			self:Message(1243569, "purple", barText)
-			self:PlaySound(1243569, "alert")
+			self:StopBlizzMessages(1) -- only the tank gets the message but in 12.1 it affects everyone
+			self:Message(1243569, "orange", barText)
+			self:PlaySound(1243569, "alarm")
 		end,
 		cancelCallback = function()
 			overwhemlingOnslaughtCount = overwhemlingOnslaughtCount - 1
@@ -188,7 +257,7 @@ function mod:OverwhemlingOnslaughtTimeline(eventInfo)
 	}
 end
 
-function mod:ForcefulRoarTimeline(eventInfo)
+function mod:ForcefulRoarTimeline(eventInfo) -- XXX remove in 12.1
 	local barText = CL.count:format(self:SpellName(1255385), forcefulRoarCount)
 	self:CDBar(1255385, eventInfo.duration, barText, nil, eventInfo.id)
 	forcefulRoarCount = forcefulRoarCount + 1
@@ -197,7 +266,7 @@ function mod:ForcefulRoarTimeline(eventInfo)
 		key = 1255385,
 		callback = function()
 			self:Message(1255385, "orange", barText)
-			self:PlaySound(1255385, "alarm")
+			self:PlaySound(1255385, "alert")
 		end,
 		cancelCallback = function()
 			forcefulRoarCount = forcefulRoarCount - 1
@@ -205,14 +274,15 @@ function mod:ForcefulRoarTimeline(eventInfo)
 	}
 end
 
-function mod:FuryOfTheWarGodTimeline(eventInfo)
-	local barText = CL.count:format(self:SpellName(1243011), furyOfTheWarGodCount)
+function mod:FuryOfTheWarGodTimeline(eventInfo) -- Fury of the War God
+	local barText = CL.count:format(self:GetRename(1243011), furyOfTheWarGodCount)
 	self:CDBar(1243011, eventInfo.duration, barText, nil, eventInfo.id)
 	furyOfTheWarGodCount = furyOfTheWarGodCount + 1
 	return {
 		msg = barText,
 		key = 1243011,
 		callback = function()
+			-- XXX cancel not needed in 12.1?
 			-- cancel + decrement the Echoing Maul bar when this ability occurs, it will be restarted later
 			local echoingMaulBarId = activeBarBySpellId[1242860] -- Echoing Maul
 			if echoingMaulBarId then
@@ -222,9 +292,9 @@ function mod:FuryOfTheWarGodTimeline(eventInfo)
 				activeBars[echoingMaulBarId] = nil
 				activeBarBySpellId[barInfo.key] = nil
 			end
-			-- has Blizzard message
-			--self:Message(1243011, "yellow", barText)
-			--self:PlaySound(1243011, "long")
+			self:StopBlizzMessages(1)
+			self:Message(1243011, "yellow", barText)
+			self:PlaySound(1243011, "long")
 		end,
 		cancelCallback = function()
 			furyOfTheWarGodCount = furyOfTheWarGodCount - 1

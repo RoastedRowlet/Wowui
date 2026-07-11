@@ -86,6 +86,11 @@ local _cdStateRules = {}                                -- subset: cas.cdStateEf
 local _cdStateTicker
 local _hasUserRules = false                             -- any profile (user) rule armed
 
+-- CD-ready sound "armed" state, keyed by ability so it survives the rule-object
+-- churn of FakeActive_Rearm (rebuilds are frequent in M+ and would otherwise eat
+-- the ready edge). Empty at login, so an already-ready preset never false-fires.
+local _cdrArmedByKey = {}
+
 -- Forward declarations
 local GetOverlay, ResolveSwipeColor, IconTexture, ApplyToFrame, ApplyRule, RaiseOverlayBorders, RestoreOverlayBorders
 local EnsureTicker, OpenWindow, CloseWindow, CloseAll, CastWindow
@@ -220,7 +225,9 @@ ApplyToFrame = function(iconFrame, rule, win)
     local ss = rule.cas
     if not ss then
         local sd = barKey and ns.GetBarSpellData and ns.GetBarSpellData(barKey)
-        ss = sd and ns.ResolveSpellSettings and ns.ResolveSpellSettings(iconFrame, rule.spellID, sd)
+        if ns.ResolveSpellSettings then
+            ss = ns.ResolveSpellSettings(iconFrame, rule.spellID, sd, barKey)
+        end
     end
 
     -- "Hide Active State" dropdown -> never show the overlay.
@@ -243,6 +250,32 @@ ApplyToFrame = function(iconFrame, rule, win)
         if ns.StyleOverlayCooldownText then
             ns.StyleOverlayCooldownText(o.cd, bd, ss, iconFrame:GetScale())
         end
+        -- Custom Active State Decimals: when the bar opts in AND Duration Text is
+        -- shown, drive the overlay countdown from the shared decimal engine
+        -- (Blizzard's cooldown numbers can't show a 1-decimal countdown). The
+        -- fake-active window's duration is hardcoded, so the remaining time is
+        -- exact. OFF BY DEFAULT = zero cost: the gate is one field read, and the
+        -- else-branch Detach no-ops unless this overlay was previously attached.
+        -- StyleOverlayCooldownText (above) already set Blizzard's numbers per the
+        -- Duration Text state, so Detach here never needs to touch them.
+        if bd and bd.faDecimals and ns.DecimalCountdown then
+            local showCD = bd.showCooldownText
+            if ss and ss.showCooldownText ~= nil then showCD = ss.showCooldownText end
+            if showCD then
+                ns.DecimalCountdown.Attach(o.cd, win.start, win.dur, bd.faDecimalsThreshold or 5,
+                    function(fs)
+                        if ns.StyleOverlayDecimalText then
+                            ns.StyleOverlayDecimalText(fs, bd, ss, iconFrame:GetScale())
+                        end
+                    end,
+                    { on = bd.faDecimalsColorEnabled, r = bd.faDecimalsColorR,
+                      g = bd.faDecimalsColorG, b = bd.faDecimalsColorB })
+            else
+                ns.DecimalCountdown.Detach(o.cd)
+            end
+        elseif ns.DecimalCountdown then
+            ns.DecimalCountdown.Detach(o.cd)
+        end
         -- Feed the active glow + border the underlying icon's shape / border so
         -- Shape Glow masks to the shape (it reads the shape from its glow frame's
         -- parent FC) and Active Border can recolour the real (now-raised) border.
@@ -264,6 +297,7 @@ ApplyToFrame = function(iconFrame, rule, win)
         RestoreOverlayBorders(iconFrame, o)
         if ns.ApplyActiveOverlays then ns.ApplyActiveOverlays(o.frame, o, ss, false, bd) end
         o.cd:Clear()
+        if ns.DecimalCountdown then ns.DecimalCountdown.Detach(o.cd) end
         o.frame:SetAlpha(0)
     end
 end
@@ -459,30 +493,37 @@ end
 --  throttled poll -- but only while at least one preset actually uses it.
 -- ---------------------------------------------------------------------------
 -- Unified "is this preset on a real (non-GCD) cooldown right now?" read.
+-- Trinkets/items read the ITEM cooldown (its on-use spell can have a shorter
+-- cooldown that would fire the ready edge early). Bail on nil / Secret Values.
 PresetOnCD = function(key)
     local now = GetTime()
     if key > 0 then
         local ci = C_Spell and C_Spell.GetSpellCooldown and C_Spell.GetSpellCooldown(key)
         return (ci and ci.isActive and not ci.isOnGCD) or false
     end
+
     local start, dur, enable
     if key == -13 or key == -14 then
         if GetInventoryItemCooldown then start, dur, enable = GetInventoryItemCooldown("player", -key) end
-        if enable ~= nil and enable ~= 1 then return false end
     else
         local itemID = -key
         if C_Container and C_Container.GetItemCooldown then start, dur = C_Container.GetItemCooldown(itemID) end
-        if not (start and dur and dur > 1.5) and C_Item and C_Item.GetItemCooldown then
+        if (start == nil or dur == nil) and C_Item and C_Item.GetItemCooldown then
             start, dur = C_Item.GetItemCooldown(itemID)
         end
     end
-    return (start and dur and dur > 1.5 and now < start + dur) or false
+    if start == nil or dur == nil then return false end
+    if issecretvalue and (issecretvalue(start) or issecretvalue(dur)
+        or (enable ~= nil and issecretvalue(enable))) then return false end
+    if enable ~= nil and enable ~= 1 then return false end
+    return (dur > 1.5 and now < start + dur) or false
 end
 
--- Normal (shown) alpha for a frame, from its bar's opacity.
+-- Normal (shown) alpha for a frame, from its bar's opacity (out-of-combat
+-- fade folded in via EffectiveBarAlpha so restores don't clobber the fade).
 local function FrameBaseAlpha(fc)
     local bd = fc and fc.barKey and ns.barDataByKey and ns.barDataByKey[fc.barKey]
-    return (bd and bd.barOpacity) or 1
+    return ns.EffectiveBarAlpha(bd)
 end
 
 -- cas is the rule's styling entry (passed in so a trinket, whose frame key is a
@@ -491,18 +532,39 @@ end
 ApplyCdState = function(frame, fc, cas, eff, onCD)
     local fd = ns._hookFrameData and ns._hookFrameData[frame]
     if fd then fd._presetCdTouched = true end
-    if eff == "hiddenOnCD" or eff == "hiddenReady" then
+    if eff == "hiddenOnCD" or eff == "hiddenReady"
+       or eff == "hiddenOnCDShift" or eff == "hiddenReadyShift" then
+        local isShift = (eff == "hiddenOnCDShift" or eff == "hiddenReadyShift")
         local hide
-        if eff == "hiddenOnCD" then hide = onCD else hide = not onCD end
+        if eff == "hiddenOnCD" or eff == "hiddenOnCDShift" then
+            hide = onCD
+        else
+            hide = not onCD
+        end
         frame:SetAlpha(hide and 0 or FrameBaseAlpha(fc))
         -- Set the SAME flag the layout / visibility / refresh code already honors,
         -- so a relayout (mount, dismount, settings change) keeps it hidden instead
         -- of flashing it visible until the next tick.
         fc._cdStateHidden = hide or false
+        -- Shift variants also maintain the bar-relayout flag (only relayouts
+        -- on an actual transition; steady-state calls return immediately).
+        if ns.SetCdStateShiftHidden then
+            ns.SetCdStateShiftHidden(fc, isShift and hide or false)
+        end
+        return
+    end
+    if eff == "lowerAlphaOnCD" then
+        -- Identical to hiddenOnCD but with a customizable opacity instead of 0.
+        -- Reuse the _cdStateHidden flag as "cd-state owns this alpha" so a relayout
+        -- keeps the lowered value instead of flashing back to full opacity.
+        frame:SetAlpha(onCD and ((cas and cas.cdStateLowerAlpha) or 0.5) or FrameBaseAlpha(fc))
+        fc._cdStateHidden = onCD or false
+        if ns.SetCdStateShiftHidden then ns.SetCdStateShiftHidden(fc, false) end
         return
     end
     -- Glow modes: glow while the ability is READY (off cooldown). Not a hide.
     fc._cdStateHidden = false
+    if ns.SetCdStateShiftHidden then ns.SetCdStateShiftHidden(fc, false) end
     local glow = fd and fd.glowOverlay
     if not glow then return end
     if not onCD then
@@ -530,7 +592,10 @@ RestoreAllCdState = function()
             if fd and fd._presetCdTouched then
                 local fc = FCt[f]
                 f:SetAlpha(FrameBaseAlpha(fc))
-                if fc then fc._cdStateHidden = false end
+                if fc then
+                    fc._cdStateHidden = false
+                    if ns.SetCdStateShiftHidden then ns.SetCdStateShiftHidden(fc, false) end
+                end
                 if fd._presetCdGlowOn and fd.glowOverlay then
                     ns.StopNativeGlow(fd.glowOverlay)
                     fd._presetCdGlowOn = false
@@ -550,16 +615,37 @@ EvalCdStateNow = function()
     if not icons or not FCt then return end
     for r = 1, #_cdStateRules do
         local rule = _cdStateRules[r]
-        local eff = rule.cas and rule.cas.cdStateEffect
-        if eff then
+        local cas = rule.cas
+        local eff = cas and cas.cdStateEffect
+        local soundKey = cas and cas.cdReadySoundKey
+        if soundKey == "none" then soundKey = nil end
+        if eff or soundKey then
             local onCD = PresetOnCD(rule.spellID)
             local sid = rule.spellID
+            -- Sound only fires while the ability's icon is present on a bar.
+            local hasIcon = false
             for _, list in pairs(icons) do
                 for i = 1, #list do
                     local f = list[i]
                     local fc = f and FCt[f]
                     if fc and fc.spellID == sid then
-                        ApplyCdState(f, fc, rule.cas, eff, onCD)
+                        hasIcon = true
+                        if eff then ApplyCdState(f, fc, cas, eff, onCD) end
+                    end
+                end
+            end
+            -- Audio Effect on CD Ready: arm while on cooldown, fire once on the ready
+            -- edge. A missing icon leaves the armed state untouched so a rebuild at
+            -- cooldown-end can't swallow the edge (armed state persists by key).
+            if soundKey then
+                local akey = rule.srcKey or sid
+                if onCD then
+                    if hasIcon then _cdrArmedByKey[akey] = true end
+                elseif hasIcon and _cdrArmedByKey[akey] then
+                    _cdrArmedByKey[akey] = nil
+                    if not (ns._cdmSoundSuppressed and ns._cdmSoundSuppressed()) then
+                        local path = ns.FOCUSKICK_SOUND_PATHS and ns.FOCUSKICK_SOUND_PATHS[soundKey]
+                        if path then PlaySoundFile(path, "Master") end
                     end
                 end
             end
@@ -687,7 +773,8 @@ function ns.FakeActive_Rearm()
             if type(cas) == "table" and key ~= -13 and key ~= -14 then
                 local hasDur = (cas.duration or 0) > 0
                 local hasCd  = cas.cdStateEffect ~= nil
-                if hasDur or hasCd then
+                local hasSound = cas.cdReadySoundKey ~= nil and cas.cdReadySoundKey ~= "none"
+                if hasDur or hasCd or hasSound then
                     -- Settings are keyed by spell / item. A trinket's settings are
                     -- keyed by item, but its ICON is a slot (-13/-14) -- so route the
                     -- rule to whichever slot currently holds that item. (Cast +
@@ -699,7 +786,7 @@ function ns.FakeActive_Rearm()
                         if GetInventoryItemID("player", 13) == itemID then matchKey = -13
                         elseif GetInventoryItemID("player", 14) == itemID then matchKey = -14 end
                     end
-                    local rule = { spellID = matchKey, cas = cas, user = true }
+                    local rule = { spellID = matchKey, srcKey = key, cas = cas, user = true }
                     _rules[#_rules + 1] = rule
                     _hasUserRules = true
                     if hasDur then
@@ -707,7 +794,8 @@ function ns.FakeActive_Rearm()
                         rule.duration = cas.duration
                         MapCast(rule)
                     end
-                    if hasCd then
+                    if hasCd or hasSound then
+                        -- Both effects ride the same cooldown poll (EvalCdStateNow).
                         _cdStateRules[#_cdStateRules + 1] = rule
                     end
                 end

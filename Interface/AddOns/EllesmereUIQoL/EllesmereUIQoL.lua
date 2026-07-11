@@ -167,6 +167,20 @@ qolFrame:SetScript("OnEvent", function(self)
         local function IsEnabled()
             return EllesmereUIDB and EllesmereUIDB.autoOpenContainers == true
         end
+        -- "Exclude Warbound Containers": true only when the option is on AND
+        -- the slot is confirmed warband-bank-eligible. Guarded like the bags
+        -- module (C_Bank / ItemLocation / DoesItemExist can all be absent or
+        -- invalid; a raw call would error mid-open). On any uncertainty it
+        -- returns false so the container opens normally rather than being
+        -- silently skipped.
+        local function IsWarboundExcluded(bag, slot)
+            if not (EllesmereUIDB and EllesmereUIDB.autoOpenContainersExcludeWarbound) then return false end
+            if not (C_Bank and C_Bank.IsItemAllowedInBankType and ItemLocation
+                and C_Item and C_Item.DoesItemExist) then return false end
+            local loc = ItemLocation:CreateFromBagAndSlot(bag, slot)
+            if not (loc and C_Item.DoesItemExist(loc)) then return false end
+            return C_Bank.IsItemAllowedInBankType(Enum.BankType.Account, loc) and true or false
+        end
         local SLOTS_PER_FRAME = 3  -- check 3 slots per OnUpdate tick
 
         local function IsOpenableByID(itemID, bag, slot)
@@ -212,18 +226,24 @@ qolFrame:SetScript("OnEvent", function(self)
                                 if InCombatLockdown() then wipe(_pendingOpens); return end
                                 local item = _pendingOpens[idx]
                                 local info = C_Container.GetContainerItemInfo(item.bag, item.slot)
-                                if info and info.itemID and _openableCache[info.itemID] and not _failedItems[info.itemID] then
-                                    local prevID = info.itemID
-                                    local prevCount = info.stackCount or 1
-                                    C_Container.UseContainerItem(item.bag, item.slot)
-                                    C_Timer.After(0.5, function()
-                                        local after = C_Container.GetContainerItemInfo(item.bag, item.slot)
-                                        if after and after.itemID == prevID and (after.stackCount or 1) >= prevCount then
-                                            _failedItems[prevID] = true
-                                        end
+                                if info and info.itemID then
+                                    if IsWarboundExcluded(item.bag, item.slot) then
                                         OpenNext(idx + 1)
-                                    end)
-                                    return
+                                        return
+                                    end
+                                    if _openableCache[info.itemID] and not _failedItems[info.itemID] then
+                                        local prevID = info.itemID
+                                        local prevCount = info.stackCount or 1
+                                        C_Container.UseContainerItem(item.bag, item.slot)
+                                        C_Timer.After(0.5, function()
+                                            local after = C_Container.GetContainerItemInfo(item.bag, item.slot)
+                                            if after and after.itemID == prevID and (after.stackCount or 1) >= prevCount then
+                                                _failedItems[prevID] = true
+                                            end
+                                            OpenNext(idx + 1)
+                                        end)
+                                        return
+                                    end
                                 end
                                 C_Timer.After(0.5, function() OpenNext(idx + 1) end)
                             end
@@ -283,18 +303,24 @@ qolFrame:SetScript("OnEvent", function(self)
                 if InCombatLockdown() then return end
                 local item = toOpen[idx]
                 local info2 = C_Container.GetContainerItemInfo(item.bag, item.slot)
-                if info2 and info2.itemID and _openableCache[info2.itemID] and not _failedItems[info2.itemID] then
-                    local prevID = info2.itemID
-                    local prevCount = info2.stackCount or 1
-                    C_Container.UseContainerItem(item.bag, item.slot)
-                    C_Timer.After(0.5, function()
-                        local after = C_Container.GetContainerItemInfo(item.bag, item.slot)
-                        if after and after.itemID == prevID and (after.stackCount or 1) >= prevCount then
-                            _failedItems[prevID] = true
-                        end
+                if info2 and info2.itemID then
+                    if IsWarboundExcluded(item.bag, item.slot) then
                         OpenNext(idx + 1)
-                    end)
-                    return
+                        return
+                    end
+                    if _openableCache[info2.itemID] and not _failedItems[info2.itemID] then
+                        local prevID = info2.itemID
+                        local prevCount = info2.stackCount or 1
+                        C_Container.UseContainerItem(item.bag, item.slot)
+                        C_Timer.After(0.5, function()
+                            local after = C_Container.GetContainerItemInfo(item.bag, item.slot)
+                            if after and after.itemID == prevID and (after.stackCount or 1) >= prevCount then
+                                _failedItems[prevID] = true
+                            end
+                            OpenNext(idx + 1)
+                        end)
+                        return
+                    end
                 end
                 C_Timer.After(0.5, function() OpenNext(idx + 1) end)
             end
@@ -896,6 +922,9 @@ qolFrame:SetScript("OnEvent", function(self)
             return false
         end
 
+        local resetAnnouncePending = false -- one announce per /reset batch (multi-dungeon reset = multiple system msgs)
+        local resetFailPending = false
+
         local resetAnnounceFrame = CreateFrame("Frame")
         resetAnnounceFrame:RegisterEvent("CHAT_MSG_SYSTEM")
         resetAnnounceFrame:SetScript("OnEvent", function(self, event, msg)
@@ -912,7 +941,10 @@ qolFrame:SetScript("OnEvent", function(self)
 
             -- Small delay so Blizzard's own system message renders first.
             if MatchesAny(msg, RESET_PATTERNS) then
+                if resetAnnouncePending then return end
+                resetAnnouncePending = true
                 C_Timer.After(0.3, function()
+                    resetAnnouncePending = false
                     local channel = IsInRaid() and "RAID" or "PARTY"
                     local customMsg = (EllesmereUIDB.instanceResetAnnounceMsg and
                                        EllesmereUIDB.instanceResetAnnounceMsg ~= "")
@@ -921,7 +953,10 @@ qolFrame:SetScript("OnEvent", function(self)
                     SendChatMessage("[EUI] " .. customMsg, channel)
                 end)
             elseif MatchesAny(msg, FAIL_PATTERNS) then
+                if resetFailPending then return end
+                resetFailPending = true
                 C_Timer.After(0.3, function()
+                    resetFailPending = false
                     local channel = IsInRaid() and "RAID" or "PARTY"
                     SendChatMessage("[EUI] Reset failed - there are still players inside the instance.", channel)
                 end)
@@ -1088,10 +1123,10 @@ do
         local vers = (issecretvalue(versRating) or issecretvalue(versBase)) and versRating or (versRating + versBase)
 
         local txt =
-            format("|cff%sCrit:|r  |cffffffff%.2f%%|r", labelHex, crit) .. "\n" ..
-            format("|cff%sHaste:|r  |cffffffff%.2f%%|r", labelHex, haste) .. "\n" ..
-            format("|cff%sMastery:|r  |cffffffff%.2f%%|r", labelHex, mastery) .. "\n" ..
-            format("|cff%sVers:|r  |cffffffff%.2f%%|r", labelHex, vers)
+            format("|cff%s%s:|r  |cffffffff%.2f%%|r", labelHex, EllesmereUI.L("Crit"), crit) .. "\n" ..
+            format("|cff%s%s:|r  |cffffffff%.2f%%|r", labelHex, EllesmereUI.L("Haste"), haste) .. "\n" ..
+            format("|cff%s%s:|r  |cffffffff%.2f%%|r", labelHex, EllesmereUI.L("Mastery"), mastery) .. "\n" ..
+            format("|cff%s%s:|r  |cffffffff%.2f%%|r", labelHex, EllesmereUI.L("Vers"), vers)
 
         if EllesmereUI.QoLExtrasGet("showTertiaryStats") then
             local tc = EllesmereUI.QoLExtrasGet("tertiaryStatsColor")
@@ -1107,9 +1142,9 @@ do
             local avoidance = GetAvoidance()
             local speed = GetSpeed()
             txt = txt .. "\n" ..
-                format("|cff%sLeech:|r  |cffffffff%.2f%%|r", tertHex, leech) .. "\n" ..
-                format("|cff%sAvoidance:|r  |cffffffff%.2f%%|r", tertHex, avoidance) .. "\n" ..
-                format("|cff%sSpeed:|r  |cffffffff%.2f%%|r", tertHex, speed)
+                format("|cff%s%s:|r  |cffffffff%.2f%%|r", tertHex, EllesmereUI.L("Leech"), leech) .. "\n" ..
+                format("|cff%s%s:|r  |cffffffff%.2f%%|r", tertHex, EllesmereUI.L("Avoidance"), avoidance) .. "\n" ..
+                format("|cff%s%s:|r  |cffffffff%.2f%%|r", tertHex, EllesmereUI.L("Speed"), speed)
         end
 
         statsText:SetText(txt)
@@ -1330,7 +1365,7 @@ do
         local elapsed = 0
         fpsFrame:SetScript("OnUpdate", function(self, dt)
             elapsed = elapsed + dt
-            if elapsed < 1 then return end
+            if elapsed < (self._interval or 3) then return end
             elapsed = 0
             UpdateFPS(self)
         end)
@@ -1342,6 +1377,7 @@ do
         local shouldShow = EllesmereUI.QoLExtrasGet("showFPS")
         if shouldShow then
             CreateFPSCounter()
+            fpsFrame._interval = EllesmereUI.QoLExtrasGet("fpsUpdateInterval") or 3
             local sz = EllesmereUI.QoLExtrasGet("fpsTextSize") or 12
             local lblSz = sz - 2
             local fp = EllesmereUI.GetFontPath("extras")
@@ -1732,48 +1768,142 @@ do
     end
     EllesmereUI.GetCrosshairValue = CrosshairGet
 
-    -- Melee-range detection, use a per-spec melee-range spell
-    local SPEC_SPELLS = {
-        [65]   = 853,    [66]   = 96231,  [70]   = 96231,             -- Paladin (Holy: Hammer of Justice 10yd; Ret/Prot: Rebuke)
-        [250]  = 316239, [251]  = 316239, [252]  = 316239,            -- Death Knight
-        [577]  = 162794, [581]  = 344859, [1480] = 473662,            -- Demon Hunter
-        [255]  = 186270,                                              -- Hunter (Survival)
-        [102]  = 5221,   [103]  = 5221,   [104]  = 5221, [105] = 5221,-- Druid (gated by form)
-        [268]  = 205523, [269]  = 205523, [270]  = 205523,            -- Monk
-        [71]   = 1464,   [72]   = 1464,   [73]   = 23922,             -- Warrior
-        [263]  = 17364,                                               -- Shaman (Enhancement)
-        [259]  = 1752,   [260]  = 1752,   [261]  = 1752,              -- Rogue
-        [1467] = 362969, [1468] = 362969, [1473] = 362969,            -- Evoker
+    -- Item-based range detection for all specs
+    local checkItems = {
+        { range = 5,   id = 37727 }, -- Ruby Acorn
+        { range = 8,   id = 34368 }, -- Attuned Crystal Cores
+        { range = 10,  id = 10699 }, -- Handful of Snowflakes
+        { range = 15,  id = 31129 }, -- Blackwhelp Net
+        { range = 20,  id = 21519 }, -- Mistletoe
+        { range = 25,  id = 13289 }, -- Egan's Blaster
+        { range = 30,  id = 17202 }, -- Snowball
+        { range = 35,  id = 18904 }, -- Zorbin's Ultra-Shrinker
+        { range = 40,  ids = { 18640, 28767 } }, -- Happy Fun Rock / The Decapitator (either works)
+        { range = 45,  id = 32698 }, -- Wrangling Rope
+        { range = 60,  id = 32825 }, -- Soul Cannon
+        { range = 80,  id = 35278 }, -- Reinforced Net
     }
+
     local DRUID_MELEE_FORMS = { [1] = true, [2] = true }  -- Bear, Cat
 
     local _, _chPlayerClass = UnitClass("player")
-    local _meleeSpell  -- cached melee spell for the current spec (nil = ranged spec)
+    local _crosshairCutoffRange = 5
 
-    local function RefreshCrosshairMeleeSpell()
-        local specID
-        if PlayerUtil and PlayerUtil.GetCurrentSpecID then
-            specID = PlayerUtil.GetCurrentSpecID()
-        elseif GetSpecialization then
-            local idx = GetSpecialization()
-            if idx then specID = (GetSpecializationInfo(idx)) end
+    local function RefreshCrosshairCutoffRange()
+        local _, classFile = UnitClass("player")
+        local specIndex = GetSpecialization()
+        if not specIndex then
+            _crosshairCutoffRange = 5
+            return
         end
-        _meleeSpell = (specID and SPEC_SPELLS[specID]) or nil
+        
+        local specID = GetSpecializationInfo(specIndex)
+        if not specID then
+            _crosshairCutoffRange = 5
+            return
+        end
+        
+        if classFile == "DRUID" then
+            if specID == 102 or specID == 105 then -- Balance, Restoration
+                if IsPlayerSpell(197488) then -- Astral Influence
+                    _crosshairCutoffRange = 45
+                else
+                    _crosshairCutoffRange = 40
+                end
+            else
+                _crosshairCutoffRange = 5
+            end
+        elseif classFile == "DEMONHUNTER" then
+            if specIndex == 3 or (specID ~= 577 and specID ~= 581) then
+                _crosshairCutoffRange = 25 -- Devourer
+            else
+                _crosshairCutoffRange = 5
+            end
+        elseif classFile == "EVOKER" then
+            if specID == 1467 or specID == 1470 then -- Devastation, Augmentation
+                _crosshairCutoffRange = 25
+            elseif specID == 1468 then -- Preservation
+                _crosshairCutoffRange = 30
+            else
+                _crosshairCutoffRange = 25
+            end
+        elseif classFile == "HUNTER" then
+            if specID == 253 or specID == 254 then -- Beast Mastery, Marksmanship
+                _crosshairCutoffRange = 40
+            else
+                _crosshairCutoffRange = 5
+            end
+        elseif classFile == "PALADIN" then
+            if specID == 65 then -- Holy
+                -- Holy is a 40yd healer by default; opt into melee (5yd) via the
+                -- "Show Melee Range for Hpal" crosshair toggle.
+                if CrosshairGet("crosshairHpalMelee") then
+                    _crosshairCutoffRange = 5
+                else
+                    _crosshairCutoffRange = 40
+                end
+            else
+                _crosshairCutoffRange = 5
+            end
+        elseif classFile == "SHAMAN" then
+            if specID == 263 then -- Enhancement
+                _crosshairCutoffRange = 5
+            else
+                _crosshairCutoffRange = 40
+            end
+        elseif classFile == "MONK" then
+            if specID == 270 then -- Mistweaver
+                _crosshairCutoffRange = 40
+            else
+                _crosshairCutoffRange = 5
+            end
+        elseif classFile == "PRIEST" or classFile == "MAGE" or classFile == "WARLOCK" then
+            _crosshairCutoffRange = 40
+        else -- WARRIOR, ROGUE, DEATHKNIGHT
+            _crosshairCutoffRange = 5
+        end
     end
-    RefreshCrosshairMeleeSpell()
+    RefreshCrosshairCutoffRange()
+    -- Exposed so the crosshair options toggle can re-resolve the cutoff live.
+    EllesmereUI._RefreshCrosshairCutoffRange = RefreshCrosshairCutoffRange
 
-    -- True only when there is an attackable, living target out of melee range.
-    -- Druids count only while in a melee form (Cat/Bear).
-    local function TargetOutOfMelee()
-        if not _meleeSpell then return false end
-        if _chPlayerClass == "DRUID" and not DRUID_MELEE_FORMS[GetShapeshiftForm()] then
-            return false
+    EllesmereUI._getCrosshairCutoffRange = function()
+        if _chPlayerClass == "DRUID" and DRUID_MELEE_FORMS[GetShapeshiftForm()] then
+            return 5
         end
+        return _crosshairCutoffRange
+    end
+
+    -- True only when there is an attackable, living target out of range.
+    local function TargetOutOfRange()
         if not (UnitExists("target") and UnitCanAttack("player", "target")
                 and not UnitIsDead("target")) then
             return false
         end
-        return C_Spell.IsSpellInRange(_meleeSpell, "target") == false
+        local cutoff = EllesmereUI._getCrosshairCutoffRange()
+        
+        local maxRange = nil
+        for _, item in ipairs(checkItems) do
+            local inRange
+            if item.ids then
+                -- Either item satisfies the check: one may be invalid/removed on
+                -- some clients, so try each and take an in-range result.
+                for _, iid in ipairs(item.ids) do
+                    if C_Item.IsItemInRange(iid, "target") == true then inRange = true; break end
+                end
+            else
+                inRange = C_Item.IsItemInRange(item.id, "target")
+            end
+            if inRange == true then
+                maxRange = item.range
+                break
+            end
+            if item.range >= cutoff then
+                break
+            end
+        end
+        
+        return (maxRange == nil) or (maxRange > cutoff)
     end
 
     local function CreateCrosshair()
@@ -1809,7 +1939,7 @@ do
             meleeAccum = 0
             local nc = self._normalColor
             if not nc then return end
-            if not (CrosshairGet("crosshairMeleeColorEnabled") and _meleeSpell) then
+            if not CrosshairGet("crosshairMeleeColorEnabled") then
                 if self._meleeActive then
                     self._meleeActive = false
                     self._hBar:SetColorTexture(nc.r, nc.g, nc.b, nc.a)
@@ -1817,7 +1947,7 @@ do
                 end
                 return
             end
-            local outOfRange = TargetOutOfMelee()
+            local outOfRange = TargetOutOfRange()
             if outOfRange ~= self._meleeActive then
                 self._meleeActive = outOfRange
                 local c = outOfRange and (CrosshairGet("crosshairMeleeColor") or { r = 1, g = 0, b = 0, a = 1 }) or nc
@@ -1928,9 +2058,10 @@ do
         visWatch:RegisterEvent("PLAYER_REGEN_ENABLED")
         visWatch:RegisterEvent("PLAYER_ENTERING_WORLD")
         visWatch:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
+        visWatch:RegisterEvent("TRAIT_CONFIG_UPDATED")
         visWatch:SetScript("OnEvent", function(_, event)
-            if event == "PLAYER_SPECIALIZATION_CHANGED" or event == "PLAYER_ENTERING_WORLD" then
-                RefreshCrosshairMeleeSpell()
+            if event == "PLAYER_SPECIALIZATION_CHANGED" or event == "PLAYER_ENTERING_WORLD" or event == "TRAIT_CONFIG_UPDATED" then
+                RefreshCrosshairCutoffRange()
             end
             -- _applyCrosshair self-guards: nil DB -> returns, "None" -> hides,
             -- and runs the one-time migration once the profile DB is ready.
@@ -2303,6 +2434,888 @@ do
             return
         end
         ApplyHideTutorials()  -- PLAYER_LOGIN
+    end)
+end
+
+-------------------------------------------------------------------------------
+--  Group Death Announcer
+--  Shows a large center-screen "<name> DIED!" alert when a party or raid
+--  member dies. Midnight removed the combat log, so deaths are detected by
+--  polling group units for an alive -> dead transition (feign death and the
+--  player's own death are excluded). Fully gated: no ticker runs while the
+--  option is off or while solo.
+-------------------------------------------------------------------------------
+do
+    local POLL_INTERVAL = 0.35
+    local alertOverlay
+    local ticker
+    local watcher
+    local installed = false
+    local deadState = {}   -- [guid] = true while dead/ghost, false while alive
+
+    local DEFAULT_TEXT_SIZE = 34
+
+    -- Applies the configured font size and saved position (or the default
+    -- center-top placement) to the overlay.
+    local function ApplyOverlaySettings()
+        if not alertOverlay then return end
+        local fontPath = (EllesmereUI.GetFontPath and EllesmereUI.GetFontPath("extras"))
+            or EllesmereUI.EXPRESSWAY or "Fonts\\FRIZQT__.TTF"
+        -- Always keep an outline so the alert stays readable over any background.
+        local outline = (EllesmereUI.GetFontOutlineFlag and EllesmereUI.GetFontOutlineFlag("extras")) or ""
+        if not outline:find("OUTLINE") then
+            outline = (outline == "") and "OUTLINE" or (outline .. ", OUTLINE")
+        end
+        local size = (EllesmereUIDB and EllesmereUIDB.groupDeathTextSize) or DEFAULT_TEXT_SIZE
+        alertOverlay._text:SetFont(fontPath, size, outline)
+        -- Keep the frame (and therefore the unlock-mode mover) compact and sized
+        -- to roughly the alert text rather than a fixed wide box.
+        alertOverlay:SetSize(size * 7, size + 14)
+
+        alertOverlay:ClearAllPoints()
+        local pos = EllesmereUIDB and EllesmereUIDB.groupDeathAlertPos
+        if pos and pos.point then
+            alertOverlay:SetPoint(pos.point, UIParent, pos.relPoint or pos.point, pos.x or 0, pos.y or 0)
+        else
+            alertOverlay:SetPoint("CENTER", UIParent, "CENTER", 0, 180)
+        end
+    end
+
+    local function CreateAlertOverlay()
+        if alertOverlay then return end
+
+        alertOverlay = CreateFrame("Frame", nil, UIParent)
+        alertOverlay:SetSize(240, 50)
+        alertOverlay:SetFrameStrata("HIGH")
+        alertOverlay:SetFrameLevel(60)
+        alertOverlay:EnableMouse(false)
+        alertOverlay:SetMouseClickEnabled(false)
+
+        local fs = alertOverlay:CreateFontString(nil, "OVERLAY")
+        fs:SetPoint("CENTER")
+        alertOverlay._text = fs
+        ApplyOverlaySettings()
+
+        -- Quick fade-in, brief hold, fade-out; hide when finished.
+        local ag = alertOverlay:CreateAnimationGroup()
+        local fadeIn = ag:CreateAnimation("Alpha")
+        fadeIn:SetFromAlpha(0); fadeIn:SetToAlpha(1); fadeIn:SetDuration(0.15); fadeIn:SetOrder(1)
+        local hold = ag:CreateAnimation("Alpha")
+        hold:SetFromAlpha(1); hold:SetToAlpha(1); hold:SetDuration(1.6); hold:SetOrder(2)
+        local fadeOut = ag:CreateAnimation("Alpha")
+        fadeOut:SetFromAlpha(1); fadeOut:SetToAlpha(0); fadeOut:SetDuration(0.6); fadeOut:SetOrder(3)
+        ag:SetScript("OnFinished", function() alertOverlay:Hide() end)
+        alertOverlay._ag = ag
+
+        alertOverlay:SetScript("OnHide", function() ag:Stop() end)
+        alertOverlay:Hide()
+    end
+
+    local function ShowAlert(name, classToken)
+        if not name then return end
+        CreateAlertOverlay()
+        ApplyOverlaySettings()
+
+        local colored = name
+        local c = classToken and RAID_CLASS_COLORS and RAID_CLASS_COLORS[classToken]
+        if c then
+            colored = "|c" .. (c.colorStr or "ffffffff") .. name .. "|r"
+        end
+        local skull = "|TInterface\\TargetingFrame\\UI-RaidTargetingIcon_8:0|t"
+        alertOverlay._text:SetText(skull .. " " .. colored .. " |cffff2020DIED!|r")
+
+        alertOverlay._ag:Stop()
+        alertOverlay:SetAlpha(1)
+        alertOverlay:Show()
+        alertOverlay._ag:Play()
+    end
+
+    -- Configurable death alert sound (default "none"). The cog dropdown lists the
+    -- bundled EllesmereUI sounds plus any SharedMedia sounds, mirroring Chat's
+    -- "Whisper Sound". Played on the "Master" channel so it stays audible even
+    -- when the SFX slider is low. Tables are exposed on EllesmereUI so the options
+    -- file can build the same dropdown.
+    local _SOUNDS_DIR = "Interface\\AddOns\\EllesmereUI\\media\\sounds\\"
+    local GROUP_DEATH_SOUND_PATHS = {
+        ["none"]     = nil,
+        ["airhorn"]  = _SOUNDS_DIR .. "AirHorn.ogg",
+        ["banana"]   = _SOUNDS_DIR .. "BananaPeelSlip.ogg",
+        ["bikehorn"] = _SOUNDS_DIR .. "BikeHorn.ogg",
+        ["boxing"]   = _SOUNDS_DIR .. "BoxingArenaSound.ogg",
+        ["water"]    = _SOUNDS_DIR .. "WaterDrop.ogg",
+    }
+    local GROUP_DEATH_SOUND_NAMES = {
+        ["none"]     = "None",
+        ["airhorn"]  = "Air Horn",
+        ["banana"]   = "Banana Peel Slip",
+        ["bikehorn"] = "Bike Horn",
+        ["boxing"]   = "Boxing Arena",
+        ["water"]    = "Water Drop",
+    }
+    local GROUP_DEATH_SOUND_ORDER = {
+        "none", "airhorn", "banana", "bikehorn", "boxing", "water",
+    }
+    -- SharedMedia sounds are appended at PLAYER_LOGIN (see the boot frame at the
+    -- end of this block), NOT here: this do-block runs at addon load, before
+    -- other addons have registered their LibSharedMedia sounds, so an append now
+    -- would miss them. (Chat's whisper-sound append runs from its PLAYER_LOGIN
+    -- init for the same reason.) The tables are exposed now by reference, so the
+    -- login append fills the same tables the options dropdown reads.
+    EllesmereUI._groupDeathSoundPaths = GROUP_DEATH_SOUND_PATHS
+    EllesmereUI._groupDeathSoundNames = GROUP_DEATH_SOUND_NAMES
+    EllesmereUI._groupDeathSoundOrder = GROUP_DEATH_SOUND_ORDER
+
+    local function PlayDeathSound()
+        local key = EllesmereUIDB and EllesmereUIDB.groupDeathSoundKey
+        if not key or key == "none" then return end
+        local path = GROUP_DEATH_SOUND_PATHS[key]
+        if path then PlaySoundFile(path, "Master") end
+    end
+
+    local function ForEachGroupUnit(fn)
+        if IsInRaid() then
+            for i = 1, GetNumGroupMembers() do
+                local u = "raid" .. i
+                if UnitExists(u) and not UnitIsUnit(u, "player") then fn(u) end
+            end
+        elseif IsInGroup() then
+            for i = 1, 4 do
+                local u = "party" .. i
+                if UnitExists(u) then fn(u) end
+            end
+        end
+    end
+
+    -- Minimum gap between death sounds. On a group wipe many members die within
+    -- the same poll (and across consecutive polls), which would otherwise fire
+    -- the sound once per corpse and turn into a spammy overlapping mess. The
+    -- cooldown collapses a burst of deaths into a single sound. It is only
+    -- applied in larger groups (raids, > 5 players); in a party of 5 or fewer
+    -- deaths are sparse enough that no throttling is needed.
+    local SOUND_COOLDOWN = 3.0
+    local COOLDOWN_MIN_GROUP = 5
+    local lastSoundTime = 0
+
+    local function TryPlayDeathSound()
+        if GetNumGroupMembers() > COOLDOWN_MIN_GROUP then
+            local now = GetTime()
+            if now - lastSoundTime < SOUND_COOLDOWN then return end
+            lastSoundTime = now
+        end
+        PlayDeathSound()
+    end
+
+    local function Poll()
+        if not (EllesmereUIDB and EllesmereUIDB.announceGroupDeaths) then return end
+        local seen = {}
+        local newlyDeadName, newlyDeadClass, newlyDeadCount
+        ForEachGroupUnit(function(u)
+            local guid = UnitGUID(u)
+            if not guid then return end
+            seen[guid] = true
+            if not UnitIsConnected(u) then return end
+            local dead = (UnitIsDeadOrGhost(u) and not UnitIsFeignDeath(u)) and true or false
+            -- prev == false means we previously saw this unit alive; a nil prev
+            -- (first sighting / just (re)joined) primes the state silently so we
+            -- never announce someone who was already dead when we started.
+            if deadState[guid] == false and dead then
+                local _, classToken = UnitClass(u)
+                newlyDeadName = UnitName(u)
+                newlyDeadClass = classToken
+                newlyDeadCount = (newlyDeadCount or 0) + 1
+            end
+            deadState[guid] = dead
+        end)
+        for guid in pairs(deadState) do
+            if not seen[guid] then deadState[guid] = nil end
+        end
+        -- Show a single alert per poll (the overlay is one frame, so multiple
+        -- ShowAlert calls would just clobber each other anyway) and play at most
+        -- one sound, throttled by the cooldown, no matter how many died.
+        if newlyDeadCount then
+            ShowAlert(newlyDeadName, newlyDeadClass)
+            TryPlayDeathSound()
+        end
+    end
+
+    local function StartTicker()
+        if ticker then return end
+        wipe(deadState)
+        Poll()  -- prime alive/dead state without announcing
+        ticker = C_Timer.NewTicker(POLL_INTERVAL, Poll)
+    end
+
+    local function StopTicker()
+        if ticker then ticker:Cancel(); ticker = nil end
+        wipe(deadState)
+        if alertOverlay then alertOverlay:Hide() end
+    end
+
+    local function UpdateActive()
+        if EllesmereUIDB and EllesmereUIDB.announceGroupDeaths and IsInGroup() then
+            StartTicker()
+        else
+            StopTicker()
+        end
+    end
+
+    local function ApplyAnnounceGroupDeaths()
+        local on = EllesmereUIDB and EllesmereUIDB.announceGroupDeaths
+        if on and not installed then
+            watcher:RegisterEvent("GROUP_ROSTER_UPDATE")
+            watcher:RegisterEvent("PLAYER_ENTERING_WORLD")
+            installed = true
+        elseif not on and installed then
+            watcher:UnregisterAllEvents()
+            installed = false
+        end
+        UpdateActive()
+    end
+    EllesmereUI._applyAnnounceGroupDeaths = ApplyAnnounceGroupDeaths
+
+    -- Fires a sample alert (with sound) so the look/sound can be checked without
+    -- a real death. Uses your own name/class purely as preview text.
+    EllesmereUI._announceGroupDeathsPreview = function()
+        local _, classToken = UnitClass("player")
+        ShowAlert(UnitName("player"), classToken)
+        PlayDeathSound()
+    end
+
+    -- Visual-only preview (used by the Text Size slider so dragging it doesn't
+    -- repeatedly fire the sound).
+    EllesmereUI._groupDeathShowVisual = function()
+        local _, classToken = UnitClass("player")
+        ShowAlert(UnitName("player"), classToken)
+    end
+
+    EllesmereUI._groupDeathPlaySound = PlayDeathSound
+
+    -- Re-apply font size / position (called from the Text Size slider and from
+    -- unlock mode when the saved position changes).
+    EllesmereUI._applyGroupDeathAlert = function()
+        CreateAlertOverlay()
+        ApplyOverlaySettings()
+    end
+
+    -- Register the alert with Unlock Mode so its position can be dragged.
+    C_Timer.After(2, function()
+        if not (EllesmereUI and EllesmereUI.RegisterUnlockElements) then return end
+        local MK = EllesmereUI.MakeUnlockElement
+        if not MK then return end
+        EllesmereUI:RegisterUnlockElements({
+            MK({
+                key      = "EUI_GroupDeathAlert",
+                label    = "Group Death Alert",
+                group    = "Quality of Life",
+                order    = 720,
+                noResize = true,
+                isHidden = function()
+                    return not (EllesmereUIDB and EllesmereUIDB.announceGroupDeaths)
+                end,
+                getFrame = function()
+                    CreateAlertOverlay()
+                    return alertOverlay
+                end,
+                getSize = function()
+                    local size = (EllesmereUIDB and EllesmereUIDB.groupDeathTextSize) or DEFAULT_TEXT_SIZE
+                    return size * 7, size + 14
+                end,
+                savePos = function(_, point, relPoint, x, y)
+                    if not point then return end
+                    if not EllesmereUIDB then EllesmereUIDB = {} end
+                    EllesmereUIDB.groupDeathAlertPos = { point = point, relPoint = relPoint, x = x, y = y }
+                    if alertOverlay and not EllesmereUI._unlockActive then
+                        ApplyOverlaySettings()
+                    end
+                end,
+                loadPos = function()
+                    local pos = EllesmereUIDB and EllesmereUIDB.groupDeathAlertPos
+                    if pos and pos.point then return pos end
+                    return { point = "CENTER", relPoint = "CENTER", x = 0, y = 180 }
+                end,
+                clearPos = function()
+                    if EllesmereUIDB then EllesmereUIDB.groupDeathAlertPos = nil end
+                    if alertOverlay then ApplyOverlaySettings() end
+                end,
+                applyPos = function()
+                    CreateAlertOverlay()
+                    ApplyOverlaySettings()
+                end,
+            }),
+        })
+    end)
+
+    watcher = CreateFrame("Frame")
+    watcher:SetScript("OnEvent", function() UpdateActive() end)
+
+    local boot = CreateFrame("Frame")
+    boot:RegisterEvent("PLAYER_LOGIN")
+    boot:SetScript("OnEvent", function(self)
+        self:UnregisterAllEvents()
+        -- Append SharedMedia sounds now, at login, once other addons have
+        -- registered theirs -- this is the same timing Chat's whisper-sound
+        -- dropdown uses. Idempotent: AppendSharedMediaSounds skips keys that
+        -- are already present, and the tables are the very ones the options
+        -- dropdown (and PlayDeathSound) read, so both pick up the SM sounds.
+        if EllesmereUI.AppendSharedMediaSounds then
+            EllesmereUI.AppendSharedMediaSounds(
+                GROUP_DEATH_SOUND_PATHS, GROUP_DEATH_SOUND_NAMES, GROUP_DEATH_SOUND_ORDER)
+        end
+        if EllesmereUIDB and EllesmereUIDB.announceGroupDeaths then
+            ApplyAnnounceGroupDeaths()
+        end
+    end)
+end
+
+-------------------------------------------------------------------------------
+--  Combat Alert
+--  Shows a large center-screen text alert when you enter and/or leave combat
+--  (PLAYER_REGEN_DISABLED / PLAYER_REGEN_ENABLED). Each transition has its own
+--  display text and color (a custom color or the player's class color); a single
+--  Text Size and a shared unlock-mode position apply to both. The "Show On" mode
+--  selects enter-only, leave-only or both. Zero cost when idle: no combat events
+--  are registered unless the master toggle is on.
+-------------------------------------------------------------------------------
+do
+    local alertFrame
+    local watcher
+    local installed = false
+    local DEFAULT_TEXT_SIZE = 22
+    local DEFAULT_POS = { point = "CENTER", relPoint = "CENTER", x = 0, y = 169 }
+
+    local DEFAULTS = {
+        enterText  = "+Combat",
+        leaveText  = "-Combat",
+        enterColor = { r = 1.00, g = 1.00, b = 1.00 },
+        leaveColor = { r = 1.00, g = 1.00, b = 1.00 },
+    }
+
+    -- Resolve the effective color for a transition: the player's class color
+    -- when the class-color toggle is on, otherwise the stored custom color.
+    local function ResolveColor(which)
+        local db = EllesmereUIDB
+        local useClass = db and db[which == "leave" and "combatAlertLeaveUseClassColor" or "combatAlertEnterUseClassColor"]
+        if useClass then
+            local _, classToken = UnitClass("player")
+            local c = classToken and RAID_CLASS_COLORS and RAID_CLASS_COLORS[classToken]
+            if c then return c.r, c.g, c.b end
+        end
+        local c = (db and db[which == "leave" and "combatAlertLeaveColor" or "combatAlertEnterColor"])
+            or (which == "leave" and DEFAULTS.leaveColor or DEFAULTS.enterColor)
+        return c.r, c.g, c.b
+    end
+
+    local function AlertText(which)
+        local db = EllesmereUIDB
+        if which == "leave" then
+            return (db and db.combatAlertLeaveText) or DEFAULTS.leaveText
+        end
+        return (db and db.combatAlertEnterText) or DEFAULTS.enterText
+    end
+
+    -- Applies the configured font size and saved position (or the default
+    -- dead-center placement) to the overlay.
+    local function ApplyOverlaySettings()
+        if not alertFrame then return end
+        local fontPath = (EllesmereUI.GetFontPath and EllesmereUI.GetFontPath("extras"))
+            or EllesmereUI.EXPRESSWAY or "Fonts\\FRIZQT__.TTF"
+        -- Always keep an outline so the alert stays readable over any background.
+        local outline = (EllesmereUI.GetFontOutlineFlag and EllesmereUI.GetFontOutlineFlag("extras")) or ""
+        if not outline:find("OUTLINE") then
+            outline = (outline == "" ) and "OUTLINE" or (outline .. ", OUTLINE")
+        end
+        local size = (EllesmereUIDB and EllesmereUIDB.combatAlertTextSize) or DEFAULT_TEXT_SIZE
+        alertFrame._text:SetFont(fontPath, size, outline)
+        -- Keep the frame (and the unlock-mode mover) sized to roughly the text.
+        alertFrame:SetSize(size * 7, size + 14)
+
+        alertFrame:ClearAllPoints()
+        local pos = EllesmereUIDB and EllesmereUIDB.combatAlertPos
+        if pos and pos.point then
+            alertFrame:SetPoint(pos.point, UIParent, pos.relPoint or pos.point, pos.x or 0, pos.y or 0)
+        else
+            alertFrame:SetPoint(DEFAULT_POS.point, UIParent, DEFAULT_POS.relPoint, DEFAULT_POS.x, DEFAULT_POS.y)
+        end
+    end
+
+    local function CreateAlertFrame()
+        if alertFrame then return end
+
+        alertFrame = CreateFrame("Frame", nil, UIParent)
+        alertFrame:SetSize(240, 50)
+        alertFrame:SetFrameStrata("HIGH")
+        alertFrame:SetFrameLevel(60)
+        alertFrame:EnableMouse(false)
+        alertFrame:SetMouseClickEnabled(false)
+
+        local fs = alertFrame:CreateFontString(nil, "OVERLAY")
+        fs:SetPoint("CENTER")
+        alertFrame._text = fs
+        ApplyOverlaySettings()
+
+        -- Quick fade-in, brief hold, fade-out; hide when finished.
+        local ag = alertFrame:CreateAnimationGroup()
+        local fadeIn = ag:CreateAnimation("Alpha")
+        fadeIn:SetFromAlpha(0); fadeIn:SetToAlpha(1); fadeIn:SetDuration(0.15); fadeIn:SetOrder(1)
+        local hold = ag:CreateAnimation("Alpha")
+        hold:SetFromAlpha(1); hold:SetToAlpha(1); hold:SetDuration(1.2); hold:SetOrder(2)
+        local fadeOut = ag:CreateAnimation("Alpha")
+        fadeOut:SetFromAlpha(1); fadeOut:SetToAlpha(0); fadeOut:SetDuration(0.5); fadeOut:SetOrder(3)
+        ag:SetScript("OnFinished", function() alertFrame:Hide() end)
+        alertFrame._ag = ag
+
+        alertFrame:SetScript("OnHide", function() ag:Stop() end)
+        alertFrame:Hide()
+    end
+
+    local function ShowAlert(which)
+        -- Never fire live alerts while unlock mode is positioning the frame.
+        if EllesmereUI._unlockActive then return end
+        CreateAlertFrame()
+        ApplyOverlaySettings()
+
+        alertFrame._text:SetText(AlertText(which))
+        alertFrame._text:SetTextColor(ResolveColor(which))
+        alertFrame._text:SetAlpha(1)
+
+        alertFrame._ag:Stop()
+        alertFrame:SetAlpha(1)
+        alertFrame:Show()
+        alertFrame._ag:Play()
+    end
+
+    local function OnCombatEvent(_, event)
+        local db = EllesmereUIDB
+        if not (db and db.combatAlertEnabled) then return end
+        local mode = db.combatAlertMode or "both"
+        if event == "PLAYER_REGEN_DISABLED" then
+            if mode ~= "leave" then ShowAlert("enter") end
+        elseif event == "PLAYER_REGEN_ENABLED" then
+            if mode ~= "enter" then ShowAlert("leave") end
+        end
+    end
+
+    local function ApplyCombatAlert()
+        local on = EllesmereUIDB and EllesmereUIDB.combatAlertEnabled
+        if on and not installed then
+            watcher:RegisterEvent("PLAYER_REGEN_DISABLED")
+            watcher:RegisterEvent("PLAYER_REGEN_ENABLED")
+            installed = true
+        elseif not on and installed then
+            watcher:UnregisterAllEvents()
+            installed = false
+        end
+        if alertFrame then ApplyOverlaySettings() end
+    end
+    EllesmereUI._applyCombatAlert = ApplyCombatAlert
+
+    -- Fires a sample alert for the given transition ("enter"/"leave") so the
+    -- look can be checked from the options cog without a real combat change.
+    EllesmereUI._combatAlertPreview = function(which)
+        if EllesmereUI._unlockActive then return end
+        CreateAlertFrame()
+        ApplyOverlaySettings()
+        alertFrame._text:SetText(AlertText(which))
+        alertFrame._text:SetTextColor(ResolveColor(which))
+        alertFrame._ag:Stop()
+        alertFrame:SetAlpha(1)
+        alertFrame:Show()
+        alertFrame._ag:Play()
+    end
+
+    -- Re-apply font size / position (called from the Text Size slider and from
+    -- unlock mode when the saved position changes).
+    EllesmereUI._applyCombatAlertFrame = function()
+        CreateAlertFrame()
+        ApplyOverlaySettings()
+    end
+
+    watcher = CreateFrame("Frame")
+    watcher:SetScript("OnEvent", OnCombatEvent)
+
+    -- Register the alert with Unlock Mode so its position can be dragged.
+    C_Timer.After(2, function()
+        if not (EllesmereUI and EllesmereUI.RegisterUnlockElements) then return end
+        local MK = EllesmereUI.MakeUnlockElement
+        if not MK then return end
+        EllesmereUI:RegisterUnlockElements({
+            MK({
+                key      = "EUI_CombatAlert",
+                label    = "Combat Alert",
+                group    = "Quality of Life",
+                order    = 721,
+                noResize = true,
+                isHidden = function()
+                    return not (EllesmereUIDB and EllesmereUIDB.combatAlertEnabled)
+                end,
+                getFrame = function()
+                    CreateAlertFrame()
+                    return alertFrame
+                end,
+                getSize = function()
+                    local size = (EllesmereUIDB and EllesmereUIDB.combatAlertTextSize) or DEFAULT_TEXT_SIZE
+                    return size * 7, size + 14
+                end,
+                savePos = function(_, point, relPoint, x, y)
+                    if not point then return end
+                    if not EllesmereUIDB then EllesmereUIDB = {} end
+                    EllesmereUIDB.combatAlertPos = { point = point, relPoint = relPoint, x = x, y = y }
+                    if alertFrame and not EllesmereUI._unlockActive then
+                        ApplyOverlaySettings()
+                    end
+                end,
+                loadPos = function()
+                    local pos = EllesmereUIDB and EllesmereUIDB.combatAlertPos
+                    if pos and pos.point then return pos end
+                    return { point = DEFAULT_POS.point, relPoint = DEFAULT_POS.relPoint, x = DEFAULT_POS.x, y = DEFAULT_POS.y }
+                end,
+                clearPos = function()
+                    if EllesmereUIDB then EllesmereUIDB.combatAlertPos = nil end
+                    if alertFrame then ApplyOverlaySettings() end
+                end,
+                applyPos = function()
+                    CreateAlertFrame()
+                    ApplyOverlaySettings()
+                end,
+            }),
+        })
+    end)
+
+    local boot = CreateFrame("Frame")
+    boot:RegisterEvent("PLAYER_LOGIN")
+    boot:SetScript("OnEvent", function(self)
+        self:UnregisterAllEvents()
+        if EllesmereUIDB and EllesmereUIDB.combatAlertEnabled then
+            ApplyCombatAlert()
+        end
+    end)
+end
+
+-------------------------------------------------------------------------------
+--  Hide Item Transforms
+--  Cancels cosmetic transform auras (profession gear, holiday costumes, toys,
+--  consumables) as soon as they land on the player. CancelUnitBuff is blocked
+--  during combat, so transforms gained mid-fight are swept on the next
+--  PLAYER_REGEN_ENABLED. The fishing outfit aura persists while the fishing
+--  channel runs, so it is cleared when the channel stops instead.
+--  Zero cost when idle: no events are registered unless the master toggle is
+--  on AND at least one transform is still included.
+-------------------------------------------------------------------------------
+do
+    local CATEGORY_ORDER = { "professions", "holiday", "toys", "items" }
+    local CATEGORY_LABEL = {
+        professions = "Profession Gear",
+        holiday     = "Holiday Costumes",
+        toys        = "Toys",
+        items       = "Consumables & Items",
+    }
+
+    -- Each entry: stable settings key, category, display label, aura spell IDs.
+    -- Fishing lists no aura IDs -- the channel-stop watcher below owns it.
+    local TRANSFORMS = {
+        -- Profession gear
+        { key = "blacksmithing",  cat = "professions", label = "Blacksmithing",  ids = { 388658 } },
+        { key = "jewelcrafting",  cat = "professions", label = "Jewelcrafting",  ids = { 394015 } },
+        { key = "tailoring",      cat = "professions", label = "Tailoring",      ids = { 391312 } },
+        { key = "engineering",    cat = "professions", label = "Engineering",    ids = { 394007 } },
+        { key = "enchanting",     cat = "professions", label = "Enchanting",     ids = { 394008 } },
+        { key = "alchemy",        cat = "professions", label = "Alchemy",        ids = { 394003 } },
+        { key = "inscription",    cat = "professions", label = "Inscription",    ids = { 394016 } },
+        { key = "leatherworking", cat = "professions", label = "Leatherworking", ids = { 394001 } },
+        { key = "herbalism",      cat = "professions", label = "Herbalism",      ids = { 394005 } },
+        { key = "mining",         cat = "professions", label = "Mining",         ids = { 394006 } },
+        { key = "skinning",       cat = "professions", label = "Skinning",       ids = { 394011 } },
+        { key = "cooking",        cat = "professions", label = "Cooking (Chef's Hat)", ids = { 391775 } },
+        { key = "fishing",        cat = "professions", label = "Fishing",        ids = {} },
+
+        -- Holiday costumes
+        { key = "lantern",    cat = "holiday", label = "Weighted Jack-o'-Lantern", ids = { 44212 } },
+        { key = "hallowed",   cat = "holiday", label = "Hallowed Wand", ids = {
+            172010, 218132, 191703, 24732, 191210, 172015, 24735, 24736, 191698, 191700,
+            172008, 24712, 24713, 191701, 191211, 24710, 24711, 191686, 191688, 24708,
+            24709, 173958, 173959, 191682, 191683, 24723, 191702, 172003, 172020, 191208, 24740,
+        } },
+        { key = "noblebunny", cat = "holiday", label = "Noblegarden Bunny", ids = { 61734, 61716 } },
+        { key = "turkey",     cat = "holiday", label = "Pilgrim's Turkey", ids = { 61781 } },
+
+        -- Toys
+        { key = "aqir",       cat = "toys", label = "Aqir Egg Cluster",          ids = { 318452 } },
+        { key = "atomic",     cat = "toys", label = "Atomically Recalibrator",   ids = { 399502 } },
+        { key = "atomgoblin", cat = "toys", label = "Atomically Regoblinator",   ids = { 1215363 } },
+        { key = "blight",     cat = "toys", label = "Detoxified Blight Grenade", ids = { 290224 } },
+        { key = "witch",      cat = "toys", label = "Lucille's Sewing Needle",   ids = { 279509 } },
+        { key = "spraybots",  cat = "toys", label = "Spraybots",                 ids = { 301892, 301893, 301894 } },
+
+        -- Consumables & items
+        { key = "pickaxe",      cat = "items", label = "Cursed Pickaxe",      ids = { 454405 } },
+        { key = "noggenfogger", cat = "items", label = "Noggenfogger Elixir", ids = { 16593, 1223630, 16595, 1223629, 1223631 } },
+        { key = "prism",        cat = "items", label = "Reflecting Prism",    ids = { 163267 } },
+    }
+
+    -- Runtime lookup: [spellID] = true for every included transform.
+    local cTable = {}
+
+    -- Transforms are included by default; the picker stores false to exclude.
+    local function ItemEnabled(key)
+        local t = EllesmereUIDB and EllesmereUIDB.hideTransformItems
+        if t and t[key] == false then return false end
+        return true
+    end
+
+    local function RebuildList()
+        wipe(cTable)
+        if not (EllesmereUIDB and EllesmereUIDB.hideTransforms) then return end
+        for _, item in ipairs(TRANSFORMS) do
+            if ItemEnabled(item.key) then
+                for _, id in ipairs(item.ids) do cTable[id] = true end
+            end
+        end
+    end
+
+    local auraFrame = CreateFrame("Frame")
+
+    -- Sweep current buffs, canceling any included transform. Descending so a
+    -- cancel (which shifts later buff indices down) cannot skip a match.
+    local function CancelMatching(force)
+        if not (C_UnitAuras and C_UnitAuras.GetBuffDataByIndex) then return end
+        if not force and UnitAffectingCombat("player") then return end
+        for i = 40, 1, -1 do
+            local data = C_UnitAuras.GetBuffDataByIndex("player", i)
+            if data then
+                local spellID = data.spellId
+                if spellID and not (issecretvalue and issecretvalue(spellID)) and cTable[spellID] then
+                    CancelUnitBuff("player", i)
+                end
+            end
+        end
+    end
+
+    auraFrame:SetScript("OnEvent", function(_, event, _, updateInfo)
+        if event == "PLAYER_REGEN_ENABLED" then
+            -- Combat just ended: clear anything that landed while locked.
+            CancelMatching(true)
+            return
+        end
+        -- UNIT_AURA (player only, via RegisterUnitEvent)
+        if not updateInfo then return end
+        if updateInfo.isFullUpdate then
+            CancelMatching(false)
+        elseif updateInfo.addedAuras then
+            for _, aura in ipairs(updateInfo.addedAuras) do
+                local spellID = aura.spellId
+                if spellID and not (issecretvalue and issecretvalue(spellID)) and cTable[spellID] then
+                    CancelMatching(false)
+                    break
+                end
+            end
+        end
+    end)
+
+    -- Fishing outfit: aura 394009 sticks while the fishing channel (131476)
+    -- runs, so it is cleared when the channel stops. Only registered while the
+    -- feature is on and the Fishing entry is included.
+    local fishFrame = CreateFrame("Frame")
+    fishFrame:SetScript("OnEvent", function(_, _, _, _, spellID)
+        if issecretvalue and issecretvalue(spellID) then return end
+        if spellID ~= 131476 then return end
+        if UnitAffectingCombat("player") then return end
+        if not (C_UnitAuras and C_UnitAuras.GetBuffDataByIndex) then return end
+        for i = 40, 1, -1 do
+            local data = C_UnitAuras.GetBuffDataByIndex("player", i)
+            if data then
+                local sid = data.spellId
+                if sid and not (issecretvalue and issecretvalue(sid)) and sid == 394009 then
+                    CancelUnitBuff("player", i)
+                end
+            end
+        end
+    end)
+
+    -- (Re)decide which events are hooked. Nothing is registered unless the
+    -- feature is on AND something is actually included, so a disabled feature
+    -- costs zero per-frame work -- the handlers are simply never installed.
+    local function ApplyHideTransforms()
+        RebuildList()
+        local on = EllesmereUIDB and EllesmereUIDB.hideTransforms
+
+        if on and next(cTable) ~= nil then
+            auraFrame:RegisterUnitEvent("UNIT_AURA", "player")
+            auraFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
+            CancelMatching(false)  -- immediate sweep of anything already active
+        else
+            auraFrame:UnregisterEvent("UNIT_AURA")
+            auraFrame:UnregisterEvent("PLAYER_REGEN_ENABLED")
+        end
+
+        if on and ItemEnabled("fishing") then
+            fishFrame:RegisterUnitEvent("UNIT_SPELLCAST_CHANNEL_STOP", "player")
+        else
+            fishFrame:UnregisterEvent("UNIT_SPELLCAST_CHANNEL_STOP")
+        end
+    end
+    EllesmereUI._applyHideTransforms = ApplyHideTransforms
+
+    -- Shared with the options picker popup (EUI_QoL_Options.lua).
+    EllesmereUI.HideTransformsData = {
+        order  = CATEGORY_ORDER,
+        labels = CATEGORY_LABEL,
+        items  = TRANSFORMS,
+    }
+    EllesmereUI.GetHideTransformItem = ItemEnabled
+    EllesmereUI.SetHideTransformItem = function(key, enabled)
+        if not EllesmereUIDB then EllesmereUIDB = {} end
+        EllesmereUIDB.hideTransformItems = EllesmereUIDB.hideTransformItems or {}
+        -- Included is the default -- store only exclusions, keeping the table sparse.
+        if enabled then
+            EllesmereUIDB.hideTransformItems[key] = nil
+        else
+            EllesmereUIDB.hideTransformItems[key] = false
+        end
+        ApplyHideTransforms()
+    end
+
+    local boot = CreateFrame("Frame")
+    boot:RegisterEvent("PLAYER_LOGIN")
+    boot:SetScript("OnEvent", function(self)
+        self:UnregisterAllEvents()
+        ApplyHideTransforms()
+    end)
+end
+
+-------------------------------------------------------------------------------
+--  Equipment Flyout item levels
+--  Blizzard's character-sheet gear flyout (hover a gear slot -> the popup of
+--  same-slot items from your bags/equipped) only shows item icons. When this is
+--  enabled we overlay each flyout button with the item level of the item it
+--  represents, coloured by item quality, so you can compare upgrades at a
+--  glance without reading every tooltip.
+--
+--  We hook EquipmentFlyout_DisplayButton (called once per button whenever the
+--  flyout is populated) and read live from EllesmereUIDB, so toggling the
+--  option takes effect on the next flyout without a reload.
+--  Toggle: EllesmereUIDB.flyoutItemLevels (Quality of Life -> UI).
+-------------------------------------------------------------------------------
+do
+    local function FlyoutEnabled()
+        return EllesmereUIDB and EllesmereUIDB.flyoutItemLevels
+    end
+
+    -- Compute item level + quality + link from a decoded bag/slot pair. Prefers
+    -- the ItemLocation API (exact per-item level, no caching) and falls back to
+    -- the item link when the location can't be built.
+    local function LevelFromSlot(isBags, bag, slot)
+        if isBags then
+            if ItemLocation then
+                local loc = ItemLocation:CreateFromBagAndSlot(bag, slot)
+                if loc and loc:IsValid() and C_Item.DoesItemExist(loc) then
+                    return C_Item.GetCurrentItemLevel(loc), C_Item.GetItemQuality(loc), C_Item.GetItemLink(loc)
+                end
+            end
+            local link = C_Container and C_Container.GetContainerItemLink(bag, slot)
+            if link then
+                return C_Item.GetDetailedItemLevelInfo(link), select(3, C_Item.GetItemInfo(link)), link
+            end
+            return
+        end
+        -- Equipped / bank inventory slot.
+        local link = GetInventoryItemLink("player", slot)
+        if link then
+            local quality = GetInventoryItemQuality and GetInventoryItemQuality("player", slot)
+            return C_Item.GetDetailedItemLevelInfo(link), quality or select(3, C_Item.GetItemInfo(link)), link
+        end
+    end
+
+    -- Return item level + quality + link for a flyout button. Handles all three
+    -- flyout shapes across game versions:
+    --   * modern flyouts that store an ItemLocation object on the button,
+    --   * current retail packed location decoded via EquipmentManager_GetLocationData,
+    --   * older clients decoded via EquipmentManager_UnpackLocation.
+    local function ButtonItemInfo(button)
+        if button.GetItemLocation then
+            local ok, loc = pcall(button.GetItemLocation, button)
+            if ok and loc and loc.IsValid and loc:IsValid() and C_Item.DoesItemExist(loc) then
+                return C_Item.GetCurrentItemLevel(loc), C_Item.GetItemQuality(loc), C_Item.GetItemLink(loc)
+            end
+        end
+
+        local location = button.location
+        if not location or type(location) ~= "number" then return end
+        if EQUIPMENTFLYOUT_FIRST_SPECIAL_LOCATION
+            and location >= EQUIPMENTFLYOUT_FIRST_SPECIAL_LOCATION then
+            return
+        end
+
+        if EquipmentManager_GetLocationData then
+            local ld = EquipmentManager_GetLocationData(location)
+            if not ld or ld.slot == nil then return end
+            return LevelFromSlot(ld.isBags, ld.bag, ld.slot)
+        elseif EquipmentManager_UnpackLocation then
+            local _, _, bags, voidStorage, slot, bag = EquipmentManager_UnpackLocation(location)
+            if voidStorage then return end
+            return LevelFromSlot(bags, bag, slot)
+        end
+    end
+
+    -- Item-level FontStrings live in an external weak-keyed table, NOT on the
+    -- button. The flyout buttons are Blizzard-owned (and the flyout is the
+    -- secure item-equipping path), so writing a custom key onto them would
+    -- taint their execution context. Creating the FontString region on the
+    -- button is fine; only the state reference must stay off the frame table.
+    local _flyoutFS = setmetatable({}, { __mode = "k" })  -- [button] = fontstring
+
+    -- Lazily attach (and return) the item-level FontString for a flyout button.
+    local function EnsureText(button)
+        local fs = _flyoutFS[button]
+        if not fs then
+            local font = EllesmereUI._font
+                or "Interface\\AddOns\\EllesmereUI\\media\\fonts\\Expressway.ttf"
+            local flag = (EllesmereUI.SlugFlag and EllesmereUI.SlugFlag("OUTLINE, SLUG"))
+                or "OUTLINE, SLUG"
+            fs = button:CreateFontString(nil, "OVERLAY", nil, 7)
+            fs:SetFont(font, 12, flag)
+            fs:SetPoint("TOP", button, "TOP", 0, -2)
+            fs:SetJustifyH("CENTER")
+            _flyoutFS[button] = fs
+        end
+        return fs
+    end
+
+    local function InstallHook()
+        if not EquipmentFlyout_DisplayButton then return end
+        hooksecurefunc("EquipmentFlyout_DisplayButton", function(button)
+            local fs = _flyoutFS[button]
+            if not FlyoutEnabled() then
+                if fs then fs:SetText("") end
+                return
+            end
+
+            local ilvl, quality, link = ButtonItemInfo(button)
+            fs = EnsureText(button)
+            if ilvl and ilvl > 0 then
+                fs:SetText(ilvl)
+                -- Match the character sheet: custom color > upgrade track > rarity.
+                local c
+                if EllesmereUI.GetItemLevelColor then
+                    c = EllesmereUI.GetItemLevelColor(link, quality)
+                elseif quality and ITEM_QUALITY_COLORS then
+                    c = ITEM_QUALITY_COLORS[quality]
+                end
+                if c then
+                    fs:SetTextColor(c.r, c.g, c.b, 1)
+                else
+                    fs:SetTextColor(1, 1, 1, 1)
+                end
+            else
+                fs:SetText("")
+            end
+        end)
+    end
+
+    local f = CreateFrame("Frame")
+    f:RegisterEvent("PLAYER_LOGIN")
+    f:SetScript("OnEvent", function(self)
+        self:UnregisterAllEvents()
+        InstallHook()
     end)
 end
 

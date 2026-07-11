@@ -15,6 +15,67 @@ local function GetFFD(frame)
 end
 
 -------------------------------------------------------------------------------
+--  Per-window skin style ("eui" | "modern" | "off"). The per-window enable
+--  keys stay the on/off source of truth, so existing settings carry over
+--  unchanged: enable key false = "off". EllesmereUIDB.blizzWindowSkinStyles
+--  only records WHICH skin set an enabled window uses (nil = "eui").
+--  "modern" is reserved for the upcoming skin set and currently renders
+--  identically to "eui" -- skin files branch on this helper when it ships.
+-------------------------------------------------------------------------------
+local WINDOW_ENABLE_KEYS = {
+    charsheet       = "themedCharacterSheet",
+    inspect         = "themedInspectSheet",
+    lfg             = "reskinLFGMenu",
+    greatvault      = "reskinGreatVault",
+    collections     = "reskinCollections",
+    playerspells    = "reskinPlayerSpells",
+    adventureguide  = "reskinAdventureGuide",
+    professionsbook = "reskinProfessionsBook",
+    guild           = "reskinGuild",
+    calendar        = "reskinCalendar",
+    achievements    = "reskinAchievements",
+    mail            = "reskinMail",
+    catalyst        = "reskinCatalyst",
+    socket          = "reskinSocket",
+    micromenu       = "reskinMicroMenu",
+    housing         = "reskinHousing",
+    professions     = "reskinProfessions",
+    worldmap        = "reskinWorldMap",
+    dressup         = "reskinDressUp",
+    transmog        = "reskinTransmog",
+    merchant        = "reskinMerchant",
+    auctionhouse    = "reskinAuctionHouse",
+    macros          = "reskinMacros",
+    settings        = "reskinSettings",
+    addonlist       = "reskinAddonList",
+    craftorders     = "reskinCraftOrders",
+    trainer         = "reskinTrainer",
+    gossip          = "reskinGossip",
+    quest           = "reskinQuest",
+    inspectrecipe   = "reskinInspectRecipe",
+    delves          = "reskinDelves",
+}
+function EllesmereUI.GetBlizzWindowStyle(winKey)
+    local ek = WINDOW_ENABLE_KEYS[winKey]
+    if ek and EllesmereUIDB and EllesmereUIDB[ek] == false then return "off" end
+    local styles = EllesmereUIDB and EllesmereUIDB.blizzWindowSkinStyles
+    if styles and styles[winKey] == "modern" then return "modern" end
+    return "eui"
+end
+
+-- Turn off every window reskin at once (used by the one-time feature-intro
+-- popup's "Disable" button). Writes an explicit false to each window's enable
+-- key so GetBlizzWindowStyle reports "off"; blizzWindowSkinStyles is left
+-- intact, so a later re-enable restores each window's chosen style. Reskins
+-- install at load, so the caller must reload for this to fully apply.
+function EllesmereUI.DisableAllBlizzWindowSkins()
+    if not EllesmereUIDB then EllesmereUIDB = {} end
+    for _, ek in pairs(WINDOW_ENABLE_KEYS) do
+        EllesmereUIDB[ek] = false
+    end
+end
+
+-------------------------------------------------------------------------------
 --  Tooltip / Context Menu / Static Popup Skinning
 --  Restyles Blizzard's GameTooltip and related frames with EUI's dark style.
 --  Visual-only changes (alpha, backdrop color, font). No Hide/Show/SetParent
@@ -56,14 +117,28 @@ end
             GetFFD(tt).bg = tt:CreateTexture(nil, "BACKGROUND", nil, -8)
             GetFFD(tt).bg:SetAllPoints()
             if _PP and _PP.CreateBorder then
-                _PP.CreateBorder(tt, 1, 1, 1, EllesmereUI.RESKIN.BRD_ALPHA, 1, "OVERLAY", 7)
+                local bR, bG, bB, bA, bSize = EllesmereUI.GetTooltipBorder()
+                _PP.CreateBorder(tt, bR, bG, bB, bA, bSize, "OVERLAY", 7)
             end
         end
         -- Unified, user-customizable background (shared with the EUI custom
         -- tooltips via EllesmereUI.GetTooltipBg). Re-applied each skin call so a
-        -- settings change shows on the next tooltip. Border alpha stays fixed.
+        -- settings change shows on the next tooltip.
         GetFFD(tt).bg:SetColorTexture(EllesmereUI.GetTooltipBg())
         GetFFD(tt).bg:Show()
+        -- Border size + colour are user-customizable (Blizz UI Enhanced >
+        -- Blizzard Tooltip > Border). Re-applied each call like the bg so a
+        -- change shows on the next tooltip; size 0 hides the border.
+        if _PP and _PP.GetBorders and _PP.GetBorders(tt) then
+            local bR, bG, bB, bA, bSize = EllesmereUI.GetTooltipBorder()
+            if bSize and bSize > 0 then
+                _PP.SetBorderSize(tt, bSize)
+                _PP.SetBorderColor(tt, bR, bG, bB, bA)
+                _PP.ShowBorder(tt)
+            else
+                _PP.HideBorder(tt)
+            end
+        end
     end
 
     local function _ttFonts(tt, startFrom)
@@ -101,6 +176,11 @@ end
     -- handler that feeds both tooltip ilvl cache and inspect sheet reskin.
     local _ilvlCache = {}       -- guid -> { ilvl = number, time = GetTime() }
     local _ilvlCacheTTL = 120
+    -- Mount-name cache. Short TTL: mount state changes often, but this only
+    -- needs to survive a single hover's refresh ticks so an unmounted player
+    -- is scanned once, not once per tick. name = false means "scanned, none".
+    local _mountCache = {}      -- guid -> { name = string|false, time = GetTime() }
+    local _mountCacheTTL = 3
     local _inspectPendingGUID = nil
     local _userInspectUntil = 0
     -- GUID the visible GameTooltip was last populated for (set by the Unit
@@ -122,6 +202,39 @@ end
             end
         end
         return false
+    end
+
+    local function _getMountedAuraName(unit)
+        if not unit or (_isSecret and _isSecret(unit)) then return nil end
+        if not UnitExists(unit) or not UnitIsPlayer(unit) then return nil end
+        if not (C_UnitAuras and C_UnitAuras.GetAuraDataByIndex) then return nil end
+        if not (C_MountJournal and C_MountJournal.GetMountFromSpell) then return nil end
+
+        for i = 1, 255 do
+            local aura = C_UnitAuras.GetAuraDataByIndex(unit, i, "HELPFUL")
+            if not aura then break end
+            local spellID = aura.spellId
+            if spellID and not (_isSecret and _isSecret(spellID)) then
+                local mountID = C_MountJournal.GetMountFromSpell(spellID)
+                if mountID and not (_isSecret and _isSecret(mountID)) and mountID > 0 then
+                    local name
+                    if C_MountJournal.GetMountInfoByID then
+                        local mountName = C_MountJournal.GetMountInfoByID(mountID)
+                        if mountName and not (_isSecret and _isSecret(mountName)) then
+                            name = mountName
+                        end
+                    end
+                    if not name then
+                        local auraName = aura.name
+                        if auraName and not (_isSecret and _isSecret(auraName)) then
+                            name = auraName
+                        end
+                    end
+                    if name and name ~= "" then return name end
+                end
+            end
+        end
+        return nil
     end
     hooksecurefunc("InspectUnit", function()
         _userInspectUntil = GetTime() + 2
@@ -303,6 +416,29 @@ end
                 GameTooltipStatusBar:SetStatusBarColor(cc.r, cc.g, cc.b)
             end
         end
+        -- Add guild rank next to guild name : Name-Realm [Rank]. The guild
+        -- line is re-found on every call -- its index varies per unit (titles
+        -- shift it), so a cached line would decorate the wrong row on other
+        -- tooltips. Deduped like the M+ line below: refresh cycles re-run
+        -- this postprocessor on text that may already carry the rank.
+        if unit and db and db.tooltipShowGuildRank then
+            local guildName, guildRankName = GetGuildInfo(unit)
+            if guildName and guildRankName
+                and not (_isSecret and (_isSecret(guildName) or _isSecret(guildRankName))) then
+                local suffix = " [" .. guildRankName .. "]"
+                for i = 2, nLinesBefore do
+                    local line = _G["GameTooltipTextLeft" .. i]
+                    local text = line and line:GetText()
+                    if text and not (_isSecret and _isSecret(text))
+                        and string.find(text, guildName, 1, true) then
+                        if text:sub(-#suffix) ~= suffix then
+                            line:SetText(text .. suffix)
+                        end
+                        break
+                    end
+                end
+            end
+        end
         -- M+ Score (append-only, deduped against any equivalent foreign line).
         if unit and db and db.tooltipMythicScore ~= false
             and C_PlayerInfo and C_PlayerInfo.GetPlayerMythicPlusRatingSummary then
@@ -315,6 +451,22 @@ end
                 local r, g, b = 1, 1, 1
                 if sColor then r, g, b = sColor.r, sColor.g, sColor.b end
                 tt:AddDoubleLine("M+ Score:", score, 1, 1, 1, r, g, b)
+            end
+        end
+        -- Mount name from the live helpful aura that MountJournal recognizes.
+        -- Opt-in (default off). Per-GUID cached so refresh ticks on an
+        -- unmounted player never re-walk the whole aura list.
+        if unit and guid and db and db.tooltipShowMount and not _tipHasLine(tt, "Mount:") then
+            local mountName
+            local cached = _mountCache[guid]
+            if cached and (GetTime() - cached.time) < _mountCacheTTL then
+                mountName = cached.name
+            else
+                mountName = _getMountedAuraName(unit) or false
+                _mountCache[guid] = { name = mountName, time = GetTime() }
+            end
+            if mountName then
+                tt:AddDoubleLine("Mount:", mountName, 1, 1, 1, 1, 1, 1)
             end
         end
         -- Item Level. Cache is keyed strictly by the authoritative GUID so a
@@ -514,9 +666,16 @@ end
             end
         end
         GetFFD(popup).bg:Show()
-        -- Skin buttons
+        -- Skin buttons (1-4 plus the optional extra action button)
+        local popupBtns = {}
         for i = 1, 4 do
-            local btn = popup["button" .. i] or _G[popup:GetName() and (popup:GetName() .. "Button" .. i)]
+            popupBtns[#popupBtns + 1] = popup["button" .. i]
+                or _G[popup:GetName() and (popup:GetName() .. "Button" .. i)]
+        end
+        local popupName = popup.GetName and popup:GetName()
+        popupBtns[#popupBtns + 1] = popup.extraButton
+            or (popupName and _G[popupName .. "ExtraButton"])
+        for _, btn in ipairs(popupBtns) do
             if btn and not GetFFD(btn).skinned then
                 GetFFD(btn).skinned = true
                 for j = 1, select("#", btn:GetRegions()) do
@@ -542,6 +701,12 @@ end
                         _PP.CreateBorder(btn, 1, 1, 1, RS.BRD_ALPHA, 1, "OVERLAY", 7)
                     end
                 end
+                -- House hover: 10% white wash (HIGHLIGHT layer only renders
+                -- while the button is enabled and hovered).
+                local hov = btn:CreateTexture(nil, "HIGHLIGHT")
+                hov:SetColorTexture(1, 1, 1, 0.1)
+                hov:SetAllPoints()
+                GetFFD(hov).owned = true
 
                 -- Mirror Blizzard's enabled/disabled state so buttons visibly
                 -- dim when locked out (e.g. Release in boss combat).
@@ -601,10 +766,27 @@ end
                     if r.SetAtlas then r:SetAtlas("") end
                 end
             end
+            -- Midnight edit boxes carry their art on a NineSlice child.
+            if eb.NineSlice and eb.NineSlice.SetAlpha then
+                eb.NineSlice:SetAlpha(0)
+            end
+            -- 6px left padding: box edge extends, text stays put.
+            if EllesmereUI._WSkinPadInput then EllesmereUI._WSkinPadInput(eb) end
             local ebBg = eb:CreateTexture(nil, "BACKGROUND", nil, -6)
             ebBg:SetAllPoints()
             ebBg:SetColorTexture(0.05, 0.05, 0.05, 0.9)
             GetFFD(ebBg).owned = true
+            -- Border matching the popup buttons (accent or white).
+            local RS2 = EllesmereUI.RESKIN
+            local EG3 = EllesmereUI.ELLESMERE_GREEN
+            if not _PP then _PP = EllesmereUI and EllesmereUI.PP end
+            if _PP and _PP.CreateBorder then
+                if _accentEnabled() and EG3 then
+                    _PP.CreateBorder(eb, EG3.r, EG3.g, EG3.b, 0.5, 1, "OVERLAY", 7)
+                else
+                    _PP.CreateBorder(eb, 1, 1, 1, RS2.BRD_ALPHA, 1, "OVERLAY", 7)
+                end
+            end
         end
     end
 
@@ -651,7 +833,8 @@ end
         local TIMER_DURATION = 40
         local timerBar, timerText, timerEndTime
 
-        -- Independent toggle, default on (not tied to any master reskin setting).
+        -- Independent toggle, default on (not tied to any master reskin setting,
+        -- including the window-skins style: this is a popup, not a window).
         local function IsQueueReskinOn()
             return not EllesmereUIDB or EllesmereUIDB.reskinQueuePopup ~= false
         end
@@ -770,6 +953,12 @@ end
                                     _PP.CreateBorder(btn, 1, 1, 1, RS2.BRD_ALPHA, 1, "OVERLAY", 7)
                                 end
                             end
+                            -- House hover: 10% white wash (owned, so the
+                            -- every-show re-strip above leaves it alone).
+                            local hov = btn:CreateTexture(nil, "HIGHLIGHT")
+                            hov:SetColorTexture(1, 1, 1, 0.1)
+                            hov:SetAllPoints()
+                            GetFFD(hov).owned = true
                         end
                         -- Accent-color the button text (every show)
                         local EG = EllesmereUI.ELLESMERE_GREEN
@@ -1291,7 +1480,8 @@ do
     f:SetScript("OnEvent", function(self)
         self:UnregisterAllEvents()
         if not GameMenuFrame then return end
-        -- Independent toggle, default on (not tied to any master reskin setting).
+        -- Independent toggle, default on (not tied to any master reskin setting,
+        -- including the window-skins style: this is a popup menu, not a window).
         if EllesmereUIDB and EllesmereUIDB.reskinGameMenu == false then return end
 
         local RS = EllesmereUI.RESKIN
@@ -1444,6 +1634,20 @@ do
         return cursorFrame
     end
 
+    -- Show + position the tracking frame at the pointer right now. The OnUpdate
+    -- alone only repositions it on the NEXT frame, so a tooltip anchored to it
+    -- and shown synchronously this frame (as the custom CDM frames do) would have
+    -- no valid rect yet -- and nothing renders.
+    local function PositionCursorFrameNow(cf)
+        cf:Show()
+        local scale = UIParent:GetEffectiveScale()
+        if scale > 0 then
+            local x, y = GetCursorPosition()
+            cf:ClearAllPoints()
+            cf:SetPoint("CENTER", UIParent, "BOTTOMLEFT", x / scale, y / scale)
+        end
+    end
+
     local function ApplyCursorAnchor(tooltip, parent)
         if tooltip ~= GameTooltip then return end
         -- Gated by the "Reskin Tooltip" master (matches the grayed-out option), so
@@ -1451,10 +1655,42 @@ do
         if EllesmereUIDB and EllesmereUIDB.customTooltips == false then return end
         if not (EllesmereUIDB and EllesmereUIDB.tooltipAnchorCursor) then return end
         if not parent or tooltip:IsForbidden() then return end
+        -- Respect the "Show Tooltips" suppression. This post-hook runs after
+        -- HideTooltipByMode in the GameTooltip_SetDefaultAnchor chain, so without
+        -- this check the re-anchor below would undo its Hide() every frame and the
+        -- tooltip would stay visible (e.g. "Out of Combat" leaking tips in combat).
+        if EllesmereUI._tooltipSuppressedByMode and EllesmereUI._tooltipSuppressedByMode(tooltip) then
+            if cursorFrame then cursorFrame:Hide() end
+            tooltip:Hide()
+            return
+        end
         local cf = EnsureCursorFrame()
-        cf:Show()
+        PositionCursorFrameNow(cf)
         local point = POINT_FOR_POS[EllesmereUIDB.tooltipCursorPosition or "top"] or "BOTTOM"
         tooltip:SetOwner(parent, "ANCHOR_NONE")
+        tooltip:ClearAllPoints()
+        tooltip:SetPoint(point, cf, "CENTER",
+            EllesmereUIDB.tooltipCursorOffsetX or 0,
+            EllesmereUIDB.tooltipCursorOffsetY or 0)
+    end
+
+    -- Re-assert the cursor anchor on GameTooltip WITHOUT re-owning it (SetOwner
+    -- would wipe the content). A custom frame whose tooltip content-setter
+    -- (e.g. SetItemByID) clears/hides the tip mid-build can fire GameTooltip's
+    -- OnHide -- which hides the tracking frame -- leaving the tip anchored to a
+    -- hidden/unpositioned frame so it never appears. Calling this AFTER the
+    -- content is set (and before Show) re-shows + repositions the tracking frame
+    -- and re-points the tooltip so it reliably renders at the cursor. No-op when
+    -- the cursor anchor (or the reskin master) is off, so callers can call it
+    -- unconditionally.
+    EllesmereUI._repointTooltipAtCursor = function(tooltip)
+        if tooltip ~= GameTooltip then return end
+        if EllesmereUIDB and EllesmereUIDB.customTooltips == false then return end
+        if not (EllesmereUIDB and EllesmereUIDB.tooltipAnchorCursor) then return end
+        if tooltip:IsForbidden() then return end
+        local cf = EnsureCursorFrame()
+        PositionCursorFrameNow(cf)
+        local point = POINT_FOR_POS[EllesmereUIDB.tooltipCursorPosition or "top"] or "BOTTOM"
         tooltip:ClearAllPoints()
         tooltip:SetPoint(point, cf, "CENTER",
             EllesmereUIDB.tooltipCursorOffsetX or 0,
@@ -1515,24 +1751,67 @@ end
 --  for the default mode, costing one table read per tooltip when unused.
 -------------------------------------------------------------------------------
 do
-    local function HideTooltipByMode(tooltip)
-        if tooltip ~= GameTooltip then return end
-        if tooltip.IsForbidden and tooltip:IsForbidden() then return end
+    -- Shared decision: should GameTooltip be suppressed right now given the
+    -- user's "Show Tooltips" mode + combat state? Exposed on EllesmereUI so the
+    -- cursor-anchor hook can honor it too (otherwise the cursor re-anchor would
+    -- re-show a tooltip this hook just hid).
+    function EllesmereUI._tooltipSuppressedByMode(tooltip)
+        if tooltip ~= GameTooltip then return false end
+        if tooltip.IsForbidden and tooltip:IsForbidden() then return false end
         -- Gated by the "Reskin Tooltip" master (matches the grayed-out "Show
         -- Tooltips" option), so disabling the reskin never leaves tooltips stuck
         -- suppressed at, e.g., "Never".
-        if EllesmereUIDB and EllesmereUIDB.customTooltips == false then return end
+        if EllesmereUIDB and EllesmereUIDB.customTooltips == false then return false end
         local mode = (EllesmereUIDB and EllesmereUIDB.tooltipShowMode) or "always"
-        if mode == "always" then return end
         if mode == "never" then
-            tooltip:Hide()
+            return true
         elseif mode == "outOfCombat" then
-            if InCombatLockdown() then tooltip:Hide() end
+            return InCombatLockdown()
         elseif mode == "outOfBossCombat" then
-            if IsEncounterInProgress() then tooltip:Hide() end
+            return IsEncounterInProgress()
+        end
+        return false
+    end
+
+    local function HideTooltipByMode(tooltip)
+        if EllesmereUI._tooltipSuppressedByMode(tooltip) then
+            tooltip:Hide()
         end
     end
     if GameTooltip_SetDefaultAnchor then
         hooksecurefunc("GameTooltip_SetDefaultAnchor", HideTooltipByMode)
+    end
+end
+
+-------------------------------------------------------------------------------
+--  Hide Unit Health Strip. GameTooltipStatusBar is Blizzard's health bar at the
+--  bottom of unit tooltips. We suppress it with a single SetAlpha(0) -- fully
+--  taint-safe: only the one top-level bar is touched, it is never Shown/Hidden
+--  or given custom keys, and observation is via hooksecurefunc (never SetScript).
+--  The hook fires only when Blizzard shows the bar (unit tooltips), covering
+--  every anchor path (default, cursor, unit-frame), and early-outs when the
+--  feature is off -- so it costs one table read when disabled and one SetAlpha
+--  when enabled. Default ENABLED (nil / true = hidden). Independent of the
+--  reskin: works on default Blizzard tooltips too.
+-------------------------------------------------------------------------------
+do
+    local function _healthStripHidden()
+        -- Default enabled: hidden unless the user explicitly turned it off.
+        return not (EllesmereUIDB and EllesmereUIDB.tooltipHideHealthStrip == false)
+    end
+
+    -- Live apply for the options toggle (immediate hide/restore) and login seed.
+    EllesmereUI._applyTooltipHealthStrip = function()
+        if not GameTooltipStatusBar then return end
+        GameTooltipStatusBar:SetAlpha(_healthStripHidden() and 0 or 1)
+    end
+
+    if GameTooltipStatusBar then
+        -- Re-assert alpha 0 each time Blizzard shows the bar so it can never
+        -- flash back into view. SetAlpha does not call Show, so no recursion.
+        hooksecurefunc(GameTooltipStatusBar, "Show", function(bar)
+            if _healthStripHidden() then bar:SetAlpha(0) end
+        end)
+        EllesmereUI._applyTooltipHealthStrip()
     end
 end

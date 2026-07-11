@@ -1,6 +1,6 @@
 # Auctionator
 
-## [327](https://github.com/TheMouseNest/Auctionator/tree/327) (2026-06-16)
-[Full Changelog](https://github.com/TheMouseNest/Auctionator/compare/326...327) 
+## [329](https://github.com/TheMouseNest/Auctionator/tree/329) (2026-07-08)
+[Full Changelog](https://github.com/TheMouseNest/Auctionator/compare/328...329) 
 
-- [Fixes #1821] Bugfix for koKR  
+- Bugfix for Blizzard error on TBC  

@@ -236,10 +236,11 @@ L.spellNameResetDesc = "该法术默认使用自定义名称，点击此按钮�
 
 -- Sharing.lua
 L.import = "导入"
-L.import_info = "导入字符串后，你可以选择要导入的设置。\n如果导入的字符串中包含不可用的设置，则无法选择这些设置。\n\n|cffff4411此导入只会改变你的常规设置，不会改变你对首领的特定设置。|r"
+L.import_info = "导入字符串后，你可以选择要导入的设置。\n如果导入的字符串中包含不可用的设置，则无法选择这些设置。"
 L.import_info_active = "选择要导入的选项，然后点击导入按钮。"
 L.import_info_none = "|cFFFF0000导入的字符串不兼容或已过期。|r"
 L.export = "导出"
+L.export_core = "导出核心"
 L.export_info = "选择要导出并分享给他人的设置。\n\n|cffff4411你只能分享常规设置，这些设置对首领的特定设置没有影响。|r"
 L.export_string = "导出字符串"
 L.export_string_desc = "要分享设置，请复制此 BigWigs 字符串。"
@@ -297,6 +298,12 @@ L.privateAuras_settings_export_desc = "导出私有光环设置。"
 L.imported_combattimer_settings = "战斗计时器设置"
 L.combattimer_settings_import_desc = "导入计时器设置"
 L.combattimer_settings_export_desc = "导出计时器设置"
+L.export_bosses = "导出首领设置"
+L.export_bosses_info = "导出下方所选副本中全部首领的设置。"
+L.raids_section = "团队副本"
+L.expansion_dungeons_section = "内容更新地下城"  -- 同步暴雪官方的本地化翻译EXPANSION_FILTER_TEXT = "内容更新"
+L.seasonal_dungeons_section = "赛季地下城"
+L.confirm_import_addon_boss_settings = "插件 |cFF436EEE\"%s\"|r 即将自动修改以下副本中所有首领的 BigWigs 设置：\n\n|cFFFFFF99%s|r\n\n此更改将应用于以下配置文件：\n\n|cFF33FF99\"%s\"|r\n\n确认继续？"
 
 -- InstanceSharing.lua
 L.sharing_window_title = "分享首领设置"

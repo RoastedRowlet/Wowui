@@ -72,6 +72,8 @@ local defaults = {
             borderSize    = 1,
             borderR       = 0, borderG = 0, borderB = 0, borderA = 1,
             noBorderDebuffs = true,
+            buffIconZoom   = 0.055,
+            debuffIconZoom = 0.055,
         },
         castbarOpacity = 1.0,
         castbarColor = { r = 0.114, g = 0.655, b = 0.514 },
@@ -85,6 +87,10 @@ local defaults = {
         -- When decimals are on, boss frames show two decimals (240.55k / 77.30%)
         -- instead of one. Default on. Inline cog on "Show Decimal on Health Text".
         showDecimalBoss2 = true,
+        -- When decimals are on, "Only Show for % Health" keeps the decimal on the
+        -- health PERCENT (77.3%) but leaves health VALUES whole (240k). Default
+        -- off. Inline cog on "Show Decimal on Health Text".
+        showDecimalPercentOnly = false,
         -- Player Threat (Non-Tank): additive "Shadow" border on the PLAYER frame
         -- when the player is pulling/has aggro, in instanced content only. Global,
         -- default off (zero cost until enabled). Colors mirror the nameplate
@@ -784,6 +790,9 @@ local defaults = {
             customBgColor = { r = 0.067, g = 0.067, b = 0.067 },
             bgClassColored = false,
             castbarHeight = 14,
+            castbarWidth = 0,
+            castbarOffsetX = 0,
+            castbarOffsetY = 0,
             showCastbar = true,
             showCastIcon = true,
             castbarIconInWidth = true,
@@ -827,8 +836,12 @@ local defaults = {
             debuffOffsetY = 0,
             buffShowCooldownText = false,
             buffCooldownTextSize = 10,
+            buffCooldownTextColor = {r=1, g=1, b=1},
+            buffStackTextColor = {r=1, g=1, b=1},
             debuffShowCooldownText = false,
             debuffCooldownTextSize = 10,
+            debuffCooldownTextColor = {r=1, g=1, b=1},
+            debuffStackTextColor = {r=1, g=1, b=1},
             simpleDebuffShowCooldownText = false,
             simpleDebuffCooldownTextSize = 14,
             simpleDebuffs = "left",  -- "none"/"left"/"right": simple display forces that-side anchor + frame-height-matched debuff size (legacy boolean true=left / false=none honored at read time)
@@ -934,23 +947,16 @@ end
 
 local SOLID_BACKDROP = { bgFile = "Interface\\Buttons\\WHITE8X8" }
 
--- Locale system font override: for CJK/Cyrillic clients, bypass all custom
--- fonts and use the WoW built-in font that supports the locale's glyphs.
-local LOCALE_FONT_OVERRIDE = EllesmereUI and EllesmereUI.LOCALE_FONT_FALLBACK
-
-local cachedFontPath = LOCALE_FONT_OVERRIDE or (EllesmereUI and EllesmereUI.GetFontPath and EllesmereUI.GetFontPath("unitFrames"))
+-- Font resolution routes through the shared EllesmereUI.GetFontPath("unitFrames"),
+-- which already handles glyph-restricted locales (CJK/Cyrillic): it keeps a
+-- user-installed SharedMedia font that can render the locale's glyphs and only
+-- falls back to the system glyph font otherwise. Unit frames must NOT re-decide
+-- the locale fallback locally, or a locale client could never use a custom font
+-- here even when every other module honors it.
+local cachedFontPath = (EllesmereUI and EllesmereUI.GetFontPath and EllesmereUI.GetFontPath("unitFrames"))
     or "Interface\\AddOns\\EllesmereUI\\media\\fonts\\Expressway.TTF"
 local cachedFontPaths = {}  -- per-unit font cache
 local function ResolveFontPath(unitKey)
-    -- Locale override takes absolute priority ? no custom font can render CJK/Cyrillic
-    if LOCALE_FONT_OVERRIDE then
-        cachedFontPath = LOCALE_FONT_OVERRIDE
-        for _, uKey in ipairs({"player", "target", "focus", "boss", "pet", "targettarget", "focustarget"}) do
-            cachedFontPaths[uKey] = LOCALE_FONT_OVERRIDE
-        end
-        return
-    end
-    -- Global font system
     local gPath = EllesmereUI and EllesmereUI.GetFontPath and EllesmereUI.GetFontPath("unitFrames")
         or "Interface\\AddOns\\EllesmereUI\\media\\fonts\\Expressway.TTF"
     cachedFontPath = gPath
@@ -1045,6 +1051,8 @@ local healthBarTextures = {
     ["gradient-tb"]   = TEXTURE_BASE .. "gradient-tb.tga",
     ["matte"]         = TEXTURE_BASE .. "matte.tga",
     ["sheer"]         = TEXTURE_BASE .. "sheer.tga",
+    ["blinkii-diamonds"] = TEXTURE_BASE .. "blinkii-diamonds.tga",
+    ["kringel-window"]   = TEXTURE_BASE .. "kringel-window.tga",
 }
 local healthBarTextureOrder = {
     "none", "melli", "atrocity",
@@ -1054,6 +1062,7 @@ local healthBarTextureOrder = {
     "divide", "glass",
     "gradient-lr", "gradient-rl", "gradient-bt", "gradient-tb",
     "matte", "sheer",
+    "blinkii-diamonds", "kringel-window",
 }
 local healthBarTextureNames = {
     ["none"]        = "None",
@@ -1073,6 +1082,8 @@ local healthBarTextureNames = {
     ["gradient-tb"] = "Gradient Down",
     ["matte"]       = "Matte",
     ["sheer"]       = "Sheer",
+    ["blinkii-diamonds"] = "Blinkii Diamonds",
+    ["kringel-window"]   = "Kringel Window",
 }
 ns.healthBarTextures = healthBarTextures
 ns.healthBarTextureOrder = healthBarTextureOrder
@@ -1151,7 +1162,7 @@ ns.ApplyCastBarTexture = function(castbar, texKey)
 end
 
 -------------------------------------------------------------------------------
---  Health Bar Opacity ? controls the overall alpha of the health bar fill
+--  Health Bar Opacity -- controls the overall alpha of the health bar fill
 -------------------------------------------------------------------------------
 local function ApplyHealthBarAlpha(health, unitKey)
     if not health then return end
@@ -1168,7 +1179,7 @@ local function ApplyHealthBarAlpha(health, unitKey)
 end
 
 -------------------------------------------------------------------------------
---  Power Bar Opacity ? controls the overall alpha of the power bar
+--  Power Bar Opacity -- controls the overall alpha of the power bar
 -------------------------------------------------------------------------------
 local function ApplyPowerBarAlpha(power, unitKey)
     if not power then return end
@@ -1184,7 +1195,7 @@ local function ApplyPowerBarAlpha(power, unitKey)
 end
 
 -------------------------------------------------------------------------------
---  Dark Mode ? flat dark health bar with gray background
+--  Dark Mode -- flat dark health bar with gray background
 -------------------------------------------------------------------------------
 -- Non-dark fallback bg colour (#111) used when no class/custom colour source is
 -- available. The Dark Mode fill/background come from the global per-profile
@@ -1216,6 +1227,7 @@ local function ApplyDarkTheme(health)
     local isDark = db and db.profile and db.profile.darkTheme
     if isDark then
         health.colorClass = false
+        health.colorClassPet = false
         health.colorReaction = false
         health.colorTapped = false
         health.colorDisconnected = false
@@ -1236,7 +1248,7 @@ local function ApplyDarkTheme(health)
         end
         -- PostUpdateColor: re-apply dark color after oUF tries to class-color,
         -- and re-anchor bg to track the fill edge.
-        -- Alpha is NOT re-applied here ? SetStatusBarColor(r,g,b) with 3 args
+        -- Alpha is NOT re-applied here -- SetStatusBarColor(r,g,b) with 3 args
         -- preserves existing texture alpha, so the alpha set by
         -- ApplyHealthBarAlpha persists through oUF recolors.
         health.PostUpdateColor = function(self)
@@ -1254,6 +1266,14 @@ local function ApplyDarkTheme(health)
         -- Check for custom fill/bg colors on this unit
         local unitKey = health._euiUnitKey
         local unitSettings = unitKey and db.profile[unitKey]
+        -- Pet class coloring is opt-in. Pets never match oUF's colorClass (that
+        -- path requires a player unit), so the pet frame uses colorClassPet, gated
+        -- on the pet page's Class Colored Fill toggle.
+        if unitKey == "pet" and unitSettings and unitSettings.healthClassColored then
+            health.colorClassPet = true
+        else
+            health.colorClassPet = false
+        end
         local customFill = unitSettings and unitSettings.customFillColor
         local customBg   = unitSettings and unitSettings.customBgColor
         if customFill then
@@ -1267,7 +1287,7 @@ local function ApplyDarkTheme(health)
             end
         end
         -- Tint bg to 20% of the class/reaction color, or use custom bg color.
-        -- Alpha is NOT re-applied ? SetStatusBarColor(r,g,b) preserves
+        -- Alpha is NOT re-applied -- SetStatusBarColor(r,g,b) preserves
         -- existing texture alpha through oUF recolors.
         health.PostUpdateColor = function(self, unit, color)
             local uKey = self._euiUnitKey
@@ -1379,6 +1399,23 @@ if EllesmereUI.RegisterDarkModeRefresh then
     end)
 end
 
+-- Global Dark Mode master: expose Unit Frames' darkTheme flag so the parent
+-- addon's master toggle can flip it alongside the other modules. setOn mirrors
+-- the individual Dark Mode toggle (write the flag + reload the frames).
+if EllesmereUI.RegisterDarkModeToggle then
+    EllesmereUI.RegisterDarkModeToggle({
+        id = "unitFrames",
+        isOn = function()
+            return (db and db.profile and db.profile.darkTheme) or false
+        end,
+        setOn = function(on)
+            if not (db and db.profile) then return end
+            db.profile.darkTheme = on
+            if ns.ReloadFrames then ns.ReloadFrames() end
+        end,
+    })
+end
+
 -- Smart power text: percent for healers/prot pally/arcane mage, numeric for everyone else.
 -- Shared helper used by both the oUF tag and the resource bars renderer.
 -- `displayedPowerType` (optional, an Enum.PowerType value) is the power the
@@ -1444,13 +1481,20 @@ ns._decimalAbbrevConfig2 = { breakpointData = {
 function ns.ApplyTextDecimalGlobals()
     if db and db.profile and db.profile.showDecimalOnText then
         _G._EUI_TextDecimals = true
+        -- "Only Show for % Health": keep the decimal on the health PERCENT but
+        -- leave health/absorb VALUES whole. Achieved by withholding the abbreviate
+        -- configs (values fall back to the plain whole-number AbbreviateNumbers)
+        -- while _EUI_TextDecimals stays true for the percent tags.
+        local percentOnly = db.profile.showDecimalPercentOnly
         _G._EUI_AbbrevDecimalCfg = ns._decimalAbbrevConfig
+        if percentOnly then _G._EUI_AbbrevDecimalCfg = nil end
         -- Boss frames get a second decimal place (default on). Tags fall back
         -- to the 1-decimal path for every non-boss unit when the flag is set,
         -- and ignore it entirely when nil.
         if db.profile.showDecimalBoss2 ~= false then
             _G._EUI_BossExtraDecimal = true
             _G._EUI_AbbrevDecimalCfg2 = ns._decimalAbbrevConfig2
+            if percentOnly then _G._EUI_AbbrevDecimalCfg2 = nil end
         else
             _G._EUI_BossExtraDecimal = false
             _G._EUI_AbbrevDecimalCfg2 = nil
@@ -1621,6 +1665,10 @@ ns.NICK_ADDON = addonName:find("Standalone") and addonName or "EllesmereUI"
 function ns.ResolveUnitNickname(unit)
     local name = UnitName(unit)
     if not name then return "" end
+    -- Master toggle (Unit Frames > main frames > Display, default OFF): when off,
+    -- skip every provider lookup and show the raw unit name. One switch for all
+    -- main frames. Returning the raw (possibly secret) name here is display-safe.
+    if not (db and db.profile and db.profile.showNicknames) then return name end
     -- Nicknames are a player-only concept; NPCs (bosses, etc.) keep their name.
     if not UnitIsPlayer(unit) then return name end
     local nameSecret = issecretvalue and issecretvalue(name)
@@ -1872,7 +1920,7 @@ local function LayoutCastbarIcon(castbar, inWidth, iconH, onRight)
     end
 end
 
--- Returns the donor settings table for mini frames (focus ? target ? player)
+-- Returns the donor settings table for mini frames (focus > target > player)
 -- Used to inherit border, texture, and font settings
 local function GetMiniDonorSettings()
     local ef = db.profile.enabledFrames
@@ -2550,7 +2598,7 @@ local function CreateBottomTextBar(frame, unit, settings, anchorFrame, xOffset, 
     btb._applyBTBTextPositions = ApplyBTBTextPositions
     btb._applyBTBPowerColors = ApplyBTBPowerColors
 
-    -- Class icon overlay ? on a high-level frame so it renders above the border
+    -- Class icon overlay -- on a high-level frame so it renders above the border
     local classIconHolder = CreateFrame("Frame", nil, frame)
     classIconHolder:SetAllPoints(textOvr)
     classIconHolder:SetFrameLevel(frame:GetFrameLevel() + 12)
@@ -2587,7 +2635,7 @@ local function CreateBottomTextBar(frame, unit, settings, anchorFrame, xOffset, 
     return btb
 end
 
--- SetFrameMovable removed � positioning is now handled by Unlock Mode
+-- SetFrameMovable removed -- positioning is now handled by Unlock Mode
 
 local function ApplyFramePosition(frame, unit)
     if not frame or not db.profile.positions[unit] then return end
@@ -2680,7 +2728,7 @@ local function UpdateBordersForScale(frame, unit)
     local ppIsAtt = (ppPos == "below" or ppPos == "above")
     local ppIsDet = (ppPos == "detached_top" or ppPos == "detached_bottom")
     local ph = settings.powerHeight or 6
-    -- Simple frames (pet/tot/focustarget) have no power bar ? skip power height
+    -- Simple frames (pet/tot/focustarget) have no power bar -- skip power height
     local isMini = (unit == "pet" or unit == "targettarget" or unit == "focustarget")
     local powerH = (ppIsAtt and not isMini) and ph or 0
 
@@ -2814,9 +2862,12 @@ local function UpdateBordersForScale(frame, unit)
         if castbarBg then
             -- Trim castbar bg width to match frame width, but only if the
             -- user hasn't set a custom width (castbarWidth > 0 means custom).
+            -- Use the settings already resolved from this function's unit
+            -- parameter, NOT frame.unit: boss preview swaps frame.unit to
+            -- "player", which has no castbarWidth and made this trim eat the
+            -- boss castbar's custom width while previewing.
             local cbW = castbarBg:GetWidth()
-            local cbSettings = GetSettingsForUnit(frame._unit or frame.unit)
-            local hasCustomW = cbSettings and (cbSettings.castbarWidth or 0) > 0
+            local hasCustomW = (settings.castbarWidth or 0) > 0
             if not hasCustomW and cbW > snappedFrameW + 0.01 then
                 PP.Width(castbarBg, snappedFrameW)
             end
@@ -2859,7 +2910,7 @@ end
 
 -- Scale system removed -- all sizing is now width/height based.
 
--- ToggleLock removed � positioning is now handled by Unlock Mode
+-- ToggleLock removed -- positioning is now handled by Unlock Mode
 
 -- fakeFrames / CreateFakeFrame / ShowFakeFrames / HideFakeFrames removed
 -- Positioning is now handled exclusively by Unlock Mode
@@ -2911,7 +2962,7 @@ local function GetFrameDimensions(unit)
     return 150, 30
 end
 
--- ShowFakeFrames / HideFakeFrames removed � Unlock Mode handles all positioning
+-- ShowFakeFrames / HideFakeFrames removed -- Unlock Mode handles all positioning
 
 local function CreateHealthBar(frame, unit, height, xOffset, settings, rightInset)
     height = height or settings.healthHeight
@@ -3648,6 +3699,39 @@ local function CreateAbsorbBar(frame, unit, settings)
     return backfillBar
 end
 
+-- Detached power bar border: create lazily, then restyle/show/hide from the
+-- current settings. Lazy creation is what lets a bar switched to a detached
+-- position (or a Border Size raised from 0) gain its border live -- the old
+-- create-only-at-spawn path needed a /reload. Shown only while the position is
+-- detached AND Border Size > 0. Shared by the creation path and the player/
+-- target/focus refresh branches (the target branch previously tested a local
+-- that only existed in the player branch, so its border was force-hidden on
+-- every refresh; focus had no refresh at all). On ns (not a new file-scope
+-- local) to respect the Lua 5.1 200-local ceiling.
+function ns.UpdatePowerBorder(power, settings)
+    if not power or not settings then return end
+    local pos = settings.powerPosition or "below"
+    local isDet = (pos == "detached_top" or pos == "detached_bottom")
+    local size = settings.powerBorderSize or 0
+    local border = power._pbBorder
+    if not border then
+        -- Nothing to render and nothing to hide: stay lazy.
+        if not (isDet and size > 0) then return end
+        border = CreateFrame("Frame", nil, power)
+        PP.Point(border, "TOPLEFT", power, "TOPLEFT", 0, 0)
+        PP.Point(border, "BOTTOMRIGHT", power, "BOTTOMRIGHT", 0, 0)
+        power._pbBorder = border
+    end
+    local c = settings.powerBorderColor or { r = 0, g = 0, b = 0 }
+    EllesmereUI.ApplyBorderStyle(border, size, c.r, c.g, c.b,
+        settings.powerBorderAlpha or 1, settings.powerBorderStyle or "solid",
+        settings.powerBorderOffsetX, settings.powerBorderOffsetY,
+        settings.powerBorderShiftX, settings.powerBorderShiftY, "unitframes", size)
+    border:SetFrameLevel(settings.powerBorderBehind
+        and math.max(0, power:GetFrameLevel() - 1) or (power:GetFrameLevel() + 5))
+    if isDet and size > 0 then border:Show() else border:Hide() end
+end
+
 local function CreatePowerBar(frame, unit, settings)
     local powerPos = settings.powerPosition or "below"
 
@@ -3997,23 +4081,8 @@ local function CreatePowerBar(frame, unit, settings)
         end
     end
 
-    -- Power bar border (only when detached)
-    if isDetached then
-        local pbBorder = CreateFrame("Frame", nil, power)
-        PP.Point(pbBorder, "TOPLEFT", power, "TOPLEFT", 0, 0)
-        PP.Point(pbBorder, "BOTTOMRIGHT", power, "BOTTOMRIGHT", 0, 0)
-        local pbBehind = settings.powerBorderBehind
-        pbBorder:SetFrameLevel(pbBehind and math.max(0, power:GetFrameLevel() - 1) or (power:GetFrameLevel() + 5))
-        local pbTexKey = settings.powerBorderStyle or "solid"
-        local pbSize = settings.powerBorderSize or 0
-        local pbColor = settings.powerBorderColor or { r = 0, g = 0, b = 0 }
-        local pbAlpha = settings.powerBorderAlpha or 1
-        EllesmereUI.ApplyBorderStyle(pbBorder, pbSize, pbColor.r, pbColor.g, pbColor.b, pbAlpha,
-            pbTexKey, settings.powerBorderOffsetX, settings.powerBorderOffsetY,
-            settings.powerBorderShiftX, settings.powerBorderShiftY, "unitframes", pbSize)
-        if pbSize == 0 then pbBorder:Hide() end
-        power._pbBorder = pbBorder
-    end
+    -- Power bar border (detached positions only; lazily created in the helper)
+    ns.UpdatePowerBorder(power, settings)
 
     return power
 end
@@ -4582,7 +4651,10 @@ local function CreateCastBar(frame, unit, settings)
         cbWidth = db.profile.player.playerCastbarWidth or 181
         cbHeight = db.profile.player.playerCastbarHeight or 14
     else
-        cbWidth = settings.castbarWidth or 181
+        -- castbarWidth 0 = auto (boss frames: match frame width; the boss
+        -- update pass re-sizes to the live frame width right after creation).
+        local cbw = settings.castbarWidth or 0
+        cbWidth = cbw > 0 and cbw or 181
         cbHeight = settings.castbarHeight or 14
     end
     PP.Size(castbarBg, cbWidth, cbHeight)
@@ -4908,7 +4980,19 @@ local function SetupShowOnCastBar(frame, unit)
 
     castbar.PostCastStart = function(self, ...)
         local bg = self:GetParent()
-        if bg then bg:Show() end
+        if bg then
+            -- Boss: re-assert the configured width (castbarWidth > 0 = custom,
+            -- 0 = match frame width) at cast start, so a live cast always shows
+            -- the right width even if no settings pass ran since the frame
+            -- was resized or another path touched the bg.
+            if unit and unit:match("^boss") then
+                local s = db and db.profile and GetSettingsForUnit(unit)
+                local cw = (s and s.castbarWidth) or 0
+                if cw > 0 and cw < 30 then cw = 30 end
+                if s then PP.Width(bg, cw > 0 and cw or frame:GetWidth()) end
+            end
+            bg:Show()
+        end
         self:Show()
         if self._iconFrame then
             local s = db and db.profile and GetSettingsForUnit(unit)
@@ -5255,7 +5339,7 @@ function ns.ApplyStackAnchor(fs, parent, pos, offX, offY)
     fs:SetPoint(point, parent, point, baseX + (offX or 0), offY or 0)
 end
 
-local function ApplyAuraCooldownText(container, showCD, cdSize, stackSize, cdOffX, cdOffY, stackOffX, stackOffY, auraSize, cropped, stackPos)
+local function ApplyAuraCooldownText(container, showCD, cdSize, stackSize, cdOffX, cdOffY, stackOffX, stackOffY, auraSize, cropped, stackPos, cdTextColor, stackTextColor)
     if not container then return end
     -- Cropped style: make the buttons rectangular (height = 80% of width). oUF
     -- sizes each button to element.width x element.height and uses them for the
@@ -5283,7 +5367,12 @@ local function ApplyAuraCooldownText(container, showCD, cdSize, stackSize, cdOff
             btn.Cooldown:SetHideCountdownNumbers(not showCD)
             local cdText = btn.Cooldown:GetRegions()
             if cdText and cdText.SetFont then
-                if showCD then EllesmereUI.ApplyIconTextFont(cdText, cachedFontPath, cdSize, "unitFrames") end
+                if showCD then
+                    EllesmereUI.ApplyIconTextFont(cdText, cachedFontPath, cdSize, "unitFrames")
+                    if cdTextColor then
+                        cdText:SetTextColor(cdTextColor.r or 1, cdTextColor.g or 1, cdTextColor.b or 1)
+                    end
+                end
                 -- Default cooldown text is centered; offset 0,0 == default.
                 cdText:ClearAllPoints()
                 cdText:SetPoint("CENTER", btn.Cooldown, "CENTER", cdOffX or 0, cdOffY or 0)
@@ -5295,6 +5384,9 @@ local function ApplyAuraCooldownText(container, showCD, cdSize, stackSize, cdOff
         -- oUF (BOTTOMRIGHT -1,0); offset 0,0 == default.
         if btn and btn.Count then
             EllesmereUI.ApplyIconTextFont(btn.Count, cachedFontPath, stackSize or 14, "unitFrames")
+            if stackTextColor then
+                btn.Count:SetTextColor(stackTextColor.r or 1, stackTextColor.g or 1, stackTextColor.b or 1)
+            end
             ns.ApplyStackAnchor(btn.Count, btn, stackPos, stackOffX, stackOffY)
         end
     end
@@ -5417,7 +5509,7 @@ local function CreateTargetAuras(frame, unit)
         if button.Cooldown then
             button.Cooldown:SetDrawEdge(false)
             button.Cooldown:SetReverse(true)
-            local showText, textSize, cdOffX, cdOffY
+            local showText, textSize, cdOffX, cdOffY, cdTextColor
             if isBuff then
                 if s and unit and unit:match("^boss") and ns.GetBossSimpleBuffMode(s) ~= "none" then
                     showText = s and s.simpleBuffShowCooldownText
@@ -5430,21 +5522,26 @@ local function CreateTargetAuras(frame, unit)
                     cdOffX = (s and s.buffCooldownTextOffsetX) or 0
                     cdOffY = (s and s.buffCooldownTextOffsetY) or 0
                 end
+                cdTextColor = (s and s.buffCooldownTextColor) or {r=1, g=1, b=1}
             elseif s and unit and unit:match("^boss") and ns.GetBossSimpleDebuffMode(s) ~= "none" then
                 showText = s and s.simpleDebuffShowCooldownText
                 textSize = s and s.simpleDebuffCooldownTextSize or 14
                 cdOffX = (s and s.debuffCooldownTextOffsetX) or 0
                 cdOffY = (s and s.debuffCooldownTextOffsetY) or 0
+                cdTextColor = (s and s.debuffCooldownTextColor) or {r=1, g=1, b=1}
             else
                 showText = s and s.debuffShowCooldownText
                 textSize = s and s.debuffCooldownTextSize or 10
                 cdOffX = (s and s.debuffCooldownTextOffsetX) or 0
                 cdOffY = (s and s.debuffCooldownTextOffsetY) or 0
+                cdTextColor = (s and s.debuffCooldownTextColor) or {r=1, g=1, b=1}
             end
             button.Cooldown:SetHideCountdownNumbers(not showText)
             local cdText = button.Cooldown:GetRegions()
             if cdText and cdText.SetFont then
                 if showText then EllesmereUI.ApplyIconTextFont(cdText, cachedFontPath, textSize, "unitFrames") end
+                cdText:SetTextColor(cdTextColor.r, cdTextColor.g, cdTextColor.b)
+
                 -- Default cooldown text is centered; offset 0,0 == default (no change).
                 cdText:ClearAllPoints()
                 cdText:SetPoint("CENTER", button.Cooldown, "CENTER", cdOffX, cdOffY)
@@ -5457,19 +5554,22 @@ local function CreateTargetAuras(frame, unit)
         -- oUF (BOTTOMRIGHT -1,0); offset 0,0 == default (no change).
         if button.Count then
             local s2 = GetSettingsForUnit(unit or "target")
-            local stackSize, sOffX, sOffY, sPos
+            local stackSize, sOffX, sOffY, sPos, sTextColor
             if container and container.filter == "HELPFUL" then
                 stackSize = s2 and s2.buffStackTextSize
                 sOffX = (s2 and s2.buffStackTextOffsetX) or 0
                 sOffY = (s2 and s2.buffStackTextOffsetY) or 0
                 sPos = s2 and s2.buffStackTextPosition
+                sTextColor = (s2 and s2.buffStackTextColor) or {r=1, g=1, b=1}
             else
                 stackSize = s2 and s2.debuffStackTextSize
                 sOffX = (s2 and s2.debuffStackTextOffsetX) or 0
                 sOffY = (s2 and s2.debuffStackTextOffsetY) or 0
                 sPos = s2 and s2.debuffStackTextPosition
+                sTextColor = (s2 and s2.debuffStackTextColor) or {r=1, g=1, b=1}
             end
             EllesmereUI.ApplyIconTextFont(button.Count, cachedFontPath, stackSize or 14, "unitFrames")
+            button.Count:SetTextColor(sTextColor.r, sTextColor.g, sTextColor.b)
             ns.ApplyStackAnchor(button.Count, button, sPos, sOffX, sOffY)
         end
 
@@ -5480,11 +5580,20 @@ local function CreateTargetAuras(frame, unit)
             PP.CreateBorder(button.Border, 0, 0, 0, 1)
         end
 
-        -- Keep the cooldown (and its built-in countdown text) above the icon
-        -- border so the duration number isn't hidden behind it. oUF's stack-count
-        -- frame sits one level above the cooldown, so it stays on top too.
+        -- Keep the duration and stack text above the icon border. The PP border
+        -- textures live on a container ONE level above button.Border, so lifting
+        -- the cooldown to button.Border+1 would only tie the container's level and
+        -- let it draw over the duration number. Go TWO levels above button.Border
+        -- so the cooldown (its built-in countdown/duration text) clears the border
+        -- container, then re-park oUF's stack-count frame one level above that so
+        -- the stack number stays on top too (its creation-time level was relative
+        -- to the cooldown's OLD level, so it no longer tracks after this bump).
         if button.Cooldown and button.Border then
-            button.Cooldown:SetFrameLevel(button.Border:GetFrameLevel() + 1)
+            button.Cooldown:SetFrameLevel(button.Border:GetFrameLevel() + 2)
+            local countFrame = button.Count and button.Count:GetParent()
+            if countFrame then
+                countFrame:SetFrameLevel(button.Cooldown:GetFrameLevel() + 1)
+            end
         end
     end
 
@@ -5524,6 +5633,13 @@ local function CreateTargetAuras(frame, unit)
     end
 
     local buffs = CreateFrame("Frame", nil, frame)
+    -- Boss frames: lift auras above the unified border so it renders BEHIND the
+    -- buffs/debuffs instead of over their flush edge. The border FRAME is at
+    -- frame+10, but its solid PP border textures live on a sub-container at
+    -- frame+11, so the auras must clear frame+11 (not merely the border frame).
+    -- frame+13 also clears the class-icon holder (frame+12) and stays below the
+    -- portrait (frame+15) and health-text (frame+20) overlays.
+    if unitIsBoss then buffs:SetFrameLevel(frame:GetFrameLevel() + 13) end
     local buffGrowthEff = simpleBuffOn and "auto" or (settings and settings.buffGrowth)
     local bfp, bia, bgx, bgy, box, boy = ResolveBuffLayout(
         simpleBuffOn and simpleBuffMode or (settings and settings.buffAnchor),
@@ -5605,6 +5721,11 @@ local function CreateTargetAuras(frame, unit)
     end
     do
         local debuffs = CreateFrame("Frame", nil, frame)
+        -- Boss frames: lift auras above the unified border so it renders BEHIND
+        -- them. The border FRAME is frame+10 but its solid PP border textures sit
+        -- on a sub-container at frame+11, so clear frame+11 (frame+13 also clears
+        -- the class-icon holder at frame+12). See the Buffs container above.
+        if unitIsBoss then debuffs:SetFrameLevel(frame:GetFrameLevel() + 13) end
         local effectiveAnc = (dAnc ~= "none") and dAnc or "bottomleft"
         local effectiveGrowth = simpleOn and "auto" or (settings and settings.debuffGrowth or "auto")
         local dfp, dia, dgx, dgy, dox, doy = ResolveBuffLayout(effectiveAnc, effectiveGrowth)
@@ -6664,7 +6785,6 @@ local function StylePetFrame(frame, unit)
     bg:SetColorTexture(0, 0, 0, 0.5)
     health.bg = bg
 
-    health.colorClass = true
     health.colorReaction = true
     health.colorTapped = true
     health.colorDisconnected = true
@@ -7293,7 +7413,8 @@ local CLASS_POWER_TYPES = {
                     [1480] = { "SOUL_FRAGMENTS_DEVOURER", 50, "bar" } },
     SHAMAN      = { [263] = { "MAELSTROM_WEAPON", 10 } },
     HUNTER      = { [255] = { "TIP_OF_THE_SPEAR", 3 } },
-    WARRIOR     = { [72]  = { "WHIRLWIND_STACKS", 4 } },
+    WARRIOR     = { [72]  = { "WHIRLWIND_STACKS", 4 },
+                    [71]  = { "SWEEPING_STRIKES", 12 } },
 }
 
 -- Returns true if the player's current spec has a class resource in CLASS_POWER_TYPES
@@ -7367,6 +7488,8 @@ local function CreateCustomClassPower(playerFrame, style)
         elseif powerType == "TIP_OF_THE_SPEAR" then
             maxPower = customMax
         elseif powerType == "WHIRLWIND_STACKS" then
+            maxPower = customMax
+        elseif powerType == "SWEEPING_STRIKES" then
             maxPower = customMax
         elseif powerType == "ICICLES" then
             maxPower = customMax or 5
@@ -7580,6 +7703,8 @@ local function CreateCustomClassPower(playerFrame, style)
                 cur, max = EllesmereUI.GetTipOfTheSpear()
             elseif powerType == "WHIRLWIND_STACKS" and EllesmereUI and EllesmereUI.GetWhirlwindStacks then
                 cur, max = EllesmereUI.GetWhirlwindStacks()
+            elseif powerType == "SWEEPING_STRIKES" and EllesmereUI and EllesmereUI.GetSweepingStrikes then
+                cur, max = EllesmereUI.GetSweepingStrikes()
             elseif powerType == "ICICLES" then
                 -- Frost Mage Icicles: stack count from the Icicles aura (205473).
                 local count = 0
@@ -7679,7 +7804,8 @@ local function CreateCustomClassPower(playerFrame, style)
         local auraDriven    = (powerType == "MAELSTROM_WEAPON" or powerType == "ICICLES")
         local needsOnUpdate = not auraDriven
         local needsAura     = auraDriven
-        local needsCasts    = (powerType == "TIP_OF_THE_SPEAR" or powerType == "WHIRLWIND_STACKS")
+        local needsCasts    = (powerType == "TIP_OF_THE_SPEAR" or powerType == "WHIRLWIND_STACKS"
+                               or powerType == "SWEEPING_STRIKES")
 
         if needsOnUpdate then
             local elapsed = 0
@@ -7702,7 +7828,7 @@ local function CreateCustomClassPower(playerFrame, style)
             eventFrame:RegisterEvent("PLAYER_DEAD")
             eventFrame:RegisterEvent("PLAYER_ALIVE")
         end
-        if powerType == "WHIRLWIND_STACKS" then
+        if powerType == "WHIRLWIND_STACKS" or powerType == "SWEEPING_STRIKES" then
             eventFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
         end
 
@@ -7725,6 +7851,9 @@ local function CreateCustomClassPower(playerFrame, style)
                         if EllesmereUI.HandleWhirlwindStacks then
                             EllesmereUI.HandleWhirlwindStacks(event, unit, castGUID, spellID)
                         end
+                        if EllesmereUI.HandleSweepingStrikes then
+                            EllesmereUI.HandleSweepingStrikes(event, unit, castGUID, spellID)
+                        end
                     end
                 end
             elseif event == "PLAYER_DEAD" or event == "PLAYER_ALIVE" then
@@ -7735,10 +7864,18 @@ local function CreateCustomClassPower(playerFrame, style)
                     if EllesmereUI.HandleWhirlwindStacks then
                         EllesmereUI.HandleWhirlwindStacks(event)
                     end
+                    if EllesmereUI.HandleSweepingStrikes then
+                        EllesmereUI.HandleSweepingStrikes(event)
+                    end
                 end
             elseif event == "PLAYER_REGEN_ENABLED" then
-                if not _G._ERB_AceDB and EllesmereUI and EllesmereUI.HandleWhirlwindStacks then
-                    EllesmereUI.HandleWhirlwindStacks(event)
+                if not _G._ERB_AceDB and EllesmereUI then
+                    if EllesmereUI.HandleWhirlwindStacks then
+                        EllesmereUI.HandleWhirlwindStacks(event)
+                    end
+                    if EllesmereUI.HandleSweepingStrikes then
+                        EllesmereUI.HandleSweepingStrikes(event)
+                    end
                 end
             end
             UpdatePips()
@@ -7910,10 +8047,18 @@ local function ReloadFrames()
             end
             -- The cast bar is a child of the frame, so the SetFrameStrata above
             -- reset it to the frame's strata. Lift player/target/focus cast bars
-            -- to HIGH so they never hide behind other MEDIUM-strata frames.
+            -- to HIGH so they never hide behind other MEDIUM-strata frames -- unless
+            -- the global "Raise Cast Bar Strata (All)" toggle is off, in which case the
+            -- cast bar is explicitly left at the frame's strata.
             if frame.Castbar and (unitKey == "player" or unitKey == "target" or unitKey == "focus") then
                 local cbg = frame.Castbar:GetParent()
-                if cbg then cbg:SetFrameStrata("HIGH") end
+                if cbg then
+                    if profile.raiseCastbarStrata ~= false then
+                        cbg:SetFrameStrata("HIGH")
+                    else
+                        cbg:SetFrameStrata(strata)
+                    end
+                end
             end
             -- SetFrameStrata re-stacks children; lift the raid marker holder back
             -- above the text overlay so the marker is never hidden behind name/health text.
@@ -8273,24 +8418,8 @@ local function ReloadFrames()
                         end
                         if frame.Power._applyPowerPercentText then frame.Power._applyPowerPercentText(settings) end
 
-                        -- Update power bar border (detached only)
-                        if frame.Power._pbBorder then
-                            local pbTexKey = settings.powerBorderStyle or "solid"
-                            local pbSize = settings.powerBorderSize or 0
-                            local pbColor = settings.powerBorderColor or { r = 0, g = 0, b = 0 }
-                            local pbAlpha = settings.powerBorderAlpha or 1
-                            EllesmereUI.ApplyBorderStyle(frame.Power._pbBorder, pbSize,
-                                pbColor.r, pbColor.g, pbColor.b, pbAlpha,
-                                pbTexKey, settings.powerBorderOffsetX, settings.powerBorderOffsetY,
-                                settings.powerBorderShiftX, settings.powerBorderShiftY, "unitframes", pbSize)
-                            local pbBehind = settings.powerBorderBehind
-                            frame.Power._pbBorder:SetFrameLevel(pbBehind and math.max(0, frame.Power:GetFrameLevel() - 1) or (frame.Power:GetFrameLevel() + 5))
-                            if pbSize > 0 and ppIsDetached then
-                                frame.Power._pbBorder:Show()
-                            else
-                                frame.Power._pbBorder:Hide()
-                            end
-                        end
+                        -- Update power bar border (detached only; lazily created)
+                        ns.UpdatePowerBorder(frame.Power, settings)
 
                         -- Gray out power bar background for generic melee NPCs
                         if ppPos ~= "none" and (ppPos == "below" or ppPos == "above") then
@@ -8581,7 +8710,7 @@ local function ReloadFrames()
                             end
                             if btb._applyBTBTextPositions then
                                 btb._applyBTBTextPositions(settings)
-                if btb._applyBTBClassIcon then btb._applyBTBClassIcon(settings) end
+                                if btb._applyBTBClassIcon then btb._applyBTBClassIcon(settings) end
                             end
                             btb:Show()
                         end
@@ -8690,24 +8819,8 @@ local function ReloadFrames()
                         end
                         if frame.Power._applyPowerPercentText then frame.Power._applyPowerPercentText(settings) end
 
-                        -- Update power bar border (detached only)
-                        if frame.Power._pbBorder then
-                            local pbTexKey = settings.powerBorderStyle or "solid"
-                            local pbSize = settings.powerBorderSize or 0
-                            local pbColor = settings.powerBorderColor or { r = 0, g = 0, b = 0 }
-                            local pbAlpha = settings.powerBorderAlpha or 1
-                            EllesmereUI.ApplyBorderStyle(frame.Power._pbBorder, pbSize,
-                                pbColor.r, pbColor.g, pbColor.b, pbAlpha,
-                                pbTexKey, settings.powerBorderOffsetX, settings.powerBorderOffsetY,
-                                settings.powerBorderShiftX, settings.powerBorderShiftY, "unitframes", pbSize)
-                            local pbBehind = settings.powerBorderBehind
-                            frame.Power._pbBorder:SetFrameLevel(pbBehind and math.max(0, frame.Power:GetFrameLevel() - 1) or (frame.Power:GetFrameLevel() + 5))
-                            if pbSize > 0 and ppIsDetached then
-                                frame.Power._pbBorder:Show()
-                            else
-                                frame.Power._pbBorder:Hide()
-                            end
-                        end
+                        -- Update power bar border (detached only; lazily created)
+                        ns.UpdatePowerBorder(frame.Power, settings)
 
                         -- Gray out power bar background for generic melee NPCs
                         if ppPos ~= "none" and (ppPos == "below" or ppPos == "above") then
@@ -8744,7 +8857,7 @@ local function ReloadFrames()
                         frame._applyTextPositions(settings)
                     end
 
-                    -- Bottom Text Bar update (target) ? must come before castbar so castbar can anchor to it
+                    -- Bottom Text Bar update (target) -- must come before castbar so castbar can anchor to it
                     local tPpBtbAnchor = (ppIsAtt and (settings.powerHeight or 0) > 0 and frame.Power and frame.Power:IsShown()) and frame.Power or frame.Health
                     if settings.bottomTextBar then
                         local btbPos2 = settings.btbPosition or "bottom"
@@ -9097,6 +9210,8 @@ local function ReloadFrames()
                         frame.Power:Show()
                     end
                     if frame.Power._applyPowerPercentText then frame.Power._applyPowerPercentText(settings) end
+                    -- Update power bar border (detached only; lazily created)
+                    ns.UpdatePowerBorder(frame.Power, settings)
                 end
                 if frame._applyTextTags then
                     frame._applyTextTags(settings.leftTextContent or "name", settings.rightTextContent or "perhp", settings.centerTextContent or "none")
@@ -9105,7 +9220,7 @@ local function ReloadFrames()
                     frame._applyTextPositions(settings)
                 end
 
-                -- Bottom Text Bar update (focus) ? must come before castbar so castbar can anchor to it
+                -- Bottom Text Bar update (focus) -- must come before castbar so castbar can anchor to it
                 local fPpBtbAnchor = (fPpIsAtt and frame.Power) or frame.Health
                 if settings.bottomTextBar then
                     local btbPos2 = settings.btbPosition or "bottom"
@@ -9485,7 +9600,12 @@ local function ReloadFrames()
                             if not frame:IsElementEnabled("Castbar") then
                                 frame:EnableElement("Castbar")
                             end
-                            PP.Size(castbarBg, totalWidth, settings.castbarHeight or 14)
+                            -- castbarWidth > 0 = user-set custom width; 0 = match frame width.
+                            -- Custom widths floor at 30: below the cast icon size the
+                            -- icon-in-width inset inverts the bar's anchor rect.
+                            local bCbW = settings.castbarWidth or 0
+                            if bCbW > 0 and bCbW < 30 then bCbW = 30 end
+                            PP.Size(castbarBg, bCbW > 0 and bCbW or totalWidth, settings.castbarHeight or 14)
                             LayoutCastbarIcon(frame.Castbar, CastIconInWidth("boss1", settings), nil, CastIconOnRight("boss1", settings))
                             if frame.Castbar._iconFrame then
                                 local cbH = settings.castbarHeight or 14
@@ -9503,8 +9623,8 @@ local function ReloadFrames()
                             -- bar's bottom: the health/power bars live in the half-pixel-inset
                             -- bar clip, which left a ~1px gap below the frame. The cast bar is
                             -- full frame width, so frame bottom-center keeps it centered + flush.
-                            -- castbarOffsetY nudges the whole cast bar vertically (positive = up).
-                            castbarBg:SetPoint("TOP", frame, "BOTTOM", 0, settings.castbarOffsetY or 0)
+                            -- castbarOffsetX/Y nudge the whole cast bar (positive = right/up).
+                            castbarBg:SetPoint("TOP", frame, "BOTTOM", settings.castbarOffsetX or 0, settings.castbarOffsetY or 0)
                             if settings.castbarHideWhenInactive and not frame.Castbar:IsShown() then
                                 castbarBg:Hide()
                             else
@@ -9659,9 +9779,9 @@ local function ReloadFrames()
                     -- Use simple debuff cooldown text settings when simple display
                     -- is active, regular debuff settings otherwise.
                     if simpleOn then
-                        ApplyAuraCooldownText(frame.Debuffs, settings.simpleDebuffShowCooldownText, settings.simpleDebuffCooldownTextSize or 14, settings.debuffStackTextSize, settings.simpleDebuffCooldownTextOffsetX, settings.simpleDebuffCooldownTextOffsetY, settings.debuffStackTextOffsetX, settings.debuffStackTextOffsetY, nil, nil, settings.debuffStackTextPosition)
+                        ApplyAuraCooldownText(frame.Debuffs, settings.simpleDebuffShowCooldownText, settings.simpleDebuffCooldownTextSize or 14, settings.debuffStackTextSize, settings.simpleDebuffCooldownTextOffsetX, settings.simpleDebuffCooldownTextOffsetY, settings.debuffStackTextOffsetX, settings.debuffStackTextOffsetY, nil, nil, settings.debuffStackTextPosition, settings.debuffCooldownTextColor, settings.debuffStackTextColor)
                     else
-                        ApplyAuraCooldownText(frame.Debuffs, settings.debuffShowCooldownText, settings.debuffCooldownTextSize or 10, settings.debuffStackTextSize, settings.debuffCooldownTextOffsetX, settings.debuffCooldownTextOffsetY, settings.debuffStackTextOffsetX, settings.debuffStackTextOffsetY, settings.debuffSize or 22, settings.debuffCropIcons, settings.debuffStackTextPosition)
+                        ApplyAuraCooldownText(frame.Debuffs, settings.debuffShowCooldownText, settings.debuffCooldownTextSize or 10, settings.debuffStackTextSize, settings.debuffCooldownTextOffsetX, settings.debuffCooldownTextOffsetY, settings.debuffStackTextOffsetX, settings.debuffStackTextOffsetY, settings.debuffSize or 22, settings.debuffCropIcons, settings.debuffStackTextPosition, settings.debuffCooldownTextColor, settings.debuffStackTextColor)
                     end
                 end
 
@@ -9756,9 +9876,9 @@ local function ReloadFrames()
                     -- Cooldown/stack text: simple uses the simpleBuff* keys (sharing the
                     -- regular buff stack settings), regular buff keys otherwise.
                     if simpleBuffOn then
-                        ApplyAuraCooldownText(frame.Buffs, settings.simpleBuffShowCooldownText, settings.simpleBuffCooldownTextSize or 14, settings.buffStackTextSize, settings.simpleBuffCooldownTextOffsetX, settings.simpleBuffCooldownTextOffsetY, settings.buffStackTextOffsetX, settings.buffStackTextOffsetY, nil, nil, settings.buffStackTextPosition)
+                        ApplyAuraCooldownText(frame.Buffs, settings.simpleBuffShowCooldownText, settings.simpleBuffCooldownTextSize or 14, settings.buffStackTextSize, settings.simpleBuffCooldownTextOffsetX, settings.simpleBuffCooldownTextOffsetY, settings.buffStackTextOffsetX, settings.buffStackTextOffsetY, nil, nil, settings.buffStackTextPosition, settings.buffCooldownTextColor, settings.buffStackTextColor)
                     else
-                        ApplyAuraCooldownText(frame.Buffs, settings.buffShowCooldownText, settings.buffCooldownTextSize or 10, settings.buffStackTextSize, settings.buffCooldownTextOffsetX, settings.buffCooldownTextOffsetY, settings.buffStackTextOffsetX, settings.buffStackTextOffsetY, settings.buffSize or 22, settings.buffCropIcons, settings.buffStackTextPosition)
+                        ApplyAuraCooldownText(frame.Buffs, settings.buffShowCooldownText, settings.buffCooldownTextSize or 10, settings.buffStackTextSize, settings.buffCooldownTextOffsetX, settings.buffCooldownTextOffsetY, settings.buffStackTextOffsetX, settings.buffStackTextOffsetY, settings.buffSize or 22, settings.buffCropIcons, settings.buffStackTextPosition, settings.buffCooldownTextColor, settings.buffStackTextColor)
                     end
                 end
 
@@ -10447,6 +10567,13 @@ function InitializeFrames()
         end
     end
 
+    -- The expected parent for the Blizzard class power bar after positioning.
+    -- Set by PositionClassPowerBar so the SetParent hook knows what's correct.
+    -- MUST be declared before PositionClassPowerBar: a later declaration made
+    -- the function assign a global while the hook read this always-nil local,
+    -- so the hook fell back to frames.player even for UIParent-parented bars.
+    local _cpExpectedParent = nil
+
     local function PositionClassPowerBar(bar)
         if not bar or not frames.player then return end
         bar:ClearAllPoints()
@@ -10462,7 +10589,7 @@ function InitializeFrames()
         end
 
         if style == "modern" and position == "above" then
-            -- Above health bar, inside the frame ? pips stretch to fill health bar width
+            -- Above health bar, inside the frame -- pips stretch to fill health bar width
             -- Bottom of pips flush with top of health bar, top of pips flush with top of border
             _cpExpectedParent = frames.player
             bar:SetParent(frames.player)
@@ -10492,7 +10619,7 @@ function InitializeFrames()
                 bar._bottomBdrFrame:Show()
             end
         elseif style == "modern" and position == "top" then
-            -- "top" floats above the frame (like "bottom" floats below) ? does NOT become part of the frame
+            -- "top" floats above the frame (like "bottom" floats below) -- does NOT become part of the frame
             _cpExpectedParent = frames.player
             bar:SetParent(frames.player)
             ResizeFrameForClassPower(0)
@@ -10594,10 +10721,6 @@ function InitializeFrames()
     -- to keep it visible. Only active while classPowerStyle == "blizzard".
     local _blizzCPHooked = false
     local _blizzCPActive = false  -- true while we own the bar
-
-    -- The expected parent for the Blizzard class power bar after positioning.
-    -- Set by PositionClassPowerBar so the SetParent hook knows what's correct.
-    local _cpExpectedParent = nil
 
     local function HookBlizzardClassPower(cpFrame)
         if _blizzCPHooked then return end
@@ -10930,10 +11053,18 @@ function InitializeFrames()
             end
             -- The cast bar is a child of the frame, so the SetFrameStrata above
             -- reset it to the frame's strata. Lift player/target/focus cast bars
-            -- to HIGH so they never hide behind other MEDIUM-strata frames.
+            -- to HIGH so they never hide behind other MEDIUM-strata frames -- unless
+            -- the global "Raise Cast Bar Strata (All)" toggle is off, in which case the
+            -- cast bar is explicitly left at the frame's strata.
             if frame.Castbar and (unitKey == "player" or unitKey == "target" or unitKey == "focus") then
                 local cbg = frame.Castbar:GetParent()
-                if cbg then cbg:SetFrameStrata("HIGH") end
+                if cbg then
+                    if db.profile.raiseCastbarStrata ~= false then
+                        cbg:SetFrameStrata("HIGH")
+                    else
+                        cbg:SetFrameStrata(strata)
+                    end
+                end
             end
             -- SetFrameStrata re-stacks children; lift the raid marker holder back
             -- above the text overlay so the marker is never hidden behind name/health text.
@@ -11495,7 +11626,11 @@ function SetupOptionsPanel()
         local iconGap = PP.FromPixels(ns.GetBossDebuffSpacing(settings, simple))
         local holder = CreateFrame("Frame", nil, frame)
         holder:SetSize(iconSize * count + iconGap * (count - 1), iconSize)
-        holder:SetFrameLevel(frame:GetFrameLevel() + 5)
+        -- Above the unified border so it sits BEHIND the preview debuffs, matching
+        -- the live boss aura layering. The border FRAME is frame+10 but its solid
+        -- PP border textures live on a sub-container at frame+11, so clear that
+        -- (frame+13 also clears the class-icon holder at frame+12).
+        holder:SetFrameLevel(frame:GetFrameLevel() + 13)
         holder:ClearAllPoints()
         -- The boss cast bar lives as a sibling parented to the frame but
         -- anchored BELOW frame bottom, so frame:GetHeight() excludes it.
@@ -11548,6 +11683,8 @@ function SetupOptionsPanel()
         local stackOffX = settings.debuffStackTextOffsetX or 0
         local stackOffY = settings.debuffStackTextOffsetY or 0
         local stackPos = settings.debuffStackTextPosition
+        local cdTextColor = settings.debuffCooldownTextColor or {r=1, g=1, b=1}
+        local stackTextColor = settings.debuffStackTextColor or {r=1, g=1, b=1}
         local fontPath = (EllesmereUI.GetFontPath and EllesmereUI.GetFontPath("unitFrames")) or "Fonts\\FRIZQT__.TTF"
         local now = GetTime()
         for idx, spellID in ipairs(FAKE_DEBUFF_SPELLS) do
@@ -11571,7 +11708,9 @@ function SetupOptionsPanel()
             -- FontString instead.
             local cd = CreateFrame("Cooldown", nil, iconFrame, "CooldownFrameTemplate")
             cd:SetAllPoints(iconFrame)
-            cd:SetFrameLevel(iconFrame:GetFrameLevel() + 1)
+            -- Swipe sits above the border (border at +1, PP container at +2) so
+            -- the layering matches the live boss aura buttons.
+            cd:SetFrameLevel(iconFrame:GetFrameLevel() + 3)
             cd:SetDrawEdge(false)
             cd:SetDrawBling(false)
             cd:SetReverse(false)
@@ -11580,14 +11719,16 @@ function SetupOptionsPanel()
             cd:SetHideCountdownNumbers(true)
             local frac = FAKE_DEBUFF_FRACS[idx] or 0.6
             cd:SetCooldown(now - 3600 * (1 - frac), 3600)
-            -- Text host above the swipe so duration/stack never sit under it.
+            -- Text host above the swipe AND the border container so the
+            -- duration/stack text renders over the icon border, not under it.
             local textHost = CreateFrame("Frame", nil, iconFrame)
             textHost:SetAllPoints(iconFrame)
-            textHost:SetFrameLevel(cd:GetFrameLevel() + 1)
+            textHost:SetFrameLevel(iconFrame:GetFrameLevel() + 4)
             local durText = textHost:CreateFontString(nil, "OVERLAY")
             durText:SetDrawLayer("OVERLAY", 7)
             EllesmereUI.ApplyIconTextFont(durText, fontPath, cdSize, "unitFrames")
             durText:SetPoint("CENTER", iconFrame, "CENTER", cdOffX, cdOffY)
+            durText:SetTextColor(cdTextColor.r, cdTextColor.g, cdTextColor.b)
             durText:SetText(FAKE_DEBUFF_SECS[idx] or 10)
             if not showCD then durText:Hide() end
             -- Stack text on a single icon only (looks natural; most debuffs are
@@ -11597,11 +11738,14 @@ function SetupOptionsPanel()
                 stack:SetDrawLayer("OVERLAY", 7)
                 EllesmereUI.ApplyIconTextFont(stack, fontPath, stackSize, "unitFrames")
                 ns.ApplyStackAnchor(stack, iconFrame, stackPos, stackOffX, stackOffY)
+                stack:SetTextColor(stackTextColor.r, stackTextColor.g, stackTextColor.b)
                 stack:SetText(FAKE_DEBUFF_STACKS[idx])
             end
+            -- Border just above the icon; its PP container renders at border+1
+            -- (iconFrame+2), below the swipe and text host so both stay on top.
             local border = CreateFrame("Frame", nil, iconFrame)
             border:SetAllPoints(icon)
-            border:SetFrameLevel(textHost:GetFrameLevel() + 1)
+            border:SetFrameLevel(iconFrame:GetFrameLevel() + 1)
             if PP and PP.CreateBorder then PP.CreateBorder(border, 0, 0, 0, 1) end
         end
         frame._previewDebuffs = holder
@@ -11657,7 +11801,11 @@ function SetupOptionsPanel()
         local iconGap = PP.FromPixels(ns.GetBossBuffSpacing(settings, simple))
         local holder = CreateFrame("Frame", nil, frame)
         holder:SetSize(iconSize * count + iconGap * (count - 1), iconSize)
-        holder:SetFrameLevel(frame:GetFrameLevel() + 5)
+        -- Above the unified border so it sits BEHIND the preview buffs, matching
+        -- the live boss aura layering. The border FRAME is frame+10 but its solid
+        -- PP border textures live on a sub-container at frame+11, so clear that
+        -- (frame+13 also clears the class-icon holder at frame+12).
+        holder:SetFrameLevel(frame:GetFrameLevel() + 13)
         holder:ClearAllPoints()
         local castBg = frame.Castbar and frame.Castbar:GetParent()
         local castbarH = (settings.showCastbar ~= false and castBg)
@@ -11941,10 +12089,19 @@ function SetupOptionsPanel()
     if ns._InitEUIModule then
         ns._InitEUIModule()
     end
+end
 
-    ---------------------------------------------------------------------------
-    --  Register unit frame elements with Unlock Mode
-    ---------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+--  Register unit frame elements with Unlock Mode
+--  Called synchronously from OnEnable (right after InitializeFrames) so the
+--  elements are registered inside the PLAYER_LOGIN pre-lockdown window on a
+--  combat reload. This block used to live at the end of SetupOptionsPanel,
+--  which OnEnable runs via C_Timer.After(0) -- and timers never fire during
+--  the loading screen, so registration always landed on the first post-load
+--  frame, after combat lockdown had re-engaged. Anchored unit frames then
+--  could not be positioned until combat dropped.
+-------------------------------------------------------------------------------
+local function RegisterUFUnlockElements()
     if EllesmereUI and EllesmereUI.RegisterUnlockElements then
         local MK = EllesmereUI.MakeUnlockElement
         local UNIT_LABELS = {
@@ -12081,6 +12238,13 @@ function SetupOptionsPanel()
                 applyPos = function(k)
                     local pos = db.profile.positions[k]
                     if not pos then return end
+                    -- Unlock-anchored elements: the anchor system is the
+                    -- position authority. Only bootstrap from the saved
+                    -- standalone position while the frame has no bounds yet
+                    -- (first placement); otherwise leave it alone so the
+                    -- anchor position is never clobbered.
+                    local anchored = EllesmereUI.IsUnlockAnchored
+                        and EllesmereUI.IsUnlockAnchored(k)
                     local pt = pos.point
                     local rpt = pos.relPoint or pt
                     local px, py = pos.x, pos.y
@@ -12105,7 +12269,7 @@ function SetupOptionsPanel()
                     if k == "boss" then
                         local spacing = db.profile.bossSpacing or 60
                         local bossStackDir = db.profile.boss and db.profile.boss.bossStackDirection or "down"
-                        if frames.boss1 then
+                        if frames.boss1 and not (anchored and frames.boss1:GetLeft()) then
                             local bx, by = SnapForFrame(frames.boss1, pos.x, pos.y)
                             frames.boss1:ClearAllPoints()
                             frames.boss1:SetPoint(pt, UIParent, rpt, bx, by)
@@ -12123,14 +12287,15 @@ function SetupOptionsPanel()
                             end
                         end
                     elseif k == "classPower" then
-                        if frames._classPowerBar then
-                            px, py = SnapForFrame(frames._classPowerBar, px, py)
-                            frames._classPowerBar:ClearAllPoints()
-                            frames._classPowerBar:SetPoint(pt, UIParent, rpt, px, py)
+                        local cpb = frames._classPowerBar
+                        if cpb and not (anchored and cpb:GetLeft()) then
+                            px, py = SnapForFrame(cpb, px, py)
+                            cpb:ClearAllPoints()
+                            cpb:SetPoint(pt, UIParent, rpt, px, py)
                         end
                     else
                         local fr = frames[k]
-                        if fr then
+                        if fr and not (anchored and fr:GetLeft()) then
                             px, py = SnapForFrame(fr, px, py)
                             fr:ClearAllPoints()
                             fr:SetPoint(pt, UIParent, rpt, px, py)
@@ -12248,6 +12413,13 @@ function SetupOptionsPanel()
                     if not pos then return end
                     local f = GetCBFrame()
                     if not f then return end
+                    -- Unlock-anchored castbars: the anchor system owns the
+                    -- position (castbars are anchored to their unit frame by
+                    -- default). Only bootstrap while the frame has no bounds.
+                    if EllesmereUI.IsUnlockAnchored and EllesmereUI.IsUnlockAnchored(cbKey)
+                       and f:GetLeft() then
+                        return
+                    end
                     local pt, rpt = pos.point, pos.relPoint or pos.point
                     local px, py = pos.x, pos.y
                     local PPa = EllesmereUI and EllesmereUI.PP
@@ -12368,6 +12540,10 @@ end
 
 function EllesmereUF:OnEnable()
     InitializeFrames()
+    -- Register with unlock mode synchronously: on a combat reload this runs
+    -- inside the pre-lockdown window, so the login position pass can resolve
+    -- and place anchored unit frames before SetPoint gets blocked.
+    RegisterUFUnlockElements()
     C_Timer.After(0, SetupOptionsPanel)
     C_Timer.After(0, function()
         if EllesmereUI and EllesmereUI.ApplyColorsToOUF then

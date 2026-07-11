@@ -10,6 +10,15 @@ local ERF = EllesmereUI.Lite.NewAddon(ADDON_NAME)
 ns.ERF = ERF
 _G.EllesmereUIRaidFrames = ERF
 
+-- Cache the parent-addon table on ns so hot, event-driven paths (UNIT_AURA,
+-- PLAYER_REGEN_DISABLED) can read it as an upvalue field instead of a true
+-- global. Reading the global EllesmereUI from an event frame that is still in a
+-- secure execution context is what raised the benign "tainted while reading
+-- global EllesmereUI" self-taint in the taint log; an upvalue/table-field read
+-- does not trigger that. Stored on ns (not a new file-scope local) so the
+-- main-chunk 200-local cap is untouched.
+ns.EllesmereUI = EllesmereUI
+
 -- The addon name external nickname providers (TimelineReminders, NSRT) key us by.
 -- Full suite = the brand "EllesmereUI" (the parent addon they registered support
 -- for). Standalone build = our own renamed folder name (ADDON_NAME, e.g.
@@ -185,6 +194,8 @@ local UnitExists            = UnitExists
 local UnitIsConnected       = UnitIsConnected
 local UnitIsVisible         = UnitIsVisible
 local UnitIsDeadOrGhost     = UnitIsDeadOrGhost
+-- HELD (PR #610 incoming rez, disabled for this build):
+-- local UnitHasIncomingResurrection = UnitHasIncomingResurrection
 local UnitGroupRolesAssigned = UnitGroupRolesAssigned
 local UnitThreatSituation   = UnitThreatSituation
 local UnitIsUnit            = UnitIsUnit
@@ -523,10 +534,13 @@ local defaults = {
         absorbBarEnabled = false,
         absorbBarHeight  = 4,
         absorbBarColor   = { r = 1, g = 1, b = 1 },
+        -- Fill direction for the vertical (Right/Left Edge) positions.
+        absorbBarGrowDir = "up",
         -- Heal Absorb Bar: separate strip showing the heal-absorb amount
         healAbsorbBarPosition = "none",
         healAbsorbBarHeight   = 4,
         healAbsorbBarColor    = { r = 200/255, g = 29/255, b = 29/255 },
+        healAbsorbBarGrowDir  = "up",
 
         -- Indicators
         roleIconStyle    = "modern",  -- none/modern/modernCircle/styled/classicCircle/classic/blizzDefault/blizzLight
@@ -545,6 +559,7 @@ local defaults = {
         raidMarkerOffsetY  = 0,
         showReadyCheck   = true,
         showSummonPending = true,
+        -- showIncomingRez  = true,  -- HELD (PR #610 incoming rez, disabled for this build)
         readyCheckSize   = 20,
         readyCheckPosition = "center",  -- "topleft", "top", "topright", "left", "center", "right", "bottomleft", "bottom"
         readyCheckOffsetX  = 0,
@@ -629,6 +644,8 @@ local defaults = {
         debuffCCGlowClassColor = false,
         debuffCCGlowR = 1.0, debuffCCGlowG = 0.776, debuffCCGlowB = 0.376,
         debuffCCGlowLines = 8, debuffCCGlowThickness = 2, debuffCCGlowSpeed = 4,
+        debuffCCGlowBackground = false,
+        debuffCCGlowBackgroundR = 0, debuffCCGlowBackgroundG = 0, debuffCCGlowBackgroundB = 0,
         -- Defensives & Externals
         showDefensives   = true,
         showExternals    = true,
@@ -997,7 +1014,10 @@ local function PixelSnap(value)
     if not perfect then return value end
     local es = containerFrame and containerFrame:GetEffectiveScale() or (UIParent and UIParent:GetEffectiveScale() or 1)
     local onePixel = perfect / es
-    return floor(value / onePixel + 0.5) * onePixel
+    -- Epsilon-guarded round (matches PP.SnapForES): the CENTER->TOPLEFT
+    -- derivation puts odd-footprint edges exactly on half-pixel boundaries,
+    -- where uiScale float dust otherwise decides the direction per reload.
+    return floor(value / onePixel + 0.5 + 0.001) * onePixel
 end
 
 -------------------------------------------------------------------------------
@@ -1045,9 +1065,11 @@ local function InitHealthBarTextures()
     healthBarTextures["gradient-tb"]      = TEX_BASE .. "gradient-tb.tga"
     healthBarTextures["matte"]            = TEX_BASE .. "matte.tga"
     healthBarTextures["sheer"]            = TEX_BASE .. "sheer.tga"
+    healthBarTextures["blinkii-diamonds"] = TEX_BASE .. "blinkii-diamonds.tga"
+    healthBarTextures["kringel-window"]   = TEX_BASE .. "kringel-window.tga"
 
     healthBarTextureNames["none"]             = "None"
-    healthBarTextureNames["melli"]            = "Melli"
+    healthBarTextureNames["melli"]            = "Melli (ElvUI)"
     healthBarTextureNames["atrocity"]         = "Atrocity"
     healthBarTextureNames["beautiful"]        = "Beautiful"
     healthBarTextureNames["plating"]          = "Plating"
@@ -1063,6 +1085,8 @@ local function InitHealthBarTextures()
     healthBarTextureNames["gradient-tb"]      = "Gradient Down"
     healthBarTextureNames["matte"]            = "Matte"
     healthBarTextureNames["sheer"]            = "Sheer"
+    healthBarTextureNames["blinkii-diamonds"] = "Blinkii Diamonds"
+    healthBarTextureNames["kringel-window"]   = "Kringel Window"
 
     healthBarTextureOrder[1]  = "none"
     healthBarTextureOrder[2]  = "melli"
@@ -1081,6 +1105,8 @@ local function InitHealthBarTextures()
     healthBarTextureOrder[15] = "gradient-tb"
     healthBarTextureOrder[16] = "matte"
     healthBarTextureOrder[17] = "sheer"
+    healthBarTextureOrder[18] = "blinkii-diamonds"
+    healthBarTextureOrder[19] = "kringel-window"
 
     -- Append SharedMedia textures after built-ins
     if EllesmereUI.AppendSharedMediaTextures then
@@ -1317,6 +1343,7 @@ end
 -- the inline fallbacks only allocate if the DB key is missing. On ns (not a
 -- local) to stay under the main-chunk 200-local cap.
 function ns._ApplyHealthBg(d, health, s, unit)
+    local EllesmereUI = ns.EllesmereUI  -- upvalue read, not a global read (see taint note at top)
     local bg = d.bg
     if UnitIsDeadOrGhost(unit) then
         if bg then
@@ -1351,6 +1378,7 @@ function ns._ApplyHealthBg(d, health, s, unit)
 end
 
 local function GetHealthColor(unit, s)
+    local EllesmereUI = ns.EllesmereUI  -- upvalue read, not a global read (see taint note at top)
     s = s or db.profile
     local mode = s.healthColorMode or "class"
 
@@ -1419,8 +1447,9 @@ end
 ns.RF_NAME_WIDTH_FRACTION = 1.0
 
 -- Resolve the display name for a unit. Nickname sources are consulted in order:
--- Northern Sky Raid Tools (NSAPI) first, then Timeline Reminders (TimelineReminders),
--- then the Liquid addon (LiquidAPI), falling back to the short character name. For
+-- Northern Sky Raid Tools (NSAPI) first, then MethodInternal (EasyNicknameAPI),
+-- then Timeline Reminders (TimelineReminders), then the Liquid addon (LiquidAPI),
+-- falling back to the short character name. For
 -- NSRT we pass our addon key "EUI" (NSRT added a dedicated per-addon setting +
 -- EUI_NICKNAME_TOGGLE callback for us): NSAPI:GetName self-gates on NSRT's Global
 -- Nicknames AND its EUI checkbox, so the user controls nicknames entirely through
@@ -1438,7 +1467,16 @@ local function ResolveDisplayName(unit, applyCap)
             display = dn
         end
     end
-    -- Timeline Reminders nicknames (secondary source, consulted when NSRT did not
+    -- MethodInternal nicknames (EasyNicknameAPI), consulted after NSRT and before
+    -- Timeline Reminders.
+    if not display and EasyNicknameAPI and EasyNicknameAPI.GetNicknameForUnit then
+        local ok, dn = pcall(EasyNicknameAPI.GetNicknameForUnit, unit)
+        if ok and type(dn) == "string"
+           and not (issecretvalue and issecretvalue(dn)) and dn ~= "" and dn ~= name then
+            display = dn
+        end
+    end
+    -- Timeline Reminders nicknames (consulted when earlier sources did not
     -- produce a nickname). Gated by TR's own EllesmereUI checkbox, so the user
     -- controls these entirely through TR (no EUI-side toggle). GetNickname falls
     -- back to the plain unit name when no nickname is set, so HasNickname is
@@ -1501,10 +1539,11 @@ function ns.GetBgColor(unit, s)
 end
 
 local function GetNameColor(unit, s)
+    local EllesmereUI = ns.EllesmereUI  -- upvalue read, not a global read (see taint note at top)
     s = s or db.profile
     local mode = s.nameColorMode or "class"
     if mode == "accent" then
-        local r, g, b = EllesmereUI.ResolveThemeColor(EllesmereUI.GetActiveTheme())
+        local r, g, b = EllesmereUI.ResolveActiveAccent()
         if r then return r, g, b end
         return 1, 1, 1
     elseif mode == "custom" then
@@ -1611,7 +1650,7 @@ local function GetHealthTextColor(unit, s)
     s = s or db.profile
     local mode = s.healthTextColorMode or "custom"
     if mode == "accent" then
-        local r, g, b = EllesmereUI.ResolveThemeColor(EllesmereUI.GetActiveTheme())
+        local r, g, b = EllesmereUI.ResolveActiveAccent()
         if r then return r, g, b end
         return 1, 1, 1
     elseif mode == "class" then
@@ -1633,7 +1672,7 @@ function ns.GetHealAbsorbTextColor(unit, s)
     s = s or db.profile
     local mode = s.healAbsorbTextColorMode or "custom"
     if mode == "accent" then
-        local r, g, b = EllesmereUI.ResolveThemeColor(EllesmereUI.GetActiveTheme())
+        local r, g, b = EllesmereUI.ResolveActiveAccent()
         if r then return r, g, b end
         return 1, 0.3, 0.3
     elseif mode == "class" then
@@ -2228,7 +2267,9 @@ end
 
 -------------------------------------------------------------------------------
 --  Absorb Bar position (replaces the old on/off toggle)
---  Positions: none / aboveRight / aboveLeft / topRight / topLeft.
+--  Positions: none / aboveRight / aboveLeft / topRight / topLeft /
+--  rightVertical / leftVertical (vertical side bar; fill direction comes
+--  from the per-bar grow-direction setting, default up).
 --  Legacy: the old boolean (absorbBarEnabled) maps to "aboveRight" when on and
 --  "none" when off. The new key (absorbBarPosition) takes precedence once the
 --  user picks one, so existing settings carry over with no migration.
@@ -2252,10 +2293,28 @@ end
 -- absorb-style texture. "belowAbsorb" (heal bar only) sits flush below the
 -- Absorb Bar's bottom edge, derived from the Absorb Bar's POSITION -- not its
 -- live visibility, so it never shifts up. "*Right" fills from the right edge.
-ns.ApplyStripBarLayout = function(stripBar, ab, button, position, height, absorbPos, absorbHeight)
+-- "*Vertical" hug the health bar's left/right edge as a vertical bar
+-- (Grid2-style side bar); "height" acts as its width and vertGrowDir
+-- ("up" default / "down", per bar) picks the fill direction.
+ns.ApplyStripBarLayout = function(stripBar, ab, button, position, height, absorbPos, absorbHeight, vertGrowDir)
     if not stripBar then return end
     local hp = ab._hpBar or button
     stripBar:ClearAllPoints()
+    if position == "rightVertical" or position == "leftVertical" then
+        stripBar:SetOrientation("VERTICAL")
+        stripBar:SetReverseFill(vertGrowDir == "down")
+        stripBar:SetWidth(PixelSnap(height or 4))
+        if position == "rightVertical" then
+            stripBar:SetPoint("TOPRIGHT", hp, "TOPRIGHT", 0, 0)
+            stripBar:SetPoint("BOTTOMRIGHT", hp, "BOTTOMRIGHT", 0, 0)
+        else
+            stripBar:SetPoint("TOPLEFT", hp, "TOPLEFT", 0, 0)
+            stripBar:SetPoint("BOTTOMLEFT", hp, "BOTTOMLEFT", 0, 0)
+        end
+        stripBar:SetFrameLevel(ab:GetFrameLevel() + 1)
+        return
+    end
+    stripBar:SetOrientation("HORIZONTAL")
     stripBar:SetHeight(PixelSnap(height or 4))
     if position == "belowAbsorb" then
         absorbPos = absorbPos or "none"
@@ -2340,10 +2399,11 @@ local function UpdateAbsorb(button, unit)
         if barOn then
             local bc = s.absorbBarColor or { r = 1, g = 1, b = 1 }
             local bh = s.absorbBarHeight or 4
-            -- Re-layout only when position/height changes (no per-update SetPoint churn).
-            if topBar._lpPos ~= barPos or topBar._lpH ~= bh then
-                topBar._lpPos = barPos; topBar._lpH = bh
-                ns.ApplyStripBarLayout(topBar, ab, button, barPos, bh)
+            local gd = s.absorbBarGrowDir or "up"
+            -- Re-layout only when position/height/direction changes (no per-update SetPoint churn).
+            if topBar._lpPos ~= barPos or topBar._lpH ~= bh or topBar._lpGD ~= gd then
+                topBar._lpPos = barPos; topBar._lpH = bh; topBar._lpGD = gd
+                ns.ApplyStripBarLayout(topBar, ab, button, barPos, bh, nil, nil, gd)
             end
             topBar:SetStatusBarColor(bc.r, bc.g, bc.b, bc.a or 1)
             topBar:SetMinMaxValues(0, maxHealth)
@@ -2362,12 +2422,15 @@ local function UpdateAbsorb(button, unit)
             local hbc = s.healAbsorbBarColor or { r = 200/255, g = 29/255, b = 29/255 }
             local hbh = s.healAbsorbBarHeight or 4
             local abh = s.absorbBarHeight or 4
+            local hgd = s.healAbsorbBarGrowDir or "up"
             -- Re-layout only when its or the Absorb Bar's position/height changes.
             if healTopBar._lpPos ~= healBarPos or healTopBar._lpH ~= hbh
-               or healTopBar._lpAP ~= barPos or healTopBar._lpAH ~= abh then
+               or healTopBar._lpAP ~= barPos or healTopBar._lpAH ~= abh
+               or healTopBar._lpGD ~= hgd then
                 healTopBar._lpPos = healBarPos; healTopBar._lpH = hbh
                 healTopBar._lpAP = barPos; healTopBar._lpAH = abh
-                ns.ApplyStripBarLayout(healTopBar, ab, button, healBarPos, hbh, barPos, abh)
+                healTopBar._lpGD = hgd
+                ns.ApplyStripBarLayout(healTopBar, ab, button, healBarPos, hbh, barPos, abh, hgd)
             end
             healTopBar:SetStatusBarColor(hbc.r, hbc.g, hbc.b, hbc.a or 1)
             healTopBar:SetMinMaxValues(0, maxHealth)
@@ -3891,6 +3954,7 @@ end
 --  Update all visual elements for a single button
 -------------------------------------------------------------------------------
 local function UpdateButton(button)
+    local EllesmereUI = ns.EllesmereUI  -- upvalue read, not a global read (see taint note at top)
     local unit = button:GetAttribute("unit")
     if not unit or not UnitExists(unit) then
         button:SetAlpha(0)
@@ -4086,16 +4150,21 @@ local function UpdateButton(button)
         local stc = s.statusTextColor or { r = 1, g = 1, b = 1 }
         if s.statusTextPosition == "none" then
             d.statusText:Hide()
+        -- HELD (PR #610 incoming rez, disabled for this build):
+        -- elseif db.profile.showIncomingRez and UnitHasIncomingResurrection(unit) then
+        --     -- Being resurrected: hide DEAD so the incoming-rez icon (shown in the same
+        --     -- spot by UpdateReadyCheck) isn't covered by the status text.
+        --     d.statusText:Hide()
         elseif UnitIsDeadOrGhost(unit) then
-            d.statusText:SetText("DEAD")
+            d.statusText:SetText(EllesmereUI.L("DEAD"))
             d.statusText:SetTextColor(stc.r, stc.g, stc.b)
             d.statusText:Show()
         elseif not UnitIsConnected(unit) then
-            d.statusText:SetText("OFFLINE")
+            d.statusText:SetText(EllesmereUI.L("OFFLINE"))
             d.statusText:SetTextColor(stc.r, stc.g, stc.b)
             d.statusText:Show()
         elseif s.statusShowAFK and UnitIsAFK and not issecretvalue(UnitIsAFK(unit)) and UnitIsAFK(unit) then
-            d.statusText:SetText("AFK")
+            d.statusText:SetText(EllesmereUI.L("AFK"))
             d.statusText:SetTextColor(stc.r, stc.g, stc.b)
             d.statusText:Show()
         else
@@ -4240,6 +4309,8 @@ local function ApplyDebuffIcon(icon, auraData, unit, s)
     else
         icon._tex:SetTexture("Interface\\Icons\\INV_Misc_QuestionMark")
     end
+    local _z = s.debuffIconZoom or 0.08
+    icon._tex:SetTexCoord(_z, 1 - _z, _z, 1 - _z)
 
     -- A typed (dispellable) debuff carries a non-nil dispelName even when the
     -- name itself is a secret value (other players' debuffs inside instances);
@@ -4508,17 +4579,23 @@ function ns.ApplyDebuffCCGlow(icon, auraData, unit, s)
             if cc then cr, cg, cb = cc.r, cc.g, cc.b end
         end
         local sz = s.debuffSize or 18
-        local oN, oTh, oPer
+        local oN, oTh, oPer, oBgR, oBgG, oBgB
         if gType == 1 then  -- Pixel Glow uses the Lines/Thickness/Speed params
             oN, oTh, oPer = s.debuffCCGlowLines or 8, s.debuffCCGlowThickness or 2, s.debuffCCGlowSpeed or 4
+            if s.debuffCCGlowBackground then
+                oBgR, oBgG, oBgB = s.debuffCCGlowBackgroundR or 0, s.debuffCCGlowBackgroundG or 0, s.debuffCCGlowBackgroundB or 0
+            end
         end
         if (not gov._euiGlowActive) or gov._ccStyle ~= gType or gov._ccW ~= sz
            or gov._ccCR ~= cr or gov._ccCG ~= cg or gov._ccCB ~= cb
-           or gov._ccN ~= oN or gov._ccTh ~= oTh or gov._ccPer ~= oPer then
-            Glows.StartGlow(gov, gType, sz, cr, cg, cb, oN and { N = oN, th = oTh, period = oPer } or nil)
+           or gov._ccN ~= oN or gov._ccTh ~= oTh or gov._ccPer ~= oPer
+           or gov._ccBgR ~= oBgR or gov._ccBgG ~= oBgG or gov._ccBgB ~= oBgB then
+            Glows.StartGlow(gov, gType, sz, cr, cg, cb,
+                oN and { N = oN, th = oTh, period = oPer, bg = oBgR and { r = oBgR, g = oBgG, b = oBgB } or nil } or nil)
             gov._ccStyle, gov._ccW = gType, sz
             gov._ccCR, gov._ccCG, gov._ccCB = cr, cg, cb
             gov._ccN, gov._ccTh, gov._ccPer = oN, oTh, oPer
+            gov._ccBgR, gov._ccBgG, gov._ccBgB = oBgR, oBgG, oBgB
         end
     elseif icon._ccGlowOverlay and icon._ccGlowOverlay._euiGlowActive and Glows and Glows.StopGlow then
         Glows.StopGlow(icon._ccGlowOverlay)
@@ -4536,6 +4613,7 @@ end
 
 -- Render the cached debuff list to icon frames
 local function RenderDebuffs(d, s, unit)
+    local EllesmereUI = ns.EllesmereUI  -- upvalue read, not a global read (see taint note at top)
     local debuffCache = d.debuffCache
     local cap = s.debuffCap or 3
     local shown = 0
@@ -4649,9 +4727,22 @@ local function UpdateDebuffs(button, unit, updateInfo)
                 if iid and C_UnitAuras_IsAuraFilteredOutByInstanceID
                     and not C_UnitAuras_IsAuraFilteredOutByInstanceID(unit, iid, "HARMFUL")
                     and IsDisplayDebuff(unit, auraData, s) then
-                    local idx = #cache + 1
-                    cache[idx] = auraData
-                    imap[auraData.auraInstanceID] = idx
+                    -- Blizzard re-announces an already-visible aura as "added"
+                    -- when its visibility/classification is re-evaluated (duel
+                    -- start/end, phasing, PvP flag changes). Appending it again
+                    -- would render the same debuff twice -- the stale snapshot
+                    -- (often still typed non-dispellable) next to the fresh
+                    -- dispellable one -- and orphan the stale copy in the cache
+                    -- until the next full scan. Refresh the existing slot in
+                    -- place instead.
+                    local existing = imap[iid]
+                    if existing and cache[existing] then
+                        cache[existing] = auraData
+                    else
+                        local idx = #cache + 1
+                        cache[idx] = auraData
+                        imap[auraData.auraInstanceID] = idx
+                    end
                 end
             end
         end
@@ -4774,6 +4865,8 @@ local function UpdateDefensives(button, unit, updateInfo)
                 else
                     icon._tex:SetTexture(136243)
                 end
+                local _z = s.defIconZoom or 0.08
+                icon._tex:SetTexCoord(_z, 1 - _z, _z, 1 - _z)
 
                 -- Duration swipe + text (secret-safe via DurationObject + GetCountdownFontString)
                 local cd = icon._cooldown
@@ -5028,9 +5121,13 @@ local function UpdateDispelContainerVisibility(button)
     local wrapper = d.dispelContainer
     if not wrapper then return end
 
-    -- Our custom overlay is active = we handle this debuff, suppress container
+    -- Our custom visuals are active = we handle this debuff, suppress container.
+    -- Must include the dispel-type ICON: with an icon-only setup (border 0,
+    -- overlay "none") the border/overlay checks alone read false and Blizzard's
+    -- container un-suppresses, drawing a second dispel indicator next to ours.
     local ourShowing = (d.dispelFrame and d.dispelFrame:IsShown())
         or (d.dispelOLTex and d.dispelOLTex:IsShown())
+        or (d.dispelIcon and d.dispelIcon:IsShown())
     if ourShowing then
         wrapper:SetAlpha(0)
         return
@@ -5046,6 +5143,7 @@ local function UpdateDispelContainerVisibility(button)
         if not d2 then return end
         local stillOurs = (d2.dispelFrame and d2.dispelFrame:IsShown())
             or (d2.dispelOLTex and d2.dispelOLTex:IsShown())
+            or (d2.dispelIcon and d2.dispelIcon:IsShown())
         if not stillOurs then
             wrapper:SetAlpha(1)
         end
@@ -5437,9 +5535,10 @@ end
 -------------------------------------------------------------------------------
 local readyCheckActive = false
 
--- The d.readyCheck texture is shared between the ready-check and incoming-summon
--- indicators (they almost never overlap). Ready check takes priority while a check
--- is active; otherwise the summon status is shown.
+-- The d.readyCheck texture is shared between the ready-check, incoming-summon and
+-- incoming-resurrection indicators (they almost never overlap -- rez only shows on
+-- dead units, the other two on living ones). Priority: an active ready check wins,
+-- then a pending summon, then an incoming rez.
 local function UpdateReadyCheck(button, unit)
     local d = GetFFD(button)
     local tex = d.readyCheck
@@ -5486,6 +5585,17 @@ local function UpdateReadyCheck(button, unit)
             return
         end
     end
+
+    -- Incoming resurrection ("someone is casting a rez / rez waiting to be
+    -- accepted"). Lowest priority; only meaningful on a dead unit. Lets healers
+    -- see a body is already being picked up so they don't all rez the same one.
+    -- HELD (PR #610 incoming rez, disabled for this build):
+    -- if db.profile.showIncomingRez and unit and UnitHasIncomingResurrection(unit) then
+    --     tex:SetTexCoord(0, 1, 0, 1)
+    --     tex:SetTexture("Interface\\RaidFrame\\Raid-Icon-Rez")
+    --     tex:Show()
+    --     return
+    -- end
 
     tex:Hide()
 end
@@ -5753,16 +5863,20 @@ ns._UpdateButtonHealth = function(button)
         local stc = s.statusTextColor or { r = 1, g = 1, b = 1 }
         if s.statusTextPosition == "none" then
             d.statusText:Hide()
+        -- HELD (PR #610 incoming rez, disabled for this build):
+        -- elseif db.profile.showIncomingRez and UnitHasIncomingResurrection(unit) then
+        --     -- Being resurrected: hide DEAD so the incoming-rez icon isn't covered.
+        --     d.statusText:Hide()
         elseif UnitIsDeadOrGhost(unit) then
-            d.statusText:SetText("DEAD")
+            d.statusText:SetText(EllesmereUI.L("DEAD"))
             d.statusText:SetTextColor(stc.r, stc.g, stc.b)
             d.statusText:Show()
         elseif not UnitIsConnected(unit) then
-            d.statusText:SetText("OFFLINE")
+            d.statusText:SetText(EllesmereUI.L("OFFLINE"))
             d.statusText:SetTextColor(stc.r, stc.g, stc.b)
             d.statusText:Show()
         elseif s.statusShowAFK and UnitIsAFK and not issecretvalue(UnitIsAFK(unit)) and UnitIsAFK(unit) then
-            d.statusText:SetText("AFK")
+            d.statusText:SetText(EllesmereUI.L("AFK"))
             d.statusText:SetTextColor(stc.r, stc.g, stc.b)
             d.statusText:Show()
         else
@@ -6450,7 +6564,7 @@ FB.SetMoverShown = function(owner, show, frameName, labelText)
         local mbg = m:CreateTexture(nil, "BACKGROUND")
         mbg:SetAllPoints()
         mbg:SetColorTexture(0.075, 0.113, 0.141, 0.95)
-        local ar, ag, ab = EllesmereUI.ResolveThemeColor(EllesmereUI.GetActiveTheme())
+        local ar, ag, ab = EllesmereUI.ResolveActiveAccent()
         if EllesmereUI.MakeBorder then
             EllesmereUI.MakeBorder(m, ar or 1, ag or 1, ab or 1, 0.6)
         end
@@ -7727,8 +7841,11 @@ ns._LayoutGroupsImpl = function()
     end
     containerFrame:SetSize(PixelSnap(totalW), PixelSnap(totalH))
 
-    -- Snap the container's screen position to the pixel grid
-    if not InCombatLockdown() then
+    -- Snap the container's screen position to the pixel grid. Skip when
+    -- element-anchored: ApplyAnchorPosition already pixel-snaps, and a
+    -- TOPLEFT re-anchor here would fight the anchor cascade.
+    if not InCombatLockdown()
+       and not (EllesmereUI.IsUnlockAnchored and EllesmereUI.IsUnlockAnchored("RF_RaidFrames")) then
         local l = containerFrame:GetLeft()
         local t = containerFrame:GetTop()
         if l and t then
@@ -7993,6 +8110,46 @@ ns.ReloadFrames = ReloadFrames
 ns.PixelSnap = PixelSnap
 ns._allButtons = allButtons
 
+-- Global Dark Mode master: Raid Frames store Dark Mode as a fill-colour MODE
+-- (healthColorMode == "dark"), not a boolean, so enabling remembers the prior
+-- mode and disabling restores it -- the master must not silently clobber a
+-- user's Classic/Custom fill choice. A party colour override (party_healthColorMode,
+-- only present when the party colour section is decoupled) is flipped the same
+-- way when it exists. db is set at PLAYER_LOGIN; the closures read it lazily.
+if EllesmereUI.RegisterDarkModeToggle then
+    EllesmereUI.RegisterDarkModeToggle({
+        id = "raidFrames",
+        isOn = function()
+            return (db and db.profile and db.profile.healthColorMode == "dark") or false
+        end,
+        setOn = function(on)
+            if not (db and db.profile) then return end
+            local p = db.profile
+            if on then
+                if p.healthColorMode ~= "dark" then
+                    p._darkPrevHealthColorMode = p.healthColorMode or "class"
+                    p.healthColorMode = "dark"
+                end
+                if rawget(p, "party_healthColorMode") ~= nil and p.party_healthColorMode ~= "dark" then
+                    p._darkPrevPartyHealthColorMode = p.party_healthColorMode
+                    p.party_healthColorMode = "dark"
+                end
+            else
+                if p.healthColorMode == "dark" then
+                    p.healthColorMode = p._darkPrevHealthColorMode or "class"
+                end
+                p._darkPrevHealthColorMode = nil
+                if rawget(p, "party_healthColorMode") == "dark" then
+                    p.party_healthColorMode = p._darkPrevPartyHealthColorMode or "class"
+                end
+                p._darkPrevPartyHealthColorMode = nil
+            end
+            if ns.ReloadFrames then ns.ReloadFrames() end
+            if ns.ReloadPartyFrames then ns.ReloadPartyFrames() end
+        end,
+    })
+end
+
 -- Lightweight resize: only changes button/health/power dimensions + layout.
 -- No texture, border, font, or anchor changes. Safe for slider hot path.
 ns._ResizeButtons = function(w, h)
@@ -8206,6 +8363,12 @@ end
 -- tier offsets were rebased once by _NormalizeTierOffsetAnchors).
 ns._ApplyTierOffset = function()
     if not containerFrame or InCombatLockdown() then return end
+    -- Element-anchored container: the unlock anchor system owns the position
+    -- (absolute coords recomputed from the anchor target), so repositioning
+    -- from unlockPos here would clobber it on every roster/tier pass. The
+    -- anchor's edge-to-edge offsets keep the near edge flush across tier
+    -- size changes; per-tier offsets do not apply while anchored.
+    if EllesmereUI.IsUnlockAnchored and EllesmereUI.IsUnlockAnchored("RF_RaidFrames") then return end
     local pos = db.profile.unlockPos
     if not pos then return end
     local ox, oy = 0, 0
@@ -9050,6 +9213,16 @@ local function OnEvent(self, event, arg1, ...)
             local u = btn:GetAttribute("unit")
             if u and btn:IsVisible() then UpdateReadyCheck(btn, u) end
         end
+    -- HELD (PR #610 incoming rez, disabled for this build):
+    -- elseif event == "INCOMING_RESURRECT_CHANGED" then
+    --     -- Fires with a unit payload when a rez starts/stops on that unit. Refresh the
+    --     -- status text (so DEAD hides while rezzing / reappears after) as well as the
+    --     -- shared rez icon.
+    --     local btn = unitToButton[arg1] or ns._partyUnitToButton[arg1]
+    --     if btn and btn:IsVisible() then
+    --         if ns._UpdateButtonHealth then ns._UpdateButtonHealth(btn) end
+    --         UpdateReadyCheck(btn, arg1)
+    --     end
     elseif event == "PLAYER_SPECIALIZATION_CHANGED" then
         if ns.BM_RebuildLookup then ns.BM_RebuildLookup(db) end
         -- BM_RebuildLookup only rebuilds the global spell-lookup tables for the
@@ -9177,7 +9350,9 @@ do
         absorbs = {
             "absorbStyle", "absorbOpacity", "absorbColor", "absorbEdgeMode", "showOvershield",
             "absorbBarEnabled", "absorbBarPosition", "absorbBarHeight", "absorbBarColor",
+            "absorbBarGrowDir",
             "healAbsorbBarPosition", "healAbsorbBarHeight", "healAbsorbBarColor",
+            "healAbsorbBarGrowDir",
             "healAbsorbStyle", "healAbsorbOpacity", "healAbsorbColor", "healAbsorbEdgeMode",
             "healAbsorbBgOpacity",
             "maxHealthStyle", "maxHealthOpacity", "maxHealthColor", "maxHealthBgOpacity",
@@ -9199,7 +9374,7 @@ do
             "roleIconStyle", "roleIconSize", "roleIconPosition", "roleIconOffsetX", "roleIconOffsetY", "roleIconHideInCombat",
             "showRoleForTank", "showRoleForHealer", "showRoleForDPS",
             "showRaidMarker", "raidMarkerSize", "raidMarkerPosition", "raidMarkerOffsetX", "raidMarkerOffsetY",
-            "showReadyCheck", "showSummonPending",
+            "showReadyCheck", "showSummonPending", --[[ HELD (PR #610): "showIncomingRez", ]]
             "readyCheckSize", "readyCheckPosition", "readyCheckOffsetX", "readyCheckOffsetY",
             "statusTextPosition", "statusTextOffsetX", "statusTextOffsetY", "statusTextSize", "statusTextColor",
             "showLeaderIcon", "showLeaderIconInCombat", "leaderIconPosition", "leaderIconSize", "leaderIconOffsetX", "leaderIconOffsetY",
@@ -9227,7 +9402,7 @@ do
         defensives = {
             "showDefensives", "showExternals",
             "defPosition", "defOffsetX", "defOffsetY", "defGrowDirection",
-            "defSize", "defSpacing", "defBorderSize", "defBorderColor",
+            "defSize", "defIconZoom", "defSpacing", "defBorderSize", "defBorderColor",
             "defShowSwipe", "defShowDurText", "defDurTextColor", "defDurTextSize", "defDurTextOffsetX", "defDurTextOffsetY",
         },
         privateAuras = {
@@ -9243,7 +9418,7 @@ do
             "dispellableDebuffOffsetX", "dispellableDebuffOffsetY",
         },
         debuffStyle = {
-            "debuffSize", "debuffBorderSize", "debuffBorderColor", "debuffSpacing",
+            "debuffSize", "debuffIconZoom", "debuffBorderSize", "debuffBorderColor", "debuffSpacing",
             "debuffShowStacks", "debuffStacksTextColor", "debuffStacksTextSize", "debuffStacksOffsetX", "debuffStacksOffsetY",
             "debuffShowSwipe", "debuffShowDurText", "debuffDurTextColor", "debuffDurTextSize", "debuffDurTextOffsetX", "debuffDurTextOffsetY",
         },
@@ -10023,9 +10198,6 @@ local function RegisterWithUnlockMode()
             label = "Raid Frames",
             group = "Raid Frames",
             order = 500,
-            noAnchorChildren = true,
-            noAnchorTo = true,
-            noAnchorTarget = true,
             noResize = true,
             -- RF positions its own container via _ApplyTierOffset (base 20-man
             -- top-left + per-tier offset, tier-footprint-INDEPENDENT), re-run on
@@ -10065,9 +10237,6 @@ local function RegisterWithUnlockMode()
             label = "Party Frames",
             group = "Raid Frames",
             order = 501,
-            noAnchorChildren = true,
-            noAnchorTo = true,
-            noAnchorTarget = true,
             noResize = true,
 
             getFrame = function() return ns._partyContainerFrame end,
@@ -10085,6 +10254,13 @@ local function RegisterWithUnlockMode()
                 db.profile.partyUnlockPos = nil
             end,
             applyPos = function()
+                -- Element-anchored: the anchor system owns the position. Only
+                -- apply the saved pos as a bootstrap while the frame has no
+                -- resolved geometry yet (anchor pass corrects it after).
+                if EllesmereUI.IsUnlockAnchored and EllesmereUI.IsUnlockAnchored("RF_PartyFrames")
+                   and ns._partyContainerFrame and ns._partyContainerFrame:GetLeft() then
+                    return
+                end
                 local pos = db.profile.partyUnlockPos
                 if pos and ns._partyContainerFrame then
                     ns._partyContainerFrame:ClearAllPoints()
@@ -10292,6 +10468,15 @@ local function PvAuraApply(frameIndex, auraType, slotIndex)
     local startTime = GetTime()
 
     icon._tex:SetTexture(tex)
+    -- Private auras keep the fixed crop: live PA icons are Blizzard-rendered
+    -- and can't be zoomed, so the preview must not suggest otherwise.
+    if auraType == "db" then
+        local _z = s2.debuffIconZoom or 0.08
+        icon._tex:SetTexCoord(_z, 1 - _z, _z, 1 - _z)
+    elseif auraType == "def" then
+        local _z = s2.defIconZoom or 0.08
+        icon._tex:SetTexCoord(_z, 1 - _z, _z, 1 - _z)
+    end
     if icon._cooldown then
         local showSwipe, showDurText, dtColor, dtSize, dtOX, dtOY
         if auraType == "pa" then
@@ -10522,6 +10707,8 @@ local function PvAuraTick()
                 if f and f._pvDebuffs and f._pvDebuffs[1] and f._health then
                     local icon = f._pvDebuffs[1]
                     icon._tex:SetTexture(5927657)
+                    local _z = s2.debuffIconZoom or 0.08
+                    icon._tex:SetTexCoord(_z, 1 - _z, _z, 1 - _z)
                     icon:SetSize(s2.debuffSize or 18, s2.debuffSize or 18)
                     if icon._cooldown then
                         icon._cooldown:SetCooldown(now, dur)
@@ -10957,6 +11144,8 @@ ns.RefreshPvAuraVisuals = function()
     local _reanchor = ns._PvAuraReanchorFrame
     local fp = (EllesmereUI.GetFontPath and EllesmereUI.GetFontPath("raidFrames")) or "Fonts\\FRIZQT__.TTF"
 
+    local dbZ = s2.debuffIconZoom or 0.08
+    local defZ = s2.defIconZoom or 0.08
     local dbBdrSz = s2.debuffBorderSize or 1
     local dbBdrC = s2.debuffBorderColor or { r = 0, g = 0, b = 0 }
     local dbShowSwipe = s2.debuffShowSwipe ~= false
@@ -10983,6 +11172,7 @@ ns.RefreshPvAuraVisuals = function()
             for _, ic in ipairs(f._pvDebuffs) do
                 if ic:IsShown() then
                     ic:SetSize(s2.debuffSize or 18, s2.debuffSize or 18)
+                    ic._tex:SetTexCoord(dbZ, 1 - dbZ, dbZ, 1 - dbZ)
                     if ic._borderFrame and _PP then
                         if dbBdrSz > 0 then
                             _PP.UpdateBorder(ic._borderFrame, dbBdrSz, dbBdrC.r, dbBdrC.g, dbBdrC.b, 1)
@@ -11018,6 +11208,7 @@ ns.RefreshPvAuraVisuals = function()
             for _, ic in ipairs(f._pvDefs) do
                 if ic:IsShown() then
                     ic:SetSize(s2.defSize or 22, s2.defSize or 22)
+                    ic._tex:SetTexCoord(defZ, 1 - defZ, defZ, 1 - defZ)
                     if ic._borderFrame and _PP then
                         if defBdrSz > 0 then
                             _PP.UpdateBorder(ic._borderFrame, defBdrSz, defBdrC.r, defBdrC.g, defBdrC.b, 1)
@@ -11774,18 +11965,31 @@ local function BuildPreviewRoles()
         end
         previewRoles._dispelMap = dispelMap
 
-        -- Dead/offline: one of each, random non-player slots
+        -- Dead/offline/rez: one of each, random non-player slots. Two of them are
+        -- corpses -- a plain dead body and a separate one that's being resurrected --
+        -- so the showcase shows both states side by side.
         local statePool = {}
         for i = 2, 20 do statePool[#statePool + 1] = i end
         for i = #statePool, 2, -1 do
             local j = math.random(i)
             statePool[i], statePool[j] = statePool[j], statePool[i]
         end
-        previewRoles._deadSlot    = statePool[1]
+        previewRoles._deadSlot    = statePool[1]  -- plain corpse
         previewRoles._offlineSlot = statePool[2]
-        -- Clear readycheck on dead/offline slots
+        -- HELD (PR #610 incoming rez, disabled for this build):
+        -- previewRoles._rezSlot     = statePool[3]  -- corpse with an incoming-rez icon
+        -- Plain dead + offline bodies carry no readycheck/summon icon (looks wrong there).
         if rcStatuses[statePool[1]] then rcStatuses[statePool[1]] = nil end
         if rcStatuses[statePool[2]] then rcStatuses[statePool[2]] = nil end
+        -- The rez corpse gets the incoming-rez icon. But markers win the shared icon
+        -- slot (same as the readycheck de-confliction above): if the rez slot landed
+        -- on a marker slot, skip the icon (the frame is still shown as a dead body).
+        -- HELD (PR #610 incoming rez, disabled for this build):
+        -- if statePool[3] ~= ms1 and statePool[3] ~= ms2 then
+        --     rcStatuses[statePool[3]] = "rez"
+        -- else
+        --     rcStatuses[statePool[3]] = nil
+        -- end
     end
 end
 
@@ -11926,7 +12130,7 @@ local function ApplyPreviewData(f, index)
             end
             if barOn and absorbAmt > 0 then
                 local bc = s.absorbBarColor or { r = 1, g = 1, b = 1 }
-                ns.ApplyStripBarLayout(topBar, f._absorbBar, f, barPos, s.absorbBarHeight or 4)
+                ns.ApplyStripBarLayout(topBar, f._absorbBar, f, barPos, s.absorbBarHeight or 4, nil, nil, s.absorbBarGrowDir or "up")
                 topBar:SetStatusBarColor(bc.r, bc.g, bc.b, bc.a or 1)
                 topBar:SetValue(absorbAmt)
                 topBar:Show()
@@ -11949,7 +12153,7 @@ local function ApplyPreviewData(f, index)
                 local haAmtPv = ns.previewHealAbsorbValues[index] or 0
                 if healBarOn and haAmtPv > 0 then
                     local hbc = s.healAbsorbBarColor or { r = 200/255, g = 29/255, b = 29/255 }
-                    ns.ApplyStripBarLayout(healTopBarPv, f._absorbBar, f, healBarPos, s.healAbsorbBarHeight or 4, ns.GetAbsorbBarPosition(s), s.absorbBarHeight or 4)
+                    ns.ApplyStripBarLayout(healTopBarPv, f._absorbBar, f, healBarPos, s.healAbsorbBarHeight or 4, ns.GetAbsorbBarPosition(s), s.absorbBarHeight or 4, s.healAbsorbBarGrowDir or "up")
                     healTopBarPv:SetStatusBarColor(hbc.r, hbc.g, hbc.b, hbc.a or 1)
                     healTopBarPv:SetValue(haAmtPv)
                     healTopBarPv:Show()
@@ -12433,7 +12637,8 @@ local function ApplyPreviewData(f, index)
             local dbSz = s.debuffSize or 18
             ddi:SetSize(dbSz, dbSz)
             ddi._tex:SetTexture(ns._PV_DISPEL_DB_ICONS[dispelType])
-            ddi._tex:SetTexCoord(0.08, 0.92, 0.08, 0.92)
+            local _z = s.debuffIconZoom or 0.08
+            ddi._tex:SetTexCoord(_z, 1 - _z, _z, 1 - _z)
 
             -- Position using debuff settings
             ddi:ClearAllPoints()
@@ -12537,6 +12742,13 @@ local function ApplyPreviewData(f, index)
         local rcStatuses = previewRoles._readyCheck
         local rcStatus = rcStatuses and rcStatuses[index]
         local isSummon = rcStatus and rcStatus:sub(1, 6) == "summon"
+        -- HELD (PR #610 incoming rez, disabled for this build):
+        -- local isRez    = rcStatus == "rez"
+        -- local showRC = indVis and rcStatus and (
+        --     (isRez and s.showIncomingRez) or
+        --     (isSummon and s.showSummonPending) or
+        --     (not isSummon and not isRez and s.showReadyCheck)
+        -- )
         local showRC = indVis and rcStatus and (
             (not isSummon and s.showReadyCheck) or
             (isSummon and s.showSummonPending)
@@ -12583,6 +12795,10 @@ local function ApplyPreviewData(f, index)
                 f._readyCheck:SetAtlas("RaidFrame-Icon-SummonAccepted")
             elseif rcStatus == "summon_declined" then
                 f._readyCheck:SetAtlas("RaidFrame-Icon-SummonDeclined")
+            -- HELD (PR #610 incoming rez, disabled for this build):
+            -- elseif rcStatus == "rez" then
+            --     f._readyCheck:SetTexture("Interface\\RaidFrame\\Raid-Icon-Rez")
+            --     f._readyCheck:SetTexCoord(0, 1, 0, 1)
             end
             f._readyCheck:Show()
         else
@@ -12636,7 +12852,7 @@ local function ApplyPreviewData(f, index)
         ApplyFont(f._nameText, s.nameSize or 10)
         local nameMode = s.nameColorMode or "class"
         if nameMode == "accent" then
-            local ar, ag, ab = EllesmereUI.ResolveThemeColor(EllesmereUI.GetActiveTheme())
+            local ar, ag, ab = EllesmereUI.ResolveActiveAccent()
             if ar then f._nameText:SetTextColor(ar, ag, ab)
             else f._nameText:SetTextColor(1, 1, 1) end
         elseif nameMode == "custom" then
@@ -12650,9 +12866,14 @@ local function ApplyPreviewData(f, index)
         end -- pos ~= "none"
     end
 
-    -- Dead/offline/AFK states (only when indicators eyeball is on)
-    local isDead    = indVis and index == previewRoles._deadSlot
-    local isOffline = indVis and index == previewRoles._offlineSlot
+    -- Dead/offline/AFK states (only when indicators eyeball is on). The rez slot is
+    -- a second corpse (dimmed, no "DEAD" text) that shows an incoming-rez icon in
+    -- place of the status text -- mirrors the live "hide DEAD while rezzing" behavior.
+    -- HELD (PR #610 incoming rez, disabled for this build):
+    -- local isRezCorpse = indVis and index == previewRoles._rezSlot
+    -- local isDead      = indVis and (index == previewRoles._deadSlot or isRezCorpse)
+    local isDead      = indVis and index == previewRoles._deadSlot
+    local isOffline   = indVis and index == previewRoles._offlineSlot
     -- Mark dead/offline preview frames so the animated-preview ticker skips them
     -- (their health bar is emptied and health text hidden -- never animated).
     f._pvHideHealthText = (isDead or isOffline) or nil
@@ -12707,7 +12928,7 @@ local function ApplyPreviewData(f, index)
         local htMode = s.healthTextColorMode or "custom"
         local htr, htg, htb = 1, 1, 1
         if htMode == "accent" then
-            local ar, ag, ab = EllesmereUI.ResolveThemeColor(EllesmereUI.GetActiveTheme())
+            local ar, ag, ab = EllesmereUI.ResolveActiveAccent()
             if ar then htr, htg, htb = ar, ag, ab end
         elseif htMode == "class" then
             local cc = EllesmereUI.GetClassColor(classToken)
@@ -12755,7 +12976,7 @@ local function ApplyPreviewData(f, index)
             local haCM = s.healAbsorbTextColorMode or "custom"
             local hr, hg, hb = 1, 0.3, 0.3
             if haCM == "accent" then
-                local ar, ag, ab = EllesmereUI.ResolveThemeColor(EllesmereUI.GetActiveTheme())
+                local ar, ag, ab = EllesmereUI.ResolveActiveAccent()
                 if ar then hr, hg, hb = ar, ag, ab end
             elseif haCM == "class" then
                 local cc = EllesmereUI.GetClassColor(classToken)
@@ -12798,14 +13019,19 @@ local function ApplyPreviewData(f, index)
         else
             f._statusText:SetPoint("CENTER", f._health, "CENTER", stOX, stOY)
         end
+        -- HELD (PR #610 incoming rez, disabled for this build):
+        -- if isRezCorpse then
+        --     -- Being resurrected: the rez icon takes this spot, so no DEAD text.
+        --     f._statusText:Hide()
+        -- elseif isDead then
         if isDead then
-            f._statusText:SetText("DEAD")
+            f._statusText:SetText(EllesmereUI.L("DEAD"))
             f._statusText:Show()
         elseif isOffline then
-            f._statusText:SetText("OFFLINE")
+            f._statusText:SetText(EllesmereUI.L("OFFLINE"))
             f._statusText:Show()
         elseif isAfk then
-            f._statusText:SetText("AFK")
+            f._statusText:SetText(EllesmereUI.L("AFK"))
             f._statusText:Show()
         else
             f._statusText:Hide()
@@ -13837,8 +14063,11 @@ local function BuildPartyPreviewRoles()
         local dispelTypes = { "Magic", "Curse", "Disease", "Poison", "" }
         ns._partyPvRoles._dispelMap = {}
         for i, dt in ipairs(dispelTypes) do ns._partyPvRoles._dispelMap[i] = dt end
-        -- Status showcase: 1 dead, 1 offline, 1 AFK, 1 summon-accepted, one each
-        -- on the four non-player slots (2-5). No ready-check ticks.
+        -- Status showcase: 1 dead, 1 offline, 1 AFK, 1 summon-accepted, one each on
+        -- the four non-player slots (2-5). No ready-check ticks. (Incoming-rez isn't
+        -- previewed here: a 5-man has only four non-player slots and they're all
+        -- taken, so there's no room for a separate rez corpse the way the raid
+        -- preview has one. The live indicator still shows on party frames.)
         local statusSlots = { 2, 3, 4, 5 }
         for i = #statusSlots, 2, -1 do
             local j = math.random(i)
@@ -14390,7 +14619,12 @@ function ERF:OnEnable()
         local sp = s.cellSpacing or 2
         ns._partyContainerFrame:SetSize(w, h * 5 + sp * 4)
         local pos = s.partyUnlockPos
-        if pos then
+        -- Skip the saved-pos SetPoint when element-anchored with resolved
+        -- geometry: the unlock anchor system owns the position.
+        local anchored = EllesmereUI.IsUnlockAnchored
+            and EllesmereUI.IsUnlockAnchored("RF_PartyFrames")
+            and ns._partyContainerFrame:GetLeft()
+        if pos and not anchored then
             ns._partyContainerFrame:ClearAllPoints()
             ns._partyContainerFrame:SetPoint(pos.point, UIParent, pos.relPoint, pos.x, pos.y)
         end
@@ -14431,7 +14665,12 @@ function ERF:OnEnable()
             local sp = s.cellSpacing or 2
             ns._partyContainerFrame:SetSize(w, h * 5 + sp * 4)
             local pos = s.partyUnlockPos
-            if pos then
+            -- Skip the saved-pos SetPoint when element-anchored with resolved
+            -- geometry: the unlock anchor system owns the position.
+            local anchored = EllesmereUI.IsUnlockAnchored
+                and EllesmereUI.IsUnlockAnchored("RF_PartyFrames")
+                and ns._partyContainerFrame:GetLeft()
+            if pos and not anchored then
                 ns._partyContainerFrame:ClearAllPoints()
                 ns._partyContainerFrame:SetPoint(pos.point, UIParent, pos.relPoint, pos.x, pos.y)
             end
@@ -14464,6 +14703,7 @@ function ERF:OnEnable()
     eventFrame:RegisterEvent("READY_CHECK_CONFIRM")
     eventFrame:RegisterEvent("READY_CHECK_FINISHED")
     eventFrame:RegisterEvent("INCOMING_SUMMON_CHANGED")
+    -- eventFrame:RegisterEvent("INCOMING_RESURRECT_CHANGED")  -- HELD (PR #610 incoming rez, disabled for this build)
     eventFrame:RegisterEvent("PLAYER_REGEN_DISABLED")
     eventFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
     eventFrame:RegisterEvent("PLAYER_ENTERING_WORLD")

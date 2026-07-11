@@ -1,89 +1,104 @@
 # EllesmereUI
 
-## [v8.3.3](https://github.com/EllesmereGaming/EllesmereUI/tree/v8.3.3) (2026-06-29)
-[Full Changelog](https://github.com/EllesmereGaming/EllesmereUI/compare/v8.3.2...v8.3.3) [Previous Releases](https://github.com/EllesmereGaming/EllesmereUI/releases)
+## [v8.4.1](https://github.com/EllesmereGaming/EllesmereUI/tree/v8.4.1) (2026-07-08)
+[Full Changelog](https://github.com/EllesmereGaming/EllesmereUI/compare/v8.4...v8.4.1) [Previous Releases](https://github.com/EllesmereGaming/EllesmereUI/releases)
 
-- Release v8.3.3  
-- Merge pull request #500 from Kneeull/patch-27  
-    Add in Support for Feign Death to not show  
-- Merge pull request #495 from nulltyto/bugfix/gcd-drops  
-    fix(gcd-bar): stop GCD bar dropping while spamming + add Deplete Fill option  
-- Update EllesmereUIDamageMeters.lua  
-- Update EllesmereUIDamageMeters.lua  
-- Merge pull request #499 from labrie75/labrie75-patch-1  
-    Update koKR 8.3.2  
-- Add in Support for Feign Death to not show  
-    Should work, no lua errors in /euidev and shows deaths correctly.  
-- Update koKR 8.3.2  
-    Update koKR 8.3.2  
-- Merge pull request #497 from Nnoggie/codex/quick-keybind-macros  
-    Add quick keybind support for macros  
-- Merge pull request #498 from Filpet96/fix/mythic-timer-format  
-    Fix Mythic+ Timer detail format and show overtime as negative  
-- Fix Mythic+ Timer detail format and show overtime as negative  
-    The in-bar timer only drew the primary value, so the "(remaining / total)"  
-    detail of the detailed format was silently dropped and it looked identical to  
-    the plain elapsed option. The detail is now appended in-bar, matching the  
-    above-the-bar layout.  
-    The remaining clock also stayed frozen at 00:00 once a key was over time. It now  
-    counts into the negative (e.g. -01:04) so it's clear by how much you are over.  
-- Merge pull request #496 from Filpet96/fix/healthstone-hide-if-missing  
-    Fix Hide Items if Missing keeping cross-linked healthstones visible  
-- Add quick keybind support for macros  
-- fix(gcd-bar): don't drop GCD tracking while spamming; add Deplete Fill option  
-    The GCD bar dropped out during sustained spam and stayed gone for the rest of  
-    combat. captureGCD only (re)started the bar when the GCD read as 'freshly  
-    started' (elapsed < 0.3s). While spamming, the next ability is queued and its  
-    UNIT\_SPELLCAST\_SUCCEEDED lands partway into the fresh GCD -- measured elapsed  
-    0.4-0.7s -- so that gate rejected every queued cast and the bar never re-armed.  
-    (Confirmed in-game: clean, non-secret cooldown reads with elapsed ~0.44s,  
-    bar=nil.)  
-    Fix: re-arm whenever the read is a genuinely NEWER GCD than the last captured  
-    one (actualStart > \_gcdActualStart), instead of gating on how far it has  
-    elapsed. That's latency/spell-queue independent and still rejects off-GCD  
-    abilities (they read the SAME running GCD, so the start isn't newer). A small  
-    remaining-time check skips an already-finished GCD.  
-    Also: keep the bar on a failed (secret) stop-event read rather than wiping it,  
-    and add a Deplete Fill option that starts the bar full and drains it as the GCD  
-    elapses instead of filling up (snaps to the start value on the first frame so  
-    deplete mode doesn't ease up from idle).  
-- Fix Hide Items if Missing keeping cross-linked healthstones visible  
-- Merge pull request #490 from Filpet96/feat/tooltip-cursor-anchor  
-    Add Anchor Tooltip to Cursor option  
-- Merge pull request #489 from asdfractal/bug/gcd-instant  
-    Fix GCD showing on channel/empower  
-- Merge pull request #485 from TF0rd/feat/color-picker-enhancements  
-    feat(color-picker): add favorites and recent colors swatch rows  
-- Merge pull request #486 from TF0rd/feat/quick-keybind-slash  
-    feat(action-bars): add /kb slash command for Quick Keybind Mode  
-- feat(color-picker): add favorites and recent colors swatch rows  
-    Add two interactive swatch rows below the HSV picker:  
-    - Favorites: right-click any swatch to add/remove favorites, persisted  
-      in EllesmereUIDB.colorPicker.favorites (max 14, FIFO)  
-    - Recent Colors: automatically records colors on OK click, deduped by  
-      RGB, persisted in EllesmereUIDB.colorPicker.recentColors (max 14, FIFO)  
-    Both rows support left-click to apply color and right-click to toggle  
-    favorite status. Tooltips show hex code and context-appropriate action  
-    text.  
-    ![Color Picker Preview](.github/color-picker-preview.png)  
-- feat(action-bars): add /kb slash command for Quick Keybind Mode  
-- Default cursor tooltip position to Top  
-- Instantly hide world-unit tooltip fade while anchored to cursor  
-- Regenerate Locales/\_keys.txt  
-- Merge remote-tracking branch 'origin/main' into feat/tooltip-cursor-anchor  
-- Add Anchor Tooltip to Cursor option  
-    Adds an "Anchor Tooltip to Cursor" toggle to Blizz UI Enhanced > Tooltips,  
-    Menus & Popups. When enabled the default game tooltip follows the mouse  
-    instead of sitting in its default screen corner. A position control exposes a  
-    Position dropdown (Top Right by default, plus the other corners/edges and  
-    center) and X/Y offset sliders for exact placement relative to the cursor.  
-    The tooltip is re-owned to a 1x1 frame that tracks the cursor, hooked through  
-    GameTooltip\_SetDefaultAnchor so unit, world, and action button tooltips all  
-    follow. Off by default: the hook installs only on first enable and re-checks  
-    the flag (Blizzard's default anchor stands when off), and the tracking frame  
-    only ticks while a tooltip is shown.  
-- Fix GCD showing on channel/empower  
-- Merge pull request #487 from Kirihasio2/update1  
-    [QoL] Hide Tutorial Button Remake  
-- EUI QoL Hide Tutorial Button  
-- QoL Hide tutorial implmentation  
+- Release v8.4.1  
+- Merge pull request #618 from Snsei987/fix/pet-unit-frame-class-colored  
+    Pet unit frame: fix class colored health bar  
+- Merge pull request #617 from Filpet96/fix/instance-reset-announce-spam  
+    fix(qol): debounce instance reset announce for multi-dungeon resets  
+- chore(locale): refresh key list  
+- Pet unit frame: fix class colored health bar  
+- style: trim instance reset announce comment  
+    Co-authored-by: Cursor <cursoragent@cursor.com>  
+- chore: regenerate Locales/\_keys.txt  
+    Keep the locale key list current for CI.  
+    Co-authored-by: Cursor <cursoragent@cursor.com>  
+- fix(qol): debounce instance reset announce for multi-dungeon resets  
+    Resetting multiple saved instances fires one system message per dungeon,  
+    which caused duplicate party announcements. Debounce so only one message  
+    is sent per reset batch.  
+    Co-authored-by: Cursor <cursoragent@cursor.com>  
+- Merge pull request #610 from SamJin98/feat/incoming-resurrection  
+    [WIP]  feat(raidframes): incoming resurrection indicator on raid/party frames  
+- Merge pull request #612 from luispemu/main  
+    feat: Arms Warrior Sweeping Strikes charges as class resource  
+- Merge pull request #1 from luispemu/feature/arms-sweeping-strikes  
+    Feature/arms sweeping strikes  
+- perf: cache talent lookups in the Whirlwind stacks tracker  
+    Same optimization as the Sweeping Strikes tracker: GetWhirlwindStacks  
+    is polled every 0.1 s by the resource bar, unit frame and personal  
+    nameplate readouts (two IsSpellKnown C calls per poll), and  
+    HandleWhirlwindStacks ran an IsSpellKnown guard on every player cast  
+    for every class. Talents cannot change in combat, so the four flags  
+    (Improved Whirlwind, Crashing Thunder, Unhinged, Crackling Thunder)  
+    are resolved once per login/spec/talent event by a watcher that is  
+    only registered on warriors; other classes keep the flags false and  
+    both entry points early-out on a plain upvalue read.  
+    Also hoists EnemyInStrikeRange's inner InReach helper to block scope  
+    (wide passed as a parameter) so no closure is allocated per generator  
+    cast in combat.  
+    Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>  
+- perf: cache talent lookups in the Sweeping Strikes tracker  
+    GetSweepingStrikes is polled every 0.1 s by three surfaces (resource  
+    bar, unit frame, personal nameplate) and made two C\_SpellBook  
+    IsSpellKnown C calls per poll; HandleSweepingStrikes additionally ran  
+    an IsSpellKnown guard on every player cast for every class. Talents  
+    cannot change in combat, so resolve the four flags (Sweeping Strikes,  
+    Improved, Broad Strokes, Fervor of Battle) once per login/spec/talent  
+    event instead -- same rationale as the cached spec ID above  
+    GetSoulFragments. The watcher frame is only registered on warriors;  
+    other classes keep the flags false and both entry points early-out on  
+    a plain upvalue read.  
+    Also hoists EnemiesInReach's inner InReach helper to block scope so no  
+    closure is allocated per tracked spender cast in combat.  
+    Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>  
+- fix: sync preview count text with the lit segments  
+    The preview's count text recomputed its own filled count from the raw  
+    5-pip random value, so it disagreed with the rescaled pip fill (e.g. 12  
+    Sweeping Strikes pips lit 8 but the text said 3). The pip loop now  
+    exposes its resolved filled count/max and the text mirrors it, shown as  
+    "cur / max" like the live bar (single number when Show Max Stacks is  
+    off).  
+    Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>  
+- feat: options preview shows the real pip count for the current spec  
+    The Class Resource Bar preview in the ResourceBars options hardcoded 5  
+    pips regardless of spec. Resolve the count from the live secondary  
+    resource instead (via \_ERB\_GetSecondaryResource plus the tracker maxes),  
+    so Arms previews its 12/18 Sweeping Strikes charges, Fury its 4  
+    Whirlwind stacks, DK its 6 runes, Enhancement its 5/10 Maelstrom  
+    Weapon, etc. Falls back to the generic 5 when there is no discrete  
+    secondary.  
+    The random preview fill scales to the pip count, and the update pass  
+    creates missing pip frames on demand (builder still pre-creates the  
+    initial set).  
+    Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>  
+- feat: Arms Warrior Sweeping Strikes charges as class resource  
+    Adds SWEEPING\_STRIKES as the Arms (spec 71) secondary resource, mirroring  
+    the Fury WHIRLWIND\_STACKS implementation across all display surfaces:  
+    resource bars, unit frames and nameplates.  
+    Tracker (core, UNIT\_SPELLCAST\_SUCCEEDED-based, secret-value safe):  
+    - Sweeping Strikes (260708): 12 charges, 18 with Improved Sweeping  
+      Strikes (383155); 30 s duration  
+    - Broad Strokes (1261049): Colossus Smash / Warbreaker also activate it  
+    - Spenders consume only with a sweep partner in range (nameplate probe);  
+      Demolish consumes 2 charges per channel (two sweeping hits)  
+    - Fervor of Battle (202316): Cleave/Whirlwind on 3+ targets consume one  
+      charge via the triggered Slam, with an echo-suppression window  
+    - Rend and Storm Bolt deliberately excluded (not in the aura's  
+      affected-spells list)  
+    Also adds the "Sweeping Strikes" entry to Class Resource Colors.  
+    Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>  
+- feat: incoming resurrection indicator on raid/party frames  
+    Show a rez icon on dead units that have an incoming resurrection  
+    (UnitHasIncomingResurrection) so healers can see a body is already being  
+    picked up and avoid three healers rezzing the same corpse. It shares the  
+    ready-check / summon texture slot at lowest priority and has its own  
+    toggle under "Ready Check / Summon / Rez" (on by default).  
+    - Hide the DEAD status text while a rez is incoming so the icon isn't  
+      covered, matching Blizzard's CompactUnitFrame behavior. Handled in both  
+      the full and health-only button update paths.  
+    - Refresh on INCOMING\_RESURRECT\_CHANGED (status text + shared icon).  
+    - Indicator preview shows a second corpse carrying the rez icon; party  
+      preview has no free slot for it (documented inline).  

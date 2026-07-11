@@ -43,7 +43,7 @@ local OFFSET_GEM_ID_4 = 6
 local OFFSET_GEM_BASE = OFFSET_GEM_ID_1
 local OFFSET_SUFFIX_ID = 7
 -- local OFFSET_FLAGS = 11
--- local OFFSET_CONTEXT = 12
+local OFFSET_CONTEXT = 12
 local OFFSET_BONUS_ID = 13
 
 local OFFSET_GEM_BONUS_FROM_MODS = 2
@@ -55,6 +55,10 @@ local ITEM_MOD_TYPE_DROP_LEVEL = 9
 local ITEM_MOD_TYPE_CONTENT_TUNING = 28
 local ITEM_MOD_TYPE_CRAFT_STATS_1 = 29
 local ITEM_MOD_TYPE_CRAFT_STATS_2 = 30
+-- 12.1: catalyst items inherit secondary stats from the source item
+-- We think this might be the mechanism to do it - it makes sense if this encodes the source item ID.
+-- Adding prospectively to see when the functionality shows up on the PTR
+local ITEM_MOD_TYPE_REDIRECTED_BASE_STATS = 64
 
 local SUPPORTED_LOADOUT_SERIALIZATION_VERSION = 2
 
@@ -116,7 +120,13 @@ function Simulationcraft:OnInitialize()
         height = 400,
       },
     },
+    char = {
+      -- array of { season, spec, currency, source, context, keyLevel, itemId, ts } (one per won roll)
+      bonusRolls = {},
+    },
   });
+  -- expose the db on the shared addon table so bonusrolls.lua can reach it
+  Simulationcraft.db = OptionsDB
   LibDBIcon:Register("SimulationCraft", SimcLDB, OptionsDB.profile.minimap)
   Simulationcraft:UpdateMinimapButton()
   Simulationcraft:RegisterChatCommand('simc', 'HandleChatCommand')
@@ -131,7 +141,7 @@ function Simulationcraft:OnInitialize()
 end
 
 function Simulationcraft:OnEnable()
-
+  self:SetupBonusRolls()
 end
 
 function Simulationcraft:OnDisable()
@@ -198,6 +208,10 @@ local function GetItemSplit(itemLink)
 
   return itemSplit
 end
+-- expose the item-string parser and its context field offset so bonusrolls.lua can reuse the
+-- single parser instead of re-implementing it
+Simulationcraft.GetItemSplit = GetItemSplit
+Simulationcraft.OFFSET_CONTEXT = OFFSET_CONTEXT
 
 local function Trim(str)
   return string.match(str, '^%s*(.-)%s*$')
@@ -571,6 +585,8 @@ local function GetItemStringFromItemLink(slotNum, itemLink, debugOutput)
       simcItemOptions[#simcItemOptions + 1] = 'content_tuning=' .. pairValue
     elseif pairType == ITEM_MOD_TYPE_CRAFT_STATS_1 or pairType == ITEM_MOD_TYPE_CRAFT_STATS_2 then
       craftedStats[#craftedStats + 1] = pairValue
+    elseif pairType == ITEM_MOD_TYPE_REDIRECTED_BASE_STATS then
+      simcItemOptions[#simcItemOptions + 1] = 'redirected_base_stats=' .. pairValue
     end
   end
 
@@ -1320,6 +1336,12 @@ function Simulationcraft:GetSimcProfile(debugOutput, noBags, showMerchant, links
   local upgradeAchievementsStr = Simulationcraft:GetItemUpgradeAchievements()
   simulationcraftProfile = simulationcraftProfile .. '#\n'
   simulationcraftProfile = simulationcraftProfile .. '# upgrade_achievements=' .. upgradeAchievementsStr .. '\n'
+
+  local bonusRollStr = Simulationcraft:GetBonusRollItems()
+  if bonusRollStr and bonusRollStr ~= '' then
+    simulationcraftProfile = simulationcraftProfile .. '#\n'
+    simulationcraftProfile = simulationcraftProfile .. '# bonus_roll_items=' .. bonusRollStr .. '\n'
+  end
 
   -- sanity checks - if there's anything that makes the output completely invalid, punt!
   if specId==nil then
