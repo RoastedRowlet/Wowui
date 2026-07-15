@@ -234,7 +234,7 @@ local function getChunkLookup(table, length)
 end
 
 local lookup = {'DemonHunter-Devourer','Warlock-Demonology',}
-local provider = {region='US',realm="Drak'Tharon",name='US',type='subscribers',zone=46,date='2026-07-07',data={Cr='Crash:BAEALgAECgEJAgABLgAFFAcJEQABAN8XAA==.',Tr='Trater:BAEBLgAECn8bAAICAAYJshHkrADpAAZoDAAABgAsAGkMAAAFADcAawwAAAUAJwBqDAAABQAtAGwMAAAFACcA6gwAAAEALwACAAYJshHkrADpAAZoDAAABgAsAGkMAAAFADcAawwAAAUAJwBqDAAABQAtAGwMAAAFACcA6gwAAAEALwAAAA==.',},}
+local provider = {region='US',realm="Drak'Tharon",name='US',type='subscribers',zone=46,date='2026-07-15',data={Cr='Crash:BAEALgAECgEJAgABLgAFFAgJEgABADoXAA==.',Tr='Trater:BAEBLgAECn8bAAICAAYJshHkrADpAAZoDAAABgAsAGkMAAAFADcAawwAAAUAJwBqDAAABQAtAGwMAAAFACcA6gwAAAEALwACAAYJshHkrADpAAZoDAAABgAsAGkMAAAFADcAawwAAAUAJwBqDAAABQAtAGwMAAAFACcA6gwAAAEALwAAAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

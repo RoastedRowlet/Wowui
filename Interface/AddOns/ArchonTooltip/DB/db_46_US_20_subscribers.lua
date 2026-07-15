@@ -234,7 +234,7 @@ local function getChunkLookup(table, length)
 end
 
 local lookup = {'Druid-Restoration','DemonHunter-Devourer','Priest-Shadow',}
-local provider = {region='US',realm='Arthas',name='US',type='subscribers',zone=46,date='2026-07-07',data={Mo='Mooge:BAEALgAECgIJAgABLgAECgYJFAABAJwTAA==.Mooky:BAEBLgAECn8UAAIBAAYJnBNOXAAiAQZoDAAABAAmAGkMAAAEACwAawwAAAQANwBqDAAAAwBKAGwMAAACAB0A6gwAAAMAOQABAAYJnBNOXAAiAQZoDAAABAAmAGkMAAAEACwAawwAAAQANwBqDAAAAwBKAGwMAAACAB0A6gwAAAMAOQAAAA==.',Sp='Sproxs:BAEALgAECgcJEgAAAA==.',Th='Theirashes:BAEALgAFFAEJAQABLgAFFAgJGAACAJwYAA==.',Ve='Verbatim:BAEALgAECgMJAwAAAA==.',Vy='Vyr:BAEALgADCgYJBgABLgAFFAcJFQADAB0SAA==.',Yo='Yourpaleddy:BAEALgAECgIJAgABLgAFFAgJGAACAJwYAA==.',},}
+local provider = {region='US',realm='Arthas',name='US',type='subscribers',zone=46,date='2026-07-15',data={Mo='Mooge:BAEALgAECgIJAgABLgAECgYJFAABAJwTAA==.Mooky:BAEBLgAECn8UAAIBAAYJnBNOXAAiAQZoDAAABAAmAGkMAAAEACwAawwAAAQANwBqDAAAAwBKAGwMAAACAB0A6gwAAAMAOQABAAYJnBNOXAAiAQZoDAAABAAmAGkMAAAEACwAawwAAAQANwBqDAAAAwBKAGwMAAACAB0A6gwAAAMAOQAAAA==.',Sp='Sproxs:BAEALgAECgcJEgAAAA==.',Th='Theirashes:BAEALgAFFAEJAQABLgAFFAgJGwACAJwYAA==.',Ve='Verbatim:BAEALgAECgMJAwAAAA==.',Vy='Vyr:BAEALgADCgYJBgABLgAFFAcJFQADAB0SAA==.',Yo='Yourpaleddy:BAEALgAECgIJAgABLgAFFAgJGwACAJwYAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

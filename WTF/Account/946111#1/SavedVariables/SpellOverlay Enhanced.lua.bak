@@ -79,9 +79,9 @@ SpellOverlayEnhancedDB = {
 },
 },
 ["profileKeys"] = {
-["Klutzykubfu - Stormrage"] = "Default",
 ["Lonelylitten - Stormrage"] = "Default",
 ["Barelynoer - Area 52"] = "Default",
+["Klutzykubfu - Stormrage"] = "Default",
 },
 ["profiles"] = {
 ["Default"] = {

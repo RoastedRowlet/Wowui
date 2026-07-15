@@ -1,9 +1,9 @@
 
 SpellOverlayEnhancedDB = {
 ["profileKeys"] = {
-["Barelynoer - Area 52"] = "Default",
 ["Klutzykubfu - Stormrage"] = "Default",
 ["Lonelylitten - Stormrage"] = "Default",
+["Barelynoer - Area 52"] = "Default",
 },
 ["global"] = {
 ["snapshots"] = {
@@ -65,10 +65,6 @@ SpellOverlayEnhancedDB = {
 },
 ["right"] = {
 ["isAtlas"] = false,
-["texture"] = 4699056,
-["height"] = 204.8000183105469,
-["width"] = 102.3999557495117,
-["scale"] = 1,
 ["texCoords"] = {
 1,
 0,
@@ -79,6 +75,10 @@ SpellOverlayEnhancedDB = {
 0,
 1,
 },
+["height"] = 204.8000183105469,
+["scale"] = 1,
+["width"] = 102.3999557495117,
+["texture"] = 4699056,
 },
 },
 },
