@@ -9,7 +9,7 @@ Blizzard_WeeklyRewards: enabled
 Blizzard_EncounterJournal: enabled
 Blizzard_Transmog: enabled
 OPie_Classic: disabled
-ArcUI: enabled
+ArcUI: disabled
 Auctionator: enabled
 Bartender4: enabled
 BetterBags: enabled
@@ -72,7 +72,7 @@ BigWigs_Core: enabled
 BigWigs_Options: enabled
 BigWigs_Plugins: enabled
 LittleWigs: enabled
-EllesmereUICooldownManager: disabled
+EllesmereUICooldownManager: enabled
 BigWigs_TheVoidspire: enabled
 LittleWigs_WrathOfTheLichKing: enabled
 LittleWigs_WarlordsOfDraenor: enabled
@@ -90,7 +90,7 @@ EllesmereUI: enabled
 EllesmereUIActionBars: enabled
 EllesmereUIBasics: enabled
 EllesmereUINameplates: enabled
-EllesmereUIResourceBars: disabled
+EllesmereUIResourceBars: enabled
 EllesmereUIUnitFrames: enabled
 EXBossData: enabled
 EXBOSS-EXWIND: enabled
