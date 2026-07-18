@@ -56,9 +56,24 @@ local aidIndexCount = 0
 -- HELPERS
 -- ===================================================================
 
+-- INDEX presence: rejects secret. Feeds aidIndex / capturedAID, whose keys and the
+-- UNIT_AURA-removed backup only work with non-secret instance ids (a secret can't be a
+-- reliable table key, and the removed-id payload is itself secret in restricted content).
 local function HasAID(value)
     if value == nil then return false end
     if issecretvalue and issecretvalue(value) then return false end
+    return value ~= 0
+end
+
+-- ACTIVE-STATE presence: a SECRET auraInstanceID means the aura IS present (12.1 restricted
+-- content) -- we just can't read/compare its value. This MUST agree with
+-- ns.API.HasAuraInstanceID, which AuraFrames keys off. If they disagree, FrameActive fires
+-- "inactive" when the swipe ends while the aura's id is still secret-present, AuraFrames then
+-- re-asserts "active" (SetAlpha 1), and when the id finally clears there is no fa transition to
+-- re-run AuraFrames -> the icon sticks at alpha=1. See cdm-debuff-stuck-alpha-secret-env.
+local function AuraPresent(value)
+    if value == nil then return false end
+    if issecretvalue and issecretvalue(value) then return true end
     return value ~= 0
 end
 
@@ -241,7 +256,7 @@ local function OnAII_Cleared(frame)
         -- Re-check: are we still inactive after the window?
         local cd2 = frame.Cooldown
         local recheck = (cd2 and cd2:IsShown())
-                     or HasAID(frame.auraInstanceID)
+                     or AuraPresent(frame.auraInstanceID)
                      or frame.totemData ~= nil
         local final = recheck and true or false
 
@@ -265,7 +280,7 @@ end
 local function OnCD_Hide(frame)
     local entry = entries[frame]
     if not entry then return end
-    local active = HasAID(frame.auraInstanceID) or frame.totemData ~= nil
+    local active = AuraPresent(frame.auraInstanceID) or frame.totemData ~= nil
     ApplyActive(entry, frame, active and true or false)
 end
 
@@ -283,7 +298,7 @@ local function OnTotem_Deferred(frame)
         -- Full check: any of cooldown shown, aura bound, totem present
         local cd = frame.Cooldown
         local active = (cd and cd:IsShown())
-                    or HasAID(frame.auraInstanceID)
+                    or AuraPresent(frame.auraInstanceID)
                     or frame.totemData ~= nil
         ApplyActive(entry, frame, active and true or false)
     end)
@@ -301,15 +316,21 @@ local function OnUnitAuraRemoved(entry, frame)
     UpdateAID(entry, frame)
     local cd = frame.Cooldown
     local active = (cd and cd:IsShown())
-                or HasAID(frame.auraInstanceID)
+                or AuraPresent(frame.auraInstanceID)
                 or frame.totemData ~= nil
     ApplyActive(entry, frame, active and true or false)
 end
 
-OnUnitAuraEvent = function(_, _, _, info)
+OnUnitAuraEvent = function(_, _, unit, info)
+    -- 12.1: feed the shared aura-secrecy cache early (this handler is "player"-registered and
+    -- often fires around the CDM icon-assignment path, keeping ns.API.AurasSecret fresh there).
+    if ns.API and ns.API.NoteUnitAuraSecrecy then ns.API.NoteUnitAuraSecrecy(unit or "player", info) end
     if not info then return end
     local removed = info.removedAuraInstanceIDs
     if not removed then return end
+    -- 12.1: the UNIT_AURA payload is secret in restricted content, so #removed throws. The
+    -- AII-Cleared hooks are the primary path; this UNIT_AURA backup just bails when secret.
+    if issecretvalue and issecretvalue(removed) then return end
     for i = 1, #removed do
         local entry = aidIndex[removed[i]]
         if entry then
@@ -394,7 +415,7 @@ function FA.Register(frame)
 
     local cd = frame.Cooldown
     entry.isActive = (cd and cd:IsShown())
-                  or (entry.capturedAID ~= nil)
+                  or AuraPresent(frame.auraInstanceID)
                   or frame.totemData ~= nil
     if not entry.isActive then entry.isActive = false end
 end
@@ -462,7 +483,7 @@ function FA.RequestRecompute(frame)
     UpdateAID(entry, frame)
     local cd = frame.Cooldown
     local active = (cd and cd:IsShown())
-                or (entry.capturedAID ~= nil)
+                or AuraPresent(frame.auraInstanceID)
                 or frame.totemData ~= nil
     ApplyActive(entry, frame, active and true or false)
 end

@@ -46,7 +46,6 @@ end or isRetail and EJ_GetEncounterInfo or function(key)
 	return BigWigsAPI:GetLocale("BigWigs: Encounters")[key]
 end
 local SendChatMessage, GetInstanceInfo, SimpleTimer, SetRaidTarget = loader.SendChatMessage, loader.GetInstanceInfo, loader.CTimerAfter, loader.SetRaidTarget
-local IsEncounterInProgress = C_InstanceEncounter and C_InstanceEncounter.IsEncounterInProgress or IsEncounterInProgress -- XXX 12.0 compat
 local hasanysecretvalues = hasanysecretvalues or function() return false end -- XXX 12.0 compat
 local UnitGUID = loader.UnitGUID
 local RegisterAddonMessagePrefix = loader.RegisterAddonMessagePrefix
@@ -671,7 +670,7 @@ function boss:Enable(isWipe)
 
 		if type(self.OnBossEnable) == "function" then self:OnBossEnable() end
 
-		if IsEncounterInProgress() and not isWiping then -- Safety. ENCOUNTER_END might fire whilst IsEncounterInProgress is still true and engage a module.
+		if self:IsAnyEncounterInProgress() and not isWiping then -- Safety. ENCOUNTER_END might fire whilst IsEncounterInProgress is still true and engage a module.
 			self:CheckForEncounterEngage("NoEngage") -- Prevent engaging if enabling during a boss fight (after a DC)
 		end
 
@@ -1474,8 +1473,16 @@ end
 --
 
 do
+	local IsEncounterInProgress = loader.IsEncounterInProgress
+	--- Return the result of Blizzard's IsEncounterInProgress() function
+	function boss:IsAnyEncounterInProgress()
+		return IsEncounterInProgress()
+	end
+end
+
+do
 	local function wipeCheck(module)
-		if not IsEncounterInProgress() then
+		if not module:IsAnyEncounterInProgress() then
 			module:Debug(":StartWipeCheck IsEncounterInProgress() is nil, wiped", module:GetEncounterID())
 			local wipeTime = GetTime()
 			module:Wipe(wipeTime)
@@ -4629,7 +4636,7 @@ function boss:SimpleTimer(func, delay)
 end
 
 do
-	local Timer = BigWigsLoader.CTimerNewTimer
+	local Timer = loader.CTimerNewTimer
 	function boss:ScheduleTimer(func, delay, one, two, three, four, five, six, seven, eight)
 		if type(func) == "function" then
 			local timerId = Timer(delay, function() func(one, two, three, four, five, six, seven, eight) end)
@@ -4644,7 +4651,7 @@ do
 end
 
 do
-	local Ticker = BigWigsLoader.CTimerNewTicker
+	local Ticker = loader.CTimerNewTicker
 	function boss:ScheduleRepeatingTimer(func, delay, one, two, three, four, five, six, seven, eight)
 		if type(func) == "function" then
 			local timerId = Ticker(delay, function() func(one, two, three, four, five, six, seven, eight) end)

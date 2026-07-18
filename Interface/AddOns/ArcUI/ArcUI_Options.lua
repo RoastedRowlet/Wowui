@@ -10,6 +10,27 @@ ns.Options = ns.Options or {}
 local AceConfig = LibStub("AceConfig-3.0")
 local AceConfigDialog = LibStub("AceConfigDialog-3.0")
 local AceDB = LibStub("AceDB-3.0")
+local LSM = LibStub("LibSharedMedia-3.0", true)
+
+local function GetGlobalFontValues()
+  local fonts = { ["Friz Quadrata TT"] = "Friz Quadrata TT" }
+  if LSM then
+    for _, name in pairs(LSM:List("font")) do
+      fonts[name] = name
+    end
+  end
+  return fonts
+end
+
+local function GetGlobalStatusBarTextureValues()
+  local textures = { ["Blizzard"] = "Blizzard", ["Smooth"] = "Smooth" }
+  if LSM then
+    for _, name in pairs(LSM:List("statusbar")) do
+      textures[name] = name
+    end
+  end
+  return textures
+end
 
 -- Profile browser collapsed state (defaults closed)
 local profileBrowserCollapsed = true
@@ -589,6 +610,7 @@ local function GetOptionsTable()
             tbl.order = 3
             return tbl
           end)(),
+
         },
       },
 
@@ -766,16 +788,34 @@ local function GetOptionsTable()
         return tbl
       end)(),
 
-      castbar = (function()
-        local tbl = ns.CastbarOptions and ns.CastbarOptions.GetOptionsTable() or {
-          type = "group",
-          name = "Castbar",
-          args = { loading = { type = "description", name = "Loading...", order = 1 } }
-        }
-        tbl.name  = "Castbar"
-        tbl.order = 5
-        return tbl
-      end)(),
+      castbar = {
+        type        = "group",
+        name        = "Castbar",
+        order       = 5,
+        childGroups = "tab",
+        args        = {
+          playerCastbar = (function()
+            local tbl = ns.CastbarOptions and ns.CastbarOptions.GetOptionsTable() or {
+              type = "group",
+              name = "Player Castbar",
+              args = { loading = { type = "description", name = "Loading...", order = 1 } }
+            }
+            tbl.name  = "Player Castbar"
+            tbl.order = 1
+            return tbl
+          end)(),
+          focusCastbar = (function()
+            local tbl = ns.FocusCastbarOptions and ns.FocusCastbarOptions.GetOptionsTable() or {
+              type = "group",
+              name = "Focus Castbar",
+              args = { loading = { type = "description", name = "Loading...", order = 1 } }
+            }
+            tbl.name  = "Focus Castbar"
+            tbl.order = 2
+            return tbl
+          end)(),
+        },
+      },
 
       setMyKick = (function()
         local tbl = ns.GetSetMyKickOptionsTable and ns.GetSetMyKickOptionsTable() or {
@@ -824,6 +864,67 @@ local function GetOptionsTable()
             end,
           },
           
+          fontTextureHeader = {
+            type = "header",
+            name = "Global Font & Texture",
+            order = 3,
+          },
+          fontTextureDesc = {
+            type = "description",
+            name = "|cffaaaaaaPick a font and statusbar texture once, then push them onto everything: every aura, resource, cooldown, and timer bar, both castbars, and every CDM icon group's cooldown/stack text, custom labels, and keybind text -- no need to set it in each group individually. This updates everything in place; anything can still be customized afterward.|r",
+            order = 4,
+            fontSize = "medium",
+          },
+          globalFont = {
+            type = "select",
+            dialogControl = "LSM30_Font",
+            name = "Font",
+            order = 5,
+            width = 1.2,
+            values = GetGlobalFontValues,
+            get = function()
+              local g = ns.API.GetGlobalDB and ns.API.GetGlobalDB()
+              return g and g.globalFont or "Friz Quadrata TT"
+            end,
+            set = function(_, val)
+              local g = ns.API.GetGlobalDB and ns.API.GetGlobalDB()
+              if g then g.globalFont = val end
+            end,
+          },
+          globalBarTexture = {
+            type = "select",
+            dialogControl = "LSM30_Statusbar",
+            name = "Statusbar Texture",
+            order = 6,
+            width = 1.2,
+            values = GetGlobalStatusBarTextureValues,
+            get = function()
+              local g = ns.API.GetGlobalDB and ns.API.GetGlobalDB()
+              return g and g.globalBarTexture or "Blizzard"
+            end,
+            set = function(_, val)
+              local g = ns.API.GetGlobalDB and ns.API.GetGlobalDB()
+              if g then g.globalBarTexture = val end
+            end,
+          },
+          globalFontTextureApply = {
+            type = "execute",
+            name = "Apply to All Bars",
+            desc = "Push the font and texture above onto every existing aura, resource, cooldown, and timer bar, the player and focus castbars, and the font onto every CDM icon group's cooldown/stack text, custom labels, and keybind text.",
+            order = 7,
+            width = 1.5,
+            confirm = true,
+            confirmText = "This will overwrite the font and statusbar texture on every bar, castbar, and icon group you have configured. Continue?",
+            func = function()
+              local g = ns.API.GetGlobalDB and ns.API.GetGlobalDB()
+              local font = g and g.globalFont or "Friz Quadrata TT"
+              local texture = g and g.globalBarTexture or "Blizzard"
+              if ns.API.ApplyGlobalFontTexture then
+                ns.API.ApplyGlobalFontTexture(font, texture)
+              end
+            end,
+          },
+
           minimapHeader = {
             type = "header",
             name = "Minimap",
@@ -1259,33 +1360,19 @@ initFrame:SetScript("OnEvent", function(self, event)
   
   if event == "PLAYER_LOGIN" then
     -- ═══════════════════════════════════════════════════════════════════
-    -- ACEDB INITIALIZATION WITH ERROR HANDLING
+    -- ACEDB INITIALIZATION
+    -- pcall is banned in ArcUI, so instead of catching an AceDB failure we
+    -- pre-sanitize the raw SavedVariable: a corrupted, non-table ArcUIDB is the
+    -- one thing that makes AceDB:New throw. Reset it to nil and let AceDB rebuild
+    -- from defaults. Valid saved data is left untouched.
     -- ═══════════════════════════════════════════════════════════════════
-    local dbSuccess, dbError = pcall(function()
-      ns.db = AceDB:New("ArcUIDB", ns.DB_DEFAULTS, true)
-    end)
-    
-    if not dbSuccess then
-      -- Database failed to load - likely corrupted
-      print("|cff00ccffArc UI|r |cffff0000ERROR:|r Database failed to load!")
-      print("|cff00ccffArc UI|r Error: " .. tostring(dbError))
-      print("|cff00ccffArc UI|r Type |cffff0000/arcui reset-db|r to reset settings and fix this.")
-      
-      -- Create a minimal database so the addon doesn't completely break
-      ns.db = {
-        char = {},
-        profile = {},
-        global = ns.DB_DEFAULTS.global,
-      }
-      
-      -- Still register options so the UI can open (even if limited)
-      C_Timer.After(0.1, function()
-        RegisterOptions()
-        print("|cff00ccffArc UI|r v" .. ns.AddonInfo.Version .. " loaded with LIMITED functionality.")
-      end)
-      return
+    if ArcUIDB ~= nil and type(ArcUIDB) ~= "table" then
+      print("|cff00ccffArc UI|r |cffff0000WARNING:|r Saved settings were corrupted and have been reset to defaults.")
+      print("|cff00ccffArc UI|r Type |cffff0000/arcui reset-db|r if problems persist.")
+      ArcUIDB = nil
     end
-    
+    ns.db = AceDB:New("ArcUIDB", ns.DB_DEFAULTS, true)
+
     -- ═══════════════════════════════════════════════════════════════════
     -- CLEANUP: Remove empty/unconfigured bar configs to reduce memory
     -- Replaces old sparse array hole-filling which was adding bloat
@@ -1314,6 +1401,9 @@ initFrame:SetScript("OnEvent", function(self, event)
       end
       if ns.Castbar and ns.Castbar.Init then
         ns.Castbar.Init()
+      end
+      if ns.FocusCastbar and ns.FocusCastbar.Init then
+        ns.FocusCastbar.Init()
       end
       if ns.SetMyKick and ns.SetMyKick.Init then
         ns.SetMyKick.Init()

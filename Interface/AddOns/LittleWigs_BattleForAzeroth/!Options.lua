@@ -588,7 +588,7 @@ BigWigs:AddColors("The Golden Serpent", {
 	[265773] = {"blue","orange"},
 	[265781] = "red",
 	[265910] = "purple",
-	[265923] = "yellow",
+	[265923] = "cyan",
 })
 
 BigWigs:AddSounds("The Golden Serpent", {
@@ -599,50 +599,64 @@ BigWigs:AddSounds("The Golden Serpent", {
 })
 
 BigWigs:AddColors("Mchimba the Embalmer", {
-	[267618] = {"blue","orange"},
-	[267639] = "red",
+	[267618] = {"blue","red"},
+	[267639] = "orange",
 	[267702] = {"blue","green","yellow"},
 })
 
 BigWigs:AddSounds("Mchimba the Embalmer", {
-	[267618] = "alarm",
-	[267639] = "warning",
+	[267618] = "alert",
+	[267639] = "alarm",
 	[267702] = {"info","long"},
 })
 
 BigWigs:AddColors("The Council of Tribes", {
-	[266206] = "yellow",
-	[266231] = {"blue","orange"},
+	[266206] = "orange",
+	[266231] = {"blue","yellow"},
 	[266237] = "purple",
 	[266951] = {"blue","red"},
 	[267060] = "yellow",
-	[267273] = "orange",
+	[267273] = "red",
+	[267494] = "red",
+	[1305810] = "orange",
 	["stages"] = "cyan",
 })
 
 BigWigs:AddSounds("The Council of Tribes", {
-	[266206] = "alert",
-	[266231] = "alarm",
-	[266237] = "alarm",
-	[266951] = "warning",
+	[266206] = "alarm",
+	[266231] = "alert",
+	[266237] = "alert",
+	[266951] = "info",
 	[267060] = "long",
-	[267273] = "alarm",
+	[267273] = "alert",
+	[267494] = "info",
+	[1305810] = "alarm",
 	["stages"] = "long",
 })
 
 BigWigs:AddColors("Dazar, The First King", {
 	[268586] = "purple",
 	[268932] = {"blue","orange"},
+	[269230] = "orange",
 	[269231] = "blue",
 	[269369] = "red",
+	[1303115] = "yellow",
+	[1303267] = "red",
+	[1303326] = {"blue","orange"},
+	[1303481] = "purple",
 	["stages"] = {"cyan","yellow"},
 })
 
 BigWigs:AddSounds("Dazar, The First King", {
-	[268586] = "alarm",
+	[268586] = "alert",
 	[268932] = "long",
+	[269230] = "alarm",
 	[269231] = "alert",
 	[269369] = "warning",
+	[1303115] = "info",
+	[1303267] = "warning",
+	[1303326] = "long",
+	[1303481] = "alarm",
 	["stages"] = "info",
 })
 
@@ -1214,6 +1228,10 @@ BigWigs:AddColors("Adderis and Aspix", {
 	[263309] = "yellow",
 	[263371] = {"blue","orange"},
 	[263424] = "orange",
+	[1288049] = "orange",
+	[1288428] = "purple",
+	[1288864] = {"blue","yellow"},
+	[1289059] = {"blue","red"},
 })
 
 BigWigs:AddSounds("Adderis and Aspix", {
@@ -1222,6 +1240,10 @@ BigWigs:AddSounds("Adderis and Aspix", {
 	[263309] = "alert",
 	[263371] = "warning",
 	[263424] = "alert",
+	[1288049] = "info",
+	[1288428] = "alert",
+	[1288864] = "warning",
+	[1289059] = "alarm",
 })
 
 BigWigs:AddColors("Merektha", {
@@ -1229,7 +1251,12 @@ BigWigs:AddColors("Merektha", {
 	[263914] = "red",
 	[263927] = "blue",
 	[263958] = {"blue","red"},
+	[264172] = {"cyan","green"},
 	[264206] = {"cyan","green"},
+	[1289109] = "yellow",
+	[1289205] = "yellow",
+	[1290797] = "purple",
+	[1293048] = "orange",
 })
 
 BigWigs:AddSounds("Merektha", {
@@ -1237,17 +1264,27 @@ BigWigs:AddSounds("Merektha", {
 	[263914] = "warning",
 	[263927] = "alarm",
 	[263958] = "warning",
+	[264172] = {"info","long"},
 	[264206] = {"info","long"},
+	[1289109] = "alert",
+	[1289205] = "info",
+	[1290029] = "warning",
+	[1290797] = "alert",
+	[1293048] = "alarm",
 })
 
 BigWigs:AddColors("Galvazzt", {
 	[266512] = {"orange","red"},
 	[266923] = {"blue","orange"},
+	[1291618] = "yellow",
+	[1309525] = "orange",
 })
 
 BigWigs:AddSounds("Galvazzt", {
 	[266512] = {"alarm","warning"},
 	[266923] = {"alert","info"},
+	[1291618] = "info",
+	[1309525] = "alarm",
 })
 
 BigWigs:AddColors("Avatar of Sethraliss", {
@@ -1257,6 +1294,8 @@ BigWigs:AddColors("Avatar of Sethraliss", {
 	[269686] = {"blue","orange"},
 	[269688] = "orange",
 	[274149] = {"blue","green"},
+	[1273408] = "cyan",
+	[1301202] = "yellow",
 	["adds"] = "orange",
 	["stages"] = "cyan",
 })
@@ -1268,6 +1307,8 @@ BigWigs:AddSounds("Avatar of Sethraliss", {
 	[269686] = "alarm",
 	[269688] = "info",
 	[274149] = "info",
+	[1273408] = "long",
+	[1301202] = "info",
 	["adds"] = "warning",
 	["stages"] = {"info","long"},
 })

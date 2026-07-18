@@ -1282,12 +1282,55 @@ local function ProcessTransfer(srcBag, srcSlot)
     end
     local bank = _G.EUI_BankFrame
     if not bank or not bank:IsVisible() then return true end -- bank closed, discard
-    local targetBag = bank:GetSelectedTabBagID()
-    if not targetBag then return true end -- no tab selected, discard
     local info = C_Container.GetContainerItemInfo(srcBag, srcSlot)
     if not info or not info.itemID then return true end
-    local targetSlot = FindTargetSlot(targetBag, info.itemID)
-    if not targetSlot then return true end -- no space, discard
+
+    local targetBag, targetSlot
+    -- Aggregate warband views: search ALL warband tabs for stacking, then empty
+    if _selectedView == -2 or _selectedView == -3 then
+        local maxStack = C_Item.GetItemMaxStackSizeByID(info.itemID) or 1
+        -- Pass 1: partial stack in any warband tab
+        if maxStack > 1 then
+            for _, tab in ipairs(_allTabs) do
+                if tab.isWarband then
+                    local numSlots = C_Container.GetContainerNumSlots(tab.bagID)
+                    for slot = 1, numSlots do
+                        if not IsSlotAllocated(tab.bagID, slot) then
+                            local si = C_Container.GetContainerItemInfo(tab.bagID, slot)
+                            if si and si.itemID == info.itemID and si.stackCount < maxStack then
+                                targetBag, targetSlot = tab.bagID, slot
+                                break
+                            end
+                        end
+                    end
+                    if targetSlot then break end
+                end
+            end
+        end
+        -- Pass 2: first empty slot in any warband tab
+        if not targetSlot then
+            for _, tab in ipairs(_allTabs) do
+                if tab.isWarband then
+                    local numSlots = C_Container.GetContainerNumSlots(tab.bagID)
+                    for slot = 1, numSlots do
+                        if not IsSlotAllocated(tab.bagID, slot) then
+                            if not C_Container.GetContainerItemInfo(tab.bagID, slot) then
+                                targetBag, targetSlot = tab.bagID, slot
+                                break
+                            end
+                        end
+                    end
+                    if targetSlot then break end
+                end
+            end
+        end
+    else
+        targetBag = bank:GetSelectedTabBagID()
+        if not targetBag then return true end
+        targetSlot = FindTargetSlot(targetBag, info.itemID)
+    end
+
+    if not targetBag or not targetSlot then return true end -- no space, discard
     AllocateSlot(targetBag, targetSlot)
     C_Container.PickupContainerItem(srcBag, srcSlot)
     C_Container.PickupContainerItem(targetBag, targetSlot)
@@ -1359,7 +1402,7 @@ local function GetOrCreateBankSlot(idx)
     if btn.newitemglowAnim then btn.newitemglowAnim:Stop() end
 
     btn:SetSize(SLOT_SIZE, SLOT_SIZE)
-    if btn.icon then btn.icon:SetTexCoord(0.08, 0.92, 0.08, 0.92) end
+    if btn.icon then local z = BP().bagItemIconZoom or 0.08; btn.icon:SetTexCoord(z, 1 - z, z, 1 - z) end
 
     -- Remove highlight/pushed textures shape
     local ht = btn.HighlightTexture or btn:GetHighlightTexture()
@@ -1481,6 +1524,15 @@ local function RefreshBankTextSizes()
     end
 end
 EUI_Bank.RefreshTextSizes = RefreshBankTextSizes
+
+-- Fast icon-zoom update for bank slots (mirrors bags RefreshIconZoom)
+local function RefreshBankIconZoom()
+    local z = BP().bagItemIconZoom or 0.08
+    for _, btn in pairs(_bankSlots) do
+        if btn.icon then btn.icon:SetTexCoord(z, 1 - z, z, 1 - z) end
+    end
+end
+EUI_Bank.RefreshIconZoom = RefreshBankIconZoom
 
 local function CountUsedSlots(bagID, numSlots)
     local used = 0

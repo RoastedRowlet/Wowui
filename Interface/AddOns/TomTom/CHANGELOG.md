@@ -1,7 +1,7 @@
 # TomTom
 
-## [v4.3.5-release](https://github.com/jnwhiteh/TomTom/tree/v4.3.5-release) (2026-06-19)
-[Full Changelog](https://github.com/jnwhiteh/TomTom/commits/v4.3.5-release) [Previous Releases](https://github.com/jnwhiteh/TomTom/releases)
+## [v4.3.6-release](https://github.com/jnwhiteh/TomTom/tree/v4.3.6-release) (2026-06-19)
+[Full Changelog](https://github.com/jnwhiteh/TomTom/commits/v4.3.6-release) [Previous Releases](https://github.com/jnwhiteh/TomTom/releases)
 
 - Update TomTom for 12.0.7  
 - Add new localization strings for TomTom (#16)  

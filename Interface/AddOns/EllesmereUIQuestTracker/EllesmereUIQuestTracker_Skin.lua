@@ -54,6 +54,18 @@ local SUB_TRACKERS = {
     "InitiativeTasksObjectiveTracker",
 }
 
+-- ScenarioObjectiveTracker and UIWidgetObjectiveTracker render their content
+-- through Blizzard's shared UI-widget pool -- the same pool GameTooltip and
+-- AreaPOI tooltips draw from. ANY method call on their child blocks taints
+-- that pool, and the taint surfaces later as "attempt to compare a secret
+-- number value" in LayoutFrame.lua when a tooltip lays out a widget set
+-- (e.g. hovering an AreaPOI on the world map). We only ever skin their
+-- headers; block-level loops must skip them entirely.
+local function SharesWidgetPool(tracker)
+    return tracker == _G.ScenarioObjectiveTracker
+        or tracker == _G.UIWidgetObjectiveTracker
+end
+
 -- Shared font sizes -- read from DB so the options panel can tweak them.
 -- Defaults are seeded in the loader's QT_DEFAULTS table.
 local function GetTitleSize() return EQT.Cfg("titleFontSize")     or 13 end
@@ -162,6 +174,74 @@ function EQT.RefreshFonts()
             ApplyShadow(fs)
         end
     end
+end
+
+-- Forces Blizzard to fully recompute block heights/positions after we
+-- resize existing FontStrings (RestyleAll) or Blizzard only partially
+-- relayouts around a focus change -- both leave stale cached block heights
+-- that overlap the next block until a full ObjectiveTrackerFrame:Update()
+-- runs (normally only happens on /reload).
+--
+-- Deferred via C_Timer.After(0) so this never runs inline inside whatever
+-- callback triggered it: the documented SplashFrame taint (see
+-- EllesmereUIQuestTracker_QoL.lua) came from calling Update() SYNCHRONOUSLY
+-- inside a Blizzard secure call chain (OnHide during a quest turn-in flow).
+-- A fresh timer tick, fired from a plain insecure options-panel action or
+-- event handler, has no such ancestor. Also combat-gated because Update()
+-- rebuilds the tracker's secure quest-item action buttons; if combat is
+-- active when the tick fires, retry once on PLAYER_REGEN_ENABLED instead of
+-- silently dropping the request.
+--
+-- TAINT-LOG VERIFIED 2026-07-10 (taintLog 1, empty log): the exact deferred +
+-- combat-gated shape here -- relayout trigger, immediately enter combat, use
+-- a quest-item button -- leaves no blocking taint on the current client. That
+-- verification covers ONLY this shape: the retry listener is one-shot (it
+-- unregisters on fire and re-arms per deferral) so Update() never runs more
+-- often than requested, and the SYNCHRONOUS case in the QoL SplashFrame fix
+-- remains forbidden. Do not widen this pattern without re-verifying.
+local _relayoutPending = false
+local _relayoutRetryFrame = nil
+local function DoTrackerRelayout()
+    if InCombatLockdown() then
+        if not _relayoutRetryFrame then
+            _relayoutRetryFrame = CreateFrame("Frame")
+            if not EQT._eventFrames then EQT._eventFrames = {} end
+            if not EQT._eventRegistrations then EQT._eventRegistrations = {} end
+            local idx = #EQT._eventFrames + 1
+            EQT._eventFrames[idx] = _relayoutRetryFrame
+            EQT._eventRegistrations[idx] = {"PLAYER_REGEN_ENABLED"}
+            _relayoutRetryFrame:SetScript("OnEvent", function(self)
+                -- One-shot: without this, every combat end for the rest of the
+                -- session would run a full tracker Update nobody asked for.
+                self:UnregisterEvent("PLAYER_REGEN_ENABLED")
+                if EQT.ForceTrackerRelayout then EQT.ForceTrackerRelayout() end
+            end)
+        end
+        _relayoutRetryFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
+        return
+    end
+    local otf = _G.ObjectiveTrackerFrame
+    if otf and otf.Update then
+        -- 12.1: Blizzard's scenario layout probes player auras during Update
+        -- (ShouldShowMawBuffs -> GetAuraDataByIndex), and aura APIs hard-error
+        -- when auras are secret and the caller is tainted -- which our forced
+        -- Update() is. Probe the same access first and skip the relayout while
+        -- secret; the tracker relayouts naturally on Blizzard's next update.
+        if EllesmereUI and EllesmereUI.IS_121
+           and C_UnitAuras and C_UnitAuras.GetAuraDataByIndex then
+            local ok = pcall(C_UnitAuras.GetAuraDataByIndex, "player", 1, "HELPFUL")
+            if not ok then return end
+        end
+        otf:Update()
+    end
+end
+function EQT.ForceTrackerRelayout()
+    if _relayoutPending then return end
+    _relayoutPending = true
+    C_Timer.After(0, function()
+        _relayoutPending = false
+        DoTrackerRelayout()
+    end)
 end
 
 -- Physical-pixel-perfect 1px accent divider under each section header.
@@ -674,26 +754,15 @@ local function HookBlockLineMethods(block)
         block.HeaderButton:HookScript("OnLeave", reassertTitle)
     end
 
-    -- Left-click on a quest block also super-tracks it (in addition to
-    -- Blizzard's default click behavior). HookScript preserves the
-    -- default handler and just adds our side-effect.
-    local function superTrackOnClick(self, button)
-        if button ~= "LeftButton" then return end
-        local qID = self.id
-        if type(qID) ~= "number" then return end
-        if C_SuperTrack and C_SuperTrack.SetSuperTrackedQuestID then
-            C_SuperTrack.SetSuperTrackedQuestID(qID)
-        end
-    end
-    -- Only hook the HeaderButton (title-text area), NOT the whole block.
-    -- Hooking block:OnMouseUp eats clicks meant for the quest item button
-    -- and LFG eyeball that sit inside the block's hit region, breaking
-    -- the user's ability to actually use quest items.
-    if block.HeaderButton and block.HeaderButton.HookScript then
-        block.HeaderButton:HookScript("OnClick", function(self, button)
-            superTrackOnClick(block, button)
-        end)
-    end
+    -- REMOVED: an OnClick post-hook here used to call
+    -- C_SuperTrack.SetSuperTrackedQuestID(block.id) so a left-click also
+    -- super-tracked the quest. Setting the super-track from addon (tainted)
+    -- execution taints Blizzard's world-map super-track / AreaPOI refresh,
+    -- surfacing later as a blocked Frame:SetPropagateMouseClicks() when the map
+    -- builds POI pins (ADDON_ACTION_BLOCKED via QuestMapFrame_ShowQuestDetails).
+    -- Blizzard's native block click already super-tracks the quest securely, so
+    -- the hook was redundant; the focus highlight still follows the super-track
+    -- via the SUPER_TRACKING_CHANGED handler.
 
     -- AddObjective / SetStringText hooks REMOVED (session 68 perf audit).
     -- SkinBlock already styles all fontstrings via GetRegions() walk +
@@ -867,6 +936,10 @@ local function SkinExistingBlocks(tracker)
     -- so collapsed/re-expanded states always keep a visible divider.
     if tracker.Header then EnsureAccentDivider(tracker.Header) end
 
+    -- Never touch shared-widget-pool trackers' blocks (see SharesWidgetPool).
+    -- The header/divider above is safe; the block loop below is not.
+    if SharesWidgetPool(tracker) then return end
+
     -- Collect blocks into an ordered list sorted top-to-bottom by Y. We use
     -- this to apply sequential per-section numbering (1, 2, 3...) that
     -- matches the visual order.
@@ -919,8 +992,7 @@ local function HookTracker(tracker)
     -- call on those frames taints the pool, causing secret-value arithmetic
     -- errors when GameTooltip processes widget sets later (LayoutFrame.lua
     -- "attempt to compare a secret number value" via GameTooltip_ClearWidgetSet).
-    if tracker == _G.ScenarioObjectiveTracker
-       or tracker == _G.UIWidgetObjectiveTracker then
+    if SharesWidgetPool(tracker) then
         if tracker.Header then SkinHeader(tracker.Header) end
         if tracker.Update then
             hooksecurefunc(tracker, "Update", function(self)
@@ -1026,6 +1098,9 @@ end
 -- that Blizzard assigns when the player clicks a quest on the map.
 EQT._SuppressAllPOIs = function()
     EachTracker(function(tracker)
+        -- Shared-widget-pool trackers have no quest POI buttons and touching
+        -- their blocks taints the tooltip widget pool (see SharesWidgetPool).
+        if SharesWidgetPool(tracker) then return end
         if not tracker.usedBlocks then return end
         for _, byTemplate in pairs(tracker.usedBlocks) do
             if type(byTemplate) == "table" then
@@ -1078,8 +1153,15 @@ function EQT.InitSkin()
     -- Quest events just need a BG resize. Block skinning is handled by
     -- AddBlock/AddObjective/GetProgressBar/GetTimerBar hooks, so we no
     -- longer need to walk the entire tracker tree on every event.
-    evt:SetScript("OnEvent", function()
+    evt:SetScript("OnEvent", function(_, event)
         if EQT.QueueResize then EQT.QueueResize() end
+        -- Focusing a quest can expand its objective text without Blizzard
+        -- relayouting sibling blocks underneath it; force a full relayout
+        -- for this event specifically (not the frequent quest-log events,
+        -- which already go through Blizzard's own native Update()).
+        if event == "SUPER_TRACKING_CHANGED" and EQT.ForceTrackerRelayout then
+            EQT.ForceTrackerRelayout()
+        end
     end)
     if not EQT._eventFrames then EQT._eventFrames = {} end
     if not EQT._eventRegistrations then EQT._eventRegistrations = {} end
@@ -1107,6 +1189,10 @@ function EQT.InitSkin()
             if t.Header then SkinHeader(t.Header) end
             SkinExistingBlocks(t)
         end)
+        -- Font/color size changes just resized existing FontStrings in
+        -- place; Blizzard's cached block heights are now stale until a
+        -- full relayout runs (see EQT.ForceTrackerRelayout above).
+        if EQT.ForceTrackerRelayout then EQT.ForceTrackerRelayout() end
     end
 
     -- Live-update headers, blocks and progress bar fills when the user

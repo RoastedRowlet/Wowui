@@ -24,6 +24,9 @@ VER 3 0100000000000005 "Eruption -> Blac" "5199630"
 /cast [nostance:1] Black Attunement
 /cast Eruption
 END
+VER 3 0100000000000010 "focus eruption" "134400"
+/cast [@focus,exists,nodead,harm] Eruption
+END
 VER 3 0100000000000004 "Focus Kick" "134400"
 /cast [@focus,exists,nodead,harm] Quell
 /stopmacro [@focus,exists,nodead,harm]

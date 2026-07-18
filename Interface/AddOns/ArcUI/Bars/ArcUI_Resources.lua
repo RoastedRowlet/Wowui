@@ -630,7 +630,9 @@ function ns.Resources.GetSecondaryResourceValue(secondaryType)
     -- NON-SECRET: aura 203981 applications = fragment count for color evaluation
     local current = C_Spell and C_Spell.GetSpellCastCount and C_Spell.GetSpellCastCount(228477) or 0
     local auraData = C_UnitAuras and C_UnitAuras.GetPlayerAuraBySpellID and C_UnitAuras.GetPlayerAuraBySpellID(203981)
-    local displayCount = auraData and auraData.applications or 0  -- non-secret, safe to compare
+    -- 12.1: GetPlayerAuraBySpellID returns a SECRET AuraData for non-whitelisted spells; reading
+    -- .applications and the `or 0` truthiness are unsafe on a secret. Guard -> 0 when secret. Inert on live.
+    local displayCount = (auraData and not (issecretvalue and issecretvalue(auraData)) and auraData.applications) or 0
     local max = 6
     return max, current, displayCount, "number"
   end
@@ -642,7 +644,7 @@ function ns.Resources.GetSecondaryResourceValue(secondaryType)
   -- ═══════════════════════════════════════════════════════════════
   if secondaryType == "soulFragmentsDevourer" then
     local auraData = C_UnitAuras and (C_UnitAuras.GetPlayerAuraBySpellID(1225789) or C_UnitAuras.GetPlayerAuraBySpellID(1227702))
-    local current = auraData and auraData.applications or 0
+    local current = (auraData and not (issecretvalue and issecretvalue(auraData)) and auraData.applications) or 0
     local hasSoulGlutton = C_SpellBook and C_SpellBook.IsSpellKnown and C_SpellBook.IsSpellKnown(1247534)
     local max = hasSoulGlutton and 35 or 50
     return max, current, current, "number"
@@ -654,7 +656,7 @@ function ns.Resources.GetSecondaryResourceValue(secondaryType)
   -- ═══════════════════════════════════════════════════════════════
   if secondaryType == "maelstromWeapon" then
     local auraData = C_UnitAuras and C_UnitAuras.GetPlayerAuraBySpellID(344179)
-    local current = auraData and auraData.applications or 0
+    local current = (auraData and not (issecretvalue and issecretvalue(auraData)) and auraData.applications) or 0
     local max = 10
     return max, current, current, "number"
   end
@@ -4760,7 +4762,9 @@ local function UpdateThresholdLayers(barNumber, secretValue, passedMaxValue, dis
       fs:SetPoint(anchor, mainFrame, anchor, ox, oy)
       cd:Show()
       local auraData = C_UnitAuras and C_UnitAuras.GetPlayerAuraBySpellID(344179)
-      if auraData and auraData.expirationTime and auraData.expirationTime > 0 then
+      -- 12.1: AuraData is secret in restricted content -> expirationTime compare/arithmetic would
+      -- throw. Guard (this is the options-preview branch). Inert on live.
+      if auraData and not (issecretvalue and issecretvalue(auraData)) and auraData.expirationTime and auraData.expirationTime > 0 then
         -- Real aura: let Cooldown frame handle it, hide preview text
         pfs:Hide()
         CooldownFrame_Set(cd, auraData.expirationTime - (auraData.duration or 0), auraData.duration or 0, 1, false, auraData.timeMod or 1)

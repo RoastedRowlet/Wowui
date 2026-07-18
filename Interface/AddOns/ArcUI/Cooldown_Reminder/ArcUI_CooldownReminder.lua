@@ -761,57 +761,18 @@ function Engine:_EvaluateRecord(rec, source)
 
     if nowAvailable and wasUnavailable and not rec._readyPulseFired then
         rec._readyPulseFired = true
-        local kind   = rec.isChargeRecord and KIND_CHARGE or KIND_COOLDOWN
-        local reason = rec.isChargeRecord and "charge"    or "cooldown"
-
-        -- Multi-trigger system: if the user has defined per-spell triggers,
-        -- fire any "when_ready" entries instead of the default pulse. Each
-        -- entry has its own sound/TTS/icon settings. If NO trigger array
-        -- exists, fall through to the legacy _EmitPulse path so existing
-        -- user configs (per-spell sounds, delay modes, etc.) continue to
-        -- work unchanged. If a trigger array exists but has no when_ready
-        -- entries, the user has explicitly chosen NOT to fire on ready —
-        -- we suppress the legacy pulse in that case.
-        local triggers = self:_GetTriggerArray(rec)
-        if triggers then
-            local fired = false
-            for i = 1, #triggers do
-                local t = triggers[i]
-                if t.type == "when_ready" then
-                    self:_FireTrigger(rec, t, nil)
-                    fired = true
-                elseif t.type == "after_ready" then
-                    -- Schedule a delayed pulse N seconds AFTER the ready
-                    -- transition. Reuses the trigger token so a re-cast
-                    -- (which bumps the token in _CancelTriggerTimers via
-                    -- _StartWatching) cancels any pending after_ready
-                    -- pulses from the previous cycle.
-                    -- Default 3 when seconds was never written (same nil-
-                    -- seconds trap as into_cooldown; matches the UI slider).
-                    local secs = tonumber(t.seconds) or 3
-                    if secs > 0 then
-                        local capturedT = t
-                        local token = rec._triggerToken or 0
-                        C_Timer.After(secs, function()
-                            if not Engine or not Engine.records then return end
-                            if (rec._triggerToken or 0) ~= token then return end
-                            Engine:_FireTrigger(rec, capturedT,
-                                tostring(secs) .. "s_after_ready")
-                        end)
-                    end
-                end
-            end
-            -- Even if no when_ready trigger fired, we DON'T fall through to
-            -- _EmitPulse. The user's trigger array represents their full
-            -- intent — silence on ready is a valid choice when they only
-            -- defined on_use / before_ready / into_cooldown triggers.
-            if not fired then
-                Log:Write("DEBUG", rec.spellID, "READY (multi-trigger, no when_ready entries)")
-            end
+        if rec.isItem then
+            -- ITEM READY VERIFICATION: items with a windup/effect phase
+            -- (Algari Puzzle Box) report a SHORT cooldown covering the
+            -- effect window; when that expires there is a brief gap before
+            -- the server starts reporting the real multi-minute item CD.
+            -- Firing synchronously here reads zero during that gap and the
+            -- user hears "ready" the moment the buff ends. Defer the pulse
+            -- briefly and re-check the INV path — if a real cooldown shows
+            -- up within the window, the READY was false and is suppressed.
+            self:_ScheduleVerifiedItemReady(rec, lastState, state, source)
         else
-            Log:Write("INFO", rec.spellID, string.format(
-                "PULSE %s -> %s via %s", tostring(lastState), state, tostring(source)))
-            self:_EmitPulse(rec.spellID, kind, reason, rec.isItem)
+            self:_FireReadyPulses(rec, lastState, state, source)
         end
     end
 
@@ -819,6 +780,103 @@ function Engine:_EvaluateRecord(rec, source)
     if state == "READY" then
         self:_StopWatching(rec, "ready")
     end
+end
+
+-- Fire the ready-transition pulse(s) for a record. Split out of
+-- _EvaluateRecord so the item path can defer it through the false-ready
+-- verification window while spells keep firing synchronously.
+function Engine:_FireReadyPulses(rec, lastState, state, source)
+    local kind   = rec.isChargeRecord and KIND_CHARGE or KIND_COOLDOWN
+    local reason = rec.isChargeRecord and "charge"    or "cooldown"
+
+    -- Multi-trigger system: if the user has defined per-spell triggers,
+    -- fire any "when_ready" entries instead of the default pulse. Each
+    -- entry has its own sound/TTS/icon settings. If NO trigger array
+    -- exists, fall through to the legacy _EmitPulse path so existing
+    -- user configs (per-spell sounds, delay modes, etc.) continue to
+    -- work unchanged. If a trigger array exists but has no when_ready
+    -- entries, the user has explicitly chosen NOT to fire on ready —
+    -- we suppress the legacy pulse in that case.
+    local triggers = self:_GetTriggerArray(rec)
+    if triggers then
+        local fired = false
+        for i = 1, #triggers do
+            local t = triggers[i]
+            if t.type == "when_ready" then
+                self:_FireTrigger(rec, t, nil)
+                fired = true
+            elseif t.type == "after_ready" then
+                -- Schedule a delayed pulse N seconds AFTER the ready
+                -- transition. Reuses the trigger token so a re-cast
+                -- (which bumps the token in _CancelTriggerTimers via
+                -- _StartWatching) cancels any pending after_ready
+                -- pulses from the previous cycle.
+                -- Default 3 when seconds was never written (same nil-
+                -- seconds trap as into_cooldown; matches the UI slider).
+                local secs = tonumber(t.seconds) or 3
+                if secs > 0 then
+                    local capturedT = t
+                    local token = rec._triggerToken or 0
+                    C_Timer.After(secs, function()
+                        if not Engine or not Engine.records then return end
+                        if (rec._triggerToken or 0) ~= token then return end
+                        Engine:_FireTrigger(rec, capturedT,
+                            tostring(secs) .. "s_after_ready")
+                    end)
+                end
+            end
+        end
+        -- Even if no when_ready trigger fired, we DON'T fall through to
+        -- _EmitPulse. The user's trigger array represents their full
+        -- intent — silence on ready is a valid choice when they only
+        -- defined on_use / before_ready / into_cooldown triggers.
+        if not fired then
+            Log:Write("DEBUG", rec.spellID, "READY (multi-trigger, no when_ready entries)")
+        end
+    else
+        Log:Write("INFO", rec.spellID, string.format(
+            "PULSE %s -> %s via %s", tostring(lastState), state, tostring(source)))
+        self:_EmitPulse(rec.spellID, kind, reason, rec.isItem)
+    end
+end
+
+-- Deferred, re-verified ready pulse for ITEM records. The INV cooldown
+-- APIs can briefly read zero between an item's windup/effect-window
+-- "cooldown" expiring and the real item cooldown registering (Algari
+-- Puzzle Box: the effect window expires at buff end, the multi-minute CD
+-- shows up a moment later). Waiting a short beat and re-feeding before
+-- firing kills that false ready without touching legitimate ones — a
+-- genuinely ready item still reads zero after the delay. Cost: item
+-- ready alerts arrive ITEM_READY_VERIFY_DELAY late, which is invisible
+-- for a "your trinket is back up" reminder.
+local ITEM_READY_VERIFY_DELAY = 0.5
+
+function Engine:_ScheduleVerifiedItemReady(rec, lastState, state, source)
+    -- Monotonic token: only the most recent scheduled verification may
+    -- fire. A newer ready transition (or anything else that reschedules)
+    -- invalidates older pending callbacks.
+    rec._itemReadyToken = (rec._itemReadyToken or 0) + 1
+    local token = rec._itemReadyToken
+    C_Timer.After(ITEM_READY_VERIFY_DELAY, function()
+        if not Engine or not Engine.records then return end
+        if rec._itemReadyToken ~= token then return end
+        -- Record removed or rebuilt while we waited — don't pulse for a
+        -- reminder that no longer exists.
+        if Engine.records[rec.spellID] ~= rec then return end
+        FeedItemInvShadow(rec)
+        if rec.cdWidget and rec.cdWidget:IsShown() then
+            -- The real cooldown appeared inside the verify window: the
+            -- READY was the windup/effect-window gap. Suppress the pulse
+            -- and resume watching so the REAL ready fires later. (A
+            -- BAG_UPDATE_COOLDOWN usually re-watches first; adoption is
+            -- a no-op in that case.)
+            Log:Write("INFO", rec.spellID,
+                "Suppressed false ready (real cooldown appeared within verify window)")
+            Engine:_AdoptInFlightCooldown(rec)
+            return
+        end
+        Engine:_FireReadyPulses(rec, lastState, state, source)
+    end)
 end
 
 function Engine:OnCooldownUpdate(event, arg1, arg2, arg3, arg4)
@@ -966,6 +1024,53 @@ function Engine:_StartWatching(rec)
     -- triggers fire from OnPlayerCastSucceeded directly; when_ready triggers
     -- fire from _EvaluateRecord on the ready transition.
     self:_ScheduleTriggerArray(rec)
+end
+
+-- Start watching a record whose spell/item is ALREADY on cooldown right
+-- now, without a cast event. This is the "initialize" path for reminders
+-- created or edited mid-cooldown (typical: the user presses the trinket,
+-- then opens the options panel to configure it — the record is created
+-- idle and nothing feeds it until the NEXT cast or BAG_UPDATE_COOLDOWN,
+-- so the very first ready transition after adding was silently missed
+-- and the reminder looked dead until the panel was closed and the item
+-- used again).
+--
+-- Differences from _StartWatching: no trigger-array scheduling (an
+-- into_cooldown "N sec after cast" trigger must anchor to a real cast,
+-- not to the moment the reminder was configured) and no delayed-reminder
+-- scheduling for the same reason. _lastShadowState is seeded from the
+-- CURRENT widget state so the eventual ready transition is detected as
+-- unavailable -> available and fires when_ready normally.
+function Engine:_AdoptInFlightCooldown(rec)
+    if not rec or rec.watchToken then return end
+    self:_FeedRecordShadows(rec)
+    local mainShown   = rec.cdWidget     and rec.cdWidget:IsShown()     or false
+    local chargeShown = rec.chargeWidget and rec.chargeWidget:IsShown() or false
+    if not mainShown and not chargeShown then return end  -- fully ready, nothing in flight
+
+    rec.watchTokenCounter = rec.watchTokenCounter + 1
+    rec.watchToken        = rec.watchTokenCounter
+    rec.bindStartTime     = GetTime()
+    rec._lastShadowState  = _ClassifyShadowState(mainShown, chargeShown)
+    rec._readyPulseFired  = false
+
+    Log:Write("INFO", rec.spellID, "Adopted in-flight cooldown -> watching ("
+        .. rec._lastShadowState .. ")")
+end
+
+-- Public sweep over every record. Called from RebuildTrackedSpells (add/
+-- remove/ApplySettings) and from the options panel on every refresh, so
+-- a reminder being configured while its spell/item is mid-cooldown is
+-- armed the moment the user touches the panel — no cast or item event
+-- needed. Gated on db.enabled so a disabled module never arms watches
+-- that could pulse through the trigger path.
+function Engine:AdoptInFlightCooldowns()
+    if not self._enabled or not self.records then return end
+    local db = GetDB()
+    if not db or not db.enabled then return end
+    for _, rec in pairs(self.records) do
+        self:_AdoptInFlightCooldown(rec)
+    end
 end
 
 -- ===================================================================
@@ -1440,6 +1545,15 @@ function Engine:RebuildTrackedSpells(reason)
             self.useSpellIDToItemRec[rec._useSpellID] = rec
         end
     end
+
+    -- Adopt anything already on cooldown. RebuildTrackedSpells runs on
+    -- every add/remove and on CR.ApplySettings, so a reminder created
+    -- while its spell/item is mid-CD starts watching IMMEDIATELY instead
+    -- of waiting for the next cast / BAG_UPDATE_COOLDOWN (the "reminder
+    -- doesn't work until the panel is closed and the item used again"
+    -- report). Idle-and-ready records are left untouched; already-
+    -- watching records are skipped inside the adopter.
+    self:AdoptInFlightCooldowns()
 end
 
 -- Seed a default trigger for a freshly-added spell/item so the multi-trigger

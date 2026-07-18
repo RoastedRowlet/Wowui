@@ -6496,6 +6496,7 @@ function ns.AppearanceOptions.GetOptionsTable()
         end,
         order = 33.72,
         width = 1.4,
+        disabled = function() return (ns.API and ns.API.IS_121) or false end,
         hidden = function()
           if not IsDurationBar() then return true end
           if IsIconMode() then return true end
@@ -6503,7 +6504,19 @@ function ns.AppearanceOptions.GetOptionsTable()
           return false
         end
       },
-      
+      durationColorCurveNote121 = {
+        type = "description",
+        name = "|cffff8800Disabled on the 12.1 (Midnight) PTR: the bar fill can't be recolored by remaining time there (the duration is a protected value). This works normally on live servers.|r",
+        fontSize = "medium",
+        order = 33.721,
+        hidden = function()
+          if not IsDurationBar() then return true end
+          if IsIconMode() then return true end
+          if collapsedSections.colorOptions then return true end
+          return not (ns.API and ns.API.IS_121)
+        end
+      },
+
       -- As % vs Seconds toggle
       durationThresholdAsSeconds = {
         type = "toggle",

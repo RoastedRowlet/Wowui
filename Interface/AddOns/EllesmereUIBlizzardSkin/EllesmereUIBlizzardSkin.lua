@@ -160,7 +160,19 @@ end
         end
     end
 
-    local function _ttOnShow(self) _ttSkin(self); _ttFonts(self) end
+    local _ttRelaying = setmetatable({}, { __mode = "k" })
+    local function _ttOnShow(self)
+        _ttSkin(self)
+        _ttFonts(self)
+        -- Re-show so the frame recalculates size with the new fonts. Gated
+        -- on the skin toggle: with it off the fonts above were never
+        -- applied, and the hook (uninstallable) must stay zero-cost.
+        if _enabled() and not _ttRelaying[self] then
+            _ttRelaying[self] = true
+            self:Show()
+            _ttRelaying[self] = nil
+        end
+    end
 
     local function _ttHook(tt)
         if not tt or tt:IsForbidden() or _ttSkinned[tt] then return end
@@ -179,7 +191,7 @@ end
     -- Mount-name cache. Short TTL: mount state changes often, but this only
     -- needs to survive a single hover's refresh ticks so an unmounted player
     -- is scanned once, not once per tick. name = false means "scanned, none".
-    local _mountCache = {}      -- guid -> { name = string|false, time = GetTime() }
+    local _mountCache = {}      -- guid -> { name = string|false, collected = bool|nil, time = GetTime() }
     local _mountCacheTTL = 3
     local _inspectPendingGUID = nil
     local _userInspectUntil = 0
@@ -204,6 +216,10 @@ end
         return false
     end
 
+    -- Returns the mount name shown on a unit and whether the LOCAL player has
+    -- that mount collected (true/false, or nil when unknown -- e.g. the name
+    -- could only be read from the aura, not MountJournal). Collection state is
+    -- the 11th return of GetMountInfoByID, which is per-character.
     local function _getMountedAuraName(unit)
         if not unit or (_isSecret and _isSecret(unit)) then return nil end
         if not UnitExists(unit) or not UnitIsPlayer(unit) then return nil end
@@ -217,11 +233,13 @@ end
             if spellID and not (_isSecret and _isSecret(spellID)) then
                 local mountID = C_MountJournal.GetMountFromSpell(spellID)
                 if mountID and not (_isSecret and _isSecret(mountID)) and mountID > 0 then
-                    local name
+                    local name, collected
                     if C_MountJournal.GetMountInfoByID then
-                        local mountName = C_MountJournal.GetMountInfoByID(mountID)
+                        local mountName, _, _, _, _, _, _, _, _, _, isCollected =
+                            C_MountJournal.GetMountInfoByID(mountID)
                         if mountName and not (_isSecret and _isSecret(mountName)) then
                             name = mountName
+                            if type(isCollected) == "boolean" then collected = isCollected end
                         end
                     end
                     if not name then
@@ -230,7 +248,7 @@ end
                             name = auraName
                         end
                     end
-                    if name and name ~= "" then return name end
+                    if name and name ~= "" then return name, collected end
                 end
             end
         end
@@ -263,9 +281,9 @@ end
         if cached and _GameTooltip:IsShown() and _tipShownGUID == guid
             and not ttd.ilvlShown
             and EllesmereUIDB and EllesmereUIDB.tooltipItemLevel ~= false
-            and not _tipHasLine(_GameTooltip, "Item Level") then
+            and not _tipHasLine(_GameTooltip, EllesmereUI.L("Item Level")) then
             local nBefore = _GameTooltip:NumLines() or 0
-            _GameTooltip:AddDoubleLine("Item Level:", cached.ilvl, 1, 1, 1, 1, 1, 1)
+            _GameTooltip:AddDoubleLine(EllesmereUI.L("Item Level:"), cached.ilvl, 1, 1, 1, 1, 1, 1)
             _ttFonts(_GameTooltip, nBefore + 1)
             _GameTooltip:Show()
             ttd.ilvlShown = true
@@ -457,16 +475,27 @@ end
         -- Opt-in (default off). Per-GUID cached so refresh ticks on an
         -- unmounted player never re-walk the whole aura list.
         if unit and guid and db and db.tooltipShowMount and not _tipHasLine(tt, "Mount:") then
-            local mountName
+            local mountName, mountCollected
             local cached = _mountCache[guid]
             if cached and (GetTime() - cached.time) < _mountCacheTTL then
                 mountName = cached.name
+                mountCollected = cached.collected
             else
-                mountName = _getMountedAuraName(unit) or false
-                _mountCache[guid] = { name = mountName, time = GetTime() }
+                local nm, col = _getMountedAuraName(unit)
+                mountName = nm or false
+                mountCollected = col
+                _mountCache[guid] = { name = mountName, collected = mountCollected, time = GetTime() }
             end
             if mountName then
-                tt:AddDoubleLine("Mount:", mountName, 1, 1, 1, 1, 1, 1)
+                -- Append a green check / red X for whether YOU own this mount
+                -- (nil = unknown, so no marker) Credit for Fix: TipTac
+                local valText = mountName
+                if mountCollected == true then
+                    valText = mountName .. " |TInterface\\RaidFrame\\ReadyCheck-Ready:0|t"
+                elseif mountCollected == false then
+                    valText = mountName .. " |TInterface\\RaidFrame\\ReadyCheck-NotReady:0|t"
+                end
+                tt:AddDoubleLine("Mount:", valText, 1, 1, 1, 1, 1, 1)
             end
         end
         -- Item Level. Cache is keyed strictly by the authoritative GUID so a
@@ -498,8 +527,8 @@ end
                     end
                 end
             end
-            if ilvl and not _tipHasLine(tt, "Item Level") then
-                tt:AddDoubleLine("Item Level:", ilvl, 1, 1, 1, 1, 1, 1)
+            if ilvl and not _tipHasLine(tt, EllesmereUI.L("Item Level")) then
+                tt:AddDoubleLine(EllesmereUI.L("Item Level:"), ilvl, 1, 1, 1, 1, 1, 1)
                 ttd.ilvlShown = true
             end
         end
@@ -1655,15 +1684,11 @@ do
         if EllesmereUIDB and EllesmereUIDB.customTooltips == false then return end
         if not (EllesmereUIDB and EllesmereUIDB.tooltipAnchorCursor) then return end
         if not parent or tooltip:IsForbidden() then return end
-        -- Respect the "Show Tooltips" suppression. This post-hook runs after
-        -- HideTooltipByMode in the GameTooltip_SetDefaultAnchor chain, so without
-        -- this check the re-anchor below would undo its Hide() every frame and the
-        -- tooltip would stay visible (e.g. "Out of Combat" leaking tips in combat).
-        if EllesmereUI._tooltipSuppressedByMode and EllesmereUI._tooltipSuppressedByMode(tooltip) then
-            if cursorFrame then cursorFrame:Hide() end
-            tooltip:Hide()
-            return
-        end
+        -- "Show Tooltips" suppression parks the tip in a hidden host (see the
+        -- Show Tooltips block below): it stays alive and invisible so the
+        -- peek modifier can reveal it. Anchor it normally -- it must already
+        -- be riding the cursor when revealed. (The old Hide()-based
+        -- suppression needed an early-return here to avoid undoing its Hide.)
         local cf = EnsureCursorFrame()
         PositionCursorFrameNow(cf)
         local point = POINT_FOR_POS[EllesmereUIDB.tooltipCursorPosition or "top"] or "BOTTOM"
@@ -1749,8 +1774,29 @@ end
 --  IsEncounterInProgress() is queried inline (only for the outOfBossCombat case)
 --  so there is no ENCOUNTER event bookkeeping. Installed once at load; a no-op
 --  for the default mode, costing one table read per tooltip when unused.
+--  An optional "peek" modifier (tooltipShowModifier) lifts suppression while the
+--  chosen key is held, so a suppressed tip can be read on hover (e.g. mid-combat).
+--  Suppression keeps the tooltip SHOWN but parked in a hidden host frame (never
+--  Hide, never alpha) so peek is a pure reparent flip -- rebuilding a hidden
+--  tooltip from insecure code errors on secret cooldown data in combat, and
+--  alpha is engine-owned (FadeOut snaps it back and leaks the tip).
 -------------------------------------------------------------------------------
 do
+    local function ShowModifierHeld()
+        local mod = (EllesmereUIDB and EllesmereUIDB.tooltipShowModifier) or "none"
+        if mod == "none" then return false end
+        if mod == "control" then return IsControlKeyDown() end
+        if mod == "alt" then return IsAltKeyDown() end
+        return IsShiftKeyDown()
+    end
+
+    -- Exposed so modules with their own tooltip suppression (e.g. the raid/party
+    -- frames, whose OnEnter hides tips per its own combat mode) can let the same
+    -- peek modifier reveal their tips through their normal hover path.
+    function EllesmereUI._tooltipPeekHeld()
+        return ShowModifierHeld()
+    end
+
     -- Shared decision: should GameTooltip be suppressed right now given the
     -- user's "Show Tooltips" mode + combat state? Exposed on EllesmereUI so the
     -- cursor-anchor hook can honor it too (otherwise the cursor re-anchor would
@@ -1763,6 +1809,8 @@ do
         -- suppressed at, e.g., "Never".
         if EllesmereUIDB and EllesmereUIDB.customTooltips == false then return false end
         local mode = (EllesmereUIDB and EllesmereUIDB.tooltipShowMode) or "always"
+        if mode == "always" then return false end
+        if ShowModifierHeld() then return false end
         if mode == "never" then
             return true
         elseif mode == "outOfCombat" then
@@ -1773,14 +1821,142 @@ do
         return false
     end
 
-    local function HideTooltipByMode(tooltip)
-        if EllesmereUI._tooltipSuppressedByMode(tooltip) then
-            tooltip:Hide()
+    -- Suppression parks the tooltip in a hidden host frame -- NOT Hide() and
+    -- NOT alpha. Hide()-based suppression forced the peek path to REBUILD the
+    -- tooltip from our insecure execution: in combat, action tooltips read
+    -- secret cooldown data and that rebuild hard-errors ("secret values are
+    -- only allowed during untainted execution"), which the FireHoveredOnEnter
+    -- pcall silently swallowed -- peek looked dead in combat on action bars.
+    -- Alpha-based suppression fought the engine: FadeOut (hover-off on world
+    -- units) snaps alpha back to full and animates it down, leaking the tip.
+    -- Parking wins both ways: the tooltip stays SHOWN (the secure hover path
+    -- keeps building and refreshing it), visibility inherits from the hidden
+    -- host regardless of what the engine does to alpha, and peek is a pure
+    -- reparent flip. NOTE: OnHide never fires while parked (the frame is not
+    -- visible), so restore CANNOT rely on it -- the SetOwner hook below is
+    -- the restore point: every tooltip build starts with SetOwner, so an
+    -- explicitly-anchored use (bags, other addons) that never passes
+    -- SetDefaultAnchor can't inherit a parked tooltip; default-anchored
+    -- builds re-park right after, in the SetDefaultAnchor post-hook (its
+    -- internal SetOwner runs before that hook fires).
+    local _suppressHost = CreateFrame("Frame", nil, UIParent)
+    _suppressHost:Hide()
+    local _parked = false
+    local _defaultAnchored = false
+    local _origParent, _origStrata
+    local function ParkTooltip(tt)
+        if _parked then return end
+        _parked = true
+        _origParent = tt:GetParent()
+        if _origParent == _suppressHost then _origParent = nil end
+        _origStrata = tt:GetFrameStrata()
+        tt:SetParent(_suppressHost)
+    end
+    local function UnparkTooltip(tt)
+        if not _parked then return end
+        _parked = false
+        tt:SetParent(_origParent or UIParent)
+        -- SetParent can demote strata; the tooltip must stay topmost.
+        tt:SetFrameStrata(_origStrata or "TOOLTIP")
+    end
+    local function ApplySuppression(tt)
+        if EllesmereUI._tooltipSuppressedByMode(tt) then
+            ParkTooltip(tt)
+        else
+            UnparkTooltip(tt)
         end
     end
-    if GameTooltip_SetDefaultAnchor then
-        hooksecurefunc("GameTooltip_SetDefaultAnchor", HideTooltipByMode)
+    local function SuppressTooltipByMode(tooltip)
+        if tooltip ~= GameTooltip then return end
+        _defaultAnchored = true
+        ApplySuppression(tooltip)
     end
+    if GameTooltip_SetDefaultAnchor then
+        hooksecurefunc("GameTooltip_SetDefaultAnchor", SuppressTooltipByMode)
+    end
+    hooksecurefunc(GameTooltip, "SetOwner", function(tt)
+        _defaultAnchored = false
+        UnparkTooltip(tt)
+    end)
+    GameTooltip:HookScript("OnHide", function(tt)
+        -- Only fires for unparked hides (a parked tooltip is never visible);
+        -- kept so a normal hide clears the default-anchored flag promptly.
+        _defaultAnchored = false
+    end)
+
+    -- Live peek: pressing the modifier while already hovering reveals the tip
+    -- for the current frame; releasing it hides it again. Moving onto other
+    -- frames while the key stays held reveals each in turn through the normal
+    -- hover path -- suppression is lifted while held (globally via
+    -- _tooltipSuppressedByMode, and per-module via _tooltipPeekHeld, which the
+    -- raid/party frames honor in their own OnEnter).
+    local function KeyMatchesModifier(key, mod)
+        return (mod == "shift"   and (key == "LSHIFT" or key == "RSHIFT"))
+            or (mod == "control" and (key == "LCTRL"  or key == "RCTRL"))
+            or (mod == "alt"     and (key == "LALT"   or key == "RALT"))
+    end
+    -- Reveal the tooltip for whatever the cursor is over. First re-run the
+    -- hovered frame's OnEnter (buttons, icons, unit frames build their own
+    -- tip) -- the topmost mouse-focus frame is often an overlay without one,
+    -- so scan every frame under the cursor and walk up parents. Nameplates'
+    -- clickable frame has an OnEnter that builds nothing (its tip comes from
+    -- the engine's mouseover unit on a real hover), so fall back to driving
+    -- the unit tooltip directly when one is up.
+    local function FireHoveredOnEnter()
+        local foci = (GetMouseFoci and GetMouseFoci()) or (GetMouseFocus and { GetMouseFocus() })
+        local anchorFrame = foci and foci[1]
+        if foci then
+            for _, focus in ipairs(foci) do
+                local frame = focus
+                while frame and frame ~= WorldFrame and frame ~= UIParent do
+                    if frame.GetScript then
+                        local onEnter = frame:GetScript("OnEnter")
+                        if onEnter then
+                            pcall(onEnter, frame)
+                            if GameTooltip:IsShown() then return end
+                            anchorFrame = frame
+                            break
+                        end
+                    end
+                    frame = frame.GetParent and frame:GetParent()
+                end
+            end
+        end
+        if not GameTooltip:IsShown() and UnitExists("mouseover") then
+            GameTooltip_SetDefaultAnchor(GameTooltip, anchorFrame or UIParent)
+            GameTooltip:SetUnit("mouseover")
+            if EllesmereUI._repointTooltipAtCursor then
+                EllesmereUI._repointTooltipAtCursor(GameTooltip)
+            end
+            GameTooltip:Show()
+        end
+    end
+    local modWatcher = CreateFrame("Frame")
+    modWatcher:RegisterEvent("MODIFIER_STATE_CHANGED")
+    modWatcher:SetScript("OnEvent", function(_, _event, key, down)
+        if EllesmereUIDB and EllesmereUIDB.customTooltips == false then return end
+        local mod = (EllesmereUIDB and EllesmereUIDB.tooltipShowModifier) or "none"
+        if mod == "none" or not KeyMatchesModifier(key, mod) then return end
+        if down == 1 then
+            if _parked and GameTooltip:IsShown() then
+                -- The parked tip is alive and current under the cursor
+                -- (built by the secure hover path): just reveal it. Never
+                -- rebuild it from here -- see the parking note above.
+                UnparkTooltip(GameTooltip)
+            else
+                -- No live tip: module-built tips (raid frames, CDM) skip
+                -- building while suppressed, so re-drive the hovered frame's
+                -- OnEnter -- with the modifier now held they build normally.
+                FireHoveredOnEnter()
+            end
+        elseif GameTooltip:IsShown() and EllesmereUI._tooltipSuppressedByMode(GameTooltip) then
+            if _defaultAnchored then
+                ParkTooltip(GameTooltip)
+            else
+                GameTooltip:Hide()
+            end
+        end
+    end)
 end
 
 -------------------------------------------------------------------------------

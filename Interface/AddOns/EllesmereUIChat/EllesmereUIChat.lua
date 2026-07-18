@@ -933,15 +933,13 @@ function ECHAT.ApplyIconFreeMove()
     end
 end
 
--- Portal flyout: dungeon portal spell buttons
-local PORTAL_SPELLS = {
-    1254400, 1254572, 1254563, 1254559,
-    159898,  1254555, 1254551, 393273,
-}
-local PORTAL_SHORT = {
-    [1254400] = "WRS", [1254572] = "MT",  [1254563] = "NPX", [1254559] = "MC",
-    [159898]  = "SR",  [1254555] = "PoS", [1254551] = "SoT", [393273]  = "AA",
-}
+-- Portal flyout: dungeon portal spell buttons, built from the shared season
+-- list (EllesmereUI.SEASON_PORTALS) -- one place to update per season.
+local PORTAL_SPELLS, PORTAL_SHORT = {}, {}
+for _, e in ipairs(EllesmereUI.SEASON_PORTALS) do
+    PORTAL_SPELLS[#PORTAL_SPELLS + 1] = e.spellID
+    PORTAL_SHORT[e.spellID] = e.short
+end
 
 local _portalFlyout, _portalBtns
 
@@ -3121,23 +3119,47 @@ initFrame:SetScript("OnEvent", function(self)
         do
             local _SOUNDS_DIR = "Interface\\AddOns\\EllesmereUI\\media\\sounds\\"
             local WHISPER_SOUND_PATHS = {
-                ["none"]     = nil,
-                ["airhorn"]  = _SOUNDS_DIR .. "AirHorn.ogg",
-                ["banana"]   = _SOUNDS_DIR .. "BananaPeelSlip.ogg",
-                ["bikehorn"] = _SOUNDS_DIR .. "BikeHorn.ogg",
-                ["boxing"]   = _SOUNDS_DIR .. "BoxingArenaSound.ogg",
-                ["water"]    = _SOUNDS_DIR .. "WaterDrop.ogg",
+                ["none"]      = nil,
+                ["airhorn"]   = _SOUNDS_DIR .. "AirHorn.ogg",
+                ["banana"]    = _SOUNDS_DIR .. "BananaPeelSlip.ogg",
+                ["bikehorn"]  = _SOUNDS_DIR .. "BikeHorn.ogg",
+                ["bite"]      = _SOUNDS_DIR .. "Bite.ogg",
+                ["boxing"]    = _SOUNDS_DIR .. "BoxingArenaSound.ogg",
+                ["catmeow"]   = _SOUNDS_DIR .. "CatMeow.ogg",
+                ["catmeow2"]  = _SOUNDS_DIR .. "CatMeow2.ogg",
+                ["gunshot"]   = _SOUNDS_DIR .. "FrontalsGunshot.wav",
+                ["glass"]     = _SOUNDS_DIR .. "Glass.mp3",
+                ["kaching"]   = _SOUNDS_DIR .. "Kaching.ogg",
+                ["phone"]     = _SOUNDS_DIR .. "Phone.ogg",
+                ["robotblip"] = _SOUNDS_DIR .. "RobotBlip.ogg",
+                ["sonar"]     = _SOUNDS_DIR .. "Sonar.ogg",
+                ["siren"]     = _SOUNDS_DIR .. "WarningSiren.ogg",
+                ["water"]     = _SOUNDS_DIR .. "WaterDrop.ogg",
+                ["wilhelm"]   = _SOUNDS_DIR .. "Wilhelm.ogg",
             }
             local WHISPER_SOUND_NAMES = {
-                ["none"]     = "None",
-                ["airhorn"]  = "Air Horn",
-                ["banana"]   = "Banana Peel Slip",
-                ["bikehorn"] = "Bike Horn",
-                ["boxing"]   = "Boxing Arena",
-                ["water"]    = "Water Drop",
+                ["none"]      = "None",
+                ["airhorn"]   = "Air Horn",
+                ["banana"]    = "Banana Peel Slip",
+                ["bikehorn"]  = "Bike Horn",
+                ["bite"]      = "Bite",
+                ["boxing"]    = "Boxing Arena",
+                ["catmeow"]   = "Cat Meow",
+                ["catmeow2"]  = "Cat Meow 2",
+                ["gunshot"]   = "Frontals Gunshot",
+                ["glass"]     = "Glass",
+                ["kaching"]   = "Kaching",
+                ["phone"]     = "Phone",
+                ["robotblip"] = "Robot Blip",
+                ["sonar"]     = "Sonar",
+                ["siren"]     = "Warning Siren",
+                ["water"]     = "Water Drop",
+                ["wilhelm"]   = "Wilhelm",
             }
             local WHISPER_SOUND_ORDER = {
-                "none", "airhorn", "banana", "bikehorn", "boxing", "water",
+                "none", "airhorn", "banana", "bikehorn", "bite", "boxing", "catmeow",
+                "catmeow2", "gunshot", "glass", "kaching", "phone", "robotblip", "sonar",
+                "siren", "water", "wilhelm",
             }
             ECHAT.WHISPER_SOUND_PATHS = WHISPER_SOUND_PATHS
             ECHAT.WHISPER_SOUND_NAMES = WHISPER_SOUND_NAMES

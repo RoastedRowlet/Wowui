@@ -503,7 +503,7 @@ ns.CDMEnhance.StopAllGlows = StopAllGlows
 -- DATABASE
 -- ===================================================================
 -- Current settings version - increment when adding new migrations
-local SETTINGS_VERSION = 7
+local SETTINGS_VERSION = 8
 
 -- Migrate a single settings table (icon or global) from legacy to current format
 local function MigrateSettingsTable(cfg)
@@ -633,6 +633,40 @@ local function MigrateSettingsTable(cfg)
     if cs.noDesaturate == false then
       cs.noDesaturate = nil
     end
+  end
+
+  -- Migration 8: Duration Override's per-override appearance was merged into the shared
+  -- "Aura Active State" look. Copy the old override GLOW onto auraActiveState (only fields
+  -- the user hasn't already set there, so we never clobber a new-system choice), then drop
+  -- the retired durationOverride appearance fields. The SOURCE fields (enabled / mode /
+  -- auraSource / manual / endSpells) are KEPT — the override still fires; only its styling
+  -- now follows Aura Active State. (Desaturate / swipe-visibility had no equivalent in the
+  -- shared look, so they are dropped, not migrated.)
+  if cfg.durationOverride then
+    local d = cfg.durationOverride
+    if d.glow == true then
+      if not cfg.auraActiveState then cfg.auraActiveState = {} end
+      local aa = cfg.auraActiveState
+      if aa.glow            == nil then aa.glow            = true             end
+      if aa.glowType        == nil then aa.glowType        = d.glowType       end
+      if aa.glowColor       == nil then aa.glowColor       = d.glowColor      end
+      if aa.glowScale       == nil then aa.glowScale       = d.glowScale      end
+      if aa.glowSpeed       == nil then aa.glowSpeed       = d.glowSpeed      end
+      if aa.glowLines       == nil then aa.glowLines       = d.glowLines      end
+      if aa.glowThickness   == nil then aa.glowThickness   = d.glowThickness  end
+      if aa.glowParticles   == nil then aa.glowParticles   = d.glowParticles  end
+      if aa.glowXOffset     == nil then aa.glowXOffset     = d.glowXOffset    end
+      if aa.glowYOffset     == nil then aa.glowYOffset     = d.glowYOffset    end
+      if aa.glowFrameStrata == nil then aa.glowFrameStrata = d.glowFrameStrata end
+      if aa.glowFrameLevel  == nil then aa.glowFrameLevel  = d.glowFrameLevel end
+    end
+    d.glow, d.glowType, d.glowColor          = nil, nil, nil
+    d.glowScale, d.glowSpeed, d.glowLines     = nil, nil, nil
+    d.glowThickness, d.glowParticles          = nil, nil
+    d.glowXOffset, d.glowYOffset              = nil, nil
+    d.glowFrameStrata, d.glowFrameLevel       = nil, nil
+    d.glowPreview, d.desaturate               = nil, nil
+    d.showSwipe, d.showEdge                   = nil, nil
   end
 end
 
@@ -3209,7 +3243,7 @@ ApplyIconStyle = function(frame, cdID)
         
         -- Apply user's reverse (animation direction) setting
         -- CDM template has reverse="true" by default, so we need to set it explicitly
-        local auraActive = (parentFrame._arcAuraActive == true) or (parentFrame.totemData ~= nil)
+        local auraActive = (parentFrame._arcAuraActive == true) or (parentFrame.totemData ~= nil) or (parentFrame._arcDurOvActive == true)
         self:SetReverse((parentFrame._arcUserReverse or false) or (auraActive and (parentFrame._arcReverseWhileAura or false)))
       end)
     end
@@ -3323,7 +3357,7 @@ ApplyIconStyle = function(frame, cdID)
       -- only set the base reverse it would stomp the reversed direction back to
       -- normal while the aura is still up (the out-of-combat revert bug). Mirrors
       -- the Masque SetCooldown hook above, the aura-transition handlers, and CooldownState.
-      local auraActive = (frame._arcAuraActive == true) or (frame.totemData ~= nil)
+      local auraActive = (frame._arcAuraActive == true) or (frame.totemData ~= nil) or (frame._arcDurOvActive == true)
       frame.Cooldown:SetReverse((swipeCfg.reverse == true) or (auraActive and swipeCfg.reverseWhileAura == true))
 
       -- Apply edge scale (size of spinning edge line)
@@ -3384,8 +3418,11 @@ ApplyIconStyle = function(frame, cdID)
             -- for CDM's next aura event. Fully guarded: if the API is unavailable, CDM's
             -- next refresh restores it. _arcBypassCDHook mirrors the IAO entry push above.
             if (frame.wasSetFromAura == true) and frame.auraInstanceID
+               and not (ns.API and ns.API.AurasSecret and ns.API.AurasSecret(frame.auraDataUnit or "player"))
                and C_UnitAuras and C_UnitAuras.GetAuraDuration
                and frame.Cooldown.SetCooldownFromDurationObject then
+              -- 12.1: instance-id GetAuraDuration errors when auras secret; skip the best-effort
+              -- re-push (CDM's own refresh restores the swipe). Inert on live.
               local durObj = C_UnitAuras.GetAuraDuration(frame.auraDataUnit or "player", frame.auraInstanceID)
               if durObj then
                 frame._arcBypassCDHook = true
@@ -3578,7 +3615,7 @@ ApplyIconStyle = function(frame, cdID)
           local cfg = self._arcCdID and GetIconSettings(self._arcCdID)
           local sc = cfg and cfg.cooldownSwipe and cfg.cooldownSwipe.auraSwipeColor
           if not sc then return end
-          local isActive = (pf._arcAuraActive == true) or (pf.totemData ~= nil)
+          local isActive = (pf._arcAuraActive == true) or (pf.totemData ~= nil) or (pf._arcDurOvActive == true)
           if not isActive then return end
           -- Only re-apply if CDM set a different color
           if r == sc.r and g == sc.g and b == sc.b then return end
@@ -4078,7 +4115,7 @@ ApplyIconStyle = function(frame, cdID)
           if not masqueControlsCooldowns then
             -- ArcUI controls: Apply all user settings
             self:SetDrawBling(not swipe or swipe.showBling ~= false)
-            local isAuraNowActive = (parentFrame._arcAuraActive == true) or (parentFrame.totemData ~= nil)
+            local isAuraNowActive = (parentFrame._arcAuraActive == true) or (parentFrame.totemData ~= nil) or (parentFrame._arcDurOvActive == true)
             self:SetReverse((swipe and swipe.reverse == true or false) or (isAuraNowActive and swipe and swipe.reverseWhileAura == true))
 
             -- Set swipe color: auraSwipeColor when aura is active, swipeColor otherwise, else black
@@ -4115,7 +4152,7 @@ ApplyIconStyle = function(frame, cdID)
           -- Just apply bling/reverse/color.
           -- ═══════════════════════════════════════════════════════════════════
           self:SetDrawBling(swipe.showBling ~= false)
-          local isAuraNowActive = (parentFrame._arcAuraActive == true) or (parentFrame.totemData ~= nil)
+          local isAuraNowActive = (parentFrame._arcAuraActive == true) or (parentFrame.totemData ~= nil) or (parentFrame._arcDurOvActive == true)
           self:SetReverse((swipe.reverse == true) or (isAuraNowActive and swipe.reverseWhileAura == true))
 
           -- Apply swipe color: auraSwipeColor when aura is active, else swipeColor
@@ -4588,7 +4625,12 @@ function SetupChargeText(frame, cdID, cfg)
     -- single-stack mirror does: suppress native Applications, render our own.
     local bandsOn = chargeCfg and chargeCfg.enabled ~= false and chargeCfg.thresholdColorEnabled
                   and ns.StackColor and ns.StackColor.HasEnabledBands(chargeCfg)
-    if (chargeCfg and chargeCfg.showSingleStack) or bandsOn then
+    -- 12.1: under aura secrecy our own mirror/bands can't read the count (they blank out). So on 12.1
+    -- we do NOT take the "suppress native + render our own" path -- we fall through to the else branch,
+    -- which shows Blizzard's secret-safe native count AND restyles/repositions it per the user's
+    -- chargeText settings (uncolored, but at their configured font/position). On live: unchanged.
+    local stackSecret = ns.API and ns.API.AurasSecret and ns.API.AurasSecret(frame.auraDataUnit or "player")
+    if ((chargeCfg and chargeCfg.showSingleStack) or bandsOn) and not stackSecret then
       -- Suppress native Applications so only our mirror/bands show
       appFrame:Hide()
       appFrame:SetAlpha(0)
@@ -4598,6 +4640,8 @@ function SetupChargeText(frame, cdID, cfg)
         hooksecurefunc(appFrame, "Show", function(self)
           local pf = self._arcParentIconFrame
           if not pf then return end
+          -- 12.1: never re-hide the native count under secrecy (our own stays blank there).
+          if ns.API and ns.API.AurasSecret and ns.API.AurasSecret(pf.auraDataUnit or "player") then return end
           local cdID2 = pf.cooldownID
           local cfg2 = cdID2 and ns.CDMEnhance and ns.CDMEnhance.GetIconSettings and ns.CDMEnhance.GetIconSettings(cdID2)
           if cfg2 and cfg2.chargeText and (cfg2.chargeText.showSingleStack or (cfg2.chargeText.enabled ~= false and cfg2.chargeText.thresholdColorEnabled)) then
@@ -4660,6 +4704,14 @@ function SetupChargeText(frame, cdID, cfg)
           return
         end
         local unit = f.auraDataUnit or "player"
+        -- 12.1: aura stack count is secret and GetAuraDataByAuraInstanceID throws;
+        -- blank our overlay (value feature off under secrecy) instead of reading it.
+        if ns.API and ns.API.AurasSecret and ns.API.AurasSecret(unit) then
+          f._arcSingleStackShowing = false
+          f._arcSingleStackText:SetText("")
+          if ns.StackColor then ns.StackColor.UpdateBands(f) end
+          return
+        end
         local auraData = C_UnitAuras.GetAuraDataByAuraInstanceID(unit, auraID)
         if auraData and auraData.applications then
           f._arcSingleStackText:SetText(auraData.applications)
@@ -4756,8 +4808,9 @@ function SetupChargeText(frame, cdID, cfg)
       end
       UpdateSingleStackText(frame)
     else
-      -- showSingleStack OFF and bands OFF: hide mirror/bands, restore Applications alpha,
-      -- then reposition the native Applications text using chargeText anchor settings
+      -- showSingleStack OFF and bands OFF -- OR on 12.1 where our mirror/bands can't render under
+      -- secrecy: hide mirror/bands, restore Applications alpha, then restyle + reposition the native
+      -- Applications text using the user's chargeText font/color/anchor settings (secret-safe).
       if ns.StackColor then ns.StackColor.ClearBands(frame) end
       if frame._arcSingleStackContainer then
         frame._arcSingleStackContainer:Hide()
@@ -6968,7 +7021,19 @@ EnhanceFrame = function(frame, cdID, viewerType, viewerName)
 
         -- HIDDEN BY BAR: Core.lua is hiding this icon for a tracking bar
         if IsFrameHiddenByBar(self) then return end
-        
+
+        -- AURA-ACTIVE ALPHA (separate-aura / Duration Override): hold the user's
+        -- "alpha while aura active" over CDM repaints while the override owns the
+        -- frame. Own-CDM-aura frames carry this via the ready/cooldown alpha levers
+        -- below instead (CooldownState computes it), so this lever is override-only.
+        if self._arcAuraActiveAlpha ~= nil then
+          self._arcBypassFrameAlphaHook = true
+          self:SetAlpha(self._arcAuraActiveAlpha)
+          self._arcBypassFrameAlphaHook = false
+          self._lastAppliedAlpha = self._arcAuraActiveAlpha
+          return
+        end
+
         -- READY STATE ALPHA ENFORCEMENT (includes merged usability alpha)
         if self._arcEnforceReadyAlpha and self._arcReadyAlphaValue then
           self._arcBypassFrameAlphaHook = true

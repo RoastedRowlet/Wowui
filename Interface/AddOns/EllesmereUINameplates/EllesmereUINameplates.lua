@@ -137,7 +137,7 @@ function ns._appendDisplayPresetKeys(t)
         "buffDurationTextSize", "buffDurationTextX", "buffDurationTextY", "buffDurationTextColor",
         "ccDurationTextSize", "ccDurationTextX", "ccDurationTextY", "ccDurationTextColor",
         "buffTextSize", "buffTextColor", "ccTextSize", "ccTextColor",
-        "raidMarkerPos", "classificationSlot",
+        "raidMarkerPos", "classificationSlot", "classificationShowInInstances",
         "castNameSize", "castNameColor", "castTargetSize", "castTargetClassColor", "castTargetColor",
         "showCastTimer", "castTimerSize", "castTimerColor", "targetScale",
         "castNameSide", "castTargetSide", "castTimerSide",
@@ -194,6 +194,12 @@ local defaults = {
     -- Mini Coloring M+ Only: on = restrict the Mini Enemies color to 5-man
     -- dungeons; off = apply it everywhere (default; see GetReactionColor).
     miniColoringMPlusOnly = false,
+    -- Open World Basic Coloring (inline cog on Enemy Types): off by default.
+    -- On: outside instances, the mob-type special colors (Mini Enemies,
+    -- Spell Casters, Mini-Bosses, Bosses) collapse into the single flat
+    -- owBasicColor; Neutral keeps its own color (see GetReactionColor).
+    owBasicColoring = false,
+    owBasicColor = { r = 0.800, g = 0.137, b = 0.137 },
     darkenEnemiesOOC = true,
     tankHasAggro = { r = 0.05, g = 0.82, b = 0.62 },
     tankHasAggroEnabled = false,
@@ -338,6 +344,9 @@ local defaults = {
     raidMarkerPos = "topright",
     raidMarkerSize = 24,
     classificationSlot = "topleft",
+    -- Rare/Quest Indicator "Show In Instances" (slot cog): lifts the
+    -- open-world-only gates in UpdateClassification + IsQuestMob.
+    classificationShowInInstances = false,
     rareEliteIconSize = 20,
     castBarHeight = 17,
     castBarOffsetY = 0,
@@ -1516,10 +1525,12 @@ local function StartPandemicGlow(slot, slotSize)
     if not pg then
         local wrapper = CreateFrame("Frame", nil, slot)
         wrapper:SetAllPoints()
-        -- Sit just above the border (slot+1) so the glow renders beneath the
-        -- cooldown countdown text (slot.cd at +2) and stack count (+3) instead
-        -- of covering them.
-        wrapper:SetFrameLevel(slot:GetFrameLevel() + 1)
+        -- Sit ABOVE the cooldown frame (slot.cd at +2) so the duration swipe
+        -- can't render on top of the pandemic border and dim it. Matches the
+        -- dispel glow (slot+5); the glow is an edge border, so it doesn't
+        -- meaningfully obscure the corner countdown / stack numbers. (At the old
+        -- slot+1 the swipe drew over the glow, making it hard to see.)
+        wrapper:SetFrameLevel(slot:GetFrameLevel() + 5)
         local flipTex = wrapper:CreateTexture(nil, "OVERLAY", nil, 7)
         flipTex:SetPoint("CENTER")
         local animGroup = flipTex:CreateAnimationGroup()
@@ -1890,6 +1901,14 @@ local function GetAuraSlotOffsets(slotKey)
     if not pos or pos == "none" then return 0, 0 end
     return GetSlotOffsets(pos)
 end
+-- 12.1 aura containers read layout inputs through these.
+ns.GetAuraSlotOffsets = GetAuraSlotOffsets
+function ns.NP_GetProfile() return p end
+function ns.NP_GetDefaults() return defaults end
+function ns.NP_ClassPowerTopPush(plate)
+    if GetClassPowerTopPush then return GetClassPowerTopPush(plate) or 0 end
+    return 0
+end
 
 -- Get XY offset for a text slot key (e.g. "textSlotTop")
 local function GetTextSlotOffsets(slotKey)
@@ -2038,18 +2057,36 @@ PositionArrowsOutsideAuras = function(plate)
         local cxOff = select(1, GetAuraSlotOffsets("classification"))
         rightExtent = math.max(rightExtent, sideOff + rightPush + clSz + cxOff)
     end
+    -- 12.1 restricted-tree rendering (field-confirmed on PTR): inside the
+    -- aspect-restricted nameplate subtree, SINGLE-POINT + SetSize regions
+    -- render displaced from their anchor, while rects fully defined by
+    -- anchors (fill, bg, hash line) render exactly. So both arrows pin
+    -- TOP+BOTTOM to the health bar's CORNERS (hash-line pattern): the bar
+    -- edges resolve engine-side, the offsets stay small numbers scaled
+    -- exactly like the legacy single-point form (live-visual parity), and
+    -- nothing here reads geometry ("Can't measure restricted regions").
+    -- Same rendered result as before: inner edge (extent + 8) from the bar
+    -- edge, vertically centered, 16 * scale tall. The symmetric +/-dy pair
+    -- keeps centering exact regardless of pixel-mult rounding.
+    local st = ns.ResolveTargetArrowStyle(p)
+    local sc = (p and p.targetArrowScale) or 1.0
+    local aw = math.floor(((st and st.w) or 16) * sc + 0.5)
+    local ah = math.floor(16 * sc + 0.5)
+    local dy = (ah - GetHealthBarHeight()) / 2
+    local lox = -(leftExtent + 8 + aw / 2)
+    local rox = (rightExtent + 8 + aw / 2)
+    -- Stashed for the 12.1 container reanchor (EUI_Nameplates_AuraContainers
+    -- ReanchorArrows), which re-points arrows to engine-sized aura container
+    -- edges and needs the same dimensions without re-deriving the style.
+    plate._arrowW, plate._arrowH = aw, ah
     plate.leftArrow:ClearAllPoints()
     plate.rightArrow:ClearAllPoints()
-    if leftExtent > 0 then
-        PP.Point(plate.leftArrow, "RIGHT", plate.health, "LEFT", -(leftExtent + 8), 0)
-    else
-        PP.Point(plate.leftArrow, "RIGHT", plate.health, "LEFT", -8, 0)
-    end
-    if rightExtent > 0 then
-        PP.Point(plate.rightArrow, "LEFT", plate.health, "RIGHT", rightExtent + 8, 0)
-    else
-        PP.Point(plate.rightArrow, "LEFT", plate.health, "RIGHT", 8, 0)
-    end
+    PP.Point(plate.leftArrow, "TOP", plate.health, "TOPLEFT", lox, dy)
+    PP.Point(plate.leftArrow, "BOTTOM", plate.health, "BOTTOMLEFT", lox, -dy)
+    PP.Width(plate.leftArrow, aw)
+    PP.Point(plate.rightArrow, "TOP", plate.health, "TOPRIGHT", rox, dy)
+    PP.Point(plate.rightArrow, "BOTTOM", plate.health, "BOTTOMRIGHT", rox, -dy)
+    PP.Width(plate.rightArrow, aw)
 end
 end -- do (AddSideExtent scope)
 ns.PositionArrowsOutsideAuras = PositionArrowsOutsideAuras
@@ -2167,15 +2204,21 @@ local function EnsureArrows(plate)
     local st = ns.ResolveTargetArrowStyle(p)
     local sc = (p and p.targetArrowScale) or 1.0
     local aw, ah = math.floor(st.w * sc + 0.5), math.floor(16 * sc + 0.5)
-    plate.leftArrow = plate:CreateTexture(nil, "OVERLAY")
+    -- Regions OF the health bar (12.1: the plate subtree is aspect-restricted
+    -- and unmeasurable). NO creation anchors: single-point + size rects render
+    -- DISPLACED inside the restricted tree, so the only sanctioned anchor form
+    -- is the fully-anchored TOP+BOTTOM scheme applied by
+    -- PositionArrowsOutsideAuras -- which runs on every target apply, always
+    -- after Show(). An unanchored hidden texture has no rect and draws
+    -- nothing, so the creation state is safe. Rendering outside the bar rect
+    -- is fine (health runs SetClipsChildren(false)).
+    plate.leftArrow = plate.health:CreateTexture(nil, "OVERLAY")
     plate.leftArrow:SetTexture(ns.TARGET_ARROW_DIR .. st.l .. ".png")
-    plate.rightArrow = plate:CreateTexture(nil, "OVERLAY")
+    plate.rightArrow = plate.health:CreateTexture(nil, "OVERLAY")
     plate.rightArrow:SetTexture(ns.TARGET_ARROW_DIR .. st.r .. ".png")
     PP.Size(plate.leftArrow, aw, ah)
-    PP.Point(plate.leftArrow, "RIGHT", plate.health, "LEFT", -8, 0)
     plate.leftArrow:Hide()
     PP.Size(plate.rightArrow, aw, ah)
-    PP.Point(plate.rightArrow, "LEFT", plate.health, "RIGHT", 8, 0)
     plate.rightArrow:Hide()
 end
 
@@ -2198,23 +2241,35 @@ function ns.ResolveOverlayTexPath(key)
     return nil
 end
 
--- Stripe overlays keep their fixed 200px, left-anchored pattern (continuous
--- diagonal across the fill/background split). Bar textures instead fill the full
--- bar width so they render like a normal bar fill; the clip frames still window
--- the filled vs empty portions.
+-- Both overlays span the full bar width (anchored LEFT+RIGHT to the health bar)
+-- so the pattern always covers the whole bar and follows Health Bar Width
+-- changes automatically. Fill and bg share the identical geometry, so a stripe's
+-- diagonal stays continuous across the fill/background split; the clip frames
+-- still window the filled vs empty portions. (Previously stripe overlays used a
+-- fixed 200px width, which left bars wider than 200 uncovered on the right.)
+-- Stripes additionally CROP via texcoord to the bar's share of the pattern's
+-- native 200px span, so the diagonal density stays pixel-identical to the old
+-- fixed-200px look on every bar up to 200 wide. Wider bars stretch the full
+-- pattern (that region was simply blank before the full-width fix, so there is
+-- no legacy look to preserve there). Width comes from settings
+-- (GetHealthBarWidth), never from measuring the plate subtree (12.1 restricted
+-- regions forbid reads there).
+local STRIPE_NATIVE_W = 200
 local function ApplyOverlayGeometry(fillT, bgT, health, isStripe)
     fillT:ClearAllPoints(); bgT:ClearAllPoints()
     fillT:SetPoint("TOPLEFT", health, "TOPLEFT", 0, 0)
     fillT:SetPoint("BOTTOMLEFT", health, "BOTTOMLEFT", 0, 0)
+    fillT:SetPoint("RIGHT", health, "RIGHT", 0, 0)
     bgT:SetPoint("TOPLEFT", health, "TOPLEFT", 0, 0)
     bgT:SetPoint("BOTTOMLEFT", health, "BOTTOMLEFT", 0, 0)
+    bgT:SetPoint("RIGHT", health, "RIGHT", 0, 0)
+    local u = 1
     if isStripe then
-        fillT:SetWidth(200)
-        bgT:SetWidth(200)
-    else
-        fillT:SetPoint("RIGHT", health, "RIGHT", 0, 0)
-        bgT:SetPoint("RIGHT", health, "RIGHT", 0, 0)
+        u = GetHealthBarWidth() / STRIPE_NATIVE_W
+        if u > 1 then u = 1 end
     end
+    fillT:SetTexCoord(0, u, 0, 1)
+    bgT:SetTexCoord(0, u, 0, 1)
 end
 
 -- Alpha for the empty (background) portion of an overlay. The per-state "Full
@@ -2242,12 +2297,13 @@ local function EnsureFocusOverlay(plate)
     plate.focusClipFill:SetPoint("RIGHT", fillTex, "RIGHT", 0, 0)
     plate.focusClipFill:SetFrameLevel(plate.health:GetFrameLevel() + 1)
     plate.focusOverlayFill = plate.focusClipFill:CreateTexture(nil, "ARTWORK", nil, 2)
-    -- Texture: full bar height, fixed width, anchored to the health LEFT so the
-    -- diagonal pattern stays continuous across the fill/background split (both
-    -- overlays share the same origin) and snaps with the clip's vertical edges.
+    -- Texture: full bar height and full bar width (anchored LEFT+RIGHT to the
+    -- health bar) so the diagonal pattern stays continuous across the
+    -- fill/background split (both overlays share the same geometry) and snaps
+    -- with the clip's vertical edges.
     plate.focusOverlayFill:SetPoint("TOPLEFT", plate.health, "TOPLEFT", 0, 0)
     plate.focusOverlayFill:SetPoint("BOTTOMLEFT", plate.health, "BOTTOMLEFT", 0, 0)
-    plate.focusOverlayFill:SetWidth(200)
+    plate.focusOverlayFill:SetPoint("RIGHT", plate.health, "RIGHT", 0, 0)
     plate.focusOverlayFill:SetTexture(STRIPE_TEX)
     plate.focusOverlayFill:SetAlpha(overlayAlpha)
     plate.focusOverlayFill:SetVertexColor(overlayColor.r, overlayColor.g, overlayColor.b)
@@ -2261,10 +2317,13 @@ local function EnsureFocusOverlay(plate)
     plate.focusOverlayBg = plate.focusClipBg:CreateTexture(nil, "ARTWORK", nil, 1)
     plate.focusOverlayBg:SetPoint("TOPLEFT", plate.health, "TOPLEFT", 0, 0)
     plate.focusOverlayBg:SetPoint("BOTTOMLEFT", plate.health, "BOTTOMLEFT", 0, 0)
-    plate.focusOverlayBg:SetWidth(200)
+    plate.focusOverlayBg:SetPoint("RIGHT", plate.health, "RIGHT", 0, 0)
     plate.focusOverlayBg:SetTexture(STRIPE_TEX)
     plate.focusOverlayBg:SetAlpha(OverlayBgAlpha(p and p.focusOverlayFullBgAlpha, overlayAlpha))
     plate.focusOverlayBg:SetVertexColor(overlayColor.r, overlayColor.g, overlayColor.b)
+    -- Creation-time texcoord for the STRIPE_TEX default (the state-gated apply
+    -- re-runs this with the actual texture kind).
+    ApplyOverlayGeometry(plate.focusOverlayFill, plate.focusOverlayBg, plate.health, true)
     plate.focusClipBg:Hide()
 end
 
@@ -2344,7 +2403,7 @@ ns.EnsureHoverOverlay = function(plate)
     plate.hoverOverlayFill = plate.hoverClipFill:CreateTexture(nil, "ARTWORK", nil, 2)
     plate.hoverOverlayFill:SetPoint("TOPLEFT", plate.health, "TOPLEFT", 0, 0)
     plate.hoverOverlayFill:SetPoint("BOTTOMLEFT", plate.health, "BOTTOMLEFT", 0, 0)
-    plate.hoverOverlayFill:SetWidth(200)
+    plate.hoverOverlayFill:SetPoint("RIGHT", plate.health, "RIGHT", 0, 0)
     plate.hoverOverlayFill:SetTexture(STRIPE_TEX)
     plate.hoverOverlayFill:SetAlpha(overlayAlpha)
     plate.hoverOverlayFill:SetVertexColor(overlayColor.r, overlayColor.g, overlayColor.b)
@@ -2358,10 +2417,13 @@ ns.EnsureHoverOverlay = function(plate)
     plate.hoverOverlayBg = plate.hoverClipBg:CreateTexture(nil, "ARTWORK", nil, 1)
     plate.hoverOverlayBg:SetPoint("TOPLEFT", plate.health, "TOPLEFT", 0, 0)
     plate.hoverOverlayBg:SetPoint("BOTTOMLEFT", plate.health, "BOTTOMLEFT", 0, 0)
-    plate.hoverOverlayBg:SetWidth(200)
+    plate.hoverOverlayBg:SetPoint("RIGHT", plate.health, "RIGHT", 0, 0)
     plate.hoverOverlayBg:SetTexture(STRIPE_TEX)
     plate.hoverOverlayBg:SetAlpha(OverlayBgAlpha(p and p.hoverOverlayFullBgAlpha, overlayAlpha))
     plate.hoverOverlayBg:SetVertexColor(overlayColor.r, overlayColor.g, overlayColor.b)
+    -- Creation-time texcoord for the STRIPE_TEX default (the state-gated apply
+    -- re-runs this with the actual texture kind).
+    ApplyOverlayGeometry(plate.hoverOverlayFill, plate.hoverOverlayBg, plate.health, true)
     plate.hoverClipBg:Hide()
 end
 
@@ -2382,12 +2444,13 @@ ns.EnsureTargetOverlay = function(plate)
     plate.targetClipFill:SetPoint("RIGHT", fillTex, "RIGHT", 0, 0)
     plate.targetClipFill:SetFrameLevel(plate.health:GetFrameLevel() + 1)
     plate.targetOverlayFill = plate.targetClipFill:CreateTexture(nil, "ARTWORK", nil, 2)
-    -- Texture: full bar height, fixed width, anchored to the health LEFT so the
-    -- diagonal pattern stays continuous across the fill/background split (both
-    -- overlays share the same origin) and snaps with the clip's vertical edges.
+    -- Texture: full bar height and full bar width (anchored LEFT+RIGHT to the
+    -- health bar) so the diagonal pattern stays continuous across the
+    -- fill/background split (both overlays share the same geometry) and snaps
+    -- with the clip's vertical edges.
     plate.targetOverlayFill:SetPoint("TOPLEFT", plate.health, "TOPLEFT", 0, 0)
     plate.targetOverlayFill:SetPoint("BOTTOMLEFT", plate.health, "BOTTOMLEFT", 0, 0)
-    plate.targetOverlayFill:SetWidth(200)
+    plate.targetOverlayFill:SetPoint("RIGHT", plate.health, "RIGHT", 0, 0)
     plate.targetOverlayFill:SetTexture(STRIPE_TEX)
     plate.targetOverlayFill:SetAlpha(overlayAlpha)
     plate.targetOverlayFill:SetVertexColor(overlayColor.r, overlayColor.g, overlayColor.b)
@@ -2401,10 +2464,13 @@ ns.EnsureTargetOverlay = function(plate)
     plate.targetOverlayBg = plate.targetClipBg:CreateTexture(nil, "ARTWORK", nil, 1)
     plate.targetOverlayBg:SetPoint("TOPLEFT", plate.health, "TOPLEFT", 0, 0)
     plate.targetOverlayBg:SetPoint("BOTTOMLEFT", plate.health, "BOTTOMLEFT", 0, 0)
-    plate.targetOverlayBg:SetWidth(200)
+    plate.targetOverlayBg:SetPoint("RIGHT", plate.health, "RIGHT", 0, 0)
     plate.targetOverlayBg:SetTexture(STRIPE_TEX)
     plate.targetOverlayBg:SetAlpha(OverlayBgAlpha(p and p.targetOverlayFullBgAlpha, overlayAlpha))
     plate.targetOverlayBg:SetVertexColor(overlayColor.r, overlayColor.g, overlayColor.b)
+    -- Creation-time texcoord for the STRIPE_TEX default (the state-gated apply
+    -- re-runs this with the actual texture kind).
+    ApplyOverlayGeometry(plate.targetOverlayFill, plate.targetOverlayBg, plate.health, true)
     plate.targetClipBg:Hide()
 end
 
@@ -3338,7 +3404,58 @@ function ns.RefreshAllSettings()
             plate:SetUnit(plate.unit, plate.nameplate)
         end
     end
+    if ns.NT_RefreshSetting then ns.NT_RefreshSetting() end
     if ns.ApplyClassPowerSetting then ns.ApplyClassPowerSetting() end
+    -- 12.1 aura containers: fingerprint-guarded, near-free when no aura
+    -- settings changed.
+    if ns.NPC_ReloadAll then ns.NPC_ReloadAll() end
+end
+
+-------------------------------------------------------------------------------
+--  Non-Target Opacity: while the player has a target, every skinned plate
+--  that is not the target, the focus, or the player fades to the configured
+--  opacity (profile key nonTargetAlpha, 0-100). 100 = feature OFF: every
+--  hook below reduces to a single numeric compare, and no plate is ever
+--  touched. The alpha rides the plate ROOT (our own frame, parented to the
+--  Blizzard nameplate), so Blizzard's own occlusion fade still multiplies in.
+-------------------------------------------------------------------------------
+ns._ntAlpha = 1   -- cached 0..1 from the profile; 1 = inert
+
+-- Applies the correct root alpha to ONE plate. Value-guarded via
+-- _ntCurAlpha so redundant SetAlpha calls are skipped and pooled frames
+-- reset cheaply (nil = never faded).
+function ns.NT_Apply(plate)
+    local unit = plate.unit
+    if not unit then return end
+    local a = 1
+    local nt = ns._ntAlpha
+    if nt < 1 and UnitExists("target")
+       and not UnitIsUnit(unit, "target")
+       and not UnitIsUnit(unit, "focus")
+       and not UnitIsUnit(unit, "player") then
+        a = nt
+    end
+    if (plate._ntCurAlpha or 1) ~= a then
+        plate._ntCurAlpha = a
+        plate:SetAlpha(a)
+    end
+end
+
+function ns.NT_ApplyAll()
+    for _, plate in pairs(ns.plates) do
+        ns.NT_Apply(plate)
+    end
+end
+
+-- Re-derives the cached opacity from the profile and reapplies every plate
+-- (also un-fades everything when the slider returns to 100). Called from
+-- the options slider, OnInitialize, and RefreshAllSettings -- the latter
+-- covers profile swaps and Spec Overrides applies.
+function ns.NT_RefreshSetting()
+    local v = tonumber(p and p.nonTargetAlpha) or 100
+    if v < 0 then v = 0 elseif v > 100 then v = 100 end
+    ns._ntAlpha = v / 100
+    ns.NT_ApplyAll()
 end
 
 function ns.HideHoverEffect(plate)
@@ -4487,6 +4604,10 @@ local function RefreshThreatCache()
     -- instanceType "party"; excludes raids/delves/open world). Cached here so the
     -- per-plate color path costs one field read, not a GetInstanceInfo call.
     ns._inDungeon = (instanceType == "party")
+    -- Any-instance flag for Open World Basic Coloring (dungeons, raids, delves,
+    -- scenarios, arenas, battlegrounds all count as instanced; only true open
+    -- world is "none").
+    ns._inInstance = (instanceType ~= nil and instanceType ~= "none")
     if difficultyID == 0
     or (C_Garrison and C_Garrison.IsOnGarrisonMap and C_Garrison.IsOnGarrisonMap()) then
         _inThreatContent = false
@@ -4531,10 +4652,17 @@ end
 local function IsQuestMob(unit)
     if not C_TooltipInfo or not QUEST_LINE_TYPES then return false end
     if questMobCache[unit] ~= nil then return questMobCache[unit] end
-    -- Skip inside instances quest mobs are open-world only
+    -- Quest mobs are open-world only, unless the indicator's "Show In
+    -- Instances" opt-in lifts the gate (safe: every tooltip-line read below
+    -- is pcall'd and escape values are issecretvalue-verified, so instanced
+    -- combat cannot leak or error on secret text).
     if InRealInstancedContent() then
-        questMobCache[unit] = false
-        return false
+        local show = p and p.classificationShowInInstances
+        if show == nil then show = defaults.classificationShowInInstances end
+        if not show then
+            questMobCache[unit] = false
+            return false
+        end
     end
     local info = C_TooltipInfo.GetUnit(unit)
     if not info then
@@ -4782,14 +4910,26 @@ local function GetReactionColor(unit)
     -- still returned at their own priority steps (7, 8, 10b) further down.
     local inCombat = UnitAffectingCombat(unit)
     local classification = UnitClassification(unit)
+    -- Open World Basic Coloring (inline cog on Enemy Types): outside instances,
+    -- collapse the mob-type special colors (Mini Enemies, Spell Casters,
+    -- Mini-Bosses, Bosses) into the single flat owBasicColor at the enemy
+    -- fallback (step 11). Neutral is unaffected: outside dungeons it already
+    -- returned at step 5. Off by default -- when off (or in any instance)
+    -- every step below behaves exactly as before.
+    local owBasic = false
+    if not ns._inInstance then
+        owBasic = defaults.owBasicColoring
+        if db.owBasicColoring ~= nil then owBasic = db.owBasicColoring end
+    end
     -- Mini Enemies color scope: restricted to 5-man dungeons when "Mini Coloring
     -- M+ Only" is on (default), applied everywhere when it is off.
     local miniMPlusOnly = defaults.miniColoringMPlusOnly
     if db.miniColoringMPlusOnly ~= nil then miniMPlusOnly = db.miniColoringMPlusOnly end
-    local miniColorScope = ns._inDungeon or not miniMPlusOnly
+    local miniColorScope = not owBasic and (ns._inDungeon or not miniMPlusOnly)
     local _isBossUnit = false  -- deferred: boss color is applied at step 10b
     local _isMiniBoss = false
-    if classification == "elite" or classification == "worldboss" or classification == "rareelite" then
+    if not owBasic
+       and (classification == "elite" or classification == "worldboss" or classification == "rareelite") then
         -- Effective level (handles level scaling / Chromie time), not raw level.
         local level = UnitEffectiveLevel(unit)
         local playerLevel = UnitEffectiveLevel("player")
@@ -4813,7 +4953,7 @@ local function GetReactionColor(unit)
         end
     end
     local unitClass = UnitClassBase and UnitClassBase(unit)
-    local _isCaster = (unitClass == "PALADIN")
+    local _isCaster = not owBasic and (unitClass == "PALADIN")
     -- DPS/healer No Aggro override state (mirrors the tank has-aggro overrides at
     -- 6b). Each override independently promotes the No Aggro color above a single
     -- mob-type step (mini-boss step 7, caster step 8). Only active for a non-tank
@@ -4962,8 +5102,10 @@ local function GetReactionColor(unit)
     if isNeutral then
         return ResolveNeutralColor(unit)
     end
-    -- 11. Fallback: enemy in combat / out of combat
-    local eic = _C("enemyInCombat")
+    -- 11. Fallback: enemy in combat / out of combat. With Open World Basic
+    -- Coloring active, every mob-type special above was suppressed, so all
+    -- hostile mobs land here and share the flat "All Enemies" color.
+    local eic = _C(owBasic and "owBasicColor" or "enemyInCombat")
     return MaybeDarken(eic.r, eic.g, eic.b, inCombat)
 end
 local hookedUFs = {}
@@ -5069,7 +5211,7 @@ local function HideBlizzardFrame(nameplate, unit)
     -- -> immediate rebuild; no stash otherwise -> owe ONE deferred
     -- authoritative rebuild (never rebuild ungated per event -- that
     -- was the rebuild storm that negated every fast path).
-    if uf.AurasFrame and not hookedAurasFrames[uf.AurasFrame] then
+    if uf.AurasFrame and not ns.NPC_OwnsAuras and not hookedAurasFrames[uf.AurasFrame] then
         hookedAurasFrames[uf.AurasFrame] = true
         hooksecurefunc(uf.AurasFrame, "RefreshAuras", function(af)
             if af:IsForbidden() then return end
@@ -5112,7 +5254,8 @@ local function HideBlizzardFrame(nameplate, unit)
     end
     -- Keep Blizzard's UnitFrame processing UNIT_AURA so its
     -- debuffList/buffList stay current for our importance filter.
-    if unit and uf.AurasFrame then
+    -- (12.1 containers: those lists are taint-locked and unused -- skip.)
+    if unit and uf.AurasFrame and not ns.NPC_OwnsAuras then
         uf:RegisterUnitEvent("UNIT_AURA", unit)
     end
     if uf.selectionHighlight and not hookedHighlights[uf.selectionHighlight] then
@@ -5319,6 +5462,10 @@ function NameplateFrame:ApplyAppearance()
     self.health:SetPoint("CENTER", self, "CENTER", 0, GetNameplateYOffset())
     self.health:SetSize(GetHealthBarWidth(), GetHealthBarHeight())
     self.absorb:SetSize(GetHealthBarWidth(), GetHealthBarHeight())
+    -- Width may have changed: clear the overlay state gates so the next
+    -- overlay apply re-runs geometry (the stripe texcoord crop is derived
+    -- from the settings width, and the gates never watch width).
+    self._ovTgtTex, self._ovFocTex, self._ovHoverTex = nil, nil, nil
     ns.LayoutCastBar(self, ns.GetHealthBarWidth(), castH)
     ns.LayoutCastIcon(self, castH)
     local showIcon = GetShowCastIcon()
@@ -5724,8 +5871,17 @@ function NameplateFrame:SetUnit(unit, nameplate)
     self:RegisterUnitEvent("UNIT_HEALTH", unit)
     self:RegisterUnitEvent("UNIT_ABSORB_AMOUNT_CHANGED", unit)
     self:RegisterUnitEvent("UNIT_NAME_UPDATE", unit)
-    self:RegisterUnitEvent("UNIT_AURA", unit)
+    -- 12.1 containers own the aura rows and the legacy UNIT_AURA handler
+    -- chain ends in an inert UpdateAuras -- skip the registration entirely
+    -- (dead event delivery per plate per aura change otherwise).
+    if not ns.NPC_OwnsAuras then
+        self:RegisterUnitEvent("UNIT_AURA", unit)
+    end
     self:RegisterUnitEvent("UNIT_THREAT_LIST_UPDATE", unit)
+    -- 12.1: attach a pooled aura-container bundle for this unit.
+    if ns.NPC_AttachPlate then ns.NPC_AttachPlate(self, unit) end
+    -- Non-Target Opacity (zero cost while off: one numeric compare).
+    if ns._ntAlpha < 1 then ns.NT_Apply(self) end
     -- Critical: health bar must display immediately
     self:UpdateHealth()
     -- PERF: defer non-critical work 1 frame. Stacking bounds, name, cast bar,
@@ -5816,6 +5972,13 @@ end
 function NameplateFrame:ClearUnit()
     self:UnregisterAllEvents()
 
+    -- Non-Target Opacity: released pool frames always go back at full
+    -- alpha (nil _ntCurAlpha = never faded, keeps this a no-op).
+    if self._ntCurAlpha and self._ntCurAlpha < 1 then
+        self:SetAlpha(1)
+    end
+    self._ntCurAlpha = nil
+
     if self.isCasting then
         self.isCasting = false
         if self._castFallback then
@@ -5866,6 +6029,8 @@ function NameplateFrame:ClearUnit()
         end
         bSlot._auraId = nil
     end
+    -- 12.1: release this plate's aura-container bundle back to the pool.
+    if ns.NPC_DetachPlate then ns.NPC_DetachPlate(self) end
     self.unit = nil
     self.nameplate = nil
     self._shownAuras = nil
@@ -5970,7 +6135,11 @@ function NameplateFrame:UpdateHealthValues()
             unit = actualUnit
             -- Only refresh auras for the lockout when one was actually active
             -- (zero cost when the Cast Lockout feature is off / no lockout).
-            if self._castLockout then self._castLockout = nil; self:UpdateAuras() end
+            if self._castLockout then
+                self._castLockout = nil
+                self:UpdateAuras()
+                if ns.NPC_UpdateLockout then ns.NPC_UpdateLockout(self) end
+            end
             self:UpdateName()
             self._castDirtyFull = true
             self:UpdateCast()
@@ -6261,6 +6430,13 @@ function NameplateFrame:UpdateClassification()
     local slot = GetClassificationSlot()
     local _, iType = GetInstanceInfo()
     local inInstance = (iType == "party" or iType == "raid" or iType == "pvp" or iType == "arena")
+    if inInstance then
+        -- "Show In Instances" (slot cog on the Rare/Quest Indicator) lifts
+        -- the open-world-only gate.
+        local show = p and p.classificationShowInInstances
+        if show == nil then show = defaults.classificationShowInInstances end
+        if show then inInstance = false end
+    end
     if slot == "none" or inInstance then
         self.classFrame:Hide()
         self:UpdateNameWidth()
@@ -6335,6 +6511,8 @@ function NameplateFrame:UpdateClassification()
         PP.Point(self.classFrame, "BOTTOMLEFT", self.health, "TOPLEFT", cxOff, 2 + cpPush + cyOff)
     elseif slot == "topright" then
         PP.Point(self.classFrame, "BOTTOMRIGHT", self.health, "TOPRIGHT", cxOff, 2 + cpPush + cyOff)
+    elseif slot == "bottom" then
+        PP.Point(self.classFrame, "TOP", self.cast, "BOTTOM", cxOff, -2 + cyOff)
     end
     self.classFrame:Show()
     self:UpdateNameWidth()
@@ -6714,6 +6892,9 @@ function ns._npGroupTouched(updateInfo, frames, count)
 end
 
 function NameplateFrame:UpdateAuras(updateInfo)
+    -- 12.1: aura rows render via engine containers (see the containers
+    -- file); this whole legacy path is inert.
+    if ns.NPC_OwnsAuras then return end
     if not self.unit or not self.nameplate then return end
     local unit = self.unit
 
@@ -8052,10 +8233,12 @@ function NameplateFrame:ShowCastLockout()
     }
     self._castLockout = lockout
     self:UpdateAuras()
+    if ns.NPC_UpdateLockout then ns.NPC_UpdateLockout(self) end
     C_Timer.After(ns.DEFAULT_CAST_LOCKOUT_DURATION, function()
         if self._castLockout ~= lockout or GetTime() < lockout.expires then return end
         self._castLockout = nil
         self:UpdateAuras()
+        if ns.NPC_UpdateLockout then ns.NPC_UpdateLockout(self) end
     end)
 end
 function NameplateFrame:UNIT_HEALTH()
@@ -8715,6 +8898,10 @@ manager:SetScript("OnEvent", function(self, event, unit)
             ns._cachedTargetPlate:ApplyTarget()
             ns._cachedTargetPlate:UpdateHealthColor()
         end
+        -- Non-Target Opacity: gaining/losing a target flips every plate's
+        -- fade state, so this is the one full-iteration site. Zero cost
+        -- while off (single compare); value-guarded SetAlpha when on.
+        if ns._ntAlpha < 1 then ns.NT_ApplyAll() end
     elseif event == "PLAYER_FOCUS_CHANGED" then
         -- PERF: only update old + new focus plates instead of iterating all
         local oldFocus = ns._cachedFocusPlate
@@ -8744,6 +8931,14 @@ manager:SetScript("OnEvent", function(self, event, unit)
         UpdateFocusPlate(oldFocus)
         if ns._cachedFocusPlate and ns._cachedFocusPlate ~= oldFocus then
             UpdateFocusPlate(ns._cachedFocusPlate)
+        end
+        -- Non-Target Opacity: only the old and new focus plates change
+        -- fade state on a focus swap.
+        if ns._ntAlpha < 1 then
+            if oldFocus then ns.NT_Apply(oldFocus) end
+            if ns._cachedFocusPlate and ns._cachedFocusPlate ~= oldFocus then
+                ns.NT_Apply(ns._cachedFocusPlate)
+            end
         end
     elseif event == "UPDATE_MOUSEOVER_UNIT" then
         ns._UpdateMouseover()
@@ -8905,6 +9100,10 @@ function npAddon:OnInitialize()
     ENP.db = EllesmereUI.Lite.NewDB("EllesmereUINameplatesDB", { profile = defaults })
     p = ENP.db.profile
     ns.db = ENP.db
+    -- Non-Target Opacity: derive the cached value at login (no plates exist
+    -- yet, so the apply loop is a no-op; SetUnit fades new plates as they
+    -- spawn).
+    if ns.NT_RefreshSetting then ns.NT_RefreshSetting() end
     -- Append SharedMedia textures to runtime tables so SM texture keys resolve at runtime
     if EllesmereUI.AppendSharedMediaTextures then
         EllesmereUI.AppendSharedMediaTextures(

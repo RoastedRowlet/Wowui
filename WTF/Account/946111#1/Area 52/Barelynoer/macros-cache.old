@@ -46,6 +46,9 @@ VER 3 0100000000000001 "M0 Sale" "134400"
 #showtooltip
 /4 WTS Mythic 0s Individual or world tour PST for details
 END
+VER 3 010000000000000F "mo sw" "134400"
+/cast [@mouseover,nodead]  Sleep Walk
+END
 VER 3 0100000000000008 "mouseover dispel" "134400"
 #127
 #showtooltip

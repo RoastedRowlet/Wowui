@@ -642,7 +642,7 @@ function WSkin.ScrollBarsIn(frame, depth)
     if not frame or depth > 7 or frame:IsForbidden() then return end
     for i = 1, select("#", frame:GetChildren()) do
         local child = select(i, frame:GetChildren())
-        if child then
+        if child and not WSkin.IsForeignFrame(child, frame) then
             if child.Track and (child.Back or child.Forward) then WSkin.ScrollBar(child) end
             WSkin.ScrollBarsIn(child, depth + 1)
         end
@@ -721,6 +721,7 @@ end
 function WSkin.PagingIn(frame, depth)
     depth = depth or 0
     if not frame or depth > 8 or not frame.GetChildren or frame:IsForbidden() then return end
+    if depth > 0 and WSkin.IsForeignFrame(frame) then return end
     if frame.PrevPageButton then WSkin.PageButton(frame.PrevPageButton, "<") end
     if frame.NextPageButton then WSkin.PageButton(frame.NextPageButton, ">") end
     for i = 1, select("#", frame:GetChildren()) do
@@ -936,11 +937,21 @@ function WSkin.NormalizeTabRow(tabs)
     -- pixels and rounds inconsistently. PP.perfect (= 1 physical pixel at
     -- scale 1) divided by the tab's effective scale is exact at any scale.
     local PP = EUI and EUI.PP
+    -- Shave a few px off every skinned tab's height, ONCE per tab (guarded in
+    -- the WSkin FFD so repeated re-skins never shrink it cumulatively). Applied
+    -- here so every window's bottom tab row gets the same shorter profile.
+    local TAB_TRIM_H = 2
     local prev
     for i = 1, #tabs do
         local t = tabs[i]
         if t and t.IsForbidden and not t:IsForbidden()
            and (not t.IsShown or t:IsShown()) then
+            local d = GetFFD(t)
+            if not d.heightTrimmed and t.SetHeight and t.GetHeight then
+                d.heightTrimmed = true
+                local h = t:GetHeight() or 0
+                if h > TAB_TRIM_H then t:SetHeight(h - TAB_TRIM_H) end
+            end
             if prev then
                 local gap = (PP and PP.mult) or 1
                 local es = t.GetEffectiveScale and t:GetEffectiveScale()
@@ -1092,6 +1103,46 @@ function WSkin.IsArtExempt(frame)
     return d and d.artExempt or false
 end
 
+-- Frame provenance: is this frame Blizzard's, or was it parented into the
+-- window by another addon? Every recursive DISCOVERY sweep (art fades, button
+-- flattening, control/scrollbar/paging finds) skips foreign frames and their
+-- whole subtree, so third-party panels riding a Blizzard window keep their own
+-- look. Explicit primitive calls (WSkin.Button(frame), Panel, ...) stay
+-- ungated: naming a frame is opting in.
+--
+-- The signal: Blizzard's secure code leaves SECURE references behind -- a
+-- named frame's global, or the parentKey slot on its parent -- while frames
+-- created by any addon leave tainted ones. issecurevariable reads taint
+-- without spreading it, so the whole check is side-effect free. Frames with
+-- no name and no reference on their parent (pooled list rows) stay treated as
+-- Blizzard's; only confirmed-foreign verdicts cache (a frame could gain its
+-- addon-written reference key after we first see it).
+local _foreign = setmetatable({}, { __mode = "k" })
+
+function WSkin.IsForeignFrame(frame, parent)
+    if _foreign[frame] then return true end
+    local name = frame.GetName and frame:GetName()
+    if name and _G[name] == frame then
+        if issecurevariable(name) then return false end
+        _foreign[frame] = true
+        return true
+    end
+    parent = parent or (frame.GetParent and frame:GetParent())
+    if not parent then return false end
+    local insecureRef = false
+    for k, v in pairs(parent) do
+        if type(k) == "string" and not issecretvalue(v) and v == frame then
+            if issecurevariable(parent, k) then return false end
+            insecureRef = true
+        end
+    end
+    if insecureRef then
+        _foreign[frame] = true
+        return true
+    end
+    return false
+end
+
 local BG_ART_KEYS = {
     "CustomBG", "InfoBackground", "BackgroundTexture", "DungeonBackground",
     "Background", "background", "Bg", "bg", "WaterMark", "Watermark",
@@ -1105,6 +1156,7 @@ function WSkin.FadeKeyedArt(frame, depth)
     depth = depth or 0
     if not frame or depth > 6 or frame:IsForbidden() then return end
     if WSkin.IsArtExempt(frame) then return end
+    if depth > 0 and WSkin.IsForeignFrame(frame) then return end
     for _, key in ipairs(BG_ART_KEYS) do
         local t = frame[key]
         if t and t.IsObjectType and t:IsObjectType("Texture") then t:SetAlpha(0) end
@@ -1140,6 +1192,7 @@ function WSkin.FadeArtIn(frame, depth)
     depth = depth or 0
     if not frame or depth > 9 or not frame.GetRegions or frame:IsForbidden() then return end
     if WSkin.IsArtExempt(frame) then return end
+    if depth > 0 and WSkin.IsForeignFrame(frame) then return end
     local mybg = FFD[frame] and FFD[frame].bg
     for i = 1, select("#", frame:GetRegions()) do
         local r = select(i, frame:GetRegions())
@@ -1164,12 +1217,14 @@ function WSkin.ButtonsIn(frame, depth)
     if not frame or depth > 9 or not frame.GetChildren or frame:IsForbidden() then return end
     for i = 1, select("#", frame:GetChildren()) do
         local child = select(i, frame:GetChildren())
-        if child and child.GetObjectType and child:GetObjectType() == "Button"
-           and not GetFFD(child).skinned and not GetFFD(child).x
-           and child.Left and child.Middle and child.Right then
-            WSkin.Button(child)
+        if child and not WSkin.IsForeignFrame(child, frame) then
+            if child.GetObjectType and child:GetObjectType() == "Button"
+               and not GetFFD(child).skinned and not GetFFD(child).x
+               and child.Left and child.Middle and child.Right then
+                WSkin.Button(child)
+            end
+            WSkin.ButtonsIn(child, depth + 1)
         end
-        WSkin.ButtonsIn(child, depth + 1)
     end
 end
 
@@ -1183,6 +1238,7 @@ local CONTROL_KEYS = {
 function WSkin.ControlsIn(frame, depth)
     depth = depth or 0
     if not frame or depth > 9 or not frame.GetChildren or frame:IsForbidden() then return end
+    if depth > 0 and WSkin.IsForeignFrame(frame) then return end
     for _, key in ipairs(CONTROL_KEYS) do
         local el = frame[key]
         if el and el.IsObjectType and el.GetObjectType then

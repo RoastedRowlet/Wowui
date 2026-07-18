@@ -2810,7 +2810,11 @@ function CCS:LoadBlizzardAddOns()
     }
 
     for _, addon in ipairs(addons) do
-        safeLoad(addon)
+        if addon == "Blizzard_Transmog" and CCS.CurrentVersion ~= CCS.RETAIL then
+            -- Just skipping the Transmog for non-retail
+        else
+            safeLoad(addon)
+        end
     end
 
     -- Initialize WeeklyRewards UI if available

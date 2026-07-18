@@ -3,6 +3,7 @@ local addonName, ns = ...
 local math_floor, math_ceil, math_max, math_min, math_abs =
     math.floor, math.ceil, math.max, math.min, math.abs
 local string_format = string.format
+local issecretvalue = issecretvalue
 
 local oUF = ns.oUF or oUF
 local PP = EllesmereUI.PP
@@ -74,6 +75,7 @@ local defaults = {
             noBorderDebuffs = true,
             buffIconZoom   = 0.055,
             debuffIconZoom = 0.055,
+            durationFormat = "blizzard",
         },
         castbarOpacity = 1.0,
         castbarColor = { r = 0.114, g = 0.655, b = 0.514 },
@@ -139,6 +141,17 @@ local defaults = {
             debuffOffsetY = 0,
             debuffShowCooldownText = false,
             debuffCooldownTextSize = 10,
+            -- Private Auras (Blizzard-rendered personal boss-mechanic icons).
+            -- Player frame only. Opt-in; zero cost until paEnabled is true.
+            paEnabled        = false,
+            paSize           = 20,
+            paShowCountdown  = false,
+            paHideTooltip    = true,
+            paPosition       = "center",
+            paOffsetX        = 0,
+            paOffsetY        = 0,
+            paGrowDirection  = "RIGHT",
+            paSpacing        = 0,
             namePosition = "left",
             healthTextPosition = "right",
             leftTextContent = "name",
@@ -162,6 +175,14 @@ local defaults = {
             extraTextY = 0,
             extraTextClassColor = false,
             extraTextAlign = "left",
+            leftTextShortNameLength = 0,
+            leftTextShortNameEllipsis = true,
+            rightTextShortNameLength = 0,
+            rightTextShortNameEllipsis = true,
+            centerTextShortNameLength = 0,
+            centerTextShortNameEllipsis = true,
+            extraTextShortNameLength = 0,
+            extraTextShortNameEllipsis = true,
             bottomTextBar = false,
             bottomTextBarHeight = 16,
             btbPosition = "bottom",
@@ -188,6 +209,12 @@ local defaults = {
             btbCenterY = 0,
             btbCenterClassColor = false,
             btbCenterPowerColor = false,
+            btbLeftShortNameLength = 0,
+            btbLeftShortNameEllipsis = true,
+            btbRightShortNameLength = 0,
+            btbRightShortNameEllipsis = true,
+            btbCenterShortNameLength = 0,
+            btbCenterShortNameEllipsis = true,
             btbClassIcon = "none",
             btbClassIconSize = 14,
             btbClassIconLocation = "left",
@@ -272,6 +299,8 @@ local defaults = {
             showInParty = true,
             showSolo = true,
             barVisibility = "always",
+            oocFadeEnabled = false,  -- "Fade Out of Combat" toggle (off by default)
+            oocAlpha       = 0.5,    -- whole-frame alpha while out of combat
             visHideHousing = false,
             visOnlyInstances = false,
             visHideMounted = false,
@@ -293,6 +322,16 @@ local defaults = {
         },
         target = {
             frameWidth = 181,
+            -- Combat indicator (target frame): same option set as the player
+            -- frame, but opt-in -- defaults to "none" so nothing changes for
+            -- existing users until they pick a style.
+            combatIndicatorStyle = "none",
+            combatIndicatorColor = "custom",
+            combatIndicatorCustomColor = { r = 1, g = 1, b = 1 },
+            combatIndicatorPosition = "healthbar",
+            combatIndicatorSize = 22,
+            combatIndicatorX = 0,
+            combatIndicatorY = 0,
             healthHeight = 46,
             powerHeight = 6,
             powerPosition = "below",
@@ -381,6 +420,14 @@ local defaults = {
             extraTextY = 0,
             extraTextClassColor = false,
             extraTextAlign = "left",
+            leftTextShortNameLength = 0,
+            leftTextShortNameEllipsis = true,
+            rightTextShortNameLength = 0,
+            rightTextShortNameEllipsis = true,
+            centerTextShortNameLength = 0,
+            centerTextShortNameEllipsis = true,
+            extraTextShortNameLength = 0,
+            extraTextShortNameEllipsis = true,
             bottomTextBar = false,
             bottomTextBarHeight = 16,
             btbPosition = "bottom",
@@ -407,6 +454,12 @@ local defaults = {
             btbCenterY = 0,
             btbCenterClassColor = false,
             btbCenterPowerColor = false,
+            btbLeftShortNameLength = 0,
+            btbLeftShortNameEllipsis = true,
+            btbRightShortNameLength = 0,
+            btbRightShortNameEllipsis = true,
+            btbCenterShortNameLength = 0,
+            btbCenterShortNameEllipsis = true,
             btbClassIcon = "none",
             btbClassIconSize = 14,
             btbClassIconLocation = "left",
@@ -437,6 +490,8 @@ local defaults = {
             showInParty = true,
             showSolo = true,
             barVisibility = "always",
+            oocFadeEnabled = false,  -- "Fade Out of Combat" toggle (off by default)
+            oocAlpha       = 0.5,    -- whole-frame alpha while out of combat
             visHideHousing = false,
             visOnlyInstances = false,
             visHideMounted = false,
@@ -531,6 +586,12 @@ local defaults = {
             centerTextClassColor = false,
             centerTextColorR = 1, centerTextColorG = 1, centerTextColorB = 1,
             centerTextX = 0, centerTextY = 0,
+            leftTextShortNameLength = 0,
+            leftTextShortNameEllipsis = true,
+            rightTextShortNameLength = 0,
+            rightTextShortNameEllipsis = true,
+            centerTextShortNameLength = 0,
+            centerTextShortNameEllipsis = true,
             borderSize = 1,
             borderColor = { r = 0, g = 0, b = 0 },
             borderTexture = "solid",
@@ -566,6 +627,12 @@ local defaults = {
             centerTextClassColor = false,
             centerTextColorR = 1, centerTextColorG = 1, centerTextColorB = 1,
             centerTextX = 0, centerTextY = 0,
+            leftTextShortNameLength = 0,
+            leftTextShortNameEllipsis = true,
+            rightTextShortNameLength = 0,
+            rightTextShortNameEllipsis = true,
+            centerTextShortNameLength = 0,
+            centerTextShortNameEllipsis = true,
             borderSize = 1,
             borderColor = { r = 0, g = 0, b = 0 },
             borderTexture = "solid",
@@ -597,6 +664,12 @@ local defaults = {
             centerTextClassColor = false,
             centerTextColorR = 1, centerTextColorG = 1, centerTextColorB = 1,
             centerTextX = 0, centerTextY = 0,
+            leftTextShortNameLength = 0,
+            leftTextShortNameEllipsis = true,
+            rightTextShortNameLength = 0,
+            rightTextShortNameEllipsis = true,
+            centerTextShortNameLength = 0,
+            centerTextShortNameEllipsis = true,
             borderSize = 1,
             borderColor = { r = 0, g = 0, b = 0 },
             borderTexture = "solid",
@@ -675,6 +748,14 @@ local defaults = {
             extraTextY = 0,
             extraTextClassColor = false,
             extraTextAlign = "left",
+            leftTextShortNameLength = 0,
+            leftTextShortNameEllipsis = true,
+            rightTextShortNameLength = 0,
+            rightTextShortNameEllipsis = true,
+            centerTextShortNameLength = 0,
+            centerTextShortNameEllipsis = true,
+            extraTextShortNameLength = 0,
+            extraTextShortNameEllipsis = true,
             bottomTextBar = false,
             bottomTextBarHeight = 16,
             btbPosition = "bottom",
@@ -699,6 +780,12 @@ local defaults = {
             btbCenterY = 0,
             btbCenterClassColor = false,
             btbCenterPowerColor = false,
+            btbLeftShortNameLength = 0,
+            btbLeftShortNameEllipsis = true,
+            btbRightShortNameLength = 0,
+            btbRightShortNameEllipsis = true,
+            btbCenterShortNameLength = 0,
+            btbCenterShortNameEllipsis = true,
             btbClassIcon = "none",
             btbClassIconSize = 14,
             btbClassIconLocation = "left",
@@ -754,6 +841,8 @@ local defaults = {
             showInParty = true,
             showSolo = true,
             barVisibility = "always",
+            oocFadeEnabled = false,  -- "Fade Out of Combat" toggle (off by default)
+            oocAlpha       = 0.5,    -- whole-frame alpha while out of combat
             visHideHousing = false,
             visOnlyInstances = false,
             visHideMounted = false,
@@ -865,6 +954,12 @@ local defaults = {
             centerTextClassColor = false,
             centerTextColorR = 1, centerTextColorG = 1, centerTextColorB = 1,
             centerTextX = 0, centerTextY = 0,
+            leftTextShortNameLength = 0,
+            leftTextShortNameEllipsis = true,
+            rightTextShortNameLength = 0,
+            rightTextShortNameEllipsis = true,
+            centerTextShortNameLength = 0,
+            centerTextShortNameEllipsis = true,
             borderSize = 1,
             borderColor = { r = 0, g = 0, b = 0 },
             borderTexture = "solid",
@@ -896,6 +991,11 @@ local defaults = {
             focustarget = false,
             boss = true,
         },
+        -- Per-unit frame source: "eui" (EllesmereUI skinned frame), "blizzard"
+        -- (leave Blizzard's default frame in place), or "hidden" (no frame).
+        -- Resolved through ns.GetUnitFrameSource, which also honours the legacy
+        -- enabledFrames flag (false => "hidden") for backward compatibility.
+        frameSource = {},
         positions = {
             player = { point = "CENTER", relPoint = "CENTER", x = -317, y = -193.5 },
             target = { point = "CENTER", relPoint = "CENTER", x = 317, y = -201 },
@@ -909,8 +1009,9 @@ local defaults = {
         bossSpacing = 80,
 
         -- Player dispel overlay (player frame only; keys mirror Raid Frames)
-        dispelOverlay        = "none",   -- "none", "fill", "full", "gradient"
+        dispelOverlay        = "none",   -- "none", "fill", "full", "gradient", "gradient_sharp"
         dispelOverlayOpacity = 100,
+        dispelOverlayByMe    = false,    -- only debuffs the player can dispel (engine filter token)
         dispelColorMagic   = { r = 0.349, g = 0.475, b = 1.0 },
         dispelColorCurse   = { r = 0.636, g = 0.0,   b = 0.64 },
         dispelColorDisease = { r = 0.671, g = 0.384, b = 0.098 },
@@ -1222,6 +1323,11 @@ local function AnchorHealthBg(health)
     end
 end
 
+local function ClassColorSourceUnit(unitKey, unit)
+    if unitKey == "pet" then return "player" end
+    return unit or unitKey
+end
+
 local function ApplyDarkTheme(health)
     if not health then return end
     local isDark = db and db.profile and db.profile.darkTheme
@@ -1266,13 +1372,17 @@ local function ApplyDarkTheme(health)
         -- Check for custom fill/bg colors on this unit
         local unitKey = health._euiUnitKey
         local unitSettings = unitKey and db.profile[unitKey]
-        -- Pet class coloring is opt-in. Pets never match oUF's colorClass (that
-        -- path requires a player unit), so the pet frame uses colorClassPet, gated
-        -- on the pet page's Class Colored Fill toggle.
-        if unitKey == "pet" and unitSettings and unitSettings.healthClassColored then
-            health.colorClassPet = true
-        else
-            health.colorClassPet = false
+        health.colorClassPet = false
+        if unitKey == "pet" then
+            health.colorClass = false
+            if unitSettings and unitSettings.healthClassColored then
+                health.colorReaction = false
+                health.colorTapped = false
+                health.colorDisconnected = false
+                local _, ct = UnitClass("player")
+                local cc = ct and not issecretvalue(ct) and EllesmereUI.GetClassColor(ct)
+                if cc then health:SetStatusBarColor(cc.r, cc.g, cc.b) end
+            end
         end
         local customFill = unitSettings and unitSettings.customFillColor
         local customBg   = unitSettings and unitSettings.customBgColor
@@ -1301,6 +1411,10 @@ local function ApplyDarkTheme(health)
             local bR, bG, bB
             if cFill and not classColored then
                 bR, bG, bB = cFill.r, cFill.g, cFill.b
+            elseif classColored and uKey == "pet" then
+                local _, ct = UnitClass("player")
+                local cc = ct and not issecretvalue(ct) and EllesmereUI.GetClassColor(ct)
+                if cc then bR, bG, bB = cc.r, cc.g, cc.b end
             elseif color and color.GetRGB then
                 bR, bG, bB = color:GetRGB()
             end
@@ -1313,6 +1427,8 @@ local function ApplyDarkTheme(health)
                 ApplyBarGradient(self:GetStatusBarTexture(), uSettings.gradientDir or "HORIZONTAL",
                     bR, bG, bB, ga,
                     gc and gc.r or 0.20, gc and gc.g or 0.20, gc and gc.b or 0.80, ga)
+            elseif classColored and uKey == "pet" and bR then
+                self:SetStatusBarColor(bR, bG, bB)
             elseif cFill and not classColored then
                 self:SetStatusBarColor(cFill.r, cFill.g, cFill.b)
             end
@@ -1323,9 +1439,9 @@ local function ApplyDarkTheme(health)
                 AnchorHealthBg(self)
                 local bgClassR, bgClassG, bgClassB
                 if bgClassColored then
-                    local u = unit or self.unit or uKey
-                    if u then
-                        local _, ct = UnitClass(u)
+                    local classUnit = ClassColorSourceUnit(uKey, unit or self.unit or uKey)
+                    if classUnit then
+                        local _, ct = UnitClass(classUnit)
                         -- ct can be a secret value (out-of-range/uninspectable units); skip if so.
                         local cc = ct and not issecretvalue(ct) and EllesmereUI.GetClassColor(ct)
                         if cc then bgClassR, bgClassG, bgClassB = cc.r, cc.g, cc.b end
@@ -1356,9 +1472,9 @@ local function ApplyDarkTheme(health)
             local bgClassColored = unitSettings and unitSettings.bgClassColored
             local bgClassR, bgClassG, bgClassB
             if bgClassColored then
-                local u = unitKey or (health.__owner and health.__owner.unit)
-                if u then
-                    local _, ct = UnitClass(u)
+                local classUnit = ClassColorSourceUnit(unitKey, unitKey or (health.__owner and health.__owner.unit))
+                if classUnit then
+                    local _, ct = UnitClass(classUnit)
                     -- ct can be a secret value (out-of-range/uninspectable units); skip if so.
                     local cc = ct and not issecretvalue(ct) and EllesmereUI.GetClassColor(ct)
                     if cc then bgClassR, bgClassG, bgClassB = cc.r, cc.g, cc.b end
@@ -1710,8 +1826,30 @@ end
 -- Nickname-aware replacement for the stock [name] tag (see ContentToTag). Returns
 -- the nickname when one applies, else the raw unit name -- identical to [name] for
 -- everyone without a nickname.
-oUF.Tags.Methods["eui-name"] = function(unit)
-    return ns.ResolveUnitNickname(unit)
+oUF.Tags.Methods["eui-name"] = function(unit, realUnit, lenStr, ellipsisStr)
+    local name = ns.ResolveUnitNickname(unit)
+    local maxLen = tonumber(lenStr) or 0
+    if maxLen <= 0 then return name end
+    -- Secret names (enemy target/focus in protected content) cannot be
+    -- inspected: #, sub and concat all throw. Return the secret raw -- the
+    -- display sink accepts it -- so those names render untruncated.
+    if issecretvalue and issecretvalue(name) then return name end
+    -- Truncate by UTF-8 codepoints, never bytes: multibyte names (Cyrillic,
+    -- CJK, accents) must cut on a character boundary, and byte length would
+    -- overcount their character count.
+    local i, chars = 1, 0
+    local len = #name
+    while i <= len do
+        if chars == maxLen then
+            local cut = name:sub(1, i - 1)
+            if ellipsisStr ~= "0" then return cut .. "..." end
+            return cut
+        end
+        local b = name:byte(i)
+        i = i + ((b >= 240 and 4) or (b >= 224 and 3) or (b >= 192 and 2) or 1)
+        chars = chars + 1
+    end
+    return name
 end
 oUF.Tags.Events["eui-name"] = "UNIT_NAME_UPDATE"
 
@@ -1722,6 +1860,49 @@ function ns.RefreshAllUnitNames()
     for _, f in pairs(frames) do
         if type(f) == "table" and f.UpdateTags then f:UpdateTags() end
     end
+end
+-- Name tags only re-render on name events or via the refresh above, so a raw
+-- db restore (Spec Overrides apply, profile swap) needs this exported.
+_G._EUF_RefreshUnitNames = ns.RefreshAllUnitNames
+
+-- Cold-login text repaint: on a first (uncached) login a unit-frame text
+-- fontstring can hold the correct string yet render blank until a /reload. A
+-- fontstring only repaints when its text changes, and re-running the tag sets the
+-- same string (a no-op), so shortly after login we force a "" -> value transition
+-- on every tagged fontstring, repeated a few times as the timing varies. Only
+-- ._curTag strings are blanked (UpdateTags restores them) and the blank+restore is
+-- synchronous, so there is no visible flicker.
+do
+    local TEXT_FIELDS = { "LeftText", "RightText", "CenterText", "ExtraText" }
+
+    local function ForceTextRepaint()
+        for _, f in pairs(frames) do
+            if type(f) == "table" then
+                local changed = false
+                for _, host in ipairs({ f, f.BottomTextBar }) do
+                    if type(host) == "table" then
+                        for _, key in ipairs(TEXT_FIELDS) do
+                            local fs = host[key]
+                            if fs and fs._curTag and fs.SetText then
+                                fs:SetText("")
+                                changed = true
+                            end
+                        end
+                    end
+                end
+                if changed and f.UpdateTags then f:UpdateTags() end
+            end
+        end
+    end
+
+    local ev = CreateFrame("Frame")
+    ev:RegisterEvent("PLAYER_ENTERING_WORLD")
+    ev:SetScript("OnEvent", function(self)
+        self:UnregisterAllEvents()
+        for _, delay in ipairs({ 0.25, 1, 3 }) do
+            C_Timer.After(delay, ForceTextRepaint)
+        end
+    end)
 end
 
 -- Provider callbacks. NSRT (NSAPI) and Timeline Reminders (TR) may load after us,
@@ -1773,9 +1954,11 @@ end
 -- never compared/concatenated/string.format'd in Lua -- oUF joins the tag returns via
 -- SetFormattedText, where the name is only a %s display arg (exactly how the stock
 -- [name] tag stays safe). ContentToTag maps "nametotarget" to
--- "[name][eui-tgtsep][eui-tgtcol][eui-tgtname]":
+-- "[name][eui-tgtsep(...)][eui-tgtcol][eui-tgtname]":
 --   [name]        -> the unit's own name (zone-colored, stock oUF tag)
---   [eui-tgtsep]  -> " > " only when the unit has a target (a plain literal)
+--   [eui-tgtsep]  -> the indicator between the names, only when the unit has a
+--                    target. Per-slot separator string and indicator color ride
+--                    in the tag ARGS (see BuildTgtSepTag); no args = " > ".
 --   [eui-tgtcol]  -> the target's class/reaction COLOR escape (no name involved)
 --   [eui-tgtname] -> the target's name, returned RAW
 -- The colour escape precedes the raw name and runs to the end of the string, so the
@@ -1788,12 +1971,49 @@ end
 -- PLAYER_TARGET_CHANGED is unitless in oUF (refreshes every frame), covering the
 -- player frame's target; UNIT_TARGET covers target/focus frames' own target.
 
--- " > " separator, shown only when the unit has a target. Plain literal -- no secret.
-oUF.Tags.Methods["eui-tgtsep"] = function(unit)
-    if unit and UnitExists(unit .. "target") then return " > " end
-    return ""
+-- Separator/indicator between the names, shown only when the unit has a target.
+-- Plain literal plus color escapes -- no secret is ever touched. Args:
+--   sepHex    -> the separator string, hex-encoded per byte (any character the
+--                user types is safe inside the tag brackets); rendered with a
+--                space on each side, exactly like the stock " > ".
+--   colorSpec -> "class" = the TARGET's class/reaction color (same resolver as
+--                the target name), else a fixed "rrggbb" hex. The escape is
+--                closed with |r so a missing [eui-tgtcol] cannot inherit it.
+-- Decoded separators and custom escapes are cached: the tag fires on every
+-- target change and must not allocate after warmup.
+do
+    local sepCache = {}   -- sepHex -> " sep " (decoded, space-padded)
+    local escCache = {}   -- rrggbb -> "|cffrrggbb"
+    local function HexToChar(h) return string.char(tonumber(h, 16)) end
+    oUF.Tags.Methods["eui-tgtsep"] = function(unit, _, sepHex, colorSpec)
+        if not (unit and UnitExists(unit .. "target")) then return "" end
+        local sep = " > "
+        if sepHex then
+            sep = sepCache[sepHex]
+            if not sep then
+                sep = " " .. sepHex:gsub("%x%x", HexToChar) .. " "
+                sepCache[sepHex] = sep
+            end
+        end
+        if colorSpec == "class" then
+            local r, g, b = ns.ResolveUnitNameColor(unit .. "target")
+            if r then
+                return string.format("|cff%02x%02x%02x%s|r",
+                    math.floor(r * 255 + 0.5), math.floor(g * 255 + 0.5),
+                    math.floor(b * 255 + 0.5), sep)
+            end
+            return sep
+        elseif colorSpec then
+            local esc = escCache[colorSpec]
+            if not esc then esc = "|cff" .. colorSpec; escCache[colorSpec] = esc end
+            return esc .. sep .. "|r"
+        end
+        return sep
+    end
 end
-oUF.Tags.Events["eui-tgtsep"] = "UNIT_TARGET PLAYER_TARGET_CHANGED"
+-- UNIT_FACTION mirrors [eui-tgtcol]: the class-colored indicator must recolor
+-- when the target's reaction flips, exactly like the target name it precedes.
+oUF.Tags.Events["eui-tgtsep"] = "UNIT_TARGET PLAYER_TARGET_CHANGED UNIT_FACTION"
 
 -- The target's class/reaction colour escape (e.g. "|cffc41f3b"), or "" when none. Uses
 -- ns.ResolveUnitNameColor -- the SAME resolver ApplyClassColor uses for the Target of
@@ -1838,6 +2058,70 @@ local function GetSettingsForUnit(unit)
         end
     end
     return unitSettingsMap[unit] or db.profile.player
+end
+
+-- Per-unit frame source resolver. Returns one of:
+--   "eui"      -- spawn the EllesmereUI skinned frame (default)
+--   "blizzard" -- do not spawn; leave Blizzard's default frame in place
+--   "hidden"   -- do not spawn; actively disable Blizzard's frame too
+-- "hidden" has the highest precedence so a legacy disabled frame
+-- (enabledFrames[unit] == false, e.g. Visibility set to "never" or an
+-- "Enable X Frame" toggle turned off) keeps meaning "no frame at all".
+function ns.GetUnitFrameSource(unit)
+    if not db or not db.profile then return "eui" end
+    if db.profile.enabledFrames[unit] == false then return "hidden" end
+    local fs = db.profile.frameSource and db.profile.frameSource[unit]
+    if fs == "blizzard" then
+        -- Target-of-target / focus-target have no standalone Blizzard frame -- the
+        -- native one is a child of the parent TargetFrame/FocusFrame and only lives
+        -- while that parent frame does. So "blizzard" is honoured for them ONLY when
+        -- the parent (target/focus) is itself on Blizzard's frame; otherwise there
+        -- is no live native child to show, so fall back to the EllesmereUI frame.
+        if unit == "targettarget" then
+            return ns.GetUnitFrameSource("target") == "blizzard" and "blizzard" or "eui"
+        elseif unit == "focustarget" then
+            return ns.GetUnitFrameSource("focus") == "blizzard" and "blizzard" or "eui"
+        end
+        return "blizzard"
+    end
+    return "eui"
+end
+
+-- Writes a unit's frame source, keeping the legacy enabledFrames flag and the
+-- per-unit "never" visibility in sync so all existing readers stay correct.
+-- Switching source only takes full effect after a UI reload (oUF permanently
+-- disables the Blizzard frame at spawn, and secure frames cannot be created or
+-- torn down in combat), so callers should also prompt a reload.
+function ns.SetUnitFrameSource(unit, source)
+    if not db or not db.profile then return end
+    db.profile.frameSource = db.profile.frameSource or {}
+    db.profile.frameSource[unit] = source
+    db.profile.enabledFrames[unit] = (source ~= "hidden")
+    -- Keep the player/target/focus "Visibility" dropdown ("never") consistent
+    -- with the hidden state; other units have no barVisibility key.
+    local s = db.profile[unit]
+    if s and s.barVisibility ~= nil then
+        if source == "hidden" then
+            -- Remember the visible mode so a hidden -> visible round trip does
+            -- not lose an "in_combat"/"mouseover"/etc. preference. A
+            -- multi-selection set is stashed the same way -- it must also be
+            -- cleared, or it would stay authoritative over the forced
+            -- "never" and the frame would keep showing.
+            if type(s.visibilityModes) == "table" and next(s.visibilityModes) then
+                s._preHiddenVisibilityModes = s.visibilityModes
+            end
+            s.visibilityModes = nil
+            if s.barVisibility ~= "never" then
+                s._preHiddenBarVisibility = s.barVisibility
+            end
+            s.barVisibility = "never"
+        elseif s.barVisibility == "never" then
+            s.barVisibility = s._preHiddenBarVisibility or "always"
+            s._preHiddenBarVisibility = nil
+            s.visibilityModes = s._preHiddenVisibilityModes
+            s._preHiddenVisibilityModes = nil
+        end
+    end
 end
 
 -- Cast-bar icon "part of the bar" resolver. Returns true when the spell icon
@@ -2113,11 +2397,46 @@ local function GetBossHealthTag()
     end
 end
 
+-- Build a truncated name tag for the given settings prefix (e.g. "leftText", "btbLeft").
+local function BuildShortNameTag(prefix, settings)
+    local len = settings[prefix .. "ShortNameLength"] or 0
+    if len <= 0 then return "[eui-name]" end
+    local ellipsis = settings[prefix .. "ShortNameEllipsis"] ~= false and "1" or "0"
+    return "[eui-name(" .. len .. "," .. ellipsis .. ")]"
+end
+
+-- Build the per-slot "Name > Target" indicator tag. The separator string is
+-- hex-encoded per byte so any user-typed character (commas, parens, multibyte
+-- symbols) survives the tag brackets; the indicator color rides as "class" or
+-- a fixed rrggbb hex (default white).
+local function BuildTgtSepTag(prefix, settings)
+    local sep = settings[prefix .. "TargetSep"]
+    if type(sep) ~= "string" or sep == "" then sep = ">" end
+    local hex = sep:gsub(".", function(ch) return string.format("%02x", ch:byte()) end)
+    local col
+    if settings[prefix .. "TargetSepClassColor"] then
+        col = "class"
+    else
+        local c = settings[prefix .. "TargetSepColor"]
+        if type(c) == "table" then
+            col = string.format("%02x%02x%02x",
+                math.floor((c.r or 1) * 255 + 0.5),
+                math.floor((c.g or 1) * 255 + 0.5),
+                math.floor((c.b or 1) * 255 + 0.5))
+        else
+            col = "ffffff"
+        end
+    end
+    return "[eui-tgtsep(" .. hex .. "," .. col .. ")]"
+end
+
 -- Resolve a leftTextContent / rightTextContent value to an oUF tag string.
 -- content: "name", "both", "curhpshort", "perhp", "perhpnosign", "perhpnum", "none"
-local function ContentToTag(content)
-    if content == "name" then return "[eui-name]"
-    elseif content == "nametotarget" then return "[eui-name][eui-tgtsep][eui-tgtcol][eui-tgtname]"
+local function ContentToTag(content, prefix, settings)
+    if content == "name" then return BuildShortNameTag(prefix, settings)
+    elseif content == "nametotarget" then
+        return BuildShortNameTag(prefix, settings)
+            .. BuildTgtSepTag(prefix, settings) .. "[eui-tgtcol][eui-tgtname]"
     elseif content == "both" then return "[curhpshort] | [eui-perhp]%"
     elseif content == "bothdash" then return "[curhpshort] - [eui-perhp]%"
     elseif content == "perhpnum" then return "[eui-perhp]% | [curhpshort]"
@@ -2511,9 +2830,9 @@ local function CreateBottomTextBar(frame, unit, settings, anchorFrame, xOffset, 
 
     -- Tag and position the BTB texts
     local function ApplyBTBTextTags(lc, rc, cc)
-        local lt = ContentToTag(lc)
-        local rt = ContentToTag(rc)
-        local ct = ContentToTag(cc)
+        local lt = ContentToTag(lc, "btbLeft", settings)
+        local rt = ContentToTag(rc, "btbRight", settings)
+        local ct = ContentToTag(cc, "btbCenter", settings)
         if leftFS._curTag then frame:Untag(leftFS); leftFS._curTag = nil end
         if rightFS._curTag then frame:Untag(rightFS); rightFS._curTag = nil end
         if centerFS._curTag then frame:Untag(centerFS); centerFS._curTag = nil end
@@ -2681,7 +3000,7 @@ local function EnsureBarClip(frame)
     return clip
 end
 
-local function ReparentBarsToClip(frame, powerPosition)
+local function ReparentBarsToClip(frame, powerPosition, settings)
     local clip = EnsureBarClip(frame)
     if frame.Health and frame.Health:GetParent() ~= clip then
         frame.Health:SetParent(clip)
@@ -2697,10 +3016,25 @@ local function ReparentBarsToClip(frame, powerPosition)
                 frame.Power:SetParent(clip)
             end
         end
-        -- Power bar must render above absorb overlay (health level + 1).
         -- SetParent resets frame level, so re-assert after every reparent.
-        local hpLevel = frame.Health and frame.Health:GetFrameLevel() or clip:GetFrameLevel()
-        frame.Power:SetFrameLevel(hpLevel + 2)
+        if detached then
+            -- Detached bars are reparented onto `frame` itself (not the bar
+            -- clip), which also holds the border (frame:GetFrameLevel() + 10,
+            -- see CreateUnifiedBorder/UpdatePowerBorder). hpLevel + 2 (below)
+            -- sits well under that and let the border render over a detached
+            -- power bar dragged onto its edge -- match CreatePowerBar's own
+            -- detached offset instead so this stays consistently above it.
+            frame.Power:SetFrameLevel(frame:GetFrameLevel() + 12)
+        else
+            -- Power bar must render above absorb overlay (health level + 1).
+            local hpLevel = frame.Health and frame.Health:GetFrameLevel() or clip:GetFrameLevel()
+            frame.Power:SetFrameLevel(hpLevel + 2)
+        end
+        -- Reparent/SetFrameLevel leave the border and text overlay at stale
+        -- absolute levels; re-apply after the final level is set.
+        if settings then
+            ns.UpdatePowerBorder(frame.Power, settings)
+        end
     end
 end
 
@@ -3535,6 +3869,15 @@ local function CreateAbsorbBar(frame, unit, settings)
             -- hid. (Heal Absorb Style defaults to "clean", so it shows even
             -- when the shield Absorb Style is "none".)
             local s = GetSettingsForUnit(updUnit)
+            -- Boss frames have no absorb settings of their own: render with
+            -- the TARGET frame's absorb styling (donor convention, no
+            -- per-boss customization), behind the single "Show on Boss
+            -- Frames" toggle in the absorb cog (nil = enabled).
+            local bossAbsorbOff
+            if updUnit and updUnit:match("^boss") then
+                bossAbsorbOff = db.profile.boss and db.profile.boss.showAbsorbs == false
+                s = db.profile.target or s
+            end
             local ha = ab._healAbsorb
             local topBar = ab._topBar
             local healTopBar = ab._healTopBar
@@ -3544,7 +3887,7 @@ local function CreateAbsorbBar(frame, unit, settings)
             local healBarOn = healTopBar and healBarPos ~= "none"
             local shieldOff = s and (not s.showPlayerAbsorb or s.showPlayerAbsorb == "none")
             local healOff = (((s and s.healAbsorbStyle) or "clean") == "none")
-            if shieldOff and healOff and not barOn and not healBarOn then
+            if bossAbsorbOff or (shieldOff and healOff and not barOn and not healBarOn) then
                 ab:Hide()
                 if fw then fw:Hide() end
                 if ha then ha:Hide() end
@@ -3727,9 +4070,24 @@ function ns.UpdatePowerBorder(power, settings)
         settings.powerBorderAlpha or 1, settings.powerBorderStyle or "solid",
         settings.powerBorderOffsetX, settings.powerBorderOffsetY,
         settings.powerBorderShiftX, settings.powerBorderShiftY, "unitframes", size)
-    border:SetFrameLevel(settings.powerBorderBehind
-        and math.max(0, power:GetFrameLevel() - 1) or (power:GetFrameLevel() + 5))
-    if isDet and size > 0 then border:Show() else border:Hide() end
+    local borderLevel = settings.powerBorderBehind
+        and math.max(0, power:GetFrameLevel() - 1) or (power:GetFrameLevel() + 5)
+    border:SetFrameLevel(borderLevel)
+    local showBorder = isDet and size > 0
+    if showBorder then border:Show() else border:Hide() end
+
+    -- Power text overlay must clear the border: it shares the bar's strata and can
+    -- sit above the overlay's default level, so match strata and lift past it.
+    local ovr = power._ppTextOvr
+    if ovr then
+        ovr:SetFrameStrata(power:GetFrameStrata())
+        if showBorder then
+            ovr:SetFrameLevel(borderLevel + 5)
+        else
+            local pf = power:GetParent()
+            ovr:SetFrameLevel((pf and pf:GetFrameLevel() or power:GetFrameLevel()) + 15)
+        end
+    end
 end
 
 local function CreatePowerBar(frame, unit, settings)
@@ -3843,7 +4201,10 @@ local function CreatePowerBar(frame, unit, settings)
         -- creation/refresh stands, for zero per-update cost in the default case.
         if s2.powerBgPowerColored and self.bg then
             local pr, pg, pb = EllesmereUI.ResolveUnitPowerColor(unit)
-            if pr then self.bg:SetColorTexture(pr, pg, pb, 1) end
+            if pr then
+                local f = EllesmereUI.GetPowerBgDarkenFactor()
+                self.bg:SetColorTexture(pr * f, pg * f, pb * f, 1)
+            end
         end
         -- Keep the power-percent text color in sync with THIS unit (fires on
         -- target/focus change + UNIT_DISPLAYPOWER, so the text follows the unit
@@ -4024,7 +4385,9 @@ local function CreatePowerBar(frame, unit, settings)
                 -- Power-colored bg: restore this unit's power color (mirrors fill);
                 -- the next PostUpdateColor keeps it tracking thereafter.
                 local pr, pg, pb = EllesmereUI.ResolveUnitPowerColor(u)
-                if pr then self.bg:SetColorTexture(pr, pg, pb, 1)
+                if pr then
+                    local f = EllesmereUI.GetPowerBgDarkenFactor()
+                    self.bg:SetColorTexture(pr * f, pg * f, pb * f, 1)
                 else self.bg:SetColorTexture(17/255, 17/255, 17/255, 1) end
             else
                 local customBg = s.customPowerBgColor
@@ -5301,15 +5664,18 @@ end
 -- after the height is rounded to whole pixels.
 local AURA_CROP_HEIGHT = 0.80
 local AURA_ZOOM = 0.07
-local function SetAuraIconCrop(icon, cropped, w, h)
+-- zoom (optional) overrides the default AURA_ZOOM crop; per-unit/per-category
+-- Icon Zoom values flow in here, defaulting to AURA_ZOOM so unset = unchanged.
+local function SetAuraIconCrop(icon, cropped, w, h, zoom)
     if not icon then return end
+    local z = zoom or AURA_ZOOM
     if cropped and w and h and w > 0 then
-        local uSpan = 1 - 2 * AURA_ZOOM
+        local uSpan = 1 - 2 * z
         local vSpan = uSpan * (h / w)
         local v0 = 0.5 - vSpan / 2
-        icon:SetTexCoord(AURA_ZOOM, 1 - AURA_ZOOM, v0, 1 - v0)
+        icon:SetTexCoord(z, 1 - z, v0, 1 - v0)
     else
-        icon:SetTexCoord(AURA_ZOOM, 1 - AURA_ZOOM, AURA_ZOOM, 1 - AURA_ZOOM)
+        icon:SetTexCoord(z, 1 - z, z, 1 - z)
     end
 end
 -- Exposed so the options live preview can apply the exact same crop math
@@ -5339,7 +5705,7 @@ function ns.ApplyStackAnchor(fs, parent, pos, offX, offY)
     fs:SetPoint(point, parent, point, baseX + (offX or 0), offY or 0)
 end
 
-local function ApplyAuraCooldownText(container, showCD, cdSize, stackSize, cdOffX, cdOffY, stackOffX, stackOffY, auraSize, cropped, stackPos, cdTextColor, stackTextColor)
+local function ApplyAuraCooldownText(container, showCD, cdSize, stackSize, cdOffX, cdOffY, stackOffX, stackOffY, auraSize, cropped, stackPos, cdTextColor, stackTextColor, iconZoom)
     if not container then return end
     -- Cropped style: make the buttons rectangular (height = 80% of width). oUF
     -- sizes each button to element.width x element.height and uses them for the
@@ -5362,7 +5728,7 @@ local function ApplyAuraCooldownText(container, showCD, cdSize, stackSize, cdOff
     end
     for i = 1, (container.createdButtons or 0) do
         local btn = container[i]
-        if btn and btn.Icon then SetAuraIconCrop(btn.Icon, cropped, cropW, cropH) end
+        if btn and btn.Icon then SetAuraIconCrop(btn.Icon, cropped, cropW, cropH, iconZoom) end
         if btn and btn.Cooldown then
             btn.Cooldown:SetHideCountdownNumbers(not showCD)
             local cdText = btn.Cooldown:GetRegions()
@@ -5490,6 +5856,15 @@ function ns.ApplyEUIAuraFilter(element, base, settings)
 end
 
 local function CreateTargetAuras(frame, unit)
+    -- 12.1 aura containers: migrated units render through the container system
+    -- in EUI_UnitFrames_AuraContainers.lua. frame.Buffs/frame.Debuffs stay nil
+    -- for those units, which self-neutralizes every legacy element touchpoint
+    -- (all reload/startup/toggle sites are frame.Buffs-guarded).
+    if ns.UF_CreateAuraContainers and ns.UF_ContainerUnits and ns.UF_ContainerUnits[unit or "target"] then
+        ns.UF_GetSettings = GetSettingsForUnit -- always-fresh settings access for the container file
+        ns.UF_GetProfile = ns.UF_GetProfile or function() return db and db.profile end
+        return ns.UF_CreateAuraContainers(frame, unit or "target")
+    end
     local function SetupAuraIcon(container, button)
         if not button then return end
 
@@ -5499,11 +5874,11 @@ local function CreateTargetAuras(frame, unit)
         local s = GetSettingsForUnit(unit or "target")
         if button.Icon then
             -- Cropped icons trim the texture top/bottom to keep aspect ratio.
-            local cropped, aSize
-            if isBuff then cropped = s and s.buffCropIcons; aSize = (s and s.buffSize) or 22
-            else cropped = s and s.debuffCropIcons; aSize = (s and s.debuffSize) or 22 end
+            local cropped, aSize, zoom
+            if isBuff then cropped = s and s.buffCropIcons; aSize = (s and s.buffSize) or 22; zoom = s and s.buffIconZoom
+            else cropped = s and s.debuffCropIcons; aSize = (s and s.debuffSize) or 22; zoom = s and s.debuffIconZoom end
             local cH = cropped and math.floor(aSize * AURA_CROP_HEIGHT + 0.5) or aSize
-            SetAuraIconCrop(button.Icon, cropped, aSize, cH)
+            SetAuraIconCrop(button.Icon, cropped, aSize, cH, zoom)
         end
 
         if button.Cooldown then
@@ -5775,6 +6150,11 @@ local function CreateTargetAuras(frame, unit)
         debuffs.growthY = dgy
         ns.ApplyEUIAuraFilter(debuffs, "HARMFUL", settings)
         debuffs.PostCreateButton = SetupAuraIcon
+        -- Dispel-type border recolor; reads the per-unit setting live so the
+        -- options toggle applies on the next aura update without a rebuild.
+        debuffs.PostUpdateButton = function(_, button, u, data)
+            if ns.UF_ColorDebuffDispelBorder then ns.UF_ColorDebuffDispelBorder(button, u, data) end
+        end
         if settings and settings.onlyPlayerDebuffs then
             debuffs.onlyShowPlayer = true
         end
@@ -5918,7 +6298,7 @@ local function StyleFullFrame(frame, unit)
 
     CreateUnifiedBorder(frame, unit)
     UpdateBordersForScale(frame, unit)
-    ReparentBarsToClip(frame, settings.powerPosition)
+    ReparentBarsToClip(frame, settings.powerPosition, settings)
 
     -- Raid target marker icon -- oUF's RaidTargetIndicator element manages
     -- visibility via RAID_TARGET_UPDATE. We only assign the element when
@@ -6050,10 +6430,10 @@ local function StyleFullFrame(frame, unit)
     -- alignment-based anchor and a 95%-of-bar-width clamp (ellipsis truncation).
     local function ApplyTextTags(lc, rc, cc, ec)
         ec = ec or (settings.extraTextContent or "none")
-        local ltag = ContentToTag(lc)
-        local rtag = ContentToTag(rc)
-        local ctag = ContentToTag(cc)
-        local etag = ContentToTag(ec)
+        local ltag = ContentToTag(lc, "leftText", settings)
+        local rtag = ContentToTag(rc, "rightText", settings)
+        local ctag = ContentToTag(cc, "centerText", settings)
+        local etag = ContentToTag(ec, "extraText", settings)
         if leftText._curTag then frame:Untag(leftText); leftText._curTag = nil end
         if rightText._curTag then frame:Untag(rightText); rightText._curTag = nil end
         if centerText._curTag then frame:Untag(centerText); centerText._curTag = nil end
@@ -6253,7 +6633,7 @@ local function StyleFocusFrame(frame, unit)
 
     CreateUnifiedBorder(frame, unit)
     UpdateBordersForScale(frame, unit)
-    ReparentBarsToClip(frame, settings.powerPosition)
+    ReparentBarsToClip(frame, settings.powerPosition, settings)
 
     -- Raid target marker icon
     do
@@ -6384,10 +6764,10 @@ local function StyleFocusFrame(frame, unit)
     -- alignment-based anchor and a 95%-of-bar-width clamp (ellipsis truncation).
     local function ApplyTextTags(lc, rc, cc, ec)
         ec = ec or (settings.extraTextContent or "none")
-        local ltag = ContentToTag(lc)
-        local rtag = ContentToTag(rc)
-        local ctag = ContentToTag(cc)
-        local etag = ContentToTag(ec)
+        local ltag = ContentToTag(lc, "leftText", settings)
+        local rtag = ContentToTag(rc, "rightText", settings)
+        local ctag = ContentToTag(cc, "centerText", settings)
+        local etag = ContentToTag(ec, "extraText", settings)
         if leftText._curTag then frame:Untag(leftText); leftText._curTag = nil end
         if rightText._curTag then frame:Untag(rightText); rightText._curTag = nil end
         if centerText._curTag then frame:Untag(centerText); centerText._curTag = nil end
@@ -6582,7 +6962,7 @@ local function StyleSimpleFrame(frame, unit)
 
     CreateUnifiedBorder(frame, unit)
     UpdateBordersForScale(frame, unit)
-    ReparentBarsToClip(frame, settings.powerPosition)
+    ReparentBarsToClip(frame, settings.powerPosition, settings)
 
     -- Text overlay frame (parented to frame, not health, to avoid clipping)
     local textOverlay = CreateFrame("Frame", nil, frame)
@@ -6675,9 +7055,9 @@ local function StyleSimpleFrame(frame, unit)
     end
 
     local function ApplyTextTags(lc, rc, cc)
-        local ltag = ContentToTag(lc)
-        local rtag = ContentToTag(rc)
-        local ctag = ContentToTag(cc)
+        local ltag = ContentToTag(lc, "leftText", settings)
+        local rtag = ContentToTag(rc, "rightText", settings)
+        local ctag = ContentToTag(cc, "centerText", settings)
         if leftText._curTag then frame:Untag(leftText); leftText._curTag = nil end
         if rightText._curTag then frame:Untag(rightText); rightText._curTag = nil end
         if centerText._curTag then frame:Untag(centerText); centerText._curTag = nil end
@@ -6828,7 +7208,7 @@ local function StylePetFrame(frame, unit)
 
     CreateUnifiedBorder(frame, unit)
     UpdateBordersForScale(frame, unit)
-    ReparentBarsToClip(frame, settings.powerPosition)
+    ReparentBarsToClip(frame, settings.powerPosition, settings)
 
     -- Text overlay frame (parented to frame, not health, to avoid clipping)
     local textOverlay = CreateFrame("Frame", nil, frame)
@@ -6920,9 +7300,9 @@ local function StylePetFrame(frame, unit)
     end
 
     local function ApplyTextTags(lc, rc, cc)
-        local ltag = ContentToTag(lc)
-        local rtag = ContentToTag(rc)
-        local ctag = ContentToTag(cc)
+        local ltag = ContentToTag(lc, "leftText", settings)
+        local rtag = ContentToTag(rc, "rightText", settings)
+        local ctag = ContentToTag(cc, "centerText", settings)
         if leftText._curTag then frame:Untag(leftText); leftText._curTag = nil end
         if rightText._curTag then frame:Untag(rightText); rightText._curTag = nil end
         if centerText._curTag then frame:Untag(centerText); centerText._curTag = nil end
@@ -7018,6 +7398,12 @@ local function StyleBossFrame(frame, unit)
     local healthRightInset = (showPortrait and pSide == "right") and bossBarHeight or 0
     frame.Health = CreateHealthBar(frame, unit, settings.healthHeight, portraitHeight, settings, healthRightInset)
     frame.Power = CreatePowerBar(frame, unit, settings)
+    -- Always create the absorb bar (visibility gated at render time). Boss
+    -- frames carry no absorb settings of their own: they render with the
+    -- TARGET frame's absorb styling (donor convention, like textures) behind
+    -- the "Show on Boss Frames" toggle in the absorb cog. Geometry (reverse
+    -- fill) still comes from the boss block via `settings`.
+    CreateAbsorbBar(frame, unit, settings)
     -- Always create portrait; hide backdrop when disabled
     frame.Portrait = CreatePortrait(frame, pSide, bossBarHeight, unit)
     EllesmereUI._ufPortraitSide[frame] = pSide
@@ -7053,7 +7439,7 @@ local function StyleBossFrame(frame, unit)
 
     CreateUnifiedBorder(frame, unit)
     UpdateBordersForScale(frame, unit)
-    ReparentBarsToClip(frame, settings.powerPosition)
+    ReparentBarsToClip(frame, settings.powerPosition, settings)
 
     -- Raid target marker icon (boss frames) -- anchored outside the LEFT edge
     do
@@ -7172,9 +7558,9 @@ local function StyleBossFrame(frame, unit)
     end
 
     local function ApplyTextTags(lc, rc, cc)
-        local ltag = ContentToTag(lc)
-        local rtag = ContentToTag(rc)
-        local ctag = ContentToTag(cc)
+        local ltag = ContentToTag(lc, "leftText", settings)
+        local rtag = ContentToTag(rc, "rightText", settings)
+        local ctag = ContentToTag(cc, "centerText", settings)
         if leftText._curTag then frame:Untag(leftText); leftText._curTag = nil end
         if rightText._curTag then frame:Untag(rightText); rightText._curTag = nil end
         if centerText._curTag then frame:Untag(centerText); centerText._curTag = nil end
@@ -8045,6 +8431,22 @@ local function ReloadFrames()
                     frame.BottomTextBar:SetFrameStrata(strata)
                 end
             end
+            -- Same re-lift for a detached power bar. frame:SetFrameStrata above
+            -- just reset it to the frame's strata (same reason the cast bar needs
+            -- re-lifting below), so without this a detached power bar silently
+            -- falls back to the frame's strata and can end up behind the frame's
+            -- own border, however "Detached Power Bar" strata is configured.
+            if frame.Power then
+                local us2 = GetSettingsForUnit(unitKey)
+                local ppPos = us2 and us2.powerPosition or "below"
+                if ppPos == "detached_top" or ppPos == "detached_bottom" then
+                    if profile.enableCustomBarStratas then
+                        frame.Power:SetFrameStrata(profile.detachedPowerStrata or "HIGH")
+                    else
+                        frame.Power:SetFrameStrata("MEDIUM")
+                    end
+                end
+            end
             -- The cast bar is a child of the frame, so the SetFrameStrata above
             -- reset it to the frame's strata. Lift player/target/focus cast bars
             -- to HIGH so they never hide behind other MEDIUM-strata frames -- unless
@@ -8075,6 +8477,13 @@ local function ReloadFrames()
     -- Live enable/disable frames without reload
     local function ToggleFrame(unit, frame)
         if not frame then return end
+        if frame._euiVisDriver then
+            -- A secure condition driver owns this frame's Show/Hide (its
+            -- group gating included); manual toggling here would de-sync
+            -- it until the next driver re-evaluation. The visibility pass
+            -- converts the driver when the frame is disabled.
+            return
+        end
         local unitKey = unit:match("^boss%d$") and "boss" or unit
         local isEnabled = enabled[unitKey] ~= false
         -- Check group visibility for player/target/focus
@@ -8546,9 +8955,20 @@ local function ReloadFrames()
                     -- keeps running in the background and the value stays
                     -- live whether the bar is visible or not.
                     if frame.HealthPrediction and frame.HealthPrediction.damageAbsorb then
+                        -- Boss frames style from the TARGET donor block,
+                        -- behind the "Show on Boss Frames" toggle (nil = on).
+                        local absSettings = settings
                         local absStyle = settings.showPlayerAbsorb
+                        if unit and unit:match("^boss") then
+                            if db.profile.boss and db.profile.boss.showAbsorbs == false then
+                                absStyle = nil
+                            else
+                                absSettings = db.profile.target or settings
+                                absStyle = absSettings.showPlayerAbsorb
+                            end
+                        end
                         if absStyle and absStyle ~= "none" then
-                            ApplyAbsorbStyle(frame.HealthPrediction.damageAbsorb, absStyle, settings)
+                            ApplyAbsorbStyle(frame.HealthPrediction.damageAbsorb, absStyle, absSettings)
                             frame.HealthPrediction.damageAbsorb:Show()
                             -- Force an immediate value update so the bar doesn't
                             -- show stale/uninitialized fill covering the full frame.
@@ -8608,7 +9028,7 @@ local function ReloadFrames()
                                     frame.Buffs:ForceUpdate()
                                 end
                             end
-                            ApplyAuraCooldownText(frame.Buffs, settings.buffShowCooldownText, settings.buffCooldownTextSize or 10, settings.buffStackTextSize, settings.buffCooldownTextOffsetX, settings.buffCooldownTextOffsetY, settings.buffStackTextOffsetX, settings.buffStackTextOffsetY, settings.buffSize or 22, settings.buffCropIcons, settings.buffStackTextPosition)
+                            ApplyAuraCooldownText(frame.Buffs, settings.buffShowCooldownText, settings.buffCooldownTextSize or 10, settings.buffStackTextSize, settings.buffCooldownTextOffsetX, settings.buffCooldownTextOffsetY, settings.buffStackTextOffsetX, settings.buffStackTextOffsetY, settings.buffSize or 22, settings.buffCropIcons, settings.buffStackTextPosition, nil, nil, settings.buffIconZoom or 0.07)
                         else
                             if frame:IsElementEnabled("Buffs") then
                                 frame:DisableElement("Buffs")
@@ -8658,7 +9078,7 @@ local function ReloadFrames()
                                     frame.Debuffs:ForceUpdate()
                                 end
                             end
-                            ApplyAuraCooldownText(frame.Debuffs, settings.debuffShowCooldownText, settings.debuffCooldownTextSize or 10, settings.debuffStackTextSize, settings.debuffCooldownTextOffsetX, settings.debuffCooldownTextOffsetY, settings.debuffStackTextOffsetX, settings.debuffStackTextOffsetY, settings.debuffSize or 22, settings.debuffCropIcons, settings.debuffStackTextPosition)
+                            ApplyAuraCooldownText(frame.Debuffs, settings.debuffShowCooldownText, settings.debuffCooldownTextSize or 10, settings.debuffStackTextSize, settings.debuffCooldownTextOffsetX, settings.debuffCooldownTextOffsetY, settings.debuffStackTextOffsetX, settings.debuffStackTextOffsetY, settings.debuffSize or 22, settings.debuffCropIcons, settings.debuffStackTextPosition, nil, nil, settings.debuffIconZoom or 0.07)
                         end
                     end
 
@@ -8719,7 +9139,7 @@ local function ReloadFrames()
                     end
 
                     UpdateBordersForScale(frame, unit)
-                    ReparentBarsToClip(frame, settings.powerPosition)
+                    ReparentBarsToClip(frame, settings.powerPosition, settings)
 
                 elseif unit == "target" then
                     local pSide = settings.portraitSide or "right"
@@ -9036,7 +9456,7 @@ local function ReloadFrames()
                             frame.Buffs:Hide()
                             frame.Buffs.num = 0
                         end
-                        ApplyAuraCooldownText(frame.Buffs, settings.buffShowCooldownText, settings.buffCooldownTextSize or 10, settings.buffStackTextSize, settings.buffCooldownTextOffsetX, settings.buffCooldownTextOffsetY, settings.buffStackTextOffsetX, settings.buffStackTextOffsetY, settings.buffSize or 22, settings.buffCropIcons, settings.buffStackTextPosition)
+                        ApplyAuraCooldownText(frame.Buffs, settings.buffShowCooldownText, settings.buffCooldownTextSize or 10, settings.buffStackTextSize, settings.buffCooldownTextOffsetX, settings.buffCooldownTextOffsetY, settings.buffStackTextOffsetX, settings.buffStackTextOffsetY, settings.buffSize or 22, settings.buffCropIcons, settings.buffStackTextPosition, nil, nil, settings.buffIconZoom or 0.07)
                     end
 
                     -- Debuffs
@@ -9082,11 +9502,11 @@ local function ReloadFrames()
                                 end
                             end
                         end
-                        ApplyAuraCooldownText(frame.Debuffs, settings.debuffShowCooldownText, settings.debuffCooldownTextSize or 10, settings.debuffStackTextSize, settings.debuffCooldownTextOffsetX, settings.debuffCooldownTextOffsetY, settings.debuffStackTextOffsetX, settings.debuffStackTextOffsetY, settings.debuffSize or 22, settings.debuffCropIcons, settings.debuffStackTextPosition)
+                        ApplyAuraCooldownText(frame.Debuffs, settings.debuffShowCooldownText, settings.debuffCooldownTextSize or 10, settings.debuffStackTextSize, settings.debuffCooldownTextOffsetX, settings.debuffCooldownTextOffsetY, settings.debuffStackTextOffsetX, settings.debuffStackTextOffsetY, settings.debuffSize or 22, settings.debuffCropIcons, settings.debuffStackTextPosition, nil, nil, settings.debuffIconZoom or 0.07)
                     end
 
                     UpdateBordersForScale(frame, unit)
-                    ReparentBarsToClip(frame, settings.powerPosition)
+                    ReparentBarsToClip(frame, settings.powerPosition, settings)
                 end
 
                 -- (health tag re-tagging now handled by _applyTextTags above)
@@ -9399,7 +9819,7 @@ local function ReloadFrames()
                                 frame.Debuffs:ForceUpdate()
                             end
                         end
-                        ApplyAuraCooldownText(frame.Debuffs, settings.debuffShowCooldownText, settings.debuffCooldownTextSize or 10, settings.debuffStackTextSize, settings.debuffCooldownTextOffsetX, settings.debuffCooldownTextOffsetY, settings.debuffStackTextOffsetX, settings.debuffStackTextOffsetY, settings.debuffSize or 22, settings.debuffCropIcons, settings.debuffStackTextPosition)
+                        ApplyAuraCooldownText(frame.Debuffs, settings.debuffShowCooldownText, settings.debuffCooldownTextSize or 10, settings.debuffStackTextSize, settings.debuffCooldownTextOffsetX, settings.debuffCooldownTextOffsetY, settings.debuffStackTextOffsetX, settings.debuffStackTextOffsetY, settings.debuffSize or 22, settings.debuffCropIcons, settings.debuffStackTextPosition, nil, nil, settings.debuffIconZoom or 0.07)
                     end
                 end
 
@@ -9448,11 +9868,11 @@ local function ReloadFrames()
                         frame.Buffs:Hide()
                         frame.Buffs.num = 0
                     end
-                    ApplyAuraCooldownText(frame.Buffs, settings.buffShowCooldownText, settings.buffCooldownTextSize or 10, settings.buffStackTextSize, settings.buffCooldownTextOffsetX, settings.buffCooldownTextOffsetY, settings.buffStackTextOffsetX, settings.buffStackTextOffsetY, settings.buffSize or 22, settings.buffCropIcons, settings.buffStackTextPosition)
+                    ApplyAuraCooldownText(frame.Buffs, settings.buffShowCooldownText, settings.buffCooldownTextSize or 10, settings.buffStackTextSize, settings.buffCooldownTextOffsetX, settings.buffCooldownTextOffsetY, settings.buffStackTextOffsetX, settings.buffStackTextOffsetY, settings.buffSize or 22, settings.buffCropIcons, settings.buffStackTextPosition, nil, nil, settings.buffIconZoom or 0.07)
                 end
 
                 UpdateBordersForScale(frame, unit)
-                ReparentBarsToClip(frame, settings.powerPosition)
+                ReparentBarsToClip(frame, settings.powerPosition, settings)
 
             elseif unit == "pet" or unit == "targettarget" or unit == "focustarget" then
                 -- Pet, ToT and FoT all share the same simple-frame layout:
@@ -9486,7 +9906,7 @@ local function ReloadFrames()
                 end
 
                 UpdateBordersForScale(frame, unit)
-                ReparentBarsToClip(frame, settings.powerPosition)
+                ReparentBarsToClip(frame, settings.powerPosition, settings)
 
             elseif unit:match("^boss%d$") then
                 local bPpPos = settings.powerPosition or "below"
@@ -9779,9 +10199,9 @@ local function ReloadFrames()
                     -- Use simple debuff cooldown text settings when simple display
                     -- is active, regular debuff settings otherwise.
                     if simpleOn then
-                        ApplyAuraCooldownText(frame.Debuffs, settings.simpleDebuffShowCooldownText, settings.simpleDebuffCooldownTextSize or 14, settings.debuffStackTextSize, settings.simpleDebuffCooldownTextOffsetX, settings.simpleDebuffCooldownTextOffsetY, settings.debuffStackTextOffsetX, settings.debuffStackTextOffsetY, nil, nil, settings.debuffStackTextPosition, settings.debuffCooldownTextColor, settings.debuffStackTextColor)
+                        ApplyAuraCooldownText(frame.Debuffs, settings.simpleDebuffShowCooldownText, settings.simpleDebuffCooldownTextSize or 14, settings.debuffStackTextSize, settings.simpleDebuffCooldownTextOffsetX, settings.simpleDebuffCooldownTextOffsetY, settings.debuffStackTextOffsetX, settings.debuffStackTextOffsetY, nil, nil, settings.debuffStackTextPosition, settings.debuffCooldownTextColor, settings.debuffStackTextColor, settings.debuffIconZoom or 0.07)
                     else
-                        ApplyAuraCooldownText(frame.Debuffs, settings.debuffShowCooldownText, settings.debuffCooldownTextSize or 10, settings.debuffStackTextSize, settings.debuffCooldownTextOffsetX, settings.debuffCooldownTextOffsetY, settings.debuffStackTextOffsetX, settings.debuffStackTextOffsetY, settings.debuffSize or 22, settings.debuffCropIcons, settings.debuffStackTextPosition, settings.debuffCooldownTextColor, settings.debuffStackTextColor)
+                        ApplyAuraCooldownText(frame.Debuffs, settings.debuffShowCooldownText, settings.debuffCooldownTextSize or 10, settings.debuffStackTextSize, settings.debuffCooldownTextOffsetX, settings.debuffCooldownTextOffsetY, settings.debuffStackTextOffsetX, settings.debuffStackTextOffsetY, settings.debuffSize or 22, settings.debuffCropIcons, settings.debuffStackTextPosition, settings.debuffCooldownTextColor, settings.debuffStackTextColor, settings.debuffIconZoom or 0.07)
                     end
                 end
 
@@ -9876,14 +10296,14 @@ local function ReloadFrames()
                     -- Cooldown/stack text: simple uses the simpleBuff* keys (sharing the
                     -- regular buff stack settings), regular buff keys otherwise.
                     if simpleBuffOn then
-                        ApplyAuraCooldownText(frame.Buffs, settings.simpleBuffShowCooldownText, settings.simpleBuffCooldownTextSize or 14, settings.buffStackTextSize, settings.simpleBuffCooldownTextOffsetX, settings.simpleBuffCooldownTextOffsetY, settings.buffStackTextOffsetX, settings.buffStackTextOffsetY, nil, nil, settings.buffStackTextPosition, settings.buffCooldownTextColor, settings.buffStackTextColor)
+                        ApplyAuraCooldownText(frame.Buffs, settings.simpleBuffShowCooldownText, settings.simpleBuffCooldownTextSize or 14, settings.buffStackTextSize, settings.simpleBuffCooldownTextOffsetX, settings.simpleBuffCooldownTextOffsetY, settings.buffStackTextOffsetX, settings.buffStackTextOffsetY, nil, nil, settings.buffStackTextPosition, settings.buffCooldownTextColor, settings.buffStackTextColor, settings.buffIconZoom or 0.07)
                     else
-                        ApplyAuraCooldownText(frame.Buffs, settings.buffShowCooldownText, settings.buffCooldownTextSize or 10, settings.buffStackTextSize, settings.buffCooldownTextOffsetX, settings.buffCooldownTextOffsetY, settings.buffStackTextOffsetX, settings.buffStackTextOffsetY, settings.buffSize or 22, settings.buffCropIcons, settings.buffStackTextPosition, settings.buffCooldownTextColor, settings.buffStackTextColor)
+                        ApplyAuraCooldownText(frame.Buffs, settings.buffShowCooldownText, settings.buffCooldownTextSize or 10, settings.buffStackTextSize, settings.buffCooldownTextOffsetX, settings.buffCooldownTextOffsetY, settings.buffStackTextOffsetX, settings.buffStackTextOffsetY, settings.buffSize or 22, settings.buffCropIcons, settings.buffStackTextPosition, settings.buffCooldownTextColor, settings.buffStackTextColor, settings.buffIconZoom or 0.07)
                     end
                 end
 
                 UpdateBordersForScale(frame, unit)
-                ReparentBarsToClip(frame, settings.powerPosition)
+                ReparentBarsToClip(frame, settings.powerPosition, settings)
             end
 
             -- Determine if this is a mini frame that inherits border/texture/font
@@ -9984,7 +10404,10 @@ local function ReloadFrames()
                     -- color each update (mirrors the fill); see CreatePowerBar.
                     if s2.powerBgPowerColored and self.bg then
                         local pr, pg, pb = EllesmereUI.ResolveUnitPowerColor(unit)
-                        if pr then self.bg:SetColorTexture(pr, pg, pb, 1) end
+                        if pr then
+                            local f = EllesmereUI.GetPowerBgDarkenFactor()
+                            self.bg:SetColorTexture(pr * f, pg * f, pb * f, 1)
+                        end
                     end
                     -- Keep the power-percent text color in sync with this unit
                     -- (per-unit power color; set up in CreatePowerBar). Gated on
@@ -10093,13 +10516,17 @@ local function ReloadFrames()
         end
     end
 
-    -- Refresh combat indicator on player frame after settings change
-    if frames.player and frames.player._applyCombatTexture then
-        frames.player._applyCombatTexture()
-        if (db.profile.player.combatIndicatorStyle or "standard") ~= "none" and UnitAffectingCombat("player") then
-            frames.player._combatIndicator:Show()
-        else
-            frames.player._combatIndicator:Hide()
+    -- Refresh combat indicator on player + target frames after settings change
+    for _, ciu in ipairs({ "player", "target" }) do
+        local cif = frames[ciu]
+        if cif and cif._applyCombatTexture then
+            cif._applyCombatTexture()
+            local ciDefStyle = (ciu == "player") and "standard" or "none"
+            if (db.profile[ciu].combatIndicatorStyle or ciDefStyle) ~= "none" and UnitAffectingCombat(ciu) then
+                cif._combatIndicator:Show()
+            else
+                cif._combatIndicator:Hide()
+            end
         end
     end
 
@@ -10163,8 +10590,28 @@ end
 -- other EUI modules and releases control cleanly for external addons.
 local function ApplyBlizzCastbarState()
     if EllesmereUI and EllesmereUI.SetPlayerCastBarSuppressed and db and db.profile and db.profile.player then
-        EllesmereUI.SetPlayerCastBarSuppressed("UnitFrames", db.profile.player.showPlayerCastbar)
+        -- Only suppress Blizzard's player cast bar when EUI actually provides a
+        -- replacement. If the player is on the Blizzard (or hidden) frame source,
+        -- there is no EUI cast bar, so leave Blizzard's alone.
+        local suppress = (db.profile.player.showPlayerCastbar
+            and ns.GetUnitFrameSource("player") == "eui") or false
+        EllesmereUI.SetPlayerCastBarSuppressed("UnitFrames", suppress)
     end
+end
+
+-- Effective whole-frame alpha for a unit frame. When "Fade Out of Combat" is
+-- enabled and the player is out of combat, the frame shows at its chosen
+-- oocAlpha; otherwise full opacity. Off by default, so existing setups are
+-- unchanged. Every "shown" SetAlpha site (visibility loop + mouseover hover)
+-- routes through this so a combat transition or hover can't clobber the fade.
+-- Combat state is passed in by the caller (the visibility loop uses its own
+-- event-tracked _ufInCombat, which leads InCombatLockdown() on regen events).
+-- On ns (not a new file-scope local) to respect the Lua 200-locals cap.
+function ns.ResolveFrameAlpha(s, inCombat)
+    if s and s.oocFadeEnabled and not inCombat then
+        return s.oocAlpha or 0.5
+    end
+    return 1
 end
 
 local function UnitFrame_OnEnter(self)
@@ -10173,7 +10620,22 @@ local function UnitFrame_OnEnter(self)
     local unitKey = unit:match("^boss%d$") and "boss" or unit
     local s = db and db.profile and db.profile[unitKey]
     if s and (s.barVisibility or "always") == "mouseover" then
-        (self._visWrap or self):SetAlpha(1)
+        -- Hover-gated sets only reveal while their conditions pass; a
+        -- legacy single "mouseover" reveals unconditionally as before.
+        local eligible = true
+        if EllesmereUI.VisWantsMouseover then
+            eligible = EllesmereUI.VisWantsMouseover(s, "barVisibility", nil, EllesmereUI.VIS_CAPS_INCLUSIVE)
+        end
+        if eligible then
+            local a = ns.ResolveFrameAlpha(s, InCombatLockdown())
+            ;(self._visWrap or self):SetAlpha(a)
+            -- 3D models don't inherit parent alpha: reveal the portrait too
+            local bd3d = self.Portrait and self.Portrait.backdrop and self.Portrait.backdrop._3d
+            if bd3d then bd3d:SetAlpha(a) end
+            -- Mini-frame inheritance: the companion frame reveals with us
+            local mini = ns.UF_MINI_OF and frames[ns.UF_MINI_OF[unitKey]]
+            if mini then mini:SetAlpha(a) end
+        end
     end
     if unit and GameTooltip and GameTooltip_SetDefaultAnchor then
         local showTooltip = not s or s.showUnitTooltip ~= false
@@ -10203,18 +10665,34 @@ local function UnitFrame_OnLeave(self)
     local unitKey = unit:match("^boss%d$") and "boss" or unit
     local s = db and db.profile and db.profile[unitKey]
     if s and (s.barVisibility or "always") == "mouseover" then
-        -- Mirror UpdateFrameVisibility's mouseover logic: when a positive
-        -- "Hide if" override is configured and currently not triggering,
-        -- keep the frame shown on mouse leave instead of re-hiding it.
-        local hiddenByOpts = EllesmereUI and EllesmereUI.CheckVisibilityOptions
-                             and EllesmereUI.CheckVisibilityOptions(s)
-        local hasAnyHideOpt = s.visHideNoTarget
-                           or s.visHideNoEnemy
-                           or s.visHideMounted
-                           or s.visHideHousing
-                           or s.visOnlyInstances
-        local keepShown = (not hiddenByOpts) and hasAnyHideOpt
-        ;(self._visWrap or self):SetAlpha(keepShown and 1 or 0)
+        local vmActive = EllesmereUI.GetActiveVisibilityModes
+            and EllesmereUI.GetActiveVisibilityModes(s, "barVisibility")
+        local leaveAlpha
+        if vmActive then
+            -- Hover-gated set: hidden again on leave; the visibility pass
+            -- re-evaluates the conditions on the next event.
+            leaveAlpha = 0
+        else
+            -- Mirror UpdateFrameVisibility's mouseover logic: when a positive
+            -- "Hide if" override is configured and currently not triggering,
+            -- keep the frame shown on mouse leave instead of re-hiding it.
+            local hiddenByOpts = EllesmereUI and EllesmereUI.CheckVisibilityOptions
+                                 and EllesmereUI.CheckVisibilityOptions(s)
+            local hasAnyHideOpt = s.visHideNoTarget
+                               or s.visHideNoEnemy
+                               or s.visHideMounted
+                               or s.visHideHousing
+                               or s.visOnlyInstances
+            local keepShown = (not hiddenByOpts) and hasAnyHideOpt
+            leaveAlpha = keepShown and ns.ResolveFrameAlpha(s, InCombatLockdown()) or 0
+        end
+        ;(self._visWrap or self):SetAlpha(leaveAlpha)
+        -- 3D models don't inherit parent alpha: hide/dim the portrait too
+        local bd3d = self.Portrait and self.Portrait.backdrop and self.Portrait.backdrop._3d
+        if bd3d then bd3d:SetAlpha(leaveAlpha) end
+        -- Mini-frame inheritance: the companion frame hides/dims with us
+        local mini = ns.UF_MINI_OF and frames[ns.UF_MINI_OF[unitKey]]
+        if mini then mini:SetAlpha(leaveAlpha) end
     end
     if self._tooltipTicker then self._tooltipTicker:Cancel(); self._tooltipTicker = nil end
     if GameTooltip and GameTooltip:IsOwned(self) then
@@ -10233,6 +10711,11 @@ function InitializeFrames()
     end
 
     local classPowerStyle = db.profile.player.classPowerStyle or "none"
+    -- Per-unit frame source, resolved once for this build. When a unit is set to
+    -- "blizzard" (leave Blizzard's default frame) or "hidden", the EllesmereUI
+    -- frame is not spawned at all -- which is the ONLY way to keep Blizzard's own
+    -- frame alive, because oUF:Spawn() permanently disables it.
+    local playerFrameSource = ns.GetUnitFrameSource("player")
     -- Per-class Blizzard class power bar frame names
     local BLIZZARD_CP_FRAMES = {
         DEATHKNIGHT = "RuneFrame",
@@ -10248,7 +10731,9 @@ function InitializeFrames()
     -- Blizzard frames -- see CLAUDE.md _FFD rule).
     local _blizzCPState = {}  -- { origParent, hooked }
     local savedClassPowerBar = nil
-    if classPowerStyle == "blizzard" then
+    -- Only take over the Blizzard class power bar when the EUI player frame is
+    -- actually being spawned; otherwise leave it to Blizzard's player frame.
+    if classPowerStyle == "blizzard" and playerFrameSource == "eui" then
         local _, classFile = UnitClass("player")
         local frameName = BLIZZARD_CP_FRAMES[classFile]
         local cpFrame = frameName and _G[frameName]
@@ -10287,9 +10772,15 @@ function InitializeFrames()
         ClickCastFrames[frame] = true
     end
 
-    -- Always spawn all frames; hide disabled ones for zero performance impact
+    -- Spawn each unit's EllesmereUI frame only when its source is "eui". A unit
+    -- set to "blizzard" keeps Blizzard's own frame (we never call oUF:Spawn for
+    -- it, so oUF never disables it); "hidden" removes Blizzard's frame too.
     oUF:SetActiveStyle("EllesmerePlayer")
-    frames.player = oUF:Spawn("player", "EllesmereUIUnitFrames_Player")
+    if playerFrameSource == "eui" then
+        frames.player = oUF:Spawn("player", "EllesmereUIUnitFrames_Player")
+    elseif playerFrameSource == "hidden" then
+        oUF:DisableBlizzard("player")
+    end
 
     -- Visibility wrapper for the player frame only. Parent the player frame
     -- to a non-secure wrapper and drive visibility via the wrapper's alpha
@@ -10302,6 +10793,7 @@ function InitializeFrames()
     -- The wrapper is inserted between the player frame and whatever parent
     -- oUF originally gave it (PetBattleFrameHider), so the pet-battle state
     -- driver chain continues to work.
+    if frames.player then
     local origParent = frames.player:GetParent() or UIParent
     local playerVisWrap = CreateFrame("Frame", nil, origParent)
     playerVisWrap:SetAllPoints(origParent)
@@ -10316,114 +10808,10 @@ function InitializeFrames()
         frames.player:Hide()
         frames.player:SetAttribute("unit", nil)
     end
-
-    -- Combat indicator overlay on player frame
-    do
-        local pf = frames.player
-        local ps = db.profile.player
-        local COMBAT_MEDIA = "Interface\\AddOns\\EllesmereUI\\media\\combat\\"
-
-        -- Create holder + texture ONCE, reuse on subsequent calls
-        if not pf._combatHolder then
-            pf._combatHolder = CreateFrame("Frame", nil, pf)
-            pf._combatHolder:SetAllPoints(pf)
-            pf._combatIndicator = pf._combatHolder:CreateTexture(nil, "OVERLAY", nil, 7)
-            pf._combatIndicator:Hide()
-        end
-        pf._combatHolder:SetFrameLevel(pf:GetFrameLevel() + 20)
-        local combat = pf._combatIndicator
-
-        -- Helper: resolve which texture file + coords to use
-        local function ApplyCombatTexture()
-            local style = ps.combatIndicatorStyle or "standard"
-            if style == "none" then combat:Hide(); return end
-
-            local colorMode = ps.combatIndicatorColor or "custom"
-            local sz = ps.combatIndicatorSize or 22
-            local ox = ps.combatIndicatorX or 0
-            local oy = ps.combatIndicatorY or 0
-            local pos = ps.combatIndicatorPosition or "healthbar"
-
-            combat:SetSize(sz, sz)
-            combat:ClearAllPoints()
-
-            -- Determine anchor element
-            local anchor = pf
-            if pos == "healthbar" and pf.Health then
-                anchor = pf.Health
-            elseif pos == "textbar" and pf._btb then
-                anchor = pf._btb
-            elseif pos == "portrait" and pf.Portrait then
-                anchor = pf.Portrait
-            end
-            combat:SetPoint("CENTER", anchor, "CENTER", ox, oy)
-
-            -- Determine texture file (always use -custom / white base)
-            local _, classToken = UnitClass("player")
-            -- All custom combat icons (Arcade/Dungeoneer/Classic/Cross/Circle/Square =
-            -- combat0..5) are shown exactly as authored: no class theming, no tint, no
-            -- desaturation. Standard/Class Theme below are tinted by the colour mode.
-            if style:find("^combat%d") then
-                combat:SetTexture(COMBAT_MEDIA .. style .. ".tga")
-                combat:SetTexCoord(0, 1, 0, 1)
-                if combat.SetDesaturated then combat:SetDesaturated(false) end
-                combat:SetVertexColor(1, 1, 1, 1)
-            else
-                if style == "class" then
-                    combat:SetTexture(COMBAT_MEDIA .. "combat-indicator-class-custom.png")
-                    local coords = CLASS_FULL_COORDS[classToken]
-                    if coords then
-                        combat:SetTexCoord(coords[1], coords[2], coords[3], coords[4])
-                    else
-                        combat:SetTexCoord(0, 1, 0, 1)
-                    end
-                else
-                    combat:SetTexture(COMBAT_MEDIA .. "combat-indicator-custom.png")
-                    combat:SetTexCoord(0, 1, 0, 1)
-                end
-
-                -- Apply color tint
-                if colorMode == "classcolor" then
-                    local cc = (EllesmereUI.GetClassColor and EllesmereUI.GetClassColor(classToken)) or { r = 1, g = 1, b = 1 }
-                    combat:SetVertexColor(cc.r, cc.g, cc.b, 1)
-                elseif colorMode == "custom" then
-                    local cc = ps.combatIndicatorCustomColor or { r = 1, g = 1, b = 1 }
-                    combat:SetVertexColor(cc.r, cc.g, cc.b, 1)
-                else
-                    combat:SetVertexColor(1, 1, 1, 1)
-                end
-            end
-        end
-        pf._applyCombatTexture = ApplyCombatTexture
-
-        -- Event frame for combat state changes (reuse existing)
-        if not pf._combatEventFrame then
-            pf._combatEventFrame = CreateFrame("Frame", nil, pf)
-            pf._combatEventFrame:RegisterEvent("PLAYER_REGEN_DISABLED")
-            pf._combatEventFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
-        end
-        local combatFrame = pf._combatEventFrame
-        combatFrame:SetScript("OnEvent", function(_, event)
-            local style = ps.combatIndicatorStyle or "standard"
-            if style ~= "none" then
-                if event == "PLAYER_REGEN_DISABLED" then
-                    ApplyCombatTexture()
-                    combat:Show()
-                else
-                    combat:Hide()
-                end
-            else
-                combat:Hide()
-            end
-        end)
-
-        -- Set correct initial state
-        local style = ps.combatIndicatorStyle or "standard"
-        if style ~= "none" and UnitAffectingCombat("player") then
-            ApplyCombatTexture()
-            combat:Show()
-        end
     end
+
+    -- (Combat indicator overlay moved below the target/focus spawns -- the
+    -- target frame does not exist yet at this point in the setup.)
 
     -- Rested indicator ("ZZZ") on player health bar top-left
     do
@@ -10775,6 +11163,9 @@ function InitializeFrames()
     -- Live toggle for class power bar (no reload needed)
     -- Called with the style string: "none", "modern", or "blizzard"
     frames._toggleClassPower = function(style)
+        -- Class power is a player-frame feature; if the player is on Blizzard's
+        -- default frame (or hidden), there is no EUI frame to attach it to.
+        if not frames.player then return end
         style = style or db.profile.player.classPowerStyle or "none"
         -- Keep showClassPowerBar in sync with style
         db.profile.player.showClassPowerBar = (style ~= "none")
@@ -10861,22 +11252,190 @@ function InitializeFrames()
         end)
     end)
 
-    oUF:SetActiveStyle("EllesmereTarget")
-    frames.target = oUF:Spawn("target", "EllesmereUIUnitFrames_Target")
-    ApplyFramePosition(frames.target, "target")
-    SetupUnitMenu(frames.target, "target")
-    if enabled.target == false then
-        frames.target:Hide()
-        frames.target:SetAttribute("unit", nil)
+    -- Durably suppress a live Blizzard child frame (target-of-target /
+    -- focus-target). These are PROTECTED CHILDREN of TargetFrame/FocusFrame: when
+    -- the parent uses Blizzard's source it stays alive and re-drives the child
+    -- (TargetOfTargetMixin:Update) on every target change, so a one-shot Hide is
+    -- undone. We unregister its events and re-hide on OnShow.
+    --
+    -- KNOWN LIMITATION (in-combat double frame): the child is a protected frame, so
+    -- Hide() is blocked in combat. If the player changes target mid-combat, Blizzard
+    -- (secure) re-Shows the native child and our OnShow re-hide cannot fire until
+    -- PLAYER_REGEN_ENABLED -- so with the parent on Blizzard Default and this mini
+    -- frame on EllesmereUI/Hidden, the native child stays visible for the WHOLE of
+    -- combat (not just a flash): once Blizzard shows it we cannot re-hide until combat
+    -- ends, so it sits alongside the EllesmereUI frame (or shows despite "Hidden").
+    -- Not fixable without reparenting/overriding a secure frame in combat, so it's
+    -- surfaced in the mini-frame "Frame Source" tooltip (see BuildFoTToTOptions), which
+    -- recommends matching the parent's source instead of mixing them.
+    local _suppressedChildren, _suppressWatcher
+    local function SuppressBlizzardChildFrame(frame)
+        if not frame then return end
+        frame:UnregisterAllEvents()
+        if not InCombatLockdown() then frame:Hide() end
+        _suppressedChildren = _suppressedChildren or {}
+        if not _suppressWatcher then
+            _suppressWatcher = CreateFrame("Frame")
+            _suppressWatcher:SetScript("OnEvent", function(self)
+                self:UnregisterEvent("PLAYER_REGEN_ENABLED")
+                if InCombatLockdown() then return end
+                for f in pairs(_suppressedChildren) do f:Hide() end
+            end)
+        end
+        if not _suppressedChildren[frame] then
+            _suppressedChildren[frame] = true
+            frame:HookScript("OnShow", function(self)
+                if InCombatLockdown() then
+                    _suppressWatcher:RegisterEvent("PLAYER_REGEN_ENABLED")
+                else
+                    self:Hide()
+                end
+            end)
+        end
     end
 
-    oUF:SetActiveStyle("EllesmereFocus")
-    frames.focus = oUF:Spawn("focus", "EllesmereUIUnitFrames_Focus")
-    ApplyFramePosition(frames.focus, "focus")
-    SetupUnitMenu(frames.focus, "focus")
-    if enabled.focus == false then
-        frames.focus:Hide()
-        frames.focus:SetAttribute("unit", nil)
+    local targetFrameSource = ns.GetUnitFrameSource("target")
+    if targetFrameSource == "eui" then
+        oUF:SetActiveStyle("EllesmereTarget")
+        frames.target = oUF:Spawn("target", "EllesmereUIUnitFrames_Target")
+        ApplyFramePosition(frames.target, "target")
+        SetupUnitMenu(frames.target, "target")
+    elseif targetFrameSource == "hidden" then
+        oUF:DisableBlizzard("target")
+    end
+
+    local focusFrameSource = ns.GetUnitFrameSource("focus")
+    if focusFrameSource == "eui" then
+        oUF:SetActiveStyle("EllesmereFocus")
+        frames.focus = oUF:Spawn("focus", "EllesmereUIUnitFrames_Focus")
+        ApplyFramePosition(frames.focus, "focus")
+        SetupUnitMenu(frames.focus, "focus")
+    elseif focusFrameSource == "hidden" then
+        oUF:DisableBlizzard("focus")
+    end
+
+    -- Combat indicator overlay on the player + target frames. Each frame shows
+    -- its OWN unit's combat state: player via the exact regen events, target via
+    -- UNIT_FLAGS (combat flag changes) + PLAYER_TARGET_CHANGED re-evaluation.
+    -- Target defaults to "none" (opt-in); player keeps its legacy default.
+    -- Must run after the target frame is spawned (right above).
+    for _, ciDef in ipairs({
+        { unit = "player", defStyle = "standard" },
+        { unit = "target", defStyle = "none" },
+    }) do
+        local pf = frames[ciDef.unit]
+        if pf then
+        local ciUnit = ciDef.unit
+        local ciDefStyle = ciDef.defStyle
+        local ps = db.profile[ciUnit]
+        local COMBAT_MEDIA = "Interface\\AddOns\\EllesmereUI\\media\\combat\\"
+
+        -- Create holder + texture ONCE, reuse on subsequent calls
+        if not pf._combatHolder then
+            pf._combatHolder = CreateFrame("Frame", nil, pf)
+            pf._combatHolder:SetAllPoints(pf)
+            pf._combatIndicator = pf._combatHolder:CreateTexture(nil, "OVERLAY", nil, 7)
+            pf._combatIndicator:Hide()
+        end
+        pf._combatHolder:SetFrameLevel(pf:GetFrameLevel() + 20)
+        local combat = pf._combatIndicator
+
+        -- Helper: resolve which texture file + coords to use
+        local function ApplyCombatTexture()
+            local style = ps.combatIndicatorStyle or ciDefStyle
+            if style == "none" then combat:Hide(); return end
+
+            local colorMode = ps.combatIndicatorColor or "custom"
+            local sz = ps.combatIndicatorSize or 22
+            local ox = ps.combatIndicatorX or 0
+            local oy = ps.combatIndicatorY or 0
+            local pos = ps.combatIndicatorPosition or "healthbar"
+
+            combat:SetSize(sz, sz)
+            combat:ClearAllPoints()
+
+            -- Determine anchor element
+            local anchor = pf
+            if pos == "healthbar" and pf.Health then
+                anchor = pf.Health
+            elseif pos == "textbar" and pf._btb then
+                anchor = pf._btb
+            elseif pos == "portrait" and pf.Portrait then
+                anchor = pf.Portrait
+            end
+            combat:SetPoint("CENTER", anchor, "CENTER", ox, oy)
+
+            -- Determine texture file (always use -custom / white base).
+            -- Class theming resolves the FRAME's unit (player class on the
+            -- player frame, current target's class on the target frame).
+            local _, classToken = UnitClass(ciUnit)
+            -- All custom combat icons (Arcade/Dungeoneer/Classic/Cross/Circle/Square =
+            -- combat0..5) are shown exactly as authored: no class theming, no tint, no
+            -- desaturation. Standard/Class Theme below are tinted by the colour mode.
+            if style:find("^combat%d") then
+                combat:SetTexture(COMBAT_MEDIA .. style .. ".tga")
+                combat:SetTexCoord(0, 1, 0, 1)
+                if combat.SetDesaturated then combat:SetDesaturated(false) end
+                combat:SetVertexColor(1, 1, 1, 1)
+            else
+                if style == "class" then
+                    combat:SetTexture(COMBAT_MEDIA .. "combat-indicator-class-custom.png")
+                    local coords = classToken and CLASS_FULL_COORDS[classToken]
+                    if coords then
+                        combat:SetTexCoord(coords[1], coords[2], coords[3], coords[4])
+                    else
+                        combat:SetTexCoord(0, 1, 0, 1)
+                    end
+                else
+                    combat:SetTexture(COMBAT_MEDIA .. "combat-indicator-custom.png")
+                    combat:SetTexCoord(0, 1, 0, 1)
+                end
+
+                -- Apply color tint
+                if colorMode == "classcolor" then
+                    local cc = (classToken and EllesmereUI.GetClassColor and EllesmereUI.GetClassColor(classToken)) or { r = 1, g = 1, b = 1 }
+                    combat:SetVertexColor(cc.r, cc.g, cc.b, 1)
+                elseif colorMode == "custom" then
+                    local cc = ps.combatIndicatorCustomColor or { r = 1, g = 1, b = 1 }
+                    combat:SetVertexColor(cc.r, cc.g, cc.b, 1)
+                else
+                    combat:SetVertexColor(1, 1, 1, 1)
+                end
+            end
+        end
+        pf._applyCombatTexture = ApplyCombatTexture
+
+        -- Event frame for combat state changes (reuse existing)
+        if not pf._combatEventFrame then
+            pf._combatEventFrame = CreateFrame("Frame", nil, pf)
+            if ciUnit == "player" then
+                pf._combatEventFrame:RegisterEvent("PLAYER_REGEN_DISABLED")
+                pf._combatEventFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
+            else
+                -- UNIT_FLAGS fires on the unit's combat flag flips; target
+                -- change re-evaluates for the new unit.
+                pf._combatEventFrame:RegisterUnitEvent("UNIT_FLAGS", ciUnit)
+                pf._combatEventFrame:RegisterEvent("PLAYER_TARGET_CHANGED")
+            end
+        end
+        local combatFrame = pf._combatEventFrame
+        combatFrame:SetScript("OnEvent", function()
+            local style = ps.combatIndicatorStyle or ciDefStyle
+            if style ~= "none" and UnitAffectingCombat(ciUnit) then
+                ApplyCombatTexture()
+                combat:Show()
+            else
+                combat:Hide()
+            end
+        end)
+
+        -- Set correct initial state
+        local style = ps.combatIndicatorStyle or ciDefStyle
+        if style ~= "none" and UnitAffectingCombat(ciUnit) then
+            ApplyCombatTexture()
+            combat:Show()
+        end
+        end
     end
 
     -- Leader indicator (crown when unit is the group/raid leader). oUF doesn't
@@ -10885,7 +11444,6 @@ function InitializeFrames()
     -- Must run after target frame is spawned (right above) so the texture can
     -- be parented to it.
     do
-        local LEADER_ATLAS = "plunderstorm-glues-icon-leader"
         local _leaderUnits = {}
 
         local function _leaderRefresh(uf)
@@ -10894,8 +11452,13 @@ function InitializeFrames()
             local tex = uf._leaderIndicator
             if s.leaderIndicatorEnabled == false then tex:Hide(); return end
             local unit = uf.unit
-            if unit and UnitExists(unit) and UnitIsGroupLeader(unit) then
-                tex:SetAtlas(LEADER_ATLAS)
+            local isLeader = UnitIsGroupLeader(unit)
+            local isAssist = UnitIsGroupAssistant(unit)
+            if isLeader and not issecretvalue(isLeader) then
+                tex:SetTexture("Interface\\GroupFrame\\UI-Group-LeaderIcon")
+                tex:Show()
+            elseif isAssist and not issecretvalue(isAssist) then
+                tex:SetTexture("Interface\\GroupFrame\\UI-Group-AssistantIcon")
                 tex:Show()
             else
                 tex:Hide()
@@ -10957,33 +11520,48 @@ function InitializeFrames()
         end
     end
 
-    oUF:SetActiveStyle("EllesmerePet")
-    frames.pet = oUF:Spawn("pet", "EllesmereUIUnitFrames_Pet")
-    ApplyFramePosition(frames.pet, "pet")
-    SetupUnitMenu(frames.pet, "pet")
-    if enabled.pet == false then
-        frames.pet:Hide()
-        frames.pet:SetAttribute("unit", nil)
+    local petFrameSource = ns.GetUnitFrameSource("pet")
+    if petFrameSource == "eui" then
+        oUF:SetActiveStyle("EllesmerePet")
+        frames.pet = oUF:Spawn("pet", "EllesmereUIUnitFrames_Pet")
+        ApplyFramePosition(frames.pet, "pet")
+        SetupUnitMenu(frames.pet, "pet")
+    elseif petFrameSource == "hidden" then
+        oUF:DisableBlizzard("pet")
     end
 
-    oUF:SetActiveStyle("EllesmereTargetTarget")
-    frames.targettarget = oUF:Spawn("targettarget", "EllesmereUIUnitFrames_TargetTarget")
-    ApplyFramePosition(frames.targettarget, "targettarget")
-    SetupUnitMenu(frames.targettarget, "targettarget")
-    if enabled.targettarget == false then
-        frames.targettarget:Hide()
-        frames.targettarget:SetAttribute("unit", nil)
+    local totFrameSource = ns.GetUnitFrameSource("targettarget")
+    if totFrameSource == "eui" then
+        oUF:SetActiveStyle("EllesmereTargetTarget")
+        frames.targettarget = oUF:Spawn("targettarget", "EllesmereUIUnitFrames_TargetTarget")
+        ApplyFramePosition(frames.targettarget, "targettarget")
+        SetupUnitMenu(frames.targettarget, "targettarget")
+    end
+    -- Blizzard's target-of-target is a child of TargetFrame. When the target
+    -- frame itself is EUI or hidden, oUF/our code already disabled TargetFrame so
+    -- the child is gone with it. It only needs suppressing when the target uses
+    -- Blizzard's live frame but the user does NOT want Blizzard's ToT (EUI or
+    -- hidden) -- otherwise the EUI ToT and Blizzard's would both show.
+    if totFrameSource ~= "blizzard" and targetFrameSource == "blizzard" then
+        SuppressBlizzardChildFrame(TargetFrame and TargetFrame.totFrame)
     end
 
-    oUF:SetActiveStyle("EllesmereFocusTarget")
-    frames.focustarget = oUF:Spawn("focustarget", "EllesmereUIUnitFrames_FocusTarget")
-    ApplyFramePosition(frames.focustarget, "focustarget")
-    SetupUnitMenu(frames.focustarget, "focustarget")
-    if enabled.focustarget == false then
-        frames.focustarget:Hide()
-        frames.focustarget:SetAttribute("unit", nil)
+    local ftFrameSource = ns.GetUnitFrameSource("focustarget")
+    if ftFrameSource == "eui" then
+        oUF:SetActiveStyle("EllesmereFocusTarget")
+        frames.focustarget = oUF:Spawn("focustarget", "EllesmereUIUnitFrames_FocusTarget")
+        ApplyFramePosition(frames.focustarget, "focustarget")
+        SetupUnitMenu(frames.focustarget, "focustarget")
+    end
+    -- Same as target-of-target: FocusFrame's native focus-target is a child of
+    -- FocusFrame, so it only needs suppressing when focus uses Blizzard's live
+    -- frame and the user does not want the native focus-target.
+    if ftFrameSource ~= "blizzard" and focusFrameSource == "blizzard" then
+        SuppressBlizzardChildFrame(FocusFrame and FocusFrame.totFrame)
     end
 
+    local bossFrameSource = ns.GetUnitFrameSource("boss")
+    if bossFrameSource == "eui" then
     oUF:SetActiveStyle("EllesmereBoss")
     local bossPos = db.profile.positions.boss
 
@@ -11018,18 +11596,23 @@ function InitializeFrames()
         end
 
         SetupUnitMenu(bossFrame, bossUnit)
-
-        if enabled.boss == false then
-            bossFrame:Hide()
-            bossFrame:SetAttribute("unit", nil)
-        end
+    end
+    elseif bossFrameSource == "hidden" then
+        -- Disabling boss1 makes oUF hide the whole BossTargetFrameContainer
+        -- (and all five Boss*TargetFrame children).
+        oUF:DisableBlizzard("boss1")
     end
 
-    for i = 1, 5 do
-        local blizzBoss = _G["Boss" .. i .. "TargetFrame"]
-        if blizzBoss then
-            blizzBoss:UnregisterAllEvents()
-            blizzBoss:Hide()
+    -- Kill Blizzard's boss frames for every source except "blizzard" (where the
+    -- user wants them). For "eui" oUF already disabled them at spawn; this pass
+    -- is belt-and-suspenders and also runs for "hidden".
+    if bossFrameSource ~= "blizzard" then
+        for i = 1, 5 do
+            local blizzBoss = _G["Boss" .. i .. "TargetFrame"]
+            if blizzBoss then
+                blizzBoss:UnregisterAllEvents()
+                blizzBoss:Hide()
+            end
         end
     end
 
@@ -11049,6 +11632,19 @@ function InitializeFrames()
                     frame.BottomTextBar:SetFrameStrata(db.profile.detachedTextBarStrata or "DIALOG")
                 else
                     frame.BottomTextBar:SetFrameStrata(strata)
+                end
+            end
+            -- Same re-lift for a detached power bar -- see the matching comment
+            -- in the other frameStrata-apply pass above for why this is needed.
+            if frame.Power then
+                local us2 = GetSettingsForUnit(unitKey)
+                local ppPos = us2 and us2.powerPosition or "below"
+                if ppPos == "detached_top" or ppPos == "detached_bottom" then
+                    if db.profile.enableCustomBarStratas then
+                        frame.Power:SetFrameStrata(db.profile.detachedPowerStrata or "HIGH")
+                    else
+                        frame.Power:SetFrameStrata("MEDIUM")
+                    end
                 end
             end
             -- The cast bar is a child of the frame, so the SetFrameStrata above
@@ -11121,6 +11717,35 @@ function InitializeFrames()
         end
     end
 
+    -- Boss frames: same absorb refresh, styled from the TARGET donor block
+    -- and gated by the "Show on Boss Frames" toggle (nil = enabled).
+    do
+        local bossOff = db.profile.boss and db.profile.boss.showAbsorbs == false
+        local donor = db.profile.target
+        for i = 1, 5 do
+            local f = frames["boss" .. i]
+            if f and f.HealthPrediction and f.HealthPrediction.damageAbsorb then
+                local absStyle
+                if not bossOff and donor then absStyle = donor.showPlayerAbsorb end
+                if absStyle and absStyle ~= "none" then
+                    ApplyAbsorbStyle(f.HealthPrediction.damageAbsorb, absStyle, donor)
+                    f.HealthPrediction.damageAbsorb:Show()
+                    if f.HealthPrediction.damageAbsorb._forward then
+                        f.HealthPrediction.damageAbsorb._forward:Show()
+                    end
+                else
+                    f.HealthPrediction.damageAbsorb:Hide()
+                    if f.HealthPrediction.damageAbsorb._forward then
+                        f.HealthPrediction.damageAbsorb._forward:Hide()
+                    end
+                end
+                if f.HealthPrediction.ForceUpdate then
+                    f.HealthPrediction:ForceUpdate()
+                end
+            end
+        end
+    end
+
     -- Player buffs: disable oUF element if not wanted (frame is always created)
     if frames.player and frames.player.Buffs then
         if not db.profile.player.showBuffs then
@@ -11176,6 +11801,11 @@ function InitializeFrames()
     ---------------------------------------------------------------------------
     --  Group visibility: show/hide player/target/focus based on group state
     ---------------------------------------------------------------------------
+    -- Companion mini frame for each main frame: the mini inherits its
+    -- parent's FULL effective visibility (modes, multi-selections, hide
+    -- options, fade, mouseover reveals, Never/disabled).
+    ns.UF_MINI_OF = { player = "pet", target = "targettarget", focus = "focustarget" }
+
     local _ufInCombat = InCombatLockdown()
     local function UpdateFrameVisibility()
         -- Do NOT return early during combat lockdown. Alpha operations
@@ -11186,12 +11816,64 @@ function InitializeFrames()
         local inRaid = IsInRaid()
         local inParty = not inRaid and IsInGroup()
         local solo = not inRaid and not inParty
+        -- One state table per pass for the multi-select visibility engine
+        local visState = { inCombat = _ufInCombat, inRaid = inRaid, inParty = inParty }
         for _, unitKey in ipairs({"player", "target", "focus"}) do
             local s = db.profile[unitKey]
             local frame = frames[unitKey]
             if frame and enabled2[unitKey] ~= false and s then
                 local hiddenByOpts = EllesmereUI and EllesmereUI.CheckVisibilityOptions and EllesmereUI.CheckVisibilityOptions(s)
                 local vis = s.barVisibility or "always"
+
+                -- Multi-select / dragonriding path: non-nil = engine-owned.
+                -- nil = legacy single mode, untouched.
+                local ext = EllesmereUI.EvalVisibilityExtended
+                    and EllesmereUI.EvalVisibilityExtended(s, "barVisibility", visState, EllesmereUI.VIS_CAPS_INCLUSIVE)
+
+                -- Secure condition driver: an engine-owned selection
+                -- compiles into a state-visibility driver (the action bar
+                -- mechanism), replacing the frame's unit watch. A
+                -- driver-hidden frame is TRULY hidden -- it absorbs no
+                -- clicks -- and the secure engine flips it mid-combat
+                -- natively. Mouseover sets keep the frame shown while their
+                -- conditions pass (the compiler ignores the mouseover key);
+                -- the alpha bucket + hover handlers do the revealing.
+                -- Registration is out-of-combat only; a selection changed
+                -- during combat rides on alpha until the regen pass
+                -- registers the driver.
+                local drvSet = EllesmereUI.GetActiveVisibilityModes
+                    and EllesmereUI.GetActiveVisibilityModes(s, "barVisibility")
+                -- Condition scalars ride the driver too: dragonriding (the
+                -- engine owns it everywhere) and the combat pair, whose
+                -- legacy alpha-hide left an invisible click-absorbing frame
+                -- out of combat. Visibility is unchanged; the driver just
+                -- hides for real and flips frame-exactly at the combat edge.
+                if not drvSet and (vis == "show_dragonriding" or vis == "show_not_dragonriding"
+                    or vis == "in_combat" or vis == "out_of_combat") then
+                    drvSet = { [vis] = true }
+                end
+                local wantDriver
+                if drvSet and EllesmereUI.BuildVisibilityDriverString then
+                    wantDriver = EllesmereUI.BuildVisibilityDriverString(
+                        "[@" .. unitKey .. ",noexists] hide; ", drvSet)
+                end
+                if frame._euiVisDriver ~= wantDriver and not isLocked then
+                    if wantDriver then
+                        UnregisterUnitWatch(frame)
+                        RegisterAttributeDriver(frame, "state-visibility", wantDriver)
+                    else
+                        UnregisterAttributeDriver(frame, "state-visibility")
+                        RegisterUnitWatch(frame)
+                    end
+                    frame._euiVisDriver = wantDriver
+                end
+
+                -- Whole-frame out-of-combat fade: the alpha to use whenever the
+                -- frame is "shown" below. 1 unless "Fade Out of Combat" is on and
+                -- we are out of combat, in which case the chosen oocAlpha. Uses the
+                -- event-tracked _ufInCombat (authoritative on regen transitions,
+                -- which lead InCombatLockdown()) so the fade flips instantly.
+                local shownAlpha = ns.ResolveFrameAlpha(s, _ufInCombat)
 
                 -- Combat-sensitive and mouseover modes use SetAlpha to show/hide
                 -- (SetAlpha is not a restricted API). The frame stays technically
@@ -11203,10 +11885,25 @@ function InitializeFrames()
                 -- reappear/disappear against our will. Alpha inherits down the
                 -- parent chain so wrapper alpha 0 always wins.
                 local alphaTarget = frame._visWrap or frame
-                if vis == "in_combat" then
-                    alphaTarget:SetAlpha((not hiddenByOpts and _ufInCombat) and 1 or 0)
+                local bodyAlpha
+                if ext == "mouseover" then
+                    -- Hover-gated set with passing conditions: hidden until
+                    -- hovered (the hover handlers reveal it).
+                    bodyAlpha = 0
+                elseif ext ~= nil then
+                    if frame._euiVisDriver then
+                        -- The driver owns hiding; alpha only carries the
+                        -- ooc fade (hide-options still force 0 below).
+                        bodyAlpha = shownAlpha
+                    else
+                        -- Driver not registered yet (selection changed in
+                        -- combat): alpha covers until the regen pass.
+                        bodyAlpha = (not hiddenByOpts and ext) and shownAlpha or 0
+                    end
+                elseif vis == "in_combat" then
+                    bodyAlpha = (not hiddenByOpts and _ufInCombat) and shownAlpha or 0
                 elseif vis == "out_of_combat" then
-                    alphaTarget:SetAlpha((not hiddenByOpts and not _ufInCombat) and 1 or 0)
+                    bodyAlpha = (not hiddenByOpts and not _ufInCombat) and shownAlpha or 0
                 elseif vis == "mouseover" then
                     -- Mouseover: hidden by default; hover toggles alpha.
                     -- But when the user has configured any positive "Hide if"
@@ -11221,16 +11918,16 @@ function InitializeFrames()
                                        or s.visHideHousing
                                        or s.visOnlyInstances
                     if hiddenByOpts then
-                        alphaTarget:SetAlpha(0)
+                        bodyAlpha = 0
                     elseif hasAnyHideOpt then
-                        alphaTarget:SetAlpha(1)
+                        bodyAlpha = shownAlpha
                     else
-                        alphaTarget:SetAlpha(0)
+                        bodyAlpha = 0
                     end
                 else
-                    -- Non-combat modes: restore full alpha; Show/Hide controls
-                    -- visibility in the block below.
-                    alphaTarget:SetAlpha(1)
+                    -- Non-combat modes: restore the resting alpha (full, or the
+                    -- out-of-combat fade); Show/Hide controls visibility below.
+                    bodyAlpha = shownAlpha
                 end
 
                 -- Alpha-only hide for the "visHide*" overrides (mounted,
@@ -11241,20 +11938,32 @@ function InitializeFrames()
                 -- (Show/SetAttribute are restricted in combat, so we can't
                 -- re-show it until combat ends).
                 if hiddenByOpts then
-                    alphaTarget:SetAlpha(0)
+                    bodyAlpha = 0
                 end
+                alphaTarget:SetAlpha(bodyAlpha)
 
-                -- 3D PlayerModel frames don't inherit parent alpha, so
-                -- explicitly sync the model's alpha with the visibility state.
+                -- 3D PlayerModel frames don't inherit parent alpha, so the
+                -- model must mirror the EXACT body alpha computed above --
+                -- every alpha-hidden state (engine-owned, in_combat,
+                -- out_of_combat, mouseover, hide-opts) would otherwise leave
+                -- a floating portrait over an invisible frame. The hover
+                -- handlers mirror it too when they reveal a mouseover frame.
                 local bd3d = frame.Portrait and frame.Portrait.backdrop and frame.Portrait.backdrop._3d
                 if bd3d then
-                    bd3d:SetAlpha(hiddenByOpts and 0 or 1)
+                    bd3d:SetAlpha(bodyAlpha)
                 end
 
                 -- Show/Hide and SetAttribute are restricted during lockdown.
-                if not isLocked then
+                -- When a condition driver is registered it owns Show/Hide
+                -- entirely -- a manual toggle would de-sync it until its
+                -- next re-evaluation -- so this whole bucket steps aside.
+                if not isLocked and not frame._euiVisDriver then
                     local shouldShow
-                    if vis == "never" then
+                    if ext ~= nil then
+                        -- Engine-owned: frame stays secure-Shown; the alpha
+                        -- bucket above drives visibility.
+                        shouldShow = true
+                    elseif vis == "never" then
                         shouldShow = false
                     elseif vis == "in_combat" or vis == "out_of_combat" or vis == "mouseover" then
                         -- Frame is kept shown; alpha (above) drives visibility.
@@ -11320,6 +12029,61 @@ function InitializeFrames()
                         end
                     end
                 end
+
+                local mini = frames[ns.UF_MINI_OF[unitKey]]
+
+                -- The companion mini frame gets its own condition driver
+                -- (parent conditions + its own unit existence), so a
+                -- condition-hidden mini absorbs no clicks either.
+                if mini then
+                    local miniWant
+                    if drvSet and EllesmereUI.BuildVisibilityDriverString then
+                        miniWant = EllesmereUI.BuildVisibilityDriverString(
+                            "[@" .. ns.UF_MINI_OF[unitKey] .. ",noexists] hide; ", drvSet)
+                    end
+                    if mini._euiVisDriver ~= miniWant and not isLocked then
+                        if miniWant then
+                            UnregisterUnitWatch(mini)
+                            RegisterAttributeDriver(mini, "state-visibility", miniWant)
+                        else
+                            UnregisterAttributeDriver(mini, "state-visibility")
+                            RegisterUnitWatch(mini)
+                        end
+                        mini._euiVisDriver = miniWant
+                    end
+                end
+
+                -- Mini-frame visibility inheritance: pet follows player,
+                -- target-of-target follows target, focus-target follows
+                -- focus. The mini mirrors the parent's effective state --
+                -- the body alpha computed above (modes, multi-selections,
+                -- hide options, ooc fade, mouseover default) plus the
+                -- secure Show/Hide bucket via IsShown() -- so every way the
+                -- parent hides takes its mini along. RegisterUnitWatch
+                -- keeps owning the mini's own Show/Hide (unit existence);
+                -- alpha never conflicts with it. Hover reveals mirror in
+                -- the OnEnter/OnLeave handlers.
+                if mini then
+                    mini:SetAlpha(frame:IsShown() and bodyAlpha or 0)
+                end
+            elseif frame then
+                -- Parent disabled ("Never" clears enabledFrames): a
+                -- leftover condition driver must not keep re-showing the
+                -- frame, so pin it to a constant hide. Frames that never
+                -- had a driver keep the legacy disabled path untouched.
+                -- The mini inherits both.
+                if not isLocked and frame._euiVisDriver and frame._euiVisDriver ~= "hide" then
+                    RegisterAttributeDriver(frame, "state-visibility", "hide")
+                    frame._euiVisDriver = "hide"
+                end
+                local mini = frames[ns.UF_MINI_OF[unitKey]]
+                if mini then
+                    if not isLocked and mini._euiVisDriver and mini._euiVisDriver ~= "hide" then
+                        RegisterAttributeDriver(mini, "state-visibility", "hide")
+                        mini._euiVisDriver = "hide"
+                    end
+                    mini:SetAlpha(0)
+                end
             end
         end
     end
@@ -11335,6 +12099,12 @@ function InitializeFrames()
         frames._visFrame:RegisterEvent("UPDATE_SHAPESHIFT_FORM")
         frames._visFrame:RegisterEvent("ZONE_CHANGED_NEW_AREA")
         frames._visFrame:RegisterEvent("PLAYER_TARGET_CHANGED")
+        -- Dragonriding visibility modes: capability edge plus the airborne
+        -- edge (probed at load in EllesmereUI_Visibility.lua)
+        frames._visFrame:RegisterEvent("PLAYER_CAN_GLIDE_CHANGED")
+        if EllesmereUI._hasGlidingEvent then
+            frames._visFrame:RegisterEvent("PLAYER_IS_GLIDING_CHANGED")
+        end
     end
     frames._visFrame:SetScript("OnEvent", function(_, event)
         if event == "PLAYER_REGEN_DISABLED" then
@@ -11454,12 +12224,27 @@ function InitializeFrames()
     -- this is a cheap no-op unless the user enabled a boss border.
     -- Defined on ns (not a local) to avoid the Lua 200-local cap.
     ns.UpdateBossTargetBorders = function()
+        local s = db.profile.boss
         for i = 1, 5 do
-            local f = frames["boss" .. i]
-            if f and f.unifiedBorder then
-                local isT = UnitIsUnit("boss" .. i, "target")
-                f._isTarget = (isT and not issecretvalue(isT)) and true or false
-                ns.ApplyBossBorderState(f)
+            local bUnit = "boss" .. i
+            local f = frames[bUnit]
+            if f then
+                if f.unifiedBorder then
+                    local isT = UnitIsUnit(bUnit, "target")
+                    f._isTarget = (isT and not issecretvalue(isT)) and true or false
+                    ns.ApplyBossBorderState(f)
+                end
+                if s then
+                    if f.LeftText and s.leftTextClassColor ~= nil then
+                        ApplyClassColor(f.LeftText, bUnit, s.leftTextClassColor, s.leftTextColorR, s.leftTextColorG, s.leftTextColorB)
+                    end
+                    if f.RightText and s.rightTextClassColor ~= nil then
+                        ApplyClassColor(f.RightText, bUnit, s.rightTextClassColor, s.rightTextColorR, s.rightTextColorG, s.rightTextColorB)
+                    end
+                    if f.CenterText and s.centerTextClassColor ~= nil then
+                        ApplyClassColor(f.CenterText, bUnit, s.centerTextClassColor, s.centerTextColorR, s.centerTextColorG, s.centerTextColorB)
+                    end
+                end
             end
         end
     end
@@ -11563,6 +12348,21 @@ function SetupOptionsPanel()
         -- name. Re-assert the preview (red color + fake name) so a settings
         -- change doesn't revert it. Secret-safe: no health values are read.
         if ns._bossPreviewActive and ns.SetBossPreview then ns.SetBossPreview(true) end
+        -- ReloadFrames rebuilds frames but never touches the top-level wrapper /
+        -- 3D-portrait alpha, so recompute the out-of-combat fade here. Without
+        -- this, a profile/spec swap (or first switch to a 3D portrait, whose
+        -- PlayerModel is created at alpha 1) leaves player/target/focus stuck at
+        -- the old opacity until the next combat/target/zone event. Safe from the
+        -- throttle: UpdateFrameVisibility guards its restricted Show/Hide behind
+        -- InCombatLockdown, and SetAlpha is unrestricted.
+        if ns.UpdateFrameVisibility then ns.UpdateFrameVisibility() end
+        -- 12.1 aura containers reload with every real pass (direct call --
+        -- ns.ReloadFrames is just the throttle-arming stub, so wrapping it
+        -- from the container file is timing-unreliable).
+        if ns.UF_ReloadAllAuraContainers then ns.UF_ReloadAllAuraContainers() end
+        -- Player private auras re-register with fresh geometry (one boolean
+        -- check + return when disabled).
+        if ns.PlayerPA_Apply then ns.PlayerPA_Apply() end
     end)
     ns.ReloadFrames = function()
         if not reloadPending then
@@ -11596,6 +12396,7 @@ function SetupOptionsPanel()
             frame.Debuffs:Hide()
             frame.Debuffs.num = 0
         end
+        if ns.UF_HideAuraContainers then ns.UF_HideAuraContainers(frame) end
         local settings = db.profile.boss or {}
         local simpleMode = ns.GetBossSimpleDebuffMode(settings)
         local simple = simpleMode ~= "none"
@@ -11701,7 +12502,8 @@ function SetupOptionsPanel()
             local tex = GetSpellTexture and GetSpellTexture(spellID)
                      or (C_Spell and C_Spell.GetSpellTexture and C_Spell.GetSpellTexture(spellID))
             if tex then icon:SetTexture(tex) end
-            icon:SetTexCoord(0.07, 0.93, 0.07, 0.93)
+            local z = settings.debuffIconZoom or 0.07
+            icon:SetTexCoord(z, 1 - z, z, 1 - z)
             -- Static fake cooldown swipe: a huge duration parked at a fixed
             -- fraction so the wedge never visibly moves. Native countdown
             -- numbers stay hidden; the duration text below is a manual static
@@ -11771,6 +12573,7 @@ function SetupOptionsPanel()
             frame.Buffs:Hide()
             frame.Buffs.num = 0
         end
+        if ns.UF_HideAuraContainers then ns.UF_HideAuraContainers(frame) end
         local settings = db.profile.boss or {}
         local simpleMode = ns.GetBossSimpleBuffMode(settings)
         local simple = simpleMode ~= "none"
@@ -11846,7 +12649,8 @@ function SetupOptionsPanel()
             local tex = GetSpellTexture and GetSpellTexture(spellID)
                      or (C_Spell and C_Spell.GetSpellTexture and C_Spell.GetSpellTexture(spellID))
             if tex then icon:SetTexture(tex) end
-            icon:SetTexCoord(0.07, 0.93, 0.07, 0.93)
+            local z = settings.buffIconZoom or 0.07
+            icon:SetTexCoord(z, 1 - z, z, 1 - z)
             local border = CreateFrame("Frame", nil, iconFrame)
             border:SetAllPoints(icon)
             border:SetFrameLevel(iconFrame:GetFrameLevel() + 1)
@@ -12155,7 +12959,8 @@ local function RegisterUFUnlockElements()
                 end,
                 setWidth = function(k, w)
                     if k == "classPower" then return end
-                    if not EllesmereUI._unlockActive and not EllesmereUI._propagatingMatch then Rebuild(); return end
+                    if not EllesmereUI._unlockActive and not EllesmereUI._propagatingMatch
+                       and not EllesmereUI._unlockLayerApplying then Rebuild(); return end
                     local unit = (k == "boss") and "boss1" or k
                     local s = GetSettingsForUnit(unit)
                     if not s then return end
@@ -12178,7 +12983,8 @@ local function RegisterUFUnlockElements()
                 end,
                 setHeight = function(k, h)
                     if k == "classPower" then return end
-                    if not EllesmereUI._unlockActive and not EllesmereUI._propagatingMatch then Rebuild(); return end
+                    if not EllesmereUI._unlockActive and not EllesmereUI._propagatingMatch
+                       and not EllesmereUI._unlockLayerApplying then Rebuild(); return end
                     local unit = (k == "boss") and "boss1" or k
                     local s = GetSettingsForUnit(unit)
                     if not s then return end
@@ -12305,14 +13111,21 @@ local function RegisterUFUnlockElements()
             })
         end
 
-        -- Core unit frames
-        elements[#elements + 1] = MakeUFElement("player", 1)
-        elements[#elements + 1] = MakeUFElement("target", 2)
-        elements[#elements + 1] = MakeUFElement("focus", 3)
-        elements[#elements + 1] = MakeUFElement("pet", 4)
-        elements[#elements + 1] = MakeUFElement("targettarget", 5)
-        elements[#elements + 1] = MakeUFElement("focustarget", 6)
-        do
+        -- Core unit frames. Only register a mover for units that actually use
+        -- the EllesmereUI frame; a unit set to Blizzard-default or Hidden has no
+        -- EUI frame to move.
+        local function AddUFElement(u, order)
+            if ns.GetUnitFrameSource(u) == "eui" then
+                elements[#elements + 1] = MakeUFElement(u, order)
+            end
+        end
+        AddUFElement("player", 1)
+        AddUFElement("target", 2)
+        AddUFElement("focus", 3)
+        AddUFElement("pet", 4)
+        AddUFElement("targettarget", 5)
+        AddUFElement("focustarget", 6)
+        if ns.GetUnitFrameSource("boss") == "eui" then
             local bossElem = MakeUFElement("boss", 7)
             -- Boss is a stack of 5 chained frames; resize / match actions
             -- don't make sense on the aggregate element. Boss can still
@@ -12324,7 +13137,7 @@ local function RegisterUFUnlockElements()
         end
 
         -- Conditional elements
-        if db.profile.player.showClassPowerBar and not db.profile.player.lockClassPowerToFrame then
+        if ns.GetUnitFrameSource("player") == "eui" and db.profile.player.showClassPowerBar and not db.profile.player.lockClassPowerToFrame then
             elements[#elements + 1] = MakeUFElement("classPower", 9)
         end
 
@@ -12380,7 +13193,7 @@ local function RegisterUFUnlockElements()
                     if f then PP.Size(f, newW, f:GetHeight()) end
                 end,
                 setHeight = function(_, h)
-                    if not EllesmereUI._unlockActive then return end
+                    if not EllesmereUI._unlockActive and not EllesmereUI._unlockLayerApplying then return end
                     local s = GetCBSettings()
                     if not s then return end
                     local newH = math.max(PP.Snap(h), 5)
@@ -12443,9 +13256,15 @@ local function RegisterUFUnlockElements()
         -- Always register all three cast bars; visibility is gated live via each
         -- element's isHidden (mirrors the show setting), so toggling a cast bar
         -- on/off takes effect on the next unlock-mode open -- no /reload needed.
-        elements[#elements + 1] = MakeCastBarElement("playerCastbar", "player", 10)
-        elements[#elements + 1] = MakeCastBarElement("targetCastbar", "target", 11)
-        elements[#elements + 1] = MakeCastBarElement("focusCastbar", "focus", 12)
+        if ns.GetUnitFrameSource("player") == "eui" then
+            elements[#elements + 1] = MakeCastBarElement("playerCastbar", "player", 10)
+        end
+        if ns.GetUnitFrameSource("target") == "eui" then
+            elements[#elements + 1] = MakeCastBarElement("targetCastbar", "target", 11)
+        end
+        if ns.GetUnitFrameSource("focus") == "eui" then
+            elements[#elements + 1] = MakeCastBarElement("focusCastbar", "focus", 12)
+        end
 
         EllesmereUI:RegisterUnlockElements(elements, "EllesmereUIUnitFrames")
 
@@ -12518,6 +13337,257 @@ StaticPopupDialogs["ELLESMERE_RESET_DEFAULTS"] = {
 -- 3D portrait warning popup is now handled by EllesmereUI:ShowConfirmPopup
 -- in EUI_UnitFrames_Options.lua (portrait mode dropdown handler).
 
+-------------------------------------------------------------------------------
+--  Private Auras (player frame only, 12.0.5+)
+--  Blizzard renders personal boss-mechanic aura icons through
+--  C_UnitAuras.AddPrivateAuraAnchor; we register one non-container anchor per
+--  slot frame, mirroring the raid frames implementation. Opt-in: no frames,
+--  no events, and no anchors exist until paEnabled is true. The player unit
+--  token never changes, so anchors are registered once and re-registered only
+--  on PLAYER_ENTERING_WORLD (Blizzard drops anchors on unit reassignment and
+--  a static player unit never fires OnAttributeChanged) or settings changes.
+-------------------------------------------------------------------------------
+do
+    local C_UnitAuras_AddPrivateAuraAnchor    = C_UnitAuras and C_UnitAuras.AddPrivateAuraAnchor
+    local C_UnitAuras_RemovePrivateAuraAnchor = C_UnitAuras and C_UnitAuras.RemovePrivateAuraAnchor
+
+    -- Private aura icons render behind the parent unless the slot frame's
+    -- strata sits one level above it (12.0.5 rendering bug).
+    local PA_STRATA_FIX = {
+        BACKGROUND = "LOW", LOW = "MEDIUM", MEDIUM = "HIGH", HIGH = "DIALOG",
+    }
+    local PA_SLOT_COUNT = 5   -- fixed pool; player boss mechanics are few
+    local PA_LVL_AURA   = 13  -- frame level offset, matches the raid frames aura layer
+
+    -- Snap to the physical pixel grid (same approach as the raid frames
+    -- helper): EllesmereUI.PP.perfect is the real pixel-perfect multiplier.
+    local function PA_PixelSnap(value)
+        if value == 0 then return 0 end
+        local realPP = EllesmereUI and EllesmereUI.PP
+        local perfect = realPP and realPP.perfect
+        if not perfect then return value end
+        local pf = frames.player
+        local es = (pf and pf:GetEffectiveScale()) or (UIParent and UIParent:GetEffectiveScale()) or 1
+        local onePixel = perfect / es
+        return math.floor(value / onePixel + 0.5 + 0.001) * onePixel
+    end
+
+    local st = { frames = nil, anchorIDs = {}, active = false, ev = nil }
+    ns._playerPA = st
+
+    -- Lazily create the slot frames the first time the feature is enabled.
+    local function CreateSlots(frame)
+        if st.frames then return end
+        local sz = db.profile.player.paSize or 20
+        st.frames = {}
+        for i = 1, PA_SLOT_COUNT do
+            local f = CreateFrame("Frame", nil, frame)
+            f:SetFrameLevel(frame:GetFrameLevel() + PA_LVL_AURA)
+            f:SetSize(sz, sz)
+            f:EnableMouse(false)
+            if f.SetMouseClickEnabled then f:SetMouseClickEnabled(false) end
+            f:Hide()
+            st.frames[i] = f
+        end
+    end
+
+    -- Remove all live anchors and hide the slot frames (frames persist for
+    -- cheap re-enable).
+    local function Unregister()
+        if C_UnitAuras_RemovePrivateAuraAnchor then
+            for _, aid in ipairs(st.anchorIDs) do
+                C_UnitAuras_RemovePrivateAuraAnchor(aid)
+            end
+            wipe(st.anchorIDs)
+        end
+        if st.frames then
+            for _, f in ipairs(st.frames) do f:Hide() end
+        end
+    end
+    ns.UnregisterPlayerPrivateAuras = Unregister
+
+    -- Position the slot frames and register one per-slot anchor each.
+    local function Register(frame)
+        if not C_UnitAuras_AddPrivateAuraAnchor then return end
+        if not st.frames then return end
+        local unit = "player"
+        if not UnitExists(unit) then return end
+
+        -- Remove old anchors before re-adding
+        for _, aid in ipairs(st.anchorIDs) do
+            C_UnitAuras_RemovePrivateAuraAnchor(aid)
+        end
+        wipe(st.anchorIDs)
+
+        local d = db.profile.player
+        local health = frame.Health
+        if not health then return end
+        local sz = d.paSize or 20
+        local showCD = d.paShowCountdown ~= false
+
+        local pos = d.paPosition or "center"
+        -- "None": private auras hidden. Old anchors were already removed above;
+        -- hide the slot frames and skip registration so Blizzard's secure layer
+        -- draws nothing.
+        if pos == "none" then
+            for _, f in ipairs(st.frames) do f:Hide() end
+            return
+        end
+        local ox = d.paOffsetX or 0
+        local oy = d.paOffsetY or 0
+        local grow = d.paGrowDirection or "RIGHT"
+        local spc = PA_PixelSnap(d.paSpacing or 0)
+
+        -- Hide Tooltips: Blizzard draws each private aura icon at iconInfo size
+        -- centered on the slot frame, but the icon's HOVER area comes from the
+        -- slot frame's own rect (the C-side icon ignores Lua mouse flags set on
+        -- the parent). Collapsing each slot to a sub-pixel point leaves the icon
+        -- rendering at full size with no surface left to hover, so the tooltip
+        -- can never trigger. The offset shift below moves the point to where the
+        -- full-size slot's CENTER used to sit, and the chain spacing regains the
+        -- icon width the collapsed frames no longer contribute -- the rendered
+        -- icons land pixel-identical to normal mode.
+        local slotSz = sz
+        if d.paHideTooltip then
+            slotSz = 0.001
+            local half = sz / 2
+            if pos == "topleft" or pos == "left" or pos == "bottomleft" then
+                ox = ox + half
+            elseif pos == "topright" or pos == "right" or pos == "bottomright" then
+                ox = ox - half
+            end
+            if pos == "topleft" or pos == "top" or pos == "topright" then
+                oy = oy - half
+            elseif pos == "bottomleft" or pos == "bottom" or pos == "bottomright" then
+                oy = oy + half
+            end
+            spc = spc + sz
+        end
+
+        local parentStrata = frame:GetFrameStrata()
+        local fixedStrata = PA_STRATA_FIX[parentStrata] or "DIALOG"
+
+        -- Countdown text scale-trick: Blizzard draws the timer/stack text as a
+        -- child of the slot frame, so its on-screen size follows the frame's
+        -- SCALE, not the iconInfo pixel size. Scaling the frame by (size / 32)
+        -- makes the text track the icon size; the icon dimension is compensated
+        -- back to a constant 32 local units so the rendered icon stays exactly
+        -- paSize pixels. SetPoint offsets and spacing live in the frame's local
+        -- (pre-scale) space, so they are divided by the same factor.
+        local ts = sz / 32
+        if ts <= 0 then ts = 1 end
+        local comp = 32               -- icon size in local units; renders at comp*ts = paSize px
+        local oxL, oyL, spcL = ox / ts, oy / ts, spc / ts
+
+        for i, paFrame in ipairs(st.frames) do
+            paFrame:SetScale(ts)
+            paFrame:SetSize(slotSz / ts, slotSz / ts)
+            paFrame:SetFrameStrata(fixedStrata)
+            paFrame:SetFrameLevel(frame:GetFrameLevel() + PA_LVL_AURA)
+            paFrame:ClearAllPoints()
+
+            if i == 1 then
+                -- Private auras anchor flush to the health bar edge (no inset),
+                -- matching the raid frames behavior.
+                if pos == "topleft" then
+                    paFrame:SetPoint("TOPLEFT", health, "TOPLEFT", oxL, oyL)
+                elseif pos == "top" then
+                    paFrame:SetPoint("TOP", health, "TOP", oxL, oyL)
+                elseif pos == "topright" then
+                    paFrame:SetPoint("TOPRIGHT", health, "TOPRIGHT", oxL, oyL)
+                elseif pos == "left" then
+                    paFrame:SetPoint("LEFT", health, "LEFT", oxL, oyL)
+                elseif pos == "center" then
+                    paFrame:SetPoint("CENTER", health, "CENTER", oxL, oyL)
+                elseif pos == "right" then
+                    paFrame:SetPoint("RIGHT", health, "RIGHT", oxL, oyL)
+                elseif pos == "bottomright" then
+                    paFrame:SetPoint("BOTTOMRIGHT", health, "BOTTOMRIGHT", oxL, oyL)
+                elseif pos == "bottom" then
+                    paFrame:SetPoint("BOTTOM", health, "BOTTOM", oxL, oyL)
+                else
+                    paFrame:SetPoint("BOTTOMLEFT", health, "BOTTOMLEFT", oxL, oyL)
+                end
+            else
+                local prev = st.frames[i - 1]
+                if grow == "RIGHT" then
+                    paFrame:SetPoint("LEFT", prev, "RIGHT", spcL, 0)
+                elseif grow == "LEFT" then
+                    paFrame:SetPoint("RIGHT", prev, "LEFT", -spcL, 0)
+                elseif grow == "UP" then
+                    paFrame:SetPoint("BOTTOM", prev, "TOP", 0, spcL)
+                elseif grow == "DOWN" then
+                    paFrame:SetPoint("TOP", prev, "BOTTOM", 0, -spcL)
+                end
+            end
+
+            paFrame:Show()
+
+            -- Register per-slot anchor
+            local iconInfoTbl = {
+                iconWidth  = comp,
+                iconHeight = comp,
+                iconAnchor = {
+                    point         = "CENTER",
+                    relativeTo    = paFrame,
+                    relativePoint = "CENTER",
+                    offsetX       = 0,
+                    offsetY       = 0,
+                },
+            }
+            -- Scale Blizzard's native border 1:1 to OUR icon size. The border
+            -- art is authored for a 32px icon, so iconSize/32*2 makes it fit
+            -- any size. Divide by the frame scale (ts) so the visible border
+            -- stays identical to the pre-scale-trick size.
+            iconInfoTbl.borderScale = (sz / 32 * 2) / ts
+            local ok, anchorID = pcall(function()
+                return C_UnitAuras_AddPrivateAuraAnchor({
+                    unitToken     = unit,
+                    auraIndex     = i,
+                    parent        = paFrame,
+                    isContainer   = false,
+                    -- 12.1 renamed this anchor key; retail keeps the old spelling.
+                    [EllesmereUI.IS_121 and "showCooldownFrame" or "showCountdownFrame"] = true,
+                    showCountdownNumbers = showCD,
+                    iconInfo = iconInfoTbl,
+                })
+            end)
+            if ok and anchorID then
+                st.anchorIDs[i] = anchorID
+            end
+        end
+    end
+
+    -- Master apply: safe to call any time after OnInitialize. The disabled
+    -- path costs one boolean check.
+    local function Apply()
+        local d = db and db.profile and db.profile.player
+        if not d then return end
+        if not d.paEnabled then
+            if st.active then
+                Unregister()
+                if st.ev then st.ev:UnregisterAllEvents() end
+                st.active = false
+            end
+            return
+        end
+        if not C_UnitAuras_AddPrivateAuraAnchor then return end
+        local pf = frames.player
+        if not pf or not pf.Health then return end
+
+        CreateSlots(pf)
+        -- Lazy PEW watcher: exists and is registered only while enabled.
+        if not st.ev then
+            st.ev = CreateFrame("Frame")
+            st.ev:SetScript("OnEvent", function() Apply() end)
+        end
+        st.ev:RegisterEvent("PLAYER_ENTERING_WORLD")
+        st.active = true
+        Register(pf)
+    end
+    ns.PlayerPA_Apply = Apply
+end
+
 local EllesmereUF = EllesmereUI.Lite.NewAddon("EllesmereUIUnitFrames")
 
 function EllesmereUF:OnInitialize()
@@ -12553,6 +13623,12 @@ function EllesmereUF:OnEnable()
         -- (zero cost otherwise -- nothing is registered when off).
         if db and db.profile and db.profile.playerThreatBorderEnabled and ns.SetPlayerThreatEnabled then
             ns.SetPlayerThreatEnabled(true)
+        end
+        -- Restore player private auras if the saved setting has them enabled
+        -- (zero cost otherwise -- nothing is created when off).
+        if db and db.profile and db.profile.player and db.profile.player.paEnabled
+            and ns.PlayerPA_Apply then
+            ns.PlayerPA_Apply()
         end
     end)
 
@@ -12728,6 +13804,13 @@ do
 
     local function Update()
         if not db then return end
+        -- 12.1: dispel display is owned by the container dispel slots once the
+        -- player frame migrates (the index scan below errors while auras are
+        -- secret). The slots live in EUI_UnitFrames_AuraContainers.lua.
+        if ns.UF_DispelOverlayDisabled then
+            if olTex then olTex:Hide() end
+            return
+        end
         local pf = frames and frames["player"]
         local health = pf and pf.Health
         if not health then return end
@@ -12745,9 +13828,13 @@ do
         -- First harmful aura with a dispel type. dispelName can be SECRET on
         -- the player in raid content: only the nil-test is permitted -- never
         -- index a table with it or branch on its value.
+        -- "Only Dispellable by You" delegates entirely to the engine filter
+        -- token (class/spec/talents evaluated live, no addon tables) -- the
+        -- same token the Raid Frames dispel system uses.
+        local scanFilter = p.dispelOverlayByMe and "HARMFUL|RAID_PLAYER_DISPELLABLE" or "HARMFUL"
         local found
         for i = 1, 40 do
-            local ad = C_UnitAuras.GetAuraDataByIndex("player", i, "HARMFUL")
+            local ad = C_UnitAuras.GetAuraDataByIndex("player", i, scanFilter)
             if not ad then break end
             if ad.dispelName ~= nil then
                 found = ad
@@ -12773,11 +13860,13 @@ do
         if mode == "full" then
             olTex:SetAllPoints(health)
             olTex:SetColorTexture(r, g, b, alpha)
-        elseif mode == "gradient" then
+        elseif mode == "gradient" or mode == "gradient_sharp" then
             -- Pre-baked vertical gradient tinted via vertex color (CreateColor
             -- cannot wrap secret components; SetVertexColor passes them natively)
             olTex:SetAllPoints(health)
-            olTex:SetTexture("Interface\\AddOns\\EllesmereUI\\media\\textures\\gradient-tb.tga")
+            olTex:SetTexture(mode == "gradient_sharp"
+                and "Interface\\AddOns\\EllesmereUI\\media\\textures\\gradient-sharp.tga"
+                or "Interface\\AddOns\\EllesmereUI\\media\\textures\\gradient-tb.tga")
             olTex:SetVertexColor(r, g, b, alpha)
         else -- "fill": cover only the filled health portion
             local fillTex = health:GetStatusBarTexture()
@@ -12795,6 +13884,47 @@ do
     ns.UpdatePlayerDispelOverlay = function()
         RebuildCurve()
         Update()
+        -- 12.1: the container dispel slots own the overlay (Update() bails
+        -- above); poke their fingerprinted reload so dropdown/cog edits
+        -- apply live instead of waiting for the next full container pass.
+        if ns.UF_DispelOverlayDisabled and ns.UF_ReloadPlayerDispelSlots then
+            ns.UF_ReloadPlayerDispelSlots()
+        end
+    end
+
+    -- Debuff dispel-type borders (per-unit debuffDispelBorder, default off):
+    -- recolors a debuff icon's PP border by dispel type on the legacy oUF
+    -- aura path, sharing this block's palette-seeded curve. Same secret
+    -- discipline as the overlay: presence = the permitted nil-test, color =
+    -- curve evaluation whose components pass natively into the border
+    -- setters. Untyped debuffs (and the feature off) restore the standard
+    -- black border. On 12.1 the containers own UF auras and render the
+    -- engine dispel border instead (style.dispelBorder in
+    -- EUI_UnitFrames_AuraContainers.lua) -- engine-picked colors there.
+    ns.UF_ColorDebuffDispelBorder = function(button, unit, data)
+        local border = button and button.Border
+        if not border then return end
+        local s = GetSettingsForUnit(unit)
+        local dispelName = data and data.dispelName
+        if s and s.debuffDispelBorder and dispelName ~= nil then
+            if not curve then RebuildCurve() end
+            local r, g, b
+            if curve and C_UnitAuras.GetAuraDispelTypeColor then
+                local col = C_UnitAuras.GetAuraDispelTypeColor(unit, data.auraInstanceID, curve)
+                if col then r, g, b = col:GetRGB() end
+            end
+            if r then
+                PP.SetBorderColor(border, r, g, b, 1)
+                button._euiDispelTinted = true
+                return
+            end
+        end
+        -- Restore the standard border only when we tinted it (pooled buttons
+        -- recycle across auras; never churn untouched borders).
+        if button._euiDispelTinted then
+            button._euiDispelTinted = nil
+            PP.SetBorderColor(border, 0, 0, 0, 1)
+        end
     end
 
     -- Re-seed the curve + re-apply after any frame reload (settings changes

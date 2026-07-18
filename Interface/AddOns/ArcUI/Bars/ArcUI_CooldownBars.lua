@@ -63,8 +63,12 @@ ns.CooldownBars.maxLogLines = 100
 local function SafeToString(val)
   if val == nil then return "nil" end
   if issecretvalue and issecretvalue(val) then return "** SECRET **" end
-  local ok, str = pcall(tostring, val)
-  return ok and str or "** ERROR **"
+  local t = type(val)
+  if t == "string" then return val end
+  if t == "number" or t == "boolean" then return tostring(val) end
+  -- Other types can carry a __tostring metamethod, which is the only thing that makes
+  -- tostring throw. This is a debug logger, so report the type rather than pcall-guard it.
+  return "<" .. t .. ">"
 end
 
 local function Log(msg)
@@ -8177,8 +8181,15 @@ local function IsAuraActive(cooldownID, auraType)
   
   if auraType == "totem" then
     -- Totem/pet/ground: check preferredTotemUpdateSlot
-    local slot = cdmFrame.preferredTotemUpdateSlot or (cdmFrame.totemData and cdmFrame.totemData.slot)
-    if slot and type(slot) == "number" and slot > 0 then
+    -- totemData is a SECRET table in instances; only index it when non-secret (open world).
+    local slot = cdmFrame.preferredTotemUpdateSlot
+    if not slot then
+      local td = cdmFrame.totemData
+      if td and not issecretvalue(td) then slot = td.slot end
+    end
+    -- A secret slot can't be compared (slot > 0 would throw); treat it as valid and let the
+    -- GetTotemInfo / issecretvalue path below decide.
+    if slot and (issecretvalue(slot) or (type(slot) == "number" and slot > 0)) then
       local haveTotem = GetTotemInfo(slot)
       -- Secret value or truthy = totem exists
       if issecretvalue and issecretvalue(haveTotem) then
@@ -8606,6 +8617,10 @@ timerEventFrame:SetScript("OnEvent", function(self, event, ...)
   elseif event == "UNIT_AURA" then
     local unit, updateInfo = ...
     if unit ~= "player" or not updateInfo then return end
+    -- 12.1: UNIT_AURA payload is fully secret in restricted content -- the id vectors are
+    -- secret tables, so #/ipairs on them throw. Bail; Stack Changed triggers won't fire
+    -- under secrecy. Inert on live (issecretvalue false -> normal path).
+    if issecretvalue and issecretvalue(updateInfo.isFullUpdate) then return end
 
     -- ── STACK CHANGED TRIGGER ─────────────────────────────────────────
     -- updatedAuraInstanceIDs = stack gained/lost mid-aura

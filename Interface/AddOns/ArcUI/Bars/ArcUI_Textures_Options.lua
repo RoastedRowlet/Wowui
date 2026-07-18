@@ -673,6 +673,13 @@ local function BuildEditor()
           order = 0,
           width = "full",
         },
+        progressNote121 = {
+          type = "description",
+          name = "|cffff8800On the 12.1 (Midnight) PTR: the smooth drain isn't available (duration is a protected value), so the texture simply shows while the aura is active and hides when it drops. The full drain works normally on live servers.|r",
+          order = 0.5,
+          width = "full",
+          hidden = function() return not (ns.API and ns.API.IS_121) end,
+        },
         progressEnabled = {
           type = "toggle",
           name = "Drain As It Expires",
@@ -820,6 +827,14 @@ local function BuildEditor()
           set = function(_, v) SetDisplay("fadeOutEnabled", v) end,
           order = 5,
           width = "full",
+          disabled = function() return (ns.API and ns.API.IS_121) or false end,
+        },
+        fadeNote121 = {
+          type = "description",
+          name = "|cffff8800Disabled on the 12.1 (Midnight) PTR: a texture can't be faded by remaining time there (the duration is a protected value), so it stays at its normal opacity while active. This works normally on live servers.|r",
+          order = 5.05,
+          width = "full",
+          hidden = function() return not (ns.API and ns.API.IS_121) end,
         },
         fadeStartPct = {
           type = "range",

@@ -364,6 +364,7 @@ end
 local function FadeSpellItemsIn(frame, depth)
     depth = depth or 0
     if not frame or depth > 10 or not frame.GetChildren or frame:IsForbidden() then return end
+    if depth > 0 and WSkin.IsForeignFrame(frame) then return end
     if frame.Backplate and frame.Button then FadeSpellItem(frame) end
     for i = 1, select("#", frame:GetChildren()) do
         FadeSpellItemsIn(select(i, frame:GetChildren()), depth + 1)
@@ -376,6 +377,7 @@ end
 local function DimTalentArt(host, depth)
     depth = depth or 0
     if not host or depth > 2 or not host.GetRegions or host:IsForbidden() then return end
+    if depth > 0 and WSkin.IsForeignFrame(host) then return end
     for i = 1, select("#", host:GetRegions()) do
         local r = select(i, host:GetRegions())
         if r and r.IsObjectType and r:IsObjectType("Texture") and r:GetDrawLayer() == "BACKGROUND" then
@@ -727,6 +729,7 @@ local function FadeEJArt(frame, depth)
     depth = depth or 0
     if not frame or depth > 11 or not frame.GetRegions or frame:IsForbidden() then return end
     if WSkin.IsArtExempt(frame) then return end
+    if depth > 0 and WSkin.IsForeignFrame(frame) then return end
     local mybg = FFD[frame] and FFD[frame].bg
     for i = 1, select("#", frame:GetRegions()) do
         local r = select(i, frame:GetRegions())
@@ -742,6 +745,24 @@ local function FadeEJArt(frame, depth)
     for i = 1, select("#", frame:GetChildren()) do
         FadeEJArt(select(i, frame:GetChildren()), depth + 1)
     end
+end
+
+-- Some Blizzard text bakes a |cff000000 black or |cff414141 dark grey run INTO
+-- the string (gossip/quest option titles, and localized quest reward/greeting
+-- blurbs on non-English clients); a plain SetTextColor cannot lighten those --
+-- the embedded run wins. Rewrite just those two tones to readable light ones in
+-- place, leaving every other color (links, quest difficulty) untouched.
+-- Idempotent: once rewritten the source codes are gone, so re-runs are no-ops.
+local DARK_TEXT_RECOLOR = { ["000000"] = "ffffff", ["414141"] = "b0b8bc" }
+local function RecolorDarkText(fs)
+    if not fs or not fs.GetText then return end
+    local txt = fs:GetText()
+    if not txt or txt == "" or not txt:find("|cff", 1, true) then return end
+    local new, n = txt:gsub("|c[fF][fF](%x%x%x%x%x%x)", function(hex)
+        local repl = DARK_TEXT_RECOLOR[hex:lower()]
+        if repl then return "|cff" .. repl end
+    end)
+    if n > 0 and new ~= txt then fs:SetText(new) end
 end
 
 -- Force encounter text white so it reads on the dark panel once the parchment
@@ -766,18 +787,21 @@ local function WhitenTextIn(frame, depth)
             if r and r.IsObjectType and r:IsObjectType("FontString") and r.SetTextColor then
                 r:SetTextColor(1, 1, 1)
                 RecolorLinks(r)
+                RecolorDarkText(r)
             end
         end
     end
     if frame.GetChildren then
         for i = 1, select("#", frame:GetChildren()) do
             local c = select(i, frame:GetChildren())
-            if c and c.GetObjectType and c:GetObjectType() == "SimpleHTML" and c.SetTextColor then
-                for _, el in ipairs({ "P", "H1", "H2", "H3" }) do
-                    pcall(c.SetTextColor, c, el, 1, 1, 1)
+            if c and not WSkin.IsForeignFrame(c, frame) then
+                if c.GetObjectType and c:GetObjectType() == "SimpleHTML" and c.SetTextColor then
+                    for _, el in ipairs({ "P", "H1", "H2", "H3" }) do
+                        pcall(c.SetTextColor, c, el, 1, 1, 1)
+                    end
                 end
+                WhitenTextIn(c, depth + 1)
             end
-            WhitenTextIn(c, depth + 1)
         end
     end
 end
@@ -986,10 +1010,12 @@ local function FlattenBossButtons(frame, depth)
     if not frame or depth > 8 or frame:IsForbidden() or not frame.GetChildren then return end
     for i = 1, select("#", frame:GetChildren()) do
         local c = select(i, frame:GetChildren())
-        if c and c.creature and (c.text or c.name) and c.GetObjectType and c:GetObjectType() == "Button" then
-            SkinBossButton(c)
+        if c and not WSkin.IsForeignFrame(c, frame) then
+            if c.creature and (c.text or c.name) and c.GetObjectType and c:GetObjectType() == "Button" then
+                SkinBossButton(c)
+            end
+            FlattenBossButtons(c, depth + 1)
         end
-        FlattenBossButtons(c, depth + 1)
     end
 end
 
@@ -1049,10 +1075,12 @@ local function FlattenInstanceButtons(frame, depth)
     if not frame or depth > 8 or frame:IsForbidden() or not frame.GetChildren then return end
     for i = 1, select("#", frame:GetChildren()) do
         local c = select(i, frame:GetChildren())
-        if c and c.bgImage and c.name and c.GetObjectType and c:GetObjectType() == "Button" then
-            SkinInstanceButton(c)
+        if c and not WSkin.IsForeignFrame(c, frame) then
+            if c.bgImage and c.name and c.GetObjectType and c:GetObjectType() == "Button" then
+                SkinInstanceButton(c)
+            end
+            FlattenInstanceButtons(c, depth + 1)
         end
-        FlattenInstanceButtons(c, depth + 1)
     end
 end
 
@@ -1174,10 +1202,12 @@ local function FlattenLootRows(frame, depth)
     if not frame or depth > 8 or frame:IsForbidden() or not frame.GetChildren then return end
     for i = 1, select("#", frame:GetChildren()) do
         local c = select(i, frame:GetChildren())
-        if c and c.bossTexture and c.slot and c.GetObjectType and c:GetObjectType() == "Button" then
-            SkinLootRow(c)
+        if c and not WSkin.IsForeignFrame(c, frame) then
+            if c.bossTexture and c.slot and c.GetObjectType and c:GetObjectType() == "Button" then
+                SkinLootRow(c)
+            end
+            FlattenLootRows(c, depth + 1)
         end
-        FlattenLootRows(c, depth + 1)
     end
 end
 
@@ -1226,7 +1256,7 @@ local function SkinAbilityHeaders(frame, depth)
     if not frame or depth > 9 or frame:IsForbidden() or not frame.GetChildren then return end
     for i = 1, select("#", frame:GetChildren()) do
         local c = select(i, frame:GetChildren())
-        if c then
+        if c and not WSkin.IsForeignFrame(c, frame) then
             if c.descriptionBG and c.descriptionBG.SetAlpha then c.descriptionBG:SetAlpha(0) end
             if c.descriptionBGBottom and c.descriptionBGBottom.SetAlpha then c.descriptionBGBottom:SetAlpha(0) end
             -- Description line bullets -> the round status orb (first cell of
@@ -2206,7 +2236,7 @@ local function Skin_ProfessionsBook()
         if depth > 3 or not host.GetChildren then return end
         for i = 1, select("#", host:GetChildren()) do
             local c = select(i, host:GetChildren())
-            if c and c.GetObjectType and c:GetObjectType() == "Button" then
+            if c and not WSkin.IsForeignFrame(c, host) and c.GetObjectType and c:GetObjectType() == "Button" then
                 if not GetFFD(c).moved then
                     local nt = c.GetNormalTexture and c:GetNormalTexture()
                     local hay = nt and WSkin.TexHay(nt)
@@ -3291,19 +3321,80 @@ local function Skin_Guild()
         local cdStock = capturePts(cd2)
         local boxWide = boxStock and widePts(boxStock, 23, 20)
         local cdWide = cdStock and widePts(cdStock, 23, 23)
+        -- Also widen `ml` (MemberList) itself at the source, since Blizzard's
+        -- own row-sizing below (SetWidth(GetMemberList():GetWidth())) reads
+        -- ml's width directly. RefreshLayout only ever gives `ml` a single
+        -- positional anchor (not a LEFT+RIGHT pair like box2/cd2), so it's
+        -- resized with a plain SetWidth rather than the capturePts/widePts
+        -- anchor-nudge technique above. This works alongside the per-row
+        -- SetWidth override below, not instead of it: the two are
+        -- belt-and-braces, so rows stay correctly sized whether Blizzard's
+        -- layout picks up the widened ml on its own or not.
+        local mlStockWidth = ml:GetWidth()
+        local mlWideWidth = mlStockWidth + 23 + 20
+        -- Every roster row is sized by Blizzard to MemberList's own width
+        -- (CommunitiesMemberListEntryMixin:SetExpanded -> SetWidth(GetMemberList()
+        -- :GetWidth())), a frame this pass never touches -- only its ScrollBox
+        -- and ColumnDisplay children get widened above. Left alone, rows stay
+        -- stock width while the header grows, so each row's GuildInfo text
+        -- (RIGHT-anchored to the row, -4) sits in a box that ends well short of
+        -- the widened header -- the Achievement Points / M+ Rating value renders
+        -- under the Note column instead of the far-right stat column. Re-stamp
+        -- every live row to the ScrollBox's actual current width so it always
+        -- matches. GuildInfo is also LEFT-justified in that box by default, so
+        -- widening it alone never moves the visible text -- center it and nudge
+        -- it left while the roster is showing, and put both back to Blizzard's
+        -- stock LEFT/20/-4 layout when it's not, since MemberList/ScrollBox is
+        -- shared with the Chat tab's narrower names column and a row must not
+        -- stay stranded in the roster's styling after the swap.
+        local GUILD_INFO_NUDGE = 20
+        local function ApplyRowLayout(row)
+            if not row then return end
+            if row.SetWidth then row:SetWidth(box2:GetWidth()) end
+            local gi = row.GuildInfo
+            if gi and row.Note and gi.SetJustifyH and gi.ClearAllPoints then
+                gi:ClearAllPoints()
+                if cd2:IsShown() then
+                    gi:SetJustifyH("CENTER")
+                    gi:SetPoint("LEFT", row.Note, "RIGHT", 20 - GUILD_INFO_NUDGE, 0)
+                    gi:SetPoint("RIGHT", row, "RIGHT", -4 - GUILD_INFO_NUDGE, 0)
+                else
+                    gi:SetJustifyH("LEFT")
+                    gi:SetPoint("LEFT", row.Note, "RIGHT", 20, 0)
+                    gi:SetPoint("RIGHT", row, "RIGHT", -4, 0)
+                end
+            end
+        end
+        -- Same uninitialized-ScrollBox guard used for the AH summary/rail rows
+        -- elsewhere in this file: ForEachFrame errors inside Blizzard's code
+        -- if the view doesn't exist yet (e.g. this pass runs at ADDON_LOADED,
+        -- before the roster has ever been shown).
+        local function SyncRowWidths()
+            if box2.ForEachFrame and box2.GetView and box2:GetView() then
+                pcall(box2.ForEachFrame, box2, ApplyRowLayout)
+            end
+        end
+        hooksecurefunc(box2, "Update", WSkin.Debounce(SyncRowWidths))
         cd2:HookScript("OnShow", function()
             applyPts(box2, boxWide)
             applyPts(cd2, cdWide)
+            ml:SetWidth(mlWideWidth)
+            SyncRowWidths()
         end)
         cd2:HookScript("OnHide", function()
             applyPts(box2, boxStock)
+            ml:SetWidth(mlStockWidth)
+            SyncRowWidths()
         end)
         if cd2:IsShown() then
             applyPts(box2, boxWide)
             applyPts(cd2, cdWide)
+            ml:SetWidth(mlWideWidth)
         else
             applyPts(box2, boxStock)
+            ml:SetWidth(mlStockWidth)
         end
+        SyncRowWidths()
     end
 
     -- Chat view's names-column scrollbar sits 5px right (one-shot, every
@@ -3557,7 +3648,8 @@ local function Skin_Guild()
         TreatClose(_G[n .. "CloseButton"])
         for i = 1, select("#", gl:GetChildren()) do
             local ch = select(i, gl:GetChildren())
-            if ch and ch.GetObjectType and ch:GetObjectType() == "Button" then
+            if ch and not WSkin.IsForeignFrame(ch, gl)
+               and ch.GetObjectType and ch:GetObjectType() == "Button" then
                 TreatClose(ch)
             end
         end
@@ -4023,6 +4115,7 @@ end
 local function AchWhiteTextsIn(host, depth)
     depth = depth or 0
     if not host or depth > 5 or host:IsForbidden() then return end
+    if depth > 0 and WSkin.IsForeignFrame(host) then return end
     AchWhiteTexts(host)
     if not host.GetChildren then return end
     for i = 1, select("#", host:GetChildren()) do
@@ -4389,7 +4482,7 @@ local function Skin_Achievements()
             if sub then
                 for i = 1, select("#", sub:GetChildren()) do
                     local c = select(i, sub:GetChildren())
-                    if c and c.NineSlice then
+                    if c and c.NineSlice and not WSkin.IsForeignFrame(c, sub) then
                         WSkin.FadeNineSlice(c.NineSlice)
                         WSkin.FadeRegions(c)
                         WSkin.Register(c, true)
@@ -4838,17 +4931,25 @@ local function SkinMailRow(row)
     if row.Button then SkinMailItemButton(row.Button) end
 end
 
--- Letter body is a SimpleHTML with per-element colors; force readable white.
+-- Letter body: force readable white + skin font on the SimpleHTML elements.
 local function WhitenMailText()
     local html = _G.OpenMailBodyText
     if html and html.SetTextColor then
+        local fp = Theme.fontPath
+        local ff = Theme.fontFlag or ""
         for _, el in ipairs({ "P", "H1", "H2", "H3" }) do
             pcall(html.SetTextColor, html, el, 1, 1, 1)
+            if fp and html.GetFont then
+                local ok, _, sz = pcall(html.GetFont, html, el)
+                if ok and sz and not issecretvalue(sz) then
+                    pcall(html.SetFont, html, el, fp, sz, ff)
+                end
+            end
         end
     end
-    if _G.OpenMailSubject then WSkin.White(_G.OpenMailSubject) end
+    if _G.OpenMailSubject then WSkin.Font(_G.OpenMailSubject); WSkin.White(_G.OpenMailSubject) end
     local sender = _G.OpenMailSender
-    if sender and sender.Name then WSkin.White(sender.Name) end
+    if sender and sender.Name then WSkin.Font(sender.Name); WSkin.White(sender.Name) end
 end
 
 local function Skin_OpenMail()
@@ -4925,18 +5026,78 @@ local function Skin_Mail()
         if a and not GetFFD(a).sock then
             local d = GetFFD(a)
             d.sock = true
-            local keep = {}
-            local icon = a.icon or (a.GetName and a:GetName() and _G[a:GetName() .. "IconTexture"])
-            if icon then keep[icon] = true end
-            WSkin.FadeRegions(a, keep)
             local nt = a.GetNormalTexture and a:GetNormalTexture()
+
+            -- Fade every direct texture on the button. The SendMailAttachment
+            -- button has a static placeholder texture (returned by the item API)
+            -- plus a separate dynamic icon texture that Blizzard creates/updates
+            -- when items are placed. Fading everything initially prevents the
+            -- placeholder from clipping through; the hook below re-shows the
+            -- actual icon when an item is dropped in.
+            WSkin.FadeRegions(a)
             if nt and nt.SetAlpha then nt:SetAlpha(0) end
-            local bg = a:CreateTexture(nil, "BACKGROUND", nil, -2)
+            if a.IconBorder then a.IconBorder:SetAlpha(0) end
+
+            -- Background at a very low sublevel so it cannot cover the icon.
+            local bg = a:CreateTexture(nil, "BACKGROUND", nil, -8)
             bg:SetColorTexture(Theme.bgR, Theme.bgG, Theme.bgB, Theme.bgA)
             bg:SetAllPoints(a)
             d.bg = bg
             WSkin.AddBorder(a)
-            if icon then WSkin.SquareIcon(icon) end
+
+            -- If the slot already contains an item when the frame is shown (e.g.
+            -- reopening the mailbox), the icon texture exists at ARTWORK/OVERLAY
+            -- with a real item texture. Re-show it here because the hook below
+            -- only fires on later SetItemButtonTexture calls.
+            local countFS = a.Count or (a.GetName and _G[a:GetName() .. "Count"])
+            local countText = countFS and countFS.GetText and countFS:GetText()
+            if countText and countText ~= "" and countText ~= "0" then
+                for j = 1, select("#", a:GetRegions()) do
+                    local r = select(j, a:GetRegions())
+                    if r and r:IsObjectType("Texture") and r.GetDrawLayer and r.GetTexture then
+                        local layer = ({r:GetDrawLayer()})[1]
+                        if (layer == "ARTWORK" or layer == "OVERLAY") and r:GetTexture() then
+                            r:SetAlpha(1)
+                            r:Show()
+                            if r.SetTexCoord then r:SetTexCoord(0.08, 0.92, 0.08, 0.92) end
+                        end
+                    end
+                end
+            end
+
+            -- Hook SetItemButtonTexture: when an item is placed, find the region
+            -- that actually received the item texture and show only that. When
+            -- the slot is cleared, hide all icon textures again.
+            if a.SetItemButtonTexture and not d.texHook then
+                d.texHook = true
+                hooksecurefunc(a, "SetItemButtonTexture", function(self, texture)
+                    -- Our themed background is a direct region of this button;
+                    -- the sweeps below must never fade it or the slot loses its
+                    -- backdrop the first time an item is set or cleared.
+                    if not texture then
+                        for j = 1, select("#", self:GetRegions()) do
+                            local r = select(j, self:GetRegions())
+                            if r and r ~= d.bg and r:IsObjectType("Texture") then
+                                r:SetAlpha(0)
+                            end
+                        end
+                        return
+                    end
+                    for j = 1, select("#", self:GetRegions()) do
+                        local r = select(j, self:GetRegions())
+                        if r and r ~= d.bg and r:IsObjectType("Texture") then
+                            local match = (r.GetTexture and r:GetTexture() == texture) or (r.GetAtlas and r:GetAtlas() == texture)
+                            if match then
+                                r:SetAlpha(1)
+                                r:Show()
+                                if r.SetTexCoord then r:SetTexCoord(0.08, 0.92, 0.08, 0.92) end
+                            else
+                                r:SetAlpha(0)
+                            end
+                        end
+                    end
+                end)
+            end
         end
     end
 
@@ -4963,19 +5124,6 @@ local function Skin_Mail()
                 SkinMailItemButton(_G.OpenMailLetterButton)
                 for i = 1, 16 do SkinMailItemButton(_G["OpenMailAttachmentButton" .. i]) end
                 WhitenMailText()
-            end))
-        end
-        if type(_G.SendMailFrame_Update) == "function" then
-            hooksecurefunc("SendMailFrame_Update", WSkin.Debounce(function()
-                for i = 1, 16 do
-                    local a = _G["SendMailAttachment" .. i]
-                    if a then
-                        local icon = a.icon or (a.GetName and a:GetName() and _G[a:GetName() .. "IconTexture"])
-                        if icon then WSkin.SquareIcon(icon) end
-                        local nt = a.GetNormalTexture and a:GetNormalTexture()
-                        if nt and nt.SetAlpha then nt:SetAlpha(0) end
-                    end
-                end
             end))
         end
     end
@@ -6760,8 +6908,9 @@ local function Skin_WorldMap()
                     if fs and fs.SetTextColor then fs:SetTextColor(1, 0.82, 0) end
                 end
                 local rw = _G.QuestInfoRewardsFrame
-                if rw and rw.Header and rw.Header.SetTextColor then
-                    rw.Header:SetTextColor(1, 0.82, 0)
+                if rw then
+                    WhitenTextIn(rw)  -- catch nested spell/effect + SimpleHTML reward blurbs
+                    if rw.Header and rw.Header.SetTextColor then rw.Header:SetTextColor(1, 0.82, 0) end
                 end
                 for _, n in ipairs({ "QuestInfoDescriptionText", "QuestInfoObjectivesText",
                                      "QuestInfoGroupSize" }) do
@@ -7530,6 +7679,117 @@ WSkin.RegisterWindow({
 })
 
 -------------------------------------------------------------------------------
+--  Merchant item-level overlay (QoL, independent of the Merchant reskin).
+--  Shows the item level on the top-left of each vendor tile for gear
+--  (weapons/armor) when EllesmereUIDB.merchantShowItemLevel is set. Buttons
+--  carry their merchant slot index as their ID (Blizzard's MerchantFrame_Update
+--  sets it), so we resolve the link straight from GetMerchantItemLink.
+-------------------------------------------------------------------------------
+local MERCHANT_ILVL_WEAPON = Enum.ItemClass.Weapon
+local MERCHANT_ILVL_ARMOR  = Enum.ItemClass.Armor
+
+local function UpdateMerchantItemLevels()
+    local f = _G.MerchantFrame
+    if not f then return end
+    local show = EllesmereUIDB and EllesmereUIDB.merchantShowItemLevel == true
+    local onSellTab = (f.selectedTab or 1) == 1
+    local render = show and onSellTab and f:IsVisible()
+    for i = 1, 12 do
+        local btn = _G["MerchantItem" .. i .. "ItemButton"]
+        if btn then
+            -- FontString ref lives in the engine FFD, never on Blizzard's
+            -- button table. Read without creating so the disabled path costs
+            -- one weak-table lookup per slot.
+            local fd = FFD[btn]
+            local fs = fd and fd.merchantILvl
+            if not render then
+                if fs then fs:SetText("") end
+            else
+                if not fs then
+                    fs = btn:CreateFontString(nil, "OVERLAY", nil, 7)
+                    fs:SetPoint("TOPLEFT", btn, "TOPLEFT", 1, -1)
+                    local path = (EllesmereUI.GetFontPath and EllesmereUI.GetFontPath()) or "Fonts\\FRIZQT__.TTF"
+                    local flag = (EllesmereUI.SlugFlag and EllesmereUI.SlugFlag("OUTLINE, SLUG")) or "OUTLINE"
+                    fs:SetFont(path, 12, flag)
+                    GetFFD(btn).merchantILvl = fs
+                end
+                fs:SetText("")
+                local index = btn:GetID()
+                local link = index and index > 0 and GetMerchantItemLink(index)
+                if link then
+                    local _, _, _, _, _, classID = C_Item.GetItemInfoInstant(link)
+                    if classID == MERCHANT_ILVL_WEAPON or classID == MERCHANT_ILVL_ARMOR then
+                        local ilvl = C_Item.GetDetailedItemLevelInfo(link)
+                        if ilvl and ilvl > 0 then
+                            fs:SetText(ilvl)
+                            local quality = select(3, C_Item.GetItemInfo(link))
+                            local r, g, b = 1, 1, 1
+                            if EllesmereUI.GetItemLevelColor then
+                                local c = EllesmereUI.GetItemLevelColor(link, quality)
+                                if c then r, g, b = c.r or 1, c.g or 1, c.b or 1 end
+                            elseif quality then
+                                r, g, b = C_Item.GetItemQualityColor(quality)
+                            end
+                            fs:SetTextColor(r, g, b, 1)
+                        end
+                    end
+                end
+            end
+        end
+    end
+end
+
+local _merchantILvlHooked = false
+local function EnsureMerchantILvlHook()
+    if _merchantILvlHooked then return end
+    _merchantILvlHooked = true
+    if type(_G.MerchantFrame_Update) == "function" then
+        hooksecurefunc("MerchantFrame_Update", WSkin.Debounce(UpdateMerchantItemLevels))
+    end
+end
+
+-- The MerchantFrame_Update hook is what renders the item levels; it installs
+-- once the toggle is on and stays (cheap: MerchantFrame_Update only fires
+-- while a merchant is up, and the updater no-ops when the toggle is off). It
+-- must NOT be gated on MerchantFrame:IsVisible(): MERCHANT_SHOW fires before
+-- Blizzard shows the frame, so IsVisible() is false there and the hook would
+-- never install. GET_ITEM_INFO_RECEIVED fires on every item-cache resolve
+-- suite-wide, so it is registered ONLY while a merchant is actually open
+-- (tracked by an explicit flag, not visibility) AND the toggle is on.
+local mILvlBoot = CreateFrame("Frame")
+local _merchantOpen = false
+local function SyncMerchantILvlEvents()
+    local on = EllesmereUIDB and EllesmereUIDB.merchantShowItemLevel == true
+    if on then EnsureMerchantILvlHook() end
+    if on and _merchantOpen then
+        mILvlBoot:RegisterEvent("GET_ITEM_INFO_RECEIVED")
+    else
+        mILvlBoot:UnregisterEvent("GET_ITEM_INFO_RECEIVED")
+    end
+end
+
+-- Options toggle entry point: re-sync listeners, then render or clear.
+EllesmereUI._Merchant_RefreshItemLevels = function()
+    SyncMerchantILvlEvents()
+    UpdateMerchantItemLevels()
+end
+
+mILvlBoot:RegisterEvent("MERCHANT_SHOW")
+mILvlBoot:RegisterEvent("MERCHANT_CLOSED")
+mILvlBoot:SetScript("OnEvent", function(_, event)
+    if event == "MERCHANT_SHOW" then
+        _merchantOpen = true
+        SyncMerchantILvlEvents()
+        UpdateMerchantItemLevels()
+    elseif event == "MERCHANT_CLOSED" then
+        _merchantOpen = false
+        SyncMerchantILvlEvents()
+    else -- GET_ITEM_INFO_RECEIVED: an item's data resolved while shopping
+        UpdateMerchantItemLevels()
+    end
+end)
+
+-------------------------------------------------------------------------------
 --  Class / Profession Trainer (ClassTrainerFrame, Blizzard_TrainerUI)
 --  Portrait frame: flat chrome, squared skill-row icons, native availability
 --  text color kept (green/red/gray -- like item rarity, we never force white),
@@ -7760,31 +8020,13 @@ WSkin.RegisterWindow({
 -------------------------------------------------------------------------------
 --  Gossip (GossipFrame) -- NPC dialog window. Base UI, always loaded.
 -------------------------------------------------------------------------------
--- One gossip / quest option: white text for readability on the dark bg.
--- Gossip quest/option titles bake a |cff000000 black (or |cff414141 dark grey)
--- color code INTO the string, so a plain SetTextColor cannot lighten them --
--- the embedded run wins. Rewrite just those two tones to readable light ones in
--- place, leaving every other color (links, quest difficulty) untouched.
--- Idempotent: once rewritten the source codes are gone, so re-runs are no-ops.
-local GOSSIP_TEXT_RECOLOR = { ["000000"] = "ffffff", ["414141"] = "b0b8bc" }
-local function RecolorGossipText(fs)
-    if not fs or not fs.GetText then return end
-    local txt = fs:GetText()
-    if not txt or txt == "" or not txt:find("|cff", 1, true) then return end
-    local new, n = txt:gsub("|c[fF][fF](%x%x%x%x%x%x)", function(hex)
-        local repl = GOSSIP_TEXT_RECOLOR[hex:lower()]
-        if repl then return "|cff" .. repl end
-    end)
-    if n > 0 and new ~= txt then fs:SetText(new) end
-end
-
 local function SkinGossipOption(btn)
     if not btn or btn:IsForbidden() then return end
     -- Recolor ONLY -- keep Blizzard's native font on gossip text (its buttons
     -- follow the color-only widget font policy). No WSkin.Font here.
-    if btn.GreetingText then WSkin.White(btn.GreetingText); RecolorGossipText(btn.GreetingText) end
+    if btn.GreetingText then WSkin.White(btn.GreetingText); RecolorDarkText(btn.GreetingText) end
     local fs = btn.GetFontString and btn:GetFontString()
-    if fs then WSkin.White(fs); RecolorGossipText(fs) end
+    if fs then WSkin.White(fs); RecolorDarkText(fs) end
     -- The NPC greeting body text is a FontString nested inside the element (not
     -- the named GreetingText field or the button label), so it slips past both
     -- checks above and renders black on the dark panel. Whiten every FontString
@@ -7958,13 +8200,13 @@ local function Skin_Quest()
             if fs and fs.SetTextColor then fs:SetTextColor(1, 0.82, 0) end
         end
         local rw = _G.QuestInfoRewardsFrame
-        if rw and rw.Header and rw.Header.SetTextColor then rw.Header:SetTextColor(1, 0.82, 0) end
         for _, n in ipairs({ "QuestInfoDescriptionText", "QuestInfoObjectivesText",
                              "QuestInfoGroupSize", "QuestInfoRewardText", "QuestInfoQuestType" }) do
             local fs = _G[n]
             if fs and fs.SetTextColor then fs:SetTextColor(1, 1, 1) end
         end
         if rw then
+            WhitenTextIn(rw)  -- catch nested spell/effect + SimpleHTML reward blurbs the fields below miss
             for _, k in ipairs({ "ItemChooseText", "ItemReceiveText",
                                  "PlayerTitleText", "SpellLearnText" }) do
                 local fs = rw[k]
@@ -7980,6 +8222,7 @@ local function Skin_Quest()
                     if btn.Name and btn.Name.SetTextColor then btn.Name:SetTextColor(1, 1, 1) end
                 end
             end
+            if rw.Header and rw.Header.SetTextColor then rw.Header:SetTextColor(1, 0.82, 0) end
         end
         local of = _G.QuestInfoObjectivesFrame
         if of and of.Objectives then
@@ -8004,25 +8247,32 @@ local function Skin_Quest()
             end
         end
     end
-    local function SkinQuestGreetingButtons()
+    -- Greeting text + section labels + quest title buttons. Blizzard re-applies
+    -- the dark parchment material colour in the greeting panel OnShow after our
+    -- skin runs, so re-white on every show (hooked below), not just once here.
+    local function StyleQuestGreeting()
+        if _G.QuestGreetingText then WSkin.White(_G.QuestGreetingText); RecolorDarkText(_G.QuestGreetingText) end
+        for _, n in ipairs({ "CurrentQuestsText", "AvailableQuestsText" }) do
+            local fs = _G[n]
+            if fs then WSkin.White(fs); RecolorDarkText(fs) end
+        end
         local gp = _G.QuestFrameGreetingPanel
-        if not gp or not gp.titleButtonPool then return end
-        for btn in gp.titleButtonPool:EnumerateActive() do
-            SkinQuestGreetingButton(btn)
+        if gp and gp.titleButtonPool then
+            for btn in gp.titleButtonPool:EnumerateActive() do
+                SkinQuestGreetingButton(btn)
+            end
         end
     end
 
-    -- Greeting panel body: white greeting paragraph + section labels, faded
-    -- divider, readable quest title buttons.
-    if _G.QuestGreetingText then WSkin.Font(_G.QuestGreetingText); WSkin.White(_G.QuestGreetingText) end
+    if _G.QuestGreetingText then WSkin.Font(_G.QuestGreetingText) end
     for _, n in ipairs({ "CurrentQuestsText", "AvailableQuestsText" }) do
         local fs = _G[n]
-        if fs then WSkin.Font(fs); WSkin.White(fs) end
+        if fs then WSkin.Font(fs) end
     end
     if _G.QuestGreetingFrameHorizontalBreak and _G.QuestGreetingFrameHorizontalBreak.SetAlpha then
         _G.QuestGreetingFrameHorizontalBreak:SetAlpha(0)
     end
-    SkinQuestGreetingButtons()
+    StyleQuestGreeting()
 
     -- Progress panel static text.
     if _G.QuestProgressTitleText then
@@ -8037,9 +8287,12 @@ local function Skin_Quest()
         end))
         -- Greeting rows repopulate on QUEST_GREETING / QUEST_LOG_UPDATE.
         local gp = _G.QuestFrameGreetingPanel
-        if gp then gp:HookScript("OnShow", WSkin.Debounce(SkinQuestGreetingButtons)) end
+        if gp then gp:HookScript("OnShow", WSkin.Debounce(StyleQuestGreeting)) end
         if type(_G.QuestFrameGreetingPanel_OnShow) == "function" then
-            hooksecurefunc("QuestFrameGreetingPanel_OnShow", SkinQuestGreetingButtons)
+            hooksecurefunc("QuestFrameGreetingPanel_OnShow", function()
+                StyleQuestGreeting()
+                if C_Timer then C_Timer.After(0, StyleQuestGreeting) end
+            end)
         end
         -- Body text: Blizzard re-colors it on each display, so re-assert in the
         -- hook (and once more next frame -- objectives are colored after this).
@@ -10115,7 +10368,15 @@ local function Skin_CraftOrders()
         List(mo.OrderList)
     end
 
-    -- Bottom tabs (frame.Tabs table, AH-style).
+    -- Bottom tabs (frame.Tabs table, AH-style). Confirmed via live dump these
+    -- carry none of the standard selection fields (tabID/selectedTabID,
+    -- isSelected, displayMode are all nil, and there's no GetDisplayMode API
+    -- either) so the engine's TabIsSelected() never matches and neither tab
+    -- ever shows active. Selection here is purely which content page is
+    -- shown, so sync the FFD override from BrowseOrders/MyOrdersPage
+    -- visibility instead (mirrors the Auction House's displayMode-based
+    -- SyncTabSel). Runs every Skin_CraftOrders() pass, which the browse/mo
+    -- OnShow hooks below already re-trigger on every tab switch.
     local coTabs = {}
     if type(f.Tabs) == "table" then
         for _, t in ipairs(f.Tabs) do
@@ -10123,6 +10384,15 @@ local function Skin_CraftOrders()
         end
     end
     WSkin.NormalizeTabRow(coTabs)
+    for _, t in ipairs(coTabs) do
+        local name = t.GetName and t:GetName()
+        if name and name:find("BrowseTab", 1, true) then
+            GetFFD(t).selOverride = (f.BrowseOrders and f.BrowseOrders:IsShown()) and true or false
+        elseif name and name:find("OrdersTab", 1, true) then
+            GetFFD(t).selOverride = (f.MyOrdersPage and f.MyOrdersPage:IsShown()) and true or false
+        end
+    end
+    WSkin.UpdateAllTabs()
 
     if not _craftHooked then
         _craftHooked = true

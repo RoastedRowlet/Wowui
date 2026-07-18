@@ -191,7 +191,10 @@ local function ColorTick(_, elapsed)
   colorElapsed = 0
   for fs, data in pairs(colorBindings) do
     -- GetAuraDuration returns nil for a gone aura and does not throw -- no pcall.
+    -- 12.1: GetAuraDuration THROWS while the unit's auras are secret (id stays NON-secret) -> gate
+    -- on the ns.API.AurasSecret probe. Drop the binding (falls to base color). Inert on live.
     local durObj = C_UnitAuras and C_UnitAuras.GetAuraDuration
+                   and not (ns.API and ns.API.AurasSecret and ns.API.AurasSecret(data.unit))
                    and C_UnitAuras.GetAuraDuration(data.unit, data.auraID)
     if not durObj then
       ApplyBaseColor(fs, data.baseColor)
@@ -210,6 +213,7 @@ function DT.BindColor(fs, unit, auraID, curve, baseColor)
   colorBindings[fs] = { unit = unit, auraID = auraID, curve = curve, baseColor = baseColor }
   -- Apply once immediately so the colour is correct before the next tick.
   local durObj = C_UnitAuras and C_UnitAuras.GetAuraDuration
+                 and not (ns.API and ns.API.AurasSecret and ns.API.AurasSecret(unit))
                  and C_UnitAuras.GetAuraDuration(unit, auraID)
   local cr = durObj and durObj:EvaluateRemainingPercent(curve)
   if cr then fs:SetTextColor(cr:GetRGBA()) end

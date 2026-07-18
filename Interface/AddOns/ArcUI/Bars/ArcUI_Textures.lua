@@ -75,6 +75,9 @@ local function GetDurObjFor(cfg, activeFrame)
   local aiid = activeFrame.auraInstanceID
   if not HasAuraInstanceID(aiid) then return nil end
   local unit = (cfg.tracking and cfg.tracking.trackType == "debuff") and "target" or "player"
+  -- 12.1: the aura APIs THROW while the unit's auras are secret (aiid stays NON-secret), so gate
+  -- on the ns.API.AurasSecret probe. Skip -> texture holds its active alpha (no fade). Inert on live.
+  if ns.API and ns.API.AurasSecret and ns.API.AurasSecret(unit) then return nil end
   if C_UnitAuras.GetAuraDataByAuraInstanceID and not C_UnitAuras.GetAuraDataByAuraInstanceID(unit, aiid) then
     return nil
   end
@@ -134,6 +137,13 @@ local function StartFade(num, frame, cfg, activeFrame)
   end
 
   local unit = (cfg.tracking and cfg.tracking.trackType == "debuff") and "target" or "player"
+  -- 12.1: GetAuraDuration THROWS while the unit's auras are secret. Under secrecy skip the fade
+  -- entirely (static active alpha, and no OnUpdate ticker that would throw every frame). Inert on live.
+  if ns.API and ns.API.AurasSecret and ns.API.AurasSecret(unit) then
+    StopFade(frame)
+    tex:SetAlpha(fullA)
+    return
+  end
   frame._arcFadeData = { unit = unit, frame = activeFrame, curve = curve, fullA = fullA, elapsed = 0, tex = tex }
 
   local durObj = C_UnitAuras.GetAuraDuration(unit, activeFrame.auraInstanceID)
@@ -154,6 +164,8 @@ local function StartFade(num, frame, cfg, activeFrame)
     local af = data.frame
     local aiid = af and af.auraInstanceID
     if not HasAuraInstanceID(aiid) then data.tex:SetAlpha(data.fullA); return end
+    -- 12.1: went secret mid-fade (e.g. entered an instance) -> static alpha, stop reading. Inert on live.
+    if ns.API and ns.API.AurasSecret and ns.API.AurasSecret(data.unit) then data.tex:SetAlpha(data.fullA); return end
     local durObj2 = C_UnitAuras.GetAuraDuration(data.unit, aiid)
     if not durObj2 then data.tex:SetAlpha(data.fullA); return end
     local cr2 = durObj2:EvaluateRemainingPercent(data.curve)
@@ -381,6 +393,7 @@ local function EnsureFrame(num)
   dtext:SetPoint("CENTER", dtf, "CENTER", 0, 0)
   dtext:SetText("")
   dtf:Hide()
+  dtf.text = dtext   -- expose as .text so ns.BarDuration.ApplyStyle can read the styled font (12.1)
   frame._arcDurFrame = dtf
   frame._arcDurText = dtext
 
@@ -1384,15 +1397,46 @@ function Textures.UpdateTexture(num)
   local dtf, dtext = frame._arcDurFrame, frame._arcDurText
   if dtf and dtext then
     if d.showDuration == true then
+      local unit = (cfg.tracking and cfg.tracking.trackType == "debuff") and "target" or "player"
+      local secret = ns.API and ns.API.AurasSecret and ns.API.AurasSecret(unit)
       if optionsOpen then
+        if ns.BarDuration and ns.BarDuration.Detach then ns.BarDuration.Detach(dtf) end
         if ns.DurationText and ns.DurationText.Unbind then ns.DurationText.Unbind(dtext) end
         dtext:SetText("12.3")
         dtf:Show()
+      elseif secret then
+        -- 12.1: durObj is unreadable, so drive the countdown via the AuraButton engine (text-only,
+        -- no bar) exactly like the aura duration bars. The engine's ArcTimer overlays our dtext.
+        local cdID = cfg.tracking and cfg.tracking.cooldownID
+        local tsID = cfg.tracking and cfg.tracking.trackedSpellID
+        if active and ns.BarDuration and ns.BarDuration.Attach and ((cdID and cdID > 0) or (tsID and tsID > 0)) then
+          local dOutline = DUR_OUTLINE[d.durationOutline or "THICKOUTLINE"] or "THICKOUTLINE"
+          local dFontPath = "Fonts\\FRIZQT__.TTF"
+          if LSM and d.durationFont then local f = LSM:Fetch("font", d.durationFont); if f and f ~= "" then dFontPath = f end end
+          local dec = tonumber(d.durationDecimals) or 1
+          local tce = d.durationTextColorEnabled and true or false
+          local dFmt
+          if tce and ns.DurationText and ns.DurationText.BuildSecondsColorFormatter then
+            dFmt = ns.DurationText.BuildSecondsColorFormatter(d, dec)
+          end
+          ns.BarDuration.Attach(dtf, dtext, cdID, tsID, unit, {
+            showDuration = true, durFontPath = dFontPath, durFontSize = tonumber(d.durationFontSize) or 18,
+            durOutline = dOutline, durDecimals = dec, durationColor = d.durationColor,
+            durFormatter = dFmt, textColorEnabled = tce,
+          })
+          if ns.BarDuration.ApplyStyle then
+            ns.BarDuration.ApplyStyle(dtf, dtf, true, dec, d.durationColor, nil, nil, dFmt, tce)
+          end
+          dtext:SetText("")   -- our own fontstring stays blank; the engine ArcTimer shows the countdown
+          dtf:Show()
+        else
+          if ns.BarDuration and ns.BarDuration.Detach then ns.BarDuration.Detach(dtf) end
+          dtext:SetText(""); dtf:Hide()
+        end
       else
         local durObj = active and GetDurObjFor(cfg, activeFrame)
         -- unit + auraInstanceID drive the optional threshold colour ticker (mirrors
         -- GetDurObjFor's resolution); `d` opts the duration text into colouring.
-        local unit = (cfg.tracking and cfg.tracking.trackType == "debuff") and "target" or "player"
         local aiid = activeFrame and activeFrame.auraInstanceID
         if durObj and ns.DurationText and ns.DurationText.IsSupported and ns.DurationText.IsSupported()
            and ns.DurationText.Bind(dtext, durObj, tonumber(d.durationDecimals) or 1, unit, aiid, d) then
@@ -1403,6 +1447,7 @@ function Textures.UpdateTexture(num)
         end
       end
     else
+      if ns.BarDuration and ns.BarDuration.Detach then ns.BarDuration.Detach(dtf) end
       if ns.DurationText and ns.DurationText.Unbind then ns.DurationText.Unbind(dtext) end
       dtf:Hide()
     end

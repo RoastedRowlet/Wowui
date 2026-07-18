@@ -128,7 +128,7 @@ BigWigs3DB = {
 ["BigWigs_Plugins_Bars"] = {
 ["profiles"] = {
 ["Default"] = {
-["emphasize"] = false,
+["normalWidth"] = 120,
 ["expPosition"] = {
 "BOTTOMLEFT",
 "BOTTOMLEFT",
@@ -136,7 +136,7 @@ BigWigs3DB = {
 21,
 },
 ["visibleBarLimit"] = 1,
-["normalWidth"] = 120,
+["emphasize"] = false,
 ["normalPosition"] = {
 "BOTTOMLEFT",
 "BOTTOMLEFT",

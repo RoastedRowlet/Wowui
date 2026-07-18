@@ -20,23 +20,54 @@ BigWigs3DB = {
 },
 },
 },
-["BigWigs_Bosses_Saprish"] = {
+["BigWigs_Bosses_Echo of Doragosa"] = {
 ["profiles"] = {
 ["Default"] = {
 ["toggles"] = {
-[1263523] = 3129591,
+[388822] = 3129591,
 },
 },
 },
 },
-["BigWigs_Plugins_BossBlock"] = {
+["BigWigs_Bosses_Ick & Krick"] = {
+["profiles"] = {
+["Default"] = {
+["toggles"] = {
+[1264336] = 3129591,
+},
+},
+},
+},
+["BigWigs_Bosses_Vexamus"] = {
+["profiles"] = {
+["Default"] = {
+["toggles"] = {
+[386173] = 3129591,
+},
+},
+},
+},
+["MythicPlus"] = {
 ["global"] = {
-["tableNeedsCopied"] = false,
-["watchedMovies"] = {
-[1050] = true,
-[-2516] = true,
-[1049] = true,
-[-2529] = true,
+["showViewerTeleportTip"] = false,
+},
+["profiles"] = {
+["Default"] = {
+["viewerPosition"] = {
+"TOPLEFT",
+"TOPLEFT",
+213,
+-182,
+},
+},
+},
+},
+["BigWigs_Bosses_Zuraal"] = {
+["profiles"] = {
+["Default"] = {
+["toggles"] = {
+[1263399] = 3129591,
+},
 },
 },
 },
@@ -82,31 +113,6 @@ BigWigs3DB = {
 },
 },
 },
-["BigWigs_Bosses_Echo of Doragosa"] = {
-["profiles"] = {
-["Default"] = {
-["toggles"] = {
-[388822] = 3129591,
-},
-},
-},
-},
-["BigWigs_Bosses_Ick & Krick"] = {
-["profiles"] = {
-["Default"] = {
-["toggles"] = {
-[1264336] = 3129591,
-},
-},
-},
-},
-["BigWigs_Plugins_Timeline"] = {
-["profiles"] = {
-["Default"] = {
-["blizzTimeline"] = true,
-},
-},
-},
 ["BigWigs_Bosses_Chimaerus the Undreamt God"] = {
 ["profiles"] = {
 ["Default"] = {
@@ -116,19 +122,10 @@ BigWigs3DB = {
 },
 },
 },
-["BigWigs_Bosses_Vexamus"] = {
-["profiles"] = {
-["Default"] = {
-["toggles"] = {
-[386173] = 3129591,
-},
-},
-},
-},
 ["BigWigs_Plugins_Bars"] = {
 ["profiles"] = {
 ["Default"] = {
-["normalWidth"] = 120,
+["emphasize"] = false,
 ["expPosition"] = {
 "BOTTOMLEFT",
 "BOTTOMLEFT",
@@ -136,36 +133,12 @@ BigWigs3DB = {
 21,
 },
 ["visibleBarLimit"] = 1,
-["emphasize"] = false,
+["normalWidth"] = 120,
 ["normalPosition"] = {
 "BOTTOMLEFT",
 "BOTTOMLEFT",
 330,
 0,
-},
-},
-},
-},
-["BigWigs_Bosses_Zuraal"] = {
-["profiles"] = {
-["Default"] = {
-["toggles"] = {
-[1263399] = 3129591,
-},
-},
-},
-},
-["MythicPlus"] = {
-["global"] = {
-["showViewerTeleportTip"] = false,
-},
-["profiles"] = {
-["Default"] = {
-["viewerPosition"] = {
-"TOPLEFT",
-"TOPLEFT",
-213,
--182,
 },
 },
 },
@@ -179,12 +152,39 @@ BigWigs3DB = {
 },
 },
 },
+["BigWigs_Bosses_Saprish"] = {
+["profiles"] = {
+["Default"] = {
+["toggles"] = {
+[1263523] = 3129591,
+},
+},
+},
+},
+["BigWigs_Plugins_BossBlock"] = {
+["global"] = {
+["tableNeedsCopied"] = false,
+["watchedMovies"] = {
+[1050] = true,
+[-2516] = true,
+[1049] = true,
+[-2529] = true,
+},
+},
+},
+["BigWigs_Plugins_Timeline"] = {
+["profiles"] = {
+["Default"] = {
+["blizzTimeline"] = true,
+},
+},
+},
 },
 ["myKeystones"] = {
 ["Player-3676-0DF7D3EF"] = {
-["playerRating"] = 4173,
+["playerRating"] = 4191,
 ["specId"] = 1473,
-["keyMap"] = 161,
+["keyMap"] = 557,
 ["name"] = "Barelynoer",
 ["keyLevel"] = 23,
 ["realm"] = "Area 52",

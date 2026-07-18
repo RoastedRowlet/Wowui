@@ -44,6 +44,21 @@
 local ADDON, ns = ...
 ns.Display = ns.Display or {}
 
+-- 12.1 secret-safe wrappers. The instance-id aura APIs Lua-ERROR when auras are secret, so never
+-- call them with a secret (or nil) auraInstanceID. Returning nil makes the bar fill fall back
+-- (holds last state) instead of crashing. Inert on live. All C_UnitAuras.GetAuraDuration /
+-- GetAuraDataByAuraInstanceID CALL sites in this file route through these.
+local _C_GetAuraDuration = C_UnitAuras and C_UnitAuras.GetAuraDuration
+local _C_GetAuraData     = C_UnitAuras and C_UnitAuras.GetAuraDataByAuraInstanceID
+local function SafeGetAuraDuration(unit, aiid)
+  if aiid == nil or (ns.API and ns.API.AurasSecret and ns.API.AurasSecret(unit)) then return nil end
+  return _C_GetAuraDuration and _C_GetAuraDuration(unit, aiid)
+end
+local function SafeGetAuraData(unit, aiid)
+  if aiid == nil or (ns.API and ns.API.AurasSecret and ns.API.AurasSecret(unit)) then return nil end
+  return _C_GetAuraData and _C_GetAuraData(unit, aiid)
+end
+
 -- Performance: local aliases for hot-path globals
 local string_format = string.format
 local math_floor = math.floor
@@ -2343,7 +2358,7 @@ function ns.Display.UpdateBar(barNumber, stacks, maxStacks, active, durationFont
          and durationFontString.GetAuraInfo and ns.DurationText and ns.DurationText.IsSupported() then
         local auraID, unit = durationFontString:GetAuraInfo()
         if auraID and unit then
-          local durObj = C_UnitAuras.GetAuraDuration(unit, auraID)
+          local durObj = SafeGetAuraDuration(unit, auraID)
           if durObj then
             ns.DurationText.Bind(durationFrame.text, durObj, barConfig.display.durationDecimals or 1, unit, auraID, barConfig.display)
           end
@@ -2927,7 +2942,7 @@ function ns.Display.UpdateBar(barNumber, stacks, maxStacks, active, durationFont
       -- Has GetAuraInfo - use DurationObject for auto-updating countdown text
       local auraID, unit = durationFontString:GetAuraInfo()
       if auraID and unit and active then
-        local durObj = C_UnitAuras.GetAuraDuration(unit, auraID)
+        local durObj = SafeGetAuraDuration(unit, auraID)
         if ns.DurationText and ns.DurationText.IsSupported() then
           -- 12.0.7: Blizzard drives the countdown text C-side — no Lua OnUpdate.
           durationFrame:SetScript("OnUpdate", nil)
@@ -2966,7 +2981,7 @@ function ns.Display.UpdateBar(barNumber, stacks, maxStacks, active, durationFont
                 return
               end
 
-              local d = C_UnitAuras.GetAuraDuration(currentUnit, currentAuraID)
+              local d = SafeGetAuraDuration(currentUnit, currentAuraID)
               if d then
                 self.text:SetFormattedText(DURATION_FMT[self.storedDecimals] or "%.1f", d:GetRemainingDuration())
               else
@@ -3468,7 +3483,22 @@ function ns.Display.UpdateDurationBar(barNumber, stacks, maxStacks, active, sour
   if previewMode and IsOptionsOpen() and sourceBar then
     return  -- Skip real tracking update, let preview control the display
   end
-  
+
+  -- 12.1 duration-bar diagnostics: record what we see per bar so /arcbardur can show WHERE the
+  -- AuraButton driver path breaks (no trackedSpellID / wrong source branch / not active / not secret).
+  if ns.BarDuration and ns.BarDuration.Trace then
+    ns.BarDuration.Trace(barNumber, {
+      active = active,
+      hasAuraInfo = (sourceBar and sourceBar.GetAuraInfo) and true or false,
+      hasTotemInfo = (sourceBar and sourceBar.GetTotemInfo) and true or false,
+      hasGetValue = (sourceBar and sourceBar.GetValue) and true or false,
+      cooldownID = barConfig.tracking and barConfig.tracking.cooldownID,
+      trackedSpellID = barConfig.tracking and barConfig.tracking.trackedSpellID,
+      showDuration = barConfig.display and barConfig.display.showDuration and true or false,
+      secret = (ns.API and ns.API.AurasSecret and ns.API.AurasSecret("player")) and true or false,
+    })
+  end
+
   if PM then PM("VisibilityChecks") end
   
   -- ═══════════════════════════════════════════════════════════════════════════
@@ -3926,11 +3956,87 @@ function ns.Display.UpdateDurationBar(barNumber, stacks, maxStacks, active, sour
       barFrame.bar:SetSmoothing(false)
     end
     
-    if auraID and unit then
+    -- 12.1 (auras secret): the durObj/colorCurve/polling machinery in the normal branch below is
+    -- BOTH secret-unsafe (`existingData.auraID == auraID` compares two secret auraInstanceIDs;
+    -- RegisterAuraPolling is fed the secret id) AND non-functional (SafeGetAuraDuration returns nil
+    -- -> no durObj to drain). Two 12.1 outcomes: if the bar's tracked spell ID is known, an
+    -- invisible AuraButton (ns.BarDuration) drives THIS bar's fill + countdown secret-safely; else
+    -- the bar stays inert (the "no valid aura" else-branch). AurasSecret is false on live/pre-12.1,
+    -- so neither 12.1 path can run there -- the normal branch is unchanged.
+    -- Route the engine by the user's buff/debuff PICKER (trackType), NOT the frame's auraDataUnit,
+    -- which lies for selfAura debuffs like Flame Shock (it reports "player" though the debuff is on
+    -- the target). A debuff tracks the target/HARMFUL; a buff the player/HELPFUL.
+    local bdUnit = (barConfig.tracking and barConfig.tracking.trackType == "debuff") and "target" or "player"
+    local aurasSecret121 = ns.API and ns.API.AurasSecret and ns.API.AurasSecret(bdUnit)
+    local bdCooldownID   = barConfig.tracking and barConfig.tracking.cooldownID
+    local bdTrackedSpell = barConfig.tracking and barConfig.tracking.trackedSpellID
+    if aurasSecret121 and ns.BarDuration and ns.BarDuration.IsAvailable()
+       and ((bdCooldownID and bdCooldownID > 0) or (bdTrackedSpell and bdTrackedSpell > 0)) then
+      -- 12.1 AuraButton-driven duration bar: the invisible button drives the FILL (and the
+      -- countdown text via SetDurationText); we own only color + visibility here. No OnUpdate,
+      -- no polling, no durObj, no secret compare.
+      local fillMode = barConfig.display.durationBarFillMode or "drain"
+      local bdDirection = (fillMode == "fill")
+        and Enum.StatusBarTimerDirection.ElapsedTime
+        or Enum.StatusBarTimerDirection.RemainingTime
+      barFrame.bar:SetScript("OnUpdate", nil)
+      barFrame.bar.colorCurveData = nil
+      UnregisterAuraPolling(barNumber)
+      local ddc = barConfig.display.durationColor or {r=1, g=1, b=1, a=1}
+      -- Resolve the duration-text style the SAME way ApplyAppearance styles durationFrame.text,
+      -- so the engine countdown matches the user's Font/Size/Outline/Decimals exactly.
+      local bdDurOutline = GetOutlineFlag(barConfig.display.durationOutline)
+      local bdDurFontPath = "Fonts\\FRIZQT__.TTF"
+      if LSM and barConfig.display.durationFont then
+        local ff = LSM:Fetch("font", barConfig.display.durationFont)
+        if ff and ff ~= "" then bdDurFontPath = ff end
+      end
+      -- Colour-by-time text: reuse the LIVE approach -- seconds bands baked into the formatter,
+      -- applied C-side with no durObj read -- so it survives 12.1. nil when the toggle/bands are off.
+      local bdDurFmt
+      if barConfig.display.durationTextColorEnabled and ns.DurationText and ns.DurationText.BuildSecondsColorFormatter then
+        bdDurFmt = ns.DurationText.BuildSecondsColorFormatter(barConfig.display, barConfig.display.durationDecimals or 1)
+      end
+      ns.BarDuration.Attach(barFrame, durationFrame and durationFrame.text, bdCooldownID, bdTrackedSpell, bdUnit, {
+        direction = bdDirection,
+        interpolation = barConfig.display.enableSmoothing and Enum.StatusBarInterpolation.ExponentialEaseOut or Enum.StatusBarInterpolation.Immediate,
+        showDuration = barConfig.display.showDuration,
+        baseColor = baseColor,
+        durationColor = ddc,
+        durFontPath = bdDurFontPath,
+        durFontSize = barConfig.display.durationFontSize or 18,
+        durOutline = bdDurOutline,
+        durDecimals = barConfig.display.durationDecimals or 1,
+        durFormatter = bdDurFmt,
+        textColorEnabled = barConfig.display.durationTextColorEnabled and true or false,
+      })
+      -- Our own fill sits empty UNDER the engine's ArcBar overlay (which shows the real drain);
+      -- the bar frame's border/background/ticks still render normally around it.
+      local bdTex = barFrame.bar:GetStatusBarTexture()
+      if bdTex then bdTex:SetVertexColor(1, 1, 1, 1) end
+      barFrame.bar:SetMinMaxValues(0, maxValue)
+      barFrame.bar:SetValue(0)
+      barFrame.bar:SetStatusBarColor(baseColor.r, baseColor.g, baseColor.b, baseColor.a or 1)
+      barFrame.bar:SetAlpha(1)
+      barFrame.bar:Show()
+      barFrame._arcBDActive = true
+      -- Duration text: when shown, the engine ArcTimer overlays it (our fs is hidden in
+      -- initializeFrame); when NOT shown, hide the whole durationFrame so no stale value lingers
+      -- (this branch skips ArcUI's own duration-text section).
+      if durationFrame then
+        if barConfig.display.showDuration then
+          durationFrame.text:SetText("")   -- clear any stale value; the engine ArcTimer overlays the live countdown
+          durationFrame:Show()
+        else
+          durationFrame:Hide()
+        end
+      end
+    elseif auraID and unit and not aurasSecret121 then
+      barFrame._arcBDActive = nil
       -- Determine timer direction based on fillMode setting
       local fillMode = barConfig.display.durationBarFillMode or "drain"
-      local timerDirection = (fillMode == "fill") 
-        and Enum.StatusBarTimerDirection.ElapsedTime 
+      local timerDirection = (fillMode == "fill")
+        and Enum.StatusBarTimerDirection.ElapsedTime
         or Enum.StatusBarTimerDirection.RemainingTime
       
       -- Check if user wants dynamic max (Auto) or manual max
@@ -3940,8 +4046,8 @@ function ns.Display.UpdateDurationBar(barNumber, stacks, maxStacks, active, sour
         -- AUTO MODE: Use SetTimerDuration for auto-animation (normalized 0-1).
         -- GetAuraDuration returns nil for gone auras and does not throw; validate the
         -- instance first so a stale id (the real crash risk) falls back cleanly.
-        local durObj = C_UnitAuras.GetAuraDataByAuraInstanceID(unit, auraID)
-          and C_UnitAuras.GetAuraDuration(unit, auraID)
+        local durObj = SafeGetAuraData(unit, auraID)
+          and SafeGetAuraDuration(unit, auraID)
         if durObj then
           barFrame.bar:SetMinMaxValues(0, 1)
           barFrame.bar:SetTimerDuration(durObj, Enum.StatusBarInterpolation.ExponentialEaseOut, timerDirection)
@@ -3974,8 +4080,8 @@ function ns.Display.UpdateDurationBar(barNumber, stacks, maxStacks, active, sour
             
             -- GetAuraDuration returns nil for gone auras and does not throw; validate
             -- the instance first, then evaluate the curve directly (no pcall).
-            local durObj = C_UnitAuras.GetAuraDataByAuraInstanceID(unit, auraID)
-              and C_UnitAuras.GetAuraDuration(unit, auraID)
+            local durObj = SafeGetAuraData(unit, auraID)
+              and SafeGetAuraDuration(unit, auraID)
             local colorResult = durObj and durObj:EvaluateRemainingPercent(colorCurve)
             if colorResult then
               -- SetStatusBarColor handles alpha directly - base color alpha 0 = invisible
@@ -4000,7 +4106,7 @@ function ns.Display.UpdateDurationBar(barNumber, stacks, maxStacks, active, sour
               data.elapsed = 0
 
               -- GetAuraDuration returns nil for gone auras, does not throw — no pcall needed
-              local durObj = C_UnitAuras.GetAuraDuration(data.unit, data.auraID)
+              local durObj = SafeGetAuraDuration(data.unit, data.auraID)
               if not durObj then
                 self:SetAlpha(0)
                 self:SetScript("OnUpdate", nil)
@@ -4080,7 +4186,7 @@ function ns.Display.UpdateDurationBar(barNumber, stacks, maxStacks, active, sour
           data.elapsed = 0
 
           -- GetAuraDuration returns nil for gone auras, does not throw — no pcall needed
-          local durObj = C_UnitAuras.GetAuraDuration(data.unit, data.auraID)
+          local durObj = SafeGetAuraDuration(data.unit, data.auraID)
           if not durObj then
             self:SetAlpha(0)
             self:SetScript("OnUpdate", nil)
@@ -4097,7 +4203,7 @@ function ns.Display.UpdateDurationBar(barNumber, stacks, maxStacks, active, sour
         RegisterAuraPolling(barNumber, unit, auraID, barFrame, nil, nil)
 
         -- Apply initial value — no pcall, GetAuraDuration returns nil safely
-        local durObj = C_UnitAuras.GetAuraDuration(unit, auraID)
+        local durObj = SafeGetAuraDuration(unit, auraID)
         if durObj then
           barFrame.bar:SetValue(durObj:GetRemainingDuration(), durationInterp)
         end
@@ -4112,6 +4218,7 @@ function ns.Display.UpdateDurationBar(barNumber, stacks, maxStacks, active, sour
       end
     else
       -- No valid aura - clear OnUpdate
+      barFrame._arcBDActive = nil
       barFrame.bar.colorCurveData = nil
       barFrame.bar:SetScript("OnUpdate", nil)
       UnregisterAuraPolling(barNumber)
@@ -4132,6 +4239,7 @@ function ns.Display.UpdateDurationBar(barNumber, stacks, maxStacks, active, sour
     
   elseif active and sourceBar and sourceBar.GetValue then
     -- Generic fallback (no GetAuraInfo) - clear OnUpdate
+    barFrame._arcBDActive = nil
     barFrame.bar.colorCurveData = nil
     barFrame.bar:SetScript("OnUpdate", nil)
     UnregisterAuraPolling(barNumber)
@@ -4158,10 +4266,11 @@ function ns.Display.UpdateDurationBar(barNumber, stacks, maxStacks, active, sour
     
   elseif active and not sourceBar and IsNumericAndPositive(stacks) then
     -- Preview mode from ApplyPreviewValue - clear OnUpdate
+    barFrame._arcBDActive = nil   -- preview has no engine overlay -> let the duration-text section run
     barFrame.bar.colorCurveData = nil
     barFrame.bar:SetScript("OnUpdate", nil)
     UnregisterAuraPolling(barNumber)
-    
+
     barFrame.bar:SetMinMaxValues(0, maxValue)
     local effectiveMax = (maxStacks and maxStacks > 0) and maxStacks or 10
     local pct = stacks / effectiveMax
@@ -4196,6 +4305,7 @@ function ns.Display.UpdateDurationBar(barNumber, stacks, maxStacks, active, sour
     
   else
     -- Not active - clear OnUpdate and show dimmed empty bar
+    barFrame._arcBDActive = nil
     barFrame.bar.colorCurveData = nil
     barFrame.bar:SetScript("OnUpdate", nil)
     UnregisterAuraPolling(barNumber)
@@ -4236,8 +4346,11 @@ function ns.Display.UpdateDurationBar(barNumber, stacks, maxStacks, active, sour
     textFrame.text:SetTextColor(tc.r, tc.g, tc.b, tc.a)
   end
   
-  -- Duration text - DurationTextBinding drives it C-side when supported
-  if barConfig.display.showDuration and durationFrame then
+  -- Duration text - DurationTextBinding drives it C-side when supported.
+  -- 12.1 BarDuration: when the invisible AuraButton is driving this bar's countdown
+  -- (SetDurationText), skip ArcUI's own durObj text logic so the two don't fight over
+  -- the same fontstring -- the BarDuration branch already showed + colored durationFrame.
+  if barConfig.display.showDuration and durationFrame and not barFrame._arcBDActive then
     local decimals = barConfig.display.durationDecimals or 1
     local dc = barConfig.display.durationColor or {r=1, g=1, b=1, a=1}
 
@@ -4277,7 +4390,7 @@ function ns.Display.UpdateDurationBar(barNumber, stacks, maxStacks, active, sour
       -- Use DurationObject for auto-updating countdown text
       local auraID, unit = sourceBar:GetAuraInfo()
       if auraID and unit then
-        local durObj = C_UnitAuras.GetAuraDuration(unit, auraID)
+        local durObj = SafeGetAuraDuration(unit, auraID)
         if ns.DurationText and ns.DurationText.IsSupported() then
           -- 12.0.7: Blizzard drives the countdown text C-side — no Lua OnUpdate.
           -- Re-binds with a fresh durObj whenever this runs (aura refresh/extend).
@@ -4318,7 +4431,7 @@ function ns.Display.UpdateDurationBar(barNumber, stacks, maxStacks, active, sour
                 return
               end
 
-              local d = C_UnitAuras.GetAuraDuration(currentUnit, currentAuraID)
+              local d = SafeGetAuraDuration(currentUnit, currentAuraID)
               if d then
                 self.text:SetFormattedText(DURATION_FMT[self.storedDecimals] or "%.1f", d:GetRemainingDuration())
               else
@@ -4524,24 +4637,48 @@ local function UpdateBarForGroup(barNumber, cfg, barFrame, groupName)
 
   barFrame:ClearAllPoints()
   local matchSlots = cfg.matchGroupWidth and cfg.matchSlotsOnly and barWidth
+  -- "Match Icon Edges" (cfg.matchIconEdges): same option Resources/CooldownBars already
+  -- honor. Anchors flush to the GROUP'S ACTUAL ICON BOUNDING BOX (via the shared
+  -- BarGroupAlign insets) instead of the centered/container-edge fallback below.
+  -- Gated behind matchSlots + the toggle so default behavior (toggle off) is
+  -- byte-for-byte unchanged for every existing bar.
+  local iconEdges = matchSlots and cfg.matchIconEdges and ns.BarGroupAlign
   if anchorPoint == "TOP" then
-    if matchSlots then
+    if iconEdges then
+      local insetX = ns.BarGroupAlign.GetIconInsetX(grp)
+      local insetY = ns.BarGroupAlign.GetIconInsetY(grp)
+      barFrame:SetPoint("BOTTOMLEFT", container, "TOPLEFT", insetX + offsetX, -insetY + offsetY)
+    elseif matchSlots then
       local halfWidth = PixelSnap(barWidth / 2, effScale)
       barFrame:SetPoint("BOTTOMLEFT", container, "TOP", -halfWidth + offsetX, offsetY)
     else
       barFrame:SetPoint("BOTTOMLEFT", container, "TOPLEFT", offsetX, offsetY)
     end
   elseif anchorPoint == "BOTTOM" then
-    if matchSlots then
+    if iconEdges then
+      local insetX = ns.BarGroupAlign.GetIconInsetX(grp)
+      local insetBottom = ns.BarGroupAlign.GetIconInsetBottom(grp)
+      barFrame:SetPoint("TOPLEFT", container, "BOTTOMLEFT", insetX + offsetX, insetBottom + offsetY)
+    elseif matchSlots then
       local halfWidth = PixelSnap(barWidth / 2, effScale)
       barFrame:SetPoint("TOPLEFT", container, "BOTTOM", -halfWidth + offsetX, offsetY)
     else
       barFrame:SetPoint("TOPLEFT", container, "BOTTOMLEFT", offsetX, offsetY)
     end
   elseif anchorPoint == "LEFT" then
-    barFrame:SetPoint("RIGHT", container, "LEFT", offsetX, offsetY)
+    if iconEdges then
+      local insetY = ns.BarGroupAlign.GetIconInsetY(grp)
+      barFrame:SetPoint("TOPRIGHT", container, "TOPLEFT", offsetX, -(insetY + offsetY))
+    else
+      barFrame:SetPoint("RIGHT", container, "LEFT", offsetX, offsetY)
+    end
   elseif anchorPoint == "RIGHT" then
-    barFrame:SetPoint("LEFT", container, "RIGHT", offsetX, offsetY)
+    if iconEdges then
+      local insetY = ns.BarGroupAlign.GetIconInsetY(grp)
+      barFrame:SetPoint("TOPLEFT", container, "TOPRIGHT", offsetX, -(insetY + offsetY))
+    else
+      barFrame:SetPoint("LEFT", container, "RIGHT", offsetX, offsetY)
+    end
   end
 end
 
@@ -5224,6 +5361,19 @@ function ns.Display.ApplyAppearance(barNumber)
     end
   end
   
+  -- 12.1: re-push the freshly-applied fill/text style onto the engine duration overlay so
+  -- option changes (bar texture, duration font/colour/decimals) take effect LIVE instead of
+  -- only after a reload. No-op on live and on non-BD bars.
+  if ns.BarDuration and ns.BarDuration.ApplyStyle then
+    local bdDir = (cfg.durationBarFillMode == "fill")
+      and Enum.StatusBarTimerDirection.ElapsedTime or Enum.StatusBarTimerDirection.RemainingTime
+    local bdDurFmt
+    if cfg.durationTextColorEnabled and ns.DurationText and ns.DurationText.BuildSecondsColorFormatter then
+      bdDurFmt = ns.DurationText.BuildSecondsColorFormatter(cfg, cfg.durationDecimals or 1)
+    end
+    ns.BarDuration.ApplyStyle(barFrame, durationFrame, cfg.showDuration, cfg.durationDecimals or 1, cfg.durationColor, cfg.barColor, bdDir, bdDurFmt, cfg.durationTextColorEnabled and true or false)
+  end
+
   -- CRITICAL FIX: Check preview mode BEFORE refreshing
   if previewMode then
     -- In preview mode - maintain preview value

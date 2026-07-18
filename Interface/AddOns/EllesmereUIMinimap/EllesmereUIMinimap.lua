@@ -78,9 +78,11 @@ local defaults = {
             -- false -> hover/topLeft.
             coordsMode     = "always",
             coordsPosition = "topLeft",
+            coordsScale    = 1.0,
             -- FPS/MS readout (Text section); options mirror the QoL FPS counter
             showFPS           = false,
             fpsTextSize       = 12,
+            fpsScale          = 1.0,
             fpsShowLocalMS    = true,
             fpsShowWorldMS    = false,
             fpsUseAccent      = false,  -- description text: accent vs custom fpsColor
@@ -1786,14 +1788,13 @@ end
 -------------------------------------------------------------------------------
 -- M+ Portal button. Identical flyout as Chat sidebar but anchored to minimap.
 -------------------------------------------------------------------------------
-local PORTAL_SPELLS = {
-    1254400, 1254572, 1254563, 1254559,
-    159898,  1254555, 1254551, 393273,
-}
-local PORTAL_SHORT = {
-    [1254400] = "WRS", [1254572] = "MT",  [1254563] = "NPX", [1254559] = "MC",
-    [159898]  = "SR",  [1254555] = "PoS", [1254551] = "SoT", [393273]  = "AA",
-}
+-- Built from the shared season list (EllesmereUI.SEASON_PORTALS) -- one
+-- place to update per season.
+local PORTAL_SPELLS, PORTAL_SHORT = {}, {}
+for _, e in ipairs(EllesmereUI.SEASON_PORTALS) do
+    PORTAL_SPELLS[#PORTAL_SPELLS + 1] = e.spellID
+    PORTAL_SHORT[e.spellID] = e.short
+end
 
 local _portalBtn = nil
 local _portalFlyout, _portalFlyoutBtns
@@ -4092,7 +4093,27 @@ local function ApplyMinimap()
         if minimap.SetFixedFrameStrata then minimap:SetFixedFrameStrata(true) end
         if minimap.SetFixedFrameLevel then minimap:SetFixedFrameLevel(true) end
     end
-    minimap:Show()
+    -- Visibility-aware terminal: an unconditional Show() here force-showed
+    -- the minimap for a frame on EVERY rebuild (visible blink for users with
+    -- visibility "never"/mouseover -- e.g. settings-override transitions run
+    -- this as the module refresher), with the corrective Hide only arriving
+    -- via the deferred visibility sweep. Render the profile's visibility
+    -- directly instead.
+    do
+        local vis = EllesmereUI.EvalVisibility and p and EllesmereUI.EvalVisibility(p)
+        if not EllesmereUI.EvalVisibility or vis == true then
+            minimap:SetAlpha(1)
+            minimap:Show()
+        elseif vis == "mouseover" then
+            minimap:SetAlpha(0)
+            minimap:Show()
+        elseif vis then
+            minimap:SetAlpha(1)
+            minimap:Show()
+        else
+            minimap:Hide()
+        end
+    end
 
     -- Middle-click interceptor: prevent minimap ping on middle-click,
     -- route middle-click to our micro menu instead.
@@ -4707,6 +4728,8 @@ local function ApplyMinimap()
     local cpy = p and p.coordsBelowOffsetY or 0
     coordFrame:ClearAllPoints()
     coordFrame:SetPoint(cpAnchor[1], minimap, cpAnchor[2], cpAnchor[3] + cpx, cpAnchor[4] + cpy)
+    coordFrame:SetScale(p and p.coordsScale or 1.0)
+    _G._EBS_CoordFrame = coordFrame
     if not coordTicker then
         coordTicker = CreateFrame("Frame")  -- kept for Show/Hide API
         coordTicker._ticker = nil
@@ -4869,6 +4892,8 @@ local function ApplyMinimap()
         fpsBg:ClearAllPoints()
         fpsBg:SetPoint(fAnchor[1], minimap, fAnchor[2],
             fAnchor[3] + (p.fpsOffsetX or 0), fAnchor[4] + (p.fpsOffsetY or 0))
+        fpsBg:SetScale(p.fpsScale or 1.0)
+        _G._EBS_FpsBg = fpsBg
         -- Mouse only while a hover tooltip is assigned, so the readout never
         -- blocks map clicks otherwise
         fpsBg:EnableMouse((p.fpsHoverTooltip or "none") ~= "none")
@@ -5184,26 +5209,38 @@ do
                 btn:SetPoint("TOPRIGHT", menuFrame, "TOPRIGHT", -1, y)
                 btn:SetHeight(BUTTON_H)
 
+                -- 12.1: "/click <name>" macro transport (the 12.1 "click"
+                -- secure action crashes on a Blizzard typo, SecureTemplates
+                -- :564; MicroButtons are globally named so the macro reaches
+                -- them directly). 12.0 keeps the proven click transport.
+                local secureType = EllesmereUI.IS_121 and "macro" or "click"
                 if microRef then
-                    btn:SetAttribute("*clickbutton1", microRef)
+                    if EllesmereUI.IS_121 then
+                        btn:SetAttribute("*macrotext1", "/click " .. item.microButton)
+                    else
+                        btn:SetAttribute("*clickbutton1", microRef)
+                    end
                 end
                 btn:SetAttribute("useOnKeyDown", false)
-                btn:SetAttribute("*type1", "click")
+                btn:SetAttribute("*type1", secureType)
                 btn:EnableMouse(true)
                 btn:RegisterForClicks("AnyUp")
 
                 -- Activate secure click from the restricted secure environment.
                 -- Without this, addon-set attributes are not trusted.
+                -- The restore branch MUST match the transport set above --
+                -- restoring a mismatched type silently reverts the 12.1
+                -- macro transport on the first combat exit.
                 RegisterStateDriver(btn, "combatlock", "[combat] combat; nocombat")
-                btn:SetAttribute("_onstate-combatlock", [[
+                btn:SetAttribute("_onstate-combatlock", ([[
                     if newstate == 'combat' then
                         self:SetAttribute('*type1', nil)
                         self:EnableMouse(false)
                     else
-                        self:SetAttribute('*type1', 'click')
+                        self:SetAttribute('*type1', '%s')
                         self:EnableMouse(true)
                     end
-                ]])
+                ]]):format(secureType))
 
                 local hl = btn:CreateTexture(nil, "HIGHLIGHT")
                 hl:SetAllPoints()
@@ -5321,7 +5358,12 @@ function EBS:OnInitialize()
     -- Called when toggling btnBackgrounds or ungrouping a button.
     local function FullRebuildMinimap()
         wipe(flyoutSavedRegions)
-        ApplyMinimap()
+        -- ApplyAll, not bare ApplyMinimap: visibility runs through the shared
+        -- EllesmereUI visibility dispatcher and only re-evaluates on request.
+        -- Without it, a visibility change applied programmatically (settings
+        -- override transitions use this as the module refresher) updates the
+        -- stored setting but the minimap never actually hides/shows.
+        ApplyAll()
     end
 
     -- Global bridge for options <-> main communication
@@ -5336,7 +5378,10 @@ function EBS:OnInitialize()
     if EllesmereUI.RegisterMouseoverTarget and Minimap then
         EllesmereUI.RegisterMouseoverTarget(Minimap, function()
             local p = EBS.db and EBS.db.profile and EBS.db.profile.minimap
-            return p and p.enabled and p.visibility == "mouseover"
+            if not (p and p.enabled) then return false end
+            -- Hover-gated sets only reveal while their conditions pass;
+            -- a legacy single "mouseover" behaves exactly as before.
+            return EllesmereUI.VisWantsMouseover(p, "visibility")
         end)
     end
 end

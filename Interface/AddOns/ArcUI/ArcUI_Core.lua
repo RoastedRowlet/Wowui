@@ -1861,10 +1861,156 @@ local function FindBuffFrameByCooldownID(cooldownID)
 end
 
 
+-- 12.1 (PTR4): the instance-id C_UnitAuras APIs (GetAuraDataByAuraInstanceID / GetAuraDuration /
+-- GetAuraApplicationDisplayCount / GetUnitAuraInstanceIDs) all THROW "Auras cannot be accessed
+-- when secret while tainted" if the UNIT carries ANY secret aura -- EVEN when reading a NON-secret
+-- aura on it. Secrecy is PER-AURA (Blizzard whitelists some, e.g. Maelstrom Weapon), but the block
+-- is UNIT-WIDE: reading whitelisted MSW still throws while the same unit also has a secret aura
+-- (e.g. Crash Lightning). And NO C_UnitAuras call can detect the state (they all throw). Two
+-- non-throwing signals, OR'd:
+--   (1) SCAN the CDM aura frames for the unit: any active frame whose auraInstanceID is SECRET
+--       means the unit has a secret aura. Pure field reads -> never throw; immediate (works at
+--       login before any UNIT_AURA). Catches CDM-tracked secret auras and self-clears when gone.
+--   (2) STICKY flag set from a secret UNIT_AURA payload -> catches secret auras with no CDM frame
+--       (and target auras). Set-true-only (a non-secret partial update must NOT clear it); wiped
+--       on combat-end / zone via ns.API.ClearAuraSecrecyCache.
+-- Default false -> inert on live (no secret auras -> both signals false -> reads pass through).
+local AURA_VIEWERS_FOR_SECRECY = { "BuffIconCooldownViewer", "BuffBarCooldownViewer" }
+local aurasSecretSticky = {}                       -- [unit] = true (sticky within combat/zone)
+local _scanSecretCache, _scanSecretStamp = {}, {}  -- [unit] -> bool, GetTime()
+local _rawReadCount = 0                             -- DIAG: how many times a raw aura read actually executed
+local function ScanUnitHasSecretAura(unit)
+  for _, vname in ipairs(AURA_VIEWERS_FOR_SECRECY) do
+    local viewer = _G[vname]
+    local pool = viewer and viewer.itemFramePool
+    if pool and pool.EnumerateActive then
+      for f in pool:EnumerateActive() do
+        local aiid = f.auraInstanceID
+        if aiid ~= nil and (f.auraDataUnit or "player") == unit
+           and issecretvalue and issecretvalue(aiid) then
+          return true
+        end
+      end
+    end
+  end
+  return false
+end
+-- The engine puts aura access into "secret mode" whenever the unit is restricted -- which is true
+-- even at login/setup with NO secret aura currently active (e.g. the six RestrictionsForced CVars,
+-- or a real M+/instance/encounter/PvP context). In that mode the instance-id APIs throw regardless
+-- of the specific aura. The forced-test CVars are readable (non-secret) so we check them directly;
+-- this catches the login-before-first-UNIT_AURA window the scan/sticky can't. (Real restrictions
+-- don't set these CVars -> covered by the scan + sticky once auras/UNIT_AURA arrive.)
+local RESTRICTION_CVARS = {
+  "addonCombatRestrictionsForced", "addonChallengeModeRestrictionsForced",
+  "addonEncounterRestrictionsForced", "addonMapRestrictionsForced", "addonPvPMatchRestrictionsForced",
+}
+local function ForcedRestriction()
+  local get = C_CVar and C_CVar.GetCVar
+  if not get then return false end
+  for i = 1, #RESTRICTION_CVARS do
+    if get(RESTRICTION_CVARS[i]) == "1" then return true end
+  end
+  return false
+end
+-- 120100 = 12.1. STOP-GAP: no fully-reliable non-throwing per-call secrecy signal has held up -- a
+-- SYNCHRONOUS action-button read (UseAction -> UpdateGroupVisibility -> RefreshDisplay) beats the
+-- scan/sticky/UNIT_AURA before any signal materializes -- so on 12.1 conservatively treat auras as
+-- ALWAYS secret: every instance-id aura read is skipped -> zero crashes. Value-derived aura features
+-- are off on 12.1 (they cannot work under secrecy anyway) until the sanctioned AuraContainer rework
+-- lands. Inert on 12.0.x.
+-- HISTORY: this was previously OR'd with (Enum.ForbiddenAspect ~= nil) as a "version-proof" 12.1
+-- marker, on the belief that the enum was 12.1-only. It was NOT -- Blizzard seeded it on live 12.0.7
+-- (present on 12.0.7.68453, absent from the earlier 68275 UI-source dump that was checked), so it
+-- flagged live as 12.1 and blanked every stack/duration display. Interface version is the honest gate.
+-- 12.1 (Midnight) = interface 120100. Detect strictly by interface version.
+-- Do NOT also test Enum.ForbiddenAspect: that enum was seeded on LIVE 12.0.7 as
+-- 12.1 groundwork, so testing for it flagged live clients as 12.1 -> AurasSecret
+-- returned true for every unit -> every stack/duration secret-gate blanked out on
+-- live (icons showed, stacks/counts did not). Interface version is the reliable gate.
+local IS_121 = (tonumber((select(4, GetBuildInfo()))) or 0) >= 120100
+-- On-demand diagnostic (/arcsec) + one-shot on first call: prints the raw secrecy signals so
+-- detection can be checked against ground truth instead of guessed.
+local function DumpAuraSecrecy()
+  local g = C_CVar and C_CVar.GetCVar
+  local function cv(n) return (g and tostring(g(n))) or "?" end
+  print(("|cffff8800[ArcSecDbg BUILD=trip4]|r iface=%s IS_121=%s ForbiddenAspect=%s rawReads=%d | forcedCVar=%s (combat=%s mplus=%s map=%s enc=%s pvp=%s) | sticky.player=%s scan.player=%s"):format(
+    tostring(tonumber((select(4, GetBuildInfo())))), tostring(IS_121),
+    tostring(Enum and Enum.ForbiddenAspect ~= nil), _rawReadCount, tostring(ForcedRestriction()),
+    cv("addonCombatRestrictionsForced"), cv("addonChallengeModeRestrictionsForced"), cv("addonMapRestrictionsForced"),
+    cv("addonEncounterRestrictionsForced"), cv("addonPvPMatchRestrictionsForced"),
+    tostring(aurasSecretSticky.player), tostring(ScanUnitHasSecretAura("player"))))
+end
+local function AurasSecret(unit)
+  unit = unit or "player"
+  -- The ONLY environment where the C_UnitAuras aura APIs actually THROW is 12.1 (they
+  -- blanket-throw "cannot be accessed when secret while tainted"). On live 12.0.x those same
+  -- calls return secret-SAFE values, and every AurasSecret gate feeds the result only to a safe
+  -- sink (SetText / SetTimerDuration / SetAlpha), never a compare -- so on live they must run and
+  -- DISPLAY (a secret stack/duration is still showable). Gating on live-secrecy (the old
+  -- sticky/scan/forced paths) wrongly blanked displayable stacks/durations in M+ -- the "lost
+  -- functionality on live" regression. So the gate is 12.1-only. The sticky/scan/forced signals
+  -- are kept (populated by NoteUnitAuraSecrecy / used by the /arcsec dump) for diagnostics only.
+  return IS_121
+end
+local function NoteUnitAuraSecrecy(unit, updateInfo)
+  -- Set-true-only: a non-secret partial update (e.g. an MSW stack tick) must not clear a unit that
+  -- still has a secret aura. The sticky is cleared on combat-end/zone instead.
+  if unit and updateInfo and issecretvalue and issecretvalue(updateInfo.isFullUpdate) then
+    aurasSecretSticky[unit] = true
+  end
+end
+ns.API = ns.API or {}
+ns.API.AurasSecret = AurasSecret
+ns.API.IS_121 = IS_121   -- true on a 12.1 client (Midnight); used to disable secret-broken options
+ns.API.NoteUnitAuraSecrecy = NoteUnitAuraSecrecy
+ns.API.DumpAuraSecrecy = DumpAuraSecrecy
+ns.API.ClearAuraSecrecyCache = function() wipe(aurasSecretSticky); wipe(_scanSecretCache); wipe(_scanSecretStamp) end
+SLASH_ARCSEC1 = "/arcsec"
+SlashCmdList["ARCSEC"] = function() DumpAuraSecrecy() end
+
+-- Secret-safe wrappers: skip the read entirely when the unit's auras are secret (the API would
+-- throw). All C_UnitAuras.GetAuraDataByAuraInstanceID / GetAuraDurationRemaining CALL sites in
+-- this file route through these (existence-checks untouched).
+local _C_GetAuraData   = C_UnitAuras and C_UnitAuras.GetAuraDataByAuraInstanceID
+local _C_GetAuraDurRem  = C_UnitAuras and C_UnitAuras.GetAuraDurationRemaining
+local function SafeGetAuraData(unit, aiid)
+  if aiid == nil or AurasSecret(unit) then return nil end
+  _rawReadCount = _rawReadCount + 1
+  if IS_121 and _rawReadCount <= 3 then print(("|cffff0000[ArcSec TRIPWIRE]|r SafeGetAuraData raw read #%d on 12.1 unit=%s | %s"):format(_rawReadCount, tostring(unit), tostring(debugstack(2, 3, 0)))) end
+  return _C_GetAuraData and _C_GetAuraData(unit, aiid)
+end
+local function SafeGetAuraDurationRemaining(unit, aiid)
+  if aiid == nil or AurasSecret(unit) then return nil end
+  _rawReadCount = _rawReadCount + 1
+  if IS_121 and _rawReadCount <= 3 then print(("|cffff0000[ArcSec TRIPWIRE]|r SafeGetAuraDurationRemaining raw read #%d on 12.1 unit=%s | %s"):format(_rawReadCount, tostring(unit), tostring(debugstack(2, 3, 0)))) end
+  return _C_GetAuraDurRem and _C_GetAuraDurRem(unit, aiid)
+end
+
+-- 12.1 STACK-BAR SWITCH-OVER. When the unit's auras are secret, SafeGetAuraData returns nil
+-- (the C_UnitAuras read would throw). The CDM frame still holds a NON-secret auraDataCached
+-- table for the aura it is CURRENTLY showing: its .applications is a SECRET number that is
+-- safe to feed StatusBar:SetValue, and .icon a secret safe for SetTexture. Returning it lets
+-- stack bars keep working (with a user-set max) on 12.1. This is the SAME kind of secret the
+-- Core->Display pipeline already carries on live in M+ (applications is SecretWhenUnitAura-
+-- Restricted there too), so nothing downstream needs to change -- only the source.
+-- ONLY valid at call sites reading the frame's OWN current aura (aiid == frame.auraInstanceID);
+-- auraDataCached reflects the frame's shown aura, not an arbitrary cached/cross-spell aiid.
+-- Live (IS_121 false): the cached branch is dead code -> behaviour identical to SafeGetAuraData.
+local function SafeGetFrameAuraData(frame, unit, aiid)
+  local d = SafeGetAuraData(unit, aiid)
+  if d then return d end
+  if IS_121 and frame and frame.auraDataCached ~= nil then return frame.auraDataCached end
+  return nil
+end
+
 local function GetBuffStacks(frame, unit)
   if not frame or not HasAuraInstanceID(frame.auraInstanceID) then return 0 end
+  -- 12.1: GetAuraDataByAuraInstanceID Lua-errors when auras are secret (a secret id is that
+  -- signal). HasAuraInstanceID returns TRUE for secret, so this extra guard is required. Inert on live.
+  if issecretvalue and issecretvalue(frame.auraInstanceID) then return 0 end
   unit = unit or "player"
-  local auraData = C_UnitAuras.GetAuraDataByAuraInstanceID(unit, frame.auraInstanceID)
+  local auraData = SafeGetAuraData(unit, frame.auraInstanceID)
   if not auraData then return 0 end
   return auraData.applications or 0
 end
@@ -1873,13 +2019,16 @@ end
 -- Tries player first (buffs), then target (debuffs)
 local function GetAuraDataAutoUnit(auraInstanceID)
   if not HasAuraInstanceID(auraInstanceID) then return nil, nil end
-  
+  -- 12.1: GetAuraDataByAuraInstanceID Lua-errors when auras are secret; a secret id is that
+  -- signal (HasAuraInstanceID returns TRUE for secret). Inert on live.
+  if issecretvalue and issecretvalue(auraInstanceID) then return nil, nil end
+
   -- Try player first (most common for buffs)
-  local auraData = C_UnitAuras.GetAuraDataByAuraInstanceID("player", auraInstanceID)
+  local auraData = SafeGetAuraData("player", auraInstanceID)
   if auraData then return auraData, "player" end
   
   -- Try target (for debuffs)
-  auraData = C_UnitAuras.GetAuraDataByAuraInstanceID("target", auraInstanceID)
+  auraData = SafeGetAuraData("target", auraInstanceID)
   if auraData then return auraData, "target" end
   
   return nil, nil
@@ -2465,9 +2614,9 @@ UpdateBarBuffInfo = function(barNumber)
     local checkID = state.trackedAuraInstanceID or state.buffAuraInstanceID or state.debuffAuraInstanceID
     if HasAuraInstanceID(checkID) then
       local checkUnit = state.trackedAuraUnit or state.buffAuraUnit or state.detectedUnit or "player"
-      if C_UnitAuras.GetAuraDataByAuraInstanceID(checkUnit, checkID) then
+      if SafeGetAuraData(checkUnit, checkID) then
         auraStillActive = true
-      elseif C_UnitAuras.GetAuraDataByAuraInstanceID("target", checkID) then
+      elseif SafeGetAuraData("target", checkID) then
         auraStillActive = true
       end
     end
@@ -2565,7 +2714,7 @@ UpdateBarBuffInfo = function(barNumber)
       
       if isOurSpell and HasAuraInstanceID(auraInstanceID) then
         -- CDM is showing our tracked spell! Use this auraInstanceID
-        local auraData = C_UnitAuras.GetAuraDataByAuraInstanceID(auraDataUnit, auraInstanceID)
+        local auraData = SafeGetFrameAuraData(cdmFrame, auraDataUnit, auraInstanceID)
         if auraData then
           active = true
           stacks = auraData.applications or 0
@@ -2581,7 +2730,7 @@ UpdateBarBuffInfo = function(barNumber)
       elseif HasAuraInstanceID(state.trackedAuraInstanceID) then
         -- CDM is showing a DIFFERENT spell, use our cached auraInstanceID
         local unit = state.trackedAuraUnit or "target"
-        local auraData = C_UnitAuras.GetAuraDataByAuraInstanceID(unit, state.trackedAuraInstanceID)
+        local auraData = SafeGetAuraData(unit, state.trackedAuraInstanceID)
         if auraData then
           active = true
           stacks = auraData.applications or 0
@@ -2607,7 +2756,7 @@ UpdateBarBuffInfo = function(barNumber)
       
       if auraDataUnit == "target" and HasAuraInstanceID(auraInstanceID) then
         state.debuffAuraInstanceID = auraInstanceID
-        local auraData = C_UnitAuras.GetAuraDataByAuraInstanceID("target", auraInstanceID)
+        local auraData = SafeGetFrameAuraData(cdmFrame, "target", auraInstanceID)
         if auraData then
           active = true
           stacks = auraData.applications or 0
@@ -2618,7 +2767,7 @@ UpdateBarBuffInfo = function(barNumber)
           stacks = 0
         end
       elseif HasAuraInstanceID(state.debuffAuraInstanceID) then
-        local auraData = C_UnitAuras.GetAuraDataByAuraInstanceID("target", state.debuffAuraInstanceID)
+        local auraData = SafeGetAuraData("target", state.debuffAuraInstanceID)
         if auraData then
           active = true
           stacks = auraData.applications or 0
@@ -2640,7 +2789,7 @@ UpdateBarBuffInfo = function(barNumber)
         active = HasAuraInstanceID(barFrame.auraInstanceID)
         if active then
           local unit = barFrame.auraDataUnit or "target"
-          local auraData = C_UnitAuras.GetAuraDataByAuraInstanceID(unit, barFrame.auraInstanceID)
+          local auraData = SafeGetFrameAuraData(barFrame, unit, barFrame.auraInstanceID)
           if auraData then 
             stacks = auraData.applications or 0
             auraIconFromData = auraData.icon
@@ -2652,7 +2801,7 @@ UpdateBarBuffInfo = function(barNumber)
         active = HasAuraInstanceID(frame.auraInstanceID)
         if active then
           local unit = frame.auraDataUnit or "target"
-          local auraData = C_UnitAuras.GetAuraDataByAuraInstanceID(unit, frame.auraInstanceID)
+          local auraData = SafeGetFrameAuraData(frame, unit, frame.auraInstanceID)
           if auraData then
             stacks = auraData.applications or 0
             auraIconFromData = auraData.icon
@@ -2698,7 +2847,7 @@ UpdateBarBuffInfo = function(barNumber)
       
       if isOurSpell and HasAuraInstanceID(auraInstanceID) then
         -- CDM is showing our tracked spell! Use this auraInstanceID
-        local auraData = C_UnitAuras.GetAuraDataByAuraInstanceID(auraDataUnit, auraInstanceID)
+        local auraData = SafeGetFrameAuraData(cdmFrame, auraDataUnit, auraInstanceID)
         if auraData then
           active = true
           stacks = auraData.applications or 0
@@ -2715,7 +2864,7 @@ UpdateBarBuffInfo = function(barNumber)
       elseif HasAuraInstanceID(state.trackedAuraInstanceID) then
         -- CDM is showing a DIFFERENT spell, use our cached auraInstanceID
         local unit = state.trackedAuraUnit or "player"
-        local auraData = C_UnitAuras.GetAuraDataByAuraInstanceID(unit, state.trackedAuraInstanceID)
+        local auraData = SafeGetAuraData(unit, state.trackedAuraInstanceID)
         if auraData then
           active = true
           stacks = auraData.applications or 0
@@ -2743,7 +2892,7 @@ UpdateBarBuffInfo = function(barNumber)
       if auraDataUnit == "player" and HasAuraInstanceID(auraInstanceID) then
         state.buffAuraInstanceID = auraInstanceID
         detectedUnit = "player"
-        local auraData = C_UnitAuras.GetAuraDataByAuraInstanceID("player", auraInstanceID)
+        local auraData = SafeGetFrameAuraData(cdmFrame, "player", auraInstanceID)
         if auraData then
           active = true
           stacks = auraData.applications or 0
@@ -2755,7 +2904,7 @@ UpdateBarBuffInfo = function(barNumber)
         end
       elseif HasAuraInstanceID(state.buffAuraInstanceID) then
         detectedUnit = "player"
-        local auraData = C_UnitAuras.GetAuraDataByAuraInstanceID("player", state.buffAuraInstanceID)
+        local auraData = SafeGetAuraData("player", state.buffAuraInstanceID)
         if auraData then
           active = true
           stacks = auraData.applications or 0
@@ -2781,10 +2930,16 @@ UpdateBarBuffInfo = function(barNumber)
         local auraData = nil
         
         if auraDataUnit then
-          auraData = C_UnitAuras.GetAuraDataByAuraInstanceID(auraDataUnit, auraInstanceID)
+          auraData = SafeGetFrameAuraData(cdmFrame, auraDataUnit, auraInstanceID)
           detectedUnit = auraDataUnit
         else
           auraData, detectedUnit = GetAuraDataAutoUnit(auraInstanceID)
+          -- 12.1: the auto-unit read is nil under secrecy -> fall back to the frame's own
+          -- cached data (auraDataCached is the frame's currently-shown aura). Inert on live.
+          if not auraData and IS_121 and cdmFrame and cdmFrame.auraDataCached ~= nil then
+            auraData = cdmFrame.auraDataCached
+            detectedUnit = detectedUnit or auraDataUnit or "player"
+          end
         end
         
         if auraData then
@@ -2811,7 +2966,7 @@ UpdateBarBuffInfo = function(barNumber)
         -- swap) — the frame state is torn down for a few frames while the buff is
         -- still up. VERIFY against the live API before trusting the nil frame read.
         local unit = state.buffAuraUnit or "player"
-        local auraData = C_UnitAuras.GetAuraDataByAuraInstanceID(unit, state.buffAuraInstanceID)
+        local auraData = SafeGetAuraData(unit, state.buffAuraInstanceID)
         if auraData then
           -- Live API confirms the aura is still present — the frame was just stale.
           active = true
@@ -2969,14 +3124,14 @@ UpdateBarBuffInfo = function(barNumber)
     local cachedUnit = state.trackedAuraUnit or "player"
     durationStacksRef = {
       GetText = function()
-        local auraData = C_UnitAuras.GetAuraDataByAuraInstanceID(cachedUnit, cachedAuraInstanceID)
+        local auraData = SafeGetAuraData(cachedUnit, cachedAuraInstanceID)
         if auraData then
           return auraData.applications
         end
         return 0
       end,
       GetDuration = function()
-        local auraData = C_UnitAuras.GetAuraDataByAuraInstanceID(cachedUnit, cachedAuraInstanceID)
+        local auraData = SafeGetAuraData(cachedUnit, cachedAuraInstanceID)
         if auraData then
           return auraData.duration, auraData.expirationTime
         end
@@ -2998,14 +3153,14 @@ UpdateBarBuffInfo = function(barNumber)
       local cachedUnit = cdmFrame and cdmFrame.auraDataUnit or "target"
       durationStacksRef = {
         GetText = function()
-          local auraData = C_UnitAuras.GetAuraDataByAuraInstanceID(cachedUnit, cachedAuraInstanceID)
+          local auraData = SafeGetAuraData(cachedUnit, cachedAuraInstanceID)
           if auraData then
             return auraData.applications
           end
           return 0
         end,
         GetDuration = function()
-          local auraData = C_UnitAuras.GetAuraDataByAuraInstanceID(cachedUnit, cachedAuraInstanceID)
+          local auraData = SafeGetAuraData(cachedUnit, cachedAuraInstanceID)
           if auraData then
             return auraData.duration, auraData.expirationTime
           end
@@ -3044,7 +3199,7 @@ UpdateBarBuffInfo = function(barNumber)
       durationStacksRef = {
         GetText = function()
           local id, unit = resolve()
-          local auraData = C_UnitAuras.GetAuraDataByAuraInstanceID(unit, id)
+          local auraData = SafeGetAuraData(unit, id)
           if auraData then
             return auraData.applications
           end
@@ -3052,7 +3207,7 @@ UpdateBarBuffInfo = function(barNumber)
         end,
         GetDuration = function()
           local id, unit = resolve()
-          local auraData = C_UnitAuras.GetAuraDataByAuraInstanceID(unit, id)
+          local auraData = SafeGetAuraData(unit, id)
           if auraData then
             return auraData.duration, auraData.expirationTime
           end
@@ -3089,17 +3244,17 @@ UpdateBarBuffInfo = function(barNumber)
         GetValue = function()
           -- CRITICAL: Validate aura still exists before calling GetAuraDurationRemaining
           -- Calling with stale auraInstanceID causes client crash in Beta 4
-          local auraData = C_UnitAuras.GetAuraDataByAuraInstanceID(cachedUnit, cachedAuraInstanceID)
+          local auraData = SafeGetAuraData(cachedUnit, cachedAuraInstanceID)
           if not auraData then
             return 0
           end
           if C_UnitAuras.GetAuraDurationRemaining then
-            return C_UnitAuras.GetAuraDurationRemaining(cachedUnit, cachedAuraInstanceID)
+            return SafeGetAuraDurationRemaining(cachedUnit, cachedAuraInstanceID)
           end
           return 0
         end,
         GetMinMaxValues = function()
-          local auraData = C_UnitAuras.GetAuraDataByAuraInstanceID(cachedUnit, cachedAuraInstanceID)
+          local auraData = SafeGetAuraData(cachedUnit, cachedAuraInstanceID)
           if auraData and auraData.duration then
             return 0, auraData.duration
           end
@@ -3138,17 +3293,17 @@ UpdateBarBuffInfo = function(barNumber)
           GetValue = function()
             local id = liveFrame and liveFrame.auraInstanceID or cachedAuraInstanceID
             local unit = (liveFrame and liveFrame.auraDataUnit) or cachedUnit
-            local auraData = C_UnitAuras.GetAuraDataByAuraInstanceID(unit, id)
+            local auraData = SafeGetAuraData(unit, id)
             if not auraData then return 0 end
             if C_UnitAuras.GetAuraDurationRemaining then
-              return C_UnitAuras.GetAuraDurationRemaining(unit, id)
+              return SafeGetAuraDurationRemaining(unit, id)
             end
             return 0
           end,
           GetMinMaxValues = function()
             local id = liveFrame and liveFrame.auraInstanceID or cachedAuraInstanceID
             local unit = (liveFrame and liveFrame.auraDataUnit) or cachedUnit
-            local auraData = C_UnitAuras.GetAuraDataByAuraInstanceID(unit, id)
+            local auraData = SafeGetAuraData(unit, id)
             if auraData and auraData.duration then
               return 0, auraData.duration
             end
@@ -3200,16 +3355,16 @@ UpdateBarBuffInfo = function(barNumber)
         effectiveDurationRef = {
           GetValue = function()
             local id, unit = resolve()
-            local auraData = C_UnitAuras.GetAuraDataByAuraInstanceID(unit, id)
+            local auraData = SafeGetAuraData(unit, id)
             if not auraData then return 0 end
             if C_UnitAuras.GetAuraDurationRemaining then
-              return C_UnitAuras.GetAuraDurationRemaining(unit, id)
+              return SafeGetAuraDurationRemaining(unit, id)
             end
             return 0
           end,
           GetMinMaxValues = function()
             local id, unit = resolve()
-            local auraData = C_UnitAuras.GetAuraDataByAuraInstanceID(unit, id)
+            local auraData = SafeGetAuraData(unit, id)
             if auraData and auraData.duration then
               return 0, auraData.duration
             end
@@ -3234,8 +3389,14 @@ UpdateBarBuffInfo = function(barNumber)
           if totemCdmFrame.cooldownID ~= originalCooldownID then return nil end
           if totemCdmFrame.totemData == nil then return nil end
           local slot = totemCdmFrame.preferredTotemUpdateSlot
-          if not slot and totemCdmFrame.totemData then
-            slot = totemCdmFrame.totemData.slot
+          -- totemData is a SECRET table in instances; indexing it (.slot) while tainted
+          -- throws. Only read from it when non-secret (open world). preferredTotemUpdateSlot
+          -- covers the usual case; otherwise slot stays nil this tick.
+          if not slot then
+            local td = totemCdmFrame.totemData
+            if td and not issecretvalue(td) then
+              slot = td.slot
+            end
           end
           if not slot then return nil end
           if not issecretvalue(slot) and slot <= 0 then return nil end
@@ -3431,7 +3592,17 @@ local function HandleUnitAura(unit, updateInfo)
   local e = auraEntries[unit]
   if not e then return end
 
-  if not updateInfo or updateInfo.isFullUpdate then
+  if not updateInfo then
+    RefreshBarsForUnit(unit)
+    return
+  end
+  -- 12.1: the UNIT_AURA payload is fully secret in restricted content -- isFullUpdate is a
+  -- secret boolean and the id vectors are secret tables, so we can neither boolean-test nor
+  -- iterate them (and a refresh would hit secret C_UnitAuras). Bail; bars hold last state.
+  -- Inert on live (issecretvalue false -> normal path below).
+  if issecretvalue and issecretvalue(updateInfo.isFullUpdate) then return end
+
+  if updateInfo.isFullUpdate then
     RefreshBarsForUnit(unit)
     return
   end
@@ -3489,6 +3660,9 @@ eventFrame:RegisterUnitEvent("UNIT_AURA", "player", "target")
 eventFrame:SetScript("OnEvent", function(self, event, ...)
   if event == "UNIT_AURA" then
     local unit, updateInfo = ...
+    -- 12.1: cache this unit's aura secrecy from isFullUpdate (the ONLY non-throwing signal) BEFORE
+    -- anything else, so every subsequent aura-read guard (AurasSecret) has a fresh answer.
+    NoteUnitAuraSecrecy(unit, updateInfo)
     if unit == "player" or unit == "target" then
       HandleUnitAura(unit, updateInfo)
     end
@@ -3507,9 +3681,11 @@ eventFrame:SetScript("OnEvent", function(self, event, ...)
     -- on all frames. UpdateAllBars refreshes all debuff bars for new target.
     UpdateAllBars()
   elseif event == "PLAYER_ENTERING_WORLD" then
+    -- 12.1: fresh zone -> clear sticky aura-secrecy; the per-frame scan re-detects live state.
+    if ns.API.ClearAuraSecrecyCache then ns.API.ClearAuraSecrecyCache() end
     -- Bars stay hidden until initialization completes (prevents flash on reload)
     -- Delay allows frames to be created and positioned before showing
-    C_Timer.After(0.5, function() 
+    C_Timer.After(0.5, function()
       ns.API.ValidateAllBarTracking()
       -- Mark initialization complete - bars can now show
       if ns.Display and ns.Display.MarkInitializationComplete then
@@ -3526,6 +3702,8 @@ eventFrame:SetScript("OnEvent", function(self, event, ...)
     if ns.Display and ns.Display.InvalidateVisibilityCache then
       ns.Display.InvalidateVisibilityCache()
     end
+    -- 12.1: clear the sticky aura-secrecy flags; the per-frame scan re-detects any that persist.
+    if ns.API.ClearAuraSecrecyCache then ns.API.ClearAuraSecrecyCache() end
     -- Refresh icon textures while out of combat (they might have been secret during combat)
     C_Timer.After(0.2, function()
       local db = ns.API.GetDB()

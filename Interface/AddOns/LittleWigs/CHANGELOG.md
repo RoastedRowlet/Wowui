@@ -1,8 +1,23 @@
 # LittleWigs
 
-## [v12.0.61](https://github.com/BigWigsMods/LittleWigs/tree/v12.0.61) (2026-07-09)
-[Full Changelog](https://github.com/BigWigsMods/LittleWigs/compare/v12.0.60...v12.0.61) [Previous Releases](https://github.com/BigWigsMods/LittleWigs/releases)
+## [v12.0.62](https://github.com/BigWigsMods/LittleWigs/tree/v12.0.62) (2026-07-13)
+[Full Changelog](https://github.com/BigWigsMods/LittleWigs/compare/v12.0.61...v12.0.62) [Previous Releases](https://github.com/BigWigsMods/LittleWigs/releases)
 
-- Midnight/AltarOfFangs/Zuljan: Boneslicer personal message  
-- Midnight/AltarOfFangs/TheWrithingCoil: Timer updates, new abilities  
-- Midnight/AltarOfFangs/Ravi: Fresh Meat bar, fix Ssscavenging, Ravenous Stomp on pull  
+- WoD/Skyreach/Rukhran: Remove extra Searing Quills message  
+- Bump toc  
+- BfA/KingsRest/Dazar: Update for Midnight season 2  
+- BfA/KingsRest/Council: Update for Midnight season 2  
+- BfA/KingsRest/Mchimba: Update for Midnight season 2  
+- BfA/KingsRest/GoldenSerpent: Update for Midnight season 2  
+- Dragonflight/RubyLifePools/KyrakkaAndErkhartStormvein: Update for Midnight season 2  
+- Dragonflight/RubyLifePools/KokiaBlazehoof: Update for Midnight season 2  
+- Dragonflight/RubyLifePools/MelidrussaChillworn: Update for Midnight season 2  
+- Dragonflight/RubyLifePools/Trash: Update for Midnight season 2  
+- BfA/TempleOfSethraliss: Update colors and sounds  
+- BfA/KingsRest/Trash: Don't load on Retail  
+- BfA/TempleOfSethraliss: Avatar auto gossip  
+- BfA/TempleOfSethraliss/Avatar: Update for Midnight season 2  
+- BfA/TempleOfSethraliss/Galvazzt: Update for Midnight season 2  
+- BfA/TempleOfSethraliss/Merektha: Update for Midnight season 2  
+- BfA/TempleOfSethraliss/AdderisAspix: Update for Midnight season 2  
+- WoD/Skyreach/Rukhran: Searing Quills over message, fix timing  

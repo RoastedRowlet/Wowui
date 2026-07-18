@@ -14,13 +14,11 @@ RaiderIO_Config = {
 }
 RaiderIO_LastCharacter = "us-Barelynoer-area-52"
 RaiderIO_MissingCharacters = {
-["us-Googleads-area-52"] = true,
-["us-Unsëëñ-area-52"] = true,
-["us-Ezclassyawn-area-52"] = true,
-["us-Gomesh-area-52"] = true,
-["us-Drsmegalodon-area-52"] = true,
-["us-Batlord-area-52"] = true,
-["us-Shreadmind-area-52"] = true,
+["us-Poplockndròp-illidan"] = true,
+["us-Morples-area-52"] = true,
+["us-Smashstick-area-52"] = true,
+["us-Malzorian-area-52"] = true,
+["us-Kezzladomis-area-52"] = true,
 }
 RaiderIO_MissingServers = {
 }

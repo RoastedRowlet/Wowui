@@ -742,9 +742,12 @@ BigWigs:AddColors("Melidrussa Chillworn", {
 	[372682] = {"blue","red"},
 	[372851] = {"blue","yellow"},
 	[372988] = "green",
-	[373046] = "yellow",
+	[373046] = "cyan",
 	[373680] = {"green","red"},
+	[373686] = {"green","red"},
 	[396044] = "orange",
+	[1307297] = "orange",
+	[1307308] = {"blue","yellow"},
 })
 
 BigWigs:AddSounds("Melidrussa Chillworn", {
@@ -753,21 +756,28 @@ BigWigs:AddSounds("Melidrussa Chillworn", {
 	[372988] = "info",
 	[373046] = "long",
 	[373680] = {"info","long"},
+	[373686] = {"info","long"},
 	[396044] = "alarm",
+	[1307297] = "alarm",
+	[1307308] = "alert",
 })
 
 BigWigs:AddColors("Kokia Blazehoof", {
-	[372107] = {"blue","yellow"},
+	[372107] = {"blue","orange"},
+	[372110] = "orange",
 	[372858] = "purple",
-	[372863] = "orange",
+	[372863] = "red",
+	[372864] = "red",
 	[373017] = "red",
 	[373087] = "orange",
 })
 
 BigWigs:AddSounds("Kokia Blazehoof", {
 	[372107] = "alarm",
+	[372110] = "alarm",
 	[372858] = "alert",
 	[372863] = "long",
+	[372864] = "long",
 	[373017] = "warning",
 	[373087] = "alarm",
 })
@@ -778,7 +788,7 @@ BigWigs:AddColors("Kyrakka and Erkhart Stormvein", {
 	[381517] = "yellow",
 	[381525] = "orange",
 	[381602] = "red",
-	[381862] = "blue",
+	[381862] = {"blue","orange"},
 	["stages"] = "cyan",
 })
 

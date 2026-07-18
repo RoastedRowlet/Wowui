@@ -1,0 +1,26 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/">
+  <!-- Extra template appended to CustomAuraButtonTemplate for Duration Override overlays.
+       Blizzard shows/hides this whole button with the (secret) aura, so while the aura is up
+       it fully COVERS the icon underneath: an opaque icon (ArcIcon) + the aura's remaining-time
+       swipe (ArcCD) + timer text (ArcTimer). When the aura drops, the button hides and the real
+       cooldown shows through -> no double display. All regions fill the button. 12.1 only. -->
+  <Button name="ArcDurOvOverlayButtonTemplate" virtual="true">
+    <Layers>
+      <Layer level="BACKGROUND">
+        <Texture parentKey="ArcIcon" setAllPoints="true"/>
+      </Layer>
+    </Layers>
+    <Frames>
+      <Cooldown parentKey="ArcCD" inherits="CooldownFrameTemplate" setAllPoints="true"/>
+    </Frames>
+    <Layers>
+      <Layer level="OVERLAY">
+        <FontString parentKey="ArcTimer" inherits="NumberFontNormal" justifyH="CENTER">
+          <Anchors>
+            <Anchor point="CENTER" x="0" y="0"/>
+          </Anchors>
+        </FontString>
+      </Layer>
+    </Layers>
+  </Button>
+</Ui>

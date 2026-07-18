@@ -167,6 +167,15 @@ qolFrame:SetScript("OnEvent", function(self)
         local function IsEnabled()
             return EllesmereUIDB and EllesmereUIDB.autoOpenContainers == true
         end
+        -- A merchant being open turns UseContainerItem into a SELL (Blizzard
+        -- routes "use item" to the vendor), so auto-open must pause while any
+        -- merchant frame is shown -- otherwise freshly-bought containers get
+        -- opened at the vendor, or a non-openable item throws "the merchant
+        -- doesn't want that item". Re-checked before every open; the pass
+        -- re-runs on MERCHANT_CLOSED.
+        local function MerchantOpen()
+            return (MerchantFrame and MerchantFrame:IsShown()) and true or false
+        end
         -- "Exclude Warbound Containers": true only when the option is on AND
         -- the slot is confirmed warband-bank-eligible. Guarded like the bags
         -- module (C_Bank / ItemLocation / DoesItemExist can all be absent or
@@ -174,7 +183,13 @@ qolFrame:SetScript("OnEvent", function(self)
         -- returns false so the container opens normally rather than being
         -- silently skipped.
         local function IsWarboundExcluded(bag, slot)
-            if not (EllesmereUIDB and EllesmereUIDB.autoOpenContainersExcludeWarbound) then return false end
+            -- Default ON: the options UI shows this checked when unset
+            -- (autoOpenContainersExcludeWarbound ~= false), so the runtime must
+            -- treat nil the same way. Only an explicit false disables it -- the
+            -- old `not value` test made a never-toggled setting (nil) skip the
+            -- exclusion, so warbound containers auto-opened despite the toggle
+            -- appearing enabled.
+            if not EllesmereUIDB or EllesmereUIDB.autoOpenContainersExcludeWarbound == false then return false end
             if not (C_Bank and C_Bank.IsItemAllowedInBankType and ItemLocation
                 and C_Item and C_Item.DoesItemExist) then return false end
             local loc = ItemLocation:CreateFromBagAndSlot(bag, slot)
@@ -220,13 +235,20 @@ qolFrame:SetScript("OnEvent", function(self)
                         _cacheBuilt = true
                         self:Hide()
                         -- Open any containers found during scan
-                        if #_pendingOpens > 0 and not InCombatLockdown() then
+                        if #_pendingOpens > 0 and not InCombatLockdown() and not MerchantOpen() then
                             local function OpenNext(idx)
                                 if idx > #_pendingOpens then wipe(_pendingOpens); return end
-                                if InCombatLockdown() then wipe(_pendingOpens); return end
+                                if not IsEnabled() then wipe(_pendingOpens); return end
+                                if InCombatLockdown() or MerchantOpen() then wipe(_pendingOpens); return end
                                 local item = _pendingOpens[idx]
                                 local info = C_Container.GetContainerItemInfo(item.bag, item.slot)
-                                if info and info.itemID then
+                                -- Never act on a slot mid-action (isLocked): re-using a
+                                -- container that's still resolving a previous open (a loot
+                                -- window or a slow server round-trip) leaves it stuck
+                                -- greyed/unopenable. For the same reason, a slot still
+                                -- locked at the post-open check is in-progress, not a real
+                                -- failure, so it isn't cached as failed -- a later pass retries.
+                                if info and info.itemID and not info.isLocked then
                                     if IsWarboundExcluded(item.bag, item.slot) then
                                         OpenNext(idx + 1)
                                         return
@@ -237,7 +259,7 @@ qolFrame:SetScript("OnEvent", function(self)
                                         C_Container.UseContainerItem(item.bag, item.slot)
                                         C_Timer.After(0.5, function()
                                             local after = C_Container.GetContainerItemInfo(item.bag, item.slot)
-                                            if after and after.itemID == prevID and (after.stackCount or 1) >= prevCount then
+                                            if after and after.itemID == prevID and not after.isLocked and (after.stackCount or 1) >= prevCount then
                                                 _failedItems[prevID] = true
                                             end
                                             OpenNext(idx + 1)
@@ -264,24 +286,49 @@ qolFrame:SetScript("OnEvent", function(self)
             end
         end)
 
-        -- Start incremental scan 2s after login
-        C_Timer.After(2, function()
-            if not IsEnabled() then return end
-            _scanBag = BACKPACK_CONTAINER
-            _scanSlot = 1
-            wipe(_pendingOpens)
-            scanFrame:Show()
-        end)
-
         -- After cache is built, BAG_UPDATE_DELAYED only checks changed slots
         local containerFrame = CreateFrame("Frame")
-        if EllesmereUIDB and EllesmereUIDB.autoOpenContainers == true then
-            containerFrame:RegisterEvent("BAG_UPDATE_DELAYED")
+
+        -- Live apply: registers the bag listener and (until the cache exists)
+        -- runs the incremental scan; disable unregisters and stops any
+        -- in-progress scan. Called at login and from the options toggle, so
+        -- enabling mid-session works without a reload.
+        EllesmereUI._applyAutoOpenContainers = function()
+            if IsEnabled() then
+                containerFrame:RegisterEvent("BAG_UPDATE_DELAYED")
+                -- Re-run once the vendor closes: BAG_UPDATE_DELAYED from a
+                -- purchase fires while the merchant is open (when opens are
+                -- suppressed), so without this the just-bought containers would
+                -- never open after leaving the vendor.
+                containerFrame:RegisterEvent("MERCHANT_CLOSED")
+                if not _cacheBuilt then
+                    _scanBag = BACKPACK_CONTAINER
+                    _scanSlot = 1
+                    wipe(_pendingOpens)
+                    scanFrame:Show()
+                end
+            else
+                containerFrame:UnregisterEvent("BAG_UPDATE_DELAYED")
+                containerFrame:UnregisterEvent("MERCHANT_CLOSED")
+                scanFrame:Hide()
+            end
         end
-        containerFrame:SetScript("OnEvent", function()
+
+        -- Initial kick 2s after login (bags need a moment to settle)
+        C_Timer.After(2, function()
+            if IsEnabled() then EllesmereUI._applyAutoOpenContainers() end
+        end)
+        -- skipMerchantGate: the MERCHANT_CLOSED re-run fires before Blizzard's
+        -- MerchantFrame finishes hiding, so its entry check would still read
+        -- "merchant open" and bail. That run skips only THIS gate -- actual
+        -- safety comes from the chain's 0.5s pre-open delay plus the per-open
+        -- MerchantOpen() re-check in OpenNext (by which time the frame has
+        -- hidden, or a genuinely re-opened merchant correctly aborts).
+        local function ScanAndOpen(skipMerchantGate)
             if not _cacheBuilt then return end
             if not IsEnabled() then return end
             if InCombatLockdown() then return end
+            if not skipMerchantGate and MerchantOpen() then return end
             local toOpen = {}
             for bag = BACKPACK_CONTAINER, NUM_BAG_SLOTS do
                 for slot = 1, C_Container.GetContainerNumSlots(bag) do
@@ -300,10 +347,13 @@ qolFrame:SetScript("OnEvent", function(self)
             if #toOpen == 0 then return end
             local function OpenNext(idx)
                 if idx > #toOpen then return end
+                if not IsEnabled() then return end
                 if InCombatLockdown() then return end
+                if MerchantOpen() then return end
                 local item = toOpen[idx]
                 local info2 = C_Container.GetContainerItemInfo(item.bag, item.slot)
-                if info2 and info2.itemID then
+                -- Skip locked (mid-action) slots -- see the scan pass above.
+                if info2 and info2.itemID and not info2.isLocked then
                     if IsWarboundExcluded(item.bag, item.slot) then
                         OpenNext(idx + 1)
                         return
@@ -314,7 +364,7 @@ qolFrame:SetScript("OnEvent", function(self)
                         C_Container.UseContainerItem(item.bag, item.slot)
                         C_Timer.After(0.5, function()
                             local after = C_Container.GetContainerItemInfo(item.bag, item.slot)
-                            if after and after.itemID == prevID and (after.stackCount or 1) >= prevCount then
+                            if after and after.itemID == prevID and not after.isLocked and (after.stackCount or 1) >= prevCount then
                                 _failedItems[prevID] = true
                             end
                             OpenNext(idx + 1)
@@ -325,6 +375,13 @@ qolFrame:SetScript("OnEvent", function(self)
                 C_Timer.After(0.5, function() OpenNext(idx + 1) end)
             end
             C_Timer.After(0.5, function() OpenNext(1) end)
+        end
+
+        containerFrame:SetScript("OnEvent", function(_, event)
+            -- MERCHANT_CLOSED: the interaction is over but the frame may not
+            -- have hidden yet -- skip the entry gate (see ScanAndOpen note)
+            -- instead of settling on a timer.
+            ScanAndOpen(event == "MERCHANT_CLOSED")
         end)
     end
 
@@ -423,7 +480,10 @@ qolFrame:SetScript("OnEvent", function(self)
             trainBtn:SetScript("OnClick", function()
                 local wallet = GetMoney and GetMoney() or 0
                 local slots  = FreeProfessionSlots()
-                for i = 1, GetNumTrainerServices() do
+                -- Descending: if a purchase removes its entry and reindexes
+                -- the list, only higher (already visited) indices shift, so
+                -- no still-trainable skill is skipped.
+                for i = GetNumTrainerServices(), 1, -1 do
                     local ok, cost, takesProfSlot = SkillIsAffordable(i, wallet, slots)
                     if ok then
                         BuyTrainerService(i)
@@ -549,19 +609,31 @@ qolFrame:SetScript("OnEvent", function(self)
 
     ---------------------------------------------------------------------------
     --  Quick Loot
+    --  Frame is created lazily on first enable; LOOT_READY registers and
+    --  unregisters with the toggle so it applies live and costs zero when off.
     ---------------------------------------------------------------------------
-    if EllesmereUIDB and EllesmereUIDB.quickLoot then
-        local lootFrame = CreateFrame("Frame")
-        lootFrame:RegisterEvent("LOOT_READY")
-        lootFrame:SetScript("OnEvent", function()
-            if IsShiftKeyDown() then return end
-            for i = 1, GetNumLootItems() do
-                local index = i
-                C_Timer.After(0.05 * index, function()
-                    LootSlot(index)
-                end)
+    do
+        local lootFrame
+        EllesmereUI._applyQuickLoot = function()
+            if EllesmereUIDB and EllesmereUIDB.quickLoot then
+                if not lootFrame then
+                    lootFrame = CreateFrame("Frame")
+                    lootFrame:SetScript("OnEvent", function()
+                        if IsShiftKeyDown() then return end
+                        for i = 1, GetNumLootItems() do
+                            local index = i
+                            C_Timer.After(0.05 * index, function()
+                                LootSlot(index)
+                            end)
+                        end
+                    end)
+                end
+                lootFrame:RegisterEvent("LOOT_READY")
+            elseif lootFrame then
+                lootFrame:UnregisterEvent("LOOT_READY")
             end
-        end)
+        end
+        EllesmereUI._applyQuickLoot()
     end
 
     ---------------------------------------------------------------------------
@@ -926,7 +998,6 @@ qolFrame:SetScript("OnEvent", function(self)
         local resetFailPending = false
 
         local resetAnnounceFrame = CreateFrame("Frame")
-        resetAnnounceFrame:RegisterEvent("CHAT_MSG_SYSTEM")
         resetAnnounceFrame:SetScript("OnEvent", function(self, event, msg)
             if not (EllesmereUIDB and EllesmereUIDB.instanceResetAnnounce) then return end
 
@@ -962,6 +1033,17 @@ qolFrame:SetScript("OnEvent", function(self)
                 end)
             end
         end)
+
+        -- CHAT_MSG_SYSTEM fires for all system chat, so it is registered only
+        -- while the option is on (options toggle re-applies live).
+        EllesmereUI._applyInstanceResetAnnounce = function()
+            if EllesmereUIDB and EllesmereUIDB.instanceResetAnnounce then
+                resetAnnounceFrame:RegisterEvent("CHAT_MSG_SYSTEM")
+            else
+                resetAnnounceFrame:UnregisterEvent("CHAT_MSG_SYSTEM")
+            end
+        end
+        EllesmereUI._applyInstanceResetAnnounce()
     end
 
     ---------------------------------------------------------------------------
@@ -1093,6 +1175,13 @@ do
     local statsFrame, statsText
     local format = string.format
 
+    -- Secret-safe percent text: stat getters can return secret numbers in
+    -- restricted content, and string.format errors on a secret value.
+    local function PctText(v)
+        if v == nil or issecretvalue(v) then return "?" end
+        return format("%.2f%%", v)
+    end
+
     local function UpdateSecondaryStats()
         if not statsFrame or not statsFrame:IsShown() then return end
         if not statsFrame._classHex then
@@ -1120,13 +1209,19 @@ do
         local mastery = GetMasteryEffect()
         local versRating = GetCombatRatingBonus(CR_VERSATILITY_DAMAGE_DONE) or 0
         local versBase = GetVersatilityBonus(CR_VERSATILITY_DAMAGE_DONE) or 0
-        local vers = (issecretvalue(versRating) or issecretvalue(versBase)) and versRating or (versRating + versBase)
+        -- Arithmetic on a secret errors; show the rating alone in that case
+        local vers
+        if issecretvalue(versRating) or issecretvalue(versBase) then
+            vers = versRating
+        else
+            vers = versRating + versBase
+        end
 
         local txt =
-            format("|cff%s%s:|r  |cffffffff%.2f%%|r", labelHex, EllesmereUI.L("Crit"), crit) .. "\n" ..
-            format("|cff%s%s:|r  |cffffffff%.2f%%|r", labelHex, EllesmereUI.L("Haste"), haste) .. "\n" ..
-            format("|cff%s%s:|r  |cffffffff%.2f%%|r", labelHex, EllesmereUI.L("Mastery"), mastery) .. "\n" ..
-            format("|cff%s%s:|r  |cffffffff%.2f%%|r", labelHex, EllesmereUI.L("Vers"), vers)
+            format("|cff%s%s:|r  |cffffffff%s|r", labelHex, EllesmereUI.L("Crit"), PctText(crit)) .. "\n" ..
+            format("|cff%s%s:|r  |cffffffff%s|r", labelHex, EllesmereUI.L("Haste"), PctText(haste)) .. "\n" ..
+            format("|cff%s%s:|r  |cffffffff%s|r", labelHex, EllesmereUI.L("Mastery"), PctText(mastery)) .. "\n" ..
+            format("|cff%s%s:|r  |cffffffff%s|r", labelHex, EllesmereUI.L("Vers"), PctText(vers))
 
         if EllesmereUI.QoLExtrasGet("showTertiaryStats") then
             local tc = EllesmereUI.QoLExtrasGet("tertiaryStatsColor")
@@ -1142,9 +1237,9 @@ do
             local avoidance = GetAvoidance()
             local speed = GetSpeed()
             txt = txt .. "\n" ..
-                format("|cff%s%s:|r  |cffffffff%.2f%%|r", tertHex, EllesmereUI.L("Leech"), leech) .. "\n" ..
-                format("|cff%s%s:|r  |cffffffff%.2f%%|r", tertHex, EllesmereUI.L("Avoidance"), avoidance) .. "\n" ..
-                format("|cff%s%s:|r  |cffffffff%.2f%%|r", tertHex, EllesmereUI.L("Speed"), speed)
+                format("|cff%s%s:|r  |cffffffff%s|r", tertHex, EllesmereUI.L("Leech"), PctText(leech)) .. "\n" ..
+                format("|cff%s%s:|r  |cffffffff%s|r", tertHex, EllesmereUI.L("Avoidance"), PctText(avoidance)) .. "\n" ..
+                format("|cff%s%s:|r  |cffffffff%s|r", tertHex, EllesmereUI.L("Speed"), PctText(speed))
         end
 
         statsText:SetText(txt)
@@ -1190,17 +1285,26 @@ do
             if EllesmereUI and EllesmereUI.PrimeFontShadow then EllesmereUI.PrimeFontShadow(statsText, EllesmereUI.GetFontUseShadow("extras")) end
             statsText:SetFont(font, fontSize, EllesmereUI.GetFontOutlineFlag("extras"))
         end
+        -- Unit-scoped events filter at the engine (player only); in a raid a
+        -- plain RegisterEvent would deliver every member's stat changes.
         for _, ev in ipairs({
-            "UNIT_STATS", "COMBAT_RATING_UPDATE", "PLAYER_EQUIPMENT_CHANGED",
-            "UNIT_ATTACK_POWER", "UNIT_RANGED_ATTACK_POWER", "UNIT_SPELL_HASTE",
+            "UNIT_STATS", "UNIT_ATTACK_POWER", "UNIT_RANGED_ATTACK_POWER",
+            "UNIT_SPELL_HASTE",
+        }) do
+            statsFrame:RegisterUnitEvent(ev, "player")
+        end
+        for _, ev in ipairs({
+            "COMBAT_RATING_UPDATE", "PLAYER_EQUIPMENT_CHANGED",
             "MASTERY_UPDATE", "SPELL_POWER_CHANGED", "PLAYER_DAMAGE_DONE_MODS",
             "PLAYER_SPECIALIZATION_CHANGED", "PLAYER_ENTERING_WORLD",
         }) do
             statsFrame:RegisterEvent(ev)
         end
         local _statsPending = false
-        statsFrame:SetScript("OnEvent", function(_, _, unit)
-            if unit and unit ~= "player" then return end
+        -- No runtime unit filter needed: the unit events are engine-filtered
+        -- to the player above (the old `unit ~= "player"` check also wrongly
+        -- swallowed PLAYER_EQUIPMENT_CHANGED, whose first arg is a slot id).
+        statsFrame:SetScript("OnEvent", function()
             if _statsPending then return end
             _statsPending = true
             C_Timer.After(0.5, function()
@@ -1274,12 +1378,14 @@ do
         local fsWorldLbl = MakeFS(LABEL_SIZE)
         fpsFrame._divWorld = divWorld
         fpsFrame._textWorld = fsWorldVal
+        fpsFrame._lblWorld = fsWorldLbl
 
         local divLocal = MakeDivider()
         local fsLocalVal = MakeFS(FONT_SIZE)
         local fsLocalLbl = MakeFS(LABEL_SIZE)
         fpsFrame._divLocal = divLocal
         fpsFrame._textLocal = fsLocalVal
+        fpsFrame._lblLocal = fsLocalLbl
 
         local function UpdateFPS(self)
             local c = EllesmereUI.QoLExtrasGet("fpsColor")
@@ -1611,12 +1717,6 @@ do
     end
 
     local repairWarnFrame = CreateFrame("Frame", nil, UIParent)
-    if not (EllesmereUIDB and EllesmereUIDB.repairWarning == false) then
-        repairWarnFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
-        repairWarnFrame:RegisterEvent("PLAYER_REGEN_DISABLED")
-        repairWarnFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
-        repairWarnFrame:RegisterEvent("UPDATE_INVENTORY_DURABILITY")
-    end
 
     local function CheckDurabilityAndShow()
         if not EllesmereUIDB then return end
@@ -1650,6 +1750,23 @@ do
         end
         CheckDurabilityAndShow()
     end)
+
+    -- Events registered only while the warning is enabled; the options toggle
+    -- re-syncs live so re-enabling mid-session works without a reload. On
+    -- enable, one immediate check surfaces an already-low item.
+    EllesmereUI._syncDurWarnEvents = function()
+        if EllesmereUIDB and EllesmereUIDB.repairWarning == false then
+            repairWarnFrame:UnregisterAllEvents()
+            if durWarnOverlay then durWarnOverlay:Hide() end
+        else
+            repairWarnFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
+            repairWarnFrame:RegisterEvent("PLAYER_REGEN_DISABLED")
+            repairWarnFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
+            repairWarnFrame:RegisterEvent("UPDATE_INVENTORY_DURABILITY")
+            CheckDurabilityAndShow()
+        end
+    end
+    EllesmereUI._syncDurWarnEvents()
 end
 
 -------------------------------------------------------------------------------
@@ -1966,15 +2083,47 @@ do
         Thick  = { width = 3, length = 40 },
     }
 
+    -- Re-evaluates visibility on combat / zone transitions and refreshes the
+    -- cached melee spell on spec changes. Events are registered only while the
+    -- crosshair is enabled: with the size set to "None" nothing fires here.
+    -- On the off->on transition the cutoff range is re-read directly to catch
+    -- spec changes that happened while unregistered.
+    local visWatch = CreateFrame("Frame")
+    local visWatchRegistered = false
+    visWatch:SetScript("OnEvent", function(_, event)
+        if event == "PLAYER_SPECIALIZATION_CHANGED" or event == "PLAYER_ENTERING_WORLD" or event == "TRAIT_CONFIG_UPDATED" then
+            RefreshCrosshairCutoffRange()
+        end
+        -- _applyCrosshair self-guards: nil DB -> returns, "None" -> hides,
+        -- and runs the one-time migration once the profile DB is ready.
+        if EllesmereUI._applyCrosshair then EllesmereUI._applyCrosshair() end
+    end)
+    local function SyncVisWatch(want)
+        if want == visWatchRegistered then return end
+        visWatchRegistered = want
+        if want then
+            visWatch:RegisterEvent("PLAYER_REGEN_DISABLED")
+            visWatch:RegisterEvent("PLAYER_REGEN_ENABLED")
+            visWatch:RegisterEvent("PLAYER_ENTERING_WORLD")
+            visWatch:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
+            visWatch:RegisterEvent("TRAIT_CONFIG_UPDATED")
+            RefreshCrosshairCutoffRange()
+        else
+            visWatch:UnregisterAllEvents()
+        end
+    end
+
     EllesmereUI._applyCrosshair = function()
         local PP = EllesmereUI.PP
         -- Effective reads (profile override -> global root -> inline default)
         local G = CrosshairGet
         local size = G("crosshairSize") or "None"
         if size == "None" then
+            SyncVisWatch(false)
             if crosshairFrame then crosshairFrame:Hide() end
             return
         end
+        SyncVisWatch(true)
 
         CreateCrosshair()
 
@@ -2048,25 +2197,6 @@ do
             show = IsInInstance() and inCombat
         end
         if show then crosshairFrame:Show() else crosshairFrame:Hide() end
-    end
-
-    -- Re-evaluate visibility on combat / zone transitions, and refresh the
-    -- cached melee spell when the spec changes.
-    do
-        local visWatch = CreateFrame("Frame")
-        visWatch:RegisterEvent("PLAYER_REGEN_DISABLED")
-        visWatch:RegisterEvent("PLAYER_REGEN_ENABLED")
-        visWatch:RegisterEvent("PLAYER_ENTERING_WORLD")
-        visWatch:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
-        visWatch:RegisterEvent("TRAIT_CONFIG_UPDATED")
-        visWatch:SetScript("OnEvent", function(_, event)
-            if event == "PLAYER_SPECIALIZATION_CHANGED" or event == "PLAYER_ENTERING_WORLD" or event == "TRAIT_CONFIG_UPDATED" then
-                RefreshCrosshairCutoffRange()
-            end
-            -- _applyCrosshair self-guards: nil DB -> returns, "None" -> hides,
-            -- and runs the one-time migration once the profile DB is ready.
-            if EllesmereUI._applyCrosshair then EllesmereUI._applyCrosshair() end
-        end)
     end
 
     C_Timer.After(1, function()
@@ -2336,12 +2466,22 @@ do
             HideButtonsUnder((select(i, ...)))
         end
     end
+    -- Some Blizzard frame trees refuse GetChildren from insecure code with a
+    -- usage error (house editor list rows do). This walk runs inside a
+    -- ShowUIPanel hooksecurefunc, so an uncaught error propagates into the
+    -- panel's caller and aborts the rest of its flow (e.g. the house
+    -- editor's OnActiveModeChanged). pcall per node: a refusing frame only
+    -- skips its own subtree; siblings still get scanned. ScanFrame is
+    -- hoisted so the pcall allocates nothing per node.
+    local function ScanFrame(root)
+        ScanChildren(root:GetChildren())
+    end
     function HideButtonsUnder(root)
         if not root then return end
         local fp = GetFingerprint()
         if not fp then return end
         if root.ShowTooltip == fp then HideButton(root) end
-        if root.GetChildren then ScanChildren(root:GetChildren()) end
+        if root.GetChildren then pcall(ScanFrame, root) end
     end
 
     -- One-time full walk (no allocation, never on a timer) to catch panels that
@@ -2537,23 +2677,47 @@ do
     -- file can build the same dropdown.
     local _SOUNDS_DIR = "Interface\\AddOns\\EllesmereUI\\media\\sounds\\"
     local GROUP_DEATH_SOUND_PATHS = {
-        ["none"]     = nil,
-        ["airhorn"]  = _SOUNDS_DIR .. "AirHorn.ogg",
-        ["banana"]   = _SOUNDS_DIR .. "BananaPeelSlip.ogg",
-        ["bikehorn"] = _SOUNDS_DIR .. "BikeHorn.ogg",
-        ["boxing"]   = _SOUNDS_DIR .. "BoxingArenaSound.ogg",
-        ["water"]    = _SOUNDS_DIR .. "WaterDrop.ogg",
+        ["none"]      = nil,
+        ["airhorn"]   = _SOUNDS_DIR .. "AirHorn.ogg",
+        ["banana"]    = _SOUNDS_DIR .. "BananaPeelSlip.ogg",
+        ["bikehorn"]  = _SOUNDS_DIR .. "BikeHorn.ogg",
+        ["bite"]      = _SOUNDS_DIR .. "Bite.ogg",
+        ["boxing"]    = _SOUNDS_DIR .. "BoxingArenaSound.ogg",
+        ["catmeow"]   = _SOUNDS_DIR .. "CatMeow.ogg",
+        ["catmeow2"]  = _SOUNDS_DIR .. "CatMeow2.ogg",
+        ["gunshot"]   = _SOUNDS_DIR .. "FrontalsGunshot.wav",
+        ["glass"]     = _SOUNDS_DIR .. "Glass.mp3",
+        ["kaching"]   = _SOUNDS_DIR .. "Kaching.ogg",
+        ["phone"]     = _SOUNDS_DIR .. "Phone.ogg",
+        ["robotblip"] = _SOUNDS_DIR .. "RobotBlip.ogg",
+        ["sonar"]     = _SOUNDS_DIR .. "Sonar.ogg",
+        ["siren"]     = _SOUNDS_DIR .. "WarningSiren.ogg",
+        ["water"]     = _SOUNDS_DIR .. "WaterDrop.ogg",
+        ["wilhelm"]   = _SOUNDS_DIR .. "Wilhelm.ogg",
     }
     local GROUP_DEATH_SOUND_NAMES = {
-        ["none"]     = "None",
-        ["airhorn"]  = "Air Horn",
-        ["banana"]   = "Banana Peel Slip",
-        ["bikehorn"] = "Bike Horn",
-        ["boxing"]   = "Boxing Arena",
-        ["water"]    = "Water Drop",
+        ["none"]      = "None",
+        ["airhorn"]   = "Air Horn",
+        ["banana"]    = "Banana Peel Slip",
+        ["bikehorn"]  = "Bike Horn",
+        ["bite"]      = "Bite",
+        ["boxing"]    = "Boxing Arena",
+        ["catmeow"]   = "Cat Meow",
+        ["catmeow2"]  = "Cat Meow 2",
+        ["gunshot"]   = "Frontals Gunshot",
+        ["glass"]     = "Glass",
+        ["kaching"]   = "Kaching",
+        ["phone"]     = "Phone",
+        ["robotblip"] = "Robot Blip",
+        ["sonar"]     = "Sonar",
+        ["siren"]     = "Warning Siren",
+        ["water"]     = "Water Drop",
+        ["wilhelm"]   = "Wilhelm",
     }
     local GROUP_DEATH_SOUND_ORDER = {
-        "none", "airhorn", "banana", "bikehorn", "boxing", "water",
+        "none", "airhorn", "banana", "bikehorn", "bite", "boxing", "catmeow",
+        "catmeow2", "gunshot", "glass", "kaching", "phone", "robotblip", "sonar",
+        "siren", "water", "wilhelm",
     }
     -- SharedMedia sounds are appended at PLAYER_LOGIN (see the boot frame at the
     -- end of this block), NOT here: this do-block runs at addon load, before
@@ -3074,11 +3238,21 @@ do
 
     local auraFrame = CreateFrame("Frame")
 
+    -- 12.1: index scans hard-error while aura restrictions are active
+    -- (M+/raids, even out of combat). Transforms are cosmetic; skipping the
+    -- sweep there is fine -- it re-runs on the next event outside.
+    local function AurasRestricted()
+        local AK = EllesmereUI and EllesmereUI.AuraKit
+        if AK and AK.AurasRestricted then return AK.AurasRestricted() end
+        return false
+    end
+
     -- Sweep current buffs, canceling any included transform. Descending so a
     -- cancel (which shifts later buff indices down) cannot skip a match.
     local function CancelMatching(force)
         if not (C_UnitAuras and C_UnitAuras.GetBuffDataByIndex) then return end
         if not force and UnitAffectingCombat("player") then return end
+        if AurasRestricted() then return end
         for i = 40, 1, -1 do
             local data = C_UnitAuras.GetBuffDataByIndex("player", i)
             if data then
@@ -3096,9 +3270,14 @@ do
             CancelMatching(true)
             return
         end
-        -- UNIT_AURA (player only, via RegisterUnitEvent)
+        -- UNIT_AURA (player only, via RegisterUnitEvent). 12.1: the payload
+        -- (and its fields) can be secret in restricted content -- boolean
+        -- use of a secret errors, and the sweep would error anyway; bail.
         if not updateInfo then return end
-        if updateInfo.isFullUpdate then
+        if issecretvalue and issecretvalue(updateInfo) then return end
+        local isFull = updateInfo.isFullUpdate
+        if isFull ~= nil and issecretvalue and issecretvalue(isFull) then return end
+        if isFull then
             CancelMatching(false)
         elseif updateInfo.addedAuras then
             for _, aura in ipairs(updateInfo.addedAuras) do
@@ -3120,6 +3299,7 @@ do
         if spellID ~= 131476 then return end
         if UnitAffectingCombat("player") then return end
         if not (C_UnitAuras and C_UnitAuras.GetBuffDataByIndex) then return end
+        if AurasRestricted() then return end
         for i = 40, 1, -1 do
             local data = C_UnitAuras.GetBuffDataByIndex("player", i)
             if data then

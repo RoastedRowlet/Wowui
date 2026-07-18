@@ -200,7 +200,10 @@ function SC.UpdateBands(frame)
   if not fsList then return end
 
   local auraID = frame.auraInstanceID
-  if not HasAuraInstanceID(auraID) then
+  -- 12.1: GetAuraApplicationDisplayCount THROWS "cannot be accessed when secret" while the unit's
+  -- auras are secret -- and the auraInstanceID stays NON-secret in that state, so gate on the
+  -- ns.API.AurasSecret probe, not issecretvalue(auraID). Treat secret as no-aura: clear, bail. Inert on live.
+  if not HasAuraInstanceID(auraID) or (ns.API and ns.API.AurasSecret and ns.API.AurasSecret(frame.auraDataUnit or "player")) then
     for i = 1, MAX_BANDS do
       local fs = fsList[i]
       if fs then fs:SetText("") end

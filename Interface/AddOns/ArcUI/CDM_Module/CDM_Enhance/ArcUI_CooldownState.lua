@@ -757,6 +757,23 @@ local function ApplyAuraInactiveDesat(frame, iconTex)
   if ApplyBorderDesaturation then ApplyBorderDesaturation(frame, 1) end
 end
 
+-- "Alpha while aura active" (auraActiveState.activeAlpha): when this spell's OWN CDM aura is
+-- active (or a totem occupies the frame), override the ready/cooldown alpha with the user's
+-- value so the icon dims/hides while the aura is up. Returns nil when not applicable (normal
+-- alpha). The SEPARATE-aura (Duration Override) case is handled in DO.ApplyVisuals -- this
+-- frame delegates to it while _arcDurOvActive, so this path never double-applies.
+local function AuraActiveAlphaOverride(frame)
+  local aa = frame._arcCfg and frame._arcCfg.auraActiveState
+  if not (aa and aa.activeAlphaEnabled) then return nil end   -- opt-in; any value (incl. 1) overrides
+  -- Use the SAME live signal the aura-active glow uses (HasFrameAura = auraInstanceID ~= nil),
+  -- NOT the cached _arcAuraActive flag (often unset/stale -> alpha never applied, ready/cooldown
+  -- alpha won). totemData ~= nil is the secret-safe nil-compare for totem frames.
+  if HasFrameAura(frame.auraInstanceID) or (frame.totemData ~= nil) then
+    return aa.activeAlpha or 1
+  end
+  return nil
+end
+
 -- ═══════════════════════════════════════════════════════════════════
 -- APPLY READY STATE
 -- ═══════════════════════════════════════════════════════════════════
@@ -769,6 +786,8 @@ local function ApplyReadyState(frame, iconTex, stateVisuals, usabilityAlphaOverr
   if frame._arcProcGlowActive and stateVisuals and stateVisuals.readyProcOverride then
     effectiveReadyAlpha = 1.0
   end
+  local aaAlpha = AuraActiveAlphaOverride(frame)
+  if aaAlpha then effectiveReadyAlpha = aaAlpha end
   effectiveReadyAlpha = PreviewClampAlpha(effectiveReadyAlpha)
   frame._arcTargetAlpha = nil
   if effectiveReadyAlpha < 1.0 then
@@ -829,6 +848,8 @@ local function ApplyCooldownAlpha(frame, stateVisuals)
   if frame._arcProcGlowActive and stateVisuals.cooldownProcOverride then
     cdAlpha = 1.0
   end
+  local aaAlpha = AuraActiveAlphaOverride(frame)
+  if aaAlpha then cdAlpha = aaAlpha end
   cdAlpha = PreviewClampAlpha(cdAlpha)
   frame._arcEnforceReadyAlpha = false
   frame._arcReadyAlphaValue = nil
@@ -1273,7 +1294,10 @@ local function HandleAuraLogic(frame, iconTex, cfg, stateVisuals)
           if cat == 3 then unit = "target" end
         end
         InitCooldownCurves()
+        -- 12.1: instance-id aura APIs THROW while the unit's auras are secret (the auraID stays
+        -- NON-secret), so gate on the ns.API.AurasSecret probe. Skip -> plain ready glow. Inert on live.
         local auraDurObj = C_UnitAuras and C_UnitAuras.GetAuraDuration
+                           and not (ns.API and ns.API.AurasSecret and ns.API.AurasSecret(unit))
                            and C_UnitAuras.GetAuraDuration(unit, auraID)
         if auraDurObj then
           local thresholdCurve = GetGlowThresholdCurve(threshold)

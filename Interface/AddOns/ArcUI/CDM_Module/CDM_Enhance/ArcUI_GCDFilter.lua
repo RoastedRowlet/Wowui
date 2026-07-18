@@ -100,6 +100,13 @@ function GCDFilter.Install(frame, cdID)
     --   IAO on:  IAOFight in CooldownState handles the push. Skip here.
     if pf.wasSetFromAura == true then return end
 
+    -- Duration Override active: the override owns the cooldown display (a custom
+    -- aura/totem/manual duration, NOT the real spell cooldown) and DurationOverride
+    -- re-asserts its durObj on every push. Skip the GCD re-push so we don't fight it --
+    -- otherwise, while the spell is on cooldown, the real cooldown races/clobbers the
+    -- override (and its refreshes never make it onto the widget).
+    if pf._arcDurOvActive then return end
+
     -- Skip non-cooldown viewers (aura trackers etc).
     if pf._arcViewerType == "aura" then return end
 
@@ -157,6 +164,7 @@ function GCDFilter.Install(frame, cdID)
       if not pf._arcNoGCDSwipeEnabled then return end
       if pf._arcBypassCDHook then return end
       if pf.wasSetFromAura == true then return end
+      if pf._arcDurOvActive then return end   -- override owns the display; don't fight it
       if pf._arcViewerType == "aura" then return end
       local eqSlot = pf.cooldownInfo and pf.cooldownInfo.equipSlot
       if not eqSlot then return end

@@ -9,7 +9,7 @@ EUI_Bags:Hide()
 -- from its first/active tab; while open it only ever grows (never shrinks).
 EUI_Bags:HookScript("OnHide", function(self)
     self._asCols  = nil
-    self._asMaxW  = nil
+    self._asMaxGridW = nil
     self._asMaxH  = nil
 end)
 
@@ -733,7 +733,7 @@ local function CreateHeader()
         local function ConsolidateStacks(onDone)
             local function DoOnePass()
                 local stacks = {}  -- itemID -> { {bag,slot,count}, ... }
-                for bag = 0, 4 do
+                for bag = 0, 5 do
                     local numSlots = C_Container.GetContainerNumSlots(bag)
                     for slot = 1, numSlots do
                         local info = C_Container.GetContainerItemInfo(bag, slot)
@@ -807,12 +807,14 @@ local function CreateHeader()
 
         -- Scan bags, compute sorted order, and execute all moves in one pass.
         -- Re-scans on every call so retries always work from fresh state.
-        local function ComputeAndExecute()
+        local function ComputeAndExecute(bagMin, bagMax)
+            bagMin = bagMin or 0
+            bagMax = bagMax or 4
             local total = 0
             local sBag, sSlot, sKey, sID = {}, {}, {}, {}
 
             local items = {}
-            for bag = 0, 4 do
+            for bag = bagMin, bagMax do
                 local numSlots = C_Container.GetContainerNumSlots(bag)
                 for slot = 1, numSlots do
                     total = total + 1
@@ -900,16 +902,18 @@ local function CreateHeader()
             return #moves > 0
         end
 
-        local function RunSort()
-            local moved = ComputeAndExecute()
-
-            if not moved then
-                SetCVar("Sound_EnableSFX", sfxWas)
+        local function FinishSort()
+            SetCVar("Sound_EnableSFX", sfxWas)
+            C_Timer.After(0.3, function()
                 EUI_Bags.refreshEnabled = true
                 EUI_Bags:RefreshInventory()
                 C_Timer.After(3, UnlockSort)
-                return
-            end
+            end)
+        end
+
+        local function RunRetryLoop(bagMin, bagMax, onDone)
+            local moved = ComputeAndExecute(bagMin, bagMax)
+            if not moved then onDone(); return end
 
             local retryCount = 0
             local retryFrame = CreateFrame("Frame")
@@ -918,20 +922,25 @@ local function CreateHeader()
                 self:UnregisterAllEvents()
                 retryCount = retryCount + 1
                 C_Timer.After(0.15, function()
-                    local moved = ComputeAndExecute()
+                    local moved = ComputeAndExecute(bagMin, bagMax)
                     if moved and retryCount < 15 then
                         self:RegisterEvent("BAG_UPDATE")
                     else
                         self:SetScript("OnEvent", nil)
-                        SetCVar("Sound_EnableSFX", sfxWas)
-                        C_Timer.After(0.3, function()
-                        EUI_Bags.refreshEnabled = true
-                        EUI_Bags:RefreshInventory()
-                        C_Timer.After(3, UnlockSort)
-                    end)
+                        onDone()
+                    end
+                end)
+            end)
+        end
+
+        local function RunSort()
+            RunRetryLoop(0, 4, function()
+                if C_Container.GetContainerNumSlots(5) > 0 then
+                    RunRetryLoop(5, 5, FinishSort)
+                else
+                    FinishSort()
                 end
             end)
-        end)
         end  -- end RunSort
 
         -- Consolidate partial stacks first, then sort
@@ -1603,7 +1612,7 @@ local function CreateFooter()
     end
 
     local money = CreateFrame("Frame", "EUI_BagMoneyFrame", footer, "SmallMoneyFrameTemplate")
-    money:SetPoint("RIGHT", footer, "RIGHT", 0, 0)
+    money:SetPoint("BOTTOMRIGHT", footer, "BOTTOMRIGHT", 0, 7)
     MoneyFrame_SetType(money, "PLAYER")
 
     -- Style money frame text with our font
@@ -1647,9 +1656,9 @@ local function CreateFooter()
     EUI_Bags.Footer, EUI_Bags.Money = footer, money
 end
 
-local function UpdateCurrencyDisplays()
+local function UpdateCurrencyDisplays(footerWidth)
     local pool = EUI_Bags._currencyPool
-    if not pool or not EUI_Bags.Footer then return end
+    if not pool or not EUI_Bags.Footer then return FOOTER_H end
     local footer = EUI_Bags.Footer
 
     -- Hide all existing displays/hitboxes
@@ -1694,10 +1703,13 @@ local function UpdateCurrencyDisplays()
     local padding = 5
     local rowHeight = 14
     local rowGap = 8
+    local bottomPad = 7
+    local topPad = 7
     local leftOffset = 10
     local rightMargin = 180
-    local footerWidth = footer:GetWidth()
-    local availableWidth = footerWidth - leftOffset - rightMargin
+    footerWidth = footerWidth or footer:GetWidth() or EUI_Bags:GetWidth() or 0
+    if footerWidth <= 0 then footerWidth = EUI_Bags:GetWidth() or 400 end
+    local availableWidth = math.max(40, footerWidth - leftOffset - rightMargin)
     local currentRow = 0
     local currentX = leftOffset
     local currencyLayout = {}
@@ -1723,13 +1735,18 @@ local function UpdateCurrencyDisplays()
         end
     end
 
-    -- Position displays and hitboxes
-    local numRows = currentRow + 1
+    local numRows = math.max(1, currentRow + 1)
+    local footerHeight = math.max(
+        FOOTER_H,
+        bottomPad + topPad + numRows * rowHeight + math.max(0, numRows - 1) * rowGap
+    )
+
     for _, layout in ipairs(currencyLayout) do
         local display = pool.displays[layout.idx]
         display:ClearAllPoints()
-        local yPos = -7 - ((numRows - 1 - layout.row) * (rowHeight + rowGap))
-        display:SetPoint("TOPLEFT", footer, "TOPLEFT", layout.x, yPos)
+        local rowFromBottom = numRows - 1 - layout.row
+        local yPos = bottomPad + rowFromBottom * (rowHeight + rowGap)
+        display:SetPoint("BOTTOMLEFT", footer, "BOTTOMLEFT", layout.x, yPos)
         display:Show()
 
         local hb = pool.hitboxes[layout.idx]
@@ -1740,7 +1757,26 @@ local function UpdateCurrencyDisplays()
         hb:Show()
     end
 
-    footer:SetHeight(FOOTER_H)
+    footer:SetHeight(footerHeight)
+    EUI_Bags._footerH = footerHeight
+    return footerHeight
+end
+
+-- Re-lay-out the currency footer and grow/shrink the bag frame by the height
+-- delta. Reads the previous footer height BEFORE UpdateCurrencyDisplays stamps
+-- the new one, so the delta is real.
+local function SyncBagFrameToFooter()
+    local prev = EUI_Bags._footerH or FOOTER_H
+    local footerH = UpdateCurrencyDisplays() or FOOTER_H
+    if footerH == prev then return end
+    if not EUI_Bags:IsVisible() then return end
+    local delta = footerH - prev
+    if BP().bagAutoSize then
+        EUI_Bags._asMaxH = math.max(EUI_Bags._asMaxH or EUI_Bags:GetHeight() or 0, EUI_Bags:GetHeight() + delta)
+        EUI_Bags:SetHeight(EUI_Bags._asMaxH)
+    else
+        EUI_Bags:SetHeight(EUI_Bags:GetHeight() + delta)
+    end
 end
 
 -------------------------------------------------------------------------------
@@ -2009,7 +2045,8 @@ local function GetOrCreateSlot(idx)
 
     btn:SetSize(SLOT_SIZE, SLOT_SIZE)
     if btn.icon then
-        btn.icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
+        local z = BP().bagItemIconZoom or 0.08
+        btn.icon:SetTexCoord(z, 1 - z, z, 1 - z)
         btn.icon:ClearAllPoints()
         btn.icon:SetAllPoints(btn)
     end
@@ -2125,7 +2162,8 @@ local function GetOrCreateReagentSlot(idx)
 
     btn:SetSize(SLOT_SIZE, SLOT_SIZE)
     if btn.icon then
-        btn.icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
+        local z = BP().bagItemIconZoom or 0.08
+        btn.icon:SetTexCoord(z, 1 - z, z, 1 - z)
         btn.icon:ClearAllPoints()
         btn.icon:SetAllPoints(btn)
     end
@@ -2198,7 +2236,8 @@ local function GetOrCreateBagSlot(idx)
     btn:SetAllPoints(slotParent)
     btn:RegisterForClicks("LeftButtonUp", "RightButtonUp")
     btn.icon = btn:CreateTexture(nil, "ARTWORK")
-    btn.icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
+    local z = BP().bagItemIconZoom or 0.08
+    btn.icon:SetTexCoord(z, 1 - z, z, 1 - z)
     btn.icon:SetAllPoints(btn)
     btn.Count = btn:CreateFontString(nil, "OVERLAY")
     EllesmereUI.ApplyIconTextFont(btn.Count, GetFont(), BP().bagCountFontSize or 11, "bags")
@@ -2246,6 +2285,24 @@ local function RefreshTextSizes()
     end
 end
 EUI_Bags.RefreshTextSizes = RefreshTextSizes
+
+-------------------------------------------------------------------------------
+--  Fast icon-zoom update: re-applies the item-icon crop to existing slots
+--  without a full RefreshInventory. Called by the options zoom cog.
+-------------------------------------------------------------------------------
+local function RefreshIconZoom()
+    local z = BP().bagItemIconZoom or 0.08
+    for _, btn in pairs(itemSlots) do
+        if btn.icon then btn.icon:SetTexCoord(z, 1 - z, z, 1 - z) end
+    end
+    for _, btn in pairs(reagentSlots) do
+        if btn.icon then btn.icon:SetTexCoord(z, 1 - z, z, 1 - z) end
+    end
+    for _, btn in pairs(bagSlots) do
+        if btn.icon then btn.icon:SetTexCoord(z, 1 - z, z, 1 - z) end
+    end
+end
+EUI_Bags.RefreshIconZoom = RefreshIconZoom
 
 -------------------------------------------------------------------------------
 --  Bind type text (shared by bags and bank render paths)
@@ -3726,27 +3783,22 @@ local function CreateSidebar()
         if EUI.HideWidgetTooltip then EUI.HideWidgetTooltip() end
     end)
     collapseBtn:SetScript("OnClick", function()
-        -- Determine which edge to preserve based on screen position
         local center = EUI_Bags:GetCenter()
         local screenW = UIParent:GetWidth()
         local onRightSide = center and screenW and (center > screenW / 2)
-        local oldWidth = onRightSide and EUI_Bags:GetWidth() or nil
+        local oldRight = onRightSide and EUI_Bags:GetRight() or nil
+        local oldTop = onRightSide and EUI_Bags:GetTop() or nil
 
         BP().bagSidebarCollapsed = not BP().bagSidebarCollapsed
         UpdateCollapseArrow()
         sidebar:SetWidth(GetSidebarWidth())
         EUI_Bags:RefreshInventory()
 
-        -- Shift frame by width difference to preserve right edge
-        if onRightSide and oldWidth then
-            local newWidth = EUI_Bags:GetWidth()
-            local shift = oldWidth - newWidth
-            if math.abs(shift) > 0.5 then
-                local point, rel, relPoint, x, y = EUI_Bags:GetPoint()
-                EUI_Bags:ClearAllPoints()
-                EUI_Bags:SetPoint(point, rel, relPoint, x + shift, y)
-                BP().bagsPosition = { point = point, relativePoint = relPoint, x = x + shift, y = y }
-            end
+        if onRightSide and oldRight and oldTop then
+            local left = oldRight - EUI_Bags:GetWidth()
+            EUI_Bags:ClearAllPoints()
+            EUI_Bags:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", left, oldTop)
+            BP().bagsPosition = { point = "TOPLEFT", relativePoint = "BOTTOMLEFT", x = left, y = oldTop }
         end
     end)
 
@@ -5004,7 +5056,6 @@ function EUI_Bags:RefreshInventory()
     -- 5. Render grid into scroll child
     local _t0GridSetup = ProfBegin("GridSetup")
     for _, btn in pairs(itemSlots) do
-        btn:GetParent():Hide()
         if btn.ProfessionQualityOverlay then btn.ProfessionQualityOverlay:SetAlpha(0) end
         if btn.IconOverlay then btn.IconOverlay:SetAlpha(0); btn.IconOverlay:Hide() end
         if btn.IconOverlay2 then btn.IconOverlay2:SetAlpha(0); btn.IconOverlay2:Hide() end
@@ -5231,10 +5282,12 @@ function EUI_Bags:RefreshInventory()
             for j, data in ipairs(pinItems) do
                 slotIdx = slotIdx + 1
                 local btn = GetOrCreateSlot(slotIdx)
-                btn:GetParent():SetParent(child)
-                local col = (j - 1) % columns
-                local row = math.floor((j - 1) / columns)
-                RenderButton(btn, data, slotIdx, col, row, startX, curY, columns)
+                if btn then  -- nil during combat (avoids minting tainted secure buttons)
+                    btn:GetParent():SetParent(child)
+                    local col = (j - 1) % columns
+                    local row = math.floor((j - 1) / columns)
+                    RenderButton(btn, data, slotIdx, col, row, startX, curY, columns)
+                end
             end
             -- Pin "+" button
             local pinItemCount = #pinItems
@@ -5242,16 +5295,18 @@ function EUI_Bags:RefreshInventory()
                 local pinIdx = pinItemCount + 1
                 slotIdx = slotIdx + 1
                 local pinSlot = GetOrCreateSlot(slotIdx)
-                pinSlot:GetParent():SetParent(child)
-                local col = (pinIdx - 1) % columns
-                local row = math.floor((pinIdx - 1) / columns)
-                RenderButton(pinSlot, { bag = 0, slot = 0 }, slotIdx, col, row, startX, curY, columns)
-                local ov = GetOrCreatePinOverlay()
-                ov:SetParent(child)
-                ov:ClearAllPoints()
-                ov:SetAllPoints(pinSlot)
-                ov:Show()
-                pinItemCount = pinItemCount + 1
+                if pinSlot then  -- nil during combat (avoids minting tainted secure buttons)
+                    pinSlot:GetParent():SetParent(child)
+                    local col = (pinIdx - 1) % columns
+                    local row = math.floor((pinIdx - 1) / columns)
+                    RenderButton(pinSlot, { bag = 0, slot = 0 }, slotIdx, col, row, startX, curY, columns)
+                    local ov = GetOrCreatePinOverlay()
+                    ov:SetParent(child)
+                    ov:ClearAllPoints()
+                    ov:SetAllPoints(pinSlot)
+                    ov:Show()
+                    pinItemCount = pinItemCount + 1
+                end
             end
             -- Pad remaining slots in last row
             local pinRemainder = pinItemCount % columns
@@ -5321,10 +5376,12 @@ function EUI_Bags:RefreshInventory()
             for j, data in ipairs(recentItems) do
                 slotIdx = slotIdx + 1
                 local btn = GetOrCreateSlot(slotIdx)
-                btn:GetParent():SetParent(child)
-                local col = (j - 1) % columns
-                local row = math.floor((j - 1) / columns)
-                RenderButton(btn, data, slotIdx, col, row, startX, curY, columns)
+                if btn then  -- nil during combat (avoids minting tainted secure buttons)
+                    btn:GetParent():SetParent(child)
+                    local col = (j - 1) % columns
+                    local row = math.floor((j - 1) / columns)
+                    RenderButton(btn, data, slotIdx, col, row, startX, curY, columns)
+                end
             end
             local recItemCount = #recentItems
             local recRemainder = recItemCount % columns
@@ -5434,10 +5491,12 @@ function EUI_Bags:RefreshInventory()
                 local _t0RB = ProfBegin("RenderButton")
                 slotIdx = slotIdx + 1
                 local btn = GetOrCreateSlot(slotIdx)
-                btn:GetParent():SetParent(child)
-                local col = (i - 1) % columns
-                local row = math.floor((i - 1) / columns)
-                RenderButton(btn, data, slotIdx, col, row, startX, curY, columns, true)
+                if btn then  -- nil during combat (avoids minting tainted secure buttons)
+                    btn:GetParent():SetParent(child)
+                    local col = (i - 1) % columns
+                    local row = math.floor((i - 1) / columns)
+                    RenderButton(btn, data, slotIdx, col, row, startX, curY, columns, true)
+                end
                 ProfEnd("RenderButton", _t0RB)
             end
             local reagRows = math.ceil(#reagentSlotList / columns)
@@ -5476,10 +5535,12 @@ function EUI_Bags:RefreshInventory()
                 local _t0RB = ProfBegin("RenderButton")
                 slotIdx = slotIdx + 1
                 local btn = GetOrCreateSlot(slotIdx)
-                btn:GetParent():SetParent(child)
-                local col = (j - 1) % columns
-                local row = math.floor((j - 1) / columns)
-                RenderButton(btn, data, slotIdx, col, row, startX, curY, columns)
+                if btn then  -- nil during combat (avoids minting tainted secure buttons)
+                    btn:GetParent():SetParent(child)
+                    local col = (j - 1) % columns
+                    local row = math.floor((j - 1) / columns)
+                    RenderButton(btn, data, slotIdx, col, row, startX, curY, columns)
+                end
                 ProfEnd("RenderButton", _t0RB)
             end
             local remainder = n % columns
@@ -5823,17 +5884,19 @@ function EUI_Bags:RefreshInventory()
                     local aIdx = memberItemCount + 1
                     slotIdx = slotIdx + 1
                     local aSlot = GetOrCreateSlot(slotIdx)
-                    aSlot:GetParent():SetParent(child)
-                    local col = (aIdx - 1) % columns
-                    local row = math.floor((aIdx - 1) / columns)
-                    RenderButton(aSlot, { bag = 0, slot = 0 }, slotIdx, col, row, startX, curY, columns)
-                    local aOv = GetOrCreateAssignOverlay()
-                    aOv._assignCatKey = memberCat._defaultName
-                    aOv:SetParent(child)
-                    aOv:ClearAllPoints()
-                    aOv:SetAllPoints(aSlot)
-                    aOv:Show()
-                    memberItemCount = memberItemCount + 1
+                    if aSlot then  -- nil during combat (avoids minting tainted secure buttons)
+                        aSlot:GetParent():SetParent(child)
+                        local col = (aIdx - 1) % columns
+                        local row = math.floor((aIdx - 1) / columns)
+                        RenderButton(aSlot, { bag = 0, slot = 0 }, slotIdx, col, row, startX, curY, columns)
+                        local aOv = GetOrCreateAssignOverlay()
+                        aOv._assignCatKey = memberCat._defaultName
+                        aOv:SetParent(child)
+                        aOv:ClearAllPoints()
+                        aOv:SetAllPoints(aSlot)
+                        aOv:Show()
+                        memberItemCount = memberItemCount + 1
+                    end
                 end
 
                 local remainder = memberItemCount % columns
@@ -6015,6 +6078,12 @@ function EUI_Bags:RefreshInventory()
         end
     end
 
+    -- Hide slots that were not rendered this pass
+    for i = slotIdx + 1, #itemSlots do
+        local btn = itemSlots[i]
+        if btn then btn:GetParent():Hide() end
+    end
+
     -- Set scroll child height to content height
     local contentH = math.abs(curY) + 10
     if child then child:SetHeight(contentH) end
@@ -6039,21 +6108,26 @@ function EUI_Bags:RefreshInventory()
     -- column count; both track a running max while open so the window never
     -- shrinks mid-session, floored at the base height and capped at the screen.
     local FIXED_H = 650
-    local totalW = sidebarW + gridW + gridPadX * 2 + scrollbarPad + 2
+    local gridContentW = gridW + gridPadX * 2 + scrollbarPad + 2
+    local totalW = sidebarW + gridContentW
+    if BP().bagAutoSize then
+        EUI_Bags._asMaxGridW = math.max(EUI_Bags._asMaxGridW or 0, gridContentW)
+        totalW = sidebarW + EUI_Bags._asMaxGridW
+    end
+    local currencyFooterH = UpdateCurrencyDisplays(totalW) or FOOTER_H
 
     if BP().bagAutoSize then
         local sc = EUI_Bags:GetScale(); if not sc or sc <= 0 then sc = 1 end
         local maxH = (UIParent:GetHeight() / sc) * 0.95
         -- Cap at the screen first, then floor at the base height so the window
         -- is never smaller than its normal size (even on very short screens).
-        local neededH = math.max(FIXED_H, math.min(contentH + HEADER_H + FOOTER_H + 2, maxH))
-        EUI_Bags._asMaxW = math.max(EUI_Bags._asMaxW or 0, totalW)
+        local neededH = math.max(FIXED_H, math.min(contentH + HEADER_H + currencyFooterH + 2, maxH))
         EUI_Bags._asMaxH = math.max(EUI_Bags._asMaxH or 0, neededH)
-        EUI_Bags:SetWidth(EUI_Bags._asMaxW)
+        EUI_Bags:SetWidth(totalW)
         EUI_Bags:SetHeight(EUI_Bags._asMaxH)
     else
         EUI_Bags:SetWidth(totalW)
-        EUI_Bags:SetHeight(FIXED_H)
+        EUI_Bags:SetHeight(FIXED_H + currencyFooterH - FOOTER_H)
     end
 
     -- Update header item count
@@ -6084,7 +6158,6 @@ function EUI_Bags:RefreshInventory()
     end
 
     UpdateBagMoneyDisplay()
-    UpdateCurrencyDisplays()
 end
 
 -------------------------------------------------------------------------------
@@ -6111,6 +6184,7 @@ function EUI_BagsReagent:RefreshInventory()
     local REAGENT_COLUMNS = 4
     for i, data in ipairs(tempItems) do
         local btn = GetOrCreateReagentSlot(i)
+        if btn then  -- nil during combat (avoids minting tainted secure buttons)
         local parent = btn:GetParent()
         parent:ClearAllPoints()
         parent:Show()
@@ -6165,6 +6239,7 @@ function EUI_BagsReagent:RefreshInventory()
         local col = (i - 1) % REAGENT_COLUMNS
         local row = math.floor((i - 1) / REAGENT_COLUMNS)
         parent:SetPoint("TOPLEFT", startX + (col * (SLOT_SIZE + SPACING)), startY - (row * (SLOT_SIZE + SPACING)))
+        end
     end
 
     EUI_BagsReagent:SetWidth((REAGENT_COLUMNS * (SLOT_SIZE + SPACING)) + 30)
@@ -6630,7 +6705,9 @@ local function StartAddon()
                 end
             end
             _lastBlizzSet = blizzSet
-            if EUI_Bags:IsVisible() then UpdateCurrencyDisplays() end
+            if EUI_Bags:IsVisible() then
+                SyncBagFrameToFooter()
+            end
             if EllesmereUI and EllesmereUI.RefreshPage then EllesmereUI:RefreshPage() end
         end, EUI_Bags)
     end
@@ -6675,7 +6752,7 @@ local function StartAddon()
             CaptureTrackedGold()
             UpdateBagMoneyDisplay()
         elseif event == "CURRENCY_DISPLAY_UPDATE" then
-            UpdateCurrencyDisplays()
+            SyncBagFrameToFooter()
         end
     end)
 

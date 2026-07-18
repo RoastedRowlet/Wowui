@@ -49,7 +49,8 @@ local modelbtnfont1 = _G["CCS_clk_Btnfs1"] or modelbtn:CreateFontString("CCS_clk
 ---------------------------------
 function CCS.GetAverageItemLevel(unit)
     local total, count = 0, 0
-
+    local skipoh = false
+    
     for slot = 1, 18 do
         if slot ~= 4 then  -- skip shirt
             local link = GetInventoryItemLink(unit, slot)
@@ -61,13 +62,16 @@ function CCS.GetAverageItemLevel(unit)
                     if slot == 16 and equipLoc == "INVTYPE_2HWEAPON" then
                         total = total + (ilvl * 2)
                         count = count + 2
+                        skipoh = true
                     else
                         total = total + ilvl
                         count = count + 1
                     end
                 end
             else
-                count = count + 1
+                if slot == 17 and not skipoh then
+                    count = count + 1
+                end
             end
         end
     end
@@ -2368,6 +2372,7 @@ function InitializeStats()
             local btnfontilvl = _G["CSPilvlfs1"] or btn:CreateFontString("CSPilvlfs1")
             local btntex = _G["CSPilvltex"] or btn:CreateTexture("CSPilvltex", "BACKGROUND", nil, 1)
             local avgItemLevelEquipped = CCS.GetAverageItemLevel("player")
+            --local avgItemLevel, avgItemLevelEquipped, avgItemLevelPvP = GetAverageItemLevel();
             local Color = "a336ed"
             local tt_name = ""
             local tt_desc = ""

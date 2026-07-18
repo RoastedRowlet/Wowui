@@ -39,6 +39,10 @@ function Addon:GetLoadoutEntryInfo(importText, configID)
 		return loadoutEntryInfo;
 	end
 
+	if InCombatLockdown() then
+		return false;
+	end
+
 	local talentsFrame = Addon.TalentsFrame;
 	local specID = PlayerUtil.GetCurrentSpecID();
 	local treeID = C_ClassTalents.GetTraitTreeForSpec(specID);

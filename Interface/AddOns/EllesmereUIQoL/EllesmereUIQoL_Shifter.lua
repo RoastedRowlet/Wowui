@@ -31,6 +31,7 @@ local PRELOADED = {
     "BankFrame",
     "MailFrame",
     "GossipFrame",
+    "QuestFrame",
     "MerchantFrame",
     "AddonList",
     "ChatConfigFrame",
@@ -94,8 +95,44 @@ local ADDON_FRAMES = {
 -- For these frames the drag target is a child header element, not the frame
 -- itself (avoids fighting model-rotate or interior click regions).
 local DRAG_HEADERS = {
-    ["AchievementFrame"] = "AchievementFrameHeader",
-    ["WorldMapFrame"]    = "WorldMapTitleButton",
+    ["WorldMapFrame"] = "WorldMapTitleButton",
+}
+
+-- Extra drag handles layered ON TOP of the frame body. Used when a
+-- mouse-enabled child sits over the frame and would otherwise swallow the
+-- drag (e.g. the Achievement frame's floating points header). Values resolve
+-- to a child frame: either a global name or a function(frame) -> child.
+local EXTRA_DRAG_TARGETS = {
+    ["AchievementFrame"] = function(frame) return frame.Header or _G["AchievementFrameHeader"] end,
+}
+
+-- Blizzard windows that normally dock beside CharacterFrame (Item Upgrade,
+-- Transmog, Item Socketing, Merchant -- covers vendors like the Crest
+-- Exchange -- plus Friends, Guild/Communities, and Professions, which
+-- normally sit to CharacterFrame's left with CharacterFrame staying put).
+-- See the docking hook in HookFrame for why and how.
+--
+-- PVEFrame is deliberately NOT here: EllesmereUIBlizzardSkin_GroupFinder.lua
+-- owns that pairing instead, docking CharacterFrame beside PVEFrame (rather
+-- than the reverse) with room-detection that also accounts for third-party
+-- companion panels bolted onto PVEFrame (e.g. RaiderIO's Mythic+ panel).
+-- Having both mechanisms active fought each other: this one's plain room
+-- check has no idea RaiderIO's panel exists, so it could re-dock PVEFrame
+-- right back on top of it the moment CharacterFrame got any saved/temp
+-- Shifter position at all. PVEFrame being protected already skipped this
+-- module's strata/Raise writes too (see the `else` branch below), so
+-- dropping it here leaves it entirely to GroupFinder.lua, with nothing lost.
+local DOCKING_COMPANIONS = {
+    ItemUpgradeFrame = true,
+    TransmogFrame = true,
+    ItemSocketingFrame = true,
+    MerchantFrame = true,
+    FriendsFrame = true,
+    CommunitiesFrame = true,
+    ProfessionsFrame = true,
+    ProfessionsBookFrame = true,
+    WorldMapFrame = true,
+    HousingDashboardFrame = true,
 }
 
 -------------------------------------------------------------------------------
@@ -434,6 +471,32 @@ local function StartSecureDrag(frame, name, mode)
 end
 
 -------------------------------------------------------------------------------
+--  Companion re-dock on CharacterFrame changes.
+--
+--  Each DOCKING_COMPANIONS frame only re-evaluates its own docked position
+--  when ITS OWN OnShow/SetPoint fires -- never when CharacterFrame itself
+--  moves or rescales. So a companion (WorldMap, Guild/Communities, PVEFrame,
+--  etc.) that's already open and correctly docked goes stale the moment
+--  CharacterFrame is scaled or repositioned afterward, since nothing tells
+--  it to re-check. Every companion registers its ShouldDock/DockToCharacter-
+--  Frame closures here as it's hooked; CharacterFrame's own SetPoint/SetScale
+--  (hooked separately below) walks this list and re-docks anything that
+--  should currently be docked, closing that gap.
+-------------------------------------------------------------------------------
+local dockedCompanions = {}
+
+local function RedockCompanions()
+    for i = 1, #dockedCompanions do
+        local c = dockedCompanions[i]
+        if c.frame:IsShown() and c.shouldDock() then
+            if not c.frame:IsProtected() then c.frame:SetFrameStrata("DIALOG") end
+            c.dock()
+            if not c.frame:IsProtected() then c.frame:Raise() end
+        end
+    end
+end
+
+-------------------------------------------------------------------------------
 --  Hook a single frame
 -------------------------------------------------------------------------------
 local function HookFrame(frame, name)
@@ -452,55 +515,64 @@ local function HookFrame(frame, name)
         frame:SetClampedToScreen(true)
     end
 
-    -- Determine drag target (header child or the frame itself)
-    local headerName = DRAG_HEADERS[name]
-    local dragTarget = (headerName and _G[headerName]) or frame
-
     local dragging  -- non-protected only: "save" | "temp" | nil
 
-    dragTarget:HookScript("OnMouseDown", function(_, button)
-        if not IsEnabled() then return end
-        if button ~= "LeftButton" then return end
-        if InCombatLockdown() and frame:IsProtected() then return end
-        local noShift = EllesmereUIDB and EllesmereUIDB.shifterNoShift
-        local mode
-        if IsShiftKeyDown() or noShift then
-            mode = "save"
-        elseif IsControlKeyDown() then
-            mode = "temp"
-        else
-            return
-        end
-        if frame:IsProtected() then
-            StartSecureDrag(frame, name, mode)
-        else
-            dragging = mode
-            frame:StartMoving()
-        end
-    end)
-
-    dragTarget:HookScript("OnMouseUp", function(_, button)
-        if button ~= "LeftButton" then return end
-        if frame:IsProtected() then
-            if secureDrag.frame == frame then StopSecureDrag() end
-            return
-        end
-        if not dragging then return end
-        frame:StopMovingOrSizing()
-        frame:SetUserPlaced(false)
-        local p, _, rp, x, y = frame:GetPoint(1)
-        if p then
-            if dragging == "save" then
-                SavePos(name, p, rp, x, y)
-                tempPos[frame] = nil
+    local function AttachDrag(dragTarget)
+        if not dragTarget or not dragTarget.HookScript then return end
+        dragTarget:HookScript("OnMouseDown", function(_, button)
+            if not IsEnabled() then return end
+            if button ~= "LeftButton" then return end
+            if InCombatLockdown() and frame:IsProtected() then return end
+            local noShift = EllesmereUIDB and EllesmereUIDB.shifterNoShift
+            local mode
+            if IsShiftKeyDown() or noShift then
+                mode = "save"
+            elseif IsControlKeyDown() then
+                mode = "temp"
             else
-                tempPos[frame] = {
-                    point = p, relPoint = rp, x = x, y = y,
-                }
+                return
             end
-        end
-        dragging = nil
-    end)
+            if frame:IsProtected() then
+                StartSecureDrag(frame, name, mode)
+            else
+                dragging = mode
+                frame:StartMoving()
+            end
+        end)
+
+        dragTarget:HookScript("OnMouseUp", function(_, button)
+            if button ~= "LeftButton" then return end
+            if frame:IsProtected() then
+                if secureDrag.frame == frame then StopSecureDrag() end
+                return
+            end
+            if not dragging then return end
+            frame:StopMovingOrSizing()
+            frame:SetUserPlaced(false)
+            local p, _, rp, x, y = frame:GetPoint(1)
+            if p then
+                if dragging == "save" then
+                    SavePos(name, p, rp, x, y)
+                    tempPos[frame] = nil
+                else
+                    tempPos[frame] = {
+                        point = p, relPoint = rp, x = x, y = y,
+                    }
+                end
+            end
+            dragging = nil
+        end)
+    end
+
+    -- Primary drag target (header child or the frame itself)
+    local headerName = DRAG_HEADERS[name]
+    AttachDrag((headerName and _G[headerName]) or frame)
+
+    -- Extra handles layered on top of the frame body
+    local extra = EXTRA_DRAG_TARGETS[name]
+    if extra then
+        AttachDrag(type(extra) == "function" and extra(frame) or _G[extra])
+    end
 
     frame:HookScript("OnShow", function()
         if not IsEnabled() then return end
@@ -511,16 +583,150 @@ local function HookFrame(frame, name)
     end)
 
     frame:HookScript("OnHide", function()
+        if not IsEnabled() then return end
         if secureDrag.frame == frame then StopSecureDrag() end
         tempPos[frame] = nil
         tempScale[frame] = nil
     end)
+
+    -- Item Upgrade / Transmog / Item Socketing / Merchant (covers vendors
+    -- like the Crest Exchange) dock beside CharacterFrame. Blizzard's own
+    -- docking math assumes CharacterFrame sits at its default screen
+    -- position; once Shifter has CharacterFrame pinned somewhere else that
+    -- math falls apart and the companion ends up wherever Blizzard's now-
+    -- wrong calculation put it -- frequently right on top of CharacterFrame's
+    -- pinned spot, and since CharacterFrame's skin forces it to "HIGH"
+    -- strata while these default to "MEDIUM", it then renders buried
+    -- underneath. Docks left by default (matching Blizzard's normal layout),
+    -- falling back to whichever side actually has room -- otherwise
+    -- SetClampedToScreen just snaps it back onto CharacterFrame regardless of
+    -- which side we pick. Only kicks in when the companion has no pin of its
+    -- own; an explicit Shift+drag on the companion wins over auto-docking.
+    local ShouldDock, DockToCharacterFrame
+    if DOCKING_COMPANIONS[name] then
+        local defaultStrata = frame:GetFrameStrata()
+        ShouldDock = function()
+            -- Protected frames (PVEFrame) still dock -- but position-only,
+            -- through the SecureSetPoint branch below; their strata/Raise
+            -- touches are skipped in the OnShow/OnHide hooks (insecure writes
+            -- taint a protected tree -- the PVEFrame SetMovable incident).
+            if tempPos[frame] or GetSavedPos(name) then return false end
+            local cf = _G.CharacterFrame
+            return cf ~= nil and cf:IsShown() and (tempPos[cf] or GetSavedPos("CharacterFrame")) ~= nil
+        end
+        DockToCharacterFrame = function()
+            local cf = _G.CharacterFrame
+            local margin = 4
+            -- Compare available room in SCREEN-ABSOLUTE units. cf's edges
+            -- are in CF's effective-scale space and this frame's width is in
+            -- its own; raw mixing picks the wrong side (and mis-places the
+            -- protected dock below) the moment either frame is
+            -- Shifter-scaled -- which is the headline scenario here.
+            local cs = cf:GetEffectiveScale() or 1
+            local es = frame:GetEffectiveScale() or 1
+            local ues = UIParent:GetEffectiveScale() or 1
+            local wAbs = (frame:GetWidth() or 0) * es
+            local leftRoom = (cf:GetLeft() or 0) * cs
+            local rightRoom = (GetScreenWidth() or 0) * ues - (cf:GetRight() or 0) * cs
+            local dockLeft = leftRoom >= wAbs + margin * es or leftRoom >= rightRoom
+            if frame:IsProtected() then
+                -- Plain SetPoint on a protected frame (e.g. PVEFrame) taints
+                -- it -- same reason SecureSetPoint exists for saved/dragged
+                -- positions above. SecureSetPoint only anchors relative to
+                -- UIParent, so convert the dock target into a UIParent-CENTER
+                -- offset, with every coordinate normalized through its own
+                -- frame's effective scale (screen-absolute space) before
+                -- dividing back into this frame's units.
+                if InCombatLockdown() then return end
+                local hAbs = (frame:GetHeight() or 0) * es
+                local absCenterX
+                if dockLeft then
+                    absCenterX = leftRoom - margin * es - wAbs / 2
+                else
+                    absCenterX = (cf:GetRight() or 0) * cs + margin * es + wAbs / 2
+                end
+                local absCenterY = (cf:GetTop() or 0) * cs - hAbs / 2
+                local ucx, ucy = UIParent:GetCenter()
+                if ucx and es > 0 then
+                    SecureSetPoint(frame, "CENTER", "CENTER",
+                        (absCenterX - ucx * ues) / es,
+                        (absCenterY - ucy * ues) / es)
+                end
+            else
+                ffd._shIgnoreSP = true
+                frame:ClearAllPoints()
+                if dockLeft then
+                    frame:SetPoint("TOPRIGHT", cf, "TOPLEFT", -margin, 0)
+                else
+                    frame:SetPoint("TOPLEFT", cf, "TOPRIGHT", margin, 0)
+                end
+                ffd._shIgnoreSP = false
+            end
+        end
+        frame:HookScript("OnHide", function()
+            -- Strata writes are INSECURE: on a protected frame (PVEFrame)
+            -- they taint its whole tree, exactly like the SetMovable call
+            -- that caused the original secret-value incident. Skip them.
+            if not frame:IsProtected() then frame:SetFrameStrata(defaultStrata) end
+        end)
+        frame:HookScript("OnShow", function()
+            if not IsEnabled() then return end
+            if ShouldDock() then
+                -- The strata raise only matters when the companion OVERLAPS
+                -- CharacterFrame -- a docked frame no longer does. Protected
+                -- frames therefore get position-only docking; strata and
+                -- Raise are insecure writes that would taint their tree.
+                if not frame:IsProtected() then frame:SetFrameStrata("DIALOG") end
+                DockToCharacterFrame()
+                if not frame:IsProtected() then frame:Raise() end
+            end
+        end)
+        dockedCompanions[#dockedCompanions + 1] = { frame = frame, shouldDock = ShouldDock, dock = DockToCharacterFrame }
+    elseif name == "CharacterFrame" then
+        -- CharacterFrame itself isn't a companion, but every companion's dock
+        -- is relative to IT -- so a scale or position change here is exactly
+        -- what leaves already-open companions stale (see RedockCompanions).
+        hooksecurefunc(frame, "SetPoint", function()
+            if IsEnabled() then RedockCompanions() end
+        end)
+        hooksecurefunc(frame, "SetScale", function()
+            if IsEnabled() then RedockCompanions() end
+        end)
+    else
+        -- Any other Shifter-managed window can end up rendered underneath a
+        -- Shifter-pinned CharacterFrame purely because CharacterFrame's skin
+        -- forces it to "HIGH" strata -- not because it's meant to dock
+        -- beside CharacterFrame (unlike DOCKING_COMPANIONS, this never
+        -- touches position, just strata). Applies generically to every other
+        -- Shifter-hooked frame so newly discovered cases don't need a
+        -- hardcoded entry. Protected frames are skipped: SetFrameStrata and
+        -- Raise are still INSECURE writes, and on a protected frame they
+        -- taint its whole tree (the PVEFrame SetMovable incident) -- those
+        -- stay at Blizzard strata, possibly buried but never tainted.
+        local defaultStrata = frame:GetFrameStrata()
+        frame:HookScript("OnHide", function()
+            if not frame:IsProtected() then frame:SetFrameStrata(defaultStrata) end
+        end)
+        frame:HookScript("OnShow", function()
+            if not IsEnabled() then return end
+            if frame:IsProtected() then return end
+            local cf = _G.CharacterFrame
+            if cf and cf:IsShown() and (tempPos[cf] or GetSavedPos("CharacterFrame")) then
+                frame:SetFrameStrata("DIALOG")
+                frame:Raise()
+            end
+        end)
+    end
 
     hooksecurefunc(frame, "SetPoint", function()
         if not IsEnabled() then return end
         if ffd._shIgnoreSP then return end
         if secureDrag.frame == frame then return end  -- don't fight an active drag
         if InCombatLockdown() and frame:IsProtected() then return end
+        if DockToCharacterFrame and ShouldDock() then
+            DockToCharacterFrame()
+            return
+        end
         if tempPos[frame] or GetSavedPos(name) then
             ApplyPosition(frame, name)
         end
@@ -792,6 +998,15 @@ end)
 -- Exposed for the options toggle (mid-session enable without /reload)
 function EllesmereUI._InitShifter()
     InitShifter()
+end
+
+-- Exposed for the options toggle (mid-session disable). Stops the modifier
+-- key listener and parks the wheel overlay; re-enable re-runs InitShifter,
+-- which registers the event again. Frame hooks are irreversible and stay
+-- installed, but every hook body bails first-line while disabled.
+function EllesmereUI._ShutdownShifter()
+    eventFrame:UnregisterEvent("MODIFIER_STATE_CHANGED")
+    UpdateWheelOverlay()
 end
 
 -- Exposed for the options reset button (positions AND zoom)

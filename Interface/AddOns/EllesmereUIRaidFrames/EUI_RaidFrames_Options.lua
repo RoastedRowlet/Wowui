@@ -1829,6 +1829,32 @@ initFrame:SetScript("OnEvent", function(self)
                   disabledTooltip="Show Power Bar For",
                   getValue=function() return SVal("powerHeight", 4) end,
                   setValue=function(v) SSet("powerHeight", v) end });  y = y - h
+            -- Cog: Uniform Icon Anchoring (power bar independence). Greyed +
+            -- blocked while no role shows a power bar (nothing to ignore then).
+            do
+                local rgn = row._rightRegion
+                local _, cogShow = EllesmereUI.BuildCogPopup({
+                    title = "Power Height",
+                    rows = {
+                        { type="toggle", label="Icons Ignore Power Bar",
+                          tooltip="Anchor icons and text as if no power bar existed, so frames with and without one line up identically.",
+                          get=function() return SVal("powerUniformAnchors", false) end,
+                          set=function(v) SSet("powerUniformAnchors", v) end },
+                    },
+                })
+                local cogBtn = CreateFrame("Button", nil, rgn)
+                cogBtn:SetSize(26, 26)
+                cogBtn:SetPoint("RIGHT", rgn._lastInline or rgn._control, "LEFT", -8, 0)
+                rgn._lastInline = cogBtn
+                cogBtn:SetFrameLevel(rgn:GetFrameLevel() + 5)
+                cogBtn:SetAlpha(IsPowerOff() and 0.15 or 0.4)
+                local cogTex = cogBtn:CreateTexture(nil, "OVERLAY")
+                cogTex:SetAllPoints(); cogTex:SetTexture(EllesmereUI.COGS_ICON)
+                cogBtn:SetScript("OnEnter", function(self) if not IsPowerOff() then self:SetAlpha(0.7) end end)
+                cogBtn:SetScript("OnLeave", function(self) self:SetAlpha(IsPowerOff() and 0.15 or 0.4) end)
+                cogBtn:SetScript("OnClick", function(self) if not IsPowerOff() then cogShow(self) end end)
+                EllesmereUI.RegisterWidgetRefresh(function() cogBtn:SetAlpha(IsPowerOff() and 0.15 or 0.4) end)
+            end
             do
                 local rgn = row._leftRegion
                 if rgn._control then rgn._control:Hide() end
@@ -1908,9 +1934,32 @@ initFrame:SetScript("OnEvent", function(self)
               disabledTooltip="Show Power Bar For",
               getValue=function() return SVal("powerBgDarkness", 70) end,
               setValue=function(v) SSet("powerBgDarkness", v) end });  y = y - h
-        -- Inline swatch for power bg color
+        -- Inline swatches for power bg: Custom + Power Colored pair. Clicking
+        -- either toggles powerBgPowerColored; the inactive one dims (mirrors the
+        -- health bar background picker).
         do
             local rgn = pwBgRow._rightRegion
+            -- Power-colored background swatch (player's power color; not editable).
+            local bgPwrSwatch = EllesmereUI.BuildColorSwatch(
+                rgn, pwBgRow:GetFrameLevel() + 3,
+                function()
+                    local _, pToken = UnitPowerType("player")
+                    local info = EllesmereUI.GetPowerColor(pToken or "MANA")
+                    local f = EllesmereUI.GetPowerBgDarkenFactor()
+                    if info then return info.r * f, info.g * f, info.b * f, 1 end
+                    return 0, 0.5 * f, f, 1
+                end,
+                function() end, false, 20)
+            bgPwrSwatch:SetScript("OnClick", function()
+                SSet("powerBgPowerColored", true)
+                EllesmereUI:RefreshPage()
+            end)
+            bgPwrSwatch:HookScript("OnEnter", function() EllesmereUI.ShowWidgetTooltip(bgPwrSwatch, "Power Colored Background") end)
+            bgPwrSwatch:HookScript("OnLeave", function() EllesmereUI.HideWidgetTooltip() end)
+            bgPwrSwatch:SetPoint("RIGHT", rgn._lastInline or rgn._control, "LEFT", -8, 0)
+            rgn._lastInline = bgPwrSwatch
+
+            -- Custom background color swatch.
             local bgSwatch = EllesmereUI.BuildColorSwatch(
                 rgn, pwBgRow:GetFrameLevel() + 3,
                 function()
@@ -1922,8 +1971,27 @@ initFrame:SetScript("OnEvent", function(self)
                     SWrite("powerBgColor", { r=r, g=g, b=b })
                     ReloadAndUpdate()
                 end, false, 20)
+            bgSwatch._eabOrigClick = bgSwatch:GetScript("OnClick")
+            bgSwatch:SetScript("OnClick", function(self)
+                if SVal("powerBgPowerColored", false) then
+                    SSet("powerBgPowerColored", false)
+                    EllesmereUI:RefreshPage()
+                    return
+                end
+                if self._eabOrigClick then self._eabOrigClick(self) end
+            end)
+            bgSwatch:HookScript("OnEnter", function() EllesmereUI.ShowWidgetTooltip(bgSwatch, "Custom Colored Background") end)
+            bgSwatch:HookScript("OnLeave", function() EllesmereUI.HideWidgetTooltip() end)
             bgSwatch:SetPoint("RIGHT", rgn._lastInline or rgn._control, "LEFT", -8, 0)
             rgn._lastInline = bgSwatch
+
+            local function UpdatePwBgSwatchVis()
+                local pwrOn = SVal("powerBgPowerColored", false)
+                bgSwatch:SetAlpha(pwrOn and 0.3 or 1)
+                bgPwrSwatch:SetAlpha(pwrOn and 1 or 0.3)
+            end
+            EllesmereUI.RegisterWidgetRefresh(UpdatePwBgSwatchVis)
+            UpdatePwBgSwatchVis()
         end
 
         -- (Show Power Bar For moved to Row 1 above)
@@ -1995,15 +2063,20 @@ initFrame:SetScript("OnEvent", function(self)
                       return SVal("nameColorMode", "class") == "accent" and 1 or 0.3
                   end },
               } });  y = y - h
-        -- Cog for name character-count cap (lives on the Name Size slider).
+        -- Cog for name character-count cap + text stacking (lives on the Name
+        -- Size slider).
         do
             local rgn = row._leftRegion
             local _, cogShow = EllesmereUI.BuildCogPopup({
-                title = "Name Length",
+                title = "Name Text",
                 rows = {
                     { type="slider", label="Max Characters (0=off)", min=0, max=30, step=1,
                       get=function() return SVal("nameMaxLength", 15) end,
                       set=function(v) SSet("nameMaxLength", v) end },
+                    { type="toggle", label="Show Above Icons",
+                      tooltip="Render the name and health text above buff and debuff icons.",
+                      get=function() return SVal("nameTextAboveIcons", false) end,
+                      set=function(v) SSet("nameTextAboveIcons", v) end },
                 },
             })
             local cogBtn = CreateFrame("Button", nil, rgn)
@@ -2561,6 +2634,12 @@ initFrame:SetScript("OnEvent", function(self)
             cogBtn:SetScript("OnClick", function(self) cogShow(self) end)
         end
 
+        -- The rows below Marker Position are the less-common indicators. On the
+        -- RAID tab they collapse behind a session-only "Show More" toggle (state
+        -- held in EllesmereUI._rfShowLessCommonIndicators, not a saved variable);
+        -- the party tab (_partyCtx) always shows them.
+        if _partyCtx or EllesmereUI._rfShowLessCommonIndicators then
+
         -- Ready Check / Summon / Rez icon position + size (the three indicators
         -- share a single texture, so one set of controls drives all of them).
         local readyCheckPositionValues = {
@@ -2577,8 +2656,7 @@ initFrame:SetScript("OnEvent", function(self)
         local readyCheckPositionOrder = { "topleft", "top", "topright", "left", "center", "right", "bottomleft", "bottom", "bottomright" }
         local rcRow
         rcRow, h = W:DualRow(parent, y,
-            -- HELD (PR #610 incoming rez, disabled for this build): text="Ready Check / Summon / Rez"
-            { type="dropdown", text="Ready Check & Summon", values=readyCheckPositionValues, order=readyCheckPositionOrder,
+            { type="dropdown", text="Ready Check / Summon / Rez", values=readyCheckPositionValues, order=readyCheckPositionOrder,
               getValue=function() return SVal("readyCheckPosition", "center") end,
               setValue=function(v) SSet("readyCheckPosition", v) end },
             { type="slider", text="Icon Size", min=8, max=40, step=1,
@@ -2588,8 +2666,7 @@ initFrame:SetScript("OnEvent", function(self)
         do
             local rgn = rcRow._leftRegion
             local _, cogShow = EllesmereUI.BuildCogPopup({
-                -- HELD (PR #610 incoming rez, disabled for this build): title = "Ready Check / Summon / Rez"
-                title = "Ready Check / Summon",
+                title = "Ready Check / Summon / Rez",
                 rows = {
                     { type="toggle", label="Show Ready Check",
                       get=function() return SVal("showReadyCheck", true) end,
@@ -2597,10 +2674,9 @@ initFrame:SetScript("OnEvent", function(self)
                     { type="toggle", label="Show Incoming Summon",
                       get=function() return SVal("showSummonPending", true) end,
                       set=function(v) SSet("showSummonPending", v) end },
-                    -- HELD (PR #610 incoming rez, disabled for this build):
-                    -- { type="toggle", label="Show Incoming Resurrection",
-                    --   get=function() return SVal("showIncomingRez", true) end,
-                    --   set=function(v) SSet("showIncomingRez", v) end },
+                    { type="toggle", label="Show Incoming Resurrection",
+                      get=function() return SVal("showIncomingRez", true) end,
+                      set=function(v) SSet("showIncomingRez", v) end },
                     { type="slider", label="Offset X", min=-50, max=50, step=1,
                       get=function() return SVal("readyCheckOffsetX", 0) end,
                       set=function(v) SSet("readyCheckOffsetX", v) end },
@@ -2756,6 +2832,111 @@ initFrame:SetScript("OnEvent", function(self)
             cogBtn:SetScript("OnClick", function(self) cogShow(self) end)
         end
 
+        -- Row: Combat Icon Position (includes "None" to disable) | Combat Icon Size.
+        -- Shows on members currently in combat -- e.g. to spot who's still pulling
+        -- during a Mythic+ skip. Style/color/offset live in the inline cog.
+        local combatPositionValues = {
+            none        = "None",
+            topleft     = "Top Left",
+            top         = "Top",
+            topright    = "Top Right",
+            left        = "Left",
+            center      = "Center",
+            right       = "Right",
+            bottomleft  = "Bottom Left",
+            bottom      = "Bottom",
+            bottomright = "Bottom Right",
+        }
+        local combatPositionOrder = { "none", "topleft", "top", "topright", "left", "center", "right", "bottomleft", "bottom", "bottomright" }
+        local combatStyleValues = {
+            standard = "Standard",
+            class    = "Class Theme",
+            combat0  = "Arcade",
+            combat1  = "Dungeoneer",
+            combat2  = "Classic",
+            combat3  = "Cross",
+            combat4  = "Circle",
+            combat5  = "Square",
+        }
+        local combatStyleOrder = { "standard", "class", "combat0", "combat1", "combat2", "combat3", "combat4", "combat5" }
+        local ciRow
+        ciRow, h = W:DualRow(parent, y,
+            { type="dropdown", text="Combat Icon", values=combatPositionValues, order=combatPositionOrder,
+              getValue=function()
+                  if not SVal("showCombatIndicator", false) then return "none" end
+                  return SVal("combatIndicatorPosition", "right")
+              end,
+              setValue=function(v)
+                  if v == "none" then
+                      SSet("showCombatIndicator", false)
+                  else
+                      SWrite("showCombatIndicator", true)
+                      SSet("combatIndicatorPosition", v)
+                  end
+                  if ns._UpdateCombatIcons then ns._UpdateCombatIcons() end
+                  EllesmereUI:RefreshPage()
+              end },
+            { type="slider", text="Combat Icon Size", min=8, max=40, step=1,
+              disabled=function() return not SVal("showCombatIndicator", false) end,
+              disabledTooltip="Combat Icon",
+              getValue=function() return SVal("combatIndicatorSize", 16) end,
+              setValue=function(v) SSet("combatIndicatorSize", v) end });  y = y - h
+        -- Cog for combat icon style / color / offset X/Y
+        do
+            local rgn = ciRow._leftRegion
+            local _, cogShow = EllesmereUI.BuildCogPopup({
+                title = "Combat Icon",
+                rows = {
+                    { type="dropdown", label="Style", values=combatStyleValues, order=combatStyleOrder,
+                      get=function() return SVal("combatIndicatorStyle", "standard") end,
+                      set=function(v) SSet("combatIndicatorStyle", v); if ns._UpdateCombatIcons then ns._UpdateCombatIcons() end end },
+                    { type="toggle", label="Class Colored",
+                      tooltip="Tint the combat icon by the member's class color. Not available for the Arcade/Dungeoneer/Classic/Cross/Circle/Square styles.",
+                      disabled=function()
+                          local st = SVal("combatIndicatorStyle", "standard")
+                          return st:find("^combat%d") and true or false
+                      end,
+                      disabledTooltip="Not available for this combat icon style.", rawTooltip=true,
+                      get=function() return SVal("combatIndicatorColor", "custom") == "classcolor" end,
+                      set=function(v) SSet("combatIndicatorColor", v and "classcolor" or "custom"); if ns._UpdateCombatIcons then ns._UpdateCombatIcons() end end },
+                    { type="slider", label="Offset X", min=-50, max=50, step=1,
+                      get=function() return SVal("combatIndicatorOffsetX", 0) end,
+                      set=function(v) SSet("combatIndicatorOffsetX", v) end },
+                    { type="slider", label="Offset Y", min=-50, max=50, step=1,
+                      get=function() return SVal("combatIndicatorOffsetY", 0) end,
+                      set=function(v) SSet("combatIndicatorOffsetY", v) end },
+                },
+            })
+            local cogBtn = CreateFrame("Button", nil, rgn)
+            cogBtn:SetSize(26, 26)
+            cogBtn:SetPoint("RIGHT", rgn._lastInline or rgn._control, "LEFT", -8, 0)
+            rgn._lastInline = cogBtn
+            cogBtn:SetFrameLevel(rgn:GetFrameLevel() + 5)
+            cogBtn:SetAlpha(0.4)
+            local cogTex = cogBtn:CreateTexture(nil, "OVERLAY")
+            cogTex:SetAllPoints(); cogTex:SetTexture(EllesmereUI.COGS_ICON)
+            cogBtn:SetScript("OnEnter", function(self) self:SetAlpha(0.7) end)
+            cogBtn:SetScript("OnLeave", function(self) self:SetAlpha(0.4) end)
+            cogBtn:SetScript("OnClick", function(self) cogShow(self) end)
+        end
+        -- Inline color swatch for the combat icon custom color
+        do
+            local rgn = ciRow._rightRegion
+            local swatch = EllesmereUI.BuildColorSwatch(
+                rgn, ciRow:GetFrameLevel() + 3,
+                function()
+                    local c = SGet("combatIndicatorCustomColor")
+                    if c then return c.r, c.g, c.b, 1 end
+                    return 1, 0.2, 0.2, 1
+                end,
+                function(r, g, b)
+                    SWrite("combatIndicatorCustomColor", { r=r, g=g, b=b })
+                    if ns._UpdateCombatIcons then ns._UpdateCombatIcons() end
+                end, false, 20)
+            swatch:SetPoint("RIGHT", rgn._lastInline or rgn._control, "LEFT", -8, 0)
+            rgn._lastInline = swatch
+        end
+
         -- Show Group Numbers | Number Size (+ inline color swatch with alpha).
         -- Raid only: party frames have no groups. The size + color also drive the
         -- always-on preview group labels; the toggle gates only the real frames.
@@ -2811,6 +2992,33 @@ initFrame:SetScript("OnEvent", function(self)
                 cogBtn:SetScript("OnLeave", function(self) self:SetAlpha(0.4) end)
                 cogBtn:SetScript("OnClick", function(self) cogShow(self) end)
             end
+        end
+        end   -- close the less-common-indicators collapse wrapper
+
+        -- Raid tab only: the session expander shown while the less-common
+        -- indicator rows above are collapsed. White text, accent on hover;
+        -- clicking reveals them for the rest of the session (not saved).
+        if (not _partyCtx) and not EllesmereUI._rfShowLessCommonIndicators then
+            local cpad = EllesmereUI.CONTENT_PAD or 45
+            local moreBtn = CreateFrame("Button", nil, parent)
+            moreBtn:SetHeight(22)
+            moreBtn:SetPoint("TOPLEFT", parent, "TOPLEFT", cpad, y - 4)
+            moreBtn:SetFrameLevel(parent:GetFrameLevel() + 5)
+            local moreFS = EllesmereUI.MakeFont(moreBtn, 13, nil, 1, 1, 1)
+            moreFS:SetPoint("LEFT")
+            moreFS:SetText("+ Show Less Common Indicator Options")
+            moreBtn:SetWidth(math.max((moreFS:GetStringWidth() or 0) + 8, 120))
+            local EG = EllesmereUI.ELLESMERE_GREEN or { r = 0.05, g = 0.82, b = 0.62 }
+            moreBtn:SetScript("OnEnter", function() moreFS:SetTextColor(EG.r, EG.g, EG.b) end)
+            moreBtn:SetScript("OnLeave", function() moreFS:SetTextColor(1, 1, 1) end)
+            moreBtn:SetScript("OnClick", function()
+                EllesmereUI._rfShowLessCommonIndicators = true
+                -- force=true: full teardown+rebuild. RefreshPage() without it takes
+                -- the values-only fast path and never re-runs the page builder, so
+                -- the collapsed rows would not appear.
+                EllesmereUI:RefreshPage(true)
+            end)
+            y = y - 30
         end
 
         -------------------------------------------------------------------
@@ -2888,8 +3096,9 @@ initFrame:SetScript("OnEvent", function(self)
             fill     = "Fill Overlay",
             full     = "Full Overlay",
             gradient = "Gradient Overlay",
+            gradient_sharp = "Gradient Sharp",
         }
-        local dispelOverlayOrder = { "none", "fill", "full", "gradient" }
+        local dispelOverlayOrder = { "none", "fill", "full", "gradient", "gradient_sharp" }
 
         -- Row 1: Dispel Overlay | Overlay Opacity
         _, h = W:DualRow(parent, y,
@@ -3038,6 +3247,10 @@ initFrame:SetScript("OnEvent", function(self)
             local _, cogShow = EllesmereUI.BuildCogPopup({
                 title = "Dispellable Debuff Location",
                 rows = {
+                    -- 0 = match the main Debuff Size (the pre-existing behavior).
+                    { type="slider", label="Icon Size", min=0, max=40, step=1,
+                      get=function() return SVal("dispellableDebuffSize", 0) end,
+                      set=function(v) SSet("dispellableDebuffSize", v) end },
                     { type="dropdown", label="Growth Direction", values=dispGrowValues, order=dispGrowOrder,
                       get=function() return SVal("dispellableDebuffGrowDirection", "RIGHT") end,
                       set=function(v) SSet("dispellableDebuffGrowDirection", v) end },
@@ -3467,7 +3680,7 @@ initFrame:SetScript("OnEvent", function(self)
             -- Row 1: Show Tanks toggle | Add to Extra Group Hotkey (capture)
             row, h = W:DualRow(parent, y,
                 { type="toggle", text="Show Tanks in Extra Group",
-                  tooltip="Automatically duplicates the raid's tanks into the Extra Frames group. Shares the 5-frame cap with hotkey picks.",
+                  tooltip="Automatically duplicates the raid's tanks into the Extra Frames group. Shares the frame cap with hotkey picks.",
                   getValue = function() return XFSet().showTanks == true end,
                   setValue = function(v)
                       XFSet().showTanks = v
@@ -3597,7 +3810,7 @@ initFrame:SetScript("OnEvent", function(self)
                 end)
             end
 
-            -- Row 2: Position | Free Move Position (Move Frames + cog)
+            -- Row 2: Position | Free Move Position (Move Frames)
             row, h = W:DualRow(parent, y,
                 { type="dropdown", text="Position",
                   values = { left="Before First Group", right="After Last Group", free="Free Move" },
@@ -3609,7 +3822,9 @@ initFrame:SetScript("OnEvent", function(self)
                       XFSet().position = v
                       if v ~= "free" and ns.XF_SetMoverShown then ns.XF_SetMoverShown(false) end
                       if ns.XF_Apply then ns.XF_Apply() end
-                      EllesmereUI:RefreshPage()
+                      -- Full rebuild: the Grow/Wrap Direction row only exists
+                      -- while the position is Free Move.
+                      EllesmereUI:RefreshPage(true)
                   end },
                 { type="label", text="Free Move Position" }); y = y - h
             do
@@ -3630,37 +3845,6 @@ initFrame:SetScript("OnEvent", function(self)
                 lbl:SetPoint("CENTER", btn, "CENTER", 0, 0)
                 lbl:SetText(EllesmereUI.L("Move Frames"))
 
-                -- Inline cog: Free Move layout options (created before
-                -- UpdateMoveBtn so its closure captures the local)
-                local _, xfCogShow = EllesmereUI.BuildCogPopup({
-                    title = "Free Move Options",
-                    rows = {
-                        { type="toggle", label="Horizontal Frames",
-                          get=function() return XFSet().freeHorizontal == true end,
-                          set=function(v)
-                              XFSet().freeHorizontal = v
-                              if ns.XF_Apply then ns.XF_Apply() end
-                              -- Resize/reposition the drag overlay if it is up
-                              if ns.XF_IsMoverShown and ns.XF_IsMoverShown()
-                                 and ns.XF_SetMoverShown then
-                                  ns.XF_SetMoverShown(true)
-                              end
-                          end },
-                    },
-                })
-                local cogBtn = CreateFrame("Button", nil, row)
-                cogBtn:SetSize(26, 26)
-                cogBtn:SetPoint("RIGHT", btn, "LEFT", -8, 0)
-                cogBtn:SetFrameLevel(row:GetFrameLevel() + 5)
-                local cogTex = cogBtn:CreateTexture(nil, "OVERLAY")
-                cogTex:SetAllPoints()
-                cogTex:SetTexture(EllesmereUI.COGS_ICON)
-                cogBtn:SetScript("OnEnter", function(self) self:SetAlpha(0.7) end)
-                cogBtn:SetScript("OnLeave", function(self)
-                    self:SetAlpha(XFSet().position == "free" and 0.4 or 0.15)
-                end)
-                cogBtn:SetScript("OnClick", function(self) xfCogShow(self) end)
-
                 local function MoveAllowed()
                     return XFConfigured() and (XFSet().position == "free")
                         and not InCombatLockdown()
@@ -3669,9 +3853,6 @@ initFrame:SetScript("OnEvent", function(self)
                     local active = ns.XF_IsMoverShown and ns.XF_IsMoverShown()
                     lbl:SetText(active and EllesmereUI.L("Stop Moving") or EllesmereUI.L("Move Frames"))
                     btn:SetAlpha(MoveAllowed() and 1 or 0.35)
-                    local freeOn = XFConfigured() and XFSet().position == "free"
-                    cogBtn:SetAlpha(freeOn and 0.4 or 0.15)
-                    cogBtn:EnableMouse(freeOn)
                     -- Plain-label slots have no native disabled handling; dim
                     -- the "Free Move Position" label with the rest of the row
                     if rgn._label then
@@ -3700,7 +3881,95 @@ initFrame:SetScript("OnEvent", function(self)
                 UpdateMoveBtn()
             end
 
-            -- Row 3: size offset on top of the shared raid frame size
+            -- Row 3 (Free Move only -- hidden otherwise, so Position's
+            -- setValue forces a page rebuild): growth axes of the
+            -- free-floating grid, with Wrap After tucked into an inline cog
+            -- on Wrap Direction. Attached positions need none of this: they
+            -- stack group-sized runs of 5 along the raid's own growth
+            -- settings, like additional raid groups. Grow Direction
+            -- supersedes the old Horizontal Frames cog toggle: its default
+            -- derives from the legacy freeHorizontal key, so existing
+            -- layouts read back unchanged.
+            if XFSet().position == "free" then
+            local function XFGrowDir()
+                local set = XFSet()
+                return set.growDirection or (set.freeHorizontal and "RIGHT" or "DOWN")
+            end
+            local function XFReapply()
+                if ns.XF_Apply then ns.XF_Apply() end
+                if ns.XF_IsMoverShown and ns.XF_IsMoverShown()
+                   and ns.XF_SetMoverShown then
+                    ns.XF_SetMoverShown(true)
+                end
+            end
+
+            -- The wrap dropdown only offers the two directions perpendicular
+            -- to the primary run, so a grow change forces a full page rebuild
+            -- to swap its value set.
+            local xfHoriz = (XFGrowDir() == "RIGHT" or XFGrowDir() == "LEFT")
+            row, h = W:DualRow(parent, y,
+                { type="dropdown", text="Grow Direction",
+                  tooltip="Direction the frames are laid out.",
+                  values = { DOWN="Down", UP="Up", RIGHT="Right", LEFT="Left" },
+                  order  = { "DOWN", "UP", "RIGHT", "LEFT" },
+                  disabled = function() return not XFConfigured() end,
+                  disabledTooltip = XF_DISABLED_TIP,
+                  getValue = XFGrowDir,
+                  setValue = function(v)
+                      local set = XFSet()
+                      set.growDirection = v
+                      -- Keep the legacy key coherent for exports/older reads
+                      set.freeHorizontal = (v == "RIGHT" or v == "LEFT")
+                      XFReapply()
+                      EllesmereUI:RefreshPage(true)
+                  end },
+                { type="dropdown", text="Wrap Direction",
+                  tooltip="Direction each new row or column stacks. Set Wrap After in the cog to enable wrapping.",
+                  values = xfHoriz and { DOWN="Down", UP="Up" } or { RIGHT="Right", LEFT="Left" },
+                  order  = xfHoriz and { "DOWN", "UP" } or { "RIGHT", "LEFT" },
+                  disabled = function() return not XFConfigured() end,
+                  disabledTooltip = XF_DISABLED_TIP,
+                  getValue = function()
+                      local wd = XFSet().wrapDirection
+                      if XFGrowDir() == "RIGHT" or XFGrowDir() == "LEFT" then
+                          return (wd == "UP" or wd == "DOWN") and wd or "DOWN"
+                      end
+                      return (wd == "LEFT" or wd == "RIGHT") and wd or "RIGHT"
+                  end,
+                  setValue = function(v)
+                      XFSet().wrapDirection = v
+                      XFReapply()
+                  end }); y = y - h
+            -- Inline cog on Wrap Direction: Wrap After slider
+            do
+                local rgn = row._rightRegion
+                local _, cogShow = EllesmereUI.BuildCogPopup({
+                    title = "Row Wrapping",
+                    rows = {
+                        { type="slider", label="Wrap After", min=0, max=20, step=1,
+                          get=function() return XFSet().wrapAfter or 0 end,
+                          set=function(v)
+                              XFSet().wrapAfter = v
+                              XFReapply()
+                          end },
+                    },
+                })
+                local cogBtn = CreateFrame("Button", nil, rgn)
+                cogBtn:SetSize(26, 26)
+                cogBtn:SetPoint("RIGHT", rgn._lastInline or rgn._control, "LEFT", -8, 0)
+                rgn._lastInline = cogBtn
+                cogBtn:SetFrameLevel(rgn:GetFrameLevel() + 5)
+                cogBtn:SetAlpha(0.4)
+                local cogTex = cogBtn:CreateTexture(nil, "OVERLAY")
+                cogTex:SetAllPoints()
+                cogTex:SetTexture(EllesmereUI.COGS_ICON)
+                cogBtn:SetScript("OnEnter", function(self) self:SetAlpha(0.7) end)
+                cogBtn:SetScript("OnLeave", function(self) self:SetAlpha(0.4) end)
+                cogBtn:SetScript("OnClick", function(self) cogShow(self) end)
+            end
+            end -- Free Move only row
+
+            -- Row 4: size offset on top of the shared raid frame size
             row, h = W:DualRow(parent, y,
                 { type="slider", text="Extra Width", min=-50, max=100, step=1,
                   tooltip="Widens or narrows the extra frames relative to the raid frame size.",
@@ -3940,6 +4209,33 @@ initFrame:SetScript("OnEvent", function(self)
               order={ "always", "outOfCombat", "outOfBossCombat", "never" },
               getValue=function() return CurTooltipMode() end,
               setValue=function(v) SSet("tooltipMode", v) end });  y = y - h
+        -- Cog: buff/HoT aura-icon tooltips (Buff Manager). Hidden by default --
+        -- matches the long-standing behavior where buff icons showed no tooltip;
+        -- opt in here. When shown, the aura tip still follows the tooltip mode
+        -- on this dropdown (mode governs when, this governs whether).
+        do
+            local rgn = row._rightRegion
+            local _, cogShow = EllesmereUI.BuildCogPopup({
+                title = "Tooltip Settings",
+                rows = {
+                    { type="toggle", label="Hide Buff Tooltips",
+                      tooltip="Hide the tooltip when hovering a buff/HoT icon on a raid or party frame.",
+                      get=function() return SVal("buffHideTooltips", true) end,
+                      set=function(v) SSet("buffHideTooltips", v); if ns.ReloadFrames then ns.ReloadFrames() end end },
+                },
+            })
+            local cogBtn = CreateFrame("Button", nil, rgn)
+            cogBtn:SetSize(26, 26)
+            cogBtn:SetPoint("RIGHT", rgn._lastInline or rgn._control, "LEFT", -8, 0)
+            rgn._lastInline = cogBtn
+            cogBtn:SetFrameLevel(rgn:GetFrameLevel() + 5)
+            cogBtn:SetAlpha(0.4)
+            local cogTex = cogBtn:CreateTexture(nil, "OVERLAY")
+            cogTex:SetAllPoints(); cogTex:SetTexture(EllesmereUI.COGS_ICON)
+            cogBtn:SetScript("OnEnter", function(s) s:SetAlpha(0.7) end)
+            cogBtn:SetScript("OnLeave", function(s) s:SetAlpha(0.4) end)
+            cogBtn:SetScript("OnClick", function(s) cogShow(s) end)
+        end
 
         -- Hide Blizzard Party Panel. Shares the exact same global setting and
         -- apply function as the QoL module's toggle (EllesmereUIDB.hideBlizzardPartyFrame
@@ -4028,11 +4324,11 @@ initFrame:SetScript("OnEvent", function(self)
                               return ov and ov[tier] and ov[tier].width or SVal("frameWidth", 72)
                           end,
                           setValue=function(v)
-                              if not db.profile.raidSizeOverrides then db.profile.raidSizeOverrides = {} end
-                              if not db.profile.raidSizeOverrides[tier] then
-                                  db.profile.raidSizeOverrides[tier] = { width = v, height = db.profile.frameHeight or 60 }
+                              local ovs = ns._EnsureRaidSizeOverrides()
+                              if not ovs[tier] then
+                                  ovs[tier] = { width = v, height = db.profile.frameHeight or 60 }
                               else
-                                  db.profile.raidSizeOverrides[tier].width = v
+                                  ovs[tier].width = v
                               end
                               if ns._sizePreviewTier == tier and ns._ShowSizePreview then
                                   ns._ShowSizePreview(tier)
@@ -4054,11 +4350,11 @@ initFrame:SetScript("OnEvent", function(self)
                               return ov and ov[tier] and ov[tier].height or SVal("frameHeight", 46)
                           end,
                           setValue=function(v)
-                              if not db.profile.raidSizeOverrides then db.profile.raidSizeOverrides = {} end
-                              if not db.profile.raidSizeOverrides[tier] then
-                                  db.profile.raidSizeOverrides[tier] = { width = db.profile.frameWidth or 125, height = v }
+                              local ovs = ns._EnsureRaidSizeOverrides()
+                              if not ovs[tier] then
+                                  ovs[tier] = { width = db.profile.frameWidth or 125, height = v }
                               else
-                                  db.profile.raidSizeOverrides[tier].height = v
+                                  ovs[tier].height = v
                               end
                               if ns._sizePreviewTier == tier and ns._ShowSizePreview then
                                   ns._ShowSizePreview(tier)
@@ -4154,9 +4450,17 @@ initFrame:SetScript("OnEvent", function(self)
                                 ns._sizePreviewTier = nil
                                 if ns._HideSizePreview then ns._HideSizePreview() end
                             end
-                            if db.profile.raidSizeOverrides then
-                                db.profile.raidSizeOverrides[tier] = nil
-                                if not next(db.profile.raidSizeOverrides) then
+                            local ovs = db.profile.raidSizeOverrides
+                            if ovs then
+                                ovs[tier] = nil
+                                -- Conversion markers (_topLeftAnchored /
+                                -- _cornerAnchored) always remain in the
+                                -- table; only tier TABLES count as content.
+                                local anyTier = false
+                                for _, o in pairs(ovs) do
+                                    if type(o) == "table" then anyTier = true; break end
+                                end
+                                if not anyTier then
                                     db.profile.raidSizeOverrides = nil
                                 end
                             end
@@ -4169,18 +4473,18 @@ initFrame:SetScript("OnEvent", function(self)
                     do
                         local rgn = sizeRow._leftRegion
                         local function EnsureTierOv()
-                            if not db.profile.raidSizeOverrides then db.profile.raidSizeOverrides = {} end
-                            if not db.profile.raidSizeOverrides[tier] then
-                                db.profile.raidSizeOverrides[tier] = { width = db.profile.frameWidth or 125, height = db.profile.frameHeight or 60 }
+                            local ovs = ns._EnsureRaidSizeOverrides()
+                            if not ovs[tier] then
+                                ovs[tier] = { width = db.profile.frameWidth or 125, height = db.profile.frameHeight or 60 }
                             end
-                            return db.profile.raidSizeOverrides[tier]
+                            return ovs[tier]
                         end
                         local function TierGrowthChanged()
-                            if ns._sizePreviewTier == tier and ns._ShowSizePreview then
-                                ns._ShowSizePreview(tier)
-                            else
-                                ReloadAndUpdate()
-                            end
+                            -- Resync BOTH representations: ReloadAndUpdate
+                            -- reloads the live frames (incl. the growth-corner
+                            -- anchor) and re-shows the active size preview
+                            -- itself, so the two can never diverge.
+                            ReloadAndUpdate()
                         end
                         local _, cogShow = EllesmereUI.BuildCogPopup({
                             title = EllesmereUI.Lf("%1$s Options", tierLabel),
@@ -4229,10 +4533,12 @@ initFrame:SetScript("OnEvent", function(self)
                                   end,
                                   set=function(v)
                                       EnsureTierOv().offsetX = v
+                                      -- Update BOTH: live frames (cheap corner
+                                      -- re-anchor, per tick) and the size
+                                      -- preview when it shows this tier.
+                                      if ns._ApplyTierOffset then ns._ApplyTierOffset() end
                                       if ns._sizePreviewTier == tier and ns._ShowSizePreview then
                                           ns._ShowSizePreview(tier)
-                                      elseif ns._ApplyTierOffset then
-                                          ns._ApplyTierOffset()
                                       end
                                   end },
                                 { type="slider", label="Y Offset", min=-200, max=200, step=1,
@@ -4242,10 +4548,12 @@ initFrame:SetScript("OnEvent", function(self)
                                   end,
                                   set=function(v)
                                       EnsureTierOv().offsetY = v
+                                      -- Update BOTH: live frames (cheap corner
+                                      -- re-anchor, per tick) and the size
+                                      -- preview when it shows this tier.
+                                      if ns._ApplyTierOffset then ns._ApplyTierOffset() end
                                       if ns._sizePreviewTier == tier and ns._ShowSizePreview then
                                           ns._ShowSizePreview(tier)
-                                      elseif ns._ApplyTierOffset then
-                                          ns._ApplyTierOffset()
                                       end
                                   end },
                             },
@@ -4297,11 +4605,9 @@ initFrame:SetScript("OnEvent", function(self)
                       setValue=function(v)
                           local tier = tonumber(v)
                           if not tier then return end
-                          if not db.profile.raidSizeOverrides then
-                              db.profile.raidSizeOverrides = {}
-                          end
+                          local ovs = ns._EnsureRaidSizeOverrides()
                           -- Copy current 20 man size as starting point
-                          db.profile.raidSizeOverrides[tier] = {
+                          ovs[tier] = {
                               width = db.profile.frameWidth or 125,
                               height = db.profile.frameHeight or 60,
                           }
@@ -6751,6 +7057,38 @@ initFrame:SetScript("OnEvent", function(self)
         pages       = { PAGE_MAIN, PAGE_DEBUFFS, PAGE_PARTY, PAGE_BUFFS, PAGE_CLICKCAST },
         searchTerms = rfSearchTerms,
         buildPage   = function(pageName, parent, yOffset)
+            -- All of the cleanup/preview logic below acts on live, real state
+            -- (the buff-manager/click-cast roots, and the raid/party preview
+            -- overlays over the player's actual frames) keyed only on the
+            -- pageName this particular call happens to build -- not on
+            -- whether the player is really looking at this module at all.
+            -- During an off-screen search pre-build, pageName cycles through
+            -- every page in this module's `pages` regardless of what's really
+            -- on screen, so none of it may run here.
+            --
+            -- PAGE_BUFFS / PAGE_CLICKCAST go further: their builders
+            -- (BuildBuffManagerPage -> ns.BM_BuildPage, ns.CC_BuildPage)
+            -- bypass the given `parent` entirely and build directly onto the
+            -- live, shared EllesmereUI._scrollFrame, so building them here
+            -- would inject real, visible UI onto whatever the player is
+            -- actually looking at. Skip them; they're indexed normally the
+            -- first time the player visits them live.
+            --
+            -- _partyCtx (read by SGet/SSet/SVal inside getValue/setValue
+            -- closures) is deliberately left untouched here: this hidden
+            -- pass's widgets and their closures are discarded with the
+            -- wrapper and never invoked again, so only the live path needs
+            -- it to be correct.
+            if EllesmereUI._prebuilding then
+                if pageName == PAGE_MAIN then
+                    return BuildMainPage(pageName, parent, yOffset)
+                elseif pageName == PAGE_PARTY then
+                    return BuildPartyPage(pageName, parent, yOffset)
+                elseif pageName == PAGE_DEBUFFS then
+                    return BuildDebuffsPage(pageName, parent, yOffset)
+                end
+                return
+            end
             -- Clean up Buff Manager root when switching away
             if pageName ~= PAGE_BUFFS and ns._bmRoot then
                 ns._bmRoot:Hide()
@@ -6817,6 +7155,27 @@ initFrame:SetScript("OnEvent", function(self)
             end
         end,
         onPageCacheRestore = function(pageName)
+            -- Mirror buildPage's unconditional root cleanup (see above): this
+            -- fires instead of buildPage whenever the target page was already
+            -- cached, so without this, switching away from Buffs/HoverCast to
+            -- an already-cached page (e.g. Party) never hid ns._bmRoot/
+            -- ns._ccRoot -- both are built onto the shared live scroll frame,
+            -- not a per-page wrapper, so they stayed stuck on screen over
+            -- whatever page was cache-restored next.
+            if pageName ~= PAGE_BUFFS and ns._bmRoot then
+                ns._bmRoot:Hide()
+                ns._bmRoot:SetParent(nil)
+                ns._bmRoot = nil
+            end
+            if pageName ~= PAGE_CLICKCAST and ns._ccRoot then
+                if ns._ccGridPopup then ns._ccGridPopup:Hide(); ns._ccGridPopup = nil end
+                if ns._ccSpecPopup then ns._ccSpecPopup:Hide(); ns._ccSpecPopup = nil end
+                if ns._ccQBPopup then ns._ccQBPopup:Hide(); ns._ccQBPopup = nil end
+                if ns._ccSpellStrip then ns._ccSpellStrip:Hide(); ns._ccSpellStrip:SetParent(nil); ns._ccSpellStrip = nil end
+                ns._ccRoot:Hide()
+                ns._ccRoot:SetParent(nil)
+                ns._ccRoot = nil
+            end
             if pageName == PAGE_MAIN or pageName == PAGE_DEBUFFS then
                 local mode = db.profile.previewMode or "overlay"
                 -- Keep real party frames hidden under the preview (skip restore) so

@@ -167,10 +167,10 @@ local function EvaluateThresholdGlows()
               local function evalDurObj(durObj)
                 if threshSec then
                   local curve = AF.GetGlowThresholdCurveSeconds(threshSec)
-                  if curve then
-                    local ok, val = pcall(durObj.EvaluateRemainingDuration, durObj, curve)
-                    return ok and val or nil
-                  end
+                  -- Direct call (no pcall): EvaluateRemainingDuration returns a NON-secret
+                  -- result and does not throw on a valid durObj -- same contract the
+                  -- EvaluateRemainingPercent branch below already relies on.
+                  if curve then return durObj:EvaluateRemainingDuration(curve) end
                 else
                   local curve = AF.GetGlowThresholdCurve(stateVisuals.glowThreshold)
                   if curve then return durObj:EvaluateRemainingPercent(curve) end
@@ -187,7 +187,10 @@ local function EvaluateThresholdGlows()
               -- is a non-throwing lookup (nil when absent), so it gates the call safely.
               local glowUnit = frame.auraDataUnit or trackedUnit
               local durObj
-              if glowUnit and auraID and auraID ~= 0 and C_UnitAuras
+              -- 12.1: the aura APIs THROW while the unit's auras are secret (auraID stays NON-secret),
+              -- so gate on the ns.API.AurasSecret probe, placed BEFORE the API call. When secret,
+              -- durObj stays nil -> plain ready glow (no threshold fade). Inert on live.
+              if glowUnit and auraID and not (ns.API and ns.API.AurasSecret and ns.API.AurasSecret(glowUnit)) and auraID ~= 0 and C_UnitAuras
                 and C_UnitAuras.GetAuraDataByAuraInstanceID
                 and C_UnitAuras.GetAuraDataByAuraInstanceID(glowUnit, auraID)
                 and C_UnitAuras.GetAuraDuration then
@@ -753,7 +756,9 @@ function AF.InstallHooks(frame, cdID)
     -- Single-stack text refresh — was inline in OnAuraInstanceInfoSet/Cleared
     if self._arcSingleStackText then
       local auraID = self.auraInstanceID
-      if isActive and HasAuraInstanceID(auraID) then
+      -- 12.1: GetAuraApplicationDisplayCount THROWS while the unit's auras are secret (auraID stays
+      -- NON-secret), so gate on the ns.API.AurasSecret probe. Clear the stack text under secrecy. Inert on live.
+      if isActive and HasAuraInstanceID(auraID) and not (ns.API and ns.API.AurasSecret and ns.API.AurasSecret(self.auraDataUnit or "player")) then
         local unit = self.auraDataUnit or "player"
         local count = C_UnitAuras.GetAuraApplicationDisplayCount(unit, auraID, 1)
         self._arcSingleStackText:SetText(count)
@@ -794,7 +799,9 @@ function AF.InstallHooks(frame, cdID)
   local function UpdateSingleStackText(self)
     if not self._arcSingleStackText then return end
     local auraID = self.auraInstanceID
-    if not HasAuraInstanceID(auraID) then
+    -- 12.1: GetAuraApplicationDisplayCount THROWS while the unit's auras are secret (auraID stays
+    -- NON-secret) -> gate on the ns.API.AurasSecret probe.
+    if not HasAuraInstanceID(auraID) or (ns.API and ns.API.AurasSecret and ns.API.AurasSecret(self.auraDataUnit or "player")) then
       self._arcSingleStackText:SetText("")
       return
     end

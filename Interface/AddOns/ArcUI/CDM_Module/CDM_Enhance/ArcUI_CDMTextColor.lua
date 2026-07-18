@@ -346,7 +346,9 @@ local function GetDurationForFrame(frame)
 
   -- Aura fallback (normal aura mode — no stored obj yet)
   local auraID = frame.auraInstanceID
-  if auraID and type(auraID) == "number" then
+  -- 12.1: GetAuraDuration THROWS while the unit's auras are secret (the auraID stays NON-secret),
+  -- so gate on the ns.API.AurasSecret probe. Skip -> text uses static color. Inert on live.
+  if auraID and type(auraID) == "number" and not (ns.API and ns.API.AurasSecret and ns.API.AurasSecret(frame.auraDataUnit or frame.unitToken or "player")) then
     local unit = frame.auraDataUnit or frame.unitToken or "player"
     local dur = C_UnitAuras.GetAuraDuration(unit, auraID)
     if dur then return dur end

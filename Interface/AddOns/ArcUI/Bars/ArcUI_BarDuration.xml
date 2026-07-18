@@ -1,0 +1,25 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/">
+  <!-- Extra template on top of CustomAuraButtonTemplate for BAR-duration engines (12.1).
+       SetDurationBar/SetDurationText only accept a widget the AuraButton OWNS (a forbidden
+       object), never an addon frame. So the button carries its OWN regions: ArcBar (the fill,
+       kept at the low fill level, below the bar border) and ArcTimer on a separate ArcTextHolder
+       frame whose LEVEL we raise to the user's duration-frame level so the countdown draws ABOVE
+       the border. Splitting fill and text onto two owned frames lets each sit at its own level
+       without reparenting (which detaches the text binding). -->
+  <Button name="ArcBarDurButtonTemplate" virtual="true">
+    <Frames>
+      <StatusBar parentKey="ArcBar" setAllPoints="true"/>
+      <Frame parentKey="ArcTextHolder" setAllPoints="true">
+        <Layers>
+          <Layer level="OVERLAY">
+            <FontString parentKey="ArcTimer" inherits="NumberFontNormal" justifyH="CENTER">
+              <Anchors>
+                <Anchor point="CENTER" x="0" y="0"/>
+              </Anchors>
+            </FontString>
+          </Layer>
+        </Layers>
+      </Frame>
+    </Frames>
+  </Button>
+</Ui>
