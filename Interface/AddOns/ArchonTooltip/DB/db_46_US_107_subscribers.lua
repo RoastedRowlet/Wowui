@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'Warrior-Protection','Evoker-Preservation',}
-local provider = {region='US',realm='Gilneas',name='US',type='subscribers',zone=46,date='2026-07-15',data={Ch='Chelives:BAEBLgAECn83AAIBAAkJygIjMADAAAloDAAACQAEAGkMAAAIAAYAawwAAAgAAwBqDAAABgARAGwMAAAIAAkAbQwAAAEAAwDqDAAACQANAG4MAAAFAAsAbwwAAAEABAABAAkJygIjMADAAAloDAAACQAEAGkMAAAIAAYAawwAAAgAAwBqDAAABgARAGwMAAAIAAkAbQwAAAEAAwDqDAAACQANAG4MAAAFAAsAbwwAAAEABAAAAA==.',Mi='Mizu:BAEALgAFFAEJAQABLgAFFAgJHAACAHsNAA==.',},}
+local lookup = {'Warrior-Protection','Evoker-Augmentation',}
+local provider = {region='US',realm='Gilneas',name='US',type='subscribers',zone=46,date='2026-07-20',data={Ch='Chelives:BAEBLgAECn83AAIBAAkJygIjMADAAAloDAAACQAEAGkMAAAIAAYAawwAAAgAAwBqDAAABgARAGwMAAAIAAkAbQwAAAEAAwDqDAAACQANAG4MAAAFAAsAbwwAAAEABAABAAkJygIjMADAAAloDAAACQAEAGkMAAAIAAYAawwAAAgAAwBqDAAABgARAGwMAAAIAAkAbQwAAAEAAwDqDAAACQANAG4MAAAFAAsAbwwAAAEABAAAAA==.',Mi='Mizu:BAEALgAFFAEJAQABLgAFFAgJHgACADMRAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

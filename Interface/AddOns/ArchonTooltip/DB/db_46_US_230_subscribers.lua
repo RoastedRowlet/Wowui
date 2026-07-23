@@ -234,7 +234,7 @@ local function getChunkLookup(table, length)
 end
 
 local lookup = {'Unknown-Unknown','DeathKnight-Unholy','DeathKnight-Blood',}
-local provider = {region='US',realm='Undermine',name='US',type='subscribers',zone=46,date='2026-07-14',data={Al='Aleathris:BAEALgADCgcJBwABLgAECgQJBAABAAAAAA==.',Ci='Cindershade:BAEALgADCgYJBwAAAA==.',Le='Lethapriest:BAEALgAECgEJAQABLgAFFAQJCgACAEASAA==.Letharanos:BAECLgAFFH8KAAMCAAQJQBLUSgCtAARoDAAABQAuAGkMAAACAEAAawwAAAEABQDqDAAAAgBFAAIABAlAEtRKAK0ABGgMAAAFAC4AaQwAAAIAQABrDAAAAQAFAOoMAAABAEUAAwABCX0HY0MAKAAB6gwAAAEAEwAuAAQKfycAAwIACQl0GQ9FAPMBAAIACQl0GQ9FAPMBAAMAAQl7DuRgACgAAAAA.',},}
+local provider = {region='US',realm='Undermine',name='US',type='subscribers',zone=46,date='2026-07-20',data={Al='Aleathris:BAEALgADCgcJBwABLgAECgQJBAABAAAAAA==.',Ar='Ardor:BAEALgADCgkJCQAAAA==.',Ci='Cindershade:BAEALgADCgYJBwABLgADCgkJCQABAAAAAA==.',Le='Lethapriest:BAEALgAECgEJAQABLgAFFAQJCgACAEASAA==.Letharanos:BAECLgAFFH8KAAMCAAQJQBLOjgDtAARoDAAABQAuAGkMAAACAEAAawwAAAEABQDqDAAAAgBFAAIABAlAEs6OAO0ABGgMAAAFAC4AaQwAAAIAQABrDAAAAQAFAOoMAAABAEUAAwABCX0HY0MAKAAB6gwAAAEAEwAuAAQKfycAAwIACQl0GQ9FAPMBAAIACQl0GQ9FAPMBAAMAAQl7DuRgACgAAAAA.',},}
 provider.parse = parse
 
 local rawData = provider.data

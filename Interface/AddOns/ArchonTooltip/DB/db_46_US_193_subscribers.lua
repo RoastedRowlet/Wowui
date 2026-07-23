@@ -234,7 +234,7 @@ local function getChunkLookup(table, length)
 end
 
 local lookup = {'Hunter-Survival','Warrior-Protection','Warrior-Fury','Warrior-Arms',}
-local provider = {region='US',realm='ShatteredHand',name='US',type='subscribers',zone=46,date='2026-07-15',data={Ka='Kageyuki:BAEALgAECgYJBgABLgAFFAkJIwABAGcWAA==.',Pa='Panzerwolf:BAECLgAFFH8wAAICAAUJdiY0CAC0AQVoDAAADQBjAGkMAAAMAGEAawwAAAgAYQBqDAAABABhAOoMAAALAGMAAgAFCXYmNAgAtAEFaAwAAA0AYwBpDAAADABhAGsMAAAIAGEAagwAAAQAYQDqDAAACwBjAC4ABAp/mwAEAgAJCdEmPgAAiQMAAgAJCcomPgAAiQMAAwAJCWkk7gEAWwMABAAJCa4iaAIAJQMAAAA=.',Pr='Prilas:BAEALgADCgEJAQAAAA==.',Ru='Runie:BAEALgAFFAEJAQABLgAFFAgJKgAEAKIeAA==.',},}
+local provider = {region='US',realm='ShatteredHand',name='US',type='subscribers',zone=46,date='2026-07-20',data={Ka='Kageyuki:BAEALgAECgYJBgABLgAFFAkJIwABAGcWAA==.',Pa='Panzerwolf:BAECLgAFFH8wAAICAAUJdiY0CAC0AQVoDAAADQBjAGkMAAAMAGEAawwAAAgAYQBqDAAABABhAOoMAAALAGMAAgAFCXYmNAgAtAEFaAwAAA0AYwBpDAAADABhAGsMAAAIAGEAagwAAAQAYQDqDAAACwBjAC4ABAp/mwAEAgAJCdEmPgAAiQMAAgAJCcomPgAAiQMAAwAJCWkk7gEAWwMABAAJCa4iaAIAJQMAAAA=.',Pr='Prilas:BAEALgADCgEJAQAAAA==.',Ru='Runie:BAEALgAFFAEJAQABLgAFFAkJKwAEAAgfAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

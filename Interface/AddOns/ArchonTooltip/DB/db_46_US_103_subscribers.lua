@@ -234,7 +234,7 @@ local function getChunkLookup(table, length)
 end
 
 local lookup = {'Druid-Restoration',}
-local provider = {region='US',realm='Garithos',name='US',type='subscribers',zone=46,date='2026-07-15',data={Ul='Uley:BAEBLgAECn8dAAIBAAgJLxa7AgAPAghoDAAABwBUAGkMAAAFAEYAawwAAAUATQBqDAAAAgA9AGwMAAAEAEEAbQwAAAEAIQDqDAAABAAyAG4MAAABAAsAAQAICS8WuwIADwIIaAwAAAcAVABpDAAABQBGAGsMAAAFAE0AagwAAAIAPQBsDAAABABBAG0MAAABACEA6gwAAAQAMgBuDAAAAQALAAAA.',},}
+local provider = {region='US',realm='Garithos',name='US',type='subscribers',zone=46,date='2026-07-20',data={Ul='Uley:BAEBLgAECn8dAAIBAAgJLxYJAwANAghoDAAABwBUAGkMAAAFAEYAawwAAAUATQBqDAAAAgA9AGwMAAAEAEEAbQwAAAEAIQDqDAAABAAyAG4MAAABAAsAAQAICS8WCQMADQIIaAwAAAcAVABpDAAABQBGAGsMAAAFAE0AagwAAAIAPQBsDAAABABBAG0MAAABACEA6gwAAAQAMgBuDAAAAQALAAAA.',},}
 provider.parse = parse
 
 local rawData = provider.data

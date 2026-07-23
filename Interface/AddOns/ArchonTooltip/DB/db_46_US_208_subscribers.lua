@@ -234,7 +234,7 @@ local function getChunkLookup(table, length)
 end
 
 local lookup = {'Evoker-Preservation','Warlock-Demonology','Mage-Frost','Unknown-Unknown',}
-local provider = {region='US',realm='Stormscale',name='US',type='subscribers',zone=46,date='2026-07-14',data={Fu='Furrybait:BAEALgAECgUJCgABLgAFFAUJCgABAIAPAA==.',Sh='Shareholder:BAEBLgAFFH8MAAICAAcJiBiDLACTAQdoDAAAAgA1AGkMAAACAFIAawwAAAEAMABqDAAAAQACAGwMAAABACwAbQwAAAEAUgDqDAAABABBAAIABwmIGIMsAJMBB2gMAAACADUAaQwAAAIAUgBrDAAAAQAwAGoMAAABAAIAbAwAAAEALABtDAAAAQBSAOoMAAAEAEEAAS4ABRQHCRgAAwCQHwA=.',Ts='Tsuicide:BAEALgAECgIJAgABLgAECgcJEAAEAAAAAA==.Tsunt:BAEALgAECgcJEAAAAA==.Tsusha:BAEALgADCgkJEAABLgAECgcJEAAEAAAAAA==.',},}
+local provider = {region='US',realm='Stormscale',name='US',type='subscribers',zone=46,date='2026-07-20',data={Fu='Furrybait:BAEALgAECgUJCgABLgAFFAUJCgABAIAPAA==.',Sh='Shareholder:BAEBLgAFFH8NAAICAAcJ7xqDLACTAQdoDAAAAgA1AGkMAAACAFIAawwAAAIAVQBqDAAAAQACAGwMAAABACwAbQwAAAEAUgDqDAAABABBAAIABwnvGoMsAJMBB2gMAAACADUAaQwAAAIAUgBrDAAAAgBVAGoMAAABAAIAbAwAAAEALABtDAAAAQBSAOoMAAAEAEEAAS4ABRQHCR4AAwDBIgA=.',Ts='Tsuicide:BAEALgAECgIJAgABLgAECgcJEAAEAAAAAA==.Tsunt:BAEALgAECgcJEAAAAA==.Tsusha:BAEALgADCgkJEAABLgAECgcJEAAEAAAAAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data
