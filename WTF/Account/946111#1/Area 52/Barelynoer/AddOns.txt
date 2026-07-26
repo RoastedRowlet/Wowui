@@ -135,3 +135,4 @@ NotEvenClose: enabled
 EllesmereUIBags: enabled
 EllesmereUIRaidFrames: enabled
 BigWigs_Sporefall: enabled
+TotemRecall: disabled

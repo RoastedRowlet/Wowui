@@ -9,6 +9,13 @@ L.EditMode.AddonName = "Advanced Focus Cast Bar"
 
 L.Settings = {}
 
+L.Settings.TargetMarkerScaleLabel = "Zielmarkierungsskalierung"
+L.Settings.TargetMarkerScaleTooltip =
+	"Skaliert die Zielmarkierung relativ zu ihrer Standardgröße. 1 entspricht den Standardmaßen."
+L.Settings.CustomSoundLabel = "Eigener Ton"
+L.Settings.CustomSoundTooltip =
+	"Wähle „Keine“, um zu deaktivieren (Standard). Wenn ausgewählt, hat Vorrang vor dem Text-zu-Sprache-Text."
+
 L.Settings.EditModeReminder =
 	string.format("Einstellungen ausschließlich via Bearbeitungsmodus: Escape > %s.", HUD_EDIT_MODE_MENU)
 
@@ -134,7 +141,7 @@ L.Settings.FeatureFlagLabels = {
 	[Private.Enum.FeatureFlag.IgnoreFriendlies] = "Freundliche Ziele ignorieren",
 	[Private.Enum.FeatureFlag.UnfillChannels] = "Kanalisierungszauberanimation leert statt füllt",
 	[Private.Enum.FeatureFlag.HideWhenUninterruptible] = "Nur anzeigen wenn unterbrechbar & kann unterbrechen",
-	[Private.Enum.FeatureFlag.PlayTTSOnCastStart] = "Text-zu-Sprache bei Beginn eines Zaubers abspielen",
+	[Private.Enum.FeatureFlag.PlayTTSOnCastStart] = "Text-zu-Sprache/Ton bei Beginn eines Zaubers abspielen",
 }
 L.Settings.FeatureFlagSettingTitles = {
 	[Private.Enum.FeatureFlag.ShowIcon] = "'Features' links hat weitere Infos im Tooltip",

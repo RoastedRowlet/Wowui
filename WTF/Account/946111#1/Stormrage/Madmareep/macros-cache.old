@@ -1,0 +1,61 @@
+VER 3 0100000000000009 "dismiss pet" "134400"
+#129
+#showtooltip
+/petdismiss
+END
+VER 3 0100000000000006 "Feather Friend" "134400"
+#126
+#showtooltip Angelic Feather
+/cast [@cursor] Angelic Feather
+END
+VER 3 0100000000000001 "Focus MC" "134400"
+#121
+#showtooltip Dominate Mind 
+/cast [@focus, exists] [@target] Dominate Mind
+END
+VER 3 010000000000000A "Focus Silence" "134400"
+#024
+#showtooltip Silence
+/cast [@focus, exists, harm] Silence
+END
+VER 3 0100000000000003 "no cancel penance" "134400"
+#123
+#showtooltip
+/cast [nochanneling] Smite
+END
+VER 3 0100000000000007 "pet auto cast off" "134400"
+#127
+#showtooltip
+/click PetActionButton5 RightButton 
+/click PetActionButton4 RightButton
+END
+VER 3 0100000000000002 "PET MOVE" "134400"
+#122
+#showtooltip 
+/petmoveto 
+/petpassive [known:Dispel Magic]
+END
+VER 3 0100000000000005 "Purge the wicked" "134400"
+#125
+#showtooltip
+/cast [nochanneling] Shadow Word: Pain
+END
+VER 3 010000000000000B "Shadow Crash" "134400"
+#showtooltip
+/cast [@cursor][] Shadow Crash
+END
+VER 3 010000000000000C "Shadow PI" "134400"
+#showtooltip
+/cast [@INSERTPLAYERNAMEHERE,help,nodead][] Power Infusion
+/cast [@player] Power Infusion
+END
+VER 3 0100000000000008 "SoulSplit" "134400"
+#128
+#showtooltip
+/cast Soul Split
+END
+VER 3 0100000000000004 "SW:D" "134400"
+#124
+#showtooltip
+/cast [nochanneling] Shadow Word: Death
+END

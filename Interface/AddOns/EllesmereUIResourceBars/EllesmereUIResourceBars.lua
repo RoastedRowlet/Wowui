@@ -970,12 +970,25 @@ end
 -------------------------------------------------------------------------------
 local _, playerClassFile = UnitClass("player")
 
--- Druid "hide bar text per form"
-_G._ERB_TextHiddenByForm = function(cfg)
+-- Druid "hide bar text per form". isClassResource: Moonkin (31/35) is exempt on
+-- the class resource bar (shows Astral there); power/health keep it in "Caster".
+_G._ERB_TextHiddenByForm = function(cfg, isClassResource)
     if playerClassFile ~= "DRUID" then return false end
     local df = cfg and cfg.textDisabledForms
     if not df then return false end
     local f = GetShapeshiftFormID()
+    if isClassResource and (f == 31 or f == 35) then return false end
+    local key = (f == 1) and "energy" or (f == 5) and "rage" or "mana"
+    return df[key] and true or false
+end
+-- Druid "hide whole bar per form": same buckets/isClassResource rule as above,
+-- driven by cfg.barDisabledForms. Alpha-based hide, safe to flip mid-combat.
+_G._ERB_BarHiddenByForm = function(cfg, isClassResource)
+    if playerClassFile ~= "DRUID" then return false end
+    local df = cfg and cfg.barDisabledForms
+    if not df then return false end
+    local f = GetShapeshiftFormID()
+    if isClassResource and (f == 31 or f == 35) then return false end
     local key = (f == 1) and "energy" or (f == 5) and "rage" or "mana"
     return df[key] and true or false
 end
@@ -1000,6 +1013,7 @@ local DEFAULTS = {
             darkTheme   = false,
             customColored = false,
             fillR       = CUSTOM_FILL_DEFAULT[1], fillG = CUSTOM_FILL_DEFAULT[2], fillB = CUSTOM_FILL_DEFAULT[3], fillA = 1,
+            fillOpacity = 100,  -- 0-100; below 100 the world shows through the fill
             bgR         = 0x11/255, bgG = 0x11/255, bgB = 0x11/255, bgA = 0.75,
             textFormat  = "none",  -- "none","both","curhpshort","perhp"
             textSize    = 11,
@@ -1034,6 +1048,11 @@ local DEFAULTS = {
             bandMode = "percent",  -- "percent" | "value" (bar/health/power only)
             bandReverse = false,
             bands = {},            -- ordered ascending by `to`: { { to=N, r,g,b,a }, ... }
+            hashEnabled = false,
+            hashValues  = "",          -- e.g. "25, 50, 75"
+            hashMode    = "percent",
+            hashWidth   = 1,
+            hashColorR  = 1, hashColorG = 1, hashColorB = 1, hashColorA = 0.7,
         },
         primary = {
             enabled     = true,
@@ -1046,6 +1065,7 @@ local DEFAULTS = {
             darkTheme   = false,
             customColored = false,
             fillR       = CUSTOM_FILL_DEFAULT[1], fillG = CUSTOM_FILL_DEFAULT[2], fillB = CUSTOM_FILL_DEFAULT[3], fillA = 1,
+            fillOpacity = 100,  -- 0-100; below 100 the world shows through the fill
             bgR         = 0x11/255, bgG = 0x11/255, bgB = 0x11/255, bgA = 0.75,
             textFormat  = "perpp",  -- "none","smart","curpp","perpp","both"
             showPercent = true,
@@ -1082,6 +1102,12 @@ local DEFAULTS = {
             bandMode = "percent",
             bandReverse = false,
             bands = {},
+            -- User hash lines (opt-in). See health.hashEnabled for semantics.
+            hashEnabled = false,
+            hashValues  = "",
+            hashMode    = "percent",
+            hashWidth   = 1,
+            hashColorR  = 1, hashColorG = 1, hashColorB = 1, hashColorA = 0.7,
             expandIfNoResource = false,
             -- Shift elements anchored to the power bar when the spec has no
             -- primary power (e.g. BM/MM Hunter, whose Focus shows as the class
@@ -1102,10 +1128,11 @@ local DEFAULTS = {
             classColored = true,
             resourceColored = false,  -- "Class Resource Color" fill mode (per-spec resource/power color); takes precedence over classColored when on
             fillR       = 0.95, fillG = 0.90, fillB = 0.60, fillA = 1,
+            fillOpacity = 100,  -- 0-100; below 100 the world shows through the fill
             bgR         = 1, bgG = 1, bgB = 1, bgA = 0.1,
             showText    = true,
             showTextOnlyIfNoPower = false,  -- only show the resource text while the power bar is hidden (see IsPowerBarHidden)
-            showPercent = true,
+            showPercent = false,  -- secondary "Show %": OFF (default) = current / max, ON = percent (Maelstrom/Insanity/Focus/Astral Power bars). Default OFF restores the pre-8.4.9 value display; 8.4.9 accidentally forced percent in combat for all four bars.
             showMaxStacks = true,
             textSize    = 11,
             textR       = 1, textG = 1, textB = 1,
@@ -1169,6 +1196,7 @@ local DEFAULTS = {
             anchorY       = -54,
             classColored  = false,
             fillR         = 0.898, fillG = 0.729, fillB = 0.267, fillA = 1,
+            fillOpacity   = 100,  -- 0-100; below 100 the world shows through the fill
             gradientEnabled = false,
             gradientR     = 0.20, gradientG = 0.20, gradientB = 0.80, gradientA = 1,
             gradientDir   = "HORIZONTAL",  -- "HORIZONTAL","VERTICAL"
@@ -1335,7 +1363,13 @@ local _gradColorA = CreateColor(1, 1, 1, 1)
 local _gradColorB = CreateColor(1, 1, 1, 1)
 
 local function ApplyBarGradient(ft, dir, br, bg, bb, ba, er, eg, eb, ea)
-    ft:SetVertexColor(1, 1, 1, 1)
+    -- Bypass the Fill Opacity SetVertexColor wrapper (if installed): gradient
+    -- opacity is carried in the endpoint alphas below, and the wrapper's
+    -- re-assert would fight the corner alphas.
+    local rawVC = ft._erbSetVC or ft.SetVertexColor
+    rawVC(ft, 1, 1, 1, 1)
+    local _fop = ft._erbFillOp
+    if _fop then ba = (ba or 1) * _fop; ea = (ea or 1) * _fop end
     _gradColorA:SetRGBA(br, bg, bb, ba)
     _gradColorB:SetRGBA(er, eg, eb, ea)
     ft:SetGradient(dir, _gradColorA, _gradColorB)
@@ -1344,6 +1378,107 @@ end
 -- Flat-color a bar fill (no gradient).
 local function ApplyBarFlat(ft, r, g, b, a)
     ft:SetVertexColor(r, g, b, a or 1)
+end
+
+-- Fill Opacity (continuous bars). Below 100 the fill turns translucent via
+-- texture REGION alpha (survives every runtime SetVertexColor/SetGradient
+-- writer) and the bg is re-anchored to cover ONLY the empty portion of the
+-- bar, so the world shows through the fill instead of the background. Fully
+-- inert at 100: nothing is touched unless the option was previously applied
+-- (_fillOpApplied), so default profiles run the exact legacy path. Value-blind
+-- by design (region alpha + relational anchors only), so it renders
+-- identically when bar values are secret. On ns to respect the 200-local cap.
+-- Anchor a bg texture to cover ONLY the empty portion of a fill. The empty
+-- side depends on fill direction: VERTICAL_UP fills bottom-up (empty top),
+-- VERTICAL_DOWN fills top-down (empty bottom), horizontal fills
+-- left-to-right (empty right). The anchor is relational to the fill
+-- texture's moving edge, so it tracks value changes with no per-frame work.
+ns.AnchorBgToFillEdge = function(bg, tex, container, orientation)
+    bg:ClearAllPoints()
+    if orientation == "VERTICAL_UP" then
+        bg:SetPoint("TOPLEFT", container, "TOPLEFT", 0, 0)
+        bg:SetPoint("BOTTOMRIGHT", tex, "TOPRIGHT", 0, 0)
+    elseif orientation == "VERTICAL_DOWN" or orientation == "VERTICAL" then
+        bg:SetPoint("TOPLEFT", tex, "BOTTOMLEFT", 0, 0)
+        bg:SetPoint("BOTTOMRIGHT", container, "BOTTOMRIGHT", 0, 0)
+    else
+        bg:SetPoint("TOPLEFT", tex, "TOPRIGHT", 0, 0)
+        bg:SetPoint("BOTTOMRIGHT", container, "BOTTOMRIGHT", 0, 0)
+    end
+end
+
+ns.ApplyFillOpacity = function(bar, orientation, fillOpacity)
+    local op = fillOpacity or 100
+    local sb, bg = bar._sb, bar._bg
+    if not sb or not bg then return end
+    if op >= 100 then
+        if bar._fillOpApplied then
+            bar._fillOpApplied = nil
+            local tex = sb:GetStatusBarTexture()
+            if tex then
+                tex._erbFillOp = nil
+                -- Uninstall the SetVertexColor wrapper: clearing the shadow
+                -- key restores the metatable method, back to the legacy path.
+                if tex._erbVCWrapped then
+                    tex.SetVertexColor = nil
+                    tex._erbVCWrapped = nil
+                    tex._erbSetVC = nil
+                end
+                tex:SetAlpha(1)
+            end
+            bg:ClearAllPoints()
+            bg:SetAllPoints(sb)
+        end
+        return
+    end
+    local tex = sb:GetStatusBarTexture()
+    if not tex then return end
+    bar._fillOpApplied = true
+    -- The alpha channel is UNIFIED on this client: SetAlpha and
+    -- SetVertexColor's 4th arg write the same slot, so every runtime color
+    -- writer (threshold curves, band colors, power-type recolors) would wipe
+    -- a build-time alpha. Shadow SetVertexColor on this one fill texture
+    -- (our own object) with a wrapper that passes args through UNTOUCHED --
+    -- no arithmetic, so secret color components flow through safely -- and
+    -- re-asserts the opacity afterward. Installed only while below 100, so
+    -- default profiles never see it. Gradient writers bypass the wrapper and
+    -- carry the opacity in their endpoint alphas (see ApplyBarGradient).
+    tex._erbFillOp = op / 100
+    if not tex._erbVCWrapped then
+        tex._erbVCWrapped = true
+        tex._erbSetVC = tex.SetVertexColor
+        tex.SetVertexColor = function(t, ...)
+            t._erbSetVC(t, ...)
+            local o = t._erbFillOp
+            if o then t:SetAlpha(o) end
+        end
+    end
+    tex:SetAlpha(op / 100)
+    ns.AnchorBgToFillEdge(bg, tex, sb, orientation)
+end
+
+-- Restore a pip/rune to full-opacity legacy state after Fill Opacity was on.
+-- Only ever called on the 100-or-above build pass when _fillOp is still set,
+-- so untouched profiles never run it.
+ns.ClearPipFillOpacity = function(pip)
+    pip._fillOp = nil
+    pip._fill:SetAlpha(1)
+    pip._bg:SetAlpha(1)
+    local function reset(sb)
+        if sb then
+            local t = sb:GetStatusBarTexture()
+            if t then t:SetAlpha(1) end
+        end
+    end
+    reset(pip._secretBar); reset(pip._secretThreshBar); reset(pip._bandResetBar)
+    if pip._bandBars then
+        for k = 1, #pip._bandBars do reset(pip._bandBars[k]) end
+    end
+    if pip._sbgAnchored then
+        pip._sbgAnchored = nil
+        pip._bg:ClearAllPoints()
+        pip._bg:SetAllPoints(pip)
+    end
 end
 
 -- Returns the current empowered stage (0-based) based on progress and cached thresholds
@@ -1605,9 +1740,19 @@ local function CreatePip(parent, w, h, idx, borderSize, borderR, borderG, border
         self._active = active
         if active then
             self._fill:SetVertexColor(r, g, b, a or 1)
+            -- Fill Opacity on: re-assert the fill alpha (the alpha channel is
+            -- unified, so the SetVertexColor above just wiped it) and hide the
+            -- bg so the translucent fill shows the world, not the background.
+            -- _fillOp is nil unless the option is below 100, so this whole
+            -- branch is inert by default.
+            if self._fillOp then
+                self._fill:SetAlpha(self._fillOp)
+                self._bg:SetAlpha(0)
+            end
             self._fill:Show()
         else
             self._fill:Hide()
+            if self._fillOp then self._bg:SetAlpha(1) end
         end
     end
 
@@ -1623,14 +1768,58 @@ end
 --  changes pip sizing or spacing geometry.
 -------------------------------------------------------------------------------
 -- Attached to ERB (not a new file-scope local) -- this file is at the Lua 200-local cap.
+
+-- Per-pip empty-slot backdrop color. At Fill Opacity 100 this is just the
+-- Empty Bar Overlay tint (bgR/G/B/A, dark theme override). Below 100 the
+-- full-bar backdrop is hidden (it cannot hole itself behind active pips and
+-- would tint the translucent fills), so the overlay texture -- which already
+-- covers exactly the empty regions via SetActive / the secret fill-edge
+-- anchor -- takes over the backdrop's job: composite the bar background
+-- UNDER the overlay tint so empty slots keep the exact stacked look.
+function ERB.PipBgColor(sp)
+    local ovR, ovG, ovB, ovA = sp.bgR, sp.bgG, sp.bgB, sp.bgA
+    if sp.darkTheme then
+        local dr, dg, db = EllesmereUI.GetDarkModeBg()
+        ovR, ovG, ovB, ovA = dr, dg, db, DARK_BG_A
+    end
+    ovR, ovG, ovB, ovA = ovR or 0, ovG or 0, ovB or 0, ovA or 0
+    if (sp.fillOpacity or 100) >= 100 then
+        return ovR, ovG, ovB, ovA
+    end
+    local bbR, bbG, bbB, bbA
+    if sp.darkTheme then
+        bbR, bbG, bbB, bbA = 0, 0, 0, 1
+    else
+        bbR, bbG, bbB, bbA = sp.barBgR or 0, sp.barBgG or 0, sp.barBgB or 0, sp.barBgA or 0.5
+    end
+    -- Standard alpha compositing: overlay OVER bar background
+    local a = ovA + bbA * (1 - ovA)
+    if a <= 0 then return bbR, bbG, bbB, 0 end
+    local r = (ovR * ovA + bbR * bbA * (1 - ovA)) / a
+    local g = (ovG * ovA + bbG * bbA * (1 - ovA)) / a
+    local b = (ovB * ovA + bbB * bbA * (1 - ovA)) / a
+    return r, g, b, a
+end
+
 function ERB.ApplyGapFills(frame, slots, count, isVertical, isReversed, sp)
     local fills = frame._gapFills
-    if not (sp.gapColorEnabled and slots and count and count > 1) then
+    -- Pip/rune Fill Opacity hides the full-bar backdrop (it would tint the
+    -- translucent fills from behind), so the gap strips take over its job:
+    -- draw them in the bar-bg color even with "Bar Spacing" color disabled.
+    local fillOpActive = (sp.fillOpacity or 100) < 100
+    if not ((sp.gapColorEnabled or fillOpActive) and slots and count and count > 1) then
         if fills then for i = 1, #fills do fills[i]:Hide() end end
         return
     end
     if not fills then fills = {}; frame._gapFills = fills end
-    local r, g, b, a = sp.gapR or 0, sp.gapG or 0, sp.gapB or 0, sp.gapA or 1
+    local r, g, b, a
+    if sp.gapColorEnabled then
+        r, g, b, a = sp.gapR or 0, sp.gapG or 0, sp.gapB or 0, sp.gapA or 1
+    elseif sp.darkTheme then
+        r, g, b, a = 0, 0, 0, 1
+    else
+        r, g, b, a = sp.barBgR or 0, sp.barBgG or 0, sp.barBgB or 0, sp.barBgA or 0.5
+    end
     local n = 0
     for i = 1, count - 1 do
         local x1 = slots[i].x1          -- trailing edge of pip i
@@ -1737,8 +1926,9 @@ end
 --  Is the power bar effectively hidden right now?
 --  True when the power bar leaves no visible slot: globally disabled, filtered
 --  off for the current spec via the spec picker, the spec has no primary power,
---  or hidden by "Hide Power Bar if Resource". Mirrors the conditions
---  ResolveShiftDirPower reacts to, plus the hidePowerIfResource toggle. Used to
+--  hidden per druid form, or hidden by "Hide Power Bar if Resource". Mirrors
+--  the conditions ResolveShiftDirPower reacts to, plus the dynamic
+--  hidePowerIfResource / per-form toggles. Used to
 --  gate features that should appear only in the power bar's absence (e.g. the
 --  class resource "Resource Text" shown only when the power bar is hidden).
 -------------------------------------------------------------------------------
@@ -1749,6 +1939,7 @@ local function IsPowerBarHidden()
     if not pp then return true end
     if pp.enabled == false then return true end
     if IsSpecDisabled(pp) then return true end
+    if _G._ERB_BarHiddenByForm(pp) then return true end  -- druid per-form bar disable
     if not GetPrimaryPowerType() then return true end
     if p.secondary and p.secondary.hidePowerIfResource and GetSecondaryResource() then return true end
     return false
@@ -1847,6 +2038,7 @@ local function RegisterUnlockElements()
             setWidth = function(_, w) SS().width = PP.Snap(w); Rebuild() end,
             setHeight = function(_, h) SS().height = PP.Snap(h); Rebuild() end,
             isAnchored = function() local s = S(); return s.anchorTo and s.anchorTo ~= "none" end,
+            keepMoverWhenAnchored = true,
             onLiveMove = LiveMove,
             savePos = save, loadPos = load, clearPos = clear, applyPos = apply,
         })
@@ -1867,6 +2059,7 @@ local function RegisterUnlockElements()
             setWidth = function(_, w) SS().width = PP.Snap(w); Rebuild() end,
             setHeight = function(_, h) SS().height = PP.Snap(h); Rebuild() end,
             isAnchored = function() local s = S(); return s.anchorTo and s.anchorTo ~= "none" end,
+            keepMoverWhenAnchored = true,
             onLiveMove = LiveMove,
             savePos = save, loadPos = load, clearPos = clear, applyPos = apply,
         })
@@ -1892,6 +2085,7 @@ local function RegisterUnlockElements()
             setHeight = function(_, h) SS().pipHeight = PP.Snap(h); Rebuild() end,
             isHidden = function() local s = S(); return s.enabled == false or IsSpecDisabled(s) end,
             isAnchored = function() local s = S(); return s.anchorTo and s.anchorTo ~= "none" end,
+            keepMoverWhenAnchored = true,
             onLiveMove = LiveMove,
             savePos = save, loadPos = load, clearPos = clear, applyPos = apply,
         })
@@ -2382,7 +2576,10 @@ end
 --   Bar-type only; pip resources always use counts. Default false (legacy).
 -- maxRenderVal (optional): suppress any tick whose resource-value position exceeds
 -- it (e.g. Devourer in Void Meta caps at 39 so nothing renders at the 40 edge).
-local function ApplyResourceBarTicks(sb, maxVal, tickStr, tickCache, hashWidth, hashR, hashG, hashB, hashA, hashIsPercent, maxRenderVal)
+-- vInset (optional): amount to shrink each tick vertically at the top and
+-- bottom, so hash lines sit inside the border instead of spanning over it. Default
+-- 0. Callers pass borderSize * PP.mult.
+local function ApplyResourceBarTicks(sb, maxVal, tickStr, tickCache, hashWidth, hashR, hashG, hashB, hashA, hashIsPercent, maxRenderVal, vInset)
     local vals = ParseTickValues(tickStr)
 
     for i = 1, #tickCache do tickCache[i]:Hide() end
@@ -2418,6 +2615,10 @@ local function ApplyResourceBarTicks(sb, maxVal, tickStr, tickCache, hashWidth, 
     local pxW = PP and (tickW * PP.mult) or tickW
     local barW = sb:GetWidth()
     local barH = sb:GetHeight()
+    local vI = vInset or 0
+    -- Clamp so a fat border on a short bar can never invert the height.
+    if vI * 2 >= barH then vI = math.max(0, (barH - 1) / 2) end
+    local tickH = barH - vI * 2
     for i, v in ipairs(vals) do
         local frac, inRange
         if hashIsPercent then
@@ -2437,11 +2638,43 @@ local function ApplyResourceBarTicks(sb, maxVal, tickStr, tickCache, hashWidth, 
             t:SetColorTexture(tR, tG, tB, tA)
             t:ClearAllPoints()
             local off = PP and PP.Scale(barW * frac) or (barW * frac)
-            t:SetSize(pxW, barH)
-            t:SetPoint("TOPLEFT", sb, "TOPLEFT", off, 0)
+            t:SetSize(pxW, tickH)
+            t:SetPoint("TOPLEFT", sb, "TOPLEFT", off, -vI)
             t:Show()
         end
     end
+end
+
+-- Value mode needs a readable max: getMaxFn returns the current max, if
+-- it is secret we fall back to a last-known-good value cached on the bar frame
+function ns.ApplyHashLines(sb, cfg, getMaxFn)
+    if not sb then return end
+    local tickCache = sb._userHashTicks
+    if not (cfg and cfg.hashEnabled) then
+        if tickCache then for i = 1, #tickCache do tickCache[i]:Hide() end end
+        return
+    end
+    if not tickCache then tickCache = {}; sb._userHashTicks = tickCache end
+    local isPercent = (cfg.hashMode or "percent") == "percent"
+    local maxVal
+    if isPercent then
+        maxVal = 100
+    else
+        local mx = getMaxFn and getMaxFn() or nil
+        if mx and issecretvalue and issecretvalue(mx) then mx = nil end
+        if mx and mx > 0 then
+            sb._hashMaxCache = mx
+        else
+            mx = sb._hashMaxCache  -- last-known-good, or nil on first secret read
+        end
+        maxVal = mx or 0
+    end
+    -- Shrink the hash vertically by the border so it sits inside the bar
+    local PP = EllesmereUI and EllesmereUI.PP
+    local vInset = (cfg.borderSize or 0) * ((PP and PP.mult) or 1)
+    ApplyResourceBarTicks(sb, maxVal, cfg.hashValues, tickCache,
+        cfg.hashWidth, cfg.hashColorR, cfg.hashColorG, cfg.hashColorB, cfg.hashColorA,
+        isPercent, nil, vInset)
 end
 
 -- Moving-hash overlay for the Guardian Ironfur bar. Lives above the inner
@@ -2578,7 +2811,7 @@ local function BuildBars()
         do
             local fR, fG, fB, fA
             if hp.customColored then
-                fR, fG, fB, fA = hp.fillR, hp.fillG, hp.fillB, hp.fillA
+                fR, fG, fB, fA = hp.fillR, hp.fillG, hp.fillB, 1
             else
                 local cc = CLASS_COLORS[cachedClass]
                 if cc then fR, fG, fB, fA = cc[1], cc[2], cc[3], 1
@@ -2613,6 +2846,7 @@ local function BuildBars()
         healthBar:Show()
         healthBar:SetAlpha(ns.ResolveBarAlpha(hp))
         ApplyBarOrientation(healthBar, hpOri)
+        ns.ApplyFillOpacity(healthBar, hpOri, hp.fillOpacity)
         if IsSpecDisabled(hp) then
             EllesmereUI.SetElementVisibility(healthBar, false)
         end
@@ -2752,7 +2986,7 @@ local function BuildBars()
         do
             local fR, fG, fB, fA
             if pp.customColored then
-                fR, fG, fB, fA = pp.fillR, pp.fillG, pp.fillB, pp.fillA
+                fR, fG, fB, fA = pp.fillR, pp.fillG, pp.fillB, 1
             else
                 local pc = POWER_COLORS[cachedPrimary]
                 if pc then fR, fG, fB, fA = pc[1], pc[2], pc[3], 1
@@ -2792,6 +3026,7 @@ local function BuildBars()
             primaryBar:SetAlpha(ns.ResolveBarAlpha(pp))
         end
         ApplyBarOrientation(primaryBar, ppOri)
+        ns.ApplyFillOpacity(primaryBar, ppOri, pp.fillOpacity)
         if IsSpecDisabled(pp) then
             EllesmereUI.SetElementVisibility(primaryBar, false)
         end
@@ -2998,25 +3233,26 @@ local function BuildBars()
                     local cc = CLASS_COLORS[cachedClass]
                     if cc then rr, rg, rb = cc[1], cc[2], cc[3] else rr, rg, rb = 1, 1, 1 end
                 end
-                secondaryBar:GetStatusBarTexture():SetVertexColor(rr, rg, rb, sp.fillA or 1)
+                secondaryBar:GetStatusBarTexture():SetVertexColor(rr, rg, rb, 1)
                 secondaryBar._bg:SetColorTexture(sp.bgR, sp.bgG, sp.bgB, sp.bgA)
             elseif sp.classColored ~= false then
                 -- Power types in secondary slot use power color; class resources use class color
                 local pc2 = POWER_COLORS[cachedSecondary.power]
                 if pc2 then
-                    secondaryBar:GetStatusBarTexture():SetVertexColor(pc2[1], pc2[2], pc2[3], sp.fillA or 1)
+                    secondaryBar:GetStatusBarTexture():SetVertexColor(pc2[1], pc2[2], pc2[3], 1)
                 else
                     local cc = CLASS_COLORS[cachedClass]
                     if cc then
-                        secondaryBar:GetStatusBarTexture():SetVertexColor(cc[1], cc[2], cc[3], sp.fillA or 1)
+                        secondaryBar:GetStatusBarTexture():SetVertexColor(cc[1], cc[2], cc[3], 1)
                     end
                 end
                 secondaryBar._bg:SetColorTexture(sp.bgR, sp.bgG, sp.bgB, sp.bgA)
             else
                 -- classColored explicitly false -- use custom fill color
-                secondaryBar:GetStatusBarTexture():SetVertexColor(sp.fillR, sp.fillG, sp.fillB, sp.fillA)
+                secondaryBar:GetStatusBarTexture():SetVertexColor(sp.fillR, sp.fillG, sp.fillB, 1)
                 secondaryBar._bg:SetColorTexture(sp.bgR, sp.bgG, sp.bgB, sp.bgA)
             end
+            ns.ApplyFillOpacity(secondaryBar, pipOri, sp.fillOpacity)
             secondaryBar:ApplyBorder(0, 0, 0, 0, 0)
             if cachedSecondary.power == "IRONFUR_BAR" then
                 -- Guardian Ironfur: no static threshold hash lines; the moving
@@ -3107,13 +3343,15 @@ local function BuildBars()
                 ApplyRunePos()
                 runeFrames[i]:ApplyBorder(0, 0, 0, 0, 0)
                 runeFrames[i]:ApplyTexture(g.barTexture or "none")
-                if sp.darkTheme then
-                    local _dbr, _dbg, _dbb = EllesmereUI.GetDarkModeBg()
-                    runeFrames[i]._bg:SetColorTexture(_dbr, _dbg, _dbb, DARK_BG_A)
-                elseif sp.classColored then
-                    runeFrames[i]._bg:SetColorTexture(sp.bgR, sp.bgG, sp.bgB, sp.bgA)
-                else
-                    runeFrames[i]._bg:SetColorTexture(sp.bgR, sp.bgG, sp.bgB, sp.bgA)
+                runeFrames[i]._bg:SetColorTexture(ERB.PipBgColor(sp))
+                -- Fill Opacity: same stamp as regular pips (consumed by
+                -- SetActive in the rune update). Inert at 100 unless restoring.
+                local _runeOp = sp.fillOpacity or 100
+                if _runeOp < 100 then
+                    runeFrames[i]._fillOp = _runeOp / 100
+                    runeFrames[i]._fill:SetAlpha(_runeOp / 100)
+                elseif runeFrames[i]._fillOp then
+                    ns.ClearPipFillOpacity(runeFrames[i])
                 end
                 runeFrames[i]:Show()
             end
@@ -3167,13 +3405,15 @@ local function BuildBars()
                 ApplyPipPos()
                 pips[i]:ApplyBorder(0, 0, 0, 0, 0)
                 pips[i]:ApplyTexture(g.barTexture or "none")
-                if sp.darkTheme then
-                    local _dbr, _dbg, _dbb = EllesmereUI.GetDarkModeBg()
-                    pips[i]._bg:SetColorTexture(_dbr, _dbg, _dbb, DARK_BG_A)
-                elseif sp.classColored then
-                    pips[i]._bg:SetColorTexture(sp.bgR, sp.bgG, sp.bgB, sp.bgA)
-                else
-                    pips[i]._bg:SetColorTexture(sp.bgR, sp.bgG, sp.bgB, sp.bgA)
+                pips[i]._bg:SetColorTexture(ERB.PipBgColor(sp))
+                -- Fill Opacity: stamp the per-pip factor (consumed by SetActive
+                -- and the secret renderer). Inert at 100 unless restoring.
+                local _pipOp = sp.fillOpacity or 100
+                if _pipOp < 100 then
+                    pips[i]._fillOp = _pipOp / 100
+                    pips[i]._fill:SetAlpha(_pipOp / 100)
+                elseif pips[i]._fillOp then
+                    ns.ClearPipFillOpacity(pips[i])
                 end
                 pips[i]:Show()
             end
@@ -3217,7 +3457,24 @@ local function BuildBars()
             secondaryFrame._barBg = secondaryFrame:CreateTexture(nil, "BACKGROUND", nil, -1)
         end
         secondaryFrame._barBg:ClearAllPoints()
-        secondaryFrame._barBg:SetAllPoints(secondaryFrame)
+        if secondaryBar and secondaryBar._fillOpApplied and secondaryBar:IsShown() then
+            -- Bar-type Fill Opacity active: the full-bar backdrop must also
+            -- retreat to the empty portion, or it would tint the translucent
+            -- fill from behind and defeat the world-show-through.
+            ns.AnchorBgToFillEdge(secondaryFrame._barBg, secondaryBar:GetStatusBarTexture(),
+                secondaryFrame, sp.pipOrientation or "HORIZONTAL")
+            secondaryFrame._barBg:Show()
+        elseif (sp.fillOpacity or 100) < 100 then
+            -- Pip/rune-type Fill Opacity active: a full-frame backdrop cannot
+            -- hole itself behind each active pip, so it would tint every
+            -- translucent pip fill from behind. Hide it entirely; ApplyGapFills
+            -- draws the gap strips in the bar-bg color instead, and inactive
+            -- pips keep their own per-pip background.
+            secondaryFrame._barBg:Hide()
+        else
+            secondaryFrame._barBg:SetAllPoints(secondaryFrame)
+            secondaryFrame._barBg:Show()
+        end
         if sp.darkTheme then
             secondaryFrame._barBg:SetColorTexture(0, 0, 0, 1)
         else
@@ -3249,7 +3506,7 @@ local function BuildBars()
             -- (so text-value writes never hit a nil), but hide it while the power
             -- bar is visible. Re-evaluated on every build (spec / power changes
             -- trigger a rebuild, same as the shift feature).
-            if _G._ERB_TextHiddenByForm(ERB.db.profile.secondary) or (sp.showTextOnlyIfNoPower and not IsPowerBarHidden()) then
+            if _G._ERB_TextHiddenByForm(ERB.db.profile.secondary, true) or (sp.showTextOnlyIfNoPower and not IsPowerBarHidden()) then
                 secondaryFrame._countText:Hide()
             else
                 secondaryFrame._countText:Show()
@@ -3279,6 +3536,17 @@ local function BuildBars()
             end
         end
         EllesmereUI.SetElementVisibility(secondaryFrame, false)
+    end
+
+    -- Hash lines on the health and power bars 
+    do
+        local _prof = ERB.db and ERB.db.profile
+        if _prof then
+            ns.ApplyHashLines(healthBar, _prof.health,
+                function() return UnitHealthMax("player") end)
+            ns.ApplyHashLines(primaryBar, _prof.primary,
+                function() return UnitPowerMax("player", GetPrimaryPowerType()) end)
+        end
     end
 
     ReapplyInternalBarAnchors()
@@ -3483,12 +3751,36 @@ local function UpdatePrimaryBar()
 
     cachedPrimary = GetPrimaryPowerType()
     if not cachedPrimary then return end
+    -- 12.1: park the engine-slot overlay when the primary is no longer
+    -- Ebon Might (nil-dead on retail).
+    if ns.EMB121_Gate then ns.EMB121_Gate(cachedPrimary == "EBON_MIGHT") end
 
     -- Ebon Might: aura-based countdown, not a standard power type.
     -- OnUpdate ticker handles smooth frame-by-frame updates; this path
     -- runs on UNIT_AURA to pick up buff gain/loss/refresh.
     if cachedPrimary == "EBON_MIGHT" then
+        if ns.EMB121_Owns then
+            -- 12.1: the engine slot renders the fill and text (see
+            -- EUI_ResourceBars_EbonMight121.lua -- secrecy makes the
+            -- numeric path below impossible in combat). Legacy stays
+            -- empty underneath; Sync attaches/builds the overlay with
+            -- the live bar and resolved settings.
+            if ns.EMB121_Sync then
+                ns.EMB121_Sync(primaryBar, pp, POWER_COLORS["EBON_MIGHT"])
+            end
+            primaryBar:SetMinMaxValues(0, EBON_MIGHT_DURATION)
+            primaryBar:SetValue(0)
+            primaryBar._smoothTarget = 0
+            primaryBar._smoothCurrent = 0
+            primaryBar._text:Hide()
+            return
+        end
         local aura = C_UnitAuras.GetPlayerAuraBySpellID(EBON_MIGHT_SPELL_ID)
+        -- 12.1 (build 68824+): Ebon Might is secret-flagged, so under aura
+        -- restriction the query returns nil or carries secret fields; a
+        -- secret expirationTime would error in the numeric chain below.
+        -- Degrade to an empty bar there (retail: IS_121 short-circuits).
+        if EllesmereUI.IS_121 and aura and issecretvalue(aura.expirationTime) then aura = nil end
         _ebonMightExpiry = (aura and aura.expirationTime) or 0
         local remaining = (_ebonMightExpiry > 0) and max(0, _ebonMightExpiry - GetTime()) or 0
         primaryBar:SetMinMaxValues(0, EBON_MIGHT_DURATION)
@@ -3831,13 +4123,13 @@ local function UpdateIronfurBar()
     local r, g, b, a
     if sp.darkTheme then
         local _dfr, _dfg, _dfb = EllesmereUI.GetDarkModeFill()
-        r, g, b, a = _dfr, _dfg, _dfb, sp.fillA or 1
+        r, g, b, a = _dfr, _dfg, _dfb, 1
     elseif sp.classColored ~= false then
         local cc = CLASS_COLORS[cachedClass]
         if cc then r, g, b = cc[1], cc[2], cc[3] else r, g, b = 1, 1, 1 end
-        a = sp.fillA or 1
+        a = 1
     else
-        r, g, b, a = sp.fillR, sp.fillG, sp.fillB, sp.fillA or 1
+        r, g, b, a = sp.fillR, sp.fillG, sp.fillB, 1
     end
     local tsEntry = ResolveThresholdSpecEntry(sp)
     -- Capture "recolor text instead" before the buff nils tsEntry below, so the flag
@@ -4157,7 +4449,7 @@ local function UpdateSecondaryResource()
             local cc = CLASS_COLORS[cachedClass]
             if cc then r, g, b = cc[1], cc[2], cc[3] end
         end
-        a = sp.fillA or 1
+        a = 1
     elseif sp.classColored ~= false then
         -- Power types in secondary slot use power color; class resources use class color
         local pc = POWER_COLORS[powerType]
@@ -4166,10 +4458,10 @@ local function UpdateSecondaryResource()
             local cc = CLASS_COLORS[cachedClass]
             if cc then r, g, b = cc[1], cc[2], cc[3] end
         end
-        a = sp.fillA or 1
+        a = 1
     else
         -- classColored explicitly false -- custom fill
-        r, g, b, a = sp.fillR, sp.fillG, sp.fillB, sp.fillA or 1
+        r, g, b, a = sp.fillR, sp.fillG, sp.fillB, 1
     end
 
     -- While the tracked buff is up, override the fill (buff wins over threshold).
@@ -4183,6 +4475,14 @@ local function UpdateSecondaryResource()
         end
         _tsEntry = nil
         _tsBandOn = false
+    end
+
+    -- Points: read once. A secret can't survive the comparison-based points
+    -- path, so it routes to the secret overlay renderer (custom branch).
+    local _ptsCur, _ptsSecret
+    if cachedSecondary.type == "points" then
+        _ptsCur = UnitPower("player", powerType)
+        _ptsSecret = (issecretvalue and issecretvalue(_ptsCur)) and true or false
     end
 
     if cachedSecondary.type == "runes" then
@@ -4694,68 +4994,64 @@ local function UpdateSecondaryResource()
             end
             -- Count text
             if sp.showText and secondaryFrame._countText then
+                local ct = secondaryFrame._countText
                 local percentSuffix = (sp.showPercent == false) and "" or "%"
-                if not tainted then
-                    if powerType == "BREWMASTER_STAGGER" then
-                        -- Show stagger as percentage of max health
+                -- The power-based bar resources treat "Show %" as a
+                -- value<->percent switch: OFF (the default) = the bare
+                -- current value (what these bars actually displayed before
+                -- 8.4.9 -- the old in-combat percent probe was secret and
+                -- always fell back to the raw value), ON = percent
+                -- (secret-safe via the ScaleTo100 declassifier; capped 0-100
+                -- by nature). The same mode now applies in and out of
+                -- instanced combat -- the old code flipped display with the
+                -- taint state. All modes use SetFormattedText, which renders
+                -- a secret value's digits engine-side, so they work in
+                -- instanced combat with no Lua compare/concat on the secret.
+                local pType = (powerType == "MAELSTROM_BAR") and PT.MAELSTROM
+                           or (powerType == "INSANITY_BAR") and PT.INSANITY
+                           or (powerType == "FOCUS_BAR") and PT.FOCUS
+                           or (powerType == "LUNAR_POWER_BAR") and PT.LUNAR_POWER
+                           or nil
+                if powerType == "BREWMASTER_STAGGER" then
+                    -- Stagger always shows a percentage of max health
+                    -- The "%" sign is the only thing "Show %" toggles here
+                    if not tainted then
                         local pct = maxC > 0 and (cur / maxC * 100) or 0
-                        secondaryFrame._countText:SetText(format("%d", pct) .. percentSuffix)
-                    elseif powerType == "IGNOREPAIN_BAR" then
-                        -- Text is driven per-frame by IP.UpdateText (viewer
-                        -- capture preferred, fill-width fallback). No-op here.
-                    elseif sp.showMaxStacks == false then
-                        -- Devourer with Show Max Stacks off: current count only.
-                        secondaryFrame._countText:SetFormattedText("%s", cur)
+                        ct:SetText(format("%d", pct) .. percentSuffix)
                     else
-                        -- Current / max. SetFormattedText renders the (possibly
-                        -- secret) current and keeps the clean max -- no Lua concat
-                        -- of a secret value (see the note at the primary bar).
-                        secondaryFrame._countText:SetFormattedText("%s / %s", cur, maxC)
+                        local cp = secondaryBar._staggerPctCache
+                        if cp then ct:SetText(format("%d", cp) .. percentSuffix) else ct:SetText("") end
                     end
+                elseif powerType == "IGNOREPAIN_BAR" then
+                    -- Text is driven per-frame by IP.UpdateText. No-op here.
+                elseif pType and sp.showPercent and UnitPowerPercent then
+                    -- Percent
+                    local pct = UnitPowerPercent("player", pType, true, CurveConstants and CurveConstants.ScaleTo100) or 0
+                    ct:SetFormattedText("%d%%", pct)
+                elseif pType then
+                    -- Value: bare current for the power bars (their pre-8.4.9
+                    -- display; no "/ max").
+                    ct:SetFormattedText("%s", cur)
+                elseif sp.showMaxStacks == false then
+                    -- Current count only (Devourer "Show Max Stacks" off).
+                    ct:SetFormattedText("%s", cur)
                 else
-                    -- Secret value path: try UnitPowerPercent first, fall back to tostring
-                    if powerType == "MAELSTROM_BAR" then
-                        local pct = UnitPowerPercent and UnitPowerPercent("player", PT.MAELSTROM) or 0
-                        if not issecretvalue(pct) then
-                            secondaryFrame._countText:SetText(format("%d", pct) .. percentSuffix)
-                        else
-                            secondaryFrame._countText:SetText(tostring(cur))
-                        end
-                    elseif powerType == "INSANITY_BAR" then
-                        local pct = UnitPowerPercent and UnitPowerPercent("player", PT.INSANITY) or 0
-                        if not issecretvalue(pct) then
-                            secondaryFrame._countText:SetText(format("%d", pct) .. percentSuffix)
-                        else
-                            secondaryFrame._countText:SetText(tostring(cur))
-                        end
-                    elseif powerType == "FOCUS_BAR" then
-                        local pct = UnitPowerPercent and UnitPowerPercent("player", PT.FOCUS) or 0
-                        if not issecretvalue(pct) then
-                            secondaryFrame._countText:SetText(format("%d", pct) .. percentSuffix)
-                        else
-                            secondaryFrame._countText:SetText(tostring(cur))
-                        end
-                    elseif powerType == "LUNAR_POWER_BAR" then
-                        local pct = UnitPowerPercent and UnitPowerPercent("player", PT.LUNAR_POWER) or 0
-                        if not issecretvalue(pct) then
-                            secondaryFrame._countText:SetText(format("%d", pct) .. percentSuffix)
-                        else
-                            secondaryFrame._countText:SetText(tostring(cur))
-                        end
-                    elseif powerType == "IGNOREPAIN_BAR" then
-                        -- Text is driven per-frame by IP.UpdateText. No-op here.
-                    elseif sp.showMaxStacks == false then
-                        secondaryFrame._countText:SetFormattedText("%s", cur)
-                    else
-                        secondaryFrame._countText:SetFormattedText("%s / %s", cur, maxC)
-                    end
+                    -- Current / max (Devourer default). SetFormattedText
+                    -- renders the (possibly secret) current and keeps the
+                    -- clean max -- no Lua concat of a secret value (see the
+                    -- note at the primary bar).
+                    ct:SetFormattedText("%s / %s", cur, maxC)
                 end
             end
         end
-    elseif cachedSecondary.type == "custom" then
+    elseif cachedSecondary.type == "custom" or _ptsSecret then
         local cur, maxC = 0, maxPts
         local isSecret = false
-        if powerType == "SOUL_FRAGMENTS_VENGEANCE" then
+        if _ptsSecret then
+            cur = _ptsCur
+            maxC = maxPts
+            isSecret = true
+        elseif powerType == "SOUL_FRAGMENTS_VENGEANCE" then
             -- Vengeance DH: GetSpellCastCount returns a SECRET value in 12.0+.
             -- We cannot compare it in Lua.  Instead we pass the raw value to
             -- StatusBar widgets embedded in each pip (SetMinMaxValues(i-1, i)
@@ -4937,11 +5233,57 @@ local function UpdateSecondaryResource()
 
                     -- Hide the normal fill; the StatusBar replaces it
                     pip._fill:Hide()
+
+                    -- Fill Opacity in secret contexts: same look as the clean
+                    -- path. Region alpha on the overlay fills + bg anchored to
+                    -- the base fill's moving edge so it covers only the empty
+                    -- remainder -- never reads the (secret) value. _fillOp is
+                    -- nil at 100, so this whole block is inert by default.
+                    if pip._fillOp then
+                        local _sft = pip._secretBar:GetStatusBarTexture()
+                        if _sft then
+                            _sft:SetAlpha(pip._fillOp)
+                            if not pip._sbgAnchored then
+                                pip._sbgAnchored = true
+                                pip._bg:ClearAllPoints()
+                                pip._bg:SetPoint("TOPLEFT", _sft, "TOPRIGHT", 0, 0)
+                                pip._bg:SetPoint("BOTTOMRIGHT", pip, "BOTTOMRIGHT", 0, 0)
+                                pip._bg:SetAlpha(1)
+                            end
+                        end
+                        local _stb = pip._secretThreshBar
+                        if _stb and _stb:IsShown() then
+                            local t = _stb:GetStatusBarTexture()
+                            if t then t:SetAlpha(pip._fillOp) end
+                        end
+                        local _srb = pip._bandResetBar
+                        if _srb and _srb:IsShown() then
+                            local t = _srb:GetStatusBarTexture()
+                            if t then t:SetAlpha(pip._fillOp) end
+                        end
+                        if pip._bandBars then
+                            for k = 1, #pip._bandBars do
+                                local bb = pip._bandBars[k]
+                                if bb:IsShown() then
+                                    local t = bb:GetStatusBarTexture()
+                                    if t then t:SetAlpha(pip._fillOp) end
+                                end
+                            end
+                        end
+                    end
                 end
             end
-            -- Count text -- tostring handles secret values safely
+            -- Count text: derive from UnitPowerPercent when it reads clean
+            -- (raw secrets don't reliably render); else pass the raw value.
             if sp.showText and secondaryFrame._countText then
-                secondaryFrame._countText:SetText(tostring(cur))
+                local shown = cur
+                if type(powerType) == "number" and UnitPowerPercent and maxC and maxC > 0 then
+                    local pct = UnitPowerPercent("player", powerType, true, CurveConstants and CurveConstants.ScaleTo100)
+                    if pct and not (issecretvalue and issecretvalue(pct)) then
+                        shown = math.floor(pct * maxC / 100 + 0.5)
+                    end
+                end
+                secondaryFrame._countText:SetText(shown)
             end
         else
             -- Clean-value path: normal boolean comparisons
@@ -4953,6 +5295,13 @@ local function UpdateSecondaryResource()
                     if p._secretThreshBar then p._secretThreshBar:Hide() end
                     if p._bandResetBar then p._bandResetBar:Hide() end
                     if p._bandBars then for k = 1, #p._bandBars do p._bandBars[k]:Hide() end end
+                    -- Leaving a secret Fill Opacity pass: restore the full-pip
+                    -- bg anchor (SetActive owns bg visibility from here).
+                    if p._sbgAnchored then
+                        p._sbgAnchored = nil
+                        p._bg:ClearAllPoints()
+                        p._bg:SetAllPoints(p)
+                    end
                 end
             end
             -- Enhance 5-bar overflow: stacks 6-10 recolor pips 1-5
@@ -5011,7 +5360,25 @@ local function UpdateSecondaryResource()
             end
         end
     else
-        local cur = UnitPower("player", powerType)
+        local cur = _ptsCur or UnitPower("player", powerType)
+        -- Hide any secret StatusBar overlays left from a combat update that
+        -- routed through the secret pip renderer above.
+        for i = 1, maxPts do
+            local p = pips[i]
+            if p then
+                if p._secretBar then p._secretBar:Hide() end
+                if p._secretThreshBar then p._secretThreshBar:Hide() end
+                if p._bandResetBar then p._bandResetBar:Hide() end
+                if p._bandBars then for k = 1, #p._bandBars do p._bandBars[k]:Hide() end end
+                -- Leaving a secret Fill Opacity pass: restore the full-pip
+                -- bg anchor (SetActive owns bg visibility from here).
+                if p._sbgAnchored then
+                    p._sbgAnchored = nil
+                    p._bg:ClearAllPoints()
+                    p._bg:SetAllPoints(p)
+                end
+            end
+        end
         -- Direction: "From" (>=, default) or "Up to" (<=, thresholdReverse).
         local useThresh = _tsEntry and ((_tsReverse and cur <= _tsThreshCount)
             or ((not _tsReverse) and cur >= _tsThreshCount))
@@ -5187,7 +5554,7 @@ local function ShouldShowSecondary()
         st.inCombat = isInCombat
         st.inRaid = inRaid
         st.inParty = not inRaid and (IsInGroup and IsInGroup() or false)
-        local ext = EllesmereUI.EvalVisibilityExtended(sp, "visibility", st, EllesmereUI.VIS_CAPS_INCLUSIVE)
+        local ext = EllesmereUI.EvalVisibilityExtended(sp, "visibility", st, EllesmereUI.VIS_CAPS_DEFAULT)
         if ext ~= nil then return ext end
     end
     local vis = sp.visibility
@@ -5200,7 +5567,7 @@ local function ShouldShowSecondary()
     if vis == "in_raid" then return IsInRaid and IsInRaid() or false end
     if vis == "in_party" then
         local inRaid = IsInRaid and IsInRaid() or false
-        return inRaid or (IsInGroup and IsInGroup() or false)
+        return not inRaid and (IsInGroup and IsInGroup() or false)
     end
     if vis == "solo" then
         return not (IsInRaid and IsInRaid()) and not (IsInGroup and IsInGroup())
@@ -5219,7 +5586,7 @@ local function ShouldShowBar(barProfile)
         st.inCombat = isInCombat
         st.inRaid = inRaid
         st.inParty = not inRaid and (IsInGroup and IsInGroup() or false)
-        local ext = EllesmereUI.EvalVisibilityExtended(barProfile, "visibility", st, EllesmereUI.VIS_CAPS_INCLUSIVE)
+        local ext = EllesmereUI.EvalVisibilityExtended(barProfile, "visibility", st, EllesmereUI.VIS_CAPS_DEFAULT)
         if ext ~= nil then return ext end
     end
     local vis = barProfile.visibility or "always"
@@ -5232,7 +5599,7 @@ local function ShouldShowBar(barProfile)
     if vis == "in_raid" then return IsInRaid and IsInRaid() or false end
     if vis == "in_party" then
         local inRaid = IsInRaid and IsInRaid() or false
-        return inRaid or (IsInGroup and IsInGroup() or false)
+        return not inRaid and (IsInGroup and IsInGroup() or false)
     end
     if vis == "solo" then
         return not (IsInRaid and IsInRaid()) and not (IsInGroup and IsInGroup())
@@ -5257,7 +5624,7 @@ local function UpdateVisibility()
     -- Health bar visibility
     if healthBar then
         local hp = _G._ERB_ResolveHealthCfg()
-        local vis = hp and hp.enabled and not IsSpecDisabled(hp) and not inVehicle and ShouldShowBar(hp)
+        local vis = hp and hp.enabled and not IsSpecDisabled(hp) and not _G._ERB_BarHiddenByForm(hp) and not inVehicle and ShouldShowBar(hp)
         ERB._moEligible.health = (vis == "mouseover")
         if vis == true then
             healthBar:Show()
@@ -5275,7 +5642,7 @@ local function UpdateVisibility()
         -- Also check cachedPrimary: specs without a primary power (e.g. BM/MM Hunter)
         -- should hide the power bar even if enabled in settings
         local hidePower = sp and sp.hidePowerIfResource and cachedSecondary
-        local vis = not hidePower and pp and pp.enabled ~= false and not IsSpecDisabled(pp) and cachedPrimary and not inVehicle and ShouldShowBar(pp)
+        local vis = not hidePower and pp and pp.enabled ~= false and not IsSpecDisabled(pp) and not _G._ERB_BarHiddenByForm(pp) and cachedPrimary and not inVehicle and ShouldShowBar(pp)
         ERB._moEligible.primary = (vis == "mouseover")
         if vis == true then
             primaryBar:Show()
@@ -5289,7 +5656,7 @@ local function UpdateVisibility()
     -- Secondary resource visibility + ooc alpha
     if secondaryFrame then
         local sp = _G._ERB_ResolveSecondaryCfg()
-        local vis = sp and sp.enabled ~= false and not IsSpecDisabled(sp) and cachedSecondary and not inVehicle and ShouldShowSecondary()
+        local vis = sp and sp.enabled ~= false and not IsSpecDisabled(sp) and not _G._ERB_BarHiddenByForm(sp, true) and cachedSecondary and not inVehicle and ShouldShowSecondary()
         ERB._moEligible.secondary = (vis == "mouseover")
         if vis == true then
             secondaryFrame:Show()
@@ -5411,6 +5778,9 @@ local function OnUpdate(self, dt)
     if primaryBar and primaryBar:IsShown() then
         if cachedPrimary == "EBON_MIGHT" then
             -- Ebon Might countdown (throttled to ~20 fps for smooth drain)
+            -- 12.1: the engine slot owns the countdown -- nothing to tick
+            -- (guard is nil-dead on retail).
+            if not ns.EMB121_Owns then
             _ebonMightThrottle = _ebonMightThrottle + dt
             if _ebonMightThrottle >= 0.05 then
                 _ebonMightThrottle = 0
@@ -5432,6 +5802,7 @@ local function OnUpdate(self, dt)
                     primaryBar._text:SetText(txt)
                 end
             end
+            end -- not EMB121_Owns
         else
             local tgt = primaryBar._smoothTarget
             if issecretvalue and issecretvalue(tgt) then
@@ -5860,8 +6231,14 @@ BuildCastBar = function()
     local bar = castBarFrame._bar
     local bdrInset = (PP and PP.mult) or 1
     clipFrame:ClearAllPoints()
-    clipFrame:SetPoint("TOPLEFT", castBarFrame, "TOPLEFT", ((hasIcon and not iconOnRight) and h or 0) + bdrInset, -bdrInset)
-    clipFrame:SetPoint("BOTTOMRIGHT", castBarFrame, "BOTTOMRIGHT", -((iconOnRight and h or 0)) - bdrInset, bdrInset)
+    -- The icon-adjacent side sits FLUSH against the icon (no inset): that seam
+    -- is interior, no border draws there, and insetting it exposed a 1px
+    -- background column next to the icon (visible with light bg colors).
+    -- Outer edges keep the inset so the fill never bleeds past the border.
+    local clipLeft  = (hasIcon and not iconOnRight) and h or bdrInset
+    local clipRight = iconOnRight and h or bdrInset
+    clipFrame:SetPoint("TOPLEFT", castBarFrame, "TOPLEFT", clipLeft, -bdrInset)
+    clipFrame:SetPoint("BOTTOMRIGHT", castBarFrame, "BOTTOMRIGHT", -clipRight, bdrInset)
     clipFrame:SetFrameLevel(castBarFrame:GetFrameLevel() + 1)
     bar:ClearAllPoints()
     bar:SetAllPoints(clipFrame)
@@ -5880,23 +6257,38 @@ BuildCastBar = function()
         bar:SetStatusBarTexture(texPath)
         castBarFrame._bg:SetTexture(nil)
         castBarFrame._bg:SetColorTexture(cb.bgR, cb.bgG, cb.bgB, cb.bgA)
+        -- Fill Opacity below 100: anchor the bg to cover ONLY the empty
+        -- portion of the bar so the translucent fill reveals the world behind
+        -- it instead of the background. The anchor is relational to the fill
+        -- texture's moving edge, so it tracks the cast progress on its own.
+        -- At 100 the bg spans the whole frame (original behavior).
+        castBarFrame._bg:ClearAllPoints()
+        if (cb.fillOpacity or 100) < 100 then
+            castBarFrame._bg:SetPoint("TOPLEFT", bar:GetStatusBarTexture(), "TOPRIGHT", 0, 0)
+            castBarFrame._bg:SetPoint("BOTTOMRIGHT", bar, "BOTTOMRIGHT", 0, 0)
+        else
+            castBarFrame._bg:SetAllPoints(castBarFrame)
+        end
     end
 
-    -- Bar color / gradient
+    -- Bar color / gradient. Fill Opacity multiplies into the fill alpha
+    -- (solid color and both gradient endpoints) so the fill turns translucent
+    -- without double-dimming through a separate region alpha.
 local fillTex = bar:GetStatusBarTexture()
+local fillOp = (cb.fillOpacity or 100) / 100
 
 if cb.gradientEnabled then
     local dir = cb.gradientDir or "HORIZONTAL"
 
-    local fR, fG, fB, fA = cb.fillR, cb.fillG, cb.fillB, cb.fillA
+    local fR, fG, fB, fA = cb.fillR, cb.fillG, cb.fillB, 1
     if cb.classColored then
         local cc = CLASS_COLORS[cachedClass]
         if cc then fR, fG, fB = cc[1], cc[2], cc[3] end
     end
     fillTex:SetVertexColor(1, 1, 1, 1)
     fillTex:SetGradient(dir,
-        CreateColor(fR, fG, fB, fA),
-        CreateColor(cb.gradientR, cb.gradientG, cb.gradientB, cb.gradientA)
+        CreateColor(fR, fG, fB, fA * fillOp),
+        CreateColor(cb.gradientR, cb.gradientG, cb.gradientB, cb.gradientA * fillOp)
     )
 
     -- Hide the old clip-frame gradient if it exists from a prior session
@@ -5915,12 +6307,12 @@ else
     castBarFrame._timerText:SetParent(castBarFrame._textFrame)
 
     do
-        local fR, fG, fB, fA = cb.fillR, cb.fillG, cb.fillB, cb.fillA
+        local fR, fG, fB, fA = cb.fillR, cb.fillG, cb.fillB, 1
         if cb.classColored then
             local cc = CLASS_COLORS[cachedClass]
             if cc then fR, fG, fB = cc[1], cc[2], cc[3] end
         end
-        fillTex:SetVertexColor(fR, fG, fB, fA)
+        fillTex:SetVertexColor(fR, fG, fB, fA * fillOp)
     end
 end
 
@@ -5929,13 +6321,13 @@ end
     if cb.showSpark then
         spark:SetSize(8, h)
         spark:ClearAllPoints()
-    
+
         if cb.gradientEnabled and castBarFrame._gradClip then
             spark:SetPoint("CENTER", castBarFrame._gradClip, "RIGHT", 0, 0)
         else
             spark:SetPoint("CENTER", fillTex, "RIGHT", 0, 0)
         end
-    
+
         spark:Show()
     else
         spark:Hide()
@@ -6182,13 +6574,13 @@ UpdateCastBar = function(dt)
             local stage = GetCurrentEmpowerStage(progress, numStages)
             local r, g, b = GetEmpowerStageColor(stage, numStages)
 
-            -- Apply color to bar or gradient
+            -- Apply color to bar or gradient (fill alpha keeps Fill Opacity)
             if castBarFrame._gradientFullBar and castBarFrame._gradTex then
                 empowerColorA:SetRGBA(r, g, b, 1)
                 empowerColorB:SetRGBA(r, g, b, 1)
                 castBarFrame._gradTex:SetGradient("HORIZONTAL", empowerColorA, empowerColorB)
             else
-                bar:GetStatusBarTexture():SetVertexColor(r, g, b, 1)
+                bar:GetStatusBarTexture():SetVertexColor(r, g, b, (cb.fillOpacity or 100) / 100)
             end
             castBarFrame._empowerColorApplied = true
         end
@@ -6237,7 +6629,7 @@ UpdateCastBar = function(dt)
     -- Update spark position
     if castBarFrame._spark:IsShown() then
         castBarFrame._spark:ClearAllPoints()
-    
+
         if castBarFrame._gradientFullBar and castBarFrame._gradClip and castBarFrame._gradClip:IsShown() then
             castBarFrame._spark:SetPoint("CENTER", castBarFrame._gradClip, "RIGHT", 0, 0)
         else
@@ -6483,7 +6875,7 @@ local function OnEmpowerStop(eventCastID)
     if castBarFrame._empowerColorApplied then
         castBarFrame._empowerColorApplied = false
         local cb = ERB.db.profile.castBar
-        local fR, fG, fB, fA = cb.fillR, cb.fillG, cb.fillB, cb.fillA
+        local fR, fG, fB, fA = cb.fillR, cb.fillG, cb.fillB, 1
         if cb.classColored then
             local cc = CLASS_COLORS[cachedClass]
             if cc then fR, fG, fB = cc[1], cc[2], cc[3] end
@@ -6492,9 +6884,14 @@ local function OnEmpowerStop(eventCastID)
             empowerColorA:SetRGBA(fR, fG, fB, fA)
             empowerColorB:SetRGBA(cb.gradientR or fR, cb.gradientG or fG, cb.gradientB or fB, cb.gradientA or fA)
             castBarFrame._gradTex:SetGradient(cb.gradientDir or "HORIZONTAL", empowerColorA, empowerColorB)
+        elseif cb.gradientEnabled then
+            -- Gradient colors live in the SetGradient endpoints (with Fill
+            -- Opacity baked in); the vertex color must return to plain white
+            -- or the empower tint would keep coloring the gradient.
+            castBarFrame._bar:GetStatusBarTexture():SetVertexColor(1, 1, 1, 1)
         else
             local fillTex = castBarFrame._bar:GetStatusBarTexture()
-            fillTex:SetVertexColor(fR, fG, fB, fA)
+            fillTex:SetVertexColor(fR, fG, fB, fA * ((cb.fillOpacity or 100) / 100))
         end
     end
     cachedStageThresholds = nil
@@ -7270,6 +7667,77 @@ function ERB:ApplySmoothing()
     if secondaryBar then secondaryBar._smoothing = (_sCfg and _sCfg.smoothBars) and interp or nil end
 end
 
+-------------------------------------------------------------------------------
+--  Legacy "Anchor To" retirement
+--  The Bar Position "Anchor To" dropdown for the health/power/class resource
+--  bars was removed from the options UI in 4.9.8, but the runtime kept
+--  honoring profile values written before that (or imported via old profile
+--  strings). A leftover anchorTo still anchors the bar AND suppresses its
+--  unlock-mode mover, with no UI left to see or clear the setting. Retire it:
+--  once the anchored layout has real geometry, capture the bar's on-screen
+--  position as a normal free position (unlockPos), clear anchorTo, and
+--  rebuild -- the bar stays visually in place and gets its mover back.
+--  Geometry-dependent, so it runs from ApplyAll on the active profile rather
+--  than the data-migration registry. do-block + ns exposure: this file is at
+--  Lua's 200-local cap.
+do
+    local pending
+    local function LegacyAnchored()
+        local p = ERB.db and ERB.db.profile
+        if not p then return nil end
+        local list
+        local function add(s, f)
+            -- "mouse" is the LIVE Anchor to Cursor setting (BuildCursorAnchorRow),
+            -- not a retired legacy frame anchor -- migrating it froze the bar at
+            -- its momentary position and nil'd the setting on every login, so
+            -- cursor anchoring never survived a reload.
+            if s and s.anchorTo and s.anchorTo ~= "none" and s.anchorTo ~= "mouse" then
+                list = list or {}
+                list[#list + 1] = { cfg = s, frame = f }
+            end
+        end
+        add(p.health, healthBar)
+        add(p.primary, primaryBar)
+        add(p.secondary, secondaryFrame)
+        return list
+    end
+    function ns.MigrateLegacyAnchorTo()
+        if pending or (EllesmereUI and EllesmereUI._unlockActive) then return end
+        if not LegacyAnchored() then return end
+        pending = true
+        -- One frame later so ApplyBarAnchor's SetPoint has flushed and
+        -- GetCenter returns the anchored on-screen position.
+        C_Timer.After(0, function()
+            pending = nil
+            if EllesmereUI and EllesmereUI._unlockActive then return end
+            local list = LegacyAnchored()
+            if not list then return end
+            local uiS = UIParent:GetEffectiveScale()
+            local uiW, uiH = UIParent:GetWidth(), UIParent:GetHeight()
+            local cleared = false
+            for _, e in ipairs(list) do
+                local s, f = e.cfg, e.frame
+                -- Plain multi-value assignment: wrapping GetCenter in "f and"
+                -- would truncate it to one value and leave cy always nil.
+                local cx, cy
+                if f then cx, cy = f:GetCenter() end
+                if cx and cy then
+                    local r = f:GetEffectiveScale() / uiS
+                    s.unlockPos = {
+                        point = "CENTER", relPoint = "CENTER",
+                        x = cx * r - uiW * 0.5, y = cy * r - uiH * 0.5,
+                    }
+                end
+                -- Clear even without geometry (bar never laid out): defaults
+                -- position the bar; leaving anchorTo would re-suppress the mover.
+                s.anchorTo = nil
+                cleared = true
+            end
+            if cleared then ERB:ApplyAll() end
+        end)
+    end
+end
+
 function ERB:ApplyAll()
     local _, classFile = UnitClass("player")
     cachedClass = classFile
@@ -7303,6 +7771,7 @@ function ERB:ApplyAll()
     UpdateSecondaryResource()
     UpdateVisibility()
     self:ApplySmoothing()
+    if ns.MigrateLegacyAnchorTo then ns.MigrateLegacyAnchorTo() end
 
     -- Vehicle proxy: hide resource bars during full vehicle UI ([vehicleui] condition)
     -- Secure frame creation + RegisterStateDriver both need to happen outside combat
@@ -7413,6 +7882,8 @@ local function OnEvent(self, event, ...)
         if oldMax ~= newMax then
             cachedSecondary = newSec
             BuildBars()
+            -- BuildBars re-shows the frames; re-apply conditional hides.
+            UpdateVisibility()
         end
         UpdatePrimaryBar()
         UpdateSecondaryResource()

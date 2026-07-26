@@ -50,7 +50,8 @@ L["BUILDS_PROFILE_COPY_LOADOUT_LINK_POPUP_TITLE"] = "Raider.IO 장비 구성 링
 L["BUILDS_PROFILE_COPY_LOADOUT_POPUP_TITLE"] = "장비 구성 문자열 복사:"
 L["BUILDS_PROFILE_ERROR_CREATING_LOADOUT"] = "장비 구성을 생성할 수 없습니다. 추가 장비 구성을 저장할 공간이 부족하다면 공간을 확보해 주세요."
 L["BUILDS_PROFILE_FAILED_IMPORTING_BUILD"] = "빌드 가져오기에 실패했습니다."
-L["BUILDS_PROFILE_HERO_FORMAT"] = "%.0f%% (%s)"
+--[[Translation missing --]]
+--[[ L["BUILDS_PROFILE_HERO_FORMAT"] = ""--]] 
 L["BUILDS_PROFILE_IMPORTED_BUILD_TO_LOADOUT"] = "“%s”로 빌드를 가져왔습니다."
 L["BUILDS_PROFILE_LOAD_LOADOUT_ACTION_TITLE"] = "불러오기"
 L["BUILDS_PROFILE_LOADOUT_IS_ALREADY_ACTIVE"] = "현재 장비 구성이 이 빌드와 일치합니다."

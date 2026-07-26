@@ -17,7 +17,7 @@ local peaversTalentsDataPrefixes = {
 };
 
 local peaversTalentsDataIcons = {
-	-- https://github.com/peavers-warcraft/PeaversTalentsData/blob/master/src/Data/ArchonMythicDB.lua
+	-- https://github.com/peavers-warcraft/PeaversTalentsData/blob/master/src/Data/TopPlayersMythicDB.lua
 	mythic = {
 		[0] = Addon.MYTHICPLUS_ICON,
 		["All Dungeons"] = Addon.MYTHICPLUS_ICON,
@@ -33,8 +33,7 @@ local peaversTalentsDataIcons = {
 		["Windrunner Spire"] = 7266215,
 	},
 
-
-	-- https://github.com/peavers-warcraft/PeaversTalentsData/blob/master/src/Data/ArchonHeroicRaidDB.lua
+	-- https://github.com/peavers-warcraft/PeaversTalentsData/blob/master/src/Data/TopPlayersHeroicRaidDB.lua
 	raid = {
 		-- Midnight: Season 1
 		[0] = 7490911,
@@ -116,7 +115,12 @@ local function GetPeaversTalentsDataByCategory(category)
 			presetData = {};
 
 			local prefix = option.isCombineGroups and peaversTalentsDataPrefixes[category] or "";
-			for _, build in ipairs(API.GetBuilds(classID, specID, "archon")) do
+			local builds, errorMsg = API.GetBuilds(classID, specID, "top-players");
+			if errorMsg then
+				Addon:Print("PeaversTalentsData.API.GetBuilds() -> ", errorMsg);
+			end
+
+			for _, build in ipairs(builds or {}) do
 				local buildCategory = build.category;
 				buildCategory = buildCategory == "sporefall_heroic" and "heroic_raid" or buildCategory;
 				buildCategory = buildCategory == "sporefall_mythic" and "mythic_raid" or buildCategory;
@@ -138,7 +142,7 @@ local function GetPeaversTalentsDataByCategory(category)
 				if not group then
 					group = {
 						isPreset = true,
-						name = "Archon: "..peaversTalentsDataGroupNames[category],
+						name = peaversTalentsDataGroupNames[category].."\nWoWCompare",
 						icon = icons[0];
 						isExpanded = false,
 					};
@@ -246,7 +250,7 @@ local function GetMurlokExportDataByCategory(category)
 				if not group then
 					group = {
 						isPreset = true,
-						name = "Murlok.io: "..murlokExportGroupNames[category],
+						name = murlokExportGroupNames[category].."\nMurlok.io",
 						icon = murlokExportIcons[category],
 						isExpanded = false,
 					};
@@ -269,7 +273,7 @@ end
 local combinedGroups = {
 	PeaversTalentsData = {
 		isPreset = true,
-		name = "Archon",
+		name = "WoWCompare",
 		isExpanded = false,
 	},
 	MurlokExport = {

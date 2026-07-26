@@ -138,7 +138,8 @@ function ns._appendDisplayPresetKeys(t)
         "ccDurationTextSize", "ccDurationTextX", "ccDurationTextY", "ccDurationTextColor",
         "buffTextSize", "buffTextColor", "ccTextSize", "ccTextColor",
         "raidMarkerPos", "classificationSlot", "classificationShowInInstances",
-        "castNameSize", "castNameColor", "castTargetSize", "castTargetClassColor", "castTargetColor",
+        "castNameSize", "castNameColor", "castCombineNameTarget",
+        "castTargetSize", "castTargetClassColor", "castTargetColor",
         "showCastTimer", "castTimerSize", "castTimerColor", "targetScale",
         "castNameSide", "castTargetSide", "castTimerSide",
         "castNameWidthPct", "castNameWrap", "castTargetWidthPct", "castTargetWrap",
@@ -152,6 +153,7 @@ function ns._appendDisplayPresetKeys(t)
         "showCastLockoutAsCrowdControl",
         "castIconOffsetX", "castIconOffsetY",
         "targetGlowEllesmereUI", "targetGlowBorderColor", "targetGlowHighlight", "targetBorderColor",
+        "targetGlowBorderSize", "targetBorderSizeValue",
     }) do t[#t + 1] = k end
 end
 
@@ -194,10 +196,12 @@ local defaults = {
     -- Mini Coloring M+ Only: on = restrict the Mini Enemies color to 5-man
     -- dungeons; off = apply it everywhere (default; see GetReactionColor).
     miniColoringMPlusOnly = false,
-    -- Open World Basic Coloring (inline cog on Enemy Types): off by default.
-    -- On: outside instances, the mob-type special colors (Mini Enemies,
+    -- Full Coloring M+ Only (inline cog on Enemy Types): off by default.
+    -- On: outside 5-man dungeons, the mob-type special colors (Mini Enemies,
     -- Spell Casters, Mini-Bosses, Bosses) collapse into the single flat
     -- owBasicColor; Neutral keeps its own color (see GetReactionColor).
+    -- Keys keep their original owBasic* names (formerly "Open World Basic
+    -- Coloring", which gated on any instance instead of dungeons).
     owBasicColoring = false,
     owBasicColor = { r = 0.800, g = 0.137, b = 0.137 },
     darkenEnemiesOOC = true,
@@ -363,6 +367,7 @@ local defaults = {
     -- the historical castW*0.42 clamp) and a wrap toggle (off = single line + ellipsis).
     castNameWidthPct = 42,
     castNameWrap = false,
+    castCombineNameTarget = false,
     castTargetSize = 10,
     castTargetClassColor = true,
     castTargetColor = { r = 1, g = 1, b = 1 },
@@ -388,7 +393,14 @@ local defaults = {
     enemyNameWidthPct = 100,
     enemyNameWrap = false,
     targetScale = 100,
+    nonTargetKeepFocus = true,
     showAllDebuffs = false,
+    -- Distance to Target Text (range bucket on the target's nameplate)
+    rangeTextEnabled = false,
+    rangeTextSize = 11,
+    rangeTextOffsetX = 0,
+    rangeTextOffsetY = 0,
+    rangeTextColor = { r = 0.816, g = 0.357, b = 0.220 },  -- #D05B38
     maxDebuffs = 5,
     showBorder = true,
     borderSize = 1,
@@ -534,11 +546,14 @@ function ns.IsCustomBorderEnabled()
     if v == nil then return defaults.customBorderEnabled end
     return v
 end
-function ns.ApplyCustomBorderStyle(plate)
+-- szOverride: optional size override used by the "Border Size" target effect
+-- (the targeted plate rebuilds its custom border at the override size). All
+-- existing callers pass one arg and are unchanged.
+function ns.ApplyCustomBorderStyle(plate, szOverride)
     if not plate or not plate.health then return end
     if not (EllesmereUI and EllesmereUI.ApplyBorderStyle) then return end
     local tex    = (p and p.customBorderTexture) or defaults.customBorderTexture
-    local sz     = (p and p.customBorderSize) or defaults.customBorderSize
+    local sz     = szOverride or (p and p.customBorderSize) or defaults.customBorderSize
     local col    = (p and p.customBorderColor) or defaults.customBorderColor
     local a      = (p and p.customBorderAlpha) or defaults.customBorderAlpha or 1
     local behind = p and p.customBorderBehind
@@ -1321,6 +1336,17 @@ end
 function ns.GetTargetGlowHighlight()
     if p and p.targetGlowHighlight ~= nil then return p.targetGlowHighlight end
     return false  -- no legacy equivalent
+end
+function ns.GetTargetGlowBorderSize()
+    if p and p.targetGlowBorderSize ~= nil then return p.targetGlowBorderSize end
+    return false  -- no legacy equivalent
+end
+-- The target border size value is nil until the effect's first enable
+-- snapshots the user's then-current border size (options side); nil = the
+-- effect applies nothing (fail-safe for imported partial profiles).
+function ns.GetTargetBorderSizeValue()
+    local v = p and p.targetBorderSizeValue
+    return v
 end
 function ns.GetTargetBorderColor()
     return (p and p.targetBorderColor) or defaults.targetBorderColor
@@ -2212,9 +2238,29 @@ local function EnsureArrows(plate)
     -- after Show(). An unanchored hidden texture has no rect and draws
     -- nothing, so the creation state is safe. Rendering outside the bar rect
     -- is fine (health runs SetClipsChildren(false)).
-    plate.leftArrow = plate.health:CreateTexture(nil, "OVERLAY")
+    local arrowParent = plate.health
+    if EllesmereUI.IS_121 then
+        -- 68914: aura containers carry UntrustedLayoutScriptExecution once
+        -- they hold a group, and only aspect-bearing objects may anchor to
+        -- them. Aspects cannot be gained later (SetParent/SetPoint
+        -- inheritance is deliberately blocked), so the arrows must be BORN
+        -- inside a template holder: regions inherit the holder's aspect at
+        -- creation, letting the containers file anchor them to the side
+        -- aura containers while the legacy writers keep anchoring them to
+        -- readable frames. Stale builds without the template keep the
+        -- plain parent (their containers carry no aspect either).
+        local ok, holder = pcall(CreateFrame, "Frame", nil, plate.health,
+            "DisableUntrustedLayoutScriptsTemplate")
+        if ok and holder then
+            holder:SetAllPoints(plate.health)
+            holder:SetFrameLevel(plate.health:GetFrameLevel())
+            plate.arrowHost = holder
+            arrowParent = holder
+        end
+    end
+    plate.leftArrow = arrowParent:CreateTexture(nil, "OVERLAY")
     plate.leftArrow:SetTexture(ns.TARGET_ARROW_DIR .. st.l .. ".png")
-    plate.rightArrow = plate.health:CreateTexture(nil, "OVERLAY")
+    plate.rightArrow = arrowParent:CreateTexture(nil, "OVERLAY")
     plate.rightArrow:SetTexture(ns.TARGET_ARROW_DIR .. st.r .. ".png")
     PP.Size(plate.leftArrow, aw, ah)
     plate.leftArrow:Hide()
@@ -3420,6 +3466,7 @@ end
 --  Blizzard nameplate), so Blizzard's own occlusion fade still multiplies in.
 -------------------------------------------------------------------------------
 ns._ntAlpha = 1   -- cached 0..1 from the profile; 1 = inert
+ns._ntKeepFocus = true   -- cached "Keep Focus Full Opacity" (default on)
 
 -- Applies the correct root alpha to ONE plate. Value-guarded via
 -- _ntCurAlpha so redundant SetAlpha calls are skipped and pooled frames
@@ -3431,7 +3478,7 @@ function ns.NT_Apply(plate)
     local nt = ns._ntAlpha
     if nt < 1 and UnitExists("target")
        and not UnitIsUnit(unit, "target")
-       and not UnitIsUnit(unit, "focus")
+       and not (ns._ntKeepFocus and UnitIsUnit(unit, "focus"))
        and not UnitIsUnit(unit, "player") then
         a = nt
     end
@@ -3455,6 +3502,7 @@ function ns.NT_RefreshSetting()
     local v = tonumber(p and p.nonTargetAlpha) or 100
     if v < 0 then v = 0 elseif v > 100 then v = 100 end
     ns._ntAlpha = v / 100
+    ns._ntKeepFocus = not (p and p.nonTargetKeepFocus == false)
     ns.NT_ApplyAll()
 end
 
@@ -4604,10 +4652,6 @@ local function RefreshThreatCache()
     -- instanceType "party"; excludes raids/delves/open world). Cached here so the
     -- per-plate color path costs one field read, not a GetInstanceInfo call.
     ns._inDungeon = (instanceType == "party")
-    -- Any-instance flag for Open World Basic Coloring (dungeons, raids, delves,
-    -- scenarios, arenas, battlegrounds all count as instanced; only true open
-    -- world is "none").
-    ns._inInstance = (instanceType ~= nil and instanceType ~= "none")
     if difficultyID == 0
     or (C_Garrison and C_Garrison.IsOnGarrisonMap and C_Garrison.IsOnGarrisonMap()) then
         _inThreatContent = false
@@ -4640,22 +4684,23 @@ local questMobCache = {}
 -- exact invalidation lifecycle as questMobCache. Stored on ns (not a new
 -- file-scope local) because this file is near the Lua 5.1 local cap.
 ns._questObjText = ns._questObjText or {}
-local QUEST_LINE_TYPES
-if Enum and Enum.TooltipDataLineType then
-    QUEST_LINE_TYPES = {
-        [Enum.TooltipDataLineType.QuestObjective] = true,
-        [Enum.TooltipDataLineType.QuestTitle] = true,
-        [Enum.TooltipDataLineType.QuestPlayer] = true,
-    }
-end
-
+-- Detect whether a unit is one of the local player's active quest objectives
+-- with work remaining, from its unit tooltip. Blizzard tags the tooltip's quest
+-- lines with structured data: a QuestObjective line carries a `completed` flag
+-- plus numFulfilled/numRequired counts, and a QuestTitle line carries the quest
+-- id -- so completion is read straight from those fields, with no progress
+-- string to parse. Ownership is resolved through the player's own quest log
+-- (only their quests answer C_QuestLog.IsOnQuest), so a group member's objective
+-- is ignored without inspecting player-name lines. Every structured value is
+-- treated as possibly secret (12.1) and issecretvalue-checked before use.
+-- Cached per unit; the cache clears on QUEST_LOG_UPDATE and plate removal.
 local function IsQuestMob(unit)
-    if not C_TooltipInfo or not QUEST_LINE_TYPES then return false end
-    if questMobCache[unit] ~= nil then return questMobCache[unit] end
-    -- Quest mobs are open-world only, unless the indicator's "Show In
-    -- Instances" opt-in lifts the gate (safe: every tooltip-line read below
-    -- is pcall'd and escape values are issecretvalue-verified, so instanced
-    -- combat cannot leak or error on secret text).
+    if not (C_TooltipInfo and Enum and Enum.TooltipDataLineType) then return false end
+    local cached = questMobCache[unit]
+    if cached ~= nil then return cached end
+
+    -- Open-world only, unless the indicator's "Show In Instances" opt-in lifts
+    -- the gate.
     if InRealInstancedContent() then
         local show = p and p.classificationShowInInstances
         if show == nil then show = defaults.classificationShowInInstances end
@@ -4664,85 +4709,53 @@ local function IsQuestMob(unit)
             return false
         end
     end
+
     local info = C_TooltipInfo.GetUnit(unit)
-    if not info then
+    if not (info and info.lines) then
         questMobCache[unit] = false
         return false
     end
-    local playerName = UnitName("player")
-    local isInGroup = IsInGroup()
-    local ignoreUntilTitle = false
-    for _, line in ipairs(info.lines or {}) do
-        local lt = line.type
-        if not QUEST_LINE_TYPES[lt] then
-            -- skip non-quest lines
-        elseif lt == Enum.TooltipDataLineType.QuestPlayer then
-            -- In a group, only color for YOUR quests
-            -- Use pcall to safely compare leftText — it may be a tainted secret
-            -- string value in certain combat/nameplate contexts
-            if isInGroup then
-                local ok, result = pcall(function() return line.leftText ~= playerName end)
-                ignoreUntilTitle = ok and result or false
+
+    local LT = Enum.TooltipDataLineType
+    local onQuest = C_QuestLog and C_QuestLog.IsOnQuest
+    local wantText = (p and p.replaceQuestIconWithObjective == true) or false
+    local questID  -- id carried by the most recent QuestTitle line
+    local isQuest, objText = false, nil
+
+    for _, line in ipairs(info.lines) do
+        local kind = line.type
+        if kind == LT.QuestTitle then
+            local id = line.id
+            if id and not (issecretvalue and issecretvalue(id)) then
+                questID = id
+            else
+                questID = nil
             end
-        elseif lt == Enum.TooltipDataLineType.QuestTitle then
-            ignoreUntilTitle = false
-        elseif lt == Enum.TooltipDataLineType.QuestObjective and not ignoreUntilTitle then
-            -- leftText may be a tainted secret string; wrap in pcall
-            local ok, isIncomplete = pcall(function()
-                local txt = line.leftText or ""
-                local c1, c2 = txt:match("(%d+)/(%d+)")
-                if c1 and c1 ~= c2 then return true end
-                local pct = txt:match("(%d+)%%")
-                if pct and pct ~= "100" then return true end
-                return false
-            end)
-            if ok and isIncomplete then
-                questMobCache[unit] = true
-                -- Optional progress extraction for the icon-replace feature.
-                -- Fully gated by the setting: nothing here runs when OFF.
-                -- Isolated in its own pcall so a secret/tainted leftText can
-                -- never disturb the boolean decision above. We never branch on
-                -- the (possibly secret) values; the count ("current/required")
-                -- or percentage string escapes only if it is clean (issecretvalue
-                -- + a strict digit pattern, both inside the pcall); otherwise
-                -- nothing is cached and the icon is used.
-                if p and p.replaceQuestIconWithObjective == true then
-                    local okN, rem = pcall(function()
-                        local txt = line.leftText or ""
-                        local c1, c2 = txt:match("(%d+)/(%d+)")
-                        if c1 and c2 and c1 ~= c2 then
-                            local s = c1 .. "/" .. c2
-                            if (not issecretvalue or not issecretvalue(s))
-                               and s:match("^%d+/%d+$") then
-                                return s
-                            end
-                        end
-                        -- Percent-based objective (e.g. "50%") has no
-                        -- current/required pair; show the percentage itself.
-                        -- Same clean-value gate as the count path: the string
-                        -- escapes only when verifiably non-secret.
-                        local pct = txt:match("(%d+)%%")
-                        if pct and pct ~= "100" then
-                            local s = pct .. "%"
-                            if (not issecretvalue or not issecretvalue(s))
-                               and s:match("^%d+%%$") then
-                                return s
-                            end
-                        end
-                        return nil
-                    end)
-                    if okN and type(rem) == "string" then
-                        ns._questObjText[unit] = rem
-                    else
-                        ns._questObjText[unit] = nil
+        elseif kind == LT.QuestObjective then
+            local done = line.completed
+            -- An incomplete objective the player is actually on: their quest log
+            -- scopes out a group member's objectives. Fail open when the id is
+            -- unreadable so a real quest mob is never silently skipped.
+            if not (issecretvalue and issecretvalue(done)) and done == false
+               and (not questID or not onQuest or onQuest(questID)) then
+                isQuest = true
+                if wantText then
+                    local have, need = line.numFulfilled, line.numRequired
+                    if have and need
+                       and not (issecretvalue and (issecretvalue(have) or issecretvalue(need))) then
+                        objText = have .. "/" .. need
                     end
                 end
-                return true
+                break
             end
         end
     end
-    questMobCache[unit] = false
-    return false
+
+    questMobCache[unit] = isQuest
+    if wantText then
+        ns._questObjText[unit] = isQuest and objText or nil
+    end
+    return isQuest
 end
 ns.IsQuestMob = IsQuestMob
 
@@ -4842,7 +4855,15 @@ local function GetReactionColor(unit)
                     -- Only show no-aggro warning if a non-tank has it.
                     -- If another tank holds aggro, this is normal offtank positioning.
                     local unitTarget = unit .. "target"
-                    local targetRole = UnitExists(unitTarget) and UnitGroupRolesAssigned(unitTarget) or "NONE"
+                    -- Role reads on identity-restricted units return SECRET
+                    -- values (68914): never truthiness-chain or compare one.
+                    -- Unreadable role reads as non-tank, matching the
+                    -- unknown-target behavior.
+                    local targetRole = "NONE"
+                    if UnitExists(unitTarget) then
+                        local r = UnitGroupRolesAssigned(unitTarget)
+                        if not issecretvalue(r) and r then targetRole = r end
+                    end
                     if targetRole ~= "TANK" then
                         local c = _C("tankNoAggro")
                         return c.r, c.g, c.b
@@ -4899,6 +4920,9 @@ local function GetReactionColor(unit)
     -- 6. Enemy player class colors
     if UnitIsPlayer(unit) and UnitCanAttack("player", unit) then
         local _, class = UnitClass(unit)
+        -- Secret class token (identity-restricted, 68914) cannot key a
+        -- color table -- fall through to the reaction color.
+        if issecretvalue(class) then class = nil end
         local c = class and RAID_CLASS_COLORS and RAID_CLASS_COLORS[class]
         if c then
             return c.r, c.g, c.b
@@ -4910,14 +4934,15 @@ local function GetReactionColor(unit)
     -- still returned at their own priority steps (7, 8, 10b) further down.
     local inCombat = UnitAffectingCombat(unit)
     local classification = UnitClassification(unit)
-    -- Open World Basic Coloring (inline cog on Enemy Types): outside instances,
-    -- collapse the mob-type special colors (Mini Enemies, Spell Casters,
-    -- Mini-Bosses, Bosses) into the single flat owBasicColor at the enemy
-    -- fallback (step 11). Neutral is unaffected: outside dungeons it already
-    -- returned at step 5. Off by default -- when off (or in any instance)
-    -- every step below behaves exactly as before.
+    -- Full Coloring M+ Only (inline cog on Enemy Types): outside 5-man
+    -- dungeons, collapse the mob-type special colors (Mini Enemies, Spell
+    -- Casters, Mini-Bosses, Bosses) into the single flat owBasicColor at the
+    -- enemy fallback (step 11). Neutral is unaffected: outside dungeons it
+    -- already returned at step 5. Off by default -- when off (or in a 5-man
+    -- dungeon) every step below behaves exactly as before. Same dungeon gate
+    -- as Mini Coloring M+ Only (ns._inDungeon).
     local owBasic = false
-    if not ns._inInstance then
+    if not ns._inDungeon then
         owBasic = defaults.owBasicColoring
         if db.owBasicColoring ~= nil then owBasic = db.owBasicColoring end
     end
@@ -4930,22 +4955,23 @@ local function GetReactionColor(unit)
     local _isMiniBoss = false
     if not owBasic
        and (classification == "elite" or classification == "worldboss" or classification == "rareelite") then
-        -- Effective level (handles level scaling / Chromie time), not raw level.
+        -- Effective level (handles scaling / Chromie time), not raw level, so
+        -- the tier tracks how the game ranks the mob against the player.
         local level = UnitEffectiveLevel(unit)
-        local playerLevel = UnitEffectiveLevel("player")
         local lvlClean = level and not (issecretvalue and issecretvalue(level))
+        local isSkull = lvlClean and level == -1
+        local playerLevel = UnitEffectiveLevel("player")
         local plvlClean = playerLevel and not (issecretvalue and issecretvalue(playerLevel))
-        if lvlClean and (level == -1 or (plvlClean and level >= playerLevel + 1)) then
-            -- Tier by effective-level delta (how the game ranks instance mobs):
-            -- ?? (skull) or player+2 and up = boss; player+1 = mini-boss. World
-            -- bosses are always bosses; a flagged lieutenant is always a mini-boss.
-            local isBoss = (classification == "worldboss")
-                or (level == -1)
-                or (plvlClean and level >= playerLevel + 2)
-            if level ~= -1 and UnitIsLieutenant and UnitIsLieutenant(unit) then
-                isBoss = false
-            end
-            if isBoss then
+        -- A skull, or an elite ranked at least one effective level above the
+        -- player, gets a tier; ordinary same/lower-level elites are left alone.
+        local aboveOne = plvlClean and lvlClean and level >= playerLevel + 1
+        if isSkull or aboveOne then
+            -- Boss when it reads as boss-ranked: a skull, a world boss, or two+
+            -- effective levels up. UnitIsLieutenant is the client's own mini-boss
+            -- marker, so a non-skull lieutenant is pinned to mini-boss.
+            local aboveTwo = plvlClean and lvlClean and level >= playerLevel + 2
+            local lieutenant = (not isSkull) and UnitIsLieutenant and UnitIsLieutenant(unit)
+            if not lieutenant and (isSkull or aboveTwo or classification == "worldboss") then
                 _isBossUnit = true
             else
                 _isMiniBoss = true
@@ -4953,6 +4979,9 @@ local function GetReactionColor(unit)
         end
     end
     local unitClass = UnitClassBase and UnitClassBase(unit)
+    -- Identity-restricted units return a SECRET token (68914); comparing
+    -- one errors, so an unreadable class is just not a caster.
+    if issecretvalue(unitClass) then unitClass = nil end
     local _isCaster = not owBasic and (unitClass == "PALADIN")
     -- DPS/healer No Aggro override state (mirrors the tank has-aggro overrides at
     -- 6b). Each override independently promotes the No Aggro color above a single
@@ -5005,14 +5034,19 @@ local function GetReactionColor(unit)
     -- (step 10c), so their has-aggro / caster / mob-type colors still win on trash.
     if miniColorScope
        and (classification == "normal" or classification == "minus" or classification == "trivial") then
-        -- Neutral + mini-enemy: neutral coloring wins over the trash color, for
-        -- ALL viewers. Placed above the tank-role gate, the DPS carve-out, and the
-        -- Mini Enemies return below, so a neutral mini beats them (and Caster too,
-        -- since 7b already sits above step 8). Non-trash neutral units are not
-        -- caught here and still defer to step 10d.
-        if isNeutral then return ResolveNeutralColor(unit) end
         local thae = defaults.tankHasAggroEnabled
         if db.tankHasAggroEnabled ~= nil then thae = db.tankHasAggroEnabled end
+        -- Neutral + mini-enemy: neutral coloring wins over the trash color --
+        -- EXCEPT for a tank holding aggro with the Tank Has Aggro color enabled.
+        -- That viewer falls through here (same as hostile trash does via the
+        -- role gate below) so step 9 paints the has-aggro color; without this
+        -- exception the in-combat neutral return blocked threat coloring and
+        -- neutral mobs stayed enemy-red for tanks. All other viewers: neutral
+        -- beats the trash color, the DPS carve-out, and Caster (7b sits above
+        -- step 8). Non-trash neutral units are not caught here and still defer
+        -- to step 10d.
+        local tankAggroPending = isThreatUnit and _isTankRole and threatStatus >= 3 and thae
+        if isNeutral and not tankAggroPending then return ResolveNeutralColor(unit) end
         if not (_isTankRole and thae) then
             -- DPS "No Aggro" still wins over the promoted Mini Enemies color, so a
             -- DPS/healer without aggro sees the no-aggro warning on trash instead
@@ -5102,8 +5136,8 @@ local function GetReactionColor(unit)
     if isNeutral then
         return ResolveNeutralColor(unit)
     end
-    -- 11. Fallback: enemy in combat / out of combat. With Open World Basic
-    -- Coloring active, every mob-type special above was suppressed, so all
+    -- 11. Fallback: enemy in combat / out of combat. With Full Coloring M+
+    -- Only active, every mob-type special above was suppressed, so all
     -- hostile mobs land here and share the flat "All Enemies" color.
     local eic = _C(owBasic and "owBasicColor" or "enemyInCombat")
     return MaybeDarken(eic.r, eic.g, eic.b, inCombat)
@@ -5148,29 +5182,35 @@ local function HideBlizzardFrame(nameplate, unit)
     -- the entire block and leaves Blizzard's UnitFrame visible behind ours
     -- as a giant black box.
     uf:SetAlpha(0)
-    if uf.healthBar then
-        uf.healthBar:SetParent(npOffscreenParent)
-    end
-    -- Move visual children off the UnitFrame so Blizzard's layout engine
-    -- stops recalculating bounds from them.
-    MoveToOffscreen(uf.HealthBarsContainer, unit)
-    MoveToOffscreen(uf.castBar, unit)
-    MoveToOffscreen(uf.name, unit)
-    MoveToOffscreen(uf.selectionHighlight, unit)
-    MoveToOffscreen(uf.aggroHighlight, unit)
-    MoveToOffscreen(uf.softTargetFrame, unit)
-    MoveToOffscreen(uf.SoftTargetFrame, unit)
-    MoveToOffscreen(uf.ClassificationFrame, unit)
-    MoveToOffscreen(uf.RaidTargetFrame, unit)
-    MoveToOffscreen(uf.PlayerLevelDiffFrame, unit)
-    if uf.BuffFrame then uf.BuffFrame:SetAlpha(0) end
-    -- Move AurasFrame list frames offscreen -- we query C_UnitAuras
-    -- directly for debuff/CC data so these visual lists are unused.
+    -- One Blizzard child stays live rather than riding the frame offscreen:
+    -- the AurasFrame, which our RefreshAuras hook below reads. Re-home it on
+    -- the nameplate and alpha it out so Blizzard keeps updating it while its
+    -- rows stay invisible. (The WidgetContainer is likewise kept, further down.)
     if uf.AurasFrame then
-        MoveToOffscreen(uf.AurasFrame.DebuffListFrame, unit)
-        MoveToOffscreen(uf.AurasFrame.BuffListFrame, unit)
-        MoveToOffscreen(uf.AurasFrame.CrowdControlListFrame, unit)
-        MoveToOffscreen(uf.AurasFrame.LossOfControlFrame, unit)
+        if not storedParents[uf.AurasFrame] then
+            storedParents[uf.AurasFrame] = uf.AurasFrame:GetParent()
+        end
+        uf.AurasFrame:SetParent(nameplate)
+        uf.AurasFrame:SetAlpha(0)
+    end
+    -- Park the UnitFrame's child frames on the hidden holder, discovered
+    -- generically -- whatever Blizzard parents under the UnitFrame is swept, so
+    -- there is no per-widget list to maintain as Blizzard adds fields. The
+    -- UnitFrame ITSELF stays on the nameplate exactly as Blizzard placed it
+    -- (alpha 0 from above): parking the whole frame under a hidden holder
+    -- flipped every plate's content to IsVisible()==false and broke click
+    -- target selection between overlapping plates in packs (8.5.5 regression,
+    -- Semage report) -- the plate's hit-test context must keep its live,
+    -- on-plate UnitFrame like it always had. Exclusions: the two kept-live
+    -- frames above/below, and protected or forbidden children are never
+    -- touched (alpha 0 hides them anyway).
+    for i = 1, uf:GetNumChildren() do
+        local child = select(i, uf:GetChildren())
+        if child and child ~= uf.WidgetContainer and child ~= uf.AurasFrame
+           and not child:IsForbidden() and not child:IsProtected() then
+            if not storedParents[child] then storedParents[child] = uf end
+            child:SetParent(npOffscreenParent)
+        end
     end
     -- All visual children are reparented offscreen so layout
     -- recalculations won't shift bounds.
@@ -5292,32 +5332,33 @@ local function RestoreBlizzardFrame(nameplate)
     if not nameplate then return end
     local uf = nameplate.UnitFrame
     if not uf then return end
-    -- Restore reparented children
-    if uf.healthBar and storedParents[uf.healthBar] then
-        uf.healthBar:SetParent(storedParents[uf.healthBar])
-        storedParents[uf.healthBar] = nil
+    -- Return this UnitFrame's parked children from the hidden holder (the
+    -- holder is shared by every plate, so filter by recorded owner), then
+    -- re-home the kept-live frames, returning the recycled nameplate to a
+    -- clean state for its next unit.
+    for i = npOffscreenParent:GetNumChildren(), 1, -1 do
+        local child = select(i, npOffscreenParent:GetChildren())
+        if child and storedParents[child] == uf then
+            child:SetParent(uf)
+            storedParents[child] = nil
+        end
     end
-    RestoreFromOffscreen(uf.HealthBarsContainer)
-    RestoreFromOffscreen(uf.castBar)
-    RestoreFromOffscreen(uf.name)
-    RestoreFromOffscreen(uf.selectionHighlight)
-    RestoreFromOffscreen(uf.aggroHighlight)
-    RestoreFromOffscreen(uf.softTargetFrame)
-    RestoreFromOffscreen(uf.SoftTargetFrame)
-    RestoreFromOffscreen(uf.ClassificationFrame)
-    RestoreFromOffscreen(uf.RaidTargetFrame)
-    RestoreFromOffscreen(uf.PlayerLevelDiffFrame)
-    -- Restore WidgetContainer
+    -- Safety for a mid-session state where the whole UnitFrame was parked
+    -- (transitional builds); normally a no-op.
+    if storedParents[uf] then
+        uf:SetParent(storedParents[uf])
+        storedParents[uf] = nil
+    end
+    uf:SetAlpha(1)
+    if uf.AurasFrame then
+        if storedParents[uf.AurasFrame] then
+            uf.AurasFrame:SetParent(storedParents[uf.AurasFrame])
+            storedParents[uf.AurasFrame] = nil
+        end
+        uf.AurasFrame:SetAlpha(1)
+    end
     if uf.WidgetContainer then
         uf.WidgetContainer:SetParent(uf)
-    end
-    -- Restore AurasFrame children
-    if uf.AurasFrame then
-        local af = uf.AurasFrame
-        RestoreFromOffscreen(af.DebuffListFrame)
-        RestoreFromOffscreen(af.BuffListFrame)
-        RestoreFromOffscreen(af.CrowdControlListFrame)
-        RestoreFromOffscreen(af.LossOfControlFrame)
     end
 end
 ns.HideBlizzardFrame = HideBlizzardFrame
@@ -5339,20 +5380,11 @@ castFallbackFrame:SetScript("OnUpdate", function(self, elapsed)
             if bc and bc:IsShown() then
                 plate.cast:SetMinMaxValues(bc:GetMinMaxValues())
                 plate.cast:SetValue(bc:GetValue())
-                -- Update cast target in fallback mode (not handled by UpdateCast)
-                if doText and plate.castTarget then
-                    local tgt
-                    if UnitShouldDisplaySpellTargetName and UnitShouldDisplaySpellTargetName(plate.unit) then
-                        tgt = UnitSpellTargetName and UnitSpellTargetName(plate.unit)
-                    end
-                    -- tgt may be a SECRET string: truthiness (tgt or "")
-                    -- would error; type() is the safe nil check and
-                    -- SetText accepts secret strings natively.
-                    if type(tgt) == "nil" then
-                        plate.castTarget:SetText("")
-                    else
-                        plate.castTarget:SetText(tgt)
-                    end
+                -- Keep spell name + target current in fallback mode.
+                if doText and plate.UpdateCastText then
+                    local castName = UnitCastingInfo(plate.unit)
+                    if type(castName) == "nil" then castName = UnitChannelInfo(plate.unit) end
+                    plate:UpdateCastText(castName)
                 end
             else
                 if not plate._interrupted then
@@ -5446,6 +5478,82 @@ end
 
 local NameplateFrame = {}
 
+function NameplateFrame:UpdateCastText(spellName)
+    local spellTarget, spellTargetClass
+    if UnitShouldDisplaySpellTargetName and UnitShouldDisplaySpellTargetName(self.unit) then
+        local rawTarget = UnitSpellTargetName and UnitSpellTargetName(self.unit)
+        -- Names may be SECRET: type() is safe, and SetText/SetFormattedText
+        -- accept secret strings without exposing them to Lua.
+        if type(rawTarget) ~= "nil" then
+            spellTarget = rawTarget
+            spellTargetClass = UnitSpellTargetClass and UnitSpellTargetClass(self.unit)
+        end
+    end
+
+    local hasTarget = type(spellTarget) ~= "nil"
+    local db = p or defaults
+    local combine = db.castCombineNameTarget == true
+    local useClassColor = defaults.castTargetClassColor
+    if db.castTargetClassColor ~= nil then useClassColor = db.castTargetClassColor end
+
+    local targetColor, targetHex
+    if useClassColor then
+        if type(spellTargetClass) ~= "nil" and C_ClassColor then
+            targetColor = C_ClassColor.GetClassColor(spellTargetClass)
+        end
+        -- spellTargetClass may be SECRET in instanced content, and the color
+        -- object's components are then secret too: GenerateHexColor runs
+        -- arithmetic + string.format on them (errors under our taint), and
+        -- the hex is concatenated into the combined-mode format string below,
+        -- where a secret string would also error. Combined mode falls back to
+        -- white for secret-class targets; the separate castTarget FontString
+        -- keeps full class color either way via SetTextColor, whose setter
+        -- accepts secret components.
+        if targetColor and targetColor.GenerateHexColor
+            and not (issecretvalue and issecretvalue(spellTargetClass)) then
+            targetHex = targetColor:GenerateHexColor()
+        end
+        targetHex = targetHex or "ffffffff"
+    else
+        local c = db.castTargetColor or defaults.castTargetColor
+        targetHex = string.format("ff%02x%02x%02x",
+            math.floor(c.r * 255 + 0.5), math.floor(c.g * 255 + 0.5), math.floor(c.b * 255 + 0.5))
+    end
+
+    if type(spellName) == "nil" then
+        self.castName:SetText("")
+    elseif combine and hasTarget then
+        self.castName:SetFormattedText("%s - |c" .. targetHex .. "%s|r", spellName, spellTarget)
+    else
+        self.castName:SetText(spellName)
+    end
+    if combine or not hasTarget then
+        self.castTarget:SetText("")
+    else
+        self.castTarget:SetText(spellTarget)
+    end
+
+    if useClassColor then
+        if targetColor then
+            self.castTarget:SetTextColor(targetColor:GetRGB())
+        else
+            self.castTarget:SetTextColor(1, 1, 1, 1)
+        end
+    else
+        local c = db.castTargetColor or defaults.castTargetColor
+        self.castTarget:SetTextColor(c.r, c.g, c.b, 1)
+    end
+
+    local castW = self.cast:GetWidth()
+    if castW and castW > 0 then
+        local nameWidth = combine and 80 or (db.castNameWidthPct or defaults.castNameWidthPct)
+        self.castName:SetWidth(castW * nameWidth / 100)
+    end
+    self.castName:SetShown((db.castNameSide or defaults.castNameSide) ~= "none")
+    self.castTarget:SetShown(not combine and hasTarget
+        and (db.castTargetSide or defaults.castTargetSide) ~= "none")
+end
+
 -- Appearance generation: bumped by RefreshAllSettings so plates re-apply
 -- static appearance on next SetUnit. Plates stamp _appearanceGen after
 -- applying so cache-hit re-spawns skip the work entirely.
@@ -5506,6 +5614,7 @@ function NameplateFrame:ApplyAppearance()
     local nameSide   = (p and p.castNameSide)   or defaults.castNameSide
     local targetSide = (p and p.castTargetSide) or defaults.castTargetSide
     local timerSide  = (p and p.castTimerSide)  or defaults.castTimerSide
+    local combineNameTarget = p and p.castCombineNameTarget == true
     local castW = self.cast:GetWidth()
     local timerW = ctmSz * 2.2
     -- Per-element truncation: width as a % of the cast bar, plus a wrap toggle.
@@ -5523,7 +5632,7 @@ function NameplateFrame:ApplyAppearance()
     if castW and castW > 0 then
         if nameSide ~= "none" then
             local pt, xb, jh = ns.GetCastTextAnchor(nameSide, showTimer and timerSide == nameSide, timerW, false)
-            self.castName:SetWidth(castW * cnWPct / 100)
+            self.castName:SetWidth(castW * (combineNameTarget and 80 or cnWPct) / 100)
             self.castName:SetJustifyH(jh)
             self.castName:ClearAllPoints()
             self.castName:SetPoint(pt, self.cast, pt, xb + cnOX, cnOY)
@@ -5549,7 +5658,7 @@ function NameplateFrame:ApplyAppearance()
     end
     -- Base visibility by side (UpdateCast refines the target per cast on hasTarget).
     self.castName:SetShown(nameSide ~= "none")
-    self.castTarget:SetShown(targetSide ~= "none")
+    self.castTarget:SetShown(not combineNameTarget and targetSide ~= "none")
     self.castTimer:SetShown(showTimer)
     -- Force the new justify to take effect on text that is already rendered (e.g.
     -- changing the side while a plate is mid-cast). A fresh cast re-flows on its own
@@ -6522,9 +6631,10 @@ function NameplateFrame:UpdateNameWidth()
     -- Width % scales the computed (bar-derived) width; 100 = historical behaviour.
     local pct = (p and p.enemyNameWidthPct) or defaults.enemyNameWidthPct
     local nameSlot = FindSlotForElement("enemyName")
-    local nameMarkerReserve = (self.nameRaidFrame and self.nameRaidFrame:IsShown()) and (((p and p.nameRaidMarkerSize) or defaults.nameRaidMarkerSize or 14) + 3) or 0
+    local nameMarkerReserve = self._nameRaidMarkerShown == true
+        and (((p and p.nameRaidMarkerSize) or defaults.nameRaidMarkerSize or 14) + 3) or 0
     if nameSlot == "textSlotTop" then
-        -- Above the bar: full bar width minus raid marker if shown
+        -- Above the bar: reserve a fixed slot for the inline raid marker.
         local nameW = barW - nameMarkerReserve
         local rmPos = GetRaidMarkerPos()
         if rmPos ~= "none" and self.raidFrame:IsShown() then
@@ -6652,18 +6762,7 @@ function NameplateFrame:RefreshNamePosition(localOnly)
         nameRaid:SetFrameStrata("MEDIUM")
         nameRaid:SetFrameLevel(901)
         nameRaid:ClearAllPoints()
-        local textW = self.name:GetWidth() or 0
-        local ok, renderedW = pcall(self.name.GetStringWidth, self.name)
-        if ok and type(renderedW) == "number" and not (issecretvalue and issecretvalue(renderedW)) then
-            textW = math.min(renderedW, textW)
-        end
-        if nameSlot == "textSlotLeft" then
-            nameRaid:SetPoint("RIGHT", self.name, "LEFT", -3, 0)
-        elseif nameSlot == "textSlotRight" then
-            nameRaid:SetPoint("RIGHT", self.name, "RIGHT", -textW - 3, 0)
-        else
-            nameRaid:SetPoint("RIGHT", self.name, "CENTER", -(textW * 0.5) - 3, 0)
-        end
+        nameRaid:SetPoint("RIGHT", self.name, "LEFT", -3, 0)
         nameRaid:Show()
     elseif nameRaid then
         nameRaid:Hide()
@@ -6736,6 +6835,26 @@ function NameplateFrame:ApplyTarget()
         self.glow:Show()
     elseif self.glow then
         self.glow:Hide()
+    end
+    -- Border Size: resize the health border while targeted (Border Size
+    -- target effect). tbsz stays nil unless the effect is on AND a size was
+    -- snapshotted, so everyone else runs the original paths untouched. Runs
+    -- BEFORE the Border Color block so a rebuilt custom border gets its
+    -- target tint re-applied right after. Restore is one-shot via
+    -- self._targetBorderSized (ApplyBorder re-derives the normal size), so
+    -- untargeted plates never pay a re-apply.
+    local tbsz
+    if isTarget and ns.GetTargetGlowBorderSize() then tbsz = ns.GetTargetBorderSizeValue() end
+    if tbsz then
+        if ns.IsCustomBorderEnabled() then
+            ns.ApplyCustomBorderStyle(self, tbsz)
+        elseif PP and IsBorderEnabled() then
+            PP.SetBorderSize(self.health, tbsz)
+        end
+        self._targetBorderSized = true
+    elseif self._targetBorderSized then
+        self._targetBorderSized = nil
+        self:ApplyBorder()
     end
     -- Border Color: recolor the health bar border with the custom target color
     if isTarget and ns.GetTargetGlowBorderColor() then
@@ -7009,7 +7128,11 @@ function NameplateFrame:UpdateAuras(updateInfo)
             for _, aura in ipairs(updateInfo.addedAuras) do
                 if aura.isFromPlayerOrPlayerPet then rebuildD = true; rebuildC = true end
                 if aura.isHelpful then rebuildB = true end
-                if aura.dispelName and aura.isHarmful then rebuildC = true end
+                if aura.dispelName and aura.isHarmful then
+                    rebuildC = true
+                    -- "Debuffs + CC": foreign CC can enter the debuff row too
+                    if p and p.debuffIncludeCC then rebuildD = true end
+                end
             end
         end
         if mask then
@@ -7080,6 +7203,26 @@ function NameplateFrame:UpdateAuras(updateInfo)
     if debuffSlotVal ~= "none" then
     local maxDbfSlots = #self.debuffs
     local showAll = p and p.showAllDebuffs
+    -- "Debuffs + CC" core position: the debuff row leads with up to 2
+    -- crowd-control debuffs (any caster, same filter as the CC row), then
+    -- the normal debuff logic below fills the remaining slots. The
+    -- selection loops dedupe against the lead-in -- a player-cast CC
+    -- passes both filters. Zero cost when the option is off.
+    local ccLead = 0
+    if p and p.debuffIncludeCC and C_UnitAuras and C_UnitAuras.GetUnitAuras then
+        local ccAuras = C_UnitAuras.GetUnitAuras(unit, "HARMFUL|CROWD_CONTROL")
+        if ccAuras then
+            for _, aura in ipairs(ccAuras) do
+                if ccLead >= 2 or dIdx > maxDbfSlots then break end
+                if aura and aura.auraInstanceID and aura.icon then
+                    skipIDs[dIdx] = aura.auraInstanceID
+                    skipAuras[dIdx] = aura
+                    dIdx = dIdx + 1
+                    ccLead = ccLead + 1
+                end
+            end
+        end
+    end
     if showAll then
         -- showAll mode: must scan all player debuffs
         if C_UnitAuras and C_UnitAuras.GetUnitAuras then
@@ -7089,9 +7232,15 @@ function NameplateFrame:UpdateAuras(updateInfo)
                     if dIdx > maxDbfSlots then break end
                     local id = aura and aura.auraInstanceID
                     if id and aura.icon then
-                        skipIDs[dIdx] = id
-                        skipAuras[dIdx] = aura
-                        dIdx = dIdx + 1
+                        local dup = false
+                        for ci = 1, ccLead do
+                            if skipIDs[ci] == id then dup = true; break end
+                        end
+                        if not dup then
+                            skipIDs[dIdx] = id
+                            skipAuras[dIdx] = aura
+                            dIdx = dIdx + 1
+                        end
                     end
                 end
             end
@@ -7121,9 +7270,15 @@ function NameplateFrame:UpdateAuras(updateInfo)
                         if dIdx > maxDbfSlots then break end
                         local id = aura and aura.auraInstanceID
                         if id and aura.icon and importantSet[id] then
-                            skipIDs[dIdx] = id
-                            skipAuras[dIdx] = aura
-                            dIdx = dIdx + 1
+                            local dup = false
+                            for ci = 1, ccLead do
+                                if skipIDs[ci] == id then dup = true; break end
+                            end
+                            if not dup then
+                                skipIDs[dIdx] = id
+                                skipAuras[dIdx] = aura
+                                dIdx = dIdx + 1
+                            end
                         end
                     end
                 end
@@ -7619,11 +7774,6 @@ function NameplateFrame:UpdateCast()
     if isFullSetup then
         self.cast:Show()
         self:ApplyNameVisibility()
-        local castW = self.cast:GetWidth()
-        if castW and castW > 0 then
-            local cnWPct = (p and p.castNameWidthPct) or defaults.castNameWidthPct
-            self.castName:SetWidth(castW * cnWPct / 100)
-        end
         -- Icon and name must describe the SAME cast. Both are taken from this
         -- UnitCastingInfo/UnitChannelInfo snapshot: the icon comes straight from
         -- the live texture (which may be a secret value -- SetTexture accepts
@@ -7644,53 +7794,7 @@ function NameplateFrame:UpdateCast()
         else
             self.castIcon:SetTexture(nil)
         end
-        self.castName:SetText(type(name) ~= "nil" and name or "")
-
-        local spellTarget, spellTargetClass
-        if UnitShouldDisplaySpellTargetName and UnitShouldDisplaySpellTargetName(self.unit) then
-            local rawTarget = UnitSpellTargetName and UnitSpellTargetName(self.unit)
-            -- May be a SECRET string: type() is the only safe existence
-            -- check (truthiness on a secret errors); SetText/SetTextColor
-            -- accept secrets natively downstream.
-            if type(rawTarget) ~= "nil" then
-                spellTarget = rawTarget
-                spellTargetClass = UnitSpellTargetClass and UnitSpellTargetClass(self.unit)
-            end
-        end
-        local hasTarget = type(spellTarget) ~= "nil"
-        if hasTarget then
-            self.castTarget:SetText(spellTarget)
-        else
-            self.castTarget:SetText("")
-        end
-
-        local db = p or defaults
-        local useClassColor = defaults.castTargetClassColor
-        if db.castTargetClassColor ~= nil then useClassColor = db.castTargetClassColor end
-        if useClassColor then
-            local appliedCTC = false
-            -- spellTargetClass may be SECRET; GetClassColor accepts it and
-            -- returns a clean color object whose components stay secret-safe
-            -- through SetTextColor.
-            if type(spellTargetClass) ~= "nil" and C_ClassColor then
-                local c = C_ClassColor.GetClassColor(spellTargetClass)
-                if c then
-                    self.castTarget:SetTextColor(c:GetRGB())
-                    appliedCTC = true
-                end
-            end
-            if not appliedCTC then
-                self.castTarget:SetTextColor(1, 1, 1, 1)
-            end
-        else
-            local ctc = (db and db.castTargetColor) or defaults.castTargetColor
-            self.castTarget:SetTextColor(ctc.r, ctc.g, ctc.b, 1)
-        end
-
-        local nameSide   = db.castNameSide   or defaults.castNameSide
-        local targetSide = db.castTargetSide or defaults.castTargetSide
-        self.castName:SetShown(nameSide ~= "none")
-        self.castTarget:SetShown(hasTarget and targetSide ~= "none")
+        self:UpdateCastText(name)
         self.castTimer:SetShown(self._showCastTimer)
 
         if type(kickProtected) == "nil" then
@@ -8151,23 +8255,23 @@ function NameplateFrame:ShowInterrupted(interrupterGUID)
     local fc = (p and p.interruptedFlashColor) or defaults.interruptedFlashColor
     self.cast:GetStatusBarTexture():SetVertexColor(fc.r, fc.g, fc.b)
 
-    -- Resolve the interrupter's name + class from the GUID, exactly as PR #398
-    -- does. Class-color is applied via an embedded hex code when the class
-    -- resolves; if it doesn't (e.g. a secret GUID), the `if interrupterClass`
-    -- check simply skips coloring and the name shows uncolored.
+    -- Resolve the interrupter's name + class from the GUID. For a player GUID,
+    -- GetPlayerInfoByGUID returns both in one call (class = 2nd return, name =
+    -- 6th return).
     local interrupterName
     local interrupterClass
     if interrupterGUID then
-        if UnitNameFromGUID then
-            interrupterName = UnitNameFromGUID(interrupterGUID)
-            local _, class = GetPlayerInfoByGUID(interrupterGUID)
-            interrupterClass = class
-        else
-            local unitToken = UnitTokenFromGUID(interrupterGUID)
-            if unitToken then
-                interrupterName = UnitName(unitToken)
-                interrupterClass = UnitClassBase(unitToken)
-            end
+        local _, class, _, _, _, name = GetPlayerInfoByGUID(interrupterGUID)
+        interrupterClass = class
+        interrupterName = name
+        if not interrupterName then
+            -- Fallback for a NON-player interrupter GUID (a pet or an NPC):
+            -- GetPlayerInfoByGUID only resolves players, so it returns nothing
+            -- above and the name is pulled from the GUID's live unit token
+            -- instead. Non-players have no class, so interrupterClass stays nil
+            -- and the class-color path below is simply skipped for them.
+            local token = UnitTokenFromGUID(interrupterGUID)
+            if token then interrupterName = UnitName(token) end
         end
     end
     local cfg = p or defaults
@@ -8178,11 +8282,11 @@ function NameplateFrame:ShowInterrupted(interrupterGUID)
     -- FontString; the cast-target / timer slots are cleared during the flash.
     local castW = self.cast:GetWidth()
     if castW and castW > 0 then
-        -- Interrupter name uses near-full bar width to fit "Interrupted (Name)";
-        -- the plain "Interrupted" flash falls back to the configured name width %.
         local cnWPct = (p and p.castNameWidthPct) or defaults.castNameWidthPct
         self.castName:SetWidth(interrupterName and math.max(castW - 8, 20) or castW * cnWPct / 100)
     end
+
+    local interruptedText = (EllesmereUI and EllesmereUI.L and EllesmereUI.L("Interrupted")) or "Interrupted"
     if interrupterName then
         local sourceText = interrupterName
         if useClassColor and interrupterClass and C_ClassColor then
@@ -8195,10 +8299,11 @@ function NameplateFrame:ShowInterrupted(interrupterGUID)
                 if hex then sourceText = "|c" .. hex .. interrupterName .. "|r" end
             end
         end
-        self.castName:SetText("Interrupted (" .. sourceText .. ")")
+        self.castName:SetText(interruptedText .. " (" .. sourceText .. ")")
     else
-        self.castName:SetText("Interrupted")
+        self.castName:SetText(interruptedText)
     end
+
     self.castTarget:SetText("")
     self.castTarget:Hide()
     self.castTimer:Hide()
@@ -8949,6 +9054,13 @@ manager:SetScript("OnEvent", function(self, event, unit)
         for _, plate in pairs(ns.plates) do
             plate:UpdateRaidIcon()
             if p and p.nameRaidMarkerEnabled == true then plate:RefreshNamePosition(true) end
+            -- A marker appearing or clearing in a side slot changes the side
+            -- extents the target arrows sit outside of; re-run arrow
+            -- positioning (no-op on plates not showing arrows). On 12.1 the
+            -- container reanchor then re-points container-bearing sides,
+            -- same order as the target-swap path.
+            ns.PositionArrowsOutsideAuras(plate)
+            if ns.NPC_ReanchorArrows then ns.NPC_ReanchorArrows(plate) end
         end
     elseif event == "PLAYER_REGEN_DISABLED" or event == "PLAYER_REGEN_ENABLED" then
         for _, plate in pairs(ns.plates) do
@@ -9123,4 +9235,173 @@ function npAddon:OnEnable()
     ApplyClassPowerSetting()
     -- Apply spec-assigned preset on login (before UI is opened)
     if ns._ApplySpecPresetFromDB then ns._ApplySpecPresetFromDB() end
+    if ns.RangeText_Apply then ns.RangeText_Apply() end
+end
+
+-------------------------------------------------------------------------------
+--  Distance to Target Text (EXTRAS): shows a range BUCKET on the current
+--  target's nameplate -- "15+" means the target is beyond the 15yd rung and
+--  inside the next longer one. Exact enemy distance is not exposed by the
+--  API; the lower bound comes from the shared range engine's spell ladder
+--  (EllesmereUI_Range.lua), activated only while this feature is enabled.
+--  Anchoring: 5px left of whatever text occupies
+--  the Right Text core slot, else just outside the health bar's right edge.
+--  Zero cost while disabled (nothing is created until first enabled); while
+--  enabled a single OnUpdate driver ticks 5x/s and hides when toggled off.
+--  Range results are skipped when secret (combat contexts) -- fail-open to
+--  no text, never an error.
+-------------------------------------------------------------------------------
+do
+    -- Single-table state: this file sits at Lua 5.1's 200-local chunk cap,
+    -- so the whole feature uses ONE chunk local (RT) with everything else
+    -- as table fields.
+    local RT = { acc = 0 }
+
+    function RT.Anchor(plate)
+        RT.fs:ClearAllPoints()
+        local offX = (p and p.rangeTextOffsetX) or 0
+        local offY = (p and p.rangeTextOffsetY) or 0
+        local rightEl = GetTextSlot("textSlotRight")
+        local anchorTo
+        if rightEl == "enemyName" then
+            anchorTo = plate.name
+        elseif rightEl and rightEl ~= "none" then
+            local ca = plate._cachedHealthSlots
+            if ca then
+                for i = 1, ca._count or 0 do
+                    local e = ca[i]
+                    if e and e.slotKey == "textSlotRight" and e.fs then
+                        anchorTo = e.fs
+                        break
+                    end
+                end
+            end
+        end
+        if anchorTo and anchorTo.IsShown and anchorTo:IsShown() then
+            RT.fs:SetPoint("RIGHT", anchorTo, "LEFT", -5 + offX, offY)
+        else
+            RT.fs:SetPoint("LEFT", plate.health or plate, "RIGHT", 5 + offX, offY)
+        end
+    end
+
+    function RT.Appearance()
+        SetFSFont(RT.fs, (p and p.rangeTextSize) or defaults.rangeTextSize, GetNPOutline())
+        local c = (p and p.rangeTextColor) or defaults.rangeTextColor
+        RT.fs:SetTextColor(c.r, c.g, c.b, 1)
+    end
+
+    function RT.Detach()
+        RT.plate = nil
+        if RT.carrier then
+            RT.carrier:Hide()
+            RT.carrier:SetParent(nil)
+        end
+    end
+
+    function RT.Tick()
+        local plate = ns._cachedTargetPlate
+        if not plate or not plate.unit or not plate:IsShown() then
+            if RT.plate then RT.Detach() end
+            return
+        end
+        if plate ~= RT.plate then
+            if not RT.carrier then
+                RT.carrier = CreateFrame("Frame")
+                RT.carrier:SetSize(2, 2)
+                RT.fs = RT.carrier:CreateFontString(nil, "OVERLAY")
+            end
+            RT.carrier:SetParent(plate)
+            RT.carrier:SetPoint("CENTER", plate, "CENTER", 0, 0)
+            -- Well above the health bar / text frames: when the Right Text
+            -- slot is occupied the text sits ON the bar, and a low frame
+            -- level draws it underneath the bar fill.
+            RT.carrier:SetFrameLevel(plate:GetFrameLevel() + 30)
+            RT.plate = plate
+            RT.Appearance()
+            RT.Anchor(plate)
+            RT.carrier:Show()
+        end
+        -- "0+" (inside the shortest rung, i.e. basically melee) shows
+        -- nothing -- the indicator only matters when there is distance.
+        -- Queried as "target" rather than plate.unit: this is the target's
+        -- plate by definition, and the token lets the shared engine serve
+        -- the QoL distance text from the same cached walk.
+        local lower = EllesmereUI.Range_LowerBound("target")
+        if lower and lower > 0 then
+            RT.fs:SetText(lower .. "+")
+            RT.fs:Show()
+        else
+            RT.fs:Hide()
+        end
+    end
+
+    -- Options: re-apply font/color/anchor on the live attachment.
+    ns.RangeText_Refresh = function()
+        if RT.plate and RT.fs then
+            RT.Appearance()
+            RT.Anchor(RT.plate)
+        end
+    end
+
+    ns.RangeText_Apply = function()
+        if p and p.rangeTextEnabled then
+            if not RT.drv then
+                RT.drv = CreateFrame("Frame")
+                RT.drv:Hide()
+                RT.drv:SetScript("OnUpdate", function(_, dt)
+                    RT.acc = RT.acc + dt
+                    if RT.acc < 0.2 then return end
+                    RT.acc = 0
+                    RT.Tick()
+                end)
+            end
+            -- Ladder builds and invalidation live in the shared range engine.
+            EllesmereUI.Range_SetActive("npRangeText", true)
+            RT.drv:Show()
+        elseif RT.drv then
+            EllesmereUI.Range_SetActive("npRangeText", false)
+            RT.drv:Hide()
+            RT.Detach()
+        end
+    end
+
+    -- /euirangedbg: user-invoked one-shot diagnostic (same role as
+    -- /cdmdbg). Prints every link in the chain so a single paste names the
+    -- failure: setting, driver, target plate, ladder rungs, and each
+    -- rung's live IsSpellInRange answer (SECRET called out explicitly).
+    SLASH_EUIRANGEDBG1 = "/euirangedbg"
+    SlashCmdList.EUIRANGEDBG = function()
+        local function out(msg) print("|cffD05B38[RangeText]|r " .. msg) end
+        out("enabled=" .. tostring(p and p.rangeTextEnabled)
+            .. " driver=" .. tostring(RT.drv and RT.drv:IsShown() or false)
+            .. " targetPlate=" .. tostring(ns._cachedTargetPlate ~= nil)
+            .. " attached=" .. tostring(RT.plate ~= nil)
+            .. " text=" .. tostring(RT.fs and RT.fs:IsShown() and RT.fs:GetText() or "hidden"))
+        if RT.fs then
+            -- Geometry/visibility chain: IsVisible false with IsShown true
+            -- means a hidden ancestor; a nil rect means the anchor never
+            -- resolved; width 0 means the font never applied.
+            out(("fs visible=%s rect=%s,%s strW=%s alpha=%s")
+                :format(tostring(RT.fs:IsVisible()),
+                    tostring(RT.fs:GetLeft()), tostring(RT.fs:GetBottom()),
+                    tostring(RT.fs:GetStringWidth()),
+                    tostring(RT.fs:GetAlpha())))
+        end
+        if RT.carrier then
+            out(("carrier visible=%s level=%s strata=%s scale=%s")
+                :format(tostring(RT.carrier:IsVisible()),
+                    tostring(RT.carrier:GetFrameLevel()),
+                    tostring(RT.carrier:GetFrameStrata()),
+                    tostring(RT.carrier:GetEffectiveScale())))
+        end
+        local tp = ns._cachedTargetPlate
+        if tp then
+            out(("plate level=%s strata=%s healthLevel=%s rightSlot=%s")
+                :format(tostring(tp:GetFrameLevel()), tostring(tp:GetFrameStrata()),
+                    tostring(tp.health and tp.health:GetFrameLevel()),
+                    tostring(GetTextSlot("textSlotRight"))))
+        end
+        local unit = ns._cachedTargetPlate and ns._cachedTargetPlate.unit
+        EllesmereUI.Range_DebugDump(unit, out)
+    end
 end

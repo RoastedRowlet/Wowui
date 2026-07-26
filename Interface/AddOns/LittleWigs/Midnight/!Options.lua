@@ -329,12 +329,14 @@ BigWigs:AddSounds("Maisara Caverns Trash", {
 
 BigWigs:AddColors("Kystia Manaheart", {
 	[474240] = "orange",
+	[1230304] = "green",
 	[1253811] = "red",
 	[1264095] = "cyan",
 })
 
 BigWigs:AddSounds("Kystia Manaheart", {
 	[474240] = "alarm",
+	[1230304] = "info",
 	[1253811] = "alarm",
 	[1264095] = "info",
 })
@@ -439,7 +441,7 @@ BigWigs:AddColors("Lightblossom Trinity", {
 	[1234753] = "purple",
 	[1234850] = "red",
 	[1235564] = "cyan",
-	[1235640] = "yellow",
+	[1235640] = {"blue","yellow"},
 })
 
 BigWigs:AddSounds("Lightblossom Trinity", {
@@ -472,7 +474,7 @@ BigWigs:AddColors("Lightwarden Ruia", {
 })
 
 BigWigs:AddSounds("Lightwarden Ruia", {
-	[1239824] = "warning",
+	[1239824] = "alarm",
 	[1239882] = "info",
 	[1239883] = "info",
 	[1239885] = "info",
@@ -536,6 +538,7 @@ BigWigs:AddColors("Charonus", {
 	[1227264] = "red",
 	[1263982] = "cyan",
 	[1282770] = "orange",
+	[1311923] = "purple",
 })
 
 BigWigs:AddSounds("Charonus", {
@@ -543,6 +546,7 @@ BigWigs:AddSounds("Charonus", {
 	[1227264] = "alarm",
 	[1263982] = "info",
 	[1282770] = "alert",
+	[1311923] = "alarm",
 })
 
 BigWigs:AddColors("Emberdawn", {

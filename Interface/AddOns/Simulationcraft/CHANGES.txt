@@ -1,10 +1,22 @@
-lightweight tag b6989062dfd9077efd5b10b6c15c216c5b1a2b4a 12.1.0
+lightweight tag 661084207278ad9642fb74f1bef62efaf45bb0b5 12.1.0-01
 Author:	Dave Hendler <sollaires@gmail.com>
-Date:	Sun Jul 5 19:22:46 2026 -0700
+Date:	Tue Jul 21 11:30:15 2026 -1000
 
-commit b6989062dfd9077efd5b10b6c15c216c5b1a2b4a
+commit 661084207278ad9642fb74f1bef62efaf45bb0b5
 Author: Dave Hendler <sollaires@gmail.com>
-Date:   Sun Jul 5 19:22:46 2026 -0700
+Date:   Tue Jul 21 11:30:15 2026 -1000
 
-    Export all bonus rolls, release for 12.1.0
+    Version bump
+
+commit f50249cc2e98f4626aa92f7b09a63713e5069a47
+Author: Dave Hendler <sollaires@gmail.com>
+Date:   Tue Jul 21 11:28:49 2026 -1000
+
+    Fix some 12.1 crashes related to currency in the vault and deprecation of the Titan belt spell
+
+commit add9dead28260815359ac2de24f1043f3f08d82e
+Author: Dave Hendler <sollaires@gmail.com>
+Date:   Tue Jul 21 11:20:13 2026 -1000
+
+    Remove suffix item attribute, been inactive since ~BfA
 

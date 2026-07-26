@@ -194,7 +194,7 @@ end
 
 -- addonName: Input the name of YOUR addon, i.e. the addon making the profile request
 -- optionalCustomProfileName: Providing this optional name will create a new profile by that name (if it doesn't already exist) and then swap to it.
--- optionalCallbackFunction: You can supply a callback function that will return false if the user declined the profile import, and true if the user accepted.
+-- optionalCallbackFunction: You can supply a callback function that will return false if the user declined the profile import, and true if the user accepted and the import process has completed.
 function API.RegisterProfile(addonName, profileString, optionalCustomProfileName, optionalCallbackFunction)
 	if type(addonName) ~= "string" or #addonName < 3 then error("Invalid addon name for profile import.") return end
 	if type(profileString) ~= "string" or #profileString < 3 then error("Invalid profile string for profile import.") return end
@@ -207,7 +207,7 @@ function API.RegisterProfile(addonName, profileString, optionalCustomProfileName
 end
 
 -- addonName: Input the name of YOUR addon, i.e. the addon making the profile request
--- optionalCallbackFunction: You can supply a callback function that will return false if the user declined the profile import, and true if the user accepted.
+-- optionalCallbackFunction: You can supply a callback function that will return false if the user declined the profile import, and true if the user accepted and the import process has completed.
 ---- WARNING: If you're calling this API from some UI profile installer, we strongly recommend using a callback function, as this is an async process.
 ---- You may want to have your UI state "Waiting..." while the import is in progress, and then continue whenever your callback function is triggered.
 ---- This is required as we may need to load multiple addons with bosses in them to apply the profiles, and loading them all in the same execution path could lock up the game.
@@ -242,8 +242,7 @@ end
 -- profileName: The profile name to check the validity of.
 function API.IsValidProfile(profileName)
 	if type(profileName) ~= "string" then error("Cannot check the validity of a profile that isn't a string.") return end
-	local profileList = {}
-	addonTbl.loaderPublic.db:GetProfiles(profileList)
+	local profileList = API.GetProfileList()
 	for i = 1, #profileList do
 		if profileList[i] == profileName then
 			return true
@@ -252,10 +251,17 @@ function API.IsValidProfile(profileName)
 	return false
 end
 
--- Fetch the name of the current profile
+-- Return the name of the current profile
 function API.GetProfileName()
 	local name = addonTbl.loaderPublic.db:GetCurrentProfile()
 	return name
+end
+
+-- Return a table containing all profile names
+function API.GetProfileList()
+	local profileList = {}
+	addonTbl.loaderPublic.db:GetProfiles(profileList)
+	return profileList
 end
 
 do

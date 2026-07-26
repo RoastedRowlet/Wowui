@@ -9,6 +9,13 @@ L.EditMode.AddonName = "Advanced Focus Cast Bar"
 
 L.Settings = {}
 
+L.Settings.TargetMarkerScaleLabel = "Target Marker Scale"
+L.Settings.TargetMarkerScaleTooltip =
+	"Scales the target marker relative to its default size. 1 renders it at the default dimensions."
+L.Settings.CustomSoundLabel = "Custom Sound"
+L.Settings.CustomSoundTooltip =
+	"Choose None to disable (default). When selected, takes priority over the Text-To-Speech Text."
+
 L.Settings.EditModeReminder = string.format("設定僅可透過 Esc > %s 進行調整。", HUD_EDIT_MODE_MENU)
 
 L.Settings.LoadConditionContentTypeLabel = "在內容中載入"

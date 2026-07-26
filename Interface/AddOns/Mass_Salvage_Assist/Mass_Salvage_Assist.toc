@@ -1,0 +1,31 @@
+## Interface: 120005, 120007
+
+## Title: Mass Salvage Assist
+## Author: TheGenomeWhisperer (Arkaan-Zul'jin)
+## Version: 1.0.32
+## Notes: Mass Salvage without error or interruption
+## Category: Professions
+## Category-ruRU: Профессии
+## SavedVariables: MSA_save
+
+MSA_Core.lua
+
+MSA_Localization.lua
+locales\English.lua
+locales\German.lua
+locales\French.lua
+locales\Italian.lua
+locales\MandarinCN.lua
+locales\MandarinTW.lua
+locales\Korean.lua
+locales\PortugueseBR.lua
+locales\Russian.lua
+locales\SpanishEU.lua
+locales\SpanishMX.lua
+
+MSA_Crafting.lua
+MSA_UI.lua
+MSA_Slash.lua
+MSA_Craft_Timer.lua
+MSA_afk.lua
+MSA_Util.lua

@@ -98,6 +98,7 @@ local REFRESH_FNS = {
     EllesmereUIFriends           = { "_EFR_ApplyFriends" },
     EllesmereUIMythicTimer       = { "_EMT_Apply" },
     EllesmereUIDamageMeters      = { "_EDM_Apply" },
+    EllesmereUIDataBars          = { "_EDB_Apply" },
     EllesmereUIAuraBuffReminders = { "_EABR_RequestRefresh", "_EABR_ApplyUnlockPos" },
 }
 
@@ -249,6 +250,36 @@ local function ConflictSpec(entry, group)
         end
     end
     return nil
+end
+
+-- A per-spec value is STRANDED on a group-owned entry when the spec is not
+-- a member of the owning group and every group the spec DOES belong to is
+-- conflict-locked against the owner (shares at least one spec with it). No
+-- editing session can ever reach the value again: the owner's sessions only
+-- bank into member specs, and the spec's own groups see the entry as a
+-- conflict -- yet the value still applies at every boundary, pinning the
+-- spec off the shared default with no sanctioned way to edit or remove it.
+-- Specs in NO group are not stranded (the phantom self-heal owns those),
+-- and legacy entries (group == nil) keep per-spec values by design.
+local function SpecStrandedOnEntry(entry, specID)
+    if entry.group == nil then return false end
+    local owner = GroupById(entry.group)
+    if not owner then return false end
+    for _, sid in ipairs(owner.specs or {}) do
+        if sid == specID then return false end
+    end
+    local inAnyGroup = false
+    for _, g in ipairs(GetGroups() or {}) do
+        local hasSpec = false
+        for _, sid in ipairs(g.specs or {}) do
+            if sid == specID then hasSpec = true; break end
+        end
+        if hasSpec then
+            inAnyGroup = true
+            if not ConflictSpec(entry, g) then return false end
+        end
+    end
+    return inAnyGroup
 end
 
 -- fkey -> owning entry index (rebuilt whenever entries change)
@@ -417,7 +448,12 @@ function EllesmereUI.SpecOverrides_OnCDMBarsRestructured()
             local hit = false
             if e.values and e.values.default then
                 for fkey in pairs(e.values.default) do
-                    if NumAllowedFKey(fkey) then hit = true; break end
+                    -- CDM bars ONLY -- NumAllowedFKey also matches the
+                    -- raid-size tier subtree (added to it later for capture
+                    -- allowlisting), and sweeping on it here destroyed
+                    -- users' captured raid-size overrides whenever a CDM
+                    -- bar was deleted.
+                    if fkey:sub(1, #CDM_BARS_PREFIX) == CDM_BARS_PREFIX then hit = true; break end
                 end
             end
             if hit then
@@ -458,10 +494,48 @@ local function ReadLive(fkey)
     return t[SegKey(t, segs[#segs])]
 end
 
+--- True when the fkey's path resolves to a REGISTERED DEFAULT in the owning
+--- module's defaults table (same walk as ReadLive, against _profileDefaults).
+--- A stored NIL_SENT ("key removed") for such a key can never be legitimate
+--- state: the Lite defaults merge guarantees the key exists live at every
+--- login, so honoring the removal strips a key module code reads RAW under
+--- the completeness contract -- e.g. the new-char SetFont crash, where an
+--- imported store carried NIL_SENT for the resource bar text size (banked on
+--- the exporter's machine by the pre-guard disabled-module harvest bug) and
+--- every spec apply nilled the live key after the login merge had filled it.
+--- Apply sites skip those writes; the next boundary harvest then banks live
+--- (the default) over the marker, so poisoned stores self-heal.
+local function HasRegisteredDefault(fkey)
+    local folder, path = SplitFKey(fkey)
+    if not folder or not path then return false end
+    local reg = EllesmereUI.Lite and EllesmereUI.Lite._dbRegistry
+    if not reg then return false end
+    local t
+    for _, db in ipairs(reg) do
+        if db.folder == folder then t = db._profileDefaults; break end
+    end
+    if type(t) ~= "table" then return false end
+    local segs = { strsplit(PS, path) }
+    for i = 1, #segs - 1 do
+        t = t[SegKey(t, segs[i])]
+        if type(t) ~= "table" then return false end
+    end
+    return t[SegKey(t, segs[#segs])] ~= nil
+end
+
 local function WriteLive(fkey, v)
     local folder, path = SplitFKey(fkey)
     local t = folder and DBFor(folder)
     if type(t) ~= "table" then return false end
+    -- Raid-size tier overrides are the ONE allowlisted subtree whose numeric
+    -- segments are DICTIONARY keys (tier 10/15/25/30), not array indices:
+    -- absent means "not customized yet" and the RF options UI fabricates the
+    -- sub-tables on demand too. Everything RF-side nil-guards sparse tier
+    -- tables, so fabricate-and-write is safe. Without this, a captured tier
+    -- width/height override silently stopped applying whenever the tier's
+    -- sub-table was absent at apply time (tier removed after capture, or a
+    -- profile that never created it).
+    local isRaidSizeOv = fkey:sub(1, #RAID_SIZE_OV_PREFIX) == RAID_SIZE_OV_PREFIX
     local segs = { strsplit(PS, path) }
     for i = 1, #segs - 1 do
         local k = SegKey(t, segs[i])
@@ -475,8 +549,18 @@ local function WriteLive(fkey, v)
             -- Creating it here plants a skeleton "ghost" row -- e.g. a CDM
             -- bar { barVisibility = ... } with no key -- that crashes every
             -- keyed consumer downstream. Skip the write instead.
-            if tonumber(segs[i]) ~= nil then return false end
+            -- (Raid-size tier keys are exempt -- see isRaidSizeOv above.)
+            if tonumber(segs[i]) ~= nil and not isRaidSizeOv then return false end
             nxt = {}
+            -- A fresh raidSizeOverrides ROOT must carry the offset-scheme
+            -- markers RF stamps at its own creation point
+            -- (_EnsureRaidSizeOverrides); without them the next
+            -- _NormalizeTierOffsetAnchors pass would "convert" (silently
+            -- shift) offsets that were never old-scheme.
+            if isRaidSizeOv and i == 1 then
+                nxt._topLeftAnchored = true
+                nxt._cornerAnchored = true
+            end
             t[k] = nxt
         end
         t = nxt
@@ -598,7 +682,15 @@ local function Harvest(specID)
         local prev = entry.values[specID]
         local has = false
         for fkey, dv in pairs(entry.values.default) do
-            if m[fkey] == dv then
+            if MatchOwnedFKey(fkey) then
+                -- Match-owned size keys: live is the match engine's write,
+                -- never a user edit. With apply skipping these keys, live
+                -- permanently diverges from stored values; banking it here
+                -- adopted the matched width into every spec map it touched
+                -- (store-wide homogenization, 2026-07-16 field data).
+                -- Retain the stored value verbatim, like HarvestDefaults.
+                if prev then m[fkey] = prev[fkey] else m[fkey] = nil end
+            elseif m[fkey] == dv then
                 -- Live equals the default: never a revert outside a session
                 -- (the default may have moved onto the override). Retain the
                 -- previously stored value, if any. (No and/or chain: a stored
@@ -686,7 +778,16 @@ local function HarvestGroup(group)
             local m = maps[i]
             local preserve
             for fkey, dv in pairs(entry.values.default) do
-                if m[fkey] == dv then
+                if MatchOwnedFKey(fkey) then
+                    -- Match-owned size keys never bank FROM live (see
+                    -- Harvest): the broadcast below would stamp the match
+                    -- engine's current write onto EVERY member at once (the
+                    -- group-wide homogenization). Route through preserve so
+                    -- each member keeps its own stored value.
+                    preserve = preserve or {}
+                    preserve[fkey] = true
+                    m[fkey] = nil
+                elseif m[fkey] == dv then
                     local s = _enterSnap and SnapValue(_enterSnap, fkey)
                     if type(s) == "table" then s = nil end
                     s = (s == nil) and NIL_SENT or s
@@ -738,11 +839,17 @@ local function WriteSpecValues(specID)
                 local v = m[fkey]
                 if v == nil then v = def end
                 if v == NIL_SENT then v = nil end
+                -- Key-removal markers are honored ONLY for keys with no
+                -- registered default: for defaults-backed keys the marker is
+                -- harvest residue (see HasRegisteredDefault) and writing the
+                -- nil strips a key consumers read raw. Skip; live keeps the
+                -- merged default and the next harvest self-heals the store.
+                local nilPoison = (v == nil) and HasRegisteredDefault(fkey)
                 local cur = ReadLive(fkey)
                 -- Table values are never written or compared (a stored table
                 -- reference NEVER equals live -> phantom "write" + a full
                 -- module refresh on every apply).
-                if type(v) ~= "table" and type(cur) ~= "table" and cur ~= v then
+                if not nilPoison and type(v) ~= "table" and type(cur) ~= "table" and cur ~= v then
                     if WriteLive(fkey, v) then
                         local folder = SplitFKey(fkey)
                         if folder then
@@ -777,7 +884,8 @@ local function WriteDefaultValues()
             if not BlacklistedFKey(fkey) and not MatchOwnedFKey(fkey) then
                 local v = def
                 if v == NIL_SENT then v = nil end
-                if ReadLive(fkey) ~= v then
+                -- Same defaults-backed nil-poison skip as WriteSpecValues.
+                if not ((v == nil) and HasRegisteredDefault(fkey)) and ReadLive(fkey) ~= v then
                     if WriteLive(fkey, v) then
                         local folder = SplitFKey(fkey)
                         if folder then
@@ -862,6 +970,41 @@ function EllesmereUI.SpecOverrides_ApplyValues(specID)
     -- Conditional value overlay rides last (spec values always win their
     -- own fkeys; the two sets are disjoint by the ownership gate).
     if EllesmereUI._CondOv then EllesmereUI._CondOv.ApplyValues() end
+    -- Close the import window (see ImportProfile): first apply on a session
+    -- OTHER than the importing one -- its runtime flag died at the ReloadUI.
+    -- Then converge live to the imported store's layer truth exactly once:
+    -- the exported module blob carries whatever layer was LIVE on the
+    -- exporter at export time (SnapshotAllAddons copies live stores
+    -- verbatim), and nothing on the normal login path re-applies the
+    -- recipient spec's layer over it -- the import-tail ApplyLayer's flush
+    -- died at the ReloadUI, and the plain login apply early-outs on
+    -- want == s.active. Forced, the apply resolves the spec's fork, else
+    -- the exporter's true baselineLayout; FlushUnlock's exact-equality
+    -- guards no-op wherever blob and bucket already agree, and its pend
+    -- overlay keeps the post-clear boundary banks intent-true until the
+    -- flush lands. Clear-first so an apply error can never wedge the
+    -- window shut (banks resume regardless).
+    if not EllesmereUI._importGuardArmedNow then
+        local prof = GetProfileRoot()
+        if prof and prof._importEstablishPending then
+            -- Resolve the spec BEFORE closing the window: a spec-less apply
+            -- must leave the flag set (bounded stuck-window shape, next
+            -- apply retries) rather than burn the one-shot converge with
+            -- nothing to converge to. pcall so a converge error cannot
+            -- abort the caller's module fan-out (RefreshAllAddons runs
+            -- ApplyValues as its first statement).
+            local sid = specID or _activeSpec or CurrentSpecID()
+            if sid then
+                prof._importEstablishPending = nil
+                if EllesmereUI.SpecOverrides_ApplyUnlock then
+                    pcall(EllesmereUI.SpecOverrides_ApplyUnlock, sid, true)
+                end
+                if EllesmereUI.SpecOverrides_ApplyBm then
+                    pcall(EllesmereUI.SpecOverrides_ApplyBm, sid, true)
+                end
+            end
+        end
+    end
 end
 
 --- Full apply: values + targeted refresh of the touched addons.
@@ -899,6 +1042,41 @@ function EllesmereUI.SpecOverrides_Apply(specID, deferLogin)
     -- Conditional overrides re-arm after every spec transition: the engine
     -- bails while the value system is mid-swap, and this is its retry point.
     if EllesmereUI.Conditions_Recheck then EllesmereUI.Conditions_Recheck() end
+    -- Close the import window (see ImportProfile): first apply on a session
+    -- OTHER than the importing one -- its runtime flag died at the ReloadUI.
+    -- Then converge live to the imported store's layer truth exactly once:
+    -- the exported module blob carries whatever layer was LIVE on the
+    -- exporter at export time (SnapshotAllAddons copies live stores
+    -- verbatim), and nothing on the normal login path re-applies the
+    -- recipient spec's layer over it -- the import-tail ApplyLayer's flush
+    -- died at the ReloadUI, and the plain login apply early-outs on
+    -- want == s.active. Forced, the apply resolves the spec's fork, else
+    -- the exporter's true baselineLayout; FlushUnlock's exact-equality
+    -- guards no-op wherever blob and bucket already agree, and its pend
+    -- overlay keeps the post-clear boundary banks intent-true until the
+    -- flush lands. Clear-first so an apply error can never wedge the
+    -- window shut (banks resume regardless).
+    if not EllesmereUI._importGuardArmedNow then
+        local prof = GetProfileRoot()
+        if prof and prof._importEstablishPending then
+            -- Resolve the spec BEFORE closing the window: a spec-less apply
+            -- must leave the flag set (bounded stuck-window shape, next
+            -- apply retries) rather than burn the one-shot converge with
+            -- nothing to converge to. pcall so a converge error cannot
+            -- abort the caller's module fan-out (RefreshAllAddons runs
+            -- ApplyValues as its first statement).
+            local sid = specID or _activeSpec or CurrentSpecID()
+            if sid then
+                prof._importEstablishPending = nil
+                if EllesmereUI.SpecOverrides_ApplyUnlock then
+                    pcall(EllesmereUI.SpecOverrides_ApplyUnlock, sid, true)
+                end
+                if EllesmereUI.SpecOverrides_ApplyBm then
+                    pcall(EllesmereUI.SpecOverrides_ApplyBm, sid, true)
+                end
+            end
+        end
+    end
 end
 
 --- Spec transition entry point, called by the profile system's spec handler
@@ -1064,6 +1242,142 @@ function EllesmereUI.SpecOverrides_GroupById(gid)
     return GroupById(gid)
 end
 
+--- READ-ONLY view-state probe: true ONLY while the panel's Default Editing
+--- Mode swap is live. Editing-as sessions (spec group or conditional)
+--- deliberately preview their OWN swapped values -- the RF effective
+--- overlay must stay OFF there so "click an override" keeps previewing
+--- that override (user directive 2026-07-16). Only the Default view needs
+--- the panel-closed effective resolution.
+--- (_CondOv, not the Cond local: Cond is declared further down the file.)
+function EllesmereUI.SpecOverrides_ViewActive()
+    if _editGroup then return false end
+    local C = EllesmereUI._CondOv
+    if C and C._edit then return false end
+    return _defaultView and true or false
+end
+
+--- READ-ONLY: the CUSTOM unlock-layer fork of the override session being
+--- edited (editing-as group or conditional), nil when no session is open
+--- or the session's group has no custom unlock mode. Second return is the
+--- shared baselineLayout for per-element fallback. Lets the RF real
+--- preview mirror the session's unlock positions (recorded layer elems;
+--- anchored containers use their recorded bookkeeping coordinates).
+function EllesmereUI.SpecOverrides_EditSessionUnlockLayer()
+    local s = GetUnlockStore()
+    if _editGroup then
+        local layer = s and s.layouts and s.layouts[_editGroup.id]
+        if layer then return layer, s.baselineLayout end
+        return nil
+    end
+    local C = EllesmereUI._CondOv
+    local e = C and C._edit
+    if e and e.id then
+        local cs = C.GetUnlockStore and C.GetUnlockStore()
+        local layer = cs and cs.layouts and cs.layouts[e.id]
+        if layer then return layer, s and s.baselineLayout or nil end
+    end
+    return nil
+end
+
+--- READ-ONLY: display name of the override session currently being edited
+--- (editing-as group or editing-as-conditional), nil when none. Drives the
+--- preview chrome while a session's own values are on screen.
+function EllesmereUI.SpecOverrides_EditSessionName()
+    if _editGroup then return _editGroup.name or _editGroup.label end
+    local C = EllesmereUI._CondOv
+    local e = C and C._edit
+    if e and e.id and EllesmereUI.Conditions_GroupById then
+        local cg = EllesmereUI.Conditions_GroupById(e.id)
+        return cg and (cg.name or cg.label)
+    end
+    return nil
+end
+
+--- READ-ONLY owning group for a spec's VALUES: first group in creation
+--- order containing the spec. Unlock-layout ownership (OwnerGid) is a
+--- different, layout-carrying rule -- never use it for values.
+function EllesmereUI.SpecOverrides_OwningGroupFor(specID)
+    if not specID then return nil end
+    for _, g in ipairs(GetGroups() or {}) do
+        for _, sid in ipairs(g.specs or {}) do
+            if sid == specID then return g end
+        end
+    end
+    return nil
+end
+
+--- READ-ONLY effective-value resolver for ONE folder: what the value
+--- system WOULD hold live for the current REAL spec with the panel closed.
+--- Mirrors WriteSpecValues' ladder (values[spec] or default per fkey,
+--- blacklist/match-owned skipped, table values never resolved) with
+--- Cond.WriteValues' RUNTIME overlay on top (the applied conditional's
+--- values for fkeys the spec store does not own -- spec always wins).
+--- NIL_SENT stays ENCODED in the returned map (decode against
+--- EllesmereUI.SPECOV_NIL); like the writers, it is decoded conceptually
+--- BEFORE the table-type skip, so sentinel deletions always resolve.
+--- Returns (flatMap fkey->value or nil, specSrcName, condSrcName).
+--- ZERO writes, no store creation, safe from any module at any time.
+function EllesmereUI.SpecOverrides_PeekEffectiveValues(folder)
+    if not folder then return nil end
+    local specID = CurrentSpecID()
+    local out, specSrc, condSrc
+    local store = GetStore()
+    if store and specID then
+        for _, entry in ipairs(store) do
+            local m = entry.values[specID] or entry.values.default
+            for fkey, def in pairs(entry.values.default) do
+                if not BlacklistedFKey(fkey) and not MatchOwnedFKey(fkey)
+                   and SplitFKey(fkey) == folder then
+                    local v = m[fkey]
+                    if v == nil then v = def end
+                    if v == NIL_SENT or type(v) ~= "table" then
+                        out = out or {}
+                        out[fkey] = v
+                        if not specSrc and m ~= entry.values.default
+                           and m[fkey] ~= nil then
+                            local g = EllesmereUI.SpecOverrides_OwningGroupFor(specID)
+                            specSrc = (g and (g.name or g.label))
+                                or L("Spec Override")
+                        end
+                    end
+                end
+            end
+        end
+    end
+    local C = EllesmereUI._CondOv
+    if C and C.GetStore then
+        local cstore = C.GetStore()
+        if cstore and #cstore > 0 then
+            local gid = EllesmereUI.Conditions_AppliedGid
+                and EllesmereUI.Conditions_AppliedGid() or nil
+            for _, entry in ipairs(cstore) do
+                local map = gid and entry.values[gid] or nil
+                for fkey, def in pairs(entry.values.default) do
+                    if not BlacklistedFKey(fkey) and not MatchOwnedFKey(fkey)
+                       and not EntryOwning(fkey) and SplitFKey(fkey) == folder then
+                        local v = def
+                        local fromCond = false
+                        if map and map[fkey] ~= nil then
+                            v = map[fkey]
+                            fromCond = true
+                        end
+                        if v == NIL_SENT or type(v) ~= "table" then
+                            out = out or {}
+                            out[fkey] = v
+                            if fromCond and not condSrc then
+                                local cg = EllesmereUI.Conditions_GroupById
+                                    and EllesmereUI.Conditions_GroupById(gid)
+                                condSrc = cg and (cg.name or cg.label)
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end
+    return out, specSrc, condSrc
+end
+
 --- Active layer gid; nil = the baseline layout is live.
 function EllesmereUI.SpecOverrides_UnlockActive()
     local s = GetUnlockStore()
@@ -1083,6 +1397,33 @@ local function OwnerGid(specID)
                 if sid == specID then return g.id end
             end
         end
+    end
+    return nil
+end
+
+--- READ-ONLY: the RESOLVED effective unlock-layer fork for the current
+--- REAL spec -- the owner group's fork, else the applied conditional's
+--- fork, else nil (baseline effective: live positioning is already
+--- correct). Mirrors SpecOverrides_ApplyUnlock's want resolution WITHOUT
+--- reading s.active: the live pointer lags membership and unlock-mode
+--- edits made while the panel is open, and the RF real preview must show
+--- the layer that WOULD apply at the next boundary. Second return is
+--- baselineLayout for per-element fallback.
+function EllesmereUI.SpecOverrides_EffectiveUnlockLayer()
+    local s = GetUnlockStore()
+    if not s then return nil end
+    local specID = CurrentSpecID()
+    if not specID then return nil end
+    local want = OwnerGid(specID)
+    if want and s.layouts and s.layouts[want] then
+        return s.layouts[want], s.baselineLayout
+    end
+    local C = EllesmereUI._CondOv
+    local cond = C and C.ResolveGid and C.ResolveGid() or nil
+    if cond then
+        local cs = C.GetUnlockStore and C.GetUnlockStore()
+        local layer = cs and cs.layouts and cs.layouts[cond]
+        if layer then return layer, s.baselineLayout end
     end
     return nil
 end
@@ -1213,6 +1554,20 @@ local _unlockDeferredElemLayout = nil
 -- element existed) left the OUTGOING layer's position/size live, and the
 -- next harvest baked that residue into the incoming layer permanently.
 local _unlockDeferredElemFallback = nil
+
+-- Anchored children's positions are OWNED by the anchor system: a layer or
+-- baseline elem recorded for a currently-anchored key is derived bookkeeping
+-- (whatever geometry the anchor produced at harvest time) and must never be
+-- painted back through savePosition. The import-establish forced converge
+-- did exactly that with a kept store's stale baseline elems -- stomping
+-- freshly anchor-applied DM windows AND poisoning their module-saved
+-- positions (the imported-profile window-snap bug, 2026-07-20). Mirrors the
+-- ApplyCenterPosition anchored-skip, applied at the flush's write sites.
+local function UnlockElemAnchorOwned(key)
+    local a = EllesmereUIDB and EllesmereUIDB.unlockAnchors
+    local info = a and a[key]
+    return type(info) == "table" and info.target ~= nil
+end
 local _unlockSettleWanted = false
 local _unlockFlushScheduled = false
 local _unlockFlushCombatWatch  -- one-shot PLAYER_REGEN_ENABLED re-flush frame
@@ -1317,6 +1672,20 @@ local function ApplyLayer(layer, baseline)
             if not t then t = {}; cdm.cdmBarPositions = t end
             wipe(t)
             for k, v in pairs(pos) do t[k] = DeepCopy(v) end
+            -- Per-bar missing-means-baseline: a layer's cdmPos is a snapshot
+            -- from its last harvest, so bars created AFTER that harvest have
+            -- no entry in older layers -- and an entryless bar falls to its
+            -- DEFAULT (centered) placement at layout time (the "CDM centered
+            -- on this one spec" class: the layer applied 12 of 15 bars).
+            -- Fill the gaps from the baseline, mirroring the per-bar rule
+            -- the grow keys below already follow; the layer self-heals to
+            -- full coverage at its next harvest.
+            local bpos = baseline and baseline.cdmPos
+            if bpos and bpos ~= pos then
+                for k, v in pairs(bpos) do
+                    if t[k] == nil then t[k] = DeepCopy(v) end
+                end
+            end
         end
         if cdm.cdmBars and cdm.cdmBars.bars then
             -- Grow keys follow missing-means-baseline too. A grow store is
@@ -1347,6 +1716,13 @@ local function ApplyLayer(layer, baseline)
             if not t then t = {}; ab.barPositions = t end
             wipe(t)
             for k, v in pairs(pos) do t[k] = DeepCopy(v) end
+            -- Per-bar missing-means-baseline, same as cdmPos above.
+            local bpos = baseline and baseline.abPos
+            if bpos and bpos ~= pos then
+                for k, v in pairs(bpos) do
+                    if t[k] == nil then t[k] = DeepCopy(v) end
+                end
+            end
         end
         if ab.bars then
             -- Same authority rule and per-bar fallback as cdmGrow.
@@ -1426,7 +1802,49 @@ function EllesmereUI.SpecOverrides_ApplyUnlock(specID, force)
             end
         end
     end
-    if want == s.active and not force then return end
+    if want == s.active and not force then
+        -- Same-layer arrival: live drift stays live (never re-apply). BUT
+        -- the module POSITION stores can carry gaps persisted from before
+        -- the per-bar baseline fallback existed: a layer snapshot missing
+        -- bars created after its last harvest left them entryless (default
+        -- centered placement), and this early-out skipped ApplyLayer on
+        -- every same-layer login, so the gap could never heal without a
+        -- layer transition. ADD-ONLY heal: fill missing bar keys from the
+        -- live layer, then the baseline -- existing entries (live drift)
+        -- are never touched, and the settle only runs when something was
+        -- actually missing.
+        local base = s.baselineLayout
+        local function GapFill(prof, storeKey, layerPos, basePos)
+            if not prof then return false end
+            local t = prof[storeKey]
+            if not t then t = {}; prof[storeKey] = t end
+            local added = false
+            if layerPos then
+                for k, v in pairs(layerPos) do
+                    if t[k] == nil then t[k] = DeepCopy(v); added = true end
+                end
+            end
+            if basePos and basePos ~= layerPos then
+                for k, v in pairs(basePos) do
+                    if t[k] == nil then t[k] = DeepCopy(v); added = true end
+                end
+            end
+            return added
+        end
+        local cdm = LiteProfile("EllesmereUICooldownManager")
+        local ab = LiteProfile("EllesmereUIActionBars")
+        local added = GapFill(cdm, "cdmBarPositions",
+            target and target.cdmPos, base and base.cdmPos)
+        if GapFill(ab, "barPositions",
+            target and target.abPos, base and base.abPos) then added = true end
+        if added then
+            -- Same settle ApplyLayer uses: repositions bars from the now
+            -- complete store (flush self-defers in combat).
+            _unlockSettleWanted = true
+            ScheduleUnlockFlush()
+        end
+        return
+    end
     -- TIER 3: baseline.
     if not target then target = s.baselineLayout end
     s.active = want
@@ -1443,7 +1861,7 @@ end
 --- (the active group layer, else the baseline). Runs at every transition
 --- boundary while live still belongs to the outgoing state: spec change,
 --- profile switch/export/logout, and unlock Save & Exit.
-function EllesmereUI.SpecOverrides_HarvestUnlockLayout()
+function EllesmereUI.SpecOverrides_HarvestUnlockLayout(userCommit)
     local s = GetUnlockStore()
     if not s then return end
     -- Zero-cost for non-users: nothing to bank into until a layer exists.
@@ -1458,6 +1876,26 @@ function EllesmereUI.SpecOverrides_HarvestUnlockLayout()
     -- first, and banks resume on the next boundary.
     if EllesmereUI.Conditions_EstablishPending and EllesmereUI.Conditions_EstablishPending() then
         return
+    end
+    -- Import window (see ImportProfile): from the moment an imported profile
+    -- activates until the first apply of a LATER session, the store holds the
+    -- exporter's layers verbatim while live geometry is mid-import residue
+    -- (inherited link tables, unconverged anchors). Banking any boundary in
+    -- that window -- the import-tail Conditions recheck, the reload's
+    -- PLAYER_LOGOUT, the first post-login spec transition -- would wholesale-
+    -- replace a pristine bucket with that residue. Same fail-open semantics
+    -- as the guards above: skip, banks resume once the window closes.
+    do
+        local prof = GetProfileRoot()
+        if prof and prof._importEstablishPending then
+            if userCommit then
+                -- Unlock Save & Exit: a user-committed layout is converged,
+                -- live-authoritative state -- close the window and bank it.
+                prof._importEstablishPending = nil
+            else
+                return
+            end
+        end
     end
     -- Default Editing Mode / editing-as session: live module sizes are the
     -- VIEW's swapped values, not the active layer's state (value writes
@@ -1606,12 +2044,23 @@ function EllesmereUI.SpecOverrides_FlushUnlock()
             if elem then
                 -- Value-equal guards throughout: the arriving layer matches
                 -- live for most elements; only real deltas write and settle.
-                if e.point and elem.savePosition then
+                -- Anchor-owned keys never take elem positions (see
+                -- UnlockElemAnchorOwned): the anchor is the authority.
+                if e.point and elem.savePosition and not UnlockElemAnchorOwned(key) then
                     local cur = elem.loadPosition and elem.loadPosition(key)
                     if not (cur and cur.point == e.point
                         and (cur.relPoint or cur.point) == (e.relPoint or e.point)
                         and cur.x == e.x and cur.y == e.y) then
                         pcall(elem.savePosition, key, e.point, e.relPoint or e.point, e.x, e.y)
+                        -- Re-anchor through the element's OWN authority:
+                        -- noInitHook elements (the RF raid container) are
+                        -- skipped by the settle's saved-positions loop, so
+                        -- without this the DB gets the layer's position but
+                        -- the frame stays where module init anchored it from
+                        -- the PRE-flush value (login-only "last played
+                        -- spec's layout" visual; cross-character shared
+                        -- profiles surface it).
+                        if elem.applyPosition then pcall(elem.applyPosition, key) end
                         _unlockSettleWanted = true
                     end
                 end
@@ -1647,12 +2096,16 @@ function EllesmereUI.SpecOverrides_FlushUnlock()
                 fb[key] = nil   -- the layer owns this key
             elseif elems and elems[key] then
                 local elem = elems[key]
-                if e.point and elem.savePosition then
+                -- Same anchor-owned skip as the pend path above.
+                if e.point and elem.savePosition and not UnlockElemAnchorOwned(key) then
                     local cur = elem.loadPosition and elem.loadPosition(key)
                     if not (cur and cur.point == e.point
                         and (cur.relPoint or cur.point) == (e.relPoint or e.point)
                         and cur.x == e.x and cur.y == e.y) then
                         pcall(elem.savePosition, key, e.point, e.relPoint or e.point, e.x, e.y)
+                        -- Same authority re-anchor as the pend path above
+                        -- (noInitHook elements never get moved by the settle).
+                        if elem.applyPosition then pcall(elem.applyPosition, key) end
                         _unlockSettleWanted = true
                     end
                 end
@@ -1883,6 +2336,12 @@ function EllesmereUI.SpecOverrides_HarvestBmLayout()
     local cs = GetCondBmStore()
     if not s.active and not next(s.layouts) and not s.baselineLayout
        and not (cs and next(cs.layouts)) then return end
+    -- Import window: same suppression as SpecOverrides_HarvestUnlockLayout
+    -- (the BM forks arrived verbatim in the same import; live is residue).
+    do
+        local prof = GetProfileRoot()
+        if prof and prof._importEstablishPending then return end
+    end
     local snap = BmHarvestLayer()
     if not snap then return end
     -- Editing-as-conditional session swap: while a conditional's fork is
@@ -2586,11 +3045,13 @@ function Cond.WriteValues(gid, forSession)
                 local v = def
                 if map and map[fkey] ~= nil then v = map[fkey] end
                 if v == NIL_SENT then v = nil end
+                -- Same defaults-backed nil-poison skip as WriteSpecValues.
+                local nilPoison = (v == nil) and HasRegisteredDefault(fkey)
                 local cur = ReadLive(fkey)
                 -- Table values are never written or compared (a stored table
                 -- reference NEVER equals live, so it would register a "write"
                 -- and force a full module refresh on EVERY transition).
-                if type(v) ~= "table" and type(cur) ~= "table" and cur ~= v then
+                if not nilPoison and type(v) ~= "table" and type(cur) ~= "table" and cur ~= v then
                     if WriteLive(fkey, v) then
                         local folder = SplitFKey(fkey)
                         if folder then
@@ -2671,7 +3132,11 @@ function Cond.Harvest(gid)
             for fkey, dv in pairs(entry.values.default) do
                 -- FKeyLoaded: disabled module reads nil for every path;
                 -- banking that would poison the maps with deletion markers.
-                if not EntryOwning(fkey) and FKeyLoaded(fkey) then
+                -- MatchOwnedFKey: match-engine writes never bank (mirrors
+                -- the spec-side Harvest; Cond.WriteValues already skips
+                -- these at apply time).
+                if not EntryOwning(fkey) and FKeyLoaded(fkey)
+                   and not MatchOwnedFKey(fkey) then
                     local live = ReadLive(fkey)
                     if type(live) ~= "table" then
                         local defVal = (dv == NIL_SENT) and nil or dv
@@ -2692,7 +3157,8 @@ function Cond.Harvest(gid)
         elseif not sessionLive then
             local map = entry.values.default
             for fkey in pairs(map) do
-                if not EntryOwning(fkey) and FKeyLoaded(fkey) then
+                if not EntryOwning(fkey) and FKeyLoaded(fkey)
+                   and not MatchOwnedFKey(fkey) then
                     local live = ReadLive(fkey)
                     if type(live) ~= "table" then
                         map[fkey] = live == nil and NIL_SENT or live
@@ -2752,12 +3218,22 @@ end
 ---   * unlock layout forks: whole-layout snapshots spanning ALL modules, so
 ---     they cannot ride per-module. Full import: recipient's are dropped,
 ---     incoming's come in when carried. Partial (subset) import
----     (incoming.partialImport, stamped by the import dialog): recipient's
----     are KEPT and incoming's are never taken (the dialog also strips them
----     from the payload; the gate here is the belt to that suspender).
+---     (incoming.partialImport, stamped by the import dialog on recipient
+---     deselection AND by ExportProfile on subset exports): recipient's
+---     are KEPT and incoming's are never taken (both ends also strip them
+---     from the payload; the gate here is the belt to those suspenders).
+---     incoming.layoutExcluded ("Include layout" OFF at either end) keeps
+---     the recipient's forks the same way -- stripped-nil must never read
+---     as "exporter had none, wipe yours".
 ---   * Buff Manager forks: Raid Frames data, so they follow the per-module
 ---     rule for EllesmereUIRaidFrames -- replaced (or cleared) when RF is
 ---     imported, kept when it is not.
+-- RETIRED 2026-07-20 (no callers): the per-folder override import merge was
+-- replaced by ALL-OR-NOTHING semantics in ImportProfile (take the exporter's
+-- complete override system or keep the recipient's; see the Include Overrides
+-- export/import controls). Kept for reference only -- do NOT re-wire: the
+-- partition/union/remap machinery here is the bug surface the redesign
+-- deliberately eliminated.
 function EllesmereUI.SpecOverrides_MergeImportedStores(merged, incoming)
     local function maxNumericId(groups)
         local m = 0
@@ -2921,7 +3397,12 @@ function EllesmereUI.SpecOverrides_MergeImportedStores(merged, incoming)
     -- unrelated groups as dead, do-nothing cards. Recipient groups are never
     -- touched.
     local rfImported = importedFolders["EllesmereUIRaidFrames"] and true or false
-    local takeUnlockForks = not partial
+    -- layoutExcluded (stamped by ExportProfile / the import dialog when the
+    -- "Include layout" toggle is OFF): layout was deliberately excluded, so
+    -- the fork stores must be KEPT from the base copy -- taking the branch
+    -- below with nil incoming tables would wipe the recipient's group
+    -- layouts, the opposite of "keep my layout".
+    local takeUnlockForks = not partial and incoming.layoutExcluded ~= true
     local specNeeded, condNeeded = {}, {}
     for _, e in ipairs(incSpec) do
         if e.group ~= nil then specNeeded[e.group] = true end
@@ -3732,7 +4213,7 @@ local function AutoCapture(changes)
     -- Excluded contexts (whole modules, pages, or single sections) never
     -- factor into spec overrides: absorb, and shield these paths from the
     -- exit sweep. The slot's section is derived up front so section-scoped
-    -- exclusions (e.g. Keys, Logs & Brez -> Keystone Check Popup) apply.
+    -- (nested-table) EXCLUDED_CONTEXTS entries apply when one is listed.
     local row = region._isOptionRow and region or region:GetParent()
     local hdr = row and row._sectionHeader
     local section = hdr and hdr._sectionName or nil
@@ -3752,6 +4233,11 @@ local function AutoCapture(changes)
             skippedNum = true
         elseif BlacklistedFKey(c.fkey) then
             skippedBlack = c.folder
+        elseif MatchOwnedFKey(c.fkey) then
+            -- Match-owned size keys are the match engine's territory: apply
+            -- skips them and every bank preserves, so capturing one would
+            -- only create a dead slot the harvests must then tiptoe around.
+            _sessionIgnored[c.fkey] = true
         else
             paths[#paths + 1] = c.fkey
         end
@@ -3995,7 +4481,11 @@ SweepUncaptured = function(group)
     if not store then return end
     local added = false
     for _, c in ipairs(DiffProfiles(_enterSnap)) do
+        -- MatchOwnedFKey: a match-owned size diff is the match engine's own
+        -- write, never a session edit -- minting an entry from it hands the
+        -- key to the harvest broadcast (proliferation vector).
         if not EntryOwning(c.fkey) and (not c.num or NumAllowedFKey(c.fkey)) and not BlacklistedFKey(c.fkey)
+           and not MatchOwnedFKey(c.fkey)
            and not _sessionIgnored[c.fkey] then
             local orig = SnapValue(_enterSnap, c.fkey)
             -- Same guard as AutoCapture: a cond-owned fkey's snapshot may be
@@ -4310,6 +4800,19 @@ end
 --- session -- the transition handler refuses to run under one, which
 --- strands the incoming profile un-overlaid until the next zone change.
 function EllesmereUI.SpecOverrides_CloseEditSessions()
+    -- Unlock-open window (the unlock return-module capture is live exactly
+    -- then): remember the active session so the post-unlock reopen restores
+    -- it. This is the same stash the panel-hide hook takes -- but
+    -- OpenUnlockMode now closes sessions BEFORE the panel hides (the value
+    -- snapshot must be taken over canonical live data), so the hook finds
+    -- no session and would lose the roundtrip without this.
+    if EllesmereUI._unlockReturnModule ~= nil then
+        if _editGroup then
+            _unlockRoundtrip = { kind = "spec", id = _editGroup.id }
+        elseif Cond._edit then
+            _unlockRoundtrip = { kind = "cond", id = Cond._edit.id }
+        end
+    end
     if _editGroup and ExitGroupEdit then ExitGroupEdit() end
     if Cond._edit and Cond.ExitEdit then Cond.ExitEdit() end
     if _defaultView and ExitDefaultView then ExitDefaultView() end
@@ -4383,7 +4886,10 @@ function Cond.HarvestEdit(g)
                 local live = ReadLive(fkey)
                 -- Table-typed live: structure change; never bank (aliasing).
                 -- FKeyLoaded: disabled module reads nil; never bank that.
-                if FKeyLoaded(fkey) and type(live) ~= "table" then
+                -- MatchOwnedFKey: match-engine writes never bank (mirrors
+                -- the spec-side Harvest); the held value stays as-is.
+                if FKeyLoaded(fkey) and type(live) ~= "table"
+                   and not MatchOwnedFKey(fkey) then
                     local defVal = (dv == NIL_SENT) and nil or dv
                     if live == defVal then
                         -- Equal to the default: a REVERT only if this session
@@ -4418,8 +4924,11 @@ function Cond.SweepUncapturedEdit(g)
     for _, c in ipairs(DiffProfiles(_enterSnap)) do
         -- Spec ownership does NOT block cond capture (coexistence: each
         -- store keeps its own value; spec wins only at runtime).
+        -- MatchOwnedFKey: never mint from a match engine write (see
+        -- SweepUncaptured).
         if not Cond.EntryOwning(c.fkey)
            and (not c.num or NumAllowedFKey(c.fkey)) and not BlacklistedFKey(c.fkey)
+           and not MatchOwnedFKey(c.fkey)
            and not _sessionIgnored[c.fkey] then
             local orig = SnapValue(_enterSnap, c.fkey)
             if type(orig) == "table" then orig = nil end
@@ -5077,6 +5586,23 @@ local function BuildCardRow(parent, y, opts)
     return row, 44
 end
 
+-- Seed-map copy for membership adds, MINUS match-owned size keys: a seed
+-- member's map can carry stale match-engine widths (pre-fix harvest
+-- artifacts); copying them forward would replicate the poison onto every
+-- spec ever added to the group. Returns a fresh filtered table per call
+-- (never alias one table across member ids), nil when nothing survives.
+local function CopySeedMap(seedMap)
+    if not seedMap then return nil end
+    local out
+    for k, v in pairs(seedMap) do
+        if not MatchOwnedFKey(k) then
+            out = out or {}
+            out[k] = (type(v) == "table") and DeepCopy(v) or v
+        end
+    end
+    return out
+end
+
 -- Applies a membership change to a group: specs ADDED receive the group's
 -- current override values (copied from the seed member, falling back to the
 -- defaults), specs REMOVED lose their stored values (they revert to the
@@ -5103,9 +5629,9 @@ local function SetGroupSpecs(g, newSpecs)
                     -- CURRENT default forever (sticky harvest retains held
                     -- values): with no map, the per-key default fallback in
                     -- WriteSpecValues already gives the same live result and
-                    -- keeps following future default edits.
-                    entry.values[id] = (seedMap and next(seedMap) ~= nil)
-                        and DeepCopy(seedMap) or nil
+                    -- keeps following future default edits. Match-owned size
+                    -- keys are filtered out of the copy (see CopySeedMap).
+                    entry.values[id] = CopySeedMap(seedMap)
                 end
             end
         end
@@ -5134,7 +5660,10 @@ local function SetGroupSpecs(g, newSpecs)
             if seedMap and next(seedMap) ~= nil then
                 for _, id in ipairs(newSpecs) do
                     if not oldSet[id] then
-                        entry.values[id] = DeepCopy(seedMap)
+                        -- Fresh filtered copy PER id (CopySeedMap never
+                        -- aliases); nil when only match-owned keys existed.
+                        local copy = CopySeedMap(seedMap)
+                        if copy then entry.values[id] = copy end
                     end
                 end
             end
@@ -5154,6 +5683,36 @@ local function SetGroupSpecs(g, newSpecs)
         if not newSet[id] and not SpecInAnyGroup(id) then
             for _, entry in ipairs(GetStore() or {}) do
                 if entry.values and entry.group ~= nil then entry.values[id] = nil end
+            end
+        end
+    end
+    -- Ingress guard for STRANDED values: a removed spec still in ANOTHER
+    -- group is skipped by the blanket sweep above, but values THIS group's
+    -- sessions banked onto foreign non-conflicting entries stay behind --
+    -- and when every group the spec still belongs to is conflict-locked
+    -- against that entry's owner, no session can ever edit or remove them
+    -- again (they pin the spec off the shared default forever, invisible in
+    -- this list's group buckets). Removing the spec from this group is the
+    -- user saying "stop overriding it here", so clear exactly those: only
+    -- entries this group could reach BEFORE the change (its own entries are
+    -- already swept in the first loop), and only values stranded under the
+    -- NEW membership. Values another group can still reach are kept -- that
+    -- group's own flows manage them. Pre-existing strays on entries this
+    -- group never could reach are NOT touched here; the management list
+    -- surfaces those with a per-value Remove control.
+    local oldGroupView = { id = g.id, specs = {} }
+    for id in pairs(oldSet) do
+        oldGroupView.specs[#oldGroupView.specs + 1] = id
+    end
+    for id in pairs(oldSet) do
+        if not newSet[id] and SpecInAnyGroup(id) then
+            for _, entry in ipairs(GetStore() or {}) do
+                if entry.values and entry.values[id] ~= nil
+                    and entry.group ~= nil and entry.group ~= g.id
+                    and not ConflictSpec(entry, oldGroupView)
+                    and SpecStrandedOnEntry(entry, id) then
+                    entry.values[id] = nil
+                end
             end
         end
     end
@@ -6123,6 +6682,57 @@ local function BuildListRow(parent, y, entry)
     return row, 38
 end
 
+-- Row for one STRANDED per-spec value (see SpecStrandedOnEntry): shows the
+-- spec + the setting it silently overrides and offers a per-value Remove
+-- that returns the spec to the shared default. Removal is the only action
+-- possible for these -- no editing session can reach them.
+local function BuildStrandedRow(parent, y, entry, specID)
+    local CONTENT_PAD = EllesmereUI.CONTENT_PAD or 40
+    local row = CreateFrame("Frame", nil, parent)
+    row:SetSize(parent:GetWidth() - CONTENT_PAD * 2, 36)
+    row:SetPoint("TOPLEFT", parent, "TOPLEFT", CONTENT_PAD, y)
+
+    local name = EllesmereUI.MakeFont(row, 13, nil, 1, 1, 1, 0.9)
+    name:SetPoint("LEFT", row, "LEFT", 20, 0)
+    name:SetText(SpecName(specID))
+
+    local owner = GroupById(entry.group)
+    local crumb = EllesmereUI.MakeFont(row, 11, nil, 1, 1, 1, 0.3)
+    crumb:SetPoint("LEFT", name, "RIGHT", 10, 0)
+    crumb:SetText(string.format("%s  -  %s", L(entry.label or "?"),
+        string.format(L("held by '%s'"), (owner and owner.name) or "?")))
+
+    local rm = CreateFrame("Button", nil, row)
+    rm:SetSize(116, 22)
+    rm:SetPoint("RIGHT", row, "RIGHT", -20, 0)
+    EllesmereUI.SolidTex(rm, "BACKGROUND", 0.10, 0.10, 0.11, 0.9)
+    local rmBrd = EllesmereUI.MakeBorder(rm, 1, 1, 1, 0.22)
+    local rmLbl = EllesmereUI.MakeFont(rm, 11, nil, 1, 1, 1, 0.8)
+    rmLbl:SetPoint("CENTER")
+    rmLbl:SetText(L("Remove Override"))
+    rm:SetScript("OnEnter", function() if rmBrd and rmBrd.SetColor then rmBrd:SetColor(1, 0.35, 0.35, 0.8) end end)
+    rm:SetScript("OnLeave", function() if rmBrd and rmBrd.SetColor then rmBrd:SetColor(1, 1, 1, 0.22) end end)
+    rm:SetScript("OnClick", function()
+        EllesmereUI:ShowConfirmPopup({
+            title = L("Remove Stranded Override"),
+            message = string.format(L("Remove the stranded '%s' override for %s? The spec returns to the shared default."),
+                entry.label or "?", SpecName(specID)),
+            confirmText = L("Remove"),
+            cancelText = L("Cancel"),
+            onConfirm = function()
+                entry.values[specID] = nil
+                if EllesmereUI.SpecOverrides_Apply then
+                    EllesmereUI.SpecOverrides_Apply(_activeSpec or CurrentSpecID())
+                end
+                RequestGoldWalk()
+                EllesmereUI:RefreshPage(true)
+            end,
+        })
+    end)
+
+    return row, 38
+end
+
 -- Prunes entries whose owning group no longer exists (orphans from group
 -- deletions made before deletions removed their entries). Entries with no
 -- group at all (legacy captures) are kept.
@@ -6144,8 +6754,10 @@ local function PruneOrphanEntries()
             if not BlacklistedFKey(fkey) and FKeyLoaded(fkey) then
                 local v = def
                 if v == NIL_SENT then v = nil end
+                -- Same defaults-backed nil-poison skip as WriteSpecValues.
+                local nilPoison = (v == nil) and HasRegisteredDefault(fkey)
                 local cur = ReadLive(fkey)
-                if type(v) ~= "table" and type(cur) ~= "table" and cur ~= v then
+                if not nilPoison and type(v) ~= "table" and type(cur) ~= "table" and cur ~= v then
                     if WriteLive(fkey, v) then
                         local folder = SplitFKey(fkey)
                         if folder then
@@ -6322,6 +6934,181 @@ local BM_ROW_COND = {
     removeFn = function(gid) EllesmereUI.Conditions_RemoveBmLayout(gid) end,
 }
 
+-------------------------------------------------------------------------------
+--  Promote Override to Profile (one-shot rescue)
+--
+--  Makes the selected spec group's stored state the profile's own: its
+--  captured values become the shared defaults, its custom unlock mode and
+--  Buff Manager forks (where present) become the baseline layouts, and EVERY
+--  spec override group on the profile is then deleted. For profiles that were
+--  accidentally built entirely inside an override group. Purely additive:
+--  only existing writers repaint live, and the final state is
+--  indistinguishable from a profile that never had spec overrides.
+--  Conditional overrides are untouched and keep riding the new baseline.
+-------------------------------------------------------------------------------
+local _promoteSelGid = nil   -- list-page dropdown selection (runtime only)
+
+local function PromoteGroupToProfile(g)
+    if not g or not g.specs or #g.specs == 0 then return end
+    -- Combat re-check (the typed-confirm popup can sit open while combat
+    -- starts): the tail must flush secure-frame repositioning synchronously
+    -- before the reload, and that is blocked in lockdown. Nothing has been
+    -- written yet, so refusing here is a clean abort.
+    if InCombatLockdown() then
+        EllesmereUI:ShowConfirmPopup({
+            title = L("In Combat"),
+            message = L("Promoting an override reloads the UI and cannot run in combat. Leave combat and try again."),
+            confirmText = L("OK"),
+            hideCancel = true,
+        })
+        return
+    end
+    -- Bank any open editing session and leave the Default view so the stores
+    -- hold the freshest session edits and live holds canonical spec values.
+    if EllesmereUI.SpecOverrides_CloseEditSessions then
+        EllesmereUI.SpecOverrides_CloseEditSessions()
+    end
+
+    -- 1) VALUES: the group's stored values become the recorded defaults.
+    --    Per-entry resolution mirrors WriteGroupValues exactly (first member
+    --    spec's map, per-fkey fallback to the current default), so the
+    --    promoted baseline is exactly what "editing as" the group shows.
+    local store = GetStore()
+    local seed = g.specs[1]
+    if store then
+        for _, entry in ipairs(store) do
+            local def = entry.values and entry.values.default
+            local m = entry.values and entry.values[seed]
+            if def and m then
+                for fkey in pairs(def) do
+                    local v = m[fkey]
+                    -- Blacklisted paths never apply anywhere; match-owned
+                    -- size keys belong to the match engine (the layer
+                    -- promote below carries the real geometry). NIL_SENT
+                    -- markers promote as-is: the default writer decodes
+                    -- them behind its own nil-poison guard.
+                    if v ~= nil and type(v) ~= "table"
+                       and not BlacklistedFKey(fkey) and not MatchOwnedFKey(fkey) then
+                        def[fkey] = v
+                    end
+                end
+            end
+        end
+    end
+    -- Write the promoted defaults live while the entries still exist (the
+    -- store is wiped below and nothing could repaint them afterwards).
+    -- Writes are value-equal no-ops for specs already living on the group's
+    -- values, so members of the promoted group see zero churn.
+    WriteDefaultValues()
+
+    -- 2) UNLOCK LAYOUT: the group's fork becomes the baseline, resolved the
+    --    way ApplyLayer resolves a live fork: links wholesale, position
+    --    stores with per-key baseline gap-fill, grow keys under the
+    --    authority rule, elems overlaid onto the baseline's. All copies --
+    --    the new baseline shares no tables with the wiped fork buckets.
+    local s = GetUnlockStore()
+    if s then
+        local layer = s.layouts and s.layouts[g.id]
+        local base = s.baselineLayout
+        if layer then
+            local nb = { anchors = {}, widthMatch = {}, heightMatch = {},
+                         cdmGrow = {}, abGrow = {}, elems = {} }
+            for k, v in pairs(layer.anchors or {}) do
+                if not IsTBBChildKey(k) then nb.anchors[k] = DeepCopy(v) end
+            end
+            for k, v in pairs(layer.widthMatch or {}) do
+                if not IsTBBChildKey(k) then nb.widthMatch[k] = v end
+            end
+            for k, v in pairs(layer.heightMatch or {}) do
+                if not IsTBBChildKey(k) then nb.heightMatch[k] = v end
+            end
+            local function MergePos(lp, bp)
+                local out = lp and DeepCopy(lp) or (bp and DeepCopy(bp) or nil)
+                if lp and bp then
+                    for k, v in pairs(bp) do
+                        if out[k] == nil then out[k] = DeepCopy(v) end
+                    end
+                end
+                return out
+            end
+            nb.cdmPos = MergePos(layer.cdmPos, base and base.cdmPos)
+            nb.abPos = MergePos(layer.abPos, base and base.abPos)
+            -- A grow store is authoritative only when its layer was
+            -- harvested with the owning module loaded (pos store present);
+            -- effective = layer's grow, else the baseline's.
+            local function MergeGrow(out, lAuth, lg, bAuth, bg)
+                if bAuth and bg then
+                    for k, v in pairs(bg) do out[k] = v end
+                end
+                if lAuth and lg then
+                    for k, v in pairs(lg) do out[k] = v end
+                end
+            end
+            MergeGrow(nb.cdmGrow, layer.cdmPos ~= nil, layer.cdmGrow,
+                      base and base.cdmPos ~= nil, base and base.cdmGrow)
+            MergeGrow(nb.abGrow, layer.abPos ~= nil, layer.abGrow,
+                      base and base.abPos ~= nil, base and base.abGrow)
+            if base and base.elems then
+                for k, e in pairs(base.elems) do
+                    if not LayerSkipsKey(k) then nb.elems[k] = DeepCopy(e) end
+                end
+            end
+            for k, e in pairs(layer.elems or {}) do
+                if not LayerSkipsKey(k) then nb.elems[k] = DeepCopy(e) end
+            end
+            s.baselineLayout = nb
+        end
+        wipe(s.layouts)
+        s.active = nil
+    end
+
+    -- 3) BUFF MANAGER: BM layers are complete wholesale subtrees; the fork
+    --    (when present) becomes the baseline verbatim.
+    local bs = GetBmStore()
+    if bs then
+        local bl = bs.layouts and bs.layouts[g.id]
+        if bl then bs.baselineLayout = DeepCopy(bl) end
+        wipe(bs.layouts)
+        bs.active = nil
+    end
+
+    -- 4) DELETE the spec override system: every group and every entry. The
+    --    promoted values are already live and the promoted layouts are the
+    --    baselines, so from here the profile simply IS the override.
+    local groups = GetGroups()
+    if groups then wipe(groups) end
+    if store then wipe(store) end
+    RebuildFKeyIndex()
+
+    -- 5) CONVERGE live onto the new baselines, forced: with the groups gone
+    --    the resolver wants the baseline (or a live conditional fork over
+    --    it), and the same-layer early-out would otherwise skip the repaint
+    --    for a spec that was NOT on the promoted fork. Where live already
+    --    matches, every write is value-equal and the flush's equality
+    --    guards no-op. pcall like the import converge: an error must not
+    --    strand the cleanup half-done.
+    local sid = CurrentSpecID()
+    if sid then
+        if EllesmereUI.SpecOverrides_ApplyUnlock then
+            pcall(EllesmereUI.SpecOverrides_ApplyUnlock, sid, true)
+        end
+        if EllesmereUI.SpecOverrides_ApplyBm then
+            pcall(EllesmereUI.SpecOverrides_ApplyBm, sid, true)
+        end
+    end
+    -- 6) RELOAD. The converge's element writes are DEFERRED (FlushUnlock);
+    --    reloading inside that window strands them: the logout bank keeps
+    --    the intent in the bucket, but the post-reload login early-outs on
+    --    the nil active pointer and never paints it back into module DBs.
+    --    Flush synchronously first (out of combat by the gate above) so
+    --    every store is settled, then reload -- every runtime cache, ticker,
+    --    and session structure rebuilds from the clean promoted state.
+    if EllesmereUI.SpecOverrides_FlushUnlock then
+        pcall(EllesmereUI.SpecOverrides_FlushUnlock)
+    end
+    ReloadUI()
+end
+
 --- Page builder for the "Spec Overrides" tab (called from the Profiles &
 --- Presets module registration).
 function EllesmereUI.SpecOverrides_BuildListPage(parent, startY)
@@ -6436,6 +7223,149 @@ function EllesmereUI.SpecOverrides_BuildListPage(parent, startY)
             local _, rh = BuildListRow(parent, y, entry)
             y = y - rh
         end
+    end
+
+    -- STRANDED values: per-spec overrides no editing session can reach (see
+    -- SpecStrandedOnEntry). They apply at every boundary but are invisible
+    -- in the group buckets above and uneditable through any session, so
+    -- each gets its own row with a per-value Remove.
+    local stranded
+    for _, entry in ipairs(store or {}) do
+        if entry.values then
+            for k in pairs(entry.values) do
+                if type(k) == "number" and SpecStrandedOnEntry(entry, k) then
+                    stranded = stranded or {}
+                    stranded[#stranded + 1] = { entry = entry, spec = k }
+                end
+            end
+        end
+    end
+    if stranded then
+        table.sort(stranded, function(a, b) return a.spec < b.spec end)
+        local _, hh = W:SectionHeader(parent, "Stranded Overrides", y);  y = y - hh
+        local CONTENT_PAD = EllesmereUI.CONTENT_PAD or 40
+        local hint = EllesmereUI.MakeFont(parent, 11, nil, 1, 1, 1, 0.45)
+        hint:SetPoint("TOPLEFT", parent, "TOPLEFT", CONTENT_PAD + 20, y)
+        hint:SetWidth(parent:GetWidth() - CONTENT_PAD * 2 - 40)
+        hint:SetJustifyH("LEFT")
+        hint:SetText(L("These specs hold override values that no group's editing mode can reach anymore (left behind by membership changes). They still apply. Remove one to return that spec to the shared default."))
+        y = y - 34
+        for _, s in ipairs(stranded) do
+            local _, rh = BuildStrandedRow(parent, y, s.entry, s.spec)
+            y = y - rh
+        end
+    end
+
+    -- DANGER ZONE: one-shot "this override IS my profile" rescue. Only
+    -- rendered while a group exists to promote.
+    if #groups > 0 then
+        y = y - 14
+        local _, hh = W:SectionHeader(parent, "Promote Override to Profile", y);  y = y - hh
+        local CONTENT_PAD = EllesmereUI.CONTENT_PAD or 40
+        local hint = EllesmereUI.MakeFont(parent, 11, nil, 1, 1, 1, 0.45)
+        hint:SetPoint("TOPLEFT", parent, "TOPLEFT", CONTENT_PAD + 20, y)
+        hint:SetWidth(parent:GetWidth() - CONTENT_PAD * 2 - 40)
+        hint:SetJustifyH("LEFT")
+        hint:SetText(L("Rescue tool for a profile built inside an override: the selected group's settings and layouts become this profile's own baseline, then ALL spec override groups are deleted. Conditional overrides are not affected."))
+        y = y - 44
+        local ddValues, ddOrder = {}, {}
+        for _, gg in ipairs(groups) do
+            ddValues[gg.id] = gg.name or ("Group " .. gg.id)
+            ddOrder[#ddOrder + 1] = gg.id
+        end
+        if not _promoteSelGid or not GroupById(_promoteSelGid) then
+            _promoteSelGid = groups[1].id
+        end
+        local _, dh = W:WideDropdown(parent, "Override to Promote", y, ddValues,
+            function() return _promoteSelGid end,
+            function(v) _promoteSelGid = v end,
+            ddOrder, 300)
+        y = y - dh
+        y = y - 6
+        local BTN_W, BTN_H = 300, 38
+        local lerp = EllesmereUI.lerp
+        local DARK_BG = EllesmereUI.DARK_BG or { r = 0.05, g = 0.07, b = 0.09 }
+        local btn = CreateFrame("Button", nil, parent)
+        btn:SetSize(BTN_W, BTN_H)
+        btn:SetPoint("TOP", parent, "TOP", 0, y)
+        btn:SetFrameLevel(parent:GetFrameLevel() + 5)
+        btn:SetAlpha(0.85)
+        local brd = EllesmereUI.MakeBorder(btn, 0.8, 0.2, 0.2, 0.5, EllesmereUI.PanelPP)
+        local bg = EllesmereUI.SolidTex(btn, "BACKGROUND", DARK_BG.r, DARK_BG.g, DARK_BG.b, 0.92)
+        bg:SetAllPoints()
+        local lbl = EllesmereUI.MakeFont(btn, 13, nil, 0.9, 0.3, 0.3)
+        lbl:SetAlpha(0.7)
+        lbl:SetPoint("CENTER")
+        lbl:SetText(L("Promote Override & Delete ALL Overrides"))
+        do
+            local FADE_DUR = 0.1
+            local progress, target = 0, 0
+            local function Apply(t)
+                lbl:SetTextColor(lerp(0.9, 1, t), lerp(0.3, 0.35, t), lerp(0.3, 0.35, t), lerp(0.7, 1, t))
+                brd:SetColor(0.8, 0.2, 0.2, lerp(0.5, 0.8, t))
+            end
+            local function OnUpdate(self, elapsed)
+                local dir = (target == 1) and 1 or -1
+                progress = progress + dir * (elapsed / FADE_DUR)
+                if (dir == 1 and progress >= 1) or (dir == -1 and progress <= 0) then
+                    progress = target; self:SetScript("OnUpdate", nil)
+                end
+                Apply(progress)
+            end
+            btn:SetScript("OnEnter", function(self) target = 1; self:SetScript("OnUpdate", OnUpdate) end)
+            btn:SetScript("OnLeave", function(self) target = 0; self:SetScript("OnUpdate", OnUpdate) end)
+        end
+        btn:SetScript("OnClick", function()
+            local pg = GroupById(_promoteSelGid)
+            if not pg then return end
+            -- The promote ends in a synchronous flush + ReloadUI, neither
+            -- of which belongs in combat lockdown.
+            if InCombatLockdown() then
+                EllesmereUI:ShowConfirmPopup({
+                    title = L("In Combat"),
+                    message = L("Promoting an override reloads the UI and cannot run in combat. Leave combat and try again."),
+                    confirmText = L("OK"),
+                    hideCancel = true,
+                })
+                return
+            end
+            -- Modules with captured overrides must be loaded: promoted
+            -- values for an unloaded module cannot be written live, and the
+            -- store they lived in is deleted at the end -- silent loss.
+            local missingSet, missingList
+            for _, entry in ipairs(GetStore() or {}) do
+                for fkey in pairs(entry.values and entry.values.default or {}) do
+                    if not BlacklistedFKey(fkey) and not FKeyLoaded(fkey) then
+                        local folder = SplitFKey(fkey)
+                        if folder and not (missingSet and missingSet[folder]) then
+                            missingSet = missingSet or {}
+                            missingSet[folder] = true
+                            missingList = missingList or {}
+                            missingList[#missingList + 1] = folder:gsub("^EllesmereUI", "")
+                        end
+                    end
+                end
+            end
+            if missingList then
+                EllesmereUI:ShowConfirmPopup({
+                    title = L("Enable Modules First"),
+                    message = string.format(L("Captured overrides reference disabled modules (%s). Enable them and reload before promoting, or those settings would be lost."), table.concat(missingList, ", ")),
+                    confirmText = L("OK"),
+                    hideCancel = true,
+                })
+                return
+            end
+            EllesmereUI:ShowConfirmPopup({
+                title = L("Promote Override to Profile"),
+                message = string.format(L("This permanently overwrites this profile's settings with the override '%s': its captured settings and its custom Unlock Mode and Buff Manager layouts (where present) become the profile's own baseline for every spec. ALL spec override groups on this profile are then deleted and the UI reloads. Conditional overrides are not affected."), pg.name or "?"),
+                disclaimer = L("This cannot be undone. Consider exporting this profile as a backup first."),
+                typeToConfirm = "Confirm",
+                confirmText = L("Promote & Reload"),
+                cancelText = L("Cancel"),
+                onConfirm = function() PromoteGroupToProfile(pg) end,
+            })
+        end)
+        y = y - BTN_H - 10
     end
 
     return -y + 40

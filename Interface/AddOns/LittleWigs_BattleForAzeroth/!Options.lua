@@ -602,12 +602,14 @@ BigWigs:AddColors("Mchimba the Embalmer", {
 	[267618] = {"blue","red"},
 	[267639] = "orange",
 	[267702] = {"blue","green","yellow"},
+	[1312146] = "cyan",
 })
 
 BigWigs:AddSounds("Mchimba the Embalmer", {
 	[267618] = "alert",
 	[267639] = "alarm",
 	[267702] = {"info","long"},
+	[1312146] = "info",
 })
 
 BigWigs:AddColors("The Council of Tribes", {
@@ -640,7 +642,7 @@ BigWigs:AddColors("Dazar, The First King", {
 	[269230] = "orange",
 	[269231] = "blue",
 	[269369] = "red",
-	[1303115] = "yellow",
+	[1303115] = {"blue","yellow"},
 	[1303267] = "red",
 	[1303326] = {"blue","orange"},
 	[1303481] = "purple",
@@ -654,7 +656,7 @@ BigWigs:AddSounds("Dazar, The First King", {
 	[269231] = "alert",
 	[269369] = "warning",
 	[1303115] = "info",
-	[1303267] = "warning",
+	[1303267] = "long",
 	[1303326] = "long",
 	[1303481] = "alarm",
 	["stages"] = "info",
@@ -1231,7 +1233,7 @@ BigWigs:AddColors("Adderis and Aspix", {
 	[1288049] = "orange",
 	[1288428] = "purple",
 	[1288864] = {"blue","yellow"},
-	[1289059] = {"blue","red"},
+	[1289059] = "blue",
 })
 
 BigWigs:AddSounds("Adderis and Aspix", {
@@ -1251,10 +1253,11 @@ BigWigs:AddColors("Merektha", {
 	[263914] = "red",
 	[263927] = "blue",
 	[263958] = {"blue","red"},
-	[264172] = {"cyan","green"},
+	[264172] = {"cyan","green","orange"},
 	[264206] = {"cyan","green"},
 	[1289109] = "yellow",
 	[1289205] = "yellow",
+	[1290029] = "red",
 	[1290797] = "purple",
 	[1293048] = "orange",
 })
@@ -1264,11 +1267,11 @@ BigWigs:AddSounds("Merektha", {
 	[263914] = "warning",
 	[263927] = "alarm",
 	[263958] = "warning",
-	[264172] = {"info","long"},
+	[264172] = {"alarm","info","long"},
 	[264206] = {"info","long"},
 	[1289109] = "alert",
 	[1289205] = "info",
-	[1290029] = "warning",
+	[1290029] = "info",
 	[1290797] = "alert",
 	[1293048] = "alarm",
 })
@@ -1295,7 +1298,7 @@ BigWigs:AddColors("Avatar of Sethraliss", {
 	[269688] = "orange",
 	[274149] = {"blue","green"},
 	[1273408] = "cyan",
-	[1301202] = "yellow",
+	[1301202] = {"green","yellow"},
 	["adds"] = "orange",
 	["stages"] = "cyan",
 })
@@ -1308,7 +1311,7 @@ BigWigs:AddSounds("Avatar of Sethraliss", {
 	[269688] = "info",
 	[274149] = "info",
 	[1273408] = "long",
-	[1301202] = "info",
+	[1301202] = {"alarm","info"},
 	["adds"] = "warning",
 	["stages"] = {"info","long"},
 })

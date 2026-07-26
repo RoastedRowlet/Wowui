@@ -1,0 +1,20 @@
+
+MyTotemDB = {
+["profileKeys"] = {
+["Barelynoer - Area 52"] = "Default",
+},
+["profiles"] = {
+["Default"] = {
+["ParentSelectMode"] = "EllesmereUIUnitFrames_Player",
+["IconScale"] = 1.9,
+["XOffset"] = 32.39999999999998,
+["YOffset"] = 11.10000000000002,
+["IconSpacing"] = -15.5,
+["GrowthDirection"] = "UP",
+["ParentAnchor"] = "TOPLEFT",
+["FontSize"] = 10,
+["ParentFrameName"] = "EssentialCooldownViewer",
+["TestCount"] = 4,
+},
+},
+}

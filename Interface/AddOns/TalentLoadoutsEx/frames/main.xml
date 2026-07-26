@@ -397,7 +397,7 @@
 				</Scripts>
 			</Frame>
 			<Frame parentKey="PresetPopupFrame" enableMouse="true" hidden="true" frameLevel="50">
-				<Size x="270" y="300"/>
+				<Size x="310" y="300"/>
 				<Anchors>
 					<Anchor point="TOPRIGHT" relativePoint="TOPLEFT" y="-21"/>
 				</Anchors>
@@ -425,7 +425,7 @@
 							<Frame parentArray="PresetAddons" inherits="TalentLoadoutExPresetAddonFrameTemplate">
 								<Size x="100" y="120"/>
 								<KeyValues>
-									<KeyValue key="title" value="Archon(PeaversTalentsData)"/>
+									<KeyValue key="title" value="WoWCompare(PeaversTalentsData)"/>
 									<KeyValue key="addonName" value="PeaversTalentsData"/>
 								</KeyValues>
 								<Frames>

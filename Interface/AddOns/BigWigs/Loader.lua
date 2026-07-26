@@ -14,12 +14,12 @@ local strfind = string.find
 
 local BIGWIGS_VERSION = 419
 local CONTENT_PACK_VERSIONS = {
-	["LittleWigs"] = {12, 0, 61},
-	["BigWigs_Classic"] = {12, 0, 19},
-	["BigWigs_BurningCrusade"] = {12, 0, 15},
+	["LittleWigs"] = {12, 0, 63},
+	["BigWigs_Classic"] = {12, 0, 21},
+	["BigWigs_BurningCrusade"] = {12, 0, 16},
 	["BigWigs_WrathOfTheLichKing"] = {12, 0, 10},
 	["BigWigs_Cataclysm"] = {12, 0, 5},
-	["BigWigs_MistsOfPandaria"] = {12, 0, 8},
+	["BigWigs_MistsOfPandaria"] = {12, 0, 9},
 	["BigWigs_WarlordsOfDraenor"] = {12, 0, 3},
 	["BigWigs_Legion"] = {12, 0, 3},
 	["BigWigs_BattleForAzeroth"] = {12, 0, 5},
@@ -57,7 +57,7 @@ do
 	local ALPHA = "ALPHA"
 
 	local releaseType
-	local myGitHash = "7899ab4" -- The ZIP packager will replace this with the Git hash.
+	local myGitHash = "3fdc10f" -- The ZIP packager will replace this with the Git hash.
 	local releaseString
 	--[=[@alpha@
 	-- The following code will only be present in alpha ZIPs.

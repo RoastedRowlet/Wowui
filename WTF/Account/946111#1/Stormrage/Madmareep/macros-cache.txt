@@ -18,6 +18,9 @@ VER 3 010000000000000A "Focus Silence" "134400"
 #showtooltip Silence
 /cast [@focus, exists, harm] Silence
 END
+VER 3 010000000000000D "MSA resume" "136103"
+/msa resume
+END
 VER 3 0100000000000003 "no cancel penance" "134400"
 #123
 #showtooltip

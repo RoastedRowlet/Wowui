@@ -39,6 +39,7 @@ function Private.Settings.GetDefaultSettings()
 			[Private.Enum.FontFlags.SHADOW] = false,
 		},
 		SecondaryFontScale = 0.66,
+		TargetMarkerScale = 1,
 		BackgroundOpacity = 0.35,
 		CustomTextsPosition = Private.Enum.CustomTextsPosition.BOTTOMRIGHT,
 		TickWidth = 3,
@@ -61,6 +62,7 @@ function Private.Settings.GetDefaultSettings()
 			[Private.Enum.FeatureFlag.PlayTTSOnCastStart] = false,
 		},
 		CustomTTSOnCastStartText = "",
+		CustomSound = -1,
 	}
 end
 
@@ -92,7 +94,11 @@ function Private.Settings.Import(string)
 		local newValue = result[key]
 		local expectedType = type(defaultValue)
 
-		if newValue ~= nil and type(newValue) == expectedType then
+		-- CustomSound may be either -1 (number, "None") or a LibSharedMedia SOUND
+		-- key (string), so accept both regardless of the default's type.
+		local typeMatches = type(newValue) == expectedType or key == "CustomSound"
+
+		if newValue ~= nil and typeMatches then
 			local eventKey = Private.Enum.Setting[key]
 			local event = Private.Enum.Events.SETTING_CHANGED
 

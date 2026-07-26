@@ -733,7 +733,15 @@ local function RepointAllDBs(profileName)
             for folder, targets in pairs(sm) do
                 if type(targets) == "table" and targets[profileName] and targets[outName]
                    and outProf.addons[folder] then
+                    -- Override-owned settings never sync: merge both profiles'
+                    -- override-entry paths into the static exclusions
+                    -- (fail-open -- a derive error keeps the static set).
                     local exclusions = EllesmereUI._syncExclusions and EllesmereUI._syncExclusions[folder]
+                    local exFn = EllesmereUI._SyncExclusionsWithOverrides
+                    if exFn then
+                        local ok, m = pcall(exFn, folder, exclusions, outProf, profileData)
+                        if ok and m then exclusions = m end
+                    end
                     local dst = profileData.addons[folder]
                     if not (exclusions and next(exclusions)) then
                         profileData.addons[folder] = DeepCopy(outProf.addons[folder])
@@ -1207,6 +1215,22 @@ function EllesmereUI.ApplyProfileData(profileData)
                         mm.omniumFolioMode = (mm.showOmniumFolio == false) and "never" or "always"
                     end
                 end
+                -- Pre-enum imports carry the legacy anchorFirstRow boolean but
+                -- no rowGrowDirection. The conversion migration
+                -- (cdm_row_grow_direction_v1) is SKIPPED for imported profiles
+                -- (inherited migration flags), so forward-copy here so the
+                -- pinned-row behavior survives the import.
+                if entry.folder == "EllesmereUICooldownManager"
+                    and type(profile.cdmBars) == "table" and type(profile.cdmBars.bars) == "table" then
+                    for _, bar in ipairs(profile.cdmBars.bars) do
+                        if bar.anchorFirstRow then
+                            if bar.rowGrowDirection == nil then
+                                bar.rowGrowDirection = bar.verticalOrientation and "RIGHT" or "DOWN"
+                            end
+                            bar.anchorFirstRow = nil
+                        end
+                    end
+                end
                 if db._profileDefaults then
                     EllesmereUI.Lite.DeepMergeDefaults(profile, db._profileDefaults)
                 end
@@ -1464,12 +1488,15 @@ local function EnsureProfileBindBtn(profileName)
         if active == profileName then return end
         local _, profiles = EllesmereUI.GetProfileList()
         local fontWillChange = EllesmereUI.ProfileChangesFont(profiles and profiles[profileName])
+        local skinsWillChange = EllesmereUI.ProfileChangesWindowSkins(profiles and profiles[profileName])
         EllesmereUI.SwitchProfile(profileName)
         EllesmereUI.RefreshAllAddons()
-        if fontWillChange then
+        if fontWillChange or skinsWillChange then
             EllesmereUI:ShowConfirmPopup({
                 title       = "Reload Required",
-                message     = "Font changed. A UI reload is needed to apply the new font.",
+                message     = fontWillChange
+                    and "Font changed. A UI reload is needed to apply the new font."
+                    or "Window skins changed for this profile. A UI reload is needed to apply them.",
                 confirmText = "Reload Now",
                 cancelText  = "Later",
                 onConfirm   = function() ReloadUI() end,
@@ -1555,6 +1582,19 @@ function EllesmereUI.ProfileChangesFont(profileData)
     return curFont ~= newFont or curOutline ~= newOutline
 end
 
+--- Returns true if switching to profileData would cross the per-profile
+--- "Disable Window Skins" flag in either direction. Skins install at load,
+--- so a crossing needs a UI reload to fully apply -- callers pair this with
+--- the same reload popup as the font check above. Must be called BEFORE
+--- the switch (compares the CURRENT active profile root against the target).
+function EllesmereUI.ProfileChangesWindowSkins(profileData)
+    if type(profileData) ~= "table" then return false end
+    local cur = EllesmereUI.GetActiveProfileData and EllesmereUI.GetActiveProfileData()
+    local a = (cur and cur.disableWindowSkins) and true or false
+    local b = profileData.disableWindowSkins and true or false
+    return a ~= b
+end
+
 --[[ ADDON-SPECIFIC EXPORT DISABLED
 --- Apply a partial profile (specific addons only) by merging into active
 function EllesmereUI.ApplyPartialProfile(profileData)
@@ -1604,6 +1644,15 @@ local EXPORT_PREFIX = "!EUI_"
 -- itself isn't part of a subset export.
 local function SnapshotProfileCDMSpells(profileName, includedFolders, cdmSpecs)
     if includedFolders and not includedFolders["EllesmereUICooldownManager"] then return nil end
+    -- Reconcile the ACTIVE spec's default-bar store against the live icons
+    -- before snapshotting: untouched base-bar spells render via the
+    -- frames-as-truth fallback without being recorded, and an export taken
+    -- before the login reseed ran would ship them missing (the importer's
+    -- ghost pass then hides them). No-ops when the CDM child is disabled,
+    -- when an import's ghosting is pending, or when no live icons exist.
+    if EllesmereUI.CDMReconcileActiveSpecSpells then
+        EllesmereUI.CDMReconcileActiveSpecSpells()
+    end
     local sa = EllesmereUIDB and EllesmereUIDB.spellAssignments
     local bucket = sa and sa.profiles and sa.profiles[profileName]
     if not bucket or type(bucket.specProfiles) ~= "table" or not next(bucket.specProfiles) then
@@ -1642,10 +1691,149 @@ local function CollectAssignedSpecs(profileName)
     return list
 end
 
-function EllesmereUI.ExportProfile(profileName, includedFolders, includeLayout, includeCDM, cdmSpecs, includeGlobals)
+-------------------------------------------------------------------------------
+-- Blizz UI Enhanced account-global settings ("Window & Tooltip Skins").
+-- These keys live at the TOP LEVEL of EllesmereUIDB (account-wide, shared by
+-- every profile) and cover exactly the first two Blizz UI Enhanced tabs:
+-- Window Skins and Tooltips, Menus & Popups. The bundle is OPT-IN on export
+-- (Include dropdown, default off) and OPT-IN on import (Include Window Skins
+-- checkbox + confirmation), because applying it overwrites the recipient's
+-- settings across ALL of their profiles.
+--
+-- CO-MAINTAIN with the module onReset key list in
+-- EllesmereUIBlizzardSkin/EUI_BlizzardSkin_Options.lua: a new account-global
+-- setting added to either tab must be added here too or it will not travel.
+--
+-- Deliberately absent (state, not settings): lfgSavedRoles (the player's
+-- saved LFG roles), charSheetCollapsedSections (transient UI state),
+-- characterFramePos / friendsFramePos (dragged panel positions, resolution-
+-- bound), tooltipFixedPos (stale account key; the live one is per-profile
+-- and rides the profile itself), blizzWindowModernBG (dead key, read
+-- nowhere).
+-------------------------------------------------------------------------------
+local BLIZZ_SKIN_GLOBAL_KEYS = {}
+do
+    local keys = BLIZZ_SKIN_GLOBAL_KEYS
+    local function add(list)
+        for _, k in ipairs(list) do keys[#keys + 1] = k end
+    end
+    -- Tooltips, Menus & Popups tab
+    add({
+        "customTooltips", "tooltipFontScale", "tooltipPlayerTitles",
+        "tooltipItemLevel", "tooltipMythicScore", "tooltipShowMount",
+        "tooltipShowGuildRank", "tooltipShowTarget", "tooltipShowMode",
+        "tooltipShowModifier", "tooltipGrowthDirection",
+        "uberTooltips", "uberTooltipsManual", "tooltipHideHealthStrip",
+        "tooltipAnchorCursor", "tooltipCursorPosition",
+        "tooltipCursorOffsetX", "tooltipCursorOffsetY",
+        "tooltipBgColor", "tooltipBgOpacity", "tooltipBorderSize",
+        "showSpellID", "spellIDModifier",
+        "showItemMaxStacks", "itemStackModifier",
+        "reskinPopupsMenus", "reskinGameMenu", "reskinQueuePopup",
+        "showQueueTimer", "resurrectAcceptGlow",
+        "popupMenuButtonBackgroundColor", "popupMenuButtonTextColorMode",
+        "popupMenuButtonTextColor",
+        "accentReskinElements",
+    })
+    -- Shared border-editor key sets (tooltip / popup menu / popup menu button)
+    for _, prefix in ipairs({ "tooltip", "popupMenu", "popupMenuButton" }) do
+        for _, suffix in ipairs({
+            "BorderTexture", "BorderThickness", "BorderColor",
+            "BorderColorMode", "BorderOpacity", "BorderOffsetX",
+            "BorderOffsetY", "BorderShiftX", "BorderShiftY", "BorderBehind",
+        }) do
+            keys[#keys + 1] = prefix .. suffix
+        end
+    end
+    -- Window Skins tab: per-window enables + skin styles + shared look
+    add({
+        "themedCharacterSheet", "themedInspectSheet",
+        "reskinLFGMenu", "reskinGreatVault", "reskinCollections",
+        "reskinPlayerSpells", "reskinAdventureGuide", "reskinProfessionsBook",
+        "reskinProfessions", "reskinWorldMap", "reskinGuild", "reskinCalendar",
+        "reskinAchievements", "reskinMail", "reskinCatalyst", "reskinSocket",
+        "reskinMicroMenu", "reskinHousing", "reskinDressUp", "reskinTransmog",
+        "reskinMerchant", "reskinAuctionHouse", "reskinMacros",
+        "reskinSettings", "reskinAddonList", "reskinCraftOrders",
+        "reskinTrainer", "reskinGossip", "reskinQuest", "reskinInspectRecipe",
+        "reskinDelves",
+        "blizzWindowSkinStyles", "blizzWindowModernDefault",
+        "blizzWinAccentBar", "blizzWinBarFill", "blizzWinLinks",
+    })
+    -- Window Skins tab: per-window card options
+    add({
+        -- Character Sheet card
+        "statCategoryColors", "statCategoryUseColor", "statSectionsOrder",
+        "showMythicRating", "showItemLevel", "showUpgradeTrack", "showGems",
+        "showEnchants", "showPvpItemLevel", "charSheetSocketPanel",
+        "charSheetIconZoom", "charSheetEnchantNames", "charSheetEnchantSize",
+        "flyoutItemLevels", "showSecondaryRaw", "showSecondaryBoth",
+        "showTertiaryRaw", "showTertiaryBoth", "showAdjustedStats",
+        -- Inspect card
+        "inspectShowEnchants", "inspectShowItemLevel", "inspectShowUpgradeTrack",
+        -- LFG / Merchant cards
+        "lfgRememberRoles",
+        "merchantShowAsList", "merchantListRowHeight", "merchantShowItemLevel",
+    })
+end
+
+-- Snapshot the bundle for export. nil-valued keys are simply absent from the
+-- snapshot; the import side clears keys absent from the bundle, so the
+-- recipient lands on the exporter's EXACT two-tab configuration (absent =
+-- that setting's default).
+local function SnapshotBlizzSkinGlobals()
+    if not EllesmereUIDB then return nil end
+    local out = {}
+    for _, k in ipairs(BLIZZ_SKIN_GLOBAL_KEYS) do
+        local v = EllesmereUIDB[k]
+        if v ~= nil then out[k] = DeepCopy(v) end
+    end
+    return out
+end
+
+-- Apply an imported bundle: every allowlisted key takes the bundle's value,
+-- INCLUDING nil (absent = exporter default), so mixed old/new state can't
+-- linger. Bundle keys this build doesn't know yet apply too (a newer
+-- exporter's keys are inert on builds that never read them). Callers reload
+-- right after -- these settings install at load, so no live re-apply is
+-- needed or attempted.
+function EllesmereUI.ApplyBlizzSkinGlobals(bundle)
+    if type(bundle) ~= "table" or not EllesmereUIDB then return end
+    local known = {}
+    for _, k in ipairs(BLIZZ_SKIN_GLOBAL_KEYS) do
+        known[k] = true
+        EllesmereUIDB[k] = DeepCopy(bundle[k])
+    end
+    for k, v in pairs(bundle) do
+        if not known[k] then
+            EllesmereUIDB[k] = DeepCopy(v)
+        end
+    end
+end
+
+function EllesmereUI.ExportProfile(profileName, includedFolders, includeLayout, includeCDM, cdmSpecs, includeGlobals, includeOverrides, includeBlizzSkin)
     if includeLayout == nil then includeLayout = true end  -- default ON
-    if includeCDM == nil then includeCDM = false end  -- default OFF (opt-in, spec-picked)
+    -- Overrides (value stores + groups + unlock-layer forks + BM forks)
+    -- default ON: headless full calls (Wago, partner installers) keep
+    -- carrying the complete override system exactly as classic full exports
+    -- always did; the export UI passes the user's explicit Include choice.
+    if includeOverrides == nil then includeOverrides = true end
+    -- CDM spell layouts default ON with every spec included (cdmSpecs nil =
+    -- all specs with data). Headless callers -- the Wago UI Packs creator
+    -- export and partner installers -- call this bare and must receive a
+    -- COMPLETE profile; the opt-in + spec-picker experience belongs to the
+    -- options UI, which always passes includeCDM and cdmSpecs explicitly.
+    -- (The old nil=OFF default silently shipped every Wago pack without its
+    -- CDM spell layouts: the exporter never saw it because the in-game export
+    -- flow passes explicit values.)
+    if includeCDM == nil then includeCDM = true end
     if includeGlobals == nil then includeGlobals = true end  -- default ON ("Include Global Settings")
+    -- Blizz UI Enhanced account-global bundle: headless full calls (the Wago
+    -- creator export, partner installers) default ON so a pack delivers the
+    -- creator's complete look -- there is no UI in that path to opt in. The
+    -- export UI always passes its explicit "Window Skins" Include choice
+    -- (default off there: manual sharers opt in deliberately).
+    if includeBlizzSkin == nil then includeBlizzSkin = true end
     local db = GetProfilesDB()
     local profileData = db.profiles[profileName]
     if not profileData then return nil end
@@ -1657,6 +1845,18 @@ function EllesmereUI.ExportProfile(profileName, includedFolders, includeLayout, 
         profileData.unlockLayout = SnapshotUnlockLayout()
     end
     local exportData = DeepCopy(profileData)
+    -- Import-window guard flag (see ImportProfile) is recipient-local state;
+    -- never let it ride an export string. The import-flow stamps below it are
+    -- payload metadata, never profile data -- strip any stale copies too (the
+    -- export re-stamps them deliberately further down).
+    exportData._importEstablishPending = nil
+    exportData.overridesIncluded = nil
+    exportData.overridesExcluded = nil
+    exportData.partialImport     = nil
+    exportData.layoutExcluded    = nil
+    exportData.blizzSkinGlobals      = nil
+    exportData.applyBlizzSkinGlobals = nil
+    exportData.applyUIScale          = nil
     -- UI accent color (per-profile): serialize the RESOLVED accent for THIS
     -- profile (works for active and non-active profiles; never mutates the
     -- stored profile, and is rename-immune since it is a data-root field, not
@@ -1706,19 +1906,31 @@ function EllesmereUI.ExportProfile(profileName, includedFolders, includeLayout, 
     -- fonts/customColors/darkMode/euiAccent are profile-GLOBAL appearance and are
     -- not separable per-addon, so a subset export must not carry them (they'd
     -- clobber the recipient's). Only a full-profile export carries them.
-    if includedFolders then
-        -- UI scale has its own dedicated import toggle and never rides a subset
-        -- export (it is not part of "Include Global Settings").
-        exportData.uiScale = nil
-        -- Profile-global appearance (fonts, custom colours, dark mode, accent)
-        -- rides a per-addon export only when "Include Global Settings" is on
-        -- (default). Off = the recipient keeps their own look.
-        if not includeGlobals then
-            exportData.fonts        = nil
-            exportData.customColors = nil
-            exportData.darkMode     = nil
-            exportData.euiAccent    = nil
-        end
+    -- Profile-global appearance (fonts, custom colours, dark mode, accent)
+    -- and the account UI scale ride only when "Global Settings" is included
+    -- (default ON) -- full and subset exports alike, since the unified export
+    -- flow offers the toggle for both (2026-07-20 redesign; the old subset
+    -- path dropped uiScale unconditionally, which would have regressed scale
+    -- transfer once the separate full-export button was removed). Off = the
+    -- recipient keeps their own look and scale.
+    if not includeGlobals then
+        exportData.fonts        = nil
+        exportData.customColors = nil
+        exportData.darkMode     = nil
+        exportData.euiAccent    = nil
+        exportData.uiScale      = nil
+    end
+    -- Blizz UI Enhanced account-global bundle ("Window & Tooltip Skins"):
+    -- rides when includeBlizzSkin resolves true -- explicit opt-in from the
+    -- export UI's "Window Skins" Include item, or the headless default (see
+    -- the nil-default above: Wago packs deliver the creator's complete look).
+    -- Gated on the module being loaded so a build without Blizz UI Enhanced
+    -- never ships an empty bundle. Bundle presence in a string is therefore
+    -- always deliberate, which is what lets the importer treat presence as
+    -- the apply signal (the import dialog's checkbox strips the bundle for
+    -- recipient-side opt-out).
+    if includeBlizzSkin and EllesmereUI.IsModuleAddonLoaded("EllesmereUIBlizzardSkin") then
+        exportData.blizzSkinGlobals = SnapshotBlizzSkinGlobals()
     end
     -- Layout relationships (unlockLayout) are governed by the "Include layout"
     -- toggle and FILTERED per-module: only relationships whose both endpoints are
@@ -1730,6 +1942,45 @@ function EllesmereUI.ExportProfile(profileName, includedFolders, includeLayout, 
         exportData.unlockLayout, includeLayout, includedFolders)
     exportData.unlockLayout     = fLayout      -- nil when includeLayout is off
     exportData.unlockLayoutMeta = layoutMeta   -- nil when includeLayout is off
+    -- Override system (2026-07-20 redesign): ALL-OR-NOTHING under the single
+    -- "Overrides" include. Value stores, group definitions, the spec/cond
+    -- unlock-layer FORKS, and the BM forks travel together or not at all --
+    -- there is no per-module override merging anymore (and forks were never
+    -- per-module separable anyway). Excluded -> strip everything and stamp
+    -- overridesExcluded so the importer KEEPS the recipient's stores instead
+    -- of reading the stripped nils as "exporter had none, wipe yours".
+    -- Included on a SUBSET export -> stamp overridesIncluded: subset strings
+    -- default to keep-recipient at import (matching legacy subset behavior),
+    -- so carrying overrides needs the positive marker.
+    if includeOverrides then
+        if includedFolders then
+            exportData.overridesIncluded = true
+        end
+    else
+        exportData.specOverrides       = nil
+        exportData.specOverrideGroups  = nil
+        exportData.specOverrideNextId  = nil
+        exportData.condOverrides       = nil
+        exportData.condOverrideGroups  = nil
+        exportData.condOverrideNextId  = nil
+        exportData.specUnlockOverrides = nil
+        exportData.condUnlockOverrides = nil
+        exportData.specBmOverrides     = nil
+        exportData.condBmOverrides     = nil
+        exportData.overridesExcluded   = true
+    end
+    -- Layout deliberately excluded: stamped for the importer's baseline
+    -- layout handling (kept for compatibility; fork keep/take is governed by
+    -- the overrides stamps above since the 2026-07-20 redesign).
+    if not includeLayout then
+        exportData.layoutExcluded = true
+    end
+    -- A subset export IS a partial import regardless of what the recipient
+    -- checks: stamp it at the source so the store merge takes the same
+    -- keep-existing subset path the import dialog stamps on deselection.
+    if includedFolders then
+        exportData.partialImport = true
+    end
     -- Normalize local db.folder keys -> canonical (suite) keys so the string
     -- imports correctly into any build. No-op in the suite (canon == folder).
     exportData.addons = AddonsToCanon(exportData.addons)
@@ -1944,7 +2195,10 @@ end
 
 function EllesmereUI.ExportCurrentProfile(includeLayout, includeCDM, cdmSpecs)
     if includeLayout == nil then includeLayout = true end  -- default ON
-    if includeCDM == nil then includeCDM = false end  -- default OFF (opt-in, spec-picked)
+    -- Same nil-default as ExportProfile: bare (headless/API) calls get the
+    -- complete profile including CDM spell layouts for every spec; the
+    -- options export flow always passes the user's explicit choice.
+    if includeCDM == nil then includeCDM = true end
     local profileData = EllesmereUI.SnapshotAllAddons()
     -- Legacy account-wide spell store never travels (the per-profile snapshot below
     -- carries CDM content instead).
@@ -2336,9 +2590,87 @@ local function GetSpellStoreProfiles()
     return sa.profiles
 end
 
+-- Build an imported profile's per-profile CDM spell bucket on the same
+-- merge-base-on-active contract as the addon blobs: START from a copy of the
+-- ACTIVE profile's spell store, so specs the incoming string does not carry
+-- keep the current profile's layouts VERBATIM (they are the user's own
+-- current data -- no import flags or migrations touch them), THEN overlay
+-- the incoming specs and arm import-authoritative ghosting on THOSE ONLY, so
+-- the importer's tracked-but-unplaced spells get hidden (not spilled onto a
+-- default bar) once the profile is active. Runs even with no incoming specs
+-- (inherit-only): an imported profile must never pair inherited CDM bar
+-- definitions with an empty spell store. Existing bucket keys other than
+-- specProfiles are preserved on overwrite, and the active bucket may BE the
+-- target bucket (overwriting the active profile): inheritance copies into a
+-- fresh table before specProfiles is replaced, so that case is a clean
+-- self-copy plus incoming overlay.
+local function BuildImportedCDMSpellBucket(profileName, activeName, incomingSpecs, importedBarsCfg)
+    if not EllesmereUIDB then return end
+    EllesmereUIDB.spellAssignments = EllesmereUIDB.spellAssignments or { profiles = {} }
+    local sa = EllesmereUIDB.spellAssignments
+    sa.profiles = sa.profiles or {}
+    local bucket = sa.profiles[profileName] or {}
+    sa.profiles[profileName] = bucket
+    local inherited = {}
+    local activeBucket = sa.profiles[activeName]
+    if activeBucket and type(activeBucket.specProfiles) == "table" then
+        for specKey, sp in pairs(activeBucket.specProfiles) do
+            if type(sp) == "table" then inherited[specKey] = DeepCopy(sp) end
+        end
+    end
+    bucket.specProfiles = inherited
+    if type(incomingSpecs) ~= "table" then return end
+    for specKey, specProf in pairs(DeepCopy(incomingSpecs)) do
+        bucket.specProfiles[specKey] = specProf
+        if type(specProf) == "table" then
+            if type(specProf.barSpells) == "table" then specProf.barSpells.__ghost_cd = nil end
+            specProf._barFilterModelV6 = nil    -- re-run the migration on activate
+            specProf._importGhostMode  = true   -- ghost tracked-but-unplaced spells
+            specProf._dormantMerged    = true   -- imported data is already current-model
+            -- Old-format strings (pre tiered-settings) carry per-bar
+            -- spellSettings; transform NOW so the live session reads the
+            -- new shape (the registered migration also covers it on the
+            -- next reload -- both idempotent, flag lives in the bucket).
+            if EllesmereUI.MigrateCdmSpellSettingsShape then
+                EllesmereUI.MigrateCdmSpellSettingsShape(specProf, importedBarsCfg)
+            end
+            -- Hosted-buff settings moved family stores (CD -> BUFF);
+            -- relocate old-format imports the same way (idempotent).
+            if EllesmereUI.MigrateCdmHostedBuffSettings then
+                EllesmereUI.MigrateCdmHostedBuffSettings(specProf)
+            end
+            -- Collided-buff cooldownID claims moved from the
+            -- assignedBuffCdIDs side-table to cd-claim markers inside
+            -- assignedSpells; convert old-format imports too (idempotent),
+            -- or their claims sit unread and the slots silently unclaim.
+            if EllesmereUI.MigrateCdmBuffCdClaims then
+                EllesmereUI.MigrateCdmBuffCdClaims(specProf)
+            end
+            -- Strings exported before _buffDisplayOrderUserModified
+            -- existed carry a drag-arranged buffDisplayOrder without
+            -- the flag; stamp it or the first live reconcile resyncs
+            -- the imported order to Blizzard order (idempotent).
+            if EllesmereUI.MigrateCdmBuffOrderUserFlag then
+                EllesmereUI.MigrateCdmBuffOrderUserFlag(specProf)
+            end
+        end
+    end
+end
+
 --- Import a profile string. Returns: success, errorMsg
 --- The caller must provide a name for the new profile.
 function EllesmereUI.ImportProfile(importStr, profileName)
+    -- A concurrent silent import (e.g. the Wago path) invalidates any pending
+    -- INTERACTIVE import session: its selection UI is stale against the
+    -- profile data this call is about to change. The interactive flow's own
+    -- commit sets `committing` around this call, so it never cancels itself.
+    do
+        local s = EllesmereUI._apiImportSession
+        if s and s.state ~= "done" and not s.committing then
+            EllesmereUI._FinishApiImportSession(false)
+            if EllesmereUI._ProfilesResetToMain then pcall(EllesmereUI._ProfilesResetToMain) end
+        end
+    end
     -- Accepts either an encoded string or an already-decoded payload table.
     -- The options import page decodes asynchronously and passes the table,
     -- which skips a full re-encode/re-decode of the data at commit time.
@@ -2393,20 +2725,44 @@ function EllesmereUI.ImportProfile(importStr, profileName)
         -- global), never inside a profile. Strip any stray clickCast from the
         -- payload so an import can never overwrite the user's own click-cast setup.
         imported.clickCast = nil
+        -- The Blizz UI Enhanced bundle + its opt-in marker are payload-root
+        -- transport, never profile data -- strip so they can't ride into the
+        -- stored profile (applied separately below).
+        imported.blizzSkinGlobals      = nil
+        imported.applyBlizzSkinGlobals = nil
 
-        -- UI scale (account-wide) is applied ONLY when the importer explicitly
-        -- opted in: the import page's "Exclude UI Scale" toggle defaults ON, so
-        -- the applyUIScale marker is absent by default, and a raw-string / Wago
-        -- import (no options UI) never sets it either -- the user's own scale is
-        -- left untouched. Writing the account keys here lets the caller's imminent
-        -- reload apply the new scale (EllesmereUI_Startup reads ppUIScale). Range
-        -- matches PP.PixelBestSize's clamp; out-of-range values are ignored.
-        if payload.data.applyUIScale and type(payload.data.uiScale) == "number" and EllesmereUIDB then
+        -- UI scale (account-wide): PRESENCE IS CONSENT (2026-07-20, matching
+        -- Window Skins). The import dialog's scale-mismatch popup runs before
+        -- its commit and STRIPS uiScale from the payload when the user picks
+        -- Keep Mine (or the scales already match), so a value still present
+        -- is either the dialog's accepted Match Scale choice or a headless
+        -- (Wago / partner / silent API) full-string import -- which applies
+        -- the creator's scale by default, matching overrides, CDM spell
+        -- layouts, and window skins. Writing the account keys here lets the
+        -- caller's imminent reload apply the new scale (EllesmereUI_Startup
+        -- reads ppUIScale). Range matches PP.PixelBestSize's clamp;
+        -- out-of-range values are ignored.
+        if type(payload.data.uiScale) == "number" and EllesmereUIDB then
             local s = payload.data.uiScale
             if s >= 0.40 and s <= 1.15 then
                 EllesmereUIDB.ppUIScale = s
                 EllesmereUIDB.ppUIScaleAuto = false
             end
+        end
+
+        -- Blizz UI Enhanced account-global bundle ("Window & Tooltip Skins"):
+        -- applied whenever the string CARRIES it -- presence is consent
+        -- (2026-07-20): a bundle only ever rides via the exporter's explicit
+        -- "Window Skins" Include choice or the headless full-export default,
+        -- and the import dialog's "Include Window Skins" checkbox STRIPS the
+        -- bundle when unchecked (after its overwrite confirmation), so the
+        -- recipient-side opt-out still holds. Headless (Wago / partner /
+        -- silent API) full-string imports therefore apply the creator's
+        -- window skins by default, matching overrides and CDM spell layouts.
+        -- Writes the account-wide keys now; the caller's imminent reload
+        -- applies them (these skins install at load).
+        if type(payload.data.blizzSkinGlobals) == "table" then
+            EllesmereUI.ApplyBlizzSkinGlobals(payload.data.blizzSkinGlobals)
         end
 
         -- Base: deep-copy current active profile, then overlay imported addons
@@ -2418,18 +2774,48 @@ function EllesmereUI.ImportProfile(importStr, profileName)
                 merged.addons[folder] = DeepCopy(snap)
             end
         end
+        -- Per-profile migration stamps must reflect the PAYLOAD's data
+        -- vintage, not the base profile's. On a fresh install the base
+        -- (active) profile carries no stamps yet, so without this the next
+        -- load would run every profile-scope migration over the
+        -- just-imported data as if it were legacy. A current-version export
+        -- carries its own stamps; a genuinely old string carries none and
+        -- still gets migrated, which is the intended behavior for old data.
+        if type(imported._migrations) == "table" then
+            merged._migrations = DeepCopy(imported._migrations)
+        end
         -- Take fonts/colors from import if present (the partial-import OnClick nils
         -- these so a subset import keeps the base profile's appearance).
         if imported.fonts then merged.fonts = DeepCopy(imported.fonts) end
         if imported.customColors then merged.customColors = DeepCopy(imported.customColors) end
         if imported.darkMode then merged.darkMode = DeepCopy(imported.darkMode) end
-        -- Override stores: union-merge with incoming priority, the fork drop
-        -- rules, and a post-apply default re-baseline (kept stores' defaults
-        -- are stale against the imported values -- restoring them when an
-        -- override deactivates would overwrite the imported profile's own
-        -- settings). Full semantics in SpecOverrides_MergeImportedStores.
-        if EllesmereUI.SpecOverrides_MergeImportedStores then
-            EllesmereUI.SpecOverrides_MergeImportedStores(merged, imported)
+        -- Override stores: ALL-OR-NOTHING (2026-07-20 redesign; the old
+        -- per-folder value merge in SpecOverrides_MergeImportedStores is
+        -- retired and must not be re-wired). Taking -> the exporter's
+        -- complete override system (values + groups + unlock-layer forks +
+        -- BM forks) replaces the recipient's wholesale, ids verbatim: an
+        -- incoming store is internally consistent, and with nothing merging
+        -- there is nothing to remap or dedupe. Not taking -> the base copy's
+        -- (recipient's) stores stand untouched. Gate: the explicit
+        -- overridesIncluded stamp (new subset exports / the import dialog's
+        -- Include Overrides checkbox), or a FULL string without an exclusion
+        -- stamp (classic full-import semantics). Legacy subset strings
+        -- (partialImport, no positive stamp) keep the recipient's stores,
+        -- preserving their old keep-mine behavior.
+        do
+            local takeOverrides = imported.overridesIncluded == true
+                or (imported.partialImport ~= true and imported.overridesExcluded ~= true)
+            if takeOverrides then
+                local OV_KEYS = {
+                    "specOverrides", "specOverrideGroups", "specOverrideNextId",
+                    "condOverrides", "condOverrideGroups", "condOverrideNextId",
+                    "specUnlockOverrides", "condUnlockOverrides",
+                    "specBmOverrides", "condBmOverrides",
+                }
+                for _, k in ipairs(OV_KEYS) do
+                    merged[k] = imported[k]
+                end
+            end
         end
         -- Layout: the new profile's unlockLayout is the active profile's CURRENT
         -- layout, with the imported relationships merged in PER MODULE.
@@ -2450,9 +2836,21 @@ function EllesmereUI.ImportProfile(importStr, profileName)
                 if type(live) == "table" then for k, v in pairs(live) do dst[k] = DeepCopy(v) end end
             end
             if EllesmereUIDB then
-                overlayLive(baseUL.anchors,     EllesmereUIDB.unlockAnchors)
-                overlayLive(baseUL.widthMatch,  EllesmereUIDB.unlockWidthMatch)
-                overlayLive(baseUL.heightMatch, EllesmereUIDB.unlockHeightMatch)
+                -- CONTRACT (see SnapshotUnlockLayout): while a spec/cond
+                -- group's unlock layer is LIVE, the raw globals hold that
+                -- FORK's links -- overlaying them raw stamped the fork as
+                -- the new profile's baseline (the one snapshot writer the
+                -- Cluster-A hardening missed: importing while playing a
+                -- forked spec leaked its geometry onto every spec of the
+                -- new profile). Source through the same baseline-resolved
+                -- snapshot every other writer uses; TBB child entries are
+                -- carried from live inside it.
+                local liveSnap = SnapshotUnlockLayout()
+                if liveSnap then
+                    overlayLive(baseUL.anchors,     liveSnap.anchors)
+                    overlayLive(baseUL.widthMatch,  liveSnap.widthMatch)
+                    overlayLive(baseUL.heightMatch, liveSnap.heightMatch)
+                end
             end
             merged.unlockLayout = baseUL  -- current full layout (kept when no import layout)
 
@@ -2466,6 +2864,27 @@ function EllesmereUI.ImportProfile(importStr, profileName)
                 end
                 merged.unlockLayout = EllesmereUI.MergeImportedLayout(
                     baseUL, imported.unlockLayout, importedFolders)
+            end
+        end
+        -- BASELINE-LINKS == PROFILE-LINKS contract (imported-profile DM
+        -- window snap, 2026-07-20): whichever override store this profile
+        -- ends up with (kept from the recipient on a partial import, or taken
+        -- from the exporter), its baselineLayout link tables must mirror the
+        -- freshly merged unlockLayout above -- a kept store's baseline
+        -- predates the merge, and a taken store's mirrors the exporter's
+        -- layout rather than the per-module mix. The import-establish forced
+        -- converge applies baseline LINKS over the live tables at the first
+        -- post-import login, so stale ones silently wiped the recipient's
+        -- just-merged anchors there. Links only: elems stay untouched (elems
+        -- of anchored children are additionally inert via the FlushUnlock
+        -- anchor-owned guard).
+        do
+            local s2 = merged.specUnlockOverrides
+            local ul2 = merged.unlockLayout
+            if type(s2) == "table" and type(s2.baselineLayout) == "table" and type(ul2) == "table" then
+                s2.baselineLayout.anchors     = DeepCopy(ul2.anchors     or {})
+                s2.baselineLayout.widthMatch  = DeepCopy(ul2.widthMatch  or {})
+                s2.baselineLayout.heightMatch = DeepCopy(ul2.heightMatch or {})
             end
         end
         -- UI accent color travels with the profile. A new-format string always
@@ -2487,50 +2906,23 @@ function EllesmereUI.ImportProfile(importStr, profileName)
         if not found then
             table.insert(db.profileOrder, 1, profileName)
         end
-        -- CDM spell allocation: apply the imported per-profile spell store (which
-        -- spells sit on which bars + per-spell settings) into THIS profile's store,
-        -- and arm import-authoritative ghosting so the importer's tracked-but-unplaced
-        -- spells get HIDDEN (not spilled onto a default bar) once the profile is
-        -- active. Bar definitions already arrived in the addon blob, so the bar keys
-        -- match by construction. Older strings (no cdmSpells) skip this untouched.
-        if type(payload.data.cdmSpells) == "table" and EllesmereUIDB then
-            EllesmereUIDB.spellAssignments = EllesmereUIDB.spellAssignments or { profiles = {} }
-            local sa = EllesmereUIDB.spellAssignments
-            sa.profiles = sa.profiles or {}
-            local bucket = sa.profiles[profileName] or {}
-            sa.profiles[profileName] = bucket
-            bucket.specProfiles = DeepCopy(payload.data.cdmSpells)
+        -- CDM spell allocation: inherit-then-overlay via the shared builder
+        -- (BuildImportedCDMSpellBucket above): specs missing from the string
+        -- keep the ACTIVE profile's spell layouts -- the same
+        -- merge-base-on-active contract the addon blobs use -- and incoming
+        -- specs arm ghosting + the old-format migrations. Runs for strings
+        -- with no cdmSpells too (inherit-only), so an imported profile never
+        -- pairs inherited bar definitions with an empty spell store. Note:
+        -- db.activeProfile still names the PRE-import active profile here
+        -- (activation happens further down), which is exactly the inheritance
+        -- source the contract wants.
+        do
             local importedBarsCfg = payload.data.addons
                 and payload.data.addons["EllesmereUICooldownManager"]
                 and payload.data.addons["EllesmereUICooldownManager"].cdmBars
                 and payload.data.addons["EllesmereUICooldownManager"].cdmBars.bars
-            for _, specProf in pairs(bucket.specProfiles) do
-                if type(specProf) == "table" then
-                    if type(specProf.barSpells) == "table" then specProf.barSpells.__ghost_cd = nil end
-                    specProf._barFilterModelV6 = nil    -- re-run the migration on activate
-                    specProf._importGhostMode  = true   -- ghost tracked-but-unplaced spells
-                    specProf._dormantMerged    = true   -- imported data is already current-model
-                    -- Old-format strings (pre tiered-settings) carry per-bar
-                    -- spellSettings; transform NOW so the live session reads the
-                    -- new shape (the registered migration also covers it on the
-                    -- next reload -- both idempotent, flag lives in the bucket).
-                    if EllesmereUI.MigrateCdmSpellSettingsShape then
-                        EllesmereUI.MigrateCdmSpellSettingsShape(specProf, importedBarsCfg)
-                    end
-                    -- Hosted-buff settings moved family stores (CD -> BUFF);
-                    -- relocate old-format imports the same way (idempotent).
-                    if EllesmereUI.MigrateCdmHostedBuffSettings then
-                        EllesmereUI.MigrateCdmHostedBuffSettings(specProf)
-                    end
-                    -- Strings exported before _buffDisplayOrderUserModified
-                    -- existed carry a drag-arranged buffDisplayOrder without
-                    -- the flag; stamp it or the first live reconcile resyncs
-                    -- the imported order to Blizzard order (idempotent).
-                    if EllesmereUI.MigrateCdmBuffOrderUserFlag then
-                        EllesmereUI.MigrateCdmBuffOrderUserFlag(specProf)
-                    end
-                end
-            end
+            BuildImportedCDMSpellBucket(profileName, db.activeProfile or "Default",
+                payload.data.cdmSpells, importedBarsCfg)
         end
         -- Old-format strings can carry the per-bar Custom Active State Decimals
         -- keys (bd.faDecimals*); convert them to the per-spell Threshold Text
@@ -2582,6 +2974,22 @@ function EllesmereUI.ImportProfile(importStr, profileName)
             if EllesmereUI.MigrateRBAdvancedProfile then
                 EllesmereUI.MigrateRBAdvancedProfile(db.profiles[profileName])
             end
+            -- Import window guard, spec_locked flavor: the merged profile was
+            -- built on the dirty active profile all the same, so its first
+            -- ACTIVATION (e.g. a later login preseeding onto an auto-assigned
+            -- spec) hits the same unguarded pre-apply harvest as a direct
+            -- import. The flag sits inert while the profile is stored;
+            -- whichever session first activates it clears it at its first
+            -- apply. Runtime armed flag deliberately NOT set here: this
+            -- session keeps its own active profile.
+            db.profiles[profileName]._importEstablishPending = true
+            -- First-install captures: an imported profile is a chosen layout.
+            -- Stamp the one-shot capture flags so a capture that has not
+            -- fired yet cannot overwrite this stored profile's layout data
+            -- once a later session activates it.
+            db._capturedOnce_EAB = true
+            db._capturedOnce_CDM = true
+            db._capturedOnce_RF = true
             return true, nil, "spec_locked"
         end
         -- Flush the OUTGOING (currently active) profile's LIVE unlock data into its
@@ -2609,6 +3017,20 @@ function EllesmereUI.ImportProfile(importStr, profileName)
         StampUnlockLayoutIfMissing(db.profiles[profileName])
         db.activeProfile = profileName
         RepointAllDBs(profileName)
+        -- Import window guard: suppress unlock/BM LAYOUT banks from now until
+        -- the first apply of a later session. The imported store already holds
+        -- the exporter's layers verbatim; live geometry in this window is
+        -- mid-import residue (inherited link tables, unconverged anchors), and
+        -- any boundary harvest -- the import-tail Conditions recheck, the
+        -- caller's ReloadUI firing PLAYER_LOGOUT, the first post-login spec
+        -- transition -- would wholesale-replace a pristine bucket with it.
+        -- Persisted on the profile root so it survives the reload; the
+        -- companion runtime flag stops THIS session's applies (the
+        -- SpecOverrides_Apply below) from closing the window early. Cleared
+        -- unconditionally at the first apply of any later session; value
+        -- harvests are never suppressed.
+        db.profiles[profileName]._importEstablishPending = true
+        EllesmereUI._importGuardArmedNow = true
         -- Custom colours resolve live via GetCustomColorsDB. In GLOBAL colour
         -- mode the shared palette comes from colorsPullFrom (or the first
         -- profile); a recipient who pinned a specific source would store the
@@ -2653,9 +3075,38 @@ function EllesmereUI.ImportProfile(importStr, profileName)
         if EllesmereUI.SpecOverrides_Apply then
             EllesmereUI.SpecOverrides_Apply(curSpecID)
         end
+        -- First-install captures: an imported profile is a chosen layout.
+        -- Stamp the one-shot capture flags (central-store root keys; the
+        -- capture handlers re-check them at fire time) so a capture that has
+        -- not fired yet -- deferred past login, spec-gated, or armed by a
+        -- module first enabled in a later session -- can never overwrite the
+        -- imported data with live-captured layout state.
+        db._capturedOnce_EAB = true
+        db._capturedOnce_CDM = true
+        db._capturedOnce_RF = true
+        -- The minimap capture flag is per-profile. Stamp the imported
+        -- profile's minimap table (after ApplyProfileData, so the write
+        -- sticks) in case the payload predates the flag or came from an
+        -- install that never ran the Minimap module.
+        do
+            if not merged.addons then merged.addons = {} end
+            local mm = merged.addons.EllesmereUIMinimap
+            if type(mm) ~= "table" then
+                mm = {}
+                merged.addons.EllesmereUIMinimap = mm
+            end
+            if type(mm.minimap) ~= "table" then mm.minimap = {} end
+            mm.minimap._capturedOnce = true
+        end
+        -- A successful import means real user data exists: close the
+        -- first-install window now instead of at the next login's
+        -- data-detection pass, so first-run popups and capture paths stay
+        -- quiet from here on.
+        db.firstInstallPopupShown = true
+        EllesmereUI._firstInstallPending = nil
         -- Don't ReloadUI() here: the caller (options panel import flow)
-        -- may need to show the CDM spec picker popup before reloading.
-        -- The caller handles the reload/refresh after the popup completes.
+        -- reloads unconditionally right after this returns. (The old CDM
+        -- spec-picker popup flow is gone -- CDM spells import as-is.)
         return true, nil
     --[[ ADDON-SPECIFIC EXPORT DISABLED
     elseif payload.type == "partial" then
@@ -2735,6 +3186,21 @@ function EllesmereUI.ImportProfile(importStr, profileName)
         if not found then
             table.insert(db.profileOrder, 1, profileName)
         end
+        -- CDM spell allocation: same inherit-then-overlay contract as the
+        -- full branch (BuildImportedCDMSpellBucket). Subset strings carry
+        -- cdmSpells only when the CDM module was included in the export;
+        -- either way the imported profile's spell bucket pairs coherently
+        -- with its (imported or inherited) bar definitions instead of being
+        -- dropped entirely, which this branch previously did for the modern
+        -- cdmSpells format.
+        do
+            local importedBarsCfg = payload.data and payload.data.addons
+                and payload.data.addons["EllesmereUICooldownManager"]
+                and payload.data.addons["EllesmereUICooldownManager"].cdmBars
+                and payload.data.addons["EllesmereUICooldownManager"].cdmBars.bars
+            BuildImportedCDMSpellBucket(profileName, current,
+                payload.data and payload.data.cdmSpells, importedBarsCfg)
+        end
         -- Write spell assignments to dedicated store
         if payload.data and payload.data.spellAssignments then
             if not EllesmereUIDB.spellAssignments then
@@ -2812,6 +3278,8 @@ function EllesmereUI.SaveCurrentAsProfile(name)
     -- Count existing profiles BEFORE adding the new one
     -- Deep-copy the current profile into the new name
     local copy = src and DeepCopy(src) or {}
+    -- Never inherit the import-window guard flag (see ImportProfile).
+    copy._importEstablishPending = nil
     -- Ensure fonts/colors/unlock layout are current
     copy.fonts = DeepCopy(EllesmereUI.GetFontsDB())
     copy.customColors = DeepCopy(EllesmereUI.GetCustomColorsDB())
@@ -3106,13 +3574,17 @@ do
                     if current ~= targetProfile then
                         local fontWillChange = EllesmereUI.ProfileChangesFont(
                             EllesmereUIDB.profiles[targetProfile])
+                        local skinsWillChange = EllesmereUI.ProfileChangesWindowSkins(
+                            EllesmereUIDB.profiles[targetProfile])
                         -- _specProfileSwitching disabled (see doSwitch comment)
                         EllesmereUI.SwitchProfile(targetProfile)
                         EllesmereUI.RefreshAllAddons()
-                        if fontWillChange then
+                        if fontWillChange or skinsWillChange then
                             EllesmereUI:ShowConfirmPopup({
                                 title       = "Reload Required",
-                                message     = "Font changed. A UI reload is needed to apply the new font.",
+                                message     = fontWillChange
+                                    and "Font changed. A UI reload is needed to apply the new font."
+                                    or "Window skins changed for this profile. A UI reload is needed to apply them.",
                                 confirmText = "Reload Now",
                                 cancelText  = "Later",
                                 onConfirm   = function() ReloadUI() end,
@@ -3175,13 +3647,17 @@ do
                             if cur ~= target then
                                 local fontChange = EllesmereUI.ProfileChangesFont(
                                     EllesmereUIDB.profiles[target])
+                                local skinsChange = EllesmereUI.ProfileChangesWindowSkins(
+                                    EllesmereUIDB.profiles[target])
                                 -- _specProfileSwitching disabled (see doSwitch comment)
                                 EllesmereUI.SwitchProfile(target)
                                 EllesmereUI.RefreshAllAddons()
-                                if fontChange then
+                                if fontChange or skinsChange then
                                     EllesmereUI:ShowConfirmPopup({
                                         title       = "Reload Required",
-                                        message     = "Font changed. A UI reload is needed to apply the new font.",
+                                        message     = fontChange
+                                            and "Font changed. A UI reload is needed to apply the new font."
+                                            or "Window skins changed for this profile. A UI reload is needed to apply them.",
                                         confirmText = "Reload Now",
                                         cancelText  = "Later",
                                         onConfirm   = function() ReloadUI() end,
@@ -3282,12 +3758,15 @@ do
                     -- before the flag is set, flag stuck true forever).
                     -- EllesmereUI._specProfileSwitching = true
                     local fontWillChange = EllesmereUI.ProfileChangesFont(db.profiles[targetProfile])
+                    local skinsWillChange = EllesmereUI.ProfileChangesWindowSkins(db.profiles[targetProfile])
                     EllesmereUI.SwitchProfile(targetProfile)
                     EllesmereUI.RefreshAllAddons()
-                    if not isFirstLogin and fontWillChange then
+                    if not isFirstLogin and (fontWillChange or skinsWillChange) then
                         EllesmereUI:ShowConfirmPopup({
                             title       = "Reload Required",
-                            message     = "Font changed. A UI reload is needed to apply the new font.",
+                            message     = fontWillChange
+                                and "Font changed. A UI reload is needed to apply the new font."
+                                or "Window skins changed for this profile. A UI reload is needed to apply them.",
                             confirmText = "Reload Now",
                             cancelText  = "Later",
                             onConfirm   = function() ReloadUI() end,
@@ -4154,4 +4633,300 @@ end
 
 function EllesmereUI.CloseConfig()
     EllesmereUI:Hide()
+end
+
+-------------------------------------------------------------------------------
+--  Interactive Import API (separate from the silent ImportProfile above; the
+--  Wago path keeps calling ImportProfile unchanged).
+--
+--  A partner addon hands over an import string and the USER completes the
+--  import through the normal options import flow: UI-scale prompt, per-module
+--  selection page, profile name, final Import click. Contract:
+--    * callback(true)  -- the user completed the final Import step. The forced
+--      reload is SUPPRESSED and the options panel closes: the CALLER now owns
+--      the ReloadUI() at the end of its own install flow. (The imported-but-
+--      not-yet-reloaded state is the same one the silent Wago path has always
+--      produced.)
+--    * callback(false) -- the user closed the options panel without importing,
+--      the string failed to decode, or a silent ImportProfile call replaced
+--      the session. Tab switches inside the panel do NOT decline (the user
+--      can navigate back and resume), and a combat auto-close keeps the
+--      session alive to resume when the panel reopens.
+--    * The callback may never fire if the player reloads or logs out with the
+--      session open -- callers must not hard-block waiting on it.
+--  One session at a time: a second call while one is live fails fast.
+--
+--  opts: importString (required), profileName (optional prefill for the name
+--  box), source (optional display name of the caller), callback (optional).
+--  Returns true, or false + reason when the call could not start a session.
+-------------------------------------------------------------------------------
+function EllesmereUI.ImportProfileInteractive(opts)
+    if type(opts) ~= "table" or type(opts.importString) ~= "string"
+        or opts.importString == "" then
+        return false, "invalid arguments"
+    end
+    if InCombatLockdown() then return false, "in combat" end
+    local existing = EllesmereUI._apiImportSession
+    if existing and existing.state ~= "done" then
+        return false, "an interactive import is already pending"
+    end
+
+    EllesmereUI._apiImportSession = {
+        str      = opts.importString,
+        name     = type(opts.profileName) == "string" and opts.profileName or nil,
+        source   = type(opts.source) == "string" and opts.source or nil,
+        callback = type(opts.callback) == "function" and opts.callback or nil,
+        state    = "pending",   -- pending -> active (import page up) -> done
+    }
+    -- Land on the Profiles page (opens the panel if needed). The page builder
+    -- registers _ProfilesConsumeApiImport when it builds -- either during this
+    -- navigation or from an earlier cached visit -- so after navigating, enter
+    -- the import flow through the CURRENT build's registered entry. Never
+    -- force a rebuild here: a rebuild mid-consume orphans the async decode's
+    -- continuation on destroyed page frames.
+    EllesmereUI:NavigateToElementSettings("_EUIProfiles", "Profiles")
+    EllesmereUI._EnsureApiImportCloseHook()
+    if EllesmereUI._ProfilesConsumeApiImport then
+        EllesmereUI._ProfilesConsumeApiImport()
+    end
+    return true
+end
+
+--- Fire the session callback exactly once and clear the session. pcall'd so a
+--- partner error can never break the import flow that invoked it.
+function EllesmereUI._FinishApiImportSession(accepted)
+    local s = EllesmereUI._apiImportSession
+    if not s or s.state == "done" then return end
+    s.state = "done"
+    EllesmereUI._apiImportSession = nil
+    if s.callback then pcall(s.callback, accepted and true or false) end
+end
+
+--- Decline-on-close: closing the options panel with a live session counts as
+--- "no". Installed once on the main frame (ours, so HookScript is safe); the
+--- success path finishes the session BEFORE hiding the panel, so this handler
+--- only ever fires for genuine user closes.
+do
+    local hooked = false
+    function EllesmereUI._EnsureApiImportCloseHook()
+        if hooked then return end
+        local mf = EllesmereUI._mainFrame
+        if not mf then return end  -- panel not built yet; consumer retries
+        hooked = true
+        mf:HookScript("OnHide", function()
+            local s = EllesmereUI._apiImportSession
+            if not s or s.state == "done" then return end
+            -- Combat auto-close is not a decision: keep the session so it
+            -- resumes when the panel reopens out of combat.
+            if InCombatLockdown() then return end
+            EllesmereUI._FinishApiImportSession(false)
+            -- Clear the stale import page out of the cached Profiles wrapper
+            -- so reopening the panel shows the normal Profiles view.
+            if EllesmereUI._ProfilesResetToMain then pcall(EllesmereUI._ProfilesResetToMain) end
+        end)
+    end
+end
+
+-------------------------------------------------------------------------------
+--  Silent partner-installer import (public API, additive)
+--
+--  One call that ports a creator's exported profile string EXACTLY, for
+--  installer addons that manage the whole setup themselves (no EUI dialogs).
+--  The interactive dialog flow is untouched. Fonts, custom colors, accent,
+--  CDM spell layouts, overrides, the window/tooltip skin bundle and UI scale
+--  all apply precisely as the string carries them (presence is consent), so
+--  the recipient lands on the creator's complete look.
+--
+--  opts:
+--    importString  (required) the creator's export string.
+--    profileName   (required) target profile name.
+--    disableAddons (optional) array of suite child FOLDER names the pack
+--                  replaces with external addons. When present the API:
+--                    * strips those modules' content from the payload
+--                      (addon blobs incl. hosted sub-modules, CDM spell
+--                      layouts when the CDM module is listed, the window/
+--                      tooltip skin bundle when the skin module is listed)
+--                    * filters cross-module layout relationships down to
+--                      kept modules, so no anchor or size-match edge can
+--                      reference a module that will have no frames
+--                    * after a successful import, disables those folders
+--                      and enables every other suite child (authoritative
+--                      list: children added to the suite after a pack
+--                      shipped enable by default), and records the bags
+--                      choice so the bag-addon auto-disable respects the
+--                      pack's composition.
+--                  The shared-services shim and the parent addon are load-
+--                  bearing for every child and are never disabled here.
+--    cleanSlate    (optional, default true) delete an existing profile of
+--                  the same name first: an import onto an existing name
+--                  inherits its name-keyed external buckets (CDM spell
+--                  store, spec assignments, sync targets), and DeleteProfile
+--                  is the one path that purges them all.
+--    applyUIScale  (optional, default true) false strips the string's UI
+--                  scale so the user keeps their own.
+--    autoAssignSpecs (optional, default false) true keeps the exporter's
+--                  spec->profile assignments; headless presence would apply
+--                  them, so installers opt in deliberately.
+--
+--  Returns ok, err. NEVER reloads: the caller owns the ReloadUI at the end
+--  of its own flow (addon enable/disable state also only applies then).
+-------------------------------------------------------------------------------
+function EllesmereUI.ImportProfileSilent(opts)
+    if type(opts) ~= "table" or type(opts.importString) ~= "string"
+        or opts.importString == "" then
+        return false, "invalid arguments"
+    end
+    if type(opts.profileName) ~= "string" or opts.profileName == "" then
+        return false, "profileName is required"
+    end
+    if InCombatLockdown() then return false, "in combat" end
+    local profileName = opts.profileName
+
+    -- Decode once and hand ImportProfile the TABLE. Never re-encode a decoded
+    -- payload: a serializer round trip is not identity on decoded content.
+    local payload = EllesmereUI.DecodeImportString(opts.importString)
+    if type(payload) ~= "table" or type(payload.data) ~= "table" then
+        return false, "could not decode import string"
+    end
+
+    -- Normalize + guard the disable set.
+    local disable
+    if type(opts.disableAddons) == "table" then
+        disable = {}
+        for _, folder in ipairs(opts.disableAddons) do
+            if type(folder) == "string" then disable[folder] = true end
+        end
+        disable["EllesmereUIBasics"] = nil
+        disable["EllesmereUI"] = nil
+    end
+
+    if disable then
+        -- Partition profile-data modules into stripped vs kept (canonical
+        -- keys, matching the payload), resolving hosted sub-modules through
+        -- their host addon.
+        local keepCanon, stripCanon = {}, {}
+        for _, e in ipairs(ADDON_DB_MAP) do
+            local canon = FOLDER_TO_CANON[e.folder] or e.folder
+            if disable[e.folder] or (e.hostAddon and disable[e.hostAddon]) then
+                stripCanon[canon] = true
+            else
+                keepCanon[canon] = true
+            end
+        end
+        if payload.data.addons then
+            for canon in pairs(stripCanon) do
+                payload.data.addons[canon] = nil
+            end
+        end
+        -- CDM spell layouts live outside the addon blob.
+        if disable["EllesmereUICooldownManager"] then
+            payload.data.cdmSpells = nil
+        end
+        -- The account-global window/tooltip skin bundle belongs to the skin
+        -- module; a pack that replaces it must not apply the bundle.
+        if disable["EllesmereUIBlizzardSkin"] then
+            payload.data.blizzSkinGlobals      = nil
+            payload.data.applyBlizzSkinGlobals = nil
+        end
+        -- Keep only layout relationships whose endpoints both survive: the
+        -- same per-element filter the import dialog applies on deselection.
+        local ul = payload.data.unlockLayout
+        if ul then
+            local meta = payload.data.unlockLayoutMeta
+            local k2f = EllesmereUI.BuildImportKeyToFolder(ul, meta and meta.keyToFolder)
+            payload.data.unlockLayout = EllesmereUI.FilterLayoutToFolders(ul, keepCanon, k2f)
+        end
+    end
+    -- Meta is transport-only; never let it persist into the profile.
+    payload.data.unlockLayoutMeta = nil
+
+    if opts.applyUIScale == false then
+        payload.data.uiScale      = nil
+        payload.data.applyUIScale = nil
+    end
+    if not opts.autoAssignSpecs then
+        payload.data.assignedSpecs = nil
+    end
+
+    -- Clean slate (see doc block above).
+    if opts.cleanSlate ~= false then
+        local db = GetProfilesDB()
+        if db.profiles and db.profiles[profileName] then
+            EllesmereUI.DeleteProfile(profileName)
+        end
+    end
+
+    local ok, err, status = EllesmereUI.ImportProfile(payload, profileName)
+    if not ok then return false, err end
+
+    -- Apply the pack's folder composition (takes effect at the caller's
+    -- reload). Enabling sweeps the whole suite so children added after a
+    -- pack shipped default ON instead of ending up in neither set.
+    if disable and C_AddOns and C_AddOns.EnableAddOn then
+        local exists = C_AddOns.DoesAddOnExist
+        local seen = {}
+        local function apply(folder)
+            if seen[folder] then return end
+            seen[folder] = true
+            if exists and not exists(folder) then return end
+            if disable[folder] then
+                C_AddOns.DisableAddOn(folder)
+            else
+                C_AddOns.EnableAddOn(folder)
+            end
+        end
+        for _, e in ipairs(ADDON_DB_MAP) do
+            apply(e.hostAddon or e.folder)
+        end
+        apply("EllesmereUIBasics")
+        -- The pack made the bags decision; keep the bag-addon auto-disable
+        -- from overriding it later.
+        if EllesmereUIDB then EllesmereUIDB.bagsUserChosen = true end
+    end
+
+    return true, nil, status
+end
+
+-------------------------------------------------------------------------------
+--  External installer registration
+--  A partner installer that owns the whole first-run experience calls this at
+--  its ADDON_LOADED (every session). While registered, the suite's own
+--  first-install picker stays silent -- the picker's reload-handshake flag
+--  still arms, so first-run popups stay quiet until the installer's import
+--  completes (the import stamps first-install state). Fail-open: if the
+--  installer never imports, the picker returns on a later login without a
+--  registration.
+-------------------------------------------------------------------------------
+function EllesmereUI.RegisterExternalInstaller(displayName)
+    EllesmereUI._externalInstaller = (type(displayName) == "string" and displayName ~= "")
+        and displayName or true
+end
+
+-------------------------------------------------------------------------------
+--  /euiapitest -- dev helper for the interactive import API. A real profile
+--  string is far past the 255-character /run limit, so this stands in for a
+--  partner-addon call: it exports the ACTIVE profile in code and feeds the
+--  string straight to ImportProfileInteractive. Nothing is written unless the
+--  final Import step is completed, and the prefilled name is "API Test" so
+--  the active profile is never the default overwrite target. The callback
+--  result prints to chat.
+-------------------------------------------------------------------------------
+SLASH_EUIAPITEST1 = "/euiapitest"
+SlashCmdList.EUIAPITEST = function()
+    local str = EllesmereUI.ExportCurrentProfile and EllesmereUI.ExportCurrentProfile()
+    if not str then
+        EllesmereUI.Print("API test: could not export the active profile.")
+        return
+    end
+    local ok, why = EllesmereUI.ImportProfileInteractive({
+        importString = str,
+        profileName  = "API Test",
+        source       = "API Test",
+        callback     = function(accepted)
+            EllesmereUI.Print("ImportProfileInteractive callback -> " .. tostring(accepted))
+        end,
+    })
+    if not ok then
+        EllesmereUI.Print("API test: " .. (why or "could not start the session"))
+    end
 end

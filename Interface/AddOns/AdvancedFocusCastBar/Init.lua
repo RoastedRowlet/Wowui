@@ -28,7 +28,7 @@ EventUtil.ContinueOnAddOnLoaded(addonName, function()
 	for key, value in pairs(Private.Settings.GetDefaultSettings()) do
 		if
 			AdvancedFocusCastBarSaved.Settings[key] == nil
-			or type(value) ~= type(AdvancedFocusCastBarSaved.Settings[key])
+			or (key ~= "CustomSound" and type(value) ~= type(AdvancedFocusCastBarSaved.Settings[key]))
 		then
 			AdvancedFocusCastBarSaved.Settings[key] = value
 		end

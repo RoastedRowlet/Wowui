@@ -4,6 +4,25 @@ local LibCustomGlow = LibStub("LibCustomGlow-1.0")
 local LibEditMode = LibStub("LibEditMode")
 local LibSharedMedia = LibStub("LibSharedMedia-3.0")
 
+local castTimeFormatter = C_StringUtil.CreateNumericRuleFormatter()
+castTimeFormatter:SetBreakpoints({
+	{
+		threshold = 0,
+		step = 0.1,
+		format = "%.1f",
+	},
+	{
+		threshold = 10,
+		step = 1,
+		format = "%d",
+	},
+	{
+		threshold = 30,
+		step = 1,
+		format = ">30",
+	},
+})
+
 ---@class AdvancedFocusCastBarMixin
 AdvancedFocusCastBarMixin = {}
 
@@ -83,6 +102,7 @@ function AdvancedFocusCastBarMixin:OnLoad()
 		self:ToggleTargetNameVisibility()
 		self:AdjustCustomTextsPosition()
 		self:AdjustBackgroundOpacity()
+		self:AdjustTargetMarkerScale()
 	end
 
 	-- edit mode setup
@@ -115,6 +135,14 @@ function AdvancedFocusCastBarMixin:OnLoad()
 				return {
 					min = 0.1,
 					max = 5,
+					step = 0.01,
+				}
+			end
+
+			if key == Private.Enum.Setting.TargetMarkerScale then
+				return {
+					min = 0,
+					max = 10,
 					step = 0.01,
 				}
 			end
@@ -233,6 +261,39 @@ function AdvancedFocusCastBarMixin:OnLoad()
 					kind = Enum.EditModeSettingDisplayType.Slider,
 					default = defaults.SecondaryFontScale,
 					desc = L.SecondaryFontScaleTooltip,
+					get = Get,
+					set = Set,
+					minValue = sliderSettings.min,
+					maxValue = sliderSettings.max,
+					valueStep = sliderSettings.step,
+				}
+			end
+
+			if key == Private.Enum.Setting.TargetMarkerScale then
+				local sliderSettings = GetSliderSettingsForOption(key)
+
+				---@param layoutName string
+				---@return number
+				local function Get(layoutName)
+					return AdvancedFocusCastBarSaved.Settings.TargetMarkerScale
+				end
+
+				---@param layoutName string
+				---@param value number
+				local function Set(layoutName, value)
+					value = math.floor(value * 100) / 100
+					if value ~= AdvancedFocusCastBarSaved.Settings.TargetMarkerScale then
+						AdvancedFocusCastBarSaved.Settings.TargetMarkerScale = value
+						Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, value)
+					end
+				end
+
+				---@type LibEditModeSlider
+				return {
+					name = L.TargetMarkerScaleLabel,
+					kind = Enum.EditModeSettingDisplayType.Slider,
+					default = defaults.TargetMarkerScale,
+					desc = L.TargetMarkerScaleTooltip,
 					get = Get,
 					set = Set,
 					minValue = sliderSettings.min,
@@ -659,6 +720,48 @@ function AdvancedFocusCastBarMixin:OnLoad()
 					kind = Enum.EditModeSettingDisplayType.Dropdown,
 					desc = L.TextureTooltip,
 					default = defaults.Texture,
+					multiple = false,
+					generator = Generator,
+					set = Set,
+				}
+			end
+
+			if key == Private.Enum.Setting.CustomSound then
+				---@param layoutName string
+				---@param value number|string
+				local function Set(layoutName, value)
+					if AdvancedFocusCastBarSaved.Settings.CustomSound ~= value then
+						AdvancedFocusCastBarSaved.Settings.CustomSound = value
+						Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, value)
+						self:PlayCustomSound()
+					end
+				end
+
+				local function Generator(owner, rootDescription, data)
+					local sounds = CopyTable(LibSharedMedia:List(LibSharedMedia.MediaType.SOUND))
+					table.sort(sounds)
+
+					for index, label in pairs(sounds) do
+						local function IsEnabled()
+							return AdvancedFocusCastBarSaved.Settings.CustomSound == label
+						end
+
+						local function SetProxy()
+							Set(LibEditMode:GetActiveLayoutName(), label)
+						end
+
+						rootDescription:CreateRadio(label, IsEnabled, SetProxy)
+					end
+
+					rootDescription:SetScrollMode(30 * 20)
+				end
+
+				---@type LibEditModeDropdown
+				return {
+					name = L.CustomSoundLabel,
+					kind = Enum.EditModeSettingDisplayType.Dropdown,
+					desc = L.CustomSoundTooltip,
+					default = defaults.CustomSound,
 					multiple = false,
 					generator = Generator,
 					set = Set,
@@ -1238,6 +1341,7 @@ function AdvancedFocusCastBarMixin:OnLoad()
 			CreateSetting(Private.Enum.Setting.FontSize),
 			CreateSetting(Private.Enum.Setting.FontFlags),
 			CreateSetting(Private.Enum.Setting.SecondaryFontScale),
+			CreateSetting(Private.Enum.Setting.TargetMarkerScale),
 			CreateSetting(Private.Enum.Setting.ColorUninterruptible),
 			CreateSetting(Private.Enum.Setting.ColorInterruptibleCanInterrupt),
 			CreateSetting(Private.Enum.Setting.ColorInterruptibleCannotInterrupt),
@@ -1249,6 +1353,7 @@ function AdvancedFocusCastBarMixin:OnLoad()
 			CreateSetting(Private.Enum.Setting.OffsetX),
 			CreateSetting(Private.Enum.Setting.OffsetY),
 			CreateSetting(Private.Enum.Setting.Unit),
+			CreateSetting(Private.Enum.Setting.CustomSound),
 		})
 
 		---@param title string
@@ -1513,11 +1618,35 @@ function AdvancedFocusCastBarMixin:UpdateTargetMarker()
 	end
 end
 
+function AdvancedFocusCastBarMixin:AdjustTargetMarkerScale()
+	-- 16 is the base size the TargetMarker texture is defined at in the XML
+	-- template, so a scale of 1 renders it at its default dimensions
+	local size = 16 * AdvancedFocusCastBarSaved.Settings.TargetMarkerScale
+	self.CustomElementsFrame.TargetMarker:SetSize(size, size)
+end
+
+function AdvancedFocusCastBarMixin:PlayCustomSound()
+	local path = LibSharedMedia:Fetch(LibSharedMedia.MediaType.SOUND, AdvancedFocusCastBarSaved.Settings.CustomSound,
+		true)
+
+	if path then
+		PlaySoundFile(path, "Master")
+	end
+end
+
 function AdvancedFocusCastBarMixin:MaybePlayCastStartTTS()
 	if
 		AdvancedFocusCastBarSaved.Settings.FeatureFlags[Private.Enum.FeatureFlag.PlayTTSOnCastStart]
 		and self.contentType ~= Private.Enum.ContentType.Raid
 	then
+		-- a selected custom sound takes priority over the text-to-speech text
+		local customSound = AdvancedFocusCastBarSaved.Settings.CustomSound
+
+		if customSound ~= -1 then
+			self:PlayCustomSound()
+			return
+		end
+
 		local text = AdvancedFocusCastBarSaved.Settings.CustomTTSOnCastStartText or Private.L.Settings.CastStartText
 		self:PlayTTS(text)
 	end
@@ -1606,6 +1735,8 @@ function AdvancedFocusCastBarMixin:OnSettingsChange(key, value)
 		or key == Private.Enum.Setting.SecondaryFontScale
 	then
 		self:SetFontAndFontSize()
+	elseif key == Private.Enum.Setting.TargetMarkerScale then
+		self:AdjustTargetMarkerScale()
 	elseif key == Private.Enum.Setting.ColorUninterruptible then
 		self.colors.Uninterruptible = CreateColorFromHexString(value)
 	elseif key == Private.Enum.Setting.ColorInterruptibleCanInterrupt then
@@ -1859,7 +1990,7 @@ function AdvancedFocusCastBarMixin:OnUpdate(elapsed)
 	self.elapsed = self.elapsed - 0.1
 
 	if AdvancedFocusCastBarSaved.Settings.FeatureFlags[Private.Enum.FeatureFlag.ShowCastTime] then
-		self.CastBar.CastTimeText:SetFormattedText("%.1f", self.castInformation.duration:GetRemainingDuration())
+		self.CastBar.CastTimeText:SetText(self.castInformation.duration:FormatRemainingDuration(castTimeFormatter))
 	end
 
 	-- ensure the following calls will have the expected opacity since they're all pointing to the same value

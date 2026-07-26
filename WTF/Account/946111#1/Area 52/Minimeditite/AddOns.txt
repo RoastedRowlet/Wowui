@@ -45,7 +45,7 @@ M33kAurasCompanion: enabled
 M33kAurasArchive: enabled
 M33Auras: disabled
 WeakAuras: disabled
-EllesmereUIBags: disabled
+EllesmereUIBags: enabled
 BigWigs_MidnightWorld: enabled
 ArcUI: disabled
 EllesmereUIResourceBars: disabled

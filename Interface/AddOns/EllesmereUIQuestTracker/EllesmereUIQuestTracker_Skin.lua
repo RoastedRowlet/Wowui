@@ -176,73 +176,23 @@ function EQT.RefreshFonts()
     end
 end
 
--- Forces Blizzard to fully recompute block heights/positions after we
--- resize existing FontStrings (RestyleAll) or Blizzard only partially
--- relayouts around a focus change -- both leave stale cached block heights
--- that overlap the next block until a full ObjectiveTrackerFrame:Update()
--- runs (normally only happens on /reload).
+-- FORBIDDEN: calling ObjectiveTrackerFrame:Update() from addon execution,
+-- in ANY shape -- synchronous, deferred via C_Timer, or combat-gated with a
+-- regen retry. A forced Update() runs Blizzard's entire quest machinery in
+-- our (tainted) execution context, and the Lua tables that machinery
+-- materializes are served to secure code for the rest of the session:
+-- QuestEventListener callback tables, cached quest/task/mapInfo tables, and
+-- structural writes on the world map's data-provider objects. Secure map
+-- code reading any of them turns tainted mid-flight, which surfaces as
+-- "blocked in combat ... SetPassThroughButtons()" on every map pin refresh
+-- and secret-number compare errors in tooltip layout. Field taint logs from
+-- two testers (2026-07-18) confirmed this end to end; deferral does NOT
+-- launder taint (taint is execution-context, not call ancestry).
 --
--- Deferred via C_Timer.After(0) so this never runs inline inside whatever
--- callback triggered it: the documented SplashFrame taint (see
--- EllesmereUIQuestTracker_QoL.lua) came from calling Update() SYNCHRONOUSLY
--- inside a Blizzard secure call chain (OnHide during a quest turn-in flow).
--- A fresh timer tick, fired from a plain insecure options-panel action or
--- event handler, has no such ancestor. Also combat-gated because Update()
--- rebuilds the tracker's secure quest-item action buttons; if combat is
--- active when the tick fires, retry once on PLAYER_REGEN_ENABLED instead of
--- silently dropping the request.
---
--- TAINT-LOG VERIFIED 2026-07-10 (taintLog 1, empty log): the exact deferred +
--- combat-gated shape here -- relayout trigger, immediately enter combat, use
--- a quest-item button -- leaves no blocking taint on the current client. That
--- verification covers ONLY this shape: the retry listener is one-shot (it
--- unregisters on fire and re-arms per deferral) so Update() never runs more
--- often than requested, and the SYNCHRONOUS case in the QoL SplashFrame fix
--- remains forbidden. Do not widen this pattern without re-verifying.
-local _relayoutPending = false
-local _relayoutRetryFrame = nil
-local function DoTrackerRelayout()
-    if InCombatLockdown() then
-        if not _relayoutRetryFrame then
-            _relayoutRetryFrame = CreateFrame("Frame")
-            if not EQT._eventFrames then EQT._eventFrames = {} end
-            if not EQT._eventRegistrations then EQT._eventRegistrations = {} end
-            local idx = #EQT._eventFrames + 1
-            EQT._eventFrames[idx] = _relayoutRetryFrame
-            EQT._eventRegistrations[idx] = {"PLAYER_REGEN_ENABLED"}
-            _relayoutRetryFrame:SetScript("OnEvent", function(self)
-                -- One-shot: without this, every combat end for the rest of the
-                -- session would run a full tracker Update nobody asked for.
-                self:UnregisterEvent("PLAYER_REGEN_ENABLED")
-                if EQT.ForceTrackerRelayout then EQT.ForceTrackerRelayout() end
-            end)
-        end
-        _relayoutRetryFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
-        return
-    end
-    local otf = _G.ObjectiveTrackerFrame
-    if otf and otf.Update then
-        -- 12.1: Blizzard's scenario layout probes player auras during Update
-        -- (ShouldShowMawBuffs -> GetAuraDataByIndex), and aura APIs hard-error
-        -- when auras are secret and the caller is tainted -- which our forced
-        -- Update() is. Probe the same access first and skip the relayout while
-        -- secret; the tracker relayouts naturally on Blizzard's next update.
-        if EllesmereUI and EllesmereUI.IS_121
-           and C_UnitAuras and C_UnitAuras.GetAuraDataByIndex then
-            local ok = pcall(C_UnitAuras.GetAuraDataByIndex, "player", 1, "HELPFUL")
-            if not ok then return end
-        end
-        otf:Update()
-    end
-end
-function EQT.ForceTrackerRelayout()
-    if _relayoutPending then return end
-    _relayoutPending = true
-    C_Timer.After(0, function()
-        _relayoutPending = false
-        DoTrackerRelayout()
-    end)
-end
+-- Consequence we accept instead: after a font-size change or a focus
+-- change, Blizzard's cached block heights can be briefly stale (overlapping
+-- text) until its next natural relayout (any quest event). Cosmetic and
+-- self-healing; never reintroduce a forced Update() to fix it.
 
 -- Physical-pixel-perfect 1px accent divider under each section header.
 -- Parented to ObjectiveTrackerFrame (NOT the header) so collapse/expand
@@ -411,29 +361,28 @@ local function SkinHeader(header)
     -- Accent-colored 1px divider beneath the header.
     EnsureAccentDivider(header)
 
-    -- Click-anywhere-on-header overlay: forwards clicks to SetCollapsed so
-    -- clicking the title text (not just the +/- button) toggles the
-    -- section. The overlay is our own frame; we own its mouse state and
-    -- never touch Blizzard's frames' mouse state. Stops short of the
-    -- MinimizeButton so that button's native click still fires normally.
-    if not _headerClickOverlays[header] then
+    -- Click-anywhere-on-header overlay: clicking the title text (not just
+    -- the +/- button) toggles the section, by forwarding to the
+    -- MinimizeButton via a plain button's Click() out of combat.
+    -- History (2026-07-20, PR #879): this WAS a SecureActionButtonTemplate
+    -- click-redirect under the belief that a programmatic Click() taints the
+    -- collapse cascade. That evidence was confounded: the constant taint
+    -- injector was TightenTopAnchor's insecure SetPoint inside its SetPoint
+    -- hook (since removed, see the topModulePadding comment below), and the
+    -- secure redirect threw combat errors of its own. The plain-Click() form
+    -- shipped here is the field-tested-clean one -- do not "fix" it back to
+    -- a secure redirect without fresh taint-log evidence.
+    if not _headerClickOverlays[header] and header.MinimizeButton then
+        local minBtn = header.MinimizeButton
         local overlay = CreateFrame("Button", nil, header)
         overlay:SetFrameLevel(header:GetFrameLevel() + 1)
         overlay:RegisterForClicks("LeftButtonUp")
-        overlay:SetPoint("TOPLEFT",     header, "TOPLEFT",     0, 0)
-        local minBtn = header.MinimizeButton
-        if minBtn then
-            overlay:SetPoint("BOTTOMRIGHT", minBtn, "BOTTOMLEFT", -2, 0)
-        else
-            overlay:SetPoint("BOTTOMRIGHT", header, "BOTTOMRIGHT", 0, 0)
-        end
+        overlay:SetPoint("TOPLEFT", header, "TOPLEFT", 0, 0)
+        overlay:SetPoint("BOTTOMRIGHT", minBtn, "BOTTOMLEFT", -2, 0)
         overlay:SetScript("OnClick", function()
-            -- Simulate a click on the MinimizeButton so Blizzard's full
-            -- collapse cascade runs (header state + tracker layout pass).
-            if header.MinimizeButton and header.MinimizeButton.Click then
-                header.MinimizeButton:Click("LeftButton")
-            elseif header.ToggleCollapsed then
-                header:ToggleCollapsed()
+            if InCombatLockdown() then return end
+            if minBtn and minBtn:IsShown() then
+                minBtn:Click()
             end
         end)
         _headerClickOverlays[header] = overlay
@@ -819,30 +768,32 @@ local function ProcessBlockChildren(frame, depth)
             end
         end
     end
-
 end
 
--- Suppress a POI button permanently. Hooks Show + SetAlpha so Blizzard
--- can never make it visible again. The _euiSuppressed flag is on the
--- frame object itself, so it persists even if the button is pooled.
-local _poiHiddenParent = CreateFrame("Frame")
-_poiHiddenParent:Hide()
+local _hookedPOIs = setmetatable({}, { __mode = "k" })
 
 local function SuppressPOI(block)
-    -- "Show Quest Icons" on: leave Blizzard's native POI button visible and
-    -- skip installing the keep-hidden hook entirely. Reload-gated, so this is
-    -- read fresh per block; no live un-suppression needed.
     if EQT.Cfg("showQuestIcons") then return end
     local pb = block and block.poiButton
-    if not pb or EllesmereUI._GetFFD(pb).suppressed then return end
-    EllesmereUI._GetFFD(pb).suppressed = true
-    pb:SetParent(_poiHiddenParent)
+    if not pb then return end
+    if pb:IsShown() then pb:Hide() end
     pb:EnableMouse(false)
-    hooksecurefunc(pb, "SetParent", function(self, parent)
-        if parent ~= _poiHiddenParent then
-            self:SetParent(_poiHiddenParent)
-        end
-    end)
+
+    -- Config-gated Show hook: without it, Blizzard re-shows the pooled button
+    -- for a frame when the user tracks a quest via the context menu (visible
+    -- blink) before the next SkinBlock suppress pass runs. Hooked once per
+    -- pooled button (weak-keyed cache); no-op while Show Quest Icons is on,
+    -- so enabling the setting restores default behavior without a reload.
+    -- Taint-verified clean with the tracker's field-write injector removed.
+    if not _hookedPOIs[pb] then
+        _hookedPOIs[pb] = true
+
+        hooksecurefunc(pb, "Show", function(self)
+            if not EQT.Cfg("showQuestIcons") then
+                self:Hide()
+            end
+        end)
+    end
 end
 
 local function SkinBlock(block)
@@ -920,7 +871,6 @@ local function SkinBlock(block)
     ProcessBlockChildren(block, 0)
 
     _skinned[block] = true
-
 end
 
 
@@ -975,8 +925,49 @@ local function SkinExistingBlocks(tracker)
             end
         end
     end
-
 end
+
+-------------------------------------------------------------------------------
+-- Blizzard anchors whichever module sits in the top slot via
+-- ObjectiveTrackerContainerMixin:Update() (Blizzard_ObjectiveTrackerContainer.lua):
+--   module:SetPoint("TOP", 0, -self.topModulePadding)
+-- topModulePadding is a KeyValue on the EditMode-managed ObjectiveTrackerFrame,
+-- default 38. We once wrote it to 6 for a tighter top gap on the (false)
+-- assumption that "a plain table assignment carries no taint." It does: an
+-- addon-written value is tainted, Update() reads it every layout pass, and the
+-- taint propagates through the managed-frame / UIPanel layout into protected
+-- calls and secret values (see the block below). So we NEVER write it -- the
+-- top gap stays Blizzard's 38 and our skin chrome follows TOP_ANCHOR_OFFSET.
+-------------------------------------------------------------------------------
+-- Blizzard's default topModulePadding is 38. We NEVER write this field on
+-- EITHER client. ObjectiveTrackerContainerMixin:Update() reads it at the top
+-- of every layout pass (GetAvailableHeight); reading an addon-written value
+-- taints that whole pass. The frame is EditMode/UIPanel-managed, so opening
+-- ANY panel (the world map, etc.) reflows it and reads the field inside the
+-- secure ShowUIPanel path -- in a secret environment (M+/raid) that tainted
+-- execution then hits a PROTECTED call (WorldMapFrame -> PerformEmote, blocked)
+-- and secret tooltip/widget values (AreaPOI "compare a secret number value").
+-- On 12.1 the same read reaches C_UnitAuras.GetAuraDataByIndex and hard-errors.
+-- The old 12.0-only write (=6, a tighter top gap) was assumed clean because
+-- its only consumer was thought to be a non-protected SetPoint, but that never
+-- covered the secret-env map-open path (field taint.log 2026-07-23: PerformEmote
+-- block + AreaPOI secret-number errors, both tainted by EllesmereUIQuestTracker,
+-- on Retail 12.0). We accept Blizzard's 38px gap on both clients; the skin
+-- chrome follows TOP_ANCHOR_OFFSET so BG/divider still hug content. Comp-
+-- ensating with our own SetPoint is NOT an option (managed-frame-position taint).
+local TOP_MODULE_PADDING = 38
+-- Shared with EllesmereUIQuestTracker_Visibility.lua (BG/top-divider offset)
+-- so both files derive the top gap from a single source instead of two
+-- independent magic numbers drifting apart. Sign convention (negative Y
+-- offset) preserved for compatibility with that existing consumer.
+EQT.TOP_ANCHOR_OFFSET = -TOP_MODULE_PADDING
+
+-- Intentional no-op, retained for its call sites / EQT API: writing
+-- topModulePadding onto the managed tracker taints it (see above), so we
+-- never do -- Blizzard's default value stands.
+local function ApplyTopModulePadding()
+end
+EQT.ApplyTopModulePadding = ApplyTopModulePadding
 
 -------------------------------------------------------------------------------
 -- Hook a single sub-tracker.
@@ -1009,7 +1000,6 @@ local function HookTracker(tracker)
         if tracker.Header.SetCollapsed then
             hooksecurefunc(tracker.Header, "SetCollapsed", function(self)
                 if ShouldSkipSkin() then return end
-            
                 SkinHeader(self)
             end)
         end
@@ -1018,7 +1008,6 @@ local function HookTracker(tracker)
     if tracker.AddBlock then
         hooksecurefunc(tracker, "AddBlock", function(_, block)
             if ShouldSkipSkin() then return end
-        
             if block then _skinned[block] = nil end
             SkinBlock(block)
         end)
@@ -1036,7 +1025,6 @@ local function HookTracker(tracker)
             C_Timer.After(0, function()
                 _updateDirty = false
                 if ShouldSkipSkin() then return end
-            
                 if tracker.Header then EnsureAccentDivider(tracker.Header) end
                 if EQT.QueueResize then EQT.QueueResize() end
                 if tracker.usedBlocks then
@@ -1130,12 +1118,18 @@ function EQT.InitSkin()
         end
         if otf.Header and otf.Header ~= headerMenu then
             otf.Header:Hide()
-            otf.Header:HookScript("OnShow", function(self) self:Hide() end)
+            if otf.Header.SetHeight then otf.Header:SetHeight(0.001) end
+            otf.Header:HookScript("OnShow", function(self)
+                self:Hide()
+                if self.SetHeight then self:SetHeight(0.001) end
+            end)
         end
         -- Strip the parchment / nine-slice background behind the whole tracker.
         if otf.NineSlice then otf.NineSlice:Hide() end
         StripTextures(otf)
     end
+
+    ApplyTopModulePadding()
 
     EachTracker(HookTracker)
 
@@ -1152,22 +1146,24 @@ function EQT.InitSkin()
     evt:RegisterEvent("SUPER_TRACKING_CHANGED")
     -- Quest events just need a BG resize. Block skinning is handled by
     -- AddBlock/AddObjective/GetProgressBar/GetTimerBar hooks, so we no
-    -- longer need to walk the entire tracker tree on every event.
+    -- longer need to walk the entire tracker tree on every event. No combat
+    -- catch-up event needed anymore: ApplyTopModulePadding() sets a plain
+    -- field once and Blizzard's own Update() re-reads it every layout pass,
+    -- in and out of combat -- there's nothing for us to re-correct after
+    -- PLAYER_REGEN_ENABLED.
     evt:SetScript("OnEvent", function(_, event)
+        -- Resize only. A forced ObjectiveTrackerFrame:Update() used to run
+        -- here on SUPER_TRACKING_CHANGED; removed -- see the FORBIDDEN
+        -- comment near the top of this file. Focus-change layout staleness
+        -- self-heals on Blizzard's next natural update.
         if EQT.QueueResize then EQT.QueueResize() end
-        -- Focusing a quest can expand its objective text without Blizzard
-        -- relayouting sibling blocks underneath it; force a full relayout
-        -- for this event specifically (not the frequent quest-log events,
-        -- which already go through Blizzard's own native Update()).
-        if event == "SUPER_TRACKING_CHANGED" and EQT.ForceTrackerRelayout then
-            EQT.ForceTrackerRelayout()
-        end
     end)
     if not EQT._eventFrames then EQT._eventFrames = {} end
     if not EQT._eventRegistrations then EQT._eventRegistrations = {} end
     local idx = #EQT._eventFrames + 1
     EQT._eventFrames[idx] = evt
-    EQT._eventRegistrations[idx] = {"QUEST_LOG_UPDATE", "QUEST_WATCH_LIST_CHANGED", "SCENARIO_UPDATE", "SCENARIO_CRITERIA_UPDATE", "TRACKED_ACHIEVEMENT_LIST_CHANGED", "TRACKED_RECIPE_UPDATE", "SUPER_TRACKING_CHANGED"}
+    EQT._eventRegistrations[idx] = { "QUEST_LOG_UPDATE", "QUEST_WATCH_LIST_CHANGED", "SCENARIO_UPDATE",
+        "SCENARIO_CRITERIA_UPDATE", "TRACKED_ACHIEVEMENT_LIST_CHANGED", "TRACKED_RECIPE_UPDATE", "SUPER_TRACKING_CHANGED" }
 
     -- OTF.Update / ObjectiveTracker_Update hooks REMOVED (session 68).
     -- They only called QueueResize, which is already triggered by
@@ -1189,10 +1185,11 @@ function EQT.InitSkin()
             if t.Header then SkinHeader(t.Header) end
             SkinExistingBlocks(t)
         end)
-        -- Font/color size changes just resized existing FontStrings in
-        -- place; Blizzard's cached block heights are now stale until a
-        -- full relayout runs (see EQT.ForceTrackerRelayout above).
-        if EQT.ForceTrackerRelayout then EQT.ForceTrackerRelayout() end
+        -- Font/color size changes resize existing FontStrings in place, so
+        -- Blizzard's cached block heights can be stale until its next
+        -- natural relayout (any quest event). We deliberately do NOT force
+        -- an ObjectiveTrackerFrame:Update() -- see the FORBIDDEN comment
+        -- near the top of this file for the taint post-mortem.
     end
 
     -- Live-update headers, blocks and progress bar fills when the user
@@ -1203,4 +1200,3 @@ function EQT.InitSkin()
         end })
     end
 end
-

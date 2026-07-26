@@ -41,6 +41,14 @@ L.Settings.SecondaryFontScaleLabel = "Secondary Font Scale"
 L.Settings.SecondaryFontScaleTooltip =
 	"Controls the ratio of Cast Target and Interrupt Source text in relation to the general font size."
 
+L.Settings.TargetMarkerScaleLabel = "Target Marker Scale"
+L.Settings.TargetMarkerScaleTooltip =
+	"Scales the target marker relative to its default size. 1 renders it at the default dimensions."
+
+L.Settings.CustomSoundLabel = "Custom Sound"
+L.Settings.CustomSoundTooltip =
+	"Choose None to disable (default). When selected, takes priority over the Text-To-Speech Text."
+
 L.Settings.FrameWidthLabel = "Width"
 L.Settings.FrameWidthTooltip = nil
 
@@ -132,7 +140,7 @@ L.Settings.FeatureFlagLabels = {
 	[Private.Enum.FeatureFlag.IgnoreFriendlies] = "Ignore Friendlies",
 	[Private.Enum.FeatureFlag.UnfillChannels] = "(Un)Fill Channels",
 	[Private.Enum.FeatureFlag.HideWhenUninterruptible] = "Only show when interruptible & can interrupt",
-	[Private.Enum.FeatureFlag.PlayTTSOnCastStart] = "Play TTS on Cast Start",
+	[Private.Enum.FeatureFlag.PlayTTSOnCastStart] = "Play TTS/Sound on Cast Start",
 }
 L.Settings.FeatureFlagSettingTitles = {
 	[Private.Enum.FeatureFlag.ShowIcon] = "For more info, hover 'Features' on the left",

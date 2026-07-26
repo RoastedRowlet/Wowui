@@ -1,12 +1,14 @@
 # BigWigs
 
-## [v419](https://github.com/BigWigsMods/BigWigs/tree/v419) (2026-07-15)
-[Full Changelog](https://github.com/BigWigsMods/BigWigs/compare/v418.4...v419) [Previous Releases](https://github.com/BigWigsMods/BigWigs/releases)
+## [v419.1](https://github.com/BigWigsMods/BigWigs/tree/v419.1) (2026-07-21)
+[Full Changelog](https://github.com/BigWigsMods/BigWigs/compare/v419...v419.1) [Previous Releases](https://github.com/BigWigsMods/BigWigs/releases)
 
 - Bump version  
-- Plugins/BarStyles: Add "NaowhUI" bar style  
-- API: Expand `RequestProfile` to include boss options (#2654)  
-- Update deDE (#2653)  
-- Update zhCN (#2652)  
-- API: `RequestProfile` now requires a profile name  
-- Core/BossPrototype: Tweaks  
+- Plugins/Pull: Fix Auto Combat Log for Mythic+ (#2663)  
+- Update koKR (#2662)  
+- Update esES (#2660)  
+- Sharing: Also return true even if there's no string available  
+- API: callbacks when importing options now return true after the import process has completed  
+- Update frFR (#2658)  
+- Update koKR (#2659)  
+- API: Add `GetProfileList`  

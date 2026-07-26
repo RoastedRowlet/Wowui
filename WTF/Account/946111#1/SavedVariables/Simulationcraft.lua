@@ -1,5 +1,21 @@
 
 SimulationCraftDB = {
+["char"] = {
+["Barelynoer - Area 52"] = {
+["bonusRolls"] = {
+{
+["ts"] = 1784761320,
+["currency"] = 3418,
+["source"] = 268471,
+["context"] = 16,
+["keyLevel"] = 22,
+["spec"] = 1473,
+["season"] = 34,
+["itemId"] = 251097,
+},
+},
+},
+},
 ["profileKeys"] = {
 ["Taurostotem - Area 52"] = "Taurostotem - Area 52",
 ["Zappyxatu - Stormrage"] = "Zappyxatu - Stormrage",
@@ -34,14 +50,14 @@ SimulationCraftDB = {
 },
 },
 ["Lonelylitten - Stormrage"] = {
+["minimap"] = {
+["minimapPos"] = 225.6023459701718,
+},
 ["frame"] = {
 ["ofsx"] = -276.667724609375,
 ["ofsy"] = 12.50020217895508,
 ["point"] = "RIGHT",
 ["relativePoint"] = "RIGHT",
-},
-["minimap"] = {
-["minimapPos"] = 225.6023459701718,
 },
 },
 ["Madmareep - Stormrage"] = {

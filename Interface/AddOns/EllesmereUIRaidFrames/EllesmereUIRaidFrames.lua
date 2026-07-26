@@ -488,6 +488,7 @@ local defaults = {
         -- Uniform Icon Anchoring: icons/text anchor as if no power bar existed,
         -- so frames with and without a per-role power bar line up identically.
         powerUniformAnchors = false,
+        extendHealthBehindPower = false,  -- health spans full frame; power bar overlays it
 
         -- Top Name Bar (reserves height from the TOP of the frame, the way the
         -- power bar reserves from the bottom; shows the unit name in a dedicated
@@ -829,7 +830,7 @@ local defaults = {
         partyShowSelfFirst = true,
         partySelfLast      = false,
         partyHorizontal   = false,
-        partyFlipGrowth   = false,  -- DOWN->UP / RIGHT->LEFT growth flip
+        partyFlipGrowth   = false,  -- false=default growth, true=DOWN->UP / RIGHT->LEFT flip, "centered"=stack centered in the 5-slot container
         partyHideSelf     = false,
         partyUnlockPos    = nil,
         -- Party Tracked Buffs (Buff Manager) auto-resize. Defaults ON (matching
@@ -1240,6 +1241,17 @@ function ns.RF_AnchorHost(health, s)
     return health
 end
 
+-- "Extend Health Bar Behind Power": the health-height inset every layout site
+-- subtracts for the power bar. Returns 0 when the option is on -- the health
+-- bar then spans the full frame and the power bar (higher frame level, own
+-- bg) draws over its bottom strip. Additive by construction: default off
+-- returns the passed powerH untouched, so every site computes the exact
+-- legacy value.
+function ns.RF_HealthPowerInset(s, powerH)
+    if s and s.extendHealthBehindPower then return 0 end
+    return powerH
+end
+
 -- Live-render convenience: resolves the button's settings source (party/extra
 -- proxies) before delegating to ns.RF_AnchorHost.
 function ns.RF_AnchorHostFor(d)
@@ -1586,6 +1598,19 @@ local function ResolveDisplayName(unit, applyCap)
             display = dn
         end
     end
+    -- RakGaming Aliases (consulted last). Gated on ns._rgaNick, maintained
+    -- by RegisterRGALIASNicknames and RGA's module callbacks: true only while
+    -- RGA is present AND its "ellesmereui" module is enabled. Everyone
+    -- without the addon pays exactly one flag read here; the RGA settings
+    -- shape is never dereferenced in this hot path. dn ~= name keeps the
+    -- Ambiguate short-realm path for units RGA has no alias for.
+    if not display and ns._rgaNick then
+        local ok, dn = pcall(RG_UnitName, unit)
+        if ok and type(dn) == "string"
+           and not (issecretvalue and issecretvalue(dn)) and dn ~= "" and dn ~= name then
+            display = dn
+        end
+    end
     if not display then
         if Ambiguate then name = Ambiguate(name, "short") end
         display = name
@@ -1664,7 +1689,7 @@ local function LayoutTopNameBar(s, baseH, powerH, healthBar, tnb, tnbBg, tnbText
         healthBar:ClearAllPoints()
         healthBar:SetPoint("TOPLEFT", parent, "TOPLEFT", 0, -topBarH)
         healthBar:SetPoint("TOPRIGHT", parent, "TOPRIGHT", 0, -topBarH)
-        healthBar:SetHeight(PixelSnap(baseH - powerH - topBarH))
+        healthBar:SetHeight(PixelSnap(baseH - ns.RF_HealthPowerInset(s, powerH) - topBarH))
     end
     if not tnb then return topBarH end
     if not enabled then
@@ -4296,7 +4321,7 @@ local function UpdateButton(button)
             -- Restore health bar height with power bar space (and Top Name Bar)
             local powerH = PixelSnap(s.powerHeight or 4)
             if d.health then
-                d.health:SetHeight(PixelSnap(frameH - powerH - tnbH))
+                d.health:SetHeight(PixelSnap(frameH - ns.RF_HealthPowerInset(s, powerH) - tnbH))
             end
             -- Was the bar already visible before this update? Smooth
             -- interpolation only animates correctly on a bar that was already
@@ -4393,6 +4418,18 @@ local function UpdateButton(button)
             local pct = GetSafeHealthPercent(unit)
             local numStr = (curr and AbbreviateNumbers) and AbbreviateNumbers(curr) or tostring(curr or 0)
             d.healthText:SetFormattedText("%.0f%% | %s", pct, numStr)
+            local htr, htg, htb = GetHealthTextColor(unit, s)
+            d.healthText:SetTextColor(htr, htg, htb, 0.9)
+        elseif mode == "missing" then
+            local curr = UnitHealthMissing(unit, true)
+            d.healthText:SetText(C_StringUtil.TruncateWhenZero(curr))
+            if d.healthText:GetText() then
+                if curr and AbbreviateNumbers then
+                    d.healthText:SetText(AbbreviateNumbers(curr))
+                elseif curr then
+                    d.healthText:SetFormattedText("%s", curr)
+                end
+            end
             local htr, htg, htb = GetHealthTextColor(unit, s)
             d.healthText:SetTextColor(htr, htg, htb, 0.9)
         else
@@ -4531,7 +4568,6 @@ local SATED_DEBUFFS = {
     [160455] = true,  -- Fatigued (Netherwinds)
     [264689] = true,  -- Fatigued (Primal Rage)
     [390435] = true,  -- Exhaustion (Fury of the Aspects)
-    [428628] = true,  -- Exhaustion (variant)
 }
 
 -- Debuff filter check based on user setting
@@ -5237,13 +5273,25 @@ local function HideDispelVisuals(d)
     if d.dispelIcon then d.dispelIcon:Hide() end
 end
 
-local function ApplyDispelOverlay(d, dc, s)
+local function ApplyDispelOverlay(d, dc, s, olA)
     local olTex = d.dispelOLTex
     if not olTex then return end
     local mode = s.dispelOverlay or "fill"
     if mode == "none" then olTex:Hide(); return end
 
-    local alpha = (s.dispelOverlayOpacity or 100) / 100
+    -- Combined overlay alpha (user opacity x per-type opt-out alpha). The
+    -- curve path hands in olA already combined at curve-build time -- it may
+    -- be SECRET, which setters accept but arithmetic and boolean tests do
+    -- not, so it is never touched here. Only the plain fallback combines.
+    local alpha = olA
+    if type(alpha) == "nil" then
+        local dcA = dc.a
+        if issecretvalue and issecretvalue(dcA) then
+            alpha = dcA
+        else
+            alpha = ((s.dispelOverlayOpacity or 100) / 100) * (dcA or 1)
+        end
+    end
     local health = d.dispelOLHealth or d.health
 
     olTex:ClearAllPoints()
@@ -5661,12 +5709,15 @@ ns._dispelScratchDark = ns._dispelScratchDark or {}
 -- (not file locals) to respect the 200-local main-chunk cap.
 function ns._RebuildDispelCurves()
     if not (C_CurveUtil and C_CurveUtil.CreateColorCurve) then return end
-    local function build(profile, mult)
+    local function build(profile, mult, alphaMult)
         local c = C_CurveUtil.CreateColorCurve()
         c:SetType(Enum.LuaCurveType.Step)
         local function add(idx, key, dr, dg, db)
             local col = profile and profile[key]
-            c:AddPoint(idx, CreateColor((col and col.r or dr) * mult, (col and col.g or dg) * mult, (col and col.b or db) * mult))
+            -- Per-type alpha rides the curve too (0 = user opted this type
+            -- out of the dispel border/overlay). Never darkened by mult.
+            c:AddPoint(idx, CreateColor((col and col.r or dr) * mult, (col and col.g or dg) * mult,
+                (col and col.b or db) * mult, ((col and col.a) or 1) * (alphaMult or 1)))
         end
         add(0,  "dispelColorMagic",   0.349, 0.475, 1.0)   -- none: harmless default
         add(1,  "dispelColorMagic",   0.349, 0.475, 1.0)
@@ -5684,6 +5735,14 @@ function ns._RebuildDispelCurves()
     ns._dispelCurveParty     = build(ns._scaledPartyProxy, 1)
     ns._dispelCurveDark      = build(ns._scaledProfile,    0.5)
     ns._dispelCurveDarkParty = build(ns._scaledPartyProxy, 0.5)
+    -- Overlay curves: per-type alpha premultiplied by the user's overlay
+    -- opacity HERE, on plain saved numbers. The evaluated per-frame alpha is
+    -- SECRET, and arithmetic on it is a hard error -- it may only ever flow
+    -- straight into setters.
+    local rOp = ((ns._scaledProfile    and ns._scaledProfile.dispelOverlayOpacity)    or 100) / 100
+    local pOp = ((ns._scaledPartyProxy and ns._scaledPartyProxy.dispelOverlayOpacity) or 100) / 100
+    ns._dispelCurveOL      = build(ns._scaledProfile,    1, rOp)
+    ns._dispelCurveOLParty = build(ns._scaledPartyProxy, 1, pOp)
 end
 
 -- Per-type visibility curves for the dispel-type icons. Each curve is white at
@@ -5749,16 +5808,23 @@ local function UpdateDispelBorder(button, unit, updateInfo)
     end
 
     -- Apply the dispel visuals (border/overlay/icon) for a chosen aura.
-    local function ShowDispelFor(auraData, dc)
+    -- olA: overlay alpha from the opacity-premultiplied curve (may be SECRET;
+    -- nil on the plain fallback path, where ApplyDispelOverlay combines).
+    local function ShowDispelFor(auraData, dc, olA)
         d.dispelInstanceID = auraData.auraInstanceID
+        -- Per-type alpha (0 = user opted this type out). May be a SECRET
+        -- value from the curve path: only nil-heal when readably nil, and
+        -- feed it straight into setters otherwise.
+        local dcA = dc.a
+        if not issecretvalue(dcA) and dcA == nil then dcA = 1 end
         if wantBorder and d.dispelFrame and PP then
-            PP.UpdateBorder(d.dispelFrame, borderSize, dc.r, dc.g, dc.b, 1)
+            PP.UpdateBorder(d.dispelFrame, borderSize, dc.r, dc.g, dc.b, dcA)
             d.dispelFrame:Show()
         elseif d.dispelFrame then
             d.dispelFrame:Hide()
         end
         if wantOverlay then
-            ApplyDispelOverlay(d, dc, s)
+            ApplyDispelOverlay(d, dc, s, olA)
         elseif d.dispelOLTex then
             d.dispelOLTex:Hide()
         end
@@ -5796,17 +5862,34 @@ local function UpdateDispelBorder(button, unit, updateInfo)
             -- handled the same way (per-type alpha curves) inside ShowDispelFor.
             local iid = auraData.auraInstanceID
             local curve = d._isParty and ns._dispelCurveParty or ns._dispelCurve
-            local dc
+            local dc, olA
             if curve and C_UnitAuras.GetAuraDispelTypeColor then
                 local col = C_UnitAuras.GetAuraDispelTypeColor(unit, iid, curve)
                 if col then
                     local sc = ns._dispelScratch
-                    sc.r, sc.g, sc.b = col:GetRGB()
+                    -- Alpha carries the per-type opt-out (may be SECRET --
+                    -- it flows only into setters, never boolean tests).
+                    if col.GetRGBA then
+                        sc.r, sc.g, sc.b, sc.a = col:GetRGBA()
+                    else
+                        sc.r, sc.g, sc.b = col:GetRGB()
+                        sc.a = 1
+                    end
                     dc = sc
+                    -- Overlay alpha via the opacity-premultiplied curve, so
+                    -- the (secret) result needs no arithmetic downstream.
+                    if wantOverlay then
+                        local olCurve = d._isParty and ns._dispelCurveOLParty or ns._dispelCurveOL
+                        local ocol = olCurve and C_UnitAuras.GetAuraDispelTypeColor(unit, iid, olCurve)
+                        if ocol and ocol.GetRGBA then
+                            local _, _, _, oa = ocol:GetRGBA()
+                            olA = oa
+                        end
+                    end
                 end
             end
             if not dc then dc = GetDispelColor("Magic", s) end
-            ShowDispelFor(auraData, dc)
+            ShowDispelFor(auraData, dc, olA)
             return
         end
     end
@@ -6189,6 +6272,18 @@ ns._UpdateButtonHealth = function(button)
             d.healthText:SetFormattedText("%.0f%% | %s", pct, numStr)
             local htr, htg, htb = GetHealthTextColor(unit, s)
             d.healthText:SetTextColor(htr, htg, htb, 0.9)
+        elseif mode == "missing" then
+            local curr = UnitHealthMissing(unit, true)
+            d.healthText:SetText(C_StringUtil.TruncateWhenZero(curr))
+            if d.healthText:GetText() then
+                if curr and AbbreviateNumbers then
+                    d.healthText:SetText(AbbreviateNumbers(curr))
+                elseif curr then
+                    d.healthText:SetFormattedText("%s", curr)
+                end
+            end
+            local htr, htg, htb = GetHealthTextColor(unit, s)
+            d.healthText:SetTextColor(htr, htg, htb, 0.9)
         else
             d.healthText:SetText("")
         end
@@ -6460,6 +6555,18 @@ FB.Update = function(b)
             local curr = UnitHealth(unit, true)
             local numStr = (curr and AbbreviateNumbers) and AbbreviateNumbers(curr) or tostring(curr or 0)
             b._healthText:SetFormattedText("%.0f%% | %s", pct, numStr)
+        elseif mode == "missing" then
+            local curr = UnitHealthMissing(unit, true)
+            b._healthText:SetText(C_StringUtil.TruncateWhenZero(curr))
+            if b._healthText:GetText() then
+                if curr and AbbreviateNumbers then
+                    b._healthText:SetText(AbbreviateNumbers(curr))
+                elseif curr then
+                    b._healthText:SetFormattedText("%s", curr)
+                end
+            end
+            local htr, htg, htb = GetHealthTextColor(unit, s)
+            b._healthText:SetTextColor(htr, htg, htb, 0.9)
         else
             b._healthText:SetText("")
         end
@@ -6541,6 +6648,14 @@ FB.EnsureBuilt = function()
         -- visible-count drives the range ticker lifecycle.
         b:HookScript("OnShow", function(self)
             FB.visCount = (FB.visCount or 0) + 1
+            -- Containers first: the legacy refresh below still has
+            -- restriction-era failure modes, and an error there must not
+            -- starve the container of its unit assignment.
+            if ns.RFC_OnUnitAssigned then
+                local d = GetFFD(self)
+                local unit = FB.UnitOf(self)
+                if d and unit then ns.RFC_OnUnitAssigned(self, d, unit) end
+            end
             FB.Update(self)
             FB.ApplyRange(self)
             FB.UpdateRangeTicker()
@@ -6565,6 +6680,12 @@ FB.EnsureBuilt = function()
         -- without an OnShow on already-visible buttons).
         b:HookScript("OnAttributeChanged", function(self, name)
             if name == "unit" and self:IsVisible() then
+                -- Containers first (same rationale as the OnShow hook).
+                if ns.RFC_OnUnitAssigned then
+                    local d = GetFFD(self)
+                    local unit = FB.UnitOf(self)
+                    if d and unit then ns.RFC_OnUnitAssigned(self, d, unit) end
+                end
                 FB.Update(self)
                 FB.ApplyRange(self)
             end
@@ -6592,6 +6713,11 @@ FB.EnsureBuilt = function()
         FB.trackers[i] = t
 
         FB.buttons[i] = b
+
+        if ns.RFC_SetupButton then
+            local d = GetFFD(b)
+            ns.RFC_SetupButton(b, b._health, d)
+        end
     end
 
     -- Slot controller: collapses friendly bosses into the FIRST slots. Button
@@ -7267,7 +7393,7 @@ XF.Layout = function()
         -- correct the height/width-derived pieces for the offset size.
         local d = GetFFD(b)
         if d.health then
-            d.health:SetHeight(((d.power and d.power:IsShown()) and PixelSnap(h - powerH) or h) - topBarH)
+            d.health:SetHeight(((d.power and d.power:IsShown()) and PixelSnap(h - ns.RF_HealthPowerInset(s, powerH)) or h) - topBarH)
         end
 
         -- Scaled visual pass: re-apply every ratio-affected element through
@@ -8666,7 +8792,7 @@ ns._ResizeButtons = function(w, h)
     local bh = PixelSnap(h)
     local s = db.profile
     local powerH = IsPowerBarEnabled(s) and PixelSnap(s.powerHeight or 4) or 0
-    local healthH = PixelSnap(bh - powerH)
+    local healthH = PixelSnap(bh - ns.RF_HealthPowerInset(s, powerH))
     local topBarH = (s.topNameBarEnabled and PixelSnap(s.topNameBarHeight or 20)) or 0
     local xfset = s.extraFrames
     for _, btn in ipairs(allButtons) do
@@ -8678,7 +8804,7 @@ ns._ResizeButtons = function(w, h)
             if d._isExtra and xfset then
                 xbw = PixelSnap(math.max(10, w + (xfset.extraWidth or 0)))
                 xbh = PixelSnap(math.max(10, h + (xfset.extraHeight or 0)))
-                xhealthH = PixelSnap(xbh - powerH)
+                xhealthH = PixelSnap(xbh - ns.RF_HealthPowerInset(s, powerH))
             end
             btn:SetSize(xbw, xbh)
             -- Full height when the power bar is hidden for this button's role
@@ -8711,7 +8837,7 @@ ns._ResizePartyButtons = function(w, h)
     local bh = PixelSnap(h)
     local s = db.profile
     local powerH = IsPowerBarEnabled(s) and PixelSnap(s.powerHeight or 4) or 0
-    local healthH = PixelSnap(bh - powerH)
+    local healthH = PixelSnap(bh - ns.RF_HealthPowerInset(s, powerH))
     local topBarH = (s.topNameBarEnabled and PixelSnap(s.topNameBarHeight or 20)) or 0
     -- Auto Resize scale depends on frame size; recompute on this lightweight
     -- width/height slider path (which skips the full reload).
@@ -8788,8 +8914,9 @@ ns._ResizePartyButtons = function(w, h)
     -- anchor tracking -- no secure re-process, no blink.
     if ns._PositionPartySlots then
         local cs2 = PixelSnap(s.partyCellSpacing or s.cellSpacing or 2)
-        local growth2 = s.partyHorizontal and (s.partyFlipGrowth and "LEFT" or "RIGHT")
-            or (s.partyFlipGrowth and "UP" or "DOWN")
+        -- Explicit true only: "centered" keeps the default direction.
+        local growth2 = s.partyHorizontal and (s.partyFlipGrowth == true and "LEFT" or "RIGHT")
+            or (s.partyFlipGrowth == true and "UP" or "DOWN")
         ns._PositionPartySlots(bw, bh, cs2, growth2)
     end
 end
@@ -10112,7 +10239,7 @@ do
             "showPowerBar", "powerHeight", "powerBgDarkness", "powerBgColor", "powerBgPowerColored",
             "powerBorderStyle", "powerBorderSize", "powerBorderColor", "powerBorderAlpha",
             "powerShowForHealer", "powerShowForTank", "powerShowForDPS", "smoothPowerBars",
-            "powerUniformAnchors",
+            "powerUniformAnchors", "extendHealthBehindPower",
         },
         textDisplay = {
             "nameSize", "nameColorMode", "nameCustomColor",
@@ -10288,14 +10415,38 @@ ns._scaledExtraProxy = setmetatable({}, { __index = function(_, key)
 end })
 
 ns._scaledPartyProxy = setmetatable({}, { __index = function(_, key)
-    -- Return party dimensions for frameWidth/frameHeight reads
+    -- Return party dimensions for frameWidth/frameHeight reads. The real-
+    -- preview effective overlay (ns._pvOverlayProxy) shadows live while a
+    -- panel view swap is active; it falls through to db.profile itself.
     if key == "frameWidth" then
-        return db and db.profile and (db.profile.partyFrameWidth or db.profile.frameWidth)
+        local p = ns._pvOverlayProxy or (db and db.profile)
+        return p and (p.partyFrameWidth or p.frameWidth)
     end
     if key == "frameHeight" then
-        return db and db.profile and (db.profile.partyFrameHeight or db.profile.frameHeight)
+        local p = ns._pvOverlayProxy or (db and db.profile)
+        return p and (p.partyFrameHeight or p.frameHeight)
     end
-    local val = ns._partyProxy[key]
+    local val
+    local resolved = false
+    -- Effective overlay first (preview-scoped ONLY -- ns._partyProxy also
+    -- serves the REAL party frames and must never consult it): party_
+    -- variant wins over the base key, mirroring _partyProxy's precedence.
+    -- Sentinel deletions resolve to nil WITHOUT falling through to the
+    -- live view value.
+    local ov = ns._pvOverlayProxy and ns._pvOverlay
+    if ov then
+        local pv
+        local section = ns._PARTY_KEY_SECTION[key]
+        if section and ns._IsPartySectionCustom(section) then
+            pv = ov["party_" .. key]
+        end
+        if pv == nil then pv = ov[key] end
+        if pv ~= nil then
+            resolved = true
+            if pv ~= EllesmereUI.SPECOV_NIL then val = pv end
+        end
+    end
+    if not resolved then val = ns._partyProxy[key] end
     if INDICATOR_SCALE_KEYS[key] and type(val) == "number" and ns._partyIndicatorScale ~= 1 then
         return val * ns._partyIndicatorScale
     end
@@ -10496,6 +10647,25 @@ ns._PositionPartySlots = function(bw, bh, cs, unitGrowth)
         slotStepY = -(bh + cs)
     end
 
+    -- Centered growth shifts the whole stack (self button + header) so the
+    -- shown frames sit centered in the always-5-slot container: (5 - shown)/2
+    -- slots along the growth axis. Solo is the shown=1 case of the same math,
+    -- and the Center When Solo cog forces it while solo regardless of the
+    -- growth mode.
+    local centerShift = 0
+    local centered = (s.partyFlipGrowth == "centered")
+    if not IsInGroup() then
+        if centered or s.partyCenterWhenSolo then centerShift = 2 end
+    elseif centered then
+        local shown = GetNumGroupMembers() or 0
+        if shown > 5 then shown = 5 end
+        if hideSelf then shown = shown - 1 end
+        if shown < 1 then shown = 1 end
+        centerShift = (5 - shown) / 2
+    end
+    local cShiftX = PixelSnap(slotStepX * centerShift)
+    local cShiftY = PixelSnap(slotStepY * centerShift)
+
     local sb = ns._partySelfButton
     if useSelf then
         local selfSlot, hdrSlot = 0, 1
@@ -10507,24 +10677,15 @@ ns._PositionPartySlots = function(bw, bh, cs, unitGrowth)
         if sb then
             sb:SetSize(bw, bh)
             sb:ClearAllPoints()
-            sb:SetPoint(basePoint, ns._partyContainerFrame, basePoint, PixelSnap(slotStepX * selfSlot), PixelSnap(slotStepY * selfSlot))
+            sb:SetPoint(basePoint, ns._partyContainerFrame, basePoint, PixelSnap(slotStepX * selfSlot) + cShiftX, PixelSnap(slotStepY * selfSlot) + cShiftY)
             if not InCombatLockdown() then sb:Show() end
         end
         ns._partyHeader:ClearAllPoints()
-        ns._partyHeader:SetPoint(basePoint, ns._partyContainerFrame, basePoint, PixelSnap(slotStepX * hdrSlot), PixelSnap(slotStepY * hdrSlot))
+        ns._partyHeader:SetPoint(basePoint, ns._partyContainerFrame, basePoint, PixelSnap(slotStepX * hdrSlot) + cShiftX, PixelSnap(slotStepY * hdrSlot) + cShiftY)
     else
         if sb and not InCombatLockdown() then sb:Hide() end
         ns._partyHeader:ClearAllPoints()
-        -- Center When Solo: when not in a group, center the lone player frame in
-        -- the container by offsetting the header 2 slots along the growth axis
-        -- ((5-1)/2 = 2). The container is always sized for 5 slots, so a single
-        -- frame at slot 2 sits centered.
-        local cOffX, cOffY = 0, 0
-        if s.partyCenterWhenSolo and not IsInGroup() then
-            cOffX = slotStepX * 2
-            cOffY = slotStepY * 2
-        end
-        ns._partyHeader:SetPoint(basePoint, ns._partyContainerFrame, basePoint, PixelSnap(cOffX), PixelSnap(cOffY))
+        ns._partyHeader:SetPoint(basePoint, ns._partyContainerFrame, basePoint, cShiftX, cShiftY)
     end
     return useSelf
 end
@@ -10538,8 +10699,9 @@ ns._LayoutPartyFrames = function()
     local bw = PixelSnap(s.partyFrameWidth or s.frameWidth or 125)
     local bh = PixelSnap(s.partyFrameHeight or s.frameHeight or 60)
     local cs = PixelSnap(s.partyCellSpacing or s.cellSpacing or 2)
-    local unitGrowth = s.partyHorizontal and (s.partyFlipGrowth and "LEFT" or "RIGHT")
-        or (s.partyFlipGrowth and "UP" or "DOWN")
+    -- Explicit true only: "centered" keeps the default direction.
+    local unitGrowth = s.partyHorizontal and (s.partyFlipGrowth == true and "LEFT" or "RIGHT")
+        or (s.partyFlipGrowth == true and "UP" or "DOWN")
 
     local hdrPoint, hdrXOff, hdrYOff
     if unitGrowth == "DOWN" then
@@ -10933,6 +11095,11 @@ ns.ReloadPartyFrames = function()
     -- Re-layout header
     ns._LayoutPartyFrames()
     ns._RebuildPartyUnitMap()
+    -- Re-sync UNIT_POWER_UPDATE registration: a Power Bar section sync/unsync
+    -- (or a party-side role-flag edit) changes the party's effective power
+    -- gating, same reasoning as UpdateCombatEventRegistration above. Must run
+    -- after the temp-swap restore so raid reads see raid values.
+    if ns.UpdatePowerEventRegistration then ns.UpdatePowerEventRegistration() end
     ns._UpdateAllPartyButtons()
 
     -- Re-register private aura anchors
@@ -11127,14 +11294,158 @@ end
 -- previewFrames are file-locals; the closure tracks the live values)
 ns._TSRaidPvState = function() return previewActive, previewFrames end
 -- Party preview reads party-scaled / party-prefixed settings so aura icons match
--- the party frames (size, position, colors); raid preview reads the live profile.
+-- the party frames (size, position, colors); raid preview reads the live profile
+-- through the real-preview effective overlay (below) so an open panel's view
+-- swap never leaks into the preview.
 local function PvSettings()
-    return (ns._partyPvActive and ns._scaledPartyProxy) or db.profile
+    return (ns._partyPvActive and ns._scaledPartyProxy)
+        or ns._pvOverlayProxy or db.profile
 end
 -- Class tokens for icon selection: the async ticker runs outside the synchronous
 -- table swap in ApplyPartyPreviewData, so it must resolve party tokens itself.
 local function PvClassTokens()
     return (ns._partyPvActive and ns._partyPvCT) or previewClassTokens
+end
+
+-------------------------------------------------------------------------------
+--  Real-preview effective-value overlay
+--  While the options panel holds a value-swapped VIEW (Default Editing Mode
+--  or an editing-as session) and preview mode is "real", preview reads must
+--  resolve the CURRENT SPEC's panel-closed effective values (spec override,
+--  else the applied conditional, else defaults) -- never the view's swapped
+--  live values. The overlay is a read-through proxy: captured RF keys
+--  resolve from the override stores, everything else falls through to live
+--  db.profile, so options widgets (which read live directly) keep showing
+--  the view. Rebuilt event-driven at the preview refresh entry points and
+--  the module-refresh tail; nil whenever no view swap is active, making
+--  every read byte-identical to today outside editing views. ZERO writes
+--  to live stores or override stores. (ns fields + do-end locals only:
+--  this file sits at Lua 5.1's 200-local cap.)
+-------------------------------------------------------------------------------
+do
+    local proxy
+    local proxyMT = {
+        __index = function(_, key)
+            local ov = ns._pvOverlay
+            if ov ~= nil then
+                local v = ov[key]
+                if v ~= nil then
+                    if v == EllesmereUI.SPECOV_NIL then return nil end
+                    return v
+                end
+            end
+            return db.profile[key]
+        end,
+    }
+    -- Segment-key resolution mirrors the value system's live walk: prefer
+    -- the string key when the table holds it, else numeric.
+    local function SegKey(t, seg)
+        if t[seg] ~= nil then return seg end
+        local n = tonumber(seg)
+        if n ~= nil and t[n] ~= nil then return n end
+        return seg
+    end
+
+    function ns._RebuildPvOverlay()
+        local active = (db.profile.previewMode == "real")
+            and EllesmereUI.SpecOverrides_ViewActive
+            and EllesmereUI.SpecOverrides_ViewActive()
+            and EllesmereUI.SpecOverrides_PeekEffectiveValues
+        local flat, specSrc, condSrc
+        if active then
+            flat, specSrc, condSrc =
+                EllesmereUI.SpecOverrides_PeekEffectiveValues("EllesmereUIRaidFrames")
+        end
+        if not flat then
+            ns._pvOverlay = nil
+            ns._pvOverlayProxy = nil
+            ns._pvOverlaySrc = nil
+            if ns._UpdatePvModeChrome then ns._UpdatePvModeChrome() end
+            return
+        end
+        local NIL_SENT = EllesmereUI.SPECOV_NIL
+        local overlay = {}
+        for fkey, v in pairs(flat) do
+            local path = fkey:match("^[^\31]+\31(.*)$")
+            if path and path ~= "" then
+                local segs = { strsplit("\30", path) }
+                if #segs == 1 then
+                    -- Depth-1: NIL_SENT stays encoded; the proxy decodes it.
+                    overlay[SegKey(db.profile, segs[1])] = v
+                else
+                    -- Deeper path: shallow-clone the LIVE parent chain along
+                    -- the path once, then set (or remove) the leaf -- sibling
+                    -- keys inside the cloned subtable keep their live values.
+                    local liveT = db.profile
+                    local dstParent = overlay
+                    local ok = true
+                    for i = 1, #segs - 1 do
+                        local k = SegKey(liveT, segs[i])
+                        local liveChild = liveT[k]
+                        if type(liveChild) ~= "table" then ok = false; break end
+                        local dstChild = dstParent[k]
+                        if type(dstChild) ~= "table" then
+                            dstChild = {}
+                            for ck, cv in pairs(liveChild) do dstChild[ck] = cv end
+                            dstParent[k] = dstChild
+                        end
+                        dstParent = dstChild
+                        liveT = liveChild
+                    end
+                    if ok then
+                        local lk = SegKey(liveT, segs[#segs])
+                        if v == NIL_SENT then
+                            dstParent[lk] = nil
+                        else
+                            dstParent[lk] = v
+                        end
+                    end
+                end
+            end
+        end
+        ns._pvOverlay = overlay
+        if not proxy then proxy = setmetatable({}, proxyMT) end
+        ns._pvOverlayProxy = proxy
+        ns._pvOverlaySrc = { spec = specSrc, cond = condSrc }
+        if ns._UpdatePvModeChrome then ns._UpdatePvModeChrome() end
+    end
+
+    -- The preview-path settings accessor: overlay proxy while a view swap
+    -- is active in real preview mode, else the live profile itself.
+    function ns.PvEffectiveProfile()
+        return ns._pvOverlayProxy or db.profile
+    end
+
+    -- Session unlock-layer element lookup: while an override session with a
+    -- CUSTOM unlock mode is being edited in real preview mode, the preview
+    -- mirrors that session's unlock positions -- the layer's recorded elem
+    -- for the key, baseline fallback per element. nil in every other state
+    -- (live positioning, today's behavior). Anchored containers resolve to
+    -- their recorded bookkeeping coordinates, not a live anchor chain.
+    function ns._PvSessionElem(key)
+        if db.profile.previewMode ~= "real" then return nil end
+        local layer, base
+        local sfn = EllesmereUI.SpecOverrides_EditSessionUnlockLayer
+        if sfn then layer, base = sfn() end
+        if not layer then
+            -- Default view: mirror the REAL spec's RESOLVED effective fork.
+            -- Never the live pointer (s.active) -- it lags membership and
+            -- unlock-mode edits made while the panel is open, and the
+            -- preview must show the layer that WOULD apply on exit.
+            -- Baseline-effective specs return nil here -> live positioning,
+            -- byte-identical to before the feature.
+            local vfn = EllesmereUI.SpecOverrides_ViewActive
+            if vfn and vfn() and EllesmereUI.SpecOverrides_EffectiveUnlockLayer then
+                layer, base = EllesmereUI.SpecOverrides_EffectiveUnlockLayer()
+            end
+        end
+        if not layer then return nil end
+        local e = layer.elems and layer.elems[key]
+        if not e and base and base ~= layer then
+            e = base.elems and base.elems[key]
+        end
+        return e
+    end
 end
 
 local function PvAuraGetGroup(index)
@@ -11697,13 +12008,21 @@ local function GetConfiguredBuffSpells()
     -- Resolve the player's spec via the shared, locale-independent helper (matches
     -- by spec ID, not the localized spec name) so indicators show on every client.
     local specKey = ns.BM_CurrentSpecKey and ns.BM_CurrentSpecKey()
+    -- Untracked spec: preview only the class-fallback indicators flagged
+    -- Show Own on All Specs (the ones that actually render live there).
+    local flaggedOnly = false
+    if not specKey then
+        specKey = ns.BM_ClassFallbackSpecKey and ns.BM_ClassFallbackSpecKey()
+        flaggedOnly = true
+    end
     if not specKey then return {} end
     local indicators = db.profile.bmIndicators[specKey]
     if not indicators then return {} end
     local spells = {}
     local seen = {}
     for _, ind in ipairs(indicators) do
-        if ind.enabled and ind.spells and (ind.type == "icon" or ind.type == "square") then
+        if ind.enabled and ind.spells and (not flaggedOnly or ind.showOwnAllSpecs)
+           and (ind.type == "icon" or ind.type == "square") then
             for _, sid in ipairs(ind.spells) do
                 if not seen[sid] then
                     seen[sid] = true
@@ -12060,7 +12379,7 @@ local function CreatePreviewFrame(index)
     local w = PixelSnap(s.frameWidth or 72)
     local h = PixelSnap(s.frameHeight or 46)
     local powerH = IsPowerBarEnabled(s) and PixelSnap(s.powerHeight or 4) or 0
-    local healthH = PixelSnap(h - powerH)
+    local healthH = PixelSnap(h - ns.RF_HealthPowerInset(s, powerH))
 
     local f = CreateFrame("Frame", nil, previewContainer or containerFrame)
     f:SetSize(w, h)
@@ -12332,7 +12651,10 @@ local function CreatePreviewFrame(index)
 
     local function PvApplyBorderColor()
         if not PP then return end
-        local s = ns._previewSettingsOverride or (ns._partyPvActive and ns._scaledPartyProxy) or ns._scaledProfile
+        -- Overlay ahead of _scaledProfile: border/hover/target keys are not
+        -- tier-scaled, so the effective overlay may shadow them safely.
+        local s = ns._previewSettingsOverride or (ns._partyPvActive and ns._scaledPartyProxy)
+            or ns._pvOverlayProxy or ns._scaledProfile
         if (s.borderSize or 1) <= 0 then return end
         local r, g, b, a
         local raised = false
@@ -12811,7 +13133,10 @@ local function ApplyPreviewData(f, index)
     -- re-spaced the layout without resizing the buttons whenever a custom raid
     -- size was active (e.g. in a party / small group on the Raid tab). The
     -- party preview still passes its own override via _previewSettingsOverride.
-    local s = ns._previewSettingsOverride or db.profile
+    -- The real-preview effective overlay (when active) resolves captured keys
+    -- to their panel-closed values; it is NOT tier-scaled, so the base-width
+    -- contract above holds.
+    local s = ns._previewSettingsOverride or ns._pvOverlayProxy or db.profile
     local classToken = previewClassTokens[index] or ns._PV_CLASS_TOKENS[((index - 1) % #ns._PV_CLASS_TOKENS) + 1]
     local playerSlot = previewRoles._playerSlot or 1
     local name
@@ -12826,7 +13151,7 @@ local function ApplyPreviewData(f, index)
     local w = PixelSnap(s.frameWidth or 72)
     local h = PixelSnap(s.frameHeight or 46)
     local powerH = IsPowerBarEnabled(s) and PixelSnap(s.powerHeight or 4) or 0
-    local healthH = PixelSnap(h - powerH)
+    local healthH = PixelSnap(h - ns.RF_HealthPowerInset(s, powerH))
     local topBarH = (s.topNameBarEnabled and PixelSnap(s.topNameBarHeight or 20)) or 0
 
     f:SetSize(w, h)
@@ -13358,10 +13683,12 @@ local function ApplyPreviewData(f, index)
     local dispelType = dispelMap and dispelMap[index]
     local dispelDC = dispelType and GetDispelColor(dispelType, s)
     if dispVis and dispelDC then
+        -- Per-type alpha (plain saved value in the preview path)
+        local dcA = dispelDC.a or 1
         -- Dispel border (PP.UpdateBorder handles physical pixel sizing internally)
         local dbs = s.dispelBorderSize or 2
         if f._dispelBdrFrame and PP and dbs > 0 then
-            PP.UpdateBorder(f._dispelBdrFrame, dbs, dispelDC.r, dispelDC.g, dispelDC.b, 1)
+            PP.UpdateBorder(f._dispelBdrFrame, dbs, dispelDC.r, dispelDC.g, dispelDC.b, dcA)
             f._dispelBdrFrame:Show()
         elseif f._dispelBdrFrame then
             f._dispelBdrFrame:Hide()
@@ -13369,7 +13696,7 @@ local function ApplyPreviewData(f, index)
         -- Dispel overlay
         local olMode = s.dispelOverlay or "fill"
         if olMode ~= "none" and f._dispelOLTex and f._health then
-            local olAlpha = (s.dispelOverlayOpacity or 100) / 100
+            local olAlpha = (s.dispelOverlayOpacity or 100) / 100 * dcA
             local olTex = f._dispelOLTex
             olTex:ClearAllPoints()
             -- Reset any prior vertex tint so fill/full render their explicit color cleanly.
@@ -13784,6 +14111,15 @@ local function ApplyPreviewData(f, index)
             local numStr = AbbreviateNumbers and AbbreviateNumbers(fakeHP) or tostring(fakeHP)
             f._healthText:SetFormattedText("%d%% | %s", healthPct, numStr)
             f._healthText:SetTextColor(htr, htg, htb, 0.9)
+        elseif mode == "missing" then
+            local fakeHP = (100 - healthPct) * 12000
+            f._healthText:SetText(C_StringUtil.TruncateWhenZero(fakeHP))
+            if f._healthText:GetText() then
+                if AbbreviateNumbers then
+                    f._healthText:SetText(AbbreviateNumbers(fakeHP))
+                end
+            end
+            f._healthText:SetTextColor(htr, htg, htb, 0.9)
         else
             f._healthText:SetText("")
         end
@@ -14077,9 +14413,10 @@ end
 local function RefreshPreview()
     if not previewActive then return end
     if not containerFrame then return end
+    if ns._RebuildPvOverlay then ns._RebuildPvOverlay() end
     BuildPreviewRoles()
 
-    local s = db.profile
+    local s = ns._pvOverlayProxy or db.profile
     local groupGrowth = s.groupGrowth or "RIGHT"
     local unitGrowth  = s.unitGrowth or "DOWN"
     local bw = PixelSnap(s.frameWidth or 72)
@@ -14189,19 +14526,19 @@ local function RefreshPreview()
             lbl = anchor:CreateFontString(nil, "OVERLAY")
             previewGroupLabels[g + 1] = lbl
         end
-        ApplyFont(lbl, db.profile.groupNumberSize or 10)
+        ApplyFont(lbl, s.groupNumberSize or 10)
         do
             -- Shared size/color with the real frames (group-number settings).
             -- Not gated by showGroupNumbers: the preview always shows numbers.
-            local gc = db.profile.groupNumberColor or {}
+            local gc = s.groupNumberColor or {}
             lbl:SetTextColor(gc.r or 1, gc.g or 1, gc.b or 1, gc.a or 0.75)
         end
         lbl:SetText(tostring(g + 1))
         lbl:ClearAllPoints()
         -- Anchor based on unit growth: label goes "before" the first unit.
         -- The X/Y offset (shared group-number setting) shifts it from there.
-        local gnox = db.profile.groupNumberOffsetX or 0
-        local gnoy = db.profile.groupNumberOffsetY or 0
+        local gnox = s.groupNumberOffsetX or 0
+        local gnoy = s.groupNumberOffsetY or 0
         if unitGrowth == "DOWN" then
             lbl:SetPoint("BOTTOM", firstFrame, "TOP", gnox, 4 + gnoy)
         elseif unitGrowth == "UP" then
@@ -14248,9 +14585,15 @@ local function RefreshPreview()
         -- until the panel reopened). Anchored at the base footprint's
         -- top-left so size changes grow down/right exactly like the real
         -- container's _ApplyTierOffset scheme.
+        local se = ns._PvSessionElem and ns._PvSessionElem("RF_RaidFrames")
         local bl, bt = ns._RFBaseTopLeft()
         previewContainer:ClearAllPoints()
-        if bl then
+        if se and se.point then
+            -- Editing an override with a custom unlock mode: place the
+            -- preview at the LAYER's recorded container position.
+            previewContainer:SetPoint(se.point, UIParent, se.relPoint or se.point,
+                PixelSnap(se.x or 0), PixelSnap(se.y or 0))
+        elseif bl then
             previewContainer:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", PixelSnap(bl), PixelSnap(bt))
         else
             previewContainer:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
@@ -15007,9 +15350,13 @@ local function ApplyPartyPreviewData(f, index)
     -- Use party proxy so ApplyPreviewData reads party-specific settings
     ns._previewSettingsOverride = ns._scaledPartyProxy
 
+    -- Sandwich values sourced through the effective overlay (panel-closed
+    -- values while a view swap is active); s stays live db.profile so the
+    -- mutation+restore semantics are unchanged.
+    local eff = ns._pvOverlayProxy or db.profile
     local origW, origH = s.frameWidth, s.frameHeight
-    s.frameWidth  = s.partyFrameWidth  or s.frameWidth
-    s.frameHeight = s.partyFrameHeight or s.frameHeight
+    s.frameWidth  = eff.partyFrameWidth  or eff.frameWidth
+    s.frameHeight = eff.partyFrameHeight or eff.frameHeight
 
     -- Temporarily swap preview value tables so ApplyPreviewData reads party data
     local origHealth = previewHealthValues
@@ -15089,14 +15436,15 @@ end
 
 local function RefreshPartyPreview()
     if not ns._partyPvActive then return end
+    if ns._RebuildPvOverlay then ns._RebuildPvOverlay() end
     -- Recompute party indicator/aura scale before applying preview data so the
     -- party preview reflects Auto Resize live (preview reads _scaledPartyProxy).
     if ns._UpdatePartyIndicatorScale then ns._UpdatePartyIndicatorScale() end
-    local s = db.profile
+    local s = ns._pvOverlayProxy or db.profile
     local w = PixelSnap(s.partyFrameWidth or s.frameWidth or 125)
     local h = PixelSnap(s.partyFrameHeight or s.frameHeight or 60)
     local spacing = PixelSnap(s.partyCellSpacing or s.cellSpacing or 2)
-    local mode = s.previewMode or "overlay"
+    local mode = db.profile.previewMode or "overlay"
 
     BuildPartyPreviewRoles()
 
@@ -15111,8 +15459,9 @@ local function RefreshPartyPreview()
     local isOverlay = (mode == "overlay")
     local anchorPad = isOverlay and 10 or 0
     local topExtra = isOverlay and 25 or 0   -- top space for the centered "Preview" title
-    local unitGrowth = s.partyHorizontal and (s.partyFlipGrowth and "LEFT" or "RIGHT")
-        or (s.partyFlipGrowth and "UP" or "DOWN")
+    -- Explicit true only: "centered" keeps the default direction.
+    local unitGrowth = s.partyHorizontal and (s.partyFlipGrowth == true and "LEFT" or "RIGHT")
+        or (s.partyFlipGrowth == true and "UP" or "DOWN")
     local isVert = (unitGrowth == "DOWN" or unitGrowth == "UP")
     local totalW, totalH
     if isVert then
@@ -15198,6 +15547,25 @@ local function RefreshPartyPreview()
     -- stack height/width versus the edit-mode location.
     if mode == "real" and ns._partyContainerFrame then
         local pos = s.partyUnlockPos
+        -- Editing an override with a custom unlock mode: anchor the preview
+        -- at the LAYER's recorded party-container position (a lightweight
+        -- proxy frame stands in for the real container, which sits at the
+        -- REAL spec's position).
+        local anchorTo = ns._partyContainerFrame
+        local se = ns._PvSessionElem and ns._PvSessionElem("RF_PartyFrames")
+        if se and se.point then
+            local proxy = ns._pvSessionPartyAnchor
+            if not proxy then
+                proxy = CreateFrame("Frame", nil, UIParent)
+                ns._pvSessionPartyAnchor = proxy
+            end
+            proxy:SetSize(ns._partyContainerFrame:GetSize())
+            proxy:ClearAllPoints()
+            proxy:SetPoint(se.point, UIParent, se.relPoint or se.point,
+                PixelSnap(se.x or 0), PixelSnap(se.y or 0))
+            anchorTo = proxy
+            pos = pos or se
+        end
         if pos then
             local stepX, stepY = 0, 0
             local basePoint = "TOPLEFT"
@@ -15218,7 +15586,7 @@ local function RefreshPartyPreview()
                         f:Hide()
                     else
                         f:ClearAllPoints()
-                        f:SetPoint(basePoint, ns._partyContainerFrame, basePoint,
+                        f:SetPoint(basePoint, anchorTo, basePoint,
                             PixelSnap(stepX * idx), PixelSnap(stepY * idx))
                         idx = idx + 1
                     end
@@ -15564,6 +15932,12 @@ function ERF:OnEnable()
         -- Friendly Boss Frames and Extra Frames re-read the swapped profile.
         if ns.FB_Apply then ns.FB_Apply() end
         if ns.XF_Apply then ns.XF_Apply() end
+        -- Real-preview effective overlay: RunRefreshers reaches here
+        -- synchronously from every view/spec/conditional transition, so the
+        -- preview's value source is corrected in the SAME frame -- the
+        -- shared tickers never render a stale overlay across a flip.
+        -- Near-zero cost when the overlay gate is inactive.
+        if ns._RebuildPvOverlay then ns._RebuildPvOverlay() end
     end
 
     -- Buff Manager LAYER swap refresh (spec-override BM forks): re-derives
@@ -15666,18 +16040,33 @@ function ERF:OnEnable()
 
     -- Dynamically register/unregister UNIT_POWER_UPDATE per unit based on
     -- role and power display settings. Called after roster changes and
-    -- when the user changes power bar role filters.
+    -- when the user changes power bar role filters. The trackers are shared
+    -- by raid AND party frames: player/party1-4 tokens also drive the party
+    -- buttons, whose Power Bar section can be unsynced from raid -- those
+    -- must consult the party proxy too, or raid-off/party-on would strip
+    -- their events and freeze the party power bars mid-combat.
     local function UpdatePowerEventRegistration()
-        local s = db.profile
-        local anyPower = IsPowerBarEnabled(s)
+        local rs = db.profile
+        local ps = ns._partyProxy
+        local function wantsPower(s, role)
+            return (role == "HEALER" and s.powerShowForHealer)
+                or (role == "TANK" and s.powerShowForTank)
+                or (role == "DAMAGER" and s.powerShowForDPS)
+                or (role == "NONE" and s.powerShowForDPS)
+        end
         for unit, tracker in pairs(unitTrackers) do
             local wantPower = false
-            if anyPower and UnitExists(unit) then
+            if UnitExists(unit) then
                 local role = ns._ResolvePowerRole(unit)
-                wantPower = (role == "HEALER" and s.powerShowForHealer)
-                    or (role == "TANK" and s.powerShowForTank)
-                    or (role == "DAMAGER" and s.powerShowForDPS)
-                    or (role == "NONE" and s.powerShowForDPS)
+                wantPower = IsPowerBarEnabled(rs) and wantsPower(rs, role)
+                -- player/party tokens always count as party-displayable; the
+                -- routing-map check additionally covers arena, where the party
+                -- header binds raid1-5.
+                if not wantPower and IsPowerBarEnabled(ps)
+                    and (unit == "player" or unit:match("^party%d$")
+                        or (ns._partyUnitToButton and ns._partyUnitToButton[unit])) then
+                    wantPower = wantsPower(ps, role)
+                end
             end
             if wantPower then
                 tracker:RegisterUnitEvent("UNIT_POWER_UPDATE", unit)
@@ -15743,17 +16132,51 @@ function ERF:OnEnable()
         end
         return false
     end
+    local function RegisterRGALIASNicknames()
+        if ns._rgaliasNickHooked then return true end
+        local RGA = _G.RG_ALIAS
+        if RGA and RGA.RegisterCallback and _G.RG_UnitName then
+            -- ns._rgaNick gates the ResolveDisplayName consult. The settings
+            -- shape is nil-guarded and only read here and in callbacks, never
+            -- per name resolve; a fresh RGA install with no settings table
+            -- yet simply reads as module-off.
+            local function SyncRGAFlag()
+                local s = RG_ALTS_SETTINGS and RG_ALTS_SETTINGS.settings
+                ns._rgaNick = (s and s["ellesmereui"]) and true or nil
+                if ns.RefreshAllNames then ns.RefreshAllNames() end
+            end
+            -- pcall: RGA owns its RegisterCallback signature; a mismatch or
+            -- future change must not error our OnEnable. If registration
+            -- fails, the flag is still seeded once below -- module toggles
+            -- then need a /reload to be noticed (degraded, never broken).
+            pcall(RGA.RegisterCallback, "DbUpdated", SyncRGAFlag)
+            pcall(RGA.RegisterCallback, "ModuleEnabled", function(event, moduleName)
+                if moduleName == "ellesmereui" then SyncRGAFlag() end
+            end)
+            pcall(RGA.RegisterCallback, "ModuleDisabled", function(event, moduleName)
+                if moduleName == "ellesmereui" then SyncRGAFlag() end
+            end)
+            local s = RG_ALTS_SETTINGS and RG_ALTS_SETTINGS.settings
+            ns._rgaNick = (s and s["ellesmereui"]) and true or nil
+            ns._rgaliasNickHooked = true
+            return true
+        end
+        return false
+    end
+
     local nsrtHooked = RegisterNSRTNicknames()
     local trHooked = RegisterTRNicknames()
-    if not (nsrtHooked and trHooked) then
+    local rgaliasHooked = RegisterRGALIASNicknames()
+    if not (nsrtHooked and trHooked and rgaliasHooked) then
         local nickFrame = CreateFrame("Frame")
         nickFrame:RegisterEvent("PLAYER_LOGIN")
         nickFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
         nickFrame:SetScript("OnEvent", function(self, event)
             local a = RegisterNSRTNicknames()
             local b = RegisterTRNicknames()
+            local c = RegisterRGALIASNicknames()
             -- Anything not loaded by first PLAYER_ENTERING_WORLD is not coming.
-            if (a and b) or event == "PLAYER_ENTERING_WORLD" then self:UnregisterAllEvents() end
+            if (a and b and c) or event == "PLAYER_ENTERING_WORLD" then self:UnregisterAllEvents() end
         end)
     end
 
