@@ -4,13 +4,13 @@ SimulationCraftDB = {
 ["Barelynoer - Area 52"] = {
 ["bonusRolls"] = {
 {
-["ts"] = 1784761320,
 ["currency"] = 3418,
+["ts"] = 1784761320,
 ["source"] = 268471,
-["context"] = 16,
+["season"] = 34,
 ["keyLevel"] = 22,
 ["spec"] = 1473,
-["season"] = 34,
+["context"] = 16,
 ["itemId"] = 251097,
 },
 },
@@ -50,14 +50,14 @@ SimulationCraftDB = {
 },
 },
 ["Lonelylitten - Stormrage"] = {
-["minimap"] = {
-["minimapPos"] = 225.6023459701718,
-},
 ["frame"] = {
 ["ofsx"] = -276.667724609375,
 ["ofsy"] = 12.50020217895508,
 ["point"] = "RIGHT",
 ["relativePoint"] = "RIGHT",
+},
+["minimap"] = {
+["minimapPos"] = 225.6023459701718,
 },
 },
 ["Madmareep - Stormrage"] = {
