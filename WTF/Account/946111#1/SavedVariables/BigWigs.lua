@@ -57,11 +57,11 @@ BigWigs3DB = {
 ["Default"] = {
 ["player"] = {
 ["maxIcons"] = 5,
-["anchorYOffset"] = -216,
+["growthDirection"] = "RIGHT",
 ["anchorPoint"] = "TOP",
+["anchorYOffset"] = -216,
 ["anchorRelPoint"] = "TOP",
 ["anchorXOffset"] = 426,
-["growthDirection"] = "RIGHT",
 },
 },
 },
@@ -128,8 +128,6 @@ BigWigs3DB = {
 ["BigWigs_Plugins_Bars"] = {
 ["profiles"] = {
 ["Default"] = {
-["normalWidth"] = 120,
-["visibleBarLimit"] = 1,
 ["emphasize"] = false,
 ["expPosition"] = {
 "BOTTOMLEFT",
@@ -137,6 +135,8 @@ BigWigs3DB = {
 330,
 21,
 },
+["visibleBarLimit"] = 1,
+["normalWidth"] = 120,
 ["normalPosition"] = {
 "BOTTOMLEFT",
 "BOTTOMLEFT",
@@ -202,6 +202,14 @@ BigWigs3DB = {
 ["specId"] = 270,
 ["keyMap"] = 0,
 ["name"] = "Klutzykubfu",
+["keyLevel"] = 0,
+["realm"] = "Stormrage",
+},
+["Player-60-0F85ABEF"] = {
+["playerRating"] = 3929,
+["specId"] = 105,
+["keyMap"] = 0,
+["name"] = "Lonelylitten",
 ["keyLevel"] = 0,
 ["realm"] = "Stormrage",
 },

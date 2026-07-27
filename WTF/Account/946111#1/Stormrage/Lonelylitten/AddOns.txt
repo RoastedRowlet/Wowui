@@ -20,10 +20,10 @@ CraftScan: enabled
 Bartender4: disabled
 idTip: enabled
 EllesmereUINameplates: enabled
-EllesmereUIResourceBars: disabled
+EllesmereUIResourceBars: enabled
 EllesmereUIUnitFrames: enabled
 EllesmereUIActionBars: enabled
-EllesmereUICooldownManager: disabled
+EllesmereUICooldownManager: enabled
 EllesmereUICursor: disabled
 Auctionator: enabled
 AutoFlood: enabled

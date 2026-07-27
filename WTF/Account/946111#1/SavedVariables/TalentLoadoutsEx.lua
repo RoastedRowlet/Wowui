@@ -102,9 +102,9 @@ TalentLoadoutEx = {
 ["icon"] = 134400,
 },
 {
+["isExpanded"] = true,
 ["icon"] = 6025441,
 ["name"] = "Dungeons",
-["isExpanded"] = true,
 },
 {
 ["isInGroup"] = true,
@@ -215,19 +215,19 @@ TalentLoadoutEx = {
 },
 {
 ["icon"] = 134400,
-["name"] = "dragons",
+["pvp2"] = 180,
 ["text"] = "CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMDwsYmZmBDDz2MLjthZmNWmZZMzMshhBYA22GbYamZZAAAAwmZmZmBbGzYMDgZGAYA",
 ["pvp1"] = 182,
 ["pvp3"] = 3058,
-["pvp2"] = 180,
+["name"] = "dragons",
 },
 {
 ["icon"] = 134400,
-["name"] = "Paladins",
+["pvp2"] = 180,
 ["text"] = "CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMDwsYmZmBDzYMzyMLmZGbsMzyYmZGLYYAGbbzMYMbDgJAAAALMzMzgNjZMGAAmZgB",
 ["pvp1"] = 182,
 ["pvp3"] = 3058,
-["pvp2"] = 180,
+["name"] = "Paladins",
 },
 {
 ["pvp3"] = 3058,
@@ -239,11 +239,11 @@ TalentLoadoutEx = {
 },
 {
 ["icon"] = 134400,
-["pvp2"] = 180,
+["name"] = "Archon M+",
 ["pvp1"] = 182,
 ["text"] = "CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMDMmlZmZGLMYMmZZmFzMzsMWmZZMzgNMAYssNzgxsNAmAAAAswMzMD2MMGDAAzMwA",
 ["pvp3"] = 3058,
-["name"] = "Archon M+",
+["pvp2"] = 180,
 },
 },
 {
@@ -263,36 +263,42 @@ TalentLoadoutEx = {
 {
 {
 ["name"] = "China",
+["isInGroup"] = false,
 ["text"] = "CkGAAAAAAAAAAAAAAAAAAAAAAMMmZZ2mxMzY2GeAmZWGzitZAAAAAAAAAAwygmNDTzMGzYWMzMzYGGDAAAAAAAAAAAAgZbmtmlZWsxMzAmZB0MAAzMAMA",
 ["icon"] = 134400,
 ["pvp1"] = 697,
 },
 {
 ["name"] = "Wizard Wildstalker",
+["isInGroup"] = false,
 ["text"] = "CkGA8cL7tpvige+kkmGM9zUPWPMmZZMjZmxsNzgxsxsYbGAAAAAAAAAAsYoZzMmmZAmFzMzMMMAAAAAYADgBAgAAAmtZ2aWmZxGzMzMMzsBaGAgZGAGA",
 ["icon"] = 134400,
 ["pvp1"] = 697,
 },
 {
 ["name"] = "Wizard Keeper",
+["isInGroup"] = false,
 ["text"] = "CkGA8cL7tpvige+kkmGM9zUPWPMmZZMjZmxsNzgxsxsYbGAAAAAAAAAAsYoZzMmmZAmFzMzMLGGAAAAAMgBwA22GLYamZZAAACYhxMzwMzGoZAwMDAYA",
 ["icon"] = 134400,
 ["pvp1"] = 697,
 },
 {
 ["name"] = "Greedy",
+["isInGroup"] = false,
 ["pvp1"] = 697,
 ["icon"] = 134400,
 ["text"] = "CkGA8cL7tpvige+kkmGM9zUPWPMmZZMjZmxsNMMmFmFbzAAAAAAAAAAglBNbzw0MM8AmFzMzMLGeADAAAAgBAYGAACAAY2mZrZZmFbMmZwMzCoZAAmZAYA",
 },
 {
 ["name"] = "Raid",
+["isInGroup"] = false,
 ["text"] = "CkGA8cL7tpvige+kkmGM9zUPWPjxMLz2MmZGz2wDwMzmxCzAAAAAAAAAAgFDNbmx0MDwsMzMzMMMDAAAAADAAAAEAAwsNzSz2Mb2YMzMMzAjmBAYmBgB",
 ["icon"] = 134400,
 ["pvp1"] = 697,
 },
 {
 ["name"] = "m+",
+["isInGroup"] = false,
 ["pvp1"] = 697,
 ["icon"] = 134400,
 ["text"] = "CkGA8cL7tpvige+kkmGM9zUPWPMmZZMjZmxsN8AMzswsYbGAAAAAAAAAAsMoZzw0MMMmFzMzMLzwYAAAAAAAwAAQAAAz2MbNLzsYjxMDmZWANDAwMDAD",
