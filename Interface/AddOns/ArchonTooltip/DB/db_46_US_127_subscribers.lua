@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'Warlock-Affliction','Unknown-Unknown','Priest-Holy','Warlock-Demonology','Priest-Shadow',}
-local provider = {region='US',realm='Kalecgos',name='US',type='subscribers',zone=46,date='2026-07-20',data={Dr='Dracarsynimz:BAEALgAFFAIJAgAAAQ==.Driver:BAEALgAFFAMJAgABLgAFFAUJEQABALYLAA==.',Sh='Shaihardt:BAEALgAECgQJBQABLgAFFAEJAQACAAAAAA==.',Un='Uniboom:BAEALgADCgYJBgABLgAFFAcJLQADABwcAA==.Unilock:BAECLgAFFH8KAAIEAAQJ8RQfSwAwAQRoDAAAAwAwAGkMAAADAFIAawwAAAEALwDqDAAAAwAjAAQABAnxFB9LADABBGgMAAADADAAaQwAAAMAUgBrDAAAAQAvAOoMAAADACMALgAECn8gAAIEAAkJshmXKAA5AgAEAAkJshmXKAA5AgABLgAFFAcJLQADABwcAA==.Unipray:BAECLgAFFH8tAAMDAAcJHByKBQAJAgdoDAAACgBAAGkMAAAKAF8AawwAAAcAOgBqDAAABQBXAGwMAAABACsAbQwAAAEANgDqDAAACwBjAAMABwkcHIoFAAkCB2gMAAAEAEAAaQwAAAUAXwBrDAAABAA6AGoMAAADAFcAbAwAAAEAKwBtDAAAAQA2AOoMAAAIAGMABQAFCZ8aThUAOgEFaAwAAAYASQBpDAAABQBOAGsMAAADADcAagwAAAIASwDqDAAAAwBBAC4ABAp/KQADAwAJCbAiUAEAbwMAAwAJCbAiUAEAbwMABQAHCeseWh4A0wEAAAA=.',},}
+local lookup = {'Warlock-Demonology','Shaman-Restoration',}
+local provider = {region='US',realm='Kalecgos',name='US',type='subscribers',zone=46,date='2026-07-28',data={Dr='Dracarsynimz:BAEALgAFFAIJAgAAAQ==.Driver:BAEALgAFFAMJAgABLgAFFAUJEQABALYLAA==.',Sh='Shaihardt:BAEALgAECgQJBQABLgAECgkJPAACAIcUAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

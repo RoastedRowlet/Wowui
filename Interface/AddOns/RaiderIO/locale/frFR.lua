@@ -174,6 +174,8 @@ L["DISABLE_RWF_MODE_RELOAD"] = "Vous désactivez le mode « Course au World Firs
 L["DPS"] = "DPS"
 L["DUNGEON_SHORT_NAME_AA"] = "Académie"
 L["DUNGEON_SHORT_NAME_AD"] = "AD"
+--[[Translation missing --]]
+--[[ L["DUNGEON_SHORT_NAME_AOF"] = ""--]] 
 L["DUNGEON_SHORT_NAME_ARAK"] = "AraK"
 --[[Translation missing --]]
 --[[ L["DUNGEON_SHORT_NAME_ARC"] = ""--]] 
@@ -184,12 +186,16 @@ L["DUNGEON_SHORT_NAME_ARAK"] = "AraK"
 L["DUNGEON_SHORT_NAME_BREW"] = "Hydro"
 L["DUNGEON_SHORT_NAME_BRH"] = "BdF"
 --[[Translation missing --]]
+--[[ L["DUNGEON_SHORT_NAME_BV"] = ""--]] 
+--[[Translation missing --]]
 --[[ L["DUNGEON_SHORT_NAME_COEN"] = ""--]] 
 L["DUNGEON_SHORT_NAME_COS"] = "CoS"
 L["DUNGEON_SHORT_NAME_COT"] = "CdF"
 L["DUNGEON_SHORT_NAME_DAWN"] = "LBA"
 L["DUNGEON_SHORT_NAME_DFC"] = "Faille"
 L["DUNGEON_SHORT_NAME_DHT"] = "FS"
+--[[Translation missing --]]
+--[[ L["DUNGEON_SHORT_NAME_DON"] = ""--]] 
 L["DUNGEON_SHORT_NAME_DOS"] = "AC"
 L["DUNGEON_SHORT_NAME_EB"] = "LFé"
 L["DUNGEON_SHORT_NAME_EDA"] = "ECO"
@@ -218,6 +224,8 @@ L["DUNGEON_SHORT_NAME_MISTS"] = "Brumes"
 L["DUNGEON_SHORT_NAME_ML"] = "Filon"
 --[[Translation missing --]]
 --[[ L["DUNGEON_SHORT_NAME_MOS"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["DUNGEON_SHORT_NAME_MR"] = ""--]] 
 L["DUNGEON_SHORT_NAME_MT"] = "Terrasse"
 L["DUNGEON_SHORT_NAME_NELT"] = "NELT"
 L["DUNGEON_SHORT_NAME_NL"] = "RdN"
@@ -261,6 +269,8 @@ L["DUNGEON_SHORT_NAME_ULD"] = "ULD"
 --[[ L["DUNGEON_SHORT_NAME_VOTW"] = ""--]] 
 --[[Translation missing --]]
 --[[ L["DUNGEON_SHORT_NAME_VP"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["DUNGEON_SHORT_NAME_VSA"] = ""--]] 
 L["DUNGEON_SHORT_NAME_WM"] = "MM"
 L["DUNGEON_SHORT_NAME_WORK"] = "Mécagone"
 L["DUNGEON_SHORT_NAME_WS"] = "Flèche"
@@ -607,6 +617,22 @@ L["RAID_BOSS_TOT_8"] = "Primordius"
 L["RAID_BOSS_TOT_9"] = "Sombre animus"
 L["RAID_BOSS_TOTFW_1"] = "Conclave du Vent"
 L["RAID_BOSS_TOTFW_2"] = "Al’Akir"
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_VA_1"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_VA_2"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_VA_3"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_VA_4"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_VA_5"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_VA_6"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_VA_7"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_VA_8"] = ""--]] 
 L["RAID_BOSS_VOTI_1"] = "Eranog"
 L["RAID_BOSS_VOTI_2"] = "Terros"
 L["RAID_BOSS_VOTI_3"] = "Le Conseil primordial"
@@ -682,6 +708,8 @@ L["RAID_ToES"] = "Terrasse Printanière"
 L["RAID_TOES"] = "Terrasse Printanière"
 L["RAID_TOT"] = "Trône du tonnerre"
 L["RAID_TOTFW"] = "Trône des quatre vents"
+--[[Translation missing --]]
+--[[ L["RAID_VA"] = ""--]] 
 --[[Translation missing --]]
 --[[ L["RAID_VS"] = ""--]] 
 --[[Translation missing --]]

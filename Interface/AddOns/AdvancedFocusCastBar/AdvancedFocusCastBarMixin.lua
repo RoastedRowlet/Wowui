@@ -1534,6 +1534,7 @@ function AdvancedFocusCastBarMixin:OnLoad()
 
 	self:ToggleTargetMarkerIntegration()
 	self:ToggleUnitIntegration()
+	self:SetFrameStrata("HIGH")
 end
 
 function AdvancedFocusCastBarMixin:ToggleUnitIntegration()
@@ -1716,14 +1717,12 @@ function AdvancedFocusCastBarMixin:OnSettingsChange(key, value)
 		self:SetWidth(value)
 		self:AdjustIconLayout(AdvancedFocusCastBarSaved.Settings.FeatureFlags[Private.Enum.FeatureFlag.ShowIcon])
 		self:AdjustSpellNameTextWidth()
-		self:HideGlow()
-		self:ShowGlow(false)
+		self:RefreshGlow()
 	elseif key == Private.Enum.Setting.Height then
 		self:SetHeight(value)
 		self:AdjustIconLayout(AdvancedFocusCastBarSaved.Settings.FeatureFlags[Private.Enum.FeatureFlag.ShowIcon])
 		self:AdjustSpellNameTextWidth()
-		self:HideGlow()
-		self:ShowGlow(false)
+		self:RefreshGlow()
 	elseif key == Private.Enum.Setting.Opacity then
 		self:SetAlpha(value)
 	elseif key == Private.Enum.Setting.Texture then
@@ -1744,10 +1743,7 @@ function AdvancedFocusCastBarMixin:OnSettingsChange(key, value)
 	elseif key == Private.Enum.Setting.ColorInterruptibleCannotInterrupt then
 		self.colors.InterruptibleCannotInterrupt = CreateColorFromHexString(value)
 	elseif key == Private.Enum.Setting.ColorGlow then
-		if AdvancedFocusCastBarSaved.Settings.FeatureFlags[Private.Enum.FeatureFlag.ShowImportantSpellsGlow] then
-			self:HideGlow()
-			self:ShowGlow(false)
-		end
+		self:RefreshGlow()
 	elseif key == Private.Enum.Setting.ColorInterruptTick then
 		self.colors.InterruptTick = CreateColorFromHexString(value)
 	elseif key == Private.Enum.Setting.BackgroundOpacity then
@@ -1772,9 +1768,8 @@ function AdvancedFocusCastBarMixin:OnSettingsChange(key, value)
 				self.CastBar.CastTimeText:SetShown(AdvancedFocusCastBarSaved.Settings.FeatureFlags[id])
 				self:AdjustSpellNameTextWidth()
 			elseif id == Private.Enum.FeatureFlag.ShowBorder then
-				self:HideGlow()
 				self.Border:SetShown(AdvancedFocusCastBarSaved.Settings.FeatureFlags[id])
-				self:ShowGlow(false)
+				self:RefreshGlow()
 			elseif id == Private.Enum.FeatureFlag.ShowImportantSpellsGlow then
 				if not AdvancedFocusCastBarSaved.Settings.FeatureFlags[id] then
 					self:HideGlow()
@@ -1840,7 +1835,20 @@ function AdvancedFocusCastBarMixin:SetFontAndFontSize()
 	local flags = AdvancedFocusCastBarSaved.Settings.FontFlags[Private.Enum.FontFlags.OUTLINE] and "OUTLINE" or ""
 
 	for fontString, targetFontSize in pairs(fontStrings) do
-		fontString:SetFont(AdvancedFocusCastBarSaved.Settings.Font, targetFontSize, flags)
+		local ok = pcall(function()
+			fontString:SetFont(AdvancedFocusCastBarSaved.Settings.Font, targetFontSize, flags)
+		end)
+
+		if not ok then
+			fontString:SetFont("Fonts\\FRIZQT__.TTF", targetFontSize, flags)
+			print(
+				string.format(
+					"AdvancedFocusCastBar: The font '%s' is invalid. Falling back to the default font.",
+					AdvancedFocusCastBarSaved.Settings.Font
+				)
+			)
+			AdvancedFocusCastBarSaved.Settings.Font = "Fonts\\FRIZQT__.TTF"
+		end
 
 		if AdvancedFocusCastBarSaved.Settings.FontFlags[Private.Enum.FontFlags.SHADOW] then
 			fontString:SetShadowOffset(1, -1)
@@ -2062,9 +2070,16 @@ function AdvancedFocusCastBarMixin:ShowGlow(isImportant)
 end
 
 function AdvancedFocusCastBarMixin:HideGlow()
-	LibCustomGlow.PixelGlow_Stop(
-		AdvancedFocusCastBarSaved.Settings.FeatureFlags[Private.Enum.FeatureFlag.ShowBorder] and self.Border or self
-	)
+	LibCustomGlow.PixelGlow_Stop(self.Border)
+	LibCustomGlow.PixelGlow_Stop(self)
+end
+
+function AdvancedFocusCastBarMixin:RefreshGlow()
+	self:HideGlow()
+
+	if AdvancedFocusCastBarSaved.Settings.FeatureFlags[Private.Enum.FeatureFlag.ShowImportantSpellsGlow] then
+		self:ShowGlow(false)
+	end
 end
 
 function AdvancedFocusCastBarMixin:LoadConditionsProhibitExecution()
@@ -2094,39 +2109,45 @@ function AdvancedFocusCastBarMixin:UnitIsIrrelevant()
 	return false
 end
 
-function AdvancedFocusCastBarMixin:DetectInterruptId()
-	local playerClass = select(3, UnitClass("player"))
+do
+	local eligibleInterrupts = {}
 
-	local classInterruptMap = {
-		[Constants.UICharacterClasses.Warrior] = { 6552 },
-		[Constants.UICharacterClasses.Paladin] = { 96231, 31935 }, -- Rebuke must come before Avenger's Shield
-		[Constants.UICharacterClasses.Hunter] = { 147362, 187707 },
-		[Constants.UICharacterClasses.Rogue] = { 1766 },
-		[Constants.UICharacterClasses.Priest] = { 15487 },
-		[Constants.UICharacterClasses.DeathKnight] = { 47528 },
-		[Constants.UICharacterClasses.Shaman] = { 57994 },
-		[Constants.UICharacterClasses.Mage] = { 2139 },
-		[Constants.UICharacterClasses.Warlock] = { 19647, 89766, 119910, 1276467, 132409 },
-		[Constants.UICharacterClasses.Monk] = { 116705 },
-		[Constants.UICharacterClasses.Druid] = { 38675, 78675, 106839 },
-		[Constants.UICharacterClasses.DemonHunter] = { 183752 },
-		[Constants.UICharacterClasses.Evoker] = { 351338 },
-	}
+	do
+		local playerClass = select(3, UnitClass("player"))
 
-	local eligibleInterrupts = classInterruptMap[playerClass]
+		local classInterruptMap = {
+			[Constants.UICharacterClasses.Warrior] = { 6552 },
+			[Constants.UICharacterClasses.Paladin] = { 96231, 31935 }, -- Rebuke must come before Avenger's Shield
+			[Constants.UICharacterClasses.Hunter] = { 147362, 187707 },
+			[Constants.UICharacterClasses.Rogue] = { 1766 },
+			[Constants.UICharacterClasses.Priest] = { 15487 },
+			[Constants.UICharacterClasses.DeathKnight] = { 47528 },
+			[Constants.UICharacterClasses.Shaman] = { 57994 },
+			[Constants.UICharacterClasses.Mage] = { 2139 },
+			[Constants.UICharacterClasses.Warlock] = { 19647, 89766, 119910, 1276467, 132409 },
+			[Constants.UICharacterClasses.Monk] = { 116705 },
+			[Constants.UICharacterClasses.Druid] = { 38675, 78675, 106839 },
+			[Constants.UICharacterClasses.DemonHunter] = { 183752 },
+			[Constants.UICharacterClasses.Evoker] = { 351338 },
+		}
 
-	for i = 1, #eligibleInterrupts do
-		local id = eligibleInterrupts[i]
-
-		if
-			C_SpellBook.IsSpellKnownOrInSpellBook(id)
-			or C_SpellBook.IsSpellKnownOrInSpellBook(id, Enum.SpellBookSpellBank.Pet)
-		then
-			return id
-		end
+		eligibleInterrupts = classInterruptMap[playerClass]
 	end
 
-	return nil
+	function AdvancedFocusCastBarMixin:DetectInterruptId()
+		for i = 1, #eligibleInterrupts do
+			local id = eligibleInterrupts[i]
+
+			if
+				C_SpellBook.IsSpellKnownOrInSpellBook(id)
+				or C_SpellBook.IsSpellKnownOrInSpellBook(id, Enum.SpellBookSpellBank.Pet)
+			then
+				return id
+			end
+		end
+
+		return nil
+	end
 end
 
 function AdvancedFocusCastBarMixin:DeriveAndSetNextColor(interruptDuration)
@@ -2204,10 +2225,11 @@ function AdvancedFocusCastBarMixin:ProcessCastInformation()
 	if AdvancedFocusCastBarSaved.Settings.FeatureFlags[Private.Enum.FeatureFlag.ShowImportantSpellsGlow] then
 		self:ShowGlow(self.castInformation.isImportant)
 	else
-		-- looks anti intuitive - because it is.
-		-- once the glow was enabled once, we just never stop it but only hide it to avoid going through the whole
-		-- LibCustomGlow lifecycle again.
-		self:ShowGlow(false)
+		-- Feature is off: stop the glow entirely so LibCustomGlow's per-frame
+		-- OnUpdate (repositioning 8 textures every frame) isn't left running at
+		-- alpha 0 for a bar the user disabled the glow on. Re-acquiring from the
+		-- frame pool on the next important cast is cheap next to that per-frame cost.
+		self:HideGlow()
 	end
 
 	-- interruptId won't change while the castbar is visible, so its set once outside to prevent spamming this
@@ -2357,279 +2379,279 @@ function AdvancedFocusCastBarMixin:QueueDelayedHide()
 	end)
 end
 
-function AdvancedFocusCastBarMixin:OnEvent(event, ...)
+function AdvancedFocusCastBarMixin:OnCastStartOrUpdate(event)
+	if self:LoadConditionsProhibitExecution() or self:UnitIsIrrelevant() then
+		return
+	end
+
+	self.castInformation = self:QueryCastInformation()
+
+	if self.castInformation == nil then
+		return
+	end
+
+	if self.interruptHidingDelayTimer ~= nil then
+		self.interruptHidingDelayTimer:Invoke()
+	end
+
 	if
 		event == "UNIT_SPELLCAST_START"
-		or event == "UNIT_SPELLCAST_DELAYED"
 		or event == "UNIT_SPELLCAST_CHANNEL_START"
-		or event == "UNIT_SPELLCAST_CHANNEL_UPDATE"
 		or event == "UNIT_SPELLCAST_EMPOWER_START"
-		or event == "UNIT_SPELLCAST_EMPOWER_UPDATE"
 	then
-		if self:LoadConditionsProhibitExecution() or self:UnitIsIrrelevant() then
-			return
-		end
+		self:MaybePlayCastStartTTS()
+	end
 
-		self.castInformation = self:QueryCastInformation()
+	self:ProcessCastInformation()
+	self:Show()
+end
 
-		if self.castInformation == nil then
-			return
-		end
-
-		if self.interruptHidingDelayTimer ~= nil then
-			self.interruptHidingDelayTimer:Invoke()
-		end
-
-		if
-			event == "UNIT_SPELLCAST_START"
-			or event == "UNIT_SPELLCAST_CHANNEL_START"
-			or event == "UNIT_SPELLCAST_EMPOWER_START"
-		then
-			self:MaybePlayCastStartTTS()
-		end
-
-		self:ProcessCastInformation()
-		self:Show()
-	elseif
-		event == "UNIT_SPELLCAST_STOP"
-		or event == "UNIT_SPELLCAST_FAILED"
-		or event == "UNIT_SPELLCAST_INTERRUPTED"
-		or event == "UNIT_SPELLCAST_CHANNEL_STOP"
-		or event == "UNIT_SPELLCAST_EMPOWER_STOP"
+function AdvancedFocusCastBarMixin:OnCastStopOrFail(event, ...)
+	if
+		self:LoadConditionsProhibitExecution()
+		or self:UnitIsIrrelevant()
+		or not self:IsShown()
+		or self.interruptHidingDelayTimer ~= nil
 	then
+		return
+	end
+
+	local interruptedBy = nil
+
+	if AdvancedFocusCastBarSaved.Settings.FeatureFlags[Private.Enum.FeatureFlag.ShowInterruptSource] then
+		if event == "UNIT_SPELLCAST_CHANNEL_STOP" or event == "UNIT_SPELLCAST_INTERRUPTED" then
+			interruptedBy = select(4, ...)
+		elseif event == "UNIT_SPELLCAST_EMPOWER_STOP" then
+			interruptedBy = select(5, ...)
+		end
+	end
+
+	self.castInformation = self:QueryCastInformation()
+
+	if self.castInformation == nil and interruptedBy == nil then
+		self:Hide()
+
+		return
+	end
+
+	local delayHiding = false
+
+	if
+		AdvancedFocusCastBarSaved.Settings.FeatureFlags[Private.Enum.FeatureFlag.ShowInterruptSource]
+		and interruptedBy ~= nil
+	then
+		delayHiding = true
+
+		local interruptName = UnitNameFromGUID(interruptedBy)
+		local interruptColor = nil
+
 		if
-			self:LoadConditionsProhibitExecution()
-			or self:UnitIsIrrelevant()
-			or not self:IsShown()
-			or self.interruptHidingDelayTimer ~= nil
-		then
-			return
-		end
-
-		local interruptedBy = nil
-
-		if AdvancedFocusCastBarSaved.Settings.FeatureFlags[Private.Enum.FeatureFlag.ShowInterruptSource] then
-			if event == "UNIT_SPELLCAST_CHANNEL_STOP" or event == "UNIT_SPELLCAST_INTERRUPTED" then
-				interruptedBy = select(4, ...)
-			elseif event == "UNIT_SPELLCAST_EMPOWER_STOP" then
-				interruptedBy = select(5, ...)
-			end
-		end
-
-		self.castInformation = self:QueryCastInformation()
-
-		if self.castInformation == nil and interruptedBy == nil then
-			self:Hide()
-
-			return
-		end
-
-		local delayHiding = false
-
-		if
-			AdvancedFocusCastBarSaved.Settings.FeatureFlags[Private.Enum.FeatureFlag.ShowInterruptSource]
+			AdvancedFocusCastBarSaved.Settings.FeatureFlags[Private.Enum.FeatureFlag.UseInterruptSourceClassColor]
 			and interruptedBy ~= nil
 		then
-			delayHiding = true
-
-			local interruptName = UnitNameFromGUID(interruptedBy)
-			local interruptColor = nil
-
-			if
-				AdvancedFocusCastBarSaved.Settings.FeatureFlags[Private.Enum.FeatureFlag.UseInterruptSourceClassColor]
-				and interruptedBy ~= nil
-			then
-				local className = select(2, UnitClassFromGUID(interruptedBy))
-				if className ~= nil then
-					interruptColor = C_ClassColor.GetClassColor(className)
-				end
-			end
-
-			if interruptColor == nil then
-				interruptColor = CreateColor(1, 1, 1)
-			end
-
-			self.CustomElementsFrame.InterruptSourceText:SetFormattedText(
-				Private.L.Settings.InterruptSourceText,
-				interruptColor == nil and interruptName or interruptColor:WrapTextInColorCode(interruptName)
-			)
-
-			self.CustomElementsFrame.InterruptSourceText:Show()
-		end
-
-		if delayHiding then
-			self:QueueDelayedHide()
-		else
-			-- when testing against yourself, this avoids breakage when the testing spell is in a macro trying to cast other stuff
-			if event == "UNIT_SPELLCAST_FAILED" and UnitIsUnit(AdvancedFocusCastBarSaved.Settings.Unit, "player") then
-				return
-			end
-
-			self:Hide()
-		end
-	elseif event == "PLAYER_FOCUS_CHANGED" or event == "PLAYER_TARGET_CHANGED" then
-		if self:LoadConditionsProhibitExecution() then
-			return
-		end
-
-		if not UnitExists(AdvancedFocusCastBarSaved.Settings.Unit) then
-			if self:IsShown() then
-				self:Hide()
-			end
-
-			if
-				AdvancedFocusCastBarSaved.Settings.FeatureFlags[Private.Enum.FeatureFlag.PlayTargetingTTSReminder]
-				and self.contentType == Private.Enum.ContentType.Dungeon
-			then
-				-- delay this as focus target dying may imply leaving combat
-				C_Timer.After(1, function()
-					if InCombatLockdown() then
-						self:PlayTTS(AdvancedFocusCastBarSaved.Settings.Unit)
-					end
-				end)
-			end
-
-			return
-		end
-
-		if self:UnitIsIrrelevant() then
-			-- hide if focus moved to an irrelevant unit.
-			if self:IsShown() then
-				self:Hide()
-			end
-
-			return
-		end
-
-		self.castInformation = self:QueryCastInformation()
-
-		if self.castInformation == nil then
-			if self:IsShown() then
-				self:Hide()
-			end
-
-			return
-		end
-
-		self:MaybePlayCastStartTTS()
-		self:ProcessCastInformation()
-		self:Show()
-	elseif event == "UNIT_SPELLCAST_INTERRUPTIBLE" then
-		if self:LoadConditionsProhibitExecution() then
-			return
-		end
-
-		self.castInformation = self:QueryCastInformation()
-
-		if self.castInformation == nil then
-			self:Hide()
-			return
-		end
-
-		self:DeriveAndSetNextColor()
-	elseif event == "UNIT_SPELLCAST_NOT_INTERRUPTIBLE" then
-		if self:LoadConditionsProhibitExecution() then
-			return
-		end
-
-		self.castInformation = self:QueryCastInformation()
-
-		if self.castInformation == nil then
-			self:Hide()
-			return
-		end
-
-		self:DeriveAndSetNextColor()
-	elseif event == "RAID_TARGET_UPDATE" then
-		self:UpdateTargetMarker()
-	elseif
-		event == "ZONE_CHANGED_NEW_AREA"
-		or event == "LOADING_SCREEN_DISABLED"
-		or event == "PLAYER_SPECIALIZATION_CHANGED"
-		or event == "UPDATE_INSTANCE_INFO"
-	then
-		if
-			event == "LOADING_SCREEN_DISABLED"
-			and not UnitExists(AdvancedFocusCastBarSaved.Settings.Unit)
-			and self:IsShown()
-		then
-			self:Hide()
-		end
-
-		local nextInterruptId = self:DetectInterruptId()
-
-		if nextInterruptId ~= self.interruptId then
-			self.interruptId = nextInterruptId
-
-			Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, Private.Enum.Setting.FeatureFlag, {
-				Private.Enum.FeatureFlag.HideWhenUninterruptible,
-			})
-		end
-
-		local _, instanceType, difficultyId = GetInstanceInfo()
-		-- equivalent to `instanceType == "none"`
-		local nextContentType = Private.Enum.ContentType.OpenWorld
-
-		if instanceType == "raid" then
-			nextContentType = Private.Enum.ContentType.Raid
-		elseif instanceType == "party" then
-			if
-				difficultyId == DifficultyUtil.ID.DungeonTimewalker
-				or difficultyId == DifficultyUtil.ID.DungeonNormal
-				or difficultyId == DifficultyUtil.ID.DungeonHeroic
-				or difficultyId == DifficultyUtil.ID.DungeonMythic
-				or difficultyId == DifficultyUtil.ID.DungeonChallenge
-				or difficultyId == 205 -- follower dungeons
-			then
-				nextContentType = Private.Enum.ContentType.Dungeon
-			end
-		elseif instanceType == "pvp" then
-			nextContentType = Private.Enum.ContentType.Battleground
-		elseif instanceType == "arena" then
-			nextContentType = Private.Enum.ContentType.Arena
-		elseif instanceType == "scenario" then
-			if difficultyId == 208 then
-				nextContentType = Private.Enum.ContentType.Delve
+			local className = select(2, UnitClassFromGUID(interruptedBy))
+			if className ~= nil then
+				interruptColor = C_ClassColor.GetClassColor(className)
 			end
 		end
 
-		self.contentType = nextContentType
-
-		local specId = PlayerUtil.GetCurrentSpecID()
-
-		if
-			specId == 105 -- restoration druid
-			or specId == 1468 -- preservation evoker
-			or specId == 270 -- mistweaver monk
-			or specId == 65 -- holy paladin
-			or specId == 256 -- discipline priest
-			or specId == 257 -- holy priest
-			or specId == 264 -- restoration shaman
-		then
-			self.role = Private.Enum.Role.Healer
-		elseif
-			specId == 250 -- blood death knight
-			or specId == 581 -- vengeance demon hunter
-			or specId == 104 -- guardian druid
-			or specId == 268 -- brewmaster monk
-			or specId == 66 -- protection paladin
-			or specId == 73 -- protection warrior
-		then
-			self.role = Private.Enum.Role.Tank
-		else
-			self.role = Private.Enum.Role.Damager
+		if interruptColor == nil then
+			interruptColor = CreateColor(1, 1, 1)
 		end
-	elseif event == Private.Enum.Events.EDIT_MODE_POSITION_CHANGED then
-		self:ClearAllPoints()
-		self:SetPoint(
-		---@diagnostic disable-next-line: param-type-mismatch
-			AdvancedFocusCastBarSaved.Settings.Point,
-			AdvancedFocusCastBarSaved.Settings.OffsetX,
-			AdvancedFocusCastBarSaved.Settings.OffsetY
+
+		self.CustomElementsFrame.InterruptSourceText:SetFormattedText(
+			Private.L.Settings.InterruptSourceText,
+			interruptColor == nil and interruptName or interruptColor:WrapTextInColorCode(interruptName)
 		)
-	elseif event == "FIRST_FRAME_RENDERED" then
-		self.firstFrameTimestamp = GetTime()
-		self:UnregisterEvent("FIRST_FRAME_RENDERED")
+
+		self.CustomElementsFrame.InterruptSourceText:Show()
+	end
+
+	if delayHiding then
+		self:QueueDelayedHide()
+	else
+		-- when testing against yourself, this avoids breakage when the testing spell is in a macro trying to cast other stuff
+		if event == "UNIT_SPELLCAST_FAILED" and UnitIsUnit(AdvancedFocusCastBarSaved.Settings.Unit, "player") then
+			return
+		end
+
+		self:Hide()
+	end
+end
+
+function AdvancedFocusCastBarMixin:OnWatchedUnitChanged()
+	if self:LoadConditionsProhibitExecution() then
+		return
+	end
+
+	if not UnitExists(AdvancedFocusCastBarSaved.Settings.Unit) then
+		if self:IsShown() then
+			self:Hide()
+		end
+
+		if
+			AdvancedFocusCastBarSaved.Settings.FeatureFlags[Private.Enum.FeatureFlag.PlayTargetingTTSReminder]
+			and self.contentType == Private.Enum.ContentType.Dungeon
+		then
+			-- delay this as focus target dying may imply leaving combat
+			C_Timer.After(1, function()
+				if InCombatLockdown() then
+					self:PlayTTS(AdvancedFocusCastBarSaved.Settings.Unit)
+				end
+			end)
+		end
+
+		return
+	end
+
+	if self:UnitIsIrrelevant() then
+		-- hide if focus moved to an irrelevant unit.
+		if self:IsShown() then
+			self:Hide()
+		end
+
+		return
+	end
+
+	self.castInformation = self:QueryCastInformation()
+
+	if self.castInformation == nil then
+		if self:IsShown() then
+			self:Hide()
+		end
+
+		return
+	end
+
+	self:MaybePlayCastStartTTS()
+	self:ProcessCastInformation()
+	self:Show()
+end
+
+function AdvancedFocusCastBarMixin:OnInterruptibleChanged()
+	if self:LoadConditionsProhibitExecution() then
+		return
+	end
+
+	self.castInformation = self:QueryCastInformation()
+
+	if self.castInformation == nil then
+		self:Hide()
+		return
+	end
+
+	self:DeriveAndSetNextColor()
+end
+
+function AdvancedFocusCastBarMixin:OnRaidTargetUpdate()
+	self:UpdateTargetMarker()
+end
+
+function AdvancedFocusCastBarMixin:OnZoneOrSpecChanged(event)
+	if
+		event == "LOADING_SCREEN_DISABLED"
+		and not UnitExists(AdvancedFocusCastBarSaved.Settings.Unit)
+		and self:IsShown()
+	then
+		self:Hide()
+	end
+
+	local nextInterruptId = self:DetectInterruptId()
+
+	if nextInterruptId ~= self.interruptId then
+		self.interruptId = nextInterruptId
+
+		Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, Private.Enum.Setting.FeatureFlag, {
+			Private.Enum.FeatureFlag.HideWhenUninterruptible,
+		})
+	end
+
+	local _, instanceType, difficultyId = GetInstanceInfo()
+	-- equivalent to `instanceType == "none"`
+	local nextContentType = Private.Enum.ContentType.OpenWorld
+
+	if instanceType == "raid" then
+		nextContentType = Private.Enum.ContentType.Raid
+	elseif instanceType == "party" then
+		if
+			difficultyId == DifficultyUtil.ID.DungeonTimewalker
+			or difficultyId == DifficultyUtil.ID.DungeonNormal
+			or difficultyId == DifficultyUtil.ID.DungeonHeroic
+			or difficultyId == DifficultyUtil.ID.DungeonMythic
+			or difficultyId == DifficultyUtil.ID.DungeonChallenge
+			or difficultyId == 205 -- follower dungeons
+		then
+			nextContentType = Private.Enum.ContentType.Dungeon
+		end
+	elseif instanceType == "pvp" then
+		nextContentType = Private.Enum.ContentType.Battleground
+	elseif instanceType == "arena" then
+		nextContentType = Private.Enum.ContentType.Arena
+	elseif instanceType == "scenario" then
+		if difficultyId == 208 then
+			nextContentType = Private.Enum.ContentType.Delve
+		end
+	end
+
+	self.contentType = nextContentType
+
+	local role = GetSpecializationRoleByID(PlayerUtil.GetCurrentSpecID())
+
+	if role == "TANK" then
+		self.role = Private.Enum.Role.Tank
+	elseif role == "DAMAGER" then
+		self.role = Private.Enum.Role.Damager
+	else
+		self.role = Private.Enum.Role.Healer
+	end
+end
+
+function AdvancedFocusCastBarMixin:OnFirstFrameRendered()
+	self.firstFrameTimestamp = GetTime()
+	self:UnregisterEvent("FIRST_FRAME_RENDERED")
+end
+
+do
+	local handlers = {
+		UNIT_SPELLCAST_START = AdvancedFocusCastBarMixin.OnCastStartOrUpdate,
+		UNIT_SPELLCAST_DELAYED = AdvancedFocusCastBarMixin.OnCastStartOrUpdate,
+		UNIT_SPELLCAST_CHANNEL_START = AdvancedFocusCastBarMixin.OnCastStartOrUpdate,
+		UNIT_SPELLCAST_CHANNEL_UPDATE = AdvancedFocusCastBarMixin.OnCastStartOrUpdate,
+		UNIT_SPELLCAST_EMPOWER_START = AdvancedFocusCastBarMixin.OnCastStartOrUpdate,
+		UNIT_SPELLCAST_EMPOWER_UPDATE = AdvancedFocusCastBarMixin.OnCastStartOrUpdate,
+
+		UNIT_SPELLCAST_STOP = AdvancedFocusCastBarMixin.OnCastStopOrFail,
+		UNIT_SPELLCAST_FAILED = AdvancedFocusCastBarMixin.OnCastStopOrFail,
+		UNIT_SPELLCAST_INTERRUPTED = AdvancedFocusCastBarMixin.OnCastStopOrFail,
+		UNIT_SPELLCAST_CHANNEL_STOP = AdvancedFocusCastBarMixin.OnCastStopOrFail,
+		UNIT_SPELLCAST_EMPOWER_STOP = AdvancedFocusCastBarMixin.OnCastStopOrFail,
+
+		PLAYER_FOCUS_CHANGED = AdvancedFocusCastBarMixin.OnWatchedUnitChanged,
+		PLAYER_TARGET_CHANGED = AdvancedFocusCastBarMixin.OnWatchedUnitChanged,
+
+		UNIT_SPELLCAST_INTERRUPTIBLE = AdvancedFocusCastBarMixin.OnInterruptibleChanged,
+		UNIT_SPELLCAST_NOT_INTERRUPTIBLE = AdvancedFocusCastBarMixin.OnInterruptibleChanged,
+
+		RAID_TARGET_UPDATE = AdvancedFocusCastBarMixin.OnRaidTargetUpdate,
+
+		ZONE_CHANGED_NEW_AREA = AdvancedFocusCastBarMixin.OnZoneOrSpecChanged,
+		LOADING_SCREEN_DISABLED = AdvancedFocusCastBarMixin.OnZoneOrSpecChanged,
+		PLAYER_SPECIALIZATION_CHANGED = AdvancedFocusCastBarMixin.OnZoneOrSpecChanged,
+		UPDATE_INSTANCE_INFO = AdvancedFocusCastBarMixin.OnZoneOrSpecChanged,
+
+		-- custom event routed through Private.EventRegistry; identical to the
+		-- LibEditMode "layout" callback, so reuse that handler.
+		[Private.Enum.Events.EDIT_MODE_POSITION_CHANGED] = AdvancedFocusCastBarMixin.RestoreEditModePosition,
+
+		FIRST_FRAME_RENDERED = AdvancedFocusCastBarMixin.OnFirstFrameRendered,
+	}
+
+	function AdvancedFocusCastBarMixin:OnEvent(event, ...)
+		local handler = handlers[event]
+
+		if handler then
+			handler(self, event, ...)
+		end
 	end
 end
 

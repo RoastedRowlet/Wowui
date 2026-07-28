@@ -171,18 +171,24 @@ L["DISABLE_RWF_MODE_RELOAD"] = "Du deaktivierst den Wettrennen Welt 1.-Modus. Du
 L["DPS"] = "DPS"
 L["DUNGEON_SHORT_NAME_AA"] = "Akademie von Algeth'ar"
 L["DUNGEON_SHORT_NAME_AD"] = "Atal'Dazar"
+--[[Translation missing --]]
+--[[ L["DUNGEON_SHORT_NAME_AOF"] = ""--]] 
 L["DUNGEON_SHORT_NAME_ARAK"] = "Ara-Kara, Stadt der Echos"
 L["DUNGEON_SHORT_NAME_ARC"] = "Der Arkus"
 L["DUNGEON_SHORT_NAME_AV"] = "Azurblaue Gewölbe"
 L["DUNGEON_SHORT_NAME_BH"] = "Brackenfellhöhle"
 L["DUNGEON_SHORT_NAME_BREW"] = "Metbrauerei Glutbräu"
 L["DUNGEON_SHORT_NAME_BRH"] = "Die Rabenwehr"
+--[[Translation missing --]]
+--[[ L["DUNGEON_SHORT_NAME_BV"] = ""--]] 
 L["DUNGEON_SHORT_NAME_COEN"] = "Die Kathedrale der Ewigen Nacht"
 L["DUNGEON_SHORT_NAME_COS"] = "Hof der Sterne"
 L["DUNGEON_SHORT_NAME_COT"] = "Stadt der Fäden"
 L["DUNGEON_SHORT_NAME_DAWN"] = "Morgenbringer"
 L["DUNGEON_SHORT_NAME_DFC"] = "Dunkelflammenspalt"
 L["DUNGEON_SHORT_NAME_DHT"] = "Das Finsterherzdickicht"
+--[[Translation missing --]]
+--[[ L["DUNGEON_SHORT_NAME_DON"] = ""--]] 
 L["DUNGEON_SHORT_NAME_DOS"] = "Die Andre Seite"
 L["DUNGEON_SHORT_NAME_EB"] = "Der Immergrüne Flor"
 L["DUNGEON_SHORT_NAME_EDA"] = "Eco-Dome Al'dani"
@@ -203,6 +209,8 @@ L["DUNGEON_SHORT_NAME_MC"] = "Maisarakavernen"
 L["DUNGEON_SHORT_NAME_MISTS"] = "Nebel von Tirna Scithe"
 L["DUNGEON_SHORT_NAME_ML"] = "Das Riesenflöz"
 L["DUNGEON_SHORT_NAME_MOS"] = "Die Helmaulklippen"
+--[[Translation missing --]]
+--[[ L["DUNGEON_SHORT_NAME_MR"] = ""--]] 
 L["DUNGEON_SHORT_NAME_MT"] = "Terrasse der Magister"
 L["DUNGEON_SHORT_NAME_NELT"] = "Neltharus"
 L["DUNGEON_SHORT_NAME_NL"] = "Neltharions Hort"
@@ -234,6 +242,8 @@ L["DUNGEON_SHORT_NAME_UNDR"] = "Der Tiefenpfuhl"
 L["DUNGEON_SHORT_NAME_UPPR"] = "Obere Rückkehr nach Karazhan"
 L["DUNGEON_SHORT_NAME_VOTW"] = "Verlies der Wächterinnen"
 L["DUNGEON_SHORT_NAME_VP"] = "Der Vortexgipfel"
+--[[Translation missing --]]
+--[[ L["DUNGEON_SHORT_NAME_VSA"] = ""--]] 
 L["DUNGEON_SHORT_NAME_WM"] = "Das Kronsteiganwesen"
 L["DUNGEON_SHORT_NAME_WORK"] = "Operation Mechagon - Werkstatt"
 L["DUNGEON_SHORT_NAME_WS"] = "Windläuferturm"
@@ -559,6 +569,22 @@ L["RAID_BOSS_TOT_8"] = "Primordius"
 L["RAID_BOSS_TOT_9"] = "Dunkler Animus"
 L["RAID_BOSS_TOTFW_1"] = "Konklave des Windes"
 L["RAID_BOSS_TOTFW_2"] = "Al'Akir"
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_VA_1"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_VA_2"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_VA_3"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_VA_4"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_VA_5"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_VA_6"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_VA_7"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_VA_8"] = ""--]] 
 L["RAID_BOSS_VOTI_1"] = "Eranog"
 L["RAID_BOSS_VOTI_2"] = "Terros"
 L["RAID_BOSS_VOTI_3"] = "Der Primalistenrat"
@@ -616,6 +642,8 @@ L["RAID_ToES"] = "Terrasse des Endlosen Frühlings"
 L["RAID_TOES"] = "Terrasse des Endlosen Frühlings"
 L["RAID_TOT"] = "Der Thron des Donners"
 L["RAID_TOTFW"] = "Thron der Vier Winde"
+--[[Translation missing --]]
+--[[ L["RAID_VA"] = ""--]] 
 L["RAID_VS"] = "Die Leerenspitze"
 L["RAID_VS_DR_MQD"] = "Leerenspitze/Traumriss/Quel'Danas"
 --[[Translation missing --]]

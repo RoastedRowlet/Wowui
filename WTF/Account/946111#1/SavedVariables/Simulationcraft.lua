@@ -13,6 +13,16 @@ SimulationCraftDB = {
 ["context"] = 16,
 ["itemId"] = 251097,
 },
+{
+["currency"] = 3418,
+["ts"] = 1785242040,
+["source"] = 268471,
+["season"] = 34,
+["keyLevel"] = 20,
+["spec"] = 1473,
+["context"] = 16,
+["itemId"] = 250144,
+},
 },
 },
 },
@@ -52,9 +62,9 @@ SimulationCraftDB = {
 ["Lonelylitten - Stormrage"] = {
 ["frame"] = {
 ["ofsx"] = -276.667724609375,
+["ofsy"] = 12.50020217895508,
 ["point"] = "RIGHT",
 ["relativePoint"] = "RIGHT",
-["ofsy"] = 12.50020217895508,
 },
 ["minimap"] = {
 ["minimapPos"] = 225.6023459701718,

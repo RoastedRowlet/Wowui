@@ -116,18 +116,21 @@ L["DISABLE_RWF_MODE_RELOAD"] = "您正在停用世界首推競賽模式。單擊
 L["DPS"] = "傷害輸出"
 L["DUNGEON_SHORT_NAME_AA"] = "學院"
 L["DUNGEON_SHORT_NAME_AD"] = "阿塔"
+L["DUNGEON_SHORT_NAME_AOF"] = "毒牙祭壇"
 L["DUNGEON_SHORT_NAME_ARAK"] = "回音"
 L["DUNGEON_SHORT_NAME_ARC"] = "地道"
 L["DUNGEON_SHORT_NAME_AV"] = "蒼藍"
 L["DUNGEON_SHORT_NAME_BH"] = "蕨皮谷"
 L["DUNGEON_SHORT_NAME_BREW"] = "酒莊"
 L["DUNGEON_SHORT_NAME_BRH"] = "玄鴉"
+L["DUNGEON_SHORT_NAME_BV"] = "盲目谷地"
 L["DUNGEON_SHORT_NAME_COEN"] = "永夜"
 L["DUNGEON_SHORT_NAME_COS"] = "眾星"
 L["DUNGEON_SHORT_NAME_COT"] = "蛛絲"
 L["DUNGEON_SHORT_NAME_DAWN"] = "破曉"
 L["DUNGEON_SHORT_NAME_DFC"] = "裂縫"
 L["DUNGEON_SHORT_NAME_DHT"] = "暗心"
+L["DUNGEON_SHORT_NAME_DON"] = "納羅拉克"
 L["DUNGEON_SHORT_NAME_DOS"] = "彼界"
 L["DUNGEON_SHORT_NAME_EB"] = "永茂"
 L["DUNGEON_SHORT_NAME_EDA"] = "秘境"
@@ -148,6 +151,7 @@ L["DUNGEON_SHORT_NAME_MC"] = "梅薩拉"
 L["DUNGEON_SHORT_NAME_MISTS"] = "迷霧"
 L["DUNGEON_SHORT_NAME_ML"] = "晶喜"
 L["DUNGEON_SHORT_NAME_MOS"] = "靈喉"
+L["DUNGEON_SHORT_NAME_MR"] = "兇殺路"
 L["DUNGEON_SHORT_NAME_MT"] = "博學者"
 L["DUNGEON_SHORT_NAME_NELT"] = "柰堡"
 L["DUNGEON_SHORT_NAME_NL"] = "巢穴"
@@ -179,6 +183,7 @@ L["DUNGEON_SHORT_NAME_UNDR"] = "幽腐"
 L["DUNGEON_SHORT_NAME_UPPR"] = "卡拉上"
 L["DUNGEON_SHORT_NAME_VOTW"] = "洪荒"
 L["DUNGEON_SHORT_NAME_VP"] = "漩渦"
+L["DUNGEON_SHORT_NAME_VSA"] = "競技場"
 L["DUNGEON_SHORT_NAME_WM"] = "莊園"
 L["DUNGEON_SHORT_NAME_WORK"] = "工坊"
 L["DUNGEON_SHORT_NAME_WS"] = "風行者"
@@ -501,6 +506,21 @@ L["RAID_BOSS_TOT_8"] = "普莫迪斯"
 L["RAID_BOSS_TOT_9"] = "黑暗憎惡魔像"
 L["RAID_BOSS_TOTFW_1"] = "風之議會"
 L["RAID_BOSS_TOTFW_2"] = "奧拉基爾"
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_VA_1"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_VA_2"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_VA_3"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_VA_4"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_VA_5"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_VA_6"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_VA_7"] = ""--]] 
+L["RAID_BOSS_VA_8"] = "烏拉特克"
 L["RAID_BOSS_VOTI_1"] = "伊拉諾格"
 L["RAID_BOSS_VOTI_2"] = "忒羅司"
 L["RAID_BOSS_VOTI_3"] = "洪荒議會"
@@ -558,6 +578,7 @@ L["RAID_ToES"] = "豐泉臺"
 L["RAID_TOES"] = "豐泉台"
 L["RAID_TOT"] = "雷霆王座"
 L["RAID_TOTFW"] = "四風王座"
+L["RAID_VA"] = "劇毒深淵"
 L["RAID_VS"] = "虛無之塔"
 L["RAID_VS_DR_MQD"] = "虛無/夢境/進軍"
 L["RAIDERIO"] = "Raider.IO"

@@ -5,7 +5,7 @@
 ## IconTexture: Interface\Icons\spell_hunter_focusingshot
 ## Category: Archon
 ## Notes: A focus cast bar with bells and whistles.
-## Version: 1.0.19
+## Version: 1.0.20
 ## Author: Xephyris-Blackrock-EU
 
 ## X-Curse-Project-ID: 1441078

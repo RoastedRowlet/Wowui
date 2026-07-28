@@ -234,7 +234,7 @@ local function getChunkLookup(table, length)
 end
 
 local lookup = {'Warrior-Fury','Paladin-Retribution','Unknown-Unknown',}
-local provider = {region='US',realm='Uldum',name='US',type='subscribers',zone=46,date='2026-07-20',data={Br='Brahruhanu:BAEALgADCgUJCAAAAA==.',Da='Dartoy:BAECLgAFFH8MAAIBAAMJYCN3KQAPAQNoDAAABABXAGkMAAADAFgA6gwAAAUAYAABAAMJYCN3KQAPAQNoDAAABABXAGkMAAADAFgA6gwAAAUAYAAuAAQKfzoAAgEACQljDjsmAMYBAAEACQljDjsmAMYBAAEuAAUUCQkkAAIAfx8A.',Ep='Epsilòn:BAEALgAECgkJAQAAAA==.',Ra='Raeris:BAEALgAECgcJAQABLgAECgkJAQADAAAAAA==.',},}
+local provider = {region='US',realm='Uldum',name='US',type='subscribers',zone=46,date='2026-07-28',data={Br='Brahruhanu:BAEALgADCgUJCAAAAA==.',Da='Dartoy:BAECLgAFFH8MAAIBAAMJYCN3KQAPAQNoDAAABABXAGkMAAADAFgA6gwAAAUAYAABAAMJYCN3KQAPAQNoDAAABABXAGkMAAADAFgA6gwAAAUAYAAuAAQKfzoAAgEACQljDjsmAMYBAAEACQljDjsmAMYBAAEuAAUUCQknAAIAfiIA.',Ep='Epsilòn:BAEALgAECgkJAQAAAA==.',Ra='Raeris:BAEALgAECgcJAQABLgAECgkJAQADAAAAAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

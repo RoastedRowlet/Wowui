@@ -6,6 +6,14 @@
 ---@diagnostic disable:undefined-global
 local L = EllesmereUI.RegisterLocale("ruRU")
 if not L then return end
+
+L["BLIZZARD POPUPS & GAME MENU"] = "ОКНА BLIZZARD И ИГРОВОЕ МЕНЮ"
+L["Reskin Popups and Menus"] = "Изменить оформление окон и меню"
+L["Reskins Blizzard's right-click context menus and pop-up dialogs with the EUI dark style. Requires reload to apply."] = "Оформляет контекстные меню и всплывающие окна Blizzard в тёмном стиле EUI. Для применения требуется перезагрузка интерфейса."
+L["Resurrect Accept Glow"] = "Свечение принятия воскрешения"
+L["Adds a glowing, pulsating border around the Accept button of resurrection popups so a pending resurrect is hard to miss. Follows the Element & Text Color setting. Applies instantly, no reload needed."] = "Добавляет светящуюся пульсирующую рамку вокруг кнопки принятия в окне воскрешения, чтобы его было трудно пропустить. Использует настройку цвета элементов и текста. Применяется сразу без перезагрузки."
+L["Button Border Size"] = "Размер рамки кнопки"
+L["Element & Text Color"] = "Цвет элементов и текста"
 L["Behind Unit Frame"] = "За рамкой юнита"
 
 -- == Common vocabulary (highest frequency) =================================
@@ -939,6 +947,7 @@ L["Back (Relic)"]                  = "Спина (Реликвия)"
 -- Character Sheet Settings Page
 L["Show Defense"]                  = "Защита"
 L["Show Crests"]                   = "Гербы"
+L["Show Mana"]                     = "Показывать ману"
 L["Toggle visibility of the Defense stat category."] = "Переключить видимость категории характеристик «Защита»."
 L["Toggle visibility of the Crests stat category."] = "Переключить видимость категории характеристик «Гербы»."
 L["Inspect Sheet theme setting requires a UI reload to fully apply."] = "Настройка темы окна осмотра требует перезагрузки интерфейса."
@@ -1326,6 +1335,7 @@ L["Increase the magnitude of your attacks and Abilities"] = "Увеличива�
 L["Primary stat"]                  = "Основная характеристика"
 L["Increases health"]              = "Увеличивает здоровье"
 L["The amount of damage you can take"] = "Количество урона, которое вы можете выдержать"
+L["The size of your mana pool"]    = "Размер вашего запаса маны"
 L["Increases the power of your spells and abilities"] = "Увеличивает силу ваших заклинаний и способностей"
 L["Attacks per second"]            = "Атак в секунду"
 L["Reduces physical damage taken"] = "Уменьшает получаемый физический урон"
@@ -1772,6 +1782,8 @@ L["Proc Glow"]                   = "Свечение прока"
 L["Active State"]                = "Активное состояние"
 L["Active State Glow"]           = "Свечение в активном состоянии"
 L["Non Active State"]            = "Неактивное состояние"
+L["Cooldown Saturation"]         = "Насыщенность при перезарядке"
+L["Keep Colored (On CD)"]        = "Оставлять цветным (при перезарядке)"
 L["Cooldown State Effect"]       = "Эффект в состоянии перезарядки"
 L["Glow Effect Color"]           = "Цвет эффекта свечения"
 L["Custom Colored"]               = "Своего цвета"

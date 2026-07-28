@@ -37,112 +37,62 @@ L["BEST_SCORE"] = "Miglior punteggio M+"
 --[[ L["BINDING_NAME_RAIDERIO_REPLAYUI_TIMING_DUNGEON"] = ""--]] 
 --[[Translation missing --]]
 --[[ L["BINDING_NAME_RAIDERIO_REPLAYUI_TOGGLE"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_DUNGEON_BRACKET_10-99"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_DUNGEON_BRACKET_15-99"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_DUNGEON_BRACKET_20-99"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_DUNGEON_BRACKET_6-9"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_DUNGEONS"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_DUNGEONS_ALL"] = ""--]] 
+L["BUILDS_DUNGEON_BRACKET_10-99"] = "M+ Livello 10 e superiore"
+L["BUILDS_DUNGEON_BRACKET_15-99"] = "M+ Livello 15 e superiore "
+L["BUILDS_DUNGEON_BRACKET_20-99"] = "M+ Livello 20 e superiore "
+L["BUILDS_DUNGEON_BRACKET_6-9"] = "M+ Livello 6 a 9"
+L["BUILDS_DUNGEONS"] = "Mitica+"
+L["BUILDS_DUNGEONS_ALL"] = "Tutte le Spedizioni "
 --[[Translation missing --]]
 --[[ L["BUILDS_DUNGEONS_SPECIFIC"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_ENCOUNTER_DIFFICULY_all"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_ENCOUNTER_DIFFICULY_heroic"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_ENCOUNTER_DIFFICULY_mythic"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_ENCOUNTER_DIFFICULY_normal"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_PROFILE_ACTIVE_LOADOUT_TITLE"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_PROFILE_ALTERNATE"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_PROFILE_COPY_COMPARELINK_ACTION_TITLE"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_PROFILE_COPY_COMPARELINK_POPUP_TITLE"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_PROFILE_COPY_LOADOUT_ACTION_TITLE"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_PROFILE_COPY_LOADOUT_LINK_ACTION_TITLE"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_PROFILE_COPY_LOADOUT_LINK_POPUP_TITLE"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_PROFILE_COPY_LOADOUT_POPUP_TITLE"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_PROFILE_ERROR_CREATING_LOADOUT"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_PROFILE_FAILED_IMPORTING_BUILD"] = ""--]] 
+L["BUILDS_ENCOUNTER_DIFFICULY_all"] = "Qualsiasi Difficoltà "
+L["BUILDS_ENCOUNTER_DIFFICULY_heroic"] = "Eroica"
+L["BUILDS_ENCOUNTER_DIFFICULY_mythic"] = "Mitica"
+L["BUILDS_ENCOUNTER_DIFFICULY_normal"] = "Normale "
+L["BUILDS_PROFILE_ACTIVE_LOADOUT_TITLE"] = "Questo caricamento è attivo "
+L["BUILDS_PROFILE_ALTERNATE"] = "Alternativa "
+L["BUILDS_PROFILE_COPY_COMPARELINK_ACTION_TITLE"] = "Copia il link di confronto"
+L["BUILDS_PROFILE_COPY_COMPARELINK_POPUP_TITLE"] = "Copia il link di confronto del caricamento di Raider.IO:"
+L["BUILDS_PROFILE_COPY_LOADOUT_ACTION_TITLE"] = "Esporta caricamento"
+L["BUILDS_PROFILE_COPY_LOADOUT_LINK_ACTION_TITLE"] = "Copia il link di caricamento"
+L["BUILDS_PROFILE_COPY_LOADOUT_LINK_POPUP_TITLE"] = "Copia il link del caricamento su Raider.IO:"
+L["BUILDS_PROFILE_COPY_LOADOUT_POPUP_TITLE"] = "Copia la stringa di caricamento:"
+L["BUILDS_PROFILE_ERROR_CREATING_LOADOUT"] = "Impossibile creare il caricamento. Se non hai spazio per i caricamenti aggiuntivi, libera spazio."
+L["BUILDS_PROFILE_FAILED_IMPORTING_BUILD"] = "Impossibile importare la build."
 --[[Translation missing --]]
 --[[ L["BUILDS_PROFILE_HERO_FORMAT"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_PROFILE_IMPORTED_BUILD_TO_LOADOUT"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_PROFILE_LOAD_LOADOUT_ACTION_TITLE"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_PROFILE_LOADOUT_IS_ALREADY_ACTIVE"] = ""--]] 
+L["BUILDS_PROFILE_IMPORTED_BUILD_TO_LOADOUT"] = "Build importato come \"%s\"."
+L["BUILDS_PROFILE_LOAD_LOADOUT_ACTION_TITLE"] = "Carica"
+L["BUILDS_PROFILE_LOADOUT_IS_ALREADY_ACTIVE"] = "Il tuo caricamento attuale corrisponde a questa configurazione."
 --[[Translation missing --]]
 --[[ L["BUILDS_PROFILE_LOADOUT_NAME"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_PROFILE_NO_DATA"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_PROFILE_RECOMMENDED"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_PROFILE_SHOW_JOURNALFRAME_BUTTON"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_PROFILE_SHOW_JOURNALFRAME_BUTTON_DESC"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_PROFILE_SHOW_TALENTFRAME_BUTTON"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_PROFILE_SHOW_TALENTFRAME_BUTTON_DESC"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_PROFILE_STATS_FORMAT"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_PROFILE_STATS_SUFFIX_KILLS"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_PROFILE_STATS_SUFFIX_RUNS"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_PROFILE_SWITCHING_TO_EXISTING_LOADOUT"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_PROFILE_SWITCHING_TO_LOADOUT"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_PROFILE_UNABLE_TO_DELETE_LOADOUT"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_PROFILE_UPDATED_BUILD_TO_LOADOUT"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_RAIDS"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_RAIDS_ENCOUNTERS_ALL"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_SPEED_all"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_SPEED_fast"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_SPEED_median"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_TITLE"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_TITLE_FULL"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_WEAPON_1"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_WEAPON_2"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_WEAPON_3"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_WEAPON_4"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_WEAPON_5"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_WEAPON_6"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_WEAPON_all"] = ""--]] 
+L["BUILDS_PROFILE_NO_DATA"] = "I murloc non sono riusciti a trovare nulla di utile da visualizzare qui. Prova a cambiare i filtri."
+L["BUILDS_PROFILE_RECOMMENDED"] = "Raccomandata "
+L["BUILDS_PROFILE_SHOW_JOURNALFRAME_BUTTON"] = "Pulsante \"Mostra cornice della Guida alle avventure\""
+L["BUILDS_PROFILE_SHOW_JOURNALFRAME_BUTTON_DESC"] = "Abilita questa opzione per visualizzare il pulsante di scelta rapida nella finestra della Guida alle avventure."
+L["BUILDS_PROFILE_SHOW_TALENTFRAME_BUTTON"] = "Pulsante \"Mostra cornice talento\""
+L["BUILDS_PROFILE_SHOW_TALENTFRAME_BUTTON_DESC"] = "Abilita la visualizzazione del pulsante di scelta rapida nel riquadro Talenti."
+L["BUILDS_PROFILE_STATS_FORMAT"] = "%s dell'Albero degli Eroi (%s, %s %s)"
+L["BUILDS_PROFILE_STATS_SUFFIX_KILLS"] = "campioni"
+L["BUILDS_PROFILE_STATS_SUFFIX_RUNS"] = "corse"
+L["BUILDS_PROFILE_SWITCHING_TO_EXISTING_LOADOUT"] = "Passaggio a \"%s\"."
+L["BUILDS_PROFILE_SWITCHING_TO_LOADOUT"] = "Passaggio a \"%s\"."
+L["BUILDS_PROFILE_UNABLE_TO_DELETE_LOADOUT"] = "Impossibile eliminare il vecchio caricamento \"%s\". Riprova o eliminalo manualmente."
+L["BUILDS_PROFILE_UPDATED_BUILD_TO_LOADOUT"] = "Aggiornato \"%s\" con nuovi talenti."
+L["BUILDS_RAIDS"] = "Incursioni "
+L["BUILDS_RAIDS_ENCOUNTERS_ALL"] = "%s: Tutti gli incontri"
+L["BUILDS_SPEED_all"] = "Qualsiasi Velocità"
+L["BUILDS_SPEED_fast"] = "Uccisioni Rapide (primo 20%)"
+L["BUILDS_SPEED_median"] = "Uccisioni Mediane (media 20%)"
+L["BUILDS_TITLE"] = "Build dei Talenti"
+L["BUILDS_TITLE_FULL"] = "Raider.IO Build dei Talenti"
+L["BUILDS_WEAPON_1"] = "Doppia Impugnatura a 1M"
+L["BUILDS_WEAPON_2"] = "Impugnatura a 2M"
+L["BUILDS_WEAPON_3"] = "2M"
+L["BUILDS_WEAPON_4"] = "1M + Scudo"
+L["BUILDS_WEAPON_5"] = "1M + ACC"
+L["BUILDS_WEAPON_6"] = "1M"
+L["BUILDS_WEAPON_all"] = "Tutte le Armi"
 L["CANCEL"] = "Indietro"
 L["CHANGES_REQUIRES_UI_RELOAD"] = [=[Le tue modifiche sono state salvate, ma devi ricaricare la tua interfaccia affinché abbiano effetto.
 
@@ -183,6 +133,8 @@ L["DUNGEON_SHORT_NAME_AA"] = "ADA"
 --[[Translation missing --]]
 --[[ L["DUNGEON_SHORT_NAME_AD"] = ""--]] 
 --[[Translation missing --]]
+--[[ L["DUNGEON_SHORT_NAME_AOF"] = ""--]] 
+--[[Translation missing --]]
 --[[ L["DUNGEON_SHORT_NAME_ARAK"] = ""--]] 
 --[[Translation missing --]]
 --[[ L["DUNGEON_SHORT_NAME_ARC"] = ""--]] 
@@ -191,12 +143,16 @@ L["DUNGEON_SHORT_NAME_BH"] = "CDF"
 L["DUNGEON_SHORT_NAME_BREW"] = "MELIFICIO"
 L["DUNGEON_SHORT_NAME_BRH"] = "FC"
 --[[Translation missing --]]
+--[[ L["DUNGEON_SHORT_NAME_BV"] = ""--]] 
+--[[Translation missing --]]
 --[[ L["DUNGEON_SHORT_NAME_COEN"] = ""--]] 
 L["DUNGEON_SHORT_NAME_COS"] = "CDS"
 L["DUNGEON_SHORT_NAME_COT"] = "CDF"
 L["DUNGEON_SHORT_NAME_DAWN"] = "ALBA"
 L["DUNGEON_SHORT_NAME_DFC"] = "FdFO"
 L["DUNGEON_SHORT_NAME_DHT"] = "BC"
+--[[Translation missing --]]
+--[[ L["DUNGEON_SHORT_NAME_DON"] = ""--]] 
 L["DUNGEON_SHORT_NAME_DOS"] = "DOS"
 L["DUNGEON_SHORT_NAME_EB"] = "VE"
 L["DUNGEON_SHORT_NAME_EDA"] = "ESA"
@@ -223,6 +179,8 @@ L["DUNGEON_SHORT_NAME_MISTS"] = "NEBBIE"
 L["DUNGEON_SHORT_NAME_ML"] = "VM"
 --[[Translation missing --]]
 --[[ L["DUNGEON_SHORT_NAME_MOS"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["DUNGEON_SHORT_NAME_MR"] = ""--]] 
 L["DUNGEON_SHORT_NAME_MT"] = "TDM"
 --[[Translation missing --]]
 --[[ L["DUNGEON_SHORT_NAME_NELT"] = ""--]] 
@@ -260,6 +218,8 @@ L["DUNGEON_SHORT_NAME_UPPR"] = "KS"
 --[[Translation missing --]]
 --[[ L["DUNGEON_SHORT_NAME_VOTW"] = ""--]] 
 L["DUNGEON_SHORT_NAME_VP"] = "PDV"
+--[[Translation missing --]]
+--[[ L["DUNGEON_SHORT_NAME_VSA"] = ""--]] 
 L["DUNGEON_SHORT_NAME_WM"] = "MDC"
 L["DUNGEON_SHORT_NAME_WORK"] = "OFFICINA"
 L["DUNGEON_SHORT_NAME_WS"] = "PDV"
@@ -325,18 +285,14 @@ L["MINIMAP_SHORTCUT_HELP_RIGHT_CLICK"] = "Click Destro"
 L["MINIMAP_SHORTCUT_HELP_SEARCH"] = "Ricerca"
 L["MINIMAP_SHORTCUT_HELP_SETTINGS"] = "Impostazioni "
 L["MINIMAP_SHORTCUT_LOCK"] = "Pulsante di blocco"
---[[Translation missing --]]
---[[ L["MINIMAP_SHORTCUT_MENU_BUILDS"] = ""--]] 
---[[Translation missing --]]
---[[ L["MINIMAP_SHORTCUT_MENU_COPY_BUILD"] = ""--]] 
+L["MINIMAP_SHORTCUT_MENU_BUILDS"] = "Scegli la Build"
+L["MINIMAP_SHORTCUT_MENU_COPY_BUILD"] = "Copia il Link"
 L["MINIMAP_SHORTCUT_MINIMAP_ENABLE"] = "Abilita il pulsante della minimappa"
 L["MINIMAP_SHORTCUT_MINIMAP_ENABLE_DESC"] = "Abilita per visualizzare l'icona attorno alla minimappa."
 L["MINIMAP_SHORTCUT_MINIMAP_LOCK"] = "Blocca pulsante della minimappa"
---[[Translation missing --]]
---[[ L["MISC_SETTINGS"] = ""--]] 
+L["MISC_SETTINGS"] = "Varie"
 L["MODULE_AMERICAS"] = "America"
---[[Translation missing --]]
---[[ L["MODULE_CHINA"] = ""--]] 
+L["MODULE_CHINA"] = "Cina"
 L["MODULE_EUROPE"] = "Europa"
 L["MODULE_KOREA"] = "Korea"
 L["MODULE_TAIWAN"] = "Taiwan"
@@ -753,6 +709,22 @@ L["RAID_BOSS_SF_1"] = "Fangorrido"
 --[[Translation missing --]]
 --[[ L["RAID_BOSS_TOTFW_2"] = ""--]] 
 --[[Translation missing --]]
+--[[ L["RAID_BOSS_VA_1"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_VA_2"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_VA_3"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_VA_4"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_VA_5"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_VA_6"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_VA_7"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_VA_8"] = ""--]] 
+--[[Translation missing --]]
 --[[ L["RAID_BOSS_VOTI_1"] = ""--]] 
 --[[Translation missing --]]
 --[[ L["RAID_BOSS_VOTI_2"] = ""--]] 
@@ -824,6 +796,7 @@ L["RAID_SF"] = "Sporandia"
 --[[Translation missing --]]
 --[[ L["RAID_TOT"] = ""--]] 
 L["RAID_TOTFW"] = "Trono dei Quattro Venti"
+L["RAID_VA"] = "L'Abisso Velenoso"
 L["RAID_VS"] = "Pinnacolo del Vuoto"
 L["RAID_VS_DR_MQD"] = "PdV/FdS/MsQD"
 --[[Translation missing --]]
@@ -925,18 +898,14 @@ L["SHOW_LEADER_PROFILE"] = "Permetti il ​​modificatore del Tooltip del profi
 L["SHOW_LEADER_PROFILE_DESC"] = "Tenere premuto un modificatore (shift/ctlr/alt) per alternare la descrizione del profilo tra Profilo Personale/Profilo Leader."
 L["SHOW_MAINS_SCORE"] = "Mostra Punteggio del Personaggio Principale e Progresso Incursione"
 L["SHOW_MAINS_SCORE_DESC"] = "Mostra il punteggio del PG Principale del giocatore e i Progressi dell'Incursione sul tooltip. I giocatori devono essere registrati sul sito Raider.IO ed impostare un personaggio come principale."
---[[Translation missing --]]
---[[ L["SHOW_MY_WARBAND_SCORE"] = ""--]] 
---[[Translation missing --]]
---[[ L["SHOW_MY_WARBAND_SCORE_DESC"] = ""--]] 
+L["SHOW_MY_WARBAND_SCORE"] = "Mostra il mio punteggio M+ della Brigata "
+L["SHOW_MY_WARBAND_SCORE_DESC"] = "Mostra il punteggio Mythic+ della Brigata del giocatore nella sua descrizione."
 L["SHOW_ON_GUILD_ROSTER"] = "Mostra nell'elenco Membri di Gilda"
 L["SHOW_ON_GUILD_ROSTER_DESC"] = "Mostra il Punteggio M+ quando passi il mouse sopra l'elenco dei giocatori di Gilda."
 L["SHOW_ON_PLAYER_UNITS"] = "Mostra sula Finestra del Giocatore"
 L["SHOW_ON_PLAYER_UNITS_DESC"] = "Mostra il Punteggio M+ quando passi il mouse sopra un Giocatore."
---[[Translation missing --]]
---[[ L["SHOW_OTHER_WARBAND_SCORE"] = ""--]] 
---[[Translation missing --]]
---[[ L["SHOW_OTHER_WARBAND_SCORE_DESC"] = ""--]] 
+L["SHOW_OTHER_WARBAND_SCORE"] = "Mostra altri punteggi M+ della Brigata "
+L["SHOW_OTHER_WARBAND_SCORE_DESC"] = "Mostra il punteggio Mythic+ della Brigata di un altro giocatore nella relativa descrizione."
 L["SHOW_RAID_ENCOUNTERS_IN_PROFILE"] = "Mostra i progressi delle Incursioni nel Tooltip del Profilo."
 L["SHOW_RAID_ENCOUNTERS_IN_PROFILE_DESC"] = "Quando impostato, mostrerà i progressi delle Incursioni nel Tooltip di RaiderIO."
 L["SHOW_RAIDERIO_BESTRUN_FIRST"] = "(Sperimentale) Dai la priorità a Raider.IO Migliore Run"

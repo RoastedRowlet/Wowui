@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'Shaman-Elemental','Shaman-Restoration',}
-local provider = {region='US',realm='Baelgun',name='US',type='subscribers',zone=46,date='2026-07-20',data={Ev='Evilmonkeymg:BAEALgAECgEJAQABLgAECgkJGQABACceAA==.Evilmonkeysh:BAEBLgAECn8ZAAMBAAkJJx5eHAAvAgloDAAABABVAGkMAAADAFMAawwAAAMASQBqDAAAAwBEAGwMAAACAEcAbQwAAAEASwDqDAAABQBbAG4MAAADAEUAbwwAAAEAQgABAAkJJx5eHAAvAgloDAAAAwBVAGkMAAACAFMAawwAAAIASQBqDAAAAgBEAGwMAAABAEcAbQwAAAEASwDqDAAABABbAG4MAAACAEUAbwwAAAEAQgACAAcJQQvdTABPAQdoDAAAAQAmAGkMAAABABoAawwAAAEAFwBqDAAAAQAYAGwMAAABACoA6gwAAAEAJgBuDAAAAQAGAAAA.Evilmonkeywl:BAEALgADCgYJBgABLgAECgkJGQABACceAA==.',},}
+local lookup = {'Warlock-Demonology','Shaman-Elemental','Shaman-Restoration',}
+local provider = {region='US',realm='Baelgun',name='US',type='subscribers',zone=46,date='2026-07-28',data={Dr='Driver:BAEALgAFFAIJAQABLgAFFAUJEQABALYLAA==.',Ev='Evilmonkeymg:BAEALgAECgEJAQABLgAECgkJGQACACceAA==.Evilmonkeysh:BAEBLgAECn8ZAAMCAAkJJx5eHAAvAgloDAAABABVAGkMAAADAFMAawwAAAMASQBqDAAAAwBEAGwMAAACAEcAbQwAAAEASwDqDAAABQBbAG4MAAADAEUAbwwAAAEAQgACAAkJJx5eHAAvAgloDAAAAwBVAGkMAAACAFMAawwAAAIASQBqDAAAAgBEAGwMAAABAEcAbQwAAAEASwDqDAAABABbAG4MAAACAEUAbwwAAAEAQgADAAcJQQvdTABPAQdoDAAAAQAmAGkMAAABABoAawwAAAEAFwBqDAAAAQAYAGwMAAABACoA6gwAAAEAJgBuDAAAAQAGAAAA.Evilmonkeywl:BAEALgADCgYJBgABLgAECgkJGQACACceAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

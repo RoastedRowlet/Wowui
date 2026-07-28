@@ -12,9 +12,8 @@ RaiderIO_Config = {
 ["hide"] = false,
 },
 }
-RaiderIO_LastCharacter = "us-Lonelylitten-stormrage"
+RaiderIO_LastCharacter = "us-Barelynoer-area-52"
 RaiderIO_MissingCharacters = {
-["us-Lonelylitten-stormrage"] = true,
 }
 RaiderIO_MissingServers = {
 }

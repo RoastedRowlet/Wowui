@@ -57,11 +57,11 @@ BigWigs3DB = {
 ["Default"] = {
 ["player"] = {
 ["maxIcons"] = 5,
-["growthDirection"] = "RIGHT",
-["anchorPoint"] = "TOP",
 ["anchorYOffset"] = -216,
+["anchorPoint"] = "TOP",
 ["anchorRelPoint"] = "TOP",
 ["anchorXOffset"] = 426,
+["growthDirection"] = "RIGHT",
 },
 },
 },
@@ -129,14 +129,14 @@ BigWigs3DB = {
 ["profiles"] = {
 ["Default"] = {
 ["emphasize"] = false,
+["visibleBarLimit"] = 1,
+["normalWidth"] = 120,
 ["expPosition"] = {
 "BOTTOMLEFT",
 "BOTTOMLEFT",
 330,
 21,
 },
-["visibleBarLimit"] = 1,
-["normalWidth"] = 120,
 ["normalPosition"] = {
 "BOTTOMLEFT",
 "BOTTOMLEFT",
@@ -151,15 +151,6 @@ BigWigs3DB = {
 ["Default"] = {
 ["toggles"] = {
 [1243900] = 3129591,
-},
-},
-},
-},
-["BigWigs_Bosses_Zuraal"] = {
-["profiles"] = {
-["Default"] = {
-["toggles"] = {
-[1263399] = 3129591,
 },
 },
 },
@@ -179,16 +170,17 @@ BigWigs3DB = {
 },
 },
 },
+["BigWigs_Bosses_Zuraal"] = {
+["profiles"] = {
+["Default"] = {
+["toggles"] = {
+[1263399] = 3129591,
+},
+},
+},
+},
 },
 ["myKeystones"] = {
-["Player-60-0F7B1446"] = {
-["playerRating"] = 0,
-["specId"] = 258,
-["keyMap"] = 0,
-["name"] = "Madmareep",
-["keyLevel"] = 0,
-["realm"] = "Stormrage",
-},
 ["Player-3676-0DF7D3EF"] = {
 ["playerRating"] = 4212,
 ["specId"] = 1473,
@@ -197,24 +189,8 @@ BigWigs3DB = {
 ["keyLevel"] = 0,
 ["realm"] = "Area 52",
 },
-["Player-60-0FF5005C"] = {
-["playerRating"] = 3039,
-["specId"] = 270,
-["keyMap"] = 0,
-["name"] = "Klutzykubfu",
-["keyLevel"] = 0,
-["realm"] = "Stormrage",
 },
-["Player-60-0F85ABEF"] = {
-["playerRating"] = 3929,
-["specId"] = 105,
-["keyMap"] = 0,
-["name"] = "Lonelylitten",
-["keyLevel"] = 0,
-["realm"] = "Stormrage",
-},
-},
-["prevWeeklyReset"] = 1784646000,
+["prevWeeklyReset"] = 1785250800,
 ["profiles"] = {
 ["Default"] = {
 },

@@ -178,18 +178,24 @@ L["DISABLE_RWF_MODE_RELOAD"] = "Estás desactivando el modo Race World First. Al
 L["DPS"] = "DPS"
 L["DUNGEON_SHORT_NAME_AA"] = "Academia Algeth'ar - AA"
 L["DUNGEON_SHORT_NAME_AD"] = "Atal'Dazar - AD"
+--[[Translation missing --]]
+--[[ L["DUNGEON_SHORT_NAME_AOF"] = ""--]] 
 L["DUNGEON_SHORT_NAME_ARAK"] = "Ara-Kara - ARAK"
 L["DUNGEON_SHORT_NAME_ARC"] = "La Arquería - ARC"
 L["DUNGEON_SHORT_NAME_AV"] = "Cámara Azur - AV"
 L["DUNGEON_SHORT_NAME_BH"] = "Hondonada Frondacuero - BH"
 L["DUNGEON_SHORT_NAME_BREW"] = "Lagar de Tragoceniza - BREW"
 L["DUNGEON_SHORT_NAME_BRH"] = "Torreón Grajo Negro - BRH"
+--[[Translation missing --]]
+--[[ L["DUNGEON_SHORT_NAME_BV"] = ""--]] 
 L["DUNGEON_SHORT_NAME_COEN"] = "Catedral de la Noche Eterna - CoEN"
 L["DUNGEON_SHORT_NAME_COS"] = "Corte de las Estrellas - COS"
 L["DUNGEON_SHORT_NAME_COT"] = "Ciudad Tejida - COT"
 L["DUNGEON_SHORT_NAME_DAWN"] = "El Rompealbas - DAWN"
 L["DUNGEON_SHORT_NAME_DFC"] = "Grieta de Flama Oscura - DFC"
 L["DUNGEON_SHORT_NAME_DHT"] = "Arboleda Corazón Oscuro - DHT"
+--[[Translation missing --]]
+--[[ L["DUNGEON_SHORT_NAME_DON"] = ""--]] 
 L["DUNGEON_SHORT_NAME_DOS"] = "El Otro Lado - DOS"
 L["DUNGEON_SHORT_NAME_EB"] = "El Vergel Eterno - EB"
 L["DUNGEON_SHORT_NAME_EDA"] = "Ecodomo Al'dani - EDA"
@@ -211,6 +217,8 @@ L["DUNGEON_SHORT_NAME_MC"] = "Cavernas de Maisara - MC"
 L["DUNGEON_SHORT_NAME_MISTS"] = "Nieblas de Tirna Scithe - MISTS"
 L["DUNGEON_SHORT_NAME_ML"] = "VETA MADRE - ML"
 L["DUNGEON_SHORT_NAME_MOS"] = "Acantilados Boca Infernal - MOS"
+--[[Translation missing --]]
+--[[ L["DUNGEON_SHORT_NAME_MR"] = ""--]] 
 L["DUNGEON_SHORT_NAME_MT"] = "Bancal del Magister - MT"
 L["DUNGEON_SHORT_NAME_NELT"] = "Neltharus - NELT"
 L["DUNGEON_SHORT_NAME_NL"] = "Guarida de Neltharion - NL"
@@ -243,6 +251,8 @@ L["DUNGEON_SHORT_NAME_UNDR"] = "Catacumbas Putrefactas - UNDR"
 L["DUNGEON_SHORT_NAME_UPPR"] = "Karazhan: Superior - UPPR"
 L["DUNGEON_SHORT_NAME_VOTW"] = "Cámara de las Celadoras - VOTW"
 L["DUNGEON_SHORT_NAME_VP"] = "Cumbre del Vórtice - VP"
+--[[Translation missing --]]
+--[[ L["DUNGEON_SHORT_NAME_VSA"] = ""--]] 
 L["DUNGEON_SHORT_NAME_WM"] = "Mansión Crestavía - WM"
 L["DUNGEON_SHORT_NAME_WORK"] = "Mechagon: Taller - WORK"
 L["DUNGEON_SHORT_NAME_WS"] = "Aguja Brisaveloz - WS"
@@ -729,6 +739,22 @@ L["RAID_BOSS_SOD_9"] = "Kel'Thuzad"
 L["RAID_BOSS_TOTFW_1"] = "El Cónclave del Viento"
 L["RAID_BOSS_TOTFW_2"] = "Al'Akir"
 --[[Translation missing --]]
+--[[ L["RAID_BOSS_VA_1"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_VA_2"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_VA_3"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_VA_4"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_VA_5"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_VA_6"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_VA_7"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_VA_8"] = ""--]] 
+--[[Translation missing --]]
 --[[ L["RAID_BOSS_VOTI_1"] = ""--]] 
 --[[Translation missing --]]
 --[[ L["RAID_BOSS_VOTI_2"] = ""--]] 
@@ -809,6 +835,8 @@ L["RAID_ToES"] = "Veranda de la Primavera Eterna - ToES"
 L["RAID_TOES"] = "Veranda de la Primavera Eterna"
 L["RAID_TOT"] = "Solio del Trueno - ToT"
 L["RAID_TOTFW"] = "Trono de los Cuatro Vientos - TOTFW"
+--[[Translation missing --]]
+--[[ L["RAID_VA"] = ""--]] 
 L["RAID_VS"] = "Aguja del Vacío - VS"
 L["RAID_VS_DR_MQD"] = "AV/FO/MQD"
 --[[Translation missing --]]

@@ -1,6 +1,6 @@
 
 BugGrabberDB = {
-["session"] = 852,
+["session"] = 858,
 ["lastSanitation"] = 3,
 ["errors"] = {
 {
@@ -1264,20 +1264,20 @@ BugGrabberDB = {
 ["counter"] = 65,
 },
 {
-["message"] = "[ADDON_ACTION_BLOCKED] AddOn 'CraftScan' tried to call the protected function 'JoinChannelByName()'.",
-["time"] = 1784946384,
-["locals"] = "self=<table>\nevent=\"ADDON_ACTION_BLOCKED\"\naddonName=\"CraftScan\"\naddonFunc=\"JoinChannelByName()\"\nname=\"CraftScan\"\nbadAddons=<table>{\n CraftScan=true\n}\nL=<table>{\n NO_DISPLAY_2=\"|cffffff00The standard display is called BugSack, and can probably be found on the same site where you found !BugGrabber.|r\"\n ERROR_DETECTED=\"%s |cffffff00captured, click the link for more information.|r\"\n BUGGRABBER_STOPPED=\"|cffffff00There are too many errors in your UI. As a result, your game experience may be degraded. Disable or update the failing addons if you don't want to see this message again.|r\"\n USAGE=\"|cffffff00Usage: /buggrabber <1-%d>.|r\"\n STOP_NAG=\"|cffffff00!BugGrabber will not nag about missing a display addon again until next patch.|r\"\n NO_DISPLAY_STOP=\"|cffffff00If you don't want to be reminded about this again, run /stopnag.|r\"\n NO_DISPLAY_1=\"|cffffff00You seem to be running !BugGrabber with no display addon to go along with it. Although a slash command is provided for accessing error reports, a display can help you manage these errors in a more convenient way.|r\"\n ERROR_UNABLE=\"|cffffff00!BugGrabber is unable to retrieve errors from other players by itself. Please install BugSack or a similar display addon that might give you this functionality.|r\"\n ADDON_CALL_PROTECTED=\"[%s] AddOn '%s' tried to call the protected function '%s'.\"\n}\n",
-["stack"] = "[Interface/AddOns/!BugGrabber/BugGrabber.lua]:554: in function '?'\n[Interface/AddOns/!BugGrabber/BugGrabber.lua]:538: in function <Interface/AddOns/!BugGrabber/BugGrabber.lua:538>\n[C]: in function 'JoinChannelByName'\n[Interface/AddOns/CraftScan/Utils/Comm.lua]:49: in function <Interface/AddOns/CraftScan/Utils/Comm.lua:48>\n",
-["session"] = 833,
-["counter"] = 17,
-},
-{
 ["message"] = "BigWigs: \"Chief Corewright Kasreth\" had issues reading the timeline. Show the devs a screenshot of the messages in your chat, NOT this error message.",
 ["time"] = 1784947249,
 ["locals"] = "self=<table>{\n name=\"BigWigs\"\n C=<table>\n}\nmsg=\"\"Chief Corewright Kasreth\" had issues reading the timeline. Show the devs a screenshot of the messages in your chat, NOT this error message.\"\nnoPrint=true\ncore=<table>{\n name=\"BigWigs\"\n C=<table>\n}\n",
 ["stack"] = "[Interface/AddOns/BigWigs_Core/Core.lua]:413: in function 'Error'\n[Interface/AddOns/BigWigs_Core/BossPrototype.lua]:797: in function 'Disable'\n[Interface/AddOns/BigWigs_Core/BossPrototype.lua]:810: in function 'Reboot'\n[Interface/AddOns/BigWigs_Core/BossPrototype.lua]:1833: in function 'Wipe'\n[Interface/AddOns/BigWigs_Core/BossPrototype.lua]:1941: in function <Interface/AddOns/BigWigs_Core/BossPrototype.lua:1941>\n",
 ["session"] = 833,
 ["counter"] = 1,
+},
+{
+["message"] = "[ADDON_ACTION_BLOCKED] AddOn 'CraftScan' tried to call the protected function 'JoinChannelByName()'.",
+["time"] = 1785252976,
+["locals"] = "self=<table>\nevent=\"ADDON_ACTION_BLOCKED\"\naddonName=\"CraftScan\"\naddonFunc=\"JoinChannelByName()\"\nname=\"CraftScan\"\nbadAddons=<table>{\n CraftScan=true\n}\nL=<table>{\n NO_DISPLAY_2=\"|cffffff00The standard display is called BugSack, and can probably be found on the same site where you found !BugGrabber.|r\"\n ERROR_DETECTED=\"%s |cffffff00captured, click the link for more information.|r\"\n BUGGRABBER_STOPPED=\"|cffffff00There are too many errors in your UI. As a result, your game experience may be degraded. Disable or update the failing addons if you don't want to see this message again.|r\"\n USAGE=\"|cffffff00Usage: /buggrabber <1-%d>.|r\"\n STOP_NAG=\"|cffffff00!BugGrabber will not nag about missing a display addon again until next patch.|r\"\n NO_DISPLAY_STOP=\"|cffffff00If you don't want to be reminded about this again, run /stopnag.|r\"\n NO_DISPLAY_1=\"|cffffff00You seem to be running !BugGrabber with no display addon to go along with it. Although a slash command is provided for accessing error reports, a display can help you manage these errors in a more convenient way.|r\"\n ERROR_UNABLE=\"|cffffff00!BugGrabber is unable to retrieve errors from other players by itself. Please install BugSack or a similar display addon that might give you this functionality.|r\"\n ADDON_CALL_PROTECTED=\"[%s] AddOn '%s' tried to call the protected function '%s'.\"\n}\n",
+["stack"] = "[Interface/AddOns/!BugGrabber/BugGrabber.lua]:554: in function '?'\n[Interface/AddOns/!BugGrabber/BugGrabber.lua]:538: in function <Interface/AddOns/!BugGrabber/BugGrabber.lua:538>\n[C]: in function 'JoinChannelByName'\n[Interface/AddOns/CraftScan/Utils/Comm.lua]:49: in function <Interface/AddOns/CraftScan/Utils/Comm.lua:48>\n",
+["session"] = 858,
+["counter"] = 18,
 },
 },
 }

@@ -806,7 +806,7 @@ initFrame:SetScript("OnEvent", function(self)
                       end },
                     { type="colorpicker", label="Enter Color",
                       disabled=enterClassOn,
-                      disabledTooltip="Disable Class Color to pick a custom color.",
+                      disabledTooltip="Disable Class Color to pick a custom color.", rawTooltip=true,
                       get=function()
                         local c = (EllesmereUIDB and EllesmereUIDB.combatAlertEnterColor) or { r=1.00, g=1.00, b=1.00 }
                         return c.r, c.g, c.b
@@ -834,7 +834,7 @@ initFrame:SetScript("OnEvent", function(self)
                       end },
                     { type="colorpicker", label="Leave Color",
                       disabled=leaveClassOn,
-                      disabledTooltip="Disable Class Color to pick a custom color.",
+                      disabledTooltip="Disable Class Color to pick a custom color.", rawTooltip=true,
                       get=function()
                         local c = (EllesmereUIDB and EllesmereUIDB.combatAlertLeaveColor) or { r=1.00, g=1.00, b=1.00 }
                         return c.r, c.g, c.b
@@ -2032,13 +2032,13 @@ initFrame:SetScript("OnEvent", function(self)
             end
 
             local chCogRows = {
-                    { type="slider", label="H Length", min=1, max=100, step=1,
+                    { type="slider", label="H Length", min=1, max=500, step=1,
                       get=function() return cget("crosshairHLength") or 40 end,
                       set=function(v) dbset("crosshairHLength", v) end },
                     { type="slider", label="H Width", min=1, max=20, step=1,
                       get=function() return cget("crosshairHWidth") or presetThick() end,
                       set=function(v) dbset("crosshairHWidth", v); refreshSizeLabel() end },
-                    { type="slider", label="V Length", min=1, max=100, step=1,
+                    { type="slider", label="V Length", min=1, max=500, step=1,
                       get=function() return cget("crosshairVLength") or 40 end,
                       set=function(v) dbset("crosshairVLength", v) end },
                     { type="slider", label="V Width", min=1, max=20, step=1,

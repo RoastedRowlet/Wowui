@@ -119,18 +119,24 @@ L["DISABLE_RWF_MODE_RELOAD"] = "你正在禁用冲击世界首杀模式。点击
 L["DPS"] = "伤害输出"
 L["DUNGEON_SHORT_NAME_AA"] = "学院"
 L["DUNGEON_SHORT_NAME_AD"] = "阿塔达萨"
+--[[Translation missing --]]
+--[[ L["DUNGEON_SHORT_NAME_AOF"] = ""--]] 
 L["DUNGEON_SHORT_NAME_ARAK"] = "回响"
 L["DUNGEON_SHORT_NAME_ARC"] = "回廊"
 L["DUNGEON_SHORT_NAME_AV"] = "碧蓝"
 L["DUNGEON_SHORT_NAME_BH"] = "蕨皮"
 L["DUNGEON_SHORT_NAME_BREW"] = "酒庄"
 L["DUNGEON_SHORT_NAME_BRH"] = "黑鸦"
+--[[Translation missing --]]
+--[[ L["DUNGEON_SHORT_NAME_BV"] = ""--]] 
 L["DUNGEON_SHORT_NAME_COEN"] = "大教堂"
 L["DUNGEON_SHORT_NAME_COS"] = "群星"
 L["DUNGEON_SHORT_NAME_COT"] = "千丝"
 L["DUNGEON_SHORT_NAME_DAWN"] = "破晨号"
 L["DUNGEON_SHORT_NAME_DFC"] = "裂口"
 L["DUNGEON_SHORT_NAME_DHT"] = "黑心"
+--[[Translation missing --]]
+--[[ L["DUNGEON_SHORT_NAME_DON"] = ""--]] 
 L["DUNGEON_SHORT_NAME_DOS"] = "彼界"
 L["DUNGEON_SHORT_NAME_EB"] = "永茂"
 L["DUNGEON_SHORT_NAME_EDA"] = "圆顶"
@@ -151,6 +157,8 @@ L["DUNGEON_SHORT_NAME_MC"] = "洞窟"
 L["DUNGEON_SHORT_NAME_MISTS"] = "仙林"
 L["DUNGEON_SHORT_NAME_ML"] = "矿区"
 L["DUNGEON_SHORT_NAME_MOS"] = "噬魂"
+--[[Translation missing --]]
+--[[ L["DUNGEON_SHORT_NAME_MR"] = ""--]] 
 L["DUNGEON_SHORT_NAME_MT"] = "平台"
 L["DUNGEON_SHORT_NAME_NELT"] = "奈萨鲁斯"
 L["DUNGEON_SHORT_NAME_NL"] = "巢穴"
@@ -182,6 +190,8 @@ L["DUNGEON_SHORT_NAME_UNDR"] = "地渊"
 L["DUNGEON_SHORT_NAME_UPPR"] = "卡上"
 L["DUNGEON_SHORT_NAME_VOTW"] = "牢窟"
 L["DUNGEON_SHORT_NAME_VP"] = "旋云"
+--[[Translation missing --]]
+--[[ L["DUNGEON_SHORT_NAME_VSA"] = ""--]] 
 L["DUNGEON_SHORT_NAME_WM"] = "庄园"
 L["DUNGEON_SHORT_NAME_WORK"] = "车间"
 L["DUNGEON_SHORT_NAME_WS"] = "风行者"
@@ -504,6 +514,22 @@ L["RAID_BOSS_TOT_8"] = "普利莫修斯"
 L["RAID_BOSS_TOT_9"] = "黑暗意志"
 L["RAID_BOSS_TOTFW_1"] = "风之议会"
 L["RAID_BOSS_TOTFW_2"] = "奥拉基尔"
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_VA_1"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_VA_2"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_VA_3"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_VA_4"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_VA_5"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_VA_6"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_VA_7"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_VA_8"] = ""--]] 
 L["RAID_BOSS_VOTI_1"] = "艾拉诺格"
 L["RAID_BOSS_VOTI_2"] = "泰洛斯"
 L["RAID_BOSS_VOTI_3"] = "原始议会"
@@ -561,6 +587,8 @@ L["RAID_ToES"] = "永春台"
 L["RAID_TOES"] = "永春台"
 L["RAID_TOT"] = "雷电王座"
 L["RAID_TOTFW"] = "风神王座"
+--[[Translation missing --]]
+--[[ L["RAID_VA"] = ""--]] 
 L["RAID_VS"] = "虚影尖塔"
 L["RAID_VS_DR_MQD"] = "虚影/梦境/进军"
 L["RAIDERIO"] = "Raider.IO"

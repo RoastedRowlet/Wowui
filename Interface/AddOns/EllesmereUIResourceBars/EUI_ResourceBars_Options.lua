@@ -1048,7 +1048,7 @@ initFrame:SetScript("OnEvent", function(self)
             { type = "segmented", label = EllesmereUI.L("Mode"),
               disabled = HashOff,
               disabledTooltip = DIS_TIP,
-              keys = { "percent", "value" }, labels = { "%", EllesmereUI.L("Value") },
+              keys = { "percent", "value" }, labels = { percent = "%", value = "Value" },
               get = function() local c = getBarData(); return (c and c.hashMode) or "percent" end,
               set = function(k) local c = getBarData(); if not c then return end
                   c.hashMode = k; refreshFn() end },
@@ -2113,7 +2113,7 @@ initFrame:SetScript("OnEvent", function(self)
             local titleFS = EllesmereUI.MakeFont(popup, 13, nil, 1, 1, 1)
             titleFS:SetAlpha(0.55)
             titleFS:SetPoint("TOP", popup, "TOP", 0, curY)
-            titleFS:SetText(cfg.popupTitle or EllesmereUI.L("Threshold Settings"))
+            titleFS:SetText(EllesmereUI.L(cfg.popupTitle or "Threshold Settings"))
             curY = curY - 25
 
             -- Mode switch (druid power bar): Single per-spec vs three per-form
@@ -5147,7 +5147,7 @@ initFrame:SetScript("OnEvent", function(self)
         }, { disabled = function() local c = cfg(); return (not c) or (not c.enabled) or c.darkTheme end,
              disabledTooltip = function()
                  local c = cfg()
-                 if c and c.darkTheme then return "This option requires Dark Mode Class Resource to be disabled" end
+                 if c and c.darkTheme then return "This option requires Dark Mode Class Resource to be disabled. Dark Mode colors can be adjusted in Global Settings -> Fonts & Colors." end
                  return "Class Resource"
              end })
         -- Inline cog for Charged Combo Point color (on Fill Color)
@@ -7396,7 +7396,7 @@ initFrame:SetScript("OnEvent", function(self)
                   -- Force a full rebuild so the Background label re-renders.
                   EllesmereUI:RefreshPage(true)
               end },
-            { type = "slider", text = bgLabel, min = 0, max = 100, step = 1,
+            { type = "slider", text = bgLabel, min = 0, max = 100, step = 1, trackWidth = 120,
               getValue = function()
                   local p = DB(); return math.floor(((p and p.health.bgA or 0.75) * 100) + 0.5)
               end,
@@ -8375,6 +8375,20 @@ initFrame:SetScript("OnEvent", function(self)
             EllesmereUI.RegisterWidgetRefresh(UpdateCogDisIcon)
             UpdateCogDisIcon()
         end
+
+        -- Row 4: Always Show
+        _, h = W:DualRow(parent, y,
+            { type = "toggle", text = "Always Show",
+              tooltip = "Keep the cast bar visible (sitting empty) when you are not casting, instead of hiding it.",
+              disabled = castOff,
+              disabledTooltip = "Player Cast Bar",
+              getValue = function() local p = DB(); return p and p.castBar.alwaysShow end,
+              setValue = function(v)
+                  local p = DB(); if not p then return end
+                  p.castBar.alwaysShow = v; RefreshCast()
+              end },
+            { type = "spacer" }
+        );  y = y - h
 
         _, h = W:Spacer(parent, y, 16);  y = y - h
 
