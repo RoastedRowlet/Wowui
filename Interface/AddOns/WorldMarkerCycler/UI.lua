@@ -15,7 +15,7 @@ if locale == "frFR" then
     L["Use the input boxes below to set keybindings for world, target, and mouseover markers."] = "Utilisez les champs ci-dessous pour definir les raccourcis pour les marqueurs mondiaux, de cible et de survol."
     L["Marker Cycle Order (comma separated):\ne.g. 1SQUARE,2TRIANGLE,3DIAMOND,4CROSS,\n5STAR,6CIRCLE,7MOON,8SKULL"] = "Ordre de cycle des marqueurs (separe par des virgules):\nex. 1CARRE,2TRIANGLE,3DIAMANT,4CROIX,\n5ETOILE,6CERCLE,7LUNE,8CRANE"
     L["Note: Keybinds set here will override any keybinds set via slash commands or other UIs."] = "Remarque : Les raccourcis definis ici remplaceront ceux definis via les commandes ou autres interfaces."
-    L["All Markers and Numbers above them represent the orderList that will be once you press the keybinds first time so when you clear all markers it will start from that first number you put into the input box for example if you put 8 it will mean skull marker will always show first and when you clear all markers skull will be placed first again this is only made for the cycle raid markers on the ground not for target or mouseovertarget."] = "Tous les marqueurs et les numeros ci-dessus representent l'ordre qui sera utilise lorsque vous appuierez sur les raccourcis pour la premiere fois. Par exemple, si vous mettez 8, le marqueur crane sera toujours place en premier apres avoir tout efface. Ceci concerne uniquement les marqueurs de raid au sol, pas ceux de cible ou de survol."
+    L["All Markers and Numbers above them represent the orderList that will be once you press the keybinds first time so when you clear all markers it will start from that first number you put into the input box for example if you put 8 it will mean skull marker will always show first and when you clear all markers skull will be placed first again this order is now shared by the ground, target and mouseover cyclers."] = "Tous les marqueurs et les numeros ci-dessus representent l'ordre qui sera utilise lorsque vous appuierez sur les raccourcis pour la premiere fois. Par exemple, si vous mettez 8, le marqueur crane sera toujours place en premier apres avoir tout efface. Cet ordre est desormais partage par les marqueurs au sol, de cible et de survol."
     L["World Cycle Key:"] = "Raccourci cycle mondial :"
     L["World Clear Key:"] = "Raccourci effacer mondial :"
     L["Target Cycle Key:"] = "Raccourci cycle cible :"
@@ -37,7 +37,7 @@ elseif locale == "zhCN" then
     L["Use the input boxes below to set keybindings for world, target, and mouseover markers."] = "使用下面的输入框设置世界标记、目标标记和鼠标悬停标记的快捷键。"
     L["Marker Cycle Order (comma separated):\ne.g. 1SQUARE,2TRIANGLE,3DIAMOND,4CROSS,\n5STAR,6CIRCLE,7MOON,8SKULL"] = "标记循环顺序（用逗号分隔）：\n例如：1方块,2三角,3菱形,4十字,\n5星星,6圆形,7月亮,8骷髅"
     L["Note: Keybinds set here will override any keybinds set via slash commands or other UIs."] = "注意：这里设置的快捷键将覆盖通过命令或其他界面设置的快捷键。"
-    L["All Markers and Numbers above them represent the orderList that will be once you press the keybinds first time so when you clear all markers it will start from that first number you put into the input box for example if you put 8 it will mean skull marker will always show first and when you clear all markers skull will be placed first again this is only made for the cycle raid markers on the ground not for target or mouseovertarget."] = "上方的所有标记及其数字表示第一次按下快捷键时的循环顺序。例如，如果你输入8，则骷髅标记会始终首先出现，并且在清除所有标记后也会再次优先放置。此功能仅适用于地面团队标记，不适用于目标或鼠标悬停目标。"
+    L["All Markers and Numbers above them represent the orderList that will be once you press the keybinds first time so when you clear all markers it will start from that first number you put into the input box for example if you put 8 it will mean skull marker will always show first and when you clear all markers skull will be placed first again this order is now shared by the ground, target and mouseover cyclers."] = "上方的所有标记及其数字表示第一次按下快捷键时的循环顺序。例如，如果你输入8，则骷髅标记会始终首先出现，并且在清除所有标记后也会再次优先放置。此顺序现在由地面、目标和鼠标悬停标记共用。"
     L["World Cycle Key:"] = "世界循环键："
     L["World Clear Key:"] = "清除世界标记键："
     L["Target Cycle Key:"] = "目标循环键："
@@ -53,7 +53,7 @@ elseif locale == "zhTW" then
     L["Use the input boxes below to set keybindings for world, target, and mouseover markers."] = "使用下面的輸入框設定世界標記、目標標記與滑鼠懸停標記的快捷鍵。"
     L["Marker Cycle Order (comma separated):\ne.g. 1SQUARE,2TRIANGLE,3DIAMOND,4CROSS,\n5STAR,6CIRCLE,7MOON,8SKULL"] = "標記循環順序（以逗號分隔）：\n例如：1方塊,2三角,3菱形,4十字,\n5星星,6圓形,7月亮,8骷髏"
     L["Note: Keybinds set here will override any keybinds set via slash commands or other UIs."] = "注意：此處設定的快捷鍵將覆蓋透過指令或其他介面設定的快捷鍵。"
-    L["All Markers and Numbers above them represent the orderList that will be once you press the keybinds first time so when you clear all markers it will start from that first number you put into the input box for example if you put 8 it will mean skull marker will always show first and when you clear all markers skull will be placed first again this is only made for the cycle raid markers on the ground not for target or mouseovertarget."] = "上方的標記與數字表示第一次按下快捷鍵時的循環順序。例如輸入8，則骷髏標記會優先顯示，並在清除後再次優先放置。此功能僅適用於地面團隊標記，不適用於目標或滑鼠懸停目標。"
+    L["All Markers and Numbers above them represent the orderList that will be once you press the keybinds first time so when you clear all markers it will start from that first number you put into the input box for example if you put 8 it will mean skull marker will always show first and when you clear all markers skull will be placed first again this order is now shared by the ground, target and mouseover cyclers."] = "上方的標記與數字表示第一次按下快捷鍵時的循環順序。例如輸入8，則骷髏標記會優先顯示，並在清除後再次優先放置。此順序現在由地面、目標和滑鼠懸停標記共用。"
     L["World Cycle Key:"] = "世界循環鍵："
     L["World Clear Key:"] = "清除世界標記鍵："
     L["Target Cycle Key:"] = "目標循環鍵："
@@ -69,7 +69,7 @@ elseif locale == "deDE" then
     L["Use the input boxes below to set keybindings for world, target, and mouseover markers."] = "Verwenden Sie die untenstehenden Eingabefelder, um Tastenbelegungen für Welt-, Ziel- und Mouseover-Markierungen festzulegen."
     L["Marker Cycle Order (comma separated):\ne.g. 1SQUARE,2TRIANGLE,3DIAMOND,4CROSS,\n5STAR,6CIRCLE,7MOON,8SKULL"] = "Markierungsreihenfolge (durch Kommas getrennt):\nz. B. 1QUADRAT,2DREIECK,3RAUTE,4KREUZ,\n5STERN,6KREIS,7MOND,8SCHÄDEL"
     L["Note: Keybinds set here will override any keybinds set via slash commands or other UIs."] = "Hinweis: Hier gesetzte Tastenbelegungen überschreiben alle, die über Befehle oder andere Oberflächen gesetzt wurden."
-    L["All Markers and Numbers above them represent the orderList that will be once you press the keybinds first time so when you clear all markers it will start from that first number you put into the input box for example if you put 8 it will mean skull marker will always show first and when you clear all markers skull will be placed first again this is only made for the cycle raid markers on the ground not for target or mouseovertarget."] = "Alle Markierungen und Zahlen darüber stellen die Reihenfolge dar, die beim ersten Drücken der Taste verwendet wird. Wenn Sie z. B. 8 eingeben, wird der Schädel immer zuerst angezeigt und nach dem Löschen aller Markierungen erneut zuerst gesetzt. Dies gilt nur für Boden-Raidmarkierungen, nicht für Ziel oder Mouseover."
+    L["All Markers and Numbers above them represent the orderList that will be once you press the keybinds first time so when you clear all markers it will start from that first number you put into the input box for example if you put 8 it will mean skull marker will always show first and when you clear all markers skull will be placed first again this order is now shared by the ground, target and mouseover cyclers."] = "Alle Markierungen und Zahlen darüber stellen die Reihenfolge dar, die beim ersten Drücken der Taste verwendet wird. Wenn Sie z. B. 8 eingeben, wird der Schädel immer zuerst angezeigt und nach dem Löschen aller Markierungen erneut zuerst gesetzt. Diese Reihenfolge gilt jetzt für Boden-, Ziel- und Mouseover-Markierungen."
     L["World Cycle Key:"] = "Welt-Zyklus-Taste:"
     L["World Clear Key:"] = "Welt-Markierungen löschen:"
     L["Target Cycle Key:"] = "Ziel-Zyklus-Taste:"
@@ -85,7 +85,7 @@ elseif locale == "esES" or locale == "esMX" then
     L["Use the input boxes below to set keybindings for world, target, and mouseover markers."] = "Usa los campos de abajo para configurar teclas para marcadores de mundo, objetivo y mouseover."
     L["Marker Cycle Order (comma separated):\ne.g. 1SQUARE,2TRIANGLE,3DIAMOND,4CROSS,\n5STAR,6CIRCLE,7MOON,8SKULL"] = "Orden del ciclo de marcadores (separado por comas):\nej. 1CUADRADO,2TRIÁNGULO,3ROMBO,4CRUZ,\n5ESTRELLA,6CÍRCULO,7LUNA,8CALAVERA"
     L["Note: Keybinds set here will override any keybinds set via slash commands or other UIs."] = "Nota: Las teclas configuradas aquí sobrescribirán las establecidas mediante comandos u otras interfaces."
-    L["All Markers and Numbers above them represent the orderList that will be once you press the keybinds first time so when you clear all markers it will start from that first number you put into the input box for example if you put 8 it will mean skull marker will always show first and when you clear all markers skull will be placed first again this is only made for the cycle raid markers on the ground not for target or mouseovertarget."] = "Todos los marcadores y números representan el orden que se usará al presionar la tecla por primera vez. Por ejemplo, si pones 8, la calavera aparecerá primero y seguirá siendo la primera al limpiar todos los marcadores. Esto solo aplica a marcadores de suelo, no a objetivo o mouseover."
+    L["All Markers and Numbers above them represent the orderList that will be once you press the keybinds first time so when you clear all markers it will start from that first number you put into the input box for example if you put 8 it will mean skull marker will always show first and when you clear all markers skull will be placed first again this order is now shared by the ground, target and mouseover cyclers."] = "Todos los marcadores y números representan el orden que se usará al presionar la tecla por primera vez. Por ejemplo, si pones 8, la calavera aparecerá primero y seguirá siendo la primera al limpiar todos los marcadores. Este orden ahora se comparte entre los marcadores de suelo, objetivo y mouseover."
     L["World Cycle Key:"] = "Tecla ciclo mundo:"
     L["World Clear Key:"] = "Tecla limpiar mundo:"
     L["Target Cycle Key:"] = "Tecla ciclo objetivo:"
@@ -101,7 +101,7 @@ elseif locale == "itIT" then
     L["Use the input boxes below to set keybindings for world, target, and mouseover markers."] = "Usa i campi qui sotto per impostare i tasti per marcatori del mondo, bersaglio e mouseover."
     L["Marker Cycle Order (comma separated):\ne.g. 1SQUARE,2TRIANGLE,3DIAMOND,4CROSS,\n5STAR,6CIRCLE,7MOON,8SKULL"] = "Ordine ciclo marcatori (separato da virgole):\nes. 1QUADRATO,2TRIANGOLO,3ROMBO,4CROCE,\n5STELLA,6CERCHIO,7LUNA,8TESCHIO"
     L["Note: Keybinds set here will override any keybinds set via slash commands or other UIs."] = "Nota: I tasti impostati qui sovrascriveranno quelli impostati tramite comandi o altre interfacce."
-    L["All Markers and Numbers above them represent the orderList that will be once you press the keybinds first time so when you clear all markers it will start from that first number you put into the input box for example if you put 8 it will mean skull marker will always show first and when you clear all markers skull will be placed first again this is only made for the cycle raid markers on the ground not for target or mouseovertarget."] = "Tutti i marcatori e i numeri rappresentano l'ordine usato alla prima pressione. Se inserisci 8, il teschio sarà sempre il primo anche dopo aver pulito tutto. Solo per marcatori a terra, non per bersaglio o mouseover."
+    L["All Markers and Numbers above them represent the orderList that will be once you press the keybinds first time so when you clear all markers it will start from that first number you put into the input box for example if you put 8 it will mean skull marker will always show first and when you clear all markers skull will be placed first again this order is now shared by the ground, target and mouseover cyclers."] = "Tutti i marcatori e i numeri rappresentano l'ordine usato alla prima pressione. Se inserisci 8, il teschio sarà sempre il primo anche dopo aver pulito tutto. Questo ordine e ora condiviso da marcatori a terra, bersaglio e mouseover."
     L["World Cycle Key:"] = "Tasto ciclo mondo:"
     L["World Clear Key:"] = "Tasto pulizia mondo:"
     L["Target Cycle Key:"] = "Tasto ciclo bersaglio:"
@@ -117,7 +117,7 @@ elseif locale == "ptBR" then
     L["Use the input boxes below to set keybindings for world, target, and mouseover markers."] = "Use os campos abaixo para configurar teclas para marcadores de mundo, alvo e mouseover."
     L["Marker Cycle Order (comma separated):\ne.g. 1SQUARE,2TRIANGLE,3DIAMOND,4CROSS,\n5STAR,6CIRCLE,7MOON,8SKULL"] = "Ordem do ciclo de marcadores (separado por vírgulas):\nex. 1QUADRADO,2TRIÂNGULO,3LOSANGO,4CRUZ,\n5ESTRELA,6CÍRCULO,7LUA,8CAVEIRA"
     L["Note: Keybinds set here will override any keybinds set via slash commands or other UIs."] = "Nota: As teclas configuradas aqui substituirão quaisquer outras definidas por comandos ou outras interfaces."
-    L["All Markers and Numbers above them represent the orderList that will be once you press the keybinds first time so when you clear all markers it will start from that first number you put into the input box for example if you put 8 it will mean skull marker will always show first and when you clear all markers skull will be placed first again this is only made for the cycle raid markers on the ground not for target or mouseovertarget."] = "Todos os marcadores e números representam a ordem usada ao pressionar a tecla pela primeira vez. Se colocar 8, a caveira aparecerá primeiro e continuará sendo a primeira após limpar tudo. Apenas para marcadores no chão."
+    L["All Markers and Numbers above them represent the orderList that will be once you press the keybinds first time so when you clear all markers it will start from that first number you put into the input box for example if you put 8 it will mean skull marker will always show first and when you clear all markers skull will be placed first again this order is now shared by the ground, target and mouseover cyclers."] = "Todos os marcadores e números representam a ordem usada ao pressionar a tecla pela primeira vez. Se colocar 8, a caveira aparecerá primeiro e continuará sendo a primeira após limpar tudo. Esta ordem agora e compartilhada pelos marcadores no chão, de alvo e de mouseover."
     L["World Cycle Key:"] = "Tecla ciclo mundo:"
     L["World Clear Key:"] = "Tecla limpar mundo:"
     L["Target Cycle Key:"] = "Tecla ciclo alvo:"
@@ -133,7 +133,7 @@ elseif locale == "ruRU" then
     L["Use the input boxes below to set keybindings for world, target, and mouseover markers."] = "Используйте поля ниже, чтобы назначить клавиши для мировых, целевых и mouseover-меток."
     L["Marker Cycle Order (comma separated):\ne.g. 1SQUARE,2TRIANGLE,3DIAMOND,4CROSS,\n5STAR,6CIRCLE,7MOON,8SKULL"] = "Порядок цикла меток (через запятую):\nнапр. 1КВАДРАТ,2ТРЕУГОЛЬНИК,3РОМБ,4КРЕСТ,\n5ЗВЕЗДА,6КРУГ,7ЛУНА,8ЧЕРЕП"
     L["Note: Keybinds set here will override any keybinds set via slash commands or other UIs."] = "Примечание: назначенные здесь клавиши заменят те, что заданы через команды или другие интерфейсы."
-    L["All Markers and Numbers above them represent the orderList that will be once you press the keybinds first time so when you clear all markers it will start from that first number you put into the input box for example if you put 8 it will mean skull marker will always show first and when you clear all markers skull will be placed first again this is only made for the cycle raid markers on the ground not for target or mouseovertarget."] = "Все метки и числа обозначают порядок при первом нажатии. Если указать 8, череп всегда будет первым и после очистки снова станет первым. Только для наземных меток рейда."
+    L["All Markers and Numbers above them represent the orderList that will be once you press the keybinds first time so when you clear all markers it will start from that first number you put into the input box for example if you put 8 it will mean skull marker will always show first and when you clear all markers skull will be placed first again this order is now shared by the ground, target and mouseover cyclers."] = "Все метки и числа обозначают порядок при первом нажатии. Если указать 8, череп всегда будет первым и после очистки снова станет первым. Этот порядок теперь общий для наземных меток, цели и наведения мыши."
     L["World Cycle Key:"] = "Клавиша цикла мира:"
     L["World Clear Key:"] = "Клавиша очистки мира:"
     L["Target Cycle Key:"] = "Клавиша цикла цели:"
@@ -533,6 +533,46 @@ local function BuildUI()
     )
     curY = curY - 30
 
+    -- Marker bar layout: one row, or markers stacked above the buttons
+    local rowsCheck = CreateFrame("CheckButton", nil, scrollChild, "UICheckButtonTemplate")
+    rowsCheck:SetSize(24, 24)
+    rowsCheck:SetPoint("TOPLEFT", 16, curY)
+    local rowsLabel = scrollChild:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+    rowsLabel:SetPoint("LEFT", rowsCheck, "RIGHT", 2, 0)
+    rowsLabel:SetText(L["Marker bar: two rows"])
+
+    local function RefreshRowsCheck()
+        local api = WorldMarkerCyclerRaidPickerAPI
+        local rows = (api and api.GetRows and api.GetRows())
+            or (WMC_RaidPickerSaved and WMC_RaidPickerSaved.rows) or 1
+        rowsCheck:SetChecked(rows == 2)
+    end
+    RefreshRowsCheck()
+    -- keep it honest if the layout was changed with /wmcrrows
+    rowsCheck:SetScript("OnShow", RefreshRowsCheck)
+
+    rowsCheck:SetScript("OnClick", function(self)
+        local want = self:GetChecked() and 2 or 1
+        local api = WorldMarkerCyclerRaidPickerAPI
+        if api and api.SetRows then
+            -- SetRows returns false when it had to defer past combat lockdown
+            if not api.SetRows(want) then
+                print(L["Marker bar layout will change when you leave combat."])
+            end
+        else
+            if not WMC_RaidPickerSaved then WMC_RaidPickerSaved = {} end
+            WMC_RaidPickerSaved.rows = want
+        end
+    end)
+
+    local rowsDesc = scrollChild:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    rowsDesc:SetPoint("TOPLEFT", rowsCheck, "BOTTOMLEFT", 2, 2)
+    rowsDesc:SetWidth(420)
+    rowsDesc:SetJustifyH("LEFT")
+    rowsDesc:SetText(L["Splits the bar so the markers sit above the action buttons."])
+    rowsDesc:SetTextColor(0.7, 0.7, 0.7)
+    curY = curY - 46
+
     -- Note
     local noteLabel = scrollChild:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     noteLabel:SetPoint("TOPLEFT", 16, curY)
@@ -629,6 +669,16 @@ local function BuildUI()
         if #t == 8 then
             WMC_Saved.orderList = t
             if api and api.SetOrder then api.SetOrder(t) end
+            -- Push the same order to the target and mouseover cyclers.
+            -- They used to keep their own hardcoded order, which is why
+            -- editing this box only ever affected the ground markers.
+            -- Looked up at call time: those files load after UI.lua.
+            local tApi = _G.WorldMarkerCyclerTargetAPI
+            if tApi and tApi.SyncOrderFromWorld then tApi.SyncOrderFromWorld()
+            elseif tApi and tApi.SetOrder then tApi.SetOrder(t) end
+            local mApi = _G.WorldMarkerCyclerMouseoverAPI
+            if mApi and mApi.SyncOrderFromWorld then mApi.SyncOrderFromWorld()
+            elseif mApi and mApi.SetOrder then mApi.SetOrder(t) end
         end
         orderBox:SetText(table.concat(WMC_Saved.orderList, ","))
         ShowOrderIcons()
@@ -639,7 +689,7 @@ local function BuildUI()
     -- Explanation text
     local label2 = scrollChild:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     label2:SetPoint("TOPLEFT", 16, curY)
-    label2:SetText(L["All Markers and Numbers above them represent the orderList that will be once you press the keybinds first time so when you clear all markers it will start from that first number you put into the input box for example if you put 8 it will mean skull marker will always show first and when you clear all markers skull will be placed first again this is only made for the cycle raid markers on the ground not for target or mouseovertarget."])
+    label2:SetText(L["All Markers and Numbers above them represent the orderList that will be once you press the keybinds first time so when you clear all markers it will start from that first number you put into the input box for example if you put 8 it will mean skull marker will always show first and when you clear all markers skull will be placed first again this order is now shared by the ground, target and mouseover cyclers."])
     label2:SetWidth(540)
     label2:SetWordWrap(true)
     label2:SetTextColor(1, 1, 1, 1)
@@ -761,7 +811,7 @@ local function BuildUI()
     end
 
     local ccOrderLabel = ccBox:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-    ccOrderLabel:SetPoint("BOTTOMLEFT", ccBox, "BOTTOMLEFT", 12, 12)
+    ccOrderLabel:SetPoint("BOTTOMLEFT", ccBox, "BOTTOMLEFT", 12, 52)
     ccOrderLabel:SetText("Cycle order (e.g. 8,4,3,2):")
     ccOrderLabel:SetTextColor(0.8, 0.8, 0.6)
 

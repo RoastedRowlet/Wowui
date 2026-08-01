@@ -58,7 +58,32 @@ local cycleBtn = CreateFrame(
     "SecureActionButtonTemplate"
 )
 cycleBtn:SetAttribute("type", "macro")
-cycleBtn:RegisterForClicks("AnyUp", "AnyDown")
+-- IMPORTANT: register only ONE click edge.
+-- Registering both "AnyUp" and "AnyDown" makes a single keypress fire the
+-- PreClick snippet TWICE, so the cycle index advances by 2 and you only ever
+-- see half the markers (4 of 8). Core.lua does the same single-edge dance.
+cycleBtn:RegisterForClicks("AnyUp")
+
+local function ApplyCycleClickEdge()
+    local sv = SV()
+    if sv and sv.useClickDown == true then
+        cycleBtn:RegisterForClicks("AnyDown")
+        return
+    elseif sv and sv.useClickDown == false then
+        cycleBtn:RegisterForClicks("AnyUp")
+        return
+    end
+    -- Auto: mouse buttons bound via SetOverrideBindingClick fire on DOWN,
+    -- keyboard keys fire on UP.
+    if sv then
+        local key = (sv.placeKey or ""):upper()
+        if key:find("^BUTTON%d") then
+            cycleBtn:RegisterForClicks("AnyDown")
+            return
+        end
+    end
+    cycleBtn:RegisterForClicks("AnyUp")
+end
 
 -- Clear target marker
 local clearBtn = CreateFrame(
@@ -70,10 +95,37 @@ local clearBtn = CreateFrame(
 clearBtn:SetAttribute("type", "macro")
 clearBtn:SetAttribute("macrotext", "/tm 0")
 clearBtn:RegisterForClicks("AnyUp", "AnyDown")
+-- Clearing restarts the cycle at the first marker in the order (matches Core.lua)
+clearBtn:SetScript("PostClick", function()
+    if not InCombatLockdown() then SecureHandlerExecute(cycleBtn, "i=0") end
+end)
 
 -- =========================
 -- Secure Order Table
 -- =========================
+-- =========================
+-- Shared cycle order
+-- =========================
+-- Follow the SAME order as the ground markers (Core.lua / the "Marker Cycle
+-- Order" box in the options window). There is no separate order editor for
+-- this cycler, so mirroring is what keeps all three consistent - previously
+-- this module silently kept its own hardcoded 8,7,6,5,4,3,2,1 list.
+local function SyncOrderFromWorld()
+    local w = _G.WMC_Saved
+    if type(w) ~= "table" then return false end
+    -- honour Core.lua's custom-subset mode too
+    local list = (w.customCycleEnabled and w.customCycleMarkers) or w.orderList
+    if type(list) ~= "table" or #list == 0 then return false end
+    local copy = {}
+    for i, id in ipairs(list) do
+        if type(id) == "number" then copy[#copy + 1] = id end
+    end
+    if #copy == 0 then return false end
+    EnsureSV()
+    SV().orderList = copy
+    return true
+end
+
 local function BuildOrderTable()
     local sv = SV()
     local body = "i=0; order=newtable() "
@@ -106,6 +158,7 @@ SecureHandlerWrapScript(cycleBtn, "PreClick", cycleBtn, [=[
 local bindingsFrame = CreateFrame("Frame", "WMC_TargetMarkerBindings")
 
 local function UpdateBindings()
+    ApplyCycleClickEdge()  -- keep the click edge matched to the bound key
     ClearOverrideBindings(bindingsFrame)
 
     local sv = SV()
@@ -143,9 +196,14 @@ loader:RegisterEvent("PLAYER_LOGIN")
 loader:SetScript("OnEvent", function(_, event, addon)
     if event == "ADDON_LOADED" and addon == ADDON_NAME then
         InitSaved()
+        SyncOrderFromWorld()
         BuildOrderTable()
         UpdateBindings()
     elseif event == "PLAYER_LOGIN" then
+        -- Core.lua validates WMC_Saved on its own ADDON_LOADED pass;
+        -- re-sync here so we pick up the final validated list.
+        SyncOrderFromWorld()
+        BuildOrderTable()
         UpdateBindings()
     end
 end)
@@ -250,3 +308,9 @@ end
 
 -- Expose UpdateBindings for UI
 WorldMarkerCyclerTargetAPI.UpdateBindings = UpdateBindings
+
+-- Re-read the shared order (called by the options window when you edit it)
+WorldMarkerCyclerTargetAPI.SyncOrderFromWorld = function()
+    if SyncOrderFromWorld() then BuildOrderTable() end
+end
+

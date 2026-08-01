@@ -1,30 +1,21 @@
 
 SpellOverlayEnhancedDB = {
+["profileKeys"] = {
+["Madmareep - Stormrage"] = "Default",
+["Barelynoer - Area 52"] = "Default",
+["Angryabsol - Stormrage"] = "Default",
+["Lonelylitten - Stormrage"] = "Default",
+["Klutzykubfu - Stormrage"] = "Default",
+["Zappyxatu - Stormrage"] = "Default",
+},
 ["global"] = {
 ["snapshots"] = {
-["Essence Burst"] = {
-["left"] = {
-["isAtlas"] = false,
-["texture"] = 4699056,
-["height"] = 204.8000183105469,
-["width"] = 102.4000244140625,
-["scale"] = 1,
-["texCoords"] = {
-0,
-0,
-0,
-1,
-1,
-0,
-1,
-1,
-},
-},
+["Zen Pulse"] = {
 ["right"] = {
 ["isAtlas"] = false,
-["texture"] = 4699056,
-["height"] = 204.8000183105469,
-["width"] = 102.3999557495117,
+["texture"] = 623951,
+["height"] = 204.7999667080973,
+["width"] = 102.400018033114,
 ["scale"] = 1,
 ["texCoords"] = {
 1,
@@ -41,6 +32,10 @@ SpellOverlayEnhancedDB = {
 ["Strength of the Black Ox"] = {
 ["left"] = {
 ["isAtlas"] = false,
+["texture"] = 623950,
+["height"] = 204.8,
+["width"] = 102.4000063578285,
+["scale"] = 1,
 ["texCoords"] = {
 0,
 0,
@@ -51,13 +46,26 @@ SpellOverlayEnhancedDB = {
 1,
 1,
 },
-["height"] = 204.8,
+},
+},
+["Essence Burst"] = {
+["left"] = {
+["isAtlas"] = false,
+["texCoords"] = {
+0,
+0,
+0,
+1,
+1,
+0,
+1,
+1,
+},
+["height"] = 204.8000183105469,
 ["scale"] = 1,
-["width"] = 102.4000063578285,
-["texture"] = 623950,
+["width"] = 102.4000244140625,
+["texture"] = 4699056,
 },
-},
-["Zen Pulse"] = {
 ["right"] = {
 ["isAtlas"] = false,
 ["texCoords"] = {
@@ -70,19 +78,13 @@ SpellOverlayEnhancedDB = {
 0,
 1,
 },
-["height"] = 204.7999667080973,
+["height"] = 204.8000183105469,
 ["scale"] = 1,
-["width"] = 102.400018033114,
-["texture"] = 623951,
+["width"] = 102.3999557495117,
+["texture"] = 4699056,
 },
 },
 },
-},
-["profileKeys"] = {
-["Barelynoer - Area 52"] = "Default",
-["Lonelylitten - Stormrage"] = "Default",
-["Madmareep - Stormrage"] = "Default",
-["Klutzykubfu - Stormrage"] = "Default",
 },
 ["profiles"] = {
 ["Default"] = {

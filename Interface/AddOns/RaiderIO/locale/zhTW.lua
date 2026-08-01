@@ -506,20 +506,13 @@ L["RAID_BOSS_TOT_8"] = "普莫迪斯"
 L["RAID_BOSS_TOT_9"] = "黑暗憎惡魔像"
 L["RAID_BOSS_TOTFW_1"] = "風之議會"
 L["RAID_BOSS_TOTFW_2"] = "奧拉基爾"
---[[Translation missing --]]
---[[ L["RAID_BOSS_VA_1"] = ""--]] 
---[[Translation missing --]]
---[[ L["RAID_BOSS_VA_2"] = ""--]] 
---[[Translation missing --]]
---[[ L["RAID_BOSS_VA_3"] = ""--]] 
---[[Translation missing --]]
---[[ L["RAID_BOSS_VA_4"] = ""--]] 
---[[Translation missing --]]
---[[ L["RAID_BOSS_VA_5"] = ""--]] 
---[[Translation missing --]]
---[[ L["RAID_BOSS_VA_6"] = ""--]] 
---[[Translation missing --]]
---[[ L["RAID_BOSS_VA_7"] = ""--]] 
+L["RAID_BOSS_VA_1"] = "『纏魂者』尼札利"
+L["RAID_BOSS_VA_2"] = "埋葬衛哨"
+L["RAID_BOSS_VA_3"] = "迷路的探險者"
+L["RAID_BOSS_VA_4"] = "『惡性之毒』伐許尼克"
+L["RAID_BOSS_VA_5"] = "司佐拉"
+L["RAID_BOSS_VA_6"] = "雙生毒牙"
+L["RAID_BOSS_VA_7"] = "盤蛇祭壇"
 L["RAID_BOSS_VA_8"] = "烏拉特克"
 L["RAID_BOSS_VOTI_1"] = "伊拉諾格"
 L["RAID_BOSS_VOTI_2"] = "忒羅司"

@@ -29,112 +29,65 @@ L["BINDING_HEADER_RAIDERIO_REPLAYUI"] = "Wiederholungsbenutzeroberfläche"
 L["BINDING_NAME_RAIDERIO_REPLAYUI_TIMING_BOSS"] = "Setze das Timing auf Bosszeit"
 L["BINDING_NAME_RAIDERIO_REPLAYUI_TIMING_DUNGEON"] = "Setze das Timing auf Durchlaufszeit"
 L["BINDING_NAME_RAIDERIO_REPLAYUI_TOGGLE"] = "Wiederholungsbenutzeroberfläche ein/ausschalten"
---[[Translation missing --]]
---[[ L["BUILDS_DUNGEON_BRACKET_10-99"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_DUNGEON_BRACKET_15-99"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_DUNGEON_BRACKET_20-99"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_DUNGEON_BRACKET_6-9"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_DUNGEONS"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_DUNGEONS_ALL"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_DUNGEONS_SPECIFIC"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_ENCOUNTER_DIFFICULY_all"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_ENCOUNTER_DIFFICULY_heroic"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_ENCOUNTER_DIFFICULY_mythic"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_ENCOUNTER_DIFFICULY_normal"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_PROFILE_ACTIVE_LOADOUT_TITLE"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_PROFILE_ALTERNATE"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_PROFILE_COPY_COMPARELINK_ACTION_TITLE"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_PROFILE_COPY_COMPARELINK_POPUP_TITLE"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_PROFILE_COPY_LOADOUT_ACTION_TITLE"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_PROFILE_COPY_LOADOUT_LINK_ACTION_TITLE"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_PROFILE_COPY_LOADOUT_LINK_POPUP_TITLE"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_PROFILE_COPY_LOADOUT_POPUP_TITLE"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_PROFILE_ERROR_CREATING_LOADOUT"] = ""--]] 
+L["BUILDS_DUNGEON_BRACKET_10-99"] = "M+ Stufe 10 und höher"
+L["BUILDS_DUNGEON_BRACKET_15-99"] = "M+ Stufe 15 und höher"
+L["BUILDS_DUNGEON_BRACKET_20-99"] = "M+ Stufe 20 und höher"
+L["BUILDS_DUNGEON_BRACKET_6-9"] = "M+ Stufen 6 bis 9"
+L["BUILDS_DUNGEONS"] = "Mythisch Plus"
+L["BUILDS_DUNGEONS_ALL"] = "Alle Dungeons"
+L["BUILDS_DUNGEONS_SPECIFIC"] = "%s (%s)"
+L["BUILDS_ENCOUNTER_DIFFICULY_all"] = "Jede Schwierigkeit"
+L["BUILDS_ENCOUNTER_DIFFICULY_heroic"] = "Heroisch"
+L["BUILDS_ENCOUNTER_DIFFICULY_mythic"] = "Mythisch"
+L["BUILDS_ENCOUNTER_DIFFICULY_normal"] = "Normal"
+L["BUILDS_PROFILE_ACTIVE_LOADOUT_TITLE"] = "Dieses Ausrüstungsset ist aktiv"
+L["BUILDS_PROFILE_ALTERNATE"] = "Wechseln"
+L["BUILDS_PROFILE_COPY_COMPARELINK_ACTION_TITLE"] = "Vergleichslink kopieren"
+L["BUILDS_PROFILE_COPY_COMPARELINK_POPUP_TITLE"] = "Raider.IO-Vergleichslink für das Ausrüstungsset kopieren:"
+L["BUILDS_PROFILE_COPY_LOADOUT_ACTION_TITLE"] = "Ausrüstungsset exportieren"
+L["BUILDS_PROFILE_COPY_LOADOUT_LINK_ACTION_TITLE"] = "Ausrüstungsset-Link kopieren"
+L["BUILDS_PROFILE_COPY_LOADOUT_LINK_POPUP_TITLE"] = "Raider.IO-Link für das Ausrüstungsset kopieren:"
+L["BUILDS_PROFILE_COPY_LOADOUT_POPUP_TITLE"] = "Ausrüstungsset-Reihe kopieren:"
+L["BUILDS_PROFILE_ERROR_CREATING_LOADOUT"] = "Ausrüstungsset konnte nicht erstellt werden. Wenn kein Platz für weitere Ausrüstungssets vorhanden ist, schaffe bitte entsprechenden Freiraum."
 --[[Translation missing --]]
 --[[ L["BUILDS_PROFILE_FAILED_IMPORTING_BUILD"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_PROFILE_HERO_FORMAT"] = ""--]] 
+L["BUILDS_PROFILE_HERO_FORMAT"] = "%s (%s)"
 --[[Translation missing --]]
 --[[ L["BUILDS_PROFILE_IMPORTED_BUILD_TO_LOADOUT"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_PROFILE_LOAD_LOADOUT_ACTION_TITLE"] = ""--]] 
+L["BUILDS_PROFILE_LOAD_LOADOUT_ACTION_TITLE"] = "Laden"
 --[[Translation missing --]]
 --[[ L["BUILDS_PROFILE_LOADOUT_IS_ALREADY_ACTIVE"] = ""--]] 
 --[[Translation missing --]]
 --[[ L["BUILDS_PROFILE_LOADOUT_NAME"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_PROFILE_NO_DATA"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_PROFILE_RECOMMENDED"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_PROFILE_SHOW_JOURNALFRAME_BUTTON"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_PROFILE_SHOW_JOURNALFRAME_BUTTON_DESC"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_PROFILE_SHOW_TALENTFRAME_BUTTON"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_PROFILE_SHOW_TALENTFRAME_BUTTON_DESC"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_PROFILE_STATS_FORMAT"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_PROFILE_STATS_SUFFIX_KILLS"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_PROFILE_STATS_SUFFIX_RUNS"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_PROFILE_SWITCHING_TO_EXISTING_LOADOUT"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_PROFILE_SWITCHING_TO_LOADOUT"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_PROFILE_UNABLE_TO_DELETE_LOADOUT"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_PROFILE_UPDATED_BUILD_TO_LOADOUT"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_RAIDS"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_RAIDS_ENCOUNTERS_ALL"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_SPEED_all"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_SPEED_fast"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_SPEED_median"] = ""--]] 
+L["BUILDS_PROFILE_NO_DATA"] = "Die Murlocs konnten hier nichts Nützliches finden. Versuche, die Filter zu ändern."
+L["BUILDS_PROFILE_RECOMMENDED"] = "Empfohlen"
+L["BUILDS_PROFILE_SHOW_JOURNALFRAME_BUTTON"] = "Zeigt die Schaltfläche für das Begegnungsjournal an"
+L["BUILDS_PROFILE_SHOW_JOURNALFRAME_BUTTON_DESC"] = "Aktiviert die Anzeige der Schnellzugriffstaste im Fenster des Begegnungsjournals."
+L["BUILDS_PROFILE_SHOW_TALENTFRAME_BUTTON"] = "Zeigt die Schaltfläche für den Talent-Bereich an"
+L["BUILDS_PROFILE_SHOW_TALENTFRAME_BUTTON_DESC"] = "Aktiviert die Anzeige der Schnellzugriffstaste im Fenster des Talent-Bereich."
+L["BUILDS_PROFILE_STATS_FORMAT"] = "%s des Heldenbaums (%s, %s %s)"
+L["BUILDS_PROFILE_STATS_SUFFIX_KILLS"] = "Proben"
+L["BUILDS_PROFILE_STATS_SUFFIX_RUNS"] = "Durchläufe"
+L["BUILDS_PROFILE_SWITCHING_TO_EXISTING_LOADOUT"] = "Wechsel zu „%s“."
+L["BUILDS_PROFILE_SWITCHING_TO_LOADOUT"] = "Wechsel zu „%s“."
+L["BUILDS_PROFILE_UNABLE_TO_DELETE_LOADOUT"] = "Das alte Ausrüstungsset „%s“ konnte nicht bereinigt werden. Bitte versuche es erneut oder lösche es manuell."
+L["BUILDS_PROFILE_UPDATED_BUILD_TO_LOADOUT"] = "„%s“ mit neuen Talenten aktualisiert."
+L["BUILDS_RAIDS"] = "Schlachtzug"
+L["BUILDS_RAIDS_ENCOUNTERS_ALL"] = "%s: Alle Begegnungen"
+L["BUILDS_SPEED_all"] = "Jede Geschwindigkeit"
+L["BUILDS_SPEED_fast"] = "Schnelle Kills (obere 20%)"
+L["BUILDS_SPEED_median"] = "Mittlere Kills (mittlere 20%)"
 --[[Translation missing --]]
 --[[ L["BUILDS_TITLE"] = ""--]] 
 --[[Translation missing --]]
 --[[ L["BUILDS_TITLE_FULL"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_WEAPON_1"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_WEAPON_2"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_WEAPON_3"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_WEAPON_4"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_WEAPON_5"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_WEAPON_6"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_WEAPON_all"] = ""--]] 
+L["BUILDS_WEAPON_1"] = "Einhand-Doppelbewaffnung"
+L["BUILDS_WEAPON_2"] = "Zweihand-Doppelbewaffnung"
+L["BUILDS_WEAPON_3"] = "Zweihand"
+L["BUILDS_WEAPON_4"] = "Einhandwaffe + Schild"
+L["BUILDS_WEAPON_5"] = "Einhandwaffe + Nebenhand"
+L["BUILDS_WEAPON_6"] = "Einhand"
+L["BUILDS_WEAPON_all"] = "Alle Waffen"
 L["CANCEL"] = "Beenden"
 L["CHANGES_REQUIRES_UI_RELOAD"] = [=[Deine Änderungen wurden gespeichert, du musst jedoch die Benutzeroberfläche neu laden, damit diese wirksam werden.
 
@@ -171,24 +124,21 @@ L["DISABLE_RWF_MODE_RELOAD"] = "Du deaktivierst den Wettrennen Welt 1.-Modus. Du
 L["DPS"] = "DPS"
 L["DUNGEON_SHORT_NAME_AA"] = "Akademie von Algeth'ar"
 L["DUNGEON_SHORT_NAME_AD"] = "Atal'Dazar"
---[[Translation missing --]]
---[[ L["DUNGEON_SHORT_NAME_AOF"] = ""--]] 
+L["DUNGEON_SHORT_NAME_AOF"] = "Altar der Fänge"
 L["DUNGEON_SHORT_NAME_ARAK"] = "Ara-Kara, Stadt der Echos"
 L["DUNGEON_SHORT_NAME_ARC"] = "Der Arkus"
 L["DUNGEON_SHORT_NAME_AV"] = "Azurblaue Gewölbe"
 L["DUNGEON_SHORT_NAME_BH"] = "Brackenfellhöhle"
 L["DUNGEON_SHORT_NAME_BREW"] = "Metbrauerei Glutbräu"
 L["DUNGEON_SHORT_NAME_BRH"] = "Die Rabenwehr"
---[[Translation missing --]]
---[[ L["DUNGEON_SHORT_NAME_BV"] = ""--]] 
+L["DUNGEON_SHORT_NAME_BV"] = "Das blendende Tal"
 L["DUNGEON_SHORT_NAME_COEN"] = "Die Kathedrale der Ewigen Nacht"
 L["DUNGEON_SHORT_NAME_COS"] = "Hof der Sterne"
 L["DUNGEON_SHORT_NAME_COT"] = "Stadt der Fäden"
 L["DUNGEON_SHORT_NAME_DAWN"] = "Morgenbringer"
 L["DUNGEON_SHORT_NAME_DFC"] = "Dunkelflammenspalt"
 L["DUNGEON_SHORT_NAME_DHT"] = "Das Finsterherzdickicht"
---[[Translation missing --]]
---[[ L["DUNGEON_SHORT_NAME_DON"] = ""--]] 
+L["DUNGEON_SHORT_NAME_DON"] = "Naluraxbau"
 L["DUNGEON_SHORT_NAME_DOS"] = "Die Andre Seite"
 L["DUNGEON_SHORT_NAME_EB"] = "Der Immergrüne Flor"
 L["DUNGEON_SHORT_NAME_EDA"] = "Eco-Dome Al'dani"
@@ -209,8 +159,7 @@ L["DUNGEON_SHORT_NAME_MC"] = "Maisarakavernen"
 L["DUNGEON_SHORT_NAME_MISTS"] = "Nebel von Tirna Scithe"
 L["DUNGEON_SHORT_NAME_ML"] = "Das Riesenflöz"
 L["DUNGEON_SHORT_NAME_MOS"] = "Die Helmaulklippen"
---[[Translation missing --]]
---[[ L["DUNGEON_SHORT_NAME_MR"] = ""--]] 
+L["DUNGEON_SHORT_NAME_MR"] = "Mördergasse"
 L["DUNGEON_SHORT_NAME_MT"] = "Terrasse der Magister"
 L["DUNGEON_SHORT_NAME_NELT"] = "Neltharus"
 L["DUNGEON_SHORT_NAME_NL"] = "Neltharions Hort"
@@ -242,8 +191,7 @@ L["DUNGEON_SHORT_NAME_UNDR"] = "Der Tiefenpfuhl"
 L["DUNGEON_SHORT_NAME_UPPR"] = "Obere Rückkehr nach Karazhan"
 L["DUNGEON_SHORT_NAME_VOTW"] = "Verlies der Wächterinnen"
 L["DUNGEON_SHORT_NAME_VP"] = "Der Vortexgipfel"
---[[Translation missing --]]
---[[ L["DUNGEON_SHORT_NAME_VSA"] = ""--]] 
+L["DUNGEON_SHORT_NAME_VSA"] = "Arena der Leerenabe"
 L["DUNGEON_SHORT_NAME_WM"] = "Das Kronsteiganwesen"
 L["DUNGEON_SHORT_NAME_WORK"] = "Operation Mechagon - Werkstatt"
 L["DUNGEON_SHORT_NAME_WS"] = "Windläuferturm"
@@ -297,16 +245,14 @@ L["MINIMAP_SHORTCUT_ENABLE_DESC"] = "Aktiviert das Symbol um der Minikarte herum
 L["MINIMAP_SHORTCUT_HEADER"] = "Minikarte"
 L["MINIMAP_SHORTCUT_HELP"] = "|A:newplayertutorial-icon-mouse-leftbutton:16:12|a Suche |A:newplayertutorial-icon-mouse-rightbutton:16:12|a Einstellungen"
 L["MINIMAP_SHORTCUT_HELP_LEFT_CLICK"] = "Links Klick"
---[[Translation missing --]]
---[[ L["MINIMAP_SHORTCUT_HELP_OPEN_MENU"] = ""--]] 
+L["MINIMAP_SHORTCUT_HELP_OPEN_MENU"] = "Menü"
 L["MINIMAP_SHORTCUT_HELP_RIGHT_CLICK"] = "Rechts Klick"
 L["MINIMAP_SHORTCUT_HELP_SEARCH"] = "Suchen"
 L["MINIMAP_SHORTCUT_HELP_SETTINGS"] = "Einstellungen"
 L["MINIMAP_SHORTCUT_LOCK"] = "Knopf sperren"
 --[[Translation missing --]]
 --[[ L["MINIMAP_SHORTCUT_MENU_BUILDS"] = ""--]] 
---[[Translation missing --]]
---[[ L["MINIMAP_SHORTCUT_MENU_COPY_BUILD"] = ""--]] 
+L["MINIMAP_SHORTCUT_MENU_COPY_BUILD"] = "Link kopieren"
 L["MINIMAP_SHORTCUT_MINIMAP_ENABLE"] = "Minimap Button anzeigen"
 L["MINIMAP_SHORTCUT_MINIMAP_ENABLE_DESC"] = "Aktiviert die Anzeige des Symbols an der Minimap."
 L["MINIMAP_SHORTCUT_MINIMAP_LOCK"] = "Minimap Button sperren"
@@ -569,22 +515,14 @@ L["RAID_BOSS_TOT_8"] = "Primordius"
 L["RAID_BOSS_TOT_9"] = "Dunkler Animus"
 L["RAID_BOSS_TOTFW_1"] = "Konklave des Windes"
 L["RAID_BOSS_TOTFW_2"] = "Al'Akir"
---[[Translation missing --]]
---[[ L["RAID_BOSS_VA_1"] = ""--]] 
---[[Translation missing --]]
---[[ L["RAID_BOSS_VA_2"] = ""--]] 
---[[Translation missing --]]
---[[ L["RAID_BOSS_VA_3"] = ""--]] 
---[[Translation missing --]]
---[[ L["RAID_BOSS_VA_4"] = ""--]] 
---[[Translation missing --]]
---[[ L["RAID_BOSS_VA_5"] = ""--]] 
---[[Translation missing --]]
---[[ L["RAID_BOSS_VA_6"] = ""--]] 
---[[Translation missing --]]
---[[ L["RAID_BOSS_VA_7"] = ""--]] 
---[[Translation missing --]]
---[[ L["RAID_BOSS_VA_8"] = ""--]] 
+L["RAID_BOSS_VA_1"] = "Nek'zali die Seelenwicklerin"
+L["RAID_BOSS_VA_2"] = "Eingeschlossene Wachposten"
+L["RAID_BOSS_VA_3"] = "Die verlorenen Forscher"
+L["RAID_BOSS_VA_4"] = "Vashnik die Bösartige"
+L["RAID_BOSS_VA_5"] = "Sszorak"
+L["RAID_BOSS_VA_6"] = "Die Zwillingsfangzähne"
+L["RAID_BOSS_VA_7"] = "Der gewundene Altar"
+L["RAID_BOSS_VA_8"] = "Ula'tek"
 L["RAID_BOSS_VOTI_1"] = "Eranog"
 L["RAID_BOSS_VOTI_2"] = "Terros"
 L["RAID_BOSS_VOTI_3"] = "Der Primalistenrat"
@@ -642,12 +580,10 @@ L["RAID_ToES"] = "Terrasse des Endlosen Frühlings"
 L["RAID_TOES"] = "Terrasse des Endlosen Frühlings"
 L["RAID_TOT"] = "Der Thron des Donners"
 L["RAID_TOTFW"] = "Thron der Vier Winde"
---[[Translation missing --]]
---[[ L["RAID_VA"] = ""--]] 
+L["RAID_VA"] = "Der giftige Abgrund"
 L["RAID_VS"] = "Die Leerenspitze"
 L["RAID_VS_DR_MQD"] = "Leerenspitze/Traumriss/Quel'Danas"
---[[Translation missing --]]
---[[ L["RAIDERIO"] = ""--]] 
+L["RAIDERIO"] = "Raider.IO"
 L["RAIDERIO_AVERAGE_PLAYER_SCORE"] = "Durchschn. Wertungen für Zeitliche +%s"
 L["RAIDERIO_BEST_RUN"] = "Raider.IO M+ Bester Durchlauf"
 L["RAIDERIO_CLIENT_CUSTOMIZATION"] = "Raider.IO Client-Anpassung"

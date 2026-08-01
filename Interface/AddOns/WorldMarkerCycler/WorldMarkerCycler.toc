@@ -1,8 +1,8 @@
-## Interface: 120000,120001,120005,120007
+## Interface: 120000,120001,120005,120007,120100
 ## Title: World Marker Cycler
 ## Notes: Cycle world markers and clear all markers with optional modifiers
 ## Author: CKRAIGFRIEND
-## Version: 1.2
+## Version: 1.5
 ## SavedVariables: WMC_Saved, WMC_TargetSaved, WMC_MouseoverSaved, WMC_RaidPickerSaved
 
 Core.lua

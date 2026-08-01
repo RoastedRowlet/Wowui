@@ -2806,7 +2806,7 @@ function CCS:LoadBlizzardAddOns()
         "Blizzard_ChallengesUI",
         "Blizzard_WeeklyRewards",
         "Blizzard_EncounterJournal",
-        "Blizzard_Transmog"
+        "Blizzard_Transmog",
     }
 
     for _, addon in ipairs(addons) do

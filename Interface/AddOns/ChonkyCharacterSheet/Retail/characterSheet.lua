@@ -717,7 +717,6 @@ local function CreateTransmogButton()
     btn.TabBg:SetTexCoord(0.01562500, 0.79687500, 0.61328125, 0.78125000)
 
     btn.Icon = btn:CreateTexture(nil, "ARTWORK")
-    --btn.Icon:SetAtlas("transmog-icon-ui")
     btn.Icon:SetTexture("Interface\\AddOns\\ChonkyCharacterSheet\\Media\\Textures\\transmog.png")
     btn.Icon:SetSize(30, 30)
     btn.Icon:SetPoint("CENTER")
@@ -730,7 +729,11 @@ local function CreateTransmogButton()
 
     btn:SetScript("OnClick", function(self, button)
         if not InCombatLockdown() then
+            if not TransmogFrame then
+
+            else
                 ToggleFrame(TransmogFrame)
+            end
         else
 				PlaySound(8959)
 				RaidNotice_AddMessage(RaidBossEmoteFrame, format("%s", ERR_AFFECTING_COMBAT), ChatTypeInfo["SYSTEM"])        

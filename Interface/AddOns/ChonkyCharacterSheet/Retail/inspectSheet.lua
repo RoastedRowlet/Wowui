@@ -1562,8 +1562,11 @@ function CCS.initializeinspectframe()
 		local width = InspectGuildFrame:GetWidth() or 617
 		
 		InspectGuildFrameBG:SetPoint("BOTTOMRIGHT", InspectGuildFrame, "BOTTOMRIGHT", -4, 4)
-		InspectGuildFrameBanner:ClearAllPoints()
-		InspectGuildFrameBanner:SetPoint("TOP", InspectGuildFrameBG, "TOP")
+		--[[
+		if InspectGuildFrameBanner ~= nil then
+			InspectGuildFrameBanner:ClearAllPoints()
+			InspectGuildFrameBanner:SetPoint("TOP", InspectGuildFrameBG, "TOP")
+		end--]]
 	end
 
     -- This is mostly to adjust for addons like ElvUI that make changes to the character frame.  Ensures better compatibility.
@@ -1657,9 +1660,9 @@ function CCS.InspectSheetEventHandler(event, ...)
 		InspectFrame.loaded = false
         return true
 	elseif event == "INSPECT_READY" then
-				CCS.ChangeModelBg(true)
-				initializemplusplanelframe()
-				loopitems()
+		CCS.ChangeModelBg(true)
+		initializemplusplanelframe()
+		loopitems()
 	end
 end
 

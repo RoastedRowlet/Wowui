@@ -157,7 +157,7 @@ function CCS.BuilditemString(itemID, trackName, targetIlvl, bossID)
     -- Build final item string
     ---------------------------------------------------------
     local bonusString = table.concat(bonusIds, ":")
-    local specID = GetSpecializationInfo(GetSpecialization())
+    local specID = CCS.FooterFilters.spec or GetSpecializationInfo(GetSpecialization())
     local itemstring = string.format(
         "item:%d:0:0:0:0:0:0:0:%d:%d:0:0:%d:%s:0",
         itemID, UnitLevel("player"), specID, #bonusIds, bonusString
@@ -1171,7 +1171,8 @@ function CCS:UpdateFooterFiltersFromControls(parent)
 
     CCS.FooterFilters.slot    = parent.selectedSlot or "ALL"
     CCS.FooterFilters.class = parent.selectedClassID 
-    CCS.FooterFilters.armor   = parent.selectedArmorType or "ALL"
+    CCS.FooterFilters.spec = parent.selectedSpecID 	
+	CCS.FooterFilters.armor   = parent.selectedArmorType or "ALL"
     CCS.FooterFilters.primary = parent.selectedPrimaryStat or "ALL"
 
     CCS.FooterFilters.instanceID = parent.selectedInstanceID
