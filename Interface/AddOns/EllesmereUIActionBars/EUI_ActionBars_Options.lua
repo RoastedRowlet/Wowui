@@ -497,9 +497,7 @@ initFrame:SetScript("OnEvent", function(self)
         end
 
         -- Disable WoW's automatic pixel snapping on a texture
-        local function UnsnapTex(tex)
-            if tex.SetSnapToPixelGrid then tex:SetSnapToPixelGrid(false); tex:SetTexelSnappingBias(0) end
-        end
+        local UnsnapTex = EllesmereUI.PP.DisablePixelSnap
 
         -- Pre-create per-button sub-frames and textures -----------------------
         -- We allocate for all 12, then show/hide based on numButtonsShowable
@@ -3948,9 +3946,19 @@ initFrame:SetScript("OnEvent", function(self)
             local dtRow
             dtRow, h = W:DualRow(parent, y,
                 { type="toggle", text="Desaturate on Cooldown",
+                  -- setValue runs the one-shot catch-up sweep: the cooldown
+                  -- machinery repaints on edges only, so without it an icon
+                  -- grey at uncheck time stays grey until its next edge.
                   tooltip="Desaturates (grays out) action button icons while the ability is on cooldown. GCD-only cooldowns are excluded.",
                   getValue=function() return EAB.db.profile.desaturateOnCooldown or false end,
-                  setValue=function(v) EAB.db.profile.desaturateOnCooldown = v end },
+                  setValue=function(v)
+                      local p = EAB.db.profile
+                      local was = p.desaturateOnCooldown or false
+                      p.desaturateOnCooldown = v
+                      if was ~= (v or false) and EAB._DesatSettingChanged then
+                          EAB._DesatSettingChanged(v and true or false)
+                      end
+                  end },
                 { type="toggle", text="Disable Tooltips",
                   getValue=function()
                       return SGet("disableTooltips") or false
@@ -4261,6 +4269,27 @@ initFrame:SetScript("OnEvent", function(self)
                         end
                         if not anySet then bars.paging = {} end
                         if ns.RebuildBarPaging then ns.RebuildBarPaging(selKey) end
+                    end
+
+                    -- Row 0: Auto-paging opt-outs (MainBar only -- it is the only
+                    -- bar the engine pages off bonusbar). These suppress the
+                    -- implicit swaps only; an explicit page picked for a form in
+                    -- the dropdowns below still applies.
+                    if selKey == "MainBar" then
+                        local function SetAutoPageOptOut(key, v)
+                            SSet(key, v, function(k)
+                                if ns.RebuildBarPaging then ns.RebuildBarPaging(k) end
+                            end)
+                        end
+                        _, h = W:DualRow(parent, y,
+                            { type="toggle", text="Disable Form Paging",
+                              getValue=function() return SGet("disableFormPaging") or false end,
+                              setValue=function(v) SetAutoPageOptOut("disableFormPaging", v) end,
+                              tooltip="Keep Action Bar 1 on its current page when you shapeshift, stealth, or change stance, instead of swapping to that form's bar.\n\nKeybinds follow what the bar shows, so the key always casts the icon you see. Press-and-hold repeat casting is turned off on Action Bar 1 while this is enabled." },
+                            { type="toggle", text="Disable Skyriding Paging",
+                              getValue=function() return SGet("disableSkyridingPaging") or false end,
+                              setValue=function(v) SetAutoPageOptOut("disableSkyridingPaging", v) end,
+                              tooltip="Keep Action Bar 1 on its current page while skyriding, instead of swapping to the skyriding bar.\n\nYour skyriding abilities live on that bar, so put them on another bar before enabling this. Press-and-hold repeat casting is turned off on Action Bar 1 while this is enabled." });  y = y - h
                     end
 
                     -- Row 1: Show Paging Arrows (+ inline cog) | Shift Modifier
@@ -4819,11 +4848,13 @@ initFrame:SetScript("OnEvent", function(self)
                         local sz = s.cooldownFontSize or 12
                         local ox = s.cooldownTextXOffset or 0
                         local oy = s.cooldownTextYOffset or 0
+                        local ft = s.cooldownFontFit or false
                         for _, key in ipairs(GROUP_BAR_ORDER) do
                             if c then EAB.db.profile.bars[key].cooldownTextColor = { r=c.r, g=c.g, b=c.b } end
                             EAB.db.profile.bars[key].cooldownFontSize = sz
                             EAB.db.profile.bars[key].cooldownTextXOffset = ox
                             EAB.db.profile.bars[key].cooldownTextYOffset = oy
+                            EAB.db.profile.bars[key].cooldownFontFit = ft
                             EAB:ApplyCooldownFontsForBar(key)
                         end
                         EllesmereUI:RefreshPage()
@@ -4834,11 +4865,13 @@ initFrame:SetScript("OnEvent", function(self)
                         local c = s.cooldownTextColor
                         local ox = s.cooldownTextXOffset or 0
                         local oy = s.cooldownTextYOffset or 0
+                        local ft = s.cooldownFontFit or false
                         for _, key in ipairs(GROUP_BAR_ORDER) do
                             local b = EAB.db.profile.bars[key]
                             if (b.cooldownFontSize or 12) ~= sz then return false end
                             if (b.cooldownTextXOffset or 0) ~= ox then return false end
                             if (b.cooldownTextYOffset or 0) ~= oy then return false end
+                            if (b.cooldownFontFit or false) ~= ft then return false end
                             if c then
                                 local bc = b.cooldownTextColor
                                 if not bc or bc.r ~= c.r or bc.g ~= c.g or bc.b ~= c.b then return false end
@@ -4857,11 +4890,13 @@ initFrame:SetScript("OnEvent", function(self)
                             local sz = s.cooldownFontSize or 12
                             local ox = s.cooldownTextXOffset or 0
                             local oy = s.cooldownTextYOffset or 0
+                            local ft = s.cooldownFontFit or false
                             for _, key in ipairs(checkedKeys) do
                                 if c then EAB.db.profile.bars[key].cooldownTextColor = { r=c.r, g=c.g, b=c.b } end
                                 EAB.db.profile.bars[key].cooldownFontSize = sz
                                 EAB.db.profile.bars[key].cooldownTextXOffset = ox
                                 EAB.db.profile.bars[key].cooldownTextYOffset = oy
+                                EAB.db.profile.bars[key].cooldownFontFit = ft
                                 EAB:ApplyCooldownFontsForBar(key)
                             end
                             EllesmereUI:RefreshPage()
@@ -4891,7 +4926,7 @@ initFrame:SetScript("OnEvent", function(self)
                 EllesmereUI.RegisterWidgetRefresh(function() cdUpdateSwatch() end)
 
                 local _, cdCogShowRaw = EllesmereUI.BuildCogPopup({
-                    title = "Cooldown Text Offsets",
+                    title = "Cooldown Text",
                     rows = {
                         { type="slider", label="X Offset", min=-150, max=150, step=1,
                           get=function() return SVal("cooldownTextXOffset", 0) end,
@@ -4904,6 +4939,12 @@ initFrame:SetScript("OnEvent", function(self)
                           set=function(v)
                               SSet("cooldownTextYOffset", v, function(k) EAB:ApplyCooldownFontsForBar(k) end)
                               SUpdatePreview()
+                          end },
+                        { type="toggle", label="Fit Size to Button",
+                          tooltip="Caps the countdown size so it cannot spill outside small buttons.",
+                          get=function() return SVal("cooldownFontFit", false) end,
+                          set=function(v)
+                              SSet("cooldownFontFit", v and true or false, function(k) EAB:ApplyCooldownFontsForBar(k) end)
                           end },
                     },
                 })

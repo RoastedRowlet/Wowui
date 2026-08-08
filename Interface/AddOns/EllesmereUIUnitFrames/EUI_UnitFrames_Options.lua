@@ -338,21 +338,7 @@ initFrame:SetScript("OnEvent", function(self)
     local ICONS_PATH = "Interface\\AddOns\\EllesmereUI\\media\\icons\\"
     local CLASS_FULL_SPRITE_BASE = ICONS_PATH .. "class-full\\"
 
-    local CLASS_FULL_COORDS = {
-        WARRIOR     = { 0,     0.125, 0,     0.125 },
-        MAGE        = { 0.125, 0.25,  0,     0.125 },
-        ROGUE       = { 0.25,  0.375, 0,     0.125 },
-        DRUID       = { 0.375, 0.5,   0,     0.125 },
-        EVOKER      = { 0.5,   0.625, 0,     0.125 },
-        HUNTER      = { 0,     0.125, 0.125, 0.25  },
-        SHAMAN      = { 0.125, 0.25,  0.125, 0.25  },
-        PRIEST      = { 0.25,  0.375, 0.125, 0.25  },
-        WARLOCK     = { 0.375, 0.5,   0.125, 0.25  },
-        PALADIN     = { 0,     0.125, 0.25,  0.375 },
-        DEATHKNIGHT = { 0.125, 0.25,  0.25,  0.375 },
-        MONK        = { 0.25,  0.375, 0.25,  0.375 },
-        DEMONHUNTER = { 0.375, 0.5,   0.25,  0.375 },
-    }
+    local CLASS_FULL_COORDS = EllesmereUI.CLASS_ICON_SPRITE_COORDS
 
     local classIconValues = {
         ["none"]="None", ["modern"]="Modern",
@@ -1875,9 +1861,38 @@ initFrame:SetScript("OnEvent", function(self)
         --   right   = pinned to the health bar's right edge, fills leftward
         --   left    = pinned to the health bar's left edge, fills rightward
         -- right/left are absolute (independent of reverse fill); overlay mirrors.
-        local function PositionPreviewAbsorb(bar, mode, isRev)
+        local function PositionPreviewAbsorb(bar, mode, isRev, isVert)
             if not bar then return end
             bar:ClearAllPoints()
+            bar:SetOrientation(isVert and "VERTICAL" or "HORIZONTAL")
+            ns.ApplyFillRotation(bar)
+            if isVert then
+                -- Vertical fill: same rules with the axis swapped. The edge modes
+                -- keep their key names -- "right" is the far edge of the fill axis
+                -- (the top here), "left" the near one (the bottom).
+                if mode == "right" then
+                    bar:SetReverseFill(true)
+                    bar:SetPoint("TOPLEFT",  health, "TOPLEFT",  0, 0)
+                    bar:SetPoint("TOPRIGHT", health, "TOPRIGHT", 0, 0)
+                elseif mode == "left" then
+                    bar:SetReverseFill(false)
+                    bar:SetPoint("BOTTOMLEFT",  health, "BOTTOMLEFT",  0, 0)
+                    bar:SetPoint("BOTTOMRIGHT", health, "BOTTOMRIGHT", 0, 0)
+                elseif isRev then
+                    -- Reverse fill: missing health sits BELOW, so the shield grows
+                    -- down out of the current-HP edge (the health fill's bottom).
+                    bar:SetReverseFill(true)
+                    bar:SetPoint("TOPLEFT",  healthFill, "BOTTOMLEFT",  0, 0)
+                    bar:SetPoint("TOPRIGHT", healthFill, "BOTTOMRIGHT", 0, 0)
+                else
+                    -- Normal fill: missing health sits ABOVE, so the shield grows
+                    -- up out of the current-HP edge (the health fill's top).
+                    bar:SetReverseFill(false)
+                    bar:SetPoint("BOTTOMLEFT",  healthFill, "TOPLEFT",  0, 0)
+                    bar:SetPoint("BOTTOMRIGHT", healthFill, "TOPRIGHT", 0, 0)
+                end
+                return
+            end
             if mode == "right" then
                 bar:SetReverseFill(true)
                 bar:SetPoint("TOPRIGHT",    health, "TOPRIGHT",    0, 0)
@@ -1944,7 +1959,7 @@ initFrame:SetScript("OnEvent", function(self)
                 absFillTex:SetHorizTile(absTiled); absFillTex:SetVertTile(absTiled)
             end
             absorbBar:SetStatusBarColor(ac.r, ac.g, ac.b, alpha)
-            PositionPreviewAbsorb(absorbBar, settings.absorbEdgeMode or "overlay", settings.healthReverseFill)
+            PositionPreviewAbsorb(absorbBar, settings.absorbEdgeMode or "overlay", settings.healthReverseFill, settings.healthVerticalFill)
             PP.Width(absorbBar, frameW)
             PP.Height(absorbBar, healthH)
             absorbBar:SetMinMaxValues(0, 1)
@@ -1969,7 +1984,7 @@ initFrame:SetScript("OnEvent", function(self)
                 haFillTex:SetHorizTile(haTiled); haFillTex:SetVertTile(haTiled)
             end
             healAbsorbBar:SetStatusBarColor(hc.r, hc.g, hc.b, haAlpha)
-            PositionPreviewAbsorb(healAbsorbBar, settings.healAbsorbEdgeMode or "overlay", settings.healthReverseFill)
+            PositionPreviewAbsorb(healAbsorbBar, settings.healAbsorbEdgeMode or "overlay", settings.healthReverseFill, settings.healthVerticalFill)
             PP.Width(healAbsorbBar, frameW)
             PP.Height(healAbsorbBar, healthH)
             healAbsorbBar:SetMinMaxValues(0, 1)
@@ -2333,14 +2348,30 @@ initFrame:SetScript("OnEvent", function(self)
                 if portraitFrame then portraitFrame._anchored = false end
             end
             healthFill:ClearAllPoints()
-            if s.healthReverseFill then
-                healthFill:SetPoint("TOPRIGHT", health, "TOPRIGHT", 0, 0)
-                healthFill:SetPoint("BOTTOMRIGHT", health, "BOTTOMRIGHT", 0, 0)
+            -- Vertical Fill swaps the preview's fill axis to match the live bar:
+            -- the fill grows up from the bottom, and Reverse Fill flips it to
+            -- grow down from the top. The two anchors always sit on the axis the
+            -- fill does NOT grow along, so the other dimension comes from the
+            -- explicit PP.Width / PP.Height below.
+            if s.healthVerticalFill then
+                if s.healthReverseFill then
+                    healthFill:SetPoint("TOPLEFT", health, "TOPLEFT", 0, 0)
+                    healthFill:SetPoint("TOPRIGHT", health, "TOPRIGHT", 0, 0)
+                else
+                    healthFill:SetPoint("BOTTOMLEFT", health, "BOTTOMLEFT", 0, 0)
+                    healthFill:SetPoint("BOTTOMRIGHT", health, "BOTTOMRIGHT", 0, 0)
+                end
+                PP.Height(healthFill, math.floor(hh * (_previewHealthPct or 0.70) + 0.5))
             else
-                healthFill:SetPoint("TOPLEFT", health, "TOPLEFT", 0, 0)
-                healthFill:SetPoint("BOTTOMLEFT", health, "BOTTOMLEFT", 0, 0)
+                if s.healthReverseFill then
+                    healthFill:SetPoint("TOPRIGHT", health, "TOPRIGHT", 0, 0)
+                    healthFill:SetPoint("BOTTOMRIGHT", health, "BOTTOMRIGHT", 0, 0)
+                else
+                    healthFill:SetPoint("TOPLEFT", health, "TOPLEFT", 0, 0)
+                    healthFill:SetPoint("BOTTOMLEFT", health, "BOTTOMLEFT", 0, 0)
+                end
+                PP.Width(healthFill, math.floor(fw * (_previewHealthPct or 0.70) + 0.5))
             end
-            PP.Width(healthFill, math.floor(fw * (_previewHealthPct or 0.70) + 0.5))
 
             -- Live-update dark mode colors
             do
@@ -2395,13 +2426,24 @@ initFrame:SetScript("OnEvent", function(self)
                 -- backdrop, not the bg color. Mirrors the live frame edge-anchor.
                 healthBgColor:ClearAllPoints()
                 do
-                    local hpW = math.floor(fw * (_previewHealthPct or 0.70) + 0.5)
-                    if s.healthReverseFill then
-                        healthBgColor:SetPoint("TOPLEFT", health, "TOPLEFT", 0, 0)
-                        healthBgColor:SetPoint("BOTTOMRIGHT", health, "BOTTOMRIGHT", -hpW, 0)
+                    if s.healthVerticalFill then
+                        local hpH = math.floor(hh * (_previewHealthPct or 0.70) + 0.5)
+                        if s.healthReverseFill then
+                            healthBgColor:SetPoint("TOPLEFT", health, "TOPLEFT", 0, -hpH)
+                            healthBgColor:SetPoint("BOTTOMRIGHT", health, "BOTTOMRIGHT", 0, 0)
+                        else
+                            healthBgColor:SetPoint("TOPLEFT", health, "TOPLEFT", 0, 0)
+                            healthBgColor:SetPoint("BOTTOMRIGHT", health, "BOTTOMRIGHT", 0, hpH)
+                        end
                     else
-                        healthBgColor:SetPoint("TOPLEFT", health, "TOPLEFT", hpW, 0)
-                        healthBgColor:SetPoint("BOTTOMRIGHT", health, "BOTTOMRIGHT", 0, 0)
+                        local hpW = math.floor(fw * (_previewHealthPct or 0.70) + 0.5)
+                        if s.healthReverseFill then
+                            healthBgColor:SetPoint("TOPLEFT", health, "TOPLEFT", 0, 0)
+                            healthBgColor:SetPoint("BOTTOMRIGHT", health, "BOTTOMRIGHT", -hpW, 0)
+                        else
+                            healthBgColor:SetPoint("TOPLEFT", health, "TOPLEFT", hpW, 0)
+                            healthBgColor:SetPoint("BOTTOMRIGHT", health, "BOTTOMRIGHT", 0, 0)
+                        end
                     end
                 end
                 healthBgColor:SetColorTexture(uBgR, uBgG, uBgB, 1)
@@ -3022,7 +3064,7 @@ initFrame:SetScript("OnEvent", function(self)
                         _paFill:SetHorizTile(_paTiled); _paFill:SetVertTile(_paTiled)
                     end
                     absorbBar:SetStatusBarColor(_paC.r, _paC.g, _paC.b, _paA)
-                    PositionPreviewAbsorb(absorbBar, s.absorbEdgeMode or "overlay", s.healthReverseFill)
+                    PositionPreviewAbsorb(absorbBar, s.absorbEdgeMode or "overlay", s.healthReverseFill, s.healthVerticalFill)
                     absorbBar:SetWidth(fw)
                     absorbBar:SetHeight(hh)
                     absorbBar:Show()
@@ -3044,7 +3086,7 @@ initFrame:SetScript("OnEvent", function(self)
                         _haFill:SetHorizTile(_haTiled); _haFill:SetVertTile(_haTiled)
                     end
                     healAbsorbBar:SetStatusBarColor(_haC.r, _haC.g, _haC.b, _haA)
-                    PositionPreviewAbsorb(healAbsorbBar, s.healAbsorbEdgeMode or "overlay", s.healthReverseFill)
+                    PositionPreviewAbsorb(healAbsorbBar, s.healAbsorbEdgeMode or "overlay", s.healthReverseFill, s.healthVerticalFill)
                     healAbsorbBar:SetWidth(fw)
                     healAbsorbBar:SetHeight(hh)
                     healAbsorbBar:Show()
@@ -3910,6 +3952,12 @@ initFrame:SetScript("OnEvent", function(self)
         leaderIndicatorPosition= { player=true, target=true },
         leaderIndicatorX       = { player=true, target=true },
         leaderIndicatorY       = { player=true, target=true },
+        eliteIndicatorEnabled  = { target=true },
+        eliteIndicatorSize     = { target=true },
+        eliteIndicatorPosition = { target=true },
+        eliteIndicatorX        = { target=true },
+        eliteIndicatorY        = { target=true },
+        eliteIndicatorShowInInstances = { target=true },
         buffAnchor           = { player=true, target=true, focus=true },
         buffGrowth           = { player=true, target=true, focus=true },
         maxBuffs             = { player=true, target=true, focus=true },
@@ -4904,8 +4952,8 @@ initFrame:SetScript("OnEvent", function(self)
         -- showAuraTooltips key (Buffs & Debuffs item, default on = the
         -- old always-shown behavior). Zero migration; both setters write
         -- EVERY unit key so the choice covers all frames including boss.
-        local ufStrataValues = { BACKGROUND = "Background", LOW = "Low", MEDIUM = "Medium", HIGH = "High", DIALOG = "Dialog" }
-        local ufStrataOrder = { "BACKGROUND", "LOW", "MEDIUM", "HIGH", "DIALOG" }
+        local ufStrataValues = EllesmereUI.FRAME_STRATA_LABELS
+        local ufStrataOrder = EllesmereUI.FRAME_STRATA_ORDER_BASE
         local tipStrataRow
         tipStrataRow, h = W:DualRow(parent, y,
             { type="dropdown", text="Show Tooltip For",
@@ -4977,8 +5025,8 @@ initFrame:SetScript("OnEvent", function(self)
         do
             local strataRgn = tipStrataRow
             if strataRgn and strataRgn._rightRegion then strataRgn = strataRgn._rightRegion end
-            local barStrataValues = { BACKGROUND = "Background", LOW = "Low", MEDIUM = "Medium", HIGH = "High", DIALOG = "Dialog" }
-            local barStrataOrder = { "BACKGROUND", "LOW", "MEDIUM", "HIGH", "DIALOG" }
+            local barStrataValues = EllesmereUI.FRAME_STRATA_LABELS
+            local barStrataOrder = EllesmereUI.FRAME_STRATA_ORDER_BASE
             local _, cogShow = EllesmereUI.BuildCogPopup({
                 title = "Detached Bar Stratas",
                 rows = {
@@ -5764,6 +5812,15 @@ initFrame:SetScript("OnEvent", function(self)
                     { type="toggle", label="Reverse Fill",
                       get=function() return SVal("healthReverseFill", false) end,
                       set=function(v) SSet("healthReverseFill", v); ReloadAndUpdate(); UpdatePreview() end },
+                    -- Vertical Fill swaps the bar's fill AXIS; Reverse Fill still
+                    -- flips the direction within it (bottom-to-top by default,
+                    -- top-to-bottom when reversed).
+                    { type="toggle", label="Vertical Fill",
+                      tooltip="Fill the health bar bottom-to-top instead of left-to-right. Reverse Fill flips it to top-to-bottom.",
+                      get=function() return SVal("healthVerticalFill", false) end,
+                      -- RefreshPage re-labels the Absorbs Placement dropdowns for
+                      -- the new axis (cog popups bake labels in on first build).
+                      set=function(v) SSet("healthVerticalFill", v); ReloadAndUpdate(); UpdatePreview(); EllesmereUI:RefreshPage() end },
                 },
             })
             MakeCogBtn(rgn, revCogShow)
@@ -10656,8 +10713,8 @@ initFrame:SetScript("OnEvent", function(self)
             -- Inline eyeball: preview a magic dispel overlay on the top player preview.
             do
                 local rgn = dispelRow._leftRegion
-                local EYE_VISIBLE   = "Interface\\AddOns\\EllesmereUI\\media\\icons\\eui-visible.png"
-                local EYE_INVISIBLE = "Interface\\AddOns\\EllesmereUI\\media\\icons\\eui-invisible.png"
+                local EYE_VISIBLE   = EllesmereUI.EYE_VISIBLE_ICON
+                local EYE_INVISIBLE = EllesmereUI.EYE_INVISIBLE_ICON
                 local eyeBtn = CreateFrame("Button", nil, rgn)
                 eyeBtn:SetSize(26, 26)
                 eyeBtn:SetPoint("RIGHT", rgn._lastInline or rgn._control, "LEFT", -8, 0)
@@ -10747,8 +10804,8 @@ initFrame:SetScript("OnEvent", function(self)
             bottomright = "Bottom Right",
         }
         local paPosOrder = { "none", "topleft", "top", "topright", "left", "center", "right", "bottomleft", "bottom", "bottomright" }
-        local paGrowValues = { RIGHT = "Right", LEFT = "Left", UP = "Up", DOWN = "Down" }
-        local paGrowOrder = { "RIGHT", "LEFT", "UP", "DOWN" }
+        local paGrowValues = EllesmereUI.GROW_DIR_VALUES_BASE
+        local paGrowOrder = EllesmereUI.GROW_DIR_ORDER_BASE
 
         local function GetDefaultPaGrow(pos)
             if pos == "right" or pos == "topright" or pos == "bottomright" then return "LEFT" end
@@ -11002,13 +11059,35 @@ initFrame:SetScript("OnEvent", function(self)
         -- Inline cog: absorb placement (overlay / right edge / left edge)
         do
             local rgn = absorbRow._leftRegion
+            -- Placement labels follow the FILL AXIS. The saved values stay right/left --
+            -- they have always meant the FAR / NEAR end of the fill -- but on a vertical
+            -- bar "From Left Edge" describes nothing, so the wording becomes top/bottom.
+            -- MUTATED IN PLACE, never rebuilt: RefreshPage's fast path does not rebuild
+            -- the page, and a cog popup is built once then cached, so a freshly-built
+            -- table would never reach the widget. The popup re-reads values[get()] on
+            -- every show, and _invalidateMenu makes an already-built menu rebuild its
+            -- entries from this same table on the next click.
+            local absorbEdgeLabels = { overlay = "Overlay" }
+            local absorbEdgeLabelsVert  -- last applied axis; nil until the first sync
+            -- Returns true only when the axis actually flipped, so the caller can
+            -- skip _invalidateMenu on unrelated refreshes (it nils the cached menu
+            -- and would break the wired click if one were open).
+            local function SyncAbsorbEdgeLabels()
+                local vert = (SValSupported("healthVerticalFill", false)) and true or false
+                if absorbEdgeLabelsVert == vert then return false end
+                absorbEdgeLabelsVert = vert
+                absorbEdgeLabels.right = vert and "From Top Edge"    or "From Right Edge"
+                absorbEdgeLabels.left  = vert and "From Bottom Edge" or "From Left Edge"
+                return true
+            end
+            SyncAbsorbEdgeLabels()
             local _, cogShow = EllesmereUI.BuildCogPopup({
                 title = "Absorb Rendering",
                 rows = {
                     { type="dropdown", label="Placement",
-                      values = { overlay = "Overlay", right = "From Right Edge", left = "From Left Edge" },
+                      values = absorbEdgeLabels,
                       order = { "overlay", "right", "left" },
-                      get=function() return SValSupported("absorbEdgeMode", "overlay") end,
+                      get=function() SyncAbsorbEdgeLabels(); return SValSupported("absorbEdgeMode", "overlay") end,
                       set=function(v) SSetSupported("absorbEdgeMode", v) end },
                     { type="toggle", label="Show Overshield",
                       tooltip="Show the part of an absorb that exceeds your empty health and backfills over your current health. When off, absorbs only fill the empty part of the health bar.",
@@ -11029,6 +11108,17 @@ initFrame:SetScript("OnEvent", function(self)
                       end },
                 },
             })
+            -- Re-label on every page refresh (the Vertical Fill toggle fires one) and
+            -- drop any built menu so its entries rebuild with the new wording.
+            RegisterWidgetRefresh(function()
+                if not SyncAbsorbEdgeLabels() then return end
+                local pf = cogShow and cogShow._popupFrame
+                if pf and pf.GetChildren then
+                    for _, child in ipairs({ pf:GetChildren() }) do
+                        if child._invalidateMenu then child._invalidateMenu() end
+                    end
+                end
+            end)
             MakeCogBtn(rgn, cogShow)
         end
         -- Sync icon: Absorb Style + color swatch + cog settings across all frames
@@ -11084,8 +11174,8 @@ initFrame:SetScript("OnEvent", function(self)
         -- heal absorb is shown in isolation. State is a session-only runtime flag.
         do
             local rgn = healAbsorbRow._leftRegion
-            local EYE_VISIBLE   = "Interface\\AddOns\\EllesmereUI\\media\\icons\\eui-visible.png"
-            local EYE_INVISIBLE = "Interface\\AddOns\\EllesmereUI\\media\\icons\\eui-invisible.png"
+            local EYE_VISIBLE   = EllesmereUI.EYE_VISIBLE_ICON
+            local EYE_INVISIBLE = EllesmereUI.EYE_INVISIBLE_ICON
             local eyeBtn = CreateFrame("Button", nil, rgn)
             eyeBtn:SetSize(26, 26)
             eyeBtn:SetPoint("RIGHT", rgn._lastInline or rgn._control, "LEFT", -8, 0)
@@ -11147,19 +11237,52 @@ initFrame:SetScript("OnEvent", function(self)
         -- Inline cog: heal absorb placement (independent of shield absorb)
         do
             local rgn = healAbsorbRow._leftRegion
+            -- Placement labels follow the FILL AXIS. The saved values stay right/left --
+            -- they have always meant the FAR / NEAR end of the fill -- but on a vertical
+            -- bar "From Left Edge" describes nothing, so the wording becomes top/bottom.
+            -- MUTATED IN PLACE, never rebuilt: RefreshPage's fast path does not rebuild
+            -- the page, and a cog popup is built once then cached, so a freshly-built
+            -- table would never reach the widget. The popup re-reads values[get()] on
+            -- every show, and _invalidateMenu makes an already-built menu rebuild its
+            -- entries from this same table on the next click.
+            local healAbsorbEdgeLabels = { overlay = "Overlay" }
+            local healAbsorbEdgeLabelsVert  -- last applied axis; nil until the first sync
+            -- Returns true only when the axis actually flipped, so the caller can
+            -- skip _invalidateMenu on unrelated refreshes (it nils the cached menu
+            -- and would break the wired click if one were open).
+            local function SyncHealAbsorbEdgeLabels()
+                local vert = (SValSupported("healthVerticalFill", false)) and true or false
+                if healAbsorbEdgeLabelsVert == vert then return false end
+                healAbsorbEdgeLabelsVert = vert
+                healAbsorbEdgeLabels.right = vert and "From Top Edge"    or "From Right Edge"
+                healAbsorbEdgeLabels.left  = vert and "From Bottom Edge" or "From Left Edge"
+                return true
+            end
+            SyncHealAbsorbEdgeLabels()
             local _, cogShow = EllesmereUI.BuildCogPopup({
                 title = "Heal Absorb Rendering",
                 rows = {
                     { type="dropdown", label="Placement",
-                      values = { overlay = "Overlay", right = "From Right Edge", left = "From Left Edge" },
+                      values = healAbsorbEdgeLabels,
                       order = { "overlay", "right", "left" },
-                      get=function() return SValSupported("healAbsorbEdgeMode", "overlay") end,
+                      get=function() SyncHealAbsorbEdgeLabels(); return SValSupported("healAbsorbEdgeMode", "overlay") end,
                       set=function(v) SSetSupported("healAbsorbEdgeMode", v) end },
                     { type="slider", label="Backing Opacity", min=0, max=100, step=1,
                       get=function() return SValSupported("healAbsorbBgOpacity", 15) end,
                       set=function(v) SSetSupported("healAbsorbBgOpacity", v) end },
                 },
             })
+            -- Re-label on every page refresh (the Vertical Fill toggle fires one) and
+            -- drop any built menu so its entries rebuild with the new wording.
+            RegisterWidgetRefresh(function()
+                if not SyncHealAbsorbEdgeLabels() then return end
+                local pf = cogShow and cogShow._popupFrame
+                if pf and pf.GetChildren then
+                    for _, child in ipairs({ pf:GetChildren() }) do
+                        if child._invalidateMenu then child._invalidateMenu() end
+                    end
+                end
+            end)
             MakeCogBtn(rgn, cogShow)
         end
         -- Sync icon: Heal Absorb Style + color swatch + cog settings across all frames
@@ -11376,8 +11499,8 @@ initFrame:SetScript("OnEvent", function(self)
         -- (player + target only -- the focus row is dimmed with a tooltip)
         if SVisible("combatIndicatorStyle") then
             local ciRgn = sharedAddRow1._leftRegion
-            local EYE_VISIBLE   = "Interface\\AddOns\\EllesmereUI\\media\\icons\\eui-visible.png"
-            local EYE_INVISIBLE = "Interface\\AddOns\\EllesmereUI\\media\\icons\\eui-invisible.png"
+            local EYE_VISIBLE   = EllesmereUI.EYE_VISIBLE_ICON
+            local EYE_INVISIBLE = EllesmereUI.EYE_INVISIBLE_ICON
             local eyeBtn = CreateFrame("Button", nil, ciRgn)
             eyeBtn:SetSize(26, 26)
             eyeBtn:SetPoint("RIGHT", ciRgn._lastInline or ciRgn._control, "LEFT", -8, 0)
@@ -11709,6 +11832,63 @@ initFrame:SetScript("OnEvent", function(self)
                 "Apply Leader Indicator to all Frames")
             BuildLeaderSync(sharedAddRow5._rightRegion, "leaderIndicatorSize", 16,
                 "Apply Leader Icon Size to all Frames")
+        end
+
+        -- Row 5b: Elite/Rare Indicator toggle (+ inline Show-in-Instances cog)
+        -- | Elite Icon Size slider + inline directions cog (X/Y). Target only:
+        -- classification is a property of the unit being looked at. Same
+        -- controls as the Leader Indicator row above; the badge atlases match
+        -- the nameplates classification icons.
+        if selectedUnit == "target" then
+            local function eliteIndOff()
+                return SValSupported("eliteIndicatorEnabled", false) ~= true
+            end
+            local eliteRow
+            eliteRow, h = W:DualRow(parent, y,
+                { type="toggle", text="Elite/Rare Indicator",
+                  tooltip="Shows the nameplate-style dragon badge on elite, rare elite, and rare targets.",
+                  getValue=function() return SValSupported("eliteIndicatorEnabled", false) == true end,
+                  setValue=function(v)
+                      SSetSupported("eliteIndicatorEnabled", v)
+                      EllesmereUI:RefreshPage()
+                  end },
+                { type="slider", text="Elite Icon Size", min=8, max=48, step=1,
+                  disabled=eliteIndOff, disabledTooltip="Elite/Rare Indicator",
+                  getValue=function() return SValSupported("eliteIndicatorSize", 16) end,
+                  setValue=function(v) SSetSupported("eliteIndicatorSize", v) end });  y = y - h
+            SApplySupport(eliteRow._leftRegion, "eliteIndicatorEnabled")
+            SApplySupport(eliteRow._rightRegion, "eliteIndicatorSize")
+            do
+                local _, eliteInstCogShow = EllesmereUI.BuildCogPopup({
+                    title = "Elite/Rare Indicator",
+                    rows = {
+                        { type="toggle", label="Show in Instances",
+                          tooltip="Also show the badge in dungeons and raids, where most enemies are elite.",
+                          get=function() return SValSupported("eliteIndicatorShowInInstances", false) == true end,
+                          set=function(v) SSetSupported("eliteIndicatorShowInInstances", v) end },
+                    },
+                })
+                MakeCogBtn(eliteRow._leftRegion, eliteInstCogShow, nil, nil, eliteIndOff)
+            end
+            do
+                local elitePosValues = { ["topleft"]="Top Left", ["topright"]="Top Right", ["bottomleft"]="Bottom Left", ["bottomright"]="Bottom Right", ["portrait"]="Portrait" }
+                local elitePosOrder = { "topleft", "topright", "bottomleft", "bottomright", "portrait" }
+                local _, elitePosCogShow = EllesmereUI.BuildCogPopup({
+                    title = "Elite/Rare Indicator Settings",
+                    rows = {
+                        { type="dropdown", label="Position", values=elitePosValues, order=elitePosOrder,
+                          get=function() return SValSupported("eliteIndicatorPosition", "topleft") end,
+                          set=function(v) SSetSupported("eliteIndicatorPosition", v) end },
+                        { type="slider", label="X Offset", min=-200, max=200, step=1,
+                          get=function() return SValSupported("eliteIndicatorX", 0) end,
+                          set=function(v) SSetSupported("eliteIndicatorX", v) end },
+                        { type="slider", label="Y Offset", min=-200, max=200, step=1,
+                          get=function() return SValSupported("eliteIndicatorY", 0) end,
+                          set=function(v) SSetSupported("eliteIndicatorY", v) end },
+                    },
+                })
+                MakeCogBtn(eliteRow._rightRegion, elitePosCogShow, nil, nil, eliteIndOff)
+            end
         end
 
         -------------------------------------------------------------------
@@ -12177,8 +12357,8 @@ initFrame:SetScript("OnEvent", function(self)
                 -- as the main frames "Frame Strata" dropdown; overrides the global
                 -- strata for THIS frame only. Inherits the global value until set
                 -- (getter falls back to db.profile.frameStrata).
-                local miniStrataValues = { BACKGROUND = "Background", LOW = "Low", MEDIUM = "Medium", HIGH = "High", DIALOG = "Dialog" }
-                local miniStrataOrder = { "BACKGROUND", "LOW", "MEDIUM", "HIGH", "DIALOG" }
+                local miniStrataValues = EllesmereUI.FRAME_STRATA_LABELS
+                local miniStrataOrder = EllesmereUI.FRAME_STRATA_ORDER_BASE
                 rightSlot = { type="dropdown", text="Strata",
                     tooltip="Overrides the Frame Strata set in the main frames for this frame only. Controls the order that overlapping frames display in; set higher to show above other frames.",
                     values = miniStrataValues, order = miniStrataOrder,
@@ -12570,6 +12750,17 @@ initFrame:SetScript("OnEvent", function(self)
                 RegisterWidgetRefresh(function() bgSwUpdate() end)
             end
         end
+
+        -- Vertical Fill: swaps the health bar's fill AXIS. Reverse Fill (above)
+        -- still flips the direction within it, so vertical + reverse fills
+        -- top-to-bottom. Its own row -- both mini and boss layouts already fill
+        -- both halves of the Reverse Fill row.
+        _, h = W:DualRow(parent, y,
+            { type="toggle", text="Vertical Fill",
+              tooltip="Fill the health bar bottom-to-top instead of left-to-right. Reverse Fill flips it to top-to-bottom.",
+              getValue=function() return settingsTable.healthVerticalFill end,
+              setValue=function(v) settingsTable.healthVerticalFill = v; ReloadAndUpdate() end },
+            { type="spacer" });  y = y - h
 
         -- Row 3: Left Text + Right Text (with inline swatches + cogs)
         local textRow

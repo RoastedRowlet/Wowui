@@ -263,7 +263,7 @@ initFrame:SetScript("OnEvent", function(self)
             kbLbl:SetPoint("CENTER")
 
             local function FormatKey(key)
-                if not key then return "Not Bound" end
+                if not key then return EllesmereUI.L("Not Bound") end
                 local parts = {}
                 for mod in key:gmatch("(%u+)%-") do
                     parts[#parts + 1] = mod:sub(1, 1) .. mod:sub(2):lower()
@@ -1111,9 +1111,12 @@ initFrame:SetScript("OnEvent", function(self)
                     { type = "slider", label = "Scale", min = 80, max = 150, step = 1,
                       get = function() return (Cfg("hoverTooltipScale") or 100) end,
                       set = function(v) Set("hoverTooltipScale", v) end },
-                    { type = "toggle", label = "Show in Center of Screen",
-                      get = function() return Cfg("breakdownAnchorPoint") == "center" end,
-                      set = function(v) Set("breakdownAnchorPoint", v and "center" or "row") end },
+                    { type = "dropdown", label = "Anchor",
+                      values = { row = "Above Hovered Row", center = "Center of Screen",
+                                 left = "Left of Window", right = "Right of Window" },
+                      order = { "row", "center", "left", "right" },
+                      get = function() return Cfg("breakdownAnchorPoint") or "row" end,
+                      set = function(v) Set("breakdownAnchorPoint", v) end },
                     { type = "toggle", label = "Show More Spells",
                       tooltip = "Show top 15 entries instead of 8.",
                       get = function() return Cfg("showAllBreakdownSpells") ~= false end,
@@ -1458,6 +1461,9 @@ initFrame:SetScript("OnEvent", function(self)
                     { type = "slider", label = "Font Size", min = 10, max = 40, step = 1,
                       get = function() return Cfg("standaloneTimerSize") or 26 end,
                       set = function(v) Set("standaloneTimerSize", v); ApplySAT() end },
+                    { type = "toggle", label = "Show Decimal",
+                      get = function() return Cfg("standaloneTimerDecimal") or false end,
+                      set = function(v) Set("standaloneTimerDecimal", v); ApplySAT() end },
                     { type = "toggle", label = "Align Text Left",
                       disabled = function() return (Cfg("standaloneTimerAnchor") or "free") ~= "free" end,
                       disabledTooltip = "Available only when Anchor to Windows is set to Free Move.",
@@ -1612,6 +1618,8 @@ initFrame:SetScript("OnEvent", function(self)
         local SH_ICON_VIS_ITEMS = {
             { key = "iconHideInDungeon",      label = "Hide in Dungeons" },
             { key = "iconHideInRaid",         label = "Hide in Raids" },
+            { key = "iconHideInDelve",        label = "Hide in Delves" },
+            { key = "iconHideInPvP",          label = "Hide in PvP" },
             { key = "iconHideOutOfInstance",   label = "Hide out of Instances" },
         }
         local iconVisRow
@@ -1728,6 +1736,8 @@ initFrame:SetScript("OnEvent", function(self)
         local SH_BAR_VIS_ITEMS = {
             { key = "barHideInDungeon",      label = "Hide in Dungeons" },
             { key = "barHideInRaid",         label = "Hide in Raids" },
+            { key = "barHideInDelve",        label = "Hide in Delves" },
+            { key = "barHideInPvP",          label = "Hide in PvP" },
             { key = "barHideOutOfInstance",   label = "Hide out of Instances" },
         }
         local barVisRow

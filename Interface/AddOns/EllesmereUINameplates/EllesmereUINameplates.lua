@@ -150,6 +150,7 @@ function ns._appendDisplayPresetKeys(t)
         "debuffTimerPosition", "buffTimerPosition", "ccTimerPosition",
         "auraDurationTextSize", "auraDurationTextColor",
         "debuffCropIcons", "buffCropIcons", "ccCropIcons",
+        "debuffCropPercent", "buffCropPercent", "ccCropPercent",
         "showCastLockoutAsCrowdControl",
         "castIconOffsetX", "castIconOffsetY",
         "targetGlowEllesmereUI", "targetGlowBorderColor", "targetGlowHighlight", "targetBorderColor",
@@ -334,6 +335,12 @@ local defaults = {
     debuffCropIcons = false,
     buffCropIcons = false,
     ccCropIcons = false,
+    -- Per-side trim percentage for the cropped mode (5-25). 10 reproduces the
+    -- classic fixed crop (height = 80% of width) exactly, so existing cropped
+    -- setups render identically until the slider is moved.
+    debuffCropPercent = 10,
+    buffCropPercent = 10,
+    ccCropPercent = 10,
     debuffIconSize = 26,
     buffIconSize = 24,
     buffTextSize = 12,
@@ -610,61 +617,8 @@ function ns.HideCustomBorder(plate)
 end
 
 -- Health bar texture overlay tables (stored on ns to avoid local count pressure)
-do
-    local TB = "Interface\\AddOns\\EllesmereUI\\media\\textures\\"
-    ns.healthBarTextures = {
-        ["none"]          = nil,
-        ["melli"]         = TB .. "melli.tga",
-        ["beautiful"]     = TB .. "beautiful.tga",
-        ["plating"]       = TB .. "plating.tga",
-        ["atrocity"]      = TB .. "atrocity.tga",
-        ["divide"]        = TB .. "divide.tga",
-        ["glass"]         = TB .. "glass.tga",
-        ["fade-right"]    = TB .. "fade-right.tga",
-        ["thin-line-top"]    = TB .. "thin-line-top.tga",
-        ["thin-line-bottom"] = TB .. "thin-line-bottom.tga",
-        ["fade"]          = TB .. "fade.tga",
-        ["gradient-lr"]   = TB .. "gradient-lr.tga",
-        ["gradient-rl"]   = TB .. "gradient-rl.tga",
-        ["gradient-bt"]   = TB .. "gradient-bt.tga",
-        ["gradient-tb"]   = TB .. "gradient-tb.tga",
-        ["matte"]         = TB .. "matte.tga",
-        ["sheer"]         = TB .. "sheer.tga",
-        ["blinkii-diamonds"] = TB .. "blinkii-diamonds.tga",
-        ["kringel-window"]   = TB .. "kringel-window.tga",
-    }
-    ns.healthBarTextureOrder = {
-        "none", "melli", "atrocity",
-        "fade", "fade-right",
-        "thin-line-top", "thin-line-bottom",
-        "beautiful", "plating",
-        "divide", "glass",
-        "gradient-lr", "gradient-rl", "gradient-bt", "gradient-tb",
-        "matte", "sheer",
-        "blinkii-diamonds", "kringel-window",
-    }
-    ns.healthBarTextureNames = {
-        ["none"]        = "None",
-        ["melli"]       = "Melli (ElvUI)",
-        ["beautiful"]   = "Beautiful",
-        ["plating"]     = "Plating",
-        ["atrocity"]    = "Atrocity",
-        ["divide"]      = "Divide",
-        ["glass"]       = "Glass",
-        ["fade-right"]  = "Fade Right",
-        ["thin-line-top"]    = "Thin Line Top",
-        ["thin-line-bottom"] = "Thin Line Bottom",
-        ["fade"]        = "Fade",
-        ["gradient-lr"] = "Gradient Right",
-        ["gradient-rl"] = "Gradient Left",
-        ["gradient-bt"] = "Gradient Up",
-        ["gradient-tb"] = "Gradient Down",
-        ["matte"]       = "Matte",
-        ["sheer"]       = "Sheer",
-        ["blinkii-diamonds"] = "Blinkii Diamonds",
-        ["kringel-window"]   = "Kringel Window",
-    }
-end
+ns.healthBarTextures, ns.healthBarTextureNames, ns.healthBarTextureOrder =
+    EllesmereUI.BuildBarTextureTables(true)
 
 local function NoTintFlag(db, key)
     local v = db and db[key]
@@ -1343,19 +1297,35 @@ ns.GetCCIconSize = GetCCIconSize
 do
     local AURA_CROP_HEIGHT = 0.80
     local AURA_ZOOM = 0.08
+    -- Returns FALSE when uncropped, or the height FACTOR (a truthy number)
+    -- when cropped: factor = 1 - 2 * (cropPercent / 100), so the default 10%
+    -- yields the classic 0.80. Callers that only truth-test the result stay
+    -- byte-identical; the height math below reads the number when present.
     function ns.GetAuraCrop(element)
+        local on, pct
         if element == "debuffs" then
-            return (p and p.debuffCropIcons) or defaults.debuffCropIcons
+            on = (p and p.debuffCropIcons) or defaults.debuffCropIcons
+            pct = p and p.debuffCropPercent
         elseif element == "buffs" then
-            return (p and p.buffCropIcons) or defaults.buffCropIcons
+            on = (p and p.buffCropIcons) or defaults.buffCropIcons
+            pct = p and p.buffCropPercent
         elseif element == "ccs" then
-            return (p and p.ccCropIcons) or defaults.ccCropIcons
+            on = (p and p.ccCropIcons) or defaults.ccCropIcons
+            pct = p and p.ccCropPercent
         end
-        return false
+        if not on then return false end
+        pct = tonumber(pct) or 10
+        if pct < 5 then pct = 5 elseif pct > 25 then pct = 25 end
+        return 1 - 2 * (pct / 100)
     end
-    -- Frame height for a given icon width: shorter when cropped, square when not.
+    -- Frame height for a given icon width: shorter when cropped, square when
+    -- not. `cropped` is GetAuraCrop's result -- a factor number when adjustable,
+    -- plain true from any legacy caller (falls back to the classic constant).
     function ns.GetAuraCropHeight(cropped, w)
-        if cropped then return math.floor(w * AURA_CROP_HEIGHT + 0.5) end
+        if cropped then
+            local factor = (type(cropped) == "number") and cropped or AURA_CROP_HEIGHT
+            return math.floor(w * factor + 0.5)
+        end
         return w
     end
     -- Texcoord trim. Cropped scales the vertical span to the rectangle's aspect
@@ -9343,11 +9313,23 @@ function ns._UpdateMouseover()
     end
     ns._EnsureMouseoverTicker()
 end
+-- Baseline lift for friendly plates, applied to BOTH distance settings:
+-- Name Distance (name-only) and the Distance slider in the friendly plate
+-- cog (full plate). Name-only needs it because the friendly module collapses
+-- Blizzard's two-point name anchor onto the UnitFrame's centre (so long
+-- names stop truncating and the guild line has room), landing the name this
+-- far below where Blizzard's own anchor put it; the full plate carries the
+-- same lift so the two modes sit at the same height and switching between
+-- them does not jump. Both settings keep their stored values and their
+-- meaning of "relative to where the plate normally sits".
+-- On ns, not a new file local: this file is at the Lua 5.1 200-local cap.
+ns.FRIENDLY_Y_BASE = 26
+
 -- Refresh Y-offset on all visible friendly name-only plates
 function ns.RefreshFriendlyNameOnlyOffset()
     local db = p or defaults
     local nameOnly = (db.friendlyNameOnly ~= false)
-    local yOff = nameOnly and (db.friendlyNameOnlyYOffset or 0) or 0
+    local yOff = nameOnly and ((db.friendlyNameOnlyYOffset or 0) + ns.FRIENDLY_Y_BASE) or 0
     for unit, nameplate in pairs(pendingUnits) do
         if nameplate.UnitFrame then
             local uf = nameplate.UnitFrame
@@ -9403,8 +9385,9 @@ manager:SetScript("OnEvent", function(self, event, unit)
                         RestoreFromOffscreen(uf.RaidTargetFrame)
                     end
                 end
-                -- Apply Y-offset
-                local yOff = db.friendlyNameOnlyYOffset or 0
+                -- Apply Y-offset (+ the name-only baseline lift; see
+                -- ns.FRIENDLY_Y_BASE)
+                local yOff = (db.friendlyNameOnlyYOffset or 0) + ns.FRIENDLY_Y_BASE
                 if yOff ~= 0 and nameplate.UnitFrame then
                     nameplate.UnitFrame:SetPoint("TOPLEFT", nameplate, "TOPLEFT", 0, yOff)
                     nameplate.UnitFrame:SetPoint("BOTTOMRIGHT", nameplate, "BOTTOMRIGHT", 0, yOff)
@@ -9857,43 +9840,4 @@ do
         end
     end
 
-    -- /euirangedbg: user-invoked one-shot diagnostic (same role as
-    -- /cdmdbg). Prints every link in the chain so a single paste names the
-    -- failure: setting, driver, target plate, ladder rungs, and each
-    -- rung's live IsSpellInRange answer (SECRET called out explicitly).
-    SLASH_EUIRANGEDBG1 = "/euirangedbg"
-    SlashCmdList.EUIRANGEDBG = function()
-        local function out(msg) print("|cffD05B38[RangeText]|r " .. msg) end
-        out("enabled=" .. tostring(p and p.rangeTextEnabled)
-            .. " driver=" .. tostring(RT.drv and RT.drv:IsShown() or false)
-            .. " targetPlate=" .. tostring(ns._cachedTargetPlate ~= nil)
-            .. " attached=" .. tostring(RT.plate ~= nil)
-            .. " text=" .. tostring(RT.fs and RT.fs:IsShown() and RT.fs:GetText() or "hidden"))
-        if RT.fs then
-            -- Geometry/visibility chain: IsVisible false with IsShown true
-            -- means a hidden ancestor; a nil rect means the anchor never
-            -- resolved; width 0 means the font never applied.
-            out(("fs visible=%s rect=%s,%s strW=%s alpha=%s")
-                :format(tostring(RT.fs:IsVisible()),
-                    tostring(RT.fs:GetLeft()), tostring(RT.fs:GetBottom()),
-                    tostring(RT.fs:GetStringWidth()),
-                    tostring(RT.fs:GetAlpha())))
-        end
-        if RT.carrier then
-            out(("carrier visible=%s level=%s strata=%s scale=%s")
-                :format(tostring(RT.carrier:IsVisible()),
-                    tostring(RT.carrier:GetFrameLevel()),
-                    tostring(RT.carrier:GetFrameStrata()),
-                    tostring(RT.carrier:GetEffectiveScale())))
-        end
-        local tp = ns._cachedTargetPlate
-        if tp then
-            out(("plate level=%s strata=%s healthLevel=%s rightSlot=%s")
-                :format(tostring(tp:GetFrameLevel()), tostring(tp:GetFrameStrata()),
-                    tostring(tp.health and tp.health:GetFrameLevel()),
-                    tostring(GetTextSlot("textSlotRight"))))
-        end
-        local unit = ns._cachedTargetPlate and ns._cachedTargetPlate.unit
-        EllesmereUI.Range_DebugDump(unit, out)
-    end
 end

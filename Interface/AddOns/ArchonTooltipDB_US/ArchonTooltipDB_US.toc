@@ -7,7 +7,7 @@
 ## X-Database-Key: US
 ## X-Database-Name: US and Oceanic
 ## X-Game-Version-ID: warcraft-live
-## X-Updated-At: 2026-07-28T12:43:20.000Z
+## X-Updated-At: 2026-08-04T12:42:46.000Z
 ## IconTexture: Interface/AddOns/ArchonTooltip/Media/logo-32-circle.tga
 ## Category: Archon
 

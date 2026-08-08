@@ -1190,6 +1190,14 @@ local function SaveZoomLevel()
     p.savedZoom = Minimap:GetZoom()
 end
 
+-- Global names of third-party buttons that REPLACE the expansion landing page
+-- button. Such an addon hides Blizzard's button (typically unregistering its
+-- events first) and parents its own to the minimap in the same corner.
+-- Plumber's "Landing Button" is the reference case.
+local FOLIO_REPLACEMENT_BUTTONS = {
+    "PlumberLandingPageMinimapButton",
+}
+
 -- Blizzard structural frames that should NOT go into the flyout
 local flyoutBlacklist = {
     MinimapZoomIn    = true,
@@ -1200,6 +1208,18 @@ local flyoutBlacklist = {
     -- minimap surface instead of sweeping it into the addon-button flyout.
     ExpansionLandingPageMinimapButton = true,
 }
+
+-- A replacement landing button is a feature button, not a generic addon
+-- button: it belongs on the minimap surface for exactly the reason Blizzard's
+-- does. Sweeping one into the flyout also RE-CREATES the duplicate-button bug
+-- it is meant to prevent -- HideMinimapChild hides the replacement, our folio
+-- code then sees no replacement on screen and resurrects Blizzard's button via
+-- RefreshButton, and the replacing addon never hides it again because it still
+-- believes it did. Result: Blizzard's button back in the corner, the
+-- replacement buried in the flyout.
+for _, name in ipairs(FOLIO_REPLACEMENT_BUTTONS) do
+    flyoutBlacklist[name] = true
+end
 
 -- Persistently hide a minimap button via Show hook
 local addonButtonHooks = {}
@@ -3311,24 +3331,6 @@ local function MO_Refresh(p)
         MO_HookFrame(Minimap)
         for i = 1, #_moButtons do MO_HookFrame(_moButtons[i]) end
         MO_Evaluate()
-        -- Diagnostic for "stack stuck visible" reports: dumps the mouseover
-        -- state so a stuck screenshot can tell us WHICH mechanism failed
-        -- (our state says shown vs a foreign alpha write, what OverAny sees).
-        if not SlashCmdList.EUIMO then
-            SLASH_EUIMO1 = "/euimo"
-            SlashCmdList.EUIMO = function()
-                print(format("EUI MO: active=%s overAny=%s mapOver=%s hideTimer=%s",
-                    tostring(_moActive), tostring(MO_OverAny()),
-                    tostring(Minimap and Minimap:IsMouseOver()),
-                    tostring(_moHideTimer ~= nil)))
-                for i = 1, #_moButtons do
-                    local b = _moButtons[i]
-                    print(format("  %d. %s shown=%s alpha=%.2f over=%s",
-                        i, b:GetName() or "(unnamed)", tostring(b:IsShown()),
-                        b:GetAlpha() or 0, tostring(b:IsMouseOver())))
-                end
-            end
-        end
     else
         MO_CancelHide()
         -- Restore full alpha (harmless on buttons hidden by hideExtraBtns).
@@ -3798,6 +3800,26 @@ end
 -- It is a plain (non-secure) Blizzard button, so SetParent/SetPoint are safe.
 local _omniumFolioHooked = false
 
+-- True while a replacement button (FOLIO_REPLACEMENT_BUTTONS, declared with
+-- the flyout blacklist above) is on screen. Our RefreshButton nudge below
+-- would otherwise undo the replacement addon's hide -- RefreshButton re-Shows
+-- Blizzard's button, and the other addon never hides it again because it still
+-- believes it did -- so BOTH buttons end up visible until the user toggles the
+-- other addon's setting. When a replacement is visibly in charge, we keep our
+-- hands off Blizzard's button entirely; the replacement addon Shows it back
+-- itself (before hiding its own) if the user turns the replacement off, and
+-- our Show hook then re-applies our position/scale as usual.
+local function IsFolioReplacedByAddOn()
+    for _, name in ipairs(FOLIO_REPLACEMENT_BUTTONS) do
+        -- IsShown presence check: if anything else ever squats one of these
+        -- global names with a non-frame value, treat it as no replacement
+        -- rather than erroring on the method call.
+        local b = _G[name]
+        if b and b.IsShown and b:IsShown() then return true end
+    end
+    return false
+end
+
 -- Folio visibility mode with legacy fallback: pre-dropdown data carries the
 -- showOmniumFolio toggle (default ON; only false is ever stored).
 local function GetOmniumFolioMode(mp)
@@ -3934,7 +3956,7 @@ function EBS._HVRevealMapHover()
     if not mp.hideZoomButtons then
         raiseZoom()
     end
-    if GetOmniumFolioMode(mp) == "hover" then
+    if GetOmniumFolioMode(mp) == "hover" and not IsFolioReplacedByAddOn() then
         local b = _G.ExpansionLandingPageMinimapButton
         if b then
             PositionOmniumFolio(b)
@@ -3987,6 +4009,7 @@ local function ApplyOmniumFolio()
             -- Hide()/Show()s the button, and a raw IsMouseOver here could
             -- veto that Show at the exact edge for the same rounding reason.
             if mode == "never"
+               or IsFolioReplacedByAddOn()
                or (mode == "hover" and not (Minimap and EBS._HoverStillOver(Minimap))) then
                 self:Hide()
             else
@@ -4008,6 +4031,9 @@ local function ApplyOmniumFolio()
         btn:Hide()
         return
     end
+    -- A replacement landing button is on screen: leave Blizzard's alone rather
+    -- than resurrecting it next to the replacement (see IsFolioReplacedByAddOn).
+    if IsFolioReplacedByAddOn() then return end
     if mode == "hover" and not Minimap:IsMouseOver() then
         btn:Hide()
         return
@@ -5267,10 +5293,11 @@ do
 
                 local label = btn:CreateFontString(nil, "OVERLAY")
                 if EllesmereUI and EllesmereUI.PrimeFontShadow then EllesmereUI.PrimeFontShadow(label, true) end
-                label:SetFont("Fonts\\FRIZQT__.TTF", 11, "")
+                label:SetFont((EllesmereUI.GetFontPath and EllesmereUI.GetFontPath("minimap"))
+                    or "Fonts\\FRIZQT__.TTF", 11, "")
                 label:SetPoint("LEFT", btn, "LEFT", 10, 0)
                 label:SetTextColor(0.9, 0.9, 0.9)
-                label:SetText(item.text)
+                label:SetText(EllesmereUI.L(item.text))
 
                 local itemFn = item.fn
                 btn:SetScript("OnClick", function()
@@ -5327,10 +5354,11 @@ do
 
                 local label = btn:CreateFontString(nil, "OVERLAY")
                 if EllesmereUI and EllesmereUI.PrimeFontShadow then EllesmereUI.PrimeFontShadow(label, true) end
-                label:SetFont("Fonts\\FRIZQT__.TTF", 11, "")
+                label:SetFont((EllesmereUI.GetFontPath and EllesmereUI.GetFontPath("minimap"))
+                    or "Fonts\\FRIZQT__.TTF", 11, "")
                 label:SetPoint("LEFT", btn, "LEFT", 10, 0)
                 label:SetTextColor(0.9, 0.9, 0.9)
-                label:SetText(item.text)
+                label:SetText(EllesmereUI.L(item.text))
 
                 btn:HookScript("OnClick", function() C_Timer.After(0, function() SetMenuVisible(false) end) end)
 
@@ -5359,58 +5387,6 @@ do
         self:UnregisterEvent("PLAYER_LOGIN")
         CreateMenuFrame()
     end)
-end
-
--- Debug: /euiblock -- after 3 seconds, print every click-enabled frame under
--- the cursor, INCLUDING motion-disabled ones that /fstack cannot see (those
--- are the invisible click-blockers).
-SLASH_EUIBLOCK1 = "/euiblock"
-SlashCmdList.EUIBLOCK = function()
-    print("|cff0cd29fEllesmereUI:|r hover the blocked spot -- scanning in 3 seconds...")
-    -- Frame state on protected frames comes back as secret booleans in
-    -- Midnight and boolean-testing those throws, so each frame's probe runs
-    -- under pcall and secret/forbidden frames are simply skipped.
-    local function Probe(fr)
-        if fr:IsForbidden() or not fr:IsVisible() or not fr:IsMouseOver() then return end
-        if not (fr.IsMouseClickEnabled and fr:IsMouseClickEnabled()) then return end
-        return (fr:GetDebugName() or "?"), tostring(fr:IsMouseMotionEnabled())
-    end
-    C_Timer.After(3, function()
-        print("|cff0cd29fEllesmereUI:|r click-enabled frames under the cursor:")
-        local f = EnumerateFrames()
-        local n = 0
-        while f do
-            local okc, name, motion = pcall(Probe, f)
-            if okc and name then
-                n = n + 1
-                print(format("  %s  (motion: %s)", name, motion))
-            end
-            f = EnumerateFrames(f)
-        end
-        print(format("|cff0cd29fEllesmereUI:|r %d frame(s).", n))
-    end)
-end
-
--- Debug: /euimap -- dump every direct Minimap child with its size, state and
--- the atlases of its Default-state regions, to identify anonymous Blizzard
--- widgets (like the guild banner) that need suppression.
-SLASH_EUIMAP1 = "/euimap"
-SlashCmdList.EUIMAP = function()
-    print("|cff0cd29fEllesmereUI:|r Minimap children:")
-    for i, child in ipairs({ Minimap:GetChildren() }) do
-        local okc, line = pcall(function()
-            local d = child.Default
-            local a1 = d and d.Background and d.Background.GetAtlas and d.Background:GetAtlas()
-            local a2 = d and d.Border and d.Border.GetAtlas and d.Border:GetAtlas()
-            local w, h = child:GetSize()
-            return format("  %d. %s  %.0fx%.0f  shown:%s click:%s  atlas:%s / %s",
-                i, child:GetDebugName() or "?", w or 0, h or 0,
-                tostring(child:IsShown()),
-                tostring(child.IsMouseClickEnabled and child:IsMouseClickEnabled()),
-                tostring(a1), tostring(a2))
-        end)
-        if okc and line then print(line) end
-    end
 end
 
 function EBS:OnInitialize()

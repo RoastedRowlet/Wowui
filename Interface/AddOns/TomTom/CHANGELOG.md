@@ -1,8 +1,18 @@
 # TomTom
 
-## [v4.3.6-release](https://github.com/jnwhiteh/TomTom/tree/v4.3.6-release) (2026-06-19)
-[Full Changelog](https://github.com/jnwhiteh/TomTom/commits/v4.3.6-release) [Previous Releases](https://github.com/jnwhiteh/TomTom/releases)
+## [v4.3.8-release](https://github.com/jnwhiteh/TomTom/tree/v4.3.8-release) (2026-08-02)
+[Full Changelog](https://github.com/jnwhiteh/TomTom/commits/v4.3.8-release) [Previous Releases](https://github.com/jnwhiteh/TomTom/releases)
 
+- Avoid lookup for /way #XXXX commands, just try to set directly  
+- Move back to a unified TOC  
+- Update TOC flavors and add explicit Wrath TOC  
+    Interface-Classic/BCC renamed to Interface-Vanilla/TBC to match the  
+    flavor names update.sh writes and release.sh validates. Interface-Retail  
+    and Interface-Cata dropped; the base line already covers retail and there  
+    is no live Cata product to track.  
+    Titan ships as an explicit TomTom\_Wrath.toc at 38002. The packager's  
+    split-TOC case for titan is commented out, so an Interface-Titan line  
+    produces an extensionless file rather than a TOC.  
 - Update TomTom for 12.0.7  
 - Add new localization strings for TomTom (#16)  
     * Update Localization.frFR.lua  
@@ -692,6 +702,3 @@
     * Enable the right-click menu for minimap waypoints  
     * Enable the right-click menu for worldmap waypoints  
     * Ask for confirmation when removing all waypoints  
-- Added an option to disable the right-click menu on the crazy-arrow  
-- Added an option to clear a waypoint from the crazy arrow, shown on the crazy arrow context menu  
-- * Added a public API to allow for custom callbacks that work with the frontend  

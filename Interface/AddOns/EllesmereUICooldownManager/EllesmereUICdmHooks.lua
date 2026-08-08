@@ -1466,16 +1466,6 @@ do
     end)
 end
 
--- Diagnostic: /cdmreadydbg toggles a one-line print at each CD-ready sound FIRE
--- (live spellID, name, base id, bar, charge state) so a "fires while spamming"
--- report can be traced to the exact spell and reason. Off by default; the print
--- is gated on the flag so it is zero cost unless toggled on.
-ns._cdReadySoundDebug = false
-SLASH_CDMREADYDBG1 = "/cdmreadydbg"
-SlashCmdList.CDMREADYDBG = function()
-    ns._cdReadySoundDebug = not ns._cdReadySoundDebug
-    print("|cff0cd29f[CDReady]|r debug " .. (ns._cdReadySoundDebug and "ON" or "OFF"))
-end
 
 -- Reject armed->ready spans shorter than this: a real cooldown arms the moment
 -- the spell is used, so a sub-GCD-length arm can only be a transient misread
@@ -1515,23 +1505,13 @@ local function CdReadyIsChargeSpell(liveSid)
     return ci ~= nil and (ci.maxCharges or 0) > 1
 end
 
--- Single play point for both drivers: throttled, always disarms, carries the
--- /cdmreadydbg print (src names which driver won the edge).
+-- Single play point for both drivers: throttled, always disarms.
 local function PlayCdReadySound(fd, key, liveSid, sid, bk, src)
     fd._cdReadyArmed = false
     local now = GetTime()
     local last = fd._cdReadySoundAt
     if last and (now - last) < CD_READY_SOUND_GAP then return end
     fd._cdReadySoundAt = now
-    if ns._cdReadySoundDebug then
-        local nm = (C_Spell.GetSpellName and C_Spell.GetSpellName(liveSid)) or "?"
-        local ci = C_Spell.GetSpellCharges and C_Spell.GetSpellCharges(liveSid)
-        print(string.format(
-            "|cff0cd29f[CDReady]|r FIRE(%s) live=%s '%s' base=%s bar=%s maxCharges=%s chargeRecharging=%s",
-            tostring(src), tostring(liveSid), tostring(nm), tostring(sid), tostring(bk),
-            ci and tostring(ci.maxCharges) or "-",
-            ci and tostring(ci.isActive) or "-"))
-    end
     local path = ns.FOCUSKICK_SOUND_PATHS and ns.FOCUSKICK_SOUND_PATHS[key]
     if path then PlaySoundFile(path, "Master") end
 end
@@ -1834,10 +1814,19 @@ end
 -------------------------------------------------------------------------------
 --  "Hide Text at 0 Stacks" (bar-level, cd/utility bars): hide the charge
 --  counter (frame.ChargeCount.Current) while a charge spell is genuinely OUT
---  of charges, instead of showing a 0. Uses the same clean charges>0
---  predicate as CdmShouldHideCountdown above -- GetSpellCooldown().isActive
---  AND not isOnGCD, both plain flags; the secret currentCharges is never
---  read, so the display is identical in and out of instanced combat. Driven
+--  of charges, instead of showing a 0. The count itself is the alpha:
+--  SetAlpha clamps to [0,1] engine-side, so alpha := currentCharges renders
+--  hidden at exactly 0 and fully visible at 1+, with no comparison at all.
+--  SetAlpha accepts secret numbers (SecretArguments AllowedWhenTainted), so
+--  the SAME write runs in and out of instanced combat -- a secret count
+--  writes through with the memo dirtied, never stored or compared. (The
+--  earlier clean-flag inference "real non-GCD cooldown = zero charges" is
+--  NOT universal: Roll-class wiring -- native, or talent-granted charges on
+--  cooldown spells like Feint / Survival of the Fittest -- keeps the main
+--  cooldown record active while charges are banked, which hid a real count.
+--  Field report 8.7.1. CdmShouldHideCountdown still uses that inference and
+--  shares the blind spot in the harmless direction: it shows the duration
+--  where it could hide it.) Driven
 --  by the same SPELL_UPDATE_CHARGES edge as the other charge features (fires
 --  on every spend AND refill, nothing else); the event shell is created
 --  lazily on first enrollment and the watch set self-drains, so a user who
@@ -1886,12 +1875,19 @@ local function EvalZeroChargeTextFrame(frame, fd)
         ZctSetAlpha(fd, fs, 1)
         return
     end
-    -- 0 charges <=> on a real (non-GCD) cooldown; see CdmShouldHideCountdown
-    -- for why the isOnGCD term is required (a GCD right after a cast reports
-    -- isActive with a charge still in hand).
-    local cdInfo = C_Spell.GetSpellCooldown and C_Spell.GetSpellCooldown(liveSid)
-    local zero = cdInfo and cdInfo.isActive and not cdInfo.isOnGCD
-    ZctSetAlpha(fd, fs, zero and 0 or 1)
+    -- Alpha := currentCharges. The engine clamps SetAlpha to [0,1], so the
+    -- count renders itself: hidden at exactly 0, fully visible at 1+ -- one
+    -- write, no comparison, correct for every charge wiring (see the block
+    -- header). Secret count (instanced combat): same write, memo dirtied.
+    local cc = ci.currentCharges
+    if cc == nil then
+        ZctSetAlpha(fd, fs, 1)
+    elseif issecretvalue and issecretvalue(cc) then
+        fd._zctAlpha = nil
+        fs:SetAlpha(cc)
+    else
+        ZctSetAlpha(fd, fs, cc > 1 and 1 or cc)
+    end
 end
 
 function ns.WatchZeroChargeTextIfEnabled(frame)
@@ -2144,34 +2140,6 @@ local function TryHookSwiftmend(frame, fd)
     if SwiftmendEnabled() then iconWidget:SetVertexColor(1, 1, 1) end
 end
 
--- Temporary diagnostic for the "keep Swiftmend bright" report: dumps every
--- CDM frame currently resolving to Swiftmend plus its hook state.
-SLASH_CDMSMDBG1 = "/cdmsmdbg"
-SlashCmdList.CDMSMDBG = function()
-    local n, hookedN = 0, 0
-    for frame, fd in pairs(hookFrameData) do
-        local dispSID, baseSID = ResolveFrameSpellID(frame)
-        if dispSID and issecretvalue(dispSID) then dispSID = nil end
-        if baseSID and issecretvalue(baseSID) then baseSID = nil end
-        if dispSID == SWIFTMEND_SID or baseSID == SWIFTMEND_SID then
-            n = n + 1
-            if fd._smVCHooked then hookedN = hookedN + 1 end
-            local col = "?"
-            local tex = fd.tex
-            if tex and tex.GetVertexColor then
-                local r, g, b = tex:GetVertexColor()
-                if r and not issecretvalue(r) then
-                    col = string.format("%.2f %.2f %.2f", r, g, b)
-                end
-            end
-            print(("|cff0cd29f[SMDBG]|r sid=%s/%s hooked=%s vc=%s shown=%s"):format(
-                tostring(dispSID), tostring(baseSID), tostring(fd._smVCHooked or false),
-                col, tostring(frame:IsShown())))
-        end
-    end
-    print(("|cff0cd29f[SMDBG]|r swiftmend frames=%d hooked=%d druid=%s enabled=%s"):format(
-        n, hookedN, tostring(_isDruid), tostring(SwiftmendEnabled())))
-end
 
 -------------------------------------------------------------------------------
 --  Per-spell Custom Icon
@@ -2646,6 +2614,9 @@ local function DecorateFrame(frame, barData)
                 -- duration timers work correctly during GCD.
                 local bd2 = bk2 and barDataByKey and barDataByKey[bk2]
                 local _gcdSuppressed = false
+                -- Recharge duration of a charge spell whose recharge is running out
+                -- underneath a GCD; see ns.GCDTailAlpha at the swipe writes below.
+                local _gcdChargeTail
                 -- Per-bar "Suppress GCD": alpha-0 the swipe while the displayed
                 -- cooldown is just a GCD. Two cases must NEVER be suppressed:
                 --   1. The Hide-Active override window is forcing the real recharge
@@ -2655,7 +2626,11 @@ local function DecorateFrame(frame, barData)
                 --      never a GCD -- alpha-0'ing it blanks the recharge for the entire
                 --      GCD whenever another ability is pressed. Charge recharges are
                 --      shown as their own swipe, so the GCD on top is irrelevant.
-                if bd2 and bd2.suppressGCD and sid2 and not fd._hideActiveOverriding
+                -- The Hide-Active exclusion applies to the whole-swipe suppression
+                -- below, NOT to the charge tail: _hideActiveOverriding follows the
+                -- active read, which flaps for charge spells, and a fix that switches
+                -- itself off whenever the icon happens to read active is no fix.
+                if bd2 and bd2.suppressGCD and sid2
                    and C_Spell and C_Spell.GetSpellCooldown then
                     -- Charge-recharge guard. A charge spell that is mid-recharge --
                     -- INCLUDING at 0 charges -- is showing its recharge, never a GCD,
@@ -2678,16 +2653,26 @@ local function DecorateFrame(frame, barData)
                         local ci = C_Spell.GetSpellCharges(effID2) or C_Spell.GetSpellCharges(sid2)
                         chargeRecharging = (ci and (ci.maxCharges or 0) > 1 and ci.isActive == true) or false
                     end
-                    if not chargeRecharging then
-                        -- The GCD read must use the override too: a transform's real
-                        -- CD ticks on the override ID (e.g. Rushing Wind Kick over
-                        -- Rising Sun Kick), and the base-ID query reads isOnGCD=true
-                        -- through that whole CD, leaving the swipe suppressed for
-                        -- its full duration.
-                        local cdInfo = C_Spell.GetSpellCooldown(effID2) or C_Spell.GetSpellCooldown(sid2)
-                        if cdInfo and cdInfo.isOnGCD then
-                            cd:SetSwipeColor(0, 0, 0, 0)
-                            _gcdSuppressed = true
+                    -- The GCD read must use the override too: a transform's real
+                    -- CD ticks on the override ID (e.g. Rushing Wind Kick over
+                    -- Rising Sun Kick), and the base-ID query reads isOnGCD=true
+                    -- through that whole CD, leaving the swipe suppressed for
+                    -- its full duration.
+                    local cdInfo = C_Spell.GetSpellCooldown(effID2) or C_Spell.GetSpellCooldown(sid2)
+                    if cdInfo and cdInfo.isOnGCD then
+                        if not chargeRecharging then
+                            if not fd._hideActiveOverriding then
+                                cd:SetSwipeColor(0, 0, 0, 0)
+                                _gcdSuppressed = true
+                            end
+                        elseif C_Spell.GetSpellChargeDuration then
+                            -- Recharge in flight, but the LAST GCD-length slice of it
+                            -- is drawn by the GCD, not the recharge. Hand the recharge
+                            -- duration to the swipe writes below, which fade the alpha
+                            -- to 0 for that slice only. Anything earlier keeps the
+                            -- recharge swipe, which is what case 2 above protects.
+                            _gcdChargeTail = C_Spell.GetSpellChargeDuration(effID2)
+                                or C_Spell.GetSpellChargeDuration(sid2)
                         end
                     end
                 end
@@ -2757,7 +2742,7 @@ local function DecorateFrame(frame, barData)
                         end
                     end
                     if not _gcdSuppressed then
-                        cd:SetSwipeColor(0, 0, 0, hideActiveAlpha)
+                        cd:SetSwipeColor(0, 0, 0, ns.GCDTailAlpha(_gcdChargeTail, hideActiveAlpha))
                     end
                     if isActive then
                         fd._hideActiveOverriding = true
@@ -2788,7 +2773,7 @@ local function DecorateFrame(frame, barData)
                 else
                     -- Not active: black swipe.
                     if not _gcdSuppressed then
-                        cd:SetSwipeColor(0, 0, 0, barData.swipeAlpha or 0.7)
+                        cd:SetSwipeColor(0, 0, 0, ns.GCDTailAlpha(_gcdChargeTail, barData.swipeAlpha or 0.7))
                     end
                     -- Desaturate When Not Active (per-spell). Symmetric: desaturate
                     -- while the setting is on, and RE-saturate when it's turned off --
@@ -4145,6 +4130,45 @@ end
 --  EvaluateRemainingDuration on a DurationObject handles secret values
 --  internally so we never compare secret numbers ourselves.
 -------------------------------------------------------------------------------
+-- Tail of a charge recharge, for "Suppress GCD". A recharge with less time left
+-- than the running GCD is no longer what the swipe draws -- the GCD outlasts it
+-- and takes the frame over -- so it has to be suppressed like any other GCD. The
+-- remaining time is a secret and cannot be compared in Lua, so the threshold is
+-- applied engine-side by a Step curve: below the GCD it yields alpha 0, at or
+-- above it yields the alpha the bar would have used. The result may itself be
+-- SECRET; never compare it. SetSwipeColor is AllowedWhenTainted so it goes
+-- straight in. GCD length comes from UnitSpellHaste -- which, field-confirmed
+-- 2026-08-02, is ALSO a secret in instanced combat, so it gets the
+-- issecretvalue-first treatment: a secret haste falls back to 0 (unhasted
+-- 1.5s GCD). That errs toward suppressing the tail slightly early on hasted
+-- players, and the moment haste reads clean again the exact window returns.
+local _gcdTailCurves = {}
+function ns.GCDTailAlpha(durObj, normalAlpha)
+    normalAlpha = normalAlpha or 0
+    if not (durObj and durObj.EvaluateRemainingDuration
+            and C_CurveUtil and C_CurveUtil.CreateCurve
+            and Enum and Enum.LuaCurveType) then
+        return normalAlpha
+    end
+    local haste = (UnitSpellHaste and UnitSpellHaste("player")) or 0
+    if (issecretvalue and issecretvalue(haste)) or type(haste) ~= "number" then
+        haste = 0
+    end
+    local len = 1.5 / (1 + haste / 100)
+    if len < 0.75 then len = 0.75 end          -- engine floor
+    len = math.floor(len * 100 + 0.5) / 100    -- bound the curve cache
+    local key = len .. ":" .. normalAlpha
+    local curve = _gcdTailCurves[key]
+    if not curve then
+        curve = C_CurveUtil.CreateCurve()
+        curve:SetType(Enum.LuaCurveType.Step)
+        curve:AddPoint(0, 0)                -- recharge ends first: the swipe is the GCD
+        curve:AddPoint(len, normalAlpha)    -- recharge outlasts it: leave it visible
+        _gcdTailCurves[key] = curve
+    end
+    return durObj:EvaluateRemainingDuration(curve, normalAlpha)
+end
+
 local _desatCurve
 if C_CurveUtil and C_CurveUtil.CreateCurve then
     _desatCurve = C_CurveUtil.CreateCurve()
@@ -5083,52 +5107,6 @@ ns._MarkPresetCdDirty = function()
     if ns.ArmBuffTicker then ns.ArmBuffTicker() end
 end
 
--- TEMP DEBUG: /cdmcc -- dumps why the "Show Charges" custom-spell count is / is
--- not displaying. Remove once diagnosed.
-SLASH_EUICDMCC1 = "/cdmcc"
-SlashCmdList["EUICDMCC"] = function()
-    local function p(...) print("|cff66ccff[EUICC]|r", ...) end
-    local function safe(v)
-        if issecretvalue and issecretvalue(v) then return "<secret>" end
-        return tostring(v)
-    end
-    p("gate _cdmAnyCustomForceCount =", tostring(ns._cdmAnyCustomForceCount),
-      "| dirty =", tostring(_presetCdDirty))
-    p("APIs: GetSpellCharges=", tostring(C_Spell and C_Spell.GetSpellCharges ~= nil),
-      "GetSpellDisplayCount=", tostring(C_Spell and C_Spell.GetSpellDisplayCount ~= nil),
-      "GetSpellCastCount=", tostring(C_Spell and C_Spell.GetSpellCastCount ~= nil))
-    local count = 0
-    for fkey, f in pairs(_presetFrames) do
-        if f._isCustomSpellFrame and not f._isCustomBuffFrame then
-            count = count + 1
-            local sid = f._cachedPresetSID
-            if not sid then local m = fkey:match(":(%d+)$"); sid = m and tonumber(m) end
-            local fc = _ecmeFC[f]
-            local bk = fc and fc.barKey
-            local sd = bk and ns.GetBarSpellData and ns.GetBarSpellData(bk)
-            local flag = sd and sd.customSpellForceCount and sd.customSpellForceCount[sid]
-            local ci = sid and C_Spell.GetSpellCharges and C_Spell.GetSpellCharges(sid)
-            local disp = sid and C_Spell.GetSpellDisplayCount and C_Spell.GetSpellDisplayCount(sid)
-            local cast = sid and C_Spell.GetSpellCastCount and C_Spell.GetSpellCastCount(sid)
-            p(string.format("[%s] %s | bk=%s shown=%s flag=%s",
-                tostring(sid), tostring(sid and C_Spell.GetSpellName(sid)),
-                tostring(bk), tostring(f:IsShown()), tostring(flag)))
-            local nEff = (ci and disp) or cast
-            local tok, tstr
-            if C_StringUtil and C_StringUtil.TruncateWhenZero then
-                tok, tstr = pcall(C_StringUtil.TruncateWhenZero, nEff)
-            end
-            p(string.format("   forceCountTbl=%s charges=%s displayCount=%s castCount=%s",
-                tostring(sd and sd.customSpellForceCount ~= nil),
-                tostring(ci ~= nil), safe(disp), safe(cast)))
-            p(string.format("   TruncateWhenZero: ok=%s -> %s | text=%s textShown=%s",
-                tostring(tok), safe(tstr),
-                tostring(f._castCountText ~= nil),
-                tostring(f._castCountText and f._castCountText:IsShown())))
-        end
-    end
-    if count == 0 then p("NO custom spell frames present (add one to a CD/utility bar first)") end
-end
 
 -- "Hide Items if Missing": detect when a tracked consumable's bag presence
 -- flips (acquired or fully used up) for any bar that opted in, and queue a

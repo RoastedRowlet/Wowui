@@ -234,7 +234,7 @@ local function getChunkLookup(table, length)
 end
 
 local lookup = {'Mage-Frost','DeathKnight-Unholy',}
-local provider = {region='US',realm='Shandris',name='US',type='subscribers',zone=46,date='2026-07-28',data={Ei='Eifaun:BAEALgAECgUJCQAAAA==.',Ki='Kippo:BAECLgAFFH8IAAIBAAUJJgURMwDRAAVoDAAAAgAhAGkMAAACAAQAawwAAAEAAgBsDAAAAQAJAOoMAAACABEAAQAFCSYFETMA0QAFaAwAAAIAIQBpDAAAAgAEAGsMAAABAAIAbAwAAAEACQDqDAAAAgARAC4ABAp/IwACAQAICZYXQEoAWAIAAQAICZYXQEoAWAIAAS4ABRQHCRUAAgC2EQA=.',},}
+local provider = {region='US',realm='Shandris',name='US',type='subscribers',zone=46,date='2026-08-04',data={Ei='Eifaun:BAEALgAECgUJCQAAAA==.',Ki='Kippo:BAECLgAFFH8IAAIBAAUJJgURMwDRAAVoDAAAAgAhAGkMAAACAAQAawwAAAEAAgBsDAAAAQAJAOoMAAACABEAAQAFCSYFETMA0QAFaAwAAAIAIQBpDAAAAgAEAGsMAAABAAIAbAwAAAEACQDqDAAAAgARAC4ABAp/IwACAQAICZYXQEoAWAIAAQAICZYXQEoAWAIAAS4ABRQHCRUAAgC2EQA=.',},}
 provider.parse = parse
 
 local rawData = provider.data

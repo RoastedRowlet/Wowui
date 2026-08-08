@@ -234,7 +234,7 @@ local function getChunkLookup(table, length)
 end
 
 local lookup = {'Priest-Discipline','Priest-Shadow',}
-local provider = {region='US',realm='Goldrinn',name='US',type='subscribers',zone=46,date='2026-07-28',data={Bl='Blu:BAECLgAFFH8XAAIBAAQJvxAOFADpAARoDAAACQApAGkMAAAHADYAawwAAAIAIQDqDAAABQAqAAEABAm/EA4UAOkABGgMAAAJACkAaQwAAAcANgBrDAAAAgAhAOoMAAAFACoALgAECn9kAAMBAAkJKiDDAABTAwABAAkJKiDDAABTAwACAAMJtxL+DwCvAAABLgAFFAQJFwABAL8QAA==.',},}
+local provider = {region='US',realm='Goldrinn',name='US',type='subscribers',zone=46,date='2026-08-04',data={Bl='Blu:BAECLgAFFH8XAAIBAAQJvxBkFQDfAARoDAAACQApAGkMAAAHADYAawwAAAIAIQDqDAAABQAqAAEABAm/EGQVAN8ABGgMAAAJACkAaQwAAAcANgBrDAAAAgAhAOoMAAAFACoALgAECn9sAAMBAAkJKiDRAABTAwABAAkJKiDRAABTAwACAAMJtxJEEQCvAAABLgAFFAQJFwABAL8QAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

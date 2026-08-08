@@ -461,6 +461,7 @@ local defaults = {
             leaderIndicatorX = 0,
             leaderIndicatorY = 0,
             healthReverseFill = false,
+            healthVerticalFill = false,
             smoothBars = false,
             powerReverseFill = false,
         },
@@ -644,7 +645,14 @@ local defaults = {
             leaderIndicatorPosition = "topleft",
             leaderIndicatorX = 0,
             leaderIndicatorY = 0,
+            eliteIndicatorEnabled = false,
+            eliteIndicatorSize = 16,
+            eliteIndicatorPosition = "topleft",
+            eliteIndicatorX = 0,
+            eliteIndicatorY = 0,
+            eliteIndicatorShowInInstances = false,
             healthReverseFill = false,
+            healthVerticalFill = false,
             smoothBars = false,
             powerReverseFill = false,
         },
@@ -697,6 +705,7 @@ local defaults = {
             playerCastbarWidth = 181,
             playerCastbarHeight = 14,
             healthReverseFill = false,
+            healthVerticalFill = false,
             smoothBars = false,
             powerReverseFill = false,
         },
@@ -729,6 +738,7 @@ local defaults = {
             highlightColor = { r = 1, g = 1, b = 1 },
             powerPosition = "none",
             healthReverseFill = false,
+            healthVerticalFill = false,
             smoothBars = false,
         },
         -- Focus Target: independent clone of Target of Target defaults.
@@ -764,6 +774,7 @@ local defaults = {
             highlightColor = { r = 1, g = 1, b = 1 },
             powerPosition = "none",
             healthReverseFill = false,
+            healthVerticalFill = false,
             smoothBars = false,
         },
         pet = {
@@ -795,6 +806,7 @@ local defaults = {
             highlightColor = { r = 1, g = 1, b = 1 },
             powerPosition = "none",
             healthReverseFill = false,
+            healthVerticalFill = false,
             smoothBars = false,
         },
         focus = {
@@ -961,6 +973,7 @@ local defaults = {
             raidMarkerX = 0,
             raidMarkerY = 0,
             healthReverseFill = false,
+            healthVerticalFill = false,
             smoothBars = false,
             powerReverseFill = false,
         },
@@ -1098,6 +1111,7 @@ local defaults = {
             raidMarkerY = 0,
             bossStackDirection = "down",
             healthReverseFill = false,
+            healthVerticalFill = false,
             smoothBars = false,
         },
         enabledFrames = {
@@ -1251,59 +1265,8 @@ local function UnsnapTex(tex)
 end
 
 -- Health bar texture overlay lookup
-local TEXTURE_BASE = "Interface\\AddOns\\EllesmereUI\\media\\textures\\"
-local healthBarTextures = {
-    ["none"]          = nil,
-    ["melli"]         = TEXTURE_BASE .. "melli.tga",
-    ["beautiful"]     = TEXTURE_BASE .. "beautiful.tga",
-    ["plating"]       = TEXTURE_BASE .. "plating.tga",
-    ["atrocity"]      = TEXTURE_BASE .. "atrocity.tga",
-    ["divide"]        = TEXTURE_BASE .. "divide.tga",
-    ["glass"]         = TEXTURE_BASE .. "glass.tga",
-    ["fade-right"]    = TEXTURE_BASE .. "fade-right.tga",
-    ["thin-line-top"]    = TEXTURE_BASE .. "thin-line-top.tga",
-    ["thin-line-bottom"] = TEXTURE_BASE .. "thin-line-bottom.tga",
-    ["fade"]          = TEXTURE_BASE .. "fade.tga",
-    ["gradient-lr"]   = TEXTURE_BASE .. "gradient-lr.tga",
-    ["gradient-rl"]   = TEXTURE_BASE .. "gradient-rl.tga",
-    ["gradient-bt"]   = TEXTURE_BASE .. "gradient-bt.tga",
-    ["gradient-tb"]   = TEXTURE_BASE .. "gradient-tb.tga",
-    ["matte"]         = TEXTURE_BASE .. "matte.tga",
-    ["sheer"]         = TEXTURE_BASE .. "sheer.tga",
-    ["blinkii-diamonds"] = TEXTURE_BASE .. "blinkii-diamonds.tga",
-    ["kringel-window"]   = TEXTURE_BASE .. "kringel-window.tga",
-}
-local healthBarTextureOrder = {
-    "none", "melli", "atrocity",
-    "fade", "fade-right",
-    "thin-line-top", "thin-line-bottom",
-    "beautiful", "plating",
-    "divide", "glass",
-    "gradient-lr", "gradient-rl", "gradient-bt", "gradient-tb",
-    "matte", "sheer",
-    "blinkii-diamonds", "kringel-window",
-}
-local healthBarTextureNames = {
-    ["none"]        = "None",
-    ["melli"]       = "Melli (ElvUI)",
-    ["beautiful"]   = "Beautiful",
-    ["plating"]     = "Plating",
-    ["atrocity"]    = "Atrocity",
-    ["divide"]      = "Divide",
-    ["glass"]       = "Glass",
-    ["fade-right"]  = "Fade Right",
-    ["thin-line-top"]    = "Thin Line Top",
-    ["thin-line-bottom"] = "Thin Line Bottom",
-    ["fade"]        = "Fade",
-    ["gradient-lr"] = "Gradient Right",
-    ["gradient-rl"] = "Gradient Left",
-    ["gradient-bt"] = "Gradient Up",
-    ["gradient-tb"] = "Gradient Down",
-    ["matte"]       = "Matte",
-    ["sheer"]       = "Sheer",
-    ["blinkii-diamonds"] = "Blinkii Diamonds",
-    ["kringel-window"]   = "Kringel Window",
-}
+local healthBarTextures, healthBarTextureNames, healthBarTextureOrder =
+    EllesmereUI.BuildBarTextureTables(true)
 ns.healthBarTextures = healthBarTextures
 ns.healthBarTextureOrder = healthBarTextureOrder
 ns.healthBarTextureNames = healthBarTextureNames
@@ -1329,6 +1292,8 @@ local function ApplyHealthBarTexture(health, unitKey, texKeyOverride)
     health:SetStatusBarTexture(path)
     local hFill = health:GetStatusBarTexture()
     if hFill then UnsnapTex(hFill) end
+    -- The swap replaced the fill object; re-derive rotation for the bar's axis.
+    ns.ApplyFillRotation(health)
 
     -- Power bar: same texture. Walk up from health to find the oUF frame
     -- (health may be parented to a clip container, not the oUF frame directly).
@@ -1514,7 +1479,19 @@ local function AnchorHealthBg(health)
     local tex = health and health.GetStatusBarTexture and health:GetStatusBarTexture()
     if not bg or not tex then return end
     bg:ClearAllPoints()
-    if health.GetReverseFill and health:GetReverseFill() then
+    local reversed = health.GetReverseFill and health:GetReverseFill()
+    -- Vertical fill empties on the TOP (or the BOTTOM when reversed); read the
+    -- axis off the bar itself so this needs no settings lookup.
+    local vert = health.GetOrientation and health:GetOrientation() == "VERTICAL"
+    if vert then
+        if reversed then
+            bg:SetPoint("TOPLEFT", tex, "BOTTOMLEFT", 0, 0)
+            bg:SetPoint("BOTTOMRIGHT", health, "BOTTOMRIGHT", 0, 0)
+        else
+            bg:SetPoint("TOPLEFT", health, "TOPLEFT", 0, 0)
+            bg:SetPoint("BOTTOMRIGHT", tex, "TOPRIGHT", 0, 0)
+        end
+    elseif reversed then
         bg:SetPoint("TOPLEFT", health, "TOPLEFT", 0, 0)
         bg:SetPoint("BOTTOMRIGHT", tex, "BOTTOMLEFT", 0, 0)
     else
@@ -2841,21 +2818,7 @@ end
 
 local UF_ICONS_PATH = "Interface\\AddOns\\EllesmereUI\\media\\icons\\"
 local CLASS_FULL_SPRITE_BASE = UF_ICONS_PATH .. "class-full\\"
-local CLASS_FULL_COORDS = {
-    WARRIOR     = { 0,     0.125, 0,     0.125 },
-    MAGE        = { 0.125, 0.25,  0,     0.125 },
-    ROGUE       = { 0.25,  0.375, 0,     0.125 },
-    DRUID       = { 0.375, 0.5,   0,     0.125 },
-    EVOKER      = { 0.5,   0.625, 0,     0.125 },
-    HUNTER      = { 0,     0.125, 0.125, 0.25  },
-    SHAMAN      = { 0.125, 0.25,  0.125, 0.25  },
-    PRIEST      = { 0.25,  0.375, 0.125, 0.25  },
-    WARLOCK     = { 0.375, 0.5,   0.125, 0.25  },
-    PALADIN     = { 0,     0.125, 0.25,  0.375 },
-    DEATHKNIGHT = { 0.125, 0.25,  0.25,  0.375 },
-    MONK        = { 0.25,  0.375, 0.25,  0.375 },
-    DEMONHUNTER = { 0.375, 0.5,   0.25,  0.375 },
-}
+local CLASS_FULL_COORDS = EllesmereUI.CLASS_ICON_SPRITE_COORDS
 
 -- Helper: apply class icon from sprite sheet
 local function ApplyClassIconTexture(tex, classToken, style)
@@ -3717,6 +3680,41 @@ end
 
 -- ShowFakeFrames / HideFakeFrames removed -- Unlock Mode handles all positioning
 
+-- Fill-texture rotation, DERIVED -- never set on its own, so it can never go
+-- stale against the bar's axis or a texture swap. Two texture families live on
+-- these bars and they want opposite treatment on a vertical bar:
+--
+--   stretch (shield.tga, striped3, blizzard, WHITE8X8, every health texture):
+--     one image scaled to the fill rect. Designed wide-and-short, so on a tall
+--     bar it must be ROTATED or it smears into a stretched mess.
+--   tiled (stripedReversed, the large* stripe sets, striped-maxhp, the modern
+--     absorb): repeats at native pixel size on BOTH axes, so it already reads
+--     correctly at any bar shape. Rotating it fights the tiling and is exactly
+--     what produced the stretched look -- leave these alone.
+--
+-- Tiling is read back off the live fill texture rather than passed in, so this
+-- stays correct no matter which style function last touched the bar.
+function ns.ApplyFillRotation(bar)
+    if not (bar and bar.SetRotatesTexture) then return end
+    local vert = bar.GetOrientation and bar:GetOrientation() == "VERTICAL"
+    local fill = bar.GetStatusBarTexture and bar:GetStatusBarTexture()
+    local tiled = fill and ((fill.GetHorizTile and fill:GetHorizTile())
+                         or (fill.GetVertTile and fill:GetVertTile()))
+    bar:SetRotatesTexture((vert and not tiled) and true or false)
+end
+
+-- Vertical health fill. SetOrientation drives the bar's fill AXIS; the existing
+-- healthReverseFill still flips the direction WITHIN that axis (horizontal:
+-- left-to-right / right-to-left, vertical: bottom-to-top / top-to-bottom).
+-- Exposed on ns so the options preview paints the same way.
+function ns.ApplyHealthOrientation(bar, settings)
+    if not bar then return end
+    local vert = (settings and settings.healthVerticalFill) and true or false
+    bar:SetOrientation(vert and "VERTICAL" or "HORIZONTAL")
+    ns.ApplyFillRotation(bar)
+    return vert
+end
+
 local function CreateHealthBar(frame, unit, height, xOffset, settings, rightInset)
     height = height or settings.healthHeight
     xOffset = xOffset or 0
@@ -3755,6 +3753,7 @@ local function CreateHealthBar(frame, unit, height, xOffset, settings, rightInse
     ApplyHealthBarTexture(health, UnitToSettingsKey(unit))
     ApplyHealthBarAlpha(health, UnitToSettingsKey(unit))
     health:SetReverseFill(settings.healthReverseFill and true or false)
+    ns.ApplyHealthOrientation(health, settings)
     ApplyDarkTheme(health)
 
     -- Smooth bar interpolation (opt-in; defaults off)
@@ -3833,6 +3832,9 @@ local function ApplyAbsorbStyle(absorbBar, style, settings)
         fill:SetVertTile(tiled)
         if mask then fill:AddMaskTexture(mask) end
     end
+    -- New fill object + new tiling state: re-derive rotation (stretch styles
+    -- rotate on a vertical bar, tiled ones must not).
+    ns.ApplyFillRotation(absorbBar)
     local fw = absorbBar._forward
     if fw then
         fw:SetStatusBarTexture(tex)
@@ -3844,6 +3846,7 @@ local function ApplyAbsorbStyle(absorbBar, style, settings)
             fwFill:SetVertTile(tiled)
             if mask then fwFill:AddMaskTexture(mask) end
         end
+        ns.ApplyFillRotation(fw)
     end
 end
 
@@ -3867,6 +3870,7 @@ local function ApplyHealAbsorbStyle(haBar, style, settings)
         fill:SetVertTile(tiled)
         if mask then fill:AddMaskTexture(mask) end
     end
+    ns.ApplyFillRotation(haBar)
 end
 
 -- Two-segment absorb rendering using dynamic clip-frame trickery, so it
@@ -3899,9 +3903,11 @@ end
 -- HealthPrediction.Override so oUF still owns event registration
 -- (UNIT_HEALTH, UNIT_ABSORB_AMOUNT_CHANGED, etc.) and enable/disable.
 
--- Re-anchor existing absorb bars for the current reverse fill state.
--- Called from the live-update path when the user toggles reverse fill.
-local function UpdateAbsorbBarReverseFill(frame, isReversed)
+-- Re-anchor existing absorb bars for the current fill state (reverse + axis).
+-- Called from the live-update path when the user toggles reverse or vertical
+-- fill. `settingsOverride` lets the creation path pass the settings table it
+-- already holds, for frames whose .unit is not resolvable yet.
+local function UpdateAbsorbBarReverseFill(frame, isReversed, settingsOverride)
     if not frame or not frame.HealthPrediction then return end
     local ab = frame.HealthPrediction.damageAbsorb
     if not ab then return end
@@ -3919,14 +3925,116 @@ local function UpdateAbsorbBarReverseFill(frame, isReversed)
     --   overlay = backfill into the filled health from the HP edge (default)
     --   right   = full bar, fill from the frame's right edge
     --   left    = full bar, fill from the frame's left edge
-    local s = GetSettingsForUnit(frame.unit)
+    local s = settingsOverride or GetSettingsForUnit(frame.unit)
     local absorbMode = (s and s.absorbEdgeMode) or "overlay"
     local healMode = (s and s.healAbsorbEdgeMode) or "overlay"
+
+    -- Vertical fill: the whole HP cluster rotates with the health bar. Every
+    -- anchor below is the horizontal layout with its axis swapped -- the health
+    -- fill's RIGHT edge (the "HP edge" the shields and heal absorb hang off)
+    -- becomes its TOP edge, and reverse fill flips it to the BOTTOM edge. The
+    -- edge modes keep their key names: "right" is the far edge of the fill axis
+    -- (top when vertical), "left" the near one (bottom when vertical).
+    local isVert = (s and s.healthVerticalFill) and true or false
+    ab._isVert = isVert
+    local ha = ab._healAbsorb
+    local healClip = ab._healClip
+    -- Indexed, not ipairs: ha can be nil and ipairs would stop at the hole.
+    local axisBars = { ab, fw, ha }
+    for i = 1, 3 do
+        local bar = axisBars[i]
+        if bar then
+            bar:SetOrientation(isVert and "VERTICAL" or "HORIZONTAL")
+            ns.ApplyFillRotation(bar)  -- derived: rotate stretch styles only
+        end
+    end
 
     curClip:ClearAllPoints()
     missClip:ClearAllPoints()
     ab:ClearAllPoints()
     fw:ClearAllPoints()
+
+    if isVert then
+        -- missClip + forward bar always use the overlay layout; in the edge
+        -- modes the full-bar backfill shows the whole absorb and the Override
+        -- hides fw.
+        if isReversed then
+            missClip:SetPoint("TOPLEFT",     hpTex, "BOTTOMLEFT",  0, 1)
+            missClip:SetPoint("BOTTOMRIGHT", hpBar, "BOTTOMRIGHT", 0, 0)
+            fw:SetReverseFill(true)
+            fw:SetPoint("TOPLEFT",  hpTex, "BOTTOMLEFT",  0, 0)
+            fw:SetPoint("TOPRIGHT", hpTex, "BOTTOMRIGHT", 0, 0)
+        else
+            missClip:SetPoint("BOTTOMLEFT", hpTex, "TOPLEFT",  0, -1)
+            missClip:SetPoint("TOPRIGHT",   hpBar, "TOPRIGHT", 0, 0)
+            fw:SetReverseFill(false)
+            fw:SetPoint("BOTTOMLEFT",  hpTex, "TOPLEFT",  0, 0)
+            fw:SetPoint("BOTTOMRIGHT", hpTex, "TOPRIGHT", 0, 0)
+        end
+
+        -- Shield absorb placement.
+        if absorbMode == "right" or absorbMode == "left" then
+            curClip:SetPoint("TOPLEFT",     hpBar, "TOPLEFT",     0, 0)
+            curClip:SetPoint("BOTTOMRIGHT", hpBar, "BOTTOMRIGHT", 0, 0)
+            if absorbMode == "left" then
+                ab:SetReverseFill(false)
+                ab:SetPoint("BOTTOMLEFT",  hpBar, "BOTTOMLEFT",  0, 0)
+                ab:SetPoint("BOTTOMRIGHT", hpBar, "BOTTOMRIGHT", 0, 0)
+            else
+                ab:SetReverseFill(true)
+                ab:SetPoint("TOPLEFT",  hpBar, "TOPLEFT",  0, 0)
+                ab:SetPoint("TOPRIGHT", hpBar, "TOPRIGHT", 0, 0)
+            end
+        elseif isReversed then
+            curClip:SetPoint("TOPLEFT",     hpBar, "TOPLEFT",       0, 0)
+            curClip:SetPoint("BOTTOMRIGHT", hpTex, "BOTTOMRIGHT",   0, 0)
+            ab:SetReverseFill(false)
+            ab:SetPoint("BOTTOMLEFT",  hpBar, "BOTTOMLEFT",  0, 0)
+            ab:SetPoint("BOTTOMRIGHT", hpBar, "BOTTOMRIGHT", 0, 0)
+        else
+            curClip:SetPoint("BOTTOMLEFT", hpBar, "BOTTOMLEFT", 0, 0)
+            curClip:SetPoint("TOPRIGHT",   hpTex, "TOPRIGHT",   0, 0)
+            ab:SetReverseFill(true)
+            ab:SetPoint("TOPLEFT",  hpBar, "TOPLEFT",  0, 0)
+            ab:SetPoint("TOPRIGHT", hpBar, "TOPRIGHT", 0, 0)
+        end
+
+        -- Heal absorb placement (own clip frame, same rules).
+        if healClip then
+            healClip:ClearAllPoints()
+            if healMode == "right" or healMode == "left" then
+                healClip:SetPoint("TOPLEFT",     hpBar, "TOPLEFT",     0, 0)
+                healClip:SetPoint("BOTTOMRIGHT", hpBar, "BOTTOMRIGHT", 0, 0)
+            elseif isReversed then
+                healClip:SetPoint("TOPLEFT",     hpBar, "TOPLEFT",     0, 0)
+                healClip:SetPoint("BOTTOMRIGHT", hpTex, "BOTTOMRIGHT", 0, 0)
+            else
+                healClip:SetPoint("BOTTOMLEFT", hpBar, "BOTTOMLEFT", 0, 0)
+                healClip:SetPoint("TOPRIGHT",   hpTex, "TOPRIGHT",   0, 0)
+            end
+        end
+        if ha then
+            ha:ClearAllPoints()
+            if healMode == "right" then
+                ha:SetReverseFill(true)
+                ha:SetPoint("TOPLEFT",  hpBar, "TOPLEFT",  0, 0)
+                ha:SetPoint("TOPRIGHT", hpBar, "TOPRIGHT", 0, 0)
+            elseif healMode == "left" then
+                ha:SetReverseFill(false)
+                ha:SetPoint("BOTTOMLEFT",  hpBar, "BOTTOMLEFT",  0, 0)
+                ha:SetPoint("BOTTOMRIGHT", hpBar, "BOTTOMRIGHT", 0, 0)
+            elseif isReversed then
+                ha:SetReverseFill(false)
+                ha:SetPoint("BOTTOMLEFT",  hpTex, "BOTTOMLEFT",  0, 0)
+                ha:SetPoint("BOTTOMRIGHT", hpTex, "BOTTOMRIGHT", 0, 0)
+            else
+                ha:SetReverseFill(true)
+                ha:SetPoint("TOPLEFT",  hpTex, "TOPLEFT",  0, 0)
+                ha:SetPoint("TOPRIGHT", hpTex, "TOPRIGHT", 0, 0)
+            end
+        end
+        return
+    end
 
     -- missClip + forward bar always use the overlay layout; in the edge modes
     -- the full-bar backfill shows the whole absorb and the Override hides fw.
@@ -3976,8 +4084,6 @@ local function UpdateAbsorbBarReverseFill(frame, isReversed)
     -- Heal absorb placement (independent of shield absorb). The heal absorb
     -- has its OWN clip frame (ab._healClip) so right/left span the full bar
     -- (filled + missing health) while overlay stays clipped to filled health.
-    local ha = ab._healAbsorb
-    local healClip = ab._healClip
     if healClip then
         healClip:ClearAllPoints()
         if healMode == "right" or healMode == "left" then
@@ -4417,8 +4523,13 @@ local function CreateAbsorbBar(frame, unit, settings)
 
             -- Re-anchor when the placement settings change. The key starts
             -- nil, so this also applies the saved placement on first update.
+            -- The fill AXIS is part of the placement now, so it belongs in the
+            -- key: the settings-apply path already re-anchors on a Vertical Fill
+            -- toggle, but including it here keeps this gate self-healing if the
+            -- axis ever changes by some route that path does not cover.
             local absorbMode = (s and s.absorbEdgeMode) or "overlay"
             local edgeKey = absorbMode .. ":" .. ((s and s.healAbsorbEdgeMode) or "overlay")
+                .. ":" .. tostring((s and s.healthVerticalFill) and true or false)
             if ab._lastEdgeKey ~= edgeKey then
                 ab._lastEdgeKey = edgeKey
                 UpdateAbsorbBarReverseFill(self, ab._isReversed)
@@ -4502,6 +4613,12 @@ local function CreateAbsorbBar(frame, unit, settings)
             end
         end,
     }
+
+    -- The anchors set above are the horizontal layout. Hand the whole cluster to
+    -- the shared re-anchor pass so a vertical-fill frame starts out correct
+    -- without waiting for the first settings apply. `settings` is passed through
+    -- because frame.unit is not resolvable this early on every frame.
+    UpdateAbsorbBarReverseFill(frame, isReversed, settings)
 
     return backfillBar
 end
@@ -5183,37 +5300,43 @@ local function HideUnitFrameKickTick(castbar)
         castbar._kickTicker = nil
     end
 end
+-- Hoisted defaults for the zero-alloc paint below: these were inline table
+-- literals allocated on EVERY call whenever the setting was absent (the
+-- common case), on a function that runs per castbar update.
+local UF_KICK_READY_TINT = { r = 0.92, g = 0.35, b = 0.20 }
+local UF_UNINTERRUPT_GREY = { r = 0.5, g = 0.5, b = 0.5 }
 local function ApplyUnitFrameCastColor(castbar)
     if not castbar or not castbar.castTintLayer then return end
     local settings = castbar._eufSettings
     local ownerUnit = castbar.__owner and castbar.__owner.unit
-    local cc
+    -- Zero-alloc (memory pass 2026-08-03): this built up to three throwaway
+    -- color tables per call (two default literals + the blended kick tint).
+    -- Same values flow as scalars; the vertex push is unchanged.
+    local r, g, b
     if settings and settings.castbarClassColored and ownerUnit == "player" then
-        if ownerUnit then
-            local _, classToken = UnitClass(ownerUnit)
-            if issecretvalue(classToken) then classToken = nil end
-            if classToken and EllesmereUI.GetClassColor then
-                cc = EllesmereUI.GetClassColor(classToken)
-            end
+        local _, classToken = UnitClass(ownerUnit)
+        if issecretvalue(classToken) then classToken = nil end
+        if classToken and EllesmereUI.GetClassColor then
+            local cc = EllesmereUI.GetClassColor(classToken)
+            if cc then r, g, b = cc.r, cc.g, cc.b end
         end
     end
-    if not cc then
+    if not r then
         local baseTint = (settings and settings.castbarFillColor) or GetCastbarColor()
         if IsKickCastbarUnit(ownerUnit) then
-            local readyTint = (settings and settings.castbarInterruptReadyColor) or { r = 0.92, g = 0.35, b = 0.20 }
-            local cr, cg, cb = ComputeCastBarTint(readyTint, baseTint)
-            cc = { r = cr, g = cg, b = cb }
+            local readyTint = (settings and settings.castbarInterruptReadyColor) or UF_KICK_READY_TINT
+            r, g, b = ComputeCastBarTint(readyTint, baseTint)
         else
-            cc = baseTint
+            r, g, b = baseTint.r, baseTint.g, baseTint.b
         end
     end
-    castbar.castTintLayer:SetVertexColor(cc.r, cc.g, cc.b)
+    castbar.castTintLayer:SetVertexColor(r, g, b)
     if castbar._shieldedTint then
         -- Uninterruptible overlay colour (customizable; defaults to the
         -- previously-hardcoded grey). The overlay's alpha is toggled from the
         -- secret "not interruptible" flag, so the colour is always set and only
         -- becomes visible on uninterruptible casts.
-        local uc = (settings and settings.castbarUninterruptibleColor) or { r = 0.5, g = 0.5, b = 0.5 }
+        local uc = (settings and settings.castbarUninterruptibleColor) or UF_UNINTERRUPT_GREY
         castbar._shieldedTint:SetVertexColor(uc.r, uc.g, uc.b)
         local uninterruptible = GetCastbarUninterruptible(castbar)
         -- Visible alpha honors Fill Opacity (castbar._fillOp, nil at 100);
@@ -7523,6 +7646,7 @@ local function StyleSimpleFrame(frame, unit)
     ApplyHealthBarTexture(health, unitKey, ns.ResolveHealthBarTextureKey(settings, donor))
     ApplyHealthBarAlpha(health, unitKey)
     health:SetReverseFill(settings.healthReverseFill and true or false)
+    ns.ApplyHealthOrientation(health, settings)
     ApplyDarkTheme(health)
 
     frame.Health = health
@@ -7768,6 +7892,7 @@ local function StylePetFrame(frame, unit)
     ApplyHealthBarTexture(health, unitKey, ns.ResolveHealthBarTextureKey(settings, donor))
     ApplyHealthBarAlpha(health, unitKey)
     health:SetReverseFill(settings.healthReverseFill and true or false)
+    ns.ApplyHealthOrientation(health, settings)
     ApplyDarkTheme(health)
 
     frame.Health = health
@@ -11156,8 +11281,9 @@ local function ReloadFrames()
                 ns.ApplyBossBorderState(frame)
             end
             frame.Health:SetReverseFill(settings.healthReverseFill and true or false)
-            ApplyDarkTheme(frame.Health)
-            UpdateAbsorbBarReverseFill(frame, settings.healthReverseFill and true or false)
+            ns.ApplyHealthOrientation(frame.Health, settings)
+            ApplyDarkTheme(frame.Health)  -- re-anchors health.bg for the new axis
+            UpdateAbsorbBarReverseFill(frame, settings.healthReverseFill and true or false, settings)
             -- Smooth bar interpolation (live toggle without /reload)
             if settings.smoothBars then
                 frame.Health.smoothing = Enum and Enum.StatusBarInterpolation
@@ -11358,6 +11484,11 @@ local function ReloadFrames()
     end
     if frames.target and frames.target._applyLeaderIndicator then
         frames.target._applyLeaderIndicator()
+    end
+
+    -- Refresh elite/rare indicator on the target frame after settings change
+    if frames.target and frames.target._applyEliteIndicator then
+        frames.target._applyEliteIndicator()
     end
 
     ---------------------------------------------------------------------------
@@ -12447,6 +12578,109 @@ function InitializeFrames()
                 for i = 1, #_leaderUnits do _leaderRefresh(_leaderUnits[i]) end
             end)
         end
+    end
+
+    -- Elite/Rare indicator (classification badge on the target frame), driven
+    -- the same way as the leader indicator above: own events, own refresh,
+    -- own show/hide. The atlas mapping matches the nameplates classification
+    -- badges exactly, so the two features read as one system. Show in
+    -- Instances (default off) keeps it quiet in dungeons and raids, where
+    -- most enemies are elite.
+    do
+        local function _eliteAtlas(c)
+            if c == "elite" or c == "worldboss" then
+                return "nameplates-icon-elite-gold"
+            elseif c == "rareelite" then
+                return "nameplates-icon-elite-silver"
+            elseif c == "rare" then
+                return "nameplates-icon-rareelite"
+            end
+        end
+
+        local _eliteFrames = {}
+        local eliteEvents
+
+        local function _eliteRefresh(uf)
+            local s = uf and uf._eliteSettings
+            if not (uf and uf._eliteIndicator and s) then return end
+            local tex = uf._eliteIndicator
+            if s.eliteIndicatorEnabled ~= true then tex:Hide(); return end
+            if not s.eliteIndicatorShowInInstances and IsInInstance() then
+                tex:Hide(); return
+            end
+            local c = UnitClassification(uf.unit)
+            -- Secrecy check MUST run before any comparison, same rule as the
+            -- leader checks above.
+            local atlas = (not issecretvalue(c)) and _eliteAtlas(c) or nil
+            if atlas then
+                tex:SetAtlas(atlas)
+                tex:Show()
+            else
+                tex:Hide()
+            end
+        end
+
+        -- Events are registered only while the feature is enabled somewhere
+        -- (zero cost while off) and re-armed from every settings apply.
+        local function _eliteArmEvents()
+            local on = false
+            for i = 1, #_eliteFrames do
+                local s = _eliteFrames[i]._eliteSettings
+                if s and s.eliteIndicatorEnabled == true then on = true; break end
+            end
+            if on then
+                if not eliteEvents then
+                    eliteEvents = CreateFrame("Frame")
+                    eliteEvents:SetScript("OnEvent", function()
+                        for i = 1, #_eliteFrames do _eliteRefresh(_eliteFrames[i]) end
+                    end)
+                end
+                eliteEvents:RegisterEvent("PLAYER_TARGET_CHANGED")
+                eliteEvents:RegisterUnitEvent("UNIT_CLASSIFICATION_CHANGED", "target")
+                eliteEvents:RegisterEvent("PLAYER_ENTERING_WORLD")
+            elseif eliteEvents then
+                eliteEvents:UnregisterAllEvents()
+            end
+        end
+
+        local function _setupEliteIndicator(uf, settings)
+            if not (uf and uf.Health and settings) then return end
+            if not uf._eliteIndicator then
+                -- Same parent and layer choice as the leader crown above.
+                local par = uf._textOverlay or uf
+                local tex = par:CreateTexture(nil, "OVERLAY", nil, 7)
+                tex:Hide()
+                uf._eliteIndicator = tex
+                _eliteFrames[#_eliteFrames + 1] = uf
+            end
+            uf._eliteSettings = settings
+
+            local function ApplyEliteIndicator()
+                local sz  = settings.eliteIndicatorSize or 16
+                local pos = settings.eliteIndicatorPosition or "topleft"
+                local ox  = settings.eliteIndicatorX or 0
+                local oy  = settings.eliteIndicatorY or 0
+                local tex = uf._eliteIndicator
+                tex:SetSize(sz, sz)
+                tex:ClearAllPoints()
+                if pos == "portrait" and uf.Portrait and uf.Portrait.backdrop then
+                    tex:SetPoint("CENTER", uf.Portrait.backdrop, "CENTER", ox, oy)
+                else
+                    local anchor =
+                        (pos == "topright"    and "TOPRIGHT")    or
+                        (pos == "bottomleft"  and "BOTTOMLEFT")  or
+                        (pos == "bottomright" and "BOTTOMRIGHT") or
+                        "TOPLEFT"
+                    tex:SetPoint(anchor, uf.Health or uf, anchor, ox, oy)
+                end
+                _eliteArmEvents()
+                _eliteRefresh(uf)
+            end
+            uf._applyEliteIndicator = ApplyEliteIndicator
+            ApplyEliteIndicator()
+        end
+
+        _setupEliteIndicator(frames.target, db.profile.target)
     end
 
     local petFrameSource = ns.GetUnitFrameSource("pet")

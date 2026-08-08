@@ -1,4 +1,4 @@
-﻿-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
 --  EUI_RaidFrames_Options.lua
 --  Registers the Raid Frames module with EllesmereUI options panel.
 --  Two tabs: Raid Frames (layout, health, power, text, border, absorbs,
@@ -476,33 +476,12 @@ initFrame:SetScript("OnEvent", function(self)
     }
     local healthColorOrder = { "class", "dark", "classic", "custom", "customDynamic" }
 
-    local namePositionValues = {
-        ["topleft"]    = "Top Left",
-        ["top"]        = "Top",
-        ["topright"]   = "Top Right",
-        ["left"]       = "Left",
-        ["center"]     = "Center",
-        ["right"]      = "Right",
-        ["bottomleft"] = "Bottom Left",
-        ["bottom"]     = "Bottom",
-        ["bottomright"] = "Bottom Right",
-    }
-    local namePositionOrder = { "topleft", "top", "topright", "left", "center", "right", "bottomleft", "bottom", "bottomright" }
+    local namePositionValues = EllesmereUI.POSITION_GRID_VALUES
+    local namePositionOrder = EllesmereUI.POSITION_GRID_ORDER
 
     -- Name Position offers an extra "None" (hides the name entirely). Health Text
     -- Position reuses the base tables above, so keep "None" out of the shared set.
-    local namePositionValuesName = {
-        ["topleft"]    = "Top Left",
-        ["top"]        = "Top",
-        ["topright"]   = "Top Right",
-        ["left"]       = "Left",
-        ["center"]     = "Center",
-        ["right"]      = "Right",
-        ["bottomleft"] = "Bottom Left",
-        ["bottom"]     = "Bottom",
-        ["bottomright"] = "Bottom Right",
-        ["none"]       = "None",
-    }
+    local namePositionValuesName = EllesmereUI.POSITION_GRID_VALUES_NONE
     local namePositionOrderName = { "topleft", "top", "topright", "left", "center", "right", "bottomleft", "bottom", "bottomright", "none" }
 
     local healthTextValues = {
@@ -740,8 +719,8 @@ initFrame:SetScript("OnEvent", function(self)
         -- Built for both raid and party pages; the animation reads the active
         -- preview frame set at runtime via ns.PvActiveFrames().
         do
-            local EYE_VISIBLE   = "Interface\\AddOns\\EllesmereUI\\media\\icons\\eui-visible.png"
-            local EYE_INVISIBLE = "Interface\\AddOns\\EllesmereUI\\media\\icons\\eui-invisible.png"
+            local EYE_VISIBLE   = EllesmereUI.EYE_VISIBLE_ICON
+            local EYE_INVISIBLE = EllesmereUI.EYE_INVISIBLE_ICON
             -- Animation state lives on ns (single shared ticker) so the raid and
             -- party eyeball builds drive the same animation and start/stop works
             -- across both. ns._healthAnimActive is the truth read by the renderer.
@@ -1007,8 +986,9 @@ initFrame:SetScript("OnEvent", function(self)
             end
         end  -- close do (health eyeball)
 
-        -- Row 1: Health Bar Texture | Fill Opacity
-        _, h = W:DualRow(parent, y,
+        -- Row 1: Health Bar Texture (+ cog: Vertical Fill) | Fill Opacity
+        local texRow
+        texRow, h = W:DualRow(parent, y,
             { type="dropdown", text="Health Bar Texture", values=hbtValues, order=hbtOrder,
               getValue=function() return SVal("healthBarTexture", "atrocity") end,
               setValue=function(v) SSet("healthBarTexture", v) end },
@@ -1016,7 +996,36 @@ initFrame:SetScript("OnEvent", function(self)
               disabled=function() return SVal("healthColorMode", "class") == "dark" end,
               disabledTooltip="Not available in Dark Mode", rawTooltip=true,
               getValue=function() return SVal("healthBarOpacity", 100) end,
-              setValue=function(v) SSet("healthBarOpacity", v) end });  y = y - h
+              setValue=function(v) SSet("healthBarOpacity", v) end });
+        -- Cog on Health Bar Texture: Vertical Fill. Part of the Health Bar
+        -- party-sync section, so an unsynced party tab keeps its own value.
+        do
+            local lrgn = texRow._leftRegion
+            local _, cogShow = EllesmereUI.BuildCogPopup({
+                title = "Health Bar Fill",
+                rows = {
+                    { type="toggle", label="Vertical Fill",
+                      tooltip="Fill the health bar bottom-to-top instead of left-to-right. Absorbs, heal prediction and the bar background follow the same axis.",
+                      get=function() return SVal("healthVerticalFill", false) end,
+                      -- RefreshPage re-labels the Absorbs Placement dropdowns for
+                      -- the new axis (cog popups bake the labels in on first build).
+                      set=function(v) SSet("healthVerticalFill", v); EllesmereUI:RefreshPage() end },
+                },
+            })
+            local cogBtn = CreateFrame("Button", nil, lrgn)
+            cogBtn:SetSize(26, 26)
+            cogBtn:SetPoint("RIGHT", lrgn._lastInline or lrgn._control, "LEFT", -8, 0)
+            lrgn._lastInline = cogBtn
+            cogBtn:SetFrameLevel(lrgn:GetFrameLevel() + 5)
+            cogBtn:SetAlpha(0.4)
+            local cogTex = cogBtn:CreateTexture(nil, "OVERLAY")
+            cogTex:SetAllPoints()
+            cogTex:SetTexture(EllesmereUI.COGS_ICON)
+            cogBtn:SetScript("OnEnter", function(s) s:SetAlpha(0.7) end)
+            cogBtn:SetScript("OnLeave", function(s) s:SetAlpha(0.4) end)
+            cogBtn:SetScript("OnClick", function(s) cogShow(s) end)
+        end
+        y = y - h
 
         -- Row 2: Fill Color | Background
         row, h = W:DualRow(parent, y,
@@ -1251,8 +1260,8 @@ initFrame:SetScript("OnEvent", function(self)
 
         -- Eyeball: toggle shield/heal-absorb effects on the preview frames.
         do
-            local EYE_VISIBLE   = "Interface\\AddOns\\EllesmereUI\\media\\icons\\eui-visible.png"
-            local EYE_INVISIBLE = "Interface\\AddOns\\EllesmereUI\\media\\icons\\eui-invisible.png"
+            local EYE_VISIBLE   = EllesmereUI.EYE_VISIBLE_ICON
+            local EYE_INVISIBLE = EllesmereUI.EYE_INVISIBLE_ICON
 
             -- Find the section label FontString
             local abLabel
@@ -1374,16 +1383,38 @@ initFrame:SetScript("OnEvent", function(self)
         -- Inline cog: absorb placement (overlay / right edge / left edge)
         do
             local rgn = absorbRow._leftRegion
+            -- Placement labels follow the FILL AXIS. The saved values stay right/left --
+            -- they have always meant the FAR / NEAR end of the fill -- but on a vertical
+            -- bar "From Left Edge" describes nothing, so the wording becomes top/bottom.
+            -- MUTATED IN PLACE, never rebuilt: RefreshPage's fast path does not rebuild
+            -- the page, and a cog popup is built once then cached, so a freshly-built
+            -- table would never reach the widget. The popup re-reads values[get()] on
+            -- every show, and _invalidateMenu makes an already-built menu rebuild its
+            -- entries from this same table on the next click.
+            local absorbEdgeLabels = { overlay = "Overlay" }
+            local absorbEdgeLabelsVert  -- last applied axis; nil until the first sync
+            -- Returns true only when the axis actually flipped, so the caller can
+            -- skip _invalidateMenu on unrelated refreshes (it nils the cached menu
+            -- and would break the wired click if one were open).
+            local function SyncAbsorbEdgeLabels()
+                local vert = (SVal("healthVerticalFill", false)) and true or false
+                if absorbEdgeLabelsVert == vert then return false end
+                absorbEdgeLabelsVert = vert
+                absorbEdgeLabels.right = vert and "From Top Edge"    or "From Right Edge"
+                absorbEdgeLabels.left  = vert and "From Bottom Edge" or "From Left Edge"
+                return true
+            end
+            SyncAbsorbEdgeLabels()
             local _, cogShow = EllesmereUI.BuildCogPopup({
                 title = "Absorb Rendering",
                 rows = {
                     { type="dropdown", label="Placement",
-                      values = { overlay = "Overlay", right = "From Right Edge", left = "From Left Edge" },
+                      values = absorbEdgeLabels,
                       order = { "overlay", "right", "left" },
                       disabled = function() return SVal("absorbStyle", "none") == "blizzardModern" end,
                       disabledTooltip = "Default Blizz Frames uses a fixed placement",
                       rawTooltip = true,
-                      get=function() return SVal("absorbEdgeMode", "overlay") end,
+                      get=function() SyncAbsorbEdgeLabels(); return SVal("absorbEdgeMode", "overlay") end,
                       set=function(v) SSet("absorbEdgeMode", v) end },
                     { type="toggle", label="Show Overshield",
                       tooltip="Show the part of an absorb that exceeds your empty health and backfills over your current health. When off, absorbs only fill the empty part of the health bar; on Default Blizz Frames the glow line stays pinned at the right edge.",
@@ -1391,6 +1422,17 @@ initFrame:SetScript("OnEvent", function(self)
                       set=function(v) SSet("showOvershield", v) end },
                 },
             })
+            -- Re-label on every page refresh (the Vertical Fill toggle fires one) and
+            -- drop any built menu so its entries rebuild with the new wording.
+            EllesmereUI.RegisterWidgetRefresh(function()
+                if not SyncAbsorbEdgeLabels() then return end
+                local pf = cogShow and cogShow._popupFrame
+                if pf and pf.GetChildren then
+                    for _, child in ipairs({ pf:GetChildren() }) do
+                        if child._invalidateMenu then child._invalidateMenu() end
+                    end
+                end
+            end)
             local cogBtn = CreateFrame("Button", nil, rgn)
             cogBtn:SetSize(26, 26)
             cogBtn:SetPoint("RIGHT", rgn._lastInline or rgn._control, "LEFT", -8, 0)
@@ -1555,13 +1597,35 @@ initFrame:SetScript("OnEvent", function(self)
         -- Inline cog: heal absorb placement (independent of shield absorb)
         do
             local rgn = healAbsorbRow._leftRegion
+            -- Placement labels follow the FILL AXIS. The saved values stay right/left --
+            -- they have always meant the FAR / NEAR end of the fill -- but on a vertical
+            -- bar "From Left Edge" describes nothing, so the wording becomes top/bottom.
+            -- MUTATED IN PLACE, never rebuilt: RefreshPage's fast path does not rebuild
+            -- the page, and a cog popup is built once then cached, so a freshly-built
+            -- table would never reach the widget. The popup re-reads values[get()] on
+            -- every show, and _invalidateMenu makes an already-built menu rebuild its
+            -- entries from this same table on the next click.
+            local healAbsorbEdgeLabels = { overlay = "Overlay" }
+            local healAbsorbEdgeLabelsVert  -- last applied axis; nil until the first sync
+            -- Returns true only when the axis actually flipped, so the caller can
+            -- skip _invalidateMenu on unrelated refreshes (it nils the cached menu
+            -- and would break the wired click if one were open).
+            local function SyncHealAbsorbEdgeLabels()
+                local vert = (SVal("healthVerticalFill", false)) and true or false
+                if healAbsorbEdgeLabelsVert == vert then return false end
+                healAbsorbEdgeLabelsVert = vert
+                healAbsorbEdgeLabels.right = vert and "From Top Edge"    or "From Right Edge"
+                healAbsorbEdgeLabels.left  = vert and "From Bottom Edge" or "From Left Edge"
+                return true
+            end
+            SyncHealAbsorbEdgeLabels()
             local _, cogShow = EllesmereUI.BuildCogPopup({
                 title = "Heal Absorb Rendering",
                 rows = {
                     { type="dropdown", label="Placement",
-                      values = { overlay = "Overlay", right = "From Right Edge", left = "From Left Edge" },
+                      values = healAbsorbEdgeLabels,
                       order = { "overlay", "right", "left" },
-                      get=function() return SVal("healAbsorbEdgeMode", "overlay") end,
+                      get=function() SyncHealAbsorbEdgeLabels(); return SVal("healAbsorbEdgeMode", "overlay") end,
                       set=function(v) SSet("healAbsorbEdgeMode", v) end },
                     { type="slider", label="Backing Opacity", min=0, max=100, step=1,
                       get=function() return SVal("healAbsorbBgOpacity", 25) end,
@@ -1571,6 +1635,17 @@ initFrame:SetScript("OnEvent", function(self)
                       set=function(v) SSet("healAbsorbOverDispel", v) end },
                 },
             })
+            -- Re-label on every page refresh (the Vertical Fill toggle fires one) and
+            -- drop any built menu so its entries rebuild with the new wording.
+            EllesmereUI.RegisterWidgetRefresh(function()
+                if not SyncHealAbsorbEdgeLabels() then return end
+                local pf = cogShow and cogShow._popupFrame
+                if pf and pf.GetChildren then
+                    for _, child in ipairs({ pf:GetChildren() }) do
+                        if child._invalidateMenu then child._invalidateMenu() end
+                    end
+                end
+            end)
             local cogBtn = CreateFrame("Button", nil, rgn)
             cogBtn:SetSize(26, 26)
             cogBtn:SetPoint("RIGHT", rgn._lastInline or rgn._control, "LEFT", -8, 0)
@@ -1757,8 +1832,8 @@ initFrame:SetScript("OnEvent", function(self)
 
         -- Power bar animation (same pattern as health; serves raid + party).
         do
-            local EYE_VISIBLE   = "Interface\\AddOns\\EllesmereUI\\media\\icons\\eui-visible.png"
-            local EYE_INVISIBLE = "Interface\\AddOns\\EllesmereUI\\media\\icons\\eui-invisible.png"
+            local EYE_VISIBLE   = EllesmereUI.EYE_VISIBLE_ICON
+            local EYE_INVISIBLE = EllesmereUI.EYE_INVISIBLE_ICON
             -- Shared anim state on ns (single ticker, resolves active preview).
             ns._powerAnimState = ns._powerAnimState or {}
 
@@ -2446,8 +2521,8 @@ initFrame:SetScript("OnEvent", function(self)
 
         -- Eyeball: toggle indicator visibility on preview (raid + party)
         do
-            local EYE_VISIBLE   = "Interface\\AddOns\\EllesmereUI\\media\\icons\\eui-visible.png"
-            local EYE_INVISIBLE = "Interface\\AddOns\\EllesmereUI\\media\\icons\\eui-invisible.png"
+            local EYE_VISIBLE   = EllesmereUI.EYE_VISIBLE_ICON
+            local EYE_INVISIBLE = EllesmereUI.EYE_INVISIBLE_ICON
 
             -- Find the section label FontString
             local indLabel
@@ -2518,16 +2593,7 @@ initFrame:SetScript("OnEvent", function(self)
         end  -- close do (indicators eyeball)
 
         -- Row 1: Role Icon Style | Role Icon Size
-        local ROLE_MEDIA = "Interface\\AddOns\\EllesmereUIRaidFrames\\Media\\"
-        local RI_STYLES = {
-            modern = { _isTexture = true, TANK = ROLE_MEDIA .. "tank-modern.png", HEALER = ROLE_MEDIA .. "healer-modern.png", DAMAGER = ROLE_MEDIA .. "dps-modern.png" },
-            modernCircle = { TANK = "UI-LFG-RoleIcon-Tank", HEALER = "UI-LFG-RoleIcon-Healer", DAMAGER = "UI-LFG-RoleIcon-DPS" },
-            styled = { TANK = "UI-LFG-RoleIcon-Tank-Background", HEALER = "UI-LFG-RoleIcon-Healer-Background", DAMAGER = "UI-LFG-RoleIcon-DPS-Background" },
-            classicCircle = { TANK = "UI-LFG-RoleIcon-Tank-Micro-GroupFinder", HEALER = "UI-LFG-RoleIcon-Healer-Micro-GroupFinder", DAMAGER = "UI-LFG-RoleIcon-DPS-Micro-GroupFinder" },
-            classic = { TANK = "roleicon-tiny-tank", HEALER = "roleicon-tiny-healer", DAMAGER = "roleicon-tiny-dps" },
-            blizzDefault = { TANK = "GM-icon-role-tank", HEALER = "GM-icon-role-healer", DAMAGER = "GM-icon-role-dps" },
-            blizzLight = { _isTexture = true, TANK = ROLE_MEDIA .. "tank.png", HEALER = ROLE_MEDIA .. "healer.png", DAMAGER = ROLE_MEDIA .. "dps.png" },
-        }
+        local RI_STYLES = ns.ROLE_ICON_STYLES
         local playerRole = UnitGroupRolesAssigned("player")
         if playerRole == "NONE" then
             local specIdx = GetSpecialization()
@@ -2628,7 +2694,7 @@ initFrame:SetScript("OnEvent", function(self)
             bottom      = "Bottom",
             bottomright = "Bottom Right",
         }
-        local rolePositionOrder = { "topleft", "top", "topright", "left", "center", "right", "bottomleft", "bottom", "bottomright" }
+        local rolePositionOrder = EllesmereUI.POSITION_GRID_ORDER
         local roleRow2
         roleRow2, h = W:DualRow(parent, y,
             { type="dropdown", text="Role Position", values=rolePositionValues, order=rolePositionOrder,
@@ -2755,7 +2821,7 @@ initFrame:SetScript("OnEvent", function(self)
             bottom      = "Bottom",
             bottomright = "Bottom Right",
         }
-        local readyCheckPositionOrder = { "topleft", "top", "topright", "left", "center", "right", "bottomleft", "bottom", "bottomright" }
+        local readyCheckPositionOrder = EllesmereUI.POSITION_GRID_ORDER
         local rcRow
         rcRow, h = W:DualRow(parent, y,
             { type="dropdown", text="Ready Check / Summon / Rez", values=readyCheckPositionValues, order=readyCheckPositionOrder,
@@ -3112,8 +3178,8 @@ initFrame:SetScript("OnEvent", function(self)
 
         -- Eyeball: toggle dispel visibility on preview (raid + party)
         do
-            local EYE_VISIBLE   = "Interface\\AddOns\\EllesmereUI\\media\\icons\\eui-visible.png"
-            local EYE_INVISIBLE = "Interface\\AddOns\\EllesmereUI\\media\\icons\\eui-invisible.png"
+            local EYE_VISIBLE   = EllesmereUI.EYE_VISIBLE_ICON
+            local EYE_INVISIBLE = EllesmereUI.EYE_INVISIBLE_ICON
 
             local dispLabel
             for _, rgn in ipairs({ dispelHeader:GetRegions() }) do
@@ -3332,8 +3398,8 @@ initFrame:SetScript("OnEvent", function(self)
             bottomright = "Bottom Right",
         }
         local dispLocOrder = { "same", "topleft", "top", "topright", "left", "center", "right", "bottomleft", "bottom", "bottomright" }
-        local dispGrowValues = { RIGHT = "Right", LEFT = "Left", UP = "Up", DOWN = "Down", CENTER = "Center" }
-        local dispGrowOrder = { "RIGHT", "LEFT", "UP", "DOWN", "CENTER" }
+        local dispGrowValues = EllesmereUI.GROW_DIR_VALUES_FULL
+        local dispGrowOrder = EllesmereUI.GROW_DIR_ORDER_FULL
         local function GetDefaultDispGrow(pos)
             if pos == "right" or pos == "topright" or pos == "bottomright" then return "LEFT" end
             if pos == "left" or pos == "topleft" or pos == "bottomleft" then return "RIGHT" end
@@ -4139,8 +4205,8 @@ initFrame:SetScript("OnEvent", function(self)
 
             -- Eyeball: toggle targeted spells visibility on the raid preview
             do
-                local EYE_VISIBLE   = "Interface\\AddOns\\EllesmereUI\\media\\icons\\eui-visible.png"
-                local EYE_INVISIBLE = "Interface\\AddOns\\EllesmereUI\\media\\icons\\eui-invisible.png"
+                local EYE_VISIBLE   = EllesmereUI.EYE_VISIBLE_ICON
+                local EYE_INVISIBLE = EllesmereUI.EYE_INVISIBLE_ICON
                 local tsLabel
                 for _, rgn in ipairs({ tsHeader:GetRegions() }) do
                     if rgn.GetText and EllesmereUI.EnKey(rgn:GetText()) == "TARGETED SPELLS" then
@@ -4241,10 +4307,10 @@ initFrame:SetScript("OnEvent", function(self)
                 bottom      = "Bottom",
                 bottomright = "Bottom Right",
             }
-            local tsPositionOrder = { "topleft", "top", "topright", "left", "center", "right", "bottomleft", "bottom", "bottomright" }
+            local tsPositionOrder = EllesmereUI.POSITION_GRID_ORDER
 
-            local tsGrowValues = { RIGHT = "Right", LEFT = "Left", UP = "Up", DOWN = "Down", CENTER = "Center" }
-            local tsGrowOrder = { "RIGHT", "LEFT", "UP", "DOWN", "CENTER" }
+            local tsGrowValues = EllesmereUI.GROW_DIR_VALUES_FULL
+            local tsGrowOrder = EllesmereUI.GROW_DIR_ORDER_FULL
 
             local function GetDefaultTSGrow(pos)
                 if pos == "right" or pos == "topright" or pos == "bottomright" then return "LEFT" end
@@ -4457,8 +4523,8 @@ initFrame:SetScript("OnEvent", function(self)
             local CUSTOM_TIERS = { 10, 15, 25, 30 }
             local TIER_LABELS = { [10] = "10 Man", [15] = "15 Man", [25] = "25 Man", [30] = "30 Man" }
             local overrides = db.profile.raidSizeOverrides
-            local EYE_VISIBLE   = "Interface\\AddOns\\EllesmereUI\\media\\icons\\eui-visible.png"
-            local EYE_INVISIBLE = "Interface\\AddOns\\EllesmereUI\\media\\icons\\eui-invisible.png"
+            local EYE_VISIBLE   = EllesmereUI.EYE_VISIBLE_ICON
+            local EYE_INVISIBLE = EllesmereUI.EYE_INVISIBLE_ICON
             local CLOSE_ICON    = "Interface\\AddOns\\EllesmereUI\\media\\icons\\eui-close.png"
 
             for _, tier in ipairs(CUSTOM_TIERS) do
@@ -5535,8 +5601,8 @@ initFrame:SetScript("OnEvent", function(self)
 
             -- Eyeball: toggle targeted spells visibility on the party preview
             do
-                local EYE_VISIBLE   = "Interface\\AddOns\\EllesmereUI\\media\\icons\\eui-visible.png"
-                local EYE_INVISIBLE = "Interface\\AddOns\\EllesmereUI\\media\\icons\\eui-invisible.png"
+                local EYE_VISIBLE   = EllesmereUI.EYE_VISIBLE_ICON
+                local EYE_INVISIBLE = EllesmereUI.EYE_INVISIBLE_ICON
                 local tsLabel
                 for _, rgn in ipairs({ tsHeader:GetRegions() }) do
                     if rgn.GetText and EllesmereUI.EnKey(rgn:GetText()) == "TARGETED SPELLS" then
@@ -5637,10 +5703,10 @@ initFrame:SetScript("OnEvent", function(self)
                 bottom      = "Bottom",
                 bottomright = "Bottom Right",
             }
-            local tsPositionOrder = { "topleft", "top", "topright", "left", "center", "right", "bottomleft", "bottom", "bottomright" }
+            local tsPositionOrder = EllesmereUI.POSITION_GRID_ORDER
 
-            local tsGrowValues = { RIGHT = "Right", LEFT = "Left", UP = "Up", DOWN = "Down", CENTER = "Center" }
-            local tsGrowOrder = { "RIGHT", "LEFT", "UP", "DOWN", "CENTER" }
+            local tsGrowValues = EllesmereUI.GROW_DIR_VALUES_FULL
+            local tsGrowOrder = EllesmereUI.GROW_DIR_ORDER_FULL
 
             local function GetDefaultTSGrow(pos)
                 if pos == "right" or pos == "topright" or pos == "bottomright" then return "LEFT" end
@@ -5776,8 +5842,8 @@ initFrame:SetScript("OnEvent", function(self)
 
         -- Eyeball: toggle defensive visibility on preview (raid + party)
         do
-            local EYE_VISIBLE   = "Interface\\AddOns\\EllesmereUI\\media\\icons\\eui-visible.png"
-            local EYE_INVISIBLE = "Interface\\AddOns\\EllesmereUI\\media\\icons\\eui-invisible.png"
+            local EYE_VISIBLE   = EllesmereUI.EYE_VISIBLE_ICON
+            local EYE_INVISIBLE = EllesmereUI.EYE_INVISIBLE_ICON
             local defLabel
             for _, rgn in ipairs({ defHeader:GetRegions() }) do
                 if rgn.GetText and EllesmereUI.EnKey(rgn:GetText()) == "DEFENSIVES & EXTERNALS" then
@@ -5843,10 +5909,10 @@ initFrame:SetScript("OnEvent", function(self)
             bottom      = "Bottom",
             bottomright = "Bottom Right",
         }
-        local defPosOrder = { "topleft", "top", "topright", "left", "center", "right", "bottomleft", "bottom", "bottomright" }
+        local defPosOrder = EllesmereUI.POSITION_GRID_ORDER
 
-        local defGrowValues = { RIGHT = "Right", LEFT = "Left", UP = "Up", DOWN = "Down", CENTER = "Center" }
-        local defGrowOrder = { "RIGHT", "LEFT", "UP", "DOWN", "CENTER" }
+        local defGrowValues = EllesmereUI.GROW_DIR_VALUES_FULL
+        local defGrowOrder = EllesmereUI.GROW_DIR_ORDER_FULL
 
         local function GetDefaultDefGrow(pos)
             if pos == "right" or pos == "topright" or pos == "bottomright" then return "LEFT" end
@@ -6050,8 +6116,8 @@ initFrame:SetScript("OnEvent", function(self)
 
         -- Eyeball: toggle private aura visibility on preview (raid + party)
         do
-            local EYE_VISIBLE   = "Interface\\AddOns\\EllesmereUI\\media\\icons\\eui-visible.png"
-            local EYE_INVISIBLE = "Interface\\AddOns\\EllesmereUI\\media\\icons\\eui-invisible.png"
+            local EYE_VISIBLE   = EllesmereUI.EYE_VISIBLE_ICON
+            local EYE_INVISIBLE = EllesmereUI.EYE_INVISIBLE_ICON
             local paLabel
             for _, rgn in ipairs({ paHeader:GetRegions() }) do
                 if rgn.GetText and EllesmereUI.EnKey(rgn:GetText()) == "PRIVATE AURAS" then
@@ -6114,8 +6180,8 @@ initFrame:SetScript("OnEvent", function(self)
             bottomright = "Bottom Right",
         }
         local paPosOrder = { "none", "topleft", "top", "topright", "left", "center", "right", "bottomleft", "bottom", "bottomright" }
-        local paGrowValues = { RIGHT = "Right", LEFT = "Left", UP = "Up", DOWN = "Down" }
-        local paGrowOrder = { "RIGHT", "LEFT", "UP", "DOWN" }
+        local paGrowValues = EllesmereUI.GROW_DIR_VALUES_BASE
+        local paGrowOrder = EllesmereUI.GROW_DIR_ORDER_BASE
 
         local function GetDefaultPaGrow(pos)
             if pos == "right" or pos == "topright" or pos == "bottomright" then return "LEFT" end
@@ -6204,8 +6270,8 @@ initFrame:SetScript("OnEvent", function(self)
 
         -- Eyeball: toggle debuff visibility on preview (raid + party)
         do
-            local EYE_VISIBLE   = "Interface\\AddOns\\EllesmereUI\\media\\icons\\eui-visible.png"
-            local EYE_INVISIBLE = "Interface\\AddOns\\EllesmereUI\\media\\icons\\eui-invisible.png"
+            local EYE_VISIBLE   = EllesmereUI.EYE_VISIBLE_ICON
+            local EYE_INVISIBLE = EllesmereUI.EYE_INVISIBLE_ICON
             local dbLabel
             for _, rgn in ipairs({ debuffHeader:GetRegions() }) do
                 if rgn.GetText and EllesmereUI.EnKey(rgn:GetText()) == "DEBUFF DISPLAY" then
@@ -6285,12 +6351,12 @@ initFrame:SetScript("OnEvent", function(self)
             bottom      = "Bottom",
             bottomright = "Bottom Right",
         }
-        local debuffPositionOrder = { "topleft", "top", "topright", "left", "center", "right", "bottomleft", "bottom", "bottomright" }
+        local debuffPositionOrder = EllesmereUI.POSITION_GRID_ORDER
 
-        local debuffGrowValues = { RIGHT = "Right", LEFT = "Left", UP = "Up", DOWN = "Down", CENTER = "Center" }
-        local debuffGrowOrder = { "RIGHT", "LEFT", "UP", "DOWN", "CENTER" }
-		local debuffWrapValues = { RIGHT = "Right", LEFT = "Left", UP = "Up", DOWN = "Down" }
-        local debuffWrapOrder = { "RIGHT", "LEFT", "UP", "DOWN" }
+        local debuffGrowValues = EllesmereUI.GROW_DIR_VALUES_FULL
+        local debuffGrowOrder = EllesmereUI.GROW_DIR_ORDER_FULL
+		local debuffWrapValues = EllesmereUI.GROW_DIR_VALUES_BASE
+        local debuffWrapOrder = EllesmereUI.GROW_DIR_ORDER_BASE
 
         local function GetDefaultDebuffGrow(pos)
             if pos == "right" or pos == "topright" or pos == "bottomright" then return "LEFT" end

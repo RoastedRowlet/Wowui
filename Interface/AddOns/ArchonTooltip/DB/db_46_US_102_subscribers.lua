@@ -234,7 +234,7 @@ local function getChunkLookup(table, length)
 end
 
 local lookup = {'Priest-Discipline',}
-local provider = {region='US',realm='Gallywix',name='US',type='subscribers',zone=46,date='2026-07-28',data={Wa='Watters:BAEALgAECgUJCwABLgAFFAQJFwABAL8QAA==.',},}
+local provider = {region='US',realm='Gallywix',name='US',type='subscribers',zone=46,date='2026-08-04',data={Wa='Watters:BAEALgAECgUJCwABLgAFFAQJFwABAL8QAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

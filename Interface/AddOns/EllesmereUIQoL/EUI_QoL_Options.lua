@@ -68,7 +68,7 @@ local function ShowTransformsPopup()
         dimTex:SetColorTexture(0, 0, 0, 0.25)
 
         local popup = CreateFrame("Frame", nil, dimmer)
-        popup:SetScale(ppScale)
+        popup:SetScale(EllesmereUI.PopupBump(1))
         popup:SetFrameStrata("FULLSCREEN_DIALOG")
         popup:SetFrameLevel(dimmer:GetFrameLevel() + 10)
         popup:SetSize(POPUP_W, POPUP_H)
@@ -1390,8 +1390,8 @@ initFrame:SetScript("OnEvent", function(self)
             if durCogInitOff then durCogBlock:Show() else durCogBlock:Hide() end
 
             -- Eye icon to toggle durability warning preview (left of cog)
-            local EYE_VISIBLE   = EllesmereUI.MEDIA_PATH .. "icons\\eui-visible.png"
-            local EYE_INVISIBLE = EllesmereUI.MEDIA_PATH .. "icons\\eui-invisible.png"
+            local EYE_VISIBLE   = EllesmereUI.EYE_VISIBLE_ICON
+            local EYE_INVISIBLE = EllesmereUI.EYE_INVISIBLE_ICON
             local durPreviewShown = false
             local eyeBtn = CreateFrame("Button", nil, leftRgn)
             eyeBtn:SetSize(26, 26)
@@ -2290,7 +2290,7 @@ initFrame:SetScript("OnEvent", function(self)
                   end
               end },
             { type="toggle", text="Auto Open Containers",
-              tooltip="Automatically opens bags, boxes and parcels in your inventory when they are added to your bags.",
+              tooltip="Automatically opens bags, boxes and parcels in your inventory when they are added to your bags.\n\nContainers received from the mailbox are held until you close the mailbox, so opening them cannot collide with mail still delivering items.",
               getValue=function()
                   if not EllesmereUIDB then return false end
                   return EllesmereUIDB.autoOpenContainers == true

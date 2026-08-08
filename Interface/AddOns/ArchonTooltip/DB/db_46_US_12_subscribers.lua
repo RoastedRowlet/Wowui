@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'Evoker-Preservation','Evoker-Augmentation',}
-local provider = {region='US',realm='Anetheron',name='US',type='subscribers',zone=46,date='2026-07-28',data={Ex='Excalibes:BAEALgAECgkJAwABLgAECgkJZgABAC4bAA==.',Ma='Math:BAEALgAFFAEJAQABLgAFFAYJEAACALwPAA==.',},}
+local lookup = {'Evoker-Preservation','Hunter-BeastMastery','Hunter-Marksmanship','Evoker-Augmentation',}
+local provider = {region='US',realm='Anetheron',name='US',type='subscribers',zone=46,date='2026-08-04',data={Ex='Excalibes:BAEALgAECgkJAwABLgAECgkJZgABAC4bAA==.',Ma='Math:BAEBLgAFFH8IAAMCAAgJQhODCwDrAQhoDAAAAQBNAGkMAAABAFIAawwAAAEAQQBqDAAAAQAtAGwMAAABAAAAbQwAAAEAGwDqDAAAAQA9AG4MAAABABwAAgAHCWkWgwsA6wEHaAwAAAEATQBpDAAAAQBSAGsMAAABAEEAagwAAAEALQBtDAAAAQAbAOoMAAABAD0AbgwAAAEAHAADAAEJWQBSPAAwAAFsDAAAAQAAAAEuAAUUBgkQAAQAvA8A.',},}
 provider.parse = parse
 
 local rawData = provider.data

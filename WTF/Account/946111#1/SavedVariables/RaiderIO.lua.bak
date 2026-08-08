@@ -12,12 +12,12 @@ RaiderIO_Config = {
 ["hide"] = false,
 },
 }
-RaiderIO_LastCharacter = "us-Madmareep-stormrage"
+RaiderIO_LastCharacter = "us-Barelynoer-area-52"
 RaiderIO_MissingCharacters = {
-["us-Dontrunaway-stormrage"] = true,
-["us-Kharaan-stormrage"] = true,
-["us-Spellclicker-stormrage"] = true,
-["us-Madmareep-stormrage"] = true,
+["us-Ângelikal-area-52"] = true,
+["us-Boombiya-area-52"] = true,
+["us-Lockworth-area-52"] = true,
+["us-Bauthimoss-area-52"] = true,
 }
 RaiderIO_MissingServers = {
 }

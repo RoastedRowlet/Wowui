@@ -75,16 +75,20 @@ MythicDungeonToolsDB = {
 },
 },
 },
-["currentDifficulty"] = 24,
+["currentDifficulty"] = 2,
 ["latestDungeonSeen"] = 150,
 ["focusMarker"] = {
 ["disableTargetMarkerInRaid"] = false,
+["assignments"] = {
+["Thesnazzyape-Area52"] = 3,
+["Gasslight-Tichondrius"] = 5,
+},
 },
 ["version"] = 6120,
 ["xoffset"] = 168.6672973632813,
 ["yoffset"] = 95.666748046875,
 ["anchorTo"] = "LEFT",
-["currentDungeonIdx"] = 11,
+["currentDungeonIdx"] = 153,
 ["minimap"] = {
 ["minimapPos"] = 158.5007881808067,
 ["showInCompartment"] = true,
@@ -42399,7 +42403,6 @@ true,
 {
 ["objects"] = {
 {
-["n"] = true,
 ["d"] = {
 594.7262372519283,
 -128.1182537556031,
@@ -42407,9 +42410,9 @@ true,
 true,
 "Para healer",
 },
+["n"] = true,
 },
 {
-["n"] = true,
 ["d"] = {
 590.0902998914379,
 -389.7850201869546,
@@ -42417,9 +42420,9 @@ true,
 true,
 "Para one voidwalker",
 },
+["n"] = true,
 },
 {
-["n"] = true,
 ["d"] = {
 647.4260796478748,
 -113.897574870558,
@@ -42427,24 +42430,19 @@ true,
 true,
 "Para left enforcer\nCage right enforcer",
 },
+["n"] = true,
 },
 },
 ["week"] = 1,
 ["uid"] = "uyVcdoj0bnz",
-["difficulty"] = 2,
-["colorPaletteInfo"] = {
-["autoColoring"] = true,
-["colorPaletteIdx"] = 4,
-},
-["text"] = "yo",
 ["value"] = {
-["currentPull"] = 6,
+["currentPull"] = 11,
 ["currentSublevel"] = 1,
 ["enemyAssignments"] = {
 },
 ["currentDungeonIdx"] = 153,
 ["selection"] = {
-6,
+11,
 },
 ["pulls"] = {
 {
@@ -42512,9 +42510,7 @@ true,
 [3] = {
 4,
 },
-[11] = {
-1,
-},
+["color"] = "fffb3e",
 [15] = {
 21,
 20,
@@ -42535,29 +42531,14 @@ true,
 15,
 18,
 },
-["color"] = "fffb3e",
+[11] = {
+1,
+},
 },
 {
 {
 10,
 9,
-},
-[19] = {
-9,
-},
-[8] = {
-},
-[18] = {
-14,
-15,
-12,
-13,
-},
-["color"] = "3eff3e",
-[4] = {
-1,
-},
-[23] = {
 },
 [15] = {
 42,
@@ -42585,6 +42566,23 @@ true,
 35,
 31,
 },
+[8] = {
+},
+[18] = {
+14,
+15,
+12,
+13,
+},
+["color"] = "3eff3e",
+[19] = {
+9,
+},
+[23] = {
+},
+[4] = {
+1,
+},
 },
 {
 {
@@ -42609,12 +42607,12 @@ true,
 4,
 3,
 },
-[25] = {
-13,
-},
 [19] = {
 12,
 11,
+},
+[25] = {
+13,
 },
 },
 {
@@ -42625,11 +42623,11 @@ true,
 },
 [19] = {
 },
+["color"] = "ff9b3e",
 [18] = {
 17,
 16,
 },
-["color"] = "ff9b3e",
 },
 {
 [6] = {
@@ -42688,14 +42686,24 @@ nil,
 26,
 19,
 23,
+28,
+32,
+33,
+29,
+34,
+35,
+30,
+31,
 },
 {
 16,
 15,
 },
 {
+13,
 },
 {
+2,
 },
 {
 1,
@@ -42704,6 +42712,7 @@ nil,
 9,
 7,
 6,
+8,
 },
 nil,
 nil,
@@ -42720,24 +42729,13 @@ nil,
 [6] = {
 },
 [7] = {
-13,
 },
 [8] = {
-2,
 },
 [10] = {
-8,
 },
 ["color"] = "ff3eff",
 [5] = {
-34,
-28,
-32,
-33,
-29,
-35,
-30,
-31,
 },
 [9] = {
 },
@@ -42752,11 +42750,11 @@ nil,
 [22] = {
 1,
 },
-["color"] = "3eff9e",
 [7] = {
 12,
 11,
 },
+["color"] = "3eff9e",
 },
 {
 {
@@ -42771,6 +42769,12 @@ nil,
 [18] = {
 },
 ["color"] = "ff3e3e",
+[10] = {
+10,
+11,
+13,
+14,
+},
 [9] = {
 3,
 },
@@ -42792,12 +42796,6 @@ nil,
 46,
 43,
 45,
-},
-[10] = {
-10,
-11,
-13,
-14,
 },
 },
 {
@@ -42838,6 +42836,12 @@ nil,
 },
 },
 },
+["colorPaletteInfo"] = {
+["autoColoring"] = true,
+["colorPaletteIdx"] = 4,
+},
+["text"] = "yo",
+["difficulty"] = 2,
 ["createdBy"] = {
 ["classIdx"] = 11,
 ["name"] = "Oldbean",

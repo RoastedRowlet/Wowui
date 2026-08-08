@@ -4210,8 +4210,8 @@ CraftScan_DB = {
 },
 ["concentration"] = {
 ["maxQuantity"] = 1000,
-["lastUpdated"] = 1785607264,
-["amount"] = 329,
+["lastUpdated"] = 1785639756,
+["amount"] = 76,
 ["rechargeTimePerPoint"] = 345600,
 ["currencyID"] = 3161,
 },

@@ -1,7 +1,7 @@
 
 BugGrabberDB = {
 ["lastSanitation"] = 3,
-["session"] = 873,
+["session"] = 885,
 ["errors"] = {
 {
 ["message"] = "...s/AdvancedFocusCastBar/AdvancedFocusCastBarMixin.lua:1861: bad argument #1 to 'SetAlpha' (Usage: self:SetAlpha(alpha))",
@@ -1094,14 +1094,6 @@ BugGrabberDB = {
 ["counter"] = 1,
 },
 {
-["message"] = "BigWigs: \"Corewarden Nysarra\" had issues reading the timeline. Show the devs a screenshot of the messages in your chat, NOT this error message.",
-["time"] = 1781282010,
-["locals"] = "self=<table>{\n name=\"BigWigs\"\n C=<table>\n}\nmsg=\"\"Corewarden Nysarra\" had issues reading the timeline. Show the devs a screenshot of the messages in your chat, NOT this error message.\"\nnoPrint=true\ncore=<table>{\n name=\"BigWigs\"\n C=<table>\n}\n",
-["stack"] = "[Interface/AddOns/BigWigs_Core/Core.lua]:413: in function 'Error'\n[Interface/AddOns/BigWigs_Core/BossPrototype.lua]:798: in function 'Disable'\n[Interface/AddOns/BigWigs_Core/BossPrototype.lua]:1817: in function <Interface/AddOns/BigWigs_Core/BossPrototype.lua:1817>\n",
-["session"] = 679,
-["counter"] = 1,
-},
-{
 ["message"] = ".../Mainline/Blizzard_UIWidgetTemplateTextWithState.lua:35: attempt to perform arithmetic on local 'textHeight' (a secret number value, while execution tainted by 'WarpDeplete')",
 ["time"] = 1781286642,
 ["locals"] = "self=Frame <Blizzard_UIWidgetManager.lua:432>{\n tooltipLoc=0\n tooltipYOffset=0\n widgetType=8\n tooltipContainsHyperLink=false\n tooltip=\"\"\n widgetID=7401\n widgetContainer=Frame <GameTooltip.lua:580>\n tooltipAnchor=\"ANCHOR_BOTTOMLEFT\"\n FadeInAnim=AnimationGroup <Blizzard_UIWidgetTemplateBase.xml:16>\n disableTooltip=true\n scriptedAnimationEffectID=0\n modelSceneLayer=0\n layoutDirection=0\n outAnimType=0\n inAnimType=0\n widgetTag=\"\"\n orderIndex=1\n widgetSetID=1799\n defaultTooltipAnchor=\"ANCHOR_BOTTOMLEFT\"\n hasTimer=true\n FadeOutAnim=AnimationGroup <Blizzard_UIWidgetTemplateBase.xml:23>\n Text=FontString <Blizzard_UIWidgetTemplateTextWithState.xml:7>\n tooltipXOffset=0\n}\nwidgetInfo=<table>{\n scriptedAnimationEffectID=0\n modelSceneLayer=0\n widgetScale=0\n tooltipLoc=0\n fontType=0\n shownState=1\n widgetSizeSetting=250\n bottomPadding=0\n enabledState=1\n textSizeType=0\n text=\"|nThis delve contains a bonus treasure chest that can be opened with a Restored Coffer Key.|nTime Left: 21 |4Hr:Hr; 9 |4Min:Min;|n|n|TInterface\\ICONS\\INV_10_Blacksmithing_Consumable_Key_Color1.BLP:15|t |cnIQ4:Restored Coffer Key|r: |cnWHITE_FONT_COLOR:0|r\r\"\n orderIndex=1\n layoutDirection=0\n inAnimType=0\n widgetTag=\"\"\n hasTimer=true\n outAnimType=0\n tooltip=\"\"\n hAlign=0\n}\nwidgetContainer=Frame <GameTooltip.lua:580>{\n horizontalAnchorXOffset=2\n verticalAnchorPoint=\"TOPLEFT\"\n disableWidgetTooltips=true\n widgetFrames=<table>\n horizontalRelativePoint=\"RIGHT\"\n verticalAnchorYOffset=0\n shownWidgetCount=0\n dirty=false\n widgetSetLayoutDirection=0\n numWidgetsShowing=0\n numTimers=1\n timerWidgets=<table>\n horizontalRowContainerPool=<table>\n widgetPools=<table>\n BackModelScene=ModelScene <Blizzard_UIWidgetManager.xml:46>\n FrontModelScene=ModelScene <Blizzard_UIWidgetManager.xml:33>\n verticalRelativePoint=\"BOTTOMLEFT\"\n widgetSetID=1799\n horizontalAnchorPoint=\"LEFT\"\n showAndHideOnWidgetSetRegistration=false\n}\ntextHeight=<no value>\n(*temporary)=0\n(*temporary)=0\n(*temporary)=0\n(*temporary)=1\n(*temporary)=0\n(*temporary)=\"attempt to perform arithmetic on local 'textHeight' (a secret number value, while execution tainted by 'WarpDeplete')\"\n",
@@ -1286,6 +1278,14 @@ BugGrabberDB = {
 ["stack"] = "[Interface/AddOns/CraftSim/Classes/RecipeData.lua]:598: in function 'SetAllReagentsBySchematicForm'\n[Interface/AddOns/CraftSim/Modules/Modules.lua]:143: in function 'GetRecipeDataFromVisibleRecipe'\n[Interface/AddOns/CraftSim/Modules/Modules.lua]:213: in function 'UpdateUI'\n[Interface/AddOns/CraftSim/Init/Init.lua]:108: in function <Interface/AddOns/CraftSim/Init/Init.lua:106>\n[Interface/AddOns/CraftSim/Libs/GUTIL/GUTIL.lua]:690: in function 'checkCondition'\n[Interface/AddOns/CraftSim/Libs/GUTIL/GUTIL.lua]:696: in function 'WaitFor'\n[Interface/AddOns/CraftSim/Init/Init.lua]:97: in function 'InitializeVisibleRecipeID'\n[Interface/AddOns/CraftSim/Init/Init.lua]:152: in function <Interface/AddOns/CraftSim/Init/Init.lua:130>\n[C]: ?\n[C]: in function 'Init'\n[Interface/AddOns/Blizzard_ProfessionsTemplates/Blizzard_ProfessionsRecipeSchematicForm.lua]:184: in function <...emplates/Blizzard_ProfessionsRecipeSchematicForm.lua:178>\n[C]: in function 'Show'\n[Interface/AddOns/Blizzard_UIParentPanelManager/Shared/UIParentPanelManager.lua]:842: in function <...UIParentPanelManager/Shared/UIParentPanelManager.lua:828>\n[C]: in function 'ShowUIPanel'\n[Interface/AddOns/Blizzard_UIParent/Mainline/UIParent.lua]:1869: in function <...rface/AddOns/Blizzard_UIParent/Mainline/UIParent.lua:1194>\n",
 ["session"] = 873,
 ["counter"] = 9,
+},
+{
+["message"] = "BigWigs: \"Corewarden Nysarra\" had issues reading the timeline. Show the devs a screenshot of the messages in your chat, NOT this error message.",
+["time"] = 1785630194,
+["locals"] = "self=<table>{\n name=\"BigWigs\"\n C=<table>\n}\nmsg=\"\"Corewarden Nysarra\" had issues reading the timeline. Show the devs a screenshot of the messages in your chat, NOT this error message.\"\nnoPrint=true\ncore=<table>{\n name=\"BigWigs\"\n C=<table>\n}\n",
+["stack"] = "[Interface/AddOns/BigWigs_Core/Core.lua]:413: in function 'Error'\n[Interface/AddOns/BigWigs_Core/BossPrototype.lua]:797: in function 'Disable'\n[Interface/AddOns/BigWigs_Core/BossPrototype.lua]:1969: in function <Interface/AddOns/BigWigs_Core/BossPrototype.lua:1969>\n",
+["session"] = 879,
+["counter"] = 2,
 },
 },
 }
