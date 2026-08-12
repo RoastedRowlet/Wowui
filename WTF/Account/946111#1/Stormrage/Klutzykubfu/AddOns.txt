@@ -25,7 +25,7 @@ CraftScan: enabled
 CraftSim: enabled
 EllesmereUI: enabled
 EllesmereUIActionBars: enabled
-EllesmereUIAuraBuffReminders: enabled
+EllesmereUIAuraBuffReminders: disabled
 EllesmereUIBags: enabled
 EllesmereUIBasics: enabled
 EllesmereUIBlizzardSkin: enabled

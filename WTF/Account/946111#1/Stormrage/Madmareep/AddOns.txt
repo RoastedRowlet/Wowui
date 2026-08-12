@@ -52,3 +52,4 @@ EllesmereUIResourceBars: disabled
 LittleWigs_BattleForAzeroth: enabled
 BigWigs_Sporefall: enabled
 ArcUI: disabled
+EllesmereUIAuraBuffReminders: disabled

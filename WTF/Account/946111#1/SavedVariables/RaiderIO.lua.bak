@@ -12,12 +12,23 @@ RaiderIO_Config = {
 ["hide"] = false,
 },
 }
-RaiderIO_LastCharacter = "us-Barelynoer-area-52"
+RaiderIO_LastCharacter = "us-Lonelylitten-stormrage"
 RaiderIO_MissingCharacters = {
-["us-Ângelikal-area-52"] = true,
-["us-Boombiya-area-52"] = true,
-["us-Lockworth-area-52"] = true,
-["us-Bauthimoss-area-52"] = true,
+["us-Ebønhørn-area-52"] = true,
+["us-Luxsan-sargeras"] = true,
+["us-Mollydh-area-52"] = true,
+["us-Greaterboat-area-52"] = true,
+["us-Daraeline-area-52"] = true,
+["us-Holyjeans-area-52"] = true,
+["us-Panzersham-area-52"] = true,
+["us-Thundergunx-area-52"] = true,
+["us-Xadrixna-area-52"] = true,
+["us-Bungcluud-area-52"] = true,
+["us-Turnek-area-52"] = true,
+["us-Highwaydk-illidan"] = true,
+["us-Nickfists-illidan"] = true,
+["us-Disastrophe-area-52"] = true,
+["us-Wingingit-area-52"] = true,
 }
 RaiderIO_MissingServers = {
 }

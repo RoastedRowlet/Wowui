@@ -50,3 +50,4 @@ BigWigs_MidnightWorld: enabled
 EllesmereUIResourceBars: disabled
 LittleWigs_BattleForAzeroth: enabled
 BigWigs_Sporefall: enabled
+EllesmereUIAuraBuffReminders: disabled

@@ -14,7 +14,6 @@ local issecretvalue = Grid2.issecretvalue
 local BackdropTemplateMixin = BackdropTemplateMixin
 local framePool = setmetatable( {}, {__index = function (t,k) local r = {}; t[k] = r; return r; end} )
 
-
 Grid2.indicators = {}
 Grid2.indicatorSorted = {}
 Grid2.indicatorEnabled = {}
@@ -26,6 +25,7 @@ indicator.__index = indicator
 
 indicator.EnableTooltips = Grid2.Dummy
 indicator.DisableTooltips = Grid2.Dummy
+indicator.UpdateDB = Grid2.Dummy
 
 function indicator:new(name)
 	local e = setmetatable({}, self)
@@ -49,9 +49,15 @@ end
 
 function indicator:Release(parent)
 	local f = parent[self.name]
+	if f and self.Destroy then
+		self:Destroy(parent, f)
+	end
+	-- We only release the first aura slot button created, if a indicator creates more slots (using a non nil key to identify them)
+	-- those slots must be manually released inside a indicator:Destroy() method.
+	if parent.__auraManager then
+		self:ReleaseAuraSlotButton(parent)
+	end
 	if f then
-		local Destroy = self.Destroy
-		if Destroy then	Destroy(self, parent, f) end
 		if f~=parent then
 			f:SetParent(nil)
 			f:ClearAllPoints()
@@ -105,9 +111,6 @@ end
 
 function indicator:Update(parent, unit)
 	self:OnUpdate(parent, unit, self:GetCurrentStatus(unit, parent) )
-end
-
-function indicator:UpdateDB()
 end
 
 function indicator:RegisterStatus(status, priority)

@@ -1,6 +1,13 @@
+-- Altar of Fangs
+
+local L = BigWigs:NewBossLocale("Altar of Fangs Trash", "zhCN")
+if L then
+	L.custom_on_mixture_autotalk_desc = "|cFFFF0000需要至暗之夜烹饪或至暗之夜炼金术达到25点技能。|r 自动选择NPC的对话选项，获取“变异药剂”增益。\n\n|T136242:16|t变异药剂\n{1310012}"
+end
+
 -- Delves: Atal'Aman
 
-local L = BigWigs:NewBossLocale("Spiritflayer Jin'ma", "zhCN")
+L = BigWigs:NewBossLocale("Spiritflayer Jin'ma", "zhCN")
 if L then
 	L.spiritflayer_jinma = "夺灵者金玛"
 end
@@ -148,6 +155,4 @@ end
 L = BigWigs:NewBossLocale("Nexus-Point Xenas Trash", "zhCN")
 if L then
 	L.custom_on_arcane_tripwire_autotalk_desc = "|cFFFF0000需要至暗之夜工程学 25 点技能。|r自动与NPC对话，选择禁用奥术绊索的选项。"
-
-	L.arcane_tripwire = "奥术绊索"
 end

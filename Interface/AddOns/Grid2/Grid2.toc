@@ -1,7 +1,7 @@
-## Interface: 120007
+## Interface: 120100
 ## Title: Grid2
 ## Author: Pastamancer & Maia, Jerry, Toadkiller
-## Version: 3.4.4
+## Version: 4.0.3
 ## IconTexture: Interface/AddOns/Grid2/media/iconsmall.tga
 ## Notes: A modular, lightweight and screen-estate saving grid of party/raid unit frames
 ## Notes-esES: Marcos de unidades de raid compactos y ligeros.
@@ -31,6 +31,7 @@ Libs\LibCustomGlow-1.0\LibCustomGlow-1.0.lua
 #Locales
 locales.xml
 
+GridBackdrop.xml
 GridGroupHeaders.xml
 
 # Grid2
@@ -38,12 +39,14 @@ GridCore.lua
 GridShims.lua
 GridUtils.lua
 GridUtilsCmd.lua
+GridPlayerSpells.lua
 GridRosterUnitEvents.lua
 GridRoster.lua
 GridFrame.lua
 GridLayout.lua
 GridLayoutLayouts.lua
 GridIndicator.lua
+GridIndicatorAuras.lua
 GridIndicatorLoad.lua
 GridIndicatorEffects.lua
 GridStatus.lua
@@ -98,5 +101,3 @@ modules\StatusVehicle.lua
 modules\StatusSummon.lua
 modules\StatusStagger.lua
 modules\StatusAuras.lua
-modules\StatusAurasTemp.lua
-modules\StatusAurasTempBuffs.lua

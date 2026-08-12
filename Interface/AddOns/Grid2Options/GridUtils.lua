@@ -137,6 +137,9 @@ Grid2Options.tooltipAnchorValues = {
 	ANCHOR_BOTTOMRIGHT = L["RIGHTBOTTOM"],
 	ANCHOR_TOPLEFT = L["TOPRIGHT"],
 	ANCHOR_TOPRIGHT = L["TOPLEFT"],
+	ANCHOR_CURSOR = L["CURSOR"],
+	ANCHOR_CURSOR_LEFT = L["CURSOR LEFT"],
+	ANCHOR_CURSOR_RIGHT = L["CURSOR RIGHT"],
 }
 
 -- raid size values calculations
@@ -450,7 +453,6 @@ function Grid2Options:IsCompatibleStatus(status, type)
 	end
 end
 
-
 -- Check if status is compatible with the specified indicator type
 function Grid2Options:IsCompatibleStatus(status, type)
 	for _,istatus in ipairs(Grid2.statusTypes[type]) do
@@ -517,24 +519,56 @@ end
 -- 	"Create" > Recreate the indicator
 --  "Update"|nil > Update all indicators in all registered frame units
 --  key > method defined inside indicator to be executed
-function Grid2Options:RefreshIndicator(indicator, method)
-	self:UpdateIndicatorDB(indicator)
-	if method then
-		if method == "Create" then
-			for _,f in next, Grid2Frame.registeredFrames do
-				if indicator:GetFrame(f) then
-					indicator:Disable(f)
-					indicator:Create(f)
-					indicator:Layout(f)
+do
+	local queue = {}
+	local qtime, qindicator, qmethod
+	function Grid2Options:RefreshIndicatorNow(indicator, method)
+		self:UpdateIndicatorDB(indicator)
+		if method then
+			if method == "Create" then
+				for _,f in next, Grid2Frame.registeredFrames do
+					if indicator:GetFrame(f) then
+						indicator:Disable(f)
+						indicator:Create(f)
+						indicator:Layout(f)
+					end
 				end
+			elseif method == 'Layout' then
+				indicator:LayoutAllFrames()
+			elseif method ~= 'Update' then
+				Grid2Frame:WithAllFrames(indicator, method)
 			end
-		elseif method == 'Layout' then
-			indicator:LayoutAllFrames()
-		elseif method ~= 'Update' then
-			Grid2Frame:WithAllFrames(indicator, method)
+		end
+		self:UpdateIndicator(indicator)
+		if indicator.parentName then
+			local pindicator =Grid2:GetIndicatorByName(indicator.parentName)
+			if pindicator then
+				self:RefreshIndicatorNow(pindicator, method)
+			end
 		end
 	end
-	Grid2Frame:UpdateIndicators()
+	function Grid2Options:RefreshIndicator(indicator, method)
+		local skip = qtime
+		qtime = GetTime()+.2
+		queue[indicator] = method
+		if skip then return end
+		C_Timer.NewTicker(.2, function(timer)
+			if GetTime()>=qtime then
+				timer:Cancel()
+				for indicator, method in pairs(queue) do
+					self:RefreshIndicatorNow(indicator,method)
+				end
+				wipe(queue); qtime = nil
+			end
+		end)
+	end
+end
+
+-- Refresh indicators linked to the specified status
+function Grid2Options:RefreshStatusIndicators(status, method)
+	for indicator in pairs(status.indicators) do
+		self:RefreshIndicator(indicator, method)
+	end
 end
 
 -- Create or recreate indicator
@@ -559,6 +593,17 @@ function Grid2Options:RegisterIndicatorStatuses(indicator)
 					indicator:RegisterStatus(status, priority)
 				end
 			end
+		end
+	end
+end
+
+-- Update one indicator
+function Grid2Options:UpdateIndicator(indicator)
+	for frame in next, Grid2Frame.activatedFrames do
+		local unit = frame.unit
+		if unit then
+			frame:UpdateAuraContainers()
+			indicator:Update(frame, unit)
 		end
 	end
 end

@@ -1,9 +1,9 @@
-## Interface: 120000, 120001, 120005, 120007
+## Interface: 120000, 120001, 120005, 120007, 120100
 ## X-Curse-Project-ID: 1462935
 ## X-Wago-ID: ANzkJg64
 ## Title: TotemRecall
 ## Author: Mantis
-## Version: v1.0.7
+## Version: v1.0.8
 ## Notes: Custom positioning and square masks for Totems.
 ## IconTexture: Interface\AddOns\TotemRecall\Media\LogoTotemRecall.tga
 ## SavedVariables: MyTotemDB

@@ -2,7 +2,7 @@
 SpellOverlayEnhancedDB = {
 ["global"] = {
 ["snapshots"] = {
-["Essence Burst"] = {
+["Lava Surge"] = {
 ["left"] = {
 ["isAtlas"] = false,
 ["texCoords"] = {
@@ -18,7 +18,7 @@ SpellOverlayEnhancedDB = {
 ["height"] = 204.8000183105469,
 ["scale"] = 1,
 ["width"] = 102.4000244140625,
-["texture"] = 4699056,
+["texture"] = 449491,
 },
 ["right"] = {
 ["isAtlas"] = false,
@@ -35,7 +35,43 @@ SpellOverlayEnhancedDB = {
 ["height"] = 204.8000183105469,
 ["scale"] = 1,
 ["width"] = 102.3999557495117,
-["texture"] = 4699056,
+["texture"] = 449491,
+},
+},
+["Clearcasting"] = {
+["left"] = {
+["isAtlas"] = false,
+["texCoords"] = {
+0,
+0,
+0,
+1,
+1,
+0,
+1,
+1,
+},
+["height"] = 204.8000081380208,
+["scale"] = 1,
+["width"] = 102.4000040690104,
+["texture"] = 450929,
+},
+["right"] = {
+["isAtlas"] = false,
+["texCoords"] = {
+1,
+0,
+1,
+1,
+0,
+0,
+0,
+1,
+},
+["height"] = 204.8000081380208,
+["scale"] = 1,
+["width"] = 102.4000040690104,
+["texture"] = 450929,
 },
 },
 ["Strength of the Black Ox"] = {
@@ -74,6 +110,99 @@ SpellOverlayEnhancedDB = {
 ["scale"] = 1,
 ["width"] = 102.400018033114,
 ["texture"] = 623951,
+},
+},
+["Essence Burst"] = {
+["left"] = {
+["isAtlas"] = false,
+["texCoords"] = {
+0,
+0,
+0,
+1,
+1,
+0,
+1,
+1,
+},
+["height"] = 204.8000183105469,
+["scale"] = 1,
+["width"] = 102.4000244140625,
+["texture"] = 4699056,
+},
+["right"] = {
+["isAtlas"] = false,
+["texCoords"] = {
+1,
+0,
+1,
+1,
+0,
+0,
+0,
+1,
+},
+["height"] = 204.8000183105469,
+["scale"] = 1,
+["width"] = 102.3999557495117,
+["texture"] = 4699056,
+},
+},
+["Lunar Eclipse"] = {
+["left"] = {
+["isAtlas"] = false,
+["texCoords"] = {
+0,
+0,
+0,
+1,
+1,
+0,
+1,
+1,
+},
+["height"] = 204.8000183105469,
+["scale"] = 1,
+["width"] = 102.4000244140625,
+["texture"] = 450914,
+},
+},
+["Solar Eclipse"] = {
+["right"] = {
+["isAtlas"] = false,
+["texCoords"] = {
+1,
+0,
+1,
+1,
+0,
+0,
+0,
+1,
+},
+["height"] = 204.8000183105469,
+["scale"] = 1,
+["width"] = 102.3999557495117,
+["texture"] = 450915,
+},
+},
+["Owlkin Frenzy"] = {
+["left"] = {
+["isAtlas"] = false,
+["texCoords"] = {
+0,
+0,
+0,
+1,
+1,
+0,
+1,
+1,
+},
+["height"] = 102.4000244140625,
+["scale"] = 1,
+["width"] = 204.800048828125,
+["texture"] = 463452,
 },
 },
 },

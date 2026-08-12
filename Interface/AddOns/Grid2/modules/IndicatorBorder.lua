@@ -5,7 +5,29 @@ local Border = Grid2.indicatorPrototype:new("border")
 local cr, cg, cb, ca = 0, 0, 0, 0
 
 Border.Create = Grid2.Dummy
-Border.Layout = Grid2.Dummy
+
+-- aura containers management
+
+function Border:Layout(parent)
+	if self.auraMode then
+		local button, filter = self:AcquireAuraSlotButton(parent)
+		local borderSize = Grid2Frame.db.profile.frameBorder
+		button:SetAllPoints(parent)
+		button:SetFrameLevel(parent:GetFrameLevel())
+		local tex = button.__texture or button:CreateTexture(nil, "OVERLAY", nil, 7)
+		tex:SetTexture( Grid2:GetSliceBorderTexture(borderSize) )
+		tex:SetTextureSliceMargins(borderSize, borderSize, borderSize, borderSize)
+		tex:SetTextureSliceMode(1)
+		tex:SetAllPoints()
+		tex:SetVertexColor(1, 1, 1, 1)
+		button:SetAuraBorder(tex, filter.borderOptions)
+		button.__texture = tex
+	else
+		self:ReleaseAuraSlotButton(parent)
+	end
+end
+
+-- standard indicators
 
 function Border:GetFrame(parent)
 	return parent

@@ -230,7 +230,7 @@ function EF:ADDON_LOADED(addon)
 		--	DSH.debug = true
 		--end
 
-        --if DSH.VERSION == "v2.2.22" then
+        --if DSH.VERSION == "v2.2.23" then
         --    DSH.debug = true
         --end
 

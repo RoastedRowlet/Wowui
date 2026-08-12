@@ -1,24 +1,9 @@
 -- buffs and debuffs statuses for midnight
+if Grid2.versionCli<120100 then return end
 
 local Grid2 = Grid2
-local next = next
-local ipairs = ipairs
-local UnitIsFriend = UnitIsFriend
-local UnitIsVisible = UnitIsVisible
-local GetUnitAuras = C_UnitAuras.GetUnitAuras
-local GetAuraDuration = C_UnitAuras.GetAuraDuration
-local GetAuraDataByIndex = C_UnitAuras.GetAuraDataByIndex
-local GetAuraDispelTypeColor = C_UnitAuras.GetAuraDispelTypeColor
-local GetAuraApplicationDisplayCount = C_UnitAuras.GetAuraApplicationDisplayCount
 
--- temporary results variables
-local slots = {}
-local color = {}
-local colors = {color, color, color, color, color, color, color, color, color, color, color, color}
-local counts = {}
-local textures = {}
-local durations = {}
-local expirations = {}
+local CopyTable = Grid2.CopyTable
 
 -------------------------------------------------------------------------------
 -- Dispel Type colors
@@ -33,11 +18,14 @@ Grid2.DispelCurveDefaults = {
 	Enrage  = { 9,  DEBUFF_TYPE_BLEED_COLOR   },
 	Bleed   = { 11, DEBUFF_TYPE_BLEED_COLOR   },
 }
-local color_default = Grid2.defaultColors.TRANSPARENT
 
--------------------------------------------------------------------------------
--- Exhaustion or similar debuffs
--------------------------------------------------------------------------------
+Grid2.DispelBorderDefaults = {
+	showIcon = false,
+	showWhenHarmful = true,
+	showWhenHelpful = true,
+	showWithoutDispelType = true,
+	style = Enum.CustomAuraButtonDispelTypeTextureStyle.PreserveAsset, -- Border, BorderWithIcon, Icon, PreserverAsset, CustomAsset
+}
 
 Grid2.SatedDebuffs = {
 	[57723]  = true, -- Exhaustion
@@ -51,104 +39,153 @@ Grid2.SatedDebuffs = {
 	[71041]  = true, -- Dungeon Deserter
 }
 
+--[[
+	if style == Enum.CustomAuraButtonDispelTypeTextureStyle.Border then
+		local showIcon = false;
+		AuraUtil.SetAuraBorderAtlas(texture, auraData.dispelName, showIcon);
+		texture:SetVertexColor(1, 1, 1, 1);
+	elseif style == Enum.CustomAuraButtonDispelTypeTextureStyle.BorderWithIcon then
+		local showIcon = true;
+		AuraUtil.SetAuraBorderAtlas(texture, auraData.dispelName, showIcon);
+		texture:SetVertexColor(1, 1, 1, 1);
+	elseif style == Enum.CustomAuraButtonDispelTypeTextureStyle.Icon then
+		AuraUtil.SetAuraDispelTypeIcon(texture, auraData.dispelName);
+		texture:SetVertexColor(1, 1, 1, 1);
+	elseif style == Enum.CustomAuraButtonDispelTypeTextureStyle.PreserveAsset then
+		AuraUtil.SetAuraBorderColor(texture, auraData.dispelName);
+	elseif style == Enum.CustomAuraButtonDispelTypeTextureStyle.CustomAsset then
+		local customAsset = secretwrap(GetCustomDispelTypeTextureAsset(options, auraData));
+		ApplyDispelTypeTextureAsset(texture, customAsset);
+		texture:SetVertexColor(1, 1, 1, 1);
+	end
+--]]
+
 -------------------------------------------------------------------------------
 -- shared methods
 -------------------------------------------------------------------------------
 
-local Shared = {
-	GetColor = Grid2.statusLibrary.GetColor,
-	UNIT_AURA = Grid2.statusPrototype.UpdateIndicatorsFromEvent,
-}
-
-function Shared:GetIcons(unit, max)
-	local i = 0
-	if self.aura_displayu==nil or self.aura_displayu(unit) then
-		local displayFunc = self.aura_display
-		local colorCurve = self.aura_color
-		local color = colorCurve.r and colorCurve or nil
-		local auras = self.aura_func(unit, self.aura_filter, displayFunc and 40 or max, self.aura_sortRule, self.aura_sortDir)
-		for _, a in ipairs(auras) do
-			if not displayFunc or displayFunc(a) then
-				i = i + 1
-				local auraInstanceID = a.auraInstanceID
-				slots[i] = auraInstanceID
-				textures[i] = a.icon
-				durations[i] = a.duration
-				expirations[i] = a.expirationTime
-				counts[i] = a.applications
-				colors[i] = color or GetAuraDispelTypeColor(unit, auraInstanceID, colorCurve) or color_default
-				if i>=max then break end
-			end
+local function GetSpellIDsTable(dbx)
+	local r = nil
+	if dbx.auras then -- buffs/mbuffs/mdebufs statuses
+		r = {}
+		for _,spell in ipairs(dbx.auras) do
+			r[spell] = true
 		end
+	elseif dbx.spellName then -- buff status
+		r = { [dbx.spellName] = true }
 	end
-	return i, textures, counts, expirations, durations, colors, slots
+	return r
 end
 
-function Shared:GetIconData(unit)
-	local _, tex, cnt, exp, dur, col, slots = self:GetIcons(unit, 1)
-	return tex[1], cnt[1], exp[1], dur[1], col[1], slots[1]
+local function Auras_IsActive()
+	return false
 end
 
-function Shared:GetDurationObject(unit, slotID)
-	return GetAuraDuration(unit, slotID)
+local function Auras_GetAurasFilter(self)
+	return self.aura_filter
 end
 
-function Shared:GetTooltip(unit, tip, slotID)
-	if slotID then
-		tip:SetUnitAuraByAuraInstanceID(unit, slotID)
+local function Auras_UpdateDB(self)
+	local dbx = self.dbx
+	local typ = dbx.type
+	-- aura filter
+	local filter = CopyTable( self.defaults, CopyTable(dbx.aura_filter or {}) )
+	--[[
+	if typ=='buff' then
+		filter.maxAuras = 1
+		filter.filter=  (dbx.mine==1 and 'HELPFUL|PLAYER') or (dbx.mine==2 and 'HELPFUL|!PLAYER') or 'HELPFUL'
+	elseif typ=='buffs' then
+		filter.maxAuras = filter.maxAuras or math.huge
+		filter.filter=  (dbx.mine==1 and 'HELPFUL|PLAYER') or (dbx.mine==2 and 'HELPFUL|!PLAYER') or 'HELPFUL'
+	else -- mbuffs/mdebuffs
+		filter.maxAuras = filter.maxAuras or math.huge
+		filter.filter = filter.filter or self.defFilter
+	end
+	--]]
+	-- spells table
+	local spells = GetSpellIDsTable(dbx)
+	if spells then
+		filter.candidateFilters = filter.candidateFilters or {}
+		if filter.candidateFilters.excludeSpellIDs then
+			filter.candidateFilters.excludeSpellIDs = spells
+		else
+			filter.candidateFilters.includeSpellIDs = spells
+		end
+	elseif filter.excludeSatedDebuffs then
+		filter.candidateFilters = filter.candidateFilters or {}
+		filter.candidateFilters.excludeSpellIDs = Grid2.SatedDebuffs
+	end
+	-- aura type colors
+ 	local colorMap, defColor = {}
+	if dbx.color1 then -- single buff
+		defColor = dbx.color1 or Grid2.defaultColors.BLACK
+		for typ, data in pairs(Grid2.DispelCurveDefaults) do
+			colorMap[typ] = defColor
+		end
 	else
-		tip:SetUnitAuraByAuraInstanceID(unit, select(6,self:GetIconData(unit)) )
+		local colors = dbx.colors
+		for typ, data in pairs(Grid2.DispelCurveDefaults) do
+			colorMap[typ] = (colors and colors[typ]) or data[2]
+		end
+		defColor = colorMap.None
 	end
-end
-
-function Shared:OnEnable()
-	self:RegisterRosterUnitEvent('UNIT_AURA')
-end
-
-function Shared:OnDisable()
-	self:UnregisterRosterUnitEvent('UNIT_AURA')
-end
-
-function Shared:IsActive(unit)
-	if self.aura_display then
-		return self:GetIcons(unit, 1) > 0
-	elseif self.aura_displayu and not self.aura_displayu(unit) then
-		return false
-	else
-		return GetAuraDataByIndex(unit, 1, self.aura_filter)~=nil
+	filter.borderOptions = CopyTable( Grid2.DispelBorderDefaults, {customDispelColorMap = colorMap} )
+	-- default status color
+	local r, g, b, a = Grid2.UnpackColor(defColor)
+	self.GetColor = function() return r, g, b, a end
+	-- color by remaining/elapsed time options
+	filter.cooldownTextOptions = nil
+	if dbx.colorThreshold and dbx.colorCount>1 then -- color by time or value
+		self.ctColorCurve = self.ctColorCurve or C_CurveUtil.CreateColorCurve()
+		self.ctColorCurve:SetType(Enum.LuaCurveType.Step)
+		self.ctColorCurve:ClearPoints()
+		for i=1,dbx.colorCount do
+			self.ctColorCurve:AddPoint( dbx.colorThreshold[i] or 0, dbx["color"..i] )
+		end
+		local durationType = dbx.colorThresholdElapsed and Enum.DurationTextBindingProperty.ElapsedDuration or Enum.DurationTextBindingProperty.RemainingDuration
+		filter.cooldownTextOptions = { textColor={ curve=self.ctColorCurve, property=durationType } }
 	end
+	-- save filter table
+	self.aura_filter = filter
+end
+
+local function Auras_Create(baseKey, dbx, defaults, status)
+	status = status or Grid2.statusPrototype:new(baseKey)
+	status.isAura = true
+	status.defaults= defaults
+	status.IsActive = Auras_IsActive
+	status.UpdateDB = Auras_UpdateDB
+	status.GetAurasFilter = Auras_GetAurasFilter
+	Grid2:RegisterStatus(status, { "icons", "icon", "color" }, baseKey, dbx)
+	return status
 end
 
 -------------------------------------------------------------------------------
 -- midnight-buffs status
 -------------------------------------------------------------------------------
+--[[
+Grid2.setupFunc["buff"] = function(baseKey, dbx)
+	return Auras_Create(baseKey, dbx, "HELPFUL")
+end
 
-do
+Grid2.setupFunc["buffs"] = function(baseKey, dbx)
+	return Auras_Create(baseKey, dbx, "HELPFUL")
+end
+--]]
 
-	local function Buffs_UpdateDB(self)
-		local filter = self.dbx.aura_filter or {}
-		self.aura_color = self.dbx.color1
-		self.aura_sortDir = filter.sortDir or 0
-		self.aura_sortRule = filter.sortRule or 0
-		self.aura_filter = filter.filter or 'HELPFUL'
-		self.aura_func = C_UnitAuras.GetUnitAuras
-		self.aura_displayu = self.aura_filter~='HELPFUL' and UnitIsVisible or nil
-	end
+local DEFAULTS = { filter = 'HELPFUL', maxAuras = 1 }
+Grid2.setupFunc["mbuff"] = function(baseKey, dbx)
+	return Auras_Create(baseKey, dbx, DEFAULTS)
+end
 
-	-- Registration
-	Grid2.setupFunc["mbuffs"] = function(baseKey, dbx)
-		local status = Grid2.statusPrototype:new(baseKey)
-		status:Inject(Shared)
-		status.UpdateDB = Buffs_UpdateDB
-		Grid2:RegisterStatus(status, { "icons", "icon", "color", "tooltip" }, baseKey, dbx)
-		return status
-	end
-
+local DEFAULTS = { filter = 'HELPFUL', maxAuras = 64 }
+Grid2.setupFunc["mbuffs"] = function(baseKey, dbx)
+	return Auras_Create(baseKey, dbx, DEFAULTS)
 end
 
 --[[ mbuffs database format
  type = "mbuffs",
- aura_filter = { filter='HELPFUL|RAID|PLAYER', sortRule=3, sortDir=0 },
+ aura_filter = { filter='HELPFUL|RAID|PLAYER', sortRule=3, sortDir=0, },
  color1 = {r=0, g=1, b=0, a=1}
 --]]
 
@@ -156,57 +193,9 @@ end
 -- midnight-debuffs status
 -------------------------------------------------------------------------------
 
-do
-	local CODE = [[local isv=Grid2.issecretvalue; local dbl=Grid2.SatedDebuffs; return function(a) return (%s) end]]
-
-	local function CompileDisplayFunc(filter)
-		local tmpTbl = {}
-		if filter.typed~=nil then
-			tmpTbl[#tmpTbl+1] = filter.typed and "a.dispelName~=nil" or "a.dispelName==nil"
-		end
-		if filter.sated then
-			tmpTbl[#tmpTbl+1] = "(isv(a.spellId) or dbl[a.spellId]==nil)"
-		end
-		if #tmpTbl>0 then
-			local s = string.format( CODE, table.concat(tmpTbl," and ") )
-			return assert(loadstring(s))()
-		end
-		return nil
-	end
-
-	local function Debuffs_GetColor(self, unit)
-		local cnt, _, _, _, _, col = self:GetIcons(unit, 1)
-		local c = cnt>0 and col[1] or color_default
-		return c.r, c.g, c.b, c.a
-	end
-
-	local function Debuffs_UpdateDB(self)
-		local filter = self.dbx.aura_filter or {}
-		self.aura_filter = filter.filter or 'HARMFUL'
-		self.aura_sortDir = filter.sortDir or 0
-		self.aura_sortRule = filter.sortRule or 0
-		self.aura_display = CompileDisplayFunc(filter)
-		self.aura_func = C_UnitAuras.GetUnitAuras
-		self.aura_displayu = self.aura_filter~='HARMFUL' and UnitIsVisible or nil
-		self.aura_color:ClearPoints()
-		local colors = self.dbx.colors or {}
-		for typ, def in pairs(Grid2.DispelCurveDefaults) do
-			self.aura_color:AddPoint( def[1], colors[typ] or def[2] )
-		end
-	end
-
-	-- Registration
-	Grid2.setupFunc["mdebuffs"] = function(baseKey, dbx)
-		local status = Grid2.statusPrototype:new(baseKey)
-		status:Inject(Shared)
-		status.GetColor = Debuffs_GetColor
-		status.UpdateDB = Debuffs_UpdateDB
-		status.aura_color = C_CurveUtil.CreateColorCurve()
-		status.aura_color:SetType(Enum.LuaCurveType.Step)
-		Grid2:RegisterStatus(status, { "icons", "icon", "color", "tooltip" }, baseKey, dbx)
-		return status
-	end
-
+local DEFAULTS = { filter = 'HARMFUL', maxAuras = 64 }
+Grid2.setupFunc["mdebuffs"] = function(baseKey, dbx)
+	return Auras_Create(baseKey, dbx, DEFAULTS)
 end
 
 --[[ mdebuffs database format
@@ -218,78 +207,12 @@ end
 -------------------------------------------------------------------------------
 -- midnight debuffs-dispellablebyme status
 -------------------------------------------------------------------------------
-do
 
-	local DebuffsDispell = Grid2.statusPrototype:new("debuffs-DispellableByMe")
+local DebuffsDispell = Grid2.statusPrototype:new("debuffs-DispellableByMe")
 
-	local dispel_cache = {}
-
-	DebuffsDispell.defaultColors = {
-		Magic   = { 1,  DEBUFF_TYPE_MAGIC_COLOR   },
-		Curse   = { 2,  DEBUFF_TYPE_CURSE_COLOR   },
-		Disease = { 3,  DEBUFF_TYPE_DISEASE_COLOR },
-		Poison  = { 4,  DEBUFF_TYPE_POISON_COLOR  },
-		Enrage  = { 9,  DEBUFF_TYPE_BLEED_COLOR   },
-		Bleed   = { 11, DEBUFF_TYPE_BLEED_COLOR   },
-	}
-
-	DebuffsDispell.aura_color = C_CurveUtil.CreateColorCurve()
-	DebuffsDispell.aura_color:SetType(Enum.LuaCurveType.Step)
-
-	DebuffsDispell:Inject(Shared)
-
-	function DebuffsDispell:UpdateCache(unit, aura)
-		local active = aura~=nil
-		if active or active ~= (dispel_cache[unit]~=nil) then -- TODO: this is wrong, if an aura is replaced by another ahora we need to update the color and the indicators
-			dispel_cache[unit] = active and GetAuraDispelTypeColor(unit, aura.auraInstanceID, self.aura_color) or nil
-			self:UpdateIndicators(unit)
-		end
-	end
-
-	function DebuffsDispell:GetColor(unit)
-		local c = dispel_cache[unit]
-		return c.r, c.g, c.b, c.a
-	end
-
-	function DebuffsDispell:UNIT_AURA(_, unit)
-		self:UpdateCache( unit, (UnitIsFriend("player", unit) and UnitIsVisible(unit)) and GetAuraDataByIndex(unit, 1, self.aura_filter) or nil )
-	end
-
-	function DebuffsDispell:Grid_UnitUpdated(_, unit)
-		dispel_cache[unit] = nil
-	end
-
-	function DebuffsDispell:OnEnable()
-		Shared.OnEnable(self)
-		self:RegisterMessage("Grid_UnitUpdated")
-	end
-
-	function DebuffsDispell:OnDisable()
-		Shared.OnDisable(self)
-		self:UnregisterMessage("Grid_UnitUpdated")
-	end
-
-	function DebuffsDispell:IsActive(unit)
-		return dispel_cache[unit]~=nil
-	end
-
-	function DebuffsDispell:UpdateDB()
-		self.aura_filter = 'HARMFUL|RAID_PLAYER_DISPELLABLE'
-		self.aura_func = C_UnitAuras.GetUnitAuras
-		self.aura_displayu = UnitIsVisible
-		self.aura_color:ClearPoints()
-		local colors = self.dbx.colors or {}
-		for typ, def in pairs(Grid2.DispelCurveDefaults) do
-			self.aura_color:AddPoint( def[1], colors[typ] or def[2])
-		end
-	end
-
-	-- Registration
-	Grid2.setupFunc["mdebuffType"] = function(baseKey, dbx)
-		Grid2:RegisterStatus(DebuffsDispell, { "icons", "icon", "color", "tooltip" }, baseKey, dbx)
-		return DebuffsDispell
-	end
-
-	Grid2:DbSetStatusDefaultValue( "debuffs-DispellableByMe", {type = "mdebuffType", subType = "DispellableByMe", colors = {}} )
-
+local DEFAULTS = { filter = 'HARMFUL|RAID', maxAuras = 64 }
+Grid2.setupFunc["mdebuffType"] = function(baseKey, dbx)
+	return Auras_Create(baseKey, dbx, DEFAULTS, DebuffsDispell)
 end
+
+Grid2:DbSetStatusDefaultValue( "debuffs-DispellableByMe", {type = "mdebuffType", subType = "DispellableByMe", colors = {}} )

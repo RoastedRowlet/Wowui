@@ -1,6 +1,13 @@
+-- Altar of Fangs
+
+local L = BigWigs:NewBossLocale("Altar of Fangs Trash", "ptBR")
+if L then
+	--L.custom_on_mixture_autotalk_desc = "|cFFFF0000Requires 25 skill in Midnight Cooking or Midnight Alchemy.|r Automatically select the NPC dialog option to gain the 'Mutating Elixir' buff.\n\n|T136242:16|tMutating Elixir\n{1310012}"
+end
+
 -- Delves: Atal'Aman
 
-local L = BigWigs:NewBossLocale("Spiritflayer Jin'ma", "ptBR")
+L = BigWigs:NewBossLocale("Spiritflayer Jin'ma", "ptBR")
 if L then
 	L.spiritflayer_jinma = "Jin'Ma, Esfolador de Espíritos"
 end
@@ -148,6 +155,4 @@ end
 L = BigWigs:NewBossLocale("Nexus-Point Xenas Trash", "ptBR")
 if L then
 	--L.custom_on_arcane_tripwire_autotalk_desc = "|cFFFF0000Requires 25 skill in Midnight Engineering.|r Automatically select the NPC dialog option to disable the Arcane Tripwire."
-
-	--L.arcane_tripwire = "Arcane Tripwire"
 end

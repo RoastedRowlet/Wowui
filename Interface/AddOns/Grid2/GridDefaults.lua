@@ -5,7 +5,7 @@ Created by Michael, based on Grid2Options\GridDefaults.lua from original Grid2 a
 local Grid2 = Grid2
 
 -- Latest database profile version
-local DB_VERSION = 106
+local DB_VERSION = 200
 
 -- Database manipulation functions
 function Grid2:DbSetStatusDefaultValue(name, value)
@@ -98,6 +98,8 @@ end
 -- Plugins can hook this function to initialize or update values in database
 function Grid2:UpdateDefaults()
 
+	if Grid2.versionCli<120001 then return end -- TODO REMOVE after 12.0.1 release
+
 	local version = Grid2:DbGetValue("versions","Grid2") or 0
 	if version>=DB_VERSION then return end
 	if version==0 then
@@ -107,6 +109,7 @@ function Grid2:UpdateDefaults()
 	else
 		local dbi = self.db.profile.indicators
 		local dbs = self.db.profile.statuses
+		local dbm = self.db.profile.statusMap
 		if version<5 then
 			-- Upgrade buffs and debuffs groups statuses
 			for _, status in pairs(dbs) do
@@ -215,17 +218,45 @@ function Grid2:UpdateDefaults()
 				end
 			end
 		end
-		if version<105 then -- add privateaurasdispel indicator
-			if dbi['private-auras-dispel']==nil then
-				dbi['private-auras-dispel'] = { type = 'privateaurasdispel', level = 7 }
+		if version<200 then
+			for key,dbx in pairs(dbi) do
+				if dbx.type=='privateaurasdispells' or dbx.type=='privateaurasdispel' then
+					dbm[key], dbi[key] = nil, nil
+				end
 			end
-		elseif version<106 then
-			if dbi['private-auras-dispells'] then
-				dbi['private-auras-dispel'], dbi['private-auras-dispells'] = dbi['private-auras-dispells'], nil
-			end
-			for _,dbx in pairs(dbi) do
-				if dbx.type=='privateaurasdispells' then
-					dbx.type = 'privateaurasdispel'
+			for key,dbx in pairs(dbs) do
+				local typ = dbx.type
+				if typ=='buff' or typ=='buffs' then
+					dbx.type = 'm'..typ
+					dbx.auras = dbx.auras or (dbx.spellName and {dbx.spellName}) or nil
+					if dbx.auras then
+						for i=#dbx.auras,1,-1 do
+							local spells = self:GetSimilarPlayerBuffs(dbx.auras[i])
+							if spells then
+								table.remove(dbx.auras,i)
+								for j=1,#spells do
+									table.insert(dbx.auras, i, spells[j])
+								end
+							end
+						end
+					end
+					dbx.aura_filter = {
+						filter = (dbx.mine==1 and 'HELPFUL|PLAYER') or (dbx.mine==2 and 'HELPFUL|!PLAYER') or nil,
+						candidateFilters = { includeSpellIDs= true },
+					}
+				elseif dbx.type=='mdebuffs' and dbx.aura_filter then
+					local aura_filter = dbx.aura_filter
+					if aura_filter.sated then
+						aura_filter.excludeSatedDebuffs, aura_filter.sated = true, nil
+					end
+					if aura_filter.typed~=nil then
+						if aura_filter.typed then
+							aura_filter.candidateFilters = { includeDispelTypes = { Magic=true, Curse=true, Disease=true, Poison=true } }
+						else
+							aura_filter.candidateFilters = { excludeDispelTypes = { None=true } }
+						end
+						aura_filter.typed = nil
+					end
 				end
 			end
 		end

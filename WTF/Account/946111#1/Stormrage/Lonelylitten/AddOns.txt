@@ -74,7 +74,7 @@ RaiderIO_DB_EU_F: disabled
 RaiderIO_DB_CN_R: disabled
 RaiderIO_DB_CN_M: disabled
 RaiderIO_DB_CN_F: disabled
-EllesmereUIAuraBuffReminders: enabled
+EllesmereUIAuraBuffReminders: disabled
 BigWigs_Core: enabled
 BigWigs_Options: enabled
 BigWigs_Plugins: enabled
@@ -96,7 +96,7 @@ ExwindCore: disabled
 ExwindMedia: enabled
 EXwindtools_EXboss_EnglishPatch: enabled
 GroupfinderFlags: enabled
-LifebloomAlert: enabled
+LifebloomAlert: disabled
 LittleWigs_BattleForAzeroth: enabled
 LittleWigs_BurningCrusade: enabled
 LittleWigs_Cataclysm: enabled

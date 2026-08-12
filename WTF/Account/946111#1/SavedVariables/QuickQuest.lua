@@ -7,11 +7,11 @@ QuickQuestDB3 = {
 ["pausekeyreverse"] = false,
 ["pausekey"] = "SHIFT",
 ["completereward"] = 1,
-["skipgossip"] = true,
 ["selectreward"] = true,
-["autoquestgossip"] = true,
-["skipcinematics"] = 3,
 ["paydarkmoonfaire"] = true,
+["skipgossip"] = true,
+["skipcinematics"] = 3,
+["autoquestgossip"] = true,
 ["skipgossipwhen"] = 2,
 ["skipmovies"] = 3,
 }
@@ -77,11 +77,13 @@ QuickQuestBlocklistDB = {
 },
 }
 QuickQuestMoviesDB = {
-[1048] = true,
-[1066] = true,
-[1049] = true,
 [1047] = true,
-[1050] = true,
+[1066] = true,
+[1048] = true,
 [682] = true,
+[1064] = true,
 [1061] = true,
+[1050] = true,
+[1049] = true,
+[1063] = true,
 }

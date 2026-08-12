@@ -49,16 +49,12 @@ L["BUILDS_PROFILE_COPY_LOADOUT_LINK_ACTION_TITLE"] = "Ausrüstungsset-Link kopie
 L["BUILDS_PROFILE_COPY_LOADOUT_LINK_POPUP_TITLE"] = "Raider.IO-Link für das Ausrüstungsset kopieren:"
 L["BUILDS_PROFILE_COPY_LOADOUT_POPUP_TITLE"] = "Ausrüstungsset-Reihe kopieren:"
 L["BUILDS_PROFILE_ERROR_CREATING_LOADOUT"] = "Ausrüstungsset konnte nicht erstellt werden. Wenn kein Platz für weitere Ausrüstungssets vorhanden ist, schaffe bitte entsprechenden Freiraum."
---[[Translation missing --]]
---[[ L["BUILDS_PROFILE_FAILED_IMPORTING_BUILD"] = ""--]] 
+L["BUILDS_PROFILE_FAILED_IMPORTING_BUILD"] = "Der Aufbau konnte nicht importiert werden."
 L["BUILDS_PROFILE_HERO_FORMAT"] = "%s (%s)"
---[[Translation missing --]]
---[[ L["BUILDS_PROFILE_IMPORTED_BUILD_TO_LOADOUT"] = ""--]] 
+L["BUILDS_PROFILE_IMPORTED_BUILD_TO_LOADOUT"] = "Aufbau als \"%s“ importiert."
 L["BUILDS_PROFILE_LOAD_LOADOUT_ACTION_TITLE"] = "Laden"
---[[Translation missing --]]
---[[ L["BUILDS_PROFILE_LOADOUT_IS_ALREADY_ACTIVE"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_PROFILE_LOADOUT_NAME"] = ""--]] 
+L["BUILDS_PROFILE_LOADOUT_IS_ALREADY_ACTIVE"] = "Dein aktuelles Rüstungsset passt zu diesem Aufbau."
+L["BUILDS_PROFILE_LOADOUT_NAME"] = "Raider.IO Aufbau"
 L["BUILDS_PROFILE_NO_DATA"] = "Die Murlocs konnten hier nichts Nützliches finden. Versuche, die Filter zu ändern."
 L["BUILDS_PROFILE_RECOMMENDED"] = "Empfohlen"
 L["BUILDS_PROFILE_SHOW_JOURNALFRAME_BUTTON"] = "Zeigt die Schaltfläche für das Begegnungsjournal an"
@@ -77,10 +73,8 @@ L["BUILDS_RAIDS_ENCOUNTERS_ALL"] = "%s: Alle Begegnungen"
 L["BUILDS_SPEED_all"] = "Jede Geschwindigkeit"
 L["BUILDS_SPEED_fast"] = "Schnelle Kills (obere 20%)"
 L["BUILDS_SPEED_median"] = "Mittlere Kills (mittlere 20%)"
---[[Translation missing --]]
---[[ L["BUILDS_TITLE"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_TITLE_FULL"] = ""--]] 
+L["BUILDS_TITLE"] = "Talentaufbau"
+L["BUILDS_TITLE_FULL"] = "Raider.IO Talentaufbau"
 L["BUILDS_WEAPON_1"] = "Einhand-Doppelbewaffnung"
 L["BUILDS_WEAPON_2"] = "Zweihand-Doppelbewaffnung"
 L["BUILDS_WEAPON_3"] = "Zweihand"
@@ -250,8 +244,7 @@ L["MINIMAP_SHORTCUT_HELP_RIGHT_CLICK"] = "Rechts Klick"
 L["MINIMAP_SHORTCUT_HELP_SEARCH"] = "Suchen"
 L["MINIMAP_SHORTCUT_HELP_SETTINGS"] = "Einstellungen"
 L["MINIMAP_SHORTCUT_LOCK"] = "Knopf sperren"
---[[Translation missing --]]
---[[ L["MINIMAP_SHORTCUT_MENU_BUILDS"] = ""--]] 
+L["MINIMAP_SHORTCUT_MENU_BUILDS"] = "Aufbau auswählen"
 L["MINIMAP_SHORTCUT_MENU_COPY_BUILD"] = "Link kopieren"
 L["MINIMAP_SHORTCUT_MINIMAP_ENABLE"] = "Minimap Button anzeigen"
 L["MINIMAP_SHORTCUT_MINIMAP_ENABLE_DESC"] = "Aktiviert die Anzeige des Symbols an der Minimap."

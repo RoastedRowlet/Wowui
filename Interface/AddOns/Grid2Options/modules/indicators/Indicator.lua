@@ -97,7 +97,18 @@ do
 		return true
 	end
 
+	local function AreCurrentStatusesIncompatible(indicator)
+		if indicator then
+			if indicator.dbx.type=='icons' then
+				return indicator.auraMode and indicator.iconMode and "Warning: This indicator does not support mixing auras and non-auras statuses. Remove some statuses from the list to fix the issue."
+			elseif (indicator.auraMode or 1)>1 then
+				return "Warning: Only one aura status can be assigned to this indicator. Remove some aura statuses from the list to fix the issue."
+			end
+		end
+	end
+
 	local sharedOptions = {
+
 		current = {
 			type = "multiselect", dialogControl = "Grid2IndicatorCurrentStatuses",
 			order = 1,
@@ -137,6 +148,12 @@ do
 				-- Grid2Options:RefreshOptions()
 			end,
 		},
+
+		msg = { type = "description", order = 0.5, fontSize = "medium",
+			name = function() return string.format("|cffFC6A03%s|r", L[AreCurrentStatusesIncompatible(editedIndicator) or ''] ) end,
+			hidden = function() return not AreCurrentStatusesIncompatible(editedIndicator) end,
+		},
+
 		title = { type = "description", order = 2, fontSize = "medium", name = string.format("|cffffd200    %s|r",L["Available Statuses"]) },
 	}
 
@@ -853,7 +870,7 @@ function Grid2Options:MakeIndicatorCooldownColorsOptions(indicator, options)
 		order = 160.1,
 		name = L["Cooldown Text"],
 		desc = L["Enable this option to apply cooldown colors to the countdown text."],
-		width = .7,
+		width = "full",
 		tristate = false,
 		get = function () return indicator.dbx.ctColorsText end,
 		set = function (_, v)
@@ -862,6 +879,7 @@ function Grid2Options:MakeIndicatorCooldownColorsOptions(indicator, options)
 		end,
 		disabled = function() return indicator.dbx.enableCooldownText==nil and indicator.dbx.ctColorsText==nil end,
 	}
+	--[[
 	options.ctColorTargetBar = {
 		type = "toggle",
 		order = 160.2,
@@ -890,6 +908,7 @@ function Grid2Options:MakeIndicatorCooldownColorsOptions(indicator, options)
 		end,
 		disabled = function() return indicator.dbx.borderSize==nil and indicator.dbx.ctColorsBorder==nil end,
 	}
+	--]]
 	options.ctFontColorCount = {
 		type = "select",
 		order = 161,

@@ -1,33 +1,23 @@
 # LittleWigs
 
-## [v12.0.63](https://github.com/BigWigsMods/LittleWigs/tree/v12.0.63) (2026-07-19)
-[Full Changelog](https://github.com/BigWigsMods/LittleWigs/compare/v12.0.62...v12.0.63) [Previous Releases](https://github.com/BigWigsMods/LittleWigs/releases)
+## [v12.0.64](https://github.com/BigWigsMods/LittleWigs/tree/v12.0.64) (2026-08-02)
+[Full Changelog](https://github.com/BigWigsMods/LittleWigs/compare/v12.0.63...v12.0.64) [Previous Releases](https://github.com/BigWigsMods/LittleWigs/releases)
 
-- Midnight/AltarOfFangs/Zuljan: Timer updates  
-- Midnight/AltarOfFangs/TheWrithingCoil: Timer updates  
-- BfA/KingsRest/Dazar: Timer updates, redirect Aerial Smash message  
-- Midnight/MurderRow/LithielCinderfury: Tweak Malefic Wave handling  
+- Midnight/AltarOfFangs/Ravi: Timer update  
+- BfA/KingsRest/Dazar: Update option keys  
+- BfA/KingsRest/Mchimba: Update option keys  
+- BfA/TempleOfSethraliss/Avatar: Timer update  
+- BfA/TempleOfSethraliss/Galvazzt: Timer updates  
+- BfA/TempleOfSethraliss/Merektha: Redirect more Blizzard messages  
+- BfA/KingsRest/Mchimba: Fix timers  
 - BfA/KingsRest/Council: Timer update  
-- BfA/KingsRest/Mchimba: Awakening Slam, timer updates  
-- BfA/KingsRest/GoldenSerpent: Timer updates  
-- Midnight/VoidscarArena/TazRah: Aura sound update  
-- Midnight/VoidscarArena/Atroxus: Aura sound update  
-- Midnight/VoidscarArena/Charonus: Dark Waves  
-- Update deDE (#1499)  
-- BfA/TempleOfSethraliss/Avatar: Redirect Blizzard message  
-- BfA/TempleOfSethraliss/Galvazzt: Timer update  
-- BfA/TempleOfSethraliss/Merektha: Fix Burrow and A Knot of Snakes messages  
-- BfA/TempleOfSethraliss/AdderisAspix: Timer updates  
-- Midnight/TheBlindingVale/Ziekket: Throttle Concentrated Lightbeam due to Blizzard bug  
-- Midnight/TheBlindingVale/LightwardenRuia: Message and sound updates  
-- Midnight/TheBlindingVale/IkuzzTheLightHunter: Improve Verdant Stomp count  
-- Midnight/TheBlindingVale/LightblossomTrinity: Timer updates, redirect Thornblade message  
-- Midnight/MurderRow/LithielCinderfury: Season 2 Malefic Wave updates  
-- Dragonflight/RubyLifePools/KyrakkaAndErkhartStormvein: Sync Classic Winds of Change  
-- Dragonflight/RubyLifePools/KyrakkaAndErkhartStormvein: Season 2 timer updates, suppress Blizzard message  
-- Dragonflight/RubyLifePools/KokiaBlazehoof: Scorched Earth  
-- Dragonflight/RubyLifePools/MelidrussaChillworn: Fix counts, sound update  
-- Midnight/DenOfNalorakk/Nalorakk: Aura sound updates  
-- Midnight/DenOfNalorakk/SentinelOfWinter: Aura sound updates  
-- Midnight/DenOfNalorakk/TheHoardmonger: Season 2 timer update  
-- Midnight/MurderRow/KystiaManaheart: Light Infusion, timer update  
+- Update deDE (#1501)  
+- Midnight/AltarOfFangs/Trash: Flag as trash module  
+- Update zhCN (#1500)  
+- Midnight/MurderRow/XathuuxTheAnnihilator: Demonic Rage bars and applied message, timer improvements  
+- Midnight/MurderRow/ZaenBladesorrow: Murder in a Row updates, fix Fire Bomb redirect  
+- Midnight/AltarOfFangs/Trash: Add Mutating Elixir auto gossip  
+- Midnight/NexusPointXenas/Trash: Clean up unused locale  
+- Midnight/AltarOfFangs/Trash: Additional aura sounds  
+- Midnight/AltarOfFangs/Zuljan: Additional aura sound  
+- Midnight/AltarOfFangs/TheWrithingCoil: Suppress an extra Blizzard message, sound updates, scoping update  

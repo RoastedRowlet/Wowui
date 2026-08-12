@@ -278,12 +278,29 @@ do
 	end
 	-- Sets a backdrop only if necessary to alleviate game freezes, see ticket #640
 	function Grid2:SetFrameBackdrop(frame, backdrop)
-		if backdrop~=frame.currentBackdrop then
+		if backdrop~=frame.currentBackdrop and frame.SetBackdrop then
 			frame:SetBackdrop(backdrop)
 			frame.currentBackdrop = backdrop
 		end
 	end
 end
+
+-- NineSlice backdrop textures
+do
+	local TEXTURES = {
+		"Interface/Addons/Grid2/media/backdrop1px",
+		"Interface/Addons/Grid2/media/backdrop2px",
+		"Interface/Addons/Grid2/media/backdrop3px",
+		"Interface/Addons/Grid2/media/backdrop4px",
+		"Interface/Addons/Grid2/media/backdrop5px",
+		"Interface/Addons/Grid2/media/backdrop6px",
+		"Interface/Addons/Grid2/media/backdrop7px",
+	}
+	function Grid2:GetSliceBorderTexture(borderSize)
+		return TEXTURES[borderSize]
+	end
+end
+
 
 -- Grid2:RunSecure(priority, object, method, arg)
 -- Queue some methods to be executed when out of combat, if we are not in combat do nothing.

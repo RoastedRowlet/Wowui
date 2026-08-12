@@ -1,6 +1,6 @@
 # Socket Helper
 
-## [v2.2.22](https://github.com/WatchThemFall/SocketHelper/tree/v2.2.22) (2026-06-16)
-[Full Changelog](https://github.com/WatchThemFall/SocketHelper/compare/v2.2.21...v2.2.22) [Previous Releases](https://github.com/WatchThemFall/SocketHelper/releases)
+## [v2.2.23](https://github.com/WatchThemFall/SocketHelper/tree/v2.2.23) (2026-08-11)
+[Full Changelog](https://github.com/WatchThemFall/SocketHelper/compare/v2.2.22...v2.2.23) [Previous Releases](https://github.com/WatchThemFall/SocketHelper/releases)
 
-- toc update for 12.0.7  
+- Update for 12.1  

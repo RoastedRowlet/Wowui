@@ -11,23 +11,35 @@ local UpdateIconColorCurve = Grid2.UpdateIconColorCurve
 local RemoveIconColorCurve = Grid2.RemoveIconColorCurve
 local TruncateWhenZero = C_StringUtil.TruncateWhenZero
 
+-------------------------------------------------------------
+-- shared
+-------------------------------------------------------------
+
 local function Icon_Create(self, parent)
-	local f = self:Acquire("Frame", parent, "BackdropTemplate")
-	local Icon = f.Icon or f:CreateTexture(nil, "ARTWORK")
+	self:Acquire("Frame", parent, "BackdropTemplate")
+end
+
+local function Icon_ButtonCreate(self, parent, f, filter)
+	local Icon = f.Icon or f:CreateTexture(nil, "BACKGROUND")
 	f.Icon = Icon
 	Icon:SetTexCoord(0.05, 0.95, 0.05, 0.95)
+	Icon:ClearAllPoints()
 	Icon:SetAllPoints()
 	Icon:Show()
+	if filter then f:SetIcon(Icon) end
 	if not self.disableCooldown then
 		local Cooldown = f.Cooldown or CreateFrame("Cooldown", nil, f, "CooldownFrameTemplate")
 		Cooldown:SetDrawEdge(not not self.dbx.drawEdge)
 		Cooldown:SetReverse(not not self.dbx.reverseCooldown)
 		Cooldown:SetDrawSwipe(self.showSwipe)
 		Cooldown:SetHideCountdownNumbers(not self.showCoolText)
-		Cooldown:Hide()
+		Cooldown:SetAllPoints()
+		Cooldown:Show()
+		if filter then f:SetDurationCooldown(Cooldown) end
 		f.Cooldown = Cooldown
 		if self.showCoolText then
 			f.coolText = Cooldown:GetCountdownFontString()
+			if filter then f:SetDurationText(f.coolText, self.ctOptions) end
 		end
 	end
 	if not self.disableStack then
@@ -41,13 +53,36 @@ local function Icon_Create(self, parent)
 			TextFrame:Show()
 			f.TextFrame = TextFrame
 		end
-		local stackText = f.stackText or f:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-		stackText:SetParent(TextFrame)
+		local stackText = f.stackText
+		if not stackText then
+			stackText = f:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+			stackText:SetParent(TextFrame)
+			f.stackText = stackText
+		end
 		if self.fontSize>=1 then stackText:SetFont(self.textfont, self.fontSize, self.dbx.fontFlags or "OUTLINE" ) end
 		local c = self.dbx.stackColor
 		if c then stackText:SetTextColor(c.r, c.g, c.b, c.a) end
-		stackText:Hide()
+		stackText:Show()
 		f.stackText = stackText
+		if filter then f:SetApplicationCount(stackText, {}) end
+	end
+	if filter then -- border
+		f:ClearAuraBorder()
+		if self.borderSize or self.useStatusColor then
+			local border = f.border or f:CreateTexture(nil, "BACKGROUND")
+			border:ClearAllPoints()
+			border:SetAllPoints()
+			border:SetColorTexture(1,1,1,1)
+			if self.useStatusColor then
+				f:SetAuraBorder(border, filter.borderOptions)
+			else
+				border:SetColorTexture(UnpackColor(self.color))
+			end
+			border:Show()
+			f.border = border
+		elseif self.border then
+			border:Hide()
+		end
 	end
 	if self.showCoolBar then
 		local bar = f.coolBar or CreateFrame("StatusBar", nil, f)
@@ -57,139 +92,38 @@ local function Icon_Create(self, parent)
 		background:ClearAllPoints()
 		background:SetAllPoints()
 		bar.background = background
+		if filter then f:SetDurationBar(bar, self.cbOptions) end
 	elseif f.coolBar then
 		f.coolBar:Hide()
 	end
-	self:EnableFrameTooltips(f, self.dbx.tooltipEnabled)
 end
 
-local function Icon_OnUpdate(self, parent, unit, status)
-	local Frame = parent[self.name]
-	if not status then Frame:Hide(); return; end
-	local Icon = Frame.Icon
-	Icon:SetTexCoord(status:GetTexCoord(unit))
-	Icon:SetVertexColor(status:GetVertexColor(unit))
-	local slot, durObject
-	if status.GetIconData then
-		local tex, cnt, exp, dur, color
-		tex, cnt, exp, dur, color, slot = status:GetIconData(unit)
-		if self.disableIcon then
-			Icon:SetColorTexture(color.r, color.g, color.b)
-		else
-			Icon:SetTexture(tex)
-		end
-		if self.borderSize then
-			local c = self.useStatusColor and color or self.color
-			Frame:SetBackdropBorderColor(c.r, c.g, c.b, c.a)
-		end
-		Icon:SetAlpha(color.a or 1)
-		if not self.disableStack then
-			Frame.stackText:SetText( TruncateWhenZero(cnt or 0) )
-			Frame.stackText:Show()
-		end
-		if not self.disableCooldown and exp and dur then
-			if canaccessvalue(exp) then
-				Frame.Cooldown:SetCooldownFromExpirationTime(exp, dur)
-			else
-				durObject = status:GetDurationObject(unit, slot)
-				if durObject then
-					Frame.Cooldown:SetCooldownFromDurationObject( durObject )
-				end
-			end
-		end
-	else
-		local r,g,b,a = status:GetColor(unit)
-		if self.disableIcon then
-			Icon:SetColorTexture(r,g,b)
-		else
-			Icon:SetTexture(status:GetIcon(unit))
-		end
-		local border = status:GetBorder()
-		if border==1 or self.useStatusColor then 	-- border=1 => always draw a border with the status color
-			Frame:SetBackdropBorderColor(r,g,b,a)
-		elseif border and self.borderSize then   	-- border=0 => status supports a border
-			local c = self.color
-			Frame:SetBackdropBorderColor(c.r, c.g, c.b, c.a)
-		else										-- border=nil => never draw a border for the status
-			Frame:SetBackdropBorderColor(0,0,0,0)
-		end
-		Icon:SetAlpha(a or 1)
-		if not self.disableStack then
-			local stackText = Frame.stackText
-			if stackText.fontSize then -- This is a ugly fix for github issue #152
-				stackText:SetFont(self.textfont, stackText.fontSize, self.dbx.fontFlags or "OUTLINE" )
-				stackText.fontSize = nil
-			end
-			local count = status:GetCount(unit)
-			if issecretvalue(count) then
-				stackText:SetText( TruncateWhenZero(count) )
-				stackText:Show()
-			elseif count>1 then
-				stackText:SetText( count )
-				stackText:Show()
-			else
-				stackText:Hide()
-			end
-		end
-		if not self.disableCooldown then
-			local Cooldown = Frame.Cooldown
-			local expiration, duration = status:GetExpirationTime(unit), status:GetDuration(unit)
-			if expiration and duration then
-				if canaccessvalue(expiration) then
-					Cooldown:SetCooldownFromExpirationTime(expiration, duration)
-				else
-					durObject = status:GetDurationObject(unit)
-					if durObject then
-						Cooldown:SetCooldownFromDurationObject( durObject )
-					end
-				end
-				Cooldown:Show()
-			else
-				Cooldown:Hide()
-			end
-		end
-	end
-	if self.needDur then
-		durObject = durObject or status:GetDurationObject(unit, slot)
-		if self.showCoolBar then
-			if durObject then
-				Frame.coolBar:SetTimerDuration(durObject, 0, self.cbDirection)
-				Frame.coolBar:Show()
-			else
-				Frame.coolBar:Hide()
-			end
-		end
-		if self.showColors then
-			UpdateIconColorCurve(Frame, durObject)
-		end
-	end
-	Frame:Show()
-end
-
-local function Icon_Layout(self, parent)
-	local f = parent[self.name]
-	local level = parent:GetFrameLevel() + self.frameLevel
-	f:SetParent(parent)
-	f:ClearAllPoints()
-	f:SetPoint(self.anchor, parent.container, self.anchorRel, self.offsetx, self.offsety)
-	f:SetFrameLevel(level)
-
+local function Icon_ButtonLayout(self, parent, f, filter, size, level)
 	local Icon = f.Icon
-	local r,g,b,a = f:GetBackdropBorderColor()
 	local borderSize = self.borderSize
-	if borderSize then
-		Icon:SetPoint("TOPLEFT", borderSize, -borderSize)
-		Icon:SetPoint("BOTTOMRIGHT", -borderSize, borderSize)
-	else
-		Icon:SetAllPoints(f)
+	if filter then -- 12.1+ aura container
+		if borderSize then
+			Icon:SetPoint("TOPLEFT", borderSize, -borderSize)
+			Icon:SetPoint("BOTTOMRIGHT", -borderSize, borderSize)
+		else
+			Icon:SetAllPoints(f)
+		end
+		Icon:SetTexCoord(Grid2.statusPrototype.GetTexCoord())
+	else -- non aura statuses
+		local r,g,b,a = f:GetBackdropBorderColor()
+		if borderSize then
+			Icon:SetPoint("TOPLEFT", borderSize, -borderSize)
+			Icon:SetPoint("BOTTOMRIGHT", -borderSize, borderSize)
+		else
+			Icon:SetAllPoints(f)
+		end
+		Grid2:SetFrameBackdrop(f, self.backdrop)
+		if r then f:SetBackdropBorderColor(r, g, b, a) end
 	end
-	Grid2:SetFrameBackdrop(f, self.backdrop)
-	if r then f:SetBackdropBorderColor(r, g, b, a) end
-	local size = self.iconSize
-	if size<=1 then
-		size = size * parent:GetHeight()
+
+	if not self.disableCooldown then
+		f.Cooldown:SetFrameLevel(f:GetFrameLevel()+1)
 	end
-	f:SetSize(size,size)
 
 	if self.showCoolText then
 		local color, text = self.ctColor, f.coolText
@@ -225,10 +159,157 @@ local function Icon_Layout(self, parent)
 		bar:Show()
 	end
 
-	f.colorCurveObject = self.showColors and self.ctColorCurve
-	f.colorCurveText   = self.showColorsText and f.coolText
-	f.colorCurveBar    = self.showColorsBar and f.coolBar
-	f.colorCurveBorder = self.showColorsBorder and f.SetBackdropBorderColor
+	if not filter then
+		f.colorCurveObject = self.showColors and self.ctColorCurve
+		f.colorCurveText   = self.showColorsText and f.coolText
+		f.colorCurveBar    = self.showColorsBar and f.coolBar
+		f.colorCurveBorder = self.showColorsBorder and f.SetBackdropBorderColor
+	end
+end
+
+local function Icon_DisableIconContainer(self, parent)
+	local f = parent[self.name]
+	if not f.iconContainer then return end
+	f:Hide()
+	f.iconContainer = nil
+end
+
+local function Icon_DisableAuraContainer(self, parent)
+	self:ReleaseAuraSlotButton(parent)
+end
+
+-------------------------------------------------------------
+-- standard non-secret statuses
+-------------------------------------------------------------
+
+local function Icon_OnUpdate(self, parent, unit, status)
+	local Frame = parent[self.name]
+	if not Frame.iconContainer then
+		return
+	end
+	if not status then
+		Frame:Hide()
+		return
+	end
+	local Icon = Frame.Icon
+	Icon:SetTexCoord(status:GetTexCoord(unit))
+	Icon:SetVertexColor(status:GetVertexColor(unit))
+	local durObject
+	local r,g,b,a = status:GetColor(unit)
+	if self.disableIcon then
+		Icon:SetColorTexture(r,g,b)
+	else
+		Icon:SetTexture(status:GetIcon(unit))
+	end
+	local border = status:GetBorder()
+	if border==1 or self.useStatusColor then 	-- border=1 => always draw a border with the status color
+		Frame:SetBackdropBorderColor(r,g,b,a)
+	elseif border and self.borderSize then   	-- border=0 => status supports a border
+		local c = self.color
+		Frame:SetBackdropBorderColor(c.r, c.g, c.b, c.a)
+	else										-- border=nil => never draw a border for the status
+		Frame:SetBackdropBorderColor(0,0,0,0)
+	end
+	Icon:SetAlpha(a or 1)
+	if not self.disableStack then
+		local stackText = Frame.stackText
+		if stackText.fontSize then -- This is a ugly fix for github issue #152
+			stackText:SetFont(self.textfont, stackText.fontSize, self.dbx.fontFlags or "OUTLINE" )
+			stackText.fontSize = nil
+		end
+		local count = status:GetCount(unit)
+		if issecretvalue(count) then
+			stackText:SetText( TruncateWhenZero(count) )
+			stackText:Show()
+		elseif count>1 then
+			stackText:SetText( count )
+			stackText:Show()
+		else
+			stackText:Hide()
+		end
+	end
+	if not self.disableCooldown then
+		local Cooldown = Frame.Cooldown
+		local expiration, duration = status:GetExpirationTime(unit), status:GetDuration(unit)
+		if expiration and duration then
+			if canaccessvalue(expiration) then
+				Cooldown:SetCooldownFromExpirationTime(expiration, duration)
+			else
+				durObject = status:GetDurationObject(unit)
+				if durObject then
+					Cooldown:SetCooldownFromDurationObject( durObject )
+				end
+			end
+			Cooldown:Show()
+		else
+			Cooldown:Hide()
+		end
+	end
+	if self.needDur then
+		durObject = durObject or status:GetDurationObject(unit)
+		if self.showCoolBar then
+			if durObject then
+				Frame.coolBar:SetTimerDuration(durObject, 0, self.cbDirection)
+				Frame.coolBar:Show()
+			else
+				Frame.coolBar:Hide()
+			end
+		end
+		if self.showColors then
+			UpdateIconColorCurve(Frame, durObject)
+		end
+	end
+	Frame:Show()
+end
+
+local function Icon_LayoutIcon(self, parent)
+	local f = parent[self.name]
+	local level = parent:GetFrameLevel() + self.frameLevel
+	local size = self.iconSize
+	if size<=1 then size = size * parent:GetHeight() end
+	f:SetParent(parent)
+	f:ClearAllPoints()
+	f:SetPoint(self.anchor, parent.container, self.anchorRel, self.offsetx, self.offsety)
+	f:SetFrameLevel(level)
+	f:SetSize(size,size)
+	f:Show()
+	Icon_ButtonCreate(self, parent, f)
+	Icon_ButtonLayout(self, parent, f, nil, size, level)
+	f.iconContainer = f
+end
+
+-------------------------------------------------------------
+-- 12.1+ aura containers
+-------------------------------------------------------------
+
+local function Icon_LayoutAura(self, parent)
+	local button, filter = self:AcquireAuraSlotButton(parent, filter)
+	local level = parent:GetFrameLevel() + self.frameLevel
+	local size = self.iconSize
+	if size<=1 then size = size * parent:GetHeight() end
+	button:ClearAllPoints()
+	button:SetFrameLevel(level)
+	button:SetPoint(self.anchor, parent.container, self.anchorRel, self.offsetx, self.offsety)
+	button:SetSize(size, size)
+	Icon_ButtonCreate(self, parent, button, filter)
+	Icon_ButtonLayout(self, parent, button, filter, size, level)
+end
+
+-------------------------------------------------------------
+-- shared
+-------------------------------------------------------------
+
+local function Icon_Layout(self, parent)
+	if self.auraMode then
+		Icon_LayoutAura(self, parent)
+	else
+		Icon_DisableAuraContainer(self, parent)
+	end
+	if self.iconMode then
+		Icon_LayoutIcon(self, parent)
+	else
+		Icon_DisableIconContainer(self, parent)
+	end
 end
 
 local function Icon_Disable(self, parent)
@@ -236,6 +317,7 @@ local function Icon_Disable(self, parent)
 	f:Hide()
 	f:SetParent(nil)
 	f:ClearAllPoints()
+	Icon_DisableAuraContainer(self, parent)
 end
 
 local function Icon_UpdateDB(self)
@@ -286,36 +368,40 @@ local function Icon_UpdateDB(self)
 	self.cbTexture		= Grid2:MediaFetch("statusbar", dbx.cbTexture or 'Grid2 Flat', 'Grid2 Flat')
 	self.cbOffsetX      = (self.cbPoint=='LEFT' or self.cbPoint=='BOTTOM') and borderSize or -borderSize
 	self.cbOffsetY      = 0
+	self.cbOptions      = { direction = self.cbDirection }
 	if self.cbOrientation=='HORIZONTAL' then self.cbOffsetX, self.cbOffsetY = self.cbOffsetY, self.cbOffsetX end
 	self.cbColor        = Grid2.MakeColor(dbx.cbColor, "WHITE")
 	self.cbColorBack    = Grid2.MakeColor(dbx.cbColorBack, "RED")
-	-- color curve
-	self.showColors      = dbx.ctColors~=nil
-	self.showColorsText  = dbx.ctColorsText
-	self.showColorsBorder= dbx.ctColorsBorder
-	self.showColorsBar   = dbx.ctColorsBar
-	if dbx.ctColors then
-		self.ctColorCurve =  self.ctColorCurve or C_CurveUtil.CreateColorCurve()
+	-- +12.1 only aura countdown text colorization supported
+	-- self.showColors      = dbx.ctColors~=nil
+	-- self.showColorsText  = dbx.ctColorsText
+	-- self.showColorsBorder= dbx.ctColorsBorder
+	-- self.showColorsBar   = dbx.ctColorsBar
+	-- self.needDur = self.showColors or self.showCoolBar
+	if dbx.ctColorsText and dbx.ctColors then
+		self.ctColorCurve = self.ctColorCurve or C_CurveUtil.CreateColorCurve()
 		self.ctColorCurve:SetType(Enum.LuaCurveType.Step)
 		self.ctColorCurve:ClearPoints()
 		for i,color in ipairs(dbx.ctColors) do
 			self.ctColorCurve:AddPoint(dbx.ctThresholds[i] or 0, color)
 		end
+		self.ctOptions = { textColor={ curve=self.ctColorCurve, property=Enum.DurationTextBindingProperty.RemainingDuration } }
+	else
+		self.ctOptions = nil
 	end
-	self.needDur = self.showColors or self.showCoolBar
 	-- backdrop
 	self.backdrop = Grid2:GetBackdropTable("Interface\\Addons\\Grid2\\media\\white16x16", self.borderSize or 1)
 end
 
 local function CreateIcon(indicatorKey, dbx)
 	local indicator = Grid2.indicatorPrototype:new(indicatorKey)
-	indicator.dbx 			= dbx
-	indicator.Create        = Icon_Create
-	indicator.Layout        = Icon_Layout
-	indicator.OnUpdate      = Icon_OnUpdate
-	indicator.Disable       = Icon_Disable
-	indicator.UpdateDB      = Icon_UpdateDB
-	indicator.GetBlinkFrame = indicator.GetFrame
+	indicator.dbx = dbx
+	indicator.Create = Icon_Create
+	indicator.Layout = Icon_Layout
+	indicator.Disable = Icon_Disable
+	indicator.UpdateDB = Icon_UpdateDB
+	indicator.OnUpdate = Icon_OnUpdate
+	-- indicator.GetBlinkFrame = indicator.GetFrame    -- Not compatible with 12.1 auras container TODO / fix
 	Grid2:RegisterIndicator(indicator, { "icon" })
 	return indicator
 end

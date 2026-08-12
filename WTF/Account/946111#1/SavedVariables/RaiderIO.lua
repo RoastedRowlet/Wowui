@@ -12,16 +12,12 @@ RaiderIO_Config = {
 ["point"] = "TOPLEFT",
 },
 }
-RaiderIO_LastCharacter = "us-Barelynoer-area-52"
+RaiderIO_LastCharacter = "us-Lonelylitten-stormrage"
 RaiderIO_MissingCharacters = {
-["us-Blackfreid-stormscale"] = true,
-["us-Sprifie-tichondrius"] = true,
-["us-Bevie-area-52"] = true,
-["us-Udûn-tol-barad"] = true,
-["us-Amegoat-area-52"] = true,
-["us-Jaelyanna-area-52"] = true,
-["us-Zexthalia-area-52"] = true,
-["us-party5-area-52"] = true,
+["us-Highwaydk-illidan"] = true,
+["us-Luxsan-sargeras"] = true,
+["us-Hmzfier-illidan"] = true,
+["us-Nickfists-illidan"] = true,
 }
 RaiderIO_MissingServers = {
 }

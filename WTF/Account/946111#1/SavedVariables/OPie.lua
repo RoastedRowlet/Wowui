@@ -4,7 +4,7 @@ OPie_SavedData = {
 },
 ["_OPieVersion"] = "8.6.3 (4.143)",
 ["_StoreVersion"] = 122,
-["_GameVersion"] = "12.0.7",
+["_GameVersion"] = "12.1.0",
 ["_StoreVersion2"] = 122,
 ["ProfileStorage"] = {
 ["default"] = {

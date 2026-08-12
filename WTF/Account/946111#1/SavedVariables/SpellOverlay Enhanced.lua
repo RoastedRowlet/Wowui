@@ -10,12 +10,29 @@ SpellOverlayEnhancedDB = {
 },
 ["global"] = {
 ["snapshots"] = {
-["Zen Pulse"] = {
+["Lava Surge"] = {
+["left"] = {
+["isAtlas"] = false,
+["texture"] = 449491,
+["height"] = 204.8000183105469,
+["width"] = 102.4000244140625,
+["scale"] = 1,
+["texCoords"] = {
+0,
+0,
+0,
+1,
+1,
+0,
+1,
+1,
+},
+},
 ["right"] = {
 ["isAtlas"] = false,
-["texture"] = 623951,
-["height"] = 204.7999667080973,
-["width"] = 102.400018033114,
+["texture"] = 449491,
+["height"] = 204.8000183105469,
+["width"] = 102.3999557495117,
 ["scale"] = 1,
 ["texCoords"] = {
 1,
@@ -27,6 +44,25 @@ SpellOverlayEnhancedDB = {
 0,
 1,
 },
+},
+},
+["Owlkin Frenzy"] = {
+["left"] = {
+["isAtlas"] = false,
+["texCoords"] = {
+0,
+0,
+0,
+1,
+1,
+0,
+1,
+1,
+},
+["height"] = 102.4000244140625,
+["scale"] = 1,
+["width"] = 204.800048828125,
+["texture"] = 463452,
 },
 },
 ["Strength of the Black Ox"] = {
@@ -48,7 +84,62 @@ SpellOverlayEnhancedDB = {
 },
 },
 },
-["Essence Burst"] = {
+["Clearcasting"] = {
+["left"] = {
+["isAtlas"] = false,
+["texCoords"] = {
+0,
+0,
+0,
+1,
+1,
+0,
+1,
+1,
+},
+["height"] = 204.8000081380208,
+["scale"] = 1,
+["width"] = 102.4000040690104,
+["texture"] = 450929,
+},
+["right"] = {
+["isAtlas"] = false,
+["texCoords"] = {
+1,
+0,
+1,
+1,
+0,
+0,
+0,
+1,
+},
+["height"] = 204.8000081380208,
+["scale"] = 1,
+["width"] = 102.4000040690104,
+["texture"] = 450929,
+},
+},
+["Zen Pulse"] = {
+["right"] = {
+["isAtlas"] = false,
+["texture"] = 623951,
+["height"] = 204.7999667080973,
+["width"] = 102.400018033114,
+["scale"] = 1,
+["texCoords"] = {
+1,
+0,
+1,
+1,
+0,
+0,
+0,
+1,
+},
+},
+},
+["Lunar Eclipse"] = {
 ["left"] = {
 ["isAtlas"] = false,
 ["texCoords"] = {
@@ -64,8 +155,10 @@ SpellOverlayEnhancedDB = {
 ["height"] = 204.8000183105469,
 ["scale"] = 1,
 ["width"] = 102.4000244140625,
-["texture"] = 4699056,
+["texture"] = 450914,
 },
+},
+["Solar Eclipse"] = {
 ["right"] = {
 ["isAtlas"] = false,
 ["texCoords"] = {
@@ -81,7 +174,43 @@ SpellOverlayEnhancedDB = {
 ["height"] = 204.8000183105469,
 ["scale"] = 1,
 ["width"] = 102.3999557495117,
+["texture"] = 450915,
+},
+},
+["Essence Burst"] = {
+["left"] = {
+["isAtlas"] = false,
 ["texture"] = 4699056,
+["height"] = 204.8000183105469,
+["width"] = 102.4000244140625,
+["scale"] = 1,
+["texCoords"] = {
+0,
+0,
+0,
+1,
+1,
+0,
+1,
+1,
+},
+},
+["right"] = {
+["isAtlas"] = false,
+["texture"] = 4699056,
+["height"] = 204.8000183105469,
+["width"] = 102.3999557495117,
+["scale"] = 1,
+["texCoords"] = {
+1,
+0,
+1,
+1,
+0,
+0,
+0,
+1,
+},
 },
 },
 },

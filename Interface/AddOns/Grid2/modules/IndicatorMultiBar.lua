@@ -81,6 +81,32 @@ local function Bar_UpdateMulti(self, parent, unit, status)
 	end
 end
 
+local function Bar_LayoutAuraColor(self, parent, f, level)
+	local color = self.sideKick
+	if color.auraMode then
+		local setup = self.bars[1]
+		local tex = f.myCTextures and f.myCTextures[1]
+		if tex and setup then
+			local filter = color:GetStatusAurasFilter()
+			local button = self:AcquireAuraSlotButton(parent, filter)
+			button:ClearAllPoints()
+			button:SetAllPoints(f)
+			button:SetFrameLevel(level)
+			local ctex = button.__texture or button:CreateTexture(nil, "OVERLAY", nil, setup.sublayer+1)
+			ctex:ClearAllPoints(tex)
+			ctex:SetTexture(setup.texture, setup.horWrap, setup.verWrap)
+			ctex:SetHorizTile(setup.horWrap~='CLAMP')
+			ctex:SetVertTile(setup.verWrap~='CLAMP')
+			ctex:SetBlendMode('ADD')
+			ctex:SetAllPoints(tex)
+			button:SetAuraBorder(ctex, filter.borderOptions)
+			button.__texture = ctex
+			return
+		end
+	end
+	self:ReleaseAuraSlotButton(parent)
+end
+
 local function Bar_Layout(self, parent)
 	local frame = parent[self.name]
 	local width = self.width  or parent.container:GetWidth()
@@ -161,6 +187,8 @@ local function Bar_Layout(self, parent)
 	frame.myTextures = textures
 	frame.myCTextures = ctextures
 	frame:Show()
+	-- aura container colorization
+	Bar_LayoutAuraColor(self, parent, frame, frameLevel)
 end
 
 local function Bar_SetOrientation(self, orientation)
@@ -290,6 +318,7 @@ local function BarColor_OnUpdate(self, parent, unit, status)
 	end
 end
 
+-- foreground bar texture colorize
 local function BarColor_SetBarColor(self, parent, r, g, b, a)
 	local frame = parent[self.parentName]
 	if frame then
@@ -303,6 +332,7 @@ local function BarColor_SetBarColor(self, parent, r, g, b, a)
 	end
 end
 
+-- background bar texture colorize
 local function BarColor_SetBarColorInverted(self, parent, r, g, b, a)
 	local frame = parent[self.parentName]
 	if frame then

@@ -1,6 +1,8 @@
 # Grid2
 
-## [3.4.4](https://github.com/michaelnpsp/Grid2/tree/3.4.4) (2026-07-24)
-[Full Changelog](https://github.com/michaelnpsp/Grid2/compare/3.4.3...3.4.4) [Previous Releases](https://github.com/michaelnpsp/Grid2/releases)
+## [4.0.3](https://github.com/michaelnpsp/Grid2/tree/4.0.3) (2026-08-12)
+[Full Changelog](https://github.com/michaelnpsp/Grid2/compare/4.0.2...4.0.3) [Previous Releases](https://github.com/michaelnpsp/Grid2/releases)
 
-- Fixing possible issue with text fonts.  
+- Fixing crash releasing text indicators.  
+- Buff statuses: Added settings to change buff colors  by remaining or elapsed time.  
+    Square indicators: Added support to color buffs by remaining/elapsed time.  
