@@ -1,3 +1,33 @@
+## 3.7.10.d
+
+### Improvements
+
+- **Hide When Inactive in the Catalog** — The Hide When Inactive toggle is now available directly on each bar's row in the Aura Catalog next to Hide CDM Icon/Bar, so you no longer need to dig into the Appearance tab for it.
+
+### Bug Fixes
+
+- **Stack text settings now survive reloads** — Show at 1 Stack and stack color bands on aura icons and CDM icons no longer silently stop working after a reload or login.
+- **Double stack numbers in dungeons** — Fixed CDM icons sometimes showing two overlapping stack counts inside dungeons.
+- **Stuck stack count on target swap** — Fixed CDM icons sometimes keeping the previous target's stack count after switching targets.
+- **Stack display vanishing mid-dungeon** — Fixed the CDM icon stack display disappearing for the rest of a dungeon after the Cooldown Manager rebuilt its icons; it now follows the icon through rebuilds, even in combat.
+- **Buff on Pet bar empty after reload** — Fixed Buff on Pet bars (e.g. Dark Transformation) showing an empty fill after a reload.
+- **Tooltip errors on scenario widgets** — Fixed errors when hovering scenario/affix spell displays with Spell IDs in Tooltips enabled.
+
+## 3.7.10.c
+
+### New Features
+
+- **Track buffs on your pet** — A new "Buff on Pet" type for duration bars and a "Buff (pet)" mode for aura icons, for buffs your pet carries (like Dark Transformation) that normal tracking can't see.
+- **Stack colors and Show at 1 Stack are back on 12.1** — Color the stack number by stack count and show it even at a single stack, on both aura icons and Cooldown Manager buff icons — working everywhere including raids and Mythic+. Changes apply instantly, and the color band controls got a cleaner layout.
+
+### Bug Fixes
+
+- **Icons stay colored while their buff is active** — A cooldown icon could stay grayed out through the whole buff after the last update.
+- **No more duplicate icons after importing a profile** — Importing could leave an unclickable copy of an icon in your row, and sometimes an empty floating square.
+- **Aura glow timing options tell the truth on 12.1** — The % and seconds glow thresholds cannot work on 12.1 (an aura's remaining time is protected), so those modes are removed there and saved thresholds behave as Always. CDM Pandemic Timing still works exactly.
+- **CDM Timer Mirror options say what applies** — Fill mode, smoothing and conditional color cannot affect mirrored bars; they are now disabled with an explanation instead of silently doing nothing.
+- **Panels look right alongside other addons** — With many addons installed, another addon's copy of a shared library could flatten ArcUI's side-by-side option layouts.
+
 ## 3.7.10.b
 
 ### Bug Fixes

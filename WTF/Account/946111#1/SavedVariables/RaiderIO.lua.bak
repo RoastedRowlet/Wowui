@@ -1,34 +1,25 @@
 
 RaiderIO_Config = {
+["minimapIcon"] = {
+["minimapPos"] = 180,
+["showInCompartment"] = true,
+["hide"] = false,
+["lock"] = false,
+},
 ["profilePoint"] = {
 ["y"] = 0,
 ["x"] = -16,
 ["point"] = "TOPLEFT",
 },
-["minimapIcon"] = {
-["minimapPos"] = 180,
-["showInCompartment"] = true,
-["lock"] = false,
-["hide"] = false,
-},
 }
 RaiderIO_LastCharacter = "us-Lonelylitten-stormrage"
 RaiderIO_MissingCharacters = {
-["us-Ebønhørn-area-52"] = true,
-["us-Luxsan-sargeras"] = true,
-["us-Mollydh-area-52"] = true,
-["us-Greaterboat-area-52"] = true,
-["us-Daraeline-area-52"] = true,
-["us-Holyjeans-area-52"] = true,
-["us-Panzersham-area-52"] = true,
-["us-Thundergunx-area-52"] = true,
-["us-Xadrixna-area-52"] = true,
-["us-Bungcluud-area-52"] = true,
-["us-Turnek-area-52"] = true,
-["us-Highwaydk-illidan"] = true,
-["us-Nickfists-illidan"] = true,
-["us-Disastrophe-area-52"] = true,
-["us-Wingingit-area-52"] = true,
+["us-Sessnishee-stormrage"] = true,
+["us-Sunnset-stormrage"] = true,
+["us-Lyìcon-stormrage"] = true,
+["us-Wasjusthere-stormrage"] = true,
+["us-Nalbaki-stormrage"] = true,
+["us-Herminds-stormrage"] = true,
 }
 RaiderIO_MissingServers = {
 }

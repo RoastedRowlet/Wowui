@@ -428,7 +428,7 @@ function Grid2Options:MakeIndicatorBorderSizeOptions(indicator, options, optionP
 		set = function (_, v)
 			if v == 0 then v = nil end
 			indicator.dbx.borderSize = v
-			self:RefreshIndicator(indicator, "Layout")
+			self:RefreshIndicator(indicator, (optionParams and optionParams.RefreshMethod) or "Layout")
 		end,
 	}
 end
@@ -682,7 +682,7 @@ function Grid2Options:MakeIndicatorCooldownTextOptions(indicator, options)
 		order = 138,
 		name = L["Font"],
 		desc = L["Adjust the font settings"],
-		get = function (info) return indicator.dbx.cfFont or self.MEDIA_VALUE_DEFAULT end,
+		get = function (info) return indicator.dbx.ctFont or self.MEDIA_VALUE_DEFAULT end,
 		set = function (info, v)
 			indicator.dbx.ctFont = self.MEDIA_VALUE_DEFAULT~=v and v or nil
 			self:RefreshIndicator(indicator, "Layout")

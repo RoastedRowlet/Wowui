@@ -247,3 +247,384 @@ function SC.ClearBands(frame)
     frame._arcStackBandContainer:Hide()
   end
 end
+
+-- ═══════════════════════════════════════════════════════════════════════════
+-- 12.1 CDM AURA-ICON COUNT OVERLAY (field-proven mechanism, 2026-08-12)
+--
+-- On 12.1 the layered min-band trick above is walled (the display-count API
+-- throws for tainted callers), and CDM's own Applications number is a game-
+-- drawn fontstring we can neither re-threshold nor recolor. The proven
+-- replacement (live-tested on Arc aura icons the same night): an INVISIBLE
+-- engine aura button whose only job is the application count — its fontstring
+-- is driven C-side by SetApplicationCount with a banded NumericRuleFormatter
+-- (Show at 1 + per-band color escapes), overlaid on the CDM icon while CDM's
+-- own count is alpha-hidden (CDM re-asserts SetShown, never alpha).
+--
+-- Structure per overlaid icon: two tiny AuraContainers (player/HELPFUL +
+-- target/HARMFUL — the BD dual-unit model, whichever unit holds the aura
+-- populates) PARENTED TO THE CDM FRAME so the overlay inherits every
+-- visibility path the icon has (hide-when, force-hide, group alpha) with zero
+-- extra plumbing. Candidate spell IDs come from BD.ResolveCandidateSpellIDs
+-- (base + override + linked). Buttons reuse ArcBarDurButtonTemplate (already
+-- carries ArcStackHolder.ArcStacks). Desk-time rebuild model: slots can't
+-- unregister, so refreshes park old generations and add fresh keys.
+-- ═══════════════════════════════════════════════════════════════════════════
+
+local IS_121_SC = select(4, GetBuildInfo()) >= 120100
+if IS_121_SC then
+
+-- One rec per CDM FRAME (identity-stable across cooldownID remaps — the
+-- old cdID-keyed model orphaned overlays every time CDM reassigned frames
+-- in M+, leaving stale counts on the wrong icons):
+--   overlayRecs[frame] = { cdID, active, dimmed, hooked,
+--                          subs = { {unit, container, key, btn} } }
+-- Slots are created ONCE per frame (stable key, never regenerated): each
+-- container receives exactly one AddAuraSlot while its pool is empty, the
+-- proven-safe pattern. Everything else — candidate filters, UpdateAllAuras,
+-- native-count alpha — is data-side and legal in ANY context, so overlays
+-- can retarget/park/re-arm inside a key.
+local overlayRecs = {}
+
+local function AurasSecretNowSC()
+  return (C_Secrets and C_Secrets.ShouldAurasBeSecret
+      and C_Secrets.ShouldAurasBeSecret()) and true or false
+end
+
+local function WantsOverlay(cfg)
+  local cht = cfg and cfg.chargeText
+  if not cht then return false end
+  if cht.enabled == false then return false end
+  return cht.showSingleStack == true or cht.thresholdColorEnabled == true
+end
+
+-- SINGLE-WRITER contract: ns.CDMEnhance.SetupChargeText asks this on every
+-- style pass and re-asserts the native count's hide itself while true. The
+-- .c build had two independent alpha writers and the 12.1 secrecy branch
+-- restored alpha 1 over a live overlay = TWO counts on one icon in keys.
+function SC.IsOverlayActive(frame)
+  local rec = frame and overlayRecs[frame]
+  return (rec and rec.active) and true or false
+end
+
+-- Create-time geometry only; formatter/style land in SetOverlayState (they
+-- depend on the frame's CURRENT occupant, which changes over the session).
+local function WireOverlayButton(btn, cdmFrame)
+  local sh = btn.ArcStackHolder
+  local fs = sh and sh.ArcStacks
+  if not fs then return end
+  btn._arcStacksFS = fs
+  btn:ClearAllPoints()
+  btn:SetAllPoints(cdmFrame)
+  btn:SetFrameStrata(cdmFrame:GetFrameStrata())
+  btn:SetFrameLevel((cdmFrame:GetFrameLevel() or 1) + 7)
+  if btn.EnableMouse then btn:EnableMouse(false) end
+  if sh and sh.SetFrameLevel then
+    sh:SetFrameStrata(cdmFrame:GetFrameStrata())
+    sh:SetFrameLevel(btn:GetFrameLevel() + 1)
+  end
+  fs:Show()
+end
+
+-- style from chargeText — the same recipe the arc aura icons use, so the
+-- overlaid number sits exactly where the user's stack text settings say.
+-- Accessible-context only (the fontstring lives in the button partition).
+local function StyleOverlayText(btn, cdID)
+  local fs = btn._arcStacksFS
+  if not fs then return end
+  local cfg = ns.CDMEnhance and ns.CDMEnhance.GetIconSettings and ns.CDMEnhance.GetIconSettings(cdID)
+  local cht = (cfg and cfg.chargeText) or {}
+  local lsm = LibStub and LibStub("LibSharedMedia-3.0", true)
+  local fontPath = (cht.font and lsm and lsm:Fetch("font", cht.font, true)) or select(1, fs:GetFont())
+  local outline = cht.outline or "OUTLINE"
+  if outline == "NONE" then outline = "" end
+  fs:SetFont(fontPath, cht.size or 16, outline)
+  fs:SetDrawLayer("OVERLAY", 7)
+  local c = cht.color
+  if c then fs:SetTextColor(c.r or 1, c.g or 1, c.b or 1, c.a or 1) end
+  if cht.shadow then
+    fs:SetShadowOffset(cht.shadowOffsetX or 1, cht.shadowOffsetY or -1)
+    fs:SetShadowColor(0, 0, 0, 0.8)
+  else
+    fs:SetShadowOffset(0, 0)
+  end
+  fs:ClearAllPoints()
+  if cht.mode == "free" then
+    fs:SetPoint("CENTER", btn, "CENTER", cht.freeX or 0, cht.freeY or 0)
+  else
+    local a = cht.anchor or cht.position or "BOTTOMRIGHT"
+    fs:SetPoint(a, btn, a, cht.offsetX or -2, cht.offsetY or 2)
+  end
+  fs:Show()
+end
+
+local function IsButtonAccessible(btn)
+  if not btn then return false end
+  if btn.CanBeAccessedInContext then return btn:CanBeAccessedInContext() end
+  return not (btn.IsForbidden and btn:IsForbidden())
+end
+
+-- Candidate spell IDs per cooldownID, resolved at DESK time (data-provider
+-- reads stay out of restricted contexts) and cached for the whole session —
+-- the CDM cooldown set is spec-fixed, so a mid-key retarget always finds its
+-- ids here. This is what lets the overlay FOLLOW frame shuffles inside keys.
+local idsByCdID = {}
+
+local function ResolveIDs(cdID)
+  local ids = idsByCdID[cdID]
+  if ids then return ids end
+  if AurasSecretNowSC() then return nil end   -- desk-only resolve; cache serves keys
+  ids = ns.BarDuration and ns.BarDuration.ResolveCandidateSpellIDs
+      and ns.BarDuration.ResolveCandidateSpellIDs(cdID, nil)
+  if ids and next(ids) then
+    idsByCdID[cdID] = ids
+    return ids
+  end
+  return nil
+end
+
+-- Point the overlay at an occupant (cdID + ids) or release it (nil, nil).
+-- Legal in ANY context: filter edits (the engine rescans internally), the
+-- per-frame formatter's breakpoint rewrite (plain userdata + saved-var
+-- reads), and the native-count alpha. Only the SetApplicationCount re-bind
+-- and text restyle need an accessible button (desk) — under secrecy the
+-- existing binding keeps serving rec.fmt, whose rules we just rewrote.
+local function SetOverlayState(f, rec, cdID, ids)
+  if cdID and ids then
+    rec.cdID = cdID
+    rec.active = true
+    if rec.fmt and ns.AuraIcons and ns.AuraIcons.ComputeStackBreakpoints then
+      rec.fmt:SetBreakpoints(ns.AuraIcons.ComputeStackBreakpoints(cdID))
+    end
+    for _, sub in ipairs(rec.subs) do
+      if sub.container.SetAuraSlotCandidateFilters then
+        -- triggers the engine's own UpdateAllAuras internally
+        sub.container:SetAuraSlotCandidateFilters(sub.key, { includeSpellIDs = ids })
+      end
+      local btn = sub.btn
+      if btn and btn._arcStacksFS and IsButtonAccessible(btn) then
+        StyleOverlayText(btn, cdID)
+        btn:SetApplicationCount(btn._arcStacksFS, { formatter = rec.fmt
+          or (ns.AuraIcons and ns.AuraIcons.GetLiveFormatter and ns.AuraIcons.GetLiveFormatter(cdID)) })
+      end
+    end
+    if f.Applications then
+      f.Applications:SetAlpha(0)
+      rec.dimmed = true
+    end
+  else
+    rec.cdID = nil
+    rec.active = false
+    for _, sub in ipairs(rec.subs) do
+      if sub.container.SetAuraSlotCandidateFilters then
+        sub.container:SetAuraSlotCandidateFilters(sub.key, { includeSpellIDs = {} })
+      end
+    end
+    if f.Applications and rec.dimmed then
+      f.Applications:SetAlpha(1)
+      rec.dimmed = nil
+    end
+  end
+end
+
+-- OnCooldownIDSet: the frame's occupant changed. Pool RELEASE clears
+-- cooldownID silently (ResetCooldownData writes the field directly — no
+-- OnCooldownIDSet, source-verified), so this only fires on ASSIGNMENT — and
+-- after a release the same-ID guard in SetCooldownID never suppresses it,
+-- meaning every reacquire lands here, including frame SHUFFLES (CDM rebuilds
+-- reassign cooldownIDs across frames constantly in keys). With the per-frame
+-- formatter + the desk-cached ids, a retarget is fully legal under secrecy —
+-- the first cut parked instead and one shuffle killed the overlay for the
+-- rest of the dungeon ("stack count goes away completely"). Only a cdID with
+-- no cached ids (cannot happen mid-key: the set is spec-fixed) degrades to
+-- the native count.
+function SC.RetargetFrame(f)
+  local rec = overlayRecs[f]
+  if not rec then return end
+  local cdID = f.cooldownID
+  local cfg = (type(cdID) == "number") and ns.CDMEnhance
+      and ns.CDMEnhance.GetIconSettings and ns.CDMEnhance.GetIconSettings(cdID) or nil
+  if cfg and WantsOverlay(cfg) then
+    local ids = ResolveIDs(cdID)
+    if ids then
+      SetOverlayState(f, rec, cdID, ids)
+      return
+    end
+  end
+  SetOverlayState(f, rec, nil, nil)
+end
+
+-- Containers + slots + remap hook for a frame, created ONCE (desk only —
+-- caller gates). Each container gets its single AddAuraSlot while fresh.
+local function EnsureOverlayInfra(f)
+  local rec = overlayRecs[f]
+  if rec then return rec end
+  rec = { subs = {} }
+  -- PER-FRAME formatter object: bound once to this frame's overlay button,
+  -- rules rewritten on every retarget/settings settle. A registry-shared
+  -- per-cdID object could not follow mid-key frame shuffles (re-binding
+  -- needs an accessible button; rewriting rules is legal anywhere, and
+  -- mutating a shared object would corrupt its other consumers).
+  if C_StringUtil and C_StringUtil.CreateNumericRuleFormatter then
+    rec.fmt = C_StringUtil.CreateNumericRuleFormatter()
+  end
+  overlayRecs[f] = rec
+  for _, unit in ipairs({ "player", "target" }) do
+    local ckey = "_arcSCOv_" .. unit
+    local cont = f[ckey]
+    if not cont then
+      cont = CreateFrame("AuraContainer", nil, f, "CustomAuraContainerTemplate")
+      if not (cont and cont.AddAuraSlot) then
+        overlayRecs[f] = nil
+        return nil
+      end
+      cont:SetUnit(unit)
+      cont:SetEnabled(true)
+      cont:SetPoint("CENTER", f, "CENTER", 0, 0)
+      cont:SetSize(1, 1)
+      cont:Show()
+      f[ckey] = cont   -- _arc* field on a Blizzard frame: taint-safe
+    end
+    local key = "arcscov_" .. unit
+    local sub = { unit = unit, container = cont, key = key }
+    if not cont._arcSlotAdded then
+      cont._arcSlotAdded = true
+      sub.btn = cont:AddAuraSlot(key, (unit == "player") and "HELPFUL" or "HARMFUL", {
+        maxFrameCount    = 1,
+        candidateFilters = { includeSpellIDs = {} },   -- parked until targeted
+        templateNames    = { "ArcBarDurButtonTemplate" },
+        initializeFrame  = function(b) WireOverlayButton(b, f) end,
+      })
+    end
+    table.insert(rec.subs, sub)
+  end
+  if not rec.hooked and f.OnCooldownIDSet then
+    rec.hooked = true
+    hooksecurefunc(f, "OnCooldownIDSet", function(self)
+      -- defer one frame so CDM's own aura linking completes first
+      C_Timer.After(0, function() SC.RetargetFrame(self) end)
+    end)
+  end
+  return rec
+end
+
+-- Target-unit containers do NOT self-refresh on a target SWAP (only on
+-- UNIT_AURA of the token) — without this the old target's count sticks on
+-- the icon ("shows a 1 until it resets itself"). Same gap the arc aura
+-- icons module closes with its own watcher.
+local swapWatcher = CreateFrame("Frame")
+swapWatcher:RegisterEvent("PLAYER_TARGET_CHANGED")
+swapWatcher:SetScript("OnEvent", function()
+  for _, rec in pairs(overlayRecs) do
+    if rec.active then
+      for _, sub in ipairs(rec.subs) do
+        if sub.unit == "target" and sub.container.UpdateAllAuras then
+          sub.container:UpdateAllAuras()
+        end
+      end
+    end
+  end
+end)
+
+-- Infra creation is desk-only — QUEUE under secrecy and flush on regen/zone
+-- (a silent skip left mid-combat toggles dead until reload). The STATE pass
+-- inside RefreshOverlays still runs under secrecy, so existing overlays
+-- follow settings/occupant changes even mid-key.
+local overlayPending = false
+local overlayFlush = CreateFrame("Frame")
+overlayFlush:RegisterEvent("PLAYER_REGEN_ENABLED")
+overlayFlush:RegisterEvent("PLAYER_ENTERING_WORLD")
+overlayFlush:SetScript("OnEvent", function()
+  if overlayPending and not AurasSecretNowSC() then
+    overlayPending = false
+    SC.RefreshOverlays()
+  end
+end)
+
+function SC.RefreshOverlays()
+  local GetEnhancedFrames = ns.CDMEnhance and ns.CDMEnhance.GetEnhancedFrames
+  local GetIconSettings   = ns.CDMEnhance and ns.CDMEnhance.GetIconSettings
+  if not (GetEnhancedFrames and GetIconSettings) then return end
+  local frames = GetEnhancedFrames()
+  if not frames then return end
+
+  -- STATE PASS (legal in any context): re-point every existing overlay at
+  -- its frame's CURRENT occupant + current settings. This is what makes a
+  -- mid-key settings change take effect on already-built overlays.
+  for f in pairs(overlayRecs) do
+    SC.RetargetFrame(f)
+  end
+
+  -- INFRA PASS (desk only): containers/slots/hooks for newly-wanted frames.
+  if AurasSecretNowSC() then
+    overlayPending = true
+    return
+  end
+  for cdID, data in pairs(frames) do
+    local f = data.frame
+    if f and data.viewerType == "aura" and type(cdID) == "number"
+       and not overlayRecs[f] then
+      local cfg = GetIconSettings(cdID)
+      if WantsOverlay(cfg) then
+        -- ResolveIDs caches into idsByCdID — the bank mid-key retargets draw from
+        local ids = ResolveIDs(cdID)
+        if ids then
+          local rec = EnsureOverlayInfra(f)
+          if rec then SetOverlayState(f, rec, cdID, ids) end
+        end
+      end
+    end
+  end
+end
+
+-- ── DIAGNOSTICS (/arcstacks, defined in ArcUI_ArcAurasAuraIcons.lua) ────────
+
+function SC.DebugDump(chtSummary)
+  print("|cffFFD100-- CDM count overlays --|r")
+  local n = 0
+  for f, rec in pairs(overlayRecs) do
+    n = n + 1
+    local nativeA = f.Applications and string.format("%.2f", f.Applications:GetAlpha()) or "-"
+    local cht = (type(f.cooldownID) == "number" and chtSummary) and chtSummary(f.cooldownID) or ""
+    local idsCached = type(rec.cdID) == "number" and idsByCdID[rec.cdID] ~= nil
+    print(string.format("  %s cdID=%s recCd=%s active=%s dimmed=%s fmt=%s ids=%s nativeAlpha=%s subs=%d  %s",
+      f:GetName() or tostring(f), tostring(f.cooldownID), tostring(rec.cdID),
+      tostring(rec.active or false), tostring(rec.dimmed or false),
+      tostring(rec.fmt ~= nil), tostring(idsCached), nativeA, #rec.subs, cht))
+  end
+  if n == 0 then print("  (no overlays)") end
+end
+
+-- Caller attribution on the native count's SetAlpha — catches any writer
+-- fighting the overlay's hide (debugstack is secret-gated, DesatLab pattern).
+local alphaWatch = false
+function SC.ToggleAlphaWatch()
+  alphaWatch = not alphaWatch
+  print("|cff00CCFF[ArcStacks]|r native-count alpha watch: " .. (alphaWatch and "ON" or "OFF"))
+  if not alphaWatch then return end
+  for f in pairs(overlayRecs) do
+    local app = f.Applications
+    if app and not app._arcSCAlphaWatchHooked then
+      app._arcSCAlphaWatchHooked = true
+      app._arcSCWatchOwner = f
+      hooksecurefunc(app, "SetAlpha", function(self, a)
+        if not alphaWatch then return end
+        local stack = debugstack and debugstack(3, 3, 0) or "?"
+        if issecretvalue and issecretvalue(stack) then stack = "<secret caller>" end
+        if issecretvalue and issecretvalue(a) then a = "<secret>" end
+        local owner = self._arcSCWatchOwner
+        print(string.format("|cffFF8800[ArcStacks]|r cdID=%s Applications:SetAlpha(%s) from:\n%s",
+          tostring(owner and owner.cooldownID), tostring(a), tostring(stack)))
+      end)
+    end
+  end
+end
+
+local scOvLoader = CreateFrame("Frame")
+scOvLoader:RegisterEvent("PLAYER_ENTERING_WORLD")
+scOvLoader:SetScript("OnEvent", function(self, event)
+  self:UnregisterAllEvents()
+  -- CDM frames get enhanced/assigned over the first seconds of a session
+  C_Timer.After(5, function() SC.RefreshOverlays() end)
+end)
+
+end -- IS_121_SC

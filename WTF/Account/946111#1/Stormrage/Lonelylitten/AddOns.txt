@@ -136,4 +136,5 @@ ArchonTooltip: disabled
 ArchonTooltipDB_US: disabled
 BigWigs_Sporefall: enabled
 CompassHUD: enabled
-EllesmereUIRaidFrames: disabled
+EllesmereUIRaidFrames: enabled
+!!AddonProfiler: disabled
