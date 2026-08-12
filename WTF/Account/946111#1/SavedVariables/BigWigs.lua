@@ -58,11 +58,11 @@ BigWigs3DB = {
 ["Default"] = {
 ["player"] = {
 ["maxIcons"] = 5,
-["anchorYOffset"] = -216,
+["growthDirection"] = "RIGHT",
 ["anchorPoint"] = "TOP",
+["anchorYOffset"] = -216,
 ["anchorRelPoint"] = "TOP",
 ["anchorXOffset"] = 426,
-["growthDirection"] = "RIGHT",
 },
 },
 },
@@ -130,14 +130,14 @@ BigWigs3DB = {
 ["profiles"] = {
 ["Default"] = {
 ["emphasize"] = false,
-["visibleBarLimit"] = 1,
-["normalWidth"] = 120,
 ["expPosition"] = {
 "BOTTOMLEFT",
 "BOTTOMLEFT",
 330,
 21,
 },
+["visibleBarLimit"] = 1,
+["normalWidth"] = 120,
 ["normalPosition"] = {
 "BOTTOMLEFT",
 "BOTTOMLEFT",
@@ -147,20 +147,20 @@ BigWigs3DB = {
 },
 },
 },
-["BigWigs_Bosses_Muro'jin and Nekraxx"] = {
-["profiles"] = {
-["Default"] = {
-["toggles"] = {
-[1243900] = 3129591,
-},
-},
-},
-},
 ["BigWigs_Bosses_Zuraal"] = {
 ["profiles"] = {
 ["Default"] = {
 ["toggles"] = {
 [1263399] = 3129591,
+},
+},
+},
+},
+["BigWigs_Bosses_Muro'jin and Nekraxx"] = {
+["profiles"] = {
+["Default"] = {
+["toggles"] = {
+[1243900] = 3129591,
 },
 },
 },
@@ -182,9 +182,17 @@ BigWigs3DB = {
 },
 },
 ["myKeystones"] = {
+["Player-3676-0DF7D3EF"] = {
+["playerRating"] = 0,
+["specId"] = 1473,
+["keyMap"] = 0,
+["name"] = "Barelynoer",
+["keyLevel"] = 0,
+["realm"] = "Area 52",
+},
 ["Player-60-0F85ABEF"] = {
 ["playerRating"] = 0,
-["specId"] = 102,
+["specId"] = 105,
 ["keyMap"] = 0,
 ["name"] = "Lonelylitten",
 ["keyLevel"] = 0,

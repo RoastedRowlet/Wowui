@@ -14,12 +14,6 @@ RaiderIO_Config = {
 }
 RaiderIO_LastCharacter = "us-Lonelylitten-stormrage"
 RaiderIO_MissingCharacters = {
-["us-Sessnishee-stormrage"] = true,
-["us-Sunnset-stormrage"] = true,
-["us-Lyìcon-stormrage"] = true,
-["us-Wasjusthere-stormrage"] = true,
-["us-Nalbaki-stormrage"] = true,
-["us-Herminds-stormrage"] = true,
 }
 RaiderIO_MissingServers = {
 }

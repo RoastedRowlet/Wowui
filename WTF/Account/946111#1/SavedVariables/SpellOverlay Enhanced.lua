@@ -96,10 +96,6 @@ SpellOverlayEnhancedDB = {
 ["Clearcasting"] = {
 ["left"] = {
 ["isAtlas"] = false,
-["texture"] = 450929,
-["height"] = 204.8000081380208,
-["width"] = 102.4000040690104,
-["scale"] = 1,
 ["texCoords"] = {
 0,
 0,
@@ -110,13 +106,13 @@ SpellOverlayEnhancedDB = {
 1,
 1,
 },
+["height"] = 204.8000081380208,
+["scale"] = 1,
+["width"] = 102.4000040690104,
+["texture"] = 450929,
 },
 ["right"] = {
 ["isAtlas"] = false,
-["texture"] = 450929,
-["height"] = 204.8000081380208,
-["width"] = 102.4000040690104,
-["scale"] = 1,
 ["texCoords"] = {
 1,
 0,
@@ -127,6 +123,10 @@ SpellOverlayEnhancedDB = {
 0,
 1,
 },
+["height"] = 204.8000081380208,
+["scale"] = 1,
+["width"] = 102.4000040690104,
+["texture"] = 450929,
 },
 },
 ["Zen Pulse"] = {
@@ -151,6 +151,10 @@ SpellOverlayEnhancedDB = {
 ["Lunar Eclipse"] = {
 ["left"] = {
 ["isAtlas"] = false,
+["texture"] = 450914,
+["height"] = 204.8000183105469,
+["width"] = 102.4000244140625,
+["scale"] = 1,
 ["texCoords"] = {
 0,
 0,
@@ -161,10 +165,6 @@ SpellOverlayEnhancedDB = {
 1,
 1,
 },
-["height"] = 204.8000183105469,
-["scale"] = 1,
-["width"] = 102.4000244140625,
-["texture"] = 450914,
 },
 },
 ["Solar Eclipse"] = {

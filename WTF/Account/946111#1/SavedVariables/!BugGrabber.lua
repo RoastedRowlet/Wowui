@@ -1,7 +1,7 @@
 
 BugGrabberDB = {
 ["lastSanitation"] = 3,
-["session"] = 913,
+["session"] = 931,
 ["errors"] = {
 {
 ["message"] = "...s/AdvancedFocusCastBar/AdvancedFocusCastBarMixin.lua:1861: bad argument #1 to 'SetAlpha' (Usage: self:SetAlpha(alpha))",
