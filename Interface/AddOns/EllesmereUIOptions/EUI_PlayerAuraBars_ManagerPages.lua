@@ -68,8 +68,8 @@ local FONT_OUTLINE_VALUES = {
     outline = "Outline", thick = "Thick Outline",
 }
 local FONT_OUTLINE_ORDER = { "default", "none", "outline", "thick" }
-local GROW_DIR_VALUES = { LEFT = "Left", RIGHT = "Right", UP = "Up", DOWN = "Down" }
-local GROW_DIR_ORDER = { "LEFT", "RIGHT", "UP", "DOWN" }
+local GROW_DIR_VALUES = { LEFT = "Left", RIGHT = "Right", CENTER_HORIZONTAL = "Centered Horizontal", CENTER_VERTICAL = "Centered Vertical", UP = "Up", DOWN = "Down" }
+local GROW_DIR_ORDER = { "LEFT", "RIGHT", "CENTER_HORIZONTAL", "CENTER_VERTICAL", "UP", "DOWN" }
 local ICON_WRAP_VALUES = { LEFT = "Left", RIGHT = "Right" }
 local ICON_WRAP_ORDER = { "LEFT", "RIGHT" }
 
@@ -855,7 +855,7 @@ local function BuildDisplayFields(frame, fontPath, sy, cfg, apply, isBuff)
             setValue = function(v) cfg.borderSize = v; apply() end
         },
         {
-            type = "slider", text = "Spacing", min = 0, max = 20, step = 1, trackWidth = 120,
+            type = "slider", text = "Spacing", min = -5, max = 20, step = 1, trackWidth = 120,
             getValue = function() return cfg.padding or 5 end,
             setValue = function(v) cfg.padding = v; apply() end
         }
@@ -1878,7 +1878,7 @@ function ns.PABMP_ShowFilterEditor()
         rl:SetPoint("LEFT", frow, "LEFT", 10, 0)
         rl:SetPoint("RIGHT", frow, "RIGHT", f.preset and -8 or -42, 0)
         rl:SetJustifyH("LEFT"); rl:SetWordWrap(false)
-        rl:SetText(f.name)
+        rl:SetText(L(f.name))
         if isSel then
             local accent = frow:CreateTexture(nil, "ARTWORK", nil, 2)
             accent:SetSize(2, 26)
@@ -1994,7 +1994,7 @@ function ns.PABMP_ShowFilterEditor()
     local nm = EllesmereUI.MakeFont(left, 13, nil, 1, 1, 1)
     nm:SetAlpha(0.9)
     nm:SetPoint("TOPLEFT", left, "TOPLEFT", 2, -2)
-    nm:SetText(sel.name)
+    nm:SetText(L(sel.name))
     if not sel.preset then
         local ren = CreateFrame("Button", nil, left)
         ren:SetSize(54, 16)

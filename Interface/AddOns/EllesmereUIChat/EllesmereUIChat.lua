@@ -76,6 +76,7 @@ local CHAT_DEFAULTS = {
             bgB        = 0.05,
             bgTexture  = "none",  -- chat background texture key (Unit Frames bar texture catalogue)
             timestampFormat = "%I:%M ",
+            timestampAll = false,
             font = "__global",
             outlineMode = "__global",
             fontSize = 12,
@@ -3324,6 +3325,8 @@ local TOOLTIP_LINK_TYPES = {
 local _hyperlinkEntered = nil
 
 local function OnHyperlinkEnter(self, hyperlink)
+    -- Secret link (lockdown line): match would error; no tooltip either way.
+    if _G.issecretvalue and _G.issecretvalue(hyperlink) then return end
     local cfg = ECHAT.DB()
     if cfg.hideTooltipOnHover then return end
     local linkType = hyperlink:match("^([^:]+)")
@@ -3341,6 +3344,11 @@ local function OnHyperlinkLeave(self)
         GameTooltip:Hide()
     end
 end
+
+-- The engine's link takeover (armed while Shortened Channel Names is on)
+-- serves hover tooltips from OUR windows through these same handlers.
+ECHAT.LinkTooltipEnter = OnHyperlinkEnter
+ECHAT.LinkTooltipLeave = OnHyperlinkLeave
 
 -- Open the copy popup when a wrapped URL link is clicked.
 hooksecurefunc("SetItemRef", function(link)
@@ -4095,11 +4103,22 @@ local function SkinChatFrame(cf)
     if cf.SetShadowOffset then cf:SetShadowOffset(1, -1) end
     if cf.SetShadowColor then cf:SetShadowColor(0, 0, 0, 0.8) end
     cf:SetFading(false)
+    -- Must match win.smf's SetIndentedWordWrap(true) (Engine.lua CreateWindowSMF):
+    -- Blizzard's own hyperlink hit-zone positions for this frame are computed
+    -- against ITS OWN indent setting, not just its text. Leaving this at the
+    -- default (false) here while our visible copy indents wrapped lines desyncs
+    -- every hyperlink hit-zone from the visible glyphs on that line -- root
+    -- cause of player-name/channel-tag links (e.g. whispers, party chat)
+    -- clicking several characters off from where the name is drawn.
+    cf:SetIndentedWordWrap(true)
 
-    -- 3. Hyperlink handlers: hover tooltip only. Blizzard's invisible text
-    --    layer still owns all hyperlink hit-testing (its clicks run SetItemRef
-    --    from ITS secure scripts; the global SetItemRef hook catches our URL
-    --    links), so these script hooks keep firing exactly as before.
+    -- 3. Hyperlink handlers: hover tooltip only. While Shortened Channel
+    --    Names is OFF, Blizzard's invisible text layer owns hyperlink
+    --    hit-testing (its clicks run SetItemRef from ITS secure scripts; the
+    --    global SetItemRef hook catches our URL links) and these hooks fire.
+    --    While it is ON, the engine's link takeover mouse-blocks that layer
+    --    and serves links from OUR windows instead -- same tooltip handlers,
+    --    exposed as ECHAT.LinkTooltip*.
     if not CFD(cf).hyperlinkHooked then
         CFD(cf).hyperlinkHooked = true
         cf:HookScript("OnHyperlinkEnter", function(...)
@@ -4442,6 +4461,11 @@ initFrame:SetScript("OnEvent", function(self)
                         cf:SetFont(wantFont, sz, wantOutline)
                     end
                 end
+                -- Blizzard resets this alongside the font/dock passes above;
+                -- re-assert every pass rather than gating on a changed-check
+                -- (a plain boolean set costs nothing). See SkinChatFrame for
+                -- why this must stay congruent with win.smf's own setting.
+                cf:SetIndentedWordWrap(true)
             end
         end
         UpdateTabColors()
@@ -4908,7 +4932,27 @@ initFrame:SetScript("OnEvent", function(self)
     -- Enable scroll-to-scroll chat (Blizzard disables by default)
     if SetCVar then SetCVar("chatMouseScroll", 1) end
 
+    -- Seed the engine's stamp-all transform with the RESOLVED format:
+    -- explicit formats pass through, "__blizzard" resolves to Blizzard's own
+    -- setting, "none" (either source) disarms it.
+    local function ApplyStampAll()
+        if not ECHAT.EngineSetStampAll then return end
+        local cfg = ECHAT.DB()
+        local fmt = cfg.timestampFormat or "%I:%M "
+        if fmt == "none" then
+            fmt = nil
+        elseif fmt == "__blizzard" then
+            local ok, f = pcall(function()
+                return ChatFrameUtil and ChatFrameUtil.GetTimestampFormat and ChatFrameUtil.GetTimestampFormat()
+            end)
+            fmt = (ok and type(f) == "string" and f ~= "" and f ~= "none") and f or nil
+        end
+        ECHAT.EngineSetStampAll(cfg.timestampAll == true and fmt ~= nil, fmt)
+    end
+    ECHAT.ApplyStampAll = ApplyStampAll
+
     local function ApplyTimestampCVar()
+        ApplyStampAll()
         if not SetCVar then return end
         local cfg = ECHAT.DB()
         local fmt = cfg.timestampFormat or "%I:%M "

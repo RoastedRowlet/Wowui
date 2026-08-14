@@ -28,7 +28,7 @@ BigWigs_Core: enabled
 BigWigs_Options: enabled
 BigWigs_Plugins: enabled
 LittleWigs: enabled
-EllesmereUICooldownManager: disabled
+EllesmereUICooldownManager: enabled
 BigWigs_TheVoidspire: enabled
 LittleWigs_WrathOfTheLichKing: enabled
 LittleWigs_WarlordsOfDraenor: enabled
@@ -48,9 +48,9 @@ M33Auras: disabled
 WeakAuras: disabled
 EllesmereUIBags: enabled
 BigWigs_MidnightWorld: enabled
-EllesmereUIResourceBars: disabled
+EllesmereUIResourceBars: enabled
 LittleWigs_BattleForAzeroth: enabled
 BigWigs_Sporefall: enabled
 ArcUI: disabled
 EllesmereUIAuraBuffReminders: disabled
-EllesmereUIRaidFrames: enabled
+EllesmereUIRaidFrames: disabled

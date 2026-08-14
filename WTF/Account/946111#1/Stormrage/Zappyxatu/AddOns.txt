@@ -28,7 +28,7 @@ BigWigs_Core: enabled
 BigWigs_Options: enabled
 BigWigs_Plugins: enabled
 LittleWigs: enabled
-EllesmereUICooldownManager: disabled
+EllesmereUICooldownManager: enabled
 BigWigs_TheVoidspire: enabled
 LittleWigs_WrathOfTheLichKing: enabled
 LittleWigs_WarlordsOfDraenor: enabled
@@ -71,7 +71,7 @@ EllesmereUIDamageMeters: enabled
 EllesmereUIMinimap: enabled
 EllesmereUINameplates: enabled
 EllesmereUIQoL: enabled
-EllesmereUIResourceBars: disabled
+EllesmereUIResourceBars: enabled
 EllesmereUIUnitFrames: enabled
 FocusMarker: enabled
 GroupfinderFlags: enabled
@@ -112,4 +112,4 @@ WaypointUI: enabled
 WorldMarkerCycler: enabled
 EllesmereUIBags: enabled
 BigWigs_Sporefall: enabled
-EllesmereUIRaidFrames: enabled
+EllesmereUIRaidFrames: disabled

@@ -955,6 +955,130 @@ end
 -------------------------------------------------------------------------------
 EllesmereUI._WHATSNEW_PATCHES = {
     {
+        version = "8.8.6",
+        features = {
+            {
+                module = "Raid Frames",
+                title  = "Fully Vertical Raid Frames",
+                desc   = "Every growth combination allowed -- Up + Up lays the raid out in one straight line",
+                nav    = { module = "EllesmereUIRaidFrames", page = "Frames", section = "LAYOUT", highlight = "Group Growth" },
+            },
+            {
+                module = "Chat",
+                title  = "Timestamp All Messages",
+                desc   = "Stamps system messages, loot, achievements, and addon prints, not just player chat",
+                nav    = { module = "EllesmereUIChat", page = "Chat", section = "EXTRAS", highlight = "Timestamp All Messages" },
+            },
+            {
+                module = "Quickdraw",
+                title  = "Bigger Menus & New Presets",
+                desc   = "Menus hold up to 16 entries, plus Quest Items and Professions presets, a Last Used Mount entry, and a Menu Cancel Action keybind",
+            },
+            {
+                module = "Quickdraw",
+                title  = "Smarter Pickers",
+                desc   = "Mount and toy pickers list everything you own and also search source and favorite fields",
+            },
+        },
+        fixes = {
+            { module = "General", text = "Reloading the UI while in combat no longer causes script-ran-too-long errors and half-loaded modules." },
+            { module = "Raid Frames", text = "Party frame dispel overlays now follow the configured display mode, icons, and custom dispel colors." },
+            { module = "Raid Frames", text = "Right-clicking a raid member who is in a different zone now opens the player menu instead of the pet menu." },
+            { module = "Raid Frames", text = "Buff Manager effect indicators set to an unavailable Show When mode now display instead of showing nothing." },
+            { module = "Chat", text = "Clickable links and player names on lines with shortened channel names now respond exactly where they appear, and the wheel scrolls into restored history right after a reload." },
+            { module = "Cooldown Manager", text = "Racial spells assigned to a custom bar stay there through spec changes and relogs, and racials untracked in Blizzard's Cooldown Manager display again." },
+            { module = "Cooldown Manager", text = "Pandemic Glow no longer flashes briefly when a tracked buff is freshly applied, and invisible reserved buff slots no longer show tooltips or block mouseover casts." },
+            { module = "Quickdraw", text = "Nested menus open reliably when moving the pointer to a child entry, and stack counts render pixel-sharp at every scale." },
+            { module = "Unit Frames", text = "Pinging over unit frames no longer errors in Mythic+ and raid combat; frame pings are temporarily world pings pending a Blizzard fix." },
+            { module = "Aura Buff Reminders", text = "The Missing Pet reminder no longer appears while mounted or flashes on dismount." },
+            { module = "Resource Bars", text = "All entries in the Threshold Settings spec dropdown are now clickable." },
+            { module = "Blizz UI Enhanced", text = "Fixed errors when hovering certain event UI widgets and when receiving certain loot toasts, such as while fishing." },
+            { module = "Localization", text = "Major catch-ups for German, Korean, Brazilian Portuguese, Simplified Chinese, and Traditional Chinese, plus Bags menus, prompts, and bank headers now translate." },
+        },
+    },
+    {
+        version = "8.8.5",
+        heroes = {
+            {
+                module = "Mythic+ Tools",
+                title  = "Targeted Spell Bars",
+                desc   = "A movable group of cast bars, one for every enemy casting around you -- spell name, cast target, and timer, growing up or down with full styling control. Off by default, under the renamed Mythic+ Tools module.",
+                nav    = { module = "EllesmereUIMythicTimer", page = "Targeted Spell Bars", section = "TARGETED SPELL BARS", highlight = "Enable Targeted Spell Bars" },
+            },
+            {
+                module = "Mythic+ Tools",
+                title  = "Target & Focus Cast Bars",
+                desc   = "Standalone cast bars for your target and focus with the nameplates' full interrupt treatment -- kick-ready coloring, uninterruptible shield, and kick timing hints. Off by default.",
+                nav    = { module = "EllesmereUIMythicTimer", page = "Target/Focus Bars", section = "TARGET CAST BAR", highlight = "Enable Target Cast Bar" },
+            },
+        },
+        features = {
+            {
+                module = "Damage Meters",
+                title  = "Lock Position & Disable Click",
+                desc   = "Freeze the standalone combat timer in place",
+                nav    = { module = "EllesmereUIDamageMeters", page = "Damage Meters", section = "STANDALONE COMBAT TIMER", highlight = "Lock Position & Disable Click" },
+            },
+            {
+                module = "General",
+                title  = "New Visibility Options",
+                desc   = "Only Show when Mounted and Only Show in Housing",
+            },
+            {
+                module = "Minimap",
+                title  = "Auto Zoom Reset",
+                desc   = "Snap back to max zoom after a chosen delay",
+                nav    = { module = "EllesmereUIMinimap", page = "Minimap", section = "DISPLAY", highlight = "Reset Zoom" },
+            },
+            {
+                module = "Nameplates",
+                title  = "Out of Range Opacity",
+                desc   = "Fade enemy plates beyond your attack range",
+                nav    = { module = "EllesmereUINameplates", page = "Display", section = "EXTRAS", highlight = "Range Check" },
+            },
+            {
+                module = "Nameplates",
+                title  = "Hide Enemy Nameplates out of Combat",
+                desc   = "Plates return the instant combat starts",
+                nav    = { module = "EllesmereUINameplates", page = "Display", section = "EXTRAS", highlight = "Hide Enemy Nameplates out of Combat" },
+            },
+            {
+                module = "QoL",
+                title  = "FPS & Latency in Secondary Stats",
+                desc   = "Attach the readout as rows in the stats block",
+                nav    = { module = "EllesmereUIQoL", page = "QoL", section = "EXTRAS", highlight = "Show FPS Counter" },
+            },
+            {
+                module = "Unit Frames",
+                title  = "Centered Aura Growth",
+                desc   = "Player Aura Bars grow from the center, spacing can go negative",
+                nav    = { module = "EllesmereUIUnitFrames", page = "Player Aura Bars", section = "DISPLAY", highlight = "Spacing" },
+            },
+        },
+        fixes = {
+            { module = "Action Bars", text = "Charge Recharge Numbers now appear reliably the moment a charge starts recharging, instead of staying hidden until the next bar update." },
+            { module = "Chat", text = "Clicking a player's name or channel tag in chat now lands where the name is drawn -- whisper reply-by-click works again." },
+            { module = "Cooldown Manager", text = "Fixed severe FPS drops and high idle CPU on Augmentation Evokers at login and for several seconds after every combat." },
+            { module = "General", text = "Aura displays across raid frames, the player frame, and Player Aura Bars no longer fill with the wrong buffs during vehicles, cinematics, or faction changes -- closing the cases the 8.8.4 fixes didn't cover." },
+            { module = "General", text = "Show/Hide when Dragonriding visibility now applies in Druid Flight Form, Dracthyr Soar, and other flight forms." },
+            { module = "Localization", text = "The Korean translation gained ~40 new entries." },
+            { module = "Localization", text = "Brazilian Portuguese now covers Unlock Mode, Conditional Overrides, Quickdraw, and more, with terminology fixes." },
+            { module = "Localization", text = "Traditional Chinese gained 328 new entries across Quickdraw, Healer Mana, Player Aura Bars, and more." },
+            { module = "Localization", text = "Simplified Chinese caught up with ~400 new entries and terminology aligned with the CN client." },
+            { module = "Nameplates", text = "Enemy nameplates are class-colored again in rated PvP and battlegrounds." },
+            { module = "QoL", text = "Secondary Stats keep live values during combat and in instances instead of showing \"?\"." },
+            { module = "QoL", text = "Fixed the remaining Skull Bash false alert and frozen Movement Alert countdown in Mythic+ and other content where cooldown data is secret." },
+            { module = "Quickdraw", text = "Toys dragged in from the Toy Box are no longer dimmed as unusable, including previously saved ones." },
+            { module = "Raid Frames", text = "The Buff Manager's Duration Swipe and Hide Icons settings now stick instead of being undone by aura updates." },
+            { module = "Raid Frames", text = "The Healer Mana Display no longer keeps showing the previous group's content after leaving a raid." },
+            { module = "Raid Frames", text = "Dispel color overlays no longer cover absorb shields, on raid frames and the player frame alike." },
+            { module = "Resource Bars", text = "Sweeping Strikes pip displays now show all 18 charges instead of capping the readout at 12." },
+            { module = "Resource Bars", text = "Ebon Might bar borders respect Border Size and Color again." },
+            { module = "Resource Bars", text = "Hidden resource bars no longer reappear empty after item upgrades or max-health changes." },
+            { module = "Unit Frames", text = "Right-Click to Cancel on player buffs works again after toggling the option or switching profiles." },
+        },
+    },
+    {
         version = "8.8.4",
         -- No hero tier this patch (same shape as 8.7.7): features present,
         -- so the tiers render normally and this is not a mini patch.
@@ -4774,7 +4898,7 @@ initFrame:SetScript("OnEvent", function(self)
                 EllesmereUIDragonRiding      = "Skyriding HUD with speed, vigor and second wind tracking.",
                 EllesmereUIBlizzardSkin       = "Clean and beautiful visual refreshes for Blizzard UI elements.",
                 EllesmereUIFriends           = "A modern friends list with built-in organization tools.",
-                EllesmereUIMythicTimer       = "A simple Mythic+ timer with full tracking customizations.",
+                EllesmereUIMythicTimer       = "Mythic+ timer, targeted spell bars, and standalone cast bars.",
                 EllesmereUIQuestTracker      = "A clean, updated reskin of Blizzard's Quest Tracker.",
                 EllesmereUIMinimap           = "A new age minimap with clean styling and square layout options.",
                 EllesmereUIDamageMeters      = "Lightweight damage meters with simple but powerful customization.",
@@ -7068,7 +7192,7 @@ initFrame:SetScript("OnEvent", function(self)
                 EllesmereUIDragonRiding      = "Skyriding HUD with speed, vigor and second wind tracking.",
                 EllesmereUIBlizzardSkin       = "Clean and beautiful visual refreshes for Blizzard UI elements.",
                 EllesmereUIFriends           = "A modern friends list with built-in organization tools.",
-                EllesmereUIMythicTimer       = "A simple Mythic+ timer with full tracking customizations.",
+                EllesmereUIMythicTimer       = "Mythic+ timer, targeted spell bars, and standalone cast bars.",
                 EllesmereUIQuestTracker      = "A clean, updated reskin of Blizzard's Quest Tracker.",
                 EllesmereUIMinimap           = "A new age minimap with clean styling and square layout options.",
                 EllesmereUIDamageMeters      = "Lightweight damage meters with simple but powerful customization.",
@@ -7834,10 +7958,11 @@ initFrame:SetScript("OnEvent", function(self)
             if EllesmereUI._applyHideBlizzardPartyFrame then
                 EllesmereUI._applyHideBlizzardPartyFrame()
             end
-            if EllesmereUI._applyFPSCounter then
-                EllesmereUI._applyFPSCounter()
-            end
-            if EllesmereUI._applySecondaryStats then
+            -- One call for both: the FPS readout may be drawn by the Secondary
+            -- Stats block, so the two owners have to re-evaluate together.
+            if EllesmereUI._applyFPSDisplay then
+                EllesmereUI._applyFPSDisplay()
+            elseif EllesmereUI._applySecondaryStats then
                 EllesmereUI._applySecondaryStats()
             end
             if EllesmereUI._applyCrosshair then

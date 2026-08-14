@@ -1,10 +1,22 @@
 
 SpellOverlayEnhancedDB = {
+["profileKeys"] = {
+["Madmareep - Stormrage"] = "Default",
+["Barelynoer - Area 52"] = "Default",
+["Angryabsol - Stormrage"] = "Default",
+["Lonelylitten - Stormrage"] = "Default",
+["Klutzykubfu - Stormrage"] = "Default",
+["Zappyxatu - Stormrage"] = "Default",
+},
 ["global"] = {
 ["snapshots"] = {
 ["Lava Surge"] = {
 ["left"] = {
 ["isAtlas"] = false,
+["texture"] = 449491,
+["height"] = 204.8000183105469,
+["width"] = 102.4000244140625,
+["scale"] = 1,
 ["texCoords"] = {
 0,
 0,
@@ -15,13 +27,13 @@ SpellOverlayEnhancedDB = {
 1,
 1,
 },
-["height"] = 204.8000183105469,
-["scale"] = 1,
-["width"] = 102.4000244140625,
-["texture"] = 449491,
 },
 ["right"] = {
 ["isAtlas"] = false,
+["texture"] = 449491,
+["height"] = 204.8000183105469,
+["width"] = 102.3999557495117,
+["scale"] = 1,
 ["texCoords"] = {
 1,
 0,
@@ -32,13 +44,9 @@ SpellOverlayEnhancedDB = {
 0,
 1,
 },
-["height"] = 204.8000183105469,
-["scale"] = 1,
-["width"] = 102.3999557495117,
-["texture"] = 449491,
 },
 },
-["Essence Burst"] = {
+["Owlkin Frenzy"] = {
 ["left"] = {
 ["isAtlas"] = false,
 ["texCoords"] = {
@@ -51,32 +59,19 @@ SpellOverlayEnhancedDB = {
 1,
 1,
 },
-["height"] = 204.8000183105469,
+["height"] = 102.4000244140625,
 ["scale"] = 1,
-["width"] = 102.4000244140625,
-["texture"] = 4699056,
-},
-["right"] = {
-["isAtlas"] = false,
-["texCoords"] = {
-1,
-0,
-1,
-1,
-0,
-0,
-0,
-1,
-},
-["height"] = 204.8000183105469,
-["scale"] = 1,
-["width"] = 102.3999557495117,
-["texture"] = 4699056,
+["width"] = 204.800048828125,
+["texture"] = 463452,
 },
 },
 ["Strength of the Black Ox"] = {
 ["left"] = {
 ["isAtlas"] = false,
+["texture"] = 623950,
+["height"] = 204.8,
+["width"] = 102.4000063578285,
+["scale"] = 1,
 ["texCoords"] = {
 0,
 0,
@@ -87,10 +82,6 @@ SpellOverlayEnhancedDB = {
 1,
 1,
 },
-["height"] = 204.8,
-["scale"] = 1,
-["width"] = 102.4000063578285,
-["texture"] = 623950,
 },
 },
 ["Clearcasting"] = {
@@ -132,6 +123,10 @@ SpellOverlayEnhancedDB = {
 ["Zen Pulse"] = {
 ["right"] = {
 ["isAtlas"] = false,
+["texture"] = 623951,
+["height"] = 204.7999667080973,
+["width"] = 102.400018033114,
+["scale"] = 1,
 ["texCoords"] = {
 1,
 0,
@@ -142,16 +137,50 @@ SpellOverlayEnhancedDB = {
 0,
 1,
 },
-["height"] = 204.7999667080973,
-["scale"] = 1,
-["width"] = 102.400018033114,
-["texture"] = 623951,
 },
 },
 ["Lunar Eclipse"] = {
 ["left"] = {
 ["isAtlas"] = false,
+["texCoords"] = {
+0,
+0,
+0,
+1,
+1,
+0,
+1,
+1,
+},
+["height"] = 204.8000183105469,
+["scale"] = 1,
+["width"] = 102.4000244140625,
 ["texture"] = 450914,
+},
+},
+["Solar Eclipse"] = {
+["right"] = {
+["isAtlas"] = false,
+["texCoords"] = {
+1,
+0,
+1,
+1,
+0,
+0,
+0,
+1,
+},
+["height"] = 204.8000183105469,
+["scale"] = 1,
+["width"] = 102.3999557495117,
+["texture"] = 450915,
+},
+},
+["Essence Burst"] = {
+["left"] = {
+["isAtlas"] = false,
+["texture"] = 4699056,
 ["height"] = 204.8000183105469,
 ["width"] = 102.4000244140625,
 ["scale"] = 1,
@@ -166,11 +195,9 @@ SpellOverlayEnhancedDB = {
 1,
 },
 },
-},
-["Solar Eclipse"] = {
 ["right"] = {
 ["isAtlas"] = false,
-["texture"] = 450915,
+["texture"] = 4699056,
 ["height"] = 204.8000183105469,
 ["width"] = 102.3999557495117,
 ["scale"] = 1,
@@ -186,34 +213,7 @@ SpellOverlayEnhancedDB = {
 },
 },
 },
-["Owlkin Frenzy"] = {
-["left"] = {
-["isAtlas"] = false,
-["texture"] = 463452,
-["height"] = 102.4000244140625,
-["width"] = 204.800048828125,
-["scale"] = 1,
-["texCoords"] = {
-0,
-0,
-0,
-1,
-1,
-0,
-1,
-1,
 },
-},
-},
-},
-},
-["profileKeys"] = {
-["Madmareep - Stormrage"] = "Default",
-["Zappyxatu - Stormrage"] = "Default",
-["Angryabsol - Stormrage"] = "Default",
-["Lonelylitten - Stormrage"] = "Default",
-["Klutzykubfu - Stormrage"] = "Default",
-["Barelynoer - Area 52"] = "Default",
 },
 ["profiles"] = {
 ["Default"] = {

@@ -96,7 +96,7 @@ ExwindCore: disabled
 ExwindMedia: enabled
 EXwindtools_EXboss_EnglishPatch: enabled
 GroupfinderFlags: enabled
-LifebloomAlert: enabled
+LifebloomAlert: disabled
 LittleWigs_BattleForAzeroth: enabled
 LittleWigs_BurningCrusade: enabled
 LittleWigs_Cataclysm: enabled
@@ -136,7 +136,7 @@ ArchonTooltip: disabled
 ArchonTooltipDB_US: disabled
 BigWigs_Sporefall: enabled
 CompassHUD: enabled
-EllesmereUIRaidFrames: enabled
+EllesmereUIRaidFrames: disabled
 !!AddonProfiler: disabled
 BigWigs_TheVenomousAbyss: enabled
 EllesmereUIDataBars: enabled

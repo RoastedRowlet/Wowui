@@ -67,8 +67,8 @@ RaiderIO_DB_EU_F: disabled
 RaiderIO_DB_CN_R: disabled
 RaiderIO_DB_CN_M: disabled
 RaiderIO_DB_CN_F: disabled
-EllesmereUICooldownManager: disabled
-EllesmereUIResourceBars: disabled
+EllesmereUICooldownManager: enabled
+EllesmereUIResourceBars: enabled
 BigWigs_Core: enabled
 BigWigs_Options: enabled
 BigWigs_Plugins: enabled
@@ -93,4 +93,4 @@ BigWigs_MidnightWorld: enabled
 LittleWigs_BattleForAzeroth: enabled
 BigWigs_Sporefall: enabled
 EllesmereUIAuraBuffReminders: disabled
-EllesmereUIRaidFrames: enabled
+EllesmereUIRaidFrames: disabled

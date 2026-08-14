@@ -8,9 +8,9 @@ NewSettingsSeen = {
 ["chatBubblesRaid"] = true,
 ["DAMAGE_METER_LABEL"] = true,
 ["raidFramesDispelIndicatorType"] = true,
-["raidFramesDispelIndicatorOverlay"] = true,
+["ADVANCED_COOLDOWN_SETTINGS1"] = true,
 ["raidFramesDisplayClassColor"] = true,
 ["COMBAT_WARNINGS_LABEL"] = true,
 ["CAA_COMBAT_AUDIO_ALERTS_LABEL"] = true,
-["ADVANCED_COOLDOWN_SETTINGS1"] = true,
+["raidFramesDispelIndicatorOverlay"] = true,
 }

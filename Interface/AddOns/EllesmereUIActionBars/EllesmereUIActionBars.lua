@@ -1962,8 +1962,20 @@ local function GetOrCreateButton(slot, parent, info, index, skipProtected)
         -- loses nothing: every event it needs is self-registered (BUTTON_EVENT_LISTS)
         -- or centrally dispatched.
         if ActionBarButtonEventsFrame and type(ActionBarButtonEventsFrame.frames) == "table" then
-            for k, f in pairs(ActionBarButtonEventsFrame.frames) do
-                if f == btn then ActionBarButtonEventsFrame.frames[k] = nil end
+            -- The entry to remove is the one this button's template OnLoad
+            -- just tinsert'd -- the array tail. Checking it directly keeps
+            -- the 120-button build O(n) instead of O(n^2) over Blizzard's
+            -- ~180-entry list (a real slice of the combat-reload watchdog
+            -- budget); the full scan stays as the fallback for any exotic
+            -- insertion order.
+            local fr = ActionBarButtonEventsFrame.frames
+            local tail = #fr
+            if fr[tail] == btn then
+                fr[tail] = nil
+            else
+                for k, f in pairs(fr) do
+                    if f == btn then fr[k] = nil end
+                end
             end
         end
         -- Desaturate-on-CD / on-CD alpha: re-evaluate the icon the moment the main
@@ -1976,8 +1988,22 @@ local function GetOrCreateButton(slot, parent, info, index, skipProtected)
         if btn.cooldown and not EFD(btn).cdDoneHooked then
             EFD(btn).cdDoneHooked = true
             btn.cooldown:HookScript("OnCooldownDone", function(cd)
+                local b = cd:GetParent()
                 if EAB._RefreshCooldownVisuals then
-                    EAB._RefreshCooldownVisuals(cd:GetParent())
+                    EAB._RefreshCooldownVisuals(b)
+                end
+                -- Recharge-numbers un-hide edge: a real main cooldown's END fires
+                -- no bar event, so an occluded charge countdown had no owning edge
+                -- to reappear on (it stranded hidden until the next unrelated
+                -- pass). The display-complete edge is the exact moment occlusion
+                -- lapses; nil-check cost for every non-charge button.
+                if b and b.chargeCooldown and ns.UpdateChargeNumbersVisibility then
+                    local action = b.GetAttribute and b:GetAttribute("action")
+                    if action and HasAction(action) then
+                        ns.UpdateChargeNumbersVisibility(b, b.chargeCooldown,
+                            C_ActionBar.GetActionCooldown(action),
+                            C_ActionBar.GetActionCharges(action))
+                    end
                 end
             end)
         end
@@ -3235,11 +3261,28 @@ end
 -- unconditionally for that overlap, and un-hiding blindly would stack two
 -- countdowns in two fonts. cdInfo.isActive/isOnGCD are plain booleans (no
 -- secret comparisons). Cached per chargeCd so repeat calls are near-free.
-function ns.UpdateChargeNumbersVisibility(btn, chargeCd, cdInfo)
+function ns.UpdateChargeNumbersVisibility(btn, chargeCd, cdInfo, chargeInfo)
     if not (chargeCd and chargeCd.SetHideCountdownNumbers) then return end
+    -- Occlusion: hide our recharge numbers only when the MAIN cooldown draws
+    -- its own countdown for this spell -- at 0 charges (the main cooldown
+    -- mirrors the recharge; the exact double-countdown this rule exists for),
+    -- or on an EXPLICITLY real main cooldown (isOnGCD == false). isOnGCD is
+    -- documented untrustworthy outside a direct SPELL_UPDATE_COOLDOWN response
+    -- and arrives NIL from the pass/press/charge-walk contexts (field-confirmed)
+    -- -- the old `not isOnGCD` read nil as "real", classified every GCD as a
+    -- countdown, and STRANDED the numbers hidden: the GCD's end fires no event
+    -- to re-evaluate. currentCharges is secret in instances: guarded read,
+    -- secret falls to the isOnGCD term (NeverSecret per the docs).
+    local zeroCharges = false
+    if chargeInfo then
+        local cur = chargeInfo.currentCharges
+        if not (issecretvalue and issecretvalue(cur)) and cur == 0 then
+            zeroCharges = true
+        end
+    end
     local hideNums = (EAB.db.profile.showChargeRechargeNumbers == false)
         or (not GetCVarBool("countdownForCooldowns"))
-        or (cdInfo and cdInfo.isActive and not cdInfo.isOnGCD and true)
+        or (cdInfo and cdInfo.isActive and (cdInfo.isOnGCD == false or zeroCharges) and true)
         or false
     local cfd = EFD(chargeCd)
     if cfd.rechargeNumbersHidden ~= hideNums then
@@ -3838,6 +3881,22 @@ do
                 end
                 RefreshCooldownVisuals(btn, action, cdInfo or false, durObj, nil)
             end
+            -- Charge recharge numbers ride the real-cooldown CLASS EDGE. The
+            -- occlusion rule (hide charge numbers while a real main cooldown
+            -- shows its own countdown) caches its verdict, and its cdReal input
+            -- was previously re-read ONLY by the charge event walk -- whose
+            -- evaluation at the spend edge lands inside the server-ack window
+            -- where the cooldown snapshot LIES (recharge-start reads as a real
+            -- main cooldown). The wrong "hidden" verdict then stranded for the
+            -- whole recharge: no later charge event re-evaluates, and this pass
+            -- observed the lie settle without owning the numbers channel. The
+            -- flip below fires exactly when cdReal changes (ack settle, real
+            -- main cooldown ending), completing the rule's input coverage --
+            -- one nil-check per push otherwise, no new gates on the swipe path.
+            if cdClassFlip and btn.chargeCooldown then
+                ns.UpdateChargeNumbersVisibility(btn, btn.chargeCooldown, cdInfo,
+                    C_ActionBar.GetActionCharges(action))
+            end
             fd.cdWasActive = active
             fd.cdWasReal = cdReal
             if active then return true end
@@ -4024,7 +4083,7 @@ do
                             -- Off-GCD charge spends can hit 0 charges without
                             -- a COOLDOWN walk in between; keep the occlusion
                             -- rule current from the charge tick too.
-                            ns.UpdateChargeNumbersVisibility(btn, chargeCd, ci)
+                            ns.UpdateChargeNumbersVisibility(btn, chargeCd, ci, chargeInfo)
                             if chargeInfo.isActive then
                                 local chargeDur = C_ActionBar.GetActionChargeDuration(action)
                                 if chargeDur then chargeCd:SetCooldownFromDurationObject(chargeDur) end
@@ -4982,9 +5041,10 @@ do
                                 local chargeCd = btn.chargeCooldown
                                 if chargeCd then
                                     local action = btn:GetAttribute("action")
-                                    local cdInfo = action and HasAction(action)
-                                        and C_ActionBar.GetActionCooldown(action) or nil
-                                    ns.UpdateChargeNumbersVisibility(btn, chargeCd, cdInfo)
+                                    local ok = action and HasAction(action)
+                                    ns.UpdateChargeNumbersVisibility(btn, chargeCd,
+                                        ok and C_ActionBar.GetActionCooldown(action) or nil,
+                                        ok and C_ActionBar.GetActionCharges(action) or nil)
                                 end
                             end
                         elseif event == "ACTIONBAR_UPDATE_USABLE" then
@@ -8626,6 +8686,11 @@ local function BuildVisibilityString(info, s, visOverride)
     -- inside the secure state driver so they work in combat without taint.
     local visOptHide = ""
     if s.visHideMounted then visOptHide = visOptHide .. "[mounted] hide; " end
+    -- Inverse of the above. [nomounted] cannot see druid travel/flight forms
+    -- (they are shapeshifts), so a druid in a mount-like form reads unmounted
+    -- here and the bar hides -- accepted asymmetry: the secure clause is what
+    -- keeps this working in combat, and Lua cannot un-hide past the driver.
+    if s.visOnlyMounted then visOptHide = visOptHide .. "[nomounted] hide; " end
     if s.visHideNoTarget then visOptHide = visOptHide .. "[noexists] hide; " end
     if s.visHideNoEnemy then visOptHide = visOptHide .. "[noharm] hide; " end
 
@@ -9067,7 +9132,7 @@ function EAB:_RefreshSoftTargetGate()
         if s then
             if s.visHideNoTarget then anySoft = true end
             if s.visHideNoTarget or s.visOnlyInstances or s.visHideHousing
-               or s.visHideMounted then
+               or s.visOnlyHousing or s.visHideMounted then
                 anyNonMacro = true
             end
         end
@@ -9522,6 +9587,11 @@ function EAB:UpdateHousingVisibility()
             end
             if s.visHideHousing then
                 if C_Housing and C_Housing.IsInsideHouseOrPlot and C_Housing.IsInsideHouseOrPlot() then
+                    return true
+                end
+            end
+            if s.visOnlyHousing then
+                if not (C_Housing and C_Housing.IsInsideHouseOrPlot and C_Housing.IsInsideHouseOrPlot()) then
                     return true
                 end
             end
@@ -10874,9 +10944,10 @@ function EAB:RefreshChargeRechargeNumbers()
                     local chargeCd = btn.chargeCooldown
                     if chargeCd then
                         local action = btn:GetAttribute("action")
-                        local cdInfo = action and HasAction(action)
-                            and C_ActionBar.GetActionCooldown(action) or nil
-                        ns.UpdateChargeNumbersVisibility(btn, chargeCd, cdInfo)
+                        local ok = action and HasAction(action)
+                        ns.UpdateChargeNumbersVisibility(btn, chargeCd,
+                            ok and C_ActionBar.GetActionCooldown(action) or nil,
+                            ok and C_ActionBar.GetActionCharges(action) or nil)
                     end
                 end
             end
@@ -12810,7 +12881,14 @@ function EAB:FinishSetup()
         -- /reload taken in combat with no cooldown events at all for the rest
         -- of the session. It registers events and builds closures, nothing
         -- protected, so both paths get it here, after their buttons exist.
-        EAB:SetupEventDispatcher()
+        -- DEFERRED one tick: ~1,600 lines of closure construction + ~25 event
+        -- registrations, pure insecure and self-guarded (_dispatcherSetup).
+        -- C_Timer callbacks fire on the first frame AFTER the loading screen,
+        -- so this leaves the shared login watchdog budget (one combat-sized
+        -- budget for the whole suite's OnEnable chain) without losing the
+        -- combat-legal window: nothing here is combat-blocked. One tick with
+        -- no cooldown events is invisible during the loading screen.
+        C_Timer_After(0, function() EAB:SetupEventDispatcher() end)
 
         -- Visual styling: defer visuals to out-of-combat if needed.
         local function DoVisuals()
@@ -12974,7 +13052,7 @@ function EAB:FinishSetup()
                             local vis = s.barVisibility or "always"
                             local hasCondition = vis ~= "always" and vis ~= "never"
                                 or s.visHideNoTarget or s.visHideNoEnemy
-                                or s.visHideMounted or s.visOnlyInstances
+                                or s.visHideMounted or s.visOnlyMounted or s.visOnlyInstances
                             if hasCondition then
                                 _gridSurfacedBars[info.key] = true
                                 RegisterAttributeDriver(frame, "state-visibility", "show")
@@ -13068,10 +13146,16 @@ function EAB:FinishSetup()
         end)
     end
 
-    -- Attach hover hooks for mouseover
-    for _, info in ipairs(BAR_CONFIG) do
-        AttachHoverHooks(info.key)
-    end
+    -- Attach hover hooks for mouseover -- DEFERRED one tick: ~290 HookScript
+    -- calls + ~60 closures, the heaviest pure-insecure chunk in the login
+    -- window. HookScript is combat-legal; every hoverStates consumer nil-
+    -- guards, so one unpopulated tick is a silent no-op; and After(0) fires
+    -- before DoVisuals' +0.1s RefreshMouseover walk.
+    C_Timer_After(0, function()
+        for _, info in ipairs(BAR_CONFIG) do
+            AttachHoverHooks(info.key)
+        end
+    end)
 
     -- When a spell flyout closes, fade out any bars that were kept visible by it
     do

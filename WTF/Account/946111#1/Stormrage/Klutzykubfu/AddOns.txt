@@ -30,7 +30,7 @@ EllesmereUIBags: enabled
 EllesmereUIBasics: enabled
 EllesmereUIBlizzardSkin: enabled
 EllesmereUIChat: enabled
-EllesmereUICooldownManager: disabled
+EllesmereUICooldownManager: enabled
 EllesmereUIDamageMeters: enabled
 EllesmereUIFriends: enabled
 EllesmereUIMinimap: enabled
@@ -38,8 +38,8 @@ EllesmereUIMythicTimer: disabled
 EllesmereUINameplates: enabled
 EllesmereUIQoL: enabled
 EllesmereUIQuestTracker: enabled
-EllesmereUIRaidFrames: enabled
-EllesmereUIResourceBars: disabled
+EllesmereUIRaidFrames: disabled
+EllesmereUIResourceBars: enabled
 EllesmereUIUnitFrames: enabled
 FocusMarker: enabled
 Grid2: disabled

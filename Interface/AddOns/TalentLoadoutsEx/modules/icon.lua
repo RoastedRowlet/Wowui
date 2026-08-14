@@ -171,6 +171,7 @@ Addon.icons = {
 	--]]
 	-- #endregion
 	-- #region M+: Midnight
+	--[[
 	{
 		-- M+: Midnight Season 1
 		{4578414, "Algeth'ar Academy", "AA"},
@@ -181,6 +182,18 @@ Addon.icons = {
 		{1711340, "Seat of the Triumvirate", "SEAT"},
 		{1002596, "Skyreach", "SR"},
 		{7266215, "Windrunner Spire", "WS"},
+	};
+	--]]
+	{
+		-- M+: Midnight Season 2
+		{7956175, "Altar of Fangs", "AOF"},
+		{7266214, "Den of Nalorakk", "DON"},
+		{2011123, "Kings' Rest", "KR"},
+		{7266213, "Murder Row", "MR"},
+		{4578416, "Ruby Life Pools", "RLP"},
+		{2011143, "Temple of Sethraliss", "TOS"},
+		{7354408, "The Blinding Vale", "TBV"},
+		{7439626, "Voidscar Arena", "VA"},
 	};
 	-- #endregion
 	-- #region Raid: TWW 
@@ -228,6 +241,7 @@ Addon.icons = {
 	--]]
 	-- #endregion
 	-- #region Raid: Midnight
+	--[[
 	{
 		-- Raid: Midnight Season 1-1
 		{7490911, "The Voidspire"},
@@ -246,6 +260,20 @@ Addon.icons = {
 		{7448204, "Midnight Falls"},
 		{7852823, "Rotmire"},
 	};
+	--]]
+	{
+		-- Raid: Midnight Season 2
+		{8039569, "Midnight Season 2"},
+		{3012069, "Nymrissa Wavecaller"},
+		{7966621, "Nek'zali the Soulcoiler" },
+		{7966620, "Entombed Sentinels" },
+		{7966622, "The Lost Explorers" },
+		{7966618, "Vashnik the Malignant]" },
+		{7966619, "Sszorak" },
+		{7966623, "The Twin Fangs" },
+		{7966625, "The Coiled Altar" },
+		{7966624, "Ula'tek" },
+	},
 	-- #endregion
 };
 
