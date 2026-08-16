@@ -933,7 +933,11 @@ local DEFAULT_ICON_SETTINGS = {
   -- NOTE: width/height are nil by default to preserve CDM's native icon size
   -- They only get set when user explicitly changes them via the sliders
   aspectRatio = 1.0,  -- 1.0 = square, >1 = wider, <1 = taller
-  zoom = 0.075,  -- Default slight zoom to crop icon borders
+  zoom = 0.08,  -- Default icon-border crop. MUST equal Blizzard's own 0.08 art
+                -- trim: their refresh re-crops CDM icons to 0.08 regardless of
+                -- us, so any other default makes arc/aura art render a visibly
+                -- different apparent size next to CDM icons in the same group
+                -- (the 15% vs 16% /afi group finding, 2026-08-14).
   padding = 0,
   alpha = 1.0,
   keepBright = false,  -- Prevent all dimming/desaturation (icon stays full brightness always)
@@ -1603,44 +1607,93 @@ end
 -- ===================================================================
 -- BORDER (4 edge textures at OVERLAY level)
 -- ===================================================================
+-- The strips must RASTERIZE by the SAME rule as the icon art they wrap — that
+-- is the whole alignment law. Both absolutist policies failed:
+--   * snap ON + bias 1 rounded the strips in ONE direction while the icon
+--     rounds to nearest ("off by 1, -1 inset fixes top/left but gaps
+--     bottom/right", the old all-four-drift report);
+--   * snap OFF rendered the strips exactly at fractional edges while the icon
+--     still rounds — timeline-proven 2026-08-14: with the strip and icon rects
+--     logically IDENTICAL (all deltas 0.00), the bleed appeared exactly when a
+--     frame edge landed on a half pixel (odd-physical-pixel icon sizes are
+--     CENTER-anchored, so edges sit at center ± n.5 px), because the icon
+--     rounded half a pixel away and the unsnapped strip stayed put. Position-
+--     dependent by construction; container snapping made it WORSE (on-grid
+--     center = guaranteed .50 edges).
+-- Mirroring the Icon texture's own snap/bias means border and icon quantize
+-- together and stay glued at ANY fraction, size, and position. Read-only on
+-- the Blizzard icon (getters), writes only on our own strip textures.
+-- Hairline visibility is still guaranteed by the thickness being snapped to
+-- >= 1 physical pixel in UpdateIconBorder (PixelUtil, minPixels=1).
+-- 12.1 API state (geo-dump-proven 2026-08-14): GetSnapToPixelGrid NO LONGER
+-- EXISTS on textures (the setter survives), GetTexelSnappingBias does. The
+-- icon art carries the client-default bias 0.30000001192093; strips at bias 0
+-- rasterize differently at half-pixel edges = the visible split. So: copy the
+-- BIAS unconditionally (never gate it behind the dead snap getter - that
+-- exact mistake made the first version of this mirror a silent no-op), copy
+-- snap only when readable, and when it is not, LEAVE the strips at client
+-- defaults (same defaults the icon gets) instead of forcing snap=false/bias=0.
+local ICON_DEFAULT_TEXEL_BIAS = 0.30000001192093  -- the client default (geo-dump-measured)
+
+local function MirrorIconSnapPolicy(frame, edges)
+  local icon = frame.Icon
+  if not icon then return end
+  -- SECRET GUARD + READ-ONCE CACHE (3.8.0 live error): in restricted content
+  -- EVEN RENDER PROPERTIES read off a Blizzard CDM frame come back secret,
+  -- and SetTexelSnappingBias rejects secret args from tainted code. Same law
+  -- as the bag-item identity cache (GetItemIdentity): read while the game
+  -- lets us, cache the PLAIN value on the icon (_arc* field, never read by
+  -- Blizzard), serve the cache under lockdown. The constant is only the
+  -- never-yet-readable fallback (it IS the client default).
+  local bias = ICON_DEFAULT_TEXEL_BIAS
+  if icon.GetTexelSnappingBias then
+    local b = icon:GetTexelSnappingBias()
+    if b ~= nil and not (issecretvalue and issecretvalue(b)) then
+      icon._arcTexelBiasCache = b    -- unrestricted: refresh the cache
+      bias = b
+    elseif icon._arcTexelBiasCache ~= nil then
+      bias = icon._arcTexelBiasCache -- lockdown: serve the last plain read
+    end
+  end
+  local snap
+  if icon.GetSnapToPixelGrid then
+    local sv = icon:GetSnapToPixelGrid()
+    if not (issecretvalue and issecretvalue(sv)) then
+      snap = sv and true or false
+      icon._arcSnapCache = snap
+    elseif icon._arcSnapCache ~= nil then
+      snap = icon._arcSnapCache
+    end
+  end
+  local function apply(t)
+    if snap ~= nil and t.SetSnapToPixelGrid then t:SetSnapToPixelGrid(snap) end
+    if bias ~= nil and t.SetTexelSnappingBias then t:SetTexelSnappingBias(bias) end
+  end
+  apply(edges.top)
+  apply(edges.bottom)
+  apply(edges.left)
+  apply(edges.right)
+end
+
 local function CreateBorderEdges(frame)
   if frame._arcBorderEdges then return frame._arcBorderEdges end
 
-  -- NO pixel-grid snapping on the strips. The old SetSnapToPixelGrid(true) +
-  -- SetTexelSnappingBias(1) made each strip's rendered rect round in ONE
-  -- direction on the physical pixel grid, while the icon texture rounds by its
-  -- own rules — at fractional frame positions/UI scales all four strips
-  -- drifted a pixel the same screen direction relative to the icon: the icon
-  -- poked past a 1px border on two edges and the border overlapped it on the
-  -- others (the classic "off by 1, -1 inset fixes top/left but gaps
-  -- bottom/right" report). Unsnapped, the strips render exactly where they are
-  -- anchored — the same rect the icon fills — so border and icon stay glued at
-  -- any scale. Hairline visibility is guaranteed by the thickness being snapped
-  -- to >= 1 physical pixel in UpdateIconBorder (PixelUtil, minPixels=1), same
-  -- approach as the bar engine's unsnapped textures.
   local edges = {}
 
   edges.top = frame:CreateTexture(nil, "OVERLAY", nil, 7)
   edges.top:SetColorTexture(1, 1, 1, 1)
-  edges.top:SetSnapToPixelGrid(false)
-  edges.top:SetTexelSnappingBias(0)
 
   edges.bottom = frame:CreateTexture(nil, "OVERLAY", nil, 7)
   edges.bottom:SetColorTexture(1, 1, 1, 1)
-  edges.bottom:SetSnapToPixelGrid(false)
-  edges.bottom:SetTexelSnappingBias(0)
 
   edges.left = frame:CreateTexture(nil, "OVERLAY", nil, 7)
   edges.left:SetColorTexture(1, 1, 1, 1)
-  edges.left:SetSnapToPixelGrid(false)
-  edges.left:SetTexelSnappingBias(0)
 
   edges.right = frame:CreateTexture(nil, "OVERLAY", nil, 7)
   edges.right:SetColorTexture(1, 1, 1, 1)
-  edges.right:SetSnapToPixelGrid(false)
-  edges.right:SetTexelSnappingBias(0)
 
   frame._arcBorderEdges = edges
+  MirrorIconSnapPolicy(frame, edges)
 
   -- BLANK-FRAME GUARD: a CDM frame can end up SHOWN with no icon art after a
   -- combat reload (its refresh never painted the icon), and our border edges
@@ -1688,6 +1741,9 @@ local function UpdateIconBorder(frame, cdID, iconWidth, iconHeight, padding, zoo
   frame._arcBorderAutoHidden = nil
 
   if cfg.border.enabled then
+    -- Re-mirror on every apply: the icon's snap flags can be (re)set by its
+    -- template after our create-time read, and the mirror is 8 cheap setters.
+    MirrorIconSnapPolicy(frame, edges)
     local color
     if cfg.border.useClassColor then
       color = GetClassColor()
@@ -2607,7 +2663,12 @@ ApplyIconStyle = function(frame, cdID)
   -- for any SetAlpha during the rest of ApplyIconStyle; the hide + text float
   -- happen after the text overlays are built (post SetupCooldownText below).
   local wasForceHidden = frame._arcForceHideActive == true
-  frame._arcForceHideActive = (cfg.forceHideIcon == true)
+  -- Arc AURA icons opt out of the whole-frame hide: their duration/stack
+  -- texts live on the ENGINE BUTTON (a separate frame tree), so alpha-0 on
+  -- the holder would erase the very texts the option promises to keep.
+  -- AuraIcons.ApplySettings/StyleActiveButton own force-hide there (ghost
+  -- art + button art hide, texts survive).
+  frame._arcForceHideActive = (cfg.forceHideIcon == true) and not frame._arcIsAuraIcon
   frame._arcWasForceHidden = wasForceHidden
 
   -- NOTE: CDMGroups controls all sizing - CDMEnhance does NOT call SetScale or SetSize
@@ -2623,7 +2684,7 @@ ApplyIconStyle = function(frame, cdID)
   end
   
   local aspectRatio = cfg.aspectRatio or 1.0
-  local zoom = cfg.zoom or 0.075
+  local zoom = cfg.zoom or 0.08
   local padding = cfg.padding or 0
   
   -- MASQUE COMPATIBILITY: Check if Masque skinning is enabled for this viewer type
@@ -3480,6 +3541,10 @@ ApplyIconStyle = function(frame, cdID)
       do
         local cooldownInfo = frame.cooldownInfo
         local spellID = cooldownInfo and (cooldownInfo.overrideSpellID or cooldownInfo.spellID)
+        -- item entries carry a SECRET spellID in restricted contexts (12.1
+        -- open-world events, instances) — the ~= compare below throws on a
+        -- secret; treat as no spellID (bag items are never charge spells)
+        if spellID and issecretvalue and issecretvalue(spellID) then spellID = nil end
         if spellID then
           if frame._arcChargeCheckSpellID ~= spellID then
             frame._arcChargeCheckSpellID = spellID
@@ -4340,8 +4405,13 @@ ApplyIconStyle = function(frame, cdID)
                        or (self.cooldownInfo and (self.cooldownInfo.overrideSpellID or self.cooldownInfo.spellID))
                        or self._arcSpellID
           if spellID and self.GetIconTexture then
+            -- SECRECY: on 12.1 item entries (potions fire this every
+            -- BAG_UPDATE_COOLDOWN) the usability booleans come back SECRET,
+            -- and testing one throws. nil = unreadable: leave CDM's own tint,
+            -- which it already applied correctly a moment ago.
+            local isUsable, notEnoughMana = ns.API.SafeIsSpellUsable(spellID)
+            if isUsable == nil then return end
             local iconTexture = self:GetIconTexture()
-            local isUsable, notEnoughMana = C_Spell.IsSpellUsable(spellID)
             if isUsable then
               iconTexture:SetVertexColor(CooldownViewerConstants.ITEM_USABLE_COLOR:GetRGBA())
             elseif notEnoughMana then
@@ -5510,6 +5580,102 @@ ns.CDMEnhance.ApplyIconStyle = ApplyIconStyle
 -- ===================================================================
 -- TEXT DRAG OVERLAYS
 -- ===================================================================
+-- ═══════════════════════════════════════════════════════════════════
+-- HOVER TOOLTIP FORWARDING (taint-safe)
+--
+-- Our drag overlays sit ON TOP of the CDM icon, so they swallow the hover and
+-- used to hand it back with parentFrame:GetScript("OnEnter")(parentFrame) --
+-- which runs Blizzard's OnEnter ON OUR TAINTED STACK. That is fine for spell
+-- icons, but the 12.1 ITEM entries walk a tooltip path
+-- (RefreshTooltip -> CheckDisplaySpellCategoryTooltip ->
+-- GetSpellCategoryTooltipItemID -> IsOnCooldown) that boolean-tests
+-- `isOnActualCooldown`, and on those frames it is a SECRET boolean. Secure
+-- code may test it; tainted code may not -- so BLIZZARD'S OWN function threw
+-- "attempt to perform boolean test ... tainted by 'ArcUI'".
+--
+-- So for item entries we never call their mixin: we build the same tooltip
+-- ourselves from non-secret ids (equip slot / the category's last-used item),
+-- which touches no protected state at all. Spell icons keep the old forward.
+-- ═══════════════════════════════════════════════════════════════════
+-- TOOLTIP OWNER PROXY: never make the CDM frame itself the GameTooltip owner.
+-- The item frame's own periodic handler (CooldownViewerItemData ~832) checks
+-- "is the tooltip owned by me?" and then re-runs the PROTECTED tooltip
+-- refresh — on the execution our tainted SetOwner poisoned — feeding a
+-- SECRET auraInstanceID into SetUnitAuraByAuraInstanceID every tick (5x
+-- error storms while hovering). Owning the tooltip with OUR proxy, sized and
+-- anchored over the icon, breaks that IsOwned match: Blizzard's refresher
+-- never engages, the tooltip looks and anchors identically. The proxy stays
+-- shown (a hidden owner auto-hides the tooltip) and is mouse-transparent.
+local tooltipOwnerProxy
+local function TooltipOwnerFor(cdmFrame)
+  if not tooltipOwnerProxy then
+    tooltipOwnerProxy = CreateFrame("Frame", "ArcUITooltipOwnerProxy", UIParent)
+    tooltipOwnerProxy:EnableMouse(false)
+    tooltipOwnerProxy:Show()
+  end
+  tooltipOwnerProxy:ClearAllPoints()
+  tooltipOwnerProxy:SetPoint("TOPLEFT", cdmFrame, "TOPLEFT", 0, 0)
+  tooltipOwnerProxy:SetPoint("BOTTOMRIGHT", cdmFrame, "BOTTOMRIGHT", 0, 0)
+  return tooltipOwnerProxy
+end
+
+local function ForwardHoverTooltip(cdmFrame)
+  if not cdmFrame then return end
+  local ci = cdmFrame.cooldownInfo
+  local eq  = ci and ci.equipSlot
+  local cat = ci and ci.spellCategoryID
+
+  if eq or cat then
+    -- honour the global Show Tooltips toggle, same as CDM's own path would
+    local db = Shared and Shared.GetCDMGroupsDB and Shared.GetCDMGroupsDB()
+    if db and db.disableTooltips then return end
+    GameTooltip:SetOwner(TooltipOwnerFor(cdmFrame), "ANCHOR_RIGHT")
+    if eq then
+      GameTooltip:SetInventoryItem("player", eq)
+    else
+      -- identity via the secret-proof cache (CooldownState.GetItemIdentity):
+      -- the live fields go SECRET in restricted contexts and tooltip setters
+      -- reject secret arguments — the cached plain IDs keep tooltips working
+      -- there; only a never-learned potion falls through to no tooltip
+      local itemID, sid
+      if ns.CooldownState and ns.CooldownState.GetItemIdentity then
+        itemID, sid = ns.CooldownState.GetItemIdentity(cdmFrame, ci)
+      end
+      if itemID then
+        GameTooltip:SetItemByID(itemID)
+      elseif sid then
+        GameTooltip:SetSpellByID(sid)
+      else
+        GameTooltip:Hide()
+        return
+      end
+    end
+    GameTooltip:Show()
+    return
+  end
+
+  -- SPELL / AURA icons: NEVER call Blizzard's OnEnter from our stack — that
+  -- seeds the tooltip's lifecycle under OUR taint, and Blizzard's own
+  -- periodic tooltip refresh then re-runs SetUnitAuraByAuraInstanceID with a
+  -- SECRET aura instance id on a tainted execution and errors every 0.2s
+  -- tick (the potion OnEnter-taint lesson, now applied to the other half of
+  -- the cases). Build the tooltip from NON-SECRET identity instead; the live
+  -- aura-instance lines are secret-walled to addons in restricted content
+  -- anyway, and taint baked into shared tooltip state is the brick class.
+  local db2 = Shared and Shared.GetCDMGroupsDB and Shared.GetCDMGroupsDB()
+  if db2 and db2.disableTooltips then return end
+  local sid = cdmFrame._arcSpellID
+  if not sid and ci then
+    local raw = ci.overrideSpellID or ci.spellID
+    if raw and not (issecretvalue and issecretvalue(raw)) then sid = raw end
+  end
+  if sid then
+    GameTooltip:SetOwner(TooltipOwnerFor(cdmFrame), "ANCHOR_RIGHT")
+    GameTooltip:SetSpellByID(sid)
+    GameTooltip:Show()
+  end
+end
+
 local function CreateTextDragOverlay(fontString, frame, cdID, textType)
   if fontString._arcDragOverlay then 
     fontString._arcDragOverlay._cdID = cdID
@@ -5536,13 +5702,10 @@ local function CreateTextDragOverlay(fontString, frame, cdID, textType)
   overlay.highlight:Hide()
   
   overlay:SetScript("OnEnter", function(self)
-    -- Propagate to grandparent (CDM icon frame) for tooltips
+    -- Propagate to grandparent (CDM icon frame) for tooltips — taint-safe
     local parentFrame = self:GetParent()
     if parentFrame then
-      local grandparent = parentFrame:GetParent()
-      if grandparent and grandparent:GetScript("OnEnter") then
-        grandparent:GetScript("OnEnter")(grandparent)
-      end
+      ForwardHoverTooltip(parentFrame:GetParent())
     end
     
     if not textDragMode then return end
@@ -5823,11 +5986,8 @@ local function CreateDragOverlay(frame, cdID)
   overlay.dragText:Hide()
   
   overlay:SetScript("OnEnter", function(self)
-    -- Always propagate OnEnter to parent frame for tooltips
-    local parentFrame = self:GetParent()
-    if parentFrame and parentFrame:GetScript("OnEnter") then
-      parentFrame:GetScript("OnEnter")(parentFrame)
-    end
+    -- Always propagate OnEnter to parent frame for tooltips — taint-safe
+    ForwardHoverTooltip(self:GetParent())
     
     if not isUnlocked then return end
     self.highlight:Show()
@@ -8191,6 +8351,13 @@ end
 
 function ns.CDMEnhance.GetIconSettings(cdID)
   return GetIconSettings(cdID)
+end
+
+-- The SPARSE per-icon entry (nil when the user never customised this icon).
+-- Needed by anything that must tell "set on THIS icon" apart from "inherited
+-- from the global defaults" -- the merged read cannot distinguish them.
+function ns.CDMEnhance.GetRawIconSettings(cdID)
+  return GetRawIconSettings(cdID)
 end
 
 -- Get effective icon settings (merged: defaults -> global -> per-icon)
@@ -10628,6 +10795,11 @@ eventFrame:SetScript("OnEvent", function(self, event, arg1)
         local frameSpellID = nil
         if data.frame.cooldownInfo then
           frameSpellID = data.frame.cooldownInfo.overrideSpellID or data.frame.cooldownInfo.spellID
+          -- item entries: SECRET in restricted contexts — the == compare
+          -- below throws; fall through to the non-secret fallbacks instead
+          if frameSpellID and issecretvalue and issecretvalue(frameSpellID) then
+            frameSpellID = nil
+          end
         end
         if not frameSpellID and data.frame.GetSpellID then
           frameSpellID = NonSecretSpellID(data.frame:GetSpellID())

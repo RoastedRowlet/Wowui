@@ -942,21 +942,43 @@ local function MarkerIcon(id)
     return "Interface\\TargetingFrame\\UI-RaidTargetingIcon_" .. id
 end
 
--- The CURRENT index of the specialization a slot names. A spec slot stores the
--- specID, which is the same number on every character that has that spec, and
--- resolves it here -- the index is only a position in one character's list, so
--- a palette carried to an alt would otherwise point at somebody else's spec.
--- A spec this character does not have answers nil, and the slot then does
--- nothing rather than switching to whatever sits at that position.
+-- The CURRENT index of the specialization a slot names, for both kinds that
+-- name one. Either way, nil leaves the slot doing nothing.
+--
+-- A spec slot banks the specID, the same number on every character that has
+-- that spec: the index is only a position in one character's list, so a
+-- palette carried to an alt would otherwise point at somebody else's spec. A
+-- dynamicspec slot banks the position instead, and means it -- the second on a
+-- druid and the second on a warrior are both simply "the second one".
 local function SpecIndexFor(slot)
-    local want = tonumber(slot and slot.specID)
-    if not want or not C_SpecializationInfo then return nil end
+    if not slot or not C_SpecializationInfo then return nil end
     local classID = select(3, UnitClass("player"))
     if not classID then return nil end
-    for i = 1, (C_SpecializationInfo.GetNumSpecializationsForClassID(classID) or 0) do
+    local count = C_SpecializationInfo.GetNumSpecializationsForClassID(classID) or 0
+
+    if slot.kind == "dynamicspec" then
+        local i = tonumber(slot.index)
+        if i and i >= 1 and i <= count then return i end
+        return nil
+    end
+
+    local want = tonumber(slot.specID)
+    if not want then return nil end
+    for i = 1, count do
         if C_SpecializationInfo.GetSpecializationInfo(i) == want then return i end
     end
     return nil
+end
+
+-- What a dynamicspec entry is CALLED when it is being picked, and on the
+-- character that cannot resolve it. Kept here rather than in the options page
+-- so the picker row and the placeholder cannot drift apart.
+--
+-- On ns with no local alias, and called back through ns below: this file's
+-- main chunk is at Lua's ceiling of 200 locals (see UsableSlots), and a local
+-- here spends the last one.
+ns.SpecPositionName = function(index)
+    return EllesmereUI.Lf("Specialization %1$d", index or 0)
 end
 
 -------------------------------------------------------------------------------
@@ -1167,7 +1189,7 @@ end
 -- self-resolving and stays.
 local function SlotUsable(slot)
     local k = slot and slot.kind
-    if k == "spec" then
+    if k == "spec" or k == "dynamicspec" then
         return SpecIndexFor(slot) ~= nil
     elseif k == "spell" then
         return SpellKnownHere(tonumber(slot.id))
@@ -1215,7 +1237,7 @@ end
 -- kind -> attribute triple for the secure button, plus an optional 4th value:
 -- a sibling attribute key that must be cleared because the same action type
 -- would otherwise read it in preference. Returns nil for the kinds with no
--- secure action type at all (battlepet, spec, randommount), which
+-- secure action type at all (battlepet, the two spec kinds, the mounts), which
 -- FireInsecure handles instead.
 --
 -- p is the palette's appearance view, for the one kind whose action depends on
@@ -1413,7 +1435,7 @@ local function FireInsecure(slot)
         local id = pf and pf.lastMountID
         C_MountJournal.SummonByID(type(id) == "number" and id or 0)
 
-    elseif slot.kind == "spec" then
+    elseif slot.kind == "spec" or slot.kind == "dynamicspec" then
         local index = SpecIndexFor(slot)
         -- Refused in combat by the game itself, with its own error message.
         -- Nothing to defer to PLAYER_REGEN_ENABLED: a spec change the user
@@ -1514,6 +1536,8 @@ local function SlotDisplay(slot)
         return icon or QUESTION_MARK, name or slot.name
 
     elseif k == "macrotext" then
+        -- slot.icon may be a { atlas = ... } table (the Pings preset stores
+        -- one verbatim); SetIconTexture/ApplyIconCrop render both forms.
         return slot.icon or QUESTION_MARK, slot.name or "Macro"
 
     elseif k == "dynamicrez" then
@@ -1556,11 +1580,21 @@ local function SlotDisplay(slot)
                MOUNT_JOURNAL_SUMMON_RANDOM_FAVORITE_MOUNT
                    or (info and info.name) or "Random Favorite Mount"
 
-    elseif k == "spec" then
+    elseif k == "spec" or k == "dynamicspec" then
         local index = SpecIndexFor(slot)
         if index then
+            -- Both kinds draw the specialization they would switch to, which
+            -- is the whole point of the dynamic one: the icon and the name are
+            -- this character's, so a palette carried to another class arrives
+            -- showing that class's specs rather than the owner's.
             local _, name, _, icon = C_SpecializationInfo.GetSpecializationInfo(index)
             return icon or QUESTION_MARK, name or slot.name
+        end
+        if k == "dynamicspec" then
+            -- A position this class has not got: four on anything but a
+            -- druid, three on a demon hunter. The entry names a seat rather
+            -- than an occupant, so with no occupant to draw it says the seat.
+            return QUESTION_MARK, ns.SpecPositionName(tonumber(slot.index))
         end
         -- A spec this character's class does not have. Its identity is still
         -- global -- the specID answers by itself -- so the editor and an
@@ -2085,6 +2119,12 @@ end
 -- its first child's marker icon stays whole too. Shared with the options
 -- picker's rows, which draw the same icons at list size.
 local function ApplyIconCrop(tex, icon)
+    -- Atlas-backed icons already have their own UVs and should not be cropped.
+    if type(icon) == "table" and icon.atlas then
+        tex:SetTexCoord(0, 1, 0, 1)
+        return
+    end
+
     if type(icon) == "string"
        and (icon:find("RaidTargetingIcon", 1, true)
             or icon:find("UI-GroupLoot-Pass-Up", 1, true)) then
@@ -2094,6 +2134,17 @@ local function ApplyIconCrop(tex, icon)
     end
 end
 ns.ApplyIconCrop = ApplyIconCrop
+
+-- ns-hosted, NOT a file-scope local: this chunk sits at the Lua 5.1 200-local
+-- cap and this function was the 200th -- hosting it on ns restores the last
+-- slot of headroom. Paint-frequency callers; the ns lookup is free there.
+function ns.SetIconTexture(tex, icon)
+    if type(icon) == "table" and icon.atlas then
+        tex:SetAtlas(icon.atlas, true)
+    else
+        tex:SetTexture(icon or QUESTION_MARK)
+    end
+end
 
 local function CreateSlotWidget(view, index)
     local w = CreateFrame("Button", nil, view.frame, "BackdropTemplate")
@@ -4719,7 +4770,7 @@ local function PaintCell(w, slot, placeholder, showLabels, showCooldowns, wantLa
     w.usability = (showUsability and not placeholder) and SlotUsability(slot) or nil
 
     local icon, name = SlotDisplay(slot)
-    w.icon:SetTexture(icon or QUESTION_MARK)
+    ns.SetIconTexture(w.icon, icon)
     -- Per paint: the widget is pooled, and the marker textures take the full
     -- rect where everything else takes the crop.
     ApplyIconCrop(w.icon, icon)
@@ -5261,7 +5312,7 @@ function PaletteView:AdvanceLiveIcons()
         local slot = self:CellSlot(index)
         if w and slot then
             local icon = SlotDisplay(slot)
-            w.icon:SetTexture(icon or QUESTION_MARK)
+            ns.SetIconTexture(w.icon, icon)
             ApplyIconCrop(w.icon, icon)
         end
     end

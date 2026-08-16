@@ -518,11 +518,15 @@ local function HookfunctionForGroupFinderSearchLeaderFlag(self)
 	
 	local resultID = self.resultID
 
+	if issecretvalue(resultID) then return end
+
 	if not C_LFGList.HasSearchResultInfo(resultID) then
 		return
 	end
 
 	local searchResultInfo = C_LFGList.GetSearchResultInfo(self.resultID)
+
+	if not canaccessvalue(searchResultInfo) then return end
 
 	if not searchResultInfo.leaderName then
 		return
@@ -534,6 +538,8 @@ local function HookfunctionForGroupFinderSearchLeaderFlag(self)
 	-- extract name+realm and (only) name
 	shortname = Ambiguate(searchResultInfo.leaderName, "short")
 	fullname = Ambiguate(searchResultInfo.leaderName, "mail")
+
+	if issecretvalue(shortname) or issecretvalue(shortname) then return end
 
 	-- if:     shortname and fullname are equal -> applicant is from user's own realm
 	-- else:   extract realm from fullname

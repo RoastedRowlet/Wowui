@@ -1,15 +1,15 @@
 
 RaiderIO_Config = {
-["minimapIcon"] = {
-["minimapPos"] = 180,
-["showInCompartment"] = true,
-["hide"] = false,
-["lock"] = false,
-},
 ["profilePoint"] = {
 ["y"] = 0,
 ["x"] = -16,
 ["point"] = "TOPLEFT",
+},
+["minimapIcon"] = {
+["minimapPos"] = 180,
+["showInCompartment"] = true,
+["lock"] = false,
+["hide"] = false,
 },
 }
 RaiderIO_LastCharacter = "us-Lonelylitten-stormrage"
@@ -33,7 +33,7 @@ RaiderIO_MissingCharacters = {
 ["us-Teardropal-stormrage"] = true,
 ["us-Jeffjarrett-stormrage"] = true,
 ["us-Onivane-stormrage"] = true,
-["us-Warpwraith-stormrage"] = true,
+["us-Skeledrus-stormrage"] = true,
 ["us-Hatefulheart-stormrage"] = true,
 ["us-Subtoxin-stormrage"] = true,
 ["us-Aonori-stormrage"] = true,
@@ -41,15 +41,15 @@ RaiderIO_MissingCharacters = {
 ["us-Dtoned-stormrage"] = true,
 ["us-Jèan-stormrage"] = true,
 ["us-Sunfirer-stormrage"] = true,
-["us-Noobsands-stormrage"] = true,
-["us-Jopurvuska-stormrage"] = true,
+["us-Warpwraith-stormrage"] = true,
 ["us-Slangwhanger-stormrage"] = true,
+["us-Jopurvuska-stormrage"] = true,
 ["us-Silver-kiljaeden"] = true,
 ["us-Liyano-sargeras"] = true,
 ["us-Kiaraanne-stormrage"] = true,
 ["us-Playforblood-stormrage"] = true,
 ["us-Hadef-stormrage"] = true,
-["us-Skeledrus-stormrage"] = true,
+["us-Noobsands-stormrage"] = true,
 }
 RaiderIO_MissingServers = {
 }

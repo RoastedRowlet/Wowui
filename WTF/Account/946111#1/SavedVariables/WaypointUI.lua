@@ -1,7 +1,7 @@
 
 WaypointDB_Global = {
-["lastLoadedVersion"] = 10504,
 ["fontPath"] = "Fonts\\FRIZQT__.TTF",
+["lastLoadedVersion"] = 10505,
 }
 WaypointDB_Global_Persistent = {
 }

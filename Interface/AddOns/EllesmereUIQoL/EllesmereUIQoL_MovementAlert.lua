@@ -950,126 +950,6 @@ local function UpdateCachedCharges()
     end
 end
 
--- Buff-active tracking (e.g. Warlock Burning Rush): tracks auraInstanceID
--- from UNIT_AURA payloads so it also works while in combat.
-local buffActiveState = {}
-local expectingBuffAura = {}
-local function BuffActiveKey(entry) return entry.spellId end
-local function IsBuffActiveTrackedSpell(castSpellId)
-    if BUFF_ACTIVE_SPELLS[castSpellId] then return castSpellId end
-    local mapped = trackedSpellSet[castSpellId]
-    if mapped and BUFF_ACTIVE_SPELLS[mapped] then return mapped end
-    return nil
-end
-local function SetBuffActiveState(spellId, active, instanceID)
-    buffActiveState[spellId] = { active = active, instanceID = instanceID }
-end
-local function ClearBuffActiveTracking()
-    wipe(buffActiveState); wipe(expectingBuffAura)
-end
-local function IsBuffActiveDisplayed(entry)
-    local key = BuffActiveKey(entry)
-    local state = buffActiveState[key]
-    if state and state.active then return true end
-    if not inCombat and not InCombatLockdown() then
-        return C_UnitAuras.GetPlayerAuraBySpellID(entry.spellId) ~= nil
-    end
-    return false
-end
-local function SyncBuffActiveOnCombatStart()
-    for _, entry in ipairs(cachedMovementSpells) do
-        if entry.checkType == "buffActive" then
-            local key = BuffActiveKey(entry)
-            local aura = C_UnitAuras.GetPlayerAuraBySpellID(key)
-            if aura and aura.auraInstanceID then SetBuffActiveState(key, true, aura.auraInstanceID) end
-        end
-    end
-end
-local function OnBuffActiveSpellCast(castSpellId)
-    local key = IsBuffActiveTrackedSpell(castSpellId)
-    if not key then return end
-    local state = buffActiveState[key]
-    if state and state.active then expectingBuffAura[key] = nil else expectingBuffAura[key] = true end
-end
-local function OnPlayerBuffActiveAuraUpdate(updateInfo)
-    if not updateInfo then return end
-    local removed = updateInfo.removedAuraInstanceIDs
-    local added   = updateInfo.addedAuras
-    -- Restricted content can hand over the payload LISTS themselves as secret
-    -- tables (ipairs on one throws; the per-FIELD PlainValue guards below never
-    -- get a chance to run). Nothing in a secret list is enumerable, so re-derive
-    -- the whole answer from the direct own-aura probe instead -- the same call
-    -- SyncBuffActiveOnCombatStart already makes under restriction, consumed by
-    -- truthiness only. Behavior stays identical in and out of restriction.
-    if IsSecret(removed) or IsSecret(added) then
-        for _, entry in ipairs(cachedMovementSpells) do
-            if entry.checkType == "buffActive" then
-                local key = BuffActiveKey(entry)
-                local aura = C_UnitAuras.GetPlayerAuraBySpellID(key)
-                if aura then
-                    SetBuffActiveState(key, true, aura.auraInstanceID)
-                    expectingBuffAura[key] = nil
-                else
-                    local state = buffActiveState[key]
-                    if state and state.active then SetBuffActiveState(key, false, nil) end
-                end
-            end
-        end
-        return
-    end
-    if removed then
-        for _, entry in ipairs(cachedMovementSpells) do
-            if entry.checkType == "buffActive" then
-                local key = BuffActiveKey(entry)
-                local state = buffActiveState[key]
-                if state and state.instanceID then
-                    for _, instanceID in ipairs(removed) do
-                        if PlainValue(instanceID) == state.instanceID then
-                            SetBuffActiveState(key, false, nil)
-                            expectingBuffAura[key] = nil
-                            break
-                        end
-                    end
-                end
-            end
-        end
-    end
-    if added then
-        for _, entry in ipairs(cachedMovementSpells) do
-            if entry.checkType == "buffActive" then
-                local key = BuffActiveKey(entry)
-                if expectingBuffAura[key] then
-                    -- Prefer an exact spellId match, but in combat the field is
-                    -- a secret value we can't read at all. Fall back to the
-                    -- batch's only unreadable aura -- with more than one there
-                    -- is no way to tell which is ours, so leave the expectation
-                    -- standing rather than latch onto an unrelated aura.
-                    local match, unreadable, unreadableCount = nil, nil, 0
-                    for _, aura in ipairs(added) do
-                        local sid = PlainValue(aura.spellId)
-                        if sid then
-                            if sid == key then match = aura; break end
-                        else
-                            unreadable = aura
-                            unreadableCount = unreadableCount + 1
-                        end
-                    end
-                    if not match and unreadableCount == 1 then match = unreadable end
-                    if match and match.auraInstanceID then
-                        SetBuffActiveState(key, true, match.auraInstanceID)
-                        expectingBuffAura[key] = nil
-                    end
-                end
-                for _, aura in ipairs(added) do
-                    local sid = PlainValue(aura.spellId)
-                    if sid and sid == key and aura.auraInstanceID then
-                        SetBuffActiveState(key, true, aura.auraInstanceID)
-                    end
-                end
-            end
-        end
-    end
-end
 
 local function CacheMovementSpells(fullReset)
     local class = select(2, UnitClass("player"))
@@ -1078,7 +958,6 @@ local function CacheMovementSpells(fullReset)
     if fullReset then
         CancelAllRechargeTimers()
         wipe(spellWasCast); wipe(spellCastTime); wipe(chargeRechargeStart)
-        ClearBuffActiveTracking()
         cacheResetTime = GetTime()
     end
 
@@ -1205,13 +1084,22 @@ local function CancelMovementCountdown()
     if movementCountdownTimer then movementCountdownTimer:Cancel(); movementCountdownTimer = nil end
 end
 
-local function HideMovementDisplay()
+-- buffActive engine-lane handles (declared here so HideMovementDisplay -- the
+-- universal off-path -- can park the host; defined in the lane block below).
+local buffAlertHost, buffAlertBuilt, buffAlertRegenArm, buffAlertLastCount
+local buffAlertContainer, buffAlertAssist, buffAlertVehicle
+
+-- keepBuffLane: the cooldown display is going away but the buffActive lane is
+-- not. A buffActive spell takes no slot, so an empty cooldown stack is its
+-- NORMAL state -- parking the host there would hide the alert permanently.
+local function HideMovementDisplay(keepBuffLane)
     wipe(readyAlertShown)
     movementFrame:Hide()
     for _, slot in ipairs(displayPool) do
         slot.text:Hide(); slot.icon:Hide(); slot.icon.cooldown:Clear(); slot.bar:Hide(); HideEngineCountdown(slot); slot:Hide()
     end
     activeSlotCount = 0
+    if buffAlertHost and not keepBuffLane then buffAlertHost:Hide() end
     CancelMovementCountdown()
 end
 
@@ -1440,40 +1328,203 @@ local function ShowMovementSlot(index, cdInfo, spellEntry, duration)
     return true
 end
 
-local function ShowBuffActiveSlot(index, spellEntry)
+-------------------------------------------------------------------------------
+--  buffActive lane (Burning Rush): ENGINE-OWNED end to end.
+--  GetPlayerAuraBySpellID is RequiresNonSecretAura -- under aura restriction
+--  (/euidev = M+/raid combat, the viability bar) it returns ZERO VALUES for a
+--  flagged spell WHILE THE BUFF IS UP, indistinguishable from absent
+--  (field-settled 2026-08-13). No Lua probe or payload state machine can know
+--  presence there; the engine can. One hidden AuraContainer with
+--  includeSpellIDs shows/hides its button on presence entirely C-side,
+--  identical in and out of restriction; the alert visual is a region ON the
+--  engine button (visibility inherits, SetText is a display-only sink).
+--  HOST RULES (forbidden-dependent geometry lock): UIParent-parented AND
+--  UIParent-anchored, positioned NUMERICALLY, out of combat only -- the
+--  engine child makes the host's own geometry writes ADDON_ACTION_BLOCKED
+--  inside lockdown, so combat repositions park on a one-shot regen re-apply.
+-------------------------------------------------------------------------------
+local BUFF_ALERT_STYLE = "qol:movealert"
+
+local function BuffAlertApplyExtra(button, d, style)
     local ma = MA()
-    local slot = GetDisplaySlot(index)
-    StyleSlot(slot)
-    local displayMode = ma.displayMode or "text"
-    local spellName = spellEntry.customText or spellEntry.spellName or "Active!"
-    local spellIcon = spellEntry.spellIcon
-
-    slot.text:Hide(); slot.icon:Hide(); slot.bar:Hide()
-    HideEngineCountdown(slot)
-
-    if displayMode == "icon" and spellIcon then
-        slot.icon.tex:SetTexture(spellIcon)
-        slot.icon.cooldown:Clear()
-        slot.icon.cooldown:SetHideCountdownNumbers(true)
-        slot.icon.timeText:SetText("")
-        slot.icon:Show()
-    elseif displayMode == "bar" then
-        slot.bar:SetMinMaxValues(0, 1); slot.bar:SetValue(1)
-        local r, g, b = ResolveAlertColor("textColor", "textColorUseClass")
-        slot.bar:SetStatusBarColor(r, g, b)
-        -- Name label, not a duration -- always shown (and the shared
-        -- fontstring may have been hidden by the Show Duration Text gate).
-        slot.bar.text:Show()
-        slot.bar.text:SetText(spellName)
-        if ma.barShowIcon ~= false and spellIcon then slot.bar.icon:SetTexture(spellIcon); slot.bar.icon:Show() else slot.bar.icon:Hide() end
-        slot.bar:Show()
-    else
-        slot.text:SetText(spellName)
-        slot.text:Show()
+    local mode = ma.displayMode or "text"
+    if not d.maText then
+        d.maText = button:CreateFontString(nil, "OVERLAY")
     end
+    local entry = style.maEntry
+    local label = (entry and (entry.customText or entry.spellName)) or "Active!"
+    local r, g, b = ResolveAlertColor("textColor", "textColorUseClass")
+    local fp = (EllesmereUI.GetFontPath and EllesmereUI.GetFontPath("qol")) or STANDARD_TEXT_FONT
+    d.maText:SetFont(fp, ma.textSize or 16, "OUTLINE")
+    d.maText:SetTextColor(r, g, b)
+    d.maText:ClearAllPoints()
+    if mode == "icon" then
+        if d.icon then d.icon:SetAlpha(1) end
+        d.maText:Hide()
+    else
+        -- text AND bar modes render as the plain label: a permanent toggle
+        -- buff has no duration for a bar to add, and the engine button is the
+        -- only restriction-safe visibility carrier either way.
+        if d.icon then d.icon:SetAlpha(0) end
+        d.maText:SetPoint("CENTER", button, "CENTER", 0, 0)
+        d.maText:SetText(label)
+        d.maText:Show()
+    end
+end
 
-    slot:Show()
+local function BuildBuffAlertStyle(entry)
+    local ma = MA()
+    local px = (EllesmereUI.PP and EllesmereUI.PP.Scale and EllesmereUI.PP.Scale(ma.iconSize or 32)) or ma.iconSize or 32
+    return {
+        width = px, height = px,
+        iconCrop = true,
+        hideDurationText = true, -- permanent buff: no countdown to draw
+        hideSwipe = true,
+        noTooltips = true,
+        applyExtra = BuffAlertApplyExtra,
+        maEntry = entry,
+    }
+end
+
+-- Identity gate (Blizzard_AuraContainer/Blizzard_AuraContainerUtil.lua,
+-- AuraContainerUtil.CanApplyIdentityCandidateFilters + DoesAuraPassCandidateFilters,
+-- verified 12.1.0.69299): includeSpellIDs is applied to a HELPFUL aura only while
+-- UnitCanAssist("player", unit) holds, and it FAILS OPEN -- when the gate fails the
+-- spell-ID filter is skipped entirely and the aura passes on its filter string
+-- alone, so a group asking for one spell renders every buff. Boarding a
+-- vehicle drops the player's own assistability, so this one-button HELPFUL group
+-- stops meaning "Burning Rush" and renders whatever buff it finds first, wearing
+-- the Burning Rush label. Membership is cached per aura instance and UNIT_AURA
+-- only re-parses what changed, so the degraded parse outlived the ride: the alert
+-- stayed up after dismounting until a reload rebuilt the container.
+-- Latched from the vehicle events rather than probed here, because
+-- UnitUsingVehicle is still true across the EXIT transition (see the RF assist
+-- gate's AssistProbe, which guards the same engine gate one unit over).
+local function BuffAlertAssistable()
+    if buffAlertVehicle then return false end
+    -- Cinematics flip the same flag without a vehicle (UNIT_FACTION edge). A
+    -- CLEANLY-false answer denies; unreadable ones stay fail-open, since a
+    -- transient nil must not blank a working alert.
+    local ok, canAssist = pcall(UnitCanAssist, "player", "player")
+    if ok and not IsSecret(canAssist) and canAssist == false then return false end
     return true
+end
+
+-- Reconcile the latch against the live flag. Needed wherever the EXITED edge
+-- could have been missed: while the tracker's events are unregistered nothing
+-- clears the latch, so a tracker switched off mid-ride (or a profile swap, or
+-- being teleported out of a vehicle) would otherwise come back with the lane
+-- suppressed for the rest of the session.
+local function SyncBuffAlertVehicleLatch()
+    local probe = UnitUsingVehicle or UnitInVehicle
+    buffAlertVehicle = (probe and probe("player")) and true or false
+end
+
+-- Build once per session on first eligible pass (warlock + Movement Alerts on
+-- + Burning Rush checked); later passes only refresh the style (mode/size/
+-- color edits ride RestyleSoon) and the host's shown state. Engine frames are
+-- permanent, so disable parks via host:Hide() (the container is a CHILD of the
+-- host -- creation-time parenting is legal) and re-enable reuses everything.
+local function EnsureBuffAlertLane()
+    local AK = EllesmereUI.AuraKit
+    if not (AK and AK.RequestContainer and AK.AddGroupToContainer and AK.RestyleSoon) then return end
+    local entry
+    for _, e in ipairs(cachedMovementSpells) do
+        if e.checkType == "buffActive" then entry = e; break end
+    end
+    if not entry then
+        if buffAlertHost then buffAlertHost:Hide() end
+        return
+    end
+    -- Resolved ahead of the Show() below, not beside it: every pass runs through
+    -- here, so a gate applied anywhere else would be undone by the next tick.
+    local assist = BuffAlertAssistable()
+    local wasDenied = (buffAlertAssist == false)
+    buffAlertAssist = assist
+    if buffAlertBuilt then
+        if not assist then buffAlertHost:Hide(); return end
+        buffAlertHost:Show()
+        -- Whatever was parsed during the degraded window is wrong, and leaving a
+        -- vehicle produces no aura edge for buffs that were already up, so the
+        -- engine would keep serving the stale membership (it is cached per aura
+        -- instance; UNIT_AURA re-parses only what changed). The Show() above
+        -- re-parses on its own -- AuraContainerPrivateMixin:OnShow_Intrinsic in
+        -- Blizzard_AuraContainer/Blizzard_AuraContainer.lua calls UpdateAllAuras --
+        -- and this is that same lever stated outright, so the recovery does not
+        -- silently depend on the host being hidden rather than faded. NOTE the
+        -- method is a no-op on AuraContainerSharedMixin; the real
+        -- MarkDirty(FullAuraRebuild) is ManagedAuraContainerSharedMixin's
+        -- override, which reaches the addon-callable partition through
+        -- ManagedAuraContainerInboundMixin. Bounded to the real denied->allowed flip.
+        if wasDenied and buffAlertContainer and buffAlertContainer.UpdateAllAuras then
+            buffAlertContainer:UpdateAllAuras()
+        end
+        AK.styles[BUFF_ALERT_STYLE] = BuildBuffAlertStyle(entry)
+        AK.RestyleSoon(BUFF_ALERT_STYLE)
+        return
+    end
+    -- Denial must not postpone the BUILD, only the display: logging in inside a
+    -- vehicle (or behind an intro cinematic) would otherwise defer creation to
+    -- the first allowed pass, and if that landed in combat AK.RequestContainer
+    -- queues it to PLAYER_REGEN_ENABLED -- no alert for the whole fight. Build
+    -- unconditionally and park at the end; the container is created and hidden
+    -- inside one call, so nothing renders in between.
+    buffAlertBuilt = true
+    buffAlertHost = CreateFrame("Frame", nil, UIParent)
+    buffAlertHost:SetSize(2, 2)
+    -- Provisional numeric seat; RepositionBuffAlertHost follows the alert
+    -- stack on every out-of-combat render pass.
+    buffAlertHost:SetPoint("CENTER", UIParent, "CENTER", 0, -260)
+    AK.styles[BUFF_ALERT_STYLE] = BuildBuffAlertStyle(entry)
+    local include = { [entry.spellId] = true }
+    -- Override form too (talent variants share the alert); Burning Rush has
+    -- none today, guarded for the day it grows one.
+    if FindSpellOverrideByID then
+        local ov = FindSpellOverrideByID(entry.spellId)
+        if type(ov) == "number" and ov > 0 then include[ov] = true end
+    end
+    AK.RequestContainer(buffAlertHost, "player", {
+        point = { "CENTER", buffAlertHost, "CENTER", 0, 0 },
+        layout = { anchorPoint = "CENTER", padding = { 0, 0, 0, 0 }, rowWidth = 400 },
+    }, function(container)
+        buffAlertContainer = container
+        AK.AddGroupToContainer(container, {
+            key = "buffalert",
+            filter = { "HELPFUL" },
+            style = BUFF_ALERT_STYLE,
+            maxFrameCount = 1,
+            candidateFilters = { includeSpellIDs = include },
+            layout = { anchorPoint = "CENTER", padding = { 0, 0, 0, 0 }, rowWidth = 400 },
+        })
+    end)
+    if not assist then buffAlertHost:Hide() end
+end
+
+-- Numeric follow of the alert stack's top (slots grow UP from movementFrame's
+-- bottom, +2px gaps). Geometry reads are on OUR movementFrame (no engine
+-- content beneath it -- always legal); the WRITE on the host is lockdown-
+-- blocked, so combat passes arm a one-shot regen re-apply reading the LAST
+-- counted stack height.
+local function RepositionBuffAlertHost(count)
+    if not buffAlertHost then return end
+    buffAlertLastCount = count
+    if InCombatLockdown() then
+        if not buffAlertRegenArm then
+            buffAlertRegenArm = CreateFrame("Frame")
+            buffAlertRegenArm:SetScript("OnEvent", function(self)
+                self:UnregisterEvent("PLAYER_REGEN_ENABLED")
+                RepositionBuffAlertHost(buffAlertLastCount or 0)
+            end)
+        end
+        buffAlertRegenArm:RegisterEvent("PLAYER_REGEN_ENABLED")
+        return
+    end
+    local fw, fh = movementFrame:GetWidth(), movementFrame:GetHeight()
+    local left, bottom = movementFrame:GetLeft(), movementFrame:GetBottom()
+    if not (fw and fh and left and bottom) then return end
+    buffAlertHost:ClearAllPoints()
+    buffAlertHost:SetPoint("CENTER", UIParent, "BOTTOMLEFT",
+        left + fw / 2, bottom + count * (fh + 2) + fh / 2)
 end
 
 -------------------------------------------------------------------------------
@@ -1554,9 +1605,8 @@ CheckMovementCooldown = function()
     local nowShownReady = {}
     for _, entry in ipairs(cachedMovementSpells) do
         if entry.checkType == "buffActive" then
-            if IsBuffActiveDisplayed(entry) then
-                if ShowBuffActiveSlot(count + 1, entry) then count = count + 1 end
-            end
+            -- Engine-owned lane: presence rendering never passes through Lua
+            -- (see EnsureBuffAlertLane). The entry deliberately takes no slot.
         else
             local spellId = entry.baseSpellId or entry.spellId
             local hasCharges = C_Spell.GetSpellCharges(spellId)
@@ -1599,6 +1649,12 @@ CheckMovementCooldown = function()
         end
     end
 
+    -- Engine lane: resolve build/park once per pass (self-hides when no
+    -- buffActive spell is enabled for the spec), then seat the host at the
+    -- stack top -- write side is OOC-gated inside RepositionBuffAlertHost.
+    EnsureBuffAlertLane()
+    RepositionBuffAlertHost(count)
+
     -- "Ready" TTS callout: fires once per spell exactly when it drops out of
     -- the on-cooldown set above (not while it sits ready, and not on the
     -- first poll after the feature/spec/class gates just opened up).
@@ -1625,7 +1681,9 @@ CheckMovementCooldown = function()
         movementCountdownTimer = C_Timer.NewTimer(0.1, CheckMovementCooldown)
     else
         activeSlotCount = 0
-        HideMovementDisplay()
+        -- EnsureBuffAlertLane just showed/parked the host for this pass; leave
+        -- its verdict alone (see keepBuffLane).
+        HideMovementDisplay(true)
     end
 end
 EllesmereUI._CheckMovementCooldown = function() if CheckMovementCooldown then CheckMovementCooldown() end end
@@ -2025,18 +2083,32 @@ local function UpdateEventRegistration()
         loader:RegisterEvent("SPELL_UPDATE_CHARGES")
         loader:RegisterUnitEvent("UNIT_SPELLCAST_SUCCEEDED", "player")
         loader:RegisterUnitEvent("UNIT_AURA", "player")
+        -- buffActive lane's identity gate (see BuffAlertAssistable): the
+        -- occupancy latch plus the faction edge cinematics flip. Player-only,
+        -- and only while the tracker is on. ENTERING as well as ENTERED --
+        -- the filters degrade from the boarding transition. CINEMATIC_STOP
+        -- covers the addon-cancelled skip, whose faction restore can order
+        -- ahead of the edge above (the RF gate carries it for the same reason);
+        -- the lane runs no ticker, so a missed restore leaves it hidden.
+        loader:RegisterUnitEvent("UNIT_ENTERING_VEHICLE", "player")
+        loader:RegisterUnitEvent("UNIT_ENTERED_VEHICLE", "player")
+        loader:RegisterUnitEvent("UNIT_EXITED_VEHICLE", "player")
+        loader:RegisterUnitEvent("UNIT_FACTION", "player")
+        loader:RegisterEvent("CINEMATIC_STOP")
+        -- The EXITED edge cannot reach a lane whose events are unregistered.
+        SyncBuffAlertVehicleLatch()
         movementEventsRegistered = true
-        -- Toggling the master switch off then back on mid-combat would
-        -- otherwise leave buffActiveState (e.g. Burning Rush) stale until
-        -- the next aura change, since it's normally only synced on
-        -- PLAYER_REGEN_DISABLED/PLAYER_ENTERING_WORLD.
-        if inCombat then SyncBuffActiveOnCombatStart() end
     elseif not moveOn and movementEventsRegistered then
         loader:UnregisterEvent("SPELL_UPDATE_USABLE")
         loader:UnregisterEvent("SPELL_UPDATE_COOLDOWN")
         loader:UnregisterEvent("SPELL_UPDATE_CHARGES")
         loader:UnregisterEvent("UNIT_SPELLCAST_SUCCEEDED")
         loader:UnregisterEvent("UNIT_AURA")
+        loader:UnregisterEvent("UNIT_ENTERING_VEHICLE")
+        loader:UnregisterEvent("UNIT_EXITED_VEHICLE")
+        loader:UnregisterEvent("UNIT_ENTERED_VEHICLE")
+        loader:UnregisterEvent("UNIT_FACTION")
+        loader:UnregisterEvent("CINEMATIC_STOP")
         movementEventsRegistered = false
         CancelMovementCountdown()
     end
@@ -2152,15 +2224,16 @@ loader:SetScript("OnEvent", function(self, event, ...)
         CheckMovementCooldown()
     elseif event == "PLAYER_ENTERING_WORLD" then
         inCombat = UnitAffectingCombat("player")
+        -- Safety net for an exit that never fires UNIT_EXITED_VEHICLE (being
+        -- teleported out of one).
+        SyncBuffAlertVehicleLatch()
         wipe(timeSpiralActiveSpells)
         timeSpiralActiveTime = nil
         CacheMovementSpells(true)
-        if inCombat then SyncBuffActiveOnCombatStart() end
         CheckMovementCooldown()
         CheckGatewayUsable()
     elseif event == "PLAYER_REGEN_DISABLED" then
         inCombat = true
-        SyncBuffActiveOnCombatStart()
         CheckMovementCooldown()
         -- Combat Only paused the ticker on the last out-of-combat check;
         -- StartGatewayPolling() resumes it now that inCombat is true.
@@ -2188,15 +2261,24 @@ loader:SetScript("OnEvent", function(self, event, ...)
         CheckMovementCooldown()
     elseif event == "UNIT_AURA" then
         local unit, updateInfo = ...
-        if unit == "player" then OnPlayerBuffActiveAuraUpdate(updateInfo) end
         UpdateCachedCharges()
         CheckMovementCooldown()
+    elseif event == "UNIT_ENTERING_VEHICLE" or event == "UNIT_ENTERED_VEHICLE" then
+        buffAlertVehicle = true
+        CheckMovementCooldown()
+    elseif event == "UNIT_EXITED_VEHICLE" then
+        buffAlertVehicle = false
+        CheckMovementCooldown()
+    elseif event == "UNIT_FACTION" or event == "CINEMATIC_STOP" then
+        -- Re-drive ONLY: a cinematic flips assistability with no vehicle
+        -- involved, and BuffAlertAssistable's own probe reads that. Neither
+        -- may touch the latch -- UNIT_FACTION also fires on the BOARDING
+        -- transition, where clearing it would undo the suppression we just set.
+        CheckMovementCooldown()
     elseif event == "PLAYER_DEAD" then
-        ClearBuffActiveTracking()
         CheckMovementCooldown()
     elseif event == "UNIT_SPELLCAST_SUCCEEDED" then
         local unit, _, spellId = ...
-        if unit == "player" then OnBuffActiveSpellCast(spellId) end
         for _, mod in ipairs(TALENT_CD_REDUCTIONS) do
             if spellId == mod.trigger and IsPlayerSpell and IsPlayerSpell(mod.talent) then
                 for _, entry in ipairs(cachedMovementSpells) do

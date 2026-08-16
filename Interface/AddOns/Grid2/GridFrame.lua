@@ -188,15 +188,22 @@ end
 function GridFramePrototype:UpdateAuraContainers()
 	local manager = self.__auraManager
 	if manager then
-		local unit = self.unit or 'none'
-		local enabled = unit ~= 'none'
-		for _, container in pairs(manager) do
-			if unit ~= container:GetUnit() then
-				container:SetUnit(unit)
-				container:SetShown(enabled)
-				container:SetEnabled(enabled)
-			else
-				container:UpdateAllAuras()
+		local unit = self.unit
+		if unit then
+			for _, container in pairs(manager) do
+				if unit ~= container:GetUnit() then
+					container:SetUnit(unit)
+				else
+					container:UpdateAllAuras()
+				end
+				container:SetShown(true)
+				container:SetEnabled(true)
+			end
+		else
+			for _, container in pairs(manager) do
+				container:SetEnabled(false)
+				container:SetShown(false)
+				container:SetUnit('none')
 			end
 		end
 	end
@@ -279,6 +286,7 @@ end
 function Grid2Frame:OnModuleEnable()
 	self.mouseClickType = Grid2.db.global.clickOnMouseDown and "AnyDown" or "AnyUp"
 	self:RegisterEvent("PLAYER_ENTERING_WORLD", "UpdateFrameUnits")
+	Grid2.RegisterRosterUnitEvent(self, "UNIT_FACTION")
 	self:CreateIndicators()
 	self:RefreshIndicators()
 	self:LayoutFrames()
@@ -288,11 +296,19 @@ end
 
 function Grid2Frame:OnModuleDisable()
 	self:UnregisterEvent("PLAYER_ENTERING_WORLD")
+	Grid2.UnregisterRosterUnitEvent(self, "UNIT_FACTION")
 end
 
 function Grid2Frame:OnModuleUpdate()
 	self:CreateIndicators()
 	self:RefreshTheme()
+end
+
+-- fix for auras not displayed after watching a cinematic (CF issue #1535)
+function Grid2Frame:UNIT_FACTION(_, unit)
+	for frame in next, Grid2:GetUnitFrames(unit) do
+		frame:UpdateAuraContainers()
+	end
 end
 
 function Grid2Frame:UpdateTheme()

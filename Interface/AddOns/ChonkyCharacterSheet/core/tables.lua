@@ -2335,7 +2335,7 @@ CCS.ClassSpecStatPriority = {
             [34] = {1,1,1,1}, -- *** Fel-Scarred
             [35] = {1,1,1,1}, -- *** Aldrachi Reaver
             [124] = {2,3,1,4}, -- Annihilator
-            [126] = {1,3,2,4}, -- Void-scarred
+            [126] = {3,2,1,4}, -- Void-scarred
         },        
     },
     [11] = { -- Druid
@@ -2371,8 +2371,8 @@ CCS.ClassSpecStatPriority = {
     [13] = { -- Evoker
         -- Devastation {"Mastery","CriticalStrike","Haste","Versatility"}
         [1] = {
-            [36] = {3,1,2,4}, -- Scalecommander
-            [37] = {3,1,2,4}, -- Flameshaper
+            [36] = {2,1,3,4}, -- Scalecommander
+            [37] = {2,1,3,4}, -- Flameshaper
             [38] = {1,1,1,1}, -- *** Chronowarden
         },
         -- Preservation
@@ -2383,17 +2383,17 @@ CCS.ClassSpecStatPriority = {
         },
         -- Augmentation
         [3] = {
-            [36] = {3,1,2,4}, -- Scalecommander
+            [36] = {1,2,3,4}, -- Scalecommander
             [37] = {1,1,1,1}, -- *** Flameshaper
-            [38] = {3,1,2,4}, -- Chronowarden
+            [38] = {1,2,3,4}, -- Chronowarden
         },
     },
     [3] = { -- Hunter
         -- Beast Mastery {"Mastery","CriticalStrike","Haste","Versatility"}
         [1] = {
             [42] = {1,1,1,1}, -- *** Sentinel
-            [43] = {1,3,2,4}, -- Pack Leader
-            [44] = {1,3,2,4}, -- Dark Ranger
+            [43] = {1,2,3,4}, -- Pack Leader
+            [44] = {2,1,3,4}, -- Dark Ranger
         },
         -- Marksmanship
         [2] = {
@@ -2411,8 +2411,8 @@ CCS.ClassSpecStatPriority = {
     [8] = { -- Mage
         -- Arcane {"Mastery","CriticalStrike","Haste","Versatility"}
         [1] = {
-            [39] = {1,3,2,4}, -- Sunfury
-            [40] = {1,3,2,4}, -- Spellslinger
+            [39] = {4,3,1,2}, -- Sunfury
+            [40] = {2,3,1,4}, -- Spellslinger
             [41] = {1,1,1,1}, -- *** Frostfire
         },
         -- Fire
@@ -2432,8 +2432,8 @@ CCS.ClassSpecStatPriority = {
         -- Brewmaster {"Mastery","CriticalStrike","Haste","Versatility"}
         [1] = {
             [64] = {1,1,1,1}, -- *** Conduit of the Celestials
-            [65] = {1,1,2,1}, -- Shado-pan
-            [66] = {1,1,2,1}, -- Master of Harmony
+            [65] = {2,1,2,2}, -- Shado-pan
+            [66] = {2,1,3,2}, -- Master of Harmony
         },
         -- Mistweaver
         [2] = {
@@ -2457,23 +2457,23 @@ CCS.ClassSpecStatPriority = {
         },
         -- Protection
         [2] = {
-            [48] = {3,3,1,2}, -- Templar
-            [49] = {3,3,1,2}, -- Lightsmith
+            [48] = {2,2,1,3}, -- Templar
+            [49] = {2,2,1,3}, -- Lightsmith
             [50] = {1,1,1,1}, -- *** Herald of the Sun
         },
         -- Retribution
         [3] = {
-            [48] = {1,2,3,4}, -- Templar
+            [48] = {1,3,2,4}, -- Templar
             [49] = {1,1,1,1}, -- *** Lightsmith
-            [50] = {1,2,3,4}, -- Herald of the Sun
+            [50] = {1,3,2,4}, -- Herald of the Sun
         },
     },
     [5] = { -- Priest
         -- Discipline {"Mastery","CriticalStrike","Haste","Versatility"}
         [1] = {
-            [18] = {3,2,1,4}, -- Voidweaver
+            [18] = {2,3,1,4}, -- Voidweaver
             [19] = {1,1,1,1}, -- *** Archon
-            [20] = {3,2,1,4}, -- Oracle
+            [20] = {2,3,1,4}, -- Oracle
         },
         -- Holy
         [2] = {
@@ -2517,22 +2517,22 @@ CCS.ClassSpecStatPriority = {
         },
         -- Enhancement
         [2] = {
-            [54] = {1,3,2,4}, -- Totemic
-            [55] = {2,2,1,3}, -- Stormbringer
+            [54] = {1,2,1,3}, -- Totemic
+            [55] = {1,2,1,3}, -- Stormbringer
             [56] = {1,1,1,1}, -- *** Farseer
         },
         -- Restoration
         [3] = {
-            [54] = {2,1,3,2}, -- Totemic
+            [54] = {4,1,2,3}, -- Totemic
             [55] = {2,1,3,2}, -- *** Stormbringer
-            [56] = {2,1,3,2}, -- Farseer
+            [56] = {4,1,2,3}, -- Farseer
         },
     },
     [9] = { -- Warlock
         -- Affliction {"Mastery","CriticalStrike","Haste","Versatility"}
         [1] = {
-            [57] = {1,1,2,3}, -- Soul Harvester
-            [58] = {1,1,2,3}, -- Hellcaller
+            [57] = {4,2,1,3}, -- Soul Harvester
+            [58] = {4,2,1,3}, -- Hellcaller
             [59] = {1,1,1,1}, -- *** Diabolist
         },
         -- Demonology

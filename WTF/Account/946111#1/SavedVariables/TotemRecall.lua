@@ -1,22 +1,22 @@
 
 MyTotemDB = {
 ["profileKeys"] = {
+["Lonelylitten - Stormrage"] = "Default",
 ["Barelynoer - Area 52"] = "Default",
 ["Zappyxatu - Stormrage"] = "Default",
-["Lonelylitten - Stormrage"] = "Default",
 },
 ["profiles"] = {
 ["Default"] = {
-["ParentSelectMode"] = "EllesmereUIUnitFrames_Player",
-["IconScale"] = 1.9,
-["XOffset"] = 32.39999999999998,
+["FontSize"] = 10,
+["TestCount"] = 4,
+["ParentAnchor"] = "TOPLEFT",
 ["YOffset"] = 11.10000000000002,
 ["IconSpacing"] = -15.5,
 ["GrowthDirection"] = "UP",
-["ParentAnchor"] = "TOPLEFT",
-["FontSize"] = 10,
+["XOffset"] = 32.39999999999998,
+["ParentSelectMode"] = "EllesmereUIUnitFrames_Player",
 ["ParentFrameName"] = "EssentialCooldownViewer",
-["TestCount"] = 4,
+["IconScale"] = 1.9,
 },
 },
 }

@@ -20,7 +20,15 @@ EllesmereUI._ModuleNS["EllesmereUIQoL"] = select(2, ...)  -- LOD options files r
 local _qolExtrasDB
 local function QoLExtrasProfile()
     if not _qolExtrasDB and EllesmereUI and EllesmereUI.Lite and EllesmereUI.Lite.NewDB then
-        _qolExtrasDB = EllesmereUI.Lite.NewDB("EllesmereUIQoLDB", { profile = {} })
+        _qolExtrasDB = EllesmereUI.Lite.NewDB("EllesmereUIQoLDB", {
+            profile = {
+                secondaryStatsHidden = {
+                    leech = true,
+                    avoidance = true,
+                    speed = true,
+                },
+            },
+        })
     end
     return _qolExtrasDB and _qolExtrasDB.profile
 end
@@ -701,9 +709,10 @@ qolFrame:SetScript("OnEvent", function(self)
             trainBtn:SetScript("OnEnter", function(self)
                 local n, gold = TrainableSummary()
                 if n <= 0 then return end
-                local msg = string.format("Learn %d skill%s for %s",
-                    n, n == 1 and "" or "s",
-                    C_CurrencyInfo.GetCoinTextureString(gold))
+                local goldStr = C_CurrencyInfo.GetCoinTextureString(gold)
+                local msg = (n == 1)
+                    and EllesmereUI.Lf("Learn %1$d skill for %2$s", n, goldStr)
+                    or  EllesmereUI.Lf("Learn %1$d skills for %2$s", n, goldStr)
                 EllesmereUI.ShowWidgetTooltip(self, msg)
             end)
             trainBtn:SetScript("OnLeave", function() EllesmereUI.HideWidgetTooltip() end)
@@ -1436,6 +1445,110 @@ qolFrame:SetScript("OnEvent", function(self)
     end
 
     ---------------------------------------------------------------------------
+    --  Hide Loot Rolls Window (GroupLootHistoryFrame) -- the running list of
+    --  what dropped, who rolled what, and who won. Two modes off one toggle:
+    --  hide it outright, or let it appear and close itself after a delay.
+    --
+    --  Blizzard re-shows the window on every drop and roll result, so a single
+    --  Hide() never sticks -- enforcement has to ride the show path. BOTH the
+    --  OnShow script and the Show method are hooked: a drop landing while the
+    --  window is already up re-calls Show() without firing OnShow, and that is
+    --  exactly when the auto-close delay has to restart.
+    --
+    --  The window is unprotected and purely informational (no secure state, no
+    --  managed-position involvement), so a plain Hide() is safe. Nothing is
+    --  unregistered or reparented either, so turning the toggle back off hands
+    --  the window straight back to Blizzard without a reload.
+    ---------------------------------------------------------------------------
+    do
+        local DEFAULT_DELAY = 5
+        local closeGen = 0  -- bumped on every show; invalidates older timers
+
+        local function HistoryFrame()
+            local f = _G.GroupLootHistoryFrame
+            if not f or not f.HookScript then return nil end
+            if f.IsForbidden and f:IsForbidden() then return nil end
+            return f
+        end
+
+        local function CloseDelay()
+            local d = EllesmereUIDB and EllesmereUIDB.lootHistoryDelay
+            if type(d) ~= "number" or d <= 0 then return DEFAULT_DELAY end
+            return d
+        end
+
+        local function Enforce()
+            if not (EllesmereUIDB and EllesmereUIDB.hideLootHistory) then return end
+            local f = HistoryFrame()
+            if not f then return end
+            closeGen = closeGen + 1
+            if EllesmereUIDB.lootHistoryMode ~= "autoclose" then
+                f:Hide()
+                return
+            end
+            local gen = closeGen
+            C_Timer.After(CloseDelay(), function()
+                -- A newer show (or a settings change) armed its own timer.
+                if gen ~= closeGen then return end
+                if not (EllesmereUIDB and EllesmereUIDB.hideLootHistory) then return end
+                local live = HistoryFrame()
+                if live and live:IsShown() then live:Hide() end
+            end)
+        end
+
+        local function HookHistory()
+            local f = HistoryFrame()
+            if not f or EllesmereUI._GetFFD(f).lootHistHooked then return end
+            EllesmereUI._GetFFD(f).lootHistHooked = true
+            f:HookScript("OnShow", Enforce)
+            hooksecurefunc(f, "Show", Enforce)
+        end
+
+        -- Hook now, or arm ONE waiter for the frame's Blizzard_ addon (it is
+        -- created on first use, not necessarily at login). Shared by the
+        -- load-time install and a mid-session enable that beats the frame's
+        -- creation -- without the waiter half, that enable would silently
+        -- never hook.
+        local waiterArmed = false
+        local function EnsureInstalled()
+            if _G.GroupLootHistoryFrame then
+                HookHistory()
+                return
+            end
+            if waiterArmed then return end
+            waiterArmed = true
+            local waiter = CreateFrame("Frame")
+            waiter:RegisterEvent("ADDON_LOADED")
+            waiter:SetScript("OnEvent", function(self)
+                if _G.GroupLootHistoryFrame then
+                    HookHistory()
+                    self:UnregisterAllEvents()
+                end
+            end)
+        end
+
+        -- Options-side apply: a toggle must bite now, not on the next drop.
+        -- The closeGen bump also cancels a pending auto-close when the mode
+        -- changes or the feature is switched off mid-countdown.
+        EllesmereUI._applyHideLootHistory = function()
+            if EllesmereUIDB and EllesmereUIDB.hideLootHistory then
+                EnsureInstalled()
+            end
+            closeGen = closeGen + 1
+            local f = HistoryFrame()
+            if f and f:IsShown() then Enforce() end
+        end
+
+        -- Load-time install ONLY for users with the feature already on
+        -- (zero cost disabled: no waiter frame, no ADDON_LOADED listener,
+        -- no hooks -- a later enable installs through _applyHideLootHistory
+        -- above).
+        if EllesmereUIDB and EllesmereUIDB.hideLootHistory then
+            EnsureInstalled()
+        end
+    end
+
+    ---------------------------------------------------------------------------
     --  Instance Reset Announce -- after a successful /reset, posts to instance
     --  chat so the group knows it's ready to re-enter.
     ---------------------------------------------------------------------------
@@ -1683,6 +1796,31 @@ do
         mastery = "55aaff",   -- blue
         vers    = "c77dff",   -- violet
     }
+    local DEFAULT_STAT_ORDER = {
+        "crit", "haste", "mastery", "vers", "leech", "avoidance", "speed",
+    }
+    local VALID_STAT = {
+        crit = true, haste = true, mastery = true, vers = true,
+        leech = true, avoidance = true, speed = true,
+    }
+
+    local function SecondaryStatsOrder()
+        local saved = EllesmereUI.QoLExtrasGet("secondaryStatsOrder")
+        if type(saved) ~= "table" then return DEFAULT_STAT_ORDER end
+
+        local order, added = {}, {}
+        for _, key in ipairs(saved) do
+            if VALID_STAT[key] and not added[key] then
+                added[key] = true
+                order[#order + 1] = key
+            end
+        end
+        for _, key in ipairs(DEFAULT_STAT_ORDER) do
+            if not added[key] then order[#order + 1] = key end
+        end
+        return order
+    end
+    EllesmereUI._secondaryStatsOrder = SecondaryStatsOrder
     -- Tertiaries keep the original default: the player's class color.
 
     -- SECRET STATS. In restricted content the stat getters return secret
@@ -1827,6 +1965,16 @@ do
             vers = versRating + versBase
             statsFrame._versLastClean = vers
         end
+        local showBoth = EllesmereUI.QoLExtrasGet("showSecondaryStatsBoth")
+        local showRawOnly = not showBoth and EllesmereUI.QoLExtrasGet("showSecondaryStatsRaw")
+        local showRawValues = showRawOnly or showBoth
+        local critRaw, hasteRaw, masteryRaw, versRaw
+        if showRawValues then
+            critRaw = GetCombatRating(CR_CRIT_MELEE)
+            hasteRaw = GetCombatRating(CR_HASTE_MELEE)
+            masteryRaw = GetCombatRating(CR_MASTERY)
+            versRaw = GetCombatRating(CR_VERSATILITY_DAMAGE_DONE)
+        end
 
         -- One template line per row, plus the figures to fill it. Nothing here
         -- reads a figure -- see the SECRET STATS note above.
@@ -1835,18 +1983,31 @@ do
         -- Values are white unless Colored Values is on, which colors
         -- each value with its row so the stat reads as one piece.
         local coloredPct = EllesmereUI.QoLExtrasGet("coloredPercentages")
-        local function Row(hex, label, value)
-            -- A "%.2f%%" placeholder when there is a figure to draw, so the
-            -- number itself travels as an argument; a literal "?" when there
-            -- is genuinely nothing. issecretvalue FIRST -- a nil test is fine
-            -- on a secret, but nothing below it would be.
-            local body = "%.2f%%"
-            if value == nil then
+        local abbreviateLabels = EllesmereUI.QoLExtrasGet("secondaryStatsAbbreviateLabels")
+        local function Label(long, short)
+            return abbreviateLabels and short or EllesmereUI.L(long)
+        end
+        local function Row(hex, label, value, raw)
+            local body, first, second
+            if showRawOnly then
+                body, first = "%.0f", raw
+            elseif showBoth then
+                body, first, second = "%.0f (%.2f%%)", raw, value
+            else
+                body, first = "%.2f%%", value
+            end
+            -- The selected figures travel as arguments so secret values are
+            -- never inspected. A nil test is safe on a secret.
+            if first == nil or (showBoth and second == nil) then
                 statUnreadable = true
                 body = "?"
             else
-                if issecretvalue(value) then anySecret = true end
-                vals[#vals + 1] = value
+                if issecretvalue(first) then anySecret = true end
+                vals[#vals + 1] = first
+                if showBoth then
+                    if issecretvalue(second) then anySecret = true end
+                    vals[#vals + 1] = second
+                end
             end
             rows[#rows + 1] = format("|cff%s%s:|r%s|cff%s%s|r",
                 hex, Esc(label), LABEL_GAP, coloredPct and hex or "ffffff", body)
@@ -1860,25 +2021,48 @@ do
             rows[#rows + 1] = format("|cff%s%s:|r%s%s",
                 hex, Esc(label), LABEL_GAP, Esc(body))
         end
-        Row(customHex or STAT_HEX.crit,    EllesmereUI.L("Crit"),    crit)
-        Row(customHex or STAT_HEX.haste,   EllesmereUI.L("Haste"),   haste)
-        Row(customHex or STAT_HEX.mastery, EllesmereUI.L("Mastery"), mastery)
-        Row(customHex or STAT_HEX.vers,    EllesmereUI.L("Vers"),    vers)
-
-        if EllesmereUI.QoLExtrasGet("showTertiaryStats") then
+        local hiddenStats = EllesmereUI.QoLExtrasGet("secondaryStatsHidden")
+        if type(hiddenStats) ~= "table" then hiddenStats = nil end
+        local hasVisibleTertiary = not (hiddenStats
+            and hiddenStats.leech and hiddenStats.avoidance and hiddenStats.speed)
+        local tertHex, leech, avoidance, speed
+        local leechRaw, avoidanceRaw, speedRaw
+        if hasVisibleTertiary then
             local tc = EllesmereUI.QoLExtrasGet("tertiaryStatsColor")
             local tmode = EllesmereUI.QoLExtrasGet("tertiaryStatsColorMode")
                 or (tc and "custom" or "class")
-            local tertHex = (tmode == "custom" and tc)
+            tertHex = (tmode == "custom" and tc)
                 and format("%02x%02x%02x", tc.r * 255, tc.g * 255, tc.b * 255)
                 or statsFrame._classHex or "ffffff"
 
-            local leech = GetLifesteal()
-            local avoidance = GetAvoidance()
-            local speed = GetSpeed()
-            Row(tertHex, EllesmereUI.L("Leech"),     leech)
-            Row(tertHex, EllesmereUI.L("Avoidance"), avoidance)
-            Row(tertHex, EllesmereUI.L("Speed"),     speed)
+            leech = GetLifesteal()
+            avoidance = GetAvoidance()
+            speed = GetSpeed()
+            if showRawValues then
+                leechRaw = GetCombatRating(CR_LIFESTEAL)
+                avoidanceRaw = GetCombatRating(CR_AVOIDANCE)
+                speedRaw = GetCombatRating(CR_SPEED)
+            end
+        end
+
+        for _, key in ipairs(SecondaryStatsOrder()) do
+            if not (hiddenStats and hiddenStats[key]) then
+                if key == "crit" then
+                    Row(customHex or STAT_HEX.crit, Label("Crit", "C"), crit, critRaw)
+                elseif key == "haste" then
+                    Row(customHex or STAT_HEX.haste, Label("Haste", "H"), haste, hasteRaw)
+                elseif key == "mastery" then
+                    Row(customHex or STAT_HEX.mastery, Label("Mastery", "M"), mastery, masteryRaw)
+                elseif key == "vers" then
+                    Row(customHex or STAT_HEX.vers, Label("Vers", "V"), vers, versRaw)
+                elseif key == "leech" then
+                    Row(tertHex, Label("Leech", "L"), leech, leechRaw)
+                elseif key == "avoidance" then
+                    Row(tertHex, Label("Avoidance", "A"), avoidance, avoidanceRaw)
+                elseif key == "speed" then
+                    Row(tertHex, Label("Speed", "S"), speed, speedRaw)
+                end
+            end
         end
 
         -- FPS and latency, drawn here rather than by the standalone counter

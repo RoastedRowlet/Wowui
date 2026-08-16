@@ -88,7 +88,6 @@ local _blockIcons        = setmetatable({}, { __mode = "k" })  -- block -> our i
 -- iteration of its own tables never sees our additions. This is the
 -- canonical taint-avoidance pattern per CLAUDE.md.
 local _blockFocus        = setmetatable({}, { __mode = "k" })  -- block -> focus texture
-local _headerClickOverlays = setmetatable({}, { __mode = "k" })  -- header -> click overlay
 local _masterHeaderCollapseHooked = false  -- guards the SetCollapsed re-skin hook below
 
 -------------------------------------------------------------------------------
@@ -433,30 +432,49 @@ local function SkinHeader(header, knownCollapsed)
     -- 1px divider beneath the header (Line Color: Class / Custom / Accent).
     EnsureAccentDivider(header)
 
-    -- Click-anywhere-on-header overlay: clicking the title text (not just the +/-
-    -- button) toggles the section, by forwarding to the MinimizeButton via a plain
-    -- button's Click() out of combat. History (2026-07-20, PR #879): this WAS a
-    -- SecureActionButtonTemplate click-redirect under the belief that a programmatic
-    -- Click() taints the collapse cascade. That evidence was confounded: the constant
-    -- taint injector was TightenTopAnchor's insecure SetPoint inside its SetPoint hook
-    -- (since removed, see the topModulePadding comment below), and the secure redirect
-    -- threw combat errors of its own. The plain-Click() form shipped here is the
-    -- field-tested-clean one -- do not "fix" it back to a secure redirect without
-    -- fresh taint-log evidence.
-    if not _headerClickOverlays[header] and header.MinimizeButton then
-        local minBtn = header.MinimizeButton
-        local overlay = CreateFrame("Button", nil, header)
-        overlay:SetFrameLevel(header:GetFrameLevel() + 1)
-        overlay:RegisterForClicks("LeftButtonUp")
-        overlay:SetPoint("TOPLEFT", header, "TOPLEFT", 0, 0)
-        overlay:SetPoint("BOTTOMRIGHT", minBtn, "BOTTOMLEFT", -2, 0)
-        overlay:SetScript("OnClick", function()
-            if InCombatLockdown() then return end
-            if minBtn and minBtn:IsShown() then
-                minBtn:Click()
+    -- Click-anywhere-on-header: widen the NATIVE MinimizeButton's hit rect
+    -- across the header, so a title click dispatches straight to Blizzard's
+    -- own OnClick -- the identical path a bare +/- press takes.
+    -- HARD RULE: no addon code may run in this click path. Forwarding via an
+    -- overlay's Click() ran the collapse cascade from our execution and
+    -- tainted the container's shared dispatch loop -- a field-confirmed
+    -- injector (secret-aura GetAuraDataByIndex errors out of LayoutContents),
+    -- and the taint survives zone changes, so combat/instance gating cannot
+    -- close it. Do not reintroduce any overlay or click redirect here without
+    -- fresh taint-log evidence. Blizzard never calls SetHitRectInsets on
+    -- these buttons (source-verified), and the header frame is not
+    -- mouse-enabled, so nothing fights or swallows this.
+    if minBtn and minBtn.SetHitRectInsets then
+        local headerW = header.GetWidth and header:GetWidth() or 0
+        local headerH = header.GetHeight and header:GetHeight() or 0
+        local btnW    = minBtn.GetWidth and minBtn:GetWidth() or 0
+        local btnH    = minBtn.GetHeight and minBtn:GetHeight() or 0
+        if headerW > 0 and btnW > 0 then
+            -- Reserve the FilterButton's width while it is showing (master
+            -- header only, hidden by default; anchored 2px left of the
+            -- MinimizeButton). The widened rect still passes under it, but
+            -- the filter is declared later at the same frame level, so it
+            -- renders on top and keeps its own clicks; the reservation just
+            -- shortens the extension (accepted: the leftmost ~20px of the
+            -- header don't toggle while the filter is shown).
+            local reserved = btnW
+            local filter = header.FilterButton
+            if filter and filter.IsShown and filter:IsShown() then
+                reserved = reserved + ((filter.GetWidth and filter:GetWidth()) or 0) + 2
             end
-        end)
-        _headerClickOverlays[header] = overlay
+            -- Negative inset expands the hit rect outward from that edge.
+            -- Re-applied on every skin pass so it tracks header size changes
+            -- (Edit Mode resize); clamped so a stale/short header can never
+            -- leave a hit area hanging off the header into empty screen.
+            local extendX = headerW - reserved
+            if extendX < 0 then extendX = 0 end
+            -- The button is shorter than the header (16 vs 26 on section
+            -- headers), so match the header's height as well or the top and
+            -- bottom few pixels of the title stay dead.
+            local extendY = (headerH - btnH) / 2
+            if extendY < 0 then extendY = 0 end
+            minBtn:SetHitRectInsets(-extendX, 0, -extendY, -extendY)
+        end
     end
 end
 
@@ -617,10 +635,14 @@ local function ApplyQuestTypeIcon(block)
                      and block.ItemButton:IsShown())
                  or (block.itemButton and block.itemButton.IsShown
                      and block.itemButton:IsShown())
+    -- block.GroupFinderButton was probed here too until the /fstack evidence in the
+    -- group-finder click fix proved it never exists (that same nil field left the
+    -- button unraised and unclickable). rightEdgeFrame is what actually covers the
+    -- group finder: it holds the LAST right-edge frame added, which is the group
+    -- finder on a quest that has only that, and a quest with both is already caught
+    -- by ItemButton above.
     local hasLFG  = (block.groupFinderButton and block.groupFinderButton.IsShown
                      and block.groupFinderButton:IsShown())
-                 or (block.GroupFinderButton and block.GroupFinderButton.IsShown
-                     and block.GroupFinderButton:IsShown())
                  or (block.rightEdgeFrame and block.rightEdgeFrame.IsShown
                      and block.rightEdgeFrame:IsShown())
     if hasItem or hasLFG then
@@ -839,29 +861,92 @@ local function ProcessBlockChildren(frame, depth)
     end
 end
 
-local _hookedPOIs = setmetatable({}, { __mode = "k" })
+local _suppressedPOIs = setmetatable({}, { __mode = "k" })
+
+-- NEVER call :Hide() on a quest POI button, and never post-hook its :Show().
+-- POIButtonTemplate wires <OnShow>/<OnHide> to POIButtonMixin, and those two
+-- handlers do nothing but EventRegistry:RegisterCallback / UnregisterCallback
+-- on "Supertracking.OnChanged". Running either from our (tainted) execution
+-- writes into EventRegistry's shared callback table for that event, so every
+-- other subscriber -- SuperTrackablePinMixin, VignetteDataProvider,
+-- QuestDataProvider, WorldQuestDataProvider, DungeonEntranceDataProvider --
+-- is then dispatched tainted on the next TriggerEvent. Observed fallout:
+-- a blocked Frame:SetPropagateMouseClicks() while the world map acquires pins,
+-- and secret-value errors when GameTooltip lays out a vignette widget set.
+--
+-- Alpha runs no script handler, so suppress with alpha + EnableMouse instead.
+-- Blizzard's own UpdateButtonAlpha only touches NormalTexture/PushedTexture,
+-- never the button frame, so it cannot undo this -- which is also why the old
+-- Show hook is gone: Show() no longer un-suppresses anything.
+local function ApplyPOISuppression(pb)
+    pb:SetAlpha(0)
+    pb:EnableMouse(false)
+end
+
+-- ObjectiveTrackerPOIButtonTemplate's AddAnim ends on alpha 1 (setToFinalAlpha),
+-- and it is the only thing in Blizzard's code that writes the button frame's
+-- alpha at all -- Pool_HideAndClearAnchors and POIButtonMixin:Reset() leave both
+-- alpha and mouse state alone, so a pooled button is handed back out still
+-- suppressed. That means current alpha says nothing about whether a fanfare is
+-- about to un-hide the button, so queue the re-apply unconditionally and dedupe
+-- on a pending timer instead. Re-arms itself if the animation is still running.
+local _poiRepair = setmetatable({}, { __mode = "k" })
+
+local function QueuePOIRepair(pb)
+    if _poiRepair[pb] then return end
+    _poiRepair[pb] = true
+    C_Timer.After(0.35, function()
+        _poiRepair[pb] = nil
+        if EQT.Cfg("showQuestIcons") then return end
+        ApplyPOISuppression(pb)
+        if pb.AddAnim and pb.AddAnim:IsPlaying() then QueuePOIRepair(pb) end
+    end)
+end
 
 local function SuppressPOI(block)
-    if EQT.Cfg("showQuestIcons") then return end
     local pb = block and block.poiButton
     if not pb then return end
-    if pb:IsShown() then pb:Hide() end
-    pb:EnableMouse(false)
 
-    -- Config-gated Show hook: without it, Blizzard re-shows the pooled button
-    -- for a frame when the user tracks a quest via the context menu (visible
-    -- blink) before the next SkinBlock suppress pass runs. Hooked once per
-    -- pooled button (weak-keyed cache); no-op while Show Quest Icons is on,
-    -- so enabling the setting restores default behavior without a reload.
-    -- Taint-verified clean with the tracker's field-write injector removed.
-    if not _hookedPOIs[pb] then
-        _hookedPOIs[pb] = true
+    if EQT.Cfg("showQuestIcons") then
+        -- Restore buttons we suppressed earlier in this session so flipping the
+        -- setting on takes effect without waiting for the reload prompt.
+        if _suppressedPOIs[pb] then
+            _suppressedPOIs[pb] = nil
+            pb:SetAlpha(1)
+            pb:EnableMouse(true)
+        end
+        return
+    end
 
-        hooksecurefunc(pb, "Show", function(self)
-            if not EQT.Cfg("showQuestIcons") then
-                self:Hide()
-            end
-        end)
+    _suppressedPOIs[pb] = true
+    ApplyPOISuppression(pb)
+    QueuePOIRepair(pb)
+end
+
+-- Raise the block's right-edge buttons (quest item / group finder) above the
+-- block itself. Blizzard acquires both the block and its right-edge frames from
+-- the same module pool, so they are siblings on ContentsFrame at the *same*
+-- frame level; the block then wins hit-testing and swallows the button's clicks.
+--
+-- Only the quest item button is stored under a named field
+-- (block.ItemButton, Blizzard_QuestObjectiveTracker.lua). The group finder
+-- button has no named field at all -- block.rightEdgeFrame holds just the last
+-- one added, which is the item button whenever a quest has both. The complete
+-- set is block.addedRegions (ObjectiveTrackerBlockMixin:OnAddedRegion), so walk
+-- that and raise every Button in it. Objective lines, timer bars and progress
+-- bars are Frames and stay untouched.
+local function RaiseRightEdgeButtons(block)
+    local bl = block.GetFrameLevel and block:GetFrameLevel() or 0
+    if block.ItemButton and block.ItemButton.SetFrameLevel then
+        block.ItemButton:SetFrameLevel(bl + 5)
+    end
+    local regions = block.addedRegions
+    if type(regions) ~= "table" then return end
+    for region in pairs(regions) do
+        if type(region) == "table" and region.SetFrameLevel and region.GetObjectType
+           and region:GetObjectType() == "Button" then
+            region:SetFrameLevel(bl + 5)
+        end
     end
 end
 
@@ -874,6 +959,11 @@ local function SkinBlock(block)
     -- poiButton to the block between skin passes.
     SuppressPOI(block)
 
+    -- Also on every entry: a block can gain a right-edge button after it was
+    -- first skinned (a quest becomes groupable, an item is granted), and the
+    -- pooled Init/Reset paths reset the level back to the block's.
+    RaiseRightEdgeButtons(block)
+
     -- Skip blocks already fully skinned. The heavy work (strip textures,
     -- style fontstrings, walk children) only needs to happen once per block.
     -- Quest type icons and focus highlight are cheap and re-applied below.
@@ -884,18 +974,6 @@ local function SkinBlock(block)
     end
 
     HookBlockLineMethods(block)
-
-    -- Raise ItemButton / GroupFinderButton frame levels above the block on EVERY skin
-    -- pass. Blizzard pools the block + Init/Reset paths can lower the level back to the
-    -- block's, after which clicks fall through to the block instead of the icon button.
-    -- Re-applying every pass is cheap and guarantees correct hit-testing.
-    local bl = block.GetFrameLevel and block:GetFrameLevel() or 0
-    if block.ItemButton and block.ItemButton.SetFrameLevel then
-        block.ItemButton:SetFrameLevel(bl + 5)
-    end
-    if block.GroupFinderButton and block.GroupFinderButton.SetFrameLevel then
-        block.GroupFinderButton:SetFrameLevel(bl + 5)
-    end
 
     -- Strip named decorative textures by key.
     for _, k in ipairs({

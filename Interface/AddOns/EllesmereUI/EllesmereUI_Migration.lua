@@ -2502,6 +2502,37 @@ EllesmereUI.RegisterMigration({
     end,
 })
 
+-- Tertiary visibility now lives entirely in the reorderable Stats to Show
+-- checklist. Preserve the removed toggle's effective state for every profile:
+-- checked enables all three tertiary rows; unchecked leaves all three hidden.
+EllesmereUI.RegisterMigration({
+    id          = "qol_tertiary_stats_checklist_v1",
+    scope       = "profile",
+    description = "Convert Show Tertiary Stats into the per-stat visibility checklist.",
+    body        = function(ctx)
+        local profile = ctx.profile
+        if type(profile.addons) ~= "table" then profile.addons = {} end
+        local qol = profile.addons.EllesmereUIQoL
+        if type(qol) ~= "table" then
+            qol = {}
+            profile.addons.EllesmereUIQoL = qol
+        end
+
+        local enabled = qol.showTertiaryStats
+        if enabled == nil then
+            enabled = EllesmereUIDB and EllesmereUIDB.showTertiaryStats
+        end
+        if type(qol.secondaryStatsHidden) ~= "table" then
+            qol.secondaryStatsHidden = {}
+        end
+        local hidden = enabled ~= true
+        qol.secondaryStatsHidden.leech = hidden
+        qol.secondaryStatsHidden.avoidance = hidden
+        qol.secondaryStatsHidden.speed = hidden
+        qol.showTertiaryStats = nil
+    end,
+})
+
 -- "Disable Slug Outline" (neverShowSlug) and "Outline Icon Text" (outlineIconText)
 -- moved from account-wide root into the per-profile fonts DB for export/import +
 -- module sync. Seeds the live working fonts table (active profile) AND every
@@ -2559,6 +2590,27 @@ EllesmereUI.RegisterMigration({
         if db.reskinGreatVault  == nil then db.reskinGreatVault  = master end
         if db.reskinGameMenu    == nil then db.reskinGameMenu    = master and queueNotFalse end
         if db.reskinLFGMenu     == nil then db.reskinLFGMenu     = master and queueNotFalse end
+    end,
+})
+
+EllesmereUI.RegisterMigration({
+    id          = "blizzskin_widget_bars_seed_v1",
+    scope       = "global",
+    description = "Seed the new Reskin Widget Bars toggle from existing chrome preferences: on only when Reskin Tooltips AND Reskin Popups and Menus are both on, so accounts that turned those off do not get newly skinned HUD bars.",
+    body        = function(ctx)
+        local db = ctx.db
+        if not db then return end
+        -- Registered AFTER the master-split migration on purpose: an account
+        -- jumping many versions gets reskinPopupsMenus seeded first in the
+        -- same pass, so this reads the settled value. Writes an explicit
+        -- boolean both ways; the key is independent from here on (same
+        -- contract as reskinPopupsMenus itself). Fresh installs never run
+        -- this (genesis stamp) and keep nil = on, which matches both masters
+        -- defaulting on.
+        if db.reskinWidgetBars == nil then
+            db.reskinWidgetBars = (db.customTooltips ~= false)
+                and (db.reskinPopupsMenus ~= false)
+        end
     end,
 })
 
@@ -3818,6 +3870,34 @@ EllesmereUI.RegisterMigration({
         local willBeLive = (ss and ss.healthBar  == false) and true or false
         if wasLive ~= willBeLive then
             rf.party_threatBorderSize = nil
+        end
+    end,
+})
+
+--------------------------------------------------------------------------------
+--  Cyrillic locales gained real font choice: several bundled faces carry the
+--  full Cyrillic block (EllesmereUI.FONT_CYRILLIC) and ResolveFontName now
+--  honours them instead of forcing the system glyph font. That must not change
+--  what anyone already sees, so existing installs are pinned to System Default
+--  and the new faces stay an opt-in pick.
+--
+--  Detecting "untouched" is exact here: before this change the ruRU picker could
+--  only ever store the __system sentinel, the __expressway sentinel, or an
+--  external SharedMedia name. Plain "Expressway" was unreachable as a choice, so
+--  it can only be the seeded default -- rewriting just that value leaves every
+--  deliberate pick alone. Fresh installs never reach this body; GetFontsDB seeds
+--  the correct default for them directly.
+--------------------------------------------------------------------------------
+EllesmereUI.RegisterMigration({
+    id          = "ru_cyrillic_font_optin_v1",
+    scope       = "global",
+    description = "Pin existing Cyrillic-locale installs to the system glyph font so the newly selectable bundled Cyrillic faces stay opt-in.",
+    body        = function(ctx)
+        if EllesmereUI.LOCALE_SCRIPT ~= "cyrillic" then return end
+        local fonts = ctx.db and ctx.db.fonts
+        if not fonts then return end            -- fresh install: GetFontsDB seeds it
+        if fonts.global == "Expressway" then
+            fonts.global = EllesmereUI.SYSTEM_FONT_KEY
         end
     end,
 })

@@ -1,7 +1,7 @@
 ## Interface: 120100
 ## Title: Grid2
 ## Author: Pastamancer & Maia, Jerry, Toadkiller
-## Version: 4.0.9-beta
+## Version: 4.0.12
 ## IconTexture: Interface/AddOns/Grid2/media/iconsmall.tga
 ## Notes: A modular, lightweight and screen-estate saving grid of party/raid unit frames
 ## Notes-esES: Marcos de unidades de raid compactos y ligeros.
@@ -63,6 +63,7 @@ modules\IndicatorBorder.lua
 modules\IndicatorBorderGlow.lua
 modules\IndicatorBackground.lua
 modules\IndicatorBar.lua
+modules\IndicatorBarAura.lua
 modules\IndicatorMultiBar.lua
 modules\IndicatorText.lua
 modules\IndicatorIcon.lua

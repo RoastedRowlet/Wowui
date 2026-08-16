@@ -13,6 +13,18 @@ ns.TrackingOptions = ns.TrackingOptions or {}
 local AceConfig = LibStub("AceConfig-3.0")
 local AceConfigDialog = LibStub("AceConfigDialog-3.0")
 
+-- Totem / pet / ground bars are driven entirely by ArcUI off GetTotemDuration,
+-- never by the 12.1 aura-slot engine, so a custom max IS expressible for them
+-- (Display maps remaining seconds through our own curve). Every other duration
+-- bar goes through the engine timer, which takes no maximum -- those stay locked
+-- to Auto. See IsTotemLikeBar in ArcUI_Display.lua.
+local TOTEM_LIKE_TRACKTYPES = { pet = true, totem = true, ground = true }
+local function MaxDurationLocked(cfg)
+  if not (ns.API and ns.API.IS_121) then return false end
+  local tt = cfg and cfg.tracking and cfg.tracking.trackType
+  return not (tt and TOTEM_LIKE_TRACKTYPES[tt])
+end
+
 -- ===================================================================
 -- UI STATE
 -- ===================================================================
@@ -954,17 +966,35 @@ local function CreateActiveBarEntry(barNum, orderBase, filterDisplayType, labelP
         hidden = function()
           if not expandedBars[barKey] then return true end
           local cfg = ns.API.GetBarConfig(barNum)
-          -- Hide for duration bars with Auto enabled (Max Ticks moved to Appearance panel)
-          if cfg and cfg.tracking.useDurationBar and cfg.tracking.dynamicMaxDuration then return true end
+          -- Hide for duration bars with Auto enabled (Max Ticks moved to Appearance panel).
+          -- On 12.1 Auto is forced on, so a manual max could never apply -- do not
+          -- offer a field that does nothing.
+          if cfg and cfg.tracking.useDurationBar
+            and (cfg.tracking.dynamicMaxDuration or MaxDurationLocked(cfg)) then return true end
           return false
         end
       },
       dynamicMax = {
         type = "toggle",
         name = "Auto",
-        desc = "Automatically get max duration from the CDM bar (adapts to haste, talents, etc.). Set Max (Ticks) in the Appearance panel for tick mark positioning.",
+        -- 12.1: a custom maximum is no longer expressible. The engine timer takes
+        -- SetTimerDuration(duration, interpolation, direction) with no max, the
+        -- duration-bar options table is only {interpolation, direction}, and the
+        -- aura's real length is secret so the fraction cannot be computed either.
+        -- Locked to Auto and disclaimed rather than silently ignored. Flip these
+        -- three functions back if Blizzard restores the parameter.
+        desc = function()
+          if MaxDurationLocked(ns.API.GetBarConfig(barNum)) then
+            return "|cffff9900Locked to Auto.|r Blizzard's 12.1 aura timer no longer accepts a custom maximum, and an aura's real length is hidden from addons.\nBars fill over the aura's own full duration until Blizzard restores it."
+          end
+          return "Automatically get max duration from the CDM bar (adapts to haste, talents, etc.). Set Max (Ticks) in the Appearance panel for tick mark positioning."
+        end,
+        disabled = function()
+          return MaxDurationLocked(ns.API.GetBarConfig(barNum))
+        end,
         get = function()
           local cfg = ns.API.GetBarConfig(barNum)
+          if MaxDurationLocked(cfg) then return true end
           return cfg and cfg.tracking.dynamicMaxDuration
         end,
         set = function(info, value)
@@ -982,6 +1012,23 @@ local function CreateActiveBarEntry(barNum, orderBase, filterDisplayType, labelP
         hidden = function()
           if not expandedBars[barKey] then return true end
           local cfg = ns.API.GetBarConfig(barNum)
+          return not (cfg and cfg.tracking.useDurationBar)
+        end
+      },
+      -- The desc above can never render while the toggle is disabled: AceGUI's
+      -- checkbox is a Button and calls frame:Disable(), and a disabled Button does
+      -- not run OnEnter/OnLeave unless SetMotionScriptsWhileDisabled(true) is set
+      -- (AceGUI never does). So the disclaimer has to be visible text, not a tooltip.
+      dynamicMaxNote = {
+        type = "description",
+        name = "|cffff9900Locked to Auto.|r 12.1 removed the API for a custom maximum, so bars fill over the aura's own full duration.",
+        fontSize = "small",
+        order = 4.6,
+        width = "full",
+        hidden = function()
+          if not expandedBars[barKey] then return true end
+          local cfg = ns.API.GetBarConfig(barNum)
+          if not MaxDurationLocked(cfg) then return true end
           return not (cfg and cfg.tracking.useDurationBar)
         end
       },
@@ -1897,15 +1944,35 @@ local function CreateActiveTextureEntry(num, orderBase)
     },
   }
 
-  -- Aura Type (buff/debuff) -- relocated here from the removed Textures > Trigger tab.
+  -- Tracking Type -- the SAME choice set as the bars (one mental model):
+  -- aura lanes (Buff / Debuff / Buff on Pet) route to their unit's aura
+  -- engine; Pet / Totem / Ground Effect route to the totem-slot duration
+  -- path (secret-safe, works in combat and instances). Unset = orange
+  -- "Type" + forced "-- Select Type --" entry, exactly like the bars.
   args.auraType = {
     type = "select",
-    name = "Aura Type",
-    desc = "Track this aura as a Buff (on you) or a Debuff (on your target).",
-    values = { buff = "Buff", debuff = "Debuff" },
+    name = function()
+      local cfg = texCfg()
+      if cfg and (not cfg.tracking or not cfg.tracking.trackType or cfg.tracking.trackType == "") then
+        return "|cffFF6600Type|r"
+      end
+      return "Type"
+    end,
+    desc = "What this texture tracks.\n\n|cffffd700Buff|r - a buff on you\n|cffffd700Debuff|r - your debuff on the target\n|cffffd700Buff on Pet|r - a buff on your pet\n|cffffd700Pet / Totem / Ground Effect|r - a summon's remaining duration, read from the totem slots (works in combat and instances)",
+    values = function()
+      local v = { [""] = "-- Select Type --", ["buff"] = "Buff", ["debuff"] = "Debuff", ["pet"] = "Pet", ["totem"] = "Totem", ["ground"] = "Ground Effect" }
+      if ns.API and ns.API.IS_121 then v["petbuff"] = "Buff on Pet" end
+      return v
+    end,
+    sorting = function()
+      if ns.API and ns.API.IS_121 then
+        return { "", "buff", "debuff", "petbuff", "pet", "totem", "ground" }
+      end
+      return { "", "buff", "debuff", "pet", "totem", "ground" }
+    end,
     get = function()
       local cfg = texCfg()
-      return (cfg and cfg.tracking and cfg.tracking.trackType) or "buff"
+      return (cfg and cfg.tracking and cfg.tracking.trackType) or ""
     end,
     set = function(_, v)
       local cfg = texCfg()
@@ -2487,13 +2554,14 @@ function ns.TrackingOptions.GetBuffDebuffSetupTable()
           local entry = GetSelectedCatalogEntry()
           if not entry then return end
 
-          -- Custom aura entry: engine-driven texture, no CDM source
+          -- Custom aura entry: engine-driven texture, no CDM source.
+          -- NO tab jump (Arc's call): stay here with the new texture's setup
+          -- row expanded so the user confirms its Type first, same as bars.
           if entry.isCustomAura then
             local ok, result = ns.Catalog.CreateCustomAuraTexture(entry.spellID, entry.trackType)
             if ok then
-              print(string.format("|cff00ccffArc UI|r: Created texture #%d — configure it in Buffs/Debuffs > Textures (use Progress mode).", result))
-              local acd = LibStub and LibStub("AceConfigDialog-3.0", true)
-              if acd and acd.SelectGroup then acd:SelectGroup("ArcUI", "auras", "textures") end
+              expandedTextures["tex_" .. result] = true
+              print(string.format("|cff00ccffArc UI|r: Created texture #%d — set it up below (use Progress mode), then Edit Texture for looks.", result))
             else
               print("|cff00ccffArc UI|r: " .. tostring(result))
             end
@@ -2514,14 +2582,13 @@ function ns.TrackingOptions.GetBuffDebuffSetupTable()
             cooldownID = entry.cooldownID,
             slotNumber = 0,
             maxStacks = 10,
+            trackType = entry.trackType,   -- bakes when the entry knows its type
           }, num)
           local db = ns.API.GetDB and ns.API.GetDB()
           if db then db.selectedTexture = num end
-          print(string.format("|cff00ccffArc UI|r: Created texture for |cffffd700%s|r - configure it in Buffs/Debuffs > Textures.", entry.name or "aura"))
-          if LibStub then
-            local acd = LibStub("AceConfigDialog-3.0", true)
-            if acd and acd.SelectGroup then acd:SelectGroup("ArcUI", "auras", "textures") end
-          end
+          -- NO tab jump: expand the setup row so the Type choice comes first.
+          expandedTextures["tex_" .. num] = true
+          print(string.format("|cff00ccffArc UI|r: Created texture for |cffffd700%s|r - set it up below, then Edit Texture for looks.", entry.name or "aura"))
           LibStub("AceConfigRegistry-3.0"):NotifyChange("ArcUI")
         end,
         order = 8.8,

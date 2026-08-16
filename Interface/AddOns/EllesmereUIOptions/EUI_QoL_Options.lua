@@ -616,6 +616,97 @@ initFrame:SetScript("OnEvent", function(self)
               end }
         );  y = y - h
 
+        -- Row: Hide Loot Rolls Window (left, with settings cog)
+        local lootHistRow
+        lootHistRow, h = W:DualRow(parent, y,
+            { type="toggle", text="Hide Loot Rolls Window",
+              tooltip="Hides Blizzard's \"Loot Rolls\" window -- the running list of dropped items showing who rolled what and who won. Use the cog to let it appear briefly and close itself instead. The Need/Greed roll popups themselves are not affected.",
+              getValue=function()
+                  return EllesmereUIDB and EllesmereUIDB.hideLootHistory or false
+              end,
+              setValue=function(v)
+                  if not EllesmereUIDB then EllesmereUIDB = {} end
+                  EllesmereUIDB.hideLootHistory = v
+                  if EllesmereUI._applyHideLootHistory then EllesmereUI._applyHideLootHistory() end
+                  EllesmereUI:RefreshPage()  -- update the cog disabled state
+              end },
+            { type="label", text="" }
+        );  y = y - h
+
+        -- Inline cog (mode + auto-close delay) on the Hide Loot Rolls toggle
+        if not EllesmereUI._prebuilding then
+            local leftRgn = lootHistRow._leftRegion
+            local function lootHistOff()
+                return not (EllesmereUIDB and EllesmereUIDB.hideLootHistory)
+            end
+            -- The delay only means anything in auto-close mode.
+            local function delayOff()
+                return lootHistOff()
+                    or (EllesmereUIDB and EllesmereUIDB.lootHistoryMode) ~= "autoclose"
+            end
+
+            local lhModeValues = {
+                hide      = "Hide Completely",
+                autoclose = "Close After Delay",
+            }
+            local lhModeOrder = { "hide", "autoclose" }
+
+            local _, lootHistCogShow = EllesmereUI.BuildCogPopup({
+                title = "Loot Rolls Window Settings",
+                minWidth = 300,
+                rows = {
+                    { type="dropdown", label="Mode",
+                      values=lhModeValues, order=lhModeOrder,
+                      get=function() return (EllesmereUIDB and EllesmereUIDB.lootHistoryMode) or "hide" end,
+                      set=function(v)
+                        if not EllesmereUIDB then EllesmereUIDB = {} end
+                        EllesmereUIDB.lootHistoryMode = v
+                        if EllesmereUI._applyHideLootHistory then EllesmereUI._applyHideLootHistory() end
+                      end },
+                    { type="slider", label="Close After (sec)",
+                      min=1, max=30, step=1,
+                      disabled=delayOff,
+                      get=function()
+                        return (EllesmereUIDB and EllesmereUIDB.lootHistoryDelay) or 5
+                      end,
+                      set=function(v)
+                        if not EllesmereUIDB then EllesmereUIDB = {} end
+                        EllesmereUIDB.lootHistoryDelay = v
+                        if EllesmereUI._applyHideLootHistory then EllesmereUI._applyHideLootHistory() end
+                      end },
+                },
+            })
+
+            local lhCogBtn = CreateFrame("Button", nil, leftRgn)
+            lhCogBtn:SetSize(26, 26)
+            lhCogBtn:SetPoint("RIGHT", leftRgn._lastInline or leftRgn._control, "LEFT", -9, 0)
+            leftRgn._lastInline = lhCogBtn
+            lhCogBtn:SetFrameLevel(leftRgn:GetFrameLevel() + 5)
+            lhCogBtn:SetAlpha(lootHistOff() and 0.15 or 0.4)
+            local lhCogTex = lhCogBtn:CreateTexture(nil, "OVERLAY")
+            lhCogTex:SetAllPoints()
+            lhCogTex:SetTexture(EllesmereUI.COGS_ICON)
+            lhCogBtn:SetScript("OnEnter", function(self) self:SetAlpha(0.7) end)
+            lhCogBtn:SetScript("OnLeave", function(self) self:SetAlpha(lootHistOff() and 0.15 or 0.4) end)
+            lhCogBtn:SetScript("OnClick", function(self) lootHistCogShow(self) end)
+
+            local lhCogBlock = CreateFrame("Frame", nil, lhCogBtn)
+            lhCogBlock:SetAllPoints()
+            lhCogBlock:SetFrameLevel(lhCogBtn:GetFrameLevel() + 10)
+            lhCogBlock:EnableMouse(true)
+            lhCogBlock:SetScript("OnEnter", function()
+                EllesmereUI.ShowWidgetTooltip(lhCogBtn, EllesmereUI.DisabledTooltip("Hide Loot Rolls Window"))
+            end)
+            lhCogBlock:SetScript("OnLeave", function() EllesmereUI.HideWidgetTooltip() end)
+
+            EllesmereUI.RegisterWidgetRefresh(function()
+                local off = lootHistOff()
+                lhCogBtn:SetAlpha(off and 0.15 or 0.4)
+                if off then lhCogBlock:Show() else lhCogBlock:Hide() end
+            end)
+            if lootHistOff() then lhCogBlock:Show() else lhCogBlock:Hide() end
+        end
+
         -- Row 7: Announce Group Deaths (left, with Text Size cog) | Hide Item
         -- Transforms (right, with picker cog)
         local deathRow
@@ -1675,7 +1766,7 @@ initFrame:SetScript("OnEvent", function(self)
             EllesmereUI.RegisterWidgetRefresh(ssUpdateState)
             ssUpdateState()
 
-            -- Cog popup: Show Tertiary Stats toggle + tertiary swatch pair + Scale
+            -- Cog popup: stat visibility/order + tertiary swatch pair + Scale
             local function tsMode()
                 local m = EllesmereUI.QoLExtrasGet("tertiaryStatsColorMode")
                 if m then return m end
@@ -1685,6 +1776,23 @@ initFrame:SetScript("OnEvent", function(self)
             local function tsSetMode(v)
                 EllesmereUI.QoLExtrasSet("tertiaryStatsColorMode", v)
                 if EllesmereUI._applySecondaryStats then EllesmereUI._applySecondaryStats() end
+            end
+            local STAT_LABELS = {
+                crit = "Crit", haste = "Haste", mastery = "Mastery", vers = "Versatility",
+                leech = "Leech", avoidance = "Avoidance", speed = "Speed",
+            }
+            local TERTIARY_STATS = { leech = true, avoidance = true, speed = true }
+            local DEFAULT_STAT_ORDER = {
+                "crit", "haste", "mastery", "vers", "leech", "avoidance", "speed",
+            }
+            local function StatItems()
+                local order = EllesmereUI._secondaryStatsOrder
+                    and EllesmereUI._secondaryStatsOrder() or DEFAULT_STAT_ORDER
+                local items = {}
+                for _, key in ipairs(order) do
+                    items[#items + 1] = { key = key, label = STAT_LABELS[key] }
+                end
+                return items
             end
             local _, ssCogShow = EllesmereUI.BuildCogPopup({
                 title = "Secondary Stats Settings",
@@ -1699,12 +1807,63 @@ initFrame:SetScript("OnEvent", function(self)
                           EllesmereUI.QoLExtrasSet("coloredPercentages", v)
                           if EllesmereUI._applySecondaryStats then EllesmereUI._applySecondaryStats() end
                       end },
-                    { type = "toggle", label = "Show Tertiary Stats",
+                    { type = "toggle", label = "Abbreviate Stat Labels",
                       get = function()
-                          return EllesmereUI.QoLExtrasGet("showTertiaryStats") or false
+                          return EllesmereUI.QoLExtrasGet("secondaryStatsAbbreviateLabels") or false
                       end,
                       set = function(v)
-                          EllesmereUI.QoLExtrasSet("showTertiaryStats", v)
+                          EllesmereUI.QoLExtrasSet("secondaryStatsAbbreviateLabels", v)
+                          if EllesmereUI._applySecondaryStats then EllesmereUI._applySecondaryStats() end
+                      end },
+                    { type = "toggle", label = "Show Raw Rating",
+                      get = function()
+                          return EllesmereUI.QoLExtrasGet("showSecondaryStatsRaw") or false
+                      end,
+                      set = function(v)
+                          EllesmereUI.QoLExtrasSet("showSecondaryStatsRaw", v)
+                          if v then EllesmereUI.QoLExtrasSet("showSecondaryStatsBoth", false) end
+                          if EllesmereUI._applySecondaryStats then EllesmereUI._applySecondaryStats() end
+                      end },
+                    { type = "toggle", label = "Show % and Raw",
+                      get = function()
+                          return EllesmereUI.QoLExtrasGet("showSecondaryStatsBoth") or false
+                      end,
+                      set = function(v)
+                          EllesmereUI.QoLExtrasSet("showSecondaryStatsBoth", v)
+                          if v then EllesmereUI.QoLExtrasSet("showSecondaryStatsRaw", false) end
+                          if EllesmereUI._applySecondaryStats then EllesmereUI._applySecondaryStats() end
+                      end },
+                    { type = "reordercheck", label = "Stats to Show",
+                      items = StatItems,
+                      hint = "Drag to Reorder",
+                      get = function(key)
+                          local hidden = EllesmereUI.QoLExtrasGet("secondaryStatsHidden")
+                          return not (type(hidden) == "table" and hidden[key])
+                      end,
+                      set = function(key, shown)
+                          local old = EllesmereUI.QoLExtrasGet("secondaryStatsHidden")
+                          local hidden = {}
+                          if type(old) == "table" then
+                              for k, v in pairs(old) do hidden[k] = v end
+                          end
+                          if shown then
+                              -- Tertiaries default off, so false is the explicit
+                              -- per-profile override that keeps one checked.
+                              if TERTIARY_STATS[key] then
+                                  hidden[key] = false
+                              else
+                                  hidden[key] = nil
+                              end
+                          else
+                              hidden[key] = true
+                          end
+                          EllesmereUI.QoLExtrasSet("secondaryStatsHidden", hidden)
+                          if EllesmereUI._applySecondaryStats then EllesmereUI._applySecondaryStats() end
+                      end,
+                      setOrder = function(keys)
+                          local order = {}
+                          for i, key in ipairs(keys) do order[i] = key end
+                          EllesmereUI.QoLExtrasSet("secondaryStatsOrder", order)
                           if EllesmereUI._applySecondaryStats then EllesmereUI._applySecondaryStats() end
                       end },
                     -- Class / custom swatch pair, the same convention as the
@@ -1712,9 +1871,11 @@ initFrame:SetScript("OnEvent", function(self)
                     -- naming tooltip on each swatch.
                     { type = "multiswatch", label = "Tertiary Label Color",
                       disabled = function()
-                          return not EllesmereUI.QoLExtrasGet("showTertiaryStats")
+                          local hidden = EllesmereUI.QoLExtrasGet("secondaryStatsHidden")
+                          return type(hidden) == "table"
+                              and hidden.leech and hidden.avoidance and hidden.speed
                       end,
-                      disabledTooltip = "Show Tertiary Stats",
+                      disabledTooltip = "a tertiary stat in Stats to Show",
                       swatches = {
                           { tooltip = "Class Color",
                             getValue = function()
@@ -2635,6 +2796,10 @@ initFrame:SetScript("OnEvent", function(self)
                 EllesmereUIDB.shifterEnabled = false
                 EllesmereUIDB.shifterPositions = nil
                 EllesmereUIDB.hideErrorMessages = false
+                EllesmereUIDB.hideLootHistory = false
+                EllesmereUIDB.lootHistoryMode = nil
+                EllesmereUIDB.lootHistoryDelay = nil
+                if EllesmereUI._applyHideLootHistory then EllesmereUI._applyHideLootHistory() end
                 EllesmereUIDB.announceGroupDeaths = false
                 EllesmereUIDB.groupDeathTextSize = nil
                 EllesmereUIDB.groupDeathAlertPos = nil

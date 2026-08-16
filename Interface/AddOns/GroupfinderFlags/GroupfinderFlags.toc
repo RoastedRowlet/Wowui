@@ -1,8 +1,8 @@
-## Interface: 120005 
+## Interface: 120100 
 ## Author: Spielstein@Curse
 ## Title: GroupfinderFlags
 ## Notes: Display the country's flags of the realm of a group finder applicant
-## Version : 0.28a
+## Version : 0.29
 ## IconTexture: Interface\AddOns\GroupfinderFlags\misc_images\merged_flags.tga
 ## SavedVariables: GroupfinderFlagsDB
 

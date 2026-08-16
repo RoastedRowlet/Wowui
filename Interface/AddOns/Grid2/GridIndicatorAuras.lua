@@ -38,10 +38,31 @@ end
 
 --=====================================================================
 
+-- a new container is born enabled at unitToken "none", where it collects every unit's auras
+-- TODO verify if this is really necessary, because hidden auraContainers dont register unit events
+-- and the only auraContainers with "none" unit are the hidden ones (unit frames with no unit assigned).
+-- There should be only one case when this could be necessary: when a relayout is done and auraContainers
+-- are recreated, but this should only happen when active theme changes and in this case the Layout
+-- is reloaded, units frames headers are disabled/reenabled and GridFramePrototype:UpdateAuraContainers()
+-- is already called for each reenabled unit frame, reasigning the correct unit for every active unit frame.
+local function BindAuraContainer(container, unit)
+	if unit then
+		container:SetUnit(unit)
+		container:SetShown(true)
+		container:SetEnabled(true)
+	else
+		container:SetEnabled(false)
+		container:SetShown(false)
+	end
+end
+
+--=====================================================================
+
 function indicator:AcquireAuraContainer(parent, key, frame)
 	local container = parent.__auraManager[key] -- __auraManager declared in GridFrame.lua
 	if not container then
 		container = CreateFrame("AuraContainer", nil, frame or parent, "CustomAuraContainerTemplate")
+		BindAuraContainer(container, parent.unit)
 		parent.__auraManager[key] = container
 	end
 	return container
@@ -69,6 +90,7 @@ local function GetAuraSlotsContainer(parent)
 	local container = parent.__auraManager[0] -- __auraManager declared in GridFrame.lua
 	if not container then
 		container = CreateFrame("AuraContainer", nil, parent, "CustomAuraContainerTemplate")
+		BindAuraContainer(container, parent.unit)
 		container.slotCount = 0
 		container.slotEnabled = {}
 		container.slotDisabled = {}

@@ -12689,8 +12689,33 @@ local function SyncEditModeIconCounts()
     if InCombatLockdown() then return end
     if not C_EditMode or not C_EditMode.GetLayouts or not C_EditMode.SaveLayouts then return end
 
+    -- Never write while Blizzard's Edit Mode is open. The manager keeps its OWN copy of
+    -- layoutInfo for the whole session and pushes that copy whole on Save, so a write from here
+    -- is either discarded by the next Save or discards the edit in progress. This runs again on
+    -- the next options close, so skipping costs nothing.
+    local emf = _G.EditModeManagerFrame
+    if emf and (emf.editModeActive or (emf.IsShown and emf:IsShown())) then return end
+
     local ok, layoutInfo = pcall(C_EditMode.GetLayouts)
     if not ok or type(layoutInfo) ~= "table" or type(layoutInfo.layouts) ~= "table" then return end
+
+    -- SaveLayouts replaces the character's ENTIRE layout set (the client holds it and writes it
+    -- at logout), so the payload has to have the shape Blizzard always passes: the preset layouts
+    -- first, then the saved ones, with activeLayout an index into that merged list.
+    -- C_EditMode.GetLayouts returns only the saved half, so writing it straight back hands the
+    -- client a list whose indices no longer line up with the activeLayout riding along with it.
+    -- Rebuild the list the way EditModeManagerFrame:UpdateLayoutInfo does before saving, and if
+    -- the presets cannot be resolved, skip the write entirely rather than send the short list.
+    local numPresets = 0
+    if EditModePresetLayoutManager and EditModePresetLayoutManager.GetCopyOfPresetLayouts then
+        local presets = EditModePresetLayoutManager:GetCopyOfPresetLayouts()
+        if type(presets) == "table" then
+            numPresets = #presets
+            tAppendAll(presets, layoutInfo.layouts)
+            layoutInfo.layouts = presets
+        end
+    end
+    if numPresets == 0 then return end
 
     -- Build desired icon counts keyed by systemIndex (all bars are system 0).
     -- MainMenuBar has no system; MainActionBar is system=0 systemIndex=1.
@@ -12722,9 +12747,10 @@ local function SyncEditModeIconCounts()
     local HIDE_BAR_ART_SETTING = Enum and Enum.EditModeActionBarSetting
         and Enum.EditModeActionBarSetting.HideBarArt
 
-    -- Check ALL layouts so switching never reverts to fewer icons.
-    for _, layout in ipairs(layoutInfo.layouts) do
-        if type(layout.systems) == "table" then
+    -- Check ALL saved layouts so switching never reverts to fewer icons. The merged-in presets
+    -- are read-only (SaveLayouts drops edits to them), so they are carried through untouched.
+    for layoutIndex, layout in ipairs(layoutInfo.layouts) do
+        if layoutIndex > numPresets and type(layout.systems) == "table" then
             for _, sysInfo in ipairs(layout.systems) do
                 if sysInfo.system == 0 and sysInfo.systemIndex and type(sysInfo.settings) == "table" then
                     local want = desired[sysInfo.systemIndex]
@@ -12968,7 +12994,12 @@ function EAB:FinishSetup()
     local _gridRestorePending = false
     local function RestoreGridSurfacedBars()
         _gridRestorePending = false
-        if InCombatLockdown() then return end
+        if InCombatLockdown() then
+            -- Restore swallowed by combat (drag ended after combat began):
+            -- flag the regen ApplyAll so the stomped drivers still re-derive.
+            ns._eabApplyDeferred = true
+            return
+        end
         -- If something is still on the cursor (spell swap), don't restore yet
         if GetCursorInfo() then return end
         for key in pairs(_gridSurfacedBars) do
@@ -12976,10 +13007,6 @@ function EAB:FinishSetup()
             local s = EAB.db.profile.bars[key]
             local frame = barFrames[key]
             if info and s and frame then
-                local vis = s.barVisibility or "always"
-                if vis ~= "always" and vis ~= "never" then
-                    RegisterAttributeDriver(frame, "state-visibility", BuildVisibilityString(info, s))
-                end
                 if s.mouseoverEnabled then
                     -- The drag has fully ended (cursor cleared, checked above). If
                     -- the cursor is still over this bar, the spell was dropped here
@@ -13000,6 +13027,14 @@ function EAB:FinishSetup()
             end
         end
         wipe(_gridSurfacedBars)
+        -- Re-derive every driver through the single recompute site instead of
+        -- a local predicate: the surface condition above admits option-driven
+        -- bars (visHideMounted etc.) whose barVisibility is "always", and a
+        -- restore predicate maintained separately drifted and left exactly
+        -- those bars stuck on "show" until a settings toggle or /reload. The
+        -- surface stomp syncs _eabLastVisStr, so this compare-and-register
+        -- pass re-registers precisely the stomped bars.
+        EAB:RefreshRuntimeVisibility()
     end
     -- Registering events on a frame stamps it with the EventRegistrations forbidden
     -- aspect, and the restricted environment refuses frames carrying any aspect. The
@@ -13056,6 +13091,13 @@ function EAB:FinishSetup()
                             if hasCondition then
                                 _gridSurfacedBars[info.key] = true
                                 RegisterAttributeDriver(frame, "state-visibility", "show")
+                                -- Keep the cache in sync with the stomp (same
+                                -- class as the QuickKeybind surface fix): a
+                                -- stale cache holding the real string makes
+                                -- every later refresh compare equal and skip
+                                -- re-registering, leaving the bar stuck on
+                                -- "show" until a settings toggle or /reload.
+                                frame._eabLastVisStr = "show"
                                 frame:Show()
                             end
                             -- Mouseover bars: force alpha to 1 during drag
@@ -14152,10 +14194,13 @@ local function ApplyDataBarLayout(barKey)
         frame._restedBar:SetRotatesTexture(orient ~= "HORIZONTAL")
     end
 
-    -- Per-bar Text Size (default 9). Re-applied here so the options slider
-    -- takes effect live through the existing ApplyDataBarLayout calls.
+    -- Per-bar Text Size (default 9) + text X/Y offsets (default 0,0).
+    -- Re-applied here so the options slider and offset cog take effect live
+    -- through the existing ApplyDataBarLayout calls.
     if frame._text then
         frame._text:SetFont(FONT_PATH, s.textSize or 9, GetEABOutline())
+        frame._text:ClearAllPoints()
+        frame._text:SetPoint("CENTER", s.textOffsetX or 0, s.textOffsetY or 0)
     end
 
     if frame._updateFunc then frame._updateFunc() end
@@ -14196,12 +14241,22 @@ local function CreateDataBarFrame(barKey, updateFunc)
     bar:SetValue(0)
     bar:GetStatusBarTexture():SetDrawLayer("ARTWORK", 4)
 
-    local text = bar:CreateFontString(nil, "OVERLAY")
+    -- Text lives on its own host ABOVE the MakeBorder strips: the border
+    -- container renders two levels above the holder, and frame level beats
+    -- draw layer, so a string on the bar itself gets cut by the border edges
+    -- whenever the glyphs reach them (large Text Size / short bars).
+    local textHost = CreateFrame("Frame", nil, bar)
+    textHost:SetAllPoints(bar)
+    local edges = holder._border and holder._border.edges
+    textHost:SetFrameLevel(((edges and edges.GetFrameLevel and edges:GetFrameLevel())
+        or holder:GetFrameLevel() + 2) + 1)
+
+    local text = textHost:CreateFontString(nil, "OVERLAY")
     if EllesmereUI and EllesmereUI.PrimeFontShadow then EllesmereUI.PrimeFontShadow(text, GetEABUseShadow()) end
-    local textSize = EAB.db and EAB.db.profile and EAB.db.profile.bars
-        and EAB.db.profile.bars[barKey] and EAB.db.profile.bars[barKey].textSize or 9
-    text:SetFont(FONT_PATH, textSize, GetEABOutline())
-    text:SetPoint("CENTER")
+    local sInit = EAB.db and EAB.db.profile and EAB.db.profile.bars
+        and EAB.db.profile.bars[barKey]
+    text:SetFont(FONT_PATH, sInit and sInit.textSize or 9, GetEABOutline())
+    text:SetPoint("CENTER", sInit and sInit.textOffsetX or 0, sInit and sInit.textOffsetY or 0)
     text:SetTextColor(1, 1, 1, 1)
 
     holder._bar = bar

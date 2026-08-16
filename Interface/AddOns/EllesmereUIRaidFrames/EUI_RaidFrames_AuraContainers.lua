@@ -1346,6 +1346,17 @@ local function BmApplyBar(button, dd, style)
     local ind = style.ind
     local r, g, b = BmColor(ind.color, 12 / 255, 210 / 255, 157 / 255)
     dd.bar:GetStatusBarTexture():SetVertexColor(r, g, b, (ind.barColorOpacity or 100) / 100)
+    -- Fill AXIS, mirroring what the preview has always done in BM_PlaceBar.
+    -- Change-guarded like the frame-level write below: SetOrientation resets the
+    -- bar's fill, so calling it on every restyle would visibly stutter a running
+    -- bar. Orientation has to be in BmVisualKey for this to run at all -- it
+    -- otherwise lives only in the geometry fingerprint, which drives the anchor
+    -- pass and never reaches here.
+    local isVert = (ind.orientation or "HORIZONTAL") == "VERTICAL"
+    if dd.bmBarVert ~= isVert then
+        dd.bmBarVert = isVert
+        dd.bar:SetOrientation(isVert and "VERTICAL" or "HORIZONTAL")
+    end
     dd.bar:SetReverseFill(ind.reverseFill == true)
     local bgr, bgg, bgb = BmColor(ind.barBgColor, 0, 0, 0)
     dd.barBg:SetColorTexture(bgr, bgg, bgb, (ind.barBgOpacity or 50) / 100)
@@ -1367,7 +1378,14 @@ local function BmApplyEffect(button, dd, style)
     if ind.type == "healthcolor" or ind.type == "bgcolor" then
         if dd.tex then
             local r, g, b = BmColor(ind.color, 0, 1, 0)
-            dd.tex:SetColorTexture(r, g, b, (ind.opacity or 100) / 100)
+            local a = (ind.opacity or 100) / 100
+            -- healthcolor rides the fill and borrows its texture; bgcolor covers
+            -- the bar's background, which is a flat color fill, so it stays flat.
+            if ind.type == "healthcolor" then
+                ns.RF_TintOverBarFill(dd.tex, dd.bmHealthBar, r, g, b, a)
+            else
+                dd.tex:SetColorTexture(r, g, b, a)
+            end
         end
     elseif ind.type == "border" then
         -- Full legacy renderer (solid/dashed/textured/sweep) on the border host --
@@ -1438,6 +1456,14 @@ local function BmBarInit(button, dd, style, ind, health)
     dd.barBg = bar:CreateTexture(nil, "BACKGROUND")
     dd.barBg:SetAllPoints(bar)
 
+    -- Fill AXIS. A StatusBar defaults to HORIZONTAL, so a vertical bar rendered
+    -- tall and narrow (BmAnchorOneSlot) while still draining sideways until this
+    -- landed. Set BEFORE the engine registration below in case the axis is
+    -- snapshotted there; BmApplyBar re-drives it for live toggles.
+    local initVert = ((style.ind and style.ind.orientation) or "HORIZONTAL") == "VERTICAL"
+    bar:SetOrientation(initVert and "VERTICAL" or "HORIZONTAL")
+    dd.bmBarVert = initVert
+
     local opts = {}
     if Enum.StatusBarInterpolation then opts.interpolation = Enum.StatusBarInterpolation.Immediate end
     if Enum.StatusBarTimerDirection then opts.direction = Enum.StatusBarTimerDirection.RemainingTime end
@@ -1456,6 +1482,7 @@ local function BmEffectInit(button, dd, style, ind, health)
         -- opaque heal absorb. Anchored to the fill texture so only the filled portion
         -- tints, not empty/missing health.
         button:SetFrameLevel(health:GetFrameLevel())
+        dd.bmHealthBar = health  -- apply pass borrows this bar's fill texture
         dd.tex = button:CreateTexture(nil, "ARTWORK", nil, 2)
         local fillTex = health.GetStatusBarTexture and health:GetStatusBarTexture()
         if fillTex then
@@ -1463,6 +1490,7 @@ local function BmEffectInit(button, dd, style, ind, health)
         else
             dd.tex:SetAllPoints(health)
         end
+        ns.RF_RegisterBarTint(health, dd.tex, nil, "bm")
     elseif ind.type == "bgcolor" then
         -- Background Color: whole health area, ARTWORK -2 = below fill (sublevel 0)
         -- and healthcolor tint (+2), above the bar's own backdrop -- reads as bg.
@@ -1921,7 +1949,10 @@ local function BmVisualKey(kind, ind, size, font, spellID)
             ind.displayGlowR, ind.displayGlowG, ind.displayGlowB)
     end
     if kind == "bar" then
-        return FP(CK(ind.color), ind.barColorOpacity, ind.reverseFill,
+        -- orientation is the one geometry field that is ALSO a visual: it swaps
+        -- the bar's screen axis (BmGeoFP, anchor pass) and its fill axis
+        -- (BmApplyBar). The other bar geometry stays out on purpose.
+        return FP(CK(ind.color), ind.barColorOpacity, ind.reverseFill, ind.orientation,
             CK(ind.barBgColor), ind.barBgOpacity, ind.frameLevel, tostring(BmTipMode()))
     end
     return FP(ind.type, CK(ind.color), ind.opacity, ind.borderWidth, ind.borderOpacity,
@@ -2683,6 +2714,11 @@ local function ReloadBm(button, d, s, cls)
         if d.rfcBm then AK.ReleaseContainer(d.rfcBm) end
         d.rfcBm, d.rfcBmFrames, d.rfcBmMeta, d.rfcBmChain = nil, nil, nil, nil
         d.rfcBmSig = nil
+        -- Those slot buttons own this bar's Health Bar Color overlays, and engine
+        -- frames are never freed (see above), so their registry entries would pile
+        -- up one set per rebuild and every later layout pass would walk the dead
+        -- ones. The registry is pure cache: the next paint re-adds what is live.
+        ns.RF_ClearBarTints(d.rfcHealth, "bm")
         -- Rebuild through the shared scheduler; the job reads live settings
         -- at run time, so rapid consecutive changes converge.
         AK.QueueBuildJob(function()

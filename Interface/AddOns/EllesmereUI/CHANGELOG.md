@@ -1,450 +1,390 @@
 # EllesmereUI
 
-## [v8.8.6](https://github.com/EllesmereGaming/EllesmereUI/tree/v8.8.6) (2026-08-13)
-[Full Changelog](https://github.com/EllesmereGaming/EllesmereUI/compare/v8.8.5...v8.8.6) [Previous Releases](https://github.com/EllesmereGaming/EllesmereUI/releases)
+## [v8.8.9](https://github.com/EllesmereGaming/EllesmereUI/tree/v8.8.9) (2026-08-16)
+[Full Changelog](https://github.com/EllesmereGaming/EllesmereUI/compare/v8.8.8...v8.8.9) [Previous Releases](https://github.com/EllesmereGaming/EllesmereUI/releases)
 
-- Release v8.8.6  
-- Merge pull request #1282 from DlargeX/main  
-    delete double entrys, optimizations, add missing German Locals  
-- Update \_keys.txt  
-- Merge remote-tracking branch 'upstream/main'  
-- Update deDE.lua  
-- Merge pull request #1389 from dfrisone/cdm-buff-placeholder-tooltip  
-    fix(cdm): no tooltip or mouse capture on an invisible buff placeholder  
-- Merge pull request #1388 from labrie75/l10n-wrap-the-Bags-right-click-menu,-ETC  
-    l10n: wrap the Bags right-click menu, prompts, bank headers and warbank tab prefix  
-- Merge branch 'main' into l10n-wrap-the-Bags-right-click-menu,-ETC  
-- Merge pull request #1387 from dfrisone/cdm-pandemic-glow-hidden-icon-flash  
-    fix(cdm): pandemic glow flashed on every fresh cast  
-- Update deDE.lua  
-- Update deDE.lua  
-- Merge pull request #1384 from nulltyto/fix/quickdraw-bugs-2026-08-12  
-    Quickdraw: ten reported items -- picker filters, nest reach, menu caps, presets  
-- Update deDE.lua  
-- Update deDE.lua  
-- Update \_keys.txt  
-- Update EllesmereUIBags\_Bank.lua  
-- Update EllesmereUIBags.lua  
-- fix(cdm): stop an invisible buff placeholder capturing the mouse  
-    An alpha-0 placeholder stayed a live mouse target, so a reserved slot for  
-    an inactive buff took mouseover from whatever the bar sits over (raid  
-    frame hover highlight, [@mouseover] casts). Blizzard hides its own  
-    inactive items, so those slots hold no frame at all; reserving them is  
-    what makes the whole grid a permanent capture surface.  
-    Fold the alpha-0 rule into one predicate, IsPlaceholderRenderHidden, and  
-    use it in the three opacity passes plus both mouse passes. The collect  
-    pass now owns mouse state for our own placeholder frames at the point  
-    they are injected, so turning Keep Buffs in Same Place back off restores  
-    capture on the next collect instead of latching it off.  
-- Merge remote-tracking branch 'upstream/main'  
-- fix(cdm): no tooltip on an invisible buff placeholder  
-    Keep Buffs in Same Place reserves every tracked buff's slot with a  
-    placeholder frame rendered at alpha 0. The frame stays shown and  
-    mouse-enabled, so hovering an inactive buff's empty slot still ran the  
-    placeholder OnEnter and showed the spell tooltip. Bail out of OnEnter  
-    for the same two flags the opacity passes test before forcing alpha 0  
-    (hidePlaceholderIcon and the hosted \_missingHidden).  
-- add 8.8.4 German Locals  
-- Merge remote-tracking branch 'upstream/main' into cdm-pandemic-glow-hidden-icon-flash  
-- Merge pull request #1383 from labrie75/koKR-catch-up-8.8.5  
-    koKR: catch up 8.8.5 additions (+158 keys)  
-- Merge pull request #1386 from labrie75/l10n-translate-Buff/Debuff-Manager-filter-names  
-    l10n: translate Buff/Debuff Manager filter names and the input placeholder  
-- fix(cdm): ignore a pandemic window whose aura already ended  
-    Clearing our flag on hide is not enough when the aura ends early rather  
-    than running out. Blizzard computes the pandemic window when the aura  
-    lands and never clears it on the way out, and the item stays registered  
-    for the viewer OnUpdate, so a window whose aura is gone keeps satisfying  
-    IsInPandemicTime and re-sets the flag on the hidden icon a frame later.  
-    Re-apply inside that leftover window and the glow lights over a fresh  
-    aura until the dead aura's end time passes.  
-    Mark the flag unusable from the hide until the item computes a new  
-    window, and only when the aura really ended (auraInstanceID is cleared  
-    before the icon hides, while a bar merely hiding leaves it set) so a  
-    visibility toggle mid-pandemic keeps its glow.  
-- Add files via upload  
-- Merge remote-tracking branch 'upstream/main'  
-- fix(cdm): stop the pandemic glow when its buff icon hides  
-    The buff tick only visits shown frames, so the glow's stop branch was  
-    unreachable at the one moment it is always needed: the aura runs out,  
-    Blizzard hides the icon, and the glow keeps animating on the hidden  
-    overlay. It came back up with the icon on the buff's next application,  
-    flashing a pandemic glow over a freshly cast aura until the next tick.  
-    Take the glow down from the icon's OnHide instead, and drop Blizzard's  
-    pandemic flag with it so a stale true cannot re-light it. Both re-arm  
-    from Blizzard's next ShowPandemicStateFrame. The hook installs lazily  
-    with the overlay, so a bar with no pandemic glow still pays nothing.  
-- Update EllesmereUI.lua  
-- Update EUI\_PlayerAuraBars\_ManagerPages.lua  
-- Update EUI\_RaidFrames\_ManagerPages.lua  
-- chore(quickdraw): regenerate locale keys for the new strings  
-    Three new keys: the preset menu's "did not fit" count, the picker's  
-    "favorite" search keyword, and the editor tooltip's note about entries a halo  
-    nest cannot show.  
-    The tooltip string moves onto the Lf line to be harvested at all -- the  
-    extractor reads one line at a time, so a literal wrapped onto the next line  
-    is a key it never learns about.  
-- feat(quickdraw): search pickers by source and favorite, not only name  
-    A picker holding several hundred rows that can only be searched by name can  
-    only be searched by someone who already knows the name of the thing they  
-    want, which is the opposite of what a search is for.  
-    An entry may now carry keywords beside its name, and the filter matches  
-    either, with the same plain substring test -- so "vend" finds a vendor mount  
-    the way "sea" finds a seahorse. Keywords are built once with the list, which  
-    the picker caches per session, so nothing was added to the typing path.  
-    Mounts carry their source and whether they are a favorite. Toys carry  
-    favorite alone: the toy API returns no source for an individual toy, and a  
-    source guessed from anywhere else would be a made-up answer in a search box.  
-    The source label is the client's own BATTLE\_PET\_SOURCE\_n string, the one the  
-    collection journals label their own source filters with, so a localized  
-    client searches in its own words.  
-    Both pickers say so: a search that reaches further than the user expects is  
-    worth nothing if the only way to find that out is to guess it, so their  
-    placeholder reads "Search name, source, favorite..." rather than "Search...".  
-    A search box rather than filter controls: the box is already on every picker  
-    and costs nothing to learn, where a filter bar is a second thing to discover  
-    and would need per-picker design for four pickers.  
-    Closes QD-09.  
-- feat(quickdraw): add a Quest Items preset  
-    Builds a menu from the usable quest items the character is carrying, so they  
-    get a keybind without being placed by hand.  
-    It walks the bags for the quest item class and keeps only items with a use  
-    effect -- an item without one is a quest object being carried, not something  
-    an entry can fire -- then folds in the quest log's own special items. Those  
-    are the ones the objective tracker draws a button for, and they are not  
-    always in the quest item class: a trinket or a toy handed out for a single  
-    quest reads as its own class and the bag walk alone would miss it. The link  
-    is the first return of GetQuestLogSpecialItemInfo; the second is the button's  
-    texture, not an id.  
-    A snapshot, like every other preset. A menu that refills itself as the bags  
-    change is a second feature: a menu's entries are a stored array the editor  
-    owns, so it needs a dynamic flag on the palette, a generator behind  
-    UsableSlots, memo invalidation and a coalesced re-push on bag and quest-log  
-    events, and an editor that refuses to let a generated menu be edited. The  
-    scan itself, which is the part this shares, is done. Recorded in the bug  
-    report rather than half-built here.  
-    Closes QD-07a.  
-- feat(quickdraw): add a Professions preset  
-    A preset rather than a new slot kind: a profession's window opener and its  
-    second ability are both ordinary spells, so the preset is a list of spell  
-    slots and everything downstream already handles them.  
-    It walks GetProfessions() -- all five slots, so cooking, fishing and  
-    archaeology arrive alongside the two main professions -- and takes the spells  
-    the profession book itself offers for each. That is where smelting,  
-    prospecting, milling and runeforging live, so they are picked up without  
-    naming any of them. Passive entries are skipped: a profession's passive is a  
-    rank, not something an entry can do.  
-    Read out of the spellbook rather than from a list of spell IDs, which is the  
-    walk Blizzard's own profession book makes. A hard-coded list would go stale  
-    with each expansion's skill lines and the preset would simply stop offering a  
-    profession, silently.  
-    The five slots are passed one at a time rather than gathered into a table: a  
-    character missing a profession hands back a nil in the middle of those  
-    returns, and a table constructor holding one stops counting there.  
-    Closes QD-07b.  
-- feat(quickdraw): add a Last Used Mount entry  
-    An entry that summons whatever mount the player rode last, offered in the  
-    mount picker beside the random-favorite roll. Both are kinds rather than  
-    mounts, so both are pinned above the collection: there is nothing in the list  
-    to pick for either.  
-    Blizzard records no such thing -- the whole C\_MountJournal surface answers  
-    only what is summoned right now -- so it is observed. Every successful player  
-    cast is handed to GetMountFromSpell, which answers with a mountID for a mount  
-    summon and nil for everything else, so the filter and the answer are one  
-    call; Blizzard's own mount UI watches the same event.  
-    The handler returns immediately while InCombatLockdown() is true. The event  
-    fires for every cast the player makes and a payload read in combat may be a  
-    secret value; nothing is missed, because no mount can be summoned then  
-    anyway. A change re-pushes through RequestPush, which coalesces and defers  
-    like every other push, so a mount cast costs everyone else one comparison.  
-    Firing rides the existing insecure branch -- SummonByID with the stored ID  
-    instead of 0 -- so there are no attribute writes, no snippet changes and no  
-    combat debt. Before anything is tracked the entry falls back to the random  
-    favorite rather than doing nothing, an entry that answers a press with  
-    silence reading as broken.  
-    Stored on the profile, so it is not blank at the start of a session. A  
-    profile shared between characters shares the memory, and the game refuses a  
-    summon the character cannot make with its own message.  
-    Closes QD-07d.  
-- feat(quickdraw): raise the menu cap to 16 and lift the arc's nest cap  
-    Twelve was what a ring of the SETTING'S OWN radius could seat: at the shipped  
-    100 with a 50-unit pitch the thirteenth entry overlaps its neighbour. So make  
-    Menu Radius a minimum instead. PaletteView:Geom now derives the arc's radius  
-    from the entry count and takes the larger of that and the setting. Nothing  
-    moves for an existing menu: a count that already fitted never reaches the  
-    floor.  
-    The separation the radius is derived from is a square's, not a disc's. Two  
-    axis-aligned squares only clear each other once their centres are a full icon  
-    apart along x or along y, so a pair whose chord runs diagonally needs  
-    iconSize * root 2 between centres -- more than a pitch at the shipped sizes.  
-    A ring held to the pitch alone still touched at the four diagonals and  
-    nowhere else. Consequence worth knowing: a menu of twelve or more at the  
-    shipped radius of 100 now grows, twelve to 109 and sixteen to 145. Those  
-    menus were overlapping at the corners before, at every count from twelve up;  
-    the growth is that overlap being paid for. Menus of eleven or fewer are  
-    untouched.  
-    With the radius growing, the cap answers to how many entries a person can  
-    still aim at rather than to how many fit. Sixteen, which is 22.5 degrees each  
-    on a full circle.  
-    The arc's nested menus are uncapped with it: an arc claim rings its children  
-    and adds a ring as they crowd, which is ground of its own to grow into, the  
-    same thing the lane and the strip have. The halo keeps eight, because it IS  
-    eight fixed positions around a cell and there is no ninth to put a child in.  
-    That rule is stated once, in NestChildCap, and ChildGeom asks it rather than  
-    carrying a second copy -- a copy is how the lift once landed in the editor's  
-    tooltip and nowhere the player could see it. The tooltip does say how many a  
-    nested menu is not showing, so the one real cap is met with a label rather  
-    than by counting.  
-    REGION\_MAX is re-derived, which is the true cost of the lift. Swept over  
-    330,692 arrangements at the new cap, 9 leaves 9,635 claims over budget and 14  
-    leaves 239; 18 would leave none, at four more gate frames and eight more  
-    wrapped scripts on every claim. 14. Its comment now carries the sweep and  
-    says the number is an output of the shapes below it, to be re-derived  
-    whenever any of them moves, and the harness is pinned to the shipped value --  
-    a sweep left at a different one proves something about a build that does not  
-    exist.  
-    Preset truncation is no longer silent: a builder returns what it found and  
-    how many it left out, and the preset menu says "4 did not fit". A hearthstone  
-    past the cap is a destination the player has lost, unlike a toy that shares  
-    its cooldown with the ones that got in.  
-    MAX\_CHILD\_ROWS stays at 4 -- four rings hold more than a nested menu can now  
-    contribute. The widget pool and the saved-variable clamp both read MAX\_SLOTS  
-    and needed nothing; raising a ceiling cannot invalidate a stored profile.  
-    Closes QD-08 and QD-03 (reported by @Shaikhain, and Discord).  
-- feat(quickdraw): add a Menu Cancel Action keybind  
-    Backing out of an open menu was Escape and nothing else, and the hand  
-    holding the menu key is nowhere near Escape. Right-click, which is what  
-    people reach for, was simply unbound and so did nothing.  
-    Add a Menu Cancel Action key, profile key cancelKey, unbound by default.  
-    Escape keeps working and stays hard-wired; this is a second key for it, and  
-    a plain mouse button is the point.  
-    It is bound the way the Select key already is: an override binding owned by  
-    the shared cancel button, claimed for exactly as long as a menu is up and  
-    handed back by the one ClearBindings on close, so the button keeps its  
-    ordinary use the rest of the time. It rides whichever of the two existing  
-    routes the open is using -- a latched menu's cancel closes the menu itself,  
-    a held menu's raises the flag its own release reads -- so no teardown moved  
-    into Lua and no protected call was added.  
-    Two chords are refused: the Select key, which would leave one chord meaning  
-    two things, and any key that opens a menu, which would take that key for the  
-    moment its own release has to reach the menu and leave it stuck open.  
-    For the record, the report's premise was not the reason: CONFIRM\_BUTTON and  
-    CANCEL\_BUTTON are internal tokens an override-binding click arrives under,  
-    on a button with EnableMouse(false), not user bindings. Right-click was  
-    never confirm, middle-click never cancelled, and confirm was already  
-    configurable through the Select key.  
-    Closes QD-01 (reported by @CallMeEddy).  
-- fix(quickdraw): draw stack counts on whole pixels, inside the icon  
-    A font height is given in the string's own units and drawn at that height  
-    times its effective scale, so a palette scaled to anything but 1 asked the  
-    client for a fractional pixel height. A glyph rasterised between two pixels  
-    is resampled and reads soft and stair-stepped, while the icon beside it is a  
-    texture and resamples cleanly -- which is exactly the report: the counts  
-    looked pixelated and the icons did not.  
-    ApplyModuleFont now snaps the height to whole physical pixels against the  
-    string's own effective scale, through PP.perfect, the same constant the  
-    borders are drawn on. At 1080p a palette at scale 1.25 asked for 17.5 pixels  
-    and now asks for 18; scale 1 and 1.5 were already whole, which is why this  
-    looked intermittent. The banked size is untouched, so the snap follows a  
-    font-settings refresh and a scale change alike, and Layout re-applies the  
-    fonts when the palette's scale actually moves.  
-    The count is also held on both bottom corners now instead of one, so a wide  
-    stack can no longer run off the icon it belongs to, with word wrap off so a  
-    clamped count cannot climb onto a second line. Shrinking the text to fit is  
-    not available: a count may be a secret value, and a secret FontString  
-    refuses text access to a tainted caller, so nothing here may measure it.  
-    Closes QD-10 (reported by @Fruit).  
-- fix(quickdraw): arm an arc nest from the claim's own ground  
-    An arc claim could only be armed by the cursor crossing its parent's ICON  
-    box. That box is 40 units across at a radius of 100 -- about eleven degrees  
-    -- while a claim's children spread up to forty-five degrees either side of  
-    it, so a straight line from the palette's centre to a child mostly misses  
-    the icon and the nest never opened. A claim with two children could not be  
-    reached directly on any arc size, which is what the report shows.  
-    Arming now asks the same question the disarm has always asked: is the cursor  
-    on this claim's ground, measured polar. Three changes, all confined to  
-    ANGULAR mode:  
-    - the arc's region gates go up with the palette rather than on arming, and a  
-      disarm leaves them up, so there is something under the cursor to raise an  
-      OnEnter on the claim's own ground;  
-    - a region gate's OnEnter carries the ground test, and asks it of EVERY  
-      claim rather than only its own. The arc's region rects are generous and  
-      overlap around the ring, and mouse focus is topmost-wins among frames on  
-      one level, so a gate answering only for itself would let the rect on top  
-      shadow the claim underneath it;  
-    - a stale region gate is not hidden on the arc, that being the way in.  
-    Claim grounds OVERLAP -- a wedge widens as it goes out, and one claim's beam  
-    crosses its neighbour's wedge near the ring -- so the ground test needs a  
-    rule for who wins where two hold the cursor at once. Taking the first claim  
-    found handed a reach past a nest's own icons to whichever neighbour also  
-    covered that point, lowest index winning, which put 12 o'clock in front of  
-    everything its wedge reached over. Two rules instead: the armed claim keeps  
-    the cursor while it still holds it, so a reach into a nest cannot be taken  
-    away mid-reach, and where nothing is armed the claim whose own axis the  
-    cursor is nearest wins.  
-    The polar test and the cursor-offset maths become two shared fragments  
-    rather than one copy each, the arm and the disarm having to measure the  
-    identical ground the identical way. Both sit inside a do block with the  
-    snippet builders, so neither costs a main-chunk local.  
-    Reaching an arc nest at all made a second thing plain: an entry that opens a  
-    menu was drawn exactly like one that fires an action, so the only thing  
-    saying a nest existed was the nest itself, drawn faintly whenever the  
-    selection touched its parent. On the arc both sit in the same ring, which put  
-    a second set of icons over the open nest's own. Say it on the entry instead  
-    -- three dots in the corner nothing else uses, on any entry that opens a  
-    menu, at every size and on every layout, sized from the icon and snapped to  
-    physical pixels like the borders. The preview state is gone entirely: one  
-    nest is drawn, the armed one, and an entry answers "is there more behind  
-    this" before it is touched rather than after.  
-    Verified offline: the generated snippet text is byte-identical to HEAD's for  
-    a parent gate's OnEnter, and the parent and floor OnLeave variants differ  
-    only in the rename the shared fragment needs and one mode guard. Every  
-    generated body compiles.  
-    Adds .tools/quickdraw-nest/arc-reach.lua, the model the numbers came from.  
-    Closes QD-05 (reported by @Nollychi).  
-- fix(quickdraw): keep the corridor between an entry and its nest  
-    A claim's region rects cover the ground it stays armed on: its own cell, its  
-    nest, and a corridor across the gap between the two. AddRegion drops any  
-    piece that neither holds a child nor touches the parent cell, that piece  
-    being on the far side of another claim's entry -- but it asked with  
-    BoxesMeet, a strict overlap test, and a corridor never overlaps the parent  
-    cell at all. CorridorBox starts it at that cell's outer edge, so the two  
-    share an edge exactly. The corridor was read as disconnected and dropped,  
-    and the pointer crossed unarmed ground on its way to every child.  
-    The filter only runs when another claim puts a hole in play, so one nesting  
-    entry behaved and two did not. That is the reported case: a grid whose  
-    entries fit one row, with two of them nesting.  
-    Ask an edge-sharing question instead. BoxesTouch counts a shared edge and  
-    not a shared corner -- a corner is not ground a cursor can cross, and a  
-    piece reachable only past one is what the filter exists to drop. It sits  
-    inside a do block with its only caller: the main chunk is a couple of locals  
-    short of Lua's ceiling of 200.  
-    The defect was not confined to the reported layout. Over a sweep of 227,172  
-    configurations -- every block layout, 2 to 12 entries, every arrangement of  
-    up to four nesting entries, 1 to 12 children each, auto and pinned columns --  
-    configurations with at least one reach across unheld ground fall from 55,620  
-    to 0 for the halo and from 65,257 to 8,405 for the perimeter lane; the strip  
-    nests the report is about go to 0. The remainder is dense lanes whose claims  
-    were already past REGION\_MAX before this change.  
-    Adds .tools/quickdraw-nest, the harness that measured all of it. It cuts the  
-    geometry out of the module by function name, so it cannot go stale against  
-    line numbers, and it reports the worst region count a claim came to -- the  
-    sweep REGION\_MAX's own comment refers to.  
-    Closes QD-04 (reported by @Shaikhain).  
-- fix(quickdraw): show every owned toy in the toy picker  
-    The toy picker walked GetNumFilteredToys/GetToyFromIndex, which is the  
-    enumeration the player's own Collections filters leave standing. Any filter  
-    set in the Toy Box carried into the picker, and "Not Collected" emptied it  
-    outright -- a toy outside the filter could not be picked at all.  
-    Widen the filters for the length of the walk and put them back afterwards.  
-    ScanToysUnfiltered banks collected/uncollected/unusable shown, every source  
-    and expansion filter, and the search string, clears them, forces a refilter,  
-    runs the scan, then restores all of it and forces another. The scan runs  
-    inside pcall and the error is re-raised after the restore, so a fault cannot  
-    leave the player holding the picker's filters. An open Toy Box is redrawn  
-    with the same pair its own filter menu calls.  
-    GetToyFromIndex is an index into the filtered list, so pairing it with  
-    GetNumToys is not an unfiltered enumeration and was not used.  
-    The walk runs once per picker session, behind the existing picker cache.  
-    Closes QD-06 (reported by @Mittoa).  
-- fix(quickdraw): offer every collected mount in the picker  
-    The mount picker filtered on the isUsable return of GetMountInfoByID, and  
-    that return moves with where the player is standing: an aquatic mount is  
-    unusable on dry ground, so it was absent from the picker until the player  
-    swam. Mounts could only be picked in the place they could be ridden.  
-    Drop isUsable from the filter and keep isCollected and not hideOnChar.  
-    Which mounts can be summoned right now is a run-time question, not a  
-    pick-time one.  
-    The comment claimed isUsable was a permanent character capability. It is  
-    not: the Mount Journal has a MOUNT\_JOURNAL\_USABILITY\_CHANGED event, rebuilds  
-    its list on it, and gates its Summon button on the same return. Comment  
-    rewritten to say why the return is not read.  
-    Closes QD-02 (reported by @Hydranide).  
+- Release v8.8.9  
+- Merge pull request #1495 from labrie75/koKR-remaining-English-strings  
+    koKR: remaining English strings + two catalog fixes  
+- Merge pull request #1494 from jixinliu666/agent/fix-combat-item-comparison-tooltip-no-flash  
+    Fix:Prevent combat item comparison tooltip flash  
+- Merge pull request #1492 from dfrisone/fix/friendly-boss-frames-missing-last-boss  
+    Friendly Boss Frames: show in dungeons, not raid only  
+- Prevent combat item comparison tooltip flash  
 - Update koKR.lua  
-- Merge pull request #1382 from tenngoxars/zhcn-8.8.5  
-    locale(zhCN): update translations for 8.8.5  
-- locale(zhCN): translate 8.8.5 UI strings  
-- Merge pull request #1380 from Barbiero/locale/ptbr-updates  
-    ptBR: translate Minimap, Mythic+ Timer, Chat, and a some shared texts  
-- Merge pull request #1379 from Crazyyoungs/main  
-    Update Korean localization for new features  
-- Merge pull request #1381 from dfrisone/border-forbidden-layout-aspect  
-    fix: guard border and tooltip skin against inherited forbidden layout aspects  
-- Merge remote-tracking branch 'upstream/main' into border-forbidden-layout-aspect  
-- ptBR: translate Minimap, Mythic+ Timer, Chat, and shared Visibility Options  
-- Merge pull request #1378 from LoChinAn/locale-zhtw-8-8-5-cast-bars-range-checks  
-    locale(zhTW): translate 60 keys for v8.8.5, unify the Tick + Bar wording  
-- Update Korean localization for new features  
-    Added new localization strings for housing and cooldown features.  
-- Merge remote-tracking branch 'upstream/main' into border-forbidden-layout-aspect  
-- fix(skins): probe tooltip restrictions before the skin pass  
-    Same window as the border fix: while a tooltip is anchored to a forbidden  
-    UI-widget owner, the reskin's own reads raise. \_ttSkin asked for the width  
-    to test it for secrecy, \_ttFonts asked for the name, and the configured  
-    border asked the owner for its frame level, each of which is the first  
-    widget call on that path. Route all three through pcall and skip the pass  
-    when the read is denied; the owner's level is now read once and reused.  
-- Merge pull request #1377 from dfrisone/abr-pet-reminder-mounted  
-    fix(abr): stop the Missing Pet reminder while mounted  
-- fix(core): guard border restyle against forbidden layout aspects  
-    A Blizzard UI widget anchors the tooltip it owns to a forbidden frame on  
-    hover. UntrustedLayoutScriptExecution propagates to that frame's children  
-    and to anything anchored to it, so a textured border hung off the tooltip  
-    inherits it and every widget call from our tainted code raises, the size  
-    read included. Read the size through pcall and skip the pass when it  
-    fails, and probe once at the top of ApplyBorderStyle so a restyle landing  
-    in that window leaves the last-good border instead of erroring.  
-- locale(zhTW): translate 60 keys for v8.8.5, unify the Tick + Bar wording  
-    Incremental pass over the 58 commits since v8.8.4. Most of it is the new  
-    Mythic+ Tools work: targeted spell bars, the standalone target/focus cast  
-    bars, and the nameplate range checks with their CPU-cost warning. The rest  
-    is spread thin -- housing and mounted visibility conditions, the minimap  
-    auto zoom reset, comma-separated tick marks in the Cooldown Manager, the  
-    damage-meter timer lock, and the character sheet and socket panel strings.  
-    Terms follow the client where the client has one: BINDING\_NAME\_NAMEPLATES  
-    for the keybind a nameplate tooltip refers to, INVTYPE\_FINGER / \_CLOAK /  
-    \_CHEST for the equipment slots. The two cast-bar preview spell names stay  
-    English, matching the preview list they sit in.  
-    Two existing values are rewritten. The two sentences describing the  
-    interrupt-ready hint quoted "Tick" and "Tick + Bar" in English while the  
-    dropdown they name has been 刻度 / 刻度 + 長條 all along, so the sentence  
-    named something the reader never sees. Both sentences now quote the  
-    dropdown, and the dropdown value itself moves from 長條 to 計量條 to match  
-    how the other cast-bar options in that panel read.  
-    Not a completeness pass: strings assembled at runtime stay invisible to a  
-    static scan.  
-    Compiles under Lua 5.1, round-trips through the catalog parser, zhTW has  
-    no duplicate keys, file stays UTF-8 without BOM.  
-- fix(abr): stop the Missing Pet reminder while mounted  
-    Mounting auto-dismisses the pet in the open world and the server  
-    resummons it on dismount, so the reminder was pure noise for the whole  
-    ride. Skyriding already hid it because Refresh() hides everything when  
-    mounted and flying, which is why it only showed on the ground.  
-    Skip the reminder while IsMounted(), plus a 2s grace after the mount  
-    display drops (the pet returns a beat later), with a scheduled refresh  
-    so a genuinely absent pet still reports once the grace expires.  
-- Merge remote-tracking branch 'upstream/main'  
-- Merge remote-tracking branch 'upstream/main'  
-- Merge remote-tracking branch 'upstream/main'  
-- Update deDE.lua  
-- Update deDE.lua  
-- Merge remote-tracking branch 'upstream/main'  
-- Update deDE.lua  
-- Merge remote-tracking branch 'upstream/main'  
-- add more missing German locals  
-- Merge remote-tracking branch 'upstream/main'  
-- Update deDE.lua  
-- Update deDE.lua  
-- Update deDE.lua  
+- Merge pull request #1491 from Kirihasio2/feature/trade-window-and-rarity-borders  
+    [Feature] Reskins, MANY reskins.  
 - Update \_keys.txt  
-- Merge remote-tracking branch 'upstream/main'  
-- Merge remote-tracking branch 'upstream/main'  
-- Merge remote-tracking branch 'upstream/main'  
-- Merge remote-tracking branch 'upstream/main'  
-- Update deDE.lua  
-- Update deDE.lua  
-- Update deDE.lua  
-- Merge remote-tracking branch 'upstream/main'  
-- Update deDE.lua  
-- Merge remote-tracking branch 'upstream/main'  
-- delete double entrys, optimizations  
+- Merge pull request #1489 from Barbiero/locale/ptbr-updates  
+    ptBR: add recently added translation keys  
+- Merge pull request #1488 from dfrisone/fix/movealert-buffalert-vehicle-identity-gate  
+    Movement Alert: stop a vehicle degrading the Burning Rush alert  
+- Merge pull request #1487 from svart2521/interact-icon-on-nameplates  
+    Hide Interact Icon from enemies  
+- Merge pull request #1485 from dfrisone/fix/questtracker-poi-supertrack-taint  
+    Quest Tracker: stop POI suppression tainting the supertracking registry  
+- Merge pull request #1484 from lolswirl/main  
+    [bugfix] Resolve class color background for NPC reaction on unit frames  
+- Update koKR.lua  
+- Merge pull request #1483 from uNBEx/minimal\_cdm\_width  
+    feat(cdm): minimum bar width  
+- Merge pull request #1481 from Odiurd/fix/missing\_ascendance  
+    Fix Ascendance buff tracking for Elemental Shamans  
+- Merge pull request #1480 from uNBEx/arcane\_missiles\_ticks  
+    fix(castbar): accurate arcane missiles cast bar  
+- Regenerate locale keys after syncing upstream/main  
+- Merge remote-tracking branch 'upstream/main' into fix/friendly-boss-frames-missing-last-boss  
+- Merge pull request #1478 from Odiurd/fix/missing\_arcane\_surge  
+    Fix Arcane Surge buff tracking  
+- Merge pull request #1477 from tyyrenn/main  
+    feat(quickdraw): add preset for ping system  
+- Merge pull request #1475 from Nialoshaar/ABR-fix-text-frame-strata-  
+    fix(ABR): render icon text above borders and glows  
+- chore(locales): regenerate \_keys.txt  
+    Ran .tools/extract-locale-keys.sh, which the locale-keys CI check  
+    verifies. Adds 7 keys (731 -> 738).  
+    None originate from this PR. They come from strings already on main:  
+      EllesmereUIQoL.lua                      Learn %1$d skill(s) for %2$s  
+      EUI\_Quickdraw\_Options.lua               Left-click to set a keybind...  
+                                              nested action menu, %1$d entr(y|ies)  
+      EllesmereUIBlizzardSkin\_SocketPanel.lua No gems in bags.  
+                                              \nPick a gem from the list to socket it.  
+    \_keys.txt had simply not been regenerated after those landed, so the  
+    check fails on main as well; this PR only surfaced it.  
+    The options strings added by this PR are not expected here. They reach  
+    the translator as variables (L(win.title) / L(win.desc) in the shared  
+    card builder), which the static extractor cannot see by design -- the  
+    in-game /euiloc harvester is the source of truth for those.  
+    Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>  
+- Merge pull request #1474 from Barbiero/feature/aura-bar-shapes  
+    feat(pab): allow custom shapes and zoom for player aura icons like action bars  
+- Blizzard skin: HUD reskins, window packs, square rarity borders  
+    Ports the local Blizzard-skin work onto 8.8.8. Three-way merged against  
+    v8.8.6 so upstream's 8.8.7/8.8.8 changes to these files are preserved --  
+    all 335 upstream-added lines are present, no conflicts.  
+    HUD reskins (BlizzardSkin.lua tail block)  
+      Tooltip progress/status bars, UI widget status-bar COVERS, extra action  
+      and zone ability buttons.  
+      Widget covers never write into a widget tree -- values are secret in  
+      instanced content -- so an EUI-owned StatusBar is anchored over  
+      Blizzard's and mirrors it through pcall'd reads, retiring on any secret  
+      or failed read.  
+      Registration is gated at PLAYER\_LOGIN: with the setting off the frame  
+      ends up with no events and no script, so it costs nothing rather than  
+      returning early from a live handler. There is no timer -- sweeps run  
+      from UPDATE\_UI\_WIDGET / UPDATE\_ALL\_UI\_WIDGETS / nameplate events,  
+      coalesced to one per frame, plus a per-bar hook on DisplayBarValue for  
+      hasTimer widgets and smooth fills, which move with no event at all.  
+      The extra action / zone ability reskin is opt-in (default off).  
+    Window packs (WindowPacks.lua tail block)  
+      Queue status, ready check, delve tier picker, choice windows, stack  
+      split, and a new trade window pack.  
+      Trade runs its phases in individual pcalls: the engine isolates each  
+      WINDOW, so one forbidden object would otherwise take out every step  
+      after it and leave the frame half skinned. The currency row is left  
+      stock -- the money frame, its edit boxes and even their bevel textures  
+      are all forbidden.  
+    Square rarity borders (WindowEngine.lua)  
+      WSkin.QualityBorder draws a 1px square edge coloured from the quality  
+      Blizzard already worked out, read back off IconBorder rather than  
+      re-derived from an itemID. Applied to quest rewards, loot rolls, delve  
+      tiles and both merchant views.  
+      Repaints hook BOTH routes to SetItemButtonQuality: the global delegates  
+      to the button's own method when it has one, so MerchantFrame's direct  
+      method call never reaches a global-only hook.  
+    Verified against a mock-client harness (78 + 83 + 39 assertions,  
+    mutation-tested 30/42/17). NOT verified in game for the 8.8.8 merge --  
+    the in-game testing was done against 8.8.6.  
+    Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>  
+- Friendly Boss Frames: fix the party attach axis and stale layout anchor  
+    The attach axis read unitGrowth off the party proxy, which never carries it:  
+    party growth comes from partyHorizontal/partyFlipGrowth, so Horizontal Party  
+    Frames put the boss group beside a five-wide bar instead of above it. Read the  
+    same source, and re-anchor from \_LayoutPartyFrames so a growth or size change  
+    mid-dungeon moves the group with it.  
+- Friendly Boss Frames: show in dungeons, not raid only  
+    The slot controller was gated on [@raid1,exists], so the five boss buttons  
+    stayed hidden in every 5-man even though dungeon encounters expose the same  
+    healable friendly bossN tokens. Gate on raid OR party instead, and attach the  
+    group beside the party container when the raid headers are the hidden ones.  
+- Merge pull request #1472 from JuJuFX-dev/fix/questtracker-shared-pool-header-click  
+    Fix(questtracker): shared pool header click  
+- Merge pull request #1471 from Cryogenics/fix/ru-cyrillic-bundled-fonts  
+    ruRU: honour bundled fonts that carry Cyrillic glyphs  
+- Merge pull request #1470 from svart2521/Max-character-of-name-in-raid-and-party-frames-can't-be-different  
+    Refactor CapName and ResolveDisplayName functions  
+- Merge pull request #1467 from Zac-oihfdwrrtuinvbcp/CDM-Allow-buff-bars-decimal-treshold-under-3s  
+    Allow buff bars decimal treshold under 3s  
+- Merge pull request #1466 from RedAces/hide-loot-rolls-window  
+    add the ability to hide the group "Loot roll window"  
+- Merge pull request #1465 from RedAces/style-readycheck-window  
+    Style readycheck window  
+- Merge pull request #1464 from SamJin98/feat/bags-per-equipment-set-categories  
+    feat(Bags): bags per equipment set categories and equipment set names  
+- ptBR: add recently added translation keys  
+- Merge pull request #1462 from RoakStatic/nameplate-name-reaction-color  
+    [Feature Request] Colour the nameplate enemy name text by their reaction colour  
+- Merge pull request #1460 from jixinliu666/agent/fix-combat-item-comparison-tooltip  
+    Fix combat item comparison tooltips  
+- Merge pull request #1459 from LoChinAn/locale-wrap-missing-l-calls  
+    fix(locale): wrap display strings that never reached L()  
+- Update nameplate icon visibility logic  
+    Refactor visibility logic for nameplate icons to hide only for attackable enemies.  
+- Movement Alert: cite the Blizzard source the vehicle gate rests on  
+    Cross-checked against the 12.1.0.69299 clone. No code change; records the  
+    files and mixins so the claims are re-checkable rather than re-derived.  
+    Worth calling out: UpdateAllAuras is a NO-OP stub on AuraContainerSharedMixin.  
+    It only does anything because ManagedAuraContainerSharedMixin overrides it with  
+    MarkDirty(FullAuraRebuild), and that override reaches the addon-callable  
+    partition via ManagedAuraContainerInboundMixin. Reading the base mixin alone  
+    would suggest the recovery call does nothing.  
+- Movement Alert: harden the vehicle gate on the Burning Rush lane  
+    Review follow-ups to the identity-gate fix:  
+    - Reconcile the occupancy latch whenever the tracker's events are (re-)armed.  
+      No EXITED edge reaches an unregistered lane, so a tracker switched off  
+      mid-ride came back with the alert suppressed until the next loading screen.  
+    - Gate the DISPLAY, not the build. Denying the first eligible pass (login in a  
+      vehicle, intro cinematic) postponed container creation, and if the gate then  
+      opened in combat AK.RequestContainer queued the build to PLAYER\_REGEN\_ENABLED  
+      and the alert was absent for that whole fight. Build unconditionally, park at  
+      the end.  
+    - Register CINEMATIC\_STOP alongside UNIT\_FACTION for the addon-cancelled skip  
+      path, whose faction restore can order ahead of the faction edge. The lane  
+      runs no ticker, so a missed restore left it hidden until an incidental  
+      cooldown or aura event.  
+- Movement Alert: stop a vehicle degrading the Burning Rush lane  
+    Boarding a vehicle drops the player's own assistability, and the engine's  
+    identity gate then SKIPS includeSpellIDs for helpful auras rather than  
+    failing closed. The buffActive lane is a single-button HELPFUL container  
+    filtered to Burning Rush, so it degraded to "first buff found" wearing the  
+    Burning Rush label. Aura membership is cached per instance and UNIT\_AURA  
+    only re-parses what changed, so the bad parse outlived the ride and the  
+    alert stayed up until a reload.  
+    Suppress the lane while the player is in a vehicle (latched from the  
+    vehicle events -- UnitUsingVehicle is still true across the exit  
+    transition) or while self-assist reads cleanly false, and force one  
+    UpdateAllAuras on the denied->allowed flip to clear the stale membership.  
+    Same gate the Raid Frames assist probe and the player aura bars guard.  
+- Quest Tracker: stop POI suppression tainting the supertracking registry  
+    Hiding a quest POI button ran POIButtonMixin:OnHide from our execution, and  
+    that handler calls EventRegistry:UnregisterCallback("Supertracking.OnChanged").  
+    The write landed in EventRegistry's shared callback table, so every other  
+    subscriber -- SuperTrackablePinMixin, VignetteDataProvider, QuestDataProvider,  
+    WorldQuestDataProvider, DungeonEntranceDataProvider -- was dispatched tainted  
+    on the next TriggerEvent. The post-hook on the button's Show did the same on  
+    every Blizzard button:Show(), which is why it repeated hundreds of times.  
+    Suppress with alpha and EnableMouse instead; neither runs a script handler.  
+    Blizzard's UpdateButtonAlpha only touches NormalTexture/PushedTexture, so it  
+    cannot undo this, which also makes the Show hook unnecessary.  
+    The template's AddAnim is the only writer of the button frame's alpha and ends  
+    on 1 via setToFinalAlpha, so a deferred re-apply covers it. It is queued  
+    unconditionally and deduped on a pending timer rather than gated on current  
+    alpha: Pool\_HideAndClearAnchors and POIButtonMixin:Reset() reset neither alpha  
+    nor mouse state, so a recycled button comes back already at alpha 0 and an  
+    alpha gate would skip the very re-apply its incoming fanfare needs.  
+- feat(cdm): minimum bar width  
+    - add per-bar Minimum Width/Height, counted in icon slots (0 = Off, 1-20, default off)  
+    - Reserves the exact space N real icons would occupy and applies it to the bar frame, so width match, anchor edges, the unlock mover and the bar background all inherit it  
+    - Icons center inside the reservation when fewer than N are shown  
+    - Applies to the bar's growth axis: width on horizontal bars, height on vertical  
+    - Skipped while the growth axis is match-owned, so width matching a CDM bar stays exact  
+    - Login pre-size path reserves too, so anchored elements do not settle after data loads  
+- add options for class color bg on mini frames  
+- fix class color background resolver  
+- feat(quickdraw): add preset for ping system  
+- Add missing ID  
+- fix(castbar): accurate arcane missiles cast bar  
+    - Arcane Missiles fires fenceposted (first missile at channel start, last at  
+      channel end), so the base channel draws 3 interior marks, not 4  
+    - Count extra missiles from Amplification (236628, +2) and the tier set 2pc  
+      (1296581, +1)  
+    - A recast during a running AM channel keeps the outgoing cast's missile  
+      schedule: draw the extra mark at the leftover time to the old channel's  
+      next missile, then evenly from there (chain state keyed on the channel  
+      castID so mid-cast window re-reports never chain a cast onto itself)  
+    - Recasting immediately after a missile loses the bonus missile in-game, so  
+      a carry of ~a full interval lays out as a fresh cast  
+    - A cast bar rebuild landing mid-channel (spec-override/profile refresh via  
+      ApplyAll, e.g. triggered by gaining Bloodlust) blanked the tick marks for  
+      the rest of the cast; BuildCastBar now redraws them for the channel still  
+      in progress (fixes this for all tick-marked channels, not just AM)  
+- Add correct spell id  
+- feat(pab): allow custom shapes for player auras like action bars  
+- Quest Tracker: restore click-anywhere-on-header via native hit rect  
+    Brings the feature back without putting addon code in the click path.  
+    Instead of an overlay forwarding Click() to the MinimizeButton -- which  
+    tainted ObjectiveTrackerContainer's dispatch loop and survived zone  
+    changes -- widen the native MinimizeButton's own hit rect across the  
+    header. The client then dispatches the click straight to Blizzard's  
+    OnClick closure, the same path a bare +/- press takes and the one the  
+    taint repro never reproduced on.  
+    Verified against Gethe/wow-ui-source: both header templates  
+    (ObjectiveTrackerContainerHeaderTemplate, ObjectiveTrackerModuleHeader-  
+    Template) are plain Frames with no enableMouse, so the header cannot  
+    swallow the click; their MinimizeButton OnClick is set by Blizzard in  
+    the mixin OnLoad; and Blizzard never calls SetHitRectInsets on these  
+    buttons itself, so nothing resets it.  
+    The insets are recomputed on every skin pass to track Edit Mode resizes,  
+    clamped at zero so a stale header can't leave a hit area hanging into  
+    empty screen, expanded vertically to the full header height (the button  
+    is 16px against a 26px header), and stop short of the FilterButton while  
+    it is showing.  
+- Quest Tracker: remove header click-forward, taint persists across zones  
+    In-game repro (2026-08-15) showed the instance-gated click-forward from  
+    the previous commit only narrowed the reproduction window instead of  
+    closing it: forwarding a click to a header's MinimizeButton while  
+    outside any instance still taints ObjectiveTrackerContainer's shared  
+    dispatch loop, and that taint survives the zone change into a dungeon/  
+    raid/scenario, throwing the same GetAuraDataByIndex secret-value error  
+    out of ScenarioObjectiveTracker/UIWidgetObjectiveTracker's LayoutContents  
+    the next time the container processes every module together. There is no  
+    addon-side way to clear that taint, so the click-forward is removed  
+    entirely. The native +/- button is untouched by this and keeps working  
+    everywhere, since collapsing was never routed through it.  
+- Quest Tracker: disable header click-forward inside instances  
+    In-game repro (2026-08-15): forwarding Click() to a header's own  
+    MinimizeButton from any tracker (not just the shared-widget-pool ones)  
+    taints ObjectiveTrackerContainer's dispatch loop. Outside an instance  
+    that's inert; inside a party/raid/scenario instance the same loop later  
+    carries the taint into ScenarioObjectiveTracker/UIWidgetObjectiveTracker's  
+    LayoutContents, throwing a GetAuraDataByIndex secret-value error. The  
+    native +/- button never reproduces it since its OnClick is untouched, so  
+    only the click-forward overlay is disabled while in an instance.  
+- fix(abr): render icon text above borders and glows  
+- Quest Tracker: skip header click-forward on shared-widget-pool trackers  
+    MinimizeButton:Click() on ScenarioObjectiveTracker/UIWidgetObjectiveTracker  
+    headers runs Blizzard's SetCollapsed() on a tracker whose blocks share the  
+    widget pool with GameTooltip/AreaPOI widgets, the same taint surface  
+    SharesWidgetPool() already guards everywhere else in this file. Gate the  
+    click-forward overlay installation on it too.  
+- ruRU: honour bundled fonts that carry Cyrillic glyphs  
+    ResolveFontName treated every bundled font as Latin-only in glyph-restricted  
+    locales, so ruRU always fell back to the system glyph font. Eleven of the  
+    bundled faces cover the full Russian alphabet, Expressway included, and were  
+    unreachable as a result.  
+    Add FONT\_CYRILLIC listing the faces whose cmap covers U+0410-U+044F plus  
+    U+0401/U+0451, and let ResolveFontName return those directly. The branch is  
+    gated on a new LOCALE\_SCRIPT ("cyrillic"/"cjk"), so CJK is untouched: no  
+    bundled face has CJK coverage.  
+    Defaults are preserved. GetFontsDB seeds the system font in Cyrillic locales  
+    instead of Expressway, and the ru\_cyrillic\_font\_optin\_v1 migration rewrites a  
+    stored "Expressway" to the same sentinel. That value was unreachable from the  
+    old ruRU picker, which could only store \_\_system, \_\_expressway or an external  
+    SharedMedia name, so it is provably the seeded default rather than a  
+    deliberate pick. Nothing changes until the user chooses a font.  
+    Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>  
+- Refactor CapName and ResolveDisplayName functions  
+- Allow buff bars decimal treshold under 3s  
+- add the ability to hide the group "Loot roll window" - either completely or after a certain amount of time  
+- The ready check frame can now be styled in Ellesmere UI "modern" style, you can also hide the portrait  
+- fix(bags): meet PR acceptance criteria -- default off, zero cost disabled  
+    Show Set Name on Gear now defaults OFF (all reads flipped to == true  
+    semantics), matching the "new settings default off" rule. Zero-cost-  
+    while-disabled pass: EQUIPMENT\_SETS\_CHANGED is registered dynamically  
+    (only while either set feature is on, updated from both option setters),  
+    the SetNameText FontString is lazy-created on first actual display  
+    instead of on every pooled button, and every per-refresh scan the  
+    feature added (setCatIdx refill, name stamping, sidebar children scan,  
+    filterSet/All Items/group-view/Auto-Size folds) is gated on its toggle.  
+    With both toggles off the remaining footprint is one flag read per  
+    gated site.  
+- Add Enemy Name Text Reaction Colour toggle  
+    Opt-in setting (default off) that colours enemy nameplate name text  
+    Hostile/Neutral to match the unit's reaction, independent of the  
+    existing Enemy Name Text color. Hooks the existing UpdateHealthColor  
+    event cadence rather than adding new events.  
+- perf(bags): options row rebalance + skip set-name lookups when label off  
+    Desaturate Junk Items moves up from its half-empty EXTRAS row to pair  
+    with Merge Duplicate Items in DISPLAY (it is a display effect), so no  
+    options row sits half-empty. BuildSetGearLookup skips the per-set  
+    GetEquipmentSetInfo name calls when Show Set Name on Gear is off.  
+    Deep perf review (2 adversarial lenses) upheld the no-meaningful-cost  
+    claim: the feature adds ~6-8KB alloc/refresh (~5% of the existing  
+    80-150KB baseline) and ~0.06-0.2ms CPU on a 10-30ms refresh, debounced  
+    to <=10Hz with an IsVisible early-out; loot storms don't touch  
+    EQUIPMENT\_SETS\_CHANGED, and VisualSortCompare never calls IsGearCategory  
+    so there's no O(N log N) amplification.  
+- Guard inactive tooltip comparison cleanup  
+- Drop zero-flash tooltip suppression  
+- feat(bags): set-name text size cog + half-row options placement  
+    Show Set Name on Gear moves next to Split Set Gear by Set in one dual  
+    row (Merge Duplicate Items returns to its own row), and gains an inline  
+    resize cog opening a Text Size slider (bagSetNameFontSize, 7-14,  
+    default 9 = the old computed size). Font face keeps following the bags  
+    font like every other bag text element.  
+    Perf audit of the whole feature vs main: no meaningful per-refresh cost  
+    added -- the set lookup already ran per classify pass on main; the new  
+    work is O(#cats) scans and one label SetText per button.  
+- Skip comparison work while tooltip suppression is inactive  
+- refactor(bags): nest split-mode set categories as children of the anchor  
+    Replace the runtime-group model with anchor + children: the Item Set  
+    Gear category is always built normally (keeping its saved position,  
+    rename, and The Armory grouping), and split mode appends runtime-only  
+    per-set child categories after it. The sidebar renders them one level  
+    under the anchor -- third level when the anchor sits inside a group --  
+    instead of as a separate top-level group. Anchor and group views fold  
+    the children's items in; All Items looks identical to merged mode.  
+    This deletes the SaveState collapse/carry-over machinery and all the  
+    runtime-group guards the old model needed. Kept fixes: header-drag  
+    persistence, selection re-resolution by stable key (now also applied  
+    when toggling the option, via EUI\_Bags.InvalidateSetCategories), child  
+    drag/reorder blocks. New from review: disabling the anchor now disables  
+    its children too, the classify fallback matches the anchor explicitly,  
+    child rows open no empty context menu, the drag insert line no longer  
+    targets gaps inside the child block, and Auto-Size counts the folded  
+    anchor view correctly.  
+- Make comparison suppression lazy and taint-safe  
+- feat(bags): nest set categories under Item Set Gear and label set gear  
+    Split-mode set categories now join a runtime group named after the Item  
+    Set Gear anchor, so the sidebar shows them indented under a header  
+    instead of as a flat block. The group is rebuild-owned: rename/disband/  
+    ungroup/joins are refused (they would silently revert), hide state  
+    persists under the stable anchor key, member drag is blocked while the  
+    header still moves the whole block (header block-moves now SaveState,  
+    which normal groups also gain).  
+    Separately, gear belonging to an equipment set gets the set's name  
+    bottom-center on its bag icon (new toggle, default on; works in merged  
+    mode too). The label yields to the upgrade-track rank when that occupies  
+    the same row. Known cosmetic edge: with Item Set Gear disabled or a  
+    manual assignment overriding set gear, a merged pair of identical items  
+    can carry the wrong label.  
+- Avoid per-hover comparison cleanup closures  
+- Fix combat item comparison tooltips  
+- Locale: wrap slot names, tooltips, and fallback labels that skip L()  
+    Several display strings across bags, character sheet, socket panel,  
+    Quickdraw, and QoL are built by string concatenation or string.format  
+    before reaching L()/Lf(), so a runtime-composed string can never match  
+    a catalog key even when a translation exists.  
+    - Character sheet: wrap item.slot at the three tooltip display sites;  
+      rename the cloak slot literal "Back" -> "Cloak" to avoid colliding  
+      with the existing "Back" nav-button catalog entry (Cloak already has  
+      a translation in every shipped locale, matches EUI\_UpgradeCalc.lua's  
+      own slot table). Wrap the " Crests" suffix that was concatenated  
+      outside L().  
+    - Socket panel: wrap the empty-socket tooltip and the "No gems in  
+      bags." flyout row.  
+    - Quickdraw: wrap the keybind-picker tooltip (including the optional  
+      intro line); split the nested-menu "N entries" caption into separate  
+      singular/plural Lf() keys instead of an English plural suffix.  
+    - Bags/Bank: wrap the fallback tab/bag name fallbacks ("Bag N",  
+      "Tab N", "Bank Tab N") with Lf().  
+    - QoL: localize the trainer "Learn N skill(s) for ..." tooltip, same  
+      singular/plural split as the Quickdraw caption.  
+    New Lf() keys have no zhTW translation yet; they render in English  
+    until a follow-up locale PR adds them (no regression vs. before).  
+- feat(bags): split Item Set Gear into one category per equipment set  
+    New profile toggle (default off) expands the Item Set Gear anchor into  
+    per-set categories named and iconed after each C\_EquipmentSet set, the  
+    way Baganator/BetterBags surface set membership. Runtime-only: SaveState  
+    collapses the block back to the anchor so per-character setIDs never  
+    reach the shared profile (order, state, hidden keys all collapse), and  
+    zero sets falls through to the merged category so the anchor keeps its  
+    saved position. EQUIPMENT\_SETS\_CHANGED now invalidates the category  
+    cache and re-resolves the selected view by stable key; the setID->index  
+    map and gear-category cache rebuild every classify pass so drag-reorder  
+    cannot misroute set gear. Set categories refuse rename/group/drag since  
+    none of it would persist.  
+    Known limits (pre-existing wart, tracked separately): bagVisualOrder is  
+    keyed by numeric category index, so toggling split shifts saved manual  
+    item orders; an open context menu can act on shifted indices if sets  
+    change mid-menu.  

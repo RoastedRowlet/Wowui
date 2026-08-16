@@ -109,6 +109,133 @@ ns.StoreVariantValue   = StoreVariantValue
 ns.ResolveVariantValue = ResolveVariantValue
 ns.IsVariantOf         = IsVariantOf
 
+-------------------------------------------------------------------------------
+--  CDM category-set constants (Midnight's 9-value CooldownViewerCategory).
+--  CDM_ICON_CD_CATS: cooldown/utility icon categories (Essential, Utility,
+--  SpecAgnosticEssential, EquipSlotEssential). CDM_BUFF_CATS: buff-family
+--  categories (TrackedBuff, GroupBuff, SpecAgnosticTracked, EquipSlotTracked).
+--  TrackedBar (3) is scoped separately by GetTrackedBarSpells and is a member
+--  of neither set. Hidden pseudo-categories (HiddenActive/HiddenPassive,
+--  negative values) are never members of either set. Numeric fallbacks let
+--  these build even if the Enum table is ever unavailable at load.
+-------------------------------------------------------------------------------
+do
+    local evc = Enum and Enum.CooldownViewerCategory
+    ns.CDM_ICON_CD_CATS = {
+        [(evc and evc.Essential)             or 0] = true,
+        [(evc and evc.Utility)               or 1] = true,
+        [(evc and evc.SpecAgnosticEssential) or 5] = true,
+        [(evc and evc.EquipSlotEssential)    or 7] = true,
+    }
+    ns.CDM_BUFF_CATS = {
+        [(evc and evc.TrackedBuff)         or 2] = true,
+        [(evc and evc.GroupBuff)           or 4] = true,
+        [(evc and evc.SpecAgnosticTracked) or 6] = true,
+        [(evc and evc.EquipSlotTracked)    or 8] = true,
+    }
+end
+
+-- Normalize a spell ID to its base (undo talent overrides), e.g. Voltaic
+-- Blaze (470057) -> Flame Shock (188389). Resident home for what used to be
+-- an options-file-local pair so every consumer (the keep/drop reconcile
+-- pass, the picker, migration) shares one implementation and one secrecy
+-- gate. Degrades to identity on any invalid/secret id or missing API so
+-- callers can key tables on the result without a separate validity check.
+function ns.NormalizeToBase(sid)
+    if not _IsUsableSID(sid) or not C_Spell or not C_Spell.GetBaseSpell then return sid end
+    local base = C_Spell.GetBaseSpell(sid)
+    if _IsUsableSID(base) then return base end
+    return sid
+end
+
+-- Resolve a base spell ID to its current live version (talent overrides),
+-- e.g. Flame Shock (188389) -> Voltaic Blaze (470057) when talented. Uses
+-- the spellbook override bridge (not this file's private _GetOverride, which
+-- is C_Spell.GetOverrideSpell -- a different API with different semantics)
+-- so catalog/live-icon membership tests agree with the rest of the resident code.
+function ns.ResolveToLive(sid)
+    if not _IsUsableSID(sid) or not C_SpellBook or not C_SpellBook.FindSpellOverrideByID then return sid end
+    local ovr = C_SpellBook.FindSpellOverrideByID(sid)
+    if _IsUsableSID(ovr) then return ovr end
+    return sid
+end
+
+-------------------------------------------------------------------------------
+--  Buff variant-alias ledger
+--  A buff whose live cooldown-viewer report rotates among several spellIDs
+--  (e.g. a dual-tracked or talent-swapped form) only exposes its OTHER forms
+--  via linkedSpellIDs, and only while that exact instance is the one
+--  currently active. This ledger records every id pairing ever observed
+--  together on the active spec, persisted under the spec profile
+--  (prof.buffVariantAliases, sibling of barSpells), so a later reconcile
+--  pass can recognize the whole family as one entity even when only one
+--  member is currently reporting.
+--
+--  Storage is a SET per id (ledger[a] = { [b] = true, ... }), not a single
+--  scalar partner: an N-way family writes every pairwise edge from one
+--  observation, and a scalar slot would let a later pair silently overwrite
+--  an earlier one, disconnecting part of the family from closure expansion.
+-------------------------------------------------------------------------------
+local _buffAliasSeen = {}
+
+-- Learns every pairwise edge among {displaySID} union linkedList that this session
+-- hasn't already recorded. Ids are gated for secrecy/plausibility here so callers never
+-- need to; the session-cache early-out (mirrors _learnVariantBase in
+-- EllesmereUICdmHooks.lua) keeps repeat observations of an already-known pairing from
+-- touching the profile table.
+function ns.LearnBuffVariantAlias(displaySID, linkedList)
+    if type(linkedList) ~= "table" or #linkedList == 0 then return end
+    local ids
+    if _IsUsableSID(displaySID) then ids = { displaySID } end
+    for i = 1, #linkedList do
+        local lid = linkedList[i]
+        if _IsUsableSID(lid) then
+            ids = ids or {}
+            ids[#ids + 1] = lid
+        end
+    end
+    if not ids or #ids < 2 then return end
+
+    local ledger
+    for i = 1, #ids do
+        local a = ids[i]
+        for j = i + 1, #ids do
+            local b = ids[j]
+            local seenA = _buffAliasSeen[a]
+            if not (seenA and seenA[b]) then
+                if not ledger then
+                    local sp = ns.GetActiveSpecProfiles and ns.GetActiveSpecProfiles()
+                    local sk = ns.GetActiveSpecKey and ns.GetActiveSpecKey()
+                    local prof = sp and sk and sp[sk]
+                    if not prof then return end
+                    if not prof.buffVariantAliases then prof.buffVariantAliases = {} end
+                    ledger = prof.buffVariantAliases
+                end
+                ledger[a] = ledger[a] or {}
+                ledger[a][b] = true
+                ledger[b] = ledger[b] or {}
+                ledger[b][a] = true
+                _buffAliasSeen[a] = _buffAliasSeen[a] or {}
+                _buffAliasSeen[a][b] = true
+                _buffAliasSeen[b] = _buffAliasSeen[b] or {}
+                _buffAliasSeen[b][a] = true
+            end
+        end
+    end
+end
+
+-- Shared empty fallback; never mutated (only the writer above creates the real table).
+local _EMPTY_ALIAS_LEDGER = {}
+
+-- Active spec's learned buff-family ledger, or a shared empty table when no profile is
+-- active yet or no pairing has ever been learned. Read-only: never creates the key.
+function ns.GetBuffVariantAliases()
+    local sp = ns.GetActiveSpecProfiles and ns.GetActiveSpecProfiles()
+    local sk = ns.GetActiveSpecKey and ns.GetActiveSpecKey()
+    local prof = sp and sk and sp[sk]
+    return (prof and prof.buffVariantAliases) or _EMPTY_ALIAS_LEDGER
+end
+
 -- Per-cooldownID cache of the last CLEAN frame:GetSpellID(). While a viewer
 -- frame is ACTIVE, GetSpellID()/GetAuraSpellID() return secret values, so the
 -- live talent form is unreadable and would degrade to the generic
@@ -124,7 +251,8 @@ local _cleanSidByCDID = ns._cdmCleanSidByCDID
 -- wins): 1. frame:GetSpellID() -- most authoritative, the active variant
 -- under transforms (e.g. Glacial Spike from Frostbolt), what the user can
 -- actually cast, not the static info; 2. info.overrideSpellID; 3. info.spellID;
--- 4. info.linkedSpellIDs[*]; 5. base of (1) as fallback.
+-- 4. base of (1) as fallback. (linkedSpellIDs is deliberately NOT a rung --
+-- see the comment at the info branch.)
 local function GetCanonicalSpellIDForFrame(frame)
     if not frame then return nil end
 
@@ -167,9 +295,40 @@ local function GetCanonicalSpellIDForFrame(frame)
     if info then
         if _IsUsableSID(info.overrideSpellID) then return info.overrideSpellID end
         if _IsUsableSID(info.spellID) then return info.spellID end
-        if info.linkedSpellIDs then
-            for _, lid in ipairs(info.linkedSpellIDs) do
-                if _IsUsableSID(lid) then return lid end
+        -- Deliberately NOT falling back to linkedSpellIDs[1] here: the frame's
+        -- own info is the MERGED provider table (Blizzard caches
+        -- GetCooldownInfoForID at SetCooldownID), where linked lists are
+        -- group-shared and categories are folded to DISPLAY values -- it can
+        -- tell neither frames nor native equip rows apart. The one legitimate
+        -- linked-identity source is the RAW API block below.
+    end
+
+    -- Native tracked trinket buff rows (RAW equipSlot + category
+    -- EquipSlotTracked): these carry no spellID at all at rest, and their RAW
+    -- linked list is Blizzard's own designed identity channel for the row's
+    -- tracked buff -- field-probed 2026-08-16 as per-row UNIQUE (buffSlot 1
+    -- and 2 of one trinket carry different single-entry lists). The RAW
+    -- GetCooldownViewerCooldownInfo table is the proven source: the frame's
+    -- merged copy folds category to the display value (TrackedBuff) and
+    -- cannot pass this gate. Resolved sid is cached by cooldownID like the
+    -- clean GetSpellID path, so secret windows (proc active in combat) keep
+    -- resolving from the memo. Reached only after every other rung failed
+    -- (identity-less shells), so the extra C call is shell-only.
+    if type(cdid) == "number" and C_CooldownViewer
+       and C_CooldownViewer.GetCooldownViewerCooldownInfo then
+        local raw = C_CooldownViewer.GetCooldownViewerCooldownInfo(cdid)
+        local eqTracked = Enum and Enum.CooldownViewerCategory
+            and Enum.CooldownViewerCategory.EquipSlotTracked or 8
+        if raw and raw.equipSlot and not (issecretvalue and issecretvalue(raw.equipSlot))
+           and raw.category and not (issecretvalue and issecretvalue(raw.category))
+           and raw.category == eqTracked then
+            local linked = raw.linkedSpellIDs
+            if type(linked) == "table" then
+                local lid = linked[1]
+                if _IsUsableSID(lid) then
+                    _cleanSidByCDID[cdid] = lid
+                    return lid
+                end
             end
         end
     end
@@ -377,12 +536,13 @@ end
 function ns.EnumerateCDMSettingsCatalog(wantSet)
     local evc = Enum and Enum.CooldownViewerCategory
     if not evc then return nil end
-    -- Default (no arg): CD/utility catalog (Essential + Utility). Buff
-    -- (TrackedBuff=2) / tracked-bar (TrackedBar=3) callers pass an explicit
+    -- Default (no arg): full CD/utility catalog via ns.CDM_ICON_CD_CATS
+    -- (Essential, Utility, SpecAgnosticEssential, EquipSlotEssential). Buff
+    -- (ns.CDM_BUFF_CATS) / tracked-bar (TrackedBar=3) callers pass an explicit
     -- { [catValue] = true } set so each bar type scopes its own catalog.
     if wantSet == nil then
         if evc.Essential == nil or evc.Utility == nil then return nil end
-        wantSet = { [evc.Essential] = true, [evc.Utility] = true }
+        wantSet = ns.CDM_ICON_CD_CATS
     end
     local settings = _G.CooldownViewerSettings
     if not settings or type(settings.GetDataProvider) ~= "function" then return nil end
@@ -471,7 +631,9 @@ function ns.GetCDMSpellsForBar(barKey, includeUntalented)
     -- ones Blizzard currently hides, sourced from the settings catalog
     -- (respects Not Displayed). Buff pickers untouched.
     if not isBuffType and ns.EnumerateCDMSettingsCatalog then
-        local catalog = ns.EnumerateCDMSettingsCatalog()
+        -- Explicit set (mirrors the function's own default) so this call
+        -- stays correct even if that default is ever narrowed.
+        local catalog = ns.EnumerateCDMSettingsCatalog(ns.CDM_ICON_CD_CATS)
         if catalog then
             local evc = Enum and Enum.CooldownViewerCategory
             local seenCd, seenSid = {}, {}
@@ -505,12 +667,11 @@ function ns.GetCDMSpellsForBar(barKey, includeUntalented)
         end
     end
 
-    -- Buff bars: also list untalented TrackedBuff buffs. Picker-only, so
+    -- Buff bars: also list untalented buff-family entries (TrackedBuff,
+    -- GroupBuff, SpecAgnosticTracked, EquipSlotTracked). Picker-only, so
     -- BarGlows/other consumers stay live-only.
     if isBuffType and includeUntalented and ns.EnumerateCDMSettingsCatalog then
-        local evc = Enum and Enum.CooldownViewerCategory
-        local buffCat = evc and (evc.TrackedBuff or 2)
-        local catalog = buffCat and ns.EnumerateCDMSettingsCatalog({ [buffCat] = true })
+        local catalog = ns.EnumerateCDMSettingsCatalog(ns.CDM_BUFF_CATS)
         if catalog then
             local seenCd, seenSid = {}, {}
             for _, e in ipairs(entries) do
@@ -702,7 +863,9 @@ function ns.MigrateSpecToBarFilterModelV6()
     local gci = C_CooldownViewer and C_CooldownViewer.GetCooldownViewerCooldownInfo
     local evc = Enum and Enum.CooldownViewerCategory
     if gcs and gci and evc then
-        for _, cat in ipairs({ evc.Essential, evc.Utility }) do
+        -- Full CD/utility category set so SpecAgnosticEssential/EquipSlotEssential
+        -- entries become ghost/migration candidates alongside Essential/Utility.
+        for cat in pairs(ns.CDM_ICON_CD_CATS) do
             local cdIDs = gcs(cat, true)
             if cdIDs then
                 for _, cdID in ipairs(cdIDs) do
@@ -947,6 +1110,7 @@ function ns.CollectDefaultBuffTrackEntries()
         end
     end
 
+    if ns.PruneEquipmentBuffRows then ns.PruneEquipmentBuffRows() end
     local out = {}
     local seen = {}
     local entries = ns.EnumerateCDMViewerSpells and ns.EnumerateCDMViewerSpells(true) or {}
@@ -955,7 +1119,21 @@ function ns.CollectDefaultBuffTrackEntries()
         -- slots can share a spellID but are distinct cooldownIDs; keying on
         -- sid would re-merge what EnumerateCDMViewerSpells keeps separate.
         local key = BuffDisplayStableKey(e.sid, e.cdID)
-        if e.sid and not ResolveVariantValue(diverted, e.sid)
+        -- Native equipment ON-USE rows (equipSlot + category EquipSlotEssential)
+        -- are preset-lane-only: never surface them as default-bar buff entries.
+        -- Tracked trinket PROC BUFF rows (equipSlot + category EquipSlotTracked)
+        -- are first-class buff citizens (user directive 2026-08-16): Blizzard's
+        -- CDM lets users track a trinket's buff like any spell, and our buff
+        -- bars must mirror that. Field-probed 2026-08-16: buffSlot=1 rides
+        -- BOTH categories (and plain cat-2 rows), so CATEGORY is the only
+        -- reliable discriminator.
+        local eqInfo = e.cdID and C_CooldownViewer
+            and C_CooldownViewer.GetCooldownViewerCooldownInfo
+            and C_CooldownViewer.GetCooldownViewerCooldownInfo(e.cdID)
+        local eqTracked = Enum and Enum.CooldownViewerCategory
+            and Enum.CooldownViewerCategory.EquipSlotTracked or 8
+        if e.sid and not (eqInfo and eqInfo.equipSlot and eqInfo.category ~= eqTracked)
+           and not ResolveVariantValue(diverted, e.sid)
            and not (e.cdID and divertedCd[e.cdID])
            and key and not seen[key] then
             seen[key] = true
@@ -1682,10 +1860,16 @@ function ns.RemoveTrackedSpell(barKey, idx)
 
         -- Route to the ghost CD bar so frames stay routed but hidden. Buff-family bars
         -- don't ghost (visibility managed by Blizzard's CDM settings); negative IDs and
-        -- non-viewer spells (customs, racials) skip ghost routing entirely.
+        -- non-viewer spells (customs) skip ghost routing entirely.
+        -- RACIALS GHOST like any viewer spell (changed 2026-08-13): 12.1's native
+        -- racial tracking gives them a PERSISTENT live viewer frame, so a removed
+        -- racial without a ghost is instantly re-added by the live-icon append on
+        -- the next options refresh -- remove appeared to do nothing (field: dwarf
+        -- Stoneform 20594 unremovable). The old skip was a pre-native fossil: back
+        -- then no frame existed to re-add from, and removal alone stopped the
+        -- injection lane. Customs still skip: those frames are OURS, not viewer pool.
         local isNonViewer = removedID and removedID > 0
-            and ((sd.customSpellIDs and sd.customSpellIDs[removedID])
-              or (ns._myRacialsSet and ns._myRacialsSet[removedID]))
+            and (sd.customSpellIDs and sd.customSpellIDs[removedID])
         if removedID and removedID > 0 and not isNonViewer
            and not IsBarBuffFamily(barKey) then
             ns.AddSpellToBar(ns.GHOST_CD_BAR_KEY, removedID)
@@ -1845,3 +2029,96 @@ function ns.RemoveCDMBar(key)
     return false
 end
 
+
+-- Native equipment rows that the dual-lane era auto-added into buff bar
+-- stores (12.1 EquipSlot* tracked-buff mirroring): pruned automatically.
+-- POSITIVE identification only -- a stored sid drops solely when a live
+-- viewer entry with that sid carries equipSlot; absence keeps the row
+-- (zero-values law: an unequipped item resolves nothing and must not be
+-- convicted). Runs OOC-cheap from the buff entry collector, so every
+-- options open and reconcile pass self-heals the store.
+function ns.PruneEquipmentBuffRows()
+    local equip, any = {}, false
+    -- Tracked trinket PROC BUFF rows (equipSlot + category EquipSlotTracked)
+    -- are LEGITIMATE buff-bar content (user directive 2026-08-16) -- they must
+    -- never be convicted, by EITHER source below. Positive identification
+    -- only, same zero-values posture as the conviction sets: a live
+    -- EquipSlotTracked viewer entry vouches for its sid (covers on-use
+    -- trinkets whose use-spell IS the tracked proc aura -- source 2 would
+    -- otherwise convict the legitimate row whenever the trinket is worn).
+    -- CATEGORY is the discriminator, not buffSlot (field-probed 2026-08-16:
+    -- buffSlot=1 rides the on-use cat-7 rows too).
+    local exempt = {}
+    local eqTracked = Enum and Enum.CooldownViewerCategory
+        and Enum.CooldownViewerCategory.EquipSlotTracked or 8
+    -- Viewer source: trusted only with CDM data loaded and a populated
+    -- enumeration. These guards gate THIS source alone -- the equipped-item
+    -- source below needs neither and must run regardless.
+    local entries = ns._cdmDataLoaded and ns.EnumerateCDMViewerSpells
+        and ns.EnumerateCDMViewerSpells(true) or nil
+    local gci = C_CooldownViewer and C_CooldownViewer.GetCooldownViewerCooldownInfo
+    if entries and entries[1] and gci then
+        for _, e in ipairs(entries) do
+            if e.sid and e.cdID then
+                local info = gci(e.cdID)
+                if info and info.equipSlot then
+                    if info.category == eqTracked then
+                        StoreVariantValue(exempt, e.sid, true, false)
+                    else
+                        StoreVariantValue(equip, e.sid, true, false)
+                        any = true
+                    end
+                end
+            end
+        end
+    end
+    -- Second proof source, viewer-independent: an EQUIPPED item vouches for
+    -- its own use-spell (GetItemSpell). Covers rows whose native viewer entry
+    -- is gone (untracked in Blizzard's CDM) while the item is still worn.
+    local gis = (C_Item and C_Item.GetItemSpell) or GetItemSpell
+    if gis and GetInventoryItemID then
+        for slot = 1, 19 do
+            local itemID = GetInventoryItemID("player", slot)
+            if itemID then
+                local _, useSid = gis(itemID)
+                if type(useSid) == "number" and useSid > 0 then
+                    StoreVariantValue(equip, useSid, true, false)
+                    any = true
+                end
+            end
+        end
+    end
+    if not any then return end
+    local p = ECME and ECME.db and ECME.db.profile
+    local bars = p and p.cdmBars and p.cdmBars.bars
+    if not bars then return end
+    for _, bd in ipairs(bars) do
+        -- Every bar type: dual-lane-era auto-adds landed item use-spells on
+        -- cooldowns/utility bars too, not just buff bars. Only positive ids
+        -- matching the proven equipment set drop -- markers and real spells
+        -- cannot match.
+        if bd.key ~= (ns.GHOST_CD_BAR_KEY or "__ghost_cd") then
+            local sd = ns.GetBarSpellData(bd.key)
+            local list = sd and sd.assignedSpells
+            if list then
+                local w = 1
+                for i = 1, #list do
+                    local sid = list[i]
+                    -- User-typed custom spell ids are exempt: a deliberate
+                    -- entry that happens to equal a worn item's use-spell
+                    -- (tinkers, embellishments) must never be convicted.
+                    -- Tracked proc-buff sids (buffSlot-vouched above) are
+                    -- exempt from both conviction sources.
+                    if not (type(sid) == "number" and sid > 0
+                        and ResolveVariantValue(equip, sid)
+                        and not ResolveVariantValue(exempt, sid)
+                        and not (sd.customSpellIDs and sd.customSpellIDs[sid])) then
+                        list[w] = sid
+                        w = w + 1
+                    end
+                end
+                for i = #list, w, -1 do list[i] = nil end
+            end
+        end
+    end
+end

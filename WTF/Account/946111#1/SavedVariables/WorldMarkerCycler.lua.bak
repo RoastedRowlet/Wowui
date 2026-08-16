@@ -1,16 +1,8 @@
 
 WMC_Saved = {
-["clearKey"] = "B",
+["useClickDown"] = true,
 ["placeKey"] = "G",
 ["customCycleEnabled"] = false,
-["customCycleMarkers"] = {
-2,
-3,
-4,
-8,
-},
-["clearModifier"] = "CTRL-",
-["useClickDown"] = true,
 ["orderList"] = {
 6,
 4,
@@ -19,6 +11,14 @@ WMC_Saved = {
 1,
 2,
 5,
+8,
+},
+["clearModifier"] = "CTRL-",
+["clearKey"] = "B",
+["customCycleMarkers"] = {
+2,
+3,
+4,
 8,
 },
 ["placeModifier"] = "SHIFT-",
@@ -62,7 +62,7 @@ WMC_RaidPickerSaved = {
 ["countdownSeconds"] = 10,
 ["posX"] = 0,
 ["locked"] = true,
-["rows"] = 1,
-["posAnchor"] = "CENTER",
 ["posY"] = 200,
+["posAnchor"] = "CENTER",
+["rows"] = 1,
 }
