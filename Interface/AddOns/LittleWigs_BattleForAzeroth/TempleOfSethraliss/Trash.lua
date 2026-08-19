@@ -15,6 +15,23 @@ mod:RegisterEnableMob(
 	136076, -- Agitated Nimbus
 	139949  -- Plague Doctor
 )
+if mod:Retail() then -- Midnight+
+	mod:SetAuraData({
+		{1291399}, -- Serrated Charge
+		{1291468}, -- Sunder Slam
+		{1308113}, -- Arrow Barrage
+		{1308100}, -- Poisoned Cheap Shot
+		{1308148}, -- Cytotoxin
+		{1293133}, -- Lingering Storm
+		{1296052}, -- Imbued Conduction
+		{1303596}, -- Siphon Energy
+		{1308546}, -- Venomous Slash
+		{1303486}, -- Caustic Stomp
+		{1300704}, -- Fixate
+		{1311981}, -- Latent Hex
+		{1300684}, -- Hex Muck
+	})
+end
 
 --------------------------------------------------------------------------------
 -- Localization
@@ -107,7 +124,7 @@ end
 --
 
 function mod:GOSSIP_SHOW()
-	if self:GetGossipID(107065) then
+	if self:GetGossipID(48126) then -- 48126:We will restore you!
 		local avatarModule = BigWigs:GetBossModule("Avatar of Sethraliss", true)
 		if avatarModule then
 			avatarModule:Enable()

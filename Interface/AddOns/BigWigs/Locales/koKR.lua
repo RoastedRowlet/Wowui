@@ -148,6 +148,11 @@ L.compartmentMenu_desc = "이 옵션을 끄면 BigWigs 아이콘이 애드온 �
 L.configure = "구성"
 L.resetPositions = "위치 초기화"
 L.selectEncounter = "보스 전투 선택"
+--L.primary_aura_spellId = "\n|cFFFFFF99Primary spell ID: %d|r"
+--L.secondary_aura_spellIds = "|cFFFFFF99Secondary spell ID(s): %s|r"
+L.onApplied = "적용 시"
+L.onDose = "효과 발동 시"
+L.onRemoved = "제거 시"
 L.privateAuraSounds = "비공개 오라 소리"
 L.privateAuraSounds_desc = "비공개 오라는 일반적으로 추적할 수 없지만, 해당 능력의 디버프가 자신에게 적용될 때 소리가 재생되도록 설정할 수 있습니다."
 L.listAbilities = "파티/공격대 대화에 능력 나열하기"
@@ -314,8 +319,7 @@ L.sharing_renames_desc = "구성된 사용자 지정 이름 변경 규칙을 가
 L.sharing_export_renames_desc = "구성된 사용자 지정 이름 변경 규칙을 내보냅니다."
 L.sharing_sounds_desc = "능력에 재생할 사운드를 가져옵니다."
 L.sharing_export_sounds_desc = "능력에 재생할 사운드를 내보냅니다."
-L.sharing_private_auras = "비공개 오라"
-L.sharing_private_auras_desc = "설정된 비공개 오라 사운드를 가져옵니다."
+L.sharing_auras_desc = "설정된 오라 사운드를 가져옵니다."
 L.sharing_export_private_auras_desc = "설정된 비공개 오라 사운드를 내보냅니다."
 L.sharing_colors_desc = "바와 메시지의 색상 설정을 가져옵니다."
 L.sharing_export_colors_desc = "바와 메시지의 색상 설정을 내보냅니다."
@@ -362,6 +366,7 @@ L.H10 = "영웅 10"
 L.H25 = "영웅 25"
 L.titan = "티탄" -- Chinese-only "Titan Reforged" servers
 L.mythic_flex = "신화 (탄력)" -- Mythic (Flexible 15-25 player raids)
+L.world = "월드" -- World (The first difficulty for Lairs in Retail WoW, essentially the same as LFR since its World -> Normal -> Heroic -> Mythic)
 
 -----------------------------------------------------------------------
 -- TOOLS
@@ -1089,12 +1094,14 @@ L.nameplateOptInTitle = "보스 모드 이름표 '선택 활성화' 모드"
 L.nameplateOptInWarning = "|cffff4411경고!|r\n\n'선택 활성화' 모드를 활성화하면 모든 보스 모듈에서 이름표가 비활성화됩니다. 원하는 이름표만 각 모듈에서 수동으로 활성화해야 합니다.\n\nUI가 재시작됩니다. 계속하시겠습니까?"
 
 -----------------------------------------------------------------------
--- PrivateAuras.lua
+-- PrivateAuras.lua / Auras.lua
 --
 
+L.auras = "오라" -- Buffs/Debuffs
 L.privateAuras = "비공개 오라"
 L.privateAurasDesc1 = "'비공개 오라'는 애드온이 감지하거나 자동화할 수 없는 특별한 유형의 디버프입니다. 이러한 디버프는 현재 모든 최신 보스 전투에서 사용됩니다.\n\n"
 L.privateAurasDesc2 = "BigWigs은 이를 아이콘으로 표시하여 적용 시점을 추적하는 데 도움을 줄 수 있습니다. |cFF33FF99이는 일반 디버프와 구분하여 중요한 디버프를 별도로 표시함으로써 플레이어에게 유용합니다.|r\n\n"
+--L.aurasDesc = "BigWigs can help you keep track of when boss debuffs are applied to you by displaying them as icons.\n|cFF33FF99This can help you by displaying critical debuffs separately from your normal debuffs.|r\n\n"
 
 L.createTestAura = "테스트 오라 생성"
 L.showDispelType = "해제 유형 표시기 표시"
@@ -1117,9 +1124,28 @@ L.playerInYourGroup = "그룹 내 플레이어"
 L.maxIcons = "최대 아이콘 수"
 L.maxIconsDesc = "표시할 최대 아이콘 수"
 L.privateAurasHelpTip = "|TInterface\\AddOns\\BigWigs\\Media\\Icons\\minimap_raid:0:0|tBigWigs: 이제 비공개 오라 디버프를 아이콘으로 볼 수 있으며, 다른 플레이어(예: 탱커)의 비공개 오라도 볼 수 있습니다."
+--L.aurasHelpTip = "|TInterface\\AddOns\\BigWigs\\Media\\Icons\\minimap_raid:0:0|tBigWigs: You can now see your boss debuffs as icons, or even the boss debuffs of another player (e.g. a tank)."
 
-L.privateAurasTestAnchorText = "오라\n(%d)"
-L.privateAurasTestTankAnchorText = "탱커\n오라\n(%d)"
+L.privateAurasTestAnchorText = "오라\n%d"
+L.privateAurasTestTankAnchorText = "탱커\n오라\n%d"
+
+L.auraSounds = "오라 효과음"
+L.addAuraSpell = "주문 추가"
+L.addAuraSpellDesc = "현재 알고 있는 주문을 이름으로 추가할 수 있지만, 로그에 표시된 주문 ID를 사용하는 것이 항상 가장 좋습니다."
+L.invalidSpell = "유효하지 않은 주문"
+L.bossDebuffsOnYou = "보스 디버프 적용됨"
+L.bossDebuffsOnTank = "탱커에게 적용된 보스 디버프"
+L.showCountText = "중첩 수 표시"
+L.cooldownText = "재사용 대기 시간"
+L.countText = "적용 횟수"
+--L.selectPlayer = "Select Player"
+--L.myself = "Myself"
+L.trigger = "발동 조건"
+L.remove = "추방"
+--L.auraCountdownDesc = "If enabled, a vocal countdown will be added to the last 3 seconds of the aura."
+--L.auraDuration = "Aura Duration"
+--L.auraDurationDesc = "The duration in seconds that the aura will last."
+L.currentUnit = "(현재: %s)"
 
 -----------------------------------------------------------------------
 -- Proximity.lua

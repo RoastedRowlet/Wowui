@@ -1,9 +1,106 @@
 # BigWigs
 
-## [v419.2](https://github.com/BigWigsMods/BigWigs/tree/v419.2) (2026-07-27)
-[Full Changelog](https://github.com/BigWigsMods/BigWigs/compare/v419.1...v419.2) [Previous Releases](https://github.com/BigWigsMods/BigWigs/releases)
+## [v420](https://github.com/BigWigsMods/BigWigs/tree/v420) (2026-08-18)
+[Full Changelog](https://github.com/BigWigsMods/BigWigs/compare/v419.2...v420) [Previous Releases](https://github.com/BigWigsMods/BigWigs/releases)
 
-- Sharing: Fix aura sounds import not working when importing a profile string  
-- Loader: Remove some compat code  
-- BossPrototype\_Classic: Sync Aura functions  
-- Core: Initial plumbing for aura data  
+- Update deDE (#2693)  
+- BossPrototype: Add Mythic Flex to the Mythic check  
+- Bump version  
+- Plugins/Auras: Improve player selection  
+- API: Allow OpenConfigToPanel to open the Auras panel  
+- Plugins/Auras: Cleanups  
+- Plugins/Auras: Improve GUI description  
+- Plugins/Auras: Increase default size for stacks  
+- Plugins/Auras: Enable by default and enable help tip  
+- TVA: Add aura durations  
+- Update deDE (#2691)  
+- Clean up aura countdown code  
+- Update zhCN (#2690)  
+- Plugins/BossBlock: King's Rest talking heads  
+- Aura countdowns (#2689)  
+- Plugins/Sound: Make resetting global sounds also refresh aura sounds  
+- Plugins/Sound: Make changing global sounds refresh aura sounds  
+- Plugins/Sound: Comment out global private aura sound, fix some missing code  
+- Make aura sounds respect global overrides  
+- Boss aura sound fixes (#2688)  
+- TheVenomousAbyss: Fix Twin Fangs and Vashnik not showing up  
+- Sharing: Call BigWigs\_RefreshAuraSounds after aura's have been imported to re-register  
+- Sharing: Fix individual instance sharing aura sound imports and cleanup old code  
+- Update zhCN (#2687)  
+- Update deDE (#2686)  
+- Options: Cleanup  
+- Tweak comments  
+- Locales: Disable a key that's not translated  
+- Options: Add aura spellId's to the tooltips on the aura tab  
+- MidnightLairs/Nymrissa: Fix default aura sound config  
+- Update frFR (#2684)  
+- Update koKR (#2683)  
+- Update zhCN (#2682)  
+- Update deDE (#2681)  
+- Options: Update to latest API for changing aura sounds  
+- Plugins/Sound: Listen to requests for updating aura sounds  
+- Plugins/Sound: Tweaks  
+- Core: Test instantly setting up the boss module DB  
+- Options: Fix for renamed functions  
+- Plugins/Sound: Fix typo  
+- Core/BossPrototype: Add `GetAuraSecondarySpellIDByIndex`  
+- Move all aura sound registration from the boss prototype to the sound plugin, begin deprecation of private auras API  
+- Core: Better aura validation  
+- Core/BossPrototype: Support IconAndText widget sets and change `GetGossipOptions` to return the full table  
+- Plugins/BossBlock: Additional Midnight S2 talking heads  
+- MidnightLairs: Fix toc and option keys  
+- MidnightLairs: Add Nymrissa Wavecaller  
+- Update zhCN (#2679)  
+- Update deDE (#2680)  
+- Options: Support the display of "World" difficulty stats  
+- Loader: Add The Tidebound Grotto  
+- Plugins/BattleRes: Enable in "World" difficulty (Lairs)  
+- Plugins/Statistics: Add world difficulty  
+- TheVenomousAbyss/Sentinels: Fix a typo  
+- TheVenomousAbyss/Vashnik: Update Plague Froth debuff ids  
+- TheVenomousAbyss/Nekzali: Move Essence Rend to important debuffs  
+- TheVenomousAbyss/Vashnik: Tweak aura settings  
+- TheVenomousAbyss/Sentinels: Tweak aura settings  
+- TheVenomousAbyss/Nekzali: Tweak aura settings  
+- TheVenomousAbyss/Explorers: Tweak aura settings  
+- Options: Change the aura tab icon  
+- TheVenomousAbyss: Set boss order the same as the dungeon journal  
+- Locales: Add an "Important" locale  
+- Loader: Add `UnitClassification`  
+- Update zhCN (#2678)  
+- VA: :SetPrivateAuraSounds -> :SetAuraData  
+- TheVenomousAbyss/Ulatek: Add options  
+- TheVenomousAbyss/CoiledAltar: Add options  
+- TheVenomousAbyss/Sszorak: Update  
+- TheVenomousAbyss/Explorers: Update  
+- TheVenomousAbyss/Sentinels: Update  
+- TheVenomousAbyss/Nekzali: Update  
+- Restrict workflows  
+- Locales: Tweak  
+- Add Auras module to supersede PrivateAuras (#2664)  
+- Update zhCN (#2676)  
+- Update deDE (#2677)  
+- Sharing: Add aura settings to our exports and imports (#2675)  
+- TheVenomousAbyss/TwinFangs: Cleanup SetAuraData table  
+- TheVenomousAbyss/Vashnik: Cleanup SetAuraData table  
+- TheVenomousAbyss/CoiledAltar: Rename module  
+- Core: Fix unregistering for aura sounds in 12.1  
+- Core/BossPrototype: Cleanups  
+- Update workflow  
+- Update deDE (#2673)  
+- Options: Aura Sound Options (#2672)  
+- Core: Updates to the aura data API  
+- Bump toc  
+- Plugins/BossBlock: Midnight S2 Delve toast  
+- Core/BossPrototype: Add `SecretMessage` (#2670)  
+- Update esMX (#2666)  
+- Update itIT (#2668)  
+- Update zhCN (#2669)  
+- Update koKR (#2671)  
+- Fix zhCN Vaelgor & Ezzorak  
+- Fix workflow  
+- Output number of missing localization strings to a wiki page  
+- Parser: Add SetDefaultLocale/SetBossModuleLocale checking  
+- TheVenomousAbyss/Vashnik: Remove unused variable  
+- TheVenomousAbyss/Vashnik: Update module  
+- TheVenomousAbyss/TwinFangs: Update module  

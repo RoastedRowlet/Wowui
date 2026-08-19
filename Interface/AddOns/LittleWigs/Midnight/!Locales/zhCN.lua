@@ -118,7 +118,6 @@ end
 
 L = BigWigs:NewBossLocale("Midnight Delve Trash", "zhCN")
 if L then
-	L.nullaeus = "努雷乌斯"
 end
 
 -- Den of Nalorakk
@@ -155,4 +154,32 @@ end
 L = BigWigs:NewBossLocale("Nexus-Point Xenas Trash", "zhCN")
 if L then
 	L.custom_on_arcane_tripwire_autotalk_desc = "|cFFFF0000需要至暗之夜工程学 25 点技能。|r自动与NPC对话，选择禁用奥术绊索的选项。"
+end
+
+-- Common Trash
+
+L = BigWigs:NewBossLocale("Common Trash", "zhCN")
+if L then
+	L.common_trash = "普通小怪"
+	L.trash_cast = "施法"
+	L.trash_cast_desc = "当普通小怪施放法术时发出警报。"
+	L.lieutenant_cast = "施法（副官）"
+	L.lieutenant_cast_desc = "副官级小怪施放法术时发出警报。"
+	L.trash_channel = "引导法术"
+	L.trash_channel_desc = "任意小怪引导法术时发出警报。"
+	L.customization = "自定义设置"
+	L.custom_select_unit = "追踪单位"
+	L.custom_select_unit_desc = "选择哪些单位显示信息并播放音效。"
+	L.custom_select_unit_value1 = "所有单位显示信息并播放音效"
+	L.custom_select_unit_value2 = "所有单位显示信息，仅当前目标播放音效"
+	L.custom_select_unit_value3 = "仅当前目标显示信息并播放音效"
+	L.custom_select_throttle_type = "间隔类型"
+	L.custom_select_throttle_type_desc = "选择对哪些功能进行间隔限制"
+	L.custom_select_throttle_type_value1 = "信息和音效"
+	L.custom_select_throttle_type_value2 = "仅音效"
+	L.custom_select_throttle_duration = "间隔时长"
+	L.custom_select_throttle_duration_desc = "两次警报的间隔时间。当前目标不受限制。"
+	L.custom_select_throttle_duration_value1 = "2 秒"
+	L.custom_select_throttle_duration_value2 = "1 秒"
+	L.custom_select_throttle_duration_value3 = "3 秒"
 end

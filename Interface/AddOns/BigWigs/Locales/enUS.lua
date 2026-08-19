@@ -147,6 +147,11 @@ L.compartmentMenu_desc = "Turning this option off will make BigWigs show up in t
 L.configure = "Configure"
 L.resetPositions = "Reset positions"
 L.selectEncounter = "Select encounter"
+L.primary_aura_spellId = "\n|cFFFFFF99Primary spell ID: %d|r"
+L.secondary_aura_spellIds = "|cFFFFFF99Secondary spell ID(s): %s|r"
+L.onApplied = "On Applied"
+L.onDose = "On Dose"
+L.onRemoved = "On Removed"
 L.privateAuraSounds = "Private Aura Sounds"
 L.privateAuraSounds_desc = "Private auras can't be tracked normally, but you can set a sound to be played when the ability debuff is applied to you."
 L.listAbilities = "List abilities in group chat"
@@ -313,8 +318,7 @@ L.sharing_renames_desc = "Import the custom renames that are configured."
 L.sharing_export_renames_desc = "Export the custom renames that are configured."
 L.sharing_sounds_desc = "Import which sounds to play for abilities."
 L.sharing_export_sounds_desc = "Export which sounds to play for abilities."
-L.sharing_private_auras = "Private Auras"
-L.sharing_private_auras_desc = "Import the configured Private Auras sounds."
+L.sharing_auras_desc = "Import the configured aura sounds."
 L.sharing_export_private_auras_desc = "Export the configured Private Auras sounds."
 L.sharing_colors_desc = "Import the color settings for bars and messages."
 L.sharing_export_colors_desc = "Export the color settings for bars and messages."
@@ -361,6 +365,7 @@ L.H10 = "Heroic 10"
 L.H25 = "Heroic 25"
 L.titan = "Titan" -- Chinese-only "Titan Reforged" servers
 L.mythic_flex = "Mythic (Flex)" -- Mythic (Flexible 15-25 player raids)
+L.world = "World" -- World (The first difficulty for Lairs in Retail WoW, essentially the same as LFR since its World -> Normal -> Heroic -> Mythic)
 
 -----------------------------------------------------------------------
 -- TOOLS
@@ -1088,12 +1093,14 @@ L.nameplateOptInTitle = "Boss mod nameplates 'opt-in' mode"
 L.nameplateOptInWarning = "|cffff4411WARNING!|r\n\nEnabling 'opt-in' mode will turn off nameplates across ALL of your boss modules. You will need to go through each one and manually turn on the nameplates you want.\n\nYour UI will now reload, are you sure?"
 
 -----------------------------------------------------------------------
--- PrivateAuras.lua
+-- PrivateAuras.lua / Auras.lua
 --
 
+L.auras = "Auras" -- Buffs/Debuffs
 L.privateAuras = "Private Auras"
 L.privateAurasDesc1 = "'Private Auras' are a special type of debuff that addons cannot detect or perform any automation on. These debuffs are used by all modern boss encounters now.\n\n"
 L.privateAurasDesc2 = "BigWigs can help you keep track of when they are applied to you by displaying them as icons. |cFF33FF99This can help you by displaying critical debuffs separately from your normal debuffs.|r\n\n"
+L.aurasDesc = "BigWigs can help you keep track of when boss debuffs are applied to you by displaying them as icons.\n|cFF33FF99This can help you by displaying critical debuffs separately from your normal debuffs.|r\n\n"
 
 L.createTestAura = "Create Test Aura"
 L.showDispelType = "Show Dispel Type Indicator"
@@ -1116,9 +1123,28 @@ L.playerInYourGroup = "A player in your group"
 L.maxIcons = "Max Icons"
 L.maxIconsDesc = "The maximum amount of icons to be displayed."
 L.privateAurasHelpTip = "|TInterface\\AddOns\\BigWigs\\Media\\Icons\\minimap_raid:0:0|tBigWigs: You can now see your private aura debuffs as icons, or even the private auras of another player (e.g. a tank)."
+L.aurasHelpTip = "|TInterface\\AddOns\\BigWigs\\Media\\Icons\\minimap_raid:0:0|tBigWigs: You can now see your boss debuffs as icons, or even the boss debuffs of another player (e.g. a tank)."
 
-L.privateAurasTestAnchorText = "Private\nAura\n(%d)"
-L.privateAurasTestTankAnchorText = "Tank\nAura\n(%d)"
+L.privateAurasTestAnchorText = "Player\nAura\n%d"
+L.privateAurasTestTankAnchorText = "Tank\nAura\n%d"
+
+L.auraSounds = "Aura Sounds"
+L.addAuraSpell = "Add Spell"
+L.addAuraSpellDesc = "You can add spells you currently know by name, but it is always best to use the spell ID from logs."
+L.invalidSpell = "Invalid spell"
+L.bossDebuffsOnYou = "Boss Debuffs On You"
+L.bossDebuffsOnTank = "Boss Debuffs On Tank"
+L.showCountText = "Show Stacks"
+L.cooldownText = "Cooldown Duration"
+L.countText = "Applications"
+L.selectPlayer = "Select Player"
+L.myself = "Myself"
+L.trigger = "Trigger"
+L.remove = "Remove"
+L.auraCountdownDesc = "If enabled, a vocal countdown will be added to the last 3 seconds of the aura."
+L.auraDuration = "Aura Duration"
+L.auraDurationDesc = "The duration in seconds that the aura will last."
+L.currentUnit = "(Current: %s)"
 
 -----------------------------------------------------------------------
 -- Proximity.lua

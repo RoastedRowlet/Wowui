@@ -234,7 +234,7 @@ local function getChunkLookup(table, length)
 end
 
 local lookup = {'Unknown-Unknown','Warrior-Protection',}
-local provider = {region='US',realm='Fizzcrank',name='US',type='subscribers',zone=46,date='2026-08-11',data={Bl='Blackthòrn:BAEALgAECgEJAQABLgAECgEJAwABAAAAAA==.Bloodybonne:BAEALgAECgEJAgABLgAECgEJAwABAAAAAA==.',Ke='Kegròll:BAEALgAECgEJAQABLgAECgEJAwABAAAAAA==.',Sh='Shiftytank:BAEALgAECgEJAwABLgAECgEJAwABAAAAAA==.',Th='Threaten:BAEALgAECgEJAwAAAA==.',Za='Zal:BAEALgAECgYJBgABLgAFFAgJEQACAMcVAA==.',},}
+local provider = {region='US',realm='Fizzcrank',name='US',type='subscribers',zone=46,date='2026-08-18',data={Bl='Blackthòrn:BAEALgAECgEJAQABLgAECgEJAwABAAAAAA==.Bloodybonne:BAEALgAECgEJAgABLgAECgEJAwABAAAAAA==.',Ke='Kegròll:BAEALgAECgEJAQABLgAECgEJAwABAAAAAA==.',Sh='Shiftytank:BAEALgAECgEJAwABLgAECgEJAwABAAAAAA==.',Th='Threaten:BAEALgAECgEJAwAAAA==.',Za='Zal:BAEALgAECgYJBgABLgAFFAgJEQACAMcVAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

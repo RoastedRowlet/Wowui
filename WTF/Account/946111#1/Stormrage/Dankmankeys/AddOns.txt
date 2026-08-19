@@ -52,4 +52,5 @@ EllesmereUIResourceBars: enabled
 LittleWigs_BattleForAzeroth: enabled
 BigWigs_Sporefall: enabled
 EllesmereUIAuraBuffReminders: disabled
-EllesmereUIRaidFrames: disabled
+EllesmereUIRaidFrames: enabled
+BigWigs_TheVenomousAbyss: enabled

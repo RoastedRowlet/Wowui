@@ -6,12 +6,11 @@ local mod, CL = BigWigs:NewBoss("Lightwarden Ruia", 2859, 2771)
 if not mod then return end
 mod:SetEncounterID(3201)
 mod:SetRespawnTime(30)
-mod:SetPrivateAuraSounds({
-	{1239825, sound = "none"}, -- Lightfire
-	{1239919, sound = "underyou"}, -- Lightfire Beams
-	{1241058, sound = "none"}, -- Grievous Thrash
-	{1251345, sound = "underyou"}, -- Blight Resin
-	{1257094, sound = "none"}, -- Pulverized
+mod:SetAuraData({
+	{1239825}, -- Lightfire
+	{1239919, soundOnApplied = "underyou"}, -- Lightfire Beams
+	{1241058}, -- Grievous Thrash
+	{1257094}, -- Pulverized
 })
 mod:SetStage(1)
 
@@ -108,13 +107,13 @@ function mod:ENCOUNTER_TIMELINE_EVENT_ADDED(_, eventInfo)
 		elseif duration == 31.3 or (duration == 32 and sharedCount % 4 == 0) then
 			barInfo = self:PulverizingStrikesTimeline(eventInfo)
 		end
-	elseif duration == 5 or (self:GetStage() == 1 and duration >= 20 and duration <= 21 and sharedCount % 2 == 1) then
+	elseif duration == 5 or (self:GetStage() == 1 and duration >= 19.9 and duration <= 21 and sharedCount % 2 == 1) then
 		barInfo = self:LightfireTimeline(eventInfo)
-	elseif duration == 18 or (self:GetStage() == 1 and duration >= 20 and duration <= 21 and sharedCount % 2 == 0) then
+	elseif duration == 18 or (self:GetStage() == 1 and duration >= 19.9 and duration <= 21 and sharedCount % 2 == 0) then
 		barInfo = self:LightfallTimeline(eventInfo)
-	elseif duration == 3 or (self:GetStage() == 2 and duration >= 20 and duration <= 21 and sharedCount % 2 == 1) then
+	elseif duration == 3 or (self:GetStage() == 2 and duration >= 19.9 and duration <= 21 and sharedCount % 2 == 1) then
 		barInfo = self:GrievousThrashTimeline(eventInfo)
-	elseif duration == 9 or (self:GetStage() == 2 and duration >= 20 and duration <= 21 and sharedCount % 2 == 0) then
+	elseif duration == 9 or (self:GetStage() == 2 and duration >= 19.9 and duration <= 21 and sharedCount % 2 == 0) then
 		barInfo = self:PulverizingStrikesTimeline(eventInfo)
 	elseif not self:IsWiping() then
 		self:ErrorForTimelineEvent(eventInfo)
@@ -262,19 +261,16 @@ do
 			msg = barText,
 			key = 1240210,
 			callback = function()
-				if BigWigsLoader.isNext then
-					if self:GetStage() ~= 3 then -- Stage 2
-						pulverizingStrikesRemaining = 2
-					else -- Stage 3
-						pulverizingStrikesRemaining = 3
-					end
-				else -- XXX remove in 12.1
-					pulverizingStrikesRemaining = 3
+				pulverizingStrikesRemaining = 3
+				if self:GetStage() ~= 3 then
+					self:ScheduleTimer(function()
+						self:RegisterUnitEvent("UNIT_SPELLCAST_START", nil, "boss1")
+					end, 0.1)
+					self:Message(1240210, "yellow", self:GetRename(1240210, 2)) -- Pulverizing Strikes incoming
+				else
+					self:Message(1240210, "yellow", self:GetRename(1240210)) -- Pulverizing Strikes
+					self:PlaySound(1240210, "alarm")
 				end
-				self:SimpleTimer(function()
-					self:RegisterUnitEvent("UNIT_SPELLCAST_START", nil, "boss1")
-				end, 0.1)
-				self:Message(1240210, "yellow", self:GetRename(1240210, 2)) -- Pulverizing Strikes incoming
 			end
 		}
 	end

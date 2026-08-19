@@ -148,6 +148,11 @@ L.compartmentMenu_desc = "关闭此选项将启用暴雪的小地图插件收纳
 L.configure = "配置"
 L.resetPositions = "重置位置"
 L.selectEncounter = "选择战斗"
+L.primary_aura_spellId = "\n|cFFFFFF99主要法术ID：%d|r"
+L.secondary_aura_spellIds = "|cFFFFFF99次要法术ID（s）：%s|r"
+L.onApplied = "施加时"
+L.onDose = "叠加时"
+L.onRemoved = "移除时"
 L.privateAuraSounds = "私有光环音效"
 L.privateAuraSounds_desc = "私有光环无法被正常追踪，但你可以为其设置音效，当对应减益施加到你身上时播放。"
 L.listAbilities = "列出技能到团队聊天"
@@ -314,8 +319,7 @@ L.sharing_renames_desc = "导入自定义重命名的设置。"
 L.sharing_export_renames_desc = "导出自定义重命名的设置。"
 L.sharing_sounds_desc = "导入技能播放的音效设置。"
 L.sharing_export_sounds_desc = "导出技能播放的音效设置。"
-L.sharing_private_auras = "私有光环"
-L.sharing_private_auras_desc = "导入私有光环的音效设置。"
+L.sharing_auras_desc = "导入光环的音效设置。"
 L.sharing_export_private_auras_desc = "导出私有光环的音效设置。"
 L.sharing_colors_desc = "导入计时条与信息文本的颜色设置。"
 L.sharing_export_colors_desc = "导出计时条与信息文本的颜色设置。"
@@ -362,6 +366,7 @@ L.H10 = "10人英雄"
 L.H25 = "25人英雄"
 L.titan = "25人泰坦" -- Chinese-only "Titan Reforged" servers
 L.mythic_flex = "史诗（弹性）" -- 233. 史诗 - 弹性团队副本
+L.world = "世界" -- World (The first difficulty for Lairs in Retail WoW, essentially the same as LFR since its World -> Normal -> Heroic -> Mythic) 250. 世界
 
 -----------------------------------------------------------------------
 -- TOOLS
@@ -1089,16 +1094,18 @@ L.nameplateOptInTitle = "姓名板'手动选择'模式"
 L.nameplateOptInWarning = "|cffff4411警告！|r\n\n启用'手动选择'模式将关闭所有模块的姓名板效果。您需要逐个进入每个模块的设置，手动开启您想要的姓名板效果。\n\n界面即将重新加载，是否继续？"
 
 -----------------------------------------------------------------------
--- PrivateAuras.lua
+-- PrivateAuras.lua / Auras.lua
 --
 
+L.auras = "光环" -- Buffs/Debuffs
 L.privateAuras = "私有光环"
 L.privateAurasDesc1 = "“私有光环”是一种特殊的减益效果，插件既无法检测，也无法对其进行任何自动化操作。如今，这类机制已普遍应用于所有现代首领战中。\n\n"
 L.privateAurasDesc2 = "BigWigs 会用醒目的图标为你单独显示这些效果，|cFF33FF99帮助你精准定位关键减益，不再受普通减益的干扰。|r\n\n"
+--L.aurasDesc = "BigWigs can help you keep track of when boss debuffs are applied to you by displaying them as icons.\n|cFF33FF99This can help you by displaying critical debuffs separately from your normal debuffs.|r\n\n"
 
 L.createTestAura = "创建测试光环"
 L.showDispelType = "显示驱散类型图标"
-L.showDispelTypeDesc = "如果在私有光环框体上有驱散类型，则显示一个图标。\n\n|cffffd200注意：这是对所有私有光环框体的全局设置。|r"
+L.showDispelTypeDesc = "如果在光环框体上有驱散类型，则显示一个图标。\n\n|cffffd200注意：这是对所有光环框体的全局设置。|r"
 L.iconSize = "图标尺寸"
 L.iconSpacing = "图标间距"
 L.showCooldown = "显示冷却转圈"
@@ -1111,15 +1118,34 @@ L.aurasOnAnother = "其他玩家身上的光环"
 L.aurasOnAnotherDesc = "选择一名特定玩家，然后为该玩家自定义光环图标。\n\n"
 L.chooseAPlayer = "选择一名玩家"
 L.theOtherTank = "自动寻找坦克"
-L.theOtherTankDesc = "在你队伍中除你之外另一位坦克身上的私有光环。（当前：%s）"
+L.theOtherTankDesc = "在你队伍中除你之外另一位坦克身上的光环。（当前：%s）"
 L.onlyWhenYouAreTank = "仅当你是坦克时显示"
 L.playerInYourGroup = "你队伍中的玩家"
 L.maxIcons = "最大图标数"
 L.maxIconsDesc = "显示图标的最大数量。"
-L.privateAurasHelpTip = "|TInterface\\AddOns\\BigWigs\\Media\\Icons\\minimap_raid:0:0|tBigWigs：现在您可以显示自己的私有光环减益图标，甚至还可以显示其他玩家（例如坦克）的私有光环。"
+L.privateAurasHelpTip = "|TInterface\\AddOns\\BigWigs\\Media\\Icons\\minimap_raid:0:0|tBigWigs：现在您可以显示自己的光环减益图标，甚至还可以显示其他玩家（例如坦克）的光环。"
+--L.aurasHelpTip = "|TInterface\\AddOns\\BigWigs\\Media\\Icons\\minimap_raid:0:0|tBigWigs: You can now see your boss debuffs as icons, or even the boss debuffs of another player (e.g. a tank)."
 
-L.privateAurasTestAnchorText = "私有\n光环\n（%d）"
-L.privateAurasTestTankAnchorText = "坦克\n光环\n（%d）"
+L.privateAurasTestAnchorText = "私有\n光环\n%d"
+L.privateAurasTestTankAnchorText = "坦克\n光环\n%d"
+
+L.auraSounds = "光环音效"
+L.addAuraSpell = "添加法术"
+L.addAuraSpellDesc = "可按名称添加已学会的法术，建议使用日志中的ID。"
+L.invalidSpell = "无效的法术"
+L.bossDebuffsOnYou = "首领减益（你）"
+L.bossDebuffsOnTank = "首领减益（坦克）"
+L.showCountText = "显示层数"
+L.cooldownText = "冷却时间"
+L.countText = "施加次数"
+--L.selectPlayer = "Select Player"
+--L.myself = "Myself"
+L.trigger = "触发条件"
+L.remove = "移除"
+L.auraCountdownDesc = "启用后，光环结束前3秒将播放语音倒计时。"
+L.auraDuration = "光环持续时间"
+L.auraDurationDesc = "光环的持续时间（秒）。"
+L.currentUnit = "（当前：%s）"
 
 -----------------------------------------------------------------------
 -- Proximity.lua

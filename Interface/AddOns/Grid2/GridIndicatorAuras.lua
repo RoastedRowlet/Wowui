@@ -2,6 +2,8 @@
 
 local rawget = rawget
 local tostring = tostring
+local tremove = table.remove
+local ShouldAurasBeSecret = C_Secrets.ShouldAurasBeSecret
 
 local indicator = Grid2.indicatorPrototype
 
@@ -83,7 +85,7 @@ end
 
 local function GetAuraSlotKey(self, key)
 	local prefixKey = self.dbx.type .. (key or '')
-	return prefixKey..self.name, prefixKey
+	return prefixKey..self.name, prefixKey -- prefixKey: key to store disabled slots for later reuse, with no reference to a specific indicator name
 end
 
 local function GetAuraSlotsContainer(parent)
@@ -99,7 +101,17 @@ local function GetAuraSlotsContainer(parent)
 	return container
 end
 
-function indicator:AcquireAuraSlotButton(parent, filter, releaseFunc, key)
+local function ClearAuraSlotWidgets(button)
+	button:ClearIcon()
+	button:ClearDispelTypeTextures()
+	button:ClearApplicationCount()
+	button:ClearDurationCooldown()
+	button:ClearDurationText()
+	button:ClearDurationBar()
+	button:ClearApplicationBar()
+end
+
+function indicator:AcquireAuraSlotButton(parent, filter, initFunc, releaseFunc, key)
 	local status
 	if not filter then
 		filter, status = self:GetStatusAurasFilter()
@@ -107,16 +119,28 @@ function indicator:AcquireAuraSlotButton(parent, filter, releaseFunc, key)
 	local container = GetAuraSlotsContainer(parent)
 	local buttonKey, prefixKey = GetAuraSlotKey(self, key)
 	local button = container.slotEnabled[buttonKey]
-	if not button then -- search a disabled compatible slot button
+	if ShouldAurasBeSecret() then -- we cannot reuse slot buttons if auras are secret
+		if button then
+			button = self:ReleaseAuraSlotButton(parent, key)
+		end
+	elseif not button then  -- search a disabled compatible slot button
 		local buttons = container.slotDisabled[prefixKey]
-		button = buttons and table.remove(buttons, #buttons)
+		button = buttons and tremove(buttons, #buttons)
 		container.slotEnabled[buttonKey] = button
 	end
 	if button then -- configure already existing slot button
-		 local slotKey = button.__slotKey
-		 container:SetAuraSlotFilterString(slotKey, filter.filter)
-		 container:SetAuraSlotCandidateFilters(slotKey, filter.candidateFilters)
-		 container:SetAuraSlotSortMethod(slotKey, filter.sortRule or 0, filter.sortDir or 0)
+		if button.__dirty then
+			ClearAuraSlotWidgets(button)
+			button.__dirty = nil
+		end
+		local slotKey = button.__slotKey
+		container:SetAuraSlotFilterString(slotKey, filter.filter)
+		container:SetAuraSlotCandidateFilters(slotKey, filter.candidateFilters)
+		container:SetAuraSlotSortMethod(slotKey, filter.sortRule or 0, filter.sortDir or 0)
+		self:SetAuraButtonTooltip(button)
+		if initFunc then
+			initFunc(indicator, parent, button, filter, status, key)
+		end
 	else -- create new slot button
 		container.slotCount = container.slotCount + 1
 		local slotKey = tostring(container.slotCount)
@@ -124,30 +148,36 @@ function indicator:AcquireAuraSlotButton(parent, filter, releaseFunc, key)
 			sortMethod = filter.sortRule or 0,
 			sortDirection = filter.sortDir or 0,
 			candidateFilters = filter.candidateFilters,
+			initializeFrame = function(button)
+				self:SetAuraButtonTooltip(button)
+				if initFunc then
+					initFunc(indicator, parent, button, filter, status, key)
+				end
+			end
 		} )
 		container.slotEnabled[buttonKey] = button
 		button.__slotKey = slotKey -- key used by blizzard aura container system
 		button.__releaseFunc = releaseFunc
 	end
-	self:SetAuraButtonTooltip(button)
 	return button, filter, status
 end
 
 function indicator:ReleaseAuraSlotButton(parent, key)
-	local container = GetAuraSlotsContainer(parent)
+	local container = parent.__auraManager[0]
+	if not container then return end
 	local buttonKey, prefixKey = GetAuraSlotKey(self, key)
 	local button = container.slotEnabled[buttonKey]
 	if button then
-		button:Hide()
-		local func = button.__releaseFunc
-		if func then
-			func(self, parent, button)
+		if ShouldAurasBeSecret() then
+			button.__dirty = true
 		else
-			button:ClearIcon()
-			button:ClearDispelTypeTextures()
-			button:ClearApplicationCount()
-			button:ClearDurationCooldown()
-			button:ClearApplicationBar()
+			button:Hide()
+			local func = button.__releaseFunc
+			if func then
+				func(self, parent, button)
+			else
+				ClearAuraSlotWidgets(button)
+			end
 		end
 		container:SetAuraSlotFilterString(button.__slotKey, "")
 		local disabledButtons = container.slotDisabled

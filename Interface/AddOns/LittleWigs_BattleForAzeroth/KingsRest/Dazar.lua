@@ -8,6 +8,14 @@ mod:RegisterEnableMob(136160, 136984, 136976) -- Dazar, Reban, T'zala
 mod:SetEncounterID(2143)
 mod:SetRespawnTime(30)
 mod:SetStage(1)
+if mod:Retail() then -- Midnight+
+	mod:SetAuraData({
+		{1303039}, -- Hunting Leap
+		{1302945, note = CL.debuffFailureNote}, -- Impaling Spear
+		{1303490}, -- Savage Maul
+		{1303267}, -- Gilded Destruction
+	})
+end
 
 --------------------------------------------------------------------------------
 -- Locals
@@ -98,7 +106,7 @@ local backupBars = {}
 -- Midnight Renames
 --
 
-if BigWigsLoader.isNext then -- Midnight+ XXX swap to mod:Retail() in 12.1
+if mod:Retail() then -- Midnight+
 	mod:SetRenames({
 		[269230] = {269230}, -- Hunting Leap
 		[269369] = {269369}, -- Deathly Roar
@@ -114,7 +122,7 @@ end
 -- Midnight Initialization
 --
 
-if BigWigsLoader.isNext then -- Midnight+ XXX swap to mod:Retail() in 12.1
+if mod:Retail() then -- Midnight+
 	function mod:GetOptions()
 		return {
 			269230, -- Hunting Leap
@@ -167,9 +175,9 @@ function mod:ENCOUNTER_TIMELINE_EVENT_ADDED(_, eventInfo)
 	local barInfo
 	-- Stage 1: Hunting Leap 8->10, Deathly Roar 14->10, Aerial Smash 15, Blade Combo 23, Gilded Destruction 30
 	-- Stage 2: Quaking Leap 9, Gilded Destruction 24, Savage Maul 36, Blade Combo 38
-	if duration == 8 or (duration == 10 and count10 % 2 == 1) then -- Hunting Leap
+	if duration == 8 or (duration == 10 and count10 % 2 == 1) or duration == 28 then -- Hunting Leap
 		barInfo = self:HuntingLeapTimeline(eventInfo)
-	elseif duration == 14 or (duration == 10 and count10 % 2 == 0) then -- Deathly Roar
+	elseif duration == 14 or (duration == 10 and count10 % 2 == 0) or duration == 27 then -- Deathly Roar
 		barInfo = self:DeathlyRoarTimeline(eventInfo)
 	elseif duration == 15 then -- Aerial Smash
 		barInfo = self:AerialSmashTimeline(eventInfo)
@@ -300,9 +308,10 @@ function mod:AerialSmashTimeline(eventInfo) -- Aerial Smash
 	return {
 		msg = barText,
 		key = 1303115,
-		callback = function()
-			self:Error("Aerial Smash now has a callback")
-		end,
+		--callback = function()
+			-- TODO there is a callback but it's likely late
+			--self:Error("Aerial Smash now has a callback")
+		--end,
 		cancelCallback = function()
 			if timer then
 				self:CancelTimer(timer)
@@ -354,9 +363,10 @@ function mod:QuakingLeapTimeline(eventInfo) -- Quaking Leap
 	return {
 		msg = barText,
 		key = 1303327,
-		callback = function()
-			self:Error("Quaking Leap now has a callback")
-		end,
+		--callback = function()
+			-- TODO there is a callback but it's likely late
+			--self:Error("Quaking Leap now has a callback")
+		--end,
 		cancelCallback = function()
 			if timer then
 				self:CancelTimer(timer)

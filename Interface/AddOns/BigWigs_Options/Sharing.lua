@@ -644,6 +644,12 @@ do
 						end
 					end
 
+					-- Aura Settings
+					if module.db and module.db.profile and module.db.profile.auras then
+						instanceSettings[module.name] = CopyTable(instanceSettings[module.name] or {})
+						instanceSettings[module.name].auras = module.db.profile.auras
+					end
+
 					-- Sounds
 					for soundSettingName, savedSoundModules in pairs(soundModule.db.profile) do
 						for soundSettingsModuleName, settings in pairs(savedSoundModules) do
@@ -931,26 +937,19 @@ do
 		local soundModule = BigWigs:GetPlugin("Sounds", true)
 		local colorModule = BigWigs:GetPlugin("Colors", true)
 
-		local function ImportSounds(soundSettings, moduleName)
-			if not soundModule then return end
-
-			local sDB = soundModule.db.profile
-			for soundSettingName in next, sDB do
-				if soundSettingName ~= "privateaura" then -- private auras are handled separately inside ImportPrivateAuras
-					if soundSettings and soundSettings[soundSettingName] then
-						sDB[soundSettingName][moduleName] = CopyTable(soundSettings[soundSettingName])
-					else -- wipe to set default
-						sDB[soundSettingName][moduleName] = nil
+		local function ImportAuras(auraSoundSettings, module)
+			if module then
+				if module.SetupOptions then module:SetupOptions() end
+				if module.db and module.db.profile and module.db.profile.auras then
+					for key, value in pairs(module.db.profile.auras) do
+						if auraSoundSettings and auraSoundSettings[key] then
+							module.db.profile.auras[key] = auraSoundSettings[key]
+						else -- wipe to set default
+							module.db.profile.auras[key] = nil
+						end
 					end
 				end
 			end
-		end
-
-		local function ImportPrivateAuras(soundSettings, moduleName)
-			if not soundModule then return end
-			local privateAuraSettings = soundSettings and soundSettings["privateaura"] or {}
-			local sDB = soundModule.db.profile["privateaura"]
-			sDB[moduleName] = CopyTable(privateAuraSettings)
 		end
 
 		local function ImportFlags(flagSettings, module)
@@ -1000,6 +999,19 @@ do
 			end
 		end
 
+		local function ImportSounds(soundSettings, moduleName)
+			if not soundModule then return end
+
+			local sDB = soundModule.db.profile
+			for soundSettingName in next, sDB do
+				if soundSettings and soundSettings[soundSettingName] then
+					sDB[soundSettingName][moduleName] = CopyTable(soundSettings[soundSettingName])
+				else -- wipe to set default
+					sDB[soundSettingName][moduleName] = nil
+				end
+			end
+		end
+
 		local importInstanceQueue = {}
 		for instanceID, modules in pairs(data.exportTable) do
 			if sharingImportOptionsSettings[instanceID] then
@@ -1041,10 +1053,12 @@ do
 				if module and module:IsZoneID(nextInstanceID) then
 					ImportFlags(settings.flags, module)
 					ImportRenames(settings.renames, module)
+					ImportAuras(settings.auras, module)
 
 					ImportColors(settings.colors, moduleName)
 					ImportSounds(settings.sounds, moduleName)
-					ImportPrivateAuras(settings.sounds, moduleName)
+
+					BigWigs:SendMessage("BigWigs_RefreshAuraSounds", module)
 				end
 			end
 			table.insert(chatMessages, getInstanceLabel(nextInstanceID))

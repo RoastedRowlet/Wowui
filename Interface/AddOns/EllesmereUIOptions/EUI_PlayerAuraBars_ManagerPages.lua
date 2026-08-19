@@ -352,7 +352,10 @@ local function BuildBuffBarSubtitle(bar)
                 local f = allFilters[i]
                 if bar.filters[f.id] then
                     totalSelected = totalSelected + 1
-                    if #names < 3 then names[#names + 1] = f.name end
+                    -- L() before the truncate below: preset filters carry raw
+                    -- English names (see PAB's BM2_FILTER_SEED), and truncating
+                    -- first would leave the tail untranslatable.
+                    if #names < 3 then names[#names + 1] = L(f.name) end
                 end
             end
         end
@@ -788,18 +791,26 @@ local function BuildAssignedDebuffsFields(frame, fontPath, sy, cfg, apply)
         local rgn = safRow._leftRegion
         if rgn._control then rgn._control:Hide() end
         local PAB_ALL_DEBUFFS_KEY = "__allDebuffs"
+        local PAB_DEBUFF_HAS_DUR_KEY = "__debuffHasDuration"
         local function AllOn() return cfg.showAllDebuffs ~= false end
+        -- Hovering a dimmed Show box explains the dim (the lane is inert
+        -- while All Debuffs already shows everything). Has Duration is an
+        -- AND-modifier, not a mode: it never locks the lane.
+        local lockedTip = L("All Debuffs is selected, so every debuff already shows. Use the red Hide box to exclude these instead.")
         local function FilterItems()
             local items = {
                 { key = PAB_ALL_DEBUFFS_KEY, label = "All Debuffs",
                   tooltip = "Show every debuff. Use the Hide lane below to remove specific filters." },
+                { key = PAB_DEBUFF_HAS_DUR_KEY, label = "Has Duration",
+                  tooltip = "Only show debuffs that have a duration, excluding permanent ones. Combines with the filters below; checked alone it shows every timed debuff." },
                 { isHeader = true, label = "Show", rightLabel = "Hide" },
             }
             local classItems = ns.PAB_ClassItems and ns.PAB_ClassItems(false) or {}
             for i = 1, #classItems do
                 local ci = classItems[i]
                 items[#items + 1] = { key = ci.key, label = ci.label, tooltip = ci.tooltip,
-                    dual = true, showLockedFn = AllOn }
+                    dual = true, showLockedFn = AllOn,
+                    showLockedTooltip = lockedTip }
             end
             return items
         end
@@ -809,6 +820,7 @@ local function BuildAssignedDebuffsFields(frame, fontPath, sy, cfg, apply)
             FilterItems,
             function(k, neg)
                 if k == PAB_ALL_DEBUFFS_KEY then return AllOn() end
+                if k == PAB_DEBUFF_HAS_DUR_KEY then return cfg.hasDuration == true end
                 if neg then
                     local nf = cfg.negClassFilters
                     return nf and nf[k] == true
@@ -822,6 +834,16 @@ local function BuildAssignedDebuffsFields(frame, fontPath, sy, cfg, apply)
                     -- same convention as showAllBuffs). Lanes persist across
                     -- mode flips (the hide lane subtracts in both modes).
                     cfg.showAllDebuffs = v
+                    apply()
+                    EllesmereUI:RefreshPage()
+                    return
+                end
+                if k == PAB_DEBUFF_HAS_DUR_KEY then
+                    -- AND-modifier (native maxDuration on every debuff group;
+                    -- permanents excluded): combines with All Debuffs or any
+                    -- class-filter selection; alone it acts as the timed
+                    -- catch-all (DebuffCatchAllOn).
+                    cfg.hasDuration = v or nil
                     apply()
                     EllesmereUI:RefreshPage()
                     return
@@ -1018,6 +1040,9 @@ local function BuildCoreFields(frame, fontPath, sy, cfg, apply, isBuff)
             { type = "toggle", label = "Show S for Seconds",
               get = function() return cfg.durationShowSeconds == true end,
               set = function(v) cfg.durationShowSeconds = v and true or nil; apply() end },
+            { type = "slider", label = "Precise Below (minutes, 0 = off)", min = 0, max = 60, step = 1,
+              get = function() return cfg.durationPrecisionThreshold and cfg.durationPrecisionThreshold / 60 or 0 end,
+              set = function(v) cfg.durationPrecisionThreshold = v > 0 and math.floor(v * 60 + 0.5) or nil; apply() end },
         })
     end
     do
@@ -2010,7 +2035,7 @@ local function BuildBuffBarDetail(frame, fontPath, bar)
     end
     local body = WrapCompensatedBody(frame, scrollTop)
     local by = 0
-    by = BuildBarTitle(body, fontPath, bar.name or L("Buff Bar"), L("Custom buff bar"), by)
+    by = BuildBarTitle(body, fontPath, L(bar.name or "Buff Bar"), L("Custom buff bar"), by)
     by = BuildAssignedBuffsFields(body, fontPath, by, bar, ApplyBar)
     by = BuildCoreFields(body, fontPath, by, bar, ApplyBar, true)
     by = BuildDisplayFields(body, fontPath, by, bar, ApplyBar, true)
@@ -2037,7 +2062,7 @@ local function BuildDebuffBarDetail(frame, fontPath, bar)
     end
     local body = WrapCompensatedBody(frame, scrollTop)
     local by = 0
-    by = BuildBarTitle(body, fontPath, bar.name or L("Debuff Bar"), L("Custom debuff bar"), by)
+    by = BuildBarTitle(body, fontPath, L(bar.name or "Debuff Bar"), L("Custom debuff bar"), by)
     by = BuildAssignedDebuffsFields(body, fontPath, by, bar, ApplyBar)
     by = BuildCoreFields(body, fontPath, by, bar, ApplyBar, false)
     by = BuildDisplayFields(body, fontPath, by, bar, ApplyBar, false)
@@ -2355,7 +2380,7 @@ function ns.PABMP_ShowFilterEditor()
             edit:SetScript("OnLeave", function(self) self:SetAlpha(0.5); EllesmereUI.HideWidgetTooltip() end)
             edit:SetScript("OnClick", function()
                 EditorInput({
-                    title = L("Rename Filter"), placeholder = f.name,
+                    title = L("Rename Filter"), placeholder = L(f.name),
                     confirmText = L("Rename"), cancelText = L("Cancel"),
                     onConfirm = function(text) ns.PAB_RenameFilter(f.id, text); Rebuild() end,
                 })
@@ -2429,7 +2454,7 @@ function ns.PABMP_ShowFilterEditor()
         ren:SetScript("OnLeave", function() rl:SetAlpha(0.9) end)
         ren:SetScript("OnClick", function()
             EditorInput({
-                title = L("Rename Filter"), placeholder = sel.name,
+                title = L("Rename Filter"), placeholder = L(sel.name),
                 confirmText = L("Rename"), cancelText = L("Cancel"),
                 onConfirm = function(text) ns.PAB_RenameFilter(sel.id, text); Rebuild() end,
             })
@@ -3178,7 +3203,7 @@ function ns.PABMP_BuildPage(pageName, parent, yOffset)
                 local kind = isBuff and "buff" or "debuff"
                 tileY = tileY - BuildTile(sectionChild, tileY, {
                     width = sidebarW, fontPath = fontPath,
-                    title = bar.name or (isBuff and L("Buff Bar") or L("Debuff Bar")),
+                    title = L(bar.name or (isBuff and "Buff Bar" or "Debuff Bar")),
                     subtitle = gname,
                     inheritedTooltip = EllesmereUI.Lf("Inherited from %1$s. Editable only there.", gname),
                     selected = (pabInhSel and pabInhSel.kind == kind
@@ -3243,7 +3268,7 @@ function ns.PABMP_BuildPage(pageName, parent, yOffset)
             local bar = buffBars[i]
             tileY = tileY - BuildTile(sidebarChild, tileY, {
                 width = sidebarW, fontPath = fontPath,
-                title = bar.name or L("Buff Bar"),
+                title = L(bar.name or "Buff Bar"),
                 subtitleFn = function() return BuildBuffBarSubtitle(bar) end,
                 selected = (pabSel and pabSel.kind == "buff" and pabSel.id == bar.id
                     and not pabInhSel) and true or false,
@@ -3275,7 +3300,7 @@ function ns.PABMP_BuildPage(pageName, parent, yOffset)
                 end,
                 onRename = function()
                     EllesmereUI:ShowInputPopup({
-                        title = L("Rename Bar"), placeholder = bar.name or L("Buff Bar"),
+                        title = L("Rename Bar"), placeholder = L(bar.name or "Buff Bar"),
                         confirmText = L("Rename"), cancelText = L("Cancel"),
                         onConfirm = function(text)
                             if text and text ~= "" then
@@ -3348,7 +3373,7 @@ function ns.PABMP_BuildPage(pageName, parent, yOffset)
             local bar = debuffBars[i]
             tileY = tileY - BuildTile(sidebarChild, tileY, {
                 width = sidebarW, fontPath = fontPath,
-                title = bar.name or L("Debuff Bar"),
+                title = L(bar.name or "Debuff Bar"),
                 subtitleFn = function() return BuildDebuffBarSubtitle(bar) end,
                 selected = (pabSel and pabSel.kind == "debuff" and pabSel.id == bar.id
                     and not pabInhSel) and true or false,
@@ -3380,7 +3405,7 @@ function ns.PABMP_BuildPage(pageName, parent, yOffset)
                 end,
                 onRename = function()
                     EllesmereUI:ShowInputPopup({
-                        title = L("Rename Bar"), placeholder = bar.name or L("Debuff Bar"),
+                        title = L("Rename Bar"), placeholder = L(bar.name or "Debuff Bar"),
                         confirmText = L("Rename"), cancelText = L("Cancel"),
                         onConfirm = function(text)
                             if text and text ~= "" then

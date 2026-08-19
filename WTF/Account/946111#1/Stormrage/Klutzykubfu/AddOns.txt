@@ -38,7 +38,7 @@ EllesmereUIMythicTimer: disabled
 EllesmereUINameplates: enabled
 EllesmereUIQoL: enabled
 EllesmereUIQuestTracker: enabled
-EllesmereUIRaidFrames: disabled
+EllesmereUIRaidFrames: enabled
 EllesmereUIResourceBars: enabled
 EllesmereUIUnitFrames: enabled
 FocusMarker: enabled
@@ -109,3 +109,4 @@ Blizzard_Transmog: enabled
 Dystinct_EarthenSkyriding: enabled
 Blizzard_CombatText: enabled
 Blizzard_WeeklyRewards: enabled
+BigWigs_TheVenomousAbyss: enabled

@@ -19,6 +19,25 @@ mod:RegisterEnableMob(
 	197985, -- Flame Channeler
 	197535  -- High Channeler Ryvati
 )
+if mod:Retail() then -- Midnight+
+	mod:SetAuraData({
+		{1305201}, -- Excavating Blast
+		{1307205}, -- Earthbound's Imprint
+		{1305225}, -- Tectonic Strike
+		{1305234}, -- Cold Claws
+		{373593}, -- Frozen Solid
+		{372047}, -- Steel Barrage
+		{374927, soundOnApplied = "underyou"}, -- Wall of Flames
+		{373693}, -- Living Bomb
+		{385536}, -- Flaming Barrage
+		{373692}, -- Inferno
+		{395292}, -- Fire Maw
+		{392641}, -- Rolling Thunder
+		{1310599}, -- Electrical Discharge
+		{1307372, soundOnApplied = "underyou"}, -- Fiery Demise
+		{1306366}, -- Lightning Torrent
+	})
+end
 
 --------------------------------------------------------------------------------
 -- Localization

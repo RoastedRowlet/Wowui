@@ -1,3 +1,53 @@
+## 3.8.1
+
+### New Features
+
+- **Aura icons pick a type and a set of units** — Choose Buff, Debuff or both, then tick who to watch: you, target, focus, pet or party. The icon lights up when any ticked unit has the aura, so one icon can cover several people. Icons you already made keep working exactly as before.
+- **Aura picker** — Add an aura icon by clicking it from a grid of everything the Cooldown Manager knows for your spec, instead of hunting for a spell ID. Auras you already track are dimmed, and ones in the database but missing from your CDM display are marked.
+- **Own auras only** — An aura icon can ignore other players' copies of the same buff or debuff and react only to yours.
+- **More than one icon for the same aura** — You can now create several icons for one spell, to watch it on different units or give each a different look.
+
+### Improvements
+
+- **Account sharing now has one owner** — Only the character you push from sends its layout out. Everyone else receives it and keeps their own edits local, so an alt can no longer take the profile over just by moving something. Press Push to make the character you are on the source.
+- **More of your setup travels between characters** — Aura icons, custom icons and totem slots now sync with shared profiles. Until now they never left the source character, so alts quietly ended up with a different set.
+- **Trinket auto-tracking starts turned off** — New characters no longer track trinket slots on their own. Characters that already have it on are untouched.
+- **Deleting a trinket icon turns its slot off** — It no longer reappears on your next login.
+- **New Icon routing shows deleted groups** — If a routing option points at a group you have since deleted, the panel says so instead of showing a blank dropdown.
+
+### Bug Fixes
+
+- **Cooldown bars vanished on charge spells** — The bar disappeared when the first charge came back. It now runs through the whole recharge.
+- **Pulling a shared profile removed your Arc icons** — Aura icons, custom icons and totem icons were destroyed every time a profile was pulled. They now survive it.
+- **Deleted groups came back** — Deleting a group in a shared layout now removes it for every character using that layout. Another character could previously rebuild it on login and hand it back to everyone.
+- **Icons from a deleted group** — They become free icons you can place, instead of quietly recreating the group they pointed at.
+- **Totem icons jumped to the middle of the screen** — They no longer lose their position when you log in.
+- **Icons drifted off the side of the screen** — Icons could be pushed further right each time until they left the screen entirely.
+- **Stray icons appeared after logging in** — Untracked icons with borders and working tooltips no longer show up.
+- **Errors with potions, healthstones and trinkets** — Fixed an error that could repeat in dungeons and raids for anyone tracking them.
+- **Icons stranded when a group was removed** — Icons whose group disappeared during a profile or spec change are no longer left styled but unplaceable.
+
+## 3.8.0.b
+
+### Improvements
+
+- **Display Export** — "Bars Export" is now "Display Export" and includes your textures and castbar, so one string moves your whole setup.
+- **Textures ask for a tracking type** — New textures now show "Type Not Set" until you pick Buff, Debuff, Pet Buff, Totem or Ground, just like bars.
+
+### Bug Fixes
+
+- **Icons set to show while a buff is missing didn't appear** — They stayed hidden if Cooldown Manager's "Hide when inactive" was on. Your Aura Missing opacity controls this again.
+- **Icons flickered when a buff ended** — The brief blink as an aura dropped is gone.
+- **Totem icons stayed bright on cooldown** — Totem spells that show a cooldown, like Surging Totem, now grey out properly.
+- **Pandemic glow stayed on** — It could keep glowing after the aura expired until you switched target.
+- **Cooldown Manager tooltip errors** — Hovering an icon could spam errors. Fixed at the source this time.
+- **Spell usability tinting removed desaturation** — Icons randomly stopped greying out while on cooldown.
+- **Error spam when a spell changed form** — Fixed a burst of errors in dungeons and raids.
+- **Hidden Opacity ignored in combat** — Bars could sit at the wrong opacity once combat began.
+- **Arc icon tooltips** — Hovering showed an internal window instead of the normal spell tooltip.
+- **Timer icons flickered** — Custom timers no longer blink when their group refreshes.
+- **Icons hidden by bars could stay hidden** — They now come back when they should.
+
 ## 3.8.0.a
 
 ### Bug Fixes

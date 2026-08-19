@@ -11,6 +11,14 @@ mod:RegisterEnableMob(
 mod:SetEncounterID(2623)
 mod:SetRespawnTime(30)
 mod:SetStage(1)
+if mod:Retail() then -- Midnight+
+	mod:SetAuraData({
+		{381515, note = CL.debuffTankAfterCastNote}, -- Stormslam
+		{381518}, -- Winds of Change
+		{381862}, -- Inferno Spit
+		{384773, soundOnApplied = "underyou", note = CL.debuffUnderYouNote}, -- Flaming Embers
+	})
+end
 
 --------------------------------------------------------------------------------
 -- Localization
@@ -109,7 +117,7 @@ local backupBars = {}
 -- Midnight Renames
 --
 
-if BigWigsLoader.isNext then -- Midnight+ XXX swap to mod:Retail() in 12.1
+if mod:Retail() then -- Midnight+
 	mod:SetRenames({
 		[381525] = {381525}, -- Roaring Firebreath
 		[381512] = {381512}, -- Stormslam
@@ -123,7 +131,7 @@ end
 -- Midnight Initialization
 --
 
-if BigWigsLoader.isNext then -- Midnight+ XXX swap to mod:Retail() in 12.1
+if mod:Retail() then -- Midnight+
 	function mod:GetOptions()
 		return {
 			"warmup",
@@ -304,7 +312,7 @@ function mod:InfernoSpitTimeline(eventInfo) -- Inferno Spit
 		msg = barText,
 		key = 381862,
 		callback = function()
-			self:PersonalMessageFromBlizzMessage(381862, 1, false, self:GetRename(381862, 2)) -- TODO confirm
+			self:PersonalMessageFromBlizzMessage(381862, 3, false, self:GetRename(381862, 2))
 			self:Message(381862, "yellow", barText)
 			self:PlaySound(381862, "alarm")
 		end
@@ -487,7 +495,7 @@ function mod:Stormslam(args)
 	if self:Tank() then
 		self:Message(args.spellId, "purple")
 		self:CDBar(args.spellId, 17.0)
-		self:PlaySound(args.spellId, "alarm")
+		self:PlaySound(args.spellId, "alert")
 	elseif self:Dispeller("magic", nil, args.spellId) then
 		self:CDBar(args.spellId, 17.0)
 	end

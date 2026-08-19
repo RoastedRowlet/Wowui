@@ -5482,6 +5482,50 @@ initFrame:SetScript("OnEvent", function(self)
         local displayHeader
         displayHeader, h = W:SectionHeader(parent, "Display", y);  y = y - h
 
+        -- Visibility (mode dropdown) | Visibility Options (checkbox dropdown, CDM-Bars-style
+        -- plus the TBB-only Hide When Inactive cap; Only In Combat lives in the Visibility
+        -- mode dropdown itself now, In Combat).
+        local tbbVisRow, tbbVisH = EllesmereUI.BuildVisibilityModeRow(W, parent, y,
+            { getStore = SelectedTBB, legacyKey = "barVisibility",
+              caps = { partyIncludesRaid = false, noMouseover = true, luaDragonriding = true },
+              onChanged = function() RefreshTBB() end },
+            { type="dropdown", text="Visibility Options",
+              values={ __placeholder = "..." }, order={ "__placeholder" },
+              getValue=function() return "__placeholder" end,
+              setValue=function() end });  y = y - tbbVisH
+
+        -- Replace the dummy right dropdown with the checkbox dropdown (same technique CDM
+        -- Bars uses -- BuildVisibilityModeRow only knows how to build a plain dropdown slot).
+        if not EllesmereUI._prebuilding then
+            local rightRgn = tbbVisRow._rightRegion
+            if rightRgn._control then rightRgn._control:Hide() end
+            -- The shared list (skyriding included) plus the TBB-only Hide When Inactive cap.
+            local tbbVisItems = {}
+            for _, item in ipairs(EllesmereUI.VIS_OPT_ITEMS) do
+                tbbVisItems[#tbbVisItems + 1] = item
+            end
+            tbbVisItems[#tbbVisItems + 1] = { key = "hideWhenInactive", label = "Hide When Inactive",
+                tooltip = "Only show this bar while the tracked buff/cooldown is active. Unchecked keeps an empty bar on screen at all times." }
+            local tbbCbDD, tbbCbDDRefresh = EllesmereUI.BuildVisOptsCBDropdown(
+                rightRgn, 210, rightRgn:GetFrameLevel() + 2,
+                tbbVisItems,
+                function(k)
+                    local bd = SelectedTBB(); if not bd then return false end
+                    -- hideWhenInactive predates this dropdown and is nil-means-on everywhere
+                    -- it is read, so it cannot go through the plain truthiness path.
+                    if k == "hideWhenInactive" then return bd.hideWhenInactive ~= false end
+                    return bd[k] or false
+                end,
+                function(k, v)
+                    local bd = SelectedTBB(); if not bd then return end
+                    bd[k] = v; RefreshTBB()
+                end)
+            PP.Point(tbbCbDD, "RIGHT", rightRgn, "RIGHT", -20, 0)
+            rightRgn._control = tbbCbDD
+            rightRgn._lastInline = nil
+            EllesmereUI.RegisterWidgetRefresh(tbbCbDDRefresh)
+        end
+
         -- Show Icon | Opacity
         local iconRow
         iconRow, h = W:DualRow(parent, y,
@@ -5747,24 +5791,6 @@ initFrame:SetScript("OnEvent", function(self)
                         bd.bgR, bd.bgG, bd.bgB, bd.bgA = r, g, b, a; RefreshTBB()
                     end },
               } },
-            { type = "toggle", text = "Hide When Inactive",
-              getValue = function() local bd = SelectedTBB(); return bd and bd.hideWhenInactive ~= false end,
-              setValue = function(v)
-                  local bd = SelectedTBB(); if not bd then return end
-                  bd.hideWhenInactive = v and true or false; RefreshTBB()
-              end,
-              tooltip = "Only show this bar while the tracked buff/cooldown is active. Turn off to keep an empty bar on screen at all times." }
-        );  y = y - h
-
-        -- Only In Combat | empty
-        _, h = W:DualRow(parent, y,
-            { type = "toggle", text = "Only In Combat",
-              getValue = function() local bd = SelectedTBB(); return bd and bd.onlyInCombat == true end,
-              setValue = function(v)
-                  local bd = SelectedTBB(); if not bd then return end
-                  bd.onlyInCombat = v and true or false; RefreshTBB()
-              end,
-              tooltip = "Hide this bar completely while out of combat, even when the tracked buff/cooldown is active." },
             { type = "label", text = "" }
         );  y = y - h
 
@@ -17262,42 +17288,6 @@ initFrame:SetScript("OnEvent", function(self)
                       ns.BuildAllCDMBars(); Refresh(); UpdateCDMPreviewAndResize()
                   end });  y = y - h
 
-            -- Inline cog on Icon Scale: Minimum Bar Size (growth-axis icon-slot
-            -- reservation; lives here rather than as its own Bar Layout row,
-            -- user-directed). The popup slider stays always-editable -- the
-            -- runtime skips the reservation while the growth axis is
-            -- width/height matched, so no MatchGuard lock is needed and an
-            -- existing value can always be lowered or cleared. Orientation
-            -- resolves at build time; the page rebuilds on orientation flips.
-            if not isFocusKick then
-                local minVert = BD().verticalOrientation == true
-                local _, minCogShow = EllesmereUI.BuildCogPopup({
-                    title = minVert and "Minimum Height" or "Minimum Width",
-                    rows = {
-                        { type="slider",
-                          label=minVert and "Icon Slots Tall (0 = Off)" or "Icon Slots Wide (0 = Off)",
-                          min=0, max=20, step=1,
-                          get=function() return BD().minSizeIcons or 0 end,
-                          set=function(v)
-                              if v == 0 then v = nil end
-                              local bd = BD()
-                              bd.minSizeIcons = v
-                              -- Growth-axis extent changed: cached match dims stale.
-                              bd._matchIconPhys = nil
-                              bd._matchExtraPixels = nil
-                              bd._matchStride = nil
-                              bd._matchExtraPixelsH = nil
-                              bd._matchStrideH = nil
-                              ns.BuildAllCDMBars(); Refresh(); UpdateCDMPreviewAndResize()
-                          end },
-                    },
-                })
-                if not EllesmereUI._prebuilding then
-                    local rgn = scaleAnimRow._rightRegion
-                    MakeCogBtn(rgn, minCogShow, nil, EllesmereUI.RESIZE_ICON)
-                end
-            end
-
             -- Inline cog on Always Show Buffs toggle (per-bar; native buff bars)
             if isBuffBar then
                 local _, asbCogShow = EllesmereUI.BuildCogPopup({
@@ -17822,6 +17812,47 @@ initFrame:SetScript("OnEvent", function(self)
         })
         end
         end -- isBuffBar else
+
+        -- Inline cog on Icon Scale: Minimum Bar Size (growth-axis icon-slot
+        -- reservation; lives here rather than as its own Bar Layout row,
+        -- user-directed). Placed AFTER the isBuffGlowBar branch because each
+        -- side builds its own scaleAnimRow -- and Icon Scale sits in a
+        -- different slot on each: buff-family rows put Always Show Buffs on the
+        -- left and Icon Scale on the right, every other bar type has Icon Scale
+        -- on the left (Icon Spacing on the right).
+        -- The popup slider stays always-editable -- the runtime skips the
+        -- reservation while the growth axis is width/height matched, so no
+        -- MatchGuard lock is needed and an existing value can always be lowered
+        -- or cleared. Orientation resolves at build time; the page rebuilds on
+        -- orientation flips. FocusKick is excluded: it is nameplate-anchored, so nothing matches or anchors to its edges.
+        if not isFocusKick then
+            local minVert = BD().verticalOrientation == true
+            local _, minCogShow = EllesmereUI.BuildCogPopup({
+                title = minVert and "Minimum Height" or "Minimum Width",
+                rows = {
+                    { type="slider",
+                      label=minVert and "Icon Slots Tall (0 = Off)" or "Icon Slots Wide (0 = Off)",
+                      min=0, max=20, step=1,
+                      get=function() return BD().minSizeIcons or 0 end,
+                      set=function(v)
+                          if v == 0 then v = nil end
+                          local bd = BD()
+                          bd.minSizeIcons = v
+                          -- Growth-axis extent changed: cached match dims stale.
+                          bd._matchIconPhys = nil
+                          bd._matchExtraPixels = nil
+                          bd._matchStride = nil
+                          bd._matchExtraPixelsH = nil
+                          bd._matchStrideH = nil
+                          ns.BuildAllCDMBars(); Refresh(); UpdateCDMPreviewAndResize()
+                      end },
+                },
+            })
+            if not EllesmereUI._prebuilding then
+                local rgn = isBuffGlowBar and scaleAnimRow._rightRegion or scaleAnimRow._leftRegion
+                MakeCogBtn(rgn, minCogShow, nil, EllesmereUI.RESIZE_ICON)
+            end
+        end
 
         -- Border Style dropdown (CD/utility and non-buff bars only)
         if not isBuffGlowBar then
@@ -18806,12 +18837,13 @@ initFrame:SetScript("OnEvent", function(self)
                   BD().barStrata = v
                   ns.BuildAllCDMBars(); Refresh()
               end },
-            -- Profile-wide (one switch covers the Light's Potential and
-            -- Recklessness presets on every CD/utility bar): a pot preset whose
-            -- own family is fully out of bags swaps its icon/count/cooldown to
-            -- the best pot of the other family instead of sitting greyed.
-            { type = "toggle", text = "Swap Light/Reckless Pots When Missing",
-              tooltip = "When your bags have none of one potion type, its icon swaps to track the other type.",
+            -- Profile-wide (one switch covers the Light's Potential, Recklessness
+            -- and Liquid Luster presets on every CD/utility bar): a pot preset
+            -- whose own family is fully out of bags swaps its icon/count/cooldown
+            -- to the best pot of the partner families instead of sitting greyed
+            -- (Liquid Luster is the final fallback for the other two).
+            { type = "toggle", text = "Swap Combat Potions When Missing",
+              tooltip = "When your bags have none of one combat potion type, its icon swaps to track the next type you own.",
               getValue = function()
                   local p = DB(); return p and p.cdmBars and p.cdmBars.swapPotionsWhenMissing == true
               end,
@@ -18854,24 +18886,9 @@ initFrame:SetScript("OnEvent", function(self)
             local function SetAddOffset(axisKey, v)
                 local b = BD(); if not b then return end
                 b[axisKey] = (v ~= 0) and v or nil
-                local hasOff = (b.addOffsetX or 0) ~= 0 or (b.addOffsetY or 0) ~= 0
-                -- Keep the anchor extra-offset registry in sync immediately
-                -- (unlock-anchored bars fold the offset through it): set a
-                -- fresh live-reading getter or clear the entry. The unlock
-                -- registration pass maintains the same entries at setup.
-                local xoff = EllesmereUI._anchorExtraOffset
-                if not xoff then
-                    xoff = {}
-                    EllesmereUI._anchorExtraOffset = xoff
-                end
-                if hasOff then
-                    xoff["CDM_" .. b.key] = function()
-                        if EllesmereUI._unlockActive then return 0, 0 end
-                        return b.addOffsetX or 0, b.addOffsetY or 0
-                    end
-                else
-                    xoff["CDM_" .. b.key] = nil
-                end
+                -- The anchor extra-offset registry getter is registered for
+                -- every eligible bar by the unlock registration pass below and
+                -- reads the live value, so no per-edit set/clear is needed.
                 -- Re-register unlock elements so the mover's offset marker
                 -- (tint + tooltip) reflects the new state at the next unlock
                 -- entry, then re-apply positions: the build covers saved and

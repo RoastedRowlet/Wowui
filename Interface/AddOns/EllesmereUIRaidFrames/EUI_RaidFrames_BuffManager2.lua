@@ -257,6 +257,26 @@ function _G._ERF_BM2HarvestFork()
     return { specs = LegacyCopy(b.specs), seeded = LegacyCopy(b.seeded) }
 end
 
+-- Preset v2 payloads for a fork created from scratch (SpecOverrides' create
+-- popup). "default" = a fresh profile: nothing seeded, so SeedSpec lays down
+-- the starter sets on first read. "empty" = every key SeedSpec would fill with
+-- content (healer keys + the shared non-healer key) pre-seeded EMPTY, so nothing
+-- renders anywhere until the user builds it; the additive group buckets start
+-- empty either way.
+function _G._ERF_BM2PresetFork(kind)
+    local out = { specs = {}, seeded = {} }
+    if kind ~= "empty" then return out end
+    local function Empty(key)
+        out.specs[key] = { nextId = 1000001, inds = {} }
+        out.seeded[key] = true
+    end
+    for _, spec in ipairs(ns.BM_HEALER_SPECS or {}) do
+        if spec.key then Empty(spec.key) end
+    end
+    Empty("nonhealer")
+    return out
+end
+
 -- Applies a BM layer's v2 payload into the live store, converting legacy-only
 -- layers in place on first touch. layer.bm2 doubles as the conversion marker:
 -- layers already carrying v2 data are never re-derived from legacy fields.
@@ -335,6 +355,49 @@ function ns.BM2_GetFilter(id)
     for i = 1, #b.filters.list do
         if b.filters.list[i].id == id then return b.filters.list[i] end
     end
+end
+
+-- Square per-FILTER colors (ind.filterColors[fid], options swatches): fan the
+-- filter's color out to every enabled member so the whole per-spell color
+-- machinery downstream (BmSquareColor, BmChainMode slot forcing, style keys)
+-- consumes it unchanged. DIRECT per-spell colors overlay last (an explicit
+-- pick wins); overlapping colored filters resolve in ascending fid order
+-- (deterministic). Returns nil when no filter color exists, so plain
+-- indicators keep their raw spellColors reference -- zero behavior change.
+-- A single uniform filter color keeps chain GROUP mode (identical entries);
+-- only genuinely mixed colors force per-spell slots, same as mixed direct
+-- colors always did. Keyed by PRIMARY ids (alternates ride their primary's
+-- include map and inherit its slot color).
+function ns.BM2_SquareFilterColors(ind)
+    local fc = ind.filterColors
+    if not fc or not ind.filters or ind.type ~= "square" then return nil end
+    local fids
+    for fid in pairs(ind.filters) do
+        if fc[fid] then
+            fids = fids or {}
+            fids[#fids + 1] = fid
+        end
+    end
+    if not fids then return nil end
+    table.sort(fids)
+    local merged
+    for i = 1, #fids do
+        local c = fc[fids[i]]
+        local f = ns.BM2_GetFilter(fids[i])
+        if f and f.spells then
+            for id, on in pairs(f.spells) do
+                if on then
+                    merged = merged or {}
+                    if merged[id] == nil then merged[id] = c end
+                end
+            end
+        end
+    end
+    if not merged then return nil end
+    if ind.spellColors then
+        for id, c in pairs(ind.spellColors) do merged[id] = c end
+    end
+    return merged
 end
 
 function ns.BM2_AddFilter(name)
@@ -787,6 +850,10 @@ function ns.BM2_SpecIndicators()
                 for k in pairs(v) do v[k] = nil end
                 for k, val in pairs(ind) do v[k] = val end
                 v.spells = resolved
+                -- Per-filter square colors fan out into the view's spellColors
+                -- (fresh merged table; readers reach it through the stable
+                -- view, so the identity-stability contract holds).
+                v.spellColors = ns.BM2_SquareFilterColors(ind) or ind.spellColors
                 -- Always explicit: the legacy nil-default (own-only TRUE)
                 -- can't leak.
                 v.ownOnly = ind.ownOnly == true

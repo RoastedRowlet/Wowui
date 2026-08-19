@@ -1770,6 +1770,10 @@ L["Nothing Extra"] = "추가 없음"
 L["Overrides"] = "재정의"
 L["Shift+Middle Click to always show all settings"] = "쉬프트 + 가운데 클릭 = 모든 설정 항상 보기"
 L["Unlock Mode Layout"] = "잠금 해제 모드 배치"
+L["Game Text Scale"] = "게임 글자 크기"
+L["Scales the size of Blizzard's default game text (menus, tooltips, quest log, and more). Requires a UI reload."] = "블리자드 기본 게임 글자의 크기를 조절합니다(메뉴, 툴팁, 퀘스트 창 등). UI 리로드가 필요합니다."
+L["Resize Blizzard's default game text from 75-125%"] = "블리자드 기본 게임 글자를 75-125% 로 조절"
+
 -- == add ActionBars (행동 단축바) ==============================================
 L["Alpha when on CD"] = "재사용 중 투명도"
 L["Always Show Buttons"] = "버튼 항상 표시"
@@ -2326,6 +2330,8 @@ L["Out of Combat Color"] = "비전투 시 색상"
 L["Glow Nameplate When Near Aggro"] = "위협 근접 시 이름표 반짝임"
 L["Edit Tracked Auras"] = "추적 오라 편집"
 L["Edit Tracked CC"] = "추적 군중 제어 편집"
+L["Enemy Buff Filter"] = "적 강화 효과 필터"
+
 -- == add UnitFrames (유닛 프레임) ==============================================
 L["Only Dispellable by You"] = "내가 해제 가능한 것만"
 L["Shows the overlay only for debuffs you can currently dispel."] = "현재 내가 해제할 수 있는 약화 효과에만 오버레이를 표시합니다."
@@ -2771,6 +2777,13 @@ L["One-time copy of the Raid Frames Buff Manager filters into these filters. Sam
 L["Enter the spell ID to track."] = "추적할 주문 ID를 입력하세요."
 L["Growth"] = "성장"
 L["Icon Wrap"] = "아이콘 줄바꿈"
+L["Disable All"] = "전부 끄기"
+L["Turns off Player Aura Bars completely."] = "플레이어 오라 바를 완전히 끕니다."
+L["Use Blizzard Buffs"] = "블리자드 강화 효과 사용"
+L["Keeps Blizzard's own buff and debuff display and turns off the built-in Buffs and Debuffs bars. Custom bars keep working."] = "블리자드 기본 강화/약화 효과 표시를 그대로 두고, 내장 강화 효과 바와 약화 효과 바를 끕니다. 사용자 지정 바는 계속 동작합니다."
+L["Player Aura Bars are disabled and Blizzard's default display is back. A UI reload is recommended to finish cleanup."] = "플레이어 오라 바를 껐고 블리자드 기본 표시로 돌아왔습니다. 정리를 마치려면 UI 리로드를 권장합니다."
+L["EDITING SPEC"] = "편집 중인 전문화"
+
 -- == add RaidFrames (공격대 프레임) =============================================
 L["Previewing Override: %1$s"] = "재정의 미리보기: %1$s"
 L["Previewing Overrides: %1$s, %2$s"] = "재정의 미리보기: %1$s, %2$s"
@@ -3380,6 +3393,8 @@ L["Show Names in Raid"] = "공격대에서 이름 표시"
 L["Class Colored Names"] = "직업 색상 이름"
 L["Shows a mana percentage row for every healer in your group as its own movable text display. Position it in Unlock Mode."] = "그룹의 모든 치유 전담에 대해 마나 비율 줄을 별도의 이동 가능한 글자로 표시합니다. 위치는 잠금 해제 모드에서 조정하세요."
 L["All Non Healers/Aug"] = "치유 전담/증강 외 전체"
+L["All DPS (Non-Aug)"] = "증강 외 전체 딜러"
+L["All Healers/Aug"] = "치유 전담/증강"
 L["Custom Order"] = "사용자 지정 순서"
 L["Buff Order"] = "강화 효과 순서"
 L["Active Mitigation"] = "능동 피해 완화"
@@ -3399,6 +3414,17 @@ L["Vertical space between rows."] = "줄 사이의 세로 간격입니다."
 L["Which way the rows stack as healers are added."] = "치유 전담이 늘어날 때 줄이 쌓이는 방향입니다."
 L["All Debuffs"] = "모든 약화 효과"
 L["Non-Player Auras"] = "플레이어 외 오라"
+L["Inherited from %1$s. Editable only there."] = "%1$s 에서 물려받았습니다. 수정은 거기서만 할 수 있습니다."
+L["Inherited from %1$s"] = "%1$s 에서 물려받음"
+L["Inherited from %1$s. Edit it there, or use the tile toggle to enable or disable it for this spec."] = "%1$s 에서 물려받았습니다. 수정은 거기서 하고, 이 전문화에서 켜고 끄는 것은 타일의 스위치를 쓰세요."
+
+L["Show every buff. Use the Hide lane below to remove specific filters."] = "모든 강화 효과를 표시합니다. 특정 필터를 빼려면 아래 숨김 칸을 쓰세요."
+L["Show every buff that has a duration (hides permanent buffs). Use the Hide lane below to remove specific filters."] = "지속시간이 있는 강화 효과만 표시합니다(영구 효과는 숨김). 특정 필터를 빼려면 아래 숨김 칸을 쓰세요."
+L["Show every debuff. Use the Hide lane below to remove specific filters."] = "모든 약화 효과를 표시합니다. 특정 필터를 빼려면 아래 숨김 칸을 쓰세요."
+L["Show every debuff in this indicator. Use the Hide lane below to remove specific filters."] = "이 표시기에서 모든 약화 효과를 표시합니다. 특정 필터를 빼려면 아래 숨김 칸을 쓰세요."
+L["Only show debuffs that have a duration, excluding permanent ones. Combines with the filters below; checked alone it shows every timed debuff."] = "지속시간이 있는 약화 효과만 표시하고 영구 효과는 제외합니다. 아래 필터와 함께 동작하며, 이것만 체크하면 지속시간이 있는 모든 약화 효과를 표시합니다."
+L["Debuffs not caused by any player or player pet (this is what shows most pve debuffs)."] = "플레이어나 플레이어의 소환수가 건 것이 아닌 약화 효과입니다(대부분의 PvE 약화 효과가 여기에 해당합니다)."
+
 -- == add CooldownManager (재사용 대기시간 관리자) ===================================
 L["Apply Height to all %s Bars"] = "모든 %s 바에 높이 적용"
 L["Apply Width to all %s Bars"] = "모든 %s 바에 너비 적용"
@@ -3796,6 +3822,11 @@ L["How much is trimmed from the icon's top and bottom, as a percentage per side.
 L["Power Colored Background. Power colors can be adjusted in Global Settings -> Fonts & Colors."] = "자원 색 배경입니다. 자원 색은 전체 설정 -> 글꼴 및 색상에서 조정할 수 있습니다."
 L["Power Colored Fill. Power colors can be adjusted in Global Settings -> Fonts & Colors."] = "자원 색 채움입니다. 자원 색은 전체 설정 -> 글꼴 및 색상에서 조정할 수 있습니다."
 L["This option requires Dark Mode Class Resource to be disabled. Dark Mode colors can be adjusted in Global Settings -> Fonts & Colors."] = "이 옵션은 어두운 모드 직업 자원을 꺼야 사용할 수 있습니다. 어두운 모드 색은 전체 설정 -> 글꼴 및 색상에서 조정할 수 있습니다."
+L["Swap Combat Potions When Missing"] = "없으면 다른 전투 물약으로 교체"
+L["When your bags have none of one combat potion type, its icon swaps to track the next type you own."] = "가방에 특정 전투 물약이 하나도 없으면, 그 아이콘이 가지고 있는 다음 물약을 추적하도록 바뀝니다."
+L["Concentrated Health Potion"] = "농축된 실버문 생명력 물약"
+L["Liquid Luster"] = "액화 광택제"
+
 -- == add ResourceBars (자원 바) ==============================================
 L["(Ex: 2,4)"] = "(예: 2,4)"
 L["(Ex: 25,50,75)"] = "(예: 25,50,75)"
@@ -4429,6 +4460,18 @@ L["Pick which content this section's reminders appear in.\nRested areas (cities 
 L["Others are missing my buff"] = "다른 사람에게 내 강화 효과 없음"
 L["I am missing others' buffs"] = "나에게 다른 사람 강화 효과 없음"
 L["Others are missing my buff: remind when a groupmate is missing a buff you can cast.\nI am missing others' buffs: remind when you are missing a buff a groupmate could give you (only shown when someone who can cast it is present). Off by default."] = "'다른 사람에게 내 강화 효과 없음' = 내가 걸어줄 수 있는 강화 효과가 없는 파티원이 있으면 알립니다.\n'나에게 다른 사람 강화 효과 없음' = 파티원이 걸어줄 수 있는 강화 효과가 나에게 없으면 알립니다 (걸어줄 수 있는 사람이 있을 때만 표시). 기본 꺼짐."
+L["Pick which content these consumable reminders appear in.\nRested areas (cities and inns) always stay hidden."] = "이 소모품 알림을 어떤 콘텐츠에서 표시할지 고릅니다.\n휴식 지역(도시와 여관)에서는 항상 숨겨집니다."
+-- 던전/공격대/전장 이름 (wago Map + JournalInstance koKR 공식)
+L["The Venomous Abyss"] = "맹독 심연"
+L["Murder Row"] = "죽음의 골목"
+L["Den of Nalorakk"] = "날로라크의 소굴"
+L["The Blinding Vale"] = "눈부신 골짜기"
+L["Voidscar Arena"] = "공허흉터 투기장"
+L["Altar of Fangs"] = "송곳니의 제단"
+L["Ruby Life Pools"] = "루비 생명의 웅덩이"
+L["Temple of Sethraliss"] = "세스랄리스 사원"
+L["Kings' Rest"] = "왕들의 안식처"
+
 -- == add Quickdraw (빠른 실행) ================================================
 -- 신규 모듈 2026-08-12 전수 등록. 키를 누르고 있으면 동작 메뉴가 열리는 기능.
 -- nest = 하위 메뉴(중첩) / action menu = 동작 메뉴 로 통일.
@@ -4519,6 +4562,8 @@ L["Hide entries this character cannot use: another class's specializations and s
 L["Toggle World Markers"] = "장소 표식 토글"
 L["Use a world marker entry again to pick that marker back up. Off places the marker again, at the new position.\nThis does not change the entry that clears all world markers, or the cycling entry."] = "장소 표식 항목을 다시 사용하면 그 표식을 도로 집어 듭니다. 끄면 새 위치에 표식을 다시 놓습니다.\n모든 장소 표식을 지우는 항목과 순환 항목은 이 설정의 영향을 받지 않습니다."
 L["Disable Quickdraw"] = "빠른 실행 비활성화"
+L["This option requires the module to be enabled"] = "이 설정은 모듈을 켜야 사용할 수 있습니다"
+
 -- == add QoL (편의 기능) ====================================================
 L[" (guild bank)"] = " (길드 은행)"
 L["(est)"] = "(예상)"
@@ -4890,6 +4935,15 @@ L["Loss of Control (off)"] = "행동 불가 (꺼짐)"
 L["Spin"] = "회전"
 L["Slowly orbits your action bar buttons around each bar's centre while Party Mode is active. The buttons stay upright, so clicking, cooldowns and keybinds are unaffected. Pauses in combat, where moving a button is blocked."] = "파티 모드가 켜져 있는 동안 행동 단축바 버튼들이 각 바의 중심을 천천히 공전합니다. 버튼 자체는 똑바로 유지되어 클릭, 재사용 대기시간, 단축키에 영향이 없습니다. 버튼 이동이 차단되는 전투 중에는 멈춥니다."
 L["Degrees per second. 360 is one full turn a second; 0 parks the bars where they are."] = "초당 회전 각도입니다. 360이면 1초에 한 바퀴 돌고, 0이면 바가 제자리에 멈춥니다."
+L["GROUP BUTTONS"] = "그룹 단추"
+L["Show Role Check"] = "역할 체크 단추 표시"
+L["Shows the Role Check button. Turn it off and the remaining buttons close the gap."] = "역할 체크 단추를 표시합니다. 끄면 남은 단추들이 빈자리를 메웁니다."
+L["Show Convert to Raid"] = "공격대로 전환 단추 표시"
+L["Shows the Convert to Raid button, which reads Convert to Party while you are in a raid."] = "공격대로 전환 단추를 표시합니다. 공격대에 있는 동안에는 파티로 전환으로 바뀝니다."
+L["Show Disband"] = "공격대 해체 단추 표시"
+L["Shows the Disband button. It always asks before disbanding, but hiding it puts it out of misclick range for good."] = "공격대 해체 단추를 표시합니다. 해체 전에 항상 한 번 묻지만, 숨겨 두면 잘못 누를 일이 아예 없습니다."
+L["Countdown length of this pull button, in seconds. Set it to 0 to hide the button; with all three at 0 the whole pull row disappears, Stop included."] = "이 풀링 단추의 초읽기 길이입니다(초). 0으로 두면 그 단추가 숨겨지고, 셋 다 0이면 정지 단추까지 포함해 풀링 줄 전체가 사라집니다."
+
 -- == add BlizzardSkin (블리자드 스킨) ===========================================
 L["Accent Colored Elements"] = "강조 색상 요소"
 L["AddOn List"] = "애드온 목록"
@@ -5230,6 +5284,8 @@ L["Enable Skin Third-Party Addons"] = "외부 애드온 스킨 적용 켜기"
 L["THIRD-PARTY ADDONS"] = "외부 애드온"
 L["Some addon skins could not apply live. A UI reload will fully apply them."] = "일부 애드온 스킨을 바로 적용하지 못했습니다. UI를 리로드하면 완전히 적용됩니다."
 L["Removing third-party addon skins requires a UI reload."] = "외부 애드온 스킨을 제거하려면 UI 리로드가 필요합니다."
+L["The ready check prompt with its Yes / No buttons."] = "수락 / 거절 단추가 포함된 전투 준비 창입니다."
+
 -- == add Friends (친구 목록) ==================================================
 L["Australia"] = "오스트레일리아"
 L["Auto-Accept Friend Invites"] = "친구 초대 자동 수락"
@@ -5535,9 +5591,9 @@ L["|cff888888No friends online|r"] = "|cff888888접속 중인 친구 없음|r"
 -- add Minimap Dropdown (미니맵 드롭다운)
 L["Above Map"] = "미니맵 위"
 L["Below Map"] = "미니맵 아래"
-L["Bottom Left, Grow Right"] = "왼쪽 하단, 오른쪽으로 확장"
+L["Bottom Left, Grow Right"] = "왼쪽 하단, 오른쪽 확장"
 L["Bottom Left, Grow Up"] = "왼쪽 하단, 위로 확장"
-L["Bottom Right, Grow Left"] = "오른쪽 하단, 왼쪽으로 확장"
+L["Bottom Right, Grow Left"] = "오른쪽 하단, 왼쪽 확장"
 L["Bottom Right, Grow Up"] = "오른쪽 하단, 위로 확장"
 L["Edge Box"] = "가장자리 상자"
 L["Hide Extra Buttons"] = "추가 버튼 숨기기"
@@ -5547,9 +5603,9 @@ L["On Hover"] = "마우스 오버 시"
 L["Show Blizzard Elements"] = "블리자드 요소 표시"
 L["Textured Circle"] = "텍스처 원"
 L["Top Left, Grow Down"] = "왼쪽 상단, 아래로 확장"
-L["Top Left, Grow Right"] = "왼쪽 상단, 오른쪽으로 확장"
+L["Top Left, Grow Right"] = "왼쪽 상단, 오른쪽 확장"
 L["Top Right, Grow Down"] = "오른쪽 상단, 아래로 확장"
-L["Top Right, Grow Left"] = "오른쪽 상단, 왼쪽으로 확장"
+L["Top Right, Grow Left"] = "오른쪽 상단, 왼쪽 확장"
 L["Ungroup Minimap Buttons"] = "미니맵 버튼 그룹 해제"
 L["Zoom +/- Icons"] = "확대/축소 +/- 아이콘"
 -- add Minimap Tooltip (미니맵 툴팁)
@@ -6009,6 +6065,15 @@ L["Warband Bank (%1$d / %2$d)"] = "전투부대 은행 (%1$d / %2$d)"   -- 선�
 L["Sorting normally packs your items into the first free slots, at the top of the grid. Turn this on to pack them into the last slots instead, so the empty slots end up at the top. The item order itself does not change. This affects the OneBag, MultiBag and bank views -- category views fill their own grid with no gaps, so there is nothing to move. MultiBag and the bank use Blizzard's own sorting, so while this is on it also flips Blizzard's cleanup direction; turning it back off restores the direction you had."] = "정렬은 보통 아이템을 격자 위쪽의 첫 빈 칸부터 채웁니다. 켜면 마지막 칸부터 채워서 빈 칸이 위쪽에 모입니다. 아이템 순서 자체는 바뀌지 않습니다. 통합 가방/멀티 가방/은행 보기에 적용되며, 카테고리 보기는 빈틈없이 자체 격자를 채우므로 해당 없습니다. 멀티 가방과 은행은 블리자드 자체 정렬을 쓰기 때문에 켜져 있는 동안 블리자드 정리 방향도 뒤집히고, 끄면 원래 방향으로 돌아갑니다."
 L["Containers received from the mailbox are held until you close the mailbox, so opening them cannot collide with mail still delivering items."] = "우편함에서 받은 상자는 우편함을 닫을 때까지 대기하므로, 아이템을 전달 중인 우편과 충돌하지 않습니다."
 L["Automatically opens bags, boxes and parcels in your inventory when they are added to your bags.\n\nContainers received from the mailbox are held until you close the mailbox, so opening them cannot collide with mail still delivering items."] = "가방에 추가되는 가방/상자/꾸러미를 자동으로 엽니다.\n\n우편함에서 받은 상자는 우편함을 닫을 때까지 대기하므로, 아이템을 전달 중인 우편과 충돌하지 않습니다."
+L["1H"] = "한손 장비"
+L["2H"] = "양손 장비"
+L["OH"] = "보조 장비"
+L["Ranged"] = "원거리 장비"
+L["Cosmetic"] = "장식"
+L["Group Armory by Slot"] = "장비를 부위별로 묶기"
+L["In The Armory and the Weapons / Trinkets, Armor, and Item Set Gear category views, group items under equip-slot sub-headers (Head, Shoulders, Chest, Cosmetic, ...). Does not add sidebar views."] = "장비 / 무기·장신구 / 방어구 / 장비 세트 분류 화면에서 착용 부위별 소제목(머리, 어깨, 가슴, 장식 ...) 아래로 묶어 보여줍니다. 사이드바에 분류를 추가하지는 않습니다."
+L["Set Name Text Options"] = "세트 이름 글자 설정"
+
 -- == add Misc - dynamic/concat, not in source (기타 - 동적 생성·조합, 소스 리터럴 미발견,) ===
 L["%.2f%% Enemy Forces"] = "적 병력 %.2f%%"
 L["%d / %d Items"] = "%d / %d개"
@@ -6858,6 +6923,52 @@ L["Enter a volume from 0 to 100 for %1$s:"] = "%1$s의 음량을 0에서 100 사
 L[" (Rested: %s)"] = " (휴식 상태: %s)"
 L[" (Rested: %.1f%%)"] = " (휴식 상태: %.1f%%)"
 L["House Level %d: %d / %d"] = "집 레벨 %d: %d / %d"
+--2026-08-16 신규
+--재사용 대기시간 관리자 
+L["ADDITIONAL BAR OFFSET"] = "추가 바 오프셋"
+L["Extra horizontal shift stacked on top of this bar's normal position. Unlock mode shows the base position; the offset re-applies when you exit."] = "이 바의 기본 위치 위에 추가로 적용되는 가로 이동 거리입니다. 프레임 이동 모드에서는 기본 위치가 표시되며, 이동 모드를 종료하면 오프셋이 다시 적용됩니다."
+L["Extra vertical shift stacked on top of this bar's normal position. Unlock mode shows the base position; the offset re-applies when you exit."] = "이 바의 기본 위치 위에 추가로 적용되는 세로 이동 거리입니다. 프레임 이동 모드에서는 기본 위치가 표시되며, 이동 모드를 종료하면 오프셋이 다시 적용됩니다."
+
+--편의 기능 
+L["Hide Loot Rolls Window"] = "전리품 주사위 창 숨기기"
+L["Hides Blizzard's \"Loot Rolls\" window -- the running list of dropped items showing who rolled what and who won. Use the cog to let it appear briefly and close itself instead. The Need/Greed roll popups themselves are not affected."] = "블리자드 기본 '전리품 주사위' 창(획득한 아이템 목록과 주사위 굴림 현황 및 낙찰자를 보여주는 창)을 숨깁니다. 톱니바퀴 아이콘을 설정하면 창이 잠시 나타났다가 자동으로 닫히게 할 수 있습니다. 입찰/차선 주사위 선택 창 자체에는 영향을 주지 않습니다."
+L["Loot Rolls Window Settings"] = "전리품 주사위 창 설정"
+L["Hide Completely"] = "완전히 숨기기"
+L["Close After Delay"] = "일정 시간 후 닫기"
+L["Close After (sec)"] = "닫기 지연 시간 (초)"
+
+--기본 UI 개선
+L["The ready check prompt with its Yes / No buttons, plus the initiator's response list."] = "수락 / 거절 단추가 포함된 전투 준비 창과 전투 준비를 시작한 사람의 응답 현황 목록입니다."
+L["Hide Portrait"] = "초상화 숨기기"
+L["Hides the ready check glyph above the prompt, leaving just the question and the Yes / No buttons. Applies while the Ready Check reskin is enabled."] = "전투 준비 창 상단의 문양을 숨기고 질문과 수락 / 거절 단추만 남겨둡니다. 이 옵션은 전투 준비 스킨 변경 기능이 활성화되어 있을 때만 적용됩니다."
+L["The panel the minimap Group Finder eye shows on hover: queue titles, role icons and counts, and time in queue."] = "미니맵 파티 찾기 아이콘(눈동자)에 마우스를 올렸을 때 표시되는 창입니다. 신청한 대기열 이름, 역할 아이콘 및 인원수, 대기 시간이 포함됩니다."
+L["Delve Tier Picker"] = "구렁 단계 선택창"
+L["The delve difficulty window: tier dropdown, reward list and Enter button. The Map Properties row is left stock -- it is a Blizzard widget display and is not safe to restyle."] = "구렁 난이도 창을 변경합니다. 단계 드롭다운 메뉴, 보상 목록, 입장 단추가 포함됩니다. '지도 속성' 영역은 블리자드 기본 위젯 표시 방식이라 스타일을 변경하면 오류가 발생할 수 있어 원본 그대로 유지합니다."
+L["Choice Windows"] = "선택창"
+L["Weekly and event choice windows such as Abundance harvests and \"how will you aid...\" pickers: option plates, headers, reward icons and buttons. Option artwork stays."] = "풍요로운 구렁 보상이나 '누구를 도우시겠습니까...' 같은 주간 및 이벤트 선택창을 변경합니다. 선택지 판, 머리말, 보상 아이콘 및 단추가 포함됩니다. 선택지 아트워크는 그대로 유지됩니다."
+L["Trade"] = "거래"
+L["The player-to-player trade window: frame, both item columns, the enchant slots, money rows and buttons. Item icons are squared and carry a rarity border. Both portraits are removed, as on every other window."] = "플레이어 간 거래 창을 변경합니다. 프레임, 양쪽 아이템 칸, 마법부여 칸, 골드 입력 칸 및 단추가 포함됩니다. 아이템 아이콘은 사각형으로 바뀌고 등급별 테두리가 적용됩니다. 다른 창들과 마찬가지로 양쪽 캐릭터 초상화는 제거됩니다."
+
+--기본 UI 개선 - 툴팁, 메뉴&팝업/알림
+L["BLIZZARD HUD"] = "블리자드 HUD"
+L["Reskin Widget Bars"] = "위젯 바 스킨 변경"
+L["Reskin Extra Action Buttons"] = "추가 행동 단추 스킨 변경"
+L["Restyles Blizzard's on-screen progress bars (event objectives, nameplate counters) to the EUI look. Requires reload to apply.\n\nThese bars are drawn over rather than modified, so if the game ever reports their contents as protected the original bar is shown instead."] = "화면에 표시되는 블리자드 진행 바(이벤트 목표, 이름표 카운터 등)를 EUI 스타일로 변경합니다. 적용하려면 UI를 다시 불러와야 합니다.\n\n이 바들은 기존 바를 수정하는 것이 아니라 그 위에 새로 그리는 방식입니다. 따라서 게임에서 해당 콘텐츠를 '보호됨'으로 판단하면 원래의 블리자드 기본 바가 대신 표시됩니다."
+L["Squares the extra action and zone ability buttons and gives them a thin black border.\n\nOff by default. The size slider below works whether this is on or off."] = "추가 행동 단추와 지역 능력을 사각형 모양으로 바꾸고 얇은 검은색 테두리를 적용합니다.\n\n기본값은 비활성화입니다. 아래의 크기 조절 슬라이더는 이 옵션의 켜짐/꺼짐 여부와 상관없이 작동합니다."
+L["Reskins the dungeon and battleground queue accept popups with the EUI dark style, and adds an accept countdown timer bar to the dungeon one."] = "던전 및 전장 입장 수락 알림창을 EUI 어두운 스타일로 변경하고, 던전 알림창에는 입장 수락 초읽기 바를 추가합니다."
+
+--가방
+L["Show Set Name on Gear"] = "장비에 세트 이름 표시"
+L["Display the equipment set's name at the bottom of bag items that belong to one of your equipment sets."] = "저장된 장비 세트에 포함된 가방 아이템의 하단에 해당 장비 세트의 이름을 표시합니다."
+L["Split Set Gear by Set"] = "장비 세트별로 아이템 분류"
+L["Show one sub-category per equipment set (named after the set) nested under Item Set Gear. Gear in several sets goes to the first one."] = "'세트 장비' 항목 아래에 각 장비 세트별 하위 분류(세트 이름)를 생성하여 표시합니다. 여러 세트에 중복으로 포함된 장비는 첫 번째 세트에 분류됩니다."
+
+--이름표 
+L["Color Name by Reaction"] = "대상 관계별 이름 색상 적용"
+L["Colors the enemy nameplate name text to match the unit's reaction (Hostile or Neutral) instead of the Enemy Name Text color."] = "적 이름표의 이름 텍스트 색상을 '적 이름 텍스트' 색상 대신 대상과의 관계(적대적 또는 중립적)에 맞춰 변경합니다."
+
+--오라/강화 효과 알림
+L["Pick which content the class-special reminders (poisons/rites/imbues/shields) appear in.\nRested areas (cities and inns) always stay hidden."] = "직업 전용 알림(독/의식/무기 부여/보호막)을 표시할 콘텐츠를 선택합니다. 휴식 지역(도시 및 여관)에서는 항상 숨겨집니다."
 
 -- == Chat prints (채팅창 print 출력 - 소스 엘키(L/Lf) 삽입 대기) ==================
 -- 원본이 print() 에 영문 리터럴을 직접 쓰는 곳들. 엔진 자동번역 밖이라 소스에서

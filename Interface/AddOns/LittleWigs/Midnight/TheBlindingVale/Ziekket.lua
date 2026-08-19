@@ -6,10 +6,11 @@ local mod, CL = BigWigs:NewBoss("Ziekket", 2859, 2772)
 if not mod then return end
 mod:SetEncounterID(3202)
 mod:SetRespawnTime(30)
-mod:SetPrivateAuraSounds({
-	{1246751, sound = "warning"}, -- Concentrated Lightbeam
-	{1246753, sound = "underyou"}, -- Lightsap
-	{1247746, sound = "alarm"}, -- Thornspike
+mod:SetAuraData({
+	{1247052, soundOnAppliedDose = "none"}, -- Lightbloom's Might
+	{1246751, soundOnApplied = "warning"}, -- Concentrated Lightbeam
+	{1246753, soundOnApplied = "underyou", note = CL.debuffUnderYouNote}, -- Lightsap
+	{1247746}, -- Thornspike
 })
 
 --------------------------------------------------------------------------------

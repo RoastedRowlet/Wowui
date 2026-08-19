@@ -12,12 +12,12 @@ local strfind = string.find
 -- Generate our version variables
 --
 
-local BIGWIGS_VERSION = 419
+local BIGWIGS_VERSION = 420
 local CONTENT_PACK_VERSIONS = {
-	["LittleWigs"] = {12, 0, 63},
-	["BigWigs_Classic"] = {12, 0, 21},
-	["BigWigs_BurningCrusade"] = {12, 0, 16},
-	["BigWigs_WrathOfTheLichKing"] = {12, 0, 10},
+	["LittleWigs"] = {12, 1, 0},
+	["BigWigs_Classic"] = {12, 1, 0},
+	["BigWigs_BurningCrusade"] = {12, 1, 2},
+	["BigWigs_WrathOfTheLichKing"] = {12, 0, 11},
 	["BigWigs_Cataclysm"] = {12, 0, 5},
 	["BigWigs_MistsOfPandaria"] = {12, 0, 9},
 	["BigWigs_WarlordsOfDraenor"] = {12, 0, 3},
@@ -57,7 +57,7 @@ do
 	local ALPHA = "ALPHA"
 
 	local releaseType
-	local myGitHash = "e3e0d1e" -- The ZIP packager will replace this with the Git hash.
+	local myGitHash = "ff94920" -- The ZIP packager will replace this with the Git hash.
 	local releaseString
 	--[=[@alpha@
 	-- The following code will only be present in alpha ZIPs.
@@ -174,6 +174,7 @@ public.UnitIsPlayer = UnitIsPlayer
 public.UnitLevel = UnitLevel
 public.UnitName = UnitNameUnmodified
 public.UnitSex = UnitSex
+public.UnitClassification = UnitClassification
 public.UnitTokenFromGUID = UnitTokenFromGUID
 public.Print = sysprint
 public.isTestBuild = IsPublicTestClient() -- PTR/beta
@@ -464,6 +465,7 @@ do
 		[2913] = mn, -- March on Quel'Danas
 		[2939] = mn, -- The Dreamrift
 		[1592] = mn, -- Sporefall
+		[2987] = mn, -- The Tidebound Grotto
 		[3004] = public.isNext and mn or nil, -- The Venomous Abyss
 
 
@@ -1652,12 +1654,12 @@ end
 --
 
 do
-	local DBMdotRevision = "20260714231042" -- The changing version of the local client, changes with every new zip using the project-date-integer packager replacement.
-	local DBMdotDisplayVersion = "12.0.55" -- "N.N.N" for a release and "N.N.N alpha" for the alpha duration.
-	local DBMdotReleaseRevision = "20260714000000" -- Hardcoded time, manually changed every release, they use it to track the highest release version, a new DBM release is the only time it will change.
+	local DBMdotRevision = "20260818051002" -- The changing version of the local client, changes with every new zip using the project-date-integer packager replacement.
+	local DBMdotDisplayVersion = "12.1.4" -- "N.N.N" for a release and "N.N.N alpha" for the alpha duration.
+	local DBMdotReleaseRevision = "20260817000000" -- Hardcoded time, manually changed every release, they use it to track the highest release version, a new DBM release is the only time it will change.
 	local protocol = 3
 	local versionPrefix = "V"
-	local PForceDisable = 26
+	local PForceDisable = 27
 
 	local timer = nil
 	local function sendDBMMsg()
@@ -2073,7 +2075,7 @@ do
 	mod:GROUP_FORMED() -- If you're already in a group, the event only fires when logging on, not when reloading UI, so we force a check
 end
 
-function mod:BigWigs_BossModuleRegistered(_, _, module)
+function mod:BigWigs_BossModuleRegistered(_, module)
 	if module:IsWorldModule() then
 		local id = -(module.mapId)
 		enableZones[id] = "world"

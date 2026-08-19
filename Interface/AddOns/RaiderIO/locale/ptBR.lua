@@ -29,28 +29,17 @@ L["BINDING_HEADER_RAIDERIO_REPLAYUI"] = "Interface de Replay"
 L["BINDING_NAME_RAIDERIO_REPLAYUI_TIMING_BOSS"] = "Definir timing para Tempo do Chefe"
 L["BINDING_NAME_RAIDERIO_REPLAYUI_TIMING_DUNGEON"] = "Definir timing para Tempo da Masmorra"
 L["BINDING_NAME_RAIDERIO_REPLAYUI_TOGGLE"] = "Alternar interface de replay"
---[[Translation missing --]]
---[[ L["BUILDS_DUNGEON_BRACKET_10-99"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_DUNGEON_BRACKET_15-99"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_DUNGEON_BRACKET_20-99"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_DUNGEON_BRACKET_6-9"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_DUNGEONS"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_DUNGEONS_ALL"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_DUNGEONS_SPECIFIC"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_ENCOUNTER_DIFFICULY_all"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_ENCOUNTER_DIFFICULY_heroic"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_ENCOUNTER_DIFFICULY_mythic"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_ENCOUNTER_DIFFICULY_normal"] = ""--]] 
+L["BUILDS_DUNGEON_BRACKET_10-99"] = "M+ Nível 10 e acima"
+L["BUILDS_DUNGEON_BRACKET_15-99"] = "M+ Nível 15 e acima"
+L["BUILDS_DUNGEON_BRACKET_20-99"] = "M+ Nível 20 e acima"
+L["BUILDS_DUNGEON_BRACKET_6-9"] = "M+ Nível 6-9"
+L["BUILDS_DUNGEONS"] = "Mítica+"
+L["BUILDS_DUNGEONS_ALL"] = "Todas as masmorras"
+L["BUILDS_DUNGEONS_SPECIFIC"] = "%s (%s)"
+L["BUILDS_ENCOUNTER_DIFFICULY_all"] = "Qualquer dificuldade"
+L["BUILDS_ENCOUNTER_DIFFICULY_heroic"] = "Heroico"
+L["BUILDS_ENCOUNTER_DIFFICULY_mythic"] = "Mítico"
+L["BUILDS_ENCOUNTER_DIFFICULY_normal"] = "Normal"
 --[[Translation missing --]]
 --[[ L["BUILDS_PROFILE_ACTIVE_LOADOUT_TITLE"] = ""--]] 
 --[[Translation missing --]]
@@ -83,8 +72,7 @@ L["BINDING_NAME_RAIDERIO_REPLAYUI_TOGGLE"] = "Alternar interface de replay"
 --[[ L["BUILDS_PROFILE_LOADOUT_NAME"] = ""--]] 
 --[[Translation missing --]]
 --[[ L["BUILDS_PROFILE_NO_DATA"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_PROFILE_RECOMMENDED"] = ""--]] 
+L["BUILDS_PROFILE_RECOMMENDED"] = "Recomendado"
 --[[Translation missing --]]
 --[[ L["BUILDS_PROFILE_SHOW_JOURNALFRAME_BUTTON"] = ""--]] 
 --[[Translation missing --]]
@@ -107,20 +95,15 @@ L["BINDING_NAME_RAIDERIO_REPLAYUI_TOGGLE"] = "Alternar interface de replay"
 --[[ L["BUILDS_PROFILE_UNABLE_TO_DELETE_LOADOUT"] = ""--]] 
 --[[Translation missing --]]
 --[[ L["BUILDS_PROFILE_UPDATED_BUILD_TO_LOADOUT"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_RAIDS"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_RAIDS_ENCOUNTERS_ALL"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_SPEED_all"] = ""--]] 
+L["BUILDS_RAIDS"] = "Raide"
+L["BUILDS_RAIDS_ENCOUNTERS_ALL"] = "%s: Todos os encontros"
+L["BUILDS_SPEED_all"] = "Qualquer velocidade"
 --[[Translation missing --]]
 --[[ L["BUILDS_SPEED_fast"] = ""--]] 
 --[[Translation missing --]]
 --[[ L["BUILDS_SPEED_median"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_TITLE"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_TITLE_FULL"] = ""--]] 
+L["BUILDS_TITLE"] = "Configurações de Talento"
+L["BUILDS_TITLE_FULL"] = "Configurações de Talento do Raider.IO"
 --[[Translation missing --]]
 --[[ L["BUILDS_WEAPON_1"] = ""--]] 
 --[[Translation missing --]]
@@ -171,24 +154,21 @@ L["DISABLE_RWF_MODE_RELOAD"] = "Você está desabilitando o modo Race World Firs
 L["DPS"] = "DPS"
 L["DUNGEON_SHORT_NAME_AA"] = "Academia Algeth'ar"
 L["DUNGEON_SHORT_NAME_AD"] = "Atal'Dazar"
---[[Translation missing --]]
---[[ L["DUNGEON_SHORT_NAME_AOF"] = ""--]] 
+L["DUNGEON_SHORT_NAME_AOF"] = "ALTAR"
 L["DUNGEON_SHORT_NAME_ARAK"] = "Ara-Kara"
 L["DUNGEON_SHORT_NAME_ARC"] = "O Arcâneo"
 L["DUNGEON_SHORT_NAME_AV"] = "Câmara Lazúli"
 L["DUNGEON_SHORT_NAME_BH"] = "Clareira de Courambaia"
 L["DUNGEON_SHORT_NAME_BREW"] = "Hidromelaria Cinzagris"
 L["DUNGEON_SHORT_NAME_BRH"] = "Castelo Corvo Negro"
---[[Translation missing --]]
---[[ L["DUNGEON_SHORT_NAME_BV"] = ""--]] 
+L["DUNGEON_SHORT_NAME_BV"] = "VALE"
 L["DUNGEON_SHORT_NAME_COEN"] = "Catedral da Noite Eterna"
 L["DUNGEON_SHORT_NAME_COS"] = "Pátio das Estrelas"
 L["DUNGEON_SHORT_NAME_COT"] = "Cidade das Tramas"
 L["DUNGEON_SHORT_NAME_DAWN"] = "Alvorada"
 L["DUNGEON_SHORT_NAME_DFC"] = "Fenda Chamanegra"
 L["DUNGEON_SHORT_NAME_DHT"] = "Bosque Corenegro"
---[[Translation missing --]]
---[[ L["DUNGEON_SHORT_NAME_DON"] = ""--]] 
+L["DUNGEON_SHORT_NAME_DON"] = "COVIL"
 L["DUNGEON_SHORT_NAME_DOS"] = "Outro Lado"
 L["DUNGEON_SHORT_NAME_EB"] = "Floretérnia"
 L["DUNGEON_SHORT_NAME_EDA"] = "Ecodomo Al'dani"
@@ -203,14 +183,13 @@ L["DUNGEON_SHORT_NAME_HOA"] = "Salões da Expiação"
 L["DUNGEON_SHORT_NAME_HOI"] = "Salões da Infusão"
 L["DUNGEON_SHORT_NAME_HOV"] = "Salões da Bravura"
 L["DUNGEON_SHORT_NAME_ID"] = "Docas de Ferro"
-L["DUNGEON_SHORT_NAME_KR"] = "Repouso do Rei"
+L["DUNGEON_SHORT_NAME_KR"] = "REPOUSO"
 L["DUNGEON_SHORT_NAME_LOWR"] = "Karazhan: Inferior "
 L["DUNGEON_SHORT_NAME_MC"] = "Cavernas de Maisara"
 L["DUNGEON_SHORT_NAME_MISTS"] = "Brumas de Tirna Scithe"
 L["DUNGEON_SHORT_NAME_ML"] = "MEGAMINA"
 L["DUNGEON_SHORT_NAME_MOS"] = "Penhascos da Boca do Inferno"
---[[Translation missing --]]
---[[ L["DUNGEON_SHORT_NAME_MR"] = ""--]] 
+L["DUNGEON_SHORT_NAME_MR"] = "TRAVESSA"
 L["DUNGEON_SHORT_NAME_MT"] = "Terraço dos Magísteres"
 L["DUNGEON_SHORT_NAME_NELT"] = "Neltharus"
 L["DUNGEON_SHORT_NAME_NL"] = "Covil de Neltharion"
@@ -221,7 +200,7 @@ L["DUNGEON_SHORT_NAME_PF"] = "Empéstia"
 L["DUNGEON_SHORT_NAME_POS"] = "Fosso de Saron"
 L["DUNGEON_SHORT_NAME_PSF"] = "Priorado da Chama"
 L["DUNGEON_SHORT_NAME_RISE"] = "Ascensão de Murozond"
-L["DUNGEON_SHORT_NAME_RLP"] = "Poços da Vida Rubi"
+L["DUNGEON_SHORT_NAME_RLP"] = "POÇOS"
 L["DUNGEON_SHORT_NAME_ROOK"] = "O Viveiro"
 L["DUNGEON_SHORT_NAME_SBG"] = "Sepulcrário da Lua Negra"
 L["DUNGEON_SHORT_NAME_SD"] = "Profundezas"
@@ -235,15 +214,14 @@ L["DUNGEON_SHORT_NAME_SV"] = "Abóboda de Pedra"
 L["DUNGEON_SHORT_NAME_TD"] = "Alvorada"
 L["DUNGEON_SHORT_NAME_TJS"] = "Templo da Serpente de Jade"
 L["DUNGEON_SHORT_NAME_TOP"] = "Teatro"
-L["DUNGEON_SHORT_NAME_TOS"] = "Templo de Sethraliss"
+L["DUNGEON_SHORT_NAME_TOS"] = "TEMPLO"
 L["DUNGEON_SHORT_NAME_TOTT"] = "Trono das Marés"
 L["DUNGEON_SHORT_NAME_ULD"] = "Uldaman"
 L["DUNGEON_SHORT_NAME_UNDR"] = "Terra Podre"
 L["DUNGEON_SHORT_NAME_UPPR"] = "Karazhan: Superior"
 L["DUNGEON_SHORT_NAME_VOTW"] = "Câmara das Guardiãs"
 L["DUNGEON_SHORT_NAME_VP"] = "Pináculo do Vórtice"
---[[Translation missing --]]
---[[ L["DUNGEON_SHORT_NAME_VSA"] = ""--]] 
+L["DUNGEON_SHORT_NAME_VSA"] = "ARENA"
 L["DUNGEON_SHORT_NAME_WM"] = "Mansão Capelo"
 L["DUNGEON_SHORT_NAME_WORK"] = "Gnomecan - Oficina"
 L["DUNGEON_SHORT_NAME_WS"] = "Pico dos Correventos"
@@ -297,8 +275,7 @@ L["MINIMAP_SHORTCUT_ENABLE_DESC"] = "Ative para exibir o ícone ao redor do mini
 L["MINIMAP_SHORTCUT_HEADER"] = "Minimapa"
 L["MINIMAP_SHORTCUT_HELP"] = "|A:newplayertutorial-icon-mouse-leftbutton:16:12|a Procurar |A:newplayertutorial-icon-mouse-rightbutton:16:12|a Configurações"
 L["MINIMAP_SHORTCUT_HELP_LEFT_CLICK"] = "Clique esquerdo"
---[[Translation missing --]]
---[[ L["MINIMAP_SHORTCUT_HELP_OPEN_MENU"] = ""--]] 
+L["MINIMAP_SHORTCUT_HELP_OPEN_MENU"] = "Menu"
 L["MINIMAP_SHORTCUT_HELP_RIGHT_CLICK"] = "Clique direito"
 L["MINIMAP_SHORTCUT_HELP_SEARCH"] = "Procurar"
 L["MINIMAP_SHORTCUT_HELP_SETTINGS"] = "Configurações"

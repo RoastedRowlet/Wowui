@@ -6,6 +6,19 @@ PremadeGroupsFilterState = {
 ["c4f8"] = {
 ["enabled"] = true,
 },
+["c1f4"] = {
+["role"] = {
+["heals"] = {
+},
+["tanks"] = {
+},
+["dps"] = {
+},
+["members"] = {
+},
+["expression"] = "",
+},
+},
 ["c2f4"] = {
 ["enabled"] = true,
 ["dungeon"] = {
@@ -49,7 +62,7 @@ PremadeGroupsFilterState = {
 },
 },
 ["c3f5"] = {
-["enabled"] = true,
+["enabled"] = false,
 ["raid"] = {
 ["difficulty"] = {
 ["act"] = false,

@@ -1,10 +1,12 @@
-lightweight tag 0366e46a4ba7c85354d8ca3d1d7e71bf9e4a0563 1.1.4
+tag 7200150197c4ba841f5b0fd1335b5e8fdbc218b6 1.1.5
 Author:	ComagHaveFun <ComagHaveFun@localhost>
-Date:	Wed Jun 17 12:45:53 2026 +0200
+Date:	Mon Aug 17 23:28:25 2026 +0200
 
-commit 0366e46a4ba7c85354d8ca3d1d7e71bf9e4a0563
+- Bump supported interface version
+
+commit 1e26dc5c8d413aa5190bb4cef3971b4ae9f0b719
 Author: ComagHaveFun <ComagHaveFun@localhost>
-Date:   Wed Jun 17 12:45:53 2026 +0200
+Date:   Mon Aug 17 23:28:02 2026 +0200
 
     - Bump supported interface version
 

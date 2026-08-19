@@ -165,9 +165,23 @@ BigWigs:AddSounds("Blademaster Darza", {
 })
 
 BigWigs:AddColors("Azta'rec", {
+	[1288103] = "cyan",
+	[1288125] = "cyan",
+	[1291555] = "red",
+	[1293824] = "yellow",
+	[1293825] = "purple",
+	[1294963] = "red",
+	[1309418] = "orange",
 })
 
 BigWigs:AddSounds("Azta'rec", {
+	[1288103] = "long",
+	[1288125] = "info",
+	[1291555] = "alarm",
+	[1293824] = "info",
+	[1293825] = "alert",
+	[1294963] = "warning",
+	[1309418] = "info",
 })
 
 BigWigs:AddColors("Midnight Delve Trash", {
@@ -206,14 +220,12 @@ BigWigs:AddColors("Nalorakk Den", {
 	[1242860] = "red",
 	[1243011] = "yellow",
 	[1243569] = "orange",
-	[1255385] = "orange",
 })
 
 BigWigs:AddSounds("Nalorakk Den", {
 	[1242860] = "info",
 	[1243011] = "long",
 	[1243569] = "alarm",
-	[1255385] = "alert",
 })
 
 BigWigs:AddColors("Den of Nalorakk Trash", {
@@ -500,21 +512,21 @@ BigWigs:AddSounds("Ziekket", {
 	[1247685] = "alert",
 })
 
+BigWigs:AddColors("The Blinding Vale Trash", {
+})
+
+BigWigs:AddSounds("The Blinding Vale Trash", {
+})
+
 BigWigs:AddColors("Taz'Rah", {
-	[1222085] = "purple",
 	[1222098] = {"blue","red"},
-	[1222274] = "yellow",
-	[1262901] = "cyan",
 	[1296963] = "orange",
 	[1297017] = "purple",
 	[1300259] = "yellow",
 })
 
 BigWigs:AddSounds("Taz'Rah", {
-	[1222085] = "alert",
 	[1222098] = {"alarm","info"},
-	[1222274] = "long",
-	[1262901] = "info",
 	[1296963] = "alarm",
 	[1297017] = "alert",
 	[1300259] = "long",
@@ -550,6 +562,12 @@ BigWigs:AddSounds("Charonus", {
 	[1263982] = "info",
 	[1282770] = "alert",
 	[1311923] = "alarm",
+})
+
+BigWigs:AddColors("Voidscar Arena Trash", {
+})
+
+BigWigs:AddSounds("Voidscar Arena Trash", {
 })
 
 BigWigs:AddColors("Emberdawn", {
@@ -604,4 +622,16 @@ BigWigs:AddSounds("Restless Heart", {
 	[468429] = "long",
 	[472556] = "info",
 	[472662] = "alert",
+})
+
+BigWigs:AddColors("Common Trash", {
+	["lieutenant_cast"] = "orange",
+	["trash_cast"] = "red",
+	["trash_channel"] = "yellow",
+})
+
+BigWigs:AddSounds("Common Trash", {
+	["lieutenant_cast"] = "alarm",
+	["trash_cast"] = "alert",
+	["trash_channel"] = "info",
 })

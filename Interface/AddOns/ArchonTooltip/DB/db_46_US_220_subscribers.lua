@@ -234,7 +234,7 @@ local function getChunkLookup(table, length)
 end
 
 local lookup = {'DeathKnight-Unholy','Unknown-Unknown','Paladin-Holy','Druid-Restoration',}
-local provider = {region='US',realm='Thunderhorn',name='US',type='subscribers',zone=46,date='2026-08-11',data={Ar='Arice:BAEALgAECgEJAQABLgAECgkJOQABAP0cAA==.',Ca='Cassiopeía:BAEALgAECgEJAQAAAA==.',Ch='Chaosity:BAEALgAECgEJAQABLgAECgEJAQACAAAAAA==.',Fo='Foe:BAEALgAECggJEwAAAA==.',Ra='Raerlynn:BAEALgADCgMJAwABLgAECgEJAQACAAAAAA==.',Sg='Sgathaich:BAEBLgAECn8sAAIDAAgJVBpFHAAhAghoDAAACABUAGkMAAAFAEIAawwAAAUAQgBqDAAABQBNAGwMAAAGADcAbQwAAAMANgDqDAAABwBOAG4MAAAFADgAAwAICVQaRRwAIQIIaAwAAAgAVABpDAAABQBCAGsMAAAFAEIAagwAAAUATQBsDAAABgA3AG0MAAADADYA6gwAAAcATgBuDAAABQA4AAEuAAQKCQkfAAQAQBoA.',St='Streakycat:BAEALgAECgEJAQAAAA==.',},}
+local provider = {region='US',realm='Thunderhorn',name='US',type='subscribers',zone=46,date='2026-08-18',data={Ar='Arice:BAEALgAECgEJAQABLgAECgkJOQABAP0cAA==.',Ca='Cassiopeía:BAEALgAECgEJAQAAAA==.',Ch='Chaosity:BAEALgAECgEJAQABLgAECgEJAQACAAAAAA==.',Fo='Foe:BAEALgAECggJEwAAAA==.',Ra='Raerlynn:BAEALgADCgMJAwABLgAECgEJAQACAAAAAA==.',Sg='Sgathaich:BAEBLgAECn8sAAIDAAgJVBpFHAAhAghoDAAACABUAGkMAAAFAEIAawwAAAUAQgBqDAAABQBNAGwMAAAGADcAbQwAAAMANgDqDAAABwBOAG4MAAAFADgAAwAICVQaRRwAIQIIaAwAAAgAVABpDAAABQBCAGsMAAAFAEIAagwAAAUATQBsDAAABgA3AG0MAAADADYA6gwAAAcATgBuDAAABQA4AAEuAAQKCQkfAAQAQBoA.',St='Streakycat:BAEALgAECgEJAQAAAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

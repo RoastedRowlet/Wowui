@@ -1,4 +1,3 @@
-if not BigWigsLoader.isNext then return end -- XXX 12.1
 --------------------------------------------------------------------------------
 -- Module Declaration
 --
@@ -6,11 +5,17 @@ if not BigWigsLoader.isNext then return end -- XXX 12.1
 local mod, CL = BigWigs:NewBoss("Altar of Fangs Trash", 2993)
 if not mod then return end
 mod:SetTrashModule(true)
-mod:SetPrivateAuraSounds({
-	{1306232, sound = "underyou"}, -- Septic Spatter
-	{1307531, sound = "underyou"}, -- Bloodletting
-	{1297422, sound = "none"}, -- Deadly Venom
-	{1308865, sound = "alert"}, -- Infest
+mod:SetAuraData({
+	{1306669, note = CL.debuffHitByCastNote:format(mod:SpellName(1306668))}, -- Toxic Breath
+	{1294569, soundOnAppliedDose = "none"}, -- Paralyzing Shots
+	{1306232, soundOnApplied = "underyou", note = CL.debuffUnderYouNote}, -- Septic Spatter
+	{1306550}, -- Blood Sacrifice
+	{1294845}, -- Corrosive Fangs
+	{1307531, soundOnApplied = "underyou", note = CL.debuffUnderYouNote}, -- Bloodletting
+	{1307571, soundOnAppliedDose = "none"}, -- Envenom
+	{1308518}, -- Laced Edge
+	{1297422, note = CL.debuffUnderYouNote}, -- Deadly Venom
+	{1308865, soundOnApplied = "alert"}, -- Infest
 })
 
 --------------------------------------------------------------------------------

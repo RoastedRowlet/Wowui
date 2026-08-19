@@ -234,7 +234,7 @@ local function getChunkLookup(table, length)
 end
 
 local lookup = {'DeathKnight-Unholy','Unknown-Unknown',}
-local provider = {region='US',realm='Dreadmaul',name='US',type='subscribers',zone=46,date='2026-08-11',data={Aw='Awry:BAECLgAFFH8qAAIBAAYJ+BsSFgC4AQZoDAAACgBiAGkMAAAKAEwAawwAAAoATQBqDAAABgBNAGwMAAACACkA6gwAAAQAPgABAAYJ+BsSFgC4AQZoDAAACgBiAGkMAAAKAEwAawwAAAoATQBqDAAABgBNAGwMAAACACkA6gwAAAQAPgAuAAQKfzcAAgEACQlkIssMAAYDAAEACQlkIssMAAYDAAAA.',Da='Dathil:BAEALgAECgYJCQAAAA==.',Vo='Voidthotnimz:BAEALgADCgcJBgABLgAECgkJDgACAAAAAQ==.',},}
+local provider = {region='US',realm='Dreadmaul',name='US',type='subscribers',zone=46,date='2026-08-18',data={Aw='Awry:BAECLgAFFH8qAAIBAAYJ+Bs+FgC4AQZoDAAACgBiAGkMAAAKAEwAawwAAAoATQBqDAAABgBNAGwMAAACACkA6gwAAAQAPgABAAYJ+Bs+FgC4AQZoDAAACgBiAGkMAAAKAEwAawwAAAoATQBqDAAABgBNAGwMAAACACkA6gwAAAQAPgAuAAQKfzcAAgEACQlkIssMAAYDAAEACQlkIssMAAYDAAAA.',Da='Dathil:BAEALgAECgYJCQAAAA==.',Vo='Voidthotnimz:BAEALgADCgcJBgABLgAECgkJDgACAAAAAQ==.',},}
 provider.parse = parse
 
 local rawData = provider.data

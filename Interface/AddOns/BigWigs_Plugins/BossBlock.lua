@@ -670,11 +670,12 @@ do
 					tbl.title = nil
 					tbl.bwDuration = 3
 					printMessage(self, tbl)
-				elseif tbl.eventToastID == 337 or tbl.eventToastID == 338 or tbl.eventToastID == 371 or tbl.eventToastID == 372 then -- Delve Spoils Found
+				elseif tbl.eventToastID == 337 or tbl.eventToastID == 338 or tbl.eventToastID == 371 or tbl.eventToastID == 372 or tbl.eventToastID == 483 then -- Delve Spoils Found
 					-- 337: Flickering Spoils Will Manifest Upon Delve Completion
 					-- 338: Shadowed Flickering Spoils Will Manifest Upon Delve Completion
 					-- 371: Grand Sanctified Spoils Will Manifest Upon Delve Completion
 					-- 372: Sanctified Spoils Will Manifest Upon Delve Completion
+					-- 483: Dundun Hides Within. Can You Find Him?
 					tbl.subtitle = tbl.title
 					tbl.title = nil
 					tbl.bwDuration = 3
@@ -1002,6 +1003,9 @@ do
 		[106402]=true,[106404]=true,[106406]=true,[106411]=true,[106412]=true,[106413]=true,
 		-- Freehold
 		[104684]=true,[104682]=true,[104685]=true,[104690]=true,
+		-- Kings' Rest
+		[106795]=true,[106140]=true,[106141]=true,[106142]=true,[102918]=true,[102919]=true,[102920]=true,
+		[106138]=true,
 		-- Operation: Mechagon
 		[132189]=true,[132190]=true,[132349]=true,[132350]=true,[132351]=true,[132352]=true,[132353]=true,
 		[132354]=true,[132355]=true,[132374]=true,[132375]=true,[132376]=true,[132377]=true,[132380]=true,
@@ -1013,6 +1017,9 @@ do
 		[106666]=true,[106667]=true,[106668]=true,[106669]=true,[106670]=true,[106671]=true,[113764]=true,
 		[113765]=true,[113766]=true,[107844]=true,[107845]=true,[107848]=true,[107851]=true,[107852]=true,
 		[107853]=true,[106655]=true,[102055]=true,[103182]=true,[103183]=true,[103184]=true,
+		-- Temple of Sethraliss
+		[107501]=true,[107502]=true,[107503]=true,[107493]=true,[107494]=true,[107495]=true,[107496]=true,
+		[107504]=true,[107505]=true,[107497]=true,[107498]=true,[107499]=true,[107500]=true,
 		-- The MOTHERLODE!!
 		[104611]=true,[106390]=true,[106392]=true,
 		-- The Underrot
@@ -1103,7 +1110,8 @@ do
 		[308433]=true,[308351]=true,
 		-- Midnight/Altar of Fangs [Dungeon]
 		[345108]=true,[344783]=true,[345112]=true,[344971]=true,[344862]=true,[344910]=true,[344908]=true,[344609]=true,[344660]=true,
-		[344969]=true,[345031]=true,[344973]=true,[344615]=true,[344896]=true,[345003]=true,[344719]=true,[344808]=true,
+		[344969]=true,[344967]=true,[344998]=true,[345031]=true,[344973]=true,[344615]=true,[344896]=true,[345003]=true,[344719]=true,
+		[344808]=true,[345109]=true,[345100]=true,[344840]=true,
 		-- Midnight/The Voidspire [Raid]
 		[316005]=true,[316006]=true,[316007]=true,[316008]=true,[316009]=true,[316010]=true,[303419]=true,[303420]=true,[303421]=true,
 		-- Midnight/The Dreamrift [Raid]

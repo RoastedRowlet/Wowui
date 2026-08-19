@@ -1,0 +1,20 @@
+## Interface: 120100
+## Title: PlateTweaks
+## Notes: Nameplate coloring and aura icons driven by your own debuffs. Works with EllesmereUI, Platynator, Blizzard plates and more. /pt
+## Author: Graham
+## Version: 1.6.0
+## SavedVariables: PLATETWEAKS_SETTINGS, PLATETWEAKS_PROFILES, PLATETWEAKS_DEBUG
+## Category: Unit Frames
+
+Libs\LibStub\LibStub.lua
+Libs\CallbackHandler-1.0\CallbackHandler-1.0.lua
+Libs\LibSharedMedia-3.0\lib.xml
+
+Spells.lua
+Core.lua
+Share.lua
+Tints.lua
+Icons.lua
+Tweaks.lua
+TestMode.lua
+Options.lua

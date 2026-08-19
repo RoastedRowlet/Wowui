@@ -1,4 +1,3 @@
-if BigWigsLoader.isRetail then return end -- don't load in Midnight+
 --------------------------------------------------------------------------------
 -- TODO
 --
@@ -39,6 +38,27 @@ mod:RegisterEnableMob(
 	135231, -- Spectral Brute
 	138489 -- Shadow of Zul
 )
+if mod:Retail() then -- Midnight+
+	mod:SetAuraData({
+		{269936}, -- Fixate
+		{269972}, -- Hex Volley
+		{1306763}, -- Serpent Strike
+		{270931, soundOnApplied = "underyou"}, -- Shadow Volley
+		{270927}, -- Bladestorm
+		{1297918}, -- Mortal Bleed
+		{1297781}, -- Sudden Rupture
+		{270292, soundOnApplied = "underyou"}, -- Purifying Flame
+		{271555}, -- Entomb
+		{1301851}, -- Bloodthirsty Axe
+		{1302028}, -- Soul Crush
+		{270492}, -- Hex
+		{272388}, -- Shadow Barrage
+		{1298304}, -- Dark Revelation
+		{276031}, -- Pit of Despair
+		{274387}, -- Absorbed in Darkness
+		{272021}, -- Erupting Darkness
+	})
+end
 
 --------------------------------------------------------------------------------
 -- Locals
@@ -279,6 +299,23 @@ end
 
 function mod:OnBossDisable()
 	prevTable = {}
+end
+
+--------------------------------------------------------------------------------
+-- Midnight Initialization
+--
+
+if mod:Retail() then -- Midnight+
+	function mod:GetOptions()
+		return {
+		}
+	end
+
+	function mod:OnBossEnable()
+	end
+
+	function mod:OnBossDisable()
+	end
 end
 
 --------------------------------------------------------------------------------

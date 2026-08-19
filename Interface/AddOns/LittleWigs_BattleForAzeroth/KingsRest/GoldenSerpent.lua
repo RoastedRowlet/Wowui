@@ -7,6 +7,13 @@ if not mod then return end
 mod:RegisterEnableMob(135322) -- The Golden Serpent
 mod:SetEncounterID(2139)
 mod:SetRespawnTime(30)
+if mod:Retail() then -- Midnight+
+	mod:SetAuraData({
+		{1306736, note = CL.preDebuffNote}, -- Spit Gold (pre-application)
+		{265773, note = CL.mainDebuffNote}, -- Spit Gold (DoT)
+		{265914, soundOnApplied = "underyou", note = CL.debuffUnderYouNote}, -- Molten Gold
+	})
+end
 
 --------------------------------------------------------------------------------
 -- Initialization
@@ -53,7 +60,7 @@ local backupBars = {}
 -- Midnight Renames
 --
 
-if BigWigsLoader.isNext then -- Midnight+ XXX swap to mod:Retail() in 12.1
+if mod:Retail() then -- Midnight+
 	mod:SetRenames({
 		[265773] = {265773, CL.you:format(mod:SpellName(265773)), notes = {CL.generalNote, CL.messageOnYouNote}, original = {265773, CL.you:format(mod:SpellName(265773))}}, -- Spit Gold
 		[265910] = {265910}, -- Tail Thrash
@@ -66,7 +73,7 @@ end
 -- Midnight Initialization
 --
 
-if BigWigsLoader.isNext then -- Midnight+ XXX swap to mod:Retail() in 12.1
+if mod:Retail() then -- Midnight+
 	function mod:GetOptions()
 		return {
 			265773, -- Spit Gold

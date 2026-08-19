@@ -6,6 +6,7 @@ local plugin, L = BigWigs:NewPlugin("Sounds", {
 	"db",
 	"soundOptions",
 	"SetSoundOptions",
+	"GetSoundFile",
 	"GetDefaultSound",
 	"GetDefaultSoundFile",
 })
@@ -29,7 +30,11 @@ local sounds = {
 	underyou = L.spell_under_you,
 	privateaura = "BigWigs: Raid Warning",
 }
+local validGlobalSounds = {
+	[L.spell_under_you] = "underyou",
+}
 local allowBlizzMessages = true
+local registeredAuraModules = {}
 
 --------------------------------------------------------------------------------
 -- Profile
@@ -124,6 +129,8 @@ plugin.pluginOptions = {
 	set = function(info, value)
 		local sound = info[#info]
 		db.media[sound] = soundList[value]
+		plugin:UnregisterAllAuraSounds()
+		plugin:CheckAllBossModulesForAuraSounds()
 		plugin:PlaySoundFile(LibSharedMedia:Fetch(SOUND, soundList[value]))
 	end,
 	order = 7,
@@ -152,15 +159,15 @@ plugin.pluginOptions = {
 			width = "full",
 			itemControl = "DDI-Sound",
 		},
-		privateaura = {
-			type = "select",
-			name = L.privateaura,
-			order = 4,
-			values = function() return soundList end,
-			width = "full",
-			itemControl = "DDI-Sound",
-			hidden = BigWigsLoader.isClassic,
-		},
+		--privateaura = {
+		--	type = "select",
+		--	name = L.privateaura,
+		--	order = 4,
+		--	values = function() return soundList end,
+		--	width = "full",
+		--	itemControl = "DDI-Sound",
+		--	hidden = BigWigsLoader.isClassic,
+		--},
 		newline2 = {
 			type = "description",
 			name = "\n\n",
@@ -220,6 +227,8 @@ plugin.pluginOptions = {
 				for k in next, plugin.db.profile.media do
 					plugin.db.profile.media[k] = sounds[k]
 				end
+				plugin:UnregisterAllAuraSounds()
+				plugin:CheckAllBossModulesForAuraSounds()
 			end,
 			order = 27,
 		},
@@ -227,7 +236,12 @@ plugin.pluginOptions = {
 			type = "execute",
 			name = L.resetAll,
 			desc = L.resetAllCustomSound,
-			func = function() plugin.db:ResetProfile() updateProfile() end,
+			func = function()
+				plugin.db:ResetProfile()
+				updateProfile()
+				plugin:UnregisterAllAuraSounds()
+				plugin:CheckAllBossModulesForAuraSounds()
+			end,
 			order = 28,
 		},
 	}
@@ -365,8 +379,17 @@ function plugin:OnPluginEnable()
 	end
 	timer = BigWigsLoader.CTimerNewTicker(0, Loop)
 
+	-- Register aura sounds
+	if self:IsAuraSoundRestrictionsActive() then
+		self:RegisterEvent("ADDON_RESTRICTION_STATE_CHANGED")
+	else
+		self:CheckAllBossModulesForAuraSounds()
+	end
+
 	self:RegisterMessage("BigWigs_Sound")
 	self:RegisterMessage("BigWigs_ProfileUpdate", updateProfile)
+	self:RegisterMessage("BigWigs_BossModuleRegistered")
+	self:RegisterMessage("BigWigs_RefreshAuraSounds")
 	if BigWigsLoader.isRetail then
 		self:RegisterEvent("ENCOUNTER_WARNING")
 		self:RegisterMessage("BigWigs_BlockBlizzMessages")
@@ -374,10 +397,165 @@ function plugin:OnPluginEnable()
 	end
 end
 
+function plugin:OnPluginDisable()
+	self:UnregisterAllAuraSounds()
+end
+
 -------------------------------------------------------------------------------
 -- Event Handlers
 --
 
+-- Functions for Aura Sounds
+function plugin:BigWigs_BossModuleRegistered(_, bossModule, currentInstanceID)
+	if bossModule:IsZoneID(currentInstanceID) and bossModule:HasAuraData() and not registeredAuraModules[bossModule] then
+		self:RegisterAuraSounds(bossModule)
+	end
+end
+
+function plugin:BigWigs_RefreshAuraSounds(_, bossModule)
+	if registeredAuraModules[bossModule] then
+		self:UnregisterAuraSounds(bossModule)
+		self:RegisterAuraSounds(bossModule)
+	end
+end
+
+do
+	local IsAddOnRestrictionActive = C_RestrictedActions.IsAddOnRestrictionActive
+	function plugin:IsAuraSoundRestrictionsActive()
+		if IsAddOnRestrictionActive(1) or (IsAddOnRestrictionActive(0) and IsAddOnRestrictionActive(2)) then
+			return true -- Encounter, or Combat+ChallengeMode
+		end
+	end
+end
+
+do
+	local GetInstanceInfo = BigWigsLoader.GetInstanceInfo
+	function plugin:CheckAllBossModulesForAuraSounds()
+		local _, _, _, _, _, _, _, instanceID = GetInstanceInfo()
+		for _, bossModule in BigWigs:IterateBossModules() do
+			if bossModule:IsZoneID(instanceID) and bossModule:HasAuraData() and not registeredAuraModules[bossModule] then
+				self:RegisterAuraSounds(bossModule)
+			end
+		end
+	end
+end
+
+function plugin:ADDON_RESTRICTION_STATE_CHANGED(event)
+	if self:IsAuraSoundRestrictionsActive() then
+		return
+	end
+	self:UnregisterEvent(event)
+	self:CheckAllBossModulesForAuraSounds()
+end
+
+do
+	local function getCountdownSoundFile(duration)
+		if duration and duration > 0 and duration <= 30 then
+			local path = [[Interface\AddOns\BigWigs\Media\Sounds\AuraCountdowns\Amy\Amy_Countdown%d.ogg]]
+			return path:format(duration)
+		end
+	end
+
+	local auraEventToID = {
+		-- These are the enum values for UnitAuraSoundTrigger
+		onApplied = 0,
+		onStack = 1,
+		onRemoved = 2,
+		onCountdown = 0,
+	}
+	local AddAuraSound = C_UnitAuras.AddAuraSound
+	function plugin:RegisterAuraSounds(bossModule)
+		if bossModule:HasAuraData() and not registeredAuraModules[bossModule] then
+			if self:IsAuraSoundRestrictionsActive() then
+				self:RegisterEvent("ADDON_RESTRICTION_STATE_CHANGED")
+				return
+			end
+
+			local soundsRegistedForThisModule = {}
+			registeredAuraModules[bossModule] = soundsRegistedForThisModule
+			local spellIDList = bossModule:GetAuraSpellIDToIndexList()
+			for spellId in next, spellIDList do
+				local soundsToRegister = {}
+				local onAppliedSound = bossModule:GetAuraAppliedSound(spellId)
+				if not onAppliedSound then
+					onAppliedSound = bossModule:GetAuraAppliedSoundDefault(spellId)
+					local hasGlobalSound = validGlobalSounds[onAppliedSound]
+					if hasGlobalSound then
+						onAppliedSound = db.media[hasGlobalSound]
+					end
+				end
+				local onStackSound = bossModule:GetAuraAppliedDoseSound(spellId)
+				if not onStackSound then
+					onStackSound = bossModule:GetAuraAppliedDoseSoundDefault(spellId)
+					if onStackSound then
+						local hasGlobalSound = validGlobalSounds[onStackSound]
+						if hasGlobalSound then
+							onStackSound = db.media[hasGlobalSound]
+						end
+					end
+				end
+				local onRemovedSound = bossModule:GetAuraRemovedSound(spellId)
+				if not onRemovedSound then
+					onRemovedSound = bossModule:GetAuraRemovedSoundDefault(spellId)
+					local hasGlobalSound = validGlobalSounds[onAppliedSound]
+					if hasGlobalSound then
+						onAppliedSound = db.media[hasGlobalSound]
+					end
+				end
+				if onAppliedSound and onAppliedSound ~= "None" then
+					soundsToRegister.onApplied = self:GetSoundFile(nil, nil, onAppliedSound)
+				end
+				if onStackSound and onStackSound ~= "None" then
+					soundsToRegister.onStack = self:GetSoundFile(nil, nil, onStackSound)
+				end
+				if onRemovedSound and onRemovedSound ~= "None" then
+					soundsToRegister.onRemoved = self:GetSoundFile(nil, nil, onRemovedSound)
+				end
+				if bossModule:GetAuraCountdownVoice(spellId) then
+					soundsToRegister.onCountdown = getCountdownSoundFile(bossModule:GetAuraDuration(spellId))
+				end
+
+				for event, sound in next, soundsToRegister do
+					local auraSoundInfoTable = {
+						spellID = spellId,
+						unitToken = "player",
+						outputChannel = "master",
+					}
+					if type(sound) == "string" then
+						auraSoundInfoTable.soundFileName = sound
+					else
+						auraSoundInfoTable.soundFileID = sound
+					end
+					local auraSoundID = AddAuraSound(auraEventToID[event], auraSoundInfoTable)
+					if auraSoundID ~= nil then
+						soundsRegistedForThisModule[#soundsRegistedForThisModule + 1] = auraSoundID
+					end
+				end
+			end
+		end
+	end
+end
+
+do
+	local RemoveAuraSound = C_UnitAuras.RemoveAuraSound
+	function plugin:UnregisterAuraSounds(bossModule)
+		if registeredAuraModules[bossModule] then
+			for i = 1, #registeredAuraModules[bossModule] do
+				local auraSoundID = registeredAuraModules[bossModule][i]
+				RemoveAuraSound(auraSoundID)
+			end
+			registeredAuraModules[bossModule] = nil
+		end
+	end
+end
+
+function plugin:UnregisterAllAuraSounds()
+	for bossModule in next, registeredAuraModules do
+		self:UnregisterAuraSounds(bossModule)
+	end
+end
+
+-- Functions for regular sounds
 do
 	local tmp = { -- XXX temp
 		["long"] = "Long",

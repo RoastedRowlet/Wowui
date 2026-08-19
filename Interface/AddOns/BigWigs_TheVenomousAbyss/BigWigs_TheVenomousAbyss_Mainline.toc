@@ -23,7 +23,7 @@
 ## Notes-zhCN: BigWigs 烈毒之渊模块
 ## Notes-zhTW: BigWigs 劇毒深淵模組
 ## IconTexture: Interface\AddOns\BigWigs\Media\Icons\minimap_raid.tga
-## Version: v419.2
+## Version: v420
 
 ## LoadOnDemand: 1
 ## Dependencies: BigWigs
@@ -33,10 +33,10 @@
 
 Nekzali.lua
 Sentinels.lua
-Vashnik.lua
 Explorers.lua
+Vashnik.lua
 Sszorak.lua
 TwinFangs.lua
-Crown.lua
+CoiledAltar.lua
 Ulatek.lua
 !Options.lua

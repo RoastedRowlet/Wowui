@@ -1,9 +1,9 @@
 
 MyTotemDB = {
 ["profileKeys"] = {
-["Barelynoer - Area 52"] = "Default",
 ["Zappyxatu - Stormrage"] = "Default",
 ["Lonelylitten - Stormrage"] = "Default",
+["Barelynoer - Area 52"] = "Default",
 },
 ["profiles"] = {
 ["Default"] = {

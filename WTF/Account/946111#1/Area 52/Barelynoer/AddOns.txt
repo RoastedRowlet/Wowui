@@ -1,4 +1,4 @@
-Grid2: enabled
+Grid2: disabled
 Grid2LDB: enabled
 Grid2Options: enabled
 Blizzard_ObjectiveTracker: enabled
@@ -133,6 +133,7 @@ FocusMarker: enabled
 LightDamage: enabled
 NotEvenClose: enabled
 EllesmereUIBags: enabled
-EllesmereUIRaidFrames: disabled
+EllesmereUIRaidFrames: enabled
 BigWigs_Sporefall: enabled
 TotemRecall: disabled
+BigWigs_TheVenomousAbyss: enabled

@@ -1060,7 +1060,8 @@ initFrame:SetScript("OnEvent", function(self)
         -- Gear flyout item levels. Independent of the themed character sheet
         -- (it enhances Blizzard's own equipment flyout), so it is not gated by
         -- the section's disabled overlay.
-        _, h = W:DualRow(parent, y,
+        local flyoutDurRow
+        flyoutDurRow, h = W:DualRow(parent, y,
             { type="toggle", text="Gear Flyout Item Levels",
               tooltip="Shows the item level on each item in the character sheet gear flyout (the popup of same-slot bag items that appears when hovering an equipped slot), coloured by quality.",
               getValue=function() return EllesmereUIDB and EllesmereUIDB.flyoutItemLevels or false end,
@@ -1068,8 +1069,70 @@ initFrame:SetScript("OnEvent", function(self)
                   if not EllesmereUIDB then EllesmereUIDB = {} end
                   EllesmereUIDB.flyoutItemLevels = v
               end },
-            { type="label", text="" }
+            { type="toggle", text="Show Item Durability",
+              tooltip="Show total equipped durability above the character model, colored from green to red.",
+              getValue=function() return EllesmereUIDB and EllesmereUIDB.showCharSheetDurability or false end,
+              setValue=function(v)
+                  if not EllesmereUIDB then EllesmereUIDB = {} end
+                  EllesmereUIDB.showCharSheetDurability = v
+                  if v then
+                      if EllesmereUIDB.charSheetDurabilityLocation == nil then
+                          EllesmereUIDB.charSheetDurabilityLocation = "model"
+                      end
+                      if EllesmereUIDB.charSheetDurabilityShowLabel == nil then
+                          EllesmereUIDB.charSheetDurabilityShowLabel = true
+                      end
+                  end
+                  if EllesmereUI._updateCharSheetDurability then EllesmereUI._updateCharSheetDurability() end
+                  if EllesmereUI._updateScrollHeaderOffset then EllesmereUI._updateScrollHeaderOffset() end
+                  EllesmereUI:RefreshPage()
+              end }
         );  y = y - h
+
+        if not EllesmereUI._prebuilding then
+            local rgn = flyoutDurRow._rightRegion
+            local _, cogShow = EllesmereUI.BuildCogPopup({
+                title = "Durability Settings",
+                rows = {
+                    { type="dropdown", label="Location",
+                      values={ model="Above Model", header="Stats Header", footer="Frame Footer" },
+                      order={ "model", "header", "footer" },
+                      get=function()
+                          return EllesmereUIDB and EllesmereUIDB.charSheetDurabilityLocation or "model"
+                      end,
+                      set=function(v)
+                          if not EllesmereUIDB then EllesmereUIDB = {} end
+                          EllesmereUIDB.charSheetDurabilityLocation = v
+                          if EllesmereUI._updateCharSheetDurability then EllesmereUI._updateCharSheetDurability() end
+                          if EllesmereUI._updateScrollHeaderOffset then EllesmereUI._updateScrollHeaderOffset() end
+                      end },
+                    { type="toggle", label="Show Label",
+                      tooltip="Prefix the durability percent with \"Durability:\".",
+                      get=function() return not EllesmereUIDB or EllesmereUIDB.charSheetDurabilityShowLabel ~= false end,
+                      set=function(v)
+                          if not EllesmereUIDB then EllesmereUIDB = {} end
+                          EllesmereUIDB.charSheetDurabilityShowLabel = v
+                          if EllesmereUI._updateCharSheetDurability then EllesmereUI._updateCharSheetDurability() end
+                      end },
+                },
+            })
+            local cogBtn = CreateFrame("Button", nil, rgn)
+            cogBtn:SetSize(26, 26)
+            cogBtn:SetPoint("RIGHT", rgn._lastInline or rgn._control, "LEFT", -8, 0)
+            rgn._lastInline = cogBtn
+            cogBtn:SetFrameLevel(rgn:GetFrameLevel() + 5)
+            local cogTex = cogBtn:CreateTexture(nil, "OVERLAY"); cogTex:SetAllPoints(); cogTex:SetTexture(EllesmereUI.COGS_ICON)
+            local function durabilityOn() return EllesmereUIDB and EllesmereUIDB.showCharSheetDurability end
+            cogBtn:SetScript("OnEnter", function(s) if durabilityOn() then s:SetAlpha(0.7) end end)
+            cogBtn:SetScript("OnLeave", function(s) s:SetAlpha(durabilityOn() and 0.4 or 0.15) end)
+            cogBtn:SetScript("OnClick", function(s) if durabilityOn() then cogShow(s) end end)
+            local function cogState()
+                local on = durabilityOn()
+                cogBtn:SetAlpha(on and 0.4 or 0.15)
+                cogBtn:EnableMouse(on)
+            end
+            EllesmereUI.RegisterWidgetRefresh(cogState); cogState()
+        end
 
         _, h = W:Spacer(parent, y, 10);  y = y - h
 
@@ -1474,29 +1537,6 @@ initFrame:SetScript("OnEvent", function(self)
         return y
     end
 
-    local function BuildReadyCheckContent(parent, y)
-        local W = EllesmereUI.Widgets
-        local _, h
-
-        _, h = WSCardSection(parent, "QUALITY OF LIFE", y);  y = y - h
-
-        _, h = W:DualRow(parent, y,
-            { type="toggle", text="Hide Portrait",
-              tooltip="Hides the ready check glyph above the prompt, leaving just the question and the Yes / No buttons. Applies while the Ready Check reskin is enabled.",
-              getValue=function()
-                  return EllesmereUIDB and EllesmereUIDB.readyCheckHidePortrait == true
-              end,
-              setValue=function(v)
-                  if not EllesmereUIDB then EllesmereUIDB = {} end
-                  EllesmereUIDB.readyCheckHidePortrait = v
-                  if EllesmereUI._ReadyCheck_Refresh then EllesmereUI._ReadyCheck_Refresh() end
-              end },
-            { type="label", text="" }
-        ); y = y - h
-
-        return y
-    end
-
     ---------------------------------------------------------------------------
     --  Blizzard Window Skins page: one expandable card per reskinned window.
     --  Card headers are custom chrome, but every sub-setting ROW is a standard
@@ -1861,13 +1901,12 @@ initFrame:SetScript("OnEvent", function(self)
         {
             key   = "readycheck",
             title = "Ready Check",
-            desc  = "The ready check prompt with its Yes / No buttons, plus the initiator's response list.",
+            desc  = "The ready check prompt with its Yes / No buttons.",
             reloadMsg = "Changing the Ready Check reskin requires a UI reload to fully swap between Blizzard and Ellesmere styles.",
             setEnabled = function(v)
                 if not EllesmereUIDB then EllesmereUIDB = {} end
                 EllesmereUIDB.reskinReadyCheck = v
             end,
-            buildContent = BuildReadyCheckContent,
         },
         {
             key   = "housing",
@@ -3036,8 +3075,6 @@ initFrame:SetScript("OnEvent", function(self)
                 EllesmereUIDB.reskinLootHistory = nil
                 EllesmereUIDB.reskinGroupInvite = nil
                 EllesmereUIDB.reskinReadyCheck = nil
-                EllesmereUIDB.readyCheckHidePortrait = nil
-                if EllesmereUI._ReadyCheck_Refresh then EllesmereUI._ReadyCheck_Refresh() end
                 EllesmereUIDB.reskinMicroMenu = nil
                 EllesmereUIDB.reskinHousing = nil
                 EllesmereUIDB.reskinProfessions = nil
@@ -3067,6 +3104,9 @@ initFrame:SetScript("OnEvent", function(self)
                 EllesmereUIDB.showMythicRating = nil
                 EllesmereUIDB.showPvpItemLevel = nil
                 EllesmereUIDB.flyoutItemLevels = nil
+                EllesmereUIDB.showCharSheetDurability = nil
+                EllesmereUIDB.charSheetDurabilityLocation = nil
+                EllesmereUIDB.charSheetDurabilityShowLabel = nil
                 EllesmereUIDB.statCategoryColors = nil
                 EllesmereUIDB.statSectionsOrder = nil
                 EllesmereUIDB.charSheetCollapsedSections = nil

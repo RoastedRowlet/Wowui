@@ -6,8 +6,13 @@ local mod, CL = BigWigs:NewBoss("Galvazzt", 1877, 2144)
 if not mod then return end
 mod:RegisterEnableMob(133389)
 mod:SetEncounterID(2126)
-if BigWigsLoader.isNext then -- Midnight+ XXX swap to mod:Retail() in 12.1
+if mod:Retail() then -- Midnight+
 	mod:SetRespawnTime(30)
+	mod:SetAuraData({
+		{266923}, -- Galvanize
+		{1291815, soundOnApplied = "underyou"}, -- Induction Field
+		{266512}, -- Consume Charge
+	})
 else
 	mod:SetRespawnTime(25)
 end
@@ -58,7 +63,7 @@ local backupBars = {}
 -- Midnight Renames
 --
 
-if BigWigsLoader.isNext then -- Midnight+ XXX swap to mod:Retail() in 12.1
+if mod:Retail() then -- Midnight+
 	mod:SetRenames({
 		[1291618] = {1291618}, -- Lightning Spire
 		[1309525] = {1309525}, -- Induction
@@ -69,7 +74,7 @@ end
 -- Midnight Initialization
 --
 
-if BigWigsLoader.isNext then -- Midnight+ XXX swap to mod:Retail() in 12.1
+if mod:Retail() then -- Midnight+
 	function mod:GetOptions()
 		return {
 			1291618, -- Lightning Spire

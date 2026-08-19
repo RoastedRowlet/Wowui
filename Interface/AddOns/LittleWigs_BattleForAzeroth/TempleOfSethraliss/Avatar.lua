@@ -6,8 +6,16 @@ local mod, CL = BigWigs:NewBoss("Avatar of Sethraliss", 1877, 2145)
 if not mod then return end
 mod:RegisterEnableMob(133392, 137204) -- Avatar of Sethraliss, Hoodoo Hexer (boss add)
 mod:SetEncounterID(2127)
-if BigWigsLoader.isNext then -- Midnight+ XXX swap to mod:Retail() in 12.1
+if mod:Retail() then -- Midnight+
 	mod:SetRespawnTime(30)
+	mod:SetAuraData({
+		{1300714}, -- Shadowlash
+		{1300877}, -- Corruption
+		{1303446}, -- Tainted Strike
+		{1302618}, -- Vile Charge
+		{1311979}, -- Latent Hex
+		{1302826}, -- Corruption Burst
+	})
 else
 	mod:SetRespawnTime(20)
 end
@@ -88,7 +96,7 @@ local backupBars = {}
 -- Midnight Renames
 --
 
-if BigWigsLoader.isNext then -- Midnight+ XXX swap to mod:Retail() in 12.1
+if mod:Retail() then -- Midnight+
 	mod:SetRenames({
 		[1301202] = {1301202, L.heal_boss, notes = {CL.generalNote, CL.messageCastOverNote}, original = {1301202, CL.removed:format(mod:SpellName(1301202))}}, -- Defiling Taint
 		[1273408] = {1273408}, -- Stage One
@@ -99,7 +107,7 @@ end
 -- Midnight Initialization
 --
 
-if BigWigsLoader.isNext then -- Midnight+ XXX swap to mod:Retail() in 12.1
+if mod:Retail() then -- Midnight+
 	function mod:GetOptions()
 		return {
 			autotalk,
@@ -239,8 +247,9 @@ end
 --
 
 function mod:GOSSIP_SHOW() -- called from Trash module
-	if self:GetOption(autotalk) and self:GetGossipID(107065) then
-		self:SelectGossipID(107065)
+	if self:GetOption(autotalk) and self:GetGossipID(48126) then -- Avatar of Sethraliss, start encounter
+		-- 48126:We will restore you!
+		self:SelectGossipID(48126)
 	end
 end
 

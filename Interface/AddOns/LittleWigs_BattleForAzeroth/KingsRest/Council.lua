@@ -8,6 +8,14 @@ mod:RegisterEnableMob(135475, 135470, 135472) -- Kula the Butcher, Aka'ali the C
 mod:SetEncounterID(2140)
 mod:SetRespawnTime(30)
 mod:SetStage(1)
+if mod:Retail() then -- Midnight+
+	mod:SetAuraData({
+		{266191}, -- Whirling Axe
+		{266231}, -- Severing Axe
+		{267494}, -- Barrel Through
+		{266238}, -- Shattered Defenses
+	})
+end
 
 --------------------------------------------------------------------------------
 -- Locals
@@ -80,7 +88,7 @@ local backupBars = {}
 -- Midnight Renames
 --
 
-if BigWigsLoader.isNext then -- Midnight+ XXX swap to mod:Retail() in 12.1
+if mod:Retail() then -- Midnight+
 	mod:SetRenames({
 		[266206] = {266206}, -- Whirling Axes
 		[266231] = {266231}, -- Severing Axe
@@ -96,7 +104,7 @@ end
 -- Midnight Initialization
 --
 
-if BigWigsLoader.isNext then -- Midnight+ XXX swap to mod:Retail() in 12.1
+if mod:Retail() then -- Midnight+
 	function mod:GetOptions()
 		return {
 			-- Kula the Butcher

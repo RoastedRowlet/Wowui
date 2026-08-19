@@ -148,6 +148,11 @@ L.compartmentMenu_desc = "關閉此選項將會啟用暴雪的小地圖插件收
 L.configure = "配置"
 L.resetPositions = "重置位置"
 L.selectEncounter = "選擇戰鬥"
+--L.primary_aura_spellId = "\n|cFFFFFF99Primary spell ID: %d|r"
+--L.secondary_aura_spellIds = "|cFFFFFF99Secondary spell ID(s): %s|r"
+--L.onApplied = "On Applied"
+--L.onDose = "On Dose"
+--L.onRemoved = "On Removed"
 L.privateAuraSounds = "私有光環音效"
 L.privateAuraSounds_desc = "插件無法追蹤私有光環的具體內容，但你可以設定獲得私有光環的減益效果時播放指定音效。"
 L.listAbilities = "將技能列表發送到團隊聊天頻道"
@@ -314,8 +319,7 @@ L.sharing_renames_desc = "匯出技能的別名設定。"
 L.sharing_export_renames_desc = "匯出技能的別名設定。"
 L.sharing_sounds_desc = "匯入技能對應的音效設定。"
 L.sharing_export_sounds_desc = "匯出技能對應的音效設定。"
-L.sharing_private_auras = "私有光環"
-L.sharing_private_auras_desc = "匯入私有光環的音效設定。"
+--L.sharing_auras_desc = "Import the configured aura sounds."
 L.sharing_export_private_auras_desc = "匯出私有光環的音效設定。"
 L.sharing_colors_desc = "匯入計時條與訊息文字的顏色設定。"
 L.sharing_export_colors_desc = "匯出計時條與訊息文字的顏色設定。"
@@ -362,6 +366,7 @@ L.H10 = "10人英雄"
 L.H25 = "25人英雄"
 L.titan = "25人泰坦" -- Chinese-only "Titan Reforged" servers
 --L.mythic_flex = "Mythic (Flex)" -- Mythic (Flexible 15-25 player raids)
+--L.world = "World" -- World (The first difficulty for Lairs in Retail WoW, essentially the same as LFR since its World -> Normal -> Heroic -> Mythic)
 
 -----------------------------------------------------------------------
 -- TOOLS
@@ -1089,12 +1094,14 @@ L.nameplateOptInTitle = "名條「手動啟用」模式"
 L.nameplateOptInWarning = "|cffff4411警告！|r\n\n開啟「手動啟用」模式會關閉所有首領模組的名條圖示。你必須分別進入每個模組，啟用你需要顯示圖示的名條。\n\n即將重載介面，確定要啟用嗎？"
 
 -----------------------------------------------------------------------
--- PrivateAuras.lua
+-- PrivateAuras.lua / Auras.lua
 --
 
+--L.auras = "Auras" -- Buffs/Debuffs
 L.privateAuras = "私有光環"
 L.privateAurasDesc1 = "「私有光環」是一種特殊的減益光環，插件無法直接取得光環的詳細資訊，也無法對其進行任何自動化操作。目前，魔獸世界正式版（主時間線）的首領戰鬥普遍採用了這種機制。\n\n" -- retail 正式版 mainline 主時間線
 L.privateAurasDesc2 = "BigWigs 會將這些特殊光環以獨立且醒目的大圖示顯示在畫面中；|cFF33FF99這能將關鍵的減益狀態與一般的負面效果區分開來，讓你迅速掌握自身狀況。|r\n\n"
+--L.aurasDesc = "BigWigs can help you keep track of when boss debuffs are applied to you by displaying them as icons.\n|cFF33FF99This can help you by displaying critical debuffs separately from your normal debuffs.|r\n\n"
 
 L.createTestAura = "創建測試光環"
 L.showDispelType = "顯示驅散類型圖示"
@@ -1117,9 +1124,28 @@ L.playerInYourGroup = "隊伍中的玩家"
 L.maxIcons = "圖示最大數量"
 L.maxIconsDesc = "最多顯示幾個圖示。"
 L.privateAurasHelpTip = "|TInterface\\AddOns\\BigWigs\\Media\\Icons\\minimap_raid:0:0|tBigWigs: 現在，你可以在受到私有光環減益效果時，獲得大圖示提示；並且，你可以設定是否要監視其他隊友（例如坦克）的狀態。"
+--L.aurasHelpTip = "|TInterface\\AddOns\\BigWigs\\Media\\Icons\\minimap_raid:0:0|tBigWigs: You can now see your boss debuffs as icons, or even the boss debuffs of another player (e.g. a tank)."
 
-L.privateAurasTestAnchorText = "私有\n（%d）"
-L.privateAurasTestTankAnchorText = "坦克\n光環\n(%d)"
+L.privateAurasTestAnchorText = "私有\n%d"
+L.privateAurasTestTankAnchorText = "坦克\n光環\n%d"
+
+--L.auraSounds = "Aura Sounds"
+--L.addAuraSpell = "Add Spell"
+--L.addAuraSpellDesc = "You can add spells you currently know by name, but it is always best to use the spell ID from logs."
+--L.invalidSpell = "Invalid spell"
+--L.bossDebuffsOnYou = "Boss Debuffs On You"
+--L.bossDebuffsOnTank = "Boss Debuffs On Tank"
+--L.showCountText = "Show Stacks"
+--L.cooldownText = "Cooldown Duration"
+--L.countText = "Applications"
+--L.selectPlayer = "Select Player"
+--L.myself = "Myself"
+--L.trigger = "Trigger"
+L.remove = "移除"
+--L.auraCountdownDesc = "If enabled, a vocal countdown will be added to the last 3 seconds of the aura."
+--L.auraDuration = "Aura Duration"
+--L.auraDurationDesc = "The duration in seconds that the aura will last."
+L.currentUnit = "（當前：%s）"
 
 -----------------------------------------------------------------------
 -- Proximity.lua

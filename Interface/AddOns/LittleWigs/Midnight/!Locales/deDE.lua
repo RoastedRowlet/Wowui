@@ -118,7 +118,6 @@ end
 
 L = BigWigs:NewBossLocale("Midnight Delve Trash", "deDE")
 if L then
-	L.nullaeus = "Nullaeus"
 end
 
 -- Den of Nalorakk
@@ -155,4 +154,32 @@ end
 L = BigWigs:NewBossLocale("Nexus-Point Xenas Trash", "deDE")
 if L then
 	L.custom_on_arcane_tripwire_autotalk_desc = "|cFFFF0000Benötigt 25 Fertigkeitspunkte der Ingenieurskunst von Midnight.|r Wählt automatisch die NSC Dialogoption zum Deaktivieren des arkanen Stolperdrahtes."
+end
+
+-- Common Trash
+
+L = BigWigs:NewBossLocale("Common Trash", "deDE")
+if L then
+	L.common_trash = "Gemeinsamer Trash"
+	L.trash_cast = "Zauber"
+	L.trash_cast_desc = "Alarmieren wenn ein normaler Gegner einen Zauber wirkt."
+	L.lieutenant_cast = "Zauber (Leutnant)"
+	L.lieutenant_cast_desc = "Alarmieren wenn ein Leutnant einen Zauber wirkt."
+	L.trash_channel = "Kanalisieren"
+	L.trash_channel_desc = "Alarmieren, wenn ein Gegner einen Zauber kanalisiert."
+	L.customization = "Anpassung"
+	L.custom_select_unit = "Zu berücksichtigende Einheiten"
+	L.custom_select_unit_desc = "Legt fest, welche Einheiten Nachrichten anzeigen und Sounds wiedergeben."
+	L.custom_select_unit_value1 = "Alle Einheiten zeigen Nachrichten und geben Sounds wieder"
+	L.custom_select_unit_value2 = "Alle Einheiten zeigen Nachrichten, aber nur Dein Ziel gibt Sounds wieder"
+	L.custom_select_unit_value3 = "Nur Dein Ziel zeigt Nachrichten und gibt Sounds wieder"
+	L.custom_select_throttle_type = "Drossel Typ"
+	L.custom_select_throttle_type_desc = "Welche Funktionen sollen gedrosselt werden"
+	L.custom_select_throttle_type_value1 = "Sowohl Nachrichten als auch Sounds"
+	L.custom_select_throttle_type_value2 = "Nur Sounds"
+	L.custom_select_throttle_duration = "Drossel Dauer"
+	L.custom_select_throttle_duration_desc = "Wartezeit zwischen Alarmen. Dein Ziel wird nie gedrosselt."
+	L.custom_select_throttle_duration_value1 = "2 Sekunden"
+	L.custom_select_throttle_duration_value2 = "1 Sekunde"
+	L.custom_select_throttle_duration_value3 = "3 Sekunden"
 end
