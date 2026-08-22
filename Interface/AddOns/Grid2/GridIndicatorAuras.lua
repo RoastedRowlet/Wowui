@@ -1,5 +1,8 @@
 --=====================================================================
+-- blizzard aura containers & slots managament
+--=====================================================================
 
+local ipairs = ipairs
 local rawget = rawget
 local tostring = tostring
 local tremove = table.remove
@@ -25,6 +28,21 @@ function indicator:GetStatusAurasFilter()
 	for _,status in ipairs(self.statuses) do
 		if status.GetAurasFilter then
 			return status:GetAurasFilter(), status
+		end
+	end
+end
+
+function indicator:IterateStatusAurasFilters(max)
+	local statuses, mid, idx = self.statuses, 0, 0
+	return function()
+		if mid>=max then return end
+		while idx<#statuses do
+			idx = idx + 1
+			local status = statuses[idx]
+			if status.GetAurasFilter then
+				mid = mid + 1
+				return status:GetAurasFilter(), status, mid
+			end
 		end
 	end
 end

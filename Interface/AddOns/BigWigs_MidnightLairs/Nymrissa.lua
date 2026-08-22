@@ -1,4 +1,3 @@
-if not BigWigsLoader.isNext then return end
 
 --------------------------------------------------------------------------------
 -- Module Declaration
@@ -20,10 +19,12 @@ local backupBars = {}
 
 local alluringBubbleCount = 1
 local frostBarrageCount = 1
-local tidepiercersRushCount = 1
+local swirlingWhirlpoolsCount = 1
 local abyssalRainCount = 1
-local waterFlurryCount = 1
+local icebladeFlurryCount = 1
 local waterJetCount = 1
+
+local spellChoiceCount = 1
 
 --------------------------------------------------------------------------------
 -- Localization
@@ -37,11 +38,13 @@ local waterJetCount = 1
 --
 
 mod:SetRenames({
+	[1276710] = {CL.adds}, -- Alluring Bubble (Adds)
 	[1257717] = {1257717}, -- Alluring Bubble
 	[1257608] = {1257608}, -- Frost Barrage
-	[1258668] = {1258668}, -- Tidepiercer's Rush
+	[1258668] = {1258668}, -- Swirling Whirlpools
 	[1260837] = {1260837}, -- Abyssal Rain
-	[1282937] = {1282937}, -- Water Flurry
+	[1282937] = {CL.tank_hit}, -- Iceblade Flurry (Tank Hit)
+	[1313393] = {1313393}, -- Chilling Frost
 	-- Mythic
 	[1268562] = {CL.tank_hit}, -- Water Jet
 })
@@ -51,24 +54,26 @@ mod:SetRenames({
 --
 
 mod:SetAuraData({
-    {1257608, soundOnApplied = "warning", header = CL.important}, -- Frost Barrage
-    {1282937, soundOnApplied = "warning"}, -- Water Flurry
-    {1282404, soundOnApplied = "none", header = CL.general}, -- Drenched
-    {1257651, soundOnApplied = "none"}, -- Drifting Globules
-    {1257644, soundOnApplied = "none"}, -- Frost Barrage
-    {1257654, soundOnApplied = "none"}, -- Lingering Frost
-    {1295086, soundOnApplied = "none"}, -- Unending Tides
-    {1282947, soundOnApplied = "none"}, -- Water Flurry
-    {1258901, soundOnApplied = "none", header = CL.mythic}, -- Water Jet
+	{1257608, soundOnApplied = "warning", header = CL.important}, -- Frost Barrage
+	{1282937, soundOnApplied = "warning"}, -- Iceblade Flurry
+	{1282404, soundOnApplied = "none", header = CL.general}, -- Drenched
+	{1257651, soundOnApplied = "none"}, -- Drifting Globules
+	{1257644, soundOnApplied = "none"}, -- Frost Barrage
+	{1257654, soundOnApplied = "none"}, -- Lingering Frost
+	{1295086, soundOnApplied = "none"}, -- Unending Tides
+	{1282947, soundOnApplied = "none"}, -- Iceblade Flurry
+	{1258901, soundOnApplied = "none", header = CL.mythic}, -- Water Jet
 })
 
 function mod:GetOptions()
 	return {
+		1276710, -- Alluring Bubble
 		1257717, -- Alluring Bubble
 		1257608, -- Frost Barrage
-		1258668, -- Tidepiercer's Rush
+		1258668, -- Swirling Whirlpools
 		1260837, -- Abyssal Rain
-		1282937, -- Water Flurry
+		1282937, -- Iceblade Flurry
+		1313393, -- Chilling Frost
 
 		-- Mythic
 		{1268562, "TANK"}, -- Water Jet
@@ -81,7 +86,11 @@ end
 
 function mod:OnBossEnable()
 	backupBars = {}
-	self:RegisterEvent("ENCOUNTER_TIMELINE_EVENT_ADDED")
+	if self:Mythic() then
+		self:RegisterEvent("ENCOUNTER_TIMELINE_EVENT_ADDED", "TimersMythic")
+	else
+		self:RegisterEvent("ENCOUNTER_TIMELINE_EVENT_ADDED", "Timers")
+	end
 	self:RegisterEvent("ENCOUNTER_TIMELINE_EVENT_STATE_CHANGED")
 	self:RegisterEvent("ENCOUNTER_TIMELINE_EVENT_REMOVED")
 end
@@ -91,17 +100,18 @@ function mod:OnEncounterStart()
 
 	alluringBubbleCount = 1
 	frostBarrageCount = 1
-	tidepiercersRushCount = 1
+	swirlingWhirlpoolsCount = 1
 	abyssalRainCount = 1
-	waterFlurryCount = 1
+	icebladeFlurryCount = 1
 	waterJetCount = 1
+	spellChoiceCount = 1
 end
 
 --------------------------------------------------------------------------------
 -- Timeline Event Handlers
 --
 
-function mod:ENCOUNTER_TIMELINE_EVENT_ADDED(_, eventInfo)
+function mod:TimersMythic(_, eventInfo)
 	if eventInfo.source ~= 0 or self:IsWiping() then return end
 	local barInfo = nil
 
@@ -117,16 +127,66 @@ function mod:ENCOUNTER_TIMELINE_EVENT_ADDED(_, eventInfo)
 	elseif durationRounded == 9 then -- Mythic
 		barInfo = self:AbyssalRain()
 	elseif durationRounded == 13 or durationRounded == 30 or durationRounded == 49 then
-		barInfo = self:WaterFlurry()
+		barInfo = self:IcebladeFlurry()
 	elseif durationRounded == 27 then
 		barInfo = self:AlluringBubble()
 	elseif durationRounded == 33 or durationRounded == 20 or durationRounded == 51
 		or durationRounded == 31 or durationRounded == 24 or durationRounded == 46 then -- 31/24/46 Mythic
 		barInfo = self:FrostBarrage()
 	elseif durationRounded == 64 or durationRounded == 68 then -- 68 Mythic
-		barInfo = self:TidepiercersRush()
+		barInfo = self:SwirlingWhirlpools()
 	elseif durationRounded == 17 or durationRounded == 29 or durationRounded == 40 then -- Mythic
 		barInfo = self:WaterJet()
+	end
+
+	if barInfo then
+		activeBars[eventInfo.id] = barInfo
+		if self:ShouldShowBars() then
+			self:CDBar(barInfo.key, barInfo.duration or eventInfo.duration, barInfo.msg, barInfo.icon, eventInfo.id)
+		end
+	elseif barInfo == nil and self:ShouldShowBars() then
+		self:ErrorForTimelineEvent(eventInfo)
+		backupBars[eventInfo.id] = true
+		self:SendMessage("BigWigs_StartBar", nil, nil, ("[B] %s"):format(eventInfo.spellName), eventInfo.duration, eventInfo.iconFileID, eventInfo.maxQueueDuration, nil, eventInfo.id, eventInfo.id)
+
+		local state = C_EncounterTimeline.GetEventState(eventInfo.id)
+		if state == 1 then -- Paused
+			self:SendMessage("BigWigs_PauseBar", nil, nil, eventInfo.id)
+		end
+	end
+end
+
+function mod:Timers(_, eventInfo)
+	if eventInfo.source ~= 0 or self:IsWiping() then return end
+	local barInfo = nil
+
+	local duration = eventInfo.duration
+	local durationRounded = self:RoundNumber(duration, 0)
+
+	if durationRounded == 44 then
+		if spellChoiceCount == 1 then
+			barInfo = self:AlluringBubbleAdds(eventInfo)
+		elseif spellChoiceCount == 2 then
+			barInfo = self:ChillingFrost(eventInfo)
+		elseif spellChoiceCount == 3 then
+			barInfo = self:AbyssalRain(eventInfo)
+		end
+		spellChoiceCount = spellChoiceCount + 1
+		if spellChoiceCount > 3 then
+			spellChoiceCount = 1
+		end
+	elseif duration == 18 then
+		barInfo = self:AlluringBubble(eventInfo)
+	elseif durationRounded == 8 or durationRounded == 23 or durationRounded == 33 then
+		barInfo = self:AbyssalRain(eventInfo)
+	elseif durationRounded == 22 or durationRounded == 27 or durationRounded == 9 then
+		barInfo = self:IcebladeFlurry(eventInfo)
+	elseif durationRounded == 25 or durationRounded == 7 then
+		barInfo = self:AlluringBubbleAdds(eventInfo)
+	elseif durationRounded == 107 or durationRounded == 89 then
+		barInfo = self:SwirlingWhirlpools(eventInfo)
+	elseif durationRounded == 35 or durationRounded == 17 then
+		barInfo = self:ChillingFrost(eventInfo)
 	end
 
 	if barInfo then
@@ -190,6 +250,23 @@ end
 -- Event Handlers
 --
 
+function mod:AlluringBubbleAdds(eventInfo) -- Adds
+	local barText = CL.count:format(self:GetRename(1276710), alluringBubbleCount)
+	alluringBubbleCount = alluringBubbleCount + 1
+	self:ScheduleTimer(function() -- onFinished doesn't fire, timer just pauses until it expires
+		self:Message(1276710, "cyan", barText)
+		self:PlaySound(1276710, "info")
+	end, eventInfo.duration)
+	return {
+		msg = barText,
+		key = 1276710,
+		onFinished = function()
+			self:Message(1276710, "cyan", barText)
+			self:PlaySound(1276710, "info")
+		end
+	}
+end
+
 function mod:AlluringBubble()
 	local barText = CL.count:format(self:GetRename(1257717), alluringBubbleCount)
 	alluringBubbleCount = alluringBubbleCount + 1
@@ -198,7 +275,6 @@ function mod:AlluringBubble()
 		key = 1257717,
 		onFinished = function()
 			self:Message(1257717, "cyan", barText)
-			self:PlaySound(1257717, "info")
 		end
 	}
 end
@@ -216,9 +292,9 @@ function mod:FrostBarrage()
 	}
 end
 
-function mod:TidepiercersRush()
-	local barText = CL.count:format(self:GetRename(1258668), tidepiercersRushCount)
-	tidepiercersRushCount = tidepiercersRushCount + 1
+function mod:SwirlingWhirlpools()
+	local barText = CL.count:format(self:GetRename(1258668), swirlingWhirlpoolsCount)
+	swirlingWhirlpoolsCount = swirlingWhirlpoolsCount + 1
 	return {
 		msg = barText,
 		key = 1258668,
@@ -242,9 +318,9 @@ function mod:AbyssalRain()
 	}
 end
 
-function mod:WaterFlurry()
-	local barText = CL.count:format(self:GetRename(1282937), waterFlurryCount)
-	waterFlurryCount = waterFlurryCount + 1
+function mod:IcebladeFlurry() -- Tank Hit
+	local barText = CL.count:format(self:GetRename(1282937), icebladeFlurryCount)
+	icebladeFlurryCount = icebladeFlurryCount + 1
 	return {
 		msg = barText,
 		key = 1282937,
@@ -264,6 +340,19 @@ function mod:WaterJet()
 		onFinished = function()
 			self:Message(1268562, "purple", barText)
 			-- self:PlaySound(1268562, "alarm") -- tank hit
+		end
+	}
+end
+
+function mod:ChillingFrost()
+	local barText = CL.count:format(self:GetRename(1313393), waterJetCount)
+	waterJetCount = waterJetCount + 1
+	return {
+		msg = barText,
+		key = 1313393,
+		onFinished = function()
+			self:Message(1313393, "yellow", barText)
+			-- self:PlaySound(1313393, "alarm")
 		end
 	}
 end

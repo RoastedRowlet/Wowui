@@ -1965,13 +1965,13 @@ function CCS.updateLocationInfo(unit, slotIndex, framename)
     -- Get item link and info
     local link = GetInventoryItemLink(unit, slotIndex)
     local itemLoc = isPlayer and ItemLocation:CreateFromEquipmentSlot(slotIndex) or nil
-
+--[[
     -- Outfitter Fix
     if C_AddOns.IsAddOnLoaded("Outfitter") and isPlayer then
         local outfitterslot = CCS.getSlotFrameName(slotIndex, "OutfitterEnable") 
         if _G[outfitterslot] then _G[outfitterslot]:SetFrameStrata("HIGH") end
     end
-
+--]]
     -- Quick fix for ElvUI
     if _G[slotFrameName].iLvlText then _G[slotFrameName].iLvlText:Hide() end
     if _G[slotFrameName].enchantText then _G[slotFrameName].enchantText:Hide() end

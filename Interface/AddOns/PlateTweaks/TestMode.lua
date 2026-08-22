@@ -1,27 +1,19 @@
 local _, NS = ...
 
--------------------------------------------------------------------------------
 -- Test mode.
 --
--- Paints the currently SIMULATED rules onto every real nameplate, using frames
--- we own outright. Nothing here is aura-gated, so you see your exact colours,
--- thickness, gap and inside/outside geometry at real size, on your own
--- nameplate addon's plates, with no debuffs required.
+-- Paints the SIMULATED rules onto every real nameplate using frames we own.
+-- Nothing here is aura-gated, so you see your exact colours and geometry at
+-- real size with no debuffs required.
 --
--- This is deliberately NOT the tint engine. The engine's visuals only appear
--- when the game says the aura is present, and nothing can force that. Test
--- mode sidesteps the question entirely by drawing its own copies.
---
--- What it therefore CANNOT tell you: whether a rule would actually match. A
--- wrong spell ID looks perfect in test mode.
---
--- Toggled from the buttons on either colouring tab.
--------------------------------------------------------------------------------
+-- Deliberately NOT the tint engine -- the engine only draws when the game says
+-- the aura is present, and nothing can force that. So this cannot tell you
+-- whether a rule would actually match: a wrong spell ID looks perfect here.
 
 local test = { on = false, plates = {}, ticker = nil }
 
--- Same four edges as the real border, and the same unit-vector scheme, so the
--- geometry cannot drift from what the engine draws.
+-- Same four edges and unit vectors as the real border, so the geometry cannot
+-- drift from what the engine draws.
 local SIDES = {
   { a = "TOPLEFT",    b = "TOPRIGHT",    ax = -1, ay =  1, bx =  1, by =  1, vertical = false },
   { a = "BOTTOMLEFT", b = "BOTTOMRIGHT", ax = -1, ay = -1, bx =  1, by = -1, vertical = false },
@@ -29,20 +21,19 @@ local SIDES = {
   { a = "TOPRIGHT",   b = "BOTTOMRIGHT", ax =  1, ay =  1, bx =  1, by = -1, vertical = true  },
 }
 
--- Top matching rule from a list against the debuffs ticked in the options
--- preview. Mirrors the preview's own logic rather than the engine's, because
--- the engine's answer is exactly the thing we are standing in for.
--- Set while the options window is sitting on ONE rule's page. The test buttons
--- there are testing that rule, not the rule list, so the ticked-debuff walk
--- below is the wrong question entirely: it would paint whichever rule the
--- ticks happen to select, which on a rule page is usually a different rule.
+-- Top matching rule against the debuffs ticked in the preview. Mirrors the
+-- preview's logic, not the engine's -- the engine's answer is what we stand in
+-- for.
+--
+-- focusRule is set while the options window sits on ONE rule's page: the test
+-- buttons there test that rule, so the ticked-debuff walk would paint whichever
+-- rule the ticks happen to select instead.
 local focusRule
 function NS.TestFocusRule() return focusRule end
 
 local function Winner(list)
-  -- Deliberately ignores enabled and conditions. You pressed test on this
-  -- rule's own page; a disabled rule showing nothing would look like the
-  -- button was broken.
+  -- Ignores enabled and conditions: you pressed test on this rule's page, and
+  -- a disabled rule showing nothing would look like a broken button.
   if focusRule then
     for _, rule in ipairs(list or {}) do
       if rule == focusRule then return rule end
@@ -52,9 +43,8 @@ local function Winner(list)
 
   local active = NS.PreviewActive and NS.PreviewActive() or {}
   for _, rule in ipairs(list or {}) do
-    -- Missing rules never paint the bar, so one placing first here would win
-    -- a contest it is not in and leave the bar blank. The ladder resolves
-    -- them separately, further down in Paint.
+    -- Missing rules never paint the bar, so one placing first would win a
+    -- contest it is not in and leave the bar blank.
     if not rule.showWhenMissing and rule.enabled ~= false and #(rule.conditions or {}) > 0 then
       local all = true
       for _, c in ipairs(rule.conditions) do
@@ -63,25 +53,22 @@ local function Winner(list)
       if all then return rule end
     end
   end
-  -- Nothing ticked means no rule matches, so nothing is drawn. Falling back
-  -- to some default rule would paint a colour no real debuff produces, which
-  -- is worse than showing nothing; the banner explains the empty result.
+  -- Nothing ticked means nothing drawn. A fallback rule would paint a colour
+  -- no real debuff produces; the banner explains the empty result.
 end
 
 local function BuildOverlay(healthBar)
   local o = CreateFrame("Frame", nil, healthBar)
   o:SetAllPoints(healthBar)
-  -- Above everything the tint engine draws, so test mode is never the thing
-  -- hidden by a real rule that happens to be firing.
+  -- Above everything the engine draws, so test mode is never the thing hidden
+  -- by a real rule that happens to be firing.
   o:SetFrameLevel(healthBar:GetFrameLevel() + 60)
 
   o.tint = o:CreateTexture(nil, "OVERLAY", nil, 0)
   o.tint:Hide()
 
-  -- Above the tint's own sublevel, not sharing it: the two are spatially
-  -- disjoint (opposite sides of the live fill edge) but a texture-mode fill
-  -- is only masked down to that edge, which can leave an unclipped sliver
-  -- right at the boundary with an undefined winner if the sublevels tie.
+    -- Above the tint's sublevel, not sharing it: a texture-mode fill is only
+    -- masked to the live edge and can leave a sliver with an undefined winner.
   o.missingCover = o:CreateTexture(nil, "OVERLAY", nil, 2)
   o.missingCover:Hide()
 
@@ -91,13 +78,11 @@ local function BuildOverlay(healthBar)
     o.edges[index]:Hide()
   end
 
-  -- The missing wash. One texture rather than the engine's ladder: this
-  -- overlay is above everything the engine draws, so it can simply paint
-  -- whichever rank the simulated state resolves to.
-  --
-  -- Sublevel BELOW o.tint, matching the plate: the ladder is built under every
-  -- presence rule (see ruleBase in NS.BuildTints), so a matching rule's colour
-  -- wins the bar and the reminder shows where nothing matches.
+    -- The missing wash. One texture rather than the engine's ladder, since
+    -- this overlay is above everything the engine draws.
+    --
+    -- Sublevel BELOW o.tint, matching the plate: the ladder is built under
+    -- every presence rule, so a matching rule wins the bar.
   o.missingWash = o:CreateTexture(nil, "OVERLAY", nil, -1)
   o.missingWash:Hide()
   return o
@@ -106,34 +91,24 @@ end
 local function Paint(healthBar, overlay)
   -- Suppress the ENGINE's own missing wash while test mode is on.
   --
-  -- Test mode stands in for the engine, and for every other visual that works
-  -- for free: the engine only draws when an aura is actually present, and in
-  -- test mode you have applied nothing, so it draws nothing and the overlay
-  -- has the plate to itself.
+  -- Everything else the engine draws needs a real aura, so in test mode it
+  -- draws nothing. A missing rule is the first visual lit BECAUSE nothing is
+  -- applied, so it is the first one still on screen underneath -- and the
+  -- overlay stops covering it the moment you tick the debuff, which reads as
+  -- the test wash refusing to clear.
   --
-  -- A missing rule is the first visual that is lit BECAUSE nothing is applied,
-  -- so it is the first one still on screen underneath. The overlay covers it
-  -- while the overlay is painting something, and stops covering it the moment
-  -- you tick the debuff -- which reads as the test wash refusing to clear.
-  --
-  -- Only rank 1 needs this. Deeper washes live on aura buttons and require
-  -- every debuff above them to be present, which in test mode they are not.
-  -- The frame is ours (see NS.BuildMissingWash), so hiding it is allowed.
+  -- Only rank 1: deeper washes need every debuff above them present.
   if healthBar.ptMissingWash then pcall(healthBar.ptMissingWash.Hide, healthBar.ptMissingWash) end
 
   local barRule = Winner(NS.db.tints.rules)
   local borderRule = Winner(NS.db.tints.borderRules)
 
-  -- Bar tint, matching the engine's inset so the two look the same.
   local healthOn = NS.db.tints.enabled
   local borderOn = NS.db.tints.borderEnabled ~= false
 
   if healthOn and barRule and barRule.barEnabled ~= false and barRule.color then
-    -- Through the same fill logic the real engine uses, not a hand-rolled
-    -- copy of it: this used to always SetColorTexture directly, so a rule
-    -- set to Colored Texture previewed as flat solid in test mode even
-    -- though it was texture-mode everywhere else. One shared function means
-    -- the two cannot drift apart again.
+    -- Through the same fill logic the engine uses. This used to
+    -- SetColorTexture directly, so a Colored Texture rule previewed as flat.
     NS.ApplyRuleFill(overlay.tint, healthBar, barRule, 0)
     overlay.tint:Show()
     if NS.ApplyMissingCover then
@@ -144,19 +119,16 @@ local function Paint(healthBar, overlay)
     if overlay.missingCover then overlay.missingCover:Hide() end
   end
 
-  -- The missing wash. Drawn whether or not any rule "wins" -- a missing rule
-  -- is lit precisely when nothing has matched. The ladder resolves to the
-  -- highest-ranked rule still owed, which is what the engine's chain expresses
-  -- structurally.
+  -- The missing wash, drawn whether or not any rule wins -- a missing rule is
+  -- lit precisely when nothing has matched.
   local missingBar
   if healthOn then
     local active = NS.PreviewActive and NS.PreviewActive() or {}
     for _, rule in ipairs(NS.db.tints.rules or {}) do
       if rule.showWhenMissing and rule.enabled ~= false
         and #(rule.conditions or {}) == 1 and not missingBar then
-        -- On a rule's own page the test button is testing THAT rule, so the
-        -- ticked-debuff walk is the wrong question -- same carve-out Winner
-        -- makes above. Focused means "show me this one lit".
+    -- On a rule's own page the button tests THAT rule, so the ticked-debuff
+    -- walk is the wrong question. Same carve-out Winner makes.
         local owed
         if focusRule then
           owed = (rule == focusRule)
@@ -195,11 +167,9 @@ local function Paint(healthBar, overlay)
   end
 end
 
--- A banner, because a test mode you can forget you left on is worse than no
--- test mode: every plate would look like your rules were firing constantly.
--- Small self-contained button. TestMode.lua loads before Options.lua and does
--- not share its widget helpers, so this is deliberately minimal rather than
--- reaching across files for a nicer one.
+  -- A banner, because a test mode you forget you left on is worse than none.
+  -- Minimal on purpose: TestMode loads before Options and cannot use its
+  -- widget helpers.
 local function BannerButton(parent, width, onClick)
   local b = CreateFrame("Button", nil, parent, "BackdropTemplate")
   b:SetSize(width, 20)
@@ -238,8 +208,7 @@ local function Banner(show)
     f:SetBackdropColor(0.10, 0.10, 0.12, 0.95)
     f:SetBackdropBorderColor(1, 0.82, 0.1, 1)
 
-    -- Draggable: it sits centre-top by default, which is exactly where
-    -- nameplates tend to be while you are looking at them.
+  -- Draggable: it defaults to centre-top, which is where plates tend to be.
     f:SetMovable(true)
     f:EnableMouse(true)
     f:RegisterForDrag("LeftButton")
@@ -251,8 +220,8 @@ local function Banner(show)
     NS.ApplyFont(f.text, "Expressway", 12, "NONE")
     f.text:SetTextColor(1, 0.82, 0.1)
 
-    -- The two module switches, on the banner because A/B-ing them against a
-    -- live plate is the whole reason you are in test mode.
+  -- The module switches, because A/B-ing them against a live plate is the
+  -- reason you are in test mode.
     f.health = BannerButton(f, 150, function()
       NS.db.tints.enabled = not NS.db.tints.enabled
       NS.RebuildAllRigs()
@@ -275,8 +244,8 @@ local function Banner(show)
   if show then NS.UpdateTestBanner() end
 end
 
--- Says WHAT is being simulated, so "my plates are unchanged" and "my plates
--- are all one colour" are both explained on screen rather than guessed at.
+  -- Says WHAT is simulated, so "unchanged" and "all one colour" are both
+  -- explained on screen.
 function NS.UpdateTestBanner()
   if not test.banner then return end
   local active = NS.PreviewActive and NS.PreviewActive() or {}
@@ -289,8 +258,7 @@ function NS.UpdateTestBanner()
 
   local scope = test.all and "ALL PLATES" or "TARGET"
   if focusRule then
-    -- The ticked debuffs are irrelevant while one rule is being tested, so
-    -- listing them would be actively misleading.
+  -- Ticked debuffs are irrelevant while one rule is tested.
     local label = {}
     for _, c in ipairs(focusRule.conditions or {}) do
       table.insert(label, NS.SpellName(c.spellID) or ("#" .. tostring(c.spellID)))
@@ -313,7 +281,6 @@ function NS.UpdateTestBanner()
     test.banner.text:SetText(("TEST MODE (%s) - simulating |cff55dd55%s|r")
       :format(scope, table.concat(names, ", ")))
   end
-  -- Width follows the longest line, with the two buttons setting the floor.
   test.banner:SetWidth(math.max(340, test.banner.text:GetStringWidth() + 40))
 
   local healthOn = NS.db.tints.enabled and true or false
@@ -324,9 +291,8 @@ function NS.UpdateTestBanner()
   test.banner.border.Paint(borderOn)
 end
 
--- Which plates to paint. Target only by default: it is the one you are
--- looking at while tuning a colour, and a direct GetNamePlateForUnit lookup
--- avoids guessing which of several plates you meant.
+  -- Target only by default: it is the plate you are looking at, and a direct
+  -- GetNamePlateForUnit avoids guessing which of several you meant.
 local function Plates()
   if test.all then
     return C_NamePlate.GetNamePlates() or {}
@@ -343,12 +309,11 @@ local function Refresh()
 
   for _, plate in ipairs(Plates()) do
     test.plateCount = test.plateCount + 1
-    -- The error is captured, not swallowed: reporting "no health bar" for
-    -- every failure would be a diagnostic that lies.
+    -- Captured, not swallowed: reporting "no health bar" for every failure
+    -- would be a diagnostic that lies.
     local ok, err = pcall(function()
-      -- Deliberately independent of the rig table. Friendly plates are never
-      -- rigged (nothing you apply can land on them), and test mode is a
-      -- drawing tool rather than a matching one, so it finds the bar itself.
+  -- Independent of the rig table: friendly plates are never rigged, and test
+  -- mode is a drawing tool rather than a matching one.
       local unit = plate.namePlateUnitToken
       local rig = unit and NS.UnitRig and NS.UnitRig(unit)
       local healthBar = (rig and rig.healthBar)
@@ -367,7 +332,6 @@ local function Refresh()
     if not ok then test.lastError = tostring(err) end
   end
 
-  -- Anything we painted before but are no longer covering.
   for healthBar, overlay in pairs(test.plates) do
     local stillWanted = false
     for _, plate in ipairs(Plates()) do
@@ -381,7 +345,7 @@ local function Refresh()
 end
 NS.RefreshTestMode = Refresh
 
--- Called on every page change. nil means "back to testing the whole list".
+-- nil means back to testing the whole list.
 function NS.SetTestFocus(rule)
   if focusRule == rule then return end
   focusRule = rule
@@ -407,10 +371,8 @@ function NS.TestMode(arg)
     for _, overlay in pairs(test.plates) do pcall(overlay.Hide, overlay) end
     if test.ticker then test.ticker:Cancel(); test.ticker = nil end
     Banner(false)
-    -- Give the engine its missing wash back. Through NS.AnchorTints rather
-    -- than a bare Show: whether the wash should be up at all depends on
-    -- whether a ladder exists, and that answer lives in NS.BuildMissingWash --
-    -- a blind Show would strand a wash on a profile with no missing rules.
+  -- Give the engine its missing wash back through NS.AnchorTints, not a bare
+  -- Show -- whether it should be up depends on whether a ladder exists.
     for _, rig in pairs(NS.rigs or {}) do
       if rig.healthBar then pcall(NS.AnchorTints, rig) end
     end
@@ -418,11 +380,9 @@ function NS.TestMode(arg)
   end
 
   Banner(true)
-  -- Plates come and go constantly, so this re-attaches rather than assuming
-  -- the set is stable. Cheap: a handful of SetPoint calls per plate.
+  -- Plates come and go, so this re-attaches rather than assuming a stable set.
   test.ticker = test.ticker or C_Timer.NewTicker(0.3, Refresh)
   Refresh()
 
-  -- No chat output: the banner already says the scope, what is simulated,
-  -- and how to stop.
+  -- No chat output: the banner already says scope, simulation and how to stop.
 end

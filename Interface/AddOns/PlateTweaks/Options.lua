@@ -1,28 +1,23 @@
 local _, NS = ...
 
--- Standalone options window. Each tab is built the same way:
+-- Standalone options window. Each tab:
 --
 --   [ Enable module ]      always at the top, never scrolls away
 --   [ Preview        ]     pinned, so it stays visible while you adjust
 --   [ scrolling sections ] collapsible, remembered per character
 --
--- Pinning the preview is the point: dragging a slider and watching the plate
--- change is only useful if both are on screen at once.
---
 -- The colour preview runs the real rule-priority logic against pretend debuff
--- state — legal because the pretend state is ours, not the game's.
+-- state -- legal because the pretend state is ours, not the game's.
 
 local window, tabButtons, tabPanels = nil, {}, {}
 -- The three Global Settings pages, in rail order. Held separately from tabPanels
 -- because their rebuild reaches into fields only they have.
 local globalPanels
--- Height of the "PREVIEW & TEST" strip at the top of every page, and the
--- width of the test-controls column beside the preview plate.
--- Where a collapsible section actually lands, so the preview can sit on the
--- same edges. The body is a fixed SetSize(716) scroll child anchored at the
--- scroll frame's left (panel x=4), and LayoutSections insets each section by
--- 6 -- so a section spans panel x=10 to x=714, 704 wide. Matching the body
--- itself was still 6px out on each side.
+-- Height of the preview strip, and the width of the test column beside it.
+
+-- Where a collapsible section lands, so the preview can sit on the same edges.
+-- The body is a fixed 716-wide scroll child at panel x=4, and LayoutSections
+-- insets each section by 6 -- so a section spans x=10 to x=714.
 local BODY_W = 704
 local BODY_X = 10
 -- One inset for everything inside the preview panel. Its contents were at 4,
@@ -72,24 +67,17 @@ local CTRL_H = 20
 local CTRL_BOX_W = 20
 local CTRL_EDGE = 1
 
--- Section metrics, in ONE place.
---
--- These were spelled out as bare numbers in CollapsibleSection and again in
--- LayoutSections, so "there is too much white space under the content" was two
--- separate edits that had to agree. Changing SECTION_PAD now moves every
--- section's bottom margin at once, which is the whole point of the widget
--- being shared.
+-- Section metrics in one place. These were spelled out as bare numbers in
+-- CollapsibleSection and again in LayoutSections, so "too much white space"
+-- was two edits that had to agree.
 local SECTION_HEAD_H = 30 -- header bar plus the 1px the backdrop insets it
 local SECTION_PAD    = 6  -- under the content, inside the border
 local SECTION_GAP    = 8  -- between stacked sections
 local SECTION_INSET  = 6  -- left/right, from the body's edge
 
--------------------------------------------------------------------------------
--- Theme — every color the window chrome uses, in one place. Edit these and
--- /reload to re-skin the window; nothing else in this file needs to change.
--- Each entry is {r, g, b} or {r, g, b, a}, 0-1. See PlateTweaks_Theme.md
--- (shipped outside the addon folder) for a guide to what each one touches.
--------------------------------------------------------------------------------
+-- Theme -- every colour the window chrome uses. Edit and /reload to re-skin;
+-- nothing else in this file changes. {r,g,b} or {r,g,b,a}, 0-1. See
+-- PlateTweaks_Theme.md for what each one touches.
 local THEME = {
   accent        = { 0.35, 0.62, 0.98 },        -- selected tab, focus rings, slider fill, checkbox fill
   accentBorder  = { 0.45, 0.68, 1.00 },        -- border drawn around an active/checked control
@@ -204,26 +192,18 @@ local function Header(parent, text)
   return fs
 end
 
--------------------------------------------------------------------------------
--- Tooltips
+-- Tooltips.
 --
--- One helper, attached to a widget, explaining what that widget does. Held for
--- a second before it appears: this window is dense, and a tooltip that fires
--- the instant the cursor crosses something turns simply moving the mouse into
--- a flicker of popups.
+-- Held for a second before appearing: this window is dense, and firing the
+-- instant the cursor crosses something turns moving the mouse into a flicker.
 --
--- HookScript, not SetScript. Half the widgets here already own OnEnter and
--- OnLeave -- hover painting, the grip highlight, the rule row's own tooltip --
--- and replacing those would silently break them.
+-- HookScript, not SetScript -- half these widgets already own OnEnter/OnLeave.
 --
--- Everything anchors to the cursor. The rail briefly opened off the window's
--- left edge on the theory that a cursor tooltip would cover the list, but in
--- practice it read as a different, unrelated panel -- one consistent place is
--- worth more than avoiding the overlap.
+-- Everything anchors to the cursor. Opening off the window's left edge was
+-- tried and read as a different, unrelated panel.
 --
--- Text may be a string or a function returning one -- a rule row's tooltip has
--- to describe whichever rule it currently holds, and these widgets are pooled.
--------------------------------------------------------------------------------
+-- Text may be a string or a function: a pooled rule row has to describe
+-- whichever rule it currently holds.
 
 -- Long enough that sweeping the cursor across a dense page stays quiet, short
 -- enough that deliberately resting on something feels answered rather than
@@ -342,8 +322,9 @@ local TIPS = {
   barTexture    = "A bar texture from LibSharedMedia, stretched across the fill and tinted by this rule's colour.",
   missingCover  = "Paints over the EMPTY part of the bar as well, hiding whatever your nameplate addon draws there.",
   missingColor  = "The colour used over missing health. Shared by every rule that covers it, not per rule.",
-  showWhen      = "Present colours the bar while the debuffs are up. MISSING flips it: the rule stays lit until you apply them. Absence has no direct expression under 12.1's aura rules, so a missing rule is drawn unconditionally and then COVERED once the debuff lands.",
-  missingCombatOnly = "Holds the missing-rule wash off while the target is out of combat, so it only lights up on mobs you're actually fighting without the debuff on them -- not every untouched mob standing around before a pull. Off by default, since some missing rules are exactly for a pre-pull buff check.\n\nThis applies to ALL your missing rules at once, not just this one: only one missing wash is ever lit, and which one depends on aura state the game will not let an addon read -- so the choice cannot be made per rule. It takes effect once every missing rule has it ticked.",
+  appliedByClass = "Once a missing rule's debuff IS applied, paint the bar a flat colour chosen by the mob's tier -- boss, lieutenant, caster, rare, elite, normal -- instead of restoring the bar's own art.\n\nThat is the state you are in most of the time, so this is what keeps lieutenants and casters telling themselves apart while the reminder only shows on mobs you still owe. The trade is whatever the bar was encoding on its own, usually threat.\n\nTiers come from the client's own markers -- lieutenant flag, an actual mana pool for casters, and effective level against yours -- not from a list of creature IDs, which the game will not let an addon read inside a dungeon. So this keeps working in M+, where plain elite/rare classification would put nearly every mob in one bucket.\n\nShared by every missing rule. Occlusion mode only, and occlusion is no longer the default -- run |cffffff00/pt missingmode occlude|r to reach it. Displacement never covers the bar at all, so the mob's own colouring survives untouched and there is nothing here to colour.",
+  showWhen      = "Present colours the bar while the debuffs are up. MISSING flips it: the rule stays lit until you apply them. Absence has no direct expression under 12.1's aura rules, so a missing rule is drawn unconditionally and then taken away once the debuff lands.\n\nOn a BORDER rule this needs |cffffff00/pt missingmode displace|r. Taking it away means one of two things -- covering it with a copy of what was underneath, or sliding it off screen -- and only the second works for a border, since the addon has no copy to make of whatever your nameplate addon drew there. In occlusion mode a missing border rule is simply not built, and |cffffff00/pt status|r says how many were skipped.",
+  missingCombatOnly = "Holds the missing-rule wash off while the target is out of combat, so it only lights up on mobs you're actually fighting without the debuff on them -- not every untouched mob standing around before a pull. Off by default, since some missing rules are exactly for a pre-pull buff check.\n\nPer rule in the default displacement mode: each rule owns its own frame, so its setting is honoured on its own. Under |cffffff00/pt missingmode occlude|r it becomes all-or-nothing instead -- only one wash is ever lit there and which one depends on aura state the game will not let an addon read, so the gate engages only once every missing rule has it ticked.",
   showOnTarget  = "Untick to stop this rule colouring your current target's nameplate.",
   showOnFocus   = "Untick to stop this rule colouring your focus target's nameplate.",
   borderThick   = "How thick this rule's border is drawn, in pixels.",
@@ -392,6 +373,24 @@ local TIPS = {
   textOffsetX   = "Horizontal nudge from that corner.",
   textOffsetY   = "Vertical nudge from that corner.",
 
+  -- Missing Debuff
+  switchMissingIcons = "Turns the Missing Debuffs module off entirely. A different visual from the missing-debuff wash under Health/Border Coloring -- this one is an icon that gets pushed off the plate while the debuff is present, and returns once it drops.",
+  missingList     = "Which debuffs get a reminder icon, in display order. Each one is its own independent icon: they can each have their own colour and their own combat-only setting.",
+  missingLayout   = "Where the row sits, how big the icons are, and whether they collapse toward the anchor as debuffs land.",
+  missingAdd      = "Adds a debuff to the tracked list. The icon shows while it is ABSENT and is pushed off the plate the moment you apply it.",
+  missingUseIcon  = "Switch this entry between its spell icon and a flat colour.",
+  missingColor    = "The flat colour used when this entry is set to Color instead of Icon.",
+  missingCombatOnly = "Holds this one reminder off while you or the target are out of combat. Unlike the bar wash under Health/Border Coloring, each Missing Debuffs icon is independent, so this can be set per entry rather than for the whole list.",
+  missingAnchor   = "Which point of the nameplate the row attaches to.",
+  missingGrow     = "The direction icons fill as more of them are tracked.",
+  missingOffsetX  = "Horizontal nudge from the anchor point, in pixels.",
+  missingOffsetY  = "Vertical nudge from the anchor point, in pixels.",
+  missingSize     = "Icon width and height in pixels.",
+  missingSpacing  = "Gap between icons.",
+  missingCollapse = "Icons past the first slide toward the anchor as the debuffs before them land, instead of leaving a gap. Turns off on its own past 4 tracked debuffs -- collapsing costs one extra secure container per debuff before it, and that adds up fast.",
+  missingBorder     = "Thickness of the border drawn around each icon. Zero for none.",
+  missingBorderCol  = "Colour of that border.",
+
   -- Profiles
   profileSelect = "The profile in use. Each character gets its own on first login rather than sharing a default.",
   profileNew    = "Creates an empty profile and switches to it.",
@@ -428,16 +427,12 @@ local TIPS = {
   diagCopy      = "Selects the whole report so you can copy it with Ctrl+C.",
 }
 
--- The same, for a LABEL.
+-- The same, for a LABEL. A fontstring has no scripts, so this lays an
+-- invisible mouse-enabled frame over its rect and tips that. SetAllPoints
+-- against the fontstring, so the hit area follows a re-anchored rebuild.
 --
--- A fontstring is not a frame: it has no scripts, so it can never answer the
--- cursor. This lays an invisible mouse-enabled frame over its rect and tips
--- that instead. SetAllPoints against the fontstring rather than fixed
--- coordinates, so the hit area follows the text when a rebuild re-anchors it.
---
--- Worth knowing: the frame swallows clicks inside its rect. That is harmless
--- over label text, which nothing beneath needs to receive -- but it is why
--- this is not simply applied to every fontstring in the window.
+-- The frame swallows clicks inside its rect -- harmless over label text, but
+-- it is why this is not applied to every fontstring.
 local function TipLabel(fontString, title, body, opts)
   if not fontString or not fontString.GetParent then return fontString end
   local hit = fontString.ptTipHit
@@ -496,13 +491,11 @@ local function Button(parent, text, width, onClick)
   return b
 end
 
--- Flat checkbox: a small square that fills when on. Blizzard's template
--- carries a lot of chrome for what is a binary.
--- An ordinary tick box, for settings.
+-- Flat checkbox: a small square that fills when on.
 --
--- A switch is reserved for turning a MODULE on and off (see ToggleSwitch):
--- that is a different kind of statement -- power, not preference -- and if
--- every option were a switch the distinction would be gone.
+-- A switch is reserved for turning a MODULE on and off (see ToggleSwitch) --
+-- power, not preference. If every option were a switch the distinction would
+-- be gone.
 local function Checkbox(parent, getValue, setValue)
   local c = CreateFrame("Button", nil, parent, "BackdropTemplate")
   c:SetSize(CTRL_BOX_W, CTRL_H)
@@ -530,14 +523,11 @@ local function Checkbox(parent, getValue, setValue)
   c:SetScript("OnEnter", function() Paint(true) end)
   c:SetScript("OnLeave", function() Paint(false) end)
   c:SetScript("OnClick", function()
-    -- Derived from the SOURCE, not from the local `checked`.
-    --
-    -- These widgets are pooled and re-pointed at different rules as the list
-    -- is reordered or rebuilt, and any external change (a rebuild, a profile
-    -- switch, another control writing the same field) moves the real value
-    -- without touching this local. Flipping the local then meant writing the
-    -- opposite of what was on screen -- which is what "toggles at random"
-    -- was: not a race, a stale copy.
+    -- Derived from the SOURCE, not the local `checked`. These widgets are
+    -- pooled and re-pointed as the list is reordered, and any external change
+    -- moves the real value without touching the local -- so flipping the local
+    -- wrote the opposite of what was on screen. That was "toggles at random":
+    -- a stale copy, not a race.
     local now = getValue() and true or false
     checked = not now
     Paint(true)
@@ -560,12 +550,9 @@ local function Checkbox(parent, getValue, setValue)
   return c
 end
 
--- A sliding switch, used ONLY for a module's on/off.
---
--- The distinction is the point: a tick box says "this option is set", a
--- switch says "this whole module is running or it is not". Keeping them
--- visually different is what lets the rail headings read as power controls
--- rather than as one more setting.
+-- A sliding switch, used only for a module's on/off. Keeping it visually
+-- distinct from a tick box is what lets the rail headings read as power
+-- controls rather than one more setting.
 local function ToggleSwitch(parent, getValue, setValue)
   local t = CreateFrame("Button", nil, parent, "BackdropTemplate")
   t:SetSize(26, 13)
@@ -619,12 +606,9 @@ local function ToggleSwitch(parent, getValue, setValue)
   return t
 end
 
--- A small square delete control.
---
--- Was a plain Button carrying the letter X, which read as a button someone
--- had forgotten to label. This one is sized like the tick boxes and swatches
--- it sits beside, and goes red on hover, so "this removes something" is
--- legible from the shape rather than from the caption.
+-- A small square delete control. Sized like the tick boxes and swatches it
+-- sits beside, and red on hover, so "this removes something" is legible from
+-- the shape rather than the caption.
 local function CloseX(parent, onClick, size)
   local b = CreateFrame("Button", nil, parent, "BackdropTemplate")
   size = size or CTRL_H
@@ -660,16 +644,12 @@ end
 
 -- Hand-built rather than Blizzard's ColorSwatchTemplate.
 --
--- That template brings its own art -- a colour texture plus a border sized by
--- the TEMPLATE, not by the frame -- so SetSize moved the hit box and left the
--- visible square at whatever size Blizzard drew it. Beside a CTRL_BOX_W tick
--- box it was plainly a different control, which is why "the pickers and the
--- checkboxes are still not the same size" kept coming back however the frame
--- was sized.
+-- That template sizes its border by the TEMPLATE, not the frame, so SetSize
+-- moved the hit box and left the visible square at Blizzard's size -- which is
+-- why "the pickers and the checkboxes are still not the same size" kept coming
+-- back however the frame was sized.
 --
--- This is the Checkbox's geometry exactly: same frame size, same backdrop,
--- same edge weight, same 3px inset on the fill. Change CTRL_BOX_W/CTRL_H and
--- both move together.
+-- This is the Checkbox's geometry exactly, so CTRL_BOX_W/CTRL_H moves both.
 local function ColorSwatch(parent, getColor, setColor)
   local s = CreateFrame("Button", nil, parent, "BackdropTemplate")
   s:SetSize(CTRL_BOX_W, CTRL_H)
@@ -805,14 +785,11 @@ local function Dropdown(parent, width, entries, getValue, setValue)
   menu.offset = 0
   d.menu = menu
 
-  -- Scrollbar. The wheel alone was fine when every list was short, but the
-  -- LibSharedMedia texture lists run to dozens of entries and a wheel gives
-  -- no sense of where you are in one or how much is left.
+  -- Scrollbar. The wheel alone was fine while lists were short, but the LSM
+  -- texture lists run to dozens and a wheel gives no sense of position.
   --
-  -- Built by hand rather than with a Slider: the thumb has to RESIZE to show
-  -- what fraction of the list is visible, which a Slider's fixed thumb cannot
-  -- do, and the whole widget is drawn to match this panel rather than the
-  -- default UI.
+  -- Hand-built rather than a Slider: the thumb has to RESIZE to show what
+  -- fraction is visible, which a Slider's fixed thumb cannot do.
   local track = CreateFrame("Frame", nil, menu)
   track:SetWidth(SCROLL_WIDTH)
   track:SetPoint("TOPRIGHT", -3, -3)
@@ -1238,22 +1215,17 @@ local function AddSpellDropdown(parent, width, defaultText, isTracked, onPick)
   return d
 end
 
--- Accepts a spell ID or a spell NAME. Not numeric-only any more: the ID that
--- has to go in is often one the Cooldown Manager never offers (Rend's debuff
--- is 388539, not the 772 it lists), and a name is easier to be right about
--- than a number nobody can memorise.
+-- Accepts a spell ID or a NAME. The ID that has to go in is often one the
+-- Cooldown Manager never offers (Rend's debuff is 388539, not the 772 listed),
+-- and a name is easier to be right about.
 --
--- What is typed is not necessarily what is stored. NS.ResolveAuraInput checks
--- it against the auras actually on your target and substitutes the aura's own
--- ID when they differ, reporting what it did rather than doing it silently.
--- Resolve whatever the user chose -- typed text, or a spell ID picked from a
--- dropdown -- into the ID that actually lands, reporting any substitution.
+-- What is typed is not necessarily what is stored: NS.ResolveAuraInput checks
+-- it against the auras on your target and substitutes the aura's own ID,
+-- reporting what it did.
 --
--- Deliberately shared by the DROPDOWNS as well as the boxes. The Cooldown
--- Manager lists abilities: Moonfire and Sunfire come out of it as cast IDs,
--- so picking them from the list built rules that could never match, while
--- typing the same two names worked. Every path that adds a spell goes
--- through here so they cannot disagree again.
+-- Shared by the DROPDOWNS too. The Cooldown Manager lists abilities, so
+-- picking Moonfire from the list built rules that could never match while
+-- typing the same name worked.
 local function ResolveAndReport(input)
   local spellID, note, changed = NS.ResolveAuraInput(input)
   if spellID and changed then
@@ -1372,12 +1344,10 @@ local function CollapsibleSection(parent, key, title, subtitle, palette)
     self.contentHeight = height
     self.content:SetHeight(math.max(1, height))
     self:SetHeight(self.open and (SECTION_HEAD_H + height + SECTION_PAD) or SECTION_HEAD_H)
-    -- Anything anchored BELOW this section has to move when it changes size,
-    -- and collapsing changes its size by its whole content height. Pushing
-    -- that out as a notification rather than leaving each page to remember to
+    -- Anything anchored below this section has to move when it changes size.
+    -- Pushing that out as a notification rather than leaving each page to
     -- re-run its own layout is the difference between "one page forgot" and
-    -- "it cannot be forgotten" -- see BuildTabFrame, which uses it to re-anchor
-    -- the scrolling body under the preview.
+    -- "it cannot be forgotten".
     if self.onResize then self.onResize(self) end
   end
 
@@ -1526,12 +1496,11 @@ local function BuildScrollBar(scrollFrame)
   return bar
 end
 
--- Turns the open rule's preview on. Its debuffs ARE the preview state, so
--- "preview this rule" means ticking every one of them.
+-- Turns the open rule's preview on: its debuffs ARE the preview state.
 --
--- Called when a rule is opened and whenever a test button is pressed: you
--- pressed test to look at something, and a rule page with its own preview
--- switched off is the one state where that would show you nothing.
+-- Called when a rule is opened and whenever a test button is pressed -- you
+-- pressed test to look at something, and a rule page with its preview off is
+-- the one state where that shows nothing.
 local function EnsureRulePreview()
   if not expandedRule then return end
   for _, condition in ipairs(expandedRule.conditions or {}) do
@@ -1562,12 +1531,10 @@ local function RefreshPreviews()
   end
 end
 
--- Applying a change reaches into every live nameplate, and a structural one
--- tears their containers down and builds them again — up to a thousand
--- textures per plate for a three-debuff rule. Doing that once per slider step
--- made dragging stutter, so the world-side work is coalesced: the preview
--- updates immediately (it is what you are looking at), the plates catch up
--- shortly after you stop moving.
+-- Applying a change reaches every live nameplate, and a structural one
+-- rebuilds their containers -- up to a thousand textures per plate. Doing that
+-- per slider step made dragging stutter, so the world-side work is coalesced:
+-- the preview updates immediately, the plates catch up when you stop.
 local APPLY_DELAY = 0.25
 local pendingLive, pendingStructural, applyTimer = false, false, nil
 
@@ -1588,6 +1555,7 @@ local function ApplyPending()
       for _, rig in pairs(NS.rigs) do
         NS.AnchorTints(rig)
         NS.AnchorIcons(rig)
+        NS.AnchorMissingIcons(rig)
       end
     end
   end)
@@ -1646,14 +1614,11 @@ end
 -- Shared preview stage
 -------------------------------------------------------------------------------
 
--- Test-mode buttons, on both colouring tabs. Deliberately do NOT close the
--- window: the point is to tick different debuffs in the simulate row and watch
--- the plate change as you do.
+-- Test-mode buttons on both colouring tabs. Deliberately do not close the
+-- window -- the point is to tick debuffs and watch the plate change.
 --
--- The "all" argument picks which scope this button owns. Each one stops test mode if it is
--- already running in ITS scope, and switches to that scope otherwise -- so
--- clicking "all" while testing the target switches rather than stopping,
--- which is what you meant by clicking it.
+-- Each button owns a scope: it stops test mode if already running in ITS
+-- scope, and switches to that scope otherwise.
 local function TestModeButton(parent, all)
   local b
   b = Button(parent, "", all and 170 or 190, function()
@@ -1716,15 +1681,12 @@ local function BuildStage(parent, height)
   stage.name:SetTextColor(1, 0.82, 0)
 
   -- The plate border, drawn the way the ENGINE draws it: four textures on the
-  -- bar itself at the top OVERLAY sublevel, exactly like stage.borderEdges
-  -- does for rule borders a few lines below.
+  -- bar at the top OVERLAY sublevel.
   --
-  -- It used to be a backdrop on a separate frame sitting 2px OUTSIDE the
-  -- plate, which was fine while it was only scene-setting. Once the engine
-  -- began reserving a band INSIDE the bar for it, that frame had to win a
-  -- draw-order fight against the bar it overlapped -- and lost, leaving the
-  -- bar's own colour showing in the band where the border should have been.
-  -- Textures on the bar have no such fight: sublevel decides, and 7 is the top.
+  -- It used to be a backdrop on a frame 2px outside the plate. Once the engine
+  -- reserved a band INSIDE the bar, that frame had to win a draw-order fight
+  -- against the bar it overlapped, and lost. Textures on the bar have no such
+  -- fight -- sublevel decides, and 7 is the top.
   stage.plateEdges = {}
 
   function stage:RefreshPlateBorder()
@@ -1775,30 +1737,21 @@ local function BuildStage(parent, height)
   stage.barBG:SetAllPoints()
   stage.barBG:SetColorTexture(0.10, 0.03, 0.03, 0.95)
 
-  -- OVERLAY sublayer 7 and anchored to the BAR FRAME, not to the status-bar
-  -- fill texture.
-  --
-  -- Anchored to the fill, the preview inherited the fill's width and draw
-  -- order: at a low health value it shrank, and on ARTWORK it shared a layer
-  -- with the bar texture itself and could lose. This is a diagram of the rule
-  -- logic, not a simulation of a health bar, so neither should be able to
-  -- affect whether the colour is visible.
-  -- Anchored to the status bar's FILL, exactly as the real tint is, so the
-  -- colour covers only the health that is actually there. It was moved onto
-  -- the bar frame while chasing a visibility bug; the real cause was the
-  -- draw layer, and OVERLAY sublayer 5 is what fixed it.
+  -- OVERLAY 7 and anchored to the BAR FRAME, not the fill texture. Anchored to
+  -- the fill, the preview inherited its width and draw order: it shrank at low
+  -- health and could lose on ARTWORK. This is a diagram of the rule logic, not
+  -- a simulation of a health bar.
+
+  -- Anchored to the FILL, exactly as the real tint is, so the colour covers
+  -- only the health actually there.
   stage.tint = stage.bar:CreateTexture(nil, "OVERLAY", nil, 5)
   stage.tint:SetPoint("TOPLEFT", stage.bar:GetStatusBarTexture(), "TOPLEFT", 0, 0)
   stage.tint:SetPoint("BOTTOMRIGHT", stage.bar:GetStatusBarTexture(), "BOTTOMRIGHT", 0, 0)
   stage.tint:Hide()
 
-  -- Missing-health cover preview. Anchored/repainted per refresh via
-  -- NS.ApplyMissingCover, same as the tint is via NS.ApplyRuleFill -- the
-  -- 72%-fixed stage bar always leaves a visible missing side to preview.
-  -- Sublevel 6, not 5: above the tint's own sublevel so it reliably wins any
-  -- unclipped sliver a texture-mode fill's mask leaves at the live edge
-  -- (same reasoning as the real engine's missingCoverSublevel), and below
-  -- stage.borderEdges at 7.
+  -- Missing-health cover preview, anchored and repainted per refresh via
+  -- NS.ApplyMissingCover. Sublevel 6: above the tint so it wins any unclipped
+  -- sliver a texture-mode mask leaves, and below borderEdges at 7.
   stage.missingCover = stage.bar:CreateTexture(nil, "OVERLAY", nil, 6)
   stage.missingCover:Hide()
 
@@ -1813,17 +1766,14 @@ local function BuildStage(parent, height)
     stage.borderEdges[index] = e
   end
 
-  -- The missing wash. Created here rather than per preview pane so every stage
-  -- gets one and none can be forgotten -- the same reasoning as the note
-  -- below.
+  -- The missing wash. Created here rather than per pane so no stage can be
+  -- missing one.
   --
-  -- BELOW stage.tint, mirroring the plate: the ladder is built at the rig's
-  -- base level, under every presence rule (see ruleBase in NS.BuildTints), so
-  -- a matching rule wins the bar and the reminder shows on mobs where nothing
-  -- matches. On a real plate the ladder's own two halves sit on different
-  -- frames and the engine's strata rules separate them, which a flat preview
-  -- cannot reproduce -- so this draws ONE texture and paints it the colour the
-  -- ladder would have resolved to.
+  -- BELOW stage.tint, mirroring the plate: the ladder is built under every
+  -- presence rule, so a matching rule wins the bar and the reminder shows
+  -- where nothing matches. On a real plate the ladder's halves sit on
+  -- different frames and strata separates them, which a flat preview cannot
+  -- reproduce -- so this draws one texture.
   stage.missingWash = stage.bar:CreateTexture(nil, "OVERLAY", nil, 4)
   stage.missingWash:Hide()
 
@@ -1889,14 +1839,12 @@ end
 
 -- Which MISSING rule the ladder would be washing the bar with, or nil.
 --
--- Resolved the way the engine resolves it, because the engine does not choose
--- -- it CONSTRUCTS the answer. Wash k is built to show only while D1..D(k-1)
--- are present and Dk is not, so the rule you see is simply the first one in
--- list order whose debuff is not up. Everything after it is covered by
--- definition; everything before it has already been applied.
+-- Resolved the way the engine constructs it: wash k shows only while D1..D(k-1)
+-- are present and Dk is not, so the answer is the first rule in list order
+-- whose debuff is not up.
 --
--- Single-debuff and enabled only, matching the ladder's own admission rules
--- in NS.BuildTints. Health list only -- border rules have no wash.
+-- Single-debuff and enabled only, matching the ladder's admission rules.
+-- Health list only -- border rules have no wash.
 local function PreviewMissingRule()
   if not (NS.db and NS.db.tints and NS.db.tints.enabled) then return end
   for _, rule in ipairs(NS.db.tints.rules or {}) do
@@ -2054,13 +2002,10 @@ local function BuildIconSwatch(parent)
   return box
 end
 
--- A single dummy icon for the Timer & Stacks section.
---
--- It is built at the icon's REAL pixel size and then the whole frame is
--- scaled up, so what you see is a magnified nameplate icon rather than a
--- bigger one: a 28pt timer on a 24px icon overflows it here exactly as much
--- as it will in the world. Drawing the dummy at a fixed 72px instead made
--- every font look far smaller than it really was.
+-- A dummy icon for Timer & Stacks, built at the icon's REAL pixel size and
+-- then scaled up, so a 28pt timer on a 24px icon overflows here exactly as
+-- much as it will in the world. Drawing it at a fixed 72px made every font
+-- look far smaller than it was.
 local SWATCH_TARGET = 76 -- how many screen pixels the magnified icon fills
 local SWATCH_MAX_ZOOM = 5
 
@@ -2126,12 +2071,8 @@ local function BuildTextSwatch(parent)
   return box
 end
 
--------------------------------------------------------------------------------
--- Confirmation dialog
---
--- Hand-built rather than StaticPopupDialogs so it matches the rest of the
--- window. One shared instance, re-labelled per use.
--------------------------------------------------------------------------------
+-- Confirmation dialog. Hand-built rather than StaticPopupDialogs so it matches
+-- the window. One shared instance, re-labelled per use.
 
 local confirmDialog
 
@@ -2196,13 +2137,9 @@ local function ShowConfirm(title, body, acceptText, onAccept)
   confirmDialog:Raise()
 end
 
--------------------------------------------------------------------------------
--- Text prompt
---
--- ShowConfirm with an edit box. Separate instance rather than a mode flag on
--- the shared one: the two can never be open at once, but a stray edit box
--- left visible on an ordinary confirm is the kind of bug that lingers.
--------------------------------------------------------------------------------
+-- Text prompt: ShowConfirm with an edit box. Separate instance rather than a
+-- mode flag -- a stray edit box left visible on an ordinary confirm is the
+-- kind of bug that lingers.
 
 local promptDialog
 
@@ -2269,14 +2206,10 @@ local function ShowPrompt(title, body, acceptText, onAccept, initialText)
   promptDialog.edit:HighlightText()
 end
 
--------------------------------------------------------------------------------
--- First-run warning
---
--- Shown once per account, before the addon has done anything the user did not
--- ask for. Two real choices: accept, or unload. "Unload" genuinely disables
--- the addon and reloads -- there is no way to unload in place, and a button
--- that only hid itself would be a lie.
--------------------------------------------------------------------------------
+-- First-run warning, once per account, before the addon has done anything
+-- unasked. Two real choices: accept, or unload. Unload genuinely disables and
+-- reloads -- there is no way to unload in place, and a button that only hid
+-- itself would be a lie.
 
 local WARNING_TEXT =
   "This addon is in very early stages and completely experimental. "
@@ -2412,13 +2345,9 @@ local function SelectTab(index)
 end
 
 
--- The expand/collapse triangle.
---
--- A rotated texture, not a "+"/"-" or a ▶ character: the panels' own
--- collapsibles use text glyphs, but Expressway has no guaranteed triangle and
--- a missing glyph would leave an empty square. UI-SortArrow is a clean solid
--- triangle that ships with the client, pointing UP, so it is turned a quarter
--- clockwise for closed and a half for open.
+-- The expand/collapse triangle. A rotated texture, not a glyph: Expressway has
+-- no guaranteed triangle and a missing one leaves an empty square.
+-- UI-SortArrow points UP, so a quarter turn is closed and a half is open.
 local function Twisty(parent, onToggle)
   local b = CreateFrame("Button", nil, parent)
   b:SetSize(14, 14)
@@ -2554,22 +2483,17 @@ local SECTION_TINT = {
 
 -- The heading for one rule section, as a clickable row.
 --
--- Was a small tinted fontstring, which said "these two lists are different
--- kinds of thing" but did not say "this opens" and did not look like anything
--- else in the rail. It reads as a menu item now -- same font, same size, same
--- resting colour, same hover wash as NavItem -- because that is what it
--- behaves like. The section's own colour survives on the panel edge beside its
--- rules, which is where it is doing structural work rather than decorating a
--- label.
--- The "New Rule" row that closes each rule section.
+-- It reads as a menu item -- same font, size, resting colour and hover wash as
+-- NavItem -- because that is what it behaves like. The section's own colour
+-- survives on the panel edge beside its rules, where it is doing structural
+-- work rather than decorating a label.
+
+-- The "New Rule" row closing each rule section.
 --
--- Built to the SAME internal offsets as RuleRow -- the button where the
--- colour swatch sits, the text where the rule name sits -- so the column of
--- swatches down a section stays unbroken and this reads as the next entry in
--- the list rather than a control bolted on underneath it.
---
--- The plus is drawn as two bars rather than typed: at 10px square, matching
--- the swatch, a font glyph is mostly padding and lands off centre.
+-- Built to the SAME internal offsets as RuleRow, so the column of swatches
+-- stays unbroken and this reads as the next entry rather than a control bolted
+-- underneath. The plus is two bars rather than a glyph: at 10px square a font
+-- glyph is mostly padding and lands off centre.
 local function AddRuleRow(parent)
   local r = CreateFrame("Button", nil, parent)
   r:SetHeight(20)
@@ -2620,23 +2544,20 @@ local function AddRuleRow(parent)
   return r
 end
 
--- Rows currently on screen, keyed by GROUP rather than by list:
--- "health|combo", "health|single", and the same pair for border.
+-- Rows on screen, keyed by GROUP: "health|combo", "health|single", and the
+-- same pair for border.
 --
--- Rules are split by how many debuffs they require, and a drag is confined to
--- its own group. That is not decoration -- it makes the one ordering mistake
--- this addon allows structurally impossible. A rule dies when something above
--- it needs a SUBSET of its debuffs, which in practice is a single-debuff rule
--- sitting above a combo containing it. Keep every combo above every single
--- and that arrangement cannot be expressed at all, so dragging stops being
--- something to validate after the fact.
+-- A drag is confined to its group, which makes the one ordering mistake this
+-- addon allows structurally impossible: a rule dies when something above it
+-- needs a SUBSET of its debuffs, i.e. a single sitting above a combo
+-- containing it. Keep every combo above every single and that cannot be
+-- expressed at all.
 --
--- Module-level rather than local to each RebuildRail: the drag handlers used
--- to close over per-rebuild tables, which left every previous generation of
--- handlers pointing at a stale list.
--- Rows of the rule TABLE on a Color Rules page, per list, so a drag there can
--- find its neighbours. Separate from railRows: the same rule appears in both
--- places and each needs its own on-screen geometry.
+-- Module-level rather than local to RebuildRail: the drag handlers used to
+-- close over per-rebuild tables, leaving old generations on stale lists.
+
+-- Rows of the rule TABLE on a Color Rules page, so a drag there can find its
+-- neighbours. Separate from railRows -- the same rule appears in both.
 local pageRows = {}
 local pageRowCount = {}
 
@@ -2668,12 +2589,9 @@ local function RuleRow(parent)
   -- drag are driven from OnMouseDown/OnUpdate below, so the two cannot fight
   -- over the same press.
 
-  -- No priority number. Position in the list IS the priority, and a column of
-  -- digits restating it was noise -- worse, it read as an identifier, as
-  -- though rule 2 stayed rule 2 after a drag.
-  -- Offsets are small because the ROW is now inset as a whole (see
-  -- RebuildRail) rather than each part being pushed right individually. The
-  -- row's own left edge is the indent.
+  -- No priority number: position IS the priority, and a column of digits
+  -- restating it read as an identifier, as though rule 2 stayed rule 2 after
+  -- a drag. Offsets are small because the ROW is inset as a whole.
   r.swatch = r:CreateTexture(nil, "ARTWORK")
   r.swatch:SetSize(10, 10)
   r.swatch:SetPoint("LEFT", 8, 0)
@@ -2685,12 +2603,10 @@ local function RuleRow(parent)
   r.label:SetWordWrap(false)
   StyleText(r.label, 11.5)
 
-  -- Two bars, like an equals sign. Drawn rather than typed: the addon's own
-  -- typeface has no guaranteed glyph for this, and a missing one leaves a
-  -- blank column exactly where the only hint that the row moves should be.
-  --
-  -- It brightens on hover (see Paint) because a static grey mark reads as
-  -- decoration; something that responds to the cursor reads as a control.
+  -- Two bars, like an equals sign. Drawn rather than typed -- the typeface has
+  -- no guaranteed glyph, and a missing one leaves a blank column exactly where
+  -- the only hint that the row moves should be. Brightens on hover, because a
+  -- static grey mark reads as decoration.
   r.grip = CreateFrame("Frame", nil, r)
   r.grip:SetSize(14, 14)
   r.grip:SetPoint("RIGHT", -7, 0)
@@ -2740,14 +2656,11 @@ local function RuleRow(parent)
   r:SetScript("OnEnter", function() hovered = true; Paint() end)
   r:SetScript("OnLeave", function() hovered = false; Paint() end)
 
-  -- Through the shared tooltip system rather than driving GameTooltip here.
-  -- It used to fire the instant the cursor touched a row, which made scanning
-  -- the rail a strobe of popups; now it waits like every other tooltip and
-  -- opens off the window's left edge instead of over the list.
+  -- Through the shared tooltip system. It used to fire the instant the cursor
+  -- touched a row, which made scanning the rail a strobe.
   --
-  -- Functions, not strings: these rows are pooled and re-pointed at a different
-  -- rule on every rebuild, so text captured at construction would describe
-  -- whichever rule happened to be first.
+  -- Functions, not strings: rows are pooled and re-pointed on every rebuild,
+  -- so text captured at construction would describe whichever rule was first.
   Tip(r,
     function(self) return self.fullLabel end,
     function(self)
@@ -2765,12 +2678,10 @@ local function RuleRow(parent)
     end,
     { note = "Click to edit. Drag to reorder." })
 
-  -- Drag by tracking the cursor ourselves rather than through
-  -- RegisterForDrag/OnDragStart. Same technique as the dropdown's scrollbar
-  -- thumb, and for the same reason: we need the position DURING the drag to
-  -- move the drop indicator, which the drag events do not give us. It also
-  -- keeps click and drag on one code path, so a click cannot be swallowed by
-  -- a drag that never started.
+  -- Drag by tracking the cursor rather than RegisterForDrag: we need the
+  -- position DURING the drag to move the drop indicator, which the drag events
+  -- do not give. It also keeps click and drag on one path, so a click cannot
+  -- be swallowed by a drag that never started.
   local DRAG_THRESHOLD = 4
 
   -- Finishing a press: either a click (open the rule) or a drop (reorder).
@@ -2812,14 +2723,12 @@ local function RuleRow(parent)
     local moved = table.remove(group, from)
     table.insert(group, math.max(1, math.min(#group + 1, target)), moved)
 
-    -- Write the master list back as combos-then-singles. The rail only ever
-    -- reorders WITHIN a group, so rebuilding the whole list from the two
-    -- groups is what keeps the stored order matching what is on screen -- and
-    -- it re-establishes the combos-above-singles invariant for free, without
-    -- anyone having to remember it.
+    -- Write the master list back as combos-then-singles. The rail only
+    -- reorders within a group, so rebuilding from the two groups keeps the
+    -- stored order matching the screen and re-establishes the
+    -- combos-above-singles invariant for free.
     --
-    -- Mutated in place rather than replaced: NS.db.tints.rules is held by
-    -- reference in a few places, and swapping the table would strand them.
+    -- Mutated in place: NS.db.tints.rules is held by reference elsewhere.
     wipe(list)
     for _, rule in ipairs(self.combos) do table.insert(list, rule) end
     for _, rule in ipairs(self.singles) do table.insert(list, rule) end
@@ -2944,18 +2853,14 @@ function UpdateRailIndicator(group, target)
   line:Show()
 end
 
--- Built from scratch rather than from PortraitFrameTemplate. Every widget in
--- here is already hand-drawn and flat, so the gold-bevelled chrome around
--- them was the last thing that still read as someone else's UI — and the
--- portrait ring in particular was only ever being worked around.
--- Width stays fixed: every row inside the pages is laid out at hardcoded pixel
--- offsets, so only height is free to resize until that layout is reworked.
+-- Built from scratch rather than PortraitFrameTemplate: every widget here is
+-- hand-drawn and flat, so the gold chrome was the last thing that read as
+-- someone else's UI.
 --
--- Widened from 790 when the tab strip became a left rail. The rail could have
--- been carved out of the old width instead, but the page bodies are pinned at
--- SetSize(716, ...) and there are ~170 hardcoded left offsets inside them --
--- narrowing the content area would have put every one of those in scope.
--- Growing the window keeps all of them valid and costs nothing but pixels.
+-- Width is fixed -- the pages are laid out at hardcoded pixel offsets, so only
+-- height is free. Widened from 790 when the tab strip became a left rail:
+-- narrowing the content area instead would have put ~170 hardcoded left
+-- offsets in scope.
 local RAIL_W = 186
 -- Sized to the content rather than the other way round. Sections are a fixed
 -- BODY_W wide at BODY_X, so any width beyond what they need shows up entirely
@@ -2996,25 +2901,26 @@ local PAGE_ICON_LAYOUT, PAGE_ICON_TEXT = 10, 11
 -- Optional Tweaks: conveniences that have nothing to do with nameplates. Its
 -- own heading precisely so nobody looks for a colouring setting in it.
 local PAGE_TWEAKS = 12
--- Import/export strings. Its own page rather than a section on Profiles: that
--- page is about which profile is in force on this account, and this one is
--- about moving a profile off it entirely.
+-- Import/export. Its own page rather than a section on Profiles: that page is
+-- about which profile is in force, this one about moving one off the account.
 --
--- Everything this page owns hangs off ONE table rather than a local each,
--- because this file's main chunk is at Lua's hard limit of 200 locals -- seven
--- more and it does not compile, which fails the whole addon rather than the
--- page. Anything added here from now on should go in this table too.
+-- Everything this page owns hangs off ONE table rather than a local each --
+-- this file's main chunk is at Lua's hard limit of 200 locals, and seven more
+-- fails the whole addon. Anything added here should go in this table too.
 local share = { PAGE = 13 }
-local PAGE_COUNT = 13
+-- Missing Debuffs: same one-table-not-several-locals discipline as `share`
+-- above, for the same reason -- this file's main chunk is already at Lua's
+-- 200-local ceiling. Everything this module's pages own (page indices,
+-- pooled rows, build/rebuild functions) hangs off this one table.
+local missing = { PAGE_LIST = 14, PAGE_LAYOUT = 15, rows = {}, ROW_W = 620, STAGE_H = 100 }
+local PAGE_COUNT = 15
 
--- Reading order, not index order. Modules first because that is what people
--- come here to change; the global drawing settings next, under a heading that
--- says why they are not inside a module; setup last because it is visited
--- rarely.
+-- Reading order, not index order: modules first, global drawing settings next
+-- under a heading that says why they are not inside a module, setup last.
 --
 -- Every entry is a page under a heading -- there is no second level -- so they
--- all share one indent. An earlier version indented some and not others,
--- which implied a hierarchy that does not exist.
+-- share one indent. Indenting some and not others implied a hierarchy that
+-- does not exist.
 local NAV_GROUP_INDENT = 10
 local NAV_ITEM_INDENT = 22
 -- Rules and the "New Rule" row that closes each section: one level in from
@@ -3028,23 +2934,17 @@ local RULE_ROW_INDENT = 22
 -- extra pixels. Everything on the bar centres on RAIL_HEADER_H / 2.
 local RAIL_HEADER_H = 24
 
--- Aura Icons is the one module set apart. It is off by default and most
--- people leave it that way -- their nameplate addon already draws an aura row
--- -- so listing it beside the modules everyone actually uses overstated it.
--- Everything else that paints the bar is a Module regardless of how often it
--- is switched on.
--- Each colouring module heads its own group with its rule list directly
--- underneath, because the rules ARE what you navigate that module for. A
--- shared "Modules" heading put one more level between you and the thing you
--- came to edit, and the rule list was buried inside a page besides.
+-- Aura Icons is set apart: it is off by default and most people leave it that
+-- way, since their nameplate addon already draws an aura row.
+
+-- Each colouring module heads its own group with its rule list directly under
+-- it, because the rules ARE what you navigate that module for. A shared
+-- "Modules" heading put another level between you and the thing you came for.
 --
 -- ruleList marks where a live list gets injected -- see RebuildRail.
 --
--- One level of nesting, not two. The rules hang directly under their page
--- link, behind its twisty; the combo/single split is a hairline between two
--- halves of that one list rather than two collapsible sections of its own.
--- Each half is named by the add row that closes it, so nothing is lost and
--- the rail loses a level.
+-- One level of nesting, not two: the combo/single split is a hairline between
+-- two halves of one list rather than two collapsible sections.
 local NAV_LAYOUT = {
   { group = "Health Coloring", module = "health", tip = "switchHealth" },
   { label = "Color Rules",      index = PAGE_HEALTH, collapse = "health", tip = "health" },
@@ -3059,6 +2959,9 @@ local NAV_LAYOUT = {
   { label = "Filters",          index = PAGE_ICONS, tip = "icons" },
   { label = "Position & Size",  index = PAGE_ICON_LAYOUT, tip = "iconLayout" },
   { label = "Timer & Stacks",   index = PAGE_ICON_TEXT, tip = "iconText" },
+  { group = "Missing Debuffs", module = "missingIcons", tip = "switchMissingIcons" },
+  { label = "Which Debuffs",    index = missing.PAGE_LIST, tip = "missingList" },
+  { label = "Position & Size",  index = missing.PAGE_LAYOUT, tip = "missingLayout" },
   { group = "Optional Tweaks" },
   { label = "Tooltip IDs",      index = PAGE_TWEAKS, module = "tooltipIDs",
     tip = "tweakTooltips", switchTip = "switchTooltipIDs" },
@@ -3086,6 +2989,10 @@ local MODULE_SWITCH = {
   icons = {
     get = function() return NS.db.icons.enabled and true or false end,
     set = function(v) NS.db.icons.enabled = v end,
+  },
+  missingIcons = {
+    get = function() return NS.db.missingIcons.enabled and true or false end,
+    set = function(v) NS.db.missingIcons.enabled = v end,
   },
   -- Neither of these is a nameplate module, but the rail switch does not care
   -- what a thing IS -- only how to read and write its on/off.
@@ -3249,12 +3156,10 @@ local function CreateWindow()
 
   -- Left rail instead of the old five-tab strip.
   --
-  -- The strip was already full at five entries across 790px, and three of the
-  -- sections it hid under "Health Coloring" were never about health colouring
-  -- at all -- Plate Border, Bar Edges and Pandemic Flash draw on every plate
-  -- whether or not a rule matches. They now have their own pages, which a
-  -- horizontal strip had no room for. A vertical list also lets related pages
-  -- sit under a heading rather than every page competing at the same level.
+  -- The strip was full at five entries, and three sections hidden under
+  -- "Health Coloring" were never about health colouring -- Plate Border, Bar
+  -- Edges and Pandemic Flash draw on every plate whether or not a rule
+  -- matches. A vertical list also lets related pages sit under a heading.
   local rail = CreateFrame("Frame", nil, frame, "BackdropTemplate")
   rail:SetPoint("TOPLEFT", 8, -52)
   rail:SetPoint("BOTTOMLEFT", 8, 30)
@@ -3404,17 +3309,11 @@ local function CreateWindow()
   return frame
 end
 
--- Lays the whole rail out: headings, pages, and a live row per rule.
---
--- Re-run on every rule change rather than patched in place, because priority
--- numbers, shadow warnings and ordering all shift together and a partial
--- update is how they drift apart.
--- The colour a rail row shows for a rule. A border rule's swatch has to read
--- its border colour: rule.color on a border rule is whatever the health half
--- happens to hold, which is usually the untouched default.
---
--- Declared ABOVE RebuildRail on purpose -- a local defined after it would not
--- be in scope inside it, and the call would silently resolve to a nil global.
+-- Lays out the whole rail: headings, pages, and a live row per rule. Re-run on
+-- every rule change rather than patched, because priority numbers, shadow
+-- warnings and ordering shift together and a partial update is how they drift.
+
+-- The colour a rail row shows for a rule.
 local function RuleSwatchColor(rule, kind)
   if kind == "border" then
     return (rule.border and rule.border.color) or NS.DefaultBorder().color
@@ -3631,14 +3530,10 @@ function RebuildRail()
 
       end
 
-      -- ONE creation row for the whole list, after both halves.
-      --
-      -- There used to be two, because a rule's shape was fixed when you made
-      -- it: the combo row set wantsCombo, which was the only thing that gave a
-      -- rule a second condition slot. A rule now just grows -- add a second
-      -- debuff and it re-sorts into the combo half on its own -- so a choice
-      -- at creation time would be asking for something the rule no longer has
-      -- to decide up front.
+      -- ONE creation row for the whole list. There used to be two, because a
+      -- rule's shape was fixed at creation: the combo row set wantsCombo,
+      -- which was the only thing giving a second condition slot. A rule now
+      -- grows and re-sorts into the combo half on its own.
       nAdd = nAdd + 1
       local addRow = railPool.adds[nAdd]
       if not addRow then
@@ -3649,14 +3544,12 @@ function RebuildRail()
       addRow.label:SetText("NEW RULE")
       Tip(addRow, "New Rule", TIPS.addRule)
       addRow:SetScript("OnClick", function()
-        -- Which normaliser depends on which list this is. NS.NormaliseRule
-        -- leaves barEnabled=true and border.enabled=false -- correct for a bar
-        -- rule, but the opposite of what a border rule needs. Getting this
-        -- wrong doesn't error: the rule is created, just shaped like a bar
-        -- rule, so it silently tries to paint a tint and never draws a border
-        -- -- until the next /reload, whose DB migration force-normalises every
-        -- entry in borderRules and fixes it retroactively. That "fixed by
-        -- reload, nothing else" signature is what this bug looked like.
+        -- Which normaliser depends on which list. NS.NormaliseRule leaves
+        -- barEnabled=true and border.enabled=false -- the opposite of what a
+        -- border rule needs. Getting it wrong does not error: the rule is
+        -- created shaped like a bar rule and never draws a border, until the
+        -- next /reload force-normalises borderRules and fixes it. That
+        -- "fixed by reload only" signature is what the bug looked like.
         local rule = (kind == "border") and NS.NewBorderRule()
           or NS.NormaliseRule({ color = NS.DefaultColor(), conditions = {}, enabled = true })
         table.insert(list, rule)
@@ -3768,14 +3661,11 @@ function RebuildRail()
 
   -- Grow the window to fit the rail, unless the user has chosen a height.
   --
-  -- The rail's length is not a fixed thing to design a window around: it is
-  -- however many rules you have, plus whichever sections you left open. A
-  -- default height picked once can only be right for one of those. So it is
-  -- computed from what the rail actually contains, and stops the moment
-  -- someone drags the resize grip -- their choice outranks this.
+  -- The rail's length is however many rules you have plus whichever sections
+  -- are open, so a fixed default can only ever be right for one of those. It
+  -- stops the moment someone drags the resize grip.
   --
-  -- Only ever GROWS to fit. Shrinking to hug a short rail would fight the
-  -- right-hand page, which usually wants more room than the rail does.
+  -- Only ever GROWS: shrinking to hug a short rail would fight the page.
   if not (NS.db.uiSize and NS.db.uiSize.height) then
     -- 52 above the rail for the title bar, 30 below it for the footer.
     local wanted = math.min(WINDOW_MAX_H, math.max(WINDOW_MIN_H, contentHeight + 82))
@@ -3787,20 +3677,12 @@ function RebuildRail()
   if window.railBar then window.railBar:Update() end
 end
 
--- Repaints the rail's swatches from the rules themselves.
+-- Repaints every existing swatch -- rail rows and table rows -- from the rules
+-- themselves, without going through Structural().
 --
--- Called from the colour pickers, which fire on every frame of a drag -- far
--- too often for a full RebuildRail, and unnecessary: the row already knows
--- which rule it is showing, so only the texture is stale.
--- Repaints every swatch that already exists for the CURRENT rule set --
--- rail rows and the flat table's rows alike -- without going through
--- Structural(), which is overkill for a colour that changed nothing about
--- what gets built. A colour picker calls this on every drag frame, so a full
--- rebuild here would be the stutter Structural() itself exists to avoid.
---
--- Named for the rail originally, when the rail was the only place a rule's
--- swatch appeared live; the table's own swatch had a bug that hid the need
--- for this until the colour it read was fixed to be the right one at all.
+-- Colour pickers call this on every frame of a drag, which a full rebuild
+-- could not survive, and the row already knows which rule it shows, so only
+-- the texture is stale.
 local function RefreshRailColors()
   for _, row in ipairs(railPool.rows) do
     if row.rule and row:IsShown() then
@@ -3819,13 +3701,10 @@ local function RefreshRailColors()
 end
 
 -- Lays the test-column buttons out as one block, centred against the preview
--- plate beside them. Top-aligning them left the group floating against the
--- plate's top edge with all the slack underneath; centring reads as two
--- halves of one row.
+-- plate. Top-aligning left the group floating with all the slack underneath.
 --
--- The column is exactly as tall as its page's stage, and the offset is read
--- from the frame rather than from the constant -- the Aura Icons pages build
--- a taller one (ICON_STAGE_H).
+-- The column is as tall as its page's stage, read from the frame rather than
+-- the constant -- the Aura Icons pages build a taller one.
 local TEST_BTN_GAP = 6
 
 local function StackTestButtons(column, buttons)
@@ -3850,12 +3729,11 @@ local function StackTestButtons(column, buttons)
   end
 end
 
--- Fixed head (module toggle + preview) with a scrolling body beneath it.
--- enableLabel nil = no module toggle on this page. The Global Settings pages
--- are not modules -- there is nothing to switch on or off at the page level, only
--- individual settings inside them -- but they still want the preview stage,
--- since every one of them changes how the bar is drawn and you should be able
--- to see that while you change it.
+-- Fixed head (module toggle + preview) with a scrolling body beneath.
+--
+-- enableLabel nil = no module toggle. The Global Settings pages are not
+-- modules, but still want the preview stage -- every one of them changes how
+-- the bar is drawn.
 local function BuildTabFrame(panel, enableLabel, enableGet, enableSet, stageHeight)
   -- Per page, because only the Aura Icons pages need the extra room. Stored on
   -- the panel so the pages' own SetHeadHeight arithmetic reads the same number
@@ -3918,17 +3796,15 @@ local function BuildTabFrame(panel, enableLabel, enableGet, enableSet, stageHeig
   panel.scroll = scroll
   panel.body = body
 
-  -- Pages call this with the height their content needs; the section adds its
-  -- own header and padding, exactly as it does for every other section, and
-  -- collapsing is the section's own behaviour rather than a special case.
-  -- Re-anchors the scrolling body directly under the preview section, whatever
-  -- height that section currently has.
+  -- Pages pass the height their content needs; the section adds its own
+  -- header and padding, so collapsing is ordinary section behaviour.
+
+  -- Re-anchors the scrolling body under the preview, whatever height it has.
   --
-  -- Driven by the section's own resize notification, NOT only by SetHeadHeight.
-  -- Collapsing the preview fires Resize without any page code running, and
-  -- Options_RebuildAll does not refresh previews -- so on every page whose
-  -- rebuild did not happen to call RefreshPreview, collapsing left the body
-  -- anchored at the open height: a page-sized hole above the first section.
+  -- Driven by the section's own resize notification, NOT only SetHeadHeight:
+  -- collapsing the preview fires Resize with no page code running, and
+  -- Options_RebuildAll does not refresh previews -- so any page that did not
+  -- happen to call RefreshPreview was left with a page-sized hole.
   local function ReanchorBody()
     local top = section:GetHeight()
     scroll:ClearAllPoints()
@@ -3953,16 +3829,14 @@ end
 -- Tab 1 — nameplate colors
 -------------------------------------------------------------------------------
 
--- The preview is a pure simulation of the rule logic. It never touches an
--- aura container and never asks the game anything: it answers "given exactly
--- these debuffs, which rule wins" using the same ordering the engine uses.
+-- The preview is a pure simulation: it never touches an aura container and
+-- never asks the game anything, it answers "given exactly these debuffs, which
+-- rule wins" using the engine's ordering.
 --
--- It used to disagree with live plates for one reason: preview.active was
--- never pruned. A tick for a spell that later left every rule -- most easily
--- by having its ID corrected from a cast ID to the aura's -- stayed set
--- forever. So "is anything ticked" answered yes when nothing was visibly
--- ticked, and a rule could match on a debuff that had no checkbox on screen.
--- Pruning first makes what is on screen the whole state.
+-- It used to disagree with live plates because preview.active was never
+-- pruned: a tick for a spell that later left every rule stayed set forever, so
+-- "is anything ticked" said yes when nothing visibly was. Pruning first makes
+-- what is on screen the whole state.
 local function PrunedPreviewState()
   -- BOTH lists. preview.active is shared by the health tab, the border tab
   -- and test mode, so pruning against health rules alone deleted any debuff
@@ -3993,13 +3867,11 @@ local function EvaluatePreview()
     if on then ticked = ticked + 1 end
   end
 
-  -- GetOrderedRules is exactly what Tints.lua builds from, so preview
-  -- priority and plate priority cannot drift apart.
+  -- GetOrderedRules is what Tints.lua builds from, so preview and plate
+  -- priority cannot drift.
   --
-  -- Missing rules are excluded. They never paint the bar body, so they cannot
-  -- win or lose the "which rule colours the bar" question this answers -- and
-  -- letting one place first would report a winner whose colour is nowhere on
-  -- the bar. They preview on their own editor page instead.
+  -- Missing rules are excluded: they never paint the bar body, so letting one
+  -- place first would report a winner whose colour is nowhere on the bar.
   local matches = {}
   for _, rule in ipairs(NS.GetOrderedRules()) do
     if not rule.showWhenMissing then
@@ -4035,16 +3907,12 @@ local function RuleSpells()
   return list
 end
 
--- Style block for the expanded rule: which halves of the plate this rule
--- paints. Built once and repositioned, because only one rule is ever open.
---
--- Lives in the Edit panel rather than the row: thickness needs a slider and
--- the row is already six columns wide. The row shows two swatches so you can
--- still tell at a glance which halves a rule uses.
--- Re-checks every rig's target/focus gating without touching any container's
--- unit binding or rebuilding anything -- cheap enough to run straight from a
--- checkbox click rather than routing through the Live/Restyle/Structural
--- queue built for things that touch the world.
+-- Style block for the expanded rule. Built once and repositioned, since only
+-- one rule is ever open. Lives in the Edit panel rather than the row --
+-- thickness needs a slider and the row is already six columns wide.
+
+-- Re-checks every rig's target/focus gating without touching a unit binding
+-- or rebuilding, so it can run straight from a checkbox click.
 local function ApplyGating()
   for _, rig in pairs(NS.rigs) do
     NS.SetTintsUnit(rig)
@@ -4077,22 +3945,15 @@ local function BarTextureEntries()
   return list
 end
 
--- Everything about how a rule LOOKS, as opposed to what it requires: colour,
--- fill style and texture, target/focus gating, border shape. Lives behind
--- its own "Edit Color/Appearance" button on the row now rather than sharing space
--- with the debuff list -- the two were getting crowded together, and neither
--- needs the other open to be useful.
+-- Everything about how a rule LOOKS, as opposed to what it requires. Behind
+-- its own button on the row rather than sharing space with the debuff list.
 --
--- isBorder picks which extra controls this instance shows: border shape for
--- the border list, fill/texture for the bar list. Show-on-target/focus and
--- the colour swatch apply to both -- either list can have a rule you don't
--- want fighting your own target or focus selection glow, and both lists
--- still have exactly one colour per rule.
--- Adding a debuff to a rule, shared by the rule tables and the rule editor.
---
--- Was a local inside BuildHealthTab, which meant the editor could not reach
--- it -- and a second copy would have been a second place for the cost warning
--- and the duplicate/limit checks to drift.
+-- isBorder picks the extra controls: border shape for the border list,
+-- fill/texture for the bar list. Colour and target/focus gating apply to both.
+
+-- Adding a debuff to a rule, shared by the rule tables and the editor. Was a
+-- local inside BuildHealthTab, which the editor could not reach -- and a
+-- second copy would have been a second place for the checks to drift.
 local function RuleConditionLimit(rule)
   if not rule then return 1 end
   -- A missing rule is single-debuff and cannot be raised. Its rank in the
@@ -4100,14 +3961,10 @@ local function RuleConditionLimit(rule)
   -- own debuff, and a second condition would need another interleaved into a
   -- sublevel budget with no room for it (see Tints.lua).
   if rule.showWhenMissing then return NS.MAX_MISSING_CONDITIONS or 1 end
-  -- Every other rule gets the full allowance.
-  --
-  -- This used to gate a rule to ONE debuff unless it carried `wantsCombo`, set
-  -- by whichever rail row created it. That flag existed because a rule's shape
-  -- was fixed at creation time; with one creation row there is nothing to
-  -- remember -- a rule simply grows, and re-sorts into the combo half of the
-  -- rail once it reaches two. `wantsCombo` may still sit in saved profiles and
-  -- is now ignored everywhere.
+  -- This used to gate a rule to one debuff unless it carried wantsCombo, set
+  -- by whichever rail row created it -- a rule's shape was fixed at creation.
+  -- With one creation row there is nothing to remember. wantsCombo may still
+  -- sit in saved profiles and is ignored everywhere.
   return NS.MAX_RULE_CONDITIONS
 end
 
@@ -4134,28 +3991,23 @@ local function AddConditionTo(rule, input, sortList)
     Structural()
   end
 
-  -- No cost warning here any more.
-  --
-  -- There used to be one, because a second debuff multiplied a rule's textures
-  -- by ten: containers pooled ten buttons each and the rule had to cover every
-  -- pairing. The engine uses aura SLOTS now, which pool one -- a combo rule
-  -- costs one texture and one extra frame, the same as any other rule. A
-  -- dialog interrupting someone to warn about a cost that no longer exists is
-  -- worse than no dialog at all.
+  -- No cost warning any more. A second debuff used to multiply a rule's
+  -- textures by ten, because containers pooled ten buttons each and the rule
+  -- had to cover every pairing. Aura slots pool one, so a combo costs one
+  -- texture and one frame.
   Commit()
 end
 
--- `part` selects which half gets built:
---   "all"         both halves, each under its own small heading
+-- part selects which half gets built:
+--   "all"         both, each under its own small heading
 --   "appearance"  colour, fill, texture, border shape
---   "visibility"  the target/focus gating
+--   "visibility"  target/focus gating
 --
 -- The rule editor asks for the split forms because each half is its own
--- collapsible section there, and a section headed "Appearance" whose first
--- line reads APPEARANCE says it twice.
+-- collapsible section there.
 --
 -- Both halves are always CREATED and merely hidden, so p.Refresh never has to
--- ask which widgets this instance happens to have.
+-- ask which widgets this instance has.
 local function BuildStylePanel(parent, isBorder, part)
   part = part or "all"
   local split = part ~= "all"
@@ -4169,13 +4021,11 @@ local function BuildStylePanel(parent, isBorder, part)
     -- 20px to stop overlapping it (see that block for why).
     height = isBorder and 82 or 172
   else
-    -- Non-border needs room for a THREE-line wrap on the texture-conflict
-    -- warning at typical window width, plus the missing-health cover row
-    -- below it, not just the two rows above it.
-    -- Tall enough for the missing-health colour row beneath its checkbox. That
-    -- row hides when the rule is not covering missing health, but the panel
-    -- keeps the height either way: a panel that changes size as you tick a box
-    -- shoves every rule below it up and down the list.
+    -- Room for a three-line wrap on the texture-conflict warning plus the
+    -- missing-health cover row below it.
+
+    -- Tall enough for the missing-health colour row even when hidden: a panel
+    -- that resizes as you tick a box shoves every rule below it up and down.
     height = isBorder and 116 or 220
   end
   p:SetSize(660, height)
@@ -4244,15 +4094,12 @@ local function BuildStylePanel(parent, isBorder, part)
   Tip(p.swatch, "Color", TIPS.ruleColor)
 
   -- Which STATE this rule fires on, on the colour row because it decides what
-  -- that colour means -- "the bar looks like this" versus "you still owe this
-  -- debuff". Everything below it still applies either way: a missing rule
-  -- washes the bar exactly as a presence rule does, with the same fill style
-  -- and texture, just on the opposite condition.
+  -- that colour means. Everything below applies either way.
   --
-  -- Bar rules only. A border rule paints an edge rather than the bar, and its
-  -- cover would have nothing to restore -- occlusion needs a surface it can
-  -- repaint, which is the bar itself.
-  if not isBorder then
+  -- Both lists, by different machinery: a bar rule can be built either way, a
+  -- border rule only by displacement. A missing border on occlude is dropped
+  -- at build time and says so in /pt status.
+  do
     p.whenLabel = Dim(ap, "Show when")
     p.whenLabel:SetPoint("TOPLEFT", 224, -26)
     TipLabel(p.whenLabel, "Show when", TIPS.showWhen)
@@ -4308,17 +4155,21 @@ local function BuildStylePanel(parent, isBorder, part)
     p.combatOnlyLabel:SetPoint("LEFT", p.combatOnlyCheck, "RIGHT", 6, 0)
     TipLabel(p.combatOnlyLabel, "In combat only", TIPS.missingCombatOnly)
 
-    -- Opacity advisory, in the gap under the fill row. A presence tint fires
-    -- occasionally; a missing tint is lit BY DEFAULT on every mob you have not
-    -- touched, so the same alpha reads completely differently. Advisory only
-    -- -- the colour is never changed for you.
-    p.missingAlphaWarn = ap:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    StyleText(p.missingAlphaWarn, 11, "NONE")
-    p.missingAlphaWarn:SetPoint("TOPLEFT", 14, -160)
-    p.missingAlphaWarn:SetPoint("TOPRIGHT", -14, -160)
-    p.missingAlphaWarn:SetJustifyH("LEFT")
-    p.missingAlphaWarn:SetWordWrap(true)
-    p.missingAlphaWarn:SetTextColor(1, 0.55, 0.15)
+    -- Opacity advisory. A presence tint fires occasionally; a missing tint is
+    -- lit BY DEFAULT on every untouched mob, so the same alpha reads
+    -- completely differently. Advisory only.
+    --
+    -- Bar rules only: both notes it carries are about a WASH, and a border is
+    -- a few pixels at the bar's edge whose gate is genuinely per rule.
+    if not isBorder then
+      p.missingAlphaWarn = ap:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+      StyleText(p.missingAlphaWarn, 11, "NONE")
+      p.missingAlphaWarn:SetPoint("TOPLEFT", 14, -160)
+      p.missingAlphaWarn:SetPoint("TOPRIGHT", -14, -160)
+      p.missingAlphaWarn:SetJustifyH("LEFT")
+      p.missingAlphaWarn:SetWordWrap(true)
+      p.missingAlphaWarn:SetTextColor(1, 0.55, 0.15)
+    end
   end
 
   -- Checked (the default) is "show here too, same as any other rule" -- both
@@ -4380,15 +4231,14 @@ local function BuildStylePanel(parent, isBorder, part)
       local r = Rule()
       if r then
         r.fillStyle = v
-        -- Switching a rule to Texture Overlay for the first time lands it on
-        -- an actual pattern rather than on "Bar's own art", which is the nil
-        -- entry and therefore what an untouched rule would otherwise show --
-        -- i.e. picking Texture Overlay would appear to do nothing at all.
+        -- Switching to Texture Overlay for the first time lands on a real
+        -- pattern rather than "Bar's own art" -- the nil entry, and what an
+        -- untouched rule already shows, so picking Texture Overlay would
+        -- appear to do nothing.
         --
-        -- Guarded by fillTexturePicked, not by "is fillTexture nil": nil is a
-        -- legitimate choice (Bar's own art), so without the flag anyone who
-        -- deliberately picked it would have it silently replaced every time
-        -- they toggled fill style.
+        -- Guarded by fillTexturePicked, not "is fillTexture nil": nil is a
+        -- legitimate choice, so without the flag anyone who deliberately
+        -- picked it would have it replaced on every style toggle.
         if v == "texture" and not r.fillTexturePicked and r.fillTexture == nil then
           r.fillTexture = "stripes-spread"
         end
@@ -4399,16 +4249,12 @@ local function BuildStylePanel(parent, isBorder, part)
     p.fillStyle:SetPoint("TOPLEFT", 60, -56)
     Tip(p.fillStyle, "Fill", TIPS.fillStyle)
 
-    -- Two pickers sharing one slot, one per fill style, because the two
-    -- overlays take completely different art: Texture Overlay tiles a pattern
-    -- from the bundled library, Solid Overlay stretches a bar texture from
-    -- LibSharedMedia. Only the one matching the current style is shown (see
-    -- p.Refresh) -- a single combined list would offer every rule a pile of
-    -- choices that do nothing in its current mode.
+    -- Two pickers sharing one slot, one per fill style: Texture Overlay tiles
+    -- a bundled pattern, Solid Overlay stretches an LSM bar texture. Only the
+    -- matching one is shown, or a rule would be offered choices that do
+    -- nothing in its current mode.
     --
-    -- Separate rule fields too (fillTexture / barTexture), so switching style
-    -- back and forth keeps both selections instead of clobbering whichever
-    -- one is currently out of view.
+    -- Separate rule fields too, so switching style keeps both selections.
     p.textureLabel = Dim(ap, "Texture")
     p.textureLabel:SetPoint("TOPLEFT", 224, -58)
     TipLabel(p.textureLabel, "Texture", TIPS.fillTexture)
@@ -4448,12 +4294,9 @@ local function BuildStylePanel(parent, isBorder, part)
     p.barTexDrop:SetPoint("TOPLEFT", 280, -56)
     Tip(p.barTexDrop, "Texture", TIPS.barTexture)
 
-    -- OUTLINE rather than the plain font every other label here uses: this
-    -- is the one warning in the panel that needs to read as urgent rather
-    -- than informational, since it is telling you about a conflict you will
-    -- not see coming from inside this addon at all -- it shows up as visual
-    -- noise on your nameplate art, sourced from a completely different
-    -- addon, with nothing here to point at the cause.
+    -- OUTLINE rather than the plain font: this is the one warning here that
+    -- needs to read as urgent, since it describes a conflict sourced from a
+    -- completely different addon with nothing here to point at the cause.
     p.textureWarning = ap:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     StyleText(p.textureWarning, 12, "OUTLINE")
     p.textureWarning:SetPoint("TOPLEFT", 14, -86)
@@ -4494,19 +4337,15 @@ local function BuildStylePanel(parent, isBorder, part)
     p.missingCoverWarn:SetText("(overwrites other addons' overlays on the missing health side)")
     p.missingCoverWarn:SetTextColor(1, 0.55, 0.15)
 
-    -- The colour, directly under the checkbox that turns it on -- the moment
-    -- you decide you want this is the moment you want to pick the colour, and
-    -- it used to be somewhere else entirely.
+    -- The colour directly under the checkbox that turns it on.
     --
-    -- Shown only while this rule uses the option (see p.Refresh), because it
-    -- is not a per-rule setting: every rule that covers missing health shares
-    -- one colour, and the same swatch appears on Global Settings > Effects. Both
-    -- edit the same value, so the label has to say so or this reads as a rule
-    -- setting that mysteriously changes the other rules too.
-    -- Laid out as a ROW, matching the tick box above it: control first at the
-    -- same x, then its name, then the aside. The swatch is now exactly a tick
-    -- box's size (see ColorSwatch), so the two left edges genuinely line up
-    -- rather than nearly doing so.
+    -- Shown only while this rule uses the option, because it is not a per-rule
+    -- setting: every rule that covers missing health shares one colour, and
+    -- the same swatch is on Global Settings > Effects. The label has to say so
+    -- or this reads as a rule setting that changes other rules.
+    --
+    -- Laid out as a ROW matching the tick box above: control first at the same
+    -- x, then its name. The swatch is exactly a tick box's size.
     p.missingColorLabel = Label(ap, "Color")
     p.missingColor = ColorSwatch(ap,
       function()
@@ -4527,12 +4366,10 @@ local function BuildStylePanel(parent, isBorder, part)
   end
 
   if isBorder then
-    -- This whole block sits 20px lower than it used to (-38/-66 -> -58/-86).
-    -- At the old offset "Border shape" started only 12px under the Color
-    -- row above it -- both DIm() labels at the same x=14, 11pt font -- and the
-    -- two lines rendered on top of each other. Every other second-row label in
-    -- this panel (Fill, on the non-border side) keeps a 32px gap under Color;
-    -- this now matches that.
+    -- 20px lower than it used to be. At the old offset "Border shape" started
+    -- 12px under the Color row -- both Dim() labels at x=14, 11pt -- and the
+    -- two rendered on top of each other. Fill, on the non-border side, keeps a
+    -- 32px gap under Color; this matches it.
     p.growLabel = Dim(ap, "Grows")
     p.growLabel:SetPoint("TOPLEFT", 130, -86)
     TipLabel(p.growLabel, "Grows", TIPS.borderGrow)
@@ -4614,14 +4451,12 @@ local function BuildStylePanel(parent, isBorder, part)
       local r = Rule()
 
       -- Gone entirely once a rule has more than one debuff, rather than left
-      -- up to be refused on click. A missing rule is single-debuff by
-      -- construction (NS.MAX_MISSING_CONDITIONS), so on a combo rule this
-      -- control has exactly one reachable value -- and a dropdown whose other
-      -- option always errors is worse than no dropdown.
+      -- to be refused on click: a missing rule is single-debuff, so on a combo
+      -- this control has one reachable value, and a dropdown whose other
+      -- option always errors is worse than none.
       --
-      -- Safe to hide: NS.NormaliseRule clears showWhenMissing on anything with
-      -- too many conditions, so the control can never be hidden while holding
-      -- the value it is hiding.
+      -- Safe to hide -- NS.NormaliseRule clears showWhenMissing on anything
+      -- with too many conditions.
       local canMiss = #(r and r.conditions or {}) <= (NS.MAX_MISSING_CONDITIONS or 1)
       p.whenLabel:SetShown(canMiss)
       p.whenDrop:SetShown(canMiss)
@@ -4647,13 +4482,16 @@ local function BuildStylePanel(parent, isBorder, part)
           :format(math.floor(alpha * 100 + 0.5))
       end
 
-      -- "In combat" is a property of the whole missing LADDER, not of one rule
-      -- (see NS.LadderCombatAllows in Tints.lua): only one missing wash is ever
-      -- lit, and which one depends on aura state the addon is not allowed to
-      -- read, so the gate cannot be resolved per rule. It engages only when
-      -- every missing rule asks for it -- and a half-ticked set therefore does
-      -- nothing at all, which is invisible unless it is said here.
-      if isMissing and combatShown then
+      -- "In combat" is a property of the whole missing LADDER: only one wash
+      -- is ever lit and which one depends on aura state we may not read, so
+      -- the gate cannot be resolved per rule. It engages only when every rule
+      -- asks for it, and a half-ticked set does nothing at all.
+      --
+      -- OCCLUSION ONLY. That limitation belongs to the ladder, not the
+      -- feature -- displacement honours each setting independently, and it is
+      -- the default, so unguarded this told most users the opposite of what
+      -- their client was doing.
+      if isMissing and combatShown and NS.db.tints.missingMode == "occlude" then
         local total, gated = 0, 0
         for _, other in ipairs((NS.db.tints and NS.db.tints.rules) or {}) do
           if other.showWhenMissing and other.enabled ~= false then
@@ -4668,22 +4506,21 @@ local function BuildStylePanel(parent, isBorder, part)
         end
       end
 
-      p.missingAlphaWarn:SetShown(#notes > 0)
-      if #notes > 0 then
-        p.missingAlphaWarn:SetText(table.concat(notes, "\n\n"))
+      if p.missingAlphaWarn then
+        p.missingAlphaWarn:SetShown(#notes > 0)
+        if #notes > 0 then
+          p.missingAlphaWarn:SetText(table.concat(notes, "\n\n"))
+        end
       end
     end
     if p.fillStyle then
       p.fillStyle.Refresh()
-      -- Exactly one texture picker is up at a time, chosen by fill style:
-      -- patterns for Texture Overlay, LibSharedMedia bar textures for Solid
-      -- Overlay. Both live in the same slot, so showing both would stack them
-      -- on top of each other.
+      -- Exactly one texture picker is up at a time, chosen by fill style;
+      -- both live in the same slot.
       --
-      -- The conflict warning stays tied to texture mode alone. A stretched
-      -- bar texture is what the nameplate addon was already drawing there, so
-      -- it does not collide with their art the way a tiled pattern overlay
-      -- does -- warning about it in solid mode would be crying wolf.
+      -- The conflict warning stays tied to texture mode alone: a stretched bar
+      -- texture is what the nameplate addon was already drawing, so warning
+      -- about it in solid mode would be crying wolf.
       p.textureLabel:SetShown(inTextureMode)
       p.textureDrop:SetShown(inTextureMode)
       p.textureWarning:SetShown(inTextureMode)
@@ -4697,13 +4534,11 @@ local function BuildStylePanel(parent, isBorder, part)
     end
     if p.missingCoverCheck then
       p.missingCoverCheck:Refresh()
-      -- Rides with the texture warning: both belong to Texture Overlay and
-      -- neither has anything to say about a flat fill.
+      -- Rides with the texture warning -- both belong to Texture Overlay.
       --
-      -- Never on a missing rule. Its wash is anchored to the FILL, and so is
-      -- the cover that hides it -- so a texture painted on the UNFILLED side
-      -- would have nothing to hide it and would sit there permanently, which
-      -- is the one thing a missing rule must not do.
+      -- Never on a missing rule: its wash is anchored to the FILL, and so is
+      -- the cover that hides it, so a texture on the UNFILLED side would have
+      -- nothing to hide it and would sit there permanently.
       local coverable = inTextureMode and not isMissing
       p.missingCoverCheck:SetShown(coverable)
       p.missingCoverLabel:SetShown(coverable)
@@ -4984,15 +4819,12 @@ local function BuildHealthTab()
   head.togglesLabel:SetPoint("TOPLEFT", HEAD_PAD, -(6 + STAGE_H + 30))
   head.toggles = {}
 
-  -- Preview-only, and shared with the border tab: someone running both wants
-  -- to see how the two look together, not each in isolation.
-  -- A button in the same column and the same format as the two test buttons,
-  -- because it belongs to the same group of preview-and-test actions -- a
-  -- lone checkbox hanging under them read as a different class of control.
-  -- Shows the OTHER colouring module's rules on top of this one's, so you can
-  -- judge how they look together. Named for what it adds, and hidden entirely
-  -- when that module is switched off -- offering to overlay rules that cannot
-  -- draw would be a button that does nothing.
+  -- Preview-only, shared with the border tab: someone running both wants to
+  -- see how the two look together.
+  --
+  -- A button in the same column and format as the test buttons, since it
+  -- belongs to the same group -- a lone checkbox read as a different class of
+  -- control. Hidden entirely when the other module is off.
   head.combine = Button(head.testColumn, "", 150, function()
     NS.db.uiPreviewCombine = not NS.db.uiPreviewCombine
     if head.combine.Refresh then head.combine.Refresh() end
@@ -5030,12 +4862,11 @@ local function BuildHealthTab()
   body.rules = rules
 
   local c = rules.content
-  -- Centred over the whole UP / number / DOWN cluster (x 8 to 108) rather
-  -- than left-aligned to its first pixel, which read as a label for the UP
-  -- button alone.
-  -- Headers sit over the columns the rebuilt row actually has. "Order"
-  -- rather than "Priority" because the number is gone -- position in the
-  -- list IS the priority, and you set it by dragging.
+  -- Centred over the whole UP / number / DOWN cluster rather than
+  -- left-aligned, which read as a label for UP alone.
+
+  -- "Order" rather than "Priority": the number is gone -- position IS the
+  -- priority, and you set it by dragging.
   rules.hOrder = Header(c, "Order")
   rules.hOrder:SetPoint("TOPLEFT", 8, -6)
   rules.hDebuffs = Header(c, "Rule")
@@ -5073,14 +4904,12 @@ local function BuildHealthTab()
     Structural()
   end)
 
-  -- One shared colour for every rule's "Cover missing health", below the
-  -- table and behind a rule of its own -- it belongs to the list as a whole
-  -- rather than to any single rule, and the divider is what says so.
+  -- One shared colour for every rule's "Cover missing health", below the table
+  -- and behind a rule of its own -- it belongs to the list, and the divider is
+  -- what says so. The same swatch is in each rule's appearance panel; both
+  -- edit one value.
   --
-  -- The same swatch also sits under the checkbox in each rule's appearance
-  -- panel, where the decision to switch it on gets made. Both edit one value.
-  -- Built only for the health list: border rules paint no bar, so they can
-  -- never use the option at all.
+  -- Health list only: border rules paint no bar.
   rules.missingDivider = c:CreateTexture(nil, "ARTWORK")
   rules.missingDivider:SetHeight(1)
   rules.missingDivider:SetColorTexture(0.4, 0.4, 0.45, 0.6)
@@ -5104,14 +4933,77 @@ local function BuildHealthTab()
   rules.missingHint = Dim(c, "shared by every rule that covers missing health")
   rules.missingHint:Hide()
 
-  -- Shared by the dropdown and the ID box below. The Cooldown Manager cannot
-  -- offer every usable ID — an ability whose aura is a separate spell (Rend
-  -- casts 772 and applies 388539) has no CDM entry for the aura at all — so
-  -- typing one in has to be a first-class way to build a rule, exactly as it
-  -- already is on the icon tab.
-  -- `input` is a spell ID from the dropdown or raw text from the box; both
-  -- are resolved to the aura's own ID before anything else looks at them, so
-  -- the duplicate check below compares what will actually be stored.
+  -- What a missing rule paints once its debuff is APPLIED. Global rather than
+  -- per rule, for the same reason as the missing-health swatch above.
+  -- Occlusion only -- displacement has no cover to colour.
+  rules.classDivider = c:CreateTexture(nil, "ARTWORK")
+  rules.classDivider:SetHeight(1)
+  rules.classDivider:SetColorTexture(0.4, 0.4, 0.45, 0.6)
+  rules.classDivider:Hide()
+
+  rules.classCheck = Checkbox(c,
+    function() return NS.db.tints.missingAppliedByClass and true or false end,
+    function(v)
+      NS.db.tints.missingAppliedByClass = v
+      -- Covers are repainted by the poll, not rebuilt, so this is a repaint
+      -- rather than a Structural().
+      for _, rig in pairs(NS.rigs or {}) do
+        if NS.UpdateCovers then pcall(NS.UpdateCovers, rig) end
+      end
+      NS.Options_RebuildAll()
+      RefreshPreviews()
+    end)
+  rules.classCheck:Hide()
+  Tip(rules.classCheck, "Color by mob rank once applied", TIPS.appliedByClass)
+
+  rules.classLabel = Label(c, "Color by mob rank once applied")
+  rules.classLabel:Hide()
+  TipLabel(rules.classLabel, "Color by mob rank once applied", TIPS.appliedByClass)
+
+  rules.classHint = Dim(c, "instead of restoring the bar's own color")
+  rules.classHint:Hide()
+
+  -- Order is strongest first, which is also the order they matter in.
+  rules.classSwatches = {}
+  for _, entry in ipairs({
+    { key = "boss",       text = "Boss" },
+    { key = "lieutenant", text = "Lieutenant" },
+    { key = "caster",     text = "Caster" },
+    { key = "rare",       text = "Rare" },
+    { key = "elite",      text = "Elite" },
+    { key = "normal",     text = "Normal" },
+  }) do
+    local key = entry.key
+    local item = {}
+    item.label = Dim(c, entry.text)
+    item.label:Hide()
+    item.swatch = ColorSwatch(c,
+      function()
+        local colors = NS.db.tints.missingAppliedClassColors or {}
+        -- The default for THIS tier, not a placeholder grey: a key that has
+        -- gone missing should read as its shipped colour rather than as a
+        -- deliberate dark choice nobody made.
+        return colors[key]
+          or NS.Defaults.tints.missingAppliedClassColors[key]
+      end,
+      function(r, g, b, a)
+        NS.db.tints.missingAppliedClassColors = NS.db.tints.missingAppliedClassColors or {}
+        NS.db.tints.missingAppliedClassColors[key] = { r = r, g = g, b = b, a = a }
+        for _, rig in pairs(NS.rigs or {}) do
+          if NS.UpdateCovers then pcall(NS.UpdateCovers, rig) end
+        end
+        RefreshPreviews()
+      end)
+    item.swatch:Hide()
+    table.insert(rules.classSwatches, item)
+  end
+
+  -- Shared by the dropdown and the ID box. The Cooldown Manager cannot offer
+  -- every usable ID -- an ability whose aura is a separate spell has no CDM
+  -- entry for the aura at all -- so typing one has to be first-class.
+  --
+  -- input is a dropdown ID or raw text; both resolve to the aura's own ID
+  -- before the duplicate check, so it compares what will be stored.
   local function AddConditionToExpanded(input)
     local rule = expandedRule
     if not rule or not input then return end
@@ -5217,13 +5109,10 @@ local function BuildHealthTab()
     local stage = headFrame.stage
 
     -- The missing wash, drawn whether or not a presence rule matches -- it is
-    -- lit precisely when you have not applied something, so "nothing matched"
-    -- is its normal state rather than an edge case.
+    -- lit precisely when you have not applied something.
     --
-    -- Safe to show here now that presence tints draw ABOVE it (see ruleBase in
-    -- NS.BuildTints). While it sat on top this washed over whatever tint you
-    -- were trying to look at, which is why it was pulled; the layering change
-    -- is what makes it previewable.
+    -- Safe to show now that presence tints draw ABOVE it. While it sat on top
+    -- this washed over whatever tint you were trying to look at.
     local missingRule = PreviewMissingRule()
     if missingRule then
       NS.ApplyRuleFill(stage.missingWash, stage.bar, missingRule)
@@ -5373,12 +5262,9 @@ local function RenderRuleSection(sec, list, rowPool, condPool, isBorder, getList
       pageRows[listKey][pageRowCount[listKey]] = row
       row.summary:SetText(NS.RuleSummary(rule))
       row.enabled.Refresh()
-      -- RuleSwatchColor, not a bare rule.color: a border rule's editable
-      -- colour lives at rule.border.color, and rule.color is a leftover
-      -- unused field on it (NS.NormaliseBorderRule sets it but nothing ever
-      -- writes to it again). Reading it directly meant every border rule's
-      -- row showed the default pink forever, regardless of what its border
-      -- colour actually was -- the swatch, and the swatch alone, was wrong.
+      -- RuleSwatchColor, not a bare rule.color: a border rule's editable colour
+      -- is rule.border.color, and rule.color is a leftover field nothing
+      -- writes. Reading it directly showed every border rule as default pink.
       local colour = RuleSwatchColor(rule, listKey)
       row.swatch:SetColorTexture(colour.r, colour.g, colour.b, 1)
       -- Always false now. Editing happens on the rule's own page, so this
@@ -5465,12 +5351,9 @@ local function RenderRuleSection(sec, list, rowPool, condPool, isBorder, getList
 
     local bottom = y - 8 - 26 -- below the New Rule / Auto sort row
 
-    -- Missing-health colour, under the buttons and behind a divider. Built
-    -- only on the health table (the border table never creates these), and
-    -- shown only once some rule here actually covers missing health --
-    -- otherwise it is a control for something nothing on screen uses. Each
-    -- rule's appearance panel carries the same swatch, so it stays reachable
-    -- either way.
+    -- Missing-health colour, under the buttons behind a divider. Health table
+    -- only, and shown only once some rule here covers missing health. Each
+    -- rule's appearance panel carries the same swatch.
     if sec.missingDivider then
       local anyCovering = false
       for _, rule in ipairs(list) do
@@ -5501,6 +5384,66 @@ local function RenderRuleSection(sec, list, rowPool, condPool, isBorder, getList
       end
     end
 
+    -- Applied-state colour by mob rank. Shown once any rule here is a MISSING
+    -- rule -- the only kind with a cover to colour.
+    --
+    -- Needs OCCLUSION, which is no longer the default, so outside that mode it
+    -- is hidden outright. A disabled-but-visible version was tried and
+    -- dropped: a dead control on the page everyone lands on, whose mode is
+    -- reached by a slash command rather than anything nearby.
+    if sec.classDivider then
+      local anyMissing = false
+      for _, rule in ipairs(list) do
+        if rule.showWhenMissing then anyMissing = true break end
+      end
+      local occluding = NS.db.tints.missingMode == "occlude"
+      local show = anyMissing and occluding
+
+      sec.classDivider:SetShown(show)
+      sec.classCheck:SetShown(show)
+      sec.classLabel:SetShown(show)
+      sec.classHint:SetShown(show)
+
+      -- The swatches are a second row under the checkbox, and only earn their
+      -- space once the option is actually on.
+      local swatchesShown = show and NS.db.tints.missingAppliedByClass
+      for _, item in ipairs(sec.classSwatches or {}) do
+        item.swatch:SetShown(swatchesShown)
+        item.label:SetShown(swatchesShown)
+      end
+
+      if show then
+        sec.classDivider:ClearAllPoints()
+        sec.classDivider:SetPoint("TOPLEFT", 10, bottom - 10)
+        sec.classDivider:SetPoint("TOPRIGHT", -10, bottom - 10)
+
+        sec.classCheck:ClearAllPoints()
+        sec.classCheck:SetPoint("TOPLEFT", 12, bottom - 26)
+        sec.classCheck:Refresh()
+
+        sec.classLabel:ClearAllPoints()
+        sec.classLabel:SetPoint("LEFT", sec.classCheck, "RIGHT", 6, 0)
+
+        sec.classHint:ClearAllPoints()
+        sec.classHint:SetPoint("LEFT", sec.classLabel, "RIGHT", 10, 0)
+
+        bottom = bottom - 48
+
+        if swatchesShown then
+          local x = 16
+          for _, item in ipairs(sec.classSwatches) do
+            item.label:ClearAllPoints()
+            item.label:SetPoint("TOPLEFT", x, bottom - 4)
+            item.swatch:ClearAllPoints()
+            item.swatch:SetPoint("TOPLEFT", x, bottom - 20)
+            item.swatch:Refresh()
+            x = x + 100
+          end
+          bottom = bottom - 48
+        end
+      end
+    end
+
     sec:Resize(-bottom + 42)
   return expandedHere
 end
@@ -5511,13 +5454,9 @@ local borderTab
 -- Color, which meant anyone using only borders scrolled past a list they
 -- never touch. The two are independent features and now read that way.
 local function BuildBorderTab()
-  -- Same shell as Health Coloring: module toggle, live preview, scrolling body.
-  -- The toggle drives the same master switch -- borders and health colouring
-  -- are one module -- so turning it off here turns off both, as it should.
-  -- Its OWN flag, not the health one: the two are independent modules that
-  -- happen to share a rule engine, so turning borders off must leave health
-  -- colouring alone.
-  -- Enable lives on the rail heading now (see MODULE_SWITCH).
+  -- Same shell as Health Coloring: module toggle, live preview, scrolling
+  -- body. Its OWN flag, not the health one -- the two are independent modules
+  -- that happen to share a rule engine. Enable lives on the rail heading.
   local panel = BuildTabFrame(tabPanels[2])
 
   local head = panel.head
@@ -5527,13 +5466,9 @@ local function BuildBorderTab()
   head.togglesLabel:SetPoint("TOPLEFT", HEAD_PAD, -(6 + STAGE_H + 30))
   head.toggles = {}
 
-  -- A button in the same column and the same format as the two test buttons,
-  -- because it belongs to the same group of preview-and-test actions -- a
-  -- lone checkbox hanging under them read as a different class of control.
-  -- Shows the OTHER colouring module's rules on top of this one's, so you can
-  -- judge how they look together. Named for what it adds, and hidden entirely
-  -- when that module is switched off -- offering to overlay rules that cannot
-  -- draw would be a button that does nothing.
+  -- Same column and format as the test buttons, since it belongs to the same
+  -- group. Shows the other colouring module's rules on top of this one's, and
+  -- is hidden entirely when that module is off.
   head.combine = Button(head.testColumn, "", 150, function()
     NS.db.uiPreviewCombine = not NS.db.uiPreviewCombine
     if head.combine.Refresh then head.combine.Refresh() end
@@ -5566,13 +5501,9 @@ local function BuildBorderTab()
   local body = panel.body
   body.sections = {}
 
-  -----------------------------------------------------------------------------
-  -- Border rules: their own list, their own priority.
-  --
-  -- Separate from the bar list rather than a second half of each rule. Someone
-  -- who only wants borders never sees a bar control, and the two stacks order
-  -- independently -- the top bar rule and the top border rule both apply.
-  -----------------------------------------------------------------------------
+  -- Border rules: their own list, their own priority. Separate from the bar
+  -- list rather than a second half of each rule -- the two stacks order
+  -- independently, and the top of each applies.
   local brules = CollapsibleSection(body, "colourBorders", "Border Rules",
     "draw a coloured border, independent of health colouring")
   table.insert(body.sections, brules)
@@ -5623,10 +5554,7 @@ local function BuildBorderTab()
     for _, cond in ipairs(rule.conditions) do if cond.spellID == spellID then return end end
     -- Through RuleConditionLimit like every other add path. It used to be
     -- MAX_RULE_CONDITIONS directly, because the shared helper gated a bar rule
-    -- to one debuff until it was explicitly made a combo and border rules
-    -- never had that gate. That gate is gone, so the two now agree -- and a
-    -- border rule can never be a missing rule (the Show when control is
-    -- bar-only), which is the only case the helper still special-cases.
+    -- to one debuff until it was made a combo. That gate is gone.
     local limit = RuleConditionLimit(rule)
     if #rule.conditions >= limit then
       NS.Print(("A rule can require at most %d debuffs."):format(limit))
@@ -5782,10 +5710,39 @@ local function RebuildBorderTab()
   if panel.RefreshPreview then panel.RefreshPreview() end
 
   local targetAuras = NS.GetTargetAuraSet()
+
+  -- Everything that silently stops a MISSING border rule drawing. All three
+  -- are enforced in NS.BuildTints, where the only feedback was a /pt status
+  -- line nobody runs unless they already suspect something.
+  local messages = {}
+  local missingBorders, incomplete = 0, 0
+  for _, rule in ipairs(NS.db.tints.borderRules or {}) do
+    if rule.showWhenMissing and rule.enabled ~= false then
+      missingBorders = missingBorders + 1
+      if #(rule.conditions or {}) == 0
+        or not (rule.border and rule.border.enabled) then
+        incomplete = incomplete + 1
+      end
+    end
+  end
+  if missingBorders > 0 and NS.db.tints.missingMode == "occlude" then
+    table.insert(messages,
+      "|cffffcc00MISSING border rules need displacement mode and are not being built. Run /pt missingmode displace. Occlusion hides a rule by covering it with a copy of what was underneath, and there is no copy to make of whatever your nameplate addon drew under the border.|r")
+  elseif missingBorders - incomplete > (NS.MAX_MISSING_BORDER_RULES or 2) then
+    table.insert(messages,
+      ("|cffffcc00Only %d MISSING border rule(s) can be drawn at once, and you have %d. The lowest-priority ones are not built -- the draw levels just under the border band are all there is to give.|r")
+        :format(NS.MAX_MISSING_BORDER_RULES or 2, missingBorders - incomplete))
+  end
+  if incomplete > 0 then
+    table.insert(messages,
+      ("|cffffcc00%d MISSING border rule(s) cannot draw yet -- no debuff picked, or the border itself is switched off.|r")
+        :format(incomplete))
+  end
+
   local brules = panel.body.borderRules
   if brules then
     RenderRuleSection(brules, NS.db.tints.borderRules, borderRows, borderCondRows, true,
-      function() return NS.db.tints.borderRules end, {}, targetAuras)
+      function() return NS.db.tints.borderRules end, messages, targetAuras)
   end
   LayoutSections(panel.body, panel.body.sections)
 end
@@ -5828,14 +5785,12 @@ local function RebuildHealthTab()
     table.insert(messages, ("|cffff4040%d debuff(s) marked ! use an ID the Cooldown Manager doesn't list as an aura you apply.|r"):format(suspect))
   end
 
-  -- The "N rule(s) require three debuffs" warning is gone. It dated from the
+  -- The "requires three debuffs" warning is gone: it dated from the
   -- AddAuraGroup engine, where a third debuff meant ~111 containers and 1000
-  -- textures per plate and genuinely did not work. Aura slots pool ONE button,
-  -- so a chain costs one container and one texture per level -- three debuffs
-  -- is now an ordinary rule, not an artefact of an older version.
-  -- A rule with both halves off silently does nothing. Easy to reach by
-  -- unticking one and forgetting the other, and impossible to diagnose from
-  -- the plate, so it is called out here.
+  -- textures per plate. Aura slots make it an ordinary rule.
+
+  -- A rule with both halves off silently does nothing, and is impossible to
+  -- diagnose from the plate.
   local inert = 0
   for _, rule in ipairs(list) do
     if rule.enabled ~= false and rule.barEnabled == false
@@ -5849,19 +5804,14 @@ local function RebuildHealthTab()
         :format(inert))
   end
 
-  -- A MISSING rule sitting above a normal one promises something the engine
-  -- cannot deliver.
+  -- A MISSING rule above a normal one promises something the engine cannot
+  -- deliver. Priority here is one list, but the engine builds two stacks:
+  -- presence rules, and the missing ladder underneath them. A missing rule's
+  -- position ranks it against other MISSING rules only.
   --
-  -- Priority in this table is one list, but the engine builds two stacks from
-  -- it: presence rules, and the missing ladder underneath them (see ruleBase
-  -- in Tints.lua). A missing rule's position therefore ranks it against OTHER
-  -- MISSING rules only -- against a normal rule it means nothing, and the
-  -- normal rule wins the bar whenever it matches regardless of which is
-  -- higher here.
-  --
-  -- Worth saying out loud precisely because the table looks like it should
-  -- work: dragging a missing rule to the top is the obvious thing to try when
-  -- a reminder is not showing, and it changes nothing.
+  -- Worth saying out loud because the table looks like it should work:
+  -- dragging a missing rule to the top is the obvious thing to try when a
+  -- reminder is not showing, and it changes nothing.
   local misplaced, presenceBelow = 0, 0
   for index = #list, 1, -1 do
     local rule = list[index]
@@ -5945,13 +5895,9 @@ local function BuildIconRow(parent)
   return row
 end
 
--- Taller than every other page's preview, and only here.
---
--- The colouring pages draw entirely ON the bar, so STAGE_H frames it exactly.
--- Aura icons sit ABOVE the bar with their own timer and stack text, and at
--- STAGE_H the icon row was pressed against the top edge of the stage with its
--- text clipped. Nothing else uses this number, which is the point -- the other
--- previews are unchanged.
+-- Taller than every other page's preview, and only here. The colouring pages
+-- draw entirely ON the bar; aura icons sit above it with timer and stack text,
+-- which at STAGE_H was pressed against the top edge and clipped.
 local ICON_STAGE_H = 140
 
 local function BuildAuraIconTab()
@@ -5971,13 +5917,9 @@ local function BuildAuraIconTab()
       if NS.RefreshBlizzardAuras then NS.RefreshBlizzardAuras() end
       Structural()
     end)
-  -- BELOW the stage, not above it.
-  --
-  -- This sat at -6 from the head's top, which was clear when the head began
-  -- with a module-toggle row. It does not any more -- the switch moved to the
-  -- rail -- so the stage starts at 6 and drew straight over this, leaving a
-  -- checkbox poking out of the preview's top-left corner with its label hidden
-  -- behind the plate.
+  -- BELOW the stage. This sat at -6 from the head's top, which was clear while
+  -- the head began with a module-toggle row. The switch moved to the rail, so
+  -- the stage starts at 6 and drew straight over it.
   head.hideBliz:SetPoint("TOPLEFT", HEAD_PAD, -(6 + ICON_STAGE_H + 6))
   head.hideBlizLabel = Label(head, "Hide Blizzard's own aura icons on nameplates")
   head.hideBlizLabel:SetPoint("LEFT", head.hideBliz, "RIGHT", 6, 0)
@@ -6440,12 +6382,396 @@ local function RebuildAuraIconTab()
   end
 end
 
--------------------------------------------------------------------------------
--- Tab 3 — profiles
+-- Missing Debuffs.
 --
--- Deliberately not built on BuildTabFrame: that shell assumes a module toggle
--- and a live preview, and a profile has neither. Just a scrolling body.
--------------------------------------------------------------------------------
+-- A different visual from the missing-debuff wash under Health/Border
+-- Coloring: an icon that displaces off the plate while its debuff is present.
+-- Styled on the Aura Icons pages -- same scaffold, same widgets -- but its own
+-- row shape, since each entry carries an icon-or-colour choice and its own
+-- combat-only toggle.
+--
+-- Everything hangs off the `missing` table, not a local per concern: this
+-- file's main chunk is at Lua's 200-local ceiling.
+
+function missing.BuildRow(parent)
+  local row = CreateFrame("Frame", nil, parent)
+  row:SetSize(missing.ROW_W, ROW_H)
+
+  row.stripe = row:CreateTexture(nil, "BACKGROUND")
+  row.stripe:SetAllPoints()
+  row.stripe:SetColorTexture(1, 1, 1, 0.03)
+
+  row.up = Button(row, "UP", 30, function()
+    if NS.ListMove(NS.db.missingIcons.list, row.index, -1) then Structural() end
+  end)
+  row.up:SetPoint("LEFT", 8, 0)
+  StyleText(row.up.label, 10)
+  row.priority = EditableNumber(row, 26,
+    function() return row.index or 1 end,
+    function(value)
+      if NS.ListMoveTo(NS.db.missingIcons.list, row.index, value) then Structural() end
+    end)
+  row.priority:SetPoint("LEFT", 41, 0)
+
+  row.down = Button(row, "DOWN", 38, function()
+    if NS.ListMove(NS.db.missingIcons.list, row.index, 1) then Structural() end
+  end)
+  row.down:SetPoint("LEFT", 70, 0)
+  StyleText(row.down.label, 10)
+
+  row.icon = row:CreateTexture(nil, "ARTWORK")
+  row.icon:SetSize(20, 20)
+  row.icon:SetPoint("LEFT", 118, 0)
+  row.icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
+
+  row.name = Label(row, "")
+  row.name:SetPoint("LEFT", 146, 0)
+  row.name:SetWidth(160)
+  row.name:SetJustifyH("LEFT")
+  row.name:SetWordWrap(false)
+
+  row.id = Dim(row, "")
+  row.id:SetPoint("LEFT", 312, 0)
+  row.id:SetWidth(46)
+
+  row.enabled = Checkbox(row,
+    function() return row.entry and row.entry.enabled ~= false end,
+    function(v) if row.entry then row.entry.enabled = v; Structural() end end)
+  row.enabled:SetPoint("LEFT", 366, 0)
+
+  -- Icon-or-colour, per entry. The button's own label says which mode this
+  -- entry is in; the swatch beside it is only live in Color mode, and dims
+  -- to a hint of itself otherwise -- picking a colour switches the mode for
+  -- you, rather than needing the button pressed first.
+  row.mode = Button(row, "Icon", 56, function()
+    if not row.entry then return end
+    row.entry.useIcon = row.entry.useIcon == false
+    Structural()
+  end)
+  row.mode:SetPoint("LEFT", 398, 0)
+  StyleText(row.mode.label, 10)
+
+  row.swatch = ColorSwatch(row,
+    function() return (row.entry and row.entry.color) or { r = 1, g = 0.25, b = 0.8, a = 1 } end,
+    function(r, g, b, a)
+      if not row.entry then return end
+      row.entry.color = { r = r, g = g, b = b, a = a }
+      row.entry.useIcon = false
+      Structural()
+    end)
+  row.swatch:SetPoint("LEFT", 460, 0)
+
+  row.combatOnly = Checkbox(row,
+    function() return row.entry and row.entry.missingCombatOnly and true or false end,
+    function(v) if row.entry then row.entry.missingCombatOnly = v; Structural() end end)
+  row.combatOnly:SetPoint("LEFT", 494, 0)
+  Tip(row.combatOnly, "Combat only", TIPS.missingCombatOnly)
+
+  row.remove = CloseX(row, function()
+    table.remove(NS.db.missingIcons.list, row.index)
+    Structural()
+  end)
+  row.remove:SetPoint("LEFT", 528, 0)
+
+  return row
+end
+
+-- Row-shape refresh, split out of missing.Rebuild so it never drifts from
+-- what BuildRow actually laid out.
+function missing.RefreshRow(row, index, entry)
+  row.index, row.entry = index, entry
+  row.icon:SetTexture(NS.SpellIcon(entry.spellID))
+  row.icon:SetDesaturated(entry.useIcon == false)
+  row.icon:SetAlpha(entry.useIcon == false and 0.35 or 1)
+  row.name:SetText(NS.SpellName(entry.spellID))
+  row.id:SetText(tostring(entry.spellID))
+  row.enabled:Refresh()
+  row.mode:SetText(entry.useIcon == false and "Color" or "Icon")
+  row.swatch:Refresh()
+  row.swatch:SetAlpha(entry.useIcon == false and 1 or 0.35)
+  row.combatOnly:Refresh()
+end
+
+function missing.Build()
+  local list = BuildTabFrame(tabPanels[missing.PAGE_LIST], nil, nil, nil, missing.STAGE_H)
+  local layoutPanel = BuildTabFrame(tabPanels[missing.PAGE_LAYOUT], nil, nil, nil, missing.STAGE_H)
+  missing.panels = { list, layoutPanel }
+  missing.tab = list
+  list:SetHeadHeight(6 + missing.STAGE_H + 12)
+  layoutPanel:SetHeadHeight(6 + missing.STAGE_H + 12)
+
+  -- RefreshPreviews() (the generic sweep every Live()/Structural() change
+  -- goes through) only ever touches a panel's stage via this callback --
+  -- see RefreshIconPage for the Aura Icons equivalent. Without it, a
+  -- Live()-only change (anchor, padX, padY) never reached LayoutStage at
+  -- all, since only Structural() happens to also rebuild the whole tab.
+  local function RefreshMissingStage(panel)
+    return function()
+      if panel.head and panel.head.stage then missing.LayoutStage(panel.head.stage) end
+    end
+  end
+  list.RefreshPreview = RefreshMissingStage(list)
+  layoutPanel.RefreshPreview = RefreshMissingStage(layoutPanel)
+
+  local body = list.body
+  body.sections = {}
+  local filter = CollapsibleSection(body, "missingFilter", "Which Debuffs",
+    "reminder icons, in display order")
+  table.insert(body.sections, filter)
+  body.filter = filter
+
+  local fc = filter.content
+  filter.hOrder = Header(fc, "Priority")
+  filter.hOrder:SetPoint("TOPLEFT", 8, -6)
+  filter.hOrder:SetWidth(100)
+  filter.hOrder:SetJustifyH("CENTER")
+  filter.hAura = Header(fc, "Debuff")
+  filter.hAura:SetPoint("TOPLEFT", 118, -6)
+  filter.hID = Header(fc, "ID")
+  filter.hID:SetPoint("TOPLEFT", 312, -6)
+  filter.hShow = Header(fc, "Show")
+  filter.hShow:SetPoint("TOPLEFT", 366, -6)
+  filter.hMode = Header(fc, "Icon/Color")
+  filter.hMode:SetPoint("TOPLEFT", 398, -6)
+  filter.hCombat = Header(fc, "Combat")
+  filter.hCombat:SetPoint("TOPLEFT", 494, -6)
+
+  filter.divider = fc:CreateTexture(nil, "ARTWORK")
+  filter.divider:SetPoint("TOPLEFT", 10, -22)
+  filter.divider:SetPoint("TOPRIGHT", -10, -22)
+  filter.divider:SetHeight(1)
+  filter.divider:SetColorTexture(0.4, 0.4, 0.45, 0.6)
+
+  local function AddMissingSpell(input)
+    if not input then return end
+    local spellID = ResolveAndReport(input)
+    if not spellID then return end
+    if not NS.ListIndexOf(NS.db.missingIcons.list, spellID) then
+      table.insert(NS.db.missingIcons.list, { spellID = spellID, enabled = true })
+      Structural()
+    end
+  end
+
+  filter.addDrop = AddSpellDropdown(fc, 250, "Track a missing debuff...",
+    function(spellID) return NS.ListIndexOf(NS.db.missingIcons.list, spellID) ~= nil end,
+    AddMissingSpell)
+  filter.addBox = IDBox(fc, AddMissingSpell)
+  Tip(filter.addDrop, "Track a missing debuff", TIPS.missingAdd)
+  Tip(filter.addBox, "Track by ID or name", TIPS.missingAdd)
+  filter.addBoxLabel = Dim(fc, "or ID/name:")
+
+  body = layoutPanel.body
+  body.sections = {}
+  local layout = CollapsibleSection(body, "missingLayout", "Position & Size",
+    "where the row sits, and how the icons look")
+  table.insert(body.sections, layout)
+  body.layout = layout
+
+  local lc = layout.content
+  layout.anchorLabel = Label(lc, "Anchor to bar")
+  layout.anchorLabel:SetPoint("TOPLEFT", 14, -12)
+  layout.anchor = Dropdown(lc, 150, ANCHOR_POINTS,
+    function() return NS.db.missingIcons.anchor end,
+    function(v) NS.db.missingIcons.anchor = v; Live() end)
+  layout.anchor:SetPoint("TOPLEFT", 150, -10)
+  TipLabel(layout.anchorLabel, "Anchor to bar", TIPS.missingAnchor)
+  Tip(layout.anchor, "Anchor to bar", TIPS.missingAnchor)
+
+  layout.growLabel = Label(lc, "Grow direction")
+  layout.growLabel:SetPoint("TOPLEFT", 14, -44)
+  layout.grow = Dropdown(lc, 150, {
+    { text = "Grow right", value = "RIGHT" },
+    { text = "Grow left",  value = "LEFT" },
+  }, function() return NS.db.missingIcons.grow end,
+     -- Baked into each entry's displaced position at build time (see
+     -- MissingIcons.lua), unlike Aura Icons' flow layout -- has to be a
+     -- full rebuild, not a reposition.
+     function(v) NS.db.missingIcons.grow = v; Structural() end)
+  layout.grow:SetPoint("TOPLEFT", 150, -42)
+  TipLabel(layout.growLabel, "Grow direction", TIPS.missingGrow)
+  Tip(layout.grow, "Grow direction", TIPS.missingGrow)
+
+  layout.padXLabel = Label(lc, "X padding")
+  layout.padXLabel:SetPoint("TOPLEFT", 14, -78)
+  layout.padX = Slider(lc, 130, -60, 60, 120,
+    function() return NS.db.missingIcons.padX or 0 end,
+    function(v) NS.db.missingIcons.padX = v; Live() end)
+  layout.padX:SetPoint("TOPLEFT", 150, -78)
+  TipLabel(layout.padXLabel, "X padding", TIPS.missingOffsetX)
+  Tip(layout.padX, "X padding", TIPS.missingOffsetX)
+
+  layout.padYLabel = Label(lc, "Y padding")
+  layout.padYLabel:SetPoint("TOPLEFT", 14, -104)
+  layout.padY = Slider(lc, 130, -60, 60, 120,
+    function() return NS.db.missingIcons.padY or 0 end,
+    function(v) NS.db.missingIcons.padY = v; Live() end)
+  layout.padY:SetPoint("TOPLEFT", 150, -104)
+  TipLabel(layout.padYLabel, "Y padding", TIPS.missingOffsetY)
+  Tip(layout.padY, "Y padding", TIPS.missingOffsetY)
+
+  layout.divider = lc:CreateTexture(nil, "ARTWORK")
+  layout.divider:SetPoint("TOPLEFT", 12, -132)
+  layout.divider:SetPoint("TOPRIGHT", -12, -132)
+  layout.divider:SetHeight(1)
+  layout.divider:SetColorTexture(0.4, 0.4, 0.45, 0.5)
+
+  layout.sizeLabel = Label(lc, "Icon size")
+  layout.sizeLabel:SetPoint("TOPLEFT", 14, -144)
+  layout.size = Slider(lc, 130, 10, 48, 38,
+    function() return NS.db.missingIcons.size end,
+    function(v) NS.db.missingIcons.size = v; Structural() end)
+  layout.size:SetPoint("TOPLEFT", 150, -144)
+  TipLabel(layout.sizeLabel, "Icon size", TIPS.missingSize)
+  Tip(layout.size, "Icon size", TIPS.missingSize)
+
+  layout.spacingLabel = Label(lc, "Icon spacing")
+  layout.spacingLabel:SetPoint("TOPLEFT", 14, -170)
+  layout.spacing = Slider(lc, 130, 0, 16, 16,
+    function() return NS.db.missingIcons.spacing end,
+    function(v) NS.db.missingIcons.spacing = v; Structural() end)
+  layout.spacing:SetPoint("TOPLEFT", 150, -170)
+  TipLabel(layout.spacingLabel, "Icon spacing", TIPS.missingSpacing)
+  Tip(layout.spacing, "Icon spacing", TIPS.missingSpacing)
+
+  layout.borderLabel = Label(lc, "Border size")
+  layout.borderLabel:SetPoint("TOPLEFT", 14, -196)
+  layout.border = Slider(lc, 130, 0, 5, 5,
+    function() return NS.db.missingIcons.borderSize or 0 end,
+    function(v) NS.db.missingIcons.borderSize = v; Structural() end)
+  layout.border:SetPoint("TOPLEFT", 150, -196)
+  TipLabel(layout.borderLabel, "Border size", TIPS.missingBorder)
+  Tip(layout.border, "Border size", TIPS.missingBorder)
+
+  layout.borderColorLabel = Label(lc, "Border color")
+  layout.borderColorLabel:SetPoint("TOPLEFT", 14, -222)
+  layout.borderColor = ColorSwatch(lc,
+    function() return NS.db.missingIcons.borderColor or { r = 1, g = 1, b = 1, a = 1 } end,
+    function(r, g, b, a)
+      NS.db.missingIcons.borderColor = { r = r, g = g, b = b, a = a }
+      Structural()
+    end)
+  layout.borderColor:SetPoint("TOPLEFT", 150, -222)
+  TipLabel(layout.borderColorLabel, "Border color", TIPS.missingBorderCol)
+  Tip(layout.borderColor, "Border color", TIPS.missingBorderCol)
+
+  layout.collapse = Checkbox(lc,
+    function() return NS.db.missingIcons.collapse ~= false end,
+    function(v) NS.db.missingIcons.collapse = v; Structural() end)
+  layout.collapse:SetPoint("TOPLEFT", 14, -254)
+  layout.collapseLabel = Label(lc, "Collapse")
+  layout.collapseLabel:SetPoint("LEFT", layout.collapse, "RIGHT", 6, 0)
+  Tip(layout.collapse, "Collapse", TIPS.missingCollapse)
+  TipLabel(layout.collapseLabel, "Collapse", TIPS.missingCollapse)
+end
+
+-- Static preview only: no secure containers, so nothing here can be refused by
+-- combat lockdown or thrown off by a debuff that happens to be up. It cannot
+-- tell you whether a spell ID is correct -- same caveat as every preview.
+function missing.LayoutStage(stage)
+  for _, chip in ipairs(stage.missingChips or {}) do chip:Hide() end
+  stage.missingChips = stage.missingChips or {}
+
+  local db = NS.db.missingIcons
+  local list = db.list
+  if #list == 0 then return end
+
+  local host = stage.missingHost
+  if not host then
+    host = CreateFrame("Frame", nil, stage)
+    stage.missingHost = host
+  end
+  host:SetSize(NS.MissingIconRowWidth(db, #list), db.size)
+  host:ClearAllPoints()
+  host:SetPoint(NS.AnchorMirror[db.anchor] or "BOTTOM", stage.bar, db.anchor or "TOP",
+    db.padX or 0, db.padY or 0)
+
+  local bw = db.borderSize or 0
+  local bc = db.borderColor or { r = 1, g = 1, b = 1, a = 1 }
+  for index, entry in ipairs(list) do
+    local chip = stage.missingChips[index]
+    if not chip then
+      chip = CreateFrame("Frame", nil, host)
+      chip.bg = chip:CreateTexture(nil, "BACKGROUND")
+      chip.bg:SetAllPoints()
+      chip.art = chip:CreateTexture(nil, "ARTWORK")
+      stage.missingChips[index] = chip
+    end
+    chip:SetSize(db.size, db.size)
+    chip:ClearAllPoints()
+    chip:SetPoint("LEFT", host, "LEFT", NS.MissingIconSlotOffset(db, index, #list), 0)
+    chip.bg:SetColorTexture(bc.r, bc.g, bc.b, bc.a or 1)
+    chip.art:ClearAllPoints()
+    chip.art:SetPoint("TOPLEFT", chip, "TOPLEFT", bw, -bw)
+    chip.art:SetPoint("BOTTOMRIGHT", chip, "BOTTOMRIGHT", -bw, bw)
+    if entry.useIcon == false then
+      local ec = entry.color or { r = 1, g = 0.25, b = 0.8 }
+      chip.art:SetColorTexture(ec.r, ec.g, ec.b, 0.9)
+    else
+      -- SetTexture alone is enough to replace what a prior SetColorTexture
+      -- call left behind -- SetColorTexture(nil) is not a valid call
+      -- (it needs real r,g,b), which is what was throwing here. Vertex
+      -- colour is reset too, in case a colour-mode draw ever tinted it.
+      chip.art:SetTexture(NS.SpellIcon(entry.spellID))
+      chip.art:SetVertexColor(1, 1, 1)
+      chip.art:SetTexCoord(0.07, 0.93, 0.07, 0.93)
+    end
+    chip:Show()
+  end
+end
+
+function missing.Rebuild()
+  local panel = missing.tab
+  if not panel then return end
+  for _, r in ipairs(missing.rows) do r:Hide() end
+
+  for _, p in ipairs(missing.panels or {}) do
+    if p.head and p.head.stage then missing.LayoutStage(p.head.stage) end
+  end
+
+  local body = panel.body
+  local filter = body.filter
+  local list = NS.db.missingIcons.list
+  local y = -28
+  for index, entry in ipairs(list) do
+    local row = missing.rows[index]
+    if not row then row = missing.BuildRow(filter.content); missing.rows[index] = row end
+    row:SetParent(filter.content)
+    missing.RefreshRow(row, index, entry)
+    row.up:SetEnabled(index > 1)
+    row.down:SetEnabled(index < #list)
+    row.priority.Refresh()
+    row.stripe:SetShown(index % 2 == 0)
+    row:SetPoint("TOPLEFT", 0, y)
+    row:Show()
+    y = y - ROW_H - 2
+  end
+
+  filter.addDrop:SetPoint("TOPLEFT", 10, y - 10)
+  filter.addBoxLabel:SetPoint("LEFT", filter.addDrop, "RIGHT", 14, 0)
+  filter.addBox:SetPoint("LEFT", filter.addBoxLabel, "RIGHT", 8, 0)
+  filter:Resize(-y + 46)
+
+  local layout = missing.panels[2].body.layout
+  layout.anchor:Refresh()
+  layout.grow:Refresh()
+  layout.padX:Refresh()
+  layout.padY:Refresh()
+  layout.size:Refresh()
+  layout.spacing:Refresh()
+  layout.border:Refresh()
+  layout.borderColor:Refresh()
+  layout.collapse:Refresh()
+  local overCap = #list > 4
+  layout.collapseLabel:SetText(overCap and "Collapse (off past 4)" or "Collapse")
+  layout:Resize(278)
+
+  for _, p in ipairs(missing.panels or {}) do
+    LayoutSections(p.body, p.body.sections)
+  end
+end
+
+-- Tab 3 -- profiles. Not built on BuildTabFrame: that shell assumes a module
+-- toggle and a live preview, and a profile has neither.
 
 local profilesTab
 
@@ -6655,14 +6981,11 @@ local function RebuildProfilesTab()
   LayoutSections(body, body.sections)
 end
 
--------------------------------------------------------------------------------
--- Tab 4 — about
+-- Tab 4 -- about.
 --
--- The priority diagram is DRAWN, not a screenshot. A shipped image would need
--- a .tga in the addon, would not follow the theme colours, and would go stale
--- the moment the rules UI changed. Frames and textures cost nothing here and
--- always match what the user is actually looking at.
--------------------------------------------------------------------------------
+-- The priority diagram is DRAWN, not a screenshot: a shipped image would need
+-- a .tga, would not follow the theme colours, and would go stale the moment
+-- the rules UI changed.
 
 local aboutTab
 
@@ -6926,14 +7249,12 @@ end
 -------------------------------------------------------------------------------
 
 -- These three lived under "Health Coloring" purely because that is where they
--- were built. None is conditional on a rule matching: the plate border is
--- redrawn on every plate, the edge inset applies to health and border tints
--- alike, and the pandemic flash is a global toggle. Filing them inside one
--- module made the other module look like it was missing settings.
+-- were built. None is conditional on a rule matching -- the plate border is
+-- redrawn on every plate, the edge inset applies to both tint kinds, and the
+-- pandemic flash is a global toggle.
 --
--- The CollapsibleSection keys are unchanged (colourOutline / colourEdge /
--- colourPandemic), so everyone's open/closed state survives the move -- the
--- key is what that state is stored against, not the page it sits on.
+-- The CollapsibleSection keys are unchanged, so everyone's open/closed state
+-- survives the move.
 
 -- Every Global Settings page previews against the same simulated plate, painted
 -- from the live global settings, so a change is visible on the page that makes
@@ -7139,14 +7460,11 @@ local function BuildGlobalTabs()
   globalPanels = { panel }
 end
 
--- Pandemic Flash, as its own module rather than a section inside a settings
--- page. It has an on/off of its own, its own colour and its own timing -- the
--- same shape as Health Coloring or Border Coloring -- and burying that under
--- a page called "Effects" made a feature look like a checkbox.
+-- Pandemic Flash as its own module rather than a section: it has an on/off, a
+-- colour and timing of its own, the same shape as Health or Border Coloring.
 --
--- Worth knowing while reading this: the flash only ever applies to
--- single-debuff rules (see the pandemic block in Tints.lua), because a flash
--- region doubles a rule's texture count and a combo rule cannot afford it.
+-- Only ever applies to single-debuff rules -- a flash region doubles a rule's
+-- texture count and a combo cannot afford it.
 local pandemicPanel
 
 local function BuildPandemicTab()
@@ -7278,15 +7596,13 @@ end
 -- Rule editor — one rule, the whole pane
 -------------------------------------------------------------------------------
 
--- Selecting a rule in the rail opens it here instead of expanding a row
--- inside a table. The table had to fit an editor between two other rules, so
--- everything competed for a few hundred pixels; here the rule is the only
--- thing on screen and each concern gets its own card.
+-- Selecting a rule in the rail opens it here instead of expanding a row inside
+-- a table, where everything competed for a few hundred pixels.
 --
--- The appearance controls are the SAME BuildStylePanel the tables use, not a
--- reimplementation -- it already knows fills, textures, missing-health cover,
--- target/focus gating and border shape, and it reads whatever expandedRule
--- points at. Two instances exist because isBorder is fixed at construction.
+-- The appearance controls are the SAME BuildStylePanel the tables use -- it
+-- already knows fills, textures, cover, gating and border shape, and reads
+-- whatever expandedRule points at. Two instances, since isBorder is fixed at
+-- construction.
 local rulePanel
 
 local function RuleEditorList()
@@ -7319,12 +7635,9 @@ local function BuildRuleEditor()
     RefreshPreviews()
   end
 
-  -- One toggle, not one per debuff.
-  --
-  -- The colouring pages simulate a whole rule LIST, so they need each debuff
-  -- separately to work out which rule wins. Here exactly one rule is on
-  -- screen and the only question is "show it or not" -- a row of per-debuff
-  -- boxes asked you to assemble that answer by hand.
+  -- One toggle, not one per debuff. The colouring pages simulate a whole rule
+  -- LIST and need each debuff separately to work out which wins; here exactly
+  -- one rule is on screen and the only question is show it or not.
   head.simulate = Checkbox(head,
     function()
       local conditions = expandedRule and expandedRule.conditions or {}
@@ -7525,24 +7838,34 @@ local function BuildRuleEditor()
     end
 
     local _, isBorder = RuleEditorList()
-    local isMissing = (not isBorder) and expandedRule and expandedRule.showWhenMissing
+    local isMissing = expandedRule and expandedRule.showWhenMissing
 
-    -- Only on a missing rule's own page, and only for THIS rule.
+    -- Only on a missing rule's own page, and only for THIS rule. Showing the
+    -- whole ladder meant a higher-ranked rule washed over the one you opened,
+    -- and showing it elsewhere meant one missing rule covered every preview in
+    -- the window. The stage is shared with the border editor, which is why
+    -- this is gated here rather than at the stage.
     --
-    -- Showing the whole ladder here meant a higher-ranked missing rule washed
-    -- over the one you opened, and showing it on any other page meant one
-    -- missing rule covered every preview in the window -- it is lit by
-    -- default, so that was its normal state rather than an edge case. The
-    -- stage is shared with the border editor too, which is why this is gated
-    -- here rather than at the stage.
-    if isMissing and not matches then
+    -- Bar rules only: a missing BORDER has no wash, just edges that leave.
+    if isMissing and not isBorder and not matches then
       NS.ApplyRuleFill(stage.missingWash, stage.bar, expandedRule)
       stage.missingWash:Show()
     else
       stage.missingWash:Hide()
     end
 
-    if isMissing then
+    if isMissing and isBorder then
+      -- Inverted against the presence case below: the border is what you see
+      -- while the debuff is ABSENT, and it leaves once the debuff lands.
+      head.verdict:SetText(#spells == 0
+        and "|cff808080Add a debuff below to preview this rule.|r"
+        or (matches
+          and "|cff808080Debuff applied — the border disappears.|r"
+          or "|cffffcc22Debuff missing — the border shows in this rule's color.|r"))
+      stage.tint:Hide()
+      stage.missingCover:Hide()
+      DrawStageBorder(stage, (not matches) and expandedRule or nil)
+    elseif isMissing then
       -- A missing rule draws no border and no presence tint. Its whole preview
       -- is the wash above, which the simulate switch drives on its own -- so
       -- there is nothing left to do here except say which state you are
@@ -7665,14 +7988,12 @@ local function RebuildRuleEditor()
   body.idBox:SetShown(not full and body.addOpen)
 
   if not full then
-    -- INLINE with the first debuff, right-aligned, rather than on a line of
-    -- its own beneath the list. A rule has one or two debuffs, so a dedicated
-    -- row for the button was a third of this block's height spent on a
-    -- control that is idle most of the time -- and it pushed the appearance
-    -- and visibility groups below the fold on the rule page.
+    -- Inline with the first debuff, right-aligned, rather than on its own row:
+    -- a rule has one or two debuffs, so a dedicated row spent a third of this
+    -- block's height on a control that is idle most of the time, and pushed
+    -- appearance and visibility below the fold.
     --
-    -- Right-aligned so it clears the remove X at the other end of the row,
-    -- whatever the debuff's name happens to be.
+    -- Right-aligned so it clears the remove X whatever the debuff is called.
     body.addToggle:SetText(body.addOpen and "Done" or "Add debuff")
     body.addToggle:ClearAllPoints()
     body.addToggle:SetPoint("TOPRIGHT", -12, condTop - 2)
@@ -7739,12 +8060,9 @@ end
 -- Diagnostics
 -------------------------------------------------------------------------------
 
--- The same facts /pt status prints, on a page instead of in chat.
---
--- Chat is where this information went to die: it scrolls away, it cannot be
--- selected, and it is the first thing anyone is asked for in a bug report. The
--- numbers come from NS.CollectDiagnostics, shared with the slash command, so
--- the two can never disagree.
+-- The same facts /pt status prints, on a page instead of in chat -- which
+-- scrolls away, cannot be selected, and is the first thing asked for in a bug
+-- report. Numbers come from NS.CollectDiagnostics, shared with the command.
 local function DiagStat(parent, label)
   local box = CreateFrame("Frame", nil, parent, "BackdropTemplate")
   box:SetSize(150, 44)
@@ -7849,29 +8167,23 @@ local function RebuildTweaksTab()
   LayoutSections(panel.body, panel.body.sections)
 end
 
--------------------------------------------------------------------------------
 -- Import / Export
 --
 -- Two halves that never touch: the top turns a profile into a string, the
 -- bottom turns a string into a profile.
 --
--- Import is deliberately three presses rather than one -- paste, Check,
--- Import. Check only DECODES, so the summary is on screen before anything is
--- written, and a string from a stranger can be inspected without committing to
--- it. NS.CommitShare is the only call here that writes, and nothing reaches it
--- until the name box has been seen.
+-- Import is three presses on purpose -- paste, Check, Import. Check only
+-- DECODES, so the summary is on screen before anything is written.
+-- NS.CommitShare is the only call here that writes.
 --
--- Everything lives on the `share` table declared with the page constants, not
--- in locals -- see the note there. The fields used here:
+-- Everything lives on the `share` table, not in locals -- see the note there:
 --
 --   share.tab      the panel
---   share.pending  the decoded payload waiting to be committed, or nil. Cleared
---                  whenever the box changes, so Import can never write a
---                  payload belonging to a string since edited away.
---   share.Rebuild  reachable from the builder, because this page's Check button
---                  calls its own rebuild. Every other page in this file gets
---                  away with declaring that afterwards; this one cannot.
--------------------------------------------------------------------------------
+--   share.pending  decoded payload awaiting commit, or nil. Cleared whenever
+--                  the box changes, so Import can never write a payload
+--                  belonging to a string since edited away.
+--   share.Rebuild  reachable from the builder, because this page's Check
+--                  button calls its own rebuild.
 
 -- A read-only multiline box in a scroll frame. Same reason as the Diagnostics
 -- report: WoW gives an addon no way to write the clipboard, so handing someone
@@ -8245,7 +8557,10 @@ local function BuildDiagnosticsTab()
   panel.subtitle:SetPoint("TOPLEFT", 10, -28)
 
   panel.refresh = Button(panel, "Refresh", 90, function()
+    -- The explicit way back to the live summary after loading a capture.
+    panel.showingCapture = nil
     if panel.Render then panel.Render() end
+    if panel.savedPick and panel.savedPick.Refresh then panel.savedPick.Refresh() end
   end)
   panel.refresh:SetPoint("TOPRIGHT", -10, -8)
   Tip(panel.refresh, "Refresh", TIPS.diagRefresh)
@@ -8298,6 +8613,112 @@ local function BuildDiagnosticsTab()
   end)
   panel.copy:SetPoint("BOTTOMRIGHT", -10, 10)
   Tip(panel.copy, "Select All for Copy", TIPS.diagCopy)
+
+  -- The full report, in the box, ready to select. Same text /pt capture writes
+  -- to SavedVariables -- but that route needs someone to reload, find the file
+  -- and pick the right block out of it, which in practice means the report
+  -- never arrives. This is two clicks in a window that is already open.
+  panel.full = Button(panel, "Full Report", 110, function()
+    if not NS.CaptureSave then return end
+    -- Labelled by adapter, same as the slash command. Sorting a list of
+    -- captures by which nameplate addon they came from is the whole reason
+    -- the label exists.
+    local item = NS.CaptureSave(NS.CurrentAdapterName and NS.CurrentAdapterName() or "window")
+    -- Saved as well as shown. A report taken here is worth exactly as much as
+    -- one taken from the slash command, and losing it because the box was
+    -- later re-rendered would be its own bug.
+    edit:SetText(table.concat(item.lines or {}, "\n"))
+    panel.showingCapture = true
+    edit:SetFocus()
+    edit:HighlightText()
+    panel.copyHint:SetText(
+      UnitExists("target")
+        and "Saved and selected - press |cff55dd55Ctrl+C|r to copy."
+        -- Said here rather than left as an empty section in the pasted text:
+        -- the two halves that need a target are the layering ones, which are
+        -- exactly what a "colours do not show" report turns on.
+        or "Saved, but |cffff8800target a mob and press again|r for the layout sections.")
+    if panel.savedPick and panel.savedPick.Refresh then panel.savedPick.Refresh() end
+  end)
+  panel.full:SetPoint("RIGHT", panel.copy, "LEFT", -6, 0)
+  Tip(panel.full, "Full Report",
+    "Everything /pt status, /pt bar, /pt adapter and /pt layers know, in one block. Target a mob first. Saved as well as shown, so it is still here later.")
+
+  -- Saved captures.
+  --
+  -- The whole point of the pairing: this window CANNOT open in combat, and the
+  -- capture worth having is the one taken mid-pull. So /pt capture records it
+  -- there, and this reads it back once you are out -- including next session,
+  -- since it lives in SavedVariables.
+  panel.savedPick = Dropdown(panel, 190,
+    function()
+      local out = {}
+      local store = (PLATETWEAKS_DEBUG or {}).captures or {}
+      -- Everything at once, first in the list.
+      --
+      -- Without this, someone with six captures loads and copies six times,
+      -- which in practice means they send one and the picture is partial. The
+      -- alternative on offer is "send me your whole SavedVariables file", and
+      -- that carries every character name on their account -- so the safe
+      -- route has to be at least as easy as the lazy one.
+      if #store > 1 then
+        out[#out + 1] = { text = ("All %d captures"):format(#store), value = "all" }
+      end
+      -- Newest first: it is the one you just took.
+      for index = #store, 1, -1 do
+        local item = store[index]
+        out[#out + 1] = {
+          text = ("%s  |cff808080%s|r"):format(tostring(item.label), tostring(item.when)),
+          value = index,
+        }
+      end
+      if #out == 0 then out[1] = { text = "none yet - use /pt capture", value = false } end
+      return out
+    end,
+    function() return nil end,
+    function(index)
+      local store = (PLATETWEAKS_DEBUG or {}).captures or {}
+
+      if index == "all" then
+        local out = {}
+        -- Oldest first here, unlike the menu. A file someone pastes reads top
+        -- to bottom as the order things happened, which is what you want when
+        -- comparing a run before and after a change.
+        for position, item in ipairs(store) do
+          out[#out + 1] = ("===== capture %d/%d: %s  %s ====="):format(
+            position, #store, tostring(item.label), tostring(item.when))
+          for _, line in ipairs(item.lines or {}) do out[#out + 1] = line end
+          out[#out + 1] = ""
+        end
+        edit:SetText(table.concat(out, "\n"))
+        panel.showingCapture = true
+        edit:SetFocus()
+        edit:HighlightText()
+        panel.copyHint:SetText(("All |cff55dd55%d|r captures selected - press |cff55dd55Ctrl+C|r to copy."):format(#store))
+        return
+      end
+
+      local item = index and store[index]
+      if not item then return end
+      edit:SetText(table.concat(item.lines or {}, "\n"))
+      panel.showingCapture = true
+      edit:SetFocus()
+      edit:HighlightText()
+      panel.copyHint:SetText(("Loaded |cff55dd55%s|r - press |cff55dd55Ctrl+C|r to copy."):format(
+        tostring(item.label)))
+    end)
+  panel.savedPick:SetPoint("RIGHT", panel.full, "LEFT", -6, 0)
+  panel.savedPick.label:SetText("Saved captures")
+  -- Always reads as a prompt: this picks something to load, it is not a
+  -- setting with a current value.
+  panel.savedPick.Refresh = function()
+    panel.savedPick.label:SetText("Saved captures")
+    panel.savedPick.icon:Hide()
+    panel.savedPick.label:SetPoint("LEFT", 8, 0)
+  end
+  panel.savedPick.Refresh()
+  Tip(panel.savedPick, "Saved captures",
+    "Reports taken with /pt capture, including ones from a previous session. Take one mid-dungeon -- this window cannot open in combat -- then read it back here.")
 
   -- Rendered on demand rather than on a timer: these numbers change with
   -- every plate that appears, and a panel that rewrites itself while you are
@@ -8362,8 +8783,13 @@ local function BuildDiagnosticsTab()
         table.insert(out, "  " .. t.note)
       end
       if t.bar then
-        table.insert(out, ("  bar %s | frame level %s | plater-style %s"):format(
-          t.bar, tostring(t.frameLevel), tostring(t.isPlater)))
+        -- flat-pinned is true for two different reasons -- real Plater, or
+        -- a default Blizzard bar tagged to get the same treatment (see
+        -- FindHealthBar) -- so it is reported on its own, not as
+        -- "plater-style", which read as a claim about which addon this is.
+        local why = t.isPlater and "plater" or (t.isDefaultBlizzard and "default-blizzard" or "no")
+        table.insert(out, ("  bar %s | frame level %s | flat-pinned %s (%s)"):format(
+          t.bar, tostring(t.frameLevel), tostring(t.flatPinned), why))
       end
       if t.rigged then
         table.insert(out, ("  rig base level %s | tints shown %d of %d"):format(
@@ -8371,7 +8797,13 @@ local function BuildDiagnosticsTab()
       end
     end
 
-    edit:SetText(table.concat(out, "\n"))
+    -- Never over a loaded capture. Render runs on every tab open, so without
+    -- this, walking away from the page and back destroys the report you took
+    -- in a dungeon -- silently, and with no way to get it back.
+    -- Refresh clears the flag when you actually want the live view again.
+    if not panel.showingCapture then
+      edit:SetText(table.concat(out, "\n"))
+    end
     edit:SetCursorPosition(0)
     panel.copyHint:SetText("")
   end
@@ -8395,6 +8827,7 @@ function NS.Options_RebuildAll()
   if NS.db.tints.enabled then table.insert(modules, "Health Coloring") end
   if NS.db.tints.borderEnabled ~= false then table.insert(modules, "Border Coloring") end
   if NS.db.icons.enabled then table.insert(modules, "Aura Icons") end
+  if NS.db.missingIcons.enabled then table.insert(modules, "Missing Debuffs") end
 
   profileLabel:SetText(("Profile |cff55dd55%s|r   |cff808080--|r   Enabled: %s"):format(
     NS.ProfileKey(),
@@ -8413,21 +8846,14 @@ function NS.Options_RebuildAll()
       and (("Use this profile whenever I am |cff55dd55%s|r"):format(spec))
       or "|cffffcc00Spec not known yet - binding unavailable.|r")
   end
-  -- Before the pages: the rail now carries the rule list itself, so priority
-  -- numbers, colours, labels and the unreachable-rule warnings all have to
-  -- follow any edit made on a page.
-  -- Each one guarded and NAMED.
-  --
-  -- These used to be nine bare calls, so an error in any of them aborted every
-  -- rebuild after it -- and since most people run with Lua errors hidden, the
-  -- symptom was a page that silently stopped populating with nothing in chat
-  -- to say why. The page that broke is now the only one that suffers, and it
-  -- says which one it was.
+  -- Before the pages: the rail carries the rule list itself, so priority,
+  -- colours, labels and the unreachable-rule warnings all follow any edit.
   local passes = {
     { "rail", RebuildRail },
     { "health", RebuildHealthTab },
     { "border", RebuildBorderTab },
     { "aura icons", RebuildAuraIconTab },
+    { "missing debuff", missing.Rebuild },
     { "global", RebuildGlobalTabs },
     { "rule editor", RebuildRuleEditor },
     { "pandemic", RebuildPandemicTab },
@@ -8464,6 +8890,7 @@ function NS.OpenOptions()
         { "health", BuildHealthTab },
         { "border", BuildBorderTab },
         { "aura icons", BuildAuraIconTab },
+        { "missing debuff", missing.Build },
         { "global settings", BuildGlobalTabs },
         { "pandemic", BuildPandemicTab },
         { "profiles", BuildProfilesTab },

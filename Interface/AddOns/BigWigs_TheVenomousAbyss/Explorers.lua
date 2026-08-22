@@ -117,7 +117,7 @@ mod:SetAuraData({
 	{1310500, soundOnApplied = "none"}, -- Aftershock
 	{1305844, soundOnApplied = "underyou"}, -- Blast Wave (Explosion DoT)
 	{1299854, soundOnApplied = "none"}, -- Bounce (Mushroom bounce)
-	{1291390, soundOnApplied = "none"}, -- Cataclysmic Invocation
+	{1291390, soundOnApplied = "none", soundOnAppliedDose = "none"}, -- Cataclysmic Invocation
 	{1295952, soundOnApplied = "none"}, -- Elemental Explosion
 	{1297649, soundOnApplied = "none"}, -- Fire Patch (Standing in ice)
 	{1297648, soundOnApplied = "none"}, -- Frost Patch (Standing in fire)
@@ -129,7 +129,7 @@ mod:SetAuraData({
 })
 
 
-function mod:GetOptions() -- SetOption:skip-unused
+function mod:GetOptions()
 	return {
 		-- Mor'zahi
 		1296535, -- Disgusting Fish
@@ -181,7 +181,16 @@ function mod:OnEncounterStart()
 	commandCastID = nil
 	stageCount = 1
 	ascensionCount = 1
+	self:ResetCounts()
 
+	self:RegisterEvent("UPDATE_EXTRA_ACTIONBAR")
+	-- boss units: 1 gebbo, 2 mor'zani, 3 nama, 4 iku
+	self:RegisterUnitEvent("UNIT_FLAGS", "CheckStage", "boss1", "boss3", "boss4")
+	self:RegisterUnitEvent("UNIT_SPELLCAST_CHANNEL_START", nil, "boss2")
+	self:RegisterUnitEvent("UNIT_SPELLCAST_CHANNEL_STOP", nil, "boss2")
+end
+
+function mod:ResetCounts()
 	blinkNovaCount = 1
 	iceboundFlamesCount = 1
 	frostfireVolleyCount = 1
@@ -190,12 +199,6 @@ function mod:OnEncounterStart()
 	throwJunkCount = 1
 	mushroomTossCount = 1
 	explosiveSurpriseCount = 1
-
-	self:RegisterEvent("UPDATE_EXTRA_ACTIONBAR")
-	-- boss units: 1 gebbo, 2 mor'zani, 3 nama, 4 iku
-	self:RegisterUnitEvent("UNIT_FLAGS", "CheckStage", "boss1", "boss3", "boss4")
-	self:RegisterUnitEvent("UNIT_SPELLCAST_CHANNEL_START", nil, "boss2")
-	self:RegisterUnitEvent("UNIT_SPELLCAST_CHANNEL_STOP", nil, "boss2")
 end
 
 --------------------------------------------------------------------------------
@@ -209,7 +212,7 @@ do
 		scheduled = nil
 		for i = 1, #events do
 			local eventInfo = events[i]
-			mod:Timeline(eventInfo, events)
+			mod:Timeline(nil, eventInfo, events)
 		end
 		table.wipe(events)
 	end
@@ -238,15 +241,7 @@ function mod:Timeline(_, eventInfo, events)
 		self:StopBar(self:GetRename(1297022, stage)) -- Empower: Turtle
 
 		self:SetStage(stage)
-
-		blinkNovaCount = 1
-		iceboundFlamesCount = 1
-		frostfireVolleyCount = 1
-		shellSpinCount = 1
-		mightyThudCount = 1
-		throwJunkCount = 1
-		mushroomTossCount = 1
-		explosiveSurpriseCount = 1
+		self:ResetCounts()
 
 		self:Message(1297022, "cyan", self:GetRename(1297022, stage), false) -- Mor'zahi's Command: Turtle
 		local commandCD = (commandCastStart + 60) - GetTime()
@@ -264,14 +259,21 @@ function mod:Timeline(_, eventInfo, events)
 	if stage == 1 then
 		if rounded == 60 then
 			barInfo = self:FinalAscension()
-		elseif rounded == 28 then
-			barInfo = self:FlingFish()
-			-- cancels instead of finishes
-			barInfo.timer = self:ScheduleTimer(function()
-				self:StopTimelineBar(barInfo, true)
-			end, duration)
-		elseif rounded == 20 or rounded == 4 or rounded == 27 then
+		-- elseif rounded == 28 then
+		-- 	barInfo = self:FlingFish()
+		-- 	-- cancels instead of finishes
+		-- 	barInfo.timer = self:ScheduleTimer(function() self:StopBar(barInfo.msg) end, duration)
+		elseif rounded == 20 or rounded == 4 or rounded == 27 or rounded == 23 then
 			barInfo = self:ThrowJunk(duration)
+			if rounded == 20 then
+				self:FlingFish()
+			elseif rounded == 4 and throwJunkCount == 4 then
+				-- Throw Junk cast with the fish. Cancels instead of finishes (like the original event)
+				barInfo.timer = self:ScheduleTimer(function()
+					self:StopBar(barInfo.msg)
+					barInfo:onFinished()
+				end, duration)
+			end
 		elseif rounded == 30 then
 			barInfo = self:ShreddingShards()
 		elseif rounded == 10 then
@@ -301,7 +303,7 @@ function mod:Timeline(_, eventInfo, events)
 			barInfo = self:ThrowJunk(duration)
 		elseif rounded == 13 then
 			barInfo = self:ExplosiveSurprise()
-		elseif rounded == 11 or rounded == 17 or rounded == 15 then
+		elseif rounded == 11 or rounded == 17 or rounded == 15 or rounded == 7 then
 			barInfo = self:ShellSpin()
 		elseif rounded == 32 then
 			durationEventCount[rounded] = (durationEventCount[rounded] or 0) + 1
@@ -326,12 +328,14 @@ function mod:Timeline(_, eventInfo, events)
 			barInfo = self:IceboundFlames()
 		end
 
-	-- Ikku
+	-- Iku
 	elseif stage == 4 then
-		if rounded == 7 or rounded == 4 or rounded == 11 then
+		if rounded == 7 or rounded == 4 or rounded == 11 or rounded == 23 then
 			barInfo = self:ThrowJunk(duration)
 		elseif rounded == 30 then
 			barInfo = self:ShreddingShards()
+		elseif rounded == 21 then
+			barInfo = self:BlinkNova()
 		elseif rounded == 2 or rounded == 13 then
 			barInfo = self:IceboundFlames()
 		elseif rounded == 17 or rounded == 16 then
@@ -423,17 +427,6 @@ function mod:CheckStage(event, unit, isFriend)
 		self:PlaySound(1296535, "info")
 
 		self:CDBar(1297022, 6.2, self:GetRename(1297022, stage)) -- Empower: Turtle
-
-	-- elseif nextEmpower == unit then
-	-- 	-- XXX this is after timers are started fffffuuuuuu
-	-- 	nextEmpower = nil
-	-- 	unitEmpowered = unit
-	-- 	local stage = UNIT_TO_STAGE[unit]
-
-	-- 	self:SetStage(stage)
-	-- 	self:Message(1297022, "cyan", self:GetRename(1297022, stage), false) -- Mor'zahi's Command: Turtle
-	-- 	self:Bar(1297022, 60, self:GetRename(1297022, stage))
-	-- 	self:PlaySound(1297022, "long")
 	end
 end
 
@@ -452,16 +445,8 @@ function mod:UNIT_SPELLCAST_CHANNEL_STOP(event, unit, _, _, _, castID)
 		unitEmpowered = nil
 
 		self:SetStage(1)
-
 		-- XXX reset again?
-		-- blinkNovaCount = 1
-		-- iceboundFlamesCount = 1
-		-- frostfireVolleyCount = 1
-		-- shellSpinCount = 1
-		-- mightyThudCount = 1
-		-- throwJunkCount = 1
-		-- mushroomTossCount = 1
-		-- explosiveSurpriseCount = 1
+		self:ResetCounts()
 
 		self:Message(1297022, "green", self:GetRename(1297022, 1), false) -- Mor'zahi's Command over
 		self:PlaySound(1297022, "long")
@@ -573,7 +558,7 @@ function mod:ShellSpin()
 		msg = barText,
 		key = 1291759,
 		onFinished = function()
-			self:StopBlizzMessages(0.3) -- First Mate Nama spins [Shell Spin]!
+			self:StopBlizzMessages(1) -- First Mate Nama spins [Shell Spin]!
 			self:Message(1291759, "orange", barText)
 			self:PlaySound(1291759, "alarm")
 		end,
@@ -595,29 +580,39 @@ end
 
 -- Trader Gebbo
 
-function mod:ThrowJunk(duration)
-	local barText = CL.count:format(self:GetRename(1291933), throwJunkCount)
-	throwJunkCount = throwJunkCount + 1
-	return {
-		msg = barText,
-		key = 1291933,
-		onFinished = function()
-			self:Message(1291933, "yellow", barText)
-			self:PlaySound(1291933, "alert")
-		end,
-	}
-end
+do
+	local fishTimer = nil
 
-function mod:FlingFish()
-	local barText = self:GetRename(1295817)
-	return {
-		msg = barText,
-		key = 1295817,
-		onFinished = function()
-			self:Message(1295817, "green", barText)
-			self:PlaySound(1295817, "info")
-		end,
-	}
+	function mod:ThrowJunk(duration)
+		local barText = CL.count:format(self:GetRename(1291933), throwJunkCount)
+		throwJunkCount = throwJunkCount + 1
+		return {
+			msg = barText,
+			key = 1291933,
+			onFinished = function()
+				self:Message(1291933, "yellow", barText)
+				self:PlaySound(1291933, "alert")
+			end,
+			onCanceled = function()
+				-- Cancel Fling Fish if Throw Junk is canceled while it is running
+				if fishTimer then
+					self:StopBar(self:GetRename(1295817))
+					self:CancelTimer(fishTimer)
+					fishTimer = nil
+				end
+			end,
+		}
+	end
+
+	function mod:FlingFish()
+		local duration = 28
+		self:Bar(1295817, duration)
+		fishTimer = self:ScheduleTimer(function()
+			self:Message(1295817, "green")
+			-- self:PlaySound(1295817, "info") -- same time as Throw Junk
+			fishTimer = nil
+		end, duration)
+	end
 end
 
 function mod:MushroomToss()

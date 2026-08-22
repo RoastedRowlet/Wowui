@@ -80,11 +80,28 @@ BigWigsAPI.SetBossModuleLocale("Crown of the Cosmos", {
 	devouring_cosmos = "换场地",
 })
 
+-- The Venomous Abyss
+
+BigWigsAPI.SetBossModuleLocale("Nek'zali the Soulcoiler", {
+	--possession_barrage = "Barrage",
+})
+
 BigWigsAPI.SetBossModuleLocale("Vashnik the Malignant", {
 	malignant_catalyst = "催化剂", -- “恶性催化剂”简称
+})
+
+BigWigsAPI.SetBossModuleLocale("Sszorak", {
+	--raging_crosswinds = "Winds",
 })
 
 BigWigsAPI.SetBossModuleLocale("The Twin Fangs", {
 	coiling_toxin = "脓液", -- “盘卷脓液”简称
 	corrosive_spit = "唾液", -- “腐蚀唾液”简称
+})
+
+BigWigsAPI.SetBossModuleLocale("Ula'tek", {
+	mephitic_thrash = "横扫",
+	call_of_the_serpent = "蛇蛋",
+	gore_rattle = "尾击",
+	circling_prey = "平台碎裂",
 })

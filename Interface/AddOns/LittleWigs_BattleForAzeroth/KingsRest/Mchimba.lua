@@ -117,7 +117,7 @@ function mod:ENCOUNTER_TIMELINE_EVENT_ADDED(_, eventInfo)
 	-- on pull and after each Entomb: DF=5, BC=20, AS=30, ET=60
 	-- follow-ups: DF=32, BC=30, AS=102
 	-- can't skip timers based on Entomb time left because if Entomb is skipped they will be cast as scheduled
-	if duration == 62 then -- Entomb placeholder
+	if duration == 63 then -- Entomb placeholder
 		return
 	elseif (initialEvents and duration == 5) or (not initialEvents and duration == 32) then -- Drain Fluids
 		barInfo = self:DrainFluidsTimeline(eventInfo)

@@ -115,12 +115,6 @@ END
 VER 3 0000000000000071 "dismount" "134400"
 /dismount
 END
-VER 3 0000000000000058 "DrinkBot" "134400"
-#169
-#showtooltip item:0
-/use [btn:1] item:0
-/cast [btn:2] Conjure Refreshment
-END
 VER 3 000000000000005A "DrinkBot" "INV_MISC_QUESTIONMARK"
 #showtooltip item:222744
 /use [btn:1] item:222744
@@ -130,6 +124,12 @@ VER 3 000000000000005F "DrinkBot" "1387609"
 #019
 #showtooltip item:226811
 /use [btn:1] item:226811
+/cast [btn:2] Conjure Refreshment
+END
+VER 3 0000000000000058 "DrinkBot" "134400"
+#169
+#showtooltip item:0
+/use [btn:1] item:0
 /cast [btn:2] Conjure Refreshment
 END
 VER 3 0000000000000050 "Earth Shield" "134400"
@@ -186,7 +186,7 @@ VER 3 000000000000006B "FocusMark" "132160"
 #showtooltip
 /focus [exists,nodead][]
 /stopmacro [@focus,noexists]
-/tm [@focus] 5
+/tm [@focus] 6
 END
 VER 3 000000000000006C "FocusTargetMarker" "132219"
 /focus [@mouseover, harm, nodead][]

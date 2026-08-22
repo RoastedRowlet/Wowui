@@ -1290,6 +1290,11 @@ CCS.CRESTS = {
         { id = 3418, tocinfo = {120000, 120009} },
         { id = 3418, tocinfo = {120100, 120199} }, -- same ID, new icon?
     },
+	
+    crests_valorstone = {
+        { id = 3448, tocinfo = {120000, 120009} },
+        { id = 3448, tocinfo = {120100, 120199} }, -- same ID, new icon?
+    },	
 }
 
 local function GetCrestIDForRow(rowKey)
@@ -1497,7 +1502,6 @@ local STAT_SECTIONS = {
         color       = { r = 0.85, g = 0.55, b = 1.00 },
 
         rows = {
-         -- { key="crests_valorstone", name=L["Valorstones"] or "Valorstones", id=3008, statFunc=GetStatCurrency, icon="Interface\\Icons\\inv_valorstone_base" },
             { key="crests_myth",       name=L["Myth"]        or "Myth",        id=-1, statFunc=GetStatCurrency, icon="Interface\\Icons\\inv_120_crest_myth" },
             { key="crests_hero",       name=L["Hero"]        or "Hero",        id=-1, statFunc=GetStatCurrency, icon="Interface\\Icons\\inv_120_crest_hero" },
             { key="crests_champion",   name=L["Champion"]    or "Champion",    id=-1, statFunc=GetStatCurrency, icon="Interface\\Icons\\inv_120_crest_champion" },
@@ -1505,6 +1509,8 @@ local STAT_SECTIONS = {
             { key="crests_adventurer", name=L["Adventurer"]  or "Adventurer",  id=-1, statFunc=GetStatCurrency, icon="Interface\\Icons\\inv_120_crest_adventurer" },
             { key="crests_catalyst", name=L["Catalyst"]  or "Catalyst",  id=-1, statFunc=GetStatCurrency, icon="Interface\\Icons\\inv_120_crest_adventurer" },
             { key="crests_voidcore", name=BONUS_LOOT_LABEL  or "Bonus Loot",  id=-1, statFunc=GetStatCurrency, icon="Interface\\Icons\\inv_120_crest_adventurer" },
+			--{ key="crests_valorstone", name=BONUS_ROLL_REWARD_COIN or "Valorstones", id=-1, statFunc=GetStatCurrency, icon="Interface\\Icons\\inv_valorstone_base" },
+
         },
     },
 

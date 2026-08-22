@@ -178,24 +178,21 @@ L["DISABLE_RWF_MODE_RELOAD"] = "Estás desactivando el modo Race World First. Al
 L["DPS"] = "DPS"
 L["DUNGEON_SHORT_NAME_AA"] = "Academia Algeth'ar - AA"
 L["DUNGEON_SHORT_NAME_AD"] = "Atal'Dazar - AD"
---[[Translation missing --]]
---[[ L["DUNGEON_SHORT_NAME_AOF"] = ""--]] 
+L["DUNGEON_SHORT_NAME_AOF"] = "Altar de los Colmillos - AOF"
 L["DUNGEON_SHORT_NAME_ARAK"] = "Ara-Kara - ARAK"
 L["DUNGEON_SHORT_NAME_ARC"] = "La Arquería - ARC"
 L["DUNGEON_SHORT_NAME_AV"] = "Cámara Azur - AV"
 L["DUNGEON_SHORT_NAME_BH"] = "Hondonada Frondacuero - BH"
 L["DUNGEON_SHORT_NAME_BREW"] = "Lagar de Tragoceniza - BREW"
 L["DUNGEON_SHORT_NAME_BRH"] = "Torreón Grajo Negro - BRH"
---[[Translation missing --]]
---[[ L["DUNGEON_SHORT_NAME_BV"] = ""--]] 
+L["DUNGEON_SHORT_NAME_BV"] = "El Valle Cegador - BV"
 L["DUNGEON_SHORT_NAME_COEN"] = "Catedral de la Noche Eterna - CoEN"
 L["DUNGEON_SHORT_NAME_COS"] = "Corte de las Estrellas - COS"
 L["DUNGEON_SHORT_NAME_COT"] = "Ciudad Tejida - COT"
 L["DUNGEON_SHORT_NAME_DAWN"] = "El Rompealbas - DAWN"
 L["DUNGEON_SHORT_NAME_DFC"] = "Grieta de Flama Oscura - DFC"
 L["DUNGEON_SHORT_NAME_DHT"] = "Arboleda Corazón Oscuro - DHT"
---[[Translation missing --]]
---[[ L["DUNGEON_SHORT_NAME_DON"] = ""--]] 
+L["DUNGEON_SHORT_NAME_DON"] = "Guarida de Nalorakk - DON"
 L["DUNGEON_SHORT_NAME_DOS"] = "El Otro Lado - DOS"
 L["DUNGEON_SHORT_NAME_EB"] = "El Vergel Eterno - EB"
 L["DUNGEON_SHORT_NAME_EDA"] = "Ecodomo Al'dani - EDA"
@@ -217,8 +214,7 @@ L["DUNGEON_SHORT_NAME_MC"] = "Cavernas de Maisara - MC"
 L["DUNGEON_SHORT_NAME_MISTS"] = "Nieblas de Tirna Scithe - MISTS"
 L["DUNGEON_SHORT_NAME_ML"] = "VETA MADRE - ML"
 L["DUNGEON_SHORT_NAME_MOS"] = "Acantilados Boca Infernal - MOS"
---[[Translation missing --]]
---[[ L["DUNGEON_SHORT_NAME_MR"] = ""--]] 
+L["DUNGEON_SHORT_NAME_MR"] = "Frontal de la Muerte - MR"
 L["DUNGEON_SHORT_NAME_MT"] = "Bancal del Magister - MT"
 L["DUNGEON_SHORT_NAME_NELT"] = "Neltharus - NELT"
 L["DUNGEON_SHORT_NAME_NL"] = "Guarida de Neltharion - NL"
@@ -251,8 +247,7 @@ L["DUNGEON_SHORT_NAME_UNDR"] = "Catacumbas Putrefactas - UNDR"
 L["DUNGEON_SHORT_NAME_UPPR"] = "Karazhan: Superior - UPPR"
 L["DUNGEON_SHORT_NAME_VOTW"] = "Cámara de las Celadoras - VOTW"
 L["DUNGEON_SHORT_NAME_VP"] = "Cumbre del Vórtice - VP"
---[[Translation missing --]]
---[[ L["DUNGEON_SHORT_NAME_VSA"] = ""--]] 
+L["DUNGEON_SHORT_NAME_VSA"] = "Arena Lacravacua - VSA"
 L["DUNGEON_SHORT_NAME_WM"] = "Mansión Crestavía - WM"
 L["DUNGEON_SHORT_NAME_WORK"] = "Mechagon: Taller - WORK"
 L["DUNGEON_SHORT_NAME_WS"] = "Aguja Brisaveloz - WS"
@@ -643,8 +638,7 @@ L["RAID_BOSS_NP_6"] = "Nexus-Princess"
 L["RAID_BOSS_NP_7"] = "Silken Court"
 L["RAID_BOSS_NP_8"] = "Queen Ansurek"
 L["RAID_BOSS_RS_1"] = "Halion"
---[[Translation missing --]]
---[[ L["RAID_BOSS_SF_1"] = ""--]] 
+L["RAID_BOSS_SF_1"] = "Pudrelodo"
 L["RAID_BOSS_SFO_1"] = "Guardián vigilante"
 L["RAID_BOSS_SFO_10"] = "Rygelon"
 L["RAID_BOSS_SFO_11"] = "El Carcelero"
@@ -827,18 +821,15 @@ L["RAID_MQD"] = "Marcha a Quel'Danas - MQD"
 L["RAID_MSV"] = "Cámaras Mogu'shan"
 L["RAID_NP"] = "Palacio Nerub'ar - NP"
 L["RAID_RS"] = "El Sagrario Rubí - RS"
---[[Translation missing --]]
---[[ L["RAID_SF"] = ""--]] 
---[[Translation missing --]]
---[[ L["RAID_SOO"] = ""--]] 
+L["RAID_SF"] = "Micosis - SF"
+L["RAID_SOO"] = "Asedio de Orgrimmar - SOO"
 L["RAID_ToES"] = "Veranda de la Primavera Eterna - ToES"
 L["RAID_TOES"] = "Veranda de la Primavera Eterna"
 L["RAID_TOT"] = "Solio del Trueno - ToT"
 L["RAID_TOTFW"] = "Trono de los Cuatro Vientos - TOTFW"
---[[Translation missing --]]
---[[ L["RAID_VA"] = ""--]] 
+L["RAID_VA"] = "Abismo Venenoso - VA"
 L["RAID_VS"] = "Aguja del Vacío - VS"
-L["RAID_VS_DR_MQD"] = "AV/FO/MQD"
+L["RAID_VS_DR_MQD"] = "Aguja/Falla/Marcha - AV/FO/MQD"
 --[[Translation missing --]]
 --[[ L["RAIDERIO"] = ""--]] 
 L["RAIDERIO_AVERAGE_PLAYER_SCORE"] = "Puntuación media de +%s en tiempo"

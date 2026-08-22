@@ -17,13 +17,13 @@
 ## Notes-esMX: BigWigs Midnight Lair Boss Modules
 ## Notes-frFR: BigWigs Midnight Lair Boss Modules
 ## Notes-itIT: BigWigs Midnight Lair Boss Modules
-## Notes-koKR: BigWigs Midnight Lair Boss Modules
+## Notes-koKR: BigWigs 한밤 희귀 보스 모듈
 ## Notes-ptBR: BigWigs Midnight Lair Boss Modules
 ## Notes-ruRU: BigWigs Midnight Lair Boss Modules
 ## Notes-zhCN: BigWigs 潮缚石窟模块
 ## Notes-zhTW: BigWigs 浪縛岩窟模組
 ## IconTexture: Interface\AddOns\BigWigs\Media\Icons\minimap_raid.tga
-## Version: v420
+## Version: v422
 
 ## LoadOnDemand: 1
 ## Dependencies: BigWigs

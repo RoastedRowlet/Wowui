@@ -48,7 +48,7 @@ mod:SetRenames({
 --
 
 mod:SetAuraData({
-	{1295173, soundOnApplied = "warning", header = CL.important, note = CL.dispel}, -- Exploding Infection
+	{1295173, soundOnApplied = "warning", soundOnAppliedDose = "none", header = CL.important, note = CL.dispel}, -- Exploding Infection
 	{1281908, 1281913, soundOnApplied = "warning", duration = 6}, -- Plague Froth (Heroic & Mythic)
 	{1295224, soundOnApplied = "warning"}, -- Siphoning Infection (Main debuff)
 	{1280934, soundOnApplied = "none", soundOnAppliedDose = "none", header = CL.general, note = CL.tank_debuff}, -- Dripping Fangs
@@ -108,15 +108,20 @@ function mod:ENCOUNTER_TIMELINE_EVENT_ADDED(_, eventInfo)
 
 	if durationRounded == 20 or durationRounded == 80 then
 		barInfo = self:Imbibe()
-	elseif durationRounded == 10 or durationRounded == 16
-		or durationRounded == 21 or durationRounded == 31 then
+	elseif durationRounded == 30 or durationRounded == 33 then
 		barInfo = self:PlagueFroth()
-	elseif durationRounded == 8 or durationRounded == 11 or durationRounded == 22 then
+	elseif durationRounded == 8 or durationRounded == 27 or durationRounded == 28 then
 		barInfo = self:DrippingFangs()
-	elseif durationRounded == 23 or durationRounded == 24 then
+	elseif durationRounded == 18 or durationRounded == 52 then
 		barInfo = self:AdaptiveInfection()
-	elseif durationRounded == 6 or durationRounded == 44 then
+	elseif durationRounded == 6 or durationRounded == 39 then
 		barInfo = self:MalignantCatalyst()
+	elseif durationRounded == 13 then
+		if plagueFrothCount == 1 then
+			barInfo = self:PlagueFroth()
+		else
+			barInfo = self:DrippingFangs()
+		end
 	end
 
 	if barInfo then

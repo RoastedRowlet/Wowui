@@ -131,8 +131,7 @@ L["DPS"] = "DPS"
 L["DUNGEON_SHORT_NAME_AA"] = "ADA"
 --[[Translation missing --]]
 --[[ L["DUNGEON_SHORT_NAME_AD"] = ""--]] 
---[[Translation missing --]]
---[[ L["DUNGEON_SHORT_NAME_AOF"] = ""--]] 
+L["DUNGEON_SHORT_NAME_AOF"] = "ADZ"
 --[[Translation missing --]]
 --[[ L["DUNGEON_SHORT_NAME_ARAK"] = ""--]] 
 --[[Translation missing --]]
@@ -141,8 +140,7 @@ L["DUNGEON_SHORT_NAME_AV"] = "CA"
 L["DUNGEON_SHORT_NAME_BH"] = "CDF"
 L["DUNGEON_SHORT_NAME_BREW"] = "MELIFICIO"
 L["DUNGEON_SHORT_NAME_BRH"] = "FC"
---[[Translation missing --]]
---[[ L["DUNGEON_SHORT_NAME_BV"] = ""--]] 
+L["DUNGEON_SHORT_NAME_BV"] = "VA"
 --[[Translation missing --]]
 --[[ L["DUNGEON_SHORT_NAME_COEN"] = ""--]] 
 L["DUNGEON_SHORT_NAME_COS"] = "CDS"
@@ -150,8 +148,7 @@ L["DUNGEON_SHORT_NAME_COT"] = "CDF"
 L["DUNGEON_SHORT_NAME_DAWN"] = "ALBA"
 L["DUNGEON_SHORT_NAME_DFC"] = "FdFO"
 L["DUNGEON_SHORT_NAME_DHT"] = "BC"
---[[Translation missing --]]
---[[ L["DUNGEON_SHORT_NAME_DON"] = ""--]] 
+L["DUNGEON_SHORT_NAME_DON"] = "TDN"
 L["DUNGEON_SHORT_NAME_DOS"] = "DOS"
 L["DUNGEON_SHORT_NAME_EB"] = "VE"
 L["DUNGEON_SHORT_NAME_EDA"] = "ESA"
@@ -169,8 +166,7 @@ L["DUNGEON_SHORT_NAME_HOI"] = "SDI"
 L["DUNGEON_SHORT_NAME_HOV"] = "SDV"
 --[[Translation missing --]]
 --[[ L["DUNGEON_SHORT_NAME_ID"] = ""--]] 
---[[Translation missing --]]
---[[ L["DUNGEON_SHORT_NAME_KR"] = ""--]] 
+L["DUNGEON_SHORT_NAME_KR"] = "RdR"
 --[[Translation missing --]]
 --[[ L["DUNGEON_SHORT_NAME_LOWR"] = ""--]] 
 L["DUNGEON_SHORT_NAME_MC"] = "CDM"
@@ -178,8 +174,7 @@ L["DUNGEON_SHORT_NAME_MISTS"] = "NEBBIE"
 L["DUNGEON_SHORT_NAME_ML"] = "VM"
 --[[Translation missing --]]
 --[[ L["DUNGEON_SHORT_NAME_MOS"] = ""--]] 
---[[Translation missing --]]
---[[ L["DUNGEON_SHORT_NAME_MR"] = ""--]] 
+L["DUNGEON_SHORT_NAME_MR"] = "TdI"
 L["DUNGEON_SHORT_NAME_MT"] = "TDM"
 --[[Translation missing --]]
 --[[ L["DUNGEON_SHORT_NAME_NELT"] = ""--]] 
@@ -207,8 +202,7 @@ L["DUNGEON_SHORT_NAME_SV"] = "VDP"
 --[[ L["DUNGEON_SHORT_NAME_TD"] = ""--]] 
 L["DUNGEON_SHORT_NAME_TJS"] = "TDSDG"
 L["DUNGEON_SHORT_NAME_TOP"] = "TdD"
---[[Translation missing --]]
---[[ L["DUNGEON_SHORT_NAME_TOS"] = ""--]] 
+L["DUNGEON_SHORT_NAME_TOS"] = "TDS"
 L["DUNGEON_SHORT_NAME_TOTT"] = "TDM"
 --[[Translation missing --]]
 --[[ L["DUNGEON_SHORT_NAME_ULD"] = ""--]] 
@@ -217,8 +211,7 @@ L["DUNGEON_SHORT_NAME_UPPR"] = "KS"
 --[[Translation missing --]]
 --[[ L["DUNGEON_SHORT_NAME_VOTW"] = ""--]] 
 L["DUNGEON_SHORT_NAME_VP"] = "PDV"
---[[Translation missing --]]
---[[ L["DUNGEON_SHORT_NAME_VSA"] = ""--]] 
+L["DUNGEON_SHORT_NAME_VSA"] = "ASV"
 L["DUNGEON_SHORT_NAME_WM"] = "MDC"
 L["DUNGEON_SHORT_NAME_WORK"] = "OFFICINA"
 L["DUNGEON_SHORT_NAME_WS"] = "PDV"
@@ -707,20 +700,14 @@ L["RAID_BOSS_SF_1"] = "Fangorrido"
 --[[ L["RAID_BOSS_TOTFW_1"] = ""--]] 
 --[[Translation missing --]]
 --[[ L["RAID_BOSS_TOTFW_2"] = ""--]] 
---[[Translation missing --]]
---[[ L["RAID_BOSS_VA_1"] = ""--]] 
---[[Translation missing --]]
---[[ L["RAID_BOSS_VA_2"] = ""--]] 
---[[Translation missing --]]
---[[ L["RAID_BOSS_VA_3"] = ""--]] 
---[[Translation missing --]]
---[[ L["RAID_BOSS_VA_4"] = ""--]] 
+L["RAID_BOSS_VA_1"] = "Nek'zali la Spiranima"
+L["RAID_BOSS_VA_2"] = "Sentinelle Sepolte"
+L["RAID_BOSS_VA_3"] = "Gli Esploratori Perduti"
+L["RAID_BOSS_VA_4"] = "Vashnik il Maligno"
 --[[Translation missing --]]
 --[[ L["RAID_BOSS_VA_5"] = ""--]] 
---[[Translation missing --]]
---[[ L["RAID_BOSS_VA_6"] = ""--]] 
---[[Translation missing --]]
---[[ L["RAID_BOSS_VA_7"] = ""--]] 
+L["RAID_BOSS_VA_6"] = "Zanne Gemelle"
+L["RAID_BOSS_VA_7"] = "Altare Serpeggiante"
 --[[Translation missing --]]
 --[[ L["RAID_BOSS_VA_8"] = ""--]] 
 --[[Translation missing --]]
@@ -795,7 +782,7 @@ L["RAID_SF"] = "Sporandia"
 --[[Translation missing --]]
 --[[ L["RAID_TOT"] = ""--]] 
 L["RAID_TOTFW"] = "Trono dei Quattro Venti"
-L["RAID_VA"] = "L'Abisso Velenoso"
+L["RAID_VA"] = "Abissi Velenosi"
 L["RAID_VS"] = "Pinnacolo del Vuoto"
 L["RAID_VS_DR_MQD"] = "PdV/FdS/MsQD"
 --[[Translation missing --]]

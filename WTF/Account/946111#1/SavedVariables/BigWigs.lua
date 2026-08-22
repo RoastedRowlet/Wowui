@@ -87,8 +87,8 @@ BigWigs3DB = {
 ["viewerPosition"] = {
 "TOPLEFT",
 "TOPLEFT",
-213,
--182,
+13,
+-156,
 },
 },
 },
@@ -197,14 +197,22 @@ BigWigs3DB = {
 ["Player-3676-0DF7D3EF"] = {
 ["playerRating"] = 992,
 ["specId"] = 1473,
-["keyMap"] = 584,
+["keyMap"] = 0,
 ["name"] = "Barelynoer",
-["keyLevel"] = 9,
+["keyLevel"] = 0,
 ["realm"] = "Area 52",
 },
+["Player-60-0F7B141D"] = {
+["playerRating"] = 2271,
+["specId"] = 264,
+["keyMap"] = 585,
+["name"] = "Zappyxatu",
+["keyLevel"] = 12,
+["realm"] = "Stormrage",
+},
 ["Player-60-0F85ABEF"] = {
-["playerRating"] = 2665,
-["specId"] = 102,
+["playerRating"] = 2743,
+["specId"] = 105,
 ["keyMap"] = 0,
 ["name"] = "Lonelylitten",
 ["keyLevel"] = 0,
@@ -535,9 +543,9 @@ BigWigsStatsDB = {
 },
 [2887] = {
 ["LFR"] = {
-["kills"] = 1,
+["kills"] = 2,
 ["fkDuration"] = 292.4869999999646,
-["wipes"] = 1,
+["wipes"] = 3,
 ["fkWipes"] = 1,
 ["best"] = 292.4869999999646,
 ["bestDate"] = "2026/08/18",
@@ -563,8 +571,11 @@ BigWigsStatsDB = {
 },
 },
 [2888] = {
+["normal"] = {
+["wipes"] = 1,
+},
 ["LFR"] = {
-["kills"] = 1,
+["kills"] = 2,
 ["fkDuration"] = 267.2110000000102,
 ["best"] = 267.2110000000102,
 ["bestDate"] = "2026/08/18",

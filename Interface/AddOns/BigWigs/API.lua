@@ -510,16 +510,12 @@ do
 end
 
 do
-	local pcall = pcall
-	local dummy = UIParent:CreateFontString()
-	dummy:Hide()
-	local IsKnownFile = C_UIFileAsset and C_UIFileAsset.IsKnownFile -- XXX [Mainline:✓ MoP:✗ Wrath:✗ TBC:✗ Vanilla:✗]
+	local IsKnownFile = C_UIFileAsset.IsKnownFile
 	function API.IsValidMediaPath(mediaPath)
-		if IsKnownFile then
-			local result = IsKnownFile(mediaPath)
-			return result
+		if type(mediaPath) ~= "string" then
+			return false
 		else
-			local result = pcall(dummy.SetFont, dummy, mediaPath, 10)
+			local result = IsKnownFile(mediaPath)
 			return result
 		end
 	end

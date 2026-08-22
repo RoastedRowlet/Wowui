@@ -286,14 +286,14 @@ local ICONS_PATH    = MEDIA_PATH .. "icons\\"
 --    altSpellIDs - optional variant teleport spell ids
 -------------------------------------------------------------------------------
 EllesmereUI.SEASON_PORTALS = {
-    { spellID = 1254400, short = "WRS", dungeonID = 2739, names = { "windrunner spire", "шпиль ветрокрылых" } },
-    { spellID = 1254572, short = "MT",  dungeonID = 3085, names = { "magisters' terrace", "терраса магистров" } },
-    { spellID = 1254563, short = "NPX", dungeonID = 3056, names = { "nexus-point xenas", "нексус-пойнт ксенас", "нексус-поинт ксенас" } },
-    { spellID = 1254559, short = "MC",  dungeonID = 3097, names = { "maisara caverns", "пещеры майсара" } },
-    { spellID = 159898,  short = "SR",  dungeonID = 779,  altSpellIDs = { 1254557 }, names = { "skyreach", "небесный путь" } },
-    { spellID = 1254555, short = "PoS", dungeonID = 3113, names = { "pit of saron", "яма сарона" } },
-    { spellID = 1254551, short = "SoT", dungeonID = 3118, names = { "seat of the triumvirate", "престол триумвирата" } },
-    { spellID = 393273,  short = "AA",  dungeonID = 2366, names = { "algeth'ar academy", "академия алгет'ар", "академия алгетар" } },
+    { spellID = 1286801, short = "BV",  dungeonID = 3102, names = { "the blinding vale", "blinding vale", "слепящая долина" } },
+    { spellID = 1286804, short = "VA",  dungeonID = 3106, names = { "voidscar arena", "арена шрама бездны" } },
+    { spellID = 1286807, short = "DoN", dungeonID = 3051, names = { "den of nalorakk", "den of nalorak", "берлога налоракка" } },
+    { spellID = 1286809, short = "MR",  dungeonID = 3090, names = { "murder row", "закоулок душегубов" } },
+    { spellID = 1286812, short = "AoF", dungeonID = 3191, names = { "altar of fangs", "алтарь клыков" } },
+    { spellID = 393256,  short = "RLP", dungeonID = 2361, names = { "ruby life pools", "рубиновые омуты жизни" } },
+    { spellID = 1286828, short = "ToS", dungeonID = 1694, names = { "temple of sethraliss", "храм сетралисс" } },
+    { spellID = 1286831, short = "KR",  dungeonID = 1785, names = { "kings' rest", "king's rest", "гробница королей" } },
 }
 
 local ADDON_ROSTER = {
@@ -3531,6 +3531,14 @@ function EllesmereUI.GetCustomColorsDB()
             if active then active.customColors = active.customColors or {}; return active.customColors end
         else
             -- Global (default): the chosen source profile's palette, used everywhere.
+            -- Heal a dangling source pointer first (profile removed by a path that
+            -- missed the DeleteProfile/RenameProfile cleanup, or a DB saved before
+            -- that cleanup existed): treat it as unset so the first profile takes
+            -- over, instead of silently falling through to the legacy account table.
+            local pull = EllesmereUIDB.colorsPullFrom
+            if pull and not (pdb.profiles and pdb.profiles[pull]) then
+                EllesmereUIDB.colorsPullFrom = nil
+            end
             local srcName = EllesmereUIDB.colorsPullFrom or (pdb.profileOrder and pdb.profileOrder[1])
             local src = srcName and pdb.profiles and pdb.profiles[srcName]
             if src then src.customColors = src.customColors or {}; return src.customColors end
@@ -3847,6 +3855,9 @@ EllesmereUI._fontCache = { path = {}, name = {}, outline = {}, icon = {} }
 EllesmereUI._fontCacheDirty = true
 -- Stand-in key for a nil addonKey (the global font), which cannot index a table.
 EllesmereUI._FONT_KEY_GLOBAL = "\1global"
+-- Dropdown sentinel for "Blizzard Default": resolves to the client's own
+-- standard UI font (STANDARD_TEXT_FONT, locale-aware) in ResolveFontName.
+EllesmereUI.BLIZZARD_FONT_KEY = "__blizzard"
 
 function EllesmereUI.InvalidateFontCache()
     EllesmereUI._fontCacheDirty = true
@@ -3883,6 +3894,12 @@ end
 
 -- Resolve a font name to a full file path
 local function ResolveFontName(fontName)
+    -- Blizzard Default: the client's own standard UI font. Handled before the
+    -- glyph-restriction branch because STANDARD_TEXT_FONT is already
+    -- locale-aware (the engine picks the right face per client language).
+    if fontName == EllesmereUI.BLIZZARD_FONT_KEY then
+        return _G.STANDARD_TEXT_FONT or "Fonts\\FRIZQT__.TTF"
+    end
     -- Explicit Expressway override: bypasses the glyph-restriction mapping below.
     if fontName == EllesmereUI.EXPRESSWAY_FORCED_KEY then
         return MEDIA_PATH .. "fonts\\Expressway.TTF"
@@ -4274,8 +4291,13 @@ function EllesmereUI.BuildFontDropdownData()
         end
         return values, order
     end
-    local values = { ["__global"] = { text = "EUI Global Font" } }
-    local order  = { "__global", "---" }
+    -- "Blizzard Default" sits right under the inherit entry on unrestricted
+    -- locales. Glyph-restricted pickers (branch above) skip it: their "System
+    -- Default" entry already IS the client's own font.
+    local values = { ["__global"] = { text = "EUI Global Font" },
+                     [EllesmereUI.BLIZZARD_FONT_KEY] = { text = "Blizzard Default",
+                         font = _G.STANDARD_TEXT_FONT or "Fonts\\FRIZQT__.TTF" } }
+    local order  = { "__global", EllesmereUI.BLIZZARD_FONT_KEY, "---" }
     local FONT_DIR = EllesmereUI.MEDIA_PATH .. "fonts\\"
     for _, name in ipairs(EllesmereUI.FONT_ORDER) do
         if name == "---" then
@@ -11249,7 +11271,7 @@ end
 -------------------------------------------------------------------------------
 --  Slash commands
 -------------------------------------------------------------------------------
-EllesmereUI.VERSION = "8.9.3"
+EllesmereUI.VERSION = "8.9.8"
 
 -- Register this addon's version into a shared global table (taint-free at load time)
 if not _G._EUI_AddonVersions then _G._EUI_AddonVersions = {} end

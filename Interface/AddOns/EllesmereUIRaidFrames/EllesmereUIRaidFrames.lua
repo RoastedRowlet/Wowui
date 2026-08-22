@@ -711,6 +711,7 @@ local separatedHdrs  = {}   -- [1..8] group headers
 local containerFrame = nil  -- top-level positioning frame
 ns._flatButtons      = {}   -- buttons owned by the flat (merged) header
 ns._flatHeader       = nil  -- single header for merge-groups mode
+ns._flatGfStr        = nil  -- merged groupFilter LayoutGroups would write (Self Position fallback)
 local eventFrame     = CreateFrame("Frame")
 local unitTrackers   = {}  -- [unitToken] = tracker frame
 local inCombat       = false
@@ -1968,7 +1969,7 @@ ns.ApplyHealAbsorbStyle = function(haBar, style, settings)
     if style == "healBlizzModern" or style == "largeOutlinedStripes" or style == "largeOutlinedStripesR" then hc = { r = 1, g = 1, b = 1 } end
     local mask = haBar._absorbMask
     haBar:SetStatusBarTexture(tex)
-    haBar:SetStatusBarColor(hc.r, hc.g, hc.b, alpha)
+    haBar:SetStatusBarColor(hc.r or 0.8, hc.g or 0.15, hc.b or 0.15, alpha)
     local tiled = (style == "striped" or style == "stripedReversed" or style == "stripedThick" or style == "stripedThickR" or style == "largeStripes" or style == "largeStripesR" or style == "largeOutlinedStripes" or style == "largeOutlinedStripesR")
     local fill = haBar:GetStatusBarTexture()
     if fill then
@@ -1998,7 +1999,7 @@ ns.ApplyMaxHealthStyle = function(bar, style, settings)
     local mc = settings and settings.maxHealthColor or { r = 0.7, g = 0.1, b = 0.1 }
     if style == "healBlizzModern" or style == "largeOutlinedStripes" or style == "largeOutlinedStripesR" then mc = { r = 1, g = 1, b = 1 } end
     bar:SetStatusBarTexture(tex)
-    bar:SetStatusBarColor(mc.r, mc.g, mc.b, alpha)
+    bar:SetStatusBarColor(mc.r or 0.7, mc.g or 0.1, mc.b or 0.1, alpha)
     local fill = bar:GetStatusBarTexture()
     if fill then
         fill:SetDrawLayer("ARTWORK", 3)
@@ -2040,9 +2041,12 @@ local function CreateAbsorbBar(button, healthBar)
     -- CLAMPTOBLACKADDITIVE is what makes the mask a BOUND: the default wrap
     -- extends the white edge pixels past the mask's rect, so the backfill
     -- rendered unmasked over missing health (doubled onto the forward bar).
+    -- NEAREST because WHITE8X8 is 8x8: stretched over the rect, bilinear blends
+    -- the edge texel with the black border across the outer 1/16 of each side,
+    -- and that alpha ramp read as a shadow along the overshield's edges.
     local curMask = healthBar:CreateMaskTexture()
     curMask:SetAllPoints(curClip)
-    curMask:SetTexture("Interface\\Buttons\\WHITE8X8", "CLAMPTOBLACKADDITIVE", "CLAMPTOBLACKADDITIVE")
+    curMask:SetTexture("Interface\\Buttons\\WHITE8X8", "CLAMPTOBLACKADDITIVE", "CLAMPTOBLACKADDITIVE", "NEAREST")
 
     -- Backfill bar (overflow): grows into filled health from the right edge.
     -- Child of the HEALTH BAR, not curClip -- the filled-region bound rides
@@ -2678,7 +2682,8 @@ local function UpdateAbsorb(button, unit)
             ha._styleNone = (haStyle == "none")
             if not ha._styleNone then
                 local hc = s.healAbsorbColor or { r = 0.8, g = 0.15, b = 0.15 }
-                local haKey = (haStyle or "") .. (s.healAbsorbOpacity or 75) .. hc.r .. hc.g .. hc.b
+                local hcR, hcG, hcB = hc.r or 0.8, hc.g or 0.15, hc.b or 0.15
+                local haKey = (haStyle or "") .. (s.healAbsorbOpacity or 75) .. hcR .. hcG .. hcB
                 if ha._lastHaKey ~= haKey then
                     ha._lastHaKey = haKey
                     ns.ApplyHealAbsorbStyle(ha, haStyle, s)
@@ -2879,7 +2884,8 @@ local function UpdateAbsorb(button, unit)
             rmh._styleNone = (rmhStyle == "none")
             if not rmh._styleNone then
                 local mc = s.maxHealthColor or { r = 0.7, g = 0.1, b = 0.1 }
-                local rmhKey = rmhStyle .. (s.maxHealthOpacity or 100) .. mc.r .. mc.g .. mc.b
+                local mcR, mcG, mcB = mc.r or 0.7, mc.g or 0.1, mc.b or 0.1
+                local rmhKey = rmhStyle .. (s.maxHealthOpacity or 100) .. mcR .. mcG .. mcB
                 if rmh._lastRmhKey ~= rmhKey then
                     rmh._lastRmhKey = rmhKey
                     ns.ApplyMaxHealthStyle(rmh, rmhStyle, s)
@@ -2955,10 +2961,20 @@ function ns.DebuffGridPoint(s, idx0, total, opts)
     else                       gvx = 1   -- RIGHT or CENTER
     end
 
-    -- Row-stack vector (perpendicular). Explicit wrap direction wins; else derive away from the anchored edge.
+    -- Row-stack vector (perpendicular). CENTER growth stacks away from the
+    -- position's own edge (ResolveFlowAnchor parity); wrap has no options
+    -- setter and defaults to "UP", so letting it win here put this preview's
+    -- rows on the opposite side from the live frame. Otherwise the explicit
+    -- wrap direction wins, else derive away from the anchored edge.
     local svx, svy = 0, 0
     local wrap = s.debuffWrapDirection
-    if     wrap == "UP"    then svy = 1
+    local centerSvy
+    if grow == "CENTER" then
+        if pos:find("top", 1, true) then centerSvy = -1
+        elseif pos:find("bottom", 1, true) then centerSvy = 1 end
+    end
+    if     centerSvy       then svy = centerSvy
+    elseif wrap == "UP"    then svy = 1
     elseif wrap == "DOWN"  then svy = -1
     elseif wrap == "RIGHT" then svx = 1
     elseif wrap == "LEFT"  then svx = -1
@@ -3753,21 +3769,17 @@ ns._StyleButtonSecure = function(button)
         button:SetAttribute("*type2", "togglemenu")
     end
 
-    -- Hover ping support: without it a mouseover ping falls through to the 3D world (the ping system
-    -- only targets units on frames flagged as ping receivers). Mix in the pingable-unit type, set
-    -- the secure "ping-receiver" attribute, and resolve the target GUID live from our "unit"
-    -- attribute so it tracks the current occupant after sorts/roster changes; returning nil lets the
-    -- ping fall through. The GUID can be SECRET: hand it over raw, never guard or stringify it.
-    -- Writes are safe -- our own spawned secure template, once per button, out of combat.
+    -- Hover ping support, MIXIN-PURE: Blizzard's mixin methods run untouched
+    -- (its GetTargetInfo resolves the unit from our "unit" attribute, which
+    -- tracks the current occupant across sorts). Never override
+    -- GetIsPingable/GetTargetInfo -- addon Lua in the ping path makes a
+    -- secret GUID "inaccessible" to PingManager's securecopy (hard error +
+    -- wedged listener), and a secrecy-guarded override deadens pings in all
+    -- restricted content (both field-failed 2026-08-20). Writes are safe --
+    -- our own spawned secure template, once per button, out of combat.
     if PingableType_UnitFrameMixin then
         Mixin(button, PingableType_UnitFrameMixin)
         button:SetAttribute("ping-receiver", true)
-        button.GetTargetPingGUID = function(self)
-            local u = self:GetAttribute("unit")
-            if u and UnitExists(u) then
-                return UnitGUID(u)
-            end
-        end
     end
 
     -- Register for click-casting (EUI built-in system)
@@ -4085,7 +4097,7 @@ local function UpdateButton(button)
         local stc = s.statusTextColor or { r = 1, g = 1, b = 1 }
         if s.statusTextPosition == "none" then
             d.statusText:Hide()
-        elseif s.showIncomingRez and UnitHasIncomingResurrection(unit) then
+        elseif s.showIncomingRez and ns._RFRezShown(unit) then
             -- Being resurrected: hide status text so the incoming-rez icon (same spot) isn't covered.
             d.statusText:Hide()
         elseif not UnitIsConnected(unit) then
@@ -4229,6 +4241,37 @@ end
 -------------------------------------------------------------------------------
 local readyCheckActive = false
 
+-- Incoming-rez indicator state. UnitHasIncomingResurrection covers only the CAST
+-- window: it drops to false the moment the cast lands, while the target still has
+-- the accept dialog up. ns._rezPend carries the unit across that edge: true while
+-- a cast has been seen, then a GetTime() expiry latched when the flag falls on a
+-- still-dead unit (the offer window). Cleared on accept (alive read), a fresh
+-- cast, roster shifts (unit tokens move), or the 60s offer expiry. A cancelled
+-- cast latches too -- the completion and cancel edges are indistinguishable
+-- without a combat log; the alive-clear and expiry bound the miss.
+ns._rezPend = {}
+
+-- Shared predicate for the rez icon and the DEAD-text suppression at all paint
+-- sites. Writes the casting mark itself so a cast already in flight at paint
+-- time (login, roster reassignment) still latches when its completion edge fires.
+-- PURE otherwise: it must NEVER clear the latch -- many painters call it (status
+-- text, Extra Frames duplicates, full passes) and whichever read first would
+-- consume the entry before the icon's own repaint, stranding the icon shown.
+-- Clearing belongs to the owners: the INCOMING edges, the UNIT_HEALTH alive
+-- edge, the expiry timer, and the roster wipe -- each repaints what it clears.
+ns._RFRezShown = function(unit)
+    if UnitHasIncomingResurrection(unit) then
+        ns._rezPend[unit] = true
+        return true
+    end
+    local exp = ns._rezPend[unit]
+    if type(exp) ~= "number" then return false end
+    if GetTime() >= exp or not UnitIsDeadOrGhost(unit) then
+        return false
+    end
+    return true
+end
+
 -- d.readyCheck is shared by the ready-check, incoming-summon and incoming-rez indicators (rez only
 -- on dead units). Priority: active ready check > pending summon > incoming rez.
 local function UpdateReadyCheck(button, unit)
@@ -4283,8 +4326,9 @@ local function UpdateReadyCheck(button, unit)
         end
     end
 
-    -- Incoming resurrection (being cast / waiting to accept). Lowest priority; shows a body is already being picked up.
-    if s.showIncomingRez and unit and UnitHasIncomingResurrection(unit) then
+    -- Incoming resurrection (cast in flight, or the latched unaccepted-offer window
+    -- -- see ns._RFRezShown). Lowest priority; shows a body is already being picked up.
+    if s.showIncomingRez and unit and ns._RFRezShown(unit) then
         tex:SetTexCoord(0, 1, 0, 1)
         tex:SetTexture("Interface\\RaidFrame\\Raid-Icon-Rez")
         tex:Show()
@@ -4610,7 +4654,7 @@ ns._UpdateButtonHealth = function(button)
         local stc = s.statusTextColor or { r = 1, g = 1, b = 1 }
         if s.statusTextPosition == "none" then
             d.statusText:Hide()
-        elseif s.showIncomingRez and UnitHasIncomingResurrection(unit) then
+        elseif s.showIncomingRez and ns._RFRezShown(unit) then
             -- Being resurrected: hide the status text so the incoming-rez icon isn't covered.
             d.statusText:Hide()
         elseif not UnitIsConnected(unit) then
@@ -4632,6 +4676,24 @@ ns._UpdateButtonHealth = function(button)
 
     -- Background + dead/offline tint. This path owns death/resurrect transitions arriving via UNIT_HEALTH, so it restores the bg when alive.
     ns._ApplyHealthBg(d, health, s, unit)
+
+    -- Debuff Manager dead-corpse swap rides the same ownership: one field read
+    -- for every button without a qualifying config.
+    if d.dmDeadSwap then ns.DM_DeadEdge(d, unit) end
+end
+
+-- Two-step max-health landing (max first, value after): one next-frame re-read
+-- settles torn numbers; the flag collapses a raid-wide change to one pass per
+-- button (canonical story: UF engine RESETTLE_EVENTS). Flag lives in FFD --
+-- header children never carry insecure keys.
+ns._ResettleButtonHealth = function(button)
+    local d = GetFFD(button)
+    if d.hpResettle then return end
+    d.hpResettle = true
+    C_Timer.After(0, function()
+        d.hpResettle = nil
+        if button:IsVisible() then ns._UpdateButtonHealth(button) end
+    end)
 end
 
 -------------------------------------------------------------------------------
@@ -5773,6 +5835,7 @@ XF.EnsureBuilt = function(count)
             if not b:IsVisible() then return end
             if event == "UNIT_HEALTH" or event == "UNIT_MAXHEALTH" then
                 ns._UpdateButtonHealth(b)
+                if event == "UNIT_MAXHEALTH" then ns._ResettleButtonHealth(b) end
             elseif event == "UNIT_AURA" then
                     -- Aura displays are engine containers; only the absorb
                     -- overlay is event-driven here.
@@ -5801,6 +5864,10 @@ XF.EnsureBuilt = function(count)
                 or event == "UNIT_HEAL_PREDICTION" or event == "UNIT_MAX_HEALTH_MODIFIERS_CHANGED" then
                 UpdateAbsorb(b, unit)
                 if event == "UNIT_HEAL_ABSORB_AMOUNT_CHANGED" then ns.UpdateHealAbsorbTextFor(b, unit) end
+                if event == "UNIT_MAX_HEALTH_MODIFIERS_CHANGED" then
+                    ns._UpdateButtonHealth(b)
+                    ns._ResettleButtonHealth(b)
+                end
             elseif event == "UNIT_THREAT_LIST_UPDATE" or event == "UNIT_THREAT_SITUATION_UPDATE" then
                 local d = GetFFD(b)
                 if d.threatFrame then
@@ -6005,7 +6072,8 @@ end -- XF scope block
 --  per-group nameList listing every member with the player first, so the
 --  secure header orders natively -- no SetPoint override, no flicker.
 --  showPlayer can't exclude the player in a raid, so the party-style self
---  button doesn't apply here. Non-merged only (ignored when Merge Groups on).
+--  button doesn't apply here. Merged mode pins the player via a whole-raid
+--  nameList instead (ns._BuildMergedSelfNameList below).
 -------------------------------------------------------------------------------
 -- Player's raid subgroup (1-8). Party/solo collapses to group 1.
 function ns._GetPlayerSubgroup()
@@ -6180,10 +6248,54 @@ function ns._BuildArenaNameList(hideSelf, selfFirst, selfLast, sortByRole, roleO
     return table.concat(names, ",")
 end
 
+-- Whole-raid nameList for Merge Groups + Self Position: player pinned first
+-- (or last), everyone else in the active sort (role blocks in ROLE mode, raid
+-- index otherwise). Replaces the flat header's groupFilter, so members of
+-- groups hidden via Show Groups are simply not listed. Bails to nil while any
+-- name is unresolved (a nameList missing a member HIDES that frame); the
+-- caller falls back to the engine path until names resolve.
+function ns._BuildMergedSelfNameList(sortByRole, roleOrder, selfLast, visibleGroups)
+    if not IsInRaid() then return nil end
+    local pri
+    if sortByRole then
+        pri = {}
+        for p, r in ipairs(roleOrder) do pri[r] = p end
+    end
+    local members = {}
+    local n = GetNumGroupMembers()
+    for i = 1, n do
+        local name, _, subgroup = GetRaidRosterInfo(i)
+        if not name or name == UNKNOWNOBJECT then return nil end
+        if not visibleGroups or visibleGroups[subgroup] ~= false then
+            local unit = "raid" .. i
+            local rp = 99
+            if pri then rp = pri[UnitGroupRolesAssigned(unit)] or 99 end
+            members[#members + 1] = {
+                name = name,
+                isPlayer = UnitIsUnit(unit, "player"),
+                rolePri = rp,
+                index = i,
+            }
+        end
+    end
+    if #members == 0 then return nil end
+    table.sort(members, function(a, b)
+        -- Player to top (self-first) or bottom (self-last); exactly one of a/b
+        -- is the player in this branch, so the XOR with selfLast flips it.
+        if a.isPlayer ~= b.isPlayer then return a.isPlayer ~= selfLast end
+        if sortByRole and a.rolePri ~= b.rolePri then return a.rolePri < b.rolePri end
+        return a.index < b.index
+    end)
+    local names = {}
+    for _, m in ipairs(members) do names[#names + 1] = m.name end
+    return table.concat(names, ",")
+end
+
 -------------------------------------------------------------------------------
 --  Apply sort attributes to all headers. Show Self First (raid) uses the
---  per-group nameList (see the Show Self First banner above). Non-merged,
---  in-raid only. Expensive Hide/Show runs only when an attribute actually changed.
+--  per-group nameList (see the Show Self First banner above); merged mode
+--  uses the whole-raid nameList (ns._BuildMergedSelfNameList). Expensive
+--  Hide/Show runs only when an attribute actually changed.
 -------------------------------------------------------------------------------
 local function ApplySortToHeaders()
     if not containerFrame or InCombatLockdown() then return end
@@ -6225,9 +6337,22 @@ local function ApplySortToHeaders()
     end
 
     if s.mergeGroups and ns._flatHeader then
-        -- Flat header's groupFilter is managed by LayoutGroups; pass it through.
-        applySortTo(ns._flatHeader, baseGroupBy, baseSortMethod, baseGroupingOrder, nil,
-            ns._flatHeader:GetAttribute("groupFilter"))
+        -- Self Position in merged mode: a whole-raid nameList owns the order
+        -- (player pinned, rest by the active sort), so groupFilter must be
+        -- CLEARED -- the list itself only names visible groups' members --
+        -- and groupBy nil so the list order is what the header uses (same
+        -- combo as the non-merged player's-group path). While names are
+        -- unresolved (builder bailed) the engine path runs instead, with
+        -- LayoutGroups' groupFilter restored from ns._flatGfStr.
+        local mergedSelf = (s.showSelfFirst or s.showSelfLast) and IsInRaid()
+        local mergedList = mergedSelf
+            and ns._BuildMergedSelfNameList(sortByRole, roleOrder, selfLast, s.visibleGroups) or nil
+        if mergedList then
+            applySortTo(ns._flatHeader, nil, "NAMELIST", "", mergedList, nil)
+        else
+            applySortTo(ns._flatHeader, baseGroupBy, baseSortMethod, baseGroupingOrder, nil,
+                ns._flatGfStr or ns._flatHeader:GetAttribute("groupFilter"))
+        end
     else
         for group = 1, 8 do
             local hdr = separatedHdrs[group]
@@ -6583,7 +6708,14 @@ ns._LayoutGroupsImpl = function()
             ns._flatHeader:ClearAllPoints()
             ns._flatHeader:SetPoint("TOPLEFT", containerFrame, "TOPLEFT", 0, 0)
             local layoutChanged = false
-            if ns._flatHeader:GetAttribute("groupFilter") ~= gfStr then
+            -- While Self Position owns the merged header (whole-raid nameList,
+            -- applied by ApplySortToHeaders at the end of this pass), a
+            -- groupFilter write here would fight its clear on every pass. Cache
+            -- the string instead -- ApplySortToHeaders restores it whenever the
+            -- nameList bails on unresolved names.
+            ns._flatGfStr = gfStr
+            local selfOwnsHeader = (s.showSelfFirst or s.showSelfLast) and IsInRaid()
+            if not selfOwnsHeader and ns._flatHeader:GetAttribute("groupFilter") ~= gfStr then
                 ns._flatHeader:SetAttribute("groupFilter", gfStr)
             end
             if ns._flatHeader:GetAttribute("point") ~= hdrPoint
@@ -7834,6 +7966,9 @@ local function OnEvent(self, event, arg1, ...)
             ns._LayoutPartyFrames()
         end
     elseif event == "GROUP_ROSTER_UPDATE" or event == "PARTY_LEADER_CHANGED" then
+        -- Unit tokens reindex on roster changes; a latched rez offer keyed by the
+        -- old token would paint on the wrong player, so drop them all.
+        if event == "GROUP_ROSTER_UPDATE" then wipe(ns._rezPend) end
         if inCombat then
             ns._rosterDirtyInCombat = true
             -- Check if size tier changed during combat (deferred to REGEN)
@@ -7985,12 +8120,31 @@ local function OnEvent(self, event, arg1, ...)
     elseif event == "UNIT_HEALTH" then
         local btn = unitToButton[arg1] or ns._partyUnitToButton[arg1]
         if btn then
+            -- Latched rez offer: the accept lands as a health edge (no further
+            -- INCOMING_RESURRECT_CHANGED). This edge OWNS the alive-clear (the
+            -- predicate is deliberately pure), then repaints the shared icon.
+            -- Clearing here also stops a lingering offer window from painting a
+            -- fresh, unrezzed corpse if the unit dies again. Nil lookup for
+            -- everyone else.
+            local hadRez = ns._rezPend[arg1]
+            if hadRez ~= nil and hadRez ~= true and not UnitIsDeadOrGhost(arg1) then
+                ns._rezPend[arg1] = nil
+            end
             ns._UpdateButtonHealth(btn)
+            if hadRez then UpdateReadyCheck(btn, arg1) end
         end
     elseif event == "UNIT_MAXHEALTH" then
         local btn = unitToButton[arg1] or ns._partyUnitToButton[arg1]
         if btn then
+            -- Same latch ownership as UNIT_HEALTH: on accept both fire in
+            -- unguaranteed order, and whichever runs first must fix the icon.
+            local hadRez = ns._rezPend[arg1]
+            if hadRez ~= nil and hadRez ~= true and not UnitIsDeadOrGhost(arg1) then
+                ns._rezPend[arg1] = nil
+            end
             ns._UpdateButtonHealth(btn)
+            ns._ResettleButtonHealth(btn)
+            if hadRez then UpdateReadyCheck(btn, arg1) end
         end
     elseif event == "UNIT_POWER_UPDATE" then
         -- Healer Mana Display rides the same per-unit registration: one hash
@@ -8031,6 +8185,10 @@ local function OnEvent(self, event, arg1, ...)
         if btn then
             UpdateAbsorb(btn, arg1)
             if event == "UNIT_HEAL_ABSORB_AMOUNT_CHANGED" then ns.UpdateHealAbsorbTextFor(btn, arg1) end
+            if event == "UNIT_MAX_HEALTH_MODIFIERS_CHANGED" then
+                ns._UpdateButtonHealth(btn)
+                ns._ResettleButtonHealth(btn)
+            end
         end
     elseif event == "UNIT_NAME_UPDATE" then
         local btn = unitToButton[arg1] or ns._partyUnitToButton[arg1]
@@ -8153,9 +8311,34 @@ local function OnEvent(self, event, arg1, ...)
             if u and btn:IsVisible() then UpdateReadyCheck(btn, u) end
         end
     elseif event == "INCOMING_RESURRECT_CHANGED" then
-        -- Fires with a unit payload when a rez starts/stops on that unit. Refresh the
-        -- status text (so DEAD hides while rezzing / reappears after) as well as the
-        -- shared rez icon.
+        -- Fires with a unit payload when a rez starts/stops on that unit. The stop
+        -- edge on a still-dead unit that was being cast on latches the offer window
+        -- (ns._RFRezShown keeps the icon up until accept/expiry); the single-shot
+        -- timer is the only thing that repaints an untouched corpse at expiry.
+        if arg1 then
+            if UnitHasIncomingResurrection(arg1) then
+                ns._rezPend[arg1] = true
+            elseif ns._rezPend[arg1] == true then
+                if UnitIsDeadOrGhost(arg1) then
+                    local exp = GetTime() + 60
+                    ns._rezPend[arg1] = exp
+                    local unit = arg1
+                    C_Timer.After(60.1, function()
+                        if ns._rezPend[unit] ~= exp then return end
+                        ns._rezPend[unit] = nil
+                        local b = unitToButton[unit] or ns._partyUnitToButton[unit]
+                        if b and b:IsVisible() then
+                            if ns._UpdateButtonHealth then ns._UpdateButtonHealth(b) end
+                            UpdateReadyCheck(b, unit)
+                        end
+                    end)
+                else
+                    ns._rezPend[arg1] = nil
+                end
+            end
+        end
+        -- Refresh the status text (so DEAD hides while rezzing / reappears after)
+        -- as well as the shared rez icon.
         local btn = unitToButton[arg1] or ns._partyUnitToButton[arg1]
         if btn and btn:IsVisible() then
             if ns._UpdateButtonHealth then ns._UpdateButtonHealth(btn) end
@@ -11323,10 +11506,13 @@ local function BuildPreviewRoles()
 
     -- Sort within each group based on sort settings
     local sortMode = db.profile.sortMode or "INDEX"
-    -- Self ordering is non-merged only (ignored when Merge Groups is enabled).
-    -- showSelfFirst here means "self ordering active"; selfLast picks the end.
-    local selfLast = db.profile.showSelfLast and not db.profile.mergeGroups
-    local showSelfFirst = (db.profile.showSelfFirst or db.profile.showSelfLast) and not db.profile.mergeGroups
+    -- Self ordering pins the player first (or last). Separated mode moves the
+    -- player within each preview group; merged mode flows the whole grid in
+    -- one sort, which the per-group preview approximates with the player at
+    -- the first cell. showSelfFirst here means "self ordering active";
+    -- selfLast picks the end.
+    local selfLast = db.profile.showSelfLast
+    local showSelfFirst = db.profile.showSelfFirst or db.profile.showSelfLast
     previewRoles._playerSlot = 1  -- default: player is slot 1
 
     if sortMode == "ROLE" or showSelfFirst then
@@ -11921,7 +12107,7 @@ local function ApplyPreviewData(f, index)
             local hpH = healthH
             local mask = f._healAbsorbBar._mask
             f._healAbsorbBar:SetStatusBarTexture(haTex)
-            f._healAbsorbBar:SetStatusBarColor(hc.r, hc.g, hc.b, haAlpha)
+            f._healAbsorbBar:SetStatusBarColor(hc.r or 0.8, hc.g or 0.15, hc.b or 0.15, haAlpha)
             f._healAbsorbBar:SetWidth(hpW)
             f._healAbsorbBar:SetHeight(hpH)
             local haFillPv = f._healAbsorbBar:GetStatusBarTexture()

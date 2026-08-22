@@ -7,9 +7,20 @@ local issecretvalue = Grid2.issecretvalue
 local AlignPoints = Grid2.AlignPoints
 local defaultBackColor = { r=0, g=0, b=0, a=1 }
 
+-- helper functions
+local function ReleaseAuraColorsSlots(self, parent, f)
+	local count = f.countSlots
+	if count then
+		for i=1,count do
+			self:ReleaseAuraSlotButton(parent, i)
+		end
+		f.countSlots = nil
+	end
+end
+
+-- indicator methods
 local function Bar_CreateHH(self, parent)
 	local bar = self:Acquire("StatusBar", parent)
-	bar.indicator = self
 	bar:SetStatusBarColor(0,0,0,0)
 	bar:SetMinMaxValues(0, 1)
 	bar:SetValue(0)
@@ -19,24 +30,25 @@ local function Bar_CreateHH(self, parent)
 end
 
 local function Bar_LayoutAuraColor(self, parent, f, level)
+	ReleaseAuraColorsSlots(self, parent, f)
 	local color = self.sideKick
 	if color.auraMode then
-		local filter = color:GetStatusAurasFilter()
-		self:AcquireAuraSlotButton(parent, filter, function(_, _, button)
-			local tex = f:GetStatusBarTexture()
-			button:ClearAllPoints()
-			button:SetAllPoints(f)
-			button:SetFrameLevel(level)
-			local ctex = button.__texture or button:CreateTexture(nil, "OVERLAY", nil, 7)
-			ctex:ClearAllPoints(tex)
-			ctex:SetTexture(self.texture)
-			ctex:SetBlendMode('BLEND')
-			ctex:SetAllPoints(tex)
-			button:SetAuraBorder(ctex, filter.borderOptions)
-			button.__texture = ctex
-		end)
-	else
-		self:ReleaseAuraSlotButton(parent)
+		local tex = f:GetStatusBarTexture()
+		for filter, status, index in color:IterateStatusAurasFilters(self.maxSlots) do
+			self:AcquireAuraSlotButton(parent, filter, function(_, _, button)
+				button:ClearAllPoints()
+				button:SetAllPoints(f)
+				button:SetFrameLevel(level)
+				local ctex = button.__texture or button:CreateTexture(nil, "OVERLAY", nil, -index)
+				ctex:ClearAllPoints(tex)
+				ctex:SetTexture(self.texture)
+				ctex:SetBlendMode('BLEND')
+				ctex:SetAllPoints(tex)
+				button:SetAuraBorder(ctex, filter.borderOptions)
+				button.__texture = ctex
+				f.countSlots = index
+			end, nil, index)
+		end
 	end
 end
 
@@ -140,10 +152,7 @@ local function Bar_Disable(self, parent)
 	bar:Hide()
 	bar:SetParent(nil)
 	bar:ClearAllPoints()
-end
-
-local function Bar_Destroy(self, parent, bar)
-	bar.indicator = nil
+	ReleaseAuraColorsSlots(self, parent, bar)
 end
 
 local function Bar_UpdateDB(self)
@@ -167,6 +176,7 @@ local function Bar_UpdateDB(self)
 	self.direction   = (dbx.duration==true and 1) or (dbx.duration==false and 0) or nil
 	self.interpol    = dbx.interpolation or 0
 	self.OnUpdate    = dbx.duration~=nil and Bar_OnUpdateD or Bar_OnUpdate
+	self.maxSlots    = Grid2.db.profile.formatting.maxAuraColorSlots or 3
 end
 
 local function BarColor_OnUpdate(self, parent, unit, status)
@@ -213,7 +223,6 @@ local function Create(indicatorKey, dbx)
 	local Bar = Grid2.indicatorPrototype:new(indicatorKey)
 	Bar.dbx            = dbx
 	Bar.Create         = Bar_CreateHH
-	Bar.Destroy        = Bar_Destroy
 	Bar.OnUpdate       = Bar_OnUpdate
 	Bar.SetOrientation = Bar_SetOrientation
 	Bar.Disable        = Bar_Disable

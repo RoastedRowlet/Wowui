@@ -18,7 +18,7 @@ HarreksAdvancedRaidFrames: disabled
 Blizzard_CombatText: enabled
 CraftScan: enabled
 Bartender4: disabled
-idTip: enabled
+idTip: disabled
 EllesmereUINameplates: enabled
 EllesmereUIResourceBars: enabled
 EllesmereUIUnitFrames: enabled
@@ -147,4 +147,4 @@ LFGInspect: enabled
 Mass_Salvage_Assist: enabled
 MythicDungeonTools_UI: enabled
 SpellOverlay Enhanced: enabled
-TotemRecall: enabled
+TotemRecall: disabled

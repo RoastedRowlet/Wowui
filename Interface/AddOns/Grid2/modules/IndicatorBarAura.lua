@@ -15,6 +15,8 @@ local function Bar_Layout(self, parent)
 		return
 	end
 	local f = parent[self.name]
+	f:SetParent(parent)
+	f:ClearAllPoints()
 	f:SetAllPoints()
 	self:AcquireAuraSlotButton(parent, nil, function(_, _, button, filter, status)
 		button:Hide()
@@ -105,8 +107,6 @@ local function Create(indicatorKey, dbx)
 	local Bar = Grid2.indicatorPrototype:new(indicatorKey)
 	Bar.dbx            = dbx
 	Bar.Create         = Bar_Create
-	Bar.Destroy        = Bar_Destroy
-	Bar.OnUpdate       = Bar_OnUpdate
 	Bar.SetOrientation = Bar_SetOrientation
 	Bar.Disable        = Bar_Disable
 	Bar.Layout         = Bar_Layout

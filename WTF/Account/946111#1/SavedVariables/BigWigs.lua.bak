@@ -194,21 +194,29 @@ BigWigs3DB = {
 },
 },
 ["myKeystones"] = {
-["Player-60-0F85ABEF"] = {
-["playerRating"] = 2665,
-["specId"] = 105,
-["keyMap"] = 399,
-["name"] = "Lonelylitten",
-["keyLevel"] = 11,
-["realm"] = "Stormrage",
-},
 ["Player-3676-0DF7D3EF"] = {
 ["playerRating"] = 992,
 ["specId"] = 1473,
-["keyMap"] = 584,
+["keyMap"] = 0,
 ["name"] = "Barelynoer",
-["keyLevel"] = 9,
+["keyLevel"] = 0,
 ["realm"] = "Area 52",
+},
+["Player-60-0F7B141D"] = {
+["playerRating"] = 2271,
+["specId"] = 264,
+["keyMap"] = 0,
+["name"] = "Zappyxatu",
+["keyLevel"] = 0,
+["realm"] = "Stormrage",
+},
+["Player-60-0F85ABEF"] = {
+["playerRating"] = 2743,
+["specId"] = 105,
+["keyMap"] = 0,
+["name"] = "Lonelylitten",
+["keyLevel"] = 0,
+["realm"] = "Stormrage",
 },
 },
 ["prevWeeklyReset"] = 1787065200,
@@ -516,8 +524,8 @@ BigWigsStatsDB = {
 [2882] = {
 ["normal"] = {
 ["kills"] = 1,
-["bestDate"] = "2026/08/19",
 ["fkDate"] = "2026/08/19",
+["bestDate"] = "2026/08/19",
 ["best"] = 332.8079999999609,
 ["fkDuration"] = 332.8079999999609,
 },
@@ -525,10 +533,10 @@ BigWigsStatsDB = {
 [2871] = {
 ["normal"] = {
 ["kills"] = 1,
-["bestDate"] = "2026/08/19",
-["best"] = 377.4539999999688,
-["fkWipes"] = 1,
 ["fkDate"] = "2026/08/19",
+["bestDate"] = "2026/08/19",
+["fkWipes"] = 1,
+["best"] = 377.4539999999688,
 ["wipes"] = 1,
 ["fkDuration"] = 377.4539999999688,
 },
@@ -536,8 +544,8 @@ BigWigsStatsDB = {
 [2874] = {
 ["normal"] = {
 ["kills"] = 1,
-["bestDate"] = "2026/08/19",
 ["fkDate"] = "2026/08/19",
+["bestDate"] = "2026/08/19",
 ["best"] = 354.4259999999777,
 ["fkDuration"] = 354.4259999999777,
 },
@@ -552,8 +560,11 @@ BigWigsStatsDB = {
 },
 },
 [2888] = {
+["normal"] = {
+["wipes"] = 1,
+},
 ["LFR"] = {
-["kills"] = 1,
+["kills"] = 2,
 ["fkDate"] = "2026/08/18",
 ["bestDate"] = "2026/08/18",
 ["best"] = 267.2110000000102,
@@ -562,12 +573,12 @@ BigWigsStatsDB = {
 },
 [2887] = {
 ["LFR"] = {
-["kills"] = 1,
+["kills"] = 2,
 ["fkDate"] = "2026/08/18",
 ["bestDate"] = "2026/08/18",
 ["fkWipes"] = 1,
 ["best"] = 292.4869999999646,
-["wipes"] = 1,
+["wipes"] = 3,
 ["fkDuration"] = 292.4869999999646,
 },
 },

@@ -10,10 +10,11 @@ mod:SetRespawnTime(30)
 mod:SetStage(1)
 if mod:Retail() then -- Midnight+
 	mod:SetAuraData({
-		{385518}, -- Chillstorm
-		{372963}, -- Storm's Eye
-		{373688}, -- Frost Overload
-		{384024}, -- Hailbombs
+		{385518, duration = 4.5}, -- Chillstorm
+		{397077}, -- Chillstorm
+		{372963, note = CL.debuffUnderYouNote}, -- Storm's Eye
+		{373688, duration = 3, soundOnAppliedDose = "none"}, -- Frost Overload
+		{384024, duration = 20, soundOnApplied = "warning", note = CL.debuffHitByCastNote:format(mod:SpellName(1307297))}, -- Hailbombs
 	})
 end
 
@@ -70,7 +71,7 @@ end
 local hailburstCount = 1
 local chillstormCount = 1
 local frostOverloadCount = 1
-local count24 = 1
+local sharedCount = 1
 local activeBars = {}
 local backupBars = {}
 
@@ -81,9 +82,9 @@ local backupBars = {}
 if mod:Retail() then -- Midnight+
 	mod:SetRenames({
 		[1307297] = {1307297}, -- Hailburst
-		[1307308] = {1307308, CL.you:format(mod:SpellName(1307308)), notes = {CL.generalNote, CL.messageOnYouNote}, original = {1307308, CL.you:format(mod:SpellName(1307308))}}, -- Chillstorm
+		[1307308] = {1307308, CL.you:format(mod:SpellName(1307308)), CL.cast:format(CL.knockback), notes = {CL.generalNote, CL.messageOnYouNote, CL.castTimerNote}, original = {1307308, CL.you:format(mod:SpellName(1307308)), CL.cast:format(mod:SpellName(1307308))}}, -- Chillstorm
 		[373046] = {373046}, -- Awaken Whelps
-		[373686] = {373686, CL.over:format(mod:SpellName(373686)), notes = {CL.generalNote, CL.messageNote}, original = {373686, CL.over:format(mod:SpellName(373686))}}, -- Frost Overload
+		[373686] = {373686, CL.over:format(mod:SpellName(373686)), notes = {CL.generalNote, CL.messageCastOverNote}, original = {373686, CL.over:format(mod:SpellName(373686))}}, -- Frost Overload
 	})
 end
 
@@ -95,7 +96,7 @@ if mod:Retail() then -- Midnight+
 	function mod:GetOptions()
 		return {
 			1307297, -- Hailburst
-			1307308, -- Chillstorm
+			{1307308, "CASTBAR"}, -- Chillstorm
 			373046, -- Awaken Whelps
 			373686, -- Frost Overload
 		}
@@ -110,7 +111,7 @@ if mod:Retail() then -- Midnight+
 		chillstormCount = 1
 		awakenWhelpsCount = 1
 		frostOverloadCount = 1
-		count24 = 1
+		sharedCount = 1
 		activeBars = {}
 		backupBars = {}
 		self:SetStage(1)
@@ -136,25 +137,46 @@ function mod:ENCOUNTER_TIMELINE_EVENT_ADDED(_, eventInfo)
 	if eventInfo.source ~= 0 then return end -- Enum.EncounterTimelineEventSource.Encounter
 	local duration = self:RoundNumber(eventInfo.duration, 0)
 	local barInfo
-	if duration == 5 or (duration == 24 and count24 % 2 == 1) then -- Hailburst
-		barInfo = self:HailburstTimeline(eventInfo)
-	elseif duration == 15 or (duration == 24 and count24 % 2 == 0) then -- Chillstorm
-		barInfo = self:ChillstormTimeline(eventInfo)
-	elseif duration == 12 then -- Frost Overload
-		barInfo = self:FrostOverloadTimeline(eventInfo)
-	elseif not self:IsWiping() then
-		self:ErrorForTimelineEvent(eventInfo)
-		backupBars[eventInfo.id] = true
-		self:SendMessage("BigWigs_StartBar", nil, nil, ("[B] %s"):format(eventInfo.spellName), eventInfo.duration, eventInfo.iconFileID, eventInfo.maxQueueDuration, nil, eventInfo.id, eventInfo.id)
-		local state = C_EncounterTimeline.GetEventState(eventInfo.id)
-		if state == 1 then -- Enum.EncounterTimelineEventState.Paused = 1
-			self:SendMessage("BigWigs_PauseBar", nil, nil, eventInfo.id)
+	if self:Mythic() then
+		if duration == 5 or (duration == 24 and sharedCount % 2 == 1) then -- Hailburst
+			barInfo = self:HailburstTimeline(eventInfo)
+		elseif duration == 15 or (duration == 24 and sharedCount % 2 == 0) then -- Chillstorm
+			barInfo = self:ChillstormTimeline(eventInfo)
+		elseif duration == 12 then -- Frost Overload
+			barInfo = self:FrostOverloadTimeline(eventInfo)
+		elseif not self:IsWiping() then
+			self:ErrorForTimelineEvent(eventInfo)
+			backupBars[eventInfo.id] = true
+			self:SendMessage("BigWigs_StartBar", nil, nil, ("[B] %s"):format(eventInfo.spellName), eventInfo.duration, eventInfo.iconFileID, eventInfo.maxQueueDuration, nil, eventInfo.id, eventInfo.id)
+			local state = C_EncounterTimeline.GetEventState(eventInfo.id)
+			if state == 1 then -- Enum.EncounterTimelineEventState.Paused = 1
+				self:SendMessage("BigWigs_PauseBar", nil, nil, eventInfo.id)
+			end
+		end
+	else -- Normal / Heroic
+		if duration == 5 or (duration == 24 and sharedCount % 2 == 1) or duration == 22 or (duration == 25 and sharedCount % 2 == 1) then -- Hailburst
+			if duration == 22 then
+				sharedCount = 1
+			end
+			barInfo = self:HailburstTimeline(eventInfo)
+		elseif duration == 15 or (duration == 24 and sharedCount % 2 == 0) or duration == 32 or (duration == 25 and sharedCount % 2 == 0) then -- Chillstorm
+			barInfo = self:ChillstormTimeline(eventInfo)
+		elseif not self:IsWiping() then
+			self:ErrorForTimelineEvent(eventInfo)
+			backupBars[eventInfo.id] = true
+			self:SendMessage("BigWigs_StartBar", nil, nil, ("[B] %s"):format(eventInfo.spellName), eventInfo.duration, eventInfo.iconFileID, eventInfo.maxQueueDuration, nil, eventInfo.id, eventInfo.id)
+			local state = C_EncounterTimeline.GetEventState(eventInfo.id)
+			if state == 1 then -- Enum.EncounterTimelineEventState.Paused = 1
+				self:SendMessage("BigWigs_PauseBar", nil, nil, eventInfo.id)
+			end
 		end
 	end
 	if barInfo then
 		activeBars[eventInfo.id] = barInfo
 	end
-	if duration == 24 then count24 = count24 + 1 end
+	if duration == 24 or duration == 25 then
+		sharedCount = sharedCount + 1
+	end
 end
 
 function mod:ENCOUNTER_TIMELINE_EVENT_STATE_CHANGED(_, eventID)
@@ -235,7 +257,8 @@ function mod:ChillstormTimeline(eventInfo) -- Chillstorm
 		msg = barText,
 		key = 1307308,
 		callback = function()
-			self:PersonalMessageFromBlizzMessage(1307308, 1, false, self:GetRename(1307308, 2)) -- TODO confirm
+			self:PersonalMessageFromBlizzMessage(1307308, 1, false, self:GetRename(1307308, 2))
+			self:CastBar(1307308, 11.5, 3) -- 4.5s cast + 7s debuff
 			self:Message(1307308, "yellow", barText)
 			self:PlaySound(1307308, "alert")
 		end,

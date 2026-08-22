@@ -1,3 +1,13 @@
+VER 3 0100000000000009 "AS Ascendence" "134400"
+#showtooltip Ascendance
+/cast Ancestral Swiftness
+/cast Ascendance
+END
+VER 3 010000000000000B "Chain light" "134400"
+#showtooltip Chain Lightning
+/cast Ancestral Swiftness
+/cast Chain Lightning
+END
 VER 3 0100000000000007 "Cursor WRT" "134400"
 /cast [@cursor] Wind Rush Totem
 END
@@ -7,10 +17,20 @@ END
 VER 3 0100000000000006 "CursorSLT" "134400"
 /cast [@cursor] Spirit Link Totem
 END
+VER 3 010000000000000C "Ele Blast" "134400"
+#showtooltip Elemental Blast
+/cast Ancestral Swiftness
+/cast Elemental Blast
+END
 VER 3 0100000000000003 "Ele Blast NS" "134400"
 #showtooltip Elemental Blast
 /use Nature's Swiftness
 /use Elemental Blast
+END
+VER 3 010000000000000D "Flame Shock" "134400"
+#showtooltip Flame Shock
+/cast Ancestral Swiftness
+/cast Flame Shock
 END
 VER 3 0100000000000002 "FOCUS KICK" "134400"
 #122
@@ -25,6 +45,14 @@ VER 3 0100000000000001 "HPPOT" "5931169"
 --&0b
 #showtooltip
 /use item:211879--&
+END
+VER 3 010000000000000A "Lightning bolt" "134400"
+#showtooltip Lightning Bolt
+/cast Ancestral Swiftness
+/cast Lightning Bolt
+END
+VER 3 010000000000000E "PCT" "134400"
+/cast Poison Cleansing Totem
 END
 VER 3 0100000000000005 "ToProj Cursor" "134400"
 /cast [@cursor] totemic projection

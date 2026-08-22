@@ -3,76 +3,23 @@ TalentLoadoutEx = {
 ["SHAMAN"] = {
 {
 {
-["text"] = "CYQAAAAAAAAAAAAAAAAAAAAAAAAAAAzMbLzMzYML2mhZMzAAAAAAbmxwGsAzwQjNAY2mZmxMbLzEmBWmZmZMDzyMWMzMmZBAYGgZGYYYA",
-["name"] = "ASDF",
+["text"] = "CYQALMl7AwW51MWzGneuHE3tPCAAAAzMbLzMGjZZZZMmhBAAAAsYmNYADY2YCZWAgZbmZGjtFTbMzYsMzMzYYxyMzyMGzMLAADDgZGDDD",
+["name"] = "M+",
 ["icon"] = 134400,
 },
 },
 [3] = {
 {
 ["isInGroup"] = false,
-["text"] = "CgQAAAAAAAAAAAAAAAAAAAAAAAAAAgBAAAAzMzMLLbjZmxYmZmZYGLwGMjFN2GAzAbmBw2MzMTz2yMDzMDWmZMjBzyAAAAzMDmZAgBD",
-["name"] = "Raid",
+["text"] = "CgQALMl7AwW51MWzGneuHE3tPCAAAgBAAAAzMzsstMmZmZMzMjZMsAbwMW0YbAZGYDzMY2mZMaWWmZ2MjZhFjZGDLzyAAgBwMDmZAYMYA",
+["name"] = "M+ old",
 ["icon"] = 134400,
 },
 {
 ["isInGroup"] = false,
-["text"] = "CgQAAAAAAAAAAAAAAAAAAAAAAAAAAgBAAAAjZmZZbZmZmZGzMGDDLwGMjFN2GAzAbYmBz2YmRzyyMzmZMYZGzMGWmlZAAYAMzgZGAMDG",
-["name"] = "Zorthas",
+["text"] = "CgQAAAAAAAAAAAAAAAAAAAAAAAAAAgBAAAAzMzsssNjZGjZGzMDjFYDmxiGbDIzAbmhZw2YMTz2yMzmZMLsYegZGzwsMAAAwMzgZGAYwM",
+["name"] = "Raid",
 ["icon"] = 134400,
-},
-{
-["name"] = "Dungeons",
-["isExpanded"] = true,
-["icon"] = 6025441,
-},
-{
-["isInGroup"] = true,
-["text"] = "CgQARUG2fGwHkLP0T7/MoTNl/AAAAgBAAAAjZMLbLjZmZmZmZGDDLwGMjFN2GQmB2wMDmlZmZ0stMzsZGDWmxMjBzyMAAMAmZwMDAjBD",
-["name"] = "Alg",
-["icon"] = 4578414,
-},
-{
-["isInGroup"] = true,
-["text"] = "CgQARUG2fGwHkLP0T7/MoTNl/AAAAgBAAAAjZmZZbZMzMzYmZGDDLwGMjFN2GQmB2wMDmlZmZ0ssMzwMGsMjZGDLzyMAAMAmZwMDAjBD",
-["name"] = "MC",
-["icon"] = 7322719,
-},
-{
-["isInGroup"] = true,
-["text"] = "CgQARUG2fGwHkLP0T7/MoTNl/AAAAgBAAAAjZmZZbZMzMzYmZGDDLwGMjFN2GQmB2wMDmlZmZ0stMzwMGsMjZGDLzyMAAMAmZwMDAjBD",
-["name"] = "MT",
-["icon"] = 7439625,
-},
-{
-["isInGroup"] = true,
-["text"] = "CgQARUG2fGwHkLP0T7/MoTNl/AAAAgBAAAAjZmZZbZMzMzYmZGDDLwGMjFN2GQmB2wMDsNzMjmllZGmxsxyMmZMsMLzAAwAYmBzMAMGM",
-["name"] = "NPX",
-["icon"] = 7553062,
-},
-{
-["isInGroup"] = true,
-["text"] = "CgQARUG2fGwHkLP0T7/MoTNl/AAAAgBAAAAjZmZZbZMzMzYmZGzYYB2gZsox2AyMwGmZwsNzYmmllZGmxsxixMjBzyMAAMAmZwMDAjBD",
-["name"] = "POS",
-["icon"] = 343641,
-},
-{
-["isInGroup"] = true,
-["text"] = "CgQARUG2fGwHkLP0T7/MoTNl/AAAAgBAAAAjZmZZbZMzMzYmZGDDLwGMjFN2GQmB2wMDmtZmZ0stMzwMmNWmxMjBzyMAAMAmZwMDAjBD",
-["name"] = "Seat",
-["icon"] = 1711340,
-},
-{
-["isInGroup"] = true,
-["text"] = "CgQARUG2fGwHkLP0T7/MoTNl/AAAAgBAAAAjZmZZbZMzMzYmZGDDLwGMjFN2GQmB2wMDmlZmZ0stMzwMGsMjZGDLzyMAAMAmZwMDAjBD",
-["name"] = "Sky",
-["icon"] = 1002596,
-},
-{
-["isInGroup"] = true,
-["text"] = "CgQARUG2fGwHkLP0T7/MoTNl/AAAAgBAAAAjZmZZbZMzMzYmZGzYYB2gZsox2AyMwGmZwsMmZ0YZmZzMGsMjZGDLzyMAAMAmZwMDAjBD",
-["name"] = "WS",
-["icon"] = 7266215,
 },
 },
 },
@@ -180,7 +127,6 @@ TalentLoadoutEx = {
 {
 ["text"] = "CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNMmZgxsMzMzMLMgxMLzsYmZswyMLjxMjNMAYstNzgxsNCMBAAAYhZmZGsZMjxAAwMDWGA",
 ["pvp2"] = 3058,
-["isInGroup"] = false,
 ["pvp1"] = 180,
 ["icon"] = 134400,
 ["name"] = "Wowhead M+",
@@ -203,21 +149,24 @@ TalentLoadoutEx = {
 {
 {
 ["name"] = "Crazy Cow",
-["isInGroup"] = false,
 ["pvp1"] = 697,
 ["icon"] = 134400,
 ["text"] = "CkGADBD3hSPCL9Y9gz68WcKvMMMmxYmZmZMbDPAzMLMb2mBAAAAAAAAAALDa2mhpZYgZZmZmZWMMGAAAAADAYGAAEAAwsNzWz2Mb2YMzgZGgmBAYmBgB",
 },
 {
+["name"] = "Theory",
+["text"] = "CkGADBD3hSPCL9Y9gz68WcKvMMMmxYmZmZMbzMGmZjZz2MAAAAAAAAAAYZQz2MMNDDMLzMzMzihxAAAAAYAAzAstNWw0MzyAAY2mZrZbmNLMmZwMAaGAMzMzAwA",
+["icon"] = 134400,
+["pvp1"] = 697,
+},
+{
 ["name"] = "wowhead raid",
-["isInGroup"] = false,
 ["text"] = "CkGAAAAAAAAAAAAAAAAAAAAAAMjxMLzMjZmxsNMYmNjNmBAAAAAAAAAAbDa2YMNzY4BMLzMzMDDzAAAAAAAAAAIAAgZbmlmtZ2sxYmZYmBGNDAwMDADA",
 ["icon"] = 134400,
 ["pvp1"] = 697,
 },
 {
 ["name"] = "wowhead",
-["isInGroup"] = false,
 ["text"] = "CkGAAAAAAAAAAAAAAAAAAAAAAMMmZZMjZmxsNMMzsMsZbGAAAAAAAAAAsMoZzw0MjZwsYmZmZZGegZAAAAAAAwAAQAAAz2MbNbzsYjxMDMzCoZAAmZAYA",
 ["icon"] = 134400,
 ["pvp1"] = 697,

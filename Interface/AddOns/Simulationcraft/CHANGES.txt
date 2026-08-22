@@ -1,10 +1,16 @@
-lightweight tag e6d1bbb6c0ce6239b05cc1df43e6494ccdaa4d4a 12.1.0-02
+lightweight tag d2452dce69276ede2bddf8056baf00288f1d4f2b 12.1.0-04
 Author:	Dave Hendler <sollaires@gmail.com>
-Date:	Sun Aug 2 20:30:50 2026 -0700
+Date:	Fri Aug 21 16:04:36 2026 -0700
 
-commit e6d1bbb6c0ce6239b05cc1df43e6494ccdaa4d4a
+commit d2452dce69276ede2bddf8056baf00288f1d4f2b
 Author: Dave Hendler <sollaires@gmail.com>
-Date:   Sun Aug 2 20:30:50 2026 -0700
+Date:   Fri Aug 21 16:04:36 2026 -0700
 
-    Add bonus_roll_currencies
+    Add Offspec Talent Loadouts checkbox functionality
+
+commit e2a26501af24f189ae29dd739abea8e36950a56f
+Author: Dave Hendler <sollaires@gmail.com>
+Date:   Thu Aug 20 15:53:25 2026 -0700
+
+    Use built-in talent loadout string exporter instead of our own
 

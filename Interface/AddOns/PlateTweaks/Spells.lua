@@ -1,29 +1,22 @@
 local _, NS = ...
 
--------------------------------------------------------------------------------
 -- Spell sources.
 --
--- Blizzard's Cooldown Manager is the only trustworthy source of aura IDs:
--- its aura categories store the ID of the aura that actually lands, which is
--- often not the cast ID (Corruption casts as 172 but applies 146739). Reading
--- it is a query about the player's own spell setup, not aura state, so the
--- secrets system does not restrict it.
--------------------------------------------------------------------------------
+-- The Cooldown Manager is the only trustworthy source of aura IDs: its aura
+-- categories store the ID that actually lands, which is often not the cast ID
+-- (Corruption casts as 172, applies 146739). Reading it is a query about the
+-- player's own setup, not aura state, so secrets do not restrict it.
 
--- Aura-bearing categories first: their spellID is the aura ID, and being seen
--- first lets them win the dedupe against cast IDs from Essential/Utility.
--- Categories whose entries describe an AURA: their spellID is the thing that
--- lands on the unit, so it is safe to offer as something to track.
+-- Aura-bearing categories first, so they win the dedupe against cast IDs.
 local CDM_AURA_CATEGORIES = {
   "TrackedBuff",
   "TrackedBar",
   "SpecAgnosticTracked",
 }
 
--- Categories whose entries describe an ABILITY you cast. These often have
--- hasAura set -- the ability does apply something -- but their spellID is the
--- CAST, not the aura, and a filter built from it can never match. Scanned for
--- linked IDs only, never offered directly.
+-- Categories describing an ABILITY you cast. Their spellID is the CAST, not
+-- the aura, so a filter built from it can never match -- scanned for linked
+-- IDs only, never offered directly.
 local CDM_ABILITY_CATEGORIES = {
   "Essential",
   "SpecAgnosticEssential",
@@ -36,21 +29,16 @@ local CDM_CATEGORIES = {}
 for _, name in ipairs(CDM_AURA_CATEGORIES) do table.insert(CDM_CATEGORIES, name) end
 for _, name in ipairs(CDM_ABILITY_CATEGORIES) do table.insert(CDM_CATEGORIES, name) end
 
--------------------------------------------------------------------------------
--- Fonts, via LibSharedMedia — the standard registry, so anything another addon
--- has registered (ElvUI, WeakAuras, SharedMedia packs) appears here too, and
--- names stay valid even if file paths change.
--------------------------------------------------------------------------------
+-- Fonts via LibSharedMedia, so anything another addon registered appears here
+-- and names stay valid if paths change.
 
 local LSM = LibStub and LibStub("LibSharedMedia-3.0", true)
 NS.LSM = LSM
 
 local EXPRESSWAY = "Interface\\AddOns\\PlateTweaks\\media\\fonts\\Expressway.ttf"
 
--- Shipped with the addon rather than borrowed. Expressway was already the UI
--- font, but only ever resolved when EllesmereUI or Plater happened to be
--- loaded and had registered it -- otherwise every string silently fell back
--- to Friz Quadrata. Registering our own copy makes the addon standalone.
+-- Shipped rather than borrowed: Expressway only resolved when EllesmereUI or
+-- Plater happened to be loaded, otherwise everything fell back to Friz.
 if LSM and not LSM:Fetch("font", "Expressway", true) then
   pcall(LSM.Register, LSM, "font", "Expressway", EXPRESSWAY)
 end
@@ -116,10 +104,9 @@ function NS.GetTargetAuraSet()
   local onTargets = NS.GetCooldownManagerSpells()
   for _, item in ipairs(onTargets) do
     set[item.spellID] = true
-    -- Also every ID linked to it. A resolved rule stores the AURA's id
-    -- (Moonfire's debuff, not the cast), which the Cooldown Manager does not
-    -- list on its own — without this the marker flagged exactly the IDs that
-    -- had just been corrected to the right ones.
+    -- Also every linked ID: a resolved rule stores the AURA's id, which the
+    -- Cooldown Manager does not list -- without this the marker flagged
+    -- exactly the IDs that had just been corrected.
     if NS.RelatedSpellIDs then
       for id in pairs(NS.RelatedSpellIDs(item.spellID)) do
         set[id] = true
@@ -129,16 +116,12 @@ function NS.GetTargetAuraSet()
   return set
 end
 
--- Can THIS character ever apply this aura?
+-- Can THIS character ever apply this aura? Used to skip building containers
+-- for rules belonging to another character in a shared profile.
 --
--- Used to skip building containers for rules that belong to another character
--- in a shared profile -- a 3-debuff rule costs about a thousand textures per
--- nameplate whether or not you can cast any of it.
---
--- Answers false only on POSITIVE evidence of absence, and true on anything it
--- cannot check. The failure modes are not symmetrical: a wrong "false" quietly
--- disables a rule that works, which is the single worst thing this addon can
--- do, while a wrong "true" costs some textures.
+-- False only on positive evidence of absence, true on anything unchecked. The
+-- failure modes are asymmetric: a wrong false quietly disables a working rule,
+-- a wrong true costs some textures.
 function NS.CanApplyAura(spellID)
   if not spellID then return true end
 
@@ -173,18 +156,13 @@ function NS.CanApplyAura(spellID)
   return false
 end
 
--- Two arrays of { spellID }: auras this character puts on other units (what
--- a HARMFUL|PLAYER filter can match), and everything else it knows about.
 -- Auras the Cooldown Manager does not list, keyed by the ability that applies
--- them. Offered in the "add a debuff" dropdown only when the player actually
--- knows that ability, so a Druid entry never appears on a Warlock.
+-- them. Offered in the dropdown only when the player knows that ability.
 --
--- The ability is named rather than given an ID: the name is what we can look
--- up and confirm you know, and it keeps the table readable. The AURA is an ID
--- because that is the part which must be exact.
+-- The ability is named because that is what we can confirm you know; the aura
+-- is an ID because that part must be exact.
 --
--- To add one: put the debuff on something, note the ID it really uses, and
--- add a row here.
+-- To add: put the debuff on something, note the ID it really uses, add a row.
 NS.EXTRA_AURAS = {
   { ability = "Ursol's Vortex", aura = 127797 },
 }
@@ -217,10 +195,8 @@ function NS.GetCooldownManagerSpells()
     return onTargets, other
   end
 
-  -- Deduped by NAME as well as ID. A spell can appear under several IDs —
-  -- Corruption is 146739 as an aura and 172 as a cast — and only the first,
-  -- which comes from the aura-bearing categories listed above, is trackable.
-  -- Keeping both would offer an ID that can never match.
+  -- Deduped by NAME as well as ID: a spell can appear under several IDs, and
+  -- only the first -- from the aura-bearing categories -- is trackable.
   local seen, seenName = {}, {}
   local function Consider(spellID, isTargetAura)
     if not spellID or seen[spellID] then return end
@@ -229,10 +205,8 @@ function NS.GetCooldownManagerSpells()
     local name = C_Spell and C_Spell.GetSpellName and C_Spell.GetSpellName(spellID)
     if not name then return end -- unresolvable IDs are never useful
 
-    -- Rules filter HARMFUL|PLAYER, so a helpful aura can never match one.
     -- Unknown counts as harmful: IsSpellHarmful is not readable everywhere,
-    -- and dropping a real debuff because we could not confirm it is worse
-    -- than leaving one heal in the list.
+    -- and dropping a real debuff is worse than leaving one heal in the list.
     if isTargetAura and C_Spell and C_Spell.IsSpellHarmful then
       local okHarm, harmful = pcall(C_Spell.IsSpellHarmful, spellID)
       if okHarm and not (issecretvalue and issecretvalue(harmful)) and harmful == false then
@@ -298,17 +272,32 @@ end
 
 -- Every spell ID that could plausibly BE the aura this ability applies.
 --
--- The Cooldown Manager points at the ABILITY, not at its aura: Rend's entry
--- is 772 while the debuff that lands is 388539, and Rallying Cry is 97462
--- with its buff at 97463. There is no auraSpellID field to read -- when a
--- separate aura exists it appears in linkedSpellIDs, which this file used to
--- discard as "alternates, never primary". That is what made a rule entered
--- correctly from the dropdown unable to match anything.
+-- The Cooldown Manager points at the ABILITY: Rend's entry is 772 while the
+-- debuff is 388539. There is no auraSpellID field -- a separate aura shows up
+-- in linkedSpellIDs, which this file used to discard.
 --
--- Rather than guess which of them is the aura, hand the container ALL of
--- them. includeSpellIDs is a set, so a group listing the cast ID and its
--- linked IDs matches whichever the engine actually sees, and the guess
--- disappears from the problem entirely.
+-- Rather than guess which is the aura, hand the container ALL of them.
+-- includeSpellIDs is a set, so the engine matches whichever it actually sees.
+
+-- Abilities whose applied aura the Cooldown Manager does NOT link, ID -> ID.
+--
+-- Last resort. Everything else here is discovered at runtime -- linkedSpellIDs,
+-- and names observed landing on a real target. This covers only an ability
+-- whose aura shares neither its name nor a CDM link, on a character that has
+-- never applied it.
+--
+-- IDs, not names: NS.AURA_ALIASES is keyed on lowercase ENGLISH names and does
+-- nothing on any other locale. Prefer adding here.
+--
+-- A wrong ID is worse than a missing one -- it matches nothing and looks like
+-- the rule being broken. Verify in game: apply the ability, then check /pt bar
+-- reports the rule matching.
+NS.SPELL_APPLIES = {
+  -- Voltaic Blaze (Stormbringer shaman) applies Flame Shock, which shares
+  -- neither its name nor, on this build, a CDM link with it.
+  [470057] = 188389,
+}
+
 local relatedCache = {}
 
 function NS.RelatedSpellIDs(spellID)
@@ -348,10 +337,22 @@ function NS.RelatedSpellIDs(spellID)
   local learned = name and NS.LearnedAuraID and NS.LearnedAuraID(name)
   if learned then set[learned] = true end
 
-  -- Only cache once there is more to say than "the ID you gave me". A lone
-  -- entry means nothing has been learned or linked YET, and caching that
-  -- would freeze the wrong answer in for the rest of the session -- the aura
-  -- may well be observed a minute from now.
+  -- Hand-declared pairs, for the case none of the above can reach.
+  local applies = NS.SPELL_APPLIES and NS.SPELL_APPLIES[spellID]
+  if applies then set[applies] = true end
+
+  -- Applied here as well as at input resolution: it used to run only when
+  -- someone typed a name, so a rule already holding the ability's ID never
+  -- benefited. Resolved through the learn store, so it lands on an observed ID.
+  if name and NS.AURA_ALIASES then
+    local aliasName = NS.AURA_ALIASES[name:lower()]
+    local aliasID = aliasName and NS.LearnedAuraID and NS.LearnedAuraID(aliasName)
+    if aliasID then set[aliasID] = true end
+  end
+
+  -- Only cache once there is more than "the ID you gave me" -- a lone entry
+  -- means nothing has been learned yet, and caching that freezes the wrong
+  -- answer for the session.
   local count = 0
   for _ in pairs(set) do count = count + 1 end
   if count > 1 then relatedCache[spellID] = set end
@@ -364,24 +365,16 @@ function NS.WipeRelatedCache()
   wipe(relatedCache)
 end
 
--------------------------------------------------------------------------------
 -- Turning what the user typed into the ID that actually lands.
 --
--- Three things can be typed: the aura's own ID (already right), the ability's
--- ID (Rend's 772, which never matches because the debuff is 388539), or a
--- name. All three should end up at the aura.
+-- Three things can be typed: the aura's ID (right already), the ability's ID
+-- (772, which never matches), or a name. Evidence in order of what it proves:
 --
--- Evidence is used in order of how much it proves:
---
---   1. An aura of that name is on the target RIGHT NOW. Definitive — it is
---      literally the thing the engine would have to match.
---   2. The Cooldown Manager links the typed ID to other spells. Strong, but
---      it cannot say which of them is the aura, so this only narrows.
---   3. Nothing. Keep what was typed; the container filter includes every
---      linked ID anyway, so a cast ID still has a good chance of working.
+--   1. An aura of that name is on the target now. Definitive.
+--   2. The Cooldown Manager links the typed ID to others. Narrows only.
+--   3. Nothing. Keep what was typed -- the filter includes every linked ID.
 --
 -- Never silently wrong: the caller gets a note explaining what happened.
--------------------------------------------------------------------------------
 
 -- Name -> spellID for every harmful aura the player currently has on target.
 -- Returns an empty table when there is no target or auras are sealed, which
@@ -404,23 +397,18 @@ local function LiveTargetAuras()
 end
 NS.LiveTargetAuras = LiveTargetAuras
 
--- Returns spellID, note, resolved
---   spellID  the best ID we can justify, or nil if the input meant nothing
---   note     one line for the user about what was chosen and why
---   resolved true when the returned ID differs from what was typed
--- Abilities whose applied aura is named differently from the ability itself.
+-- Returns spellID, note, resolved.
+
+-- Abilities whose applied aura is named differently from the ability.
 --
--- Most cast/aura mismatches share a name -- Rend casts 772 and applies 388539,
--- both called "Rend" -- so matching on the name resolves them. These do not:
--- Fury of Elune applies a debuff called "Atmospheric Exposure", and no amount
--- of name matching gets from one to the other.
+-- Most mismatches share a name (Rend casts 772, applies 388539, both "Rend"),
+-- so name matching resolves them. These do not: Fury of Elune applies
+-- "Atmospheric Exposure".
 --
--- Keys and values are both lowercase names. The value is looked up exactly as
--- if the user had typed it, so it still goes through the live-target and
--- learned-aura checks and still ends up at a real ID.
+-- Both sides are lowercase names, looked up as if typed, so it still goes
+-- through the live-target and learned-aura checks.
 --
--- To add one: cast the ability, hover the debuff it puts on the target, and
--- add ["ability name"] = "debuff name".
+-- To add: cast it, hover the debuff, add ["ability"] = "debuff".
 NS.AURA_ALIASES = {
   ["fury of elune"] = "atmospheric exposure",
 }
@@ -546,21 +534,15 @@ function NS.ResolveAuraInput(text)
   return spellID, note, false
 end
 
--------------------------------------------------------------------------------
 -- Learned aura IDs.
 --
--- Resolving a cast ID to the aura it applies needs ONE observation of that
--- aura, ever -- not one at the moment you happen to open the options window.
--- Requiring a live target mid-combat is exactly the wrong time to ask.
+-- Resolving a cast ID needs ONE observation of that aura, ever -- not one at
+-- the moment you open the options window. So whenever auras are readable,
+-- record name -> the ID actually on a unit. Account-wide, because a name maps
+-- to the same ID on every character that can cast it.
 --
--- So: whenever auras are readable, quietly record name -> the ID that is
--- actually on a unit. Stored account-wide, because a spell name maps to the
--- same aura ID on every character that can cast it. By the time you type
--- "Moonfire", the answer was learned the first time you cast it.
---
--- This never reads anything secret: the scan is skipped entirely while auras
--- are sealed, and a secret value aborts it.
--------------------------------------------------------------------------------
+-- Never reads anything secret: skipped while auras are sealed, and a secret
+-- value aborts it.
 
 local function LearnStore()
   BOONPLATES_SETTINGS = BOONPLATES_SETTINGS or {}

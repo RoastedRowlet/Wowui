@@ -40,38 +40,22 @@ L["BUILDS_ENCOUNTER_DIFFICULY_all"] = "Qualquer dificuldade"
 L["BUILDS_ENCOUNTER_DIFFICULY_heroic"] = "Heroico"
 L["BUILDS_ENCOUNTER_DIFFICULY_mythic"] = "Mítico"
 L["BUILDS_ENCOUNTER_DIFFICULY_normal"] = "Normal"
---[[Translation missing --]]
---[[ L["BUILDS_PROFILE_ACTIVE_LOADOUT_TITLE"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_PROFILE_ALTERNATE"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_PROFILE_COPY_COMPARELINK_ACTION_TITLE"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_PROFILE_COPY_COMPARELINK_POPUP_TITLE"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_PROFILE_COPY_LOADOUT_ACTION_TITLE"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_PROFILE_COPY_LOADOUT_LINK_ACTION_TITLE"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_PROFILE_COPY_LOADOUT_LINK_POPUP_TITLE"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_PROFILE_COPY_LOADOUT_POPUP_TITLE"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_PROFILE_ERROR_CREATING_LOADOUT"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_PROFILE_FAILED_IMPORTING_BUILD"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_PROFILE_HERO_FORMAT"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_PROFILE_IMPORTED_BUILD_TO_LOADOUT"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_PROFILE_LOAD_LOADOUT_ACTION_TITLE"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_PROFILE_LOADOUT_IS_ALREADY_ACTIVE"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_PROFILE_LOADOUT_NAME"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_PROFILE_NO_DATA"] = ""--]] 
+L["BUILDS_PROFILE_ACTIVE_LOADOUT_TITLE"] = "Este equipamento está ativo"
+L["BUILDS_PROFILE_ALTERNATE"] = "Alternar"
+L["BUILDS_PROFILE_COPY_COMPARELINK_ACTION_TITLE"] = "Copiar link de comparação"
+L["BUILDS_PROFILE_COPY_COMPARELINK_POPUP_TITLE"] = "Copiar link de comparação de equipamento do Raider.IO:"
+L["BUILDS_PROFILE_COPY_LOADOUT_ACTION_TITLE"] = "Exportar equipamento"
+L["BUILDS_PROFILE_COPY_LOADOUT_LINK_ACTION_TITLE"] = "Copiar link de equipamento"
+L["BUILDS_PROFILE_COPY_LOADOUT_LINK_POPUP_TITLE"] = "Copiar link de equipamento do Raider.IO:"
+L["BUILDS_PROFILE_COPY_LOADOUT_POPUP_TITLE"] = "Copiar string de equipamento:"
+L["BUILDS_PROFILE_ERROR_CREATING_LOADOUT"] = "Não foi possível criar o equipamento. Se não houver espaço para equipamentos adicionais, por favor, libere espaço."
+L["BUILDS_PROFILE_FAILED_IMPORTING_BUILD"] = "Falha ao importar a configuração."
+L["BUILDS_PROFILE_HERO_FORMAT"] = "%s (%s)"
+L["BUILDS_PROFILE_IMPORTED_BUILD_TO_LOADOUT"] = "Configuração importada como \"%s\"."
+L["BUILDS_PROFILE_LOAD_LOADOUT_ACTION_TITLE"] = "Carregar"
+L["BUILDS_PROFILE_LOADOUT_IS_ALREADY_ACTIVE"] = "Seu equipamento atual corresponde a esta configuração."
+L["BUILDS_PROFILE_LOADOUT_NAME"] = "Configuração do Raider.IO"
+L["BUILDS_PROFILE_NO_DATA"] = "Os murlocs não conseguiram encontrar nada de útil para exibir aqui. Tente alterar os filtros."
 L["BUILDS_PROFILE_RECOMMENDED"] = "Recomendado"
 --[[Translation missing --]]
 --[[ L["BUILDS_PROFILE_SHOW_JOURNALFRAME_BUTTON"] = ""--]] 
@@ -289,8 +273,7 @@ L["MINIMAP_SHORTCUT_MINIMAP_ENABLE_DESC"] = "Ative para exibir um ícone ao redo
 L["MINIMAP_SHORTCUT_MINIMAP_LOCK"] = "Travar botão de minimapa"
 L["MISC_SETTINGS"] = "Diversos"
 L["MODULE_AMERICAS"] = "Américas"
---[[Translation missing --]]
---[[ L["MODULE_CHINA"] = ""--]] 
+L["MODULE_CHINA"] = "China"
 L["MODULE_EUROPE"] = "Europa"
 L["MODULE_KOREA"] = "Coréia"
 L["MODULE_TAIWAN"] = "Taiwan"
@@ -489,8 +472,7 @@ L["RAID_BOSS_NP_6"] = "Princesa do Nexus Ky'veza"
 L["RAID_BOSS_NP_7"] = "A Corte Sedosa"
 L["RAID_BOSS_NP_8"] = "Rainha Ansurek"
 L["RAID_BOSS_RS_1"] = "Halion"
---[[Translation missing --]]
---[[ L["RAID_BOSS_SF_1"] = ""--]] 
+L["RAID_BOSS_SF_1"] = "Necrocharco"
 L["RAID_BOSS_SFO_1"] = "Guardião Vigilante"
 L["RAID_BOSS_SFO_10"] = "Rygelon"
 L["RAID_BOSS_SFO_11"] = "O Carcereiro"
@@ -563,22 +545,14 @@ L["RAID_BOSS_TOT_8"] = "Primordius"
 L["RAID_BOSS_TOT_9"] = "Animus Sombrio"
 L["RAID_BOSS_TOTFW_1"] = "O Conclave do Vento"
 L["RAID_BOSS_TOTFW_2"] = "Al'Akir"
---[[Translation missing --]]
---[[ L["RAID_BOSS_VA_1"] = ""--]] 
---[[Translation missing --]]
---[[ L["RAID_BOSS_VA_2"] = ""--]] 
---[[Translation missing --]]
---[[ L["RAID_BOSS_VA_3"] = ""--]] 
---[[Translation missing --]]
---[[ L["RAID_BOSS_VA_4"] = ""--]] 
---[[Translation missing --]]
---[[ L["RAID_BOSS_VA_5"] = ""--]] 
---[[Translation missing --]]
---[[ L["RAID_BOSS_VA_6"] = ""--]] 
---[[Translation missing --]]
---[[ L["RAID_BOSS_VA_7"] = ""--]] 
---[[Translation missing --]]
---[[ L["RAID_BOSS_VA_8"] = ""--]] 
+L["RAID_BOSS_VA_1"] = "Nek'zali, a Enrosca-almas"
+L["RAID_BOSS_VA_2"] = "Sentinelas Sepultadas"
+L["RAID_BOSS_VA_3"] = "Exploradores Perdidos"
+L["RAID_BOSS_VA_4"] = "Vashnik, o Maligno"
+L["RAID_BOSS_VA_5"] = "Sszorak"
+L["RAID_BOSS_VA_6"] = "As Presas Gêmeas"
+L["RAID_BOSS_VA_7"] = "O Altar Enrolado"
+L["RAID_BOSS_VA_8"] = "Ula'tek"
 L["RAID_BOSS_VOTI_1"] = "Eranog"
 L["RAID_BOSS_VOTI_2"] = "Terros"
 L["RAID_BOSS_VOTI_3"] = "Conselho Primevo"
@@ -630,27 +604,23 @@ L["RAID_MQD"] = "Marcha em Quel'Danas"
 L["RAID_MSV"] = "Galerias Mogu'shan"
 L["RAID_NP"] = "Palácio Nerub-ar"
 L["RAID_RS"] = "Santuário Rubi"
---[[Translation missing --]]
---[[ L["RAID_SF"] = ""--]] 
---[[Translation missing --]]
---[[ L["RAID_SOO"] = ""--]] 
+L["RAID_SF"] = "Esporasca"
+L["RAID_SOO"] = "Cerco a Orgrimmar"
 L["RAID_ToES"] = "Terraço da Primavera Eterna"
 L["RAID_TOES"] = "Terraço da Primavera Eterna"
 L["RAID_TOT"] = "Trono do Trovão"
 L["RAID_TOTFW"] = "Trono dos Quatro Ventos"
---[[Translation missing --]]
---[[ L["RAID_VA"] = ""--]] 
+L["RAID_VA"] = "Abismo Peçonhento"
 L["RAID_VS"] = "A Torre do Caos"
 L["RAID_VS_DR_MQD"] = "Torre/Fenda/Quel'Danas"
---[[Translation missing --]]
---[[ L["RAIDERIO"] = ""--]] 
+L["RAIDERIO"] = "Raider.IO"
 L["RAIDERIO_AVERAGE_PLAYER_SCORE"] = "Pontuação média para +%s concluídas"
 L["RAIDERIO_BEST_RUN"] = "Raider.IO Melhor Mítica+"
 L["RAIDERIO_CLIENT_CUSTOMIZATION"] = "Personalização do cliente Raider.IO"
 L["RAIDERIO_LIVE_TRACKING"] = "Rastreamento ao vivo do Raider.IO"
 L["RAIDERIO_MP_BASE_SCORE"] = "Pontuação Base de Mítica+"
 L["RAIDERIO_MP_BEST_SCORE"] = "Pontuação de Mítica+ (%s)"
-L["RAIDERIO_MP_SCORE"] = "Raider.IO Pontuação de M+"
+L["RAIDERIO_MP_SCORE"] = "Pontuação de M+ do Raider.IO "
 L["RAIDERIO_MYTHIC_OPTIONS"] = "Opções do Addon do Raider.IO "
 L["RAIDING_DATA_HEADER"] = "Progresso de Raide"
 L["RAIDING_DB_MODULES"] = "Módulos de banco de dados de raide"
@@ -773,8 +743,8 @@ L["USE_ENGLISH_ABBREVIATION"] = "Forçar abreviações em inglês das masmorras"
 L["USE_ENGLISH_ABBREVIATION_DESC"] = "Quando ativado, isso substituirá as abreviações usadas para masmorras para serem as versões em inglês, em vez do seu idioma atual."
 L["USE_RAIDERIO_CLIENT_LIVE_TRACKING_SETTINGS"] = "Permitir Raider.IO controlar o Registro de Combate"
 L["USE_RAIDERIO_CLIENT_LIVE_TRACKING_SETTINGS_DESC"] = "Permite que o Raider.IO (quando possível) controle automaticamente as configurações de seu Registro de Combate."
-L["WARBAND_BEST_SCORE_BEST_SEASON"] = "Maior pontuação do Bando de Guerra (%s)"
-L["WARBAND_SCORE"] = "Pontuação do Bando de Guerra"
+L["WARBAND_BEST_SCORE_BEST_SEASON"] = "Maior pontuação do Bando (%s)"
+L["WARBAND_SCORE"] = "Pontuação do Bando"
 L["WARNING_DEBUG_MODE_ENABLE"] = "|cffFFFFFF%s|r Modo de Depuração está habilitado. Você pode desabilitá-lo ao digitar |cffFFFFFF/raiderio debug|r"
 L["WARNING_LOCK_POSITION_FRAME_AUTO"] = "Raider.IO: Você deve primeiro desabilitar o Posicionamento Automático para o Perfil do Raider.IO"
 L["WARNING_RWF_MODE_ENABLE"] = "|cffFFFFFF%s|r O modo Race World First está ativado. Você pode desativá-lo digitando |cffFFFFFF/raiderio rwf|r."

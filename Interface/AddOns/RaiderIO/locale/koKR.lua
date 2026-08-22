@@ -119,24 +119,21 @@ L["DISABLE_RWF_MODE_RELOAD"] = "RWF 모드를 비활성화 합니다. 확인하�
 L["DPS"] = "|cffFF3636공격전담|r"
 L["DUNGEON_SHORT_NAME_AA"] = "대학"
 L["DUNGEON_SHORT_NAME_AD"] = "아탈"
---[[Translation missing --]]
---[[ L["DUNGEON_SHORT_NAME_AOF"] = ""--]] 
+L["DUNGEON_SHORT_NAME_AOF"] = "송곳니"
 L["DUNGEON_SHORT_NAME_ARAK"] = "아라카라"
 L["DUNGEON_SHORT_NAME_ARC"] = "비전로"
 L["DUNGEON_SHORT_NAME_AV"] = "하늘빛"
 L["DUNGEON_SHORT_NAME_BH"] = "담쟁이"
 L["DUNGEON_SHORT_NAME_BREW"] = "양조장"
 L["DUNGEON_SHORT_NAME_BRH"] = "검떼"
---[[Translation missing --]]
---[[ L["DUNGEON_SHORT_NAME_BV"] = ""--]] 
+L["DUNGEON_SHORT_NAME_BV"] = "골짜기"
 L["DUNGEON_SHORT_NAME_COEN"] = "대성당"
 L["DUNGEON_SHORT_NAME_COS"] = "별궁"
 L["DUNGEON_SHORT_NAME_COT"] = "실타래"
 L["DUNGEON_SHORT_NAME_DAWN"] = "새인호"
 L["DUNGEON_SHORT_NAME_DFC"] = "어둠불꽃"
 L["DUNGEON_SHORT_NAME_DHT"] = "어숲"
---[[Translation missing --]]
---[[ L["DUNGEON_SHORT_NAME_DON"] = ""--]] 
+L["DUNGEON_SHORT_NAME_DON"] = "날로라크"
 L["DUNGEON_SHORT_NAME_DOS"] = "저편"
 L["DUNGEON_SHORT_NAME_EB"] = "상록숲"
 L["DUNGEON_SHORT_NAME_EDA"] = "알다니"
@@ -157,8 +154,7 @@ L["DUNGEON_SHORT_NAME_MC"] = "마이사라"
 L["DUNGEON_SHORT_NAME_MISTS"] = "티르너"
 L["DUNGEON_SHORT_NAME_ML"] = "왕노"
 L["DUNGEON_SHORT_NAME_MOS"] = "아귀"
---[[Translation missing --]]
---[[ L["DUNGEON_SHORT_NAME_MR"] = ""--]] 
+L["DUNGEON_SHORT_NAME_MR"] = "죽골"
 L["DUNGEON_SHORT_NAME_MT"] = "정원"
 L["DUNGEON_SHORT_NAME_NELT"] = "넬루"
 L["DUNGEON_SHORT_NAME_NL"] = "넬둥"
@@ -190,8 +186,7 @@ L["DUNGEON_SHORT_NAME_UNDR"] = "썩은굴"
 L["DUNGEON_SHORT_NAME_UPPR"] = "상층"
 L["DUNGEON_SHORT_NAME_VOTW"] = "금고"
 L["DUNGEON_SHORT_NAME_VP"] = "누각"
---[[Translation missing --]]
---[[ L["DUNGEON_SHORT_NAME_VSA"] = ""--]] 
+L["DUNGEON_SHORT_NAME_VSA"] = "공투"
 L["DUNGEON_SHORT_NAME_WM"] = "웨이"
 L["DUNGEON_SHORT_NAME_WORK"] = "작업장"
 L["DUNGEON_SHORT_NAME_WS"] = "첨탑"
@@ -514,22 +509,14 @@ L["RAID_BOSS_TOT_8"] = "프리모디우스"
 L["RAID_BOSS_TOT_9"] = "암흑 원령"
 L["RAID_BOSS_TOTFW_1"] = "바람의 비밀의회"
 L["RAID_BOSS_TOTFW_2"] = "알아키르"
---[[Translation missing --]]
---[[ L["RAID_BOSS_VA_1"] = ""--]] 
---[[Translation missing --]]
---[[ L["RAID_BOSS_VA_2"] = ""--]] 
---[[Translation missing --]]
---[[ L["RAID_BOSS_VA_3"] = ""--]] 
---[[Translation missing --]]
---[[ L["RAID_BOSS_VA_4"] = ""--]] 
---[[Translation missing --]]
---[[ L["RAID_BOSS_VA_5"] = ""--]] 
---[[Translation missing --]]
---[[ L["RAID_BOSS_VA_6"] = ""--]] 
---[[Translation missing --]]
---[[ L["RAID_BOSS_VA_7"] = ""--]] 
---[[Translation missing --]]
---[[ L["RAID_BOSS_VA_8"] = ""--]] 
+L["RAID_BOSS_VA_1"] = "영혼살무사 네크잘리"
+L["RAID_BOSS_VA_2"] = "매장된 파수꾼"
+L["RAID_BOSS_VA_3"] = "길 잃은 탐험가"
+L["RAID_BOSS_VA_4"] = "악성의 바쉬니크"
+L["RAID_BOSS_VA_5"] = "스조라크"
+L["RAID_BOSS_VA_6"] = "쌍둥이 송곳니"
+L["RAID_BOSS_VA_7"] = "똬리의 제단"
+L["RAID_BOSS_VA_8"] = "울라텍"
 L["RAID_BOSS_VOTI_1"] = "에라노그"
 L["RAID_BOSS_VOTI_2"] = "테로스"
 L["RAID_BOSS_VOTI_3"] = "원시 의회"
@@ -587,8 +574,7 @@ L["RAID_ToES"] = "영원한 봄의 정원"
 L["RAID_TOES"] = "영원한 봄의 정원"
 L["RAID_TOT"] = "천둥의 왕좌"
 L["RAID_TOTFW"] = "네 바람의 왕좌"
---[[Translation missing --]]
---[[ L["RAID_VA"] = ""--]] 
+L["RAID_VA"] = "맹독 심연"
 L["RAID_VS"] = "공허첨탑"
 L["RAID_VS_DR_MQD"] = "첨탑/균열/진격로"
 L["RAIDERIO"] = "Raider.IO"

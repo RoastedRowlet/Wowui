@@ -1,5 +1,5 @@
 PlateTweaks
-Version 1.6.0  ·  World of Warcraft 12.1 (Midnight)
+Version 1.7.0  ·  World of Warcraft 12.1 (Midnight)
 
 Colors enemy nameplate health bars and borders based on which of your own
 debuffs are active on them -- or missing from them.
@@ -39,6 +39,7 @@ MODULES
 Health Coloring   tints the health bar
 Border Coloring   draws a colored border, with its own separate rules
 Aura Icons        an optional row of icons; off by default
+Missing Debuffs   a reminder icon that displaces when it lands; off by default
 Optional Tweaks   small conveniences unrelated to nameplates; off by default
 
 Under Setup you will also find Profiles, Import / Export, Help and
@@ -115,6 +116,64 @@ is not a simplification: only one missing wash is ever lit at a time, and
 which one depends on aura state the game does not let an addon read, so the
 choice genuinely cannot be made per rule. The settings panel says so when
 you have it ticked on some but not all.
+
+There are two ways the addon can take a lit wash away once the debuff
+lands, and you can pick between them:
+
+    /pt missingmode displace   (default) the wash rides a mask that is
+                               shoved off screen
+    /pt missingmode occlude    the wash is covered by an opaque replica of
+                               the bar
+
+Displacement is the default even though it costs more -- a ten-button pool
+per rule where occlusion costs one slot -- because it is the only one that
+leaves your bar alone. Occlusion's cover repaints the whole bar, so
+whatever your nameplate addon was encoding there (threat, mob-tier colors,
+execute range) is gone for as long as the debuff is up, which is most of
+the time. Displacement paints nothing in that state, so all of it survives.
+
+If you switch to occlusion, "Color by mob rank once applied" on the Health
+Coloring page claws some of that back: instead of restoring the bar's own
+art, the cover is painted a flat color chosen by the mob's tier. That
+option exists only in occlusion mode -- displacement has no cover to color,
+because it never covers anything.
+
+BORDER rules can be inverted too, and they need displacement specifically.
+Taking a lit reminder away means one of two things -- covering it with a
+copy of whatever was underneath, or sliding it off screen. Only the second
+works for a border. The addon can replicate the health bar's own art well
+enough to cover a wash, but it cannot replicate whatever your nameplate
+addon drew beneath the border band, so there is no cover to build there.
+
+In occlusion mode a missing border rule is not built at all, and /pt status
+says how many were skipped rather than leaving you with a rule in the
+options window that quietly does nothing. Two missing border rules is the
+cap -- the sublevels immediately under the border band are all there are to
+give, and everything below them belongs to the bar ladder.
+
+/pt perf counts displacement's real cost honestly, so you can see what it
+is spending on your setup before deciding. Combat-only, on the other hand,
+is genuinely per rule in displacement mode -- the all-or-nothing limitation
+described above is a property of the occlusion ladder, not of the feature.
+
+
+MISSING DEBUFFS (ICON)
+-----------------------
+A different reminder from the missing-debuff wash above. Instead of tinting
+the bar, an icon sits near the nameplate and gets pushed off it the instant
+the tracked debuff lands, then slides back once it drops. Its own module,
+off by default, and independent of everything above -- either can be used
+without the other.
+
+Each tracked debuff is its own entry and can be set to show its spell icon
+or a flat color, and can have its own combat-only option -- unlike the wash's
+version of that option, this one is genuinely per debuff, since each icon
+here does not share state with the others.
+
+With several debuffs tracked, Collapse (on by default) slides later icons
+toward the anchor as earlier ones land, instead of leaving a gap. It turns
+itself off past 4 tracked debuffs -- collapsing costs real per-debuff frames,
+and that stops being worth it beyond a handful.
 
 
 PANDEMIC FLASH
@@ -204,6 +263,12 @@ If you are on a client that does not offer the aura-slot API, the addon
 falls back to the older pooled path automatically, and the old per-debuff
 multiplication applies again. /pt perf reports what is actually built.
 
+Missing Debuffs (the displacing icon, not the wash) is the one exception to
+all of the above: displacement only works on the older pooled container, so
+it always pays that cost regardless of the aura-slot API, and Collapse adds
+more of it per debuff before the one collapsing. That is why it is capped at
+4 tracked debuffs for collapsing -- see MISSING DEBUFF (ICON) above.
+
 
 TROUBLESHOOTING
 ---------------
@@ -225,6 +290,73 @@ For "the settings look right but this particular nameplate is not colored".
 Reports what the addon found on your current target specifically: the health
 bar it is drawing on, and whether each of that rule's textures is actually
 visible. Useful when /pt status looks healthy but one plate does not.
+
+    /pt capture
+
+The one to use for a bug report. Runs status, bar, adapter and layers all at
+once and stores the result in SavedVariables instead of chat, along with which
+nameplate addon you have loaded, your class and spec, and whether you were in
+an instance. Target a mob first, or the parts that need one come out empty.
+
+Works in combat, which matters: the settings window refuses to open in a
+dungeon, and a capture taken mid-pull is the useful one. Take it while the
+problem is happening, then read it back afterwards in
+
+    /pt  >  Diagnostics  >  Saved captures
+
+Pick one from the dropdown and it fills the box ready to select and Ctrl+C.
+With more than one stored there is an "All captures" entry that loads every
+run at once, so a whole test session copies in one go.
+Captures are kept, not overwritten, and they survive to the next session, so
+the one you took in a key is still there tomorrow. The last 25 are held.
+
+/pt capture list shows what is stored, /pt capture clear empties it, and
+/pt capture <name> labels a run -- useful when comparing the same setup across
+nameplate addons.
+
+The Full Report button on that page does the same thing for the plate you are
+targeting right now, and saves it too.
+
+If you cannot open the window at all, the same text is in
+
+    WTF\Account\<your account>\SavedVariables\PlateTweaks.lua
+
+though nothing is written there until you reload or log out.
+
+    /pt layers
+
+For "colouring does not work with <my nameplate addon>". Reports where that
+addon draws on the health bar, and where this addon draws, as frame levels
+and draw sublevels side by side. Needs a target. This is the one to paste if
+colours are simply not appearing on a plate the addon says it has rigged.
+
+    /pt adapter
+
+Four settings describe your nameplate addon's bars rather than your taste:
+how far above the bar to draw, whether to elevate at all, how far the host's
+border reaches inside, and the gap between its bar frame and its fill. These
+are stored per nameplate addon, so the shipped values are simply correct for
+Plater and Blizzard's plates and you never need to look.
+
+If yours needs a nudge, /pt adapter shows what is in use on the plate you are
+targeting and where each value came from. To change one:
+
+    /pt adapter edgeadjust 2
+    /pt adapter leveloffset 3
+    /pt adapter outlineoffset -1
+    /pt adapter pinflat on
+    /pt adapter reset
+
+Any of them takes "auto" to go back to inheriting. Changes apply only to the
+nameplate addon you are currently using, so switching addons cannot inherit
+someone else's workaround.
+
+    /pt pinflat on | off | auto
+
+Shorthand for /pt adapter pinflat. Changes how rules are stacked against the
+host's own artwork. On draws every rule at the bar's own frame level and
+separates them by draw sublevel instead. Try it if /pt layers shows the host
+drawing above the rule levels, or if colours cover the host's name text.
 
 
 HELP

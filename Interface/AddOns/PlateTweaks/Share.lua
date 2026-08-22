@@ -1,32 +1,24 @@
 local _, NS = ...
 
--------------------------------------------------------------------------------
 -- Profile sharing.
 --
 -- SavedVariables are per account, so a text string is the only way a setup
--- reaches another install. Export writes one, import reads it back.
+-- reaches another install.
 --
--- Encoding is the client's own: CBOR -> deflate -> base64, through
--- C_EncodingUtil. No library to ship, and nothing anywhere near loadstring --
--- an import string is DATA being decoded, never Lua being run, so a hostile
--- string cannot execute anything.
+-- Encoding is the client's own: CBOR -> deflate -> base64 via C_EncodingUtil.
+-- Nothing near loadstring -- an import string is DATA being decoded.
 --
--- What it CAN still do is hand us a table of the wrong SHAPE, and the engine
--- reads these fields on a hot path without re-checking them. A string where a
--- number belongs, or a size of 1e9, reaches SetSize and then errors on every
--- nameplate, every frame. So everything crossing the boundary goes through the
--- whitelist below: known keys only, coerced to the expected type, clamped to a
--- sane range, unknown keys dropped.
+-- What it CAN do is hand us a table of the wrong SHAPE, and the engine reads
+-- these fields on a hot path. A string where a number belongs, or a size of
+-- 1e9, reaches SetSize and errors on every plate every frame. So everything
+-- crossing the boundary goes through the whitelist below.
 --
--- Applied on the way OUT as well as IN. A profile that has picked up junk from
--- an older version should not pass it on, and sanitising both ends means the
--- two directions cannot disagree about what a profile is.
--------------------------------------------------------------------------------
+-- Applied on the way OUT as well as IN, so the two directions cannot disagree
+-- about what a profile is.
 
 -- Bumped only when the payload shape changes in a way an older client could
--- not read. Field ADDITIONS do not need it -- an older client drops unknown
--- keys and a newer one fills in defaults, which is the whole point of running
--- the result through NS.InitializeConfig afterwards.
+-- not read. Additions do not need it -- older clients drop unknown keys and
+-- newer ones fill in defaults.
 local SCHEMA = 1
 
 -- Short, and carries the schema number so a future format can be told apart
@@ -53,12 +45,8 @@ end
 
 NS.ShareAvailable = function() return Encoding() ~= nil end
 
--------------------------------------------------------------------------------
--- Bounds
---
--- Not guesses at what a user would choose -- they are the point past which a
+-- Bounds: not guesses at what a user would choose, but the point past which a
 -- value stops being a setting and starts being a way to wedge the client.
--------------------------------------------------------------------------------
 
 -- Comfortably past any screen dimension, and far short of what breaks a frame.
 local MAX_ABS = 4096
@@ -96,11 +84,9 @@ end
 
 local function Str(value)
   if type(value) ~= "string" then return nil end
-  -- "|" opens a UI escape sequence. These are texture and font names picked
-  -- from a dropdown in normal use, but an imported one is arbitrary text that
-  -- ends up in a label -- and |H...|h would turn it into a clickable link, or
-  -- |T...|t into an image. Control characters get the same treatment for the
-  -- same reason.
+  -- "|" opens a UI escape sequence. Normally these come from a dropdown, but
+  -- an imported one is arbitrary text in a label -- |H would make it a
+  -- clickable link, |T an image.
   value = value:gsub("|", ""):gsub("%c", "")
   if value == "" then return nil end
   return value:sub(1, MAX_STRING)
@@ -135,17 +121,14 @@ local function Colour(value, fallback)
   }
 end
 
--- Deliberately NOT routed through Num/Int.
+-- Deliberately NOT routed through Num/Int, which clamp to MAX_ABS -- a bound
+-- for PIXEL values. Spell IDs are not pixels; almost every modern one is above
+-- 4096.
 --
--- Those clamp to MAX_ABS, which is a bound for PIXEL values -- offsets, sizes,
--- thicknesses. Spell IDs are not pixels: Agony is 980 but Corruption's aura is
--- 146739, and almost every modern ID is above 4096.
---
--- Clamping one does not produce an obviously broken rule. It produces a
--- DIFFERENT REAL SPELL: 4096 is "Raptor Hide Harness". The rule then imports
--- cleanly, displays a plausible icon and name, and simply never matches. That
--- is far worse than dropping it, which is why the range is checked here and
--- an out-of-range value is discarded rather than pulled to a boundary.
+-- Clamping does not produce an obviously broken rule, it produces a DIFFERENT
+-- REAL SPELL: 4096 is "Raptor Hide Harness". The rule imports cleanly, shows a
+-- plausible icon, and never matches. So out-of-range is discarded, not pulled
+-- to a boundary.
 local MAX_SPELL_ID = 10000000
 
 local function SpellID(value)
@@ -157,13 +140,9 @@ local function SpellID(value)
   return id
 end
 
--------------------------------------------------------------------------------
--- Schema
---
--- One table per shape. Adding a setting means adding it here too -- and
--- NS.ShareSchemaGaps below exists so that forgetting is noticed rather than
--- silently dropping the setting from every export.
--------------------------------------------------------------------------------
+-- Schema: one table per shape. Adding a setting means adding it here too --
+-- NS.ShareSchemaGaps exists so forgetting is noticed rather than silently
+-- dropping the setting from every export.
 
 local ANCHORS = {
   TOPLEFT = true, TOP = true, TOPRIGHT = true,
@@ -263,6 +242,21 @@ local function SanitiseOutlineSides(source)
   return out
 end
 
+-- Fixed key set, same discipline as SanitiseOutlineSides above: an arbitrary
+-- key here would be a classification the game never reports, so it could only
+-- ever sit in the config doing nothing.
+local CLASS_KEYS = { "boss", "lieutenant", "caster", "rare", "elite", "normal" }
+
+local function SanitiseClassColors(source)
+  local defaults = (NS.Defaults and NS.Defaults.tints
+    and NS.Defaults.tints.missingAppliedClassColors) or {}
+  local out = {}
+  for _, key in ipairs(CLASS_KEYS) do
+    out[key] = Colour(type(source) == "table" and source[key] or nil, defaults[key])
+  end
+  return out
+end
+
 local function SanitiseTints(source, dropped)
   source = type(source) == "table" and source or {}
   return {
@@ -279,6 +273,12 @@ local function SanitiseTints(source, dropped)
     plateOutlineSize    = Num(source.plateOutlineSize, nil),
     plateOutlineOffset  = Num(source.plateOutlineOffset, nil),
     plateOutlineSides   = SanitiseOutlineSides(source.plateOutlineSides),
+    -- Whitelisted to the two real values, and defaulted the way the addon
+    -- does: an unrecognised value would fall through every branch in Tints.lua
+    -- and silently build nothing, which looks like the rules being broken.
+    missingMode         = (source.missingMode == "occlude") and "occlude" or "displace",
+    missingAppliedByClass = Bool(source.missingAppliedByClass, false),
+    missingAppliedClassColors = SanitiseClassColors(source.missingAppliedClassColors),
     pandemic            = {
       enabled    = Bool(source.pandemic and source.pandemic.enabled, false),
       color      = Colour(source.pandemic and source.pandemic.color,
@@ -583,7 +583,8 @@ local KNOWN = {
     "enabled", "borderEnabled", "rules", "borderRules", "edgeAdjust",
     "missingCoverColor", "gateUnknownSpells", "plateOutline",
     "plateOutlineColor", "plateOutlineSize", "plateOutlineOffset",
-    "plateOutlineSides", "pandemic",
+    "plateOutlineSides", "pandemic", "missingMode",
+    "missingAppliedByClass", "missingAppliedClassColors",
   },
   icons = {
     "enabled", "list", "size", "spacing", "anchor", "grow", "padX", "padY",
