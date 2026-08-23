@@ -17,37 +17,36 @@ local peaversTalentsDataPrefixes = {
 };
 
 local peaversTalentsDataIcons = {
-	-- https://github.com/peavers-warcraft/PeaversTalentsData/blob/master/src/Data/TopPlayersMythicDB.lua
+	-- https://github.com/peavers-warcraft/PeaversTalentsData/blob/master/src/Data/ParsesMythicDB.lua
 	mythic = {
 		[0] = Addon.MYTHICPLUS_ICON,
 		["All Dungeons"] = Addon.MYTHICPLUS_ICON,
 
-		-- Midnight: Season 1
-		["Algethar Academy"] = 4578414,
-		["Magisters"] = 7439625,
-		["Maisara Caverns"] = 7322719,
-		["Nexus Point Xenas"] = 7553062,
-		["Pit Of Saron"] = 343641,
-		["Seat"] = 1711340,
-		["Skyreach"] = 1002596,
-		["Windrunner Spire"] = 7266215,
+		-- Midnight: Season 2
+		["Kings' Rest"] = 2011123,
+		["Temple of Sethraliss"] = 2011143,
+		["Ruby Life Pools"] = 4578416,
+		["The Blinding Vale"] = 7354408,
+		["Voidscar Arena"] = 7439626,
+		["Den of Nalorakk"] = 7266214,
+		["Murder Row"] = 7266213,
+		["Altar of Fangs"] = 7956175,
 	},
 
-	-- https://github.com/peavers-warcraft/PeaversTalentsData/blob/master/src/Data/TopPlayersHeroicRaidDB.lua
+	-- https://github.com/peavers-warcraft/PeaversTalentsData/blob/master/src/Data/ParsesHeroicRaidDB.lua
 	raid = {
-		-- Midnight: Season 1
-		[0] = 7490911,
-		["All Bosses"] = 7490911,
-		["Imperator"] = 7448209,
-		["Vorasius"] = 7448210,
-		["Salhadaar"] = 7448212,
-		["Vaelgor Ezzorak"] = 7448207,
-		["Vanguard"] = 7448211,
-		["Crown"] = 7448205,
-		["Chimaerus"] = 7448202,
-		["Beloren"] = 7448203,
-		["Midnight Falls"] = 7448204,
-		["Rotmire"] = 7852823,
+		-- Midnight: Season 2
+		[0] = 8039569,
+		["All Bosses"] = 8039569,
+		["Nymrissa Wavecaller"] = 3012069,
+		["Nek'zali the Soulcoiler"] = 7966621,
+		["Entombed Sentinels"] = 7966620,
+		["The Lost Explorers"] = 7966622,
+		["Vashnik the Malignant]"] = 7966618,
+		["Sszorak"] = 7966619,
+		["The Twin Fangs"] = 7966623,
+		["The Coiled Altar"] = 7966625,
+		["Ula'tek"] = 7966624,
 	},
 };
 
@@ -115,7 +114,7 @@ local function GetPeaversTalentsDataByCategory(category)
 			presetData = {};
 
 			local prefix = option.isCombineGroups and peaversTalentsDataPrefixes[category] or "";
-			local builds, errorMsg = API.GetBuilds(classID, specID, "top-players");
+			local builds, errorMsg = API.GetBuilds(classID, specID, "parses");
 			if errorMsg then
 				Addon:Print("PeaversTalentsData.API.GetBuilds() -> ", errorMsg);
 			end

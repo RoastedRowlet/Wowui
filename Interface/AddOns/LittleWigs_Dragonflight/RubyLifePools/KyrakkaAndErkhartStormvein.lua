@@ -13,10 +13,11 @@ mod:SetRespawnTime(30)
 mod:SetStage(1)
 if mod:Retail() then -- Midnight+
 	mod:SetAuraData({
-		{381515, note = CL.debuffTankAfterCastNote}, -- Stormslam
-		{381518}, -- Winds of Change
-		{381862}, -- Inferno Spit
+		{381515, duration = 30, dispel = "magic", soundOnAppliedDose = "none", note = CL.debuffTankAfterCastNote:format(mod:SpellName(381512))}, -- Stormslam
+		{381518, note = CL.debuffGroupAfterCastNote:format(mod:SpellName(381517))}, -- Winds of Change
+		{381862, duration = 6, note = CL.debuffDotAfterCastNote:format(mod:SpellName(381862))}, -- Inferno Spit
 		{384773, soundOnApplied = "underyou", note = CL.debuffUnderYouNote}, -- Flaming Embers
+		{381526, soundOnApplied = "alarm", note = CL.debuffHitByCastNote:format(mod:SpellName(381525))}, -- Roaring Firebreath
 	})
 end
 
@@ -26,7 +27,6 @@ end
 
 local L = mod:GetLocale()
 if L then
-	L.winds = "Winds"
 	L.warmup_icon = "achievement_dungeon_lifepools"
 end
 
@@ -57,7 +57,7 @@ function mod:GetOptions()
 		[381862] = -25365, -- Kyrakka
 		[381517] = -25369, -- Erkhart Stormvein
 	}, {
-		[381517] = L.winds, -- Winds of Change (Winds)
+		[381517] = CL.winds, -- Winds of Change (Winds)
 	}
 end
 
@@ -96,7 +96,7 @@ function mod:OnEngage()
 		self:CDBar(381516, 9.7) -- Interrupting Cloudburst
 	end
 	if not self:Normal() then
-		self:CDBar(381517, 17.0, CL.other:format(L.winds, CL.north_west), "misc_arrowlup") -- Winds of Change
+		self:CDBar(381517, 17.0, CL.other:format(CL.winds, CL.north_west), "misc_arrowlup") -- Winds of Change
 	end
 end
 
@@ -112,6 +112,7 @@ local count20 = 1
 local count16 = 1
 local activeBars = {}
 local backupBars = {}
+local windDirectionIcons = { "misc_arrowlup", "misc_arrowleft", "misc_arrowdown", "misc_arrowright" } -- North-West, South-West, South-East, North-East
 
 --------------------------------------------------------------------------------
 -- Midnight Renames
@@ -121,7 +122,18 @@ if mod:Retail() then -- Midnight+
 	mod:SetRenames({
 		[381525] = {381525}, -- Roaring Firebreath
 		[381512] = {381512}, -- Stormslam
-		[381517] = {381517}, -- Winds of Change
+		[381517] = {
+			CL.other:format(CL.winds, CL.north_west), -- Winds: North-West
+			CL.other:format(CL.winds, CL.south_west), -- Winds: South-West
+			CL.other:format(CL.winds, CL.south_east), -- Winds: South-East
+			CL.other:format(CL.winds, CL.north_east), -- Winds: North-East
+			notes = {CL.north_west, CL.south_west, CL.south_east, CL.north_east}, original = {
+				CL.other:format(mod:SpellName(381517), CL.north_west), -- Winds of Change: North-West
+				CL.other:format(mod:SpellName(381517), CL.south_west), -- Winds of Change: South-West
+				CL.other:format(mod:SpellName(381517), CL.south_east), -- Winds of Change: South-East
+				CL.other:format(mod:SpellName(381517), CL.north_east), -- Winds of Change: North-East
+			}
+		},
 		[381862] = {381862, CL.you:format(mod:SpellName(381862)), notes = {CL.generalNote, CL.messageOnYouNote}, original = {381862, CL.you:format(mod:SpellName(381862))}}, -- Inferno Spit
 		[381516] = {381516, CL.cast:format(mod:SpellName(381516)), notes = {CL.generalNote, CL.castTimerNote}, original = false}, -- Interrupting Cloudburst
 	})
@@ -183,16 +195,17 @@ function mod:ENCOUNTER_TIMELINE_EVENT_ADDED(_, eventInfo)
 	if eventInfo.source ~= 0 then return end -- Enum.EncounterTimelineEventSource.Encounter
 	local duration = self:RoundNumber(eventInfo.duration, 1)
 	local barInfo
-	if duration == 1 or (duration == 20 and count20 % 2 == 1) or (duration == 16 and count16 % 2 == 1) then -- Roaring Firebreath
-		if duration == 16 and self:GetStage() == 1 then
+	if C_EncounterTimeline.GetEventState(eventInfo.id) == 1 then return end -- filter Paused bars
+	if duration == 1 or (stormslamCount > 1 and duration == 5) or (duration == 20 and count20 % 2 == 1) or (duration == 16 and count16 % 2 == 1) then -- Roaring Firebreath
+		if duration == 5 and self:GetStage() == 1 then
 			self:EncounterEvent() -- Stage 2
 		end
 		barInfo = self:RoaringFirebreathTimeline(eventInfo)
-	elseif duration == 5 or duration == 22.5 then -- Stormslam
+	elseif (stormslamCount == 1 and duration == 5) or duration == 22.5 then -- Stormslam
 		barInfo = self:StormslamTimeline(eventInfo)
 	elseif duration == 10 or duration == 21.5 then -- Winds of Change
 		barInfo = self:WindsOfChangeTimeline(eventInfo)
-	elseif duration == 12 or (duration == 20 and count20 % 2 == 0) or duration == 9 or (duration == 16 and count16 % 2 == 0) then -- Inferno Spit
+	elseif duration == 12 or (duration == 20 and count20 % 2 == 0) or duration == 13 or (duration == 16 and count16 % 2 == 0) then -- Inferno Spit
 		barInfo = self:InfernoSpitTimeline(eventInfo)
 	elseif duration == 21 or duration == 25 then -- Interrupting Cloudburst
 		barInfo = self:InterruptingCloudburstTimeline(eventInfo)
@@ -291,14 +304,16 @@ function mod:StormslamTimeline(eventInfo) -- Stormslam
 end
 
 function mod:WindsOfChangeTimeline(eventInfo) -- Winds of Change
-	local barText = CL.count:format(self:GetRename(381517), windsOfChangeCount)
-	self:CDBar(381517, eventInfo.duration, barText, nil, eventInfo.id)
+	local direction = (windsOfChangeCount - 1) % 4 -- 0 = North-West, 1 = South-West, 2 = South-East, 3 = North-East
+	local barText = CL.count:format(self:GetRename(381517, direction + 1), windsOfChangeCount)
+	local icon = windDirectionIcons[direction + 1]
+	self:CDBar(381517, eventInfo.duration, barText, icon, eventInfo.id)
 	windsOfChangeCount = windsOfChangeCount + 1
 	return {
 		msg = barText,
 		key = 381517,
 		callback = function()
-			self:Message(381517, "cyan", barText)
+			self:Message(381517, "cyan", barText, icon)
 			self:PlaySound(381517, "info")
 		end
 	}
@@ -312,7 +327,7 @@ function mod:InfernoSpitTimeline(eventInfo) -- Inferno Spit
 		msg = barText,
 		key = 381862,
 		callback = function()
-			self:PersonalMessageFromBlizzMessage(381862, 3, false, self:GetRename(381862, 2))
+			self:PersonalMessageFromBlizzMessage(381862, 3.5, false, self:GetRename(381862, 2))
 			self:Message(381862, "yellow", barText)
 			self:PlaySound(381862, "alarm")
 		end
@@ -382,7 +397,7 @@ function mod:BossDeath(args)
 			elseif windsOfChangeCount % 4 == 0 then
 				nextDirection = CL.north_west
 			end
-			self:StopBar(CL.other:format(L.winds, nextDirection)) -- Winds of Change
+			self:StopBar(CL.other:format(CL.winds, nextDirection)) -- Winds of Change
 			self:StopBar(381516) -- Interrupting Cloudburst
 			self:StopBar(381512) -- Stormslam
 		end
@@ -479,9 +494,9 @@ function mod:WindsOfChange(args)
 		icon = "misc_arrowright"
 		nextIcon = "misc_arrowlup"
 	end
-	self:Message(args.spellId, "cyan", CL.other:format(L.winds, direction), icon)
-	self:StopBar(CL.other:format(L.winds, direction))
-	self:CDBar(args.spellId, 19.4, CL.other:format(L.winds, nextDirection), nextIcon)
+	self:Message(args.spellId, "cyan", CL.other:format(CL.winds, direction), icon)
+	self:StopBar(CL.other:format(CL.winds, direction))
+	self:CDBar(args.spellId, 19.4, CL.other:format(CL.winds, nextDirection), nextIcon)
 	self:PlaySound(args.spellId, "info")
 end
 

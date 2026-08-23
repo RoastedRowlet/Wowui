@@ -594,6 +594,8 @@ L["RAID_BOSS_SOD_9"] = "Kel’Thuzad"
 --[[ L["RAID_BOSS_SOO_8"] = ""--]] 
 --[[Translation missing --]]
 --[[ L["RAID_BOSS_SOO_9"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_TG_1"] = ""--]] 
 L["RAID_BOSS_ToES_1"] = "Protecteurs de l’Éternel"
 L["RAID_BOSS_TOES_1"] = "Protecteurs de l’Éternel"
 L["RAID_BOSS_TOES_2"] = "Tsulong"
@@ -704,6 +706,8 @@ L["RAID_RS"] = "Le sanctum Rubis"
 --[[ L["RAID_SF"] = ""--]] 
 --[[Translation missing --]]
 --[[ L["RAID_SOO"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_TG"] = ""--]] 
 L["RAID_ToES"] = "Terrasse Printanière"
 L["RAID_TOES"] = "Terrasse Printanière"
 L["RAID_TOT"] = "Trône du tonnerre"

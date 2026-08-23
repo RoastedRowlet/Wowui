@@ -689,6 +689,8 @@ L["RAID_BOSS_SOD_9"] = "Kel'Thuzad"
 --[[Translation missing --]]
 --[[ L["RAID_BOSS_SOO_9"] = ""--]] 
 --[[Translation missing --]]
+--[[ L["RAID_BOSS_TG_1"] = ""--]] 
+--[[Translation missing --]]
 --[[ L["RAID_BOSS_ToES_1"] = ""--]] 
 --[[Translation missing --]]
 --[[ L["RAID_BOSS_TOES_1"] = ""--]] 
@@ -823,6 +825,7 @@ L["RAID_NP"] = "Palacio Nerub'ar - NP"
 L["RAID_RS"] = "El Sagrario Rubí - RS"
 L["RAID_SF"] = "Micosis - SF"
 L["RAID_SOO"] = "Asedio de Orgrimmar - SOO"
+L["RAID_TG"] = "La Gruta Mareal - TG"
 L["RAID_ToES"] = "Veranda de la Primavera Eterna - ToES"
 L["RAID_TOES"] = "Veranda de la Primavera Eterna"
 L["RAID_TOT"] = "Solio del Trueno - ToT"

@@ -28,9 +28,8 @@ local crosswindsCount = 1
 -- Localization
 --
 
-local L = mod:SetDefaultLocale({
-	raging_crosswinds = "Winds",
-})
+--local L = mod:SetDefaultLocale({
+--})
 
 --------------------------------------------------------------------------------
 -- Renames
@@ -46,7 +45,7 @@ mod:SetRenames({
 		original = {1305959, CL.you:format(mod:SpellName(1305959))}
 	},
 	[1285425] = { -- Raging Crosswinds
-		L.raging_crosswinds, CL.you:format(L.raging_crosswinds),
+		CL.winds, CL.you:format(CL.winds),
 		notes = {CL.generalNote, CL.messageOnYouNote},
 		original = {1285425, CL.you:format(mod:SpellName(1285425))}
 	},
@@ -145,6 +144,7 @@ function mod:ENCOUNTER_TIMELINE_EVENT_ADDED(_, eventInfo)
 	end
 
 	if barInfo then
+		barInfo.eventID = eventInfo.id
 		activeBars[eventInfo.id] = barInfo
 		if self:ShouldShowBars() then
 			self:CDBar(barInfo.key, barInfo.duration or eventInfo.duration, barInfo.msg, barInfo.icon, eventInfo.id)

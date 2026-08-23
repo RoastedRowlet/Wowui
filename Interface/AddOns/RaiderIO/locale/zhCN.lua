@@ -485,6 +485,8 @@ L["RAID_BOSS_SOO_6"] = "钢铁战蝎"
 L["RAID_BOSS_SOO_7"] = "库卡隆黑暗萨满"
 L["RAID_BOSS_SOO_8"] = "纳兹戈林将军"
 L["RAID_BOSS_SOO_9"] = "马尔考罗克"
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_TG_1"] = ""--]] 
 L["RAID_BOSS_ToES_1"] = "无尽守护者"
 L["RAID_BOSS_TOES_1"] = "无尽守护者"
 L["RAID_BOSS_TOES_2"] = "烛龙"
@@ -569,6 +571,8 @@ L["RAID_NP"] = "尼鲁巴尔王宫"
 L["RAID_RS"] = "红玉圣所"
 L["RAID_SF"] = "孢陨幽境"
 L["RAID_SOO"] = "决战奥格瑞玛"
+--[[Translation missing --]]
+--[[ L["RAID_TG"] = ""--]] 
 L["RAID_ToES"] = "永春台"
 L["RAID_TOES"] = "永春台"
 L["RAID_TOT"] = "雷电王座"

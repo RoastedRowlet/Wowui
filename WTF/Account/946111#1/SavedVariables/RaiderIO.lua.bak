@@ -1,23 +1,47 @@
 
 RaiderIO_Config = {
+["minimapIcon"] = {
+["minimapPos"] = 180,
+["showInCompartment"] = true,
+["hide"] = false,
+["lock"] = false,
+},
 ["profilePoint"] = {
 ["y"] = 0,
 ["x"] = -16,
 ["point"] = "TOPLEFT",
 },
-["minimapIcon"] = {
-["minimapPos"] = 180,
-["showInCompartment"] = true,
-["lock"] = false,
-["hide"] = false,
-},
 }
 RaiderIO_LastCharacter = "us-Zappyxatu-stormrage"
 RaiderIO_MissingCharacters = {
-["us-Lylyf-moon-guard"] = true,
-["us-Genjy-chogall"] = true,
-["us-Bullmanncow-illidan"] = true,
-["us-Flashy-tichondrius"] = true,
+["us-Horgash-stormrage"] = true,
+["us-Imam-stormrage"] = true,
+["us-Drearines-drakkari"] = true,
+["us-Falchior-stormrage"] = true,
+["us-Gluesmash-area-52"] = true,
+["us-Maevere-stormrage"] = true,
+["us-Mingjanamnan-azralon"] = true,
+["us-Verdereina-thunderlord"] = true,
+["us-Jalhidha-ragnaros"] = true,
+["us-Soloanal-ragnaros"] = true,
+["us-Kreathos-ragnaros"] = true,
+["us-Safto-stormrage"] = true,
+["us-Coochsmoochz-stormrage"] = true,
+["us-Bellasignora-stormrage"] = true,
+["us-Holyyapper-stormrage"] = true,
+["us-Thundashock-stormrage"] = true,
+["us-Orcoguerrero-ragnaros"] = true,
+["us-Atzara-stormrage"] = true,
+["us-Laelecktra-stormrage"] = true,
+["us-Trexkiller-illidan"] = true,
+["us-Bloodydktank-area-52"] = true,
+["us-Kiwicat-stormrage"] = true,
+["us-Coffeegirls-stormrage"] = true,
+["us-Exid-stormrage"] = true,
+["us-Wakawakka-stormrage"] = true,
+["us-Ognibs-stormrage"] = true,
+["us-Leidy-stormrage"] = true,
+["us-Earther-stormrage"] = true,
 }
 RaiderIO_MissingServers = {
 }

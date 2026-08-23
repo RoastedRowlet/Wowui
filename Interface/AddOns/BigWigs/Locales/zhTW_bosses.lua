@@ -90,10 +90,6 @@ BigWigsAPI.SetBossModuleLocale("Vashnik the Malignant", {
 	malignant_catalyst = "催化", -- Short for Malignant Catalyst
 })
 
-BigWigsAPI.SetBossModuleLocale("Sszorak", {
-	--raging_crosswinds = "Winds",
-})
-
 BigWigsAPI.SetBossModuleLocale("The Twin Fangs", {
 	coiling_toxin = "射線", -- Short for Coiling Toxin
 	corrosive_spit = "紅圈", -- Short for Corrosive Spit
@@ -104,4 +100,5 @@ BigWigsAPI.SetBossModuleLocale("Ula'tek", {
 	--call_of_the_serpent = "Eggs",
 	--gore_rattle = "Tail",
 	--circling_prey = "Platform Break",
+	--p3_knock_up = "Knock Up",
 })

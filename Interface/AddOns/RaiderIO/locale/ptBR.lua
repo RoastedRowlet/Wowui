@@ -522,6 +522,8 @@ L["RAID_BOSS_SOD_9"] = "Kel'Thuzad"
 --[[ L["RAID_BOSS_SOO_8"] = ""--]] 
 --[[Translation missing --]]
 --[[ L["RAID_BOSS_SOO_9"] = ""--]] 
+--[[Translation missing --]]
+--[[ L["RAID_BOSS_TG_1"] = ""--]] 
 L["RAID_BOSS_ToES_1"] = "Protetores do Infinito"
 L["RAID_BOSS_TOES_1"] = "Protetores do Infinito"
 L["RAID_BOSS_TOES_2"] = "Tsulong"
@@ -606,6 +608,8 @@ L["RAID_NP"] = "Palácio Nerub-ar"
 L["RAID_RS"] = "Santuário Rubi"
 L["RAID_SF"] = "Esporasca"
 L["RAID_SOO"] = "Cerco a Orgrimmar"
+--[[Translation missing --]]
+--[[ L["RAID_TG"] = ""--]] 
 L["RAID_ToES"] = "Terraço da Primavera Eterna"
 L["RAID_TOES"] = "Terraço da Primavera Eterna"
 L["RAID_TOT"] = "Trono do Trovão"

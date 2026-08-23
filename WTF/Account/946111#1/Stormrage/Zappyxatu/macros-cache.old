@@ -51,6 +51,9 @@ VER 3 010000000000000A "Lightning bolt" "134400"
 /cast Ancestral Swiftness
 /cast Lightning Bolt
 END
+VER 3 010000000000000E "PCT" "134400"
+/cast Poison Cleansing Totem
+END
 VER 3 0100000000000005 "ToProj Cursor" "134400"
 /cast [@cursor] totemic projection
 END
