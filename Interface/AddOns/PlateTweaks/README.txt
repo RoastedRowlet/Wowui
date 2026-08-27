@@ -1,5 +1,5 @@
 PlateTweaks
-Version 1.7.0  ·  World of Warcraft 12.1 (Midnight)
+Version 1.8.5  ·  World of Warcraft 12.1 (Midnight)
 
 Colors enemy nameplate health bars and borders based on which of your own
 debuffs are active on them -- or missing from them.
@@ -233,7 +233,7 @@ account rather than the profile.
 COMPATIBILITY
 -------------
 Works with Blizzard's default nameplates and with other nameplate addons
-(EllesmereUI, Plater, Platynator and others). It draws on whatever health bar
+(EllesmereUI, Plater, Platynator, NDui and others). It draws on whatever health bar
 it finds rather than replacing your plates.
 
 If your nameplate addon already shows aura icons, leave the Aura Icons module

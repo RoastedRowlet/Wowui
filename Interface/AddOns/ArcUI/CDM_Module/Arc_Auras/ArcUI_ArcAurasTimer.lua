@@ -1079,37 +1079,15 @@ end
 -- Apply a custom icon override. iconID is a raw FileDataID (texture ID) —
 -- the number shown in the tooltip's "IconID" line. SetTexture accepts this
 -- directly; no spell/item lookup needed. Pass nil/0 to clear.
+-- Public entry point kept for existing callers; the implementation is the
+-- shared writer in ArcUI_ArcAuras.lua (see the ONE PATH block there).
+-- iconID is an already-resolved texture FileDataID for timers, which is the
+-- contract the shared writer honours for arc_timer_ IDs.
 function ArcAurasTimer.ApplyIconOverride(arcID, iconID)
-    local db = GetDB()
-    if not db or not db.customTimers or not db.customTimers[arcID] then return end
-    local cfg = db.customTimers[arcID]
-
-    local n = tonumber(iconID)
-    if not n or n <= 0 then
-        cfg.icon = nil
-        cfg.iconID = nil
-        -- Restore original (watched spell's icon)
-        local _, originalIcon = GetSpellNameAndIcon(cfg.spellID)
-        local td = ArcAurasTimer.timers[arcID]
-        if td and td.frame and td.frame.Icon then
-            td.frame.Icon:SetTexture(originalIcon or 134400)
-        end
-        print("|cff00CCFF[Arc Auras]|r Timer icon reset to default")
-        return
+    if ns.ArcAuras and ns.ArcAuras.SetIconOverride then
+        return ns.ArcAuras.SetIconOverride(arcID, iconID)
     end
-
-    -- SetTexture accepts a FileDataID (number) directly. WoW resolves it
-    -- to the texture file at render time. If the ID is invalid, the icon
-    -- will just show as a question mark / missing texture — which is the
-    -- expected behaviour and gives clear feedback to the user.
-    cfg.icon   = n
-    cfg.iconID = n
-
-    local td = ArcAurasTimer.timers[arcID]
-    if td and td.frame and td.frame.Icon then
-        td.frame.Icon:SetTexture(n)
-    end
-    print(string.format("|cff00CCFF[Arc Auras]|r Timer icon -> FileID %d", n))
+    return false
 end
 
 -- Refresh engine state after Options UI edits the timer config (duration,
@@ -1224,6 +1202,8 @@ function ArcAurasTimer.GetTimers()
 end
 
 -- Build all timer frames from saved config. Called on login / enable.
+local ShouldTimerBeVisible  -- forward decl: defined below, RebuildAll gates on it
+
 function ArcAurasTimer.RebuildAll()
     local db = GetDB()
     if not db or not db.customTimers then return end
@@ -1235,10 +1215,24 @@ function ArcAurasTimer.RebuildAll()
         end
     end
 
-    -- Create new / refresh existing
+    -- Create new / refresh existing.
+    -- LOGIN COLUMN-RATCHET FIX (coltrace-proven): this used to create EVERY
+    -- timer unconditionally and let the +1.5s RefreshSpecVisibility destroy
+    -- the spec/talent-gated ones. That transient member joined its group for
+    -- ~1.5s at login, the grid RATCHETED a column to fit it, and the ratchet
+    -- outlived the destroy ("Group1 gains a column every login"; the trace
+    -- showed cols 1->2 with arc_timer_2645 present, then -member with cols
+    -- stuck at 2). Gate creation on the SAME visibility check instead.
+    -- Early-login trait data can be unloaded, making the check falsely
+    -- false -- that is now SAFE: the +1.5s pass CREATES anything whose
+    -- conditions actually pass ("shouldShow and not td"), so the worst case
+    -- flipped from created-then-destroyed (ratchet, ghost hazards) to
+    -- absent-for-1.5s-then-created.
     for arcID, config in pairs(db.customTimers) do
         if not ArcAurasTimer.timers[arcID] then
-            ArcAurasTimer.CreateTimer(arcID, config)
+            if ShouldTimerBeVisible(config, config.spellID) then
+                ArcAurasTimer.CreateTimer(arcID, config)
+            end
         end
     end
 end
@@ -1269,7 +1263,7 @@ end
 --   4. (no PlayerKnowsSpell fallback — trust the user)
 -- ═══════════════════════════════════════════════════════════════════════════
 
-local function ShouldTimerBeVisible(config, spellID)
+ShouldTimerBeVisible = function(config, spellID)  -- assigns the forward decl above RebuildAll
     if not config or not spellID then return false end
 
     -- forceShow = unconditional yes. Bypasses every gate below.

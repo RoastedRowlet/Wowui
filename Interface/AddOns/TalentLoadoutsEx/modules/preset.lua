@@ -6,12 +6,16 @@ TalentLoadoutEx = TalentLoadoutEx or {};
 
 local peaversTalentsDataGroupNames = {
 	mythic = "Mythic+",
+	lfr_raid    = "Raid: LFR",
+	normal_raid = "Raid: Normal",
 	heroic_raid = "Raid: Heroic",
 	mythic_raid = "Raid: Mythic",
 };
 
 local peaversTalentsDataPrefixes = {
 	mythic = "Mythic+:\n",
+	lfr_raid    = "Raid(L):\n",
+	normal_raid = "Raid(N):\n",
 	heroic_raid = "Raid(H):\n",
 	mythic_raid = "Raid(M):\n",
 };
@@ -121,8 +125,6 @@ local function GetPeaversTalentsDataByCategory(category)
 
 			for _, build in ipairs(builds or {}) do
 				local buildCategory = build.category;
-				buildCategory = buildCategory == "sporefall_heroic" and "heroic_raid" or buildCategory;
-				buildCategory = buildCategory == "sporefall_mythic" and "mythic_raid" or buildCategory;
 				if buildCategory == category then
 					table.insert(
 						presetData,
@@ -285,6 +287,8 @@ local combinedGroups = {
 local function GetPeaversTalentsData()
 	local presetData = {};
 	AddData(presetData, GetPeaversTalentsDataByCategory("mythic"));
+	AddData(presetData, GetPeaversTalentsDataByCategory("lfr_raid"));
+	AddData(presetData, GetPeaversTalentsDataByCategory("normal_raid"));
 	AddData(presetData, GetPeaversTalentsDataByCategory("heroic_raid"));
 	AddData(presetData, GetPeaversTalentsDataByCategory("mythic_raid"));
 

@@ -137,3 +137,4 @@ EllesmereUIRaidFrames: enabled
 BigWigs_Sporefall: enabled
 TotemRecall: disabled
 BigWigs_TheVenomousAbyss: enabled
+BigWigs_MidnightLairs: enabled

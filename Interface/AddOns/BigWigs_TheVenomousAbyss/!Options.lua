@@ -11,6 +11,7 @@ BigWigs:AddColors("Nek'zali the Soulcoiler", {
 })
 
 BigWigs:AddSounds("Nek'zali the Soulcoiler", {
+	[1292036] = "alert",
 	[1293212] = "long",
 	[1295397] = "info",
 	[1299673] = "alarm",
@@ -41,7 +42,7 @@ BigWigs:AddSounds("Entombed Sentinels", {
 
 BigWigs:AddColors("The Lost Explorers", {
 	[1286921] = "yellow",
-	[1290711] = {"blue","yellow"},
+	[1290711] = "blue",
 	[1291390] = "red",
 	[1291759] = "orange",
 	[1291933] = "yellow",
@@ -50,7 +51,7 @@ BigWigs:AddColors("The Lost Explorers", {
 	[1295817] = "green",
 	[1295854] = "purple",
 	[1295886] = "orange",
-	[1296092] = "orange",
+	[1296092] = {"blue","orange"},
 	[1296249] = "red",
 	[1296535] = {"blue","green"},
 	[1297022] = {"cyan","green"},

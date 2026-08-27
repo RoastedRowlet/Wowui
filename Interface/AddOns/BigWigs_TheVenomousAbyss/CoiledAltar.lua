@@ -116,7 +116,7 @@ mod:SetAuraData({
 	{1283485, soundOnApplied = "warning", duration = 5, note = "Targeted"}, -- Guillotine
 	{1297435, soundOnApplied = "warning", duration = 6, note = "Targeted"}, -- Dreadmarch XXX not applied to players?
 	{1285911, soundOnApplied = "warning", duration = 7}, -- Unnerving Fixation
-	{1286901, soundOnApplied = "warning", duration = 5}, -- Gloombomb
+	{1286901, 1310881, soundOnApplied = "warning", duration = 5}, -- Gloombomb
 	{1286837, soundOnApplied = "alarm", soundOnAppliedDose = "none", duration = 11}, -- Gravebound
 	{1299266, soundOnApplied = "warning", duration = 5, note = "Targeted"}, -- Grim Guillotine
 	-- Zul'jan
@@ -378,7 +378,7 @@ function mod:OtherTimeline(_, eventInfo)
 			elseif rounded == 6 or rounded == 34 then -- 5.5
 				barInfo = self:Dreadmarch(duration)
 			elseif rounded == 20 or rounded == 40 then
-				barInfo = self:Gloombomb(duration)
+				barInfo = self:Gloombomb()
 			elseif rounded == 32 or rounded == 33 then
 				barInfo = self:SoulSever()
 			end
@@ -408,6 +408,8 @@ function mod:OtherTimeline(_, eventInfo)
 					barInfo = self:BlightedSever()
 				elseif count == 2 then
 					barInfo = self:Gloombomb()
+				elseif count == 3 then
+					barInfo = self:BlightedSever()
 				end
 			elseif rounded == 60 then -- 59.77
 				durationEventCount[rounded] = (durationEventCount[rounded] or 0) + 1
@@ -431,9 +433,10 @@ function mod:OtherTimeline(_, eventInfo)
 				barInfo = self:DefilementOfTheCoiledAltar()
 			elseif rounded == 34 then
 				durationEventCount[rounded] = (durationEventCount[rounded] or 0) + 1
-				if durationEventCount[rounded] % 2 == 1 then
+				local count = durationEventCount[rounded]
+				if count == 1 then
 					barInfo = self:EternalNightfall()
-				else
+				elseif count == 2 then
 					barInfo = self:BlightedSever()
 				end
 			end
@@ -474,7 +477,6 @@ end
 
 function mod:ENCOUNTER_TIMELINE_EVENT_STATE_CHANGED(_, eventID)
 	local state = C_EncounterTimeline.GetEventState(eventID)
-
 	local barInfo = activeBars[eventID]
 
 	if barInfo and barInfo.key == 1282487 and state == 3 then -- Fangs of the Coiled Altar (Canceled)
@@ -491,8 +493,8 @@ function mod:ENCOUNTER_TIMELINE_EVENT_STATE_CHANGED(_, eventID)
 		barInfo = nil
 	end
 
-	if barInfo and barInfo.gapTimer and state == 2 then -- Finished
-		self:Bar(barInfo.key, barInfo.gapTimer, CL.count:format(self:GetRename(barInfo.key, barInfo.renamePosition), spellCount[barInfo.key]))
+	if barInfo and barInfo.gapTimer and state == 2 then -- Finished (reuse the eventID to set the spell indicator for the next bar)
+		self:Bar(barInfo.key, barInfo.gapTimer, CL.count:format(self:GetRename(barInfo.key, barInfo.renamePosition), spellCount[barInfo.key]), nil, eventID)
 	end
 
 	if barInfo and not barInfo.skipState then

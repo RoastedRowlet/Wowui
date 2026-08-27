@@ -12,9 +12,9 @@ local strfind = string.find
 -- Generate our version variables
 --
 
-local BIGWIGS_VERSION = 422
+local BIGWIGS_VERSION = 423
 local CONTENT_PACK_VERSIONS = {
-	["LittleWigs"] = {12, 1, 4},
+	["LittleWigs"] = {12, 1, 7},
 	["BigWigs_Classic"] = {12, 1, 1},
 	["BigWigs_BurningCrusade"] = {12, 1, 2},
 	["BigWigs_WrathOfTheLichKing"] = {12, 0, 11},
@@ -56,7 +56,7 @@ do
 	local ALPHA = "ALPHA"
 
 	local releaseType
-	local myGitHash = "7451339" -- The ZIP packager will replace this with the Git hash.
+	local myGitHash = "1ca42c4" -- The ZIP packager will replace this with the Git hash.
 	local releaseString
 	--[=[@alpha@
 	-- The following code will only be present in alpha ZIPs.
@@ -142,6 +142,7 @@ public.CTimerNewTicker = C_Timer.NewTicker
 public.CTimerNewTimer = CTimerNewTimer
 public.DoCountdown = C_PartyInfo.DoCountdown
 public.GetBestMapForUnit = GetBestMapForUnit
+public.GetCreatureID = C_CreatureInfo.GetCreatureID
 public.GetInstanceInfo = GetInstanceInfoModified
 public.GetMapInfo = GetMapInfo
 public.GetPlayerAuraBySpellID = C_UnitAuras.GetPlayerAuraBySpellID
@@ -1881,21 +1882,20 @@ do
 			CreateFrame("Frame"), CreateFrame("Frame"), CreateFrame("Frame"), CreateFrame("Frame"), CreateFrame("Frame"), CreateFrame("Frame"),
 			CreateFrame("Frame"), CreateFrame("Frame"), CreateFrame("Frame"), CreateFrame("Frame"), CreateFrame("Frame"), CreateFrame("Frame"),
 		}
-		local UnitIsPlayer = UnitIsPlayer
+		local GetCreatureID = C_CreatureInfo.GetCreatureID
 		local function UNIT_TARGET(_, _, unit)
 			local unitTarget = unit.."target"
-			local guid = UnitGUID(unitTarget)
-			if guid and not UnitIsPlayer(unitTarget) then
-				local _, _, _, _, _, mobIdString = strsplit("-", guid)
-				local mobId = tonumber(mobIdString)
-				if mobId then
-					local zoneId = worldBosses[mobId]
+			local GUID = UnitGUID(unitTarget)
+			if GUID then
+				local creatureID = GetCreatureID(GUID)
+				if creatureID then
+					local zoneId = worldBosses[creatureID]
 					if zoneId and loadAndEnableCore() then
 						loadZone(zoneId)
 						BigWigs:Enable()
 					end
 
-					public:SendMessage("BigWigs_UNIT_TARGET", mobId, unitTarget, guid)
+					public:SendMessage("BigWigs_UNIT_TARGET", creatureID, unitTarget, GUID)
 				end
 			end
 		end

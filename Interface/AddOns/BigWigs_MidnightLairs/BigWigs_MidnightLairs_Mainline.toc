@@ -23,7 +23,7 @@
 ## Notes-zhCN: BigWigs 潮缚石窟模块
 ## Notes-zhTW: BigWigs 浪縛岩窟模組
 ## IconTexture: Interface\AddOns\BigWigs\Media\Icons\minimap_raid.tga
-## Version: v422.3
+## Version: v423.1
 
 ## LoadOnDemand: 1
 ## Dependencies: BigWigs

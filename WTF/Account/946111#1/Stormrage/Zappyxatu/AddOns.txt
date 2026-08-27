@@ -114,3 +114,4 @@ EllesmereUIBags: enabled
 BigWigs_Sporefall: enabled
 EllesmereUIRaidFrames: enabled
 BigWigs_TheVenomousAbyss: enabled
+BigWigs_MidnightLairs: enabled

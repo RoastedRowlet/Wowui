@@ -483,8 +483,7 @@ L["RAID_BOSS_SOO_6"] = "鋼鐵破滅邪神"
 L["RAID_BOSS_SOO_7"] = "柯爾克隆黑暗薩滿"
 L["RAID_BOSS_SOO_8"] = "納茲格寧姆將軍"
 L["RAID_BOSS_SOO_9"] = "馬可羅克"
---[[Translation missing --]]
---[[ L["RAID_BOSS_TG_1"] = ""--]] 
+L["RAID_BOSS_TG_1"] = "妮莉莎​‧​喚浪​者"
 L["RAID_BOSS_ToES_1"] = "豐泉守衛者"
 L["RAID_BOSS_TOES_1"] = "豐泉守衛者"
 L["RAID_BOSS_TOES_2"] = "楚龍"
@@ -569,8 +568,7 @@ L["RAID_NP"] = "奈幽巴宮殿"
 L["RAID_RS"] = "晶紅聖所"
 L["RAID_SF"] = "孢子之殞"
 L["RAID_SOO"] = "圍攻奧格瑪"
---[[Translation missing --]]
---[[ L["RAID_TG"] = ""--]] 
+L["RAID_TG"] = "浪​縛​​岩​窟"
 L["RAID_ToES"] = "豐泉臺"
 L["RAID_TOES"] = "豐泉台"
 L["RAID_TOT"] = "雷霆王座"

@@ -19,6 +19,7 @@ local activeBars = {}
 local backupBars = {}
 
 local durationEventCount = {}
+local checkStage = nil
 
 local rageCount = 1
 local goreRattleCount = 1
@@ -64,14 +65,19 @@ mod:SetRenames({
 	[1296301] = {L.mephitic_thrash}, -- Mephitic Thrash
 	[1300530] = {CL.soaks}, -- Spectral Coils
 	[1286860] = { -- Rage of the Shackled
-		CL.weakened, CL.weakened,
+		CL.weakened, CL.cast:format(CL.weakened),
 		notes = {CL.generalNote, CL.castTimerNote},
+		original = {1286860, CL.cast:format(mod:SpellName(1286860))}
 	},
 
 	[1302982] = {1302982}, -- Virulent Spit
 
 	[1292999] = {1292999}, -- Submerge
-	[1301510] = {L.circling_prey}, -- Circling Prey
+	[1301510] = { -- Circling Prey
+		L.circling_prey, CL.cast:format(L.circling_prey),
+		notes = {CL.generalNote, CL.castTimerNote},
+		original = {1301510, CL.cast:format(mod:SpellName(1301510))}
+	},
 	[1295905] = {CL.soaks}, -- Serpent's Bite
 	[1286905] = {1286905}, -- Fury Unleashed
 })
@@ -187,6 +193,7 @@ function mod:OnEncounterStart()
 	self:ResetCounts()
 	rageCount = 1
 
+	checkStage = nil
 	self:RegisterUnitEvent("UNIT_TARGETABLE_CHANGED", nil, "boss1")
 end
 
@@ -217,17 +224,24 @@ end
 function mod:HeroicTimeline(_, eventInfo)
 	if eventInfo.source ~= 0 or self:IsWiping() then return end
 
-	if spitCount == 3 then -- out of data
-		return self:HandleBar(nil, eventInfo, true) -- no data
-	end
-
 	local barInfo
 
 	local stage = self:GetStage()
 	local duration = eventInfo.duration
 	local rounded = self:RoundNumber(duration, 0)
 
-	if stage == 2 and rounded == 10 then -- Spectral Coils is the only bar in the intermission
+	if stage == 1 and checkStage and rounded == 118 then -- Rage of the Shackled = Phase 2 (backup for UNIT_TARGETABLE_CHANGED)
+		checkStage = nil
+		stage = 2
+		self:SetStage(stage)
+		self:ResetCounts()
+
+		self:Message("stages", "cyan", self:GetRename("stages", 2), false)
+		self:PlaySound("stages", "long")
+
+		self:UnregisterUnitEvent("UNIT_TARGETABLE_CHANGED", "boss1")
+
+	elseif stage == 2 and rounded == 10 then -- Spectral Coils is the only bar in the intermission
 		stage = 2.5
 		self:SetStage(stage)
 		self:ResetCounts()
@@ -346,7 +360,18 @@ function mod:EasyTimeline(_, eventInfo)
 	local duration = eventInfo.duration
 	local rounded = self:RoundNumber(duration, 0)
 
-	if stage == 2 and rounded == 10 then -- Spectral Coils is the only bar in the intermission
+	if stage == 1 and checkStage  and rounded == 118 then -- Rage of the Shackled = Phase 2 (backup for UNIT_TARGETABLE_CHANGED)
+		checkStage = nil
+		stage = 2
+		self:SetStage(stage)
+		self:ResetCounts()
+
+		self:Message("stages", "cyan", self:GetRename("stages", 2), false)
+		self:PlaySound("stages", "long")
+
+		self:UnregisterUnitEvent("UNIT_TARGETABLE_CHANGED", "boss1")
+
+	elseif stage == 2 and rounded == 10 then -- Spectral Coils is the only bar in the intermission
 		stage = 2.5
 		self:SetStage(stage)
 		self:ResetCounts()
@@ -545,11 +570,12 @@ end
 --
 
 function mod:UNIT_TARGETABLE_CHANGED(_, unit)
-	if self:GetStage() == 1 and not UnitCanAttack("player", unit) then
+	if checkStage and not UnitCanAttack("player", unit) then
+		checkStage = nil
 		self:SetStage(2)
 		self:ResetCounts()
 
-		self:Message("stages", "cyan", CL.stage:format(2), false)
+		self:Message("stages", "cyan", self:GetRename("stages", 2), false)
 		self:PlaySound("stages", "long")
 
 		self:UnregisterUnitEvent("UNIT_TARGETABLE_CHANGED", "boss1")
@@ -650,11 +676,14 @@ function mod:RageOfTheShackled()
 		onFinished = function()
 			self:Message(1286860, "yellow", CL.casting:format(barText))
 			self:PlaySound(1286860, "info")
-			self:CastBar(1286860, 6.5, self:GetRename(1286860, 2))
+			self:CastBar(1286860, 6.5, 2)
 			self:ScheduleTimer(function()
 				self:Message(1286860, "green")
 				self:PlaySound(1286860, "long")
 			end, 6.5)
+			if self:GetStage() == 1 then
+				checkStage = true
+			end
 		end,
 	}
 end
@@ -685,7 +714,7 @@ function mod:CirclingPrey(duration)
 		key = 1301510,
 		onFinished = function()
 			self:Message(1301510, "red", barText)
-			self:CastBar(1301510, 8, self:GetRename(1301510, 2))
+			self:CastBar(1301510, 8, 2)
 			self:PlaySound(1301510, "long")
 		end,
 	}

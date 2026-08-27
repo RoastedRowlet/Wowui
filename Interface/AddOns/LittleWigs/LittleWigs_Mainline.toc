@@ -23,9 +23,9 @@
 
 ## Dependencies: BigWigs
 ## LoadOnDemand: 1
-## Version: v12.1.5
+## Version: v12.1.9
 
 ## X-BigWigs-Minimum: 422
 ## X-BigWigs-LoadOn-InstanceId: 2805,2811,2813,2825,2859,2874,2915,2923,2993, 2933,2952,2953,2961,2962,2963,2964,2965,2966,2979,3003,3038,3077,3079
-Midnight\modules.xml
 Midnight\!Locales\[TextLocale].lua [AllowLoadTextLocale deDE, esES, esMX, frFR, itIT, koKR, ptBR, ruRU, zhCN, zhTW]
+Midnight\modules.xml

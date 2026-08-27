@@ -110,3 +110,4 @@ Dystinct_EarthenSkyriding: enabled
 Blizzard_CombatText: enabled
 Blizzard_WeeklyRewards: enabled
 BigWigs_TheVenomousAbyss: enabled
+BigWigs_MidnightLairs: enabled

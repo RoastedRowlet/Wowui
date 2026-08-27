@@ -339,6 +339,7 @@ local TIPS = {
   outlineSides  = "Which edges to draw. Turn off the ones you do not want -- a line under the bar alone is a common look.",
   edgeInset     = "How far a tint stops short of the bar edge. Raise it if your colours are covering a border your nameplate addon draws.",
   perfGate      = "For profiles shared between characters. A rule you cannot trigger is still built on every nameplate. Off by default -- see the warning below it.",
+  maxRigRepairs = "How many times a plate built during combat lockdown may be rebuilt once combat allows it. 1 is the original default -- see the warning below it.",
 
   -- Pandemic
   pandemicColor = "The colour washed over the bar during the refresh window.",
@@ -7457,6 +7458,37 @@ local function BuildGlobalTabs()
   perf.gateWarn:SetJustifyH("LEFT")
   perf.gateWarn:SetHeight(42)
 
+  -- A rig built during combat lockdown is suspected structurally incomplete
+  -- and gets ONE chance to be discarded and rebuilt once combat allows it --
+  -- see the comment at OnPlateAdded in Core.lua. Raising this trades a small
+  -- bounded amount of leaked frames (secure frames cannot be destroyed) for
+  -- a better shot at recovering a plate whose one repair attempt itself
+  -- landed mid-lockdown, e.g. a brief regen flicker between two pulls.
+  perf.repairLabel = Label(pfc, "Rig repair attempts")
+  perf.repairLabel:SetPoint("TOPLEFT", 14, -122)
+  TipLabel(perf.repairLabel, "Rig repair attempts", TIPS.maxRigRepairs)
+  perf.repair = Slider(pfc, 150, 1, 5, 4,
+    function() return NS.db.tints.maxRigRepairs or 1 end,
+    function(v) NS.db.tints.maxRigRepairs = v end)
+  perf.repair:SetPoint("TOPLEFT", 130, -122)
+  Tip(perf.repair, "Rig repair attempts", TIPS.maxRigRepairs)
+  perf.repairHint = Dim(pfc, "how many times a plate built mid-combat may be rebuilt once combat allows it")
+  perf.repairHint:SetPoint("TOPLEFT", 14, -146)
+  perf.repairHint:SetPoint("TOPRIGHT", -14, -146)
+  perf.repairHint:SetJustifyH("LEFT")
+  perf.repairHint:SetHeight(28)
+
+  perf.repairWarn = Dim(pfc,
+    "|cffffcc00Each extra attempt leaks the previous rebuild's frames -- WoW cannot destroy "
+    .. "secure frames once created.|r 1 is the addon's original, conservative default. Raise "
+    .. "this only if plates that appear mid-fight (long boss fights, chained M+ pulls) are "
+    .. "staying uncolored for the rest of that fight; the leak is small and bounded per plate, "
+    .. "but it accumulates over a long session.")
+  perf.repairWarn:SetPoint("TOPLEFT", 14, -178)
+  perf.repairWarn:SetPoint("TOPRIGHT", -14, -178)
+  perf.repairWarn:SetJustifyH("LEFT")
+  perf.repairWarn:SetHeight(56)
+
   globalPanels = { panel }
 end
 
@@ -7585,7 +7617,8 @@ local function RebuildGlobalTabs()
 
   if ob.perf then
     ob.perf.gate:Refresh()
-    ob.perf:Resize(116)
+    ob.perf.repair:Refresh()
+    ob.perf:Resize(250)
   end
 
   -- One layout pass at the end, after every section has been given its height.

@@ -148,3 +148,4 @@ Mass_Salvage_Assist: enabled
 MythicDungeonTools_UI: enabled
 SpellOverlay Enhanced: enabled
 TotemRecall: disabled
+BigWigs_MidnightLairs: enabled

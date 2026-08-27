@@ -654,8 +654,7 @@ L["RAID_BOSS_SF_1"] = "Fangorrido"
 --[[ L["RAID_BOSS_SOO_8"] = ""--]] 
 --[[Translation missing --]]
 --[[ L["RAID_BOSS_SOO_9"] = ""--]] 
---[[Translation missing --]]
---[[ L["RAID_BOSS_TG_1"] = ""--]] 
+L["RAID_BOSS_TG_1"] = "Invocatrice dell'Onda Nymrissa"
 --[[Translation missing --]]
 --[[ L["RAID_BOSS_ToES_1"] = ""--]] 
 --[[Translation missing --]]
@@ -777,8 +776,7 @@ L["RAID_RS"] = "Santuario di Rubino"
 L["RAID_SF"] = "Sporandia"
 --[[Translation missing --]]
 --[[ L["RAID_SOO"] = ""--]] 
---[[Translation missing --]]
---[[ L["RAID_TG"] = ""--]] 
+L["RAID_TG"] = "La Grotta Vincolata alla Marea"
 --[[Translation missing --]]
 --[[ L["RAID_ToES"] = ""--]] 
 --[[Translation missing --]]

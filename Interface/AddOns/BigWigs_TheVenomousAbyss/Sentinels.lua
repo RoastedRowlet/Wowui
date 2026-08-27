@@ -20,8 +20,8 @@ local backupBars = {}
 
 local durationEventCount = {}
 local isIntermission = nil
+local berserkCD = 0
 local nextStasis = 0
-local berserkTime = 0
 
 local dropletsCount = 1
 local coagulationCount = 1
@@ -46,11 +46,11 @@ mod:SetRenames({
 	["berserk"] = {26662, CL.custom_end:format(mod.displayName, mod:SpellName(26662)), notes = {CL.timerNote, CL.messageNote}}, -- Berserk
 	[1284588] = {CL.intermission, CL.over:format(CL.intermission), original = {1284588, CL.over:format(mod:SpellName(1284588))}}, -- Vitriolic Stasis
 	[1296878] = {1296878, CL.soon:format(mod:SpellName(1296878)), original = false}, -- Shifting Protovenom
-	[1284251] = {1284251, CL.add_spawning, original = false}, -- Venom Coagulation
+	[1284251] = {CL.add, CL.add_spawning, original = false}, -- Venom Coagulation
 	[1284434] = {1284434}, -- Toxic Droplets
 	[1284458] = {1284458}, -- Empowering Slam
-	[1284483] = {1284483}, -- Blighted Blood
-	[1288232] = {1288232, CL.you:format(mod:SpellName(1288232)), original = false, notes = {CL.generalNote, CL.messageOnYouNote}}, -- Unstable Miasma
+	[1284483] = {CL.dispels}, -- Blighted Blood
+	[1288232] = {CL.soak, CL.you:format(CL.soak), original = {1288232, CL.you:format(mod:SpellName(1288232))}, notes = {CL.generalNote, CL.messageOnYouNote}}, -- Unstable Miasma
 	[1284487] = {1284487}, -- Bloodvenom Injection
 })
 
@@ -124,10 +124,14 @@ function mod:OnEncounterStart()
 	self:Bar(1284588, stasisCD, CL.count:format(self:GetRename(1284588), 1)) -- Vitriolic Stasis
 	nextStasis = self.stageTime + stasisCD
 
-	-- berserkTime = self:Heroic() and 540 or 0
-
-	if self:Mythic() then
+	berserkCD = 0
+	if self:Heroic() then
+		berserkCD = 540
+		self:Bar("berserk", berserkCD, self:GetRename("berserk"), 26662)
+	elseif self:Mythic() then
 		self:Bar(1296878, 36, CL.count:format(self:GetRename(1296878), protovenomCount)) -- Shifting Protovenom
+		berserkCD = 420
+		self:Bar("berserk", berserkCD, self:GetRename("berserk"), 26662)
 	end
 end
 
@@ -168,19 +172,6 @@ function mod:ENCOUNTER_TIMELINE_EVENT_ADDED(_, eventInfo)
 				self:Bar(1296878, 39.9, CL.count:format(self:GetRename(1296878), protovenomCount)) -- Shifting Protovenom
 			end
 		end
-
-		--if berserkTime > 0 then
-		--	-- Show berserk if it'll happen before the end of the next intermission
-		--	local berserkCD = berserkTime - self.stageTime
-		--	if berserkCD < stasisCD + 25 and self:ShouldShowBars() then
-		--		local berserkInfo = self:BerserkEvent()self:ShouldShowBars()
-		--		self:Bar(barInfo.key, berserkCD, barInfo.msg, barInfo.icon)
-		--		self:ScheduleTimer(function()
-		--			self:StopBar(berserkInfo.msg)
-		--			berserkInfo:onFinished()
-		--		end, berserkCD)
-		--	end
-		--end
 	end
 
 	durationEventCount[rounded] = (durationEventCount[rounded] or 0) + 1
@@ -199,7 +190,7 @@ function mod:ENCOUNTER_TIMELINE_EVENT_ADDED(_, eventInfo)
 	end
 
 	-- Don't show events that will get canceled (skipping Vitriolic Stasis itself)
-	if duration ~= 20 and not isBeforeVitriolicStasis(duration) then
+	if duration ~= 20 and duration ~= 15 and not isBeforeVitriolicStasis(duration) then
 		return false
 	end
 
@@ -217,6 +208,12 @@ function mod:ENCOUNTER_TIMELINE_EVENT_ADDED(_, eventInfo)
 		barInfo = self:BlightedBlood()
 	elseif rounded == 6 then
 		barInfo = self:BloodvenomInjection()
+	elseif rounded == 15 then
+		barInfo = self:BerserkEvent()
+		if berserkCD > 0 then
+			-- replace our bar with the blizzard one
+			barInfo.duration = { duration, berserkCD }
+		end
 
 	elseif rounded == 20 then
 		if stage == 1 then
@@ -311,11 +308,13 @@ end
 
 function mod:BerserkEvent()
 	local barText = self:GetRename("berserk")
+
 	return {
 		msg = barText,
 		icon = 26662,
 		key = "berserk",
 		onFinished = function()
+			self:StopBlizzMessages(2)
 			self:Message("berserk", "red", self:GetRename("berserk", 2), 26662)
 			self:PlaySound("berserk", "alarm")
 		end,
@@ -340,13 +339,13 @@ function mod:ShiftingProtovenom()
 		duration = newDuration,
 		msg = barText,
 		key = 1296878,
-		onFinished = function()
+		onFinished = function(barInfo)
 			-- self:StopBlizzMessages(0.3) -- Vashnik infects players with a [Shifting Protovenom]!
 			self:Message(1296878, "red", barText)
 			-- self:PlaySound(1296878, "warning")
 
 			if barOnFinish then
-				self:Bar(1296878, barOnFinish, CL.count:format(self:GetRename(1296878), protovenomCount))
+				self:Bar(1296878, barOnFinish, CL.count:format(self:GetRename(1296878), protovenomCount), nil, barInfo.eventID)
 			end
 		end,
 	}
@@ -366,6 +365,7 @@ function mod:VitriolicStasis(duration)
 		onFinished = function(this)
 			self:CancelTimer(this.blocktimer)
 			self:CancelTimer(this.timer)
+			if isIntermission then return end
 
 			isIntermission = true
 			durationEventCount = {}
@@ -420,10 +420,10 @@ function mod:VenomCoagulation()
 	return {
 		msg = barText,
 		key = 1284251,
-		onFinished = function()
+		onFinished = function(barInfo)
 			self:StopBlizzMessages(0.4) -- Breath of Ula'tek hurls forth a [Venom Coagulation]!
 			self:Message(1284251, "cyan", messageText)
-			self:CDBar(1284251, 5.5, self:GetRename(1284251, 2)) -- Add spawning
+			self:CDBar(1284251, 5.5, self:GetRename(1284251, 2), nil, barInfo.eventID) -- Add spawning
 			self:PlaySound(1284251, "info")
 
 			self:RegisterBossEvent("boss3", function() -- catch the next IEEU

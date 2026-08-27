@@ -116,6 +116,22 @@ function NS.GetTargetAuraSet()
   return set
 end
 
+-- Direct proof this ID landed as a PLAYER aura on some unit, via NS.LearnAuras
+-- below. Stronger than every heuristic in NS.CanApplyAura: a hero-talent
+-- passive that applies a debuff without ever appearing as its own Cooldown
+-- Manager entry or spellbook entry (Sentinel's Mark is one) is exactly what
+-- the spellbook/CDM checks miss, and this catches it by direct observation
+-- instead.
+local function HasLearnedAura(spellID)
+  if not spellID then return false end
+  local store = PLATETWEAKS_SETTINGS and PLATETWEAKS_SETTINGS.auraIDs
+  if not store then return false end
+  for _, id in pairs(store) do
+    if id == spellID then return true end
+  end
+  return false
+end
+
 -- Can THIS character ever apply this aura? Used to skip building containers
 -- for rules belonging to another character in a shared profile.
 --
@@ -124,6 +140,9 @@ end
 -- a wrong true costs some textures.
 function NS.CanApplyAura(spellID)
   if not spellID then return true end
+
+  -- Seen this land for real -- trust that over anything below.
+  if HasLearnedAura(spellID) then return true end
 
   -- The Cooldown Manager's own list of what you apply to other units, already
   -- expanded through RelatedSpellIDs. Empty means it is unavailable rather
@@ -142,6 +161,7 @@ function NS.CanApplyAura(spellID)
   local checkedAny = false
   if IsPlayerSpell then
     for id in pairs(ids) do
+      if HasLearnedAura(id) then return true end
       local ok, known = pcall(IsPlayerSpell, id)
       if ok then
         checkedAny = true
@@ -545,9 +565,13 @@ end
 -- value aborts it.
 
 local function LearnStore()
-  BOONPLATES_SETTINGS = BOONPLATES_SETTINGS or {}
-  BOONPLATES_SETTINGS.auraIDs = BOONPLATES_SETTINGS.auraIDs or {}
-  return BOONPLATES_SETTINGS.auraIDs
+  -- PLATETWEAKS_SETTINGS, not BOONPLATES_SETTINGS: the latter is a leftover
+  -- global from before the BoonPlates -> PlateTweaks rename and is not
+  -- declared in the .toc's SavedVariables, so anything written there never
+  -- survives a reload. Found while wiring HasLearnedAura into CanApplyAura.
+  PLATETWEAKS_SETTINGS = PLATETWEAKS_SETTINGS or {}
+  PLATETWEAKS_SETTINGS.auraIDs = PLATETWEAKS_SETTINGS.auraIDs or {}
+  return PLATETWEAKS_SETTINGS.auraIDs
 end
 
 -- Only auras the PLAYER applied are useful here: those are the ones a

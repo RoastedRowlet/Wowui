@@ -2597,9 +2597,17 @@ initFrame:SetScript("OnEvent", function(self)
         local function MakeSpellItem(sp)
             -- Every spell here came from BuffBarCooldownViewer enumeration, so it's by definition tracked -- no popup needed.
             local usedOnBar = ns.SpellUsedOnAnyOtherTBB and ns.SpellUsedOnAnyOtherTBB(sp.spellID, nil)
-            local isSelected = not barCfg.popularKey and not barCfg.spellIDs
+            -- A family bar (Roll the Bones) is selected by its base id OR any member,
+            -- since the row resolves to the active outcome while one is up.
+            local isSelected = not barCfg.popularKey
                              and barCfg.trackType ~= "cooldown"
                              and barCfg.spellID and barCfg.spellID > 0 and barCfg.spellID == sp.spellID
+            if not isSelected and barCfg.spellIDs and not barCfg.popularKey
+               and barCfg.trackType ~= "cooldown" then
+                for _, sid in ipairs(barCfg.spellIDs) do
+                    if sid == sp.spellID then isSelected = true; break end
+                end
+            end
             local item = CreateFrame("Button", nil, inner)
             item:SetHeight(ITEM_H)
             item:SetPoint("TOPLEFT", inner, "TOPLEFT", 1, -mH)
@@ -2676,8 +2684,33 @@ initFrame:SetScript("OnEvent", function(self)
                 barCfg.baseSpellID = nil
                 if sp.cdID and C_CooldownViewer and C_CooldownViewer.GetCooldownViewerCooldownInfo then
                     local info = C_CooldownViewer.GetCooldownViewerCooldownInfo(sp.cdID)
-                    if info and info.spellID and info.spellID > 0 and info.spellID ~= sp.spellID then
-                        barCfg.baseSpellID = info.spellID
+                    local RTB_BASE_SPELL_ID = 1214909
+                    local isSec = issecretvalue
+                    local baseSID = info and info.spellID
+                    if baseSID and (isSec and isSec(baseSID)) then baseSID = nil end
+                    if baseSID and baseSID > 0 and baseSID ~= sp.spellID then
+                        barCfg.baseSpellID = baseSID
+                    end
+                    -- Roll the Bones: ONE tracked-bar slot cycles through mutually
+                    -- exclusive outcome buffs, listed only in the raw linkedSpellIDs.
+                    -- The row resolves to whichever outcome is up at pick time, so a
+                    -- single id matches nothing else after a re-roll: store the whole
+                    -- family as the want-set and key the config on the stable base.
+                    if baseSID == RTB_BASE_SPELL_ID and type(info.linkedSpellIDs) == "table" then
+                        local ids = {}
+                        for i = 1, #info.linkedSpellIDs do
+                            local lid = info.linkedSpellIDs[i]
+                            if type(lid) == "number" and not (isSec and isSec(lid)) and lid > 0 then
+                                ids[#ids + 1] = lid
+                            end
+                        end
+                        if #ids >= 2 then
+                            barCfg.spellIDs    = ids
+                            barCfg.spellID     = baseSID
+                            barCfg.baseSpellID = nil
+                            local nm = C_Spell and C_Spell.GetSpellName and C_Spell.GetSpellName(baseSID)
+                            if nm and nm ~= "" then barCfg.name = nm end
+                        end
                     end
                 end
                 Refresh()
@@ -4611,7 +4644,7 @@ initFrame:SetScript("OnEvent", function(self)
                 local _, cogShow = EllesmereUI.BuildCogPopup({
                     title = "Shift Offset",
                     rows = {
-                        { type = "slider", label = "Extra Y Offset", min = -50, max = 50, step = 1,
+                        { type = "slider", pixel = true, label = "Extra Y Offset", min = -50, max = 50, step = 1,
                           get = function()
                               local e = GlobalEntry()
                               return (e and e.shiftNoBarExtraY) or 0
@@ -8633,15 +8666,16 @@ initFrame:SetScript("OnEvent", function(self)
                                        and type(b2.assignedSpells) == "table" then
                                         for _, sid2 in ipairs(b2.assignedSpells) do
                                             claimed[sid2] = true
+                                            -- A cd-claimed member is listed by its MARKER but stores
+                                            -- its settings under "c"..cooldownID; claim both or this
+                                            -- bar's entry reads as unclaimed and gets wiped.
+                                            local cdID2 = ns.CdClaimMarkerToCdID and ns.CdClaimMarkerToCdID(sid2)
+                                            if cdID2 then claimed["c" .. cdID2] = true end
                                         end
                                     end
                                     -- Also exclude HOSTED buffs (on cd/util bars): removed from Apply-to-Bar,
                                     -- so a default-buffs-bar apply must not treat their buff-store entry as unclaimed and wipe it.
-                                    if type(b2) == "table" and type(b2.hostedBuffSpellIDs) == "table" then
-                                        for hsid in pairs(b2.hostedBuffSpellIDs) do
-                                            claimed[hsid] = true
-                                        end
-                                    end
+                                    AB.ForEachHostedKey(b2, function(hkey) claimed[hkey] = true end)
                                 end
                             end
                             for sid2, e in pairs(st) do
@@ -8723,6 +8757,74 @@ initFrame:SetScript("OnEvent", function(self)
                         thresholdColorEnabled = true, thresholdColorR = true,
                         thresholdColorG = true, thresholdColorB = true,
                     }
+                    -- Keys a bar apply also stamps onto the bar's HOSTED buffs. A hosted buff
+                    -- never chains to the bar tiers -- the tier carries cd-bar meaning for shared
+                    -- keys (Duration Text, Border) and its entry is the same one the spell uses on
+                    -- a buffs bar -- so a bar apply otherwise skips it entirely. These keys read
+                    -- the same on any icon, so they stamp directly, like preset icons do through
+                    -- StampMemberCas. Only rows whose keys are ALL in here stamp.
+                    AB.HOSTED_KEYS = {
+                        thresholdSeconds = true, thresholdDecimals = true,
+                        thresholdColorEnabled = true, thresholdColorR = true,
+                        thresholdColorG = true, thresholdColorB = true,
+                    }
+                    -- Hosted buffs keep their entries in the BUFF family store whatever family the host bar belongs to.
+                    AB.hostedFamKey = ns.SettingsFamilyKey("buffs")
+                    AB.TouchesHosted = function(keys)
+                        if not keys or #keys == 0 then return false end
+                        for _, k in ipairs(keys) do
+                            if not AB.HOSTED_KEYS[k] then return false end
+                        end
+                        return true
+                    end
+                    -- Every BUFF-store key the bar's hosted buffs use. Two shapes: a plain spell id
+                    -- from hostedBuffSpellIDs, and "c"..cooldownID for a CD-CLAIMED slot, whose
+                    -- marker lives in assignedSpells while hostedBuffSpellIDs carries only the
+                    -- existence sentinel AddHostedBuffByCdID sets. That sentinel doubles as the
+                    -- gate: a buff-family bar never sets it, so its own cd-claim markers (ordinary
+                    -- members via AddTrackedBuffByCdID, not hosted) are never read as hosted slots.
+                    AB.ForEachHostedKey = function(bsX, fn)
+                        if type(bsX) ~= "table" or type(bsX.hostedBuffSpellIDs) ~= "table" then return end
+                        for hsid in pairs(bsX.hostedBuffSpellIDs) do fn(hsid) end
+                        if type(bsX.assignedSpells) == "table" and ns.CdClaimMarkerToCdID then
+                            for _, sid2 in ipairs(bsX.assignedSpells) do
+                                local cdID = ns.CdClaimMarkerToCdID(sid2)
+                                if cdID then fn("c" .. cdID) end
+                            end
+                        end
+                    end
+                    -- Stamp one spec profile's hosted buffs on this bar. Blocking-false has nothing
+                    -- to block here (hosted entries chain to no tier), so an "off" apply clears the
+                    -- keys instead, and an entry left empty is dropped.
+                    AB.StampHostedBuffs = function(prof, bsX, applyWrite, val, keys)
+                        local st
+                        local mintedCdKey = false
+                        AB.ForEachHostedKey(bsX, function(hkey)
+                            -- Resolved on the first hosted key, not up front: an All Specs apply on
+                            -- a bar with no hosted buffs would otherwise mint an empty family store
+                            -- in every spec profile.
+                            st = st or (ns.GetSpellSettingsStoreForProf
+                                and ns.GetSpellSettingsStoreForProf(prof, AB.hostedFamKey, true))
+                            if not st then return end
+                            local e, fresh = st[hkey], false
+                            if not e then e = {}; st[hkey] = e; fresh = true end
+                            applyWrite(e, val)
+                            -- Only the keys this apply wrote: reaching across the whole set would
+                            -- drop blocking-false values the apply never touched, and the un-stamp
+                            -- walks `keys` too, so it could not put them back.
+                            for _, k in ipairs(keys) do
+                                if rawget(e, k) == false then e[k] = nil end
+                            end
+                            if next(e) == nil then
+                                st[hkey] = nil
+                            elseif fresh and type(hkey) == "string" then
+                                mintedCdKey = true
+                            end
+                        end)
+                        -- A newly minted "c"..cooldownID entry stays invisible to the runtime until
+                        -- the buff-family cd-key gate flips, the same call the menu's EnsureSS makes.
+                        if mintedCdKey and ns.MarkBuffFamHasCdKey then ns.MarkBuffFamHasCdKey() end
+                    end
                     AB.StampMemberCas = function(bsX, applyWrite, val, keys)
                         if not (bsX and type(bsX.assignedSpells) == "table") then return end
                         if not (ns.GetCustomActiveState and ns.ResolveCustomActiveKey) then return end
@@ -8783,6 +8885,7 @@ initFrame:SetScript("OnEvent", function(self)
                         for _, k in ipairs(keys) do
                             if AB.CAS_KEYS[k] then touchesCas = true; break end
                         end
+                        local touchesHosted = AB.TouchesHosted(keys)
                         local count = 0
                         local CAS_FALSE_STRIPPED = {
                             cdStateEffect = true, thresholdSeconds = true,
@@ -8828,6 +8931,18 @@ initFrame:SetScript("OnEvent", function(self)
                                     end
                                 end
                             end
+                            -- Hosted buffs stamp their own entries (StampHostedBuffs), under the same blocking-false normalization the cas stamps use.
+                            if touchesHosted then
+                                local st = prof[AB.hostedFamKey]
+                                if st then
+                                    AB.ForEachHostedKey(bsX, function(hkey)
+                                        local e = st[hkey]
+                                        if type(e) == "table" and entryLoses(e, true) then
+                                            count = count + 1
+                                        end
+                                    end)
+                                end
+                            end
                         end
                         local spAll = ns.GetActiveSpecProfiles and ns.GetActiveSpecProfiles()
                         if allSpecs then
@@ -8852,6 +8967,7 @@ initFrame:SetScript("OnEvent", function(self)
                         for _, k in ipairs(keys) do
                             if AB.CAS_KEYS[k] then touchesCas = true; break end
                         end
+                        local touchesHosted = AB.TouchesHosted(keys)
                         local function sweepProf(prof)
                             if type(prof) ~= "table" then return end
                             -- Sweeps can delete emptied member entries and the per-spec tier: retire memoized resolution results.
@@ -8870,6 +8986,9 @@ initFrame:SetScript("OnEvent", function(self)
                             end)
                             if touchesCas then
                                 AB.StampMemberCas(bsX, applyWrite, val, keys)
+                            end
+                            if touchesHosted then
+                                AB.StampHostedBuffs(prof, bsX, applyWrite, val, keys)
                             end
                         end
                         if allSpecs then
@@ -8967,6 +9086,7 @@ initFrame:SetScript("OnEvent", function(self)
                             removed[k] = rawget(t, k)
                             rawset(t, k, nil)
                         end
+                        local touchesHosted = AB.TouchesHosted(keys)
                         if next(t) == nil then
                             if allSpecs then
                                 if bdSel then bdSel.barSpellSettings = nil end
@@ -8994,7 +9114,19 @@ initFrame:SetScript("OnEvent", function(self)
                                     if rv ~= nil and rawget(e, k) == rv then e[k] = nil end
                                 end
                             end
-                            local function unstamp(bsX)
+                            local function unstamp(prof, bsX)
+                                if touchesHosted then
+                                    local st = prof and prof[AB.hostedFamKey]
+                                    if st then
+                                        AB.ForEachHostedKey(bsX, function(hkey)
+                                            local e = st[hkey]
+                                            if not e then return end
+                                            unstampEntry(e)
+                                            -- Mirror the stamp: an entry the un-stamp empties is dropped, so it cannot linger and defeat the resolver's empty-store shortcut.
+                                            if next(e) == nil then st[hkey] = nil end
+                                        end)
+                                    end
+                                end
                                 if not (bsX and type(bsX.assignedSpells) == "table") then return end
                                 for _, sid2 in ipairs(bsX.assignedSpells) do
                                     local isInj = ((type(sid2) == "number" and sid2 < 0)
@@ -9021,14 +9153,14 @@ initFrame:SetScript("OnEvent", function(self)
                                 if spAll then
                                     for _, prof in pairs(spAll) do
                                         if type(prof) == "table" then
-                                            unstamp(prof.barSpells and prof.barSpells[barKey])
+                                            unstamp(prof, prof.barSpells and prof.barSpells[barKey])
                                         end
                                     end
                                 end
                             else
                                 local specKeyA = ns.GetActiveSpecKey and ns.GetActiveSpecKey()
                                 local prof = spAll and specKeyA and spAll[specKeyA]
-                                if prof then unstamp(prof.barSpells and prof.barSpells[barKey]) end
+                                if prof then unstamp(prof, prof.barSpells and prof.barSpells[barKey]) end
                             end
                             if ns.FakeActive_Rearm then ns.FakeActive_Rearm() end
                         end
@@ -18918,11 +19050,11 @@ initFrame:SetScript("OnEvent", function(self)
                 Refresh()
             end
             _, h = W:DualRow(parent, y,
-                { type = "slider", text = "Offset X", min = -500, max = 500, step = 1, trackWidth = 120,
+                { type = "slider", pixel = true, text = "Offset X", min = -500, max = 500, step = 1, trackWidth = 120,
                   tooltip = "Extra horizontal shift stacked on top of this bar's normal position. Unlock mode shows the base position; the offset re-applies when you exit.",
                   getValue = function() local b = BD(); return (b and b.addOffsetX) or 0 end,
                   setValue = function(v) SetAddOffset("addOffsetX", v) end },
-                { type = "slider", text = "Offset Y", min = -500, max = 500, step = 1, trackWidth = 120,
+                { type = "slider", pixel = true, text = "Offset Y", min = -500, max = 500, step = 1, trackWidth = 120,
                   tooltip = "Extra vertical shift stacked on top of this bar's normal position. Unlock mode shows the base position; the offset re-applies when you exit.",
                   getValue = function() local b = BD(); return (b and b.addOffsetY) or 0 end,
                   setValue = function(v) SetAddOffset("addOffsetY", v) end }

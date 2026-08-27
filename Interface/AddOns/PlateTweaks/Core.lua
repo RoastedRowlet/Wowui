@@ -131,6 +131,14 @@ NS.Defaults = {
     -- the debuff is up. It is also the only mode that can express a missing
     -- border rule.
     missingMode = "displace",
+  -- How many times a rig built during combat lockdown (and therefore
+  -- suspected structurally incomplete) may be discarded and rebuilt once
+  -- combat allows it. Each attempt that still lands mid-lockdown leaks the
+  -- old container set, since secure frames cannot be destroyed -- see
+  -- RigIsSound/OnPlateAdded in this file. 1 is the original, conservative
+  -- behavior; raising it trades a small bounded frame cost for a better
+  -- chance of recovering plates added during a long fight.
+    maxRigRepairs = 1,
   },
   levelOffset = 1,
 }
@@ -1115,6 +1123,11 @@ NS.ADAPTER_KEYS = ADAPTER_KEYS
 NS.ADAPTER_DEFAULTS = {
   Plater   = { pinFlat = true },
   Blizzard = { pinFlat = true },
+  -- Contributed, not measured. The user who added NDui support reports flat
+  -- works for them; nobody here has run /pt layers on it. If it turns out
+  -- wrong, an NDui user can flip it with /pt adapter pinflat off without
+  -- waiting for a build -- which is the reason these are per-adapter.
+  NDui     = { pinFlat = true },
 }
 
 -- Resolution order, nil meaning "keep falling through":
@@ -1169,6 +1182,14 @@ function NS.FindHealthBar(nameplate)
   -- the nameplate. A direct field read, so it survives aura secrecy.
   if IsStatusBar(nameplate.unitFrame and nameplate.unitFrame.healthBar) then
     return Adapter(nameplate.unitFrame.healthBar, "Plater")
+  end
+
+  -- NDui: same nameplate.unitFrame as Plater but a .Health StatusBar on it,
+  -- so this has to come after Plater's .healthBar check rather than before.
+  -- Contributed by an NDui user; the field names are theirs, not measured here.
+  local nduiHealth = nameplate.unitFrame and nameplate.unitFrame.Health
+  if IsStatusBar(nduiHealth) and nduiHealth:IsShown() then
+    return Adapter(nduiHealth, "NDui")
   end
 
   -- EllesmereUI: plate child with a .health StatusBar.
@@ -1617,17 +1638,22 @@ local function OnPlateAdded(unit, isRetry)
   -- the pull, so a broken rig is kept until combat drops and the regen handler
   -- walks back through here.
   --
-  -- ONE repair, ever. Frames cannot be destroyed, so a rebuild leaks the old
-  -- container set -- and a rule that fails for a reason other than lockdown
-  -- fails again on the retry. Without the cap that is an unbounded leak on
-  -- every plate add, which is worse than the bug being fixed. The one attempt
-  -- covers the case that matters: built in combat, rebuilt once out of it.
+  -- Capped, configurable (NS.db.tints.maxRigRepairs, default 1). Frames cannot
+  -- be destroyed, so each rebuild leaks the old container set -- and a rule
+  -- that fails for a reason other than lockdown fails again on the retry.
+  -- Without a cap that is an unbounded leak on every plate add, which is worse
+  -- than the bug being fixed. One attempt covers the case that matters: built
+  -- in combat, rebuilt once out of it. Raising the cap trades a small bounded
+  -- amount of leaked frames for a better chance of recovering a plate whose
+  -- one repair attempt itself landed mid-lockdown (a brief regen flicker
+  -- between two pulls).
   --
   -- CanBuild first, so mid-pull this whole branch is one boolean. Adds arrive
   -- in bursts, and there is no point walking a rig's records to grade it when
   -- lockdown means the answer cannot be acted on either way.
   local repairs = rig and rig.repairs or 0
-  if rig and NS.CanBuild() and repairs < 1 and not RigIsSound(rig) then
+  local repairCap = (NS.db and NS.db.tints and NS.db.tints.maxRigRepairs) or 1
+  if rig and NS.CanBuild() and repairs < repairCap and not RigIsSound(rig) then
     DiscardRig(rig, SetRigUnit)
     rig = nil
     repairs = repairs + 1
@@ -2188,8 +2214,9 @@ local function PrintStatus()
   -- Only when it has happened. A zero here is the normal case and would just
   -- be another number to scroll past in a bug report.
   if (info.repairs or 0) > 0 then
-    NS.Print(("rigs rebuilt after a bad build: %d (built in combat, or a container was refused)")
-      :format(info.repairs))
+    local cap = (NS.db.tints and NS.db.tints.maxRigRepairs) or 1
+    NS.Print(("rigs rebuilt after a bad build: %d (built in combat, or a container was refused; cap %d)")
+      :format(info.repairs, cap))
   end
   if info.errored > 0 then
     NS.Print(("build errors on %d rig(s): %s"):format(info.errored, tostring(info.firstError)))
@@ -3160,7 +3187,7 @@ end
 -- Also the thing to hand a bug reporter: "run /pt capture, reload, paste the
 -- file" beats asking someone for screenshots of chat.
 local NAMEPLATE_ADDONS = {
-  "Plater", "Platynator", "EllesmereUI", "ElvUI", "NamePlateKit",
+  "Plater", "Platynator", "EllesmereUI", "NDui", "ElvUI", "NamePlateKit",
   "Kui_Nameplates", "TidyPlates", "ThreatPlates", "BetterBlizzPlates",
 }
 

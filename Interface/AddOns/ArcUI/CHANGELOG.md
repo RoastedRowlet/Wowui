@@ -1,3 +1,39 @@
+## 3.8.4
+
+### Improvements
+
+- **Hidden icons stay in the Icon Catalog** — An Arc icon unloaded by its spec or talent condition now stays listed with a red "off" tag, so you can still select it and change its conditions. The filter also gained an Arc Auras option and moved under the Icon Catalog header.
+- **Groups grow back for returning icons** — If you shrink a group while one of its icons is hidden by a talent condition, the icon's return now restores the group to its saved shape and puts the icon back in its old slot, with a chat message. Before, it could end up stacked on top of another icon.
+
+### Bug Fixes
+
+- **Groups no longer gain a column at login** — A group could permanently grow one column wider when logging in, getting a little wider over time. Found at the root and fixed.
+- **Ghost borders from condition-hidden icons** — An Arc icon hidden by its spec or talent condition could leave behind a border that even showed a tooltip, while the icon itself was gone.
+- **Talent conditions on custom timers apply immediately** — Setting a spec or talent condition on a custom timer from the icon settings panel now hides or shows it right away, instead of only after a reload.
+
+## 3.8.3
+
+### New Features
+
+- **Keep Texture Still** — New toggle for bars that mirror a Cooldown Manager timer and fill up as time passes: the bar texture stays in place while the fill moves through it, instead of the whole texture stretching with the fill. Find it in the bar's Fill section.
+
+### Improvements
+
+- **The bar list now tells you why a bar is not on screen** — A bar that exists but is hidden now says why next to its name: not shown on this spec, opacity set to 0, or hidden because its aura is not active. No more hunting for bars that are working exactly as configured.
+- **Totem slots answer the icon field** — Typing an icon ID for a totem slot now explains that totem slots always show the totem's own icon, instead of silently doing nothing.
+
+### Bug Fixes
+
+- **Custom icons sometimes did not apply at login** — A custom icon on a Cooldown Manager icon could show the default art until you re-entered the ID in the options panel. It now applies on its own, at login and whenever the game reshuffles icons.
+- **Custom icons fought the icon in combat** — A custom icon could flip back and forth against the original art during fights. One system now owns the icon art, so the flicker is gone.
+- **Custom icons on aura icons only changed the inactive look** — The icon you picked now also shows while the buff or debuff is active, not just on the dimmed inactive state.
+- **Wrong spell tracked while a cooldown is replaced** — When an ability temporarily turns into another one (for example during Ascendance), glows and cooldown state now follow the replacement spell instead of staying on the base spell for the whole window.
+- **Icons stayed grey after portals and zone changes** — An icon set to desaturate only while its aura is missing could arrive in the new zone desaturated and stay that way until the options panel was opened.
+- **Error spam from trinket and potion icons in dungeons** — A repeating error could start mid-dungeon and not stop until a reload.
+- **Bar name text went missing with Hide When Inactive** — Custom aura bars set to hide when inactive showed up without their name text. The name now appears with the bar.
+- **Stray numbers floating on screen** — A stack count could stay behind on screen after its bar hid, with nothing under it, until a reload.
+- **Proc Glow reset button was in the wrong section** — The Reset Section button for Proc Glow sat under Spell Usability; it is back with the Proc Glow options.
+
 ## 3.8.2
 
 ### Improvements

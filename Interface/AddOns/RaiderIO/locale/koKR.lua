@@ -486,8 +486,7 @@ L["RAID_BOSS_SOO_6"] = "강철의 거대괴수"
 L["RAID_BOSS_SOO_7"] = "코르크론 암흑주술사"
 L["RAID_BOSS_SOO_8"] = "장군 나즈그림"
 L["RAID_BOSS_SOO_9"] = "말코록"
---[[Translation missing --]]
---[[ L["RAID_BOSS_TG_1"] = ""--]] 
+L["RAID_BOSS_TG_1"] = "님리사 웨이브콜러"
 L["RAID_BOSS_ToES_1"] = "영원의 수호병"
 L["RAID_BOSS_TOES_1"] = "영원의 수호병"
 L["RAID_BOSS_TOES_2"] = "출롱"
@@ -572,8 +571,7 @@ L["RAID_NP"] = "네룹아르 궁전"
 L["RAID_RS"] = "루비 성소"
 L["RAID_SF"] = "진균나락"
 L["RAID_SOO"] = "오그리마 공성전"
---[[Translation missing --]]
---[[ L["RAID_TG"] = ""--]] 
+L["RAID_TG"] = "해일결속 동굴"
 L["RAID_ToES"] = "영원한 봄의 정원"
 L["RAID_TOES"] = "영원한 봄의 정원"
 L["RAID_TOT"] = "천둥의 왕좌"

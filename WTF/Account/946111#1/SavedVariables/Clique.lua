@@ -3,10 +3,10 @@ CliqueDB = nil
 CliqueDB3 = {
 ["char"] = {
 ["Zappyxatu - Stormrage"] = {
-["spec3_profileKey"] = "Zappyxatu - Stormrage",
-["spec1_profileKey"] = "Zappyxatu - Stormrage",
-["specswap"] = false,
 ["spec2_profileKey"] = "Zappyxatu - Stormrage",
+["spec1_profileKey"] = "Zappyxatu - Stormrage",
+["spec3_profileKey"] = "Zappyxatu - Stormrage",
+["specswap"] = false,
 },
 ["Barelynoer - Area 52"] = {
 ["spec1_profileKey"] = "Barelynoer - Area 52",
@@ -29,12 +29,12 @@ CliqueDB3 = {
 },
 ["Lonelylitten - Stormrage"] = {
 ["spec1_profileKey"] = "Lonelylitten - Stormrage",
-["spec2_profileKey"] = "Lonelylitten - Stormrage",
+["spec3_profileKey"] = "Lonelylitten - Stormrage",
 ["downclick"] = false,
 ["spec4_profileKey"] = "Lonelylitten - Stormrage",
-["fastooc"] = false,
+["spec2_profileKey"] = "Lonelylitten - Stormrage",
 ["specswap"] = false,
-["spec3_profileKey"] = "Lonelylitten - Stormrage",
+["fastooc"] = false,
 },
 ["Klutzykubfu - Stormrage"] = {
 ["spec1_profileKey"] = "Klutzykubfu - Stormrage",
@@ -343,13 +343,6 @@ CliqueDB3 = {
 ["unit"] = "mouseover",
 },
 {
-["type"] = "menu",
-["key"] = "CTRL-BUTTON2",
-["sets"] = {
-["default"] = true,
-},
-},
-{
 ["spell"] = "Healing Wave",
 ["key"] = "BUTTON2",
 ["sets"] = {
@@ -359,12 +352,19 @@ CliqueDB3 = {
 ["type"] = "spell",
 },
 {
-["type"] = "menu",
 ["sets"] = {
 ["default"] = true,
 },
-["key"] = "SHIFT-BUTTON2",
+["type"] = "menu",
 ["icon"] = 132212,
+["key"] = "SHIFT-BUTTON2",
+},
+{
+["type"] = "menu",
+["key"] = "CTRL-BUTTON2",
+["sets"] = {
+["default"] = true,
+},
 },
 {
 ["type"] = "target",
@@ -374,15 +374,6 @@ CliqueDB3 = {
 },
 ["icon"] = 132331,
 ["unit"] = "mouseover",
-},
-{
-["spell"] = "Purify Spirit",
-["key"] = "BUTTON3",
-["sets"] = {
-["default"] = true,
-},
-["icon"] = 236288,
-["type"] = "spell",
 },
 {
 ["spell"] = "Ancestral Spirit",
@@ -400,6 +391,15 @@ CliqueDB3 = {
 ["default"] = true,
 },
 ["icon"] = 252995,
+["type"] = "spell",
+},
+{
+["spell"] = "Purify Spirit",
+["key"] = "BUTTON3",
+["sets"] = {
+["default"] = true,
+},
+["icon"] = 236288,
 ["type"] = "spell",
 },
 {

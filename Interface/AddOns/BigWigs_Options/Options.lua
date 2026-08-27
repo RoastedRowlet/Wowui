@@ -341,12 +341,30 @@ local spellDescriptionUpdater = CreateFrame("Frame")
 local visibleSpellDescriptionWidgets = {}
 spellDescriptionUpdater:SetScript("OnEvent", function(_, _, spellId)
 	local scrollFrame = nil
-	for widget, widgetSpellId in next, visibleSpellDescriptionWidgets do
-		if spellId == widgetSpellId then
-			scrollFrame = widget:GetUserData("scrollFrame")
-			local module, bossOption = widget:GetUserData("module"), widget:GetUserData("option")
-			local _, _, desc = BigWigs:GetBossOptionDetails(module, bossOption)
+	for widget, widgetDescription in next, visibleSpellDescriptionWidgets do
+		local module, bossOption = widget:GetUserData("module"), widget:GetUserData("option")
+		local _, _, desc = BigWigs:GetBossOptionDetails(module, bossOption)
+		if desc ~= widgetDescription then
 			widget:SetDescription(desc)
+			visibleSpellDescriptionWidgets[widget] = desc
+			scrollFrame = widget:GetUserData("scrollFrame")
+		end
+	end
+	if scrollFrame then
+		scrollFrame:PerformLayout()
+	end
+end)
+
+local creatureNameUpdater = CreateFrame("Frame")
+local visibleCreatureNameWidgets = {}
+local GetTooltipHyperlink = C_TooltipInfo and C_TooltipInfo.GetHyperlink
+creatureNameUpdater:SetScript("OnEvent", function()
+	local scrollFrame = nil
+	for headerWidget, widgetCreatureID in next, visibleCreatureNameWidgets do
+		local data = GetTooltipHyperlink("unit:Creature-0-0-0-0-" .. widgetCreatureID)
+		if data and data.lines and data.lines[1] then
+			scrollFrame = headerWidget:GetUserData("scrollFrame")
+			headerWidget:SetText(L.parenthesesID:format(data.lines[1].leftText, widgetCreatureID))
 		end
 	end
 	if scrollFrame then
@@ -428,6 +446,7 @@ local function masterOptionToggled(self, event, value)
 			local scrollFrame = self:GetUserData("scrollFrame")
 			local bossOption = self:GetUserData("option")
 			visibleSpellDescriptionWidgets = {}
+			visibleCreatureNameWidgets = {}
 			scrollFrame:ReleaseChildren()
 			scrollFrame:AddChildren(getAdvancedToggleOption(scrollFrame, dropdown, module, bossOption))
 			scrollFrame:PerformLayout()
@@ -598,6 +617,7 @@ do
 		local scrollFrame = master:GetUserData("scrollFrame")
 		local bossOption = master:GetUserData("option")
 		visibleSpellDescriptionWidgets = {}
+		visibleCreatureNameWidgets = {}
 		lastAdvancedOptionsTab = "renames"
 		scrollFrame:ReleaseChildren()
 		scrollFrame:AddChildren(getAdvancedToggleOption(scrollFrame, dropdown, module, bossOption))
@@ -672,6 +692,7 @@ do
 		if widget:GetUserData("tab") == tab then return end
 		widget:SetUserData("tab", tab)
 		visibleSpellDescriptionWidgets = {}
+		visibleCreatureNameWidgets = {}
 		widget:PauseLayout()
 		widget:ReleaseChildren()
 		local module = widget:GetUserData("module")
@@ -827,6 +848,7 @@ end
 
 local function buttonClicked(widget)
 	visibleSpellDescriptionWidgets = {}
+	visibleCreatureNameWidgets = {}
 	-- save scroll bar position
 	toggleOptionsStatusTable.restore_scrollvalue = toggleOptionsStatusTable.scrollvalue
 	toggleOptionsStatusTable.restore_offset = toggleOptionsStatusTable.offset
@@ -933,30 +955,7 @@ local function getDefaultToggleOption(scrollFrame, dropdown, module, bossOption)
 	check.text:SetTextColor(1, 0.82, 0) -- After :SetValue so it's not overwritten
 	if icon then check:SetImage(icon, 0.07, 0.93, 0.07, 0.93) end
 
-	local spellId = nil
-	if type(dbKey) == "number" then
-		if dbKey < 0 then
-			-- the "why did you use an ej id instead of the spell directly" check
-			-- headers and other non-spell entries don't load async
-			local info = C_EncounterJournal_GetSectionInfo(-dbKey)
-			if info.spellID > 0 then
-				spellId = info.spellID
-			end
-		else
-			spellId = dbKey
-		end
-	else
-		local moduleLocale = module:GetLocale(true)
-		local title, description = moduleLocale[dbKey], moduleLocale[dbKey .. "_desc"]
-		if type(title) == "number" and not description then
-			spellId = title
-		elseif type(description) == "number" then
-			spellId = description
-		end
-	end
-	if spellId then
-		visibleSpellDescriptionWidgets[check] = spellId
-	end
+	visibleSpellDescriptionWidgets[check] = desc
 
 	if type(dbKey) == "string" and dbKey:find("^custom_") then
 		return check
@@ -1306,6 +1305,8 @@ do
 		end
 
 		local function toggleOptionsTabSelected(widget, callback, tab)
+			visibleSpellDescriptionWidgets = {}
+			visibleCreatureNameWidgets = {}
 			widget:PauseLayout()
 			widget:ReleaseChildren()
 
@@ -1322,7 +1323,16 @@ do
 						local header = module:GetAuraHeader(spellID)
 						if header then
 							local headerWidget = AceGUI:Create("Heading")
-							headerWidget:SetText(header)
+							if type(header) == "number" then
+								local data = GetTooltipHyperlink("unit:Creature-0-0-0-0-" .. header)
+								if data and data.lines and data.lines[1] then
+									headerWidget:SetText(L.parenthesesID:format(data.lines[1].leftText, header))
+								else
+									visibleCreatureNameWidgets[headerWidget] = header
+								end
+							else
+								headerWidget:SetText(header)
+							end
 							headerWidget:SetFullWidth(true)
 							widget:AddChild(headerWidget)
 						end
@@ -1375,6 +1385,7 @@ do
 
 		function populateToggleOptions(widget, module)
 			visibleSpellDescriptionWidgets = {}
+			visibleCreatureNameWidgets = {}
 			local scrollFrame = widget:GetUserData("parent")
 			scrollFrame:ReleaseChildren()
 			scrollFrame:PauseLayout()
@@ -1791,6 +1802,7 @@ do
 	local function onTreeGroupSelected(widget, event, value)
 		lastTreeGroupSelected = value
 		visibleSpellDescriptionWidgets = {}
+		visibleCreatureNameWidgets = {}
 		widget:ReleaseChildren()
 		local instanceIdOrMapId = value:match("\001(-?%d+)$")
 		local bigwigsContent = value:match("(BigWigs_%a+)$")
@@ -1885,6 +1897,7 @@ do
 	local currentlyOpenContainer, openPath
 	local function onTabGroupSelected(widget, event, value)
 		visibleSpellDescriptionWidgets = {}
+		visibleCreatureNameWidgets = {}
 		widget:ReleaseChildren()
 
 		if value ~= lastTabSelected then
@@ -2095,6 +2108,7 @@ do
 			return
 		end
 		spellDescriptionUpdater:RegisterEvent("SPELL_TEXT_UPDATE")
+		creatureNameUpdater:RegisterEvent("TOOLTIP_DATA_UPDATE")
 
 		local bw = AceGUI:Create("Frame")
 		configFrame = bw
@@ -2106,10 +2120,12 @@ do
 		bw:SetLayout("Flow")
 		bw:SetCallback("OnClose", function(widget)
 			visibleSpellDescriptionWidgets = {}
+			visibleCreatureNameWidgets = {}
 			statusTable = {}
 			currentlyOpenContainer = nil
 			configFrame = nil
 			spellDescriptionUpdater:UnregisterEvent("SPELL_TEXT_UPDATE")
+			creatureNameUpdater:UnregisterEvent("TOOLTIP_DATA_UPDATE")
 			widget:ReleaseChildren()
 			AceGUI:Release(widget)
 			options:SendMessage("BigWigs_CloseGUI")

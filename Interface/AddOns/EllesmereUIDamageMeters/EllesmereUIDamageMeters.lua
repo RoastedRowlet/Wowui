@@ -517,14 +517,24 @@ ns.RegisterDMUnlock = function()
     if DB().standaloneTimer and ns.MakeSATimerUnlockElement then
         elements[#elements + 1] = ns.MakeSATimerUnlockElement(MK)
     end
+    -- Icon History is owned by the spell-history file, but participates in the
+    -- same first-class unlock system as the meter windows and combat timer.
+    local spellHistory = DB().spellHistory
+    if spellHistory and spellHistory.iconEnabled and ns.MakeIconHistoryUnlockElement then
+        elements[#elements + 1] = ns.MakeIconHistoryUnlockElement(MK)
+    end
     EUI:RegisterUnlockElements(elements, "EllesmereUIDamageMeters")
-    -- Drop registrations for window slots beyond the live count and the timer while disabled (symmetric across profile swaps)
+    -- Drop registrations for window slots beyond the live count and optional
+    -- elements while disabled (symmetric across profile swaps).
     if EUI.UnregisterUnlockElement then
         for i = #_windows + 1, MAX_WINDOWS do
             EUI:UnregisterUnlockElement("EDM_Win" .. i)
         end
         if not DB().standaloneTimer then
             EUI:UnregisterUnlockElement("EDM_CombatTimer")
+        end
+        if not (spellHistory and spellHistory.iconEnabled) then
+            EUI:UnregisterUnlockElement("EDM_IconHistory")
         end
     end
 end
@@ -814,10 +824,11 @@ local function GetDMOutline()
     return (EUI and EUI.GetFontOutlineFlag and EUI.GetFontOutlineFlag("damageMeters")) or ""
 end
 
-local function SetDMFont(fs, size)
+local function SetDMFont(fs, size, flagsOverride, fontOverride)
     if not (fs and fs.SetFont) then return end
-    local font = GetDMFont()
-    local flags = GetDMOutline()
+    local font = fontOverride or GetDMFont()
+    local flags = flagsOverride
+    if flags == nil then flags = GetDMOutline() end
     if EllesmereUI and EllesmereUI.PrimeFontShadow then EllesmereUI.PrimeFontShadow(fs, flags == "") end
     fs:SetFont(font, size, flags)
 end
@@ -1464,7 +1475,7 @@ local function PopulatePreview(bar, curSession, curSessionID, curDMType)
         -- Reverse to oldest-first
         local reversed = {}
         for ri = #raw, 1, -1 do reversed[#reversed + 1] = raw[ri] end
-        ApplyTTHeader(StripRealm(bar._src.name) or "Unknown", EllesmereUI.L("Death Recap"))
+        ApplyTTHeader(StripRealm(bar._src.name), EllesmereUI.L("Death Recap"))
         local texPath, texKey = GetBreakdownBarTexturePath()
         local deathTime = reversed[#reversed] and reversed[#reversed].timestamp
         if IsSecret(deathTime) then deathTime = nil end
@@ -1619,7 +1630,7 @@ local function PopulatePreview(bar, curSession, curSessionID, curDMType)
     end
     if not srcData or not srcData.combatSpells or #srcData.combatSpells == 0 then return false end
 
-    ApplyTTHeader(StripRealm(bar._src.name) or "Unknown", L(DM_TYPE_NAMES[curDMType] or "Damage Done"))
+    ApplyTTHeader(StripRealm(bar._src.name), L(DM_TYPE_NAMES[curDMType] or "Damage Done"))
 
     wipe(_ttSorted)
     for _, spell in ipairs(srcData.combatSpells) do
@@ -2245,7 +2256,7 @@ local function CreateDMWindow(winIdx)
                 end
                 if not hasRecap then
                     EnsureTooltipFrame()
-                    local playerName = StripRealm(bar._src.name) or "Unknown"
+                    local playerName = StripRealm(bar._src.name)
                     _ttFrame._hdrText:SetText(EllesmereUI.Lf("%1$s's Death Recap", playerName))
                     local cfg2 = DB()
                     local hc = cfg2.hdrBgColor; local hR = hc and hc.r or 0x1B/255; local hG = hc and hc.g or 0x1B/255; local hB = hc and hc.b or 0x1B/255
@@ -2270,7 +2281,7 @@ local function CreateDMWindow(winIdx)
                and W.curDMType ~= Enum.DamageMeterType.Deaths then
                 EnsureTooltipFrame()
                 -- Show header with player name + type
-                local playerName = StripRealm(bar._src and bar._src.name) or "Unknown"
+                local playerName = StripRealm(bar._src and bar._src.name)
                 local typeName = L(DM_TYPE_NAMES[W.curDMType] or "Damage Done")
                 _ttFrame._hdrText:SetText(EllesmereUI.Lf("%1$s's %2$s Breakdown", playerName, typeName))
                 local cfg2 = DB()
@@ -3352,11 +3363,11 @@ local function CreateDMWindow(winIdx)
         -- Name: only when source name changes (guard secret values)
         local srcName = src.name
         if issecretvalue and issecretvalue(srcName) then
-            bar.label:SetText(StripRealm(srcName) or "You")
+            bar.label:SetText(StripRealm(srcName))
             W._stickyNameCache = nil
         elseif srcName ~= W._stickyNameCache then
             W._stickyNameCache = srcName
-            bar.label:SetText(StripRealm(srcName) or "You")
+            bar.label:SetText(StripRealm(srcName))
         end
         if isDeaths then
             local isOverall = (not W.curSessionID and W.curSession == Enum.DamageMeterSessionType.Overall)
@@ -4510,8 +4521,25 @@ end
 -- Standalone Combat Timer
 local _saTimer  -- frame reference
 local _saTimerFS -- fontstring
+local _saTimerBG -- backdrop texture
+local _saTimerBorder -- PP border child frame
 local _saTimerPreview = false
 local _saTimerLive = false  -- last live/idle state seen (drives OOC desaturation)
+
+local function GetSATimerPreviewText()
+    return DB().standaloneTimerDecimal and "11:37.0" or "11:37"
+end
+
+-- Per-user font override for the standalone timer only (standaloneTimerFont,
+-- a dropdown key: "__global"/nil = follow the Damage Meters module font).
+local function GetSATimerFontOverride()
+    local key = DB().standaloneTimerFont
+    if key and key ~= "__global" and EllesmereUI and EllesmereUI.ResolveFontName then
+        local path = EllesmereUI.ResolveFontName(key)
+        if path and path ~= "" then return path end
+    end
+    return nil
+end
 
 local function GetSATimerColor()
     local cfg = DB()
@@ -4536,23 +4564,64 @@ local function ApplySATimerStyle()
     if not _saTimer or not _saTimerFS then return end
     local cfg = DB()
     _saTimer:SetFrameStrata(cfg.standaloneTimerStrata or "HIGH")
-    SetDMFont(_saTimerFS, cfg.standaloneTimerSize or 14)
+
+    local outline = cfg.standaloneTimerOutline or "INHERIT"
+    local outlineFlags
+    if outline == "NONE" then
+        outlineFlags = ""
+    elseif outline == "THICKOUTLINE" then
+        outlineFlags = "THICKOUTLINE"
+    elseif outline == "INHERIT" then
+        outlineFlags = nil
+    else
+        outlineFlags = "OUTLINE"
+    end
+    SetDMFont(_saTimerFS, cfg.standaloneTimerSize or 26, outlineFlags, GetSATimerFontOverride())
     ApplySATimerColor()
+
+    local previousText = _saTimerFS:GetText()
+    -- Auto-size worst case must cover the decimal form, or live tenths clip.
+    _saTimerFS:SetText(cfg.standaloneTimerDecimal and "99:99.9" or "99:99")
+    local autoWidth = (_saTimerFS:GetStringWidth() or 30) + 4
+    local autoHeight = (_saTimerFS:GetStringHeight() or 14) + 4
+    _saTimerFS:SetText(previousText)
+    _saTimer:SetSize(cfg.standaloneTimerWidth and math.max(40, cfg.standaloneTimerWidth) or autoWidth,
+                     cfg.standaloneTimerHeight and math.max(20, cfg.standaloneTimerHeight) or autoHeight)
+
+    if _saTimerBG then
+        local c = cfg.standaloneTimerBackgroundColor or { r = 0, g = 0, b = 0, a = 0 }
+        _saTimerBG:SetColorTexture(c.r or 0, c.g or 0, c.b or 0, c.a or 0)
+    end
+
+    if _saTimerBorder then
+        local PP = EllesmereUI and EllesmereUI.PP
+        local c = cfg.standaloneTimerBorderColor or { r = 0, g = 0, b = 0, a = 1 }
+        local borderSize = math.max(0, math.floor((cfg.standaloneTimerBorderSize or 0) + 0.5))
+        if borderSize > 0 and PP and PP.UpdateBorder then
+            PP.UpdateBorder(_saTimerBorder, borderSize, c.r or 0, c.g or 0, c.b or 0, c.a == nil and 1 or c.a)
+            _saTimerBorder:Show()
+        else
+            _saTimerBorder:Hide()
+        end
+    end
+
     _saTimerFS:ClearAllPoints()
-    local anchor = cfg.standaloneTimerAnchor or "free"
-    local alignLeft
-    if anchor == "free" then
-        alignLeft = cfg.standaloneTimerAlignLeft
-    else
-        alignLeft = anchor == "topleft" or anchor == "bottomleft"
+    local borderSize = cfg.standaloneTimerBorderSize or 0
+    local inset = borderSize > 0 and borderSize + 3 or 0
+    _saTimerFS:SetPoint("LEFT", _saTimer, "LEFT", inset, 0)
+    _saTimerFS:SetPoint("RIGHT", _saTimer, "RIGHT", -inset, 0)
+    -- Preserve the old binary left-align preference until the user chooses
+    -- a value in the new three-way alignment control.
+    local textAlign = cfg.standaloneTimerTextAlign
+    if not textAlign then
+        local anchor = cfg.standaloneTimerAnchor or "free"
+        if anchor == "free" then
+            textAlign = cfg.standaloneTimerAlignLeft and "LEFT" or "RIGHT"
+        else
+            textAlign = (anchor == "topleft" or anchor == "bottomleft") and "LEFT" or "RIGHT"
+        end
     end
-    if alignLeft then
-        _saTimerFS:SetPoint("LEFT")
-        _saTimerFS:SetJustifyH("LEFT")
-    else
-        _saTimerFS:SetPoint("RIGHT")
-        _saTimerFS:SetJustifyH("RIGHT")
-    end
+    _saTimerFS:SetJustifyH(textAlign)
 end
 
 -- Decimal display: API duration is whole seconds, so tenths are derived from a GetTime() anchor
@@ -4698,20 +4767,17 @@ local function CreateSATimer()
         end
     end)
 
-    _saTimerFS = _saTimer:CreateFontString(nil, "OVERLAY")
-    _saTimerFS:SetPoint("RIGHT")
-    ApplySATimerStyle()
-    _saTimerFS:SetText("0:00")
+    _saTimerBG = _saTimer:CreateTexture(nil, "BACKGROUND")
+    _saTimerBG:SetAllPoints()
 
-    -- Size to text
-    _saTimer:SetScript("OnSizeChanged", nil)
-    local function ResizeToText()
-        local w = (_saTimerFS:GetStringWidth() or 30) + 4
-        local h = (_saTimerFS:GetStringHeight() or 14) + 4
-        _saTimer:SetSize(w, h)
-    end
-    _saTimerFS:SetText("99:99")
-    ResizeToText()
+    _saTimerBorder = CreateFrame("Frame", nil, _saTimer)
+    _saTimerBorder:SetAllPoints(_saTimer)
+    _saTimerBorder:SetFrameLevel(_saTimer:GetFrameLevel() + 5)
+    local PP = EllesmereUI and EllesmereUI.PP
+    if PP and PP.CreateBorder then PP.CreateBorder(_saTimerBorder, 0, 0, 0, 1, 1) end
+
+    _saTimerFS = _saTimer:CreateFontString(nil, "OVERLAY")
+    ApplySATimerStyle()
     _saTimerFS:SetText("0:00")
 
     RepositionSATimer()
@@ -4725,15 +4791,10 @@ ns.ApplySATimer = function()
     if cfg.standaloneTimer then
         if not _saTimer then CreateSATimer() end
         ApplySATimerStyle()
-        -- Resize for new font size (measure with worst-case, then restore)
         local prevText = _saTimerFS:GetText()
-        _saTimerFS:SetText("99:99")
-        local w = (_saTimerFS:GetStringWidth() or 30) + 4
-        local h = (_saTimerFS:GetStringHeight() or 14) + 4
-        _saTimer:SetSize(w, h)
         RepositionSATimer()
         if _saTimerPreview then
-            _saTimerFS:SetText("11:37")
+            _saTimerFS:SetText(GetSATimerPreviewText())
         else
             _saTimerFS:SetText(prevText or "0:00")
             UpdateSATimerText()
@@ -4752,7 +4813,7 @@ ns.ShowSATimerPreview = function()
         return
     end
     _saTimerPreview = true
-    _saTimerFS:SetText("11:37")
+    _saTimerFS:SetText(GetSATimerPreviewText())
     _saTimer:Show()
 end
 ns.HideSATimerPreview = function()
@@ -5182,6 +5243,9 @@ initFrame:SetScript("OnEvent", function(self)
             _windows[i] = CreateDMWindow(i)
             ns.ApplyWindowBorder()
         end
+        -- Spell History caches its profile table; refresh it before rebuilding
+        -- optional unlock registrations so enable state and positions agree.
+        if ns.RefreshSpellHistoryProfile then ns.RefreshSpellHistoryProfile() end
         -- Refresh unlock registrations for the new profile's window count
         ns.RegisterDMUnlock()
         -- Recreate standalone timer if enabled

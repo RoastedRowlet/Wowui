@@ -1,12 +1,8 @@
 # LittleWigs
 
-## [v12.1.5](https://github.com/BigWigsMods/LittleWigs/tree/v12.1.5) (2026-08-22)
-[Full Changelog](https://github.com/BigWigsMods/LittleWigs/compare/v12.1.4...v12.1.5) [Previous Releases](https://github.com/BigWigsMods/LittleWigs/releases)
+## [v12.1.9](https://github.com/BigWigsMods/LittleWigs/tree/v12.1.9) (2026-08-26)
+[Full Changelog](https://github.com/BigWigsMods/LittleWigs/compare/v12.1.8...v12.1.9) [Previous Releases](https://github.com/BigWigsMods/LittleWigs/releases)
 
-- Bump min version  
-- Midnight/AltarOfFangs/Zuljan: Timer updates  
-- Dragonflight/RubyLifePools/KyrakkaAndErkhartStormvein: Use common locale  
-- Dragonflight/RubyLifePools/KyrakkaAndErkhartStormvein: Fix timers  
-- Dragonflight/RubyLifePools/KyrakkaAndErkhartStormvein: Wind directions, update aura data  
-- Dragonflight/RubyLifePools/KokiaBlazehoof: Update aura data  
-- Dragonflight/RubyLifePools/MelidrussaChillworn: Update aura notes  
+- Update to new locale system (#1516)  
+- Midnight/Delves/VenomfallDeeps/Aztarec: Timer update  
+- Midnight/Delves/VenomfallDeeps/Aztarec: Timer update  

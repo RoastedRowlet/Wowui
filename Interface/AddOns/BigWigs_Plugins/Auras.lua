@@ -14,16 +14,17 @@ if not plugin then return end
 local LibSharedMedia = LibStub("LibSharedMedia-3.0")
 local FONT = LibSharedMedia.MediaType and LibSharedMedia.MediaType.FONT or "font"
 local SOUND = LibSharedMedia.MediaType and LibSharedMedia.MediaType.SOUND or "sound"
+local ARROW = [[Interface\AddOns\BigWigs\Media\Icons\arrows_up]]
 
 local CONFIG_MODE_DURATION = 10
 
 local db
 local containers = {}
-local anchors = { player = {}, other = {} }
+local anchors = {}
 local inConfigureMode = false
 local previouslyFoundUnit = nil
 
-local InitializeAuraFrame, UpdateAuraFrame, UpdateTestAura
+local InitializeAuraFrame, UpdateAuraFrame, UpdateTestAuras
 local UpdateAuraContainer
 local UpdateSoundOptions, UpdateRegisteredSounds
 local AddAuraSound, RemoveAuraSound, AddAllAuraSounds, RemoveAllAuraSounds
@@ -37,6 +38,7 @@ plugin.defaultDB = {
 		disabled = false,
 
 		size = 64,
+		zoom = 0,
 		spacing = 6,
 		showCooldown = true,
 		showTooltip = true,
@@ -62,6 +64,9 @@ plugin.defaultDB = {
 		cooldownTextSlug = true,
 		cooldownTextMillisecondsThreshold = 3,
 		cooldownTextColor = {1, 1, 1, 1},
+		cooldownEmphasizeTime = 0,
+		cooldownEmphasizeColor = {1, 1, 1, 1},
+		cooldownEmphasizeFontSize = 16,
 
 		showCountText = true,
 		countTextFontName = "Noto Sans Medium",
@@ -87,6 +92,7 @@ plugin.defaultDB = {
 		disabled = true,
 
 		size = 64,
+		zoom = 0,
 		spacing = 6,
 		showCooldown = true,
 		showTooltip = true,
@@ -112,6 +118,9 @@ plugin.defaultDB = {
 		cooldownTextSlug = true,
 		cooldownTextMillisecondsThreshold = 3,
 		cooldownTextColor = {1, 1, 1, 1},
+		cooldownEmphasizeTime = 0,
+		cooldownEmphasizeColor = {1, 1, 1, 1},
+		cooldownEmphasizeFontSize = 16,
 
 		showCountText = true,
 		countTextFontName = "Noto Sans Medium",
@@ -227,6 +236,13 @@ local function updateProfile()
 		db.other.size = plugin.defaultDB.other.size
 	end
 
+	if db.player.zoom < 0 or db.player.zoom > 0.5 then
+		db.player.zoom = plugin.defaultDB.player.zoom
+	end
+	if db.other.zoom < 0 or db.other.zoom > 0.5 then
+		db.other.zoom = plugin.defaultDB.other.zoom
+	end
+
 	if db.player.spacing < 0 or db.player.spacing > 50 then
 		db.player.spacing = plugin.defaultDB.player.spacing
 	end
@@ -242,7 +258,21 @@ local function updateProfile()
 	end
 	ValidateColor(db.other.cooldownTextColor, plugin.defaultDB.other.cooldownTextColor, 0)
 	ValidateColor(db.player.cooldownTextColor, plugin.defaultDB.player.cooldownTextColor, 0)
-	ValidateColor(db.player.borderColor, plugin.defaultDB.player.borderColor, 0)
+
+	if db.player.cooldownEmphasizeTime < 0 or db.player.cooldownEmphasizeTime > 30 then
+		db.player.cooldownEmphasizeTime = plugin.defaultDB.player.cooldownEmphasizeTime
+	end
+	if db.other.cooldownEmphasizeTime < 0 or db.other.cooldownEmphasizeTime > 30 then
+		db.other.cooldownEmphasizeTime = plugin.defaultDB.other.cooldownEmphasizeTime
+	end
+	if db.player.cooldownTextFontSize < 10 or db.player.cooldownTextFontSize > 200 then
+		db.player.cooldownTextFontSize = plugin.defaultDB.player.cooldownTextFontSize
+	end
+	if db.other.cooldownTextFontSize < 10 or db.other.cooldownTextFontSize > 200 then
+		db.other.cooldownTextFontSize = plugin.defaultDB.other.cooldownTextFontSize
+	end
+	ValidateColor(db.player.cooldownEmphasizeColor, plugin.defaultDB.player.cooldownEmphasizeColor, 0)
+	ValidateColor(db.other.cooldownEmphasizeColor, plugin.defaultDB.other.cooldownEmphasizeColor, 0)
 
 	if db.player.countTextFontSize < 8 or db.player.countTextFontSize > 200 then
 		db.player.countTextFontSize = plugin.defaultDB.player.countTextFontSize
@@ -252,6 +282,7 @@ local function updateProfile()
 	end
 	ValidateColor(db.other.countTextColor, plugin.defaultDB.other.countTextColor, 0)
 	ValidateColor(db.player.countTextColor, plugin.defaultDB.player.countTextColor, 0)
+	ValidateColor(db.other.borderColor, plugin.defaultDB.other.borderColor, 0)
 	ValidateColor(db.player.borderColor, plugin.defaultDB.player.borderColor, 0)
 
 	if db.player.borderSize < 1 or db.player.borderSize > 32 then
@@ -696,16 +727,28 @@ do
 						type = "range",
 						name = L.iconSize,
 						min = 24, max = 256, step = 1,
-						width = 1.6,
+						width = 1.1,
 						order = 4,
+						disabled = IsAnchorDisabled,
+					},
+					zoom = {
+						type = "range",
+						name = L.zoom,
+						desc = L.zoomDesc,
+						order = 5,
+						min = 0,
+						max = 0.5,
+						step = 0.01,
+						width = 1.1,
+						isPercent = true,
 						disabled = IsAnchorDisabled,
 					},
 					spacing = {
 						type = "range",
 						name = L.iconSpacing,
 						min = 0, max = 50, step = 1,
-						width = 1.6,
-						order = 5,
+						width = 1.1,
+						order = 6,
 						disabled = IsAnchorDisabled,
 					},
 					growthDirection = {
@@ -716,9 +759,11 @@ do
 							RIGHT = L.RIGHT,
 							UP = L.UP,
 							DOWN = L.DOWN,
+							CENTER_HORIZONTAL = L.CENTER_HORIZONTAL,
+							CENTER_VERTICAL = L.CENTER_VERTICAL,
 						},
 						width = 1.6,
-						order = 6,
+						order = 7,
 						disabled = IsAnchorDisabled,
 					},
 					maxIcons = {
@@ -727,14 +772,14 @@ do
 						desc = L.maxIconsDesc,
 						min = 1, max = 5, step = 1,
 						width = 1.6,
-						order = 7,
+						order = 8,
 						disabled = IsAnchorDisabled,
 					},
 					showTooltip = {
 						type = "toggle",
 						name = L.iconTooltip,
 						desc = L.iconTooltipDesc,
-						order = 8,
+						order = 9,
 						disabled = IsAnchorDisabled,
 					},
 					showCooldown = {
@@ -742,7 +787,7 @@ do
 						name = L.showCooldown,
 						desc = L.showCooldownSwipeDesc,
 						width = 1.6,
-						order = 9,
+						order = 10,
 						disabled = IsAnchorDisabled,
 					},
 					cooldownText = {
@@ -750,7 +795,7 @@ do
 						inline = true,
 						name = L.cooldownText,
 						disabled = function(info) return db.player.disabled or not db.player.showCooldownText end,
-						order = 10,
+						order = 11,
 						args = {
 							showCooldownText = {
 								type = "toggle",
@@ -818,13 +863,61 @@ do
 								end,
 								hasAlpha = true,
 							},
+							cooldownEmphasizeHeader = {
+								type = "header",
+								name = L.emphasize,
+								order = 8,
+							},
+							cooldownEmphasizeHeading = {
+								type = "description",
+								name = L.cooldownEmphasizeHeader,
+								order = 9,
+								width = "full",
+								fontSize = "medium",
+							},
+							cooldownEmphasizeTime = {
+								type = "range",
+								name = L.emphasizeAt,
+								order = 10,
+								min = 0,
+								max = 30,
+								step = 1,
+								width = "full",
+							},
+							cooldownEmphasizeColor = {
+								type = "color",
+								name = L.fontColor,
+								hasAlpha = true,
+								get = function(info)
+									local colorTable = db.player.cooldownEmphasizeColor
+									return colorTable[1], colorTable[2], colorTable[3], colorTable[4]
+								end,
+								set = function(_, r, g, b, a)
+									db.player.cooldownEmphasizeColor = {r, g, b, a}
+									updateProfile()
+								end,
+								order = 11,
+								disabled = function(info) return db.player.disabled or not db.player.showCooldownText or db.player.cooldownEmphasizeTime == 0 end,
+							},
+							cooldownEmphasizeFontSize = {
+								type = "range",
+								name = L.fontSize,
+								desc = L.fontSizeDesc,
+								order = 12,
+								softMax = 100,
+								max = 200,
+								min = 10,
+								step = 1,
+								disabled = true, -- not currently possible
+								-- disabled = function(info) return db.player.disabled or not db.player.showCooldownText or db.player.cooldownEmphasizeTime == 0 end,
+							},
 						},
 					},
 					dispelTypeOptions = {
 						type = "group",
 						inline = true,
 						name = L.dispelType,
-						order = 11,
+						order = 12,
 						disabled = function(info) return db.player.disabled or not db.player.showDispelType end,
 						args = {
 							showDispelType = {
@@ -867,7 +960,7 @@ do
 						type = "group",
 						inline = true,
 						name = L.border,
-						order = 12,
+						order = 13,
 						disabled = function(info)
 							return db.player.disabled or db.player.borderName == "None"
 						end,
@@ -933,7 +1026,7 @@ do
 						type = "group",
 						inline = true,
 						name = L.countText,
-						order = 13,
+						order = 14,
 						disabled = function(info) return db.player.disabled or not db.player.showCountText end,
 						args = {
 							showCountText = {
@@ -1084,7 +1177,7 @@ do
 						set = function(_, value)
 							db.otherPlayerType = value
 							db.otherPlayerName = ""
-							plugin:UpdateAnchors("other")
+							plugin:UpdateAnchor("other")
 						end,
 						disabled = IsAnchorDisabled,
 						width = 1.3,
@@ -1115,7 +1208,7 @@ do
 						get = function() return db.otherPlayerName end,
 						set = function(_, value)
 							db.otherPlayerName = value
-							plugin:UpdateAnchors("other")
+							plugin:UpdateAnchor("other")
 						end,
 						hidden = function()
 							return db.otherPlayerType == "tank"
@@ -1160,16 +1253,28 @@ do
 						type = "range",
 						name = L.iconSize,
 						min = 24, max = 256, step = 1,
-						width = 1.6,
+						width = 1.1,
 						order = 10,
+						disabled = IsAnchorDisabled,
+					},
+					zoom = {
+						type = "range",
+						name = L.zoom,
+						desc = L.zoomDesc,
+						order = 11,
+						min = 0,
+						max = 0.5,
+						step = 0.01,
+						width = 1.1,
+						isPercent = true,
 						disabled = IsAnchorDisabled,
 					},
 					spacing = {
 						type = "range",
 						name = L.iconSpacing,
 						min = 0, max = 50, step = 1,
-						width = 1.6,
-						order = 11,
+						width = 1.1,
+						order = 12,
 						disabled = IsAnchorDisabled,
 					},
 					growthDirection = {
@@ -1180,9 +1285,11 @@ do
 							RIGHT = L.RIGHT,
 							UP = L.UP,
 							DOWN = L.DOWN,
+							CENTER_HORIZONTAL = L.CENTER_HORIZONTAL,
+							CENTER_VERTICAL = L.CENTER_VERTICAL,
 						},
 						width = 1.6,
-						order = 12,
+						order = 13,
 						disabled = IsAnchorDisabled,
 					},
 					maxIcons = {
@@ -1191,7 +1298,7 @@ do
 						desc = L.maxIconsDesc,
 						min = 1, max = 5, step = 1,
 						width = 1.6,
-						order = 13,
+						order = 14,
 						disabled = IsAnchorDisabled,
 					},
 					showCooldown = {
@@ -1199,21 +1306,21 @@ do
 						name = L.showCooldown,
 						desc = L.showCooldownSwipeDesc,
 						width = 1.6,
-						order = 14,
+						order = 15,
 						disabled = IsAnchorDisabled,
 					},
 					showTooltip = {
 						type = "toggle",
 						name = L.iconTooltip,
 						desc = L.iconTooltipDesc,
-						order = 15,
+						order = 16,
 						disabled = IsAnchorDisabled,
 					},
 					cooldownText = {
 						type = "group",
 						inline = true,
 						name = L.cooldownText,
-						order = 16,
+						order = 17,
 						disabled = function(info) return db.other.disabled or not db.other.showCooldownText end,
 						args = {
 							showCooldownText = {
@@ -1282,13 +1389,61 @@ do
 								end,
 								hasAlpha = true,
 							},
+							cooldownEmphasizeHeader = {
+								type = "header",
+								name = L.emphasize,
+								order = 8,
+							},
+							cooldownEmphasizeHeading = {
+								type = "description",
+								name = L.cooldownEmphasizeHeader,
+								order = 9,
+								width = "full",
+								fontSize = "medium",
+							},
+							cooldownEmphasizeTime = {
+								type = "range",
+								name = L.emphasizeAt,
+								order = 10,
+								min = 0,
+								max = 30,
+								step = 1,
+								width = "full",
+							},
+							cooldownEmphasizeColor = {
+								type = "color",
+								name = L.fontColor,
+								hasAlpha = true,
+								get = function(info)
+									local colorTable = db.other.cooldownEmphasizeColor
+									return colorTable[1], colorTable[2], colorTable[3], colorTable[4]
+								end,
+								set = function(_, r, g, b, a)
+									db.other.cooldownEmphasizeColor = {r, g, b, a}
+									updateProfile()
+								end,
+								order = 11,
+								disabled = function(info) return db.other.disabled or not db.other.showCooldownText or db.other.cooldownEmphasizeTime == 0 end,
+							},
+							cooldownEmphasizeFontSize = {
+								type = "range",
+								name = L.fontSize,
+								desc = L.fontSizeDesc,
+								order = 12,
+								softMax = 100,
+								max = 200,
+								min = 10,
+								step = 1,
+								disabled = true, -- not currently possible
+								-- disabled = function(info) return db.other.disabled or not db.other.showCooldownText or db.other.cooldownEmphasizeTime == 0 end,
+							},
 						},
 					},
 					dispelTypeOptions = {
 						type = "group",
 						inline = true,
 						name = L.dispelType,
-						order = 17,
+						order = 18,
 						disabled = function(info) return db.other.disabled or not db.other.showDispelType end,
 						args = {
 							showDispelType = {
@@ -1331,7 +1486,7 @@ do
 						type = "group",
 						inline = true,
 						name = L.border,
-						order = 18,
+						order = 19,
 						disabled = function(info)
 							return db.other.disabled or db.other.borderName == "None"
 						end,
@@ -1397,7 +1552,7 @@ do
 						type = "group",
 						inline = true,
 						name = L.countText,
-						order = 19,
+						order = 20,
 						args = {
 							showCountText = {
 								type = "toggle",
@@ -1522,7 +1677,7 @@ do
 						end,
 						set = function(info, value)
 							db.player[info[#info]] = value
-							local anchor = anchors.player[1]
+							local anchor = anchors.player
 							if anchor then
 								anchor:UpdateAnchorPosition()
 							end
@@ -1566,7 +1721,7 @@ do
 										anchorDB.anchorYOffset = defaultDB.anchorYOffset
 										anchorDB.anchorRelativeTo = defaultDB.anchorRelativeTo
 									end
-									local anchor = anchors.player[1]
+									local anchor = anchors.player
 									if anchor then
 										anchor:UpdateAnchorPosition()
 									end
@@ -1608,7 +1763,7 @@ do
 						end,
 						set = function(info, value)
 							db.other[info[#info]] = value
-							local anchor = anchors.other[1]
+							local anchor = anchors.other
 							if anchor then
 								anchor:UpdateAnchorPosition()
 							end
@@ -1652,7 +1807,7 @@ do
 										anchorDB.anchorYOffset = defaultDB.anchorYOffset
 										anchorDB.anchorRelativeTo = defaultDB.anchorRelativeTo
 									end
-									local anchor = anchors.other[1]
+									local anchor = anchors.other
 									if anchor then
 										anchor:UpdateAnchorPosition()
 									end
@@ -1737,9 +1892,9 @@ do
 		display:SetScript("OnDragStart", OnDragStart)
 		display:SetScript("OnDragStop", OnDragStop)
 
-		local bg = display:CreateTexture(nil, "BACKGROUND")
+		local bg = display:CreateTexture(nil, "BACKGROUND", nil, 2)
 		bg:SetAllPoints(display)
-		bg:SetColorTexture(0, 0, 0, parent.hasTestIcon and 0 or 0.3)
+		bg:SetColorTexture(0, 0, 0, 0.3)
 		display.bg = bg
 
 		local header = display:CreateFontString()
@@ -1751,6 +1906,36 @@ do
 		header:SetJustifyV("MIDDLE")
 		display.text = header
 
+		local directionBox = CreateFrame("Frame", nil, display)
+		display.directionBox = directionBox
+
+		local directionUp = directionBox:CreateTexture(nil, "BACKGROUND", nil, 1)
+		directionUp:SetTexture(ARROW)
+		directionUp:SetPoint('CENTER', directionBox, 'TOP')
+		directionUp:SetSize(20, 20)
+		display.directionUp = directionUp
+
+		local directionRight = directionBox:CreateTexture(nil, "BACKGROUND", nil, 1)
+		directionRight:SetTexture(ARROW)
+		directionRight:SetPoint('CENTER', directionBox, 'RIGHT')
+		directionRight:SetSize(20, 20)
+		directionRight:SetTexCoord(1, 1, 0, 1, 1, 0, 0, 0)
+		display.directionRight = directionRight
+
+		local directionDown = directionBox:CreateTexture(nil, "BACKGROUND", nil, 1)
+		directionDown:SetTexture(ARROW)
+		directionDown:SetPoint('CENTER', directionBox, 'BOTTOM')
+		directionDown:SetSize(20, 20)
+		directionDown:SetTexCoord(0, 1, 0, 0, 1, 1, 1, 0)
+		display.directionDown = directionDown
+
+		local directionLeft = directionBox:CreateTexture(nil, "BACKGROUND", nil, 1)
+		directionLeft:SetTexture(ARROW)
+		directionLeft:SetPoint('CENTER', directionBox, 'LEFT')
+		directionLeft:SetSize(20, 20)
+		directionLeft:SetTexCoord(1, 0, 0, 0, 1, 1, 0, 1)
+		display.directionLeft = directionLeft
+
 		return display
 	end
 
@@ -1758,16 +1943,47 @@ do
 		if mode and mode ~= self.moduleName then return end
 		inConfigureMode = true
 
-		for _, unitAnchors in next, anchors do
-			for i = 1, #unitAnchors do
-				local anchor = unitAnchors[i]
-				if not anchor.configModeFrame then
-					anchor.configModeFrame = createDragAnchor(anchor)
-					anchor.configModeFrame.text:SetText(anchor.hasTestIcon and "" or (anchor.unitType == "player" and L.aurasTestAnchorText or L.aurasTestTankAnchorText):format(i))
-					anchor.configModeFrame.dragAnchor = unitAnchors[1]
-				end
-				anchor.configModeFrame:Show()
+		for unitType, anchor in next, anchors do
+			if not anchor.configModeFrame then
+				anchor.configModeFrame = createDragAnchor(anchor)
+				anchor.configModeFrame.text:SetText(anchor.unitType == "player" and L.aurasTestAnchorText or L.aurasTestTankAnchorText)
+				anchor.configModeFrame.dragAnchor = anchor
 			end
+
+			local anchorDB = db[unitType]
+			local size = anchorDB.size
+			local spacing = anchor.numTestIcons > 1 and anchorDB.spacing or 0
+			local direction = anchorDB.growthDirection
+			anchor.configModeFrame.directionBox:ClearAllPoints()
+			if anchor.numTestIcons == 0 then
+				anchor.configModeFrame.directionBox:SetAllPoints()
+			elseif direction == "UP" then
+				anchor.configModeFrame.directionBox:SetSize(size, (anchor.numTestIcons * (size + spacing)) - spacing)
+				anchor.configModeFrame.directionBox:SetPoint("BOTTOM", anchor.configModeFrame)
+			elseif direction == "DOWN" then
+				anchor.configModeFrame.directionBox:SetSize(size, (anchor.numTestIcons * (size + spacing)) - spacing)
+				anchor.configModeFrame.directionBox:SetPoint("TOP", anchor.configModeFrame)
+			elseif direction == "CENTER_VERTICAL" then
+				anchor.configModeFrame.directionBox:SetSize(size, (anchor.numTestIcons * (size + spacing)) - spacing)
+				anchor.configModeFrame.directionBox:SetPoint("CENTER", anchor.configModeFrame)
+			elseif direction == "LEFT" then
+				anchor.configModeFrame.directionBox:SetSize((anchor.numTestIcons * (size + spacing)) - spacing, size)
+				anchor.configModeFrame.directionBox:SetPoint("RIGHT", anchor.configModeFrame)
+			elseif direction == "RIGHT" then
+				anchor.configModeFrame.directionBox:SetSize((anchor.numTestIcons * (size + spacing)) - spacing, size)
+				anchor.configModeFrame.directionBox:SetPoint("LEFT", anchor.configModeFrame)
+			elseif direction == "CENTER_HORIZONTAL" then
+				anchor.configModeFrame.directionBox:SetSize((anchor.numTestIcons * (size + spacing)) - spacing, size)
+				anchor.configModeFrame.directionBox:SetPoint("CENTER", anchor.configModeFrame)
+			end
+
+			anchor.configModeFrame.directionUp:SetShown(direction == "UP" or direction == "CENTER_VERTICAL")
+			anchor.configModeFrame.directionRight:SetShown(direction == "RIGHT" or direction == "CENTER_HORIZONTAL")
+			anchor.configModeFrame.directionDown:SetShown(direction == "DOWN" or direction == "CENTER_VERTICAL")
+			anchor.configModeFrame.directionLeft:SetShown(direction == "LEFT" or direction == "CENTER_HORIZONTAL")
+			anchor.configModeFrame.bg:SetAlpha(anchor.numTestIcons > 0 and 0 or 1)
+			anchor.configModeFrame.text:SetAlpha(anchor.numTestIcons > 0 and 0 or 1)
+			anchor.configModeFrame:Show()
 		end
 	end
 
@@ -1775,12 +1991,9 @@ do
 		if mode and mode ~= self.moduleName then return end
 		inConfigureMode = false
 
-		for _, unitAnchors in next, anchors do
-			for i = 1, #unitAnchors do
-				local anchor = unitAnchors[i]
-				if anchor.configModeFrame then
-					anchor.configModeFrame:Hide()
-				end
+		for _, anchor in next, anchors do
+			if anchor.configModeFrame then
+				anchor.configModeFrame:Hide()
 			end
 		end
 
@@ -1805,7 +2018,7 @@ local function ShowHelpTip()
 	tip:SetFrameLevel(100)
 	tip:SetFixedFrameLevel(true)
 	tip:SetClampedToScreen(true)
-	tip:SetPoint("BOTTOM", anchors.player[1], "TOP", 0, 20)
+	tip:SetPoint("BOTTOM", anchors.player, "TOP", 0, 20)
 	local arrow = CreateFrame("Frame", nil, tip, "GlowBoxArrowTemplate")
 	arrow:SetPoint("TOP", tip, "BOTTOM", 0, 5)
 	local tipText = tip:CreateFontString(nil, "OVERLAY", "GameFontHighlightLeft")
@@ -1840,7 +2053,7 @@ function plugin:OnPluginEnable()
 
 	AddAllAuraSounds()
 
-	if not db.player.disabled and self.db.global.showHelpTip and anchors.player[1] then
+	if not db.player.disabled and self.db.global.showHelpTip and anchors.player then
 		self:CreateTestAura()
 		self:ScheduleRepeatingTimer(function() plugin:CreateTestAura() end, 10.2)
 		if ShowHelpTip then
@@ -1851,12 +2064,9 @@ end
 
 function plugin:OnPluginDisable()
 	-- Hide aura icon anchors
-	for _, unitAnchors in next, anchors do
-		for i = 1, #unitAnchors do
-			local anchor = unitAnchors[i]
-			anchor:ClearAllPoints()
-			anchor:Hide()
-		end
+	for _, anchor in next, anchors do
+		anchor:ClearAllPoints()
+		anchor:Hide()
 	end
 	-- Disable aura icon containers
 	for _, auraContainer in next, containers do
@@ -1876,36 +2086,15 @@ local function UpdateAnchorPosition(anchor)
 	local scale = anchor:GetScale()
 	anchor:ClearAllPoints()
 
-	local index = anchor:GetID()
-	if index == 1 then
-		local relativeTo = anchorDB.anchorRelativeTo
-		local point, relPoint = anchorDB.anchorPoint, anchorDB.anchorRelPoint
-		local x, y = anchorDB.anchorXOffset, anchorDB.anchorYOffset
-		anchor:SetPoint(point, relativeTo, relPoint, x / scale, y / scale)
-	else
-		local relativeTo = anchors[anchor.unitType][index - 1]
-		local point, relPoint
-		local x, y = 0, 0
-		if anchorDB.growthDirection == "RIGHT" then
-			point, relPoint = "LEFT", "RIGHT"
-			x = anchorDB.spacing
-		elseif anchorDB.growthDirection == "LEFT" then
-			point, relPoint = "RIGHT", "LEFT"
-			x = -anchorDB.spacing
-		elseif anchorDB.growthDirection == "UP" then
-			point, relPoint = "BOTTOM", "TOP"
-			y = anchorDB.spacing
-		elseif anchorDB.growthDirection == "DOWN" then
-			point, relPoint = "TOP", "BOTTOM"
-			y = -anchorDB.spacing
-		end
-		anchor:SetPoint(point, relativeTo, relPoint, x / scale, y / scale)
-	end
+	local relativeTo = anchorDB.anchorRelativeTo
+	local point, relPoint = anchorDB.anchorPoint, anchorDB.anchorRelPoint
+	local x, y = anchorDB.anchorXOffset, anchorDB.anchorYOffset
+	anchor:SetPoint(point, relativeTo, relPoint, x / scale, y / scale)
 end
 
 function plugin:UpdateAllAnchors()
-	self:UpdateAnchors("player", "player")
-	self:UpdateAnchors("other")
+	self:UpdateAnchor("player", "player")
+	self:UpdateAnchor("other")
 
 	-- reset and force roster update
 	previouslyFoundUnit = nil
@@ -1935,55 +2124,50 @@ do
 				local token = self:GetUnitToken(db.otherPlayerType, db.otherPlayerName)
 				if token ~= previouslyFoundUnit then
 					previouslyFoundUnit = token
-					self:UpdateAnchors("other", token)
+					self:UpdateAnchor("other", token)
 				end
 			end
 		end
 		UpdateRegisteredSounds()
 	end
 
-	function plugin:UpdateAnchors(unitType, unitToken)
-		for i = 1, #anchors[unitType] do
-			local anchor = anchors[unitType][i]
-			anchor:ClearAllPoints()
-			anchor:Hide()
+	function plugin:UpdateAnchor(unitType, unitToken)
+		local anchor = anchors[unitType]
+		if not anchor then
+			anchor = CreateFrame("Frame", "BigWigsAurasAnchor" .. (unitType:gsub("^%l", string.upper)), UIParent)
+			anchor:SetFrameStrata("MEDIUM")
+			anchor:SetFixedFrameStrata(true)
+			anchor:SetFrameLevel(1000)
+			anchor:SetFixedFrameLevel(true)
+			anchor:SetMovable(true)
+			anchor:SetClampedToScreen(true)
+
+			anchor.unitType = unitType
+			anchor.UpdateAnchorPosition = UpdateAnchorPosition
+
+			anchors[unitType] = anchor
 		end
+
+		anchor:ClearAllPoints()
+		anchor:Hide()
 
 		local anchorDB = self.db.profile[unitType]
 		if anchorDB.disabled then
 			return
 		end
 
-		for index = 1, anchorDB.maxIcons do
-			local anchor = anchors[unitType][index]
-			if not anchor then
-				anchor = CreateFrame("Frame", "BigWigsAurasAnchor" .. (unitType:gsub("^%l", string.upper)) .. index, UIParent, nil, index)
-				anchor:SetFrameStrata("MEDIUM")
-				anchor:SetFixedFrameStrata(true)
-				anchor:SetFrameLevel(1000)
-				anchor:SetFixedFrameLevel(true)
-				anchor:SetMovable(true)
-				anchor:SetClampedToScreen(true)
+		anchor:SetSize(anchorDB.size, anchorDB.size)
+		anchor:UpdateAnchorPosition()
+		anchor:Show()
 
-				anchor.unitType = unitType
-				anchor.UpdateAnchorPosition = UpdateAnchorPosition
-
-				anchors[unitType][index] = anchor
-			end
-
-			anchor:SetSize(anchorDB.size, anchorDB.size)
-			anchor:UpdateAnchorPosition()
-			anchor:Show()
-
-			UpdateTestAura(unitType, index)
-		end
+		UpdateTestAuras(unitType)
 
 		if not unitToken and unitType == "other" then
 			if not db.onlyWhenYouAreTank or (db.onlyWhenYouAreTank and UnitGroupRolesAssigned("player") == "TANK") then
 				unitToken = self:GetUnitToken(db.otherPlayerType, db.otherPlayerName)
 			end
 		end
-		UpdateAuraContainer(unitType, unitToken, anchors[unitType][1])
+		UpdateAuraContainer(unitType, unitToken, anchors[unitType])
 	end
 end
 
@@ -1997,30 +2181,69 @@ local function GetAtlasBorderSize(size)
 end
 
 do
-	-- local durationFormater do
-	-- 	-- a copy of DefaultAuraDurationFormatter
-	-- 	local maxIntervalSecondsMultiplier = 1.5
-	-- 	local maxIntervalCurve = C_CurveUtil.CreateCurve()
-	-- 	maxIntervalCurve:AddPoint(1 + (maxIntervalSecondsMultiplier * SECONDS_PER_MIN), Enum.SecondsFormatterInterval.Minutes)
-	-- 	maxIntervalCurve:AddPoint(1 + (maxIntervalSecondsMultiplier * SECONDS_PER_HOUR), Enum.SecondsFormatterInterval.Hours)
-	-- 	maxIntervalCurve:AddPoint(1 + (maxIntervalSecondsMultiplier * SECONDS_PER_DAY), Enum.SecondsFormatterInterval.Days)
+	local playerCooldownDurationBinding = C_DurationUtil.CreateDurationTextBinding()
+	do
+		local formatter = C_StringUtil.CreateNumericRuleFormatter()
+		formatter:SetBreakpoints({
+			{
+				threshold = 0.01,
+				format = "",
+			},
+			{
+				threshold = 0.011,
+				format = "%0.1f",
+			},
+			{
+				threshold = 2.999,
+				format = "%0.1f",
+			},
+			{
+				threshold = 3,
+				format = "%d",
+			},
+		})
+		playerCooldownDurationBinding:SetFormatter(formatter)
+		playerCooldownDurationBinding.formatter = formatter -- there's no 'binding:GetFormatter()'
 
-	-- 	durationFormater = C_StringUtil.CreateSecondsFormatter()
-	-- 	durationFormater:SetDefaultAbbreviation(Enum.SecondsFormatterAbbreviation.OneLetter)
-	-- 	durationFormater:SetMinInterval(Enum.SecondsFormatterInterval.Seconds)
-	-- 	durationFormater:SetMaxIntervalCurve(maxIntervalCurve)
-	-- 	durationFormater:SetDesiredUnitCount(1)
+		local colorCurve = C_CurveUtil.CreateColorCurve()
+		colorCurve:SetType(Enum.LuaCurveType.Step)
+		playerCooldownDurationBinding:SetTextColorCurve(colorCurve, Enum.DurationTextBindingProperty.RemainingDuration)
+	end
 
-	-- 	-- changes
-	-- 	durationFormater:SetStripIntervalWhitespace(Enum.SecondsFormatterIntervalWhitespace.Strip)
-	-- 	durationFormater:SetMillisecondsThreshold(3)
-	-- end
+	local otherCooldownDurationBinding = C_DurationUtil.CreateDurationTextBinding()
+	do
+		local formatter = C_StringUtil.CreateNumericRuleFormatter()
+		formatter:SetBreakpoints({
+			{
+				threshold = 0.01,
+				format = "",
+			},
+			{
+				threshold = 0.011,
+				format = "%0.1f",
+			},
+			{
+				threshold = 2.999,
+				format = "%0.1f",
+			},
+			{
+				threshold = 3,
+				format = "%d",
+			},
+		})
+		otherCooldownDurationBinding:SetFormatter(formatter)
+		otherCooldownDurationBinding.formatter = formatter -- there's no 'binding:GetFormatter()'
+
+		local colorCurve = C_CurveUtil.CreateColorCurve()
+		colorCurve:SetType(Enum.LuaCurveType.Step)
+		otherCooldownDurationBinding:SetTextColorCurve(colorCurve, Enum.DurationTextBindingProperty.RemainingDuration)
+	end
 
 	local function BorderGetSize(border)
 		return border.plainSize
 	end
 
-	function InitializeAuraFrame(aura, optionsDB)
+	function InitializeAuraFrame(unitType, aura, optionsDB)
 		optionsDB = optionsDB or aura:GetParent().db
 		local size = optionsDB.size
 
@@ -2029,7 +2252,6 @@ do
 
 		local icon = aura:CreateTexture(nil, "BACKGROUND")
 		icon:SetAllPoints()
-		icon:SetTexCoord(0.07, 0.93, 0.07, 0.93) -- TODO: this needs an option
 		aura:SetIcon(icon)
 		aura.icon = icon
 
@@ -2039,10 +2261,12 @@ do
 		cooldown:SetDrawEdge(false)
 		cooldown:SetDrawBling(false)
 		cooldown:SetDrawSwipe(optionsDB.showCooldown)
+		cooldown:SetHideCountdownNumbers(true)
 		aura.cooldown = cooldown
 		aura:SetDurationCooldown(cooldown)
 
-		local duration = cooldown:GetCountdownFontString()
+		local duration = cooldown:CreateFontString(nil, "OVERLAY")
+		duration:SetPoint("CENTER")
 		do
 			local flags = {}
 			if optionsDB.cooldownTextMonochrome then
@@ -2061,8 +2285,18 @@ do
 			end
 			duration:SetFont(LibSharedMedia:Fetch(FONT, optionsDB.cooldownTextFontName), optionsDB.cooldownTextFontSize, flags)
 		end
-		cooldown:SetHideCountdownNumbers(not optionsDB.showCooldownText)
-		cooldown:SetCountdownMillisecondsThreshold(optionsDB.cooldownTextMillisecondsThreshold)
+		aura.duration = duration
+
+		if unitType == "player" then
+			aura.durationBinding = playerCooldownDurationBinding
+			aura.durationBinding:SetFontString(duration)
+		else
+			aura.durationBinding = otherCooldownDurationBinding
+			aura.durationBinding:SetFontString(duration)
+		end
+		aura.durationOptions = {
+			binding = aura.durationBinding
+		}
 
 		-- local cooldownBar = CreateFrame("StatusBar", nil, aura)
 		-- aura.cooldownBar = cooldownBar
@@ -2141,13 +2375,21 @@ do
 	function UpdateAuraFrame(aura, optionsDB)
 		aura:SetSize(optionsDB.size, optionsDB.size)
 
+		do
+			-- icon aspect ratio and zoom calcs
+			local baseZoom = 0.86
+			local zoom = baseZoom * (1 - optionsDB.zoom)
+			local zoomedOffset = 1 - ((1 - zoom) / 2)
+			local offsetX, offsetY = zoomedOffset, zoomedOffset
+			local left, right, top, bottom = 1 - offsetX, offsetX, 1 - offsetY, offsetY
+			aura.icon:SetTexCoord(left, right, top, bottom)
+		end
+
 		local cooldown = aura:GetDurationCooldown()
 		cooldown:SetDrawSwipe(optionsDB.showCooldown)
-		cooldown:SetHideCountdownNumbers(not optionsDB.showCooldownText)
-		cooldown:SetCountdownMillisecondsThreshold(optionsDB.cooldownTextMillisecondsThreshold)
 
-		local duration = cooldown:GetCountdownFontString()
-		do
+		local duration = aura.duration
+		if optionsDB.showCooldownText then
 			local flags = {}
 			if optionsDB.cooldownTextMonochrome then
 				flags[#flags + 1] = "MONOCHROME"
@@ -2165,8 +2407,24 @@ do
 			end
 			duration:SetFont(LibSharedMedia:Fetch(FONT, optionsDB.cooldownTextFontName), optionsDB.cooldownTextFontSize, flags)
 
-			local textColor = optionsDB.cooldownTextColor
-			duration:SetTextColor(textColor[1], textColor[2], textColor[3], textColor[4])
+			local textColor = CreateColor(unpack(optionsDB.cooldownTextColor))
+			local curve = aura.durationBinding:GetTextColorCurve()
+			curve:ClearPoints()
+
+			if optionsDB.cooldownEmphasizeTime > 0 then
+				local emphasizedColor = CreateColor(unpack(optionsDB.cooldownEmphasizeColor))
+				curve:AddPoint(0.1, emphasizedColor)
+				curve:AddPoint(optionsDB.cooldownEmphasizeTime - 0.1, emphasizedColor)
+				curve:AddPoint(optionsDB.cooldownEmphasizeTime, textColor)
+			else
+				curve:AddPoint(0, textColor)
+			end
+
+			aura:SetDurationText(duration, aura.durationOptions)
+			duration:Show()
+		else
+			aura:ClearDurationText()
+			duration:Hide()
 		end
 
 		aura:ClearDispelTypeTextures()
@@ -2250,7 +2508,7 @@ do
 
 			auraContainer:AddAuraGroup("debuffs", "HARMFUL", {
 				maxFrameCount = optionsDB.maxIcons,
-				initializeFrame = InitializeAuraFrame,
+				initializeFrame = GenerateClosure(InitializeAuraFrame, unitType),
 				sortMethod = 4, -- Enum.UnitAuraSortRule.ExpirationOnly
 				sortDirection = 0, -- Enum.UnitAuraSortDirection.Normal
 				layout = {
@@ -2279,23 +2537,28 @@ do
 
 		auraContainer:ClearAllPoints()
 		local axis, point, x, y
-		if optionsDB.growthDirection == "RIGHT" then
+		if optionsDB.growthDirection == "RIGHT" or optionsDB.growthDirection == "CENTER_HORIZONTAL" then
 			axis = FlowLayoutAxis.Horizontal
 			point, x, y = "LEFT", FlowDirection.Right, FlowDirection.Down
 		elseif optionsDB.growthDirection == "LEFT" then
 			axis = FlowLayoutAxis.Horizontal
 			point, x, y = "RIGHT", FlowDirection.Left, FlowDirection.Down
-		elseif optionsDB.growthDirection == "UP" then
+		elseif optionsDB.growthDirection == "UP" or optionsDB.growthDirection == "CENTER_VERTICAL" then
 			axis = FlowLayoutAxis.Vertical
 			point, x, y = "BOTTOM", FlowDirection.Right, FlowDirection.Up
 		elseif optionsDB.growthDirection == "DOWN" then
 			axis = FlowLayoutAxis.Vertical
 			point, x, y = "TOP", FlowDirection.Right, FlowDirection.Down
 		end
-		auraContainer:SetPoint(point)
 		auraContainer:SetFlowLayoutAxis(axis)
 		auraContainer:SetFlowLayoutAnchorPoint(point)
 		auraContainer:SetFlowLayoutGrowthDirection(x, y)
+
+		if optionsDB.growthDirection == "CENTER_HORIZONTAL" or optionsDB.growthDirection == "CENTER_VERTICAL" then
+			auraContainer:SetPoint("CENTER")
+		else
+			auraContainer:SetPoint(point)
+		end
 
 		auraContainer:SetAuraGroupMaxFrameCount("debuffs", optionsDB.maxIcons)
 		auraContainer:SetAuraGroupCandidateFilters("debuffs", {
@@ -2330,39 +2593,8 @@ end
 --
 
 do
-	local testAuras = { player = {}, other = {} }
-	local testCount = 1
-	local auraFramePool = {}
-
-	local dispelTypeInfo = AuraUtil.GetDebuffDisplayInfoTable()
-	local dispelTypeList = { "Magic", "Curse", "Disease", "Poison", "Enrage", "Bleed", [0] = "None" }
+	local dispelTypeList = { "Magic", "Curse", "Disease", "Poison", "Enrage", "Bleed", "None" }
 	local privateAuraSpellList = { 407221, 418720, 421828, 428970, 406317 }
-
-	local function releaseFrame(frame)
-		frame:ClearAllPoints()
-		local anchor = frame:GetParent()
-		frame:SetParent(nil)
-		frame:SetScript("OnUpdate", nil)
-		frame.cooldown:Clear()
-		frame.timerID = nil
-		frame:Hide()
-		anchor.hasTestIcon = nil
-		if anchor.configModeFrame then
-			anchor.configModeFrame.text:SetText((anchor.unitType == "player" and L.aurasTestAnchorText or L.aurasTestTankAnchorText):format(anchor:GetID()))
-			anchor.configModeFrame.bg:SetColorTexture(0, 0, 0, 0.3)
-		end
-
-		-- Pull it out of the active list
-		local active = testAuras[frame.unitType]
-		for i = #active, 1, -1 do
-			if active[i] == frame then
-				table.remove(active, i)
-				break
-			end
-		end
-		-- And put it back in the pool
-		table.insert(auraFramePool, frame)
-	end
 
 	local methods = { -- pretty annoying
 		GetApplicationBar = false,
@@ -2412,33 +2644,54 @@ do
 	}
 	local noop = function() end
 
-	local function getTestAura(unitType, index)
-		local aura = table.remove(auraFramePool)
-		if not aura then
-			aura = CreateFrame("Frame", nil, UIParent)
-			aura:SetFrameStrata("MEDIUM")
-			aura:SetFixedFrameStrata(true)
-			aura:SetFrameLevel(1000)
-			aura:SetFixedFrameLevel(true)
-			aura:SetClampedToScreen(true)
-			for name, func in next, methods do
-				aura[name] = func or noop
-			end
-			InitializeAuraFrame(aura, db[unitType])
+	local function createTestAura(unitType)
+		local aura = CreateFrame("Frame", nil, anchors[unitType])
+		aura:SetFrameStrata("MEDIUM")
+		aura:SetFixedFrameStrata(true)
+		aura:SetFrameLevel(1000)
+		aura:SetFixedFrameLevel(true)
+		aura:Hide()
+
+		for name, func in next, methods do
+			aura[name] = func or noop
 		end
 
+		InitializeAuraFrame(unitType, aura, db[unitType])
+
+		return aura
+	end
+
+	local function resetTestAura(_, aura)
+		aura:ClearAllPoints()
+		aura:Hide()
+		aura.cooldown:Clear()
+		aura.durationBinding:SetEnabled(false)
+		aura.timerID = nil
+	end
+
+	local pools = {
+		player = CreateUnsecuredObjectPool(GenerateClosure(createTestAura, "player"), resetTestAura),
+		other = CreateUnsecuredObjectPool(GenerateClosure(createTestAura, "other"), resetTestAura),
+	}
+
+	local function activateTestAura(unitType, index)
+		local pool = pools[unitType]
+		local aura = pool:Acquire()
+
 		-- Setup test aura info
-		local spellIndex = (index - 1) % #privateAuraSpellList + 1
-		local spellId = privateAuraSpellList[spellIndex]
-		local dispelType = dispelTypeList[(index - 1) % 7]
+		local spellId = privateAuraSpellList[math.random(#privateAuraSpellList)]
+		local dispelType = dispelTypeList[math.random(#dispelTypeList)]
 
 		local icon = C_Spell.GetSpellTexture(spellId)
-		local duration = CONFIG_MODE_DURATION
-		local expirationTime = GetTime() + duration
 		local applications = math.random(0, 5)
 
+		local duration = C_DurationUtil.CreateDuration()
+		duration:SetTimeFromStart(GetTime(), CONFIG_MODE_DURATION)
+
 		aura.icon:SetTexture(icon)
-		aura.cooldown:SetCooldownFromExpirationTime(expirationTime, CONFIG_MODE_DURATION)
+		aura.cooldown:SetCooldownFromDurationObject(duration)
+		aura.durationBinding:SetDuration(duration)
+		aura.durationBinding:SetEnabled(true)
 		aura.stacks:SetText(applications > 1 and applications or "")
 		aura.dispelType = dispelType
 		aura.unitType = unitType
@@ -2461,51 +2714,79 @@ do
 		-- We don't want to use ScheduleTimer as we don't want the timer to cancel if this plugin is disabled
 		local onDelay = function()
 			if tbl == aura.timerID then
-				releaseFrame(aura)
+				pool:Release(aura)
+				UpdateTestAuras(unitType)
 			end
 		end
-		plugin:SimpleTimer(onDelay, duration)
+		plugin:SimpleTimer(onDelay, CONFIG_MODE_DURATION)
 
-		return aura
-	end
-
-	function UpdateTestAura(unitType, index)
-		local aura = testAuras[unitType][index]
-		if not aura then return end
-
-		UpdateAuraFrame(aura, db[unitType])
 		aura:Show()
 	end
 
+	function UpdateTestAuras(unitType)
+		local anchor = anchors[unitType]
+		local pool = pools[unitType]
+		local numActive = pool:GetNumActive()
+		if numActive > 0 then
+			local optionsDB = db[unitType]
+			local scale = anchor:GetScale()
+			local point, relPoint
+			local x, y = 0, 0
+			if optionsDB.growthDirection == "RIGHT" then
+				point, relPoint = "LEFT", "RIGHT"
+				x = optionsDB.spacing
+			elseif optionsDB.growthDirection == "LEFT" then
+				point, relPoint = "RIGHT", "LEFT"
+				x = -optionsDB.spacing
+			elseif optionsDB.growthDirection == "UP" then
+				point, relPoint = "BOTTOM", "TOP"
+				y = optionsDB.spacing
+			elseif optionsDB.growthDirection == "DOWN" then
+				point, relPoint = "TOP", "BOTTOM"
+				y = -optionsDB.spacing
+			elseif optionsDB.growthDirection == "CENTER_HORIZONTAL" then
+				point = "CENTER"
+			elseif optionsDB.growthDirection == "CENTER_VERTICAL" then
+				point = "CENTER"
+			end
+
+			local lastAura
+			for index = 1, numActive do
+				local aura = pool:GetNextActive(lastAura)
+				aura:ClearAllPoints()
+				if relPoint then
+					if index == 1 then
+						aura:SetPoint("CENTER")
+					else
+						aura:SetPoint(point, lastAura, relPoint, x / scale, y / scale)
+					end
+				else
+					local centerIndex = (numActive + 1) / 2
+					local offset = (index - centerIndex) * (optionsDB.size + optionsDB.spacing)
+					if optionsDB.growthDirection == "CENTER_HORIZONTAL" then
+						aura:SetPoint(point, anchor, point, offset / scale, 0)
+					elseif optionsDB.growthDirection == "CENTER_VERTICAL" then
+						aura:SetPoint(point, anchor, point, 0, offset / scale)
+					end
+				end
+
+				UpdateAuraFrame(aura, optionsDB)
+				lastAura = aura
+			end
+		end
+
+		anchor.numTestIcons = numActive
+		if inConfigureMode then
+			plugin:BigWigs_StartConfigureMode(nil, plugin.moduleName)
+		end
+	end
+
 	function plugin:CreateTestAura()
-		for unitType, unitAnchors in next, anchors do
+		for unitType in next, anchors do
 			if not db[unitType].disabled then
-				local auras = testAuras[unitType]
-
-				local aura = getTestAura(unitType, testCount)
-				table.insert(auras, 1, aura) -- Pop it on
-				testCount = testCount + 1
-				if testCount > 10 then
-					testCount = 1
-				end
-
-				for i = 1, math.min(#auras, db[unitType].maxIcons) do
-					local frame = auras[i]
-					frame:ClearAllPoints()
-					frame:SetParent(unitAnchors[i])
-					frame:SetPoint("CENTER")
-					if unitAnchors[i].configModeFrame then
-						unitAnchors[i].configModeFrame.text:SetText("")
-						unitAnchors[i].configModeFrame.bg:SetColorTexture(0, 0, 0, 0)
-					end
-					unitAnchors[i].hasTestIcon = true
-					UpdateTestAura(unitType, i)
-				end
-				for i = #auras, db[unitType].maxIcons + 1, -1 do
-					local frame = auras[i]
-					if frame then
-						releaseFrame(frame)
-					end
+				if pools[unitType]:GetNumActive() < db[unitType].maxIcons then
+					activateTestAura(unitType)
+					UpdateTestAuras(unitType)
 				end
 			end
 		end

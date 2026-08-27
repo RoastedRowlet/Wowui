@@ -397,7 +397,7 @@
 				</Scripts>
 			</Frame>
 			<Frame parentKey="PresetPopupFrame" enableMouse="true" hidden="true" frameLevel="50">
-				<Size x="310" y="300"/>
+				<Size x="310" y="360"/>
 				<Anchors>
 					<Anchor point="TOPRIGHT" relativePoint="TOPLEFT" y="-21"/>
 				</Anchors>
@@ -423,7 +423,7 @@
 								</Anchors>
 							</CheckButton>
 							<Frame parentArray="PresetAddons" inherits="TalentLoadoutExPresetAddonFrameTemplate">
-								<Size x="100" y="120"/>
+								<Size x="100" y="180"/>
 								<KeyValues>
 									<KeyValue key="title" value="WoWCompare(PeaversTalentsData)"/>
 									<KeyValue key="addonName" value="PeaversTalentsData"/>
@@ -433,6 +433,18 @@
 										<KeyValues>
 											<KeyValue key="CheckButtonText" value="Mythic+"/>
 											<KeyValue key="category" value="mythic"/>
+										</KeyValues>
+									</CheckButton>
+									<CheckButton parentArray="CategoryCheckButtons" inherits="TalentLoadoutExCheckButtonTemplate">
+										<KeyValues>
+											<KeyValue key="CheckButtonText" value="Raid LFR"/>
+											<KeyValue key="category" value="lfr_raid"/>
+										</KeyValues>
+									</CheckButton>
+									<CheckButton parentArray="CategoryCheckButtons" inherits="TalentLoadoutExCheckButtonTemplate">
+										<KeyValues>
+											<KeyValue key="CheckButtonText" value="Raid Normal"/>
+											<KeyValue key="category" value="normal_raid"/>
 										</KeyValues>
 									</CheckButton>
 									<CheckButton parentArray="CategoryCheckButtons" inherits="TalentLoadoutExCheckButtonTemplate">
