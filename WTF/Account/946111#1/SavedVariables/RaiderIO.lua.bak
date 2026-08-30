@@ -14,14 +14,17 @@ RaiderIO_Config = {
 }
 RaiderIO_LastCharacter = "us-Zappyxatu-stormrage"
 RaiderIO_MissingCharacters = {
-["us-Doisbotaobm-illidan"] = true,
-["us-Elzerah-illidan"] = true,
-["us-Sixpiecenugg-illidan"] = true,
-["us-Orstedd-illidan"] = true,
-["us-Extremekaos-illidan"] = true,
-["us-Bodwod-illidan"] = true,
-["us-Chantsubark-illidan"] = true,
-["us-Karambola-illidan"] = true,
+["us-Shame-nesingwary"] = true,
+["us-Shmìt-illidan"] = true,
+["us-Naxuda-stormrage"] = true,
+["us-Kasyra-elune"] = true,
+["us-party5-stormrage"] = true,
+["us-Rocksmom-illidan"] = true,
+["us-Bamboopanda-alterac-mountains"] = true,
+["us-Mofangii-illidan"] = true,
+["us-Sticknstone-zuljin"] = true,
+["us-Shadê-kargath"] = true,
+["us-Maxytouches-stormrage"] = true,
 }
 RaiderIO_MissingServers = {
 }

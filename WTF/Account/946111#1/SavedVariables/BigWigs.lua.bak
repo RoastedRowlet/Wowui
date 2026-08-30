@@ -55,6 +55,7 @@ BigWigs3DB = {
 [1049] = true,
 [1050] = true,
 [-2529] = true,
+[1065] = true,
 },
 },
 },
@@ -69,6 +70,15 @@ BigWigs3DB = {
 "TOPLEFT",
 13,
 -156,
+},
+},
+},
+},
+["BigWigs_Bosses_Chimaerus the Undreamt God"] = {
+["profiles"] = {
+["Default"] = {
+["toggles"] = {
+[1264756] = 3129591,
 },
 },
 },
@@ -147,7 +157,7 @@ BigWigs3DB = {
 ["BigWigs_Plugins_Bars"] = {
 ["profiles"] = {
 ["Default"] = {
-["emphasize"] = false,
+["normalWidth"] = 120,
 ["expPosition"] = {
 "BOTTOMLEFT",
 "BOTTOMLEFT",
@@ -155,7 +165,7 @@ BigWigs3DB = {
 21,
 },
 ["visibleBarLimit"] = 1,
-["normalWidth"] = 120,
+["emphasize"] = false,
 ["normalPosition"] = {
 "BOTTOMLEFT",
 "BOTTOMLEFT",
@@ -183,31 +193,22 @@ BigWigs3DB = {
 },
 },
 },
-["BigWigs_Bosses_Chimaerus the Undreamt God"] = {
-["profiles"] = {
-["Default"] = {
-["toggles"] = {
-[1264756] = 3129591,
-},
-},
-},
-},
 },
 ["myKeystones"] = {
 ["Player-60-0F85ABEF"] = {
-["playerRating"] = 2902,
-["specId"] = 102,
-["keyMap"] = 588,
+["playerRating"] = 2993,
+["specId"] = 105,
+["keyMap"] = 0,
 ["name"] = "Lonelylitten",
-["keyLevel"] = 12,
+["keyLevel"] = 0,
 ["realm"] = "Stormrage",
 },
 ["Player-60-0F7B141D"] = {
-["playerRating"] = 2967,
-["specId"] = 264,
-["keyMap"] = 587,
+["playerRating"] = 3348,
+["specId"] = 262,
+["keyMap"] = 585,
 ["name"] = "Zappyxatu",
-["keyLevel"] = 12,
+["keyLevel"] = 15,
 ["realm"] = "Stormrage",
 },
 },
@@ -517,7 +518,7 @@ BigWigsStatsDB = {
 ["heroic"] = {
 ["kills"] = 2,
 ["fkDuration"] = 449.2459999999992,
-["wipes"] = 1,
+["wipes"] = 2,
 ["fkWipes"] = 1,
 ["best"] = 385.1609999999928,
 ["bestDate"] = "2026/08/26",
@@ -536,6 +537,33 @@ BigWigsStatsDB = {
 ["bestDate"] = "2026/08/25",
 ["best"] = 157.4089999999851,
 ["fkDuration"] = 159.2999999999884,
+},
+},
+[2888] = {
+["normal"] = {
+["kills"] = 3,
+["fkDate"] = "2026/08/23",
+["bestDate"] = "2026/08/25",
+["fkWipes"] = 3,
+["best"] = 364.9669999999751,
+["wipes"] = 5,
+["fkDuration"] = 369.376,
+},
+["heroic"] = {
+["kills"] = 2,
+["fkDuration"] = 534.4850000000006,
+["wipes"] = 12,
+["fkWipes"] = 1,
+["best"] = 474.8859999999986,
+["bestDate"] = "2026/08/27",
+["fkDate"] = "2026/08/24",
+},
+["LFR"] = {
+["kills"] = 4,
+["fkDate"] = "2026/08/18",
+["bestDate"] = "2026/08/25",
+["best"] = 169.012000000017,
+["fkDuration"] = 267.2110000000102,
 },
 },
 [2871] = {
@@ -575,52 +603,6 @@ BigWigsStatsDB = {
 ["fkDuration"] = 222.4190000000235,
 },
 },
-[2894] = {
-["normal"] = {
-["kills"] = 4,
-["fkDuration"] = 272.8699999999953,
-["best"] = 272.8699999999953,
-["bestDate"] = "2026/08/19",
-["wipes"] = 2,
-["fkDate"] = "2026/08/19",
-},
-["heroic"] = {
-["kills"] = 1,
-["fkDuration"] = 386.3110000000015,
-["wipes"] = 5,
-["fkWipes"] = 5,
-["best"] = 386.3110000000015,
-["bestDate"] = "2026/08/24",
-["fkDate"] = "2026/08/24",
-},
-},
-[2888] = {
-["normal"] = {
-["kills"] = 3,
-["fkDate"] = "2026/08/23",
-["bestDate"] = "2026/08/25",
-["fkWipes"] = 3,
-["best"] = 364.9669999999751,
-["wipes"] = 5,
-["fkDuration"] = 369.376,
-},
-["heroic"] = {
-["kills"] = 1,
-["fkDuration"] = 534.4850000000006,
-["wipes"] = 4,
-["fkWipes"] = 1,
-["best"] = 534.4850000000006,
-["bestDate"] = "2026/08/24",
-["fkDate"] = "2026/08/24",
-},
-["LFR"] = {
-["kills"] = 4,
-["fkDate"] = "2026/08/18",
-["bestDate"] = "2026/08/25",
-["best"] = 169.012000000017,
-["fkDuration"] = 267.2110000000102,
-},
-},
 [2887] = {
 ["normal"] = {
 ["kills"] = 2,
@@ -638,6 +620,36 @@ BigWigsStatsDB = {
 ["best"] = 216.9260000000068,
 ["wipes"] = 3,
 ["fkDuration"] = 292.4869999999646,
+},
+},
+[2895] = {
+["normal"] = {
+["kills"] = 1,
+["fkDuration"] = 408.070000000007,
+["wipes"] = 3,
+["fkWipes"] = 3,
+["best"] = 408.070000000007,
+["bestDate"] = "2026/08/27",
+["fkDate"] = "2026/08/27",
+},
+},
+[2894] = {
+["normal"] = {
+["kills"] = 4,
+["fkDuration"] = 272.8699999999953,
+["best"] = 272.8699999999953,
+["bestDate"] = "2026/08/19",
+["wipes"] = 2,
+["fkDate"] = "2026/08/19",
+},
+["heroic"] = {
+["kills"] = 2,
+["fkDuration"] = 386.3110000000015,
+["wipes"] = 10,
+["fkWipes"] = 5,
+["best"] = 386.3110000000015,
+["bestDate"] = "2026/08/24",
+["fkDate"] = "2026/08/24",
 },
 },
 },

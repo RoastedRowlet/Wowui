@@ -1,6 +1,34 @@
 
 SimulationCraftDB = {
 ["char"] = {
+["Lonelylitten - Stormrage"] = {
+["bonusRolls"] = {
+{
+["currency"] = 3418,
+["ts"] = 1787873280,
+["source"] = 278285,
+["season"] = 37,
+["keyLevel"] = 1,
+["spec"] = 105,
+["context"] = 5,
+["itemId"] = 268235,
+},
+},
+},
+["Zappyxatu - Stormrage"] = {
+["bonusRolls"] = {
+{
+["ts"] = 1787927220,
+["currency"] = 3418,
+["source"] = 278286,
+["context"] = 5,
+["keyLevel"] = 2,
+["spec"] = 263,
+["season"] = 37,
+["itemId"] = 270924,
+},
+},
+},
 ["Barelynoer - Area 52"] = {
 ["bonusRolls"] = {
 {

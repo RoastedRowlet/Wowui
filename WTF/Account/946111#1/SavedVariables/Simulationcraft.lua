@@ -25,6 +25,34 @@ SimulationCraftDB = {
 },
 },
 },
+["Lonelylitten - Stormrage"] = {
+["bonusRolls"] = {
+{
+["ts"] = 1787873280,
+["currency"] = 3418,
+["source"] = 278285,
+["context"] = 5,
+["keyLevel"] = 1,
+["spec"] = 105,
+["season"] = 37,
+["itemId"] = 268235,
+},
+},
+},
+["Zappyxatu - Stormrage"] = {
+["bonusRolls"] = {
+{
+["currency"] = 3418,
+["ts"] = 1787927220,
+["source"] = 278286,
+["season"] = 37,
+["keyLevel"] = 2,
+["spec"] = 263,
+["context"] = 5,
+["itemId"] = 270924,
+},
+},
+},
 },
 ["profileKeys"] = {
 ["Taurostotem - Area 52"] = "Taurostotem - Area 52",

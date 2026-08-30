@@ -92,22 +92,6 @@ CliqueDB3 = {
 ["unit"] = "mouseover",
 },
 {
-["spell"] = "Regrowth",
-["key"] = "BUTTON2",
-["sets"] = {
-["default"] = true,
-},
-["icon"] = 136085,
-["type"] = "spell",
-},
-{
-["type"] = "menu",
-["key"] = "CTRL-BUTTON2",
-["sets"] = {
-["default"] = true,
-},
-},
-{
 ["spell"] = "Rejuvenation",
 ["key"] = "BUTTON1",
 ["sets"] = {
@@ -126,6 +110,22 @@ CliqueDB3 = {
 ["icon"] = 134332,
 },
 {
+["spell"] = "Regrowth",
+["key"] = "BUTTON2",
+["sets"] = {
+["default"] = true,
+},
+["icon"] = 136085,
+["type"] = "spell",
+},
+{
+["type"] = "menu",
+["key"] = "CTRL-BUTTON2",
+["sets"] = {
+["default"] = true,
+},
+},
+{
 ["type"] = "macro",
 ["key"] = "ALT-BUTTON2",
 ["macrotext"] = "/cast Nature's Swiftness\n/cast [@mouseover] Regrowth\n",
@@ -133,24 +133,6 @@ CliqueDB3 = {
 ["default"] = true,
 },
 ["icon"] = 134332,
-},
-{
-["type"] = "target",
-["key"] = "CTRL-BUTTON1",
-["sets"] = {
-["default"] = true,
-},
-["icon"] = 132331,
-["unit"] = "mouseover",
-},
-{
-["spell"] = "Nature's Cure",
-["key"] = "BUTTON3",
-["sets"] = {
-["default"] = true,
-},
-["icon"] = 236288,
-["type"] = "spell",
 },
 {
 ["spell"] = "Revive",
@@ -168,6 +150,24 @@ CliqueDB3 = {
 ["default"] = true,
 },
 ["icon"] = 135952,
+["type"] = "spell",
+},
+{
+["type"] = "target",
+["key"] = "CTRL-BUTTON1",
+["sets"] = {
+["default"] = true,
+},
+["icon"] = 132331,
+["unit"] = "mouseover",
+},
+{
+["spell"] = "Nature's Cure",
+["key"] = "BUTTON3",
+["sets"] = {
+["default"] = true,
+},
+["icon"] = 236288,
 ["type"] = "spell",
 },
 {
@@ -343,6 +343,13 @@ CliqueDB3 = {
 ["unit"] = "mouseover",
 },
 {
+["type"] = "menu",
+["key"] = "CTRL-BUTTON2",
+["sets"] = {
+["default"] = true,
+},
+},
+{
 ["spell"] = "Healing Wave",
 ["key"] = "BUTTON2",
 ["sets"] = {
@@ -352,19 +359,12 @@ CliqueDB3 = {
 ["type"] = "spell",
 },
 {
+["type"] = "menu",
 ["sets"] = {
 ["default"] = true,
 },
-["type"] = "menu",
-["icon"] = 132212,
 ["key"] = "SHIFT-BUTTON2",
-},
-{
-["type"] = "menu",
-["key"] = "CTRL-BUTTON2",
-["sets"] = {
-["default"] = true,
-},
+["icon"] = 132212,
 },
 {
 ["type"] = "target",
@@ -374,6 +374,15 @@ CliqueDB3 = {
 },
 ["icon"] = 132331,
 ["unit"] = "mouseover",
+},
+{
+["spell"] = "Purify Spirit",
+["key"] = "BUTTON3",
+["sets"] = {
+["default"] = true,
+},
+["icon"] = 236288,
+["type"] = "spell",
 },
 {
 ["spell"] = "Ancestral Spirit",
@@ -391,15 +400,6 @@ CliqueDB3 = {
 ["default"] = true,
 },
 ["icon"] = 252995,
-["type"] = "spell",
-},
-{
-["spell"] = "Purify Spirit",
-["key"] = "BUTTON3",
-["sets"] = {
-["default"] = true,
-},
-["icon"] = 236288,
 ["type"] = "spell",
 },
 {

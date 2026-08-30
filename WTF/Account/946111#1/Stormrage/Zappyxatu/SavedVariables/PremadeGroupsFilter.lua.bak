@@ -32,9 +32,9 @@ PremadeGroupsFilterState = {
 ["min"] = "",
 ["act"] = false,
 },
-["dungeon7"] = false,
+["partyfit"] = true,
 ["dungeon6"] = false,
-["dungeon1"] = false,
+["expression"] = "",
 ["dps"] = {
 ["max"] = "",
 ["min"] = "",
@@ -45,33 +45,28 @@ PremadeGroupsFilterState = {
 ["min"] = "",
 ["act"] = false,
 },
-["expression"] = "",
+["dungeon5"] = true,
 ["difficulty"] = {
 },
 ["dungeon4"] = false,
-["dungeon2"] = false,
-["dungeon3"] = false,
-["dungeon8"] = false,
 ["tanks"] = {
 ["max"] = "1",
 ["min"] = "1",
 ["act"] = true,
 },
-["dungeon5"] = false,
-["partyfit"] = false,
+["dungeon3"] = false,
+["dungeon8"] = false,
+["dungeon2"] = false,
+["dungeon1"] = false,
+["dungeon7"] = true,
 },
 },
-["c9f8"] = {
-["enabled"] = true,
-},
-["c121f4"] = {
-["enabled"] = true,
-},
-["version"] = 8,
-["c3f6"] = {
+["c3f5"] = {
 ["enabled"] = true,
 ["raid"] = {
 ["difficulty"] = {
+["act"] = true,
+["val"] = 2,
 },
 ["heals"] = {
 ["max"] = "",
@@ -83,7 +78,7 @@ PremadeGroupsFilterState = {
 ["min"] = "",
 ["act"] = false,
 },
-["defeated"] = {
+["members"] = {
 ["max"] = "",
 ["min"] = "",
 ["act"] = false,
@@ -93,7 +88,7 @@ PremadeGroupsFilterState = {
 ["min"] = "",
 ["act"] = false,
 },
-["members"] = {
+["defeated"] = {
 ["max"] = "",
 ["min"] = "",
 ["act"] = false,
@@ -101,10 +96,14 @@ PremadeGroupsFilterState = {
 ["expression"] = "",
 },
 },
-["c114f6"] = {
+["c121f4"] = {
 ["enabled"] = true,
 },
+["version"] = 8,
 ["c114f5"] = {
+["enabled"] = true,
+},
+["c114f6"] = {
 ["enabled"] = true,
 },
 ["c6f4"] = {
@@ -120,12 +119,10 @@ PremadeGroupsFilterState = {
 ["expression"] = "",
 },
 },
-["c3f5"] = {
+["c3f6"] = {
 ["enabled"] = true,
 ["raid"] = {
 ["difficulty"] = {
-["val"] = 2,
-["act"] = true,
 },
 ["heals"] = {
 ["max"] = "",
@@ -137,7 +134,7 @@ PremadeGroupsFilterState = {
 ["min"] = "",
 ["act"] = false,
 },
-["defeated"] = {
+["members"] = {
 ["max"] = "",
 ["min"] = "",
 ["act"] = false,
@@ -147,12 +144,15 @@ PremadeGroupsFilterState = {
 ["min"] = "",
 ["act"] = false,
 },
-["members"] = {
+["defeated"] = {
 ["max"] = "",
 ["min"] = "",
 ["act"] = false,
 },
 ["expression"] = "",
 },
+},
+["c9f8"] = {
+["enabled"] = true,
 },
 }

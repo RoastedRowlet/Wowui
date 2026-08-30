@@ -1,6 +1,13 @@
 VER 3 0100000000000009 "AS Ascendence" "134400"
 #showtooltip Ascendance
 /cast Ancestral Swiftness
+/use Light's Potential
+/USE 14
+/cast Ascendance
+END
+VER 3 010000000000000F "Asc No Pot" "134400"
+#showtooltip Ascendance
+/cast Ancestral Swiftness
 /USE 14
 /cast Ascendance
 END
