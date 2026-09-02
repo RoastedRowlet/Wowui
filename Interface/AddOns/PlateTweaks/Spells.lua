@@ -122,8 +122,63 @@ end
 -- Manager entry or spellbook entry (Sentinel's Mark is one) is exactly what
 -- the spellbook/CDM checks miss, and this catches it by direct observation
 -- instead.
+-- Per CHARACTER, not per account. PLATETWEAKS_SETTINGS.auraIDs stays a shared
+-- name -> id map: knowing that "Agony" means 980 is a fact about the game,
+-- useful on every character, and NS.LearnedAuraID depends on it.
+--
+-- But "have I seen this land" is a fact about ONE character, and reading it
+-- out of the shared map made the known-spell gate useless. Measured: 25
+-- minutes on Demonology running an Affliction profile still built 3 of the 4
+-- rules on every plate -- 148 containers and 222 textures across 37 nameplates
+-- for auras that spec cannot apply -- because Agony and Corruption sat in the
+-- account-wide store from the Affliction character. One cast on any alt
+-- defeated the gate for the entire account, permanently.
+local function CharAuraStore(create)
+  if not PLATETWEAKS_SETTINGS then return nil end
+  local key = NS.CharacterKey and NS.CharacterKey()
+  -- CharacterKey contains "?" while UnitName/GetRealmName are briefly
+  -- unavailable at login; entries written under that would be stranded.
+  if not key or key:find("?", 1, true) then return nil end
+  local all = PLATETWEAKS_SETTINGS.charAuras
+  if not all then
+    if not create then return nil end
+    all = {}
+    PLATETWEAKS_SETTINGS.charAuras = all
+  end
+  local mine = all[key]
+  if not mine and create then
+    mine = {}
+    all[key] = mine
+  end
+  return mine
+end
+NS.CharAuraStore = CharAuraStore
+
+-- Per-character evidence FIRST, shared store second -- so this is a superset of
+-- what it used to answer and can never say no where it previously said yes.
+--
+-- Reading only the per-character store was tried and reverted. It fixes the
+-- CPU waste (see CharAuraStore above) but it is strictly more likely to refuse,
+-- and refusing is the expensive direction: a wrong no silently kills a working
+-- tint, a wrong yes costs some textures. The exposed case is an aura the
+-- Cooldown Manager does not link and whose ID is not itself a player spell --
+-- precisely the hero-talent case this function was written for -- on a
+-- character not yet observed applying it.
+--
+-- The two properties cannot both come from this signal: "someone on this
+-- account has applied it" and "this character can apply it" are the same
+-- evidence at different scopes. Sharing it wastes CPU; splitting it drops
+-- rules. The right discriminator for another spec's rules is the spec-bound
+-- profile support that already exists, not a castability heuristic.
+--
+-- charAuras is still recorded, so a future version can act on it once there is
+-- a safe way to. Nothing reads it for a negative decision today.
 local function HasLearnedAura(spellID)
   if not spellID then return false end
+
+  local mine = CharAuraStore(false)
+  if mine and mine[spellID] then return true end
+
   local store = PLATETWEAKS_SETTINGS and PLATETWEAKS_SETTINGS.auraIDs
   if not store then return false end
   for _, id in pairs(store) do
@@ -592,6 +647,15 @@ local function LearnFromUnit(unit, store)
       if key and store[key] ~= aura.spellId then
         store[key] = aura.spellId
         learned = learned + 1
+      end
+
+      -- The same sighting, recorded against THIS character. The shared map
+      -- above answers "what ID does this name use"; this answers "have I,
+      -- personally, applied it" -- the only one of the two that the
+      -- known-spell gate may act on.
+      local mine = CharAuraStore(true)
+      if mine and aura.spellId and not mine[aura.spellId] then
+        mine[aura.spellId] = true
       end
     end
   end

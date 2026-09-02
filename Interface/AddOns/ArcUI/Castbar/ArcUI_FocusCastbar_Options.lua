@@ -11,6 +11,7 @@ local AceConfigRegistry = LibStub and LibStub("AceConfigRegistry-3.0", true)
 local LSM               = LibStub and LibStub("LibSharedMedia-3.0", true)
 
 local collapsed = {
+  skins        = true,
   appearance   = true,
   colors       = true,
   background   = true,
@@ -117,6 +118,20 @@ function ns.FocusCastbarOptions.GetOptionsTable()
   }
 
   -- ── Appearance ─────────────────────────────────────────────────
+
+  a.skinsHeader = Header("Skins", "skins", 0.5)
+  if ns.Presets and ns.Presets.InjectCastbarSkinArgs then
+    ns.Presets.InjectCastbarSkinArgs(a, {
+      keyPrefix = "fcsSkin",
+      orderBase = 0.51,
+      hidden    = function() return collapsed.skins end,
+      getCfg    = GetDB,
+      apply     = function()
+        if ns.FocusCastbar and ns.FocusCastbar.ApplyAppearance then ns.FocusCastbar.ApplyAppearance() end
+      end,
+    })
+  end
+
   a.appearanceHeader = Header("Appearance", "appearance", 10)
 
   a.fcWidth = {

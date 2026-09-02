@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {}
-local provider = {region='US',realm='BurningBlade',name='US',type='subscribers',zone=53,date='2026-08-26',data={As='Ascend:BAEANQAECggICAAAAA==.',Bl='Blessthat:BAEANQADCgcIBwAAAA==.',Em='Emailed:BAEANQAECggICwAAAA==.',Ma='Marmalady:BAEANQAFFAEIAQAAAA==.',Za='Zaraphym:BAEANQADCgcIBwAAAA==.',},}
+local lookup = {'Evoker-Preservation','Unknown-Unknown',}
+local provider = {region='US',realm='BurningBlade',name='US',type='subscribers',zone=53,date='2026-09-01',data={As='Ascend:BAEANQAFFAIIAgAAAA==.',Bl='Blessthat:BAEANQADCgcIDQAAAA==.',Em='Emailed:BAEANQAFFAIIAgAAAA==.',Ma='Marmalady:BAEBNQAFFIEGAAIBAAUJRB5BAADpAQWODQAAAgBUAHUNAAABAEQAfw0AAAEASwCpDQAAAQBIADMNAAABAFYAAQAFCUQeQQAA6QEFjg0AAAIAVAB1DQAAAQBEAH8NAAABAEsAqQ0AAAEASAAzDQAAAQBWAAAA.',Za='Zandrissil:BAEANQADCgYIBgABNQADCggIDwACAAAAAA==.Zarafie:BAEANQADCgIIAgABNQADCggIDwACAAAAAA==.Zaraphym:BAEANQADCggIDwAAAA==.',Zu='Zuroxxar:BAEANQADCgcIBwABNQADCggIDwACAAAAAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

@@ -14,7 +14,7 @@
 ## Notes-ptBR: Abordagem modular, leve e não intrusiva para avisos em encontros com chefes.
 ## IconTexture: Interface\AddOns\BigWigs\Media\Icons\minimap_raid.tga
 ## Author: Funkeh, Nebula, Justwait, Delk
-## Version: v423.1
+## Version: v424.3
 ## LoadSavedVariablesFirst: 1
 
 ## X-Credits: Ammo, Elvador, Vhaarr

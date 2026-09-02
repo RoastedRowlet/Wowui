@@ -1,6 +1,6 @@
-## Interface: 120007, 120100
+## Interface: 120100
 ## Author: p3lim
-## Version: 120000.97-Release
+## Version: 120100.98-Release
 ## Title: QuickQuest
 ## Notes: Quest automation wizardry
 ## IconTexture: Interface\Icons\spell_nature_timestop

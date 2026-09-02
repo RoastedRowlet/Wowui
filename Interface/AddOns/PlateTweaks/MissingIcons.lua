@@ -258,7 +258,7 @@ function NS.UpdateMissingIconsCombatGate(rig)
   -- rig.unit is nil for a built-but-unbound rig; treat that as not allowed
   -- rather than passing nil to UnitAffectingCombat.
   for _, item in ipairs(gated) do
-    local allowed = rig.unit and UnitAffectingCombat(rig.unit) and UnitAffectingCombat("player") and true or false
+    local allowed = NS.UnitEngaged(rig.unit)
     if item.allowed ~= allowed then
       item.allowed = allowed
       item.chip:SetShown(allowed)

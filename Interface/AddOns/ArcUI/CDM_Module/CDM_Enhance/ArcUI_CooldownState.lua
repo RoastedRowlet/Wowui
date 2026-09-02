@@ -337,6 +337,75 @@ local FeedShadowCooldown
 local EnforceCooldownReadyGlow
 
 -- Shared dispatch: apply visuals + glow + label after shadow state changes.
+-- ═══════════════════════════════════════════════════════════════════════════
+-- COOLDOWN SOUND ALERTS (2026-08-30): 3-state classifier over the two shadow
+-- bools — empty (on cd / all charges spent), recharging (1+ charge, still
+-- recharging), full. Fires the per-icon Ready / On Cooldown sounds on state
+-- TRANSITIONS only; Charge Gained fires from the charge shadow's
+-- OnCooldownDone (each completion = one charge back; the final one lands on
+-- "full" and the READY transition covers it instead). Playback goes through
+-- ns.CDMAuraAlerts.QueueCooldownAlert — deferred 0.15s + live re-verify so a
+-- GCD-window transient never plays a wrong sound. Baseline: the FIRST
+-- evaluation after enhance/rebind only records state (prevS nil → no fire) —
+-- rebind paths nil _arcCDAlertState alongside _arcShadowFedSpellID.
+-- ═══════════════════════════════════════════════════════════════════════════
+local function CDAlertState(mainShown, chargeShown)
+  if mainShown then return "empty" end
+  if chargeShown then return "recharging" end
+  return "full"
+end
+
+local function CDAlertLiveVerify(frame, expected)
+  return function()
+    if not frame._arcEnhanced then return false end
+    local m = frame._arcCDMShadowCooldown and frame._arcCDMShadowCooldown:IsShown() or false
+    local c = frame._arcCDMChargeShadow   and frame._arcCDMChargeShadow:IsShown()   or false
+    return CDAlertState(m, c) == expected
+  end
+end
+
+local function EvaluateCooldownAlerts(frame, cfg, newMain, newCharge)
+  local newS  = CDAlertState(newMain, newCharge)
+  local prevS = frame._arcCDAlertState
+  frame._arcCDAlertState = newS
+  if prevS == nil or prevS == newS then return end
+  if ns.TraceTap then
+    ns.TraceTap("CDA", string.format("cdm transition %s->%s cd=%s ca=%s",
+      tostring(prevS), tostring(newS), tostring(frame.cooldownID),
+      tostring(cfg and cfg.cooldownAlerts ~= nil)))
+  end
+  local ca = cfg and cfg.cooldownAlerts
+  if not ca then return end
+  local CAA = ns.CDMAuraAlerts
+  if not (CAA and CAA.QueueCooldownAlert) then return end
+  local key = tostring(frame)
+  if newS == "full" then
+    local s, x = CAA.ResolveAlertPair(ca, "ready")
+    CAA.QueueCooldownAlert(key .. "#ready", s, x, ca.channel,
+      CDAlertLiveVerify(frame, "full"))
+  elseif newS == "empty" then
+    local s, x = CAA.ResolveAlertPair(ca, "cooldown")
+    CAA.QueueCooldownAlert(key .. "#oncd", s, x, ca.channel,
+      CDAlertLiveVerify(frame, "empty"))
+  elseif newS == "recharging" and prevS == "full" then
+    -- ON COOLDOWN (RECHARGING): a charge spent while the spell stays castable
+    -- (charge spells only; the trigger split, 2026-08-30).
+    local s, x = CAA.ResolveAlertPair(ca, "recharging")
+    CAA.QueueCooldownAlert(key .. "#recharging", s, x, ca.channel,
+      CDAlertLiveVerify(frame, "recharging"))
+  elseif newS == "recharging" and prevS == "empty" then
+    -- CHARGE GAINED, the reliable path: first charge back from depleted.
+    -- The charge shadow's OnCooldownDone is NOT reliable for this — the
+    -- event-driven re-feed usually replaces/clears the widget before its
+    -- cooldown expires naturally, so Done never fires (cdalert-log-proven
+    -- 2026-08-30). Same queue key as the chargeOnDone bonus path, so when
+    -- both fire the token dedupe collapses them into one sound.
+    local s, x = CAA.ResolveAlertPair(ca, "charge")
+    CAA.QueueCooldownAlert(key .. "#charge", s, x, ca.channel,
+      CDAlertLiveVerify(frame, "recharging"))
+  end
+end
+
 -- Called from OnCooldownDone hooks AND CDM Cooldown write hook.
 local function DispatchAfterShadowUpdate(frame)
   local cachedCfg = frame._arcCfg
@@ -346,9 +415,20 @@ local function DispatchAfterShadowUpdate(frame)
   -- When isOnGCD=true we already set _arcLastShadowShown=false explicitly.
   -- Don't overwrite with IsShown() — shadow is still physically showing until
   -- OnCooldownDone fires, but we want ReadCooldownState to see ready state now.
-  if not frame._arcLastIsOnGCD then
-    frame._arcLastShadowShown = shadowCD    and shadowCD:IsShown()    or false
-    frame._arcLastChargeShown = chargeShadow and chargeShadow:IsShown() or false
+  -- SOUND ALERTS run UNGATED: _arcLastIsOnGCD is only refreshed by FEEDS, and
+  -- charge frames are excluded from the POSTGCD re-feed (992) — so between
+  -- casts the flag can stay stale-true indefinitely and a gated classifier
+  -- NEVER fires for charge spells (the "no sound from any option" report,
+  -- 2026-08-30). The classifier keeps its own baseline and the queue re-reads
+  -- LIVE shadow state 0.15s later, which absorbs any GCD-window transient.
+  do
+    local newMain   = shadowCD    and shadowCD:IsShown()    or false
+    local newCharge = chargeShadow and chargeShadow:IsShown() or false
+    EvaluateCooldownAlerts(frame, cachedCfg, newMain, newCharge)
+    if not frame._arcLastIsOnGCD then
+      frame._arcLastShadowShown = newMain
+      frame._arcLastChargeShown = newCharge
+    end
   end
   ns.CDMEnhance.ApplyCooldownStateVisuals(frame, cachedCfg)
   if ns.CDMSpellUsability and ns.CDMSpellUsability.UpdateGlow then
@@ -758,7 +838,24 @@ local function EnsureShadowCooldown(frame)
       DispatchAfterShadowUpdate(frame)
     end
     local function chargeOnDone()
-      C_Timer.After(0.1, function() DispatchAfterShadowUpdate(frame) end)
+      C_Timer.After(0.1, function()
+        DispatchAfterShadowUpdate(frame)
+        -- CHARGE GAINED sound: each charge-shadow completion is one charge
+        -- returning. By this deferred moment the engine has re-fed the NEXT
+        -- charge: still recharging = intermediate charge (play); landed full
+        -- = final charge — the READY transition alert covers that instead.
+        local cfg = frame._arcCfg
+        local ca = cfg and cfg.cooldownAlerts
+        if ca and ns.CDMAuraAlerts and ns.CDMAuraAlerts.QueueCooldownAlert then
+          local m = frame._arcCDMShadowCooldown and frame._arcCDMShadowCooldown:IsShown() or false
+          local c = frame._arcCDMChargeShadow   and frame._arcCDMChargeShadow:IsShown()   or false
+          if (not m) and c then
+            local s, x = ns.CDMAuraAlerts.ResolveAlertPair(ca, "charge")
+            ns.CDMAuraAlerts.QueueCooldownAlert(tostring(frame) .. "#charge",
+              s, x, ca.channel, nil)
+          end
+        end
+      end)
     end
     frame._arcCDMChargeShadow:HookScript("OnShow",        _Track2 and _Track2("CooldownState.ChargeOnShow",        chargeOnShow) or chargeOnShow)
     frame._arcCDMChargeShadow:HookScript("OnHide",        _Track2 and _Track2("CooldownState.ChargeOnHide",        chargeOnHide) or chargeOnHide)
@@ -867,6 +964,7 @@ FeedShadowCooldown = function(frame, spellID)
   if prevSpellID and prevSpellID ~= spellID then
     frame._arcLastShadowShown = false
     frame._arcLastChargeShown = false
+    frame._arcCDAlertState = nil   -- sound-alert baseline: new spell, no transition
     if frame._arcReadyGlowActive and ns.CDMEnhance and ns.CDMEnhance.HideReadyGlow then
       ns.CDMEnhance.HideReadyGlow(frame)
     end
@@ -2425,6 +2523,9 @@ function ns.CooldownState.InstallCooldownAuraHooks(frame)
     end)
   end
 
+  -- (rebind re-feed subscriber installed at file scope below — see the
+  -- REBIND RE-FEED block at the end of this file)
+
   -- ── SPELL OVERRIDE HOOK ──────────────────────────────────────────
   -- COOLDOWN_VIEWER_SPELL_OVERRIDE_UPDATED fires when a proc swaps the
   -- spell tied to a CDM frame (Hot Streak's Pyroblast slot, Tempest on
@@ -2452,3 +2553,68 @@ function ns.CooldownState.InstallCooldownAuraHooks(frame)
     end)
   end
 end
+
+-- ═══════════════════════════════════════════════════════════════════
+-- REBIND RE-FEED (Arc's Stormstrike report, 2026-08-29): a talent change
+-- makes CDM shuffle pooled frames across cooldownIDs, but the SHADOW
+-- Cooldowns are only re-fed by EVENTS matching the frame's spell ids -- so
+-- after a rebind the shadow kept the PREVIOUS occupant's running cooldown
+-- and the icon wore an on-cooldown face (desat, no ready state) until some
+-- cooldown event for the NEW spell finally fired (the user had to cast).
+-- FeedShadow already contains the spell-change invalidation (stale flags +
+-- ready-glow kill on prevSpellID ~= spellID); the missing piece was only a
+-- TRIGGER at rebind time. Subscribe to FrameController's rebind dispatch:
+-- clear the fed-spell memory immediately, then run ONE settled feed +
+-- dispatch shortly after (CDM's own RefreshData populates the new
+-- cooldownInfo in the same wave; feeding at +0.1s reads the final ids).
+-- Storm-safe: one queued re-feed per frame, feeding whatever the frame
+-- holds when the timer lands. Zero idle cost, event-driven only.
+-- Same ADDON_LOADED boot pattern as ArcUI_AuraFrames' subscriber:
+-- ns.FrameController does not exist yet at this file's load time.
+-- ═══════════════════════════════════════════════════════════════════
+local function InstallCSRebindHandler()
+  if not (ns.FrameController and ns.FrameController.OnFrameRebind) then return end
+  ns.FrameController.OnFrameRebind(function(frame, oldCdID, newCdID)
+    if not frame then return end
+    if frame._arcConfig or frame._arcAuraID then return end
+    if frame._arcViewerType == "aura" then return end
+    -- the shadow's contents belong to the previous occupant now: force the
+    -- next feed through the spell-change invalidation regardless of timing
+    frame._arcShadowFedSpellID = nil
+    frame._arcCDAlertState = nil   -- sound-alert baseline: never fire across a rebind
+    if not newCdID then return end   -- released to the pool: nothing to feed
+    if frame._arcRebindRefeedQueued then return end
+    frame._arcRebindRefeedQueued = true
+    C_Timer.After(0.1, function()
+      frame._arcRebindRefeedQueued = nil
+      if not frame._arcEnhanced then
+        if ns.TraceTap then ns.TraceTap("CS", "REBIND-REFEED skipped (not enhanced) cd=" .. tostring(frame.cooldownID)) end
+        return
+      end
+      local cfg = frame._arcCfg
+      if not cfg and ns.CDMEnhance and ns.CDMEnhance.GetEffectiveIconSettingsForFrame then
+        cfg = ns.CDMEnhance.GetEffectiveIconSettingsForFrame(frame)
+      end
+      if not cfg then
+        if ns.TraceTap then ns.TraceTap("CS", "REBIND-REFEED skipped (no cfg) cd=" .. tostring(frame.cooldownID)) end
+        return
+      end
+      if ns.TraceTap then
+        local ci = frame.cooldownInfo
+        ns.TraceTap("CS", string.format("REBIND-REFEED cd=%s spell=%s",
+          tostring(frame.cooldownID), tostring(ci and (ci.overrideSpellID or ci.spellID))))
+      end
+      ns.CooldownState.FeedShadow(frame, cfg)
+      DispatchAfterShadowUpdate(frame)
+    end)
+  end)
+end
+
+local csRebindBoot = CreateFrame("Frame")
+csRebindBoot:RegisterEvent("ADDON_LOADED")
+csRebindBoot:SetScript("OnEvent", function(self, event, addon)
+  if addon == ADDON then
+    InstallCSRebindHandler()
+    self:UnregisterEvent("ADDON_LOADED")
+  end
+end)

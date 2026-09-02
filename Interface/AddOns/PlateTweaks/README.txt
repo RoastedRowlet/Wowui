@@ -1,5 +1,5 @@
 PlateTweaks
-Version 1.8.5  ·  World of Warcraft 12.1 (Midnight)
+Version 1.9.3  ·  World of Warcraft 12.1 (Midnight)
 
 Colors enemy nameplate health bars and borders based on which of your own
 debuffs are active on them -- or missing from them.

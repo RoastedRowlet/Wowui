@@ -234,7 +234,7 @@ local function getChunkLookup(table, length)
 end
 
 local lookup = {'Unknown-Unknown',}
-local provider = {region='US',realm='Magtheridon',name='US',type='subscribers',zone=53,date='2026-08-26',data={Bi='Bigzee:BAEANQAECgUIBAAAAA==.',Bo='Bowvice:BAEANQADCgUIBQABNQAECgQIBAABAAAAAA==.',Dr='Drstagger:BAEANQAECgEIAQAAAA==.',Ga='Gazelle:BAEANQADCgcIBwAAAA==.',Hy='Hyperìen:BAEANQAECgYICQAAAA==.',Po='Poonzer:BAEANQAECgQIBAAAAA==.',['Év']='Évié:BAEANQADCggIDAAAAA==.',},}
+local provider = {region='US',realm='Magtheridon',name='US',type='subscribers',zone=53,date='2026-09-01',data={Bi='Bigzee:BAEANQAECgYICgAAAA==.',Bo='Bowvice:BAEANQADCgUIBQABNQAECgcICwABAAAAAA==.',['Cí']='Círí:BAEANQAECgIIAgAAAA==.',Dr='Drstagger:BAEANQAECgQIBQAAAA==.',Ga='Gazelle:BAEANQAECgIIAgAAAA==.',Hy='Hyperìen:BAEANQAECggIDgAAAA==.',Po='Poonzer:BAEANQAECgcICwAAAA==.',Re='Reznoop:BAEANQADCgcIBwABNQAECgcICwABAAAAAA==.',['Év']='Évié:BAEANQADCggIEAABNQAECgIIAgABAAAAAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

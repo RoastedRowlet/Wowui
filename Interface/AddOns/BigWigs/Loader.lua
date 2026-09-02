@@ -12,11 +12,11 @@ local strfind = string.find
 -- Generate our version variables
 --
 
-local BIGWIGS_VERSION = 423
+local BIGWIGS_VERSION = 424
 local CONTENT_PACK_VERSIONS = {
-	["LittleWigs"] = {12, 1, 7},
+	["LittleWigs"] = {12, 1, 12},
 	["BigWigs_Classic"] = {12, 1, 1},
-	["BigWigs_BurningCrusade"] = {12, 1, 2},
+	["BigWigs_BurningCrusade"] = {12, 1, 7},
 	["BigWigs_WrathOfTheLichKing"] = {12, 0, 11},
 	["BigWigs_Cataclysm"] = {12, 0, 5},
 	["BigWigs_MistsOfPandaria"] = {12, 0, 9},
@@ -56,7 +56,7 @@ do
 	local ALPHA = "ALPHA"
 
 	local releaseType
-	local myGitHash = "1ca42c4" -- The ZIP packager will replace this with the Git hash.
+	local myGitHash = "6a37cb3" -- The ZIP packager will replace this with the Git hash.
 	local releaseString
 	--[=[@alpha@
 	-- The following code will only be present in alpha ZIPs.
@@ -141,6 +141,7 @@ public.CTimerAfter = CTimerAfter
 public.CTimerNewTicker = C_Timer.NewTicker
 public.CTimerNewTimer = CTimerNewTimer
 public.DoCountdown = C_PartyInfo.DoCountdown
+public.GetAreaInfo = C_Map.GetAreaInfo
 public.GetBestMapForUnit = GetBestMapForUnit
 public.GetCreatureID = C_CreatureInfo.GetCreatureID
 public.GetInstanceInfo = GetInstanceInfoModified
@@ -948,7 +949,8 @@ do
 			EnableAddOn(i) -- Make sure it wasn't left disabled for whatever reason
 		end
 
-		if GetAddOnEnableState(name, myGUID) == 2 then -- if addonState ~= "DISABLED" then (only works when disabled on ALL characters)
+		local addonEnabled = GetAddOnEnableState(name, myGUID) == 2 -- addonState ~= "DISABLED" only works when disabled on ALL characters
+		if addonEnabled then
 			local meta = GetAddOnMetadata(i, "X-BigWigs-LoadOn-CoreEnabled")
 			if meta then
 				if name == "BigWigs_Plugins" then -- Always first
@@ -1029,8 +1031,17 @@ do
 			if GetAddOnMetadata(i, "X-LittleWigs-Repo") then
 				public.usingLittleWigsRepo = true
 				public.littlewigsVersion = "repo"
-			else
+			else -- Packaged installs of LittleWigs
 				public.littlewigsVersion = GetAddOnMetadata(i, "Version") -- e.g. "v12.1.0" or "v12.1.0-1"
+				if addonEnabled then
+					-- Packaged releases always load the main LittleWigs addon in current season zones.
+					-- This ensures shared modules (e.g. "Common Trash") are also loaded in seasonal dungeons.
+					for zone in next, public.currentExpansion.currentSeason do
+						enableZones[zone] = true
+						if not loadOnZone[zone] then loadOnZone[zone] = {} end
+						loadOnZone[zone][#loadOnZone[zone] + 1] = i
+					end
+				end
 			end
 		end
 	end
@@ -1653,9 +1664,9 @@ end
 --
 
 do
-	local DBMdotRevision = "20260821065939" -- The changing version of the local client, changes with every new zip using the project-date-integer packager replacement.
-	local DBMdotDisplayVersion = "12.1.5" -- "N.N.N" for a release and "N.N.N alpha" for the alpha duration.
-	local DBMdotReleaseRevision = "20260820000000" -- Hardcoded time, manually changed every release, they use it to track the highest release version, a new DBM release is the only time it will change.
+	local DBMdotRevision = "20260826083115" -- The changing version of the local client, changes with every new zip using the project-date-integer packager replacement.
+	local DBMdotDisplayVersion = "12.1.6" -- "N.N.N" for a release and "N.N.N alpha" for the alpha duration.
+	local DBMdotReleaseRevision = "20260825000000" -- Hardcoded time, manually changed every release, they use it to track the highest release version, a new DBM release is the only time it will change.
 	local protocol = 3
 	local versionPrefix = "V"
 	local PForceDisable = 27

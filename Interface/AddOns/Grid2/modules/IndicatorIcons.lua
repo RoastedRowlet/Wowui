@@ -90,6 +90,8 @@ local function Icon_Update(self, parent, unit)
 					aura.cooldown:SetCooldown(0, 0)
 				end
 			end
+			-- TODO: No statuses implement GetDurationObject() method so this code is not required, this implies only aura statuses display
+			-- cooldown bars in icons indicators. So remove this code or keep it for the future (maybe some future status could need this method).
 			if needDur then
 				local durObject = status:GetDurationObject(unit)
 				if showBar then
@@ -475,7 +477,7 @@ local function Icon_UpdateDB(self)
 	self.layoutAxis     = AnchorUtil.FlowLayoutAxis[dbx.orientation=='VERTICAL' and 'Vertical' or 'Horizontal']
 	self.vertical       = dbx.orientation=='VERTICAL'
 	self.borderSize     = dbx.borderSize or 0
-	self.frameLevel     = dbx.level or 1
+	self.frameLevel     = self:GetFrameLevel(dbx.level)
 	self.iconSize       = dbx.iconSize or theme.iconSize or 14
 	self.iconSpacing    = dbx.iconSpacing or 1
 	self.maxIcons       = dbx.maxIcons or 3

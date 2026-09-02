@@ -474,6 +474,25 @@ function boss:SetStage(stage)
 end
 
 do
+	local sortOrder = {}
+
+	--- Set this module's sort order in the encounter list.
+	-- The list is sorted by value, lower first; the default is 0 and equal values keep registration order.
+	-- @number order Sort value
+	function boss:SetSortOrder(order)
+		if type(order) == "number" then
+			sortOrder[self] = order
+		end
+	end
+
+	--- Get this module's sort order.
+	-- @return number Sort order, or 0 if none is set
+	function boss:GetSortOrder()
+		return sortOrder[self] or 0
+	end
+end
+
+do
 	local menuArt = {
 		MESSAGE = "Interface\\AddOns\\BigWigs\\Media\\Icons\\Menus\\Messages",
 		ME_ONLY = "Interface\\AddOns\\BigWigs\\Media\\Icons\\Menus\\MeOnly",
@@ -566,8 +585,6 @@ function boss:Enable(isWipe)
 			if module == self then return end
 		end
 		enabledModules[#enabledModules+1] = self
-
-		if self.SetupOptions then self:SetupOptions() end
 
 		if self:GetEncounterID() then
 			if not self:Retail() then
@@ -1142,14 +1159,14 @@ do
 
 	--- Get the aura type. (Magic/Poison/Etc)
 	-- @return string or nil
-	function boss:GetAuraType(spellID)
+	function boss:GetAuraDispelType(spellID)
 		local index = moduleAurasList[self] and moduleAurasList[self].spellIDToIndex[spellID]
 		if not index then
 			error(("Module %q has no aura data for spell ID %q."):format(self.moduleName, tostring(spellID)))
 			return
 		end
 
-		return moduleAurasList[self][index].type
+		return moduleAurasList[self][index].dispel
 	end
 
 	--- Get the aura mechanic. (Snare/Stun/Etc)
@@ -1173,8 +1190,19 @@ do
 			return
 		end
 
-		local note = moduleAurasList[self][index].note
-		return note
+		return moduleAurasList[self][index].note
+	end
+
+	--- Get the aura tip.
+	-- @return string or nil
+	function boss:GetAuraTip(spellID)
+		local index = moduleAurasList[self] and moduleAurasList[self].spellIDToIndex[spellID]
+		if not index then
+			error(("Module %q has no aura data for spell ID %q."):format(self.moduleName, tostring(spellID)))
+			return
+		end
+
+		return moduleAurasList[self][index].tip
 	end
 
 	--- Get the aura header.
@@ -2330,6 +2358,7 @@ do
 		[205] = "Follower",
 		[208] = "Delves",
 		[220] = "Story",
+		[233] = "Mythic Flex",
 		[250] = "World"
 	}
 	--- Get the current instance difficulty name in English.

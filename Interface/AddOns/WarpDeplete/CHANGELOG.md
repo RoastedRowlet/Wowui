@@ -1,8 +1,15 @@
 # WarpDeplete
 
-## [v5.4.2](https://github.com/happenslol/WarpDeplete/tree/v5.4.2) (2026-06-22)
-[Full Changelog](https://github.com/happenslol/WarpDeplete/commits/v5.4.2) [Previous Releases](https://github.com/happenslol/WarpDeplete/releases)
+## [v5.4.3](https://github.com/happenslol/WarpDeplete/tree/v5.4.3) (2026-08-31)
+[Full Changelog](https://github.com/happenslol/WarpDeplete/commits/v5.4.3) [Previous Releases](https://github.com/happenslol/WarpDeplete/releases)
 
+- chore: Bump version  
+- fix: Implement Maw Buffs Taint Workaround (#164)  
+    Added a workaround to prevent crashes in the objective tracker caused by tainted MAW auras.  
+- fix: Fix Feign Death showing multiple hunter death's in the tooltip (#161)  
+- chore: Update interface version (#158)  
+    * Update toc  
+    * Update toc for 12.1.0  
 - chore: Bump version  
 - fix: Avoid comparing secret value UnitHealth (#156)  
     UnitHealth can be secret, which causes a lua error. Previously, feign death caused UnitIsDead to return 'true', but this seems to no longer be the case.  
@@ -57,8 +64,4 @@
 - chore: Bump version  
 - feat: Show forces count in tooltips for midnight (#149)  
     Adds back the forces count as a fixed string in mob tooltips. Custom formatting is removed for now, since it would involve wrangling with secret values which is very error-prone.  
-- chore: Bump version  
-- fix: Add missing fonts and textures  
-- chore: Bump version  
-- fix: Check for secret values in UNIT\_DIED event (#141)  
 - chore: Bump version  

@@ -361,8 +361,6 @@ SlashCmdList["CHONKYCHARACTERSHEET"] = function(msg)
 
         return
 
-
-
     end
     -- Test
     if msg == "testio" then

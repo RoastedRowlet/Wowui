@@ -8,13 +8,6 @@ mod:RegisterEnableMob(133379, 133944) -- Adderis, Aspix
 mod:SetEncounterID(2124)
 if mod:Retail() then -- Midnight+
 	mod:SetRespawnTime(30)
-	mod:SetAuraData({
-		{1288457, duration = 4, note = CL.debuffDotAfterCastNote:format(mod:SpellName(1288457))}, -- Gust
-		{1289059, duration = 4, note = CL.debuffTargetedNote:format(mod:SpellName(1289059))}, -- Gale Force
-		{1288874, duration = 5, soundOnRemoved = "alarm", note = CL.debuffTargetedNote:format(mod:SpellName(1311805))}, -- Tempest Winds
-		{1288885, duration = 4, mechanic = "silenced", note = CL.debuffFailureMoveFromCastNote:format(mod:SpellName(1311805))}, -- Tempest Winds
-		{1288074, duration = 4.5, soundOnRemoved = "alarm", note = CL.debuffTargetedNote:format(mod:SpellName(1288049))}, -- Thunder and Lightning
-	})
 else
 	mod:SetRespawnTime(20)
 end
@@ -63,6 +56,7 @@ end
 -- Midnight Locals
 --
 
+local stormBlessedCount = 1
 local galeForceCount = 1
 local thunderAndLightningCount = 1
 local tempestWindsCount = 1
@@ -82,10 +76,25 @@ local backupBars = {}
 
 if mod:Retail() then -- Midnight+
 	mod:SetRenames({
+		[1310311] = {CL.on:format(mod:SpellName(1310311), mod:SpellName(-18485)), CL.on:format(mod:SpellName(1310311), mod:SpellName(-18484)), original = {CL.on:format(mod:SpellName(1310311), mod:SpellName(-18485)), CL.on:format(mod:SpellName(1310311), mod:SpellName(-18484))}}, -- Storm Blessed
 		[1289059] = {1289059, CL.you:format(mod:SpellName(1289059)), notes = {CL.generalNote, CL.messageOnYouNote}, original = {1289059, CL.you:format(mod:SpellName(1289059))}}, -- Gale Force
 		[1311805] = {1311805, CL.you:format(mod:SpellName(1311805)), notes = {CL.generalNote, CL.messageOnYouNote}, original = {1311805, CL.you:format(mod:SpellName(1311805))}}, -- Tempest Winds
 		[1288049] = {1288049}, -- Thunder and Lightning
 		[1311804] = {1311804}, -- Overload
+	})
+end
+
+--------------------------------------------------------------------------------
+-- Midnight Auras
+--
+
+if mod:Retail() then -- Midnight+
+	mod:SetAuraData({
+		{1288457, duration = 4, note = CL.debuffDotAfterCastNote:format(mod:SpellName(1288457))}, -- Gust
+		{1289059, duration = 4, note = CL.debuffTargetedNote:format(mod:SpellName(1289059))}, -- Gale Force
+		{1288874, duration = 5, soundOnRemoved = "alarm", note = CL.debuffTargetedNote:format(mod:SpellName(1311805))}, -- Tempest Winds
+		{1288885, duration = 4, mechanic = "silenced", note = CL.debuffFailureMoveFromCastNote:format(mod:SpellName(1311805))}, -- Tempest Winds
+		{1288074, duration = 4.5, soundOnRemoved = "alarm", note = CL.debuffTargetedNote:format(mod:SpellName(1288049))}, -- Thunder and Lightning
 	})
 end
 
@@ -96,6 +105,7 @@ end
 if mod:Retail() then -- Midnight+
 	function mod:GetOptions()
 		return {
+			1310311, -- Storm Blessed
 			-- Aspix
 			1289059, -- Gale Force
 			1311805, -- Tempest Winds
@@ -113,6 +123,7 @@ if mod:Retail() then -- Midnight+
 
 	mod:UseCustomTimers(true)
 	function mod:OnEncounterStart()
+		stormBlessedCount = 1
 		galeForceCount = 1
 		thunderAndLightningCount = 1
 		tempestWindsCount = 1
@@ -197,6 +208,10 @@ function mod:ENCOUNTER_TIMELINE_EVENT_ADDED(_, eventInfo)
 	elseif bossJustDied and (duration == 5 or duration == 12) and not aspixDead then -- Gale Force or Tempest Winds, after Adderis dies
 		adderisDead = true
 	end
+	if eventInfo.duration == 1 then -- detect the Gale Force that's cast as part of the re-sync
+		-- reset the shared ability counter during the re-sync in case anything weird happened during Storm Blessed
+		count45 = 1
+	end
 	if (galeForceCount == 1 and duration == 5) or duration == 1 or (bossJustDied and duration == 5) then -- Gale Force (Aspix)
 		barInfo = self:GaleForceTimeline(eventInfo, duration == 1)
 	elseif duration == 9 or duration == 5 or (bossJustDied and duration == 22) then -- Thunder and Lightning (Adderis)
@@ -231,7 +246,7 @@ function mod:ENCOUNTER_TIMELINE_EVENT_ADDED(_, eventInfo)
 			end
 		end
 		count19 = count19 + 1
-	else
+	else -- re-sync matches against previous durations, this also handles queued bars during Storm Blessed
 		-- these durations will match the existing bars and generally be in these ranges:
 		-- - 0-1s Gale Force (0.001 can also be any spell queued during Storm Blessed)
 		-- - 4-5s Thunder and Lightning
@@ -283,6 +298,8 @@ function mod:ENCOUNTER_TIMELINE_EVENT_STATE_CHANGED(_, eventID)
 		elseif state == 1 then -- Paused
 			barInfo.pauseStart = GetTime()
 			self:PauseBar(barInfo.key, barInfo.msg)
+			-- bars pausing means Storm Blessed is being swapped
+			self:StormBlessed()
 		elseif state == 2 then -- Finished
 			self:StopBar(barInfo.msg)
 			if barInfo.callback then
@@ -319,6 +336,22 @@ end
 --------------------------------------------------------------------------------
 -- Timeline Ability Handlers
 --
+
+do
+	local prev = 0
+	function mod:StormBlessed()
+		if GetTime() - prev > 2 then -- all bars pause, so throttle here
+			prev = GetTime()
+			if stormBlessedCount % 2 == 1 then
+				self:Message(1310311, "cyan", self:GetRename(1310311, 1)) -- Storm Blessed on Adderis
+			else
+				self:Message(1310311, "cyan", self:GetRename(1310311, 2)) -- Storm Blessed on Aspix
+			end
+			stormBlessedCount = stormBlessedCount + 1
+			self:PlaySound(1310311, "long")
+		end
+	end
+end
 
 do
 	local function IfOnMe(self)

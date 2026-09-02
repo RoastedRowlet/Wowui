@@ -29,7 +29,8 @@ local defaultStrings = {
     ------------------------------------------------------------
     -- General / Common
     ------------------------------------------------------------
-		["Class Crest"] = "Class Crest", -- enUS / enGB
+    ["SHOW_MYTHIC_SP_ONOPEN_INSPECT"] = "Show Mythic+ Side Panel On Inspect Sheet Open", -- enUS / enGB
+	["Class Crest"] = "Class Crest", -- enUS / enGB
 	["INSTRUCTIONS"] = "Instructions",  -- enUS / enGB
 	["CLICK_COL_EXP"] = "Click to Collapse or Expand", -- enUS / enGB
 	["CTRL_CLICK_COL_EXP"] = "Control + Click to Save Collapse State", -- enUS / enGB
@@ -439,6 +440,7 @@ if locale == "enGB" then
     }
 elseif locale == "deDE" then
     localizedStrings = {
+		["SHOW_MYTHIC_SP_ONOPEN_INSPECT"] = "Mythic+ Seitenleiste beim Öffnen des Inspektionsfensters anzeigen", -- deDE
         ["Class Crest"] = "Klassenwappen", -- deDE
         ["INSTRUCTIONS"] = "Anweisungen", -- deDE
         ["CLICK_COL_EXP"] = "Klicken zum Ein- oder Ausklappen", -- deDE
@@ -820,6 +822,7 @@ elseif locale == "deDE" then
     }	
 elseif locale == "frFR" then
     localizedStrings = {
+		["SHOW_MYTHIC_SP_ONOPEN_INSPECT"] = "Afficher le panneau Mythique+ lors de l’ouverture de la fiche d’inspection", -- frFR
         ["Class Crest"] = "Emblème de classe", -- frFR
         ["INSTRUCTIONS"] = "Instructions", -- frFR
         ["CLICK_COL_EXP"] = "Cliquez pour réduire ou développer", -- frFR
@@ -1201,6 +1204,7 @@ elseif locale == "frFR" then
     }
 elseif locale == "esES" then
     localizedStrings = {
+		["SHOW_MYTHIC_SP_ONOPEN_INSPECT"] = "Mostrar el panel lateral de Míticas+ al abrir la hoja de inspección", -- esMX
         ["Class Crest"] = "Emblema de clase", -- esES
         ["INSTRUCTIONS"] = "Instrucciones", -- esES
         ["CLICK_COL_EXP"] = "Clic para contraer o expandir", -- esES
@@ -1582,6 +1586,7 @@ elseif locale == "esES" then
     }
 elseif locale == "esMX" then
     localizedStrings = {
+		["SHOW_MYTHIC_SP_ONOPEN_INSPECT"] = "Mostrar el panel lateral de Míticas+ al abrir la hoja de inspección", -- esES
         ["Class Crest"] = "Emblema de clase", -- esMX
         ["INSTRUCTIONS"] = "Instrucciones", -- esMX
         ["CLICK_COL_EXP"] = "Clic para contraer o expandir", -- esMX
@@ -1963,6 +1968,7 @@ elseif locale == "esMX" then
     }
 elseif locale == "ruRU" then
     localizedStrings = {
+		["SHOW_MYTHIC_SP_ONOPEN_INSPECT"] = "Показывать боковую панель Mythic+ при открытии окна осмотра персонажа", -- ruRU
         ["Class Crest"] = "Герб класса", -- ruRU
         ["INSTRUCTIONS"] = "Инструкции", -- ruRU
         ["CLICK_COL_EXP"] = "Щёлкните, чтобы свернуть или развернуть", -- ruRU
@@ -2345,6 +2351,7 @@ elseif locale == "ruRU" then
     }
 elseif locale == "koKR" then
     localizedStrings = {
+		["SHOW_MYTHIC_SP_ONOPEN_INSPECT"] = "캐릭터 정보창에서 검사 시 신화+ 사이드 패널 표시", -- koKR
         ["Class Crest"] = "직업 문장", -- koKR
         ["INSTRUCTIONS"] = "안내", -- koKR
         ["CLICK_COL_EXP"] = "클릭하여 접거나 펼치기", -- koKR
@@ -2726,6 +2733,7 @@ elseif locale == "koKR" then
     }
 elseif locale == "zhCN" then
     localizedStrings = {
+		["SHOW_MYTHIC_SP_ONOPEN_INSPECT"] = "在打开角色检视界面时显示史诗钥石侧边面板", -- zhCN
         ["Class Crest"] = "职业徽章", -- zhCN
         ["INSTRUCTIONS"] = "说明", -- zhCN
         ["CLICK_COL_EXP"] = "点击以折叠或展开", -- zhCN
@@ -3107,6 +3115,7 @@ elseif locale == "zhCN" then
     }
 elseif locale == "zhTW" then
     localizedStrings = {
+		["SHOW_MYTHIC_SP_ONOPEN_INSPECT"] = "開啟檢視角色資訊時顯示傳奇+側邊面板", -- zhTW
         ["Class Crest"] = "職業徽章", -- zhTW
         ["INSTRUCTIONS"] = "說明", -- zhTW
         ["CLICK_COL_EXP"] = "點擊以收合或展開", -- zhTW
@@ -3487,6 +3496,7 @@ elseif locale == "zhTW" then
     }
 elseif locale == "ptBR" then
     localizedStrings = {
+		["SHOW_MYTHIC_SP_ONOPEN_INSPECT"] = "Mostrar o painel lateral de Míticas+ ao abrir a janela de inspeção", -- ptBR
         ["Class Crest"] = "Brasão da classe", -- ptBR
         ["INSTRUCTIONS"] = "Instruções", -- ptBR
         ["CLICK_COL_EXP"] = "Clique para recolher ou expandir", -- ptBR
@@ -3868,6 +3878,7 @@ elseif locale == "ptBR" then
     }
 elseif locale == "itIT" then
     localizedStrings = {
+		["SHOW_MYTHIC_SP_ONOPEN_INSPECT"] = "Mostra il pannello Mitiche+ all’apertura della scheda di ispezione", -- itIT
         ["Class Crest"] = "Stemma di classe", -- itIT
         ["INSTRUCTIONS"] = "Istruzioni", -- itIT
         ["CLICK_COL_EXP"] = "Clic per comprimere o espandere", -- itIT

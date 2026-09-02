@@ -234,7 +234,7 @@ local function getChunkLookup(table, length)
 end
 
 local lookup = {'Unknown-Unknown',}
-local provider = {region='US',realm='BloodFurnace',name='US',type='subscribers',zone=53,date='2026-08-26',data={Dy='Dycedarg:BAEANQADCgQIBAAAAA==.',Ho='Hondò:BAEANQAECgEIAQABNQAECgYIBwABAAAAAA==.Hondô:BAEANQAECgYIBwAAAA==.',['Hô']='Hôndo:BAEANQADCgEIAQABNQAECgYIBwABAAAAAA==.',Ki='Kippo:BAEANQAECgQIBQAAAA==.',Li='Lildwarf:BAEANQADCgIIAgABNQADCgUIBQABAAAAAA==.',Ma='Mastalys:BAEANQADCgQIBAAAAQ==.',},}
+local provider = {region='US',realm='BloodFurnace',name='US',type='subscribers',zone=53,date='2026-09-01',data={Dy='Dycedarg:BAEANQADCgUICQAAAA==.',Ho='Hondò:BAEANQAECgMIBAABNQAECggIDgABAAAAAA==.Hondô:BAEANQAECggIDgAAAA==.',['Hô']='Hôndo:BAEANQADCgEIAQABNQAECggIDgABAAAAAA==.',Ki='Kippo:BAEANQAECgYICgAAAA==.',Li='Lildwarf:BAEANQAECgEIAQAAAA==.',Ma='Mastalys:BAEANQADCgQIBAAAAQ==.',},}
 provider.parse = parse
 
 local rawData = provider.data

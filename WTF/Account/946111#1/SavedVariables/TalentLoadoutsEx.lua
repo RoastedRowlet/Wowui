@@ -3,23 +3,27 @@ TalentLoadoutEx = {
 ["SHAMAN"] = {
 {
 {
-["name"] = "Explo",
+["isInGroup"] = false,
 ["text"] = "CYQAAAAAAAAAAAAAAAAAAAAAAAAAAAzMbbzMGjZZZZMmhBAAAAsYmNYADY2YCMLAwsMzMjx2iJMzsMWmZmZMmFLjZZYMzsMAghBwMjhZ8BA",
+["name"] = "Explo",
 ["icon"] = 134400,
 },
 {
-["name"] = "Top M+",
+["isInGroup"] = false,
 ["text"] = "CYQALMl7AwW51MWzGneuHE3tPCAAAAzMbLzMGjZZbZMmhZAAAAgFzsBDYAzGTIzCAMbzMzgF0GmZbmlZMz8AjZZWmZWGGzMLAAzYAMzYYYA",
+["name"] = "Top M+",
 ["icon"] = 134400,
 },
 {
-["name"] = "Raid",
+["isInGroup"] = false,
 ["text"] = "CYQAAAAAAAAAAAAAAAAAAAAAAAAAAAzMbLzMmZmZZbZMMjBAAAAsYmNYADY2YCZWAgZZmZGjtFTYmZZsMzMzYYZWmxiZGmZZAADAMzYYYA",
+["name"] = "Raid",
 ["icon"] = 134400,
 },
 {
-["name"] = "M+",
+["isInGroup"] = false,
 ["text"] = "CYQALMl7AwW51MWzGneuHE3tPCAAAAzMbLzMGjZZZZMmhBAAAAsYmNYADY2YCZWAgZbmZGjtFTbMzYsMzMzYYxyMzyMGzMLAADDgZGDDD",
+["name"] = "M+",
 ["icon"] = 134400,
 },
 },
@@ -28,6 +32,12 @@ TalentLoadoutEx = {
 ["isInGroup"] = false,
 ["text"] = "CgQALMl7AwW51MWzGneuHE3tPCAAAgBAAAAzMzsstMzMzMjZGjZgFYDmxiGbDIzAbMzMY2mZMaWWmZ2MjZjFjZGDLzyAAAAzMDmZAgBzA",
 ["name"] = "M+",
+["icon"] = 134400,
+},
+{
+["isInGroup"] = false,
+["text"] = "CgQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAYmZmltlxMzYMzYMDjFYDmxiGbDgZgNmZGzMbzMmpZbZmZzMmNWMmZMYWGAAMDYmZwMDAMYA",
+["name"] = "Downpour Angle?",
 ["icon"] = 134400,
 },
 {
@@ -146,25 +156,25 @@ TalentLoadoutEx = {
 ["DRUID"] = {
 {
 {
+["pvp2"] = 3058,
 ["pvp1"] = 180,
-["name"] = "First boss",
 ["text"] = "CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMD8AmFzMzMYYGjZWmZxMzYjlZWGjZGLYYAGbbzMYMbDgJAAAALmZmZGsZgxMAAmZgBA",
 ["icon"] = 134400,
-["pvp2"] = 3058,
+["name"] = "First boss",
 },
 {
+["name"] = "Keeper Pad",
 ["text"] = "CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNjxMDwsNmZmBDzY2mZZsNMjtZWmxYmZYDDDwAstN2w0MzyAAAAgNmZmZwmxMGzAYmBAGA",
-["pvp2"] = 3058,
 ["pvp1"] = 180,
 ["icon"] = 134400,
-["name"] = "Keeper Pad",
+["pvp2"] = 3058,
 },
 {
+["pvp2"] = 3058,
 ["pvp1"] = 180,
-["name"] = "Wowhead M+",
 ["text"] = "CYGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWoMbNMmZgxsMzMzMLMgxMLzsYmZswyMLjxMjNMAYstNzgxsNCMBAAAYhZmZGsZMjxAAwMDWGA",
 ["icon"] = 134400,
-["pvp2"] = 3058,
+["name"] = "Wowhead M+",
 },
 },
 {

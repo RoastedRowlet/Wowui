@@ -530,6 +530,8 @@ ns.optionDefs = {
     { type="checkbox", cat="INSPECT-SHEET", ver=bit.bor(CCS.ALL), key="showmodel_inspect", label=L["SHOW_MODEL_INSPECT"], value=true, default=true, slots=1 },
     { type="checkbox", cat="INSPECT-SHEET", ver=bit.bor(CCS.RETAIL), key="showmythicplusscore_inspect", label=L["SHOW_MYTHIC_SCORE_INSPECT"], value=true, default=true, slots=1 },
     { type="checkbox", cat="INSPECT-SHEET", ver=bit.bor(CCS.RETAIL), key="showm_sp_btn_inspect", label=L["SHOW_MYTHIC_SP_BTN"], value=true, default=true, slots=1 },    
+    { type="checkbox", cat="INSPECT-SHEET", ver=bit.bor(CCS.RETAIL), key="showm_sp_onopen_inspect", label=L["SHOW_MYTHIC_SP_ONOPEN_INSPECT"], value=false, default=false, slots=3 },    
+
 
     { type="divider", cat="INSPECT-SHEET", ver=bit.bor(CCS.ALL), slots=4 },        
     { type="checkbox", cat="INSPECT-SHEET", ver=bit.bor(CCS.ALL), key="showilvl_inspect", label=L["SHOW_ITEMILVL_INSPECT"], value=true, default=true, slots=1 },

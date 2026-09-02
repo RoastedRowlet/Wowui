@@ -12,11 +12,11 @@ NewSettingsSeen = {
 ["raidFramesDispelIndicatorOverlayAnimation"] = true,
 ["SOCIAL_ENABLE_DISCORD_FUNCTIONALITY"] = true,
 ["showPingsOnRaidFrames"] = true,
-["ADVANCED_COOLDOWN_SETTINGS1"] = true,
+["DAMAGE_METER_LABEL"] = true,
 ["raidFramesDispelIndicatorOverlay"] = true,
 ["nameplateUseClassColorForFriendlyPlayerUnitNames"] = true,
 ["NAMEPLATES_LABEL"] = true,
 ["COMBAT_WARNINGS_LABEL"] = true,
 ["nameplateShowOnlyNameForFriendlyPlayerUnits"] = true,
-["DAMAGE_METER_LABEL"] = true,
+["ADVANCED_COOLDOWN_SETTINGS1"] = true,
 }

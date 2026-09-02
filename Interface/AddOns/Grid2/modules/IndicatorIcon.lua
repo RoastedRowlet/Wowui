@@ -186,7 +186,7 @@ local function Icon_ButtonLayout(self, parent, f, filter, size, level, status)
 		bar:SetStatusBarTexture(self.cbTexture)
 		bar:SetStatusBarColor(UnpackColor(self.cbColor))
 		bar:SetReverseFill(self.cbReverse)
-		bar:Show()
+		bar:SetShown(filter~=nil) -- in non-aura mode there are no statuses displaying bars
 	end
 
 	if not filter then
@@ -278,6 +278,8 @@ local function Icon_OnUpdate(self, parent, unit, status)
 			Cooldown:Hide()
 		end
 	end
+	 -- TODO: No statuses implement GetDurationObject() method so this code is not required, this implies only aura statuses display
+	 -- cooldown bars in icon indicators. So remove this code or keep it for the future (maybe some future status could need this method).
 	if self.needDur then
 		durObject = durObject or status:GetDurationObject(unit)
 		if self.showCoolBar then
@@ -297,7 +299,7 @@ end
 
 local function Icon_LayoutIcon(self, parent)
 	local f = parent[self.name]
-	local level = parent:GetFrameLevel() + self.frameLevel
+	local level = parent:GetFrameLevel() + self.frameLevel + self.iconLevel*2 -- hackish, we need to increase frame level by 2 because aura cooldown frames are set to frameLevel+1
 	local size = self.iconSize
 	if size<=1 then size = size * parent:GetHeight() end
 	f:SetParent(parent)
@@ -317,7 +319,7 @@ end
 
 local function Icon_LayoutAura(self, parent)
 	self:AcquireAuraSlotButton(parent, nil, function(_, _, button, filter, status)
-		local level = parent:GetFrameLevel() + self.frameLevel
+		local level = parent:GetFrameLevel() + self.frameLevel + self.auraLevel*2 -- hackish, we need to increase frame level by 2 because icon cooldown frames are set to frameLevel+1
 		local size = self.iconSize
 		if size<=1 then size = size * parent:GetHeight() end
 		button:ClearAllPoints()
@@ -370,7 +372,7 @@ local function Icon_UpdateDB(self)
 	self.useStatusColorText = self.showCoolText and dbx.ctUseStatusColor
 	self.disableCooldown = dbx.disableCooldown and not dbx.enableCooldownText
 	self.disableStack    = dbx.disableStack
-	self.frameLevel      = dbx.level
+	self.frameLevel      = self:GetFrameLevel(dbx.level)
 	self.borderSize      = dbx.borderSize
 	self.useStatusColor  = dbx.useStatusColor
 	self.iconSize        = dbx.size or theme.iconSize or 14

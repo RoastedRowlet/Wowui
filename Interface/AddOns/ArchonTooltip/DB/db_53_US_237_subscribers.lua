@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {}
-local provider = {region='US',realm='Whisperwind',name='US',type='subscribers',zone=53,date='2026-08-26',data={Ak='Akinira:BAEANQAECgEIAQAAAA==.',Am='Amelrik:BAEANQAECgYIBgAAAA==.',An='Ansys:BAEANQAECgIIAgAAAA==.',Ar='Arries:BAEANQADCgcIBwAAAA==.',Az='Azorthas:BAEANQADCgUICgAAAA==.',Dr='Dragonton:BAEANQAECgQICAAAAA==.',Se='Seanald:BAEANQAECgYICwAAAA==.',Sl='Slyferrain:BAEANQADCgQIBAAAAA==.',Sy='Syy:BAEANQADCggICAAAAA==.',},}
+local lookup = {'Unknown-Unknown',}
+local provider = {region='US',realm='Whisperwind',name='US',type='subscribers',zone=53,date='2026-09-01',data={Ak='Akinira:BAEANQAECgMIBAAAAA==.',Am='Amelrik:BAEANQAECgcIDQAAAA==.',An='Ansys:BAEANQAECgYICAAAAA==.',Ar='Arries:BAEANQADCggIDwAAAA==.',Az='Azorthas:BAEANQADCgcIDwAAAA==.',Dr='Dragonton:BAEANQAECgcICwAAAA==.',La='Larissah:BAEANQADCggICAABNQAECgcICgABAAAAAA==.',Se='Seanald:BAEANQAECgcIDAAAAA==.',Sy='Syy:BAEANQAECgIIAgAAAA==.',Ve='Vexkwondo:BAEANQADCgYICwAAAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

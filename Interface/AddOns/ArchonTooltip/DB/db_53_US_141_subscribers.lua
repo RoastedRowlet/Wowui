@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'Unknown-Unknown',}
-local provider = {region='US',realm='Lightbringer',name='US',type='subscribers',zone=53,date='2026-08-26',data={An='Anasrastra:BAEANQADCgIIAgABNQADCgYIBgABAAAAAA==.',Bi='Bighugz:BAEANQADCgYICwAAAA==.',Ca='Catcatchme:BAEANQAECgEIAgAAAA==.',Cr='Crackerjill:BAEANQADCgcIBwAAAA==.',Fe='Felgrihm:BAEANQADCgQIBAABNQADCgUIBQABAAAAAA==.',Fh='Fhurian:BAEANQADCgUIBQABNQADCgUIBQABAAAAAA==.',Pa='Pandomedic:BAEANQADCgYIBgABNQADCggICAABAAAAAA==.',Ra='Raboge:BAEANQADCgUIBQAAAA==.',Sa='Sageoffan:BAEANQADCgcICAAAAA==.',Sh='Shaî:BAEANQADCgcICAAAAA==.',St='Stemihunter:BAEANQADCggICAAAAA==.Strzyga:BAEANQAECgEIAgAAAA==.',Th='Thorgrihm:BAEANQADCgUIBQAAAA==.Threslor:BAEANQAECgcIDwAAAA==.',Wa='Warrtag:BAEANQAECgEIAQAAAA==.',},}
+local lookup = {'Unknown-Unknown','DemonHunter-Devourer',}
+local provider = {region='US',realm='Lightbringer',name='US',type='subscribers',zone=53,date='2026-09-01',data={An='Anasrastra:BAEANQADCgIIAgABNQADCggIDgABAAAAAA==.',Bi='Bighugz:BAEANQADCgcIDAAAAA==.',Ca='Catcatchme:BAEANQAECgQIBQAAAA==.',Cr='Crackerjill:BAEANQAECgIIAgAAAA==.',Fe='Felgrihm:BAEANQADCgUICQABNQADCgYICwABAAAAAA==.',Fh='Fhurian:BAEANQADCgUIBQABNQADCgYICwABAAAAAA==.',Go='Gof:BAEANQADCgYIBgABNQADCgcICQABAAAAAA==.Gofsham:BAEANQADCgcICQAAAA==.',Pa='Pandomedic:BAEANQADCgcIDQABNQAECgEIAQABAAAAAA==.',Ra='Raboge:BAEANQADCgYICwAAAA==.',Sa='Sageoffan:BAEANQAECgQIBAAAAA==.',Sh='Shaî:BAEANQADCggIDgAAAA==.',St='Stemihunter:BAEANQAECgEIAQAAAA==.Stemislayer:BAEANQADCgYIBgABNQAECgEIAQABAAAAAA==.Strzyga:BAEANQAECgQIBQAAAA==.',Th='Thorgrihm:BAEANQADCgYICwAAAA==.Threslor:BAEBNQAECoEXAAICAAkJTx/+AgBDAwmODQAAAwBcAHUNAAADAFoAfw0AAAMAYQCpDQAAAwBaAFwNAAADAE0AXQ0AAAIAOwBlDQAAAgBJAKQNAAABADUAMw0AAAMAVwACAAkJTx/+AgBDAwmODQAAAwBcAHUNAAADAFoAfw0AAAMAYQCpDQAAAwBaAFwNAAADAE0AXQ0AAAIAOwBlDQAAAgBJAKQNAAABADUAMw0AAAMAVwAAAA==.',Wa='Warrtag:BAEANQAECgQIBQAAAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

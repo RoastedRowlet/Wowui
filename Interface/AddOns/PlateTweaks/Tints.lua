@@ -5,6 +5,18 @@ local _, NS = ...
 -- while that button is shown. Several debuffs are ANDed by nesting containers,
 -- tint on the deepest button; cross-button masking is refused as forbidden.
 
+-- Hoisted to upvalues. Every reference to a global is a hash lookup in _G, and
+-- the maintenance sweep reaches these once per container, per rule, per rig,
+-- per second. Standard addon practice, and the one classic Lua idiom this file
+-- was missing.
+local pairs, ipairs, pcall, type = pairs, ipairs, pcall, type
+
+-- Shared and NEVER mutated. `x or {}` allocates a fresh table on every
+-- evaluation where x is nil, which on the per-second sweep is garbage per rig
+-- per rule. Only ever used where the result is READ -- handing this to
+-- something that inserts would corrupt every other caller at once.
+local EMPTY = {}
+
 local MAX_TINTS_PER_RULE = 1200
 
 -- Aura slots, not groups: a group pools ten buttons and calls initializeFrame
@@ -12,13 +24,51 @@ local MAX_TINTS_PER_RULE = 1200
 -- Asked of the container as it is created -- probing at ADDON_LOADED cached
 -- "unavailable" before Blizzard_AuraContainer had loaded. /pt slots off.
 local function SlotsAvailable(frame)
-  if NS.db and NS.db.useAuraSlots == false then return false end
+  -- PROBE FIRST, always. slotApiPresent describes the CLIENT, not the user's
+  -- preference, and returning early on the setting left it nil -- so after
+  -- /pt slots off plus a reload everything reported "unavailable on this
+  -- client", which reads as "your client cannot do this" rather than "you
+  -- turned it off". The switch to pooled groups was working the whole time;
+  -- only the reporting was wrong, and it made a deliberate A/B test look like
+  -- a failed command.
   local present = type(frame.AddAuraSlot) == "function"
     and type(frame.SetAuraSlotCandidateFilters) == "function"
   NS.slotApiPresent = present
+  if NS.db and NS.db.useAuraSlots == false then return false end
   return present
 end
 local LEVELS_PER_RULE = 4
+
+-- OVERLAY is -8..7; 6 and 7 are the border band, so the ladder gets -8..5,
+-- two per rule. That is what caps the ladder, not cost.
+--
+-- Declared HERE, not next to the ladder code that reads them. These were
+-- file-locals defined below PlaterMissingPlan, and a Lua local is only in
+-- scope for what follows it -- so inside that function both names compiled as
+-- globals and read nil. Every missing-debuff rule on a Plater bar threw
+-- (`bad argument #1 to 'min'`), which aborts the rig build, so the plate ended
+-- with zero containers and could not colour at all. Not a level problem, and
+-- the sublevel maths was never reached.
+local MISSING_SUBLEVEL_MIN = -8
+local MISSING_SUBLEVEL_MAX = 5
+
+-- Cumulative, for the session. Per-record failure counts are the only evidence
+-- a container was refused, and a rig is DISCARDED when it gets repaired -- so
+-- the recovery attempt destroys the proof of what went wrong. These survive it.
+--
+-- Split by lockdown because that is the whole question: secure containers
+-- cannot be created in combat, so a plate first seen mid-pull can build empty.
+-- "Refused while in combat" climbing during a big pull is that theory being
+-- confirmed; refusals OUT of combat mean something else entirely.
+NS.buildFailures = { containers = 0, containersInCombat = 0, combos = 0 }
+
+function NS.NoteContainerRefused()
+  local f = NS.buildFailures
+  f.containers = f.containers + 1
+  if InCombatLockdown() then
+    f.containersInCombat = f.containersInCombat + 1
+  end
+end
 
 local UNDERLAY_OVERDRAW = 0
 
@@ -63,6 +113,17 @@ end
 
 -- Lowest OVERLAY sublevel Plater's own text uses on this bar. Some skins draw
 -- a health value on the bar too, so this is discovered, not hardcoded to 7.
+--
+-- okLayer only proves the CALL succeeded, not that what it returned is safe
+-- to touch: unlike healthBar.unitName (a specific FontString known to be
+-- plain -- see PrintBarDebug), an arbitrary region found by scanning every
+-- FontString on the bar is NOT guaranteed non-secret, and a raw "layer ==
+-- "OVERLAY"" on a secret value throws ("attempt to compare ... a secret
+-- string value, while execution tainted"). This runs during BuildTints on
+-- every Plater plate, wrapped in a pcall at the call site -- so an unguarded
+-- throw here does not crash the game, but it does silently drop the whole
+-- rig as a build error, which is a much worse failure mode than a bad
+-- diagnostic print.
 function NS.PlaterTextFloor(healthBar)
   local floor = 7
   local okRegions, regions = pcall(function() return { healthBar:GetRegions() } end)
@@ -70,7 +131,9 @@ function NS.PlaterTextFloor(healthBar)
     for _, region in ipairs(regions) do
       if region and region.GetObjectType and region:GetObjectType() == "FontString" then
         local okLayer, layer, sublevel = pcall(region.GetDrawLayer, region)
-        if okLayer and layer == "OVERLAY" and type(sublevel) == "number" then
+        local safe = okLayer
+          and not (issecretvalue and (issecretvalue(layer) or issecretvalue(sublevel)))
+        if safe and layer == "OVERLAY" and type(sublevel) == "number" then
           floor = math.min(floor, sublevel)
         end
       end
@@ -79,22 +142,296 @@ function NS.PlaterTextFloor(healthBar)
   return floor
 end
 
--- Rank as a draw sublevel, for bars where frame level is pinned.
+-- Draw sublevels for a flat-pinned bar, allocated to what each rule ACTUALLY
+-- draws rather than a fixed three per rank.
 --
--- floor is where Plater's text starts; floor-1 is our border, floor-3 down is
--- tints. Three per rank: tint, underlay below, missing cover above. The cover
--- must be strictly above -- a texture-mode fill's mask can leave a sliver
--- whose winner would otherwise be undefined.
--- Exposed: on a flat-pinned bar these ARE the draw order, and /pt layers had
--- no way to show them -- it printed three identical frame levels, which says
--- nothing about who wins.
-function NS.PlaterRankSublevels(rank, floor)
-  floor = floor or 7
-  local borderSublevel = floor - 1
-  local tint = math.max(-8, (floor - 3) - 3 * (rank - 1))
-  return tint, math.max(-8, tint - 1), math.min(borderSublevel, tint + 1)
+-- floor is where the host's text starts, floor-1 is our border band, and the
+-- ladder runs from floor-3 downward to -8.
+--
+-- The previous version gave every rule three consecutive sublevels -- cover,
+-- tint, underlay -- whether or not it had a cover or an underlay to put in
+-- them. That is affordable when floor is 7, which is what the design assumed
+-- (four clean ranks before anything clamps). It is not affordable on a live
+-- Plater bar: every FontString there reports OVERLAY 0, including the ones
+-- Plater's own code explicitly sends to 5 and 7, so the entire ladder has to
+-- fit between -1 and -8. Three-per-rule into that range is two rules. The
+-- third rule's tint and its own underlay both clamp onto -8, and its cover
+-- lands on the second rule's underlay -- two real collisions, with undefined
+-- draw order between an opaque bar replica and the tint it is supposed to
+-- sit under. Measured on a real client, not inferred.
+--
+-- Most rules need exactly one sublevel. An underlay exists only when the rule
+-- covers a lower one, a cover only with "cover missing health", and the
+-- pandemic flash is hardcoded to tint+1 in BuildRule, so it claims a slot of
+-- its own whenever that module is on. Handing out only what is asked for fits
+-- four to six rules in the same space instead of two.
+--
+-- The TOP of the ladder is deliberately unchanged at floor-3. Compacting
+-- downward only means nothing can newly collide with whatever sits above --
+-- notably the missing ladder, which shares this range on a flat-pinned bar.
+local SUBLEVEL_MIN = -8
+local SUBLEVEL_MAX = 7
+
+-- What the host already draws on this bar, per layer.
+--
+-- EVERY host texture counts, shown or not.
+--
+-- Shown-only was the obvious reading -- a hidden texture cannot cover anything
+-- today -- and it is wrong. Host art is conditional: Plater keeps its target
+-- selection and marker textures hidden until you target the mob, then shows
+-- them. Measured: ARTWORK 4-7 read hidden on an untargeted plate, so the pool
+-- handed rule 4 ARTWORK 5, which Plater owns and would light up the moment
+-- that plate became the target.
+--
+-- We cannot see that happen mid-combat and could not move the rule if we did.
+-- So a slot the host has ever claimed is the host's. Occupying it costs one
+-- slot; not occupying it costs correctness on exactly the plate you are
+-- looking at.
+--
+-- Our own tints never appear here, which is what makes this safe to run on
+-- every rebuild: they are created on the aura BUTTON, not on the bar, so
+-- healthBar:GetRegions() returns host art only.
+function NS.HostOccupancy(healthBar)
+  local occ = { ARTWORK = {}, OVERLAY = {} }
+  local okRegions, regions = pcall(function() return { healthBar:GetRegions() } end)
+  for _, region in ipairs(okRegions and regions or {}) do
+    local okType, kind = pcall(region.GetObjectType, region)
+    if okType and kind == "Texture" then
+      local okDL, layer, sub = pcall(region.GetDrawLayer, region)
+      local secret = issecretvalue and (issecretvalue(layer) or issecretvalue(sub))
+      if okDL and not secret and occ[layer] and type(sub) == "number" then
+        occ[layer][sub] = true
+      end
+    end
+  end
+  return occ
 end
-local PlaterRankSublevels = NS.PlaterRankSublevels
+
+local HostOccupancy = NS.HostOccupancy
+
+-- Lowest OVERLAY sublevel the host has claimed -- its border, in practice.
+-- Computed from the HOST survey only, and passed around rather than re-derived,
+-- because the missing ladder marks its own slots occupied before the presence
+-- allocator runs and would otherwise drag this down onto our own textures.
+function NS.OverlayCeiling(occ)
+  local lowest
+  for sub in pairs(occ.OVERLAY) do
+    if lowest == nil or sub < lowest then lowest = sub end
+  end
+  return lowest
+end
+
+-- Where the host's own fill sits. Everything we draw has to be strictly above
+-- it, and a TIE is worse than losing: the winner is creation order, it differs
+-- between hosts (our texture beat a plain bar's fill, Plater's fill beat ours),
+-- and it can flip when the host touches its bar.
+local function FillSublevel(healthBar)
+  local okTex, tex = pcall(healthBar.GetStatusBarTexture, healthBar)
+  if okTex and tex then
+    local okDL, layer, sub = pcall(tex.GetDrawLayer, tex)
+    local secret = issecretvalue and (issecretvalue(layer) or issecretvalue(sub))
+    if okDL and not secret and layer == "ARTWORK" and type(sub) == "number" then
+      return sub
+    end
+  end
+  return 0
+end
+
+-- n CONSECUTIVE free sublevels at or below `cursor`, descending. Returns the
+-- run's top sublevel, or nil if it will not fit.
+--
+-- Consecutive matters: a rule's pieces sit at tint-1, tint and tint+1, so a run
+-- with a hole in it would put its underlay or cover on top of host art.
+local function TakeRun(occ, layer, cursor, bottom, n)
+  local sub = cursor
+  while sub - (n - 1) >= bottom do
+    local free = true
+    for k = 0, n - 1 do
+      if occ[layer][sub - k] then free = false break end
+    end
+    if free then return sub end
+    sub = sub - 1
+  end
+  return nil
+end
+
+-- Sublevels for the MISSING ladder on a flat-pinned bar.
+--
+-- Two bugs this replaces, both Plater-only and both silent:
+--
+--  1. Collision with presence rules. The presence allocator is handed only the
+--     presence list, so it never knew the ladder existed. In occlusion mode the
+--     ladder's fixed arithmetic starts at -8 and climbs (wash -8, cover -7,
+--     wash -6 ...) while the presence pool runs -3 down to -8 -- the same
+--     range, both claiming it, winner decided by aura-button init order. That
+--     is per plate, which is the inconsistency.
+--  2. Host art. The ladder's sublevels were pure arithmetic and never consulted
+--     what the host already draws, while presence rules were surveyed.
+--
+-- Both are fixed the same way: allocate from the shared occupancy map and mark
+-- what is taken, so the presence allocator that runs next sees it.
+--
+-- Direction differs by mode and that is deliberate. Occlusion sits BELOW every
+-- presence rule (its cover is an opaque replica that has to lose to a real
+-- tint). Displacement sits ABOVE them: a missing wash and a presence tint can
+-- both be lit at once, and the reminder is the one that has to be seen.
+function NS.PlaterMissingPlan(occ, count, displace, ceiling)
+  local out = {}
+  if not count or count <= 0 then return out end
+
+  if displace then
+    local top = math.min(MISSING_SUBLEVEL_MAX,
+      ceiling and (ceiling - 1) or MISSING_SUBLEVEL_MAX)
+    local sub = top
+    for rank = 1, count do
+      while sub >= MISSING_SUBLEVEL_MIN and occ.OVERLAY[sub] do sub = sub - 1 end
+      if sub < MISSING_SUBLEVEL_MIN then break end
+      occ.OVERLAY[sub] = true
+      out[rank] = { wash = sub }
+      sub = sub - 1
+    end
+  else
+    -- Wash and its cover must be ADJACENT and in that order, so this takes
+    -- pairs rather than single slots.
+    local sub = MISSING_SUBLEVEL_MIN
+    for rank = 1, count do
+      while sub + 1 <= MISSING_SUBLEVEL_MAX
+        and (occ.OVERLAY[sub] or occ.OVERLAY[sub + 1]) do
+        sub = sub + 1
+      end
+      if sub + 1 > MISSING_SUBLEVEL_MAX then break end
+      occ.OVERLAY[sub] = true
+      occ.OVERLAY[sub + 1] = true
+      out[rank] = { wash = sub, cover = sub + 1 }
+      sub = sub + 2
+    end
+  end
+  return out
+end
+
+-- Sublevels for a flat-pinned bar, drawn from a pool spanning TWO layers.
+--
+-- OVERLAY alone gives about six usable slots on Plater, and a four-rule
+-- profile with Pandemic Flash needs eight -- measured, with two rules landing
+-- on -8 together and the winner decided by whichever button initialised first.
+-- That is per-plate, which is why identical rules paint some bars and not
+-- others in the same pull.
+--
+-- ARTWORK above the host's fill is the room nobody was using: it sits above
+-- the bar's own colour and below EVERYTHING in OVERLAY, which is exactly where
+-- a tint wants to be. A staircase probe on a live Plater bar showed ARTWORK 1
+-- as the first visible sublevel and 1..7 all drawing.
+--
+-- Because ARTWORK is entirely below OVERLAY, a rule that spills into it is
+-- automatically outranked by every rule above it -- rule priority comes out
+-- right for free, with no cross-layer arithmetic. Each rule's own pieces stay
+-- within ONE layer, so tint+1 / tint-1 keep meaning what they always did.
+-- occ and ceiling come from the caller so the missing ladder can claim its
+-- slots first and be seen here. ceiling is the HOST's, deliberately computed
+-- before any of our own reservations went into occ.
+function NS.PlaterSublevelPlan(ordered, floor, pandemicOn, healthBar, occ, ceiling)
+  floor = floor or 7
+  local plan, starved = {}, false
+  local count = #ordered
+
+  occ = occ or (healthBar and HostOccupancy(healthBar))
+    or { ARTWORK = {}, OVERLAY = {} }
+
+  -- The ceiling is the lowest SHOWN host texture on OVERLAY -- its border, in
+  -- practice. NOT its text: a texture cannot cover a FontString at any
+  -- sublevel (measured across all 16 on a live plate), so text never
+  -- constrained where we draw. The old text-derived floor happened to land in
+  -- the same place on Plater and had no reason to.
+  if ceiling == nil then ceiling = NS.OverlayCeiling(occ) end
+
+  -- NEVER above the old text-derived top, even when the survey says there is
+  -- room. Measured regression: on a live Plater bar the survey missed its
+  -- border (hidden at scan time, or living on a child frame, or its layer
+  -- reading secret in combat -- all three skip the same way) and placed rule 1
+  -- at -1, one ABOVE that border, so the tint painted over the plate outline.
+  --
+  -- HostOccupancy treats anything unreadable as free, and free is the wrong
+  -- guess when being wrong means covering the host's art. Clamping to floor-3
+  -- keeps the proven ceiling and lets the pool only ever ADD room below it --
+  -- which is where the gain was anyway.
+  local overlayTop = math.min(ceiling and (ceiling - 1) or (floor - 3), floor - 3)
+  if overlayTop > SUBLEVEL_MAX then overlayTop = SUBLEVEL_MAX end
+
+  local layers = {
+    { name = "OVERLAY", cursor = overlayTop, bottom = SUBLEVEL_MIN },
+    { name = "ARTWORK", cursor = SUBLEVEL_MAX,
+      bottom = (healthBar and FillSublevel(healthBar) or 0) + 1 },
+  }
+
+  -- Our border band sits one ABOVE the host's, so "keep the plate's border
+  -- visible" redraws on top of it rather than under.
+  local borderSublevel = ceiling and (ceiling + 1) or (floor - 1)
+
+  for index, rule in ipairs(ordered) do
+    local paints = rule.barEnabled ~= false
+    local needsUnderlay = false
+    if paints then
+      for lower = index + 1, count do
+        if NS.RuleCovers(rule, ordered[lower]) then needsUnderlay = true break end
+      end
+    end
+    local needsCover = paints and rule.missingCover and true or false
+    -- SINGLE-DEBUFF ONLY, matching BuildRule's own gate
+    -- (`record.spellCount == 1`): a flash doubles a rule's texture count and a
+    -- combo cannot afford it, so multi-debuff rules never get one. Reserving a
+    -- slot for every rule held space for textures that are never created, and
+    -- pushed real rules off the bottom of the ladder -- starving a three-rule
+    -- profile that fits comfortably.
+    local needsFlash = paints and pandemicOn
+      and #(rule.conditions or {}) == 1 and true or false
+
+    local entry = {
+      needsUnderlay = needsUnderlay,
+      needsCover = needsCover,
+      layer = "OVERLAY",
+    }
+    if not paints then
+      -- Border-only rule: it draws in the border band, so it takes nothing from
+      -- either pool. The numbers still have to be valid, since BuildRule is
+      -- handed them either way.
+      entry.tint = layers[1].cursor
+      entry.underlay = math.max(SUBLEVEL_MIN, entry.tint - 1)
+      entry.cover = borderSublevel
+    else
+      -- Reserve above the tint for whichever of cover/flash this rule has: the
+      -- flash is hardcoded to tint+1 in BuildRule, so a cover has to clear it
+      -- rather than land on top of it.
+      local above = (needsCover and 1 or 0) + (needsFlash and 1 or 0)
+      local need = above + 1 + (needsUnderlay and 1 or 0)
+
+      local placed
+      for _, L in ipairs(layers) do
+        local top = TakeRun(occ, L.name, L.cursor, L.bottom, need)
+        if top then
+          for k = 0, need - 1 do occ[L.name][top - k] = true end
+          L.cursor = top - need
+          placed = { layer = L.name, top = top }
+          break
+        end
+      end
+
+      if not placed then
+        -- Both pools full. Clamp and flag it rather than silently stacking
+        -- rules onto one sublevel where the winner is undefined.
+        starved = true
+        placed = { layer = "OVERLAY", top = SUBLEVEL_MIN + above }
+      end
+
+      local tint = placed.top - above
+      entry.layer = placed.layer
+      entry.tint = tint
+      entry.cover = math.min(SUBLEVEL_MAX, tint + 1 + (needsFlash and 1 or 0))
+      entry.underlay = math.max(SUBLEVEL_MIN, tint - 1)
+    end
+    plan[index] = entry
+  end
+  return plan, starved
+end
 
 -- Memo for config-derived values. AnchorTints re-applies every texture on
 -- every rig per reposition, each re-deriving the same LSM fetch, library scan
@@ -262,12 +599,18 @@ end
 --
 --   wash 1, cover 1, wash 2, cover 2, ...   bottom to top
 
--- OVERLAY is -8..7; 6 and 7 are the border band, so the ladder gets -8..5,
--- two per rule. That is what caps the ladder, not cost.
-local MISSING_SUBLEVEL_MIN = -8
-local MISSING_SUBLEVEL_MAX = 5
 NS.MAX_MISSING_RULES =
   math.floor((MISSING_SUBLEVEL_MAX - MISSING_SUBLEVEL_MIN + 1) / 2)
+
+-- The allocated slot for this rank if there is one (flat-pinned bars), else
+-- the fixed arithmetic. Elevated bars separate the ladder by FRAME level, so
+-- they never needed an allocator and still do not.
+local function MissingSub(rig, rank, key, fallback)
+  local entry = rig and rig.missingSublevels and rig.missingSublevels[rank]
+  local value = entry and entry[key]
+  if value then return value end
+  return fallback
+end
 
 local function MissingWashSublevel(rank)
   return MISSING_SUBLEVEL_MIN + 2 * (rank - 1)
@@ -327,14 +670,20 @@ local BORDER_SIDES = {
 -- Nothing here can be destroyed, so created-vs-live is the only view of it.
 NS.stats = { containers = 0, textures = 0, rebuilds = 0 }
 
-local function CreateBarTexture(owner, healthBar, sublayer, expand)
-  local tex = owner:CreateTexture(nil, "OVERLAY", nil, sublayer or 0)
+-- layer defaults to OVERLAY. A presence rule can now be placed in ARTWORK
+-- instead when OVERLAY is full (see NS.PlaterSublevelPlan); everything else --
+-- borders, the missing ladder -- stays in OVERLAY and simply omits the
+-- argument. The layer is set at CREATION and never changed afterwards, which
+-- is deliberate: nothing in this addon calls SetDrawLayer, so a texture's
+-- layer is fixed for its lifetime and cannot drift out of step with the plan.
+local function CreateBarTexture(owner, healthBar, sublayer, expand, layer)
+  local tex = owner:CreateTexture(nil, layer or "OVERLAY", nil, sublayer or 0)
   NS.stats.textures = NS.stats.textures + 1
   return AnchorToFill(tex, healthBar, expand)
 end
 
-local function CreateMissingCoverTexture(owner, healthBar, sublayer, expand)
-  local tex = owner:CreateTexture(nil, "OVERLAY", nil, sublayer or 0)
+local function CreateMissingCoverTexture(owner, healthBar, sublayer, expand, layer)
+  local tex = owner:CreateTexture(nil, layer or "OVERLAY", nil, sublayer or 0)
   NS.stats.textures = NS.stats.textures + 1
   return AnchorToMissingFill(tex, healthBar, expand)
 end
@@ -579,12 +928,17 @@ function NS.ApplyMissingCover(tex, healthBar, rule, expand)
   tex:Show()
 end
 
-local function BuildRule(rig, healthBar, rule, level, needsUnderlay, overdraw, tintSublevel, underlaySublevel, borderSublevel, missingCoverSublevel)
+local function BuildRule(rig, healthBar, rule, level, needsUnderlay, overdraw, tintSublevel, underlaySublevel, borderSublevel, missingCoverSublevel, tintLayer)
   tintSublevel = tintSublevel or 0
   underlaySublevel = underlaySublevel or -1
   borderSublevel = borderSublevel or 7
 -- Strictly above the tint: the mask can leave a sliver at the live edge.
   missingCoverSublevel = missingCoverSublevel or (tintSublevel + 2)
+-- Which layer this rule's own pieces live in. All four -- underlay, tint,
+-- flash, cover -- share it, so their +1/-1 relationships hold. Only the
+-- BORDER stays in OVERLAY, since it is placed against the host's border band
+-- rather than against this rule's tint.
+  tintLayer = tintLayer or "OVERLAY"
   local record = {
     rule = rule,
     containers = {},
@@ -629,12 +983,12 @@ local function BuildRule(rig, healthBar, rule, level, needsUnderlay, overdraw, t
 -- Underlay: opaque copy of the bar, so this rule masks lower ones. Only when
 -- a lower rule can match, and only when this rule paints the bar.
     if needsUnderlay and record.rule.barEnabled ~= false then
-      local underlay = CreateBarTexture(host, healthBar, underlaySublevel, UNDERLAY_OVERDRAW + record.overdraw)
+      local underlay = CreateBarTexture(host, healthBar, underlaySublevel, UNDERLAY_OVERDRAW + record.overdraw, tintLayer)
       for index = 2, #stack do underlay:AddMaskTexture(stack[index]) end
       table.insert(record.underlays, underlay)
     end
     if record.rule.barEnabled ~= false then
-      local tint = CreateBarTexture(host, healthBar, tintSublevel, record.overdraw)
+      local tint = CreateBarTexture(host, healthBar, tintSublevel, record.overdraw, tintLayer)
       ApplyRuleFill(tint, healthBar, record.rule, record.overdraw)
       for index = 2, #stack do tint:AddMaskTexture(stack[index]) end
       table.insert(record.tints, tint)
@@ -644,7 +998,7 @@ local function BuildRule(rig, healthBar, rule, level, needsUnderlay, overdraw, t
     -- tint's sublevel -- the mask can leave a sliver whose winner would
     -- otherwise be undefined.
     if record.rule.barEnabled ~= false and record.rule.missingCover then
-      local cover = CreateMissingCoverTexture(host, healthBar, missingCoverSublevel, record.overdraw)
+      local cover = CreateMissingCoverTexture(host, healthBar, missingCoverSublevel, record.overdraw, tintLayer)
       local mc = NS.MissingCoverColor()
       cover:SetColorTexture(mc.r, mc.g, mc.b, mc.a)
       for index = 2, #stack do cover:AddMaskTexture(stack[index]) end
@@ -705,7 +1059,7 @@ local function BuildRule(rig, healthBar, rule, level, needsUnderlay, overdraw, t
       end
 
       if not region then
-        local flash = CreateBarTexture(host, healthBar, tintSublevel + 1)
+        local flash = CreateBarTexture(host, healthBar, tintSublevel + 1, nil, tintLayer)
         flash:SetColorTexture(pc.r, pc.g, pc.b, pc.a)
         for index = 2, #stack do flash:AddMaskTexture(stack[index]) end
         region = flash
@@ -725,6 +1079,7 @@ local function BuildRule(rig, healthBar, rule, level, needsUnderlay, overdraw, t
   AttachContainer = function(parent, depth)
     local okFrame, frame = pcall(CreateFrame, "AuraContainer", nil, parent, "CustomAuraContainerTemplate")
     if not okFrame or not frame then
+      NS.NoteContainerRefused()
       record.failures = record.failures + 1
       record.lastError = record.lastError or ("container at depth " .. depth .. ": " .. tostring(frame))
       return
@@ -745,8 +1100,59 @@ local function BuildRule(rig, healthBar, rule, level, needsUnderlay, overdraw, t
           table.insert(record.hosts, button)
         end
         -- Every depth: BuildCombination attaches to the deepest button.
-        -- Refused while auras are secret.
-        pcall(button.SetFrameLevel, button, level)
+        --
+        -- ACCEPTED here even in combat, measured on a live plate: this is the
+        -- button's own initializeFrame callback, the one place a forbidden
+        -- object may be touched. The "refused while auras are secret" note that
+        -- used to sit here is true of the re-level pass in AnchorTints, which
+        -- reaches buttons from OUTSIDE any callback -- do not generalise it to
+        -- this line.
+        --
+        -- The result is RECORDED, because it cannot be recovered later: in
+        -- combat the button's own frame level and strata both read back as
+        -- secret, so "did flat-pinning take?" is unanswerable after the fact --
+        -- and out of combat the re-level pass has already repaired it, so the
+        -- answer is always yes by the time anyone can look. This callback is
+        -- the only moment the truth is observable, and a plain counter is
+        -- carried out of it.
+        --
+        -- It matters because when this call fails the button keeps the higher
+        -- level its container gave it, frame level then beats draw layer, and
+        -- the tint draws over the host's border and name whatever sublevel it
+        -- was assigned.
+        -- record.level, NOT the captured `level`. The upvalue is the level this
+        -- plate had when the rig was BUILT; record.level is what it should be
+        -- now, and both AnchorTints and RepinLevels keep it current.
+        --
+        -- Plater raises a plate by 5000 the instant it becomes your target.
+        -- RepinLevels then re-levels the containers, which accept, and the aura
+        -- buttons, which do not: a bound button takes a level only inside this
+        -- callback. So the container moved to 5051 while the button carrying
+        -- the tint stayed at 51 -- frame level beats draw layer, and the bar's
+        -- own fill covered the tint at every sublevel.
+        --
+        -- Measured over one session: 73 drift events, 69 deferred, 276 refused
+        -- frames, 4 successful re-pins -- and all 4 were out of combat.
+        --
+        -- Reading the current level here lets a pooled button correct itself
+        -- the next time it is initialised, inside the one callback the engine
+        -- allows, instead of waiting for combat to end.
+        local okLevel = pcall(button.SetFrameLevel, button, record.level or level)
+        if okLevel then
+          record.levelSet = (record.levelSet or 0) + 1
+          -- This IS the repair, so record it. rig.appliedLevel previously only
+          -- advanced when a full external re-pin succeeded, which stopped
+          -- happening once buttons started fixing themselves here -- leaving
+          -- the field permanently stale and every diagnostic reading off it
+          -- crying failure over work that had already been done. Measured at
+          -- an 88% false positive rate against the buttons' real levels.
+          --
+          -- rig.baseLevel, not record.level: record.level carries this rule's
+          -- own offset, while appliedLevel is compared against the bar.
+          if rig.baseLevel then rig.appliedLevel = rig.baseLevel end
+        else
+          record.levelRefused = (record.levelRefused or 0) + 1
+        end
         record.dirty = true
 
         if depth < record.spellCount then
@@ -781,6 +1187,10 @@ local function BuildRule(rig, healthBar, rule, level, needsUnderlay, overdraw, t
       frame:SetAuraGroupMaxFrameCount(key, 1)
     end
 
+    -- Only the depth-1 container is a child of the HEALTH BAR and therefore
+    -- ours to show and hide. Deeper links are children of aura buttons, where
+    -- Show is refused -- see NS.RetireTints.
+    frame.ptRootContainer = (depth == 1)
     table.insert(record.containers, frame)
     NS.ActivateContainer(rig, frame, record)
   end
@@ -888,26 +1298,87 @@ function NS.BuildTints(rig, healthBar)
     insets[index] = math.min(RANK_INSET_MAX, inset)
   end
 
+  -- Derived here rather than further down, because on a flat-pinned bar the
+  -- ladder competes for the SAME draw sublevels as the presence rules and has
+  -- to claim its slots before they are handed out.
+  --
+  -- Single-debuff only: rank k already spends a chain level per rule above it,
+  -- and a second condition needs another with no room for it.
+  local ladder = {}
+  for _, rule in ipairs(missingRules) do
+    if #(rule.conditions or {}) == 1 and #ladder < NS.MAX_MISSING_RULES then
+      ladder[#ladder + 1] = rule
+    end
+  end
+
+  -- Allocated once for the whole ladder, up front: what sublevel a rule gets
+  -- depends on what the rules ABOVE it consumed, which cannot be decided one
+  -- rule at a time the way a fixed three-per-rank could.
+  local plan
+  rig.missingSublevels = nil
+  if isPlater then
+    local pandemicOn = (NS.db.tints.pandemic or {}).enabled and true or false
+    -- ONE occupancy map, shared. The survey is what turns this from arithmetic
+    -- into a measurement: the host's own textures are read off the bar, so the
+    -- ceiling and the free slots are per bar instead of assumed per adapter.
+    --
+    -- The ceiling is taken BEFORE anything of ours is marked, or our own
+    -- reservations would drag it down and move the border band with it.
+    local occ = NS.HostOccupancy(healthBar)
+    local ceiling = NS.OverlayCeiling(occ)
+    -- Missing ladder first: it marks its slots taken, so the presence
+    -- allocator below can no longer be handed the same ones.
+    rig.missingSublevels =
+      NS.PlaterMissingPlan(occ, #ladder, MissingModeIsDisplace(), ceiling)
+    plan, rig.sublevelStarved =
+      NS.PlaterSublevelPlan(ordered, platerTextFloor, pandemicOn, healthBar,
+        occ, ceiling)
+  end
+
   for index, rule in ipairs(ordered) do
     -- Plater pins every rule to one level, so rank becomes a sublevel.
     local level, tintSublevel, underlaySublevel, missingCoverSublevel
+    local entry = plan and plan[index]
     if isPlater then
       level = rig.baseLevel
-      tintSublevel, underlaySublevel, missingCoverSublevel = PlaterRankSublevels(index, platerTextFloor)
+      tintSublevel = entry.tint
+      underlaySublevel = entry.underlay
+      missingCoverSublevel = entry.cover
     else
       level = ruleBase + (count - index) * LEVELS_PER_RULE
     end
     -- Needed only when a lower rule's debuffs are a subset of this one's.
-    local needsUnderlay = false
-    for lower = index + 1, count do
-      if NS.RuleCovers(rule, ordered[lower]) then needsUnderlay = true break end
+    -- Taken from the plan where there is one: the allocator already decided
+    -- this to size the rule, and recomputing it here could disagree, which
+    -- would put a texture on a sublevel nothing reserved.
+    local needsUnderlay
+    if entry then
+      needsUnderlay = entry.needsUnderlay
+    else
+      needsUnderlay = false
+      for lower = index + 1, count do
+        if NS.RuleCovers(rule, ordered[lower]) then needsUnderlay = true break end
+      end
     end
-    local overdraw = -(insets[index] or 0)
+    -- Insets exist because frame level cannot arbitrate between two rules that
+    -- can be lit at once and do not cover each other. On a flat-pinned bar
+    -- draw sublevel does arbitrate, so the shrink buys nothing and costs up to
+    -- a pixel off every tint.
+    local overdraw = isPlater and 0 or -(insets[index] or 0)
     local record = BuildRule(rig, healthBar, rule, level, needsUnderlay, overdraw,
-      tintSublevel, underlaySublevel, isPlater and (platerTextFloor - 1) or nil, missingCoverSublevel)
+      tintSublevel, underlaySublevel, isPlater and (platerTextFloor - 1) or nil,
+      missingCoverSublevel, entry and entry.layer or nil)
     -- Replayed by NS.AnchorTints. Stored, not recomputed, so they cannot
     -- disagree.
     record.levelOffset = level - rig.baseLevel
+    -- Same reason, and now load-bearing: /pt layers used to re-derive these
+    -- from the rule's index, which stopped being possible the moment
+    -- allocation depended on what earlier rules asked for.
+    record.tintLayer = entry and entry.layer or "OVERLAY"
+    record.tintSublevel = tintSublevel
+    record.underlaySublevel = underlaySublevel
+    record.missingCoverSublevel = missingCoverSublevel
+    record.needsUnderlay = needsUnderlay
     table.insert(rig.rules, record)
   end
 
@@ -963,15 +1434,6 @@ function NS.BuildTints(rig, healthBar)
     local record = BuildRule(rig, healthBar, rule, level, false, nil, nil, nil, isPlater and (platerTextFloor - 1) or nil)
     record.levelOffset = level - rig.baseLevel
     table.insert(rig.rules, record)
-  end
-
-  -- Single-debuff only: rank k already spends a chain level per rule above it,
-  -- and a second condition needs another with no room for it.
-  local ladder = {}
-  for _, rule in ipairs(missingRules) do
-    if #(rule.conditions or {}) == 1 and #ladder < NS.MAX_MISSING_RULES then
-      ladder[#ladder + 1] = rule
-    end
   end
 
   -- Rank 1's wash first, so the cover has something underneath it. The ladder
@@ -1033,15 +1495,41 @@ end
 -- LADDER-WIDE, forced: only one wash is ever lit and which one depends on
 -- aura state we may not read. Engages only when every rule asks for it, and a
 -- mixed ladder fails toward SHOWING.
+-- "Am I fighting this mob?"
+--
+-- UnitAffectingCombat(unit) alone was too strict. It reports the MOB's own
+-- combat flag, which plenty of things you are actively fighting never set:
+-- a mob dotted at range before it aggros, an add on someone else's threat
+-- that has not engaged, scripted or immune mobs, training dummies. On those
+-- the gate stayed shut and the reminder never lit -- the "enemies without
+-- threat show no combat rules" report.
+--
+-- Threat closes the gap without opening it too far: being on a mob's threat
+-- table means you have touched it, which is exactly the population a missing
+-- reminder is for. A mob standing untouched across the room has neither flag
+-- and still stays dark, which is the whole point of the option.
+--
+-- UnitThreatSituation is a readable carve-out in instances, same as
+-- UnitAffectingCombat, so this costs nothing in a key. pcall anyway: it is
+-- called at 4Hz on every rigged plate and a throw here kills the ticker.
+function NS.UnitEngaged(unit)
+  if not unit then return false end
+  if not UnitAffectingCombat("player") then return false end
+  if UnitAffectingCombat(unit) then return true end
+  local ok, threat = pcall(UnitThreatSituation, "player", unit)
+  if ok and threat ~= nil and not (issecretvalue and issecretvalue(threat)) then
+    return true
+  end
+  return false
+end
+
 local function LadderCombatAllows(rig)
   local ladder = rig and rig.missingLadder
   if not ladder or #ladder == 0 then return true end
   for _, rule in ipairs(ladder) do
     if not rule.missingCombatOnly then return true end
   end
-  local unit = rig.unit
-  if not (unit and UnitAffectingCombat(unit)) then return false end
-  return UnitAffectingCombat("player") and true or false
+  return NS.UnitEngaged(rig.unit)
 end
 NS.LadderCombatAllows = LadderCombatAllows
 
@@ -1060,8 +1548,7 @@ function NS.UpdateMissingCombatGate(rig)
   local displace = rig.missingDisplace
   if displace then
     local unit = rig.unit
-    local inCombat = unit and UnitAffectingCombat(unit)
-      and UnitAffectingCombat("player") and true or false
+    local inCombat = NS.UnitEngaged(unit)
     for _, entry in ipairs(displace.entries or {}) do
       local allow = (not entry.rule.missingCombatOnly) or inCombat
       if entry.allowed ~= allow then
@@ -1131,7 +1618,8 @@ function NS.BuildMissingWash(rig, healthBar, level, topRule)
 
   local tex = frame.wash
   if not tex then
-    tex = frame:CreateTexture(nil, "OVERLAY", nil, MissingWashSublevel(1))
+    tex = frame:CreateTexture(nil, "OVERLAY", nil,
+      MissingSub(rig, 1, "wash", MissingWashSublevel(1)))
     NS.stats.textures = NS.stats.textures + 1
     frame.wash = tex
   end
@@ -1165,6 +1653,7 @@ function NS.BuildMissingBarStack(rig, healthBar, rules, level)
     local okFrame, frame = pcall(CreateFrame, "AuraContainer", nil, parent,
       "CustomAuraContainerTemplate")
     if not okFrame or not frame then
+      NS.NoteContainerRefused()
       record.failures = record.failures + 1
       record.lastError = record.lastError
         or ("missing ladder at rank " .. rank .. ": " .. tostring(frame))
@@ -1196,7 +1685,7 @@ function NS.BuildMissingBarStack(rig, healthBar, rules, level)
 
       -- Into underlays, because that is the list NS.UpdateCovers repaints.
         local cover = button:CreateTexture(nil, "OVERLAY", nil,
-          MissingCoverSublevel(rank))
+          MissingSub(rig, rank, "cover", MissingCoverSublevel(rank)))
         NS.stats.textures = NS.stats.textures + 1
       -- record.overdraw, not UNDERLAY_OVERDRAW -- AnchorTints replays this as
       -- the sum, so they agree only if the same field is used.
@@ -1206,7 +1695,7 @@ function NS.BuildMissingBarStack(rig, healthBar, rules, level)
         local nextRule = rules[rank + 1]
         if nextRule then
           local wash = button:CreateTexture(nil, "OVERLAY", nil,
-            MissingWashSublevel(rank + 1))
+            MissingSub(rig, rank + 1, "wash", MissingWashSublevel(rank + 1)))
           NS.stats.textures = NS.stats.textures + 1
           ApplyRuleFill(wash, healthBar, nextRule, 0)
       -- Unconditional by necessity: this belongs to a secure aura button and
@@ -1255,7 +1744,8 @@ function NS.BuildMissingDisplace(rig, healthBar, rules, level)
         holder:SetAllPoints(healthBar)
         pcall(holder.SetFrameLevel, holder, level)
 
-        local wash = holder:CreateTexture(nil, "OVERLAY", nil, DisplaceWashSublevel(rank))
+        local wash = holder:CreateTexture(nil, "OVERLAY", nil,
+          MissingSub(rig, rank, "wash", DisplaceWashSublevel(rank)))
         NS.stats.textures = NS.stats.textures + 1
         ApplyRuleFill(wash, healthBar, rule, 0)
 
@@ -1493,6 +1983,11 @@ function NS.AnchorTints(rig)
   local healthBar = rig.healthBar
   local baseLevel = NS.BaseLevelFor(healthBar)
   rig.baseLevel = baseLevel
+  -- The full re-anchor runs out of combat, where every frame accepts a level,
+  -- so this is the one path allowed to declare the level actually applied.
+  -- RepinLevels only claims it when nothing was refused.
+  rig.appliedLevel = baseLevel
+  rig.levelRefusedCount = nil
 
   local okW, w = pcall(healthBar.GetWidth, healthBar)
   local okH, h = pcall(healthBar.GetHeight, healthBar)
@@ -1584,6 +2079,111 @@ function NS.AnchorTints(rig)
   NS.UpdateCovers(rig)
 end
 
+-- Session-cumulative. Split because they answer different questions: detected
+-- is "did the host move the bar out from under us at all", refused is "and
+-- could we do anything about it there and then".
+NS.levelDrift = { detected = 0, repinned = 0, refused = 0, deferred = 0 }
+
+-- The host bar's frame level is read ONCE, when the rig is built, and every
+-- container and aura button is pinned to it. Plater raises its unit frame by
+-- 5000 AFTER the plate appears, so a rig built inside that window latches the
+-- pre-bump number -- measured on live plates as bar 5011 against baseLevel 11,
+-- bar 5151 against 151, while the one plate that coloured had 5081 against
+-- 5081. Health bars are pooled, so the stale level then rides that bar onto
+-- later mobs.
+--
+-- Nothing FAILS when this happens, which is why no counter ever caught it:
+-- SetFrameLevel was accepted, it was simply aimed at the wrong number. Frame
+-- level is decided before draw layer, so from 5000 below every region the bar
+-- owns -- the health fill included -- draws over our tint at every sublevel.
+-- The plate just never colours.
+--
+-- AnchorTints already re-reads the level, but the only thing that calls it
+-- mid-pull is combat ending, which is exactly too late. Hence a ticker.
+--
+-- Levels only, deliberately: AnchorTints also redoes anchors, sizes, masks and
+-- covers, which is far too much to run every second. Nothing has MOVED here --
+-- the bar is where it was, at a new level -- so there is nothing else to redo.
+function NS.RepinLevels(rig)
+  local healthBar = rig.healthBar
+  if not healthBar then return false end
+  local okLevel, wanted = pcall(NS.BaseLevelFor, healthBar)
+  if not okLevel or type(wanted) ~= "number" then return false end
+  if wanted == rig.baseLevel then return false end
+
+  NS.levelDrift.detected = NS.levelDrift.detected + 1
+  -- Set BEFORE anything is pinned, deliberately: the offsets below are all
+  -- computed against it, and leaving it stale would make a retry every tick.
+  --
+  -- The cost is that it is a statement of intent, not of fact, and every
+  -- diagnostic was reading it as fact. When the pins were refused this field
+  -- still matched the bar, so `/pt bar` reported no drift and an external
+  -- probe computing BaseLevelFor(bar) - rig.baseLevel got 0 -- on a plate
+  -- whose tint was sitting 5000 levels below its bar and could not draw.
+  -- Months of "same rules, some mobs colour and some do not" looked healthy
+  -- in every diagnostic for exactly this reason.
+  --
+  -- rig.appliedLevel below is the honest one: it only advances when every
+  -- frame accepted and read back the new level.
+  rig.baseLevel = wanted
+  local isPlater = NS.IsPlaterBar(healthBar)
+  local refused = 0
+
+  -- Accepted is not applied. A pcall that returns true only proves the call
+  -- did not throw, so the level is read back rather than trusted -- the same
+  -- trap that made this bug invisible in the first place.
+  local function Pin(frame, level)
+    if not frame then return end
+    if pcall(frame.SetFrameLevel, frame, level) then
+      local okGot, got = pcall(frame.GetFrameLevel, frame)
+      if okGot and got == level then return end
+    end
+    refused = refused + 1
+  end
+
+  if rig.outline then Pin(rig.outline, wanted + (rig.outlineLevelOffset or 0)) end
+
+  for _, record in ipairs(rig.rules or EMPTY) do
+    local level = isPlater and wanted or (wanted + (record.levelOffset or 0))
+    record.level = level
+    for _, frame in ipairs(record.containers or EMPTY) do Pin(frame, level) end
+    for _, host in ipairs(record.hosts or EMPTY) do Pin(host, level) end
+    for _, host in ipairs(record.tintHosts or EMPTY) do Pin(host, level) end
+  end
+
+  if rig.missingWash then
+    Pin(rig.missingWash, isPlater and wanted or (wanted + (rig.missingLevelOffset or 0)))
+  end
+  for _, entry in ipairs((rig.missingDisplace or EMPTY).entries or EMPTY) do
+    Pin(entry.holder,
+      isPlater and wanted or (wanted + (entry.levelOffset or rig.missingLevelOffset or 0)))
+  end
+
+  if refused > 0 then
+    NS.levelDrift.refused = NS.levelDrift.refused + refused
+    NS.levelDrift.deferred = NS.levelDrift.deferred + 1
+    -- An aura button only accepts a level inside its own initializeFrame, so
+    -- some of these can only be fixed by a rebuild. Marked, not rebuilt here:
+    -- rebuilding mid-combat is the churn this whole area exists to avoid, and
+    -- Reapply on PLAYER_REGEN_ENABLED re-anchors every rig anyway.
+    --
+    -- Since the initializeFrame callback now reads record.level rather than
+    -- the level captured at build time, a refused button also repairs itself
+    -- the next time the pool initialises it -- which under a HARMFUL|PLAYER
+    -- filter is the next time the debuff lands. The deferral is the backstop
+    -- now, not the only route.
+    rig.levelDirty = true
+    -- appliedLevel deliberately NOT advanced: the frames are not there.
+    rig.levelRefusedCount = refused
+  else
+    NS.levelDrift.repinned = NS.levelDrift.repinned + 1
+    rig.levelDirty = nil
+    rig.levelRefusedCount = nil
+    rig.appliedLevel = wanted
+  end
+  return true
+end
+
 function NS.SetTintsUnit(rig)
   for _, record in ipairs(rig.rules or {}) do
     for _, frame in ipairs(record.containers) do
@@ -1610,6 +2210,49 @@ end
 
 -- Nested containers are children of aura buttons: SetEnabled and field writes
 -- are accepted, Hide is refused. SetEnabled(false) is what retires one.
+-- Combat-safe recovery: notice a container that has gone dark and switch it
+-- back on, WITHOUT rebuilding anything.
+--
+-- Every other fix in this area works by stopping a container being turned off
+-- in the first place, which only helps for causes already identified. This
+-- does not care why. If a root container on a bound plate is hidden or
+-- disabled, that plate cannot colour, and both are reversible in combat --
+-- unlike Show on a NESTED container, which is refused, and unlike a rebuild,
+-- which needs lockdown to end.
+--
+-- Cheap on purpose, because it runs on a ticker: a couple of boolean reads per
+-- root container, and nothing at all for a plate that is healthy. Root
+-- containers only -- one per rule, not one per pooled button.
+--
+-- SetUnit is deliberately NOT called here. Re-assigning the same unit churns
+-- the container's button pool, which is what drove runaway button counts
+-- before; ActivateContainer owns that decision and guards it with boonUnit.
+function NS.ReviveContainers(rig)
+  if not rig.unit then return 0 end
+  local revived = 0
+  for _, record in ipairs(rig.rules or EMPTY) do
+    for _, frame in ipairs(record.containers or EMPTY) do
+      if frame.ptRootContainer ~= false then
+        local okShown, shown = pcall(frame.IsShown, frame)
+        local okEnabled, enabled = pcall(frame.IsEnabled, frame)
+        -- Only act on a definite negative. A refused or secret read means we
+        -- do not know, and switching something on every tick because we
+        -- cannot read it would be its own churn.
+        local darkShown = okShown and shown == false
+        local darkEnabled = okEnabled and enabled == false
+        if darkShown or darkEnabled then
+          if darkShown then pcall(frame.Show, frame) end
+          if darkEnabled and frame.boonUnit then
+            pcall(frame.SetEnabled, frame, true)
+          end
+          revived = revived + 1
+        end
+      end
+    end
+  end
+  return revived
+end
+
 function NS.RetireTints(rig)
   -- The missing wash is shown unconditionally, so a retired rig that left it
   -- up would keep a reminder on a plate this addon no longer drives.
@@ -1626,7 +2269,23 @@ function NS.RetireTints(rig)
       pcall(frame.SetEnabled, frame, false)
       frame.boonEnabled = false
       frame.boonUnit = nil
-      pcall(frame.Hide, frame)
+      -- ROOT ONLY. A nested container is a child of an aura button, where
+      -- Show is refused -- so hiding one is a ONE-WAY DOOR: it goes dark and
+      -- nothing can bring it back, for the life of that health bar. Bars are
+      -- pooled, so every later mob handed that bar inherits the dead chain.
+      --
+      -- ActivateContainer already assumed this, in as many words: "those were
+      -- never hidden in the first place, so a refusal costs nothing". They
+      -- were, right here. Only combo rules can be hit -- a single-debuff rule
+      -- owns just the root -- which shows up as some rules painting on a bar
+      -- while others never do again.
+      --
+      -- Disabling the root is sufficient anyway: with it disabled the engine
+      -- pools no buttons, so the nested containers have nothing to hang off
+      -- and draw nothing regardless of their shown state.
+      if frame.ptRootContainer ~= false then
+        pcall(frame.Hide, frame)
+      end
     end
   end
 end

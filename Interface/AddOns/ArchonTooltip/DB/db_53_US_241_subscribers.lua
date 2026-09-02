@@ -234,7 +234,31 @@ local function getChunkLookup(table, length)
 end
 
 local lookup = {'Unknown-Unknown',}
-local provider = {region='US',realm='WyrmrestAccord',name='US',type='subscribers',zone=53,date='2026-08-26',data={Ag='Aggrodari:BAEANQADCgUIBQAAAA==.Aggrodorei:BAEANQADCggIDgABNQADCgUIBQABAAAAAA==.',Ar='Arcis:BAEANQAECgEIAQAAAA==.',Be='Belowknee:BAEANQADCgYIBwAAAA==.',Br='Breadroll:BAEANQAECgIIAgAAAA==.',Ca='Caedues:BAEANQADCggIDgAAAA==.Candlemage:BAEANQAECgMIAwAAAA==.',Dr='Drommekage:BAEANQADCgYIDAAAAA==.',Fe='Fedja:BAEANQADCgQIBAAAAA==.',Fi='Fitzerka:BAEANQADCgcIBwAAAA==.',Ha='Harivata:BAEANQADCgYIDgABNQADCgQIBAABAAAAAA==.',Hy='Hyjink:BAEANQADCgYIBgAAAA==.',Il='Illothe:BAEANQAECgYIBgAAAA==.',Jl='Jlucks:BAEANQAECgMIAwABNQAECgYICAABAAAAAA==.Jlucksdr:BAEANQAECgYICAAAAA==.',Ju='Juturna:BAEANQAECgYICQAAAA==.Juturnah:BAEANQAECgEIAQABNQAECgYICQABAAAAAA==.',Ki='Kippee:BAEANQAECgMIAwAAAA==.',Kr='Kredrothos:BAEANQADCgYICwAAAA==.',Me='Meliora:BAEANQADCgIIAgAAAA==.',Ni='Nitedragon:BAEANQADCgYICgAAAA==.',Te='Tenisia:BAEANQAECgQIBAAAAA==.',Ti='Titandb:BAEANQAECgcIDAAAAA==.',Zi='Zirkondrake:BAEANQADCgYIBgAAAA==.',},}
+local provider = {region='US',realm='WyrmrestAccord',name='US',type='subscribers',zone=53,date='2026-09-01',data={Ag='Aggrodari:BAEANQADCgUIBQAAAA==.Aggrodorei:BAEANQAECgQIBAABNQADCgUIBQABAAAAAA==.',
+Ar='Arcis:BAEANQAECgUIBgAAAA==.',
+Be='Belowknee:BAEANQAECgEIAQAAAA==.',
+Br='Breadroll:BAEANQAECgIIAgAAAA==.',
+Ca='Caedues:BAEANQAECgIIAgAAAA==.Candlemage:BAEANQAECgcICgAAAA==.',
+Dr='Drommekage:BAEANQAECgIIAgAAAA==.',
+Fe='Fedja:BAEANQAECgQIBAABNQADCgUIBQABAAAAAA==.',
+Fi='Fitzerka:BAEANQAECgEIAQAAAA==.',
+Ha='Harivata:BAEANQADCgYIDgABNQADCgYICQABAAAAAA==.',
+Hy='Hyjink:BAEANQADCggIDgAAAA==.',
+Il='Illothe:BAEANQAECgcIDQAAAA==.',
+Jl='Jlucks:BAEANQAECgYICQABNQAECgcIDwABAAAAAA==.Jlucksdr:BAEANQAECgcIDwAAAA==.',
+Ju='Juturna:BAEANQAECgcICgAAAA==.Juturnah:BAEANQAECgEIAQABNQAECgcICgABAAAAAA==.',
+Ki='Kippee:BAEANQAECgQICAAAAA==.',
+Kr='Kredrothos:BAEANQADCggIDQAAAA==.',
+Ma='Marosia:BAEANQADCggIBQAAAA==.',
+Me='Meliora:BAEANQADCgIIAgAAAA==.',
+Ni='Nitedragon:BAEANQADCgcIEQAAAA==.',
+Qa='Qahz:BAEANQABCgMIAgABNQADCgUIBQABAAAAAA==.',
+Te='Tenisia:BAEANQAECgcIBwAAAA==.',
+Ti='Titandb:BAEANQAECgcIDgAAAA==.Titanpp:BAEANQADCggICAABNQAECgcIDgABAAAAAA==.',
+Vl='Vladja:BAEANQADCgUIBQAAAA==.',
+Xa='Xanthor:BAEANQADCgMIAwABNQADCggIDgABAAAAAA==.',
+Zi='Zirkondrake:BAEANQADCggIDgAAAA==.',
+},}
 provider.parse = parse
 
 local rawData = provider.data

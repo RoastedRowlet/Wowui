@@ -4257,16 +4257,15 @@ ApplyIconStyle = function(frame, cdID)
           -- This hook handles: texture override, bling, reverse, swipe color.
           -- ═══════════════════════════════════════════════════════════════════
 
-          -- Set texture to spell icon (not aura icon)
-          local cooldownInfo = parentFrame.cooldownInfo
-          local spellID = cooldownInfo and (cooldownInfo.overrideSpellID or cooldownInfo.spellID)
-          if spellID and parentFrame.Icon then
-            local texture = C_Spell.GetSpellTexture(spellID)
-            if texture then
-              parentFrame._arcBypassTextureHook = true
-              parentFrame.Icon:SetTexture(texture)
-              parentFrame._arcBypassTextureHook = false
-            end
+          -- Set texture through THE resolver (one-path law, icon-override-system
+          -- skill): a custom icon wins outright; else IAO forces the spell art
+          -- back while the aura is active. The old DIRECT spell-art push here
+          -- bypassed the texture hook and stomped custom icons on every
+          -- in-combat cooldown push -- the "custom icon switches when I enter
+          -- combat" report (2026-08-31). When neither applies, no write: CDM's
+          -- own art already stands.
+          if parentFrame.Icon then
+            ApplyIconTexture(parentFrame, false)
           end
           
           -- Apply bling/reverse/color based on who controls cooldowns
@@ -7282,7 +7281,46 @@ EnhanceFrame = function(frame, cdID, viewerType, viewerName)
   -- Track which cdID this frame is currently enhanced for
   frame._arcLastEnhancedCdID = cdID
   frame._arcEnhanced = true
-  
+
+  -- SHADOW IDENTITY CATCH-ALL (2026-08-29): the shadow Cooldowns must always
+  -- hold state for the spell the frame CURRENTLY shows. Rebinds can slip past
+  -- the FrameController dispatch (frames momentarily unmanaged mid-storm), and
+  -- the OnCooldownEvent override detection only runs on cooldown EVENTS — which
+  -- an idle player never sends, so a stale shadow survived until the user cast
+  -- something. Enhance runs on every settled wave with fresh cooldownInfo:
+  -- a fed-spell / current-spell mismatch here re-feeds immediately. Identity
+  -- compare, so it also catches A→B→A round trips that defeat any
+  -- endpoint-compared stamp. Secret-guarded: item/trinket entries can expose
+  -- a SECRET spellID (12.1, instance-based) — never compare those.
+  if (viewerType == "cooldown" or viewerType == "utility")
+     and ns.CooldownState and ns.CooldownState.FeedShadow then
+    local fedSpell = frame._arcShadowFedSpellID
+    local ci = frame.cooldownInfo
+    local curSpell = ci and (ci.overrideSpellID or ci.spellID)
+    -- A NIL fed marker is ALSO a violation: the shadow is UNFED (fresh pool
+    -- frame, or a released frame whose marker the release dispatch nil'd while
+    -- the rebind landed un-adopted and skipped the container gate) — Apply
+    -- renders an unfed shadow as READY, which put a saturated face on an
+    -- on-cooldown Bloodlust (trace-proven 2026-08-29). Feed on nil too; the
+    -- feed stamps the marker so settled frames skip this on every later pass.
+    if curSpell and not issecretvalue(curSpell)
+       and (not fedSpell or issecretvalue(fedSpell) or fedSpell ~= curSpell) then
+      frame._arcLastShadowShown  = nil
+      frame._arcLastChargeShown  = nil
+      frame._arcShadowFedSpellID = nil
+      frame._arcCDAlertState     = nil  -- sound-alert baseline: new spell, no transition
+      local csCfg = GetEffectiveIconSettingsForFrame(frame)
+      if csCfg then
+        if ns.TraceTap then
+          ns.TraceTap("CS", string.format("ENHANCE-REFEED cd=%s fed=%s now=%s",
+            tostring(cdID), tostring(fedSpell), tostring(curSpell)))
+        end
+        ns.CooldownState.FeedShadow(frame, csCfg)
+        ApplyCooldownStateVisuals(frame, csCfg)
+      end
+    end
+  end
+
   -- Update tracking table
   enhancedFrames[cdID] = {
     frame = frame,
@@ -10263,7 +10301,12 @@ StartLCGProcGlow = function(frame, glowCfg, padding)
     yOffset = glowOffset + (glowCfg.yOffset or 0),
     translateX = glowCfg.translateX or 0,
     translateY = glowCfg.translateY or 0,
-    frameLevel = glowCfg.frameLevel,
+    -- strata/frameLevel defaulting mirrors ShowProcGlowPreview EXACTLY (this
+    -- function's stated contract) -- the live path had drifted and silently
+    -- DROPPED the user's Glow Strata (panel key procGlow.strata; the
+    -- glow-wiring pass caught a user running DIALOG that did nothing)
+    strata = (not glowCfg.strata or glowCfg.strata == "inherit") and "MEDIUM" or glowCfg.strata,
+    frameLevel = glowCfg.frameLevel or ((not glowCfg.strata or glowCfg.strata == "inherit") and 1 or nil),
   })
 end
 

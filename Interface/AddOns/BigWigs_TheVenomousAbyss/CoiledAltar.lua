@@ -116,7 +116,7 @@ mod:SetAuraData({
 	{1283485, soundOnApplied = "warning", duration = 5, note = "Targeted"}, -- Guillotine
 	{1297435, soundOnApplied = "warning", duration = 6, note = "Targeted"}, -- Dreadmarch XXX not applied to players?
 	{1285911, soundOnApplied = "warning", duration = 7}, -- Unnerving Fixation
-	{1286901, 1310881, soundOnApplied = "warning", duration = 5}, -- Gloombomb
+	{1310881, soundOnApplied = "warning", duration = 5}, -- Gloombomb
 	{1286837, soundOnApplied = "alarm", soundOnAppliedDose = "none", duration = 11}, -- Gravebound
 	{1299266, soundOnApplied = "warning", duration = 5, note = "Targeted"}, -- Grim Guillotine
 	-- Zul'jan
@@ -480,17 +480,21 @@ function mod:ENCOUNTER_TIMELINE_EVENT_STATE_CHANGED(_, eventID)
 	local barInfo = activeBars[eventID]
 
 	if barInfo and barInfo.key == 1282487 and state == 3 then -- Fangs of the Coiled Altar (Canceled)
-		-- Normally canceled after the next set of timers are added
-		self:StopBar(barInfo.msg)
-		if spellCount[1283832] > barInfo.count then -- 1283832 = Axegrinder, a once per Fangs ability
-			-- next bar started, so it finished
-			barInfo:onFinished()
-		else
-			-- actually ended early, so trigger next phase
-			self:StartPhaseTwo()
-		end
-		activeBars[eventID] = nil
-		barInfo = nil
+		-- Normally canceled after the next set of timers are added, but can rarely happen before
+		-- Just run next frame so we're always after
+		self:SimpleTimer(function()
+			-- Check Axegrinder (1283832), a once per Fangs ability, since Fangs _ADDED is after the rest of the timers
+			self:StopBar(barInfo.msg)
+			if spellCount[1283832] > barInfo.count then
+				-- next bar started, so it finished
+				barInfo:onFinished()
+			else
+				-- actually ended early, so trigger next phase
+				self:StartPhaseTwo()
+			end
+			activeBars[eventID] = nil
+		end, 0)
+		return
 	end
 
 	if barInfo and barInfo.gapTimer and state == 2 then -- Finished (reuse the eventID to set the spell indicator for the next bar)

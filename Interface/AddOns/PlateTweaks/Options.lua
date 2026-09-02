@@ -8637,7 +8637,9 @@ local function BuildDiagnosticsTab()
   panel.report = edit
 
   panel.copyHint = Dim(panel, "")
-  panel.copyHint:SetPoint("BOTTOMLEFT", 12, 14)
+  -- One row ABOVE the buttons. It shared the row with them and the longer
+  -- messages ran straight under Delete, which read as a rendering bug.
+  panel.copyHint:SetPoint("BOTTOMLEFT", 12, 14 + CTRL_H + 6)
 
   panel.copy = Button(panel, "Select All for Copy", 150, function()
     edit:SetFocus()
@@ -8727,12 +8729,17 @@ local function BuildDiagnosticsTab()
         panel.showingCapture = true
         edit:SetFocus()
         edit:HighlightText()
+        panel.selectedCapture = nil
         panel.copyHint:SetText(("All |cff55dd55%d|r captures selected - press |cff55dd55Ctrl+C|r to copy."):format(#store))
         return
       end
 
       local item = index and store[index]
       if not item then return end
+      -- Remembered so Delete knows what to remove. The dropdown is the only
+      -- place a capture is ever identified, so without this the button would
+      -- have nothing to act on.
+      panel.selectedCapture = index
       edit:SetText(table.concat(item.lines or {}, "\n"))
       panel.showingCapture = true
       edit:SetFocus()
@@ -8741,6 +8748,65 @@ local function BuildDiagnosticsTab()
         tostring(item.label)))
     end)
   panel.savedPick:SetPoint("RIGHT", panel.full, "LEFT", -6, 0)
+
+  -- Deleting ONE capture, not all of them. Captures pile up over a testing
+  -- session and the useful one usually sits beside several throwaways; before
+  -- this the only option was wiping the lot, so people kept the junk rather
+  -- than risk losing the good run.
+  panel.deleteCapture = Button(panel, "Delete", 70, function()
+    local store = (PLATETWEAKS_DEBUG or {}).captures or {}
+    local index = panel.selectedCapture
+    local item = index and store[index]
+    if not item then
+      panel.copyHint:SetText("|cffff8800Pick a single capture first|r -- 'All' is not a single capture.")
+      return
+    end
+    table.remove(store, index)
+    panel.selectedCapture = nil
+    panel.showingCapture = nil
+    edit:SetText("")
+    panel.copyHint:SetText(("Deleted |cff55dd55%s|r. %d capture(s) left."):format(
+      tostring(item.label), #store))
+    -- The dropdown indexes straight into this table, so it has to be rebuilt
+    -- or the next pick reads a shifted entry.
+    panel.savedPick.Refresh()
+    if panel.Render then panel.Render() end
+  end)
+  -- Destructive controls together at the right-hand end, away from the two
+  -- copy buttons people press constantly.
+  panel.deleteAll = Button(panel, "Delete All", 90, function()
+    local store = (PLATETWEAKS_DEBUG or {}).captures or {}
+    if #store == 0 then
+      panel.copyHint:SetText("No captures to delete.")
+      return
+    end
+    -- Confirmed, unlike single Delete: this can wipe runs from earlier
+    -- sessions that someone was keeping deliberately, and there is no undo.
+    ShowConfirm("Delete all captures",
+      ("This removes all %d saved capture(s), including any taken in earlier sessions. This cannot be undone."):format(#store),
+      "Delete All",
+      function()
+        PLATETWEAKS_DEBUG.captures = {}
+        panel.selectedCapture = nil
+        panel.showingCapture = nil
+        edit:SetText("")
+        panel.copyHint:SetText("All captures deleted.")
+        panel.savedPick.Refresh()
+        if panel.Render then panel.Render() end
+      end)
+  end)
+  Tip(panel.deleteAll, "Delete All",
+    "Removes every saved capture, including ones from previous sessions. Asks first.")
+
+  -- Anchored here rather than where each button is created: the row runs
+  -- right to left from Delete All, and panel.copy is built before these exist.
+  panel.deleteAll:SetPoint("BOTTOMRIGHT", -10, 10)
+  panel.deleteCapture:SetPoint("RIGHT", panel.deleteAll, "LEFT", -6, 0)
+  panel.copy:ClearAllPoints()
+  panel.copy:SetPoint("RIGHT", panel.deleteCapture, "LEFT", -6, 0)
+  Tip(panel.deleteCapture, "Delete capture",
+    "Removes the capture currently loaded above. Delete All removes every one.")
+
   panel.savedPick.label:SetText("Saved captures")
   -- Always reads as a prompt: this picks something to load, it is not a
   -- setting with a current value.
@@ -8791,6 +8857,19 @@ local function BuildDiagnosticsTab()
     if info.errored > 0 then
       table.insert(out, ("build errors on %d rig(s): %s"):format(info.errored, tostring(info.firstError)))
     end
+    if info.testMode then
+      table.insert(out, "TEST MODE IS ON -- colours on screen are simulated, not driven by real debuffs")
+    end
+    table.insert(out, ("peak plates this session: %d (%d of them in combat)")
+      :format(info.peakPlates or 0, info.peakPlatesInCombat or 0))
+    if (info.containerRefusals or 0) > 0 then
+      table.insert(out, ("containers refused this session: %d (%d under combat lockdown)")
+        :format(info.containerRefusals or 0, info.containerRefusalsInCombat or 0))
+    end
+    if (info.rigsEmpty or 0) > 0 or (info.rigsFailed or 0) > 0 or (info.rigsUnsound or 0) > 0 then
+      table.insert(out, ("rig health: %d bound plate(s) drawing nothing | %d with refused builds | %d unsound")
+        :format(info.rigsEmpty or 0, info.rigsFailed or 0, info.rigsUnsound or 0))
+    end
 
     table.insert(out, "")
     if #info.rules == 0 then
@@ -8827,6 +8906,8 @@ local function BuildDiagnosticsTab()
       if t.rigged then
         table.insert(out, ("  rig base level %s | tints shown %d of %d"):format(
           tostring(t.baseLevel), t.tintsShown or 0, t.tintsTotal or 0))
+        table.insert(out, ("  built in combat %s | sound %s | repairs used %d/%d"):format(
+          tostring(t.builtInCombat), tostring(t.sound), t.repairs or 0, t.repairCap or 1))
       end
     end
 

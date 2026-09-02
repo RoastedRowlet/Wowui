@@ -234,7 +234,7 @@ local function getChunkLookup(table, length)
 end
 
 local lookup = {'Unknown-Unknown',}
-local provider = {region='US',realm='Aegwynn',name='US',type='subscribers',zone=53,date='2026-08-26',data={Al='Alextros:BAEANQAECgEIAQAAAA==.',Gw='Gwiontotems:BAEANQADCgQIBAABNQADCgYIBgABAAAAAA==.',Ho='Holyhero:BAEANQADCgQIBAAAAA==.',Me='Meion:BAEANQADCgIIAwAAAA==.',Ni='Niviene:BAEANQADCgYIBgAAAA==.',Sa='Saranii:BAEANQADCgUIBQAAAA==.',Ta='Tankiemctank:BAEANQADCgYIBgAAAA==.',Zi='Zingerdk:BAEANQADCggICAABNQAECgEIAQABAAAAAA==.',['Zí']='Zíngerdh:BAEANQAECgEIAQAAAA==.',},}
+local provider = {region='US',realm='Aegwynn',name='US',type='subscribers',zone=53,date='2026-09-01',data={Al='Alextros:BAEANQAECgEIAQAAAA==.',Do='Dodgeypoo:BAEANQADCgUIBQAAAA==.',Gw='Gwiontotems:BAEANQADCgQIBgABNQADCgcICwABAAAAAA==.',Ha='Hailey:BAEANQAECgYIBgAAAA==.',Ho='Holyhero:BAEANQADCgQIBAABNQADCgUIBQABAAAAAA==.',Im='Immunized:BAEANQADCgIIAgABNQADCgMIBQABAAAAAA==.',Me='Meion:BAEANQADCgYICQAAAA==.',Ni='Niviene:BAEANQADCgcICwAAAA==.',Sa='Saranii:BAEANQADCgcICgAAAA==.',Ta='Tankiemctank:BAEANQADCgYICQAAAA==.',Zi='Zingerdk:BAEANQAECgIIAgAAAA==.',['Zí']='Zíngerdh:BAEANQAECgEIAQABNQAECgIIAgABAAAAAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

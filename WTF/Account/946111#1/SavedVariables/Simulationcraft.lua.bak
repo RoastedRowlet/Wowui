@@ -1,34 +1,6 @@
 
 SimulationCraftDB = {
 ["char"] = {
-["Lonelylitten - Stormrage"] = {
-["bonusRolls"] = {
-{
-["currency"] = 3418,
-["ts"] = 1787873280,
-["source"] = 278285,
-["season"] = 37,
-["keyLevel"] = 1,
-["spec"] = 105,
-["context"] = 5,
-["itemId"] = 268235,
-},
-},
-},
-["Zappyxatu - Stormrage"] = {
-["bonusRolls"] = {
-{
-["ts"] = 1787927220,
-["currency"] = 3418,
-["source"] = 278286,
-["context"] = 5,
-["keyLevel"] = 2,
-["spec"] = 263,
-["season"] = 37,
-["itemId"] = 270924,
-},
-},
-},
 ["Barelynoer - Area 52"] = {
 ["bonusRolls"] = {
 {
@@ -50,6 +22,54 @@ SimulationCraftDB = {
 ["spec"] = 1473,
 ["context"] = 16,
 ["itemId"] = 250144,
+},
+},
+},
+["Lonelylitten - Stormrage"] = {
+["bonusRolls"] = {
+{
+["currency"] = 3418,
+["ts"] = 1787873280,
+["source"] = 278285,
+["season"] = 37,
+["keyLevel"] = 1,
+["spec"] = 105,
+["context"] = 5,
+["itemId"] = 268235,
+},
+{
+["currency"] = 3418,
+["ts"] = 1788297300,
+["source"] = 278285,
+["season"] = 37,
+["keyLevel"] = 1,
+["spec"] = 105,
+["context"] = 5,
+["itemId"] = 268248,
+},
+},
+},
+["Zappyxatu - Stormrage"] = {
+["bonusRolls"] = {
+{
+["ts"] = 1787927220,
+["currency"] = 3418,
+["source"] = 278286,
+["context"] = 5,
+["keyLevel"] = 2,
+["spec"] = 263,
+["season"] = 37,
+["itemId"] = 270924,
+},
+{
+["ts"] = 1788293700,
+["currency"] = 3418,
+["source"] = 278286,
+["context"] = 5,
+["keyLevel"] = 2,
+["spec"] = 263,
+["season"] = 37,
+["itemId"] = 270164,
 },
 },
 },
@@ -90,9 +110,9 @@ SimulationCraftDB = {
 ["Lonelylitten - Stormrage"] = {
 ["frame"] = {
 ["ofsx"] = -276.667724609375,
-["ofsy"] = 12.50020217895508,
 ["point"] = "RIGHT",
 ["relativePoint"] = "RIGHT",
+["ofsy"] = 12.50020217895508,
 },
 ["minimap"] = {
 ["minimapPos"] = 225.6023459701718,

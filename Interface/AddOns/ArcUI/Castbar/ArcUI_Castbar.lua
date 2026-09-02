@@ -91,7 +91,7 @@ end
 -- shared (size, position, icon, empower segments, uninterruptible, behavior, etc.).
 local CASTBAR_CATEGORY = {
   -- colors
-  barColor = "colors", conditionalColorEnabled = "colors", colorThresholds = "colors",
+  barColor = "colors", classColor = "colors", conditionalColorEnabled = "colors", colorThresholds = "colors",
   conditionalColorAsSec = "colors",
   -- fill
   texture = "fill", opacity = "fill", reverseFill = "fill",
@@ -343,12 +343,26 @@ local function GetSpellOverride(spellID, cfg)
   return nil
 end
 
+-- CLASS COLOR (feature request 2026-08-31): when enabled, the bar's BASE color
+-- is the player's class color (alpha kept from barColor). Spell overrides and
+-- the uninterruptible color still win above it, same as a custom base color.
+local function ResolveBaseBarColor(cfg)
+  if cfg.classColor then
+    local _, classFile = UnitClass("player")
+    local cc = classFile and RAID_CLASS_COLORS and RAID_CLASS_COLORS[classFile]
+    if cc then
+      return { r = cc.r, g = cc.g, b = cc.b, a = (cfg.barColor and cfg.barColor.a) or 1 }
+    end
+  end
+  return cfg.barColor or {r=0.2, g=0.8, b=1, a=1}
+end
+
 -- Returns: fillColor {r,g,b,a}, overrideTexPath (or nil), borderColorOverride (or nil),
 --          colorLocked (true when a fixed color should win over threshold/curve coloring)
 -- Priority: base type → spell override → uninterruptible
 local function ResolveActiveDisplay(cfg, spellID, isChannel, isEmpowered, notInterruptible)
   -- cfg is the per-type effective config, so cfg.barColor is already this cast type's color.
-  local color = cfg.barColor or {r=0.2, g=0.8, b=1, a=1}
+  local color = ResolveBaseBarColor(cfg)
 
   local overrideTex = nil
   local borderOvr   = nil
@@ -1212,7 +1226,7 @@ local function ShowPreview()
     end
   else
     HideEmpowerVisuals()
-    local color = cfg.barColor or {r=0.2, g=0.8, b=1, a=1}
+    local color = ResolveBaseBarColor(cfg)
     if cfg.conditionalColorEnabled then
       local th = ResolveProgressColor(cfg, 25, 0.5)  -- preview at 25% / 0.5s remaining
       if th then color = th end
@@ -1294,6 +1308,7 @@ castEventFrame:RegisterUnitEvent("UNIT_SPELLCAST_EMPOWER_STOP",   "player")
 castEventFrame:RegisterUnitEvent("UNIT_SPELLCAST_EMPOWER_UPDATE", "player")
 castEventFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
 castEventFrame:RegisterEvent("PLAYER_REGEN_DISABLED")
+castEventFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
 castEventFrame:RegisterEvent("ACTIVE_PLAYER_SPECIALIZATION_CHANGED")
 castEventFrame:RegisterEvent("PLAYER_TALENT_UPDATE")
 
@@ -1379,6 +1394,22 @@ castEventFrame:SetScript("OnEvent", function(self, event, unit, castGUID, spellI
           end
         end
       end
+    end
+    return
+  end
+
+  if event == "PLAYER_ENTERING_WORLD" then
+    -- STUCK-BAR SWEEP (bug report): a cast that ends IN a loading screen --
+    -- Hearthstone, a Hero's Path dungeon teleport -- never delivers its
+    -- STOP/SUCCEEDED to us, so castActive stayed true and the bar sat on
+    -- screen until the next cast. On zone-in, if we think a cast is running
+    -- but the client says nothing is casting or channeling, clear it with the
+    -- plain StopCast (NOT EndCast: that can play the interrupted flash, and
+    -- these casts actually SUCCEEDED). A mid-cast /reload is unaffected:
+    -- castActive is false in the fresh session here, and the PLAYER_LOGIN
+    -- deferred replay re-acquires the live cast a frame later.
+    if castActive and not UnitCastingInfo("player") and not UnitChannelInfo("player") then
+      StopCast()
     end
     return
   end

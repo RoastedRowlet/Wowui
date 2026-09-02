@@ -1,3 +1,57 @@
+## 3.8.6.a
+
+### Bug Fixes
+
+- **Custom Icons Switching in Combat** — A custom icon no longer switches back to the spell's default art during combat when Ignore Aura Override is enabled on the same icon. The custom icon always wins.
+
+## 3.8.6
+
+### New Features
+
+- **Cooldown Sound Alerts** — Icons can now play a sound or speak a line on cooldown events: Ready, On Cooldown (No Charges), On Cooldown (Recharging), and Charge Gained. Each trigger has its own sound and speech toggles, an output channel picker, and works on CDM icons and Arc spell/item icons alike - in dungeons and raids too.
+- **Icon Copies** — Adding a spell or item you already track now creates another copy of it ("Stormstrike (2)") instead of doing nothing. Each copy is a full icon with its own settings and placement - up to 5 per spell, great for charge spells and multi-position layouts.
+- **Target Castbar** — A third castbar for your current target, with the full option set the player and focus bars have: interrupt readiness, uninterruptible color, important-cast glow, raid marker, and more.
+- **Castbar Skins for Focus and Target** — The skin system now covers all three castbars, sharing one skin list: save a look once and load it on any bar. Auto-switch rules (per spec, with talent conditions) work on the focus and target bars too.
+- **Castbar Class Color** — New toggle to color the player castbar with your class color.
+- **Focus Hide Conditions** — Bars gained "No Focus Target" and "Has Focus Target" hide conditions.
+- **Editable Spell ID on Custom Bars** — A custom aura bar's spell ID can now be changed in place - the bar and its catalog entry follow immediately, no delete-and-recreate.
+- **Hide Stack Text at 0** — Cooldown Manager tracked bars that stay visible while their aura is down can now blank the stack number instead of showing 0.
+
+### Improvements
+
+- **Sound Alerts Panel Rework** — Both alert panels (aura and cooldown) now show each trigger in its own titled box with separate Sound and Speech toggles, so you can enable one, both, or neither per trigger. "None" now sits at the top of every sound list.
+- **Stack Numbers From 1** — Stack text on bars now shows from the first stack instead of only at 2 or more.
+
+### Bug Fixes
+
+- **Removing a Row or Column With Icons** — Shrinking a group no longer makes the icon in the removed space invisible (and no longer grows the column back on reload). Icons move to a free slot when there is room; when the group is full, the removal is refused with a message instead of losing an icon.
+- **Some Alert Sounds Never Played** — Sounds from certain packs (like the Arc Pings set) were silently failing to play in aura alerts. They play now.
+- **Deleted Custom Bars Coming Back** — Deleting a custom aura bar and creating a new one no longer resurrects the deleted bar's tracking.
+- **Ghost Bar After Changing a Bar's Spell** — Reconfiguring a bar to a different aura no longer leaves the old aura still driving the fill and text.
+
+## 3.8.5
+
+### New Features
+
+- **Aura Bar Targets** — When you add your own aura bar, you can now choose what it tracks (buffs, debuffs, or both) and who it watches (you, your target, focus, pet, or party members - any combination). There is also a toggle to only show auras you applied yourself. The add window now looks and works like the one in the icon catalog, and everything can be changed later per bar.
+- **Alert Sound Channel** — Aura icon alert sounds can now play through whichever volume slider you pick (Master, Sound Effects, Music, Ambience, or Dialog).
+- **New Sounds** — Added "Ultra Instinct" and "Ultra Instinct Theme" to the sound list, usable anywhere you can pick a sound.
+
+### Improvements
+
+- **Glow Settings Pass** — All the glow options (position, size, layering) now actually work on every glow type, for both CDM icons and Arc icons - several of them previously did nothing. Glows also no longer sit slightly off-center when padding is set, and the marching-ants glow no longer restarts from the beginning every time you cast while using Masque.
+- **Cooldown Reminder Big Cooldowns** — Reminders now work reliably for spells with long cooldowns (like 3 to 5 minute cooldowns) - previously the reminder could give up before the spell came back.
+
+### Bug Fixes
+
+- **Icons Showing the Wrong Cooldown After Talent Changes** — After changing talents or Cooldown Manager settings, icons could look ready while the spell was actually on cooldown (or look on cooldown while ready) until you cast something. Icons now always show the right state immediately.
+- **Groups Growing Extra Columns** — Fixed groups growing extra columns or moving icons around on their own after talent changes, especially with shared or imported layouts.
+- **Icons Swapping Places** — Icons in dynamic groups no longer trade spots back and forth for no reason.
+- **Giant Icon on Screen** — Fixed a rare bug where an icon could suddenly appear huge in the middle of the screen.
+- **Masque Background Stuck On** — With Masque on, an icon's skin background no longer stays visible when the icon itself is hidden.
+- **Castbar Stuck After Loading Screens** — Finishing a cast right as a loading screen hits (Hearthstone, dungeon teleports) no longer leaves the castbar frozen on your screen.
+- **Custom Aura Bars Lost on Import** — Sharing your bar setup with someone (or another character) no longer breaks manually added aura bars.
+
 ## 3.8.4
 
 ### Improvements

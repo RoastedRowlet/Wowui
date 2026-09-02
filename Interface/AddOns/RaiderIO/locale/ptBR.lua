@@ -23,7 +23,7 @@ L["AUTO_COMBATLOG_DESC"] = "Ativa ou desativa automaticamente o log de combate a
 L["AUTO_COMBATLOG_DISABLED_DESC"] = "O registro de combate está desabilitado em um trilha-tempo."
 L["BEST_FOR_DUNGEON"] = "Melhor por Masmorra"
 L["BEST_RUN"] = "Melhor Mítica+"
-L["BEST_SCORE"] = "Maior pontuação de M+ (%s)"
+L["BEST_SCORE"] = "Melhor classificação de M+ (%s)"
 L["BINDING_CATEGORY_RAIDERIO"] = "Raider.IO"
 L["BINDING_HEADER_RAIDERIO_REPLAYUI"] = "Interface de Replay"
 L["BINDING_NAME_RAIDERIO_REPLAYUI_TIMING_BOSS"] = "Definir timing para Tempo do Chefe"
@@ -57,51 +57,31 @@ L["BUILDS_PROFILE_LOADOUT_IS_ALREADY_ACTIVE"] = "Seu equipamento atual correspon
 L["BUILDS_PROFILE_LOADOUT_NAME"] = "Configuração do Raider.IO"
 L["BUILDS_PROFILE_NO_DATA"] = "Os murlocs não conseguiram encontrar nada de útil para exibir aqui. Tente alterar os filtros."
 L["BUILDS_PROFILE_RECOMMENDED"] = "Recomendado"
---[[Translation missing --]]
---[[ L["BUILDS_PROFILE_SHOW_JOURNALFRAME_BUTTON"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_PROFILE_SHOW_JOURNALFRAME_BUTTON_DESC"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_PROFILE_SHOW_TALENTFRAME_BUTTON"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_PROFILE_SHOW_TALENTFRAME_BUTTON_DESC"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_PROFILE_STATS_FORMAT"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_PROFILE_STATS_SUFFIX_KILLS"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_PROFILE_STATS_SUFFIX_RUNS"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_PROFILE_SWITCHING_TO_EXISTING_LOADOUT"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_PROFILE_SWITCHING_TO_LOADOUT"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_PROFILE_UNABLE_TO_DELETE_LOADOUT"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_PROFILE_UPDATED_BUILD_TO_LOADOUT"] = ""--]] 
+L["BUILDS_PROFILE_SHOW_JOURNALFRAME_BUTTON"] = "Mostrar botão da janela do Diário de Encontros"
+L["BUILDS_PROFILE_SHOW_JOURNALFRAME_BUTTON_DESC"] = "Habilita a exibição do botão de atalho na janela do Diário de Encontros."
+L["BUILDS_PROFILE_SHOW_TALENTFRAME_BUTTON"] = "Exibir botão do quadro de talentos"
+L["BUILDS_PROFILE_SHOW_TALENTFRAME_BUTTON_DESC"] = "Habilite a exibição do botão de atalho no quadro de Talentos."
+L["BUILDS_PROFILE_STATS_FORMAT"] = "%s da Árvore de Talentos Heroicos (%s, %s %s)"
+L["BUILDS_PROFILE_STATS_SUFFIX_KILLS"] = "amostras"
+L["BUILDS_PROFILE_STATS_SUFFIX_RUNS"] = "execuções"
+L["BUILDS_PROFILE_SWITCHING_TO_EXISTING_LOADOUT"] = "Trocando para \"%s\"."
+L["BUILDS_PROFILE_SWITCHING_TO_LOADOUT"] = "Trocando para \"%s\"."
+L["BUILDS_PROFILE_UNABLE_TO_DELETE_LOADOUT"] = "Não foi possível limpar o carregamento antigo \"%s\". Tente novamente ou exclua-o manualmente."
+L["BUILDS_PROFILE_UPDATED_BUILD_TO_LOADOUT"] = "\"%s\" atualizado com novos talentos."
 L["BUILDS_RAIDS"] = "Raide"
 L["BUILDS_RAIDS_ENCOUNTERS_ALL"] = "%s: Todos os encontros"
 L["BUILDS_SPEED_all"] = "Qualquer velocidade"
---[[Translation missing --]]
---[[ L["BUILDS_SPEED_fast"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_SPEED_median"] = ""--]] 
+L["BUILDS_SPEED_fast"] = "Abates Rápidos (top 20%)"
+L["BUILDS_SPEED_median"] = "Abates Medianos (20% centrais)"
 L["BUILDS_TITLE"] = "Configurações de Talento"
 L["BUILDS_TITLE_FULL"] = "Configurações de Talento do Raider.IO"
---[[Translation missing --]]
---[[ L["BUILDS_WEAPON_1"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_WEAPON_2"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_WEAPON_3"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_WEAPON_4"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_WEAPON_5"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_WEAPON_6"] = ""--]] 
---[[Translation missing --]]
---[[ L["BUILDS_WEAPON_all"] = ""--]] 
+L["BUILDS_WEAPON_1"] = "Uma Mão - Empunhadura Dupla"
+L["BUILDS_WEAPON_2"] = "Duas Mãos - Empunhadura Dupla"
+L["BUILDS_WEAPON_3"] = "Duas Mãos"
+L["BUILDS_WEAPON_4"] = "Uma Mão + Escudo"
+L["BUILDS_WEAPON_5"] = "Uma Mão + Mão Secundária"
+L["BUILDS_WEAPON_6"] = "Uma Mão"
+L["BUILDS_WEAPON_all"] = "Todas as armas"
 L["CANCEL"] = "Cancelar"
 L["CHANGES_REQUIRES_UI_RELOAD"] = "Suas mudanças foram salvas, mas você precisa recarregar sua interface para que elas funcionem. Você deseja fazer isso agora?"
 L["CHARACTER_LF_GUILD_MPLUS"] = "Procurando por Guilda para Mítica+"
@@ -121,17 +101,15 @@ L["CONFIRM"] = "Confirmar"
 L["COPY_RAIDERIO_PROFILE_URL"] = "Copiar URL do Raider.IO"
 L["COPY_RAIDERIO_RECRUITMENT_URL"] = "Copiar URL de Recrutamento"
 L["COPY_RAIDERIO_URL"] = "Copiar URL do Raider.IO"
-L["CURRENT_MAINS_SCORE"] = "Pontuação atual de M+ do Main"
-L["CURRENT_SCORE"] = "Pontuação atual de M+"
+L["CURRENT_MAINS_SCORE"] = "Classificação M+ principal"
+L["CURRENT_SCORE"] = "Classificação M+ atual"
 L["DB_MODULES"] = "Módulos de banco de dados"
 L["DB_MODULES_HEADER_MYTHIC_PLUS"] = "Mítica+"
 L["DB_MODULES_HEADER_RAIDING"] = "Raidando"
 L["DB_MODULES_HEADER_RECRUITMENT"] = "Recrutamento"
 L["DISABLE_DEBUG_MODE_RELOAD"] = "Você está desabilitando o Modo de Depuração. Clicar em Confirmar irá Recarregar sua Interface."
---[[Translation missing --]]
---[[ L["DISABLE_DROPDOWN_MENU_BUTTON"] = ""--]] 
---[[Translation missing --]]
---[[ L["DISABLE_DROPDOWN_MENU_BUTTON_DESC"] = ""--]] 
+L["DISABLE_DROPDOWN_MENU_BUTTON"] = "Desativar menu suspenso da unidade (correção temporária)"
+L["DISABLE_DROPDOWN_MENU_BUTTON_DESC"] = "É uma correção temporária para um problema contínuo com o sistema de menus suspensos. Você só precisa marcar esta opção se estiver enfrentando erros ao usar o menu suspenso para definir foco, marcar um alvo de raide ou usar o quadro da comunidade durante o combate em encontros. Esta opção será removida no futuro, quando a Blizzard resolver os problemas subjacentes."
 L["DISABLE_RWF_MODE_BUTTON"] = "Desabilitar"
 L["DISABLE_RWF_MODE_BUTTON_TOOLTIP"] = "Clique para desativar o modo Race World First. Isso fará com que sua interface seja recarregada."
 L["DISABLE_RWF_MODE_RELOAD"] = "Você está desabilitando o modo Race World First. Clicar em Confirmar irá recarregar sua interface."
@@ -217,8 +195,8 @@ L["ENABLE_LFG_EXPORT_BUTTON"] = "Mostrar botão de exportar grupo no LFG"
 L["ENABLE_LFG_EXPORT_BUTTON_DESC"] = "Exibe um botão de lupa na parte inferior do painel do localizador de grupos que, ao ser clicado, exporta seu grupo atual e os candidatos na fila para você copiar e colar no site do Raider.IO e consultar o perfil de todos."
 L["ENABLE_LOCK_PROFILE_FRAME"] = "Bloquear quadro de perfil do Raider.IO"
 L["ENABLE_LOCK_PROFILE_FRAME_DESC"] = "Impede que o quadro de perfil de M+ seja arrastado. Não tem efeito se o quadro de perfil de M+ estiver definido para posicionamento automático."
-L["ENABLE_NO_SCORE_COLORS"] = "Desativar as cores da pontuação de Mítica+"
-L["ENABLE_NO_SCORE_COLORS_DESC"] = "Coloração de pontuação desativada. Todas as pontuações serão mostradas em branco."
+L["ENABLE_NO_SCORE_COLORS"] = "Desativar as cores da classificação de Mítica+"
+L["ENABLE_NO_SCORE_COLORS_DESC"] = "Coloração de classificação desativada. Todas as classificações serão mostradas em branco."
 L["ENABLE_RAIDERIO_CLIENT_ENHANCEMENTS"] = "Permitir melhorias do cliente Raider.IO"
 L["ENABLE_RAIDERIO_CLIENT_ENHANCEMENTS_DESC"] = "Ativar isso permitirá ver dados detalhados do perfil Raider.IO baixados pelo cliente Raider.IO para seus personagens reivindicados."
 L["ENABLE_REPLAY"] = "Exibir sistema de replay de Mítica+"
@@ -226,8 +204,8 @@ L["ENABLE_REPLAY_DESC"] = "Ativar isso permitirá competir contra registros de M
 L["ENABLE_RWF_MODE_BUTTON"] = "Habilitar"
 L["ENABLE_RWF_MODE_BUTTON_TOOLTIP"] = "Clique para ativar o modo Race World First. Isso fará com que sua interface seja recarregada."
 L["ENABLE_RWF_MODE_RELOAD"] = "Você está ativando o modo Race World First. Isso é destinado ao uso com a corrida Mythic World First e deve ser usado apenas para esse propósito junto com o cliente do Raider.IO para upload de dados. Clicar em Confirmar irá recarregar sua interface."
-L["ENABLE_SIMPLE_SCORE_COLORS"] = "Usar cores simples para Pontuação de Mítica+"
-L["ENABLE_SIMPLE_SCORE_COLORS_DESC"] = "Exibe pontuações usando apenas as cores padrão de qualidade de item. Isso pode facilitar a distinção dos níveis de pontuação para pessoas com deficiência para distinguir cores."
+L["ENABLE_SIMPLE_SCORE_COLORS"] = "Usar cores simples para classificação de Mítica+"
+L["ENABLE_SIMPLE_SCORE_COLORS_DESC"] = "Exibe classificações usando apenas as cores padrão de qualidade de item. Isso pode facilitar a distinção dos níveis de classificação para pessoas com deficiência para distinguir cores."
 L["ENTER_REALM_AND_CHARACTER"] = "Reino e nome do personagem:"
 L["EXPORTJSON_COPY_TEXT"] = "Copie o seguinte e cole em qualquer lugar em |cff00C8FFhttps://raider.io|r para consultar todos os jogadores."
 L["GENERAL_TOOLTIP_OPTIONS"] = "Opções gerais da dica de ferramenta"
@@ -235,7 +213,7 @@ L["GUILD_BEST_SEASON"] = "Guilda: Melhor da temporada"
 L["GUILD_BEST_TITLE"] = "Recordes do Raider.IO"
 L["GUILD_BEST_WEEKLY"] = "Guilda: Melhor da semana"
 L["GUILD_LF_MPLUS_DEFAULT"] = "Recrutando Jogadores de Mítica+"
-L["GUILD_LF_MPLUS_WITH_SCORE"] = "Recrutando Jogadores de Mítica+ com score de %d+"
+L["GUILD_LF_MPLUS_WITH_SCORE"] = "Recrutando jogadores de Mítica+ com classificação de %d+"
 L["GUILD_LF_PVP"] = "Recrutando Jogadores para PvP"
 L["GUILD_LF_RAID_DEFAULT"] = "Recrutando Raiders"
 L["GUILD_LF_RAID_HEROIC"] = "Recrutando Raiders para Heroico"
@@ -249,9 +227,9 @@ L["INVERSE_PROFILE_MODIFIER"] = "Inverter modificador da dica de perfil do Raide
 L["INVERSE_PROFILE_MODIFIER_DESC"] = "Ativar isso inverterá o comportamento do modificador da dica de perfil do Raider.IO (Shift/Ctrl/Alt): segure para alternar a visualização entre perfil pessoal/líder ou perfil líder/pessoal."
 L["LOCALE_NAME"] = "ptBR"
 L["LOCKING_PROFILE_FRAME"] = "Raider.IO: Bloqueando o quadro de perfil M+."
-L["MAINS_BEST_SCORE_BEST_SEASON"] = "Melhor pontuação de M+ do Main (%s)"
-L["MAINS_RAID_PROGRESS"] = "Progresso do Main"
-L["MAINS_SCORE"] = "Pontuação de M+ do Main"
+L["MAINS_BEST_SCORE_BEST_SEASON"] = "Melhor classificação M+ principal (%s)"
+L["MAINS_RAID_PROGRESS"] = "Progresso principal"
+L["MAINS_SCORE"] = "Classificação M+ principal"
 L["MINIMAP_SHORTCUT_BROKER_ENABLE"] = "Habilitar o botão de compartimento de addons"
 L["MINIMAP_SHORTCUT_BROKER_ENABLE_DESC"] = "Ative para exibir o ícone dentro do menu do compartimento de addons. Isso também o tornará disponível em qualquer outro addon que suporte o sistema de broker."
 L["MINIMAP_SHORTCUT_ENABLE"] = "Habilitar botão"
@@ -264,10 +242,8 @@ L["MINIMAP_SHORTCUT_HELP_RIGHT_CLICK"] = "Clique direito"
 L["MINIMAP_SHORTCUT_HELP_SEARCH"] = "Procurar"
 L["MINIMAP_SHORTCUT_HELP_SETTINGS"] = "Configurações"
 L["MINIMAP_SHORTCUT_LOCK"] = "Botão de travar"
---[[Translation missing --]]
---[[ L["MINIMAP_SHORTCUT_MENU_BUILDS"] = ""--]] 
---[[Translation missing --]]
---[[ L["MINIMAP_SHORTCUT_MENU_COPY_BUILD"] = ""--]] 
+L["MINIMAP_SHORTCUT_MENU_BUILDS"] = "Escolher equipamento"
+L["MINIMAP_SHORTCUT_MENU_COPY_BUILD"] = "Copiar link"
 L["MINIMAP_SHORTCUT_MINIMAP_ENABLE"] = "Habilitar botão de minimapa"
 L["MINIMAP_SHORTCUT_MINIMAP_ENABLE_DESC"] = "Ative para exibir um ícone ao redor do minimapa."
 L["MINIMAP_SHORTCUT_MINIMAP_LOCK"] = "Travar botão de minimapa"
@@ -279,7 +255,7 @@ L["MODULE_KOREA"] = "Coréia"
 L["MODULE_TAIWAN"] = "Taiwan"
 L["MY_PROFILE_TITLE"] = "Perfil do Raider.IO"
 L["MYTHIC_PLUS_DB_MODULES"] = "Módulos de banco de dados de Mítica+"
-L["MYTHIC_PLUS_SCORES"] = "Dica de ferramenta de Mítica+"
+L["MYTHIC_PLUS_SCORES"] = "Dica de HUD de Mítica+"
 L["NO_GUILD_RECORD"] = "Sem registros da Guilda"
 L["OPEN_CONFIG"] = "Abrir Configuração"
 L["OUT_OF_SYNC_DATABASE_S"] = "|cffFFFFFF%s|r possui dados de facção da Horda/Aliança que não estão sincronizados. Atualize as configurações do cliente do Raider.IO para sincronizar as duas facções."
@@ -293,7 +269,7 @@ L["OUTDATED_EXPIRES_IN_HOURS"] = "Dados do Raider.IO expiram em %d horas."
 L["OUTDATED_EXPIRES_IN_MINUTES"] = "Dados do Raider.IO expiram em %d Minutos"
 L["OUTDATED_PROFILE_TOOLTIP_MESSAGE"] = [=[Atualize seu Addon agora para ver os dados mais precisos. Os jogadores trabalham duro para melhorar seu progresso, e exibir dados muito antigos é um desserviço para eles. Você pode usar o Raider.IO Client para manter seus dados sincronizados automaticamente.
 ]=]
-L["PREVIOUS_SCORE"] = "Pontuação anterior de M+ (%s)"
+L["PREVIOUS_SCORE"] = "Classificação M+ anterior (%s)"
 L["PROFILE_BEST_RUNS"] = "Melhores M+ concluídas por masmorra"
 L["PROFILE_TOOLTIP_ANCHOR_TOOLTIP"] = "Tranque o Quadro de Perfil do Raider.IO ou ative o Posicionamento Automático para ocultar esta âncora."
 L["PROVIDER_NOT_LOADED"] = "|cffFF0000Warning:|r |cffFFFFFF%s|r não pode encontrar dados para sua facção atual. Verifique suas configurações |cffFFFFFF/raiderio|r e ative os dados da ferramenta para |cffFFFFFF%s|r."
@@ -494,34 +470,20 @@ L["RAID_BOSS_SOD_6"] = "Artífice da Dor Raznal"
 L["RAID_BOSS_SOD_7"] = "Guardião dos Primogênitos"
 L["RAID_BOSS_SOD_8"] = "Escreve-sinas Roh-Kalo"
 L["RAID_BOSS_SOD_9"] = "Kel'Thuzad"
---[[Translation missing --]]
---[[ L["RAID_BOSS_SOO_1"] = ""--]] 
---[[Translation missing --]]
---[[ L["RAID_BOSS_SOO_10"] = ""--]] 
---[[Translation missing --]]
---[[ L["RAID_BOSS_SOO_11"] = ""--]] 
---[[Translation missing --]]
---[[ L["RAID_BOSS_SOO_12"] = ""--]] 
---[[Translation missing --]]
---[[ L["RAID_BOSS_SOO_13"] = ""--]] 
---[[Translation missing --]]
---[[ L["RAID_BOSS_SOO_14"] = ""--]] 
---[[Translation missing --]]
---[[ L["RAID_BOSS_SOO_2"] = ""--]] 
---[[Translation missing --]]
---[[ L["RAID_BOSS_SOO_3"] = ""--]] 
---[[Translation missing --]]
---[[ L["RAID_BOSS_SOO_4"] = ""--]] 
---[[Translation missing --]]
---[[ L["RAID_BOSS_SOO_5"] = ""--]] 
---[[Translation missing --]]
---[[ L["RAID_BOSS_SOO_6"] = ""--]] 
---[[Translation missing --]]
---[[ L["RAID_BOSS_SOO_7"] = ""--]] 
---[[Translation missing --]]
---[[ L["RAID_BOSS_SOO_8"] = ""--]] 
---[[Translation missing --]]
---[[ L["RAID_BOSS_SOO_9"] = ""--]] 
+L["RAID_BOSS_SOO_1"] = "Immerseus"
+L["RAID_BOSS_SOO_10"] = "Espólios de Pandária"
+L["RAID_BOSS_SOO_11"] = "Thok, o Sedento de Sangue"
+L["RAID_BOSS_SOO_12"] = "Cerqueiro Pavio Preto"
+L["RAID_BOSS_SOO_13"] = "Paragões dos Klaxxi"
+L["RAID_BOSS_SOO_14"] = "Garrosh Grito Infernal"
+L["RAID_BOSS_SOO_2"] = "Os Protetores Caídos"
+L["RAID_BOSS_SOO_3"] = "Norushen"
+L["RAID_BOSS_SOO_4"] = "Sha do Orgulho"
+L["RAID_BOSS_SOO_5"] = "Galakras"
+L["RAID_BOSS_SOO_6"] = "Jaganata de Ferro"
+L["RAID_BOSS_SOO_7"] = "Xamãs Sombrios Kor'kron"
+L["RAID_BOSS_SOO_8"] = "General Nazgrim"
+L["RAID_BOSS_SOO_9"] = "Malkorok"
 L["RAID_BOSS_TG_1"] = "Nymrissa Clamaondas"
 L["RAID_BOSS_ToES_1"] = "Protetores do Infinito"
 L["RAID_BOSS_TOES_1"] = "Protetores do Infinito"
@@ -616,13 +578,13 @@ L["RAID_VA"] = "Abismo Peçonhento"
 L["RAID_VS"] = "A Torre do Caos"
 L["RAID_VS_DR_MQD"] = "Torre/Fenda/Quel'Danas"
 L["RAIDERIO"] = "Raider.IO"
-L["RAIDERIO_AVERAGE_PLAYER_SCORE"] = "Pontuação média para +%s concluídas"
+L["RAIDERIO_AVERAGE_PLAYER_SCORE"] = "Classificação média para +%s concluídas"
 L["RAIDERIO_BEST_RUN"] = "Raider.IO Melhor Mítica+"
 L["RAIDERIO_CLIENT_CUSTOMIZATION"] = "Personalização do cliente Raider.IO"
 L["RAIDERIO_LIVE_TRACKING"] = "Rastreamento ao vivo do Raider.IO"
-L["RAIDERIO_MP_BASE_SCORE"] = "Pontuação Base de Mítica+"
-L["RAIDERIO_MP_BEST_SCORE"] = "Pontuação de Mítica+ (%s)"
-L["RAIDERIO_MP_SCORE"] = "Pontuação de M+ do Raider.IO "
+L["RAIDERIO_MP_BASE_SCORE"] = "Classificação base de Mítica+"
+L["RAIDERIO_MP_BEST_SCORE"] = "Classificação Mítica+ (%s)"
+L["RAIDERIO_MP_SCORE"] = "Classificação M+ do Raider.IO "
 L["RAIDERIO_MYTHIC_OPTIONS"] = "Opções do Addon do Raider.IO "
 L["RAIDING_DATA_HEADER"] = "Progresso de Raide"
 L["RAIDING_DB_MODULES"] = "Módulos de banco de dados de raide"
@@ -677,10 +639,10 @@ L["SEASON_LABEL_1"] = "S1-P"
 L["SEASON_LABEL_2"] = "S2"
 L["SEASON_LABEL_3"] = "S3"
 L["SEASON_LABEL_4"] = "S4"
-L["SHOW_AVERAGE_PLAYER_SCORE_INFO"] = "Exibir pontuações médias de míticas concluídas"
-L["SHOW_AVERAGE_PLAYER_SCORE_INFO_DESC"] = "Exibe a pontuação média do Raider.IO vista em membros de míticas concluídas dentro do tempo. Isso é visível nas dicas de ferramenta da Pedra-chave e nas dicas de ferramenta do Jogador no Localizador de Masmorras."
-L["SHOW_BEST_MAINS_SCORE"] = "Exibir pontuação de M+ do main da melhor temporada"
-L["SHOW_BEST_MAINS_SCORE_DESC"] = "Mostra na dica de ferramenta a pontuação de Mítica+ e o progresso de raide da melhor temporada do personagem principal do jogador. Os jogadores precisam ter se registrado no Raider.IO e definido um personagem como principal."
+L["SHOW_AVERAGE_PLAYER_SCORE_INFO"] = "Exibir classificações médias de míticas concluídas"
+L["SHOW_AVERAGE_PLAYER_SCORE_INFO_DESC"] = "Exibe a classificação média do Raider.IO vista em membros de míticas concluídas dentro do tempo. Isso é visível nas dicas de HUD da Pedra-chave e nas dicas do jogador no Localizador de Masmorras."
+L["SHOW_BEST_MAINS_SCORE"] = "Exibir classificação M+ principal da melhor temporada"
+L["SHOW_BEST_MAINS_SCORE_DESC"] = "Mostra na dica de HUD a classificação Mítica+ e o progresso de raide da melhor temporada do personagem principal do jogador. Os jogadores precisam ter se registrado no Raider.IO e definido um personagem como principal."
 L["SHOW_BEST_RUN"] = "Melhor Mítica+ concluída como título"
 L["SHOW_BEST_RUN_DESC"] = "Exibe a melhor Mítica+ concluída pelo jogador da temporada atual como o título da dica de ferramenta."
 L["SHOW_BEST_SEASON"] = "Melhor pontuação de Mítica+ como título"
@@ -704,31 +666,31 @@ L["SHOW_KEYSTONE_INFO"] = "Exibir pontuação base para pedras-chave"
 L["SHOW_KEYSTONE_INFO_DESC"] = "Adiciona a pontuação base do Raider.IO para pedras-chave nas dicas de ferramenta. Também mostra a melhor mítica+ concluída registrada para cada jogador do seu grupo."
 L["SHOW_LEADER_PROFILE"] = "Permitir modificador da dica do Raider.IO"
 L["SHOW_LEADER_PROFILE_DESC"] = "Mantenha pressionado um modificador (shift/ctrl/alt) para alternar a dica de ferramenta de perfil do Raider.IO entre perfil Pessoal/Líder."
-L["SHOW_MAINS_SCORE"] = "Exibir pontuação e progresso de M+ do main nas dicas"
-L["SHOW_MAINS_SCORE_DESC"] = "Exibe na dica de ferramenta a pontuação de Mítica+ da temporada atual do personagem principal do jogador e o progresso de raide. Os jogadores precisam ter se registrado no Raider.IO e definido um personagem como principal."
-L["SHOW_MY_WARBAND_SCORE"] = "Exibir pontuação de M+ do meu Bando"
-L["SHOW_MY_WARBAND_SCORE_DESC"] = "Exibe a pontuação de Mítica+ do Bando de Guerra do jogador em sua própria dica de ferramenta."
+L["SHOW_MAINS_SCORE"] = "Exibir classificação e progresso de M+ principal nas dicas"
+L["SHOW_MAINS_SCORE_DESC"] = "Exibe na dica de HUD a classificação de Mítica+ da temporada atual do personagem principal do jogador e o progresso de raide. Os jogadores precisam ter se registrado no Raider.IO e definido um personagem como principal."
+L["SHOW_MY_WARBAND_SCORE"] = "Exibir classificação M+ do meu Bando"
+L["SHOW_MY_WARBAND_SCORE_DESC"] = "Exibe a classificação de Mítica+ do Bando de Guerra do jogador em sua própria dica de HUD."
 L["SHOW_ON_GUILD_ROSTER"] = "Exibir nas dicas da guilda e comunidade"
 L["SHOW_ON_GUILD_ROSTER_DESC"] = "Exibe a pontuação de Mítica+ ao passar o mouse sobre os membros da guilda e de uma comunidade."
 L["SHOW_ON_PLAYER_UNITS"] = "Exibir nas dicas de Jogadores"
 L["SHOW_ON_PLAYER_UNITS_DESC"] = "Exibe a pontuação de Mítica+ ao passar o mouse sobre as unidades de jogador."
-L["SHOW_OTHER_WARBAND_SCORE"] = "Exibir pontuação de M+ do Bando de outros"
-L["SHOW_OTHER_WARBAND_SCORE_DESC"] = "Exibe a pontuação de Mítica+ do Bando de Guerra de outros jogadores em suas dicas de ferramenta."
+L["SHOW_OTHER_WARBAND_SCORE"] = "Exibir classificação M+ do Bando dos outros"
+L["SHOW_OTHER_WARBAND_SCORE_DESC"] = "Exibe a classificação de Mítica+ do Bando de Guerra de outros jogadores em suas dicas."
 L["SHOW_RAID_ENCOUNTERS_IN_PROFILE"] = "Exibir encontros de raide na dica do perfil"
 L["SHOW_RAID_ENCOUNTERS_IN_PROFILE_DESC"] = "Quando ativado, isso mostrará o progresso dos encontros de Raide nas dicas de ferramenta do perfil do Raider.IO."
 L["SHOW_RAIDERIO_BESTRUN_FIRST"] = "(Experimental) Priorize mostrar a melhor mítica+ concluída do Raider.IO"
 L["SHOW_RAIDERIO_BESTRUN_FIRST_DESC"] = "Este é um recurso experimental. Em vez de mostrar a pontuação do Raider.IO como a primeira linha, mostre a melhor mítica+ concluída pelo jogador."
 L["SHOW_RAIDERIO_PROFILE"] = "Exibir dica de perfil do Raider.IO"
-L["SHOW_RAIDERIO_PROFILE_DESC"] = "Exibe a dica de ferramenta de perfil do Raider.IO."
-L["SHOW_RAIDERIO_PROFILE_OPTION"] = "Exibir Perfil do Raider.IO"
+L["SHOW_RAIDERIO_PROFILE_DESC"] = "Exibe a dica de perfil do Raider.IO."
+L["SHOW_RAIDERIO_PROFILE_OPTION"] = "Exibir perfil do Raider.IO"
 L["SHOW_ROLE_ICONS"] = "Exibir ícones de função nas dicas"
 L["SHOW_ROLE_ICONS_DESC"] = "Quando ativado, as principais funções do jogador em Mítica+ serão exibidas em suas dicas de ferramenta."
 L["SHOW_SCORE_IN_COMBAT"] = "Exibir a dica do Raider.IO em combate"
 L["SHOW_SCORE_IN_COMBAT_DESC"] = "Desative para minimizar o impacto no desempenho ao passar o mouse sobre jogadores durante o combate."
 L["SHOW_SCORE_WITH_MODIFIER"] = "Exibir info. da dica do Raider.IO com modificador"
 L["SHOW_SCORE_WITH_MODIFIER_DESC"] = "Desative a exibição de dados ao passar o mouse sobre jogadores, a menos que uma tecla modificadora seja pressionada."
-L["SHOW_WARBAND_SCORE"] = "Exibir pontuação e progresso de M+ do Bando nas dicas"
-L["SHOW_WARBAND_SCORE_DESC"] = "Exibe a pontuação de Mítica+ do Bando do jogador na temporada atual e o progresso de raide nas dicas de ferramenta. Os jogadores devem ter se registrado no Raider.IO e sincronizado seu Battle.net para que o progresso do bando de guerra funcione."
+L["SHOW_WARBAND_SCORE"] = "Exibir classificação e progresso de M+ do Bando nas dicas"
+L["SHOW_WARBAND_SCORE_DESC"] = "Exibe a classificação de Mítica+ do Bando do jogador na temporada atual e o progresso de raide nas dicas de HUD. Os jogadores devem ter se registrado no Raider.IO e sincronizado seu Battle.net para que o progresso do bando de guerra funcione."
 L["TANK"] = "Tank"
 L["TEAM_LF_MPLUS_DEFAULT"] = "Recrutando jogadores para Mítica+"
 L["TEAM_LF_MPLUS_WITH_SCORE"] = "Recrutando %d+ jogadores de Mítica+"
@@ -745,8 +707,8 @@ L["USE_ENGLISH_ABBREVIATION"] = "Forçar abreviações em inglês das masmorras"
 L["USE_ENGLISH_ABBREVIATION_DESC"] = "Quando ativado, isso substituirá as abreviações usadas para masmorras para serem as versões em inglês, em vez do seu idioma atual."
 L["USE_RAIDERIO_CLIENT_LIVE_TRACKING_SETTINGS"] = "Permitir Raider.IO controlar o Registro de Combate"
 L["USE_RAIDERIO_CLIENT_LIVE_TRACKING_SETTINGS_DESC"] = "Permite que o Raider.IO (quando possível) controle automaticamente as configurações de seu Registro de Combate."
-L["WARBAND_BEST_SCORE_BEST_SEASON"] = "Maior pontuação do Bando (%s)"
-L["WARBAND_SCORE"] = "Pontuação do Bando"
+L["WARBAND_BEST_SCORE_BEST_SEASON"] = "Melhor classificação do Bando (%s)"
+L["WARBAND_SCORE"] = "Classificação do bando"
 L["WARNING_DEBUG_MODE_ENABLE"] = "|cffFFFFFF%s|r Modo de Depuração está habilitado. Você pode desabilitá-lo ao digitar |cffFFFFFF/raiderio debug|r"
 L["WARNING_LOCK_POSITION_FRAME_AUTO"] = "Raider.IO: Você deve primeiro desabilitar o Posicionamento Automático para o Perfil do Raider.IO"
 L["WARNING_RWF_MODE_ENABLE"] = "|cffFFFFFF%s|r O modo Race World First está ativado. Você pode desativá-lo digitando |cffFFFFFF/raiderio rwf|r."

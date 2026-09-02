@@ -856,6 +856,7 @@ local function updatemplussideframe()
 			ccsmi_bx_fs7:SetText("     -")
 		end 
 	end
+	_G["ccsmi_sf"]:SetShown(option("showm_sp_onopen_inspect"))
 end
 
 local function initializemplusplanelframe()
@@ -880,7 +881,7 @@ local function initializemplusplanelframe()
 	ccsmi_sf:SetPoint("BOTTOMLEFT", ccsmi_af, "BOTTOMRIGHT", 0, 0); 
 	ccsmi_sf:SetSize(660, 640)
 	ccsmi_sf.throttle = 0;
-	ccsmi_sf:Hide()
+	ccsmi_sf:SetShown(option("showm_sp_onopen_inspect"))
 
 	sf_bg:SetAllPoints()
 	sf_bg:SetTexture("Interface\\Masks\\SquareMask.BLP")
@@ -1177,7 +1178,7 @@ local function initmplusframe()
 		PlaySound(SOUNDKIT.GS_LOGIN_CHANGE_REALM_OK)
 
 		if IsControlKeyDown() and button == "LeftButton" then
-			local def = CCS:GetOptionDefByKey("showm_sp")
+			local def = CCS:GetOptionDefByKey("showm_sp_onopen_inspect")
 			if def then
 				CCS:UpdateOption(def, _G["ccsmi_sf"]:IsShown())
 				C_Timer.After(.1, function() CCS:LoadOptions() end)
@@ -1628,8 +1629,11 @@ loopitems = function()
 		ilvlTxt:SetText("|cFF".. color .. format("%.2f", iLvl or "") .. "|r")
 		ilvlTxt:SetShown(option("showilvlinspect"))
     end
-    initmplusframe()
-    initclickframe()
+	if not InspectFrame.ccsinitload then
+		initmplusframe()
+		initclickframe()
+		InspectFrame.ccsinitload = true
+	end
 end 
 
 -- Event handler for inspect sheet
@@ -1637,7 +1641,7 @@ function CCS.InspectSheetEventHandler(event, ...)
 
     -- Retail-only inspect frame updates
     if CCS.CurrentVersion ~= CCS.RETAIL then return end
-    if not InspectFrame or not InspectFrame.unit or not option("show_inspect") then return end
+    if not InspectFrame or not InspectFrame.unit or not option("show_inspect") or InspectFrame.unit == "mouseover" then return end
 
 	if not InspectFrame.loaded then
 		CCS.initializeinspectframe()
@@ -1659,9 +1663,14 @@ function CCS.InspectSheetEventHandler(event, ...)
 
 		InspectFrame.loaded = false
         return true
-	elseif event == "INSPECT_READY" then
+	elseif event == "INSPECT_READY" then 
 		CCS.ChangeModelBg(true)
-		initializemplusplanelframe()
+		if not CCS.initmplus then
+			initializemplusplanelframe()
+			CCS.initmplus = true
+		else
+			updatemplussideframe()
+		end
 		loopitems()
 	end
 end

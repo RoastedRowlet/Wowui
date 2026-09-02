@@ -234,7 +234,7 @@ local function getChunkLookup(table, length)
 end
 
 local lookup = {'Unknown-Unknown',}
-local provider = {region='US',realm='Destromath',name='US',type='subscribers',zone=53,date='2026-08-26',data={Ba='Baangdog:BAEANQADCggICAAAAA==.',Dr='Drakkar:BAEANQAECgcIBwAAAA==.',Gl='Glimmr:BAEANQADCgYICAABNQAECgEIAQABAAAAAA==.',Ke='Keanuglaives:BAEANQAECgEIAQABNQAECgcIBwABAAAAAA==.',Ku='Kurohìme:BAEANQAECgEIAQAAAA==.',Me='Melodý:BAEANQADCggICwABNQAECgEIAQABAAAAAA==.',Su='Surtvyr:BAEANQAECgEIAQABNQAECgcIBwABAAAAAA==.',Ti='Tirynis:BAEANQAECgUIBQAAAA==.',},}
+local provider = {region='US',realm='Destromath',name='US',type='subscribers',zone=53,date='2026-09-01',data={Ba='Baangdog:BAEANQAECgQIBAAAAA==.',Dr='Drakkar:BAEANQAECggIDQAAAA==.',Gl='Glimmr:BAEANQADCgYIDgABNQAECgQIBQABAAAAAA==.',Ke='Keanuglaives:BAEANQAECgEIAQABNQAECggIDQABAAAAAA==.',Ku='Kurohìme:BAEANQAECgQIBQAAAA==.',Me='Melodý:BAEANQAECgQIBAABNQAECgQIBQABAAAAAA==.',Su='Surtvyr:BAEANQAECgEIAQABNQAECggIDQABAAAAAA==.',Ti='Tirynis:BAEANQAECgcIDAAAAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

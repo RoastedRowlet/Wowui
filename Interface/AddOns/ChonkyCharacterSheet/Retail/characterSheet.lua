@@ -89,18 +89,18 @@ local function hookfix()
     ccs_cshow()
     if C_AddOns.IsAddOnLoaded("ZygorGuidesVIewer") then
 
-	CharacterFrameInset:Hide()
-	CharacterFramePortrait:Hide()
-	CharacterFrameBg:Hide()
-	CharacterFrameTitleText:Show()
-	CharacterFrameCloseButton:Show()
+        CharacterFrameInset:Hide()
+        CharacterFramePortrait:Hide()
+        CharacterFrameBg:Hide()
+        CharacterFrameTitleText:Show()
+        CharacterFrameCloseButton:Show()
 
-	if CharacterFrame.NineSlice then
-		for i,v in pairs(CharacterFrame.NineSlice) do
-			if type(v)=="table" and v.Show then v:Hide() end
-		end
-		CharacterFrame.TitleContainer:Show()
-	end
+        if CharacterFrame.NineSlice then
+            for i,v in pairs(CharacterFrame.NineSlice) do
+                if type(v)=="table" and v.Show then v:Hide() end
+            end
+            CharacterFrame.TitleContainer:Show()
+        end
     
     end
 
@@ -172,8 +172,9 @@ end
 
 ccs_cshow = function()
     MoveModelLeft()
-    if C_AddOns.IsAddOnLoaded("Narcissus") then -- Just relocate the mini talent tree so it isn't hidden behind the character frame.
-    C_Timer.NewTicker(.1, function() NarciMiniTalentTree:ClearAllPoints(); 
+    if C_AddOns.IsAddOnLoaded("Narcissus") and NarciMiniTalentTree and NarciMiniTalentTree:IsVisible() then -- Just relocate the mini talent tree so it isn't hidden behind the character frame.
+    C_Timer.NewTicker(.1, function() 
+            NarciMiniTalentTree:ClearAllPoints(); 
             NarciMiniTalentTree:SetPoint("TOPLEFT", CharacterFrameBg, "TOPRIGHT", 0, 0) end, 1)
     end
     --if option("hideshowchbtn") == true then modelbtn:Hide() else modelbtn:Show() end
@@ -448,6 +449,7 @@ local function ReputationFrame_Update()
     for _,k in ipairs(ks) do -- Individual Row
         local factionData = C_Reputation.GetFactionDataByIndex(k.factionIndex)
         local ks2={k:GetChildren()}; 
+
         if factionData ~= nil then
             for _,k2 in ipairs(ks2) do  -- Reputation Bar (in the row)
                 local factionID = factionData.factionID
@@ -456,7 +458,7 @@ local function ReputationFrame_Update()
                 local barMin =  factionData.currentReactionThreshold
                 local barMax =  factionData.nextReactionThreshold
                 local barValue =  factionData.currentStanding
-
+                
                 k2.Background = k2.Background or k2:CreateTexture(nil, "BACKGROUND", nil, 2)
                 
                 if (k2.Background) then
@@ -484,7 +486,7 @@ local function ReputationFrame_Update()
                 if name == "Inactive" or name == "Other" then
                     -- we skip the inactive header since the friendship lookup doesn't like it.
                 else
-                    local friendID, friendRep, friendMaxRep, friendName, friendText, friendTexture, friendTextLevel, friendThreshold, nextFriendThreshold = C_GossipInfo.GetFriendshipReputation(factionID);
+                    --local friendID, friendRep, friendMaxRep, friendName, friendText, friendTexture, friendTextLevel, friendThreshold, nextFriendThreshold = C_GossipInfo.GetFriendshipReputation(factionID);
                     local colorIndex = standingID;
                     local barColor = FACTION_BAR_COLORS[colorIndex];
                     local factionStandingtext;
@@ -493,14 +495,23 @@ local function ReputationFrame_Update()
                     local isMajorFaction = factionID and C_Reputation.IsMajorFaction(factionID);
                     local repInfo = factionID and C_GossipInfo.GetFriendshipReputation(factionID);
                     
-                    if (repInfo and repInfo.friendshipFactionID > 0) then
-                        factionStandingtext = repInfo.reaction;
-                        if ( repInfo.nextThreshold ) then
+                	local friendshipData = C_GossipInfo.GetFriendshipReputation(factionID);
+                    local isFriendshipReputation = friendshipData and friendshipData.friendshipFactionID > 0;
+                    local rankInfo = friendshipData and C_GossipInfo.GetFriendshipReputationRanks(friendshipData.friendshipFactionID);
+
+                    if friendshipData ~= nil and friendshipData.name ~= nil then                        
+                        if repInfo.nextThreshold then
                             barMin, barMax, barValue = repInfo.reactionThreshold, repInfo.nextThreshold, repInfo.standing;
                         else
-                            barMin, barMax, barValue = 0, 1, 1;
+                            barMin, barMax, barValue = repInfo.reactionThreshold, repInfo.reactionThreshold, repInfo.reactionThreshold;
                             isCapped = true;
                         end
+                        factionStandingtext = repInfo.reaction --"("..(rankInfo.currentLevel or 0).." / "..(rankInfo.maxLevel or 0)..")"
+                        
+                        if k2.Name ~= nil then
+                            k2.Name:SetText(name .. " ("..RANK..": "..(rankInfo.currentLevel or 0).." / "..(rankInfo.maxLevel or 0)..")")
+                        end
+                        
                         local friendshipColorIndex = 5;
                         barColor = FACTION_BAR_COLORS[colorIndex];
                         k2.friendshipID = repInfo.friendshipFactionID;  
@@ -525,6 +536,13 @@ local function ReputationFrame_Update()
                         barMax = 21000;
                         barValue = 21000;
                         barMin = 0;
+                    elseif isCapped and friendshipData ~= nil and friendshipData.name ~= nil then                        
+                        --
+                        if factionID == 2640 or factionID == 2744 then -- Bran Bronzebeard or Valeera
+                            barMax = barMax - barMin;
+                            barValue = barValue - barMin;
+                            barMin = 0;
+                        end
                     else
                         barMax = barMax - barMin;
                         barValue = barValue - barMin;
@@ -555,7 +573,7 @@ local function ReputationFrame_Update()
                     
                     if (k2.ReputationBar) then
                         local fontName, fontHeight, fontFlags = k2.ReputationBar.BarText:GetFont()
-                        xtext = format("  %-20.20s %-30.30s", factiontext, format(REPUTATION_PROGRESS_FORMAT, BreakUpLargeNumbers(barValue), BreakUpLargeNumbers(barMax)))
+                        xtext = format("  %-20.20s %-30.30s", factiontext or "", format(REPUTATION_PROGRESS_FORMAT, BreakUpLargeNumbers(barValue) or "", BreakUpLargeNumbers(barMax)) or "")
                         k2.ReputationBar.barProgressText = xtext
                         k2.ReputationBar.reputationStandingText = xtext
                         k2.ReputationBar.BarText:SetFont(option("fontname_repstanding") or fontName, option("fontsize_repstanding"), CCS.textoutline)
@@ -1030,7 +1048,7 @@ function CCS.HookSetup()
         end
        
     end
-    
+   
     if C_AddOns.IsAddOnLoaded("PrettyReps") == false then
         hooksecurefunc(ReputationFrame, "Hide", function() ReputationFrame.ReputationDetailFrame:Hide(); end )
         hooksecurefunc(ReputationFrame.ScrollBox, "Update", ReputationFrame_Update)

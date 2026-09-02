@@ -113,18 +113,26 @@ local function BuildDesired()
             local ids = SpellIDsOf(def)
             local units = UnitsFor(def)
             for _, entry in ipairs(SOUND_KEYS) do
-                local fileName, fileID = ResolveSound(alerts[entry.key])
+                -- per-trigger Sound enable flag (nil = legacy on, false = muted
+                -- without clearing the stored pick) -- see CAA.ResolveAlertPair
+                local flagOn = alerts[entry.key .. "On"] ~= false
+                local fileName, fileID
+                if flagOn then fileName, fileID = ResolveSound(alerts[entry.key]) end
                 if fileName or fileID then
                     for _, unit in ipairs(units) do
                         for _, spellID in ipairs(ids) do
                             list[#list + 1] = {
                                 trig = entry.trig, unit = unit, spellID = spellID,
                                 fileName = fileName, fileID = fileID,
+                                channel = alerts.channel,
                             }
                         end
                     end
+                    -- the channel is part of the signature: changing it has to
+                    -- re-register, or the engine keeps playing on the old one
                     sigParts[#sigParts + 1] = arcID .. ":" .. entry.key .. ":"
                         .. tostring(fileName or fileID) .. ":" .. #ids
+                        .. ":" .. tostring(alerts.channel or "Master")
                 end
             end
             -- TTS lookup: keyed by the spell IDs, matched against the
@@ -133,6 +141,7 @@ local function BuildDesired()
             -- switch -- it no longer waits for the sound slot to hold the old
             -- "__tts__" sentinel.
             local text = alerts.gainedTTS
+            if alerts.gainedTTSOn == false then text = nil end
             if type(text) == "string" and text ~= "" then
                 for _, spellID in ipairs(ids) do
                     tts[spellID] = tts[spellID] or {}
@@ -188,7 +197,7 @@ function AIS.Sync()
             local info = {
                 unitToken = r.unit,
                 spellID = r.spellID,
-                outputChannel = "Master",
+                outputChannel = r.channel or "Master",
             }
             if r.fileName then info.soundFileName = r.fileName
             else info.soundFileID = r.fileID end

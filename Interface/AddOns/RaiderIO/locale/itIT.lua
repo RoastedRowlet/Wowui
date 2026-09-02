@@ -776,7 +776,7 @@ L["RAID_RS"] = "Santuario di Rubino"
 L["RAID_SF"] = "Sporandia"
 --[[Translation missing --]]
 --[[ L["RAID_SOO"] = ""--]] 
-L["RAID_TG"] = "La Grotta Vincolata alla Marea"
+L["RAID_TG"] = "Grotta Vincolata alla Marea"
 --[[Translation missing --]]
 --[[ L["RAID_ToES"] = ""--]] 
 --[[Translation missing --]]

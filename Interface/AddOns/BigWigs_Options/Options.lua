@@ -1186,7 +1186,7 @@ local function getAuraOptions(module, spellID)
 	icon:SetCallback("OnEnter", auraOnEnter)
 	icon:SetCallback("OnLeave", optionsTooltip_Hide)
 
-	local appliedDropdown = AceGUI:Create("SharedDropdown")
+	local appliedDropdown = AceGUI:Create("BigWigsSharedDropdown")
 	appliedDropdown:SetLabel(L.onApplied)
 	appliedDropdown:SetList(soundList, nil, "DDI-Sound")
 	appliedDropdown:SetRelativeWidth(defaultDoseSound and 0.29 or hasDuration and 0.42 or 0.44)
@@ -1208,7 +1208,7 @@ local function getAuraOptions(module, spellID)
 
 	local doseDropdown
 	if defaultDoseSound then
-		doseDropdown = AceGUI:Create("SharedDropdown")
+		doseDropdown = AceGUI:Create("BigWigsSharedDropdown")
 		doseDropdown:SetLabel(L.onDose)
 		doseDropdown:SetList(soundList, nil, "DDI-Sound")
 		doseDropdown:SetRelativeWidth(0.3)
@@ -1226,7 +1226,7 @@ local function getAuraOptions(module, spellID)
 		end
 	end
 
-	local removedDropdown = AceGUI:Create("SharedDropdown")
+	local removedDropdown = AceGUI:Create("BigWigsSharedDropdown")
 	removedDropdown:SetLabel(L.onRemoved)
 	removedDropdown:SetList(soundList, nil, "DDI-Sound")
 	removedDropdown:SetRelativeWidth(defaultDoseSound and 0.29 or hasDuration and 0.42 or 0.44)
@@ -1471,17 +1471,21 @@ do
 							difficultyText:SetText(L.unknown)
 							statGroup:AddChild(difficultyText)
 
-							local defeatsLabel = AceGUI:Create("Label")
+							local defeatsLabel = AceGUI:Create("InteractiveLabel")
 							defeatsLabel:SetWidth(83)
 							defeatsLabel:SetText(tbl.wipes or (not tbl.kills and "-" or "0"))
+							defeatsLabel:SetCallback("OnEnter", statsDefeatLabelOnEnter)
+							defeatsLabel:SetCallback("OnLeave", HideTooltip)
 							statGroup:AddChild(defeatsLabel)
 
-							local victoriesLabel = AceGUI:Create("Label")
+							local victoriesLabel = AceGUI:Create("InteractiveLabel")
 							victoriesLabel:SetWidth(83)
 							victoriesLabel:SetText(tbl.kills or "-")
+							victoriesLabel:SetCallback("OnEnter", statsVictoryLabelOnEnter)
+							victoriesLabel:SetCallback("OnLeave", HideTooltip)
 							statGroup:AddChild(victoriesLabel)
 
-							local fastestVictoryLabel = AceGUI:Create("Label")
+							local fastestVictoryLabel = AceGUI:Create("InteractiveLabel")
 							fastestVictoryLabel:SetWidth(130)
 							local value = tbl.best and SecondsToTime(tbl.best)
 							local bestDate = tbl.bestDate
@@ -1492,9 +1496,11 @@ do
 							elseif value then
 								fastestVictoryLabel:SetText(value)
 							end
+							fastestVictoryLabel:SetCallback("OnEnter", statsFastestLabelOnEnter)
+							fastestVictoryLabel:SetCallback("OnLeave", HideTooltip)
 							statGroup:AddChild(fastestVictoryLabel)
 
-							local firstKillDataLabel = AceGUI:Create("Label")
+							local firstKillDataLabel = AceGUI:Create("InteractiveLabel")
 							firstKillDataLabel:SetWidth(140)
 							if not tbl.fkDate then
 								firstKillDataLabel:SetText("-")
@@ -1502,6 +1508,8 @@ do
 								local text = table.concat({tbl.fkWipes or "0", SecondsToTime(tbl.fkDuration), tbl.fkDate}, " - ")
 								firstKillDataLabel:SetText(text)
 							end
+							firstKillDataLabel:SetCallback("OnEnter", statsFirstLabelOnEnter)
+							firstKillDataLabel:SetCallback("OnLeave", HideTooltip)
 							statGroup:AddChild(firstKillDataLabel)
 						end
 					end
@@ -1515,17 +1523,21 @@ do
 							difficultyText:SetText(L[diff] or "?")
 							statGroup:AddChild(difficultyText)
 
-							local defeatsLabel = AceGUI:Create("Label")
+							local defeatsLabel = AceGUI:Create("InteractiveLabel")
 							defeatsLabel:SetWidth(83)
 							defeatsLabel:SetText(tbl.wipes or (not tbl.kills and "-" or "0"))
+							defeatsLabel:SetCallback("OnEnter", statsDefeatLabelOnEnter)
+							defeatsLabel:SetCallback("OnLeave", HideTooltip)
 							statGroup:AddChild(defeatsLabel)
 
-							local victoriesLabel = AceGUI:Create("Label")
+							local victoriesLabel = AceGUI:Create("InteractiveLabel")
 							victoriesLabel:SetWidth(83)
 							victoriesLabel:SetText(tbl.kills or "-")
+							victoriesLabel:SetCallback("OnEnter", statsVictoryLabelOnEnter)
+							victoriesLabel:SetCallback("OnLeave", HideTooltip)
 							statGroup:AddChild(victoriesLabel)
 
-							local fastestVictoryLabel = AceGUI:Create("Label")
+							local fastestVictoryLabel = AceGUI:Create("InteractiveLabel")
 							fastestVictoryLabel:SetWidth(130)
 							local value = tbl.best and SecondsToTime(tbl.best)
 							local bestDate = tbl.bestDate
@@ -1536,9 +1548,11 @@ do
 							elseif value then
 								fastestVictoryLabel:SetText(value)
 							end
+							fastestVictoryLabel:SetCallback("OnEnter", statsFastestLabelOnEnter)
+							fastestVictoryLabel:SetCallback("OnLeave", HideTooltip)
 							statGroup:AddChild(fastestVictoryLabel)
 
-							local firstKillDataLabel = AceGUI:Create("Label")
+							local firstKillDataLabel = AceGUI:Create("InteractiveLabel")
 							firstKillDataLabel:SetWidth(140)
 							if not tbl.fkDate then
 								firstKillDataLabel:SetText("-")
@@ -1546,13 +1560,13 @@ do
 								local text = table.concat({tbl.fkWipes or "0", SecondsToTime(tbl.fkDuration), tbl.fkDate}, " - ")
 								firstKillDataLabel:SetText(text)
 							end
+							firstKillDataLabel:SetCallback("OnEnter", statsFirstLabelOnEnter)
+							firstKillDataLabel:SetCallback("OnLeave", HideTooltip)
 							statGroup:AddChild(firstKillDataLabel)
 						end
 					end
 				end -- End statistics table
 			end
-
-			if module.SetupOptions then module:SetupOptions() end
 
 			local tabs = {}
 			if module.optionHeaders then
@@ -1665,12 +1679,17 @@ local function onZoneShow(treeWidget, instanceIdOrMapId)
 	if type(moduleList) ~= "table" then return end -- No modules registered
 
 	local zoneList, zoneSort = {}, {}
-	do
-		for i = 1, #moduleList do
-			local module = moduleList[i]
-			zoneList[module.moduleName] = module.displayName
-			zoneSort[i] = module.moduleName
-		end
+	for i = 1, #moduleList do
+		local module = moduleList[i]
+		zoneList[module.moduleName] = module.displayName
+		zoneSort[i] = {name = module.moduleName, order = module:GetSortOrder(), index = i}
+	end
+	-- sort according to sortOrder, ties sort by registration order
+	table.sort(zoneSort, function(a, b)
+		return a.order < b.order or (a.order == b.order and a.index < b.index)
+	end)
+	for i = 1, #zoneSort do
+		zoneSort[i] = zoneSort[i].name
 	end
 
 	local outerContainer = AceGUI:Create("SimpleGroup")

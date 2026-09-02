@@ -14,6 +14,10 @@ RaiderIO_Config = {
 }
 RaiderIO_LastCharacter = "us-Zappyxatu-stormrage"
 RaiderIO_MissingCharacters = {
+["us-Taterlord-stormrage"] = true,
+["us-Minlyn-stormrage"] = true,
+["us-Dyrix-stormrage"] = true,
+["us-Voidhearted-stormrage"] = true,
 }
 RaiderIO_MissingServers = {
 }

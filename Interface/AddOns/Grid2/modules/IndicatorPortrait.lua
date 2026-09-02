@@ -26,7 +26,7 @@ local function Portrait_OnUpdateClass(self, parent, unit)
 	local Portrait = parent[self.name]
 	if Portrait then
 		local class = select(2, UnitClass(unit))
-		if class then
+		if canaccessvalue(class) and class then
 			Portrait.portraitTexture:SetTexture("Interface\\Glues\\CharacterCreate\\UI-CharacterCreate-Classes")
 			Portrait.portraitTexture:SetTexCoord(CLASS_ICON_TCOORDS[class][1], CLASS_ICON_TCOORDS[class][2], CLASS_ICON_TCOORDS[class][3], CLASS_ICON_TCOORDS[class][4])
 		else
@@ -77,7 +77,7 @@ local function Portrait_Layout(self, parent)
 	local l   = dbx.location
 	Portrait:SetParent(parent)
 	Portrait:ClearAllPoints()
-	Portrait:SetFrameLevel(parent:GetFrameLevel() + (dbx.level or 4) )
+	Portrait:SetFrameLevel( parent:GetFrameLevel() + self:GetFrameLevel(dbx.level or 4) )
 	Portrait:SetPoint(l.point, container, l.relPoint, l.x, l.y)
 	Portrait:SetWidth( dbx.width or container:GetWidth() )
 	Portrait:SetHeight( dbx.height or container:GetHeight() )

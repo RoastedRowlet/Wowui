@@ -235,6 +235,35 @@ local function HandlePreviewMythicRewardTooltip(self, itemLevel, upgradeItemLeve
 	end
 end
 
+local function ForceGenerateWeeklyRewards()
+    if not WeeklyRewardsFrame then
+        LoadAddOn("Blizzard_WeeklyRewards")
+    end
+    if not WeeklyRewardsFrame then return end
+
+    -- Move offscreen and force Blizzard to generate example rewards
+	if WeeklyRewardsFrame:IsVisible() then return end
+
+    -- Save current SFX state
+    local oldSFX = GetCVar("Sound_EnableSFX")
+
+    -- Disable SFX to silence the vault chest open/close sound
+    SetCVar("Sound_EnableSFX", 0)
+
+    WeeklyRewardsFrame:ClearAllPoints()
+    WeeklyRewardsFrame:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", 0, -500)
+    WeeklyRewardsFrame:Show()
+    WeeklyRewardsFrame:FullRefresh()
+	
+	SetCVar("Sound_EnableSFX", oldSFX)
+	
+    C_Timer.After(0.05, function()
+	    SetCVar("Sound_EnableSFX", 0)
+        WeeklyRewardsFrame:Hide()
+		SetCVar("Sound_EnableSFX", oldSFX)
+    end)
+end
+
 local function ShowPreviewItemTooltip(t, tframe)
 	if t == nil or tframe == nil then return end
 	GameTooltip:SetOwner(tframe, "ANCHOR_RIGHT", -7, -11);
@@ -247,7 +276,7 @@ local function ShowPreviewItemTooltip(t, tframe)
 	if upgradeItemLink then
 		upgradeItemLevel = C_Item.GetDetailedItemLevelInfo(upgradeItemLink);
 	end
-	
+
 	if not itemLevel then
 		GameTooltip_AddErrorLine(GameTooltip, RETRIEVING_ITEM_INFO);
 		t.UpdateTooltip = t.ShowPreviewItemTooltip;
@@ -527,7 +556,9 @@ function CCS.updatemplussideframe(sortby, sortdirection)
 
 			if C_WeeklyRewards.HasGeneratedRewards() and t.ItemFrame and t.ItemFrame.displayedItemDBID then
 				local itemLink = C_WeeklyRewards.GetItemHyperlink(t.ItemFrame.displayedItemDBID)
-				itemName, _, _, itemLevel = C_Item.GetItemInfo(itemLink)
+				if itemLink ~= nil then
+					itemName, _, _, itemLevel = C_Item.GetItemInfo(itemLink)
+				end
 				iconTexture = t.ItemFrame.Icon:GetTexture() or "Interface\\Masks\\SquareMask.BLP"
 				tooltipFunc = function(self)
 					GameTooltip:SetOwner(self, "ANCHOR_RIGHT", -3, -6)
@@ -2025,7 +2056,7 @@ function CCS.MythicPlusEventHandler(event, ...)
 		if _G["MPlusScoreBtn"] then _G["MPlusScoreBtn"]:Hide() end
 		return 
 	end
-	
+	MuteSoundFile(169062)
     if event == "PLAYER_LEVEL_UP" then
 	   C_Timer.After(.2, function() 
 			if UnitLevel("player") >= 80 then  
@@ -2050,6 +2081,7 @@ function CCS.MythicPlusEventHandler(event, ...)
 
     if not CCS.mythicUpdatePending then
         CCS.mythicUpdatePending = true
+		--ForceGenerateWeeklyRewards(); 
 		WeeklyRewardsFrame:FullRefresh()
 		
         C_Timer.After(1, function()

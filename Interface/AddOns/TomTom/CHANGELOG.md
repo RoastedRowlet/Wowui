@@ -1,8 +1,16 @@
 # TomTom
 
-## [v4.3.8-release](https://github.com/jnwhiteh/TomTom/tree/v4.3.8-release) (2026-08-02)
-[Full Changelog](https://github.com/jnwhiteh/TomTom/commits/v4.3.8-release) [Previous Releases](https://github.com/jnwhiteh/TomTom/releases)
+## [v4.3.9-release](https://github.com/jnwhiteh/TomTom/tree/v4.3.9-release) (2026-08-29)
+[Full Changelog](https://github.com/jnwhiteh/TomTom/commits/v4.3.9-release) [Previous Releases](https://github.com/jnwhiteh/TomTom/releases)
 
+- Update embedded Ace3 and HereBeDragons libraries  
+    AceGUI-3.0:  
+    - CheckBox: replace deprecated SetDesaturation global with :SetDesaturated method  
+    - Slider: workaround for font-loading bug leaving editbox blank until text changes  
+    HereBeDragons (5ccefa1 -> 0547c95, tag 2.17-release):  
+    - Pins: Add* pin functions now return true/false to indicate success  
+    - TOC: bump supported interface versions  
+- Add French translation for map data availability message (#17)  
 - Avoid lookup for /way #XXXX commands, just try to set directly  
 - Move back to a unified TOC  
 - Update TOC flavors and add explicit Wrath TOC  
@@ -697,8 +705,3 @@
 - Fixed a bug with the /way slash command, when used without arguments  
 - Alter TomTom to use Astrolabe trunk  
 - Added an option to change the title height/width of the crazy arrow  
-- Added an option to change the scale/opacity of the waypoint arrow  
-- Added options for the following:  
-    * Enable the right-click menu for minimap waypoints  
-    * Enable the right-click menu for worldmap waypoints  
-    * Ask for confirmation when removing all waypoints  

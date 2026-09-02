@@ -12,19 +12,25 @@ RaiderIO_Config = {
 ["hide"] = false,
 },
 }
-RaiderIO_LastCharacter = "us-Zappyxatu-stormrage"
+RaiderIO_LastCharacter = "us-Lonelylitten-stormrage"
 RaiderIO_MissingCharacters = {
-["us-Shame-nesingwary"] = true,
-["us-Shmìt-illidan"] = true,
-["us-Naxuda-stormrage"] = true,
-["us-Kasyra-elune"] = true,
+["us-Rëno-area-52"] = true,
+["us-Dalebeanhrdt-icecrown"] = true,
+["us-Cedars-proudmoore"] = true,
+["us-Ancilário-stormrage"] = true,
+["us-Glutencorp-area-52"] = true,
+["us-Pacchetto-stormrage"] = true,
+["us-Lorahawe-area-52"] = true,
+["us-Voidcastah-sargeras"] = true,
+["us-Snaglvr-dathremar"] = true,
 ["us-party5-stormrage"] = true,
-["us-Rocksmom-illidan"] = true,
-["us-Bamboopanda-alterac-mountains"] = true,
-["us-Mofangii-illidan"] = true,
-["us-Sticknstone-zuljin"] = true,
-["us-Shadê-kargath"] = true,
-["us-Maxytouches-stormrage"] = true,
+["us-Bigpriest-guldan"] = true,
+["us-Mysticnature-stormrage"] = true,
+["us-Imply-dalaran"] = true,
+["us-Midnytfrost-stormrage"] = true,
+["us-Malcolm-draka"] = true,
+["us-Peopy-stormrage"] = true,
+["us-Seimei-scarlet-crusade"] = true,
 }
 RaiderIO_MissingServers = {
 }

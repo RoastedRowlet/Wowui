@@ -18,11 +18,10 @@ local activeBars = {}
 local backupBars = {}
 
 local alluringBubbleCount = 1
-local frostBarrageCount = 1
 local swirlingWhirlpoolsCount = 1
 local abyssalRainCount = 1
 local icebladeFlurryCount = 1
-local waterJetCount = 1
+local chillingFrostCount = 1
 
 local spellChoiceCount = 1
 
@@ -40,13 +39,12 @@ local spellChoiceCount = 1
 mod:SetRenames({
 	[1276710] = {CL.adds}, -- Alluring Bubble (Adds)
 	[1257717] = {1257717}, -- Alluring Bubble
-	[1257608] = {1257608}, -- Frost Barrage
 	[1258668] = {1258668}, -- Swirling Whirlpools
 	[1260837] = {1260837}, -- Abyssal Rain
 	[1282937] = {CL.tank_hit}, -- Iceblade Flurry (Tank Hit)
 	[1313393] = {1313393}, -- Chilling Frost
 	-- Mythic
-	[1268562] = {CL.tank_hit}, -- Water Jet
+	[1268562] = {CL.tank_frontal}, -- Water Jet
 })
 
 --------------------------------------------------------------------------------
@@ -54,29 +52,31 @@ mod:SetRenames({
 --
 
 mod:SetAuraData({
-	{1257608, soundOnApplied = "warning", header = CL.important}, -- Frost Barrage
-	{1282937, soundOnApplied = "warning"}, -- Iceblade Flurry
-	{1282404, soundOnApplied = "none", header = CL.general}, -- Drenched
-	{1257651, soundOnApplied = "none"}, -- Drifting Globules
-	{1257644, soundOnApplied = "none"}, -- Frost Barrage
+	{1313393, soundOnApplied = "warning", duration = 5, header = CL.important}, -- Chilling Frost
+	{1282947, soundOnApplied = "alarm", duration = 5}, -- Iceblade Flurry
+	{1258901, soundOnApplied = "warning", mythic = true}, -- Water Jet
+
+	{1260843, soundOnApplied = "none", soundOnAppliedDose = "none", header = CL.general}, -- Abyssal Rain
+	{1313448, soundOnApplied = "none", duration = 16}, -- Frost Orb
 	{1257654, soundOnApplied = "none"}, -- Lingering Frost
 	{1295086, soundOnApplied = "none"}, -- Unending Tides
-	{1282947, soundOnApplied = "none"}, -- Iceblade Flurry
-	{1258901, soundOnApplied = "none", header = CL.mythic}, -- Water Jet
+	{1282947, soundOnApplied = "none", note = CL.tank_debuff}, -- Iceblade Flurry (Vulnerability)
+	{1260637, soundOnApplied = "none", soundOnAppliedDose = "none", mythic = true, note = CL.tank_debuff}, -- Water Jet (Vulnerability)
 })
 
 function mod:GetOptions()
 	return {
 		1276710, -- Alluring Bubble
 		1257717, -- Alluring Bubble
-		1257608, -- Frost Barrage
 		1258668, -- Swirling Whirlpools
 		1260837, -- Abyssal Rain
 		1282937, -- Iceblade Flurry
 		1313393, -- Chilling Frost
 
 		-- Mythic
-		{1268562, "TANK"}, -- Water Jet
+		1268562, -- Water Jet
+	}, {
+		[1268562] = "mythic",
 	}
 end
 
@@ -95,11 +95,10 @@ function mod:OnEncounterStart()
 	activeBars = {}
 
 	alluringBubbleCount = 1
-	frostBarrageCount = 1
 	swirlingWhirlpoolsCount = 1
 	abyssalRainCount = 1
 	icebladeFlurryCount = 1
-	waterJetCount = 1
+	chillingFrostCount = 1
 	spellChoiceCount = 1
 end
 
@@ -131,7 +130,11 @@ function mod:ENCOUNTER_TIMELINE_EVENT_ADDED(_, eventInfo)
 	elseif durationRounded == 8 or durationRounded == 23 or durationRounded == 33 then
 		barInfo = self:AbyssalRain(eventInfo)
 	elseif durationRounded == 22 or durationRounded == 27 or durationRounded == 9 then
-		barInfo = self:IcebladeFlurry(eventInfo)
+		if self:Mythic() then
+			barInfo = self:WaterJet(eventInfo)
+		else
+			barInfo = self:IcebladeFlurry(eventInfo)
+		end
 	elseif durationRounded == 25 or durationRounded == 7 then
 		barInfo = self:AlluringBubbleAdds(eventInfo)
 	elseif durationRounded == 107 or durationRounded == 89 then
@@ -230,19 +233,6 @@ function mod:AlluringBubble()
 	}
 end
 
-function mod:FrostBarrage()
-	local barText = CL.count:format(self:GetRename(1257608), frostBarrageCount)
-	frostBarrageCount = frostBarrageCount + 1
-	return {
-		msg = barText,
-		key = 1257608,
-		onFinished = function()
-			self:Message(1257608, "yellow", barText)
-			self:PlaySound(1257608, "alert")
-		end
-	}
-end
-
 function mod:SwirlingWhirlpools()
 	local barText = CL.count:format(self:GetRename(1258668), swirlingWhirlpoolsCount)
 	swirlingWhirlpoolsCount = swirlingWhirlpoolsCount + 1
@@ -276,15 +266,15 @@ function mod:IcebladeFlurry() -- Tank Hit
 		msg = barText,
 		key = 1282937,
 		onFinished = function()
-			self:Message(1282937, "yellow", barText)
+			self:Message(1282937, "purple", barText)
 			self:PlaySound(1282937, "alert")
 		end
 	}
 end
 
 function mod:WaterJet()
-	local barText = CL.count:format(self:GetRename(1268562), waterJetCount)
-	waterJetCount = waterJetCount + 1
+	local barText = CL.count:format(self:GetRename(1268562), icebladeFlurryCount)
+	icebladeFlurryCount = icebladeFlurryCount + 1
 	return {
 		msg = barText,
 		key = 1268562,
@@ -296,8 +286,8 @@ function mod:WaterJet()
 end
 
 function mod:ChillingFrost()
-	local barText = CL.count:format(self:GetRename(1313393), waterJetCount)
-	waterJetCount = waterJetCount + 1
+	local barText = CL.count:format(self:GetRename(1313393), chillingFrostCount)
+	chillingFrostCount = chillingFrostCount + 1
 	return {
 		msg = barText,
 		key = 1313393,

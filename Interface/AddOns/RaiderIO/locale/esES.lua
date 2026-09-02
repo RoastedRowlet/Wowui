@@ -240,8 +240,7 @@ L["DUNGEON_SHORT_NAME_SV"] = "La Petrocámara - SV"
 L["DUNGEON_SHORT_NAME_TD"] = "Tol Dagor - TD"
 L["DUNGEON_SHORT_NAME_TJS"] = "Templo del Dragón de Jade - TJS"
 L["DUNGEON_SHORT_NAME_TOP"] = "Teatro del Dolor - TOP"
-L["DUNGEON_SHORT_NAME_TOS"] = [=[El Sagrario Obsidiana - TOS
-Templo de Sethraliss - TOS]=]
+L["DUNGEON_SHORT_NAME_TOS"] = "Templo de Sethraliss - TOS"
 L["DUNGEON_SHORT_NAME_TOTT"] = "Trono de las Mareas - TOTT"
 L["DUNGEON_SHORT_NAME_ULD"] = "Uldaman - ULD"
 L["DUNGEON_SHORT_NAME_UNDR"] = "Catacumbas Putrefactas - UNDR"

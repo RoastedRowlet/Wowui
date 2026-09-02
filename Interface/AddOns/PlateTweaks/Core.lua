@@ -6,6 +6,15 @@ local _, NS = ...
 -- containers evaluate the conditions and hand back visibility; we only build
 -- and place frames. See Tints.lua for the gate mechanics.
 
+-- Hoisted to upvalues: a global is a hash lookup in _G every time, and the
+-- maintenance tickers below reach these once per rig per tick.
+local pairs, ipairs, pcall, type = pairs, ipairs, pcall, type
+
+-- Shared and NEVER mutated -- see the same note in Tints.lua. `x or {}` builds
+-- a table on every evaluation where x is nil, and the polled helpers run four
+-- times a second. Read-only sites only.
+local EMPTY = {}
+
 NS.Defaults = {
   -- Optional Tweaks: unrelated conveniences, each off until asked for. Kept in
   -- their own table so nothing here can be mistaken for a nameplate setting.
@@ -141,6 +150,11 @@ NS.Defaults = {
     maxRigRepairs = 1,
   },
   levelOffset = 1,
+  -- Aura slots, on. Only ever read as `== false`, so nil already meant on --
+  -- stated explicitly here because "off" is a diagnostic A/B switch, not a
+  -- setting anyone should end up on by accident. The group path costs ten
+  -- times as much per rule and is a visible freeze on a big pull.
+  useAuraSlots = true,
 }
 
 -- 75% rather than opaque. EllesmereUI's hash line, highlights and absorb
@@ -884,6 +898,17 @@ function NS.InitializeConfig()
   -- Deliberately no starter rule: a new character begins blank, with icons
   -- off, because a seeded Warlock spell would be meaningless on a Druid.
 
+  -- One-time: clear a stored `/pt slots off`. That switch exists to A/B the
+  -- slot API against the old pooled-group path, and someone who flipped it to
+  -- test has no reason to still be carrying it -- but it survives reloads
+  -- silently, and the group path is the lag people then report as a bug. Runs
+  -- once per profile; anyone who genuinely wants it off can set it again and
+  -- it will stick.
+  if db.useAuraSlots == false and not db.slotsDefaultRestored then
+    db.useAuraSlots = true
+  end
+  db.slotsDefaultRestored = true
+
   NS.db = db
 end
 
@@ -1354,9 +1379,55 @@ end
 -- left a broken rig on that bar -- and every later mob handed that bar got it
 -- too, for the rest of the session. That is the "first key fine, later pulls
 -- dead" report.
+-- builtInCombat is a reason to INSPECT, not a verdict.
+--
+-- It used to disqualify a rig outright, on the reasoning that a container can
+-- be refused mid-combat without raising. True -- but it fires for every plate
+-- that appears during a pull, whether or not anything actually failed, and a
+-- measured session showed the cost of that: 3 rigs discarded and rebuilt with
+-- `0 with refused builds` and `0 bound plate(s) drawing nothing`. Nothing had
+-- gone wrong; the rebuilds were pure churn.
+--
+-- They are not free churn either. A repair is DiscardRig (retire and disable
+-- the old containers) then a fresh BuildRig, and the new containers' buttons
+-- only initialise as the engine pools them -- so the plate is UNCOLOURED for
+-- that window. Those repairs run from ResyncVisiblePlates on
+-- PLAYER_REGEN_ENABLED, which walks every visible plate, so the end of each
+-- pull tore down and rebuilt every plate rigged during it at once. Chain-pull
+-- and that is repeated bursts of plates losing colour -- the symptom this was
+-- meant to protect against.
+--
+-- So: check the structure instead of the clock. A chain rule builds one
+-- container per condition, so the count is directly verifiable, and a rule
+-- that paints the bar must have a tint. A combat-built rig that passes both
+-- is demonstrably whole and is kept.
+-- Deliberately only checks what is populated SYNCHRONOUSLY by BuildRule.
+--
+-- The obvious test -- "a 3-condition rule should own 3 containers, and a rule
+-- that paints the bar should own a tint" -- is wrong here, because neither is
+-- true yet at the moment this runs. Only the depth-1 container is created
+-- inline; the deeper links and every tint are created inside initializeFrame
+-- as the engine pools buttons. Testing those would call a perfectly healthy
+-- fresh rig broken and rebuild it, which is the exact churn this change
+-- exists to stop.
+--
+-- The root container IS synchronous, so "a rule that wanted containers has
+-- none" is a real signal and the one worth keeping.
+local function RigStructureComplete(rig)
+  for _, record in ipairs(rig.rules or {}) do
+    -- Rules that were never going to build anything are not evidence of a
+    -- bad build: unsupported depth, or inert (border-only with the bar off).
+    if record.rule and not record.unsupported and not record.inert then
+      if (record.spellCount or 0) > 0 and #(record.containers or {}) == 0 then
+        return false
+      end
+    end
+  end
+  return true
+end
+
 local function RigIsSound(rig)
   if not rig then return false end
-  if rig.builtInCombat then return false end
   if #(rig.buildErrors or {}) > 0 then return false end
   for _, record in ipairs(rig.rules or {}) do
     if (record.failures or 0) > 0 then return false end
@@ -1364,6 +1435,10 @@ local function RigIsSound(rig)
   if ((rig.missingDisplace or {}).failures or 0) > 0 then return false end
   if ((rig.icons or {}).failures or 0) > 0 then return false end
   if (rig.missingFailures or 0) > 0 then return false end
+  -- Last, and only for combat-built rigs: the counters above catch anything
+  -- that reported a failure, this catches a container that went missing
+  -- without saying so.
+  if rig.builtInCombat and not RigStructureComplete(rig) then return false end
   return true
 end
 
@@ -1751,6 +1826,29 @@ local function ResyncSwappedBars(confirmed)
 end
 NS.ResyncVisiblePlates = ResyncVisiblePlates
 
+-- Targeting a unit is the ONE moment we can predict Plater will move the bar:
+-- UpdateUIParentTargetLevels raises the unit frame by 5000 on the new target
+-- and drops the old one back. Until now only the once-a-second ticker noticed,
+-- so a plate could sit up to a full second either uncoloured (bar 5000 above
+-- our tint) or overdrawing Plater's own fill and text (tint 5000 above the
+-- bar). Fast target switching between adds hits this repeatedly.
+--
+-- Every bound rig, not just the two units involved: the old target's unit
+-- token is gone by the time this fires, and RepinLevels is one integer compare
+-- against BaseLevelFor when nothing has moved -- which is the case for all but
+-- the two plates that did.
+--
+-- Deferred one frame. Plater's own PLAYER_TARGET_CHANGED handler may run after
+-- ours, so reading the level in this frame can return the PRE-bump number,
+-- which would latch the stale value again and hand the job straight back to
+-- the ticker. C_Timer.After(0) puts us after every handler for this event.
+local function RepinBoundRigs()
+  if not NS.RepinLevels then return end
+  for _, rig in pairs(rigs) do
+    if rig.unit then pcall(NS.RepinLevels, rig) end
+  end
+end
+
 -- One place that decides what "catch up" means, so no trigger can drift.
 --
 -- reason is unread on purpose -- call sites read as Reapply("combat ended"),
@@ -1779,9 +1877,26 @@ local function Reapply(reason)
 end
 NS.Reapply = Reapply
 
+-- High-water mark of concurrent plates, and of how many were up while in
+-- combat. "It only happens on large pulls" is the most common shape of report
+-- and the least checkable -- a capture taken after the fact shows whatever is
+-- on screen now, not what the pull peaked at. Cheap: one compare per add.
+NS.peakPlates = 0
+NS.peakPlatesInCombat = 0
+
+local function NotePeakPlates()
+  local live = 0
+  for _ in pairs(activeUnits) do live = live + 1 end
+  if live > NS.peakPlates then NS.peakPlates = live end
+  if InCombatLockdown() and live > NS.peakPlatesInCombat then
+    NS.peakPlatesInCombat = live
+  end
+end
+
 eventFrame:SetScript("OnEvent", function(_, event, arg1)
   if event == "NAME_PLATE_UNIT_ADDED" then
     activeUnits[arg1] = true
+    NotePeakPlates()
     OnPlateAdded(arg1)
   elseif event == "NAME_PLATE_UNIT_REMOVED" then
     activeUnits[arg1] = nil
@@ -1836,6 +1951,8 @@ eventFrame:SetScript("OnEvent", function(_, event, arg1)
     -- having changed, so it is a no-op for addons that keep one bar.
     ResyncSwappedBars(false)
     ReapplyGating()
+    -- Levels only, and next frame. See RepinBoundRigs.
+    C_Timer.After(0, RepinBoundRigs)
 
   elseif event == "PLAYER_SPECIALIZATION_CHANGED"
       or event == "ACTIVE_TALENT_GROUP_CHANGED"
@@ -1878,12 +1995,39 @@ eventFrame:RegisterEvent("ADDON_LOADED")
   -- Backstop. Every trigger above is an event that MIGHT not fire -- a rebuild
   -- queued in combat that ends without PLAYER_REGEN_ENABLED reaching us, a
   -- plate that arrived while the config was loading. One boolean a second.
+-- Counts recoveries for the session, so /pt status can say whether this is
+-- doing anything. A climbing number means containers really are going dark
+-- mid-fight, which is a finding in itself.
+NS.containerRevives = 0
+
 C_Timer.NewTicker(1.0, function()
   if not NS.db then return end
   if rebuildPending and NS.CanBuild() then
     Reapply("pending rebuild")
   elseif NS.colorPending and not InCombatLockdown() then
     NS.ApplyTintColors()
+  end
+
+  -- Runs IN COMBAT, unlike everything above it.
+  --
+  -- Rebuilds, re-anchors and repairs all wait for lockdown to end, which is
+  -- why a plate that breaks mid-pull stays broken until the pull does. Showing
+  -- and enabling a root container is permitted in combat, so this recovers
+  -- that class of failure without waiting -- and without needing to know what
+  -- caused it.
+  for _, rig in pairs(rigs) do
+    if rig.unit then
+      if NS.ReviveContainers then
+        local okRevive, revived = pcall(NS.ReviveContainers, rig)
+        if okRevive and revived and revived > 0 then
+          NS.containerRevives = NS.containerRevives + revived
+        end
+      end
+      -- Also in combat, and for the same reason: the host can raise the bar's
+      -- frame level after we have pinned to it, and until now the only thing
+      -- that noticed was combat ending. One integer compare per bound plate.
+      if NS.RepinLevels then pcall(NS.RepinLevels, rig) end
+    end
   end
   -- Plates whose bar we could not find -- restricted, or just lost the retry
   -- race. Retried regardless of restriction state.
@@ -1921,14 +2065,16 @@ end)
 --
 -- Walked only while at least one missing rule uses the option.
 local function AnyMissingCombatOnly()
-  local tints = NS.db.tints or {}
-  for _, rule in ipairs(tints.rules or {}) do
+  -- Polled at 4Hz, so the three tables this used to allocate per call were a
+  -- dozen a second for nothing. All three uses are read-only iteration.
+  local tints = NS.db.tints or EMPTY
+  for _, rule in ipairs(tints.rules or EMPTY) do
     if rule.showWhenMissing and rule.missingCombatOnly then return true end
   end
   -- Border rules keep their own list. Left out here, a combat-gated missing
   -- BORDER was evaluated once at build time and never polled again, so the
   -- option silently did nothing for it.
-  for _, rule in ipairs(tints.borderRules or {}) do
+  for _, rule in ipairs(tints.borderRules or EMPTY) do
     if rule.showWhenMissing and rule.missingCombatOnly then return true end
   end
   return false
@@ -2017,22 +2163,64 @@ function NS.CollectDiagnostics()
     rules = {},
     textures = 0,
     containers = 0,
+    -- Counted across EVERY rig, unlike info.rules below, which samples one.
+    --
+    -- info.errored only catches a builder that THREW. The builders deliberately
+    -- count their failures instead of raising, so the case that matters here --
+    -- a container refused, leaving a plate with nothing to draw -- leaves
+    -- buildErrors empty and was invisible from anywhere. That is exactly the
+    -- shape of "colouring just does not happen on big pulls": some plates are
+    -- fine and some built nothing, and no count distinguished them.
+    rigsEmpty = 0,
+    rigsFailed = 0,
+    rigsUnsound = 0,
+    -- Test mode paints its own copies onto real nameplates and suppresses the
+    -- missing wash, so a session left running shows colours unrelated to any
+    -- debuff. It was never reported anywhere, which makes it invisible in
+    -- exactly the reports it would explain.
+    testMode = (NS.TestModeActive and NS.TestModeActive()) and true or false,
+    peakPlates = NS.peakPlates or 0,
+    peakPlatesInCombat = NS.peakPlatesInCombat or 0,
+    containerRevives = NS.containerRevives or 0,
+    containerRefusals = (NS.buildFailures or {}).containers or 0,
+    containerRefusalsInCombat = (NS.buildFailures or {}).containersInCombat or 0,
+    levelDrift = NS.levelDrift or {},
+    -- Plates sitting at the wrong level RIGHT NOW, as opposed to the
+    -- cumulative counters: a live count is what says whether the sweep is
+    -- keeping up or losing ground during a pull.
+    levelWrong = 0,
   }
 
   for _, rig in pairs(rigs) do
     info.rigged = info.rigged + 1
     if rig.unit then info.bound = info.bound + 1 end
+    if rig.unit and rig.healthBar and NS.BaseLevelFor then
+      local okWant, want = pcall(NS.BaseLevelFor, rig.healthBar)
+      if okWant and type(want) == "number" and want ~= rig.baseLevel then
+        info.levelWrong = info.levelWrong + 1
+      end
+    end
     if rig.buildErrors and #rig.buildErrors > 0 then
       info.errored = info.errored + 1
       info.firstError = info.firstError or rig.buildErrors[1]
     end
+    local drawn, failed = 0, false
     for _, record in ipairs(rig.rules or {}) do
       info.textures = info.textures
         + #(record.tints or {}) + #(record.underlays or {})
         + #(record.borders or {}) + #(record.pandemics or {})
         + #(record.missingCovers or {})
       info.containers = info.containers + #(record.containers or {})
+      drawn = drawn + #(record.tints or {}) + #(record.borders or {})
+      if (record.failures or 0) > 0 then failed = true end
     end
+    drawn = drawn + #((rig.missingDisplace or {}).entries or {})
+    if failed then info.rigsFailed = info.rigsFailed + 1 end
+    if not RigIsSound(rig) then info.rigsUnsound = info.rigsUnsound + 1 end
+    -- Bound only. An unbound rig sitting in the pool with nothing built is
+    -- normal; a rig attached to a plate on screen with nothing built is the
+    -- user-visible bug.
+    if rig.unit and drawn == 0 then info.rigsEmpty = info.rigsEmpty + 1 end
   -- Displacement entries are not in rig.rules, so their cost has to be added
   -- explicitly or the totals report the occlusion figure in both modes.
     for _, entry in ipairs((rig.missingDisplace or {}).entries or {}) do
@@ -2054,12 +2242,24 @@ function NS.CollectDiagnostics()
       math.max(info.missingBorderIncomplete or 0, rig.missingBorderIncomplete or 0)
     info.borderRulesOff =
       math.max(info.borderRulesOff or 0, rig.borderRulesOff or 0)
+    -- Set by the Plater sublevel allocator when both pools fill and rules get
+    -- clamped onto one sublevel. It was recorded and never read, so the one
+    -- state that makes identical rules paint some plates and not others was
+    -- invisible from every command.
+    if rig.sublevelStarved then info.sublevelStarved = true end
   end
 
   for _ in pairs(pendingUnits) do info.pending = info.pending + 1 end
 
-  -- One entry per rule from a single representative rig. Every rig builds the
-  -- same rules, so walking them all would just repeat this N times.
+  -- One entry per rule from a single SAMPLED rig.
+  --
+  -- This used to say "representative", which was wrong in the one case people
+  -- actually report: every rig is built from the same CONFIG, but not with the
+  -- same OUTCOME. A rig built while a container was refused has the same rules
+  -- with nothing attached, and `pairs` hands back whichever it likes -- so a
+  -- pull where half the plates built nothing could sample a healthy one and
+  -- look perfect. The rigsEmpty/rigsFailed/rigsUnsound counts above are the
+  -- ones that cover every rig; these lines describe one plate.
   for _, rig in pairs(rigs) do
     for index, record in ipairs(rig.rules or {}) do
       local flags = {}
@@ -2067,6 +2267,17 @@ function NS.CollectDiagnostics()
       if record.inert then table.insert(flags, "INERT") end
       if record.truncated then table.insert(flags, "TRUNCATED") end
       if record.blocked then table.insert(flags, "BLOCKED") end
+      -- Per-rule opt-outs. These unbind the rule's containers for that ONE
+      -- plate (see NS.ActivateContainer), so the plate never colours while
+      -- every count here stays perfectly healthy -- and nothing reported them.
+      -- A tick someone set months ago and forgot reads as "it sometimes just
+      -- does not work".
+      if record.rule and record.rule.showOnTarget == false then
+        table.insert(flags, "|cffffcc00not-on-target|r")
+      end
+      if record.rule and record.rule.showOnFocus == false then
+        table.insert(flags, "|cffffcc00not-on-focus|r")
+      end
       -- Ladder only. lever says which mechanism the combat gate settled on
       -- (shown = cheap, enabled = re-initialises buttons); reinit counts
       -- buttons that came back through initializeFrame after being built. A
@@ -2149,6 +2360,20 @@ function NS.CollectDiagnostics()
         else
           target.rigged = true
           target.baseLevel = rig.baseLevel
+          -- "shown/alpha/... refused" on a tint (below) is a READ limitation
+          -- under aura secrecy -- it says nothing about whether the texture
+          -- actually exists or draws. This is the field that answers the
+          -- question those refusals cannot: whether this specific rig was
+          -- assembled during combat lockdown (and is therefore SUSPECTED
+          -- incomplete -- AuraContainer creation can be silently refused
+          -- there) and how many of its repair attempts are already spent.
+          -- See RigIsSound/OnPlateAdded. A rig that reads sound=false and
+          -- repairs=cap is the concrete, checkable version of "this plate's
+          -- coloring looks wrong and I don't know why."
+          target.builtInCombat = rig.builtInCombat and true or false
+          target.sound = RigIsSound(rig)
+          target.repairs = rig.repairs or 0
+          target.repairCap = (NS.db.tints and NS.db.tints.maxRigRepairs) or 1
           local shown, total, secret = 0, 0, 0
           for _, record in ipairs(rig.rules or {}) do
             for _, tex in ipairs(record.tints or {}) do
@@ -2221,6 +2446,51 @@ local function PrintStatus()
   if info.errored > 0 then
     NS.Print(("build errors on %d rig(s): %s"):format(info.errored, tostring(info.firstError)))
   end
+  -- Loud, and first: test mode draws colours that have nothing to do with your
+  -- debuffs, so every other line below is describing a plate you are not
+  -- actually looking at.
+  if info.testMode then
+    NS.Print("|cffff4040TEST MODE IS ON|r -- colours on screen are simulated, not driven by real debuffs")
+  end
+  -- Peak, not current: a capture taken after the pull shows what is on screen
+  -- now, which is never the number the report is about.
+  NS.Print(("peak plates this session: %d (%d of them in combat)"):format(
+    info.peakPlates or 0, info.peakPlatesInCombat or 0))
+  -- Survives the rig being discarded and rebuilt, which is what destroys the
+  -- per-record evidence. In combat is the diagnostic half.
+  -- A non-zero count here means containers are going dark mid-fight and the
+  -- ticker is switching them back on. Useful either way: zero rules the
+  -- mechanism out, non-zero confirms it and says how often.
+  if (info.containerRevives or 0) > 0 then
+    NS.Print(("containers revived this session: |cff55dd55%d|r (dark mid-fight, switched back on)")
+      :format(info.containerRevives))
+  end
+  if (info.containerRefusals or 0) > 0 then
+    NS.Print(("|cffff8800containers refused this session: %d (%d under combat lockdown)|r"):format(
+      info.containerRefusals or 0, info.containerRefusalsInCombat or 0))
+  end
+  -- The host moving the bar's frame level after we pinned to it. Silent when
+  -- it has never happened, since that is the answer we want for most hosts.
+  local drift = info.levelDrift or {}
+  if (drift.detected or 0) > 0 or (info.levelWrong or 0) > 0 then
+    NS.Print(("bar level drift: |cff55dd55%d|r re-pinned | %d needed a rebuild | %d seen this session")
+      :format(drift.repinned or 0, drift.deferred or 0, drift.detected or 0))
+    if (info.levelWrong or 0) > 0 then
+      NS.Print(("  |cffff8800%d bound plate(s) sitting at the wrong level right now -- those cannot colour|r")
+        :format(info.levelWrong))
+    end
+  end
+  -- The line for "colouring just does not happen sometimes". Printed only when
+  -- something is actually wrong, since all-zero is the normal case.
+  if (info.rigsEmpty or 0) > 0 or (info.rigsFailed or 0) > 0 or (info.rigsUnsound or 0) > 0 then
+    NS.Print(("rig health: |cffff8800%d|r bound plate(s) drawing nothing | %d with refused builds | %d unsound")
+      :format(info.rigsEmpty or 0, info.rigsFailed or 0, info.rigsUnsound or 0))
+    if (info.rigsEmpty or 0) > 0 then
+      NS.Print("  |cffff8800a plate on screen with nothing built will never colour, whatever debuffs land on it|r")
+      NS.Print("  |cff808080secure containers cannot be created under combat lockdown, so plates that first appear|r")
+      NS.Print("  |cff808080mid-pull can build empty and stay that way until combat drops. /pt bar on one to confirm.|r")
+    end
+  end
 
   for _, rule in ipairs(info.rules) do
     local flags = #rule.flags > 0 and (" " .. table.concat(rule.flags, " ")) or ""
@@ -2273,6 +2543,12 @@ local function PrintStatus()
   -- rolling them together sent people looking for a cap they had not hit.
   -- Before the per-rule lines below: with the module off none of those can
   -- fire, so this is the only thing that would be said at all.
+  if info.sublevelStarved then
+    NS.Print("|cffff0000out of draw sublevels|r -- more rules than this nameplate addon leaves room for.")
+    NS.Print("  Rules are stacked on one sublevel and which one wins is undefined, so colouring")
+    NS.Print("  will look inconsistent from plate to plate. Remove a rule, or turn off Pandemic")
+    NS.Print("  Flash (it claims a sublevel per single-debuff rule). |cffffff00/pt layers|r shows the layout.")
+  end
   if (info.borderRulesOff or 0) > 0 then
     NS.Print(("|cffff8800Border Coloring is OFF|r -- %d border rule(s) not built. Switch it on at the Border Coloring heading in |cffffff00/pt|r.")
       :format(info.borderRulesOff))
@@ -2409,6 +2685,64 @@ local function PrintBarDebug()
     tostring(healthBar and healthBar.GetFrameStrata and healthBar:GetFrameStrata()),
     tostring(healthBar and NS.IsPlaterBar and NS.IsPlaterBar(healthBar)),
     tostring(rig.baseLevel)))
+
+  -- Spelled out because reading it off the line above means spotting that two
+  -- five-digit numbers differ, and the difference IS the bug: pinned flat only
+  -- works while our level equals the bar's. Below it, frame level decides
+  -- before draw layer and the bar's own fill covers every tint we own.
+  do
+    -- Reported BEFORE the drift check, because it is the failure the drift
+    -- check cannot see. rig.baseLevel is set to the wanted value BEFORE any
+    -- frame is pinned, so a plate whose pins were every one refused still
+    -- reports zero drift -- while its tint sits thousands of levels beneath
+    -- the bar and cannot draw. That is what made this invisible for months.
+    -- rig.appliedLevel only advances when every frame accepted and read back.
+    local okApplied, applied = pcall(NS.BaseLevelFor, healthBar)
+    if okApplied and type(applied) == "number"
+       and rig.appliedLevel and rig.appliedLevel ~= applied then
+      -- Deliberately NOT phrased as a failure. This says the last level we can
+      -- prove was accepted differs from the bar's -- which is often stale
+      -- rather than wrong, because a button that repairs itself inside its own
+      -- initializeFrame is real work this field may not have caught yet.
+      -- Measured against the buttons' actual levels, the confident wording
+      -- this replaces was a false alarm 14 times out of 16.
+      NS.Print(("  |cffffcc00LEVEL UNVERIFIED: bar is at %d; the last level we can "
+        .. "confirm our frames accepted was %d|r"):format(applied, rig.appliedLevel))
+      NS.Print(("  |cff808080%d frame(s) refused the last re-pin. Bound aura buttons "
+        .. "only accept a level inside their own callback, so this usually clears "
+        .. "itself the next time the debuff lands. Check the tint host levels below "
+        .. "before treating it as a fault.|r"):format(rig.levelRefusedCount or 0))
+    end
+
+    local okWant, want = pcall(NS.BaseLevelFor, healthBar)
+    if okWant and type(want) == "number" and want ~= rig.baseLevel then
+      NS.Print(("  |cffff4040LEVEL DRIFT: bar wants %d, we are pinned at %d (off by %d)|r")
+        :format(want, rig.baseLevel or 0, want - (rig.baseLevel or 0)))
+      NS.Print("  |cffff8800this plate cannot colour at any sublevel until it is re-pinned|r")
+      if rig.levelDirty then
+        NS.Print("  |cff808080re-pin was refused here -- waiting for combat to end to rebuild|r")
+      end
+    end
+  end
+
+  -- The question "shown/alpha/... refused" on a tint below cannot answer:
+  -- that is a READ limitation under aura secrecy, not evidence either way
+  -- about whether the texture actually exists. THIS rig's own build state
+  -- is checkable. A rig built during combat lockdown is suspected
+  -- structurally incomplete (secure AuraContainer creation can be silently
+  -- refused there) and gets a capped number of chances to be discarded and
+  -- rebuilt once combat allows it -- see RigIsSound/OnPlateAdded. If this
+  -- reads unsound with repairs already at the cap, that plate's coloring is
+  -- not going to self-correct until something else rebuilds it (a bar swap,
+  -- a config change, or /pt rebuild).
+  do
+    local cap = (NS.db.tints and NS.db.tints.maxRigRepairs) or 1
+    local repairsUsed = rig.repairs or 0
+    NS.Print(("rig build: %s | built in combat %s | sound %s | repairs used %d/%d"):format(
+      tostring(rig), tostring(rig.builtInCombat and true or false),
+      tostring(RigIsSound(rig)), repairsUsed, cap))
+  end
+
   local adapterName = NS.HostName(healthBar)
   local overrides = (NS.db.adapters or {})[adapterName]
   local tuned = {}
@@ -2419,16 +2753,80 @@ local function PrintBarDebug()
       and (" |cffffcc00(overridden: %s)|r"):format(table.concat(tuned, ", "))
       or ""))
 
-  -- Ground truth for the sublevel arithmetic: where Plater's OWN text
-  -- actually sits, read directly off the object rather than re-derived.
-  -- healthBar.unitName is a plain FontString Plater owns outright -- never
-  -- secret -- so this is safe to read unconditionally.
+  -- Any of these can come back SECRET: they are read off a frame or region
+  -- under a secret aura button (or, on a default plate under secrecy, off the
+  -- plate's own unitFrame), and both tostring() and a raw comparison on one
+  -- throw exactly like a boolean test does -- "attempt to compare ... a
+  -- secret string value, while execution tainted" is the exact error a raw
+  -- comparison produces. okXxx from a pcall only proves the CALL succeeded,
+  -- never that what it returned is safe to touch.
+  local function DescribeField(ok, value)
+    if not ok then return "refused" end
+    if issecretvalue and issecretvalue(value) then return "secret" end
+    if value == nil then return "nil" end
+    return tostring(value)
+  end
+  local function FieldSecret(ok, value)
+    return ok and issecretvalue and issecretvalue(value) and true or false
+  end
+
+  -- Ground truth for the sublevel arithmetic: where the host's OWN text sits,
+  -- read directly off the objects rather than re-derived.
+  --
+  -- NS.PlaterTextFloor takes the MINIMUM OVERLAY sublevel across every
+  -- FontString on the bar, and PlaterRankSublevels derives the entire rank
+  -- ladder from it -- so ONE text sitting lower than expected compresses
+  -- every rule's sublevel at once. That is not hypothetical: Plater creates
+  -- its level text as CreateFontString(nil, "overlay", ...) with no sublevel
+  -- argument, which lands at 0, while its name text is explicitly sent to 7
+  -- and its health percent to 5. A floor of 0 instead of 7 costs three of
+  -- the four clean ranks and collapses rank 3+ onto a shared sublevel.
+  --
+  -- Printing the floor alone could never show that -- it is one number with
+  -- no owner. Each FontString is named by identity against the host's own
+  -- fields so the line says WHICH text is holding the floor down, which is
+  -- the difference between "Plater's level text, as expected" and "this skin
+  -- genuinely draws something low".
   if healthBar and healthBar.unitName then
-    local okTextLayer, textLayer, textSublevel = pcall(healthBar.unitName.GetDrawLayer, healthBar.unitName)
     local okFloor, floor = pcall(NS.PlaterTextFloor, healthBar)
-    NS.Print(("plater name text: layer %s sublevel %s | NS.PlaterTextFloor() says %s"):format(
-      okTextLayer and tostring(textLayer) or "?", okTextLayer and tostring(textSublevel) or "?",
-      okFloor and tostring(floor) or "?"))
+    NS.Print(("plater text floor: %s |cff808080(lowest OVERLAY FontString on the bar; every rule's sublevel derives from this)|r")
+      :format(okFloor and tostring(floor) or "?"))
+
+    local known = {}
+    if healthBar.unitName then known[healthBar.unitName] = "unitName" end
+    if healthBar.actorLevel then known[healthBar.actorLevel] = "actorLevel (level)" end
+    if healthBar.lifePercent then known[healthBar.lifePercent] = "lifePercent" end
+
+    local okRegions, regions = pcall(function() return { healthBar:GetRegions() } end)
+    local texts = 0
+    for _, region in ipairs(okRegions and regions or {}) do
+      local okType, kind = pcall(region.GetObjectType, region)
+      if okType and kind == "FontString" then
+        texts = texts + 1
+        local okDL, layer, sublevel = pcall(region.GetDrawLayer, region)
+        local okShown, isShown = pcall(region.IsShown, region)
+        local okText, text = pcall(region.GetText, region)
+        -- A unit name is secret in an instance, and both sub() and # throw
+        -- on one -- so the secrecy test has to come before either.
+        local body
+        if not okText then
+          body = "refused"
+        elseif issecretvalue and issecretvalue(text) then
+          body = "secret"
+        elseif type(text) == "string" and text ~= "" then
+          body = (#text > 12) and (text:sub(1, 12) .. "...") or text
+        else
+          body = "(empty)"
+        end
+        NS.Print(("  text: %s | layer %s sublevel %s | shown %s | %s"):format(
+          known[region] or "|cffffcc00unknown|r",
+          DescribeField(okDL, layer), DescribeField(okDL, sublevel),
+          DescribeField(okShown, isShown), body))
+      end
+    end
+    if texts == 0 then
+      NS.Print("  no FontStrings on the bar -- floor is the hardcoded default")
+    end
   end
 
   -- The default-Blizzard equivalent, and a real question: flat-pinning to
@@ -2440,11 +2838,12 @@ local function PrintBarDebug()
     local unitFrame = nameplate.UnitFrame
     local okUL, unitLevel = pcall(unitFrame.GetFrameLevel, unitFrame)
     local okHL, healthLevel = pcall(healthBar.GetFrameLevel, healthBar)
+    local levelsSecret = FieldSecret(okUL, unitLevel) or FieldSecret(okHL, healthLevel)
     NS.Print(("default plate: unitFrame level %s | healthBar level %s | %s"):format(
-      okUL and tostring(unitLevel) or "?", okHL and tostring(healthLevel) or "?",
-      (okUL and okHL and healthLevel > unitLevel)
+      DescribeField(okUL, unitLevel), DescribeField(okHL, healthLevel),
+      (okUL and okHL and not levelsSecret and healthLevel > unitLevel)
         and "|cffff4040healthBar is ABOVE unitFrame -- flat-pin cannot help|r"
-        or "healthBar is not above unitFrame"))
+        or (levelsSecret and "level comparison unavailable while secret" or "healthBar is not above unitFrame")))
     -- Any FontString living directly on unitFrame is a candidate for the
     -- name text -- same scan NS.PlaterTextFloor already does for Plater,
     -- just aimed at the frame that actually owns this text on default plates.
@@ -2471,21 +2870,11 @@ local function PrintBarDebug()
           -- only ever looked at healthBar's regions, never unitFrame's.
           local okDL, drawLayer, sublevel = pcall(region.GetDrawLayer, region)
           NS.Print(("  unitFrame fontstring: %s (owner level %s | layer %s sublevel %s)"):format(
-            shown, okUL and tostring(unitLevel) or "?",
-            okDL and tostring(drawLayer) or "?", okDL and tostring(sublevel) or "?"))
+            shown, DescribeField(okUL, unitLevel),
+            DescribeField(okDL, drawLayer), DescribeField(okDL, sublevel)))
         end
       end
     end
-  end
-
-  -- Any of these can come back SECRET: they are read off a texture or frame
-  -- under a secret aura button, and tostring() on one throws exactly like a
-  -- boolean test does. Alpha, size and level are as unsafe as shown.
-  local function DescribeField(ok, value)
-    if not ok then return "refused" end
-    if value == nil then return "nil" end
-    if issecretvalue and issecretvalue(value) then return "secret" end
-    return tostring(value)
   end
 
   -- Rank 1's missing wash -- never dumped before, even though it lives on
@@ -2569,6 +2958,45 @@ local function PrintBarDebug()
     if #(record.tints or {}) > 0 or #(record.hosts or {}) > 0 then
       NS.Print(("rule %d: recordLevel %s | hosts %d | tints %d"):format(
         index, tostring(record.level), #(record.hosts or {}), #(record.tints or {})))
+
+      -- Did flat-pinning actually TAKE on this rule's aura buttons?
+      --
+      -- Flat-pinning works by forcing each button's frame level down to the
+      -- bar's, so their draw layers interleave and sublevel decides. That call
+      -- is `pcall(button.SetFrameLevel, ...)` and it is REFUSED while auras
+      -- are secret -- i.e. in combat, which is when most plates get rigged.
+      -- When it fails the button keeps the higher level the container gave it,
+      -- frame level then beats draw layer, and the tint draws over the host's
+      -- border and name text no matter what sublevel it was given.
+      --
+      -- The outline builder already compensates for exactly this, but it skips
+      -- flat-pinned bars on purpose (raising it there would blank Plater's
+      -- name), so on those two hosts nothing detects or corrects it.
+      --
+      -- Readable even under secrecy: GetFrameLevel on the button object we
+      -- hold a reference to is fine. It is going through the TEXTURE's parent
+      -- that gets refused, which is why the per-tint ownerLevel below reads
+      -- "refused" while this does not.
+      -- Read from counters recorded inside initializeFrame, NOT by inspecting
+      -- the buttons now. Measuring it live was the obvious approach and it
+      -- does not work: in combat a button's frame level and strata both come
+      -- back secret, and out of combat the re-level pass has already repaired
+      -- whatever went wrong, so a live read reports success either way.
+      if NS.IsPlaterBar and NS.IsPlaterBar(healthBar) then
+        local set, refused = record.levelSet or 0, record.levelRefused or 0
+        if set + refused > 0 then
+          if refused > 0 then
+            NS.Print(("  |cffff4040flat pin REFUSED on %d of %d button(s)|r (set ok on %d)")
+              :format(refused, set + refused, set))
+            NS.Print("  |cffff8800those buttons kept a level above the bar -- frame level beats sublevel,|r")
+            NS.Print("  |cffff8800so their tints draw OVER the host's border and name text.|r")
+          else
+            NS.Print(("  flat pin ok: level accepted on all %d button(s)"):format(set))
+          end
+        else
+          NS.Print("  flat pin: no buttons initialised yet (nothing to level)")
+        end
+      end
       for ti, tex in ipairs(record.tints) do
         local okShown, shown = pcall(tex.IsShown, tex)
         local okAlpha, alpha = pcall(tex.GetAlpha, tex)
@@ -2764,7 +3192,19 @@ local function PrintLayers()
         -- Across ALL regions, not just the twelve printed. Textures count as
         -- much as FontStrings: the host's OVERLAY decoration is just as
         -- capable of sitting over a tint as its name text is.
-        if layer == "OVERLAY" and type(sublevel) == "number"
+        --
+        -- okLayer only proves the CALL succeeded, not that what it returned is
+        -- safe to touch -- GetDrawLayer can hand back a secret layer/sublevel
+        -- on a plate under secrecy even when the call itself does not throw.
+        -- A raw "layer == "OVERLAY"" on a secret value throws
+        -- ("attempt to compare ... a secret string value, while execution
+        -- tainted"), which killed /pt layers outright on a Blizzard default
+        -- plate in combat. issecretvalue is the safe test; it must gate this
+        -- before any comparison, the same as the Show() helper below does.
+        local layerSecret = issecretvalue and issecretvalue(layer)
+        local sublevelSecret = issecretvalue and issecretvalue(sublevel)
+        if not layerSecret and not sublevelSecret
+          and layer == "OVERLAY" and type(sublevel) == "number"
           and (hostTopOverlay == nil or sublevel > hostTopOverlay) then
           hostTopOverlay = sublevel
         end
@@ -2898,18 +3338,44 @@ local function PrintLayers()
   -- it says who draws on top. Draw sublevel is what arbitrates, and it was
   -- never printed -- which made Plater and Blizzard undiagnosable from here.
   local flat = NS.IsPlaterBar(healthBar)
-  if flat and NS.PlaterRankSublevels then
+  if flat then
     local floor = NS.PlaterTextFloor and NS.PlaterTextFloor(healthBar) or 7
     NS.Print("  |cff66ccffpinned flat -- draw sublevel decides here, not frame level|r")
     NS.Print(("    text floor: %s (lowest OVERLAY FontString sublevel on the bar)"):format(
       tostring(floor)))
-    for index = 1, #(rig.rules or {}) do
-      local tint, under, cover = NS.PlaterRankSublevels(index, floor)
-      NS.Print(("    rule %d: tint sublevel %d | underlay %d | cover %d"):format(
-        index, tint, under, cover))
+    -- Read back off the records, never re-derived. Sublevels are allocated
+    -- across the whole ladder from what each rule actually draws, so the
+    -- index alone no longer determines them -- and a diagnostic that computed
+    -- its own answer would be reporting a different ladder than the one built.
+    local ourTop
+    for index, record in ipairs(rig.rules or {}) do
+      local tint = record.tintSublevel
+      if tint then
+        -- OVERLAY only. ourTop is compared against the host's highest OVERLAY
+        -- sublevel below, and an ARTWORK rule is beneath ALL of OVERLAY no
+        -- matter its number -- so mixing them printed "your top tint: 5" for a
+        -- rule sitting under everything, which reads as the opposite of true.
+        if (record.tintLayer or "OVERLAY") == "OVERLAY"
+          and (not ourTop or tint > ourTop) then
+          ourTop = tint
+        end
+        -- "unused" rather than a number: a rule with no underlay still has a
+        -- sublevel reserved in the plan, and printing it invites chasing an
+        -- overlap between two textures that were never both created.
+        -- The LAYER matters as much as the number now: a rule placed in
+        -- ARTWORK sits below every OVERLAY rule regardless of sublevel, so
+        -- "-3" on its own no longer says who draws on top.
+        NS.Print(("    rule %d: %s %s | underlay %s | cover %s"):format(
+          index, tostring(record.tintLayer or "OVERLAY"), tostring(tint),
+          record.needsUnderlay and tostring(record.underlaySublevel) or "unused",
+          (record.rule and record.rule.missingCover)
+            and tostring(record.missingCoverSublevel) or "unused"))
+      end
     end
-    if hostTopOverlay then
-      local ourTop = select(1, NS.PlaterRankSublevels(1, floor))
+    if rig.sublevelStarved then
+      NS.Print("    |cffff8800ran out of sublevels -- the lowest rules share one, and which of them draws on top is undefined. Remove a rule, or turn off Cover missing health / Pandemic Flash to free slots.|r")
+    end
+    if hostTopOverlay and ourTop then
       -- Reported, NOT flagged.
       --
       -- Plater draws Textures up to OVERLAY 7 while our top tint sits at -3,
@@ -3311,8 +3777,32 @@ local function Capture(arg)
   local store = PLATETWEAKS_DEBUG.captures
 
   if arg == "clear" then
+    local had = #store
     PLATETWEAKS_DEBUG.captures = {}
-    NS.Print("captures cleared.")
+    NS.Print(("captures cleared (%d removed)."):format(had))
+    return
+  end
+  -- Delete one, by the number /pt capture list shows. Clearing everything was
+  -- the only way to drop a capture, which is no good once someone has a run
+  -- worth keeping alongside a few junk ones.
+  local deleteIndex = arg and arg:match("^delete%s+(%d+)$")
+  if deleteIndex then
+    local index = tonumber(deleteIndex)
+    local item = store[index]
+    if not item then
+      NS.Print(("no capture %d. |cffffff00/pt capture list|r to see what is stored."):format(index))
+      return
+    end
+    table.remove(store, index)
+    NS.Print(("deleted capture %d (%s). %d left."):format(
+      index, tostring(item.label), #store))
+    -- The dropdown on the Diagnostics page indexes into this same table, so it
+    -- has to be rebuilt or it points one past the end.
+    if NS.Options_RebuildAll then pcall(NS.Options_RebuildAll) end
+    return
+  end
+  if arg == "delete" then
+    NS.Print("usage: |cffffff00/pt capture delete <number>|r -- the number from |cffffff00/pt capture list|r")
     return
   end
   if arg == "list" then
@@ -4336,11 +4826,23 @@ SlashCmdList["PLATETWEAKS"] = function(msg)
     elseif slotsArg == "on" then
       NS.db.useAuraSlots = true
     end
-    local using = NS.slotApiPresent and NS.db.useAuraSlots ~= false
+    local turnedOff = NS.db.useAuraSlots == false
+    local using = NS.slotApiPresent and not turnedOff
+    -- "turned off by you" and "your client cannot do it" are different facts
+    -- and used to print identically, which matters when someone is running
+    -- this as a deliberate A/B test.
+    local why = ""
+    if turnedOff then
+      why = " -- |cffffcc00you turned these off|r (/pt slots on to restore)"
+    elseif NS.slotApiPresent == false then
+      why = " -- unavailable on this client"
+    elseif NS.slotApiPresent == nil then
+      why = " -- not probed yet; no container has been built"
+    end
     NS.Print(("aura slots: %s%s|r%s"):format(
       using and "|cff55dd55" or "|cffffcc00",
       using and "ON (1 texture per rule)" or "OFF (10 per rule, 100 per combo)",
-      NS.slotApiPresent and "" or " -- unavailable on this client"))
+      why))
     if slotsArg == "off" or slotsArg == "on" then
       NS.RebuildAllRigs(true)
       NS.Print("rebuilt. |cffffff00/pt bench build|r to see the difference.")
@@ -4375,3 +4877,29 @@ SlashCmdList["PLATETWEAKS"] = function(msg)
   end
   NS.OpenOptions()
 end
+
+--------------------------------------------------------------------------------
+-- Probe bridge
+--
+-- Read-only handle for the PTProbe companion addon, which records live plate
+-- state to SavedVariables so a fault can be read off disk after a reload
+-- instead of reconstructed from a screenshot.
+--
+-- Exported because rigs/unitRigs/activeUnits are file-locals and NS is the
+-- addon table, none of which another addon can reach. Nothing here is a
+-- setter: the probe must never be able to change what it is measuring, and a
+-- recorder that perturbs the thing it records is worse than no recorder.
+--
+-- Costs nothing when PTProbe is not installed.
+--------------------------------------------------------------------------------
+
+_G.PlateTweaks_Probe = {
+  api = 1,
+  version = (C_AddOns and C_AddOns.GetAddOnMetadata
+    and C_AddOns.GetAddOnMetadata("PlateTweaks", "Version")) or "?",
+  NS = NS,
+  Rigs = function() return rigs end,
+  UnitRigs = function() return unitRigs end,
+  ActiveUnits = function() return activeUnits end,
+  PendingUnits = function() return pendingUnits end,
+}
