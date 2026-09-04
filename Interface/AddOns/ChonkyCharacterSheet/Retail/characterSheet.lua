@@ -458,7 +458,7 @@ local function ReputationFrame_Update()
                 local barMin =  factionData.currentReactionThreshold
                 local barMax =  factionData.nextReactionThreshold
                 local barValue =  factionData.currentStanding
-                
+
                 k2.Background = k2.Background or k2:CreateTexture(nil, "BACKGROUND", nil, 2)
                 
                 if (k2.Background) then
@@ -466,7 +466,7 @@ local function ReputationFrame_Update()
                     if standingID == 1 then
                         k2.Background:SetColorTexture(.15, .15, .15, 0)
                     else
-                        k2.Background:SetColorTexture(.15, .15, .15, 0.90)
+                        k2.Background:SetColorTexture(.15, .15, .15, 1)
                     end
                     k2.Background:SetPoint("TOPLEFT", k2, "TOPLEFT")
                     k2.Background:SetPoint("BOTTOMRIGHT", k2, "BOTTOMRIGHT")                
@@ -477,8 +477,10 @@ local function ReputationFrame_Update()
                     k2.ReputationBar.LeftTexture:SetGradient("Vertical", CreateColor(0, 0, 0, .2), CreateColor(.2, .2, .2, .4)) -- Dark Gray
                     k2.ReputationBar.LeftTexture:SetAlpha(0.9)
                     k2.ReputationBar.LeftTexture:SetPoint("RIGHT", k2, "RIGHT")
+                    --k2.ReputationBar:SetPoint("RIGHT", k2, "RIGHT", 0, 0)
+                    
                     local hpad = math.min(math.max(210, (option("hpad") or 279)), 279)
-                    k2.ReputationBar:SetWidth(250 * hpad / 279)  
+                    k2.ReputationBar:SetWidth(140 * hpad / 279 * 2)  
                     k2.ReputationBar:SetHeight(k2:GetHeight()*.9)            
                     k2.ReputationBar.RightTexture:Hide()
                 end
@@ -506,7 +508,7 @@ local function ReputationFrame_Update()
                             barMin, barMax, barValue = repInfo.reactionThreshold, repInfo.reactionThreshold, repInfo.reactionThreshold;
                             isCapped = true;
                         end
-                        factionStandingtext = repInfo.reaction --"("..(rankInfo.currentLevel or 0).." / "..(rankInfo.maxLevel or 0)..")"
+                        factionStandingtext = repInfo.reaction 
                         
                         if k2.Name ~= nil then
                             k2.Name:SetText(name .. " ("..RANK..": "..(rankInfo.currentLevel or 0).." / "..(rankInfo.maxLevel or 0)..")")
@@ -573,21 +575,43 @@ local function ReputationFrame_Update()
                     
                     if (k2.ReputationBar) then
                         local fontName, fontHeight, fontFlags = k2.ReputationBar.BarText:GetFont()
-                        xtext = format("  %-20.20s %-30.30s", factiontext or "", format(REPUTATION_PROGRESS_FORMAT, BreakUpLargeNumbers(barValue) or "", BreakUpLargeNumbers(barMax)) or "")
+                        --xtext = format("  %-60.60s %-60.60s", factiontext or "", format(REPUTATION_PROGRESS_FORMAT, BreakUpLargeNumbers(barValue) or "", BreakUpLargeNumbers(barMax)) or "")
+                        xtext = format("  %-60.60s", factiontext or "")
+
+                        if k2.ReputationBar.BarText2 == nil then
+                            k2.ReputationBar.BarText2 = k2.ReputationBar:CreateFontString()
+                            k2.ReputationBar.BarText2:SetFont(option("fontname_repstanding") or fontName, option("fontsize_repstanding"), CCS.textoutline)                            
+                            k2.ReputationBar.BarText2:SetPoint("RIGHT", k2.ReputationBar, "RIGHT", -2, 0)
+                        end
+                            
+    
                         k2.ReputationBar.barProgressText = xtext
                         k2.ReputationBar.reputationStandingText = xtext
                         k2.ReputationBar.BarText:SetFont(option("fontname_repstanding") or fontName, option("fontsize_repstanding"), CCS.textoutline)
+                        k2.ReputationBar.BarText2:SetFont(option("fontname_repstanding") or fontName, option("fontsize_repstanding"), CCS.textoutline)
+
                         if option("showfontshadow") == true then
                             k2.ReputationBar.BarText:SetShadowColor(unpack(option("fontshadowcolor") or {0,0,0,1}))
                             k2.ReputationBar.BarText:SetShadowOffset(option("fontshadowx") or 0, option("fontshadowy") or 0)
+                            k2.ReputationBar.BarText2:SetShadowColor(unpack(option("fontshadowcolor") or {0,0,0,1}))
+                            k2.ReputationBar.BarText2:SetShadowOffset(option("fontshadowx") or 0, option("fontshadowy") or 0)
+                            
                         end	                                                                
-                        
+
                         k2.ReputationBar.BarText:SetTextColor(
                             option("fontcolor_repstanding")[1] or 1,
                             option("fontcolor_repstanding")[2] or 1,
                             option("fontcolor_repstanding")[3] or 1,
                             option("fontcolor_repstanding")[4] or 1
                         )
+
+                        k2.ReputationBar.BarText2:SetTextColor(
+                            option("fontcolor_repstanding")[1] or 1,
+                            option("fontcolor_repstanding")[2] or 1,
+                            option("fontcolor_repstanding")[3] or 1,
+                            option("fontcolor_repstanding")[4] or 1
+                        )                            
+                                                                        
                         k2.Name:SetFont(option("fontname_reputation") or fontName, option("fontsize_reputation"), CCS.textoutline)
                         if option("showfontshadow") == true then
                             k2.Name:SetShadowColor(unpack(option("fontshadowcolor") or {0,0,0,1}))
@@ -600,7 +624,8 @@ local function ReputationFrame_Update()
                             option("fontcolor_reputation")[3] or 1,
                             option("fontcolor_reputation")[4] or 1
                         )
-                        k2.ReputationBar.BarText:SetText(xtext)                
+                        k2.ReputationBar.BarText:SetText(xtext)  
+                        k2.ReputationBar.BarText2:SetText(format(REPUTATION_PROGRESS_FORMAT, BreakUpLargeNumbers(barValue) or "", BreakUpLargeNumbers(barMax)) or "")
                         k2.ReputationBar.BarText:ClearAllPoints()
                         k2.ReputationBar.BarText:SetPoint("LEFT", k2.ReputationBar, "LEFT")
                     end

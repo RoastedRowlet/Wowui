@@ -1,10 +1,6 @@
 # BigWigs
 
-## [v424.3](https://github.com/BigWigsMods/BigWigs/tree/v424.3) (2026-09-01)
-[Full Changelog](https://github.com/BigWigsMods/BigWigs/compare/v424.2...v424.3) [Previous Releases](https://github.com/BigWigsMods/BigWigs/releases)
+## [v424.5](https://github.com/BigWigsMods/BigWigs/tree/v424.5) (2026-09-03)
+[Full Changelog](https://github.com/BigWigsMods/BigWigs/compare/v424.4...v424.5) [Previous Releases](https://github.com/BigWigsMods/BigWigs/releases)
 
-- Bump version  
-- Plugins/Bars: Disable some bar callbacks on classic  
-- Plugins/Auras: Set text alignment based on anchor  
-- Plugins/Auras: Add option to change cooldown anchor  
-- Tools/AutoInvite: Cleanup  
+- Bump up profile name length  

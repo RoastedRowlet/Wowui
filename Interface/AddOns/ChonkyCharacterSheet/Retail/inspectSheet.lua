@@ -766,9 +766,12 @@ end
 
 local function updatemplussideframe()
 	if not InspectFrame or not InspectFrame.unit or InCombatLockdown() == true then return end
+
 	local unit = InspectFrame.unit
 	local ccsmi_fs2 = _G["ccsmi_fs2"]
-	ccsmi_fs2:SetText(CCS.getraiderioscoreinspect())
+	
+	if ccsmi_fs2 then ccsmi_fs2:SetText(CCS.getraiderioscoreinspect() or "") end
+	
 	if not C_PlayerInfo.GetPlayerMythicPlusRatingSummary(unit) or not C_PlayerInfo.GetPlayerMythicPlusRatingSummary(unit).runs then return end
 	for x=1,8 do 
 		
@@ -1645,6 +1648,7 @@ function CCS.InspectSheetEventHandler(event, ...)
 
 	if not InspectFrame.loaded then
 		CCS.initializeinspectframe()
+		initializemplusplanelframe()
 	end
     if event == "CCS_EVENT_OPTIONS" then
         if not option("show_inspect") then
@@ -1665,12 +1669,7 @@ function CCS.InspectSheetEventHandler(event, ...)
         return true
 	elseif event == "INSPECT_READY" then 
 		CCS.ChangeModelBg(true)
-		if not CCS.initmplus then
-			initializemplusplanelframe()
-			CCS.initmplus = true
-		else
-			updatemplussideframe()
-		end
+		updatemplussideframe()
 		loopitems()
 	end
 end

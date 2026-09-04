@@ -8,7 +8,7 @@ END
 VER 3 010000000000000F "Asc No Pot" "134400"
 #showtooltip Ascendance
 /cast Ancestral Swiftness
-/USE 14
+/use 14
 /cast Ascendance
 END
 VER 3 010000000000000B "Chain light" "134400"

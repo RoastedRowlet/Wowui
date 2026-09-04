@@ -1,36 +1,35 @@
 
 RaiderIO_Config = {
+["minimapIcon"] = {
+["minimapPos"] = 180,
+["showInCompartment"] = true,
+["hide"] = false,
+["lock"] = false,
+},
 ["profilePoint"] = {
 ["y"] = 0,
 ["x"] = -16,
 ["point"] = "TOPLEFT",
 },
-["minimapIcon"] = {
-["minimapPos"] = 180,
-["showInCompartment"] = true,
-["lock"] = false,
-["hide"] = false,
-},
 }
-RaiderIO_LastCharacter = "us-Lonelylitten-stormrage"
+RaiderIO_LastCharacter = "us-Zappyxatu-stormrage"
 RaiderIO_MissingCharacters = {
-["us-Rëno-area-52"] = true,
-["us-Dalebeanhrdt-icecrown"] = true,
-["us-Cedars-proudmoore"] = true,
-["us-Ancilário-stormrage"] = true,
-["us-Glutencorp-area-52"] = true,
-["us-Pacchetto-stormrage"] = true,
-["us-Lorahawe-area-52"] = true,
-["us-Voidcastah-sargeras"] = true,
-["us-Snaglvr-dathremar"] = true,
-["us-party5-stormrage"] = true,
-["us-Bigpriest-guldan"] = true,
-["us-Mysticnature-stormrage"] = true,
-["us-Imply-dalaran"] = true,
-["us-Midnytfrost-stormrage"] = true,
-["us-Malcolm-draka"] = true,
-["us-Peopy-stormrage"] = true,
-["us-Seimei-scarlet-crusade"] = true,
+["us-Frosttoy-stormrage"] = true,
+["us-Dékk-stormrage"] = true,
+["us-Kweefcake-stormrage"] = true,
+["us-Rabbidhuntr-stormrage"] = true,
+["us-Anadaed-stormrage"] = true,
+["us-Zohsi-stormrage"] = true,
+["us-Aelastia-ragnaros"] = true,
+["us-Darkenedlite-stormrage"] = true,
+["us-Flybell-stormrage"] = true,
+["us-Bellingham-stormrage"] = true,
+["us-Durako-stormrage"] = true,
+["us-Dommydazzle-stormrage"] = true,
+["us-Xarhan-stormrage"] = true,
+["us-Nixhaleeze-stormrage"] = true,
+["us-Bandanga-stormrage"] = true,
+["us-Shilee-stormrage"] = true,
 }
 RaiderIO_MissingServers = {
 }
