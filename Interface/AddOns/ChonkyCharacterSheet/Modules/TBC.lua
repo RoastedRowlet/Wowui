@@ -55,7 +55,7 @@ function CCS.GetAverageItemLevel(unit)
         if slot ~= 4 then  -- skip shirt
             local link = GetInventoryItemLink(unit, slot)
             if link then
-                local _, _, _, ilvl, _, _, _, _, equipLoc = GetItemInfo(link)
+                local _, _, _, ilvl, _, _, _, _, equipLoc = C_Item.GetItemInfo(link)
 
                 if ilvl and ilvl > 0 then
                     -- 2H weapon counts as two slots
@@ -257,7 +257,7 @@ local function TBCupdateLocationInfo(unit, slotIndex, framename)
 
     if slotIndex == 0 then
         local id = GetInventoryItemID("player", slotIndex)
-        local _, ammolink = GetItemInfo(id)
+        local _, ammolink = C_Item.GetItemInfo(id)
         link = ammolink
     end
 
@@ -922,7 +922,7 @@ local function TryLoopItems()
     local allReady = true
     for slot = 1, 19 do
         local link = GetInventoryItemLink("player", slot)
-        if link and not GetItemInfo(link) then
+        if link and not C_Item.GetItemInfo(link) then
             allReady = false
             break
         end
@@ -2146,7 +2146,7 @@ function CCS.TBCCharacterSheetEventHandler(event, ...)
         for slot = 1, 19 do
             local link = GetInventoryItemLink("player", slot)
             if link then
-                GetItemInfo(link) -- queues item for caching
+                C_Item.GetItemInfo(link) -- queues item for caching
                 local itemID = GetInventoryItemID("player", slot)
                 if itemID then
                     C_Item.RequestLoadItemDataByID(itemID) -- nudges client to fetch item data

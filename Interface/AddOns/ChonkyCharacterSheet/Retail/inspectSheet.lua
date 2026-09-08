@@ -17,7 +17,7 @@ CCS.Modules[module.Name] = module
 local modbg = _G["InspectModelFramebg"] or CreateFrame("Frame", "InspectModelFramebg")
 local modtex = _G["InspectModelFramebgtex"] or modbg:CreateTexture("InspectModelFramebgtex", "BACKGROUND")    
 local modtex2 = _G["InspectModelFramebgtex2"] or modbg:CreateTexture("InspectModelFramebgtex2", "ARTWORK")    
-
+local updatemplussideframe
 ---------------------------
 -- Module methods
 ---------------------------
@@ -764,104 +764,6 @@ local function stars(runtime, dungeontime)
 	return text
 end
 
-local function updatemplussideframe()
-	if not InspectFrame or not InspectFrame.unit or InCombatLockdown() == true then return end
-
-	local unit = InspectFrame.unit
-	local ccsmi_fs2 = _G["ccsmi_fs2"]
-	
-	if ccsmi_fs2 then ccsmi_fs2:SetText(CCS.getraiderioscoreinspect() or "") end
-	
-	if not C_PlayerInfo.GetPlayerMythicPlusRatingSummary(unit) or not C_PlayerInfo.GetPlayerMythicPlusRatingSummary(unit).runs then return end
-	for x=1,8 do 
-		
-		local ccsmi_bx = _G["ccsmi_b"..x] or CreateFrame("Frame", "ccsmi_b"..x, _G["ccsmi_sf"]);
-		local mapID = C_ChallengeMode.GetMapTable()[x] or 0
-		local mapspellID = 0
-		local mapName, _, MaptimeLimit, MapTexture = C_ChallengeMode.GetMapUIInfo(mapID)
-		local summary = C_PlayerInfo.GetPlayerMythicPlusRatingSummary(unit)
-		local runForThisMap = nil
-
-		for _, run in ipairs(summary.runs) do
-			if run.challengeModeID == mapID then
-				runForThisMap = run
-				break
-			end
-		end
-
-		local MapTable= runForThisMap
-		local MapScore= runForThisMap and runForThisMap.mapScore or 0
-		local ccsmi_bx_btn1 = _G["ccsmi_b"..x.."_btn1"]
-		local ccsmi_bx_btn2 = _G["ccsmi_b"..x.."_btn2"]
-		local ccsmi_bx_tex1 = _G["ccsmi_b"..x.."_tex1"]
-		local ccsmi_bx_tex2 = _G["ccsmi_b"..x.."_tex2"]
-		local ccsmi_bx_fs1 = _G["ccsmi_b"..x.."_fs1"]
-		local ccsmi_bx_fs2 = _G["ccsmi_b"..x.."_fs2"]
-		local ccsmi_bx_fs3 = _G["ccsmi_b"..x.."_fs3"]
-		local ccsmi_bx_fs4 = _G["ccsmi_b"..x.."_fs4"]
-		local ccsmi_bx_fs7 = _G["ccsmi_b"..x.."_fs7"]
-		local ccsmi_bx_btn1_bg = _G["ccsmi_b"..x.."_btn1_bg"] or ccsmi_bx_btn1:CreateTexture("ccsmi_b"..x.."_btn1_bg", "BACKGROUND", nil)
-		local ccsmi_bx_btn2_bg = _G["ccsmi_b"..x.."_btn2_bg"]
-		
-		ccsmi_bx_tex2:SetTexture(MapTexture or 5221804)
-		ccsmi_bx_fs2:SetText(mapName or " ");
-        ccsmi_bx_tex2:Show()
-		ccsmi_bx_btn2_bg:SetTexture(MapTexture or "Interface\\CovenantRenown\\DragonflightMajorFactionsNiffen.BLP")
-		ccsmi_bx_btn2_bg:SetTexCoord(0, 1, 0, 1)
-		ccsmi_bx_btn2_bg:SetAlpha(1)
-		
-		ccsmi_bx_btn1:Show()
-
-		ccsmi_bx_btn1_bg:SetTexture(MapTexture or "Interface\\CovenantRenown\\DragonflightMajorFactionsNiffen.BLP")
-		ccsmi_bx_btn1_bg:SetTexCoord(0, 1, 0, 1)
-		ccsmi_bx_btn1_bg:SetAlpha(1)
-		ccsmi_bx_btn1_bg:SetAllPoints(ccsmi_bx_btn2_bg)
-		ccsmi_bx_btn1_bg:Show()
-
-		if MapTable ~= nil and MapScore ~= nil then
-			local color = C_ChallengeMode.GetSpecificDungeonOverallScoreRarityColor(MapScore) or HIGHLIGHT_FONT_COLOR
-			local red = color.r
-			local green = color.g
-			local blue = color.b
-			local scorecolor = format("|cff%.2x%.2x%.2x", red*255,green*255,blue*255)
-			local bestRunDuration = MapTable.bestRunDurationMS and math.floor(MapTable.bestRunDurationMS / 1000) or 0
-			local timeLeft = (math.floor(MapTable.bestRunDurationMS / 1000) or 0) - MaptimeLimit			
-
-			ccsmi_bx_fs1:SetText(format("%s", scorecolor) .. MapScore or " " .. format("|r\n"))
-			
-			--== Fortified Score and Color
-			
-			ccsmi_bx_fs3:SetText(stars(bestRunDuration, MaptimeLimit).. (MapTable and MapTable.bestRunLevel or "0"));
-			
-			color = C_ChallengeMode.GetSpecificDungeonOverallScoreRarityColor(MapScore) or HIGHLIGHT_FONT_COLOR
-			red = color.r
-			green = color.g
-			blue = color.b
-			scorecolor = format("|cff%.2x%.2x%.2x", red*255,green*255,blue*255)
-			
-			ccsmi_bx_fs4:SetText(format("%s", scorecolor) .. format("%.f", MapScore).. format("|r\n"))
-			
-			if option("showm_overundertime") then
-				if (bestRunDuration) == 0 then
-					ccsmi_bx_fs7:SetText("     -")
-				elseif (bestRunDuration) - MaptimeLimit <= 0 then
-					ccsmi_bx_fs7:SetText(CCS.display_time(bestRunDuration, false).."  ".."(|cFF00AA00-"..CCS.display_time(timeLeft, false).."|r)\n");            
-				else
-					ccsmi_bx_fs7:SetText(CCS.display_time(bestRunDuration, false).."  ".."(|cFFAA0000+"..CCS.display_time(timeLeft, false).."|r)\n");            
-				end
-			else
-				ccsmi_bx_fs7:SetText(CCS.display_time(bestRunDuration, false).."\n");            
-			end
-		else
-			ccsmi_bx_fs1:SetText("-")
-			ccsmi_bx_fs3:SetText("-")
-			ccsmi_bx_fs4:SetText("-")
-			ccsmi_bx_fs7:SetText("     -")
-		end 
-	end
-	_G["ccsmi_sf"]:SetShown(option("showm_sp_onopen_inspect"))
-end
-
 local function initializemplusplanelframe()
 	if not InspectFrame or not InspectFrame.unit or InCombatLockdown() == true then return end
 	
@@ -1132,9 +1034,111 @@ local function initializemplusplanelframe()
 	ccsmi_tp_fs:Show()
 
 	_G["ccsmi_sf_bg"]:SetColorTexture(bgr,bgg,bgb,bgalpha)
-
+	InspectFrame.CCS_MPLUSLOADED = true;
 	C_Timer.After(.2, function() updatemplussideframe(); end)
 
+end
+
+updatemplussideframe = function()
+	if not InspectFrame or not InspectFrame.unit then return end --or InCombatLockdown() == true
+	if not InspectFrame.CCS_MPLUSLOADED then
+		initializemplusplanelframe()
+		return
+	end
+	local unit = InspectFrame.unit
+	local ccsmi_fs2 = _G["ccsmi_fs2"]
+	
+	if ccsmi_fs2 then ccsmi_fs2:SetText(CCS.getraiderioscoreinspect() or "") end
+	if not C_PlayerInfo.GetPlayerMythicPlusRatingSummary(unit) or not C_PlayerInfo.GetPlayerMythicPlusRatingSummary(unit).runs then return end
+	for x=1,8 do 
+		
+		local ccsmi_bx = _G["ccsmi_b"..x] or CreateFrame("Frame", "ccsmi_b"..x, _G["ccsmi_sf"]);
+		local mapID = C_ChallengeMode.GetMapTable()[x] or 0
+		local mapspellID = 0
+		local mapName, _, MaptimeLimit, MapTexture = C_ChallengeMode.GetMapUIInfo(mapID)
+		local summary = C_PlayerInfo.GetPlayerMythicPlusRatingSummary(unit)
+		local runForThisMap = nil
+
+		for _, run in ipairs(summary.runs) do
+			if run.challengeModeID == mapID then
+				runForThisMap = run
+				break
+			end
+		end
+
+		local MapTable= runForThisMap
+		local MapScore= runForThisMap and runForThisMap.mapScore or 0
+		local ccsmi_bx_btn1 = _G["ccsmi_b"..x.."_btn1"]
+		local ccsmi_bx_btn2 = _G["ccsmi_b"..x.."_btn2"]
+		local ccsmi_bx_tex1 = _G["ccsmi_b"..x.."_tex1"]
+		local ccsmi_bx_tex2 = _G["ccsmi_b"..x.."_tex2"]
+		local ccsmi_bx_fs1 = _G["ccsmi_b"..x.."_fs1"]
+		local ccsmi_bx_fs2 = _G["ccsmi_b"..x.."_fs2"]
+		local ccsmi_bx_fs3 = _G["ccsmi_b"..x.."_fs3"]
+		local ccsmi_bx_fs4 = _G["ccsmi_b"..x.."_fs4"]
+		local ccsmi_bx_fs7 = _G["ccsmi_b"..x.."_fs7"]
+		local ccsmi_bx_btn1_bg = _G["ccsmi_b"..x.."_btn1_bg"] --or ccsmi_bx_btn1:CreateTexture("ccsmi_b"..x.."_btn1_bg", "BACKGROUND", nil)
+		local ccsmi_bx_btn2_bg = _G["ccsmi_b"..x.."_btn2_bg"]
+		
+		ccsmi_bx_tex2:SetTexture(MapTexture or 5221804)
+		ccsmi_bx_fs2:SetText(mapName or " ");
+        ccsmi_bx_tex2:Show()
+		ccsmi_bx_btn2_bg:SetTexture(MapTexture or "Interface\\CovenantRenown\\DragonflightMajorFactionsNiffen.BLP")
+		ccsmi_bx_btn2_bg:SetTexCoord(0, 1, 0, 1)
+		ccsmi_bx_btn2_bg:SetAlpha(1)
+		
+		ccsmi_bx_btn1:Show()
+
+		ccsmi_bx_btn1_bg:SetTexture(MapTexture or "Interface\\CovenantRenown\\DragonflightMajorFactionsNiffen.BLP")
+		ccsmi_bx_btn1_bg:SetTexCoord(0, 1, 0, 1)
+		ccsmi_bx_btn1_bg:SetAlpha(1)
+		--ccsmi_bx_btn1_bg:SetAllPoints(ccsmi_bx_btn2_bg)
+		ccsmi_bx_btn1_bg:Show()
+
+		if MapTable ~= nil and MapScore ~= nil then
+			local color = C_ChallengeMode.GetSpecificDungeonOverallScoreRarityColor(MapScore) or HIGHLIGHT_FONT_COLOR
+			local red = color.r
+			local green = color.g
+			local blue = color.b
+			local scorecolor = format("|cff%.2x%.2x%.2x", red*255,green*255,blue*255)
+			local bestRunDuration = MapTable.bestRunDurationMS and math.floor(MapTable.bestRunDurationMS / 1000) or 0
+			local timeLeft = (math.floor(MapTable.bestRunDurationMS / 1000) or 0) - MaptimeLimit			
+
+			ccsmi_bx_fs1:SetText(format("%s", scorecolor) .. MapScore or " " .. format("|r\n"))
+			
+			--== Fortified Score and Color
+			
+			ccsmi_bx_fs3:SetText(stars(bestRunDuration, MaptimeLimit).. (MapTable and MapTable.bestRunLevel or "0"));
+			
+			color = C_ChallengeMode.GetSpecificDungeonOverallScoreRarityColor(MapScore) or HIGHLIGHT_FONT_COLOR
+			red = color.r
+			green = color.g
+			blue = color.b
+			scorecolor = format("|cff%.2x%.2x%.2x", red*255,green*255,blue*255)
+			
+			ccsmi_bx_fs4:SetText(format("%s", scorecolor) .. format("%.f", MapScore).. format("|r\n"))
+			
+			if option("showm_overundertime") then
+				if (bestRunDuration) == 0 then
+					ccsmi_bx_fs7:SetText("     -")
+				elseif (bestRunDuration) - MaptimeLimit <= 0 then
+					ccsmi_bx_fs7:SetText(CCS.display_time(bestRunDuration, false).."  ".."(|cFF00AA00-"..CCS.display_time(timeLeft, false).."|r)\n");            
+				else
+					ccsmi_bx_fs7:SetText(CCS.display_time(bestRunDuration, false).."  ".."(|cFFAA0000+"..CCS.display_time(timeLeft, false).."|r)\n");            
+				end
+			else
+				ccsmi_bx_fs7:SetText(CCS.display_time(bestRunDuration, false).."\n");            
+			end
+		else
+			ccsmi_bx_fs1:SetText("-")
+			ccsmi_bx_fs3:SetText("-")
+			ccsmi_bx_fs4:SetText("-")
+			ccsmi_bx_fs7:SetText("     -")
+		end 
+	end
+	if InCombatLockdown() == false then
+		_G["ccsmi_sf"]:SetShown(option("showm_sp_onopen_inspect"))
+	end
 end
 
 local function initmplusframe()
@@ -1179,7 +1183,9 @@ local function initmplusframe()
 	-- Click behavior
 	btn2:SetScript("OnClick", function(self, button)
 		PlaySound(SOUNDKIT.GS_LOGIN_CHANGE_REALM_OK)
-
+		if not InspectFrame.CCS_MPLUSLOADED then
+			initializemplusplanelframe()	
+		end
 		if IsControlKeyDown() and button == "LeftButton" then
 			local def = CCS:GetOptionDefByKey("showm_sp_onopen_inspect")
 			if def then
@@ -1648,7 +1654,6 @@ function CCS.InspectSheetEventHandler(event, ...)
 
 	if not InspectFrame.loaded then
 		CCS.initializeinspectframe()
-		initializemplusplanelframe()
 	end
     if event == "CCS_EVENT_OPTIONS" then
         if not option("show_inspect") then
@@ -1669,6 +1674,7 @@ function CCS.InspectSheetEventHandler(event, ...)
         return true
 	elseif event == "INSPECT_READY" then 
 		CCS.ChangeModelBg(true)
+		initializemplusplanelframe()
 		updatemplussideframe()
 		loopitems()
 	end

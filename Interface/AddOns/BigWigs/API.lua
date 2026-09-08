@@ -5,6 +5,8 @@ do
 end
 local API = {}
 addonTbl.API = API
+local PrivateAPI = {}
+addonTbl.PrivateAPI = PrivateAPI
 local type, next, error, strlenutf8 = type, next, error, strlenutf8
 
 local function CopyTable(settingsTable)
@@ -268,7 +270,7 @@ do
 	local popup = CreateFrame("Frame", nil, UIParent)
 	popup:Hide()
 	popup:SetPoint("CENTER", UIParent, "CENTER")
-	popup:SetSize(320, 72)
+	popup:SetSize(400, 72)
 	popup:EnableMouse(true) -- Do not allow click-through on the frame
 	popup:SetFrameStrata("TOOLTIP")
 	popup:SetFrameLevel(120) -- Lots of room to draw under it
@@ -279,7 +281,7 @@ do
 	border:SetAllPoints(popup)
 
 	local textFrame = popup:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
-	textFrame:SetSize(290, 0)
+	textFrame:SetSize(370, 0)
 	textFrame:SetPoint("TOP", 0, -16)
 	textFrame:SetText("BigWigs")
 
@@ -319,7 +321,7 @@ do
 		if profileName == API.GetProfileName() then error("You cannot swap to the same profile.") return end
 		popup:Show()
 		textFrame:SetText(API:GetLocale("BigWigs").confirm_profile_swap:format(addonName, profileName))
-		local height = 61 + textFrame:GetHeight()
+		local height = 70 + textFrame:GetHeight()
 		popup:SetHeight(height)
 
 		acceptButton:ClearAllPoints()
@@ -443,15 +445,33 @@ end
 
 do -- Plugins
 	local tbl = {}
-	-- Get all AceGUI option tables under the "Tools" category
+	-- Get all AceGUI option tables under the "Plugins" category
 	function API.GetPluginOptions()
 		return CopyTable(tbl)
 	end
-	-- Register an AceGUI options table for a module under the "Tools" category
+	-- Register an AceGUI options table for a module under the "Plugins" category
 	function API.RegisterPluginOptions(key, settingsTable)
 		if type(key) ~= "string" then error("The key needs to be a string.") return end
 		if type(settingsTable) ~= "table" then error("The settings table needs to be a table.") return end
 		tbl[key] = settingsTable
+	end
+end
+
+do -- Plugins (Tabs)
+	local tbl = {}
+	-- Get all AceGUI option tables for custom tabs under the "Plugins" category
+	function API.GetPluginOptionsCustomTabs()
+		return CopyTable(tbl)
+	end
+
+	-- Register a custom tab to already existing Plugins, using AceGUI option tables
+	function PrivateAPI.RegisterPluginOptionsCustomTab(moduleName, tabTableKey, settingsTable)
+		if type(moduleName) ~= "string" then error("The module name needs to be a string.") return end
+		if type(tabTableKey) ~= "string" then error("The tab table key needs to be a string.") return end
+		if type(settingsTable) ~= "table" then error("The settings table needs to be a table.") return end
+		if not tbl[moduleName] then
+			tbl[moduleName] = {tabTableKey, settingsTable}
+		end
 	end
 end
 

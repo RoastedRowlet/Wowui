@@ -213,7 +213,31 @@ local function SanitiseRule(source)
     missingCover      = Bool(source.missingCover, false),
     showWhenMissing   = Bool(source.showWhenMissing, false),
     missingCombatOnly = Bool(source.missingCombatOnly, false),
+    load              = SanitiseLoad(source.load),
   }
+end
+
+-- Load conditions. Whitelisted against this client's own lists, so an
+-- imported profile cannot introduce a zone or a group key nothing will ever
+-- ask about -- the same discipline the threat states get. Absent when nothing
+-- is restricted, because an empty pair of tables IS "everywhere" and writing
+-- it out says nothing.
+local function SanitiseLoad(source)
+  if type(source) ~= "table" then return nil end
+  local out, any = { zones = {}, groups = {} }, false
+  for _, zone in ipairs(NS.LOAD_ZONES or {}) do
+    if type(source.zones) == "table" and source.zones[zone.key] then
+      out.zones[zone.key] = true
+      any = true
+    end
+  end
+  for _, group in ipairs(NS.LOAD_GROUPS or {}) do
+    if type(source.groups) == "table" and source.groups[group.key] then
+      out.groups[group.key] = true
+      any = true
+    end
+  end
+  return any and out or nil
 end
 
 local function SanitiseRuleList(source, dropped)
@@ -229,6 +253,122 @@ local function SanitiseRuleList(source, dropped)
     end
   end
   return out
+end
+
+-- Threat. Four fixed states rather than a list, so this is a fixed shape too:
+-- an imported profile cannot introduce a state this client will never
+-- evaluate, and cannot arrive with fifty entries costing draw slots.
+local THREAT_ROLE_KEYS = { auto = true, tank = true, dps = true, healer = true }
+-- The four-state keys are deliberately absent: a payload written by the older
+-- build carries them, and they are dropped on the way in rather than imported
+-- as entries nothing will ever read.
+local THREAT_STATE_KEYS = { "aggro", "near", "none" }
+
+local function SanitiseThreat(source)
+  source = type(source) == "table" and source or {}
+  local states = {}
+  local from = type(source.states) == "table" and source.states or {}
+  for _, key in ipairs(THREAT_STATE_KEYS) do
+    local entry = type(from[key]) == "table" and from[key] or nil
+    if entry then
+      states[key] = {
+        enabled = Bool(entry.enabled, true),
+        color   = Colour(entry.color, { r = 0.85, g = 0.15, b = 0.15, a = 0.85 }),
+      }
+    end
+    -- A state the sender never touched is left absent rather than filled in
+    -- here: the recipient's own role decides the shipped colour for it, and
+    -- inventing one now would import a decision nobody made.
+  end
+  return {
+    enabled     = Bool(source.enabled, true),
+    role        = THREAT_ROLE_KEYS[source.role] and source.role or "auto",
+    flashOnLoss = Bool(source.flashOnLoss, false),
+    states      = states,
+    load        = SanitiseLoad(source.load),
+  }
+end
+
+-- Target/Focus. Two states, same fixed shape and same reason as threat's.
+local MARK_STATE_KEYS = { "target", "focus" }
+
+-- Built from the live list rather than written out again: a shape added in
+-- Mark.lua should be importable without a second edit here.
+--
+-- Built on DEMAND, not at load: this file is listed before Mark.lua, so the
+-- list does not exist yet while this chunk runs. A set captured here would be
+-- permanently empty, and every imported marker would arrive as a diamond.
+local function MarkShapeKeys()
+  local keys = {}
+  for _, shape in ipairs(NS.MARK_INDICATOR_SHAPES or {}) do
+    keys[shape.key] = true
+  end
+  return keys
+end
+
+local function SanitiseMark(source)
+  source = type(source) == "table" and source or {}
+  local states = {}
+  local from = type(source.states) == "table" and source.states or {}
+  for _, key in ipairs(MARK_STATE_KEYS) do
+    local entry = type(from[key]) == "table" and from[key] or nil
+    if entry then
+      local indicator
+      if type(entry.indicator) == "table" then
+        indicator = {
+          enabled  = Bool(entry.indicator.enabled, false),
+          position = OneOf(entry.indicator.position,
+                       { LEFT = true, RIGHT = true, BOTH = true,
+                         TOP = true, BOTTOM = true }, "BOTH"),
+          -- Whitelisted against this client's own shape list, so an imported
+          -- profile cannot name a shape nothing here can draw.
+          shape    = OneOf(entry.indicator.shape, MarkShapeKeys(), "arrow"),
+          size     = Num(entry.indicator.size, 10),
+          gap      = Num(entry.indicator.gap, 4),
+        }
+      end
+      states[key] = {
+        enabled = Bool(entry.enabled, true),
+        color   = Colour(entry.color, { r = 1, g = 1, b = 1, a = 0.22 }),
+        -- The same fill fields a rule's bar half carries, whitelisted the same
+        -- way: these are read by NS.ApplyRuleFill, which does not care whether
+        -- the table it was handed is a rule or a target/focus state.
+        fillStyle  = OneOf(entry.fillStyle, FILL_STYLES, "solid"),
+        fillTexture = Str(entry.fillTexture),
+        barTexture = Str(entry.barTexture),
+        indicator  = indicator,
+      }
+    end
+  end
+  return {
+    -- Ships off, and an import cannot turn it on by omission.
+    enabled = Bool(source.enabled, false),
+    states  = states,
+    load    = SanitiseLoad(source.load),
+  }
+end
+
+local function SanitiseMarkBorder(source)
+  source = type(source) == "table" and source or {}
+  local base = SanitiseMark(source)
+  base.enabled = nil
+  base.thickness = Num(source.thickness, 2)
+  base.grow = OneOf(source.grow, BORDER_GROW, "OUT")
+  base.padding = Num(source.padding, 0)
+  return base
+end
+
+-- The border module. Same states, plus the two things a border has and a bar
+-- tint does not.
+local function SanitiseThreatBorder(source)
+  source = type(source) == "table" and source or {}
+  local base = SanitiseThreat(source)
+  base.role = nil
+  base.enabled = Bool(source.enabled, false)
+  base.thickness = Num(source.thickness, 2)
+  base.grow = OneOf(source.grow, BORDER_GROW, "OUT")
+  base.padding = Num(source.padding, 0)
+  return base
 end
 
 local function SanitiseOutlineSides(source)
@@ -264,6 +404,14 @@ local function SanitiseTints(source, dropped)
     borderEnabled       = Bool(source.borderEnabled, true),
     rules               = SanitiseRuleList(source.rules, dropped),
     borderRules         = SanitiseRuleList(source.borderRules, dropped),
+    threatEnabled       = Bool(source.threatEnabled, true),
+    -- Carried through sanitising and merged below, so a payload written
+    -- before the lists were folded together arrives as one list.
+    rulesMerged         = Bool(source.rulesMerged, false),
+    threat              = SanitiseThreat(source.threat),
+    threatBorder        = SanitiseThreatBorder(source.threatBorder),
+    mark                = SanitiseMark(source.mark),
+    markBorder          = SanitiseMarkBorder(source.markBorder),
     edgeAdjust          = Num(source.edgeAdjust, 0),
     missingCoverColor   = Colour(source.missingCoverColor,
                             { r = 0.08, g = 0.08, b = 0.08, a = 0.95 }),
@@ -366,7 +514,7 @@ end
 local function SanitiseProfile(source, dropped)
   source = type(source) == "table" and source or {}
   return {
-    tints       = SanitiseTints(source.tints, dropped),
+    tints       = MergedTints(source.tints, dropped),
     icons       = SanitiseIcons(source.icons),
     tweaks      = SanitiseTweaks(source.tweaks),
     levelOffset = Num(source.levelOffset, NS.Defaults.levelOffset),
@@ -380,7 +528,7 @@ end
 local function AddonVersion()
   local getMeta = (C_AddOns and C_AddOns.GetAddOnMetadata) or GetAddOnMetadata
   if not getMeta then return nil end
-  local ok, version = pcall(getMeta, "PlateTweaks", "Version")
+  local ok, version = pcall(getMeta, NS.ADDON, "Version")
   return (ok and type(version) == "string") and version or nil
 end
 
@@ -505,7 +653,9 @@ function NS.DescribeShare(payload)
     name        = payload.name,
     addon       = payload.addon,
     rules       = Describe(tints.rules),
-    borderRules = Describe(tints.borderRules),
+    -- One list now, so this counts the rules that carry a border rather than
+    -- a second list that no longer exists.
+    borderRules = Describe(NS.BorderHalves and NS.BorderHalves(tints.rules) or {}),
     icons       = #((payload.profile.icons or {}).list or {}),
     modules     = {
       health = tints.enabled ~= false,
@@ -557,6 +707,21 @@ end
 -------------------------------------------------------------------------------
 -- Drift check
 --
+-- Sanitise, then run the same list merge a local profile gets.
+--
+-- An import is someone else's profile arriving from an arbitrary build, so it
+-- can carry two lists, one list, or one list plus a stale second one. Running
+-- the migration here rather than trusting the sender's flag means the shape is
+-- decided by THIS build, once, in the same code path a local profile uses.
+local function MergedTints(source, dropped)
+  local tints = SanitiseTints(source, dropped)
+  if not tints.rulesMerged and NS.MergeRuleLists then
+    NS.MergeRuleLists(tints)
+  end
+  tints.rulesMerged = true
+  return tints
+end
+
 -- The schema above is a second list of every setting, and second lists rot.
 -- This reports keys the live profile has that the schema does not, so a
 -- setting added without a matching entry here shows up as a diagnostic rather
@@ -584,6 +749,8 @@ local KNOWN = {
     "missingCoverColor", "gateUnknownSpells", "plateOutline",
     "plateOutlineColor", "plateOutlineSize", "plateOutlineOffset",
     "plateOutlineSides", "pandemic", "missingMode",
+    "threatEnabled", "threat", "threatBorder", "rulesMerged",
+    "mark", "markBorder",
     "missingAppliedByClass", "missingAppliedClassColors",
   },
   icons = {

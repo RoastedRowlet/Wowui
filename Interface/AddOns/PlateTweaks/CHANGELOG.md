@@ -3,6 +3,213 @@
 All notable changes to PlateTweaks are recorded here. No file like this
 existed before 1.8.4, so history prior to that release is not reconstructed.
 
+## 1.11.0
+
+A large overhaul of the colouring pages.
+
+### Added
+
+- **Threat colouring.** Has Aggro / Near Aggro / No Aggro, on the bar and the
+  border, drawn above every spell rule. Role-aware: tanks get No Aggro first
+  and on by default. Optional flash when you lose aggro.
+- **Target and focus colouring.** Its own colours, borders and edge markers,
+  ranked under threat and above your rules. Ships on, at half opacity over
+  diagonal stripes.
+- **Draw slots.** Every rule shows what it costs and the list shows how much
+  of your nameplate addon's drawing room is left, so running out is something
+  you can see coming.
+- **"What Colors This Plate"** at the top of the page: the resolution order,
+  with live counts from your profile.
+- **A colour picker of our own**, used everywhere in the addon, with an
+  opacity switch and slider and live previews.
+- **A learned-debuff list.** The addon remembers debuffs it has seen you
+  apply, account-wide, and offers them in the rule editor alongside the
+  Cooldown Manager. `/pt learned`, `/pt forget <id>`.
+
+### Changed
+
+- **Bar rules and border rules are one list.** Border rules fold in on first
+  load; the old list is kept as a backup in your profile.
+- **Rules are edited in place**, in the list, instead of on their own page.
+- **The colouring pages are laid out by a flexbox engine**, so columns,
+  spacing and alignment come from one spec rather than from hand-placed
+  coordinates.
+- **Health Coloring's switch now governs the whole page** -- threat and
+  target/focus included.
+- Section prose moved into a `?` button on each header.
+- "Color Rules" is now "Spell Rules".
+
+### Fixed
+
+- A missing-debuff rule with its bar half switched off no longer paints the
+  bar.
+- Target/focus borders can be given a thickness, growth direction and gap.
+- Marker opacity previews correctly.
+- Test and Test All are back on every preview page.
+
+## 1.10.0
+
+### Added
+
+- **Threat colouring.** A colour chosen by the unit's threat state rather than
+  by a debuff, drawn above every spell rule on both the health bar and the
+  border. It lives in a **Threat** section at the top of the Health Bar page.
+
+  It reads as one row -- a strip of the four colours, what it is doing in
+  words, Edit, and a switch -- with the situations themselves behind Edit.
+  Threat is one thing you turn on, not four rules to maintain.
+
+  **The border is its own module**, on the Border page, with its own switch,
+  its own four colours and its own thickness. It was a column inside the bar's
+  row, which meant every border question had to be asked again there -- and it
+  costs nothing from the draw-slot budget, so pricing it beside something that
+  does was misleading.
+
+  **There is no combat option.** Threat colouring is in-combat only, always.
+  Out of combat every plate reports the same state, so the "not tanking"
+  colour would paint the whole screen and none of the others could ever fire:
+  the switch had one correct position. A stored opt-out from a profile written
+  against the first build is dropped on load.
+
+  Three situations -- **Has Aggro**, **Near Aggro**, **No Aggro** -- named the
+  same way everywhere: the rows in Edit, the colour chips on the collapsed
+  row, and `/pt threat`. The client reports four threat values; "tanking
+  securely" and "tanking, but only just" are the same news on a nameplate read
+  at a glance, while the warning shot -- top of a mob's list without holding it
+  yet -- is the one you can still act on, so it keeps its own colour.
+
+  The **Role** dropdown (Automatic from your spec, Tank, Damage, Healer)
+  decides which of the three ships switched on: a tank is alarmed by losing a
+  mob, everyone else by drawing one. No Aggro ships off either way --
+  colouring every plate in a pull green is noise, and it costs a draw slot a
+  warning colour could have had. The role changes nothing else; a state is a
+  fact about the mob, so it reads the same whatever you are playing.
+
+  Priority over spell rules is structural rather than a comparison made while
+  painting: threat reserves its draw sublevel before the missing ladder and
+  before any spell rule is allocated one. The spell rules underneath are still
+  built and still hold their own slots, so when the threat state clears their
+  colour comes straight back with no rebuild.
+
+  Nothing here rides an aura button, which is what makes the whole feature
+  possible: threat holders are frames of ours, so they can be shown and hidden
+  in combat. State is read through `UnitThreatSituation`, a readable carve-out
+  inside instances, and an unreadable answer colours nothing rather than being
+  treated as zero. Updates arrive on the client's threat events and on the
+  existing quarter-second poll.
+
+  `/pt threat` reports the role in force, which situations are coloured, and
+  what your current target reports right now.
+
+- **Draw slots.** Nameplate addons leave a finite amount of room to draw in,
+  and a profile that asks for more than fits has always failed the same quiet
+  way: the lowest rules share a slot, which of them wins is undefined, and the
+  same rules then colour some plates and not others in one pull. That was only
+  reported after the fact, on a plate that had already built.
+
+  The Spell Rules header now reads **Rule Capacity: 30%**, amber past 80% and
+  red over budget. A percentage rather than a fraction because the denominator
+  is a measurement of the host addon's leftover draw sublevels: a number nobody
+  has a feel for, and one that differs between skins of the same addon, so
+  "6 / 8" invited reading the 8 as meaningful. One line of text rather than a
+  row of pips, because a gauge earns its width when you watch it move, not when
+  it reads the same number every time you open the window. Each rule row and each rule row shows what it spends and on what (its tint, an
+  underlay, Cover missing health, Pandemic Flash). Border-only rules read as
+  costing nothing, because they draw outside the bar.
+
+  Addons that pin every rule to one frame level (Plater, Blizzard's default
+  plates, NDui) are the ones with a finite pool, and they get the gauge. On
+  Platynator, EllesmereUI and generic plates each rule gets its own frame
+  level, so the budget is level headroom in the hundreds; those report the
+  count in use and leave it at that rather than showing a bar nobody can fill.
+
+  The budget is measured off a live nameplate when one is up, since the host
+  addon's own textures decide the ceiling and it differs between skins of the
+  same addon. With no plate on screen the meter falls back to the shipped
+  estimate for your addon and says so.
+
+  `/pt slots` prints the same accounting, including which pool the room comes
+  from and what to drop when the profile is over budget.
+
+### Changed
+
+- **The Health Bar and Border pages are laid out by a flexbox engine**,
+  vendored from FlexProto as `Libs\Flex\Flex.lua`. Every other section in the options window
+  anchors each control to an x taken from a constant, while its column headings
+  take their x from a second copy of that constant -- which is how this section
+  first shipped with its headings a column off and its footnote printed through
+  a button. Under Flex the header and a row are the same node shape, so a
+  column cannot be in two places, a hidden block costs exactly zero height, and
+  the section's height is measured rather than guessed. `dev/` gains a layout
+  test asserting all three.
+
+  The rule lists moved onto it too. What that replaces is a single running
+  `y` threaded through every block -- rows, the warning, the button row, the
+  missing-health colour, the mob-tier swatches -- each one subtracting its own
+  height from it. Every overlap on those pages came from one block guessing
+  that height wrong: a wrapped warning counted as 32px, a button row as 26.
+  Optional blocks are now hidden nodes, which cost exactly zero height, and
+  the mob-tier swatches wrap onto a second line at a narrow window rather than
+  running off the edge -- something a running `y` could never do.
+
+  Alignment across both pages now comes from one set of numbers (`NS.UI`) and
+  one centring helper, rather than per-widget offsets: a heading is a cell of
+  the same width as the control it names, so the two share a centre line, and
+  explanatory text is indented past the rows so it reads as commentary rather
+  than another entry. Padding on a Flex *item* is silently ignored -- only
+  boxes have it -- which is why every footnote had been sitting flush against
+  the section's left edge; notes are wrapped in a padded box now, with a test
+  pinning both behaviours.
+
+  The library is a straight copy: fixes go upstream in FlexProto and come back
+  as a whole-file replacement.
+
+- **Section prose moved into a `?` button on each header.** Every list carried
+  a paragraph underneath saying what the list was for -- read once, then
+  permanent, costing a band of vertical space on every page on every visit.
+  The text is now one hover away and takes no room at all. Warnings stay in the
+  page: those are about the current profile being wrong right now, and
+  something you have to hover to discover is something you will not discover.
+
+- **"Color Rules" is now "Spell Rules"**, since threat colouring sits above it
+  and both are colour rules.
+
+- Profile export and import carry the threat settings. A state the sender never
+  touched stays absent rather than being filled in on the way through -- the
+  recipient's own role decides its shipped colour.
+
+## 1.9.23
+
+### Changed
+
+- **Expected aura-button re-pins are no longer counted as failures.** A bound
+  aura button only accepts a frame level inside its own `initializeFrame`, so
+  `RepinLevels` always fails on one -- in every environment, group or solo, in
+  combat or not. Those failures are the mechanism working: the button repairs
+  itself from `record.level` the next time the pool initialises it.
+
+  They were counted in the same number as a container refusing, which is a real
+  fault with no self-repair. A healthy 128-second dungeon therefore reported
+  `1 re-pinned | 46 needed a rebuild | 184 refused` when the honest reading was
+  47 drifts, all of them handled -- measured in the same capture as 3772 rule
+  samples at `lvlSet=1 lvlRefused=nil`, and 100 out of 100 readable tint-host
+  levels verified correct.
+
+  `Pin` now takes the two cases apart by which list the frame came from, since
+  an aura button's own fields are refused under secrecy and asking it what it
+  is would fail exactly where it matters. `NS.levelDrift` gains `pending` (the
+  buttons) and `selfHealing` (drifts whose only failures were buttons); a drift
+  of that shape counts as re-pinned rather than deferred, and no longer sets
+  `rig.levelDirty`.
+
+  No behaviour change on screen. Every frame is still asked for the level in
+  the same order, and `appliedLevel` is still only advanced when the whole rig
+  confirms.
+
+- `/pt status` prints the button count on its own grey line under `bar level
+  drift`, and `/pt bar` names both numbers separately rather than reporting one
+  total as refusals.
+
 ## 1.9.22
 
 ### Fixed

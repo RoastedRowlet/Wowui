@@ -488,7 +488,8 @@ local function MaxInsideBorder()
     fillCache.insideBorder = 0
     return 0
   end
-  for _, rule in ipairs(NS.db.tints.borderRules or {}) do
+  -- One list, and a rule's border half is on the rule.
+  for _, rule in ipairs(NS.db.tints.rules or {}) do
     local b = rule.border
     if rule.enabled ~= false and b and b.enabled and b.grow ~= "OUT" then
       widest = math.max(widest,
@@ -574,13 +575,32 @@ local function AnchorToMissingFill(tex, healthBar, expand)
   local fill = healthBar:GetStatusBarTexture() or healthBar
   local inset = FillInset(healthBar) + EdgeReserve(healthBar) - (expand or 0)
   tex:ClearAllPoints()
-  if PixelUtil and PixelUtil.SetPoint then
-    PixelUtil.SetPoint(tex, "TOPLEFT", fill, "TOPRIGHT", 0, -inset)
-    PixelUtil.SetPoint(tex, "BOTTOMRIGHT", healthBar, "BOTTOMRIGHT", -inset, inset)
-  else
-    tex:SetPoint("TOPLEFT", fill, "TOPRIGHT", 0, -inset)
-    tex:SetPoint("BOTTOMRIGHT", healthBar, "BOTTOMRIGHT", -inset, inset)
+  -- Anchored to the fill TEXTURE, so the cover follows the health level
+  -- geometrically and needs no per-frame arithmetic -- which is what makes it
+  -- work at all when the value itself is secret.
+  --
+  -- Which texture object that was is remembered here. A host that swaps its
+  -- statusbar texture -- a skin re-applying, a bar being re-themed -- leaves
+  -- this cover anchored to an object the bar no longer draws, and the cover
+  -- then holds whatever size it had when the swap happened. See
+  -- NS.RefreshMissingCovers, which is what notices.
+  local ok = pcall(function()
+    if PixelUtil and PixelUtil.SetPoint then
+      PixelUtil.SetPoint(tex, "TOPLEFT", fill, "TOPRIGHT", 0, -inset)
+      PixelUtil.SetPoint(tex, "BOTTOMRIGHT", healthBar, "BOTTOMRIGHT", -inset, inset)
+    else
+      tex:SetPoint("TOPLEFT", fill, "TOPRIGHT", 0, -inset)
+      tex:SetPoint("BOTTOMRIGHT", healthBar, "BOTTOMRIGHT", -inset, inset)
+    end
+  end)
+  if not ok then
+    -- The pixel-snapped path can be refused where the fill's own position is
+    -- not readable. A plain anchor is still correct, just unsnapped.
+    pcall(tex.SetPoint, tex, "TOPLEFT", fill, "TOPRIGHT", 0, -inset)
+    pcall(tex.SetPoint, tex, "BOTTOMRIGHT", healthBar, "BOTTOMRIGHT", -inset, inset)
   end
+  tex.ptFill = fill
+  tex.ptAnchorOK = ok
   return tex
 end
 
@@ -666,6 +686,10 @@ local BORDER_SIDES = {
   { side = "right",  a = "TOPRIGHT",    b = "BOTTOMRIGHT", ax =  1, ay =  1, bx =  1, by = -1, vertical = true  },
 }
 
+-- Threat.lua draws the same four edges from its own holder, so this is shared
+-- rather than copied -- one table, one definition of which corner is which.
+NS.BORDER_SIDES = BORDER_SIDES
+
 
 -- Nothing here can be destroyed, so created-vs-live is the only view of it.
 NS.stats = { containers = 0, textures = 0, rebuilds = 0 }
@@ -691,7 +715,10 @@ end
 -- Tileable patterns, white TGA masks; vertex colour tints them. Each carries
 -- its native tile size: the isotropic ones tile both axes, the stripe banners
 -- are one band already spanning a bar's height and must not tile vertically.
-local TEXTURE_PATH = "Interface\\AddOns\\PlateTweaks\\media\\textures\\"
+-- Built from the folder name, not written out: a copy of this addon in a
+-- differently named folder was still loading the ORIGINAL's textures, so
+-- editing one changed the other and the beta could not be told apart.
+local TEXTURE_PATH = "Interface\\AddOns\\" .. (NS.ADDON or "PlateTweaks") .. "\\media\\textures\\"
 
 NS.FillTextures = {
   { key = "stripes-tiny",    label = "Stripes (Tiny)",           path = TEXTURE_PATH .. "stripes-tiny.tga",    tileW = 400, tileH = 48, tileVertical = false },
@@ -705,6 +732,26 @@ NS.FillTextures = {
   { key = "crosshatch", label = "Crosshatch", path = TEXTURE_PATH .. "crosshatch.tga", tileW = 64, tileH = 64, tileVertical = true },
   { key = "checker",    label = "Checker",    path = TEXTURE_PATH .. "checker.tga",    tileW = 64, tileH = 64, tileVertical = true },
 }
+
+-- How many times a library pattern repeats across a rect, as TexCoords.
+--
+-- Factored out of ApplyRuleFill because the options window has to draw the
+-- SAME pattern in a 30x15 chip and a preview bar. Two copies of this
+-- arithmetic is two answers: a chip that tiles at a different period than the
+-- plate is a swatch that lies about the rule.
+--
+-- Vertical is the special case. A stripe banner is already one band spanning a
+-- bar's height, so repeating it vertically samples a cropped sliver and
+-- stretches that -- hence one full span unless the texture says otherwise.
+function NS.FillTexCoords(width, height, library)
+  if not library then return 0, 1, 0, 1 end
+  local repX = math.max(1, (width or 100) / library.tileW)
+  local repY = 1
+  if library.tileVertical then
+    repY = math.max(1, (height or 10) / library.tileH)
+  end
+  return 0, repX, 0, repY
+end
 
 function NS.FillTextureByKey(key)
   if not key then return nil end
@@ -827,16 +874,9 @@ local function ApplyRuleFill(tex, healthBar, rule, expand)
         tex:SetTexture(library.path, true, true)
         local okW, w = pcall(healthBar.GetWidth, healthBar)
         local okH, h = pcall(healthBar.GetHeight, healthBar)
-        local repX = math.max(1, (okW and w or 100) / library.tileW)
-        local repY
-        if library.tileVertical then
-          repY = math.max(1, (okH and h or 10) / library.tileH)
-        else
--- One full span, not a repeat count under 1 -- a fractional vMax samples a
--- cropped sliver and stretches that.
-          repY = 1
-        end
-        tex:SetTexCoord(0, repX, 0, repY)
+        -- Shared with the options window's chips and previews, so a swatch
+        -- cannot tile at a different period than the bar it describes.
+        tex:SetTexCoord(NS.FillTexCoords(okW and w or nil, okH and h or nil, library))
 
         AnchorToBarFrame(tex, healthBar, expand)
         SetFillMasked(tex, healthBar, true)
@@ -928,7 +968,17 @@ function NS.ApplyMissingCover(tex, healthBar, rule, expand)
   tex:Show()
 end
 
-local function BuildRule(rig, healthBar, rule, level, needsUnderlay, overdraw, tintSublevel, underlaySublevel, borderSublevel, missingCoverSublevel, tintLayer)
+-- `half` says which of the rule's two halves to build: "bar", "border", or nil
+-- for both.
+--
+-- It exists because the two lists became one. A rule has always carried both
+-- halves and this function has always drawn both, which was harmless while
+-- bar rules and border rules were different objects in different lists. Merged,
+-- one rule now appears in both passes -- the bar pass for its tint, the border
+-- pass for its edges, which sit in a band above every bar rule -- and building
+-- both halves in each pass would draw every border twice, at twice the cost,
+-- with the copies fighting over which is on top.
+local function BuildRule(rig, healthBar, rule, level, needsUnderlay, overdraw, tintSublevel, underlaySublevel, borderSublevel, missingCoverSublevel, tintLayer, half)
   tintSublevel = tintSublevel or 0
   underlaySublevel = underlaySublevel or -1
   borderSublevel = borderSublevel or 7
@@ -967,8 +1017,11 @@ local function BuildRule(rig, healthBar, rule, level, needsUnderlay, overdraw, t
     return record
   end
 
+  local wantBar = half ~= "border" and rule.barEnabled ~= false
+  local wantBorder = half ~= "bar" and rule.border and rule.border.enabled and true or false
+
 -- Flagged, not silently skipped, so the options panel can say why.
-  if rule.barEnabled == false and not (rule.border and rule.border.enabled) then
+  if not wantBar and not wantBorder then
     record.inert = true
     return record
   end
@@ -982,12 +1035,12 @@ local function BuildRule(rig, healthBar, rule, level, needsUnderlay, overdraw, t
 
 -- Underlay: opaque copy of the bar, so this rule masks lower ones. Only when
 -- a lower rule can match, and only when this rule paints the bar.
-    if needsUnderlay and record.rule.barEnabled ~= false then
+    if needsUnderlay and wantBar then
       local underlay = CreateBarTexture(host, healthBar, underlaySublevel, UNDERLAY_OVERDRAW + record.overdraw, tintLayer)
       for index = 2, #stack do underlay:AddMaskTexture(stack[index]) end
       table.insert(record.underlays, underlay)
     end
-    if record.rule.barEnabled ~= false then
+    if wantBar then
       local tint = CreateBarTexture(host, healthBar, tintSublevel, record.overdraw, tintLayer)
       ApplyRuleFill(tint, healthBar, record.rule, record.overdraw)
       for index = 2, #stack do tint:AddMaskTexture(stack[index]) end
@@ -997,7 +1050,7 @@ local function BuildRule(rig, healthBar, rule, level, needsUnderlay, overdraw, t
     -- Shared missing colour, not a copy of the fill. Strictly above the
     -- tint's sublevel -- the mask can leave a sliver whose winner would
     -- otherwise be undefined.
-    if record.rule.barEnabled ~= false and record.rule.missingCover then
+    if wantBar and record.rule.missingCover then
       local cover = CreateMissingCoverTexture(host, healthBar, missingCoverSublevel, record.overdraw, tintLayer)
       local mc = NS.MissingCoverColor()
       cover:SetColorTexture(mc.r, mc.g, mc.b, mc.a)
@@ -1009,7 +1062,7 @@ local function BuildRule(rig, healthBar, rule, level, needsUnderlay, overdraw, t
     -- button is silently refused, and textures are maskable where frames are
     -- not.
     local border = record.rule.border
-    if border and border.enabled then
+    if wantBorder and border and border.enabled then
       local bc = border.color or { r = 1, g = 1, b = 1, a = 1 }
       local t = math.max(1, math.min(8, border.thickness or 2))
       local pad = math.max(0, math.min(12, border.padding or 0))
@@ -1270,6 +1323,15 @@ function NS.BuildTints(rig, healthBar)
   -- Split out first, or one consumes a frame-level band and a rank-inset step
   -- for geometry it never uses.
   local candidates = NS.db.tints.enabled and Castable(NS.GetOrderedRules()) or {}
+  -- Counted for /pt status, the same way rig.borderRulesOff is below.
+  --
+  -- With the health module off, every bar rule -- presence AND missing --
+  -- drops out here, silently: the border half of those same rules is gated by
+  -- its own switch and keeps drawing, so the plates show borders and no fill
+  -- and nothing anywhere says why. That is a genuinely baffling state to be
+  -- in, and it was reported as "the missing wash broke".
+  rig.barRulesOff = (NS.db.tints.enabled == false)
+    and #(NS.GetOrderedRules() or EMPTY) or 0
   local ordered, missingRules = {}, {}
   for _, rule in ipairs(candidates) do
     if rule.showWhenMissing then
@@ -1279,6 +1341,51 @@ function NS.BuildTints(rig, healthBar)
     end
   end
   local count = #ordered
+
+  -- Threat rules are not spell rules and never enter `ordered`: they have no
+  -- conditions to gate them, no aura button to ride, and they must outrank
+  -- everything in that list. Capped here rather than in the options UI, so a
+  -- shared or imported profile cannot starve the ladder from disk.
+  local threatRules = {}
+  for _, rule in ipairs(NS.GetOrderedThreatRules and NS.GetOrderedThreatRules() or EMPTY) do
+    if #threatRules < (NS.MAX_THREAT_RULES or 4) then
+      threatRules[#threatRules + 1] = rule
+    end
+  end
+  -- The border module is separate and costs nothing from the sublevel pool --
+  -- it draws in the border band, like every other border here.
+  local threatBorders = {}
+  for _, rule in ipairs(NS.GetOrderedThreatBorders and NS.GetOrderedThreatBorders() or EMPTY) do
+    if #threatBorders < (NS.MAX_THREAT_RULES or 4) then
+      threatBorders[#threatBorders + 1] = rule
+    end
+  end
+  rig.threatRuleCount = #threatRules
+
+  -- Target/focus, between threat and the spell rules. Same shape as threat:
+  -- no conditions, no aura button, and a position in the ladder rather than a
+  -- comparison at paint time.
+  local markRules = {}
+  for _, rule in ipairs(NS.GetOrderedMarkRules and NS.GetOrderedMarkRules() or EMPTY) do
+    if #markRules < (NS.MAX_MARK_RULES or 2) then
+      markRules[#markRules + 1] = rule
+    end
+  end
+  -- Markers ride the same module and cost nothing from the pool -- they draw
+  -- beside the bar, not on it.
+  local markIndicators = {}
+  for _, rule in ipairs(NS.GetOrderedMarkIndicators and NS.GetOrderedMarkIndicators() or EMPTY) do
+    if #markIndicators < (NS.MAX_MARK_RULES or 2) then
+      markIndicators[#markIndicators + 1] = rule
+    end
+  end
+  local markBorders = {}
+  for _, rule in ipairs(NS.GetOrderedMarkBorders and NS.GetOrderedMarkBorders() or EMPTY) do
+    if #markBorders < (NS.MAX_MARK_RULES or 2) then
+      markBorders[#markBorders + 1] = rule
+    end
+  end
+  rig.markRuleCount = #markRules
 
   -- Presence starts one band above the base. The missing wash is lit by
   -- default, so on top it covered presence tints almost always.
@@ -1304,9 +1411,16 @@ function NS.BuildTints(rig, healthBar)
   --
   -- Single-debuff only: rank k already spends a chain level per rule above it,
   -- and a second condition needs another with no room for it.
+  --
+  -- And bar-half-only. The ladder builds its washes itself rather than going
+  -- through BuildRule, which is where `barEnabled` is read -- so a missing
+  -- rule split to border-only kept painting the bar, with the switch off, the
+  -- chip hollow and the editor saying it was not colouring anything. Its
+  -- border half is unaffected: that is a separate list further down.
   local ladder = {}
   for _, rule in ipairs(missingRules) do
-    if #(rule.conditions or {}) == 1 and #ladder < NS.MAX_MISSING_RULES then
+    if #(rule.conditions or {}) == 1 and rule.barEnabled ~= false
+      and #ladder < NS.MAX_MISSING_RULES then
       ladder[#ladder + 1] = rule
     end
   end
@@ -1316,6 +1430,8 @@ function NS.BuildTints(rig, healthBar)
   -- rule at a time the way a fixed three-per-rank could.
   local plan
   rig.missingSublevels = nil
+  rig.threatSublevels = nil
+  rig.markSublevels = nil
   if isPlater then
     local pandemicOn = (NS.db.tints.pandemic or {}).enabled and true or false
     -- ONE occupancy map, shared. The survey is what turns this from arithmetic
@@ -1326,7 +1442,15 @@ function NS.BuildTints(rig, healthBar)
     -- reservations would drag it down and move the border band with it.
     local occ = NS.HostOccupancy(healthBar)
     local ceiling = NS.OverlayCeiling(occ)
-    -- Missing ladder first: it marks its slots taken, so the presence
+    -- Threat FIRST, before the ladder and before presence. Priority here is
+    -- position, not a comparison at paint time: taking the top slots under the
+    -- host ceiling is what makes a threat tint beat every spell rule, and it
+    -- only works if nothing else has been handed those slots yet.
+    rig.threatSublevels = NS.ThreatSublevelPlan(occ, #threatRules, ceiling)
+    -- Straight after threat, off the same map: what is left under the ceiling
+    -- once threat has taken its slots is exactly what target/focus may have.
+    rig.markSublevels = NS.MarkSublevelPlan(occ, #markRules, ceiling)
+    -- Missing ladder next: it marks its slots taken, so the presence
     -- allocator below can no longer be handed the same ones.
     rig.missingSublevels =
       NS.PlaterMissingPlan(occ, #ladder, MissingModeIsDisplace(), ceiling)
@@ -1367,7 +1491,7 @@ function NS.BuildTints(rig, healthBar)
     local overdraw = isPlater and 0 or -(insets[index] or 0)
     local record = BuildRule(rig, healthBar, rule, level, needsUnderlay, overdraw,
       tintSublevel, underlaySublevel, isPlater and (platerTextFloor - 1) or nil,
-      missingCoverSublevel, entry and entry.layer or nil)
+      missingCoverSublevel, entry and entry.layer or nil, "bar")
     -- Replayed by NS.AnchorTints. Stored, not recomputed, so they cannot
     -- disagree.
     record.levelOffset = level - rig.baseLevel
@@ -1431,7 +1555,11 @@ function NS.BuildTints(rig, healthBar)
   local borderBase = isPlater and rig.baseLevel or (ruleBase + (count + 1) * LEVELS_PER_RULE)
   for index, rule in ipairs(borders) do
     local level = isPlater and rig.baseLevel or (borderBase + (bcount - index) * LEVELS_PER_RULE)
-    local record = BuildRule(rig, healthBar, rule, level, false, nil, nil, nil, isPlater and (platerTextFloor - 1) or nil)
+    -- Border half only: this rule's tint, if it has one, was built in the pass
+    -- above. The band it draws in sits over every bar rule, which is the whole
+    -- reason borders get a pass of their own.
+    local record = BuildRule(rig, healthBar, rule, level, false, nil, nil, nil,
+      isPlater and (platerTextFloor - 1) or nil, nil, nil, "border")
     record.levelOffset = level - rig.baseLevel
     table.insert(rig.rules, record)
   end
@@ -1482,8 +1610,38 @@ function NS.BuildTints(rig, healthBar)
   -- plate that spawns mid-pull.
   NS.UpdateMissingCombatGate(rig)
 
+  -- Threat sits above every spell rule and every spell border. On a
+  -- flat-pinned bar that is decided by the sublevels reserved at the top of
+  -- this function; on an elevated bar frame level arbitrates, so it gets its
+  -- own band above the border band. The outline moves up one band to stay
+  -- above both -- the plate's own outline is still the topmost thing we draw.
+  local threatLevel = isPlater and rig.baseLevel
+    or (borderBase + (bcount + 1) * LEVELS_PER_RULE)
+  NS.BuildThreat(rig, healthBar, threatRules, threatBorders, threatLevel,
+    rig.threatSublevels, isPlater and (platerTextFloor - 1) or 7)
+  rig.threatLevelOffset = threatLevel - rig.baseLevel
+
+  -- One band under threat on an elevated bar; on a flat-pinned bar the
+  -- sublevels reserved above decide it.
+  local markLevel = isPlater and rig.baseLevel or (threatLevel - LEVELS_PER_RULE)
+  NS.BuildMark(rig, healthBar, markRules, markBorders, markLevel,
+    rig.markSublevels, isPlater and (platerTextFloor - 1) or 6, markIndicators)
+  rig.markLevelOffset = markLevel - rig.baseLevel
+
+  -- What the cover poll asks about, decided once here rather than rediscovered
+  -- per tick. underlays are the missing ladder's replicas; missingCovers are
+  -- the "cover the missing-health side" textures on an ordinary rule.
+  rig.hasCovers = false
+  for _, record in ipairs(rig.rules or EMPTY) do
+    if #(record.underlays or EMPTY) > 0 or #(record.missingCovers or EMPTY) > 0 then
+      rig.hasCovers = true
+      break
+    end
+  end
+  NS.InvalidateCoversCache()
+
   rig.outlineLevelOffset = isPlater and 0
-    or ((borderBase - rig.baseLevel) + (bcount + 1) * LEVELS_PER_RULE)
+    or ((borderBase - rig.baseLevel) + (bcount + 2) * LEVELS_PER_RULE)
   NS.BuildOutline(rig, healthBar, rig.baseLevel + rig.outlineLevelOffset)
 end
 
@@ -2082,7 +2240,22 @@ end
 -- Session-cumulative. Split because they answer different questions: detected
 -- is "did the host move the bar out from under us at all", refused is "and
 -- could we do anything about it there and then".
-NS.levelDrift = { detected = 0, repinned = 0, refused = 0, deferred = 0 }
+--
+-- pending is the third question, and the reason refused stopped being one
+-- number. A bound aura button only accepts a frame level inside its own
+-- initializeFrame, so Pin ALWAYS fails on one -- in every environment, group
+-- or solo, combat or not. Those failures are the mechanism working, not
+-- breaking: the button repairs itself from record.level the next time the
+-- pool initialises it. Counting them alongside real refusals made a healthy
+-- 128-second dungeon read `1 re-pinned | 46 needed a rebuild | 184 refused`,
+-- when the honest reading was 47 drifts, every one of them handled.
+NS.levelDrift = {
+  detected = 0, repinned = 0, refused = 0, deferred = 0,
+  -- Aura buttons that could not take the level here and will self-heal.
+  pending = 0,
+  -- Drifts whose ONLY failures were those buttons.
+  selfHealing = 0,
+}
 
 -- The host bar's frame level is read ONCE, when the rig is built, and every
 -- container and aura button is pinned to it. Plater raises its unit frame by
@@ -2127,18 +2300,32 @@ function NS.RepinLevels(rig)
   -- frame accepted and read back the new level.
   rig.baseLevel = wanted
   local isPlater = NS.IsPlaterBar(healthBar)
-  local refused = 0
+  local refused, pending = 0, 0
 
   -- Accepted is not applied. A pcall that returns true only proves the call
   -- did not throw, so the level is read back rather than trusted -- the same
   -- trap that made this bug invisible in the first place.
-  local function Pin(frame, level)
+  --
+  -- selfHeals says the caller KNOWS this frame is a bound aura button, which
+  -- can only take a level inside its own initializeFrame. A failure there is
+  -- expected and temporary, so it is counted apart from a container refusing,
+  -- which is neither. Nothing about the pin attempt itself changes: the button
+  -- is still asked, because outside a group it sometimes accepts.
+  --
+  -- The two cases are told apart by which list the frame came from, not by
+  -- inspecting the frame -- an aura button's own fields are refused under
+  -- secrecy, so asking it what it is would fail exactly where this matters.
+  local function Pin(frame, level, selfHeals)
     if not frame then return end
     if pcall(frame.SetFrameLevel, frame, level) then
       local okGot, got = pcall(frame.GetFrameLevel, frame)
       if okGot and got == level then return end
     end
-    refused = refused + 1
+    if selfHeals then
+      pending = pending + 1
+    else
+      refused = refused + 1
+    end
   end
 
   if rig.outline then Pin(rig.outline, wanted + (rig.outlineLevelOffset or 0)) end
@@ -2147,8 +2334,10 @@ function NS.RepinLevels(rig)
     local level = isPlater and wanted or (wanted + (record.levelOffset or 0))
     record.level = level
     for _, frame in ipairs(record.containers or EMPTY) do Pin(frame, level) end
-    for _, host in ipairs(record.hosts or EMPTY) do Pin(host, level) end
-    for _, host in ipairs(record.tintHosts or EMPTY) do Pin(host, level) end
+    -- Both of these hold bound aura buttons (see the inserts in the aura
+    -- callbacks below), which is why they pass selfHeals.
+    for _, host in ipairs(record.hosts or EMPTY) do Pin(host, level, true) end
+    for _, host in ipairs(record.tintHosts or EMPTY) do Pin(host, level, true) end
   end
 
   if rig.missingWash then
@@ -2158,20 +2347,28 @@ function NS.RepinLevels(rig)
     Pin(entry.holder,
       isPlater and wanted or (wanted + (entry.levelOffset or rig.missingLevelOffset or 0)))
   end
+  for _, entry in ipairs((rig.threat or EMPTY).entries or EMPTY) do
+    Pin(entry.holder,
+      isPlater and wanted or (wanted + (entry.levelOffset or rig.threatLevelOffset or 0)))
+  end
+  for _, entry in ipairs((rig.mark or EMPTY).entries or EMPTY) do
+    Pin(entry.holder,
+      isPlater and wanted or (wanted + (entry.levelOffset or rig.markLevelOffset or 0)))
+  end
+
+  NS.levelDrift.pending = NS.levelDrift.pending + pending
+  rig.levelPendingCount = pending > 0 and pending or nil
 
   if refused > 0 then
+    -- Something that is NOT an aura button would not take the level: a
+    -- container, the outline, a missing-wash holder. None of those have a
+    -- callback to repair themselves in, so this is the case that genuinely
+    -- waits for a rebuild.
     NS.levelDrift.refused = NS.levelDrift.refused + refused
     NS.levelDrift.deferred = NS.levelDrift.deferred + 1
-    -- An aura button only accepts a level inside its own initializeFrame, so
-    -- some of these can only be fixed by a rebuild. Marked, not rebuilt here:
-    -- rebuilding mid-combat is the churn this whole area exists to avoid, and
-    -- Reapply on PLAYER_REGEN_ENABLED re-anchors every rig anyway.
-    --
-    -- Since the initializeFrame callback now reads record.level rather than
-    -- the level captured at build time, a refused button also repairs itself
-    -- the next time the pool initialises it -- which under a HARMFUL|PLAYER
-    -- filter is the next time the debuff lands. The deferral is the backstop
-    -- now, not the only route.
+    -- Marked, not rebuilt here: rebuilding mid-combat is the churn this whole
+    -- area exists to avoid, and Reapply on PLAYER_REGEN_ENABLED re-anchors
+    -- every rig anyway.
     rig.levelDirty = true
     -- appliedLevel deliberately NOT advanced: the frames are not there.
     rig.levelRefusedCount = refused
@@ -2179,7 +2376,17 @@ function NS.RepinLevels(rig)
     NS.levelDrift.repinned = NS.levelDrift.repinned + 1
     rig.levelDirty = nil
     rig.levelRefusedCount = nil
-    rig.appliedLevel = wanted
+    if pending > 0 then
+      -- Every real frame took it and the rest are buttons that will repair
+      -- themselves from record.level the next time the debuff lands. Counted
+      -- as a re-pin above, because that is what happened.
+      NS.levelDrift.selfHealing = NS.levelDrift.selfHealing + 1
+      -- appliedLevel still not advanced -- the buttons have not confirmed --
+      -- but this is no longer reported as a fault. /pt bar already says
+      -- "LEVEL UNVERIFIED" rather than wrong, which is the accurate wording.
+    else
+      rig.appliedLevel = wanted
+    end
   end
   return true
 end
@@ -2205,6 +2412,20 @@ function NS.SetTintsUnit(rig)
   -- second on every rebind.
   if displace and #(displace.entries or {}) > 0 and NS.UpdateMissingCombatGate then
     NS.UpdateMissingCombatGate(rig)
+  end
+  -- Same for threat. `lit` is cleared rather than trusted: this bar is pooled,
+  -- so the unit it just picked up has nothing to do with the one the holders
+  -- were last showing, and an edge-triggered flag that already believes it is
+  -- shown would never correct itself.
+  if rig.threat and #(rig.threat.entries or {}) > 0 then
+    for _, entry in ipairs(rig.threat.entries) do entry.lit = nil end
+    if NS.UpdateThreat then NS.UpdateThreat(rig) end
+  end
+  -- Same reset for target/focus: the bar is pooled, so "lit" describes the
+  -- last unit on it and not this one.
+  if rig.mark and #(rig.mark.entries or {}) > 0 then
+    for _, entry in ipairs(rig.mark.entries) do entry.lit = nil end
+    if NS.UpdateMark then NS.UpdateMark(rig) end
   end
 end
 
@@ -2254,10 +2475,16 @@ function NS.ReviveContainers(rig)
 end
 
 function NS.RetireTints(rig)
+  -- The gate above is a cache over every rig, and this one is leaving.
+  NS.InvalidateCoversCache()
   -- The missing wash is shown unconditionally, so a retired rig that left it
   -- up would keep a reminder on a plate this addon no longer drives.
   if rig.outline then rig.outline:Hide() end
   if rig.missingWash then rig.missingWash:Hide() end
+  -- Threat holders are ours too, and they carry per-unit history that must
+  -- not survive the unbind.
+  if NS.RetireThreat then NS.RetireThreat(rig) end
+  if NS.RetireMark then NS.RetireMark(rig) end
   -- Same for a displacement wash. The holder is ours, so Hide is allowed.
   for _, entry in ipairs((rig.missingDisplace or {}).entries or {}) do
     pcall(entry.holder.Hide, entry.holder)
@@ -2292,13 +2519,50 @@ end
 
 -- Missing-health covers are excluded: they paint a fixed colour, not a live
 -- replica, so NS.ApplyTintColors handles them.
+-- Does anything on screen need the cover poll at all?
+--
+-- Cached, because this is the GATE on a 0.25s ticker and the answer is a
+-- property of what has been BUILT, not of anything that changes between
+-- ticks. Uncached it walked every rig and every rule on that rig four times a
+-- second purely to decide whether to do any work -- which on a big pull is
+-- the walk it was supposed to be avoiding.
+--
+-- Invalidated where the answer can actually move: a rig finishing a build,
+-- and a rig being retired. Those bracket every change to the set of covers in
+-- existence; binding a rig to a different unit does not create or destroy
+-- one.
+local anyCoversCache = nil
+
+function NS.InvalidateCoversCache()
+  anyCoversCache = nil
+end
+
 function NS.AnyCovers()
+  if anyCoversCache ~= nil then return anyCoversCache end
+  local any = false
   for _, rig in pairs(NS.rigs) do
-    for _, record in ipairs(rig.rules or {}) do
-      if #record.underlays > 0 then return true end
+    if rig.hasCovers then any = true break end
+  end
+  anyCoversCache = any
+  return any
+end
+
+-- Re-anchor any cover whose fill went out from under it.
+--
+-- An identity compare, not a re-anchor every tick: SetPoint on a live texture
+-- is cheap but not free, and this runs per rule per rigged plate at 4Hz.
+function NS.RefreshMissingCovers(rig)
+  local healthBar = rig.healthBar
+  if not healthBar then return end
+  local fill = healthBar:GetStatusBarTexture()
+  if not fill then return end
+  for _, record in ipairs(rig.rules or EMPTY) do
+    for _, tex in ipairs(record.missingCovers or EMPTY) do
+      if tex.ptFill ~= fill or not tex.ptAnchorOK then
+        pcall(AnchorToMissingFill, tex, healthBar, record.overdraw)
+      end
     end
   end
-  return false
 end
 
 -- A readable value, or nil. A secret used as a table key throws.
@@ -2370,6 +2634,10 @@ end
 function NS.UpdateCovers(rig)
   local healthBar = rig.healthBar
   if not healthBar then return end
+
+  -- Before the replica work below, and independent of it: a plain cover has
+  -- no colour to maintain, only an anchor.
+  NS.RefreshMissingCovers(rig)
 
   local classColor = NS.ClassificationColor(rig.unit)
   if classColor then
@@ -2541,4 +2809,176 @@ function NS.ApplyTintColors()
       end
     end
   end
+end
+
+-- ---------------------------------------------------------------------------
+-- Draw slots.
+--
+-- Everything above allocates sublevels and then reports, once, that it ran
+-- out. This says the same thing BEFORE a rule is added: how many slots the
+-- host addon leaves us, what each rule spends, and how close the profile is to
+-- the wall.
+--
+-- Two different budgets, because two different things arbitrate:
+--
+--   flat-pinned bars (Plater, Blizzard, NDui)   every rule is on ONE frame
+--       level, so draw sublevel decides who wins and the pool is finite --
+--       OVERLAY under the host's ceiling, plus ARTWORK above the host's fill.
+--       This is the budget people actually hit.
+--
+--   elevated bars (Platynator, EllesmereUI, generic)   each rule gets its own
+--       frame level band, so the limit is level headroom rather than
+--       sublevels. Far larger, but not infinite, and worth showing next to the
+--       others rather than saying "unlimited" and leaving people to find the
+--       ceiling themselves.
+--
+-- Measured off a LIVE bar when one is rigged, because the OVERLAY ceiling is a
+-- survey of the host's own textures and differs between skins of the same
+-- addon. With no plate up it falls back to the shipped assumption, and says so.
+local ELEVATED_LEVEL_HEADROOM = 500
+
+function NS.SlotBudget(healthBar)
+  local flat = healthBar and NS.IsPlaterBar(healthBar)
+  if healthBar == nil then
+    -- No live bar: assume the current adapter's shape from the shipped
+    -- defaults rather than refusing to answer.
+    local name = NS.CurrentAdapterName and NS.CurrentAdapterName() or nil
+    local shipped = name and NS.ADAPTER_DEFAULTS[name]
+    flat = shipped and shipped.pinFlat or false
+  end
+
+  if not flat then
+    return {
+      flat = false,
+      measured = healthBar ~= nil,
+      total = math.floor(ELEVATED_LEVEL_HEADROOM / LEVELS_PER_RULE),
+      overlay = 0, artwork = 0,
+    }
+  end
+
+  local overlay, artwork
+  if healthBar then
+    local occ = HostOccupancy(healthBar)
+    local ceiling = NS.OverlayCeiling(occ)
+    local floor = NS.PlaterTextFloor(healthBar) or 7
+    -- Exactly the arithmetic PlaterSublevelPlan uses to place rule 1, so the
+    -- number here cannot promise room the allocator will not hand out.
+    local top = math.min(ceiling and (ceiling - 1) or (floor - 3), floor - 3)
+    if top > SUBLEVEL_MAX then top = SUBLEVEL_MAX end
+    overlay = math.max(0, top - SUBLEVEL_MIN + 1)
+    artwork = math.max(0, SUBLEVEL_MAX - (FillSublevel(healthBar) + 1) + 1)
+  else
+    -- The shipped assumption: OVERLAY down from floor-3, no survey.
+    overlay = math.max(0, (7 - 3) - SUBLEVEL_MIN + 1)
+    artwork = math.max(0, SUBLEVEL_MAX - 1 + 1)
+  end
+
+  return {
+    flat = true,
+    measured = healthBar ~= nil,
+    overlay = overlay,
+    artwork = artwork,
+    total = overlay + artwork,
+  }
+end
+
+-- What one bar rule spends. `list` and `index` are needed because an underlay
+-- exists only when a LOWER rule's debuffs are a subset of this one's -- cost is
+-- a property of the profile, not of the rule on its own.
+function NS.RuleSlotCost(rule, list, index, pandemicOn)
+  if not rule or rule.enabled == false or #(rule.conditions or EMPTY) == 0 then
+    return 0, EMPTY
+  end
+  local parts = { "tint" }
+  local cost = 1
+
+  if rule.barEnabled == false then
+    -- Border-only: it draws in the border band and takes nothing from the
+    -- pool, which is exactly why splitting a rule that way is the cheapest
+    -- way out of a full profile.
+    return 0, { "border band" }
+  end
+
+  if list and index then
+    for lower = index + 1, #list do
+      if NS.RuleCovers(rule, list[lower]) then
+        cost = cost + 1
+        parts[#parts + 1] = "underlay"
+        break
+      end
+    end
+  end
+  if rule.missingCover then
+    cost = cost + 1
+    parts[#parts + 1] = "cover"
+  end
+  -- Single-debuff only, matching BuildRule's own gate.
+  if pandemicOn and #(rule.conditions or EMPTY) == 1 then
+    cost = cost + 1
+    parts[#parts + 1] = "flash"
+  end
+  return cost, parts
+end
+
+-- The whole profile against the budget. One call feeds /pt slots, the meter in
+-- the options window, and the per-rule cost badges, so the three can never
+-- disagree about what fits.
+function NS.SlotReport(healthBar)
+  local cfg = (NS.db and NS.db.tints) or EMPTY
+  local pandemicOn = (cfg.pandemic or EMPTY).enabled and true or false
+  local budget = NS.SlotBudget(healthBar)
+
+  local ordered, missing = {}, {}
+  for _, rule in ipairs(NS.GetOrderedRules and NS.GetOrderedRules() or EMPTY) do
+    if rule.showWhenMissing then missing[#missing + 1] = rule
+    else ordered[#ordered + 1] = rule end
+  end
+
+  local rules, used = {}, 0
+  for index, rule in ipairs(ordered) do
+    local cost, parts = NS.RuleSlotCost(rule, ordered, index, pandemicOn)
+    rules[#rules + 1] = { rule = rule, cost = cost, parts = parts }
+    used = used + cost
+  end
+
+  -- The missing ladder pays two sublevels per rank in occlusion mode (a wash
+  -- and its cover, which must be adjacent) and one in displacement.
+  local ladder = 0
+  for _, rule in ipairs(missing) do
+    if #(rule.conditions or EMPTY) == 1 and rule.barEnabled ~= false
+      and ladder < NS.MAX_MISSING_RULES then
+      ladder = ladder + 1
+    end
+  end
+  local missingCost = ladder * (MissingModeIsDisplace() and 1 or 2)
+
+  -- One slot per enabled threat state. The border module is not counted at
+  -- all: borders draw outside the bar and take nothing from this pool.
+  local threat = #(NS.GetOrderedThreatRules and NS.GetOrderedThreatRules() or EMPTY)
+  if threat > (NS.MAX_THREAT_RULES or 4) then threat = NS.MAX_THREAT_RULES or 4 end
+  local threatCost = threat
+
+  -- Target/focus is costed the same way and for the same reason: one slot per
+  -- enabled state on the bar, nothing for the border half.
+  local mark = #(NS.GetOrderedMarkRules and NS.GetOrderedMarkRules() or EMPTY)
+  if mark > (NS.MAX_MARK_RULES or 2) then mark = NS.MAX_MARK_RULES or 2 end
+  local markCost = mark
+
+  used = used + missingCost + threatCost + markCost
+
+  return {
+    budget = budget,
+    total = budget.total,
+    used = used,
+    free = math.max(0, budget.total - used),
+    over = used > budget.total,
+    rules = rules,
+    missingRules = ladder,
+    missingCost = missingCost,
+    threatRules = threat,
+    threatCost = threatCost,
+    markRules = mark,
+    markCost = markCost,
+    pandemic = pandemicOn,
+  }
 end

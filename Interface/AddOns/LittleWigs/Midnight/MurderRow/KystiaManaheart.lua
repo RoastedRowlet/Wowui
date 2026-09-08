@@ -6,10 +6,6 @@ local mod, CL = BigWigs:NewBoss("Kystia Manaheart", 2813, 2679)
 if not mod then return end
 mod:SetEncounterID(3101)
 mod:SetRespawnTime(30)
-mod:SetAuraData({
-	{1228198, soundOnApplied = "alert"}, -- Corroding Spittle
-	{1253813}, -- Fel Spray
-})
 
 --------------------------------------------------------------------------------
 -- Locals
@@ -31,6 +27,15 @@ mod:SetRenames({
 	[1264095] = {1264095}, -- Mirror Images
 	[474240] = {474240},   -- Fel Nova
 	[1230304] = {1230304}, -- Light Infusion
+})
+
+--------------------------------------------------------------------------------
+-- Auras
+--
+
+mod:SetAuraData({
+	{1228198, duration = 30, dispel = "magic", soundOnApplied = "alert", note = CL.debuffPossibleAfterCastNote:format(mod:SpellName(1228198))}, -- Corroding Spittle
+	{1253813, soundOnApplied = "underyou", note = CL.debuffFailureMoveFromCastNote:format(mod:SpellName(1253811))}, -- Fel Spray
 })
 
 --------------------------------------------------------------------------------

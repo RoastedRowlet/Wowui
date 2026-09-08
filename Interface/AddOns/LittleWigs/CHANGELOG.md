@@ -1,38 +1,29 @@
 # LittleWigs
 
-## [v12.1.12](https://github.com/BigWigsMods/LittleWigs/tree/v12.1.12) (2026-08-29)
-[Full Changelog](https://github.com/BigWigsMods/LittleWigs/compare/v12.1.11...v12.1.12) [Previous Releases](https://github.com/BigWigsMods/LittleWigs/releases)
+## [v12.1.13](https://github.com/BigWigsMods/LittleWigs/tree/v12.1.13) (2026-09-06)
+[Full Changelog](https://github.com/BigWigsMods/LittleWigs/compare/v12.1.12...v12.1.13) [Previous Releases](https://github.com/BigWigsMods/LittleWigs/releases)
 
-- Midnight/MurderRow/XathuuxTheAnnihilator: Fix Demonic Rage castbar text  
-- Dragonflight/RubyLifePools: Reorder headers  
-- Midnight/WindrunnerSpire: Update aura data  
-- Midnight/NexusPointXenas: Update aura data  
-- Midnight/MaisaraCaverns: Update aura data  
-- Midnight/MagistersTerrace: Update aura data  
-- BfA/KingsRest/Dazar: Update aura data  
-- BfA/KingsRest/Council: Update aura data  
-- BfA/KingsRest/Mchimba: Update aura data  
-- BfA/KingsRest/GoldenSerpent: Update aura data  
-- BfA/TempleOfSethraliss/Trash: Add sound for Hex Muck  
-- BfA/TempleOfSethraliss/Trash: Update aura data  
-- BfA/TempleOfSethraliss/Avatar: Update aura data  
-- BfA/TempleOfSethraliss/Galvazzt: Update aura data  
-- BfA/TempleOfSethraliss/Merektha: Update aura data  
-- BfA/TempleOfSethraliss/AdderisAspix: Storm Blessed  
-- BfA/TempleOfSethraliss/AdderisAspix: Reorder headers  
-- Midnight/Delves/VenomfallDeeps/Aztarec: Reorder headers  
-- Midnight/Delves/TormentsRise/Nullaeus: Update aura data  
-- Midnight/Delves/Trash: Tweak  
-- WotLK/PitOfSaron: Update aura data  
-- WoD/Skyreach: Update aura data  
-- Legion/SeatOfTheTriumvirate: Update aura data  
-- Dragonflight/AlgetharAcademy: Update aura data  
-- Midnight/DenOfNalorakk/SentinelOfWinter: Update aura notes  
-- Midnight/DenOfNalorakk/Trash: Update aura data  
-- Midnight/DenOfNalorakk/Nalorakk: Update aura data  
-- Midnight/DenOfNalorakk/TheHoardmonger: Reorder headers  
-- Midnight/DenOfNalorakk/SentinelOfWinter: Update aura data  
-- Midnight/DenOfNalorakk/TheHoardmonger: Update aura data  
-- Midnight/DenOfNalorakk/Trash: Harsh Winds  
-- Fix locale load order for Classic in packaged releases  
-- Fix locale load for old expansions in packaged releases  
+- BfA/KingsRest/Trash: Fix Suppresion Slam aura info  
+- Midnight/MurderRow/KystiaManaheart: Add default sound for Fel Spray  
+- Midnight/MurderRow/Trash: Update aura data  
+- Midnight/TheBlindingVale/Trash: Update aura data  
+- Midnight/VoidscarArena/Trash: Update aura data  
+- Midnight/AltarOfFangs/Trash: Update aura data  
+- Midnight/VoidscarArena/Atroxus: Fix note  
+- Midnight/VoidscarArena/Charonus: Update aura data  
+- Midnight/VoidscarArena/Atroxus: Update aura notes  
+- Midnight/VoidscarArena/TazRah: Update aura data  
+- Midnight/TheBlindingVale/LightblossomTrinity: Update aura data  
+- Midnight/TheBlindingVale/IkuzzTheLightHunter: Update aura data  
+- Midnight/TheBlindingVale/LightwardenRuia: Update aura data  
+- Midnight/TheBlindingVale/Ziekket: Update aura data  
+- Midnight/MurderRow/LithielCinderfury: Update aura data  
+- Midnight/MurderRow/XathuuxTheAnnihilator: Update aura data  
+- Midnight/MurderRow/ZaenBladesorrow: Update aura data  
+- Midnight/MurderRow/KystiaManaheart: Update aura data  
+- Midnight/AltarOfFangs/Zuljan: Update aura data  
+- Midnight/AltarOfFangs/TheWrithingCoil: Update aura data  
+- Midnight/AltarOfFangs/Ravi: Update aura data  
+- BfA/KingsRest/Trash: Update aura data  
+- Dragonflight/RubyLifePools/Trash: Update aura data  
+- Midnight/Trash: Set menu sort order  

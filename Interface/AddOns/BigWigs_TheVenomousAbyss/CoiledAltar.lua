@@ -85,24 +85,24 @@ end
 --
 
 mod:SetRenames({
-	["stages"] = {CL.stage:format(1), CL.stage:format(2), CL.stage:format(3), CL.intermission, original = false}, -- stages
+	["stages"] = {CL.intermission, CL.stage:format(2), CL.stage:format(3), CL.intermission_over, original = false}, -- stages
 	[1282487] = {CL.pools}, -- Fangs of the Coiled Altar
 	[1299960] = {CL.orbs}, -- Toxic Deluge
 	[1283489] = {1283489}, -- Guillotine
-	[1299680] = {CL.tank_frontal}, -- Sever
+	[1299680] = {CL.tank_frontal, CL.you:format(CL.frontal), original = {1299680, CL.you:format(mod:SpellName(1299680))}, notes = {CL.generalNote, CL.messageOnYouNote}}, -- Sever
 	[1282281] = {1282281}, -- Venomfang
 	[1283832] = {1283832}, -- Axegrinder
 
-	[1289900] = {1289900, CL.you:format(mod:SpellName(1289900)), notes = {CL.generalNote, CL.messageOnYouNote}}, -- Dreadmarch
-	[1285911] = {CL.you:format(mod:SpellName(41294)), original = CL.you:format(mod:SpellName(1285911))}, -- Unnerving Fixation (Fixate)
-	[1286573] = {CL.tank_frontal}, -- Soul Sever
+	[1289900] = {1289900, CL.you:format(mod:SpellName(1289900)), original = {1285911, CL.you:format(mod:SpellName(1285911))}, notes = {CL.generalNote, CL.messageOnYouNote}}, -- Dreadmarch
+	[1285911] = {CL.you:format(CL.fixate), original = CL.you:format(mod:SpellName(1285911)), notes = CL.messageOnYouNote}, -- Unnerving Fixation
+	[1286573] = {CL.tank_frontal, CL.you:format(CL.frontal), original = {1286573, CL.you:format(mod:SpellName(1286573))}, notes = {CL.generalNote, CL.messageOnYouNote}}, -- Soul Sever
 	[1286918] = {1286918}, -- Eternal Nightfall
 	[1286441] = {CL.adds, CL.add, notes = {CL.mythicOnlyNote, CL.otherDifficultiesNote}}, -- Spiritcackle
 	[1286895] = {1286895, CL.you:format(mod:SpellName(1286895)), notes = {CL.generalNote, CL.messageOnYouNote}}, -- Gloombomb
 
 	[1298381] = {CL.pools}, -- Defilement of the Coiled Altar
 	[1299266] = {1283489}, -- Grim Guillotine (Guillotine)
-	[1307279] = {CL.tank_frontal}, -- Blighted Sever
+	[1307279] = {CL.tank_frontal, CL.you:format(CL.frontal), original = {1307279, CL.you:format(mod:SpellName(1307279))}, notes = {CL.generalNote, CL.messageOnYouNote}}, -- Blighted Sever
 })
 
 --------------------------------------------------------------------------------
@@ -113,35 +113,35 @@ mod:SetAuraData({
 	-- important
 	{1282419, soundOnApplied = "warning", duration = 5, header = CL.important}, -- Volatile Venom
 	{1310498, soundOnApplied = "warning", duration = 5, mythic = true}, -- Mutagenic Venom
-	{1283485, soundOnApplied = "warning", duration = 5, note = "Targeted"}, -- Guillotine
-	{1297435, soundOnApplied = "warning", duration = 6, note = "Targeted"}, -- Dreadmarch XXX not applied to players?
+	{1283485, soundOnApplied = "warning", duration = 5, note = CL.debuffTargetedNote:format(mod:SpellName(1283485))}, -- Guillotine
+	{1297435, soundOnApplied = "warning", duration = 6, note = CL.debuffTargetedNote:format(mod:SpellName(1297435))}, -- Dreadmarch XXX not applied to players?
 	{1285911, soundOnApplied = "warning", duration = 7}, -- Unnerving Fixation
 	{1310881, soundOnApplied = "warning", duration = 5}, -- Gloombomb
 	{1286837, soundOnApplied = "alarm", soundOnAppliedDose = "none", duration = 11}, -- Gravebound
-	{1299266, soundOnApplied = "warning", duration = 5, note = "Targeted"}, -- Grim Guillotine
+	{1299266, soundOnApplied = "warning", duration = 5, note = CL.debuffTargetedNote:format(mod:SpellName(1299266))}, -- Grim Guillotine
 	-- Zul'jan
-	{1283345, soundOnApplied = "none", soundOnAppliedDose = "none", note = "Tank stacks", header = mod:SpellName(-35063)}, -- Twinfang Toxin
+	{1283345, soundOnApplied = "none", soundOnAppliedDose = "none", note = CL.tank_debuff, header = mod:SpellName(-35063)}, -- Twinfang Toxin
 	{1283290, soundOnApplied = "none"}, -- Noxious Ground
-	{1299838, soundOnApplied = "none", soundOnAppliedDose = "none", note = "DoT"}, -- Venom Rupture
-	{1307425, soundOnApplied = "none", soundOnAppliedDose = "none", note = "Soaked"}, -- Guillotined
-	{1301690, soundOnApplied = "none", soundOnAppliedDose = "none", note = "Tank cone"}, -- Sever
-	{1306906, soundOnApplied = "none", duration = 14, note = "DoT"}, -- Venomfang
-	{1285017, soundOnApplied = "none", note = "DoT"}, -- Axegrinder
+	{1299838, soundOnApplied = "none", soundOnAppliedDose = "none"}, -- Venom Rupture
+	{1307425, soundOnApplied = "none", soundOnAppliedDose = "none", note = CL.debuffHitByCastNote:format(mod:SpellName(1283485))}, -- Guillotined
+	{1301690, soundOnApplied = "none", soundOnAppliedDose = "none", note = CL.debuffHitByCastNote:format(mod:SpellName(1301690))}, -- Sever
+	{1306906, soundOnApplied = "none", duration = 14}, -- Venomfang
+	{1285017, soundOnApplied = "none"}, -- Axegrinder
 	-- Malacrass
-	{1297445, soundOnApplied = "none", note = "Possessed", header = mod:SpellName(-35062)}, -- Dreadmarch
+	{1297445, soundOnApplied = "none", note = CL.mainDebuffNote, header = mod:SpellName(-35062)}, -- Dreadmarch
 	{1310744, soundOnApplied = "none", duration = 5, mythic = true}, -- Malevolent Resonance
-	{1307959, soundOnApplied = "none", soundOnAppliedDose = "none", note = "Tank cone"}, -- Soul Sever
+	{1307959, soundOnApplied = "none", soundOnAppliedDose = "none", note = CL.debuffHitByCastNote:format(mod:SpellName(1307959))}, -- Soul Sever
 	{1286918, soundOnApplied = "none", duration = 15}, -- Eternal Nightfall
 	{1286947, soundOnApplied = "none"}, -- Suffocating Darkness
-	{1286399, soundOnApplied = "alarm", duration = 5, note = "Kick fail"}, -- Wail of Terror
+	{1286399, soundOnApplied = "alarm", duration = 5, note = CL.debuffFailureInterruptNote:format(mod:SpellName(1286399))}, -- Wail of Terror
 	-- intermission
 	{1300665, soundOnApplied = "none", soundOnAppliedDose = "none", mythic = true, header = CL.intermission}, -- Spirit Erasure
 	-- p3
 	{1298594, soundOnApplied = "none", header = CL.stage:format(3)}, -- Defilement of the Coiled Altar
-	{1298795, soundOnApplied = "none", soundOnAppliedDose = "none", note = "Tank stacks"}, -- Corrupted Toxin
+	{1298795, soundOnApplied = "none", soundOnAppliedDose = "none", note = CL.tank_debuff}, -- Corrupted Toxin
 	{1298591, soundOnApplied = "none"}, -- Defiled Groound
-	{1307652, soundOnApplied = "none", soundOnAppliedDose = "none", note = "Soaked"}, -- Guillotined
-	{1307403, soundOnApplied = "none", soundOnAppliedDose = "none", note = "Tank cone"}, -- Blighted Sever
+	{1307652, soundOnApplied = "none", soundOnAppliedDose = "none", note = CL.debuffHitByCastNote:format(mod:SpellName(1299266))}, -- Guillotined
+	{1307403, soundOnApplied = "none", soundOnAppliedDose = "none", note = CL.debuffHitByCastNote:format(mod:SpellName(1307403))}, -- Blighted Sever
 })
 
 function mod:GetOptions()
@@ -257,16 +257,22 @@ end
 
 function mod:MythicTimeline(_, eventInfo)
 	if eventInfo.source ~= 0 or self:IsWiping() then return end
-	local barInfo
+	local barInfo = nil
 
 	local duration = eventInfo.duration
-	local rounded = self:RoundNumber(duration, 0)
+	local rounded = self:RoundNumber(self:RoundNumber(duration, 1), 0)
 
 	if warnStageThree then
 		warnStageThree = false
-		-- Starts with casting Defilement of the Coiled Altar
-		self:Message(1298381, "red")
-		self:PlaySound(1298381, "alarm")
+		if self:ShouldShowBars() then
+			self:StopBar(self:GetRename("stages", 3))
+
+			self:Message("stages", "cyan", self:GetRename("stages", 3), false)
+			self:PlaySound("stages", "long")
+
+			-- Starts with casting Defilement of the Coiled Altar
+			self:Message(1298381, "red")
+		end
 	end
 
 	local stage = self:GetStage()
@@ -294,6 +300,7 @@ function mod:MythicTimeline(_, eventInfo)
 		if rounded == 13 or rounded == 33 then
 			barInfo = self:Spiritcackle()
 		elseif rounded == 70 then
+			self:StopBar(self:GetRename("stages", 2))
 			barInfo = self:EternalNightfall()
 		elseif rounded == 6 then -- 5.5
 			barInfo = self:Dreadmarch(duration)
@@ -311,7 +318,47 @@ function mod:MythicTimeline(_, eventInfo)
 		end
 
 	elseif stage == 3 then
-		barInfo = nil -- no p3 timers
+		if rounded == 62 or rounded == 90 then
+			barInfo = self:Spiritcackle()
+		elseif rounded == 55 or rounded == 48 or rounded == 104 then
+			barInfo = self:Dreadmarch(duration)
+		elseif rounded == 24 or rounded == 44 or rounded == 63 then
+			barInfo = self:Gloombomb()
+		elseif rounded == 2 or rounded == 41 or rounded == 60 then
+			barInfo = self:ToxicDeluge()
+		elseif rounded == 32 or rounded == 31 or rounded == 33 or rounded == 37 then
+			barInfo = self:BlightedSever()
+		elseif rounded == 17 or rounded == 64 or rounded == 100 or rounded == 56 then
+			barInfo = self:GrimGuillotine()
+		elseif rounded == 102 or rounded == 101 then
+			barInfo = self:DefilementOfTheCoiledAltar()
+		elseif rounded == 38 then
+			durationEventCount[rounded] = (durationEventCount[rounded] or 0) + 1
+			local count = durationEventCount[rounded]
+			if count == 1 then
+				barInfo = self:EternalNightfall()
+			elseif count == 2 then
+				barInfo = self:Gloombomb()
+			end
+		elseif rounded == 58 then
+			durationEventCount[rounded] = (durationEventCount[rounded] or 0) + 1
+			local count = durationEventCount[rounded]
+			if count == 1 then
+				barInfo = self:DefilementOfTheCoiledAltar()
+			elseif count == 2 then
+				barInfo = self:ToxicDeluge()
+			end
+		elseif rounded == 97 then
+			durationEventCount[rounded] = (durationEventCount[rounded] or 0) + 1
+			local count = durationEventCount[rounded]
+			if count == 1 or count == 4 then
+				barInfo = self:EternalNightfall()
+			elseif count == 2 then
+				barInfo = self:Dreadmarch(duration)
+			elseif count == 3 then
+				barInfo = self:Spiritcackle()
+			end
+		end
 	end
 
 	self:HandleBar(barInfo, eventInfo)
@@ -319,16 +366,22 @@ end
 
 function mod:OtherTimeline(_, eventInfo)
 	if eventInfo.source ~= 0 or self:IsWiping() then return end
-	local barInfo
+	local barInfo = nil
 
 	local duration = eventInfo.duration
-	local rounded = self:RoundNumber(duration, 0)
+	local rounded = self:RoundNumber(self:RoundNumber(duration, 1), 0)
 
 	if warnStageThree then
 		warnStageThree = false
-		-- Starts with casting Defilement of the Coiled Altar
-		self:Message(1298381, "red")
-		self:PlaySound(1298381, "alarm")
+		if self:ShouldShowBars() then
+			self:StopBar(self:GetRename("stages", 3))
+
+			self:Message("stages", "cyan", self:GetRename("stages", 3), false)
+			self:PlaySound("stages", "long")
+
+			-- Starts with casting Defilement of the Coiled Altar
+			self:Message(1298381, "red")
+		end
 	end
 
 	local stage = self:GetStage()
@@ -357,6 +410,7 @@ function mod:OtherTimeline(_, eventInfo)
 			if rounded == 13 or rounded == 33 then
 				barInfo = self:Spiritcackle()
 			elseif rounded == 70 then
+				self:StopBar(self:GetRename("stages", 2))
 				barInfo = self:EternalNightfall()
 			elseif rounded == 6 then -- 5.5
 				barInfo = self:Dreadmarch(duration)
@@ -374,6 +428,7 @@ function mod:OtherTimeline(_, eventInfo)
 			end
 		else
 			if rounded == 70 then
+				self:StopBar(self:GetRename("stages", 2))
 				barInfo = self:EternalNightfall()
 			elseif rounded == 6 or rounded == 34 then -- 5.5
 				barInfo = self:Dreadmarch(duration)
@@ -493,7 +548,7 @@ function mod:ENCOUNTER_TIMELINE_EVENT_STATE_CHANGED(_, eventID)
 				self:StartPhaseTwo()
 			end
 			activeBars[eventID] = nil
-		end, 0)
+		end, 0.1)
 		return
 	end
 
@@ -546,7 +601,7 @@ end
 
 function mod:StartPhaseTwo()
 	-- Fangs was canceled early
-	if self:GetStage() == 1 then
+	if self:GetStage() == 1 and not self:IsWiping() then
 		self:StopBar(CL.count:format(self:GetRename(1299960), spellCount[1299960])) -- Toxic Deluge
 		self:StopBar(CL.count:format(self:GetRename(1283832), spellCount[1283832])) -- Axegrinder
 		self:StopBar(CL.count:format(self:GetRename(1282281), spellCount[1282281])) -- Venomfang
@@ -557,13 +612,17 @@ function mod:StartPhaseTwo()
 		self:SetStage(2)
 		self:ResetCounts()
 
-		self:Message("stages", "cyan", self:GetRename("stages", 2), false)
-		self:PlaySound("stages", "long")
+		if self:ShouldShowBars() then
+			self:Message("stages", "cyan", self:GetRename("stages", 2), false)
+			self:PlaySound("stages", "long")
+
+			self:CDBar("stages", 8, self:GetRename("stages", 2), "ability_warlock_shadowfurytga") -- Stage 2
+		end
 	end
 end
 
 function mod:StartIntermission()
-	if self:GetStage() == 2 then
+	if self:GetStage() == 2 and not self:IsWiping() then
 		self:UnregisterUnitEvent("UNIT_SPELLCAST_CHANNEL_START", "boss2")
 		self:StopBar(CL.count:format(self:GetRename(1286441, self:Mythic() and 1 or 2), spellCount[1286441]))
 		self:StopBar(CL.count:format(self:GetRename(1286918), spellCount[1286918]))
@@ -574,18 +633,25 @@ function mod:StartIntermission()
 		self:SetStage(2.5)
 		self:ResetCounts()
 
-		self:Message("stages", "cyan", self:GetRename("stages", 4), false) -- Intermission
-		self:PlaySound("stages", "long")
+		if self:ShouldShowBars() then
+			self:Message("stages", "cyan", self:GetRename("stages", 1), false) -- Intermission
+			self:PlaySound("stages", "long")
+
+			self:CDBar("stages", 40.5, self:GetRename("stages", 3), "spell_shadow_soulleech_1") -- Stage 3 39~41
+		end
 	end
 end
 
 function mod:UNIT_SPELLCAST_CHANNEL_STOP()
-	if self:GetStage() == 2.5 then -- Soulbinding
+	if self:GetStage() == 2.5 and not self:IsWiping() then -- Soulbinding
 		warnStageThree = true
 		self:SetStage(3)
+		self:ResetCounts()
 
-		self:Message("stages", "cyan", self:GetRename("stages", 3), false)
-		self:PlaySound("stages", "long")
+		if self:ShouldShowBars() then
+			self:Message("stages", "cyan", self:GetRename("stages", 4), false) -- Intermission over
+			self:PlaySound("stages", "info")
+		end
 	end
 end
 

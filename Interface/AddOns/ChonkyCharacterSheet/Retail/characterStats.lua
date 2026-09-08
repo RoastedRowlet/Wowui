@@ -251,7 +251,7 @@ end
 -- Modes: "slot_N" (N = 1-based index into priority_slots), "wowhead", or "none".
 -- Handles migration from legacy flat option keys, and per-spec storage.
 local function GetActiveMode()
-    if not CCS.CurrentProfile then return "none" end
+    if not CCS.CurrentProfile or UnitLevel("player") < 80 then return "none" end
 	if option("show_secondarypriority") then return "wowhead" end
 	
     -- One-time migration from legacy "mythic"/"raid" flat option keys → priority_slots array
@@ -427,7 +427,7 @@ local function GetSortedStats(classID, specID, heroID)
 
     -- update the cached lookup table using sorted RANK (position 1-4), not raw prio value
     for rank, statInfo in ipairs(stats) do
-        cachedPriorityLookup[statInfo.stat] = rank
+			cachedPriorityLookup[statInfo.stat] = rank
     end
 
     return stats
@@ -694,7 +694,7 @@ local function GetStatCrit(rowData)
 		isZero = (extraCritRating == 0)
 	end
 
-	if option("show_secondarypriority") == true then
+	if option("show_secondarypriority") == true and UnitLevel("player") >= CCS.HeroLevel then
 		leftText=prio.." "..ITEM_MOD_CRIT_RATING_SHORT
 	else
 		leftText=ITEM_MOD_CRIT_RATING_SHORT	
@@ -734,7 +734,7 @@ local function GetStatHaste(rowData)
 		isZero = (hasteRating == 0)
 	end
 
-	if option("show_secondarypriority") == true then
+	if option("show_secondarypriority") == true and UnitLevel("player") >= CCS.HeroLevel then
 		leftText=prio.." "..ITEM_MOD_HASTE_RATING_SHORT
 	else
 		leftText=ITEM_MOD_HASTE_RATING_SHORT	
@@ -773,7 +773,7 @@ local function GetStatMastery(rowData)
 		masteryBonus = GetCombatRatingBonus(CR_MASTERY) * bonusCoeff
 	end
 
-	if option("show_secondarypriority") == true then
+	if option("show_secondarypriority") == true and UnitLevel("player") >= CCS.HeroLevel then
 		leftText=prio.." "..ITEM_MOD_MASTERY_RATING_SHORT
 	else
 		leftText=ITEM_MOD_MASTERY_RATING_SHORT	
@@ -823,8 +823,7 @@ local function GetStatVersatility(rowData)
 		versatilityDamageTakenReduction = GetCombatRatingBonus(CR_VERSATILITY_DAMAGE_TAKEN) + GetVersatilityBonus(CR_VERSATILITY_DAMAGE_TAKEN)
 	end
 
-
-	if option("show_secondarypriority") == true then
+	if option("show_secondarypriority") == true and UnitLevel("player") >= CCS.HeroLevel then
 		leftText=prio.." "..STAT_VERSATILITY
 	else
 		leftText=STAT_VERSATILITY	
@@ -2055,7 +2054,7 @@ local function CreateHeaderRow(parent, frameName, section)
                         table.insert(enabledModes, "slot_" .. n)
                     end
                 end
-                if option("show_secondarypriority") then
+				if option("show_secondarypriority") == true and UnitLevel("player") >= CCS.HeroLevel then
                     table.insert(enabledModes, "wowhead")
                 end
 
@@ -2083,7 +2082,7 @@ local function CreateHeaderRow(parent, frameName, section)
             end)
         end
 		row.prioToggle:Hide()
-        if option("show_secondarypriority") == true then
+		if option("show_secondarypriority") == true and UnitLevel("player") >= CCS.HeroLevel then
 			row.prioToggle:Hide()
 		elseif numOptions > 1 then
             row.prioToggle:Show()

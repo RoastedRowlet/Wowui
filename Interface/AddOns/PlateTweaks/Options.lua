@@ -56,6 +56,47 @@ local preview = { active = {} }
 -- ticked-debuff set the previews use.
 function NS.PreviewActive() return preview.active end
 
+-- What the PREVIEW PLATE is pretending is true, for the two modules that have
+-- no debuff to tick.
+--
+-- Stage only. It paints the simulated plate at the top of the page and
+-- touches nothing on a real nameplate -- previewing a colour is a question
+-- about what it looks like, not a reason to repaint the pull you are standing
+-- in. Session-only too: never written to the profile.
+--
+-- One key each, not a set. Two threat states cannot both be true on a mob and
+-- a unit cannot be both your target and your focus at once, so a dropdown is
+-- the honest control -- picking one clears the other by construction.
+NS.stagePreview = { threat = nil, mark = nil }
+
+-- The entry a previewed key names, for one half. nil when nothing is picked,
+-- or when the state it names is switched off -- a preview of something that
+-- would not draw is a lie about the profile.
+function NS.StagePreviewThreat(kind)
+  local key = NS.stagePreview.threat
+  if not key or not NS.ThreatModule then return nil end
+  local entry = NS.ThreatModule(kind).states[key]
+  if entry and entry.enabled ~= false then return entry end
+end
+
+function NS.StagePreviewMark(kind)
+  local key = NS.stagePreview.mark
+  if not key or not NS.MarkModule then return nil end
+  local entry = NS.MarkModule(kind).states[key]
+  if not entry then return nil end
+  if entry.enabled ~= false then return entry end
+  -- A half that is off previews only when the state is off ENTIRELY.
+  --
+  -- With one half on, the switches are a real answer and the preview should
+  -- honour them -- otherwise a border you deliberately turned off comes back
+  -- on the preview and the two disagree. With both off there is no answer to
+  -- honour, and refusing to draw is how focus became invisible in a control
+  -- whose whole purpose is showing you what it would look like.
+  local other = NS.MarkModule(kind == "border" and "bar" or "border").states[key]
+  if other and other.enabled ~= false then return nil end
+  return entry
+end
+
 local ROW_H = 26
 local STAGE_H = 92
 
@@ -67,6 +108,129 @@ local CTRL_H = 20
 local CTRL_BOX_W = 20
 local CTRL_EDGE = 1
 
+-- Every border in this window, drawn on the physical pixel grid.
+--
+-- This is the fix for borders and tick boxes whose sides are visibly
+-- different weights -- one edge fat, the opposite one thin or missing. The
+-- cause is Backdrop: `edgeSize = 1` is one UI UNIT, and at any UI scale that
+-- is not 1.0 (the default at most resolutions is not) a unit is a fractional
+-- number of screen pixels. The GPU then resolves each of the four edges
+-- against a different subpixel position, so one rounds up to two pixels and
+-- another rounds down to nearly nothing. No amount of tuning edgeSize fixes
+-- it, because the number is not the problem -- the units are.
+--
+-- So the edges stop being a backdrop and become four textures placed through
+-- PixelUtil, which converts a size in UI units to the nearest WHOLE number of
+-- physical pixels for the frame's own effective scale. Same treatment
+-- NS.BuildOutline already gives the plate border and NS.FlexRule gives the
+-- hairlines; this brings the window's controls onto it too.
+--
+-- SetBackdropBorderColor is overridden on the frame rather than replaced at
+-- the call sites: every widget here already paints its border by calling it,
+-- hover states included, and those calls keep working untouched.
+local function PixelBorder(frame, thickness)
+  if not frame or frame.ptEdges then return frame end
+  local edges = {}
+  for index = 1, 4 do
+    edges[index] = frame:CreateTexture(nil, "OVERLAY", nil, 7)
+    edges[index]:SetColorTexture(0.36, 0.36, 0.42, 1)
+  end
+  frame.ptEdges = edges
+  frame.ptEdgeThickness = thickness or CTRL_EDGE
+
+  local function Apply()
+    local size = frame.ptEdgeThickness
+    local scale = frame.GetEffectiveScale and frame:GetEffectiveScale() or 1
+    if PixelUtil and PixelUtil.GetNearestPixelSize then
+      local ok, snapped = pcall(PixelUtil.GetNearestPixelSize, size, scale, size)
+      if ok and snapped and snapped > 0 then size = snapped end
+    end
+    local SetPoint = (PixelUtil and PixelUtil.SetPoint)
+      or function(region, ...) region:SetPoint(...) end
+    for _, edge in ipairs(edges) do edge:ClearAllPoints() end
+    -- Top and bottom run the full width; the sides run the full height, so the
+    -- corners are painted twice in one colour rather than left as notches.
+    SetPoint(edges[1], "TOPLEFT", frame, "TOPLEFT", 0, 0)
+    SetPoint(edges[1], "TOPRIGHT", frame, "TOPRIGHT", 0, 0)
+    edges[1]:SetHeight(size)
+    SetPoint(edges[2], "BOTTOMLEFT", frame, "BOTTOMLEFT", 0, 0)
+    SetPoint(edges[2], "BOTTOMRIGHT", frame, "BOTTOMRIGHT", 0, 0)
+    edges[2]:SetHeight(size)
+    SetPoint(edges[3], "TOPLEFT", frame, "TOPLEFT", 0, 0)
+    SetPoint(edges[3], "BOTTOMLEFT", frame, "BOTTOMLEFT", 0, 0)
+    edges[3]:SetWidth(size)
+    SetPoint(edges[4], "TOPRIGHT", frame, "TOPRIGHT", 0, 0)
+    SetPoint(edges[4], "BOTTOMRIGHT", frame, "BOTTOMRIGHT", 0, 0)
+    edges[4]:SetWidth(size)
+  end
+  frame.ptApplyEdges = Apply
+  Apply()
+  -- Effective scale follows the parent chain, and a control is often parented
+  -- and sized after it is built, so the snap is redone when either could have
+  -- changed rather than once at creation.
+  if frame.HookScript then
+    frame:HookScript("OnShow", Apply)
+    frame:HookScript("OnSizeChanged", Apply)
+  end
+
+  function frame:SetBackdropBorderColor(r, g, b, a)
+    for _, edge in ipairs(edges) do edge:SetColorTexture(r, g, b, a or 1) end
+  end
+  function frame:SetEdgeThickness(value)
+    frame.ptEdgeThickness = value
+    Apply()
+  end
+  function frame:SetEdgeShown(shown)
+    for _, edge in ipairs(edges) do edge:SetShown(shown and true or false) end
+  end
+  return frame
+end
+NS.PixelBorder = PixelBorder
+
+-- The inside of a small square control -- a tick box's fill, a swatch's
+-- colour -- centred and sized, rather than pinned by four separate insets.
+--
+-- Four insets is why the ticked boxes looked lopsided. `TOPLEFT, 3, -3` and
+-- `BOTTOMRIGHT, -3, 3` are four independent offsets in UI units, and at a
+-- fractional UI scale each one rounds to physical pixels on its own -- so the
+-- gap above the fill could land on 2 pixels while the gap below it landed on
+-- 3, in a box 20 units across. One centred texture cannot disagree with
+-- itself: the padding is the same measurement on both sides by construction,
+-- whatever the scale does to it.
+--
+-- Re-applied on size change because the frame is laid out by Flex after it is
+-- built, so the size it has at creation is not the size it keeps.
+local function PixelFill(frame, tex, inset)
+  local function Apply()
+    local w = frame:GetWidth() or 0
+    local h = frame:GetHeight() or 0
+    if w <= 0 or h <= 0 then return end
+    local pad = (inset or 3) * 2
+    tex:ClearAllPoints()
+    tex:SetPoint("CENTER")
+    tex:SetSize(math.max(1, w - pad), math.max(1, h - pad))
+  end
+  if frame.HookScript then
+    frame:HookScript("OnShow", Apply)
+    frame:HookScript("OnSizeChanged", Apply)
+  end
+  Apply()
+  return tex
+end
+
+-- One hairline, in whole physical pixels, for the places that draw a single
+-- line rather than a box: the selection outline on an open row, the table's
+-- column separators, the dotted empty chip.
+function NS.PixelWeight(region, size)
+  size = size or 1
+  local scale = region and region.GetEffectiveScale and region:GetEffectiveScale() or 1
+  if PixelUtil and PixelUtil.GetNearestPixelSize then
+    local ok, snapped = pcall(PixelUtil.GetNearestPixelSize, size, scale, size)
+    if ok and snapped and snapped > 0 then return snapped end
+  end
+  return size
+end
+
 -- Section metrics in one place. These were spelled out as bare numbers in
 -- CollapsibleSection and again in LayoutSections, so "too much white space"
 -- was two edits that had to agree.
@@ -74,6 +238,159 @@ local SECTION_HEAD_H = 30 -- header bar plus the 1px the backdrop insets it
 local SECTION_PAD    = 6  -- under the content, inside the border
 local SECTION_GAP    = 8  -- between stacked sections
 local SECTION_INSET  = 6  -- left/right, from the body's edge
+
+-------------------------------------------------------------------------------
+-- Layout spec
+--
+-- EVERY number that positions or sizes something on a Flex-laid page lives
+-- here. Not "most of them": a single literal offset left in a row is a column
+-- that can drift out from under its heading, and drift is invisible until a
+-- screenshot shows a label sitting on a button.
+--
+-- On NS rather than as file-locals because this file is a handful of locals
+-- under Lua's 200-per-chunk ceiling, and because dev/test_flex_layout.lua
+-- reads the same table -- a test that hardcoded its own copy of these numbers
+-- would pass while the window was wrong.
+--
+--   ROW_INSET   left and right edge every row, header and divider starts at
+--   NOTE_INSET  explanatory text, indented PAST the row edge so it reads as
+--               commentary on the list rather than another entry in it
+--   COL_GAP     between columns, everywhere
+--   ROW_H       one list row; the same height for every row on every page
+--   HEAD_H      the column-heading strip above a list
+--   CTRL_ROW_H  a row of controls that is not a list row (role, thickness)
+--   DIVIDER     hairline rules; drawn through PixelUtil, see FlexRule
+--   CHIP_W/H    a colour chip in a Bar or Border column
+--   BOX         a tick box, and therefore the width of a tick column's control
+-------------------------------------------------------------------------------
+NS.UI = {
+  ROW_INSET  = 12,
+  NOTE_INSET = 26,
+  COL_GAP    = 8,
+  ROW_H      = ROW_H,
+  HEAD_H     = 18,
+  CTRL_ROW_H = 22,
+  DIVIDER    = 1,
+  -- The outline around the row whose editor is open. Two pixels, not one: it
+  -- has to read as a box drawn AROUND something at a glance, and at one pixel
+  -- it was the same weight as the table's own hairlines.
+  SELECT_EDGE = 2,
+  CHIP_W     = 30,
+  CHIP_H     = 14,
+  BOX        = CTRL_BOX_W,
+  GRIP       = 14,   -- the drag handle's own texture
+
+  -- Vertical rhythm. Three gaps, by what they separate, so "tighten the rows"
+  -- and "tighten the blocks" are different edits.
+  ROW_GAP    = 2,    -- between rows of one list
+  GROUP_GAP  = 6,    -- between blocks inside a section
+  FIELD_GAP  = 4,    -- between the lines of one block
+  PAD_TOP    = 8,    -- inside a section, above its first block
+  PAD_BOTTOM = 10,   -- and below its last
+
+  -- Control widths. A dropdown's width is a layout decision (it sets the
+  -- column everything after it starts at), not a property of the dropdown.
+  DROP_W     = 200,
+  DROP_SM_W  = 96,
+  SLIDER_W   = 150,
+  -- Short, because it shares its line with a label and a swatch rather than
+  -- owning the row the way Thickness and Gap do.
+  SLIDER_SM  = 96,
+
+  -- The one-rule preview bar. Roughly a nameplate at 2x, which is the
+  -- smallest size a tiled pattern is honest at.
+  PREVIEW_W  = 300,
+  PREVIEW_H  = 28,
+
+  -- Label columns. A field's label gets a column so several rows start their
+  -- controls on one line down the panel, instead of each label's own width.
+  -- Four sizes because the words differ: "Color" against "Show on target".
+  LABEL_W    = 56,
+  LABEL_MD   = 70,
+  LABEL_SM   = 60,
+  LABEL_XS   = 50,
+  LABEL_TINY = 40,
+  LABEL_LG   = 110,
+
+  -- Narrowest the style panel is laid out at before its own rows start
+  -- wrapping their labels away.
+  PANEL_MIN_W = 260,
+
+  -- The threat row's chip strip: three states, side by side, inside one
+  -- column. Three of these plus two CHIP_GAPs must equal RULE_COLS.bar, which
+  -- dev/test_alignment.lua asserts rather than trusting the arithmetic in this
+  -- comment -- it was wrong the first time it was written here.
+  -- SQUARE, by construction: a state chip is the same measurement both ways,
+  -- so the strip reads as a row of swatches rather than as three short bars.
+  -- Derived from CHIP_H rather than written down again, which is what let the
+  -- two drift to 12x15 in the first place.
+  STRIP_CHIP = 14,
+
+  -- The rule editor's blocks: one per half, plus the rule's own conditions.
+  BLOCK_MIN_W = 210,
+  BLOCK_PAD   = 8,
+  SWATCH_GRID = 30,   -- one fill in the pattern picker
+  PILL_H      = 20,   -- a debuff in the rule's own list
+  PILL_ICON   = 16,
+  PILL_PAD    = 4,
+  CLOSE_X     = 16,   -- the remove control on a pill
+  CHIP_GAP    = 4,    -- between swatches in that grid
+
+  -- The dotted outline on a half that paints nothing: dash length, then the
+  -- hole after it. Both in pixels, along every edge of the chip.
+  CHIP_DASH     = 3,
+  CHIP_DASH_GAP = 3,
+
+  -- The resolution ladder: a rank column, then a stripe saying which band
+  -- this is, then the band's name.
+  BAND_H     = 24,
+  BAND_RANK  = 18,
+  BAND_STRIPE = 3,
+  BAND_NAME  = 150,
+}
+
+-- Rule row columns, shared by the row and its header. One table, so a heading
+-- cannot end up over the wrong control -- which is what happened every time
+-- these were two lists of x offsets kept in step by hand.
+--
+-- A column is the space a control is CENTRED in, so it is at least as wide as
+-- the control: `on` and `del` are the tick box plus breathing room, `edit` is
+-- the button's own width.
+NS.RULE_COLS = {
+  -- Wide enough for the word "Order" over it. The grip itself is still
+  -- NS.UI.GRIP wide and centres in the column: the heading is the widest
+  -- thing here, and a column sized to the control forced the heading to be
+  -- abbreviated to "Ord".
+  grip   = 38,
+  -- The two halves a rule paints. Both are always present: a rule that draws
+  -- only its border is a rule with an empty bar cell, not a rule on another
+  -- page.
+  -- Wide enough for the threat row's three state chips, because that row is
+  -- in this table and its cells are these columns. Sized for the widest thing
+  -- a column holds, and every narrower thing centres in it -- which is what
+  -- stopped the strips from shouldering the headers out of line.
+  -- STRIP_CHIP * 3 + CHIP_GAP * 2, the threat strip's own width. Derived
+  -- rather than picked:
+  -- the column has to hold the widest thing in it, and that is the strip.
+  bar    = NS.UI.STRIP_CHIP * 3 + NS.UI.CHIP_GAP * 2,
+  border = NS.UI.STRIP_CHIP * 3 + NS.UI.CHIP_GAP * 2,
+  -- The Slots column holds one integer now, not "3 slots", so it needs the
+  -- width of its own heading and no more -- which is what pays for the wider
+  -- Order column and the square state chips without pushing the table's
+  -- minimum width past 460. dev/test_alignment.lua lays the table out at that
+  -- width and fails if the last column stops landing on the row inset.
+  cost   = 38,
+  edit   = 70,
+  del    = 24,
+  on     = 24,
+}
+
+-- Threat rows use the same vocabulary: a swatch column, then a tick column.
+NS.THREAT_COLS = {
+  swatch = NS.UI.CHIP_W,
+  strip  = NS.UI.CHIP_W,
+  on     = 30,
+}
 
 -- Theme -- every colour the window chrome uses. Edit and /reload to re-skin;
 -- nothing else in this file changes. {r,g,b} or {r,g,b,a}, 0-1. See
@@ -94,6 +411,24 @@ local THEME = {
   tabBorder     = { 0.26, 0.26, 0.31, 1 },     -- unselected tab border
   tabTextDim    = { 0.66, 0.66, 0.70 },        -- unselected tab label
 
+  divider       = { 0.40, 0.40, 0.45, 0.6 },   -- hairline rules inside a section
+  tableSep      = { 1, 1, 1, 0.06 },           -- vertical column separators in the rule table
+  -- The empty chip's dashes and its X are ONE mark, so they are one colour:
+  -- a bright outline around a dim cross read as two different statements
+  -- about the same chip.
+  chipCross     = { 1, 1, 1, 0.30 },           -- the dotted outline AND the X inside an empty chip
+  chipEdge      = { 0, 0, 0, 0.85 },           -- hairline around a chip that IS painting
+  selection     = { 0.79, 0.64, 0.15, 1 },     -- the row whose editor is open
+  bandThreat    = { 0.85, 0.20, 0.20, 1 },     -- resolution ladder, by band
+  bandMark      = { 0.30, 0.72, 0.95, 1 },     -- target/focus, between threat and your rules
+  bandRules     = { 1.00, 0.35, 0.75, 1 },
+  bandMissing   = { 0.42, 0.35, 0.84, 1 },
+  bandHost      = { 0.34, 0.34, 0.40, 1 },
+  blockBG       = { 1, 1, 1, 0.03 },           -- a half's block in the editor
+  blockBGOff    = { 0, 0, 0, 0.35 },           -- ...when that half is switched off
+  rowRecessed   = 0.18,                        -- alpha of the rows an open editor is not about
+  pageRecessed  = 0.15,                        -- ...and of every OTHER section on the page
+  blockEdge     = { 0.30, 0.30, 0.36, 1 },
   panelBG       = { 0.10, 0.10, 0.12, 0.6 },   -- collapsible section body
   panelBorder   = { 0.30, 0.30, 0.34, 1 },
   headerBG      = { 0.17, 0.17, 0.20, 0.9 },   -- section header bar
@@ -453,10 +788,8 @@ end
 local function Button(parent, text, width, onClick)
   local b = CreateFrame("Button", nil, parent, "BackdropTemplate")
   b:SetSize(width, CTRL_H)
-  b:SetBackdrop({
-    bgFile = "Interface\\Buttons\\WHITE8X8",
-    edgeFile = "Interface\\Buttons\\WHITE8X8", edgeSize = CTRL_EDGE,
-  })
+  b:SetBackdrop({ bgFile = "Interface\\Buttons\\WHITE8X8" })
+  PixelBorder(b)
 
   local function Paint(bg, edge)
     b:SetBackdropColor(bg[1], bg[2], bg[3], bg[4])
@@ -500,16 +833,13 @@ end
 local function Checkbox(parent, getValue, setValue)
   local c = CreateFrame("Button", nil, parent, "BackdropTemplate")
   c:SetSize(CTRL_BOX_W, CTRL_H)
-  c:SetBackdrop({
-    bgFile = "Interface\\Buttons\\WHITE8X8",
-    edgeFile = "Interface\\Buttons\\WHITE8X8", edgeSize = CTRL_EDGE,
-  })
+  c:SetBackdrop({ bgFile = "Interface\\Buttons\\WHITE8X8" })
+  PixelBorder(c)
   c:SetBackdropColor(0.12, 0.12, 0.15, 1)
 
   c.fill = c:CreateTexture(nil, "OVERLAY")
-  c.fill:SetPoint("TOPLEFT", 3, -3)
-  c.fill:SetPoint("BOTTOMRIGHT", -3, 3)
   c.fill:SetColorTexture(RGBA(THEME.accent))
+  PixelFill(c, c.fill, 3)
 
   local checked = false
   local function Paint(hover)
@@ -557,10 +887,8 @@ end
 local function ToggleSwitch(parent, getValue, setValue)
   local t = CreateFrame("Button", nil, parent, "BackdropTemplate")
   t:SetSize(26, 13)
-  t:SetBackdrop({
-    bgFile = "Interface\\Buttons\\WHITE8X8",
-    edgeFile = "Interface\\Buttons\\WHITE8X8", edgeSize = CTRL_EDGE,
-  })
+  t:SetBackdrop({ bgFile = "Interface\\Buttons\\WHITE8X8" })
+  PixelBorder(t)
 
   t.knob = t:CreateTexture(nil, "OVERLAY")
   t.knob:SetSize(9, 9)
@@ -614,10 +942,8 @@ local function CloseX(parent, onClick, size)
   local b = CreateFrame("Button", nil, parent, "BackdropTemplate")
   size = size or CTRL_H
   b:SetSize(size, size)
-  b:SetBackdrop({
-    bgFile = "Interface\\Buttons\\WHITE8X8",
-    edgeFile = "Interface\\Buttons\\WHITE8X8", edgeSize = CTRL_EDGE,
-  })
+  b:SetBackdrop({ bgFile = "Interface\\Buttons\\WHITE8X8" })
+  PixelBorder(b)
 
   b.glyph = b:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   b.glyph:SetPoint("CENTER", 0, 0)
@@ -654,22 +980,18 @@ end
 local function ColorSwatch(parent, getColor, setColor)
   local s = CreateFrame("Button", nil, parent, "BackdropTemplate")
   s:SetSize(CTRL_BOX_W, CTRL_H)
-  s:SetBackdrop({
-    bgFile = "Interface\\Buttons\\WHITE8X8",
-    edgeFile = "Interface\\Buttons\\WHITE8X8", edgeSize = CTRL_EDGE,
-  })
+  s:SetBackdrop({ bgFile = "Interface\\Buttons\\WHITE8X8" })
+  PixelBorder(s)
   s:SetBackdropColor(0.12, 0.12, 0.15, 1)
 
   -- Behind the colour, so a low alpha reads as translucency against a known
   -- mid grey instead of as a darker shade of the colour itself.
   s.backing = s:CreateTexture(nil, "ARTWORK")
-  s.backing:SetPoint("TOPLEFT", 3, -3)
-  s.backing:SetPoint("BOTTOMRIGHT", -3, 3)
   s.backing:SetColorTexture(0.30, 0.30, 0.33, 1)
+  PixelFill(s, s.backing, 3)
 
   s.Color = s:CreateTexture(nil, "OVERLAY")
-  s.Color:SetPoint("TOPLEFT", 3, -3)
-  s.Color:SetPoint("BOTTOMRIGHT", -3, 3)
+  PixelFill(s, s.Color, 3)
 
   local hovered = false
   local function refresh()
@@ -683,33 +1005,20 @@ local function ColorSwatch(parent, getColor, setColor)
   s:SetScript("OnLeave", function() hovered = false; refresh() end)
 
   s:SetScript("OnClick", function()
-    local c = getColor()
-    -- Alpha is the fragile part. GetColorAlpha has returned nil on some
-    -- builds, and a nil or zero alpha paints every tint fully transparent —
-    -- which reads as "the coloring randomly stopped working", including in
-    -- the preview, with no error anywhere because nothing actually threw.
-    local previousAlpha = c.a or 1
-    -- These callbacks run on every frame of a drag, so anything that prints
-    -- from in here floods the chat frame. The missing-alpha case is still
-    -- handled, just silently: falling back to the previous alpha is the right
-    -- behaviour whether or not anyone is told about it.
-    local function apply()
-      local r, g, b = ColorPickerFrame:GetColorRGB()
-      local a = ColorPickerFrame.GetColorAlpha and ColorPickerFrame:GetColorAlpha()
-      if type(a) ~= "number" then a = previousAlpha end
+    -- Ours, not Blizzard's. See ColorPicker.lua: opacity as a 0-100 number
+    -- rather than an unlabelled slider, live writes through this swatch's own
+    -- setter, and every fill on the page repainted as you drag -- including
+    -- the pattern chips, which the game's picker has no way to know about.
+    NS.OpenColorPicker(s, getColor(), function(r, g, b, a)
       setColor(r, g, b, a)
       refresh()
-    end
-    ColorPickerFrame:SetupColorPickerAndShow({
-      r = c.r, g = c.g, b = c.b, opacity = c.a or 1, hasOpacity = true,
-      swatchFunc = apply, opacityFunc = apply,
-      cancelFunc = function(prev)
-        setColor(prev.r, prev.g, prev.b, prev.opacity or 1)
-        refresh()
-      end,
-    })
+    end, { hasAlpha = s.hasAlpha ~= false })
   end)
   s.Refresh = refresh
+  -- Repainted while another swatch is being dragged: a rule's colour appears
+  -- in several places at once, and only one of them is the control under the
+  -- cursor.
+  NS.RegisterLiveSwatch(refresh)
   refresh()
   return s
 end
@@ -738,13 +1047,19 @@ local function CloseOpenMenu()
   end
 end
 
-local function Dropdown(parent, width, entries, getValue, setValue)
+-- `opts.multi` turns this into a multi-select: rows toggle instead of
+-- choosing, the list stays open, and the closed control shows a summary
+-- rather than one entry. `opts.isChecked(value)`, `opts.onToggle(value)` and
+-- `opts.summary()` are then required; getValue/setValue are unused.
+--
+-- One widget rather than a second one: a menu that scrolls, tooltips, the
+-- click-outside blocker and the pixel border are all here already, and a
+-- parallel implementation is a parallel set of bugs.
+local function Dropdown(parent, width, entries, getValue, setValue, opts)
   local d = CreateFrame("Button", nil, parent, "BackdropTemplate")
   d:SetSize(width, CTRL_H)
-  d:SetBackdrop({
-    bgFile = "Interface\\Buttons\\WHITE8X8",
-    edgeFile = "Interface\\Buttons\\WHITE8X8", edgeSize = CTRL_EDGE,
-  })
+  d:SetBackdrop({ bgFile = "Interface\\Buttons\\WHITE8X8" })
+  PixelBorder(d)
   d:SetBackdropColor(0.14, 0.14, 0.17, 1)
   d:SetBackdropBorderColor(0.36, 0.36, 0.42, 1)
 
@@ -773,10 +1088,8 @@ local function Dropdown(parent, width, entries, getValue, setValue)
   -- The list lives on UIParent so it is never clipped by a scroll frame.
   local menu = CreateFrame("Frame", nil, UIParent, "BackdropTemplate")
   menu:SetFrameStrata("FULLSCREEN_DIALOG")
-  menu:SetBackdrop({
-    bgFile = "Interface\\Buttons\\WHITE8X8",
-    edgeFile = "Interface\\Buttons\\WHITE8X8", edgeSize = CTRL_EDGE,
-  })
+  menu:SetBackdrop({ bgFile = "Interface\\Buttons\\WHITE8X8" })
+  PixelBorder(menu)
   menu:SetBackdropColor(0.10, 0.10, 0.12, 0.98)
   menu:SetBackdropBorderColor(0.42, 0.42, 0.50, 1)
   menu:EnableMouse(true)
@@ -952,6 +1265,14 @@ local function Dropdown(parent, width, entries, getValue, setValue)
         end)
         row:SetScript("OnClick", function(self)
           if self.isTitle then return end
+          if opts and opts.multi then
+            -- Stays open: picking three zones out of eleven through a menu
+            -- that shuts on every click is the thing multi-select is for.
+            opts.onToggle(self.value)
+            d.Refresh()
+            menu.Render()
+            return
+          end
           CloseOpenMenu()
           setValue(self.value)
           d.Refresh()
@@ -968,9 +1289,19 @@ local function Dropdown(parent, width, entries, getValue, setValue)
         row.value = entry.value
         row.isTitle = entry.isTitle
         row.text:SetText(entry.text)
+        local picked
+        if opts and opts.multi then
+          picked = opts.isChecked(entry.value)
+          -- A tick in the text, not a texture: the row is pooled between a
+          -- multi-select and an ordinary list, and a stray checkbox left
+          -- showing on a single-choice menu is worse than a character.
+          row.text:SetText((picked and "|cff77dd77x|r  " or "     ") .. entry.text)
+        else
+          picked = getValue() == entry.value
+        end
         if entry.isTitle then
           row.text:SetTextColor(RGBA(THEME.headerText))
-        elseif getValue() == entry.value then
+        elseif picked then
           row.text:SetTextColor(0.45, 0.95, 0.55)
         else
           row.text:SetTextColor(1, 1, 1)
@@ -1022,6 +1353,13 @@ local function Dropdown(parent, width, entries, getValue, setValue)
   end)
 
   d.Refresh = function()
+    if opts and opts.multi then
+      d.icon:Hide()
+      d.label:SetPoint("LEFT", 8, 0)
+      d.label:SetText(opts.summary())
+      if menu:IsShown() then RenderRows() end
+      return
+    end
     local current = getValue()
     local shown, icon
     for _, entry in ipairs(CurrentEntries()) do
@@ -1115,10 +1453,19 @@ local function Slider(parent, width, min, max, steps, getValue, setValue)
   local holder = CreateFrame("Frame", nil, parent)
   holder:SetSize(width + 46, 18)
 
+  -- Anchored to BOTH edges of the holder, less the room the number needs,
+  -- rather than given a fixed width. The holder is laid out by Flex and can
+  -- end up narrower than it asked for; a track sized once at creation would
+  -- keep its original length and run out past the block.
   local track = CreateFrame("Frame", nil, holder)
   track:SetPoint("LEFT", 0, 0)
-  track:SetSize(width, 14)
+  track:SetPoint("RIGHT", holder, "RIGHT", -46, 0)
+  track:SetHeight(14)
   track:EnableMouse(true)
+  -- The mouse lives on the TRACK, not on the holder, so a caller that wants
+  -- to switch this slider off has to be able to reach it. See EditorBlock's
+  -- SetOff: disabling the holder alone leaves the groove draggable.
+  holder.track = track
 
   local groove = track:CreateTexture(nil, "ARTWORK")
   groove:SetPoint("LEFT")
@@ -1140,19 +1487,33 @@ local function Slider(parent, width, min, max, steps, getValue, setValue)
   end, function() holder.Refresh() end)
   value:SetPoint("LEFT", track, "RIGHT", 6, 0)
 
+  -- Read from the track, never from the `width` it was built with: those are
+  -- the same number only until something resizes this.
+  local function TrackWidth()
+    local w = track:GetWidth()
+    if not w or w < 1 then w = width end
+    return w
+  end
+
   local function Position()
     local current = math.max(min, math.min(max, getValue() or min))
     local pct = (max > min) and ((current - min) / (max - min)) or 0
-    fill:SetWidth(math.max(1, width * pct))
+    local w = TrackWidth()
+    fill:SetWidth(math.max(1, w * pct))
     thumb:ClearAllPoints()
-    thumb:SetPoint("CENTER", groove, "LEFT", width * pct, 0)
+    thumb:SetPoint("CENTER", groove, "LEFT", w * pct, 0)
   end
+
+  -- Flex sizes this frame AFTER the page has told the slider to refresh, so
+  -- the fill and thumb computed a moment ago were measured against the old
+  -- width. Re-run when the size actually lands.
+  holder:HookScript("OnSizeChanged", function() Position() end)
 
   local function SetFromCursor()
     local cursorX = GetCursorPosition() / track:GetEffectiveScale()
     local left = track:GetLeft()
     if not left then return end
-    local pct = math.max(0, math.min(1, (cursorX - left) / width))
+    local pct = math.max(0, math.min(1, (cursorX - left) / TrackWidth()))
     local raw = min + pct * (max - min)
     local snapped = min + math.floor((raw - min) / step + 0.5) * step
     snapped = math.max(min, math.min(max, snapped))
@@ -1187,20 +1548,60 @@ end
 -- Spell picker built on the same dropdown: the list is regenerated each open
 -- so already-tracked spells stay marked as you add them.
 local function AddSpellDropdown(parent, width, defaultText, isTracked, onPick)
+  -- Optional, because "mark what is already on this thing" is a question some
+  -- callers have no answer to -- and a nil here used to be an error thrown
+  -- while building the list, which reads as the whole page failing.
+  isTracked = isTracked or function() return false end
   local function BuildEntries()
     local list = { { text = defaultText, value = nil, isTitle = true } }
-    local onTargets = NS.GetCooldownManagerSpells()
-    if #onTargets == 0 then
-      table.insert(list, { text = "Cooldown Manager lists none — use the ID box", isTitle = true })
-      return list
-    end
-    for _, item in ipairs(onTargets) do
+
+    -- Two sources, one list.
+    --
+    -- The Cooldown Manager is Blizzard's own curated set for your spec: right
+    -- when it has an entry, and silent about procs, trinkets, off-spec and
+    -- anything a patch added. What this addon has SEEN you apply cannot be
+    -- wrong about the same question, and covers all of it -- but starts empty
+    -- on a fresh install.
+    --
+    -- So both, headed, deduped, with the curated one first because it is there
+    -- before you have fought anything.
+    local seen = {}
+    local function Add(spellID)
+      if not spellID or seen[spellID] then return false end
+      local name = NS.SpellName(spellID)
+      if not name then return false end
+      seen[spellID] = true
       table.insert(list, {
         text = ("%s%s  |cff808080%d|r"):format(
-          isTracked(item.spellID) and "|cff55dd55•|r " or "",
-          NS.SpellName(item.spellID), item.spellID),
-        value = item.spellID,
-        icon = NS.SpellIcon(item.spellID),
+          isTracked(spellID) and "|cff55dd55•|r " or "", name, spellID),
+        value = spellID,
+        icon = NS.SpellIcon(spellID),
+      })
+      return true
+    end
+
+    local onTargets = NS.GetCooldownManagerSpells()
+    if #onTargets > 0 then
+      table.insert(list, { text = "|cff808080From your Cooldown Manager|r", isTitle = true })
+      for _, item in ipairs(onTargets) do Add(item.spellID) end
+    end
+
+    local learned = NS.LearnedDebuffs and NS.LearnedDebuffs() or {}
+    local header = false
+    for _, item in ipairs(learned) do
+      if not seen[item.spellID] then
+        if not header then
+          header = true
+          table.insert(list, { text = "|cff808080Debuffs you have applied|r", isTitle = true })
+        end
+        Add(item.spellID)
+      end
+    end
+
+    if #list == 1 then
+      table.insert(list, {
+        text = "Nothing to offer yet — fight something, or use the ID box",
+        isTitle = true,
       })
     end
     return list
@@ -1242,10 +1643,8 @@ local function IDBox(parent, onAdd, width)
   -- widgets around it.
   local frame = CreateFrame("Frame", nil, parent, "BackdropTemplate")
   frame:SetSize(width or 110, CTRL_H)
-  frame:SetBackdrop({
-    bgFile = "Interface\\Buttons\\WHITE8X8",
-    edgeFile = "Interface\\Buttons\\WHITE8X8", edgeSize = CTRL_EDGE,
-  })
+  frame:SetBackdrop({ bgFile = "Interface\\Buttons\\WHITE8X8" })
+  PixelBorder(frame)
   frame:SetBackdropColor(0.10, 0.10, 0.13, 1)
   frame:SetBackdropBorderColor(0.36, 0.36, 0.42, 1)
 
@@ -1303,10 +1702,8 @@ local function CollapsibleSection(parent, key, title, subtitle, palette)
   local s = CreateFrame("Frame", nil, parent, "BackdropTemplate")
   s.key = key
   s.headBG, s.headHover = headBG, headHover
-  s:SetBackdrop({
-    bgFile = "Interface\\Buttons\\WHITE8X8",
-    edgeFile = "Interface\\Buttons\\WHITE8X8", edgeSize = CTRL_EDGE,
-  })
+  s:SetBackdrop({ bgFile = "Interface\\Buttons\\WHITE8X8" })
+  PixelBorder(s)
   s:SetBackdropColor(RGBA(paneBG))
   s:SetBackdropBorderColor(RGBA(paneBorder))
 
@@ -1335,9 +1732,51 @@ local function CollapsibleSection(parent, key, title, subtitle, palette)
     s.subtitle:SetPoint("LEFT", s.title, "RIGHT", 12, 0)
   end
 
+  -- Explanatory prose belongs here, not in the section.
+  --
+  -- Every list on these pages carried a paragraph under it saying what the
+  -- list was for. Read once, then permanent -- it cost a band of vertical
+  -- space on every page, on every visit, forever. As a header button the text
+  -- is one hover away and takes no room at all.
+  --
+  -- Created for every section, shown only for one that was given text: an
+  -- empty "?" is a promise of help that is not there.
+  s.help = CreateFrame("Button", nil, s.header, "BackdropTemplate")
+  s.help:SetSize(20, 18)
+  s.help:SetPoint("RIGHT", -8, 0)
+  s.help:SetBackdrop({ bgFile = "Interface\\Buttons\\WHITE8X8" })
+  PixelBorder(s.help)
+  s.help:SetBackdropColor(0.16, 0.16, 0.20, 1)
+  s.help:SetBackdropBorderColor(0.36, 0.36, 0.42, 1)
+  s.help.label = s.help:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+  s.help.label:SetPoint("CENTER")
+  s.help.label:SetText("?")
+  StyleText(s.help.label, 11)
+  s.help.label:SetTextColor(0.72, 0.72, 0.78)
+  s.help:SetScript("OnEnter", function(self)
+    self:SetBackdropBorderColor(0.50, 0.56, 0.70, 1)
+    self.label:SetTextColor(1, 0.82, 0.1)
+  end)
+  s.help:SetScript("OnLeave", function(self)
+    self:SetBackdropBorderColor(0.36, 0.36, 0.42, 1)
+    self.label:SetTextColor(0.72, 0.72, 0.78)
+  end)
+  s.help:Hide()
+
+  -- Called by whoever builds the section. Takes the same (title, body) a
+  -- tooltip anywhere else does, so the writing is not a special case.
+  function s:SetHelp(title, body)
+    Tip(self.help, title or self.title:GetText(), body)
+    self.help:SetShown(body ~= nil)
+  end
+
   s.content = CreateFrame("Frame", nil, s)
   s.content:SetPoint("TOPLEFT", 0, -SECTION_HEAD_H)
   s.content:SetPoint("TOPRIGHT", 0, -SECTION_HEAD_H)
+  -- A backstop, not the fix: a section whose height is wrong should be
+  -- corrected, but until it is, its contents must not draw over the section
+  -- below. Dropdown menus are parented to UIParent, so they are not clipped.
+  if s.content.SetClipsChildren then pcall(s.content.SetClipsChildren, s.content, true) end
 
   s.open = NS.db.uiSections[key] ~= false
 
@@ -1504,6 +1943,14 @@ end
 -- the one state where that shows nothing.
 local function EnsureRulePreview()
   if not expandedRule then return end
+  -- Inverted for a missing rule, for the same reason: what shows it is the
+  -- debuff NOT being there.
+  if expandedRule.showWhenMissing then
+    for _, condition in ipairs(expandedRule.conditions or {}) do
+      preview.active[condition.spellID] = nil
+    end
+    return
+  end
   for _, condition in ipairs(expandedRule.conditions or {}) do
     preview.active[condition.spellID] = true
   end
@@ -1661,10 +2108,8 @@ end
 local function BuildStage(parent, height)
   local stage = CreateFrame("Frame", nil, parent, "BackdropTemplate")
   stage:SetHeight(height or STAGE_H)
-  stage:SetBackdrop({
-    bgFile = "Interface\\Buttons\\WHITE8X8",
-    edgeFile = "Interface\\Buttons\\WHITE8X8", edgeSize = CTRL_EDGE,
-  })
+  stage:SetBackdrop({ bgFile = "Interface\\Buttons\\WHITE8X8" })
+  PixelBorder(stage)
   -- Dark grey rather than near-black, so the plate's black border reads
   -- against it instead of disappearing.
   stage:SetBackdropColor(RGBA(THEME.stageBG))
@@ -1732,6 +2177,10 @@ local function BuildStage(parent, height)
   stage.bar:SetStatusBarTexture("Interface\\Buttons\\WHITE8X8")
   stage.bar:SetMinMaxValues(0, 1)
   stage.bar:SetValue(0.72)
+  -- The bar under everything this addon draws: Blizzard's hostile red, which
+  -- is what a plate wears before anything here has painted it. Nothing else
+  -- in this window is allowed to be red for a different reason, so a red
+  -- preview bar means "no rule, no threat state, no target colour".
   stage.bar:SetStatusBarColor(0.62, 0.11, 0.11)
 
   stage.barBG = stage.bar:CreateTexture(nil, "BACKGROUND")
@@ -1793,7 +2242,59 @@ local function BuildStage(parent, height)
   stage.note:SetTextColor(0.55, 0.55, 0.62)
 
   stage.icons = {}
+
+  -- Markers are drawn OUTSIDE the bar, so they need a frame that is not
+  -- clipped to it. Its textures are thrown away and repainted on each refresh:
+  -- shape, side, size and gap can all change between passes, and a pool keyed
+  -- by nothing in particular would have to be reconciled against all four.
+  stage.markerHost = CreateFrame("Frame", nil, stage)
+  stage.markerHost:SetAllPoints(stage.bar)
+  stage.markerHost:SetFrameLevel(stage.bar:GetFrameLevel() + 3)
+  stage.markers = {}
+
   return stage
+end
+
+-- Paints a previewed unit's marker onto a stage, or clears it when entry is
+-- nil. Through NS.PaintMarker, which is what the engine calls -- one painter,
+-- so the preview cannot disagree with the plate about its own shape.
+local function DrawStageMarkers(stage, entry)
+  for _, tex in ipairs(stage.markers) do tex:Hide() end
+  local ind = entry and entry.indicator
+  if not (ind and ind.enabled) then
+    stage.markerKey = nil
+    return
+  end
+  -- The marker's own colour where it has one, exactly as the plate does.
+  --
+  -- This read entry.color -- the BAR's colour -- so a marker given its own
+  -- was previewed in the wash's instead, and the cache key below was built
+  -- from the same wrong colour: changing the marker's opacity did not alter
+  -- the key, so the preview did not repaint at all.
+  local colour = (NS.MarkerColor and NS.MarkerColor(entry))
+    or entry.color or { r = 1, g = 1, b = 1, a = 1 }
+
+  -- Repainted only when the marker actually changed.
+  --
+  -- A texture cannot be destroyed in WoW, and this refresh runs on every
+  -- preview pass -- so painting unconditionally would leak a handful of
+  -- textures per pass for as long as the window is open. The key covers
+  -- everything PaintMarker reads.
+  local key = table.concat({ ind.shape or "arrow", ind.position or "BOTH",
+    ind.size or 10, ind.gap or 4,
+    colour.r, colour.g, colour.b, colour.a or 1 }, ":")
+  if key == stage.markerKey then
+    for _, tex in ipairs(stage.markers) do tex:Show() end
+    return
+  end
+  stage.markerKey = key
+  wipe(stage.markers)
+  for _, side in ipairs(NS.MarkerSides(ind.position)) do
+    local _, textures = NS.PaintMarker(stage.markerHost, stage.bar, side, ind, colour, 7)
+    for _, tex in ipairs(textures or {}) do
+      stage.markers[#stage.markers + 1] = tex
+    end
+  end
 end
 
 -- Top matching rule from one list against the simulated debuffs. Used by both
@@ -1959,10 +2460,8 @@ end
 local function BuildIconSwatch(parent)
   local box = CreateFrame("Frame", nil, parent, "BackdropTemplate")
   box:SetSize(210, 96)
-  box:SetBackdrop({
-    bgFile = "Interface\\Buttons\\WHITE8X8",
-    edgeFile = "Interface\\Buttons\\WHITE8X8", edgeSize = CTRL_EDGE,
-  })
+  box:SetBackdrop({ bgFile = "Interface\\Buttons\\WHITE8X8" })
+  PixelBorder(box)
   box:SetBackdropColor(RGBA(THEME.stageBG))
   box:SetBackdropBorderColor(RGBA(THEME.stageBorder))
   box.icons = {}
@@ -2013,10 +2512,8 @@ local SWATCH_MAX_ZOOM = 5
 local function BuildTextSwatch(parent)
   local box = CreateFrame("Frame", nil, parent, "BackdropTemplate")
   box:SetSize(120, 128)
-  box:SetBackdrop({
-    bgFile = "Interface\\Buttons\\WHITE8X8",
-    edgeFile = "Interface\\Buttons\\WHITE8X8", edgeSize = CTRL_EDGE,
-  })
+  box:SetBackdrop({ bgFile = "Interface\\Buttons\\WHITE8X8" })
+  PixelBorder(box)
   box:SetBackdropColor(RGBA(THEME.stageBG))
   box:SetBackdropBorderColor(RGBA(THEME.stageBorder))
 
@@ -2090,10 +2587,8 @@ local function ShowConfirm(title, body, acceptText, onAccept)
     -- Above the options window, which sits at HIGH.
     d:SetFrameStrata("FULLSCREEN_DIALOG")
     d:EnableMouse(true) -- swallow clicks so the window behind is inert
-    d:SetBackdrop({
-      bgFile = "Interface\\Buttons\\WHITE8X8",
-      edgeFile = "Interface\\Buttons\\WHITE8X8", edgeSize = CTRL_EDGE,
-    })
+    d:SetBackdrop({ bgFile = "Interface\\Buttons\\WHITE8X8" })
+    PixelBorder(d)
     d:SetBackdropColor(RGBA(THEME.windowBG))
     d:SetBackdropBorderColor(RGBA(THEME.accentBorder))
     d:Hide()
@@ -2151,10 +2646,8 @@ local function ShowPrompt(title, body, acceptText, onAccept, initialText)
     d:SetPoint("CENTER", 0, 80)
     d:SetFrameStrata("FULLSCREEN_DIALOG")
     d:EnableMouse(true)
-    d:SetBackdrop({
-      bgFile = "Interface\\Buttons\\WHITE8X8",
-      edgeFile = "Interface\\Buttons\\WHITE8X8", edgeSize = CTRL_EDGE,
-    })
+    d:SetBackdrop({ bgFile = "Interface\\Buttons\\WHITE8X8" })
+    PixelBorder(d)
     d:SetBackdropColor(RGBA(THEME.windowBG))
     d:SetBackdropBorderColor(RGBA(THEME.accentBorder))
     d:Hide()
@@ -2233,10 +2726,8 @@ function NS.ShowFirstRunWarning(force)
     d:SetPoint("CENTER", 0, 60)
     d:SetFrameStrata("FULLSCREEN_DIALOG")
     d:EnableMouse(true)
-    d:SetBackdrop({
-      bgFile = "Interface\\Buttons\\WHITE8X8",
-      edgeFile = "Interface\\Buttons\\WHITE8X8", edgeSize = CTRL_EDGE,
-    })
+    d:SetBackdrop({ bgFile = "Interface\\Buttons\\WHITE8X8" })
+    PixelBorder(d)
     d:SetBackdropColor(RGBA(THEME.windowBG))
     d:SetBackdropBorderColor(RGBA(THEME.accentBorder))
 
@@ -2261,7 +2752,7 @@ function NS.ShowFirstRunWarning(force)
     d.title = d:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
     d.title:SetPoint("LEFT", d.logo, "RIGHT", 8, 0)
     StyleText(d.title, 18)
-    d.title:SetText("PlateTweaks")
+    d.title:SetText(NS.WindowTitle())
     d.title:SetTextColor(RGBA(THEME.titleText))
 
     d.body = d:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
@@ -2292,7 +2783,7 @@ function NS.ShowFirstRunWarning(force)
       -- do nothing until the next session.
       local disable = (C_AddOns and C_AddOns.DisableAddOn) or DisableAddOn
       if disable then
-        pcall(disable, "PlateTweaks")
+        pcall(disable, NS.ADDON)
       end
       NS.Print("Disabled. Reloading — re-enable from the AddOns menu any time.")
       C_Timer.After(1, ReloadUI)
@@ -2346,40 +2837,6 @@ local function SelectTab(index)
 end
 
 
--- The expand/collapse triangle. A rotated texture, not a glyph: Expressway has
--- no guaranteed triangle and a missing one leaves an empty square.
--- UI-SortArrow points UP, so a quarter turn is closed and a half is open.
-local function Twisty(parent, onToggle)
-  local b = CreateFrame("Button", nil, parent)
-  b:SetSize(14, 14)
-
-  -- A real texture again, but the right one. Stepped bars were geometrically
-  -- a triangle and looked it -- five hard steps at 10px is a staircase, not
-  -- an edge. ChatFrameExpandArrow is a small SOLID triangle that ships with
-  -- the client and is drawn antialiased, pointing RIGHT at rest, which is
-  -- exactly the collapsed state. Expanded turns it a quarter clockwise.
-  b.tex = b:CreateTexture(nil, "OVERLAY")
-  b.tex:SetSize(10, 10)
-  b.tex:SetPoint("CENTER")
-  b.tex:SetTexture("Interface\\ChatFrame\\ChatFrameExpandArrow")
-
-  local open, hovered = true, false
-  local function Paint()
-    -- SetRotation takes counter-clockwise radians, so a quarter TURN
-    -- clockwise -- right to down -- is negative. pcall'd so a client without
-    -- rotation support shows a right-pointing triangle rather than erroring.
-    pcall(b.tex.SetRotation, b.tex, open and (-math.pi / 2) or 0)
-    local shade = hovered and 1 or 0.66
-    b.tex:SetVertexColor(shade, shade, math.min(1, shade * 1.08), 1)
-  end
-
-  function b:SetOpen(value) open = value and true or false; Paint() end
-  b:SetScript("OnEnter", function() hovered = true; Paint() end)
-  b:SetScript("OnLeave", function() hovered = false; Paint() end)
-  b:SetScript("OnClick", onToggle)
-  Paint()
-  return b
-end
 
 -- A row in the left rail, and the only navigation widget now -- the
 -- horizontal tab strip it replaces was deleted with it. Selected state is a
@@ -2459,28 +2916,19 @@ end
 -- Pooled rail widgets. Rebuilt whenever the rule list changes, so everything
 -- is hidden and re-laid-out rather than created afresh -- WoW cannot destroy
 -- a frame, so building per rebuild would leak one per edit forever.
+-- Two kinds of thing now: group headings, and the page links under them.
+--
+-- The rule rows, their add rows, the twisties that collapsed them and the
+-- divider between combos and singles are all gone. The rail listed every rule
+-- as its own entry from when it was how you picked one to edit; the Color
+-- Rules page is that list now -- one table, both halves, dragged and edited in
+-- place -- so the rail was carrying a second copy of it that could disagree
+-- about order and about which rule was selected.
 local railPool = {
-  headers = {}, items = {}, rows = {},
-  -- Bars behind group headings. Structure rather than decoration: they say
-  -- what contains what, which indentation alone stopped managing once the
-  -- rail went three levels deep (module -> list -> rule).
-  headerBGs = {}, twisties = {}, adds = {}, switches = {},
-  -- Hairline between the combo and single halves of a rule list. It replaced
-  -- the "Combo Rules" / "Single Rules" heading rows and the inset panels
-  -- behind them; naming each half moved onto the add row that closes it.
-  dividers = {},
-  -- No button pool: the rail has no buttons of its own any more -- adding is
-  -- a row in the list, and collapsing is the twisty.
+  headers = {}, items = {},
+  headerBGs = {}, switches = {},
 }
 local RebuildRail
-
--- A combo rule used to cost roughly ten times a single-debuff one (~100 textures per
--- nameplate against ~10), so the two sections are tinted warm and cool. The
--- colour is carrying that fact, not just separating the lists.
-local SECTION_TINT = {
-  combo  = { 0.90, 0.70, 0.42 },
-  single = { 0.55, 0.80, 0.62 },
-}
 
 -- The heading for one rule section, as a clickable row.
 --
@@ -2489,61 +2937,6 @@ local SECTION_TINT = {
 -- survives on the panel edge beside its rules, where it is doing structural
 -- work rather than decorating a label.
 
--- The "New Rule" row closing each rule section.
---
--- Built to the SAME internal offsets as RuleRow, so the column of swatches
--- stays unbroken and this reads as the next entry rather than a control bolted
--- underneath. The plus is two bars rather than a glyph: at 10px square a font
--- glyph is mostly padding and lands off centre.
-local function AddRuleRow(parent)
-  local r = CreateFrame("Button", nil, parent)
-  r:SetHeight(20)
-  r:EnableMouse(true)
-
-  r.box = CreateFrame("Frame", nil, r, "BackdropTemplate")
-  r.box:SetSize(10, 10)
-  r.box:SetPoint("LEFT", 8, 0)
-  r.box:SetBackdrop({
-    bgFile = "Interface\\Buttons\\WHITE8X8",
-    edgeFile = "Interface\\Buttons\\WHITE8X8", edgeSize = CTRL_EDGE,
-  })
-
-  r.plusH = r.box:CreateTexture(nil, "OVERLAY")
-  r.plusH:SetSize(6, 2)
-  r.plusH:SetPoint("CENTER")
-  r.plusV = r.box:CreateTexture(nil, "OVERLAY")
-  r.plusV:SetSize(2, 6)
-  r.plusV:SetPoint("CENTER")
-
-  r.label = r:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-  r.label:SetPoint("LEFT", 23, 0)
-  r.label:SetPoint("RIGHT", -8, 0)
-  r.label:SetJustifyH("LEFT")
-  r.label:SetWordWrap(false)
-  r.label:SetText("NEW RULE")
-  -- Same face and size as the COMBO RULES / SINGLE RULES headings above.
-  StyleText(r.label, 9)
-
-  local hovered = false
-  local tint = { 0.60, 0.60, 0.66 }
-  local function Paint()
-    local mul = hovered and 1 or 0.72
-    local red, green, blue = tint[1] * mul, tint[2] * mul, tint[3] * mul
-    r.label:SetTextColor(red, green, blue, 1)
-    r.box:SetBackdropColor(0, 0, 0, hovered and 0.5 or 0.25)
-    r.box:SetBackdropBorderColor(red, green, blue, 1)
-    r.plusH:SetColorTexture(red, green, blue, 1)
-    r.plusV:SetColorTexture(red, green, blue, 1)
-  end
-
-  -- Tinted to whichever section it closes, so it belongs to that block.
-  function r:SetTint(colour) tint = colour; Paint() end
-
-  r:SetScript("OnEnter", function() hovered = true; Paint() end)
-  r:SetScript("OnLeave", function() hovered = false; Paint() end)
-  Paint()
-  return r
-end
 
 -- Rows on screen, keyed by GROUP: "health|combo", "health|single", and the
 -- same pair for border.
@@ -2558,301 +2951,27 @@ end
 -- close over per-rebuild tables, leaving old generations on stale lists.
 
 -- Rows of the rule TABLE on a Color Rules page, so a drag there can find its
--- neighbours. Separate from railRows -- the same rule appears in both.
+-- neighbours. The rail no longer lists rules, so this is the only place a rule
+-- appears as a draggable row.
 local pageRows = {}
 local pageRowCount = {}
 
-local railRows = {}
-local railRowCount = {}
-local railDrag = nil
-
--- Forward-declared, because RuleRow's mouse handlers call all four and it is
--- defined above them. A local declared later is simply not in scope inside an
--- earlier closure -- the call resolves to a nil global and the handler dies
--- mid-way, which looks exactly like the mouse input never arriving.
-local CursorY, DropIndexFor, RailIndicator, UpdateRailIndicator
-
--- A rule in the rail: priority number, its colour, its debuffs, and a grip.
+-- The cursor's Y in a frame's own coordinate space.
 --
--- The grip is the whole reason the row can be understood: WoW has no list
--- widget, so nothing about a frame says "this can be dragged" unless you draw
--- something that does.
-local function RuleRow(parent)
-  local r = CreateFrame("Button", nil, parent, "BackdropTemplate")
-  r:SetHeight(22)
-  r:SetBackdrop({ bgFile = "Interface\\Buttons\\WHITE8X8" })
-  -- Stated rather than relied on. Buttons are mouse-enabled by default, but
-  -- this row lives inside a ScrollFrame and is pooled across rebuilds, and a
-  -- row that silently stops taking input is indistinguishable from a drag
-  -- implementation that does not work.
-  r:EnableMouse(true)
-  -- Deliberately no RegisterForDrag and no OnClick: both the click and the
-  -- drag are driven from OnMouseDown/OnUpdate below, so the two cannot fight
-  -- over the same press.
-
-  -- No priority number: position IS the priority, and a column of digits
-  -- restating it read as an identifier, as though rule 2 stayed rule 2 after
-  -- a drag. Offsets are small because the ROW is inset as a whole.
-  r.swatch = r:CreateTexture(nil, "ARTWORK")
-  r.swatch:SetSize(10, 10)
-  r.swatch:SetPoint("LEFT", 8, 0)
-
-  r.label = r:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-  r.label:SetPoint("LEFT", 23, 0)
-  r.label:SetPoint("RIGHT", -24, 0)
-  r.label:SetJustifyH("LEFT")
-  r.label:SetWordWrap(false)
-  StyleText(r.label, 11.5)
-
-  -- Two bars, like an equals sign. Drawn rather than typed -- the typeface has
-  -- no guaranteed glyph, and a missing one leaves a blank column exactly where
-  -- the only hint that the row moves should be. Brightens on hover, because a
-  -- static grey mark reads as decoration.
-  r.grip = CreateFrame("Frame", nil, r)
-  r.grip:SetSize(14, 14)
-  r.grip:SetPoint("RIGHT", -7, 0)
-  r.grip.bars = {}
-  for i = 1, 2 do
-    local bar = r.grip:CreateTexture(nil, "OVERLAY")
-    bar:SetHeight(2)
-    bar:SetPoint("LEFT")
-    bar:SetPoint("RIGHT")
-    bar:SetPoint("TOP", 0, -3 - (i - 1) * 5)
-    r.grip.bars[i] = bar
-  end
-
-  -- Marks a rule nothing can ever reach (see NS.ShadowedRules).
-  r.dead = r:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-  r.dead:SetPoint("RIGHT", r.grip, "LEFT", -3, 0)
-  StyleText(r.dead, 12)
-  r.dead:SetTextColor(1, 0.75, 0.1)
-  r.dead:SetText("!")
-  r.dead:Hide()
-
-  local selected, hovered = false, false
-  local function Paint()
-    if selected then
-      r:SetBackdropColor(RGBA(THEME.tabBGSelected))
-      r.label:SetTextColor(RGBA(THEME.textNormal))
-    else
-      r:SetBackdropColor(RGBA(THEME.tabBGHover, hovered and 1 or 0))
-      r.label:SetTextColor(RGBA(THEME.tabTextDim))
-    end
-    -- The grip is the affordance, so it is the thing that has to answer the
-    -- cursor: dim at rest, near-white under it.
-    for _, bar in ipairs(r.grip.bars) do
-      if hovered or selected then
-        bar:SetColorTexture(0.85, 0.85, 0.90, 1)
-      else
-        bar:SetColorTexture(0.42, 0.42, 0.48, 1)
-      end
-    end
-  end
-  function r:SetSelected(value) selected = value and true or false; Paint() end
-  -- The label is truncated rather than wrapped, so the tooltip is the only
-  -- place the full rule can be read. Wrapping was the alternative and it is
-  -- the wrong trade here: it would make rows different heights, break the
-  -- drag maths that assumes a uniform row, and still lose to a long enough
-  -- rule -- while the whole rule is one click away on the right anyway.
-  r:SetScript("OnEnter", function() hovered = true; Paint() end)
-  r:SetScript("OnLeave", function() hovered = false; Paint() end)
-
-  -- Through the shared tooltip system. It used to fire the instant the cursor
-  -- touched a row, which made scanning the rail a strobe.
-  --
-  -- Functions, not strings: rows are pooled and re-pointed on every rebuild,
-  -- so text captured at construction would describe whichever rule was first.
-  Tip(r,
-    function(self) return self.fullLabel end,
-    function(self)
-      if not self.rule then return nil end
-      local count = #(self.rule.conditions or {})
-      local lines = { count == 1 and "1 debuff" or (count .. " debuffs") }
-      if self.rule.enabled == false then
-        table.insert(lines, "|cffff8080Disabled|r")
-      end
-      if self.blockedBy then
-        table.insert(lines, ("|cffffcc00Never shows -- rule %d above matches whenever this does.|r")
-          :format(self.blockedBy))
-      end
-      return table.concat(lines, "|n")
-    end,
-    { note = "Click to edit. Drag to reorder." })
-
-  -- Drag by tracking the cursor rather than RegisterForDrag: we need the
-  -- position DURING the drag to move the drop indicator, which the drag events
-  -- do not give. It also keeps click and drag on one path, so a click cannot
-  -- be swallowed by a drag that never started.
-  local DRAG_THRESHOLD = 4
-
-  -- Finishing a press: either a click (open the rule) or a drop (reorder).
-  -- Called from OnUpdate's release poll AND from OnMouseUp, whichever notices
-  -- first -- they guard each other, since OnMouseUp misses a release that
-  -- happens off the row and OnUpdate misses nothing but only runs while the
-  -- frame is shown.
-  local function FinishPress(self)
-    if not self.pressed then return end
-    self.pressed = false
-
-    local line = RailIndicator()
-    if line then line:Hide() end
-    self:SetAlpha(self.rule and self.rule.enabled == false and 0.45 or 1)
-
-    if not self.moved then
-      expandedRule = self.rule
-      expandedSection = "rule"
-      EnsureRulePreview()
-      SelectTab(self.page)
-      NS.Options_RebuildAll()
-      return
-    end
-
-    local target = DropIndexFor(self.group)
-    railDrag = nil
-    self.moved = false
-    if not target then return end
-    local from = self.index
-    -- Removing shifts everything after it up, so a drop below the original
-    -- slot has to lose one to land where it was aimed.
-    if target > from then target = target - 1 end
-    if target == from then return end
-
-    local group = self.groupRules
-    local list = self.list
-    if not group or not list then return end
-
-    local moved = table.remove(group, from)
-    table.insert(group, math.max(1, math.min(#group + 1, target)), moved)
-
-    -- Write the master list back as combos-then-singles. The rail only
-    -- reorders within a group, so rebuilding from the two groups keeps the
-    -- stored order matching the screen and re-establishes the
-    -- combos-above-singles invariant for free.
-    --
-    -- Mutated in place: NS.db.tints.rules is held by reference elsewhere.
-    wipe(list)
-    for _, rule in ipairs(self.combos) do table.insert(list, rule) end
-    for _, rule in ipairs(self.singles) do table.insert(list, rule) end
-    Structural()
-  end
-  r.FinishPress = FinishPress
-
-  r:SetScript("OnMouseDown", function(self, button)
-    if button ~= "LeftButton" or not self.rule then return end
-    self.pressY = CursorY(self)
-    self.pressed = true
-    self.moved = false
-  end)
-
-  r:SetScript("OnMouseUp", function(self, button)
-    if button ~= "LeftButton" then return end
-    FinishPress(self)
-  end)
-
-  r:SetScript("OnUpdate", function(self)
-    if not self.pressed then return end
-
-    -- The button can come up anywhere -- off the row, off the window -- and
-    -- OnMouseUp only fires while the cursor is still over this frame, so the
-    -- release is polled for here as well.
-    if not IsMouseButtonDown("LeftButton") then
-      FinishPress(self)
-      return
-    end
-
-    local y = CursorY(self)
-    if not y or not self.pressY then return end
-    if not self.moved and math.abs(y - self.pressY) >= DRAG_THRESHOLD then
-      self.moved = true
-      railDrag = self
-      self:SetAlpha(0.4)
-    end
-    if self.moved then
-      UpdateRailIndicator(self.group, DropIndexFor(self.group))
-    end
-  end)
-
-  Paint()
-  return r
-end
-
--- Cursor Y in the same coordinate space frames report their own edges in.
--- GetCursorPosition is raw screen pixels; frame:GetTop() is already divided
--- by the frame's effective scale, so the cursor has to be too or every
--- comparison is off by the UI scale factor.
-function CursorY(frame)
+-- GetCursorPosition reports in screen pixels; every rect this is compared
+-- against (GetTop, GetBottom) is in UI units, so the scale has to come out or
+-- the two are in different spaces and no row ever matches.
+--
+-- It lived with the rail's drag code and went out with it, which broke
+-- dragging in the TABLE -- the one place that still reorders rules. Kept here
+-- now, beside the rows that use it.
+local function CursorY(frame)
   local scale = frame and frame:GetEffectiveScale()
   if not scale or scale == 0 then return nil end
   local _, y = GetCursorPosition()
   return y / scale
 end
 
--- Where a drag would drop, given where the cursor is over a list of rows.
---
--- Hand-rolled because WoW has no reorderable list: compare the cursor against
--- each row's own top and bottom.
-function DropIndexFor(group)
-  local rows, count = railRows[group], railRowCount[group]
-  if not rows or count == 0 then return 1 end
-  local cursorY = CursorY(rows[1])
-  if not cursorY then return nil end
-
-  for index = 1, count do
-    local row = rows[index]
-    local top, bottom = row:GetTop(), row:GetBottom()
-    if top and bottom and cursorY <= top and cursorY >= bottom then
-      -- Above a row's midpoint means "take its place", below means "after it".
-      return cursorY >= (top + bottom) / 2 and index or index + 1
-    end
-  end
-  -- Past the ends of the list entirely.
-  local firstTop = rows[1]:GetTop()
-  if firstTop and cursorY > firstTop then return 1 end
-  return count + 1
-end
-
--- A line showing where the row would land. Without it a drag gives no
--- feedback at all until you let go, which is indistinguishable from a drag
--- that is not working.
-function RailIndicator()
-  if not window or not window.railContent then return nil end
-  local content = window.railContent
-  if not content.dropLine then
-    -- On its own elevated frame, not straight onto the content. Rows are
-    -- frames with their own backdrop, and a texture belonging to their parent
-    -- draws BEHIND them however high its draw layer -- so the indicator would
-    -- have been hidden by the very rows it points between.
-    local holder = CreateFrame("Frame", nil, content)
-    holder:SetAllPoints(content)
-    holder:SetFrameLevel(content:GetFrameLevel() + 10)
-    local line = holder:CreateTexture(nil, "OVERLAY")
-    line:SetHeight(2)
-    line:SetColorTexture(RGBA(THEME.accent))
-    line:Hide()
-    content.dropHolder = holder
-    content.dropLine = line
-  end
-  return content.dropLine
-end
-
-function UpdateRailIndicator(group, target)
-  local line = RailIndicator()
-  if not line then return end
-  local rows, count = railRows[group], railRowCount[group]
-  if not rows or count == 0 or not target then line:Hide() return end
-
-  line:ClearAllPoints()
-  if target > count then
-    local last = rows[count]
-    line:SetPoint("TOPLEFT", last, "BOTTOMLEFT", 4, 1)
-    line:SetPoint("TOPRIGHT", last, "BOTTOMRIGHT", -4, 1)
-  else
-    local row = rows[target]
-    line:SetPoint("TOPLEFT", row, "TOPLEFT", 4, 1)
-    line:SetPoint("TOPRIGHT", row, "TOPRIGHT", -4, 1)
-  end
-  line:Show()
-end
 
 -- Built from scratch rather than PortraitFrameTemplate: every widget here is
 -- hand-drawn and flat, so the gold chrome was the last thing that read as
@@ -2924,12 +3043,6 @@ local PAGE_COUNT = 15
 -- does not exist.
 local NAV_GROUP_INDENT = 10
 local NAV_ITEM_INDENT = 22
--- Rules and the "New Rule" row that closes each section: one level in from
--- their section heading, which itself sits at NAV_ITEM_INDENT alongside the
--- page links. This is the ROW's left edge, not a text offset -- RuleRow and
--- AddRuleRow keep small fixed offsets inside themselves so their swatch
--- columns stay aligned with each other.
-local RULE_ROW_INDENT = 22
 -- Group heading bar. Taller than the 19 it started at: at four levels deep the
 -- headings are the only thing giving the rail structure, so they earn the
 -- extra pixels. Everything on the bar centres on RAIL_HEADER_H / 2.
@@ -2948,14 +3061,21 @@ local RAIL_HEADER_H = 24
 -- two halves of one list rather than two collapsible sections.
 local NAV_LAYOUT = {
   { group = "Health Coloring", module = "health", tip = "switchHealth" },
-  { label = "Color Rules",      index = PAGE_HEALTH, collapse = "health", tip = "health" },
-  { ruleList = "health" },
+  -- A plain nav row, like Pandemic Flash and General Settings beside it.
+  --
+  -- It used to carry a twisty that expanded every rule as its own rail entry,
+  -- from when the rail was how you selected a rule to edit. The page itself is
+  -- that list now -- one table, both halves, dragged in place and edited in
+  -- place -- so the rail was showing a second copy of it, one level in, that
+  -- could disagree about order and selection.
+  { label = "Color Rules",      index = PAGE_HEALTH, tip = "health" },
   { label = "Pandemic Flash",   index = PAGE_PANDEMIC, module = "pandemic", tip = "pandemic",
     switchTip = "switchPandemic" },
   { label = "General Settings", index = PAGE_GENERAL, tip = "general" },
-  { group = "Border Coloring", module = "border", tip = "switchBorder" },
-  { label = "Color Rules",      index = PAGE_BORDER, collapse = "border", tip = "border" },
-  { ruleList = "border" },
+  -- No Border Coloring group. Bar and border are two halves of one rule in one
+  -- list, so a second heading with a second copy of that list under it was
+  -- describing a split that no longer exists. The module's on/off moved onto
+  -- the Health heading's page as the Border column's own switch.
   { group = "Aura Icons", module = "icons", tip = "switchIcons" },
   { label = "Filters",          index = PAGE_ICONS, tip = "icons" },
   { label = "Position & Size",  index = PAGE_ICON_LAYOUT, tip = "iconLayout" },
@@ -3020,18 +3140,9 @@ local MODULE_SWITCH = {
   },
 }
 
-local function RailOpen(kind)
-  NS.db.uiRailOpen = NS.db.uiRailOpen or {}
-  return NS.db.uiRailOpen[kind] ~= false
-end
-
-local function RuleListFor(kind)
-  if kind == "border" then return NS.db.tints.borderRules or {} end
-  return NS.db.tints.rules or {}
-end
-
 local function PageFor(kind)
-  return kind == "border" and PAGE_BORDER or PAGE_HEALTH
+  -- One page. `kind` survives as the border/health VIEW of a row, not a page.
+  return PAGE_HEALTH
 end
 
 -- A rule's label in the rail. Rules have no name of their own, so this is
@@ -3071,13 +3182,19 @@ local function CreateWindow()
   frame:SetClampedToScreen(true)
   frame:SetFrameStrata("HIGH")
   frame:SetToplevel(true)
-  frame:SetBackdrop({
-    bgFile = "Interface\\Buttons\\WHITE8X8",
-    edgeFile = "Interface\\Buttons\\WHITE8X8", edgeSize = CTRL_EDGE,
-  })
+  frame:SetBackdrop({ bgFile = "Interface\\Buttons\\WHITE8X8" })
+  PixelBorder(frame)
   frame:SetBackdropColor(RGBA(THEME.windowBG))
   frame:SetBackdropBorderColor(RGBA(THEME.windowBorder))
   frame:Hide()
+
+  -- Preview toggles are for looking at something while the window is open.
+  -- Left on, they would paint every plate in the zone with no visible control
+  -- anywhere saying why -- so closing the window clears them.
+  frame:HookScript("OnHide", function()
+    if not NS.stagePreview then return end
+    NS.stagePreview.threat, NS.stagePreview.mark = nil, nil
+  end)
 
   -- Title bar doubles as the drag handle, so the body stays click-through to
   -- the controls sitting on it.
@@ -3111,7 +3228,7 @@ local function CreateWindow()
 
   frame.title = titleBar:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   frame.title:SetPoint("LEFT", frame.logo, "RIGHT", 8, 0)
-  frame.title:SetText("PlateTweaks")
+  frame.title:SetText(NS.WindowTitle())
   StyleText(frame.title, 18)
   frame.title:SetTextColor(RGBA(THEME.titleText))
 
@@ -3165,10 +3282,8 @@ local function CreateWindow()
   rail:SetPoint("TOPLEFT", 8, -52)
   rail:SetPoint("BOTTOMLEFT", 8, 30)
   rail:SetWidth(RAIL_W)
-  rail:SetBackdrop({
-    bgFile = "Interface\\Buttons\\WHITE8X8",
-    edgeFile = "Interface\\Buttons\\WHITE8X8", edgeSize = CTRL_EDGE,
-  })
+  rail:SetBackdrop({ bgFile = "Interface\\Buttons\\WHITE8X8" })
+  PixelBorder(rail)
   rail:SetBackdropColor(RGBA(THEME.tabBG))
   rail:SetBackdropBorderColor(RGBA(THEME.tabBorder))
   frame.rail = rail
@@ -3328,23 +3443,10 @@ function RebuildRail()
 
   for _, f in ipairs(railPool.headers) do f:Hide() end
   for _, f in ipairs(railPool.items) do f:Hide() end
-  for _, f in ipairs(railPool.rows) do f:Hide() end
   for _, f in ipairs(railPool.headerBGs) do f:Hide() end
-  for _, f in ipairs(railPool.twisties) do f:Hide() end
-  for _, f in ipairs(railPool.adds) do f:Hide() end
   for _, f in ipairs(railPool.switches) do f:Hide() end
-  for _, f in ipairs(railPool.dividers) do f:Hide() end
-  local nHeader, nItem, nRow = 0, 0, 0
-  local nHeaderBG, nTwisty, nAdd, nSwitch, nDivider = 0, 0, 0, 0, 0
-
-  -- Emptied rather than replaced: the drag handlers hold references to these
-  -- exact tables. Groups are re-created below as each section is laid out.
-  for group in pairs(railRows) do
-    wipe(railRows[group])
-    railRowCount[group] = 0
-  end
-  local line = RailIndicator()
-  if line then line:Hide() end
+  local nHeader, nItem = 0, 0
+  local nHeaderBG, nSwitch = 0, 0
 
   local y = -8
   local first = true
@@ -3433,145 +3535,6 @@ function RebuildRail()
 
       y = y - (RAIL_HEADER_H + 4)
 
-    -- Collapsed by the twisty on the Color Rules row above (entry.collapse).
-    elseif entry.ruleList and RailOpen(entry.ruleList) then
-      local kind = entry.ruleList
-      local list = RuleListFor(kind)
-      local shadowed = NS.ShadowedRules and NS.ShadowedRules(list) or {}
-
-      -- Split by debuff count, preserving the stored order within each half.
-      -- Combos first, then singles, with a divider between them -- the two
-      -- groups no longer carry headings of their own, so the "New combo rule"
-      -- and "New single rule" rows that close each group are what name them.
-      -- That is the whole reason the add rows are labelled rather than plain.
-      local combos, singles, blockerOf = {}, {}, {}
-      for index, rule in ipairs(list) do
-        local count = #(rule.conditions or {})
-        -- Purely the debuff count. A rule is not created as one kind or the
-        -- other any more -- add a second debuff and it moves down here by
-        -- itself, which is the behaviour the single creation row implies.
-        local isCombo = count >= 2
-        table.insert(isCombo and combos or singles, rule)
-        blockerOf[rule] = shadowed[index]
-      end
-
-      for groupIndex, section in ipairs({
-        { rules = combos,  tag = "combo"  },
-        { rules = singles, tag = "single" },
-      }) do
-        local groupKey = kind .. "|" .. section.tag
-        railRows[groupKey] = railRows[groupKey] or {}
-        wipe(railRows[groupKey])
-        railRowCount[groupKey] = 0
-
-        -- A hairline between the two halves, standing in for the headings
-        -- they used to have. Only when BOTH have something in them: with one
-        -- half empty it is a rule dividing a list from nothing, which reads as
-        -- a mistake rather than as structure.
-        if groupIndex == 2 and #combos > 0 and #singles > 0 then
-          y = y - 4
-          nDivider = nDivider + 1
-          local divider = railPool.dividers[nDivider]
-          if not divider then
-            divider = content:CreateTexture(nil, "ARTWORK")
-            railPool.dividers[nDivider] = divider
-          end
-          divider:ClearAllPoints()
-          divider:SetPoint("TOPLEFT", content, "TOPLEFT", RULE_ROW_INDENT + 4, y)
-          divider:SetPoint("TOPRIGHT", content, "TOPRIGHT", -12, y)
-          divider:SetHeight(1)
-          divider:SetColorTexture(0.35, 0.35, 0.40, 0.6)
-          divider:Show()
-          y = y - 6
-        end
-
-        for index, rule in ipairs(section.rules) do
-          nRow = nRow + 1
-          local row = railPool.rows[nRow]
-          if not row then
-            row = RuleRow(content)
-            railPool.rows[nRow] = row
-          end
-
-          row.rule = rule
-          row.kind = kind
-          row.group = groupKey
-          row.index = index
-          row.groupRules = section.rules
-          row.combos = combos
-          row.singles = singles
-          -- Selecting a rule opens the editor page, not the list page it
-          -- came from: the rail row IS that rule.
-          row.page = PAGE_RULE
-          row.list = list
-
-          local colour = RuleSwatchColor(rule, kind)
-          row.swatch:SetColorTexture(colour.r, colour.g, colour.b, 1)
-          -- Kept in full for the tooltip: the label itself is truncated.
-          row.fullLabel = RuleLabel(rule)
-          row.label:SetText(row.fullLabel)
-          row:SetAlpha(rule.enabled == false and 0.45 or 1)
-
-          local blocker = blockerOf[rule]
-          row.dead:SetShown(blocker ~= nil)
-          row.blockedBy = blocker
-
-          -- One level in from the page link that owns the list.
-          row:ClearAllPoints()
-          row:SetPoint("TOPLEFT", RULE_ROW_INDENT, y)
-          row:SetPoint("TOPRIGHT", -8, y)
-          row:SetSelected(expandedRule == rule)
-          row:Show()
-
-          railRowCount[groupKey] = railRowCount[groupKey] + 1
-          railRows[groupKey][railRowCount[groupKey]] = row
-
-          y = y - 22
-        end
-
-      end
-
-      -- ONE creation row for the whole list. There used to be two, because a
-      -- rule's shape was fixed at creation: the combo row set wantsCombo,
-      -- which was the only thing giving a second condition slot. A rule now
-      -- grows and re-sorts into the combo half on its own.
-      nAdd = nAdd + 1
-      local addRow = railPool.adds[nAdd]
-      if not addRow then
-        addRow = AddRuleRow(content)
-        railPool.adds[nAdd] = addRow
-      end
-      addRow:SetTint(SECTION_TINT.single)
-      addRow.label:SetText("NEW RULE")
-      Tip(addRow, "New Rule", TIPS.addRule)
-      addRow:SetScript("OnClick", function()
-        -- Which normaliser depends on which list. NS.NormaliseRule leaves
-        -- barEnabled=true and border.enabled=false -- the opposite of what a
-        -- border rule needs. Getting it wrong does not error: the rule is
-        -- created shaped like a bar rule and never draws a border, until the
-        -- next /reload force-normalises borderRules and fixes it. That
-        -- "fixed by reload only" signature is what the bug looked like.
-        local rule = (kind == "border") and NS.NewBorderRule()
-          or NS.NormaliseRule({ color = NS.DefaultColor(), conditions = {}, enabled = true })
-        table.insert(list, rule)
-        expandedRule = rule
-        expandedSection = "rule"
-        SelectTab(PAGE_RULE)
-        Structural()
-      end)
-      addRow:ClearAllPoints()
-      addRow:SetPoint("TOPLEFT", RULE_ROW_INDENT, y)
-      addRow:SetPoint("TOPRIGHT", -8, y)
-      addRow:Show()
-      y = y - 20
-
-      y = y - 6
-
-    elseif entry.ruleList then
-      -- Collapsed: contributes no rows and no height. Caught here rather than
-      -- falling through to the item branch below, which would read
-      -- entry.label (nil) and index tabButtons with a nil page.
-
     else
       nItem = nItem + 1
       local item = railPool.items[nItem]
@@ -3584,32 +3547,10 @@ function RebuildRail()
       Tip(item, entry.label, entry.tip and TIPS[entry.tip])
       local index = entry.index
       item:SetScript("OnClick", function() SelectTab(index) end)
-      item:SetSubheader(entry.collapse ~= nil)
-      item:SetHeight(entry.collapse and 26 or 24)
-
-      -- The twisty toggles the list; the rest of the row still navigates to
-      -- the page. Separating them is what lets you collapse a long rule list
-      -- without being taken somewhere, and open a page without being forced
-      -- to expand.
-      if entry.collapse then
-        local kind = entry.collapse
-        nTwisty = nTwisty + 1
-        local twisty = railPool.twisties[nTwisty]
-        if not twisty then
-          twisty = Twisty(content, function() end)
-          railPool.twisties[nTwisty] = twisty
-        end
-        twisty:SetScript("OnClick", function()
-          NS.db.uiRailOpen = NS.db.uiRailOpen or {}
-          NS.db.uiRailOpen[kind] = not RailOpen(kind)
-          RebuildRail()
-        end)
-        twisty:SetOpen(RailOpen(kind))
-        twisty:ClearAllPoints()
-        twisty:SetPoint("LEFT", item, "LEFT", 4, 0)
-        twisty:SetFrameLevel(item:GetFrameLevel() + 2)
-        twisty:Show()
-      end
+      -- Every entry is a plain page link now: no entry collapses, because
+      -- nothing in the rail has children left to hide.
+      item:SetSubheader(false)
+      item:SetHeight(24)
       item:ClearAllPoints()
       item:SetPoint("TOPLEFT", 0, y)
       item:SetPoint("TOPRIGHT", 0, y)
@@ -3652,7 +3593,7 @@ function RebuildRail()
         switch:Show()
       end
 
-      y = y - (entry.collapse and 26 or 24)
+      y = y - 24
     end
     first = false
   end
@@ -3678,19 +3619,16 @@ function RebuildRail()
   if window.railBar then window.railBar:Update() end
 end
 
--- Repaints every existing swatch -- rail rows and table rows -- from the rules
--- themselves, without going through Structural().
+-- Repaints every existing table swatch from the rules themselves, without
+-- going through Structural().
 --
 -- Colour pickers call this on every frame of a drag, which a full rebuild
 -- could not survive, and the row already knows which rule it shows, so only
 -- the texture is stale.
+--
+-- The rail half of this is gone with the rail's rule rows: there is one place
+-- a rule's colour appears in the window now.
 local function RefreshRailColors()
-  for _, row in ipairs(railPool.rows) do
-    if row.rule and row:IsShown() then
-      local colour = RuleSwatchColor(row.rule, row.kind)
-      row.swatch:SetColorTexture(colour.r, colour.g, colour.b, 1)
-    end
-  end
   for _, listKey in ipairs({ "health", "border" }) do
     for _, row in ipairs(pageRows[listKey] or {}) do
       if row.rule and row:IsShown() then
@@ -3776,6 +3714,54 @@ local function BuildTabFrame(panel, enableLabel, enableGet, enableSet, stageHeig
   head.testColumn:SetWidth(TEST_COL_W)
   head.testColumn:SetHeight(stageHeight)
 
+  -- Threat and Target/Focus have no debuff to tick, so the simulate row below
+  -- the plate cannot reach them: they are decided by a mob's threat status and
+  -- by who you have targeted, neither of which the preview can pretend at by
+  -- ticking a spell. These two say "show me that state instead".
+  --
+  -- Dropdowns rather than tick boxes, because the states are exclusive in the
+  -- game: a mob reports ONE threat status, and a unit is your target or your
+  -- focus, not both at once. A list that holds one key cannot be asked to show
+  -- two colours that could never appear together.
+  --
+  -- Between the two, the engine's own order decides: threat covers
+  -- target/focus, which covers whichever rule won.
+  head.threatPreview = Dropdown(head.testColumn, TEST_COL_W, NS.StageThreatEntries,
+    function() return NS.stagePreview.threat or false end,
+    function(value)
+      NS.stagePreview.threat = value or nil
+      RefreshPreviews()
+    end)
+  Tip(head.threatPreview, "Preview a threat state",
+    "Paints the plate above with one of your threat colours.\n\nThe preview plate only -- your real nameplates are untouched, and nothing here is saved.")
+
+  head.markPreview = Dropdown(head.testColumn, TEST_COL_W, NS.StageMarkEntries,
+    function() return NS.stagePreview.mark or false end,
+    function(value)
+      NS.stagePreview.mark = value or nil
+      RefreshPreviews()
+    end)
+  -- Placed here, not left to the page.
+  --
+  -- Only the rule page ever called StackTestButtons, so a control created in
+  -- this function and positioned nowhere else simply never appeared -- which
+  -- is what happened to these two on the Color Rules page. Pages that add
+  -- their own test buttons re-stack the whole column and these come along.
+  -- Test and Test All, on every page that has this head.
+  --
+  -- These were built only by the rule editor -- the page that was retired
+  -- when rules moved in-place -- so the whole feature left with it: there was
+  -- no way to paint your real nameplates from the Color Rules page, which is
+  -- now the page you spend your time on.
+  head.testButton = TestModeButton(head.testColumn, false)
+  head.testAllButton = TestModeButton(head.testColumn, true)
+
+  StackTestButtons(head.testColumn, { head.threatPreview, head.markPreview,
+    head.testButton, head.testAllButton })
+
+  Tip(head.markPreview, "Preview target or focus",
+    "Paints the plate above as though it were your target or your focus.\n\nThreat outranks it, the same way it does on a real plate.")
+
   head.stage = BuildStage(head, stageHeight)
   head.stage:SetPoint("TOPLEFT", HEAD_PAD, -stageTop)
   head.stage:SetPoint("TOPRIGHT", head.testColumn, "TOPLEFT", -10, 0)
@@ -3844,7 +3830,7 @@ local function PrunedPreviewState()
   -- only a border rule used -- the tick vanished the moment the health
   -- preview refreshed.
   local valid = {}
-  for _, list in ipairs({ NS.db.tints.rules or {}, NS.db.tints.borderRules or {} }) do
+  for _, list in ipairs({ NS.db.tints.rules or {} }) do
     for _, rule in ipairs(list) do
       for _, c in ipairs(rule.conditions or {}) do
         valid[c.spellID] = true
@@ -3873,8 +3859,11 @@ local function EvaluatePreview()
   --
   -- Missing rules are excluded: they never paint the bar body, so letting one
   -- place first would report a winner whose colour is nowhere on the bar.
+  -- Load conditions are deliberately IGNORED here: the preview answers what
+  -- the rule looks like, and where you happen to be standing while editing it
+  -- is not part of that.
   local matches = {}
-  for _, rule in ipairs(NS.GetOrderedRules()) do
+  for _, rule in ipairs(NS.GetOrderedRules(true)) do
     if not rule.showWhenMissing then
       local all = true
       for _, c in ipairs(rule.conditions) do
@@ -3894,10 +3883,9 @@ end
 -- would look broken.
 local function RuleSpells()
   local seen, list = {}, {}
+  -- One list holds both halves, so combining the two previews no longer means
+  -- reading a second list -- it means not filtering this one.
   local sources = { NS.db.tints.rules }
-  if NS.db.uiPreviewCombine then
-    table.insert(sources, NS.db.tints.borderRules)
-  end
   for _, src in ipairs(sources) do
   for _, rule in ipairs(src) do
     for _, c in ipairs(rule.conditions or {}) do
@@ -3973,6 +3961,10 @@ local function AddConditionTo(rule, input, sortList)
   if not rule or not input then return end
   local spellID = ResolveAndReport(input)
   if not spellID then return end
+  -- Typed once, offered from then on. Someone who knows the ID of a debuff
+  -- knows something the Cooldown Manager does not, and making them look it up
+  -- twice is the addon forgetting on their behalf.
+  if NS.LearnSpell then NS.LearnSpell(spellID) end
   for _, cond in ipairs(rule.conditions or {}) do
     if cond.spellID == spellID then return end
   end
@@ -4599,21 +4591,135 @@ end
 -- One row shape for both lists. getList says which table it edits; isBorder
 -- says which half its swatch drives. Parameterised rather than duplicated so
 -- the two lists cannot drift apart in behaviour.
+-- Draw-slot meter, pinned to the right of a section header.
+--
+-- A row of pips rather than a number alone: "6 / 8" answers how much is left,
+-- the pips answer it without reading, and the pair together is what stops
+-- someone adding a ninth rule and then wondering why two of them flicker.
+--
+-- The budget is a MEASUREMENT off a live nameplate where there is one -- the
+-- host addon's own textures decide our ceiling, and it differs between skins
+-- of the same addon. With no plate up it is the shipped assumption, and the
+-- tooltip says so rather than presenting a guess as a reading.
+-- On NS rather than a file-local: this file is within a handful of locals of
+-- Lua's 200-per-chunk limit, and two more here was over it. Nothing about the
+-- widget wants to be shared -- the scope is a budget decision.
+-- Rule capacity, in the section header.
+--
+-- One line of text. It was a row of pips plus a count, which is a gauge -- and
+-- a gauge earns its width when you watch it change, not when it reads the same
+-- number every time you open the window. The percentage is the part that
+-- transfers between nameplate addons anyway: the denominator is a measurement
+-- of the host's leftover draw sublevels, a number nobody has a feel for and
+-- one that differs between skins of the same addon.
+--
+-- Everything else lives in the tooltip, which is where the reason for a number
+-- belongs.
+function NS.SlotMeter(section)
+  local header = section.header
+  local meter = CreateFrame("Frame", nil, header)
+  -- Left of the help button, which owns the right edge of every header.
+  meter:SetPoint("RIGHT", section.help or header, section.help and "LEFT" or "RIGHT", -10, 0)
+  meter:SetSize(150, 16)
+  meter:EnableMouse(true)
+
+  meter.text = Dim(meter, "")
+  meter.text:SetPoint("RIGHT", 0, 0)
+  meter.text:SetJustifyH("RIGHT")
+
+  -- The section's subtitle runs left-to-right from the title and this runs
+  -- right-to-left from the edge, so on a narrow window they met in the middle.
+  -- Bounding the subtitle at the meter's left edge keeps them apart: it
+  -- truncates instead.
+  if section.subtitle then
+    section.subtitle:SetPoint("RIGHT", meter, "LEFT", -12, 0)
+    section.subtitle:SetJustifyH("LEFT")
+    section.subtitle:SetWordWrap(false)
+  end
+
+  function meter.Refresh()
+    -- The bar reference is used and dropped inside this call: nameplates are
+    -- pooled, so holding one across a refresh would measure a plate that has
+    -- since been recycled onto a different unit.
+    local bar = NS.CurrentAdapterBar and NS.CurrentAdapterBar() or nil
+    local report = NS.SlotReport and NS.SlotReport(bar)
+    if not report then meter:Hide() return end
+    meter:Show()
+
+    local percent = (report.total or 0) > 0
+      and math.floor(((report.used or 0) / report.total) * 100 + 0.5) or 0
+
+    local colour
+    if report.over then
+      colour = "ffff4444"
+    elseif percent >= 80 then
+      colour = "ffffaa00"
+    else
+      colour = "ff9a9aa2"
+    end
+    meter.text:SetText(("|cff70707aRule Capacity:|r |c%s%d%%|r"):format(colour, percent))
+    meter.report = report
+  end
+
+  Tip(meter, "Rule capacity",
+    "How much of the room this nameplate addon leaves us on one health bar your rules currently spend.\n\n"
+    .. "A rule costs one slot, plus one more for each of: an underlay (it sits above another rule whose debuffs it contains), Cover missing health, and Pandemic Flash. Threat states take theirs from the top, above every spell rule. Border rules cost nothing here -- they draw outside the bar.\n\n"
+    .. "Run out and the lowest rules share a slot, where which of them draws on top is undefined -- the same rules then colour some plates and not others in one pull.\n\n"
+    .. "Measured from a live nameplate when one is up, since the host addon's own art decides the ceiling. With no plate on screen this is the shipped estimate for your addon. Nameplate addons that give each rule its own frame level have room in the hundreds, so the percentage there is nowhere near a limit.")
+
+  section.slotMeter = meter
+  return meter
+end
+
+
 local function BuildRuleRow(parent, getList, isBorder)
+  local Flex, C = NS.Flex, NS.RULE_COLS
+
+  -- Still a Button with its own drag scripts; Flex only places what is inside
+  -- it. FlexAdopt is what lets an existing widget be a container.
   local row = CreateFrame("Button", nil, parent)
-  row:SetSize(690, ROW_H)
+  row:SetHeight(NS.UI.ROW_H)
   row:EnableMouse(true)
+  local node = NS.FlexAdopt(row, {
+    dir = "row", align = "center", height = NS.UI.ROW_H, gap = NS.UI.COL_GAP,
+    pad = { l = NS.UI.ROW_INSET, r = NS.UI.ROW_INSET },
+  })
+  row.node = node
 
   row.stripe = row:CreateTexture(nil, "BACKGROUND")
   row.stripe:SetAllPoints()
   row.stripe:SetColorTexture(1, 1, 1, 0.03)
+  NS.PaintColumnSeps(row)
+
+  -- Recessed while some OTHER row's editor is open, so the row being edited
+  -- is the only one at full strength. One SetAlpha does it here: a rule row
+  -- is a real frame and everything on it is its child.
+  function row.SetRecessed(on)
+    row:SetAlpha(on and THEME.rowRecessed or 1)
+  end
+
+  -- The open row is outlined on three sides and the band below closes the
+  -- box, so a row and its editor read as one object rather than two stacked
+  -- ones.
+  row.sel = {}
+  for index = 1, 4 do
+    row.sel[index] = row:CreateTexture(nil, "OVERLAY")
+    row.sel[index]:SetColorTexture(RGBA(THEME.selection))
+    row.sel[index]:Hide()
+  end
+  row.sel[1]:SetPoint("TOPLEFT");    row.sel[1]:SetPoint("TOPRIGHT")
+  row.sel[2]:SetPoint("BOTTOMLEFT"); row.sel[2]:SetPoint("BOTTOMRIGHT")
+  row.sel[3]:SetPoint("TOPLEFT");    row.sel[3]:SetPoint("BOTTOMLEFT")
+  row.sel[4]:SetPoint("TOPRIGHT");   row.sel[4]:SetPoint("BOTTOMRIGHT")
+  local selWeight = NS.PixelWeight(row, NS.UI.SELECT_EDGE)
+  row.sel[1]:SetHeight(selWeight); row.sel[2]:SetHeight(selWeight)
+  row.sel[3]:SetWidth(selWeight);  row.sel[4]:SetWidth(selWeight)
 
   -- The grip, then the rule's colour, then its name. UP/DOWN buttons and the
   -- type-a-number priority box are gone: position is set by dragging now, and
   -- three ways to express one ordering was two too many.
   row.grip = CreateFrame("Frame", nil, row)
-  row.grip:SetSize(14, 14)
-  row.grip:SetPoint("LEFT", 10, 0)
+  row.grip:SetSize(NS.UI.GRIP, NS.UI.GRIP)
   row.grip.bars = {}
   for i = 1, 2 do
     local bar = row.grip:CreateTexture(nil, "OVERLAY")
@@ -4624,35 +4730,107 @@ local function BuildRuleRow(parent, getList, isBorder)
     bar:SetColorTexture(0.42, 0.42, 0.48, 1)
     row.grip.bars[i] = bar
   end
-
-  row.swatch = row:CreateTexture(nil, "ARTWORK")
-  row.swatch:SetSize(12, 12)
-  row.swatch:SetPoint("LEFT", 32, 0)
+  node:Add(NS.FlexCell(row, C.grip, Flex.Item(row.grip, { height = NS.UI.GRIP })))
 
   row.summary = Label(row, "")
-  row.summary:SetPoint("LEFT", 52, 0)
-  row.summary:SetWidth(300)
   row.summary:SetJustifyH("LEFT")
   row.summary:SetWordWrap(false)
+  -- The only child that grows and the only one that shrinks. Every control to
+  -- its right is fixed, so a narrow window shortens the rule name rather than
+  -- sliding Edit under the delete button.
+  node:Add(Flex.Item(row.summary, { grow = 1, minW = 80, clipText = true }))
+
+  -- The two halves, side by side.
+  --
+  -- These were two lists on two pages, so a rule that coloured both was
+  -- authored twice and nothing in either list said the other existed. One row,
+  -- two cells: filled means that half paints, empty means it does not.
+  --
+  -- The bar chip shows the rule's ACTUAL fill -- statusbar or tiled pattern --
+  -- because two rules with one colour and different fills are two different
+  -- things on a plate, and a list that draws them the same is a list you
+  -- cannot trust. The border chip is flat by construction: an edge is a pixel
+  -- or two, with nothing to tile across it.
+  local function Half(width, getFill, tipTitle, tipBody)
+    local chip = NS.FillChip(row, getFill, width, NS.UI.CHIP_H)
+    chip:EnableMouse(true)
+    chip:SetScript("OnMouseUp", function()
+      -- Opens the rule rather than the colour picker: which half you are
+      -- looking at is a question the editor answers, and a picker launched
+      -- from a list gives you a colour with no idea what it belongs to.
+      if row.edit and row.edit:GetScript("OnClick") then
+        row.edit:GetScript("OnClick")(row.edit)
+      end
+    end)
+    Tip(chip, tipTitle, tipBody)
+    node:Add(NS.FlexCell(row, width, Flex.Item(chip, { height = NS.UI.CHIP_H })))
+    return chip
+  end
+
+  row.barChip = Half(C.bar, function()
+    if not row.rule or row.rule.barEnabled == false then return nil end
+    return row.rule
+  end, "Health bar",
+    "What this rule paints on the bar, drawn the way it will actually draw.\n\nEmpty means the bar half is switched off -- the rule still paints its border, and costs no draw slot.")
+
+  row.borderChip = Half(C.border, function()
+    local border = row.rule and row.rule.border
+    if not border or not border.enabled then return nil end
+    return { color = border.color }
+  end, "Plate border",
+    "What this rule paints on the plate's border.\n\nFree: borders draw outside the health bar, so this costs no draw slot however many rules use it.")
+
+  -- Kept for the render pass, which paints an empty cell in the rule's colour
+  -- at low alpha so a switched-off half still says whose it is.
+  row.swatchFrame = row.barChip
+  row.swatch = row.barChip.fill
+
+  -- What this rule spends out of the draw-slot budget, and on what. Health
+  -- rules only: a border rule draws outside the bar and takes nothing from the
+  -- pool, so a badge reading "0" on every row would be noise.
+  do
+    row.cost = Dim(row, "")
+    row.cost:SetJustifyH("CENTER")
+    row.cost:SetWordWrap(false)
+    node:Add(Flex.Item(row.cost, { width = C.cost, shrink = 0, clipText = true }))
+    TipLabel(row.cost, "What this rule costs",
+      "Draw slots this rule takes on the health bar.\n\n"
+      .. "One for its tint, plus one for an underlay (only when a rule BELOW it has a subset of its debuffs, so it has to hide that rule), one for Cover missing health, and one for Pandemic Flash.\n\n"
+      .. "Turning a rule border-only drops it to nothing: borders draw outside the bar.")
+  end
 
   -- One button. Conditions and appearance both live on the rule's own page
   -- now, so the old pair of expanders had nothing left to expand.
-  row.edit = Button(row, "Edit", 70, function()
-    expandedRule = row.rule
-    expandedSection = "rule"
+  row.edit = Button(row, "Edit", C.edit, function()
+    local sec = row.section
+    if not sec then return end
+    -- One open at a time. Two open editors push the rules they are being
+    -- compared against off the screen, which is the thing opening in place was
+    -- for.
+    sec.openRule = (sec.openRule ~= row.rule) and row.rule or nil
+    if sec.openRule then
+      sec.openThreat = false
+      sec.openMark = false
+      -- Point the page's preview at what is being edited. Only on OPEN, never
+      -- on every render: these ticks are the user's, and re-asserting them
+      -- each pass would fight anyone who unticked one to see what happens.
+      wipe(preview.active)
+      -- A MISSING rule is lit by its debuff being ABSENT, so ticking its
+      -- debuffs on is the one state in which it cannot draw. Opening one used
+      -- to switch its own preview off -- the rule looked broken at exactly the
+      -- moment you opened it to look at it.
+      if not sec.openRule.showWhenMissing then
+        for _, condition in ipairs(sec.openRule.conditions or {}) do
+          preview.active[condition.spellID] = true
+        end
+      end
+    end
+    expandedRule = sec.openRule
     EnsureRulePreview()
-    SelectTab(PAGE_RULE)
     NS.Options_RebuildAll()
   end)
-  row.edit:SetPoint("LEFT", 470, 0)
   StyleText(row.edit.label, 11)
-
-  -- A tick box, not a switch: switches are reserved for turning a whole
-  -- MODULE on and off. One rule among several is a setting.
-  row.enabled = Checkbox(row,
-    function() return row.rule and row.rule.enabled ~= false end,
-    function(v) if row.rule then row.rule.enabled = v; Structural() end end)
-  row.enabled:SetPoint("LEFT", 600, 0)
+  node:Add(NS.FlexCell(row, C.edit, Flex.Item(row.edit, { width = C.edit })))
 
   -- Confirmed, because there is no undo. A rule can carry two debuffs, a
   -- colour, a fill texture and a border, and one stray click on a narrow
@@ -4676,7 +4854,14 @@ local function BuildRuleRow(parent, getList, isBorder)
         Structural()
       end)
   end)
-  row.remove:SetPoint("LEFT", 556, 0)
+  node:Add(NS.FlexCell(row, C.del, Flex.Item(row.remove)))
+
+  -- A tick box, not a switch: switches are reserved for turning a whole
+  -- MODULE on and off. One rule among several is a setting.
+  row.enabled = Checkbox(row,
+    function() return row.rule and row.rule.enabled ~= false end,
+    function(v) if row.rule then row.rule.enabled = v; Structural() end end)
+  node:Add(NS.FlexCell(row, C.on, Flex.Item(row.enabled)))
 
   -- Where the row will land. On its own raised frame because rows are frames
   -- and a texture belonging to their parent draws BEHIND them, however high
@@ -4774,11 +4959,63 @@ local function BuildRuleRow(parent, getList, isBorder)
     if not self.moved and math.abs(y - self.pressY) >= DRAG_THRESHOLD then
       self.moved = true
       self:SetAlpha(0.45)
+      -- Close the editor before reordering. The band sits between two rows, so
+      -- a drop aimed at the gap it occupies has no row under the cursor and
+      -- lands at the bottom of the list -- a move nobody asked for. Reordering
+      -- and editing are also different jobs: you drag to decide what beats
+      -- what, and open a rule to decide what it looks like.
+      local sec = self.section
+      if sec and sec.openRule then
+        sec.openRule = nil
+        expandedRule = nil
+        if sec.editorBand then sec.editorBand.hidden = true end
+        if sec.style then sec.style:Hide() end
+        NS.FlexResize(sec)
+      end
     end
     if self.moved then ShowDropLine(self) end
   end)
 
   return row
+end
+
+-- The rule list's header, built from the SAME node shape as a row: a spacer
+-- per fixed column, and a growing label where the rule name goes. That is what
+-- keeps a heading over its control.
+function NS.BuildRuleHeader(parent, isBorder)
+  local Flex, C = NS.Flex, NS.RULE_COLS
+  local head = Flex.Box(parent, {
+    dir = "row", align = "center", height = NS.UI.HEAD_H, gap = NS.UI.COL_GAP,
+    pad = { l = NS.UI.ROW_INSET, r = NS.UI.ROW_INSET },
+  })
+
+  head.order = select(1, NS.FlexHeaderCell(head.frame, "Order", C.grip))
+  head:Add(head.order)
+
+  head.rule = Header(head.frame, "Rule")
+  head.rule:SetJustifyH("LEFT")
+  head:Add(Flex.Item(head.rule, { grow = 1, minW = 80, clipText = true }))
+
+  head.bar = select(1, NS.FlexHeaderCell(head.frame, "Bar", C.bar))
+  head:Add(head.bar)
+  head.border = select(1, NS.FlexHeaderCell(head.frame, "Border", C.border))
+  head:Add(head.border)
+
+  -- Right-aligned, over a right-aligned number.
+  -- CENTRED, heading and value alike. It was right-aligned against a column
+  -- sized for the word "Slots", so a single digit sat hard against the Edit
+  -- button with the heading floating above the gap.
+  head.slots = Header(head.frame, "Slots")
+  head.slots:SetJustifyH("CENTER")
+  head:Add(Flex.Item(head.slots, { width = C.cost, shrink = 0, clipText = true }))
+  head.edit = select(1, NS.FlexHeaderCell(head.frame, "Edit", C.edit))
+  head:Add(head.edit)
+  head.del = select(1, NS.FlexHeaderCell(head.frame, "Del", C.del))
+  head:Add(head.del)
+  head.on = select(1, NS.FlexHeaderCell(head.frame, "On", C.on))
+  head:Add(head.on)
+  NS.PaintColumnSeps(head.frame)
+  return head
 end
 
 local function BuildConditionRow(parent)
@@ -4807,6 +5044,2364 @@ local function BuildConditionRow(parent)
   return row
 end
 
+-- Threat.
+--
+-- Two modules, not one: the bar tint lives on the Health Bar page and the
+-- border on the Border page, each with its own switch and its own four
+-- colours. They were one control with a "Bdr" column, which meant every
+-- border question had to be asked inside the bar's row -- and put four tick
+-- columns where two would do.
+--
+-- Each reads as ONE row: a strip of the four colours, what it is doing in
+-- words, Edit, and a switch, with the situations themselves behind Edit.
+-- Threat is one thing you turn on, not four rules you maintain.
+--
+-- Four fixed situations, because the client reports exactly one threat status
+-- per unit. The role dropdown turns those states into sentences; same states
+-- underneath, only the reading changes. There is no combat option: threat is
+-- in-combat only, since out of combat every plate reports the same state.
+--
+-- LAID OUT WITH FLEX (Libs\Flex\Flex.lua, vendored from FlexProto). The
+-- hand-written alternative anchors each control to an x from a constant while
+-- the column headings take their x from a second copy of it, which is how the
+-- first version of this section put its headings a column off and printed its
+-- footnote through a button. Under Flex the header and a row are the same node
+-- shape, so a column cannot be in two places, and the section's height is
+-- measured rather than guessed.
+--
+-- Driven manually (Layout -> Apply -> Resize) rather than through Flex.Root's
+-- own OnSizeChanged reflow: a section that resizes its content, which resizes
+-- the section, is a loop.
+--
+-- Every widget hangs off NS rather than a file-local: Options.lua sits a
+-- handful of locals under Lua's 200-per-chunk ceiling.
+
+-- Flex.Box always makes its own frame, and a row here has to BE a widget we
+-- already built -- a Button with drag handlers, or a frame carrying a stripe.
+-- Handing the node an existing frame is enough: Add parents children to
+-- node.frame, and Apply anchors them to it.
+function NS.FlexAdopt(frame, props)
+  local node = NS.Flex.Box(frame, props)
+  -- The frame Box just created is thrown away rather than left parented and
+  -- invisible. Nothing has been added to it yet, so nothing is orphaned.
+  node.frame:Hide()
+  node.frame:SetParent(nil)
+  node.frame = frame
+  return node
+end
+
+-- A fixed-width column with its content CENTRED in it.
+--
+-- Flex's `align` is the cross axis, so inside a row it controls vertical
+-- placement -- there is no horizontal centring to be had from an item. A
+-- one-child box with justify = center is how a 20px tick box sits in the
+-- middle of a 30px column, and how the heading above it lands on the same
+-- centre line rather than at the column's left edge.
+function NS.FlexCell(parent, width, child, props)
+  local cell = NS.Flex.Box(parent, {
+    dir = "row", justify = "center", align = "center",
+    width = width, shrink = 0,
+  })
+  if props then for key, value in pairs(props) do cell[key] = value end end
+  cell:Add(child)
+  return cell
+end
+
+-- Paints a rule's fill into one texture, at that texture's own size.
+--
+-- The single renderer behind every place a fill appears in this window: the
+-- Bar and Border chips in a row, the picker grid, and the preview plate. Three
+-- call sites, one implementation -- which is what stops the list from
+-- disagreeing with the plate about what a rule looks like.
+--
+-- It mirrors the two branches ApplyRuleFill takes on a real bar:
+--
+--   pattern    the library TGA, tiled, at the period NS.FillTexCoords gives
+--              for THIS rect -- a 30px chip repeats a 400px stripe sheet far
+--              less than a 150px bar does, and pretending otherwise is what
+--              made a chip look solid where the plate looked striped
+--   statusbar  the LibSharedMedia bar the rule picked, tinted
+--   neither    a flat colour, which is also what a rule with no media
+--              installed falls back to on the plate
+--
+-- `fill` is the rule (or a threat state): anything with color, fillStyle,
+-- barTexture and fillTexture.
+function NS.PaintFill(tex, fill, width, height)
+  local color = (fill and fill.color) or NS.DefaultColor()
+  width = width or NS.UI.CHIP_W
+  height = height or NS.UI.CHIP_H
+
+  local drew = false
+  if fill and fill.fillStyle == "texture" then
+    local library = NS.FillTextureByKey and NS.FillTextureByKey(fill.fillTexture)
+    if library then
+      drew = pcall(function()
+        tex:SetTexture(library.path, true, true)
+        tex:SetTexCoord(NS.FillTexCoords(width, height, library))
+        tex:SetVertexColor(color.r, color.g, color.b)
+        tex:SetAlpha(color.a or 1)
+      end)
+    end
+  elseif fill then
+    local path = NS.BarTexturePath and NS.BarTexturePath(fill.barTexture)
+    if path then
+      drew = pcall(function()
+        tex:SetTexture(path)
+        -- Reset: this texture may have been tiling a pattern a moment ago, and
+        -- a stale TexCoord crops a statusbar to a sliver of itself.
+        tex:SetTexCoord(0, 1, 0, 1)
+        tex:SetVertexColor(color.r, color.g, color.b)
+        tex:SetAlpha(color.a or 1)
+      end)
+    end
+  end
+
+  if not drew then
+    pcall(function()
+      tex:SetTexture(nil)
+      tex:SetTexCoord(0, 1, 0, 1)
+      tex:SetColorTexture(color.r, color.g, color.b, color.a or 1)
+      tex:SetVertexColor(1, 1, 1)
+      tex:SetAlpha(1)
+    end)
+  end
+  return tex
+end
+
+-- A chip: one texture at chip size, on a frame so it can be clicked or sit in
+-- a Flex cell. `getFill` is read on every Refresh, so a colour edited in the
+-- picker reaches it without anything being rebuilt.
+function NS.FillChip(parent, getFill, width, height)
+  local chip = CreateFrame("Frame", nil, parent)
+  chip:SetSize(width or NS.UI.CHIP_W, height or NS.UI.CHIP_H)
+
+  chip.bg = chip:CreateTexture(nil, "BACKGROUND")
+  chip.bg:SetAllPoints()
+  chip.bg:SetColorTexture(0.06, 0.06, 0.08, 1)
+
+  chip.fill = chip:CreateTexture(nil, "ARTWORK")
+  chip.fill:SetAllPoints()
+
+  -- A hairline around a chip that is painting.
+  --
+  -- These sit on a striped row, against a dark panel, next to each other --
+  -- and a pale fill on a dark background has no edge of its own, so two chips
+  -- side by side ran together. Black rather than a grey: it has to read as the
+  -- chip's edge at any fill colour, and every colour in this window is lighter
+  -- than black.
+  chip.edge = {}
+  for index = 1, 4 do
+    chip.edge[index] = chip:CreateTexture(nil, "OVERLAY", nil, 1)
+    chip.edge[index]:SetColorTexture(RGBA(THEME.chipEdge))
+  end
+  chip.edge[1]:SetPoint("TOPLEFT");    chip.edge[1]:SetPoint("TOPRIGHT")
+  chip.edge[2]:SetPoint("BOTTOMLEFT"); chip.edge[2]:SetPoint("BOTTOMRIGHT")
+  chip.edge[3]:SetPoint("TOPLEFT");    chip.edge[3]:SetPoint("BOTTOMLEFT")
+  chip.edge[4]:SetPoint("TOPRIGHT");   chip.edge[4]:SetPoint("BOTTOMRIGHT")
+
+  -- Two rotated hairlines, not an X glyph or an art file: at 14 pixels a font
+  -- glyph is mostly padding and lands off centre, and a texture would be one
+  -- more thing to ship. Rotation is about the texture's own centre, so both
+  -- strokes cross exactly in the middle of the chip whatever size it is.
+  chip.cross = {}
+  for index = 1, 2 do
+    chip.cross[index] = chip:CreateTexture(nil, "OVERLAY", nil, 2)
+    chip.cross[index]:SetColorTexture(RGBA(THEME.chipCross))
+    chip.cross[index]:SetPoint("CENTER")
+    pcall(chip.cross[index].SetRotation, chip.cross[index],
+      (index == 1) and (math.pi / 4) or (-math.pi / 4))
+  end
+
+  -- An empty chip is an OUTLINE, not a faint version of the colour.
+  --
+  -- A quarter-alpha wash reads as "this is painting, dimly" at a glance, which
+  -- is the opposite of what it means. A hollow box reads as an empty slot,
+  -- because that is what a hollow box is everywhere else.
+  -- Dotted, and white: a solid grey box is a border a rule could be painting,
+  -- so the empty state has to be drawn in something no rule can produce. WoW
+  -- has no dashed-line primitive, so the dashes are textures laid along each
+  -- edge, pooled and re-laid whenever the chip's size changes.
+  chip.hollow = {}
+  local function Dash(index)
+    local dash = chip.hollow[index]
+    if not dash then
+      dash = chip:CreateTexture(nil, "OVERLAY")
+      dash:SetColorTexture(RGBA(THEME.chipCross))
+      chip.hollow[index] = dash
+    end
+    return dash
+  end
+
+  -- Symmetric by construction: the dashes on an edge are CENTRED along it, so
+  -- both ends of every side finish the same distance from the corner. Laying
+  -- them from one end instead left a full dash at the start and a clipped
+  -- stub at the finish, which is what read as a lopsided outline.
+  --
+  -- Thickness goes through PixelBorder's rule -- whole physical pixels -- for
+  -- the same reason the control borders do.
+  local function LayDashes()
+    local w, h = chip:GetWidth() or 0, chip:GetHeight() or 0
+    if w <= 0 or h <= 0 then return end
+    local dashLen, gap = NS.UI.CHIP_DASH, NS.UI.CHIP_DASH_GAP
+    local weight = 1
+    if PixelUtil and PixelUtil.GetNearestPixelSize then
+      local ok, snapped = pcall(PixelUtil.GetNearestPixelSize, 1, chip:GetEffectiveScale(), 1)
+      if ok and snapped and snapped > 0 then weight = snapped end
+    end
+    local used = 0
+    local function Run(length, place)
+      -- As many whole dashes as fit, then the remainder split evenly between
+      -- the two ends.
+      local count = math.max(1, math.floor((length + gap) / (dashLen + gap)))
+      local span = count * dashLen + (count - 1) * gap
+      local lead = (length - span) / 2
+      for index = 0, count - 1 do
+        used = used + 1
+        local dash = Dash(used)
+        dash:ClearAllPoints()
+        place(dash, lead + index * (dashLen + gap))
+        dash:Show()
+      end
+    end
+    Run(w, function(dash, at)
+      dash:SetSize(dashLen, weight)
+      dash:SetPoint("TOPLEFT", at, 0)
+    end)
+    Run(w, function(dash, at)
+      dash:SetSize(dashLen, weight)
+      dash:SetPoint("BOTTOMLEFT", at, 0)
+    end)
+    Run(h, function(dash, at)
+      dash:SetSize(weight, dashLen)
+      dash:SetPoint("TOPLEFT", 0, -at)
+    end)
+    Run(h, function(dash, at)
+      dash:SetSize(weight, dashLen)
+      dash:SetPoint("TOPRIGHT", 0, -at)
+    end)
+    for index = used + 1, #chip.hollow do chip.hollow[index]:Hide() end
+    chip.dashCount = used
+    chip.dashW, chip.dashH = w, h
+
+    -- The X spans the chip's shorter side, inset so its ends stop clear of
+    -- the dashes rather than touching them.
+    local reach = math.max(4, math.min(w, h) - 6)
+    for _, stroke in ipairs(chip.cross) do
+      stroke:SetSize(reach, weight)
+    end
+  end
+
+  chip.Refresh = function()
+    local fill = getFill and getFill() or nil
+    chip.empty = fill == nil
+    chip.fill:SetShown(not chip.empty)
+    if chip.empty and (chip.dashW ~= chip:GetWidth() or chip.dashH ~= chip:GetHeight()) then
+      LayDashes()
+    end
+    for index, edge in ipairs(chip.hollow) do
+      edge:SetShown(chip.empty and index <= (chip.dashCount or 0))
+    end
+    for _, stroke in ipairs(chip.cross) do stroke:SetShown(chip.empty) end
+    -- One outline or the other, never both: the dashes ARE the empty chip's
+    -- edge, and a black hairline under them would only muddy them.
+    local weight = NS.PixelWeight(chip)
+    chip.edge[1]:SetHeight(weight); chip.edge[2]:SetHeight(weight)
+    chip.edge[3]:SetWidth(weight);  chip.edge[4]:SetWidth(weight)
+    for _, edge in ipairs(chip.edge) do edge:SetShown(not chip.empty) end
+    if not chip.empty then
+      NS.PaintFill(chip.fill, fill, chip:GetWidth(), chip:GetHeight())
+    end
+  end
+  chip.Refresh()
+  -- The reason this addon has its own picker: a striped chip has to follow a
+  -- colour drag the same way a flat swatch does.
+  NS.RegisterLiveSwatch(chip.Refresh)
+  return chip
+end
+
+-- Lays the rule style panel out with Flex, over the widgets it already built.
+--
+-- The panel creates every control with its own SetPoint and a fixed 660x220
+-- frame -- the last hand-anchored thing in the editor, and the reason its
+-- blocks were tuned by nudging offsets ("isBorder raised 62 -> 82: the border
+-- shape block moved down 20px to stop overlapping it"). None of that survives
+-- a window the user can resize.
+--
+-- Only the PLACEMENT is replaced. Every getter, setter and Refresh in
+-- BuildStylePanel is untouched, and the creation-time SetPoints are harmless:
+-- Flex's Apply clears a node's points before setting its own.
+--
+-- Rows are declared, not positioned. A row whose widgets are all hidden
+-- contributes nothing, so the panel's height is what it actually needs rather
+-- than the tallest state it could reach -- which is what the old fixed height
+-- was reserving space for.
+function NS.StylePanelLayout(panel, isBorder)
+  if panel.flex then return panel.flex end
+  local Flex, UI = NS.Flex, NS.UI
+  -- Adopted, not wrapped: the panel frame IS the container. Flex.Box would
+  -- otherwise create a second frame inside it and leave it parented there
+  -- forever, since a frame cannot be destroyed.
+  local root = NS.FlexAdopt(panel, { dir = "column", gap = UI.FIELD_GAP,
+    pad = { l = UI.ROW_INSET, r = UI.ROW_INSET, t = UI.FIELD_GAP, b = UI.FIELD_GAP } })
+
+  -- A labelled row: the label in its own column so several rows line up, then
+  -- whatever the field is.
+  local function Row(label, ...)
+    local row = Flex.Box(panel, { dir = "row", align = "center", gap = UI.COL_GAP,
+      height = UI.CTRL_ROW_H })
+    if label then
+      label:SetJustifyH("LEFT")
+      row:Add(Flex.Item(label, { width = UI.LABEL_W, shrink = 0, clipText = true }))
+    end
+    for _, spec in ipairs({ ... }) do
+      row:Add(Flex.Item(spec[1], { width = spec[2], grow = spec[3], shrink = 0,
+        minW = spec[3] and UI.LABEL_TINY or nil, clipText = spec[4] }))
+    end
+    root:Add(row)
+    return row
+  end
+
+  -- Colour, and what the rule keys off. One row: they are the two things you
+  -- change most and they belong side by side.
+  local colour = Row(panel.colorLabel, { panel.swatch, UI.BOX })
+  if panel.whenDrop then
+    colour:Add(Flex.Item(panel.whenLabel, { width = NS.UI.LABEL_MD, shrink = 0, clipText = true }))
+    colour:Add(Flex.Item(panel.whenDrop, { width = UI.DROP_W, shrink = 0 }))
+    colour:Add(Flex.Item(panel.combatOnlyCheck, { width = UI.BOX, shrink = 0 }))
+    colour:Add(Flex.Item(panel.combatOnlyLabel, { grow = 1, minW = UI.LABEL_TINY, clipText = true }))
+  end
+  panel.colourRow = colour
+
+  if not isBorder then
+    local fill = Row(panel.fillLabel, { panel.fillStyle, UI.SLIDER_W })
+    fill:Add(Flex.Item(panel.textureLabel, { width = NS.UI.LABEL_SM, shrink = 0, clipText = true }))
+    fill:Add(Flex.Item(panel.textureDrop, { width = UI.DROP_W, shrink = 0 }))
+    fill:Add(Flex.Item(panel.barTexLabel, { width = NS.UI.LABEL_SM, shrink = 0, clipText = true }))
+    fill:Add(Flex.Item(panel.barTexDrop, { width = UI.DROP_W, shrink = 0 }))
+    panel.fillRow = fill
+
+    -- Warnings wrap. They are the one thing here whose height depends on the
+    -- window's width, which is exactly what the fixed panel could not express
+    -- -- hence "room for a three-line wrap" reserved whether or not one was
+    -- showing.
+    --
+    -- An empty warning is not a short warning: a FontString with no text still
+    -- reports a line's height, so these are hidden on their text rather than
+    -- left to measure to nothing.
+    panel.textureWarnNode = root:Add(NS.FlexNote(panel, panel.textureWarning, UI.ROW_INSET))
+    panel.alphaWarnNode = root:Add(NS.FlexNote(panel, panel.missingAlphaWarn, UI.ROW_INSET))
+
+    local cover = Row(nil, { panel.missingCoverCheck, UI.BOX },
+      { panel.missingCoverLabel, nil, 1, true })
+    panel.coverRow = cover
+    panel.coverWarnNode = root:Add(NS.FlexNote(panel, panel.missingCoverWarn, UI.ROW_INSET))
+
+    local missing = Row(panel.missingColorLabel, { panel.missingColor, UI.BOX },
+      { panel.missingColorNote, nil, 1, true })
+    panel.missingRow = missing
+  else
+    local shape = Row(panel.title, { panel.thickLabel, UI.LABEL_MD }, { panel.thickness, UI.SLIDER_W })
+    shape:Add(Flex.Item(panel.growLabel, { width = NS.UI.LABEL_XS, shrink = 0, clipText = true }))
+    shape:Add(Flex.Item(panel.grow, { width = UI.DROP_SM_W, shrink = 0 }))
+    shape:Add(Flex.Item(panel.padLabel, { width = NS.UI.LABEL_TINY, shrink = 0, clipText = true }))
+    shape:Add(Flex.Item(panel.padding, { width = UI.DROP_SM_W, shrink = 0 }))
+    panel.shapeRow = shape
+  end
+
+  local vis = Row(nil, { panel.targetCheck, UI.BOX }, { panel.targetLabel, UI.LABEL_LG, nil, true },
+    { panel.focusCheck, UI.BOX }, { panel.focusLabel, nil, 1, true })
+  panel.visRow = vis
+
+  -- The two headings the split forms drop. Hidden here rather than removed:
+  -- the rule editor page still builds those forms and reads these fields.
+  if panel.appearHeader then panel.appearHeader:Hide() end
+  if panel.visHeader then panel.visHeader:Hide() end
+
+  panel.flex = root
+  return root
+end
+
+-- Lays out the panel at a given width and returns the height it needs.
+--
+-- A row every one of whose widgets is hidden is hidden itself, so the panel
+-- shrinks to what is actually on screen. Flex has no opinion about a frame
+-- being :Hide()n -- `hidden` is the layout state -- so this is where the two
+-- are reconciled.
+function NS.StylePanelResize(panel, width)
+  if not panel.flex then return 0 end
+
+  -- Take the panel's own Hide() calls into the layout, per widget.
+  --
+  -- Refresh decides what this rule can show: a bar-texture dropdown and a
+  -- pattern dropdown occupy the same column and exactly one is ever live, and
+  -- "in combat" only exists on a missing rule. It expresses that with :Hide().
+  --
+  -- Flex does not read that. `hidden` is its own layout state, and Apply calls
+  -- Show() on every node that is not hidden -- so a widget Refresh had just
+  -- hidden was put back on screen AND kept its width. That is both dropdowns
+  -- visible at once, over each other's column.
+  --
+  -- So visibility is copied into the layout before laying out, and only ever
+  -- in that direction: Refresh owns what is shown, Flex owns where it goes.
+  local function sync(node)
+    local obj = node.frame or node.region
+    if obj and obj.IsShown and not node.keepShown then
+      node.hidden = not obj:IsShown()
+    end
+    for _, child in ipairs(node.children or {}) do sync(child) end
+  end
+  for _, row in ipairs(panel.flex.children) do
+    for _, child in ipairs(row.children or {}) do sync(child) end
+    -- A row whose every widget is hidden is hidden itself, so it contributes
+    -- no height and no gap.
+    local any = false
+    for _, child in ipairs(row.children or {}) do
+      if not child.hidden then any = true break end
+    end
+    row.hidden = not any
+  end
+
+  -- A warning with nothing to say takes no room. Text, not visibility: these
+  -- are set by Refresh writing a string, and an empty one still measures a
+  -- line high.
+  for _, node in ipairs({ panel.textureWarnNode, panel.alphaWarnNode, panel.coverWarnNode }) do
+    if node then
+      local text = node.children[1]
+      local obj = text and (text.region or text.frame)
+      local body = obj and obj.GetText and obj:GetText()
+      node.hidden = (body == nil or body == "")
+    end
+  end
+
+  local height = panel.flex:Layout(width)
+  panel.flex:Apply()
+  panel:SetHeight(math.max(1, height))
+  return height
+end
+
+-- What colours a plate, in the order it is decided.
+--
+-- The order is real and it is decided when a plate is BUILT, not while it is
+-- painted: threat reserves its draw sublevel before the missing ladder, and
+-- before any spell rule is allocated one. Nothing in this window has ever said
+-- so, which is why "why is my rule not showing" is answered by /pt status
+-- rather than by looking at the page the rules are on.
+--
+-- Live counts, not a static picture. A band that says "4 rules, 3 active" is
+-- doing the same job the picture is, for the profile actually loaded.
+function NS.ResolutionBands()
+  local tints = (NS.db and NS.db.tints) or {}
+
+  local threatOn = #(NS.GetOrderedThreatRules and NS.GetOrderedThreatRules() or {})
+  local threatBorders = #(NS.GetOrderedThreatBorders and NS.GetOrderedThreatBorders() or {})
+  local states = #(NS.THREAT_STATES or {})
+
+  local rules, active, missing = tints.rules or {}, 0, 0
+  for _, rule in ipairs(rules) do
+    if rule.enabled ~= false and #(rule.conditions or {}) > 0 then
+      if rule.showWhenMissing then missing = missing + 1 else active = active + 1 end
+    end
+  end
+
+  -- The same reading for target/focus: off, on with nothing picked, or which
+  -- halves are lit.
+  local markBars = #(NS.GetOrderedMarkRules and NS.GetOrderedMarkRules() or {})
+  local markBorders = #(NS.GetOrderedMarkBorders and NS.GetOrderedMarkBorders() or {})
+  local markState
+  if NS.MarkConfig and NS.MarkConfig().enabled == false then
+    markState = "off"
+  elseif markBars == 0 and markBorders == 0 then
+    markState = "on, nothing picked"
+  elseif markBars == 0 then
+    markState = ("border only, %d of 2"):format(markBorders)
+  elseif markBorders == 0 then
+    markState = ("%d of 2"):format(markBars)
+  else
+    markState = ("%d of 2, %d with borders"):format(markBars, markBorders)
+  end
+
+  local threatState
+  if (NS.db and NS.db.tints or {}).threatEnabled == false
+    or NS.ThreatConfig().enabled == false then
+    threatState = "off"
+  elseif threatOn == 0 and threatBorders == 0 then
+    threatState = "on, no states picked"
+  elseif threatOn == 0 then
+    threatState = ("border only, %d of %d states"):format(threatBorders, states)
+  elseif threatBorders == 0 then
+    threatState = ("%d of %d states"):format(threatOn, states)
+  else
+    -- Both halves, and they need not agree: two of three bars and one border
+    -- is a real profile, and one number cannot say it.
+    threatState = ("%d of %d states, %d with borders"):format(threatOn, states, threatBorders)
+  end
+
+  return {
+    { key = "threat", colour = THEME.bandThreat, label = "Threat",
+      state = threatState, tip = "Reserves its draw sublevel first, so it covers whatever a spell rule painted. Clears the moment the state does." },
+    { key = "mark", colour = THEME.bandMark, label = "Target/Focus",
+      state = markState,
+      tip = "Claims its slots after threat and before your rules, so a target colour covers whatever a spell rule painted. Lit for as long as the unit is your target or focus." },
+    { key = "rules", colour = THEME.bandRules, label = "Your spell rules",
+      state = ("%d rule%s, %d active"):format(#rules, #rules == 1 and "" or "s", active),
+      tip = "The topmost rule that matches is what you see. Drag to change that." },
+    { key = "missing", colour = THEME.bandMissing, label = "Missing reminders",
+      state = missing == 0 and "none" or ("%d rule%s"):format(missing, missing == 1 and "" or "s"),
+      tip = "Below every rule that fires on a debuff being PRESENT, whatever order the list is in." },
+    { key = "host", colour = THEME.bandHost, label = "Your nameplate addon",
+      state = tostring((NS.CurrentAdapterName and NS.CurrentAdapterName()) or "whatever is loaded"),
+      tip = "Whatever it draws wherever you did not cover it -- threat, execute range, mob type." },
+  }
+end
+
+function NS.BuildResolutionLadder(section)
+  local Flex, UI = NS.Flex, NS.UI
+  local content = section.content
+  local root = Flex.Root(content, { dir = "column", gap = UI.ROW_GAP,
+    pad = { t = UI.PAD_TOP, b = UI.PAD_BOTTOM } })
+
+  section.bands = {}
+  for index = 1, #NS.ResolutionBands() do
+    local row = Flex.Box(content, { dir = "row", align = "center", height = UI.BAND_H,
+      gap = UI.COL_GAP, pad = { l = UI.ROW_INSET, r = UI.ROW_INSET } })
+
+    row.rank = Dim(row.frame, tostring(index))
+    row.rank:SetJustifyH("RIGHT")
+    row:Add(Flex.Item(row.rank, { width = UI.BAND_RANK, shrink = 0 }))
+
+    -- The stripe is the band's identity, and the reason the rows read as a
+    -- stack rather than four sentences: colour down the left edge is the one
+    -- thing you can follow without reading.
+    row.stripeFrame = CreateFrame("Frame", nil, content)
+    row.stripeFrame:SetSize(UI.BAND_STRIPE, UI.BAND_H)
+    row.stripe = row.stripeFrame:CreateTexture(nil, "ARTWORK")
+    row.stripe:SetAllPoints()
+    row:Add(Flex.Item(row.stripeFrame, { width = UI.BAND_STRIPE, height = UI.BAND_H, shrink = 0 }))
+
+    -- Word wrap OFF and the item pinned to the row's own height.
+    --
+    -- A FontString wraps by default, so a state as long as "2 of 3 states, 2
+    -- with borders" measured two lines tall in a 24-high row. Flex centres the
+    -- item, so a two-line box put its FIRST line half a row above the name
+    -- beside it -- which is what made these rows read as unevenly spaced when
+    -- every row is in fact the same height. Vertically centring both halves
+    -- against the full row height is what keeps a long state on the same line
+    -- as its name.
+    row.label = Label(row.frame, "")
+    row.label:SetJustifyH("LEFT")
+    row.label:SetJustifyV("MIDDLE")
+    row.label:SetWordWrap(false)
+    row:Add(Flex.Item(row.label, { width = UI.BAND_NAME, height = UI.BAND_H,
+      shrink = 0, clipText = true }))
+
+    row.state = Dim(row.frame, "")
+    row.state:SetJustifyH("LEFT")
+    row.state:SetJustifyV("MIDDLE")
+    row.state:SetWordWrap(false)
+    row:Add(Flex.Item(row.state, { grow = 1, minW = UI.LABEL_TINY, height = UI.BAND_H,
+      clipText = true }))
+
+    section.bands[index] = root:Add(row)
+  end
+
+  section:SetHelp("What colors this plate",
+    "The order these are resolved in, top to bottom. It is decided when a nameplate is built, not while it is painted -- which is why dragging a rule cannot move it above threat, and why a missing reminder cannot be dragged above a rule that fires on a debuff being present.\n\n"
+    .. "Each band shows what your profile currently has in it. A band reading `off` or `none` draws nothing at all, and whatever is below it shows through.")
+
+  section.flex = root
+  return root
+end
+
+function NS.RenderResolutionLadder(sec)
+  if not sec.flex then NS.BuildResolutionLadder(sec) end
+  for index, band in ipairs(NS.ResolutionBands()) do
+    local row = sec.bands[index]
+    row.stripe:SetColorTexture(RGBA(band.colour))
+    row.label:SetText(band.label)
+    row.state:SetText(band.state)
+    -- Dimmed as a whole when the band contributes nothing, so "what is
+    -- actually painting" reads off the strip without counting.
+    local live = band.state ~= "off" and band.state ~= "none"
+    row.label:SetAlpha(live and 1 or 0.45)
+    row.state:SetAlpha(live and 1 or 0.45)
+    row.stripeFrame:SetAlpha(live and 1 or 0.3)
+    Tip(row.frame, band.label, band.tip)
+  end
+  NS.FlexResize(sec)
+end
+
+-- Threat, as the top row of the rule list.
+--
+-- It was a section of its own above the list, which described the ordering
+-- backwards: threat is not a thing beside your rules, it is the thing that
+-- beats all of them. A row at the top of the same table, labelled TOP and with
+-- no grip, says that in the place people read priority -- and there is now one
+-- table on one page rather than a stack of sections each holding a list.
+--
+-- Its cells mean what every other row's cells mean: the Bar column shows what
+-- it paints on the bar, the Border column what it paints on the border, Slots
+-- what it costs. The differences are that it cannot be dragged and cannot be
+-- deleted, which is what TOP and the missing controls say.
+function NS.BuildThreatPinnedRow(parent)
+  local Flex, UI, C = NS.Flex, NS.UI, NS.RULE_COLS
+  local row = Flex.Box(parent, { dir = "row", align = "center", height = UI.ROW_H,
+    gap = UI.COL_GAP, pad = { l = UI.ROW_INSET, r = UI.ROW_INSET } })
+
+  row.bg = row.frame:CreateTexture(nil, "BACKGROUND")
+  row.bg:SetAllPoints()
+  row.bg:SetColorTexture(RGBA(THEME.bandThreat))
+  row.bg:SetAlpha(0.10)
+  NS.PaintColumnSeps(row.frame)
+
+  row.pin = Dim(row.frame, "TOP")
+  row.pin:SetJustifyH("LEFT")
+  row:Add(Flex.Item(row.pin, { width = C.grip, shrink = 0, clipText = true }))
+
+  row.label = Label(row.frame, "")
+  row.label:SetJustifyH("LEFT")
+  row:Add(Flex.Item(row.label, { grow = 1, minW = 80, clipText = true }))
+
+  -- One strip per half, three chips each, in the same columns the rules use.
+  local function Strip(width, kind)
+    local strip = Flex.Box(parent, { dir = "row", align = "center", gap = UI.CHIP_GAP,
+      width = width, shrink = 0, justify = "center" })
+    strip.chips = {}
+    for _, state in ipairs(NS.ThreatStatesOrdered()) do
+      local key = state.key
+      local chip = NS.FillChip(parent, function()
+        -- Hollow when threat is off, not just when this state is: a chip
+        -- painting a colour nothing will draw is the row disagreeing with the
+        -- ladder three inches above it.
+        if NS.ThreatConfig().enabled == false then return nil end
+        local entry = NS.ThreatModule(kind).states[key]
+        if not entry or entry.enabled == false then return nil end
+        return { color = entry.color }
+      end, UI.STRIP_CHIP, UI.CHIP_H)
+      -- Clickable, like a rule's chips: a colour you can see and not touch is
+      -- a colour you go hunting for a control for.
+      chip:EnableMouse(true)
+      chip:SetScript("OnMouseUp", function()
+        if row.onEdit then row.onEdit() end
+      end)
+      Tip(chip, NS.ThreatStateLabel(key), "Open the threat editor.")
+      strip.chips[#strip.chips + 1] = chip
+      strip:Add(Flex.Item(chip, { width = UI.STRIP_CHIP, height = UI.CHIP_H, shrink = 0 }))
+    end
+    row:Add(strip)
+    return strip
+  end
+  row.barStrip = Strip(C.bar, "bar")
+  row.borderStrip = Strip(C.border, "border")
+
+  row.cost = Dim(row.frame, "")
+  row.cost:SetJustifyH("CENTER")
+  row:Add(Flex.Item(row.cost, { width = C.cost, shrink = 0, clipText = true }))
+  TipLabel(row.cost, "What threat costs",
+    "One draw slot per state you switch on for the bar, taken off the TOP of the budget so a threat colour always beats a spell rule.\n\nThe border half costs nothing: borders draw outside the bar.")
+
+  row.edit = Button(parent, "Edit", C.edit, function()
+    if row.onEdit then row.onEdit() end
+  end)
+  StyleText(row.edit.label, 11)
+  row:Add(NS.FlexCell(parent, C.edit, Flex.Item(row.edit, { width = C.edit })))
+
+  -- No delete. Threat is not a rule you added.
+  -- Through FlexCell, like every other cell in the row.
+  --
+  -- A bare item sized to the column centres the TEXT inside the fontstring,
+  -- which is not the same as centring the fontstring in the column: the
+  -- string is laid out at its own measured width, so the dashes sat wherever
+  -- that width started. Every real cell in this table is a centring box with
+  -- one child, and this was the one that was not.
+  row.spacer = Dim(row.frame, "--")
+  row.spacer:SetJustifyH("CENTER")
+  row:Add(NS.FlexCell(parent, C.del, Flex.Item(row.spacer)))
+
+  row.enabled = Checkbox(parent,
+    function() return NS.ThreatConfig().enabled ~= false end,
+    function(v) NS.ThreatConfig().enabled = v; Structural() end)
+  row:Add(NS.FlexCell(parent, C.on, Flex.Item(row.enabled)))
+
+  row.recessable = { row.pin, row.label, row.cost, row.edit, row.spacer, row.enabled }
+  for _, strip in ipairs({ row.barStrip, row.borderStrip }) do
+    for _, chip in ipairs(strip.chips) do
+      row.recessable[#row.recessable + 1] = chip
+    end
+  end
+
+  -- The same recess, done the long way. A pinned row is a Flex box, and the
+  -- controls on it are parented to the page's scroll content rather than to
+  -- the box -- so there is no frame whose alpha carries them, and each one is
+  -- set directly.
+  function row.SetRecessed(on)
+    local alpha = on and THEME.rowRecessed or 1
+    row.bg:SetAlpha((on and THEME.rowRecessed or 1) * 0.10)
+    for _, widget in ipairs(row.recessable or {}) do
+      if widget and widget.SetAlpha then widget:SetAlpha(alpha) end
+    end
+  end
+  return row
+end
+
+-- Target/Focus, as a second pinned row.
+--
+-- Deliberately the same shape as the threat row above rather than a shared
+-- builder: the two modules agree on the row (a strip per half, Edit, one
+-- switch) and disagree on everything inside the editor -- threat has a role,
+-- a flash, and three states whose ORDER changes with that role; this has two
+-- states and none of that. A builder parameterised over the parts that match
+-- would leave the parts that do not spread across both call sites.
+function NS.BuildMarkPinnedRow(parent, unitKey, rank)
+  local Flex, UI, C = NS.Flex, NS.UI, NS.RULE_COLS
+  local row = Flex.Box(parent, { dir = "row", align = "center", height = UI.ROW_H,
+    gap = UI.COL_GAP, pad = { l = UI.ROW_INSET, r = UI.ROW_INSET } })
+  row.unitKey = unitKey
+
+  row.bg = row.frame:CreateTexture(nil, "BACKGROUND")
+  row.bg:SetAllPoints()
+  row.bg:SetColorTexture(RGBA(THEME.bandMark))
+  row.bg:SetAlpha(0.10)
+  NS.PaintColumnSeps(row.frame)
+
+  -- Under threat, over the rules. Two rows share the band, so they share the
+  -- rank -- they do not outrank each other, a unit is one or the other.
+  row.pin = Dim(row.frame, rank or "2ND")
+  row.pin:SetJustifyH("LEFT")
+  row:Add(Flex.Item(row.pin, { width = C.grip, shrink = 0, clipText = true }))
+
+  row.label = Label(row.frame, "")
+  row.label:SetJustifyH("LEFT")
+  row:Add(Flex.Item(row.label, { grow = 1, minW = 80, clipText = true }))
+
+  -- One chip per half, the same shape a rule row uses -- with one unit per
+  -- row there is nothing to put a strip of.
+  local function Half(width, kind)
+    local chip = NS.FillChip(parent, function()
+      if NS.MarkConfig().enabled == false then return nil end
+      local entry = NS.MarkModule(kind).states[unitKey]
+      if not entry or entry.enabled == false then return nil end
+      if kind == "border" then return { color = entry.color } end
+      return entry
+    end, UI.CHIP_W, UI.CHIP_H)
+    chip:EnableMouse(true)
+    chip:SetScript("OnMouseUp", function()
+      if row.onEdit then row.onEdit() end
+    end)
+    Tip(chip, NS.MarkStateLabel(unitKey),
+      (kind == "border") and "The border this unit paints. Open the editor."
+        or "What this unit paints on the bar. Open the editor.")
+    row:Add(NS.FlexCell(parent, width, Flex.Item(chip, { height = UI.CHIP_H })))
+    return chip
+  end
+  row.barChip = Half(C.bar, "bar")
+  row.borderChip = Half(C.border, "border")
+
+  row.cost = Dim(row.frame, "")
+  row.cost:SetJustifyH("CENTER")
+  row:Add(Flex.Item(row.cost, { width = C.cost, shrink = 0, clipText = true }))
+  TipLabel(row.cost, "What this costs",
+    "One draw slot while the bar half is on, claimed just under threat so this colour beats every spell rule.\n\nThe border and the marker cost nothing: both draw outside the bar.")
+
+  row.edit = Button(parent, "Edit", C.edit, function()
+    if row.onEdit then row.onEdit() end
+  end)
+  StyleText(row.edit.label, 11)
+  row:Add(NS.FlexCell(parent, C.edit, Flex.Item(row.edit, { width = C.edit })))
+
+  -- Through FlexCell, like every other cell in the row.
+  --
+  -- A bare item sized to the column centres the TEXT inside the fontstring,
+  -- which is not the same as centring the fontstring in the column: the
+  -- string is laid out at its own measured width, so the dashes sat wherever
+  -- that width started. Every real cell in this table is a centring box with
+  -- one child, and this was the one that was not.
+  row.spacer = Dim(row.frame, "--")
+  row.spacer:SetJustifyH("CENTER")
+  row:Add(NS.FlexCell(parent, C.del, Flex.Item(row.spacer)))
+
+  -- The MODULE's switch, on both rows. Target and focus are two halves of one
+  -- module -- they share a slot budget and a set of load conditions -- so
+  -- there is one thing to turn off, and either row can do it.
+  row.enabled = Checkbox(parent,
+    function() return NS.MarkConfig().enabled ~= false end,
+    function(v) NS.MarkConfig().enabled = v; Structural() end)
+  row:Add(NS.FlexCell(parent, C.on, Flex.Item(row.enabled)))
+
+  row.recessable = { row.pin, row.label, row.cost, row.edit, row.spacer,
+    row.enabled, row.barChip, row.borderChip }
+
+  function row.SetRecessed(on)
+    local alpha = on and THEME.rowRecessed or 1
+    row.bg:SetAlpha((on and THEME.rowRecessed or 1) * 0.10)
+    for _, widget in ipairs(row.recessable or {}) do
+      if widget and widget.SetAlpha then widget:SetAlpha(alpha) end
+    end
+  end
+  return row
+end
+
+-- Its editor, in the band shape the rules and threat already use.
+-- One band per UNIT, built with the unit's key.
+--
+-- Target and focus were one editor holding six blocks, which is more than a
+-- band can present at once -- and the two halves of it were never edited
+-- together anyway: you set your target up, and come back to focus another
+-- day. Two rows in the table, two editors, each opening on its own.
+function NS.BuildMarkBand(sec, content, unitKey)
+  local Flex, UI = NS.Flex, NS.UI
+  local band = Flex.Box(content, { dir = "column", gap = UI.FIELD_GAP,
+    pad = { l = UI.ROW_INSET, r = UI.ROW_INSET, t = UI.FIELD_GAP, b = UI.GROUP_GAP },
+    hidden = true })
+
+  local head = Flex.Box(content, { dir = "row", align = "center", gap = UI.COL_GAP,
+    height = UI.CTRL_ROW_H })
+  band.title = Label(head.frame,
+    ("Editing %s"):format(NS.MarkStateLabel(unitKey)), "GameFontNormal")
+  band.title:SetJustifyH("LEFT")
+  head:Add(Flex.Item(band.title, { grow = 1, minW = 80, clipText = true }))
+  band:Add(head)
+
+  local function MarkLoadDrop(field, summary, entries)
+    return Dropdown(content, UI.DROP_W, entries, nil, nil, {
+      multi = true,
+      isChecked = function(key)
+        local load = NS.NormaliseLoad(NS.MarkConfig().load)
+        return (load[field][key]) and true or false
+      end,
+      onToggle = function(key)
+        local cfg = NS.MarkConfig()
+        cfg.load = NS.NormaliseLoad(cfg.load)
+        cfg.load[field][key] = (not cfg.load[field][key]) or nil
+        Structural()
+      end,
+      summary = function() return summary(NS.MarkConfig().load) end,
+    })
+  end
+
+  local loadRow = Flex.Box(content, { dir = "row", align = "center", gap = UI.COL_GAP,
+    height = UI.CTRL_ROW_H })
+  band.loadLabel = Dim(loadRow.frame, "Load in")
+  loadRow:Add(Flex.Item(band.loadLabel, { width = UI.LABEL_W, shrink = 0, clipText = true }))
+  band.zoneDrop = MarkLoadDrop("zones", NS.LoadZoneSummary, NS.LoadZoneEntries())
+  loadRow:Add(Flex.Item(band.zoneDrop, { width = UI.DROP_W, shrink = 0 }))
+  band.groupLabel = Dim(loadRow.frame, "Group")
+  loadRow:Add(Flex.Item(band.groupLabel, { width = UI.LABEL_XS, shrink = 0, clipText = true }))
+  band.groupDrop = MarkLoadDrop("groups", NS.LoadGroupSummary, NS.LoadGroupEntries())
+  loadRow:Add(Flex.Item(band.groupDrop, { width = UI.DROP_W, shrink = 0 }))
+  band:Add(loadRow)
+
+  -- One block per unit, not one row per unit.
+  --
+  -- A row could carry two swatches and two tick boxes, and that is all it
+  -- could ever carry -- there is nowhere on it to put a fill, a pattern, or a
+  -- marker. These are the same kind of thing a spell rule paints, so they get
+  -- the same kind of editor: the block shape the rules already use, one per
+  -- unit, side by side.
+  -- Three blocks per unit, each with its own switch in its own head.
+  --
+  -- One block per unit could not say which half a switch governed. The bar's
+  -- switch sat in the block head and the border's ended up as a bare tick box
+  -- beside a colour swatch, where it read as "disable the bar" or as nothing
+  -- at all -- an unlabelled checkbox next to a colour is not a control anyone
+  -- can name. Splitting the halves gives each switch a heading to sit under,
+  -- and lets a half that is off go dark on its own rather than taking the
+  -- other two with it.
+  --
+  -- The marker is a third block for the same reason: it is independent of
+  -- both halves -- it draws outside the bar and costs no draw slot -- so it
+  -- can be the only thing you have switched on.
+  band.rows = {}
+
+  do
+    local key = unitKey
+    local function Entry(kind) return NS.MarkModule(kind).states[key] end
+
+    local unitRow = Flex.Box(content, { dir = "row", wrap = true, gap = UI.GROUP_GAP,
+      crossGap = UI.GROUP_GAP, align = "stretch" })
+
+    ---------------------------------------------------------------- the bar --
+    local barBlock = NS.EditorBlock(content, "Healthbar")
+    barBlock.enabled = Checkbox(content,
+      function() local e = Entry("bar") return e and e.enabled ~= false end,
+      function(v)
+        local e = Entry("bar")
+        if not e then return end
+        e.enabled = v
+        Structural()
+      end)
+    barBlock.head:Add(Flex.Item(barBlock.enabled, { width = UI.BOX, shrink = 0 }))
+    Tip(barBlock.enabled, "Colour the health bar",
+      "Paints this unit's colour across the bar. Costs one draw slot.\n\nOff still leaves the border and the marker, which cost nothing.")
+
+    barBlock.colorLabel = Dim(content, "Color")
+    barBlock.swatch = ColorSwatch(content,
+      function() local e = Entry("bar") return e and e.color or NS.DefaultColor() end,
+      function(r, g, b, a)
+        local e = Entry("bar")
+        if not e then return end
+        e.color = { r = r, g = g, b = b, a = a }
+        Restyle()
+      end)
+    NS.EditorRow(barBlock, content, barBlock.colorLabel, { barBlock.swatch, UI.BOX })
+
+    barBlock.alpha = NS.OpacitySlider(content,
+      function() local e = Entry("bar") return e and e.color or NS.DefaultColor() end,
+      function(value)
+        local e = Entry("bar")
+        if not e or not e.color then return end
+        e.color.a = value
+        Restyle()
+      end)
+    barBlock.alphaLabel = Dim(content, "Opacity")
+    NS.EditorRow(barBlock, content, barBlock.alphaLabel, { barBlock.alpha, UI.SLIDER_SM })
+
+    -- The same two fills a rule's bar half has, reading the same fields:
+    -- NS.ApplyRuleFill paints both, so a pattern picked here draws exactly as
+    -- it does on a rule.
+    barBlock.fillLabel = Dim(content, "Fill")
+    barBlock.fillDrop = Dropdown(content, UI.DROP_W, {
+      { text = "Bar texture", value = "bar" },
+      { text = "Pattern overlay", value = "texture" },
+    },
+      function() local e = Entry("bar") return (e and e.fillStyle == "texture") and "texture" or "bar" end,
+      function(value)
+        local e = Entry("bar")
+        if not e then return end
+        e.fillStyle = (value == "texture") and "texture" or nil
+        Structural()
+      end)
+    NS.EditorRow(barBlock, content, barBlock.fillLabel, { barBlock.fillDrop, UI.DROP_W })
+
+    barBlock.barTexDrop = Dropdown(content, UI.DROP_W, BarTextureEntries,
+      function() local e = Entry("bar") return e and e.barTexture end,
+      function(value)
+        local e = Entry("bar")
+        if not e then return end
+        e.barTexture = value
+        Restyle()
+      end)
+    barBlock.barTexRow = NS.EditorRow(barBlock, content, nil, { barBlock.barTexDrop, UI.DROP_W })
+
+    barBlock.grid = Flex.Box(content, { dir = "row", wrap = true,
+      gap = UI.CHIP_GAP, crossGap = UI.CHIP_GAP })
+    barBlock.gridChips = {}
+    for _, texture in ipairs(NS.FillTextures or {}) do
+      local textureKey = texture.key
+      local chip = NS.FillChip(content, function()
+        local e = Entry("bar")
+        return { color = e and e.color or NS.DefaultColor(),
+          fillStyle = "texture", fillTexture = textureKey }
+      end, UI.SWATCH_GRID, UI.CHIP_H)
+      chip:EnableMouse(true)
+      chip:SetScript("OnMouseUp", function()
+        local e = Entry("bar")
+        if not e then return end
+        e.fillStyle, e.fillTexture = "texture", textureKey
+        Structural()
+      end)
+      Tip(chip, texture.label, "Tiles across the bar. The host addon's own colour shows through the gaps.")
+      chip.sel = {}
+      for index = 1, 4 do
+        chip.sel[index] = chip:CreateTexture(nil, "OVERLAY")
+        chip.sel[index]:SetColorTexture(RGBA(THEME.accent))
+        chip.sel[index]:Hide()
+      end
+      chip.sel[1]:SetPoint("TOPLEFT", -2, 2);     chip.sel[1]:SetPoint("TOPRIGHT", 2, 2)
+      chip.sel[2]:SetPoint("BOTTOMLEFT", -2, -2); chip.sel[2]:SetPoint("BOTTOMRIGHT", 2, -2)
+      chip.sel[3]:SetPoint("TOPLEFT", -2, 2);     chip.sel[3]:SetPoint("BOTTOMLEFT", -2, -2)
+      chip.sel[4]:SetPoint("TOPRIGHT", 2, 2);     chip.sel[4]:SetPoint("BOTTOMRIGHT", 2, -2)
+      chip.sel[1]:SetHeight(2); chip.sel[2]:SetHeight(2)
+      chip.sel[3]:SetWidth(2);  chip.sel[4]:SetWidth(2)
+      chip.key = textureKey
+      barBlock.gridChips[#barBlock.gridChips + 1] = chip
+      barBlock:Register(chip)
+      barBlock.grid:Add(Flex.Item(chip, { width = UI.SWATCH_GRID, height = UI.CHIP_H, shrink = 0 }))
+    end
+    local perRow = math.ceil(#barBlock.gridChips / 2)
+    barBlock.grid.maxW = perRow * (UI.SWATCH_GRID + UI.CHIP_GAP) - UI.CHIP_GAP
+    barBlock:Add(barBlock.grid)
+
+    ------------------------------------------------------------- the border --
+    local borderBlock = NS.EditorBlock(content, "Border")
+    borderBlock.enabled = Checkbox(content,
+      function() local e = Entry("border") return e and e.enabled ~= false end,
+      function(v)
+        local e = Entry("border")
+        if not e then return end
+        e.enabled = v
+        Structural()
+      end)
+    borderBlock.head:Add(Flex.Item(borderBlock.enabled, { width = UI.BOX, shrink = 0 }))
+    Tip(borderBlock.enabled, "Colour the plate border",
+      "Draws this unit's colour around the plate.\n\nFree: borders draw outside the health bar, so this costs no draw slot.")
+
+    borderBlock.colorLabel = Dim(content, "Color")
+    borderBlock.swatch = ColorSwatch(content,
+      function() local e = Entry("border") return e and e.color or NS.DefaultColor() end,
+      function(r, g, b, a)
+        local e = Entry("border")
+        if not e then return end
+        e.color = { r = r, g = g, b = b, a = a }
+        Restyle()
+      end)
+    NS.EditorRow(borderBlock, content, borderBlock.colorLabel, { borderBlock.swatch, UI.BOX })
+
+    borderBlock.alpha = NS.OpacitySlider(content,
+      function() local e = Entry("border") return e and e.color or NS.DefaultColor() end,
+      function(value)
+        local e = Entry("border")
+        if not e or not e.color then return end
+        e.color.a = value
+        Restyle()
+      end)
+    borderBlock.alphaLabel = Dim(content, "Opacity")
+    NS.EditorRow(borderBlock, content, borderBlock.alphaLabel,
+      { borderBlock.alpha, UI.SLIDER_SM })
+
+    -- Shape, not just colour.
+    --
+    -- The engine has read thickness, grow and padding off the module since
+    -- BuildMark was written, and nothing here set them -- so a target border
+    -- was stuck at two pixels hard against the bar with no way to say
+    -- otherwise, while the same three controls sat on every spell rule.
+    --
+    -- Module-wide rather than per state, which is where the engine reads them
+    -- from: one border geometry, two colours. Two units whose edges sat at
+    -- different distances would read as a misaligned plate, not as a setting.
+    borderBlock.thickLabel = Dim(content, "Thickness")
+    borderBlock.thickness = Slider(content, UI.SLIDER_SM, 1, 8, 7,
+      function() return NS.MarkBorderConfig().thickness or 2 end,
+      function(v)
+        NS.MarkBorderConfig().thickness = v
+        Structural()
+      end)
+    NS.EditorRow(borderBlock, content, borderBlock.thickLabel,
+      { borderBlock.thickness, UI.SLIDER_SM })
+
+    -- growDrop, not grow: Flex reads `grow` off a node as its share of
+    -- leftover space, so a frame parked there is arithmetic on a table.
+    borderBlock.growLabel = Dim(content, "Grows")
+    borderBlock.growDrop = Dropdown(content, UI.DROP_SM_W, {
+      { text = "Outward", value = "OUT" },
+      { text = "Inward", value = "IN" },
+    },
+      function() return NS.MarkBorderConfig().grow or "OUT" end,
+      function(value)
+        NS.MarkBorderConfig().grow = value
+        Structural()
+      end)
+    NS.EditorRow(borderBlock, content, borderBlock.growLabel,
+      { borderBlock.growDrop, UI.DROP_SM_W })
+
+    borderBlock.padLabel = Dim(content, "Gap")
+    borderBlock.padding = Slider(content, UI.SLIDER_SM, 0, 12, 13,
+      function() return NS.MarkBorderConfig().padding or 0 end,
+      function(v)
+        NS.MarkBorderConfig().padding = v
+        Structural()
+      end)
+    NS.EditorRow(borderBlock, content, borderBlock.padLabel,
+      { borderBlock.padding, UI.SLIDER_SM })
+
+    ------------------------------------------------------------- the marker --
+    local markerBlock = NS.EditorBlock(content, "Marker")
+    markerBlock.enabled = Checkbox(content,
+      function()
+        local e = Entry("bar")
+        return e and e.indicator and e.indicator.enabled and true or false
+      end,
+      function(v)
+        local e = Entry("bar")
+        if not e or not e.indicator then return end
+        e.indicator.enabled = v
+        Structural()
+      end)
+    markerBlock.head:Add(Flex.Item(markerBlock.enabled, { width = UI.BOX, shrink = 0 }))
+    Tip(markerBlock.enabled, "Show a marker",
+      "A small shape beside the plate, in this unit's colour.\n\nCosts no draw slot -- it draws outside the health bar, like a border does -- so it works with both halves above switched off.")
+
+    -- The marker's own colour, or the unit's when it has none.
+    --
+    -- Absent by default, so a marker follows the bar colour until someone
+    -- deliberately parts them -- which is what you want when the bar half is
+    -- ON. It stops being what you want the moment the bar half is off, since
+    -- then the marker is the only thing carrying that colour and it should be
+    -- free to be its own.
+    markerBlock.colorLabel = Dim(content, "Color")
+    markerBlock.swatch = ColorSwatch(content,
+      function()
+        local e = Entry("bar")
+        return NS.MarkerColor(e)
+      end,
+      function(r, g, b, a)
+        local e = Entry("bar")
+        if not e or not e.indicator then return end
+        e.indicator.color = { r = r, g = g, b = b, a = a }
+        Restyle()
+      end)
+    markerBlock.followOn = Checkbox(content,
+      function()
+        local e = Entry("bar")
+        return not (e and e.indicator and e.indicator.color)
+      end,
+      function(v)
+        local e = Entry("bar")
+        if not e or not e.indicator then return end
+        if v then
+          e.indicator.color = nil
+        else
+          local base = e.color or NS.DefaultColor()
+          e.indicator.color = { r = base.r, g = base.g, b = base.b, a = base.a or 1 }
+        end
+        Restyle()
+      end)
+    NS.EditorRow(markerBlock, content, markerBlock.colorLabel,
+      { markerBlock.swatch, UI.BOX })
+    markerBlock.followLabel = Label(content, "Match the bar colour")
+    NS.EditorRow(markerBlock, content, nil, { markerBlock.followOn, UI.BOX },
+      { markerBlock.followLabel, nil, 1, true })
+
+    markerBlock.alpha = NS.OpacitySlider(content,
+      function() local e = Entry("bar") return NS.MarkerColor(e) end,
+      function(value)
+        local e = Entry("bar")
+        if not e or not e.indicator then return end
+        local base = e.indicator.color or e.color or NS.DefaultColor()
+        e.indicator.color = { r = base.r, g = base.g, b = base.b, a = value }
+        Restyle()
+      end)
+    markerBlock.alphaLabel = Dim(content, "Opacity")
+    NS.EditorRow(markerBlock, content, markerBlock.alphaLabel,
+      { markerBlock.alpha, UI.SLIDER_SM })
+
+    markerBlock.shapeLabel = Dim(content, "Shape")
+    -- The function, not its result: which shapes exist depends on whether
+    -- another addon is loaded, and that is not decided at build time.
+    markerBlock.shape = Dropdown(content, UI.DROP_W, NS.MarkShapeEntries,
+      function()
+        local e = Entry("bar")
+        return (e and e.indicator and e.indicator.shape) or "arrow"
+      end,
+      function(value)
+        local e = Entry("bar")
+        if not e or not e.indicator then return end
+        e.indicator.shape = value
+        Structural()
+      end)
+    NS.EditorRow(markerBlock, content, markerBlock.shapeLabel, { markerBlock.shape, UI.DROP_W })
+
+    markerBlock.posLabel = Dim(content, "Where")
+    markerBlock.pos = Dropdown(content, UI.DROP_W, NS.MarkPositionEntries(),
+      function()
+        local e = Entry("bar")
+        return (e and e.indicator and e.indicator.position) or "BOTH"
+      end,
+      function(value)
+        local e = Entry("bar")
+        if not e or not e.indicator then return end
+        e.indicator.position = value
+        Structural()
+      end)
+    NS.EditorRow(markerBlock, content, markerBlock.posLabel, { markerBlock.pos, UI.DROP_W })
+
+    markerBlock.sizeLabel = Dim(content, "Size")
+    markerBlock.size = Slider(content, UI.SLIDER_SM, 4, 32, 28,
+      function()
+        local e = Entry("bar")
+        return (e and e.indicator and e.indicator.size) or 10
+      end,
+      function(v)
+        local e = Entry("bar")
+        if not e or not e.indicator then return end
+        e.indicator.size = v
+        Structural()
+      end)
+    NS.EditorRow(markerBlock, content, markerBlock.sizeLabel, { markerBlock.size, UI.SLIDER_SM })
+
+    -- gapSlider, not gap.
+    --
+    -- A block IS a Flex node, and `gap` is one of Flex's own props -- the
+    -- space between a box's children. Storing a frame there replaced that
+    -- number with a table, and the next column layout tried to add a frame to
+    -- a height. Anything hung on a block has to avoid Flex's vocabulary:
+    -- width, height, gap, pad, align, grow, shrink, basis, minW, maxW.
+    markerBlock.gapLabel = Dim(content, "Gap")
+    markerBlock.gapSlider = Slider(content, UI.SLIDER_SM, 0, 40, 40,
+      function()
+        local e = Entry("bar")
+        return (e and e.indicator and e.indicator.gap) or 4
+      end,
+      function(v)
+        local e = Entry("bar")
+        if not e or not e.indicator then return end
+        e.indicator.gap = v
+        Structural()
+      end)
+    NS.EditorRow(markerBlock, content, markerBlock.gapLabel,
+      { markerBlock.gapSlider, UI.SLIDER_SM })
+
+    unitRow:Add(barBlock)
+    unitRow:Add(borderBlock)
+    unitRow:Add(markerBlock)
+    band:Add(unitRow)
+
+    -- One Refresh per unit, driving all three blocks. The render pass calls
+    -- this without knowing how many blocks a unit turned out to need.
+    local unit = { key = key, bar = barBlock, border = borderBlock, marker = markerBlock }
+    function unit.Refresh()
+      local barEntry = Entry("bar")
+      local borderEntry = Entry("border")
+
+      barBlock:SetOff(not (barEntry and barEntry.enabled ~= false))
+      barBlock.enabled.Refresh()
+      barBlock.swatch.Refresh()
+      barBlock.alpha.Refresh()
+      barBlock.fillDrop.Refresh()
+      local patterned = barEntry and barEntry.fillStyle == "texture"
+      barBlock.barTexRow.hidden = patterned and true or false
+      barBlock.grid.hidden = not patterned
+      if not patterned then barBlock.barTexDrop.Refresh() end
+      for _, chip in ipairs(barBlock.gridChips) do
+        chip.Refresh()
+        local on = patterned and barEntry.fillTexture == chip.key
+        for _, edge in ipairs(chip.sel) do edge:SetShown(on) end
+      end
+
+      borderBlock:SetOff(not (borderEntry and borderEntry.enabled ~= false))
+      borderBlock.enabled.Refresh()
+      borderBlock.swatch.Refresh()
+      borderBlock.alpha.Refresh()
+      borderBlock.thickness.Refresh()
+      borderBlock.growDrop.Refresh()
+      borderBlock.padding.Refresh()
+
+      local marker = barEntry and barEntry.indicator and barEntry.indicator.enabled
+      markerBlock:SetOff(not marker)
+      markerBlock.enabled.Refresh()
+      markerBlock.swatch.Refresh()
+      markerBlock.followOn.Refresh()
+      markerBlock.alpha.Refresh()
+      markerBlock.shape.Refresh()
+      markerBlock.pos.Refresh()
+      markerBlock.size.Refresh()
+      markerBlock.gapSlider.Refresh()
+    end
+
+    band.rows[#band.rows + 1] = unit
+  end
+
+  band.note = Dim(content,
+    "Lit for as long as the unit is your target or focus, in combat or out. A unit that is both takes the target colour. Keep the bar colours low in opacity -- this paints a plate you are already looking at.")
+  band:Add(NS.FlexNote(content, band.note, 0))
+
+  return band
+end
+
+-- The threat editor, in the same band the rules use.
+function NS.BuildThreatBand(sec, content)
+  local Flex, UI = NS.Flex, NS.UI
+  local band = Flex.Box(content, { dir = "column", gap = UI.FIELD_GAP,
+    pad = { l = UI.ROW_INSET, r = UI.ROW_INSET, t = UI.FIELD_GAP, b = UI.GROUP_GAP },
+    hidden = true })
+
+  local head = Flex.Box(content, { dir = "row", align = "center", gap = UI.COL_GAP,
+    height = UI.CTRL_ROW_H })
+  band.title = Label(head.frame, "Editing threat", "GameFontNormal")
+  band.title:SetJustifyH("LEFT")
+  head:Add(Flex.Item(band.title, { grow = 1, minW = 80, clipText = true }))
+  band.roleLabel = Dim(head.frame, "Read as")
+  head:Add(Flex.Item(band.roleLabel, { width = UI.LABEL_W, shrink = 0, clipText = true }))
+  band.roleDrop = Dropdown(content, UI.DROP_W, NS.ThreatRoleEntries(),
+    function() return NS.ThreatConfig().role or "auto" end,
+    function(v) NS.ThreatConfig().role = v; Structural() end)
+  head:Add(Flex.Item(band.roleDrop, { width = UI.DROP_W, shrink = 0 }))
+  band:Add(head)
+
+  -- Where threat loads. Same two lists a rule gets, on the module rather than
+  -- on one state: threat is one thing you switch on, so "not in delves" is an
+  -- answer about threat, not about Near Aggro.
+  local function ThreatLoadDrop(field, summary, entries)
+    return Dropdown(content, UI.DROP_W, entries, nil, nil, {
+      multi = true,
+      isChecked = function(key)
+        local load = NS.NormaliseLoad(NS.ThreatConfig().load)
+        return (load[field][key]) and true or false
+      end,
+      onToggle = function(key)
+        local cfg = NS.ThreatConfig()
+        cfg.load = NS.NormaliseLoad(cfg.load)
+        cfg.load[field][key] = (not cfg.load[field][key]) or nil
+        Structural()
+      end,
+      summary = function() return summary(NS.ThreatConfig().load) end,
+    })
+  end
+
+  local loadRow = Flex.Box(content, { dir = "row", align = "center", gap = UI.COL_GAP,
+    height = UI.CTRL_ROW_H })
+  band.loadLabel = Dim(loadRow.frame, "Load in")
+  loadRow:Add(Flex.Item(band.loadLabel, { width = UI.LABEL_W, shrink = 0, clipText = true }))
+  band.zoneDrop = ThreatLoadDrop("zones", NS.LoadZoneSummary, NS.LoadZoneEntries())
+  loadRow:Add(Flex.Item(band.zoneDrop, { width = UI.DROP_W, shrink = 0 }))
+  band.groupLabel = Dim(loadRow.frame, "Group")
+  loadRow:Add(Flex.Item(band.groupLabel, { width = UI.LABEL_XS, shrink = 0, clipText = true }))
+  band.groupDrop = ThreatLoadDrop("groups", NS.LoadGroupSummary, NS.LoadGroupEntries())
+  loadRow:Add(Flex.Item(band.groupDrop, { width = UI.DROP_W, shrink = 0 }))
+  band:Add(loadRow)
+  TipLabel(band.loadLabel, "Where threat colouring loads",
+    "Tick the content you want threat colours in; nothing ticked means everywhere.\n\nSolo, or in a delve, there is nobody to lose a mob to -- switching threat off there gives its draw slots back to your spell rules.")
+
+  -- One row per state, with both halves on it -- the same shape as the table
+  -- above, for the same reason: bar and border are two cells of one thing.
+  local header = Flex.Box(content, { dir = "row", align = "center", height = UI.HEAD_H,
+    gap = UI.COL_GAP })
+  header.state = Header(header.frame, "Situation")
+  header.state:SetJustifyH("LEFT")
+  header:Add(Flex.Item(header.state, { grow = 1, minW = 60, clipText = true }))
+  header.bar = select(1, NS.FlexHeaderCell(header.frame, "Bar", NS.RULE_COLS.bar))
+  header:Add(header.bar)
+  header.barOn = select(1, NS.FlexHeaderCell(header.frame, "On", NS.THREAT_COLS.on))
+  header:Add(header.barOn)
+  header.border = select(1, NS.FlexHeaderCell(header.frame, "Border", NS.RULE_COLS.border))
+  header:Add(header.border)
+  header.borderOn = select(1, NS.FlexHeaderCell(header.frame, "On", NS.THREAT_COLS.on))
+  header:Add(header.borderOn)
+  band:Add(header)
+
+  band.rows = {}
+  for index, state in ipairs(NS.ThreatStatesOrdered()) do
+    local key = state.key
+    local row = Flex.Box(content, { dir = "row", align = "center", height = UI.ROW_H,
+      gap = UI.COL_GAP })
+
+    row.stripe = row.frame:CreateTexture(nil, "BACKGROUND")
+    row.stripe:SetAllPoints()
+    row.stripe:SetColorTexture(1, 1, 1, 0.03)
+    row.stripe:SetShown(index % 2 == 0)
+
+    row.label = Label(row.frame, "")
+    row.label:SetJustifyH("LEFT")
+    row:Add(Flex.Item(row.label, { grow = 1, minW = 60, clipText = true }))
+
+    local function Half(kind, chipWidth)
+      local swatch = ColorSwatch(content,
+        function()
+          local entry = NS.ThreatModule(kind).states[key]
+          return entry and entry.color or NS.DefaultColor()
+        end,
+        function(r, g, b, a)
+          local entry = NS.ThreatModule(kind).states[key]
+          if not entry then return end
+          entry.color = { r = r, g = g, b = b, a = a }
+          NS.ThreatTouched(NS.ThreatModule(kind))
+          Restyle()
+        end)
+      row:Add(NS.FlexCell(content, chipWidth, Flex.Item(swatch, { width = UI.BOX })))
+
+      local box = Checkbox(content,
+        function()
+          local entry = NS.ThreatModule(kind).states[key]
+          return entry and entry.enabled ~= false
+        end,
+        function(v)
+          local entry = NS.ThreatModule(kind).states[key]
+          if not entry then return end
+          entry.enabled = v
+          NS.ThreatTouched(NS.ThreatModule(kind))
+          Structural()
+        end)
+      row:Add(NS.FlexCell(content, NS.THREAT_COLS.on, Flex.Item(box)))
+      return swatch, box
+    end
+
+    row.barSwatch, row.barOn = Half("bar", NS.RULE_COLS.bar)
+    row.borderSwatch, row.borderOn = Half("border", NS.RULE_COLS.border)
+    row.key = key
+    band.rows[index] = band:Add(row)
+  end
+
+  -- Losing a mob is the one threat change worth announcing rather than just
+  -- showing, so it gets a switch of its own rather than living inside a state.
+  local flashRow = Flex.Box(content, { dir = "row", align = "center", gap = UI.COL_GAP,
+    height = UI.CTRL_ROW_H })
+  band.flash = Checkbox(content,
+    function() return NS.ThreatConfig().flashOnLoss and true or false end,
+    function(v)
+      NS.ThreatConfig().flashOnLoss = v or nil
+      NS.ThreatTouched(NS.ThreatConfig())
+      Structural()
+    end)
+  flashRow:Add(Flex.Item(band.flash, { width = UI.BOX, shrink = 0 }))
+  band.flashLabel = Label(content, "Flash when you lose aggro")
+  band.flashLabel:SetJustifyH("LEFT")
+  flashRow:Add(Flex.Item(band.flashLabel, { grow = 1, minW = UI.LABEL_TINY, clipText = true }))
+  Tip(band.flash, "Flash when you lose aggro",
+    "Blinks the plate for a second and a half the moment a mob comes off you.\n\nA colour tells you what is true now; by the time you notice it changed, the moment a taunt was for has passed. Costs no extra draw slot -- it is the same colour, announcing itself.")
+  band:Add(flashRow)
+
+  band.note = Dim(content,
+    "Only ever coloured while you are in combat -- out of combat every plate reports the same state. The border half costs no draw slots.")
+  band:Add(NS.FlexNote(content, band.note, 0))
+
+  sec.threatBand = band
+  return band
+end
+
+-- The rule editor.
+--
+-- Written here rather than hosting the old style panel. That panel is the
+-- HEALTH variant -- its border controls only exist in the copy the border page
+-- builds -- so with one list holding both halves, hosting it meant a rule
+-- whose border you wanted to change had nowhere to change it.
+--
+-- Three blocks: what the rule fires on, then one per half. The two halves look
+-- the same as each other and carry the same first control (a switch), because
+-- they are the same kind of thing: a colour this rule paints somewhere.
+-- On NS, not a file-local: this file sits a handful of locals under Lua's
+-- 200-per-chunk ceiling, and two more helpers went straight through it.
+function NS.EditorBlock(parent, title)
+  local UI = NS.UI
+  -- `basis` is what makes the four blocks the same width: without it each one
+  -- starts from its own content and grow only shares out what is left over, so
+  -- the block with the widest row stayed the widest block. Starting them all
+  -- from the same number and growing equally is what "evenly spaced" means
+  -- here.
+  local block = NS.Flex.Box(parent, { dir = "column", gap = UI.FIELD_GAP,
+    grow = 1, basis = UI.BLOCK_MIN_W, minW = UI.BLOCK_MIN_W,
+    pad = { l = UI.BLOCK_PAD, r = UI.BLOCK_PAD, t = UI.BLOCK_PAD, b = UI.BLOCK_PAD } })
+
+  block.bg = block.frame:CreateTexture(nil, "BACKGROUND")
+  block.bg:SetAllPoints()
+  block.bg:SetColorTexture(RGBA(THEME.blockBG))
+
+  -- Everything inside the block that a switched-off half should take with it.
+  --
+  -- Registered rather than walked: these controls are parented to the page's
+  -- scroll content, not to the block frame -- Flex places them, it does not
+  -- own them -- so there is no child list to dim. NS.EditorRow adds whatever
+  -- it lays out; anything added to the block directly registers itself.
+  block.controls = {}
+  function block:Register(widget)
+    if widget then block.controls[#block.controls + 1] = widget end
+    return widget
+  end
+
+  -- A half that is switched off goes DARK, and everything in it goes with it:
+  -- dimmed and unclickable, so the block reads as one inert thing rather than
+  -- as live controls on a dark background. The block's OWN switch is in the
+  -- head and is never registered -- it is the way back.
+  function block:SetOff(off)
+    block.bg:SetColorTexture(RGBA(off and THEME.blockBGOff or THEME.blockBG))
+    block.title:SetAlpha(off and 0.55 or 1)
+    for _, widget in ipairs(block.controls) do
+      if widget.SetAlpha then widget:SetAlpha(off and 0.35 or 1) end
+      -- Two mechanisms, because these are not all the same kind of object: a
+      -- Button has Enable/Disable and repaints itself, a plain frame (a
+      -- slider's track) only has mouse input, and a FontString has neither.
+      if widget.EnableMouse then pcall(widget.EnableMouse, widget, not off) end
+      -- A composite control keeps its mouse on a child; Slider is the one
+      -- here, and its holder is what gets registered.
+      if widget.track and widget.track.EnableMouse then
+        pcall(widget.track.EnableMouse, widget.track, not off)
+      end
+      if off then
+        if widget.Disable then pcall(widget.Disable, widget) end
+      elseif widget.Enable then
+        pcall(widget.Enable, widget)
+      end
+    end
+  end
+
+  local head = NS.Flex.Box(parent, { dir = "row", align = "center", gap = UI.COL_GAP,
+    height = UI.CTRL_ROW_H })
+  block.title = Label(head.frame, title, "GameFontNormal")
+  block.title:SetJustifyH("LEFT")
+  head:Add(NS.Flex.Item(block.title, { grow = 1, minW = 40, clipText = true }))
+  block.head = head
+  block:Add(head)
+  return block
+end
+
+-- Opacity, on the colour's own line.
+--
+-- The alpha of a fill decides whether a rule reads as a tint or as paint over
+-- the bar, and it was reachable only by opening the picker -- so the one
+-- number most likely to be wrong was the one you could not see. Here it sits
+-- beside the swatch it belongs to, and the picker still edits the same value.
+--
+-- 0-100, not 0-1: nobody describes a colour as "0.35 opaque".
+--
+-- Registered as a live swatch, so dragging opacity IN the picker moves this
+-- slider as it goes. Two controls over one number have to agree at every
+-- frame, not just when one of them closes.
+function NS.OpacitySlider(parent, getColor, setAlpha)
+  local slider = Slider(parent, NS.UI.SLIDER_SM, 0, 100, 100,
+    function()
+      local c = getColor()
+      return math.floor(((c and c.a or 1) * 100) + 0.5)
+    end,
+    function(value) setAlpha(math.max(0, math.min(1, (value or 0) / 100))) end)
+  NS.RegisterLiveSwatch(function()
+    if slider.Refresh then slider.Refresh() end
+  end)
+  return slider
+end
+
+-- A heading INSIDE a block, for the blocks that hold more than one thing.
+--
+-- The Target/Focus blocks carry three subjects each -- the bar, the border and
+-- the marker -- and without a break between them the rows read as one long
+-- undifferentiated list where "Color" appears twice meaning two different
+-- things. Same typeface as the column headings in the table, so a heading
+-- looks like a heading wherever it is.
+function NS.EditorHeading(block, parent, text)
+  local UI = NS.UI
+  local row = NS.Flex.Box(parent, { dir = "row", align = "center",
+    height = UI.HEAD_H, pad = { t = UI.FIELD_GAP } })
+  local label = Header(parent, text)
+  label:SetJustifyH("LEFT")
+  label:SetWordWrap(false)
+  row:Add(NS.Flex.Item(label, { grow = 1, height = UI.HEAD_H, clipText = true }))
+  block:Add(row)
+  block.headings = block.headings or {}
+  block.headings[#block.headings + 1] = label
+  if block.Register then block:Register(label) end
+  return row, label
+end
+
+-- A labelled control line inside a block.
+function NS.EditorRow(block, parent, label, ...)
+  local UI = NS.UI
+  local row = NS.Flex.Box(parent, { dir = "row", align = "center", gap = UI.COL_GAP,
+    height = UI.CTRL_ROW_H })
+  if label then
+    label:SetJustifyH("LEFT")
+    -- Shrinkable, down to a floor. See the note on the control items below:
+    -- shrink = 0 is what made these rows overflow their block rather than
+    -- fit inside it.
+    row:Add(NS.Flex.Item(label, { width = UI.LABEL_W, minW = UI.LABEL_TINY,
+      shrink = 1, clipText = true }))
+  end
+  if label and block.Register then block:Register(label) end
+  for _, spec in ipairs({ ... }) do
+    if block.Register then block:Register(spec[1]) end
+    -- A FontString that GROWS reads LEFT. GameFontHighlight justifies CENTRE
+    -- by default, so a caption next to a tick box drifted into the middle of
+    -- whatever width was left over -- which is the huge gap between a box and
+    -- its own label. The fixed-width labels are set by the caller; this is
+    -- the growing one, and it is always a caption.
+    if spec[3] and spec[1].SetJustifyH then spec[1]:SetJustifyH("LEFT") end
+    -- shrink = 1, not 0.
+    --
+    -- These widths are what a control WANTS -- a dropdown asks for 200, a
+    -- slider for its length plus its number -- and a block three-to-a-row is
+    -- about 194 wide inside its padding. With shrink = 0 the row simply drew
+    -- past the block's edge and over its neighbour; there was no width at
+    -- which it would have fit. Now the label and the control give ground
+    -- together, down to floors that keep both legible.
+    --
+    -- This is why Slider anchors its track to both its own edges rather than
+    -- sizing it once: a control that is allowed to shrink has to mean it.
+    local width = spec[2]
+    row:Add(NS.Flex.Item(spec[1], { width = width, grow = spec[3],
+      minW = spec[3] and UI.LABEL_TINY or (width and math.min(width, UI.LABEL_W)) or nil,
+      shrink = 1, clipText = spec[4] }))
+  end
+  block:Add(row)
+  return row
+end
+
+function NS.BuildRuleEditor(sec, content)
+  local Flex, UI = NS.Flex, NS.UI
+  local function Rule() return sec.openRule end
+
+  local editor = Flex.Box(content, { dir = "column", gap = UI.GROUP_GAP,
+    pad = { l = UI.ROW_INSET, r = UI.ROW_INSET } })
+
+  -- Four blocks, one question each: what the rule watches, where it is
+  -- allowed to load, and what it paints on each half. They were three, with
+  -- "When" carrying both the debuffs and every restriction on them -- so the
+  -- block that answered "what does this rule fire on" also answered "and in
+  -- which raid difficulty", which are not the same question and are not
+  -- edited at the same time.
+  local when = NS.EditorBlock(content, "Tracked Spells")
+  editor.when = when
+
+  -- The debuffs themselves, editable.
+  --
+  -- This block described the rule and gave you no way to change what it fires
+  -- on -- the one thing a rule IS. Adding a debuff meant the old rule page,
+  -- which is gone, so a rule's conditions were fixed at creation.
+  --
+  -- A wrapping row of pills, each with its own remove, then the two ways to
+  -- name a spell: the Cooldown Manager list for the ones the game will admit
+  -- you cast, and an ID box for everything else.
+  when.pills = Flex.Box(content, { dir = "row", wrap = true,
+    gap = UI.CHIP_GAP, crossGap = UI.CHIP_GAP })
+  when.pillPool = {}
+  when:Add(when.pills)
+
+  -- isTracked marks the ones this rule already has, so the list says which of
+  -- your debuffs are spoken for. It is CALLED per entry, so it cannot be nil --
+  -- passing nil there took the whole page down when the list was built.
+  when.addDrop = AddSpellDropdown(content, UI.DROP_W, "Add a debuff", function(spellID)
+    local rule = Rule()
+    for _, condition in ipairs(rule and rule.conditions or {}) do
+      if condition.spellID == spellID then return true end
+    end
+    return false
+  end, function(spellID)
+    local rule = Rule()
+    if not rule then return end
+    AddConditionTo(rule, spellID, false)
+    Structural()
+  end)
+  NS.EditorRow(when, content, nil, { when.addDrop, UI.DROP_W })
+
+  when.idBox = IDBox(content, function(text)
+    local rule = Rule()
+    if not rule then return end
+    AddConditionTo(rule, text, false)
+    Structural()
+  end, UI.DROP_W)
+  when.idLabel = Dim(content, "or a spell ID")
+  when.idLabel:SetJustifyH("LEFT")
+  NS.EditorRow(when, content, nil, { when.idBox, UI.DROP_W },
+    { when.idLabel, nil, 1, true })
+
+  when.limit = Dim(when.frame, "")
+  when.limit:SetJustifyH("LEFT")
+  when:Add(NS.FlexNote(content, when.limit, 0))
+
+  when.modeDrop = Dropdown(content, UI.DROP_W, {
+    { text = "The debuff is present", value = false },
+    { text = "The debuff is MISSING", value = true },
+  },
+    function() local r = Rule() return (r and r.showWhenMissing) and true or false end,
+    function(value)
+      local r = Rule()
+      if not r then return end
+      -- Refused rather than silently dropping a debuff: a missing rule is
+      -- single-debuff by construction, and a combo has no room for the second
+      -- one in the ladder's sublevel budget.
+      if value and #(r.conditions or {}) > (NS.MAX_MISSING_CONDITIONS or 1) then
+        NS.Print("a MISSING rule can only carry one debuff.")
+        return
+      end
+      r.showWhenMissing = value or nil
+      Structural()
+    end)
+  NS.EditorRow(when, content, nil, { when.modeDrop, UI.DROP_W })
+
+  -- Everything that decides WHERE and WHEN the rule is allowed to apply, as
+  -- opposed to what it watches for.
+  local load = NS.EditorBlock(content, "Load Conditions")
+  editor.load = load
+
+  -- Where the rule loads at all.
+  --
+  -- Not a condition on the plate: a rule ruled out here is never BUILT, so it
+  -- spends no draw slot in the content it is switched off for. Both lists
+  -- empty means everywhere, which is what every rule starts as.
+  local function LoadDrop(getSet, summary, entries)
+    return Dropdown(content, UI.DROP_W, entries, nil, nil, {
+      multi = true,
+      isChecked = function(key)
+        local set = getSet(false)
+        return (set and set[key]) and true or false
+      end,
+      onToggle = function(key)
+        local set = getSet(true)
+        if not set then return end
+        -- nil, not false: an empty table is what "no opinion" reads as, and a
+        -- table full of falses is not empty.
+        set[key] = (not set[key]) or nil
+        Structural()
+      end,
+      summary = summary,
+    })
+  end
+
+  load.zoneDrop = LoadDrop(function(create)
+    local r = Rule()
+    if not r then return nil end
+    if create then r.load = NS.NormaliseLoad(r.load) end
+    return r.load and r.load.zones
+  end, function()
+    local r = Rule()
+    return NS.LoadZoneSummary(r and r.load)
+  end, NS.LoadZoneEntries())
+  load.zoneLabel = Dim(content, "Load in")
+  NS.EditorRow(load, content, load.zoneLabel, { load.zoneDrop, UI.DROP_W })
+  TipLabel(load.zoneLabel, "Where this rule loads",
+    "Tick the content you want this rule in. Nothing ticked means everywhere.\n\nA rule that does not load here is not built at all, so it costs no draw slot while you are somewhere it is switched off.")
+
+  load.groupDrop = LoadDrop(function(create)
+    local r = Rule()
+    if not r then return nil end
+    if create then r.load = NS.NormaliseLoad(r.load) end
+    return r.load and r.load.groups
+  end, function()
+    local r = Rule()
+    return NS.LoadGroupSummary(r and r.load)
+  end, NS.LoadGroupEntries())
+  load.groupLabel = Dim(content, "Group")
+  NS.EditorRow(load, content, load.groupLabel, { load.groupDrop, UI.DROP_W })
+  TipLabel(load.groupLabel, "Who you are with",
+    "Solo, in a party, or in a raid. Nothing ticked means any of them.\n\nThis is ANDed with the zones above: dungeons plus In a party means dungeons, and only while grouped.")
+
+  load.combat = Checkbox(content,
+    function() local r = Rule() return r and r.missingCombatOnly and true or false end,
+    function(v) local r = Rule() if r then r.missingCombatOnly = v or nil; Structural() end end)
+  load.combatLabel = Label(content, "Only while you are in combat")
+  load.combatRow = NS.EditorRow(load, content, nil, { load.combat, UI.BOX },
+    { load.combatLabel, nil, 1, true })
+
+  -- Your own target and focus. A restriction on which PLATES the rule may
+  -- paint, which is the same kind of question the two lists above ask.
+  load.target = Checkbox(content,
+    function() local r = Rule() return r and r.onTarget ~= false end,
+    function(v) local r = Rule() if r then r.onTarget = v; Structural() end end)
+  load.targetLabel = Label(content, "Draw on your target")
+  NS.EditorRow(load, content, nil, { load.target, UI.BOX }, { load.targetLabel, nil, 1, true })
+
+  load.focus = Checkbox(content,
+    function() local r = Rule() return r and r.onFocus ~= false end,
+    function(v) local r = Rule() if r then r.onFocus = v; Structural() end end)
+  load.focusLabel = Label(content, "Draw on your focus")
+  NS.EditorRow(load, content, nil, { load.focus, UI.BOX }, { load.focusLabel, nil, 1, true })
+
+  -- The bar half.
+  local bar = NS.EditorBlock(content, "Healthbar Coloring")
+  editor.bar = bar
+  bar.enabled = Checkbox(content,
+    function() local r = Rule() return r and r.barEnabled ~= false end,
+    function(v)
+      local r = Rule()
+      if not r then return end
+      -- NOT `v and nil or false`. Lua reads that as (v and nil) or false, and
+      -- `true and nil` is nil, so the whole thing is false however the box was
+      -- ticked -- a switch that could only ever turn the bar half OFF. Cleared
+      -- rather than set true because every reader tests `~= false`, so absent
+      -- means on.
+      if v then r.barEnabled = nil else r.barEnabled = false end
+      Structural()
+    end)
+  bar.head:Add(Flex.Item(bar.enabled, { width = UI.BOX, shrink = 0 }))
+
+  bar.colorLabel = Dim(content, "Color")
+  bar.swatch = ColorSwatch(content,
+    function() local r = Rule() return r and r.color or NS.DefaultColor() end,
+    function(r, g, b, a)
+      local rule = Rule()
+      if rule then rule.color = { r = r, g = g, b = b, a = a }; Restyle() end
+    end)
+  bar.alpha = NS.OpacitySlider(content,
+    function() local r = Rule() return r and r.color or NS.DefaultColor() end,
+    function(value)
+      local rule = Rule()
+      if not rule or not rule.color then return end
+      rule.color.a = value
+      Restyle()
+    end)
+  bar.alphaNote = Dim(content, "")
+  NS.EditorRow(bar, content, bar.colorLabel, { bar.swatch, UI.BOX })
+  bar.alphaLabel = Dim(content, "Opacity")
+  NS.EditorRow(bar, content, bar.alphaLabel, { bar.alpha, UI.SLIDER_SM })
+  NS.EditorRow(bar, content, nil, { bar.alphaNote, nil, 1, true })
+
+  -- Fill: which of the two engines paints this rule.
+  bar.fillLabel = Dim(content, "Fill")
+  bar.fillDrop = Dropdown(content, UI.DROP_W, {
+    { text = "Bar texture", value = "bar" },
+    { text = "Pattern overlay", value = "texture" },
+  },
+    function() local r = Rule() return (r and r.fillStyle == "texture") and "texture" or "bar" end,
+    function(value)
+      local r = Rule()
+      if not r then return end
+      r.fillStyle = (value == "texture") and "texture" or nil
+      Structural()
+    end)
+  NS.EditorRow(bar, content, bar.fillLabel, { bar.fillDrop, UI.DROP_W })
+
+  -- The statusbar picker stays a dropdown: those come from LibSharedMedia, so
+  -- the list is whatever the user has installed and can be a hundred long.
+  bar.barTexDrop = Dropdown(content, UI.DROP_W, BarTextureEntries,
+    function() local r = Rule() return r and r.barTexture end,
+    function(value) local r = Rule() if r then r.barTexture = value; Restyle() end end)
+  bar.barTexRow = NS.EditorRow(bar, content, nil, { bar.barTexDrop, UI.DROP_W })
+
+  -- The patterns are ten fixed textures, so they are shown rather than named.
+  -- A dropdown of "Stripes (Small, Spread)" against "Stripes (Medium)" is a
+  -- reading comprehension test; the swatches answer it by being the thing.
+  bar.grid = Flex.Box(content, { dir = "row", wrap = true,
+    gap = UI.CHIP_GAP, crossGap = UI.CHIP_GAP })
+  bar.gridChips = {}
+  for _, entry in ipairs(NS.FillTextures or {}) do
+    local key = entry.key
+    local chip = NS.FillChip(content, function()
+      local r = Rule()
+      return { color = r and r.color or NS.DefaultColor(),
+        fillStyle = "texture", fillTexture = key }
+    end, UI.SWATCH_GRID, UI.CHIP_H)
+    chip:EnableMouse(true)
+    chip:SetScript("OnMouseUp", function()
+      local r = Rule()
+      if not r then return end
+      r.fillStyle, r.fillTexture = "texture", key
+      Structural()
+    end)
+    Tip(chip, entry.label, "Tiles across the bar. The host addon's own colour shows through the gaps.")
+    -- Selection is a ring, drawn OUTSIDE the swatch. It was a filled overlay
+    -- across the whole chip, which hid the one thing the chip exists to show.
+    chip.sel = {}
+    for index = 1, 4 do
+      chip.sel[index] = chip:CreateTexture(nil, "OVERLAY")
+      chip.sel[index]:SetColorTexture(RGBA(THEME.accent))
+      chip.sel[index]:Hide()
+    end
+    chip.sel[1]:SetPoint("TOPLEFT", -2, 2);     chip.sel[1]:SetPoint("TOPRIGHT", 2, 2)
+    chip.sel[2]:SetPoint("BOTTOMLEFT", -2, -2); chip.sel[2]:SetPoint("BOTTOMRIGHT", 2, -2)
+    chip.sel[3]:SetPoint("TOPLEFT", -2, 2);     chip.sel[3]:SetPoint("BOTTOMLEFT", -2, -2)
+    chip.sel[4]:SetPoint("TOPRIGHT", 2, 2);     chip.sel[4]:SetPoint("BOTTOMRIGHT", 2, -2)
+    chip.sel[1]:SetHeight(2); chip.sel[2]:SetHeight(2)
+    chip.sel[3]:SetWidth(2);  chip.sel[4]:SetWidth(2)
+    chip.key = key
+    bar.gridChips[#bar.gridChips + 1] = chip
+    bar:Register(chip)
+    bar.grid:Add(Flex.Item(chip, { width = UI.SWATCH_GRID, height = UI.CHIP_H, shrink = 0 }))
+  end
+  -- Two rows, always.
+  --
+  -- The box already wrapped, but nothing ever made it: a block's natural width
+  -- is its widest child, so ten swatches in a line made this block half again
+  -- as wide as the other three and the row of four could not be evenly
+  -- spaced. Capping the box at half the swatches forces the wrap, and the cap
+  -- is computed from the list rather than written down, so an eleventh pattern
+  -- becomes six and five instead of overflowing.
+  local perRow = math.ceil(#bar.gridChips / 2)
+  bar.grid.maxW = perRow * (UI.SWATCH_GRID + UI.CHIP_GAP) - UI.CHIP_GAP
+  bar:Add(bar.grid)
+
+  bar.cover = Checkbox(content,
+    function() local r = Rule() return r and r.missingCover and true or false end,
+    function(v) local r = Rule() if r then r.missingCover = v or nil; Structural() end end)
+  bar.coverLabel = Label(content, "Cover the missing-health side")
+  bar.coverRow = NS.EditorRow(bar, content, nil, { bar.cover, UI.BOX },
+    { bar.coverLabel, nil, 1, true })
+
+  bar.coverColor = ColorSwatch(content,
+    function() return NS.db.tints.missingCoverColor or { r = 0.08, g = 0.08, b = 0.08, a = 0.95 } end,
+    function(r, g, b, a)
+      NS.db.tints.missingCoverColor = { r = r, g = g, b = b, a = a }
+      Restyle()
+    end)
+  bar.coverAlpha = NS.OpacitySlider(content,
+    function() return NS.db.tints.missingCoverColor or { r = 0.08, g = 0.08, b = 0.08, a = 0.95 } end,
+    function(value)
+      local c = NS.db.tints.missingCoverColor
+        or { r = 0.08, g = 0.08, b = 0.08, a = 0.95 }
+      c.a = value
+      NS.db.tints.missingCoverColor = c
+      Restyle()
+    end)
+  bar.coverColorNote = Dim(content, "shared by every rule that covers it")
+  bar.coverAlphaLabel = Dim(content, "Opacity")
+  bar.coverColorRow = NS.EditorRow(bar, content, nil, { bar.coverColor, UI.BOX },
+    { bar.coverAlphaLabel, UI.LABEL_TINY }, { bar.coverAlpha, UI.SLIDER_SM })
+  bar.coverNoteRow = NS.EditorRow(bar, content, nil,
+    { bar.coverColorNote, nil, 1, true })
+
+  -- The border half. Everything a border has, in the place the border is.
+  local border = NS.EditorBlock(content, "Border Coloring")
+  editor.border = border
+  border.enabled = Checkbox(content,
+    function() local r = Rule() return r and r.border and r.border.enabled and true or false end,
+    function(v)
+      local r = Rule()
+      if not r then return end
+      r.border = r.border or NS.DefaultBorder()
+      r.border.enabled = v
+      Structural()
+    end)
+  border.head:Add(Flex.Item(border.enabled, { width = UI.BOX, shrink = 0 }))
+
+  border.colorLabel = Dim(content, "Color")
+  border.swatch = ColorSwatch(content,
+    function()
+      local r = Rule()
+      return (r and r.border and r.border.color) or { r = 1, g = 0.85, b = 0.1, a = 1 }
+    end,
+    function(r, g, b, a)
+      local rule = Rule()
+      if not rule then return end
+      rule.border = rule.border or NS.DefaultBorder()
+      rule.border.color = { r = r, g = g, b = b, a = a }
+      Restyle()
+    end)
+  -- Says when the whole module is off, in the place you are trying to use it.
+  -- A border half that is switched on inside a rule, in a module that is
+  -- switched off, paints nothing -- and every control here would happily let
+  -- you tune it for ten minutes first.
+  border.alpha = NS.OpacitySlider(content,
+    function()
+      local r = Rule()
+      return (r and r.border and r.border.color) or { r = 1, g = 0.85, b = 0.1, a = 1 }
+    end,
+    function(value)
+      local rule = Rule()
+      if not rule then return end
+      rule.border = rule.border or NS.DefaultBorder()
+      rule.border.color = rule.border.color or { r = 1, g = 0.85, b = 0.1, a = 1 }
+      rule.border.color.a = value
+      Restyle()
+    end)
+  border.freeNote = Dim(content, "")
+  NS.EditorRow(border, content, border.colorLabel, { border.swatch, UI.BOX })
+  border.alphaLabel = Dim(content, "Opacity")
+  NS.EditorRow(border, content, border.alphaLabel, { border.alpha, UI.SLIDER_SM })
+  NS.EditorRow(border, content, nil, { border.freeNote, nil, 1, true })
+
+  border.thickLabel = Dim(content, "Thickness")
+  border.thickness = Slider(content, UI.SLIDER_W, 1, 8, 7,
+    function() local r = Rule() return (r and r.border and r.border.thickness) or 2 end,
+    function(v)
+      local r = Rule()
+      if not r then return end
+      r.border = r.border or NS.DefaultBorder()
+      r.border.thickness = v
+      Structural()
+    end)
+  NS.EditorRow(border, content, border.thickLabel, { border.thickness, UI.SLIDER_W })
+
+  border.growLabel = Dim(content, "Grows")
+  -- growDrop, not grow. These blocks ARE Flex nodes, and Flex reads `grow` off
+  -- a node as its share of leftover space -- so storing a dropdown there had
+  -- the layout doing arithmetic on a frame, which took the whole page down the
+  -- moment a rule was opened. Anything hung on a node has to dodge the
+  -- engine's own property names.
+  border.growDrop = Dropdown(content, UI.DROP_SM_W, {
+    { text = "Outward", value = "OUT" },
+    { text = "Inward", value = "IN" },
+  },
+    function() local r = Rule() return (r and r.border and r.border.grow) or "OUT" end,
+    function(value)
+      local r = Rule()
+      if not r then return end
+      r.border = r.border or NS.DefaultBorder()
+      r.border.grow = value
+      Structural()
+    end)
+  NS.EditorRow(border, content, border.growLabel, { border.growDrop, UI.DROP_SM_W })
+
+  border.padLabel = Dim(content, "Gap")
+  border.padding = Slider(content, UI.SLIDER_W, 0, 12, 13,
+    function() local r = Rule() return (r and r.border and r.border.padding) or 0 end,
+    function(v)
+      local r = Rule()
+      if not r then return end
+      r.border = r.border or NS.DefaultBorder()
+      r.border.padding = v
+      Structural()
+    end)
+  NS.EditorRow(border, content, border.padLabel, { border.padding, UI.SLIDER_W })
+
+  -- Two rows of two, as a box:
+  --
+  --   Tracked Spells      Load Conditions
+  --   Healthbar Coloring  Border Coloring
+  --
+  -- Two explicit rows rather than one wrapping row of four. Wrapping put
+  -- three across and one underneath at most window widths, because how many
+  -- fit is decided by measured width -- and "three and one" is never the
+  -- layout that was wanted. Each row still wraps on its own, so a genuinely
+  -- narrow window collapses to a single column instead of overflowing.
+  local blocks = Flex.Box(content, { dir = "column", gap = UI.GROUP_GAP })
+  local topRow = Flex.Box(content, { dir = "row", wrap = true, gap = UI.GROUP_GAP,
+    crossGap = UI.GROUP_GAP, align = "stretch" })
+  topRow:Add(when)
+  topRow:Add(load)
+  local bottomRow = Flex.Box(content, { dir = "row", wrap = true, gap = UI.GROUP_GAP,
+    crossGap = UI.GROUP_GAP, align = "stretch" })
+  bottomRow:Add(bar)
+  bottomRow:Add(border)
+  blocks:Add(topRow)
+  blocks:Add(bottomRow)
+  editor:Add(blocks)
+
+  sec.editor = editor
+  return editor
+end
+
+-- A debuff the rule fires on: its icon, its name, and the way off it.
+function NS.EditorPill(parent)
+  local pill = NS.Flex.Box(parent, { dir = "row", align = "center",
+    gap = NS.UI.PILL_PAD, height = NS.UI.PILL_H,
+    pad = { l = NS.UI.PILL_PAD, r = NS.UI.PILL_PAD } })
+
+  pill.bg = pill.frame:CreateTexture(nil, "BACKGROUND")
+  pill.bg:SetAllPoints()
+  pill.bg:SetColorTexture(0.16, 0.16, 0.20, 1)
+
+  pill.icon = pill.frame:CreateTexture(nil, "ARTWORK")
+  pill.icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
+  pill:Add(NS.Flex.Item(pill.icon,
+    { width = NS.UI.PILL_ICON, height = NS.UI.PILL_ICON, shrink = 0 }))
+
+  pill.label = Label(pill.frame, "")
+  pill.label:SetJustifyH("LEFT")
+  pill:Add(NS.Flex.Item(pill.label, { clipText = true }))
+
+  pill.remove = CloseX(parent, function()
+    if pill.onRemove then pill.onRemove() end
+  end)
+  pill:Add(NS.Flex.Item(pill.remove,
+    { width = NS.UI.CLOSE_X, height = NS.UI.CLOSE_X, shrink = 0 }))
+  return pill
+end
+
+function NS.RefreshRuleEditor(sec)
+  local editor = sec.editor
+  local rule = sec.openRule
+  if not editor or not rule then return end
+  local when, bar, border = editor.when, editor.bar, editor.border
+  local load = editor.load
+
+  -- One pill per debuff, pooled by position: which spell sits at index 2
+  -- changes every time one is removed.
+  local conditions = rule.conditions or {}
+  for index, condition in ipairs(conditions) do
+    local pill = when.pillPool[index]
+    if not pill then
+      pill = NS.EditorPill(sec.content)
+      when.pillPool[index] = pill
+      when.pills:Add(pill)
+    end
+    pill.hidden = false
+    pill.icon:SetTexture(NS.SpellIcon(condition.spellID))
+    pill.label:SetText(NS.SpellName(condition.spellID) or tostring(condition.spellID))
+    pill.onRemove = function()
+      for at, existing in ipairs(rule.conditions or {}) do
+        if existing.spellID == condition.spellID then
+          table.remove(rule.conditions, at)
+          break
+        end
+      end
+      Structural()
+    end
+  end
+  for index = #conditions + 1, #when.pillPool do
+    when.pillPool[index].hidden = true
+  end
+
+  -- What is left, and why. A limit that only announces itself by refusing a
+  -- click is a limit people meet twice.
+  local limit = RuleConditionLimit(rule)
+  local room = limit - #conditions
+  if room <= 0 then
+    when.limit:SetText(rule.showWhenMissing
+      and "|cffffcc00A MISSING rule can only carry one debuff.|r"
+      or ("|cffffcc00Full: %d debuffs is the most a rule can require.|r"):format(limit))
+  else
+    when.limit:SetText(("%d of %d debuffs -- all of them must be on the target")
+      :format(#conditions, limit))
+  end
+  when.addDrop.Refresh()
+  when.addDrop:SetShown(room > 0)
+  when.idBox:SetShown(room > 0)
+  when.idLabel:SetShown(room > 0)
+
+  when.modeDrop.Refresh()
+  load.target.Refresh()
+  load.focus.Refresh()
+  load.zoneDrop.Refresh()
+  load.groupDrop.Refresh()
+  -- In-combat belongs to missing rules: a presence rule has no "not yet
+  -- applied" state to hold anything off of.
+  load.combatRow.hidden = not rule.showWhenMissing
+  if not load.combatRow.hidden then load.combat.Refresh() end
+
+  bar.enabled.Refresh()
+  bar.swatch.Refresh()
+  bar.alpha.Refresh()
+  bar.fillDrop.Refresh()
+  local textured = rule.fillStyle == "texture"
+  bar.barTexRow.hidden = textured
+  bar.grid.hidden = not textured
+  if not textured then bar.barTexDrop.Refresh() end
+  for _, chip in ipairs(bar.gridChips) do
+    chip.Refresh()
+    local on = textured and rule.fillTexture == chip.key
+    for _, edge in ipairs(chip.sel) do edge:SetShown(on) end
+  end
+
+  -- A missing rule is lit by DEFAULT on every mob rather than occasionally, so
+  -- an opaque colour covers the bar and everything on it all the time.
+  local alpha = (rule.color and rule.color.a) or 1
+  if rule.showWhenMissing and alpha > 0.45 then
+    bar.alphaNote:SetText(("|cffffcc00%d%% opaque -- around 30%% reads as a reminder|r")
+      :format(math.floor(alpha * 100 + 0.5)))
+  else
+    bar.alphaNote:SetText("")
+  end
+
+  bar.cover.Refresh()
+  bar.coverColorRow.hidden = not rule.missingCover
+  bar.coverNoteRow.hidden = not rule.missingCover
+  if rule.missingCover then
+    bar.coverColor.Refresh()
+    bar.coverAlpha.Refresh()
+  end
+
+  local off = rule.barEnabled == false
+  bar:SetOff(off)
+  bar.colorLabel:SetAlpha(off and 0.4 or 1)
+  bar.fillLabel:SetAlpha(off and 0.4 or 1)
+
+  border.enabled.Refresh()
+  border:SetOff(not (rule.border and rule.border.enabled))
+  border.swatch.Refresh()
+  border.alpha.Refresh()
+  border.freeNote:SetText("")
+  border.thickness.Refresh()
+  border.growDrop.Refresh()
+  border.padding.Refresh()
+end
+
+-- Move an existing child of a Flex box to sit directly after another child.
+--
+-- Flex fixes a node's order when it is added, and the editor band has to
+-- follow whichever row is open. Reordering the children array is safe -- a
+-- node's parent link and its frame parentage are untouched, and the next
+-- Layout reads the array fresh. Rebuilding the band per row would leak a
+-- frame per rule instead, since a frame cannot be destroyed.
+function NS.FlexMoveAfter(parent, node, after)
+  local kids = parent.children
+  local from, to
+  for index, child in ipairs(kids) do
+    if child == node then from = index end
+    if child == after then to = index end
+  end
+  if not from then return end
+  table.remove(kids, from)
+  if not to then
+    kids[#kids + 1] = node
+    return
+  end
+  -- Recomputed: removing the node may have shifted the target down one.
+  for index, child in ipairs(kids) do
+    if child == after then to = index break end
+  end
+  table.insert(kids, to + 1, node)
+end
+
+-- NS.RulePreview is gone. The page's own stage at the top is the only preview
+-- now: two of them showing one rule updated on different passes, so one was
+-- always a step behind the other, and a preview you cannot trust is worse than
+-- the one you have to look up at.
+
+-- A hairline divider as a Flex node.
+--
+-- Through PixelUtil where the client has it: at a non-integer UI scale a plain
+-- 1px texture lands between physical pixels and renders as a soft two-pixel
+-- smear, or vanishes. The same reason NS.BuildOutline uses it for the plate
+-- border. Three separate copies of this existed, each with its own inset.
+function NS.FlexRule(parent, inset)
+  inset = inset or NS.UI.ROW_INSET
+  local node = NS.Flex.Box(parent, { height = NS.UI.DIVIDER, pad = { l = inset, r = inset } })
+  node.line = node.frame:CreateTexture(nil, "ARTWORK")
+  node.line:SetAllPoints()
+  node.line:SetColorTexture(RGBA(THEME.divider))
+  if PixelUtil and PixelUtil.SetHeight then
+    pcall(PixelUtil.SetHeight, node.line, NS.UI.DIVIDER)
+  end
+  return node
+end
+
+-- Vertical column separators for the rule table.
+--
+-- Drawn on the ROW's own frame rather than on each cell: the pinned threat row
+-- places its cells with plain Flex.Items and the rule rows use FlexCells, so a
+-- separator owned by a cell would appear on one row shape and not the other.
+-- Every column right of the rule name is fixed width, so the offsets are
+-- arithmetic off the right edge and every row agrees on them by construction.
+--
+-- To tune: THEME.tableSep for the colour (alpha is what makes it faint), and
+-- the `order` list below for which boundaries get a line at all.
+function NS.ColumnSepOffsets()
+  local C, UI = NS.RULE_COLS, NS.UI
+  local order = { C.on, C.del, C.edit, C.cost, C.border, C.bar }
+  local offsets, x = {}, UI.ROW_INSET
+  for _, width in ipairs(order) do
+    x = x + width
+    offsets[#offsets + 1] = x + UI.COL_GAP / 2
+    x = x + UI.COL_GAP
+  end
+  return offsets
+end
+
+function NS.PaintColumnSeps(frame)
+  frame.colSeps = frame.colSeps or {}
+  for index, offset in ipairs(NS.ColumnSepOffsets()) do
+    local line = frame.colSeps[index]
+    if not line then
+      line = frame:CreateTexture(nil, "BACKGROUND", nil, 1)
+      line:SetColorTexture(RGBA(THEME.tableSep))
+      frame.colSeps[index] = line
+    end
+    line:ClearAllPoints()
+    line:SetPoint("TOP", frame, "TOPRIGHT", -offset, 0)
+    line:SetPoint("BOTTOM", frame, "BOTTOMRIGHT", -offset, 0)
+    line:SetWidth(NS.PixelWeight(frame))
+  end
+  return frame.colSeps
+end
+
+-- A heading centred over a fixed column, for the same reason.
+function NS.FlexHeaderCell(parent, text, width)
+  local label = Header(parent, text)
+  label:SetJustifyH("CENTER")
+  return NS.FlexCell(parent, width, NS.Flex.Item(label)), label
+end
+
+-- Explanatory text, inset from the section's edges.
+--
+-- A Flex.Item cannot carry padding -- pad is read off BOXES, so `pad` on a
+-- leaf is silently ignored, which is why every footnote on these pages sat
+-- flush against the section's left edge while the rows above it were inset by
+-- twelve. Wrapping the FontString in a one-child box is the fix, and the box
+-- is what the indent belongs to anyway.
+function NS.FlexNote(parent, fontString, indent)
+  local node = NS.Flex.Box(parent, {
+    dir = "column",
+    pad = { l = indent or NS.UI.NOTE_INSET, r = NS.UI.NOTE_INSET, t = 2, b = 2 },
+  })
+  fontString:SetJustifyH("LEFT")
+  node:Add(NS.Flex.Item(fontString, { wrapText = true, grow = 1 }))
+  return node
+end
+
+-- What the two stage-preview dropdowns offer.
+--
+-- Only states that are switched ON. A dropdown listing a colour the profile
+-- would never draw invites you to preview something and then wonder why the
+-- plate in the game does not match.
+function NS.StageThreatEntries()
+  local out = { { text = "Threat: off", value = false } }
+  for _, state in ipairs(NS.ThreatStatesOrdered and NS.ThreatStatesOrdered() or {}) do
+    local bar = NS.ThreatModule("bar").states[state.key]
+    local border = NS.ThreatModule("border").states[state.key]
+    local on = (bar and bar.enabled ~= false) or (border and border.enabled ~= false)
+    if on then
+      out[#out + 1] = { text = NS.ThreatStateLabel(state.key), value = state.key }
+    end
+  end
+  return out
+end
+
+function NS.StageMarkEntries()
+  local out = { { text = "Target/Focus: off", value = false } }
+  -- Every state, including the switched-off ones.
+  --
+  -- Focus ships off -- most people do not keep one -- and this hid it from
+  -- the preview entirely, so the one state you would want to LOOK at before
+  -- turning on was the one state you could not. A control that silently drops
+  -- an option reads as a missing feature, not as a filter.
+  --
+  -- Said out loud rather than left to be inferred, so a preview that draws
+  -- nothing on a real plate is explained where you picked it.
+  for _, state in ipairs(NS.MARK_STATES or {}) do
+    local bar = NS.MarkModule("bar").states[state.key]
+    local border = NS.MarkModule("border").states[state.key]
+    local on = (bar and bar.enabled ~= false) or (border and border.enabled ~= false)
+    out[#out + 1] = {
+      text = on and NS.MarkStateLabel(state.key)
+        or ("%s  |cff808080(off)|r"):format(NS.MarkStateLabel(state.key)),
+      value = state.key,
+    }
+  end
+  return out
+end
+
+function NS.MarkShapeEntries()
+  local out = {}
+  -- The DRAWABLE list, not every shape defined: several come from
+  -- EllesmereUI's own art and only exist while that addon is installed.
+  for _, entry in ipairs(NS.MarkShapeList and NS.MarkShapeList() or {}) do
+    out[#out + 1] = { text = entry.label, value = entry.key }
+  end
+  return out
+end
+
+-- Where a marker sits, as dropdown entries.
+function NS.MarkPositionEntries()
+  local out = {}
+  for _, entry in ipairs(NS.MARK_INDICATOR_POSITIONS or {}) do
+    out[#out + 1] = { text = entry.label, value = entry.key }
+  end
+  return out
+end
+
+function NS.ThreatRoleEntries()
+  local entries = {}
+  for _, role in ipairs(NS.THREAT_ROLES) do
+    table.insert(entries, { text = role.label, value = role.key })
+  end
+  return entries
+end
+
+function NS.ThreatModule(kind)
+  if kind == "border" then return NS.ThreatBorderConfig() end
+  return NS.ThreatConfig()
+end
+
+-- "tank role - 3 of 4 states". Says what the strip cannot: which reading is in
+-- force, and whether anything is switched off.
+function NS.ThreatSummary(kind)
+  local cfg = NS.ThreatModule(kind)
+  local on = 0
+  for _, state in ipairs(NS.THREAT_STATES) do
+    local entry = cfg.states[state.key]
+    if entry and entry.enabled ~= false then on = on + 1 end
+  end
+  local states = on == #NS.THREAT_STATES and ("%d states"):format(on)
+    or ("%d of %d states"):format(on, #NS.THREAT_STATES)
+  return ("%s role |cff5a5a62-|r %s |cff5a5a62-|r in combat only"):format(
+    NS.ThreatRole(), states)
+end
+
+-- One clickable colour chip per state. Clicking opens the picker for that
+-- state; a state that is switched off is drawn faint, so the strip shows what
+-- is ACTIVE rather than four colours regardless.
+-- The threat SECTION is gone. It was a card above the rule list holding a
+-- summary row and, behind Edit, four state rows -- which is the rule table's
+-- job, done twice, in a second place. Threat is the top row of that table now
+-- (NS.BuildThreatPinnedRow) and its editor is a band in it
+-- (NS.BuildThreatBand), so there is one table on one page.
+
+-- Width-in, height-out. The content frame is anchored to both edges of the
+-- section, so its width is real before anything has been sized; its height is
+-- what this computes. Falling back to the section's own width covers the very
+-- first render, before either has been laid out.
+function NS.FlexResize(sec)
+  local width = sec.content:GetWidth()
+  if not width or width < 1 then width = sec:GetWidth() or 690 end
+  local height = sec.flex:Layout(width)
+  sec.flex:Apply()
+  sec:Resize(height)
+  if sec.onResize then sec.onResize(sec) end
+
+  -- The sections BELOW this one have to move too, and nothing else does that:
+  -- a body section carries no onResize (only the page head does), and each
+  -- section is anchored at a y the page computed once. So growing one -- which
+  -- is what opening Edit does -- left it drawing straight through its
+  -- neighbour. LayoutSections re-anchors the whole stack from the new heights,
+  -- and is cheap enough to run on any resize.
+  local body = sec:GetParent()
+  if body and body.sections then LayoutSections(body, body.sections) end
+end
+
 local function BuildHealthTab()
   -- No enable checkbox here any more: the module's switch lives on its
   -- heading in the rail (see MODULE_SWITCH), where it is visible without
@@ -4820,47 +7415,48 @@ local function BuildHealthTab()
   head.togglesLabel:SetPoint("TOPLEFT", HEAD_PAD, -(6 + STAGE_H + 30))
   head.toggles = {}
 
+  -- Under the debuff list, because that is where someone stands at a dummy
+  -- ticking boxes and believing what they see.
+  --
+  -- A training dummy never puts you in combat: UnitAffectingCombat is false
+  -- the whole time you are hitting one, so every "only while you are in
+  -- combat" condition -- rules, threat, missing-debuff timers -- reads as
+  -- out of combat and the plate looks wrong for reasons that have nothing to
+  -- do with the rule being tested.
+  head.dummyWarn = head:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+  StyleText(head.dummyWarn, 11)
+  head.dummyWarn:SetJustifyH("LEFT")
+  head.dummyWarn:SetText(
+    "WARNING: TRAINING DUMMIES DO NOT ALLOW ACCURATE TESTING OF \"IN COMBAT\" CONDITIONS")
+  head.dummyWarn:SetTextColor(1, 0.25, 0.25)
+
   -- Preview-only, shared with the border tab: someone running both wants to
   -- see how the two look together.
   --
   -- A button in the same column and format as the test buttons, since it
   -- belongs to the same group -- a lone checkbox read as a different class of
   -- control. Hidden entirely when the other module is off.
-  head.combine = Button(head.testColumn, "", 150, function()
-    NS.db.uiPreviewCombine = not NS.db.uiPreviewCombine
-    if head.combine.Refresh then head.combine.Refresh() end
-    RefreshPreviews()
-  end)
-  head.combine.Refresh = function()
-    local available = MODULE_SWITCH["border"].get()
-    head.combine:SetShown(available)
-    local on = available and NS.db.uiPreviewCombine and true or false
-    head.combine:SetText(on and "Hide Border Rules" or "Show Border Rules")
-    if on then
-      head.combine.label:SetTextColor(1, 0.82, 0.1)
-    else
-      head.combine.label:SetTextColor(1, 1, 1)
-    end
-    -- Re-centre: this button appearing or vanishing changes the group size.
-    if head.RestackTests then head.RestackTests() end
-  end
-  -- In the column beside the plate: actions on your real nameplates, grouped
-  -- apart from the preview they sit next to.
-  head.testButton = TestModeButton(head.testColumn, false)
-  head.testAllButton = TestModeButton(head.testColumn, true)
-  head.RestackTests = function()
-    StackTestButtons(head.testColumn, { head.testButton, head.testAllButton, head.combine })
-  end
-  head.combine.Refresh()
-  head.combineLabel = Dim(head, "")
+  -- No "Show Border Rules" button.
+  --
+  -- It existed to overlay one list's rules on the other list's preview. With
+  -- one list there is nothing to combine: the preview already draws both
+  -- halves of whichever rule is winning.
+
 
   local body = panel.body
   body.sections = {}
 
-  local rules = CollapsibleSection(body, "colourRules", "Color Rules",
+  -- Above everything, because it is the map of everything below it.
+  local ladder = CollapsibleSection(body, "resolution", "What Colors This Plate",
+    "top to bottom, the order these are decided in")
+  table.insert(body.sections, ladder)
+  body.ladder = ladder
+
+  local rules = CollapsibleSection(body, "colourRules", "Spell Rules",
     "higher rules override lower ones - the topmost match is what you see")
   table.insert(body.sections, rules)
   body.rules = rules
+  NS.SlotMeter(rules)
 
   local c = rules.content
   -- Centred over the whole UP / number / DOWN cluster rather than
@@ -5104,8 +7700,28 @@ local function BuildHealthTab()
     -- one leaves the other face stale until it is told to re-read.
     if headFrame.testButton then headFrame.testButton.Refresh() end
     if headFrame.testAllButton then headFrame.testAllButton.Refresh() end
-    if headFrame.combine then headFrame.combine.Refresh() end
+    -- Rebuilt from the profile every pass: switching a threat state off has to
+    -- take it out of the list, and clear it if it was the one being previewed.
+    if headFrame.threatPreview then
+      if NS.stagePreview.threat and not NS.StagePreviewThreat("bar")
+        and not NS.StagePreviewThreat("border") then
+        NS.stagePreview.threat = nil
+      end
+      headFrame.threatPreview.Refresh()
+    end
+    if headFrame.markPreview then
+      if NS.stagePreview.mark and not NS.StagePreviewMark("bar")
+        and not NS.StagePreviewMark("border") then
+        NS.stagePreview.mark = nil
+      end
+      headFrame.markPreview.Refresh()
+    end
     if headFrame.enable then headFrame.enable.Refresh() end
+    -- The test buttons say whether test mode is running and in which scope,
+    -- so they have to be refreshed wherever they appear -- not only on the
+    -- page that used to own them.
+    if headFrame.testButton then headFrame.testButton.Refresh() end
+    if headFrame.testAllButton then headFrame.testAllButton.Refresh() end
 
     local stage = headFrame.stage
 
@@ -5115,9 +7731,24 @@ local function BuildHealthTab()
     -- Safe to show now that presence tints draw ABOVE it. While it sat on top
     -- this washed over whatever tint you were trying to look at.
     local missingRule = PreviewMissingRule()
-    if missingRule then
+    -- Its wash, but only if it HAS one. The bar half's switch was read by the
+    -- engine and by the winning-rule branch below, and not here -- so turning
+    -- Healthbar Coloring off on a MISSING rule left the preview painting the
+    -- colour it had just been told to stop using, which reads as the switch
+    -- doing nothing. The rule itself still stands: its border half is decided
+    -- further down from the same variable.
+    if missingRule and missingRule.barEnabled == false then
+      stage.missingWash:Hide()
+      if stage.missingCover then stage.missingCover:Hide() end
+    elseif missingRule then
       NS.ApplyRuleFill(stage.missingWash, stage.bar, missingRule)
       stage.missingWash:Show()
+      -- Its cover too. This only ever followed the winning PRESENCE rule, so
+      -- ticking "cover the missing-health side" on a missing rule -- the rule
+      -- most likely to want one -- changed nothing on the preview.
+      if NS.ApplyMissingCover then
+        NS.ApplyMissingCover(stage.missingCover, stage.bar, missingRule)
+      end
     else
       stage.missingWash:Hide()
     end
@@ -5125,11 +7756,29 @@ local function BuildHealthTab()
       headFrame.verdict:SetText("|cff808080Add a rule below and it will be previewed here.|r")
       headFrame.togglesLabel:Hide()
       stage.tint:Hide()
-      stage.missingCover:Hide()
-      for _, e in ipairs(stage.borderEdges) do e:Hide() end
+      if not missingRule then stage.missingCover:Hide() end
+      -- Borders are decided above, for both kinds of rule.
+      if not borderRule then
+        for _, e in ipairs(stage.borderEdges) do e:Hide() end
+      end
     else
       headFrame.togglesLabel:Show()
       local winner, matches, ticked = EvaluatePreview()
+
+      -- Whose border is on the plate.
+      --
+      -- This lived inside `if winner then`, so a MISSING rule -- which lights
+      -- precisely when no presence rule is matching -- could never show its
+      -- border here. Same question, asked once, outside the branch that is
+      -- about the BAR: the winning rule's border if it has one, otherwise a
+      -- lit missing rule's.
+      local borderRule
+      if winner and winner.border and winner.border.enabled then
+        borderRule = winner
+      elseif missingRule and missingRule.border and missingRule.border.enabled then
+        borderRule = missingRule
+      end
+      DrawStageBorder(stage, borderRule)
 
       -- Show the edge inset, but against the BAR rather than the fill: the
       -- point is to see how much border the inset leaves, and tying it to a
@@ -5140,7 +7789,35 @@ local function BuildHealthTab()
       stage.tint:SetPoint("TOPLEFT", fill, "TOPLEFT", inset, -inset)
       stage.tint:SetPoint("BOTTOMRIGHT", fill, "BOTTOMRIGHT", -inset, inset)
 
-      if winner then
+      -- The previewed bands, in the order the engine resolves them: threat
+      -- claims its slots first, target/focus next, spell rules under both. So
+      -- a previewed threat state covers a previewed target colour, which
+      -- covers whichever rule won -- and neither dropdown can be overridden
+      -- by the other by accident, because each holds one key at a time.
+      local topPreview = (NS.StagePreviewThreat and NS.StagePreviewThreat("bar"))
+        or (NS.StagePreviewMark and NS.StagePreviewMark("bar"))
+      local topBorderPreview, borderCfg
+      if NS.StagePreviewThreat and NS.StagePreviewThreat("border") then
+        topBorderPreview, borderCfg = NS.StagePreviewThreat("border"), NS.ThreatBorderConfig()
+      elseif NS.StagePreviewMark and NS.StagePreviewMark("border") then
+        topBorderPreview, borderCfg = NS.StagePreviewMark("border"), NS.MarkBorderConfig()
+      end
+      if topBorderPreview then
+        DrawStageBorder(stage, { border = {
+          enabled = true, color = topBorderPreview.color,
+          thickness = borderCfg.thickness or 2,
+          grow = borderCfg.grow or "OUT",
+          padding = borderCfg.padding or 0,
+        } })
+      end
+
+      -- The marker belongs to the target/focus preview only: threat has none.
+      DrawStageMarkers(stage, NS.StagePreviewMark and NS.StagePreviewMark("bar"))
+
+      if topPreview then
+        NS.ApplyRuleFill(stage.tint, stage.bar, topPreview)
+        stage.tint:Show()
+      elseif winner then
         if winner.barEnabled ~= false then
           -- Through the same fill logic the real bar uses, so a rule set to
           -- Colored Texture actually PREVIEWS as a texture instead of always
@@ -5154,10 +7831,6 @@ local function BuildHealthTab()
           stage.tint:Hide()
           stage.missingCover:Hide()
         end
-        -- The border shown here is whatever the BORDER list would draw, not
-        -- anything from this rule: the two lists are independent.
-        DrawStageBorder(stage, NS.db.uiPreviewCombine
-          and PreviewWinner(NS.db.tints.borderRules) or nil)
         -- Say how many rules matched, not just which won. A rule that is
         -- being outranked looks identical to one that never matched, and
         -- that ambiguity is most of what made this feel unreliable.
@@ -5176,9 +7849,14 @@ local function BuildHealthTab()
           :format(NS.RuleSummary(winner), extra))
       else
         stage.tint:Hide()
-        stage.missingCover:Hide()
-        DrawStageBorder(stage, NS.db.uiPreviewCombine
-          and PreviewWinner(NS.db.tints.borderRules) or nil)
+        -- The branch a MISSING rule always lands in: no presence rule matched,
+        -- which is when a missing one is lit. It was hiding that rule's cover
+        -- and then redrawing the border from the retired two-list logic --
+        -- overwriting the border decided above with nothing. That is why
+        -- borders previewed on normal rules and never on missing ones.
+        if not missingRule then
+          stage.missingCover:Hide()
+        end
         -- A missing rule is a RESULT, not a failure to match, so it is
         -- answered before the "nothing matched" states below -- otherwise the
         -- bar is visibly coloured while the verdict says no rule applies.
@@ -5198,8 +7876,10 @@ local function BuildHealthTab()
             if preview.active[spellID] then table.insert(on, NS.SpellName(spellID)) end
           end
 
+          -- Same reason as EvaluatePreview: this explains the preview, so it
+          -- has to see the same rules the preview does.
           local missing
-          for _, rule in ipairs(NS.GetOrderedRules()) do
+          for _, rule in ipairs(NS.GetOrderedRules(true)) do
             local want = {}
             for _, c in ipairs(rule.conditions) do
               if not preview.active[c.spellID] then
@@ -5225,528 +7905,560 @@ local function BuildHealthTab()
     -- row's worth of space that nothing ever occupied, and with no rules at
     -- all (rows = 0) it reserved a whole row for a verdict line alone.
     local rows = math.ceil(#spells / 3)
-    panel:SetHeadHeight(6 + STAGE_H + 32 + rows * 26)
+    -- Under the last row of debuffs, wherever that lands, and the head grows
+    -- by exactly the line it adds.
+    local warnTop = 6 + STAGE_H + 30 + rows * 26
+    headFrame.dummyWarn:ClearAllPoints()
+    headFrame.dummyWarn:SetPoint("TOPLEFT", HEAD_PAD, -warnTop)
+    headFrame.dummyWarn:SetPoint("TOPRIGHT", headFrame, "TOPRIGHT", -HEAD_PAD, -warnTop)
+    panel:SetHeadHeight(warnTop + 16 + 6)
   end
 end
 
 -- Renders ONE rule list into ONE section. Both the bar list and the border
 -- list go through here, so their behaviour -- pooling, expansion, the add
 -- row, warnings -- cannot drift apart.
+-- The rule list, laid out by Flex.
+--
+-- What this replaces was a single running `y` threaded through every block --
+-- rows, then the warning, then the buttons, then two optional panels -- with
+-- each block responsible for subtracting its own height from it. Every
+-- overlap on this page came from one block guessing that height wrong: a
+-- wrapped warning counted as 32px, a button row as 26.
+--
+-- Under Flex each block is a node. Optional ones set `hidden`, which costs
+-- exactly zero height, and the section's height is what the layout measured.
+local function RuleSectionLayout(sec, isBorder, getList)
+  if sec.flex then return sec.flex end
+  local Flex = NS.Flex
+  local content = sec.content
+  local root = Flex.Root(content, { dir = "column", gap = NS.UI.FIELD_GAP,
+    pad = { t = NS.UI.PAD_TOP, b = NS.UI.PAD_BOTTOM } })
+
+  -- The hand-anchored headings and divider each tab built at x offsets are
+  -- retired here rather than deleted at the call site: they are still
+  -- referenced by name in a couple of places, and a hidden FontString costs
+  -- nothing. The Flex header below replaces all of them.
+  for _, key in ipairs({ "hOrder", "hDebuffs", "hEdit", "hDelete", "hOn", "divider" }) do
+    local widget = sec[key]
+    if widget and widget.Hide then widget:Hide() end
+  end
+
+  -- No border module switch.
+  --
+  -- A rule's border half is drawn because the rule has one and it is switched
+  -- on -- which is exactly what the Bdr cell in its row says. A second switch
+  -- governing all of them at once was a leftover from when borders were a
+  -- separate list on a separate page with its own heading, and its only
+  -- remaining job was to make every border silently stop working.
+
+  root:Add(NS.BuildRuleHeader(content, isBorder))
+
+  root:Add(NS.FlexRule(content))
+
+  -- Rows live in their own column so the pool can grow without the surrounding
+  -- blocks caring where the list ends.
+  sec.rowsNode = root:Add(Flex.Box(content, { dir = "column", gap = NS.UI.ROW_GAP }))
+
+  -- Threat, pinned above every rule, in the same table. Its position is not a
+  -- preference: the engine reserves its draw sublevel before any spell rule is
+  -- allocated one, so there is no grip on this row and no way to drag anything
+  -- above it.
+  if not isBorder then
+    sec.threatRow = sec.rowsNode:Add(NS.BuildThreatPinnedRow(content))
+    sec.threatRow.onEdit = function()
+      sec.openThreat = not sec.openThreat
+      if sec.openThreat then sec.openMark = false end
+      -- One thing open at a time, same as the rules.
+      if sec.openThreat then sec.openRule = nil end
+      NS.Options_RebuildAll()
+    end
+    NS.BuildThreatBand(sec, content)
+    sec.rowsNode:Add(sec.threatBand)
+
+    -- Target and focus, directly under threat and above the rules: one row
+    -- and one editor each, because six blocks in one band is more than a band
+    -- can present and the two are not edited together anyway.
+    sec.markRows, sec.markBands = {}, {}
+    for _, state in ipairs(NS.MARK_STATES) do
+      local key = state.key
+      local row = sec.rowsNode:Add(NS.BuildMarkPinnedRow(content, key, "2ND"))
+      row.onEdit = function()
+        sec.openMark = (sec.openMark ~= key) and key or nil
+        -- One editor open at a time across the whole table, the same rule the
+        -- rule rows and threat already follow.
+        if sec.openMark then
+          sec.openRule = nil
+          sec.openThreat = false
+        end
+        NS.Options_RebuildAll()
+      end
+      sec.markRows[key] = row
+      sec.markBands[key] = NS.BuildMarkBand(sec, content, key)
+      sec.rowsNode:Add(sec.markBands[key])
+    end
+  end
+
+  -- The editor, as a row of the list rather than a page of its own or a column
+  -- beside it.
+  --
+  -- Beside it was tried and is wrong: a side panel takes width the row's fixed
+  -- controls cannot give back, so the list starts scrolling sideways exactly
+  -- when you are making decisions about the columns that just left. A page of
+  -- its own is worse -- a rule's meaning is RELATIVE, and "is this above the
+  -- rule it has to beat" cannot be answered from somewhere the list is not.
+  --
+  -- One band, moved under whichever row is open, hidden when none is.
+  local band = Flex.Box(content, { dir = "column", gap = NS.UI.FIELD_GAP,
+    pad = { t = NS.UI.FIELD_GAP, b = NS.UI.GROUP_GAP }, hidden = true })
+  sec.editorBand = sec.rowsNode:Add(band)
+
+  -- The other three sides of the open row's outline.
+  band.sel = {}
+  for index = 1, 3 do
+    band.sel[index] = band.frame:CreateTexture(nil, "OVERLAY")
+    band.sel[index]:SetColorTexture(RGBA(THEME.selection))
+  end
+  -- The same weight the row's own three sides use, or the box would be
+  -- thicker along the top than down the sides.
+  local bandWeight = NS.PixelWeight(band.frame, NS.UI.SELECT_EDGE)
+  band.sel[1]:SetPoint("BOTTOMLEFT"); band.sel[1]:SetPoint("BOTTOMRIGHT")
+  band.sel[1]:SetHeight(bandWeight)
+  band.sel[2]:SetPoint("TOPLEFT");    band.sel[2]:SetPoint("BOTTOMLEFT")
+  band.sel[2]:SetWidth(bandWeight)
+  band.sel[3]:SetPoint("TOPRIGHT");   band.sel[3]:SetPoint("BOTTOMRIGHT")
+  band.sel[3]:SetWidth(bandWeight)
+
+  local head = Flex.Box(content, { dir = "row", align = "center", gap = NS.UI.COL_GAP,
+    height = NS.UI.CTRL_ROW_H, pad = { l = NS.UI.ROW_INSET, r = NS.UI.ROW_INSET } })
+  band.title = Label(head.frame, "", "GameFontNormal")
+  band.title:SetJustifyH("LEFT")
+  head:Add(Flex.Item(band.title, { grow = 1, minW = 80, clipText = true }))
+  -- No Done here. The row's own Edit button reads Done while its editor is
+  -- open, and two buttons doing one thing, a few pixels apart, is a question
+  -- about which one is different.
+  band:Add(head)
+
+  -- The preview first: what the controls under it are for.
+  -- No preview in here.
+  --
+  -- The page already has one at the top, and two previews of the same rule
+  -- disagreeing about what it looks like is worse than none: they update on
+  -- different passes, so one is always a step behind. The one at the top wins
+  -- because it is the real thing -- a plate with every rule fighting over it,
+  -- and the test buttons beside it.
+  --
+  -- Opening a rule ticks that rule's debuffs up there, so the shared preview
+  -- shows the rule being edited rather than whichever rule happened to win.
+  -- Kept as a node, permanently hidden: the cost is on the row's Slots column
+  -- and in that column's tooltip, and the editor repeated it in a sentence
+  -- directly underneath. Hidden rather than deleted so the band's other rows
+  -- keep the shape everything else here indexes them by.
+  band.costLine = Dim(content, "")
+  band.costLine:SetJustifyH("LEFT")
+  band.costNode = NS.FlexNote(content, band.costLine, 0)
+  band.costNode.hidden = true
+  band:Add(band.costNode)
+
+  -- The rule's own editor, not the page's style panel. That panel is built per
+  -- page and the health copy has no border controls at all -- which, with one
+  -- list holding both halves, left a rule's border with nowhere to edit it.
+  band:Add(NS.BuildRuleEditor(sec, content))
+  if sec.style then sec.style:Hide() end
+
+  -- The footnote moved into the header's "?". It is still built by the page
+  -- (other code reads it), just never placed.
+  if sec.note then sec.note:Hide() end
+  sec:SetHelp(isBorder and "Border Rules" or "Spell Rules",
+    (isBorder
+      and "Coloured borders driven by your own debuffs, on their own priority stack. The top border rule that matches draws, independently of whatever the health bar is doing.\n\n"
+      or "Bar colours driven by your own debuffs. Higher rules override lower ones -- the topmost match is what you see -- and you set the order by dragging.\n\n")
+    .. (sec.note and (sec.note:GetText() .. "\n\n") or "")
+    .. "Threat colouring is drawn over everything here, and the engine decides that when a plate is built rather than while painting it.\n\n"
+    .. "Drag a row by its grip to reorder. Auto sort puts rules with more debuffs above rules with fewer, which is the order that lets every one of them fire.")
+
+  -- Warnings stay in the page. They are about THIS profile being wrong right
+  -- now -- a rule that can never fire, a budget overrun -- and something you
+  -- have to hover to discover is something you will not discover.
+  sec.warningItem = root:Add(NS.FlexNote(content, sec.warning))
+
+  local buttons = Flex.Box(content, { dir = "row", align = "center", gap = NS.UI.COL_GAP,
+    height = NS.UI.ROW_H, pad = { l = NS.UI.ROW_INSET, r = NS.UI.ROW_INSET } })
+  buttons:Add(Flex.Item(sec.newButton, { width = sec.newButton:GetWidth(), shrink = 0 }))
+  if sec.sortButton then
+    buttons:Add(Flex.Item(sec.sortButton, { width = sec.sortButton:GetWidth(), shrink = 0 }))
+  end
+  root:Add(buttons)
+
+  -- Missing-health colour. Health list only, and shown only once some rule
+  -- here covers missing health.
+  if sec.missingSwatch then
+    local block = Flex.Box(content, { dir = "column", gap = NS.UI.GROUP_GAP, hidden = true })
+    sec.missingDivider:Hide()
+    block:Add(NS.FlexRule(content))
+    local strip = Flex.Box(content, { dir = "row", align = "center", gap = NS.UI.COL_GAP,
+      height = NS.UI.CTRL_ROW_H, pad = { l = NS.UI.ROW_INSET, r = NS.UI.ROW_INSET } })
+    sec.missingLabel:SetJustifyH("LEFT")
+    strip:Add(Flex.Item(sec.missingLabel, { clipText = true, shrink = 0 }))
+    strip:Add(Flex.Item(sec.missingSwatch, { width = NS.UI.BOX, shrink = 0, alignSelf = "center" }))
+    strip:Add(Flex.Item(sec.missingHint, { grow = 1, clipText = true }))
+    block:Add(strip)
+    sec.missingBlock = root:Add(block)
+  end
+
+  -- Applied-state colour by mob rank. Shown once any rule here is a MISSING
+  -- rule -- the only kind with a cover to colour -- and only in occlusion
+  -- mode, which is the only mode that paints one.
+  if sec.classCheck then
+    local block = Flex.Box(content, { dir = "column", gap = NS.UI.GROUP_GAP, hidden = true })
+    sec.classDivider:Hide()
+    block:Add(NS.FlexRule(content))
+    local strip = Flex.Box(content, { dir = "row", align = "center", gap = NS.UI.COL_GAP,
+      height = NS.UI.CTRL_ROW_H, pad = { l = NS.UI.ROW_INSET, r = NS.UI.ROW_INSET } })
+    sec.classLabel:SetJustifyH("LEFT")
+    strip:Add(Flex.Item(sec.classCheck, { width = NS.UI.BOX, shrink = 0, alignSelf = "center" }))
+    strip:Add(Flex.Item(sec.classLabel, { clipText = true, shrink = 0 }))
+    strip:Add(Flex.Item(sec.classHint, { grow = 1, clipText = true }))
+    block:Add(strip)
+
+    -- The swatches wrap: six of them at a narrow window is two lines, and
+    -- wrapping is the one thing a running `y` could never have done.
+    local grid = Flex.Box(content, { dir = "row", wrap = true, gap = NS.UI.COL_GAP, crossGap = NS.UI.GROUP_GAP,
+      pad = { l = NS.UI.ROW_INSET, r = NS.UI.ROW_INSET }, hidden = true })
+    for _, item in ipairs(sec.classSwatches or {}) do
+      local cell = Flex.Box(content, { dir = "row", align = "center", gap = NS.UI.GROUP_GAP, height = NS.UI.CTRL_ROW_H })
+      cell:Add(Flex.Item(item.swatch, { width = NS.UI.BOX, shrink = 0, alignSelf = "center" }))
+      cell:Add(Flex.Item(item.label, { clipText = true }))
+      grid:Add(cell)
+    end
+    block:Add(grid)
+    sec.classGrid = grid
+    sec.classBlock = root:Add(block)
+  end
+
+  sec.flex = root
+  return root
+end
+
 local function RenderRuleSection(sec, list, rowPool, condPool, isBorder, getList, messages, targetAuras)
-  local expandedHere = false
-    -- Sits above the rows, under the column headers. Only on the health list:
-    -- borders draw outside the bar and cover nothing.
-    if sec.note then
-      sec.note:ClearAllPoints()
-      sec.note:SetPoint("TOPLEFT", 12, -26)
-      sec.note:SetPoint("TOPRIGHT", -12, -26)
-      sec.note:Show()
+  RuleSectionLayout(sec, isBorder, getList)
+
+  local listKey = isBorder and "border" or "health"
+
+  -- Costed once for the whole list, not once per row: an underlay depends on
+  -- what sits BELOW a rule, so the answer is a property of the list and
+  -- recomputing it per row would be both slower and free to disagree with the
+  -- meter in the header.
+  local slots = (not isBorder) and NS.SlotReport
+    and NS.SlotReport(NS.CurrentAdapterBar and NS.CurrentAdapterBar() or nil) or nil
+  local costByRule = {}
+  for _, entry in ipairs((slots or {}).rules or {}) do
+    costByRule[entry.rule] = entry
+  end
+  if sec.slotMeter then sec.slotMeter.Refresh() end
+
+  -- Emptied rather than replaced: the drag handlers hold a reference to these
+  -- exact tables, same as the rail's.
+  pageRows[listKey] = pageRows[listKey] or {}
+  wipe(pageRows[listKey])
+  pageRowCount[listKey] = 0
+
+  -- A rule that was deleted while open leaves nothing to edit.
+  if sec.openRule then
+    local stillThere = false
+    for _, rule in ipairs(list) do
+      if rule == sec.openRule then stillThere = true break end
+    end
+    if not stillThere then sec.openRule = nil end
+  end
+
+  -- Is ANY editor open on this page? One question asked once: every row below
+  -- needs the same answer, and three rows working it out separately is how
+  -- one of them ends up disagreeing.
+  local editingSomething = (sec.openRule ~= nil) or sec.openThreat or sec.openMark
+
+  -- The rest of the PAGE goes back too, not just the rest of the list.
+  --
+  -- A section frame owns everything drawn inside it -- header, help button,
+  -- text, every control -- so one SetAlpha per section reaches the lot. That
+  -- is the whole trick: the widgets in the rules list are parented to the
+  -- page's scroll content and cannot be dimmed as a group, but the sections
+  -- around it each have a frame of their own.
+  --
+  -- Restored on every render rather than only when the editor closes: a page
+  -- whose alpha was set by the last pass has to be told when it is no longer
+  -- the background.
+  local body = sec.GetParent and sec:GetParent()
+  if body and body.sections then
+    for _, other in ipairs(body.sections) do
+      if other ~= sec and other.SetAlpha then
+        other:SetAlpha(editingSomething and THEME.pageRecessed or 1)
+      end
+    end
+  end
+
+  local openRow
+  for index, rule in ipairs(list) do
+    local row = rowPool[index]
+    if not row then
+      row = BuildRuleRow(sec.content, getList, isBorder)
+      rowPool[index] = row
+      sec.rowsNode:Add(row.node)
+      -- Added before the bands were, so they are pushed back to the end each
+      -- time the pool grows -- otherwise a new row lands underneath one.
+      local bands = { sec.editorBand, sec.threatBand }
+      for _, band in pairs(sec.markBands or {}) do bands[#bands + 1] = band end
+      for _, band in ipairs(bands) do
+        if band then
+          NS.FlexMoveAfter(sec.rowsNode, band, sec.rowsNode.children[#sec.rowsNode.children])
+        end
+      end
+    end
+    row.section = sec
+    row.node.hidden = false
+    row.index, row.rule = index, rule
+    row.listKey = listKey
+    pageRowCount[listKey] = pageRowCount[listKey] + 1
+    pageRows[listKey][pageRowCount[listKey]] = row
+    -- A restricted rule says so on its own row. Without this a rule that is
+    -- correct, enabled and simply not loaded in this zone looks identical to
+    -- one that is broken -- which is the support question the whole feature
+    -- would otherwise generate.
+    local summary = NS.RuleSummary(rule)
+    if NS.LoadIsRestricted and NS.LoadIsRestricted(rule.load) then
+      local here = NS.LoadAllows(rule.load)
+      summary = summary .. ("  |cff808080%s%s|r"):format(
+        NS.LoadSummary(rule.load), here and "" or "  --  not loaded here")
+    end
+    row.summary:SetText(summary)
+    -- Recessed unless this is the row the open editor belongs to. Done here
+    -- rather than in the Edit handler because the list is re-rendered on
+    -- every change, and a row that was dimmed by the last render has to be
+    -- told when it is no longer the odd one out.
+    if row.SetRecessed then
+      row.SetRecessed(editingSomething and rule ~= sec.openRule)
+    end
+    row.enabled.Refresh()
+    local open = rule == sec.openRule
+    if open then openRow = row end
+    row.edit:SetText(open and "Done" or "Edit")
+    row.sel[1]:SetShown(open)
+    row.sel[2]:SetShown(false)  -- the band draws this edge
+    row.sel[3]:SetShown(open)
+    row.sel[4]:SetShown(open)
+    -- Both halves, through the one renderer every fill goes through. A half
+    -- that is switched off still shows its own colour, at a quarter alpha:
+    -- "off" and "never set" look different, and the colour is still the one
+    -- turning it back on would use.
+    row.barChip.Refresh()
+    row.borderChip.Refresh()
+    row.stripe:SetShown(index % 2 == 0)
+
+    if row.cost then
+      local entry = costByRule[rule]
+      if not entry then
+        -- A rule with no debuff yet, or switched off: it builds nothing, so it
+        -- spends nothing. Left blank rather than "0 slots", which reads as a
+        -- claim about a finished rule.
+        row.cost:SetText("")
+      elseif entry.cost == 0 then
+        row.cost:SetText("|cff8080800|r")
+      else
+        -- The number, and nothing else. What the slots went ON is a question
+        -- for the tooltip -- in a column this narrow "(tint+cover)" is longer
+        -- than the fact it qualifies.
+        row.cost:SetText(("%d"):format(entry.cost))
+      end
+    end
+  end
+  -- Pooled rows past the end of the list are hidden as NODES, so they take no
+  -- height either.
+  for index = #list + 1, #rowPool do
+    if rowPool[index].node then rowPool[index].node.hidden = true end
+  end
+
+  -- Threat first, because it is the first row.
+  if sec.threatRow and sec.threatRow.SetRecessed then
+    sec.threatRow.SetRecessed(editingSomething and not sec.openThreat)
+  end
+  if sec.threatRow then
+    local cfg = NS.ThreatConfig()
+    local row = sec.threatRow
+    NS.FlexMoveAfter(sec.rowsNode, row, nil)
+    -- To the FRONT: FlexMoveAfter with no target appends, so the row is moved
+    -- explicitly to index 1 -- the one position in this list that is not
+    -- decided by the user.
+    for index, child in ipairs(sec.rowsNode.children) do
+      if child == row then
+        table.remove(sec.rowsNode.children, index)
+        table.insert(sec.rowsNode.children, 1, row)
+        break
+      end
     end
 
-    local y = sec.note and -56 or -28
-    local cursor, condsShown, appearanceShown = 0, false, false
+    local on = cfg.enabled ~= false
+    -- The role, and nothing else. It read "tank role - 2 of 3 states - in
+    -- combat only": three facts in a row that has columns for two of them.
+    -- The chips beside it already say which states are on, and in-combat is
+    -- not a setting any more.
+    row.label:SetText(("Threat  |cff808080Role: %s%s%s|r"):format(NS.ThreatRoleName(),
+      NS.ThreatFlashOn() and "  -  Flash on loss" or "",
+      (NS.LoadIsRestricted and NS.LoadIsRestricted(cfg.load))
+        and ("  -  " .. NS.LoadSummary(cfg.load)) or ""))
+    row.label:SetAlpha(on and 1 or 0.5)
+    for _, strip in ipairs({ row.barStrip, row.borderStrip }) do
+      for _, chip in ipairs(strip.chips) do
+        chip.Refresh()
+        chip:SetAlpha(on and 1 or 0.35)
+      end
+    end
+    row.cost:SetText(("%d"):format(slots and slots.threatCost or 0))
+    row.edit:SetText(sec.openThreat and "Done" or "Edit")
+    row.enabled.Refresh()
 
-    -- Emptied rather than replaced: the drag handlers hold a reference to
-    -- these exact tables, same as the rail's.
-    local listKey = isBorder and "border" or "health"
-    pageRows[listKey] = pageRows[listKey] or {}
-    wipe(pageRows[listKey])
-    pageRowCount[listKey] = 0
+    sec.threatBand.hidden = not sec.openThreat
+    if sec.openThreat then
+      NS.FlexMoveAfter(sec.rowsNode, sec.threatBand, row)
+      sec.threatBand.roleDrop.Refresh()
+      sec.threatBand.flash.Refresh()
+      -- Rebound every render: the order follows the role, and the role can
+      -- change under a rebuild.
+      sec.threatBand.zoneDrop.Refresh()
+      sec.threatBand.groupDrop.Refresh()
+      for index, state in ipairs(NS.ThreatStatesOrdered()) do
+        local bandRow = sec.threatBand.rows[index]
+        bandRow.key = state.key
+        bandRow.label:SetText(NS.ThreatStateLabel(state.key))
+        bandRow.barSwatch.Refresh()
+        bandRow.barOn.Refresh()
+        bandRow.borderSwatch.Refresh()
+        bandRow.borderOn.Refresh()
+      end
+    end
+  end
 
-    for index, rule in ipairs(list) do
-      local row = rowPool[index]
-      if not row then row = BuildRuleRow(sec.content, getList, isBorder); rowPool[index] = row end
-      row:SetParent(sec.content)
-      row.index, row.rule = index, rule
-      row.listKey = listKey
-      pageRowCount[listKey] = pageRowCount[listKey] + 1
-      pageRows[listKey][pageRowCount[listKey]] = row
-      row.summary:SetText(NS.RuleSummary(rule))
+  -- Target/Focus, immediately under threat: same treatment, one rank down.
+  if sec.markRows then
+    local cfg = NS.MarkConfig()
+    local on = cfg.enabled ~= false
+    local restricted = NS.LoadIsRestricted and NS.LoadIsRestricted(cfg.load)
+    -- Threat's band sits between threat and these while it is open, so each
+    -- row is moved after whatever is currently last above it rather than
+    -- after a fixed node.
+    local previous = (sec.openThreat and sec.threatBand) or sec.threatRow
+    for _, state in ipairs(NS.MARK_STATES) do
+      local key = state.key
+      local row = sec.markRows[key]
+      local band = sec.markBands[key]
+      NS.FlexMoveAfter(sec.rowsNode, row, previous)
+
+      row.label:SetText(("%s%s"):format(NS.MarkStateLabel(key),
+        restricted and ("  |cff808080%s|r"):format(NS.LoadSummary(cfg.load)) or ""))
+      row.label:SetAlpha(on and 1 or 0.5)
+      row.barChip.Refresh()
+      row.borderChip.Refresh()
+      for _, chip in ipairs({ row.barChip, row.borderChip }) do
+        chip:SetAlpha(on and 1 or 0.35)
+      end
+
+      -- Per unit, not the module's total: this row's bar half is what this
+      -- row's number is about.
+      local barEntry = NS.MarkModule("bar").states[key]
+      local spends = on and barEntry and barEntry.enabled ~= false
+      row.cost:SetText(spends and "1" or "|cff8080800|r")
+      row.edit:SetText((sec.openMark == key) and "Done" or "Edit")
       row.enabled.Refresh()
-      -- RuleSwatchColor, not a bare rule.color: a border rule's editable colour
-      -- is rule.border.color, and rule.color is a leftover field nothing
-      -- writes. Reading it directly showed every border rule as default pink.
-      local colour = RuleSwatchColor(rule, listKey)
-      row.swatch:SetColorTexture(colour.r, colour.g, colour.b, 1)
-      -- Always false now. Editing happens on the rule's own page, so this
-      -- table never expands -- and because the flag is computed here rather
-      -- than stored, anyone whose table was left stuck open by the old
-      -- expanders gets it closed the first time this runs, with nothing to
-      -- clear and no migration needed.
-      local openRule = false
-      row.stripe:SetShown(index % 2 == 0)
-      row:SetPoint("TOPLEFT", 0, y)
-      row:Show()
-      y = y - ROW_H - 2
-  
-      if openRule and expandedSection == "rule" then
-        for ci, condition in ipairs(rule.conditions) do
-          cursor = cursor + 1
-          local cr = condPool[cursor]
-          if not cr then cr = BuildConditionRow(sec.content); condPool[cursor] = cr end
-          cr:SetParent(sec.content)
-          cr.rule, cr.condition, cr.conditionIndex = rule, condition, ci
-          cr.icon:SetTexture(NS.SpellIcon(condition.spellID))
-          cr.name:SetText(("%s%s |cff808080(%d)|r"):format(
-            targetAuras[condition.spellID] and "" or "|cffff4040!|r ",
-            NS.SpellName(condition.spellID), condition.spellID))
-          cr:SetPoint("TOPLEFT", 0, y)
-          cr:Show()
-          y = y - 24
-        end
-        sec.addCondDrop:ClearAllPoints()
-        sec.addCondDrop:SetPoint("TOPLEFT", 144, y - 2)
-        sec.addCondDrop:Show()
-
-        -- Pooled rows accumulate anchors, so every repositioned widget clears
-        -- first: pooled rows otherwise accumulate anchors across refreshes.
-        sec.addCondBoxLabel:ClearAllPoints()
-        sec.addCondBoxLabel:SetPoint("LEFT", sec.addCondDrop, "RIGHT", 10, 0)
-        sec.addCondBoxLabel:Show()
-        sec.addCondBox:ClearAllPoints()
-        sec.addCondBox:SetPoint("LEFT", sec.addCondBoxLabel, "RIGHT", 8, 0)
-        sec.addCondBox:Show()
-        y = y - 34
-
-        condsShown = true
-      elseif openRule and expandedSection == "appearance" then
-        if sec.style then
-          sec.style:ClearAllPoints()
-          sec.style:SetPoint("TOPLEFT", 8, y - 6)
-          sec.style:SetPoint("TOPRIGHT", -8, y - 6)
-          sec.style.Refresh()
-          sec.style:Show()
-          y = y - sec.style:GetHeight() - 10
-        end
-
-        appearanceShown = true
-      end
-    end
-
-    if not condsShown then
-      sec.addCondDrop:Hide()
-      sec.addCondBox:Hide()
-      sec.addCondBoxLabel:Hide()
-    end
-    if not appearanceShown and sec.style then
-      sec.style:Hide()
-    end
-  
-    if #messages > 0 then
-      sec.warning:SetText(table.concat(messages, "\n"))
-      sec.warning:ClearAllPoints()
-      sec.warning:SetPoint("TOPLEFT", 12, y - 6)
-      sec.warning:Show()
-      y = y - 32
-    else
-      sec.warning:Hide()
-    end
-  
-    -- Anchored to each other, not to hardcoded x positions. The two lists
-    -- have different button widths ("New Rule" vs "New Border Rule"), so a
-    -- fixed 118 was correct for one and overlapping for the other.
-    sec.newButton:ClearAllPoints()
-    sec.newButton:SetPoint("TOPLEFT", 10, y - 8)
-    sec.sortButton:ClearAllPoints()
-    sec.sortButton:SetPoint("LEFT", sec.newButton, "RIGHT", 8, 0)
-
-    local bottom = y - 8 - 26 -- below the New Rule / Auto sort row
-
-    -- Missing-health colour, under the buttons behind a divider. Health table
-    -- only, and shown only once some rule here covers missing health. Each
-    -- rule's appearance panel carries the same swatch.
-    if sec.missingDivider then
-      local anyCovering = false
-      for _, rule in ipairs(list) do
-        if rule.missingCover then anyCovering = true break end
+      if row.SetRecessed then
+        row.SetRecessed(editingSomething and sec.openMark ~= key)
       end
 
-      sec.missingDivider:SetShown(anyCovering)
-      sec.missingLabel:SetShown(anyCovering)
-      sec.missingSwatch:SetShown(anyCovering)
-      sec.missingHint:SetShown(anyCovering)
-
-      if anyCovering then
-        sec.missingDivider:ClearAllPoints()
-        sec.missingDivider:SetPoint("TOPLEFT", 10, bottom - 10)
-        sec.missingDivider:SetPoint("TOPRIGHT", -10, bottom - 10)
-
-        sec.missingLabel:ClearAllPoints()
-        sec.missingLabel:SetPoint("TOPLEFT", 12, bottom - 28)
-
-        sec.missingSwatch:ClearAllPoints()
-        sec.missingSwatch:SetPoint("LEFT", sec.missingLabel, "RIGHT", 10, 2)
-        sec.missingSwatch:Refresh()
-
-        sec.missingHint:ClearAllPoints()
-        sec.missingHint:SetPoint("LEFT", sec.missingSwatch, "RIGHT", 10, -2)
-
-        bottom = bottom - 50
+      band.hidden = sec.openMark ~= key
+      if not band.hidden then
+        NS.FlexMoveAfter(sec.rowsNode, band, row)
+        band.zoneDrop.Refresh()
+        band.groupDrop.Refresh()
+        for _, block in ipairs(band.rows) do block.Refresh() end
+        previous = band
+      else
+        previous = row
       end
     end
+  end
 
-    -- Applied-state colour by mob rank. Shown once any rule here is a MISSING
-    -- rule -- the only kind with a cover to colour.
-    --
+  -- Park the band under the open row, or hide it. Hidden is a LAYOUT state --
+  -- the node costs no height at all, so a closed editor is not a gap.
+  if sec.editorBand then
+    sec.editorBand.hidden = openRow == nil
+    if openRow then
+      NS.FlexMoveAfter(sec.rowsNode, sec.editorBand, openRow.node)
+      sec.editorBand.title:SetText(("Editing %s"):format(RuleLabel(sec.openRule)))
+      -- The cost line is gone from the editor. The Slots column on the row
+      -- above already carries the number, and its tooltip carries the
+      -- breakdown -- a sentence repeating both, one line under the row it
+      -- came from, was the same fact three times.
+      sec.editorBand.costLine:SetText("")
+      NS.RefreshRuleEditor(sec)
+    end
+  end
+
+  if #messages > 0 then
+    sec.warning:SetText(table.concat(messages, "\n"))
+    sec.warningItem.hidden = false
+  else
+    sec.warning:SetText("")
+    sec.warningItem.hidden = true
+  end
+
+  if sec.missingBlock then
+    local anyCovering = false
+    for _, rule in ipairs(list) do
+      if rule.missingCover then anyCovering = true break end
+    end
+    sec.missingBlock.hidden = not anyCovering
+    if anyCovering then sec.missingSwatch:Refresh() end
+  end
+
+  if sec.classBlock then
+    local anyMissing = false
+    for _, rule in ipairs(list) do
+      if rule.showWhenMissing then anyMissing = true break end
+    end
     -- Needs OCCLUSION, which is no longer the default, so outside that mode it
     -- is hidden outright. A disabled-but-visible version was tried and
     -- dropped: a dead control on the page everyone lands on, whose mode is
     -- reached by a slash command rather than anything nearby.
-    if sec.classDivider then
-      local anyMissing = false
-      for _, rule in ipairs(list) do
-        if rule.showWhenMissing then anyMissing = true break end
-      end
-      local occluding = NS.db.tints.missingMode == "occlude"
-      local show = anyMissing and occluding
-
-      sec.classDivider:SetShown(show)
-      sec.classCheck:SetShown(show)
-      sec.classLabel:SetShown(show)
-      sec.classHint:SetShown(show)
-
+    local show = anyMissing and NS.db.tints.missingMode == "occlude"
+    sec.classBlock.hidden = not show
+    if show then
+      sec.classCheck.Refresh()
       -- The swatches are a second row under the checkbox, and only earn their
       -- space once the option is actually on.
-      local swatchesShown = show and NS.db.tints.missingAppliedByClass
-      for _, item in ipairs(sec.classSwatches or {}) do
-        item.swatch:SetShown(swatchesShown)
-        item.label:SetShown(swatchesShown)
-      end
-
-      if show then
-        sec.classDivider:ClearAllPoints()
-        sec.classDivider:SetPoint("TOPLEFT", 10, bottom - 10)
-        sec.classDivider:SetPoint("TOPRIGHT", -10, bottom - 10)
-
-        sec.classCheck:ClearAllPoints()
-        sec.classCheck:SetPoint("TOPLEFT", 12, bottom - 26)
-        sec.classCheck:Refresh()
-
-        sec.classLabel:ClearAllPoints()
-        sec.classLabel:SetPoint("LEFT", sec.classCheck, "RIGHT", 6, 0)
-
-        sec.classHint:ClearAllPoints()
-        sec.classHint:SetPoint("LEFT", sec.classLabel, "RIGHT", 10, 0)
-
-        bottom = bottom - 48
-
-        if swatchesShown then
-          local x = 16
-          for _, item in ipairs(sec.classSwatches) do
-            item.label:ClearAllPoints()
-            item.label:SetPoint("TOPLEFT", x, bottom - 4)
-            item.swatch:ClearAllPoints()
-            item.swatch:SetPoint("TOPLEFT", x, bottom - 20)
-            item.swatch:Refresh()
-            x = x + 100
-          end
-          bottom = bottom - 48
-        end
+      sec.classGrid.hidden = not NS.db.tints.missingAppliedByClass
+      if not sec.classGrid.hidden then
+        for _, item in ipairs(sec.classSwatches or {}) do item.swatch:Refresh() end
       end
     end
+  end
 
-    sec:Resize(-bottom + 42)
-  return expandedHere
+  -- The condition and appearance expanders are gone -- editing happens on the
+  -- rule's own page -- so the pools they used stay hidden.
+  if sec.addCondDrop then
+    sec.addCondDrop:Hide()
+    sec.addCondBox:Hide()
+    sec.addCondBoxLabel:Hide()
+  end
+  for _, cr in ipairs(condPool or {}) do cr:Hide() end
+
+  NS.FlexResize(sec)
+  return false
 end
 
-local borderTab
-
--- Border colouring, on its own tab. It was a second section under Health
--- Color, which meant anyone using only borders scrolled past a list they
--- never touch. The two are independent features and now read that way.
-local function BuildBorderTab()
-  -- Same shell as Health Coloring: module toggle, live preview, scrolling
-  -- body. Its OWN flag, not the health one -- the two are independent modules
-  -- that happen to share a rule engine. Enable lives on the rail heading.
-  local panel = BuildTabFrame(tabPanels[2])
-
-  local head = panel.head
-  head.verdict = Label(head, "")
-  head.verdict:SetPoint("TOPLEFT", HEAD_PAD, -(6 + STAGE_H + 8))
-  head.togglesLabel = Dim(head, "")
-  head.togglesLabel:SetPoint("TOPLEFT", HEAD_PAD, -(6 + STAGE_H + 30))
-  head.toggles = {}
-
-  -- Same column and format as the test buttons, since it belongs to the same
-  -- group. Shows the other colouring module's rules on top of this one's, and
-  -- is hidden entirely when that module is off.
-  head.combine = Button(head.testColumn, "", 150, function()
-    NS.db.uiPreviewCombine = not NS.db.uiPreviewCombine
-    if head.combine.Refresh then head.combine.Refresh() end
-    RefreshPreviews()
-  end)
-  head.combine.Refresh = function()
-    local available = MODULE_SWITCH["health"].get()
-    head.combine:SetShown(available)
-    local on = available and NS.db.uiPreviewCombine and true or false
-    head.combine:SetText(on and "Hide Health Rules" or "Show Health Rules")
-    if on then
-      head.combine.label:SetTextColor(1, 0.82, 0.1)
-    else
-      head.combine.label:SetTextColor(1, 1, 1)
-    end
-    -- Re-centre: this button appearing or vanishing changes the group size.
-    if head.RestackTests then head.RestackTests() end
-  end
-  -- In the column beside the plate: actions on your real nameplates, grouped
-  -- apart from the preview they sit next to.
-  head.testButton = TestModeButton(head.testColumn, false)
-  head.testAllButton = TestModeButton(head.testColumn, true)
-  head.RestackTests = function()
-    StackTestButtons(head.testColumn, { head.testButton, head.testAllButton, head.combine })
-  end
-  head.combine.Refresh()
-  head.combineLabel = Dim(head, "")
-  head.combineLabel:SetPoint("LEFT", head.combine, "RIGHT", 6, 0)
-
-  local body = panel.body
-  body.sections = {}
-
-  -- Border rules: their own list, their own priority. Separate from the bar
-  -- list rather than a second half of each rule -- the two stacks order
-  -- independently, and the top of each applies.
-  local brules = CollapsibleSection(body, "colourBorders", "Border Rules",
-    "draw a coloured border, independent of health colouring")
-  table.insert(body.sections, brules)
-  body.borderRules = brules
-
-  local bc2 = brules.content
-  -- Headers sit over the columns the rebuilt row actually has. "Order"
-  -- rather than "Priority" because the number is gone -- position in the
-  -- list IS the priority, and you set it by dragging.
-  brules.hOrder = Header(bc2, "Order")
-  brules.hOrder:SetPoint("TOPLEFT", 8, -6)
-  brules.hDebuffs = Header(bc2, "Rule")
-  brules.hDebuffs:SetPoint("TOPLEFT", 52, -6)
-  brules.hEdit = Header(bc2, "Edit")
-  brules.hEdit:SetPoint("TOPLEFT", 470, -6)
-  brules.hDelete = Header(bc2, "Del")
-  brules.hDelete:SetPoint("TOPLEFT", 556, -6)
-  brules.hOn = Header(bc2, "On")
-  brules.hOn:SetPoint("TOPLEFT", 600, -6)
-
-  brules.divider = bc2:CreateTexture(nil, "ARTWORK")
-  brules.divider:SetPoint("TOPLEFT", 10, -22)
-  brules.divider:SetPoint("TOPRIGHT", -10, -22)
-  brules.divider:SetHeight(1)
-  brules.divider:SetColorTexture(0.4, 0.4, 0.45, 0.6)
-
-  brules.warning = Label(bc2, "")
-  brules.warning:SetWidth(650)
-  brules.warning:SetJustifyH("LEFT")
-
-  brules.newButton = Button(bc2, "New Border Rule", 130, function()
-    local rule = NS.NewBorderRule()
-    table.insert(NS.db.tints.borderRules, rule)
-    expandedRule = rule
-    Structural()
-  end)
-  brules.sortButton = Button(bc2, "Auto sort", 100, function()
-    NS.SortRules(NS.db.tints.borderRules)
-    expandedRule = nil
-    Structural()
-  end)
-
-  local function AddBorderCondition(input)
-    local rule = expandedRule
-    if not rule or not input then return end
-    local spellID = ResolveAndReport(input)
-    if not spellID then return end
-    for _, cond in ipairs(rule.conditions) do if cond.spellID == spellID then return end end
-    -- Through RuleConditionLimit like every other add path. It used to be
-    -- MAX_RULE_CONDITIONS directly, because the shared helper gated a bar rule
-    -- to one debuff until it was made a combo. That gate is gone.
-    local limit = RuleConditionLimit(rule)
-    if #rule.conditions >= limit then
-      NS.Print(("A rule can require at most %d debuffs."):format(limit))
-      return
-    end
-    table.insert(rule.conditions, { spellID = spellID })
-    NS.SortRules(NS.db.tints.borderRules)
-    Structural()
-  end
-
-  brules.addCondDrop = AddSpellDropdown(bc2, 250, "Add a debuff to this rule...",
-    function(spellID)
-      local rule = expandedRule
-      if not rule then return false end
-      for _, cond in ipairs(rule.conditions) do if cond.spellID == spellID then return true end end
-      return false
-    end,
-    AddBorderCondition)
-  brules.addCondBox = IDBox(bc2, AddBorderCondition)
-  brules.addCondBoxLabel = Dim(bc2, "or ID/name:")
-
-  -- Shape controls, shared shape with the bar list's Edit panel.
-  brules.style = BuildStylePanel(bc2, true)
-  brules.style:Hide()
-
-
-  -- The border tab's own preview. Shares preview.active with the health tab,
-  -- so ticking a debuff on one shows its effect on both -- they are the same
-  -- simulated target seen two ways.
-  borderTab = panel
-  panel.RefreshPreview = function()
-    local headFrame = panel.head
-    local stage = headFrame.stage
-
-    -- Checkboxes for every debuff any BORDER rule names.
-    local seen, spells = {}, {}
-    local sources = { NS.db.tints.borderRules or {} }
-    if NS.db.uiPreviewCombine then
-      table.insert(sources, NS.db.tints.rules or {})
-    end
-    for _, src in ipairs(sources) do
-      for _, rule in ipairs(src) do
-        for _, c in ipairs(rule.conditions or {}) do
-          if not seen[c.spellID] then
-            seen[c.spellID] = true
-            table.insert(spells, c.spellID)
-          end
-        end
-      end
-    end
-
-    for _, t in ipairs(headFrame.toggles) do t:Hide() end
-    for index, spellID in ipairs(spells) do
-      local t = headFrame.toggles[index]
-      if not t then
-        local box
-        box = Checkbox(headFrame,
-          function() return box ~= nil and preview.active[box.spellID] and true or false end,
-          function(value)
-            if box then preview.active[box.spellID] = value; RefreshPreviews() end
-          end)
-        t = box
-        t.icon = t:CreateTexture(nil, "ARTWORK")
-        t.icon:SetSize(18, 18)
-        t.icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
-        t.icon:SetPoint("LEFT", t, "RIGHT", 6, 0)
-        t.label = Label(t, "")
-        t.label:SetPoint("LEFT", t.icon, "RIGHT", 5, 0)
-        headFrame.toggles[index] = t
-      end
-      t.spellID = spellID
-      t.Refresh()
-      t.label:SetText(NS.SpellName(spellID))
-      t.icon:SetTexture(NS.SpellIcon(spellID))
-      t:ClearAllPoints()
-      t:SetPoint("TOPLEFT",
-        HEAD_PAD + ((index - 1) % 3) * 220,
-        -(6 + STAGE_H + 28) - math.floor((index - 1) / 3) * 26)
-      t:Show()
-    end
-
-    -- Every shared control in the head, not just the buttons. combine and the
-    -- module toggle are driven from BOTH colouring tabs, so a change made on
-    -- one leaves the other face stale until it is told to re-read.
-    if headFrame.testButton then headFrame.testButton.Refresh() end
-    if headFrame.testAllButton then headFrame.testAllButton.Refresh() end
-    if headFrame.combine then headFrame.combine.Refresh() end
-    if headFrame.enable then headFrame.enable.Refresh() end
-
-    local barRule = NS.db.uiPreviewCombine and PreviewWinner(NS.db.tints.rules) or nil
-    if barRule and barRule.barEnabled ~= false and barRule.color then
-      NS.ApplyRuleFill(stage.tint, stage.bar, barRule)
-      stage.tint:Show()
-      if NS.ApplyMissingCover then
-        NS.ApplyMissingCover(stage.missingCover, stage.bar, barRule)
-      end
-    else
-      stage.tint:Hide()
-      stage.missingCover:Hide()
-    end
-
-    if #spells == 0 then
-      headFrame.verdict:SetText("|cff808080Add a border rule below and it will be previewed here.|r")
-      headFrame.togglesLabel:Hide()
-      for _, e in ipairs(stage.borderEdges) do e:Hide() end
-    else
-      headFrame.togglesLabel:Show()
-      -- Border rules have their own stack, so the winner is found among them
-      -- alone -- a health rule matching changes nothing here.
-      local winner
-      for _, rule in ipairs(NS.GetOrderedBorderRules()) do
-        local all = true
-        for _, c in ipairs(rule.conditions) do
-          if not preview.active[c.spellID] then all = false break end
-        end
-        if all then winner = rule break end
-      end
-
-      DrawStageBorder(stage, winner)
-      if winner then
-        headFrame.verdict:SetText(("Winning border rule: |cff55dd55%s|r")
-          :format(NS.RuleSummary(winner)))
-      else
-        local ticked = 0
-        for _, on in pairs(preview.active) do if on then ticked = ticked + 1 end end
-        headFrame.verdict:SetText(ticked == 0
-          and "|cffffcc00Tick a debuff below to preview a border rule.|r"
-          or "|cff808080No border rule requires exactly those debuffs.|r")
-      end
-    end
-
-    -- Measured, not padded. The toggles start at STAGE_H + 28 and step 26, so
-    -- the last row's bottom is exactly this -- the old constant reserved a
-    -- row's worth of space that nothing ever occupied, and with no rules at
-    -- all (rows = 0) it reserved a whole row for a verdict line alone.
-    local rows = math.ceil(#spells / 3)
-    panel:SetHeadHeight(6 + STAGE_H + 32 + rows * 26)
-  end
-
-  return panel
-end
-
-local function RebuildBorderTab()
-  local panel = borderTab
-  if not panel then return end
-  for _, r in ipairs(borderRows) do r:Hide() end
-  for _, r in ipairs(borderCondRows) do r:Hide() end
-
-  -- Same as the health tab. This is what recomputes the head height from the
-  -- number of debuff toggles; without it the border page's preview kept
-  -- whatever height it was last given, which after adding or removing a rule
-  -- was the wrong one.
-  if panel.RefreshPreview then panel.RefreshPreview() end
-
-  local targetAuras = NS.GetTargetAuraSet()
-
-  -- Everything that silently stops a MISSING border rule drawing. All three
-  -- are enforced in NS.BuildTints, where the only feedback was a /pt status
-  -- line nobody runs unless they already suspect something.
-  local messages = {}
-  local missingBorders, incomplete = 0, 0
-  for _, rule in ipairs(NS.db.tints.borderRules or {}) do
-    if rule.showWhenMissing and rule.enabled ~= false then
-      missingBorders = missingBorders + 1
-      if #(rule.conditions or {}) == 0
-        or not (rule.border and rule.border.enabled) then
-        incomplete = incomplete + 1
-      end
-    end
-  end
-  if missingBorders > 0 and NS.db.tints.missingMode == "occlude" then
-    table.insert(messages,
-      "|cffffcc00MISSING border rules need displacement mode and are not being built. Run /pt missingmode displace. Occlusion hides a rule by covering it with a copy of what was underneath, and there is no copy to make of whatever your nameplate addon drew under the border.|r")
-  elseif missingBorders - incomplete > (NS.MAX_MISSING_BORDER_RULES or 2) then
-    table.insert(messages,
-      ("|cffffcc00Only %d MISSING border rule(s) can be drawn at once, and you have %d. The lowest-priority ones are not built -- the draw levels just under the border band are all there is to give.|r")
-        :format(NS.MAX_MISSING_BORDER_RULES or 2, missingBorders - incomplete))
-  end
-  if incomplete > 0 then
-    table.insert(messages,
-      ("|cffffcc00%d MISSING border rule(s) cannot draw yet -- no debuff picked, or the border itself is switched off.|r")
-        :format(incomplete))
-  end
-
-  local brules = panel.body.borderRules
-  if brules then
-    RenderRuleSection(brules, NS.db.tints.borderRules, borderRows, borderCondRows, true,
-      function() return NS.db.tints.borderRules end, messages, targetAuras)
-  end
-  LayoutSections(panel.body, panel.body.sections)
-end
+-- BuildBorderTab and RebuildBorderTab are gone.
+--
+-- The page was a second view of one list once the two lists merged, and a
+-- second place to switch a module on. Both halves of a rule are columns in the
+-- one table now, and Border Coloring's switch lives on the Health heading --
+-- so this page had nothing left that was not said better elsewhere.
 
 local function RebuildHealthTab()
   local panel = healthTab
@@ -5832,6 +8544,10 @@ local function RebuildHealthTab()
 
   RenderRuleSection(rules, NS.db.tints.rules, ruleRows, conditionRows, false,
     function() return NS.db.tints.rules end, messages, targetAuras)
+
+  -- After the spell rules, deliberately: the threat rows are costed against
+  -- the same budget, and RenderRuleSection is what refreshed the meter.
+  if panel.body.ladder then NS.RenderResolutionLadder(panel.body.ladder) end
 
 
   -- Pandemic Flash, Bar Edges and Plate Border used to be refreshed here too.
@@ -7010,7 +9726,7 @@ local function MockRule(parent, y, r, g, b, text, note)
   row.border = CreateFrame("Frame", nil, row, "BackdropTemplate")
   row.border:SetPoint("TOPLEFT", row.swatch, "TOPLEFT", -1, 1)
   row.border:SetPoint("BOTTOMRIGHT", row.swatch, "BOTTOMRIGHT", 1, -1)
-  row.border:SetBackdrop({ edgeFile = "Interface\\Buttons\\WHITE8X8", edgeSize = CTRL_EDGE })
+  PixelBorder(row.border)
   row.border:SetBackdropBorderColor(0, 0, 0, 1)
 
   row.text = Label(row, text)
@@ -7043,7 +9759,7 @@ local function MockPlate(parent, x, y, r, g, b, borderColor, caption)
   local edge = CreateFrame("Frame", nil, bar, "BackdropTemplate")
   edge:SetPoint("TOPLEFT", -1, 1)
   edge:SetPoint("BOTTOMRIGHT", 1, -1)
-  edge:SetBackdrop({ edgeFile = "Interface\\Buttons\\WHITE8X8", edgeSize = CTRL_EDGE })
+  PixelBorder(edge)
   edge:SetBackdropBorderColor(0, 0, 0, 1)
 
   if r then
@@ -7641,11 +10357,13 @@ local rulePanel
 local function RuleEditorList()
   -- Which list the open rule belongs to. Identity, not a flag on the rule:
   -- nothing on a rule says which stack it came from.
+  -- Which list, and which half. There is only one list now, so the question
+  -- that remains is which half the editor should be showing: a rule whose bar
+  -- is switched off is being edited for its border.
   for _, rule in ipairs(NS.db.tints.rules or {}) do
-    if rule == expandedRule then return NS.db.tints.rules, false end
-  end
-  for _, rule in ipairs(NS.db.tints.borderRules or {}) do
-    if rule == expandedRule then return NS.db.tints.borderRules, true end
+    if rule == expandedRule then
+      return NS.db.tints.rules, rule.barEnabled == false
+    end
   end
   return nil, false
 end
@@ -7699,9 +10417,8 @@ local function BuildRuleEditor()
   -- same way wherever you are. Preview sits under the two test buttons
   -- because it is the local one -- it changes this plate, they change your
   -- real nameplates.
-  head.testButton = TestModeButton(head.testColumn, false)
-  head.testAllButton = TestModeButton(head.testColumn, true)
-
+  -- head.testButton and head.testAllButton come from BuildTabFrame now; this
+  -- page only re-stacks the column to fit its own extra button in.
   head.previewRule = Button(head.testColumn, "", 150, function()
     -- Drives the same preview state the switch did: ticking sets every
     -- debuff this rule needs.
@@ -7721,7 +10438,8 @@ local function BuildRuleEditor()
       head.previewRule.label:SetTextColor(1, 1, 1)
     end
   end
-  StackTestButtons(head.testColumn, { head.previewRule, head.testButton, head.testAllButton })
+  StackTestButtons(head.testColumn, { head.threatPreview, head.markPreview,
+    head.previewRule, head.testButton, head.testAllButton })
 
   head.verdict = Label(head, "")
   head.verdict:SetPoint("TOPLEFT", HEAD_PAD, -(6 + STAGE_H + 8))
@@ -7880,7 +10598,8 @@ local function BuildRuleEditor()
     -- this is gated here rather than at the stage.
     --
     -- Bar rules only: a missing BORDER has no wash, just edges that leave.
-    if isMissing and not isBorder and not matches then
+    if isMissing and not isBorder and not matches
+      and expandedRule.barEnabled ~= false then
       NS.ApplyRuleFill(stage.missingWash, stage.bar, expandedRule)
       stage.missingWash:Show()
     else
@@ -8102,10 +10821,8 @@ local function DiagStat(parent, label)
   -- Frames take no mouse input by default, so without this the stat boxes
   -- could never answer a hover.
   box:EnableMouse(true)
-  box:SetBackdrop({
-    bgFile = "Interface\\Buttons\\WHITE8X8",
-    edgeFile = "Interface\\Buttons\\WHITE8X8", edgeSize = CTRL_EDGE,
-  })
+  box:SetBackdrop({ bgFile = "Interface\\Buttons\\WHITE8X8" })
+  PixelBorder(box)
   box:SetBackdropColor(RGBA(THEME.tabBG))
   box:SetBackdropBorderColor(RGBA(THEME.tabBorder))
 
@@ -8847,7 +11564,7 @@ local function BuildDiagnosticsTab()
     -- Straight from the .toc, so a report can never claim a version the
     -- person is not actually running.
     local getMeta = (C_AddOns and C_AddOns.GetAddOnMetadata) or GetAddOnMetadata
-    local version = getMeta and select(1, getMeta("PlateTweaks", "Version")) or nil
+    local version = getMeta and select(1, getMeta(NS.ADDON, "Version")) or nil
     table.insert(out, ("PlateTweaks %s"):format(version or "(version unknown)"))
     table.insert(out, ("profile %s | combat %s | auras secret %s"):format(
       info.profile, info.inCombat and "yes" or "no", info.restricted and "yes" or "no"))
@@ -8939,7 +11656,7 @@ function NS.Options_RebuildAll()
   -- simply off.
   local modules = {}
   if NS.db.tints.enabled then table.insert(modules, "Health Coloring") end
-  if NS.db.tints.borderEnabled ~= false then table.insert(modules, "Border Coloring") end
+  -- Borders are not a module any more, so the footer stops listing one.
   if NS.db.icons.enabled then table.insert(modules, "Aura Icons") end
   if NS.db.missingIcons.enabled then table.insert(modules, "Missing Debuffs") end
 
@@ -8965,7 +11682,7 @@ function NS.Options_RebuildAll()
   local passes = {
     { "rail", RebuildRail },
     { "health", RebuildHealthTab },
-    { "border", RebuildBorderTab },
+
     { "aura icons", RebuildAuraIconTab },
     { "missing debuff", missing.Rebuild },
     { "global", RebuildGlobalTabs },
@@ -8989,7 +11706,21 @@ end
 -- did nothing. Report it through our own print instead, which is always
 -- visible, and keep a partially-built window rather than retrying the whole
 -- build on every subsequent /pt.
+-- The window, for anything that has to sit over it -- the colour picker dims
+-- and covers this exact frame rather than the whole screen.
+function NS.OptionsWindow() return window end
+
 function NS.OpenOptions()
+  -- Every entry point ends here -- the slash command, the Blizzard settings
+  -- panel, a keybind -- so the "there are no settings to show" check belongs
+  -- here too, not only in front of the one caller that happened to have it.
+  if not NS.db then
+    NS.Print(NS.refusedTwin
+      and ("|cffff4040this copy did not start|r -- |cffffff00%s|r is also enabled. Disable one, then reload.")
+        :format(NS.refusedTwin)
+      or "|cffff4040settings failed to load|r -- check for an earlier error, then /reload.")
+    return
+  end
   if not window then
     local ok, err = pcall(function()
       CreateWindow()
@@ -9002,7 +11733,7 @@ function NS.OpenOptions()
       -- window". Now the broken page is the only one lost, and it is named.
       local builders = {
         { "health", BuildHealthTab },
-        { "border", BuildBorderTab },
+
         { "aura icons", BuildAuraIconTab },
         { "missing debuff", missing.Build },
         { "global settings", BuildGlobalTabs },
@@ -9073,7 +11804,7 @@ local loader = CreateFrame("Frame")
 loader:RegisterEvent("PLAYER_LOGIN")
 loader:SetScript("OnEvent", function()
   local proxy = CreateFrame("Frame")
-  proxy.name = "PlateTweaks"
+  proxy.name = NS.WindowTitle()
   local text = proxy:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
   text:SetPoint("TOPLEFT", 16, -16)
   text:SetText("PlateTweaks uses its own window — /pt")
@@ -9090,6 +11821,6 @@ loader:SetScript("OnEvent", function()
     if SettingsPanel then HideUIPanel(SettingsPanel) end
     NS.OpenOptions()
   end)
-  local category = Settings.RegisterCanvasLayoutCategory(proxy, "PlateTweaks")
+  local category = Settings.RegisterCanvasLayoutCategory(proxy, NS.WindowTitle())
   Settings.RegisterAddOnCategory(category)
 end)

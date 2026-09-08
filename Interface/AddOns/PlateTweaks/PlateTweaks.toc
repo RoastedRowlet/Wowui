@@ -2,18 +2,25 @@
 ## Title: PlateTweaks
 ## Notes: Nameplate coloring and aura icons driven by your own debuffs. Works with Plater, EllesmereUI, Platynator, NDui, Blizzard plates and more. /pt
 ## Author: Graham
-## Version: 1.9.22
-## SavedVariables: PLATETWEAKS_SETTINGS, PLATETWEAKS_PROFILES, PLATETWEAKS_DEBUG
+## Version: 1.11.0
+## SavedVariables: PLATETWEAKS_SETTINGS, PLATETWEAKS_PROFILES, PLATETWEAKS_DEBUG, PLATETWEAKS_SPELLS
 ## Category: Unit Frames
 
 Libs\LibStub\LibStub.lua
 Libs\CallbackHandler-1.0\CallbackHandler-1.0.lua
 Libs\LibSharedMedia-3.0\lib.xml
+Libs\Flex\Flex.lua
 
 Spells.lua
+Learned.lua
+Migrate.lua
+Load.lua
+ColorPicker.lua
 Core.lua
 Share.lua
 Tints.lua
+Threat.lua
+Mark.lua
 Icons.lua
 MissingIcons.lua
 Tweaks.lua

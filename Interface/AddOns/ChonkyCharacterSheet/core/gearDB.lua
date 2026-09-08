@@ -1422,7 +1422,8 @@ local function AddItemToMaster(itemID, container, boss, seasonName)
             C_Item.GetItemInfo(itemID)
 
         -- Numeric class/subclass IDs (REQUIRED for filtering)
-        local itemClassID, itemSubClassID = select(12, GetItemInfo(itemID))
+        
+        local itemClassID, itemSubClassID = select(12, C_Item.GetItemInfo(itemID))
         -- itemClassID: 2 = WEAPON, 4 = ARMOR, etc.
         -- itemSubClassID: numeric weapon/armor subtype
 

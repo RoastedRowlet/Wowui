@@ -114,7 +114,7 @@ function CCS.RenderSafeTooltip(tooltip, link, unit)
 
     -- Item info
     local itemID = link:match("item:(%d+)")
-    local itemName, _, _, _, _, itemType, itemSubType = GetItemInfo(itemID)
+    local itemName, _, _, _, _, itemType, itemSubType = C_Item.GetItemInfo(itemID)
     local itemQuality = itemID and C_Item.GetItemQualityByID(itemID)
     local r, g, b = GetItemQualityColor(itemQuality or 1)
 
@@ -411,14 +411,14 @@ function CCS.GetInspectItemLevel(unit)
     local mainLink = GetInventoryItemLink(unit, 16)
     local offLink  = GetInventoryItemLink(unit, 17)
 
-    local _, _, mainRarity, _, _, _, _, _, mainEquipSlot = GetItemInfo(mainLink or "")
-    local _, _, offRarity, _, _, _, _, _, offEquipSlot   = GetItemInfo(offLink or "")
+    local _, _, mainRarity, _, _, _, _, _, mainEquipSlot = C_Item.GetItemInfo(mainLink or "")
+    local _, _, offRarity, _, _, _, _, _, offEquipSlot   = C_Item.GetItemInfo(offLink or "")
 
     if not mainRarity and mainLink then
-        mainRarity = select(3, GetItemInfoInstant(mainLink))
+        mainRarity = select(3, C_Item.GetItemInfoInstant(mainLink))
     end
     if not offRarity and offLink then
-        offRarity = select(3, GetItemInfoInstant(offLink))
+        offRarity = select(3, C_Item.GetItemInfoInstant(offLink))
     end
 
     if mainIlvl and offIlvl and mainRarity == 6 and offRarity == 6 then
@@ -1338,7 +1338,7 @@ function CCS:GetAverageEquippedRarityHex(unit)
 
             -- Treat Heirlooms as Rare
             if itemLink and itemLink:find("item:") then
-                local _, _, itemRarity = GetItemInfo(itemLink)
+                local _, _, itemRarity = C_Item.GetItemInfo(itemLink)
                 if itemRarity == 7 then
                     rarity = 3
                 end
@@ -1347,7 +1347,7 @@ function CCS:GetAverageEquippedRarityHex(unit)
             -- Check if it's a two-handed weapon
             local isTwoHander = false
             if slot == 16 and itemLink then
-                local _, _, _, _, _, _, _, _, equipSlot = GetItemInfo(itemLink)
+                local _, _, _, _, _, _, _, _, equipSlot = C_Item.GetItemInfo(itemLink)
                 if equipSlot == "INVTYPE_2HWEAPON" then
                     isTwoHander = true
                 end
@@ -1391,7 +1391,7 @@ function CCS.WaitForItemInfoReady(unit, callback)
             if slot ~= 4 and slot ~= 19 then
                 local itemLink = GetInventoryItemLink(unit, slot)
                 if itemLink then
-                    local name = GetItemInfo(itemLink)
+                    local name = C_Item.GetItemInfo(itemLink)
                     if not name then
                         retries = retries - 1
                         if retries > 0 then

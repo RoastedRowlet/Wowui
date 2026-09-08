@@ -6,13 +6,6 @@ local mod, CL = BigWigs:NewBoss("Xathuux the Annihilator", 2813, 2681)
 if not mod then return end
 mod:SetEncounterID(3103)
 mod:SetRespawnTime(30)
-mod:SetAuraData({
-	{473898}, -- Legion Strike
-	{1214637}, -- Axe Toss
-	{1214650}, -- Fel Lightning
-	{1295455}, -- Infernal Crush
-	{474234, soundOnApplied = "underyou"}, -- Burning Steps
-})
 
 --------------------------------------------------------------------------------
 -- Locals
@@ -35,6 +28,18 @@ mod:SetRenames({
 	[1214637] = {1214637, CL.you:format(mod:SpellName(1214637)), notes = {CL.generalNote, CL.messageOnYouNote}, original = {1214637, CL.you:format(mod:SpellName(1214637))}}, -- Axe Toss
 	[1295453] = {1295453}, -- Infernal Crush
 	[474197] = {474197, CL.cast:format(mod:SpellName(474197)), CL.onboss:format(mod:SpellName(474197)), notes = {CL.generalNote, CL.castTimerNote, CL.messageCastOverNote}, original = {474197, CL.cast:format(mod:SpellName(474197)), CL.onboss:format(mod:SpellName(474197))}}, -- Demonic Rage
+})
+
+--------------------------------------------------------------------------------
+-- Auras
+--
+
+mod:SetAuraData({
+	{473898, duration = 8, note = CL.debuffTankAfterCastNote:format(mod:SpellName(473898))}, -- Legion Strike
+	{1214637, duration = 5, note = CL.debuffTargetedNote:format(mod:SpellName(1214637))}, -- Axe Toss
+	{1214650, soundOnAppliedDose = "none", note = CL.debuffGroupAfterCastNote:format(mod:SpellName(1214637))}, -- Fel Lightning
+	{1295455, duration = 8, note = CL.debuffGroupAfterCastNote:format(mod:SpellName(1295453))}, -- Infernal Crush
+	{474234, soundOnApplied = "underyou", note = CL.debuffUnderYouNote}, -- Burning Steps
 })
 
 --------------------------------------------------------------------------------
@@ -120,9 +125,6 @@ function mod:ENCOUNTER_TIMELINE_EVENT_STATE_CHANGED(_, eventID)
 		elseif state == 1 then -- Paused
 			-- paused bars are never resumed, cancel them now
 			self:StopBar(barInfo.msg)
-			if barInfo.cancelCallback then
-				barInfo.cancelCallback()
-			end
 			activeBars[eventID] = nil
 		elseif state == 2 then -- Finished
 			self:StopBar(barInfo.msg)

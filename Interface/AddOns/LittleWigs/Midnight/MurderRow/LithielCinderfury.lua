@@ -6,10 +6,6 @@ local mod, CL = BigWigs:NewBoss("Lithiel Cinderfury", 2813, 2682)
 if not mod then return end
 mod:SetEncounterID(3105)
 mod:SetRespawnTime(30)
-mod:SetAuraData({
-	{1214730}, -- Demonic Gateway
-	{1217384, soundOnApplied = "warning", note = CL.debuffFailureNote}, -- Malefic Wave
-})
 
 --------------------------------------------------------------------------------
 -- Locals
@@ -29,6 +25,16 @@ mod:SetRenames({
 	[474408] = {474408},   -- Summon Vilefiend
 	[1218203] = {1218203}, -- Fingers of Gul'dan
 	[1224478] = {1224478}, -- Malefic Wave
+})
+
+--------------------------------------------------------------------------------
+-- Auras
+--
+
+mod:SetAuraData({
+	{1214730, duration = 3.5, note = CL.debuffWalkIntoObjectNote:format(mod:SpellName(1214730))}, -- Demonic Gateway
+	{1217384, duration = 60, mechanic = "infected", soundOnApplied = "warning", soundOnAppliedDose = "none", note = CL.debuffFailureMoveFromCastNote:format(mod:SpellName(1224478))}, -- Malefic Wave
+	-- there is a Fixate but it doesn't log
 })
 
 --------------------------------------------------------------------------------

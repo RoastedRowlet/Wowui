@@ -361,6 +361,18 @@ local function showTooltip()
     local st = ns.Overlay.currentState or STATE.CALM
     local sc = COLOR[st]
     GameTooltip:AddLine(format(L.TT_SEVERITY, ns.Detector:GetSeverityLabel()), sc[1], sc[2], sc[3])
+
+    -- Say plainly that nothing is being measured. A quiet button that stays
+    -- quiet for a reason the player cannot see is worse than a noisy one.
+    local isThrottled, throttleCVar = ns.Detector:IsThrottled()
+    if isThrottled then
+        local tc = COLOR.THROTTLED
+        GameTooltip:AddLine(L.TT_THROTTLED, tc[1], tc[2], tc[3])
+        local capLabel = ns.CapCVarLabel(throttleCVar)
+        GameTooltip:AddLine(capLabel and format(L.TT_THROTTLED_CVAR, capLabel) or L.TT_THROTTLED_WHY,
+            0.6, 0.6, 0.6, true)
+    end
+
     GameTooltip:AddLine(" ")
 
     -- Last 5 pulls this session (in-memory only; gone on reload/logout).
@@ -470,6 +482,12 @@ local function showTooltip()
     GameTooltip:AddLine(L.TT_HINT_EXPORT, 0.5, 0.5, 0.5)
     GameTooltip:AddLine(L.TT_HINT_CLEAR, 0.5, 0.5, 0.5)
     GameTooltip:AddLine(L.TT_HINT_MENU, 0.5, 0.5, 0.5)
+    GameTooltip:AddLine(DB.settings.locked and L.TT_HINT_LOCKED or L.TT_HINT_UNLOCKED, 0.5, 0.5, 0.5)
+    -- Only when banners are suppressed. Otherwise a player who turned them off
+    -- weeks ago has no way to tell that from the addon having gone silent.
+    if DB.settings.bannerMode ~= "ALL" then
+        GameTooltip:AddLine(L.TT_HINT_BANNERS_OFF, 0.5, 0.5, 0.5, true)
+    end
     GameTooltip:Show()
 end
 
@@ -518,6 +536,10 @@ end
 -- existing toast's counter/peak and refresh its timer instead of stacking.
 function Overlay:PushToast(key, name, isAddon, ms)
     if not frame then return end
+    -- Gated before any work: the glyph lookup, the string format and the width
+    -- measurement below all happen on a hitch frame, which is the worst possible
+    -- moment to spend anything on a banner nobody asked to see.
+    if DB.settings.bannerMode ~= "ALL" then return end
     ms = ms or 0
     local now = GetTime()
 
@@ -626,14 +648,34 @@ function Overlay:Refresh(state)
     if not frame then return end
     self.currentState = state or STATE.CALM
 
-    -- Color = severity, always. The SA logo just tints to how-bad.
-    local c = COLOR[self.currentState]
+    -- A suspended detector outranks severity: whatever the last state was, it is
+    -- stale the moment measuring stopped, and showing it would be a claim we can
+    -- no longer support.
+    local c = self.throttled and COLOR.THROTTLED or COLOR[self.currentState]
     bg:SetVertexColor(c[1], c[2], c[3], 1.0)
 
-    if self.currentState == STATE.CRITICAL then
+    if self.currentState == STATE.CRITICAL and not self.throttled then
         if not pulse:IsPlaying() then pulse:Play() end
     elseif pulse:IsPlaying() then
         pulse:Stop()
+    end
+end
+
+-- Enter/leave the "monitoring suspended, the client is running to a frame cap"
+-- presentation. `cvar` is the console variable that corroborated it, or nil when
+-- only the frame shape identified the regime.
+function Overlay:SetThrottled(on, cvar)
+    on = on and true or false
+    if self.throttled == on and self.throttleCVar == cvar then return end
+    self.throttled    = on
+    self.throttleCVar = cvar
+    if not frame then return end
+    -- Live banners describe measurements we are no longer taking.
+    if on then self:ClearToasts() end
+    self:Refresh(self.currentState)
+    if GameTooltip:IsOwned(frame) then
+        GameTooltip:Hide()
+        showTooltip()
     end
 end
 
@@ -684,6 +726,11 @@ function Overlay:ShowPullSummary(sinceTime)
     else
         c = COLOR[STATE.ELEVATED]
     end
+
+    -- Gated here rather than in PushSummaryToast, so the pull is still recorded
+    -- into the session ring the tooltip reads. Turning banners off hides them;
+    -- it does not stop the addon knowing what happened.
+    if DB.settings.bannerMode == "OFF" then return end
 
     self:PushSummaryToast(text, c)
 end
@@ -926,6 +973,23 @@ function Overlay:BuildExportReport()
                 add(format(L.EXPORT_SPAN, durText, sum.total / (monitored / 60)))
             end
         end
+
+        -- Time deliberately left out of that denominator. Stated rather than
+        -- silently dropped: an author reading "2h monitored" deserves to know
+        -- the session was longer and why the rest was not measured.
+        local throttledSec = DB.data.totals.throttledSec
+        if throttledSec and throttledSec >= 60 then
+            local durText = ns.FormatDuration(throttledSec)
+            if durText then add(format(L.EXPORT_THROTTLED, durText)) end
+        end
+
+        -- A frame cap that is currently setting this machine's normal. Stated
+        -- because it is the one explanation for a low frame rate that no
+        -- graphics setting in the advice below can touch.
+        local capCVar, capFPS = ns.Detector:GetBaselineCap()
+        if capCVar then
+            add(format(L.EXPORT_BASELINE_CAP, capFPS, ns.CapCVarLabel(capCVar)))
+        end
     end
 
     -- Constant cost. Stutters are only half the story: an addon burning a few ms
@@ -1014,6 +1078,9 @@ function Overlay:ShowExport()
         f:SetPoint("CENTER")
         f:SetFrameStrata("DIALOG")
         f:SetMovable(true)
+        -- Without this the panel can be dragged fully off-screen, after which
+        -- clicking the button looks like it does nothing at all.
+        f:SetClampedToScreen(true)
         f:EnableMouse(true)
         f:RegisterForDrag("LeftButton")
         f:SetScript("OnDragStart", f.StartMoving)
@@ -1096,6 +1163,24 @@ function Overlay:ShowExport()
     f.editBox:SetCursorPosition(0)
 end
 
+-- Click the button again to dismiss. Without a toggle, a panel that is open but
+-- not where the player is looking reads as a broken button.
+function Overlay:ToggleExport()
+    if self.panelFrame and self.panelFrame:IsShown() then
+        self.panelFrame:Hide()
+        return
+    end
+    self:ShowExport()
+end
+
+-- Put the report panel back in the middle of the screen. Called by /sa reset so
+-- there is always a way back from a panel that has ended up somewhere useless.
+function Overlay:ResetExportPosition()
+    if not self.panelFrame then return end
+    self.panelFrame:ClearAllPoints()
+    self.panelFrame:SetPoint("CENTER")
+end
+
 -- ---------------------------------------------------------------------------
 -- Construction
 -- ---------------------------------------------------------------------------
@@ -1144,8 +1229,13 @@ function Overlay:Create()
     a:SetToAlpha(0.45)
     a:SetDuration(0.4)
 
+    -- A drag ends with OnMouseUp firing too, so the click handler below must be
+    -- able to tell "released after moving me" from "clicked me". Set here,
+    -- consumed once by the next OnMouseUp.
     frame:SetScript("OnDragStart", function(self)
-        if not DB.settings.locked then self:StartMoving() end
+        if DB.settings.locked then return end
+        self:StartMoving()
+        self.wasDragging = true
     end)
     frame:SetScript("OnDragStop", function(self)
         self:StopMovingOrSizing()
@@ -1158,9 +1248,30 @@ function Overlay:Create()
 
     -- Handle native dropdown and click overrides using OnMouseUp on the Frame
     frame:SetScript("OnMouseUp", function(self, button)
+        -- Swallow the release that ends a drag: moving the button is not a click
+        -- on it, and without this every reposition would also fire the action.
+        if self.wasDragging then
+            self.wasDragging = nil
+            return
+        end
+
         if button == "RightButton" then
             MenuUtil.CreateContextMenu(self, function(owner, rootDescription)
                 rootDescription:CreateTitle(L.MENU_TITLE)
+
+                -- Banner Visibility Submenu
+                local bannerMenu = rootDescription:CreateButton(L.MENU_BANNERS)
+                local function setBannerMode(mode)
+                    DB.settings.bannerMode = mode
+                    if mode ~= "ALL" then ns.Overlay:ClearToasts() end
+                    -- Preview regardless of the mode just chosen: this is an
+                    -- explicit action, so it should always show the player what
+                    -- they picked rather than silently doing nothing.
+                    ns.Overlay:ShowPreview()
+                end
+                bannerMenu:CreateRadio(L.MENU_BANNERS_ALL, function() return DB.settings.bannerMode == "ALL" end, function() setBannerMode("ALL") end)
+                bannerMenu:CreateRadio(L.MENU_BANNERS_SUMMARY, function() return DB.settings.bannerMode == "SUMMARY" end, function() setBannerMode("SUMMARY") end)
+                bannerMenu:CreateRadio(L.MENU_BANNERS_OFF, function() return DB.settings.bannerMode == "OFF" end, function() setBannerMode("OFF") end)
 
                 -- Growth Direction Submenu
                 local growthMenu = rootDescription:CreateButton(L.MENU_GROWTH_DIR)
@@ -1201,8 +1312,12 @@ function Overlay:Create()
                 GameTooltip:Hide()
                 showTooltip()
             end
-        elseif button == "LeftButton" and DB.settings.locked then
-            ns.Overlay:ShowExport()
+        elseif button == "LeftButton" then
+            -- Deliberately NOT gated on `locked`. Locking governs whether the
+            -- button can be MOVED, not whether it can be clicked; gating the
+            -- report on it left anyone who had unlocked the button with a dead
+            -- left-click and a tooltip still promising a report.
+            ns.Overlay:ToggleExport()
         end
     end)
 

@@ -1,0 +1,8 @@
+## Interface: 120007
+## Title: |cffff4400Ex|r|cff00ccffBoss|r Voice Pack: English (ENG)
+## Notes: EXBoss standard English voice pack (direct file playback)
+## Author: ExwindStudio
+## Version: 1.0.0
+## Group: EXBoss
+## X-EXBoss-VoicePack: 1
+## X-EXBoss-VoicePackName: 英文(ENG)

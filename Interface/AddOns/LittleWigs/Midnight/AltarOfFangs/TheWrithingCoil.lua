@@ -6,12 +6,6 @@ local mod, CL = BigWigs:NewBoss("The Writhing Coil", 2993, 2879)
 if not mod then return end
 mod:SetEncounterID(3457)
 mod:SetRespawnTime(30)
-mod:SetAuraData({
-	{1299080, soundOnAppliedDose = "none"}, -- Death Rattle
-	{1300503}, -- Spiteful Hunt
-	{1310974}, -- Toxic Atrophy
-	{1299189}, -- Synchronized Venom
-})
 mod:SetStage(1)
 
 --------------------------------------------------------------------------------
@@ -48,6 +42,17 @@ mod:SetRenames({
 	[1299053] = {1299053}, -- Death Rattle
 	[1310358] = {1310358}, -- Toxic Atrophy
 	[1300686] = {1300686}, -- Assimilation
+})
+
+--------------------------------------------------------------------------------
+-- Auras
+--
+
+mod:SetAuraData({
+	{1299080, duration = 60, soundOnAppliedDose = "none", note = CL.debuffGroupAfterCastNote:format(mod:SpellName(1299080))}, -- Death Rattle
+	{1300503, duration = 20, note = CL.debuffTargetedNote:format(mod:SpellName(1300503))}, -- Spiteful Hunt
+	{1310974, duration = 60, soundOnAppliedDose = "none", note = CL.debuffFailureInterruptNote:format(mod:SpellName(1310974))}, -- Toxic Atrophy
+	{1299189, duration = 35, note = CL.debuffGroupAfterCastNote:format(mod:SpellName(1299154))}, -- Synchronized Venom
 })
 
 --------------------------------------------------------------------------------

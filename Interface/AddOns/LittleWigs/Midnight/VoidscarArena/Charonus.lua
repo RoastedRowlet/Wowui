@@ -6,15 +6,6 @@ local mod, CL = BigWigs:NewBoss("Charonus", 2923, 2793)
 if not mod then return end
 mod:SetEncounterID(3287)
 mod:SetRespawnTime(30)
-mod:SetAuraData({
-	{1300372, note = CL.debuffDotAfterCastNote:format(mod:SpellName(1227264))}, -- Cosmic Crash
-	{1264188}, -- Unstable Singularity
-	{1310026, soundOnApplied = "warning", note = CL.debuffHitByCastNote:format(mod:SpellName(1282770))}, -- Atomized
-	{1287450, soundOnApplied = "warning", note = CL.debuffPossibleAfterCastNote:format(mod:SpellName(1263982))}, -- Condensed Mass
-	{1263983}, -- Condensed Mass
-	{1311933, soundOnApplied = "info"}, -- Dark Waves
-	{1227247, soundOnApplied = "underyou", note = CL.debuffFailureNote}, -- Void Cascade
-})
 
 --------------------------------------------------------------------------------
 -- Locals
@@ -38,6 +29,20 @@ mod:SetRenames({
 	[1263982] = {1263982}, -- Gravitic Orbs
 	[1311923] = {1311923}, -- Dark Waves
 	[1222755] = {1222755}, -- Void Cascade
+})
+
+--------------------------------------------------------------------------------
+-- Auras
+--
+
+mod:SetAuraData({
+	{1300372, duration = 20, note = CL.debuffDotAfterCastNote:format(mod:SpellName(1227264))}, -- Cosmic Crash
+	{1264188, note = CL.debuffHitByCastNote:format(mod:SpellName(1282770))}, -- Unstable Singularity
+	{1310026, duration = 15, mechanic = "incapacitated", soundOnApplied = "warning", note = CL.debuffFailureMoveFromCastNote:format(mod:SpellName(1282770))}, -- Atomized
+	{1263983, soundOnApplied = "warning", note = CL.debuffTargetedNote:format(mod:SpellName(1263982))}, -- Condensed Mass
+	{1287450, mechanic = "snared", soundOnAppliedDose = "none", note = CL.debuffDotAfterCastNote:format(mod:SpellName(1263982))}, -- Condensed Mass
+	{1311933, duration = 5, soundOnApplied = "info", note = CL.debuffTargetedNote:format(mod:SpellName(1311923))}, -- Dark Waves
+	{1227247, duration = 3, soundOnApplied = "underyou", note = CL.debuffFailureMoveFromCastNote:format(mod:SpellName(1222755))}, -- Void Cascade
 })
 
 --------------------------------------------------------------------------------

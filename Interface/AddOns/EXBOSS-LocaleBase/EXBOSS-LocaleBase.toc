@@ -1,0 +1,12 @@
+﻿## Interface: 120100
+## Title: |cffff4400Ex|r|cff00ccffBoss|r Locale Base
+## Notes: EXBoss locale system bootstrap — must load before EXBOSS-Locale fills the stores
+## Author: Exwind
+## Version: 1.0.0
+## Group: EXBoss
+## RequiredDeps: ExwindCore, EXBossData
+## SavedVariables: ExBossDB
+## LoadSavedVariablesFirst: 1
+## IconTexture: Interface\AddOns\ExwindCore\Textures\LOGO\EXUI.jpg
+
+LocaleInit.lua

@@ -6,12 +6,6 @@ local mod, CL = BigWigs:NewBoss("Zul'jan", 2993, 2880)
 if not mod then return end
 mod:SetEncounterID(3458)
 mod:SetRespawnTime(30)
-mod:SetAuraData({
-	{1300885}, -- Ritual of the Fang
-	{1300894, soundOnApplied = "info", soundOnAppliedDose = "none"}, -- Ritual Venom
-	{1301508}, -- Boneslicer
-	{1301231, soundOnApplied = "underyou", note = CL.debuffUnderYouNote}, -- Bloodletting
-})
 
 --------------------------------------------------------------------------------
 -- Locals
@@ -33,6 +27,17 @@ mod:SetRenames({
 	[1301111] = {1301111}, -- Axegrinder
 	[1301350] = {1301350}, -- Chop Down
 	[1301413] = {1301413, CL.you:format(mod:SpellName(1301413)), notes = {CL.generalNote, CL.messageOnYouNote}, original = {1301413, CL.you:format(mod:SpellName(1301413))}}, -- Boneslicer
+})
+
+--------------------------------------------------------------------------------
+-- Auras
+--
+
+mod:SetAuraData({
+	{1300885, soundOnApplied = "info", note = CL.debuffWalkIntoObjectNote:format(CL.beam)}, -- Ritual of the Fang
+	{1300894, duration = 50, soundOnAppliedDose = "none", note = CL.debuffWalkIntoObjectNote:format(CL.beam)}, -- Ritual Venom
+	{1301508, duration = 7, soundOnAppliedDose = "none", note = CL.debuffHitByCastNote:format(mod:SpellName(1301413))}, -- Boneslicer
+	{1301231, soundOnApplied = "underyou", note = CL.debuffUnderYouNote}, -- Bloodletting
 })
 
 --------------------------------------------------------------------------------

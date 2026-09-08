@@ -55,7 +55,7 @@ CCS.ModelAspect = 1.385
 
 CCS.Modules = CCS.Modules or {}
 CCS.MaxLevel = GetMaxPlayerLevel()
-
+CCS.HeroLevel = 71
 -- For throttling event handling, wow is pretty chatty.
 CCS.Throttles = {
     CharacterStats = 0,
@@ -198,6 +198,7 @@ ns.optionDefs = {
     { type="dropdown", cat="CHAR-SHEET", ver=bit.bor(CCS.TBC, CCS.MOP), key="bgtype", label=L["BG_TYPE"], value="Midnight", default="Midnight", values={"Default", "Class Crest", "Race", "Midnight", "Hide"}, slots=2 },
     { type="checkbox", cat="CHAR-SHEET", ver=bit.bor(CCS.RETAIL), key="showbganimations", label=ANIMATION, value=true, default=true, slots=1 },
     { type="checkbox", cat="CHAR-SHEET", ver=bit.bor(CCS.RETAIL), key="showparagonmax", label=L["PARAGON_MAX_BAR"], value=false, default=false, slots=1 },
+    { type="checkbox", cat="CHAR-SHEET", ver=bit.bor(CCS.RETAIL), key="showtitlesearch", label=L["TITLE_SEARCH"], value=true, default=true, slots=1 },
     { type="divider", cat="CHAR-SHEET", ver=bit.bor(CCS.RETAIL), slots=4 },
     { type="header", cat="CHAR-SHEET", ver=bit.bor(CCS.ALL), key=nil, label=L["HEADER_ITEM_DISPLAY"], slots=4, color={1,1,1}, fontSize=16, fontOutline="THICKOUTLINE" },
     { type="divider", cat="CHAR-SHEET", ver=bit.bor(CCS.ALL), slots=4 },

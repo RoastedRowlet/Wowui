@@ -6,15 +6,6 @@ local mod, CL = BigWigs:NewBoss("Atroxus", 2923, 2792)
 if not mod then return end
 mod:SetEncounterID(3286)
 mod:SetRespawnTime(30)
-mod:SetAuraData({
-	{1222642, note = CL.debuffTankAfterCastNote:format(mod:SpellName(1222642))}, -- Hulking Claw
-	{1226031, note = CL.debuffHitByCastNote:format(mod:SpellName(1226120))}, -- Poison Splash
-	{1222484, soundOnApplied = "underyou", note = CL.debuffUnderYouNote}, -- Poison Pool
-	{1263971}, -- Mind-Numbing Poison
-	{1222692}, -- Toxic Aura
-	{1283506, soundOnApplied = "warning"}, -- Fixate (doesn't work due to a Blizzard bug)
-	{1282892, soundOnApplied = "alarm", soundOnAppliedDose = "alarm", note = CL.debuffFailureNote}, -- Sickening Bite
-})
 
 --------------------------------------------------------------------------------
 -- Locals
@@ -39,6 +30,20 @@ mod:SetRenames({
 	[1222721] = {1222721}, -- Noxious Breath
 	[1262497] = {1262497}, -- Monstrous Roar
 	[1222371] = {1222371}, -- Provoke Creeper
+})
+
+--------------------------------------------------------------------------------
+-- Auras
+--
+
+mod:SetAuraData({
+	{1222642, duration = 10, note = CL.debuffTankAfterCastNote:format(mod:SpellName(1222642))}, -- Hulking Claw
+	{1226031, duration = 5, dispel = "poison", note = CL.debuffHitByCastNote:format(mod:SpellName(1226120))}, -- Poison Splash
+	{1222484, soundOnApplied = "underyou", note = CL.debuffUnderYouNote}, -- Poison Pool
+	{1263971, duration = 5, dispel = "poison", note = CL.debuffUnderYouNote}, -- Mind-Numbing Poison
+	{1222692, note = CL.debuffGroupAfterCastNote:format(mod:SpellName(1262497))}, -- Toxic Aura
+	{1283506, soundOnApplied = "warning", note = CL.debuffTargetedNote:format(mod:SpellName(1283506))}, -- Fixate (doesn't work due to a Blizzard bug)
+	{1282892, duration = 300, soundOnApplied = "alarm", soundOnAppliedDose = "alarm", note = CL.debuffFailureMoveFromCastNote:format(mod:SpellName(1283506))}, -- Sickening Bite
 })
 
 --------------------------------------------------------------------------------

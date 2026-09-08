@@ -43,6 +43,10 @@ ns.COLOR = {
     [ns.STATE.ELEVATED] = { 0.95, 0.65, 0.20 }, -- amber
     [ns.STATE.CRITICAL] = { 0.90, 0.25, 0.25 }, -- red
     ENGINE              = { 0.40, 0.55, 0.90 }, -- blue-ish: not addons
+    -- Desaturated grey: monitoring is suspended because the client is running to
+    -- a deliberate frame cap. Deliberately reads as "off", not as "calm" -- a
+    -- green button would claim everything was measured and fine.
+    THROTTLED           = { 0.45, 0.45, 0.48 },
 }
 
 -- Inline attribution glyphs (FileDataIDs). Locale-independent, so they live here
@@ -209,3 +213,20 @@ ns.SEVERITY_LABEL = {
     [ns.STATE.ELEVATED] = "SEV_ELEVATED",
     [ns.STATE.CRITICAL] = "SEV_CRITICAL",
 }
+
+-- Frame-cap console variable -> locale key for its human name. The detector
+-- works in console variable names because that is what it probes, but a player
+-- reading "maxFPSBk" learns nothing: they set a slider called Max Background
+-- FPS. Same pattern Advisor.lua uses for the graphics variables.
+ns.CAP_CVAR_LABEL = {
+    maxFPSBk = "CVAR_MAX_FPS_BK",
+    maxFPS   = "CVAR_MAX_FPS",
+}
+
+-- Readable name for a cap console variable. Falls back to the raw name only if
+-- an unmapped variable ever reaches here, which is better than showing nothing.
+function ns.CapCVarLabel(name)
+    if type(name) ~= "string" then return nil end
+    local key = ns.CAP_CVAR_LABEL[name]
+    return key and L[key] or name
+end

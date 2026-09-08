@@ -101,7 +101,8 @@ local function Paint(healthBar, overlay)
   if healthBar.ptMissingWash then pcall(healthBar.ptMissingWash.Hide, healthBar.ptMissingWash) end
 
   local barRule = Winner(NS.db.tints.rules)
-  local borderRule = Winner(NS.db.tints.borderRules)
+  -- The border half of the same list, in the same order.
+  local borderRule = Winner(NS.GetOrderedBorderRules and NS.GetOrderedBorderRules() or {})
 
   local healthOn = NS.db.tints.enabled
   local borderOn = NS.db.tints.borderEnabled ~= false
@@ -126,6 +127,7 @@ local function Paint(healthBar, overlay)
     local active = NS.PreviewActive and NS.PreviewActive() or {}
     for _, rule in ipairs(NS.db.tints.rules or {}) do
       if rule.showWhenMissing and rule.enabled ~= false
+        and rule.barEnabled ~= false
         and #(rule.conditions or {}) == 1 and not missingBar then
     -- On a rule's own page the button tests THAT rule, so the ticked-debuff
     -- walk is the wrong question. Same carve-out Winner makes.

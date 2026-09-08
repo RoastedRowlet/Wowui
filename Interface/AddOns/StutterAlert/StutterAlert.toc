@@ -2,7 +2,7 @@
 ## Title: StutterAlert
 ## Notes: Auto detect micro stutters, FPS lag spikes, and frame drops to find the exact addons causing performance issues
 ## Author: Osiris the Kiwi / Discord: osirisnz
-## Version: 1.0.3
+## Version: 1.0.4
 ## SavedVariables: StutterAlertDB
 ## Category: Development Tools
 ## X-License: All Rights Reserved

@@ -6,13 +6,6 @@ local mod, CL = BigWigs:NewBoss("Ikuzz the Light Hunter", 2859, 2770)
 if not mod then return end
 mod:SetEncounterID(3200)
 mod:SetRespawnTime(30)
-mod:SetAuraData({
-	{1236747}, -- Verdant Stomp
-	{1259365, soundOnApplied = "info"}, -- Bloodthorn Roots
-	{1237091}, -- Bloodthirsty Gaze
-	{1237267, soundOnApplied = "warning", note = CL.debuffFailureNote}, -- Incise
-	{1272290, note = CL.debuffFailureNote}, -- Crunched
-})
 
 --------------------------------------------------------------------------------
 -- Locals
@@ -32,6 +25,18 @@ mod:SetRenames({
 	[1236746] = {1236746}, -- Verdant Stomp
 	[1236709] = {1236709}, -- Thorncaller Roar
 	[1237090] = {1237090, CL.you:format(mod:SpellName(1237090)), notes = {CL.generalNote, CL.messageOnYouNote}, original = {1237090, CL.you:format(mod:SpellName(1237090))}}, -- Bloodthirsty Gaze
+})
+
+--------------------------------------------------------------------------------
+-- Auras
+--
+
+mod:SetAuraData({
+	{1236747, duration = 4, note = CL.debuffGroupAfterCastNote:format(mod:SpellName(1236746))}, -- Verdant Stomp
+	{1259365, dispel = "magic", mechanic = "rooted", soundOnApplied = "info", note = CL.debuffUnderYouNote}, -- Bloodthorn Roots
+	{1237091, duration = 10, note = CL.debuffTargetedNote:format(mod:SpellName(1237091))}, -- Bloodthirsty Gaze
+	{1237267, duration = 3, dispel = "bleed", mechanic = "bleeding", soundOnApplied = "warning", note = CL.debuffFailureMoveFromCastNote:format(mod:SpellName(1237091))}, -- Incise
+	{1272290, duration = 5, note = CL.postDebuffNote:format(mod:SpellName(1237267))}, -- Crunched
 })
 
 --------------------------------------------------------------------------------

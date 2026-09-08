@@ -731,11 +731,13 @@ function Grid2Layout:ForceFramesCreation(header)
 	local maxFrames = maxColumns * unitsPerColumn
 	local count= header.FrameCount
 	if not count or count<maxFrames then
+		Grid2.forceFramesCreationEnabled = true -- flag to avoid unnecessary frame updates in GridFrame.lua
 		header:Show()
 		header:SetAttribute("startingIndex", 1-maxFrames )
 		header:SetAttribute("startingIndex", startingIndex)
 		header.FrameCount = maxFrames
 		header:Hide()
+		Grid2.forceFramesCreationEnabled = nil
 	end
 end
 

@@ -657,6 +657,14 @@ local function LearnFromUnit(unit, store)
       if mine and aura.spellId and not mine[aura.spellId] then
         mine[aura.spellId] = true
       end
+
+      -- And, for the picker, account-wide: a debuff seen under a HARMFUL
+      -- filter is a debuff worth offering on the next character of this class.
+      -- See Learned.lua -- it would rather have watched the combat log, and
+      -- this client will not register that event for an addon.
+      if filter == "HARMFUL|PLAYER" and NS.NoteAppliedAura then
+        NS.NoteAppliedAura(aura.spellId, aura.name)
+      end
     end
   end
   return learned
@@ -665,6 +673,7 @@ end
 -- Cheap and idempotent. Safe to call from a ticker, on opening the options
 -- window, or by hand.
 function NS.LearnAuras()
+  if NS.PrimeLearned then NS.PrimeLearned() end
   if NS.IsRestricted and NS.IsRestricted() then return 0 end
   if not (C_UnitAuras and C_UnitAuras.GetAuraDataByIndex) then return 0 end
 

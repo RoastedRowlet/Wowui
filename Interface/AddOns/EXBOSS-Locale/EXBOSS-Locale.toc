@@ -1,0 +1,21 @@
+﻿## Interface: 120100
+## Title: |cffff4400Ex|r|cff00ccffBoss|r Locale
+## Notes: EXBoss localization strings (zhCN / enUS + stubs)
+## Author: Exwind
+## Version: 1.0.0
+## Group: EXBoss
+## IconTexture: Interface\AddOns\ExwindCore\Textures\LOGO\EXUI.jpg
+## RequiredDeps: EXBOSS-LocaleBase
+
+zhCN.lua
+enUS.lua
+zhTW.lua
+koKR.lua
+ruRU.lua
+deDE.lua
+frFR.lua
+esES.lua
+esMX.lua
+ptBR.lua
+itIT.lua
+DynamicTextMap.lua

@@ -6,13 +6,6 @@ local mod, CL = BigWigs:NewBoss("Zaen Bladesorrow", 2813, 2680)
 if not mod then return end
 mod:SetEncounterID(3102)
 mod:SetRespawnTime(30)
-mod:SetAuraData({
-	{474515, soundOnApplied = "alert"}, -- Heartstop Poison
-	{474545, soundOnRemoved = "info"}, -- Murder in a Row
-	{474740, soundOnApplied = "warning", note = CL.debuffFailureNote}, -- Murder in a Row
-	{1214352}, -- Fire Bomb
-	{1219631}, -- Fel-Infused Freight
-})
 
 --------------------------------------------------------------------------------
 -- Locals
@@ -36,6 +29,18 @@ mod:SetRenames({
 	[1214357] = {1214357, CL.you:format(mod:SpellName(1214357)), notes = {CL.generalNote, CL.messageOnYouNote}, original = {1214357, CL.you:format(mod:SpellName(1214357))}}, -- Fire Bomb
 	[1222795] = {1222795}, -- Envenom
 	[1218347] = {1218347}, -- Murder in a Row
+})
+
+--------------------------------------------------------------------------------
+-- Auras
+--
+
+mod:SetAuraData({
+	{1219631, soundOnAppliedDose = "none", note = CL.debuffGroupAfterCastNote:format(mod:SpellName(1219631))}, -- Fel-Infused Freight
+	{1214352, duration = 6, note = CL.debuffPossibleAfterCastNote:format(mod:SpellName(1214357))}, -- Fire Bomb
+	{474515, duration = 15, dispel = "poison", soundOnApplied = "alert", note = CL.debuffTankAfterCastNote:format(mod:SpellName(1222795))}, -- Heartstop Poison
+	{474545, soundOnRemoved = "info", note = CL.debuffGroupAfterCastNote:format(mod:SpellName(1218347))}, -- Murder in a Row
+	{474740, duration = 15, dispel = "bleed", mechanic = "bleeding", soundOnApplied = "warning", note = CL.debuffFailureSafeZoneNote}, -- Murder in a Row
 })
 
 --------------------------------------------------------------------------------

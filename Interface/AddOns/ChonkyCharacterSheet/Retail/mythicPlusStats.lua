@@ -235,35 +235,6 @@ local function HandlePreviewMythicRewardTooltip(self, itemLevel, upgradeItemLeve
 	end
 end
 
-local function ForceGenerateWeeklyRewards()
-    if not WeeklyRewardsFrame then
-        LoadAddOn("Blizzard_WeeklyRewards")
-    end
-    if not WeeklyRewardsFrame then return end
-
-    -- Move offscreen and force Blizzard to generate example rewards
-	if WeeklyRewardsFrame:IsVisible() then return end
-
-    -- Save current SFX state
-    local oldSFX = GetCVar("Sound_EnableSFX")
-
-    -- Disable SFX to silence the vault chest open/close sound
-    SetCVar("Sound_EnableSFX", 0)
-
-    WeeklyRewardsFrame:ClearAllPoints()
-    WeeklyRewardsFrame:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", 0, -500)
-    WeeklyRewardsFrame:Show()
-    WeeklyRewardsFrame:FullRefresh()
-	
-	SetCVar("Sound_EnableSFX", oldSFX)
-	
-    C_Timer.After(0.05, function()
-	    SetCVar("Sound_EnableSFX", 0)
-        WeeklyRewardsFrame:Hide()
-		SetCVar("Sound_EnableSFX", oldSFX)
-    end)
-end
-
 local function ShowPreviewItemTooltip(t, tframe)
 	if t == nil or tframe == nil then return end
 	GameTooltip:SetOwner(tframe, "ANCHOR_RIGHT", -7, -11);
@@ -1947,6 +1918,8 @@ function module:Initialize(onlyStyle)
 			end
 
 			if not InCombatLockdown() then
+				--CCS.Clicky("LEFT")
+
 				if _G["ccsm_sf"]:IsShown() then 
 					_G["ccsm_sf"]:Hide()
 				else 
@@ -2021,6 +1994,8 @@ function module:Initialize(onlyStyle)
 		if _G["ccsgf_sf"] and _G["ccsgf_sf"]:IsShown() then _G["ccsgf_sf"]:Hide() end
 		
 		if not InCombatLockdown() then
+			--CCS.Clicky("LEFT")
+
 			if _G["ccsm_sf"]:IsShown() then
 				_G["ccsm_sf"]:Hide()
 			else
@@ -2041,6 +2016,12 @@ function module:Initialize(onlyStyle)
 
 	btn:SetShown(option("showmythicplusscore"))
 	btn2:SetShown(option("showm_sp_btn"))
+
+	if UnitLevel("player") < CCS.MaxLevel then
+        btn:Hide()
+        btn2:Hide()		
+    end
+	
 	CCS.updatemplussideframe()		
 end
 
@@ -2059,7 +2040,7 @@ function CCS.MythicPlusEventHandler(event, ...)
 	MuteSoundFile(169062)
     if event == "PLAYER_LEVEL_UP" then
 	   C_Timer.After(.2, function() 
-			if UnitLevel("player") >= 80 then  
+			if UnitLevel("player") == CCS.MaxLevel then  
 				_G["MPlusScoreBtn"]:Show()
 				_G["MPlusScoreIconBtn"]:Show()
 			end 
@@ -2081,7 +2062,6 @@ function CCS.MythicPlusEventHandler(event, ...)
 
     if not CCS.mythicUpdatePending then
         CCS.mythicUpdatePending = true
-		--ForceGenerateWeeklyRewards(); 
 		WeeklyRewardsFrame:FullRefresh()
 		
         C_Timer.After(1, function()

@@ -1,0 +1,86 @@
+## Interface: 120100
+## Title: |cffff0000Exwind|r |cff00ffffCore|r
+## Notes: ExwindTools 核心引擎
+## Version: 6.0.0
+## Author: Exwind
+## LoadSavedVariablesFirst: 1
+## OptionalDeps: SharedMedia, LibSharedMedia-3.0,MythicDungeonTools
+## DefaultState: Enabled
+## SavedVariables: EXCORE12S2
+## IconTexture: Interface\AddOns\ExwindCore\Textures\LOGO\EXUI.jpg
+
+# 核心依赖库
+libs\load_libs.xml
+
+# 本地化
+Locale\Init.lua
+Locale\zhCN.lua
+Locale\zhTW.lua
+Locale\enUS.lua
+Locale\deDE.lua
+Locale\frFR.lua
+Locale\koKR.lua
+Locale\ruRU.lua
+Locale\esES.lua
+Locale\esMX.lua
+Locale\ptBR.lua
+Locale\itIT.lua
+
+# 1. 主引擎
+Core\ExwindTools_Metadata.lua
+Core\ExwindTools.lua
+Core\Panel\ExwindPanelTheme.lua
+Core\Renderer\ExwindVisualLayers.lua
+Core\ExwindMedia.lua
+Core\ExwindUnitFrame.lua
+Core\Renderer\ExwindBlizzardNameplateAnchor.lua
+Core\ExwindEvent.lua
+Core\ExwindPerfMonitor.lua
+Core\GUI\ExwindTools_Changelog.lua
+
+
+# 2. 数据库与状态引擎
+Core\ExwindDB.lua
+Core\ExwindState.lua
+Core\Renderer\ExwindEditMode.lua
+
+# 3. GRID引擎
+Core\GUI\ExwindFramePool.lua
+Core\GUI\ExwindVirtualList.lua
+Core\GUI\ExwindGUI.lua
+Core\GUI\ExwindControlAppearance.lua
+Core\GUI\ExwindChoiceGroup.lua
+Core\Renderer\ExwindWidgets.lua
+Core\Renderer\ExwindRegionElements.lua
+Core\Renderer\ExwindPreviewWorkspace.lua
+Core\Renderer\ExwindWidgetLayout.lua
+Core\Renderer\ExwindMaterialCollection.lua
+Core\Renderer\ExwindTextList.lua
+Core\Renderer\ExwindTextCollection.lua
+Core\Renderer\ExwindIconCollection.lua
+Core\Renderer\ExwindSecureActionPanelWidget.lua
+Core\Renderer\ExwindTimerBarCollection.lua
+Core\Panel\ExwindPanelPreview.lua
+Core\Renderer\ExwindStandardPreview.lua
+Core\Renderer\ExwindStandardTimerBar.lua
+Core\Renderer\ExwindGlow.lua
+Core\GUI\ExwindGrid.lua
+Core\GUI\ExwindToolsUI.lua
+Core\Renderer\ExwindModuleDefinition.lua
+Core\Renderer\ExwindCentralRender.lua
+Core\Renderer\ExwindCentralTextRender.lua
+Core\Renderer\ExwindCentralTimerBarRender.lua
+Core\GUI\ExwindFramePicker.lua
+Core\Renderer\ExwindAnchorController.lua
+Core\Renderer\ExwindIconTemplate.lua
+Core\Panel\ExwindUnifiedPanel.lua
+Core\Panel\ExwindToolsPanelProvider.lua
+Core\Panel\ExwindPanelRouter.lua
+
+# 4. 配置/队伍专精
+# [临时排查内存增长]
+Core\ExwindExport.lua
+# Core\PartySync.lua
+# Core\PartySpec.lua
+
+# 5. UI 皮肤集成（可选，检测到对应插件时自动生效）

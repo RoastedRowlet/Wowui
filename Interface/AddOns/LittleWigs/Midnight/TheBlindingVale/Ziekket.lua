@@ -6,12 +6,6 @@ local mod, CL = BigWigs:NewBoss("Ziekket", 2859, 2772)
 if not mod then return end
 mod:SetEncounterID(3202)
 mod:SetRespawnTime(30)
-mod:SetAuraData({
-	{1247052, soundOnAppliedDose = "none"}, -- Lightbloom's Might
-	{1246751, soundOnApplied = "warning"}, -- Concentrated Lightbeam
-	{1246753, soundOnApplied = "underyou", note = CL.debuffUnderYouNote}, -- Lightsap
-	{1247746}, -- Thornspike
-})
 
 --------------------------------------------------------------------------------
 -- Locals
@@ -34,6 +28,17 @@ mod:SetRenames({
 	[1246858] = {1246858}, -- Lightbloom's Essence
 	[1247685] = {1247685}, -- Thornspike
 	[1246607] = {1246607, CL.you:format(mod:SpellName(1246607)), notes = {CL.generalNote, CL.messageOnYouNote}, original = {1246607, CL.you:format(mod:SpellName(1246607))}}, -- Concentrated Lightbeam
+})
+
+--------------------------------------------------------------------------------
+-- Auras
+--
+
+mod:SetAuraData({
+	{1247052, duration = 12, soundOnApplied = "info", soundOnAppliedDose = "info", note = CL.debuffWalkIntoObjectNote:format(CL.orbs)}, -- Lightbloom's Might
+	{1247746, duration = 10, dispel = "bleed", mechanic = "bleeding", note = CL.debuffTankAfterCastNote:format(mod:SpellName(1247685))}, -- Thornspike
+	{1246751, soundOnApplied = "alarm", note = CL.debuffHitByCastNote:format(mod:SpellName(1246607))}, -- Concentrated Lightbeam
+	{1246753, soundOnApplied = "underyou", note = CL.debuffUnderYouNote}, -- Lightsap
 })
 
 --------------------------------------------------------------------------------

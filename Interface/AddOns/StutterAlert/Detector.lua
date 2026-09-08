@@ -270,8 +270,181 @@ local SMOOTH_FLOOR_MS    = 33    -- ~30 fps; baseline at/above this = the machin
 local SPIKE_RATIO        = 3     -- frame must reach baseline*this (floored at hitchThresholdMs) to count
 local CLUSTER_WINDOW_SEC = 5     -- look-back window for repeated hitches
 local CLUSTER_COUNT      = 4     -- this many hitches in the window = sustained, even if baseline lags
-local CLUSTER_COUNT      = 4     -- this many hitches in the window = sustained, even if baseline lags
 local SCENE_UNITS        = 8     -- this many nearby units at hitch time = the engine is loading models/effects
+
+-- Throttle regime: the game is deliberately running slowly because the player
+-- said so (a background/foreground FPS cap, or a hard vsync lock), not because
+-- anything stuttered.
+--
+-- The discriminator is SHAPE, not speed. A cap is a metronome -- the client
+-- sleeps to hit an exact frame period, so consecutive frames are near-identical.
+-- A machine that is genuinely struggling is never that even: real slow frames
+-- jitter with whatever the engine happens to be doing. So "every recent frame is
+-- long AND they are all nearly the same length" means capped, while "every
+-- recent frame is long and they vary" stays a reported sustained slowdown.
+local THROTTLE_FLOOR_MS  = 40    -- below ~25 fps before a regime is even considered
+local THROTTLE_SPREAD    = 0.12  -- (max-min)/mean across the window; a cap sits near 0
+local THROTTLE_CONFIRM   = 4     -- consecutive frames that must agree
+local THROTTLE_CAP_TOL   = 0.08  -- how near 1000/cap a frame must land to corroborate
+local THROTTLE_DROP_RATIO= 0.75  -- normal must have been this much faster than the background cap
+local THROTTLE_TAIL_SEC  = 1     -- ignore hitches this long after the regime ends
+
+-- ---------------------------------------------------------------------------
+-- Frame-cap console variables.
+--
+-- Read exactly the way Advisor.lua reads graphics CVars: probed, never assumed.
+-- A name this client does not know returns nil and simply drops out, so the
+-- shape test below carries the decision on its own and a renamed CVar degrades
+-- this from "capped, and here is the setting responsible" to "capped" -- never
+-- to a wrong answer.
+--
+-- These only ever CORROBORATE a regime the frame shape already identified, and
+-- name it for the player. They are never sufficient on their own: a cap being
+-- configured says nothing about whether it is currently in force.
+-- ---------------------------------------------------------------------------
+-- Both names confirmed present on a live 12.1 client (maxFPSBk 30, maxFPS 120).
+-- The probes stay defensive anyway: these are console variables, not API, and
+-- nothing here may depend on one existing.
+local CAP_CVARS = { "maxFPSBk", "maxFPS" }
+
+-- The foreground cap alone. Kept separate because the two caps answer different
+-- questions and confusing them silences a real fault: see matchingForegroundCap.
+local FG_CAP_CVARS = { "maxFPS" }
+
+local function capPeriodMs(name)
+    if not (C_CVar and C_CVar.GetCVarInfo) then return nil end
+    local ok, value = pcall(C_CVar.GetCVarInfo, name)
+    if not ok or value == nil then return nil end
+    local fps = tonumber(value)
+    -- 0 is how the client spells "no cap".
+    if not fps or fps <= 0 then return nil end
+    return 1000 / fps
+end
+
+-- Which configured cap, if any, this frame length matches. Returns the CVar name
+-- and its frame period, or nil.
+local function matchingCapIn(list, frameMs)
+    for i = 1, #list do
+        local name = list[i]
+        local periodMs = capPeriodMs(name)
+        if periodMs and math.abs(frameMs - periodMs) <= periodMs * THROTTLE_CAP_TOL then
+            return name, periodMs
+        end
+    end
+    return nil
+end
+
+-- Any configured cap this frame length matches. Used to NAME a regime the frame
+-- shape has already identified, where either cap is a fair answer.
+local function matchingCap(frameMs)
+    return matchingCapIn(CAP_CVARS, frameMs)
+end
+
+-- Only the FOREGROUND cap. Used when asking "is this machine's normal explained
+-- by a limit the player set?", which is a question about a player who is sitting
+-- at the screen -- so the background cap is not an admissible answer.
+--
+-- Checking both here silences a real fault. A background cap of 30 is a common
+-- setting (it is the client's own default), so a player genuinely struggling at
+-- 30 fps in the FOREGROUND has a baseline of 33 ms that coincidentally matches
+-- their background cap. Treating that as "capped, not struggling" would deny
+-- them the one diagnosis they needed. The background cap can never explain a
+-- baseline anyway: while it is in force, monitoring is suspended and nothing is
+-- being classified at all.
+local function matchingForegroundCap(frameMs)
+    return matchingCapIn(FG_CAP_CVARS, frameMs)
+end
+
+-- ---------------------------------------------------------------------------
+-- Throttle regime state machine.
+--
+-- The ring holds the last THROTTLE_CONFIRM frame lengths. It is a fixed-size
+-- array written once per frame with no allocation; everything else here runs
+-- only on frames long enough to be candidate hitches, which are rare.
+-- ---------------------------------------------------------------------------
+local frameRing      = {}
+local frameRingPos   = 0
+local frameRingCount = 0
+
+local throttled      = false
+local throttleCVar   = nil   -- the cap CVar that corroborated it, if any
+local throttleUntil  = 0     -- resume grace: set when the regime ends
+
+local function pushFrame(ms)
+    frameRingPos = (frameRingPos % THROTTLE_CONFIRM) + 1
+    frameRing[frameRingPos] = ms
+    if frameRingCount < THROTTLE_CONFIRM then
+        frameRingCount = frameRingCount + 1
+    end
+end
+
+local function resetFrameRing()
+    frameRingPos, frameRingCount = 0, 0
+    for i = 1, THROTTLE_CONFIRM do frameRing[i] = nil end
+end
+
+-- Is the ring a metronome? Returns (isMetronome, mean frame ms). False until the
+-- ring is full, so a regime can never be declared on partial evidence.
+--
+-- Note there is no minimum frame length here: steady 60 fps is a metronome too.
+-- The callers decide what a given metronome MEANS, because the answer differs --
+-- see the background-cap test below.
+local function ringShape()
+    if frameRingCount < THROTTLE_CONFIRM then return false end
+    local lo, hi, sum = math.huge, 0, 0
+    for i = 1, THROTTLE_CONFIRM do
+        local v = frameRing[i]
+        if not v or v <= 0 then return false end
+        if v < lo then lo = v end
+        if v > hi then hi = v end
+        sum = sum + v
+    end
+    local mean = sum / THROTTLE_CONFIRM
+    if mean <= 0 then return false end
+    return ((hi - lo) / mean) <= THROTTLE_SPREAD, mean
+end
+
+-- Is this metronome specifically the BACKGROUND cap -- i.e. is the window not
+-- being looked at?
+--
+-- This matters at any frame rate, not just a punishing one. A player capped at
+-- 30 fps in the background produces 33 ms frames, which never reach the hitch
+-- floor and so were never noisy -- but the time still got counted as measured
+-- play, so an afternoon spent alt-tabbed silently inflated the denominator of
+-- the report's "about N a minute".
+--
+-- The foreground cap is checked as an exclusion, not a match: when both caps are
+-- set to the same value the two cases are indistinguishable, and assuming the
+-- player is PLAYING is the safe way to be wrong -- it keeps measuring rather
+-- than going quiet on someone sitting at the screen.
+local function looksLikeBackgroundCap(meanMs)
+    local bk = capPeriodMs("maxFPSBk")
+    if not bk or math.abs(meanMs - bk) > bk * THROTTLE_CAP_TOL then return false end
+
+    local fg = capPeriodMs("maxFPS")
+    if fg and math.abs(meanMs - fg) <= fg * THROTTLE_CAP_TOL then return false end
+
+    -- Third test, and the one that keeps a weak machine from being written off:
+    -- tabbing out is a CHANGE. The player was running faster a moment ago and is
+    -- now pinned at exactly the background cap. Without this, someone locked at
+    -- 30 fps in the foreground -- vsync at half refresh on a 60 Hz screen, say --
+    -- whose background cap also happens to be 30 (the client's default) would be
+    -- declared backgrounded while sitting at the screen, and monitoring would
+    -- stop for exactly the player who needs it most. Their baseline was already
+    -- 33 ms, so no change ever happened, and this test says so.
+    if not baselineReady or baselineMs <= 0 then return false end
+    return baselineMs < bk * THROTTLE_DROP_RATIO
+end
+
+-- Seconds of frame time currently sitting in the ring. Used to take back the
+-- monitored-time that was banked before the regime was confirmed, so the
+-- report's hitches-per-minute denominator never counts time the player was not
+-- even looking at the game.
+local function ringSeconds()
+    local sum = 0
+    for i = 1, THROTTLE_CONFIRM do sum = sum + (frameRing[i] or 0) end
+    return sum / 1000
+end
 
 -- ---------------------------------------------------------------------------
 -- Non-addon cause classifier. Returns the locale KEY for the most likely cause,
@@ -298,7 +471,15 @@ local function classifyNonAddon(gcThisFrame, ctx)
     end
 
     -- 4. Machine genuinely struggling: even ordinary frames are already slow.
-    if baselineMs >= SMOOTH_FLOOR_MS then
+    --
+    -- Unless the player ASKED for slow frames. A foreground cap of 30 fps parks
+    -- the baseline at 33.3 ms against a floor of 33 -- one percent of clearance --
+    -- so every game-caused hitch on a capped laptop or handheld was being called
+    -- a sustained slowdown, and the advice panel then recommended lowering
+    -- shadows and view distance to fix a frame rate limit those settings do not
+    -- control. A cap explains the baseline; it does not explain THIS long frame,
+    -- so the ladder falls through to the causes that might.
+    if baselineMs >= SMOOTH_FLOOR_MS and not matchingForegroundCap(baselineMs) then
         return "HEADLINE_SUSTAINED"
     end
 
@@ -461,6 +642,60 @@ local lastHitchAt = {}
 -- accusing all of them separately.
 local lastBlamed, lastBlamedAt = nil, 0
 
+-- ---------------------------------------------------------------------------
+-- Deferred commit.
+--
+-- A candidate hitch is BUILT immediately -- it has to be, because the event ring
+-- and the profiler both describe the frame that just ended and are gone by the
+-- next one -- but it is not WRITTEN until we have seen enough later frames to
+-- know whether it was a stutter or the first frame of a throttle regime.
+--
+-- Without this the transition into a background FPS cap costs THROTTLE_CONFIRM
+-- junk hitches every time the player alt-tabs, and those are the expensive kind:
+-- the log is a 100-entry ring, so junk does not merely clutter the report, it
+-- evicts the real hitches the player was trying to diagnose.
+--
+-- The delay is THROTTLE_CONFIRM frames, so a real hitch banner appears about
+-- 60 ms later than it used to at 60 fps. Nothing in the record shifts: `t`, the
+-- event summary and every profiler reading were all captured at hitch time.
+-- ---------------------------------------------------------------------------
+local pending = {}
+
+local function commitHitch(p)
+    local s = DB.settings
+    local rec = p.rec
+
+    -- Leaky-bucket severity, applied on commit so a dropped candidate never
+    -- tints the button. A worse hitch raises severity more.
+    severity = severity + (p.frameMs - s.hitchThresholdMs) * s.severityGain
+
+    DB:RecordHitch(rec)
+
+    -- Surface this hitch as a toast banner. Repeated spikes from the same source
+    -- coalesce into one banner (with an xN counter) that lives as long as the
+    -- spikes keep coming, instead of stacking a fresh banner every frame.
+    ns.Overlay:PushToast(p.toastKey, p.toastName, rec.isAddon, p.toastMs)
+
+    if s.soundOnCritical and p.frameMs >= s.criticalFrameMs then
+        PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON, "Master")
+    end
+end
+
+-- Throw away everything still waiting: the frames they described turned out to
+-- be the start of a throttle regime, not stutters.
+local function discardPending()
+    for i = #pending, 1, -1 do pending[i] = nil end
+end
+
+-- Commit anything that has now outlived the confirmation window.
+local function flushPending(frameCount)
+    -- Entries are appended in frame order, so the queue can always be drained
+    -- from the front: the first one still too young means every later one is too.
+    while pending[1] and (frameCount - pending[1].atFrame) >= THROTTLE_CONFIRM do
+        commitHitch(table.remove(pending, 1))
+    end
+end
+
 function Detector:OnHitch(frameMs, gcThisFrame, allocKB)
     local s = DB.settings
     local now = GetTime()
@@ -473,9 +708,6 @@ function Detector:OnHitch(frameMs, gcThisFrame, allocKB)
     while w[1] and w[1] < cutoff do
         table.remove(w, 1)
     end
-
-    -- Leaky-bucket: a worse hitch raises severity more.
-    severity = severity + (frameMs - s.hitchThresholdMs) * s.severityGain
 
     -- Attribute to addons.
     local addonMs = GetOverallMetric(LastTime) or 0
@@ -586,11 +818,6 @@ function Detector:OnHitch(frameMs, gcThisFrame, allocKB)
         ctx            = ctx,
         ctxKey         = ctxKey,
     }
-    DB:RecordHitch(rec)
-
-    -- Surface this hitch as a toast banner. Repeated spikes from the same source
-    -- coalesce into one banner (with an xN counter) that lives as long as the
-    -- spikes keep coming, instead of stacking a fresh banner every frame.
     local toastKey, toastName, toastMs
     if isAddon then
         toastKey  = culprit
@@ -601,11 +828,16 @@ function Detector:OnHitch(frameMs, gcThisFrame, allocKB)
         toastName = L[toastKey]
         toastMs   = rec.ms
     end
-    ns.Overlay:PushToast(toastKey, toastName, isAddon, toastMs)
 
-    if s.soundOnCritical and frameMs >= s.criticalFrameMs then
-        PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON, "Master")
-    end
+    -- Queued, not written. See the deferred-commit note above.
+    pending[#pending + 1] = {
+        rec       = rec,
+        frameMs   = frameMs,
+        atFrame   = self.frameCount,
+        toastKey  = toastKey,
+        toastName = toastName,
+        toastMs   = toastMs,
+    }
 end
 
 local function updateState(s)
@@ -659,15 +891,78 @@ local function onUpdate(_, elapsed)
         if rel > threshold then threshold = rel end
     end
 
-    local inGrace = now < graceUntil
+    -- Throttle regime, evaluated before anything is recorded. The ring has to be
+    -- fed on EVERY frame -- including hitch frames and frames inside the loading
+    -- grace -- or the shape test would be reading a discontiguous history.
+    Detector.frameCount = (Detector.frameCount or 0) + 1
+    pushFrame(frameMs)
+
+    local totals = DB.data and DB.data.totals
+
+    -- A metronome means the regime is deliberate. Two things make it one worth
+    -- suspending detection for, and either is enough:
+    --   * it matches the BACKGROUND cap, so the player is not watching -- true at
+    --     any frame rate, including a 30 fps cap that never trips the hitch floor
+    --   * or it is slower than THROTTLE_FLOOR_MS, which is the fallback for when
+    --     no cap console variable can be read at all
+    -- A foreground cap is deliberately NOT enough on its own: the player is
+    -- sitting there playing, and detection still works fine against it.
+    local metronome, ringMean = ringShape()
+    local isRegime = metronome and
+        (looksLikeBackgroundCap(ringMean) or ringMean >= THROTTLE_FLOOR_MS)
+
+    if throttled then
+        -- The moment the shape breaks, the regime is over: either the player came
+        -- back to the window, or the cap changed, and in both cases the next few
+        -- frames are genuinely long for reasons nobody should be blamed for.
+        if not isRegime then
+            throttled     = false
+            throttleCVar  = nil
+            throttleUntil = now + THROTTLE_TAIL_SEC
+            ns.Overlay:SetThrottled(false)
+        end
+    elseif isRegime then
+        throttled    = true
+        throttleCVar = matchingCap(ringMean)
+
+        -- Take back what was banked before the regime was confirmed: the
+        -- candidate hitches queued during those frames, the cluster entries they
+        -- created, and the monitored seconds they added.
+        discardPending()
+        hitchWindow = {}
+        if totals then
+            totals.throttledSec = (totals.throttledSec or 0) + ringSeconds()
+            totals.monitoredSec = (totals.monitoredSec or 0) - ringSeconds()
+            if totals.monitoredSec < 0 then totals.monitoredSec = 0 end
+        end
+        ns.Overlay:SetThrottled(true, throttleCVar)
+    end
+
+    -- Nothing is measured while capped, and nothing for a moment afterwards. The
+    -- baseline is deliberately left FROZEN rather than fed these frames: it
+    -- describes what normal looks like when the player is actually playing, and
+    -- letting it drift up to the cap would blind the detector to real hitches
+    -- for seconds after they tab back in.
+    local inGrace = (now < graceUntil) or throttled or (now < throttleUntil)
+
+    if throttled and totals then
+        totals.throttledSec = (totals.throttledSec or 0) + elapsed
+    end
 
     -- Accumulate monitored time so the report can turn a raw hitch count into a
-    -- rate. Loading screens are excluded, matching what detection ignores.
-    if not inGrace then
-        local totals = DB.data and DB.data.totals
-        if totals then
-            totals.monitoredSec = (totals.monitoredSec or 0) + elapsed
-        end
+    -- rate. Loading screens and throttled time are excluded, matching what
+    -- detection ignores.
+    if not inGrace and totals then
+        totals.monitoredSec = (totals.monitoredSec or 0) + elapsed
+    end
+
+    -- Commit or drop candidates from earlier frames. Runs after the regime check
+    -- above, so a candidate is only ever written once we know the frames that
+    -- followed it were not the start of a cap.
+    if inGrace then
+        discardPending()
+    else
+        flushPending(Detector.frameCount)
     end
 
     if frameMs >= threshold and not inGrace then
@@ -714,6 +1009,14 @@ function Detector:Enable()
     monitorStartedAt = GetTime()
     hitchWindow      = {}
 
+    -- Throttle detection starts from no history, so a regime has to re-prove
+    -- itself rather than being inherited from before monitoring was enabled.
+    resetFrameRing()
+    discardPending()
+    self.frameCount = 0
+    throttled, throttleCVar, throttleUntil = false, nil, 0
+    ns.Overlay:SetThrottled(false)
+
     -- Start the event ring from empty so the first frames after enabling cannot
     -- attribute a hitch to events captured before monitoring began.
     evCur.n, evCur.over   = 0, 0
@@ -735,6 +1038,10 @@ function Detector:Disable()
 
     severity, state = 0, STATE.CALM
     lastPushedState = nil
+    discardPending()
+    resetFrameRing()
+    throttled, throttleCVar, throttleUntil = false, nil, 0
+    ns.Overlay:SetThrottled(false)
     ns.Overlay:ClearToasts()
     ns.Overlay:Refresh(STATE.CALM)
 end
@@ -747,4 +1054,25 @@ end
 -- baseline frame time (ms) and whether it has finished warming up.
 function Detector:GetStatus()
     return baselineMs, baselineReady
+end
+
+-- Is the client currently running to a deliberate frame cap (backgrounded, or a
+-- foreground cap), and which console variable corroborated it? Detection is
+-- suspended while this is true, and both the tooltip and the report say so
+-- rather than leaving a quiet button to be read as "all clear".
+function Detector:IsThrottled()
+    return throttled, throttleCVar
+end
+
+-- Is this machine's idea of "normal" set by a frame cap rather than by what it
+-- can manage? Returns the console variable and the frame rate it is holding, or
+-- nil. Detection is unaffected -- a capped client is still measured against its
+-- own baseline -- but the cap has to be SAID, or a player looking at 30 fps and
+-- a report full of engine hitches will go tuning graphics settings that cannot
+-- move a limit they set themselves.
+function Detector:GetBaselineCap()
+    if not baselineReady or baselineMs <= 0 then return nil end
+    local name, periodMs = matchingForegroundCap(baselineMs)
+    if not name then return nil end
+    return name, floor((1000 / periodMs) + 0.5)
 end

@@ -1214,8 +1214,19 @@ do
 			return
 		end
 
-		local header = moduleAurasList[self][index].header
-		return header
+		return moduleAurasList[self][index].header
+	end
+
+	--- Get the aura difficulty.
+	-- @return string or nil
+	function boss:GetAuraDifficulty(spellID)
+		local index = moduleAurasList[self] and moduleAurasList[self].spellIDToIndex[spellID]
+		if not index then
+			error(("Module %q has no aura data for spell ID %q."):format(self.moduleName, tostring(spellID)))
+			return
+		end
+
+		return moduleAurasList[self][index].difficulty
 	end
 
 	--- Get the total number of auras for this module.
@@ -1798,7 +1809,7 @@ do
 				for i = 1, 10 do
 					local bossUnit = bosses[i]
 					local guid = self:UnitGUID(bossUnit)
-					if guid and self:GetHealth(bossUnit) > 0 then
+					if guid and not self:IsSecret(guid) and self:GetHealth(bossUnit) > 0 then
 						local mobId = self:MobId(guid)
 						if self:IsEnableMob(mobId) then
 							self:Engage(noEngage == "NoEngage" and noEngage)
@@ -1824,7 +1835,7 @@ do
 			ieeuEvents[self].dispatching = true
 			for i = 1, 10 do
 				local bossUnit = bosses[i]
-				local bossGUID = UnitGUID(bossUnit)
+				local bossGUID = self:UnitGUID(bossUnit)
 				if not bossGUID then
 					break
 				end
@@ -1975,6 +1986,7 @@ do
 		for i = 1, 5 do
 			local unit = unitTable[i]
 			local GUID = self:UnitGUID(unit)
+			if self:IsSecret(GUID) then return end
 			if id == GUID then
 				return unit, GUID
 			elseif GUID and isNumber then
@@ -2513,6 +2525,14 @@ function boss:BossName(journalEncounterId)
 	return bossNames[journalEncounterId]
 end
 
+--- Get a localized achievement name from an id.
+-- @number achievementId The achievement id
+-- @return localized achievement name
+function boss:AchievementName(achievementId)
+	local _, name = GetAchievementInfo(achievementId)
+	return name
+end
+
 --- Check if a GUID is you.
 -- @string guid player GUID
 -- @return boolean
@@ -2583,15 +2603,26 @@ do
 	end
 end
 
+do
+	local UnitLevel = loader.UnitLevel
+	--- Returns the level of a unit or -1 for boss units or hostile units 10 levels above the player (Level ??).
+	-- @string unit unit token or name
+	-- @return level the level of the unit
+	function boss:UnitLevel(unit)
+		local level = UnitLevel(unit)
+		if level then
+			return level
+		end
+	end
+end
+
 --- Get the Globally Unique Identifier of a unit.
 -- @string unit unit token or name
 -- @return guid guid of the unit
 function boss:UnitGUID(unit)
-	if not self:IsSecret(unit) then
-		local guid = UnitGUID(unit)
-		if not self:IsSecret(guid) then
-			return guid
-		end
+	local guid = UnitGUID(unit)
+	if guid then
+		return guid
 	end
 end
 

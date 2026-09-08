@@ -6,10 +6,6 @@ local mod, CL = BigWigs:NewBoss("Taz'Rah", 2923, 2791)
 if not mod then return end
 mod:SetEncounterID(3285)
 mod:SetRespawnTime(30)
-mod:SetAuraData({
-	{1222103}, -- Nether Dash
-	{1296967, soundOnApplied = "underyou", note = CL.debuffUnderYouNote}, -- Void Fissure
-})
 
 --------------------------------------------------------------------------------
 -- Locals
@@ -31,6 +27,15 @@ mod:SetRenames({
 	[1296963] = {1296963}, -- Umbral Rupture
 	[1297017] = {1297017}, -- Void Blast
 	[1300259] = {1300259}, -- Dark Bloom
+})
+
+--------------------------------------------------------------------------------
+-- Auras
+--
+
+mod:SetAuraData({
+	{1222103, duration = 15, note = CL.debuffGroupAfterCastNote:format(mod:SpellName(1222098))}, -- Nether Dash
+	{1296967, soundOnApplied = "underyou", note = CL.debuffUnderYouNote}, -- Void Fissure
 })
 
 --------------------------------------------------------------------------------

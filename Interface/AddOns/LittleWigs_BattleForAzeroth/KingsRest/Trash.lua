@@ -38,27 +38,6 @@ mod:RegisterEnableMob(
 	135231, -- Spectral Brute
 	138489 -- Shadow of Zul
 )
-if mod:Retail() then -- Midnight+
-	mod:SetAuraData({
-		{269936}, -- Fixate
-		{269972}, -- Hex Volley
-		{1306763}, -- Serpent Strike
-		{270931, soundOnApplied = "underyou"}, -- Shadow Volley
-		{270927}, -- Bladestorm
-		{1297918}, -- Mortal Bleed
-		{1297781}, -- Sudden Rupture
-		{270292, soundOnApplied = "underyou"}, -- Purifying Flame
-		{271555}, -- Entomb
-		{1301851}, -- Bloodthirsty Axe
-		{1302028}, -- Soul Crush
-		{270492}, -- Hex
-		{272388}, -- Shadow Barrage
-		{1298304}, -- Dark Revelation
-		{276031}, -- Pit of Despair
-		{274387}, -- Absorbed in Darkness
-		{272021}, -- Erupting Darkness
-	})
-end
 
 --------------------------------------------------------------------------------
 -- Locals
@@ -298,6 +277,33 @@ end
 
 function mod:OnBossDisable()
 	prevTable = {}
+end
+
+--------------------------------------------------------------------------------
+-- Midnight Auras
+--
+
+if mod:Retail() then -- Midnight+
+	mod:SetAuraData({
+		{270003, header = 133935, duration = 2.5, note = CL.debuffFailureMoveFromCastNote:format(mod:SpellName(270003))}, -- Suppression Slam (Animated Guardian)
+		{269936, header = 133943, duration = 10, note = CL.debuffTargetedNote:format(mod:SpellName(269936))}, -- Fixate (Minion of Zul)
+		{276031, duration = 6, dispel = "magic", mechanic = "fleeing", note = CL.debuffFailureMoveFromCastNote:format(mod:SpellName(269936))}, -- Pit of Despair (Minion of Zul)
+		{269972, header = 134174, duration = 12, dispel = "curse", note = CL.debuffFailureInterruptNote:format(mod:SpellName(269972))}, -- Hex Volley (Risen Hexer)
+		{1306763, header = 137486, duration = 8, dispel = "poison", note = CL.debuffPossibleAfterCastNote:format(mod:SpellName(1306763))}, -- Serpent Strike (Queen Patlaa)
+		{270931, soundOnApplied = "underyou", note = CL.debuffUnderYouNote}, -- Shadow Volley (Queen Patlaa)
+		{1297918, header = 137484, duration = 18, dispel = "bleed", mechanic = "bleeding", soundOnAppliedDose = "none", note = CL.debuffTankAfterCastNote:format(mod:SpellName(1297918))}, -- Mortal Bleed (King A'akul)
+		{1297781, header = 137485, duration = 18, dispel = "bleed", mechanic = "bleeding", soundOnAppliedDose = "none", note = CL.debuffPossibleAfterCastNote:format(mod:SpellName(1297781))}, -- Sudden Rupture (Bloodsworn Assassin)
+		{270927, header = 137474, duration = 6, note = CL.debuffTargetedNote:format(mod:SpellName(270927))}, -- Bladestorm (King Timalji)
+		{270292, header = 134739, soundOnApplied = "underyou", note = CL.debuffUnderYouNote}, -- Purifying Flame (Purification Construct)
+		{271555, header = 137969, duration = 30, note = CL.debuffPossibleAfterCastNote:format(mod:SpellName(271555))}, -- Entomb (Interment Construct)
+		{1301851, header = 135167, duration = 12, dispel = "bleed", mechanic = "bleeding", soundOnAppliedDose = "none", note = CL.debuffPossibleAfterCastNote:format(mod:SpellName(1301851))}, -- Bloodthirsty Axe (Royal Berserker)
+		{270492, header = 135204, duration = 5, dispel = "curse", mechanic = "polymorphed", note = CL.debuffFailureInterruptNote:format(mod:SpellName(270492))}, -- Hex (Phantom Hex Priest)
+		{1302028, header = 135231, duration = 15, soundOnAppliedDose = "none", note = CL.debuffTankAfterCastNote:format(mod:SpellName(1302028))}, -- Soul Crush (Ghostly Brute)
+		{272388, header = 138489, duration = 4, note = CL.debuffPossibleAfterCastNote:format(mod:SpellName(272388))}, -- Shadow Barrage (Shadow of Zul)
+		{1298304, duration = 5, note = CL.debuffTargetedNote:format(mod:SpellName(1298304))}, -- Dark Revelation (Shadow of Zul)
+		{272021, duration = 30, soundOnAppliedDose = "none", note = CL.debuffFailureGroupSoakNote:format(mod:SpellName(1309385))}, -- Erupting Darkness (Shadow of Zul)
+		{274387, note = CL.debuffWalkIntoObjectNote:format(mod:SpellName(1309385))}, -- Absorbed in Darkness (Shadow of Zul)
+	})
 end
 
 --------------------------------------------------------------------------------

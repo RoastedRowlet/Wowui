@@ -26,7 +26,7 @@ local function hookfix()
         if ClassCodexPanel then ClassCodexPanel:Hide() end
     end
 
-    if not CCS.AreSecretsDisabled() and _G["ccsm_sf"] and (option("showm_sp_onopen") == true) then
+    if not CCS.AreSecretsDisabled() and _G["ccsm_sf"] and (option("showm_sp_onopen") == true) and (UnitLevel("player") == CCS.MaxLevel)then
             _G["ccsm_sf"]:Show()
             _G["ccs_sf"]:Hide()             
     elseif _G["ccsm_sf"] and not CCS.AreSecretsDisabled() then
@@ -150,14 +150,18 @@ local function MoveModelRight()
     _G["CharacterModelFramebg"]:SetAllPoints(CharacterModelScene)    
 end
 
-local function Clicky(endstate)
+function CCS.Clicky(endstate)
+
+
     if _G["CCSf"] then _G["CCSf"]:Hide() end
     if _G["ccs_sf"] then _G["ccs_sf"]:Hide() end
     if _G["ccsm_sf"] then _G["ccsm_sf"]:Hide() end
+    if _G["ccsr_sf"] then _G["ccsr_sf"]:Hide() end    
+    if _G["ccsgf_sf"] then _G["ccsgf_sf"]:Hide() end    
     
-    if CharacterModelScene:GetHeight() >= (CharacterFrameBg:GetHeight()-5) then -- This is to move model under the character equipment
+    if endstate == "LEFT" or CharacterModelScene:GetHeight() >= (CharacterFrameBg:GetHeight()-5) then -- This is to move model under the character equipment
         MoveModelLeft()
-        if _G["ccsm_sf"] and (option("showm_sp_onopen") == true) and (C_MythicPlus.GetCurrentAffixes() and C_MythicPlus.GetCurrentAffixes()[1]) then
+        if _G["ccsm_sf"] and (option("showm_sp_onopen") == true) and UnitLevel("player") >= CCS.MaxLevel and (C_MythicPlus.GetCurrentAffixes() and C_MythicPlus.GetCurrentAffixes()[1]) then
             _G["ccsm_sf"]:Show()
         elseif _G["ccsm_sf"] then 
             _G["ccsm_sf"]:Hide() 
@@ -423,7 +427,7 @@ local function TryLoopItems()
     local allReady = true
     for slot = 1, 19 do
         local link = GetInventoryItemLink("player", slot)
-        if link and not GetItemInfo(link) then
+        if link and not C_Item.GetItemInfo(link) then
             allReady = false
             break
         end
@@ -941,7 +945,7 @@ local function CreateTitleSearchBox()
 
     local box = CreateFrame("EditBox", "CCS_TitleSearchBox", parent, "SearchBoxTemplate")
     parent.SearchBox = box
-
+    box:SetShown(option("showtitlesearch"))
     box:SetSize(200, 20)
     box:SetPoint("TOPRIGHT", parent, "TOPRIGHT", 0, 0)
     box:SetAutoFocus(false)
@@ -1617,7 +1621,7 @@ function module:SetupBlizzardFrameOverrides()
     modelbtn:SetScript("OnLeave", function() CCS.tooltip:Hide() end)
     modelbtn:SetScript("OnClick", function()
             if not InCombatLockdown() then 
-                Clicky() 
+                CCS.Clicky() 
             else
                 PlaySound(8959)
                 RaidNotice_AddMessage(RaidBossEmoteFrame, format("%s", ERR_AFFECTING_COMBAT), ChatTypeInfo["SYSTEM"])
@@ -1960,7 +1964,7 @@ function CCS.CharacterSheetEventHandler(event, ...)
             for slot = 1, 19 do
                 local link = GetInventoryItemLink("player", slot)
                 if link then
-                    GetItemInfo(link) -- queues item for caching
+                    C_Item.GetItemInfo(link) -- queues item for caching
                     local itemID = GetInventoryItemID("player", slot)
                     if itemID then
                         C_Item.RequestLoadItemDataByID(itemID) -- nudges client to fetch item data
@@ -2003,6 +2007,10 @@ function CCS.CharacterSheetEventHandler(event, ...)
         LootSpecInit()
         SpecChangeInit()        
         --print(date("%H:%M:%S") .. format(".%03d", (GetTime() * 1000) % 1000), "message")
+        if CCS_TitleSearchBox then
+            CCS_TitleSearchBox:SetShown(option("showtitlesearch"))
+        end
+
         return true
     elseif event == "CCS_EVENT_CSHOW" then
 

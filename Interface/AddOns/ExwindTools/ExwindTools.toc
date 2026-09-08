@@ -1,0 +1,17 @@
+﻿## Interface: 120100
+## Title: ExwindTools
+## Author: Exwind
+## Version: 1.0
+## Notes: Exwind工具箱 模块
+## SavedVariables: EXTOOLS12S2
+
+## LoadSavedVariablesFirst: 1
+## RequiredDeps: ExwindCore
+## OptionalDeps: SharedMedia, LibSharedMedia-3.0,MythicDungeonTools
+## IconTexture: Interface\AddOns\ExwindCore\Textures\LOGO\EXUI.jpg
+
+# 业务模块
+Storage.lua
+Changelog\ExwindTools_ChangelogData.lua
+Changelog\ExwindTools_Changelog.lua
+Modules\load_modules.xml

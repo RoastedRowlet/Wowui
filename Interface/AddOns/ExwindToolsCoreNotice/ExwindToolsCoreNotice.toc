@@ -1,0 +1,9 @@
+## Interface: 120100
+## Title: ExwindTools Core Notice
+## Notes: Displays an ExwindCore requirement notice for ExwindTools.
+## Author: Exwind
+## Version: 1.0.0
+## DefaultState: Enabled
+
+LargePanel.lua
+Bootstrap.lua

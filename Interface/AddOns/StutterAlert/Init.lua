@@ -1,5 +1,6 @@
 local _, ns = ...
 local L = ns.L
+local format = string.format
 
 local Detector = ns.Detector
 local Overlay  = ns.Overlay
@@ -68,8 +69,29 @@ local function printMsg(msg)
     DEFAULT_CHAT_FRAME:AddMessage("|cff66ccff" .. L.ADDON_TITLE .. "|r: " .. msg)
 end
 
+-- Slash spelling -> stored value, and the stored value -> the line we print back.
+local BANNER_ARG = { all = "ALL", summary = "SUMMARY", summaries = "SUMMARY", off = "OFF" }
+local BANNER_DESC = {
+    ALL     = "SLASH_BANNERS_ALL",
+    SUMMARY = "SLASH_BANNERS_SUMMARY",
+    OFF     = "SLASH_BANNERS_OFF",
+}
+
 local function handleSlash(input)
-    local cmd = (input or ""):lower():match("^%s*(%S*)")
+    input = input or ""
+    local cmd, arg = input:lower():match("^%s*(%S*)%s*(%S*)")
+
+    if cmd == "banners" then
+        local mode = BANNER_ARG[arg]
+        if mode then
+            DB.settings.bannerMode = mode
+            if mode ~= "ALL" then Overlay:ClearToasts() end
+        end
+        -- With no argument (or an unrecognised one) this just reports the
+        -- current setting, which is also how the player discovers it.
+        printMsg(format(L.SLASH_BANNERS, L[BANNER_DESC[DB.settings.bannerMode] or "SLASH_BANNERS_ALL"]))
+        return
+    end
 
     if cmd == "lock" then
         Overlay:SetLocked(true)
@@ -79,7 +101,11 @@ local function handleSlash(input)
         printMsg(L.SLASH_UNLOCKED)
     elseif cmd == "reset" then
         Overlay:ResetPosition()
+        Overlay:ResetExportPosition()
         printMsg(L.SLASH_RESET)
+    elseif cmd == "report" then
+        -- Unconditional way in, for when the button itself is the problem.
+        Overlay:ShowExport()
     elseif cmd == "toggle" then
         DB.settings.enabled = not DB.settings.enabled
         applyEnabledState()
@@ -89,6 +115,8 @@ local function handleSlash(input)
         printMsg(L.SLASH_USAGE_LOCK)
         printMsg(L.SLASH_USAGE_UNLOCK)
         printMsg(L.SLASH_USAGE_RESET)
+        printMsg(L.SLASH_USAGE_REPORT)
+        printMsg(L.SLASH_USAGE_BANNERS)
         printMsg(L.SLASH_USAGE_TOGGLE)
     end
 end

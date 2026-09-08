@@ -1,4 +1,17 @@
-local _, NS = ...
+local ADDON, NS = ...
+
+-- The folder this copy lives in, taken from the loader rather than written
+-- out. A beta build sits in its own folder under a different name, and every
+-- hardcoded "PlateTweaks" in here was a thing that silently pointed at the
+-- OTHER copy: its metadata, its memory figures, its media. Asked once, shared
+-- through NS, so a rename is a rename and nothing else.
+NS.ADDON = ADDON
+
+-- What the window and the Blizzard settings entry call this copy. The folder
+-- name with an underscore in it is a file path, not a title.
+function NS.WindowTitle()
+  return (ADDON == "PlateTweaks") and "PlateTweaks" or "PlateTweaks Beta"
+end
 
 -- PlateTweaks: nameplate coloring driven by your own debuffs.
 --
@@ -85,6 +98,21 @@ NS.Defaults = {
     borderEnabled = true,  -- border colouring
     rules = {},       -- bar rules; ordered, index 1 wins overlaps
     borderRules = {}, -- border rules; their OWN independent priority stack
+    -- Threat rules. Drawn above every spell rule on both halves -- see
+    -- Threat.lua for why that is position rather than a comparison. Empty by
+    -- default: this is a new stack, and an existing profile must look exactly
+    -- as it did before anyone opts in.
+    threatEnabled = true,
+    -- Two fixed states rather than a rule list: the client reports exactly one
+    -- threat status per unit, and the only distinction worth a colour at a
+    -- glance is whether that mob is on you.
+    --
+    -- Seeded lazily by NS.ThreatConfig, which needs the resolved role to pick
+    -- the shipped colours and cannot run this early.
+    threat = { enabled = true, role = "auto", states = {} },
+    -- The border module: same four states, its own switch, its own colours.
+    -- Off on arrival -- see NS.ThreatBorderConfig.
+    threatBorder = { enabled = false, thickness = 2, grow = "OUT", states = {} },
     -- Adjustment either side of a one-pixel inset, not an absolute inset --
     -- one pixel in is what looks right, so it is the zero point.
     edgeAdjust = 0,
@@ -207,6 +235,9 @@ function NS.NormaliseRule(rule)
   -- Holds the wash off while the target is out of combat. Off by default --
   -- some missing rules are exactly for a pre-pull buff check.
   if rule.missingCombatOnly == nil then rule.missingCombatOnly = false end
+  -- Where this rule is allowed to load at all. Both lists empty -- which is
+  -- what every rule predating the feature has -- means everywhere.
+  if NS.NormaliseLoad then rule.load = NS.NormaliseLoad(rule.load) end
   return rule
 end
 
@@ -234,6 +265,7 @@ function NS.NormaliseBorderRule(rule)
     rule.showWhenMissing = false
   end
   if rule.missingCombatOnly == nil then rule.missingCombatOnly = false end
+  if NS.NormaliseLoad then rule.load = NS.NormaliseLoad(rule.load) end
   return rule
 end
 
@@ -732,28 +764,26 @@ function NS.InitializeConfig()
   for _, rule in ipairs(db.tints.rules) do NS.NormaliseRule(rule) end
   for _, rule in ipairs(db.tints.borderRules) do NS.NormaliseBorderRule(rule) end
 
-  -- Borders used to be half of a bar rule. Any rule carrying one is SPLIT --
-  -- bar half stays, border half becomes a border rule with the same
-  -- conditions. The plate looks identical afterwards.
-  if not db.borderRulesMigrated then
-    db.borderRulesMigrated = true
-    for _, rule in ipairs(db.tints.rules) do
-      if rule.border and rule.border.enabled then
-        local conditions = {}
-        for _, c in ipairs(rule.conditions or {}) do
-          table.insert(conditions, { spellID = c.spellID })
-        end
-        table.insert(db.tints.borderRules, NS.NormaliseBorderRule({
-          conditions = conditions,
-          enabled = rule.enabled,
-          border = CopyTable(rule.border),
-        }))
-        rule.border.enabled = false
-        -- A rule that existed ONLY for its border would now paint nothing.
-        if rule.barEnabled == false then rule.barEnabled = true end
-      end
+  -- Borders used to be half of a bar rule, and a migration SPLIT them out
+  -- into a second list. That has been reversed -- see Migrate.lua -- so this
+  -- one is retired rather than left running: it would take the halves the
+  -- merge just folded in and pull them straight back out again.
+  --
+  -- The flag is still set, so a profile that predates the split never gets
+  -- split by an older build reading the same SavedVariables.
+  db.borderRulesMigrated = true
+
+  -- After normalisation, with both lists present, and before anything reads
+  -- either of them.
+  if NS.RunMigrations then
+    local notes = NS.RunMigrations(db)
+    for _, note in ipairs(notes or {}) do
+      -- Said out loud. A profile that quietly reshapes itself is one nobody
+      -- can tell from a profile that lost something.
+      NS.Print("|cff55dd55profile updated|r -- " .. note)
     end
   end
+
   -- The Color Rules twisty reads db.uiRailOpen.health/.border. That twisty
   -- was removed and reinstated mid-development, so anyone who had ever
   -- collapsed it has a dormant false under that key -- live again the moment
@@ -1011,24 +1041,45 @@ function NS.SortRules(list)
 end
 
 -- Enabled, non-empty rules from one list, in priority order.
-local function OrderList(list)
+local function OrderList(list, ignoreLoad)
   local ordered = {}
   for _, rule in ipairs(list or {}) do
-    if rule.enabled ~= false and #(rule.conditions or {}) > 0 then
+    -- Load conditions are checked HERE, not at paint time: a rule that does
+    -- not load in this zone or this group size is not built at all, so it
+    -- costs no draw slot while you are somewhere it does not apply.
+    if rule.enabled ~= false and #(rule.conditions or {}) > 0
+      and (ignoreLoad or not NS.LoadAllows or NS.LoadAllows(rule.load)) then
       table.insert(ordered, rule)
     end
   end
   return ordered
 end
 
-function NS.GetOrderedRules()
-  return OrderList(NS.db.tints.rules)
+-- `ignoreLoad` answers "what would this profile do", not "what is it doing
+-- here". The options window's preview needs that: a rule set to load in raids
+-- only must still preview while you are standing in a city, or its colours
+-- cannot be edited anywhere except the content they are for.
+function NS.GetOrderedRules(ignoreLoad)
+  return OrderList(NS.db.tints.rules, ignoreLoad)
 end
 
--- Border rules keep their own stack: the top BAR rule and the top BORDER rule
--- both apply, which is the whole point of splitting them.
+-- The border half of the one list, in the one order.
+--
+-- This used to be a second list with a priority of its own. Two stacks meant a
+-- rule that coloured both halves was authored twice with nothing tying the
+-- copies together, and the top of each applied independently -- which reads
+-- like a feature until you try to explain which of your four rules is
+-- currently drawing the border.
+--
+-- Now a rule's border half draws when the rule has one, in the same order
+-- everything else resolves in. NS.db.tints.borderRules is still on disk; the
+-- engine has not read it since the merge.
 function NS.GetOrderedBorderRules()
-  return OrderList(NS.db.tints.borderRules)
+  local out = {}
+  for _, rule in ipairs(NS.GetOrderedRules()) do
+    if rule.border and rule.border.enabled then out[#out + 1] = rule end
+  end
+  return out
 end
 
 function NS.IsRestricted()
@@ -1532,7 +1583,7 @@ local function ConfigFingerprint()
   -- be built while every setting stays byte-identical.
   if NS.db and NS.db.tints and NS.db.tints.gateUnknownSpells and NS.CanApplyAura then
     local bits = {}
-    for _, list in ipairs({ NS.db.tints.rules or {}, NS.db.tints.borderRules or {} }) do
+    for _, list in ipairs({ NS.db.tints.rules or {} }) do
       for _, rule in ipairs(list) do
         for _, condition in ipairs(rule.conditions or {}) do
           bits[#bits + 1] = tostring(condition.spellID)
@@ -1919,6 +1970,11 @@ eventFrame:SetScript("OnEvent", function(_, event, arg1)
   -- Zoning rebuilds the nameplate world, and entering a key is also where aura
   -- secrecy flips on.
   elseif event == "PLAYER_ENTERING_WORLD" then
+    -- The instance you are in is exactly what just changed.
+    if NS.InvalidateLoadContext then NS.InvalidateLoadContext() end
+    -- Specialization is reliably readable by now; at ADDON_LOADED it often is
+    -- not, which is what left a tank being read as damage.
+    if NS.RefreshThreatRole then NS.RefreshThreatRole() end
     -- Before anything else: the user should get the choice to unload while
     -- the addon has still done nothing they did not ask for.
     C_Timer.After(2, function()
@@ -1943,6 +1999,21 @@ eventFrame:SetScript("OnEvent", function(_, event, arg1)
   -- Which spell IDs you actually have changes with spec and talents --
   -- switching spec appeared to break colouring until a /reload. Neither event
   -- changes a rule's debuffs, so no rebuild.
+  -- Anything that can change WHERE you are or WHO you are with. Both decide
+  -- which rules load at all, so the answer is dropped and everything is
+  -- rebuilt -- a rule that does not load here has no containers, and one that
+  -- starts loading needs them built.
+  elseif event == "ZONE_CHANGED_NEW_AREA" or event == "GROUP_ROSTER_UPDATE"
+      or event == "PLAYER_DIFFICULTY_CHANGED" or event == "CHALLENGE_MODE_START"
+      or event == "CHALLENGE_MODE_COMPLETED" then
+    -- Only when the answer MOVED. See NS.LoadContextChanged: these events
+    -- fire far more often than the context they describe changes, and a
+    -- rebuild that is deferred out of combat and then run for nothing is a
+    -- rebuild of every container on every plate.
+    if NS.LoadContextChanged and NS.LoadContextChanged() then
+      Reapply("load context")
+    end
+
   elseif event == "PLAYER_TARGET_CHANGED" or event == "PLAYER_FOCUS_CHANGED" then
     -- Re-find health bars, not just re-gate: targeting a unit can make its
     -- addon swap in a different bar frame, leaving our rig on the frame that
@@ -1951,13 +2022,35 @@ eventFrame:SetScript("OnEvent", function(_, event, arg1)
     -- having changed, so it is a no-op for addons that keep one bar.
     ResyncSwappedBars(false)
     ReapplyGating()
+    -- The whole point of the target/focus module: this event IS the state
+    -- change, so every rig is re-asked rather than waiting for the poll.
+    if NS.UpdateMark then
+      for _, each in pairs(rigs) do
+        if each.unit and each.mark then NS.UpdateMark(each) end
+      end
+    end
     -- Levels only, and next frame. See RepinBoundRigs.
     C_Timer.After(0, RepinBoundRigs)
+
+  -- Threat, event-driven. The 0.25s poll below is the floor, not the
+  -- mechanism: a pull is exactly the moment a quarter second of stale colour
+  -- is worth avoiding, and this event fires per unit so the walk is one rig.
+  elseif event == "UNIT_THREAT_LIST_UPDATE" or event == "UNIT_THREAT_SITUATION_UPDATE" then
+    -- Rigs are keyed by health bar, not by unit, so this is a walk. It stops
+    -- at the first match and only ever runs for units the client says
+    -- changed -- which is a fraction of what the poll below covers.
+    if arg1 and NS.UpdateThreat then
+      for _, each in pairs(rigs) do
+        if each.unit == arg1 then NS.UpdateThreat(each) break end
+      end
+    end
 
   elseif event == "PLAYER_SPECIALIZATION_CHANGED"
       or event == "ACTIVE_TALENT_GROUP_CHANGED"
       or event == "TRAIT_CONFIG_UPDATED" then
     rebuildPending = true
+    -- Role decides what the threat presets MEAN, and a spec change flips it.
+    if NS.RefreshThreatRole then NS.RefreshThreatRole() end
     -- Cast-to-aura mapping comes from the Cooldown Manager, whose contents
     -- change with spec and talents.
     if NS.WipeRelatedCache then NS.WipeRelatedCache() end
@@ -1969,8 +2062,34 @@ eventFrame:SetScript("OnEvent", function(_, event, arg1)
       end
     end)
 
-  elseif event == "ADDON_LOADED" and arg1 == "PlateTweaks" then
+  elseif event == "ADDON_LOADED" and arg1 == NS.ADDON then
     eventFrame:UnregisterEvent("ADDON_LOADED")
+
+    -- Two copies of this addon must never run together.
+    --
+    -- They share SavedVariables, so the second one to write wins and the
+    -- loser's edits vanish on logout; worse, both would rig every nameplate,
+    -- doubling the containers and stacking two tints per rule on one bar. The
+    -- symptom is "my colours are wrong and my settings keep reverting", which
+    -- is a miserable thing to debug and a trivial thing to prevent.
+    --
+    -- Refuses to initialise rather than trying to arbitrate: whichever copy
+    -- you want, the other one gets disabled from the AddOns menu.
+    local loaded = C_AddOns and C_AddOns.IsAddOnLoaded
+    local twin = (NS.ADDON == "PlateTweaks") and "PlateTweaks_Beta" or "PlateTweaks"
+    if loaded and select(1, loaded(twin)) then
+      -- Recorded, not just printed. Chat scrolls, and the first thing anyone
+      -- does after "nothing is happening" is open the window -- which without
+      -- this reads as two Lua errors about a nil `db` rather than as the
+      -- deliberate refusal it is.
+      NS.refusedTwin = twin
+      NS.Print(("|cffff4040%s is not starting|r -- |cffffff00%s|r is also loaded.")
+        :format(NS.ADDON, twin))
+      NS.Print("  Both copies share one settings file and would both colour every plate.")
+      NS.Print("  Disable one of them in the AddOns menu and reload.")
+      return
+    end
+
     NS.InitializeConfig()
     activeKey = NS.ProfileKey()
     -- Registered once, for the session. The handlers gate themselves on the
@@ -1988,6 +2107,15 @@ eventFrame:SetScript("OnEvent", function(_, event, arg1)
     eventFrame:RegisterEvent("TRAIT_CONFIG_UPDATED")
     eventFrame:RegisterEvent("PLAYER_TARGET_CHANGED")
     eventFrame:RegisterEvent("PLAYER_FOCUS_CHANGED")
+    eventFrame:RegisterEvent("UNIT_THREAT_LIST_UPDATE")
+    eventFrame:RegisterEvent("UNIT_THREAT_SITUATION_UPDATE")
+    -- Load conditions.
+    eventFrame:RegisterEvent("ZONE_CHANGED_NEW_AREA")
+    eventFrame:RegisterEvent("GROUP_ROSTER_UPDATE")
+    eventFrame:RegisterEvent("PLAYER_DIFFICULTY_CHANGED")
+    eventFrame:RegisterEvent("CHALLENGE_MODE_START")
+    eventFrame:RegisterEvent("CHALLENGE_MODE_COMPLETED")
+    if NS.RefreshThreatRole then NS.RefreshThreatRole() end
   end
 end)
 eventFrame:RegisterEvent("ADDON_LOADED")
@@ -2071,12 +2199,10 @@ local function AnyMissingCombatOnly()
   for _, rule in ipairs(tints.rules or EMPTY) do
     if rule.showWhenMissing and rule.missingCombatOnly then return true end
   end
-  -- Border rules keep their own list. Left out here, a combat-gated missing
-  -- BORDER was evaluated once at build time and never polled again, so the
-  -- option silently did nothing for it.
-  for _, rule in ipairs(tints.borderRules or EMPTY) do
-    if rule.showWhenMissing and rule.missingCombatOnly then return true end
-  end
+  -- Border halves live on the same rules now, so the loop above already sees
+  -- them. This used to be a second pass over a second list: without it, a
+  -- combat-gated missing BORDER was evaluated once at build time and never
+  -- polled again, and the option silently did nothing for it.
   return false
 end
 
@@ -2098,6 +2224,28 @@ C_Timer.NewTicker(0.25, function()
         if (hasLadder or hasDisplace) and NS.UpdateMissingCombatGate then
           NS.UpdateMissingCombatGate(rig)
         end
+      end
+    end
+  end
+  -- Threat. Gated on the profile having any threat rule at all, same shape as
+  -- the missing gate above: with none, this 4Hz walk across every rig should
+  -- not happen. The events cover the important transitions; this catches
+  -- everything they miss (a mob whose list stops updating, a change trigger's
+  -- flash expiring, group composition shifting under the "other" preset).
+  if NS.AnyThreatRules and NS.AnyThreatRules() then
+    for _, rig in pairs(rigs) do
+      if rig.unit and rig.threat and #(rig.threat.entries or {}) > 0 then
+        NS.UpdateThreat(rig)
+      end
+    end
+  end
+  -- Target/focus. Its two events below cover every change the client tells us
+  -- about, so this poll is only the backstop for a plate that appears while
+  -- the unit is already targeted.
+  if NS.AnyMarkRules and NS.AnyMarkRules() then
+    for _, rig in pairs(rigs) do
+      if rig.unit and rig.mark and #(rig.mark.entries or {}) > 0 then
+        NS.UpdateMark(rig)
       end
     end
   end
@@ -2242,6 +2390,7 @@ function NS.CollectDiagnostics()
       math.max(info.missingBorderIncomplete or 0, rig.missingBorderIncomplete or 0)
     info.borderRulesOff =
       math.max(info.borderRulesOff or 0, rig.borderRulesOff or 0)
+    info.barRulesOff = math.max(info.barRulesOff or 0, rig.barRulesOff or 0)
     -- Set by the Plater sublevel allocator when both pools fill and rules get
     -- clamped onto one sublevel. It was recorded and never read, so the one
     -- state that makes identical rules paint some plates and not others was
@@ -2475,6 +2624,16 @@ local function PrintStatus()
   if (drift.detected or 0) > 0 or (info.levelWrong or 0) > 0 then
     NS.Print(("bar level drift: |cff55dd55%d|r re-pinned | %d needed a rebuild | %d seen this session")
       :format(drift.repinned or 0, drift.deferred or 0, drift.detected or 0))
+    -- Separated from "needed a rebuild", which it used to be counted as. A
+    -- bound aura button cannot take a frame level outside its own callback, so
+    -- these fail on every drift, in every environment, and repair themselves
+    -- when the debuff next lands. Folded into the refusal count they made a
+    -- healthy dungeon read as 46 failures out of 47.
+    if (drift.pending or 0) > 0 then
+      NS.Print(("  |cff808080%d aura button(s) across %d of those took the level on their own instead "
+        .. "-- expected, and not a fault|r")
+        :format(drift.pending, drift.selfHealing or 0))
+    end
     if (info.levelWrong or 0) > 0 then
       NS.Print(("  |cffff8800%d bound plate(s) sitting at the wrong level right now -- those cannot colour|r")
         :format(info.levelWrong))
@@ -2548,6 +2707,10 @@ local function PrintStatus()
     NS.Print("  Rules are stacked on one sublevel and which one wins is undefined, so colouring")
     NS.Print("  will look inconsistent from plate to plate. Remove a rule, or turn off Pandemic")
     NS.Print("  Flash (it claims a sublevel per single-debuff rule). |cffffff00/pt layers|r shows the layout.")
+  end
+  if (info.barRulesOff or 0) > 0 then
+    NS.Print(("|cffff8800Health Coloring is OFF|r -- %d rule(s) not built, missing rules included. Their BORDERS still draw, which is why plates show a border and no fill. The switch is on the |cffffff00Health Coloring|r heading in the left rail of |cffffff00/pt|r -- not on the page itself.")
+      :format(info.barRulesOff))
   end
   if (info.borderRulesOff or 0) > 0 then
     NS.Print(("|cffff8800Border Coloring is OFF|r -- %d border rule(s) not built. Switch it on at the Border Coloring heading in |cffffff00/pt|r.")
@@ -2708,10 +2871,10 @@ local function PrintBarDebug()
       -- this replaces was a false alarm 14 times out of 16.
       NS.Print(("  |cffffcc00LEVEL UNVERIFIED: bar is at %d; the last level we can "
         .. "confirm our frames accepted was %d|r"):format(applied, rig.appliedLevel))
-      NS.Print(("  |cff808080%d frame(s) refused the last re-pin. Bound aura buttons "
-        .. "only accept a level inside their own callback, so this usually clears "
-        .. "itself the next time the debuff lands. Check the tint host levels below "
-        .. "before treating it as a fault.|r"):format(rig.levelRefusedCount or 0))
+      NS.Print(("  |cff808080last re-pin: %d aura button(s) will take it themselves when the debuff "
+        .. "next lands (expected), %d other frame(s) refused outright (not expected). "
+        .. "Check the tint host levels below before treating it as a fault.|r")
+        :format(rig.levelPendingCount or 0, rig.levelRefusedCount or 0))
     end
 
     local okWant, want = pcall(NS.BaseLevelFor, healthBar)
@@ -3068,6 +3231,16 @@ function NS.CurrentAdapterName()
   return (CurrentAdapter())
 end
 
+-- The bar too, for the draw-slot budget, which is a MEASUREMENT and is worth
+-- much less without one -- the OVERLAY ceiling is a survey of the host's own
+-- textures and differs between skins of the same addon. Callers must use it
+-- and drop it inside the same call: plates are pooled and this reference goes
+-- stale as soon as one is recycled.
+function NS.CurrentAdapterBar()
+  local _, bar = CurrentAdapter()
+  return bar
+end
+
 local function PrintAdapter(arg)
   local name, bar = CurrentAdapter()
   if not name or name == "unknown" then
@@ -3321,6 +3494,26 @@ local function PrintLayers()
   local missingBand = rig.baseLevel and (rig.baseLevel + (rig.missingLevelOffset or 0))
   if missingBand then
     NS.Print(("    missing band: level %d"):format(missingBand))
+  end
+
+  -- Displacement's failure mode is INVISIBLE: the wash is masked by a texture
+  -- anchored to an aura container, so a container that never spawns a button,
+  -- or one whose width comes back secret, leaves the wash fully masked and
+  -- nothing on the bar -- while the same rule's border, built separately in
+  -- the border band, draws perfectly. "The border shows and the bar does not"
+  -- is exactly that, and none of the numbers above say it.
+  for _, entry in ipairs((rig.missingDisplace or {}).entries or {}) do
+    local holderLevel = entry.holder and Level(entry.holder) or "nil"
+    local okWidth, width = pcall(function() return entry.container:GetWidth() end)
+    local okShown, shown = pcall(function() return entry.wash:IsShown() end)
+    NS.Print(("    missing displace rank %d: holder level %s | buttons %d | container width %s | wash shown %s"):format(
+      entry.rank or 0, holderLevel, entry.buttons or 0,
+      okWidth and Show(width) or "refused",
+      okShown and tostring(shown) or "refused"))
+  end
+  if rig.missingDisplace and (rig.missingDisplace.failures or 0) > 0 then
+    NS.Print(("    |cffff8800%d missing displace chains failed to build|r"):format(
+      rig.missingDisplace.failures))
   end
   local topRule = -1
   for index, record in ipairs(rig.rules or {}) do
@@ -3612,7 +3805,7 @@ local function PrintPerf()
   -- bookkeeping, not the rendered objects above.
   if UpdateAddOnMemoryUsage and GetAddOnMemoryUsage then
     pcall(UpdateAddOnMemoryUsage)
-    local okMem, kb = pcall(GetAddOnMemoryUsage, "PlateTweaks")
+    local okMem, kb = pcall(GetAddOnMemoryUsage, NS.ADDON)
     if okMem and kb then NS.Print(("memory: %.0f KB"):format(kb)) end
   end
 
@@ -3620,7 +3813,7 @@ local function PrintPerf()
   -- itself, so it is reported when present rather than switched on.
   if GetCVar and GetCVar("scriptProfile") == "1" and GetAddOnCPUUsage then
     pcall(UpdateAddOnCPUUsage)
-    local okCPU, ms = pcall(GetAddOnCPUUsage, "PlateTweaks")
+    local okCPU, ms = pcall(GetAddOnCPUUsage, NS.ADDON)
     if okCPU and ms then NS.Print(("cpu: %.1f ms since login"):format(ms)) end
   else
     NS.Print("cpu: not profiled (scriptProfile off)")
@@ -3695,6 +3888,120 @@ function NS.CaptureSave(label)
   return store[#store], #store, dropped
 end
 
+-- Draw slots. What the host addon leaves us, what the profile spends, and
+-- which rule spends it -- said BEFORE the profile hits the wall, rather than
+-- after, which is all /pt status could ever do.
+--
+-- Measured off a live bar where there is one. With no plate up the numbers are
+-- the shipped assumption for the adapter and the report says so, because an
+-- unmeasured ceiling can be out by two or three slots either way.
+local function PrintSlots()
+  local bar = NS.CurrentAdapterBar and NS.CurrentAdapterBar() or nil
+  local name = NS.CurrentAdapterName and NS.CurrentAdapterName() or "unknown"
+  local report = NS.SlotReport(bar)
+  local budget = report.budget
+
+  NS.Print(("draw slots on |cff55dd55%s|r: |cff%s%d / %d|r used%s"):format(
+    tostring(name),
+    report.over and "ff4444" or (report.free <= 1 and "ffaa00" or "55dd55"),
+    report.used, report.total,
+    budget.measured and "" or " |cff888888(estimated -- no nameplate up)|r"))
+
+  if budget.flat then
+    NS.Print(("  this addon pins every rule to one frame level, so draw sublevel decides who wins:"))
+    NS.Print(("    OVERLAY under the host's border: %d | ARTWORK above the host's fill: %d")
+      :format(budget.overlay, budget.artwork))
+  else
+    NS.Print("  this addon leaves each rule its own frame level, so the budget is level headroom,")
+    NS.Print("  not sublevels. Far larger than a flat-pinned bar -- running out here is unlikely.")
+  end
+
+  for index, entry in ipairs(report.rules) do
+    NS.Print(("    rule %d: %d slot%s (%s)"):format(index, entry.cost,
+      entry.cost == 1 and "" or "s", table.concat(entry.parts, " + ")))
+  end
+  if report.missingRules > 0 then
+    NS.Print(("    missing rules: %d slot%s (%d rule%s, %s mode)"):format(
+      report.missingCost, report.missingCost == 1 and "" or "s",
+      report.missingRules, report.missingRules == 1 and "" or "s",
+      NS.MissingModeIsDisplace() and "displace" or "occlude"))
+  end
+  if report.threatCost > 0 then
+    NS.Print(("    threat rules: %d slot%s -- taken from the TOP, above every spell rule"):format(
+      report.threatCost, report.threatCost == 1 and "" or "s"))
+  end
+
+  if (report.markCost or 0) > 0 then
+    NS.Print(("    Target/Focus: %d slot%s -- under threat, above every spell rule"):format(
+      report.markCost, report.markCost == 1 and "" or "s"))
+  end
+
+  if report.over then
+    NS.Print("  |cffff0000over budget|r -- the lowest rules share a sublevel and which of them draws")
+    NS.Print("  on top is undefined, so colouring differs from plate to plate. Free a slot by")
+    NS.Print("  removing a rule, turning off Pandemic Flash, or making a rule border-only.")
+  elseif report.free == 0 then
+    NS.Print("  |cffffaa00full|r -- the next rule you add will not fit.")
+  end
+end
+
+-- What the addon has watched you apply.
+--
+-- Account-wide and self-maintaining, so the interesting questions are how big
+-- it has got and whether anything in it is wrong -- both of which want a list
+-- rather than a count.
+local function PrintLearned()
+  local all = NS.LearnedDebuffs and NS.LearnedDebuffs() or {}
+  local total = NS.LearnedCount and NS.LearnedCount() or 0
+  NS.Print(("debuffs seen applied: |cff55dd55%d|r on this character, %d on the account")
+    :format(#all, total))
+  if #all == 0 then
+    NS.Print("  nothing yet -- it fills in as you fight. The Cooldown Manager covers the gap meanwhile.")
+  end
+  for _, item in ipairs(all) do
+    NS.Print(("    %s |cff808080%d|r"):format(item.name, item.spellID))
+  end
+  NS.Print("  |cffffff00/pt forget <id>|r drops one. It comes back the next time you apply it.")
+end
+
+-- Threat: the role in force, which states are coloured, and what the current
+-- target reports right now. The last part is the one that answers "why is this
+-- not lighting up".
+local function PrintThreat()
+  local cfg = NS.ThreatConfig()
+  local role = NS.ThreatRole()
+  NS.Print(("threat colouring: %s | role |cff55dd55%s|r%s"):format(
+    (NS.db.tints.threatEnabled ~= false and cfg.enabled ~= false)
+      and "|cff55dd55on|r" or "|cffff8800off|r",
+    role,
+    (cfg.role or "auto") == "auto" and " (from your spec)" or " (set manually)"))
+  local border = NS.ThreatBorderConfig()
+  NS.Print(("  bar: %s | border: %s"):format(
+    cfg.enabled ~= false and "|cff55dd55on|r" or "|cff808080off|r",
+    border.enabled ~= false and "|cff55dd55on|r" or "|cff808080off|r"))
+  for _, state in ipairs(NS.THREAT_STATES) do
+    local bar = cfg.states[state.key] or {}
+    local edge = border.states[state.key] or {}
+    NS.Print(("    %s: bar %s | border %s"):format(
+      NS.ThreatStateLabel(state.key),
+      bar.enabled ~= false and "|cff55dd55on|r" or "|cff808080off|r",
+      edge.enabled ~= false and "|cff55dd55on|r" or "|cff808080off|r"))
+  end
+  if NS.ThreatFlashOn and NS.ThreatFlashOn() then
+    NS.Print("  flashes for 1.5s when a mob comes off you")
+  end
+  NS.Print("  threat colours only while YOU are in combat -- out of combat every")
+  NS.Print("  plate reports the same state, so there is nothing to tell apart.")
+  if UnitExists("target") then
+    local status = NS.ThreatStatus("target")
+    NS.Print(("  target reports threat status: %s%s"):format(
+      status == nil and "|cff888888unreadable|r" or tostring(status),
+      status == nil and " (out of instance range, or the client refused)" or ""))
+  else
+    NS.Print("  no target -- target something you are fighting to see its live status.")
+  end
+end
+
 -- The capture text, as a table of lines.
 --
 -- Split out of the slash command because the Diagnostics page shows the same
@@ -3738,7 +4045,7 @@ function NS.CaptureLines()
 
     NS.Print(("PlateTweaks %s | %s"):format(
       tostring((C_AddOns and C_AddOns.GetAddOnMetadata
-        and C_AddOns.GetAddOnMetadata("PlateTweaks", "Version")) or "?"),
+        and C_AddOns.GetAddOnMetadata(NS.ADDON, "Version")) or "?"),
       date("%Y-%m-%d %H:%M:%S")))
     NS.Print(("nameplate addons loaded: %s"):format(
       #hosts > 0 and table.concat(hosts, ", ") or "none (Blizzard default)"))
@@ -3757,6 +4064,10 @@ function NS.CaptureLines()
     for _, item in ipairs({
       { "status", PrintStatus }, { "bar", PrintBarDebug },
       { "adapter", function() PrintAdapter("") end }, { "layers", PrintLayers },
+      -- After layers, deliberately: layers says what this plate DID, slots
+      -- says what the budget was. Reading the second without the first invites
+      -- arguing with the arithmetic instead of the measurement.
+      { "slots", PrintSlots }, { "threat", PrintThreat },
     }) do
       NS.Print(("---- /pt %s ----"):format(item[1]))
       local okOne, errOne = pcall(item[2])
@@ -4070,7 +4381,7 @@ local function SpellbookProbe()
   -- is exactly the case that would make the gate skip a working rule.
   Log("--- current rule debuffs vs each source ---")
   local applied = NS.GetTargetAuraSet and NS.GetTargetAuraSet() or {}
-  for _, list in ipairs({ NS.db.tints.rules or {}, NS.db.tints.borderRules or {} }) do
+  for _, list in ipairs({ NS.db.tints.rules or {} }) do
     for _, rule in ipairs(list) do
       for _, condition in ipairs(rule.conditions or {}) do
         local spellID = condition.spellID
@@ -4788,6 +5099,29 @@ SlashCmdList["PLATETWEAKS"] = function(msg)
     end
     return
   end
+  if msg and msg:lower():match("^%s*slots%s*$") then
+    local ok, err = pcall(PrintSlots)
+    if not ok then NS.Print("slots failed: " .. tostring(err)) end
+    return
+  end
+  if msg and msg:lower():match("^%s*learned%s*$") then
+    local ok, err = pcall(PrintLearned)
+    if not ok then NS.Print("learned failed: " .. tostring(err)) end
+    return
+  end
+  local forget = msg and msg:lower():match("^%s*forget%s+(%d+)%s*$")
+  if forget then
+    local spellID = tonumber(forget)
+    NS.ForgetSpell(spellID)
+    NS.Print(("forgot |cffffff00%d|r -- it will come back if you apply it again.")
+      :format(spellID))
+    return
+  end
+  if msg and msg:lower():match("^%s*threat%s*$") then
+    local ok, err = pcall(PrintThreat)
+    if not ok then NS.Print("threat failed: " .. tostring(err)) end
+    return
+  end
   local captureArg = msg and msg:lower():match("^%s*capture%s*(.-)%s*$")
   if captureArg then
     local ok, err = pcall(Capture, captureArg)
@@ -4869,6 +5203,18 @@ SlashCmdList["PLATETWEAKS"] = function(msg)
     if not ok then NS.Print("spellbook probe failed: " .. tostring(err)) end
     return
   end
+  if NS.refusedTwin then
+    NS.Print(("|cffff4040this copy did not start|r -- |cffffff00%s|r is also enabled.")
+      :format(NS.refusedTwin))
+    NS.Print("  Disable one of the two in the AddOns menu, then reload.")
+    return
+  end
+  if not NS.db then
+    -- Something during startup failed. Refusing to open beats opening a window
+    -- whose every control reads a table that is not there.
+    NS.Print("|cffff4040settings failed to load|r -- check for an earlier error, then /reload.")
+    return
+  end
   if InCombatLockdown() then
     -- Opening rebuilds secure aura containers, which the game refuses in
     -- combat, so say so rather than opening a window that cannot act.
@@ -4896,7 +5242,7 @@ end
 _G.PlateTweaks_Probe = {
   api = 1,
   version = (C_AddOns and C_AddOns.GetAddOnMetadata
-    and C_AddOns.GetAddOnMetadata("PlateTweaks", "Version")) or "?",
+    and C_AddOns.GetAddOnMetadata(NS.ADDON, "Version")) or "?",
   NS = NS,
   Rigs = function() return rigs end,
   UnitRigs = function() return unitRigs end,

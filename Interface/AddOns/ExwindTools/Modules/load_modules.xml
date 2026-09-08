@@ -1,0 +1,59 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/">
+
+
+    <Script file="NODISPLAY/ExM+Info.MDTIconHook.lua"/>
+    <Script file="NODISPLAY/ExM+Info.MythicIcon.lua"/>
+    <Script file="NODISPLAY/ExM+Info.RunHistory.lua"/>
+    <Script file="NODISPLAY/ExM+.MythicDamage.lua"/>
+    <Script file="NODISPLAY/ExM+Info.SpellInfo.lua"/>
+    <Script file="NODISPLAY/ExM+Info.TeleMsg.lua"/>
+    <Script file="NODISPLAY/ExM+Info.Tooltip.lua"/>
+    <Script file="NODISPLAY/ExM+InfoMythicFrame.lua"/>
+    <Script file="NODISPLAY/ExM+InfoSpellData.lua"/>
+    <Script file="NODISPLAY/ExPTR.MiniTools.lua"/>
+    <Script file="NODISPLAY/ExPTR.SetKey.lua"/>
+
+
+    <!-- ExTools (小工具) -->
+    <Script file="TEXT/ExTools.MiniTools.lua"/>
+    <Script file="TEXT/ExTools.CombatAlert.lua"/>
+    <Script file="NODISPLAY/ExTools.AutoBuy.lua"/>
+    <!-- <Script file="SPECIAL/ExTools.MicroMenu.lua"/> -->
+    <Script file="SPECIAL/ExTools.PlayerStats.lua"/>
+    <Script file="ICON/ExTools.PlayerHealAbsorb.lua"/>
+    <Script file="ICON/ExTools.PlayerShield.lua"/>
+    <Script file="ICON/ExTools.TransformTimer.lua"/>
+    <Script file="ICON/ExTools.CastSequence.lua"/>
+    <Script file="NODISPLAY/ExTools.PveInfoPanel.lua"/>
+    <Script file="NODISPLAY/ExTools.PveKeystoneInfo.lua"/>
+    <Script file="SPECIAL/ExTools.ChatChannelBar.lua"/>
+    <Script file="NODISPLAY/ExTools.GossipID.lua"/>
+    <Script file="SPECIAL/ExTools.RaidMarkerPanel.lua"/>
+    <!-- 原生 AuraButton 的红色填充必须在创建时由模板声明，不能在运行时补建。 -->
+    <Frame name="ExToolsCombatMobDebuffGridAuraButtonTemplate" virtual="true" hidden="true">
+        <Layers>
+            <Layer level="ARTWORK">
+                <Texture parentKey="CombatMobDebuffGridRedFill" file="Interface\Buttons\WHITE8X8" setAllPoints="true">
+                    <Color r="1" g="1" b="1" a="1"/>
+                </Texture>
+            </Layer>
+        </Layers>
+    </Frame>
+    <Script file="SPECIAL/ExTools.CombatMobDebuffGrid.lua"/>
+    <Script file="NODISPLAY/ExClass.SpellQueue.lua"/>
+    <Script file="NODISPLAY/ExClass.SpellEffectAlpha.lua"/>
+    <Script file="ICON/ExTools.YYSound.lua"/>
+    <Script file="SPECIAL/ExTools.PlayerPosition.lua"/>
+    <!-- 个人保留旧模块：保持原功能，不纳入 EXUI 标准重构。 -->
+
+    <Script file="TEXT/ExTools.CombatTimer.lua"/>
+    <Script file="ICON/ExTools.BattleResurrection.lua"/>
+    <Script file="TEXT/ExClass.NoMoveSkillAlert.lua"/>
+    <Script file="TEXT/ExClass.RangeCheck.lua"/>
+    <Script file="ICON/ExClass.DKBloodBoil.lua"/>
+    <Script file="TIMER/ExClass.FocusCast.lua"/>
+    <Script file="TIMER/ExClass.BrewmasterStagger.lua"/>
+
+    <!-- ExUnitFrame (单位框架) -->
+
+</Ui>

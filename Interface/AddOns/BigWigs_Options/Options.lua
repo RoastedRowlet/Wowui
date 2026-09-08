@@ -2201,6 +2201,12 @@ do
 		for key, optionsTable in next, API.GetPluginOptions() do
 			aceConfigTableMainBigWigsTab.args[key] = optionsTable
 		end
+		for pluginName, dataTable in next, API.GetPluginOptionsCustomTabs() do
+			if registered[pluginName] then
+				local tabTableKey, settingsTable = dataTable[1], dataTable[2]
+				aceConfigTableMainBigWigsTab.args.general.args[pluginName].args[tabTableKey] = settingsTable
+			end
+		end
 		return aceConfigTableMainBigWigsTab
 	end
 end
@@ -2209,7 +2215,7 @@ do
 	local popup = CreateFrame("Frame", nil, UIParent)
 	popup:Hide()
 	popup:SetPoint("CENTER", UIParent, "CENTER")
-	popup:SetSize(320, 72)
+	popup:SetSize(400, 72)
 	popup:EnableMouse(true) -- Do not allow click-through on the frame
 	popup:SetFrameStrata("TOOLTIP")
 	popup:SetFrameLevel(110) -- Lots of room to draw under it
@@ -2220,7 +2226,7 @@ do
 	border:SetAllPoints(popup)
 
 	local textFrame = popup:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
-	textFrame:SetSize(290, 0)
+	textFrame:SetSize(370, 0)
 	textFrame:SetPoint("TOP", 0, -16)
 
 	local function newButton(newText)
@@ -2322,7 +2328,7 @@ do
 				textFrame:SetText(L.confirm_import_addon_new_profile:format(addonName, optionalCustomProfileName))
 			end
 		end
-		local height = 61 + textFrame:GetHeight()
+		local height = 70 + textFrame:GetHeight()
 		popup:SetHeight(height)
 
 		acceptButton:ClearAllPoints()

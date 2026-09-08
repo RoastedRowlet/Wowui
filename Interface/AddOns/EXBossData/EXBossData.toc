@@ -1,0 +1,28 @@
+﻿## Interface: 120100
+## Title: |cffff4400Ex|r|cff00ccffBoss|r Data
+## Notes: ExBoss static encounter data module
+## Author: Exwind
+## Version: 1.0.0
+## IconTexture: Interface\AddOns\ExwindCore\Textures\LOGO\EXUI.jpg
+## SavedVariables: EXBossDataDB
+
+FixedTimelineBosses.lua
+EncounterData.lua
+EncounterWarningRules.lua
+
+HealthTextRules.lua
+TrashCDData.lua
+TrashCDLocale.lua
+TrashMobTraits.lua
+TrashCDPreset.lua
+Factory.lua
+FactoryResolver.lua
+Store.lua
+
+Modules\Boss\Presets\Loader.lua
+Modules\Boss\Presets\MplusDps\PresetConfig.lua
+Modules\Boss\Presets\MplusHealer\PresetConfig.lua
+Modules\Boss\Presets\MplusTank\PresetConfig.lua
+Modules\Boss\Presets\RaidTank\PresetConfig.lua
+Modules\Boss\Presets\RaidDps\PresetConfig.lua
+Modules\Boss\Presets\RaidHealer\PresetConfig.lua

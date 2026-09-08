@@ -6,12 +6,6 @@ local mod, CL = BigWigs:NewBoss("Lightwarden Ruia", 2859, 2771)
 if not mod then return end
 mod:SetEncounterID(3201)
 mod:SetRespawnTime(30)
-mod:SetAuraData({
-	{1239825}, -- Lightfire
-	{1239919, soundOnApplied = "underyou"}, -- Lightfire Beams
-	{1241058}, -- Grievous Thrash
-	{1257094}, -- Pulverized
-})
 mod:SetStage(1)
 
 --------------------------------------------------------------------------------
@@ -38,6 +32,17 @@ mod:SetRenames({
 	[1241058] = {1241058}, -- Grievous Thrash
 	[1240210] = {1240210, CL.incoming:format(mod:SpellName(1240210)), original = {1240210, CL.incoming:format(mod:SpellName(1240210))}}, -- Pulverizing Strikes
 	[1239883] = {1239883}, -- Shapeshift: Haranir
+})
+
+--------------------------------------------------------------------------------
+-- Auras
+--
+
+mod:SetAuraData({
+	{1239825, duration = 6, note = CL.debuffPossibleAfterCastNote:format(mod:SpellName(1239824))}, -- Lightfire
+	{1239919, duration = 6, soundOnApplied = "underyou", note = CL.debuffUnderYouNote}, -- Lightfire Beams
+	{1241058, duration = 40, dispel = "bleed", mechanic = "bleeding", soundOnAppliedDose = "none", note = CL.debuffGroupAfterCastNote:format(mod:SpellName(1241058))}, -- Grievous Thrash
+	{1257094, duration = 6, soundOnAppliedDose = "none", note = CL.debuffPossibleAfterCastNote:format(mod:SpellName(1240210))}, -- Pulverized
 })
 
 --------------------------------------------------------------------------------

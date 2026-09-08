@@ -1,0 +1,2 @@
+-- AuraSound static data is part of the M+ Factory.  This former independent
+-- data module intentionally exports no configuration API.

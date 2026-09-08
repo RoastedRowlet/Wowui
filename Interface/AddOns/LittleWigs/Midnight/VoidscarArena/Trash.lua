@@ -5,29 +5,34 @@
 local mod, CL = BigWigs:NewBoss("Voidscar Arena Trash", 2923)
 if not mod then return end
 mod:SetTrashModule(true)
+
+--------------------------------------------------------------------------------
+-- Auras
+--
+
 mod:SetAuraData({
-	{1267894}, -- Savage Leap
-	{1298899, note = CL.debuffFailureInterruptNote:format(mod:SpellName(1298899))}, -- Demoralizing Shout
-	{1249712, soundOnApplied = "underyou", note = CL.debuffUnderYouNote}, -- Venomous Spit
-	{1299133}, -- Ferocious Leap
-	{1298922}, -- Savage Smash
-	{1298917}, -- Champion's Spear
-	{1299210, soundOnApplied = "underyou", note = CL.debuffUnderYouNote}, -- Aftershock
-	{1299913, soundOnApplied = "alarm"}, -- Null Eruption
-	{1234833, soundOnApplied = "underyou", note = CL.debuffUnderYouNote}, -- Ravenous Swarm
-	{1250043, soundOnAppliedDose = "none"}, -- Melt Armor
-	{1249238}, -- Fire Spit
-	{1249621}, -- Violent Sand
-	{1233535}, -- Shred Defense
-	{1233398, soundOnApplied = "warning", note = CL.debuffFailureInterruptNote:format(mod:SpellName(1233398))}, -- Mad Shriek
-	{1310309}, -- Macestorm
-	{1289258}, -- Corrosive Essence
-	{1311778}, -- Rip and Slice
-	{458835, soundOnApplied = "underyou", note = CL.debuffUnderYouNote}, -- Toxic Sludge
-	{456057, soundOnApplied = "underyou", note = CL.debuffUnderYouNote}, -- Vile Putrescence
-	{1300138}, -- Void Beam
-	{1252406}, -- Dreadbellow
-	{1300243}, -- Brutalize
+	{1267894, header = 243988, duration = 5, dispel = "bleed", note = CL.debuffPossibleAfterCastNote:format(mod:SpellName(1267894))}, -- Savage Leap (Feral Saberon)
+	{1298899, header = 238883, duration = 15, soundOnAppliedDose = "none", note = CL.debuffFailureInterruptNote:format(mod:SpellName(1298899))}, -- Demoralizing Shout (Dominated Brawler)
+	{1249712, header = 243996, soundOnApplied = "underyou", note = CL.debuffUnderYouNote}, -- Venomous Spit (Lost Sethrak)
+	{1298922, header = 267545, duration = 8.25, note = CL.debuffGroupAfterCastNote:format(mod:SpellName(1298933))}, -- Savage Smash (Aegyra the Unyielding)
+	{1298917, note = CL.debuffGroupAfterCastNote:format(mod:SpellName(1298908))}, -- Champion's Spear (Aegyra the Unyielding)
+	{1299210, soundOnApplied = "underyou", note = CL.debuffUnderYouNote}, -- Aftershock (Aegyra the Unyielding)
+	{1299133, header = 267546, duration = 4, dispel = "bleed", note = CL.debuffPossibleAfterCastNote:format(mod:SpellName(1299133))}, -- Ferocious Leap (Raj'kess the Spellstorm)
+	{1299913, header = 252072, duration = 5, soundOnApplied = "alarm", note = CL.debuffPossibleAfterCastNote:format(mod:SpellName(1299913))}, -- Null Eruption (Voidtouched Magi)
+	{1234833, header = 244260, soundOnApplied = "underyou", note = CL.debuffUnderYouNote}, -- Ravenous Swarm (Chitigoth)
+	{1250043, header = 243983, duration = 10, dispel = "magic", soundOnAppliedDose = "none", note = CL.debuffTankAfterCastNote:format(mod:SpellName(1250043))}, -- Melt Armor (Sycophantic Tarasek)
+	{1249238, header = 249461, duration = 10, dispel = "magic", note = CL.debuffPossibleAfterCastNote:format(mod:SpellName(1249238))}, -- Fire Spit (Abducted Drakonid)
+	{1249621, header = 249590, duration = 12, note = CL.debuffFailureInterruptNote:format(mod:SpellName(1249621))}, -- Violent Sand (Angry Krolusk)
+	{1233535, header = 243835, duration = 10, soundOnAppliedDose = "none", note = CL.debuffTankAfterCastNote:format(mod:SpellName(1233535))}, -- Shred Defense (Savage Shredclaw)
+	{1233398, header = 243766, duration = 6, soundOnApplied = "warning", note = CL.debuffFailureInterruptNote:format(mod:SpellName(1233398))}, -- Mad Shriek (Kilivore Screamer)
+	{1310309, header = 252053, duration = 6, note = CL.debuffTargetedNote:format(mod:SpellName(1310309))}, -- Macestorm (Brutal Overseer)
+	{1289258, header = 263228, duration = 12, dispel = "poison", soundOnAppliedDose = "none", note = CL.debuffPossibleAfterCastNote:format(mod:SpellName(1289258))}, -- Corrosive Essence (Agitated Voidscythe)
+	{1311778, duration = 8, dispel = "bleed", note = CL.debuffTankAfterCastNote:format(mod:SpellName(1311778))}, -- Rip and Slice (Agitated Voidscythe)
+	{458835, header = mod:SpellName(458835), soundOnApplied = "underyou", note = CL.debuffUnderYouNote}, -- Toxic Sludge (environmental)
+	{456057, header = mod:SpellName(456057), soundOnApplied = "underyou", note = CL.debuffUnderYouNote}, -- Vile Putrescence (environmental)
+	{1300138, header = 245950, duration = 4, note = CL.debuffPossibleAfterCastNote:format(mod:SpellName(1300138))}, -- Void Beam (Watchful Harrower)
+	{1252406, header = 268184, duration = 12, note = CL.debuffGroupAfterCastNote:format(mod:SpellName(1252406))}, -- Dreadbellow (Devouring Brutalizer)
+	{1300243, duration = 6, note = CL.debuffTankAfterCastNote:format(mod:SpellName(1300243))}, -- Brutalize (Devouring Brutalizer)
 })
 
 --------------------------------------------------------------------------------

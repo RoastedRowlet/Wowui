@@ -19,6 +19,12 @@ local function freshTotals()
         -- hitch count is uninterpretable: 454 hitches is alarming across twenty
         -- minutes and unremarkable across twenty hours.
         monitoredSec = 0,
+        -- Seconds spent with the window in the background (or otherwise running
+        -- to a cap slow enough that detection is meaningless), when monitoring
+        -- was suspended. Tracked rather than merely skipped so the report can say
+        -- how much of the session it did not measure, instead of quietly
+        -- presenting a shorter window as if it were the whole session.
+        throttledSec = 0,
         causes  = {},
         gameCtx = { combat = 0, moving = 0, byCtx = {}, byZone = {} },
     }
@@ -51,7 +57,7 @@ end
 -- (no PerCharacter), so this single table follows the player across every
 -- character on the WoW account.
 ns.DEFAULTS = {
-    version = 4,
+    version = 5,
 
     settings = {
         enabled            = true,
@@ -73,6 +79,15 @@ ns.DEFAULTS = {
         bannerHoldSec      = 10,
         summaryHoldSec     = 14,
         bannerStackMax     = 4,
+
+        -- Which banners are allowed on screen. Presentation only: detection,
+        -- recording and the report are identical at every setting, so reports
+        -- stay comparable between installs no matter what this is set to.
+        --   "ALL"     - live hitch banners and post-combat summaries
+        --   "SUMMARY" - post-combat summaries only
+        --   "OFF"     - neither; the icon tint and the hover tooltip carry it
+        -- (Monitoring itself is `enabled`, which is a separate thing entirely.)
+        bannerMode         = "ALL",
 
         -- Detection thresholds (milliseconds of frame time).
         hitchThresholdMs   = 50,   -- a frame this long counts as a felt hitch
@@ -150,13 +165,20 @@ function DB:Init()
         -- share, signatures, gaps and memory. Without a reset, old counts and the
         -- new tallies would describe different spans, and old aggregates would be
         -- missing sub-tables the report now expects.
+        --
+        -- v5 is a different kind of reset. Up to v4 a background FPS cap made
+        -- every frame read as a hitch, so anyone who alt-tabbed banked hundreds
+        -- of phantom "sustained slowdown" records -- and because `totals` is
+        -- never trimmed, those stayed permanently and skewed the advice panel
+        -- toward whichever zone the player happened to park in. Real and phantom
+        -- counts cannot be separated after the fact, so they go.
         -- (Diagnostic data only; nothing of value lost.)
-        if (StutterAlertDB.version or 1) < 4 then
+        if (StutterAlertDB.version or 1) < 5 then
             StutterAlertDB.log = {}
             StutterAlertDB.aggregates = {}
             StutterAlertDB.memory = {}
             StutterAlertDB.totals = freshTotals()
-            StutterAlertDB.version = 4
+            StutterAlertDB.version = 5
         end
     end
     self.data = StutterAlertDB

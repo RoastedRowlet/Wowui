@@ -6,14 +6,6 @@ local mod, CL = BigWigs:NewBoss("Lightblossom Trinity", 2859, 2769)
 if not mod then return end
 mod:SetEncounterID(3199)
 mod:SetRespawnTime(30)
-mod:SetAuraData({
-	{1276586}, -- Bedrock Surge
-	{1234802, soundOnApplied = "underyou", note = CL.debuffUnderYouNote}, -- Fertile Loam
-	{1235574, soundOnApplied = "info"}, -- Lightblossom Beam
-	{1235828, soundOnApplied = "underyou", note = CL.debuffUnderYouNote}, -- Light-Scorched Earth
-	{1261276, note = CL.preDebuffNote},
-	{1235865, soundOnApplied = "alert", note = CL.mainDebuffNote}, -- Thornblade
-})
 
 --------------------------------------------------------------------------------
 -- Locals
@@ -36,6 +28,19 @@ mod:SetRenames({
 	[1235640] = {1235640, CL.you:format(mod:SpellName(1235640)), notes = {CL.generalNote, CL.messageOnYouNote}, original = {1235640, CL.you:format(mod:SpellName(1235640))}}, -- Thornblade
 	[1234850] = {1234850}, -- Lightsower Dash
 	[1235564] = {1235564}, -- Lightblossom Beam
+})
+
+--------------------------------------------------------------------------------
+-- Auras
+--
+
+mod:SetAuraData({
+	{1276586, duration = 8, note = CL.debuffGroupAfterCastNote:format(mod:SpellName(1234753))}, -- Bedrock Surge
+	{1234802, soundOnApplied = "underyou", note = CL.debuffUnderYouNote}, -- Fertile Loam
+	{1235574, soundOnApplied = "info", note = CL.debuffWalkIntoObjectNote:format(CL.beam)}, -- Lightblossom Beam
+	{1235828, soundOnApplied = "underyou", note = CL.debuffUnderYouNote}, -- Light-Scorched Earth
+	{1261276, duration = 3, note = CL.debuffTargetedNote:format(mod:SpellName(1235640))}, -- Thornblade
+	{1235865, duration = 12, dispel = "bleed", mechanic = "bleeding", soundOnApplied = "alert", note = CL.debuffDotAfterCastNote:format(mod:SpellName(1235640))}, -- Thornblade
 })
 
 --------------------------------------------------------------------------------

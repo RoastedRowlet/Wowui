@@ -1,34 +1,23 @@
 
 RaiderIO_Config = {
+["minimapIcon"] = {
+["minimapPos"] = 180,
+["showInCompartment"] = true,
+["hide"] = false,
+["lock"] = false,
+},
 ["profilePoint"] = {
 ["y"] = 0,
 ["x"] = -16,
 ["point"] = "TOPLEFT",
 },
-["minimapIcon"] = {
-["minimapPos"] = 180,
-["showInCompartment"] = true,
-["lock"] = false,
-["hide"] = false,
-},
 }
 RaiderIO_LastCharacter = "us-Zappyxatu-stormrage"
 RaiderIO_MissingCharacters = {
-["us-Scòrpz-stormrage"] = true,
-["us-Brechnev-stormrage"] = true,
-["us-Purplefüry-stormrage"] = true,
-["us-Cynlae-stormrage"] = true,
-["us-Phucnut-stormrage"] = true,
-["us-Teoni-stormrage"] = true,
-["us-Urlenn-stormrage"] = true,
-["us-Ecthelion-stormrage"] = true,
-["us-Iliminate-stormrage"] = true,
-["us-Eruvandë-stormrage"] = true,
-["us-Gríef-stormrage"] = true,
-["us-Kimmara-stormrage"] = true,
-["us-Keyloh-stormrage"] = true,
-["us-Lightsleeper-stormrage"] = true,
-["us-Kookeu-stormrage"] = true,
+["us-party5-stormrage"] = true,
+["us-Raoulz-stormrage"] = true,
+["us-Batmòm-stormrage"] = true,
+["us-Nightswalk-stormrage"] = true,
 }
 RaiderIO_MissingServers = {
 }

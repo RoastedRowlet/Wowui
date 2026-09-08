@@ -86,13 +86,13 @@ LittleWigs_Legion: enabled
 LittleWigs_Dragonflight: enabled
 BigWigs_TheDreamrift: enabled
 BigWigs_MarchOnQuelDanas: enabled
-ExwindTools: disabled
+ExwindTools: enabled
 AdvancedInterfaceOptions: enabled
 BigWigs: enabled
 BigWigs_MidnightWorld: enabled
 EllesmereUI: enabled
 EllesmereUIBasics: enabled
-ExwindCore: disabled
+ExwindCore: enabled
 ExwindMedia: enabled
 EXwindtools_EXboss_EnglishPatch: enabled
 GroupfinderFlags: enabled
@@ -149,3 +149,4 @@ MythicDungeonTools_UI: enabled
 SpellOverlay Enhanced: enabled
 TotemRecall: disabled
 BigWigs_MidnightLairs: enabled
+EXBoss: enabled
