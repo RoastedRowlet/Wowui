@@ -852,6 +852,63 @@ do -- Schema
                     }
                 },
                 {
+                    widgetName = L["CONFIG_AUDIO_PROXIMITY"],
+                    widgetType = Settings_Enum.WidgetType.Container,
+                    showWhen   = function() return Config.DBGlobal:GetVariable("AudioGlobal") == true end,
+                    children   = {
+                        {
+                            widgetName = L["CONFIG_AUDIO_PROXIMITY_USEPROXIMITY"],
+                            widgetType = Settings_Enum.WidgetType.CheckButton,
+                            key        = "AudioProximity"
+                        },
+                        {
+                            widgetName               = L["CONFIG_AUDIO_PROXIMITY_USEPROXIMITY_THRESHOLD"],
+                            widgetType               = Settings_Enum.WidgetType.Container,
+                            widgetContainer_isNested = true,
+                            showWhen                 = function() return Config.DBGlobal:GetVariable("AudioProximity") == true end,
+                            children                 = {
+                                {
+                                    widgetName                     = L["CONFIG_AUDIO_PROXIMITY_USEPROXIMITY_THRESHOLD_DISTANCE"],
+                                    widgetType                     = Settings_Enum.WidgetType.Range,
+                                    widgetRange_min                = 1,
+                                    widgetRange_max                = 1000,
+                                    widgetRange_step               = 1,
+                                    widgetRange_textFormattingFunc = FormatDistance,
+                                    key                            = "AudioProximityDistance"
+                                },
+                                {
+                                    widgetName              = L["CONFIG_AUDIO_CUSTOMSOUNDID"],
+                                    widgetType              = Settings_Enum.WidgetType.Input,
+                                    widgetInput_placeholder = L["CONFIG_AUDIO_CUSTOMSOUNDID_PLACEHOLDER"],
+                                    key                     = "AudioProximitySound",
+                                    set                     = function(_, value)
+                                        if tonumber(value) then
+                                            Config.DBGlobal:SetVariable("AudioProximitySound", tonumber(value))
+                                        else
+                                            Config.DBGlobal:SetVariable("AudioProximitySound", "")
+                                        end
+                                    end
+                                },
+                                {
+                                    widgetType        = Settings_Enum.WidgetType.Button,
+                                    widgetButton_text = L["CONFIG_AUDIO_CUSTOMIZE_USECUSTOMAUDIO_PREVIEW"],
+                                    set               = function()
+                                        Sound.PlaySound("Preview", Config.DBGlobal:GetVariable("AudioProximitySound"))
+                                    end
+                                },
+                                {
+                                    widgetType                  = Settings_Enum.WidgetType.Button,
+                                    widgetButton_text           = L["CONFIG_AUDIO_CUSTOMIZE_USECUSTOMAUDIO_RESET"],
+                                    widgetButton_refreshOnClick = true,
+                                    set                         = function()
+                                        Config.DBGlobal:ResetVariable("AudioProximitySound")
+                                    end
+                                }
+                            }
+                        }
+                    }
+                },
+                {
                     widgetName = L["CONFIG_AUDIO_CUSTOMIZE"],
                     widgetType = Settings_Enum.WidgetType.Container,
                     showWhen   = function() return Config.DBGlobal:GetVariable("AudioGlobal") == true end,
@@ -868,7 +925,7 @@ do -- Schema
                             showWhen                 = function() return Config.DBGlobal:GetVariable("AudioCustom") == true end,
                             children                 = {
                                 {
-                                    widgetName              = L["CONFIG_AUDIO_CUSTOMIZE_USECUSTOMAUDIO_SOUND_ID"],
+                                    widgetName              = L["CONFIG_AUDIO_CUSTOMSOUNDID"],
                                     widgetType              = Settings_Enum.WidgetType.Input,
                                     widgetInput_placeholder = L
                                         ["Config - Audio - Customize - UseCustomAudio - Sound ID - Placeholder"],
@@ -907,7 +964,7 @@ do -- Schema
                             showWhen                 = function() return Config.DBGlobal:GetVariable("AudioCustom") == true end,
                             children                 = {
                                 {
-                                    widgetName              = L["CONFIG_AUDIO_CUSTOMIZE_USECUSTOMAUDIO_SOUND_ID"],
+                                    widgetName              = L["CONFIG_AUDIO_CUSTOMSOUNDID"],
                                     widgetType              = Settings_Enum.WidgetType.Input,
                                     widgetInput_placeholder = L
                                         ["Config - Audio - Customize - UseCustomAudio - Sound ID - Placeholder"],
@@ -947,7 +1004,7 @@ do -- Schema
                             showWhen                 = function() return Config.DBGlobal:GetVariable("AudioCustom") == true end,
                             children                 = {
                                 {
-                                    widgetName              = L["CONFIG_AUDIO_CUSTOMIZE_USECUSTOMAUDIO_SOUND_ID"],
+                                    widgetName              = L["CONFIG_AUDIO_CUSTOMSOUNDID"],
                                     widgetType              = Settings_Enum.WidgetType.Input,
                                     widgetInput_placeholder = L
                                         ["Config - Audio - Customize - UseCustomAudio - Sound ID - Placeholder"],

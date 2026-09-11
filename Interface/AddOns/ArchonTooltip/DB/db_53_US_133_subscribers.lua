@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'Unknown-Unknown',}
-local provider = {region='US',realm="Kil'jaeden",name='US',type='subscribers',zone=53,date='2026-09-01',data={Al='Allicrtotems:BAEANQAECgIIAQAAAA==.',Ki='Kiralni:BAEANQADCggIDgAAAA==.',Mn='Mnshamalan:BAEANQAECgEIAQAAAA==.',Tr='Traklok:BAEANQAECgYIBwAAAA==.Trakspect:BAEANQADCggICAABNQAECgYIBwABAAAAAA==.',Wh='Whispyr:BAEANQAFFAIIAgAAAA==.',Yr='Yrella:BAEANQADCggIDQAAAA==.',Yu='Yumdemoncum:BAEANQAECgcICwAAAA==.',},}
+local lookup = {'Druid-Restoration','Unknown-Unknown','Rogue-Assassination',}
+local provider = {region='US',realm="Kil'jaeden",name='US',type='subscribers',zone=53,date='2026-09-08',data={Al='Allicrtotems:BAEANQAECgMIBAAAAA==.',Bi='Bizmarkers:BAEANQAECgcIEQAAAA==.',Ki='Kiralni:BAEANQAECgIIAgAAAA==.',Mn='Mnshamalan:BAEANQAECgUIBgAAAA==.',Sk='Skyahti:BAEANQADCgIIAgABNQAECgkJGAABAH0lAA==.',Tr='Traklok:BAEANQAECgYIDQAAAA==.Trakspect:BAEANQADCggICAABNQAECgYIDQACAAAAAA==.',Wh='Whispyr:BAECNQAFFIEIAAIDAAYJbhQNAAA3AgaODQAAAgBZAHUNAAABAE8Afw0AAAEAAACpDQAAAgBGAFwNAAABAAYAMw0AAAEAQgADAAYJbhQNAAA3AgaODQAAAgBZAHUNAAABAE8Afw0AAAEAAACpDQAAAgBGAFwNAAABAAYAMw0AAAEAQgA1AAQKgRoAAgMACQnkJU0AANIDAAMACQnkJU0AANIDAAAA.',Yr='Yrella:BAEANQADCggIFQAAAA==.',Yu='Yumdemoncum:BAEANQAECggIDQAAAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

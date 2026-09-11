@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'Unknown-Unknown',}
-local provider = {region='US',realm='Cenarius',name='US',type='subscribers',zone=53,date='2026-09-01',data={Br='Brewkong:BAEANQADCgYIBgAAAA==.',De='Departéd:BAEANQAECggIDQAAAA==.',El='Electronaut:BAEANQADCggIDQAAAA==.',Go='Gorgoneion:BAEANQAECgIIAgABNQAECgYICQABAAAAAA==.Gortess:BAEANQAECgYICQAAAA==.',Ma='Marineoracle:BAEANQADCgYICgAAAA==.',Te='Tellen:BAEANQADCggIDgAAAA==.',},}
+local lookup = {'Rogue-Outlaw','Rogue-Assassination','Unknown-Unknown',}
+local provider = {region='US',realm='Cenarius',name='US',type='subscribers',zone=53,date='2026-09-08',data={Br='Brewkong:BAEANQADCgYIBgAAAA==.',De='Departéd:BAEBNQAECoEdAAMBAAkJMyGPAAB2AwmODQAABgBXAHUNAAAEAFkAfw0AAAMAWgCpDQAAAwBYAFwNAAADAFsAXQ0AAAMAUwBlDQAAAgBWAKQNAAACADwAMw0AAAMAWAABAAkJMyGPAAB2AwmODQAABQBXAHUNAAAEAFkAfw0AAAMAWgCpDQAAAwBYAFwNAAADAFsAXQ0AAAMAUwBlDQAAAgBWAKQNAAACADwAMw0AAAMAWAACAAEJHh4QLABZAAGODQAAAQBNAAAA.',El='Electronaut:BAEANQADCggIDQAAAA==.',Go='Gorgoneion:BAEANQAECgQIBgABNQAECgcIEAADAAAAAA==.Gortess:BAEANQAECgcIEAAAAA==.',Ma='Marineoracle:BAEANQAECgIIAgAAAA==.',Te='Tellen:BAEANQAECgUIBQAAAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

@@ -1,0 +1,27 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/ https://raw.githubusercontent.com/Gethe/wow-ui-source/live/Interface/FrameXML/UI.xsd">
+    <!-- Core initialization and helper functions (must load first) -->
+    <Script file="BossTimelines.lua"/>
+
+    <!-- Midnight Season 1 -->
+    <Script file="MidnightS1/ImperatorAverzian.lua"/>
+    <Script file="MidnightS1/Vorasius.lua"/>
+    <Script file="MidnightS1/VaelgorEzzorak.lua"/>
+    <Script file="MidnightS1/FallenKingSalhadaar.lua"/>
+    <Script file="MidnightS1/LightblindedVanguard.lua"/>
+    <Script file="MidnightS1/Beloren.lua"/>
+    <Script file="MidnightS1/Chimaerus.lua"/>
+    <Script file="MidnightS1/CrownOfTheCosmos.lua"/>
+    <Script file="MidnightS1/MidnightFalls.lua"/>
+    <Script file="MidnightS1/Rotmire.lua"/>
+
+    <!-- Midnight current raid -->
+    <Script file="MidnightS2/NymrissaWavecaller.lua"/>
+    <Script file="MidnightS2/NekzaliTheSoulcoiler.lua"/>
+    <Script file="MidnightS2/EntombedSentinels.lua"/>
+    <Script file="MidnightS2/VashnikTheMalignant.lua"/>
+    <Script file="MidnightS2/TheLostExplorers.lua"/>
+    <Script file="MidnightS2/Sszorak.lua"/>
+    <Script file="MidnightS2/TheTwinFangs.lua"/>
+    <Script file="MidnightS2/TheCoiledAltar.lua"/>
+    <Script file="MidnightS2/Ulatek.lua"/>
+</Ui>

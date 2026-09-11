@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'Unknown-Unknown',}
-local provider = {region='US',realm='Ysondre',name='US',type='subscribers',zone=53,date='2026-09-01',data={Ew='Eww:BAEANQADCggICAAAAA==.',Fr='Froztbane:BAEANQADCgUIBQABNQAECgcICwABAAAAAA==.Froztbanshee:BAEANQAECgcICwAAAA==.',Ne='Ned:BAEANQADCgQIBAABNQAECgQIBAABAAAAAA==.',Pe='Percy:BAEANQADCgMIAwAAAA==.',Sl='Slambiosis:BAEANQADCgEIAQABNQAECgcIDQABAAAAAA==.',Ta='Tale:BAEANQADCggICAABNQADCggICAABAAAAAA==.',},}
+local lookup = {'DemonHunter-Devourer','Unknown-Unknown',}
+local provider = {region='US',realm='Ysondre',name='US',type='subscribers',zone=53,date='2026-09-08',data={Ew='Eww:BAEANQADCggICAAAAA==.',Fr='Froztbane:BAEANQAECgIIAgABNQAECgkJFgABACofAA==.Froztbanshee:BAEBNQAECoEWAAIBAAkJKh/YBgAaAwmODQAAAwBbAHUNAAADAFgAfw0AAAMAVwCpDQAAAwA6AFwNAAACAFAAXQ0AAAIAUgBlDQAAAgBGAKQNAAABAEsAMw0AAAMAUgABAAkJKh/YBgAaAwmODQAAAwBbAHUNAAADAFgAfw0AAAMAVwCpDQAAAwA6AFwNAAACAFAAXQ0AAAIAUgBlDQAAAgBGAKQNAAABAEsAMw0AAAMAUgAAAA==.',Ne='Ned:BAEANQADCggICwABNQAECgYIDAACAAAAAA==.',Pe='Percy:BAEANQADCgMIAwAAAA==.',Sl='Slambiosis:BAEANQADCgEIAQABNQAECgcIDQACAAAAAA==.',Ta='Tale:BAEANQAECgEIAQABNQADCggICAACAAAAAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'Unknown-Unknown',}
-local provider = {region='US',realm='Draka',name='US',type='subscribers',zone=53,date='2026-09-01',data={El='Ellimist:BAEANQAECggIDAAAAA==.',He='Hellenkeller:BAEANQADCgYIDAABNQAECgcIDQABAAAAAA==.',Pi='Pilgrimm:BAEANQAECgcIDQAAAA==.',Sk='Skelli:BAEANQAECgQIBQABNQAECggIDAABAAAAAA==.',St='Stonedragon:BAEANQAECgUIBwAAAA==.',},}
+local lookup = {'Rogue-Subtlety','Rogue-Assassination','Unknown-Unknown',}
+local provider = {region='US',realm='Draka',name='US',type='subscribers',zone=53,date='2026-09-08',data={El='Ellimist:BAEANQAECgcIDAAAAA==.',He='Hellenkeller:BAEANQAECgIIAwABNQAECgkJFgABADsiAA==.',Pi='Pilgrimm:BAEBNQAECoEWAAMBAAkJOyLVAgBAAwmODQAAAgBdAHUNAAADAGIAfw0AAAMAWgCpDQAAAwBgAFwNAAADAGEAXQ0AAAMAYABlDQAAAgBcAKQNAAABABwAMw0AAAIAXwABAAgJGiXVAgBAAwiODQAAAgBdAHUNAAADAGIAfw0AAAMAWgCpDQAAAwBgAFwNAAADAGEAXQ0AAAMAYABlDQAAAgBcADMNAAACAF8AAgABCUEL6y8AQwABpA0AAAEAHAAAAA==.',Sk='Skelli:BAEANQAECggIDQABNQAECgcIDAADAAAAAA==.',St='Stonedragon:BAEANQAECggIEwAAAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'Unknown-Unknown',}
-local provider = {region='US',realm='Azralon',name='US',type='subscribers',zone=53,date='2026-09-01',data={Go='Gongs:BAEANQAECgUIBgAAAA==.',Sa='Satdk:BAEANQAFFAEIAQAAAA==.Satdruid:BAEANQAECgEIAQABNQAFFAEIAQABAAAAAA==.',Sh='Shindou:BAEANQAECgcICwAAAA==.Shunsungsuru:BAEANQADCgMIAwABNQAECgUIBgABAAAAAA==.',Sl='Slavenhaus:BAEANQADCggICAABNQAECggIDgABAAAAAA==.Slavenhausen:BAEANQAECggIDgAAAA==.',},}
+local lookup = {'Unknown-Unknown','Druid-Restoration',}
+local provider = {region='US',realm='Azralon',name='US',type='subscribers',zone=53,date='2026-09-08',data={Fr='Freyalise:BAEANQAECgUIBQAAAA==.',Go='Gongs:BAEANQAECgYIDAAAAA==.',Sa='Satdk:BAEANQAFFAIIAwAAAA==.Satdruid:BAEANQAECgEIAQABNQAFFAIIAwABAAAAAA==.',Sh='Shindou:BAEANQAFFAIIAgAAAA==.Shunsungsuru:BAEANQADCgMIAwABNQAECgYIDAABAAAAAA==.',Sl='Slavenhaus:BAEANQADCggICAABNQAECgkJGQACAKEeAA==.Slavenhausen:BAEBNQAECoEZAAICAAkJoR4SAwAVAwmODQAAAwBMAHUNAAADAFMAfw0AAAMAUgCpDQAAAwBgAFwNAAADAF0AXQ0AAAMANwBlDQAAAgA4AKQNAAACAEUAMw0AAAMAWgACAAkJoR4SAwAVAwmODQAAAwBMAHUNAAADAFMAfw0AAAMAUgCpDQAAAwBgAFwNAAADAF0AXQ0AAAMANwBlDQAAAgA4AKQNAAACAEUAMw0AAAMAWgAAAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

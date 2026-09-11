@@ -168,9 +168,16 @@ end
 -- Where the row lives varies by build and by which addon owns the plate.
 local function BlizzardAuraFrame(nameplate)
   if not nameplate then return nil end
-  local unitFrame = nameplate.UnitFrame
+  -- The default plate keeps it on nameplate.UnitFrame; addons that build
+  -- their own plate on top of Blizzard's keep the original around under a
+  -- lowercase name, and the row we want is still Blizzard's either way.
+  local unitFrame = nameplate.UnitFrame or nameplate.unitFrame
   if not unitFrame then return nil end
-  return unitFrame.BuffFrame or unitFrame.buffFrame or unitFrame.AuraContainer
+  -- AurasFrame first: that is where this client keeps it. The older names are
+  -- kept behind it because they were right on earlier builds and cost one
+  -- table read each when they are not there.
+  return unitFrame.AurasFrame or unitFrame.BuffFrame or unitFrame.buffFrame
+    or unitFrame.AuraContainer
 end
 
 function NS.ApplyBlizzardAuras(nameplate)
@@ -178,6 +185,10 @@ function NS.ApplyBlizzardAuras(nameplate)
   if not frame then return end
 
   local hide = NS.db and NS.db.icons and NS.db.icons.hideBlizzardAuras
+  -- Nothing to do, and nothing remembered: the common case on every plate for
+  -- anyone who leaves this off, so it costs one comparison rather than a
+  -- protected call.
+  if not hide and frame.boonPrevAlpha == nil then return end
   if hide then
   -- Remember it ONCE, before the first change, so restoring puts back the
   -- real value rather than a guess.
@@ -187,7 +198,11 @@ function NS.ApplyBlizzardAuras(nameplate)
     end
   -- Alpha, not Hide: hiding a frame the plate's own code expects shown fights
   -- that code every update, and a protected Hide can be refused in combat.
-    pcall(frame.SetAlpha, frame, 0)
+    -- Only when it is not already there. The sweep below runs this every
+    -- second on every plate, and re-setting an alpha the frame already has
+    -- would be a protected call per plate per second for no change.
+    local okNow, now = pcall(frame.GetAlpha, frame)
+    if not okNow or now ~= 0 then pcall(frame.SetAlpha, frame, 0) end
   elseif frame.boonPrevAlpha ~= nil then
     pcall(frame.SetAlpha, frame, frame.boonPrevAlpha)
     frame.boonPrevAlpha = nil

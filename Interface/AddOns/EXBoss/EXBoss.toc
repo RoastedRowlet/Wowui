@@ -106,6 +106,8 @@ ExBossDisplay\RingProgress.lua
 ExBossDisplay\IconAlert.lua
 ExBossDisplay\CastProgressBar.lua
 ExBossDisplay\ExtraShieldBar.lua
+ExBossDisplay\DungeonExtras.lua
+Modules\Boss\Encounters\S12_0_S2\AltarOfFangs\TrashHealth.lua
 ExBossDisplay\Countdown.lua
 ExBossDisplay\FlashTextMedium.lua
 
@@ -145,6 +147,7 @@ ExBossGUI\SettingsPage\RingProgressPage.lua
 ExBossGUI\SettingsPage\IconAlertPage.lua
 ExBossGUI\SettingsPage\CastProgressBarPage.lua
 ExBossGUI\SettingsPage\ExtraShieldBarPage.lua
+ExBossGUI\SettingsPage\DungeonExtrasPage.lua
 # TargetAlert\Page.lua -- 临时停用：被点名提示
 ExBossGUI\SettingsPage\ImportExportPage.lua
 ExBossGUI\SettingsPage\VoicePackPage.lua

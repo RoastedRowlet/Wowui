@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'Unknown-Unknown',}
-local provider = {region='US',realm='Nazjatar',name='US',type='subscribers',zone=53,date='2026-09-01',data={Lu='Lurchdh:BAEANQADCgQIBAABNQAECgYIDAABAAAAAA==.Lurchmage:BAEANQAECgYIAwABNQAECgYIDAABAAAAAA==.Lurchn:BAEANQAECgYIDAAAAA==.',Pa='Palulu:BAEANQAECgQIBwAAAA==.',Pr='Prezu:BAEANQAECgIIAgABNQAECgQIBwABAAAAAA==.',},}
+local lookup = {'Mage-Frost','Unknown-Unknown',}
+local provider = {region='US',realm='Nazjatar',name='US',type='subscribers',zone=53,date='2026-09-08',data={Lu='Lurchdh:BAEANQADCgQIBAABNQAECggIFQABAIoPAA==.Lurchmage:BAEANQAECgYICQABNQAECggIFQABAIoPAA==.Lurchn:BAEBNQAECoEVAAIBAAgJig9aBQCxAQiODQAABABHAHUNAAAEAFEAfw0AAAQAOQCpDQAAAwAqAFwNAAACAAQAXQ0AAAIALgBlDQAAAQAEAKQNAAABAAoAAQAICYoPWgUAsQEIjg0AAAQARwB1DQAABABRAH8NAAAEADkAqQ0AAAMAKgBcDQAAAgAEAF0NAAACAC4AZQ0AAAEABACkDQAAAQAKAAAA.',Pa='Palulu:BAEANQAECgUIDAABNQAECgYICAACAAAAAA==.',Pr='Prezu:BAEANQAECgYICAAAAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

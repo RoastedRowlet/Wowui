@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'Unknown-Unknown',}
-local provider = {region='US',realm='Moonrunner',name='US',type='subscribers',zone=53,date='2026-09-01',data={Cl='Clamslamm:BAEANQADCgUIBQABNQAECgUIBgABAAAAAA==.Cloudcrack:BAEANQAECgcIDQAAAA==.',La='Laeythe:BAEANQAECgQIBAAAAA==.',My='Mythbruh:BAEANQAECgUIBgAAAA==.',},}
+local lookup = {'Unknown-Unknown','Shaman-Restoration','Shaman-Elemental',}
+local provider = {region='US',realm='Moonrunner',name='US',type='subscribers',zone=53,date='2026-09-08',data={Cl='Clamslamm:BAEANQADCgUIBQABNQAECgUICwABAAAAAA==.Cloudcrack:BAEBNQAECoEXAAMCAAkJoBreDwCaAgmODQAAAwBTAHUNAAADAF8Afw0AAAMAUACpDQAAAwBTAFwNAAADAD8AXQ0AAAMAMABlDQAAAgAwAKQNAAABABgAMw0AAAIAVAACAAgJ0hneDwCaAgiODQAAAQBTAHUNAAABAF8Afw0AAAIAUACpDQAAAQBTAFwNAAADAD8AXQ0AAAIAMABlDQAAAgAwAKQNAAABABgAAwAGCSkboCgA0QEGjg0AAAIAXwB1DQAAAgBZAH8NAAABAFUAqQ0AAAIAOQBdDQAAAQACADMNAAACAFcAAAA=.',La='Laeythe:BAEANQAECgQIBAABNQAECgYIDAABAAAAAA==.',My='Mythbruh:BAEANQAECgUICwAAAA==.',Pi='Pixen:BAEANQAECgYIDAAAAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

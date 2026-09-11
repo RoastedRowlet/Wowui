@@ -5819,12 +5819,52 @@ function NS.BuildMarkPinnedRow(parent, unitKey, rank)
   row.spacer:SetJustifyH("CENTER")
   row:Add(NS.FlexCell(parent, C.del, Flex.Item(row.spacer)))
 
-  -- The MODULE's switch, on both rows. Target and focus are two halves of one
-  -- module -- they share a slot budget and a set of load conditions -- so
-  -- there is one thing to turn off, and either row can do it.
+  -- This ROW's switch, not the module's.
+  --
+  -- Both rows drove the one module switch, so turning focus off took target
+  -- with it -- two rows, two labels, one thing they both did. They share a
+  -- slot budget and a set of load conditions; they are still two states, and
+  -- a row with its own name and its own colours should turn itself off.
+  --
+  -- On means "either half is drawing", which is what the row shows. Off puts
+  -- both halves out and remembers which were on, so switching back restores
+  -- the state you had rather than turning on a half you had deliberately shut.
   row.enabled = Checkbox(parent,
-    function() return NS.MarkConfig().enabled ~= false end,
-    function(v) NS.MarkConfig().enabled = v; Structural() end)
+    function()
+      if NS.MarkConfig().enabled == false then return false end
+      for _, kind in ipairs({ "bar", "border" }) do
+        local entry = NS.MarkModule(kind).states[unitKey]
+        if entry and entry.enabled ~= false then return true end
+      end
+      return false
+    end,
+    function(v)
+      local bar = NS.MarkModule("bar").states[unitKey]
+      local border = NS.MarkModule("border").states[unitKey]
+      if v then
+        -- The module switch is what the rail's Health Coloring page owns; a
+        -- row switched on has to lift it, or the row says on and nothing
+        -- draws.
+        NS.MarkConfig().enabled = true
+        local kept = bar and bar.rowHalves
+        if kept then
+          if bar then bar.enabled = kept.bar end
+          if border then border.enabled = kept.border end
+          bar.rowHalves = nil
+        else
+          if bar then bar.enabled = true end
+          if border then border.enabled = true end
+        end
+      else
+        if bar then
+          bar.rowHalves = { bar = bar.enabled ~= false,
+            border = border and border.enabled ~= false or false }
+          bar.enabled = false
+        end
+        if border then border.enabled = false end
+      end
+      Structural()
+    end)
   row:Add(NS.FlexCell(parent, C.on, Flex.Item(row.enabled)))
 
   row.recessable = { row.pin, row.label, row.cost, row.edit, row.spacer,
@@ -6760,14 +6800,20 @@ function NS.BuildRuleEditor(sec, content)
   -- Your own target and focus. A restriction on which PLATES the rule may
   -- paint, which is the same kind of question the two lists above ask.
   load.target = Checkbox(content,
-    function() local r = Rule() return r and r.onTarget ~= false end,
-    function(v) local r = Rule() if r then r.onTarget = v; Structural() end end)
+    -- showOnTarget, not onTarget.
+    --
+    -- The engine, Core's normaliser and the profile sanitiser all read
+    -- showOnTarget/showOnFocus; this pair of boxes wrote a name nothing else
+    -- knows, so both controls read the default forever and neither one ever
+    -- changed a plate.
+    function() local r = Rule() return r and r.showOnTarget ~= false end,
+    function(v) local r = Rule() if r then r.showOnTarget = v; Structural() end end)
   load.targetLabel = Label(content, "Draw on your target")
   NS.EditorRow(load, content, nil, { load.target, UI.BOX }, { load.targetLabel, nil, 1, true })
 
   load.focus = Checkbox(content,
-    function() local r = Rule() return r and r.onFocus ~= false end,
-    function(v) local r = Rule() if r then r.onFocus = v; Structural() end end)
+    function() local r = Rule() return r and r.showOnFocus ~= false end,
+    function(v) local r = Rule() if r then r.showOnFocus = v; Structural() end end)
   load.focusLabel = Label(content, "Draw on your focus")
   NS.EditorRow(load, content, nil, { load.focus, UI.BOX }, { load.focusLabel, nil, 1, true })
 
@@ -8303,8 +8349,13 @@ local function RenderRuleSection(sec, list, rowPool, condPool, isBorder, getList
     -- not a setting any more.
     row.label:SetText(("Threat  |cff808080Role: %s%s%s|r"):format(NS.ThreatRoleName(),
       NS.ThreatFlashOn() and "  -  Flash on loss" or "",
+      -- The FACT of a restriction, not the list of it.
+      --
+      -- Naming every zone put six of them on a row sized for a label, and the
+      -- line wrapped over the row below it. Which zones is a question the
+      -- editor answers, one click away, where the dropdown shows them ticked.
       (NS.LoadIsRestricted and NS.LoadIsRestricted(cfg.load))
-        and ("  -  " .. NS.LoadSummary(cfg.load)) or ""))
+        and "  -  Instance Type: Custom" or ""))
     row.label:SetAlpha(on and 1 or 0.5)
     for _, strip in ipairs({ row.barStrip, row.borderStrip }) do
       for _, chip in ipairs(strip.chips) do
@@ -10942,13 +10993,40 @@ function share.Box(parent, height, readOnly, onChanged)
   local scroll = CreateFrame("ScrollFrame", nil, parent, "UIPanelScrollFrameTemplate")
   scroll:SetHeight(height)
 
+  -- The box looks like a box, and all of it is the box.
+  --
+  -- An EditBox is only as tall as its text, so an empty one is a single line
+  -- floating in a frame with no edges: there was nothing to see and almost
+  -- nothing to hit, and clicking the obvious place -- the empty space under
+  -- the line -- landed on the ScrollFrame and did nothing at all. A field
+  -- people cannot find is a field they conclude is broken.
+  scroll.bg = scroll:CreateTexture(nil, "BACKGROUND")
+  scroll.bg:SetPoint("TOPLEFT", -4, 4)
+  scroll.bg:SetPoint("BOTTOMRIGHT", 4, -4)
+  scroll.bg:SetColorTexture(0.05, 0.05, 0.07, 0.9)
+  local frame = CreateFrame("Frame", nil, scroll)
+  frame:SetPoint("TOPLEFT", -4, 4)
+  frame:SetPoint("BOTTOMRIGHT", 4, -4)
+  PixelBorder(frame)
+
   local edit = CreateFrame("EditBox", nil, scroll)
   edit:SetMultiLine(true)
   edit:SetAutoFocus(false)
   edit:SetFontObject("GameFontHighlightSmall")
   edit:SetWidth(600)
+  -- Tall enough to fill the frame, so the whole rectangle takes a click.
+  edit:SetHeight(height)
   StyleText(edit, 11)
   edit:SetScript("OnEscapePressed", function(self) self:ClearFocus() end)
+
+  -- And the frame around it, for the pixels the edit box does not cover: its
+  -- own width is fixed at 600 for the scroll child, so a wider panel leaves a
+  -- strip on the right that would otherwise swallow the click.
+  scroll:EnableMouse(true)
+  scroll:SetScript("OnMouseDown", function()
+    edit:SetFocus()
+    if readOnly then edit:HighlightText() end
+  end)
   if readOnly then
     -- Not disabled: a disabled box cannot be selected, and selecting is the
     -- entire point. Re-highlighting on any keypress makes it read-only in the

@@ -155,6 +155,29 @@ local BORDER_GROW = { IN = true, OUT = true }
 local FILL_STYLES = { solid = true, texture = true }
 local OUTLINE_SIDES = { top = true, bottom = true, left = true, right = true }
 
+-- Load conditions. Whitelisted against this client's own lists, so an
+-- imported profile cannot introduce a zone or a group key nothing will ever
+-- ask about -- the same discipline the threat states get. Absent when nothing
+-- is restricted, because an empty pair of tables IS "everywhere" and writing
+-- it out says nothing.
+local function SanitiseLoad(source)
+  if type(source) ~= "table" then return nil end
+  local out, any = { zones = {}, groups = {} }, false
+  for _, zone in ipairs(NS.LOAD_ZONES or {}) do
+    if type(source.zones) == "table" and source.zones[zone.key] then
+      out.zones[zone.key] = true
+      any = true
+    end
+  end
+  for _, group in ipairs(NS.LOAD_GROUPS or {}) do
+    if type(source.groups) == "table" and source.groups[group.key] then
+      out.groups[group.key] = true
+      any = true
+    end
+  end
+  return any and out or nil
+end
+
 local function SanitiseBorder(source)
   if type(source) ~= "table" then return nil end
   return {
@@ -215,29 +238,6 @@ local function SanitiseRule(source)
     missingCombatOnly = Bool(source.missingCombatOnly, false),
     load              = SanitiseLoad(source.load),
   }
-end
-
--- Load conditions. Whitelisted against this client's own lists, so an
--- imported profile cannot introduce a zone or a group key nothing will ever
--- ask about -- the same discipline the threat states get. Absent when nothing
--- is restricted, because an empty pair of tables IS "everywhere" and writing
--- it out says nothing.
-local function SanitiseLoad(source)
-  if type(source) ~= "table" then return nil end
-  local out, any = { zones = {}, groups = {} }, false
-  for _, zone in ipairs(NS.LOAD_ZONES or {}) do
-    if type(source.zones) == "table" and source.zones[zone.key] then
-      out.zones[zone.key] = true
-      any = true
-    end
-  end
-  for _, group in ipairs(NS.LOAD_GROUPS or {}) do
-    if type(source.groups) == "table" and source.groups[group.key] then
-      out.groups[group.key] = true
-      any = true
-    end
-  end
-  return any and out or nil
 end
 
 local function SanitiseRuleList(source, dropped)
@@ -327,8 +327,16 @@ local function SanitiseMark(source)
           gap      = Num(entry.indicator.gap, 4),
         }
       end
+      -- What the row switch put away when it turned this state off, so an
+      -- exported profile comes back switching on to the halves it had.
+      local kept
+      if type(entry.rowHalves) == "table" then
+        kept = { bar = Bool(entry.rowHalves.bar, true),
+                 border = Bool(entry.rowHalves.border, true) }
+      end
       states[key] = {
         enabled = Bool(entry.enabled, true),
+        rowHalves = kept,
         color   = Colour(entry.color, { r = 1, g = 1, b = 1, a = 0.22 }),
         -- The same fill fields a rule's bar half carries, whitelisted the same
         -- way: these are read by NS.ApplyRuleFill, which does not care whether
@@ -413,6 +421,7 @@ local function SanitiseTints(source, dropped)
     mark                = SanitiseMark(source.mark),
     markBorder          = SanitiseMarkBorder(source.markBorder),
     edgeAdjust          = Num(source.edgeAdjust, 0),
+    maxRigRepairs       = Int(source.maxRigRepairs, nil),
     missingCoverColor   = Colour(source.missingCoverColor,
                             { r = 0.08, g = 0.08, b = 0.08, a = 0.95 }),
     gateUnknownSpells   = Bool(source.gateUnknownSpells, nil),
@@ -447,10 +456,55 @@ local function SanitiseIconList(source)
     -- the same icon twice in the row.
     if id and not seen[id] then
       seen[id] = true
-      table.insert(out, { spellID = id })
+      -- With its switch. Only the spell ID crossed, so every icon someone had
+      -- switched off arrived switched on -- a list that looks like theirs and
+      -- behaves like nobody's.
+      table.insert(out, { spellID = id, enabled = Bool(entry.enabled, true) })
     end
   end
   return out
+end
+
+-- Missing debuff icons. Its own module, its own list, and its own per-entry
+-- settings -- a reminder icon carries a colour and a combat gate that the aura
+-- list has no equivalent of.
+local function SanitiseMissingList(source)
+  local out, seen = {}, {}
+  if type(source) ~= "table" then return out end
+  for _, entry in ipairs(source) do
+    if #out >= MAX_ICONS then break end
+    local id = type(entry) == "table" and SpellID(entry.spellID) or nil
+    if id and not seen[id] then
+      seen[id] = true
+      table.insert(out, {
+        spellID = id,
+        enabled = Bool(entry.enabled, true),
+        useIcon = Bool(entry.useIcon, true),
+        -- Absent is a real answer: no colour means the spell's own icon art.
+        color = (type(entry.color) == "table") and Colour(entry.color, nil) or nil,
+        missingCombatOnly = Bool(entry.missingCombatOnly, false),
+      })
+    end
+  end
+  return out
+end
+
+local function SanitiseMissingIcons(source)
+  source = type(source) == "table" and source or {}
+  local d = NS.Defaults.missingIcons
+  return {
+    enabled     = Bool(source.enabled, d.enabled),
+    list        = SanitiseMissingList(source.list),
+    size        = Num(source.size, d.size),
+    spacing     = Num(source.spacing, d.spacing),
+    anchor      = OneOf(source.anchor, ANCHORS, d.anchor),
+    grow        = OneOf(source.grow, ICON_GROW, d.grow),
+    padX        = Num(source.padX, d.padX),
+    padY        = Num(source.padY, d.padY),
+    collapse    = Bool(source.collapse, d.collapse),
+    borderSize  = Num(source.borderSize, d.borderSize),
+    borderColor = Colour(source.borderColor, d.borderColor),
+  }
 end
 
 local function SanitiseIcons(source)
@@ -499,6 +553,24 @@ local function SanitiseTweaks(source)
   return out
 end
 
+-------------------------------------------------------------------------------
+-- Drift check
+--
+-- Sanitise, then run the same list merge a local profile gets.
+--
+-- An import is someone else's profile arriving from an arbitrary build, so it
+-- can carry two lists, one list, or one list plus a stale second one. Running
+-- the migration here rather than trusting the sender's flag means the shape is
+-- decided by THIS build, once, in the same code path a local profile uses.
+local function MergedTints(source, dropped)
+  local tints = SanitiseTints(source, dropped)
+  if not tints.rulesMerged and NS.MergeRuleLists then
+    NS.MergeRuleLists(tints)
+  end
+  tints.rulesMerged = true
+  return tints
+end
+
 -- The whole profile. Deliberately NOT everything in the table:
 --
 --   ui*            window position, rail state, which sections are open.
@@ -514,10 +586,18 @@ end
 local function SanitiseProfile(source, dropped)
   source = type(source) == "table" and source or {}
   return {
-    tints       = MergedTints(source.tints, dropped),
-    icons       = SanitiseIcons(source.icons),
-    tweaks      = SanitiseTweaks(source.tweaks),
-    levelOffset = Num(source.levelOffset, NS.Defaults.levelOffset),
+    tints        = MergedTints(source.tints, dropped),
+    icons        = SanitiseIcons(source.icons),
+    -- The Missing Debuffs module. A whole page of settings and its own list,
+    -- and none of it crossed: an imported profile came back with the module
+    -- off and nothing tracked.
+    missingIcons = SanitiseMissingIcons(source.missingIcons),
+    tweaks       = SanitiseTweaks(source.tweaks),
+    levelOffset  = Num(source.levelOffset, NS.Defaults.levelOffset),
+    -- Which drawing scheme the addon uses on hosts that offer aura slots.
+    -- Changes what a profile looks like on the recipient's plates, so it is
+    -- part of the profile.
+    useAuraSlots = Bool(source.useAuraSlots, NS.Defaults.useAuraSlots),
   }
 end
 
@@ -704,24 +784,6 @@ function NS.CommitShare(payload, name, overwrite)
   return true
 end
 
--------------------------------------------------------------------------------
--- Drift check
---
--- Sanitise, then run the same list merge a local profile gets.
---
--- An import is someone else's profile arriving from an arbitrary build, so it
--- can carry two lists, one list, or one list plus a stale second one. Running
--- the migration here rather than trusting the sender's flag means the shape is
--- decided by THIS build, once, in the same code path a local profile uses.
-local function MergedTints(source, dropped)
-  local tints = SanitiseTints(source, dropped)
-  if not tints.rulesMerged and NS.MergeRuleLists then
-    NS.MergeRuleLists(tints)
-  end
-  tints.rulesMerged = true
-  return tints
-end
-
 -- The schema above is a second list of every setting, and second lists rot.
 -- This reports keys the live profile has that the schema does not, so a
 -- setting added without a matching entry here shows up as a diagnostic rather
@@ -734,8 +796,17 @@ end
 
 local LEGACY = {
   tints = { combos = true, comboSeq = true, combosMigrated = true,
-            inset = true, list = true, exclusive = true },
+            inset = true, list = true, exclusive = true,
+            -- Migration bookkeeping and the pre-merge border list's backup.
+            borderRulesMigrated = true, borderRulesBackup = true },
   icons = { offset = true, offsetX = true, showCooldown = true },
+  missingIcons = {},
+  -- The profile itself. Window geometry, rail state and which sections are
+  -- open are personal to the sender's screen and deliberately not shared.
+  profile = { uiPosition = true, uiSize = true, uiSections = true,
+              uiRailOpen = true, uiPreviewCombine = true, uiPreviewText = true,
+              uiEdgeAcknowledged = true, uiTab = true, uiScale = true,
+              spells = true, version = true },
 }
 
 -- Named explicitly rather than read back out of a sanitised table. Several
@@ -751,7 +822,7 @@ local KNOWN = {
     "plateOutlineSides", "pandemic", "missingMode",
     "threatEnabled", "threat", "threatBorder", "rulesMerged",
     "mark", "markBorder",
-    "missingAppliedByClass", "missingAppliedClassColors",
+    "missingAppliedByClass", "missingAppliedClassColors", "maxRigRepairs",
   },
   icons = {
     "enabled", "list", "size", "spacing", "anchor", "grow", "padX", "padY",
@@ -761,6 +832,15 @@ local KNOWN = {
     "showCount", "countFont", "countSize", "countOutline", "countAnchor",
     "countX", "countY",
   },
+  missingIcons = {
+    "enabled", "list", "size", "spacing", "anchor", "grow", "padX", "padY",
+    "collapse", "borderSize", "borderColor",
+  },
+  -- The profile's own keys, which nothing checked before -- which is exactly
+  -- how a whole module (missingIcons) and a drawing-scheme switch
+  -- (useAuraSlots) sat outside the schema without the check noticing.
+  profile = { "tints", "icons", "missingIcons", "tweaks", "levelOffset",
+    "useAuraSlots" },
 }
 
 local function KnownSet(list)
@@ -773,7 +853,14 @@ function NS.ShareSchemaGaps()
   local db = NS.db
   if not db then return {} end
   local gaps = {}
-  for _, key in ipairs({ "tints", "icons" }) do
+  -- The profile's own keys first, then each sub-table's.
+  local topKnown, topLegacy = KnownSet(KNOWN.profile), LEGACY.profile
+  for field in pairs(db) do
+    if not topKnown[field] and not topLegacy[field] then
+      table.insert(gaps, field)
+    end
+  end
+  for _, key in ipairs({ "tints", "icons", "missingIcons" }) do
     local known = KnownSet(KNOWN[key])
     local legacy = LEGACY[key] or {}
     for field in pairs(db[key] or {}) do

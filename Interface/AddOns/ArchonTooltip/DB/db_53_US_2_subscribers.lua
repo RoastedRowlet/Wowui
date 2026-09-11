@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'Unknown-Unknown',}
-local provider = {region='US',realm='AeriePeak',name='US',type='subscribers',zone=53,date='2026-09-01',data={An='Annasthesia:BAEANQADCgMIBAAAAA==.',As='Astrada:BAEANQADCggICAABNQAECgYICQABAAAAAA==.',Be='Bellion:BAEANQADCggIDgAAAA==.',Co='Corrupten:BAEANQADCgQIBAABNQAECgUICQABAAAAAA==.',Fi='Findula:BAEANQADCgIIAwAAAA==.',Fu='Fuzzyjager:BAEANQADCgYICwAAAA==.',Hy='Hyphie:BAEANQADCggIEAAAAA==.',Ra='Rafikiblade:BAEANQAECggIDgAAAA==.Rafikizilla:BAEANQADCgEIAQABNQAECggIDgABAAAAAA==.',Sa='Saosen:BAEANQADCgcIDQAAAA==.',Sl='Slavonk:BAEANQADCggICAABNQAECggIDgABAAAAAA==.',},}
+local lookup = {'Unknown-Unknown','DemonHunter-Havoc','DemonHunter-Devourer','Druid-Restoration',}
+local provider = {region='US',realm='AeriePeak',name='US',type='subscribers',zone=53,date='2026-09-08',data={An='Annasthesia:BAEANQADCggIDAAAAA==.',As='Astrada:BAEANQADCggICAABNQAECgcIEAABAAAAAA==.',Be='Bellion:BAEANQAECgQIBAAAAA==.',Co='Corrupten:BAEANQADCgQIBAABNQAECgcIDgABAAAAAA==.',Fi='Findula:BAEANQADCgIIAwAAAA==.',Fu='Fuzzyjager:BAEANQADCgYIEQAAAA==.',Hy='Hyphie:BAEANQAECgIIAgAAAA==.',Lu='Lucive:BAEANQADCgIIAgABNQAECgEIAQABAAAAAA==.',Ra='Rafikiblade:BAEBNQAECoEeAAMCAAkJdiEEAwBaAwmODQAABABZAHUNAAAEAFoAfw0AAAQAYQCpDQAABABbAFwNAAADAFkAXQ0AAAMAWABlDQAAAgBEAKQNAAACAD0AMw0AAAQAXwACAAkJ7B8EAwBaAwmODQAAAgBZAHUNAAACAFoAfw0AAAIAYQCpDQAAAgBbAFwNAAABAFkAXQ0AAAEAPgBlDQAAAQA6AKQNAAABAD0AMw0AAAIAXwADAAkJQSDcBwAEAwmODQAAAgBYAHUNAAACAFoAfw0AAAIAVACpDQAAAgBYAFwNAAACAFIAXQ0AAAIAWABlDQAAAQBEAKQNAAABADsAMw0AAAIAWwAAAA==.Rafikizilla:BAEANQADCgEIAQABNQAECgkJHgACAHYhAA==.',Sa='Saosen:BAEANQAECgEIAQAAAA==.',Sl='Slavonk:BAEANQADCggICAABNQAECgkJGQAEAKEeAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

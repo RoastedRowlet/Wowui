@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'Unknown-Unknown',}
-local provider = {region='US',realm='Magtheridon',name='US',type='subscribers',zone=53,date='2026-09-01',data={Bi='Bigzee:BAEANQAECgYICgAAAA==.',Bo='Bowvice:BAEANQADCgUIBQABNQAECgcICwABAAAAAA==.',['Cí']='Círí:BAEANQAECgIIAgAAAA==.',Dr='Drstagger:BAEANQAECgQIBQAAAA==.',Ga='Gazelle:BAEANQAECgIIAgAAAA==.',Hy='Hyperìen:BAEANQAECggIDgAAAA==.',Po='Poonzer:BAEANQAECgcICwAAAA==.',Re='Reznoop:BAEANQADCgcIBwABNQAECgcICwABAAAAAA==.',['Év']='Évié:BAEANQADCggIEAABNQAECgIIAgABAAAAAA==.',},}
+local lookup = {'Unknown-Unknown','Paladin-Protection',}
+local provider = {region='US',realm='Magtheridon',name='US',type='subscribers',zone=53,date='2026-09-08',data={Bi='Bigzee:BAEANQAECgcIEQAAAA==.',Bo='Bowvice:BAEANQADCgUIBQABNQAECggIEwABAAAAAA==.',['Cí']='Círí:BAEANQAECgIIAgABNQAECgYIBgABAAAAAA==.',Dr='Drstagger:BAEANQAECgYICwABNQAECgcIDgABAAAAAA==.',Ga='Gazelle:BAEANQAECgQIBgAAAA==.',Hy='Hyperìen:BAEBNQAECoEZAAICAAkJMiQJAQCVAwmODQAAAwBfAHUNAAADAGIAfw0AAAMAYQCpDQAAAwBiAFwNAAADAGIAXQ0AAAMAYQBlDQAAAgBTAKQNAAACAEIAMw0AAAMAYQACAAkJMiQJAQCVAwmODQAAAwBfAHUNAAADAGIAfw0AAAMAYQCpDQAAAwBiAFwNAAADAGIAXQ0AAAMAYQBlDQAAAgBTAKQNAAACAEIAMw0AAAMAYQAAAA==.',Po='Poonzer:BAEANQAECggIEwAAAA==.',Re='Reznoop:BAEANQAECgIIAgABNQAECggIEwABAAAAAA==.',['Év']='Évié:BAEANQAECgYIBgAAAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

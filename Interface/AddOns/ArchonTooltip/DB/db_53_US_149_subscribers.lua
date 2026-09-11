@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'Unknown-Unknown',}
-local provider = {region='US',realm='Maiev',name='US',type='subscribers',zone=53,date='2026-09-01',data={Ar='Arahgon:BAEANQAECgEIAQABNQADCgcICwABAAAAAA==.',Fi='Fiammetta:BAEANQADCgcIBwABNQAFFAEIAQABAAAAAA==.',Sa='Saphia:BAEANQAFFAEIAQAAAA==.Saphyr:BAEANQADCgEIAQABNQAFFAEIAQABAAAAAA==.',Ty='Tyranis:BAEANQADCgcICwAAAA==.',},}
+local lookup = {'Unknown-Unknown','Paladin-Protection',}
+local provider = {region='US',realm='Maiev',name='US',type='subscribers',zone=53,date='2026-09-08',data={Ar='Arahgon:BAEANQAECgUIBwABNQADCgcIEQABAAAAAA==.',Fi='Fiammetta:BAEANQADCgcIBwABNQAECgkJFgACAM4hAA==.',Sa='Saphia:BAEBNQAECoEWAAICAAkJziG/AQBYAwmODQAAAwBeAHUNAAADAFcAfw0AAAIAUwCpDQAAAwBXAFwNAAADAFcAXQ0AAAMAYABlDQAAAgBBAKQNAAABAFMAMw0AAAIAXgACAAkJziG/AQBYAwmODQAAAwBeAHUNAAADAFcAfw0AAAIAUwCpDQAAAwBXAFwNAAADAFcAXQ0AAAMAYABlDQAAAgBBAKQNAAABAFMAMw0AAAIAXgAAAA==.Saphyr:BAEANQAECgIIAgABNQAECgkJFgACAM4hAA==.',Ty='Tyranis:BAEANQADCgcIEQAAAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

@@ -3,13 +3,84 @@
 -- 请勿手动通过 Git 提交修改此文件中的版本号，除非你是为了测试。
 
 ExBoss_MetaData = {
-    version = "v26.9.8.1030",
+    version = "v26.9.10.1512",
     changelog = {
-        version = "v26.9.4.0415",
-        title = "v26.9.4.0415 更新日志",
-        publishedAt = "2026-09-04 04:15",
+        version = "v26.9.10.1512",
+        title = "v26.9.10.1512 更新日志",
+        publishedAt = "2026-09-10 15:12",
         fontSize = 14,
         content = [[
+@H1@ v26.9.10.1512
+
+@CN@ @H2@ AI声明
+@CN@ - 本插件开发过程中使用了AI的协助 如果您喜欢古法制作原汁原味非遗传承的手工编写代码请谨慎使用
+@CN@ - 豆包AI (Chinese GPT) 在开发过成功给予我们很大的协助
+
+@CN@ @H2@ 5秒倒数
+@CN@ - 修复了框架没有正确释放回池的问题 (#PR Ys1sYms)
+
+@CN@ @H2@ 副本额外功能
+@CN@ - 新增了一个设置界面 所有副本BOSS的额外提示都会显示在这里
+@CN@ (比如RLP尾王放火)
+
+@CN@ @H2@ %i:2993
+@CN@ - 新增了3号BOSS前的自曝毒球血量在副本额外提示 默认关闭需要手动开启
+
+@CN@ @H2@ 开发计划
+@CN@ - 由于上周在医院 稍微耽误了一下开发进度
+@CN@ - 准备在本周末开始爆发式的更新内容
+@CN@ - 首领被点名提示预计本CD内完成
+@CN@ - 首领额外提示预计本CD内完成
+@CN@ - 我们为EXBOSS做了很多额外定制功能 不过暂时保密 大约一两周后与大家见面
+
+@CN@ @H2@ 用户服务
+@CN@ - 过去一段时间内我们受理了很多问题回报/解答/反馈 但是人工不可能服务到所有用户
+@CN@ - 因此我们做了一个网页 预计明天上线 支援所有语言 每天会有AI定期去抓取所有问题并且整理解答
+@CN@ - 由于目前还是以插件开发为主 我们会在晚些时候完全接入24小时实时AI客服功能
+
+@CN@ @H2@ 预计12.0.5之前的开发计划
+@CN@ - 首领战排轴系统
+@CN@ - 矮人/隐遁/强隐(法师)使用提示
+@CN@ - 绿罩(AMS)使用提示
+
+@CN@ - 以下是已经部份完工 可能提前上线项目
+@CN@ - GUI 封装整体升级到3.0 整体风格改更换成现代简约主流元素
+@CN@ - 新增一些主流元素
+@CN@ - GRID 渲染引擎升级到3.0 对整体设置页面引入了WYSIWYG(所见即所得)概念
+@CN@ - 升级框架池系统
+@CN@ - (我希望可以透过写很长的开发日志来掩饰我过去一周的偷懒 反正大多数用户因该也看不到这里)
+
+@EN@ @H2@ AI Statement
+@EN@ - AI assistance was used during the development of this addon. If you prefer traditionally handcrafted, authentic, heritage-style code written entirely by hand, please use it with caution.
+@EN@ - Doubao AI (Chinese GPT) provided significant assistance throughout the development process.
+@EN@ @H2@ 5-Second Countdown
+@EN@ - Fixed an issue where frames were not properly released back into the frame pool. (#PR by Ys1sYms)
+@EN@ @H2@ Extra Dungeon Features
+@EN@ - Added a settings page where all additional dungeon boss alerts will be displayed.
+@EN@ (For example, the fire-dropping mechanic on the final boss of Ruby Life Pools.)
+@EN@ @H2@ %i:2993
+@EN@ - Added health tracking for the self-destructing poison orbs before the third boss under Extra Dungeon Features. This feature is disabled by default and must be enabled manually.
+@EN@ @H2@ Development Plans
+@EN@ - Development progress was slightly delayed because I was in the hospital last week.
+@EN@ - We are preparing to begin a burst of major updates this weekend.
+@EN@ - Boss target alerts are expected to be completed during the current weekly reset.
+@EN@ - Additional boss alerts are expected to be completed during the current weekly reset.
+@EN@ - We have created many additional custom features for EXBOSS, but they are being kept secret for now. They should be revealed in approximately one or two weeks.
+@EN@ @H2@ User Support
+@EN@ - Over the past period, we have handled many bug reports, questions, and feedback submissions, but it is impossible to provide manual support to every user.
+@EN@ - We have therefore created a website that is expected to launch tomorrow. It will support all languages, and AI will periodically collect, organize, and answer all reported questions every day.
+@EN@ - Since addon development remains our current priority, we will fully introduce 24/7 real-time AI customer support at a later date.
+@EN@ @H2@ Development Plans Before 12.0.5
+@EN@ - Boss encounter timeline system
+@EN@ - Alerts for the use of Stoneform, Shadowmeld, and Greater Invisibility (Mage)
+@EN@ - Alerts for the use of Anti-Magic Shell (AMS)
+@EN@ - The following projects are already partially complete and may be released ahead of schedule:
+@EN@ - Upgrade the overall GUI framework to version 3.0, replacing the current style with modern, minimalist, mainstream design elements
+@EN@ - Add more commonly used modern UI elements
+@EN@ - Upgrade the GRID rendering engine to version 3.0 and introduce the WYSIWYG (What You See Is What You Get) concept throughout the settings interface
+@EN@ - Upgrade the frame-pool system
+@EN@ - (I hope I can disguise how little work I did last week by writing an extremely long development log. Most users probably will not see this part anyway.)
+
 @H1@ v26.9.4.0415
 
 @CN@ @H2@ 小怪CD

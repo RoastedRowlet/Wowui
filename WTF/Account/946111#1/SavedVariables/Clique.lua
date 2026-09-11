@@ -92,6 +92,22 @@ CliqueDB3 = {
 ["unit"] = "mouseover",
 },
 {
+["spell"] = "Regrowth",
+["key"] = "BUTTON2",
+["sets"] = {
+["default"] = true,
+},
+["icon"] = 136085,
+["type"] = "spell",
+},
+{
+["type"] = "menu",
+["key"] = "CTRL-BUTTON2",
+["sets"] = {
+["default"] = true,
+},
+},
+{
 ["spell"] = "Rejuvenation",
 ["key"] = "BUTTON1",
 ["sets"] = {
@@ -110,22 +126,6 @@ CliqueDB3 = {
 ["icon"] = 134332,
 },
 {
-["spell"] = "Regrowth",
-["key"] = "BUTTON2",
-["sets"] = {
-["default"] = true,
-},
-["icon"] = 136085,
-["type"] = "spell",
-},
-{
-["type"] = "menu",
-["key"] = "CTRL-BUTTON2",
-["sets"] = {
-["default"] = true,
-},
-},
-{
 ["type"] = "macro",
 ["key"] = "ALT-BUTTON2",
 ["macrotext"] = "/cast Nature's Swiftness\n/cast [@mouseover] Regrowth\n",
@@ -133,24 +133,6 @@ CliqueDB3 = {
 ["default"] = true,
 },
 ["icon"] = 134332,
-},
-{
-["spell"] = "Revive",
-["key"] = "CTRL-BUTTON1",
-["sets"] = {
-["default"] = true,
-},
-["icon"] = 132132,
-["type"] = "spell",
-},
-{
-["spell"] = "Remove Corruption",
-["key"] = "BUTTON3",
-["sets"] = {
-["default"] = true,
-},
-["icon"] = 135952,
-["type"] = "spell",
 },
 {
 ["type"] = "target",
@@ -168,6 +150,24 @@ CliqueDB3 = {
 ["default"] = true,
 },
 ["icon"] = 236288,
+["type"] = "spell",
+},
+{
+["spell"] = "Revive",
+["key"] = "CTRL-BUTTON1",
+["sets"] = {
+["default"] = true,
+},
+["icon"] = 132132,
+["type"] = "spell",
+},
+{
+["spell"] = "Remove Corruption",
+["key"] = "BUTTON3",
+["sets"] = {
+["default"] = true,
+},
+["icon"] = 135952,
 ["type"] = "spell",
 },
 {
@@ -343,6 +343,15 @@ CliqueDB3 = {
 ["unit"] = "mouseover",
 },
 {
+["spell"] = "Healing Wave",
+["key"] = "BUTTON2",
+["sets"] = {
+["default"] = true,
+},
+["icon"] = 136043,
+["type"] = "spell",
+},
+{
 ["sets"] = {
 ["default"] = true,
 },
@@ -358,15 +367,6 @@ CliqueDB3 = {
 },
 },
 {
-["spell"] = "Healing Wave",
-["key"] = "BUTTON2",
-["sets"] = {
-["default"] = true,
-},
-["icon"] = 136043,
-["type"] = "spell",
-},
-{
 ["type"] = "target",
 ["key"] = "CTRL-BUTTON1",
 ["sets"] = {
@@ -374,6 +374,15 @@ CliqueDB3 = {
 },
 ["icon"] = 132331,
 ["unit"] = "mouseover",
+},
+{
+["spell"] = "Ancestral Spirit",
+["key"] = "CTRL-BUTTON1",
+["sets"] = {
+["default"] = true,
+},
+["icon"] = 136077,
+["type"] = "spell",
 },
 {
 ["spell"] = "Riptide",
@@ -391,15 +400,6 @@ CliqueDB3 = {
 ["default"] = true,
 },
 ["icon"] = 236288,
-["type"] = "spell",
-},
-{
-["spell"] = "Ancestral Spirit",
-["key"] = "CTRL-BUTTON1",
-["sets"] = {
-["default"] = true,
-},
-["icon"] = 136077,
 ["type"] = "spell",
 },
 {

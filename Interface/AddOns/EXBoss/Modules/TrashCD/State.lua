@@ -18,6 +18,11 @@ local MAX_NAMEPLATES = 40
 local POLL_INTERVAL = 0.10
 local POLL_BATCH = 10
 
+-- 只读消费者通知；不占用 Runtime 的单一 combat callback，也不传出可写行。
+local function NotifyUnitChanged(unit)
+    ExwindTools:SendEvent("EXBOSS_TRASH_STATE_CHANGED", unit)
+end
+
 local function NormalizeNameplateUnit(unit)
     if type(unit) ~= "string" then
         return nil
@@ -89,6 +94,7 @@ function Mod.Reset()
     Mod._lastCombatLogUnitDiedAt = 0
     Mod._pollIndex = 1
     MarkL1SummaryDirty()
+    NotifyUnitChanged(nil)
 end
 
 function Mod.GetUnit(unit)
@@ -116,6 +122,7 @@ function Mod.OnNameplateAdded(unit)
     if row.active ~= true or row.removedAt ~= nil or row.deadAt ~= nil then
         ResetUnitRow(row, unit, now)
         MarkL1SummaryDirty()
+        NotifyUnitChanged(unit)
         return row
     end
     row.active = true
@@ -140,6 +147,7 @@ function Mod.OnNameplateRemoved(unit)
     MarkL1SummaryDirty()
     DebugTrace(string.format("removed unit=%s wasCombat=%s (no combat-leave callback)",
         tostring(unit), tostring(wasInCombat)))
+    NotifyUnitChanged(unit)
     return row
 end
 
@@ -224,6 +232,7 @@ local function NotifyCombatStateChanged(unit, inCombat, row)
     if type(callback) == "function" then
         callback(unit, inCombat == true, row)
     end
+    NotifyUnitChanged(unit)
 end
 
 function Mod.RefreshUnitCombat(unit, now)
@@ -240,6 +249,7 @@ function Mod.RefreshUnitCombat(unit, now)
     end
 
     local wasActive = row.active == true
+    local wasExists = row.exists == true
     local wasInCombat = row.inCombat == true
     row.unit = unit
     row.exists = exists
@@ -297,6 +307,8 @@ function Mod.RefreshUnitCombat(unit, now)
             tostring(unit), tostring(wasInCombat), tostring(row.inCombat == true),
             tostring(row.active == true), tostring(row.deadAt ~= nil)))
         NotifyCombatStateChanged(unit, row.inCombat == true, row)
+    elseif wasExists ~= (row.exists == true) or wasActive ~= (row.active == true) then
+        NotifyUnitChanged(unit)
     end
 
     return row.inCombat == true, row
@@ -347,6 +359,7 @@ function Mod.OnUnitDead(unit)
     row.lastUpdateAt = now
     MarkL1SummaryDirty()
     DebugTrace(string.format("unit-dead unit=%s", tostring(unit)))
+    NotifyUnitChanged(unit)
     return row
 end
 
@@ -419,6 +432,7 @@ function Mod.SyncUnit(unit, runtime, obs, resolved, mapID)
     end
 
     row.lastCombatLogUnitDiedAt = tonumber(Mod._lastCombatLogUnitDiedAt) or 0
+    NotifyUnitChanged(unit)
     return row
 end
 

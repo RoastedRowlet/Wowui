@@ -1,0 +1,1262 @@
+local _, NSI = ... -- Internal namespace
+
+-- The Coiled Altar (3429)
+
+local encID = 3429
+-- /run NSAPI:DebugEncounter(3429)
+
+local eternalNightfallDuration = 15
+local eternalNightfallPreviewAbsorb = 5200000
+local p1SoakTimers = {
+    [15] = {48, 133},
+    [16] = {48, 133},
+}
+
+local p3SoakTimers = {
+    [15] = {22.3, 191.3},
+    [16] = {22.3, 191.3},
+}
+
+local debuffCircleFilter = "HARMFUL"
+local debuffCircleCandidateFilters = {isFromPlayerOrPlayerPet = false, maxDuration = 5.5}
+
+NSI.InitializeAlerts[encID] = function(self)
+    NSRT.EncounterAlerts[encID] = NSRT.EncounterAlerts[encID] or {}
+
+    local nonTankConditions = self:DefaultLoadConditions()
+    nonTankConditions.Roles.DAMAGER = true
+    nonTankConditions.Roles.HEALER = true
+
+    local tankConditions = self:DefaultLoadConditions()
+    tankConditions.Roles.TANK = true
+
+    local data = {Version = {versionNumber = 1, [1] = {group = "Coiled Altar"}}, group = "Coiled Altar", internalID = "P1Frontal", name = "P1 Frontal", text = "Frontal", DisplayType = "Text", encID = encID, phase = 1, TTS = true, dur = 8,
+        textColors = {1, 0, 0, 1}, spellID = 1299684,
+        isConditional = {
+            text = "This Alert only shows if you are not a tank or have threat on boss1.",
+            func = [[return function() if UnitGroupRolesAssigned("player") ~= "TANK" then return true end local threat = UnitThreatSituation("player", "boss1") return threat and threat >= 2 end]],
+        },
+        timers = {
+            [15] = {23, 40, 60, 77.1, 108.1, 125, 145, 162.1},
+            [16] = {23, 40, 60, 77.1, 108.1, 125, 145, 162.1},
+        },
+    }
+    self:AddEncounterAlert(data)
+
+    local data = {Version = {versionNumber = 2, [1] = {group = "Coiled Altar"}, [2] = {customIcon = 1299838}}, group = "Coiled Altar", internalID = "P1OrbDeadline", name = "Orb deadline", text = "Orb deadline", customIcon = 1299838, DisplayType = "Text", encID = encID, phase = 1, TTS = false, dur = 5,
+        timers = {
+            [15] = {17, 34, 54, 71.1, 102.1, 119, 139, 156.1},
+            [16] = {17, 34, 54, 71.1, 102.1, 119, 139, 156.1},
+        },
+    }
+    self:AddEncounterAlert(data)
+
+    local data = {Version = {versionNumber = 1, [1] = {group = "Coiled Altar"}}, group = "Coiled Altar", internalID = "P1Taunt", name = "P1 Taunt", text = "Taunt", customIcon = 355, DisplayType = "Text", encID = encID, phase = 1, TTS = true, TTSTimer = 0, dur = 6, sticky = 3,
+        textColors = {0, 1, 0, 1}, loadConditions = tankConditions, isTaunt = true,
+        isConditional = {
+            text = "This Alert only shows if you do not have threat on boss1.",
+            func = [[return function() local threat = UnitThreatSituation("player", "boss1") return threat and threat < 2 end]],
+        },
+        timers = {
+            [15] = {23.5, 40.5, 60.5, 77.6, 108.6, 125.5, 145.5, 162.6},
+            [16] = {23.5, 40.5, 60.5, 77.6, 108.6, 125.5, 145.5, 162.6},
+        },
+    }
+    self:AddEncounterAlert(data)
+
+    local data = {Version = {versionNumber = 1, [1] = {group = "Coiled Altar"}}, group = "Coiled Altar", internalID = "P1Soak", name = "P1 Soak", text = "Soak", DisplayType = "Text", encID = encID, phase = 1, TTS = true, dur = 8, spellID = 1283489,
+        loadConditions = tankConditions,
+        timers = {
+            [15] = p1SoakTimers[15],
+            [16] = p1SoakTimers[16],
+        },
+    }
+    self:AddEncounterAlert(data)
+
+    local data = {Version = {versionNumber = 1, [1] = {group = "Coiled Altar", name = "P2 Mind Controls"}}, group = "Coiled Altar", internalID = "MindControls", name = "P2 Mind Controls", text = "Mind Controls", DisplayType = "Text", encID = encID, phase = 2, TTS = false, dur = 6, spellID = 1285643,
+        timers = {
+            [15] = {8.1, 44.7, 93.1, 129},
+            [16] = {8.1, 44.7, 93.1, 129, 177.4},
+        },
+    }
+    self:AddEncounterAlert(data)
+
+    local data = {Version = {versionNumber = 1, [1] = {group = "Coiled Altar"}}, group = "Coiled Altar", internalID = "P2Frontal", name = "P2 Frontal", text = "Frontal", DisplayType = "Text", encID = encID, phase = 2, TTS = true, dur = 6,
+        textColors = {1, 0, 0, 1}, spellID = 1286620,
+        isConditional = {
+            text = "This Alert only shows if you are not a tank or have threat on boss2.",
+            func = [[return function() if UnitGroupRolesAssigned("player") ~= "TANK" then return true end local threat = UnitThreatSituation("player", "boss2") return threat and threat >= 2 end]],
+        },
+        timers = {
+            [15] = {38, 69, 123, 154},
+            [16] = {38, 69, 123, 154, 208},
+        },
+    }
+    self:AddEncounterAlert(data)
+
+    local data = {Version = {versionNumber = 1, [1] = {group = "Coiled Altar"}}, group = "Coiled Altar", internalID = "P2Taunt", name = "P2 Taunt", text = "Taunt", customIcon = 355, DisplayType = "Text", encID = encID, phase = 2, TTS = true, TTSTimer = 0, dur = 6, sticky = 3,
+        textColors = {0, 1, 0, 1}, loadConditions = tankConditions, isTaunt = true,
+        isConditional = {
+            text = "This Alert only shows if you do not have threat on boss2.",
+            func = [[return function() local threat = UnitThreatSituation("player", "boss2") return threat and threat < 2 end]],
+        },
+        timers = {
+            [15] = {38.6, 69.5, 123.6, 154.5},
+            [16] = {38.6, 69.5, 123.6, 154.5, 208.6},
+        },
+    }
+    self:AddEncounterAlert(data)
+
+    local data = {Version = {versionNumber = 1, [1] = {group = "Coiled Altar"}}, group = "Coiled Altar", internalID = "P2Debuffs", name = "P2 Debuffs", text = "Debuffs", DisplayType = "Text", encID = encID, phase = 2, TTS = false, dur = 6,
+        loadConditions = nonTankConditions, spellID = 1286895,
+        timers = {
+            [15] = {24.1, 62.1, 109, 147},
+            [16] = {20, 57, 105, 142, 190},
+        },
+    }
+    self:AddEncounterAlert(data)
+
+    local data = {Version = {versionNumber = 1, [1] = {group = "Coiled Altar"}}, group = "Coiled Altar", internalID = "P2Shield", name = "P2 Shield", text = "Shield", DisplayType = "Text", encID = encID, phase = 2, TTS = false, dur = 6,
+        spellID = 1286918,
+        timers = {
+            [15] = {70, 155},
+            [16] = {70, 155},
+        },
+    }
+    self:AddEncounterAlert(data)
+
+local debuffCirclePreview = [[return function(NSI)
+        local alert = NSRT.EncounterAlerts[3429][16].DebuffCircle
+        NSI:PreviewReminderCircle("CoiledAltarDebuffCirclePreview", 5, alert.CircleColor, alert.CircleTexture)
+    end]]
+    local debuffCircleOptions = {
+        {Type = "Color", label = NSI:Loc("Ring Color"),
+            get = [[return function() local alert = NSRT.EncounterAlerts[3429][16].DebuffCircle local c = alert.CircleColor or {1, 0, 0, 1} return c[1], c[2], c[3], c[4] end]],
+            set = [[return function(NSI, r, g, b, a) for difficultyID = 14, 16 do NSRT.EncounterAlerts[3429][difficultyID].DebuffCircle.CircleColor = {r, g, b, a} end NSI:UpdateCoiledAltarDebuffCircle() NSI:UpdateReminderCirclePreview("CoiledAltarDebuffCirclePreview", NSRT.EncounterAlerts[3429][16].DebuffCircle.CircleColor, NSRT.EncounterAlerts[3429][16].DebuffCircle.CircleTexture) end]],
+        },
+        {Type = "Dropdown", label = NSI:Loc("Ring Size"),
+            get = [[return function() local alert = NSRT.EncounterAlerts[3429][16].DebuffCircle return alert.CircleTexture or "Interface\\AddOns\\NorthernSkyRaidTools\\Media\\Textures\\circle_8px.png" end]],
+            set = [[return function(NSI, value) for difficultyID = 14, 16 do NSRT.EncounterAlerts[3429][difficultyID].DebuffCircle.CircleTexture = value end NSI:UpdateCoiledAltarDebuffCircle() NSI:UpdateReminderCirclePreview("CoiledAltarDebuffCirclePreview", NSRT.EncounterAlerts[3429][16].DebuffCircle.CircleColor, value) end]],
+            values = [[return function() return {
+                {label = "2 px", value = "Interface\\AddOns\\NorthernSkyRaidTools\\Media\\Textures\\circle_2px.png"},
+                {label = "5 px", value = "Interface\\AddOns\\NorthernSkyRaidTools\\Media\\Textures\\circle_5px.png"},
+                {label = "8 px", value = "Interface\\AddOns\\NorthernSkyRaidTools\\Media\\Textures\\circle_8px.png"},
+                {label = "10 px", value = "Interface\\AddOns\\NorthernSkyRaidTools\\Media\\Textures\\circle_10px.png"},
+                {label = "15 px", value = "Interface\\AddOns\\NorthernSkyRaidTools\\Media\\Textures\\circle_15px.png"},
+            } end]],
+        },
+    }
+    local data = {group = "Coiled Altar", internalID = "DebuffCircle", name = "Orb/Bomb Circle", text = "", DisplayType = "Circle", encID = encID,
+        phase = nil, TTS = false, difficulties = {14, 15, 16}, isSpecialDisplay = true, BlockCopy = true, NoEdit = true,
+        CircleColor = {1, 0, 0, 1}, CircleTexture = "Interface\\AddOns\\NorthernSkyRaidTools\\Media\\Textures\\circle_8px.png",
+        Preview = debuffCirclePreview, extraOptions = debuffCircleOptions,
+    }
+    self:AddEncounterAlert(data)
+
+    local eternalNightfallPreview = [[return function(NSI)
+        NSI:PreviewCoiledAltarEternalNightfall()
+    end]]
+    local eternalNightfallOptions = {
+        {Type = "Color", label = "Bar Color",
+            get = [[return function() local alert = NSRT.EncounterAlerts[3429][16].EternalNightfallAbsorb local c = alert.BarColor or NSRT.ReminderSettings.BarSettings.barColors return c[1], c[2], c[3], c[4] end]],
+            set = [[return function(NSI, r, g, b, a) for difficultyID = 15, 16 do NSRT.EncounterAlerts[3429][difficultyID].EternalNightfallAbsorb.BarColor = {r, g, b, a} end NSI:UpdateCoiledAltarEternalNightfall() end]],
+        },
+        {Type = "Slider", label = "Bar Width", min = 50, max = 600, step = 1,
+            get = [[return function() local alert = NSRT.EncounterAlerts[3429][16].EternalNightfallAbsorb return alert.BarWidth or NSRT.ReminderSettings.BarSettings.Width end]],
+            set = [[return function(NSI, value) for difficultyID = 15, 16 do NSRT.EncounterAlerts[3429][difficultyID].EternalNightfallAbsorb.BarWidth = value end NSI:UpdateCoiledAltarEternalNightfall() end]],
+        },
+        {Type = "Slider", label = "Bar Height", min = 10, max = 100, step = 1,
+            get = [[return function() local alert = NSRT.EncounterAlerts[3429][16].EternalNightfallAbsorb return alert.BarHeight or NSRT.ReminderSettings.BarSettings.Height end]],
+            set = [[return function(NSI, value) for difficultyID = 15, 16 do NSRT.EncounterAlerts[3429][difficultyID].EternalNightfallAbsorb.BarHeight = value end NSI:UpdateCoiledAltarEternalNightfall() end]],
+        },
+    }
+    local data = {Version = {versionNumber = 2, [1] = {group = "Coiled Altar"}, [2] = {customIcon = 1286918}}, group = "Coiled Altar", internalID = "EternalNightfallAbsorb", name = "Eternal Nightfall Absorb", text = "", customIcon = 1286918, DisplayType = "Bar", encID = encID,
+        phase = nil, TTS = false, dur = eternalNightfallDuration, enabled = true, isSpecialDisplay = true, BlockCopy = true,
+        BarColor = {0.6235, 0.2510, 1, 1}, BarWidth = 300, BarHeight = 40, Anchor = "TOP", relativeTo = "TOP", xOffset = 0, yOffset = -300,
+        Preview = eternalNightfallPreview, extraOptions = eternalNightfallOptions, difficulties = {15, 16}, NoEdit = true,
+    }
+    self:AddEncounterAlert(data)
+
+    local data = {Version = {versionNumber = 1, [1] = {group = "Coiled Altar"}}, group = "Coiled Altar", internalID = "InterruptAdds", name = "P2 Interrupt Adds", text = "Ghosts", DisplayType = "Text", encID = encID, phase = 2, TTS = false, dur = 6,
+        spellID = 1286399,
+        timers = {
+            [15] = {13, 46.1, 98},
+            [16] = {13, 46, 98, 131, 183},
+        },
+    }
+    self:AddEncounterAlert(data)
+
+    local data = {Version = {versionNumber = 1, [1] = {group = "Coiled Altar"}}, group = "Coiled Altar", internalID = "P3Frontal", name = "P3 Frontal", text = "Frontal", DisplayType = "Text", encID = encID, phase = 3, TTS = true, dur = 6,
+        textColors = {1, 0, 0, 1}, spellID = 1307292,
+        isConditional = {
+            text = "This Alert only shows if you are not a tank or have threat on boss1.",
+            func = [[return function() if UnitGroupRolesAssigned("player") ~= "TANK" then return true end local threat = UnitThreatSituation("player", "boss1") return threat and threat >= 2 end]],
+        },
+        timers = {
+            [15] = {36.3, 68.5, 103, 140.9, 173.1},
+            [16] = {35.5, 66.5, 99.9, 136.5, 167.6, 199.8},
+        },
+    }
+    self:AddEncounterAlert(data)
+
+    local data = {Version = {versionNumber = 2, [1] = {group = "Coiled Altar"}, [2] = {customIcon = 1299838}}, group = "Coiled Altar", internalID = "P3OrbDeadline", name = "P3 Orb deadline", text = "Orb deadline", customIcon = 1299838, DisplayType = "Text", encID = encID, phase = 3, TTS = false, dur = 5,
+        timers = {
+            [16] = {29.5, 60.5, 93.9, 130.5, 161.6, 193.8},
+        },
+        difficulties = {16},
+    }
+    self:AddEncounterAlert(data)
+
+    local data = {Version = {versionNumber = 1, [1] = {group = "Coiled Altar"}}, group = "Coiled Altar", internalID = "P3Soak", name = "P3 Soak", text = "Soak", DisplayType = "Text", encID = encID, phase = 3, TTS = true, dur = 8, spellID = 1299266,
+        loadConditions = tankConditions,
+        timers = {
+            [15] = {22.3, 191.3},
+            [16] = {21.8, 86.3, 186.3},
+        },
+    }
+    self:AddEncounterAlert(data)
+
+    local data = {Version = {versionNumber = 1, [1] = {group = "Coiled Altar"}}, group = "Coiled Altar", internalID = "P3Shield", name = "P3 Shield", text = "Shield", DisplayType = "Text", encID = encID, phase = 3, TTS = false, dur = 6,
+        spellID = 1310752,
+        timers = {
+            [15] = {41.9, 141.8},
+            [16] = {38, 134.8},
+        },
+    }
+    self:AddEncounterAlert(data)
+
+    local data = {Version = {versionNumber = 1, [1] = {group = "Coiled Altar"}}, group = "Coiled Altar", internalID = "P3Debuffs", name = "P3 Debuffs", text = "Debuffs", DisplayType = "Text", encID = encID, phase = 3, TTS = false, dur = 6,
+        loadConditions = nonTankConditions, spellID = 1310881,
+        timers = {
+            [15] = {31.2, 81.8, 115.1, 181.8},
+            [16] = {26.8, 71.1, 109, 172.2},
+        },
+    }
+    self:AddEncounterAlert(data)
+
+    local data = {Version = {versionNumber = 1, [1] = {group = "Coiled Altar"}}, group = "Coiled Altar", internalID = "P3InterruptAdds", name = "P3 Interrupt Adds", text = "Ghosts", DisplayType = "Text", encID = encID, phase = 3, TTS = false, dur = 6,
+        spellID = 1286399,
+        timers = {
+            [16] = {62.2, 159.2},
+        },
+        difficulties = {16},
+    }
+    self:AddEncounterAlert(data)
+
+    local data = {Version = {versionNumber = 1, [1] = {group = "Coiled Altar"}}, group = "Coiled Altar", internalID = "P3MindControls", name = "P3 Mind Controls", text = "Mind Controls", DisplayType = "Text", encID = encID, phase = 3, TTS = false, dur = 6, spellID = 1297445,
+        timers = {
+            [15] = {66.3, 167.5},
+            [16] = {57.8, 154.1, 201.9},
+        },
+    }
+    self:AddEncounterAlert(data)
+
+    local data = {Version = {versionNumber = 1, [1] = {group = "Coiled Altar"}}, group = "Coiled Altar", internalID = "P3Taunt", name = "P3 Taunt", text = "Taunt", customIcon = 355, DisplayType = "Text", encID = encID, phase = 3, TTS = true, TTSTimer = 0, dur = 6, sticky = 3,
+        textColors = {0, 1, 0, 1}, loadConditions = tankConditions, isTaunt = true,
+        isConditional = {
+            text = "This Alert only shows if you do not have threat on boss1.",
+            func = [[return function() local threat = UnitThreatSituation("player", "boss1") return threat and threat < 2 end]],
+        },
+        timers = {
+            [15] = {39.6, 71.8, 106.3, 144.2, 176.4},
+            [16] = {36, 67, 100.4, 137, 168.1, 200.3},
+        },
+    }
+    self:AddEncounterAlert(data)
+
+    local data = {Version = {versionNumber = 1, [1] = {group = "Coiled Altar"}}, group = "Coiled Altar", internalID = "P2_5WrongTarget", name = "Wrong Target", text = "WRONG TARGET", DisplayType = "Text", encID = encID, phase = 2.5, TTS = false, dur = 50, sticky = 50,
+        timers = {
+            [14] = {0},
+            [15] = {0},
+            [16] = {0},
+        },
+        enabled = true, textColors = {1, 0, 0, 1}, HideTimer = true, isSpecialDisplay = true, BlockCopy = true,
+    }
+    self:AddEncounterAlert(data)
+
+    local data = {group = "Coiled Altar", internalID = "InterruptAssignments", name = "Interrupt Assignments", text = "Interrupts", customIcon = 6552, DisplayType = "Text", encID = encID, phase = 2, TTS = false, dur = 35,
+        difficulties = {16}, enabled = true, pinned = true, isSpecialDisplay = true, BlockCopy = true, NoEdit = true, NumberFontSize = 12, NameFontSize = 12, BoxSize = 30,
+        NameplateAnchor = "TOP", NameplateXOffset = 0, NameplateYOffset = 0, ShowAll = false, DisplayStaticBox = false, HideNameplateBox = false,
+        Version = {versionNumber = 4, [1] = {BoxSize = 30}, [2] = {NumberFontSize = 12, NameFontSize = 12}, [3] = {group = "Coiled Altar"}, [4] = {customIcon = 6552}},
+        extraOptions = {
+            { Type = "Label", text = NSI:Loc("The first interrupt line will be assigned to the add with no raidmarker. The second interrupt line will be assigned to the add with any raidmarker. The usual strat is that you have one person instantly putting a raidmarker on the ranged add so the correct box shows and counts up.\n\nOptionally, add two more lines for separate P3 assignments, or four more lines for separate assignments for the first and second P3 add waves. Each pair follows the same order: unmarked add first, marked add second."), height = 120 },
+            { Type = "Slider", label = "Number Font Size", min = 8, max = 40, step = 1,
+                get = [[return function(NSI) local alert = NSRT.EncounterAlerts[3429][16].InterruptAssignments return alert.NumberFontSize or alert.FontSize or 12 end]],
+                set = [[return function(NSI, value) NSRT.EncounterAlerts[3429][16].InterruptAssignments.NumberFontSize = value NSI:UpdateCoiledAltarInterruptDisplay() NSI:UpdateCoiledAltarInterruptPreview() end]],
+            },
+            { Type = "Slider", label = "Name Font Size", min = 8, max = 40, step = 1,
+                get = [[return function(NSI) local alert = NSRT.EncounterAlerts[3429][16].InterruptAssignments return alert.NameFontSize or alert.FontSize or 12 end]],
+                set = [[return function(NSI, value) NSRT.EncounterAlerts[3429][16].InterruptAssignments.NameFontSize = value NSI:UpdateCoiledAltarInterruptDisplay() NSI:UpdateCoiledAltarInterruptPreview() end]],
+            },
+            { Type = "Slider", label = "Box Size", min = 30, max = 150, step = 1,
+                get = [[return function(NSI) return NSRT.EncounterAlerts[3429][16].InterruptAssignments.BoxSize or 30 end]],
+                set = [[return function(NSI, value) NSRT.EncounterAlerts[3429][16].InterruptAssignments.BoxSize = value NSI:UpdateCoiledAltarInterruptDisplay() NSI:UpdateCoiledAltarInterruptPreview() end]],
+            },
+            { Type = "Dropdown", label = "Nameplate Anchor",
+                get = [[return function(NSI) return NSRT.EncounterAlerts[3429][16].InterruptAssignments.NameplateAnchor or "TOP" end]],
+                set = [[return function(NSI, value) NSRT.EncounterAlerts[3429][16].InterruptAssignments.NameplateAnchor = value NSI:UpdateCoiledAltarInterruptDisplay() NSI:UpdateCoiledAltarInterruptPreview() end]],
+                values = [[return function()
+                    return {
+                        {label = "Top", value = "TOP"},
+                        {label = "Center", value = "CENTER"},
+                        {label = "Left", value = "LEFT"},
+                        {label = "Right", value = "RIGHT"},
+                        {label = "Bottom", value = "BOTTOM"},
+                    }
+                end]],
+            },
+            { Type = "Slider", label = "Nameplate X Offset", min = -200, max = 200, step = 1,
+                get = [[return function(NSI) return NSRT.EncounterAlerts[3429][16].InterruptAssignments.NameplateXOffset or 0 end]],
+                set = [[return function(NSI, value) NSRT.EncounterAlerts[3429][16].InterruptAssignments.NameplateXOffset = value NSI:UpdateCoiledAltarInterruptDisplay() NSI:UpdateCoiledAltarInterruptPreview() end]],
+            },
+            { Type = "Slider", label = "Nameplate Y Offset", min = -200, max = 200, step = 1,
+                get = [[return function(NSI) return NSRT.EncounterAlerts[3429][16].InterruptAssignments.NameplateYOffset or 0 end]],
+                set = [[return function(NSI, value) NSRT.EncounterAlerts[3429][16].InterruptAssignments.NameplateYOffset = value NSI:UpdateCoiledAltarInterruptDisplay() NSI:UpdateCoiledAltarInterruptPreview() end]],
+            },
+            { Type = "Checkbox", label = "Show All",
+                get = [[return function(NSI) return NSRT.EncounterAlerts[3429][16].InterruptAssignments.ShowAll or false end]],
+                set = [[return function(NSI, value) NSRT.EncounterAlerts[3429][16].InterruptAssignments.ShowAll = value NSI:UpdateCoiledAltarInterruptDisplay() NSI:UpdateCoiledAltarInterruptPreview() end]],
+                tooltip = {title = "Show All", desc = "Show the assignment boxes for both interrupt lines."},
+            },
+            { Type = "Checkbox", label = NSI:Loc("Display static box"),
+                get = [[return function(NSI) return NSRT.EncounterAlerts[3429][16].InterruptAssignments.DisplayStaticBox or false end]],
+                set = [[return function(NSI, value) local alert = NSRT.EncounterAlerts[3429][16].InterruptAssignments alert.DisplayStaticBox = value NSI:UpdateCoiledAltarInterruptDisplay() NSI:UpdateCoiledAltarInterruptPreview() end]],
+                tooltip = {title = "Display static box", desc = NSI:Loc("Use the global Interrupt Display settings for the static box.")},
+            },
+            { Type = "Checkbox", label = NSI:Loc("Hide nameplate box"),
+                get = [[return function(NSI) return NSRT.EncounterAlerts[3429][16].InterruptAssignments.HideNameplateBox or false end]],
+                set = [[return function(NSI, value) NSRT.EncounterAlerts[3429][16].InterruptAssignments.HideNameplateBox = value NSI:UpdateCoiledAltarInterruptDisplay() end]],
+                tooltip = {title = NSI:Loc("Hide nameplate box"), desc = NSI:Loc("Hide the nameplate box while keeping the static box visible.")},
+            },
+        },
+        Preview = [[return function(NSI)
+            if NSI:PreviewCoiledAltarInterruptDisplay() then
+                local alert = NSRT.EncounterAlerts[3429][16].InterruptAssignments
+                local message = alert.DisplayStaticBox and "|cFF00FFFFNSRT:|r the live display uses the global Interrupt Display settings during phases 2 and 3." or "|cFF00FFFFNSRT:|r the live display is shown on add nameplates during phases 2 and 3. Its size may also change with the nameplate frame scale."
+                print(NSI:Loc(message))
+            end
+        end]],
+    }
+    self:AddEncounterAlert(data)
+end
+
+function NSI:UpdateCoiledAltarDebuffCircle()
+    local alert = self.CoiledAltarDebuffCircleAlert
+    if not alert then return end
+
+    local shown = alert.enabled and self:EvaluateLoad(alert) and self.Phase ~= 2.5
+    self:UpdateAuraContainerCircle("CoiledAltarDebuffCircleContainer", "CoiledAltarDebuffCircleAuraSlot", alert, shown)
+end
+
+local function HideCoiledAltarWrongTarget(self)
+    self:EncounterRegister("CoiledAltarWrongTarget", "PLAYER_TARGET_CHANGED", false)
+    self.CoiledAltarWrongTargetEndTime = nil
+    if self.CoiledAltarWrongTargetTimer then
+        self.CoiledAltarWrongTargetTimer:Cancel()
+        self.CoiledAltarWrongTargetTimer = nil
+    end
+    if self.CoiledAltarWrongTargetFrame then
+        self.CoiledAltarWrongTargetFrame:Hide()
+        self.CoiledAltarWrongTargetFrame = nil
+    end
+end
+
+local function UpdateCoiledAltarWrongTarget(self)
+    if self.Phase ~= 2.5 or not self.CoiledAltarWrongTargetEndTime or GetTime() >= self.CoiledAltarWrongTargetEndTime then
+        HideCoiledAltarWrongTarget(self)
+        return
+    end
+
+    local targetExists = UnitExists("target")
+    if issecretvalue(targetExists) or not targetExists then
+        if self.CoiledAltarWrongTargetFrame then
+            self.CoiledAltarWrongTargetFrame:Hide()
+            self.CoiledAltarWrongTargetFrame = nil
+        end
+        return
+    end
+
+    local isBossTarget = UnitIsUnit("target", "boss1")
+    if issecretvalue(isBossTarget) then return end
+    if isBossTarget then
+        if self.CoiledAltarWrongTargetFrame then
+            self.CoiledAltarWrongTargetFrame:Hide()
+            self.CoiledAltarWrongTargetFrame = nil
+        end
+        return
+    end
+
+    if self.CoiledAltarWrongTargetFrame and self.CoiledAltarWrongTargetFrame:IsShown() then return end
+    local remainingDuration = self.CoiledAltarWrongTargetEndTime - GetTime()
+    local alert = self.CoiledAltarWrongTargetAlert
+    local info = self:CreateReminder({
+        text = alert.text,
+        DisplayType = alert.DisplayType,
+        textColors = alert.textColors,
+        dur = remainingDuration,
+        time = remainingDuration,
+        encID = encID,
+        phase = self.Phase,
+        HideTimer = true,
+        sticky = alert.sticky,
+        TTS = false,
+        IsAlert = false,
+        ReloeReminder = true,
+    })
+    self.CoiledAltarWrongTargetFrame = info and self:DisplayReminder(info)
+end
+
+NSI.AddAssignments[encID] = function(self, id) -- on ENCOUNTER_START
+    local settings = self.Assignments and self.Assignments[encID]
+    if not settings or UnitGroupRolesAssigned("player") == "TANK" then return end
+
+    local diff = id or self:DifficultyCheck({15, 16})
+    if not diff or not p1SoakTimers[diff] then return end
+
+    local group
+    if diff == 16 then
+        if not settings.Mythic then return end
+        group = self:GetSubGroup("player") <= 2 and 1 or 2
+    else
+        if not settings.Heroic then return end
+        local _, first = self:GetSortedGroup(true, false, false)
+        group = 2
+        for _, member in ipairs(first) do
+            if UnitIsUnit(member.unitid, "player") then
+                group = 1
+                break
+            end
+        end
+    end
+    for phase, timers in pairs({[1] = p1SoakTimers[diff], [3] = p3SoakTimers[diff]}) do
+        if #timers > 0 then
+            local alert = self:CreateDefaultAlert("", "Text", nil, nil, phase, encID, true)
+            alert.dur = 8
+            for index, timer in ipairs(timers) do
+                local shouldSoak = (index == 1 and group == 1) or (index == 2 and group == 2)
+                alert.time = timer
+                alert.text = shouldSoak and NSI:EncounterAlertLoc("|cFF00FF00SOAK") or NSI:EncounterAlertLoc("|cFFFF0000DON'T SOAK")
+                alert.TTS = shouldSoak and NSI:EncounterAlertLoc("Soak") or NSI:EncounterAlertLoc("Don't soak")
+                self:AddToReminder(alert)
+            end
+        end
+    end
+
+    if NSRT.AssignmentSettings.OnPull then
+        local side = group == 1 and "First" or "Second"
+        self:DisplayText(string.format(NSI:EncounterAlertLoc("You are assigned to the |cFF00FF00%s|r Guillotine Soak"), NSI:EncounterAlertLoc(side)), 5)
+    end
+end
+
+local function CancelCoiledAltarInterruptWaveTimer(self)
+    if self.CoiledAltarInterruptWaveTimer then
+        self.CoiledAltarInterruptWaveTimer:Cancel()
+        self.CoiledAltarInterruptWaveTimer = nil
+    end
+end
+
+local function SelectCoiledAltarInterruptAssignments(self, wave)
+    local interrupts = self.Interrupts
+    local assignments = self.CoiledAltarInterruptAssignments
+    if not interrupts or not assignments then return end
+    local first = 2
+    if wave >= 2 and assignments[4] and assignments[5] then first = 4 end
+    if wave >= 3 and assignments[6] and assignments[7] then first = 6 end
+    -- Keep the display's existing two-line indices, using only the active pair.
+    interrupts.assignTable = {[2] = assignments[first], [3] = assignments[first + 1]}
+    interrupts.myID = 0
+    interrupts.myKick = 0
+    interrupts.max = 0
+    interrupts.disabled = true
+    for line = 2, 3 do
+        for position, name in ipairs(interrupts.assignTable[line] or {}) do
+            if UnitIsUnit(name, "player") then
+                interrupts.myID = line
+                interrupts.myKick = position
+                interrupts.max = #interrupts.assignTable[line]
+                interrupts.disabled = false
+            end
+        end
+    end
+    interrupts.myTrackedID = interrupts.myID
+    interrupts.myTable = interrupts.assignTable[interrupts.myID] or {}
+end
+
+local function ReadCoiledAltarInterruptNote(self, wave)
+    self:ReadInterruptNote(1)
+    self.CoiledAltarInterruptAssignments = self.Interrupts.assignTable
+    SelectCoiledAltarInterruptAssignments(self, wave or 1)
+end
+
+local function ResetCoiledAltarInterruptDisplay(self)
+    CancelCoiledAltarInterruptWaveTimer(self)
+    self.CoiledAltarInterruptAssignments = nil
+    if self.CoiledAltarInterruptFrame then
+        self.CoiledAltarInterruptFrame:Hide()
+    end
+    if self.CoiledAltarInterruptStaticShown then
+        self:HideInterrupt()
+        self.CoiledAltarInterruptStaticShown = false
+    end
+    self.CoiledAltarInterruptActive = false
+    self.CoiledAltarInterruptBoss3Available = false
+    self.CoiledAltarInterruptCastCounts = {}
+    self.CoiledAltarInterruptLastSoundCastCounts = {}
+    for displayKey, display in pairs(self.CoiledAltarInterruptNameplates or {}) do
+        for boxIndex, box in ipairs(display.boxes) do
+            box:Hide()
+        end
+        for lineIndex, line in ipairs(display.lines) do
+            for fontIndex, fontString in ipairs(line) do
+                fontString:SetAlpha(0)
+            end
+        end
+    end
+end
+
+function NSI:UpdateCoiledAltarInterruptPreview()
+    local preview = self.CoiledAltarInterruptPreviewFrame
+    if not preview then return end
+
+    local alert = self.CoiledAltarInterruptAlert or (NSRT.EncounterAlerts[encID] and NSRT.EncounterAlerts[encID][16] and NSRT.EncounterAlerts[encID][16].InterruptAssignments)
+    local interruptSettings = NSRT.InterruptSettings
+    local assignmentTable = self.Interrupts and self.Interrupts.assignTable or {}
+    local boxSize = alert and alert.BoxSize or 30
+    local fontScale = boxSize / 30
+    local numberFontSize = alert and (alert.NumberFontSize or alert.FontSize) or 12
+    local nameFontSize = alert and (alert.NameFontSize or alert.FontSize) or 12
+    local nameFontPath = self.LSM:Fetch("font", interruptSettings.NameFont)
+    local numberFontPath = self.LSM:Fetch("font", interruptSettings.NumberFont)
+
+    self:MakeDraggable(preview, nil, false, false)
+    preview:SetScale(self:GetInterruptNameplateScale(C_NamePlate.GetNamePlateForUnit("focus")))
+    preview:SetSize(boxSize * 2 + 20, boxSize + 20)
+    preview:ClearAllPoints()
+    preview:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
+    for boxIndex, box in ipairs(preview.boxes) do
+        box:Hide()
+        local previewLine = self.Interrupts and self.Interrupts.myID == 3 and 2 or 1
+        if boxIndex == previewLine then
+            local displayLine = boxIndex
+            local lineNames = assignmentTable[displayLine + 1] or {}
+            local currentName = lineNames[1]
+            local nextName = lineNames[2]
+            local boxColor = interruptSettings.InterruptDefaultColor
+            local textColor = interruptSettings.InterruptDefaultTextColor
+            if currentName and UnitIsUnit(currentName, "player") then
+                boxColor = interruptSettings.InterruptNowColor
+                textColor = interruptSettings.InterruptNowTextColor
+            elseif nextName and UnitIsUnit(nextName, "player") then
+                boxColor = interruptSettings.InterruptNextColor
+                textColor = interruptSettings.InterruptNextTextColor
+            end
+
+            box:ClearAllPoints()
+            box:SetPoint("CENTER", preview, "CENTER", boxIndex == 1 and -(boxSize + 10) / 2 or (boxSize + 10) / 2, 0)
+            box:SetSize(boxSize, boxSize)
+            box.Background:SetColorTexture(unpack(boxColor))
+
+            local number = preview.numbers[boxIndex]
+            number:ClearAllPoints()
+            number:SetPoint(interruptSettings.NumberAnchor, box, interruptSettings.NumberRelativeTo, interruptSettings.NumberxOffset, interruptSettings.NumberyOffset)
+            number:SetFont(numberFontPath, numberFontSize * fontScale, interruptSettings.NumberFontFlags)
+            number:SetTextColor(unpack(textColor))
+            number:SetText(1)
+
+            local name = preview.names[boxIndex]
+            name:ClearAllPoints()
+            name:SetPoint(interruptSettings.NameAnchor, box, interruptSettings.NameRelativeTo, interruptSettings.NamexOffset, interruptSettings.NameyOffset)
+            name:SetFont(nameFontPath, nameFontSize * fontScale, interruptSettings.NameFontFlags)
+            name:SetText(currentName and NSAPI:Shorten(currentName, 12, false, "GlobalNickNames", true, false) or NSAPI:Shorten("player", 12, false, "GlobalNickNames", true, false))
+            box:Show()
+        end
+    end
+end
+
+function NSI:PreviewCoiledAltarInterruptDisplay()
+    local alert = self.CoiledAltarInterruptAlert or (NSRT.EncounterAlerts[encID] and NSRT.EncounterAlerts[encID][16] and NSRT.EncounterAlerts[encID][16].InterruptAssignments)
+    if alert and alert.DisplayStaticBox then
+        if self.CoiledAltarInterruptPreviewFrame then
+            self.CoiledAltarInterruptPreviewFrame:Hide()
+        end
+        ReadCoiledAltarInterruptNote(self, 1)
+        local displayLine = self.Interrupts and self.Interrupts.myID == 3 and 2 or 1
+        local lineNames = self.Interrupts and self.Interrupts.assignTable[displayLine + 1] or {}
+        local currentName = lineNames[1]
+        local nextName = lineNames[2]
+        local interruptSettings = NSRT.InterruptSettings
+        local boxColor = interruptSettings.InterruptDefaultColor
+        local textColor = interruptSettings.InterruptDefaultTextColor
+        if currentName and UnitIsUnit(currentName, "player") then
+            boxColor = interruptSettings.InterruptNowColor
+            textColor = interruptSettings.InterruptNowTextColor
+        elseif nextName and UnitIsUnit(nextName, "player") then
+            boxColor = interruptSettings.InterruptNextColor
+            textColor = interruptSettings.InterruptNextTextColor
+        end
+        local displayName = currentName and NSAPI:Shorten(currentName, 12, false, "GlobalNickNames", true, false) or NSAPI:Shorten("player", 12, false, "GlobalNickNames", true, false)
+        return self:PreviewInterruptDisplay(1, displayName, boxColor, textColor)
+    end
+    if self.CoiledAltarInterruptPreviewFrame and self.CoiledAltarInterruptPreviewFrame:IsShown() then
+        self.CoiledAltarInterruptPreviewFrame:Hide()
+        return false
+    end
+    if not self.CoiledAltarInterruptPreviewFrame then
+        local preview = CreateFrame("Frame", "NSRTCoiledAltarInterruptPreview", UIParent)
+        preview:SetFrameStrata("DIALOG")
+        preview:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
+        preview:SetFrameLevel(10)
+        preview.boxes = {}
+        preview.numbers = {}
+        preview.names = {}
+        for boxIndex = 1, 2 do
+            local box = NSI:CreateInterruptAssignmentDisplay(preview)
+            box:SetFrameLevel(1)
+            box:Show()
+            preview.boxes[boxIndex] = box
+            preview.numbers[boxIndex] = box.Number
+            preview.names[boxIndex] = box.Name
+        end
+        self.CoiledAltarInterruptPreviewFrame = preview
+    end
+    ReadCoiledAltarInterruptNote(self, 1)
+    self:UpdateCoiledAltarInterruptPreview()
+    self.CoiledAltarInterruptPreviewFrame:Show()
+    return true
+end
+
+function NSI:UpdateCoiledAltarInterruptDisplay()
+    local alert = self.CoiledAltarInterruptAlert
+    local interrupts = self.Interrupts
+    local assignmentTable = interrupts and interrupts.assignTable
+    local phaseAllowed = self.Phase == 2 or self.Phase == 2.5 or self.Phase == 3
+    local alertLoad = alert and self:EvaluateLoad(alert)
+    local active = self.CoiledAltarInterruptActive and self.CoiledAltarInterruptBoss3Available ~= false and phaseAllowed and alert and alert.enabled and alertLoad
+    if not active or not assignmentTable or not assignmentTable[2] or not assignmentTable[3] then
+        for displayKey, display in pairs(self.CoiledAltarInterruptNameplates or {}) do
+            for boxIndex, box in ipairs(display.boxes) do
+                box:Hide()
+            end
+            for lineIndex, line in ipairs(display.lines) do
+                for fontIndex, fontString in ipairs(line) do
+                    fontString:SetAlpha(0)
+                end
+            end
+        end
+        if self.CoiledAltarInterruptStaticShown then
+            self:HideInterrupt()
+            self.CoiledAltarInterruptStaticShown = false
+        end
+        return
+    end
+
+    local boxSize = alert.BoxSize or 100
+    local numberFontSize = alert.NumberFontSize or alert.FontSize or 12
+    local nameFontSize = alert.NameFontSize or alert.FontSize or 12
+    local nameplateAnchor = alert.NameplateAnchor or "TOP"
+    local boxAnchor, plateAnchor = "BOTTOM", "TOP"
+    if nameplateAnchor == "CENTER" then
+        boxAnchor, plateAnchor = "CENTER", "CENTER"
+    elseif nameplateAnchor == "LEFT" then
+        boxAnchor, plateAnchor = "RIGHT", "LEFT"
+    elseif nameplateAnchor == "RIGHT" then
+        boxAnchor, plateAnchor = "LEFT", "RIGHT"
+    elseif nameplateAnchor == "BOTTOM" then
+        boxAnchor, plateAnchor = "TOP", "BOTTOM"
+    end
+    local nameplateXOffset = alert.NameplateXOffset or 0
+    local nameplateYOffset = alert.NameplateYOffset or 0
+    local assignedLine = self.Interrupts.myID == 2 and 1 or self.Interrupts.myID == 3 and 2
+    local interruptSettings = NSRT.InterruptSettings
+    local nameFontPath = self.LSM:Fetch("font", interruptSettings.NameFont)
+    local numberFontPath = self.LSM:Fetch("font", interruptSettings.NumberFont)
+    local fontScale = boxSize / 30
+
+    if alert.DisplayStaticBox and UnitExists("focus") then
+        local focusExists = UnitExists("focus")
+        local focusIsGhost = focusExists and UnitLevel("focus") == 92
+        local focusMarker = focusIsGhost and GetRaidTargetIndex("focus")
+        local focusHasMarker = focusIsGhost and issecretvalue(focusMarker)
+        local displayLine = focusHasMarker and 2 or 1
+        local boxVisible = focusIsGhost and (alert.ShowAll or assignedLine == displayLine)
+        if boxVisible then
+            local lineNames = assignmentTable[displayLine + 1]
+            local castCount = self.CoiledAltarInterruptCastCounts["focus"] or 1
+            local currentName = #lineNames > 0 and lineNames[((castCount - 1) % #lineNames) + 1]
+            local nextName = #lineNames > 0 and lineNames[(castCount % #lineNames) + 1]
+            local boxColor = interruptSettings.InterruptDefaultColor
+            local textColor = interruptSettings.InterruptDefaultTextColor
+            if currentName and UnitIsUnit(currentName, "player") then
+                boxColor = interruptSettings.InterruptNowColor
+                textColor = interruptSettings.InterruptNowTextColor
+            elseif nextName and UnitIsUnit(nextName, "player") then
+                boxColor = interruptSettings.InterruptNextColor
+                textColor = interruptSettings.InterruptNextTextColor
+            end
+            local displayName = currentName and NSAPI:Shorten(currentName, 12, false, "GlobalNickNames", true, false) or ""
+            self:DisplayInterruptAssignment(castCount, displayName, boxColor, textColor)
+            self.CoiledAltarInterruptStaticShown = true
+        elseif self.CoiledAltarInterruptStaticShown then
+            self:HideInterrupt()
+            self.CoiledAltarInterruptStaticShown = false
+        end
+    elseif self.CoiledAltarInterruptStaticShown then
+        self:HideInterrupt()
+        self.CoiledAltarInterruptStaticShown = false
+    end
+
+    if alert.HideNameplateBox then
+        for displayKey, display in pairs(self.CoiledAltarInterruptNameplates or {}) do
+            for boxIndex, box in ipairs(display.boxes) do
+                box:Hide()
+            end
+        end
+        return
+    end
+
+    for unit, display in pairs(self.CoiledAltarInterruptNameplates or {}) do
+        if display.plate then
+            local raidMarker = GetRaidTargetIndex(unit)
+            local hasRaidMarker = issecretvalue(raidMarker)
+            for boxIndex, box in ipairs(display.boxes) do
+                box:SetAlpha(0)
+                box:Hide()
+            end
+            for bossIndex, box in ipairs(display.boxes) do
+                local displayLine = bossIndex == 2 and 2 or 1
+                local lineNames = assignmentTable[displayLine + 1]
+                local castCount = self.CoiledAltarInterruptCastCounts[unit] or 1
+                local currentName = #lineNames > 0 and lineNames[((castCount - 1) % #lineNames) + 1]
+                local nextName = #lineNames > 0 and lineNames[(castCount % #lineNames) + 1]
+                local boxColor = interruptSettings.InterruptDefaultColor
+                local textColor = interruptSettings.InterruptDefaultTextColor
+                if currentName and UnitIsUnit(currentName, "player") then
+                    boxColor = interruptSettings.InterruptNowColor
+                    textColor = interruptSettings.InterruptNowTextColor
+                elseif nextName and UnitIsUnit(nextName, "player") then
+                    boxColor = interruptSettings.InterruptNextColor
+                    textColor = interruptSettings.InterruptNextTextColor
+                end
+                box:ClearAllPoints()
+                box:SetPoint(boxAnchor, display.plate, plateAnchor, nameplateXOffset, nameplateYOffset)
+                box:SetSize(boxSize, boxSize)
+                box.Background:SetColorTexture(unpack(boxColor))
+                local boxVisible = (alert.ShowAll or assignedLine == displayLine) and ((bossIndex == 2) == hasRaidMarker)
+                if boxVisible then
+                    box:SetAlpha(1)
+                    box:Show()
+                end
+                local number = display.numbers[bossIndex]
+                local name = display.names[bossIndex]
+                local displayName = currentName and UnitExists(currentName) and NSAPI:Shorten(currentName, 12, false, "GlobalNickNames", true, false) or ""
+                number:ClearAllPoints()
+                number:SetPoint(interruptSettings.NumberAnchor, box, interruptSettings.NumberRelativeTo, interruptSettings.NumberxOffset, interruptSettings.NumberyOffset)
+                number:SetFont(numberFontPath, numberFontSize * fontScale, interruptSettings.NumberFontFlags)
+                number:SetTextColor(unpack(textColor))
+                number:SetText(castCount)
+                number:SetAlpha(1)
+                name:ClearAllPoints()
+                name:SetPoint(interruptSettings.NameAnchor, box, interruptSettings.NameRelativeTo, interruptSettings.NamexOffset, interruptSettings.NameyOffset)
+                name:SetFont(nameFontPath, nameFontSize * fontScale, interruptSettings.NameFontFlags)
+                name:SetText(displayName)
+                name:SetAlpha(1)
+            end
+            for lineIndex, line in ipairs(display.lines) do
+                for bossIndex, fontString in ipairs(line) do
+                    fontString:SetAlpha(0)
+                end
+            end
+        end
+    end
+end
+
+-- castBarID restarts at 1 per ghost, and bar 1 only ever fires a START, so a
+-- ghost's first real cast is bar 2.
+local function CoiledAltarInterruptPosition(castBarID)
+    return math.max(1, castBarID - 1)
+end
+
+-- A plate attaches after its ghost's first cast has begun, and a recycled token
+-- still holds the dead ghost's count, so prefer the bar in progress when there
+-- is one. castBarID is UnitCastingInfo's tenth return.
+local function SyncCoiledAltarInterruptCount(self, unit)
+    local castBarID = select(10, UnitCastingInfo(unit))
+    if castBarID and not issecretvalue(castBarID) then
+        self.CoiledAltarInterruptCastCounts[unit] = CoiledAltarInterruptPosition(castBarID)
+    end
+end
+
+local function AddCoiledAltarInterruptNameplate(self, unit)
+    local plate = C_NamePlate.GetNamePlateForUnit(unit)
+    local interruptSettings = NSRT.InterruptSettings
+    self.CoiledAltarInterruptNameplates = self.CoiledAltarInterruptNameplates or {}
+    if not plate or UnitLevel(unit) ~= 92 then
+        local oldDisplay = self.CoiledAltarInterruptNameplates[unit]
+        if oldDisplay then
+            for boxIndex, box in ipairs(oldDisplay.boxes) do
+                box:Hide()
+            end
+            oldDisplay.plate = nil
+        end
+        return
+    end
+    local display = self.CoiledAltarInterruptNameplates[unit]
+    if not display then
+        display = {plate = plate, lines = {}, numbers = {}, names = {}, boxes = {}}
+        self.CoiledAltarInterruptNameplates[unit] = display
+        for bossIndex = 1, 2 do
+            local box = NSI:CreateInterruptAssignmentDisplay(self.CoiledAltarInterruptFrame)
+            display.boxes[bossIndex] = box
+            box:SetFrameLevel(1)
+            box:SetSize(self.CoiledAltarInterruptAlert.BoxSize or 100, self.CoiledAltarInterruptAlert.BoxSize or 100)
+            box:SetPoint("BOTTOM", plate, "TOP", 0, 0)
+            display.numbers[bossIndex] = box.Number
+            display.numbers[bossIndex]:SetPoint(interruptSettings.NumberAnchor, box, interruptSettings.NumberRelativeTo, interruptSettings.NumberxOffset, interruptSettings.NumberyOffset)
+            display.names[bossIndex] = box.Name
+            display.names[bossIndex]:SetPoint(interruptSettings.NameAnchor, box, interruptSettings.NameRelativeTo, interruptSettings.NamexOffset, interruptSettings.NameyOffset)
+        end
+    elseif not display.numbers then
+        display.numbers = {}
+        display.names = {}
+        for bossIndex, box in ipairs(display.boxes) do
+            display.numbers[bossIndex] = box.Number
+            display.numbers[bossIndex]:SetPoint(interruptSettings.NumberAnchor, box, interruptSettings.NumberRelativeTo, interruptSettings.NumberxOffset, interruptSettings.NumberyOffset)
+            display.names[bossIndex] = box.Name
+            display.names[bossIndex]:SetPoint(interruptSettings.NameAnchor, box, interruptSettings.NameRelativeTo, interruptSettings.NamexOffset, interruptSettings.NameyOffset)
+        end
+        for lineIndex = 1, 2 do
+            display.lines[lineIndex] = {}
+            for bossIndex, box in ipairs(display.boxes) do
+                local fontString = box:CreateFontString(nil, "OVERLAY")
+                fontString:SetJustifyH("CENTER")
+                fontString:SetPoint("CENTER", box, "CENTER", 0, (2 - lineIndex) * 12)
+                display.lines[lineIndex][bossIndex] = fontString
+            end
+        end
+    elseif display.plate ~= plate then
+        for boxIndex, box in ipairs(display.boxes) do
+            box:ClearAllPoints()
+            box:SetPoint("BOTTOM", plate, "TOP", 0, 0)
+        end
+        display.plate = plate
+    end
+    SyncCoiledAltarInterruptCount(self, unit)
+    NSI:UpdateCoiledAltarInterruptDisplay()
+end
+
+local function RefreshCoiledAltarInterruptNameplates(self)
+    local activeUnits = {}
+    for plateIndex, plate in ipairs(C_NamePlate.GetNamePlates()) do
+        local unit = plate.namePlateUnitToken
+        if unit then
+            activeUnits[unit] = true
+            AddCoiledAltarInterruptNameplate(self, unit)
+        end
+    end
+    for unit, display in pairs(self.CoiledAltarInterruptNameplates or {}) do
+        if not activeUnits[unit] then
+            for boxIndex, box in ipairs(display.boxes) do
+                box:Hide()
+            end
+            display.plate = nil
+        end
+    end
+end
+
+local function RemoveCoiledAltarInterruptNameplate(self, unit)
+    local display = self.CoiledAltarInterruptNameplates and self.CoiledAltarInterruptNameplates[unit]
+    if not display then return end
+    for boxIndex, box in ipairs(display.boxes) do
+        box:Hide()
+    end
+    display.plate = nil
+end
+
+local function IsCoiledAltarInterruptUnit(self, unit)
+    if unit == "focus" then return UnitLevel(unit) == 92 end
+    local display = self.CoiledAltarInterruptNameplates and self.CoiledAltarInterruptNameplates[unit]
+    return (display and display.plate) and true or false
+end
+
+local function PlayCoiledAltarInterruptSound(self, unit, castCount)
+    local assignedLine = self.Interrupts and (self.Interrupts.myID == 2 and 1 or self.Interrupts.myID == 3 and 2)
+    if not assignedLine then return end
+    local hasRaidMarker = issecretvalue(GetRaidTargetIndex(unit))
+    local displayLine = hasRaidMarker and 2 or 1
+    if displayLine ~= assignedLine then return end
+    self.CoiledAltarInterruptLastSoundCastCounts = self.CoiledAltarInterruptLastSoundCastCounts or {}
+    if self.CoiledAltarInterruptLastSoundCastCounts[displayLine] == castCount then return end
+    self.CoiledAltarInterruptLastSoundCastCounts[displayLine] = castCount
+    local lineNames = self.Interrupts.assignTable[displayLine + 1]
+    local currentName = #lineNames > 0 and lineNames[((castCount - 1) % #lineNames) + 1]
+    if currentName and UnitIsUnit(currentName, "player") then
+        self:PlayInterruptSound()
+    end
+end
+
+local function SetCoiledAltarInterruptPhase(self, active)
+    CancelCoiledAltarInterruptWaveTimer(self)
+    local alert = self.CoiledAltarInterruptAlert
+    local alertLoad = alert and self:EvaluateLoad(alert)
+    if active and (not alert or not alert.enabled or not alertLoad) then
+        active = false
+    end
+    self.CoiledAltarInterruptActive = active
+    self.CoiledAltarInterruptBoss3Available = active
+    self.CoiledAltarInterruptCastCounts = {}
+    self.CoiledAltarInterruptLastSoundCastCounts = {}
+    if active then
+        self.CoiledAltarInterruptFrame:Show()
+        ReadCoiledAltarInterruptNote(self, self.Phase == 3 and 2 or 1)
+        if self.Phase == 3 and self.CoiledAltarInterruptAssignments[6] and self.CoiledAltarInterruptAssignments[7] then
+            -- Arm the final pair six seconds before the second P3 wave.
+            self.CoiledAltarInterruptWaveTimer = C_Timer.NewTimer(159.2 - 6, function()
+                self.CoiledAltarInterruptWaveTimer = nil
+                if self.EncounterID ~= encID or self.Phase ~= 3 or not self.CoiledAltarInterruptActive then return end
+                SelectCoiledAltarInterruptAssignments(self, 3)
+                self.CoiledAltarInterruptLastSoundCastCounts = {}
+                NSI:UpdateCoiledAltarInterruptDisplay()
+            end)
+        end
+        RefreshCoiledAltarInterruptNameplates(self)
+    end
+    NSI:UpdateCoiledAltarInterruptDisplay()
+end
+
+local function ApplyCoiledAltarEternalNightfallSettings(self, frame, alert)
+    local barSettings = NSRT.ReminderSettings.BarSettings
+    frame:SetSize(alert.BarWidth or barSettings.Width, alert.BarHeight or barSettings.Height)
+    frame:SetScale(1)
+    frame:ClearAllPoints()
+    frame:SetPoint(alert.Anchor or barSettings.Anchor, self.NSRTFrame, alert.relativeTo or barSettings.relativeTo, alert.xOffset or barSettings.xOffset, alert.yOffset or barSettings.yOffset)
+    frame:SetStatusBarTexture(self.LSM:Fetch("statusbar", barSettings.Texture))
+    frame:SetStatusBarColor(unpack(alert.BarColor or barSettings.barColors))
+    frame:SetBackdropColor(unpack(barSettings.backgroundColors))
+    frame.Border:SetBackdropBorderColor(unpack(barSettings.borderColors))
+    frame.AbsorbText:SetFont(self.LSM:Fetch("font", barSettings.Font), barSettings.TimerFontSize, "OUTLINE")
+    frame.AbsorbText:SetTextColor(unpack(barSettings.textColors))
+    frame.TimerText:SetFont(self.LSM:Fetch("font", barSettings.Font), barSettings.TimerFontSize, "OUTLINE")
+    frame.TimerText:SetTextColor(unpack(barSettings.textColors))
+    frame.Tick:SetSize(2, frame:GetHeight())
+end
+
+local function HideCoiledAltarEternalNightfall(self)
+    local frame = self.CoiledAltarEternalNightfallFrame
+    self.CoiledAltarEternalNightfallListening = false
+    if frame then
+        frame:Hide()
+        frame.EternalNightfallStart = nil
+        frame.EternalNightfallEnd = nil
+        frame.EternalNightfallMaxAbsorb = nil
+    end
+end
+
+local function ShowCoiledAltarEternalNightfall(self, preview, maxAbsorb)
+    local frame = self.CoiledAltarEternalNightfallFrame
+    local alert = self.CoiledAltarEternalNightfallAlert
+    if not frame or not alert then return end
+    ApplyCoiledAltarEternalNightfallSettings(self, frame, alert)
+    maxAbsorb = maxAbsorb or (preview and secretwrap(eternalNightfallPreviewAbsorb) or UnitGetTotalAbsorbs("boss2"))
+    frame:SetMinMaxValues(0, maxAbsorb)
+    frame:SetValue(maxAbsorb)
+    frame.EternalNightfallStart = frame.EternalNightfallStart or GetTime()
+    frame.EternalNightfallEnd = frame.EternalNightfallStart + eternalNightfallDuration
+    frame.EternalNightfallMaxAbsorb = maxAbsorb
+    frame.AbsorbText:SetText(AbbreviateNumbers(maxAbsorb))
+    frame.TimerText:SetText(string.format("%.1f", eternalNightfallDuration))
+    frame:Show()
+end
+
+function NSI:UpdateCoiledAltarEternalNightfall()
+    local frame = self.CoiledAltarEternalNightfallFrame
+    local alert = self.CoiledAltarEternalNightfallAlert
+    if not frame or not alert then return end
+    ApplyCoiledAltarEternalNightfallSettings(self, frame, alert)
+    if frame:IsShown() then
+        frame:SetMinMaxValues(0, frame.EternalNightfallMaxAbsorb or secretwrap(eternalNightfallPreviewAbsorb))
+    end
+end
+
+function NSI:PreviewCoiledAltarEternalNightfall()
+    if self.CoiledAltarEternalNightfallPreview then
+        self.CoiledAltarEternalNightfallPreview = false
+        HideCoiledAltarEternalNightfall(self)
+        self:MakeDraggable(self.CoiledAltarEternalNightfallFrame, nil, false)
+        return false
+    end
+    self.CoiledAltarEternalNightfallPreview = true
+    self.CoiledAltarEternalNightfallAlert = NSRT.EncounterAlerts[encID][16].EternalNightfallAbsorb
+    local frame = self.CoiledAltarEternalNightfallFrame
+    if not frame then
+        frame = CreateFrame("StatusBar", "NSRTCoiledAltarEternalNightfall", self.NSRTFrame, "BackdropTemplate")
+        frame:SetFrameStrata("HIGH")
+        frame:SetBackdrop({bgFile = "Interface\\Buttons\\WHITE8x8", tileSize = 0})
+        frame.Border = CreateFrame("Frame", nil, frame, "BackdropTemplate")
+        frame.Border:SetAllPoints(frame)
+        frame.Border:SetBackdrop({edgeFile = "Interface\\Buttons\\WHITE8x8", edgeSize = 1})
+        frame.AbsorbText = frame:CreateFontString(nil, "OVERLAY")
+        frame.AbsorbText:SetPoint("LEFT", frame, "LEFT", 4, 0)
+        frame.TimerText = frame:CreateFontString(nil, "OVERLAY")
+        frame.TimerText:SetPoint("RIGHT", frame, "RIGHT", -4, 0)
+        frame.Tick = frame:CreateTexture(nil, "OVERLAY")
+        frame.Tick:SetColorTexture(1, 1, 1, 1)
+        frame:SetScript("OnUpdate", function(display)
+            if not display.EternalNightfallStart then return end
+            local elapsed = GetTime() - display.EternalNightfallStart
+            if elapsed >= eternalNightfallDuration then
+                HideCoiledAltarEternalNightfall(self)
+                return
+            end
+            local previewProgress = math.min(1, elapsed / eternalNightfallDuration * 1.05)
+            local absorb = self.CoiledAltarEternalNightfallPreview and secretwrap(eternalNightfallPreviewAbsorb * (1 - previewProgress)) or UnitGetTotalAbsorbs("boss2")
+            display:SetValue(absorb)
+            display.AbsorbText:SetText(AbbreviateNumbers(absorb))
+            display.Tick:ClearAllPoints()
+            display.Tick:SetPoint("CENTER", display, "LEFT", display:GetWidth() * (1 - elapsed / eternalNightfallDuration), 0)
+            display.TimerText:SetText(string.format("%.1f", eternalNightfallDuration - elapsed))
+        end)
+        self.CoiledAltarEternalNightfallFrame = frame
+    end
+    ApplyCoiledAltarEternalNightfallSettings(self, frame, self.CoiledAltarEternalNightfallAlert)
+    self:MakeDraggable(frame, self.CoiledAltarEternalNightfallAlert, true, false, function(_, settings)
+        for difficultyID = 15, 16 do
+            local difficultySettings = NSRT.EncounterAlerts[encID][difficultyID].EternalNightfallAbsorb
+            difficultySettings.xOffset = settings.xOffset
+            difficultySettings.yOffset = settings.yOffset
+            difficultySettings.Anchor = settings.Anchor
+            difficultySettings.relativeTo = settings.relativeTo
+        end
+    end)
+    ShowCoiledAltarEternalNightfall(self, true)
+    return true
+end
+
+local function StopCoiledAltarEternalNightfallListening(self, cancelActivationTimers)
+    self.CoiledAltarEternalNightfallListening = false
+    if cancelActivationTimers then
+        for timerIndex, timer in ipairs(self.CoiledAltarEternalNightfallListenTimers or {}) do
+            timer:Cancel()
+        end
+        self.CoiledAltarEternalNightfallListenTimers = nil
+    end
+    if self.CoiledAltarEternalNightfallListenStopTimer then
+        self.CoiledAltarEternalNightfallListenStopTimer:Cancel()
+        self.CoiledAltarEternalNightfallListenStopTimer = nil
+    end
+    self:EncounterRegister("CoiledAltarEternalNightfall", {"UNIT_ABSORB_AMOUNT_CHANGED", "UNIT_SPELLCAST_START", "UNIT_SPELLCAST_STOP"}, false, "boss2")
+end
+
+local function ArmCoiledAltarEternalNightfall(self, phase)
+    StopCoiledAltarEternalNightfallListening(self, true)
+    local alert = self.CoiledAltarEternalNightfallAlert
+    local difficultyID = self:DifficultyCheck({15, 16})
+    local diffData = difficultyID and NSRT.EncounterAlerts[encID][difficultyID]
+    local shieldAlert = diffData and diffData[phase == 3 and "P3Shield" or "P2Shield"]
+    local shieldTimers = shieldAlert and shieldAlert.timers
+    if not alert or not alert.enabled or not self:EvaluateLoad(alert) or not shieldTimers then return end
+
+    self.CoiledAltarEternalNightfallListenTimers = {}
+    for shieldIndex, shieldTime in ipairs(shieldTimers) do
+        local listenDelay = shieldTime - 2
+        if listenDelay >= 0 then
+            self.CoiledAltarEternalNightfallListenTimers[#self.CoiledAltarEternalNightfallListenTimers + 1] = C_Timer.NewTimer(listenDelay, function()
+                if self.EncounterID ~= encID or self.Phase ~= phase then return end
+                HideCoiledAltarEternalNightfall(self)
+                self:EncounterRegister("CoiledAltarEternalNightfall", {"UNIT_ABSORB_AMOUNT_CHANGED", "UNIT_SPELLCAST_START", "UNIT_SPELLCAST_STOP"}, true, "boss2")
+                self.CoiledAltarEternalNightfallListenStopTimer = C_Timer.NewTimer(eternalNightfallDuration + 2, function()
+                    self.CoiledAltarEternalNightfallListenStopTimer = nil
+                    StopCoiledAltarEternalNightfallListening(self, false)
+                    HideCoiledAltarEternalNightfall(self)
+                end)
+            end)
+        end
+    end
+end
+
+NSI.EncounterAlertStart[encID] = function(self, id) -- on ENCOUNTER_START
+    id = id or self:DifficultyCheck({15, 16})
+    local diffData = id and NSRT.EncounterAlerts[encID] and NSRT.EncounterAlerts[encID][id]
+    self.CoiledAltarInterruptAlert = diffData and diffData.InterruptAssignments
+    self.CoiledAltarEternalNightfallAlert = diffData and diffData.EternalNightfallAbsorb
+    self.CoiledAltarDebuffCircleAlert = diffData and diffData.DebuffCircle
+    self.CoiledAltarEternalNightfallPreview = false
+    local debuffCircleLoad = self.CoiledAltarDebuffCircleAlert and self:EvaluateLoad(self.CoiledAltarDebuffCircleAlert)
+    StopCoiledAltarEternalNightfallListening(self, true)
+    if self.CoiledAltarDebuffCircleAlert and self.CoiledAltarDebuffCircleAlert.enabled and debuffCircleLoad then
+        self:CreateAuraContainerCircle("CoiledAltarDebuffCircleContainer", "CoiledAltarDebuffCircleAuraSlot", self.CoiledAltarDebuffCircleAlert, debuffCircleFilter, debuffCircleCandidateFilters)
+        self:UpdateCoiledAltarDebuffCircle()
+    else
+        self:HideAuraContainerCircle("CoiledAltarDebuffCircleContainer")
+    end
+    local eternalNightfallActive = self.CoiledAltarEternalNightfallAlert and self.CoiledAltarEternalNightfallAlert.enabled and self:EvaluateLoad(self.CoiledAltarEternalNightfallAlert)
+    if eternalNightfallActive then
+        local frame = self.CoiledAltarEternalNightfallFrame
+        if not frame then
+            self:PreviewCoiledAltarEternalNightfall()
+            self.CoiledAltarEternalNightfallPreview = false
+            self:MakeDraggable(self.CoiledAltarEternalNightfallFrame, nil, false)
+            HideCoiledAltarEternalNightfall(self)
+        end
+        self:EncounterFunction("CoiledAltarEternalNightfall", function(eventFrame, event)
+            local frame = self.CoiledAltarEternalNightfallFrame
+            -- Ignore incidental absorb changes while waiting for Eternal Nightfall's cast.
+            if event == "UNIT_SPELLCAST_START" then
+                self.CoiledAltarEternalNightfallListening = true
+            elseif event == "UNIT_ABSORB_AMOUNT_CHANGED" and frame and self.CoiledAltarEternalNightfallListening then
+                local absorb = UnitGetTotalAbsorbs("boss2")
+                if frame.EternalNightfallMaxAbsorb == nil then
+                    ShowCoiledAltarEternalNightfall(self, false, absorb)
+                else
+                    frame:SetValue(absorb)
+                    frame.AbsorbText:SetText(AbbreviateNumbers(absorb))
+                end
+            elseif event == "UNIT_SPELLCAST_STOP" and frame and frame.EternalNightfallMaxAbsorb ~= nil then
+                HideCoiledAltarEternalNightfall(self)
+            end
+        end)
+        if self.Phase == 2 then ArmCoiledAltarEternalNightfall(self, 2) end
+    end
+    local interruptAlertActive = self.CoiledAltarInterruptAlert and self.CoiledAltarInterruptAlert.enabled and self:EvaluateLoad(self.CoiledAltarInterruptAlert)
+    if interruptAlertActive then
+        self.CoiledAltarInterruptFrame = self.CoiledAltarInterruptFrame or CreateFrame("Frame")
+        self:EncounterRegister("CoiledAltarInterruptAssignments", {"NAME_PLATE_UNIT_ADDED", "NAME_PLATE_UNIT_REMOVED", "RAID_TARGET_UPDATE", "PLAYER_FOCUS_CHANGED", "INSTANCE_ENCOUNTER_ENGAGE_UNIT"}, true)
+        -- Unfiltered: the ghosts are on nameplate tokens, which RegisterUnitEvent cannot take.
+        self:EncounterRegister("CoiledAltarInterruptAssignments", {"UNIT_SPELLCAST_START", "UNIT_SPELLCAST_INTERRUPTED", "UNIT_SPELLCAST_STOP"}, true)
+        -- castBarID is arg4 on START/STOP, arg5 on INTERRUPTED.
+        self:EncounterFunction("CoiledAltarInterruptAssignments", function(_, event, unit, _, _, arg4, arg5)
+            if event == "NAME_PLATE_UNIT_ADDED" then
+                AddCoiledAltarInterruptNameplate(self, unit)
+            elseif event == "NAME_PLATE_UNIT_REMOVED" then
+                RemoveCoiledAltarInterruptNameplate(self, unit)
+            elseif event == "RAID_TARGET_UPDATE" then
+                NSI:UpdateCoiledAltarInterruptDisplay()
+            elseif event == "PLAYER_FOCUS_CHANGED" then
+                self.CoiledAltarInterruptCastCounts["focus"] = nil
+                SyncCoiledAltarInterruptCount(self, "focus")
+                NSI:UpdateCoiledAltarInterruptDisplay()
+            elseif event == "INSTANCE_ENCOUNTER_ENGAGE_UNIT" then
+                self.CoiledAltarInterruptBoss3Available = UnitExists("boss3") and true or false
+                NSI:UpdateCoiledAltarInterruptDisplay()
+            elseif event == "UNIT_SPELLCAST_START" then
+                if not self.CoiledAltarInterruptActive or not IsCoiledAltarInterruptUnit(self, unit) then return end
+                C_Timer.After(0, function()
+                    if not self.CoiledAltarInterruptActive or not IsCoiledAltarInterruptUnit(self, unit) then return end
+                    local castBarID = select(10, UnitCastingInfo(unit))
+                    if not castBarID or issecretvalue(castBarID) then return end
+                    local castCount = CoiledAltarInterruptPosition(castBarID)
+                    if self.CoiledAltarInterruptCastCounts[unit] ~= castCount then
+                        self.CoiledAltarInterruptCastCounts[unit] = castCount
+                        PlayCoiledAltarInterruptSound(self, unit, castCount)
+                        NSI:UpdateCoiledAltarInterruptDisplay()
+                    end
+                end)
+            elseif event == "UNIT_SPELLCAST_INTERRUPTED" or event == "UNIT_SPELLCAST_STOP" then
+                if not self.CoiledAltarInterruptActive or not IsCoiledAltarInterruptUnit(self, unit) then return end
+                local castBarID = event == "UNIT_SPELLCAST_INTERRUPTED" and arg5 or arg4
+                if not castBarID or issecretvalue(castBarID) then return end
+                local castCount = CoiledAltarInterruptPosition(castBarID) + 1
+                if self.CoiledAltarInterruptCastCounts[unit] ~= castCount then
+                    self.CoiledAltarInterruptCastCounts[unit] = castCount
+                    NSI:UpdateCoiledAltarInterruptDisplay()
+                end
+            end
+        end)
+        SetCoiledAltarInterruptPhase(self, false)
+    else
+        self:EncounterRegister("CoiledAltarInterruptAssignments", {"NAME_PLATE_UNIT_ADDED", "NAME_PLATE_UNIT_REMOVED", "RAID_TARGET_UPDATE", "PLAYER_FOCUS_CHANGED", "INSTANCE_ENCOUNTER_ENGAGE_UNIT"}, false)
+        self:EncounterRegister("CoiledAltarInterruptAssignments", {"UNIT_SPELLCAST_START", "UNIT_SPELLCAST_INTERRUPTED", "UNIT_SPELLCAST_STOP"}, false)
+        ResetCoiledAltarInterruptDisplay(self)
+    end
+    self.CoiledAltarWrongTargetAlert = diffData and diffData.P2_5WrongTarget
+    HideCoiledAltarWrongTarget(self)
+    local wrongTargetLoad = self.CoiledAltarWrongTargetAlert and self:EvaluateLoad(self.CoiledAltarWrongTargetAlert)
+    self:EncounterFunction("CoiledAltarWrongTarget", function()
+        UpdateCoiledAltarWrongTarget(self)
+    end)
+    self:EncounterRegister("CoiledAltarPhaseDetect", "UNIT_SPELLCAST_CHANNEL_START", true, "boss2")
+    self:EncounterFunction("CoiledAltarPhaseDetect", function(_, e, unit)
+        local activeTimelineCount = self:GetActiveEncounterTimelineEventCount()
+        if e ~= "UNIT_SPELLCAST_CHANNEL_START" or self.Phase ~= 2 or activeTimelineCount ~= 0 then
+            return
+        end
+        self.Phase = 2.5
+        self:StartReminders(self.Phase)
+        self.PhaseSwapTime = GetTime()
+        self:UpdateCoiledAltarDebuffCircle()
+        local alert = self.CoiledAltarWrongTargetAlert
+        if alert and alert.enabled and self:EvaluateLoad(alert) then
+            self.CoiledAltarWrongTargetEndTime = GetTime() + (alert.dur or 50)
+            self:EncounterRegister("CoiledAltarWrongTarget", "PLAYER_TARGET_CHANGED", true)
+            self.CoiledAltarWrongTargetTimer = C_Timer.NewTimer(alert.dur or 50, function()
+                HideCoiledAltarWrongTarget(self)
+            end)
+            UpdateCoiledAltarWrongTarget(self)
+        end
+    end)
+end
+
+NSI.EncounterAlertStop[encID] = function(self)
+    HideCoiledAltarWrongTarget(self)
+    self:HideAuraContainerCircle("CoiledAltarDebuffCircleContainer")
+    self:HideReminderCirclePreview("CoiledAltarDebuffCirclePreview")
+    StopCoiledAltarEternalNightfallListening(self, true)
+    self.CoiledAltarEternalNightfallPreview = false
+    HideCoiledAltarEternalNightfall(self)
+    self:EncounterRegister("CoiledAltarInterruptAssignments", {"NAME_PLATE_UNIT_ADDED", "NAME_PLATE_UNIT_REMOVED", "RAID_TARGET_UPDATE", "INSTANCE_ENCOUNTER_ENGAGE_UNIT"}, false)
+    self:EncounterRegister("CoiledAltarInterruptAssignments", {"UNIT_SPELLCAST_START", "UNIT_SPELLCAST_INTERRUPTED", "UNIT_SPELLCAST_STOP"}, false)
+    ResetCoiledAltarInterruptDisplay(self)
+end
+
+local detectedDurations = {
+    [14] = {
+        [1] = { time = 70, phase = function() return 2 end },
+    },
+    [15] = {
+        [1] = { time = 70, phase = function() return 2 end },
+    },
+    [16] = {
+        [1] = { time = 70, phase = function() return 2 end },
+    },
+}
+
+NSI.DetectPhaseChange[encID] = function(self, e, info)
+    local now = GetTime()
+    if e ~= "ENCOUNTER_TIMELINE_EVENT_ADDED" or (not info) or (not self.PhaseSwapTime) or (not (now > self.PhaseSwapTime + 5)) or (not self.EncounterID) or (not self.Phase) then return end
+
+    local difficultyID = self:DifficultyCheck({14, 15, 16})
+    if (not difficultyID) or (not detectedDurations[difficultyID]) then return end
+
+    if self.Phase == 2.5 then
+        table.insert(self.Timelines, now)
+
+        local addedcount = 0
+        for _, timestamp in ipairs(self.Timelines) do
+            if now < timestamp + 0.3 then addedcount = addedcount + 1 end
+        end
+        if addedcount < 4 then return end
+
+        self.Phase = 3
+        self:StartReminders(self.Phase)
+        self.PhaseSwapTime = now
+        StopCoiledAltarEternalNightfallListening(self, true)
+        SetCoiledAltarInterruptPhase(self, true)
+        HideCoiledAltarWrongTarget(self)
+        ArmCoiledAltarEternalNightfall(self, 3)
+        self:UpdateCoiledAltarDebuffCircle()
+        return
+    end
+
+    local phaseinfo = detectedDurations[difficultyID][self.Phase]
+    if not phaseinfo then return end
+
+    if ApproximatelyEqual(info.duration, phaseinfo.time, 0.2) then
+        local newphase = phaseinfo.phase(self.Phase)
+        if newphase <= self.Phase then return end
+        self.Phase = newphase
+        self:StartReminders(self.Phase)
+        self.PhaseSwapTime = now
+        ArmCoiledAltarEternalNightfall(self, newphase)
+        SetCoiledAltarInterruptPhase(self, newphase == 2 or newphase == 3)
+        self:UpdateCoiledAltarDebuffCircle()
+    end
+end

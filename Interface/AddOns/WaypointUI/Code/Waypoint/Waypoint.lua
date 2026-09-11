@@ -1014,6 +1014,42 @@ local function PlayPinpointShowAudio()
     Sound.PlaySound("Main", soundID)
 end
 
+do -- Proximity Audio
+    local hasPlayed = false
+    local isDistanceReady = false
+
+    local function UpdateProximityAudio()
+        if not isDistanceReady or not Waypoint_Director.isActive or not Waypoint_Cache.Get("valid") then return end
+
+        local distance = Waypoint_Cache.Get("distance")
+        if not distance or distance < 0 then return end
+
+        local proximityDistance = Config.DBGlobal:GetVariable("AudioProximityDistance")
+        if distance > proximityDistance * 2 then
+            hasPlayed = false
+        elseif not hasPlayed and distance < proximityDistance and Config.DBGlobal:GetVariable("AudioGlobal") and Config.DBGlobal:GetVariable("AudioProximity") and not Waypoint_Director.IsSuperTrackedTargetIgnored() then
+            Sound.PlaySound("Main", Config.DBGlobal:GetVariable("AudioProximitySound"))
+            hasPlayed = true
+        end
+    end
+
+    CallbackRegistry.Add("Waypoint.SuperTrackingChanged", function()
+        hasPlayed = false
+        isDistanceReady = false
+    end)
+    CallbackRegistry.Add("Waypoint.ActiveChanged", function()
+        isDistanceReady = false
+    end)
+    CallbackRegistry.Add("Waypoint.DistanceReady", function()
+        isDistanceReady = true
+        UpdateProximityAudio()
+    end)
+    CallbackRegistry.Add("Waypoint_DataProvider.CacheRealtime", UpdateProximityAudio)
+    SavedVariables.OnChange("WaypointDB_Global", "AudioGlobal", UpdateProximityAudio)
+    SavedVariables.OnChange("WaypointDB_Global", "AudioProximity", UpdateProximityAudio)
+    SavedVariables.OnChange("WaypointDB_Global", "AudioProximityDistance", UpdateProximityAudio)
+end
+
 do --Animation
     local function HideWaypoint() WUIWaypointFrame:Hide() end
     local function HidePinpoint() WUIPinpointFrame:Hide() end

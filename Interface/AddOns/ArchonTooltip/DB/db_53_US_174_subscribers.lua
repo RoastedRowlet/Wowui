@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'Unknown-Unknown',}
-local provider = {region='US',realm="Quel'Thalas",name='US',type='subscribers',zone=53,date='2026-09-01',data={Dr='Dregurath:BAEANQAECgQICAAAAA==.',St='Starkxdh:BAEANQAECgYICwAAAA==.',Xq='Xquenda:BAEANQAFFAIIAgABNQAECgQICAABAAAAAA==.',},}
+local lookup = {'DemonHunter-Devourer','Priest-Holy','Unknown-Unknown',}
+local provider = {region='US',realm="Quel'Thalas",name='US',type='subscribers',zone=53,date='2026-09-08',data={Dr='Dregurath:BAEANQAECgQICAAAAA==.',St='Starkxdh:BAEBNQAECoEYAAIBAAgJQBpfDQCZAgiODQAABQBSAHUNAAAEADwAfw0AAAMAWQCpDQAABQA1AFwNAAADAFIAXQ0AAAEALwBlDQAAAQA8ADMNAAACAD0AAQAICUAaXw0AmQIIjg0AAAUAUgB1DQAABAA8AH8NAAADAFkAqQ0AAAUANQBcDQAAAwBSAF0NAAABAC8AZQ0AAAEAPAAzDQAAAgA9AAAA.',Xq='Xquenda:BAECNQAFFIEHAAICAAUJ2hglAQDUAQWODQAAAgBYAHUNAAABADoAfw0AAAEAMwCpDQAAAgAyADMNAAABAEYAAgAFCdoYJQEA1AEFjg0AAAIAWAB1DQAAAQA6AH8NAAABADMAqQ0AAAIAMgAzDQAAAQBGADUABAqBGQACAgAJCfshbQUAJAMAAgAJCfshbQUAJAMAATUABAoECAgAAwAAAAA=.',},}
 provider.parse = parse
 
 local rawData = provider.data

@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'Unknown-Unknown',}
-local provider = {region='US',realm='Alleria',name='US',type='subscribers',zone=53,date='2026-09-01',data={Bi='Bitesize:BAEANQAECgQIBwAAAA==.',Br='Brightsize:BAEANQADCgcIBwABNQAECgQIBwABAAAAAA==.',De='Dewkiez:BAEANQAECgQIBwAAAA==.',Ph='Phlan:BAEANQADCggIDgAAAA==.',Po='Pookiez:BAEANQADCgcIBwABNQAECgQIBwABAAAAAA==.',Ra='Raidbloom:BAEANQADCgYICwABNQAECgcIDAABAAAAAA==.Raidshock:BAEANQAECgcIDAAAAA==.Ramook:BAEANQADCgQIBgAAAA==.',},}
+local lookup = {'Unknown-Unknown','Paladin-Holy',}
+local provider = {region='US',realm='Alleria',name='US',type='subscribers',zone=53,date='2026-09-08',data={Bi='Bitesize:BAEANQAECgcIDgAAAA==.',Br='Brightsize:BAEANQADCggICAABNQAECgcIDgABAAAAAA==.',De='Dewkiez:BAEANQAECgYIDQAAAA==.',Do='Dookiez:BAEANQADCggICAABNQAECgYIDQABAAAAAA==.',My='Myxian:BAEANQADCgcIBwABNQAECgcIDgABAAAAAA==.',Ph='Phlan:BAEANQAECgQIBAAAAA==.',Po='Pookiez:BAEANQADCggIDQABNQAECgYIDQABAAAAAA==.',Ra='Raidbloom:BAEANQADCgYIEAABNQAECggIFwACAE8PAA==.Raidshock:BAEBNQAECoEXAAICAAgJTw9EIwD8AQiODQAAAwAkAHUNAAADACwAfw0AAAMAJgCpDQAAAwAtAFwNAAADACcAXQ0AAAIAIQBlDQAAAwAsADMNAAADAB4AAgAICU8PRCMA/AEIjg0AAAMAJAB1DQAAAwAsAH8NAAADACYAqQ0AAAMALQBcDQAAAwAnAF0NAAACACEAZQ0AAAMALAAzDQAAAwAeAAAA.Ramook:BAEANQADCgQICQAAAA==.',Zi='Zilkir:BAEANQAECgYIDQAAAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

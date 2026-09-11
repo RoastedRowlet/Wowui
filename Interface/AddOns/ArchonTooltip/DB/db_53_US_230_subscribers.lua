@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {}
-local provider = {region='US',realm='Undermine',name='US',type='subscribers',zone=53,date='2026-09-01',data={Ka='Kaessatha:BAEANQADCgIIAgAAAA==.',Le='Letharanos:BAEANQAECgEIAQAAAA==.',},}
+local lookup = {'Unknown-Unknown','Paladin-Protection','Warlock-Destruction',}
+local provider = {region='US',realm='Undermine',name='US',type='subscribers',zone=53,date='2026-09-08',data={Ja='Jattsz:BAEANQADCggICAAAAA==.',Ka='Kaessatha:BAEANQADCgIIAgABNQADCgQICQABAAAAAA==.',Le='Letharanos:BAEANQAECgQIBQAAAA==.',Se='Seongpal:BAEBNQAECoEWAAICAAkJqCGUAQBmAwmODQAAAwBgAHUNAAADAGEAfw0AAAMAXQCpDQAAAwBXAFwNAAADAFUAXQ0AAAIAUgBlDQAAAgA5AKQNAAABAFAAMw0AAAIAXQACAAkJqCGUAQBmAwmODQAAAwBgAHUNAAADAGEAfw0AAAMAXQCpDQAAAwBXAFwNAAADAFUAXQ0AAAIAUgBlDQAAAgA5AKQNAAABAFAAMw0AAAIAXQAAAA==.',Su='Sulyvahn:BAEANQAECgIIAgABNQAECgkJFgACAKghAA==.',Xy='Xymos:BAEBNQAECoEWAAIDAAkJfiRBAADPAwmODQAAAwBfAHUNAAADAGAAfw0AAAMAZACpDQAAAwBhAFwNAAADAGMAXQ0AAAIAXwBlDQAAAgBgAKQNAAABAEAAMw0AAAIAXwADAAkJfiRBAADPAwmODQAAAwBfAHUNAAADAGAAfw0AAAMAZACpDQAAAwBhAFwNAAADAGMAXQ0AAAIAXwBlDQAAAgBgAKQNAAABAEAAMw0AAAIAXwAAAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

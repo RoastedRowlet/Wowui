@@ -65,6 +65,7 @@ local GLOBAL_SETTINGS_REDIRECTS = {
     ["iconalert"] = "iconalert",
     ["castprogressbar"] = "castprogressbar",
     ["extrashieldbar"] = "extrashieldbar",
+    ["dungeonextras"] = "dungeonextras",
     -- ["targetalert"] = "targetalert", -- 临时停用
     ["mythiccast"] = "mythiccast",
     ["interrupttracker"] = "interrupttracker",
@@ -77,6 +78,7 @@ local GLOBAL_SETTINGS_REDIRECTS = {
     ["ExBoss.IconAlert"] = "iconalert",
     ["ExBoss.CastProgressBar"] = "castprogressbar",
     ["ExBoss.ExtraShieldBar"] = "extrashieldbar",
+    ["ExBoss.DungeonExtras"] = "dungeonextras",
     -- ["ExBoss.TargetAlert"] = "targetalert", -- 临时停用
     ["ExBoss.Tools.MythicCast"] = "mythiccast",
     ["ExBoss.Tools.InterruptTracker"] = "interrupttracker",
@@ -579,6 +581,7 @@ local function RefreshContent()
         IconAlertPage,
         CastProgressBarPage,
         ExtraShieldBarPage,
+        ExBoss.UI.Panel.DungeonExtrasPage,
     }) do
         if page and page._scrollFrame then page._scrollFrame:Hide() end
         if page and page.Hide then page:Hide() end
@@ -1179,6 +1182,7 @@ function Panel:SetTab(tabKey)
         or requested == "iconalert"
         or requested == "castprogressbar"
         or requested == "extrashieldbar"
+        or requested == "dungeonextras"
     then
         local globalPage = ExBoss.UI.Panel and ExBoss.UI.Panel.GlobalSettingsPage
         if globalPage and globalPage.SetSelectedKey then

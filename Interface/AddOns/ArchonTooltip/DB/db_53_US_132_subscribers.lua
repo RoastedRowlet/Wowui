@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'Unknown-Unknown',}
-local provider = {region='US',realm="Khaz'goroth",name='US',type='subscribers',zone=53,date='2026-09-01',data={Ev='Evistrianza:BAEANQADCgYIDAAAAA==.',La='Laudde:BAEANQAECgIIBAAAAA==.',Ra='Raze:BAEANQAECgQIBAABNQAECgcIDQABAAAAAA==.Razex:BAEANQAECgcIDQAAAA==.',Sc='Scaryheäls:BAEANQADCgcIEwAAAA==.',To='Tomar:BAEANQADCggIEAAAAA==.',},}
+local lookup = {'Hunter-BeastMastery','Hunter-Marksmanship',}
+local provider = {region='US',realm="Khaz'goroth",name='US',type='subscribers',zone=53,date='2026-09-08',data={Ev='Evistrianza:BAEANQADCggIFAAAAA==.',La='Laudde:BAEANQAECgQIDAAAAA==.',Ra='Raze:BAEANQAECgQIBQABNQAECgkJGAABADYhAA==.Razex:BAEBNQAECoEYAAMBAAkJNiFGBABTAwmODQAAAwBiAHUNAAADAGEAfw0AAAMAYACpDQAAAwBjAFwNAAADADUAXQ0AAAMAXwBlDQAAAgBbAKQNAAABAC0AMw0AAAMAWAABAAkJNiFGBABTAwmODQAAAwBiAHUNAAADAGEAfw0AAAMAYACpDQAAAwBjAFwNAAADADUAXQ0AAAIAXwBlDQAAAgBbAKQNAAABAC0AMw0AAAMAWAACAAEJHxKdNgBJAAFdDQAAAQAuAAAA.',Sc='Scaryheäls:BAEANQADCgcIGwAAAA==.',To='Tomar:BAEANQAECgEIAQAAAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

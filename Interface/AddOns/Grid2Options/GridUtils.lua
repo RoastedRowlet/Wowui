@@ -503,7 +503,6 @@ function Grid2Options:UpdateIndicatorDB(indicator)
 		indicator:UpdateFilter()
 		indicator:UpdateHighlight()
 		self:UpdateIndicatorDB( indicator.sideKick )
-		self:UpdateIndicatorDB( Grid2:GetIndicatorByName(indicator.childName) )
 	end
 end
 
@@ -539,13 +538,10 @@ do
 				Grid2Frame:WithAllFrames(indicator, method)
 			end
 		end
-		if indicator.parentName then
-			local pindicator = Grid2:GetIndicatorByName(indicator.parentName)
-			if pindicator then
-				self:RefreshIndicatorNow(pindicator, method)
-			end
-		end
 		self:UpdateIndicator(indicator)
+		if indicator.sideKick then
+			self:RefreshIndicatorNow(indicator.sideKick, "Update")
+		end
 	end
 	function Grid2Options:RefreshIndicator(indicator, method)
 		local skip = qtime
@@ -614,9 +610,6 @@ function Grid2Options:UpdateIndicators(typ)
 		if indicator.parentName==nil and ( typ==nil or indicator.dbx.type == typ ) then
 			self:UpdateIndicatorDB(indicator)
 			indicator:LayoutAllFrames()
-			if indicator.childName then
-				Grid2:GetIndicatorByName(indicator.childName):LayoutAllFrames()
-			end
 		end
 	end
 	Grid2Frame:UpdateIndicators()
@@ -694,7 +687,7 @@ for class, translation in pairs(LOCALIZED_CLASS_NAMES_MALE) do
 		Grid2Options.PLAYER_CLASSES[class] = string.format("|TInterface\\GLUES\\CHARACTERCREATE\\UI-CHARACTERCREATE-CLASSES:0:0:0:0:256:256:%f:%f:%f:%f:0|t%s",coord[1]*256,coord[2]*256,coord[3]*256,coord[4]*256,translation)
 	end
 end
-Grid2Options.HEADER_TYPES = { player = L['Players'], pet = L['Pets'], boss = L['Bosses'], target = L['Target'], focus = L['Focus'], self = L['Player'], targettarget = L['Target of Target'], focustarget = L['Target of Focus'] }
+Grid2Options.HEADER_TYPES = { player = L['Players'], pet = L['Pets'], boss = L['Bosses'], target = L['Target'], focus = L['Focus'], self = L['Player'], targettarget = L['Target of Target'], focustarget = L['Target of Focus'], custom = L['Custom'] }
 
 -- Grid2Options:ConfirmDialog(), Grid2Options:ShowEditDialog()
 do

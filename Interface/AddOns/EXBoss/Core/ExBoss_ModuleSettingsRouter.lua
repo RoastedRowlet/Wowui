@@ -16,6 +16,7 @@ local ROUTABLE_SETTINGS_PAGES = {
     iconalert = true,
     castprogressbar = true,
     extrashieldbar = true,
+    dungeonextras = true,
     mythiccast = true,
     interrupttracker = true,
 }

@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'Unknown-Unknown',}
-local provider = {region='US',realm='Whisperwind',name='US',type='subscribers',zone=53,date='2026-09-01',data={Ak='Akinira:BAEANQAECgMIBAAAAA==.',Am='Amelrik:BAEANQAECgcIDQAAAA==.',An='Ansys:BAEANQAECgYICAAAAA==.',Ar='Arries:BAEANQADCggIDwAAAA==.',Az='Azorthas:BAEANQADCgcIDwAAAA==.',Dr='Dragonton:BAEANQAECgcICwAAAA==.',La='Larissah:BAEANQADCggICAABNQAECgcICgABAAAAAA==.',Se='Seanald:BAEANQAECgcIDAAAAA==.',Sy='Syy:BAEANQAECgIIAgAAAA==.',Ve='Vexkwondo:BAEANQADCgYICwAAAA==.',},}
+local lookup = {'Paladin-Retribution','Unknown-Unknown','DeathKnight-Blood',}
+local provider = {region='US',realm='Whisperwind',name='US',type='subscribers',zone=53,date='2026-09-08',data={Ak='Akinira:BAEANQAECgYICgAAAA==.',Am='Amelrik:BAEBNQAECoEYAAIBAAkJdyUmAQDgAwmODQAAAwBjAHUNAAADAGEAfw0AAAMAYQCpDQAAAwBiAFwNAAADAGMAXQ0AAAMATwBlDQAAAgBjAKQNAAABAF0AMw0AAAMAYgABAAkJdyUmAQDgAwmODQAAAwBjAHUNAAADAGEAfw0AAAMAYQCpDQAAAwBiAFwNAAADAGMAXQ0AAAMATwBlDQAAAgBjAKQNAAABAF0AMw0AAAMAYgAAAA==.',An='Ansys:BAEANQAECgcIDwAAAA==.',Ar='Arries:BAEANQAECgQIBAAAAA==.',Az='Azorthas:BAEANQAECgEIAgAAAA==.',Dr='Dragonton:BAEANQAECggIEwAAAA==.',Ke='Kendrisite:BAEANQADCgMIAwAAAA==.',La='Larissah:BAEANQADCggICAABNQAECggIEgACAAAAAA==.',Se='Seanald:BAEBNQAECoEXAAIDAAkJUB0KCAD/AgmODQAAAwBQAHUNAAADAF0Afw0AAAMATACpDQAAAwBDAFwNAAADAFIAXQ0AAAIAPgBlDQAAAgBCAKQNAAABADgAMw0AAAMAWAADAAkJUB0KCAD/AgmODQAAAwBQAHUNAAADAF0Afw0AAAMATACpDQAAAwBDAFwNAAADAFIAXQ0AAAIAPgBlDQAAAgBCAKQNAAABADgAMw0AAAMAWAAAAA==.',Sh='Shanton:BAEANQADCggICAABNQAECggIEwACAAAAAA==.',Sl='Slyferrain:BAEANQAECgIIAwAAAA==.',Sy='Syy:BAEANQAECgQIBgAAAA==.',Ve='Vexkwondo:BAEANQADCgYIEQAAAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

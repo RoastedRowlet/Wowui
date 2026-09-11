@@ -36,6 +36,18 @@ do
     local pendingFireResolved = false
     local panel, panelArea, windArrowTexture, windAnimGroup, windTranslate, fireIconTexture, fireAlphaGroup, fireScaleGroup
 
+    local function ExtrasEnabled()
+        local extras = ExBoss.UI and ExBoss.UI.DungeonExtras
+        return extras and extras:IsEnabled("rubyWindFire") and not extras:IsWorldEditing()
+    end
+
+    local function AttachToExtras()
+        local anchor = ExBoss.UI.DungeonExtras:GetAnchor()
+        panel:SetParent(anchor)
+        panel:ClearAllPoints()
+        panel:SetPoint("CENTER", anchor, "CENTER", 0, 0)
+    end
+
     local function IsKyrakkaActive()
         local state = ExwindTools and ExwindTools.State or nil
         if type(state) == "table" and state.IsBossEncounter == true and tonumber(state.EncounterID) == ENCOUNTER_ID then
@@ -61,6 +73,7 @@ do
     end
 
     local function RefreshWindVisual()
+        if not ExtrasEnabled() then return end
         if not (windArrowTexture and State.windIndex) then return end
         local cfg = WIND_ANCHOR[State.windIndex]
         windAnimGroup:Stop()
@@ -73,6 +86,7 @@ do
     end
 
     local function RefreshFireVisual()
+        if not ExtrasEnabled() then return end
         if not (fireIconTexture and State.fireIndex) then return end
         local cfg = FIRE_OFFSET[State.fireIndex]
         fireIconTexture:ClearAllPoints()
@@ -99,50 +113,13 @@ do
         RefreshTexts()
     end
 
-    local function GetSavedPosition()
-        local db = _G.EXBOSS12S2
-        local position = type(db) == "table" and db.kyrakkaWindFirePosition or nil
-        if type(position) ~= "table" then return nil end
-        local point = tostring(position.point or "")
-        local relativePoint = tostring(position.relativePoint or "")
-        local x, y = tonumber(position.x), tonumber(position.y)
-        if point == "" or relativePoint == "" or not x or not y then return nil end
-        return point, relativePoint, x, y
-    end
-
-    local function ApplySavedPosition()
-        local point, relativePoint, x, y = GetSavedPosition()
-        panel:ClearAllPoints()
-        if point then
-            panel:SetPoint(point, UIParent, relativePoint, x, y)
-        else
-            panel:SetPoint("CENTER", UIParent, "CENTER", 0, 150)
-        end
-    end
-
-    local function SaveCurrentPosition()
-        local point, _, relativePoint, x, y = panel:GetPoint(1)
-        if not point or not relativePoint or not x or not y then return end
-        _G.EXBOSS12S2 = _G.EXBOSS12S2 or {}
-        _G.EXBOSS12S2.kyrakkaWindFirePosition = {
-            point = point,
-            relativePoint = relativePoint,
-            x = x,
-            y = y,
-        }
-    end
-
     local function EnsurePanel()
         if panel then return end
         panel = CreateFrame("Frame", "EXBossKyrakkaWindFirePanel", UIParent, "BackdropTemplate")
         panel:SetSize(PANEL_SIZE + 40, PANEL_SIZE + 70)
-        panel:SetMovable(true)
         panel:EnableMouse(true)
-        panel:RegisterForDrag("LeftButton")
-        panel:SetScript("OnDragStart", function(self) self:StartMoving() end)
-        panel:SetScript("OnDragStop", function(self) self:StopMovingOrSizing(); SaveCurrentPosition() end)
-        panel:SetClampedToScreen(true)
-        ApplySavedPosition()
+        -- 位置由统一容器拥有；旧 kyrakkaWindFirePosition 数据保留，不迁移或删除。
+        -- 本文件加载早于显示容器，真正显示时才建立相对锚点。
         panel:SetBackdrop({ bgFile = "Interface\\Buttons\\WHITE8x8", edgeFile = "Interface\\Buttons\\WHITE8x8", edgeSize = 1 })
         panel:SetBackdropColor(0, 0, 0, 0.55)
         panel:SetBackdropBorderColor(1, 1, 1, 0.6)
@@ -195,7 +172,7 @@ do
 
     local function ShowPanel()
         ResetState()
-        panel:Show()
+        if ExtrasEnabled() then AttachToExtras(); panel:Show() else panel:Hide() end
     end
 
     local function HidePanel()
@@ -215,7 +192,7 @@ do
     end
 
     local function ShowFireCountdown(castTime, token)
-        if fireCountdownToken ~= token or not IsKyrakkaActive() or not State.fireIndex then return end
+        if fireCountdownToken ~= token or not IsKyrakkaActive() or not ExtrasEnabled() or not State.fireIndex then return end
         local remaining = math.max(0, (tonumber(castTime) or 0) - GetTime())
         if remaining <= 0 then return end
         local alert = ExBoss and ExBoss.Alert
@@ -268,6 +245,24 @@ do
     EnsurePanel()
 
     if ExwindTools and type(ExwindTools.RegisterEvent) == "function" then
+        ExwindTools:RegisterEvent("EXBOSS_DUNGEON_EXTRAS_CHANGED", "ExBoss_Kyrakka_WindFire_Settings", function()
+            if ExtrasEnabled() and IsKyrakkaActive() then
+                AttachToExtras()
+                panel:Show()
+                RefreshWindVisual()
+                RefreshFireVisual()
+                if State.fireCastTime and State.fireCastTime - GetTime() <= FIRE_COUNTDOWN_LEAD_SECS then
+                    ShowFireCountdown(State.fireCastTime, fireCountdownToken)
+                end
+            else
+                panel:Hide()
+                windAnimGroup:Stop()
+                fireAlphaGroup:Stop()
+                fireScaleGroup:Stop()
+                local alert = ExBoss.Alert
+                if alert and alert.StopFlashCountdown then alert:StopFlashCountdown(FIRE_COUNTDOWN_KEY) end
+            end
+        end)
         ExwindTools:RegisterEvent("EXBOSS_FIXED_AI_EVENT_SCHEDULED", "ExBoss_Kyrakka_WindFire_Scheduled", function(_, payload)
             if type(payload) ~= "table" or tonumber(payload.encounterID) ~= ENCOUNTER_ID or not IsKyrakkaActive() then return end
             local eventID = tonumber(payload.eventID)

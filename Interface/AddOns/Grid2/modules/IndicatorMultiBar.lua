@@ -139,6 +139,7 @@ local function Bar_Layout(self, parent)
 	local width = self.width  or parent.container:GetWidth()
 	local height = self.height or parent.container:GetHeight()
 	local frameLevel = parent:GetFrameLevel() + self.frameLevel
+	local normalMode = not self.sideKick.auraMode
 	frame:SetParent(parent)
 	frame:ClearAllPoints()
 	frame:SetFrameLevel(frameLevel+1) -- for aura colors the first bar goes behind this frame and it has different parent: first bar = frameLevel / other bars = framelevel+1
@@ -155,7 +156,15 @@ local function Bar_Layout(self, parent)
 		local setup = barSetup[i]
 		local texture = textures[i] or CreateFrame("StatusBar") -- texture is a StatusBar frame, not a texture
 		texture:Hide()
-		texture:SetParent( (i==1 and not self.reverseMain and self.sideKick.auraMode) and parent or frame)
+		if normalMode then
+			texture:SetParent(frame)
+		elseif i==1 then
+			texture:SetParent(self.reverseMain and frame or parent) -- a reversed mainBar is non visible so we need to use frame as parent to clip the bar
+		elseif setup.background	 then
+			texture:SetParent(parent) -- background in auraMode, we need the background behind the main bar
+		else
+			texture:SetParent(frame) -- other bars always above the mainBar
+		end
 		texture:SetFrameLevel(frameLevel) -- this has effect only on the first bar and only when aura colorization (auraMode) is enabled
 		texture:ClearAllPoints()
 		texture:SetMinMaxValues(0, 1)
@@ -185,8 +194,8 @@ local function Bar_Layout(self, parent)
 				prevTex, prevPnt = frame, prevBarIndex==0 and self.alignPoint or self.alignPointOp
 			end
 		end
-		if setup.background then
-			texture:SetAllPoints()
+		if setup.wholeBack then
+			texture:SetAllPoints(frame)
 		elseif setup.lineSize then
 			texture.SetMultibarValue = SetMultibarLineValue
 			if self.orientation == "HORIZONTAL" then
@@ -212,8 +221,9 @@ local function Bar_Layout(self, parent)
 		textures[i]:Hide()
 		textures[i]:ClearAllPoints()
 	end
-	frame.myTextures = textures
-	frame.myCTextures = ctextures
+	frame.myTextures = textures -- statusbars
+	frame.myCTextures = ctextures -- real textures
+	frame.myBTexture = self.backColor and textures[barCount]:GetStatusBarTexture() or nil -- back texture
 	frame:Show()
 	-- aura container colorization
 	Bar_LayoutAuraColor(self, parent, frame, frameLevel)
@@ -238,7 +248,7 @@ local function Bar_Disable(self, parent)
 	ReleaseAuraColorsSlots(self, parent, bar)
 end
 
-local function Bar_SortStatuses(self)
+local function Bar_SortStatusesMulti(self)
 	local statuses = self.statuses
 	table.sort(statuses, self.sortStatuses)
 	local bstatuses = self.bstatuses
@@ -252,6 +262,10 @@ local function Bar_SortStatuses(self)
 	end
 end
 
+local function Bar_SortStatusesSingle(self)
+	table.sort(self.statuses, self.sortStatuses)
+end
+
 local function Bar_UpdateDB(self)
 	local bars         = {}
 	local dbx          = self.dbx
@@ -262,6 +276,7 @@ local function Bar_UpdateDB(self)
 	local texColor     = dbx.textureColor.r and dbx.textureColor
 	local alignPoint   = POINTS[orientation][not dbx.reverseFill]
 	local opositePoint = POINTS.OPOSITE
+	self.backColor     = backColor
 	self.foreColor     = dbx.invertColor and backColor or texColor
 	self.orientation   = orientation
 	self.alignPoint    = alignPoint
@@ -320,19 +335,20 @@ local function Bar_UpdateDB(self)
 			verWrap = dbx.backVerTile or 'CLAMP',
 			color = dbx.invertColor and texColor or backColor,
 			opacity = backColor.a,
-			background = not self.backAnchor,
 			prevBar = 1,
 			sublayer = -1,
 			defValue = 1,
+			wholeBack = not self.backAnchor,
+			background = true,
 		}
 	end
 	if dbx.multiStatus then -- at least one status linked to several bars: status priority stores several bar indexes
 		self.bstatuses = (self.statuses~=self.bstatuses) and self.bstatuses or {}
-		self.SortStatuses = Bar_SortStatuses
+		self.SortStatuses = Bar_SortStatusesMulti
 		self.UpdateO = Bar_UpdateMulti
 	else -- no repeated statuses: status priority == bar index
 		self.bstatuses = self.statuses
-		self.SortStatuses = Grid2.indicatorPrototype.SortStatuses
+		self.SortStatuses = Bar_SortStatusesSingle
 		self.UpdateO = Bar_Update
 	end
     self.Update = self.UpdateO
@@ -367,9 +383,9 @@ end
 local function BarColor_SetBarColorInverted(self, parent, r, g, b, a)
 	local frame = parent[self.parentName]
 	if frame then
-		local textures = frame.myTextures
-		if textures then
-			textures[#textures]:GetStatusBarTexture():SetVertexColor(r, g, b, a)
+		local texture = frame.myBTexture
+		if texture then
+			texture:SetVertexColor(r, g, b, a)
 		end
 	end
 end

@@ -15,7 +15,7 @@ function Provider:GetLayoutMode(route)
         boss = true, trash = true, globalsettings = true, tools = true,
         timerbar = true, bunbar = true, countdown = true, flashtextmedium = true,
         ringprogress = true, iconalert = true,
-        castprogressbar = true, extrashieldbar = true,
+        castprogressbar = true, extrashieldbar = true, dungeonextras = true,
         mythiccast = true,
         interrupttracker = true,
     }

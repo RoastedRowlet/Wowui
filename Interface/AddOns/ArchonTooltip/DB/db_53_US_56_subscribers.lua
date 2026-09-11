@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'Unknown-Unknown',}
-local provider = {region='US',realm='Daggerspine',name='US',type='subscribers',zone=53,date='2026-09-01',data={De='Denimdan:BAEANQAECgIIAwAAAA==.',Ku='Kuurun:BAEANQADCgcIBwABNQAECgYICwABAAAAAA==.',Qu='Quinte:BAEANQABCgQIBAAAAA==.',Ra='Rakalaag:BAEANQADCgUIBQAAAA==.',Ru='Ruibash:BAEANQAECgYICwAAAA==.',},}
+local lookup = {'Paladin-Retribution',}
+local provider = {region='US',realm='Daggerspine',name='US',type='subscribers',zone=53,date='2026-09-08',data={De='Denimdan:BAEANQAECgUICgAAAA==.',Ku='Kuurun:BAEANQADCgcIBwABNQAECggIFQABAFkcAA==.',Qu='Quinte:BAEANQABCgQIBAAAAA==.',Ra='Rakalaag:BAEANQADCgUIBQAAAA==.',Ru='Ruibash:BAEBNQAECoEVAAIBAAgJWRxyEwCvAgiODQAABABTAHUNAAAEAFcAfw0AAAMAOgCpDQAAAwBRAFwNAAADAE4AXQ0AAAIAQQBlDQAAAQBQADMNAAABAC0AAQAICVkcchMArwIIjg0AAAQAUwB1DQAABABXAH8NAAADADoAqQ0AAAMAUQBcDQAAAwBOAF0NAAACAEEAZQ0AAAEAUAAzDQAAAQAtAAAA.',},}
 provider.parse = parse
 
 local rawData = provider.data

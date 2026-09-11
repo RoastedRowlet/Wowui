@@ -1,8 +1,10 @@
 # WarpDeplete
 
-## [v5.4.3](https://github.com/happenslol/WarpDeplete/tree/v5.4.3) (2026-08-31)
-[Full Changelog](https://github.com/happenslol/WarpDeplete/commits/v5.4.3) [Previous Releases](https://github.com/happenslol/WarpDeplete/releases)
+## [v5.4.4](https://github.com/happenslol/WarpDeplete/tree/v5.4.4) (2026-09-10)
+[Full Changelog](https://github.com/happenslol/WarpDeplete/commits/v5.4.4) [Previous Releases](https://github.com/happenslol/WarpDeplete/releases)
 
+- chore: Bump version  
+- fix: Use rolesets to control tracker visibility (#169)  
 - chore: Bump version  
 - fix: Implement Maw Buffs Taint Workaround (#164)  
     Added a workaround to prevent crashes in the objective tracker caused by tainted MAW auras.  
@@ -61,7 +63,4 @@
     - Renamed "Split Reference Color" to "Split Records Color"  
     - And changed "splitReferenceColor" key to "splitRecordsColor"  
     * Added missing translations  
-- chore: Bump version  
-- feat: Show forces count in tooltips for midnight (#149)  
-    Adds back the forces count as a fixed string in mob tooltips. Custom formatting is removed for now, since it would involve wrangling with secret values which is very error-prone.  
 - chore: Bump version  

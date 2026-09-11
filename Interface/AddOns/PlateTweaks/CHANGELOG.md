@@ -3,6 +3,27 @@
 All notable changes to PlateTweaks are recorded here. No file like this
 existed before 1.8.4, so history prior to that release is not reconstructed.
 
+## 1.11.2
+
+### Fixed
+
+- Profile import and export did not work at all.
+- A rule's "Draw on your target" and "Draw on your focus" did nothing.
+- Missing Debuffs settings, the aura-slot switch, and switched-off aura icons
+  did not survive an export.
+- Target and focus can now be switched on and off separately.
+- The import and export boxes are now a visible field you can click anywhere
+  in.
+
+## 1.11.1
+
+### Fixed
+
+- **"Hide Blizzard's own aura icons" now works.** It looked for the aura row
+  under names this client does not use, so it found nothing to hide. It also
+  ran only on hostile plates and only once per plate, so anything Blizzard
+  re-showed stayed shown.
+
 ## 1.11.0
 
 A large overhaul of the colouring pages.

@@ -75,6 +75,7 @@ local ITEMS = {
     { key = "extrashieldbar",     category = "display", titleKey = "护盾条",            descKey = "供首领机制复用的单体护盾监控条。",                                                                                                   mode = "embedded", moduleKey = "ExBoss.ExtraShieldBar" },
     { key = "trashcd",            category = "trash",   titleKey = "小怪内置CD姓名版图标", descKey = "小怪内置CD姓名版图标的外观与相对姓名版位置。",                                                                                              mode = "embedded", moduleKey  = "ExBoss.TrashCD.Settings" },
     { key = "reset",              category = "other",   titleKey = "重置设置",          descKey = "提供四种重置方式：\n1) 仅重置外观设置\n2) 仅重置小怪内置CD设置\n3) 重置所有配置（不包含外观）\n4) 清除全部设置（包含外观）",           mode = "builtin"  },
+    { key = "dungeonextras", category = "general", titleKey = "副本额外设置", descKey = "统一副本额外提示的位置与开关；血量条共用下方外观设置，风火图保留原有样式。", mode = "embedded", moduleKey = "ExBoss.DungeonExtras" },
 }
 
 local CATEGORIES = {
@@ -1010,6 +1011,7 @@ ApplyVoiceOverrides = function()
 end
 
 local STYLE_MODULE_KEYS = {
+    "ExBoss.DungeonExtras",
     "ExBoss.TimerBar",
     "ExBoss.BunBar",
     "ExBoss.Countdown",
@@ -1023,6 +1025,7 @@ local STYLE_MODULE_KEYS = {
 }
 
 local EXBOSS_MODULE_KEYS = {
+    "ExBoss.DungeonExtras",
     "ExBoss.TimerBar",
     "ExBoss.BunBar",
     "ExBoss.Countdown",
@@ -1036,6 +1039,7 @@ local EXBOSS_MODULE_KEYS = {
 }
 
 local STYLE_MODULE_KEY_SET = {
+    ["ExBoss.DungeonExtras"] = true,
     ["ExBoss.TimerBar"] = true,
     ["ExBoss.BunBar"] = true,
     ["ExBoss.Countdown"] = true,
@@ -1171,6 +1175,7 @@ ResetDisplayStylesOnly = function()
         if ExBoss.UI.ExtraShieldBar and ExBoss.UI.ExtraShieldBar.RefreshVisuals then
             ExBoss.UI.ExtraShieldBar:RefreshVisuals()
         end
+        if ExBoss.UI.DungeonExtras then ExBoss.UI.DungeonExtras:RefreshVisuals() end
         local VordazaShield = GetVordazaShieldModule()
         if VordazaShield and VordazaShield.RefreshVisuals then
             VordazaShield:RefreshVisuals()
@@ -1354,6 +1359,7 @@ local function HideEmbeddedPages()
         ExBoss and ExBoss.UI and ExBoss.UI.Panel and ExBoss.UI.Panel.IconAlertPage,
         ExBoss and ExBoss.UI and ExBoss.UI.Panel and ExBoss.UI.Panel.CastProgressBarPage,
         ExBoss and ExBoss.UI and ExBoss.UI.Panel and ExBoss.UI.Panel.ExtraShieldBarPage,
+        ExBoss and ExBoss.UI and ExBoss.UI.Panel and ExBoss.UI.Panel.DungeonExtrasPage,
         ExBoss and ExBoss.UI and ExBoss.UI.Panel and ExBoss.UI.Panel.ImportExportPage,
         ExBoss and ExBoss.UI and ExBoss.UI.Panel and ExBoss.UI.Panel.GlobalTrashCDPage,
     }
@@ -1412,6 +1418,7 @@ local function RefreshRight()
             iconalert            = ExBoss and ExBoss.UI and ExBoss.UI.Panel and ExBoss.UI.Panel.IconAlertPage,
             castprogressbar      = ExBoss and ExBoss.UI and ExBoss.UI.Panel and ExBoss.UI.Panel.CastProgressBarPage,
             extrashieldbar       = ExBoss and ExBoss.UI and ExBoss.UI.Panel and ExBoss.UI.Panel.ExtraShieldBarPage,
+            dungeonextras       = ExBoss and ExBoss.UI and ExBoss.UI.Panel and ExBoss.UI.Panel.DungeonExtrasPage,
             trashcd              = ExBoss and ExBoss.UI and ExBoss.UI.Panel and ExBoss.UI.Panel.GlobalTrashCDPage,
         }
         local page = pageMap[key]

@@ -1701,6 +1701,15 @@ local function OnPlateAdded(unit, isRetry)
   local nameplate = C_NamePlate.GetNamePlateForUnit(unit)
   if not nameplate then return end
 
+  -- Blizzard's own aura row, if the user asked for it to be out of the way.
+  --
+  -- BEFORE the gates below, not after. This sat under the health-bar lookup
+  -- and the friendly/hostile check, so it never ran on a friendly plate, on a
+  -- plate whose reaction could not be read yet, or on one whose bar we had
+  -- not found -- and "hide Blizzard's debuffs" quietly did nothing on most of
+  -- the plates on screen. It needs the nameplate and nothing else.
+  if NS.ApplyBlizzardAuras then pcall(NS.ApplyBlizzardAuras, nameplate) end
+
   local healthBar = NS.FindHealthBar(nameplate)
   if not healthBar then
     -- Some addons (Platynator) build the real bar a beat after the plate, so
@@ -1745,9 +1754,6 @@ local function OnPlateAdded(unit, isRetry)
     end
     return
   end
-
-  -- Blizzard's own aura row, if the user asked for it to be out of the way.
-  if NS.ApplyBlizzardAuras then pcall(NS.ApplyBlizzardAuras, nameplate) end
 
   -- The bar object can be REPLACED, not just restyled -- Platynator swaps in a
   -- different display frame when a unit becomes your target, which is why a
@@ -2170,6 +2176,14 @@ C_Timer.NewTicker(1.0, function()
       pendingUnits[unit] = nil
     end
   end
+  -- And Blizzard's aura row, every second on every plate.
+  --
+  -- Plate-added fires once; the row is Blizzard's and its own code shows it
+  -- again -- on a target change, on an aura update, after a UI event we do
+  -- not see. Without a sweep the row came back and stayed back. Cheap: it
+  -- returns immediately unless the setting is on or something was remembered.
+  if NS.RefreshBlizzardAuras then pcall(NS.RefreshBlizzardAuras) end
+
   -- Backstop for bar swaps with no event. Same identity check, so it stays
   -- free for addons that never swap.
   ResyncSwappedBars(true)
@@ -5104,6 +5118,57 @@ SlashCmdList["PLATETWEAKS"] = function(msg)
     if not ok then NS.Print("slots failed: " .. tostring(err)) end
     return
   end
+  -- What Blizzard's own aura row looks like from here, plate by plate.
+  --
+  -- "It does not hide them" has three possible causes -- the row is somewhere
+  -- this does not look, the setting is off, or something re-shows it -- and
+  -- from outside the game they are indistinguishable. This says which.
+  if msg and msg:lower():match("^%s*blizzauras%s*$") then
+    NS.Print(("hide Blizzard auras: |cffffff00%s|r"):format(
+      tostring(NS.db and NS.db.icons and NS.db.icons.hideBlizzardAuras)))
+    local plates = C_NamePlate.GetNamePlates() or {}
+    NS.Print(("plates on screen: %d"):format(#plates))
+    for index, plate in ipairs(plates) do
+      local uf = plate.UnitFrame or plate.unitFrame
+      local fields = {}
+      if uf then
+        -- Every frame hanging off the unit frame, not a list of names.
+        --
+        -- The named lookup came back empty on this build, which is the whole
+        -- reason a guess is not good enough: the row has to be found by
+        -- walking what is actually there.
+        for key, child in pairs(uf) do
+          if type(child) == "table" and type(child.GetObjectType) == "function" then
+            local okType, kind = pcall(child.GetObjectType, child)
+            if okType and kind == "Frame" then
+              local okA, alpha = pcall(child.GetAlpha, child)
+              local okS, shown = pcall(child.IsShown, child)
+              fields[#fields + 1] = ("%s(a=%s s=%s)"):format(tostring(key),
+                okA and string.format("%.1f", alpha) or "?",
+                okS and tostring(shown) or "?")
+            end
+          end
+        end
+        -- And the anonymous ones, which have no key on the table at all.
+        local kids = { pcall(uf.GetChildren, uf) }
+        local shownKids = 0
+        for at = 2, #kids do
+          local child = kids[at]
+          if type(child) == "table" and child.IsShown then
+            local okS, shown = pcall(child.IsShown, child)
+            if okS and shown then shownKids = shownKids + 1 end
+          end
+        end
+        fields[#fields + 1] = ("|cff808080%d child frames, %d shown|r")
+          :format(math.max(0, #kids - 1), shownKids)
+      end
+      NS.Print(("  %d. UnitFrame=%s  %s"):format(index, uf and "yes" or "|cffff5555no|r",
+        #fields > 0 and table.concat(fields, "  ") or "|cffff5555nothing on it|r"))
+      if index >= 3 then break end
+    end
+    return
+  end
+
   if msg and msg:lower():match("^%s*learned%s*$") then
     local ok, err = pcall(PrintLearned)
     if not ok then NS.Print("learned failed: " .. tostring(err)) end

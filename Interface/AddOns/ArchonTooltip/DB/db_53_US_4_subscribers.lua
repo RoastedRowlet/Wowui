@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'Unknown-Unknown',}
-local provider = {region='US',realm='Aggramar',name='US',type='subscribers',zone=53,date='2026-09-01',data={Ab='Abbotsmurfh:BAEANQADCggIDgAAAA==.',Ga='Garalagon:BAEANQADCgQIBAAAAA==.',No='Norro:BAEANQAECgcICwAAAA==.Norrow:BAEANQAECgYIDAABNQAECgcICwABAAAAAA==.',Pr='Priorsmurfh:BAEANQADCgUICgABNQADCggIDgABAAAAAA==.',Ra='Ravpt:BAEANQAECgQIBwAAAA==.Ravvs:BAEANQAECgMIAwABNQAECgQIBwABAAAAAA==.',},}
+local lookup = {'Unknown-Unknown','Hunter-Marksmanship',}
+local provider = {region='US',realm='Aggramar',name='US',type='subscribers',zone=53,date='2026-09-08',data={Ab='Abbotsmurfh:BAEANQAECgEIAQAAAA==.',['Få']='Fårnsworth:BAEANQABCgQIBAAAAA==.',Ga='Garalagon:BAEANQADCgQIBAABNQADCgYIBgABAAAAAA==.',Ke='Kendrà:BAEANQADCgYIBgAAAA==.',No='Norro:BAEANQAECggIEwABNQAECggIGgACAEceAA==.Norrow:BAEBNQAECoEaAAICAAgJRx5DCwCqAgiODQAABQBdAHUNAAAFAEkAfw0AAAQAVgCpDQAABABYAFwNAAADAEYAXQ0AAAIATQBlDQAAAQA0ADMNAAACAE4AAgAICUceQwsAqgIIjg0AAAUAXQB1DQAABQBJAH8NAAAEAFYAqQ0AAAQAWABcDQAAAwBGAF0NAAACAE0AZQ0AAAEANAAzDQAAAgBOAAAA.',Pr='Priorsmurfh:BAEANQADCgYIEAABNQAECgEIAQABAAAAAA==.',Ra='Ravpt:BAEANQAECgQIBwABNQAECgcICgABAAAAAA==.Ravvs:BAEANQAECgcICgAAAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

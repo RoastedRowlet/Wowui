@@ -249,7 +249,7 @@ do
 					barDbx.glowLine = 6
 					barDbx.texture = orientation=='HORIZONTAL' and 'Grid2 GlowV' or 'Grid2 GlowH'
 				end
-				self:RefreshIndicator(indicator, "Layout" )
+				self:RefreshIndicator(indicator, "Layout")
 			end,
 			values = TYPE_VALUES,
 			disabled = function() return barIndex<=0 end,
@@ -308,7 +308,7 @@ do
 			end,
 			set = function (_, v)
 				barDbx.prevBar = (v~=100) and v or nil
-				self:RefreshIndicator(indicator, "Layout" )
+				self:RefreshIndicator(indicator, "Layout")
 			end,
 			values = function()
 				for i=1,9 do MIDNIGHT_ANCHOR_VALUES[i+1] = i<barIndex and L['Bar']..i or nil; end
@@ -382,7 +382,7 @@ do
 					end
 					color.r, color.g, color.b = 0, 0, 0
 				end
-				self:RefreshIndicator(indicator.sideKick, "Layout" )
+				self:RefreshIndicator(indicator, "Layout")
 				self:MakeIndicatorOptions(indicator)
 			end,
 			values = MAINBAR_COLOR_SOURCES,
@@ -403,7 +403,7 @@ do
 				else -- Main Bar Color
 					c.r, c.g, c.b = nil, nil, nil
 				end
-				self:RefreshIndicator(indicator, "Layout" )
+				self:RefreshIndicator(indicator, "Layout")
 			end,
 			values = EXTRABAR_COLOR_SOURCES,
 			hidden = function() return barIndex==0 end,
@@ -414,7 +414,7 @@ do
 			order = 6,
 			width = 0.9,
 			name = L["Opacity"],
-			desc = L["Set the opacity, select zero to use the status color opacity."],
+			desc = function() return indicator.dbx.invertColor and L["Set the opacity."] or L["Set the opacity, select zero to use the status color opacity."] end,
 			min = 0,
 			max = 1,
 			step = 0.01,

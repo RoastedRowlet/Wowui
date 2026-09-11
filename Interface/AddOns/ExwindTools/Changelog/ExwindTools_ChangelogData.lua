@@ -1,11 +1,24 @@
 -- ExwindTools 的游戏内更新日志正文。由发布打包器写入；Core 只提供共享查看窗口。
 ExwindTools_ChangelogData = {
     changelog = {
-        version = "v26.9.3.1123",
-        title = "v26.9.3.1123 更新日志",
-        publishedAt = "2026-09-03 11:23",
+        version = "v26.9.10.1512",
+        title = "v26.9.10.1512 更新日志",
+        publishedAt = "2026-09-10 15:12",
         fontSize = 14,
         content = [[
+@H1@ v26.9.10.1512
+
+@CN@ @H2@ 周围怪物DEBUFF
+@CN@ - 修改方块大小后/RL就能够正常工作
+
+@CN@ @H2@ 焦点打断
+@CN@ - 修复了术士打断不进入CD问题
+
+@EN@ @H2@ Nearby Debuff
+@EN@ - Fixed an issue where resizing the frames or reloading the UI (/reload) was required for it to work correctly.
+@EN@ @H2@ Focus Interrupt
+@EN@ - Fixed an issue that prevented the Warlock interrupt from triggering its cooldown.
+
 @H1@ v26.9.3.1123
 
 @CN@ @H2@ 状态管理系统

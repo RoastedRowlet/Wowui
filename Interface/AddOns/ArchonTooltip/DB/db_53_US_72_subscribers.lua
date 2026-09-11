@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {}
-local provider = {region='US',realm='Dragonblight',name='US',type='subscribers',zone=53,date='2026-09-01',data={Sy='Synsyn:BAEANQADCgUICQAAAA==.',},}
+local lookup = {'Unknown-Unknown',}
+local provider = {region='US',realm='Dragonblight',name='US',type='subscribers',zone=53,date='2026-09-08',data={La='Lapras:BAEANQAFFAQIAgAAAA==.',Sy='Synfyl:BAEANQADCgYICgABNQAECgIIAgABAAAAAA==.Synpathi:BAEANQADCgIIAgABNQAECgIIAgABAAAAAA==.Synsyn:BAEANQAECgIIAgAAAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

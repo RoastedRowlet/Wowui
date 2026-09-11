@@ -1682,7 +1682,7 @@ local function InitializeStateMonitors()
     -- 3.5 玩家打断技能状态监控
     --===================================================================
     ExwindTools:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED", OWNER .. "_Interrupt", function(event, unit, castID, spellID)
-        if unit ~= "player" then return end
+        if unit ~= "player" and unit ~= "pet" then return end
 
         -- 获取当前专精
         local specIndex = GetSpecialization()
