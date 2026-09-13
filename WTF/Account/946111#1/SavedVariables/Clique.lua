@@ -3,10 +3,10 @@ CliqueDB = nil
 CliqueDB3 = {
 ["char"] = {
 ["Zappyxatu - Stormrage"] = {
-["specswap"] = false,
 ["spec1_profileKey"] = "Zappyxatu - Stormrage",
-["spec2_profileKey"] = "Zappyxatu - Stormrage",
 ["spec3_profileKey"] = "Zappyxatu - Stormrage",
+["specswap"] = false,
+["spec2_profileKey"] = "Zappyxatu - Stormrage",
 },
 ["Barelynoer - Area 52"] = {
 ["spec1_profileKey"] = "Barelynoer - Area 52",
@@ -29,12 +29,12 @@ CliqueDB3 = {
 },
 ["Lonelylitten - Stormrage"] = {
 ["spec1_profileKey"] = "Lonelylitten - Stormrage",
-["spec3_profileKey"] = "Lonelylitten - Stormrage",
-["downclick"] = false,
-["spec4_profileKey"] = "Lonelylitten - Stormrage",
 ["spec2_profileKey"] = "Lonelylitten - Stormrage",
-["specswap"] = false,
+["spec4_profileKey"] = "Lonelylitten - Stormrage",
 ["fastooc"] = false,
+["downclick"] = false,
+["specswap"] = false,
+["spec3_profileKey"] = "Lonelylitten - Stormrage",
 },
 ["Klutzykubfu - Stormrage"] = {
 ["spec1_profileKey"] = "Klutzykubfu - Stormrage",
@@ -343,21 +343,12 @@ CliqueDB3 = {
 ["unit"] = "mouseover",
 },
 {
-["spell"] = "Healing Wave",
-["key"] = "BUTTON2",
-["sets"] = {
-["default"] = true,
-},
-["icon"] = 136043,
-["type"] = "spell",
-},
-{
-["sets"] = {
-["default"] = true,
-},
 ["type"] = "menu",
-["icon"] = 132212,
+["sets"] = {
+["default"] = true,
+},
 ["key"] = "SHIFT-BUTTON2",
+["icon"] = 132212,
 },
 {
 ["type"] = "menu",
@@ -367,6 +358,15 @@ CliqueDB3 = {
 },
 },
 {
+["spell"] = "Healing Wave",
+["key"] = "BUTTON2",
+["sets"] = {
+["default"] = true,
+},
+["icon"] = 136043,
+["type"] = "spell",
+},
+{
 ["type"] = "target",
 ["key"] = "CTRL-BUTTON1",
 ["sets"] = {
@@ -374,15 +374,6 @@ CliqueDB3 = {
 },
 ["icon"] = 132331,
 ["unit"] = "mouseover",
-},
-{
-["spell"] = "Ancestral Spirit",
-["key"] = "CTRL-BUTTON1",
-["sets"] = {
-["default"] = true,
-},
-["icon"] = 136077,
-["type"] = "spell",
 },
 {
 ["spell"] = "Riptide",
@@ -400,6 +391,15 @@ CliqueDB3 = {
 ["default"] = true,
 },
 ["icon"] = 236288,
+["type"] = "spell",
+},
+{
+["spell"] = "Ancestral Spirit",
+["key"] = "CTRL-BUTTON1",
+["sets"] = {
+["default"] = true,
+},
+["icon"] = 136077,
 ["type"] = "spell",
 },
 {

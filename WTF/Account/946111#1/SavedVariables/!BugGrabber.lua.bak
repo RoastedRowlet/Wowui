@@ -1,6 +1,6 @@
 
 BugGrabberDB = {
-["session"] = 1182,
+["session"] = 1184,
 ["lastSanitation"] = 3,
 ["errors"] = {
 {
@@ -1906,6 +1906,14 @@ BugGrabberDB = {
 ["stack"] = "[Interface/AddOns/CraftSim/Modules/CraftLog/CraftLog.lua]:112: in function <...erface/AddOns/CraftSim/Modules/CraftLog/CraftLog.lua:110>\n",
 ["session"] = 1182,
 ["counter"] = 8,
+},
+{
+["message"] = "[ADDON_ACTION_FORBIDDEN] AddOn 'RaiderIO' tried to call the protected function 'IsUserOAuthed()'.",
+["time"] = 1789256285,
+["locals"] = "self=<table>\nevent=\"ADDON_ACTION_FORBIDDEN\"\naddonName=\"RaiderIO\"\naddonFunc=\"IsUserOAuthed()\"\nname=\"RaiderIO\"\nbadAddons=<table>{\n RaiderIO=true\n}\nL=<table>{\n NO_DISPLAY_2=\"|cffffff00The standard display is called BugSack, and can probably be found on the same site where you found !BugGrabber.|r\"\n ERROR_DETECTED=\"%s |cffffff00captured, click the link for more information.|r\"\n BUGGRABBER_STOPPED=\"|cffffff00There are too many errors in your UI. As a result, your game experience may be degraded. Disable or update the failing addons if you don't want to see this message again.|r\"\n USAGE=\"|cffffff00Usage: /buggrabber <1-%d>.|r\"\n STOP_NAG=\"|cffffff00!BugGrabber will not nag about missing a display addon again until next patch.|r\"\n NO_DISPLAY_STOP=\"|cffffff00If you don't want to be reminded about this again, run /stopnag.|r\"\n NO_DISPLAY_1=\"|cffffff00You seem to be running !BugGrabber with no display addon to go along with it. Although a slash command is provided for accessing error reports, a display can help you manage these errors in a more convenient way.|r\"\n ERROR_UNABLE=\"|cffffff00!BugGrabber is unable to retrieve errors from other players by itself. Please install BugSack or a similar display addon that might give you this functionality.|r\"\n ADDON_CALL_PROTECTED=\"[%s] AddOn '%s' tried to call the protected function '%s'.\"\n}\n",
+["stack"] = "[Interface/AddOns/!BugGrabber/BugGrabber.lua]:554: in function '?'\n[Interface/AddOns/!BugGrabber/BugGrabber.lua]:538: in function <Interface/AddOns/!BugGrabber/BugGrabber.lua:538>\n[C]: in function 'IsUserOAuthed'\n[Interface/AddOns/Blizzard_GuildControlUI/Blizzard_GuildControlUI.lua]:312: in function 'rankUpdate'\n[Interface/AddOns/Blizzard_GuildControlUI/Blizzard_GuildControlUI.lua]:53: in function 'SetSelected'\n[Interface/AddOns/Blizzard_GuildControlUI/Blizzard_GuildControlUI.lua]:58: in function 'GuildControlUI_SetupSelected'\n[Interface/AddOns/Blizzard_GuildControlUI/Blizzard_GuildControlUI.lua]:82: in function 'GuildControlUI_Setup'\n[Interface/AddOns/Blizzard_GuildControlUI/Blizzard_GuildControlUI.lua]:119: in function <.../Blizzard_GuildControlUI/Blizzard_GuildControlUI.lua:117>\n",
+["session"] = 1184,
+["counter"] = 1,
 },
 },
 }

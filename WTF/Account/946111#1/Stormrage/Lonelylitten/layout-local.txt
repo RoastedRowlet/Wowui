@@ -1,11 +1,4 @@
 Version: 1
-Frame: CraftScanScannerMenuButton
-FrameLevel: 92
-Anchor: LEFT
-X: 31
-Y: -238
-W: 53
-H: 53
 Frame: InstanceAbandonPopup
 FrameLevel: 1
 Anchor: BOTTOMRIGHT
@@ -34,3 +27,10 @@ X: -411
 Y: -255
 W: 220
 H: 30
+Frame: CraftScanScannerMenuButton
+FrameLevel: 93
+Anchor: LEFT
+X: 31
+Y: -238
+W: 53
+H: 53

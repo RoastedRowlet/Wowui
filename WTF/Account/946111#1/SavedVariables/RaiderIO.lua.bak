@@ -14,10 +14,31 @@ RaiderIO_Config = {
 }
 RaiderIO_LastCharacter = "us-Zappyxatu-stormrage"
 RaiderIO_MissingCharacters = {
-["us-Broombakersr-stormrage"] = true,
-["us-Kreytheosis-stormrage"] = true,
-["us-Silentstars-stormrage"] = true,
-["us-Witherveil-stormrage"] = true,
+["us-Balcatu-eldrethalas"] = true,
+["us-Divy-eldrethalas"] = true,
+["us-Korball-uldum"] = true,
+["us-Xyr-eldrethalas"] = true,
+["us-Ayste-stormrage"] = true,
+["us-Alandrias-eldrethalas"] = true,
+["us-party4-stormrage"] = true,
+["us-Sakuraa-silvermoon"] = true,
+["us-Cunfoo-uldum"] = true,
+["us-Alvorada-area-52"] = true,
+["us-Jedwarus-saurfang"] = true,
+["us-Coopage-tichondrius"] = true,
+["us-Elyzza-stormrage"] = true,
+["us-Malefíc-aggramar"] = true,
+["us-Kroxyn-stormrage"] = true,
+["us-party5-stormrage"] = true,
+["us-Soulreaperqt-akama"] = true,
+["us-Cdlin-illidan"] = true,
+["us-Ezre-blackhand"] = true,
+["us-Shaysan-stormrage"] = true,
+["us-Josiäh-stormrage"] = true,
+["us-Cairo-hyjal"] = true,
+["us-Pornhalfuran-stormrage"] = true,
+["us-Cyleana-stormrage"] = true,
+["us-Wolfzbåin-zuluhed"] = true,
 }
 RaiderIO_MissingServers = {
 }

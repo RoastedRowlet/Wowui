@@ -522,12 +522,7 @@ ChonkyCharacterSheetDB = {
 ["pvp_honor"] = true,
 ["show_inbag_ilvl"] = true,
 ["secondary_mastery"] = true,
-["itemupgradecolor"] = {
-0.98,
-0.6,
-0.35,
-1,
-},
+["fontname_gf_dungeon"] = "Fonts\\FRIZQT__.TTF",
 ["showitemupgrade"] = true,
 ["fontsize_repstanding"] = 10,
 ["ccs_spell_stats_color"] = {
@@ -625,7 +620,12 @@ ChonkyCharacterSheetDB = {
 ["secondary_crit"] = true,
 ["fontname_wc_obj"] = "Fonts\\FRIZQT__.TTF",
 ["fontname_specs"] = "Fonts\\FRIZQT__.TTF",
-["fontname_gf_dungeon"] = "Fonts\\FRIZQT__.TTF",
+["itemupgradecolor"] = {
+0.98,
+0.6,
+0.35,
+1,
+},
 ["crests_catalyst"] = true,
 ["fontsize_inspect_ilvl"] = 20,
 ["showgf_altbtn"] = false,
