@@ -1,6 +1,6 @@
 
 BugGrabberDB = {
-["session"] = 1198,
+["session"] = 1204,
 ["lastSanitation"] = 3,
 ["errors"] = {
 {
@@ -532,14 +532,6 @@ BugGrabberDB = {
 ["stack"] = "[Interface/AddOns/EllesmereUIDamageMeters/EllesmereUIDamageMeters.lua]:1067: in function <.../EllesmereUIDamageMeters/EllesmereUIDamageMeters.lua:900>\n[Interface/AddOns/EllesmereUIDamageMeters/EllesmereUIDamageMeters.lua]:1224: in function <.../EllesmereUIDamageMeters/EllesmereUIDamageMeters.lua:1199>\n[Interface/AddOns/EllesmereUIDamageMeters/EllesmereUIDamageMeters.lua]:1256: in function <.../EllesmereUIDamageMeters/EllesmereUIDamageMeters.lua:1252>\n",
 ["session"] = 354,
 ["counter"] = 4,
-},
-{
-["message"] = "[ADDON_ACTION_BLOCKED] AddOn 'BlizzMove' tried to call the protected function 'ReadyCheckFrame:StartMoving()'.",
-["time"] = 1778769851,
-["locals"] = "self=<table>\nevent=\"ADDON_ACTION_BLOCKED\"\naddonName=\"BlizzMove\"\naddonFunc=\"ReadyCheckFrame:StartMoving()\"\nname=\"BlizzMove\"\nbadAddons=<table>{\n BlizzMove=true\n EllesmereUIBlizzardSkin=true\n}\nL=<table>{\n NO_DISPLAY_2=\"|cffffff00The standard display is called BugSack, and can probably be found on the same site where you found !BugGrabber.|r\"\n ERROR_DETECTED=\"%s |cffffff00captured, click the link for more information.|r\"\n BUGGRABBER_STOPPED=\"|cffffff00There are too many errors in your UI. As a result, your game experience may be degraded. Disable or update the failing addons if you don't want to see this message again.|r\"\n USAGE=\"|cffffff00Usage: /buggrabber <1-%d>.|r\"\n STOP_NAG=\"|cffffff00!BugGrabber will not nag about missing a display addon again until next patch.|r\"\n NO_DISPLAY_STOP=\"|cffffff00If you don't want to be reminded about this again, run /stopnag.|r\"\n NO_DISPLAY_1=\"|cffffff00You seem to be running !BugGrabber with no display addon to go along with it. Although a slash command is provided for accessing error reports, a display can help you manage these errors in a more convenient way.|r\"\n ERROR_UNABLE=\"|cffffff00!BugGrabber is unable to retrieve errors from other players by itself. Please install BugSack or a similar display addon that might give you this functionality.|r\"\n ADDON_CALL_PROTECTED=\"[%s] AddOn '%s' tried to call the protected function '%s'.\"\n}\n",
-["stack"] = "[Interface/AddOns/!BugGrabber/BugGrabber.lua]:540: in function '?'\n[Interface/AddOns/!BugGrabber/BugGrabber.lua]:524: in function <Interface/AddOns/!BugGrabber/BugGrabber.lua:524>\n[C]: in function 'StartMoving'\n[Interface/AddOns/BlizzMove/BlizzMove.lua]:719: in function <Interface/AddOns/BlizzMove/BlizzMove.lua:713>\n[Interface/AddOns/BlizzMove/BlizzMove.lua]:783: in function <Interface/AddOns/BlizzMove/BlizzMove.lua:753>\n[tail call]: ?\n[tail call]: ?\n",
-["session"] = 373,
-["counter"] = 1,
 },
 {
 ["message"] = "BigWigs: BigWigs: \"Vaelgor & Ezzorak\" had issues reading the timeline. Show the devs a screenshot of the messages in your chat, NOT this error message.",
@@ -1688,14 +1680,6 @@ BugGrabberDB = {
 ["counter"] = 3,
 },
 {
-["message"] = "LittleWigs: \"Xathuux the Annihilator\" timeline issue. Show the devs a screenshot of the messages in your chat, NOT this error message.",
-["time"] = 1788046641,
-["locals"] = "self=<table>{\n name=\"BigWigs\"\n C=<table>\n}\nmsg=\"\"Xathuux the Annihilator\" timeline issue. Show the devs a screenshot of the messages in your chat, NOT this error message.\"\nnoPrint=true\nisLittleWigs=true\ncore=<table>{\n name=\"BigWigs\"\n C=<table>\n}\n",
-["stack"] = "[Interface/AddOns/BigWigs_Core/Core.lua]:399: in function 'Error'\n[Interface/AddOns/BigWigs_Core/BossPrototype.lua]:720: in function 'Disable'\n[Interface/AddOns/BigWigs_Core/BossPrototype.lua]:2071: in function <Interface/AddOns/BigWigs_Core/BossPrototype.lua:2071>\n",
-["session"] = 1108,
-["counter"] = 2,
-},
-{
 ["message"] = "attempt to perform numeric conversion on a secret number value (execution tainted by 'ArchonTooltip')",
 ["time"] = 1788070525,
 ["locals"] = "debuglocals() returned secrets.",
@@ -1828,14 +1812,6 @@ BugGrabberDB = {
 ["counter"] = 1,
 },
 {
-["message"] = "LittleWigs: Echoing Maul now has a callback",
-["time"] = 1788899736,
-["locals"] = "self=<table>{\n name=\"BigWigs\"\n C=<table>\n}\nmsg=\"Echoing Maul now has a callback\"\nnoPrint=nil\nisLittleWigs=true\ncore=<table>{\n name=\"BigWigs\"\n C=<table>\n}\n",
-["stack"] = "[Interface/AddOns/BigWigs_Core/Core.lua]:399: in function 'Error'\n[Interface/AddOns/BigWigs_Core/BossPrototype.lua]:726: in function 'Disable'\n[Interface/AddOns/BigWigs_Core/BossPrototype.lua]:2111: in function <Interface/AddOns/BigWigs_Core/BossPrototype.lua:2111>\n",
-["session"] = 1173,
-["counter"] = 3,
-},
-{
 ["message"] = "[ADDON_ACTION_BLOCKED] AddOn 'WarpDeplete' tried to call the protected function 'Button:SetPassThroughButtons()'.",
 ["time"] = 1788899795,
 ["locals"] = "self=<table>\nevent=\"ADDON_ACTION_BLOCKED\"\naddonName=\"WarpDeplete\"\naddonFunc=\"Button:SetPassThroughButtons()\"\nname=\"WarpDeplete\"\nbadAddons=<table>{\n WarpDeplete=true\n}\nL=<table>{\n NO_DISPLAY_2=\"|cffffff00The standard display is called BugSack, and can probably be found on the same site where you found !BugGrabber.|r\"\n ERROR_DETECTED=\"%s |cffffff00captured, click the link for more information.|r\"\n BUGGRABBER_STOPPED=\"|cffffff00There are too many errors in your UI. As a result, your game experience may be degraded. Disable or update the failing addons if you don't want to see this message again.|r\"\n USAGE=\"|cffffff00Usage: /buggrabber <1-%d>.|r\"\n STOP_NAG=\"|cffffff00!BugGrabber will not nag about missing a display addon again until next patch.|r\"\n NO_DISPLAY_STOP=\"|cffffff00If you don't want to be reminded about this again, run /stopnag.|r\"\n NO_DISPLAY_1=\"|cffffff00You seem to be running !BugGrabber with no display addon to go along with it. Although a slash command is provided for accessing error reports, a display can help you manage these errors in a more convenient way.|r\"\n ERROR_UNABLE=\"|cffffff00!BugGrabber is unable to retrieve errors from other players by itself. Please install BugSack or a similar display addon that might give you this functionality.|r\"\n ADDON_CALL_PROTECTED=\"[%s] AddOn '%s' tried to call the protected function '%s'.\"\n}\n",
@@ -1922,6 +1898,30 @@ BugGrabberDB = {
 ["stack"] = "[Interface/AddOns/BigWigs_Core/Core.lua]:399: in function 'Error'\n[Interface/AddOns/BigWigs_Core/BossPrototype.lua]:737: in function 'Disable'\n[Interface/AddOns/BigWigs_Core/BossPrototype.lua]:2111: in function <Interface/AddOns/BigWigs_Core/BossPrototype.lua:2111>\n",
 ["session"] = 1198,
 ["counter"] = 3,
+},
+{
+["message"] = "[ADDON_ACTION_BLOCKED] AddOn 'BlizzMove' tried to call the protected function 'ReadyCheckFrame:StartMoving()'.",
+["time"] = 1789540355,
+["locals"] = "self=<table>\nevent=\"ADDON_ACTION_BLOCKED\"\naddonName=\"BlizzMove\"\naddonFunc=\"ReadyCheckFrame:StartMoving()\"\nname=\"BlizzMove\"\nbadAddons=<table>{\n BlizzMove=true\n}\nL=<table>{\n NO_DISPLAY_2=\"|cffffff00The standard display is called BugSack, and can probably be found on the same site where you found !BugGrabber.|r\"\n ERROR_DETECTED=\"%s |cffffff00captured, click the link for more information.|r\"\n BUGGRABBER_STOPPED=\"|cffffff00There are too many errors in your UI. As a result, your game experience may be degraded. Disable or update the failing addons if you don't want to see this message again.|r\"\n USAGE=\"|cffffff00Usage: /buggrabber <1-%d>.|r\"\n STOP_NAG=\"|cffffff00!BugGrabber will not nag about missing a display addon again until next patch.|r\"\n NO_DISPLAY_STOP=\"|cffffff00If you don't want to be reminded about this again, run /stopnag.|r\"\n NO_DISPLAY_1=\"|cffffff00You seem to be running !BugGrabber with no display addon to go along with it. Although a slash command is provided for accessing error reports, a display can help you manage these errors in a more convenient way.|r\"\n ERROR_UNABLE=\"|cffffff00!BugGrabber is unable to retrieve errors from other players by itself. Please install BugSack or a similar display addon that might give you this functionality.|r\"\n ADDON_CALL_PROTECTED=\"[%s] AddOn '%s' tried to call the protected function '%s'.\"\n}\n",
+["stack"] = "[Interface/AddOns/!BugGrabber/BugGrabber.lua]:554: in function '?'\n[Interface/AddOns/!BugGrabber/BugGrabber.lua]:538: in function <Interface/AddOns/!BugGrabber/BugGrabber.lua:538>\n[C]: in function 'StartMoving'\n[Interface/AddOns/BlizzMove/BlizzMove.lua]:718: in function <Interface/AddOns/BlizzMove/BlizzMove.lua:712>\n[Interface/AddOns/BlizzMove/BlizzMove.lua]:782: in function <Interface/AddOns/BlizzMove/BlizzMove.lua:752>\n[tail call]: ?\n[tail call]: ?\n",
+["session"] = 1203,
+["counter"] = 2,
+},
+{
+["message"] = "LittleWigs: \"Xathuux the Annihilator\" timeline issue. Show the devs a screenshot of the messages in your chat, NOT this error message.",
+["time"] = 1789589638,
+["locals"] = "self=<table>{\n name=\"BigWigs\"\n C=<table>\n}\nmsg=\"\"Xathuux the Annihilator\" timeline issue. Show the devs a screenshot of the messages in your chat, NOT this error message.\"\nnoPrint=true\nisLittleWigs=true\ncore=<table>{\n name=\"BigWigs\"\n C=<table>\n}\n",
+["stack"] = "[Interface/AddOns/BigWigs_Core/Core.lua]:399: in function 'Error'\n[Interface/AddOns/BigWigs_Core/BossPrototype.lua]:737: in function 'Disable'\n[Interface/AddOns/BigWigs_Core/BossPrototype.lua]:2111: in function <Interface/AddOns/BigWigs_Core/BossPrototype.lua:2111>\n",
+["session"] = 1204,
+["counter"] = 3,
+},
+{
+["message"] = "LittleWigs: Echoing Maul now has a callback",
+["time"] = 1789600304,
+["locals"] = "self=<table>{\n name=\"BigWigs\"\n C=<table>\n}\nmsg=\"Echoing Maul now has a callback\"\nnoPrint=nil\nisLittleWigs=true\ncore=<table>{\n name=\"BigWigs\"\n C=<table>\n}\n",
+["stack"] = "[Interface/AddOns/BigWigs_Core/Core.lua]:399: in function 'Error'\n[Interface/AddOns/BigWigs_Core/BossPrototype.lua]:726: in function 'Disable'\n[Interface/AddOns/BigWigs_Core/BossPrototype.lua]:2111: in function <Interface/AddOns/BigWigs_Core/BossPrototype.lua:2111>\n",
+["session"] = 1204,
+["counter"] = 4,
 },
 },
 }

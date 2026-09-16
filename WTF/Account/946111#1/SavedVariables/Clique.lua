@@ -9,10 +9,10 @@ CliqueDB3 = {
 ["spec2_profileKey"] = "Barelynoer - Area 52",
 },
 ["Zappyxatu - Stormrage"] = {
-["spec3_profileKey"] = "Zappyxatu - Stormrage",
-["spec1_profileKey"] = "Zappyxatu - Stormrage",
 ["spec2_profileKey"] = "Zappyxatu - Stormrage",
+["spec1_profileKey"] = "Zappyxatu - Stormrage",
 ["specswap"] = false,
+["spec3_profileKey"] = "Zappyxatu - Stormrage",
 },
 ["Madmareep - Stormrage"] = {
 ["spec1_profileKey"] = "Madmareep - Stormrage",
@@ -92,6 +92,22 @@ CliqueDB3 = {
 ["unit"] = "mouseover",
 },
 {
+["spell"] = "Regrowth",
+["key"] = "BUTTON2",
+["sets"] = {
+["default"] = true,
+},
+["icon"] = 136085,
+["type"] = "spell",
+},
+{
+["type"] = "menu",
+["key"] = "CTRL-BUTTON2",
+["sets"] = {
+["default"] = true,
+},
+},
+{
 ["spell"] = "Rejuvenation",
 ["key"] = "BUTTON1",
 ["sets"] = {
@@ -110,22 +126,6 @@ CliqueDB3 = {
 ["icon"] = 134332,
 },
 {
-["spell"] = "Regrowth",
-["key"] = "BUTTON2",
-["sets"] = {
-["default"] = true,
-},
-["icon"] = 136085,
-["type"] = "spell",
-},
-{
-["type"] = "menu",
-["key"] = "CTRL-BUTTON2",
-["sets"] = {
-["default"] = true,
-},
-},
-{
 ["type"] = "macro",
 ["key"] = "ALT-BUTTON2",
 ["macrotext"] = "/cast Nature's Swiftness\n/cast [@mouseover] Regrowth\n",
@@ -133,24 +133,6 @@ CliqueDB3 = {
 ["default"] = true,
 },
 ["icon"] = 134332,
-},
-{
-["spell"] = "Revive",
-["key"] = "CTRL-BUTTON1",
-["sets"] = {
-["default"] = true,
-},
-["icon"] = 132132,
-["type"] = "spell",
-},
-{
-["spell"] = "Remove Corruption",
-["key"] = "BUTTON3",
-["sets"] = {
-["default"] = true,
-},
-["icon"] = 135952,
-["type"] = "spell",
 },
 {
 ["type"] = "target",
@@ -168,6 +150,24 @@ CliqueDB3 = {
 ["default"] = true,
 },
 ["icon"] = 236288,
+["type"] = "spell",
+},
+{
+["spell"] = "Revive",
+["key"] = "CTRL-BUTTON1",
+["sets"] = {
+["default"] = true,
+},
+["icon"] = 132132,
+["type"] = "spell",
+},
+{
+["spell"] = "Remove Corruption",
+["key"] = "BUTTON3",
+["sets"] = {
+["default"] = true,
+},
+["icon"] = 135952,
 ["type"] = "spell",
 },
 {
@@ -343,12 +343,12 @@ CliqueDB3 = {
 ["unit"] = "mouseover",
 },
 {
-["icon"] = 132212,
-["type"] = "menu",
 ["key"] = "SHIFT-BUTTON2",
 ["sets"] = {
 ["default"] = true,
 },
+["icon"] = 132212,
+["type"] = "menu",
 },
 {
 ["type"] = "menu",

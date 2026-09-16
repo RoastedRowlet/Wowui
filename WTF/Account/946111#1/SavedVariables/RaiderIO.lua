@@ -14,10 +14,19 @@ RaiderIO_Config = {
 }
 RaiderIO_LastCharacter = "us-Zappyxatu-stormrage"
 RaiderIO_MissingCharacters = {
-["us-Surani-zuljin"] = true,
-["us-Préacher-zuljin"] = true,
-["us-Leeyya-zuljin"] = true,
-["us-Hardsushi-wildhammer"] = true,
+["us-Chizoom-stormrage"] = true,
+["us-Deathpool-alleria"] = true,
+["us-Laddie-stormrage"] = true,
+["us-Taylörswift-thrall"] = true,
+["us-Dementiastar-zuljin"] = true,
+["us-Wizzledab-stormrage"] = true,
+["us-Remitla-stormrage"] = true,
+["us-Liliandres-stormrage"] = true,
+["us-Tarius-stormrage"] = true,
+["us-Shhiwashere-stormrage"] = true,
+["us-party5-stormrage"] = true,
+["us-Tylorenesh-thrall"] = true,
+["us-Deadbich-illidan"] = true,
 }
 RaiderIO_MissingServers = {
 }

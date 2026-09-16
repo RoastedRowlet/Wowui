@@ -1,6 +1,6 @@
 Version: 1
 Frame: CraftScanScannerMenuButton
-FrameLevel: 97
+FrameLevel: 98
 Anchor: LEFT
 X: 31
 Y: -238
@@ -34,3 +34,10 @@ X: -411
 Y: -255
 W: 220
 H: 30
+Frame: PlayerSpellsFrame
+FrameLevel: 1
+Anchor: TOPLEFT
+X: 86
+Y: -58
+W: 1618
+H: 883
