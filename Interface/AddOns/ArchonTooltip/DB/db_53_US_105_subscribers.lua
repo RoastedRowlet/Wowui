@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'Unknown-Unknown',}
-local provider = {region='US',realm='Garrosh',name='US',type='subscribers',zone=53,date='2026-09-08',data={Eu='Eulune:BAEANQADCggIFwABNQAECgYICgABAAAAAA==.',Ko='Kontroll:BAEANQADCggICwAAAA==.',Le='Lessii:BAEANQAECgcIDwAAAA==.',Ou='Oule:BAEANQAECgYICgAAAA==.',Ui='Uil:BAEANQADCgQIBAABNQAECgYICgABAAAAAA==.',},}
+local lookup = {'Unknown-Unknown','DeathKnight-Unholy',}
+local provider = {region='US',realm='Garrosh',name='US',type='subscribers',zone=53,date='2026-09-15',data={Eu='Eulune:BAEANQADCggIFwABNQAECgcIDAABAAAAAA==.',Ko='Kontroll:BAEANQADCggIFQAAAA==.',Le='Lessii:BAEBNQAECoEaAAICAAgJsRo+FwCMAgiODQAABABZAHUNAAADADwAfw0AAAMARgCpDQAABABVAFwNAAADAEsAXQ0AAAMAKABlDQAAAgApADMNAAAEAFIAAgAICbEaPhcAjAIIjg0AAAQAWQB1DQAAAwA8AH8NAAADAEYAqQ0AAAQAVQBcDQAAAwBLAF0NAAADACgAZQ0AAAIAKQAzDQAABABSAAAA.',Mo='Moosteerious:BAEANQADCggICAABNQADCggIFQABAAAAAA==.',Ou='Oule:BAEANQAECgcIDAAAAA==.',Ui='Uil:BAEANQAECgEIAQABNQAECgcIDAABAAAAAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

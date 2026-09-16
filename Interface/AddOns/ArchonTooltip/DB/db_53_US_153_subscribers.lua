@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'Unknown-Unknown',}
-local provider = {region='US',realm='Malygos',name='US',type='subscribers',zone=53,date='2026-09-08',data={Ly='Lyn:BAEANQAECgUIBwAAAA==.',No='Notagnoblin:BAEANQAECggIEgAAAA==.',Sa='Safewerd:BAEANQAECgIIAgAAAA==.',Sp='Sposi:BAEANQAECgQIBQAAAA==.',Ta='Tatersdh:BAEANQAECgQIBgABNQAECggIEgABAAAAAA==.',},}
+local lookup = {'DeathKnight-Blood',}
+local provider = {region='US',realm='Malygos',name='US',type='subscribers',zone=53,date='2026-09-15',data={Ly='Lyn:BAEANQAECgYIDQAAAA==.',No='Notagnoblin:BAEBNQAECoEcAAIBAAkJXSWgAQDKAwmODQAABABhAHUNAAAEAGIAfw0AAAMAUQCpDQAABABjAFwNAAADAGMAXQ0AAAMAXwBlDQAAAwBhAKQNAAACAGAAMw0AAAIAXgABAAkJXSWgAQDKAwmODQAABABhAHUNAAAEAGIAfw0AAAMAUQCpDQAABABjAFwNAAADAGMAXQ0AAAMAXwBlDQAAAwBhAKQNAAACAGAAMw0AAAIAXgAAAA==.',Sa='Safewerd:BAEANQAECgIIAgAAAA==.',Sp='Sposi:BAEANQAECgQICQAAAA==.',Ta='Tatersdh:BAEANQAECgQIBgABNQAECgkJHAABAF0lAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

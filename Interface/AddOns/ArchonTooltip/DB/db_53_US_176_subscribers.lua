@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'Unknown-Unknown',}
-local provider = {region='US',realm='Ragnaros',name='US',type='subscribers',zone=53,date='2026-09-08',data={Ag='Agedcow:BAEANQAECggIEgAAAA==.',Ja='Jackrubi:BAEANQADCgQIBAABNQAECgUICAABAAAAAA==.Jackrubick:BAEANQAECgUICAAAAA==.',Ra='Raistrog:BAEANQAFFAEIAgAAAA==.',Ve='Veev:BAEANQAECgUIBQAAAA==.',Zu='Zulfrost:BAEANQADCgYIBwABNQAECggIEgABAAAAAA==.',},}
+local lookup = {'Shaman-Elemental','Shaman-Restoration','Unknown-Unknown',}
+local provider = {region='US',realm='Ragnaros',name='US',type='subscribers',zone=53,date='2026-09-15',data={Ag='Agedcow:BAEBNQAECoEZAAMBAAkJBiOABgCBAwmODQAABABaAHUNAAAEAGAAfw0AAAQAYQCpDQAABABjAFwNAAACAFoAXQ0AAAEAWwBlDQAAAgBOAKQNAAABAEUAMw0AAAMAXQABAAkJBiOABgCBAwmODQAAAwBaAHUNAAADAGAAfw0AAAQAYQCpDQAABABjAFwNAAACAFoAXQ0AAAEAWwBlDQAAAgBOAKQNAAABAEUAMw0AAAMAXQACAAIJOx1+mgB1AAKODQAAAQBPAHUNAAABAEUAAAA=.',Ja='Jackrubi:BAEANQAECgIIAgABNQABCgMIAwADAAAAAA==.Jackrubick:BAEANQAECgUIDgABNQABCgMIAwADAAAAAA==.',Ra='Raistrog:BAEANQAFFAEIAgAAAA==.',Ve='Veev:BAEANQAECgUIBQAAAA==.',Zu='Zulfrost:BAEANQADCgYIBwABNQAECgkJGQABAAYjAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

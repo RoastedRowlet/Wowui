@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'Unknown-Unknown',}
-local provider = {region='US',realm='AzjolNerub',name='US',type='subscribers',zone=53,date='2026-09-08',data={Gn='Gnawbear:BAEANQAECgMIBQAAAA==.',Si='Simmune:BAEANQAFFAEIAQAAAA==.',Zo='Zoga:BAEANQADCgUIBQABNQAECgIIAgABAAAAAA==.Zogah:BAEANQADCgQIBAABNQAECgIIAgABAAAAAA==.Zoganian:BAEANQAECgEIAQABNQAECgIIAgABAAAAAA==.',},}
+local lookup = {'Paladin-Holy','Unknown-Unknown',}
+local provider = {region='US',realm='AzjolNerub',name='US',type='subscribers',zone=53,date='2026-09-15',data={Gn='Gnawbear:BAEANQAECgMIBwAAAA==.',Si='Simmune:BAEBNQAECoEdAAIBAAgJhx+yDQD8AgiODQAABABIAHUNAAAEAGAAfw0AAAQAVQCpDQAABABiAFwNAAADAF0AXQ0AAAMAMQBlDQAAAwBKADMNAAAEAEsAAQAICYcfsg0A/AIIjg0AAAQASAB1DQAABABgAH8NAAAEAFUAqQ0AAAQAYgBcDQAAAwBdAF0NAAADADEAZQ0AAAMASgAzDQAABABLAAAA.',Zo='Zoga:BAEANQADCgUIBQABNQAECgQIBgACAAAAAA==.Zogah:BAEANQADCgQIBAABNQAECgQIBgACAAAAAA==.Zoganian:BAEANQAECgEIAQABNQAECgQIBgACAAAAAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

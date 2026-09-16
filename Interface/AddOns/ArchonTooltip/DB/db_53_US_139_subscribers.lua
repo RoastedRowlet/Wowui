@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {}
-local provider = {region='US',realm='LaughingSkull',name='US',type='subscribers',zone=53,date='2026-09-08',data={Cl='Clawdragoon:BAEANQAECgcIEgAAAA==.',Es='Españamor:BAEANQAECgUICQAAAA==.',Mi='Mike:BAEANQAFFAEIAQAAAA==.',},}
+local lookup = {'Druid-Balance','Druid-Guardian','Mage-Arcane','Unknown-Unknown',}
+local provider = {region='US',realm='LaughingSkull',name='US',type='subscribers',zone=53,date='2026-09-15',data={Cl='Clawdragoon:BAEBNQAECoEbAAMBAAgJZByHFgCfAgiODQAABABEAHUNAAAEAFoAfw0AAAMAVwCpDQAABABAAFwNAAADAD4AXQ0AAAMAMgBlDQAAAgBIADMNAAAEAFQAAQAICWQchxYAnwIIjg0AAAQARAB1DQAAAgBaAH8NAAACAFcAqQ0AAAMAQABcDQAAAgA+AF0NAAADADIAZQ0AAAIASAAzDQAAAwBUAAIABQkZBG0ZAK8ABXUNAAACABoAfw0AAAEABACpDQAAAQAHAFwNAAABAAIAMw0AAAEADAAAAA==.',Es='Españamor:BAEANQAECgUIDgAAAA==.',Mi='Mike:BAEBNQAECoEcAAIDAAkJMiLAEgBZAwmODQAABQBgAHUNAAAEAF8Afw0AAAMAXACpDQAABABiAFwNAAACAE8AXQ0AAAIAWwBlDQAAAwBbAKQNAAADADcAMw0AAAIAWAADAAkJMiLAEgBZAwmODQAABQBgAHUNAAAEAF8Afw0AAAMAXACpDQAABABiAFwNAAACAE8AXQ0AAAIAWwBlDQAAAwBbAKQNAAADADcAMw0AAAIAWAAAAA==.',Mo='Montera:BAEANQAECgIIAgABNQAECgUIDgAEAAAAAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

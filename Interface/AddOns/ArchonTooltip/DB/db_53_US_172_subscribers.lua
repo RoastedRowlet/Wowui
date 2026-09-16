@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {}
-local provider = {region='US',realm='Perenolde',name='US',type='subscribers',zone=53,date='2026-09-08',data={Gl='Glaiven:BAEANQAECgcIDwAAAA==.',Ka='Kagozo:BAEANQAECgEIAQAAAA==.',Sc='Scynix:BAEANQAECgQIBQAAAA==.',Sy='Sylaria:BAEANQADCgUIBwAAAA==.',},}
+local lookup = {'DemonHunter-Havoc','DemonHunter-Devourer','Unknown-Unknown',}
+local provider = {region='US',realm='Perenolde',name='US',type='subscribers',zone=53,date='2026-09-15',data={Gl='Glaiven:BAEBNQAECoEaAAMBAAgJ9iClCgDlAgiODQAABABXAHUNAAAEAFwAfw0AAAMAUQCpDQAAAwBMAFwNAAADAFAAXQ0AAAMAVwBlDQAAAgBKADMNAAAEAF8AAQAICfofpQoA5QIIjg0AAAEAVwB1DQAAAQBcAH8NAAABAD0AqQ0AAAEATABcDQAAAQBQAF0NAAABAFcAZQ0AAAIASgAzDQAAAQBfAAIABwnPGHEaAA0CB44NAAADAEUAdQ0AAAMAVgB/DQAAAgBRAKkNAAACAB4AXA0AAAIAMQBdDQAAAgA9ADMNAAADAEIAAAA=.',Ka='Kagozo:BAEANQAECgEIAQABNQAECgIIAgADAAAAAA==.',Sc='Scynix:BAEANQAECgQIBQAAAA==.',Sy='Sylaria:BAEANQADCgYICAAAAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

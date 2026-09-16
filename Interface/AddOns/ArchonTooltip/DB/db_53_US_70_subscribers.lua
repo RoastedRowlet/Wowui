@@ -234,7 +234,7 @@ local function getChunkLookup(table, length)
 end
 
 local lookup = {'Paladin-Retribution',}
-local provider = {region='US',realm='Doomhammer',name='US',type='subscribers',zone=53,date='2026-09-08',data={Sh='Shamanstein:BAEANQADCggIDwABNQAECgkJGgABAGAkAA==.',},}
+local provider = {region='US',realm='Doomhammer',name='US',type='subscribers',zone=53,date='2026-09-15',data={Sh='Shamanstein:BAEANQADCggIDwABNQAECgkJIwABAH8mAA==.',Sm='Smâlls:BAEANQAECgEIAQAAAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

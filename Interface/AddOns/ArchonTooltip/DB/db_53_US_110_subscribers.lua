@@ -234,7 +234,7 @@ local function getChunkLookup(table, length)
 end
 
 local lookup = {'Druid-Balance',}
-local provider = {region='US',realm='Gorefiend',name='US',type='subscribers',zone=53,date='2026-09-08',data={Am='Amatsano:BAEANQADCgYICQAAAA==.',An='Animuggus:BAEANQADCgYIBgAAAA==.',Ch='Chaboomy:BAEBNQAECoEYAAIBAAkJcCEzBwA2AwmODQAAAwBXAHUNAAADAFgAfw0AAAMAVgCpDQAAAwBcAFwNAAADAGAAXQ0AAAIAVABlDQAAAgBNAKQNAAACAEgAMw0AAAMAUwABAAkJcCEzBwA2AwmODQAAAwBXAHUNAAADAFgAfw0AAAMAVgCpDQAAAwBcAFwNAAADAGAAXQ0AAAIAVABlDQAAAgBNAKQNAAACAEgAMw0AAAMAUwAAAA==.',Co='Collie:BAEANQAECgYICAAAAA==.',},}
+local provider = {region='US',realm='Gorefiend',name='US',type='subscribers',zone=53,date='2026-09-15',data={Am='Amatsano:BAEANQADCgYIDwAAAA==.',An='Animuggus:BAEANQADCgYIDAAAAA==.',Ch='Chaboomy:BAEBNQAECoEhAAIBAAkJaiJtCABVAwmODQAABABXAHUNAAAEAGEAfw0AAAQAVgCpDQAABABcAFwNAAAEAGAAXQ0AAAMAWgBlDQAAAwBNAKQNAAADAEgAMw0AAAQAWwABAAkJaiJtCABVAwmODQAABABXAHUNAAAEAGEAfw0AAAQAVgCpDQAABABcAFwNAAAEAGAAXQ0AAAMAWgBlDQAAAwBNAKQNAAADAEgAMw0AAAQAWwAAAA==.',Co='Collie:BAEANQAECgYIDgAAAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

@@ -33,7 +33,7 @@ BigWigs_TheVoidspire: enabled
 LittleWigs_WrathOfTheLichKing: disabled
 LittleWigs_WarlordsOfDraenor: disabled
 LittleWigs_Legion: disabled
-LittleWigs_Dragonflight: disabled
+LittleWigs_Dragonflight: enabled
 BigWigs_TheDreamrift: enabled
 BigWigs_MarchOnQuelDanas: enabled
 Baganator: disabled

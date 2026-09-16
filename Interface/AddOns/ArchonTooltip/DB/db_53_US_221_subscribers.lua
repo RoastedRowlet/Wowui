@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'Unknown-Unknown',}
-local provider = {region='US',realm='Thunderlord',name='US',type='subscribers',zone=53,date='2026-09-08',data={Dr='Dragonbender:BAEANQADCgUIBQAAAA==.',Fa='Fakedemon:BAEANQADCgIIAgABNQAECgEIAQABAAAAAA==.Fakelock:BAEANQADCgMIAwABNQAECgEIAQABAAAAAA==.Fakendruid:BAEANQAECgEIAQAAAA==.',Fu='Funkweave:BAEANQAECgUIBwAAAA==.',Li='Liendrah:BAEANQAECgYIEAAAAA==.',No='Noctaro:BAEANQAECggIDAAAAA==.',Ra='Raegen:BAEANQADCgUIBQABNQAECggIDAABAAAAAA==.Raezer:BAEANQADCggICAABNQAECggIDAABAAAAAA==.',Wo='Wovenxlight:BAEANQAECgQIBAAAAA==.',},}
+local lookup = {'Unknown-Unknown','Hunter-BeastMastery',}
+local provider = {region='US',realm='Thunderlord',name='US',type='subscribers',zone=53,date='2026-09-15',data={Dr='Dragonbender:BAEANQADCgUICgAAAA==.',Fa='Fakedemon:BAEANQADCgIIAgABNQAECgEIAQABAAAAAA==.Fakelock:BAEANQADCgMIAwABNQAECgEIAQABAAAAAA==.Fakendruid:BAEANQAECgEIAQAAAA==.',Fu='Funkweave:BAEANQAECgYICwAAAA==.',Li='Liendrah:BAEANQAECgcIEQAAAA==.',No='Noctaro:BAEANQAECggIEQAAAA==.',Ra='Raegen:BAEANQADCgUIBQABNQAECggIEQABAAAAAA==.Raezer:BAEANQADCggICAABNQAECggIEQABAAAAAA==.',Tr='Trakshot:BAEANQAFFAQIBAABNQAECggIFQACAJkWAA==.',Wo='Wovenxlight:BAEANQAECgQIBAAAAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

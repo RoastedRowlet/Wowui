@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'Unknown-Unknown',}
-local provider = {region='US',realm='Velen',name='US',type='subscribers',zone=53,date='2026-09-08',data={De='Deadscar:BAEANQAECgYICQAAAA==.',Ho='Hobiscuits:BAEANQABCgYIDAABNQADCggIEgABAAAAAA==.',Ki='Kij:BAEANQAECgcIDwAAAA==.',Mk='Mk:BAEANQADCgYIBgABNQAECgQICAABAAAAAA==.',Ra='Raveneyes:BAEANQADCgUICQAAAA==.',},}
+local lookup = {'Unknown-Unknown','Mage-Arcane',}
+local provider = {region='US',realm='Velen',name='US',type='subscribers',zone=53,date='2026-09-15',data={De='Deadscar:BAEANQAECgcIDAAAAA==.',Ho='Hobiscuits:BAEANQABCgcIEQABNQADCggIGgABAAAAAA==.',Ki='Kij:BAEBNQAECoEZAAICAAkJix8PFQBLAwmODQAABABOAHUNAAAEAFcAfw0AAAMAWgCpDQAABABcAFwNAAACAEkAXQ0AAAEAMwBlDQAAAgBcAKQNAAABAD4AMw0AAAQAYQACAAkJix8PFQBLAwmODQAABABOAHUNAAAEAFcAfw0AAAMAWgCpDQAABABcAFwNAAACAEkAXQ0AAAEAMwBlDQAAAgBcAKQNAAABAD4AMw0AAAQAYQAAAA==.',Mk='Mk:BAEANQADCggIDgABNQAECgQIDAABAAAAAA==.',Ra='Raveneyes:BAEANQAECgYIBgAAAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

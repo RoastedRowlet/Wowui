@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'Unknown-Unknown',}
-local provider = {region='US',realm='Nagrand',name='US',type='subscribers',zone=53,date='2026-09-08',data={Aw='Awooweewaa:BAEANQAECgIIAgAAAA==.',Is='Isenpal:BAEANQAECgMIAwAAAA==.',Mi='Minae:BAEANQAECgQIBAABNQAECgcIEAABAAAAAA==.Mitsue:BAEANQAECgcIEAAAAA==.',},}
+local lookup = {'Warrior-Arms','Warrior-Fury',}
+local provider = {region='US',realm='Nagrand',name='US',type='subscribers',zone=53,date='2026-09-15',data={Aw='Awooweewaa:BAEANQAECgMIAwAAAA==.',Is='Isenpal:BAEANQAECgQIBwAAAA==.',Mi='Minae:BAEANQAECgQIBAABNQAECggIGQABAGYkAA==.Mitsue:BAEBNQAECoEZAAMBAAgJZiSIFgAUAwiODQAABABiAHUNAAAEAF8Afw0AAAMAXQCpDQAAAwBjAFwNAAADAFgAXQ0AAAMAXABlDQAAAwBQADMNAAACAGAAAQAICVgiiBYAFAMIjg0AAAMAYQB1DQAAAwBfAH8NAAACAF0AqQ0AAAIAXwBcDQAAAgBAAF0NAAADAFwAZQ0AAAMAUAAzDQAAAQBUAAIABglDINwDAEECBo4NAAABAGIAdQ0AAAEAFgB/DQAAAQBaAKkNAAABAGMAXA0AAAEAWAAzDQAAAQBgAAAA.',},}
 provider.parse = parse
 
 local rawData = provider.data

@@ -1,25 +1,23 @@
 
 RaiderIO_Config = {
+["minimapIcon"] = {
+["minimapPos"] = 180,
+["showInCompartment"] = true,
+["hide"] = false,
+["lock"] = false,
+},
 ["profilePoint"] = {
 ["y"] = 0,
 ["x"] = -16,
 ["point"] = "TOPLEFT",
 },
-["minimapIcon"] = {
-["minimapPos"] = 180,
-["showInCompartment"] = true,
-["lock"] = false,
-["hide"] = false,
-},
 }
-RaiderIO_LastCharacter = "us-Lonelylitten-stormrage"
+RaiderIO_LastCharacter = "us-Zappyxatu-stormrage"
 RaiderIO_MissingCharacters = {
-["us-Nicecook-area-52"] = true,
-["us-Dêmõn-stormrage"] = true,
-["us-Bolgalnor-area-52"] = true,
-["us-party5-stormrage"] = true,
-["us-Calnisyr-area-52"] = true,
-["us-Lightspanker-area-52"] = true,
+["us-Surani-zuljin"] = true,
+["us-Préacher-zuljin"] = true,
+["us-Leeyya-zuljin"] = true,
+["us-Hardsushi-wildhammer"] = true,
 }
 RaiderIO_MissingServers = {
 }

@@ -234,7 +234,7 @@ local function getChunkLookup(table, length)
 end
 
 local lookup = {'Rogue-Subtlety','Druid-Balance','Druid-Restoration','Unknown-Unknown',}
-local provider = {region='US',realm='Zuluhed',name='US',type='subscribers',zone=53,date='2026-09-08',data={Be='Berserk:BAEANQAECgQIBAABNQAECggIEwABADYUAA==.',Mo='Moondo:BAECNQAFFIEGAAICAAUJmxSjAQCuAQWODQAAAgBUAHUNAAABAFYAfw0AAAEACQCpDQAAAQAvADMNAAABACIAAgAFCZsUowEArgEFjg0AAAIAVAB1DQAAAQBWAH8NAAABAAkAqQ0AAAEALwAzDQAAAQAiADUABAqBGgADAgAJCdEkfQIAnwMAAgAJCdEkfQIAnwMAAwAECVoFgyAAzAAAATUAAwoICAEABAAAAAA=.',},}
+local provider = {region='US',realm='Zuluhed',name='US',type='subscribers',zone=53,date='2026-09-15',data={Be='Berserk:BAEANQAECgUIBgABNQAECgkJHgABAJMTAA==.',Mo='Moondo:BAECNQAFFIEKAAICAAUJ6hzpAgC/AQWODQAAAgBUAHUNAAACAFYAfw0AAAIASACpDQAAAgBVADMNAAACACkAAgAFCeoc6QIAvwEFjg0AAAIAVAB1DQAAAgBWAH8NAAACAEgAqQ0AAAIAVQAzDQAAAgApADUABAqBGwADAgAJCdEkEwYAeAMAAgAJCdEkEwYAeAMAAwAECVoFUCwAwAAAATUABAoDCAIABAAAAAA=.',},}
 provider.parse = parse
 
 local rawData = provider.data

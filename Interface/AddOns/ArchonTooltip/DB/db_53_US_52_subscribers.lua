@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'Unknown-Unknown',}
-local provider = {region='US',realm="Cho'gall",name='US',type='subscribers',zone=53,date='2026-09-08',data={Ch='Chiri:BAEANQAECgcIDQAAAA==.',Co='Condor:BAEANQAECggIAwAAAA==.',Fi='Fistymoo:BAEANQADCgMIAwABNQAECgcIDQABAAAAAA==.',Ik='Ikiryo:BAEANQAECgIIAwAAAA==.',Mi='Mib:BAEANQAECgYICgABNQAECggIAwABAAAAAA==.Mibb:BAEANQAECggIBgABNQAECggIAwABAAAAAA==.',},}
+local lookup = {'Evoker-Devastation','Evoker-Preservation','Unknown-Unknown',}
+local provider = {region='US',realm="Cho'gall",name='US',type='subscribers',zone=53,date='2026-09-15',data={Ch='Chiri:BAEBNQAECoEWAAMBAAkJjRDSDQD8AQmODQAABABHAHUNAAAEAC8Afw0AAAMAJwCpDQAAAwAdAFwNAAACACMAXQ0AAAIAIgBlDQAAAgANAKQNAAABAFEAMw0AAAEAGwABAAgJpQ7SDQD8AQiODQAAAwBHAHUNAAADAC8Afw0AAAMAJwCpDQAAAwAdAFwNAAACACMAXQ0AAAIAIgBlDQAAAgANADMNAAABABsAAgADCQkD0yoAgQADjg0AAAEACgB1DQAAAQAIAKQNAAABAAQAAAA=.',Co='Condor:BAEANQAECggICwAAAA==.',Fi='Fistymoo:BAEANQADCgMIAwABNQAECgkJFgABAI0QAA==.',Ik='Ikiryo:BAEANQAECgIIAwAAAA==.',Mi='Mib:BAEANQAECggICgABNQAECggICwADAAAAAA==.Mibb:BAEANQAECggIDgABNQAECggICwADAAAAAA==.',Ne='Neuron:BAEANQABCgUICgABNQAECgIIAwADAAAAAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

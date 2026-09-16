@@ -234,7 +234,7 @@ local function getChunkLookup(table, length)
 end
 
 local lookup = {'Druid-Restoration',}
-local provider = {region='US',realm='BlackwingLair',name='US',type='subscribers',zone=53,date='2026-09-08',data={Pi='Pissbaron:BAEANQAECgUIBQABNQAECgkJHQABAJogAA==.',},}
+local provider = {region='US',realm='BlackwingLair',name='US',type='subscribers',zone=53,date='2026-09-15',data={Pi='Pissbaron:BAEANQAECgUIBQABNQAECgkJJQABAJogAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

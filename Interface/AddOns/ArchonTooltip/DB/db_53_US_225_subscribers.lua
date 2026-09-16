@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'Unknown-Unknown',}
-local provider = {region='US',realm='Trollbane',name='US',type='subscribers',zone=53,date='2026-09-08',data={As='Ashidpriest:BAEANQAECgYICgAAAA==.',Ca='Cammikins:BAEANQAECgQICQAAAA==.',Co='Coorsenjoyer:BAEANQAFFAIIAgAAAA==.',El='Electabuzz:BAEANQADCgcIBwABNQAECgYIEgABAAAAAA==.',La='Laev:BAEANQADCggICAABNQAECgYICgABAAAAAA==.',Li='Liaelina:BAEANQADCggICAAAAA==.',Mu='Multitool:BAEANQAECgUICAAAAA==.',No='Nooffensë:BAEANQADCgcIDAABNQADCggICAABAAAAAA==.',Sc='Schism:BAEANQADCgYICQABNQADCggIFQABAAAAAA==.',Wi='Williams:BAEANQAECgcIBQABNQAECgYIEgABAAAAAA==.Williamsjr:BAEANQAECgcIEgABNQAECgYIEgABAAAAAA==.',Wo='Woopiing:BAEANQADCggIFQAAAA==.',},}
+local lookup = {'Warrior-Arms','Unknown-Unknown',}
+local provider = {region='US',realm='Trollbane',name='US',type='subscribers',zone=53,date='2026-09-15',data={As='Ashidpriest:BAEANQAECgYIEAAAAA==.',Ca='Cammikins:BAEANQAECgcIEAAAAA==.',Co='Coorsenjoyer:BAEANQAFFAIIBAAAAA==.',El='Electabuzz:BAEANQADCgcIBwABNQAECgkJHgABAAocAA==.',La='Laev:BAEANQADCggICAABNQAECgYIEAACAAAAAA==.',Li='Liaelina:BAEANQAECgMIAwAAAA==.',Mu='Multitool:BAEANQAECgYIDgAAAA==.',No='Nooffensë:BAEANQADCgcIDAABNQAECgMIAwACAAAAAA==.',Wi='Williams:BAEANQAECggIDQABNQAECgkJHgABAAocAA==.Williamsjr:BAEBNQAECoEeAAIBAAkJChz2FwAKAwmODQAABgBVAHUNAAAEAE4Afw0AAAMAUACpDQAABABPAFwNAAADAEwAXQ0AAAMASgBlDQAAAgAsAKQNAAABACQAMw0AAAQAWQABAAkJChz2FwAKAwmODQAABgBVAHUNAAAEAE4Afw0AAAMAUACpDQAABABPAFwNAAADAEwAXQ0AAAMASgBlDQAAAgAsAKQNAAABACQAMw0AAAQAWQABNQAECgkJHgABAAocAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

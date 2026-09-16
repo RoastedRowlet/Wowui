@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'Unknown-Unknown',}
-local provider = {region='US',realm='Shadowsong',name='US',type='subscribers',zone=53,date='2026-09-08',data={Co='Corbis:BAEANQAECgIIAgAAAA==.',Do='Downbeatxo:BAEANQAFFAEIAQAAAA==.',Fr='Froey:BAEANQAECgMIAwAAAA==.',Ge='Genovese:BAEANQADCgYIDAABNQAECgIIAgABAAAAAA==.',},}
+local lookup = {'Warlock-Destruction','Warlock-Demonology','Unknown-Unknown',}
+local provider = {region='US',realm='Shadowsong',name='US',type='subscribers',zone=53,date='2026-09-15',data={Co='Corbis:BAEANQAECgQIBgAAAA==.',Do='Downbeatxo:BAECNQAFFIEFAAMBAAQJMAw8BgCsAASODQAAAQArAHUNAAABADIAqQ0AAAIAFAAzDQAAAQAKAAEAAgnZDTwGAKwAAnUNAAABADIAqQ0AAAIAFAACAAIJhgqnDwCbAAKODQAAAQArADMNAAABAAoANQAECoEdAAMCAAkJoiDVDgDqAgACAAgJdSDVDgDqAgABAAQJJhpxIAA2AQAAAA==.',Fr='Froey:BAEANQAECgMIAwAAAA==.',Ge='Genovese:BAEANQADCgYIDAABNQAECgQIBgADAAAAAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

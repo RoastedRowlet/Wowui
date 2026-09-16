@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'Druid-Guardian',}
-local provider = {region='US',realm='Sentinels',name='US',type='subscribers',zone=53,date='2026-09-08',data={De='Deathcrocker:BAEANQAECgcICwABNQAFFAUICAABABMVAA==.',Ge='Gencrocker:BAEANQAFFAEIAQABNQAFFAUICAABABMVAA==.',Ks='Kspboop:BAEANQAECgcIBAAAAA==.',Pv='Pvtcrocker:BAEBNQAFFIEIAAIBAAUJExUzAACzAQWODQAAAgBAAHUNAAABABIAfw0AAAEAWgCpDQAAAgA9ADMNAAACACMAAQAFCRMVMwAAswEFjg0AAAIAQAB1DQAAAQASAH8NAAABAFoAqQ0AAAIAPQAzDQAAAgAjAAAA.',},}
+local lookup = {'Paladin-Protection','Druid-Guardian',}
+local provider = {region='US',realm='Sentinels',name='US',type='subscribers',zone=53,date='2026-09-15',data={De='Deathcrocker:BAEANQAECgcICwABNQAFFAYIBwABAFwaAA==.',Ge='Gencrocker:BAEBNQAFFIEHAAIBAAYJXBpvAAAaAgaODQAAAgBSAHUNAAABACsAfw0AAAEAWwCpDQAAAQBGAFwNAAABACwAMw0AAAEASQABAAYJXBpvAAAaAgaODQAAAgBSAHUNAAABACsAfw0AAAEAWwCpDQAAAQBGAFwNAAABACwAMw0AAAEASQAAAA==.',Ks='Kspboop:BAEANQAECgcIBAAAAA==.',Pv='Pvtcrocker:BAEBNQAFFIEIAAICAAUJExVjAACqAQWODQAAAgBAAHUNAAABABIAfw0AAAEAWgCpDQAAAgA9ADMNAAACACMAAgAFCRMVYwAAqgEFjg0AAAIAQAB1DQAAAQASAH8NAAABAFoAqQ0AAAIAPQAzDQAAAgAjAAE1AAUUBggHAAEAXBoA.',},}
 provider.parse = parse
 
 local rawData = provider.data

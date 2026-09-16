@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'Unknown-Unknown','Paladin-Retribution',}
-local provider = {region='US',realm='Crushridge',name='US',type='subscribers',zone=53,date='2026-09-08',data={Co='Corrona:BAEANQADCggICAABNQAECgYICAABAAAAAA==.',De='Dearth:BAEANQAECgMIBAABNQAECgYICAABAAAAAA==.',Ph='Phèdre:BAEANQAECgEIAQABNQAECgkJGAACAKMgAA==.',Sa='Sagan:BAEANQADCgQIBAABNQAECgIIAgABAAAAAA==.',Sh='Shammer:BAEANQADCgYIBgABNQAECgcIEgABAAAAAA==.Shamshielder:BAEANQAECgcIEgAAAA==.',},}
+local lookup = {'Unknown-Unknown','Paladin-Retribution','DeathKnight-Blood','DeathKnight-Frost',}
+local provider = {region='US',realm='Crushridge',name='US',type='subscribers',zone=53,date='2026-09-15',data={Ca='Catrina:BAEANQADCggICAABNQAECggICAABAAAAAA==.',Co='Corrona:BAEANQADCggICAABNQAECggICAABAAAAAA==.',De='Dearth:BAEANQAECgcIBAABNQAECggICAABAAAAAA==.',Ph='Phèdre:BAEANQAECgIIAgABNQAECgkJGgACAK0fAA==.',Sa='Sagan:BAEANQADCgQIBAABNQAECgQIBQABAAAAAA==.',Sh='Shammer:BAEANQADCggIBgABNQAECgkJGwADANAaAA==.Shamshielder:BAEBNQAECoEbAAMDAAkJ0BrSEgChAgmODQAAAwBJAHUNAAAEAFoAfw0AAAQALwCpDQAABAAtAFwNAAAEAFMAXQ0AAAQASgBlDQAAAQBFAKQNAAACAFcAMw0AAAEALQADAAkJ0BrSEgChAgmODQAAAwBJAHUNAAADAFoAfw0AAAMALwCpDQAAAwAtAFwNAAAEAFMAXQ0AAAQASgBlDQAAAQBFAKQNAAACAFcAMw0AAAEALQAEAAMJ4AeGRABlAAN1DQAAAQAoAH8NAAABAAMAqQ0AAAEAEAAAAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

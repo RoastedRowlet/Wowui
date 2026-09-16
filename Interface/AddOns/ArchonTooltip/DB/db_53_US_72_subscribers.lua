@@ -233,8 +233,8 @@ local function getChunkLookup(table, length)
 	end
 end
 
-local lookup = {'Unknown-Unknown',}
-local provider = {region='US',realm='Dragonblight',name='US',type='subscribers',zone=53,date='2026-09-08',data={La='Lapras:BAEANQAFFAQIAgAAAA==.',Sy='Synfyl:BAEANQADCgYICgABNQAECgIIAgABAAAAAA==.Synpathi:BAEANQADCgIIAgABNQAECgIIAgABAAAAAA==.Synsyn:BAEANQAECgIIAgAAAA==.',},}
+local lookup = {'Evoker-Devastation','Unknown-Unknown',}
+local provider = {region='US',realm='Dragonblight',name='US',type='subscribers',zone=53,date='2026-09-15',data={La='Lapras:BAEBNQAECoEbAAIBAAkJtyYQAAAPBAmODQAABABjAHUNAAADAGMAfw0AAAMAYQCpDQAABABjAFwNAAADAGMAXQ0AAAIAYwBlDQAAAwBhAKQNAAABAGMAMw0AAAQAYwABAAkJtyYQAAAPBAmODQAABABjAHUNAAADAGMAfw0AAAMAYQCpDQAABABjAFwNAAADAGMAXQ0AAAIAYwBlDQAAAwBhAKQNAAABAGMAMw0AAAQAYwAAAA==.',Sy='Synfyl:BAEANQAECggICAAAAA==.Synpathi:BAEANQADCgUICAABNQAECggICAACAAAAAA==.Synsyn:BAEANQAECgUIBwABNQAECggICAACAAAAAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data

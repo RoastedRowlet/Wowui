@@ -234,7 +234,7 @@ local function getChunkLookup(table, length)
 end
 
 local lookup = {'Unknown-Unknown',}
-local provider = {region='US',realm='Hellscream',name='US',type='subscribers',zone=53,date='2026-09-08',data={Ar='Arrowhoof:BAEANQADCggIDQAAAA==.',Bu='Butterdtoast:BAEANQAECgEIAQAAAA==.',Ma='Maisrii:BAEANQADCgUICwAAAA==.',Pl='Ploppstein:BAEANQAECgIIAgAAAA==.',Ro='Roseclaw:BAEANQADCgYICwABNQAECgYIBgABAAAAAA==.Roseclawed:BAEANQAECgYIBgAAAA==.',Sk='Sko:BAEANQAECgQICQABNQADCgcICQABAAAAAA==.Skolivia:BAEANQADCgcICQAAAA==.',Sp='Splithoofe:BAEANQADCgEIAQABNQADCggIDQABAAAAAA==.',},}
+local provider = {region='US',realm='Hellscream',name='US',type='subscribers',zone=53,date='2026-09-15',data={Ar='Arrowhoof:BAEANQADCggIDQAAAA==.',Bu='Butterdtoast:BAEANQAECgMIAwAAAA==.',Ma='Maisrii:BAEANQADCgcIDQAAAA==.',Pl='Ploppstein:BAEANQAECgQIBgAAAA==.',Ro='Roseclaw:BAEANQADCgcIDAABNQAECgYIDAABAAAAAA==.Roseclawed:BAEANQAECgYIDAAAAA==.',Sk='Sko:BAEANQAECgcIEAAAAA==.',Sp='Splithoofe:BAEANQADCgEIAQABNQADCggIDQABAAAAAA==.',Sq='Squrrlydan:BAEANQAECgQIBAAAAA==.',},}
 provider.parse = parse
 
 local rawData = provider.data
