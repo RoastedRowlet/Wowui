@@ -16,10 +16,10 @@ EXCORE12S2 = {
 ["ExwindTools:ExTools.CombatAlert"] = false,
 ["ExwindTools:playerstats"] = false,
 ["ExwindTools:ExTools.CombatTimer"] = false,
-["ExwindTools:ExTools.CombatMobDebuffGrid"] = false,
+["ExwindTools:ExClass.BrewmasterStagger"] = false,
 ["ExwindTools:chat_channel_bar"] = false,
 ["ExwindTools:ExTools.PlayerShield"] = false,
-["ExwindTools:ExClass.BrewmasterStagger"] = false,
+["ExwindTools:ExTools.CombatMobDebuffGrid"] = false,
 },
 ["overlayVisible"] = true,
 },
@@ -48,14 +48,14 @@ EXCORE12S2 = {
 ["ExwindState"] = {
 ["encounter"] = {
 ["id"] = 0,
-["ts"] = 1789600304,
+["ts"] = 1789657220,
 ["inProgress"] = false,
-["instanceID"] = 2825,
+["instanceID"] = 3079,
 },
 ["versaCalibration"] = {
+["zeroValue"] = 114146.3186844834,
 ["specID"] = 262,
-["zeroValue"] = 114146.4959068056,
-["lastDescriptionValue"] = 120340,
+["lastDescriptionValue"] = 124039,
 ["spellID"] = 1271074,
 },
 },
@@ -66,17 +66,17 @@ EXCORE12S2 = {
 ["Locale"] = {
 ["mode"] = "AUTO",
 },
+["Changelog"] = {
+["LastSeenVersion"] = "v26.9.10.1512",
+["LastSeenAt"] = "2026-09-17 09:34:33",
+["LastPopupVersion"] = "v26.9.3.1123",
+["LastPopupAt"] = "2026-09-06 18:18:57",
+},
 ["PanelStylePresets"] = {
+["icon"] = {
+},
 ["timerbar"] = {
 },
 ["version"] = 1,
-["icon"] = {
-},
-},
-["Changelog"] = {
-["LastSeenVersion"] = "v26.9.10.1512",
-["LastSeenAt"] = "2026-09-16 14:56:56",
-["LastPopupAt"] = "2026-09-06 18:18:57",
-["LastPopupVersion"] = "v26.9.3.1123",
 },
 }
